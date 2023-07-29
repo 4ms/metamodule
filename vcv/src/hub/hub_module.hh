@@ -206,9 +206,8 @@ struct MetaModuleHubBase : public rack::Module {
 		labelText = "Creating patch...";
 		updateDisplay();
 
-		auto knobSets = mappings.collate_mappings();
-		VCVPatchFileWriter::writePatchFile(
-			id, knobSets, mappings.knobSetNames, patchFileName, patchName, patchDescText);
+		VCVPatchFileWriter<NumPots, MaxMapsPerPot, MaxKnobSets>::writePatchFile(
+			id, mappings.mappings, mappings.knobSetNames, patchFileName, patchName, patchDescText);
 
 		labelText = "Wrote patch file: ";
 		labelText += rack::system::getFilename(patchFileName);

@@ -5,26 +5,26 @@
 #include "util/countzip.hh"
 #include "util/static_string.hh"
 
+//Rename HubKnobMapManager
 template<size_t NumKnobs, size_t MaxMapsPerPot, size_t MaxKnobSets = 8>
-struct HubKnobMappings {
+class HubKnobMappings {
+	int64_t hubModuleId = -1;
+	unsigned activeSetId = 0;
 
+public:
 	struct KnobMappingSet {
 		rack::ParamHandle paramHandle;
 		std::array<Mapping, MaxKnobSets> maps;
 	};
 
 	using KnobMultiMap = std::array<KnobMappingSet, MaxMapsPerPot>;
+	using HubKnobsMultiMaps = std::array<KnobMultiMap, NumKnobs>;
+	HubKnobsMultiMaps mappings;
 
-	std::array<KnobMultiMap, NumKnobs> mappings;
 	std::array<std::string, MaxKnobSets> knobSetNames;
-
+	// TODO aliases
 	std::array<std::array<StaticString<31>, MaxKnobSets>, NumKnobs> aliases;
 
-private:
-	int64_t hubModuleId = -1;
-	unsigned activeSetId = 0;
-
-public:
 	HubKnobMappings(int64_t hubModuleId)
 		: hubModuleId{hubModuleId} {
 		for (unsigned i = 0; auto &knob_multimap : mappings) {
@@ -158,17 +158,6 @@ public:
 	}
 
 private:
-	// Add a map to any set, but don't update the ParamHandle
-	void populateMap(unsigned hubParamId, int64_t destModuleId, int destParamId, unsigned setId, float min, float max) {
-		auto &knob = nextFreeMap(hubParamId, setId);
-
-		auto *map = &knob.maps[setId];
-		map->moduleId = destModuleId;
-		map->paramId = destParamId;
-		map->range_min = min;
-		map->range_max = max;
-	}
-
 	KnobMappingSet &nextFreeMap(unsigned hubParamId, unsigned set_idx) {
 		// Find first unused paramHandle
 		for (auto &mapset : mappings[hubParamId]) {
@@ -208,35 +197,20 @@ public:
 		return num;
 	}
 
-	auto collate_mappings() {
-		std::array<std::array<std::array<Mapping, MaxMapsPerPot>, NumKnobs>, MaxKnobSets> knobSets;
-
-		for (auto [knob_idx, knob] : enumerate(mappings)) {
-			for (auto [map_idx, mapset] : enumerate(knob)) {
-				for (auto [set_idx, map] : enumerate(mapset.maps)) {
-					auto &ks = knobSets[set_idx][knob_idx][map_idx];
-					ks = map;
-				}
-			}
-		}
-		return knobSets;
-	}
-
 	// Save/restore VCV rack patch
 
 	json_t *encodeJson() {
-		// Translate from mappings to knobSets
-		auto knobSets = collate_mappings();
-
 		json_t *rootJ = json_object();
 		json_t *knobSetsJ = json_array();
 
-		for (unsigned knobSetId = 0; auto &mappings : knobSets) {
-
+		// Iterate mappings x MaxKnobSets times
+		for (unsigned knobSetId = 0; knobSetId < MaxKnobSets; knobSetId++) {
 			json_t *mapsJ = json_array();
 
 			for (unsigned hubParamId = 0; auto &knob : mappings) {
-				for (auto &map : knob) {
+
+				for (auto &mapsets : knob) {
+					auto &map = mapsets.maps[knobSetId];
 
 					if (!is_valid(map))
 						continue;
@@ -257,7 +231,6 @@ public:
 			}
 			json_array_append(knobSetsJ, mapsJ);
 			json_decref(mapsJ);
-			knobSetId++;
 		}
 		json_object_set_new(rootJ, "Mappings", knobSetsJ);
 
@@ -291,10 +264,10 @@ public:
 							json_t *val;
 
 							// Verify its for this module (there may be more than one hub)
-							// val = json_object_get(mappingJ, "SrcModID");
-							// auto moduleId = json_is_integer(val) ? json_integer_value(val) : -1;
-							// if (moduleId != hubModuleId)
-							// 	continue;
+							val = json_object_get(mappingJ, "SrcModID");
+							auto moduleId = json_is_integer(val) ? json_integer_value(val) : -1;
+							if (moduleId != hubModuleId)
+								continue;
 
 							val = json_object_get(mappingJ, "SrcObjID");
 							auto hubParamId = json_is_integer(val) ? json_integer_value(val) : -1;

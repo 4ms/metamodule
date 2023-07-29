@@ -121,17 +121,21 @@ void PatchFileWriter::setParamList(std::vector<ParamMap> &params) {
 //	}
 //}
 
-void PatchFileWriter::addKnobMaps(unsigned panelKnobId,
-								  std::string_view knobSetName,
-								  unsigned knobSetId,
-								  const std::span<const Mapping> maps) {
-	for (const auto &m : maps) {
-		if (!idMap.contains(m.moduleId))
-			continue;
-		if (knobSetId >= pd.knob_sets.size())
-			pd.knob_sets.resize(knobSetId + 1);
+void PatchFileWriter::addKnobMapSet(unsigned knobSetId, std::string_view knobSetName) {
+	if (knobSetId >= pd.knob_sets.size())
+		pd.knob_sets.resize(knobSetId + 1);
+	pd.knob_sets[knobSetId].name = knobSetName;
+}
 
-		pd.knob_sets[knobSetId].name = knobSetName;
+void PatchFileWriter::addKnobMaps(unsigned panelKnobId, unsigned knobSetId, const std::span<const Mapping> maps) {
+	if (knobSetId >= pd.knob_sets.size())
+		pd.knob_sets.resize(knobSetId + 1);
+
+	for (const auto &m : maps) {
+		if (!idMap.contains(m.moduleId)) {
+			printf("Skipping knob mapping to module not supported by MetaModule: %lld\n", m.moduleId);
+			continue;
+		}
 		pd.knob_sets[knobSetId].set.push_back({
 			.panel_knob_id = static_cast<uint16_t>(panelKnobId),
 			.module_id = idMap[m.moduleId],
