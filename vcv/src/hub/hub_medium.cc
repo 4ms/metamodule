@@ -58,12 +58,8 @@ struct HubMedium : MetaModuleHubBase {
 private:
 	constexpr static auto indices = ElementCount::get_indices<INFO>();
 
-	constexpr static auto element_index(INFO::Elem el) {
-		return static_cast<std::underlying_type_t<INFO::Elem>>(el);
-	}
-
 	constexpr static ElementCount::Indices index(INFO::Elem el) {
-		auto element_idx = element_index(el);
+		auto element_idx = static_cast<std::underlying_type_t<INFO::Elem>>(el);
 		return indices[element_idx];
 	}
 

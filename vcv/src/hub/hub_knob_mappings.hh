@@ -5,6 +5,14 @@
 #include "util/countzip.hh"
 #include "util/static_string.hh"
 
+// Test: quitting normally could fail to save a valid map in the patch.json.
+// 1) As VCV quits, it removes modules
+// 2) A module with maps is deleted,
+// 3) therefore VCV removes the ParamHandle.
+// 4) Then hub::knob::draw() is called, which calls is_valid()
+// 5) which will notice the paramHandle is gone, and thus delete the map
+// 6) Then, hub::encodeJson is called and writes out json without that map
+
 //Rename HubKnobMapManager
 template<size_t NumKnobs, size_t MaxMapsPerPot, size_t MaxKnobSets = 8>
 class HubKnobMappings {
@@ -74,31 +82,16 @@ public:
 		refreshParamHandles();
 	}
 
-private:
-	void refreshParamHandles() {
-		for (auto &knob : mappings) {
-			for (auto &mapset : knob) {
-				Mapping map = mapset.maps[activeSetId];
-				APP->engine->updateParamHandle(&mapset.paramHandle, map.moduleId, map.paramId, true);
-				if (!mapset.paramHandle.module) {
-					map.moduleId = -1;
-					map.paramId = -1;
-				}
-			}
-		}
-	}
-
 public:
 	// Mapping Range:
 
 	void setRangeMin(const MappableObj paramObj, float val) {
 		for (auto &knob : mappings) {
 			for (auto &mapset : knob) {
-				Mapping &map = mapset.maps[activeSetId];
-				if (is_valid(map) && paramObj.moduleID == mapset.paramHandle.moduleId &&
+				if (is_valid(mapset) && paramObj.moduleID == mapset.paramHandle.moduleId &&
 					paramObj.objID == mapset.paramHandle.paramId)
 				{
-					map.range_min = val;
+					mapset.maps[activeSetId].range_min = val;
 					return;
 				}
 			}
@@ -108,10 +101,9 @@ public:
 	void setRangeMax(const MappableObj paramObj, float val) {
 		for (auto &knob : mappings) {
 			for (auto &mapset : knob) {
-				Mapping &map = mapset.maps[activeSetId];
-				if (is_valid(map) && paramObj.moduleID == mapset.paramHandle.moduleId &&
+				if (is_valid(mapset) && paramObj.moduleID == mapset.paramHandle.moduleId &&
 					paramObj.objID == mapset.paramHandle.paramId)
-					map.range_max = val;
+					mapset.maps[activeSetId].range_max = val;
 			}
 		}
 	}
@@ -119,10 +111,10 @@ public:
 	std::pair<float, float> getRange(const MappableObj paramObj) {
 		for (auto &knob : mappings) {
 			for (auto &mapset : knob) {
-				Mapping &map = mapset.maps[activeSetId];
-				if (is_valid(map) && paramObj.moduleID == mapset.paramHandle.moduleId &&
+				if (is_valid(mapset) && paramObj.moduleID == mapset.paramHandle.moduleId &&
 					paramObj.objID == mapset.paramHandle.paramId)
 				{
+					Mapping &map = mapset.maps[activeSetId];
 					return {map.range_min, map.range_max};
 				}
 			}
@@ -162,12 +154,6 @@ private:
 		// Find first unused paramHandle
 		for (auto &mapset : mappings[hubParamId]) {
 			if (mapset.paramHandle.moduleId < 0) {
-				// Clear our local copy if VCV's paramHandle was cleared (ie. modules was removed)
-				if (mapset.maps[set_idx].moduleId >= 0) {
-					mapset.maps[set_idx].moduleId = -1;
-					mapset.maps[set_idx].paramId = -1;
-					printf("Found a mapset out of sync with VCV paramHandle\n");
-				}
 				return mapset;
 			}
 		}
@@ -191,7 +177,7 @@ public:
 			return 0;
 
 		for (auto &mapset : mappings[hubParamId]) {
-			if (is_valid(mapset.maps[activeSetId]))
+			if (is_valid(mapset))
 				num++;
 		}
 		return num;
@@ -204,16 +190,19 @@ public:
 		json_t *knobSetsJ = json_array();
 
 		// Iterate mappings x MaxKnobSets times
+
+		removeMapsToDeletedModules();
+
 		for (unsigned knobSetId = 0; knobSetId < MaxKnobSets; knobSetId++) {
 			json_t *mapsJ = json_array();
 
 			for (unsigned hubParamId = 0; auto &knob : mappings) {
 
 				for (auto &mapsets : knob) {
-					auto &map = mapsets.maps[knobSetId];
+					// if (!is_valid(mapsets, knobSetId))
+					// 	continue;
 
-					if (!is_valid(map))
-						continue;
+					auto &map = mapsets.maps[knobSetId];
 
 					json_t *thisMapJ = json_object();
 					json_object_set_new(thisMapJ, "DstModID", json_integer(map.moduleId));
@@ -311,8 +300,26 @@ public:
 	}
 
 private:
-	bool is_valid(Mapping map) {
-		return map.moduleId >= 0;
+	// checks if the mapset has a valid paramhandle in the active set
+	bool is_valid(KnobMappingSet mapset) {
+		bool paramHandleValid = mapset.paramHandle.module && mapset.paramHandle.moduleId >= 0;
+		if (!paramHandleValid) {
+			mapset.maps[activeSetId].clear();
+		}
+		return paramHandleValid;
+	}
+
+	void refreshParamHandles() {
+		for (auto &knob : mappings) {
+			for (auto &mapset : knob) {
+				Mapping map = mapset.maps[activeSetId];
+				APP->engine->updateParamHandle(&mapset.paramHandle, map.moduleId, map.paramId, true);
+				if (!mapset.paramHandle.module) {
+					// clear the map if VCV fails to update the paramHandle
+					map.clear();
+				}
+			}
+		}
 	}
 
 	void clear_all() {
@@ -328,6 +335,41 @@ private:
 	}
 
 public:
+	// Removes all maps that point to deleted modules
+	void removeMapsToDeletedModules() {
+		for (auto &knob : mappings) {
+			for (auto &mapset : knob) {
+				for (auto &map : mapset.maps) {
+					if (map.moduleId >= 0) {
+						if (APP->engine->getModule(map.moduleId) == nullptr) {
+							printf("Removed map (m:%lld p: %d)\n", map.moduleId, map.paramId);
+							map.clear();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Removes maps in the active Knob Set with a paramHandle that was unmapped by VCV engine
+	void removeUnmappedActiveMaps() {
+		for (auto &knob : mappings) {
+			for (auto &mapset : knob) {
+
+				bool paramHandleValid = mapset.paramHandle.module && mapset.paramHandle.moduleId >= 0;
+				if (!paramHandleValid) {
+					auto &map = mapset.maps[activeSetId];
+					if (map.moduleId >= 0) {
+						// VCV invalidated the paramHandle (user selected unmap, or removed module)
+						printf(
+							"Removed map (m:%lld p: %d) in active set (%d)\n", map.moduleId, map.paramId, activeSetId);
+						map.clear();
+					}
+				}
+			}
+		}
+	}
+
 	// Helpers
 
 	auto begin() {

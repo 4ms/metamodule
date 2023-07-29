@@ -86,6 +86,7 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 
 	void onHover(const HoverEvent &e) override {
 		if (hubModule->should_write_patch()) {
+			hubModule->mappings.removeMapsToDeletedModules();
 			hubModule->writePatchFile();
 		}
 	}
