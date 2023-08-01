@@ -33,10 +33,9 @@ struct HostFileIO {
 	}
 
 	uint64_t read_file(const std::string_view filename, std::span<char> buffer) {
-		std::ifstream ifs;
+		std::ifstream ifs(filename.data(), std::ios::in);
 		uint64_t sz = 0;
-		ifs.open(filename, std::ios::in);
-		if (ifs) {
+		if (ifs.is_open()) {
 			ifs.seekg(0, std::ios::end);
 			sz = ifs.tellg();
 			ifs.seekg(0, std::ios::beg);
