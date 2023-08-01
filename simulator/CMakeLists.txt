@@ -147,4 +147,10 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
                                         ryml SDL2 ui)
 
-target_link_options(simulator PUBLIC LINKER:-map,simulator.map)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  target_link_options(simulator PUBLIC "-Xlinker -Map=simulator.map")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  target_link_options(simulator PUBLIC LINKER:-map,simulator.map)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  target_link_options(cmake_testapp PRIVATE "/MAP:simulator.map")
+endif()
