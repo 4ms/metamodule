@@ -1,0 +1,39 @@
+name: Build Simulator
+
+on: [push]
+
+jobs:
+  build:
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: 
+          # - { os: windows, shell: msys2 } # currently broken
+          - { os: ubuntu,  shell: bash  }
+          - { os: macos,   shell: bash  }
+        compiler: [ {cpp: g++, c: gcc}, {cpp: clang++, c: clang} ]
+        exclude:
+          - os: { os: windows, shell: msys2 }
+            compiler: {cpp: clang++, c: clang}
+    runs-on: '${{ matrix.os.os }}-latest'
+    defaults:
+      run:
+        shell: '${{ matrix.os.shell }} {0}'
+    env:
+      CC: ${{ matrix.compiler.c }}
+      CXX: ${{ matrix.compiler.cpp }}
+          
+    steps:      
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      
+      - name: Configure, build and test the project
+        uses: threeal/cmake-action@v1.2.0
+        with: 
+          cxx-compiler: ${{ matrix.compiler }}
+          run-build: true
+          run-test: false
+          source-dir: "simulator"
