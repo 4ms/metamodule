@@ -33,7 +33,7 @@ jobs:
       - name: Configure, build and test the project
         uses: threeal/cmake-action@v1.2.0
         with: 
-          cxx-compiler: ${{ matrix.compiler }}
+          cxx-compiler: ${{ matrix.compiler.cpp }}
           run-build: true
           run-test: false
           source-dir: "simulator"
