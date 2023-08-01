@@ -30,6 +30,16 @@ jobs:
         with:
           submodules: 'recursive'
       
+      - name: Install mac dependencies
+        if: matrix.os.os == 'macos'
+        run: brew install ninja sdl2
+  
+      - name: Install linux dependencies
+        if: matrix.os.os =='ubuntu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build libsdl2-dev
+
       - name: Configure, build and test the project
         uses: threeal/cmake-action@v1.2.0
         with: 
