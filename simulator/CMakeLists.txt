@@ -46,6 +46,7 @@ file(
   GLOB
   CORE_MODULES
   #
+  ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
   # 4ms
   ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
