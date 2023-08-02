@@ -45,9 +45,8 @@ private:
 };
 
 inline Context *contextGet() {
-	// static Context context;
-	// return &context;
-	return nullptr;
+	static Context context;
+	return &context;
 }
 // void contextSet(Context* context);
 
