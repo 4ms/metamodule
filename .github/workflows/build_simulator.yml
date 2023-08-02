@@ -32,7 +32,9 @@ jobs:
       
       - name: Install mac dependencies
         if: matrix.os.os == 'macos'
-        run: brew install ninja sdl2 gcc
+        run: |
+          brew install ninja sdl2 gcc
+          cd /usr/local/bin && ln -s gcc-13 gcc && ln -s g++-13 g++
   
       - name: Install linux dependencies
         if: matrix.os.os =='ubuntu'

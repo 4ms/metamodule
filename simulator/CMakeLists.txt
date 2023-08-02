@@ -150,7 +150,7 @@ target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  target_link_options(simulator PUBLIC "-Xlinker -Map=simulator.map")
+  target_link_options(simulator PUBLIC "-Wl,-map,simulator.map")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_link_options(simulator PUBLIC LINKER:-Map,simulator.map)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
