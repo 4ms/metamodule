@@ -2,10 +2,14 @@
 
 namespace MetaModule
 {
+extern "C" {
+extern uint32_t LV_EVENT_GET_COMP_CHILD;
+}
 
 void PageManager::init() {
 	page_patchsel.init();
 	// mbox.loading_new_patch = false;
+	LV_EVENT_GET_COMP_CHILD = lv_event_register_id();
 	PageList::request_new_page(page_patchsel);
 }
 
