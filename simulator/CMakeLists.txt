@@ -34,12 +34,20 @@ file(
   ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
   ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
 
-add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
-                 ${CMAKE_CURRENT_BINARY_DIR}/meta5)
+# #################### SLS Export ##################################
 
-target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
-target_compile_options(ui PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>:
-                                  -std=c++20>)
+file(STRINGS ${MM_ROOT}/firmware/src/gui/slsexport/meta5/filelist.txt
+     SLS_SOURCES)
+list(TRANSFORM SLS_SOURCES
+     PREPEND "${MM_ROOT}/firmware/src/gui/slsexport/meta5/")
+
+# FIXME: SLS symbols not found when linking library to the executable:
+# add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
+# ${CMAKE_CURRENT_BINARY_DIR}/meta5)
+
+# target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
+# target_compile_options(ui PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>:
+# -std=c++20>)
 
 # #################### CoreModules ##################################
 file(
@@ -111,8 +119,9 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES}
-                         ${MM_ROOT}/firmware/src/gui/pages/page_manager.cc)
+add_executable(
+  simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES} ${SLS_SOURCES}
+            ${MM_ROOT}/firmware/src/gui/pages/page_manager.cc)
 
 target_include_directories(
   simulator
@@ -145,6 +154,6 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 # assembly)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        ryml SDL2 ui)
+                                        ryml SDL2)
 
 target_link_options(simulator PUBLIC LINKER:-map,simulator.map)
