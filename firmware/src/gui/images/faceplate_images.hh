@@ -8,6 +8,7 @@
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(ASR_240);
 LV_IMG_DECLARE(Braids_240);
 LV_IMG_DECLARE(StereoStrip_240);
 LV_IMG_DECLARE(SlewLimiter_240);
@@ -97,6 +98,9 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "ASR")
+			return &ASR_240;
 
 		if (slug == "Braids")
 			return &Braids_240;

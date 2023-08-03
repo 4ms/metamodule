@@ -31,6 +31,8 @@ file(
   ${MM_ROOT}/firmware/src/gui/images/Befaco/components/*.c
   ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/modules/*.c
   ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/components/*.c
+  ${MM_ROOT}/firmware/src/gui/images/hetrickcv/modules/*.c
+  ${MM_ROOT}/firmware/src/gui/images/hetrickcv/components/*.c
   ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
   ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
 
@@ -85,6 +87,12 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
     ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
     ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
+    #
+    # HetrickCV
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ASR.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/arr.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/Domain.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/scl.cpp
     #
     # support files
     ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
@@ -145,6 +153,7 @@ target_include_directories(
           ${MM_ROOT}/shared/CoreModules/4ms
           ${MM_ROOT}/shared/CoreModules/Befaco
           ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack
+          ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma
           ${MM_ROOT}/firmware/src/VCV_adaptor
           ${MM_ROOT}/firmware/src/VCV_adaptor/pffft)
 
