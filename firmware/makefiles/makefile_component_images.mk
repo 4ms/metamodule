@@ -28,7 +28,7 @@ AudibleInstruments_faceplate_svgs := $(addprefix vcv_ports/AudibleInstruments/re
 
 brands += hetrickcv
 include vcv_ports/glue/hetrickcv/modules.mk
-hetrickcv_faceplate_svgs := $(addprefix vcv_ports/hetrickcv/res/panels/,$(addsuffix .svg,$(hetriccv_modules)))
+hetrickcv_faceplate_svgs := $(addprefix vcv_ports/hetrickcv/res/,$(addsuffix .svg,$(hetrickcv_modules)))
 
 
 brands += Rack 
