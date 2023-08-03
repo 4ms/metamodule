@@ -1,0 +1,11 @@
+PatchData:
+  patch_name: Hetrickcv ASR
+  description: Testing...
+  module_slugs:
+    0: HubMedium
+    1: ASR
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs: []
