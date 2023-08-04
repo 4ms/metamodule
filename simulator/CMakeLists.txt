@@ -35,15 +35,14 @@ file(
   ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
 
 add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
-                 ${CMAKE_CURRENT_BINARY_DIR}/meta5)
+                 ${CMAKE_CURRENT_BINARY_DIR}/slsexport/meta5)
 
 target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
-target_compile_options(ui PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>:
-                                  -std=c++20>)
+target_compile_options(ui PRIVATE -Wall -Og -g2 -fno-common
+                                  $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### CoreModules ##################################
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
-
 
 set(CORE_MODULES
     ${CORE_MODULES}
