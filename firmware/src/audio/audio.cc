@@ -243,8 +243,9 @@ void AudioStream::handle_patch_mods() {
 	if (auto patch_mod = patch_mod_queue.get()) {
 		std::visit(overloaded{
 					   [this](SetStaticParam &mod) { player.apply_static_param(mod.param); },
-					   [](AddMapping &mod) {},
-					   [](ModifyMapping &mod) {},
+					   [this](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
+					   [](AddMapping &mod) { /*TODO*/ },
+					   [](ModifyMapping &mod) { /*TODO*/ },
 				   },
 				   patch_mod.value());
 	}

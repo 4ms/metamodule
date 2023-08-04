@@ -3,8 +3,8 @@
 #include "util/static_string.hh"
 #include <vector>
 
-const int MAX_MODULES_IN_PATCH = 32;
-const int MAX_KNOBS_PER_MAPPING = 16;
+constexpr int MAX_MODULES_IN_PATCH = 32;
+constexpr unsigned MaxKnobSets = 8;
 
 // 4 Bytes
 struct Jack {

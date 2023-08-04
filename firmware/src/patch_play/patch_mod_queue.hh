@@ -7,6 +7,10 @@
 namespace MetaModule
 {
 
+struct ChangeKnobSet {
+	unsigned knobset_num;
+};
+
 struct SetStaticParam {
 	StaticParam param;
 };
@@ -19,7 +23,7 @@ struct ModifyMapping {
 	MappedKnob map;
 };
 
-using PatchModRequest = std::variant<SetStaticParam, AddMapping, ModifyMapping>;
+using PatchModRequest = std::variant<SetStaticParam, AddMapping, ModifyMapping, ChangeKnobSet>;
 
 using PatchModQueue = CircularBufferOpt<PatchModRequest, 32>;
 

@@ -18,6 +18,7 @@ namespace MetaModule
 {
 
 class PatchPlayer {
+
 	enum {
 		NumInConns = PanelDef::NumUserFacingInJacks,
 		NumOutConns = PanelDef::NumUserFacingOutJacks,
@@ -36,7 +37,6 @@ public:
 	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
 	static constexpr size_t NumParams = PanelDef::NumKnobs + PanelDef::NumMidiParams;
 	using KnobSet = std::array<std::vector<MappedKnob>, NumParams>;
-	static constexpr size_t MaxKnobSets = 8;
 
 	std::array<KnobSet, MaxKnobSets> knob_conns;
 
@@ -128,6 +128,8 @@ public:
 		is_loaded = true;
 
 		calc_multiple_module_indicies();
+
+		set_active_knob_set(0);
 		return true;
 	}
 
@@ -170,7 +172,6 @@ public:
 		pd.module_slugs.clear();
 
 		clear_cache();
-		// BigAllocControl::reset();
 	}
 
 	// K-rate setters/getters:
@@ -194,6 +195,19 @@ public:
 			return 0.f;
 	}
 
+	void apply_static_param(const StaticParam &sparam) {
+		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
+		//Also set it in the patch?
+	}
+
+	void add_mapped_knob(const MappedKnob &map) {
+		//TODO
+	}
+
+	void set_active_knob_set(unsigned num) {
+		active_knob_set = std::min(num, MaxKnobSets - 1);
+	}
+
 	// General info getters:
 
 	const ModuleTypeSlug &get_patch_name() {
@@ -212,14 +226,6 @@ public:
 		if (int_cable_idx >= pd.int_cables.size())
 			return 0;
 		return pd.int_cables[int_cable_idx].ins.size();
-	}
-
-	void apply_static_param(const StaticParam &sparam) {
-		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
-		//Also set it in the patch?
-	}
-
-	void add_mapped_knob(const MappedKnob &map) {
 	}
 
 	// int get_num_mapped_knobs() {
