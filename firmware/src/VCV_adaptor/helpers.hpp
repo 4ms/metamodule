@@ -31,7 +31,7 @@ T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_
 
 inline std::string_view getParamName(engine::Module *module, int id) {
 	if (auto pq = module->getParamQuantity(id)) {
-		printf("Param %d name:%.16s\n", id, pq->name.data());
+		// printf("Param %d name:%.16s\n", id, pq->name.data());
 		return pq->name;
 	}
 	return "";
@@ -39,7 +39,7 @@ inline std::string_view getParamName(engine::Module *module, int id) {
 
 inline std::string_view getInputName(engine::Module *module, int id) {
 	if (auto info = module->getInputInfo(id)) {
-		printf("Input %d name:%.16s\n", id, info->name.data());
+		// printf("Input %d name:%.16s\n", id, info->name.data());
 		return info->name;
 	}
 	return "";
@@ -47,7 +47,7 @@ inline std::string_view getInputName(engine::Module *module, int id) {
 
 inline std::string_view getOutputName(engine::Module *module, int id) {
 	if (auto info = module->getOutputInfo(id)) {
-		printf("Output %d name:%.16s\n", id, info->name.data());
+		// printf("Output %d name:%.16s\n", id, info->name.data());
 		return info->name;
 	}
 	return "";
@@ -55,7 +55,7 @@ inline std::string_view getOutputName(engine::Module *module, int id) {
 
 inline std::string_view getLightName(engine::Module *module, int id) {
 	if (auto info = module->getLightInfo(id)) {
-		printf("Light %d name:%.16s\n", id, info->name.data());
+		// printf("Light %d name:%.16s\n", id, info->name.data());
 		return info->name;
 	}
 	return "";
@@ -94,7 +94,11 @@ TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int par
 template<class TPortWidget>
 TPortWidget *createInput(math::Vec pos, engine::Module *module, int inputId) {
 	auto name = getInputName(module, inputId);
-	auto o = createElementWidget<TPortWidget>(pos, MetaModule::Coords::TopLeft, name);
+	auto *o = new TPortWidget;
+	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	o->element =
+		typename ElementConvert<TPortWidget>::ElementTypeInput{pos.x, pos.y, MetaModule::Coords::TopLeft, name, name};
 	o->portId = inputId;
 	return o;
 }
@@ -102,7 +106,11 @@ TPortWidget *createInput(math::Vec pos, engine::Module *module, int inputId) {
 template<class TPortWidget>
 TPortWidget *createInputCentered(math::Vec pos, engine::Module *module, int inputId) {
 	auto name = getInputName(module, inputId);
-	auto o = createElementWidget<TPortWidget>(pos, MetaModule::Coords::Center, name);
+	auto *o = new TPortWidget;
+	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	o->element =
+		typename ElementConvert<TPortWidget>::ElementTypeInput{pos.x, pos.y, MetaModule::Coords::Center, name, name};
 	o->portId = inputId;
 	return o;
 }
@@ -110,7 +118,11 @@ TPortWidget *createInputCentered(math::Vec pos, engine::Module *module, int inpu
 template<class TPortWidget>
 TPortWidget *createOutput(math::Vec pos, engine::Module *module, int outputId) {
 	auto name = getOutputName(module, outputId);
-	auto o = createElementWidget<TPortWidget>(pos, MetaModule::Coords::TopLeft, name);
+	auto *o = new TPortWidget;
+	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	o->element =
+		typename ElementConvert<TPortWidget>::ElementTypeOutput{pos.x, pos.y, MetaModule::Coords::TopLeft, name, name};
 	o->portId = outputId;
 	return o;
 }
@@ -118,7 +130,11 @@ TPortWidget *createOutput(math::Vec pos, engine::Module *module, int outputId) {
 template<class TPortWidget>
 TPortWidget *createOutputCentered(math::Vec pos, engine::Module *module, int outputId) {
 	auto name = getOutputName(module, outputId);
-	auto o = createElementWidget<TPortWidget>(pos, MetaModule::Coords::Center, name);
+	auto *o = new TPortWidget;
+	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	o->element =
+		typename ElementConvert<TPortWidget>::ElementTypeOutput{pos.x, pos.y, MetaModule::Coords::Center, name, name};
 	o->portId = outputId;
 	return o;
 }
