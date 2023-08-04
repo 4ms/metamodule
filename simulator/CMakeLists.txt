@@ -54,6 +54,7 @@ file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
 
 set(CORE_MODULES
     ${CORE_MODULES}
+    ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
     #
