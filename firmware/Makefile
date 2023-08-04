@@ -62,6 +62,11 @@ flash-app-sd: uimg
 	echo "sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}" && \
 	sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}
 
+jprog: uimg
+	$(info This only works after a hard reset with the Freeze jumper installed)
+	@time JLinkExe -device STM32MP15XX_A7 -if JTAG -speed 25000 -jtagconf -1,-1 -nogui 1 -AutoConnect 1 -CommandFile flashing/program.jlink | tee /dev/tty | grep -q "failed" && \
+	echo "FAILED!!! Did you do a hard reset with the Freeze jumper installed?" || echo "Programmed OK"
+
 
 ## Cleaning
 
