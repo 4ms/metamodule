@@ -1,0 +1,5 @@
+Halt
+LoadFile build/mp1corea7/medium/main.elf
+SetPC C2000040
+Go
+quit
