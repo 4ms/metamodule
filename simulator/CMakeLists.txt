@@ -36,18 +36,12 @@ file(
 
 # #################### SLS Export ##################################
 
-file(STRINGS ${MM_ROOT}/firmware/src/gui/slsexport/meta5/filelist.txt
-     SLS_SOURCES)
-list(TRANSFORM SLS_SOURCES
-     PREPEND "${MM_ROOT}/firmware/src/gui/slsexport/meta5/")
+add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
+                 ${CMAKE_CURRENT_BINARY_DIR}/slsexport/meta5)
 
-# FIXME: SLS symbols not found when linking library to the executable:
-# add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
-# ${CMAKE_CURRENT_BINARY_DIR}/meta5)
-
-# target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
-# target_compile_options(ui PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>:
-# -std=c++20>)
+target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
+target_compile_options(ui PRIVATE -Wall -Og -g2 -fno-common
+                                  $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### CoreModules ##################################
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
@@ -153,6 +147,6 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 # assembly)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        ryml SDL2)
+                                        ryml ui SDL2)
 
 target_link_options(simulator PUBLIC LINKER:-map,simulator.map)
