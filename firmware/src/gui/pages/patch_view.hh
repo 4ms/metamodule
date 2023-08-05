@@ -9,13 +9,13 @@
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/patch_view_knobset_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 
-//exported:
 extern "C" {
 #include "gui/slsexport/meta5/ui.h"
 }
@@ -66,6 +66,7 @@ struct PatchViewPage : PageBase {
 
 		// Settings menu
 		settings_menu.init();
+		knobset_menu.init();
 
 		module_name = lv_label_create(base); //NOLINT
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
@@ -102,6 +103,8 @@ struct PatchViewPage : PageBase {
 
 		if (patch.patch_name.length() == 0)
 			return;
+
+		active_knob_set = PageList::get_active_knobset();
 
 		lv_label_set_text(patchname, patch.patch_name.c_str());
 
@@ -160,6 +163,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
 		settings_menu.focus(group);
+		knobset_menu.focus(group, patch.knob_sets);
 	}
 
 	void blur() override {
@@ -174,6 +178,7 @@ struct PatchViewPage : PageBase {
 		drawn_elements.clear();
 		module_ids.clear();
 		settings_menu.blur();
+		knobset_menu.blur();
 	}
 
 	void update() override {
@@ -185,9 +190,16 @@ struct PatchViewPage : PageBase {
 			update_map_ring_style();
 		}
 
+		if (is_patch_playing != last_is_patch_playing || knobset_settings.changed) {
+			knobset_settings.changed = false;
+			update_active_knobset();
+		}
+
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (settings_menu.visible) {
 				settings_menu.hide();
+			} else if (knobset_menu.visible) {
+				knobset_menu.hide();
 			} else if (PageList::request_last_page()) {
 				blur();
 			}
@@ -219,6 +231,10 @@ struct PatchViewPage : PageBase {
 			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
 			MapRingDisplay::update(map_ring, map_settings.map_ring_style, is_on_highlighted_module, is_patch_playing);
 		}
+	}
+
+	void update_active_knobset() {
+		active_knob_set = knobset_settings.active_knobset;
 	}
 
 	static void module_pressed_cb(lv_event_t *event) {
@@ -274,6 +290,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 		page->highlighted_module_id = std::nullopt;
 		page->settings_menu.hide();
+		page->knobset_menu.hide();
 	}
 
 private:
@@ -288,6 +305,9 @@ private:
 	PatchViewSettingsMenu::ViewSettings map_settings;
 	PatchViewSettingsMenu settings_menu{map_settings};
 
+	PatchViewKnobsetMenu::Settings knobset_settings;
+	PatchViewKnobsetMenu knobset_menu{knobset_settings};
+
 	std::optional<uint32_t> highlighted_module_id{};
 
 	PatchData &patch = patch_storage.get_view_patch();
@@ -299,7 +319,6 @@ private:
 
 	lv_draw_line_dsc_t cable_drawline_dsc;
 
-	// TODO:put this in PageList
 	unsigned active_knob_set = 0;
 
 	struct focussed_context {

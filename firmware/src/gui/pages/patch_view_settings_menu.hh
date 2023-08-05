@@ -34,6 +34,9 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_ShowPlayingMapsCheck, settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_FlashMapCheck, settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MapTranspSlider, settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+
+		visible = false;
+		lv_obj_set_height(ui_SettingsMenu, 0);
 	}
 
 	void focus(lv_group_t *group) {
