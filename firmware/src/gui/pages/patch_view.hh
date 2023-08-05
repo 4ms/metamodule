@@ -234,7 +234,10 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update_active_knobset() {
+		blur();
 		active_knob_set = knobset_settings.active_knobset;
+		PageList::set_active_knobset(active_knob_set);
+		prepare_focus();
 	}
 
 	static void module_pressed_cb(lv_event_t *event) {
