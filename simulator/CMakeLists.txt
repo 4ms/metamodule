@@ -48,6 +48,12 @@ target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
 target_compile_options(ui PRIVATE -Wall -Og -g2 -fno-common
                                   $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
+# Fixup for compiler warning in LVGL 8.3.4:
+set_source_files_properties(
+  ${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c DIRECTORY
+  ${MM_ROOT}/firmware/src/gui/slsexport/meta5 PROPERTIES COMPILE_FLAGS
+                                                         -Wno-unused-variable)
+
 # #################### CoreModules ##################################
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
 
