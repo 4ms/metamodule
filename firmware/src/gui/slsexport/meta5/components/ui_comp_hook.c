@@ -3,3 +3,8 @@
 // LVGL version: 8.3.6
 // Project name: META6
 
+#include "../ui.h"
+
+void ui_comp_Button1_create_hook( lv_obj_t * comp)
+{
+}
