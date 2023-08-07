@@ -72,7 +72,7 @@ public:
 		is_calibrating_ = true;
 	}
 	auto process_calibration() {
-		CalibrationStepResult res;
+		CalibrationStepResult res = CAL_STEP_RESULT_IN_PROGRESS;
 
 		cal_running_total_ += last_raw_reading_;
 
@@ -113,8 +113,7 @@ public:
 						res = CAL_STEP_RESULT_FAILURE;
 				} break;
 			}
-		} else
-			res = CAL_STEP_RESULT_IN_PROGRESS;
+		} 
 
 		return res;
 	}

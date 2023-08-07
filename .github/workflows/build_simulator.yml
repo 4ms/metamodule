@@ -12,10 +12,12 @@ jobs:
           # - { os: windows, shell: msys2 } # currently broken
           - { os: ubuntu,  shell: bash  }
           - { os: macos,   shell: bash  }
-        compiler: [ {cpp: g++, c: gcc}, {cpp: clang++, c: clang} ]
+        compiler: [ {cpp: clang++, c: clang},  {cpp: g++, c: gcc} ]
         exclude:
           - os: { os: windows, shell: msys2 }
             compiler: {cpp: clang++, c: clang}
+          - os: { os: macos, shell: bash }
+            compiler: {cpp: g++, c: gcc}
     runs-on: '${{ matrix.os.os }}-latest'
     defaults:
       run:
@@ -33,8 +35,7 @@ jobs:
       - name: Install mac dependencies
         if: matrix.os.os == 'macos'
         run: |
-          brew install ninja sdl2 gcc
-          cd /usr/local/bin && ln -s gcc-13 gcc && ln -s g++-13 g++
+          brew install ninja sdl2 
   
       - name: Install linux dependencies
         if: matrix.os.os =='ubuntu'

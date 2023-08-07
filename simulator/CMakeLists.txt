@@ -34,51 +34,65 @@ file(
   ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
   ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
 
-add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
-                 ${CMAKE_CURRENT_BINARY_DIR}/meta5)
+# #################### SLS Export ##################################
 
-target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
-target_compile_options(ui PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>:
-                                  -std=c++20>)
+file(STRINGS ${MM_ROOT}/firmware/src/gui/slsexport/meta5/filelist.txt
+     SLS_SOURCES)
+list(TRANSFORM SLS_SOURCES
+     PREPEND "${MM_ROOT}/firmware/src/gui/slsexport/meta5/")
+
+# Fixup for compiler warning in LVGL 8.3.4:
+set_source_files_properties(${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c
+                            PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
 
 # #################### CoreModules ##################################
-file(
-  GLOB
-  CORE_MODULES
-  #
-  # 4ms
-  ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc
-  ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
-  ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
-  #
-  # Befaco
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/StereoStrip.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SlewLimiter.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SamplingModulator.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/STMix.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Rampage.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/PonyVCO.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Percall.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/MotionMTR.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Morphader.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Mixer.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/KickAll.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/HexMixVCA.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ChoppingKinky.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ABC.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ADSR.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SpringReverb.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/DualAtenuverter.cpp
-  ${MM_ROOT}/firmware/vcv_ports/Befaco/src/EvenVCO.cpp
-  # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/NoisePlethora.cpp
-  # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Muxslicer.cpp
-  #
-  # AudibleInstruments
-  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/src/Braids.cpp
-  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/utils/random.cc
-  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/atan.cc
-  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/units.cc
-  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/analog_oscillator.cc
+file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
+
+set(CORE_MODULES
+    ${CORE_MODULES}
+    ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
+    #
+    # Befaco
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/StereoStrip.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SlewLimiter.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SamplingModulator.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/STMix.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Rampage.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/PonyVCO.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Percall.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/MotionMTR.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Morphader.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Mixer.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Kickall.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/HexmixVCA.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ChoppingKinky.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ABC.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ADSR.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SpringReverb.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/DualAtenuverter.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/EvenVCO.cpp
+    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/NoisePlethora.cpp
+    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Muxslicer.cpp
+    #
+    # AudibleInstruments
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/src/Braids.cpp
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/utils/random.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/atan.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/units.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/analog_oscillator.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
+    #
+    # support files
+    ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
+    ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
+    ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
+
+# Fixups for compiler warnings in AudibleInstruments:
+set_source_files_properties(
   ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
   ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
   ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
@@ -111,7 +125,7 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES}
+add_executable(simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES} ${SLS_SOURCES}
                          ${MM_ROOT}/firmware/src/gui/pages/page_manager.cc)
 
 target_include_directories(
@@ -145,14 +159,18 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 # assembly)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        ryml SDL2 ui)
+                                        ryml SDL2)
 
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  target_link_options(simulator PUBLIC "-Wl,-map,simulator.map")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_options(simulator PUBLIC "-Wl,-map,simulator.map")
+  else()
+    target_link_options(simulator PUBLIC LINKER:-Map,simulator.map)
+  endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_link_options(simulator PUBLIC LINKER:-Map,simulator.map)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  target_link_options(cmake_testapp PRIVATE "/MAP:simulator.map")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  target_link_options(simulator PRIVATE "/MAP:simulator.map")
 endif()
