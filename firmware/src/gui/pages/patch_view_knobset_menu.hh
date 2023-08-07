@@ -48,7 +48,7 @@ struct PatchViewKnobsetMenu {
 		lv_group_set_editing(knobset_menu_group, false);
 		lv_group_add_obj(knobset_menu_group, ui_KnobsetCloseButton);
 
-		for (auto &knobset : knobsets) {
+		for (const auto &knobset : knobsets) {
 			if (knobset.set.size()) {
 				lv_obj_t *panel = lv_obj_create(ui_KnobsetMenu);
 				lv_obj_t *check = lv_switch_create(panel);
@@ -81,7 +81,7 @@ struct PatchViewKnobsetMenu {
 			lv_group_del(knobset_menu_group);
 			knobset_menu_group = nullptr;
 		}
-		for (auto c : knobset_list) {
+		for (auto *c : knobset_list) {
 			lv_obj_del(c);
 		}
 		knobset_list.clear();
