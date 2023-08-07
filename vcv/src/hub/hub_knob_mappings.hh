@@ -33,8 +33,7 @@ public:
 	// TODO aliases
 	std::array<std::array<StaticString<31>, MaxKnobSets>, NumKnobs> aliases;
 
-	HubKnobMappings(int64_t hubModuleId)
-		: hubModuleId{hubModuleId} {
+	HubKnobMappings() {
 		for (unsigned i = 0; auto &knob_multimap : mappings) {
 			auto color = PaletteHub::color(i++);
 			for (auto &map : knob_multimap) {
@@ -51,6 +50,11 @@ public:
 			for (auto &map : knob_multimap)
 				APP->engine->removeParamHandle(&map.paramHandle);
 		}
+	}
+
+	void linkToModule(int64_t moduleId) {
+		// Can't do this in the ctor because Rack sets the id after module is constructed
+		hubModuleId = moduleId;
 	}
 
 	Mapping &activeMap(KnobMappingSet &mapset) {
@@ -82,7 +86,6 @@ public:
 		refreshParamHandles();
 	}
 
-public:
 	// Mapping Range:
 
 	void setRangeMin(const MappableObj paramObj, float val) {
@@ -149,19 +152,6 @@ public:
 		return map;
 	}
 
-private:
-	KnobMappingSet &nextFreeMap(unsigned hubParamId, unsigned set_idx) {
-		// Find first unused paramHandle
-		for (auto &mapset : mappings[hubParamId]) {
-			if (mapset.paramHandle.moduleId < 0) {
-				return mapset;
-			}
-		}
-		// If all are used, then overwrite the last one
-		return mappings[hubParamId][MaxMapsPerPot - 1];
-	}
-
-public:
 	// Return a reference to an array of KnobMappingSets of a knob
 	auto &getAllMappings(int hubParamId) {
 		if (hubParamId >= (int)NumKnobs)
@@ -199,10 +189,10 @@ public:
 			for (unsigned hubParamId = 0; auto &knob : mappings) {
 
 				for (auto &mapsets : knob) {
-					// if (!is_valid(mapsets, knobSetId))
-					// 	continue;
-
 					auto &map = mapsets.maps[knobSetId];
+
+					if (!is_valid(map))
+						continue;
 
 					json_t *thisMapJ = json_object();
 					json_object_set_new(thisMapJ, "DstModID", json_integer(map.moduleId));
@@ -252,11 +242,12 @@ public:
 						if (json_is_object(mappingJ)) {
 							json_t *val;
 
-							// Verify its for this module (there may be more than one hub)
-							val = json_object_get(mappingJ, "SrcModID");
-							auto moduleId = json_is_integer(val) ? json_integer_value(val) : -1;
-							if (moduleId != hubModuleId)
-								continue;
+							//FIXME: at this point, VCV has not assigned an ID to this module, so we can't know if it matches this Hub's ID
+							// Do we need to verify this json is for this hub (there may be more than one hub)
+							// val = json_object_get(mappingJ, "SrcModID");
+							// auto moduleId = json_is_integer(val) ? json_integer_value(val) : -1;
+							// if (moduleId != hubModuleId)
+							// 	continue;
 
 							val = json_object_get(mappingJ, "SrcObjID");
 							auto hubParamId = json_is_integer(val) ? json_integer_value(val) : -1;
@@ -300,6 +291,17 @@ public:
 	}
 
 private:
+	KnobMappingSet &nextFreeMap(unsigned hubParamId, unsigned set_idx) {
+		// Find first unused paramHandle
+		for (auto &mapset : mappings[hubParamId]) {
+			if (mapset.paramHandle.moduleId < 0) {
+				return mapset;
+			}
+		}
+		// If all are used, then overwrite the last one
+		return mappings[hubParamId][MaxMapsPerPot - 1];
+	}
+
 	// checks if the mapset has a valid paramhandle in the active set
 	bool is_valid(KnobMappingSet mapset) {
 		bool paramHandleValid = mapset.paramHandle.module && mapset.paramHandle.moduleId >= 0;
@@ -307,6 +309,10 @@ private:
 			mapset.maps[activeSetId].clear();
 		}
 		return paramHandleValid;
+	}
+
+	bool is_valid(Mapping map) {
+		return map.moduleId >= 0 && map.paramId >= 0;
 	}
 
 	void refreshParamHandles() {

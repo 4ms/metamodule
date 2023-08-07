@@ -12,32 +12,10 @@
 
 using namespace rack;
 
-struct HubMediumMappings {
-	constexpr static unsigned NumMidiSrcs = 2;
-	constexpr static unsigned NumMappings = PanelDef::NumKnobs + NumMidiSrcs;
-	static inline std::array<MappableObj::Type, NumMappings> mapping_srcs{
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::MidiNote,
-		MappableObj::Type::MidiGate,
-	};
-};
-
 struct HubMedium : MetaModuleHubBase {
 	using INFO = MetaModule::HubMediumInfo;
 
-	HubMedium()
-		: MetaModuleHubBase{HubMediumMappings::mapping_srcs} {
+	HubMedium() {
 
 		// Register with VCV the number of elements of each type
 		auto cnt = ElementCount::count<INFO>();

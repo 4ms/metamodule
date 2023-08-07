@@ -26,20 +26,12 @@ struct MetaModuleHubBase : public rack::Module {
 
 	std::optional<int> inProgressMapParamId{};
 
-	std::span<MappableObj::Type> mappingSrcs;
-
 	// FIXME: NumPots should be a template parameter
 	// We then need a common base class widgets can point to
 	static constexpr uint32_t NumPots = 12;
 	static constexpr uint32_t MaxMapsPerPot = 8;
 	static constexpr uint32_t MaxKnobSets = 4;
-	HubKnobMappings<NumPots, MaxMapsPerPot, MaxKnobSets> mappings{id};
-
-	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
-		: mappingSrcs{mappingSrcs} {
-	}
-
-	~MetaModuleHubBase() = default;
+	HubKnobMappings<NumPots, MaxMapsPerPot, MaxKnobSets> mappings;
 
 	// Mapping State/Progress
 
@@ -77,6 +69,7 @@ struct MetaModuleHubBase : public rack::Module {
 			return false;
 		}
 
+		mappings.linkToModule(id);
 		auto *map = mappings.addMap(hubParamId, module->id, moduleParamId);
 		map->range_max = 1.f;
 		map->range_min = 0.0f;
