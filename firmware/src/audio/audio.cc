@@ -121,7 +121,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
-	auto raw_out = player.get_panel_output(output_id) * mute_ctr;
+	auto raw_out = -1.f * player.get_panel_output(output_id) * mute_ctr;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
 	return scaled_out;
 }
@@ -225,11 +225,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
 
-		for (unsigned i = 0; i < PanelDef::NumDACOut; i++)
-			aux_.set_output(i, get_dac_output(i + PanelDef::NumAudioOut));
+		// for (unsigned i = 0; i < PanelDef::NumDACOut; i++)
+		// 	aux_.set_output(i, get_dac_output(i + PanelDef::NumAudioOut));
 
-		for (auto [i, gate_out] : countzip(aux_.gate_out))
-			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
+		// for (auto [i, gate_out] : countzip(aux_.gate_out))
+		// 	gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
 }
 
