@@ -26,7 +26,7 @@ constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<Vo
 {
     // two points in the V->f curve
     constexpr double V_1 = 0.4;
-    constexpr double f_1 = 0.09;
+    constexpr double f_1 = 0.009;
     constexpr double V_2 = 0.06;
     constexpr double f_2 = 1000.0;
 
