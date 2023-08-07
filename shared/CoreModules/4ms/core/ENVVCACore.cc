@@ -37,8 +37,16 @@ constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<Vo
     constexpr double b = gcem::pow(2.0f, arg / ArgScalingFactor);
     constexpr double a = f_1 / gcem::pow(gcem::pow(2.0, arg), V_1);
 
+	auto coreFunc = [a,b,ArgScalingFactor](auto voltage) -> float
+	{
+		return float(gcem::pow(b, double(voltage) * ArgScalingFactor) * a);
+	};
+
+	static_assert(std::abs(coreFunc(V_1)- f_1)/f_1 < 1e-2f);
+	static_assert(std::abs(coreFunc(V_2)- f_2)/f_2 < 1e-2f);
+
     // interpolate
-    auto frequency = float(gcem::pow(b, double(voltage) * ArgScalingFactor) * a);
+    auto frequency = coreFunc(voltage);
 
     return frequency;
 });
