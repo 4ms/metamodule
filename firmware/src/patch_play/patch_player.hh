@@ -116,9 +116,10 @@ public:
 		mark_patched_jacks();
 		calc_panel_jack_connections();
 
-		for (auto const &knob_set : pd.knob_sets) {
-			for (auto const &k : knob_set.set)
-				cache_knob_mapping(active_knob_set, k);
+		for (auto [knob_set_idx, knob_set] : enumerate(pd.knob_sets)) {
+			for (auto const &k : knob_set.set) {
+				cache_knob_mapping(knob_set_idx, k);
+			}
 		}
 
 		// Set static (non-mapped) knobs

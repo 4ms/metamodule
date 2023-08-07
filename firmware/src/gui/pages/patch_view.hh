@@ -237,6 +237,7 @@ struct PatchViewPage : PageBase {
 		blur();
 		active_knob_set = knobset_settings.active_knobset;
 		PageList::set_active_knobset(active_knob_set);
+		patch_mod_queue.put(ChangeKnobSet{active_knob_set});
 		prepare_focus();
 	}
 
