@@ -7,6 +7,7 @@
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
+#include "patch_play/multicore_play.hh"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
@@ -41,6 +42,8 @@ public:
 	std::array<KnobSet, MaxKnobSets> knob_conns;
 
 	bool is_loaded = false;
+
+	MulticorePlayer smp;
 
 private:
 	// Index of each module that appears more than once.
@@ -79,12 +82,14 @@ public:
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	bool load_patch(const PatchData &patchdata) {
-		mdrivlib::SMPThread::init();
 
 		if (patchdata.patch_name.length() == 0 || patchdata.module_slugs.size() == 0)
 			return false;
 
 		copy_patch_data(patchdata);
+
+		// Tell the other core about the patch
+		smp.load_patch(pd.module_slugs.size());
 
 		// First module is the hub, ignore it.
 		modules[0] = ModuleFactory::create(PanelDef::typeID);
@@ -104,15 +109,6 @@ public:
 			modules[i]->set_samplerate(48000.f); //Fixed SR for now
 		}
 
-		// Tell the other core about the patch
-		mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2); //first module to process
-		mdrivlib::SMPControl::write<SMPRegister::NumModulesInPatch>(pd.module_slugs.size());
-		mdrivlib::SMPControl::write<SMPRegister::UpdateModuleOffset>(2);
-		mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
-
-		// Todo: if we need to improve patch loading time by a small amount,
-		// it's a little faster to combine these functions so we only do one loop over nets/jacks
-		// ...but it's harder to unit test.
 		mark_patched_jacks();
 		calc_panel_jack_connections();
 
@@ -139,16 +135,11 @@ public:
 		if (pd.module_slugs.size() == 2)
 			modules[1]->update();
 		else {
-			mdrivlib::SMPThread::split_with_command<SMPCommand::UpdateListOfModules>();
-#ifdef SIMULATOR
-			constexpr size_t module_skip = 1;
-#else
-			constexpr size_t module_skip = 2;
-#endif
-			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += module_skip) {
+			smp.split();
+			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += smp.ModuleStride) {
 				modules[module_i]->update();
 			}
-			mdrivlib::SMPThread::join();
+			smp.join();
 		}
 
 		for (auto &cable : pd.int_cables) {
@@ -160,7 +151,7 @@ public:
 	}
 
 	void unload_patch() {
-		mdrivlib::SMPThread::join();
+		smp.join();
 		is_loaded = false;
 		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
 			modules[i].reset(nullptr);
