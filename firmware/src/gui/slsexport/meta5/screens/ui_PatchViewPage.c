@@ -219,8 +219,6 @@ lv_label_set_long_mode(ui_PatchName,LV_LABEL_LONG_SCROLL_CIRCULAR);
 lv_label_set_text(ui_PatchName,"Patch Name Here");
 lv_obj_set_style_text_color(ui_PatchName, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_PatchName, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_PatchName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_PatchName, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_decor(ui_PatchName, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_PatchName, &lv_font_montserrat_16, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -264,7 +262,7 @@ lv_obj_set_style_pad_row(ui_ModulesPanel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_ModulesPanel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SettingsMenu = lv_obj_create(ui_PatchViewPage);
-lv_obj_set_height( ui_SettingsMenu, 228);
+lv_obj_set_height( ui_SettingsMenu, 0);
 lv_obj_set_width( ui_SettingsMenu, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_align( ui_SettingsMenu, LV_ALIGN_TOP_RIGHT );
 lv_obj_set_flex_flow(ui_SettingsMenu,LV_FLEX_FLOW_COLUMN);

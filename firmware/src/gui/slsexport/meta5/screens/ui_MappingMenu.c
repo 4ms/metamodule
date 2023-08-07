@@ -70,8 +70,6 @@ lv_obj_set_y( ui_ElementRoller, -2 );
 lv_obj_set_align( ui_ElementRoller, LV_ALIGN_CENTER );
 lv_obj_set_style_text_color(ui_ElementRoller, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ElementRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_ElementRoller, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_ElementRoller, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_ElementRoller, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_ElementRoller, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_ElementRoller, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -108,8 +106,6 @@ lv_obj_set_style_shadow_ofs_y(ui_ElementRoller, 0, LV_PART_MAIN| LV_STATE_FOCUSE
 
 lv_obj_set_style_text_color(ui_ElementRoller, lv_color_hex(0xFFFFFF), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ElementRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_ElementRoller, 2, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_ElementRoller, 8, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_ElementRoller, LV_TEXT_ALIGN_CENTER, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_ElementRoller, &lv_font_montserrat_16, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_ElementRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
