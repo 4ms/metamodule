@@ -50,3 +50,4 @@ jobs:
           run-build: true
           run-test: false
           source-dir: "simulator"
+          generator: Ninja
