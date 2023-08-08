@@ -1,7 +1,11 @@
 #include "ryml_std.hpp"
 //
 #include "patch/patch.hh"
+#if defined(VCVRACK) || defined(TESTPROJECT)
+#include <cstdio>
+#else
 #include "printf.h"
+#endif
 #include "ryml.hpp"
 #include "ryml_serial_chars.hh"
 
