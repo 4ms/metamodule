@@ -154,7 +154,7 @@ lv_obj_set_style_pad_top(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_PatchListRoller = lv_roller_create(ui_PatchSelectorPage);
-lv_roller_set_options( ui_PatchListRoller, "Patch Name Here", LV_ROLLER_MODE_NORMAL );
+lv_roller_set_options( ui_PatchListRoller, "Patch Name Here\nAnother Patch", LV_ROLLER_MODE_NORMAL );
 lv_obj_set_width( ui_PatchListRoller, 228);
 lv_obj_set_height( ui_PatchListRoller, 200);
 lv_obj_set_x( ui_PatchListRoller, -4 );
@@ -177,12 +177,6 @@ lv_obj_set_style_outline_color(ui_PatchListRoller, lv_color_hex(0x444444), LV_PA
 lv_obj_set_style_outline_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_width(ui_PatchListRoller, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_pad(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_color(ui_PatchListRoller, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_shadow_opa(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_width(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_spread(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_ofs_x(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_ofs_y(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_set_style_bg_color(ui_PatchListRoller, lv_color_hex(0xFD8B18), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_PatchListRoller, 200, LV_PART_SELECTED| LV_STATE_DEFAULT);
