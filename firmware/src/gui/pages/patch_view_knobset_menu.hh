@@ -48,6 +48,17 @@ struct PatchViewKnobsetMenu {
 		lv_group_set_editing(knobset_menu_group, false);
 		lv_group_add_obj(knobset_menu_group, ui_KnobsetCloseButton);
 
+		if (knobsets.size() == 0) {
+			lv_obj_t *panel = lv_obj_create(ui_KnobsetMenu);
+			lv_obj_t *check = lv_switch_create(panel);
+			lv_obj_t *label = lv_label_create(panel);
+			lv_label_set_text(label, "Default");
+			lv_obj_add_state(check, LV_STATE_CHECKED);
+			lv_group_add_obj(knobset_menu_group, check);
+			Gui::style_menu_item_slider(panel, label, check);
+			knobset_list.push_back(panel);
+		}
+
 		for (const auto &knobset : knobsets) {
 			if (knobset.set.size()) {
 				lv_obj_t *panel = lv_obj_create(ui_KnobsetMenu);
