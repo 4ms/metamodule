@@ -1,3 +1,5 @@
+static char twosimpleosc_patch[] =
+	R"(
 PatchData:
   patch_name: twosimpleosc
   description: Two oscillators and a Djembe
@@ -20,7 +22,7 @@ PatchData:
       ins:
         - module_id: 3
           jack_id: 0
-    - panel_jack_id: 6
+    - panel_jack_id: 9 #MidiMonoGateJack
       ins:
         - module_id: 3
           jack_id: 4
@@ -164,3 +166,5 @@ PatchData:
       set: []
     - name: ''
       set: []
+
+)";

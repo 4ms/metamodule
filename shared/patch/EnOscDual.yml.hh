@@ -1,3 +1,5 @@
+static char EnOsc_Dual_patch[] =
+	R"(
 PatchData:
   patch_name: EnOsc Dual
   description: Two Ensemble Oscillators
@@ -322,3 +324,5 @@ PatchData:
           max: 1
     - name: ''
       set: []
+
+)";

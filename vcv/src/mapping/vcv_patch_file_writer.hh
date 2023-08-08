@@ -103,7 +103,7 @@ struct VCVPatchFileWriter {
 
 		std::string yml = pw.printPatchYAML();
 		writeToFile(fileName, yml);
-		// writeAsHeader(fileName + ".hh", patchStructName + "_patch", yml);
+		// writeAsHeader(fileName + ".hh", patchName + "_patch", yml);
 	}
 
 	static void writeToFile(const std::string &fileName, std::string textToWrite) {
