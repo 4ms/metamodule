@@ -10,9 +10,6 @@ void ui_PatchViewPage_screen_init(void)
 ui_PatchViewPage = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_PatchViewPage, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
 lv_obj_set_scrollbar_mode(ui_PatchViewPage, LV_SCROLLBAR_MODE_ACTIVE);
-lv_obj_set_style_radius(ui_PatchViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_PatchViewPage, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_PatchViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_color(ui_PatchViewPage, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_shadow_opa(ui_PatchViewPage, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_shadow_width(ui_PatchViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -265,7 +262,7 @@ lv_obj_set_style_pad_row(ui_ModulesPanel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_ModulesPanel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SettingsMenu = lv_obj_create(ui_PatchViewPage);
-lv_obj_set_height( ui_SettingsMenu, 240);
+lv_obj_set_height( ui_SettingsMenu, 0);
 lv_obj_set_width( ui_SettingsMenu, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_align( ui_SettingsMenu, LV_ALIGN_TOP_RIGHT );
 lv_obj_set_flex_flow(ui_SettingsMenu,LV_FLEX_FLOW_COLUMN);

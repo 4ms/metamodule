@@ -30,18 +30,15 @@ void ui_PatchViewPage_screen_init(void);
 lv_obj_t *ui_PatchViewPage;
 lv_obj_t *ui_ButtonsContainer;
 lv_obj_t *ui_PlayButton;
-void ui_event_KnobButton( lv_event_t * e);
 lv_obj_t *ui_KnobButton;
 lv_obj_t *ui_AddButton;
 lv_obj_t *ui_InfoButton;
-void ui_event_SettingsButton( lv_event_t * e);
 lv_obj_t *ui_SettingsButton;
 lv_obj_t *ui_PatchName;
 lv_obj_t *ui_ModulesPanel;
 lv_obj_t *ui_SettingsMenu;
 lv_obj_t *ui_SettingsClosePanel;
 lv_obj_t *ui_SettingsHeaderLabel;
-void ui_event_SettingsCloseButton( lv_event_t * e);
 lv_obj_t *ui_SettingsCloseButton;
 lv_obj_t *ui_SettingsMapsTitle;
 lv_obj_t *ui_ShowAllMapsPanel;
@@ -173,24 +170,6 @@ void ui_event_PatchListRoller( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
       _ui_screen_change( &ui_PatchViewPage, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_PatchViewPage_screen_init);
-}
-}
-void ui_event_KnobButton( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_MappingMenu, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_MappingMenu_screen_init);
-}
-}
-void ui_event_SettingsButton( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_flag_modify( ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
-}
-}
-void ui_event_SettingsCloseButton( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_flag_modify( ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
 }
 }
 void ui_event_ElementRoller( lv_event_t * e) {

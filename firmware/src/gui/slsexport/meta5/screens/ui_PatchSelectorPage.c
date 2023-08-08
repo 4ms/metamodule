@@ -11,8 +11,6 @@ ui_PatchSelectorPage = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_PatchSelectorPage, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_flex_flow(ui_PatchSelectorPage,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_PatchSelectorPage, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END);
-lv_obj_set_style_bg_color(ui_PatchSelectorPage, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_PatchSelectorPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_PatchSelectorPage, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_PatchSelectorPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PatchSelectorPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -120,8 +118,6 @@ lv_obj_set_height( ui_SDlabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SDlabel, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_SDlabel,LV_LABEL_LONG_CLIP);
 lv_label_set_text(ui_SDlabel," Card");
-lv_obj_set_style_text_letter_space(ui_SDlabel, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_SDlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_SDlabel, &lv_font_montserrat_10, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_Flashbut = lv_btn_create(ui_DrivesPanel);
