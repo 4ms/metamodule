@@ -62,6 +62,7 @@ struct ModuleDrawer {
 	// Also appends the DrawnElement info to the given vector
 	void draw_mapped_elements(const PatchData &patch,
 							  uint32_t module_idx,
+							  uint32_t active_knob_set,
 							  lv_obj_t *canvas,
 							  std::vector<DrawnElement> &drawn_elements,
 							  bool draw_rings = true) {
@@ -78,15 +79,14 @@ struct ModuleDrawer {
 		ElementCount::Indices indices{};
 		for (const auto &element : moduleinfo.elements) {
 			auto element_ctx = std::visit(
-				[height = height, &el_drawer, &patch, &indices, module_idx, canvas](auto &el) -> GuiElement {
+				[height = height, &el_drawer, &patch, &indices, module_idx, canvas, active_knob_set](
+					auto &el) -> GuiElement {
 					auto obj = el_drawer.draw_element(el);
-					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, indices);
+					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, indices);
 					auto mapped_ring = MapRingDrawer::draw_mapped_ring(el, obj, canvas, mapping_id, height);
 
 					auto idx = ElementIndex::get_index(el, indices);
 					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, idx, mapping_id};
-
-					// patch.get_static_knob_value(module_idx, idx);
 
 					indices = indices + ElementCount::count(el);
 					return element_ctx;

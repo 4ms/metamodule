@@ -1,7 +1,6 @@
 project(lvgl_simulation_driver LANGUAGES C CXX)
 
-find_package(PkgConfig)
-pkg_check_modules(SDL2 REQUIRED sdl2)
+find_package(SDL2 REQUIRED)
 
 add_library(lvglsdl ${PROJECT_SOURCE_DIR}/lv_sdl_disp.c
                     ${PROJECT_SOURCE_DIR}/lv_port_indev_encoder.cc)

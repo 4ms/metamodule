@@ -15,10 +15,9 @@
 #include "gpio_expander_reader.hh"
 #include "hsem_handler.hh"
 #include "params.hh"
-#include "usb/usb_manager.hh"
-
 #include "patch_file/patch_storage.hh"
 #include "patch_play/patch_mod_queue.hh"
+#include "usb/usb_manager.hh"
 
 namespace MetaModule
 {

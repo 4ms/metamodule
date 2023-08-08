@@ -6,8 +6,6 @@
 #include "patch_play/patch_player.hh"
 #include <string>
 
-#include "patch/Djembe2.hh"
-
 TEST_CASE("Simple output jack mapping") {
 	std::string patchyml{// clang-format off
 R"(PatchData:
@@ -225,7 +223,6 @@ PatchData:
   mapped_outs: 
   static_knobs: 
   mapped_knobs: 
-  midi_maps:
 	)"};
 	// clang-format on
 

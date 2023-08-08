@@ -1,10 +1,10 @@
-static char NonlinearGateSequencer_patch[] = 
-R"(
+static char NonlinearGateSequencer_patch[] =
+	R"(
 PatchData:
   patch_name: 'Non-linear Gate Sequencer'
   description: Gates off the grid
   module_slugs:
-    0: PanelMedium
+    0: HubMedium
     1: QCD
     2: QCDEXP
     3: SCM

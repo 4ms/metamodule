@@ -4,7 +4,7 @@ PatchData:
   patch_name: env even braids
   description: Patch Description
   module_slugs:
-    0: PanelMedium
+    0: HubMedium
     1: ENVVCA
     2: EvenVCO
     3: Braids
@@ -150,76 +150,78 @@ PatchData:
       param_id: 3
       value: 0.5
   mapped_knobs:
-    - panel_knob_id: 0
-      module_id: 1
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 1
-      module_id: 1
-      param_id: 1
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 2
-      module_id: 2
-      param_id: 1
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 3
-      module_id: 2
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 4
-      module_id: 1
-      param_id: 2
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 5
-      module_id: 3
-      param_id: 3
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 6
-      module_id: 1
-      param_id: 5
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 7
-      module_id: 1
-      param_id: 6
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 8
-      module_id: 1
-      param_id: 7
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 9
-      module_id: 3
-      param_id: 6
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 10
-      module_id: 3
-      param_id: 1
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 11
-      module_id: 3
-      param_id: 5
-      curve_type: 0
-      min: 0
-      max: 1
+    - name: 'Default'
+      set:
+      - panel_knob_id: 0
+        module_id: 1
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 1
+        module_id: 1
+        param_id: 1
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 2
+        module_id: 2
+        param_id: 1
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 3
+        module_id: 2
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 4
+        module_id: 1
+        param_id: 2
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 5
+        module_id: 3
+        param_id: 3
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 6
+        module_id: 1
+        param_id: 5
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 7
+        module_id: 1
+        param_id: 6
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 8
+        module_id: 1
+        param_id: 7
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 9
+        module_id: 3
+        param_id: 6
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 10
+        module_id: 3
+        param_id: 1
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 11
+        module_id: 3
+        param_id: 5
+        curve_type: 0
+        min: 0
+        max: 1
 )";

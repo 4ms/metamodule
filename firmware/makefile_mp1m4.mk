@@ -63,7 +63,6 @@ SOURCES += $(DRIVERLIB)/drivers/hal_handlers.cc
 SOURCES += $(DRIVERLIB)/drivers/i2c.cc
 SOURCES += $(TARGETDEVICEDIR_CM4)/drivers/interrupt_handler.cc
 SOURCES += $(DRIVERLIB)/drivers/pin.cc
-SOURCES += $(DRIVERLIB)/drivers/rotary.cc
 SOURCES += $(DRIVERLIB)/drivers/tim.cc
 SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES += src/console/uart_log.cc

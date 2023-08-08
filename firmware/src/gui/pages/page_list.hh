@@ -21,8 +21,10 @@ class PageList {
 	static inline CircularStack<PageBase *, 16> _history;
 	static inline std::array<PageBase *, MaxPages> _pages;
 
+	//TODO: these need to be in PageManager or somewhere else...
 	static inline uint32_t selected_patch_id = 0;
 	static inline uint32_t selected_module_id = 0;
+	static inline uint32_t active_knobset_id = 0;
 	static inline ModuleParam selected_control_id{};
 
 public:
@@ -32,6 +34,14 @@ public:
 
 	static uint32_t get_selected_patch_id() {
 		return selected_patch_id;
+	}
+
+	static void set_active_knobset(uint32_t id) {
+		active_knobset_id = id;
+	}
+
+	static uint32_t get_active_knobset() {
+		return active_knobset_id;
 	}
 
 	static void set_selected_module_id(uint32_t id) {

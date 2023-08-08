@@ -81,32 +81,36 @@ PatchData:
       param_id: 6
       value: 0.7
   mapped_knobs:
-    - alias_name: Knob1 #comment
-      panel_knob_id: 1
-      module_id: 2
-      param_id: 3
-      curve_type: 1
-      min: 0.1
-      max: 0.95
-    - panel_knob_id: 2
-      alias_name: Knob2
-      module_id: 3
-      param_id: 4
-      curve_type: 2
-      min: 0.2
-      max: 0.85
-    - panel_knob_id: 3
-      module_id: 4
-      param_id: 5
-      curve_type: 3
-      min: 0.3
-      max: 0.75
-    - panel_knob_id: 4
-      module_id: 5
-      param_id: 6
-      curve_type: 4
-      min: 0.4
-      max: 0.65
+    - name: Osc Control
+      set:
+      - alias_name: Knob1 #comment
+        panel_knob_id: 1
+        module_id: 2
+        param_id: 3
+        curve_type: 1
+        min: 0.1
+        max: 0.95
+      - panel_knob_id: 2
+        alias_name: Knob2
+        module_id: 3
+        param_id: 4
+        curve_type: 2
+        min: 0.2
+        max: 0.85
+      - panel_knob_id: 3
+        module_id: 4
+        param_id: 5
+        curve_type: 3
+        min: 0.3
+        max: 0.75
+    - name: LFO Controls
+      set:
+      - panel_knob_id: 4
+        module_id: 5
+        param_id: 6
+        curve_type: 4
+        min: 0.4
+        max: 0.65
 )";
 	// clang-format on
 
@@ -169,31 +173,38 @@ PatchData:
 	CHECK(pd.static_knobs[4].param_id == 6);
 	CHECK(pd.static_knobs[4].value == 0.7f);
 
-	CHECK(pd.mapped_knobs.size() == 4);
-	CHECK(pd.mapped_knobs[0].panel_knob_id == 1);
-	CHECK(pd.mapped_knobs[0].alias_name.is_equal("Knob1"));
-	CHECK(pd.mapped_knobs[0].module_id == 2);
-	CHECK(pd.mapped_knobs[0].param_id == 3);
-	CHECK(pd.mapped_knobs[0].curve_type == 1);
-	CHECK(pd.mapped_knobs[0].min == 0.1f);
-	CHECK(pd.mapped_knobs[0].max == 0.95f);
-	CHECK(pd.mapped_knobs[1].panel_knob_id == 2);
-	CHECK(pd.mapped_knobs[1].alias_name.is_equal("Knob2"));
-	CHECK(pd.mapped_knobs[1].module_id == 3);
-	CHECK(pd.mapped_knobs[1].param_id == 4);
-	CHECK(pd.mapped_knobs[1].curve_type == 2);
-	CHECK(pd.mapped_knobs[1].min == 0.2f);
-	CHECK(pd.mapped_knobs[1].max == 0.85f);
-	CHECK(pd.mapped_knobs[2].panel_knob_id == 3);
-	CHECK(pd.mapped_knobs[2].module_id == 4);
-	CHECK(pd.mapped_knobs[2].param_id == 5);
-	CHECK(pd.mapped_knobs[2].curve_type == 3);
-	CHECK(pd.mapped_knobs[2].min == 0.3f);
-	CHECK(pd.mapped_knobs[2].max == 0.75f);
-	CHECK(pd.mapped_knobs[3].panel_knob_id == 4);
-	CHECK(pd.mapped_knobs[3].module_id == 5);
-	CHECK(pd.mapped_knobs[3].param_id == 6);
-	CHECK(pd.mapped_knobs[3].curve_type == 4);
-	CHECK(pd.mapped_knobs[3].min == 0.4f);
-	CHECK(pd.mapped_knobs[3].max == 0.65f);
+	CHECK(pd.knob_sets.size() == 2);
+	CHECK(pd.knob_sets[0].name.is_equal("Osc Control"));
+
+	CHECK(pd.knob_sets[0].set[0].panel_knob_id == 1);
+	CHECK(pd.knob_sets[0].set[0].alias_name.is_equal("Knob1"));
+	CHECK(pd.knob_sets[0].set[0].module_id == 2);
+	CHECK(pd.knob_sets[0].set[0].param_id == 3);
+	CHECK(pd.knob_sets[0].set[0].curve_type == 1);
+	CHECK(pd.knob_sets[0].set[0].min == 0.1f);
+	CHECK(pd.knob_sets[0].set[0].max == 0.95f);
+
+	CHECK(pd.knob_sets[0].set[1].panel_knob_id == 2);
+	CHECK(pd.knob_sets[0].set[1].alias_name.is_equal("Knob2"));
+	CHECK(pd.knob_sets[0].set[1].module_id == 3);
+	CHECK(pd.knob_sets[0].set[1].param_id == 4);
+	CHECK(pd.knob_sets[0].set[1].curve_type == 2);
+	CHECK(pd.knob_sets[0].set[1].min == 0.2f);
+	CHECK(pd.knob_sets[0].set[1].max == 0.85f);
+
+	CHECK(pd.knob_sets[0].set[2].panel_knob_id == 3);
+	CHECK(pd.knob_sets[0].set[2].module_id == 4);
+	CHECK(pd.knob_sets[0].set[2].param_id == 5);
+	CHECK(pd.knob_sets[0].set[2].curve_type == 3);
+	CHECK(pd.knob_sets[0].set[2].min == 0.3f);
+	CHECK(pd.knob_sets[0].set[2].max == 0.75f);
+
+	CHECK(pd.knob_sets[1].name.is_equal("LFO Controls"));
+
+	CHECK(pd.knob_sets[1].set[0].panel_knob_id == 4);
+	CHECK(pd.knob_sets[1].set[0].module_id == 5);
+	CHECK(pd.knob_sets[1].set[0].param_id == 6);
+	CHECK(pd.knob_sets[1].set[0].curve_type == 4);
+	CHECK(pd.knob_sets[1].set[0].min == 0.4f);
+	CHECK(pd.knob_sets[1].set[0].max == 0.65f);
 }

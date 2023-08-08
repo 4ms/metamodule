@@ -38,9 +38,14 @@ public:
 
 	bool parse_view_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
-		if (!yaml_raw_to_patch(file_data, view_patch_))
+
+		// Load into a temporary patch file, so if it fails, view_patch_ is not effected
+		// And if ryml fails to deserialize, we aren't left with data from the last patch
+		PatchData patch;
+		if (!yaml_raw_to_patch(file_data, patch))
 			return false;
 
+		view_patch_ = patch;
 		view_patch_id_ = requested_view_patch_id_;
 		view_patch_vol_ = requested_view_patch_vol_;
 		return true;

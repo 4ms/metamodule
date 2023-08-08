@@ -13,6 +13,8 @@ extern "C" {
     #include "lvgl.h"
 
 #include "ui_helpers.h"
+#include "components/ui_comp.h"
+#include "components/ui_comp_hook.h"
 #include "ui_events.h"
 void Dropdown_Animation( lv_obj_t *TargetObject, int delay);
 void Dropup_Animation( lv_obj_t *TargetObject, int delay);
@@ -27,6 +29,7 @@ extern lv_obj_t *ui_SDbut;
 extern lv_obj_t *ui_SDlabel;
 extern lv_obj_t *ui_Flashbut;
 extern lv_obj_t *ui_Flashlabel;
+void ui_event_PatchListRoller( lv_event_t * e);
 extern lv_obj_t *ui_PatchListRoller;
 extern lv_obj_t *ui_waitspinner;
 // SCREEN: ui_PatchViewPage
@@ -57,104 +60,76 @@ extern lv_obj_t *ui_ShowPlayingMapsCheck;
 extern lv_obj_t *ui_FlashMapPanel;
 extern lv_obj_t *ui_FlashMapLabel;
 extern lv_obj_t *ui_FlashMapCheck;
-extern lv_obj_t *ui_Label1;
+extern lv_obj_t *ui_TransparencyTitle;
 extern lv_obj_t *ui_MapTranspSlider;
 extern lv_obj_t *ui_CablesTitle;
 extern lv_obj_t *ui_ShowAllCablesPanel;
 extern lv_obj_t *ui_ShowAllCablesLabel;
 extern lv_obj_t *ui_ShowAllCablesCheck;
-// SCREEN: ui_PatchViewPage2
-void ui_PatchViewPage2_screen_init(void);
-extern lv_obj_t *ui_PatchViewPage2;
-extern lv_obj_t *ui_PatchName2;
-extern lv_obj_t *ui_ButtonsContainer2;
-extern lv_obj_t *ui_PlayButton2;
-extern lv_obj_t *ui_KnobButton2;
-extern lv_obj_t *ui_AddButton2;
-extern lv_obj_t *ui_InfoButton2;
-extern lv_obj_t *ui_SettingsButton2;
-extern lv_obj_t *ui_ModulesPanel2;
+extern lv_obj_t *ui_KnobsetMenu;
+extern lv_obj_t *ui_KnobsetClosePanel;
+extern lv_obj_t *ui_KnobsetCloseButton;
+extern lv_obj_t *ui_KnobsetHeaderLabel;
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
 extern lv_obj_t *ui_MappingMenu;
 extern lv_obj_t *ui_MappingFlexZone;
 extern lv_obj_t *ui_ModuleImage;
+void ui_event_ElementRoller( lv_event_t * e);
+extern lv_obj_t *ui_ElementRoller;
 extern lv_obj_t *ui_MappingParameters;
 extern lv_obj_t *ui_Module_Name;
 extern lv_obj_t *ui_Element_Name;
 extern lv_obj_t *ui_MappedWindow;
 extern lv_obj_t *ui_Mappedto;
-extern lv_obj_t *ui_EditMapButton;
+extern lv_obj_t *ui_EditMap;
+extern lv_obj_t *ui_EditMapLabel;
 extern lv_obj_t *ui_NotMapped;
-extern lv_obj_t *ui_ModuleName1;
-extern lv_obj_t *ui_ElementName1;
-extern lv_obj_t *ui_MappedWindow1;
+extern lv_obj_t *ui_ModuleName;
+extern lv_obj_t *ui_ElementName;
+extern lv_obj_t *ui_NotMappedWindow;
+void ui_event_ControlButton( lv_event_t * e);
+extern lv_obj_t *ui_ControlButton;
+extern lv_obj_t *ui_ControlButtonLabel;
 void ui_event_AddMapButton( lv_event_t * e);
 extern lv_obj_t *ui_AddMapButton;
-extern lv_obj_t *ui_AddMapButton1;
-void ui_event_ElementRoller( lv_event_t * e);
-extern lv_obj_t *ui_ElementRoller;
+extern lv_obj_t *ui_AddMapLabel;
+extern lv_obj_t *ui_ControlAlert;
+extern lv_obj_t *ui_ControlAlertLabel;
 extern lv_obj_t *ui_AddMapPopUp;
-extern lv_obj_t *ui_AddPrompt;
+extern lv_obj_t *ui_AddModuleName;
 extern lv_obj_t *ui_MapDetected;
-extern lv_obj_t *ui_canceladd;
-void ui_event_okadd( lv_event_t * e);
-extern lv_obj_t *ui_okadd;
+void ui_event_CancelAdd( lv_event_t * e);
+extern lv_obj_t *ui_CancelAdd;
+extern lv_obj_t *ui_CancelAddLabel;
+void ui_event_OkAdd( lv_event_t * e);
+extern lv_obj_t *ui_OkAdd;
+extern lv_obj_t *ui_OkAddLabel;
 extern lv_obj_t *ui____initial_actions0;
 
-LV_IMG_DECLARE( ui_img_symbols_raw_light_play_light1_png);   // assets/Symbols_Raw/light/play_light1.png
-LV_IMG_DECLARE( ui_img_symbols_raw_play_dark1_png);   // assets/Symbols_Raw/play_dark1.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_knob_light1_png);   // assets/Symbols_Raw/light/knob_light1.png
-LV_IMG_DECLARE( ui_img_symbols_raw_knob_dark1_png);   // assets/Symbols_Raw/knob_dark1.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_plus_light1_png);   // assets/Symbols_Raw/light/plus_light1.png
-LV_IMG_DECLARE( ui_img_symbols_raw_plus_dark1_png);   // assets/Symbols_Raw/plus_dark1.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_info_light3_png);   // assets/Symbols_Raw/light/info_light3.png
-LV_IMG_DECLARE( ui_img_symbols_raw_info_dark3_png);   // assets/Symbols_Raw/info_dark3.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_settings_light27_png);   // assets/Symbols_Raw/light/settings_light27.png
-LV_IMG_DECLARE( ui_img_symbols_raw_settings_dark27_png);   // assets/Symbols_Raw/settings_dark27.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_play_png);   // assets/Dark Icons/Dark Play.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_play_press_png);   // assets/Dark Icons/Dark Play Press.png
-LV_IMG_DECLARE( ui_img_dark_icons_32px_circle_png);   // assets/Dark Icons/32px circle.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_knob_png);   // assets/Dark Icons/Dark Knob.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_knob_press_png);   // assets/Dark Icons/Dark Knob Press.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_add_png);   // assets/Dark Icons/Dark Add.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_add_press_png);   // assets/Dark Icons/Dark Add Press.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_info_png);   // assets/Dark Icons/Dark Info.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_info_press_png);   // assets/Dark Icons/Dark Info Press.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_settings_png);   // assets/Dark Icons/Dark Settings.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_settings_pressed_png);   // assets/Dark Icons/Dark Settings Pressed.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_settings_focused3_png);   // assets/Dark Icons/Dark Settings Focused3.png
+LV_IMG_DECLARE( ui_img_final_icons_play3_png);   // assets/Final Icons/Play3.png
+LV_IMG_DECLARE( ui_img_final_icons_1x_knobpip1_png);   // assets/Final Icons/1x/KnobPip1.png
+LV_IMG_DECLARE( ui_img_final_icons_1x_add1_png);   // assets/Final Icons/1x/Add1.png
+LV_IMG_DECLARE( ui_img_final_icons_1x_info1_png);   // assets/Final Icons/1x/Info1.png
+LV_IMG_DECLARE( ui_img_final_icons_1x_settings1_png);   // assets/Final Icons/1x/Settings1.png
 LV_IMG_DECLARE( ui_img_complexeg_mockup_png);   // assets/ComplexEG_mockup.png
 LV_IMG_DECLARE( ui_img_button_circles_c_symbol__png);   // assets/Button Circles/C_symbol..png
-LV_IMG_DECLARE( ui_img_1x_editmap2_png);   // assets/1x/editmap2.png
 LV_IMG_DECLARE( ui_img_1x_addmap1_png);   // assets/1x/addmap1.png
 LV_IMG_DECLARE( ui_img_1x_control1_png);   // assets/1x/control1.png
-LV_IMG_DECLARE( ui_img_1x_cancel_png);   // assets/1x/cancel.png
-LV_IMG_DECLARE( ui_img_1x_ok_png);   // assets/1x/ok.png
-LV_IMG_DECLARE( ui_img_dark_icons_dark_settings_focused_red2_png);   // assets/Dark Icons/Dark Settings Focused Red2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_info_light1_png);   // assets/Symbols_Raw/light/info_light1.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_info_light2_png);   // assets/Symbols_Raw/light/info_light2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_info_light4_png);   // assets/Symbols_Raw/light/info_light4.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_knob_light2_png);   // assets/Symbols_Raw/light/knob_light2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_knob_light3_png);   // assets/Symbols_Raw/light/knob_light3.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_play_light2_png);   // assets/Symbols_Raw/light/play_light2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_plus_light2_png);   // assets/Symbols_Raw/light/plus_light2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_light_settings_light2_png);   // assets/Symbols_Raw/light/settings_light2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_info_dark1_png);   // assets/Symbols_Raw/info_dark1.png
-LV_IMG_DECLARE( ui_img_symbols_raw_info_dark2_png);   // assets/Symbols_Raw/info_dark2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_info_dark4_png);   // assets/Symbols_Raw/info_dark4.png
-LV_IMG_DECLARE( ui_img_symbols_raw_knob_dark2_png);   // assets/Symbols_Raw/knob_dark2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_knob_dark3_png);   // assets/Symbols_Raw/knob_dark3.png
-LV_IMG_DECLARE( ui_img_symbols_raw_play_dark2_png);   // assets/Symbols_Raw/play_dark2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_plus_dark2_png);   // assets/Symbols_Raw/plus_dark2.png
-LV_IMG_DECLARE( ui_img_symbols_raw_settings_dark2_png);   // assets/Symbols_Raw/settings_dark2.png
+LV_IMG_DECLARE( ui_img_1x_editmap2_png);   // assets/1x/editmap2.png
+LV_IMG_DECLARE( ui_img_final_icons_1x_knobpip2_png);   // assets/Final Icons/1x/KnobPip2.png
+LV_IMG_DECLARE( ui_img_final_icons_1x_knobpressed1_png);   // assets/Final Icons/1x/KnobPressed1.png
+LV_IMG_DECLARE( ui_img_final_icons_1x_knobreleased1_png);   // assets/Final Icons/1x/KnobReleased1.png
+LV_IMG_DECLARE( ui_img_final_icons_1x_play1_png);   // assets/Final Icons/1x/Play1.png
 
 LV_FONT_DECLARE( ui_font_Arial11bpp4);
 LV_FONT_DECLARE( ui_font_Arial12bpp4);
 LV_FONT_DECLARE( ui_font_ArialBl16);
+LV_FONT_DECLARE( ui_font_ArialNB14);
+LV_FONT_DECLARE( ui_font_ArialNB16);
+LV_FONT_DECLARE( ui_font_ArialNB18);
 LV_FONT_DECLARE( ui_font_Arial_16_bpp4);
 LV_FONT_DECLARE( ui_font_Arial_bpp2);
-LV_FONT_DECLARE( ui_font_GIL12);
 
 void ui_init(void);
 

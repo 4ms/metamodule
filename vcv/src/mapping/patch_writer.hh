@@ -22,7 +22,8 @@ public:
 	void setCableList(std::vector<CableMap> &jacks);
 	void setParamList(std::vector<ParamMap> &params);
 
-	void addKnobMaps(unsigned panelKnobId, const std::span<const Mapping> maps);
+	void addKnobMaps(unsigned panelKnobId, unsigned knobSetId, const std::span<const Mapping> maps);
+	void addKnobMapSet(unsigned knobSetId, std::string_view knobSetName);
 
 	std::string printPatchYAML();
 

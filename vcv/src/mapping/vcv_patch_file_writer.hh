@@ -1,4 +1,5 @@
 #pragma once
+#include "hub/hub_knob_mappings.hh"
 #include "mapping/JackMap.hh"
 #include "mapping/ModuleID.h"
 #include "mapping/ParamMap.hh"
@@ -8,10 +9,16 @@
 #include <rack.hpp>
 
 // Adpats VCVRack-format of patch data to a format PatchFileWriter can use
+template<size_t NumKnobs, size_t MaxMapsPerPot, size_t MaxKnobSets>
 struct VCVPatchFileWriter {
+	using HubKnobsMultiMap = typename HubKnobMappings<NumKnobs, MaxMapsPerPot, MaxKnobSets>::HubKnobsMultiMaps;
 
-	static void writePatchFile(
-		int64_t hubModuleId, auto &mappings, std::string fileName, std::string patchName, std::string patchDesc) {
+	static void writePatchFile(int64_t hubModuleId,
+							   HubKnobsMultiMap &mappings,
+							   std::span<std::string> knobSetNames,
+							   std::string fileName,
+							   std::string patchName,
+							   std::string patchDesc) {
 
 		auto context = rack::contextGet();
 		auto engine = context->engine;
@@ -72,24 +79,31 @@ struct VCVPatchFileWriter {
 		pw.setCableList(cableData);
 		pw.setParamList(paramData);
 
-		for (unsigned hubParamId = 0; auto &knob_maps : mappings) {
-			std::vector<Mapping> active_maps;
-			active_maps.reserve(8);
+		// Iterate mappings, by MaxKnobSets times
+		for (unsigned set_i = 0; set_i < MaxKnobSets; set_i++) {
+			pw.addKnobMapSet(set_i, knobSetNames[set_i]);
 
-			for (auto &m : knob_maps) {
-				if (m.paramHandle.module && m.paramHandle.moduleId > 0)
-					active_maps.push_back(m);
+			for (unsigned hubParamId = 0; auto &knob_maps : mappings) {
+
+				std::vector<Mapping> active_maps;
+				active_maps.reserve(8);
+
+				for (auto &mapsets : knob_maps) {
+					auto &map = mapsets.maps[set_i];
+					if (map.moduleId > 0)
+						active_maps.push_back(map);
+				}
+
+				if (active_maps.size())
+					pw.addKnobMaps(hubParamId, set_i, active_maps);
+
+				hubParamId++;
 			}
-
-			if (active_maps.size())
-				pw.addKnobMaps(hubParamId, active_maps);
-
-			hubParamId++;
 		}
 
 		std::string yml = pw.printPatchYAML();
 		writeToFile(fileName, yml);
-		// writeAsHeader(fileName + ".hh", patchStructName + "_patch", yml);
+		// writeAsHeader(fileName + ".hh", patchName + "_patch", yml);
 	}
 
 	static void writeToFile(const std::string &fileName, std::string textToWrite) {

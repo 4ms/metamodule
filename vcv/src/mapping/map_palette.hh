@@ -23,17 +23,18 @@ struct PaletteHub {
 private:
 	static inline const std::array<NVGcolor, 12> _color = {
 		RED,
-		ORANGE,
 		YELLOW,
-		GREEN,
 		CYAN,
-		BLUE,
-		PURPLE,
 		MAGENTA,
-		BROWN,
-		GRAY25,
-		GRAY50,
-		GRAY75,
+		ORANGE,
+		GREEN,
+		//TODO: less saturated for the knobs u-z?
+		RED,
+		YELLOW,
+		CYAN,
+		MAGENTA,
+		ORANGE,
+		GREEN,
 	};
 
 public:
