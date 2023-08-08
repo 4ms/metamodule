@@ -25,9 +25,8 @@ jobs:
         with:
           submodules: recursive
       - name: Build plugin
-        run: |
-          cd vcv
-          export PLUGIN_DIR=$GITHUB_WORKSPACE
+        run: |          
+          export PLUGIN_DIR=$GITHUB_WORKSPACE/vcv
           pushd ${{ env.rack-plugin-toolchain-dir }}
           make plugin-build-${{ matrix.platform }}
       - name: Upload artifact
