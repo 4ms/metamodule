@@ -146,6 +146,7 @@ INCLUDES += -Ivcv_ports/AudibleInstruments/src
 INCLUDES += -Ivcv_ports/AudibleInstruments/eurorack
 INCLUDES += -Ivcv_ports/Befaco/src
 
+SOURCES += src/VCV_adaptor/plugin_instance.cc
 SOURCES += src/VCV_adaptor/pffft/pffft.c
 INCLUDES += -Isrc/VCV_adaptor
 INCLUDES += -Isrc/VCV_adaptor/pffft

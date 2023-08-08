@@ -35,6 +35,8 @@ struct PatchSelectorPage : PageBase {
 		lv_group_add_obj(group, roller);
 		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(roller, patchlist_scroll_cb, LV_EVENT_KEY, this);
+		lv_obj_remove_style(roller, nullptr, LV_STATE_EDITED);
+		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
 	}
 
 	void init() override {

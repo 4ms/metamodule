@@ -71,19 +71,7 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 		el["value"] << x.value;
 	}
 
-	ryml::NodeRef mapped_knobs = data["mapped_knobs"];
-	mapped_knobs |= ryml::SEQ;
-	for (auto &x : pd.mapped_knobs) {
-		ryml::NodeRef el = mapped_knobs.append_child({ryml::MAP});
-		el["panel_knob_id"] << x.panel_knob_id;
-		el["module_id"] << x.module_id;
-		el["param_id"] << x.param_id;
-		el["curve_type"] << x.curve_type;
-		el["min"] << x.min;
-		el["max"] << x.max;
-		if (x.alias_name.length())
-			el["alias_name"] << x.alias_name;
-	}
+	data["mapped_knobs"] << pd.knob_sets;
 
 	return ryml::emitrs<std::string>(tree);
 }

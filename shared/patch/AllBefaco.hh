@@ -2,7 +2,7 @@ static char AllBefaco_patch[] =
 	R"(
 PatchData:
   patch_name: AllBefaco
-  description: Patch Description
+  description: Will overload processor and freeze if played!
   module_slugs:
     0: HubMedium
     1: Morphader

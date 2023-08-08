@@ -62,6 +62,10 @@ lv_obj_t *ui_CablesTitle;
 lv_obj_t *ui_ShowAllCablesPanel;
 lv_obj_t *ui_ShowAllCablesLabel;
 lv_obj_t *ui_ShowAllCablesCheck;
+lv_obj_t *ui_KnobsetMenu;
+lv_obj_t *ui_KnobsetClosePanel;
+lv_obj_t *ui_KnobsetCloseButton;
+lv_obj_t *ui_KnobsetHeaderLabel;
 
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);

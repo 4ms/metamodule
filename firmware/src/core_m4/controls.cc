@@ -55,7 +55,7 @@ void Controls::update_params() {
 				cur_metaparams->rotary_button.register_falling_edge();
 			}
 		}
-		cur_metaparams->rotary_button.set_state(rotary_button.is_pressed());
+		cur_metaparams->rotary_button.set_state_no_events(rotary_button.is_pressed());
 
 		// Rotary turning
 		int new_rotary_motion = rotary.read();

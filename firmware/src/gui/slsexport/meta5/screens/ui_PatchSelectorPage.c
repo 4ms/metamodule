@@ -93,8 +93,6 @@ lv_label_set_long_mode(ui_USBlabel,LV_LABEL_LONG_CLIP);
 lv_label_set_text(ui_USBlabel,"USB");
 lv_obj_set_style_text_color(ui_USBlabel, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_USBlabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_USBlabel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_USBlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_USBlabel, &lv_font_montserrat_10, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SDbut = lv_btn_create(ui_DrivesPanel);
@@ -150,11 +148,9 @@ lv_obj_set_width( ui_Flashlabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Flashlabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Flashlabel, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_Flashlabel,LV_LABEL_LONG_CLIP);
-lv_label_set_text(ui_Flashlabel,"  Internal");
+lv_label_set_text(ui_Flashlabel," Internal");
 lv_obj_set_style_text_color(ui_Flashlabel, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_Flashlabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_Flashlabel, &lv_font_montserrat_10, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -162,7 +158,7 @@ lv_obj_set_style_pad_top(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_PatchListRoller = lv_roller_create(ui_PatchSelectorPage);
-lv_roller_set_options( ui_PatchListRoller, "Patch Name Here", LV_ROLLER_MODE_NORMAL );
+lv_roller_set_options( ui_PatchListRoller, "Patch Name Here\nAnother Patch", LV_ROLLER_MODE_NORMAL );
 lv_obj_set_width( ui_PatchListRoller, 228);
 lv_obj_set_height( ui_PatchListRoller, 200);
 lv_obj_set_x( ui_PatchListRoller, -4 );
@@ -170,10 +166,10 @@ lv_obj_set_y( ui_PatchListRoller, -4 );
 lv_obj_set_align( ui_PatchListRoller, LV_ALIGN_BOTTOM_RIGHT );
 lv_obj_set_style_text_color(ui_PatchListRoller, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_PatchListRoller, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_PatchListRoller, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_PatchListRoller, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_PatchListRoller, &lv_font_montserrat_16, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_PatchListRoller, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_PatchListRoller, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_PatchListRoller, lv_color_hex(0x222222), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -185,12 +181,6 @@ lv_obj_set_style_outline_color(ui_PatchListRoller, lv_color_hex(0x444444), LV_PA
 lv_obj_set_style_outline_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_width(ui_PatchListRoller, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_pad(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_color(ui_PatchListRoller, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_shadow_opa(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_width(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_spread(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_ofs_x(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_shadow_ofs_y(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_set_style_bg_color(ui_PatchListRoller, lv_color_hex(0xFD8B18), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_PatchListRoller, 200, LV_PART_SELECTED| LV_STATE_DEFAULT);

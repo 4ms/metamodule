@@ -76,12 +76,12 @@ struct ElementConvert<Davies1900hDarkGreyKnob> {
 
 template<>
 struct ElementConvert<BananutRed> {
-	using ElementType = MetaModule::BefacoOutputPort;
+	using ElementTypeOutput = MetaModule::BefacoOutputPort;
 };
 
 template<>
 struct ElementConvert<BananutBlack> {
-	using ElementType = MetaModule::BefacoInputPort;
+	using ElementTypeInput = MetaModule::BefacoInputPort;
 };
 
 template<>

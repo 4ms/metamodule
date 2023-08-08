@@ -26,19 +26,12 @@ struct MetaModuleHubBase : public rack::Module {
 
 	std::optional<int> inProgressMapParamId{};
 
-	std::span<MappableObj::Type> mappingSrcs;
-
 	// FIXME: NumPots should be a template parameter
 	// We then need a common base class widgets can point to
 	static constexpr uint32_t NumPots = 12;
 	static constexpr uint32_t MaxMapsPerPot = 8;
-	HubKnobMappings<NumPots, MaxMapsPerPot> mappings{id};
-
-	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
-		: mappingSrcs{mappingSrcs} {
-	}
-
-	~MetaModuleHubBase() = default;
+	static constexpr uint32_t MaxKnobSets = 4;
+	HubKnobMappings<NumPots, MaxMapsPerPot, MaxKnobSets> mappings;
 
 	// Mapping State/Progress
 
@@ -76,9 +69,10 @@ struct MetaModuleHubBase : public rack::Module {
 			return false;
 		}
 
+		mappings.linkToModule(id);
 		auto *map = mappings.addMap(hubParamId, module->id, moduleParamId);
 		map->range_max = 1.f;
-		map->range_min = 0.f;
+		map->range_min = 0.0f;
 		endMapping();
 
 		return true;
@@ -87,11 +81,11 @@ struct MetaModuleHubBase : public rack::Module {
 	// Runtime applying maps
 
 	void processMaps() {
-		for (int hubParamId = 0; auto &knobs : mappings) {
-			for (auto &map : knobs) {
+		for (int hubParamId = 0; auto &knob : mappings) {
+			for (auto &mapset : knob) {
 
-				int paramId = map.paramHandle.paramId;
-				auto module = map.paramHandle.module;
+				int paramId = mapset.paramHandle.paramId;
+				auto module = mapset.paramHandle.module;
 				if (!module)
 					continue;
 
@@ -101,6 +95,7 @@ struct MetaModuleHubBase : public rack::Module {
 				if (!paramQuantity->isBounded())
 					continue;
 
+				auto &map = mappings.activeMap(mapset);
 				auto val = MathTools::map_value(params[hubParamId].getValue(), 0.f, 1.f, map.range_min, map.range_max);
 				paramQuantity->setScaledValue(val);
 			}
@@ -204,7 +199,8 @@ struct MetaModuleHubBase : public rack::Module {
 		labelText = "Creating patch...";
 		updateDisplay();
 
-		VCVPatchFileWriter::writePatchFile(id, mappings.mappings, patchFileName, patchName, patchDescText);
+		VCVPatchFileWriter<NumPots, MaxMapsPerPot, MaxKnobSets>::writePatchFile(
+			id, mappings.mappings, mappings.knobSetNames, patchFileName, patchName, patchDescText);
 
 		labelText = "Wrote patch file: ";
 		labelText += rack::system::getFilename(patchFileName);

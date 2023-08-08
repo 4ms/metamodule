@@ -5,6 +5,7 @@ namespace mdrivlib
 {
 
 struct SMPControl {
+	static constexpr uint32_t NumCores = 1;
 
 	template<uint32_t channel>
 	static void notify() {

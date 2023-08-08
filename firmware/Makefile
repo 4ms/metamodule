@@ -53,7 +53,7 @@ format-sd:
 	./flashing/format-partition-sdcard.sh $${DISK}
 
 flash-bootloader-sd: 
-	cd bootloader/mp1-boot && make load
+	cd bootloader/mp1-boot && make load BOARD_CONF=../board_conf/mmp11_conf.hh
 
 flash-app-sd: uimg
 	@read -p "What is the disk device and partition to flash to (Enter for $(SD_DISK_DEV)s4): " DISK && \
@@ -62,6 +62,13 @@ flash-app-sd: uimg
 	echo "sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}" && \
 	sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}
 
+jprog: uimg
+	$(info This only works after a hard reset with the Freeze jumper installed)
+	@time JLinkExe -device STM32MP15XX_A7 -if JTAG -speed 25000 -jtagconf -1,-1 -nogui 1 -AutoConnect 1 -CommandFile flashing/program.jlink | tee /dev/tty | grep -q "failed" && \
+	echo "FAILED!!! Did you do a hard reset with the Freeze jumper installed?" || echo "Programmed OK"
+
+flash-dfu: uimg
+	dfu-util -a 0 -s 0x70080000 -D build/mp1corea7/medium/main.uimg
 
 ## Cleaning
 
