@@ -13,24 +13,18 @@
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [
-    {
-      "slug": "Mixer",
-      "name": "Mixer",
-      "description": "Mixer",
-      "tags": []
-    },
 	{
       "slug": "HubMedium",
       "name": "MetaModule",
       "description": "MetaModule",
       "tags": []
 	},
-    {
-      "slug": "SHEV",
-      "name": "SHEV",
-      "description": "SHEV",
+	{
+      "slug": "EnOsc",
+      "name": "EnOsc",
+      "description": "Ensemble Oscillator",
       "tags": []
-    },
+	},
     {
       "slug": "ENVVCA",
       "name": "ENVVCA",
@@ -40,7 +34,13 @@
     {
       "slug": "DEV",
       "name": "DEV",
-      "description": "DEV",
+      "description": "DEV (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "SHEV",
+      "name": "SHEV",
+      "description": "SHEV (not implemented)",
       "tags": []
     },
     {
@@ -50,129 +50,9 @@
       "tags": []
     },
     {
-      "slug": "STS",
-      "name": "STS",
-      "description": "STS",
-      "tags": []
-    },
-    {
-      "slug": "VCAM",
-      "name": "VCAM",
-      "description": "VCAM",
-      "tags": []
-    },
-    {
-      "slug": "Tapo",
-      "name": "Tapo",
-      "description": "Tapo",
-      "tags": []
-    },
-    {
       "slug": "Shift",
       "name": "Shift",
       "description": "Shift",
-      "tags": []
-    },
-    {
-      "slug": "SISM",
-      "name": "SISM",
-      "description": "SISM",
-      "tags": []
-    },
-    {
-      "slug": "SH",
-      "name": "SH",
-      "description": "SH",
-      "tags": []
-    },
-    {
-      "slug": "SCM",
-      "name": "SCM",
-      "description": "SCM",
-      "tags": []
-    },
-    {
-      "slug": "RCD",
-      "name": "RCD",
-      "description": "RCD",
-      "tags": []
-    },
-    {
-      "slug": "QPLFO",
-      "name": "QPLFO",
-      "description": "QPLFO",
-      "tags": []
-    },
-    {
-      "slug": "QCD",
-      "name": "QCD",
-      "description": "QCD",
-      "tags": []
-    },
-    {
-      "slug": "PI",
-      "name": "PI",
-      "description": "PI",
-      "tags": []
-    },
-    {
-      "slug": "PEG",
-      "name": "PEG",
-      "description": "PEG",
-      "tags": []
-    },
-    {
-      "slug": "LPG",
-      "name": "LPG",
-      "description": "LPG",
-      "tags": []
-    },
-    {
-      "slug": "LIO",
-      "name": "LIO",
-      "description": "LIO",
-      "tags": []
-    },
-    {
-      "slug": "L4",
-      "name": "L4",
-      "description": "L4",
-      "tags": []
-    },
-    {
-      "slug": "Gate8",
-      "name": "Gate8",
-      "description": "Gate8",
-      "tags": []
-    },
-    {
-      "slug": "Gate32",
-      "name": "Gate32",
-      "description": "Gate32",
-      "tags": []
-    },
-    {
-      "slug": "GRev",
-      "name": "GRev",
-      "description": "GRev",
-      "tags": []
-    },
-    {
-      "slug": "Fade",
-      "name": "Fade",
-      "description": "Fade",
-      "tags": []
-    },
-    {
-      "slug": "DLD",
-      "name": "DLD",
-      "description": "DLD",
-      "tags": []
-    },
-    {
-      "slug": "Comp",
-      "name": "Comp",
-      "description": "Comp",
       "tags": []
     },
     {
@@ -189,15 +69,9 @@
       "tags": []
     },
     {
-      "slug": "ADEnv",
-      "name": "ADEnv",
-      "description": "ADEnv",
-      "tags": []
-    },
-    {
-      "slug": "Sequant",
-      "name": "Sequant",
-      "description": "Sequant",
+      "slug": "Seq8",
+      "name": "Seq8",
+      "description": "Seq8",
       "tags": []
     },
     {
@@ -207,93 +81,15 @@
       "tags": []
     },
     {
-      "slug": "Switch41",
-      "name": "Switch41",
-      "description": "Switch41",
-      "tags": []
-    },
-    {
-      "slug": "Switch14",
-      "name": "Switch14",
-      "description": "Switch14",
-      "tags": []
-    },
-    {
-      "slug": "Seq8",
-      "name": "Seq8",
-      "description": "Seq8",
-      "tags": []
-    },
-    {
-      "slug": "Seq4",
-      "name": "Seq4",
-      "description": "Seq4",
-      "tags": []
-    },
-    {
-      "slug": "Quant",
-      "name": "Quant",
-      "description": "Quant",
-      "tags": []
-    },
-    {
-      "slug": "Prob8",
-      "name": "Prob8",
-      "description": "Prob8",
-      "tags": []
-    },
-    {
-      "slug": "Octave",
-      "name": "Octave",
-      "description": "Octave",
-      "tags": []
-    },
-    {
-      "slug": "MNMX",
-      "name": "MNMX",
-      "description": "MNMX",
-      "tags": []
-    },
-    {
-      "slug": "LPF",
-      "name": "LPF",
-      "description": "LPF",
-      "tags": []
-    },
-    {
       "slug": "StMix",
       "name": "StMix",
       "description": "StMix",
       "tags": []
     },
     {
-      "slug": "Source",
-      "name": "Source",
-      "description": "Source",
-      "tags": []
-    },
-    {
-      "slug": "Slew",
-      "name": "Slew",
-      "description": "Slew",
-      "tags": []
-    },
-    {
       "slug": "PitchShift",
       "name": "PitchShift",
       "description": "PitchShift",
-      "tags": []
-    },
-    {
-      "slug": "Pan",
-      "name": "Pan",
-      "description": "Pan",
-      "tags": []
-    },
-    {
-      "slug": "Noise",
-      "name": "Noise",
-      "description": "Noise",
       "tags": []
     },
     {
@@ -315,30 +111,6 @@
       "tags": []
     },
     {
-      "slug": "HPF",
-      "name": "HPF",
-      "description": "HPF",
-      "tags": []
-    },
-    {
-      "slug": "Gate",
-      "name": "Gate",
-      "description": "Gate",
-      "tags": []
-    },
-    {
-      "slug": "Follow",
-      "name": "Follow",
-      "description": "Follow",
-      "tags": []
-    },
-    {
-      "slug": "FM",
-      "name": "FM",
-      "description": "FM",
-      "tags": []
-    },
-    {
       "slug": "Drum",
       "name": "Drum",
       "description": "Drum",
@@ -357,40 +129,268 @@
       "tags": []
     },
     {
+      "slug": "STS",
+      "name": "STS",
+      "description": "STS (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "VCAM",
+      "name": "VCAM",
+      "description": "VCAM (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Tapo",
+      "name": "Tapo",
+      "description": "Tapo (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "SISM",
+      "name": "SISM",
+      "description": "SISM (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "SH",
+      "name": "SH",
+      "description": "SH (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "SCM",
+      "name": "SCM",
+      "description": "SCM (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "RCD",
+      "name": "RCD",
+      "description": "RCD (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "QPLFO",
+      "name": "QPLFO",
+      "description": "QPLFO (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "QCD",
+      "name": "QCD",
+      "description": "QCD (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "PI",
+      "name": "PI",
+      "description": "PI (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "PEG",
+      "name": "PEG",
+      "description": "PEG (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "LPG",
+      "name": "LPG",
+      "description": "LPG (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "LIO",
+      "name": "LIO",
+      "description": "LIO (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "L4",
+      "name": "L4",
+      "description": "L4 (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Gate8",
+      "name": "Gate8",
+      "description": "Gate8 (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Gate32",
+      "name": "Gate32",
+      "description": "Gate32 (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "GRev",
+      "name": "GRev",
+      "description": "GRev (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Fade",
+      "name": "Fade",
+      "description": "Fade (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "DLD",
+      "name": "DLD",
+      "description": "DLD (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Comp",
+      "name": "Comp",
+      "description": "Comp (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "ADEnv",
+      "name": "ADEnv",
+      "description": "ADEnv (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Sequant",
+      "name": "Sequant",
+      "description": "Sequant (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Switch41",
+      "name": "Switch41",
+      "description": "Switch41 (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Switch14",
+      "name": "Switch14",
+      "description": "Switch14 (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Seq4",
+      "name": "Seq4",
+      "description": "Seq4 (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Quant",
+      "name": "Quant",
+      "description": "Quant (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Prob8",
+      "name": "Prob8",
+      "description": "Prob8 (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Octave",
+      "name": "Octave",
+      "description": "Octave (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "MNMX",
+      "name": "MNMX",
+      "description": "MNMX (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "LPF",
+      "name": "LPF",
+      "description": "LPF (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Source",
+      "name": "Source",
+      "description": "Source (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Slew",
+      "name": "Slew",
+      "description": "Slew (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Pan",
+      "name": "Pan",
+      "description": "Pan (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Noise",
+      "name": "Noise",
+      "description": "Noise (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "HPF",
+      "name": "HPF",
+      "description": "HPF (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Gate",
+      "name": "Gate",
+      "description": "Gate (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "Follow",
+      "name": "Follow",
+      "description": "Follow (not implemented)",
+      "tags": []
+    },
+    {
+      "slug": "FM",
+      "name": "FM",
+      "description": "FM (not implemented)",
+      "tags": []
+    },
+    {
       "slug": "ComplexEG",
       "name": "ComplexEG",
-      "description": "ComplexEG",
+      "description": "ComplexEG (not implemented)",
       "tags": []
     },
     {
       "slug": "BPF",
       "name": "BPF",
-      "description": "BPF",
+      "description": "BPF (not implemented)",
       "tags": []
     },
     {
       "slug": "Atvert2",
       "name": "Atvert2",
-      "description": "Atvert2",
+      "description": "Atvert2 (not implemented)",
       "tags": []
     },
     {
       "slug": "SMR",
       "name": "SMR",
-      "description": "Spectral Multiband Resonator",
+      "description": "Spectral Multiband Resonator (not implemented)",
       "tags": []
     },
 	{
-      "slug": "EnOsc",
-      "name": "EnOsc",
-      "description": "Ensemble Oscillator",
-      "tags": []
-	},
-	{
       "slug": "BuffMult",
       "name": "BuffMult",
-      "description": "Buffered Multiple",
+      "description": "Buffered Multiple (not implemented)",
       "tags": []
-	}
+	},
+    {
+      "slug": "Mixer4",
+      "name": "Mixer4",
+      "description": "Mixer4 (not implemented)",
+      "tags": []
+    }
   ]
 }
