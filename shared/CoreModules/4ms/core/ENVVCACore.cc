@@ -19,7 +19,7 @@ inline auto CVToBool = [](float val) -> bool
 
 struct VoltageToFreqTableRange
 {
-	static constexpr float min = -0.1f;
+	static constexpr float min = -0.2f;
 	static constexpr float max = 0.5f;
 };
 constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage)
