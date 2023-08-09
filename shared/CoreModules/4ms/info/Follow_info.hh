@@ -8,16 +8,17 @@ struct FollowInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Follow"};
     static constexpr std::string_view description{"Follower"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/Follow-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Follow_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.67), "Rise", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.35), "Fall", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(142.56), "Thresh", "", 0, 0, 1, 0.0f},
-		AnalogJackInput4ms{to_mm<72>(28.93), to_mm<72>(214.97), "Input", ""},
-		AnalogJackOutput4ms{to_mm<72>(28.93), to_mm<72>(264.07), "Gate", ""},
-		AnalogJackOutput4ms{to_mm<72>(28.93), to_mm<72>(312.29), "Env", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.67), Center, "Rise", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.35), Center, "Fall", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(142.56), Center, "Thresh", ""},
+		AnalogJackInput4ms{to_mm<72>(28.93), to_mm<72>(214.97), Center, "Input", ""},
+		AnalogJackOutput4ms{to_mm<72>(28.93), to_mm<72>(264.07), Center, "Gate", ""},
+		AnalogJackOutput4ms{to_mm<72>(28.93), to_mm<72>(312.29), Center, "Env", ""},
 }};
 
     enum class Elem {
@@ -29,7 +30,7 @@ struct FollowInfo : ModuleInfoBase {
         EnvOut,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobRise = 0,

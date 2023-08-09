@@ -1,0 +1,32 @@
+RESet
+SYStem.RESet
+
+SYStem.CPU STM32MP153D-CA7
+SYStem.JtagClock 50MHz
+CORE.ASSIGN 1. ; 2.
+;SYStem.CONFIG.COREDEBUG.Base DAP:0xE00D0000 DAP:0xE00D2000
+;sys.o.WaitReset 1.s
+
+Trace.DISable
+SYStem.MemAccess DAP
+SYStem.Up
+
+Data.LOAD.Elf /Users/dann/4ms/stm32/meta-module/firmware/build/mp1corea7/medium/main.elf /CPP
+;Break main
+Go
+
+Trace.METHOD ONCHIP
+ETM.Trace ON
+ETM.ON
+
+B::sYmbol.AddInfo.Type std::_Vector_base<? TABLE "(#o)._M_impl._M_finish-(#o)._M_impl._M_start" "(#o)._M_impl._M_start"
+B::sYmbol.AddInfo.Type std::vector<? TABLE "(#o)._M_impl._M_finish-(#o)._M_impl._M_start" "(#o)._M_impl._M_start"
+;\callable\main\patch_list
+;\\main\callable\main\patch_list
+ENDDO
+
+
+
+
+
+

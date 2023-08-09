@@ -8,42 +8,43 @@ struct QPLFOInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"QPLFO"};
     static constexpr std::string_view description{"Quad Pingable LFO"};
     static constexpr uint32_t width_hp = 12;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/QPLFO-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/QPLFO_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 32> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(59.68), "Skew 1", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(135.28), "Skew 2", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(210.88), "Skew 3", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(286.48), "Skew 4", "", 0, 0, 1, 0.5f},
-		GateJackInput4ms{to_mm<72>(22.57), to_mm<72>(42.18), "Ping 1 Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(67.94), to_mm<72>(59.46), "Skew 1 CV", ""},
-		GateJackInput4ms{to_mm<72>(67.94), to_mm<72>(94.02), "Reset 1", ""},
-		GateJackInput4ms{to_mm<72>(22.57), to_mm<72>(117.78), "Ping 2 Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(67.94), to_mm<72>(135.06), "Skew 2 Jack", ""},
-		GateJackInput4ms{to_mm<72>(67.94), to_mm<72>(169.62), "Reset 2", ""},
-		GateJackInput4ms{to_mm<72>(22.57), to_mm<72>(193.38), "Ping 3 Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(67.94), to_mm<72>(210.66), "Skew 3 Jack", ""},
-		GateJackInput4ms{to_mm<72>(67.94), to_mm<72>(245.22), "Reset 3", ""},
-		GateJackInput4ms{to_mm<72>(22.57), to_mm<72>(268.98), "Ping 4 Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(67.94), to_mm<72>(286.26), "Skew 4 Jack", ""},
-		GateJackInput4ms{to_mm<72>(67.94), to_mm<72>(320.82), "Reset 4", ""},
-		AnalogJackOutput4ms{to_mm<72>(22.57), to_mm<72>(76.74), "Out 1", ""},
-		AnalogJackOutput4ms{to_mm<72>(22.57), to_mm<72>(152.34), "Out 2", ""},
-		AnalogJackOutput4ms{to_mm<72>(22.57), to_mm<72>(227.94), "Out 3", ""},
-		AnalogJackOutput4ms{to_mm<72>(22.57), to_mm<72>(303.54), "Out 4", ""},
-		RedGreenBlueLight{to_mm<72>(45.23), to_mm<72>(76.95), "LED 1", ""},
-		RedGreenBlueLight{to_mm<72>(45.23), to_mm<72>(152.55), "LED 2", ""},
-		RedGreenBlueLight{to_mm<72>(45.23), to_mm<72>(228.15), "LED 3", ""},
-		RedGreenBlueLight{to_mm<72>(45.23), to_mm<72>(303.75), "LED 4", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(154.79), to_mm<72>(43.18), "Ping 1", ""},
-		LatchingButtonMonoLight{to_mm<72>(154.79), to_mm<72>(81.06), "On 1", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(154.79), to_mm<72>(118.78), "Ping 2", ""},
-		LatchingButtonMonoLight{to_mm<72>(154.79), to_mm<72>(156.66), "On 2", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(154.79), to_mm<72>(194.38), "Ping 3", ""},
-		LatchingButtonMonoLight{to_mm<72>(154.79), to_mm<72>(232.26), "On 3", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(154.79), to_mm<72>(269.98), "Ping 4", ""},
-		LatchingButtonMonoLight{to_mm<72>(154.79), to_mm<72>(307.86), "On 4", ""},
+		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(59.68), Center, "Skew 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(135.28), Center, "Skew 2", ""},
+		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(210.88), Center, "Skew 3", ""},
+		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(286.48), Center, "Skew 4", ""},
+		GateJackInput4ms{to_mm<72>(22.57), to_mm<72>(42.18), Center, "Ping 1 Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(67.94), to_mm<72>(59.46), Center, "Skew 1 CV", ""},
+		GateJackInput4ms{to_mm<72>(67.94), to_mm<72>(94.02), Center, "Reset 1", ""},
+		GateJackInput4ms{to_mm<72>(22.57), to_mm<72>(117.78), Center, "Ping 2 Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(67.94), to_mm<72>(135.06), Center, "Skew 2 Jack", ""},
+		GateJackInput4ms{to_mm<72>(67.94), to_mm<72>(169.62), Center, "Reset 2", ""},
+		GateJackInput4ms{to_mm<72>(22.57), to_mm<72>(193.38), Center, "Ping 3 Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(67.94), to_mm<72>(210.66), Center, "Skew 3 Jack", ""},
+		GateJackInput4ms{to_mm<72>(67.94), to_mm<72>(245.22), Center, "Reset 3", ""},
+		GateJackInput4ms{to_mm<72>(22.57), to_mm<72>(268.98), Center, "Ping 4 Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(67.94), to_mm<72>(286.26), Center, "Skew 4 Jack", ""},
+		GateJackInput4ms{to_mm<72>(67.94), to_mm<72>(320.82), Center, "Reset 4", ""},
+		AnalogJackOutput4ms{to_mm<72>(22.57), to_mm<72>(76.74), Center, "Out 1", ""},
+		AnalogJackOutput4ms{to_mm<72>(22.57), to_mm<72>(152.34), Center, "Out 2", ""},
+		AnalogJackOutput4ms{to_mm<72>(22.57), to_mm<72>(227.94), Center, "Out 3", ""},
+		AnalogJackOutput4ms{to_mm<72>(22.57), to_mm<72>(303.54), Center, "Out 4", ""},
+		RedGreenBlueLight{to_mm<72>(45.23), to_mm<72>(76.95), Center, "LED 1", ""},
+		RedGreenBlueLight{to_mm<72>(45.23), to_mm<72>(152.55), Center, "LED 2", ""},
+		RedGreenBlueLight{to_mm<72>(45.23), to_mm<72>(228.15), Center, "LED 3", ""},
+		RedGreenBlueLight{to_mm<72>(45.23), to_mm<72>(303.75), Center, "LED 4", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(154.79), to_mm<72>(43.18), Center, "Ping 1", ""},
+		LatchingButtonMonoLight{to_mm<72>(154.79), to_mm<72>(81.06), Center, "On 1", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(154.79), to_mm<72>(118.78), Center, "Ping 2", ""},
+		LatchingButtonMonoLight{to_mm<72>(154.79), to_mm<72>(156.66), Center, "On 2", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(154.79), to_mm<72>(194.38), Center, "Ping 3", ""},
+		LatchingButtonMonoLight{to_mm<72>(154.79), to_mm<72>(232.26), Center, "On 3", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(154.79), to_mm<72>(269.98), Center, "Ping 4", ""},
+		LatchingButtonMonoLight{to_mm<72>(154.79), to_mm<72>(307.86), Center, "On 4", ""},
 }};
 
     enum class Elem {
@@ -81,7 +82,7 @@ struct QPLFOInfo : ModuleInfoBase {
         On4Button,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobSkew_1 = 0,

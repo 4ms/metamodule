@@ -43,6 +43,7 @@ bootloader:
 	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp11_conf.hh
 
 include makefile_moduleinfo.mk
+include makefile_component_images.mk
 
 format-sd:
 	@read -p "What is the disk device to format (Enter for $(SD_DISK_DEV)): " DISK && \
@@ -52,7 +53,7 @@ format-sd:
 	./flashing/format-partition-sdcard.sh $${DISK}
 
 flash-bootloader-sd: 
-	cd bootloader/mp1-boot && make load
+	cd bootloader/mp1-boot && make load BOARD_CONF=../board_conf/mmp11_conf.hh
 
 flash-app-sd: uimg
 	@read -p "What is the disk device and partition to flash to (Enter for $(SD_DISK_DEV)s4): " DISK && \
@@ -66,6 +67,8 @@ jprog: uimg
 	@time JLinkExe -device STM32MP15XX_A7 -if JTAG -speed 25000 -jtagconf -1,-1 -nogui 1 -AutoConnect 1 -CommandFile flashing/program.jlink | tee /dev/tty | grep -q "failed" && \
 	echo "FAILED!!! Did you do a hard reset with the Freeze jumper installed?" || echo "Programmed OK"
 
+flash-dfu: uimg
+	dfu-util -a 0 -s 0x70080000 -D build/mp1corea7/medium/main.uimg
 
 ## Cleaning
 
@@ -125,10 +128,6 @@ tables $(SHARED)/cpputil/math_tables.cc: $(TABLEGEN)/main.cpp
 gen_minblep:
 	make -C ../shared/gen_minblep
 	../shared/gen_minblep/gen_minblep 16 32 > ./src/VCV-adaptor/dsp/minblep_16_32.h
-
-generate_compile_txt:
-	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \
-    awk '/End of search list./ { show=0 } { if (show) printf "-I%s\n",$1 }; /#include <...> search starts here:/ { show=1; }' > compile_flags.txt
 
 compile_commands:
 	compiledb make

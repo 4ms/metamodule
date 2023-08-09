@@ -8,22 +8,23 @@ struct ADEnvInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"ADEnv"};
     static constexpr std::string_view description{"Attack Decay Envelope"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/ADEnv-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/ADEnv_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 12> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(31.85), to_mm<72>(47.96), "Attack", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(47.96), "Decay", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(31.96), to_mm<72>(104.94), "A Shape", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(104.94), "D Shape", "", 0, 0, 1, 0.0f},
-		GateJackInput4ms{to_mm<72>(32.1), to_mm<72>(167.36), "Gate", ""},
-		AnalogJackInput4ms{to_mm<72>(83.63), to_mm<72>(167.36), "Decay CV", ""},
-		AnalogJackInput4ms{to_mm<72>(32.1), to_mm<72>(214.57), "Attack CV", ""},
-		AnalogJackInput4ms{to_mm<72>(83.63), to_mm<72>(214.57), "D Shape CV", ""},
-		AnalogJackInput4ms{to_mm<72>(32.1), to_mm<72>(263.64), "A Shape CV", ""},
-		GateJackOutput4ms{to_mm<72>(83.63), to_mm<72>(263.67), "EOD", ""},
-		GateJackOutput4ms{to_mm<72>(32.1), to_mm<72>(311.23), "EOA", ""},
-		AnalogJackOutput4ms{to_mm<72>(83.63), to_mm<72>(311.26), "Out", ""},
+		Davies1900hBlackKnob{to_mm<72>(31.85), to_mm<72>(47.96), Center, "Attack", ""},
+		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(47.96), Center, "Decay", ""},
+		Davies1900hBlackKnob{to_mm<72>(31.96), to_mm<72>(104.94), Center, "A Shape", ""},
+		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(104.94), Center, "D Shape", ""},
+		GateJackInput4ms{to_mm<72>(32.1), to_mm<72>(167.36), Center, "Gate", ""},
+		AnalogJackInput4ms{to_mm<72>(83.63), to_mm<72>(167.36), Center, "Decay CV", ""},
+		AnalogJackInput4ms{to_mm<72>(32.1), to_mm<72>(214.57), Center, "Attack CV", ""},
+		AnalogJackInput4ms{to_mm<72>(83.63), to_mm<72>(214.57), Center, "D Shape CV", ""},
+		AnalogJackInput4ms{to_mm<72>(32.1), to_mm<72>(263.64), Center, "A Shape CV", ""},
+		GateJackOutput4ms{to_mm<72>(83.63), to_mm<72>(263.67), Center, "EOD", ""},
+		GateJackOutput4ms{to_mm<72>(32.1), to_mm<72>(311.23), Center, "EOA", ""},
+		AnalogJackOutput4ms{to_mm<72>(83.63), to_mm<72>(311.26), Center, "Out", ""},
 }};
 
     enum class Elem {
@@ -41,7 +42,7 @@ struct ADEnvInfo : ModuleInfoBase {
         Out,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobAttack = 0,

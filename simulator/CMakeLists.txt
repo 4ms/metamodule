@@ -25,40 +25,124 @@ include(${LVGL_DIR}/CMakeLists.txt)
 file(
   GLOB
   GUI_IMAGES
-  ${MM_ROOT}/firmware/src/pages/images/4ms/modules/*.c
-  ${MM_ROOT}/firmware/src/pages/images/4ms/components/*.c
-  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/*.c
-  ${MM_ROOT}/firmware/src/pages/images/Befaco/components/*.c
-  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/modules/*.c
-  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/components/*.c
-  ${MM_ROOT}/firmware/src/pages/fonts/MuseoSansRounded_*.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui_helpers.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui_font_*.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchview/ui.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchview/components/*.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchview/fonts/*.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchview/images/*.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchview/screens/*.c)
+  ${MM_ROOT}/firmware/src/gui/images/4ms/modules/*.c
+  ${MM_ROOT}/firmware/src/gui/images/4ms/components/*.c
+  ${MM_ROOT}/firmware/src/gui/images/Befaco/modules/*.c
+  ${MM_ROOT}/firmware/src/gui/images/Befaco/components/*.c
+  ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/modules/*.c
+  ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/components/*.c
+  ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
+  ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
+
+# #################### SLS Export ##################################
+
+add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
+                 ${CMAKE_CURRENT_BINARY_DIR}/slsexport/meta5)
+
+target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
+target_compile_options(ui PRIVATE -Wall -Og -g2 -fno-common
+                                  $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
+
+# Fixup for compiler warning in LVGL 8.3.4:
+set_source_files_properties(
+  ${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c DIRECTORY
+  ${MM_ROOT}/firmware/src/gui/slsexport/meta5 PROPERTIES COMPILE_FLAGS
+                                                         -Wno-unused-variable)
 
 # #################### CoreModules ##################################
-file(
-  GLOB
-  CORE_MODULES
-  ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc
-  ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
-  ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
-  ${MM_ROOT}/shared/CoreModules/Befaco/core/*Core.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/*Core.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/resources.cc
-  ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
-  ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
+file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
+
+set(CORE_MODULES
+    ${CORE_MODULES}
+    ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
+    #
+    # Befaco
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/StereoStrip.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SlewLimiter.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SamplingModulator.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/STMix.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Rampage.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/PonyVCO.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Percall.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/MotionMTR.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Morphader.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Mixer.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/KickAll.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/HexMixVCA.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ChoppingKinky.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ABC.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ADSR.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SpringReverb.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/DualAtenuverter.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/EvenVCO.cpp
+    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/NoisePlethora.cpp
+    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Muxslicer.cpp
+    #
+    # AudibleInstruments
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/src/Braids.cpp
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/utils/random.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/atan.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/units.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/analog_oscillator.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
+    #
+    # support files
+    ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
+    ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
+    ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
+
+# Fixups for compiler warnings in AudibleInstruments:
+set_source_files_properties(
+  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
+  PROPERTIES COMPILE_OPTIONS
+             "-Wno-unused-const-variable;-Wno-unused-but-set-variable")
+
+set(CORE_MODULES
+    ${CORE_MODULES}
+    ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
+    #
+    # Befaco
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/StereoStrip.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SlewLimiter.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SamplingModulator.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/STMix.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Rampage.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/PonyVCO.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Percall.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/MotionMTR.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Morphader.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Mixer.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/KickAll.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/HexMixVCA.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ChoppingKinky.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ABC.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ADSR.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SpringReverb.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/DualAtenuverter.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/EvenVCO.cpp
+    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/NoisePlethora.cpp
+    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Muxslicer.cpp
+    #
+    # AudibleInstruments
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/src/Braids.cpp
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/utils/random.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/atan.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/units.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/analog_oscillator.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
+    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
+    #
+    # support files
+    ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
+    ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
+    ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
 
 # #################### RYML + Patch Convert ##################################
 
@@ -83,8 +167,9 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES}
-                         ${MM_ROOT}/firmware/src/pages/page_manager.cc)
+add_executable(
+  simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES} ${SLS_SOURCES}
+            ${MM_ROOT}/firmware/src/gui/pages/page_manager.cc)
 
 target_include_directories(
   simulator
@@ -92,7 +177,10 @@ target_include_directories(
           stubs
           lvgl_drv
           ${SDL2_INCLUDE_DIRS}
+          ${MM_ROOT}/firmware
           ${MM_ROOT}/firmware/src
+          ${MM_ROOT}/firmware/src/console
+          ${MM_ROOT}/firmware/src/params
           ${MM_ROOT}/firmware/src/medium
           ${MM_ROOT}/shared
           ${MM_ROOT}/shared/cpputil
@@ -100,10 +188,9 @@ target_include_directories(
           ${MM_ROOT}/shared/CoreModules
           ${MM_ROOT}/shared/CoreModules/4ms
           ${MM_ROOT}/shared/CoreModules/Befaco
-          ${MM_ROOT}/shared/CoreModules/AudibleInstruments
-          ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core
-          ${MM_ROOT}/vcv/src # For sys/alloc_buffer.h
-)
+          ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack
+          ${MM_ROOT}/firmware/src/VCV_adaptor
+          ${MM_ROOT}/firmware/src/VCV_adaptor/pffft)
 
 target_compile_options(
   simulator PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
@@ -115,6 +202,6 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 # assembly)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        ryml SDL2)
+                                        ryml ui SDL2)
 
 target_link_options(simulator PUBLIC LINKER:-map,simulator.map)

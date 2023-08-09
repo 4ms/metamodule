@@ -1,6 +1,4 @@
 #pragma once
-
-#include "sys/alloc_buffer.hh"
 #include "util/interp_array.hh"
 #include "util/math.hh"
 
@@ -9,29 +7,27 @@ class DelayLine {
 public:
 	float output = 0;
 
-	DelayLine()
-	{
+	DelayLine() {
 		for (int i = 0; i < maxSamples; i++) {
-			delayBuffer->set(i, 0);
+			delayBuffer.set(i, 0);
 		}
 	}
 
-	void set_delay_samples(float delay)
-	{
+	void set_delay_samples(float delay) {
 		delaySamples = delay;
 	}
 
-	virtual void set_samplerate(float sr) {}
+	virtual void set_samplerate(float sr) {
+	}
 
-	float update(float input)
-	{
-		delayBuffer->set(writeIndex, input);
+	float update(float input) {
+		delayBuffer.set(writeIndex, input);
 
 		readIndex = writeIndex - delaySamples;
 		if (readIndex < 0)
 			readIndex += maxSamples;
 
-		output = delayBuffer->interp_by_index(readIndex);
+		output = delayBuffer.interp_by_index(readIndex);
 
 		writeIndex++;
 		if (writeIndex == maxSamples)
@@ -41,8 +37,7 @@ public:
 	}
 
 private:
-	using BufferType = BigAlloc<InterpArray<float, maxSamples>>;
-	BufferType *delayBuffer = new BufferType;
+	InterpArray<float, maxSamples> delayBuffer;
 	unsigned int writeIndex = 0;
 	float readIndex = 0;
 	float delaySamples = 1.0f;

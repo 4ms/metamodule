@@ -8,36 +8,37 @@ struct LIOInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"LIO"};
     static constexpr std::string_view description{"Listen IO"};
     static constexpr uint32_t width_hp = 6;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/LIO-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/LIO_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 26> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(43.21), to_mm<72>(61.27), "Gain", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(43.21), to_mm<72>(227.57), "Level", "", 0, 0, 1, 0.875f},
-		AnalogJackInput4ms{to_mm<72>(21.57), to_mm<72>(113.49), "Line In L", ""},
-		AnalogJackInput4ms{to_mm<72>(64.95), to_mm<72>(113.49), "Line In R", ""},
-		AnalogJackInput4ms{to_mm<72>(21.57), to_mm<72>(279.34), "Mod In L", ""},
-		AnalogJackInput4ms{to_mm<72>(64.95), to_mm<72>(279.34), "Mod In R", ""},
-		AnalogJackOutput4ms{to_mm<72>(21.57), to_mm<72>(153.09), "Mod Out L", ""},
-		AnalogJackOutput4ms{to_mm<72>(64.76), to_mm<72>(153.09), "Mod Out R", ""},
-		AnalogJackOutput4ms{to_mm<72>(21.57), to_mm<72>(319.12), "Line Out L", ""},
-		AnalogJackOutput4ms{to_mm<72>(64.76), to_mm<72>(319.12), "Line Out R", ""},
-		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(41.12), "LED L1 4", ""},
-		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(54.33), "LED L1 3", ""},
-		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(67.29), "LED L1 2", ""},
-		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(80.34), "LED L1 1", ""},
-		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(41.12), "LED R1 4", ""},
-		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(54.33), "LED R1 3", ""},
-		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(67.29), "LED R1 2", ""},
-		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(80.34), "LED R1 1", ""},
-		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(207.58), "LED L2 4", ""},
-		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(220.79), "LED L2 3", ""},
-		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(233.75), "LED L2 2", ""},
-		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(246.8), "LED L2 1", ""},
-		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(207.58), "LED R2 4", ""},
-		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(220.79), "LED R2 3", ""},
-		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(233.75), "LED R2 2", ""},
-		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(246.8), "LED R2 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.21), to_mm<72>(61.27), Center, "Gain", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.21), to_mm<72>(227.57), Center, "Level", ""},
+		AnalogJackInput4ms{to_mm<72>(21.57), to_mm<72>(113.49), Center, "Line In L", ""},
+		AnalogJackInput4ms{to_mm<72>(64.95), to_mm<72>(113.49), Center, "Line In R", ""},
+		AnalogJackInput4ms{to_mm<72>(21.57), to_mm<72>(279.34), Center, "Mod In L", ""},
+		AnalogJackInput4ms{to_mm<72>(64.95), to_mm<72>(279.34), Center, "Mod In R", ""},
+		AnalogJackOutput4ms{to_mm<72>(21.57), to_mm<72>(153.09), Center, "Mod Out L", ""},
+		AnalogJackOutput4ms{to_mm<72>(64.76), to_mm<72>(153.09), Center, "Mod Out R", ""},
+		AnalogJackOutput4ms{to_mm<72>(21.57), to_mm<72>(319.12), Center, "Line Out L", ""},
+		AnalogJackOutput4ms{to_mm<72>(64.76), to_mm<72>(319.12), Center, "Line Out R", ""},
+		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(41.12), Center, "LED L1 4", ""},
+		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(54.33), Center, "LED L1 3", ""},
+		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(67.29), Center, "LED L1 2", ""},
+		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(80.34), Center, "LED L1 1", ""},
+		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(41.12), Center, "LED R1 4", ""},
+		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(54.33), Center, "LED R1 3", ""},
+		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(67.29), Center, "LED R1 2", ""},
+		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(80.34), Center, "LED R1 1", ""},
+		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(207.58), Center, "LED L2 4", ""},
+		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(220.79), Center, "LED L2 3", ""},
+		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(233.75), Center, "LED L2 2", ""},
+		RedGreenBlueLight{to_mm<72>(10.34), to_mm<72>(246.8), Center, "LED L2 1", ""},
+		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(207.58), Center, "LED R2 4", ""},
+		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(220.79), Center, "LED R2 3", ""},
+		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(233.75), Center, "LED R2 2", ""},
+		RedGreenBlueLight{to_mm<72>(76.1), to_mm<72>(246.8), Center, "LED R2 1", ""},
 }};
 
     enum class Elem {
@@ -69,7 +70,7 @@ struct LIOInfo : ModuleInfoBase {
         LedR21Light,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobGain = 0,

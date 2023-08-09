@@ -15,11 +15,11 @@ inline void do_config_element(JackOutput el, const Indices &indices, const Modul
 };
 
 inline void do_config_element(Pot el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, el.min_val, el.max_val, el.default_val, el.short_name.data());
+	context.module->configParam(indices.param_idx, 0.f, 1.f, 0.5f, el.short_name.data());
 };
 
 inline void do_config_element(SliderMonoLight el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, el.min_val, el.max_val, el.default_val, el.short_name.data());
+	context.module->configParam(indices.param_idx, 0.f, 1.f, 0.5f, el.short_name.data());
 	context.module->configLight(indices.light_idx, el.short_name.data());
 };
 

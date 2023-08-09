@@ -1,15 +1,15 @@
 #pragma once
 #include "../comm/comm_module.hh"
-#include "mapping/Mapping.h"
-#include "mapping/ModuleID.h"
-#include "mapping/central_data.hh"
-#include "mapping/map_palette.hh"
-#include "mapping/patch_writer.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "hub/knob_set_menu.hh"
 #include "hub_knob.hh"
 #include "hub_midi.hh"
 #include "hub_module.hh"
-#include "local_path.hh"
+#include "mapping/Mapping.h"
+#include "mapping/ModuleID.h"
+#include "mapping/map_palette.hh"
+#include "mapping/module_directory.hh"
+#include "mapping/patch_writer.hh"
 #include "util/math.hh"
 #include "util/string_util.hh"
 #include <functional>
@@ -82,5 +82,29 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 			button->setParamQuantity(pq);
 		}
 		addParam(p);
+	}
+
+	void onHover(const HoverEvent &e) override {
+		if (hubModule->should_write_patch()) {
+			hubModule->mappings.removeMapsToDeletedModules();
+			hubModule->writePatchFile();
+		}
+	}
+
+	void appendContextMenu(rack::Menu *menu) override {
+		using namespace rack;
+		menu->addChild(new MenuSeparator());
+		menu->addChild(createMenuLabel<MenuLabel>("Mapped Knob Sets"));
+
+		for (unsigned i = 0; i < hubModule->MaxKnobSets; i++) {
+			menu->addChild(new MenuSeparator());
+			menu->addChild(createCheckMenuItem(
+				string::f("Knob Set %d", i + 1),
+				"",
+				[=]() { return hubModule->mappings.getActiveKnobSetIdx() == i; },
+				[=]() { hubModule->mappings.setActiveKnobSetIdx(i); }));
+
+			menu->addChild(new KnobSetNameMenuItem{hubModule, i});
+		}
 	}
 };

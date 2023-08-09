@@ -12,7 +12,7 @@ clean:
 warnings: clean
 	cmake --preset gcc-warn -B $(BUILDDIR)
 
-run:
+run: all
 	build/simulator
 
 .PHONY: all clean warnings run

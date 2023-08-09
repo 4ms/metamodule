@@ -8,14 +8,15 @@ struct CLKDInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"CLKD"};
     static constexpr std::string_view description{"Clock Divider"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/CLKD-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/CLKD_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Divide", "", 0, 0, 1, 0.0f},
-		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), "CV", ""},
-		GateJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), "Clk In", ""},
-		GateJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), "Clk Out", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), Center, "Divide", ""},
+		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), Center, "CV", ""},
+		GateJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), Center, "Clk In", ""},
+		GateJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), Center, "Clk Out", ""},
 }};
 
     enum class Elem {
@@ -25,7 +26,7 @@ struct CLKDInfo : ModuleInfoBase {
         ClkOut,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobDivide = 0,

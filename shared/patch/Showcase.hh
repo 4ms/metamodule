@@ -1,10 +1,10 @@
-static char Showcase_patch[] = 
-R"(
+static char Showcase_patch[] =
+	R"(
 PatchData:
   patch_name: Showcase
   description: Showing various virtual 4ms modules
   module_slugs:
-    0: PanelMedium
+    0: HubMedium
     1: STS
     2: VCAM
     3: Tapo

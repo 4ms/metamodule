@@ -4,7 +4,6 @@
 #include "comm/comm_module.hh"
 #include "hub/hub_elements.hh"
 #include "hub_module_widget.hh"
-#include "local_path.hh"
 #include "mapping/Mapping.h"
 #include "mapping/patch_writer.hh"
 #include "widgets/4ms/4ms_widgets.hh"
@@ -13,33 +12,10 @@
 
 using namespace rack;
 
-// Note: in v2, first the module is constructed, then dataFromJson is called, then the Widget is constructed
-struct HubMediumMappings {
-	constexpr static unsigned NumMidiSrcs = 2;
-	constexpr static unsigned NumMappings = PanelDef::NumKnobs + NumMidiSrcs;
-	static inline std::array<MappableObj::Type, NumMappings> mapping_srcs{
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::Knob,
-		MappableObj::Type::MidiNote,
-		MappableObj::Type::MidiGate,
-	};
-};
-
 struct HubMedium : MetaModuleHubBase {
 	using INFO = MetaModule::HubMediumInfo;
 
-	HubMedium()
-		: MetaModuleHubBase{HubMediumMappings::mapping_srcs} {
+	HubMedium() {
 
 		// Register with VCV the number of elements of each type
 		auto cnt = ElementCount::count<INFO>();
@@ -57,14 +33,11 @@ struct HubMedium : MetaModuleHubBase {
 		processMaps();
 	}
 
+private:
 	constexpr static auto indices = ElementCount::get_indices<INFO>();
 
-	constexpr static auto element_index(INFO::Elem el) {
-		return static_cast<std::underlying_type_t<INFO::Elem>>(el);
-	}
-
 	constexpr static ElementCount::Indices index(INFO::Elem el) {
-		auto element_idx = element_index(el);
+		auto element_idx = static_cast<std::underlying_type_t<INFO::Elem>>(el);
 		return indices[element_idx];
 	}
 
@@ -76,13 +49,6 @@ struct HubMediumWidget : MetaModuleHubWidget {
 
 	LedDisplayTextField *patchName;
 	LedDisplayTextField *patchDesc;
-
-	Vec fixDPI(Vec v) {
-		return v.mult(75.f / 72.f);
-	}
-	Vec fixDPIKnob(Vec v) {
-		return v.mult(75.f / 72.f).plus({0.6f, 0.2f});
-	}
 
 	HubMediumWidget(HubMedium *module) {
 		setModule(module);
@@ -98,7 +64,7 @@ struct HubMediumWidget : MetaModuleHubWidget {
 			};
 		}
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/modules/metamodule_p10-artwork.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/modules/HubMedium_artwork.svg")));
 		addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));

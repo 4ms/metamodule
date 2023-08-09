@@ -1,9 +1,9 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_info_view.hh"
-#include "module_type_slug.hh"
-#include "util/seq_map.hh"
-#include "util/static_string.hh"
+#include "CoreModules/module_type_slug.hh"
+#include "cpputil/util/seq_map.hh"
+#include "cpputil/util/static_string.hh"
 #include <array>
 #include <memory>
 
@@ -14,27 +14,40 @@ class ModuleFactory {
 public:
 	ModuleFactory() = delete;
 
-	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate, ModuleInfoView info) {
+	static bool
+	registerModuleType(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate, const ModuleInfoView &info) {
 		bool already_exists = creation_funcs.key_exists(typeslug);
 		infos.insert(typeslug, info);
 		creation_funcs.insert(typeslug, funcCreate);
 		return already_exists;
 	}
 
-	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug) {
+	static bool registerModuleType(const ModuleTypeSlug &typeslug, const ModuleInfoView &info) {
+		bool already_exists = creation_funcs.key_exists(typeslug);
+		infos.insert(typeslug, info);
+		return already_exists;
+	}
+
+	static bool registerModuleType(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate) {
+		bool already_exists = creation_funcs.key_exists(typeslug);
+		creation_funcs.insert(typeslug, funcCreate);
+		return already_exists;
+	}
+
+	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug &typeslug) {
 		if (auto f_create = creation_funcs.get(typeslug))
 			return (*f_create)();
 		else
 			return nullptr;
 	}
 
-	static std::string_view getModuleTypeName(ModuleTypeSlug typeslug) {
+	static std::string_view getModuleTypeName(const ModuleTypeSlug &typeslug) {
 		if (auto m = infos.get(typeslug))
 			return m->description;
 		return "Not found.";
 	}
 
-	static ModuleInfoView &getModuleInfo(ModuleTypeSlug typeslug) {
+	static ModuleInfoView &getModuleInfo(const ModuleTypeSlug &typeslug) {
 		if (auto m = infos.get(typeslug))
 			return *m;
 		else
@@ -42,8 +55,8 @@ public:
 	}
 
 	// Returns true if slug is valid and registered.
-	static bool isValidSlug(ModuleTypeSlug typeslug) {
-		return infos.key_exists(typeslug);
+	static bool isValidSlug(const ModuleTypeSlug &typeslug) {
+		return infos.key_exists(typeslug) && creation_funcs.key_exists(typeslug);
 	}
 
 	static inline ModuleInfoView nullinfo{};

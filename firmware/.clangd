@@ -13,7 +13,7 @@ CompileFlags:
 		"-flto=*",
 		"-mvectorize-with-neon-*",
 		"-mthumb-interwork",
-		"-ffold-simple-inlines"
+		"-ffold-simple-inlines",
 	]
 	Add: [
 		"--target=arm-none-eabi", 
@@ -28,6 +28,7 @@ CompileFlags:
 		"-Ilib/cmsis/Core_A/Include",
 		"-Ilib/cmsis-device/stm32mp157c/include",
 		"-Ilib/lvgl",
+		"-Ilib/lvgl/lvgl",
 		"-Ilib/lvgl/lvgl/src/lv_font",
         "-Isrc/fatfs",
         "-Ilib/fatfs/source",
@@ -55,7 +56,7 @@ CompileFlags:
 	]
 ---
 If:
-	PathMatch: [".*/VCV-adaptor/dsp/.*"]
+	PathMatch: [".*/VCV-adaptor/dsp/.*", ".*/VCV-adaptor/simd/.*"]
 CompileFlags:
 	Add: [
         "--include /opt/homebrew/opt/llvm/lib/clang/16/include/arm_neon.h"

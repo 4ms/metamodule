@@ -1,12 +1,12 @@
 #pragma once
 #include "comm/comm_module.hh"
 #include "hub_knob_mappings.hh"
-#include "local_path.hh"
-#include "mapping/central_data.hh"
+#include "mapping/module_directory.hh"
 #include "mapping/vcv_patch_file_writer.hh"
 #include "util/edge_detector.hh"
 #include "util/math.hh"
 #include "util/string_util.hh"
+#include <osdialog.h>
 #include <span>
 
 #define pr_dbg printf
@@ -18,25 +18,20 @@ struct MetaModuleHubBase : public rack::Module {
 	std::string labelText = "";
 	std::string patchNameText = "";
 	std::string patchDescText = "";
+	std::string lastPatchFilePath = "";
 	std::function<void(void)> updateDisplay;
 
 	EdgeStateDetector patchWriteButton;
+	bool ready_to_write_patch = false;
 
 	std::optional<int> inProgressMapParamId{};
-
-	std::span<MappableObj::Type> mappingSrcs;
 
 	// FIXME: NumPots should be a template parameter
 	// We then need a common base class widgets can point to
 	static constexpr uint32_t NumPots = 12;
 	static constexpr uint32_t MaxMapsPerPot = 8;
-	HubKnobMappings<NumPots, MaxMapsPerPot> mappings{id};
-
-	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
-		: mappingSrcs{mappingSrcs} {
-	}
-
-	~MetaModuleHubBase() = default;
+	static constexpr uint32_t MaxKnobSets = 4;
+	HubKnobMappings<NumPots, MaxMapsPerPot, MaxKnobSets> mappings;
 
 	// Mapping State/Progress
 
@@ -74,9 +69,10 @@ struct MetaModuleHubBase : public rack::Module {
 			return false;
 		}
 
+		mappings.linkToModule(id);
 		auto *map = mappings.addMap(hubParamId, module->id, moduleParamId);
 		map->range_max = 1.f;
-		map->range_min = 0.f;
+		map->range_min = 0.0f;
 		endMapping();
 
 		return true;
@@ -85,11 +81,11 @@ struct MetaModuleHubBase : public rack::Module {
 	// Runtime applying maps
 
 	void processMaps() {
-		for (int hubParamId = 0; auto &knobs : mappings) {
-			for (auto &map : knobs) {
+		for (int hubParamId = 0; auto &knob : mappings) {
+			for (auto &mapset : knob) {
 
-				int paramId = map.paramHandle.paramId;
-				auto module = map.paramHandle.module;
+				int paramId = mapset.paramHandle.paramId;
+				auto module = mapset.paramHandle.module;
 				if (!module)
 					continue;
 
@@ -99,6 +95,7 @@ struct MetaModuleHubBase : public rack::Module {
 				if (!paramQuantity->isBounded())
 					continue;
 
+				auto &map = mappings.activeMap(mapset);
 				auto val = MathTools::map_value(params[hubParamId].getValue(), 0.f, 1.f, map.range_min, map.range_max);
 				paramQuantity->setScaledValue(val);
 			}
@@ -113,8 +110,15 @@ struct MetaModuleHubBase : public rack::Module {
 		if (patchWriteButton.went_high()) {
 			updatePatchName();
 			updateDisplay();
-			writePatchFile();
+			ready_to_write_patch = true;
+			// writePatchFile();
 		}
+	}
+
+	bool should_write_patch() {
+		auto t = ready_to_write_patch;
+		ready_to_write_patch = false;
+		return t;
 	}
 
 	// VCV Rack calls this periodically on auto-save
@@ -148,20 +152,17 @@ struct MetaModuleHubBase : public rack::Module {
 		mappings.decodeJson(rootJ);
 	}
 
-private:
 	void writePatchFile() {
 		std::string patchName;
 		std::string patchDir;
-		if (patchNameText.substr(0, 5) == "test_")
-			patchDir = testPatchDir;
-		else
-			patchDir = examplePatchDir;
+
 		if (patchNameText != "" && patchNameText != "Enter Patch Name") {
 			patchName = patchNameText.c_str();
 		} else {
 			std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
 			patchName = randomname.c_str();
 		}
+
 		ReplaceString patchStructName{patchName};
 		patchStructName.replace_all(" ", "")
 			.replace_all("-", "_")
@@ -174,15 +175,35 @@ private:
 			.replace_all("?", "")
 			.replace_all("#", "")
 			.replace_all("!", "");
-		std::string patchFileName = patchDir + patchStructName.str;
+
+		osdialog_filters *filters = osdialog_filters_parse("Metamodule Patch File (.yml):yml");
+		DEFER({ osdialog_filters_free(filters); });
+
+		std::string dir = lastPatchFilePath;
+		if (dir == "")
+			dir = rack::asset::userDir.c_str();
+
+		char *filename = osdialog_file(OSDIALOG_SAVE, dir.c_str(), patchStructName.str.c_str(), filters);
+		if (!filename)
+			return;
+
+		std::string patchFileName = filename;
+		DEFER({ free(filename); });
+
+		if (rack::system::getExtension(rack::system::getFilename(patchFileName)) != ".yml") {
+			patchFileName += ".yml";
+		}
+
+		lastPatchFilePath = rack::system::getDirectory(patchFileName);
 
 		labelText = "Creating patch...";
 		updateDisplay();
 
-		VCVPatchFileWriter::writePatchFile(id, mappings.mappings, patchFileName, patchName, patchDescText);
+		VCVPatchFileWriter<NumPots, MaxMapsPerPot, MaxKnobSets>::writePatchFile(
+			id, mappings.mappings, mappings.knobSetNames, patchFileName, patchName, patchDescText);
 
 		labelText = "Wrote patch file: ";
-		labelText += patchStructName.str + ".yml";
+		labelText += rack::system::getFilename(patchFileName);
 		updateDisplay();
 	}
 };

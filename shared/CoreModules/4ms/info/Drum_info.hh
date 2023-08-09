@@ -8,31 +8,32 @@ struct DrumInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Drum"};
     static constexpr std::string_view description{"Drum Voice"};
     static constexpr uint32_t width_hp = 15;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/Drum-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Drum_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 21> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(45.96), "Pitch", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(45.96), "Pitch Env", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(172.59), to_mm<72>(45.96), "Pitch Amt", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(104.51), "Ratio", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(104.51), "FM Env", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(172.59), to_mm<72>(104.51), "FM Amt", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(163.19), "Tone Env", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(163.19), "Noise Env", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(172.59), to_mm<72>(163.19), "Noise Blend", "", 0, 0, 1, 0.0f},
-		AnalogJackInput4ms{to_mm<72>(36.54), to_mm<72>(214.33), "Trigger", ""},
-		AnalogJackInput4ms{to_mm<72>(84.82), to_mm<72>(214.33), "V/Oct", ""},
-		AnalogJackInput4ms{to_mm<72>(133.11), to_mm<72>(214.33), "P Env CV", ""},
-		AnalogJackInput4ms{to_mm<72>(181.39), to_mm<72>(214.33), "P Amt CV", ""},
-		AnalogJackInput4ms{to_mm<72>(36.54), to_mm<72>(263.05), "Ratio CV", ""},
-		AnalogJackInput4ms{to_mm<72>(84.82), to_mm<72>(263.05), "FM Env CV", ""},
-		AnalogJackInput4ms{to_mm<72>(133.11), to_mm<72>(263.05), "FM Amt CV", ""},
-		AnalogJackInput4ms{to_mm<72>(181.39), to_mm<72>(263.05), "T Env CV", ""},
-		AnalogJackInput4ms{to_mm<72>(84.82), to_mm<72>(311.77), "N Env CV", ""},
-		AnalogJackInput4ms{to_mm<72>(133.11), to_mm<72>(311.77), "N Blend CV", ""},
-		AnalogJackOutput4ms{to_mm<72>(36.54), to_mm<72>(311.77), "Inv Out", ""},
-		AnalogJackOutput4ms{to_mm<72>(181.39), to_mm<72>(311.77), "Out", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(45.96), Center, "Pitch", ""},
+		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(45.96), Center, "Pitch Env", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.59), to_mm<72>(45.96), Center, "Pitch Amt", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(104.51), Center, "Ratio", ""},
+		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(104.51), Center, "FM Env", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.59), to_mm<72>(104.51), Center, "FM Amt", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(163.19), Center, "Tone Env", ""},
+		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(163.19), Center, "Noise Env", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.59), to_mm<72>(163.19), Center, "Noise Blend", ""},
+		AnalogJackInput4ms{to_mm<72>(36.54), to_mm<72>(214.33), Center, "Trigger", ""},
+		AnalogJackInput4ms{to_mm<72>(84.82), to_mm<72>(214.33), Center, "V/Oct", ""},
+		AnalogJackInput4ms{to_mm<72>(133.11), to_mm<72>(214.33), Center, "P Env CV", ""},
+		AnalogJackInput4ms{to_mm<72>(181.39), to_mm<72>(214.33), Center, "P Amt CV", ""},
+		AnalogJackInput4ms{to_mm<72>(36.54), to_mm<72>(263.05), Center, "Ratio CV", ""},
+		AnalogJackInput4ms{to_mm<72>(84.82), to_mm<72>(263.05), Center, "FM Env CV", ""},
+		AnalogJackInput4ms{to_mm<72>(133.11), to_mm<72>(263.05), Center, "FM Amt CV", ""},
+		AnalogJackInput4ms{to_mm<72>(181.39), to_mm<72>(263.05), Center, "T Env CV", ""},
+		AnalogJackInput4ms{to_mm<72>(84.82), to_mm<72>(311.77), Center, "N Env CV", ""},
+		AnalogJackInput4ms{to_mm<72>(133.11), to_mm<72>(311.77), Center, "N Blend CV", ""},
+		AnalogJackOutput4ms{to_mm<72>(36.54), to_mm<72>(311.77), Center, "Inv Out", ""},
+		AnalogJackOutput4ms{to_mm<72>(181.39), to_mm<72>(311.77), Center, "Out", ""},
 }};
 
     enum class Elem {
@@ -59,7 +60,7 @@ struct DrumInfo : ModuleInfoBase {
         Out,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobPitch = 0,

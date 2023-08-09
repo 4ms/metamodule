@@ -142,6 +142,9 @@ def panel_to_components(tree):
         color = expand_color_synonyms(color)
         c['color'] = color
 
+        # TODO: detect Center or TopLeft coords
+        c['coord_ref'] = "Center";
+
         default_val_int = int(color[-2:], 16)
         #Red: Knob or slider
         if color.startswith("#ff00") and default_val_int <= 128:
@@ -260,8 +263,9 @@ struct {slug}Info : ModuleInfoBase {{
     static constexpr std::string_view slug{{"{slug}"}};
     static constexpr std::string_view description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
-    static constexpr bool uses_center_coords = true;
     static constexpr std::string_view svg_filename{{"res/modules/{slug}-artwork.svg"}};
+
+    using enum Coords;
 
     static constexpr std::array<Element, {len(components['elements'])}> Elements{{{{
 {list_elem_definitions(components['elements'], DPI)}}}}};
@@ -269,7 +273,7 @@ struct {slug}Info : ModuleInfoBase {{
     enum class Elem {{{list_elem_names(components['elements'])}
     }};
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     {make_legacy_enum("Knob", components['params'])}
     {make_legacy_enum("Switch", components['switches'])}
     {make_legacy_enum("Input", components['inputs'])}
@@ -290,16 +294,9 @@ def list_elem_definitions(elems, DPI):
         source += f"{k['class']}{{"
         source += f"to_mm<{DPI}>({k['cx']}), "
         source += f"to_mm<{DPI}>({k['cy']}), "
+        source += f"{k['coord_ref']}, "
         source += f"\"{k['display_name']}\", "
-        source += f"\"\""
-
-        if k['category'] == "Knob" or k['category'] == "Slider":
-            source += f", "
-            source += f"0, " #ID: TODO remove this
-            source += f"{k['min_val']}, "
-            source += f"{k['max_val']}, "
-            source += f"{k['default_val']}"
-
+        source += f"\"\"" #long name
         source += f"""}},
 """
     return source

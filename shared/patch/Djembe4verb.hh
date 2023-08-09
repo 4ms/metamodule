@@ -4,7 +4,7 @@ PatchData:
   patch_name: 'Djembe-4-verb'
   description: Four Djembes with clock divders and multipliers, and stereo reverb
   module_slugs:
-    0: PanelMedium
+    0: HubMedium
     1: Djembe
     2: Djembe
     3: StMix
@@ -227,93 +227,95 @@ PatchData:
       param_id: 3
       value: 0.73
   mapped_knobs:
-    - panel_knob_id: 0
-      module_id: 2
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: Pitch 1
-    - panel_knob_id: 1
-      module_id: 1
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: 'Pitch-2'
-    - panel_knob_id: 2
-      module_id: 5
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: Pitch3
-    - panel_knob_id: 3
-      module_id: 6
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: Pitch4
-    - panel_knob_id: 11
-      module_id: 4
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 0.459
-    - panel_knob_id: 6
-      module_id: 9
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 8
-      module_id: 8
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 7
-      module_id: 7
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 9
-      module_id: 10
-      param_id: 3
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 9
-      module_id: 11
-      param_id: 3
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 4
-      module_id: 10
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 5
-      module_id: 11
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 10
-      module_id: 11
-      param_id: 1
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 10
-      module_id: 10
-      param_id: 1
-      curve_type: 0
-      min: 0
-      max: 1
+    - name: 'EnOsc #1'
+      set:
+      - panel_knob_id: 0
+        module_id: 2
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: Pitch 1
+      - panel_knob_id: 1
+        module_id: 1
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: 'Pitch-2'
+      - panel_knob_id: 2
+        module_id: 5
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: Pitch3
+      - panel_knob_id: 3
+        module_id: 6
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: Pitch4
+      - panel_knob_id: 11
+        module_id: 4
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 0.459
+      - panel_knob_id: 6
+        module_id: 9
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 8
+        module_id: 8
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 7
+        module_id: 7
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 9
+        module_id: 10
+        param_id: 3
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 9
+        module_id: 11
+        param_id: 3
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 4
+        module_id: 10
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 5
+        module_id: 11
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 10
+        module_id: 11
+        param_id: 1
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 10
+        module_id: 10
+        param_id: 1
+        curve_type: 0
+        min: 0
+        max: 1
 
 )";

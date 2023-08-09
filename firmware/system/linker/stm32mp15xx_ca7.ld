@@ -149,7 +149,7 @@ SECTIONS
 
 
     _user_stack_start = _ram_aligned_end;
-    _user_stack_end = _user_stack_start + 0x6000; /* 24k */
+    _user_stack_end = _user_stack_start + 0x80000; /* 512k */
 
     _svc_stack_start = _user_stack_end;
     _svc_stack_end = _svc_stack_start + 0x6000; /* 24k for ISRs*/

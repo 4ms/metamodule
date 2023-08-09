@@ -8,24 +8,25 @@ struct FMInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"FM"};
     static constexpr std::string_view description{"FM Oscillator"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/FM-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/FM_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 14> Elements{{
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(40.33), "Pitch", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(40.33), "Mix", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(83.47), "Index", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(83.47), "Index CV", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(126.62), "Ratio C", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(126.62), "Ratio F", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(169.76), "Shape", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(169.76), "Shape CV", "", 0, 0, 1, 0.0f},
-		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(214.56), "V/Oct P", ""},
-		AnalogJackInput4ms{to_mm<72>(83.49), to_mm<72>(214.56), "V/Oct S", ""},
-		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(263.28), "Mix CV", ""},
-		AnalogJackInput4ms{to_mm<72>(83.49), to_mm<72>(263.28), "Index CV In", ""},
-		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(312.0), "Shape CV", ""},
-		AnalogJackOutput4ms{to_mm<72>(83.49), to_mm<72>(312.0), "Out", ""},
+		Knob9mm{to_mm<72>(31.96), to_mm<72>(40.33), Center, "Pitch", ""},
+		Knob9mm{to_mm<72>(83.49), to_mm<72>(40.33), Center, "Mix", ""},
+		Knob9mm{to_mm<72>(31.96), to_mm<72>(83.47), Center, "Index", ""},
+		Knob9mm{to_mm<72>(83.49), to_mm<72>(83.47), Center, "Index CV", ""},
+		Knob9mm{to_mm<72>(31.96), to_mm<72>(126.62), Center, "Ratio C", ""},
+		Knob9mm{to_mm<72>(83.49), to_mm<72>(126.62), Center, "Ratio F", ""},
+		Knob9mm{to_mm<72>(31.96), to_mm<72>(169.76), Center, "Shape", ""},
+		Knob9mm{to_mm<72>(83.49), to_mm<72>(169.76), Center, "Shape CV", ""},
+		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(214.56), Center, "V/Oct P", ""},
+		AnalogJackInput4ms{to_mm<72>(83.49), to_mm<72>(214.56), Center, "V/Oct S", ""},
+		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(263.28), Center, "Mix CV", ""},
+		AnalogJackInput4ms{to_mm<72>(83.49), to_mm<72>(263.28), Center, "Index CV In", ""},
+		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(312.0), Center, "Shape CV", ""},
+		AnalogJackOutput4ms{to_mm<72>(83.49), to_mm<72>(312.0), Center, "Out", ""},
 }};
 
     enum class Elem {
@@ -45,7 +46,7 @@ struct FMInfo : ModuleInfoBase {
         Out,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobPitch = 0,

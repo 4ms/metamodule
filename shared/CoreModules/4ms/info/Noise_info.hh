@@ -8,12 +8,13 @@ struct NoiseInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Noise"};
     static constexpr std::string_view description{"Noise Source"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/Noise-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Noise_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 2> Elements{{
-		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(264.61), "White", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(312.2), "Pink", ""},
+		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(264.61), Center, "White", ""},
+		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(312.2), Center, "Pink", ""},
 }};
 
     enum class Elem {
@@ -21,7 +22,7 @@ struct NoiseInfo : ModuleInfoBase {
         PinkOut,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     
     

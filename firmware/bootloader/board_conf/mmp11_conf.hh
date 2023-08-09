@@ -13,9 +13,13 @@ using GreenLED2 = Led<GPIO::E, PinNum::_2, LedActive::High>; //" EXTGPIO2
 using OrangeLED = RedLED2;
 using BlueLED = Led<GPIO::A, PinNum::_14, LedActive::Low>;
 
-//EXPANDER: right-most pins shorted
+// Boot Select pin: press Rotary encoder to select DFU USB
 constexpr bool UseBootSelect = true;
-constexpr PinConf BootSelectPin{GPIO::G, PinNum::_11}; //EXTGPIO3
+constexpr PinConf BootSelectPin{GPIO::E, PinNum::_15};
+
+// Freeze mode: jumper on top-left pin and pin to the right of the EXPANDER header
+constexpr bool UseFreezePin = true;
+constexpr PinConf FreezePin{GPIO::B, PinNum::_11}; //AUX_I2C_SDA
 
 constexpr uint32_t ConsoleUART = UART7_BASE;
 constexpr PinConf UartRX{GPIO::B, PinNum::_3, PinAF::AF_13};

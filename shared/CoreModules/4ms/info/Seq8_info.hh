@@ -8,22 +8,23 @@ struct Seq8Info : ModuleInfoBase {
     static constexpr std::string_view slug{"Seq8"};
     static constexpr std::string_view description{"8 Step Sequencer"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/Seq8-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Seq8_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 12> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(32.88), to_mm<72>(47.23), "1", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(84.41), to_mm<72>(47.23), "2", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(32.88), to_mm<72>(104.31), "3", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(84.41), to_mm<72>(104.31), "4", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(32.88), to_mm<72>(163.62), "5", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(84.41), to_mm<72>(163.62), "6", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(32.88), to_mm<72>(222.39), "7", "", 0, 0, 1, 1.0f},
-		Davies1900hBlackKnob{to_mm<72>(84.41), to_mm<72>(222.39), "8", "", 0, 0, 1, 0.25f},
-		AnalogJackInput4ms{to_mm<72>(31.02), to_mm<72>(272.5), "Clock", ""},
-		AnalogJackInput4ms{to_mm<72>(84.69), to_mm<72>(272.5), "Reset", ""},
-		AnalogJackOutput4ms{to_mm<72>(31.13), to_mm<72>(314.17), "Gate", ""},
-		AnalogJackOutput4ms{to_mm<72>(84.69), to_mm<72>(314.17), "Out", ""},
+		Davies1900hBlackKnob{to_mm<72>(32.88), to_mm<72>(47.23), Center, "1", ""},
+		Davies1900hBlackKnob{to_mm<72>(84.41), to_mm<72>(47.23), Center, "2", ""},
+		Davies1900hBlackKnob{to_mm<72>(32.88), to_mm<72>(104.31), Center, "3", ""},
+		Davies1900hBlackKnob{to_mm<72>(84.41), to_mm<72>(104.31), Center, "4", ""},
+		Davies1900hBlackKnob{to_mm<72>(32.88), to_mm<72>(163.62), Center, "5", ""},
+		Davies1900hBlackKnob{to_mm<72>(84.41), to_mm<72>(163.62), Center, "6", ""},
+		Davies1900hBlackKnob{to_mm<72>(32.88), to_mm<72>(222.39), Center, "7", ""},
+		Davies1900hBlackKnob{to_mm<72>(84.41), to_mm<72>(222.39), Center, "8", ""},
+		AnalogJackInput4ms{to_mm<72>(31.02), to_mm<72>(272.5), Center, "Clock", ""},
+		AnalogJackInput4ms{to_mm<72>(84.69), to_mm<72>(272.5), Center, "Reset", ""},
+		AnalogJackOutput4ms{to_mm<72>(31.13), to_mm<72>(314.17), Center, "Gate", ""},
+		AnalogJackOutput4ms{to_mm<72>(84.69), to_mm<72>(314.17), Center, "Out", ""},
 }};
 
     enum class Elem {
@@ -41,7 +42,7 @@ struct Seq8Info : ModuleInfoBase {
         Out,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         Knob_1 = 0,

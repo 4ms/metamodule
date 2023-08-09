@@ -1,6 +1,0 @@
-#opt	Id		Name	Type	Device	Offset		Binary
--		0x01	fsbl	Binary	none	0x00000000	u-boot-spl.stm32
--		0x03	ssbl	Binary	none	0x00000000	u-boot.img
-P		0x04	fsbl1	Binary	nor0	0x00000000	u-boot-spl.stm32
-P		0x05	fsbl2	Binary	nor0	0x00040000	u-boot-spl.stm32
-P		0x06	ssbl	Binary	nor0	0x00080000	u-boot.img

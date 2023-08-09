@@ -1,4 +1,4 @@
-target extended-remote localhost:2331
+target extended-remote localhost:3333
 file build/mp1corea7/medium/main.elf
-source ../../svd-tools/gdb-svd.py
-svd ../../cmsis-svd/data/STMicro/STM32MP157x.svd
+#source ../../svd-tools/gdb-svd.py
+#svd flashing/STM32MP15xxx.svd

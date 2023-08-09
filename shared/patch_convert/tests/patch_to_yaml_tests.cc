@@ -2,6 +2,7 @@
 #include "doctest.h"
 #include "ryml_serial.hh"
 #include <iostream>
+#include <vector>
 
 TEST_CASE("Correct yaml output produced") {
 	PatchData pd{
@@ -28,7 +29,10 @@ TEST_CASE("Correct yaml output produced") {
 	pd.mapped_outs.push_back({4, out1});
 	pd.mapped_outs.push_back({5, out2, "MapOut2"});
 
-	pd.mapped_knobs.push_back(MappedKnob{
+	MappedKnobSet set0;
+	set0.name = "MKSet0";
+
+	set0.set.push_back(MappedKnob{
 		.panel_knob_id = 1,
 		.module_id = 2,
 		.param_id = 3,
@@ -38,7 +42,7 @@ TEST_CASE("Correct yaml output produced") {
 		.alias_name = "MapKnob1",
 	});
 
-	pd.mapped_knobs.push_back(MappedKnob{
+	set0.set.push_back(MappedKnob{
 		.panel_knob_id = 2,
 		.module_id = 3,
 		.param_id = 4,
@@ -47,7 +51,7 @@ TEST_CASE("Correct yaml output produced") {
 		.max = 0.85f,
 	});
 
-	pd.mapped_knobs.push_back(MappedKnob{
+	set0.set.push_back(MappedKnob{
 		.panel_knob_id = 3,
 		.module_id = 4,
 		.param_id = 5,
@@ -56,7 +60,11 @@ TEST_CASE("Correct yaml output produced") {
 		.max = 0.75f,
 	});
 
-	pd.mapped_knobs.push_back(MappedKnob{
+	pd.knob_sets.push_back(set0);
+
+	MappedKnobSet set1;
+	set1.name = "MKSet1";
+	set1.set.push_back(MappedKnob{
 		.panel_knob_id = 4,
 		.module_id = 5,
 		.param_id = 6,
@@ -64,6 +72,7 @@ TEST_CASE("Correct yaml output produced") {
 		.min = 0.4f,
 		.max = 0.65f,
 	});
+	pd.knob_sets.push_back(set1);
 
 	pd.static_knobs.push_back({1, 2, 0.3f});
 	pd.static_knobs.push_back({2, 3, 0.4f});
@@ -144,31 +153,35 @@ R"(PatchData:
       param_id: 6
       value: 0.7
   mapped_knobs:
-    - panel_knob_id: 1
-      module_id: 2
-      param_id: 3
-      curve_type: 1
-      min: 0.1
-      max: 0.95
-      alias_name: MapKnob1
-    - panel_knob_id: 2
-      module_id: 3
-      param_id: 4
-      curve_type: 2
-      min: 0.2
-      max: 0.85
-    - panel_knob_id: 3
-      module_id: 4
-      param_id: 5
-      curve_type: 3
-      min: 0.3
-      max: 0.75
-    - panel_knob_id: 4
-      module_id: 5
-      param_id: 6
-      curve_type: 4
-      min: 0.4
-      max: 0.65
+    - name: MKSet0
+      set:
+        - panel_knob_id: 1
+          module_id: 2
+          param_id: 3
+          curve_type: 1
+          min: 0.1
+          max: 0.95
+          alias_name: MapKnob1
+        - panel_knob_id: 2
+          module_id: 3
+          param_id: 4
+          curve_type: 2
+          min: 0.2
+          max: 0.85
+        - panel_knob_id: 3
+          module_id: 4
+          param_id: 5
+          curve_type: 3
+          min: 0.3
+          max: 0.75
+    - name: MKSet1
+      set:
+        - panel_knob_id: 4
+          module_id: 5
+          param_id: 6
+          curve_type: 4
+          min: 0.4
+          max: 0.65
 )");
 	// clang-format on
 }

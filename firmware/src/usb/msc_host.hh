@@ -4,10 +4,10 @@
 #include "usb_host_helper.hh"
 
 #include "fat_file_io.hh"
+#include "fs/volumes.hh"
 #include "msc_fatfs_ops.hh"
 #include "usbh_core.h"
 #include "usbh_msc.h"
-#include "volumes.hh"
 
 class MSCHost {
 	USBH_HandleTypeDef &usbhost;

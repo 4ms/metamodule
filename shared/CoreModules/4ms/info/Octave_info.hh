@@ -8,16 +8,17 @@ struct OctaveInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Octave"};
     static constexpr std::string_view description{"Octave Shifter"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/Octave-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Octave_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Octave", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.22), "Filter", "", 0, 0, 1, 0.0f},
-		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), "CV", ""},
-		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), "Input", ""},
-		AnalogJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), "Out", ""},
-		LatchingButtonMonoLight{to_mm<72>(28.65), to_mm<72>(166.04), "Sub", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), Center, "Octave", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.22), Center, "Filter", ""},
+		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), Center, "CV", ""},
+		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), Center, "Input", ""},
+		AnalogJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), Center, "Out", ""},
+		LatchingButtonMonoLight{to_mm<72>(28.65), to_mm<72>(166.04), Center, "Sub", ""},
 }};
 
     enum class Elem {
@@ -29,7 +30,7 @@ struct OctaveInfo : ModuleInfoBase {
         SubButton,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobOctave = 0,

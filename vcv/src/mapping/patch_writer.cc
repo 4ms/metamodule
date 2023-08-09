@@ -1,5 +1,5 @@
 #include "patch_writer.hh"
-#include "mapping/central_data.hh"
+#include "mapping/module_directory.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include "patch_convert/ryml/ryml_serial.hh"
 #include <algorithm>
@@ -7,7 +7,7 @@
 PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId)
 	: hubModuleId{hubModuleId} {
 	setModuleList(modules);
-	pd.mapped_knobs.clear();
+	pd.knob_sets.clear();
 	pd.mapped_ins.clear();
 	pd.mapped_outs.clear();
 }
@@ -121,14 +121,25 @@ void PatchFileWriter::setParamList(std::vector<ParamMap> &params) {
 //	}
 //}
 
-void PatchFileWriter::addKnobMaps(unsigned panelKnobId, const std::span<const Mapping> maps) {
+void PatchFileWriter::addKnobMapSet(unsigned knobSetId, std::string_view knobSetName) {
+	if (knobSetId >= pd.knob_sets.size())
+		pd.knob_sets.resize(knobSetId + 1);
+	pd.knob_sets[knobSetId].name = knobSetName;
+}
+
+void PatchFileWriter::addKnobMaps(unsigned panelKnobId, unsigned knobSetId, const std::span<const Mapping> maps) {
+	if (knobSetId >= pd.knob_sets.size())
+		pd.knob_sets.resize(knobSetId + 1);
+
 	for (const auto &m : maps) {
-		if (!idMap.contains(m.paramHandle.moduleId))
+		if (!idMap.contains(m.moduleId)) {
+			printf("Skipping knob mapping to module not supported by MetaModule: %lld\n", m.moduleId);
 			continue;
-		pd.mapped_knobs.push_back({
+		}
+		pd.knob_sets[knobSetId].set.push_back({
 			.panel_knob_id = static_cast<uint16_t>(panelKnobId),
-			.module_id = idMap[m.paramHandle.moduleId],
-			.param_id = static_cast<uint16_t>(m.paramHandle.paramId),
+			.module_id = idMap[m.moduleId],
+			.param_id = static_cast<uint16_t>(m.paramId),
 			.curve_type = 0,
 			.min = m.range_min,
 			.max = m.range_max,

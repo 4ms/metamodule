@@ -26,7 +26,7 @@ public:
 			filterQ = map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
 			// } else if (param_id == Info::KnobCVAmount) {
 			// 	cvAmount = val;
-		} else if (param_id == Info::SwitchMode + Info::NumKnobs) {
+		} else if (param_id == static_cast<unsigned>(Info::SwitchMode) + static_cast<unsigned>(Info::NumKnobs)) {
 			mode = val;
 		}
 	}

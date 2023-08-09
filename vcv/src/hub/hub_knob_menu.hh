@@ -1,5 +1,5 @@
 #pragma once
-#include "mapping/central_data.hh"
+#include "mapping/module_directory.hh"
 
 struct KnobNameMenuLabel : rack::ui::MenuLabel {
 	rack::ParamQuantity *paramQty;

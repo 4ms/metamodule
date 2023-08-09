@@ -3,10 +3,8 @@
 
 #define printf_ printf
 
-#include "patch_player.hh"
+#include "patch_play/patch_player.hh"
 #include <string>
-
-#include "patch/Djembe2.hh"
 
 TEST_CASE("Simple output jack mapping") {
 	std::string patchyml{// clang-format off
@@ -137,8 +135,8 @@ PatchData:
 		// Check for cable2: 1->2 cable
 		// {1,1} -> {2,1},{2,2}  or  {2,2},{2,1}
 		if (cable.out == Jack{1, 1}) {
-			if ((cable.ins[0] == Jack{2, 1} &&cable.ins[1] == Jack{2, 2}) ||
-				(cable.ins[0] == Jack{2, 2} &&cable.ins[1] == Jack{2, 1}))
+			if ((cable.ins[0] == Jack{2, 1} && cable.ins[1] == Jack{2, 2}) ||
+				(cable.ins[0] == Jack{2, 2} && cable.ins[1] == Jack{2, 1}))
 			{
 				if (cable.ins.size() == 2) {
 					found_cable2 = true;
@@ -225,7 +223,6 @@ PatchData:
   mapped_outs: 
   static_knobs: 
   mapped_knobs: 
-  midi_maps:
 	)"};
 	// clang-format on
 

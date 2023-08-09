@@ -8,18 +8,19 @@ struct Switch41Info : ModuleInfoBase {
     static constexpr std::string_view slug{"Switch41"};
     static constexpr std::string_view description{"4 to 1 Switch"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/Switch41-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Switch41_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 8> Elements{{
-		AnalogJackInput4ms{to_mm<72>(31.89), to_mm<72>(167.17), "In 1", ""},
-		AnalogJackInput4ms{to_mm<72>(83.42), to_mm<72>(167.17), "In 2", ""},
-		AnalogJackInput4ms{to_mm<72>(31.89), to_mm<72>(214.56), "In 3", ""},
-		AnalogJackInput4ms{to_mm<72>(83.42), to_mm<72>(214.56), "In 4", ""},
-		AnalogJackInput4ms{to_mm<72>(31.89), to_mm<72>(263.28), "Clock", ""},
-		AnalogJackInput4ms{to_mm<72>(83.42), to_mm<72>(263.28), "CV", ""},
-		AnalogJackInput4ms{to_mm<72>(31.89), to_mm<72>(312.0), "Reset", ""},
-		AnalogJackOutput4ms{to_mm<72>(83.42), to_mm<72>(312.0), "Out", ""},
+		AnalogJackInput4ms{to_mm<72>(31.89), to_mm<72>(167.17), Center, "In 1", ""},
+		AnalogJackInput4ms{to_mm<72>(83.42), to_mm<72>(167.17), Center, "In 2", ""},
+		AnalogJackInput4ms{to_mm<72>(31.89), to_mm<72>(214.56), Center, "In 3", ""},
+		AnalogJackInput4ms{to_mm<72>(83.42), to_mm<72>(214.56), Center, "In 4", ""},
+		AnalogJackInput4ms{to_mm<72>(31.89), to_mm<72>(263.28), Center, "Clock", ""},
+		AnalogJackInput4ms{to_mm<72>(83.42), to_mm<72>(263.28), Center, "CV", ""},
+		AnalogJackInput4ms{to_mm<72>(31.89), to_mm<72>(312.0), Center, "Reset", ""},
+		AnalogJackOutput4ms{to_mm<72>(83.42), to_mm<72>(312.0), Center, "Out", ""},
 }};
 
     enum class Elem {
@@ -33,7 +34,7 @@ struct Switch41Info : ModuleInfoBase {
         Out,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     
     

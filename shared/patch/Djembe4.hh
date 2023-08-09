@@ -6,7 +6,7 @@ PatchData:
 
   Patch clocks into Gate In 1 and 2."
   module_slugs:
-    0: PanelMedium
+    0: HubMedium
     1: PitchShift
     2: Djembe
     3: Djembe
@@ -202,84 +202,86 @@ PatchData:
       param_id: 3
       value: 0.4435
   mapped_knobs:
-    - panel_knob_id: 0
-      module_id: 3
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: Pitch 1
-    - panel_knob_id: 1
-      module_id: 3
-      param_id: 3
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: Strike 1
-    - panel_knob_id: 2
-      module_id: 2
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: 'Pitch-2'
-    - panel_knob_id: 3
-      module_id: 2
-      param_id: 3
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: 'Strike-2'
-    - panel_knob_id: 4
-      module_id: 7
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: Pitch3
-    - panel_knob_id: 5
-      module_id: 8
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: Pitch4
-    - panel_knob_id: 6
-      module_id: 1
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: 'P-shift-1'
-    - panel_knob_id: 7
-      module_id: 1
-      param_id: 2
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 8
-      module_id: 7
-      param_id: 1
-      curve_type: 0
-      min: 0
-      max: 1
-      alias_name: Sharp 3
-    - panel_knob_id: 9
-      module_id: 5
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 10
-      module_id: 5
-      param_id: 1
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 11
-      module_id: 6
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
+    - name: 'Default'
+      set:
+      - panel_knob_id: 0
+        module_id: 3
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: Pitch 1
+      - panel_knob_id: 1
+        module_id: 3
+        param_id: 3
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: Strike 1
+      - panel_knob_id: 2
+        module_id: 2
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: 'Pitch-2'
+      - panel_knob_id: 3
+        module_id: 2
+        param_id: 3
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: 'Strike-2'
+      - panel_knob_id: 4
+        module_id: 7
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: Pitch3
+      - panel_knob_id: 5
+        module_id: 8
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: Pitch4
+      - panel_knob_id: 6
+        module_id: 1
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: 'P-shift-1'
+      - panel_knob_id: 7
+        module_id: 1
+        param_id: 2
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 8
+        module_id: 7
+        param_id: 1
+        curve_type: 0
+        min: 0
+        max: 1
+        alias_name: Sharp 3
+      - panel_knob_id: 9
+        module_id: 5
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 10
+        module_id: 5
+        param_id: 1
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 11
+        module_id: 6
+        param_id: 0
+        curve_type: 0
+        min: 0
+        max: 1
 )";

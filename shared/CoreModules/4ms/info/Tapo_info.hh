@@ -8,40 +8,41 @@ struct TapoInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Tapo"};
     static constexpr std::string_view description{"Tapographic Delay"};
     static constexpr uint32_t width_hp = 18;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/Tapo-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Tapo_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 30> Elements{{
-		Knob9mm{to_mm<72>(34.7), to_mm<72>(97.51), "Level", "", 0, 0, 1, 0.875f},
-		Knob9mm{to_mm<72>(223.88), to_mm<72>(97.51), "Morph", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(35.19), to_mm<72>(155.83), "Time", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(93.97), to_mm<72>(123.98), "Feedback", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(164.73), to_mm<72>(123.98), "Modulation", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(223.88), to_mm<72>(155.83), "Dry Wet", "", 0, 0, 1, 1.0f},
-		AnalogJackInput4ms{to_mm<72>(21.33), to_mm<72>(222.74), "Time Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(64.53), to_mm<72>(214.43), "Feedback Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(107.66), to_mm<72>(197.04), "Modulation Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(150.84), to_mm<72>(197.04), "Dry Wet Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(21.22), to_mm<72>(264.77), "Audio In", ""},
-		GateJackInput4ms{to_mm<72>(64.3), to_mm<72>(256.58), "Repeat Jack", ""},
-		GateJackInput4ms{to_mm<72>(107.51), to_mm<72>(246.5), "Tap", ""},
-		AnalogJackInput4ms{to_mm<72>(150.98), to_mm<72>(246.5), "Velocity", ""},
-		GateJackInput4ms{to_mm<72>(193.9), to_mm<72>(256.58), "Ext Clock", ""},
-		GateJackOutput4ms{to_mm<72>(193.9), to_mm<72>(214.43), "Gate Out", ""},
-		AnalogJackOutput4ms{to_mm<72>(237.33), to_mm<72>(222.97), "Audio Out 1", ""},
-		AnalogJackOutput4ms{to_mm<72>(237.33), to_mm<72>(264.89), "Audio Out 2", ""},
-		RedGreenBlueLight{to_mm<72>(129.3), to_mm<72>(268.61), "Tap LED", ""},
-		Toggle3pos{to_mm<72>(32.13), to_mm<72>(317.005), "ADD OFF INS", ""},
-		Toggle3pos{to_mm<72>(225.85), to_mm<72>(317.005), "RES AMP LPF", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(39.25), to_mm<72>(61.81), "Button 1", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(75.19), to_mm<72>(61.81), "Button 2", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(111.25), to_mm<72>(61.81), "Button 3", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(147.25), to_mm<72>(61.81), "Button 4", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(183.25), to_mm<72>(61.81), "Button 5", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(218.95), to_mm<72>(61.81), "Button 6", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(64.53), to_mm<72>(296.79), "Repeat", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(129.13), to_mm<72>(315.91), "Tap Sensor", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(194.13), to_mm<72>(297.17), "Delete", ""},
+		Knob9mm{to_mm<72>(34.7), to_mm<72>(97.51), Center, "Level", ""},
+		Knob9mm{to_mm<72>(223.88), to_mm<72>(97.51), Center, "Morph", ""},
+		Davies1900hBlackKnob{to_mm<72>(35.19), to_mm<72>(155.83), Center, "Time", ""},
+		Davies1900hBlackKnob{to_mm<72>(93.97), to_mm<72>(123.98), Center, "Feedback", ""},
+		Davies1900hBlackKnob{to_mm<72>(164.73), to_mm<72>(123.98), Center, "Modulation", ""},
+		Davies1900hBlackKnob{to_mm<72>(223.88), to_mm<72>(155.83), Center, "Dry Wet", ""},
+		AnalogJackInput4ms{to_mm<72>(21.33), to_mm<72>(222.74), Center, "Time Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(64.53), to_mm<72>(214.43), Center, "Feedback Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(107.66), to_mm<72>(197.04), Center, "Modulation Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(150.84), to_mm<72>(197.04), Center, "Dry Wet Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(21.22), to_mm<72>(264.77), Center, "Audio In", ""},
+		GateJackInput4ms{to_mm<72>(64.3), to_mm<72>(256.58), Center, "Repeat Jack", ""},
+		GateJackInput4ms{to_mm<72>(107.51), to_mm<72>(246.5), Center, "Tap", ""},
+		AnalogJackInput4ms{to_mm<72>(150.98), to_mm<72>(246.5), Center, "Velocity", ""},
+		GateJackInput4ms{to_mm<72>(193.9), to_mm<72>(256.58), Center, "Ext Clock", ""},
+		GateJackOutput4ms{to_mm<72>(193.9), to_mm<72>(214.43), Center, "Gate Out", ""},
+		AnalogJackOutput4ms{to_mm<72>(237.33), to_mm<72>(222.97), Center, "Audio Out 1", ""},
+		AnalogJackOutput4ms{to_mm<72>(237.33), to_mm<72>(264.89), Center, "Audio Out 2", ""},
+		RedGreenBlueLight{to_mm<72>(129.3), to_mm<72>(268.61), Center, "Tap LED", ""},
+		Toggle3pos{to_mm<72>(32.13), to_mm<72>(317.005), Center, "ADD OFF INS", ""},
+		Toggle3pos{to_mm<72>(225.85), to_mm<72>(317.005), Center, "RES AMP LPF", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(39.25), to_mm<72>(61.81), Center, "Button 1", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(75.19), to_mm<72>(61.81), Center, "Button 2", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(111.25), to_mm<72>(61.81), Center, "Button 3", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(147.25), to_mm<72>(61.81), Center, "Button 4", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(183.25), to_mm<72>(61.81), Center, "Button 5", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(218.95), to_mm<72>(61.81), Center, "Button 6", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(64.53), to_mm<72>(296.79), Center, "Repeat", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(129.13), to_mm<72>(315.91), Center, "Tap Sensor", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(194.13), to_mm<72>(297.17), Center, "Delete", ""},
 }};
 
     enum class Elem {
@@ -77,7 +78,7 @@ struct TapoInfo : ModuleInfoBase {
         DeleteButton,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobLevel = 0,

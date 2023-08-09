@@ -8,15 +8,16 @@ struct PanInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Pan"};
     static constexpr std::string_view description{"Panner"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/Pan-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Pan_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 5> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(47.42), "Pan", "", 0, 0, 1, 0.5f},
-		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(166.45), "CV", ""},
-		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(214.54), "In", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(263.64), "Out 1", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(311.23), "Out 2", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(47.42), Center, "Pan", ""},
+		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(166.45), Center, "CV", ""},
+		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(214.54), Center, "In", ""},
+		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(263.64), Center, "Out 1", ""},
+		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(311.23), Center, "Out 2", ""},
 }};
 
     enum class Elem {
@@ -27,7 +28,7 @@ struct PanInfo : ModuleInfoBase {
         Out2Out,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobPan = 0,

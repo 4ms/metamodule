@@ -8,30 +8,31 @@ struct InfOscInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"InfOsc"};
     static constexpr std::string_view description{"Infinite Oscillator"};
     static constexpr uint32_t width_hp = 15;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/InfOsc-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/InfOsc_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 20> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(46.55), "Track", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(46.55), "Abs", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(46.55), "Range", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(105.5), "FM", "", 0, 0, 1, 0.0f},
-		DaviesLargeKnob{to_mm<72>(108.13), to_mm<72>(117.06), "Pitch", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(105.5), "Phase", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(43.3), to_mm<72>(164.67), "Modshape", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(172.52), to_mm<72>(164.62), "Wave", "", 0, 0, 1, 0.0f},
-		AnalogJackInput4ms{to_mm<72>(35.96), to_mm<72>(214.54), "PM CV", ""},
-		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(214.54), "Scan CV", ""},
-		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(214.54), "Add CV", ""},
-		AnalogJackInput4ms{to_mm<72>(179.96), to_mm<72>(214.54), "Reset CV", ""},
-		AnalogJackInput4ms{to_mm<72>(35.96), to_mm<72>(263.64), "Mod CV", ""},
-		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(263.64), "Abs CV", ""},
-		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(263.64), "Lin CV", ""},
-		AnalogJackInput4ms{to_mm<72>(179.96), to_mm<72>(263.64), "Phase CV", ""},
-		AnalogJackInput4ms{to_mm<72>(35.96), to_mm<72>(311.23), "Pitch CV", ""},
-		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(311.23), "Range CV", ""},
-		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(311.23), "FM CV", ""},
-		AnalogJackOutput4ms{to_mm<72>(179.96), to_mm<72>(311.23), "Out", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(46.55), Center, "Track", ""},
+		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(46.55), Center, "Abs", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(46.55), Center, "Range", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(105.5), Center, "FM", ""},
+		DaviesLargeKnob{to_mm<72>(108.13), to_mm<72>(117.06), Center, "Pitch", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(105.5), Center, "Phase", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.3), to_mm<72>(164.67), Center, "Modshape", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.52), to_mm<72>(164.62), Center, "Wave", ""},
+		AnalogJackInput4ms{to_mm<72>(35.96), to_mm<72>(214.54), Center, "PM CV", ""},
+		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(214.54), Center, "Scan CV", ""},
+		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(214.54), Center, "Add CV", ""},
+		AnalogJackInput4ms{to_mm<72>(179.96), to_mm<72>(214.54), Center, "Reset CV", ""},
+		AnalogJackInput4ms{to_mm<72>(35.96), to_mm<72>(263.64), Center, "Mod CV", ""},
+		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(263.64), Center, "Abs CV", ""},
+		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(263.64), Center, "Lin CV", ""},
+		AnalogJackInput4ms{to_mm<72>(179.96), to_mm<72>(263.64), Center, "Phase CV", ""},
+		AnalogJackInput4ms{to_mm<72>(35.96), to_mm<72>(311.23), Center, "Pitch CV", ""},
+		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(311.23), Center, "Range CV", ""},
+		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(311.23), Center, "FM CV", ""},
+		AnalogJackOutput4ms{to_mm<72>(179.96), to_mm<72>(311.23), Center, "Out", ""},
 }};
 
     enum class Elem {
@@ -57,7 +58,7 @@ struct InfOscInfo : ModuleInfoBase {
         Out,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobTrack = 0,

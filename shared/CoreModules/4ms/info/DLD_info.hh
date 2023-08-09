@@ -8,49 +8,50 @@ struct DLDInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"DLD"};
     static constexpr std::string_view description{"Dual Looping Delay"};
     static constexpr uint32_t width_hp = 20;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/DLD-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/DLD_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 39> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(34.32), to_mm<72>(53.53), "Time A", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(254.17), to_mm<72>(53.39), "Time B", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(34.17), to_mm<72>(119.05), "Feedback A", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(254.59), to_mm<72>(119.05), "Feedback B", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(43.46), to_mm<72>(184.04), "Delay Feed A", "", 0, 0, 1, 1.0f},
-		Davies1900hBlackKnob{to_mm<72>(111.56), to_mm<72>(178.84), "Mix A", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(177.02), to_mm<72>(178.91), "Mix B", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(245.19), to_mm<72>(183.78), "Delay Feed B", "", 0, 0, 1, 1.0f},
-		AnalogJackInput4ms{to_mm<72>(167.59), to_mm<72>(42.51), "Ping Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(28.08), to_mm<72>(242.1), "In A", ""},
-		AnalogJackInput4ms{to_mm<72>(71.16), to_mm<72>(242.1), "Return A", ""},
-		GateJackInput4ms{to_mm<72>(122.51), to_mm<72>(242.1), "Reverse A Jack", ""},
-		GateJackInput4ms{to_mm<72>(165.98), to_mm<72>(242.1), "Reverse B Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(217.15), to_mm<72>(242.1), "Return B", ""},
-		AnalogJackInput4ms{to_mm<72>(260.18), to_mm<72>(242.1), "In B", ""},
-		GateJackInput4ms{to_mm<72>(122.51), to_mm<72>(281.49), "Hold A Jack", ""},
-		GateJackInput4ms{to_mm<72>(165.98), to_mm<72>(281.49), "Hold B Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(25.58), to_mm<72>(322.03), "Time A Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(72.88), to_mm<72>(322.03), "Feedback A Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(120.17), to_mm<72>(322.03), "Delay Feed A Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(167.84), to_mm<72>(322.03), "Delay Feed B Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(215.27), to_mm<72>(322.03), "Feedback B Jack", ""},
-		AnalogJackInput4ms{to_mm<72>(262.73), to_mm<72>(322.03), "Time B Jack", ""},
-		AnalogJackOutput4ms{to_mm<72>(108.25), to_mm<72>(81.44), "Loop A", ""},
-		AnalogJackOutput4ms{to_mm<72>(144.16), to_mm<72>(93.48), "Clock Out", ""},
-		AnalogJackOutput4ms{to_mm<72>(180.38), to_mm<72>(81.44), "Loop B", ""},
-		AnalogJackOutput4ms{to_mm<72>(28.08), to_mm<72>(281.49), "Out A", ""},
-		AnalogJackOutput4ms{to_mm<72>(71.16), to_mm<72>(281.49), "Send A", ""},
-		AnalogJackOutput4ms{to_mm<72>(217.15), to_mm<72>(281.49), "Send B", ""},
-		AnalogJackOutput4ms{to_mm<72>(260.18), to_mm<72>(281.49), "Out B", ""},
-		RedGreenBlueLight{to_mm<72>(66.03), to_mm<72>(34.94), "Time A LED", ""},
-		RedGreenBlueLight{to_mm<72>(222.2), to_mm<72>(34.94), "Time B LED", ""},
-		Toggle3pos{to_mm<72>(84.11), to_mm<72>(51.455), "+16 | 1/8th A", ""},
-		Toggle3pos{to_mm<72>(205.35), to_mm<72>(51.455), "+16 | 1/8th B", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(124.03), to_mm<72>(42.51), "Ping Button", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(81.85), to_mm<72>(123.11), "Reverse A", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(118.44), to_mm<72>(135.74), "Hold A", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(169.66), to_mm<72>(135.74), "Hold B", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(206.08), to_mm<72>(123.11), "Reverse B", ""},
+		Davies1900hBlackKnob{to_mm<72>(34.32), to_mm<72>(53.53), Center, "Time A", ""},
+		Davies1900hBlackKnob{to_mm<72>(254.17), to_mm<72>(53.39), Center, "Time B", ""},
+		Davies1900hBlackKnob{to_mm<72>(34.17), to_mm<72>(119.05), Center, "Feedback A", ""},
+		Davies1900hBlackKnob{to_mm<72>(254.59), to_mm<72>(119.05), Center, "Feedback B", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.46), to_mm<72>(184.04), Center, "Delay Feed A", ""},
+		Davies1900hBlackKnob{to_mm<72>(111.56), to_mm<72>(178.84), Center, "Mix A", ""},
+		Davies1900hBlackKnob{to_mm<72>(177.02), to_mm<72>(178.91), Center, "Mix B", ""},
+		Davies1900hBlackKnob{to_mm<72>(245.19), to_mm<72>(183.78), Center, "Delay Feed B", ""},
+		AnalogJackInput4ms{to_mm<72>(167.59), to_mm<72>(42.51), Center, "Ping Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(28.08), to_mm<72>(242.1), Center, "In A", ""},
+		AnalogJackInput4ms{to_mm<72>(71.16), to_mm<72>(242.1), Center, "Return A", ""},
+		GateJackInput4ms{to_mm<72>(122.51), to_mm<72>(242.1), Center, "Reverse A Jack", ""},
+		GateJackInput4ms{to_mm<72>(165.98), to_mm<72>(242.1), Center, "Reverse B Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(217.15), to_mm<72>(242.1), Center, "Return B", ""},
+		AnalogJackInput4ms{to_mm<72>(260.18), to_mm<72>(242.1), Center, "In B", ""},
+		GateJackInput4ms{to_mm<72>(122.51), to_mm<72>(281.49), Center, "Hold A Jack", ""},
+		GateJackInput4ms{to_mm<72>(165.98), to_mm<72>(281.49), Center, "Hold B Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(25.58), to_mm<72>(322.03), Center, "Time A Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(72.88), to_mm<72>(322.03), Center, "Feedback A Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(120.17), to_mm<72>(322.03), Center, "Delay Feed A Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(167.84), to_mm<72>(322.03), Center, "Delay Feed B Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(215.27), to_mm<72>(322.03), Center, "Feedback B Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(262.73), to_mm<72>(322.03), Center, "Time B Jack", ""},
+		AnalogJackOutput4ms{to_mm<72>(108.25), to_mm<72>(81.44), Center, "Loop A", ""},
+		AnalogJackOutput4ms{to_mm<72>(144.16), to_mm<72>(93.48), Center, "Clock Out", ""},
+		AnalogJackOutput4ms{to_mm<72>(180.38), to_mm<72>(81.44), Center, "Loop B", ""},
+		AnalogJackOutput4ms{to_mm<72>(28.08), to_mm<72>(281.49), Center, "Out A", ""},
+		AnalogJackOutput4ms{to_mm<72>(71.16), to_mm<72>(281.49), Center, "Send A", ""},
+		AnalogJackOutput4ms{to_mm<72>(217.15), to_mm<72>(281.49), Center, "Send B", ""},
+		AnalogJackOutput4ms{to_mm<72>(260.18), to_mm<72>(281.49), Center, "Out B", ""},
+		RedGreenBlueLight{to_mm<72>(66.03), to_mm<72>(34.94), Center, "Time A LED", ""},
+		RedGreenBlueLight{to_mm<72>(222.2), to_mm<72>(34.94), Center, "Time B LED", ""},
+		Toggle3pos{to_mm<72>(84.11), to_mm<72>(51.455), Center, "+16 | 1/8th A", ""},
+		Toggle3pos{to_mm<72>(205.35), to_mm<72>(51.455), Center, "+16 | 1/8th B", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(124.03), to_mm<72>(42.51), Center, "Ping Button", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(81.85), to_mm<72>(123.11), Center, "Reverse A", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(118.44), to_mm<72>(135.74), Center, "Hold A", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(169.66), to_mm<72>(135.74), Center, "Hold B", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(206.08), to_mm<72>(123.11), Center, "Reverse B", ""},
 }};
 
     enum class Elem {
@@ -95,7 +96,7 @@ struct DLDInfo : ModuleInfoBase {
         ReverseBButton,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobTime_A = 0,

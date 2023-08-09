@@ -8,31 +8,32 @@ struct ComplexEGInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"ComplexEG"};
     static constexpr std::string_view description{"Complex Envelope Generator"};
     static constexpr uint32_t width_hp = 15;
-    static constexpr bool uses_center_coords = true;
-    static constexpr std::string_view svg_filename{"res/modules/ComplexEG-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/ComplexEG_artwork.svg"};
+
+    using enum Coords;
 
     static constexpr std::array<Element, 21> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(46.2), "Attack", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(163.28), "Hold", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(45.53), "Decay", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(172.52), to_mm<72>(163.23), "Sustain", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(45.53), "Release", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(104.51), "A Curve", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(104.51), "D Curve", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(104.51), "R Curve", "", 0, 0, 1, 0.0f},
-		AnalogJackInput4ms{to_mm<72>(36.45), to_mm<72>(214.13), "Input", ""},
-		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(214.13), "Attack CV", ""},
-		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(265.71), "Hold CV", ""},
-		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(214.13), "Decay CV", ""},
-		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(265.71), "Sustain CV", ""},
-		AnalogJackInput4ms{to_mm<72>(179.96), to_mm<72>(214.13), "Release CV", ""},
-		AnalogJackOutput4ms{to_mm<72>(36.45), to_mm<72>(265.71), "Attack Out", ""},
-		AnalogJackOutput4ms{to_mm<72>(36.45), to_mm<72>(309.84), "Hold Out", ""},
-		AnalogJackOutput4ms{to_mm<72>(83.96), to_mm<72>(309.84), "Decay Out", ""},
-		AnalogJackOutput4ms{to_mm<72>(131.96), to_mm<72>(309.84), "Sustain Out", ""},
-		AnalogJackOutput4ms{to_mm<72>(179.96), to_mm<72>(265.71), "Release Out", ""},
-		AnalogJackOutput4ms{to_mm<72>(179.96), to_mm<72>(309.84), "Out", ""},
-		LatchingButtonMonoLight{to_mm<72>(108.12), to_mm<72>(159.77), "Loop", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(46.2), Center, "Attack", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(163.28), Center, "Hold", ""},
+		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(45.53), Center, "Decay", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.52), to_mm<72>(163.23), Center, "Sustain", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(45.53), Center, "Release", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(104.51), Center, "A Curve", ""},
+		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(104.51), Center, "D Curve", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(104.51), Center, "R Curve", ""},
+		AnalogJackInput4ms{to_mm<72>(36.45), to_mm<72>(214.13), Center, "Input", ""},
+		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(214.13), Center, "Attack CV", ""},
+		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(265.71), Center, "Hold CV", ""},
+		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(214.13), Center, "Decay CV", ""},
+		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(265.71), Center, "Sustain CV", ""},
+		AnalogJackInput4ms{to_mm<72>(179.96), to_mm<72>(214.13), Center, "Release CV", ""},
+		AnalogJackOutput4ms{to_mm<72>(36.45), to_mm<72>(265.71), Center, "Attack Out", ""},
+		AnalogJackOutput4ms{to_mm<72>(36.45), to_mm<72>(309.84), Center, "Hold Out", ""},
+		AnalogJackOutput4ms{to_mm<72>(83.96), to_mm<72>(309.84), Center, "Decay Out", ""},
+		AnalogJackOutput4ms{to_mm<72>(131.96), to_mm<72>(309.84), Center, "Sustain Out", ""},
+		AnalogJackOutput4ms{to_mm<72>(179.96), to_mm<72>(265.71), Center, "Release Out", ""},
+		AnalogJackOutput4ms{to_mm<72>(179.96), to_mm<72>(309.84), Center, "Out", ""},
+		LatchingButtonMonoLight{to_mm<72>(108.12), to_mm<72>(159.77), Center, "Loop", ""},
 }};
 
     enum class Elem {
@@ -59,7 +60,7 @@ struct ComplexEGInfo : ModuleInfoBase {
         LoopButton,
     };
 
-    // Legacy naming (safe to remove once CoreModule is converted
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
         KnobAttack = 0,

@@ -128,8 +128,17 @@ cable to the TX pin of the debug header (next to the SWD header). The TX pin is
 labeled (upper-right pin). The bottom four pins are all GND. Settings are
 115200, 8N1.
 
+You have several choices for how to load the firmware applcation. Each one is covered 
+in a section below:
 
-#### Load over SWD
+1) Load in RAM over SWD/JTAG
+
+2) Load into NOR Flash over DFU-USB
+
+3) Boot from SD Card
+
+
+#### Load in RAM over SWD/JTAG
 
 This is the preferred method for active firmware development. It requires a JTAG programmer.
 
@@ -165,6 +174,8 @@ If you have a JLink connected, you can program with this;
 ```
 make jprog
 ```
+
+This should 15-30 seconds.
 
 For other methods, just load the .elf file and then start executing from 0xC0200040.
 
@@ -220,23 +231,60 @@ ignore this.
 Or use the command line (you must have [dfu-util](https://dfu-util.sourceforge.net/) installed):
 
 ```
-dfu-util -a 0 -s 0x70080000 -D build/mp1corea7/medium/main.uimg
+make flash-dfu
 ```
 
-This command loads the main.uimg file to the default address (0x70080000).
 
+This command loads the main.uimg file to the default address (0x70080000).
+It calls `dfu-util -a 0 -s 0x70080000 -D build/mp1corea7/medium/main.uimg`
+
+This will take between 60 and 120 seconds.
 When it's done, unplug the USB cable, power-cycle, and the new code will start up.
 
 
-Power cycle the module with the jumper installed on the top-left and the pin to the right of that,
-on the Control Expander header. This forces alt firmware mode (which is DFU-USB mode).
-Connect a USB cable from a computer to the module, and open a DFU loader. (TODO)
-
 #### Boot from SD Card
 
-Use `dd` to copy main.uimg to the third partition of an SD Card that contains mp1-boot on the first two sectors. 
-Then, change the BOOT DIP switches to be both to the right (see diagram on PCB).
-(more instructions TODO)
+You need a dedicated SD Card, all contents will be erased. A 16GB card is common and works fine,
+but smaller or larger should work too.
+
+You first need to format, partition, and install the bootloader on the card. This only needs
+to happen once. 
+
+```
+make format-sd
+```
+
+This will ask you for the device path (/dev/disk4, for example). Make sure you get it right, because the
+script will run `mkfs` or `diskutil eraseDisk`.
+
+After running this, you will need to eject and re-insert the SD Card because the volumes have changed.
+
+Then do:
+
+```
+make flash-bootloader-sd
+```
+
+This will build the bootloader (mp1-boot) and use `dd` to load it onto the first two partitions of the SD Card.
+You will again be asked for the drive name.
+
+You now have a bootable SD Card. You shouldn't need to repeat the above steps unless you get a new SD Card.
+
+To flash the application, do this:
+
+```
+make flash-app-sd
+```
+
+This will build the application as normal, and then use `dd` to copy it to the third partition.
+
+Eject the card and insert it into the MetaModule.
+
+To tell the MetaModule to boot using the SD Card, you need to change the BOOT DIP switches.
+These are located on the back of the PCB, under the screen near the rotary encoder.
+They are labeled "BOOT0_2". There are two switches. Look at the diagram printed on the PCB.
+To boot with the SD, both switches should be pushed to the left.
+If you want to back to booting from Flash (internal Flash chip), then flip the bottom switch to the right.
 
 ### Converting assets
 
