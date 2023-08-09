@@ -15,9 +15,6 @@ jobs:
           - { os: windows, shell: msys2, rack-os-name: win-x64 } 
           - { os: ubuntu,  shell: bash, rack-os-name: lin-x64  }
           # - { os: macos,   shell: bash  }
-        exclude:
-          - os: { os: windows, shell: msys2 }
-            compiler: {cpp: clang++, c: clang}
     runs-on: '${{ matrix.os.os }}-latest'
     defaults:
       run:
