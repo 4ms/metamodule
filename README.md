@@ -293,3 +293,4 @@ If you want to back to booting from Flash (internal Flash chip), then flip the b
 To create the artwork files from the SVGs, you must have Inkscape installed an on your PATH
 
 ...To Be Continued...
+

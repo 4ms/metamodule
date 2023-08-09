@@ -1,4 +1,4 @@
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 // #include "info/EnOsc_info.hh"
 #include "enosc/altparam_EnOsc_info.hh"

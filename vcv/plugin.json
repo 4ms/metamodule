@@ -13,6 +13,12 @@
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [
+    {
+      "slug": "Mixer",
+      "name": "Mixer",
+      "description": "Mixer",
+      "tags": []
+    },
 	{
       "slug": "HubMedium",
       "name": "MetaModule",
@@ -113,12 +119,6 @@
       "slug": "PEG",
       "name": "PEG",
       "description": "PEG",
-      "tags": []
-    },
-    {
-      "slug": "Mixer4",
-      "name": "Mixer",
-      "description": "Mixer",
       "tags": []
     },
     {
