@@ -48,7 +48,7 @@ jobs:
         with:
           msystem: mingw64
           install: >-
-            make
+            git wget make tar unzip zip mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake autoconf automake libtool mingw-w64-x86_64-jq python zstd mingw-w64-x86_64-pkgconf
 
       - name: Build and run tests
         run: |
