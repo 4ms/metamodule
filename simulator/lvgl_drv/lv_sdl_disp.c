@@ -33,7 +33,7 @@ void lv_port_disp_init(int width, int height, int zoom) {
 	assert(LV_COLOR_DEPTH == 16 || LV_COLOR_DEPTH == 32);
 	DISPLAY_WIDTH = width;
 	DISPLAY_HEIGHT = height;
-	SDL_InitSubSystem(SDL_INIT_VIDEO);
+	SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 
 	window = SDL_CreateWindow(WINDOW_NAME,
 							  SDL_WINDOWPOS_UNDEFINED,

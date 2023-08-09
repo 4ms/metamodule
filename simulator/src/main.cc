@@ -1,6 +1,7 @@
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
 #include "lvgl.h"
+#include "sdl_audio.hh"
 #include "ui.hh"
 #include <iostream>
 
@@ -23,6 +24,7 @@ int main(int argc, char *argv[]) {
 
 	lv_init();
 	lv_port_disp_init(320, 240, zoom);
+	SDLAudio audio;
 
 	MetaModule::PatchPlayer patch_player;
 	MetaModule::PatchStorageProxy patch_storage{patch_path};
