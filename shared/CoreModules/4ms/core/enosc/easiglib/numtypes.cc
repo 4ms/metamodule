@@ -42,7 +42,7 @@ static_assert(f(0.345_u0_32) == 0.345_f, "");
 static_assert(1.0_u0_32 == 0.0_u0_32, "");
 static_assert(0.625_u0_32 + 0.125_u0_32 == 0.75_u0_32, "");
 static_assert(f(-0.5_s1_31) == -0.5_f, "");
-static_assert(f(-0.5_s1_31 + 0.75_s1_31) == 0.25_f, "");
+static_assert(f(-0.5_s1_31+0.75_s1_31) == 0.25_f, "");
 
 static_assert(1024.0_u10_22 == 0.0_u10_22, "");
 static_assert(742.625_u10_22 == 742.625_u10_22, "");
@@ -120,16 +120,18 @@ static_assert((0.75_u0_16).add_sat(0.5_u0_16) == (1.0_u0_16).pred(), "");
 static_assert((0.75_u0_16).sub_sat(0.5_u0_16) == 0.25_u0_16, "");
 
 static_assert((0.25_s1_31).add_sat(0.5_s1_31) == 0.75_s1_31, "");
-// TODO
-// static_assert((0.75_s1_31).add_sat(0.5_s1_31) == (1.0_s1_31).pred(), "");
+#ifndef __MINGW32__
+static_assert((0.75_s1_31).add_sat(0.5_s1_31) == (1.0_s1_31).pred(), "");
+#endif
 static_assert((-0.75_s1_31).add_sat(-0.5_s1_31) == 1.0_s1_31, "");
 static_assert((-0.75_s1_31).add_sat(-0.5_s1_31) == 1.0_s1_31, "");
 
 static_assert((0.25_s1_31).sub_sat(0.5_s1_31) == -0.25_s1_31, "");
 static_assert((0.75_s1_31).sub_sat(0.5_s1_31) == 0.25_s1_31, "");
 static_assert((-0.75_s1_31).sub_sat(-0.5_s1_31) == -0.25_s1_31, "");
-// TODO
-// static_assert((0.75_s1_31).sub_sat(-0.5_s1_31) == (1.0_s1_31).pred(), "");
+#ifndef __MINGW32__
+static_assert((0.75_s1_31).sub_sat(-0.5_s1_31) == (1.0_s1_31).pred(), "");
+#endif 
 
 static_assert((0.25_u0_32).add_sat(0.5_u0_32) == 0.75_u0_32, "");
 static_assert((0.75_u0_32).add_sat(0.5_u0_32) == (1.0_u0_32).pred(), "");
@@ -179,44 +181,44 @@ static_assert(1.0_u0_16 * 0.5_u0_16 == 0.0_u0_32);
 #if defined(__arm__) && defined(TEST)
 
 struct Numtypes_Tests {
-	Numtypes_Tests() {
-		assert_param((0.9_u10_22).clip() == 0.9_u10_22);
-		assert_param((1.2_u10_22).clip() == (1.0_u10_22).pred());
-		assert_param((-0.9_s10_22).clip() == -0.9_s10_22);
-		assert_param((-1.2_s10_22).clip() == -1.0_s10_22);
-		assert_param(((0.25_s10_22).to_sat<1, 31>() == 0.25_s1_31));
-		assert_param(((-0.25_s10_22).to_sat<1, 31>() == -0.25_s1_31));
-		assert_param(((0.75_s10_22).to_sat<1, 31>() == 0.75_s1_31));
-		assert_param(((-0.75_s10_22).to_sat<1, 31>() == -0.75_s1_31));
-		// TODO
-		// assert_param(((1.25_s10_22).to_sat<1, 31>() == max_val<s1_31>));
-		// TODO
-		// assert_param(((-1.25_s10_22).to_sat<1, 31>() == max_val<s1_31>));
-		assert_param(((0.25_u10_22).to_sat<0, 32>() == 0.25_u0_32));
-		assert_param(((0.75_u10_22).to_sat<0, 32>() == 0.75_u0_32));
-		// TODO
-		// assert_param(((1.25_u10_22).to_sat<0, 32>() == max_val<u0_32>));
-		assert_param(((0.25_s1_15).add_sat(0.5_s1_15) == 0.75_s1_15));
-		assert_param(((0.75_s1_15).add_sat(0.5_s1_15) == (1.0_s1_15).pred()));
-		assert_param(((-0.75_s1_15).add_sat(-0.5_s1_15) == -1.0_s1_15));
-		assert_param(((-0.75_s1_15).add_sat(-0.5_s1_15) == -1.0_s1_15));
-		assert_param(((0.25_s1_15).sub_sat(0.5_s1_15) == -0.25_s1_15));
-		assert_param(((0.75_s1_15).sub_sat(0.5_s1_15) == 0.25_s1_15));
-		assert_param(((-0.75_s1_15).sub_sat(-0.5_s1_15) == -0.25_s1_15));
-		assert_param(((0.75_s1_15).sub_sat(-0.5_s1_15) == (1.0_s1_15).pred()));
-		assert_param(((0.25_u0_16).add_sat(0.5_u0_16) == 0.75_u0_16));
-		assert_param(((0.75_u0_16).add_sat(0.5_u0_16) == (1.0_u0_16).pred()));
-		assert_param(((0.75_u0_16).sub_sat(0.5_u0_16) == 0.25_u0_16));
-		assert_param(((0.25_s1_31).add_sat(0.5_s1_31) == 0.75_s1_31));
-		assert_param(((0.75_s1_31).add_sat(0.5_s1_31) == (1.0_s1_31).pred()));
-		assert_param(((-0.75_s1_31).add_sat(-0.5_s1_31) == 1.0_s1_31));
-		assert_param(((-0.75_s1_31).add_sat(-0.5_s1_31) == 1.0_s1_31));
-		assert_param(((0.25_s1_31).sub_sat(0.5_s1_31) == -0.25_s1_31));
-		assert_param(((0.75_s1_31).sub_sat(0.5_s1_31) == 0.25_s1_31));
-		assert_param(((-0.75_s1_31).sub_sat(-0.5_s1_31) == -0.25_s1_31));
-		assert_param(((0.75_s1_31).sub_sat(-0.5_s1_31) == (1.0_s1_31).pred()));
-		assert_param(((25_f).sqrt() == 5_f));
-	}
+  Numtypes_Tests() {
+    assert_param((0.9_u10_22).clip() == 0.9_u10_22);
+    assert_param((1.2_u10_22).clip() == (1.0_u10_22).pred());
+    assert_param((-0.9_s10_22).clip() == -0.9_s10_22);
+    assert_param((-1.2_s10_22).clip() == -1.0_s10_22);
+    assert_param(((0.25_s10_22).to_sat<1, 31>() == 0.25_s1_31));
+    assert_param(((-0.25_s10_22).to_sat<1, 31>() == -0.25_s1_31));
+    assert_param(((0.75_s10_22).to_sat<1, 31>() == 0.75_s1_31));
+    assert_param(((-0.75_s10_22).to_sat<1, 31>() == -0.75_s1_31));
+    // TODO
+    // assert_param(((1.25_s10_22).to_sat<1, 31>() == max_val<s1_31>));
+    // TODO
+    // assert_param(((-1.25_s10_22).to_sat<1, 31>() == max_val<s1_31>));
+    assert_param(((0.25_u10_22).to_sat<0, 32>() == 0.25_u0_32));
+    assert_param(((0.75_u10_22).to_sat<0, 32>() == 0.75_u0_32));
+    // TODO
+    // assert_param(((1.25_u10_22).to_sat<0, 32>() == max_val<u0_32>));
+    assert_param(((0.25_s1_15).add_sat(0.5_s1_15) == 0.75_s1_15));
+    assert_param(((0.75_s1_15).add_sat(0.5_s1_15) == (1.0_s1_15).pred()));
+    assert_param(((-0.75_s1_15).add_sat(-0.5_s1_15) == -1.0_s1_15));
+    assert_param(((-0.75_s1_15).add_sat(-0.5_s1_15) == -1.0_s1_15));
+    assert_param(((0.25_s1_15).sub_sat(0.5_s1_15) == -0.25_s1_15));
+    assert_param(((0.75_s1_15).sub_sat(0.5_s1_15) == 0.25_s1_15));
+    assert_param(((-0.75_s1_15).sub_sat(-0.5_s1_15) == -0.25_s1_15));
+    assert_param(((0.75_s1_15).sub_sat(-0.5_s1_15) == (1.0_s1_15).pred()));
+    assert_param(((0.25_u0_16).add_sat(0.5_u0_16) == 0.75_u0_16));
+    assert_param(((0.75_u0_16).add_sat(0.5_u0_16) == (1.0_u0_16).pred()));
+    assert_param(((0.75_u0_16).sub_sat(0.5_u0_16) == 0.25_u0_16));
+    assert_param(((0.25_s1_31).add_sat(0.5_s1_31) == 0.75_s1_31));
+    assert_param(((0.75_s1_31).add_sat(0.5_s1_31) == (1.0_s1_31).pred()));
+    assert_param(((-0.75_s1_31).add_sat(-0.5_s1_31) == 1.0_s1_31));
+    assert_param(((-0.75_s1_31).add_sat(-0.5_s1_31) == 1.0_s1_31));
+    assert_param(((0.25_s1_31).sub_sat(0.5_s1_31) == -0.25_s1_31));
+    assert_param(((0.75_s1_31).sub_sat(0.5_s1_31) == 0.25_s1_31));
+    assert_param(((-0.75_s1_31).sub_sat(-0.5_s1_31) == -0.25_s1_31));
+    assert_param(((0.75_s1_31).sub_sat(-0.5_s1_31) == (1.0_s1_31).pred()));
+    assert_param(((25_f).sqrt() == 5_f));
+  }
 } numtypes_tests;
 
 #endif
