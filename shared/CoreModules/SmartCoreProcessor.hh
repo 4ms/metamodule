@@ -2,7 +2,6 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/element_state_conversion.hh"
-#include "CoreModules/elements/param_scales.hh"
 #include <array>
 #include <optional>
 
@@ -86,16 +85,17 @@ protected:
 	}
 
 private:
-	float getParamRaw(Elem el, std::size_t local_index = 0) {
+	float getParamRaw(Elem el, size_t local_index = 0) {
 		auto idx = index(el);
 		auto param_id = idx.param_idx + local_index;
-		return paramValues.at(param_id);
+		return (param_id < paramValues.size()) ? paramValues[param_id] : 0.f;
 	}
 
 	void setLEDRaw(Elem el, float val, size_t color_idx = 0) {
 		auto idx = index(el);
 		auto led_idx = idx.light_idx + color_idx;
-		ledValues.at(led_idx) = val;
+		if (led_idx < ledValues.size())
+			ledValues[led_idx] = val;
 	}
 
 protected:
@@ -116,14 +116,6 @@ protected:
 		}
 	}
 
-	void set_and_scale_param(int param_id, float val) override {
-		if (param_id < (int)paramValues.size()) {
-			val *= param_scales[param_id].range;
-			val += param_scales[param_id].offset;
-			paramValues[param_id] = val;
-		}
-	}
-
 	float get_led_brightness(int led_id) const override {
 		if (led_id < (int)ledValues.size()) {
 			return ledValues[led_id];
@@ -135,7 +127,6 @@ protected:
 private:
 	constexpr static auto counts = ElementCount::count<INFO>();
 	constexpr static auto indices = ElementCount::get_indices<INFO>();
-	constexpr static auto param_scales = PotElementHelper::param_scales<INFO>();
 
 	constexpr static auto index(Elem el) {
 		auto element_idx = element_index(el);
