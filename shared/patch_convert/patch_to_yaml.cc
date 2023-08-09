@@ -73,5 +73,5 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 
 	data["mapped_knobs"] << pd.knob_sets;
 
-	return ryml::emitrs<std::string>(tree);
+	return ryml::emitrs_yaml<std::string>(tree);
 }

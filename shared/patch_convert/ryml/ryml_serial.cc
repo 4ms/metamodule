@@ -29,7 +29,7 @@ void write(ryml::NodeRef *n, MappedKnobSet const &knob_set) {
 	n->append_child() << ryml::key("set") << knob_set.set;
 }
 
-bool read(ryml::NodeRef const &n, Jack *jack) {
+bool read(ryml::ConstNodeRef const &n, Jack *jack) {
 	if (n.num_children() < 2)
 		return false;
 	if (!n.is_map())
@@ -44,7 +44,7 @@ bool read(ryml::NodeRef const &n, Jack *jack) {
 	return true;
 }
 
-bool read(ryml::NodeRef const &n, InternalCable *cable) {
+bool read(ryml::ConstNodeRef const &n, InternalCable *cable) {
 	if (n.num_children() < 2)
 		return false;
 	if (!n.is_map())
@@ -65,7 +65,7 @@ bool read(ryml::NodeRef const &n, InternalCable *cable) {
 	return true;
 }
 
-bool read(ryml::NodeRef const &n, MappedInputJack *j) {
+bool read(ryml::ConstNodeRef const &n, MappedInputJack *j) {
 	if (n.num_children() < 2)
 		return false;
 	if (!n.is_map())
@@ -89,7 +89,7 @@ bool read(ryml::NodeRef const &n, MappedInputJack *j) {
 	return true;
 }
 
-bool read(ryml::NodeRef const &n, MappedOutputJack *j) {
+bool read(ryml::ConstNodeRef const &n, MappedOutputJack *j) {
 	if (n.num_children() < 2)
 		return false;
 	if (!n.is_map())
@@ -108,7 +108,7 @@ bool read(ryml::NodeRef const &n, MappedOutputJack *j) {
 	return true;
 }
 
-bool read(ryml::NodeRef const &n, MappedKnob *k) {
+bool read(ryml::ConstNodeRef const &n, MappedKnob *k) {
 	if (n.num_children() < 6)
 		return false;
 	if (!n.is_map())
@@ -139,7 +139,7 @@ bool read(ryml::NodeRef const &n, MappedKnob *k) {
 	return true;
 }
 
-bool read(ryml::NodeRef const &n, MappedKnobSet *ks) {
+bool read(ryml::ConstNodeRef const &n, MappedKnobSet *ks) {
 	if (n.num_children() < 1)
 		return false;
 	if (!n.is_map())
@@ -155,7 +155,7 @@ bool read(ryml::NodeRef const &n, MappedKnobSet *ks) {
 	return true;
 }
 
-bool read(ryml::NodeRef const &n, StaticParam *k) {
+bool read(ryml::ConstNodeRef const &n, StaticParam *k) {
 	if (n.num_children() < 3)
 		return false;
 	if (!n.is_map())
