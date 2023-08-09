@@ -130,6 +130,10 @@ LV_FONT_DECLARE( ui_font_ArialNB16);
 LV_FONT_DECLARE( ui_font_ArialNB18);
 LV_FONT_DECLARE( ui_font_Arial_16_bpp4);
 LV_FONT_DECLARE( ui_font_Arial_bpp2);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
 
 void ui_init(void);
 

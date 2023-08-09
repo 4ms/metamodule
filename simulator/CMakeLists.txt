@@ -32,7 +32,7 @@ file(
   ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/modules/*.c
   ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/components/*.c
   ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
-  ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
+  # ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
 
 # #################### SLS Export ##################################
 
