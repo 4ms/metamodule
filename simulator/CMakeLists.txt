@@ -94,13 +94,8 @@ set(CORE_MODULES
 # Fixups for compiler warnings in AudibleInstruments:
 set_source_files_properties(
   ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
-  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
-  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
-  #
-  # support files
-  ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
-  ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
-  ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
+  PROPERTIES COMPILE_OPTIONS
+             "-Wno-unused-const-variable;-Wno-unused-but-set-variable")
 
 # #################### RYML + Patch Convert ##################################
 
@@ -125,8 +120,9 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES} ${SLS_SOURCES}
-                         ${MM_ROOT}/firmware/src/gui/pages/page_manager.cc)
+add_executable(
+  simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES} ${SLS_SOURCES}
+            ${MM_ROOT}/firmware/src/gui/pages/page_manager.cc)
 
 target_include_directories(
   simulator
