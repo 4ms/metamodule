@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 
 	lv_init();
 	lv_port_disp_init(320, 240, zoom);
-	SDLAudio audio;
+	SDLAudio audio{0};
 
 	MetaModule::PatchPlayer patch_player;
 	MetaModule::PatchStorageProxy patch_storage{patch_path};
