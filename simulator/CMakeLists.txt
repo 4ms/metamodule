@@ -36,19 +36,15 @@ file(
 
 # #################### SLS Export ##################################
 
-add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
-                 ${CMAKE_CURRENT_BINARY_DIR}/slsexport/meta5)
-
-target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
-target_compile_options(ui PRIVATE -Wall -Og -g2 -fno-common
-                                  $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
+file(STRINGS ${MM_ROOT}/firmware/src/gui/slsexport/meta5/filelist.txt
+     SLS_SOURCES)
+list(TRANSFORM SLS_SOURCES
+     PREPEND "${MM_ROOT}/firmware/src/gui/slsexport/meta5/")
 
 # Fixup for compiler warning in LVGL 8.3.4:
-set_source_files_properties(
-  ${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c DIRECTORY
-  ${MM_ROOT}/firmware/src/gui/slsexport/meta5 PROPERTIES COMPILE_FLAGS
-                                                         -Wno-unused-variable)
-                                                         
+set_source_files_properties(${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c
+                            PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
+
 # #################### CoreModules ##################################
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
 
@@ -98,8 +94,13 @@ set(CORE_MODULES
 # Fixups for compiler warnings in AudibleInstruments:
 set_source_files_properties(
   ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
-  PROPERTIES COMPILE_OPTIONS
-             "-Wno-unused-const-variable;-Wno-unused-but-set-variable")
+  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
+  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
+  #
+  # support files
+  ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
+  ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
+  ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
 
 # #################### RYML + Patch Convert ##################################
 
@@ -158,7 +159,7 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 # assembly)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        ryml ui SDL2)
+                                        ryml SDL2)
 
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 
