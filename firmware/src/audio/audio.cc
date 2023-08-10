@@ -198,7 +198,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
 		}
 
-		// Pass CV values to modules
+		// Pass CV values to modules (not in current version)
 		for (auto [i, cv] : countzip(params_.cvjacks))
 			player.set_panel_input(i + FirstCVInput, cv);
 
@@ -206,8 +206,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			player.set_panel_input(i + FirstGateInput, gatein.is_high() ? 1.f : 0.f);
 
 		// Pass Knob values to modules
-		for (auto [i, knob] : countzip(params_.knobs))
-			player.set_panel_param(i, knob);
+		for (auto [i, knob, latched] : countzip(params_.knobs, param_cache.latched_knobs)) {
+			if (std::abs(knob - latched) > 1.5f / 4096.f) {
+				player.set_panel_param(i, knob);
+				latched = knob;
+			}
+		}
 
 		// TODO: add more MIDI mappings (duo/quad/octophonic, CC=>gate, CC=>param, CC=>jack)
 		if (param_block.metaparams.midi_connected) {
@@ -225,11 +229,13 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
 
-		// for (unsigned i = 0; i < PanelDef::NumDACOut; i++)
-		// 	aux_.set_output(i, get_dac_output(i + PanelDef::NumAudioOut));
+		// DAC output (not in current hardware)
+		for (unsigned i = 0; i < PanelDef::NumDACOut; i++)
+			aux_.set_output(i, get_dac_output(i + PanelDef::NumAudioOut));
 
-		// for (auto [i, gate_out] : countzip(aux_.gate_out))
-		// 	gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
+		// Gate outputs (not in current hardware)
+		for (auto [i, gate_out] : countzip(aux_.gate_out))
+			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
 }
 

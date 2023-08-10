@@ -10,8 +10,11 @@
 namespace MetaModule
 {
 
+using LatchedKnobs = std::array<float, PanelDef::NumPot>;
+
 struct ParamCache {
 	Params p;
+	LatchedKnobs latched_knobs;
 	MetaParams m;
 
 	static constexpr uint32_t WriteProcID = 1;
@@ -21,7 +24,7 @@ struct ParamCache {
 		clear();
 	}
 
-	void write_sync(Params &p_, MetaParams &m_) {
+	void write_sync(const Params &p_, MetaParams &m_) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
 			p.copy(p_);
