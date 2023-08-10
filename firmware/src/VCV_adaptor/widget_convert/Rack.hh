@@ -77,4 +77,11 @@ template<>
 struct ElementConvert<componentlibrary::Rogan2PSGreen> {
 	using ElementType = MetaModule::Rogan2PSGreen;
 };
+
+template<>
+struct ElementConvert<componentlibrary::PJ301MPort> {
+	using ElementTypeInput = MetaModule::PJ301MPortIn;
+	using ElementTypeOutput = MetaModule::PJ301MPortOut;
+};
+
 } // namespace rack

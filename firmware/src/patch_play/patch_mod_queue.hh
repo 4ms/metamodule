@@ -1,11 +1,15 @@
 #pragma once
 
 #include "patch/patch.hh"
-#include "util/circular_buffer_opt.hh"
+#include "util/lockfree_fifo_spsc.hh"
 #include <variant>
 
 namespace MetaModule
 {
+
+struct ChangeKnobSet {
+	unsigned knobset_num;
+};
 
 struct SetStaticParam {
 	StaticParam param;
@@ -19,9 +23,10 @@ struct ModifyMapping {
 	MappedKnob map;
 };
 
-using PatchModRequest = std::variant<SetStaticParam, AddMapping, ModifyMapping>;
+using PatchModRequest = std::variant<SetStaticParam, AddMapping, ModifyMapping, ChangeKnobSet>;
+static_assert(sizeof(PatchModRequest) == 36);
 
-using PatchModQueue = CircularBufferOpt<PatchModRequest, 32>;
+using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
 
 template<class... Ts>
 struct overloaded : Ts... {

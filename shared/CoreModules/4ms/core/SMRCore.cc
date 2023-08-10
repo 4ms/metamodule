@@ -1,4 +1,4 @@
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_info_view.hh"
 #include "info/SMR_info.hh"
 #include "CoreModules/moduleFactory.hh"

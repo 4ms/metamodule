@@ -22,13 +22,16 @@ git submodule update --init --recursive
 
 ### Building VCV Rack Plugin
 
-You must have the Rack-SDK on your computer already. Version 2.2.3 is known to work. Set the environment variable `RACK_DIR` equal to the patch to the location of Rack-SDK:
+You must have the Rack-SDK on your computer already. Version 2.2.3 is known to
+work. Set the environment variable `RACK_DIR` equal to the patch to the
+location of Rack-SDK:
 
 ```
 export RACK_DIR=/Users/MyName/projects/Rack-SDK
 ```
 
-Enter the vcv directory. All VCV Rack plugin code is in here, as well as in `shared/`
+Enter the vcv directory. All VCV Rack plugin code is in here, as well as in
+`shared/`
 
 ```
 cd vcv
@@ -46,18 +49,21 @@ To build the plugin, run:
 make -j16 install
 ```
 
-This will create the plugin file and install it in your local VCV Rack plugin directory. The next time you start VCV Rack, it will load the modified plugin.
+This will create the plugin file and install it in your local VCV Rack plugin
+directory. The next time you start VCV Rack, it will load the modified plugin.
 
 
 ### Building Simulator
 
-The simulator uses SDL2, which must be installed on your host machine.
-It only simulates graphics right now (audio can be added -- TODO).
-The window can be re-sized in order to examine precise pixel alignment.
+The simulator uses SDL2, which must be installed on your host machine. It only
+simulates graphics right now (audio can be added -- TODO). The window can be
+re-sized in order to examine precise pixel alignment.
 
-Navigate using the left and right arrows to simulate the encoder turning CCW and CW.
+Navigate using the left and right arrows to simulate the encoder turning CCW
+and CW.
 
-The down arrow pushes the encoder button. The up arrow pushes the RGB Button (Back)
+The down arrow pushes the encoder button. The up arrow pushes the RGB Button
+(Back)
 
 Make sure you are in the right branch and you already updated the submodules.
 
@@ -87,8 +93,8 @@ When adding/removing assets, sometimes you need to clean the build:
 rm -rf build
 ```
 
-As a shortcut, there is a Makefile wrapping the above cmake commands. (Yes, Makefile generating Cmake generating Ninja)
-So, you can just do:
+As a shortcut, there is a Makefile wrapping the above cmake commands. (Yes,
+Makefile running Cmake generating Ninja) So, you can just do:
 
 ```
 # Generate build system (if needed) and build:
@@ -104,13 +110,10 @@ make clean
 
 ### Building Firmware
 
+This requires arm-none-eabi-gcc versions 12.2 or later installed on your $PATH.
+
 Make sure you are in the right branch and you already updated the submodules.
 
-To run the unit tests 
-
-```
-make tests
-```
 To build the firmware:
 
 ```
@@ -123,69 +126,169 @@ firmware to NOR Flash or an SD card.
 The firmware file contains the Cortex-M4 firwmare embedded in it, which is
 loaded automatically by the Cortex-A7 core.
 
-You can view the console output by connecting a USB-UART cable to the TX pin
-of the debug header (next to the SWD header). The bottom four pins are all GND.
-Settings are 115200, 8N1.
+There is a bootloader that runs before the application, and it outputs useful
+messages over a UART. You can view the console output by connecting a USB-UART
+cable to the TX pin of the debug header (next to the SWD header). The TX pin is
+labeled (upper-right pin). The bottom four pins are all GND. Settings are
+115200, 8N1.
 
-Note that the on-board NOR Flash chip has a bootloader installed already
-(MP1-Boot, as the FSBL). It also has an alt bootloader (USB-DFU) installed,
-which is loaded by powering on with a particular jumper installed.
+You have several choices for how to load the firmware applcation. Each one is covered 
+in a section below:
 
-To load onto hardware, there are several options:
+1) Load in RAM over SWD/JTAG
+
+2) Load into NOR Flash over DFU-USB
+
+3) Boot from SD Card
+
 
 #### Load in RAM over SWD/JTAG
 
-Attach a JTAG debugger to the 10-pin connector at the top of the module labeled "SWD".
+This is the preferred method for active firmware development. It requires a JTAG programmer.
+
+Attach a JTAG debugger to the 10-pin connector at the top of the module labeled "SWD". The protocol is actually JTAG, despite the header's name, 
+though SWD may work since the only difference is the tRST pin instead of NRST.
 
 If you are already running the application and just need to debug, you can just attach without loading.
 
-Install a jumper at ????
-(TODO: add new jumper position to make mp1-boot hang instead of jumping to app.)
+If you need to load new firmware, then do this:
 
-Power cycle the module. The console will show MP1-Boot started up, intialized RAM, and is waiting.
+1) Install a jumper on Control Expander header that bridges the top-left pin and the pin just to the right of it.
+To be clear, the jumper should be horizontal, not vertical, on the top row of pins all the way to the left:
 
-Use jflash, TRACE32, Ozone, arm-none-eabi-gdb, etc to load the main.elf file.
+```
+  Control
+ Expander
+          [====] o  o 
+           o  o  o  o
+```
 
-Execution can begin immediately from 0xC0200040.
+2) Power off and back on. 
 
-TODO: detailed instructions using J-flash, and also gdb.
+The console will show:
+
+```
+Freeze pin detected active, freezing.
+Ready to load firmware to DDR RAM via SWD/JTAG.
+```
+
+Use Jflash, TRACE32, Ozone, arm-none-eabi-gdb, etc to load the main.elf file.
+If you have a JLink connected, you can program with this;
+
+```
+make jprog
+```
+
+This should 15-30 seconds.
+
+For other methods, just load the .elf file and then start executing from 0xC0200040.
+
+Note: If you are familiar with flashing Cortex-M series MCUs, you will notice
+some differences. One is that Flash is an external chip. Another difference is
+that the main RAM (DDR RAM) is not available until software initializes it. The
+on-board NOR Flash chip has a bootloader installed (MP1-Boot, which is the
+FSBL). This is loaded by the BOOTROM on power-up. The MP1-Boot bootloader is
+responsible for initializing the DDR RAM peripheral. Obviously, this must be
+done before loading the firmware into DDR RAM. So, unlike a Cortex-M chip, you
+must run a bootloader before programming the device. However, one of the first
+things an application does when it starts running is to enable the MMU and
+setup various memory regions, some of which are not writable. Thus, the only
+time in which it's possible to load firmware to RAM is after the bootloader has
+initialized RAM but before the application has started. To handle this,
+MP1-Boot has a "Freeze pin" option. When this pin is detected low (jumper is
+installed), then MP1-Boot will halt execution (freeze) after initializing RAM.
  
 #### Load into NOR Flash over DFU-USB
 
-Power cycle the module with a jumper installed on the Control Expander header. The jumper
-must bridge the top-left pin and the pin to the right of that.
-This forces an alt firmware to be loaded from NOR Flash (which is a USB-DFU bootloader).
+Loading onto NOR Flash will flash the firmware into the on-board FLASH chip so
+you can boot normally without a computer connected. It takes a minute or two,
+so this is a good way to flash firmware infrequently, for example, flashing the
+latest stable firwmare version. This is not recommended if you're doing active
+firmware development (use SWD/JTAG in that case).
+
+Power cycle the module while holding down the rotary encoder button. This
+forces an alt firmware to be loaded from NOR Flash (which is a USB-DFU
+bootloader). If you are using the UART console, then you'll see this in the
+console:
+
+```
+USB DFU Loader Starting...
+QSPI is initialized.
+Connect a USB cable to the computer.
+Run `dfu-util --list` in a terminal and you should see this device.
+```
 
 The button will be flashing green when in USB-DFU bootloader mode.
 
 Connect a USB cable from a computer to the module. 
 
-You can use a web-based loader [such as this one](https://devanlai.github.io/webdfu/dfu-util/).
-(detailed instructions TODO)
+You can use a web-based loader [such as this
+one](https://devanlai.github.io/webdfu/dfu-util/). Click Connect, and then
+select "STM Device in DFU Mode". Then click "Choose File" and select the uimg
+file you just built at `build/mp1corea7/medium/main.uimg`. Then click
+"Download". There may be an error `DFU GETSTATUS failed: ControlTransferIn
+failed: NetworkError: Failed to execute 'controlTransferIn' on 'USBDevice': A
+transfer error has occurred.` This is normal, and is not an error. It's safe to
+ignore this.
+
 
 Or use the command line (you must have [dfu-util](https://dfu-util.sourceforge.net/) installed):
 
 ```
-dfu-util -a 0 -s 0x70080000 -D build/mp1corea7/medium/main.uimg
+make flash-dfu
 ```
 
-Load the main.uimg file to the default address (0x70080000). It will take a minute or two.
 
-At the end, if you are using the web version, there may be an error `DFU
-GETSTATUS failed: ControlTransferIn failed: NetworkError: Failed to execute
-'controlTransferIn' on 'USBDevice': A transfer error has occurred.` This is
-normal, and is not an error. It's safe to ignore this.
+This command loads the main.uimg file to the default address (0x70080000).
+It calls `dfu-util -a 0 -s 0x70080000 -D build/mp1corea7/medium/main.uimg`
 
-Remove the jumper and power-cycle, and the new code will start up.
-
+This will take between 60 and 120 seconds.
+When it's done, unplug the USB cable, power-cycle, and the new code will start up.
 
 
 #### Boot from SD Card
 
-Use `dd` to copy main.uimg to the third partition of an SD Card that contains mp1-boot on the first two sectors. 
-Then, change the BOOT DIP switches to be both to the left (see diagram on PCB). Power cycle.
+You need a dedicated SD Card, all contents will be erased. A 16GB card is common and works fine,
+but smaller or larger should work too.
 
-(more instructions TODO)
+You first need to format, partition, and install the bootloader on the card. This only needs
+to happen once. 
+
+```
+make format-sd
+```
+
+This will ask you for the device path (/dev/disk4, for example). Make sure you get it right, because the
+script will run `mkfs` or `diskutil eraseDisk`.
+
+After running this, you will need to eject and re-insert the SD Card because the volumes have changed.
+
+Then do:
+
+```
+make flash-bootloader-sd
+```
+
+This will build the bootloader (mp1-boot) and use `dd` to load it onto the first two partitions of the SD Card.
+You will again be asked for the drive name.
+
+You now have a bootable SD Card. You shouldn't need to repeat the above steps unless you get a new SD Card.
+
+To flash the application, do this:
+
+```
+make flash-app-sd
+```
+
+This will build the application as normal, and then use `dd` to copy it to the third partition.
+
+Eject the card and insert it into the MetaModule.
+
+To tell the MetaModule to boot using the SD Card, you need to change the BOOT DIP switches.
+These are located on the back of the PCB, under the screen near the rotary encoder.
+They are labeled "BOOT0_2". There are two switches. Look at the diagram printed on the PCB.
+To boot with the SD, both switches should be pushed to the left.
+If you want to back to booting from Flash (internal Flash chip), then flip the bottom switch to the right.
 
 ### Converting assets
 
@@ -194,3 +297,4 @@ Then, change the BOOT DIP switches to be both to the left (see diagram on PCB). 
 To create the artwork files from the SVGs, you must have Inkscape installed an on your PATH
 
 ...To Be Continued...
+

@@ -26,7 +26,7 @@ bool TEST_CASE_Basic_hierarchal_YAML_Usage() {
 	level2["subB"] = "item B within level 2";
 
 	// clang-format off
-	CHECK(ryml::emitrs<std::string>(tree) == R"(Level1:
+	CHECK(ryml::emitrs_yaml<std::string>(tree) == R"(Level1:
   subA: item A within level 1
   subB: item B within level 1
 Level2:
@@ -47,7 +47,7 @@ bool TEST_CASE_Numbers_as_keys() {
 	root["1"] = "SLUG2";
 	root["2"] = "SLUG3";
 
-	CHECK(ryml::emitrs<std::string>(tree) ==
+	CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 		  // clang-format off
 R"(0: SLUG1
 1: SLUG2
@@ -67,7 +67,7 @@ bool TEST_CASE_Sequences() {
 		int_cables.append_child() << i;
 	}
 
-	CHECK(ryml::emitrs<std::string>(tree) ==
+	CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 		  // clang-format off
 R"(int_cables:
   - 0
@@ -114,7 +114,7 @@ bool TEST_CASE_Sequences2() {
 	}
 	// }
 
-	CHECK(ryml::emitrs<std::string>(tree) ==
+	CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 		  // clang-format off
 R"(int_cables:
   - out: 1
@@ -154,7 +154,7 @@ bool TEST_CASE_Can_return_a_NodeRef() {
 	root["out2"] << outjack;
 	// }
 
-	CHECK(ryml::emitrs<std::string>(tree) ==
+	CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 		  // clang-format off
 R"(out1:
   module_id: 3
@@ -203,7 +203,7 @@ bool TEST_CASE_Can_use_const_char_for_keys() {
 	// Doesn't compile:
 	// root.append_child() << ryml::key(ryml::csubstr{std::to_string(7).c_str(), 1}) << "777";
 
-	CHECK(ryml::emitrs<std::string>(tree) ==
+	CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 		  // clang-format off
 R"(0: 000
 1: 111
@@ -278,7 +278,7 @@ PatchHeader:
 	return true;
 }
 
-struct _TestPatchHeader {
+struct TestPatchHeader {
 	uint32_t header_version;
 
 	ModuleTypeSlug patch_name;
@@ -293,7 +293,7 @@ struct _TestPatchHeader {
 	uint16_t num_mapped_knobs;
 };
 
-void write(ryml::NodeRef *n, _TestPatchHeader const &ph) {
+void write(ryml::NodeRef *n, TestPatchHeader const &ph) {
 	*n |= ryml::MAP;
 	n->append_child() << ryml::key("header_version") << std::to_string(ph.header_version);
 	n->append_child() << ryml::key("patch_name") << ph.patch_name.c_str();
@@ -305,7 +305,7 @@ void write(ryml::NodeRef *n, _TestPatchHeader const &ph) {
 	n->append_child() << ryml::key("num_mapped_knobs") << std::to_string(ph.num_mapped_knobs);
 }
 
-bool read(ryml::NodeRef const &n, _TestPatchHeader *ph) {
+bool read(ryml::ConstNodeRef const &n, TestPatchHeader *ph) {
 	if (n.num_children() != 8)
 		return false;
 	if (n.child(0).key() != "header_version")
@@ -329,7 +329,7 @@ bool read(ryml::NodeRef const &n, _TestPatchHeader *ph) {
 
 bool TEST_CASE_Can_create_a_rymlTree_from_a_PatchHeader_using_operator_lshift() {
 	ryml::Tree tree;
-	_TestPatchHeader ph_in{
+	TestPatchHeader ph_in{
 		.header_version = 1,
 		.patch_name = "test123",
 		.num_modules = 4,
@@ -341,7 +341,7 @@ bool TEST_CASE_Can_create_a_rymlTree_from_a_PatchHeader_using_operator_lshift() 
 	};
 	tree.rootref() << ph_in;
 
-	_TestPatchHeader ph_out;
+	TestPatchHeader ph_out;
 	tree.rootref() >> ph_out;
 	CHECK(ph_out.header_version == ph_in.header_version);
 	CHECK(ph_out.patch_name.is_equal(ph_in.patch_name));
@@ -372,7 +372,7 @@ R"(
 
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yml_buf));
 
-	_TestPatchHeader ph_out;
+	TestPatchHeader ph_out;
 
 	tree.rootref() >> ph_out;
 	CHECK(ph_out.header_version == 1);
@@ -457,30 +457,34 @@ R"(PatchData:
       param_id: 6
       value: 0.7
   mapped_knobs:
-    - panel_knob_id: 1
-      module_id: 2
-      param_id: 3
-      curve_type: 1
-      min: 0.1
-      max: 0.95
-    - panel_knob_id: 0
-      module_id: 3
-      param_id: 4
-      curve_type: 2
-      min: 0.2
-      max: 0.85
-    - panel_knob_id: 3
-      module_id: 4
-      param_id: 5
-      curve_type: 3
-      min: 0.3
-      max: 0.75
-    - panel_knob_id: 3
-      module_id: 5
-      param_id: 6
-      curve_type: 4
-      min: 0.4
-      max: 0.65
+    - name: Set 1
+      set:
+      - panel_knob_id: 1
+        module_id: 2
+        param_id: 3
+        curve_type: 1
+        min: 0.1
+        max: 0.95
+      - panel_knob_id: 0
+        module_id: 3
+        param_id: 4
+        curve_type: 2
+        min: 0.2
+        max: 0.85
+      - panel_knob_id: 3
+        module_id: 4
+        param_id: 5
+        curve_type: 3
+        min: 0.3
+        max: 0.75
+    - name Set 2
+      set:
+      - panel_knob_id: 3
+        module_id: 5
+        param_id: 6
+        curve_type: 4
+        min: 0.4
+        max: 0.65
 )";
 	// clang-format on
 
@@ -540,31 +544,35 @@ R"(PatchData:
 	CHECK(pd.static_knobs[4].param_id == 6);
 	CHECK(pd.static_knobs[4].value == 0.7f);
 
-	CHECK(pd.mapped_knobs.size() == 4);
-	CHECK(pd.mapped_knobs[0].panel_knob_id == 1);
-	CHECK(pd.mapped_knobs[0].module_id == 2);
-	CHECK(pd.mapped_knobs[0].param_id == 3);
-	CHECK(pd.mapped_knobs[0].curve_type == 1);
-	CHECK(pd.mapped_knobs[0].min == 0.1f);
-	CHECK(pd.mapped_knobs[0].max == 0.95f);
-	CHECK(pd.mapped_knobs[1].panel_knob_id == 0);
-	CHECK(pd.mapped_knobs[1].module_id == 3);
-	CHECK(pd.mapped_knobs[1].param_id == 4);
-	CHECK(pd.mapped_knobs[1].curve_type == 2);
-	CHECK(pd.mapped_knobs[1].min == 0.2f);
-	CHECK(pd.mapped_knobs[1].max == 0.85f);
-	CHECK(pd.mapped_knobs[2].panel_knob_id == 3);
-	CHECK(pd.mapped_knobs[2].module_id == 4);
-	CHECK(pd.mapped_knobs[2].param_id == 5);
-	CHECK(pd.mapped_knobs[2].curve_type == 3);
-	CHECK(pd.mapped_knobs[2].min == 0.3f);
-	CHECK(pd.mapped_knobs[2].max == 0.75f);
-	CHECK(pd.mapped_knobs[3].panel_knob_id == 3);
-	CHECK(pd.mapped_knobs[3].module_id == 5);
-	CHECK(pd.mapped_knobs[3].param_id == 6);
-	CHECK(pd.mapped_knobs[3].curve_type == 4);
-	CHECK(pd.mapped_knobs[3].min == 0.4f);
-	CHECK(pd.mapped_knobs[3].max == 0.65f);
+	CHECK(pd.knob_sets[0].set.size() == 2);
+
+	CHECK(pd.knob_sets[0].name.is_equal("Set 0"));
+	CHECK(pd.knob_sets[0].set[0].panel_knob_id == 1);
+	CHECK(pd.knob_sets[0].set[0].module_id == 2);
+	CHECK(pd.knob_sets[0].set[0].param_id == 3);
+	CHECK(pd.knob_sets[0].set[0].curve_type == 1);
+	CHECK(pd.knob_sets[0].set[0].min == 0.1f);
+	CHECK(pd.knob_sets[0].set[0].max == 0.95f);
+	CHECK(pd.knob_sets[0].set[1].panel_knob_id == 0);
+	CHECK(pd.knob_sets[0].set[1].module_id == 3);
+	CHECK(pd.knob_sets[0].set[1].param_id == 4);
+	CHECK(pd.knob_sets[0].set[1].curve_type == 2);
+	CHECK(pd.knob_sets[0].set[1].min == 0.2f);
+	CHECK(pd.knob_sets[0].set[1].max == 0.85f);
+	CHECK(pd.knob_sets[0].set[2].panel_knob_id == 3);
+	CHECK(pd.knob_sets[0].set[2].module_id == 4);
+	CHECK(pd.knob_sets[0].set[2].param_id == 5);
+	CHECK(pd.knob_sets[0].set[2].curve_type == 3);
+	CHECK(pd.knob_sets[0].set[2].min == 0.3f);
+	CHECK(pd.knob_sets[0].set[2].max == 0.75f);
+
+	CHECK(pd.knob_sets[1].name.is_equal("Set 1"));
+	CHECK(pd.knob_sets[1].set[0].panel_knob_id == 3);
+	CHECK(pd.knob_sets[1].set[0].module_id == 5);
+	CHECK(pd.knob_sets[1].set[0].param_id == 6);
+	CHECK(pd.knob_sets[1].set[0].curve_type == 4);
+	CHECK(pd.knob_sets[1].set[0].min == 0.4f);
+	CHECK(pd.knob_sets[1].set[0].max == 0.65f);
 
 	return true;
 }

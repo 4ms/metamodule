@@ -21,6 +21,7 @@ lv_obj_t *ui_SDbut;
 lv_obj_t *ui_SDlabel;
 lv_obj_t *ui_Flashbut;
 lv_obj_t *ui_Flashlabel;
+void ui_event_PatchListRoller( lv_event_t * e);
 lv_obj_t *ui_PatchListRoller;
 lv_obj_t *ui_waitspinner;
 
@@ -52,67 +53,63 @@ lv_obj_t *ui_ShowPlayingMapsCheck;
 lv_obj_t *ui_FlashMapPanel;
 lv_obj_t *ui_FlashMapLabel;
 lv_obj_t *ui_FlashMapCheck;
-lv_obj_t *ui_Label1;
+lv_obj_t *ui_TransparencyTitle;
 lv_obj_t *ui_MapTranspSlider;
 lv_obj_t *ui_CablesTitle;
 lv_obj_t *ui_ShowAllCablesPanel;
 lv_obj_t *ui_ShowAllCablesLabel;
 lv_obj_t *ui_ShowAllCablesCheck;
-
-// SCREEN: ui_PatchViewPage2
-void ui_PatchViewPage2_screen_init(void);
-lv_obj_t *ui_PatchViewPage2;
-lv_obj_t *ui_PatchName2;
-lv_obj_t *ui_ButtonsContainer2;
-lv_obj_t *ui_PlayButton2;
-lv_obj_t *ui_KnobButton2;
-lv_obj_t *ui_AddButton2;
-lv_obj_t *ui_InfoButton2;
-lv_obj_t *ui_SettingsButton2;
-lv_obj_t *ui_ModulesPanel2;
+lv_obj_t *ui_KnobsetMenu;
+lv_obj_t *ui_KnobsetClosePanel;
+lv_obj_t *ui_KnobsetCloseButton;
+lv_obj_t *ui_KnobsetHeaderLabel;
 
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
 lv_obj_t *ui_MappingMenu;
 lv_obj_t *ui_MappingFlexZone;
 lv_obj_t *ui_ModuleImage;
+void ui_event_ElementRoller( lv_event_t * e);
+lv_obj_t *ui_ElementRoller;
 lv_obj_t *ui_MappingParameters;
 lv_obj_t *ui_Module_Name;
 lv_obj_t *ui_Element_Name;
 lv_obj_t *ui_MappedWindow;
 lv_obj_t *ui_Mappedto;
-lv_obj_t *ui_EditMapButton;
+lv_obj_t *ui_EditMap;
+lv_obj_t *ui_EditMapLabel;
 lv_obj_t *ui_NotMapped;
-lv_obj_t *ui_ModuleName1;
-lv_obj_t *ui_ElementName1;
-lv_obj_t *ui_MappedWindow1;
+lv_obj_t *ui_ModuleName;
+lv_obj_t *ui_ElementName;
+lv_obj_t *ui_NotMappedWindow;
+void ui_event_ControlButton( lv_event_t * e);
+lv_obj_t *ui_ControlButton;
+lv_obj_t *ui_ControlButtonLabel;
 void ui_event_AddMapButton( lv_event_t * e);
 lv_obj_t *ui_AddMapButton;
-lv_obj_t *ui_AddMapButton1;
-void ui_event_ElementRoller( lv_event_t * e);
-lv_obj_t *ui_ElementRoller;
+lv_obj_t *ui_AddMapLabel;
+lv_obj_t *ui_ControlAlert;
+lv_obj_t *ui_ControlAlertLabel;
 lv_obj_t *ui_AddMapPopUp;
-lv_obj_t *ui_AddPrompt;
+lv_obj_t *ui_AddModuleName;
 lv_obj_t *ui_MapDetected;
-lv_obj_t *ui_canceladd;
-void ui_event_okadd( lv_event_t * e);
-lv_obj_t *ui_okadd;
+void ui_event_CancelAdd( lv_event_t * e);
+lv_obj_t *ui_CancelAdd;
+lv_obj_t *ui_CancelAddLabel;
+void ui_event_OkAdd( lv_event_t * e);
+lv_obj_t *ui_OkAdd;
+lv_obj_t *ui_OkAddLabel;
 lv_obj_t *ui____initial_actions0;
 const lv_img_dsc_t *ui_imgset_addmap[1] = {&ui_img_1x_addmap1_png};
 const lv_img_dsc_t *ui_imgset_control[1] = {&ui_img_1x_control1_png};
 const lv_img_dsc_t *ui_imgset_editmap[1] = {&ui_img_1x_editmap2_png};
-const lv_img_dsc_t *ui_imgset_dark_settings_focused_red[1] = {&ui_img_dark_icons_dark_settings_focused_red2_png};
-const lv_img_dsc_t *ui_imgset_dark_settings_focused[1] = {&ui_img_dark_icons_dark_settings_focused3_png};
-const lv_img_dsc_t *ui_imgset_info_light[4] = {&ui_img_symbols_raw_light_info_light1_png, &ui_img_symbols_raw_light_info_light2_png, &ui_img_symbols_raw_light_info_light3_png, &ui_img_symbols_raw_light_info_light4_png};
-const lv_img_dsc_t *ui_imgset_knob_light[3] = {&ui_img_symbols_raw_light_knob_light1_png, &ui_img_symbols_raw_light_knob_light2_png, &ui_img_symbols_raw_light_knob_light3_png};
-const lv_img_dsc_t *ui_imgset_play_light[2] = {&ui_img_symbols_raw_light_play_light1_png, &ui_img_symbols_raw_light_play_light2_png};
-const lv_img_dsc_t *ui_imgset_plus_light[2] = {&ui_img_symbols_raw_light_plus_light1_png, &ui_img_symbols_raw_light_plus_light2_png};
-const lv_img_dsc_t *ui_imgset_settings_light[2] = {&ui_img_symbols_raw_light_settings_light2_png, &ui_img_symbols_raw_light_settings_light27_png};
-const lv_img_dsc_t *ui_imgset_info_dark[4] = {&ui_img_symbols_raw_info_dark1_png, &ui_img_symbols_raw_info_dark2_png, &ui_img_symbols_raw_info_dark3_png, &ui_img_symbols_raw_info_dark4_png};
-const lv_img_dsc_t *ui_imgset_knob_dark[3] = {&ui_img_symbols_raw_knob_dark1_png, &ui_img_symbols_raw_knob_dark2_png, &ui_img_symbols_raw_knob_dark3_png};
-const lv_img_dsc_t *ui_imgset_play_dark[2] = {&ui_img_symbols_raw_play_dark1_png, &ui_img_symbols_raw_play_dark2_png};
-const lv_img_dsc_t *ui_imgset_plus_dark[2] = {&ui_img_symbols_raw_plus_dark1_png, &ui_img_symbols_raw_plus_dark2_png};
-const lv_img_dsc_t *ui_imgset_settings_dark[2] = {&ui_img_symbols_raw_settings_dark2_png, &ui_img_symbols_raw_settings_dark27_png};
+const lv_img_dsc_t *ui_imgset_add[1] = {&ui_img_final_icons_1x_add1_png};
+const lv_img_dsc_t *ui_imgset_info[1] = {&ui_img_final_icons_1x_info1_png};
+const lv_img_dsc_t *ui_imgset_knobpip[2] = {&ui_img_final_icons_1x_knobpip1_png, &ui_img_final_icons_1x_knobpip2_png};
+const lv_img_dsc_t *ui_imgset_knobpressed[1] = {&ui_img_final_icons_1x_knobpressed1_png};
+const lv_img_dsc_t *ui_imgset_knobreleased[1] = {&ui_img_final_icons_1x_knobreleased1_png};
+const lv_img_dsc_t *ui_imgset_play[2] = {&ui_img_final_icons_1x_play1_png, &ui_img_final_icons_play3_png};
+const lv_img_dsc_t *ui_imgset_settings[1] = {&ui_img_final_icons_1x_settings1_png};
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
@@ -169,10 +166,10 @@ lv_anim_start(&PropertyAnimation_0);
 }
 
 ///////////////////// FUNCTIONS ////////////////////
-void ui_event_AddMapButton( lv_event_t * e) {
+void ui_event_PatchListRoller( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
-      _ui_flag_modify( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+      _ui_screen_change( &ui_PatchViewPage, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_PatchViewPage_screen_init);
 }
 }
 void ui_event_ElementRoller( lv_event_t * e) {
@@ -182,9 +179,32 @@ if ( event_code == LV_EVENT_CLICKED) {
       _ui_flag_modify( ui_ElementRoller, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
 }
 }
-void ui_event_okadd( lv_event_t * e) {
+void ui_event_ControlButton( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
+      _ui_flag_modify( ui_ControlButton, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
+      _ui_flag_modify( ui_AddMapButton, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
+      _ui_flag_modify( ui_ControlAlert, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+}
+}
+void ui_event_AddMapButton( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_flag_modify( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+}
+}
+void ui_event_CancelAdd( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_flag_modify( ui_NotMapped, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+      _ui_flag_modify( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
+}
+}
+void ui_event_OkAdd( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_flag_modify( ui_MappingParameters, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
+      _ui_flag_modify( ui_NotMapped, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
       _ui_flag_modify( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
 }
 }
@@ -192,13 +212,13 @@ if ( event_code == LV_EVENT_CLICKED) {
 ///////////////////// SCREENS ////////////////////
 
 void ui_init( void )
-{
+{LV_EVENT_GET_COMP_CHILD = lv_event_register_id();
+
 lv_disp_t *dispp = lv_disp_get_default();
 lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), true, LV_FONT_DEFAULT);
 lv_disp_set_theme(dispp, theme);
 ui_PatchSelectorPage_screen_init();
 ui_PatchViewPage_screen_init();
-ui_PatchViewPage2_screen_init();
 ui_MappingMenu_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_PatchSelectorPage);

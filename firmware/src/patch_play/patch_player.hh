@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/panel_conf.hh"
 #include "core_a7/smp_api.hh"
@@ -7,7 +7,8 @@
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
-#include "printf.h"
+#include "patch_play/multicore_play.hh"
+#include "pr_dbg.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include <array>
@@ -18,6 +19,7 @@ namespace MetaModule
 {
 
 class PatchPlayer {
+
 	enum {
 		NumInConns = PanelDef::NumUserFacingInJacks,
 		NumOutConns = PanelDef::NumUserFacingOutJacks,
@@ -34,9 +36,14 @@ public:
 	std::array<std::vector<Jack>, NumInConns + PanelDef::NumMidiJackMaps> in_conns;
 
 	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
-	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs + PanelDef::NumMidiParams> knob_conns;
+	static constexpr size_t NumParams = PanelDef::NumKnobs + PanelDef::NumMidiParams;
+	using KnobSet = std::array<std::vector<MappedKnob>, NumParams>;
+
+	std::array<KnobSet, MaxKnobSets> knob_conns;
 
 	bool is_loaded = false;
+
+	MulticorePlayer smp;
 
 private:
 	// Index of each module that appears more than once.
@@ -45,6 +52,7 @@ private:
 	uint8_t dup_module_index[MAX_MODULES_IN_PATCH] = {0};
 
 	PatchData pd;
+	unsigned active_knob_set = 0;
 	static inline ModuleTypeSlug no_patch_loaded{"(Not Loaded)"};
 
 public:
@@ -74,12 +82,14 @@ public:
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	bool load_patch(const PatchData &patchdata) {
-		mdrivlib::SMPThread::init();
 
 		if (patchdata.patch_name.length() == 0 || patchdata.module_slugs.size() == 0)
 			return false;
 
 		copy_patch_data(patchdata);
+
+		// Tell the other core about the patch
+		smp.load_patch(pd.module_slugs.size());
 
 		// First module is the hub, ignore it.
 		modules[0] = ModuleFactory::create(PanelDef::typeID);
@@ -99,20 +109,14 @@ public:
 			modules[i]->set_samplerate(48000.f); //Fixed SR for now
 		}
 
-		// Tell the other core about the patch
-		mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2); //first module to process
-		mdrivlib::SMPControl::write<SMPRegister::NumModulesInPatch>(pd.module_slugs.size());
-		mdrivlib::SMPControl::write<SMPRegister::UpdateModuleOffset>(2);
-		mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
-
-		// Todo: if we need to improve patch loading time by a small amount,
-		// it's a little faster to combine these functions so we only do one loop over nets/jacks
-		// ...but it's harder to unit test.
 		mark_patched_jacks();
 		calc_panel_jack_connections();
 
-		for (auto const &k : pd.mapped_knobs)
-			cache_knob_mapping(k);
+		for (auto [knob_set_idx, knob_set] : enumerate(pd.knob_sets)) {
+			for (auto const &k : knob_set.set) {
+				cache_knob_mapping(knob_set_idx, k);
+			}
+		}
 
 		// Set static (non-mapped) knobs
 		for (auto &k : pd.static_knobs)
@@ -121,6 +125,8 @@ public:
 		is_loaded = true;
 
 		calc_multiple_module_indicies();
+
+		set_active_knob_set(0);
 		return true;
 	}
 
@@ -129,16 +135,11 @@ public:
 		if (pd.module_slugs.size() == 2)
 			modules[1]->update();
 		else {
-			mdrivlib::SMPThread::split_with_command<SMPCommand::UpdateListOfModules>();
-#ifdef SIMULATOR
-			constexpr size_t module_skip = 1;
-#else
-			constexpr size_t module_skip = 2;
-#endif
-			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += module_skip) {
+			smp.split();
+			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += smp.ModuleStride) {
 				modules[module_i]->update();
 			}
-			mdrivlib::SMPThread::join();
+			smp.join();
 		}
 
 		for (auto &cable : pd.int_cables) {
@@ -150,26 +151,25 @@ public:
 	}
 
 	void unload_patch() {
-		mdrivlib::SMPThread::join();
+		smp.join();
 		is_loaded = false;
 		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
 			modules[i].reset(nullptr);
 		}
 		pd.int_cables.clear();
 		pd.mapped_ins.clear();
-		pd.mapped_knobs.clear();
+		pd.knob_sets.clear();
 		pd.mapped_outs.clear();
 		pd.static_knobs.clear();
 		pd.module_slugs.clear();
 
 		clear_cache();
-		// BigAllocControl::reset();
 	}
 
 	// K-rate setters/getters:
 
 	void set_panel_param(int param_id, float val) {
-		for (auto const &k : knob_conns[param_id]) {
+		for (auto const &k : knob_conns[active_knob_set][param_id]) {
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
@@ -185,6 +185,19 @@ public:
 			return modules[jack.module_id]->get_output(jack.jack_id);
 		else
 			return 0.f;
+	}
+
+	void apply_static_param(const StaticParam &sparam) {
+		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
+		//Also set it in the patch?
+	}
+
+	void add_mapped_knob(const MappedKnob &map) {
+		//TODO
+	}
+
+	void set_active_knob_set(unsigned num) {
+		active_knob_set = std::min(num, MaxKnobSets - 1);
 	}
 
 	// General info getters:
@@ -207,14 +220,6 @@ public:
 		return pd.int_cables[int_cable_idx].ins.size();
 	}
 
-	void apply_static_param(const StaticParam &sparam) {
-		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
-		//Also set it in the patch?
-	}
-
-	void add_mapped_knob(const MappedKnob &map) {
-	}
-
 	// int get_num_mapped_knobs() {
 	// 	return is_loaded ? pd.mapped_knobs.size() : 0;
 	// }
@@ -224,7 +229,7 @@ public:
 	}
 
 	StaticString<15> const &get_panel_knob_name(int param_id) {
-		return pd.mapped_knobs[param_id].alias_name;
+		return pd.knob_sets[active_knob_set].set[param_id].alias_name;
 	}
 
 	InternalCable &get_int_cable(unsigned idx) {
@@ -317,8 +322,9 @@ public:
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
 
-		for (auto &knob_conn : knob_conns)
-			knob_conn.clear();
+		for (auto &knob_set : knob_conns)
+			for (auto &mappings : knob_set)
+				mappings.clear();
 	}
 
 	// Returns the index in int_cables[] for a cable that has the given Jack as an input
@@ -401,17 +407,20 @@ public:
 	}
 
 	// Cache a panel knob mapping into knob_conns[]
-	void cache_knob_mapping(const MappedKnob &k) {
+	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
+		if (knob_set >= knob_conns.size())
+			return;
+
 		if (k.is_monophonic_note()) {
-			update_or_add(knob_conns[MidiMonoNoteParam], k);
-			printf_("DBG: Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+			update_or_add(knob_conns[knob_set][MidiMonoNoteParam], k);
+			pr_dbg("Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 
 		} else if (k.is_monophonic_gate()) {
-			update_or_add(knob_conns[MidiMonoGateParam], k);
-			printf_("DBG: Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+			update_or_add(knob_conns[knob_set][MidiMonoGateParam], k);
+			pr_dbg("Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 
 		} else if (k.panel_knob_id < PanelDef::NumKnobs) {
-			update_or_add(knob_conns[k.panel_knob_id], k);
+			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
 		}
 	}
 

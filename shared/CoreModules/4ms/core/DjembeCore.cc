@@ -1,5 +1,5 @@
 #include "CoreModules/4ms/info/Djembe_info.hh"
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/moduleFactory.hh"
 

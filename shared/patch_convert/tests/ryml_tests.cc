@@ -20,7 +20,7 @@ TEST_CASE("Basic hierarchal YAML Usage") {
 	level2["subB"] = "item B within level 2";
 
 	// clang-format off
-	CHECK(ryml::emitrs<std::string>(tree) == R"(Level1:
+	CHECK(ryml::emitrs_yaml<std::string>(tree) == R"(Level1:
   subA: item A within level 1
   subB: item B within level 1
 Level2:
@@ -39,7 +39,7 @@ TEST_CASE("Numbers as keys") {
 	root["1"] = "SLUG2";
 	root["2"] = "SLUG3";
 
-	CHECK(ryml::emitrs<std::string>(tree) ==
+	CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 		  // clang-format off
 R"(0: SLUG1
 1: SLUG2
@@ -68,7 +68,7 @@ TEST_CASE("Sequences") {
 		for (int i = 0; i < 3; i++) {
 			int_cables.append_child() << i;
 		}
-		CHECK(ryml::emitrs<std::string>(tree) ==
+		CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 			  // clang-format off
 R"(int_cables:
   - 0
@@ -109,7 +109,7 @@ R"(int_cables:
 			}
 		}
 
-		CHECK(ryml::emitrs<std::string>(tree) ==
+		CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 			  // clang-format off
 R"(int_cables:
   - out: 1
@@ -148,7 +148,7 @@ TEST_CASE("Can return a NodeRef") {
 		root["out"] << outjack;
 	}
 
-	CHECK(ryml::emitrs<std::string>(tree) ==
+	CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 		  // clang-format off
 R"(out:
   module_id: 3
@@ -193,7 +193,7 @@ TEST_CASE("Can use const char[] for keys") {
 	// Doesn't compile:
 	// root.append_child() << ryml::key(ryml::csubstr{std::to_string(7).c_str(), 1}) << "777";
 
-	CHECK(ryml::emitrs<std::string>(tree) ==
+	CHECK(ryml::emitrs_yaml<std::string>(tree) ==
 		  // clang-format off
 R"(0: 000
 1: 111

@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "VCV_adaptor/engine/Light.hpp"
 // #include "VCV_adaptor/math.hpp"
 #include "VCV_adaptor/engine/Param.hpp"

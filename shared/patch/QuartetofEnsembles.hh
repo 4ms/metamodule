@@ -1,10 +1,10 @@
-static char QuartetofEnsembles_patch[] = 
-R"(
+static char QuartetofEnsembles_patch[] =
+	R"(
 PatchData:
   patch_name: Quartet of Ensembles
   description: 'Four EnOsc and a matrix mixer, what more do you need?'
   module_slugs:
-    0: PanelMedium
+    0: HubMedium
     1: EnOsc
     2: EnOsc
     3: EnOsc
@@ -331,29 +331,31 @@ PatchData:
       param_id: 14
       value: 0
   mapped_knobs:
-    - panel_knob_id: 0
-      module_id: 2
-      param_id: 4
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 1
-      module_id: 3
-      param_id: 4
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 2
-      module_id: 1
-      param_id: 4
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 3
-      module_id: 4
-      param_id: 4
-      curve_type: 0
-      min: 0
-      max: 1
+    - name: 'Default'
+      set:
+      - panel_knob_id: 0
+        module_id: 2
+        param_id: 4
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 1
+        module_id: 3
+        param_id: 4
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 2
+        module_id: 1
+        param_id: 4
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 3
+        module_id: 4
+        param_id: 4
+        curve_type: 0
+        min: 0
+        max: 1
 
 )";

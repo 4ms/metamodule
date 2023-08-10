@@ -47,7 +47,7 @@ public:
 		if (!hub)
 			return;
 
-		auto numMaps = std::min(hub->mappings.getNumMappings(mapBut.hubParamObj.objID), 16U);
+		auto numMaps = std::min(hub->mappings.getNumActiveMappings(mapBut.hubParamObj.objID), 16U);
 
 		// TODO: different color for each one
 		const float spacing = 8;

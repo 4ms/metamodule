@@ -118,7 +118,7 @@ struct KnobEditPage : PageBase {
 		lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
 
 		// Mapped/unmapped label
-		auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), this_param_id);
+		auto mappedknob = patch.find_mapped_knob(0, PageList::get_selected_module_id(), this_param_id);
 		if (mappedknob && mappedknob->panel_knob_id < PanelDef::NumKnobs) {
 			nm.append("Mapped to Knob ");
 			nm.append(PanelDef::KnobNames[mappedknob->panel_knob_id]);

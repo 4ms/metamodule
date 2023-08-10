@@ -6,13 +6,16 @@
 #include "ryml_serial_chars.hh"
 
 void write(ryml::NodeRef *n, Jack const &jack);
-bool read(ryml::NodeRef const &n, Jack *jack);
+void write(ryml::NodeRef *n, MappedKnob const &mapped_knob);
+void write(ryml::NodeRef *n, MappedKnobSet const &knob_set);
 
-bool read(ryml::NodeRef const &n, InternalCable *cable);
-bool read(ryml::NodeRef const &n, MappedInputJack *j);
-bool read(ryml::NodeRef const &n, MappedOutputJack *j);
-bool read(ryml::NodeRef const &n, MappedKnob *k);
-bool read(ryml::NodeRef const &n, StaticParam *k);
+bool read(ryml::ConstNodeRef const &n, Jack *jack);
+bool read(ryml::ConstNodeRef const &n, InternalCable *cable);
+bool read(ryml::ConstNodeRef const &n, MappedInputJack *j);
+bool read(ryml::ConstNodeRef const &n, MappedOutputJack *j);
+bool read(ryml::ConstNodeRef const &n, MappedKnob *k);
+bool read(ryml::ConstNodeRef const &n, MappedKnobSet *ks);
+bool read(ryml::ConstNodeRef const &n, StaticParam *k);
 
 namespace RymlInit
 {

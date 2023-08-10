@@ -101,7 +101,7 @@ private:
 	Volume loaded_patch_vol_;
 
 	bool _load_patch() {
-		PatchData &patch = storage_.get_view_patch();
+		auto patch = storage_.get_view_patch();
 		auto patchid = storage_.get_view_patch_id();
 		auto vol = storage_.get_view_patch_vol();
 
