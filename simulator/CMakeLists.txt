@@ -32,7 +32,7 @@ file(
   ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/modules/*.c
   ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/components/*.c
   ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
-  # ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
+  ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
 
 # #################### SLS Export ##################################
 
@@ -41,13 +41,9 @@ file(STRINGS ${MM_ROOT}/firmware/src/gui/slsexport/meta5/filelist.txt
 list(TRANSFORM SLS_SOURCES
      PREPEND "${MM_ROOT}/firmware/src/gui/slsexport/meta5/")
 
-# FIXME: SLS symbols not found when linking library to the executable:
-# add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
-# ${CMAKE_CURRENT_BINARY_DIR}/meta5)
-
-# target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
-# target_compile_options(ui PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>:
-# -std=c++20>)
+# Fixup for compiler warning in LVGL 8.3.4:
+set_source_files_properties(${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c
+                            PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
 
 # #################### CoreModules ##################################
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
