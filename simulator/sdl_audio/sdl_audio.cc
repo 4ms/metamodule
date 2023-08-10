@@ -36,20 +36,22 @@ SDLAudio::SDLAudio(unsigned dev_id) {
 		return;
 	}
 
-	// device = SDL_OpenAudioDevice(device_name, 0, &requested, &audio_spec, SDL_AUDIO_ALLOW_ANY_CHANGE);
-	device = SDL_OpenAudioDevice(nullptr, 0, &requested, nullptr, SDL_AUDIO_ALLOW_ANY_CHANGE);
+	device = SDL_OpenAudioDevice(device_name, 0, &requested, &audio_spec, SDL_AUDIO_ALLOW_ANY_CHANGE);
 	if (device == 0) {
 		std::cout << "SDL: failed to open audio device: %s\n" << SDL_GetError();
 		return;
 	}
 	is_init = true;
 
+	bytes_per_frame = (int)audio_spec.channels * ((audio_spec.format == AUDIO_F32) ? 4 : 4);
+
 	std::cout << "SDL: Audio device " << device << " opened at " << audio_spec.freq << "Hz, ";
-	std::cout << audio_spec.channels << " channels, ";
+	std::cout << (int)audio_spec.channels << " channels, ";
 	std::cout << audio_spec.samples << " blocksize, ";
+	std::cout << bytes_per_frame << " bytes per frame, ";
 	std::cout << std::hex << audio_spec.format << " format code\n";
 
-	unpause();
+	pause();
 }
 
 SDLAudio::~SDLAudio() {
@@ -76,20 +78,7 @@ void SDLAudio::unpause(void) {
 void SDLAudio::audio_callback(void *userdata, uint8_t *stream, int len) {
 	auto instance = static_cast<SDLAudio *>(userdata);
 
-	auto buffer = std::span<float>(reinterpret_cast<float *>(stream), len / 4);
+	auto buffer = std::span<Frame>(reinterpret_cast<Frame *>(stream), len / instance->bytes_per_frame);
 
-	for (auto &sample : buffer) {
-	}
-}
-
-void test_audio_callback(void *userdata, uint8_t *stream, int len) {
-	auto buffer = std::span<float>(reinterpret_cast<float *>(stream), len / 4);
-
-	static float x = 0;
-	for (auto &sample : buffer) {
-		sample = x;
-		x += 0.001;
-		if (x > 0.25f)
-			x = -0.25f;
-	}
+	instance->callback(buffer);
 }

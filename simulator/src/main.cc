@@ -24,7 +24,6 @@ int main(int argc, char *argv[]) {
 
 	lv_init();
 	lv_port_disp_init(320, 240, zoom);
-	SDLAudio audio{0};
 
 	MetaModule::PatchPlayer patch_player;
 	MetaModule::PatchStorageProxy patch_storage{patch_path};
@@ -33,6 +32,23 @@ int main(int argc, char *argv[]) {
 	MetaModule::Ui ui{patch_playloader, patch_storage, patch_mod_queue};
 
 	ui.start();
+
+	SDLAudio audio{0};
+	audio.start([](std::span<SDLAudio::Frame> buffer) -> void {
+		static float x = 0;
+		static float y = 0;
+		for (auto &sample : buffer) {
+			sample.l = x;
+			sample.r = y;
+			x += 0.0011;
+			y += 0.0030;
+			if (x > 0.25f)
+				x = -0.25f;
+			if (y > 0.25f)
+				y = -0.25f;
+		}
+	});
+	audio.unpause();
 
 	while (ui.update()) {
 	}
