@@ -101,6 +101,12 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/Domain.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/scl.cpp
     #
+    # HetrickCV
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ASR.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/arr.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/Domain.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/scl.cpp
+    #
     # support files
     ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
     ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
