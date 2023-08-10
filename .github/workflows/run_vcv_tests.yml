@@ -12,9 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         os: 
-          - { os: windows, shell: msys2, rack-os-name: win-x64 } 
-          - { os: ubuntu,  shell: bash, rack-os-name: lin-x64  }
-          # - { os: macos,   shell: bash  }
+          # - { os: windows, shell: msys2, rack-os-name: win-x64 }    # runs out of memory - "cc1plus.exe: out of memory allocating 65536 bytes"
+          - { os: ubuntu,  shell: bash, rack-os-name: lin-x64  }      
     runs-on: '${{ matrix.os.os }}-latest'
     defaults:
       run:
