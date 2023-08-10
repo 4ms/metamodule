@@ -31,17 +31,6 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Get Rack-SDK
-        run: |
-          pushd $HOME
-          curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-${{ matrix.os.rack-os-name }}.zip
-          unzip Rack-SDK.zip
-
-      - name: Install mac dependencies
-        shell: bash
-        if: matrix.os.os == 'macos'
-        run: brew install ninja sdl2
-
       - name: Install windows dependencies (MSYS2)
         if: matrix.os.os =='windows'
         uses: msys2/setup-msys2@v2
@@ -49,6 +38,12 @@ jobs:
           msystem: mingw64
           install: >-
             git wget make tar unzip zip mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake autoconf automake libtool mingw-w64-x86_64-jq python zstd mingw-w64-x86_64-pkgconf
+
+      - name: Get Rack-SDK
+        run: |
+          pushd $HOME
+          curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-${{ matrix.os.rack-os-name }}.zip
+          unzip Rack-SDK.zip
 
       - name: Build and run tests
         run: |
