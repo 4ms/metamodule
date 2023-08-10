@@ -206,9 +206,24 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (is_patch_playing) {
+			// TODO:
+			// First, do a for/visit
+			for (auto &drawn_el : drawn_elements) {
+				auto update_element_from_params = [this, gui_el = drawn_el.gui_element](auto &el) -> void {
+					//call update_element() to redraw it, but also make it store the new value in patch.static_params
+				};
+				std::visit(update_element_from_params, drawn_el.element);
+			}
+
+			// Same for/visit loop as below, but instead of update_element() call get_static_value() which only returns get_static_knob_value
 			for (auto &drawn_el : drawn_elements) {
 				std::visit(
 					[this, gui_el = drawn_el.gui_element](auto &el) -> void {
+						auto val = patch.get_static_knob_value(gui_el.module_idx, gui_el.idx);
+						if (val) {
+							//redraw_element(el, val.value(), gui_el);
+						}
+
 						bool did_update = update_element(el, this->params, patch, gui_el);
 						if (did_update) {
 							if (map_settings.map_ring_flash_active)
