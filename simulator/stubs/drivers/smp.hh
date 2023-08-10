@@ -23,6 +23,7 @@ struct SMPControl {
 
 	template<uint32_t reg_num = 0>
 	static uint32_t read() {
+		return 0;
 	}
 
 	static uint32_t read(uint32_t reg_num) {

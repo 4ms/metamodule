@@ -1,0 +1,57 @@
+name: Build Simulator
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: 
+          # - { os: windows, shell: msys2 } # currently broken
+          - { os: ubuntu,  shell: bash  }
+          - { os: macos,   shell: bash  }
+        compiler: [ {cpp: clang++, c: clang},  {cpp: g++, c: gcc} ]
+        exclude:
+          - os: { os: windows, shell: msys2 }
+            compiler: {cpp: clang++, c: clang}
+          - os: { os: macos, shell: bash }
+            compiler: {cpp: g++, c: gcc}
+    runs-on: '${{ matrix.os.os }}-latest'
+    defaults:
+      run:
+        shell: '${{ matrix.os.shell }} {0}'
+    env:
+      CC: ${{ matrix.compiler.c }}
+      CXX: ${{ matrix.compiler.cpp }}
+          
+    steps:      
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      
+      - name: Install mac dependencies
+        if: matrix.os.os == 'macos'
+        run: |
+          brew install ninja sdl2 
+  
+      - name: Install linux dependencies
+        if: matrix.os.os =='ubuntu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build libsdl2-dev
+
+      - name: Configure and build test simulator
+        uses: threeal/cmake-action@v1.2.0
+        with: 
+          cxx-compiler: ${{ matrix.compiler.cpp }}
+          run-build: true
+          run-test: false
+          source-dir: "simulator"
+          generator: Ninja

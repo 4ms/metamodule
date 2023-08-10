@@ -15,6 +15,8 @@
 #include "patch/Seq8.hh"
 #include "patch/Showcase.hh"
 #include "patch/SpectralPings.hh"
+// #include "patch/braidslfo.hh"
+// #include "patch/dualatt.hh"
 #include "patch/envevenbraids.hh"
 #include "patch/twosimpleosc.yml.hh"
 
