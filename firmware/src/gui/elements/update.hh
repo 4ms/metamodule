@@ -14,6 +14,56 @@ namespace MetaModule
 namespace ElementUpdateImpl
 {
 
+inline std::optional<float> get_mapped_param_value(const Params &params, const GuiElement &gui_el) {
+	if (!gui_el.obj)
+		return {};
+
+	if (!gui_el.mapped_panel_id)
+		return {};
+
+	if (*gui_el.mapped_panel_id >= params.knobs.size())
+		return {};
+
+	//FixMe: return {} if latched value hasn't changed
+	return params.knobs[*gui_el.mapped_panel_id];
+}
+
+} // namespace ElementUpdateImpl
+
+// Knob update
+inline void
+update_element_value(const ParamElement &, const Params &params, PatchData &patch, const GuiElement &gui_el) {
+	auto val = ElementUpdateImpl::get_mapped_param_value(params, gui_el);
+
+	if (val.has_value())
+		patch.set_static_knob_value(gui_el.module_idx, gui_el.idx, val.value());
+}
+
+inline void update_element_value(const BaseElement &, const Params &, PatchData &, const GuiElement &) {
+}
+
+inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
+	bool updated_position = false;
+	constexpr int32_t threshold_degrees = 30;
+
+	int32_t angle = val * 3000.f - 1500.f;
+	if (angle < 0)
+		angle += 3600;
+	int32_t cur_angle = lv_img_get_angle(gui_el.obj);
+
+	if (std::abs(angle - cur_angle) > threshold_degrees) {
+		lv_img_set_angle(gui_el.obj, angle);
+		updated_position = true;
+	}
+
+	return updated_position;
+}
+inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
+	return false;
+}
+
+////////////////
+/*
 inline std::optional<float> get_param_value(const Params &params, const PatchData &patch, const GuiElement &gui_el) {
 	if (!gui_el.obj)
 		return {};
@@ -30,29 +80,6 @@ inline std::optional<float> get_param_value(const Params &params, const PatchDat
 		return patch.get_static_knob_value(gui_el.module_idx, gui_el.idx);
 	}
 	return val;
-}
-
-} // namespace ElementUpdateImpl
-
-// Knob update
-inline bool
-update_element(const Knob &element, const Params &params, const PatchData &patch, const GuiElement &gui_el) {
-	bool updated_position = false;
-	constexpr int32_t threshold_degrees = 30;
-
-	if (auto val = ElementUpdateImpl::get_param_value(params, patch, gui_el)) {
-		int32_t angle = val.value() * 3000.f - 1500.f;
-		if (angle < 0)
-			angle += 3600;
-		int32_t cur_angle = lv_img_get_angle(gui_el.obj);
-
-		if (std::abs(angle - cur_angle) > threshold_degrees) {
-			lv_img_set_angle(gui_el.obj, angle);
-			updated_position = true;
-		}
-	}
-
-	return updated_position;
 }
 
 // Slider update
@@ -181,5 +208,5 @@ update_element(const Toggle2pos &element, const Params &params, const PatchData 
 inline bool update_element(const BaseElement &, const Params &, const PatchData &, const GuiElement &) {
 	return false;
 }
-
+*/
 } // namespace MetaModule

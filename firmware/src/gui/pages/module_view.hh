@@ -176,11 +176,11 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				std::visit(
 					[this, gui_el = drawn_el.gui_element](auto &el) {
-						bool did_update = update_element(el, params, patch, gui_el);
-						if (did_update) {
-							if (settings.map_ring_flash_active)
-								MapRingDisplay::flash_once(gui_el.map_ring, settings.map_ring_style, true);
-						}
+						// bool did_update = update_element(el, params, patch, gui_el);
+						// if (did_update) {
+						// 	if (settings.map_ring_flash_active)
+						// 		MapRingDisplay::flash_once(gui_el.map_ring, settings.map_ring_style, true);
+						// }
 					},
 					drawn_el.element);
 			}

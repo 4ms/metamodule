@@ -206,26 +206,21 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (is_patch_playing) {
-			// TODO:
-			// First, do a for/visit
+
+			// Update mapped knob values
 			for (auto &drawn_el : drawn_elements) {
 				auto update_element_from_params = [this, gui_el = drawn_el.gui_element](auto &el) -> void {
-					//call update_element() to redraw it, but also make it store the new value in patch.static_params
+					update_element_value(el, params, patch, gui_el);
 				};
 				std::visit(update_element_from_params, drawn_el.element);
 			}
 
-			// Same for/visit loop as below, but instead of update_element() call get_static_value() which only returns get_static_knob_value
+			// Redraw all knobs
 			for (auto &drawn_el : drawn_elements) {
-				std::visit(
-					[this, gui_el = drawn_el.gui_element](auto &el) -> void {
-						auto val = patch.get_static_knob_value(gui_el.module_idx, gui_el.idx);
-						if (val) {
-							//redraw_element(el, val.value(), gui_el);
-						}
-
-						bool did_update = update_element(el, this->params, patch, gui_el);
-						if (did_update) {
+				auto redraw_elements_and_maprings = [this, gui_el = drawn_el.gui_element](auto &el) -> void {
+					auto val = patch.get_static_knob_value(gui_el.module_idx, gui_el.idx);
+					if (val.has_value()) {
+						if (redraw_element(el, gui_el, val.value())) {
 							if (map_settings.map_ring_flash_active)
 								MapRingDisplay::flash_once(gui_el.map_ring,
 														   map_settings.map_ring_style,
@@ -234,8 +229,9 @@ struct PatchViewPage : PageBase {
 							if (map_settings.scroll_to_active_param)
 								lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 						}
-					},
-					drawn_el.element);
+					}
+				};
+				std::visit(redraw_elements_and_maprings, drawn_el.element);
 			}
 		}
 	}
