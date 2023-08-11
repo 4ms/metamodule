@@ -20,7 +20,7 @@ private:
 
 	MessageQueue msg_queue;
 	PageManager page_manager;
-	Params params;
+	ParamsState params;
 	MetaParams metaparams;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
@@ -90,7 +90,7 @@ private:
 
 	void page_update_task() { //60Hz
 		//This returns false when audio stops
-		bool read_ok = param_cache.read_sync(&params, &metaparams);
+		bool read_ok = param_cache.read_sync(params, metaparams);
 		page_manager.update_current_page();
 		patch_playloader.handle_sync_patch_loading();
 	}

@@ -2,7 +2,7 @@
 #include "conf/panel_conf.hh"
 #include "gui/message_queue.hh"
 #include "lvgl.h"
-#include "params.hh"
+#include "param_cache.hh"
 #include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
@@ -17,7 +17,7 @@ enum class PageChangeDirection { Back, Forward, Jump };
 struct PatchInfo {
 	PatchStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
-	Params &params;
+	ParamsState &params;
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
@@ -26,7 +26,7 @@ struct PatchInfo {
 struct PageBase {
 	PatchStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
-	Params &params;
+	ParamsState &params;
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;

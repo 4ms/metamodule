@@ -89,7 +89,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin0::high();
 
-		ParamCacheSync sync{param_cache, param_blocks[block]};
+		ParamCacheSync sync{param_cache, param_state, param_blocks[block]};
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -181,6 +181,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	// Handle jacks being plugged/unplugged
 	propagate_sense_pins(param_block.params[0]);
 	const auto jack_sense = param_block.params[0].jack_senses;
+	param_state.jack_senses = jack_sense;
 
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 
@@ -199,27 +200,30 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// Pass CV values to modules (not in current version)
-		for (auto [i, cv] : countzip(params_.cvjacks))
-			player.set_panel_input(i + FirstCVInput, cv);
+		// for (auto [i, cv] : countzip(params_.cvjacks))
+		// 	player.set_panel_input(i + FirstCVInput, cv);
 
-		for (auto [i, gatein] : countzip(params_.gate_ins))
+		for (auto [i, gatein] : countzip(params_.gate_ins)) {
 			player.set_panel_input(i + FirstGateInput, gatein.is_high() ? 1.f : 0.f);
+			//TODO: set param_state.gate_ins if it changed
+		}
 
 		// Pass Knob values to modules
-		for (auto [i, knob, latched] : countzip(params_.knobs, param_cache.latched_knobs)) {
-			if (std::abs(knob - latched) > 1.5f / 4096.f) {
+		for (auto [i, knob, latch] : countzip(params_.knobs, param_state.knobs)) {
+			if (latch.store_changed(knob))
 				player.set_panel_param(i, knob);
-				latched = knob;
-			}
 		}
 
 		// TODO: add more MIDI mappings (duo/quad/octophonic, CC=>gate, CC=>param, CC=>jack)
 		if (param_block.metaparams.midi_connected) {
 			player.set_panel_param(MidiMonoNoteParam, params_.midi_note);
+			//TODO: set param_state.midi_note if it changed
+
 			// player.set_panel_param(MidiMonoGateParam, params_.midi_gate);
 
 			// player.set_panel_input(FirstMidiNoteInput, params_.midi_note);
 			player.set_panel_input(MidiMonoGateJack, params_.midi_gate);
+			//TODO: set param_state.midi_gate if it changed
 		}
 
 		// Run each module
@@ -230,12 +234,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			outchan = get_audio_output(i);
 
 		// DAC output (not in current hardware)
-		for (unsigned i = 0; i < PanelDef::NumDACOut; i++)
-			aux_.set_output(i, get_dac_output(i + PanelDef::NumAudioOut));
+		// for (unsigned i = 0; i < PanelDef::NumDACOut; i++)
+		// 	aux_.set_output(i, get_dac_output(i + PanelDef::NumAudioOut));
 
 		// Gate outputs (not in current hardware)
-		for (auto [i, gate_out] : countzip(aux_.gate_out))
-			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
+		// for (auto [i, gate_out] : countzip(aux_.gate_out))
+		// 	gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
 }
 

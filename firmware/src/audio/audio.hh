@@ -49,6 +49,7 @@ public:
 
 private:
 	ParamCache &param_cache;
+	ParamsState param_state;
 	PatchPlayLoader &patch_loader;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
