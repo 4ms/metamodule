@@ -61,11 +61,10 @@ public:
 			last_lvgl_task_tm = tm;
 		}
 
-		transfer_aux_button_events();
-		transfer_params();
-
 		tm = lv_tick_get();
 		if (tm - last_page_task_tm >= 16) {
+			transfer_aux_button_events();
+			transfer_params();
 			page_update_task();
 			last_page_task_tm = tm;
 		}
@@ -104,6 +103,8 @@ private:
 
 	void transfer_params() {
 		if (unsigned cur_param = input_driver.selected_param(); cur_param < params.knobs.size()) {
+			params.knobs[cur_param].changed = false;
+
 			if (input_driver.param_inc()) {
 				params.knobs[cur_param].val = std::clamp(params.knobs[cur_param] + 0.05f, 0.f, 1.f);
 				params.knobs[cur_param].changed = true;
