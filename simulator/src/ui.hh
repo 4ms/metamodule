@@ -1,4 +1,5 @@
 #pragma once
+#include "audio_stream.hh"
 #include "lv_port_indev.h"
 #define printf_ printf
 ///
@@ -21,6 +22,8 @@ private:
 	PageManager page_manager;
 	ParamsState params;
 	MetaParams metaparams;
+
+	Player player;
 
 	LvglEncoderSimulatorDriver input_driver{keys};
 

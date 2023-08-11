@@ -121,8 +121,8 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 # #################### Application ############################################
 
 add_executable(
-  simulator src/main.cc sdl_audio/sdl_audio.cc ${CORE_MODULES} ${GUI_IMAGES}
-            ${SLS_SOURCES} ${MM_ROOT}/firmware/src/gui/pages/page_manager.cc)
+  simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES} ${SLS_SOURCES}
+            ${MM_ROOT}/firmware/src/gui/pages/page_manager.cc)
 
 target_include_directories(
   simulator
