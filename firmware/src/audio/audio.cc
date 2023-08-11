@@ -46,12 +46,12 @@ static constexpr unsigned block_1 = 1 - block_0;
 AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
-						 SyncParams &paramcache,
+						 SyncParams &sync_params,
 						 PatchPlayLoader &patchloader,
 						 DoubleBufParamBlock &p,
 						 DoubleAuxStreamBlock &auxs,
 						 PatchModQueue &patch_mod_queue)
-	: param_cache{paramcache}
+	: sync_params{sync_params}
 	, patch_loader{patchloader}
 	, param_blocks{p}
 	, audio_blocks{{.in_codec = audio_in_block.codec[0],
@@ -100,8 +100,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.end_measurement();
 
-		param_cache.write_sync(param_state, param_blocks[block].metaparams);
-		mdrivlib::SystemCache::clean_dcache_by_range(&param_cache, sizeof(SyncParams));
+		sync_params.write_sync(param_state, param_blocks[block].metaparams);
+		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof(SyncParams));
 
 		// Debug::Pin0::low();
 	};

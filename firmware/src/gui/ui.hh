@@ -16,7 +16,7 @@ namespace MetaModule
 {
 class Ui {
 private:
-	SyncParams &param_cache;
+	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
 
 	MessageQueue msg_queue;
@@ -33,9 +33,9 @@ private:
 public:
 	Ui(PatchPlayLoader &patch_playloader,
 	   PatchStorageProxy &patch_storage,
-	   SyncParams &pc,
+	   SyncParams &sync_params,
 	   PatchModQueue &patch_mod_queue)
-		: param_cache{pc}
+		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
 		, msg_queue{1024}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
@@ -91,7 +91,7 @@ private:
 
 	void page_update_task() { //60Hz
 		//This returns false when audio stops
-		bool read_ok = param_cache.read_sync(params, metaparams);
+		bool read_ok = sync_params.read_sync(params, metaparams);
 		page_manager.update_current_page();
 		patch_playloader.handle_sync_patch_loading();
 	}
