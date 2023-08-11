@@ -3,7 +3,7 @@
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
 #include "lvgl.h"
-#include "param_cache.hh"
+#include "params_state.hh"
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 #include <optional>
@@ -18,13 +18,13 @@ inline std::optional<float> get_mapped_param_value(const ParamsState &params, co
 	if (!gui_el.obj)
 		return {};
 
-	if (!gui_el.mapped_panel_id)
+	if (!gui_el.mapped_panel_id.has_value())
 		return {};
 
-	if (*gui_el.mapped_panel_id >= params.knobs.size())
+	if (gui_el.mapped_panel_id.value() >= params.knobs.size())
 		return {};
 
-	auto latched = params.knobs[*gui_el.mapped_panel_id];
+	auto latched = params.knobs[gui_el.mapped_panel_id.value()];
 	if (latched.changed)
 		return latched.val;
 	else
@@ -48,24 +48,27 @@ inline void update_element_value(const BaseElement &, const ParamsState &, Patch
 // TODO separate file for redraw_element
 
 inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
-	bool updated_position = false;
-	constexpr int32_t threshold_degrees = 30;
+	bool did_update_position = false;
+
+	constexpr int32_t threshold_centidegrees = 30; // = 3.0 degrees
 
 	int32_t angle = val * 3000.f - 1500.f;
 	if (angle < 0)
 		angle += 3600;
 	int32_t cur_angle = lv_img_get_angle(gui_el.obj);
 
-	if (std::abs(angle - cur_angle) > threshold_degrees) {
+	if (std::abs(angle - cur_angle) > threshold_centidegrees) {
 		lv_img_set_angle(gui_el.obj, angle);
-		updated_position = true;
+		did_update_position = true;
 	}
 
-	return updated_position;
+	return did_update_position;
 }
 
 // Slider update
 inline bool redraw_element(const Slider &element, const GuiElement &gui_el, float val) {
+	bool did_update_position = false;
+
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {
 		pr_err("No handle sub-object for slider %16s\n", element.short_name.data());
@@ -81,6 +84,7 @@ inline bool redraw_element(const Slider &element, const GuiElement &gui_el, floa
 		int32_t cur_pos = lv_obj_get_y(handle);
 		if (pos != cur_pos) {
 			lv_obj_set_y(handle, pos);
+			did_update_position = true;
 		}
 
 	} else {
@@ -90,13 +94,18 @@ inline bool redraw_element(const Slider &element, const GuiElement &gui_el, floa
 		int32_t cur_pos = lv_obj_get_x(handle);
 		if (pos != cur_pos) {
 			lv_obj_set_x(handle, pos);
+			did_update_position = true;
 		}
 	}
+
+	return did_update_position;
 }
 
 // Toggle update
 inline bool redraw_element(const Toggle3pos &element, const GuiElement &gui_el, float val) {
 	using enum Toggle3pos::State_t;
+
+	bool did_update_position = false;
 
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {
@@ -127,15 +136,16 @@ inline bool redraw_element(const Toggle3pos &element, const GuiElement &gui_el, 
 			lv_obj_set_y(handle, height / 2);
 			lv_obj_set_height(handle, height / 2);
 		}
-		return true;
+		did_update_position = true;
 	}
 
-	return false;
+	return did_update_position;
 	// TODO: Horizontal Toggle
 }
 
 // Toggle 2pos update
 inline bool redraw_element(const Toggle2pos &element, const GuiElement &gui_el, float val) {
+	bool did_update_position = false;
 	using enum Toggle2pos::State_t;
 
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
@@ -163,9 +173,10 @@ inline bool redraw_element(const Toggle2pos &element, const GuiElement &gui_el, 
 			lv_obj_set_y(handle, height / 2);
 			lv_obj_set_height(handle, height / 2);
 		}
-		return true;
+		did_update_position = true;
 	}
-	return false;
+
+	return did_update_position;
 }
 
 inline bool redraw_element(const BaseElement &, const GuiElement &, float) {

@@ -6,12 +6,14 @@
 #include "drivers/codec_PCM3168.hh"
 #include "drivers/cycle_counter.hh"
 #include "drivers/stm32xx.h"
-#include "param_cache.hh"
+#include "param_block.hh"
 #include "params.hh"
+#include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
 #include "processors/tools/kneeCompress.h"
+#include "sync_params.hh"
 #include "util/calibrator.hh"
 #include "util/edge_detector.hh"
 #include "util/interp_param.hh"
@@ -37,7 +39,7 @@ public:
 	AudioStream(PatchPlayer &patchplayer,
 				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
-				ParamCache &paramcache,
+				SyncParams &paramcache,
 				PatchPlayLoader &patchloader,
 				DoubleBufParamBlock &p,
 				DoubleAuxStreamBlock &auxs,
@@ -48,7 +50,7 @@ public:
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxStreamBlock &aux);
 
 private:
-	ParamCache &param_cache;
+	SyncParams &param_cache;
 	ParamsState param_state;
 	PatchPlayLoader &patch_loader;
 	DoubleBufParamBlock &param_blocks;

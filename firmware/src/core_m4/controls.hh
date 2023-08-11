@@ -11,6 +11,8 @@
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
+#include "metaparams.hh"
+#include "param_block.hh"
 #include "params.hh"
 #include "usb/midi_host.hh"
 #include "usb/midi_message.hh"

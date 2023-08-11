@@ -15,7 +15,7 @@ namespace MetaModule
 {
 class Ui {
 private:
-	ParamCache &param_cache;
+	SyncParams &param_cache;
 	PatchPlayLoader &patch_playloader;
 
 	MessageQueue msg_queue;
@@ -32,7 +32,7 @@ private:
 public:
 	Ui(PatchPlayLoader &patch_playloader,
 	   PatchStorageProxy &patch_storage,
-	   ParamCache &pc,
+	   SyncParams &pc,
 	   PatchModQueue &patch_mod_queue)
 		: param_cache{pc}
 		, patch_playloader{patch_playloader}

@@ -45,7 +45,7 @@ void main() {
 		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
 	PatchPlayLoader patch_playloader{patch_storage_proxy, patch_player};
 
-	ParamCache param_cache;
+	SyncParams param_cache;
 	PatchModQueue patch_mod_queue;
 
 	AudioStream audio{patch_player,

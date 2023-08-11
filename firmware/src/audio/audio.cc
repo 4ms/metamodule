@@ -7,9 +7,10 @@
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
-#include "param_cache.hh"
+#include "param_block.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
+#include "sync_params.hh"
 #include "uart_log.hh"
 #include "util/calibrator.hh"
 #include "util/countzip.hh"
@@ -45,7 +46,7 @@ static constexpr unsigned block_1 = 1 - block_0;
 AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
-						 ParamCache &paramcache,
+						 SyncParams &paramcache,
 						 PatchPlayLoader &patchloader,
 						 DoubleBufParamBlock &p,
 						 DoubleAuxStreamBlock &auxs,
@@ -89,8 +90,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin0::high();
 
-		ParamCacheSync sync{param_cache, param_state, param_blocks[block]};
-
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 		load_measure.start_measurement();
@@ -100,6 +99,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		process(audio_blocks[1 - block], param_blocks[block], auxsigs[block]);
 
 		load_measure.end_measurement();
+
+		param_cache.write_sync(param_state, param_blocks[block].metaparams);
+		mdrivlib::SystemCache::clean_dcache_by_range(&param_cache, sizeof(SyncParams));
 
 		// Debug::Pin0::low();
 	};
