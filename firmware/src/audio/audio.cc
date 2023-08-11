@@ -46,14 +46,14 @@ static constexpr unsigned block_1 = 1 - block_0;
 AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
-						 SyncParams &sync_params,
+						 SyncParams &sync_p,
 						 PatchPlayLoader &patchloader,
-						 DoubleBufParamBlock &p,
+						 DoubleBufParamBlock &pblk,
 						 DoubleAuxStreamBlock &auxs,
 						 PatchModQueue &patch_mod_queue)
-	: sync_params{sync_params}
+	: sync_params{sync_p}
 	, patch_loader{patchloader}
-	, param_blocks{p}
+	, param_blocks{pblk}
 	, audio_blocks{{.in_codec = audio_in_block.codec[0],
 					.out_codec = audio_out_block.codec[0],
 					.in_ext_codec = audio_in_block.ext_codec[0],

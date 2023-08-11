@@ -206,32 +206,22 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (is_patch_playing) {
+			update_changed_params();
+		}
+	}
 
-			// Update mapped knob values
-			for (auto &drawn_el : drawn_elements) {
-				auto update_element_from_params = [this, gui_el = drawn_el.gui_element](auto &el) -> void {
-					update_element_value(el, params, patch, gui_el);
-				};
-				std::visit(update_element_from_params, drawn_el.element);
-			}
+	void update_changed_params() {
+		// Redraw all knobs
+		for (auto &drawn_el : drawn_elements) {
+			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
+			if (was_redrawn) {
+				auto &gui_el = drawn_el.gui_element;
+				if (map_settings.map_ring_flash_active)
+					MapRingDisplay::flash_once(
+						gui_el.map_ring, map_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
 
-			// Redraw all knobs
-			for (auto &drawn_el : drawn_elements) {
-				auto redraw_elements_and_maprings = [this, gui_el = drawn_el.gui_element](auto &el) -> void {
-					auto val = patch.get_static_knob_value(gui_el.module_idx, gui_el.idx);
-					if (val.has_value()) {
-						if (redraw_element(el, gui_el, val.value())) {
-							if (map_settings.map_ring_flash_active)
-								MapRingDisplay::flash_once(gui_el.map_ring,
-														   map_settings.map_ring_style,
-														   highlighted_module_id == gui_el.module_idx);
-
-							if (map_settings.scroll_to_active_param)
-								lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
-						}
-					}
-				};
-				std::visit(redraw_elements_and_maprings, drawn_el.element);
+				if (map_settings.scroll_to_active_param)
+					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 			}
 		}
 	}
