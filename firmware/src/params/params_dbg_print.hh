@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/jack_sense_conf.hh"
-#include "params.hh"
+#include "params/metaparams.hh"
+#include "params/params_state.hh"
 #include "printf.h"
 #include "util/countzip.hh"
 #include "util/term_codes.hh"
@@ -9,10 +10,10 @@ namespace MetaModule
 {
 
 struct ParamDbgPrint {
-	Params &params;
+	ParamsState &params;
 	MetaParams &metaparams;
 
-	ParamDbgPrint(Params &params, MetaParams &metaparams)
+	ParamDbgPrint(ParamsState &params, MetaParams &metaparams)
 		: params{params}
 		, metaparams{metaparams} {
 	}

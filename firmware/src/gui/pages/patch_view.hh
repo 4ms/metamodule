@@ -206,21 +206,22 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (is_patch_playing) {
-			for (auto &drawn_el : drawn_elements) {
-				std::visit(
-					[this, gui_el = drawn_el.gui_element](auto &el) -> void {
-						bool did_update = update_element(el, this->params, patch, gui_el);
-						if (did_update) {
-							if (map_settings.map_ring_flash_active)
-								MapRingDisplay::flash_once(gui_el.map_ring,
-														   map_settings.map_ring_style,
-														   highlighted_module_id == gui_el.module_idx);
+			update_changed_params();
+		}
+	}
 
-							if (map_settings.scroll_to_active_param)
-								lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
-						}
-					},
-					drawn_el.element);
+	void update_changed_params() {
+		// Redraw all knobs
+		for (auto &drawn_el : drawn_elements) {
+			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
+			if (was_redrawn) {
+				auto &gui_el = drawn_el.gui_element;
+				if (map_settings.map_ring_flash_active)
+					MapRingDisplay::flash_once(
+						gui_el.map_ring, map_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
+
+				if (map_settings.scroll_to_active_param)
+					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 			}
 		}
 	}

@@ -1,40 +1,44 @@
 #pragma once
 #include "conf/hsem_conf.hh"
-#include "drivers/cache.hh"
 #include "drivers/hsem.hh"
-#include "params.hh"
+#include "metaparams.hh"
+#include "params_state.hh"
 
-// ParamCache class
-// Stores a copy of Params and MetaParams and allows thread-safe R/W access.
-//
 namespace MetaModule
 {
 
-struct ParamCache {
-	Params p;
+// SyncParams class
+// Thread-safe sharing of ParamsState and MetaParams.
+// Each writer and reader keeps their own copy of data.
+// Non-blocking, if simultaneous read/write occurs, it just returns
+// (unmodified local copy will still be valid, just out-dated)
+struct SyncParams {
+	ParamsState p;
 	MetaParams m;
 
 	static constexpr uint32_t WriteProcID = 1;
 	static constexpr uint32_t ReadProcID = 2;
 
-	ParamCache() {
+	SyncParams() {
 		clear();
 	}
 
-	void write_sync(Params &p_, MetaParams &m_) {
+	// Writes the ParamCache
+	void write_sync(ParamsState &p_, MetaParams &m_) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
-			p.copy(p_);
+			p.move_from(p_);
 			m.update_with(m_);
 			HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
 		}
 	}
 
-	bool read_sync(Params *params, MetaParams *metaparams) {
+	// Writes the ParamCache
+	bool read_sync(ParamsState &params, MetaParams &metaparams) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(ReadProcID) == HWSemaphoreFlag::LockedOk) {
-			params->copy(p);
-			metaparams->transfer(m);
+			p.copy_to(params);
+			metaparams.transfer(m);
 			HWSemaphore<ParamCacheLock>::unlock(ReadProcID);
 			return true;
 		}
@@ -48,21 +52,6 @@ struct ParamCache {
 			m.clear();
 			HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
 		}
-	}
-};
-
-struct ParamCacheSync {
-	ParamCache &param_cache;
-	ParamBlock &param_block;
-
-	ParamCacheSync(ParamCache &param_cache, ParamBlock &param_block)
-		: param_cache{param_cache}
-		, param_block{param_block} {
-	}
-
-	~ParamCacheSync() {
-		param_cache.write_sync(param_block.params[0], param_block.metaparams);
-		mdrivlib::SystemCache::clean_dcache_by_range(&param_cache, sizeof(ParamCache));
 	}
 };
 

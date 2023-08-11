@@ -45,13 +45,13 @@ void main() {
 		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
 	PatchPlayLoader patch_playloader{patch_storage_proxy, patch_player};
 
-	ParamCache param_cache;
+	SyncParams sync_params;
 	PatchModQueue patch_mod_queue;
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
-					  param_cache,
+					  sync_params,
 					  patch_playloader,
 					  StaticBuffers::param_blocks,
 					  StaticBuffers::auxsignal_block,
@@ -80,8 +80,8 @@ void main() {
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
 
-	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue};
-	param_cache.clear();
+	Ui ui{patch_playloader, patch_storage_proxy, sync_params, patch_mod_queue};
+	sync_params.clear();
 	//TODO: load the initial patch by getting patch_storage_proxy to make requests
 	//to patch_storage...
 	patch_playloader.load_initial_patch();

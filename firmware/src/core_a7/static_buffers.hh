@@ -6,6 +6,8 @@
 #include "core_intercom/patch_icc_message.hh"
 #include "fs/ramdisk.hh"
 #include "lvgl/src/misc/lv_color.h" // for lv_color_t
+#include "metaparams.hh"
+#include "param_block.hh"
 #include "params.hh"
 #include "patch_file/patch_file.hh"
 #include <span>
