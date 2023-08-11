@@ -5,7 +5,6 @@
 #include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
-#include "sync_params.hh"
 
 #include "gui/pages/knob_edit.hh"
 #include "gui/pages/module_view.hh"

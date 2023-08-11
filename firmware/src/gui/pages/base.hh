@@ -2,12 +2,11 @@
 #include "conf/panel_conf.hh"
 #include "gui/message_queue.hh"
 #include "lvgl.h"
-#include "metaparams.hh"
-#include "params_state.hh"
+#include "params/metaparams.hh"
+#include "params/params_state.hh"
 #include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
-#include "sync_params.hh"
 
 // Use for helpers:
 

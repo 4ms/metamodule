@@ -1,8 +1,8 @@
 #pragma once
 #include "conf/jack_sense_conf.hh"
-#include "params.hh"
+#include "params/metaparams.hh"
+#include "params/params_state.hh"
 #include "printf.h"
-#include "sync_params.hh"
 #include "util/countzip.hh"
 #include "util/term_codes.hh"
 
