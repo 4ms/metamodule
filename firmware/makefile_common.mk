@@ -1,12 +1,11 @@
-ARCH 	?= $(ARM_NONE_EABI_PATH)
-CC 		= $(ARCH)-gcc
-CXX 	= $(ARCH)-g++
-LD 		= $(ARCH)-g++
-AS 		= $(ARCH)-as
-OBJCPY 	= $(ARCH)-objcopy
-OBJDMP 	= $(ARCH)-objdump
-GDB 	= $(ARCH)-gdb
-SZ 		= $(ARCH)-size
+CC 		= $(ARM_NONE_EABI_PATH)-gcc
+CXX 	= $(ARM_NONE_EABI_PATH)-g++
+LD 		= $(ARM_NONE_EABI_PATH)-g++
+AS 		= $(ARM_NONE_EABI_PATH)-as
+OBJCPY 	= $(ARM_NONE_EABI_PATH)-objcopy
+OBJDMP 	= $(ARM_NONE_EABI_PATH)-objdump
+GDB 	= $(ARM_NONE_EABI_PATH)-gdb
+SZ 		= $(ARM_NONE_EABI_PATH)-size
 
 SZOPTS 	= -d
 
