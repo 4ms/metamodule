@@ -3,13 +3,14 @@
 namespace MetaModule
 {
 
-Ui::Ui(PatchPlayLoader &patch_playloader, PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
+Ui::Ui(PatchPlayLoader &patch_playloader,
+	   PatchStorageProxy &patch_storage,
+	   PatchModQueue &patch_mod_queue,
+	   PatchPlayer &patch_player)
 	: patch_playloader{patch_playloader}
 	, msg_queue{1024}
-	, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
-}
-
-void Ui::start() {
+	, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue}
+	, audio_stream{params, patch_player, patch_playloader} {
 	params.clear();
 	metaparams.clear();
 
@@ -21,7 +22,7 @@ void Ui::start() {
 
 // "Scheduler" for UI tasks
 // returns true until it gets a QUIT event
-bool Ui::update() {
+bool Ui::run() {
 
 	auto tm = lv_tick_get(); //milliseconds
 	if (tm - last_lvgl_task_tm >= 1) {
@@ -41,8 +42,8 @@ bool Ui::update() {
 	return keep_running;
 }
 
-void Ui::run_patch(std::span<Frame> buffer) {
-	player.play(buffer);
+void Ui::play_patch(std::span<Frame> buffer) {
+	audio_stream.play(buffer);
 }
 
 void Ui::lvgl_update_task() {

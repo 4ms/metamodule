@@ -20,7 +20,7 @@ class Ui {
 	PageManager page_manager;
 	ParamsState params;
 	MetaParams metaparams;
-	Player player;
+	AudioStream audio_stream;
 	LvglEncoderSimulatorDriver input_driver{keys};
 
 	RotaryEncoderKeys keys{
@@ -34,11 +34,13 @@ class Ui {
 	};
 
 public:
-	Ui(PatchPlayLoader &patch_playloader, PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue);
+	Ui(PatchPlayLoader &patch_playloader,
+	   PatchStorageProxy &patch_storage,
+	   PatchModQueue &patch_mod_queue,
+	   PatchPlayer &player);
 
-	void start();
-	bool update();
-	void run_patch(std::span<Frame> buffer);
+	bool run();
+	void play_patch(std::span<Frame> buffer);
 
 private:
 	uint32_t last_lvgl_task_tm = 0;

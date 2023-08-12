@@ -98,5 +98,4 @@ private:
 
 		instance->callback(buffer);
 	}
-
 };

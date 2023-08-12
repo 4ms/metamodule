@@ -31,15 +31,13 @@ int main(int argc, char *argv[]) {
 	MetaModule::PatchStorageProxy patch_storage{patch_path};
 	MetaModule::PatchPlayLoader patch_playloader{patch_storage, patch_player};
 	MetaModule::PatchModQueue patch_mod_queue;
-	MetaModule::Ui ui{patch_playloader, patch_storage, patch_mod_queue};
-
-	ui.start();
+	MetaModule::Ui ui{patch_playloader, patch_storage, patch_mod_queue, patch_player};
 
 	SDLAudio<Frame> audio{0};
-	audio.start([&ui](std::span<Frame> buffer) -> void { ui.run_patch(buffer); });
+	audio.start([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
 	audio.unpause();
 
-	while (ui.update()) {
+	while (ui.run()) {
 	}
 
 	lv_port_disp_deinit();
