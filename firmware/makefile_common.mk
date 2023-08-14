@@ -1,12 +1,14 @@
-ARCH 	?= $(ARM_NONE_EABI_PATH)
-CC 		= $(ARCH)-gcc
-CXX 	= $(ARCH)-g++
-LD 		= $(ARCH)-g++
-AS 		= $(ARCH)-as
-OBJCPY 	= $(ARCH)-objcopy
-OBJDMP 	= $(ARCH)-objdump
-GDB 	= $(ARCH)-gdb
-SZ 		= $(ARCH)-size
+METAMODULE_ARM_NONE_EABI_PATH ?=
+#TODO: check if it ends in a /, and add if needed
+
+CC 		= $(METAMODULE_ARM_NONE_EABI_PATH)arm-none-eabi-gcc
+CXX 	= $(METAMODULE_ARM_NONE_EABI_PATH)arm-none-eabi-g++
+LD 		= $(METAMODULE_ARM_NONE_EABI_PATH)arm-none-eabi-g++
+AS 		= $(METAMODULE_ARM_NONE_EABI_PATH)arm-none-eabi-as
+OBJCPY 	= $(METAMODULE_ARM_NONE_EABI_PATH)arm-none-eabi-objcopy
+OBJDMP 	= $(METAMODULE_ARM_NONE_EABI_PATH)arm-none-eabi-objdump
+GDB 	= $(METAMODULE_ARM_NONE_EABI_PATH)arm-none-eabi-gdb
+SZ 		= $(METAMODULE_ARM_NONE_EABI_PATH)arm-none-eabi-size
 
 SZOPTS 	= -d
 
