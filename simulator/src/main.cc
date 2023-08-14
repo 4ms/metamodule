@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 	audio.unpause();
 
 	// Run until get QUIT event
-	while (ui.run()) {
+	while (ui.update()) {
 	}
 
 	lv_port_disp_deinit();
