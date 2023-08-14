@@ -55,6 +55,7 @@ struct SDLAudio {
 		std::cout << audio_spec.samples << " blocksize, ";
 		std::cout << bytes_per_frame << " bytes per frame, ";
 		std::cout << std::hex << audio_spec.format << " format code\n";
+		std::cout << std::dec;
 
 		pause();
 	}
@@ -68,7 +69,7 @@ struct SDLAudio {
 		SDL_CloseAudioDevice(device);
 	}
 
-	void start(Callback &&cb) {
+	void set_callback(Callback &&cb) {
 		callback = std::move(cb);
 	}
 
@@ -82,6 +83,10 @@ struct SDLAudio {
 		if (is_init) {
 			SDL_PauseAudioDevice(device, 0);
 		}
+	}
+
+	size_t get_block_size() {
+		return is_init ? audio_spec.samples : 512;
 	}
 
 private:

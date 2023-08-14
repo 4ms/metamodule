@@ -8,8 +8,11 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-	// Set zoom to startup with a larger window (zoomed in)
+	// Set zoom to startup with a larger window (zoomed in) TODO: make cli option
 	int zoom = 2;
+
+	// Index of audio device for SDL to use TODO: make cli option
+	unsigned audio_device_index = 0;
 
 	// First argument is path to dir with patch files
 	std::string_view patch_path{""};
@@ -27,16 +30,14 @@ int main(int argc, char *argv[]) {
 	lv_init();
 	lv_port_disp_init(320, 240, zoom);
 
-	MetaModule::PatchPlayer patch_player;
-	MetaModule::PatchStorageProxy patch_storage{patch_path};
-	MetaModule::PatchPlayLoader patch_playloader{patch_storage, patch_player};
-	MetaModule::PatchModQueue patch_mod_queue;
-	MetaModule::Ui ui{patch_playloader, patch_storage, patch_mod_queue, patch_player};
+	SDLAudio<Frame> audio{audio_device_index};
 
-	SDLAudio<Frame> audio{0};
-	audio.start([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
+	MetaModule::Ui ui{patch_path, audio.get_block_size()};
+
+	audio.set_callback([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
 	audio.unpause();
 
+	// Run until get QUIT event
 	while (ui.run()) {
 	}
 

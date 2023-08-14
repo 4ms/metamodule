@@ -3,14 +3,12 @@
 namespace MetaModule
 {
 
-Ui::Ui(PatchPlayLoader &patch_playloader,
-	   PatchStorageProxy &patch_storage,
-	   PatchModQueue &patch_mod_queue,
-	   PatchPlayer &patch_player)
-	: patch_playloader{patch_playloader}
+Ui::Ui(std::string_view patch_path, size_t block_size)
+	: patch_storage(patch_path)
 	, msg_queue{1024}
 	, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue}
-	, audio_stream{params, patch_player, patch_playloader} {
+	, in_buffer(block_size)
+	, out_buffer(block_size) {
 	params.clear();
 	metaparams.clear();
 
@@ -18,6 +16,9 @@ Ui::Ui(PatchPlayLoader &patch_playloader,
 	page_manager.init();
 
 	patch_playloader.audio_is_muted();
+	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";
+
+	params.jack_senses = 0xFFFFFFFF;
 }
 
 // "Scheduler" for UI tasks
@@ -42,8 +43,27 @@ bool Ui::run() {
 	return keep_running;
 }
 
-void Ui::play_patch(std::span<Frame> buffer) {
-	audio_stream.play(buffer);
+void Ui::play_patch(std::span<Frame> soundcard_out) {
+	// assert(soundcard_out.size() == out_buffer.size());
+
+	//TODO: enable soundcard audio input
+	// for (size_t i = 0; auto &frame : out_buffer) {
+	// 	auto &in = soundcard_in[i++];
+
+	// 	frame.chan[0] = in.l;
+	// 	frame.chan[1] = in.r;
+	// }
+
+	audio_stream.process(in_buffer, out_buffer);
+
+	for (size_t i = 0; auto &frame : out_buffer) {
+		auto &out = soundcard_out[i++];
+
+		//TODO: allow routing to be dynamically configured
+		// For now out 1 -> SDL 1, and 2->2
+		out.l = frame.chan[0];
+		out.r = frame.chan[1];
+	}
 }
 
 void Ui::lvgl_update_task() {

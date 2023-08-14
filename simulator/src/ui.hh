@@ -15,13 +15,6 @@ namespace MetaModule
 {
 
 class Ui {
-	PatchPlayLoader &patch_playloader;
-	MessageQueue msg_queue;
-	PageManager page_manager;
-	ParamsState params;
-	MetaParams metaparams;
-	AudioStream audio_stream;
-	LvglEncoderSimulatorDriver input_driver{keys};
 
 	RotaryEncoderKeys keys{
 		.turn_cw = SDLK_RIGHT,
@@ -34,15 +27,27 @@ class Ui {
 	};
 
 public:
-	Ui(PatchPlayLoader &patch_playloader,
-	   PatchStorageProxy &patch_storage,
-	   PatchModQueue &patch_mod_queue,
-	   PatchPlayer &player);
+	Ui(std::string_view patch_path, size_t block_size);
 
 	bool run();
 	void play_patch(std::span<Frame> buffer);
 
 private:
+	PatchPlayer patch_player;
+	PatchStorageProxy patch_storage;
+	PatchPlayLoader patch_playloader{patch_storage, patch_player};
+	PatchModQueue patch_mod_queue;
+
+	MessageQueue msg_queue;
+	PageManager page_manager;
+	ParamsState params;
+	MetaParams metaparams;
+	AudioStream audio_stream{params, patch_player, patch_playloader};
+	LvglEncoderSimulatorDriver input_driver{keys};
+
+	std::vector<StreamConfSim::Audio::AudioInFrame> in_buffer;
+	std::vector<StreamConfSim::Audio::AudioOutFrame> out_buffer;
+
 	uint32_t last_lvgl_task_tm = 0;
 	uint32_t last_page_task_tm = 0;
 
