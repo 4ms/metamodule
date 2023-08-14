@@ -44,15 +44,17 @@ struct ParamsState {
 	bool midi_gate;
 	uint32_t jack_senses;
 
+	bool set_input_plugged(unsigned panel_injack_idx, bool plugged) {
+		return jack_senses & (1 << jacksense_pin_order[panel_injack_idx]);
+	}
+
 	bool is_input_plugged(unsigned panel_injack_idx) {
-		// return jack_senses & (1 << jacksense_pin_order[panel_injack_idx]);
-		return (jack_senses >> jacksense_pin_order[panel_injack_idx]) & 1;
+		return jack_senses & (1 << jacksense_pin_order[panel_injack_idx]);
 	}
 
 	bool is_output_plugged(unsigned panel_outjack_idx) {
 		auto jack_idx = panel_outjack_idx + PanelDef::NumAudioIn + PanelDef::NumGateIn;
-		// return jack_senses & (1 << jacksense_pin_order[jack_idx]);
-		return (jack_senses >> jacksense_pin_order[jack_idx]) & 1;
+		return jack_senses & (1 << jacksense_pin_order[jack_idx]);
 	}
 
 	void clear() {

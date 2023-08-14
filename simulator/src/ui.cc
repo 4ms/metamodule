@@ -23,7 +23,7 @@ Ui::Ui(std::string_view patch_path, size_t block_size)
 
 // "Scheduler" for UI tasks
 // returns true until it gets a QUIT event
-bool Ui::run() {
+bool Ui::update() {
 
 	auto tm = lv_tick_get(); //milliseconds
 	if (tm - last_lvgl_task_tm >= 1) {

@@ -29,7 +29,7 @@ class Ui {
 public:
 	Ui(std::string_view patch_path, size_t block_size);
 
-	bool run();
+	bool update();
 	void play_patch(std::span<Frame> buffer);
 
 private:
