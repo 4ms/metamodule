@@ -20,6 +20,8 @@ Init and update the submodules recursively:
 git submodule update --init --recursive
 ```
 
+Next, setup your developement environment by [following the instructions on this page](Setup.md)
+
 ### Building VCV Rack Plugin
 
 You must have the Rack-SDK on your computer already. Version 2.2.3 is known to
