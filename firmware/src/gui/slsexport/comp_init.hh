@@ -1,4 +1,4 @@
-#include "components/ui_comp.h"
+#include "./meta5/components/ui_comp.h"
 #include "lvgl.h"
 
 // Used to force init of this constant, which must happen before
