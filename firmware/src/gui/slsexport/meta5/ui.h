@@ -25,10 +25,13 @@ extern lv_obj_t *ui_PatchSelectorTitle;
 extern lv_obj_t *ui_DrivesPanel;
 extern lv_obj_t *ui_USBbut;
 extern lv_obj_t *ui_USBlabel;
+extern lv_obj_t *ui_USBlabel1;
 extern lv_obj_t *ui_SDbut;
 extern lv_obj_t *ui_SDlabel;
+extern lv_obj_t *ui_SDlabel1;
 extern lv_obj_t *ui_Flashbut;
 extern lv_obj_t *ui_Flashlabel;
+extern lv_obj_t *ui_Flashlabel1;
 void ui_event_PatchListRoller( lv_event_t * e);
 extern lv_obj_t *ui_PatchListRoller;
 extern lv_obj_t *ui_waitspinner;
@@ -67,9 +70,10 @@ extern lv_obj_t *ui_ShowAllCablesPanel;
 extern lv_obj_t *ui_ShowAllCablesLabel;
 extern lv_obj_t *ui_ShowAllCablesCheck;
 extern lv_obj_t *ui_KnobsetMenu;
-extern lv_obj_t *ui_KnobsetClosePanel;
-extern lv_obj_t *ui_KnobsetCloseButton;
+extern lv_obj_t *ui_KnobSetClosePanel;
 extern lv_obj_t *ui_KnobsetHeaderLabel;
+extern lv_obj_t *ui_KnobsetCloseButton;
+extern lv_obj_t *ui_KnobsetHeaderLine;
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
 extern lv_obj_t *ui_MappingMenu;
@@ -107,21 +111,28 @@ extern lv_obj_t *ui_OkAdd;
 extern lv_obj_t *ui_OkAddLabel;
 extern lv_obj_t *ui____initial_actions0;
 
-LV_IMG_DECLARE( ui_img_final_icons_play3_png);   // assets/Final Icons/Play3.png
-LV_IMG_DECLARE( ui_img_final_icons_1x_knobpip1_png);   // assets/Final Icons/1x/KnobPip1.png
+LV_IMG_DECLARE( ui_img_1x_play8_png);   // assets/1x/Play8.png
+LV_IMG_DECLARE( ui_img_1x_knob2_png);   // assets/1x/Knob2.png
+LV_IMG_DECLARE( ui_img_1x_knob3pressed_png);   // assets/1x/Knob3Pressed.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_add1_png);   // assets/Final Icons/1x/Add1.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_info1_png);   // assets/Final Icons/1x/Info1.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_settings1_png);   // assets/Final Icons/1x/Settings1.png
 LV_IMG_DECLARE( ui_img_complexeg_mockup_png);   // assets/ComplexEG_mockup.png
 LV_IMG_DECLARE( ui_img_button_circles_c_symbol__png);   // assets/Button Circles/C_symbol..png
+LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
+LV_IMG_DECLARE( ui_img_1x_play3_png);   // assets/1x/Play3.png
 LV_IMG_DECLARE( ui_img_1x_addmap1_png);   // assets/1x/addmap1.png
 LV_IMG_DECLARE( ui_img_1x_control1_png);   // assets/1x/control1.png
 LV_IMG_DECLARE( ui_img_1x_editmap2_png);   // assets/1x/editmap2.png
+LV_IMG_DECLARE( ui_img_final_icons_1x_knobpip1_png);   // assets/Final Icons/1x/KnobPip1.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_knobpip2_png);   // assets/Final Icons/1x/KnobPip2.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_knobpressed1_png);   // assets/Final Icons/1x/KnobPressed1.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_knobreleased1_png);   // assets/Final Icons/1x/KnobReleased1.png
-LV_IMG_DECLARE( ui_img_final_icons_1x_play1_png);   // assets/Final Icons/1x/Play1.png
 
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
 LV_FONT_DECLARE( ui_font_Arial11bpp4);
 LV_FONT_DECLARE( ui_font_Arial12bpp4);
 LV_FONT_DECLARE( ui_font_ArialBl16);
@@ -130,10 +141,6 @@ LV_FONT_DECLARE( ui_font_ArialNB16);
 LV_FONT_DECLARE( ui_font_ArialNB18);
 LV_FONT_DECLARE( ui_font_Arial_16_bpp4);
 LV_FONT_DECLARE( ui_font_Arial_bpp2);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
 
 void ui_init(void);
 
