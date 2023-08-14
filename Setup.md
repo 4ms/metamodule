@@ -19,9 +19,11 @@ Ventura 13.4 and 13.5 have been tested.
 
  - Install [brew](https://brew.sh) and follow the "Next Steps" instructions to add Homebrew to your PATH.
 
- - `brew install cmake ninja sdl2`
+ - For the simulator this is needed (ninja is not required if you use a different -G option when invoking cmake):
+   - `brew install cmake ninja sdl2`
 
- - 
+ - For the VCV plugin, this is needed:
+   - `brew install jq rsync`
 
 ### Linux
 
