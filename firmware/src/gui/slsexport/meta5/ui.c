@@ -67,7 +67,6 @@ lv_obj_t *ui_KnobSetClosePanel;
 lv_obj_t *ui_KnobsetHeaderLabel;
 lv_obj_t *ui_KnobsetCloseButton;
 lv_obj_t *ui_KnobsetHeaderLine;
-lv_obj_t *ui_KnobSetGroup1;
 
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);

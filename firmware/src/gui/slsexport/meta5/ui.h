@@ -74,7 +74,6 @@ extern lv_obj_t *ui_KnobSetClosePanel;
 extern lv_obj_t *ui_KnobsetHeaderLabel;
 extern lv_obj_t *ui_KnobsetCloseButton;
 extern lv_obj_t *ui_KnobsetHeaderLine;
-extern lv_obj_t *ui_KnobSetGroup1;
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
 extern lv_obj_t *ui_MappingMenu;
