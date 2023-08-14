@@ -1,3 +1,4 @@
+#include "./meta5/components/ui_comp.h"
 #include "lvgl.h"
 #include "meta5/components/ui_comp.h"
 
