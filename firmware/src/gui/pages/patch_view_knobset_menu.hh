@@ -32,7 +32,8 @@ struct PatchViewKnobsetMenu {
 			lv_obj_add_event_cb(ui_KnobsetCloseButton, knob_button_cb, LV_EVENT_PRESSED, this);
 
 			visible = false;
-			lv_obj_set_height(ui_KnobsetMenu, 0);
+			// lv_obj_set_height(ui_KnobsetMenu, 0);
+			lv_obj_set_x(ui_KnobsetMenu, 220);
 
 			knobset_list.reserve(MaxKnobSets);
 

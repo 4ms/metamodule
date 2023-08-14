@@ -51,10 +51,16 @@ private:
 	uint32_t last_lvgl_task_tm = 0;
 	uint32_t last_page_task_tm = 0;
 
+	unsigned cur_outchan_left = 0;
+	unsigned cur_outchan_right = 1;
+	unsigned cur_inchan_left = 0;
+	unsigned cur_inchan_right = 1;
+
 	void lvgl_update_task();
 	void page_update_task();
 	void transfer_aux_button_events();
 	void transfer_params();
+	void update_channel_selections();
 };
 
 } // namespace MetaModule

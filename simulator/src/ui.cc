@@ -18,7 +18,12 @@ Ui::Ui(std::string_view patch_path, size_t block_size)
 	patch_playloader.audio_is_muted();
 	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";
 
-	params.jack_senses = 0xFFFFFFFF;
+	params.jack_senses = 0x0;
+	params.set_input_plugged(cur_inchan_left, true);
+	params.set_input_plugged(cur_inchan_right, true);
+
+	params.set_output_plugged(cur_outchan_left, true);
+	params.set_output_plugged(cur_outchan_right, true);
 }
 
 // "Scheduler" for UI tasks
@@ -35,6 +40,7 @@ bool Ui::update() {
 	if (tm - last_page_task_tm >= 16) {
 		transfer_aux_button_events();
 		transfer_params();
+		update_channel_selections();
 		page_update_task();
 		last_page_task_tm = tm;
 	}
@@ -61,8 +67,8 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 		//TODO: allow routing to be dynamically configured
 		// For now out 1 -> SDL 1, and 2->2
-		out.l = frame.chan[0];
-		out.r = frame.chan[1];
+		out.l = frame.chan[cur_outchan_left];
+		out.r = frame.chan[cur_outchan_right];
 	}
 }
 
@@ -71,7 +77,7 @@ void Ui::lvgl_update_task() {
 
 	auto msg = msg_queue.get_message();
 	if (!msg.empty()) {
-		printf_("%s", msg.data());
+		std::cout << "GUI: " << msg << "\n";
 		msg_queue.clear_message();
 	}
 }
@@ -98,15 +104,45 @@ void Ui::transfer_params() {
 			params.knobs[cur_param].val = std::clamp(params.knobs[cur_param] + 0.05f, 0.f, 1.f);
 			params.knobs[cur_param].changed = true;
 
-			printf("Knob #%d = %1.2f\n", cur_param, (double)params.knobs[cur_param].val);
+			std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
 		}
 
 		if (input_driver.param_dec()) {
 			params.knobs[cur_param].val = std::clamp(params.knobs[cur_param] - 0.05f, 0.f, 1.f);
 			params.knobs[cur_param].changed = true;
 
-			printf("Knob #%d = %1.2f\n", cur_param, (double)params.knobs[cur_param].val);
+			std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
 		}
+	}
+}
+
+void Ui::update_channel_selections() {
+	if (cur_outchan_left != input_driver.selected_outchan()) {
+		params.set_output_plugged(cur_outchan_left, false);
+		params.set_output_plugged(cur_outchan_right, false);
+
+		cur_outchan_left = input_driver.selected_outchan();
+		cur_outchan_right = (cur_outchan_left + 1) % 8;
+
+		params.set_output_plugged(cur_outchan_left, true);
+		params.set_output_plugged(cur_outchan_right, true);
+
+		std::cout << "Out Jack #" << cur_outchan_left + 1 << " --> Soundcard left output\n";
+		std::cout << "Out Jack #" << cur_outchan_right + 1 << " --> Soundcard right output\n";
+	}
+
+	if (cur_inchan_left != input_driver.selected_inchan()) {
+		params.set_input_plugged(cur_inchan_left, false);
+		params.set_input_plugged(cur_inchan_right, false);
+
+		cur_inchan_left = input_driver.selected_inchan();
+		cur_inchan_right = (cur_inchan_left + 1) % 8;
+
+		params.set_input_plugged(cur_inchan_left, true);
+		params.set_input_plugged(cur_inchan_right, true);
+
+		std::cout << "Soundcard left input --> Input Jack # " << cur_inchan_left + 1 << "\n";
+		std::cout << "Soundcard right input --> Input Jack # " << cur_inchan_right + 1 << "\n";
 	}
 }
 
