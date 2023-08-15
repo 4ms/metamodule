@@ -2,7 +2,7 @@
 
 This simulates the screen and the audio outputs. The pixels should be identical to the actual hardware's pixels.
 
-The audio should be 1:1 the same as in hardware (though, your sound card might be AC-coupled, vs. the hardware is DC-coupled).
+The audio should be the same as in hardware (though, your sound card might be AC-coupled, vs. the hardware is DC-coupled).
 
 ### Keyboard Control
 
@@ -34,16 +34,18 @@ by first pressing a letter to select the knob you want to turn, and then pressin
 - `y`: select knob y
 - `z`: select knob z
 
-- `[`: turn knob down 5%
-- `]`: turn knob up 5%
+- `[`: turn the selected knob down 5%
+- `]`: turn the selected knob up 5%
 
 TODO: make `{` and `}` inc/dec by small amounts
+
+The console will report the knob that was turned and its present value.
 
 #### Audio Routing
 By default, Audio Out 1 and Audio Out 2 are patched to the soundcard's left and right outputs, respectively.
 Pressing a number button will change the routing:
 
-- `1`: Audio Out 1 -> Left, Audio Out 2 -> Right
+- `1`: Audio Out 1 -> Left, Audio Out 2 -> Right (default)
 - `2`: Audio Out 2 -> Left, Audio Out 3 -> Right
 - `3`: Audio Out 3 -> Left, Audio Out 4 -> Right
 - `4`: Audio Out 4 -> Left, Audio Out 5 -> Right
@@ -63,10 +65,10 @@ Future features include:
 Command-line arguments can be passed to the executable. To see the valid arguments, run:
 
 ```
-build/simulator -h
+build/simulator --help
 ```
 
-Or you can type `-help` instead of `-h`
+Or you can type `-h` instead of `--help`
 
 Currently these are the options:
 
@@ -93,7 +95,7 @@ then the Studio Display Speakers would be chosen.
 
 #### Zoom level
 
-`-z ###': specify the initial zoom amount, as a percentage. Default is 100 (1 hardware pixel = 1 simulator pixel). 
+`-z ###`: specify the initial zoom amount, as a percentage. Default is 100 (1 hardware pixel = 1 simulator pixel). 
 
 A zoom of 300 or more is useful for inspecting pixel alignment.
 
@@ -101,18 +103,21 @@ You can also change the zoom while the simulator is running by re-sizing the win
 
 #### Patch files
 
-There are two mock "volumes" containing patch files. The `Internal` volume is the list of factory default patches. 
+There are two mock "volumes" containing patch files. The `Internal` volume is
+the list of factory default patches. This is always loaded. This list is found in
+`firmware/src/patch_file/patches_default.hh`.
 
 Patches are also loaded from a local host computer directory, and appear in the `SD Card` volume.
 
-The directory to search or patch files can be passed as an argument to the simulator:
+`-p path/to/patchfiles/`: The directory to search for patch files (.yml files)
 
 ```
-build/simulator -p path/to/patchfile/dir/
+build/simulator -p ~/MyPatchFiles/
 ```
 
-If no path is specified, `../shared/patch/` will be used. 
+If no path is specified, `patches/` will be used (which is a directory in the simulator/ dir).
 
-If a directory with no valid patch files (or an invalid directory) is specificed, the simulator will print an error and just load the Internal volume(default patches).
+If a directory is specified but it contains no valid patch files (or is an
+invalid path), the simulator will print an error and ignore it.
 
   

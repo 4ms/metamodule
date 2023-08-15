@@ -91,7 +91,7 @@ Run it:
 build/simulator
 
 # To see the possible command-line arguments:
-build/simulator -help
+build/simulator --help
 ```
 
 See the simulator README.md for arguments details.
