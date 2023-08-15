@@ -113,7 +113,6 @@ public:
 	}
 
 	PatchFileList &get_patch_list() {
-		printf("Patchlist got\n");
 		return remote_patch_list_;
 	}
 
