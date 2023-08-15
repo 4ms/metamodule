@@ -7,7 +7,7 @@ namespace MetaModuleSim
 
 struct Settings {
 	unsigned zoom = 100;
-	std::string patch_path = "../shared/patch/";
+	std::string patch_path = "patches/";
 	unsigned audioout_dev = 0;
 
 	void parse(int argc, char *argv[]) {
@@ -23,9 +23,8 @@ struct Settings {
 								  "Audio output device ID (as seen by SDL)",
 								  cxxopts::value<unsigned>()->default_value("0"));
 
-			options.add_options()("p,patchdir",
-								  "Directory with patch files",
-								  cxxopts::value<std::string>()->default_value("../shared/patch/"));
+			options.add_options()(
+				"p,patchdir", "Directory with patch files", cxxopts::value<std::string>()->default_value("patches/"));
 
 			options.add_options()("h,help", "Print help");
 
