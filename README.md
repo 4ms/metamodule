@@ -65,10 +65,6 @@ examine precise pixel alignment.
 
 See the [README.md](simulator/README.md) in the simulator directory for details on using the simulator.
 
-Navigate using the left and right arrows to simulate the encoder turning CCW
-and CW. The down arrow pushes the encoder button. The up arrow pushes the RGB
-Button (which generally takes you to the previous page).
-
 Make sure you are in the right branch and you already updated the submodules.
 
 Go to the simulator directory:
