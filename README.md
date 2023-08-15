@@ -55,15 +55,15 @@ directory. The next time you start VCV Rack, it will load the modified plugin.
 
 ### Building Simulator
 
-The simulator uses SDL2, which must be installed on your host machine. It only
-simulates graphics right now (audio can be added -- TODO). The window can be
-re-sized in order to examine precise pixel alignment.
+The simulator uses SDL2, which must be installed on your host machine. It 
+simulates graphics and audio output. The window can be re-sized in order to
+examine precise pixel alignment.
+
+See the [README.md](simulator/README.md) in the simulator directory for details on using the simulator.
 
 Navigate using the left and right arrows to simulate the encoder turning CCW
-and CW.
-
-The down arrow pushes the encoder button. The up arrow pushes the RGB Button
-(Back)
+and CW. The down arrow pushes the encoder button. The up arrow pushes the RGB
+Button (which generally takes you to the previous page).
 
 Make sure you are in the right branch and you already updated the submodules.
 
@@ -73,19 +73,28 @@ Go to the simulator directory:
 cd simulator
 ```
 
-Build it:
+Generate the build system:
 
 ```
 cmake -B build -GNinja      #Or whatever build system you want
+```
+
+Build it:
+
+```
 cmake --build build
 ```
 
-
 Run it:
+
 ```
 build/simulator
+
+# To see the possible command-line arguments:
+build/simulator -help
 ```
 
+See the simulator README.md for arguments details.
 
 When adding/removing assets, sometimes you need to clean the build:
 
@@ -106,6 +115,8 @@ make run
 # Clean:
 make clean
 ```
+
+The `make run` doesn't allow you to pass arguments.
 
 
 ### Building Firmware
