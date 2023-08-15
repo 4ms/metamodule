@@ -256,58 +256,5 @@ struct Gui {
 		// 							  &lv_font_MuseoSansRounded_700_12);
 		// lv_disp_set_theme(display, theme);
 	}
-
-	static void style_menu_item_slider(lv_obj_t *panel, lv_obj_t *label, lv_obj_t *switchobj) {
-		lv_obj_set_width(panel, 175);
-		lv_obj_set_height(panel, 28);
-		lv_obj_set_align(panel, LV_ALIGN_CENTER);
-		lv_obj_set_flex_flow(panel, LV_FLEX_FLOW_ROW);
-		lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-		lv_obj_add_flag(panel, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
-		lv_obj_clear_flag(panel,
-						  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
-							  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
-							  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
-		lv_obj_set_style_radius(panel, 0, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		// lv_obj_set_style_bg_color(panel, lv_color_hex(0xFFFFFF), (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_opa(panel, 0, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		// lv_obj_set_style_border_color(panel, lv_color_hex(0x000000), (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		// lv_obj_set_style_border_opa(panel, 0, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_width(panel, 0, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(panel, 2, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(panel, 0, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_top(panel, 0, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_bottom(panel, 0, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		// lv_obj_set_style_pad_row(panel, 0, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		// lv_obj_set_style_pad_column(panel, 8, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-
-		lv_obj_set_width(label, 125);
-		lv_obj_set_height(label, LV_SIZE_CONTENT);
-		lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
-		lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL);
-		lv_obj_clear_flag(label,
-						  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
-							  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
-							  LV_OBJ_FLAG_SCROLL_CHAIN);
-		lv_obj_set_style_text_color(label, lv_color_hex(0xEEEEEE), (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_opa(label, 255, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_letter_space(label, 1, (uint32_t)LV_PART_MAIN | LV_STATE_DEFAULT);
-
-		lv_obj_set_width(switchobj, 26);
-		lv_obj_set_height(switchobj, 25);
-		lv_obj_set_align(switchobj, LV_ALIGN_LEFT_MID);
-		lv_obj_add_flag(switchobj, LV_OBJ_FLAG_SCROLL_ON_FOCUS | LV_OBJ_FLAG_OVERFLOW_VISIBLE);
-		lv_obj_clear_flag(switchobj, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE);
-
-		lv_obj_set_style_radius(switchobj, 14, (uint32_t)LV_PART_INDICATOR | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_color(switchobj, lv_color_hex(0x202328), (uint32_t)LV_PART_INDICATOR | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_opa(switchobj, 255, (uint32_t)LV_PART_INDICATOR | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_color(switchobj, lv_color_hex(0x4067D3), (uint32_t)LV_PART_INDICATOR | LV_STATE_CHECKED);
-
-		lv_obj_set_style_pad_left(switchobj, -6, (uint32_t)LV_PART_KNOB | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(switchobj, -6, (uint32_t)LV_PART_KNOB | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_top(switchobj, -6, (uint32_t)LV_PART_KNOB | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_bottom(switchobj, -6, (uint32_t)LV_PART_KNOB | LV_STATE_DEFAULT);
-	}
 };
 } // namespace MetaModule

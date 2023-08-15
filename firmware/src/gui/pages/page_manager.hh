@@ -2,6 +2,7 @@
 #include "gui/message_queue.hh"
 #include "metaparams.hh"
 #include "params_state.hh"
+#include "gui/slsexport/comp_init.hh"
 #include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
@@ -16,13 +17,13 @@ namespace MetaModule
 {
 
 class PageManager {
-	PatchInfo info;
+	SlsComponentInit sls_comp_init;
 
-	ModuleViewPage page_module{info, "EnOsc"};
+	PatchInfo info;
+	ModuleViewPage page_module{info, ""};
 	PatchSelectorPage page_patchsel{info};
 	PatchViewPage page_patchview{info};
 	KnobEditPage knob_edit_page{info};
-	// KnobView3 page_knobs{info};
 
 public:
 	PageBase *cur_page = &page_patchsel;

@@ -35,13 +35,14 @@ struct PatchList {
 		return _patch_data[patch_id].patchname;
 	}
 
-	const std::string_view get_patch_filename(Volume vol, uint32_t patch_id) {
+	std::string_view get_patch_filename(Volume vol, uint32_t patch_id) {
 		const auto &_patch_data = _get_list(vol);
 		if (_patch_data.size() == 0)
 			return nullslug;
 
 		if (patch_id >= _patch_data.size())
-			patch_id = 0;
+			return nullslug;
+
 		return _patch_data[patch_id].filename;
 	}
 
