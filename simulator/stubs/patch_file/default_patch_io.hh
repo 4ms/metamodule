@@ -32,8 +32,9 @@ struct DefaultPatchFileIO {
 		for (unsigned i = 0; i < num_patches; i++) {
 
 			if (DefaultPatches::get_filename(i) == filename) {
-				buffer = DefaultPatches::get_patch(i);
-				sz = buffer.size_bytes();
+				const auto file = DefaultPatches::get_patch(i);
+				sz = std::min(file.size_bytes(), buffer.size_bytes());
+				std::memcpy(buffer.data(), file.data(), sz);
 			}
 		}
 
