@@ -6,7 +6,7 @@ namespace MetaModuleSim
 {
 
 struct Settings {
-	unsigned zoom = 1;
+	unsigned zoom = 100;
 	std::string patch_path = "../shared/patch/";
 	unsigned audioout_dev = 0;
 
