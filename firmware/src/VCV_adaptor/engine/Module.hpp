@@ -196,7 +196,7 @@ struct Module : VCVModuleWrapper {
 	}
 
 	void configBypass(int inputId, int outputId) {
-		printf("Bypass not supported\n");
+		// printf("Bypass not supported\n");
 		// Bypass not supported
 	}
 

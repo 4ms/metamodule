@@ -3,12 +3,11 @@
 #include "patch/patch_data.hh"
 #include "patch_file/patch_file.hh"
 #include "patch_file/patch_fileio.hh"
-#include "patch_file/patches_default.hh"
 #include "patch_file/patchlist.hh"
 #include "shared/patch_convert/yaml_to_patch.hh"
+#include "stubs/patch_file/default_patch_io.hh"
 #include "stubs/patch_file/host_file_io.hh"
 #include <cstdint>
-#include <filesystem>
 
 namespace MetaModule
 {
@@ -41,8 +40,10 @@ public:
 	using enum InterCoreCommMessage::MessageType;
 
 	PatchStorageProxy(std::string_view path)
-		: hostfs{MetaModule::Volume::NorFlash, path} {
-		PatchFileIO::add_all_to_patchlist(hostfs, patch_list_);
+		: hostfs_{MetaModule::Volume::SDCard, path}
+		, defaultpatchfs_{MetaModule::Volume::NorFlash} {
+		PatchFileIO::add_all_to_patchlist(defaultpatchfs_, patch_list_);
+		PatchFileIO::add_all_to_patchlist(hostfs_, patch_list_);
 	}
 
 	[[nodiscard]] bool request_viewpatch(Volume vol, uint32_t patch_id) {
@@ -83,25 +84,36 @@ public:
 		if (msg_state_ == MsgState::ViewPatchRequested) {
 			msg_state_ = MsgState::Idle;
 
-			if (requested_view_patch_id_ < remote_patch_list_.norflash.size()) {
+			if ((requested_view_patch_vol_ == Volume::NorFlash &&
+				 requested_view_patch_id_ < remote_patch_list_.norflash.size()) ||
+				(requested_view_patch_vol_ == Volume::SDCard &&
+				 requested_view_patch_id_ < remote_patch_list_.sdcard.size()))
+			{
 				auto bytes_read = load_patch_file(requested_view_patch_vol_, requested_view_patch_id_);
 				if (bytes_read)
 					return {PatchDataLoaded, bytes_read, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
 			}
 
-			// Something when wrong:
+			std::cout << "Out of range patch id: " << requested_view_patch_id_ << " on vol "
+					  << (int)requested_view_patch_vol_ << "\n";
 			return {PatchDataLoadFail, 0, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
 		}
 
 		if (msg_state_ == MsgState::PatchListRequested) {
 			msg_state_ = MsgState::Idle;
 
-			// Populate "norflash" the first time it's requested
+			// Populate file io the first time it's requested
 			if (remote_patch_list_.norflash.size() == 0) {
 				remote_patch_list_.norflash = patch_list_.get_patchfile_list(MetaModule::Volume::NorFlash);
-				return {PatchListChanged, 0, 0, 0};
+				return {PatchListChanged};
 			}
-			return {PatchListUnchanged, 0, 0, 0};
+
+			if (remote_patch_list_.sdcard.size() == 0) {
+				remote_patch_list_.sdcard = patch_list_.get_patchfile_list(MetaModule::Volume::SDCard);
+				return {PatchListChanged};
+			}
+
+			return {PatchListUnchanged};
 		}
 
 		return {};
@@ -113,7 +125,6 @@ public:
 	}
 
 	PatchFileList &get_patch_list() {
-		printf("Patchlist got\n");
 		return remote_patch_list_;
 	}
 
@@ -123,21 +134,26 @@ public:
 		raw_patch = raw_patch_buffer_;
 
 		bool ok = false;
+
+		if (vol == Volume::SDCard)
+			ok = PatchFileIO::read_file(raw_patch, hostfs_, filename);
+
 		if (vol == Volume::NorFlash)
-			ok = PatchFileIO::read_file(raw_patch, hostfs, filename);
+			ok = PatchFileIO::read_file(raw_patch, defaultpatchfs_, filename);
 
 		if (!ok) {
-			printf("Could not load patch id %d\n", patch_id);
+			std::cout << "Could not load patch id " << patch_id << "\n";
 			return 0;
 		}
 
-		printf("Read patch id %d, %zu bytes\n", patch_id, raw_patch.size_bytes());
+		std::cout << "Read patch id " << patch_id << " " << raw_patch.size_bytes() << " bytes\n";
 		return raw_patch.size_bytes();
 	}
 
 private:
 	PatchFileList remote_patch_list_;
-	HostFileIO hostfs;
+	HostFileIO hostfs_;
+	DefaultPatchFileIO defaultpatchfs_;
 	PatchList patch_list_;
 
 	std::array<char, 65536> raw_patch_buffer_;

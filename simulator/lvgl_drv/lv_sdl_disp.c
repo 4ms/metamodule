@@ -38,8 +38,8 @@ void lv_port_disp_init(int width, int height, int zoom) {
 	window = SDL_CreateWindow(WINDOW_NAME,
 							  SDL_WINDOWPOS_UNDEFINED,
 							  SDL_WINDOWPOS_UNDEFINED,
-							  DISPLAY_WIDTH * zoom,
-							  DISPLAY_HEIGHT * zoom,
+							  DISPLAY_WIDTH * zoom / 100,
+							  DISPLAY_HEIGHT * zoom / 100,
 							  SDL_WINDOW_RESIZABLE);
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);

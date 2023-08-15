@@ -7,16 +7,17 @@
 template<typename Frame>
 struct SDLAudio {
 	using Callback = std::function<void(std::span<Frame>)>;
+	enum { SDLPlayback = 0, SDLRecording = 1 };
 
 	SDLAudio(unsigned dev_id = 0) {
 
-		auto num_dev = SDL_GetNumAudioDevices(0);
+		auto num_dev = SDL_GetNumAudioDevices(SDLPlayback);
 
 		const char *device_name = nullptr; //nullptr tells SDL to select the default
 
 		std::cout << "SDL: " << num_dev << " audio devices found\n";
 		for (unsigned i = 0; i < num_dev; i++) {
-			auto name = SDL_GetAudioDeviceName(i, 0);
+			auto name = SDL_GetAudioDeviceName(i, SDLPlayback);
 			std::cout << i << ": " << name;
 			if (dev_id == i) {
 				device_name = name;
@@ -41,16 +42,17 @@ struct SDLAudio {
 			return;
 		}
 
-		device = SDL_OpenAudioDevice(device_name, 0, &requested, &audio_spec, SDL_AUDIO_ALLOW_ANY_CHANGE);
+		device = SDL_OpenAudioDevice(device_name, SDLPlayback, &requested, &audio_spec, SDL_AUDIO_ALLOW_ANY_CHANGE);
 		if (device == 0) {
 			std::cout << "SDL: failed to open audio device: %s\n" << SDL_GetError();
 			return;
 		}
 		is_init = true;
 
-		bytes_per_frame = (int)audio_spec.channels * ((audio_spec.format == AUDIO_F32) ? 4 : 4);
+		bytes_per_frame =
+			(int)audio_spec.channels * ((audio_spec.format == AUDIO_F32) ? 4 : 4); //TODO handle more frame types
 
-		std::cout << "SDL: Audio device " << device << " opened at " << audio_spec.freq << "Hz, ";
+		std::cout << "SDL: Audio device " << device_name << " opened at " << audio_spec.freq << "Hz, ";
 		std::cout << (int)audio_spec.channels << " channels, ";
 		std::cout << audio_spec.samples << " blocksize, ";
 		std::cout << bytes_per_frame << " bytes per frame, ";
