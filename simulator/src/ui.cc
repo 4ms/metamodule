@@ -56,8 +56,8 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 	// for (size_t i = 0; auto &frame : out_buffer) {
 	// 	auto &in = soundcard_in[i++];
 
-	// 	frame.chan[0] = in.l;
-	// 	frame.chan[1] = in.r;
+	// 	frame.chan[cur_inchan_left] = in.l;
+	// 	frame.chan[cur_inchan_right] = in.r;
 	// }
 
 	audio_stream.process(in_buffer, out_buffer);
@@ -65,8 +65,6 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 	for (size_t i = 0; auto &frame : out_buffer) {
 		auto &out = soundcard_out[i++];
 
-		//TODO: allow routing to be dynamically configured
-		// For now out 1 -> SDL 1, and 2->2
 		out.l = frame.chan[cur_outchan_left];
 		out.r = frame.chan[cur_outchan_right];
 	}

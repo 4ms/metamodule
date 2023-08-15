@@ -42,7 +42,7 @@ private:
 	PageManager page_manager;
 	ParamsState params;
 	MetaParams metaparams;
-	AudioStream audio_stream{params, patch_player, patch_playloader};
+	AudioStream audio_stream{params, patch_player, patch_playloader, patch_mod_queue};
 	LvglEncoderSimulatorDriver input_driver{keys};
 
 	std::vector<StreamConfSim::Audio::AudioInFrame> in_buffer;

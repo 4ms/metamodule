@@ -1,6 +1,7 @@
 #pragma once
 #include "frame.hh"
 #include "params_state.hh"
+#include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
 #include "stream_conf.hh"
@@ -16,18 +17,25 @@ class AudioStream {
 	ParamsState &params;
 	PatchPlayer &player;
 	PatchPlayLoader &patch_loader;
+	PatchModQueue &patch_mod_queue;
 
 public:
-	AudioStream(ParamsState &params_state, PatchPlayer &player, PatchPlayLoader &play_loader)
+	AudioStream(ParamsState &params_state,
+				PatchPlayer &player,
+				PatchPlayLoader &play_loader,
+				PatchModQueue &patch_mod_queue)
 		: params{params_state}
 		, player{player}
-		, patch_loader{play_loader} {
+		, patch_loader{play_loader}
+		, patch_mod_queue{patch_mod_queue} {
 	}
 
 	void process(StreamConfSim::Audio::AudioInBuffer in_buff, StreamConfSim::Audio::AudioOutBuffer out_buff) {
 
 		if (mute_on_patch_load(out_buff))
 			return;
+
+		handle_patch_mods();
 
 		if (in_buff.size() != out_buff.size()) {
 			std::cout << "Buffer size mis-match!\n";
@@ -67,6 +75,18 @@ public:
 					player.set_output_jack_patched_status(i, false);
 				}
 			}
+		}
+	}
+
+	void handle_patch_mods() {
+		if (auto patch_mod = patch_mod_queue.get()) {
+			std::visit(overloaded{
+						   [this](SetStaticParam &mod) { player.apply_static_param(mod.param); },
+						   [this](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
+						   [](AddMapping &mod) { /*TODO*/ },
+						   [](ModifyMapping &mod) { /*TODO*/ },
+					   },
+					   patch_mod.value());
 		}
 	}
 
