@@ -36,7 +36,6 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_MapTranspSlider, settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		visible = false;
-		// lv_obj_set_height(ui_SettingsMenu, 0);
 		lv_obj_set_x(ui_SettingsMenu, 220);
 	}
 
