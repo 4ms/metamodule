@@ -33,7 +33,8 @@ struct InterCoreCommMessage {
 };
 
 // This is a mock for firmware's PatchStorage and PatchStorageProxy classes
-// It reads from a directory on the host filesystem
+// It reads from a directory on the host filesystem and also treats the
+// Default patches as a file system
 class PatchStorageProxy {
 
 public:
@@ -81,37 +82,28 @@ public:
 	}
 
 	InterCoreCommMessage get_message() {
+
 		if (msg_state_ == MsgState::ViewPatchRequested) {
 			msg_state_ = MsgState::Idle;
 
-			if ((requested_view_patch_vol_ == Volume::NorFlash &&
-				 requested_view_patch_id_ < remote_patch_list_.norflash.size()) ||
-				(requested_view_patch_vol_ == Volume::SDCard &&
-				 requested_view_patch_id_ < remote_patch_list_.sdcard.size()))
-			{
-				auto bytes_read = load_patch_file(requested_view_patch_vol_, requested_view_patch_id_);
-				if (bytes_read)
-					return {PatchDataLoaded, bytes_read, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
-			}
-
-			std::cout << "Out of range patch id: " << requested_view_patch_id_ << " on vol "
-					  << (int)requested_view_patch_vol_ << "\n";
-			return {PatchDataLoadFail, 0, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
+			auto bytes_read = load_patch_file(requested_view_patch_vol_, requested_view_patch_id_);
+			if (bytes_read)
+				return {PatchDataLoaded, bytes_read, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
+			else
+				return {PatchDataLoadFail, 0, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
 		}
 
 		if (msg_state_ == MsgState::PatchListRequested) {
 			msg_state_ = MsgState::Idle;
 
-			// Populate file io the first time it's requested
-			if (remote_patch_list_.norflash.size() == 0) {
-				remote_patch_list_.norflash = patch_list_.get_patchfile_list(MetaModule::Volume::NorFlash);
+			if (populate_patchlist(remote_patch_list_.norflash, Volume::NorFlash) == PatchListChanged)
 				return {PatchListChanged};
-			}
 
-			if (remote_patch_list_.sdcard.size() == 0) {
-				remote_patch_list_.sdcard = patch_list_.get_patchfile_list(MetaModule::Volume::SDCard);
+			else if (populate_patchlist(remote_patch_list_.sdcard, Volume::SDCard) == PatchListChanged)
 				return {PatchListChanged};
-			}
+
+			else if (populate_patchlist(remote_patch_list_.usb, Volume::USB) == PatchListChanged)
+				return {PatchListChanged};
 
 			return {PatchListUnchanged};
 		}
@@ -141,8 +133,12 @@ public:
 		if (vol == Volume::NorFlash)
 			ok = PatchFileIO::read_file(raw_patch, defaultpatchfs_, filename);
 
+		//TODO: add USB when we have a usb fileio
+		// if (vol == Volume::USB)
+		// ok = PatchFileIO::read_file(raw_patch, usbpatchfs_, filename);
+
 		if (!ok) {
-			std::cout << "Could not load patch id " << patch_id << "\n";
+			std::cout << "Could not load patch " << patch_id << " on vol " << (int)vol << "\n";
 			return 0;
 		}
 
@@ -152,9 +148,10 @@ public:
 
 private:
 	PatchFileList remote_patch_list_;
+	PatchList patch_list_;
+
 	HostFileIO hostfs_;
 	DefaultPatchFileIO defaultpatchfs_;
-	PatchList patch_list_;
 
 	std::array<char, 65536> raw_patch_buffer_;
 	std::span<char> raw_patch;
@@ -166,5 +163,14 @@ private:
 	Volume view_patch_vol_ = Volume::NorFlash;
 
 	enum class MsgState { Idle, ViewPatchRequested, PatchListRequested } msg_state_ = MsgState::Idle;
+
+	InterCoreCommMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
+		if (list.size() == 0) {
+			list = patch_list_.get_patchfile_list(vol);
+			if (list.size() > 0)
+				return PatchListChanged;
+		}
+		return PatchListUnchanged;
+	}
 };
 } // namespace MetaModule
