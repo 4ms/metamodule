@@ -1,6 +1,7 @@
 #pragma once
 #include "fs/volumes.hh"
 #include "patch_file/patches_default.hh"
+#include <cstring>
 #include <iostream>
 #include <span>
 #include <string_view>
