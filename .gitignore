@@ -43,3 +43,4 @@ shared/gen_minblep/gen_minblep
 #symlinks:
 simulator/firmware
 simulator/shared
+*.o
