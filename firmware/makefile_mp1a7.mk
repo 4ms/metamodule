@@ -196,7 +196,8 @@ SOURCES += src/gui/fonts/MuseoSansRounded_700_18.c
 
 # Generated:
 slsexport_dir := src/gui/slsexport/meta5
-SOURCES += $(addprefix $(slsexport_dir)/,$(file <src/gui/slsexport/meta5/filelist.txt))
+slsexport_files := $(shell cat src/gui/slsexport/meta5/filelist.txt)
+SOURCES += $(addprefix $(slsexport_dir)/,$(slsexport_files))
 INCLUDES += -I$(slsexport_dir)
 
 # Patch convert

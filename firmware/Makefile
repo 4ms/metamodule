@@ -1,5 +1,3 @@
-# If you want to use `make flash`, set this to the path to your JFlash executable:
-JFLASHEXE ?= /Applications/SEGGER/JLink_V720a/JFlash.app/Contents/MacOS/JFlashExe
 ARM_NONE_EABI_PATH ?= arm-none-eabi-
 
 export BUILDDIR_MP1A7 	= build/mp1corea7
