@@ -45,28 +45,32 @@ set +x
 echo ""
 echo "Partitioning..."
 set -x
-sudo sgdisk --resize-table=128 -a 1 -n 1:34:545 -c 1:fsbl1 -n 2:546:1057 -c 2:fsbl2 -n 3:1058:17441 -c 3:ssbl -N 4 -c 4:prog -p $1
+sudo sgdisk --resize-table=128 -a 1 -n 1:34:545 -c 1:fsbl1 -n 2:546:1057 -c 2:fsbl2 -n 3:1058:17441 -c 3:ssbl -n 4:17442:33825 -c 4:prog -N 5 -c 5:fatfs -p $1 
 set +x
 
 echo ""
-echo "Unmounting"
+echo "Formatting partition 5 as FAT32"
 
 echo ""
 case "$(uname -s)" in
 	Darwin)
 		set -x
+		diskutil eraseVolume FAT32 METAMOD ${1}s5
+		sleep 3
 		diskutil unmountDisk $1
 		set +x
 		;;
 	Linux)
 		set -x
+		mkfs.fat -F 32 ${1}5
+		sleep 3
 		sudo umount $1
 		set +x
 		;;
 	*)
-		echo 'OS not supported'
+		echo 'OS not supported: please format $1 partition 5 as FAT32'
 		;;
 esac
 
-echo "Done!"
+echo "Done! You probably have to physically remove and re-insert the card before using it."
 
