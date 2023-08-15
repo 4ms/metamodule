@@ -32,7 +32,7 @@ struct PatchViewKnobsetMenu {
 			lv_obj_add_event_cb(ui_KnobsetCloseButton, knob_button_cb, LV_EVENT_PRESSED, this);
 
 			visible = false;
-			lv_obj_set_height(ui_KnobsetMenu, 0);
+			lv_obj_set_x(ui_KnobsetMenu, 220);
 
 			knobset_list.reserve(MaxKnobSets);
 
@@ -48,22 +48,11 @@ struct PatchViewKnobsetMenu {
 		lv_group_set_editing(knobset_menu_group, false);
 		lv_group_add_obj(knobset_menu_group, ui_KnobsetCloseButton);
 
-		if (knobsets.size() == 0) {
-			lv_obj_t *panel = lv_obj_create(ui_KnobsetMenu);
-			lv_obj_t *check = lv_switch_create(panel);
-			lv_obj_t *label = lv_label_create(panel);
-			lv_label_set_text(label, "Default");
-			lv_obj_add_state(check, LV_STATE_CHECKED);
-			lv_group_add_obj(knobset_menu_group, check);
-			Gui::style_menu_item_slider(panel, label, check);
-			knobset_list.push_back(panel);
-		}
-
 		for (const auto &knobset : knobsets) {
 			if (knobset.set.size()) {
-				lv_obj_t *panel = lv_obj_create(ui_KnobsetMenu);
-				lv_obj_t *check = lv_switch_create(panel);
-				lv_obj_t *label = lv_label_create(panel);
+				auto panel = ui_KnobSetGroup_create(ui_KnobsetMenu);
+				auto check = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETBUTTON);
+				auto label = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETNAME);
 				if (knobset.name.length())
 					lv_label_set_text(label, knobset.name.c_str());
 				else {
@@ -80,10 +69,18 @@ struct PatchViewKnobsetMenu {
 				lv_obj_add_event_cb(check, knobset_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 				lv_group_add_obj(knobset_menu_group, check);
 
-				//Style overall
-				Gui::style_menu_item_slider(panel, label, check);
 				knobset_list.push_back(panel);
 			}
+		}
+
+		if (knobset_list.size() == 0) {
+			auto panel = ui_KnobSetGroup_create(ui_KnobsetMenu);
+			auto check = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETBUTTON);
+			auto label = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETNAME);
+			lv_label_set_text(label, "Default");
+			lv_obj_add_state(check, LV_STATE_CHECKED);
+			lv_group_add_obj(knobset_menu_group, check);
+			knobset_list.push_back(panel);
 		}
 	}
 
@@ -153,7 +150,7 @@ struct PatchViewKnobsetMenu {
 			auto page = static_cast<PatchViewKnobsetMenu *>(event->user_data);
 
 			for (unsigned i = 0; auto *panel : page->knobset_list) {
-				auto *check = lv_obj_get_child(panel, 0);
+				auto check = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETBUTTON);
 
 				if (check == obj) {
 					if (i != page->settings.active_knobset) {

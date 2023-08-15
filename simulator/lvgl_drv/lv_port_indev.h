@@ -36,6 +36,8 @@ struct LvglEncoderSimulatorDriver {
 	bool param_inc();
 	bool param_dec();
 	unsigned selected_param();
+	unsigned selected_outchan();
+	unsigned selected_inchan();
 
 private:
 	void set_quit(QuitEvent);
@@ -55,4 +57,6 @@ private:
 	bool param_inc_pressed = false;
 	bool param_dec_pressed = false;
 	unsigned last_selected_param = 0;
+	unsigned last_selected_outchan = 0;
+	unsigned last_selected_inchan = 0;
 };

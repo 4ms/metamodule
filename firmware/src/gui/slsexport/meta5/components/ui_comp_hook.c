@@ -5,6 +5,6 @@
 
 #include "../ui.h"
 
-void ui_comp_Button1_create_hook( lv_obj_t * comp)
+void ui_comp_KnobSetGroup_create_hook( lv_obj_t * comp)
 {
 }

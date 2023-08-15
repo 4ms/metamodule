@@ -8,8 +8,6 @@
 
 //exported:
 #include "gui/slsexport/meta5/ui.h"
-// LV_FONT_DECLARE(lv_font_montserrat_10);
-// LV_FONT_DECLARE(lv_font_montserrat_16);
 
 namespace MetaModule
 {

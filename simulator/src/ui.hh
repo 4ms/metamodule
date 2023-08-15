@@ -1,4 +1,5 @@
 #pragma once
+#include "audio_stream.hh"
 #include "lv_port_indev.h"
 #define printf_ printf
 ///
@@ -14,15 +15,6 @@ namespace MetaModule
 {
 
 class Ui {
-private:
-	PatchPlayLoader &patch_playloader;
-
-	MessageQueue msg_queue;
-	PageManager page_manager;
-	ParamsState params;
-	MetaParams metaparams;
-
-	LvglEncoderSimulatorDriver input_driver{keys};
 
 	RotaryEncoderKeys keys{
 		.turn_cw = SDLK_RIGHT,
@@ -35,91 +27,40 @@ private:
 	};
 
 public:
-	Ui(PatchPlayLoader &patch_playloader, PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
-		: patch_playloader{patch_playloader}
-		, msg_queue{1024}
-		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
-	}
+	Ui(std::string_view patch_path, size_t block_size);
 
-	void start() {
-		params.clear();
-		metaparams.clear();
-
-		Gui::init_lvgl_styles();
-		page_manager.init();
-
-		patch_playloader.audio_is_muted();
-	}
-
-	// "Scheduler" for UI tasks
-	// returns true until it gets a QUIT event
-	bool update() {
-
-		auto tm = lv_tick_get(); //milliseconds
-		if (tm - last_lvgl_task_tm >= 1) {
-			lvgl_update_task();
-			last_lvgl_task_tm = tm;
-		}
-
-		tm = lv_tick_get();
-		if (tm - last_page_task_tm >= 16) {
-			transfer_aux_button_events();
-			transfer_params();
-			page_update_task();
-			last_page_task_tm = tm;
-		}
-
-		bool keep_running = input_driver.get_quit() == LV_QUIT_NONE;
-		return keep_running;
-	}
+	bool update();
+	void play_patch(std::span<Frame> buffer);
 
 private:
+	PatchPlayer patch_player;
+	PatchStorageProxy patch_storage;
+	PatchPlayLoader patch_playloader{patch_storage, patch_player};
+	PatchModQueue patch_mod_queue;
+
+	MessageQueue msg_queue;
+	PageManager page_manager;
+	ParamsState params;
+	MetaParams metaparams;
+	AudioStream audio_stream{params, patch_player, patch_playloader};
+	LvglEncoderSimulatorDriver input_driver{keys};
+
+	std::vector<StreamConfSim::Audio::AudioInFrame> in_buffer;
+	std::vector<StreamConfSim::Audio::AudioOutFrame> out_buffer;
+
 	uint32_t last_lvgl_task_tm = 0;
 	uint32_t last_page_task_tm = 0;
 
-	void lvgl_update_task() {
-		lv_timer_handler();
+	unsigned cur_outchan_left = 0;
+	unsigned cur_outchan_right = 1;
+	unsigned cur_inchan_left = 0;
+	unsigned cur_inchan_right = 1;
 
-		auto msg = msg_queue.get_message();
-		if (!msg.empty()) {
-			printf_("%s", msg.data());
-			msg_queue.clear_message();
-		}
-	}
-
-	void page_update_task() { //60Hz
-		page_manager.update_current_page();
-		patch_playloader.handle_sync_patch_loading();
-	}
-
-	void transfer_aux_button_events() {
-		// Transfer aux button events SDL => LVGL => metaparams
-		if (input_driver.aux_button_just_pressed())
-			metaparams.meta_buttons[0].register_falling_edge();
-
-		if (input_driver.aux_button_just_released())
-			metaparams.meta_buttons[0].register_rising_edge();
-	}
-
-	void transfer_params() {
-		if (unsigned cur_param = input_driver.selected_param(); cur_param < params.knobs.size()) {
-			params.knobs[cur_param].changed = false;
-
-			if (input_driver.param_inc()) {
-				params.knobs[cur_param].val = std::clamp(params.knobs[cur_param] + 0.05f, 0.f, 1.f);
-				params.knobs[cur_param].changed = true;
-
-				printf("Knob #%d = %1.2f\n", cur_param, (double)params.knobs[cur_param].val);
-			}
-
-			if (input_driver.param_dec()) {
-				params.knobs[cur_param].val = std::clamp(params.knobs[cur_param] - 0.05f, 0.f, 1.f);
-				params.knobs[cur_param].changed = true;
-
-				printf("Knob #%d = %1.2f\n", cur_param, (double)params.knobs[cur_param].val);
-			}
-		}
-	}
+	void lvgl_update_task();
+	void page_update_task();
+	void transfer_aux_button_events();
+	void transfer_params();
+	void update_channel_selections();
 };
 
 } // namespace MetaModule

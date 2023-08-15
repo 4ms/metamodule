@@ -44,7 +44,7 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 			if (rotary_pressed != ButtonEvent::Pressed) {
 				rotary_pressed = ButtonEvent::Pressed;
 				data->state = LV_INDEV_STATE_REL;
-				printf("click down\n");
+				// printf("click down\n");
 			}
 		}
 
@@ -52,7 +52,7 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 			//push back event to meta_params
 			if (aux_pressed != ButtonEvent::Pressed) {
 				aux_pressed = ButtonEvent::Pressed;
-				printf("aux down\n");
+				// printf("aux down\n");
 			}
 		}
 	}
@@ -73,7 +73,7 @@ void LvglEncoderSimulatorDriver::handle_key_press(SDL_Keycode key, lv_indev_data
 	if (key == keys.aux_button) {
 		if (aux_pressed != ButtonEvent::Released) {
 			aux_pressed = ButtonEvent::Released;
-			printf("aux up\n");
+			// printf("aux up\n");
 		}
 	}
 
@@ -81,7 +81,7 @@ void LvglEncoderSimulatorDriver::handle_key_press(SDL_Keycode key, lv_indev_data
 		if (rotary_pressed != ButtonEvent::Released) {
 			rotary_pressed = ButtonEvent::Released;
 			data->state = LV_INDEV_STATE_PR;
-			printf("click up\n");
+			// printf("click up\n");
 		}
 	}
 
@@ -101,16 +101,30 @@ void LvglEncoderSimulatorDriver::handle_key_press(SDL_Keycode key, lv_indev_data
 		_instance->param_dec_pressed = true;
 	}
 
-	// Keys 0-9 select params 0 - 9, minus => 10, equal => 11
-	if (key >= '0' && key <= '9') {
-		last_selected_param = key - '0';
+	// 1-8 select which patch output to route to the soundcard left output.
+	// Patch output (L + 1) % 8 will be routed to the soundcard right output.
+	if (key >= '1' && key <= '8') {
+		last_selected_outchan = key - '1';
 	}
-	if (key == '-') {
-		last_selected_param = 10;
-	}
-	if (key == '=') {
-		last_selected_param = 11;
-	}
+	// Shift + 1-8 select which patch input to connect to the soundcard left input channel.
+	// Soundcard right input channel is routed to patch input (L+1)%8
+	// Patch inputs 7 and 8 are Gate In 1 and 2.
+	if (key == '!')
+		last_selected_inchan = 0;
+	if (key == '@')
+		last_selected_inchan = 1;
+	if (key == '#')
+		last_selected_inchan = 2;
+	if (key == '$')
+		last_selected_inchan = 3;
+	if (key == '%')
+		last_selected_inchan = 4;
+	if (key == '^')
+		last_selected_inchan = 5;
+	if (key == '&')
+		last_selected_inchan = 6;
+	if (key == '*')
+		last_selected_inchan = 7;
 
 	// Keys A - F select params 0 - 5 (knobs A,B,C,D,E,F)
 	// Keys u - z select params 6 - 11 (knobs u,v,w,x,y,z)
@@ -164,4 +178,12 @@ bool LvglEncoderSimulatorDriver::param_dec() {
 
 unsigned LvglEncoderSimulatorDriver::selected_param() {
 	return last_selected_param;
+}
+
+unsigned LvglEncoderSimulatorDriver::selected_outchan() {
+	return last_selected_outchan;
+}
+
+unsigned LvglEncoderSimulatorDriver::selected_inchan() {
+	return last_selected_inchan;
 }
