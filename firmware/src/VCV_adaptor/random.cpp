@@ -1,5 +1,7 @@
 #include "VCV_adaptor/random.hpp"
+#include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
+#include "pr_dbg.hh"
 
 namespace rack::random
 {
@@ -11,16 +13,33 @@ void init() {
 	if (rng.isSeeded())
 		return;
 
-	// FIXME: For Cortex-A7: read RNG four times => two 64-bit numbers
-	uint64_t time = PL1_GetCurrentPhysicalValue();
-	uint64_t nsec = HAL_GetTick();
+	mdrivlib::RCC_Enable::RNG1_::set();
 
-	rng.seed(time, nsec);
+	RNG_HandleTypeDef hrng{
+		.Instance = RNG1,
+		.Init = {.ClockErrorDetection = RNG_CED_DISABLE},
+		.Lock = HAL_UNLOCKED,
+		.State = HAL_RNG_STATE_RESET,
+		.ErrorCode = HAL_RNG_ERROR_NONE,
+	};
+	HAL_RNG_Init(&hrng);
 
-	// Shift state a few times due to low seed entropy
-	for (int i = 0; i < 4; i++) {
-		rng();
+	uint32_t nums[4] = {0, 0, 0, 0};
+
+	for (auto &num : nums) {
+		if (HAL_RNG_GenerateRandomNumber(&hrng, &num) != HAL_OK) {
+			// pr_err("RNG failed to generate a random number\n");
+			return;
+		}
+		// printf_("Random: %ld\n", num);
 	}
+
+	uint64_t seed1 = ((uint64_t)(nums[0])) << 32;
+	seed1 |= nums[1];
+	uint64_t seed2 = ((uint64_t)(nums[2])) << 32;
+	seed2 |= nums[3];
+
+	rng.seed(seed1, seed2);
 }
 
 Xoroshiro128Plus &local() {
