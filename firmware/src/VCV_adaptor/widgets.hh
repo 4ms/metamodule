@@ -91,6 +91,10 @@ struct CKSS : app::ParamWidget {};
 
 template<typename T> struct MediumLight : app::ModuleLightWidget {};
 template<typename T> struct SmallLight : app::ModuleLightWidget {};
+template <typename TBase> struct VCVBezelLight : TBase {};
+template <typename TBase> using LEDBezelLight = VCVBezelLight<TBase>;
+
+
 struct GreenRedLight : app::ModuleLightWidget {};
 struct RedLight : app::ModuleLightWidget {};
 struct YellowLight : app::ModuleLightWidget {};
