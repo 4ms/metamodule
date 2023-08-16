@@ -1,0 +1,237 @@
+PatchData:
+  patch_name: 'HetrickCV 0-C'
+  description: Patch Description
+  module_slugs:
+    0: HubMedium
+    1: Chaos1Op
+    2: Chaos2Op
+    3: ASR
+    4: AnalogToDigital
+    5: BinaryGate
+    6: BinaryNoise
+    7: Bitshift
+    8: Boolean3
+    9: ChaoticAttractors
+    10: ClockedNoise
+    11: Contrast
+    12: Crackle
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 1
+    - module_id: 1
+      param_id: 2
+      value: 0
+    - module_id: 1
+      param_id: 3
+      value: 1
+    - module_id: 1
+      param_id: 4
+      value: 0
+    - module_id: 1
+      param_id: 5
+      value: 1
+    - module_id: 1
+      param_id: 6
+      value: 1
+    - module_id: 1
+      param_id: 7
+      value: 0
+    - module_id: 1
+      param_id: 8
+      value: 0
+    - module_id: 1
+      param_id: 9
+      value: 0
+    - module_id: 2
+      param_id: 0
+      value: 0.5
+    - module_id: 2
+      param_id: 1
+      value: 1
+    - module_id: 2
+      param_id: 2
+      value: 5
+    - module_id: 2
+      param_id: 3
+      value: 1
+    - module_id: 2
+      param_id: 4
+      value: 0
+    - module_id: 2
+      param_id: 5
+      value: 1
+    - module_id: 2
+      param_id: 6
+      value: 4
+    - module_id: 2
+      param_id: 7
+      value: 1
+    - module_id: 2
+      param_id: 8
+      value: 1
+    - module_id: 2
+      param_id: 9
+      value: 0
+    - module_id: 2
+      param_id: 10
+      value: 0
+    - module_id: 2
+      param_id: 11
+      value: 0
+    - module_id: 4
+      param_id: 0
+      value: 0.2
+    - module_id: 4
+      param_id: 1
+      value: 0
+    - module_id: 4
+      param_id: 2
+      value: 0
+    - module_id: 4
+      param_id: 3
+      value: 0
+    - module_id: 5
+      param_id: 0
+      value: 0
+    - module_id: 5
+      param_id: 1
+      value: 0
+    - module_id: 5
+      param_id: 2
+      value: 0
+    - module_id: 6
+      param_id: 0
+      value: 0.5
+    - module_id: 6
+      param_id: 1
+      value: 0
+    - module_id: 6
+      param_id: 2
+      value: 0
+    - module_id: 6
+      param_id: 3
+      value: 0
+    - module_id: 6
+      param_id: 4
+      value: 1
+    - module_id: 6
+      param_id: 5
+      value: 0
+    - module_id: 6
+      param_id: 6
+      value: 0
+    - module_id: 7
+      param_id: 0
+      value: 0
+    - module_id: 7
+      param_id: 1
+      value: 1
+    - module_id: 7
+      param_id: 2
+      value: 0
+    - module_id: 9
+      param_id: 0
+      value: 0.5
+    - module_id: 9
+      param_id: 1
+      value: 1
+    - module_id: 9
+      param_id: 2
+      value: 5
+    - module_id: 9
+      param_id: 3
+      value: 1
+    - module_id: 9
+      param_id: 4
+      value: 0
+    - module_id: 9
+      param_id: 5
+      value: 1
+    - module_id: 9
+      param_id: 6
+      value: 5
+    - module_id: 9
+      param_id: 7
+      value: 1
+    - module_id: 9
+      param_id: 8
+      value: 0
+    - module_id: 9
+      param_id: 9
+      value: 1
+    - module_id: 9
+      param_id: 10
+      value: 4
+    - module_id: 9
+      param_id: 11
+      value: 1
+    - module_id: 9
+      param_id: 12
+      value: 1
+    - module_id: 9
+      param_id: 13
+      value: 0
+    - module_id: 9
+      param_id: 14
+      value: 0
+    - module_id: 9
+      param_id: 15
+      value: 0
+    - module_id: 10
+      param_id: 0
+      value: 1
+    - module_id: 10
+      param_id: 1
+      value: 1
+    - module_id: 10
+      param_id: 2
+      value: -5
+    - module_id: 10
+      param_id: 3
+      value: 1
+    - module_id: 10
+      param_id: 4
+      value: 0
+    - module_id: 10
+      param_id: 5
+      value: 1
+    - module_id: 10
+      param_id: 6
+      value: 1
+    - module_id: 10
+      param_id: 7
+      value: 0
+    - module_id: 10
+      param_id: 8
+      value: 0
+    - module_id: 11
+      param_id: 0
+      value: 0
+    - module_id: 11
+      param_id: 1
+      value: 1
+    - module_id: 11
+      param_id: 2
+      value: 0
+    - module_id: 12
+      param_id: 0
+      value: 1.7
+    - module_id: 12
+      param_id: 1
+      value: 1
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
