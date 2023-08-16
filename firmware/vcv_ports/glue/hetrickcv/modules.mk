@@ -10,8 +10,8 @@ hetrickcv_modules += Chaos2Op
 hetrickcv_modules += Chaos3Op
 hetrickcv_modules += ChaoticAttractors
 hetrickcv_modules += ClockedNoise
-hetrickcv_modules += Comparator
-hetrickcv_modules += Contrast
+# hetrickcv_modules += Comparator
+# hetrickcv_modules += Contrast
 
 ########### above this line compiles ############3
 
