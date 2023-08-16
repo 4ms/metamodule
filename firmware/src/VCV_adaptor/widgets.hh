@@ -86,6 +86,9 @@ struct PJ301MPort : app::PortWidget{};
 struct BefacoSwitch : app::ParamWidget {};
 struct BefacoPush : app::ParamWidget {};
 struct CKSS : app::ParamWidget {};
+template <typename TBase> struct VCVLightBezel : app::SvgSwitch {};
+struct VCVBezel : app::SvgSwitch {};
+using LEDBezel = VCVBezel;
 
 // Lights
 
@@ -97,6 +100,7 @@ template <typename TBase> using LEDBezelLight = VCVBezelLight<TBase>;
 
 struct GreenRedLight : app::ModuleLightWidget {};
 struct RedLight : app::ModuleLightWidget {};
+struct BlueLight : app::ModuleLightWidget {};
 struct YellowLight : app::ModuleLightWidget {};
 struct GreenLight : app::ModuleLightWidget {};
 struct RedGreenBlueLight : app::ModuleLightWidget {};
