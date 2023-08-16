@@ -1,22 +1,21 @@
 #pragma once
 
-class FlipFlop
+namespace MetaModule
 {
+class FlipFlop {
 public:
-	FlipFlop(float min_, float max_) : currentState(false), min(min_), max(max_) {}
+	FlipFlop(float min_, float max_)
+		: currentState(false)
+		, min(min_)
+		, max(max_) {
+	}
 
-	bool operator()(float val)
-	{
-		if (val >= max)
-		{
+	bool operator()(float val) {
+		if (val >= max) {
 			currentState = true;
-		}
-		else if (val <= min)
-		{
+		} else if (val <= min) {
 			currentState = false;
-		}
-		else
-		{
+		} else {
 			// no change
 		}
 		return currentState;
@@ -27,3 +26,4 @@ private:
 	const float min;
 	const float max;
 };
+} // namespace MetaModule
