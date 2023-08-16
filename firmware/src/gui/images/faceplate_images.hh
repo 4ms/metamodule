@@ -35,14 +35,14 @@ LV_IMG_DECLARE(PhasorOctature_240);
 LV_IMG_DECLARE(PhasorHumanizer_240);
 LV_IMG_DECLARE(PhasorGeometry_240);
 LV_IMG_DECLARE(PhasorGen_240);
-LV_IMG_DECLARE(PhasorGates6_240);
-LV_IMG_DECLARE(PhasorGates3_240);
+LV_IMG_DECLARE(PhasorGates64_240);
+LV_IMG_DECLARE(PhasorGates32_240);
 LV_IMG_DECLARE(PhasorGates_240);
 LV_IMG_DECLARE(PhasorEuclidean_240);
 LV_IMG_DECLARE(PhasorDivMult_240);
 LV_IMG_DECLARE(PhasorBurstGen_240);
 LV_IMG_DECLARE(PhasorAnalyzer_240);
-LV_IMG_DECLARE(PhaseDrivenSequencer3_240);
+LV_IMG_DECLARE(PhaseDrivenSequencer32_240);
 LV_IMG_DECLARE(PhaseDrivenSequencer_240);
 LV_IMG_DECLARE(MinMax_240);
 LV_IMG_DECLARE(MidSide_240);
@@ -245,10 +245,10 @@ struct ModuleImages {
 			return &PhasorGen_240;
 
 		if (slug == "PhasorGates64")
-			return &PhasorGates6_240;
+			return &PhasorGates64_240;
 
 		if (slug == "PhasorGates32")
-			return &PhasorGates3_240;
+			return &PhasorGates32_240;
 
 		if (slug == "PhasorGates")
 			return &PhasorGates_240;
@@ -266,7 +266,7 @@ struct ModuleImages {
 			return &PhasorAnalyzer_240;
 
 		if (slug == "PhaseDrivenSequencer32")
-			return &PhaseDrivenSequencer3_240;
+			return &PhaseDrivenSequencer32_240;
 
 		if (slug == "PhaseDrivenSequencer")
 			return &PhaseDrivenSequencer_240;
