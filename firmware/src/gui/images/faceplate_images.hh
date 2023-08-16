@@ -331,13 +331,13 @@ struct ModuleImages {
 		if (slug == "ChaoticAttractors")
 			return &ChaoticAttractors_240;
 
-		if (slug == "3OpChaos")
+		if (slug == "Chaos3Op")
 			return &Chaos3Op_240;
 
-		if (slug == "2OpChaos")
+		if (slug == "Chaos2Op")
 			return &Chaos2Op_240;
 
-		if (slug == "1OpChaos")
+		if (slug == "Chaos1Op")
 			return &Chaos1Op_240;
 
 		if (slug == "Boolean3")
