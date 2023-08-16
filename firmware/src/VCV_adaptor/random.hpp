@@ -60,7 +60,26 @@ struct Xoroshiro128Plus {
 
 // Simple global API
 
-void init();
+static Xoroshiro128Plus rng;
+
+void init(double seed) {
+	// Don't reset state if already seeded
+	if (rng.isSeeded())
+		return;
+
+	uint64_t sec = seed;
+	uint64_t nsec = std::fmod(seed, 1.0) * 1e9;
+	rng.seed(sec, nsec);
+
+	// Shift state a few times due to low seed entropy
+	for (int i = 0; i < 4; i++) {
+		rng();
+	}
+}
+
+Xoroshiro128Plus &local() {
+	return rng;
+}
 
 /** Returns the generator.
 Named "local" because the generator was thread-local in previous versions.
