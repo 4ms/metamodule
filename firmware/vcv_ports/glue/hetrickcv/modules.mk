@@ -10,9 +10,6 @@ hetrickcv_modules += Chaos2Op
 hetrickcv_modules += Chaos3Op
 hetrickcv_modules += ChaoticAttractors
 hetrickcv_modules += ClockedNoise
-
-########### above this line compiles ############3
-
 # hetrickcv_modules += Comparator
 hetrickcv_modules += Contrast
 hetrickcv_modules += Crackle
@@ -25,16 +22,16 @@ hetrickcv_modules += FBSineChaos
 hetrickcv_modules += FlipFlop
 hetrickcv_modules += FlipPan
 hetrickcv_modules += GateDelay
-# hetrickcv_modules += GateJunction
-# hetrickcv_modules += GateJunctionExp
+hetrickcv_modules += GateJunction
+hetrickcv_modules += GateJunctionExp
 hetrickcv_modules += Gingerbread
 hetrickcv_modules += LogicCombine
 hetrickcv_modules += MidSide
 hetrickcv_modules += MinMax
-# hetrickcv_modules += PhaseDrivenSequencer
-# hetrickcv_modules += PhaseDrivenSequencer32
+hetrickcv_modules += PhaseDrivenSequencer
+hetrickcv_modules += PhaseDrivenSequencer32
 hetrickcv_modules += PhasorAnalyzer
-# hetrickcv_modules += PhasorBurstGen
+hetrickcv_modules += PhasorBurstGen
 hetrickcv_modules += PhasorDivMult
 hetrickcv_modules += PhasorEuclidean
 hetrickcv_modules += PhasorGates
