@@ -1,15 +1,14 @@
 #pragma once
 #include "VCV_adaptor/app/Widget.hh"
 
+//TODO Replace this with Rack/include/componentlibrary.hpp
+
 namespace rack::componentlibrary
 {
-
-// These are defined in Rack, though some appear to be brand-specific
 
 // clang-format off
 
 // Screws
-
 struct SvgScrew : widget::SvgWidget {};
 struct ScrewSilver : SvgScrew {};
 
