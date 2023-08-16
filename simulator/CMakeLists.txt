@@ -124,51 +124,52 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/FlipFlop.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/FlipPan.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/GateDelay.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/GateJunction.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/GateJunctionExp.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/GateJunction.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/GateJunctionExp.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Gingerbread.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/LogicCombine.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/MidSide.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/MinMax.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhaseDrivenSequencer.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhaseDrivenSequencer32.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhaseDrivenSequencer.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhaseDrivenSequencer32.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorAnalyzer.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorBurstGen.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorBurstGen.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorDivMult.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorEuclidean.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGates.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGates32.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGates64.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGen.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGeometry.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorHumanizer.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorOctature.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorQuadrature.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorRandom.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorRanger.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorReset.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorRhythmGroup.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorShape.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorShift.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorStutter.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorSubstepShape.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorSwing.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorTimetable.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToClock.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToLFO.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToWaveforms.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/XYToPolar.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Probability.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorEuclidean.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGates.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGates32.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGates64.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGen.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGeometry.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorHumanizer.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorOctature.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorQuadrature.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorRandom.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorRanger.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorReset.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorRhythmGroup.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorShape.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorShift.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorStutter.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorSubstepShape.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorSwing.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorTimetable.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToClock.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToLFO.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToWaveforms.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Polar.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Probability.cpp
     # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/RandomGates.cpp
     # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Rotator.cpp
     # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Rungler.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Scanner.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/TwoToFour.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/VectorMix.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Waveshape.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Scanner.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/TwoToFour.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/VectorMix.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Waveshape.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/arr.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/Domain.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/scl.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/HetrickUtilities.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/HCVChaos.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/Phasors/HCVPhasorEffects.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/Phasors/HCVPhasorAnalyzers.cpp
