@@ -2,7 +2,7 @@
 #include "lvgl.h"
 #include <string_view>
 
-#if 0 && defined(USE_FEWER_MODULES) //&& USE_FEWER_MODULES == 1
+#if defined(USE_FEWER_MODULES) && USE_FEWER_MODULES == 1
 #include "faceplate_images_shortlist.hh"
 #else
 
@@ -163,167 +163,167 @@ struct ModuleImages {
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
 
-		// if (slug == "Waveshape")
-		// 	return &Waveshape_240;
+		if (slug == "Waveshape")
+			return &Waveshape_240;
 
-		// if (slug == "VectorMix")
-		// 	return &VectorMix_240;
+		if (slug == "VectorMix")
+			return &VectorMix_240;
 
-		// if (slug == "TwoToFour")
-		// 	return &TwoToFour_240;
+		if (slug == "TwoToFour")
+			return &TwoToFour_240;
 
-		// if (slug == "Scanner")
-		// 	return &Scanner_240;
+		if (slug == "Scanner")
+			return &Scanner_240;
 
-		// if (slug == "Rungler")
-		// 	return &Rungler_240;
+		if (slug == "Rungler")
+			return &Rungler_240;
 
-		// if (slug == "Rotator")
-		// 	return &Rotator_240;
+		if (slug == "Rotator")
+			return &Rotator_240;
 
-		// if (slug == "RandomGates")
-		// 	return &RandomGates_240;
+		if (slug == "RandomGates")
+			return &RandomGates_240;
 
-		// if (slug == "Probability")
-		// 	return &Probability_240;
+		if (slug == "Probability")
+			return &Probability_240;
 
-		// if (slug == "Polar")
-		// 	return &XYToPolar_240;
+		if (slug == "Polar")
+			return &XYToPolar_240;
 
-		// if (slug == "PhasorToWaveforms")
-		// 	return &PhasorToWaveforms_240;
+		if (slug == "PhasorToWaveforms")
+			return &PhasorToWaveforms_240;
 
-		// if (slug == "PhasorToLFO")
-		// 	return &PhasorToLFO_240;
+		if (slug == "PhasorToLFO")
+			return &PhasorToLFO_240;
 
-		// if (slug == "PhasorToClock")
-		// 	return &PhasorToClock_240;
+		if (slug == "PhasorToClock")
+			return &PhasorToClock_240;
 
-		// if (slug == "PhasorTimetable")
-		// 	return &PhasorTimetable_240;
+		if (slug == "PhasorTimetable")
+			return &PhasorTimetable_240;
 
-		// if (slug == "PhasorSwing")
-		// 	return &PhasorSwing_240;
+		if (slug == "PhasorSwing")
+			return &PhasorSwing_240;
 
-		// if (slug == "PhasorSubstepShape")
-		// 	return &PhasorSubstepShape_240;
+		if (slug == "PhasorSubstepShape")
+			return &PhasorSubstepShape_240;
 
-		// if (slug == "PhasorStutter")
-		// 	return &PhasorStutter_240;
+		if (slug == "PhasorStutter")
+			return &PhasorStutter_240;
 
-		// if (slug == "PhasorShift")
-		// 	return &PhasorShift_240;
+		if (slug == "PhasorShift")
+			return &PhasorShift_240;
 
-		// if (slug == "PhasorShape")
-		// 	return &PhasorShape_240;
+		if (slug == "PhasorShape")
+			return &PhasorShape_240;
 
-		// if (slug == "PhasorRhythmGroup")
-		// 	return &PhasorRhythmGroup_240;
+		if (slug == "PhasorRhythmGroup")
+			return &PhasorRhythmGroup_240;
 
-		// if (slug == "PhasorReset")
-		// 	return &PhasorReset_240;
+		if (slug == "PhasorReset")
+			return &PhasorReset_240;
 
-		// if (slug == "PhasorRanger")
-		// 	return &PhasorRanger_240;
+		if (slug == "PhasorRanger")
+			return &PhasorRanger_240;
 
-		// if (slug == "PhasorRandom")
-		// 	return &PhasorRandom_240;
+		if (slug == "PhasorRandom")
+			return &PhasorRandom_240;
 
-		// if (slug == "PhasorQuadrature")
-		// 	return &PhasorQuadrature_240;
+		if (slug == "PhasorQuadrature")
+			return &PhasorQuadrature_240;
 
-		// if (slug == "PhasorOctature")
-		// 	return &PhasorOctature_240;
+		if (slug == "PhasorOctature")
+			return &PhasorOctature_240;
 
-		// if (slug == "PhasorHumanizer")
-		// 	return &PhasorHumanizer_240;
+		if (slug == "PhasorHumanizer")
+			return &PhasorHumanizer_240;
 
-		// if (slug == "PhasorGeometry")
-		// 	return &PhasorGeometry_240;
+		if (slug == "PhasorGeometry")
+			return &PhasorGeometry_240;
 
-		// if (slug == "PhasorGen")
-		// 	return &PhasorGen_240;
+		if (slug == "PhasorGen")
+			return &PhasorGen_240;
 
-		// if (slug == "PhasorGates64")
-		// 	return &PhasorGates64_240;
+		if (slug == "PhasorGates64")
+			return &PhasorGates64_240;
 
-		// if (slug == "PhasorGates32")
-		// 	return &PhasorGates32_240;
+		if (slug == "PhasorGates32")
+			return &PhasorGates32_240;
 
-		// if (slug == "PhasorGates")
-		// 	return &PhasorGates_240;
+		if (slug == "PhasorGates")
+			return &PhasorGates_240;
 
-		// if (slug == "PhasorEuclidean")
-		// 	return &PhasorEuclidean_240;
+		if (slug == "PhasorEuclidean")
+			return &PhasorEuclidean_240;
 
-		// if (slug == "PhasorDivMult")
-		// 	return &PhasorDivMult_240;
+		if (slug == "PhasorDivMult")
+			return &PhasorDivMult_240;
 
-		// if (slug == "PhasorBurstGen")
-		// 	return &PhasorBurstGen_240;
+		if (slug == "PhasorBurstGen")
+			return &PhasorBurstGen_240;
 
-		// if (slug == "PhasorAnalyzer")
-		// 	return &PhasorAnalyzer_240;
+		if (slug == "PhasorAnalyzer")
+			return &PhasorAnalyzer_240;
 
-		// if (slug == "PhaseDrivenSequencer32")
-		// 	return &PhaseDrivenSequencer32_240;
+		if (slug == "PhaseDrivenSequencer32")
+			return &PhaseDrivenSequencer32_240;
 
-		// if (slug == "PhaseDrivenSequencer")
-		// 	return &PhaseDrivenSequencer_240;
+		if (slug == "PhaseDrivenSequencer")
+			return &PhaseDrivenSequencer_240;
 
-		// if (slug == "MinMax")
-		// 	return &MinMax_240;
+		if (slug == "MinMax")
+			return &MinMax_240;
 
-		// if (slug == "MidSide")
-		// 	return &MidSide_240;
+		if (slug == "MidSide")
+			return &MidSide_240;
 
-		// if (slug == "LogicCombine")
-		// 	return &LogicCombiner_240;
+		if (slug == "LogicCombine")
+			return &LogicCombiner_240;
 
-		// if (slug == "Gingerbread")
-		// 	return &Gingerbread_240;
+		if (slug == "Gingerbread")
+			return &Gingerbread_240;
 
-		// if (slug == "GateJunctionExp")
-		// 	return &GateJunctionExpanded_240;
+		if (slug == "GateJunctionExp")
+			return &GateJunctionExpanded_240;
 
-		// if (slug == "GateJunction")
-		// 	return &GateJunction_240;
+		if (slug == "GateJunction")
+			return &GateJunction_240;
 
-		// if (slug == "GateDelay")
-		// 	return &GateDelay_240;
+		if (slug == "GateDelay")
+			return &GateDelay_240;
 
-		// if (slug == "FlipPan")
-		// 	return &FlipPan_240;
+		if (slug == "FlipPan")
+			return &FlipPan_240;
 
-		// if (slug == "FlipFlop")
-		// 	return &FlipFlop_240;
+		if (slug == "FlipFlop")
+			return &FlipFlop_240;
 
-		// if (slug == "FBSineChaos")
-		// 	return &FBSineChaos_240;
+		if (slug == "FBSineChaos")
+			return &FBSineChaos_240;
 
-		// if (slug == "Exponent")
-		// 	return &Exponent_240;
+		if (slug == "Exponent")
+			return &Exponent_240;
 
-		// if (slug == "Dust")
-		// 	return &Dust_240;
+		if (slug == "Dust")
+			return &Dust_240;
 
-		// if (slug == "Delta")
-		// 	return &Delta_240;
+		if (slug == "Delta")
+			return &Delta_240;
 
-		// if (slug == "DataCompander")
-		// 	return &DataCompander_240;
+		if (slug == "DataCompander")
+			return &DataCompander_240;
 
-		// if (slug == "DToA")
-		// 	return &DToA_240;
+		if (slug == "DToA")
+			return &DToA_240;
 
-		// if (slug == "Crackle")
-		// 	return &Crackle_240;
+		if (slug == "Crackle")
+			return &Crackle_240;
 
-		// if (slug == "Contrast")
-		// 	return &Contrast_240;
+		if (slug == "Contrast")
+			return &Contrast_240;
 
-		// if (slug == "Comparator")
-		// 	return &Comparator_240;
+		if (slug == "Comparator")
+			return &Comparator_240;
 
 		if (slug == "ClockedNoise")
 			return &ClockedNoise_240;
