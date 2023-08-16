@@ -10,11 +10,11 @@ hetrickcv_modules += Chaos2Op
 hetrickcv_modules += Chaos3Op
 hetrickcv_modules += ChaoticAttractors
 hetrickcv_modules += ClockedNoise
-# hetrickcv_modules += Comparator
-# hetrickcv_modules += Contrast
 
 ########### above this line compiles ############3
 
+# hetrickcv_modules += Comparator
+# hetrickcv_modules += Contrast
 # hetrickcv_modules += Crackle
 # hetrickcv_modules += DToA
 # hetrickcv_modules += DataCompander
@@ -68,6 +68,7 @@ hetrickcv_modules += ClockedNoise
 # hetrickcv_modules += VectorMix
 # hetrickcv_modules += Waveshape
 
+# Notes;
 # Modules with module *.cpp names different from faceplate *.svg name:
 # Module is GateJunctionExp, faceplate is GateJunctionExpanded
 # Module is Polar, faceplate is XYToPolar

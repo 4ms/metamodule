@@ -53,7 +53,6 @@ file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
 set(CORE_MODULES
     ${CORE_MODULES}
     ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
-    ${MM_ROOT}/firmware/src/VCV_adaptor/random.cpp
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
     #
@@ -103,13 +102,26 @@ set(CORE_MODULES
     #
     # HetrickCV
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ASR.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/AToD.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/BinaryGate.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/BinaryNoise.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Bitshift.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Boolean3.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Chaos1Op.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Chaos2Op.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Chaos3Op.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ChaoticAttractors.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ClockedNoise.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/arr.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/Domain.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/scl.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/HCVChaos.cpp 
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/HCVChaos.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/Phasors/HCVPhasorEffects.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/Phasors/HCVPhasorAnalyzers.cpp
     #
     # support files
     ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
+    ${MM_ROOT}/simulator/stubs/random.cpp
     ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
     ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
 
