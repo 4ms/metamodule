@@ -1,5 +1,5 @@
 #include "VCV_adaptor/random.hpp"
-#include "stm32mp1xx_hal.h"
+#include "drivers/stm32xx.h"
 
 namespace rack::random
 {
@@ -11,11 +11,11 @@ void init() {
 	if (rng.isSeeded())
 		return;
 
-	// Get epoch time for seed
-	double time = HAL_GetTick();
-	uint64_t sec = time;
-	uint64_t nsec = std::fmod(time, 1.0) * 1e9;
-	rng.seed(sec, nsec);
+	// FIXME: For Cortex-A7: read RNG four times => two 64-bit numbers
+	uint64_t time = PL1_GetCurrentPhysicalValue();
+	uint64_t nsec = HAL_GetTick();
+
+	rng.seed(time, nsec);
 
 	// Shift state a few times due to low seed entropy
 	for (int i = 0; i < 4; i++) {
