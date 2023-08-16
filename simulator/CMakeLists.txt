@@ -106,6 +106,7 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/arr.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/Domain.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/scl.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/HCVChaos.cpp 
     #
     # support files
     ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
