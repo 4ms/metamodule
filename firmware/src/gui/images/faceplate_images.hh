@@ -2,12 +2,76 @@
 #include "lvgl.h"
 #include <string_view>
 
-#if defined(USE_FEWER_MODULES) //&& USE_FEWER_MODULES == 1
+#if 0 && defined(USE_FEWER_MODULES) //&& USE_FEWER_MODULES == 1
 #include "faceplate_images_shortlist.hh"
 #else
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(Waveshape_240);
+LV_IMG_DECLARE(VectorMix_240);
+LV_IMG_DECLARE(TwoToFour_240);
+LV_IMG_DECLARE(Scanner_240);
+LV_IMG_DECLARE(Rungler_240);
+LV_IMG_DECLARE(Rotator_240);
+LV_IMG_DECLARE(RandomGates_240);
+LV_IMG_DECLARE(Probability_240);
+LV_IMG_DECLARE(XYToPolar_240);
+LV_IMG_DECLARE(PhasorToWaveforms_240);
+LV_IMG_DECLARE(PhasorToLFO_240);
+LV_IMG_DECLARE(PhasorToClock_240);
+LV_IMG_DECLARE(PhasorTimetable_240);
+LV_IMG_DECLARE(PhasorSwing_240);
+LV_IMG_DECLARE(PhasorSubstepShape_240);
+LV_IMG_DECLARE(PhasorStutter_240);
+LV_IMG_DECLARE(PhasorShift_240);
+LV_IMG_DECLARE(PhasorShape_240);
+LV_IMG_DECLARE(PhasorRhythmGroup_240);
+LV_IMG_DECLARE(PhasorReset_240);
+LV_IMG_DECLARE(PhasorRanger_240);
+LV_IMG_DECLARE(PhasorRandom_240);
+LV_IMG_DECLARE(PhasorQuadrature_240);
+LV_IMG_DECLARE(PhasorOctature_240);
+LV_IMG_DECLARE(PhasorHumanizer_240);
+LV_IMG_DECLARE(PhasorGeometry_240);
+LV_IMG_DECLARE(PhasorGen_240);
+LV_IMG_DECLARE(PhasorGates6_240);
+LV_IMG_DECLARE(PhasorGates3_240);
+LV_IMG_DECLARE(PhasorGates_240);
+LV_IMG_DECLARE(PhasorEuclidean_240);
+LV_IMG_DECLARE(PhasorDivMult_240);
+LV_IMG_DECLARE(PhasorBurstGen_240);
+LV_IMG_DECLARE(PhasorAnalyzer_240);
+LV_IMG_DECLARE(PhaseDrivenSequencer3_240);
+LV_IMG_DECLARE(PhaseDrivenSequencer_240);
+LV_IMG_DECLARE(MinMax_240);
+LV_IMG_DECLARE(MidSide_240);
+LV_IMG_DECLARE(LogicCombiner_240);
+LV_IMG_DECLARE(Gingerbread_240);
+LV_IMG_DECLARE(GateJunctionExpanded_240);
+LV_IMG_DECLARE(GateJunction_240);
+LV_IMG_DECLARE(GateDelay_240);
+LV_IMG_DECLARE(FlipPan_240);
+LV_IMG_DECLARE(FlipFlop_240);
+LV_IMG_DECLARE(FBSineChaos_240);
+LV_IMG_DECLARE(Exponent_240);
+LV_IMG_DECLARE(Dust_240);
+LV_IMG_DECLARE(Delta_240);
+LV_IMG_DECLARE(DataCompander_240);
+LV_IMG_DECLARE(DToA_240);
+LV_IMG_DECLARE(Crackle_240);
+LV_IMG_DECLARE(Contrast_240);
+LV_IMG_DECLARE(Comparator_240);
+LV_IMG_DECLARE(ClockedNoise_240);
+LV_IMG_DECLARE(ChaoticAttractors_240);
+LV_IMG_DECLARE(Chaos3Op_240);
+LV_IMG_DECLARE(Chaos2Op_240);
+LV_IMG_DECLARE(Chaos1Op_240);
+LV_IMG_DECLARE(Boolean3_240);
+LV_IMG_DECLARE(Bitshift_240);
+LV_IMG_DECLARE(BinaryNoise_240);
+LV_IMG_DECLARE(BinaryGate_240);
+LV_IMG_DECLARE(AToD_240);
 LV_IMG_DECLARE(ASR_240);
 LV_IMG_DECLARE(Braids_240);
 LV_IMG_DECLARE(StereoStrip_240);
@@ -98,6 +162,198 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "Waveshape")
+			return &Waveshape_240;
+
+		if (slug == "VectorMix")
+			return &VectorMix_240;
+
+		if (slug == "TwoToFour")
+			return &TwoToFour_240;
+
+		if (slug == "Scanner")
+			return &Scanner_240;
+
+		if (slug == "Rungler")
+			return &Rungler_240;
+
+		if (slug == "Rotator")
+			return &Rotator_240;
+
+		if (slug == "RandomGates")
+			return &RandomGates_240;
+
+		if (slug == "Probability")
+			return &Probability_240;
+
+		if (slug == "Polar")
+			return &XYToPolar_240;
+
+		if (slug == "PhasorToWaveforms")
+			return &PhasorToWaveforms_240;
+
+		if (slug == "PhasorToLFO")
+			return &PhasorToLFO_240;
+
+		if (slug == "PhasorToClock")
+			return &PhasorToClock_240;
+
+		if (slug == "PhasorTimetable")
+			return &PhasorTimetable_240;
+
+		if (slug == "PhasorSwing")
+			return &PhasorSwing_240;
+
+		if (slug == "PhasorSubstepShape")
+			return &PhasorSubstepShape_240;
+
+		if (slug == "PhasorStutter")
+			return &PhasorStutter_240;
+
+		if (slug == "PhasorShift")
+			return &PhasorShift_240;
+
+		if (slug == "PhasorShape")
+			return &PhasorShape_240;
+
+		if (slug == "PhasorRhythmGroup")
+			return &PhasorRhythmGroup_240;
+
+		if (slug == "PhasorReset")
+			return &PhasorReset_240;
+
+		if (slug == "PhasorRanger")
+			return &PhasorRanger_240;
+
+		if (slug == "PhasorRandom")
+			return &PhasorRandom_240;
+
+		if (slug == "PhasorQuadrature")
+			return &PhasorQuadrature_240;
+
+		if (slug == "PhasorOctature")
+			return &PhasorOctature_240;
+
+		if (slug == "PhasorHumanizer")
+			return &PhasorHumanizer_240;
+
+		if (slug == "PhasorGeometry")
+			return &PhasorGeometry_240;
+
+		if (slug == "PhasorGen")
+			return &PhasorGen_240;
+
+		if (slug == "PhasorGates64")
+			return &PhasorGates6_240;
+
+		if (slug == "PhasorGates32")
+			return &PhasorGates3_240;
+
+		if (slug == "PhasorGates")
+			return &PhasorGates_240;
+
+		if (slug == "PhasorEuclidean")
+			return &PhasorEuclidean_240;
+
+		if (slug == "PhasorDivMult")
+			return &PhasorDivMult_240;
+
+		if (slug == "PhasorBurstGen")
+			return &PhasorBurstGen_240;
+
+		if (slug == "PhasorAnalyzer")
+			return &PhasorAnalyzer_240;
+
+		if (slug == "PhaseDrivenSequencer32")
+			return &PhaseDrivenSequencer3_240;
+
+		if (slug == "PhaseDrivenSequencer")
+			return &PhaseDrivenSequencer_240;
+
+		if (slug == "MinMax")
+			return &MinMax_240;
+
+		if (slug == "MidSide")
+			return &MidSide_240;
+
+		if (slug == "LogicCombine")
+			return &LogicCombiner_240;
+
+		if (slug == "Gingerbread")
+			return &Gingerbread_240;
+
+		if (slug == "GateJunctionExp")
+			return &GateJunctionExpanded_240;
+
+		if (slug == "GateJunction")
+			return &GateJunction_240;
+
+		if (slug == "GateDelay")
+			return &GateDelay_240;
+
+		if (slug == "FlipPan")
+			return &FlipPan_240;
+
+		if (slug == "FlipFlop")
+			return &FlipFlop_240;
+
+		if (slug == "FBSineChaos")
+			return &FBSineChaos_240;
+
+		if (slug == "Exponent")
+			return &Exponent_240;
+
+		if (slug == "Dust")
+			return &Dust_240;
+
+		if (slug == "Delta")
+			return &Delta_240;
+
+		if (slug == "DataCompander")
+			return &DataCompander_240;
+
+		if (slug == "DToA")
+			return &DToA_240;
+
+		if (slug == "Crackle")
+			return &Crackle_240;
+
+		if (slug == "Contrast")
+			return &Contrast_240;
+
+		if (slug == "Comparator")
+			return &Comparator_240;
+
+		if (slug == "ClockedNoise")
+			return &ClockedNoise_240;
+
+		if (slug == "ChaoticAttractors")
+			return &ChaoticAttractors_240;
+
+		if (slug == "3OpChaos")
+			return &Chaos3Op_240;
+
+		if (slug == "2OpChaos")
+			return &Chaos2Op_240;
+
+		if (slug == "1OpChaos")
+			return &Chaos1Op_240;
+
+		if (slug == "Boolean3")
+			return &Boolean3_240;
+
+		if (slug == "Bitshift")
+			return &Bitshift_240;
+
+		if (slug == "BinaryNoise")
+			return &BinaryNoise_240;
+
+		if (slug == "BinaryGate")
+			return &BinaryGate_240;
+
+		if (slug == "AToD")
+			return &AToD_240;
 
 		if (slug == "ASR")
 			return &ASR_240;
