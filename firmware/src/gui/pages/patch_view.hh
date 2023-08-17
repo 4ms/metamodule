@@ -36,21 +36,7 @@ struct PatchViewPage : PageBase {
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
-		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
-		lv_obj_set_flex_align(base, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START);
-		lv_obj_set_style_pad_gap(base, 4, LV_STATE_DEFAULT);
-		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_set_scroll_dir(base, LV_DIR_VER);
-		lv_obj_set_scrollbar_mode(base, LV_SCROLLBAR_MODE_ACTIVE);
-
-		lv_obj_add_flag(ui_PlayButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_clear_flag(ui_PlayButton, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_PRESSED, this);
-
-		lv_obj_add_flag(ui_AddButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_add_flag(ui_InfoButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_add_flag(ui_KnobButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -240,7 +226,6 @@ struct PatchViewPage : PageBase {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page)
 			return;
-		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
 		auto obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));

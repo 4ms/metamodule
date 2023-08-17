@@ -8,9 +8,11 @@
 void ui_PatchViewPage_screen_init(void)
 {
 ui_PatchViewPage = lv_obj_create(NULL);
-lv_obj_clear_flag( ui_PatchViewPage, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
-lv_obj_set_flex_flow(ui_PatchViewPage,LV_FLEX_FLOW_COLUMN_WRAP);
-lv_obj_set_flex_align(ui_PatchViewPage, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_clear_flag( ui_PatchViewPage, LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
+lv_obj_set_scrollbar_mode(ui_PatchViewPage, LV_SCROLLBAR_MODE_ACTIVE);
+lv_obj_set_scroll_dir(ui_PatchViewPage, LV_DIR_VER);
+lv_obj_set_flex_flow(ui_PatchViewPage,LV_FLEX_FLOW_ROW_WRAP);
+lv_obj_set_flex_align(ui_PatchViewPage, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_set_style_radius(ui_PatchViewPage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_PatchViewPage, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_PatchViewPage, 255, LV_PART_MAIN| LV_STATE_DEFAULT);

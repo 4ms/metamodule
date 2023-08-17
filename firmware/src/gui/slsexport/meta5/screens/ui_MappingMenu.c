@@ -72,7 +72,6 @@ lv_obj_set_flex_grow( ui_ElementRoller, 1);
 lv_obj_set_x( ui_ElementRoller, 169 );
 lv_obj_set_y( ui_ElementRoller, -2 );
 lv_obj_set_align( ui_ElementRoller, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_ElementRoller, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_set_style_text_color(ui_ElementRoller, lv_color_hex(0x999999), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ElementRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_ElementRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -147,6 +146,7 @@ lv_obj_set_flex_grow( ui_MappingParameters, 1);
 lv_obj_set_align( ui_MappingParameters, LV_ALIGN_RIGHT_MID );
 lv_obj_set_flex_flow(ui_MappingParameters,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_MappingParameters, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_SPACE_EVENLY);
+lv_obj_add_flag( ui_MappingParameters, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_MappingParameters, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_MappingParameters, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_MappingParameters, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );

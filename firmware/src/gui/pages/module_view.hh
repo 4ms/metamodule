@@ -27,13 +27,14 @@ struct ModuleViewPage : PageBase {
 		: PageBase{info}
 		, slug(module_slug)
 		, patch{patch_storage.get_view_patch()}
-		, base(lv_obj_create(nullptr))
-		, roller(lv_roller_create(base))
-		, edit_pane(lv_obj_create(base))
+		, base{ui_MappingMenu}
+		, roller{ui_ElementRoller}
+		, edit_pane(ui_MappingParameters)
 		, knob_edit_pane{info, edit_pane} {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
+		lv_group_set_editing(group, false);
 
 		lv_draw_img_dsc_init(&img_dsc);
 
