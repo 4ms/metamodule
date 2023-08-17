@@ -8,17 +8,15 @@
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/cables.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_knobset_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
+#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
-
-extern "C" {
-#include "gui/slsexport/meta5/ui.h"
-}
 
 namespace MetaModule
 {
@@ -27,11 +25,13 @@ struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
 	PatchViewPage(PatchInfo info)
-		: PageBase{info} {
+		: PageBase{info}
+		, base(ui_PatchViewPage)
+		, patchname(ui_PatchName)
+		, module_name(lv_label_create(base))
+		, modules_cont(lv_obj_create(base))
+		, cable_drawer{modules_cont, drawn_elements} {
 		PageList::register_page(this, PageId::PatchView);
-
-		ui_PatchViewPage_screen_init();
-		base = ui_PatchViewPage; //NOLINT
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -43,14 +43,9 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_scroll_dir(base, LV_DIR_VER);
 		lv_obj_set_scrollbar_mode(base, LV_SCROLLBAR_MODE_ACTIVE);
 
-		// lv_obj_add_event_cb(base, base_scroll_cb, LV_EVENT_SCROLL, (void *)this);
-
-		patchname = ui_PatchName; //NOLINT
-
-		playbut = ui_PlayButton; //NOLINT
-		lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_add_event_cb(playbut, playbut_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_flag(ui_PlayButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_clear_flag(ui_PlayButton, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_PRESSED, this);
 
 		lv_obj_add_flag(ui_AddButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_InfoButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -58,7 +53,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 		// Scroll to top when focussing on a button
-		lv_obj_add_event_cb(playbut, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_AddButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_InfoButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -68,11 +63,9 @@ struct PatchViewPage : PageBase {
 		settings_menu.init();
 		knobset_menu.init();
 
-		module_name = lv_label_create(base); //NOLINT
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
 		lv_label_set_text(module_name, "Select a module:");
 
-		modules_cont = lv_obj_create(base); //NOLINT
 		lv_obj_set_size(modules_cont, 320, 4 * Height + 8);
 		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
@@ -83,20 +76,9 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-
-		cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
-		lv_obj_set_size(cable_layer, 320, 240);
-		lv_obj_set_align(cable_layer, LV_ALIGN_CENTER);
-		lv_canvas_set_buffer(cable_layer, cable_buf.data(), 320, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
-
-		lv_draw_line_dsc_init(&cable_drawline_dsc);
-		cable_drawline_dsc.width = 4;
-		cable_drawline_dsc.opa = LV_OPA_60;
-		cable_drawline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 	}
 
 	void prepare_focus() override {
-
 		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
@@ -114,7 +96,7 @@ struct PatchViewPage : PageBase {
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
 
-		lv_group_add_obj(group, playbut);
+		lv_group_add_obj(group, ui_PlayButton);
 		lv_group_add_obj(group, ui_KnobButton);
 		lv_group_add_obj(group, ui_AddButton);
 		lv_group_add_obj(group, ui_InfoButton);
@@ -157,8 +139,7 @@ struct PatchViewPage : PageBase {
 
 		highlighted_module_id = std::nullopt;
 		update_map_ring_style();
-		//auto cable_drawer = CableDrawer{cable_cont, modules, patch, height};
-		//cable_drawer.draw_all();
+		cable_drawer.draw(patch);
 
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
@@ -185,9 +166,10 @@ struct PatchViewPage : PageBase {
 		bool last_is_patch_playing = is_patch_playing;
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
 
-		if (is_patch_playing != last_is_patch_playing || map_settings.changed) {
-			map_settings.changed = false;
+		if (is_patch_playing != last_is_patch_playing || view_settings.changed) {
+			view_settings.changed = false;
 			update_map_ring_style();
+			update_cable_style();
 		}
 
 		if (is_patch_playing != last_is_patch_playing || knobset_settings.changed) {
@@ -216,11 +198,11 @@ struct PatchViewPage : PageBase {
 			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
 			if (was_redrawn) {
 				auto &gui_el = drawn_el.gui_element;
-				if (map_settings.map_ring_flash_active)
+				if (view_settings.map_ring_flash_active)
 					MapRingDisplay::flash_once(
-						gui_el.map_ring, map_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
+						gui_el.map_ring, view_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
 
-				if (map_settings.scroll_to_active_param)
+				if (view_settings.scroll_to_active_param)
 					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 			}
 		}
@@ -230,8 +212,20 @@ struct PatchViewPage : PageBase {
 		for (auto &drawn_el : drawn_elements) {
 			auto map_ring = drawn_el.gui_element.map_ring;
 			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
-			MapRingDisplay::update(map_ring, map_settings.map_ring_style, is_on_highlighted_module, is_patch_playing);
+			MapRingDisplay::update(map_ring, view_settings.map_ring_style, is_on_highlighted_module, is_patch_playing);
 		}
+	}
+
+	void update_cable_style() {
+		static MapRingDisplay::Style last_cable_style;
+		if (view_settings.cable_style.mode != last_cable_style.mode) {
+			if (view_settings.cable_style.mode == MapRingDisplay::StyleMode::ShowAll)
+				cable_drawer.draw(patch);
+			else
+				cable_drawer.clear();
+		}
+		last_cable_style = view_settings.cable_style;
+		cable_drawer.set_opacity(view_settings.cable_style.opa);
 	}
 
 	void update_active_knobset() {
@@ -246,7 +240,7 @@ struct PatchViewPage : PageBase {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page)
 			return;
-		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
 		auto obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
@@ -280,8 +274,8 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void module_defocus_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
-		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+		// auto page = static_cast<PatchViewPage *>(event->user_data);
+		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	static void playbut_cb(lv_event_t *event) {
@@ -302,13 +296,12 @@ private:
 	// lv_obj_t *description;
 	lv_obj_t *base;
 	lv_obj_t *patchname;
-	lv_obj_t *modules_cont;
 	lv_obj_t *module_name;
-	lv_obj_t *playbut;
-	lv_obj_t *cable_layer;
+	lv_obj_t *modules_cont;
+	CableDrawer cable_drawer;
 
-	PatchViewSettingsMenu::ViewSettings map_settings;
-	PatchViewSettingsMenu settings_menu{map_settings};
+	PatchViewSettingsMenu::ViewSettings view_settings;
+	PatchViewSettingsMenu settings_menu{view_settings};
 
 	PatchViewKnobsetMenu::Settings knobset_settings;
 	PatchViewKnobsetMenu knobset_menu{knobset_settings};
@@ -321,8 +314,6 @@ private:
 	std::vector<uint32_t> module_ids;
 	std::vector<DrawnElement> drawn_elements;
 	bool is_patch_playing = false;
-
-	lv_draw_line_dsc_t cable_drawline_dsc;
 
 	unsigned active_knob_set = 0;
 

@@ -1,11 +1,8 @@
 #pragma once
 #include "gui/elements/map_ring_animate.hh"
+#include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
 #include <algorithm>
-
-extern "C" {
-#include "gui/slsexport/meta5/ui.h"
-}
 
 namespace MetaModule
 {
@@ -16,6 +13,7 @@ struct PatchViewSettingsMenu {
 		bool scroll_to_active_param = false;
 		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::CurModuleIfPlaying,
 												.opa = LV_OPA_50};
+		MapRingDisplay::Style cable_style = {.mode = MapRingDisplay::StyleMode::ShowAll, .opa = LV_OPA_50};
 		bool changed = true;
 	};
 
@@ -29,11 +27,14 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_SettingsCloseButton, settings_button_cb, LV_EVENT_PRESSED, this);
 
-		lv_obj_add_event_cb(ui_ShowAllMapsCheck, settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_ShowSelectedMapsCheck, settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_ShowPlayingMapsCheck, settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_FlashMapCheck, settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_MapTranspSlider, settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_ShowAllMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_ShowSelectedMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_ShowPlayingMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_FlashMapCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_MapTranspSlider, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+
+		lv_obj_add_event_cb(ui_ShowAllCablesCheck, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_CablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		visible = false;
 		lv_obj_set_x(ui_SettingsMenu, 220);
@@ -51,6 +52,7 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_FlashMapCheck);
 		lv_group_add_obj(settings_menu_group, ui_MapTranspSlider);
 		lv_group_add_obj(settings_menu_group, ui_ShowAllCablesCheck);
+		lv_group_add_obj(settings_menu_group, ui_CablesTranspSlider);
 
 		using enum MapRingDisplay::StyleMode;
 		switch (settings.map_ring_style.mode) {
@@ -141,7 +143,7 @@ struct PatchViewSettingsMenu {
 		}
 	}
 
-	static void settings_value_change_cb(lv_event_t *event) {
+	static void map_settings_value_change_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		lv_event_code_t event_code = lv_event_get_code(event);
@@ -167,6 +169,7 @@ struct PatchViewSettingsMenu {
 				using enum MapRingDisplay::StyleMode;
 				auto &style = page->settings.map_ring_style;
 
+				style.mode = show_only_playing ? ShowAllIfPlaying : ShowAll;
 				if (show_all)
 					style.mode = show_only_playing ? ShowAllIfPlaying : ShowAll;
 				else if (show_selected)
@@ -179,6 +182,24 @@ struct PatchViewSettingsMenu {
 			opacity = (float)opacity * 2.5f;
 			page->settings.map_ring_style.opa = opacity;
 			page->settings.map_ring_flash_active = flash_active;
+			page->settings.changed = true;
+		}
+	}
+
+	static void cable_settings_value_change_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		lv_event_code_t event_code = lv_event_get_code(event);
+
+		if (event_code == LV_EVENT_VALUE_CHANGED) {
+			auto show_all = lv_obj_has_state(ui_ShowAllCablesCheck, LV_STATE_CHECKED);
+			auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
+			using enum MapRingDisplay::StyleMode;
+			page->settings.cable_style.mode = show_all ? ShowAll : HideAlways;
+
+			auto opacity = lv_slider_get_value(ui_CablesTranspSlider); //0..100
+			opacity = (float)opacity * 2.5f;
+			page->settings.cable_style.opa = opacity;
 			page->settings.changed = true;
 		}
 	}

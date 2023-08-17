@@ -58,7 +58,8 @@ flash-app-sd: uimg
 	DISK=$${DISK:-$(SD_DISK_DEV)s4} && \
 	echo "Copying app to $${DISK}" && \
 	echo "sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}" && \
-	sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}
+	sudo dd if=$(BUILDDIR_MP1A7)/medium/main.uimg of=$${DISK} && \
+	flashing/unmount.sh $${DISK}
 
 jprog: uimg
 	$(info This only works after a hard reset with the Freeze jumper installed)

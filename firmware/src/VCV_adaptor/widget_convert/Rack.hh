@@ -1,12 +1,10 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
-#include "VCV_adaptor/widget_convert/Rack_fwd.hh"
+#include "VCV_adaptor/widgets.hh"
 #include "VCV_adaptor/widget_convert/base.hh"
 
 namespace rack
 {
-
-//TODO put rest of widgets from Rack_fwd.hh here
 
 template<>
 struct ElementConvert<componentlibrary::BefacoBigKnob> {

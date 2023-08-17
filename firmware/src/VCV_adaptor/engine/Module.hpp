@@ -341,6 +341,9 @@ struct Module : VCVModuleWrapper {
 	virtual void onRandomize(const RandomizeEvent &e) {
 	}
 
+	virtual void onRandomize() {
+	}
+
 	struct SaveEvent {};
 	virtual void onSave(const SaveEvent &e) {
 	}

@@ -1,35 +1,33 @@
-#### make comp-images
-#### Generates LVGL image files from SVGs for components:
-#### The component files to be converted is ../graphics/BRANDNAME/components/*.svg
-#### The converted LVGL-format image files will be in src/gui/images/BRANDNAME/components/*.[png,c]
-####
-#### make faceplate-images
-#### Generates LVGL image files from SVGs for faceplates:
-#### Specify the path to faceplates in a variable called BRANDNAME_faceplate_svgs
-#### (full path or relative path from this makefile)
-####
-#### make image-list
-#### Adds any missing images to the faceplate_images.hh file
-#### Uses the list of all brands faceplate SVGs
+# make comp-images
+#   Generates LVGL image files from SVGs for components:
+#   The component files to be converted is ../graphics/BRANDNAME/components/*.svg
+#   The converted LVGL-format image files will be in src/gui/images/BRANDNAME/components/*.[png,c]
+#   Unlike normal Makefile rules, the .c file will only be built if it's not present
+#   (not just because the .svg file has a newer timestamp)
+
+# make faceplate-images
+#   Generates LVGL image files from SVGs for faceplates:
+#   Specify the path to faceplates in a variable called BRANDNAME_faceplate_svgs
+#   (full path or relative path from this makefile)
+
+# make image-list
+#   Adds any missing images to the faceplate_images.hh file
+#   Uses the list of all brands faceplate SVGs
 
 
-#### List of brands:
-brands = 4ms Rack Befaco AudibleInstruments 
-
-# We can use wildcards like this:
+brands := 4ms
 4ms_faceplate_svgs := $(filter-out ../vcv/res/modules/HubMedium_artwork.svg,$(wildcard ../vcv/res/modules/*.svg))
 
-# ... Or could use the modules.mk list like this:
+brands += Befaco 
 include vcv_ports/glue/Befaco/modules.mk
 Befaco_faceplate_svgs := $(addprefix vcv_ports/Befaco/res/panels/,$(addsuffix .svg,$(Befaco_modules)))
 
-# ... Or specify them manully like this:
-AudibleInstruments_faceplate_svgs := ./vcv_ports/AudibleInstruments/res/Braids.svg
+brands += AudibleInstruments 
+include vcv_ports/glue/AudibleInstruments/modules.mk
+AudibleInstruments_faceplate_svgs := $(addprefix vcv_ports/AudibleInstruments/res/panels/,$(addsuffix .svg,$(AudibleInstruments_modules)))
 
 
-
-
-
+brands += Rack 
 
 
 ###########################################################################################################
@@ -53,14 +51,15 @@ $(1)_comp_lvgls := $$(addprefix $(lvgl_image_dir)/$(1)/components/,$$(notdir $$(
 comp_lvgls += $$($(1)_comp_lvgls)
 endef
 
-comp_lvgls = 
+comp_lvgls :=
 $(foreach brand,$(brands),$(eval $(call comp_TEMPLATE,$(brand))))
 
 comp-images: $(comp_lvgls)
 
-src/gui/images/%.c: ../graphics/$$*.svg
+# This rule is order-only, so the .c will only be built if it's not found
+src/gui/images/%.c: | ../graphics/$$*.svg
 	@echo "Converting: $*"
-	@python3 $(svgscript) convertSvgToLvgl $< $@
+	python3 $(svgscript) convertSvgToLvgl $| $@
 
 # Faceplates:
 

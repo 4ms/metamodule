@@ -53,4 +53,7 @@ inline void json_object_set_new(json_t *, std::string_view, json_t *) {
 inline void json_array_insert_new(json_t *, int, json_t *) {
 }
 
+inline void json_array_append_new(json_t *, json_t *) {
+}
+
 } // namespace rack

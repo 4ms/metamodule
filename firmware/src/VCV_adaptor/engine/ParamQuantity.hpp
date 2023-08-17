@@ -45,10 +45,15 @@ struct ParamQuantity {
 	float getDefaultValue() {
 		return {};
 	}
-	float getDisplayValue() {
+	virtual float getDisplayValue() {
 		return {};
 	}
-	void setDisplayValue(float displayValue) {
+	virtual void setDisplayValue(float displayValue) {
+	}
+	void setImmediateValue(float displayValue) {
+	}
+	float getImmediateValue() {
+		return {};
 	}
 	int getDisplayPrecision() {
 		return {};

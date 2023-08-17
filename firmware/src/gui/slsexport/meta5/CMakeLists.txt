@@ -13,7 +13,7 @@ SET(SOURCES components/ui_comp_knobsetgroup.c
     images/ui_img_final_icons_1x_info1_png.c
     images/ui_img_final_icons_1x_settings1_png.c
     images/ui_img_complexeg_mockup_png.c
-    images/ui_img_button_circles_c_symbol__png.c
+    images/ui_img_button_circles_z_symbol_png.c
     images/ui_img_1x_knob1_png.c
     images/ui_img_1x_play3_png.c
     images/ui_img_1x_addmap1_png.c
