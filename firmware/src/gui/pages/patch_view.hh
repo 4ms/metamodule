@@ -25,10 +25,13 @@ struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
 	PatchViewPage(PatchInfo info)
-		: PageBase{info} {
+		: PageBase{info}
+		, base(ui_PatchViewPage)
+		, patchname(ui_PatchName)
+		, module_name(lv_label_create(base))
+		, modules_cont(lv_obj_create(base))
+		, cable_drawer{modules_cont, drawn_elements} {
 		PageList::register_page(this, PageId::PatchView);
-
-		base = ui_PatchViewPage; //NOLINT
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -40,14 +43,9 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_scroll_dir(base, LV_DIR_VER);
 		lv_obj_set_scrollbar_mode(base, LV_SCROLLBAR_MODE_ACTIVE);
 
-		// lv_obj_add_event_cb(base, base_scroll_cb, LV_EVENT_SCROLL, (void *)this);
-
-		patchname = ui_PatchName; //NOLINT
-
-		playbut = ui_PlayButton; //NOLINT
-		lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_add_event_cb(playbut, playbut_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_flag(ui_PlayButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_clear_flag(ui_PlayButton, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_PRESSED, this);
 
 		lv_obj_add_flag(ui_AddButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_InfoButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -55,7 +53,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 		// Scroll to top when focussing on a button
-		lv_obj_add_event_cb(playbut, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_AddButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_InfoButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -65,11 +63,9 @@ struct PatchViewPage : PageBase {
 		settings_menu.init();
 		knobset_menu.init();
 
-		module_name = lv_label_create(base); //NOLINT
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
 		lv_label_set_text(module_name, "Select a module:");
 
-		modules_cont = lv_obj_create(base); //NOLINT
 		lv_obj_set_size(modules_cont, 320, 4 * Height + 8);
 		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
@@ -83,7 +79,6 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-
 		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
@@ -101,7 +96,7 @@ struct PatchViewPage : PageBase {
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
 
-		lv_group_add_obj(group, playbut);
+		lv_group_add_obj(group, ui_PlayButton);
 		lv_group_add_obj(group, ui_KnobButton);
 		lv_group_add_obj(group, ui_AddButton);
 		lv_group_add_obj(group, ui_InfoButton);
@@ -144,8 +139,7 @@ struct PatchViewPage : PageBase {
 
 		highlighted_module_id = std::nullopt;
 		update_map_ring_style();
-		auto cable_drawer = CableDrawer{modules_cont, patch, drawn_elements, Height};
-		cable_drawer.draw();
+		cable_drawer.draw(patch);
 
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
@@ -221,6 +215,9 @@ struct PatchViewPage : PageBase {
 		}
 	}
 
+	void update_cable_style() {
+	}
+
 	void update_active_knobset() {
 		blur();
 		active_knob_set = knobset_settings.active_knobset;
@@ -267,7 +264,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void module_defocus_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		// auto page = static_cast<PatchViewPage *>(event->user_data);
 		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
@@ -289,9 +286,9 @@ private:
 	// lv_obj_t *description;
 	lv_obj_t *base;
 	lv_obj_t *patchname;
-	lv_obj_t *modules_cont;
 	lv_obj_t *module_name;
-	lv_obj_t *playbut;
+	lv_obj_t *modules_cont;
+	CableDrawer cable_drawer;
 
 	PatchViewSettingsMenu::ViewSettings map_settings;
 	PatchViewSettingsMenu settings_menu{map_settings};

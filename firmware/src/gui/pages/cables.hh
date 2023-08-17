@@ -11,9 +11,7 @@ namespace MetaModule
 {
 
 class CableDrawer {
-	PatchData &patch;
 	const std::vector<DrawnElement> &drawn;
-	uint32_t module_height;
 
 	lv_obj_t *canvas;
 	lv_draw_line_dsc_t drawline_dsc;
@@ -27,13 +25,8 @@ class CableDrawer {
 	};
 
 public:
-	CableDrawer(lv_obj_t *parent,
-				PatchData &patch,
-				const std::vector<DrawnElement> &drawn_elements,
-				uint32_t module_height)
-		: patch{patch}
-		, drawn{drawn_elements}
-		, module_height{module_height}
+	CableDrawer(lv_obj_t *parent, const std::vector<DrawnElement> &drawn_elements)
+		: drawn{drawn_elements}
 		, canvas(lv_canvas_create(parent)) {
 		lv_obj_set_size(canvas, 320, Height); //TODO: same as modules_cont height
 		lv_obj_set_align(canvas, LV_ALIGN_TOP_LEFT);
@@ -47,7 +40,8 @@ public:
 		drawline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 	}
 
-	void draw() {
+	void draw(PatchData &patch) {
+		lv_obj_move_foreground(canvas);
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 
 		for (const auto &cable : patch.int_cables) {
@@ -85,7 +79,7 @@ public:
 	}
 
 	static Vec2 get_obj_xy(lv_obj_t *obj) {
-		// lv_obj_refr_pos(obj);
+		lv_obj_refr_pos(obj);
 		lv_area_t coords;
 		lv_obj_get_coords(obj, &coords);
 		auto w = coords.x2 - coords.x1;
@@ -94,7 +88,6 @@ public:
 		auto y = lv_obj_get_y(obj) + h / 2;
 		auto parent = lv_obj_get_parent(obj);
 		if (parent) {
-			// lv_obj_refr_pos(parent);
 			auto offsetx = lv_obj_get_x(parent);
 			auto offsety = lv_obj_get_y(parent);
 			x += offsetx;

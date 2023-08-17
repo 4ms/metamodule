@@ -9,20 +9,9 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/knob_edit.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include <string>
-
-LV_IMG_DECLARE(jack_x);
-LV_IMG_DECLARE(knob9mm_x);
-LV_IMG_DECLARE(knob_x);
-LV_IMG_DECLARE(button_x);
-LV_IMG_DECLARE(knob_unlined_x);
-LV_IMG_DECLARE(knob_large_x);
-LV_IMG_DECLARE(slider_x);
-LV_IMG_DECLARE(switch_left);
-LV_IMG_DECLARE(switch_right);
-LV_IMG_DECLARE(switch_up);
-LV_IMG_DECLARE(switch_down);
 
 namespace MetaModule
 {
