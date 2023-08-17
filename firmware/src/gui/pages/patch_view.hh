@@ -169,6 +169,7 @@ struct PatchViewPage : PageBase {
 		if (is_patch_playing != last_is_patch_playing || map_settings.changed) {
 			map_settings.changed = false;
 			update_map_ring_style();
+			update_cable_style();
 		}
 
 		if (is_patch_playing != last_is_patch_playing || knobset_settings.changed) {
@@ -216,6 +217,15 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update_cable_style() {
+		static MapRingDisplay::Style last_cable_style;
+		if (map_settings.cable_style.mode != last_cable_style.mode) {
+			if (map_settings.cable_style.mode == MapRingDisplay::StyleMode::ShowAll)
+				cable_drawer.draw(patch);
+			else
+				cable_drawer.clear();
+		}
+		last_cable_style = map_settings.cable_style;
+		cable_drawer.set_opacity(map_settings.cable_style.opa);
 	}
 
 	void update_active_knobset() {

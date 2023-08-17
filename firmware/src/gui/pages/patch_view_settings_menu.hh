@@ -37,7 +37,6 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_MapTranspSlider, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_ShowAllCablesCheck, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_ShowSelectedCablesCheck, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_CablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		visible = false;
@@ -56,7 +55,6 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_FlashMapCheck);
 		lv_group_add_obj(settings_menu_group, ui_MapTranspSlider);
 		lv_group_add_obj(settings_menu_group, ui_ShowAllCablesCheck);
-		lv_group_add_obj(settings_menu_group, ui_ShowSelectedCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_CablesTranspSlider);
 
 		using enum MapRingDisplay::StyleMode;
@@ -199,22 +197,9 @@ struct PatchViewSettingsMenu {
 
 		if (event_code == LV_EVENT_VALUE_CHANGED) {
 			auto show_all = lv_obj_has_state(ui_ShowAllCablesCheck, LV_STATE_CHECKED);
-			auto show_selected = lv_obj_has_state(ui_ShowSelectedCablesCheck, LV_STATE_CHECKED);
-
-			// Do not allow both ShowAll and ShowSelected to be checked
-			if (obj == ui_ShowAllCablesCheck && show_all) {
-				lv_obj_clear_state(ui_ShowSelectedCablesCheck, LV_STATE_CHECKED);
-				show_selected = false;
-			} else if (obj == ui_ShowSelectedCablesCheck && show_selected) {
-				lv_obj_clear_state(ui_ShowAllCablesCheck, LV_STATE_CHECKED);
-				show_all = false;
-			}
-
 			auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
-			{
-				using enum MapRingDisplay::StyleMode;
-				page->settings.cable_style.mode = show_all ? ShowAll : show_selected ? CurModule : HideAlways;
-			}
+			using enum MapRingDisplay::StyleMode;
+			page->settings.cable_style.mode = show_all ? ShowAll : HideAlways;
 
 			auto opacity = lv_slider_get_value(ui_CablesTranspSlider); //0..100
 			opacity = (float)opacity * 2.5f;

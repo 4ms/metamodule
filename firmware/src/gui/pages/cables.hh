@@ -36,11 +36,17 @@ public:
 
 		lv_draw_line_dsc_init(&drawline_dsc);
 		drawline_dsc.width = 4;
-		drawline_dsc.opa = LV_OPA_60;
+		drawline_dsc.opa = LV_OPA_100;
 		drawline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
+		set_opacity(LV_OPA_60);
 	}
 
-	void draw(PatchData &patch) {
+	void clear() {
+		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
+	}
+
+	void draw(const PatchData &patch) {
+		clear();
 		lv_obj_move_foreground(canvas);
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 
@@ -54,6 +60,10 @@ public:
 				}
 			}
 		}
+	}
+
+	void set_opacity(lv_opa_t opa) {
+		lv_obj_set_style_opa(canvas, opa, LV_PART_MAIN);
 	}
 
 	std::optional<Vec2> find_outjack_xy(Jack jack) {
