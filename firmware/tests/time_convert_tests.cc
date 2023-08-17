@@ -20,7 +20,14 @@ TEST_CASE("fatetime->tm") {
 }
 
 void print_tm(std::tm t) {
-	printf("%u/%u/%u %u:%02u:%02u (%ld)\n", t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, mktime(&t));
+	printf("%u/%u/%u %u:%02u:%02u (%lld)\n",
+		   t.tm_year,
+		   t.tm_mon,
+		   t.tm_mday,
+		   t.tm_hour,
+		   t.tm_min,
+		   t.tm_sec,
+		   (long long)mktime(&t));
 }
 
 TEST_CASE("fattime<->ticks") {
