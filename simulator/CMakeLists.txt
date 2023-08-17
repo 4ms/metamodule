@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(CMAKE_TOOLCHAIN_FILE "./vcpkg/scripts/buildsystems/vcpkg.cmake")
+
 project(mm_sim LANGUAGES C CXX)
 
 set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
@@ -249,6 +251,14 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
                                         ryml SDL2)
+
+#these link commands are provided by vcpkg as recommended for SDL2.
+#leaving these here temporarily in case linking fails when we get there.
+#target_link_libraries(simulator
+#        PRIVATE
+#        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+#        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+#)
 
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 
