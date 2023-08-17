@@ -39,15 +39,10 @@ struct ModuleViewPage : PageBase {
 
 		lv_draw_img_dsc_init(&img_dsc);
 
-		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		lv_obj_add_style(roller,
-						 &Gui::plain_border_style,
-						 /*LV_PART_MAIN |*/ LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
-		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
+		lv_obj_remove_style(roller, nullptr, LV_STATE_EDITED);
+		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
 
 		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
-		lv_obj_add_style(edit_pane, &Gui::plain_border_style, LV_PART_MAIN);
-		lv_obj_set_style_pad_all(edit_pane, 0, LV_STATE_DEFAULT);
 
 		button.clear();
 		module_controls.clear();
@@ -81,7 +76,7 @@ struct ModuleViewPage : PageBase {
 		drawn_elements.reserve(num_elements);
 		module_controls.reserve(num_elements);
 
-		auto module_drawer = ModuleDrawer{base, 240};
+		auto module_drawer = ModuleDrawer{ui_ModuleImage, 240};
 		canvas = module_drawer.draw_faceplate(slug, buffer);
 
 		lv_obj_refr_size(canvas);
@@ -216,7 +211,7 @@ private:
 
 	void add_button(int x, int y, int size = 20) {
 		auto &b = button.emplace_back();
-		b = lv_btn_create(base);
+		b = lv_btn_create(ui_ModuleImage);
 		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 		lv_obj_set_pos(b, x - size / 2, y - size / 2);
 		lv_obj_set_size(b, size, size);
