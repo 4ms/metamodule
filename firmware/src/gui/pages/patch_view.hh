@@ -166,8 +166,8 @@ struct PatchViewPage : PageBase {
 		bool last_is_patch_playing = is_patch_playing;
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
 
-		if (is_patch_playing != last_is_patch_playing || map_settings.changed) {
-			map_settings.changed = false;
+		if (is_patch_playing != last_is_patch_playing || view_settings.changed) {
+			view_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
 		}
@@ -198,11 +198,11 @@ struct PatchViewPage : PageBase {
 			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
 			if (was_redrawn) {
 				auto &gui_el = drawn_el.gui_element;
-				if (map_settings.map_ring_flash_active)
+				if (view_settings.map_ring_flash_active)
 					MapRingDisplay::flash_once(
-						gui_el.map_ring, map_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
+						gui_el.map_ring, view_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
 
-				if (map_settings.scroll_to_active_param)
+				if (view_settings.scroll_to_active_param)
 					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 			}
 		}
@@ -212,20 +212,20 @@ struct PatchViewPage : PageBase {
 		for (auto &drawn_el : drawn_elements) {
 			auto map_ring = drawn_el.gui_element.map_ring;
 			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
-			MapRingDisplay::update(map_ring, map_settings.map_ring_style, is_on_highlighted_module, is_patch_playing);
+			MapRingDisplay::update(map_ring, view_settings.map_ring_style, is_on_highlighted_module, is_patch_playing);
 		}
 	}
 
 	void update_cable_style() {
 		static MapRingDisplay::Style last_cable_style;
-		if (map_settings.cable_style.mode != last_cable_style.mode) {
-			if (map_settings.cable_style.mode == MapRingDisplay::StyleMode::ShowAll)
+		if (view_settings.cable_style.mode != last_cable_style.mode) {
+			if (view_settings.cable_style.mode == MapRingDisplay::StyleMode::ShowAll)
 				cable_drawer.draw(patch);
 			else
 				cable_drawer.clear();
 		}
-		last_cable_style = map_settings.cable_style;
-		cable_drawer.set_opacity(map_settings.cable_style.opa);
+		last_cable_style = view_settings.cable_style;
+		cable_drawer.set_opacity(view_settings.cable_style.opa);
 	}
 
 	void update_active_knobset() {
@@ -300,8 +300,8 @@ private:
 	lv_obj_t *modules_cont;
 	CableDrawer cable_drawer;
 
-	PatchViewSettingsMenu::ViewSettings map_settings;
-	PatchViewSettingsMenu settings_menu{map_settings};
+	PatchViewSettingsMenu::ViewSettings view_settings;
+	PatchViewSettingsMenu settings_menu{view_settings};
 
 	PatchViewKnobsetMenu::Settings knobset_settings;
 	PatchViewKnobsetMenu knobset_menu{knobset_settings};

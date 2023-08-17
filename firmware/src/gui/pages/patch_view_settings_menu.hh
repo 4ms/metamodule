@@ -1,11 +1,8 @@
 #pragma once
 #include "gui/elements/map_ring_animate.hh"
+#include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
 #include <algorithm>
-
-extern "C" {
-#include "gui/slsexport/meta5/ui.h"
-}
 
 namespace MetaModule
 {
@@ -193,7 +190,6 @@ struct PatchViewSettingsMenu {
 		if (!event || !event->user_data)
 			return;
 		lv_event_code_t event_code = lv_event_get_code(event);
-		auto obj = lv_event_get_target(event);
 
 		if (event_code == LV_EVENT_VALUE_CHANGED) {
 			auto show_all = lv_obj_has_state(ui_ShowAllCablesCheck, LV_STATE_CHECKED);
