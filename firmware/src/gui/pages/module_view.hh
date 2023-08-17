@@ -35,10 +35,10 @@ struct ModuleViewPage : PageBase {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
+		lv_group_add_obj(group, roller);
 
 		lv_draw_img_dsc_init(&img_dsc);
 
-		lv_group_add_obj(group, roller);
 		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
 		lv_obj_add_style(roller,
 						 &Gui::plain_border_style,
