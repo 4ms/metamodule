@@ -1,11 +1,58 @@
 #pragma once
+#include "CoreModules/elements/element_info.hh"
+#include "gui/elements/context.hh"
+#include "gui/styles.hh"
 #include "lvgl.h"
+#include "moduleFactory.hh"
+#include "patch/patch_data.hh"
+#include <cmath>
 
-struct CableDrawer {
+namespace MetaModule
+{
+
+class CableDrawer {
+	PatchData &patch;
+	const std::vector<DrawnElement> &drawn;
+	uint32_t module_height;
+
+	lv_obj_t *canvas;
+	lv_draw_line_dsc_t drawline_dsc;
+
+	static constexpr uint32_t Height = 4 * 240 + 8;
+	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, Height)> cable_buf;
+
+public:
+	CableDrawer(lv_obj_t *parent,
+				PatchData &patch,
+				const std::vector<DrawnElement> &drawn_elements,
+				uint32_t module_height)
+		: patch{patch}
+		, drawn{drawn_elements}
+		, module_height{module_height}
+		, canvas(lv_canvas_create(parent)) {
+		lv_obj_set_size(canvas, 320, Height); //TODO: same as modules_cont height
+		lv_obj_set_align(canvas, LV_ALIGN_TOP_LEFT);
+		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_IGNORE_LAYOUT);
+		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+		lv_canvas_set_buffer(canvas, cable_buf.data(), 320, Height, LV_IMG_CF_TRUE_COLOR_ALPHA);
+
+		lv_draw_line_dsc_init(&drawline_dsc);
+		drawline_dsc.width = 4;
+		drawline_dsc.opa = LV_OPA_60;
+		drawline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
+	}
 
 	void draw() {
-		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 
+		draw_cable({10, 5}, {15, 23});
+		draw_cable({15, 23}, {120, 255});
+
+		for (const auto &cable : patch.int_cables) {
+			auto out_module_id = cable.out.module_id;
+			auto out_jack_id = cable.out.jack_id;
+			//scan DrawnElements to find it?
+		}
 		// Draw all cables connected to this module
 		// TODO: gotta be a cleaner way to do this...
 		// 		push Jack{c.out}, this_module_obj, Jack{in}, outmodule_obj
@@ -55,4 +102,64 @@ struct CableDrawer {
 		// }
 		// }
 	}
+
+	struct Vec2 {
+		int32_t x;
+		int32_t y;
+	};
+
+	void draw_cable(Vec2 start, Vec2 end, const Jack &outjack) {
+		drawline_dsc.color = get_cable_color(outjack);
+		draw_cable(start, end);
+	}
+
+	void draw_cable(Vec2 start, Vec2 end) {
+		float dist = std::abs(start.x - end.x);
+		CableDrawer::Vec2 control{(start.x + end.x) / 2, ((start.y + end.y) / 2) + (int32_t)dist};
+		CableDrawer::draw_bezier<8>(start, end, control);
+	}
+
+	static lv_color_t get_cable_color(Jack jack) {
+		return Gui::cable_palette[(jack.jack_id + jack.module_id) % Gui::cable_palette.size()];
+	}
+
+	template<size_t steps>
+	void draw_bezier(Vec2 start, Vec2 end, Vec2 control) {
+		constexpr float step_size = 1.0f / steps;
+		lv_point_t points[steps + 1];
+		for (unsigned i = 0; i <= steps; i++) {
+			auto newpt = CableDrawer::get_quadratic_bezier_pt(start, end, control, (float)i * step_size);
+			points[i] = {(int16_t)newpt.x, (int16_t)newpt.y};
+		}
+		lv_canvas_draw_line(canvas, points, steps + 1, &drawline_dsc);
+	}
+
+	static Vec2 get_quadratic_bezier_pt(Vec2 start, Vec2 end, Vec2 control, float step) {
+		auto get_midpt = [](Vec2 n1, Vec2 n2, float step) -> Vec2 {
+			int32_t x = n1.x + ((n2.x - n1.x) * step);
+			int32_t y = n1.y + ((n2.y - n1.y) * step);
+			return {x, y};
+		};
+		Vec2 a = get_midpt(start, control, step);
+		Vec2 b = get_midpt(control, end, step);
+		return get_midpt(a, b, step);
+	}
+
+	std::pair<int, int> scale_center(BaseElement const &el) {
+		const float adj = (float)(module_height) / 240.f;
+		uint16_t x = std::round(ModuleInfoBase::mm_to_px(el.x_mm, module_height) * adj);
+		uint16_t y = std::round(ModuleInfoBase::mm_to_px(el.y_mm, module_height) * adj);
+		return std::make_pair(x, y);
+	}
+
+	// Vec2 get_jack_xy(std::span<BaseElement> jacklist, lv_obj_t *module_obj, Jack const &in) {
+	// 	auto [x, y] = CableDrawer::scale_center(jacklist[in.jack_id]);
+	// 	lv_area_t coords;
+	// 	lv_obj_get_coords(module_obj, &coords);
+	// 	x += coords.x1;
+	// 	y += coords.y1;
+	// 	return {x, y};
+	// }
 };
+
+} // namespace MetaModule

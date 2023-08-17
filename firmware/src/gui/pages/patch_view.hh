@@ -8,6 +8,7 @@
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/cables.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_knobset_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
@@ -83,16 +84,6 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-
-		cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
-		lv_obj_set_size(cable_layer, 320, 240);
-		lv_obj_set_align(cable_layer, LV_ALIGN_CENTER);
-		lv_canvas_set_buffer(cable_layer, cable_buf.data(), 320, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
-
-		lv_draw_line_dsc_init(&cable_drawline_dsc);
-		cable_drawline_dsc.width = 4;
-		cable_drawline_dsc.opa = LV_OPA_60;
-		cable_drawline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 	}
 
 	void prepare_focus() override {
@@ -157,8 +148,8 @@ struct PatchViewPage : PageBase {
 
 		highlighted_module_id = std::nullopt;
 		update_map_ring_style();
-		//auto cable_drawer = CableDrawer{cable_cont, modules, patch, height};
-		//cable_drawer.draw_all();
+		auto cable_drawer = CableDrawer{modules_cont, patch, drawn_elements, Height};
+		cable_drawer.draw();
 
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
@@ -246,7 +237,7 @@ struct PatchViewPage : PageBase {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page)
 			return;
-		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
 		auto obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
@@ -281,7 +272,7 @@ struct PatchViewPage : PageBase {
 
 	static void module_defocus_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	static void playbut_cb(lv_event_t *event) {
@@ -305,7 +296,6 @@ private:
 	lv_obj_t *modules_cont;
 	lv_obj_t *module_name;
 	lv_obj_t *playbut;
-	lv_obj_t *cable_layer;
 
 	PatchViewSettingsMenu::ViewSettings map_settings;
 	PatchViewSettingsMenu settings_menu{map_settings};
@@ -321,8 +311,6 @@ private:
 	std::vector<uint32_t> module_ids;
 	std::vector<DrawnElement> drawn_elements;
 	bool is_patch_playing = false;
-
-	lv_draw_line_dsc_t cable_drawline_dsc;
 
 	unsigned active_knob_set = 0;
 
