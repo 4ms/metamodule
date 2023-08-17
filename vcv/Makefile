@@ -1,7 +1,7 @@
 # If RACK_DIR is not defined when calling the Makefile, default to two directories above
-RACK_DIR ?= ../..
+RACK_DIR ?= ../../uavcvdev/RACK-SDK
 
-SHARED_DIR = src/shared
+SHARED_DIR = ../shared
 SHARED = $(SHARED_DIR)
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 
