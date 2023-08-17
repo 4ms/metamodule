@@ -85,10 +85,10 @@ struct ModuleDrawer {
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, indices);
 					auto mapped_ring = MapRingDrawer::draw_mapped_ring(el, obj, canvas, mapping_id, height);
 
-					auto idx = ElementIndex::get_index(el, indices);
-					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, idx, mapping_id};
+					auto count = ElementCount::count(el);
+					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, indices, mapping_id};
 
-					indices = indices + ElementCount::count(el);
+					indices = indices + count;
 					return element_ctx;
 				},
 				element);

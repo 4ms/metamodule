@@ -36,7 +36,7 @@ update_element_value(const ParamElement &, const ParamsState &params, PatchData 
 	auto val = ElementUpdateDetails::get_mapped_param_value(params, gui_el);
 
 	if (val.has_value())
-		patch.set_static_knob_value(gui_el.module_idx, gui_el.idx, val.value());
+		patch.set_static_knob_value(gui_el.module_idx, gui_el.idx.param_idx, val.value());
 }
 
 inline void update_element_value(const BaseElement &, const ParamsState &, PatchData &, const GuiElement &) {
@@ -53,7 +53,7 @@ struct UpdateElement {
 		// Update mapped knob values -> store in patch (static_knobs)
 		ElementUpdateDetails::update_element_value(el, params, patch, gui_el);
 
-		auto val = patch.get_static_knob_value(gui_el.module_idx, gui_el.idx);
+		auto val = patch.get_static_knob_value(gui_el.module_idx, gui_el.idx.param_idx);
 		if (!val.has_value())
 			return false;
 

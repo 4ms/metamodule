@@ -117,8 +117,9 @@ struct ModuleViewPage : PageBase {
 					opts += "\n";
 
 					add_button(drawn.obj);
-					//emplace_back fails for clang-14
-					module_controls.push_back({ModuleParam::get_type(el), (uint32_t)drawn.idx});
+					//FIXME: don't just save the param_idx, we will need all indices
+					//use ModuleParam{el}?
+					module_controls.push_back({ModuleParam::get_type(el), (uint32_t)drawn.idx.param_idx});
 				},
 				drawn_element.element);
 		}
