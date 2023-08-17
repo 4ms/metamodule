@@ -52,8 +52,9 @@ public:
 			if (d.gui_element.module_idx != jack.module_id || d.gui_element.count.num_outputs == 0)
 				continue;
 			if (d.gui_element.idx.output_idx == jack.jack_id) {
+				lv_obj_refr_pos(d.gui_element.obj);
 				auto x = lv_obj_get_x(d.gui_element.obj);
-				auto y = lv_obj_get_x(d.gui_element.obj);
+				auto y = lv_obj_get_y(d.gui_element.obj);
 				return Vec2{x, y};
 			}
 		}
@@ -65,9 +66,9 @@ public:
 			if (d.gui_element.module_idx != jack.module_id || d.gui_element.count.num_inputs == 0)
 				continue;
 			if (d.gui_element.idx.input_idx == jack.jack_id) {
-				lv_obj_update_layout(d.gui_element.obj);
+				lv_obj_refr_pos(d.gui_element.obj);
 				auto x = lv_obj_get_x(d.gui_element.obj);
-				auto y = lv_obj_get_x(d.gui_element.obj);
+				auto y = lv_obj_get_y(d.gui_element.obj);
 				return Vec2{x, y};
 			}
 		}
