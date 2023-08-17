@@ -1,21 +1,30 @@
 [submodule "firmware/lib/mdrivlib"]
 	path = firmware/lib/mdrivlib
-	url = git@github.com:4ms/mdrivlib.git
+	url = https://github.com/4ms/mdrivlib.git
 [submodule "firmware/lib/printf"]
 	path = firmware/lib/printf
-	url = git@github.com:mpaland/printf.git
+	url = https://github.com/mpaland/printf.git
 [submodule "firmware/lib/lvgl/lvgl"]
 	path = firmware/lib/lvgl/lvgl
-	url = git@github.com:lvgl/lvgl.git
+	url = https://github.com/lvgl/lvgl.git
 [submodule "shared/svgextract/lv_img_conv"]
 	path = shared/svgextract/lv_img_conv
-	url = git@github.com:lvgl/lv_img_conv.git
+	url = https://github.com/lvgl/lv_img_conv.git
 [submodule "shared/patch_convert/ryml/rapidyaml"]
 	path = shared/patch_convert/ryml/rapidyaml
 	url = https://github.com/biojppm/rapidyaml.git
 [submodule "shared/cpputil"]
 	path = shared/cpputil
-	url = git@github.com:4ms/cpputil
+	url = https://github.com/4ms/cpputil.git
 [submodule "firmware/bootloader/mp1-boot"]
 	path = firmware/bootloader/mp1-boot
-	url = git@github.com:4ms/mp1-boot.git
+	url = https://github.com/4ms/mp1-boot.git
+[submodule "firmware/vcv_ports/AudibleInstruments"]
+	path = firmware/vcv_ports/AudibleInstruments
+	url = https://github.com/VCVRack/AudibleInstruments.git
+[submodule "firmware/vcv_ports/Befaco"]
+	path = firmware/vcv_ports/Befaco
+	url = https://github.com/hemmer/Befaco.git
+[submodule "firmware/src/VCV_adaptor/simde"]
+	path = firmware/src/VCV_adaptor/simde
+	url = https://github.com/simd-everywhere/simde.git

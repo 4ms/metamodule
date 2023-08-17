@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_info_view.hh"
 #include "CoreModules/module_type_slug.hh"
 #include "cpputil/util/seq_map.hh"

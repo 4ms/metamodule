@@ -1,4 +1,4 @@
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/PitchShift_info.hh"
 #include "processors/pitchShift.h"

@@ -2,7 +2,7 @@
 #include "audio/auxsignal.hh"
 #include "conf/ramdisk_conf.hh"
 #include "core_intercom/patch_icc_message.hh"
-#include "params.hh"
+#include "param_block.hh"
 #include "patch_file/patch_file.hh"
 #include <cstdint>
 #include <span>

@@ -84,6 +84,7 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sai.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_ltdc.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rng.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_tim.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_rcc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd.c
@@ -148,6 +149,7 @@ INCLUDES += -Ivcv_ports/Befaco/src
 
 SOURCES += src/VCV_adaptor/plugin_instance.cc
 SOURCES += src/VCV_adaptor/pffft/pffft.c
+SOURCES += src/VCV_adaptor/random.cpp
 INCLUDES += -Isrc/VCV_adaptor
 INCLUDES += -Isrc/VCV_adaptor/pffft
 
@@ -196,7 +198,8 @@ INCLUDES +=	-I$(LIBDIR)/lvgl/lvgl
 
 # Generated:
 slsexport_dir := src/gui/slsexport/meta5
-SOURCES += $(addprefix $(slsexport_dir)/,$(file <src/gui/slsexport/meta5/filelist.txt))
+slsexport_files := $(shell cat src/gui/slsexport/meta5/filelist.txt)
+SOURCES += $(addprefix $(slsexport_dir)/,$(slsexport_files))
 INCLUDES += -I$(slsexport_dir)
 
 # Patch convert

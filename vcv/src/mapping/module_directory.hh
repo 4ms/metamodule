@@ -22,7 +22,7 @@ struct ModuleDirectory {
 				return false;
 			return true;
 		}
-		if (module->model->plugin->slug == "Audible Instruments")
+		if (module->model->plugin->slug == "AudibleInstruments")
 			return true;
 
 		return false;

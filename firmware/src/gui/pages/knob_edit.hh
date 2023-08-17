@@ -1,6 +1,5 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
-// #include "gui/images/image_list.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/styles.hh"

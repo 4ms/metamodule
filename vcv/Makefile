@@ -70,7 +70,7 @@ endif
 ./build/src/shared/CoreModules/%Core.cc.o: CXXFLAGS+=-Wno-missing-braces
 ./build/src/shared/CoreModules/enosc/dynamic_data.cc.o: CXXFLAGS+=-Wno-unknown-pragmas
 
-all: plugin res tests
+all: plugin res
 
 include make-models.mk
 

@@ -24,7 +24,7 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLN = 99,
 			.PLLP = 6,
 			.PLLQ = 112,
-			.PLLR = 9,
+			.PLLR = 13,
 			.PLLRGE = RCC_PLL4IFRANGE_1,
 			.PLLFRACV = 0,
 			.PLLMODE = RCC_PLL_INTEGER,
@@ -49,7 +49,7 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_I2C35 | RCC_PERIPHCLK_SAI2 | RCC_PERIPHCLK_SAI3 |
 							RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_UART35 | RCC_PERIPHCLK_UART78 |
-							RCC_PERIPHCLK_USART6 | RCC_PERIPHCLK_SDMMC12 | RCC_PERIPHCLK_ADC,
+							RCC_PERIPHCLK_USART6 | RCC_PERIPHCLK_SDMMC12 | RCC_PERIPHCLK_CKPER | RCC_PERIPHCLK_RNG1 | RCC_PERIPHCLK_ADC,
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_PCLK1,
 	.I2c35ClockSelection = RCC_I2C35CLKSOURCE_PCLK1,
 	.Sai2ClockSelection = RCC_SAI2CLKSOURCE_PLL3_Q,
@@ -60,6 +60,8 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.Uart78ClockSelection = RCC_UART78CLKSOURCE_HSI,
 	.Sdmmc12ClockSelection =
 		RCC_SDMMC12CLKSOURCE_HSI, // See MP15x Errata: 2.3.5 Incorrect reset of glitch-free kernel clock switch
-	.AdcClockSelection = RCC_ADCCLKSOURCE_PLL4, // PLL4R: 66MHz vs PER vs PLL3
+	.CkperClockSelection = RCC_CKPERCLKSOURCE_HSI, //default
+	.Rng1ClockSelection = RCC_RNG1CLKSOURCE_PLL4,
+	.AdcClockSelection = RCC_ADCCLKSOURCE_PER, 
 
 };

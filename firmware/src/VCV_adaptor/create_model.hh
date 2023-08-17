@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "VCV_adaptor/app/ModuleWidget.hpp"
 #include "VCV_adaptor/plugin/Model.hpp"
@@ -20,7 +20,8 @@ requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<M
 plugin::Model *createModel(std::string_view slug) {
 
 	if (slug == "Braids") {
-		ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>, MetaModule::ModuleInfoView::makeView<MetaModule::BraidsInfo>());
+		ModuleFactory::registerModuleType(
+			slug, create_vcv_module<ModuleT>, MetaModule::ModuleInfoView::makeView<MetaModule::BraidsInfo>());
 		return nullptr;
 	}
 

@@ -65,8 +65,8 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/vcv_ports/Befaco/src/MotionMTR.cpp
     ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Morphader.cpp
     ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Mixer.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/KickAll.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/HexMixVCA.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Kickall.cpp
+    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/HexmixVCA.cpp
     ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ChoppingKinky.cpp
     ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ABC.cpp
     ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ADSR.cpp
@@ -90,6 +90,12 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
     ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
     ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
+
+# Fixups for compiler warnings in AudibleInstruments:
+set_source_files_properties(
+  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
+  PROPERTIES COMPILE_OPTIONS
+             "-Wno-unused-const-variable;-Wno-unused-but-set-variable")
 
 # #################### RYML + Patch Convert ##################################
 
@@ -115,7 +121,7 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 # #################### Application ############################################
 
 add_executable(
-  simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES} ${SLS_SOURCES}
+  simulator src/main.cc src/ui.cc ${CORE_MODULES} ${GUI_IMAGES} ${SLS_SOURCES}
             ${MM_ROOT}/firmware/src/gui/pages/page_manager.cc)
 
 target_include_directories(
@@ -123,6 +129,7 @@ target_include_directories(
   PRIVATE src
           stubs
           lvgl_drv
+          sdl_audio
           ${SDL2_INCLUDE_DIRS}
           ${MM_ROOT}/firmware
           ${MM_ROOT}/firmware/src
@@ -151,4 +158,16 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
                                         ryml SDL2)
 
-target_link_options(simulator PUBLIC LINKER:-map,simulator.map)
+message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_options(simulator PUBLIC "-Wl,-map,simulator.map")
+  else()
+    target_link_options(simulator PUBLIC LINKER:-Map,simulator.map)
+  endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  target_link_options(simulator PUBLIC LINKER:-Map,simulator.map)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  target_link_options(simulator PRIVATE "/MAP:simulator.map")
+endif()

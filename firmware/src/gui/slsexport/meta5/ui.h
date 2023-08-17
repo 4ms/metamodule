@@ -63,12 +63,14 @@ extern lv_obj_t *ui_ShowPlayingMapsCheck;
 extern lv_obj_t *ui_FlashMapPanel;
 extern lv_obj_t *ui_FlashMapLabel;
 extern lv_obj_t *ui_FlashMapCheck;
-extern lv_obj_t *ui_TransparencyTitle;
+extern lv_obj_t *ui_MapsTransparencyTitle;
 extern lv_obj_t *ui_MapTranspSlider;
 extern lv_obj_t *ui_CablesTitle;
 extern lv_obj_t *ui_ShowAllCablesPanel;
 extern lv_obj_t *ui_ShowAllCablesLabel;
 extern lv_obj_t *ui_ShowAllCablesCheck;
+extern lv_obj_t *ui_CablesTransparencyTitle;
+extern lv_obj_t *ui_CablesTranspSlider;
 extern lv_obj_t *ui_KnobsetMenu;
 extern lv_obj_t *ui_KnobSetClosePanel;
 extern lv_obj_t *ui_KnobsetHeaderLabel;
@@ -118,7 +120,7 @@ LV_IMG_DECLARE( ui_img_final_icons_1x_add1_png);   // assets/Final Icons/1x/Add1
 LV_IMG_DECLARE( ui_img_final_icons_1x_info1_png);   // assets/Final Icons/1x/Info1.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_settings1_png);   // assets/Final Icons/1x/Settings1.png
 LV_IMG_DECLARE( ui_img_complexeg_mockup_png);   // assets/ComplexEG_mockup.png
-LV_IMG_DECLARE( ui_img_button_circles_c_symbol__png);   // assets/Button Circles/C_symbol..png
+LV_IMG_DECLARE( ui_img_button_circles_z_symbol_png);   // assets/Button Circles/z_symbol.png
 LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
 LV_IMG_DECLARE( ui_img_1x_play3_png);   // assets/1x/Play3.png
 LV_IMG_DECLARE( ui_img_1x_addmap1_png);   // assets/1x/addmap1.png

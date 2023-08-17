@@ -9,20 +9,9 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/knob_edit.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include <string>
-
-LV_IMG_DECLARE(jack_x);
-LV_IMG_DECLARE(knob9mm_x);
-LV_IMG_DECLARE(knob_x);
-LV_IMG_DECLARE(button_x);
-LV_IMG_DECLARE(knob_unlined_x);
-LV_IMG_DECLARE(knob_large_x);
-LV_IMG_DECLARE(slider_x);
-LV_IMG_DECLARE(switch_left);
-LV_IMG_DECLARE(switch_right);
-LV_IMG_DECLARE(switch_up);
-LV_IMG_DECLARE(switch_down);
 
 namespace MetaModule
 {
@@ -117,8 +106,9 @@ struct ModuleViewPage : PageBase {
 					opts += "\n";
 
 					add_button(drawn.obj);
-					//emplace_back fails for clang-14
-					module_controls.push_back({ModuleParam::get_type(el), (uint32_t)drawn.idx});
+					//FIXME: don't just save the param_idx, we will need all indices
+					//use ModuleParam{el}?
+					module_controls.push_back({ModuleParam::get_type(el), (uint32_t)drawn.idx.param_idx});
 				},
 				drawn_element.element);
 		}
@@ -174,15 +164,11 @@ struct ModuleViewPage : PageBase {
 
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
-				std::visit(
-					[this, gui_el = drawn_el.gui_element](auto &el) {
-						bool did_update = update_element(el, params, patch, gui_el);
-						if (did_update) {
-							if (settings.map_ring_flash_active)
-								MapRingDisplay::flash_once(gui_el.map_ring, settings.map_ring_style, true);
-						}
-					},
-					drawn_el.element);
+				auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
+
+				if (was_redrawn && settings.map_ring_flash_active) {
+					MapRingDisplay::flash_once(drawn_el.gui_element.map_ring, settings.map_ring_style, true);
+				}
 			}
 		}
 	}

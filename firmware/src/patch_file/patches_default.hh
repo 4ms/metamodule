@@ -4,19 +4,15 @@
 #include <span>
 
 ///
-#include "patch/AllBefaco.hh"
-#include "patch/Djembe4.hh"
-#include "patch/Djembe4verb.hh"
-#include "patch/EnOscDual.yml.hh"
-#include "patch/EnvVCA_knobsets.yml.hh"
-#include "patch/KarplusStereo.hh"
-#include "patch/NonlinearGateSequencer.hh"
-#include "patch/QuartetofEnsembles.hh"
-#include "patch/Seq8.hh"
-#include "patch/Showcase.hh"
-#include "patch/SpectralPings.hh"
-#include "patch/envevenbraids.hh"
-#include "patch/twosimpleosc.yml.hh"
+#include "patch/default/Braids-Quad.yml.hh"
+#include "patch/default/Djembe4.hh"
+#include "patch/default/Djembe4verb.hh"
+#include "patch/default/EnOscDual.yml.hh"
+#include "patch/default/EnvVCA_knobsets.yml.hh"
+#include "patch/default/KarplusStereo.hh"
+#include "patch/default/Seq8.hh"
+#include "patch/default/envevenbraids.hh"
+#include "patch/default/twosimpleosc.yml.hh"
 
 struct DefaultPatches {
 
@@ -29,11 +25,7 @@ struct DefaultPatches {
 		twosimpleosc_patch,
 		EnvVCA_knobsets_patch,
 		EnOsc_Dual_patch,
-		Showcase_patch,
-		AllBefaco_patch,
-		NonlinearGateSequencer_patch,
-		SpectralPings_patch,
-		QuartetofEnsembles_patch,
+		BraidsQuad_patch,
 	});
 
 	static constexpr uint32_t num_patches() {
@@ -64,15 +56,7 @@ struct DefaultPatches {
 		if (id == 7)
 			return "EnOsc_Dual.yml";
 		if (id == 8)
-			return "Showcase.yml";
-		if (id == 9)
-			return "AllBefaco.yml";
-		if (id == 10)
-			return "Nonlinear.yml";
-		if (id == 11)
-			return "SpectralPings.yml";
-		if (id == 12)
-			return "QuartetofEnOsc.yml";
+			return "Braids-Quad.yml";
 
 		ModuleTypeSlug s;
 		s._data[0] = ((id / 10) % 10) + '0';

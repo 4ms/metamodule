@@ -4,7 +4,6 @@ namespace MetaModule
 {
 
 void PageManager::init() {
-	//ui_init();
 	page_patchsel.init();
 	// mbox.loading_new_patch = false;
 	PageList::request_new_page(page_patchsel);

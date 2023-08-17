@@ -1,4 +1,4 @@
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/Noise_info.hh"
 #include "util/math.hh"

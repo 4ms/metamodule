@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/panel_conf.hh"
 #include "core_a7/smp_api.hh"

@@ -3,13 +3,9 @@
 #include "gui/helpers/lvgl_string_helper.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "pr_dbg.hh"
-
-//exported:
-#include "gui/slsexport/meta5/ui.h"
-// LV_FONT_DECLARE(lv_font_montserrat_10);
-// LV_FONT_DECLARE(lv_font_montserrat_16);
 
 namespace MetaModule
 {
@@ -22,7 +18,6 @@ struct PatchSelectorPage : PageBase {
 		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchSel);
 
-		ui_PatchSelectorPage_screen_init();
 		base = ui_PatchSelectorPage; //NOLINT
 		roller = ui_PatchListRoller; //NOLINT
 		nor_but = ui_Flashbut;		 //NOLINT

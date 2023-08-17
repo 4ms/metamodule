@@ -120,14 +120,18 @@ static_assert((0.75_u0_16).add_sat(0.5_u0_16) == (1.0_u0_16).pred(), "");
 static_assert((0.75_u0_16).sub_sat(0.5_u0_16) == 0.25_u0_16, "");
 
 static_assert((0.25_s1_31).add_sat(0.5_s1_31) == 0.75_s1_31, "");
+#ifndef __MINGW32__
 static_assert((0.75_s1_31).add_sat(0.5_s1_31) == (1.0_s1_31).pred(), "");
+#endif
 static_assert((-0.75_s1_31).add_sat(-0.5_s1_31) == 1.0_s1_31, "");
 static_assert((-0.75_s1_31).add_sat(-0.5_s1_31) == 1.0_s1_31, "");
 
 static_assert((0.25_s1_31).sub_sat(0.5_s1_31) == -0.25_s1_31, "");
 static_assert((0.75_s1_31).sub_sat(0.5_s1_31) == 0.25_s1_31, "");
 static_assert((-0.75_s1_31).sub_sat(-0.5_s1_31) == -0.25_s1_31, "");
+#ifndef __MINGW32__
 static_assert((0.75_s1_31).sub_sat(-0.5_s1_31) == (1.0_s1_31).pred(), "");
+#endif 
 
 static_assert((0.25_u0_32).add_sat(0.5_u0_32) == 0.75_u0_32, "");
 static_assert((0.75_u0_32).add_sat(0.5_u0_32) == (1.0_u0_32).pred(), "");

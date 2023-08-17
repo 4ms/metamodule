@@ -1,4 +1,4 @@
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/Quant_info.hh"
 #include "scaling_config.hh"

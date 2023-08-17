@@ -2,7 +2,8 @@
 #include "conf/panel_conf.hh"
 #include "gui/message_queue.hh"
 #include "lvgl.h"
-#include "params.hh"
+#include "params/metaparams.hh"
+#include "params/params_state.hh"
 #include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
@@ -17,7 +18,7 @@ enum class PageChangeDirection { Back, Forward, Jump };
 struct PatchInfo {
 	PatchStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
-	Params &params;
+	ParamsState &params;
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
@@ -26,7 +27,7 @@ struct PatchInfo {
 struct PageBase {
 	PatchStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
-	Params &params;
+	ParamsState &params;
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
@@ -35,7 +36,6 @@ struct PageBase {
 	static constexpr uint32_t MaxBufferHeight = 240 * 4;
 	static inline std::array<lv_color_t, MaxBufferHeight * MaxBufferWidth> page_pixel_buffer;
 
-	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, 240)> cable_buf;
 	// Why doesn't this work?
 	// uint8_t *buffer = StaticBuffers::gui_scratch_buffer;
 	// uint8_t *cable_buf = StaticBuffers::gui_scratch_screen;
@@ -96,18 +96,5 @@ struct PageBase {
 
 	virtual void update() {
 	}
-
-	//TODO: add helpers? or add to separate class/namespace?
-	// std::string_view read_slug() {
-	// 	auto module_id = PageList::get_selected_module_id();
-	// 	auto patch_id = PageList::get_selected_patch_id();
-	// 	const PatchData &patch = patch_list.get_patch(patch_id);
-	// 	if (patch.patch_name.length() == 0)
-	// 		return "";
-	// 	if (module_id >= patch.module_slugs.size())
-	// 		return "";
-
-	// 	return patch.module_slugs[module_id];
-	// }
 };
 } // namespace MetaModule

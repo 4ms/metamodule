@@ -3,9 +3,10 @@
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "gui/pages/page_manager.hh"
-#include "param_cache.hh"
-#include "params.hh"
-#include "params_dbg_print.hh"
+#include "params/params.hh"
+#include "params/params_dbg_print.hh"
+#include "params/params_state.hh"
+#include "params/sync_params.hh"
 #include "patch_file/patch_storage_proxy.hh"
 #include "patch_file/patchlist.hh"
 #include "patch_play/patch_playloader.hh"
@@ -15,12 +16,12 @@ namespace MetaModule
 {
 class Ui {
 private:
-	ParamCache &param_cache;
+	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
 
 	MessageQueue msg_queue;
 	PageManager page_manager;
-	Params params;
+	ParamsState params;
 	MetaParams metaparams;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
@@ -32,9 +33,9 @@ private:
 public:
 	Ui(PatchPlayLoader &patch_playloader,
 	   PatchStorageProxy &patch_storage,
-	   ParamCache &pc,
+	   SyncParams &sync_params,
 	   PatchModQueue &patch_mod_queue)
-		: param_cache{pc}
+		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
 		, msg_queue{1024}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
@@ -90,7 +91,7 @@ private:
 
 	void page_update_task() { //60Hz
 		//This returns false when audio stops
-		bool read_ok = param_cache.read_sync(&params, &metaparams);
+		bool read_ok = sync_params.read_sync(params, metaparams);
 		page_manager.update_current_page();
 		patch_playloader.handle_sync_patch_loading();
 	}

@@ -1,5 +1,9 @@
 ## MetaModule
 
+[![Build Simulator](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml)
+[![Build VCV Rack Plugin](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml)
+[![Run VCV unit tests](https://github.com/4ms/metamodule/actions/workflows/run_vcv_tests.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/run_vcv_tests.yml)
+
 ### Start
 
 First, clone the repo and `cd` into the new directory.
@@ -16,11 +20,13 @@ Init and update the submodules recursively:
 git submodule update --init --recursive
 ```
 
+Next, setup your developement environment by [following the instructions on this page](Setup.md)
+
 ### Building VCV Rack Plugin
 
 You must have the Rack-SDK on your computer already. Version 2.2.3 is known to
-work. Set the environment variable `RACK_DIR` equal to the patch to the
-location of Rack-SDK:
+work. Set the environment variable `RACK_DIR` equal to the path to the
+location of Rack-SDK. For instance, add this to your .bashrc or .zshrc:
 
 ```
 export RACK_DIR=/Users/MyName/projects/Rack-SDK
@@ -33,7 +39,9 @@ Enter the vcv directory. All VCV Rack plugin code is in here, as well as in
 cd vcv
 ```
 
-To run the unit tests 
+You will need a recent c++ compiler such as gcc-12 or later, or clang-14 or later.
+
+To run the unit tests:
 
 ```
 make tests
@@ -51,15 +59,11 @@ directory. The next time you start VCV Rack, it will load the modified plugin.
 
 ### Building Simulator
 
-The simulator uses SDL2, which must be installed on your host machine. It only
-simulates graphics right now (audio can be added -- TODO). The window can be
-re-sized in order to examine precise pixel alignment.
+The simulator uses SDL2, which must be installed on your host machine. It 
+simulates graphics and audio output. The window can be re-sized in order to
+examine precise pixel alignment.
 
-Navigate using the left and right arrows to simulate the encoder turning CCW
-and CW.
-
-The down arrow pushes the encoder button. The up arrow pushes the RGB Button
-(Back)
+See the [README.md](simulator/README.md) in the simulator directory for details on using the simulator.
 
 Make sure you are in the right branch and you already updated the submodules.
 
@@ -69,19 +73,28 @@ Go to the simulator directory:
 cd simulator
 ```
 
-Build it:
+Generate the build system:
 
 ```
 cmake -B build -GNinja      #Or whatever build system you want
+```
+
+Build it:
+
+```
 cmake --build build
 ```
 
-
 Run it:
+
 ```
 build/simulator
+
+# To see the possible command-line arguments:
+build/simulator --help
 ```
 
+See the simulator README.md for arguments details.
 
 When adding/removing assets, sometimes you need to clean the build:
 
@@ -103,10 +116,12 @@ make run
 make clean
 ```
 
+The `make run` doesn't allow you to pass arguments.
+
 
 ### Building Firmware
 
-This requires arm-none-eabi-gcc versions 12.2 or later installed on your $PATH.
+This requires arm-none-eabi-gcc version 12.2 or later installed on your PATH.
 
 Make sure you are in the right branch and you already updated the submodules.
 
@@ -121,6 +136,21 @@ It also generates `main.uimg` in the same dir, which is used when copying
 firmware to NOR Flash or an SD card.
 The firmware file contains the Cortex-M4 firwmare embedded in it, which is
 loaded automatically by the Cortex-A7 core.
+
+
+Optional: if you have multiple versions of the gcc arm toolchain installed and don't want to 
+change your PATH for this project, you can set the METAMODULE_ARM_NONE_EABI_PATH var like this:
+
+```
+# Put in your bashrc/zshrc for convenience:
+# Note the trailing slash (required)
+export METAMODULE_ARM_NONE_EABI_PATH=/path/to/arm-gnu-toolchain-12.x-relX/bin/
+
+# Now you can run make as normal:
+make -j16
+```
+
+### Loading firmware onto the device
 
 There is a bootloader that runs before the application, and it outputs useful
 messages over a UART. You can view the console output by connecting a USB-UART
@@ -150,7 +180,7 @@ If you are already running the application and just need to debug, you can just 
 If you need to load new firmware, then do this:
 
 1) Install a jumper on Control Expander header that bridges the top-left pin and the pin just to the right of it.
-To be clear, the jumper should be horizontal, not vertical, on the top row of pins all the way to the left:
+The jumper should be horizontal, not vertical, on the top row of pins all the way to the left:
 
 ```
   Control
@@ -175,12 +205,12 @@ If you have a JLink connected, you can program with this;
 make jprog
 ```
 
-This should 15-30 seconds.
+This should take 15-30 seconds.
 
 For other methods, just load the .elf file and then start executing from 0xC0200040.
 
 Note: If you are familiar with flashing Cortex-M series MCUs, you will notice
-some differences. One is that Flash is an external chip. Another difference is
+some differences. One is that Flash is on an external chip. Another difference is
 that the main RAM (DDR RAM) is not available until software initializes it. The
 on-board NOR Flash chip has a bootloader installed (MP1-Boot, which is the
 FSBL). This is loaded by the BOOTROM on power-up. The MP1-Boot bootloader is
@@ -200,12 +230,12 @@ Loading onto NOR Flash will flash the firmware into the on-board FLASH chip so
 you can boot normally without a computer connected. It takes a minute or two,
 so this is a good way to flash firmware infrequently, for example, flashing the
 latest stable firwmare version. This is not recommended if you're doing active
-firmware development (use SWD/JTAG in that case).
+firmware development since it's slow (use SWD/JTAG in that case).
 
 Power cycle the module while holding down the rotary encoder button. This
 forces an alt firmware to be loaded from NOR Flash (which is a USB-DFU
-bootloader). If you are using the UART console, then you'll see this in the
-console:
+bootloader). Make sure the jumper mentioned in the SWD/JTAG section is not installed.
+If you are using the UART console, then you'll see this in the console:
 
 ```
 USB DFU Loader Starting...
@@ -248,7 +278,7 @@ You need a dedicated SD Card, all contents will be erased. A 16GB card is common
 but smaller or larger should work too.
 
 You first need to format, partition, and install the bootloader on the card. This only needs
-to happen once. 
+to happen once when you use a new SD Card. 
 
 ```
 make format-sd
@@ -276,7 +306,7 @@ To flash the application, do this:
 make flash-app-sd
 ```
 
-This will build the application as normal, and then use `dd` to copy it to the third partition.
+This will build the application as normal, and then use `dd` to copy it to the fourth partition.
 
 Eject the card and insert it into the MetaModule.
 
@@ -293,3 +323,4 @@ If you want to back to booting from Flash (internal Flash chip), then flip the b
 To create the artwork files from the SVGs, you must have Inkscape installed an on your PATH
 
 ...To Be Continued...
+

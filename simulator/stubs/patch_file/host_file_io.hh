@@ -2,6 +2,7 @@
 #include "fs/volumes.hh"
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <span>
 #include <string_view>
 
@@ -18,25 +19,30 @@ struct HostFileIO {
 	bool foreach_file_with_ext(const std::string_view extension, auto action) {
 		namespace fs = std::filesystem;
 
-		printf("Scanning %s for patches...\n", _patch_dir.data());
+		std::cout << "Scanning " << _patch_dir << " for patches...\n";
 
-		for (const auto &entry : fs::directory_iterator(_patch_dir)) {
-			auto fn = entry.path();
-			if (fn.extension() == fs::path(".yml")) {
-				auto last_modif = fs::last_write_time(fn);
-				auto timestamp = last_modif.time_since_epoch().count();
-				auto sz = (uint32_t)fs::file_size(fn);
-				action(fn.c_str(), timestamp, sz);
+		try {
+			for (const auto &entry : fs::directory_iterator(_patch_dir)) {
+				auto fn = entry.path();
+				if (fn.extension() == fs::path(".yml")) {
+					auto last_modif = fs::last_write_time(fn);
+					auto timestamp = last_modif.time_since_epoch().count();
+					auto sz = (uint32_t)fs::file_size(fn);
+					action(fn.c_str(), timestamp, sz);
+				}
 			}
+		} catch (const fs::filesystem_error &e) {
+			std::cout << "Error: " << e.what() << std::endl;
+			return false;
 		}
+
 		return true;
 	}
 
 	uint64_t read_file(const std::string_view filename, std::span<char> buffer) {
-		std::ifstream ifs;
+		std::ifstream ifs(filename.data(), std::ios::in);
 		uint64_t sz = 0;
-		ifs.open(filename, std::ios::in);
-		if (ifs) {
+		if (ifs.is_open()) {
 			ifs.seekg(0, std::ios::end);
 			sz = ifs.tellg();
 			ifs.seekg(0, std::ios::beg);

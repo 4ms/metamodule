@@ -1,23 +1,29 @@
+#include "audio_stream.hh"
+#include "frame.hh"
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
 #include "lvgl.h"
+#include "sdl_audio.hh"
+#include "settings.hh"
 #include "ui.hh"
+#include <iostream>
 
-int main(void) {
-	// Set zoom to startup with a larger window (zoomed in)
-	int zoom = 1;
+int main(int argc, char *argv[]) {
+	MetaModuleSim::Settings settings;
+
+	settings.parse(argc, argv);
 
 	lv_init();
-	lv_port_disp_init(320, 240, zoom);
+	lv_port_disp_init(320, 240, settings.zoom);
 
-	MetaModule::PatchPlayer patch_player;
-	MetaModule::PatchStorageProxy patch_storage{"../shared/patch/"};
-	MetaModule::PatchPlayLoader patch_playloader{patch_storage, patch_player};
-	MetaModule::PatchModQueue patch_mod_queue;
-	MetaModule::Ui ui{patch_playloader, patch_storage, patch_mod_queue};
+	SDLAudio<Frame> audio_out{settings.audioout_dev};
 
-	ui.start();
+	MetaModule::Ui ui{settings.patch_path, audio_out.get_block_size()};
 
+	audio_out.set_callback([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
+	audio_out.unpause();
+
+	// Run until get QUIT event
 	while (ui.update()) {
 	}
 

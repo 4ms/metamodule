@@ -32,7 +32,6 @@ struct PatchViewKnobsetMenu {
 			lv_obj_add_event_cb(ui_KnobsetCloseButton, knob_button_cb, LV_EVENT_PRESSED, this);
 
 			visible = false;
-			// lv_obj_set_height(ui_KnobsetMenu, 0);
 			lv_obj_set_x(ui_KnobsetMenu, 220);
 
 			knobset_list.reserve(MaxKnobSets);
@@ -54,7 +53,6 @@ struct PatchViewKnobsetMenu {
 				auto panel = ui_KnobSetGroup_create(ui_KnobsetMenu);
 				auto check = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETBUTTON);
 				auto label = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETNAME);
-
 				if (knobset.name.length())
 					lv_label_set_text(label, knobset.name.c_str());
 				else {
