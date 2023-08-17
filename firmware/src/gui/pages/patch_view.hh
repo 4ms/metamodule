@@ -12,14 +12,11 @@
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_knobset_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
+#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
-
-extern "C" {
-#include "gui/slsexport/meta5/ui.h"
-}
 
 namespace MetaModule
 {
@@ -31,7 +28,6 @@ struct PatchViewPage : PageBase {
 		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchView);
 
-		ui_PatchViewPage_screen_init();
 		base = ui_PatchViewPage; //NOLINT
 
 		init_bg(base);
