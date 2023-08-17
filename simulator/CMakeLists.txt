@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(NOT LINUX)
 set(CMAKE_TOOLCHAIN_FILE "./vcpkg/scripts/buildsystems/vcpkg.cmake")
+endif()
 
 project(mm_sim LANGUAGES C CXX)
 
