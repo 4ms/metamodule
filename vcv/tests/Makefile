@@ -3,7 +3,8 @@
 
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR ?= $(TEST_DIR)
-BUILDDIR = $(TEST_DIR)/build
+OUTERBUILDDIR = $(TEST_DIR)/build
+BUILDDIR = $(OUTERBUILDDIR)/build
 
 SHARED_DIR = ../shared
 RYMLDIR = $(SHARED_DIR)/patch_convert/ryml/rapidyaml
@@ -43,9 +44,9 @@ CXXFLAGS = 	-Wall \
 ### Boilerplate below here:
 
 LDFLAGS = -lstdc++
-OBJECTS = $(addprefix $(BUILDDIR)/, $(subst ../,,$(addsuffix .o, $(basename $(TEST_SOURCES)))))
+OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
 DEPDIR := $(BUILDDIR)
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(subst ../,,$(basename $<).d)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
 
 .PHONY: all tests clean
 
@@ -78,7 +79,7 @@ $(DOCTESTHEADER_DIR)/doctest.h:
 	wget https://raw.githubusercontent.com/onqtam/doctest/master/doctest/doctest.h -P $(DOCTESTHEADER_DIR)/
 
 clean:
-	rm -rf $(BUILDDIR)
+	rm -rf $(OUTERBUILDDIR)
 
 $(DEPDIR): ; @mkdir -p $@
 
