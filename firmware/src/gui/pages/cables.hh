@@ -21,6 +21,11 @@ class CableDrawer {
 	static constexpr uint32_t Height = 4 * 240 + 8;
 	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, Height)> cable_buf;
 
+	struct Vec2 {
+		int32_t x;
+		int32_t y;
+	};
+
 public:
 	CableDrawer(lv_obj_t *parent,
 				PatchData &patch,
@@ -42,16 +47,46 @@ public:
 		drawline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 	}
 
+	std::optional<Vec2> find_outjack_xy(Jack jack) {
+		for (const auto &d : drawn) {
+			if (d.gui_element.module_idx != jack.module_id || d.gui_element.count.num_outputs == 0)
+				continue;
+			if (d.gui_element.idx.output_idx == jack.jack_id) {
+				auto x = lv_obj_get_x(d.gui_element.obj);
+				auto y = lv_obj_get_x(d.gui_element.obj);
+				return Vec2{x, y};
+			}
+		}
+		return std::nullopt;
+	}
+
+	std::optional<Vec2> find_injack_xy(Jack jack) {
+		for (const auto &d : drawn) {
+			if (d.gui_element.module_idx != jack.module_id || d.gui_element.count.num_inputs == 0)
+				continue;
+			if (d.gui_element.idx.input_idx == jack.jack_id) {
+				lv_obj_update_layout(d.gui_element.obj);
+				auto x = lv_obj_get_x(d.gui_element.obj);
+				auto y = lv_obj_get_x(d.gui_element.obj);
+				return Vec2{x, y};
+			}
+		}
+		return std::nullopt;
+	}
+
 	void draw() {
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 
-		draw_cable({10, 5}, {15, 23});
-		draw_cable({15, 23}, {120, 255});
-
 		for (const auto &cable : patch.int_cables) {
-			auto out_module_id = cable.out.module_id;
-			auto out_jack_id = cable.out.jack_id;
-			//scan DrawnElements to find it?
+			if (auto outpos = find_outjack_xy(cable.out)) {
+
+				for (const auto &in : cable.ins) {
+					if (auto inpos = find_injack_xy(in)) {
+						printf_("Cable: %d,%d -> %d,%d\n", outpos->x, outpos->y, inpos->x, inpos->y);
+						draw_cable({outpos->x, outpos->y}, {inpos->x, inpos->y});
+					}
+				}
+			}
 		}
 		// Draw all cables connected to this module
 		// TODO: gotta be a cleaner way to do this...
@@ -102,11 +137,6 @@ public:
 		// }
 		// }
 	}
-
-	struct Vec2 {
-		int32_t x;
-		int32_t y;
-	};
 
 	void draw_cable(Vec2 start, Vec2 end, const Jack &outjack) {
 		drawline_dsc.color = get_cable_color(outjack);
