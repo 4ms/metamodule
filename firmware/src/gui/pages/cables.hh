@@ -47,34 +47,6 @@ public:
 		drawline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 	}
 
-	std::optional<Vec2> find_outjack_xy(Jack jack) {
-		for (const auto &d : drawn) {
-			if (d.gui_element.module_idx != jack.module_id || d.gui_element.count.num_outputs == 0)
-				continue;
-			if (d.gui_element.idx.output_idx == jack.jack_id) {
-				lv_obj_refr_pos(d.gui_element.obj);
-				auto x = lv_obj_get_x(d.gui_element.obj);
-				auto y = lv_obj_get_y(d.gui_element.obj);
-				return Vec2{x, y};
-			}
-		}
-		return std::nullopt;
-	}
-
-	std::optional<Vec2> find_injack_xy(Jack jack) {
-		for (const auto &d : drawn) {
-			if (d.gui_element.module_idx != jack.module_id || d.gui_element.count.num_inputs == 0)
-				continue;
-			if (d.gui_element.idx.input_idx == jack.jack_id) {
-				lv_obj_refr_pos(d.gui_element.obj);
-				auto x = lv_obj_get_x(d.gui_element.obj);
-				auto y = lv_obj_get_y(d.gui_element.obj);
-				return Vec2{x, y};
-			}
-		}
-		return std::nullopt;
-	}
-
 	void draw() {
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
 
@@ -83,60 +55,52 @@ public:
 
 				for (const auto &in : cable.ins) {
 					if (auto inpos = find_injack_xy(in)) {
-						printf_("Cable: %d,%d -> %d,%d\n", outpos->x, outpos->y, inpos->x, inpos->y);
-						draw_cable({outpos->x, outpos->y}, {inpos->x, inpos->y});
+						draw_cable({outpos->x, outpos->y}, {inpos->x, inpos->y}, cable.out);
 					}
 				}
 			}
 		}
-		// Draw all cables connected to this module
-		// TODO: gotta be a cleaner way to do this...
-		// 		push Jack{c.out}, this_module_obj, Jack{in}, outmodule_obj
-		// 		draw_cable(Jack out, Jack in, lv_obj_t *out_module, lv_obj_t *in_module);
-		// const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
-		// if (thismoduleinfo.width_hp > 0) {
-		//for (const auto &c : patch.int_cables) {
-		//	// Draw cable(s) if out jack is on this module
-		//	if (c.out.module_id == module_id) {
-		//		auto end = DrawHelper::get_jack_xy(thismoduleinfo.OutJacks, this_module_obj, c.out, height);
+	}
 
-		//		// Draw a cable from this out jack to all in jacks it's connected to
-		//		for (const auto &in : c.ins) {
-		//			// Iterate through all modules to find the one with a matching id (TODO: better way to do this?)
-		//			for (auto inmodule_obj : page->modules) {
-		//				uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(inmodule_obj)));
-		//				if (t_module_id == in.module_id) {
-		//					const auto inmodule_info =
-		//						ModuleFactory::getModuleInfo(patch.module_slugs[t_module_id]);
-		//					auto start = DrawHelper::get_jack_xy(inmodule_info.InJacks, inmodule_obj, in, height);
-		//					page->cable_drawline_dsc.color = DrawHelper::get_cable_color(in);
-		//					DrawHelper::draw_cable(start, end, page->cable_layer, &page->cable_drawline_dsc);
-		//					break;
-		//				}
-		//			}
-		//		}
-		//		continue; //We drew the output to all inputs, no need to check if any inputs are on this module
-		//	}
-		//	// Draw cable if in jack is on this module
-		//	for (const auto &in : c.ins) {
-		//		if (in.module_id == module_id) {
-		//			auto start = DrawHelper::get_jack_xy(thismoduleinfo.InJacks, this_module_obj, in, height);
-		//			//Find output jack on another module
-		//			for (auto outmodule_obj : page->modules) {
-		//				uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(outmodule_obj)));
-		//				if (t_module_id == c.out.module_id) {
-		//					auto outmodule_info = ModuleFactory::getModuleInfo(patch.module_slugs[t_module_id]);
-		//					auto end =
-		//						DrawHelper::get_jack_xy(outmodule_info.OutJacks, outmodule_obj, c.out, height);
-		//					page->cable_drawline_dsc.color = DrawHelper::get_cable_color(in);
-		//					DrawHelper::draw_cable(start, end, page->cable_layer, &page->cable_drawline_dsc);
-		//					break;
-		//				}
-		//			}
-		//		}
-		//	}
-		// }
-		// }
+	std::optional<Vec2> find_outjack_xy(Jack jack) {
+		for (const auto &d : drawn) {
+			if (d.gui_element.module_idx == jack.module_id && d.gui_element.count.num_outputs > 0 &&
+				d.gui_element.idx.output_idx == jack.jack_id)
+			{
+				return get_obj_xy(d.gui_element.obj);
+			}
+		}
+		return std::nullopt;
+	}
+
+	std::optional<Vec2> find_injack_xy(Jack jack) {
+		for (const auto &d : drawn) {
+			if (d.gui_element.module_idx == jack.module_id && d.gui_element.count.num_inputs > 0 &&
+				d.gui_element.idx.input_idx == jack.jack_id)
+			{
+				return get_obj_xy(d.gui_element.obj);
+			}
+		}
+		return std::nullopt;
+	}
+
+	static Vec2 get_obj_xy(lv_obj_t *obj) {
+		// lv_obj_refr_pos(obj);
+		lv_area_t coords;
+		lv_obj_get_coords(obj, &coords);
+		auto w = coords.x2 - coords.x1;
+		auto h = coords.y2 - coords.y1;
+		auto x = lv_obj_get_x(obj) + w / 2;
+		auto y = lv_obj_get_y(obj) + h / 2;
+		auto parent = lv_obj_get_parent(obj);
+		if (parent) {
+			// lv_obj_refr_pos(parent);
+			auto offsetx = lv_obj_get_x(parent);
+			auto offsety = lv_obj_get_y(parent);
+			x += offsetx;
+			y += offsety;
+		}
+		return Vec2{x, y};
 	}
 
 	void draw_cable(Vec2 start, Vec2 end, const Jack &outjack) {
@@ -175,22 +139,6 @@ public:
 		Vec2 b = get_midpt(control, end, step);
 		return get_midpt(a, b, step);
 	}
-
-	std::pair<int, int> scale_center(BaseElement const &el) {
-		const float adj = (float)(module_height) / 240.f;
-		uint16_t x = std::round(ModuleInfoBase::mm_to_px(el.x_mm, module_height) * adj);
-		uint16_t y = std::round(ModuleInfoBase::mm_to_px(el.y_mm, module_height) * adj);
-		return std::make_pair(x, y);
-	}
-
-	// Vec2 get_jack_xy(std::span<BaseElement> jacklist, lv_obj_t *module_obj, Jack const &in) {
-	// 	auto [x, y] = CableDrawer::scale_center(jacklist[in.jack_id]);
-	// 	lv_area_t coords;
-	// 	lv_obj_get_coords(module_obj, &coords);
-	// 	x += coords.x1;
-	// 	y += coords.y1;
-	// 	return {x, y};
-	// }
 };
 
 } // namespace MetaModule
