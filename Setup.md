@@ -15,7 +15,7 @@ All platforms:
 ### MacOS
 
 A recent-ish macOS version is required, though I do not know exactly how old will still work.
-Ventura 13.4 and 13.5 have been tested.
+Ventura 13.4 and 13.5 have been tested. 
 
  - Install [brew](https://brew.sh) and follow the "Next Steps" instructions to add Homebrew to your PATH.
 
@@ -29,8 +29,17 @@ Ventura 13.4 and 13.5 have been tested.
 
 TODO: check this, and notes for different distros
 
- - sudo apt-get install bison flex gcc-12
+ - `sudo apt-get install cmake g++-12 libsdl2-2.0.0 jq ninja-build pkg-config`
+ - Set gcc-12 and g++-12 to be the default. E.g. on Ubuntu 22.04: 
+   - `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 120`
+   - `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 120`
 
+ - To use the simulator GUI, you need to also install:
+   - `sudo apt-get install libx11-dev libxft-dev libxext-dev`
+
+ - To build the simulator on ARM platforms, you need to set the environment variable.
+   Add this to your .bashrc:
+   - `export VCPKG_FORCE_SYSTEM_BINARIES=1`
  
 ### Windows
 

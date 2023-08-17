@@ -1,5 +1,3 @@
-ARM_NONE_EABI_PATH ?= arm-none-eabi-
-
 export BUILDDIR_MP1A7 	= build/mp1corea7
 export BUILDDIR_MP1M4 	= build/mp1corem4
 export BINARYNAME  		= main
@@ -96,7 +94,7 @@ simulate:
 
 ## Tests
 
-tests: patch_convert_tests module_tests core_tests util_tests mdrivlib_tests  #vcv_tests
+tests: patch_convert_tests module_tests core_tests util_tests mdrivlib_tests
 
 module_tests:
 	$(info ... Running firmware tests....)
