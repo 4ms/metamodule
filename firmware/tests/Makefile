@@ -42,7 +42,8 @@ CXXFLAGS = 	-Wall \
 
 ### Boilerplate below here:
 
-#CXX = clang++
+CC = cc
+CXX = c++
 LDFLAGS = -lstdc++
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
 DEPDIR := $(BUILDDIR)

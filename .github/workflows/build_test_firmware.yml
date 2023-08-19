@@ -18,8 +18,11 @@ jobs:
           submodules: 'recursive'
 
       - name: Build and test
-        run: cd firmware && make -j8
-        
+        run: |
+          which c++ || true
+          which cc || true
+          cd firmware && make -j8
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
