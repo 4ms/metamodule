@@ -12,4 +12,9 @@ jobs:
         with:
           release: '12.2.Rel1' # <-- The compiler release to use
       - name: Build and test
-        run: make -j16 
+        run: cd firmware && make -j8
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: firmware/build/mp1corea7/medium/main.elf
+          name: firmware-mp1corea7-elf
