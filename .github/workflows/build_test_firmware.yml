@@ -21,7 +21,9 @@ jobs:
         run: |
           which c++ || true
           which cc || true
-          cd firmware && make -j8
+          c++ --version
+          cc --version
+          cd firmware && make mp1-med -j8
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
