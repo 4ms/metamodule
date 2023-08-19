@@ -1,0 +1,15 @@
+name: Build and test firmware
+
+on: push
+
+jobs:  
+  build:
+    name: "Build firmware"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '12.2.Rel1' # <-- The compiler release to use
+      - name: Build and test
+        run: make -j16 
