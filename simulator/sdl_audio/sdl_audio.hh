@@ -17,7 +17,7 @@ struct SDLAudio {
 		const char *device_name = nullptr; //nullptr tells SDL to select the default
 
 		std::cout << "SDL: " << num_dev << " audio devices found\n";
-		for (unsigned i = 0; i < num_dev; i++) {
+		for (int i = 0; i < num_dev; i++) {
 			auto name = SDL_GetAudioDeviceName(i, SDLPlayback);
 			std::cout << i << ": " << name;
 			if (dev_id == i) {
