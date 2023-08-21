@@ -18,7 +18,7 @@ export VALID_BOARDS = medium norflash-loader
 .PHONY: tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests patch_convert_tests
 
 
-all: mp1-med tests #images
+all: tests mp1-med
 
 # Binaries
 
