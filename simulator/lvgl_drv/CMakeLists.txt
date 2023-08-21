@@ -22,7 +22,7 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
 # possible macOS intel homebrew SDL location
 elseif(WIN32)
 	target_link_libraries(lvglsdl PRIVATE SDL2::SDL2main SDL2::SDL2)
-else() 
+else()	
   target_include_directories(lvglsdl PUBLIC /usr/local/include)
   target_link_options(lvglsdl PUBLIC -L /usr/local/lib)
 endif()
