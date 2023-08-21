@@ -1,16 +1,23 @@
 name: Build and test firmware
 
-on: push
+on:
+    push:
+      branches:
+        - main
+    pull_request:
 
 jobs:  
   build:
+    strategy:
+        matrix:
+          gcc: ['12.2.Rel1']  # can add other versions if needed
     name: "Build firmware"
     runs-on: ubuntu-latest
     steps:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          release: '12.2.Rel1' # <-- The compiler release to use
+          release: ${{ matrix.gcc }}
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -18,15 +25,12 @@ jobs:
           submodules: 'recursive'
 
       - name: Build and test
-        run: |
-          which c++ || true
-          which cc || true
-          c++ --version
-          cc --version
-          cd firmware && make -j8
+        run: cd firmware && make -j8
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          path: firmware/build/mp1corea7/medium/main.elf
-          name: firmware-mp1corea7-elf
+          name: firmware
+          path: |
+            firmware/build/mp1corea7/medium/main.elf
+            firmware/build/mp1corea7/medium/main.uimg
