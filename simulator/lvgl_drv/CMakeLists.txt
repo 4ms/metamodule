@@ -15,14 +15,16 @@ message("lvgl_drv: LV_CONF_DIR =${LV_CONF_DIR}")
 target_compile_options(lvglsdl PRIVATE -Wall -O2 $<$<COMPILE_LANGUAGE:CXX>:
                                        -std=c++20>)
 
-# possible macOS m1 homebrew SDL location
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
+  # possible macOS m1 homebrew SDL location
   target_include_directories(lvglsdl PUBLIC /opt/homebrew/include)
   target_link_options(lvglsdl PUBLIC -L /opt/homebrew/lib)
-# possible macOS intel homebrew SDL location
 elseif(WIN32)
-	target_link_libraries(lvglsdl PRIVATE SDL2::SDL2main SDL2::SDL2)
-else()	
+  target_link_libraries(
+    lvglsdl
+    PRIVATE $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+            $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>)
+else()
   target_include_directories(lvglsdl PUBLIC /usr/local/include)
   target_link_options(lvglsdl PUBLIC -L /usr/local/lib)
 endif()
