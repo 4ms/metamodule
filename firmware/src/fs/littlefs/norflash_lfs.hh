@@ -196,7 +196,7 @@ public:
 	}
 
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
-		auto res = lfs_setattr(&lfs, filename.data(), ATTR_TIMESTAMP, &timestamp, sizeof(TimeFile::timestamp));
+		lfs_setattr(&lfs, filename.data(), ATTR_TIMESTAMP, &timestamp, sizeof(TimeFile::timestamp));
 	}
 
 	int time_file_open(TimeFile *tfile, const char *path, int flags) {

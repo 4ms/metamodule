@@ -91,7 +91,8 @@ private:
 
 	void page_update_task() { //60Hz
 		//This returns false when audio stops
-		bool read_ok = sync_params.read_sync(params, metaparams);
+		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
+		//if (!read_ok) ... restart audio
 		page_manager.update_current_page();
 		patch_playloader.handle_sync_patch_loading();
 	}
