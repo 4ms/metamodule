@@ -190,11 +190,6 @@ INCLUDES +=	-I$(LIBDIR)/lvgl
 INCLUDES +=	-I$(LIBDIR)/lvgl/lvgl
 
 # Fonts
-SOURCES += src/gui/fonts/MuseoSansRounded_500_12.c
-SOURCES += src/gui/fonts/MuseoSansRounded_700_12.c
-SOURCES += src/gui/fonts/MuseoSansRounded_700_14.c
-SOURCES += src/gui/fonts/MuseoSansRounded_700_16.c
-SOURCES += src/gui/fonts/MuseoSansRounded_700_18.c
 
 # Generated:
 slsexport_dir := src/gui/slsexport/meta5
