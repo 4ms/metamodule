@@ -55,6 +55,7 @@ LFLAGS = -Wl,--gc-sections \
 	-nostdlib \
 	-nostartfiles \
 	-ffreestanding \
+	-Wl,--no-warn-rwx-segments \
 	$(EXTRA_LFLAGS)
 
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
