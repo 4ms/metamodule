@@ -3,6 +3,7 @@
 [![Build Simulator](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml)
 [![Build VCV Rack Plugin](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml)
 [![Run VCV unit tests](https://github.com/4ms/metamodule/actions/workflows/run_vcv_tests.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/run_vcv_tests.yml)
+[![Run VCV unit tests](https://github.com/4ms/metamodule/actions/workflows/build_test_firmware.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_test_firmware.yml)
 
 ### Start
 
@@ -125,18 +126,38 @@ This requires arm-none-eabi-gcc version 12.2 or later installed on your PATH.
 
 Make sure you are in the right branch and you already updated the submodules.
 
-To build the firmware:
+To prepare the build system:
 
 ```
-make -j16 
+cmake -B build -GNinja
+
+# Or use this shortcut:
+make build
 ```
 
-This will generate the firmware in `firmware/build/mp1corea7/medium/main.elf`.
-It also generates `main.uimg` in the same dir, which is used when copying
-firmware to NOR Flash or an SD card.
-The firmware file contains the Cortex-M4 firwmare embedded in it, which is
-loaded automatically by the Cortex-A7 core.
+You can replace `Ninja` with another build tool if you prefer (see https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
 
+Optional: If you plan to boot the MetaModule from an SD Card, then you can specify the
+path the SD Card device to save time. If you don't do this, then the system
+will prompt you whenever you run one of the SD Card flashing scripts.
+The device path should be to the entire SD Card device (not just one partition).
+
+```
+cmake -B build -GNinja -DSD_DISK_DEV=/dev/disk4
+```
+
+After either of the above two commands, you can build with this:
+
+```
+cmake --build build
+
+# Or use the shortcut:
+make
+```
+
+The firmware is built as `firmware/build/mp1corea7/medium/main.elf` and `main.uimg` 
+in the same directory. The .elf file is used when debugging, and the .uimg file
+is used when copying firmware to NOR Flash or an SD card.
 
 Optional: if you have multiple versions of the gcc arm toolchain installed and don't want to 
 change your PATH for this project, you can set the METAMODULE_ARM_NONE_EABI_PATH var like this:
@@ -147,7 +168,7 @@ change your PATH for this project, you can set the METAMODULE_ARM_NONE_EABI_PATH
 export METAMODULE_ARM_NONE_EABI_PATH=/path/to/arm-gnu-toolchain-12.x-relX/bin/
 
 # Now you can run make as normal:
-make -j16
+make 
 ```
 
 ### Loading firmware onto the device
