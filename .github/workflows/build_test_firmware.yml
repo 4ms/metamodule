@@ -4,6 +4,8 @@ on:
     push:
       branches:
         - main
+      tags:
+        - 'firmware-[0-9]+.[0-9]+.[0-9]+'
     pull_request:
 
 jobs:  
@@ -25,7 +27,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Build and test
-        run: cd firmware && make -j8
+        run: cd firmware && make 
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
