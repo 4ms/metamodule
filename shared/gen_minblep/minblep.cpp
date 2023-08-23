@@ -1,5 +1,5 @@
-#include "VCV-adaptor/dsp/fft.hpp"
-#include "VCV-adaptor/dsp/window.hpp"
+#include "VCV_adaptor/dsp/fft.hpp"
+#include "VCV_adaptor/dsp/window.hpp"
 
 namespace rack
 {

@@ -1,3 +1,6 @@
+#include <cstdio>
+#include <cstdlib>
+
 namespace rack::dsp
 {
 void minBlepImpulse(int z, int o, float *output);
