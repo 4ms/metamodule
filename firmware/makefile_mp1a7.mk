@@ -64,6 +64,7 @@ INCLUDES += -I$(core_src)
 INCLUDES += -I$(target_src)
 INCLUDES += -I$(SHARED)
 INCLUDES += -I$(SHARED)/patch
+INCLUDES += -Isrc/medium
 
 
 # Printf
