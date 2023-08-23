@@ -124,7 +124,7 @@ tables $(SHARED)/cpputil/math_tables.cc: $(TABLEGEN)/main.cpp
 
 gen_minblep:
 	make -C ../shared/gen_minblep
-	../shared/gen_minblep/gen_minblep 16 32 > ./src/VCV-adaptor/dsp/minblep_16_32.h
+	../shared/gen_minblep/gen_minblep 16 32 > ./src/VCV_adaptor/dsp/minblep_16_32.h
 
 compile_commands:
 	compiledb make
