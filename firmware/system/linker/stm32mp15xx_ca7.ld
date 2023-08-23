@@ -144,7 +144,7 @@ SECTIONS
 	/* } > M4_EXTDATA */
 
 	.m4_extrodata : {
-		INCLUDE m4_rodata.ld
+		INCLUDE build/mp1corem4/medium/m4_rodata.ld
 	} > M4_EXTDATA
 
 
