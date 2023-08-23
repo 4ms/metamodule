@@ -14,4 +14,4 @@ add_library(
 
 target_include_directories(AudibleInstrumentsModules PRIVATE ${AUDIBLE_DIR}/src ${AUDIBLE_DIR}/eurorack)
 
-target_compile_options(AudibleInstrumentsModules PRIVATE -Wno-double-promotion)
+target_compile_options(AudibleInstrumentsModules PRIVATE -Wno-double-promotion -Wno-deprecated-enum-float-conversion)

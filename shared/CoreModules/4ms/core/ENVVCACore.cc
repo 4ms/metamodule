@@ -1,68 +1,64 @@
-#include "CoreModules/SmartCoreProcessor.hh"
-#include "CoreModules/moduleFactory.hh"
 #include "CoreModules/4ms/core/envvca/SSI2162.h"
 #include "CoreModules/4ms/core/envvca/TriangleOscillator.h"
-#include "CoreModules/4ms/core/helpers/circuit_elements.h"
 #include "CoreModules/4ms/core/helpers/EdgeDetector.h"
+#include "CoreModules/4ms/core/helpers/circuit_elements.h"
 #include "CoreModules/4ms/info/ENVVCA_info.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
+#include "CoreModules/moduleFactory.hh"
 #include "gcem/include/gcem.hpp"
 #include "helpers/FlipFlop.h"
 #include "helpers/mapping.h"
 
-namespace MetaModule {
-
-inline auto CVToBool = [](float val) -> bool
+namespace MetaModule
 {
+
+inline auto CVToBool = [](float val) -> bool {
 	return val >= 0.5f;
 };
 
-
-struct VoltageToFreqTableRange
-{
+struct VoltageToFreqTableRange {
 	static constexpr float min = -0.2f;
 	static constexpr float max = 0.5f;
 };
-constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage)
-{
-	// voltage offset to not calculate with negative values during fitting
-	// once the table is created, we can lookup negative voltages values just fine
-	constexpr double VoltageOffset = 0.1;
+constinit auto VoltageToFrequencyTable =
+	Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage) {
+		// voltage offset to not calculate with negative values during fitting
+		// once the table is created, we can lookup negative voltages values just fine
+		constexpr double VoltageOffset = 0.1;
 
-    // two points in the V->f curve
-	// taken from voltages from the model at specific switch positions and expected frequencies from the manual
-    constexpr double V_1 = 0.31527 + VoltageOffset;
-    constexpr double f_1 = 1.0 / (5 * 60) / 2;
-    constexpr double V_2 = -0.055331 + VoltageOffset;
-    constexpr double f_2 = 800 * 2;
+		// two points in the V->f curve
+		// taken from voltages from the model at specific switch positions and expected frequencies from the manual
+		constexpr double V_1 = 0.31527 + VoltageOffset;
+		constexpr double f_1 = 1.0 / (5 * 60) / 2;
+		constexpr double V_2 = -0.055331 + VoltageOffset;
+		constexpr double f_2 = 800 * 2;
 
-	// helper constant to limit ranges of intermediate values and improve precision
-	constexpr double ArgScalingFactor = 100.0;
+		// helper constant to limit ranges of intermediate values and improve precision
+		constexpr double ArgScalingFactor = 100.0;
 
-    // This does not work in clang because math functions are not constexpr
-    // It doesn't work with gcem either because of numeric problems
-    // constexpr double arg = std::log2(f_1 / f_2) / (V_1 - V_2);
-    // constexpr double b = std::pow(2.0f, arg / ArgScalingFactor);
-    // constexpr double a = f_1 / std::pow(std::pow(2.0, arg), V_1);
-	
-    // So we just hardcode the factors that GCC produces for now
-    constexpr double a = 8.4172569220933146e+3;
-    constexpr double b = 6.8957132479261685e-1;
+		// This does not work in clang because math functions are not constexpr
+		// It doesn't work with gcem either because of numeric problems
+		// constexpr double arg = std::log2(f_1 / f_2) / (V_1 - V_2);
+		// constexpr double b = std::pow(2.0f, arg / ArgScalingFactor);
+		// constexpr double a = f_1 / std::pow(std::pow(2.0, arg), V_1);
 
-	auto coreFunc = [](double voltage) -> float
-	{
-		return float(gcem::pow(b, voltage * ArgScalingFactor) * a);
-	};
+		// So we just hardcode the factors that GCC produces for now
+		constexpr double a = 8.4172569220933146e+3;
+		constexpr double b = 6.8957132479261685e-1;
 
-	// make sure the fitting is correct
-	static_assert(gcem::abs(coreFunc(V_1) - f_1)/f_1 < 1e-2f);
-	static_assert(gcem::abs(coreFunc(V_2) - f_2)/f_2 < 1e-2f);
+		auto coreFunc = [](double voltage) -> float {
+			return float(gcem::pow(b, voltage * ArgScalingFactor) * a);
+		};
 
-    // interpolate
-    auto frequency = coreFunc(voltage + VoltageOffset);
+		// make sure the fitting is correct
+		static_assert(gcem::abs(coreFunc(V_1) - f_1) / f_1 < 1e-2f);
+		static_assert(gcem::abs(coreFunc(V_2) - f_2) / f_2 < 1e-2f);
 
-    return frequency;
-});
+		// interpolate
+		auto frequency = coreFunc((double)voltage + VoltageOffset);
 
+		return frequency;
+	});
 
 class ENVVCACore : public SmartCoreProcessor<ENVVCAInfo> {
 	using Info = ENVVCAInfo;
@@ -70,20 +66,19 @@ class ENVVCACore : public SmartCoreProcessor<ENVVCAInfo> {
 	using enum Info::Elem;
 
 public:
-	ENVVCACore() : triggerDetector(1.0f, 2.0f)
-	{}
+	ENVVCACore()
+		: triggerDetector(1.0f, 2.0f) {
+	}
 
-	void update() override
-	{
+	void update() override {
 		auto [riseCV, fallCV] = getRiseAndFallCV();
 
 		// Convert voltage to time without dealing with details of transistor core
-		auto VoltageToTime = [](float voltage) -> float
-		{
+		auto VoltageToTime = [](float voltage) -> float {
 			auto frequency = VoltageToFrequencyTable.lookup(voltage);
 
 			// limit to valid frequency range
-			frequency = std::clamp(frequency, 1.0f/(60 * 3), 20e3f);
+			frequency = std::clamp(frequency, 1.0f / (60 * 3), 20e3f);
 
 			// convert to period length
 			auto time = 1.0f / frequency;
@@ -102,8 +97,7 @@ public:
 		runAudioPath(osc.getOutput());
 	}
 
-	void runAudioPath(float triangleWave)
-	{
+	void runAudioPath(float triangleWave) {
 		triangleWave = InvertingAmpWithBias(triangleWave, 100e3f, 100e3f, 1.94f);
 
 		constexpr float VCAInputImpendance = 5e3f;
@@ -131,8 +125,7 @@ public:
 		// Ignoring output impedance and inverting 400kHz lowpass
 	}
 
-	void displayEnvelope(float val, TriangleOscillator::State_t state)
-	{
+	void displayEnvelope(float val, TriangleOscillator::State_t state) {
 		val = val / VoltageDivider(100e3f, 100e3f);
 		val *= getState<EnvLevelSlider>();
 		setOutput<EnvOut>(val);
@@ -143,8 +136,7 @@ public:
 		setLED<FallSlider>(state == TriangleOscillator::State_t::FALLING ? val / 8.f : 0);
 	}
 
-	void displayOscillatorState(TriangleOscillator::State_t state)
-	{
+	void displayOscillatorState(TriangleOscillator::State_t state) {
 		if (state == TriangleOscillator::State_t::FALLING) {
 			setOutput<EorOut>(8.f);
 			// setLED<EorLight>(true);
@@ -155,10 +147,11 @@ public:
 	}
 
 	void runOscillator() {
-		bool isCycling = (getState<CycleButton>() == LatchingButton::State_t::DOWN) ^ CVToBool(getInput<CycleIn>().value_or(0.0f));
+		bool isCycling =
+			(getState<CycleButton>() == LatchingButton::State_t::DOWN) ^ CVToBool(getInput<CycleIn>().value_or(0.0f));
 
 		osc.setCycling(isCycling);
-		if (cycleLED != isCycling){
+		if (cycleLED != isCycling) {
 			cycleLED = isCycling;
 			setLED<CycleButton>(cycleLED);
 		}
@@ -172,31 +165,24 @@ public:
 				osc.doRetrigger();
 			}
 		}
-		
+
 		osc.proceed(timeStepInS);
 	}
 
-	std::pair<float,float> getRiseAndFallCV()
-	{
-		auto ProcessCVOffset = [](auto slider, Toggle3pos::State_t range) -> float
-		{	
+	std::pair<float, float> getRiseAndFallCV() {
+		auto ProcessCVOffset = [](auto slider, Toggle3pos::State_t range) -> float {
 			// Slider plus resistor in parallel to tweak curve
 			const float SliderImpedance = 100e3f;
-			auto offset = 5.0f * VoltageDivider(slider * SliderImpedance + 17.4e3f, 0 + ParallelCircuit(100e3f, (1.0f - slider) * SliderImpedance));
+			auto offset = 5.0f * VoltageDivider(slider * SliderImpedance + 17.4e3f,
+												0 + ParallelCircuit(100e3f, (1.0f - slider) * SliderImpedance));
 
 			// Select one of three bias voltages
-			auto BiasFromRange = [](auto range) -> float
-			{
-				if (range == Toggle3pos::State_t::UP)
-				{
+			auto BiasFromRange = [](auto range) -> float {
+				if (range == Toggle3pos::State_t::UP) {
 					return -12.0f * VoltageDivider(1e3f, 10e3f);
-				}
-				else if (range == Toggle3pos::State_t::DOWN)
-				{
+				} else if (range == Toggle3pos::State_t::DOWN) {
 					return 12.0f * VoltageDivider(1e3f, 8.2e3f);
-				}
-				else
-				{
+				} else {
 					// middle position, and fail-safe default
 					return 0.0f;
 				}
@@ -241,9 +227,7 @@ public:
 		return {riseCV, fallCV};
 	}
 
-
-	void set_samplerate(float sr) override
-	{
+	void set_samplerate(float sr) override {
 		timeStepInS = 1.0f / sr;
 	}
 
@@ -272,8 +256,7 @@ private:
 	TriangleOscillator osc;
 
 private:
-	float timeStepInS = 1.f/48000.f;
-
+	float timeStepInS = 1.f / 48000.f;
 };
 
-}
+} // namespace MetaModule
