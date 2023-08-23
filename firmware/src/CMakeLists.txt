@@ -1,0 +1,254 @@
+include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
+
+set(FWDIR ${CMAKE_SOURCE_DIR})
+set(SHARED ${FWDIR}/../shared)
+
+#
+# Driver interface
+#
+add_library(mdrivlib_interface INTERFACE)
+target_link_libraries(mdrivlib_interface INTERFACE mp15xa7_arch)
+target_include_directories(
+  mdrivlib_interface
+  INTERFACE ${FWDIR}/lib/cmsis-device/stm32mp157c/include
+            ${FWDIR}/lib/cmsis/Core_A/Include
+            ${FWDIR}/lib/cmsis/Include
+            ${FWDIR}/lib/mdrivlib
+            ${FWDIR}/lib/mdrivlib/target/stm32mp1
+            ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
+            ${FWDIR}/lib/stm32-hal/stm32mp1/include
+            ${FWDIR}/src/core_a7
+)
+
+#
+# CoreModules 4ms
+#
+# TODO: CMake file in CoreModules/4ms
+file(
+  GLOB
+  CORE4MS_SOURCES
+  ${SHARED}/CoreModules/4ms/core/*Core.cc
+  ${SHARED}/CoreModules/4ms/core/enosc/data.cc
+  ${SHARED}/CoreModules/4ms/core/enosc/dynamic_data.cc
+  ${SHARED}/axoloti-wrapper/axoloti_math.cpp
+)
+
+add_library(core4ms OBJECT ${CORE4MS_SOURCES})
+target_include_directories(
+  core4ms
+  PUBLIC ${SHARED}
+         ${SHARED}/CoreModules/4ms
+         ${SHARED}/cpputil
+         ${FWDIR}/src
+)
+target_link_libraries(core4ms PUBLIC mp15xa7_arch)
+
+#
+# VCV Adaptor
+#
+file(GLOB RACKARTWORK_SOURCES ${FWDIR}/src/gui/images/Rack/components/*.c)
+
+add_library(
+  VCV_adaptor OBJECT
+  ${FWDIR}/src/VCV_adaptor/plugin_instance.cc
+  ${FWDIR}/src/VCV_adaptor/pffft/pffft.c
+  ${FWDIR}/src/VCV_adaptor/random.cpp
+  ${RACKARTWORK_SOURCES}
+)
+
+target_link_libraries(VCV_adaptor PUBLIC mdrivlib_interface lvgl::lvgl)
+
+set_source_files_properties(${FWDIR}/src/VCV_adaptor/pffft/pffft.c COMPILE_FLAGS -Wno-double-promotion)
+
+target_include_directories(
+  VCV_adaptor SYSTEM
+  PUBLIC ${FWDIR}/src/VCV_adaptor
+  PUBLIC ${FWDIR}/src/VCV_adaptor
+         ${FWDIR}/src
+         ${FWDIR}
+         ${SHARED}
+         ${SHARED}/cpputil
+)
+
+#
+# Befaco
+#
+add_subdirectory(${FWDIR}/vcv_ports/glue/Befaco ${CMAKE_CURRENT_BINARY_DIR}/Befaco)
+target_link_libraries(BefacoModules PUBLIC VCV_adaptor)
+
+#
+# AudibleInstruments
+#
+add_subdirectory(${FWDIR}/vcv_ports/glue/AudibleInstruments ${CMAKE_CURRENT_BINARY_DIR}/AudibleInstruments)
+target_link_libraries(AudibleInstrumentsModules PUBLIC VCV_adaptor)
+
+#
+# Artwork
+#
+file(
+  GLOB
+  ARTWORK_SOURCES
+  ${FWDIR}/src/gui/images/4ms/modules/*_artwork_240.c
+  ${FWDIR}/src/gui/images/4ms/components/*.c
+  ${FWDIR}/src/gui/images/Befaco/modules/*_240.c
+  ${FWDIR}/src/gui/images/Befaco/components/*.c
+  ${FWDIR}/src/gui/images/AudibleInstruments/modules/*_240.c
+  ${FWDIR}/src/gui/images/AudibleInstruments/components/*.c
+)
+
+#
+# RYML
+#
+set(RYMLDIR ${SHARED}/patch_convert/ryml/rapidyaml)
+file(
+  GLOB
+  RYML_SOURCES
+  ${RYMLDIR}/src/c4/yml/*.cpp
+  ${RYMLDIR}/ext/c4core/src/c4/*.cpp
+)
+add_library(ryml OBJECT ${RYML_SOURCES})
+target_link_libraries(ryml PUBLIC mp15xa7_arch)
+target_include_directories(ryml PUBLIC ${RYMLDIR}/src ${RYMLDIR}/ext/c4core/src)
+
+#
+# SLS Exported GUI (meta5)
+#
+add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
+target_link_libraries(ui PRIVATE lvgl::lvgl mp15xa7_arch)
+# Fix for SLS generated files (See https://forum.squareline.io/t/unused-variable-target-warning-when-compiling/1610/3 )
+target_compile_options(ui PRIVATE -Wno-unused-variable)
+
+#
+# Main App
+#
+add_executable(
+  main.elf
+  $<TARGET_FILE_DIR:main_m4.elf>/m4_rodata.ld
+  $<TARGET_FILE_DIR:main_m4.elf>/firmware_m4.h
+  $<TARGET_FILE_DIR:main_m4.elf>/firmware_m4_vectors.h
+  ${FWDIR}/system/libc_stub.c
+  ${FWDIR}/system/libcpp_stub.cc
+  ${FWDIR}/system/new.cc
+  ${FWDIR}/system/mmu_ca7.c
+  ${FWDIR}/src/core_intercom/shared_memory.cc
+  ${FWDIR}/src/console/uart_log.cc
+  ${FWDIR}/src/core_a7/main.cc
+  ${FWDIR}/src/audio/audio.cc
+  ${FWDIR}/src/gui/pages/page_manager.cc
+  ${FWDIR}/src/core_a7/aux_core_main.cc
+  ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
+  ${FWDIR}/src/fs/fatfs/diskio.cc
+  ${FWDIR}/src/fs/fatfs/fattime.cc
+  ${FWDIR}/src/fs/time_convert.cc
+  #
+  ${SHARED}/CoreModules/hub/hub_medium.cc
+  ${SHARED}/patch_convert/yaml_to_patch.cc
+  ${SHARED}/patch_convert/ryml/ryml_serial.cc
+  ${SHARED}/cpputil/util/math_tables.cc
+  #
+  ${FWDIR}/lib/fatfs/source/ff.c
+  ${FWDIR}/lib/fatfs/source/ffunicode.c
+  #
+  ${FWDIR}/lib/littlefs/lfs.c
+  ${FWDIR}/lib/littlefs/lfs_util.c
+  #
+  ${FWDIR}/lib/printf/printf.c
+  #
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_mdma.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_usart.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_usart_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_uart.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_uart_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_dma.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_sai.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_ltdc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rng.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_tim.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_rcc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_sd.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_sd_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_sdmmc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_qspi.c
+  #
+  ${FWDIR}/lib/mdrivlib/drivers/pin.cc
+  ${FWDIR}/lib/mdrivlib/drivers/tim.cc
+  ${FWDIR}/lib/mdrivlib/drivers/timekeeper.cc
+  ${FWDIR}/lib/mdrivlib/drivers/i2c.cc
+  ${FWDIR}/lib/mdrivlib/drivers/qspi_flash_driver.cc
+  ${FWDIR}/lib/mdrivlib/drivers/codec_PCM3168.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1/drivers/sai_tdm.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/system_ca7.c
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/startup_ca7.s
+  #
+  ${ARTWORK_SOURCES}
+)
+
+target_include_directories(
+  main.elf
+  PRIVATE $<TARGET_FILE_DIR:main_m4.elf>
+          ${FWDIR}/src
+          ${FWDIR}/src/console
+          ${FWDIR}/src/params
+          ${FWDIR}/src/core_a7
+          ${FWDIR}/src/medium
+          ${FWDIR}/lib/mdrivlib
+          ${FWDIR}/lib/mdrivlib/target/stm32mp1
+          ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
+          ${SHARED}
+          ${SHARED}/cpputil
+          ${SHARED}/patch
+          ${SHARED}/patch_convert
+          ${FWDIR}/lib/fatfs/source
+          ${FWDIR}/src/fs/fatfs
+          ${FWDIR}/lib/cmsis-device/stm32mp157c/include
+)
+
+target_link_libraries(
+  main.elf
+  PRIVATE lvgl::lvgl
+          mp15xa7_arch
+          mdrivlib_interface
+          core4ms
+          ui
+          ryml
+          VCV_adaptor
+          BefacoModules
+          AudibleInstrumentsModules
+)
+
+target_link_script(
+  main
+  ${FWDIR}/system/linker/stm32mp15xx_ca7.ld
+  -L${FWDIR}
+  -L$<TARGET_FILE_DIR:main_m4.elf>
+  -Wl,--gc-sections
+  -Wno-psabi
+  -ffreestanding
+  -nostartfiles
+  -nostdlib
+  -flto=auto
+)
+
+add_bin_hex_command(main)
+
+add_custom_command(
+  TARGET main.elf
+  POST_BUILD
+  COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:main.elf>/main.bin $<TARGET_FILE_DIR:main.elf>/main.uimg
+          0xC1FBFFC0 0xC2000040
+  COMMAND ls -l $<TARGET_FILE_DIR:main.elf>/main.uimg
+  COMMENT "Creating uimg file"
+  VERBATIM
+)
+
+set_source_files_properties($<TARGET_FILE_DIR:main.elf>/main.uimg PROPERTIES GENERATED TRUE)
