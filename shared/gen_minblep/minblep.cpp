@@ -1,10 +1,19 @@
 #include "VCV_adaptor/dsp/fft.hpp"
 #include "VCV_adaptor/dsp/window.hpp"
+#include <cmath>
 
 namespace rack
 {
 namespace dsp
 {
+
+inline float sinc(float x) {
+	if (x == 0.f)
+		return 1.f;
+
+	x *= M_PI;
+	return std::sin(x) / x;
+}
 
 void minBlepImpulse(int z, int o, float *output) {
 	// Symmetric sinc array with `z` zero-crossings on each side
