@@ -47,10 +47,13 @@ add_custom_target(
 add_custom_target(
   jprog
   DEPENDS main.elf
-  COMMENT "This only works after a hard reset with the Freeze jumper installed"
-  COMMAND
-    time JLinkExe -device STM32MP15XX_A7 -if JTAG -speed 25000 -jtagconf -1,-1 -nogui 1 -AutoConnect 1 -CommandFile
-    ${PROJECT_SOURCE_DIR}/flashing/program.jlink | tee /dev/tty | grep -q "Failed" && echo
-    "FAILED!!! Did you do a hard reset with the Freeze jumper installed?" || echo "Programmed OK"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+  COMMENT "Using JLinkExe to program via JTAG (Note: JLinkExe must be on your PATH)"
+  COMMAND time JLinkExe -device STM32MP15XX_A7 -if JTAG -speed 25000 -jtagconf -1,-1 -nogui 1 -AutoConnect 1
+          -CommandFile ${PROJECT_SOURCE_DIR}/flashing/program.jlink
+  COMMAND ${CMAKE_COMMAND} -E echo "-----------------"
+  COMMAND ${CMAKE_COMMAND} -E echo "If the real time shown above is less than 1.000s, then this failed."
+  COMMAND ${CMAKE_COMMAND} -E echo
+          "You must do a hard reset with the Freeze jumper installed before running this command."
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
