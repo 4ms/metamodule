@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - sls-dev
   pull_request:
 
 jobs:
@@ -16,7 +15,7 @@ jobs:
         os: 
           - { os: windows, shell: msys2 } 
           - { os: ubuntu,  shell: bash  }
-          #- { os: macos,   shell: bash  }
+          - { os: macos,   shell: bash  }
         compiler: [ {cpp: clang++, c: clang},  {cpp: g++, c: gcc} ]
         exclude:
           - os: { os: windows, shell: msys2 }
