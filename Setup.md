@@ -37,9 +37,6 @@ TODO: check this, and notes for different distros
  - To use the simulator GUI, you need to also install:
    - `sudo apt-get install libx11-dev libxft-dev libxext-dev`
 
- - To build the simulator on ARM platforms, you need to set the environment variable.
-   Add this to your .bashrc:
-   - `export VCPKG_FORCE_SYSTEM_BINARIES=1`
  
 ### Windows
 
@@ -47,12 +44,14 @@ To get started, you will want to follow the development environment guide for
 VCV Rack [here](https://vcvrack.com/manual/Building#Windows).
 
 This will help you set up an MSYS2/MinGW development environment along with
-most packages required for MetaModule development. The only additional package
-that you will need to install is `ninja` (which is a build system). Similar to
-the VCV arguments, you will want to open a MinGW prompt and type the following:
+most packages required for MetaModule development. The only additional packages
+that you will need to install are `ninja` (which is a build system), and SDL2 
+(which is only required for the simulator). Similar to the VCV arguments, you
+will want to open a MinGW prompt and type the following:
 
 ```
-pacman -Syu ninja
+pacman -Syu ninja mingw-w64-x86_64-SDL2
+
 ```
 
 When building anything for MetaModule, be sure to launch the MinGW 64-Bit
@@ -73,7 +72,7 @@ you should set the Icon option. Again, with default paths, this path is
 C:/msys64/mingw64.ico
 ```
 
-Many elements of the MetaModule code require C++ 20, so if you previously setup
+Many elements of the MetaModule code require C++20, so if you previously setup
 a VCV environment (or an MSYS2 environment), you might need to update `gcc` to
 `gcc-12` or higher. To find out which version you are using, you need to open
 up a MinGW 64-Bit shell. Type the following command:
