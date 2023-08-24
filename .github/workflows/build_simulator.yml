@@ -63,12 +63,12 @@ jobs:
           cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build
 
-      - name: Configure and build test simulator
-        if: maxtrix.os.os != 'windows'
-        uses: threeal/cmake-action@v1.2.0
-        with: 
-          cxx-compiler: ${{ matrix.compiler.cpp }}
-          run-build: true
-          run-test: false
-          source-dir: "simulator"
-          generator: Ninja
+      # - name: Configure and build test simulator
+      #   if: maxtrix.os.os != 'windows'
+      #   uses: threeal/cmake-action@v1.2.0
+      #   with: 
+      #     cxx-compiler: ${{ matrix.compiler.cpp }}
+      #     run-build: true
+      #     run-test: false
+      #     source-dir: "simulator"
+      #     generator: Ninja
