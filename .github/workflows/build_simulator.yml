@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - sls-dev
   pull_request:
 
 jobs:
@@ -13,9 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         os: 
-          # - { os: windows, shell: msys2 } # currently broken
-          - { os: ubuntu,  shell: bash  }
-          - { os: macos,   shell: bash  }
+          - { os: windows, shell: msys2 } # currently broken
+          #- { os: ubuntu,  shell: bash  }
+          #- { os: macos,   shell: bash  }
         compiler: [ {cpp: clang++, c: clang},  {cpp: g++, c: gcc} ]
         exclude:
           - os: { os: windows, shell: msys2 }
@@ -46,6 +47,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build libsdl2-dev
+
+      - name: Install windows dependencies
+        if: matrix.os.os =='windows'
+        run: |
+          pacmac -Syu
+          pacman -Syu git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake 
+          pacman -Syu mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
 
       - name: Configure and build test simulator
         uses: threeal/cmake-action@v1.2.0
