@@ -14,8 +14,8 @@ jobs:
       fail-fast: false
       matrix:
         os: 
-          - { os: windows, shell: msys2 } # currently broken
-          #- { os: ubuntu,  shell: bash  }
+          - { os: windows, shell: msys2 } 
+          - { os: ubuntu,  shell: bash  }
           #- { os: macos,   shell: bash  }
         compiler: [ {cpp: clang++, c: clang},  {cpp: g++, c: gcc} ]
         exclude:
@@ -49,7 +49,7 @@ jobs:
           sudo apt-get install ninja-build libsdl2-dev
 
       - name: Install windows dependencies
-        if: matrix.os.os =='windows'
+        if: matrix.os.os == 'windows'
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
@@ -57,19 +57,7 @@ jobs:
           install: git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
 
       - name: 'Build'
-        if: matrix.os.os =='windows'
-        shell: msys2 {0}
         run: |
           cd simulator
-          cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release
+          cmake -G Ninja -B build
           cmake --build build
-
-      # - name: Configure and build test simulator
-      #   if: maxtrix.os.os != 'windows'
-      #   uses: threeal/cmake-action@v1.2.0
-      #   with: 
-      #     cxx-compiler: ${{ matrix.compiler.cpp }}
-      #     run-build: true
-      #     run-test: false
-      #     source-dir: "simulator"
-      #     generator: Ninja
