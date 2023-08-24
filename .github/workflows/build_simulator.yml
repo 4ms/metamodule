@@ -56,10 +56,10 @@ jobs:
           update: true
           install: git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
 
-      - name: '🚧 Build TOOL'
+      - name: 'Build'
         if: matrix.os.os =='windows'
-        - shell: msys2 {0}
-          run: |
+        shell: msys2 {0}
+        run: |
           cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build
 
