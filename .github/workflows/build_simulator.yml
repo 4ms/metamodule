@@ -51,7 +51,7 @@ jobs:
       - name: Install windows dependencies
         if: matrix.os.os =='windows'
         run: |
-          pacmac -Syu
+          pacman -Syu
           pacman -Syu git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake 
           pacman -Syu mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
 
