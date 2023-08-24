@@ -60,6 +60,7 @@ jobs:
         if: matrix.os.os =='windows'
         shell: msys2 {0}
         run: |
+          cd simulator
           cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build
 
