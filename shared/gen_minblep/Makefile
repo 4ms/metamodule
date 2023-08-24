@@ -1,14 +1,19 @@
-SOURCES = minblep_main.cpp minblep.cpp ../../firmware/src/VCV-adaptor/pffft/pffft.c
+SOURCES = minblep_main.cpp \
+          minblep.cpp \
+          ../../firmware/src/VCV_adaptor/pffft/pffft.c \
+          ../cpputil/util/math_tables.cc
 
 BUILDDIR = build
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 
-CFLAGS = -I../../firmware/src/
+CFLAGS = -I../../firmware/src/ \
+         -I.. \
+         -I../cpputil
 
 CXXFLAGS = $(CFLAGS) \
-		   -std=c++17
+		   -std=c++20
 
 $(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)

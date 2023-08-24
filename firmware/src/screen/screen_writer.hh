@@ -221,8 +221,8 @@ public:
 	}
 
 protected:
-	const int _colstart;
 	const int _rowstart;
+	const int _colstart;
 	ScreenWriterConfT::Rotation _rotation;
 	int _xstart;
 	int _ystart;

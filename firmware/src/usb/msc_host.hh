@@ -36,7 +36,7 @@ public:
 		if (msc.mount_disk()) {
 			printf_("Mounted MSC drive with FATFS\n");
 			msc.foreach_file_with_ext(".yml", [](std::string_view fname, uint32_t timestamp, uint32_t fsize) {
-				if (fname[0] == '\0' | fname[0] == '.')
+				if (fname[0] == '\0' || fname[0] == '.')
 					return;
 				printf_("%.255s\t\t0x%x\t\t%d B\n", fname.data(), timestamp, fsize);
 			});

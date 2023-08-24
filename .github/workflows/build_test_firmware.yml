@@ -1,10 +1,12 @@
 name: Build and test firmware
 
 on:
-    push:
-      branches:
-        - main
-    pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - 'firmware-v[0-9]+.[0-9]+.[0-9]+'
+  pull_request:
 
 jobs:  
   build:
@@ -25,7 +27,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Build and test
-        run: cd firmware && make -j8
+        run: cd firmware && cmake -B build && cd build && make -j8
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -34,3 +36,13 @@ jobs:
           path: |
             firmware/build/mp1corea7/medium/main.elf
             firmware/build/mp1corea7/medium/main.uimg
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: "Firmware Version: ${{ env.CI_REF_NAME }}"
+          files: |
+            firmware/build/mp1corea7/medium/main.elf
+            firmware/build/mp1corea7/medium/main.uimg
+
