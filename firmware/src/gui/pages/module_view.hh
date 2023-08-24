@@ -102,9 +102,7 @@ struct ModuleViewPage : PageBase {
 					opts += "\n";
 
 					add_button(drawn.obj);
-					//FIXME: don't just save the param_idx, we will need all indices
-					//use ModuleParam{el}?
-					module_controls.push_back({ModuleParam::get_type(el), (uint32_t)drawn.idx.param_idx});
+					module_controls.push_back(ModuleParam{el, drawn.idx});
 				},
 				drawn_element.element);
 		}
@@ -270,10 +268,11 @@ private:
 			printf_("Click %d\n", cur_sel);
 			PageList::set_selected_control(module_controls[cur_sel]);
 
-			// Hide roller, show edit pane
+			// Hide roller, show edit pane (done by SLS)
 			page->mode = ViewMode::Knob;
-			lv_obj_add_flag(page->roller, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
+
+			// lv_obj_add_flag(page->roller, LV_OBJ_FLAG_HIDDEN);
+			// lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
 			page->knob_edit_pane.prepare_focus();
 			page->knob_edit_pane.set_group(page->group);
 

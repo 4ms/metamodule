@@ -86,14 +86,13 @@ extern lv_obj_t *ui_ElementRoller;
 extern lv_obj_t *ui_MappingParameters;
 extern lv_obj_t *ui_Module_Name;
 extern lv_obj_t *ui_Element_Name;
+extern lv_obj_t *ui_MappedPanel;
 extern lv_obj_t *ui_MappedWindow;
 extern lv_obj_t *ui_Mappedto;
 extern lv_obj_t *ui_EditMap;
 extern lv_obj_t *ui_EditMapLabel;
-extern lv_obj_t *ui_NotMapped;
-extern lv_obj_t *ui_ModuleName;
-extern lv_obj_t *ui_ElementName;
-extern lv_obj_t *ui_NotMappedWindow;
+extern lv_obj_t *ui_NotMappedPanel;
+extern lv_obj_t *ui_NotMappedText;
 void ui_event_ControlButton( lv_event_t * e);
 extern lv_obj_t *ui_ControlButton;
 extern lv_obj_t *ui_ControlButtonLabel;
@@ -119,7 +118,6 @@ LV_IMG_DECLARE( ui_img_1x_knob3pressed_png);   // assets/1x/Knob3Pressed.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_add1_png);   // assets/Final Icons/1x/Add1.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_info1_png);   // assets/Final Icons/1x/Info1.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_settings1_png);   // assets/Final Icons/1x/Settings1.png
-LV_IMG_DECLARE( ui_img_complexeg_mockup_png);   // assets/ComplexEG_mockup.png
 LV_IMG_DECLARE( ui_img_button_circles_z_symbol_png);   // assets/Button Circles/z_symbol.png
 LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
 LV_IMG_DECLARE( ui_img_1x_play3_png);   // assets/1x/Play3.png
