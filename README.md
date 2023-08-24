@@ -129,13 +129,20 @@ Make sure you are in the right branch and you already updated the submodules.
 To prepare the build system:
 
 ```
-cmake -B build -GNinja
-
-# Or use this shortcut:
 make build
 ```
 
-You can replace `Ninja` with another build tool if you prefer (see https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+This is just a shortcut for running:
+
+```
+# MacOS, Linux:
+cmake -B build -GNinja
+
+# MinGW:
+cmake -B build -G"Unix Makefiles"
+```
+
+The work-around for MinGW is documented with [issue #78](https://github.com/4ms/metamodule/issues/78)
 
 Optional: If you plan to boot the MetaModule from an SD Card, then you can specify the
 path the SD Card device to save time. If you don't do this, then the system
@@ -143,16 +150,20 @@ will prompt you whenever you run one of the SD Card flashing scripts.
 The device path should be to the entire SD Card device (not just one partition).
 
 ```
-cmake -B build -GNinja -DSD_DISK_DEV=/dev/disk4
+cmake -B build -DSD_DISK_DEV=/dev/disk4
+
+# Alternatively, set an environment variable:
+export SD_DISK_DEV=/dev/disk4
+make build
 ```
 
 After either of the above two commands, you can build with this:
 
 ```
-cmake --build build
-
-# Or use the shortcut:
 make
+
+# which is a shortcut for:
+cmake --build build
 ```
 
 The firmware is built as `firmware/build/mp1corea7/medium/main.elf` and `main.uimg` 
