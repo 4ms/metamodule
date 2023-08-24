@@ -46,39 +46,7 @@
 #include "ld.h"
 #include "stm32mp157cxx_ca7.h"
 
-// #define _M4_EXTDATA 0xC0200000
-// #define _M4_EXTDATA_SZ 0x01E00000
-
-// #define _M4_HEAP 0xC6000000
-// #define _M4_HEAP_SZ 0x07000000
-
-// #define __ROM_BASE 0xC2000000
-// #define __ROM_SZ 0x01000000 /* 16M */
-
-// /* RAM: 0xC3000000 - 0xC5000000 */
-// #define __RAM_BASE 0xC3000000
-// #define __RAM_SZ 0x02000000 /* 32M */
-
-// /* RAM2: 0xC2100000 - 0xD0000000 */
-// #define __RAM2_BASE 0xC2100000
-// #define __RAM2_SZ (0xD0000000 - __RAM2_BASE)
-
-// /* DMA BUF: 0xDFF00000 - 0xE0000000 */
-// #define __DMABUF_SZ (1024 * 1024)
-// #define __DMABUF_END 0xE0000000
-// #define __DMABUF_BASE (__DMABUF_END - __DMABUF_SZ)
-
-// /* VIRTDRIVE: 0xCD000000 - 0xD5000000 */
-// #define _VIRTDRIVE_BASE 0xCD000000
-// #define _VIRTDRIVE_SZ 0x08000000
-// #define _VIRTDRIVE_END 0xD5000000
-
-// /* HEAP: 0xD5000000 - 0xDFF00000*/
-// #define __HEAP_BASE 0xD5000000
-// #define __HEAP_END __DMABUF_BASE
-// #define __HEAP_SZ (__HEAP_END - __HEAP_BASE)
-
-#define __TTB_BASE 0xC0100000
+#define __TTB_BASE TTB
 
 #define A7_SYSRAM_BASE 0x2FFC0000
 #define A7_SYSRAM_SZ 0x00040000 /* 256kB */

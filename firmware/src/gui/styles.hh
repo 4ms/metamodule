@@ -3,18 +3,6 @@
 #include <array>
 #include <span>
 
-// LV_FONT_DECLARE(MuseoSansRounded_500_12);
-// LV_FONT_DECLARE(MuseoSansRounded_700_12);
-// LV_FONT_DECLARE(MuseoSansRounded_700_14);
-// LV_FONT_DECLARE(MuseoSansRounded_700_16);
-// LV_FONT_DECLARE(MuseoSansRounded_700_18);
-
-extern "C" {
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50012);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded70014);
-LV_FONT_DECLARE(ui_font_MuseoSansRounded70016);
-}
-
 // lvgl has prop1 and has_group fields out of order, thus not C++ friendly
 #define LV_STYLE_CONST_CPP(prop_array)                                                                                 \
 	lv_style_t {                                                                                                       \

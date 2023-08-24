@@ -63,11 +63,11 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 					.in_ext_codec = audio_in_block.ext_codec[1],
 					.out_ext_codec = audio_out_block.ext_codec[1]}}
 	, auxsigs{auxs}
+	, patch_mod_queue{patch_mod_queue}
 	, codec_{Hardware::codec}
 	, codec_ext_{Hardware::codec_ext}
 	, sample_rate_{Hardware::codec.get_samplerate()}
-	, player{patchplayer}
-	, patch_mod_queue{patch_mod_queue} {
+	, player{patchplayer} {
 
 	if (codec_.init() == CodecT::CODEC_NO_ERR)
 		UartLog::log("Codec initialized\n\r");

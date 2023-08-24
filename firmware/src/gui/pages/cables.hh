@@ -1,9 +1,9 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
+#include "CoreModules/moduleFactory.hh"
 #include "gui/elements/context.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
-#include "moduleFactory.hh"
 #include "patch/patch_data.hh"
 #include <cmath>
 

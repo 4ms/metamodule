@@ -1,9 +1,11 @@
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+
 namespace rack::dsp
 {
 void minBlepImpulse(int z, int o, float *output);
 }
-
-#include <vector>
 
 int main(int argc, char *argv[]) {
 	if (argc != 3) {

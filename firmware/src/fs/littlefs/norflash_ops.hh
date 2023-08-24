@@ -1,6 +1,6 @@
 #pragma once
+#include "drivers/qspi_flash_driver.hh"
 #include "lib/littlefs/lfs.h"
-#include "qspi_flash_driver.hh"
 
 // NorFlashOps is the bridge between QSPI driver and LittleFS
 struct NorFlashOps {

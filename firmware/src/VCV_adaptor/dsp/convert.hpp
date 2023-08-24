@@ -9,7 +9,7 @@ struct
 #ifdef __clang__
 	__attribute__((packed, aligned(1)))
 #else
-	__attribute__((packed, aligned(1) /*, gcc_struct*/))
+	__attribute__((packed, aligned(1) , gcc_struct))
 #endif
 	Int24 {
 	int32_t i : 24;

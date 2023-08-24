@@ -2,13 +2,12 @@ name: Build VCV Rack Plugin
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    tags:
+      - 'vcv-[0-9]+.[0-9]+.[0-9]+'
 
 
 env:
-  rack-sdk-version: 2.3.0
+  rack-sdk-version: latest
   rack-plugin-toolchain-dir: /home/build/rack-plugin-toolchain
 
 defaults:
@@ -55,7 +54,7 @@ jobs:
       - name: Get Rack-SDK
         run: |
           pushd $HOME
-          curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-mac-${{ matrix.platform }}.zip
+          wget -O Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-mac-${{ matrix.platform }}.zip
           unzip Rack-SDK.zip
       - name: Build plugin
         run: |
@@ -80,11 +79,11 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: _artifacts
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
+      - uses: FranzDiebold/github-env-vars-action@v2
+      - uses: softprops/action-gh-release@v1
+        with:        
+          name: "Development Build: ${{ env.CI_REF_NAME }}"
+          body: "VCV plugin version as of tag ${{ env.CI_REF_NAME }}"
           files: |          
             _artifacts/**/*.vcvplugin
+      

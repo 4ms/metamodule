@@ -9,7 +9,7 @@ bool yaml_raw_to_patch(char *yaml, size_t size, PatchData &pd) {
 	if (tree.num_children(0) == 0)
 		return false;
 
-	ryml::NodeRef data_root = tree[0];
+	ryml::ConstNodeRef data_root = tree[0];
 	if (data_root.key() != "PatchData")
 		return false;
 

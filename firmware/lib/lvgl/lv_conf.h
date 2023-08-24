@@ -87,7 +87,7 @@
  *It removes the need to manually update the tick with `lv_tick_inc()`)*/
 #define LV_TICK_CUSTOM 1
 #if LV_TICK_CUSTOM
-#define LV_TICK_CUSTOM_INCLUDE  "stm32xx.h"         /*Header for the system time function*/
+#define LV_TICK_CUSTOM_INCLUDE  "drivers/stm32xx.h"         /*Header for the system time function*/
 #define LV_TICK_CUSTOM_SYS_TIME_EXPR (HAL_GetTick())     /*Expression evaluating to current system time in ms*/
 #endif   /*LV_TICK_CUSTOM*/
 
@@ -360,15 +360,12 @@
 /*Optionally declare custom fonts here.
  *You can use these fonts as default font too and they will be available globally.
  *E.g. #define LV_FONT_CUSTOM_DECLARE   LV_FONT_DECLARE(my_font_1) LV_FONT_DECLARE(my_font_2)*/
-#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(ui_font_MuseoSansRounded70014) \
-	LV_FONT_DECLARE(lv_MuseoSansRounded70016) \
-	LV_FONT_DECLARE(lv_MuseoSansRounded50012) \
-	LV_FONT_DECLARE(lv_font_montserrat_10) \
-	LV_FONT_DECLARE(lv_font_montserrat_16)
+#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE( ui_font_MuseoSansRounded50012)\
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70014)\
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70016)\
 
 /*Always set a default font*/
 // #define LV_FONT_DEFAULT &lv_font_montserrat_14
-// #define LV_FONT_DEFAULT &MuseoSansRounded_700_14
 #define LV_FONT_DEFAULT &ui_font_MuseoSansRounded70014
 
 /*Enable handling large font and/or fonts with a lot of characters.

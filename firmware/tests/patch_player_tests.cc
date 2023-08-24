@@ -118,7 +118,7 @@ PatchData:
 	int cable1_idx = -1;
 	int cable2_idx = -1;
 
-	for (int net_i = 0; net_i < pd.int_cables.size(); net_i++) {
+	for (int net_i = 0; net_i < (int)pd.int_cables.size(); net_i++) {
 		auto &cable = player.get_int_cable(net_i);
 
 		// Check for cable1: 1->1 cable

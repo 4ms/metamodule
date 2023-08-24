@@ -136,7 +136,7 @@ void makeJack(ryml::NodeRef &n, Jack &jack) {
 }
 
 // This is defined in patch_writer.cpp
-void write(ryml::NodeRef *n, Jack const &jack);
+// void write(ryml::NodeRef *n, Jack const &jack);
 
 bool TEST_CASE_Can_return_a_NodeRef() {
 	ryml::Tree tree;
