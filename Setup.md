@@ -29,13 +29,13 @@ Ventura 13.4 and 13.5 have been tested.
 
 TODO: check this, and notes for different distros
 
- - `sudo apt-get install cmake g++-12 libsdl2-2.0.0 jq ninja-build pkg-config`
+ - `sudo apt-get install cmake g++-12 jq ninja-build pkg-config`
  - Set gcc-12 and g++-12 to be the default. E.g. on Ubuntu 22.04: 
    - `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 120`
    - `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 120`
 
  - To use the simulator GUI, you need to also install:
-   - `sudo apt-get install libx11-dev libxft-dev libxext-dev`
+   - `sudo apt-get install libegl-mesa0 libx11-dev libxft-dev libxext-dev libsdl2-dev`
 
  
 ### Windows
@@ -45,12 +45,12 @@ VCV Rack [here](https://vcvrack.com/manual/Building#Windows).
 
 This will help you set up an MSYS2/MinGW development environment along with
 most packages required for MetaModule development. The only additional packages
-that you will need to install are `ninja` (which is a build system), and SDL2 
+that you will need to install are ninja (which is a build system), and SDL2 
 (which is only required for the simulator). Similar to the VCV arguments, you
 will want to open a MinGW prompt and type the following:
 
 ```
-pacman -Syu ninja mingw-w64-x86_64-SDL2
+pacman -Syu mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
 
 ```
 
