@@ -28,7 +28,7 @@ struct HostFileIO {
 					auto last_modif = fs::last_write_time(fn);
 					auto timestamp = last_modif.time_since_epoch().count();
 					auto sz = (uint32_t)fs::file_size(fn);
-					action(fn.c_str(), timestamp, sz);
+					action(fn.string().c_str(), timestamp, sz);
 				}
 			}
 		} catch (const fs::filesystem_error &e) {

@@ -114,6 +114,7 @@ target_include_directories(
           ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/src
           ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/ext/c4core/src
           ${MM_ROOT}/shared/cpputil
+          ${MM_ROOT}/simulator/stubs
           ${MM_ROOT}/shared)
 
 target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
@@ -131,6 +132,7 @@ target_include_directories(
           lvgl_drv
           sdl_audio
           ${SDL2_INCLUDE_DIRS}
+          ${MM_ROOT}
           ${MM_ROOT}/firmware
           ${MM_ROOT}/firmware/src
           ${MM_ROOT}/firmware/src/console
