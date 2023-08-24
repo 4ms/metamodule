@@ -30,18 +30,18 @@ jobs:
     env:
       CC: ${{ matrix.compiler.c }}
       CXX: ${{ matrix.compiler.cpp }}
-          
-    steps:      
+
+    steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: 'recursive'
-      
+
       - name: Install mac dependencies
         if: matrix.os.os == 'macos'
         run: |
           brew install ninja sdl2 
-  
+
       - name: Install linux dependencies
         if: matrix.os.os =='ubuntu'
         run: |
@@ -50,10 +50,11 @@ jobs:
 
       - name: Install windows dependencies
         if: matrix.os.os =='windows'
-        run: |
-          pacman -Syu
-          pacman -Syu git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake 
-          pacman -Syu mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
 
       - name: Configure and build test simulator
         uses: threeal/cmake-action@v1.2.0
