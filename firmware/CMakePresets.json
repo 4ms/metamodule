@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "description": "Common settings for all projects",
+      "generator": "Ninja",
+      "binaryDir": "build",
+      "hidden": false,
+      "cacheVariables": {
+        "TOOLCHAIN_BASE_DIR":{
+          "type": "FILEPATH",
+          "value": "/home/user/.local/gcc/12.2.rel1/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/"
+        },
+        "CMAKE_TOOLCHAIN_FILE": {
+          "type": "STRING",
+          "value": "cmake/arm-none-eabi-gcc.cmake"
+        }
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "base",
+      "configurePreset": "base"
+    }
+  ]
+}
