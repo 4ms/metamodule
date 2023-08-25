@@ -127,24 +127,3 @@ update `gcc` via the package manager:
 pacman -Syu mingw-w64-x86_64-gcc
 ```
 
-To build the firmware, be sure that you've installed the `arm-none-eabi`
-package listed at the top of this document. You will need to add this to your
-MinGW PATH. If you haven't used MinGW before, this isn't the most
-straightforward. Close all terminal prompts, and open
-C:\msys64\home\\(USERNAME)\\.bashrc in a text editor of your choice. You need
-to add the following line (you might need to change this depending on if
-`arm-none-eabi` has a different version number since this document was
-written):
-
-```
-export PATH=$PATH:"/c/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/bin"
-```
-
-To test this, open a MinGW 64-bit shell and type:
-
-```
-arm-none-eabi-gcc --version
-```
-
-You should see the version number and some copyright info. If not, check where
-the arm-none-eabi package was installed and adjust you PATH setting.
