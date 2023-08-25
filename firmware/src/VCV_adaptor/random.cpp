@@ -1,7 +1,7 @@
 #include "VCV_adaptor/random.hpp"
+#include "console/pr_dbg.hh"
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
-#include "pr_dbg.hh"
 
 namespace rack::random
 {

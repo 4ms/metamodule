@@ -40,6 +40,3 @@
 [submodule "firmware/src/VCV_adaptor/simde"]
 	path = firmware/src/VCV_adaptor/simde
 	url = https://github.com/simd-everywhere/simde.git
-[submodule "simulator/vcpkg"]
-	path = simulator/vcpkg
-	url = https://github.com/microsoft/vcpkg

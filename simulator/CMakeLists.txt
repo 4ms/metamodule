@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(NOT LINUX)
-set(CMAKE_TOOLCHAIN_FILE "./vcpkg/scripts/buildsystems/vcpkg.cmake")
-endif()
-
 project(mm_sim LANGUAGES C CXX)
 
 set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
@@ -91,18 +87,6 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
     ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
     ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
-    <<<<<<<
-    HEAD
-    #
-    # HetrickCV
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ASR.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/arr.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/Domain.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/scl.cpp
-    =======
-    >>>>>>>
-    f13f019d
-    (Fix simulator CMakeList merge)
     #
     # HetrickCV
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ASR.cpp
@@ -121,7 +105,7 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Crackle.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DToA.cpp
     # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DataCompander.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Delta.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Delta.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Dust.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Exponent.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/FBSineChaos.cpp
@@ -163,9 +147,9 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToWaveforms.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Polar.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Probability.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/RandomGates.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Rotator.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Rungler.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/RandomGates.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Rotator.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Rungler.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Scanner.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/TwoToFour.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/VectorMix.cpp
@@ -254,13 +238,11 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
                                         ryml SDL2)
 
-#these link commands are provided by vcpkg as recommended for SDL2.
-#leaving these here temporarily in case linking fails when we get there.
-#target_link_libraries(simulator
-#        PRIVATE
-#        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-#        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-#)
+# these link commands are provided by vcpkg as recommended for SDL2. leaving
+# these here temporarily in case linking fails when we get there.
+# target_link_libraries(simulator PRIVATE
+# $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+# $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static> )
 
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 
