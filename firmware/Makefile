@@ -10,8 +10,6 @@ endif
 configure:
 	cmake --fresh --preset ${PRESET} -G ${GEN}
 
-$(BUILDDIR):
-	cmake -B $(BUILDDIR) -G"$(GEN)"
 all:
 	cmake --build --preset ${PRESET} 
 
