@@ -2,7 +2,7 @@ PRESET := base
 
 # Detect MinGW and use Make
 ifdef SYSTEMROOT
-GEN := Unix Makefiles
+GEN := "Unix Makefiles"
 else
 GEN := Ninja
 endif
