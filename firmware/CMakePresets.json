@@ -15,7 +15,7 @@
       "cacheVariables": {
         "TOOLCHAIN_BASE_DIR":{
           "type": "FILEPATH",
-          "value": "/home/user/.local/gcc/12.2.rel1/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/"
+          "value": ""
         },
         "CMAKE_TOOLCHAIN_FILE": {
           "type": "STRING",
