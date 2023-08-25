@@ -84,6 +84,12 @@ add_subdirectory(${FWDIR}/vcv_ports/glue/AudibleInstruments ${CMAKE_CURRENT_BINA
 target_link_libraries(AudibleInstrumentsModules PUBLIC VCV_adaptor)
 
 #
+# HetrickCV
+#
+add_subdirectory(${FWDIR}/vcv_ports/glue/hetrickcv ${CMAKE_CURRENT_BINARY_DIR}/hetrickcv)
+target_link_libraries(HetrickcvModules PUBLIC VCV_adaptor)
+
+#
 # Artwork
 #
 file(
@@ -95,6 +101,8 @@ file(
   ${FWDIR}/src/gui/images/Befaco/components/*.c
   ${FWDIR}/src/gui/images/AudibleInstruments/modules/*_240.c
   ${FWDIR}/src/gui/images/AudibleInstruments/components/*.c
+  ${FWDIR}/src/gui/images/hetrickcv/modules/*_240.c
+  ${FWDIR}/src/gui/images/hetrickcv/components/*.c
 )
 
 #
@@ -224,6 +232,7 @@ target_link_libraries(
           VCV_adaptor
           BefacoModules
           AudibleInstrumentsModules
+          HetrickcvModules
 )
 
 target_link_script(

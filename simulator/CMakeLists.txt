@@ -100,7 +100,7 @@ set(CORE_MODULES
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Chaos3Op.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ChaoticAttractors.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ClockedNoise.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Comparator.cpp
+    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Comparator.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Contrast.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Crackle.cpp
     ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DToA.cpp
