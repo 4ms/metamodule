@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
 
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
