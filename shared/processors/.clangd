@@ -1,7 +1,6 @@
 CompileFlags:
 	Add: [
-			"-std=c++17",
+			"-std=c++2a",
 			"-I..",
-			"-I../../H7/src",
 			"-I../../vcv/src"
 	]

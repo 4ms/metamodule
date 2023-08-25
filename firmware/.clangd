@@ -14,32 +14,11 @@ CompileFlags:
 		"-mvectorize-with-neon-*",
 		"-mthumb-interwork",
 		"-ffold-simple-inlines",
+        "-std=gnu++23",
 	]
 	Add: [
 		"--target=arm-none-eabi", 
-		"-DUSE_HAL_DRIVER",
-		"-DCORE_CA7", 
-		"-DSTM32MP1",
-		"-DSTM32MP157Cxx",
-		"-Isystem",
-		"-Isrc/a7",
-		"-Isrc/medium",
-		"-Ilib/stm32-hal/stm32mp1/include",
-		"-Ilib/cmsis/Core_A/Include",
-		"-Ilib/cmsis-device/stm32mp157c/include",
-		"-Ilib/lvgl",
-		"-Ilib/lvgl/lvgl",
-		"-Ilib/lvgl/lvgl/src/lv_font",
-        "-Isrc/fatfs",
-        "-Ilib/fatfs/source",
-		"-Isrc/shared/etl/include",
-		"-Isrc/shared/cpputil",
-		"-Ilib/mdrivlib",
-		"-Ilib/mdrivlib/drivers",
-		"-Ilib/mdrivlib/target/stm32mp1",
-		"-Ilib/mdrivlib/target/stm32mp1/drivers",
-		"-Ilib/mdrivlib/target/stm32mp1_ca7",
-		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
+        "-std=gnu++2b",
 	]
 ---
 If:
@@ -47,12 +26,6 @@ If:
 CompileFlags:
 	Remove: [
 		"--target=arm-none-eabi", 
-	]
----
-If:
-	PathMatch: [".*a7.*"]
-CompileFlags:
-	Add: [
 	]
 ---
 If:
@@ -64,16 +37,17 @@ CompileFlags:
 
 ---
 If:
-	PathMatch: [".*mp1.*m4.*", ".*medium.*m4.*"]
+	PathMatch: [".*core_m4.*"]
 CompileFlags:
 	Add: [
-		"-Isrc/mp1m4",
+		"-DCORE_CM4",
+		"-Isrc/core_m4",
 		"-Ilib/mdrivlib/target/stm32mp1_cm4",
 		"-Ilib/mdrivlib/target/stm32mp1_cm4/drivers",
-		"-DCORE_CM4"
 	]
 	Remove: [
 		"-DCORE_CA7",
+		"-Isrc/core_a7",
 		"-Ilib/mdrivlib/target/stm32mp1_ca7",
 		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
 	]

@@ -1,12 +1,8 @@
 ---
 CompileFlags:
-	Add: ["-std=c++2a", 
-		"-I/Users/dann/4ms/vcv/Rack-v2.2.2-m1-SDK/include",
-		"-I/Users/dann/4ms/vcv/Rack-v2.2.2-m1-SDK/dep/include",
-		"-I../shared/cpputil",
-	] 
-	Remove: [
-		"-march=nocona",
-		"-I/Users/dann/4ms/vcv/Rack-x86/include",
-		"-I/Users/dann/4ms/vcv/Rack-x86/dep/include"
-	]
+    Add: [
+      "-std=c++2a", 
+    ] 
+    Remove: [
+      "-march=nocona",
+    ]

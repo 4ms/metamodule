@@ -4,6 +4,5 @@ CompileFlags:
 			"-I../shared/doctest/doctest",
 			"-I../../doctest/doctest",
 			"-I../..",
-			"-I../../../firmware/lib/etl/include",
 		]
 
