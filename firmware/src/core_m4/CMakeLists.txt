@@ -118,6 +118,8 @@ set(MCU_FLAGS
     -mfloat-abi=hard
 )
 
+target_compile_features(main_m4.elf PUBLIC cxx_std_23)
+
 target_compile_options(
   main_m4.elf
   PRIVATE ${MCU_FLAGS}
@@ -139,7 +141,6 @@ target_compile_options(
           -Wdouble-promotion
           -flto=auto
           $<$<COMPILE_LANGUAGE:CXX>:
-          -std=c++23
           -ffold-simple-inlines
           -Wno-psabi
           -fno-rtti
