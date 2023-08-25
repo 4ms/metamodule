@@ -1,7 +1,4 @@
-BUILDDIR := build
-
-all: | $(BUILDDIR)
-	cmake --build $(BUILDDIR) 
+PRESET := base
 
 # Detect MinGW and use Make
 ifdef SYSTEMROOT
@@ -10,11 +7,16 @@ else
 GEN := Ninja
 endif
 
+configure:
+	cmake --fresh --preset ${PRESET} -G ${GEN}
+
 $(BUILDDIR):
 	cmake -B $(BUILDDIR) -G"$(GEN)"
+all:
+	cmake --build --preset ${PRESET} 
 
 # Forward arguments to cmake
-%: | $(BUILDDIR)
-	cmake --build build -- $(MAKECMDGOALS)
+%:
+	cmake --build --preset ${PRESET} -- $(MAKECMDGOALS)
 
 .PHONY: all
