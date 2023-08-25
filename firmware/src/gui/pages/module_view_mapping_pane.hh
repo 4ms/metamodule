@@ -1,9 +1,9 @@
 #pragma once
+#include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
-#include "patch_file/patch_storage.hh"
 
 namespace MetaModule
 {
@@ -39,35 +39,34 @@ struct ModuleViewMappingPane {
 		auto this_module_id = PageList::get_selected_module_id();
 		auto &patch = patch_storage.get_view_patch();
 		if (patch.patch_name.length() == 0) {
-			// msg_queue.append_message("Patch name empty\n");
+			pr_warn("Patch name empty\n");
 			return;
 		}
 		if (this_module_id >= patch.module_slugs.size()) {
-			// msg_queue.append_message("Module has invalid ID\n");
+			pr_warn("Module has invalid ID\n");
 			return;
 		}
 
 		auto slug = patch.module_slugs[this_module_id];
 		if (!slug.length()) {
-			// msg_queue.append_message("Module has invalid slug\n");
+			pr_warn("Module has invalid slug\n");
 			return;
 		}
 
 		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
-			// msg_queue.append_message("Knob Edit page got empty module slug.\n");
+			pr_warn("Knob Edit page got empty module slug.\n");
 			return;
 		}
 
-		auto this_param_id = PageList::get_selected_control().id;
+		auto this_param = PageList::get_selected_control();
 
 		// Knob name label
 		lv_label_set_text(ui_Module_Name, slug.c_str());
-		auto nm = get_panel_name<PanelDef>(el, *(drawn.mapped_panel_id));
-		// nm.append(moduleinfo.Knobs[this_param_id].long_name);
-		lv_label_set_text(ui_Element_Name, slug.c_str());
+		auto nm = std::visit([&](auto &el) -> std::string_view { return el.short_name; }, *this_param.el);
+		lv_label_set_text(ui_Element_Name, nm.data());
 
-		pr_dbg("Knob Edit: param id %d module id %d\n", this_param_id, this_module_id);
+		pr_dbg("Knob Edit: param id %d module id %d\n", this_param.id, this_module_id);
 	}
 
 	void blur() {

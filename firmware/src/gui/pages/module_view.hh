@@ -8,6 +8,7 @@
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/knob_edit.hh"
+#include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -30,7 +31,7 @@ struct ModuleViewPage : PageBase {
 		, base{ui_MappingMenu}
 		, roller{ui_ElementRoller}
 		, edit_pane(ui_MappingParameters)
-		, knob_edit_pane{info, edit_pane} {
+		, mapping_pane{info.patch_storage} {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
@@ -102,9 +103,9 @@ struct ModuleViewPage : PageBase {
 					opts += "\n";
 
 					add_button(drawn.obj);
-					module_controls.push_back(ModuleParam{el, drawn.idx});
 				},
 				drawn_element.element);
+			module_controls.emplace_back(drawn_element.element, drawn_element.gui_element.idx);
 		}
 
 		// remove final \n
@@ -273,8 +274,7 @@ private:
 
 			// lv_obj_add_flag(page->roller, LV_OBJ_FLAG_HIDDEN);
 			// lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
-			page->knob_edit_pane.prepare_focus();
-			page->knob_edit_pane.set_group(page->group);
+			page->mapping_pane.focus(page->group, 0);
 
 			// Show manual knob
 			// auto patch_id = PageList::get_selected_patch_id();
@@ -342,7 +342,7 @@ private:
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *roller = nullptr;
 	lv_obj_t *edit_pane = nullptr;
-	KnobEditPage knob_edit_pane;
+	ModuleViewMappingPane mapping_pane;
 
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_draw_img_dsc_t img_dsc;

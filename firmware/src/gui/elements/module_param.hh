@@ -7,36 +7,42 @@ namespace MetaModule
 {
 
 struct ModuleParam {
-	enum class Type { None, Knob, Switch, InJack, OutJack, Light } type;
-	uint32_t id;
+	const Element *el{nullptr};
 
-	ModuleParam()
-		: type{Type::None}
-		, id{} {
+	//Are type and id needed?
+	enum class Type { None, Knob, Switch, InJack, OutJack, Light } type{Type::None};
+	uint32_t id{};
+
+	ModuleParam() = default;
+
+	ModuleParam(const Element &element, ElementCount::Indices idx)
+		: el{&element} {
+		std::visit([&](auto &el) { set_type(el, idx); }, element);
 	}
-	ModuleParam(const BaseElement &el, ElementCount::Indices idx)
-		: type{Type::Knob}
-		, id{idx.param_idx} {
+
+	void set_type(const BaseElement &el, ElementCount::Indices idx) {
+		type = Type::None;
+		id = 0;
 	}
-	// ModuleParam(const Pot &el, ElementCount::Indices idx)
-	// 	: type{Type::Knob}
-	// 	, id{idx.param_idx} {
-	// }
-	ModuleParam(const Switch &el, ElementCount::Indices idx)
-		: type{Type::Switch}
-		, id{idx.param_idx} {
+	void set_type(const Pot &el, ElementCount::Indices idx) {
+		type = Type::Knob;
+		id = idx.param_idx;
 	}
-	ModuleParam(const JackInput &el, ElementCount::Indices idx)
-		: type{Type::InJack}
-		, id{idx.input_idx} {
+	void set_type(const Switch &el, ElementCount::Indices idx) {
+		type = Type::Switch;
+		id = idx.param_idx;
 	}
-	ModuleParam(const JackOutput &el, ElementCount::Indices idx)
-		: type{Type::OutJack}
-		, id{idx.output_idx} {
+	void set_type(const JackInput &el, ElementCount::Indices idx) {
+		type = Type::InJack;
+		id = idx.input_idx;
 	}
-	ModuleParam(const LightElement &el, ElementCount::Indices idx)
-		: type{Type::OutJack}
-		, id{idx.light_idx} {
+	void set_type(const JackOutput &el, ElementCount::Indices idx) {
+		type = Type::OutJack;
+		id = idx.output_idx;
+	}
+	void set_type(const LightElement &el, ElementCount::Indices idx) {
+		type = Type::Light;
+		id = idx.light_idx;
 	}
 };
 
