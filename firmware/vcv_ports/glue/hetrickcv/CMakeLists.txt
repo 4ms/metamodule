@@ -93,4 +93,16 @@ add_library(
 
 target_include_directories(HetrickcvModules PRIVATE ${HETRICKCV_DIR}/src ${HETRICKCV_DIR}/Gamma)
 
-target_compile_options(HetrickcvModules PRIVATE -fvisibility=hidden -fvisibility-inlines-hidden)
+target_compile_options(
+  HetrickcvModules
+  PRIVATE -fvisibility=hidden
+          -fvisibility-inlines-hidden
+          # Fixes for warnings with Gamma:
+          -Wno-misleading-indentation
+          -Wno-unused-but-set-variable
+          -Wno-unused-function
+          # Fixes for warnings with DSP and main source:
+          -Wno-unused-variable
+)
+
+target_compile_definitions(HetrickcvModules PRIVATE GAMMA_EMBEDDED_COMPILE)
