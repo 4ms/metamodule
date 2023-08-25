@@ -30,7 +30,7 @@
 	url = https://github.com/simd-everywhere/simde.git
 [submodule "firmware/vcv_ports/hetrickcv"]
 	path = firmware/vcv_ports/hetrickcv
-	url = https://github.com/mhetrick/hetrickcv.git
+	url = https://github.com/danngreen/hetrickcv.git
 [submodule "firmware/vcv_ports/AudibleInstruments"]
 	path = firmware/vcv_ports/AudibleInstruments
 	url = https://github.com/VCVRack/AudibleInstruments.git
