@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
@@ -22,19 +23,11 @@ struct ModuleViewMappingPane {
 		visible = false;
 	}
 
-	void focus(lv_group_t *group, uint32_t num_maps) {
+	void focus(lv_group_t *group, const DrawnElement &drawn_el) {
 		base_group = group;
 		pane_group = lv_group_create();
 		lv_group_remove_all_objs(pane_group);
 		lv_group_set_editing(pane_group, false);
-
-		num_mappings = num_maps;
-		if (num_mappings > 0) {
-			lv_group_add_obj(pane_group, ui_EditMap);
-		} else {
-			lv_group_add_obj(pane_group, ui_AddMapButton);
-			lv_group_add_obj(pane_group, ui_ControlButton);
-		}
 
 		auto this_module_id = PageList::get_selected_module_id();
 		auto &patch = patch_storage.get_view_patch();
@@ -59,14 +52,30 @@ struct ModuleViewMappingPane {
 			return;
 		}
 
-		auto this_param = PageList::get_selected_control();
-
 		// Knob name label
 		lv_label_set_text(ui_Module_Name, slug.c_str());
-		auto nm = std::visit([&](auto &el) -> std::string_view { return el.short_name; }, *this_param.el);
+		auto nm = std::visit([&](auto &el) -> std::string_view { return el.short_name; }, drawn_el.element);
 		lv_label_set_text(ui_Element_Name, nm.data());
 
-		pr_dbg("Knob Edit: param id %d module id %d\n", this_param.id, this_module_id);
+		std::visit(overloaded{[&](BaseElement &) {},
+							  [&](ParamElement &) {
+								  focus_mapped_knob(drawn_el);
+							  }},
+				   drawn_el.element);
+	}
+
+	void focus_mapped_knob(const DrawnElement &drawn_el) {
+		auto &patch = patch_storage.get_view_patch();
+		auto this_module_id = PageList::get_selected_module_id();
+
+		// auto maps = patch.get_knob_mappings(this_module_id, drawn_el.gui_element.module_idx);
+
+		// if (maps.size() > 0) {
+		// 	lv_group_add_obj(pane_group, ui_EditMap);
+		// } else {
+		// 	lv_group_add_obj(pane_group, ui_AddMapButton);
+		// 	lv_group_add_obj(pane_group, ui_ControlButton);
+		// }
 	}
 
 	void blur() {

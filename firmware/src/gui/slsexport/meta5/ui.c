@@ -80,16 +80,17 @@ lv_obj_t *ui_ElementRoller;
 lv_obj_t *ui_MappingParameters;
 lv_obj_t *ui_Module_Name;
 lv_obj_t *ui_Element_Name;
-lv_obj_t *ui_MappedPanel;
-lv_obj_t *ui_MappedWindow;
-lv_obj_t *ui_Mappedto;
-lv_obj_t *ui_EditMap;
-lv_obj_t *ui_EditMapLabel;
-lv_obj_t *ui_NotMappedPanel;
-lv_obj_t *ui_NotMappedText;
 void ui_event_ControlButton( lv_event_t * e);
 lv_obj_t *ui_ControlButton;
 lv_obj_t *ui_ControlButtonLabel;
+lv_obj_t *ui_MappedPanel;
+lv_obj_t *ui_MappedInfoPane;
+lv_obj_t *ui_MappedInfo;
+lv_obj_t *ui_MapList;
+lv_obj_t *ui_MapZExample;
+lv_obj_t *ui_MappedWindow;
+lv_obj_t *ui_EditMap;
+lv_obj_t *ui_EditMapLabel;
 void ui_event_AddMapButton( lv_event_t * e);
 lv_obj_t *ui_AddMapButton;
 lv_obj_t *ui_AddMapLabel;
@@ -202,7 +203,6 @@ if ( event_code == LV_EVENT_CLICKED) {
 void ui_event_CancelAdd( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
-      _ui_flag_modify( ui_NotMappedPanel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
       _ui_flag_modify( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
 }
 }
@@ -210,7 +210,6 @@ void ui_event_OkAdd( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
       _ui_flag_modify( ui_MappingParameters, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
-      _ui_flag_modify( ui_NotMappedPanel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
       _ui_flag_modify( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
 }
 }

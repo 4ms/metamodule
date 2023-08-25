@@ -267,14 +267,14 @@ private:
 
 		if (cur_sel < module_controls.size()) {
 			printf_("Click %d\n", cur_sel);
-			PageList::set_selected_control(module_controls[cur_sel]);
+			// PageList::set_selected_control(module_controls[cur_sel]);
 
 			// Hide roller, show edit pane (done by SLS)
 			page->mode = ViewMode::Knob;
 
 			// lv_obj_add_flag(page->roller, LV_OBJ_FLAG_HIDDEN);
 			// lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
-			page->mapping_pane.focus(page->group, 0);
+			page->mapping_pane.focus(page->group, page->drawn_elements[cur_sel]);
 
 			// Show manual knob
 			// auto patch_id = PageList::get_selected_patch_id();
