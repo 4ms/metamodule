@@ -26,6 +26,10 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: Install linux dependencies
+        run: |
+          sudo apt install -y ninja-build 
+
       - name: Build and test
         run: cd firmware && make configure && make all
 
