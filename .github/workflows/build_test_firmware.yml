@@ -27,7 +27,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Build and test
-        run: cd firmware && cmake -B build && cd build && make -j8
+        run: cd firmware && make configure && make all
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
