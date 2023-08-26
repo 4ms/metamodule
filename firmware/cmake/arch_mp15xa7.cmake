@@ -25,6 +25,8 @@ set(MCU_FLAGS
     -funsafe-math-optimizations
 )
 
+target_compile_features(mp15xa7_arch INTERFACE cxx_std_23)
+
 target_compile_options(
   mp15xa7_arch
   INTERFACE ${MCU_FLAGS}
@@ -48,7 +50,6 @@ target_compile_options(
             -Wsign-compare
             $<$<COMPILE_LANGUAGE:CXX>:
             -flto=auto
-            -std=c++23
             -ffold-simple-inlines
             -Wno-psabi
             -fno-rtti
