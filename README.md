@@ -3,356 +3,42 @@
 [![Build Simulator](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml)
 [![Build VCV Rack Plugin](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml)
 [![Run VCV unit tests](https://github.com/4ms/metamodule/actions/workflows/run_vcv_tests.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/run_vcv_tests.yml)
-[![Run VCV unit tests](https://github.com/4ms/metamodule/actions/workflows/build_test_firmware.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_test_firmware.yml)
+[![Build Firmware](https://github.com/4ms/metamodule/actions/workflows/build_test_firmware.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_test_firmware.yml)
 
 ### Start
 
-First, clone the repo and `cd` into the new directory.
+First, clone this repo and `cd` into the new directory.
 
-Then, make sure you are in the right branch:
+```
+git clone https://github.com/4ms/metamodule
+cd metamodule
+```
+
+If you would like to use a different branch than `main`, switch to this branch before submodules are updated:
 
 ```
 git checkout BRANCHNAME
 ```
 
-Init and update the submodules recursively:
+Initialize and update the submodules recursively:
 
 ```
 git submodule update --init --recursive
 ```
 
-Next, setup your developement environment by [following the instructions on this page](Setup.md)
+Next, setup your development environment by [following the instructions on this page](Setup.md).
 
-### Building VCV Rack Plugin
+### Next Steps
 
-You must have the Rack-SDK on your computer already. Version 2.2.3 is known to
-work. Set the environment variable `RACK_DIR` equal to the path to the
-location of Rack-SDK. For instance, add this to your .bashrc or .zshrc:
+The Meta Module environment is built using three separate components: The VCV Rack Plugin (which includes the Meta Module patch exporter module), the Firmware for the Meta Module hardware, and the Firmware Simulator that allows you to run the firmware locally to test changes.
 
-```
-export RACK_DIR=/Users/MyName/projects/Rack-SDK
-```
+To build these components, please follow the separate build guides:
+- [VCV Rack Plugin](./vcv/README.md)
+- [Firmware Simulator](./simulator/Setup.md)
+- [Firmware](./firmware/README.md)
 
-Enter the vcv directory. All VCV Rack plugin code is in here, as well as in
-`shared/`
 
-```
-cd vcv
-```
+### Contributing
 
-You will need a recent c++ compiler such as gcc-12 or later, or clang-14 or later.
-
-To run the unit tests:
-
-```
-make tests
-```
-
-To build the plugin, run:
-
-```
-make -j16 install
-```
-
-This will create the plugin file and install it in your local VCV Rack plugin
-directory. The next time you start VCV Rack, it will load the modified plugin.
-
-
-### Building Simulator
-
-The simulator uses SDL2, which must be installed on your host machine. It 
-simulates graphics and audio output. The window can be re-sized in order to
-examine precise pixel alignment.
-
-See the [README.md](simulator/README.md) in the simulator directory for details on using the simulator.
-
-Make sure you are in the right branch and you already updated the submodules.
-
-Go to the simulator directory:
-
-```
-cd simulator
-```
-
-Generate the build system:
-
-```
-cmake -B build -GNinja      #Or whatever build system you want
-```
-
-Build it:
-
-```
-cmake --build build
-```
-
-Run it:
-
-```
-build/simulator
-
-# To see the possible command-line arguments:
-build/simulator --help
-```
-
-See the simulator README.md for arguments details.
-
-When adding/removing assets, sometimes you need to clean the build:
-
-```
-rm -rf build
-```
-
-As a shortcut, there is a Makefile wrapping the above cmake commands. (Yes,
-Makefile running Cmake generating Ninja) So, you can just do:
-
-```
-# Generate build system (if needed) and build:
-make
-
-# Run the simulator:
-make run
-
-# Clean:
-make clean
-```
-
-The `make run` doesn't allow you to pass arguments.
-
-
-### Building Firmware
-
-This requires arm-none-eabi-gcc version 12.2 or later installed on your PATH.
-
-Make sure you are in the right branch and you already updated the submodules.
-
-To prepare the build system:
-
-```
-make build
-```
-
-This is just a shortcut for running:
-
-```
-# MacOS, Linux:
-cmake -B build -GNinja
-
-# MinGW:
-cmake -B build -G"Unix Makefiles"
-```
-
-The work-around for MinGW is documented with [issue #78](https://github.com/4ms/metamodule/issues/78)
-
-Optional: If you plan to boot the MetaModule from an SD Card, then you can specify the
-path the SD Card device to save time. If you don't do this, then the system
-will prompt you whenever you run one of the SD Card flashing scripts.
-The device path should be to the entire SD Card device (not just one partition).
-
-```
-cmake -B build -DSD_DISK_DEV=/dev/disk4
-
-# Alternatively, set an environment variable:
-export SD_DISK_DEV=/dev/disk4
-make build
-```
-
-After either of the above two commands, you can build with this:
-
-```
-make
-
-# which is a shortcut for:
-cmake --build build
-```
-
-The firmware is built as `firmware/build/mp1corea7/medium/main.elf` and `main.uimg` 
-in the same directory. The .elf file is used when debugging, and the .uimg file
-is used when copying firmware to NOR Flash or an SD card.
-
-Optional: if you have multiple versions of the gcc arm toolchain installed and don't want to 
-change your PATH for this project, you can set the METAMODULE_ARM_NONE_EABI_PATH var like this:
-
-```
-# Put in your bashrc/zshrc for convenience:
-# Note the trailing slash (required)
-export METAMODULE_ARM_NONE_EABI_PATH=/path/to/arm-gnu-toolchain-12.x-relX/bin/
-
-# Now you can run make as normal:
-make 
-```
-
-### Loading firmware onto the device
-
-There is a bootloader that runs before the application, and it outputs useful
-messages over a UART. You can view the console output by connecting a USB-UART
-cable to the TX pin of the debug header (next to the SWD header). The TX pin is
-labeled (upper-right pin). The bottom four pins are all GND. Settings are
-115200, 8N1.
-
-You have several choices for how to load the firmware applcation. Each one is covered 
-in a section below:
-
-1) Load in RAM over SWD/JTAG
-
-2) Load into NOR Flash over DFU-USB
-
-3) Boot from SD Card
-
-
-#### Load in RAM over SWD/JTAG
-
-This is the preferred method for active firmware development. It requires a JTAG programmer.
-
-Attach a JTAG debugger to the 10-pin connector at the top of the module labeled "SWD". The protocol is actually JTAG, despite the header's name, 
-though SWD may work since the only difference is the tRST pin instead of NRST.
-
-If you are already running the application and just need to debug, you can just attach without loading.
-
-If you need to load new firmware, then do this:
-
-1) Install a jumper on Control Expander header that bridges the top-left pin and the pin just to the right of it.
-The jumper should be horizontal, not vertical, on the top row of pins all the way to the left:
-
-```
-  Control
- Expander
-          [====] o  o 
-           o  o  o  o
-```
-
-2) Power off and back on. 
-
-The console will show:
-
-```
-Freeze pin detected active, freezing.
-Ready to load firmware to DDR RAM via SWD/JTAG.
-```
-
-Use Jflash, TRACE32, Ozone, arm-none-eabi-gdb, etc to load the main.elf file.
-If you have a JLink connected, you can program with this;
-
-```
-make jprog
-```
-
-This should take 15-30 seconds.
-
-For other methods, just load the .elf file and then start executing from 0xC0200040.
-
-Note: If you are familiar with flashing Cortex-M series MCUs, you will notice
-some differences. One is that Flash is on an external chip. Another difference is
-that the main RAM (DDR RAM) is not available until software initializes it. The
-on-board NOR Flash chip has a bootloader installed (MP1-Boot, which is the
-FSBL). This is loaded by the BOOTROM on power-up. The MP1-Boot bootloader is
-responsible for initializing the DDR RAM peripheral. Obviously, this must be
-done before loading the firmware into DDR RAM. So, unlike a Cortex-M chip, you
-must run a bootloader before programming the device. However, one of the first
-things an application does when it starts running is to enable the MMU and
-setup various memory regions, some of which are not writable. Thus, the only
-time in which it's possible to load firmware to RAM is after the bootloader has
-initialized RAM but before the application has started. To handle this,
-MP1-Boot has a "Freeze pin" option. When this pin is detected low (jumper is
-installed), then MP1-Boot will halt execution (freeze) after initializing RAM.
- 
-#### Load into NOR Flash over DFU-USB
-
-Loading onto NOR Flash will flash the firmware into the on-board FLASH chip so
-you can boot normally without a computer connected. It takes a minute or two,
-so this is a good way to flash firmware infrequently, for example, flashing the
-latest stable firwmare version. This is not recommended if you're doing active
-firmware development since it's slow (use SWD/JTAG in that case).
-
-Power cycle the module while holding down the rotary encoder button. This
-forces an alt firmware to be loaded from NOR Flash (which is a USB-DFU
-bootloader). Make sure the jumper mentioned in the SWD/JTAG section is not installed.
-If you are using the UART console, then you'll see this in the console:
-
-```
-USB DFU Loader Starting...
-QSPI is initialized.
-Connect a USB cable to the computer.
-Run `dfu-util --list` in a terminal and you should see this device.
-```
-
-The button will be flashing green when in USB-DFU bootloader mode.
-
-Connect a USB cable from a computer to the module. 
-
-You can use a web-based loader [such as this
-one](https://devanlai.github.io/webdfu/dfu-util/). Click Connect, and then
-select "STM Device in DFU Mode". Then click "Choose File" and select the uimg
-file you just built at `build/mp1corea7/medium/main.uimg`. Then click
-"Download". There may be an error `DFU GETSTATUS failed: ControlTransferIn
-failed: NetworkError: Failed to execute 'controlTransferIn' on 'USBDevice': A
-transfer error has occurred.` This is normal, and is not an error. It's safe to
-ignore this.
-
-
-Or use the command line (you must have [dfu-util](https://dfu-util.sourceforge.net/) installed):
-
-```
-make flash-dfu
-```
-
-
-This command loads the main.uimg file to the default address (0x70080000).
-It calls `dfu-util -a 0 -s 0x70080000 -D build/mp1corea7/medium/main.uimg`
-
-This will take between 60 and 120 seconds.
-When it's done, unplug the USB cable, power-cycle, and the new code will start up.
-
-
-#### Boot from SD Card
-
-You need a dedicated SD Card, all contents will be erased. A 16GB card is common and works fine,
-but smaller or larger should work too.
-
-You first need to format, partition, and install the bootloader on the card. This only needs
-to happen once when you use a new SD Card. 
-
-```
-make format-sd
-```
-
-This will ask you for the device path (/dev/disk4, for example). Make sure you get it right, because the
-script will run `mkfs` or `diskutil eraseDisk`.
-
-After running this, you will need to eject and re-insert the SD Card because the volumes have changed.
-
-Then do:
-
-```
-make flash-bootloader-sd
-```
-
-This will build the bootloader (mp1-boot) and use `dd` to load it onto the first two partitions of the SD Card.
-You will again be asked for the drive name.
-
-You now have a bootable SD Card. You shouldn't need to repeat the above steps unless you get a new SD Card.
-
-To flash the application, do this:
-
-```
-make flash-app-sd
-```
-
-This will build the application as normal, and then use `dd` to copy it to the fourth partition.
-
-Eject the card and insert it into the MetaModule.
-
-To tell the MetaModule to boot using the SD Card, you need to change the BOOT DIP switches.
-These are located on the back of the PCB, under the screen near the rotary encoder.
-They are labeled "BOOT0_2". There are two switches. Look at the diagram printed on the PCB.
-To boot with the SD, both switches should be pushed to the left.
-If you want to back to booting from Flash (internal Flash chip), then flip the bottom switch to the right.
-
-### Converting assets
-
-(TODO)
-
-To create the artwork files from the SVGs, you must have Inkscape installed an on your PATH
-
-...To Be Continued...
+If you would like to port your own VCV modules to the Meta Module platform, please see the [Porting Guide](./Porting.md).
 
