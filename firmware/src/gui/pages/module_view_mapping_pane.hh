@@ -57,8 +57,8 @@ struct ModuleViewMappingPane {
 		auto nm = std::visit([&](auto &el) -> std::string_view { return el.short_name; }, drawn_el.element);
 		lv_label_set_text(ui_Element_Name, nm.data());
 
-		std::visit(overloaded{[&](BaseElement &) {},
-							  [&](ParamElement &) {
+		std::visit(overloaded{[&](const BaseElement &) {},
+							  [&](const ParamElement &) {
 								  focus_mapped_knob(drawn_el);
 							  }},
 				   drawn_el.element);

@@ -87,8 +87,8 @@ lv_obj_t *ui_MappedPanel;
 lv_obj_t *ui_MappedInfoPane;
 lv_obj_t *ui_MappedInfo;
 lv_obj_t *ui_MapList;
-void ui_event_AddMapBut( lv_event_t * e);
-lv_obj_t *ui_AddMapBut;
+void ui_event_AddMapButton( lv_event_t * e);
+lv_obj_t *ui_AddMapButton;
 lv_obj_t *ui_PlusText;
 lv_obj_t *ui_MapZExample;
 lv_obj_t *ui_MappedWindow;
@@ -194,7 +194,7 @@ if ( event_code == LV_EVENT_CLICKED) {
       _ui_flag_modify( ui_ControlAlert, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
 }
 }
-void ui_event_AddMapBut( lv_event_t * e) {
+void ui_event_AddMapButton( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_PRESSED) {
       _ui_flag_modify( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
