@@ -1,4 +1,5 @@
 SET(SOURCES components/ui_comp_knobsetgroup.c
+    components/ui_comp_mapcircle.c
     components/ui_comp.c
     screens/ui_PatchSelectorPage.c
     screens/ui_PatchViewPage.c
@@ -12,7 +13,6 @@ SET(SOURCES components/ui_comp_knobsetgroup.c
     images/ui_img_final_icons_1x_add1_png.c
     images/ui_img_final_icons_1x_info1_png.c
     images/ui_img_final_icons_1x_settings1_png.c
-    images/ui_img_button_circles_z_symbol_png.c
     images/ui_img_1x_knob1_png.c
     images/ui_img_1x_play3_png.c
     images/ui_img_1x_addmap1_png.c

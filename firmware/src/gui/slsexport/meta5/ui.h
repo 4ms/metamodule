@@ -92,14 +92,9 @@ extern lv_obj_t *ui_ControlButtonLabel;
 extern lv_obj_t *ui_MappedPanel;
 extern lv_obj_t *ui_MappedInfoPane;
 extern lv_obj_t *ui_MappedInfo;
+extern lv_obj_t *ui_AddMap;
+extern lv_obj_t *ui_PlusText1;
 extern lv_obj_t *ui_MapList;
-void ui_event_AddMapButton( lv_event_t * e);
-extern lv_obj_t *ui_AddMapButton;
-extern lv_obj_t *ui_PlusText;
-extern lv_obj_t *ui_MapZExample;
-extern lv_obj_t *ui_MappedWindow;
-extern lv_obj_t *ui_EditMap;
-extern lv_obj_t *ui_EditMapLabel;
 extern lv_obj_t *ui_ControlAlert;
 extern lv_obj_t *ui_ControlAlertLabel;
 extern lv_obj_t *ui_AddMapPopUp;
@@ -119,7 +114,6 @@ LV_IMG_DECLARE( ui_img_1x_knob3pressed_png);   // assets/1x/Knob3Pressed.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_add1_png);   // assets/Final Icons/1x/Add1.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_info1_png);   // assets/Final Icons/1x/Info1.png
 LV_IMG_DECLARE( ui_img_final_icons_1x_settings1_png);   // assets/Final Icons/1x/Settings1.png
-LV_IMG_DECLARE( ui_img_button_circles_z_symbol_png);   // assets/Button Circles/z_symbol.png
 LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
 LV_IMG_DECLARE( ui_img_1x_play3_png);   // assets/1x/Play3.png
 LV_IMG_DECLARE( ui_img_1x_addmap1_png);   // assets/1x/addmap1.png

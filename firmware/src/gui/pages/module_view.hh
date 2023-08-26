@@ -274,7 +274,7 @@ private:
 
 			// lv_obj_add_flag(page->roller, LV_OBJ_FLAG_HIDDEN);
 			// lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
-			page->mapping_pane.focus(page->group, page->drawn_elements[cur_sel]);
+			page->mapping_pane.show(page->group, page->drawn_elements[cur_sel]);
 
 			// Show manual knob
 			// auto patch_id = PageList::get_selected_patch_id();

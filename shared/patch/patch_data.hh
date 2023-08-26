@@ -26,17 +26,6 @@ struct PatchData {
 		return nullptr;
 	}
 
-	// const std::vector<const MappedKnob *> get_knob_mappings(uint32_t module_id, uint32_t param_id) const {
-	// 	std::vector<const MappedKnob *> maps;
-	// 	for (auto &knob_set : knob_sets) {
-	// 		for (auto &m : knob_set.set) {
-	// 			if (m.module_id == module_id && m.param_id == param_id)
-	// 				maps.push_back(&m);
-	// 		}
-	// 	}
-	// 	return maps;
-	// }
-
 	const StaticParam *find_static_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : static_knobs) {
 			if (m.module_id == module_id && m.param_id == param_id)
