@@ -8,6 +8,8 @@ LOCAL
 .nvimrc
 .vimrc
 .vscode/
+.idea/
+cmake-build*/
 main.map
 .clangd/
 .tags
