@@ -51,6 +51,7 @@ jobs:
       #     name: lin-x64
 
   build-win-x64:
+    if: startsWith(github.ref, 'refs/tags/')
     name: win-x64
     runs-on: ubuntu-latest
     container:
