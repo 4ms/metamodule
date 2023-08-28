@@ -1,73 +1,73 @@
 
 ### Building Firmware
 
-This requires `arm-none-eabi-gcc` version 12.2 or later installed on your PATH. Please see the [setup guide](../Setup.md) for some important notes about this.
+This requires `arm-none-eabi-gcc` version 12.2 or later installed on your PATH.
+Please see the [setup guide](../Setup.md) for some important notes about this.
 
 Make sure you are in the right branch and you already updated the submodules.
 
-To prepare the build system:
+To prepare the build system: (only needs to be run once)
 
 ```
-make build
+make configure
 ```
 
-This is just a shortcut for running:
+To compile, run:
+
+```
+make all
+```
+
+The `make configure` command is a shortcut for running:
 
 ```
 # MacOS, Linux:
-cmake -B build -GNinja
+cmake --fresh --preset base -GNinja
 
 # MinGW:
-cmake -B build -G"Unix Makefiles"
+cmake --fresh --preset base -G"Unix Makefiles"
 ```
 
-The work-around for MinGW is documented with [issue #78](https://github.com/4ms/metamodule/issues/78)
+(The work-around for MinGW is documented with [issue #78](https://github.com/4ms/metamodule/issues/78))
 
-Optional: If you plan to boot the MetaModule from an SD Card, then you can specify the
+The `make all` command is a shortcut for running:
+
+```
+cmake --build --preset base
+```
+
+*Optional*: If you plan to flash firmware to an SD Card, then you can specify the
 path the SD Card device to save time. If you don't do this, then the system
-will prompt you whenever you run one of the SD Card flashing scripts.
-The device path should be to the entire SD Card device (not just one partition).
-
+will prompt you whenever you run one of the SD Card flashing scripts. The
+device path should be to the entire SD Card device (not just one partition).
 ```
-cmake -B build -DSD_DISK_DEV=/dev/disk4
+cmake --preset base -DSD_DISK_DEV=/dev/disk4
 
 # Alternatively, set an environment variable:
 export SD_DISK_DEV=/dev/disk4
-make build
-```
-
-After either of the above two commands, you can build with this:
-
-```
-make
-
-# which is a shortcut for:
-cmake --build build
 ```
 
 The firmware is built as `firmware/build/mp1corea7/medium/main.elf` and `main.uimg` 
 in the same directory. The .elf file is used when debugging, and the .uimg file
 is used when copying firmware to NOR Flash or an SD card.
 
-Optional: if you have multiple versions of the gcc arm toolchain installed and don't want to 
+*Optional*: if you have multiple versions of the gcc arm toolchain installed and don't want to 
 change your PATH for this project, you can set the METAMODULE_ARM_NONE_EABI_PATH var like this:
 
 ```
 # Put in your bashrc/zshrc for convenience:
 # Note the trailing slash (required)
 export METAMODULE_ARM_NONE_EABI_PATH=/path/to/arm-gnu-toolchain-12.x-relX/bin/
-
-# Now you can run make as normal:
-make 
 ```
 
-### Loading firmware onto the device
+### Console output
 
-There is a bootloader that runs before the application, and it outputs useful
-messages over a UART. You can view the console output by connecting a USB-UART
-cable to the TX pin of the debug header (next to the SWD header). The TX pin is
-labeled (upper-right pin). The bottom four pins are all GND. Settings are
-115200, 8N1.
+You can view the console output by connecting a USB-UART cable to the TX pin of
+the debug header (next to the SWD header). The TX pin is labeled (upper-right
+pin). The bottom four pins are all GND. Settings are 115200, 8N1.
+
+
+### Loading firmware onto the device
 
 You have several choices for how to load the firmware applcation. Each one is covered 
 in a section below:
@@ -81,17 +81,22 @@ in a section below:
 
 #### Load in RAM over SWD/JTAG
 
-This is the preferred method for active firmware development. It requires a JTAG programmer.
+This is the preferred method for active firmware development. It requires a
+JTAG programmer.
 
-Attach a JTAG debugger to the 10-pin connector at the top of the module labeled "SWD". The protocol is actually JTAG, despite the header's name, 
-though SWD may work since the only difference is the tRST pin instead of NRST.
+Attach a JTAG debugger to the 10-pin connector at the top of the module labeled
+"SWD". The protocol is actually JTAG, despite the header's name, though SWD may
+work since the only difference is the tRST pin instead of NRST.
 
-If you are already running the application and just need to debug, you can just attach without loading.
+If you are already running the application and just need to debug, you can just
+attach without loading.
 
 If you need to load new firmware, then do this:
 
-1) Install a jumper on Control Expander header that bridges the top-left pin and the pin just to the right of it.
-The jumper should be horizontal, not vertical, on the top row of pins all the way to the left:
+1) Install a jumper on `Control Expander` header that bridges the top-left pin
+and the pin just to the right of it. Make sure you use the right header, it's
+the one above the Wifi header, near the `y` and `z` pots. The jumper should be
+horizontal, not vertical, on the top row of pins all the way to the left:
 
 ```
   Control
@@ -100,7 +105,7 @@ The jumper should be horizontal, not vertical, on the top row of pins all the wa
            o  o  o  o
 ```
 
-2) Power off and back on. 
+2) Power off and back on (full power-cycle is required).
 
 The console will show:
 
@@ -109,7 +114,7 @@ Freeze pin detected active, freezing.
 Ready to load firmware to DDR RAM via SWD/JTAG.
 ```
 
-Use Jflash, TRACE32, Ozone, arm-none-eabi-gdb, etc to load the main.elf file.
+Use Jflash, TRACE32, Ozone, openOCD/arm-none-eabi-gdb, etc to load the main.elf file.
 If you have a JLink connected, you can program with this;
 
 ```
@@ -123,17 +128,18 @@ For other methods, just load the .elf file and then start executing from 0xC0200
 Note: If you are familiar with flashing Cortex-M series MCUs, you will notice
 some differences. One is that Flash is on an external chip. Another difference is
 that the main RAM (DDR RAM) is not available until software initializes it. The
-on-board NOR Flash chip has a bootloader installed (MP1-Boot, which is the
-FSBL). This is loaded by the BOOTROM on power-up. The MP1-Boot bootloader is
-responsible for initializing the DDR RAM peripheral. Obviously, this must be
-done before loading the firmware into DDR RAM. So, unlike a Cortex-M chip, you
-must run a bootloader before programming the device. However, one of the first
-things an application does when it starts running is to enable the MMU and
-setup various memory regions, some of which are not writable. Thus, the only
-time in which it's possible to load firmware to RAM is after the bootloader has
-initialized RAM but before the application has started. To handle this,
-MP1-Boot has a "Freeze pin" option. When this pin is detected low (jumper is
-installed), then MP1-Boot will halt execution (freeze) after initializing RAM.
+on-board NOR Flash chip has a bootloader installed
+([MP1-Boot](https://github.com/4ms/mp1-boot), which is the FSBL). This is
+loaded by the BOOTROM on power-up. The MP1-Boot bootloader is responsible for
+initializing the DDR RAM peripheral. Obviously, this must be done before
+loading the firmware into DDR RAM. So, unlike a Cortex-M chip, you must run a
+bootloader before programming the device. However, one of the first things an
+application does when it starts running is to enable the MMU and setup various
+memory regions, some of which are not writable. Thus, the only time in which
+it's possible to load firmware to RAM is after the bootloader has initialized
+RAM but before the application has started. To handle this, MP1-Boot has a
+"Freeze pin" option. When this pin is detected low (jumper is installed), then
+MP1-Boot will halt execution (freeze) after initializing RAM.
  
 #### Load into NOR Flash over DFU-USB
 
@@ -219,9 +225,9 @@ make flash-app-sd
 
 This will build the application as normal, and then use `dd` to copy it to the fourth partition.
 
-Eject the card and insert it into the MetaModule.
+Eject the card and insert it into the Meta Module.
 
-To tell the MetaModule to boot using the SD Card, you need to change the BOOT DIP switches.
+To tell the Meta Module to boot using the SD Card, you need to change the BOOT DIP switches.
 These are located on the back of the PCB, under the screen near the rotary encoder.
 They are labeled "BOOT0_2". There are two switches. Look at the diagram printed on the PCB.
 To boot with the SD, both switches should be pushed to the left.

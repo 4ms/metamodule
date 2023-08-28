@@ -1,4 +1,4 @@
-## MetaModule Simulator
+## Meta Module Simulator
 
 This simulates the screen and the audio outputs. The pixels should be identical to the actual hardware's pixels.
 

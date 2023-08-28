@@ -1,4 +1,4 @@
-## MetaModule
+## Meta Module
 
 [![Build Simulator](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml)
 [![Build VCV Rack Plugin](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml)
