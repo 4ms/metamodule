@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - 'vcv-[0-9]+.[0-9]+.[0-9]+'
+      - 'vcv-v[0-9]+.[0-9]+.[0-9]+'
     branches:
       - main
       - '83-*'
@@ -51,7 +51,7 @@ jobs:
       #     name: lin-x64
 
   build-win-x64:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/vcv-v')
     name: win-x64
     runs-on: ubuntu-latest
     container:
@@ -77,7 +77,7 @@ jobs:
       #     name: win-x64
 
   build-mac:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/vcv-v')
     name: mac 
     runs-on: macos-12
     strategy:
