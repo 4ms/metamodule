@@ -6,7 +6,7 @@ namespace MetaModule
 {
 struct ADEnvInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"ADEnv"};
-	static constexpr std::string_view description{"Attack Decay Envelope"};
+	static constexpr std::string_view description{"Attack-Decay Envelope"};
 	static constexpr uint32_t width_hp = 8;
 	static constexpr std::string_view svg_filename{"res/modules/ADEnv_artwork.svg"};
 
