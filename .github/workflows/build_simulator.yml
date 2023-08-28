@@ -1,6 +1,7 @@
 name: Build Simulator
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
