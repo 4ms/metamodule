@@ -1,28 +1,61 @@
 ## Setting up your environment
 
-All platforms:
-- A c++ toolchain that has partial support for c++20 (gcc-12 or later, clang 14 or later)
+### All platforms:
+- You will need a C++ toolchain that has partial support for c++20 (`gcc-12` or later, `clang` 14 or later).
 - To build firmware, you need the gcc arm toolchain, version 12.2 or later.
   - Download here: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
     - Make sure you get the package for your host computer that ends in `arm-none-eabi`
   - Or xpack versions are OK: https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/tag/v12.2.1-1.2
-  - Make sure arm-none-eabi-gcc is on your PATH
+  - Make sure `arm-none-eabi-gcc` is on your PATH (this is the "bin" folder in
+    the `arm-non-eabi` distribution).
   - For MacOS, sometimes the OS security system flags the executables the first
     time they are run. Just keep running "make clean" and then "make" and then
     clicking "Allow" until you get no more security pop-ups (might be 6-10
     pop-ups). It only happens the first time after installation.
+  - **IMPORTANT NOTE FOR WINDOWS USERS**: The PATH that `arm-none-eabi` is
+    installed to *must not* contain any spaces. By default, running the
+    `arm-none-eabi` installer (the download that ends in ".exe"), installs to
+    "C:\Program Files (x86)\\..." which contains spaces. It is much easier to
+    download the file ending in ".zip", which allows you to place the
+    binaries wherever you want. As an example, you could unzip the files to
+    "C:\arm-none-eabi" or similar.
+
+
+### Requirements:
+
+- Firmware:
+  - cmake v3.24 or later
+  - ninja (not required on MinGW or if you configure cmake to use a different generator) 
+  - gcc/g++ 12, or clang 14 or later (for unit tests)
+  - arm-none-eabi-gcc toolchain 12.2 or later
+  - xxd
+  - python3
+
+- Simulator:
+  - cmake v3.24 or later
+  - ninja (not required if configure cmake to use a different generator)
+  - gcc/g++ 12, or clang 14 or later
+  - SDL2.x
+
+- VCV Plugin:
+  - gcc/g++ 12 or later, clang 14 or later
+  - jq
+  - rsync
 
 ### MacOS
 
-A recent-ish macOS version is required, though I do not know exactly how old will still work.
-Ventura 13.4 and 13.5 have been tested. 
+A recent-ish macOS version is required, though it's unknown exactly how old will still work.
+Monterey (12.5) and Ventura (13.4 and 13.5) have been tested and are known to work.
 
  - Install [brew](https://brew.sh) and follow the "Next Steps" instructions to add Homebrew to your PATH.
 
- - For the simulator this is needed (ninja is not required if you use a different -G option when invoking cmake):
-   - `brew install cmake ninja sdl2`
+ - For building firmware, this is needed (ninja is not required if you use a different -G option when invoking cmake):
+   - `brew install cmake ninja`
 
- - For the VCV plugin, this is needed:
+ - For building the simulator, sdl is additionally needed:
+   - `brew install sdl2`
+
+ - For the building the VCV plugin, this is needed:
    - `brew install jq rsync`
 
 ### Linux
@@ -34,7 +67,7 @@ TODO: check this, and notes for different distros
    - `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 120`
    - `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 120`
 
- - To use the simulator GUI, you need to also install:
+ - To use the simulator GUI, you need to also install sdl2:
    - `sudo apt-get install libsdl2-dev`
 
  
@@ -43,7 +76,7 @@ TODO: check this, and notes for different distros
 To get started, you will want to follow the development environment guide for
 VCV Rack [here](https://vcvrack.com/manual/Building#Windows). This will help
 you set up an MSYS2/MinGW development environment along with most packages
-required for MetaModule development. In short, install [MSYS](http://www.msys2.org/)
+required for Meta Module development. In short, install [MSYS](http://www.msys2.org/)
 and then open the MinGW 64-bit shell and run:
 
 ```
@@ -91,7 +124,7 @@ arm-none-eabi-gcc --version
 You should see the version number and some copyright info. If not, check where
 the arm-none-eabi package was installed and adjust your PATH setting.
 
-*Tip*: When building anything for MetaModule, be sure to launch the MinGW 64-Bit
+*Tip*: When building anything for Meta Module, be sure to launch the MinGW 64-Bit
 shell! If you have Windows Terminal installed, it is worth setting up a profile
 so that you can easily launch MinGW 64-Bit shells as Terminal tabs. If you have
 Windows Terminal installed, you can open the Settings menu and create a
@@ -109,7 +142,7 @@ you should set the Icon option. Again, with default paths, this path is
 C:/msys64/mingw64.ico
 ```
 
-*Tip*: Many elements of the MetaModule code require C++20, so if you previously setup
+*Tip*: Many elements of the Meta Module code require C++20, so if you previously setup
 a VCV environment (or an MSYS2 environment), you might need to update `gcc` to
 `gcc-12` or higher. To find out which version you are using, you need to open
 up a MinGW 64-Bit shell. Type the following command:
