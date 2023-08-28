@@ -88,6 +88,7 @@ lv_obj_t *ui_AddMap;
 lv_obj_t *ui_PlusText1;
 lv_obj_t *ui_MapList;
 lv_obj_t *ui_ControlAlert;
+lv_obj_t *ui_ControlArc;
 lv_obj_t *ui_ControlAlertLabel;
 lv_obj_t *ui_AddMapPopUp;
 lv_obj_t *ui_AddModuleName;

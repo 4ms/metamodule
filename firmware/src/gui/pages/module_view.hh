@@ -20,7 +20,7 @@ struct ModuleViewPage : PageBase {
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true;
-		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::ShowAll, .opa = LV_OPA_50};
+		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::HideAlways, .opa = LV_OPA_50};
 	};
 	ViewSettings settings;
 
@@ -30,7 +30,7 @@ struct ModuleViewPage : PageBase {
 		, patch{patch_storage.get_view_patch()}
 		, base{ui_MappingMenu}
 		, roller{ui_ElementRoller}
-		, mapping_pane{info.patch_storage} {
+		, mapping_pane{info.patch_storage, info.patch_mod_queue} {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
@@ -64,7 +64,6 @@ struct ModuleViewPage : PageBase {
 			msg_queue.append_message("Module View page cannot read module slug.\n");
 			return;
 		}
-		printf_("ModuleViewPage module %s\n", slug.data());
 
 		moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
@@ -85,6 +84,8 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_refr_size(canvas);
 		auto width_px = lv_obj_get_width(canvas);
+
+		active_knob_set = PageList::get_active_knobset();
 
 		module_drawer.draw_mapped_elements(
 			patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
@@ -116,8 +117,9 @@ struct ModuleViewPage : PageBase {
 			opts.pop_back();
 
 		//Show Roller and select it
-		lv_obj_set_pos(roller, width_px, 0);
-		lv_obj_set_size(roller, 320 - width_px, 240);
+		lv_obj_set_pos(roller, 0, 0);
+		auto roller_width = std::min(320 - width_px, 220);
+		lv_obj_set_size(roller, roller_width, 240);
 		lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
 
 		// Add text list to roller options
@@ -139,6 +141,8 @@ struct ModuleViewPage : PageBase {
 
 		lv_group_focus_obj(roller);
 		// lv_group_set_editing(group, true); //why does setting edit to true make the roller not be in the edit state?
+
+		mapping_pane.prepare_focus(roller_width, is_patch_playing);
 	}
 
 	void update() override {
@@ -213,6 +217,7 @@ private:
 		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 		lv_obj_set_pos(b, x - size / 2, y - size / 2);
 		lv_obj_set_size(b, size, size);
+		lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 	}
 
 	void reset_module_page() {
@@ -268,50 +273,6 @@ private:
 			page->mode = ViewMode::Knob;
 			page->mapping_pane.show(page->group, page->drawn_elements[cur_sel]);
 		}
-
-		// Show manual knob
-		// auto patch_id = PageList::get_selected_patch_id();
-		// auto &patch = page->patch_list.get_patch(patch_id);
-		// auto mappedknob =
-		// patch.find_mapped_knob(PageList::get_selected_module_id(),
-		// module_controls[cur_sel].id); if (!mappedknob) { 	auto static_knob =
-		// patch.get_static_knob_value(page->this_module_id,
-		// module_controls[cur_sel].id); 	if (static_knob) {
-		// 		lv_obj_clear_flag(page->manual_knob,
-		// LV_OBJ_FLAG_HIDDEN); 		lv_arc_set_value(page->manual_knob,
-		// static_knob.value() * 100); 		lv_group_focus_obj(page->manual_knob);
-		// 		lv_group_set_editing(page->group, true);
-		// 		printf_("Initial knob value set to %f\n",
-		// (double)static_knob.value() * 100);
-		// 	}
-		// } else {
-		// 	lv_obj_add_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
-		// 	printf_("Knob is mapped\n");
-		// }
-
-		// PageList::request_new_page(PageId::KnobEdit);
-		// page->blur();
-	}
-
-	static void manual_knob_adjust(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto this_control_id = static_cast<uint16_t>(PageList::get_selected_control().id);
-		lv_obj_t *arc = lv_event_get_target(event);
-
-		StaticParam sp{
-			.module_id = page->this_module_id,
-			.param_id = this_control_id,
-			.value = lv_arc_get_value(arc) / 100.f,
-		};
-
-		if (page->is_patch_playing) {
-			page->patch_mod_queue.put(SetStaticParam{.param = sp});
-		} else {
-
-			// FIXME: this just modifies PatchStoage::_view_patch which will get
-			//  overwritten if we select a new patch in PatchSelector
-			page->patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
-		}
 	}
 
 	ModuleInfoView moduleinfo;
@@ -323,7 +284,6 @@ private:
 	bool is_patch_playing = false;
 	PatchData &patch;
 
-	// TODO:put this in PageList
 	unsigned active_knob_set = 0;
 
 	std::vector<lv_obj_t *> button;

@@ -21,8 +21,6 @@ ui_MappingFlexZone = lv_obj_create(ui_MappingMenu);
 lv_obj_set_width( ui_MappingFlexZone, 320);
 lv_obj_set_height( ui_MappingFlexZone, 240);
 lv_obj_set_align( ui_MappingFlexZone, LV_ALIGN_RIGHT_MID );
-lv_obj_set_flex_flow(ui_MappingFlexZone,LV_FLEX_FLOW_ROW);
-lv_obj_set_flex_align(ui_MappingFlexZone, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 lv_obj_clear_flag( ui_MappingFlexZone, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_MappingFlexZone, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_MappingFlexZone, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -35,9 +33,11 @@ lv_obj_set_style_border_color(ui_MappingFlexZone, lv_color_hex(0x000000), LV_PAR
 lv_obj_set_style_border_opa(ui_MappingFlexZone, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_MappingFlexZone, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_MappingFlexZone, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_MappingFlexZone, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_MappingFlexZone, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_MappingFlexZone, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_MappingFlexZone, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_MappingFlexZone, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_MappingFlexZone, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_MappingFlexZone, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_MappingFlexZone, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_set_style_bg_color(ui_MappingFlexZone, lv_color_hex(0x000000), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_MappingFlexZone, 255, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
@@ -49,12 +49,10 @@ lv_obj_set_style_pad_row(ui_MappingFlexZone, 0, LV_PART_SCROLLBAR| LV_STATE_DEFA
 lv_obj_set_style_pad_column(ui_MappingFlexZone, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 
 ui_ModuleImage = lv_obj_create(ui_MappingFlexZone);
-lv_obj_set_width( ui_ModuleImage, 120);
+lv_obj_set_width( ui_ModuleImage, 180);
 lv_obj_set_height( ui_ModuleImage, 240);
-lv_obj_set_x( ui_ModuleImage, -15 );
-lv_obj_set_y( ui_ModuleImage, -1 );
 lv_obj_set_align( ui_ModuleImage, LV_ALIGN_LEFT_MID );
-lv_obj_clear_flag( ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_clear_flag( ui_ModuleImage, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_ModuleImage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_ModuleImage, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_ModuleImage, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -74,11 +72,9 @@ lv_obj_set_style_bg_opa(ui_ModuleImage, 255, LV_PART_SCROLLBAR| LV_STATE_DEFAULT
 
 ui_ElementRoller = lv_roller_create(ui_MappingFlexZone);
 lv_roller_set_options( ui_ElementRoller, "Parameter 1\nParameter 2\nParameter 3\nParameter 4\nParameter 5\nParameter 6\nParameter 7\nParameter 8\nParameter 9\nParameter 10\nParameter 11\nParameter 12\nParameter 13\nParameter 14\nParameter 15\nParameter 16\nParameter 17\nParameter 18\nParameter 19\nParameter 20\nParameter 21\nParameter 22\nParameter 23\nParameter 24\nParameter 25\nParameter 26\nParameter 27\nParameter 28\nParameter 29\nParameter 28", LV_ROLLER_MODE_NORMAL );
+lv_obj_set_width( ui_ElementRoller, 120);
 lv_obj_set_height( ui_ElementRoller, 234);
-lv_obj_set_flex_grow( ui_ElementRoller, 1);
-lv_obj_set_x( ui_ElementRoller, 169 );
-lv_obj_set_y( ui_ElementRoller, -2 );
-lv_obj_set_align( ui_ElementRoller, LV_ALIGN_CENTER );
+lv_obj_set_align( ui_ElementRoller, LV_ALIGN_RIGHT_MID );
 lv_obj_add_flag( ui_ElementRoller, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_ElementRoller, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE );    /// Flags
 lv_obj_set_style_text_color(ui_ElementRoller, lv_color_hex(0x999999), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -141,10 +137,8 @@ lv_obj_set_style_shadow_ofs_y(ui_ElementRoller, 0, LV_PART_SELECTED| LV_STATE_DE
 lv_obj_set_style_blend_mode(ui_ElementRoller, LV_BLEND_MODE_NORMAL, LV_PART_SELECTED| LV_STATE_DEFAULT);
 
 ui_MappingParameters = lv_obj_create(ui_MappingFlexZone);
+lv_obj_set_width( ui_MappingParameters, 200);
 lv_obj_set_height( ui_MappingParameters, 240);
-lv_obj_set_flex_grow( ui_MappingParameters, 1);
-lv_obj_set_x( ui_MappingParameters, 0 );
-lv_obj_set_y( ui_MappingParameters, 1 );
 lv_obj_set_align( ui_MappingParameters, LV_ALIGN_RIGHT_MID );
 lv_obj_set_flex_flow(ui_MappingParameters,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_MappingParameters, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
@@ -304,10 +298,10 @@ lv_obj_set_style_text_opa(ui_MappedInfoPane, 255, LV_PART_MAIN| LV_STATE_DEFAULT
 
 ui_MappedInfo = lv_label_create(ui_MappedInfoPane);
 lv_obj_set_height( ui_MappedInfo, 18);
-lv_obj_set_width( ui_MappedInfo, lv_pct(80));
+lv_obj_set_width( ui_MappedInfo, lv_pct(100));
 lv_obj_set_align( ui_MappedInfo, LV_ALIGN_TOP_MID );
 lv_label_set_long_mode(ui_MappedInfo,LV_LABEL_LONG_CLIP);
-lv_label_set_text(ui_MappedInfo,"Found 2 Mappings");
+lv_label_set_text(ui_MappedInfo,"Mappings:");
 lv_obj_set_style_text_font(ui_MappedInfo, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_AddMap = lv_btn_create(ui_MappedInfoPane);
@@ -361,14 +355,14 @@ lv_obj_set_style_pad_row(ui_MapList, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_MapList, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_ControlAlert = lv_obj_create(ui_MappingParameters);
-lv_obj_set_height( ui_ControlAlert, 30);
-lv_obj_set_width( ui_ControlAlert, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_align( ui_ControlAlert, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_ControlAlert, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_set_height( ui_ControlAlert, 134);
+lv_obj_set_width( ui_ControlAlert, lv_pct(100));
+lv_obj_set_align( ui_ControlAlert, LV_ALIGN_BOTTOM_MID );
+lv_obj_add_flag( ui_ControlAlert, LV_OBJ_FLAG_IGNORE_LAYOUT | LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_ControlAlert, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_ControlAlert, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_ControlAlert, lv_color_hex(0x555555), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_ControlAlert, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_ControlAlert, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_color(ui_ControlAlert, lv_color_hex(0x222222), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_ControlAlert, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_ControlAlert, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -378,20 +372,41 @@ lv_obj_set_style_pad_right(ui_ControlAlert, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_ControlAlert, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_ControlAlert, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+lv_obj_set_style_pad_left(ui_ControlAlert, -4, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_ControlAlert, -4, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_ControlAlert, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_ControlAlert, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_ControlAlert, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_ControlAlert, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+
+ui_ControlArc = lv_arc_create(ui_ControlAlert);
+lv_obj_set_width( ui_ControlArc, 80);
+lv_obj_set_height( ui_ControlArc, 80);
+lv_obj_set_align( ui_ControlArc, LV_ALIGN_CENTER );
+lv_obj_set_style_arc_color(ui_ControlArc, lv_color_hex(0x4040FF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_arc_opa(ui_ControlArc, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_arc_width(ui_ControlArc, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+lv_obj_set_style_arc_color(ui_ControlArc, lv_color_hex(0x4040FF), LV_PART_INDICATOR | LV_STATE_DEFAULT );
+lv_obj_set_style_arc_opa(ui_ControlArc, 0, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+
+lv_obj_set_style_bg_color(ui_ControlArc, lv_color_hex(0xFFFFFF), LV_PART_KNOB | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ControlArc, 0, LV_PART_KNOB| LV_STATE_DEFAULT);
+
 ui_ControlAlertLabel = lv_label_create(ui_ControlAlert);
-lv_obj_set_width( ui_ControlAlertLabel, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_ControlAlertLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_ControlAlertLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_ControlAlertLabel,"Click the Rotary to \nStop Control");
+lv_obj_set_width( ui_ControlAlertLabel, lv_pct(100));
+lv_obj_set_height( ui_ControlAlertLabel, lv_pct(98));
+lv_obj_set_align( ui_ControlAlertLabel, LV_ALIGN_BOTTOM_MID );
+lv_label_set_text(ui_ControlAlertLabel,"Use Rotary to turn knob.\n\nClick to exit.");
 lv_obj_set_style_text_color(ui_ControlAlertLabel, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ControlAlertLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_ControlAlertLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_ControlAlertLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_ControlAlertLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_ControlAlertLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_ControlAlertLabel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_ControlAlertLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_ControlAlertLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_ControlAlertLabel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_ControlAlertLabel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_ControlAlertLabel, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_ControlAlertLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_AddMapPopUp = lv_obj_create(ui_MappingMenu);

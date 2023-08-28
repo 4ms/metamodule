@@ -11,9 +11,11 @@ lv_obj_t *ui_MapCircle_create(lv_obj_t *comp_parent) {
 
 lv_obj_t *cui_MapCircle;
 cui_MapCircle = lv_btn_create(comp_parent);
-lv_obj_set_width( cui_MapCircle, 148);
 lv_obj_set_height( cui_MapCircle, 28);
+lv_obj_set_width( cui_MapCircle, lv_pct(100));
 lv_obj_set_align( cui_MapCircle, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(cui_MapCircle,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(cui_MapCircle, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 lv_obj_add_flag( cui_MapCircle, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
 lv_obj_clear_flag( cui_MapCircle, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_bg_color(cui_MapCircle, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -58,10 +60,11 @@ lv_obj_set_style_pad_bottom(cui_KnobLetter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_t *cui_KnobSetNameText;
 cui_KnobSetNameText = lv_label_create(cui_MapCircle);
-lv_obj_set_width( cui_KnobSetNameText, 112);
 lv_obj_set_height( cui_KnobSetNameText, 15);
+lv_obj_set_flex_grow( cui_KnobSetNameText, 1);
 lv_obj_set_align( cui_KnobSetNameText, LV_ALIGN_RIGHT_MID );
-lv_label_set_text(cui_KnobSetNameText,"Knob Set");
+lv_label_set_long_mode(cui_KnobSetNameText,LV_LABEL_LONG_SCROLL);
+lv_label_set_text(cui_KnobSetNameText,"Knob Set 1234");
 lv_obj_clear_flag( cui_KnobSetNameText, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(cui_KnobSetNameText, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(cui_KnobSetNameText, 0, LV_PART_MAIN| LV_STATE_DEFAULT);

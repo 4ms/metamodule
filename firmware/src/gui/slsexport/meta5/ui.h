@@ -94,6 +94,7 @@ extern lv_obj_t *ui_AddMap;
 extern lv_obj_t *ui_PlusText1;
 extern lv_obj_t *ui_MapList;
 extern lv_obj_t *ui_ControlAlert;
+extern lv_obj_t *ui_ControlArc;
 extern lv_obj_t *ui_ControlAlertLabel;
 extern lv_obj_t *ui_AddMapPopUp;
 extern lv_obj_t *ui_AddModuleName;
