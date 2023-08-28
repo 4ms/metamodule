@@ -7,7 +7,14 @@ on:
       - main
     tags:
       - 'firmware-v[0-9]+.[0-9]+.[0-9]+'
-  pull_request:
+    paths:
+      - 'shared/**'
+      - 'firmware/**'
+      - '!firmware/bootloader/**'
+      - '!**.md' # Skip docs
+      - '!shared/svgextract' # Skip generator script (still run CI if generated files change)
+      - '!shared/gen_minblep' # Skip generator script (still run CI if generated files change)
+      - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
 
 jobs:  
   build:
