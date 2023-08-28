@@ -5,6 +5,7 @@
 extern rack::Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file
+
 //////////////// Auto generated ///////////////////////
 // Add models below here
 extern rack::Model *modelOctave;
