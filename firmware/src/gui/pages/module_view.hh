@@ -30,26 +30,29 @@ struct ModuleViewPage : PageBase {
 		, patch{patch_storage.get_view_patch()}
 		, base{ui_MappingMenu}
 		, roller{ui_ElementRoller}
-		, edit_pane(ui_MappingParameters)
 		, mapping_pane{info.patch_storage} {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
-		lv_group_add_obj(group, roller);
 
 		lv_draw_img_dsc_init(&img_dsc);
 
 		lv_obj_remove_style(roller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
 
-		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
 
 		button.clear();
 		module_controls.clear();
+		mapping_pane.init();
+
+		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
+		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_PRESSED, this);
 	}
 
 	void prepare_focus() override {
+
 		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
@@ -120,8 +123,6 @@ struct ModuleViewPage : PageBase {
 		// Add text list to roller options
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_visible_row_count(roller, 11);
-		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_PRESSED, this);
 
 		// Select first element
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
@@ -134,12 +135,14 @@ struct ModuleViewPage : PageBase {
 		update_map_ring_style();
 
 		// Hide Edit pane
-		lv_obj_set_pos(edit_pane, width_px, 0);
-		lv_obj_set_size(edit_pane, 320 - width_px, 240);
-		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
+		// lv_obj_set_pos(edit_pane, width_px, 0);
+		// lv_obj_set_size(edit_pane, 320 - width_px, 240);
+		// lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
 
+		lv_group_remove_all_objs(group);
+		lv_group_set_editing(group, true);
+		lv_group_add_obj(group, roller);
 		lv_group_focus_obj(roller);
-		lv_group_set_editing(group, false);
 	}
 
 	void update() override {
@@ -150,13 +153,12 @@ struct ModuleViewPage : PageBase {
 				}
 			} else {
 				mode = ViewMode::List;
-				lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
-				lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
+				mapping_pane.hide();
 				lv_group_focus_obj(roller);
 				lv_group_set_editing(group, true);
 			}
 		}
-
+		// lv_group_get_obj_count(
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
 				auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
@@ -267,13 +269,9 @@ private:
 
 		if (cur_sel < module_controls.size()) {
 			printf_("Click %d\n", cur_sel);
-			// PageList::set_selected_control(module_controls[cur_sel]);
 
-			// Hide roller, show edit pane (done by SLS)
 			page->mode = ViewMode::Knob;
 
-			// lv_obj_add_flag(page->roller, LV_OBJ_FLAG_HIDDEN);
-			// lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
 			page->mapping_pane.show(page->group, page->drawn_elements[cur_sel]);
 
 			// Show manual knob
@@ -341,7 +339,6 @@ private:
 	lv_obj_t *base = nullptr;
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *roller = nullptr;
-	lv_obj_t *edit_pane = nullptr;
 	ModuleViewMappingPane mapping_pane;
 
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];

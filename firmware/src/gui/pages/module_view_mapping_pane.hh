@@ -17,6 +17,7 @@ struct ModuleViewMappingPane {
 	}
 
 	void init() {
+		// lv_obj_set_parent(ui_MappingParameters, lv_layer_top());
 		lv_obj_add_event_cb(ui_AddMap, add_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
 
@@ -57,13 +58,11 @@ struct ModuleViewMappingPane {
 		auto nm = std::visit([&](auto &el) -> std::string_view { return el.short_name; }, drawn_el.element);
 		lv_label_set_text(ui_Element_Name, nm.data());
 
-		remove_all_map_circles();
-
 		std::visit([&, this](auto &el) { prepare_for_element(el, drawn_el); }, drawn_el.element);
 
 		display_num_mappings();
 
-		// show();
+		show();
 	}
 
 	void remove_all_map_circles() {
@@ -124,31 +123,59 @@ struct ModuleViewMappingPane {
 	}
 
 	void blur() {
-		if (pane_group) {
-			lv_group_del(pane_group);
-			pane_group = nullptr;
-		}
+		// if (pane_group) {
+		// 	lv_group_del(pane_group);
+		// 	pane_group = nullptr;
+		// }
 	}
 
 	void show() {
 		if (!visible) {
+			printf_("Showing...\n");
+			lv_obj_add_flag(ui_ElementRoller, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_clear_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
 			auto indev = lv_indev_get_next(nullptr);
-			if (!indev)
+			if (!indev) {
+				printf_("Invalid indev\n");
 				return;
+			}
 			lv_indev_set_group(indev, pane_group);
+			lv_group_focus_obj(ui_ControlButton);
+
+			auto numingroup = lv_group_get_obj_count(pane_group);
+			printf_("%d obj in pane_group\n", numingroup);
+
 			visible = true;
-		}
+		} else
+			printf_("Already visible\n");
 	}
 
 	void hide() {
 		if (visible) {
+			lv_obj_clear_flag(ui_ElementRoller, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
 				return;
-			if (base_group)
+
+			if (base_group) {
 				lv_indev_set_group(indev, base_group);
+				auto numingroup = lv_group_get_obj_count(base_group);
+				printf_("%d obj in base_group\n", numingroup);
+			} else
+				printf_("No base_group set\n");
+
+			if (pane_group) {
+				lv_group_del(pane_group);
+				pane_group = nullptr;
+			} else
+				printf_("No pane_group!\n");
+
+			remove_all_map_circles();
+
 			visible = false;
-		}
+		} else
+			printf_("Already hidden\n");
 	}
 
 	static void edit_button_cb(lv_event_t *event) {
