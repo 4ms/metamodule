@@ -16,37 +16,40 @@ jobs:
     name: "Build firmware"
     runs-on: ubuntu-latest
     steps:
-      - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
-        uses: carlosperate/arm-none-eabi-gcc-action@v1
-        with:
-          release: ${{ matrix.gcc }}
+      - name: No action
+        run: echo "Firmware workflow was triggered"
 
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
+      # - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+      #   uses: carlosperate/arm-none-eabi-gcc-action@v1
+      #   with:
+      #     release: ${{ matrix.gcc }}
 
-      - name: Install linux dependencies
-        run: |
-          sudo apt install -y ninja-build 
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+      #   with:
+      #     submodules: 'recursive'
 
-      - name: Build and test
-        run: cd firmware && make configure && make all
+      # - name: Install linux dependencies
+      #   run: |
+      #     sudo apt install -y ninja-build 
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: firmware
-          path: |
-            firmware/build/mp1corea7/medium/main.elf
-            firmware/build/mp1corea7/medium/main.uimg
+      # - name: Build and test
+      #   run: cd firmware && make configure && make all
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          name: "Firmware Version: ${{ env.CI_REF_NAME }}"
-          files: |
-            firmware/build/mp1corea7/medium/main.elf
-            firmware/build/mp1corea7/medium/main.uimg
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: firmware
+      #     path: |
+      #       firmware/build/mp1corea7/medium/main.elf
+      #       firmware/build/mp1corea7/medium/main.uimg
+
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   if: startsWith(github.ref, 'refs/tags/')
+      #   with:
+      #     name: "Firmware Version: ${{ env.CI_REF_NAME }}"
+      #     files: |
+      #       firmware/build/mp1corea7/medium/main.elf
+      #       firmware/build/mp1corea7/medium/main.uimg
 
