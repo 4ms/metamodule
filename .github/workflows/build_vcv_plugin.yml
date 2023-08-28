@@ -26,6 +26,7 @@ defaults:
 
 jobs:  
   build:
+    if: matrix.platform == 'lin-x64' || (matrix.platform == 'win-x64' && startsWith(github.ref, 'refs/tags/'))
     name: ${{ matrix.platform }}
     runs-on: ubuntu-latest
     container:
@@ -35,7 +36,6 @@ jobs:
       fail-fast: false
       matrix:
         platform: [win-x64, lin-x64]
-    if: matrix.platform == 'lin-x64' || (matrix.platform == 'win-x64' && startsWith(github.ref, 'refs/tags/'))
     steps:
       - name: Always build linux, and build windows only when pushing a tag
         run: echo "VCV plugin ${{ matrix.platform }} workflow triggered"
