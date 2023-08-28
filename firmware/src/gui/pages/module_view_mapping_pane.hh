@@ -4,6 +4,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/styles.hh"
 #include "lvgl.h"
 #include "src/core/lv_obj.h"
 
@@ -17,7 +18,6 @@ struct ModuleViewMappingPane {
 	}
 
 	void init() {
-		// lv_obj_set_parent(ui_MappingParameters, lv_layer_top());
 		lv_obj_add_event_cb(ui_AddMap, add_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
 
@@ -25,6 +25,7 @@ struct ModuleViewMappingPane {
 	}
 
 	void show(lv_group_t *group, const DrawnElement &drawn_el) {
+		printf_("Show\n");
 		base_group = group;
 		pane_group = lv_group_create();
 		lv_group_remove_all_objs(pane_group);
@@ -65,6 +66,46 @@ struct ModuleViewMappingPane {
 		show();
 	}
 
+	void blur() {
+	}
+
+	void show() {
+		if (!visible) {
+			lv_obj_add_flag(ui_ElementRoller, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_clear_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
+			auto indev = lv_indev_get_next(nullptr);
+			if (!indev)
+				return;
+
+			lv_indev_set_group(indev, pane_group);
+
+			visible = true;
+		}
+	}
+
+	void hide() {
+		if (visible) {
+			lv_obj_clear_flag(ui_ElementRoller, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
+			auto indev = lv_indev_get_next(nullptr);
+			if (!indev)
+				return;
+
+			if (base_group)
+				lv_indev_set_group(indev, base_group);
+
+			if (pane_group) {
+				lv_group_del(pane_group);
+				pane_group = nullptr;
+			}
+
+			remove_all_map_circles();
+
+			visible = false;
+		}
+	}
+
+private:
 	void remove_all_map_circles() {
 		auto num_circles = lv_obj_get_child_cnt(ui_MapList);
 		pr_dbg("Remove %d circles\n", num_circles);
@@ -80,21 +121,41 @@ struct ModuleViewMappingPane {
 			snprintf_(text, 31, "Found %d Mappings", num_mappings);
 		else
 			snprintf_(text, 31, "Not Mapped");
-
 		lv_label_set_text(ui_MappedInfo, text);
+	}
+
+	lv_obj_t *create_map_circle(std::string_view name, std::string_view knobset_name, unsigned color_id) {
+		auto obj = ui_MapCircle_create(ui_MapList);
+		auto circle = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE);
+		auto label = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE_KNOBLETTER);
+		auto setname = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_KNOBSETNAMETEXT);
+		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id % 6], LV_STATE_DEFAULT);
+		lv_label_set_text(label, name.data());
+		lv_label_set_text(setname, knobset_name.data());
+		return obj;
 	}
 
 	void prepare_for_element(const BaseElement &, const DrawnElement &drawn_el) {
 		lv_obj_add_flag(ui_ControlButton, LV_OBJ_FLAG_HIDDEN);
-		if (drawn_el.gui_element.mapped_panel_id.has_value())
+		num_mappings = 0;
+
+		if (drawn_el.gui_element.mapped_panel_id.has_value()) {
+			//TODO: find mapping in patch
+			auto obj = create_map_circle("?", "???", 0);
+			lv_group_add_obj(pane_group, obj);
 			num_mappings = 1;
-		else
-			num_mappings = 0;
+			lv_obj_add_flag(ui_AddMap, LV_OBJ_FLAG_HIDDEN);
+		}
+
+		if (num_mappings == 0) {
+			lv_obj_clear_flag(ui_AddMap, LV_OBJ_FLAG_HIDDEN);
+		}
 	}
 
 	void prepare_for_element(const ParamElement &, const DrawnElement &drawn_el) {
 		lv_obj_clear_flag(ui_ControlButton, LV_OBJ_FLAG_HIDDEN);
 		lv_group_add_obj(pane_group, ui_ControlButton);
+		lv_group_add_obj(pane_group, ui_AddMap);
 
 		auto &patch = patch_storage.get_view_patch();
 		auto this_module_id = PageList::get_selected_module_id();
@@ -104,78 +165,15 @@ struct ModuleViewMappingPane {
 		for (auto &set : patch.knob_sets) {
 			for (auto &map : set.set) {
 				if (map.param_id == drawn_el.gui_element.idx.param_idx && map.module_id == this_module_id) {
-					auto obj = ui_MapCircle_create(ui_MapList);
-
-					auto label = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE_KNOBLETTER);
 					auto name = PanelDef::get_map_param_name(map.panel_knob_id);
-					lv_label_set_text(label, name.data());
-
-					auto setname = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_KNOBSETNAMETEXT);
-					lv_label_set_text(setname, set.name.c_str());
-
-					lv_group_add_obj(pane_group, obj);
+					auto obj = create_map_circle(name, set.name.c_str(), map.panel_knob_id % 6);
+					lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE));
 					num_mappings++;
 				}
 			}
 		}
 
-		lv_group_add_obj(pane_group, ui_AddMap);
-	}
-
-	void blur() {
-		// if (pane_group) {
-		// 	lv_group_del(pane_group);
-		// 	pane_group = nullptr;
-		// }
-	}
-
-	void show() {
-		if (!visible) {
-			printf_("Showing...\n");
-			lv_obj_add_flag(ui_ElementRoller, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_clear_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
-			auto indev = lv_indev_get_next(nullptr);
-			if (!indev) {
-				printf_("Invalid indev\n");
-				return;
-			}
-			lv_indev_set_group(indev, pane_group);
-			lv_group_focus_obj(ui_ControlButton);
-
-			auto numingroup = lv_group_get_obj_count(pane_group);
-			printf_("%d obj in pane_group\n", numingroup);
-
-			visible = true;
-		} else
-			printf_("Already visible\n");
-	}
-
-	void hide() {
-		if (visible) {
-			lv_obj_clear_flag(ui_ElementRoller, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
-			auto indev = lv_indev_get_next(nullptr);
-			if (!indev)
-				return;
-
-			if (base_group) {
-				lv_indev_set_group(indev, base_group);
-				auto numingroup = lv_group_get_obj_count(base_group);
-				printf_("%d obj in base_group\n", numingroup);
-			} else
-				printf_("No base_group set\n");
-
-			if (pane_group) {
-				lv_group_del(pane_group);
-				pane_group = nullptr;
-			} else
-				printf_("No pane_group!\n");
-
-			remove_all_map_circles();
-
-			visible = false;
-		} else
-			printf_("Already hidden\n");
+		lv_group_focus_obj(ui_ControlButton);
 	}
 
 	static void edit_button_cb(lv_event_t *event) {

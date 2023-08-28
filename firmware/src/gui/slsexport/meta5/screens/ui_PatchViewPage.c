@@ -373,7 +373,7 @@ lv_obj_set_x( ui_SettingsCloseButton, -6 );
 lv_obj_set_y( ui_SettingsCloseButton, -10 );
 lv_obj_set_align( ui_SettingsCloseButton, LV_ALIGN_RIGHT_MID );
 lv_obj_add_state( ui_SettingsCloseButton, LV_STATE_FOCUSED );     /// States
-lv_obj_add_flag( ui_SettingsCloseButton, LV_OBJ_FLAG_ADV_HITTEST | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_add_flag( ui_SettingsCloseButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_SettingsCloseButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_SettingsCloseButton, 20, LV_PART_MAIN| LV_STATE_PRESSED);
 lv_obj_set_style_bg_color(ui_SettingsCloseButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_PRESSED );

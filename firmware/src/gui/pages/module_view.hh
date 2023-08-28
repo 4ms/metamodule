@@ -34,7 +34,7 @@ struct ModuleViewPage : PageBase {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
-		lv_group_set_editing(group, false);
+		// lv_group_set_editing(group, false);
 
 		lv_draw_img_dsc_init(&img_dsc);
 
@@ -134,15 +134,11 @@ struct ModuleViewPage : PageBase {
 
 		update_map_ring_style();
 
-		// Hide Edit pane
-		// lv_obj_set_pos(edit_pane, width_px, 0);
-		// lv_obj_set_size(edit_pane, 320 - width_px, 240);
-		// lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
-
 		lv_group_remove_all_objs(group);
-		lv_group_set_editing(group, true);
 		lv_group_add_obj(group, roller);
+
 		lv_group_focus_obj(roller);
+		// lv_group_set_editing(group, true); //why does setting edit to true make the roller not be in the edit state?
 	}
 
 	void update() override {
@@ -155,10 +151,11 @@ struct ModuleViewPage : PageBase {
 				mode = ViewMode::List;
 				mapping_pane.hide();
 				lv_group_focus_obj(roller);
+				lv_obj_clear_state(roller, LV_STATE_PRESSED);
 				lv_group_set_editing(group, true);
 			}
 		}
-		// lv_group_get_obj_count(
+
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
 				auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
@@ -199,9 +196,9 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
-	// void blur() final {
-	// drawn_elements.clear();
-	// }
+	void blur() final {
+		// drawn_elements.clear(); // doing this might lead to fragmentation?
+	}
 
 private:
 	void add_button(lv_obj_t *obj) {
@@ -268,35 +265,32 @@ private:
 		auto &module_controls = page->module_controls;
 
 		if (cur_sel < module_controls.size()) {
-			printf_("Click %d\n", cur_sel);
-
 			page->mode = ViewMode::Knob;
-
 			page->mapping_pane.show(page->group, page->drawn_elements[cur_sel]);
-
-			// Show manual knob
-			// auto patch_id = PageList::get_selected_patch_id();
-			// auto &patch = page->patch_list.get_patch(patch_id);
-			// auto mappedknob =
-			// patch.find_mapped_knob(PageList::get_selected_module_id(),
-			// module_controls[cur_sel].id); if (!mappedknob) { 	auto static_knob =
-			// patch.get_static_knob_value(page->this_module_id,
-			// module_controls[cur_sel].id); 	if (static_knob) {
-			// 		lv_obj_clear_flag(page->manual_knob,
-			// LV_OBJ_FLAG_HIDDEN); 		lv_arc_set_value(page->manual_knob,
-			// static_knob.value() * 100); 		lv_group_focus_obj(page->manual_knob);
-			// 		lv_group_set_editing(page->group, true);
-			// 		printf_("Initial knob value set to %f\n",
-			// (double)static_knob.value() * 100);
-			// 	}
-			// } else {
-			// 	lv_obj_add_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
-			// 	printf_("Knob is mapped\n");
-			// }
-
-			// PageList::request_new_page(PageId::KnobEdit);
-			// page->blur();
 		}
+
+		// Show manual knob
+		// auto patch_id = PageList::get_selected_patch_id();
+		// auto &patch = page->patch_list.get_patch(patch_id);
+		// auto mappedknob =
+		// patch.find_mapped_knob(PageList::get_selected_module_id(),
+		// module_controls[cur_sel].id); if (!mappedknob) { 	auto static_knob =
+		// patch.get_static_knob_value(page->this_module_id,
+		// module_controls[cur_sel].id); 	if (static_knob) {
+		// 		lv_obj_clear_flag(page->manual_knob,
+		// LV_OBJ_FLAG_HIDDEN); 		lv_arc_set_value(page->manual_knob,
+		// static_knob.value() * 100); 		lv_group_focus_obj(page->manual_knob);
+		// 		lv_group_set_editing(page->group, true);
+		// 		printf_("Initial knob value set to %f\n",
+		// (double)static_knob.value() * 100);
+		// 	}
+		// } else {
+		// 	lv_obj_add_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
+		// 	printf_("Knob is mapped\n");
+		// }
+
+		// PageList::request_new_page(PageId::KnobEdit);
+		// page->blur();
 	}
 
 	static void manual_knob_adjust(lv_event_t *event) {
