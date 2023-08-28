@@ -101,7 +101,7 @@ struct ModuleViewPage : PageBase {
 					opts += el.short_name;
 					if (drawn.mapped_panel_id) {
 						opts += " [";
-						opts += get_panel_name<PanelDef>(el, *(drawn.mapped_panel_id));
+						opts += get_panel_name<PanelDef>(el, drawn.mapped_panel_id.value());
 						opts += "]";
 					}
 					opts += "\n";
