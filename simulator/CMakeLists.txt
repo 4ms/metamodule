@@ -48,6 +48,13 @@ set_source_files_properties(${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c
 # #################### CoreModules ##################################
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
 
+# #################### Befaco ######################################
+include(${MM_ROOT}/firmware/vcv_ports/glue/Befaco/modules.cmake)
+list(TRANSFORM BefacoModules PREPEND ${MM_ROOT}/firmware/vcv_ports/Befaco/src/
+     OUTPUT_VARIABLE BEFACO_SOURCE_PATHS)
+list(TRANSFORM BEFACO_SOURCE_PATHS APPEND .cpp)
+
+
 set(CORE_MODULES
     ${CORE_MODULES}
     ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
@@ -55,26 +62,7 @@ set(CORE_MODULES
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
     #
     # Befaco
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/StereoStrip.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SlewLimiter.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SamplingModulator.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/STMix.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Rampage.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/PonyVCO.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Percall.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/MotionMTR.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Morphader.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Mixer.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Kickall.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/HexmixVCA.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ChoppingKinky.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ABC.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ADSR.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SpringReverb.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/DualAtenuverter.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/EvenVCO.cpp
-    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/NoisePlethora.cpp
-    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Muxslicer.cpp
+    ${BEFACO_SOURCE_PATHS}
     #
     # AudibleInstruments
     ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/src/Braids.cpp
