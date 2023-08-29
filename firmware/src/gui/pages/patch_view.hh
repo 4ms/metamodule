@@ -66,7 +66,6 @@ struct PatchViewPage : PageBase {
 
 	void prepare_focus() override {
 		if (displayed_patch_id == PageList::get_selected_patch_id()) {
-			pr_dbg("PatchView already loaded for selected patch\n");
 			return;
 		}
 		clear();
@@ -145,6 +144,8 @@ struct PatchViewPage : PageBase {
 		knobset_menu.hide();
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_FOCUSED);
+
+		// clear();
 	}
 
 	void clear() {

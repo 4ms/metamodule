@@ -62,22 +62,13 @@ struct PageBase {
 	}
 
 	void focus() {
-
 		for (auto &b : metaparams.meta_buttons)
 			b.clear_events();
 
 		metaparams.rotary_button.clear_events();
 
-		if (group) {
-			// From LVGL v8.1 docs: "An input device can send the keys to only one group"
-			// Therefore we must re-associate the indev (rotary) with the page's group
-			// whenever the page changes
+		if (group)
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		}
-
-		// Animation:
-		// auto animation_style = LV_SCR_LOAD_ANIM_FADE_ON;
-		// lv_scr_load_anim(screen, animation_style, 200, 0, false);
 
 		prepare_focus();
 
