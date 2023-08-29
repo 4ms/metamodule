@@ -53,8 +53,6 @@ struct PageBase {
 	}
 
 	virtual ~PageBase() = default;
-	virtual void init() {
-	}
 
 	void init_bg(lv_obj_t *screen_ptr) {
 		group = lv_group_create();
@@ -75,7 +73,6 @@ struct PageBase {
 			// Therefore we must re-associate the indev (rotary) with the page's group
 			// whenever the page changes
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
-			lv_group_set_editing(group, true);
 		}
 
 		// Animation:

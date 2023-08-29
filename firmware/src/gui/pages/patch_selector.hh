@@ -34,14 +34,10 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
 	}
 
-	void init() override {
-		state = State::TryingToRequestPatchList;
-	}
-
 	void prepare_focus() override {
-
 		state = State::TryingToRequestPatchList;
 		lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+		lv_group_set_editing(group, true);
 	}
 
 	void refresh_patchlist(PatchFileList &patchfiles) {
@@ -316,7 +312,7 @@ private:
 		RequestedPatchData,
 
 		Closing,
-	} state;
+	} state{State::TryingToRequestPatchList};
 
 	uint32_t last_refresh_check_tm = 0;
 };
