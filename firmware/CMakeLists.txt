@@ -59,6 +59,11 @@ add_custom_target(
 
 
 #
+# Flash loader
+#
+add_subdirectory(src/flash_loader)
+
+#
 # Bootloader (MP1-Boot)
 #
 if ("${TOOLCHAIN_BASE_DIR}" STREQUAL "")
