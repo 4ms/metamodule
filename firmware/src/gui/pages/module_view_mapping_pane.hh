@@ -21,9 +21,10 @@ struct ModuleViewMappingPane {
 	void init() {
 		lv_obj_add_event_cb(ui_AddMap, add_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_ControlButton, scroll_top_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ControlArc, arc_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(
-			ui_ControlArc, control_button_cb, LV_EVENT_RELEASED, this); //RELEASE = click on arc when done turning it
+		//RELEASE = click on arc when done turning it
+		lv_obj_add_event_cb(ui_ControlArc, control_button_cb, LV_EVENT_RELEASED, this);
 
 		visible = false;
 	}
@@ -250,6 +251,10 @@ private:
 		};
 		page->patch_mod_queue.put(SetStaticParam{.param = sp});
 		patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
+	}
+
+	static void scroll_top_cb(lv_event_t *event) {
+		lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_ON);
 	}
 
 	PatchStorageProxy &patch_storage;
