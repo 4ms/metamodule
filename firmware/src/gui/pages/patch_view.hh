@@ -65,6 +65,13 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		if (displayed_patch_id == PageList::get_selected_patch_id()) {
+			pr_dbg("PatchView already loaded for selected patch\n");
+			return;
+		}
+		clear();
+		displayed_patch_id = PageList::get_selected_patch_id();
+
 		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
@@ -135,15 +142,19 @@ struct PatchViewPage : PageBase {
 
 	void blur() override {
 		settings_menu.hide();
+		knobset_menu.hide();
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_FOCUSED);
+	}
 
+	void clear() {
 		for (auto &m : module_canvases)
 			lv_obj_del(m);
 
 		module_canvases.clear();
 		drawn_elements.clear();
 		module_ids.clear();
+
 		settings_menu.blur();
 		knobset_menu.blur();
 	}
@@ -299,6 +310,8 @@ private:
 	std::vector<uint32_t> module_ids;
 	std::vector<DrawnElement> drawn_elements;
 	bool is_patch_playing = false;
+
+	uint32_t displayed_patch_id = 0xFFFFFFFF;
 
 	unsigned active_knob_set = 0;
 
