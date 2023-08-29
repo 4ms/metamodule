@@ -206,17 +206,17 @@ struct ModuleViewPage : PageBase {
 
 private:
 	void add_button(lv_obj_t *obj) {
-		auto c_x = lv_obj_get_x(obj) + lv_obj_get_width(obj) / 2;
-		auto c_y = lv_obj_get_y(obj) + lv_obj_get_height(obj) / 2;
-		add_button(c_x, c_y, (float)lv_obj_get_width(obj) * 1.5f);
-	}
-
-	void add_button(int x, int y, int size = 20) {
 		auto &b = button.emplace_back();
 		b = lv_btn_create(ui_ModuleImage);
 		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
-		lv_obj_set_pos(b, x - size / 2, y - size / 2);
-		lv_obj_set_size(b, size, size);
+
+		float width = lv_obj_get_width(obj) / 2.f;
+		float height = lv_obj_get_height(obj) / 2.f;
+		float c_x = (float)lv_obj_get_x(obj) + width;
+		float c_y = (float)lv_obj_get_y(obj) + height;
+
+		lv_obj_set_pos(b, std::round(c_x - width * 1.5f), std::round(c_y - height * 1.5f));
+		lv_obj_set_size(b, (width * 3.f), (height * 3.f));
 		lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 	}
 
