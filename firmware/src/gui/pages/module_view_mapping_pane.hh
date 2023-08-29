@@ -21,7 +21,8 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_AddMap, add_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlArc, arc_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_ControlArc, control_button_cb, LV_EVENT_RELEASED, this);
+		lv_obj_add_event_cb(
+			ui_ControlArc, control_button_cb, LV_EVENT_RELEASED, this); //RELEASE = click on arc when done turning it
 
 		visible = false;
 	}
@@ -32,28 +33,19 @@ struct ModuleViewMappingPane {
 		lv_group_remove_all_objs(pane_group);
 		lv_group_set_editing(pane_group, false);
 
-		auto this_module_id = PageList::get_selected_module_id();
 		auto &patch = patch_storage.get_view_patch();
 		if (patch.patch_name.length() == 0) {
 			pr_warn("Patch name empty\n");
 			return;
 		}
+
+		auto this_module_id = PageList::get_selected_module_id();
 		if (this_module_id >= patch.module_slugs.size()) {
 			pr_warn("Module has invalid ID\n");
 			return;
 		}
 
 		auto slug = patch.module_slugs[this_module_id];
-		if (!slug.length()) {
-			pr_warn("Module has invalid slug\n");
-			return;
-		}
-
-		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-		if (moduleinfo.width_hp == 0) {
-			pr_warn("Knob Edit page got empty module slug.\n");
-			return;
-		}
 
 		// Knob name label
 		lv_label_set_text(ui_Module_Name, slug.c_str());
@@ -62,7 +54,7 @@ struct ModuleViewMappingPane {
 
 		drawn_element = &drawn_el;
 
-		std::visit([&, this](auto &el) { prepare_for_element(el, drawn_el); }, drawn_el.element);
+		std::visit([this](auto &el) { prepare_for_element(el); }, drawn_el.element);
 
 		// display_num_mappings();
 
@@ -126,15 +118,6 @@ private:
 		}
 	}
 
-	// void display_num_mappings() {
-	// 	char text[32];
-	// 	if (num_mappings)
-	// 		snprintf_(text, 31, "Found %d Mappings", num_mappings);
-	// 	else
-	// 		snprintf_(text, 31, "Not Mapped");
-	// 	lv_label_set_text(ui_MappedInfo, text);
-	// }
-
 	lv_obj_t *create_map_circle(std::string_view name, std::string_view knobset_name, unsigned color_id) {
 		auto obj = ui_MapCircle_create(ui_MapList);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE);
@@ -146,31 +129,50 @@ private:
 		return obj;
 	}
 
-	void prepare_for_element(const BaseElement &, const DrawnElement &drawn_el) {
+	void prepare_for_element(const BaseElement &) {
 		lv_obj_add_flag(ui_ControlButton, LV_OBJ_FLAG_HIDDEN);
 		num_mappings = 0;
 	}
 
-	void prepare_for_element(const JackElement &, const DrawnElement &drawn_el) {
+	void prepare_for_element(const JackOutput &) {
+		std::string_view name = "";
+
+		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
+		if (panel_jack_id)
+			name = PanelDef::get_map_outjack_name(panel_jack_id.value());
+
+		prepare_for_jack(name, panel_jack_id);
+	}
+
+	void prepare_for_element(const JackInput &) {
+		std::string_view name = "";
+
+		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
+		if (panel_jack_id)
+			name = PanelDef::get_map_injack_name(panel_jack_id.value());
+
+		prepare_for_jack(name, panel_jack_id);
+	}
+
+	void prepare_for_jack(std::string_view name, std::optional<uint16_t> jack_id) {
 		lv_obj_add_flag(ui_ControlButton, LV_OBJ_FLAG_HIDDEN);
-		num_mappings = 0;
 
-		if (drawn_el.gui_element.mapped_panel_id.has_value()) {
+		if (jack_id) {
+			char s[3];
+			snprintf_(s, 3, "%d", jack_id.value() + 1);
+			auto obj = create_map_circle(s, name.data(), jack_id.value());
 
-			//TODO: find jack mapping in patch
-			auto obj = create_map_circle("?", "???", 0);
 			lv_group_add_obj(pane_group, obj);
 			num_mappings = 1;
 			lv_obj_add_flag(ui_AddMap, LV_OBJ_FLAG_HIDDEN);
-		}
 
-		if (num_mappings == 0) {
+		} else {
 			lv_obj_clear_flag(ui_AddMap, LV_OBJ_FLAG_HIDDEN);
-			lv_group_focus_obj(ui_ControlButton);
+			lv_group_focus_obj(ui_AddMap);
 		}
 	}
 
-	void prepare_for_element(const ParamElement &, const DrawnElement &drawn_el) {
+	void prepare_for_element(const ParamElement &) {
 		if (is_patch_playing)
 			lv_obj_clear_flag(ui_ControlButton, LV_OBJ_FLAG_HIDDEN);
 		else
@@ -186,7 +188,7 @@ private:
 
 		for (auto &set : patch.knob_sets) {
 			for (auto &map : set.set) {
-				if (map.param_id == drawn_el.gui_element.idx.param_idx && map.module_id == this_module_id) {
+				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					auto name = PanelDef::get_map_param_name(map.panel_knob_id);
 					auto obj = create_map_circle(name, set.name.c_str(), map.panel_knob_id % 6);
 					lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE));
