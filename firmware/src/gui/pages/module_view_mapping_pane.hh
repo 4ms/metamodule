@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
+#include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -64,7 +65,7 @@ struct ModuleViewMappingPane {
 	void prepare_focus(uint32_t width, bool patch_playing) {
 		is_patch_playing = patch_playing;
 		lv_obj_set_width(ui_MappingParameters, width);
-		lv_obj_add_flag(ui_ControlAlert, LV_OBJ_FLAG_HIDDEN);
+		lv_hide(ui_ControlAlert);
 	}
 
 	void blur() {
@@ -72,8 +73,8 @@ struct ModuleViewMappingPane {
 
 	void show() {
 		if (!visible) {
-			lv_obj_add_flag(ui_ElementRoller, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_clear_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
+			lv_hide(ui_ElementRoller);
+			lv_show(ui_MappingParameters);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
 				return;
@@ -86,10 +87,9 @@ struct ModuleViewMappingPane {
 
 	void hide() {
 		if (visible) {
-			lv_obj_clear_flag(ui_ElementRoller, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
-
-			lv_obj_add_flag(ui_ControlAlert, LV_OBJ_FLAG_HIDDEN);
+			lv_show(ui_ElementRoller);
+			lv_hide(ui_MappingParameters);
+			lv_hide(ui_ControlAlert);
 
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
@@ -123,60 +123,55 @@ private:
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_KNOBSETNAMETEXT);
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id % 6], LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id], LV_STATE_DEFAULT);
 		lv_label_set_text(label, name.data());
 		lv_label_set_text(setname, knobset_name.data());
 		return obj;
 	}
 
 	void prepare_for_element(const BaseElement &) {
-		lv_obj_add_flag(ui_ControlButton, LV_OBJ_FLAG_HIDDEN);
+		lv_hide(ui_ControlButton);
+		lv_hide(ui_MappedPanel);
 		num_mappings = 0;
 	}
 
 	void prepare_for_element(const JackOutput &) {
-		std::string_view name = "";
-
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
-		if (panel_jack_id)
-			name = PanelDef::get_map_outjack_name(panel_jack_id.value());
-
+		std::string_view name = panel_jack_id ? PanelDef::get_map_outjack_name(panel_jack_id.value()) : "";
 		prepare_for_jack(name, panel_jack_id);
 	}
 
 	void prepare_for_element(const JackInput &) {
-		std::string_view name = "";
-
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
-		if (panel_jack_id)
-			name = PanelDef::get_map_injack_name(panel_jack_id.value());
-
+		std::string_view name = panel_jack_id ? PanelDef::get_map_injack_name(panel_jack_id.value()) : "";
 		prepare_for_jack(name, panel_jack_id);
 	}
 
 	void prepare_for_jack(std::string_view name, std::optional<uint16_t> jack_id) {
-		lv_obj_add_flag(ui_ControlButton, LV_OBJ_FLAG_HIDDEN);
+		lv_hide(ui_ControlButton);
+		lv_show(ui_MappedPanel);
 
 		if (jack_id) {
-			char s[3];
-			snprintf_(s, 3, "%d", jack_id.value() + 1);
-			auto obj = create_map_circle(s, name.data(), jack_id.value());
+			auto obj = create_map_circle("", name.data(), jack_id.value());
 
 			lv_group_add_obj(pane_group, obj);
 			num_mappings = 1;
-			lv_obj_add_flag(ui_AddMap, LV_OBJ_FLAG_HIDDEN);
+			lv_hide(ui_AddMap);
 
 		} else {
-			lv_obj_clear_flag(ui_AddMap, LV_OBJ_FLAG_HIDDEN);
+			lv_show(ui_AddMap);
 			lv_group_focus_obj(ui_AddMap);
 		}
 	}
 
 	void prepare_for_element(const ParamElement &) {
+		lv_show(ui_MappedPanel);
+		lv_show(ui_AddMap);
+
 		if (is_patch_playing)
-			lv_obj_clear_flag(ui_ControlButton, LV_OBJ_FLAG_HIDDEN);
+			lv_show(ui_ControlButton);
 		else
-			lv_obj_add_flag(ui_ControlButton, LV_OBJ_FLAG_HIDDEN);
+			lv_hide(ui_ControlButton);
 
 		lv_group_add_obj(pane_group, ui_ControlButton);
 		lv_group_add_obj(pane_group, ui_AddMap);
@@ -223,7 +218,7 @@ private:
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
 		if (event->target == ui_ControlButton) {
-			lv_obj_clear_flag(ui_ControlAlert, LV_OBJ_FLAG_HIDDEN);
+			lv_show(ui_ControlAlert);
 			lv_obj_clear_state(ui_ControlButton, LV_STATE_PRESSED);
 			lv_group_add_obj(page->pane_group, ui_ControlArc);
 			lv_group_focus_obj(ui_ControlArc);
@@ -237,7 +232,7 @@ private:
 
 		if (event->target == ui_ControlArc) {
 			//defocus
-			lv_obj_add_flag(ui_ControlAlert, LV_OBJ_FLAG_HIDDEN);
+			lv_hide(ui_ControlAlert);
 			lv_group_focus_next(page->pane_group);
 		}
 	}
