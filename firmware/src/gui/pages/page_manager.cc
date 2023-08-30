@@ -8,25 +8,10 @@ void PageManager::init() {
 }
 
 void PageManager::update_current_page() {
-	static unsigned delay_load = 0;
-	static PageBase *next_page = nullptr;
-
 	if (auto newpage = PageList::get_requested_page()) {
 		cur_page->blur();
-		next_page = newpage.value();
-		next_page->prepare_focus();
-
-		// TODO: check if LVGL is done rendering before calling focus()
-		// For now, a fixed delay works
-		delay_load = 1;
-
-	} else if (next_page && delay_load) {
-		delay_load--;
-
-		if (delay_load == 0) {
-			cur_page = next_page;
-			cur_page->focus();
-		}
+		cur_page = newpage.value();
+		cur_page->focus();
 	}
 
 	else

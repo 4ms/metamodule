@@ -70,7 +70,7 @@ struct PageBase {
 		if (group)
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
 
-		//prepare_focus();
+		prepare_focus();
 
 		if (screen)
 			lv_scr_load(screen);
