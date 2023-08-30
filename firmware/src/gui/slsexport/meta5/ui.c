@@ -24,7 +24,6 @@ lv_obj_t *ui_SDlabel1;
 lv_obj_t *ui_Flashbut;
 lv_obj_t *ui_Flashlabel;
 lv_obj_t *ui_Flashlabel1;
-void ui_event_PatchListRoller( lv_event_t * e);
 lv_obj_t *ui_PatchListRoller;
 lv_obj_t *ui_waitspinner;
 
@@ -167,12 +166,6 @@ lv_anim_start(&PropertyAnimation_0);
 }
 
 ///////////////////// FUNCTIONS ////////////////////
-void ui_event_PatchListRoller( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_PatchViewPage, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_PatchViewPage_screen_init);
-}
-}
 void ui_event_CancelAdd( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {

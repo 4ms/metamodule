@@ -22,13 +22,15 @@ void PageManager::update_current_page() {
 
 	} else if (next_page && delay_load) {
 		delay_load--;
-		cur_page = next_page;
 
-		if (delay_load == 0)
+		if (delay_load == 0) {
+			cur_page = next_page;
 			cur_page->focus();
+		}
 	}
 
-	cur_page->update();
+	else
+		cur_page->update();
 }
 
 } // namespace MetaModule

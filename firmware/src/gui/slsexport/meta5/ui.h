@@ -32,7 +32,6 @@ extern lv_obj_t *ui_SDlabel1;
 extern lv_obj_t *ui_Flashbut;
 extern lv_obj_t *ui_Flashlabel;
 extern lv_obj_t *ui_Flashlabel1;
-void ui_event_PatchListRoller( lv_event_t * e);
 extern lv_obj_t *ui_PatchListRoller;
 extern lv_obj_t *ui_waitspinner;
 // SCREEN: ui_PatchViewPage

@@ -275,6 +275,4 @@ lv_obj_set_style_arc_color(ui_waitspinner, lv_color_hex(0x4067D3), LV_PART_INDIC
 lv_obj_set_style_arc_opa(ui_waitspinner, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
 lv_obj_set_style_arc_width(ui_waitspinner, 10, LV_PART_INDICATOR| LV_STATE_DEFAULT);
 
-lv_obj_add_event_cb(ui_PatchListRoller, ui_event_PatchListRoller, LV_EVENT_ALL, NULL);
-
 }
