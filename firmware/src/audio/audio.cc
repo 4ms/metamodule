@@ -88,7 +88,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	}
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin0::high();
+		Debug::Pin0::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -103,7 +103,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof(SyncParams));
 
-		// Debug::Pin0::low();
+		Debug::Pin0::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -128,27 +128,9 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	return scaled_out;
 }
 
-// Todo: the scaling and offset shouold be part of the AuxStream, so we can support different types of DACs
-uint32_t AudioStream::get_dac_output(int output_id) {
-	auto raw_out = player.get_panel_output(output_id);
-	raw_out *= -1.f;
-	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
-	scaled_out *= AuxStream::DACscaling;
-	scaled_out += 0x00800000;
-	return scaled_out;
-}
-
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxStreamBlock &aux) {
 	auto &in = audio_block.in_codec;
 	auto &out = audio_block.out_codec;
-
-	if constexpr (DEBUG_PASSTHRU_AUDIO) {
-		AudioTestSignal::passthrough(in, out, aux);
-		return;
-	} else if (DEBUG_SINEOUT_AUDIO) {
-		AudioTestSignal::sines_out(in, out);
-		return;
-	}
 
 	if (patch_loader.is_loading_new_patch()) {
 		if (mute_ctr > 0.f)
@@ -201,10 +183,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
 		}
 
-		// Pass CV values to modules (not in current version)
-		// for (auto [i, cv] : countzip(params_.cvjacks))
-		// 	player.set_panel_input(i + FirstCVInput, cv);
-
 		for (auto [i, gatein] : countzip(params_.gate_ins)) {
 			player.set_panel_input(i + FirstGateInput, gatein.is_high() ? 1.f : 0.f);
 			//TODO: set param_state.gate_ins if it changed
@@ -234,14 +212,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		// Get outputs from modules
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
-
-		// DAC output (not in current hardware)
-		// for (unsigned i = 0; i < PanelDef::NumDACOut; i++)
-		// 	aux_.set_output(i, get_dac_output(i + PanelDef::NumAudioOut));
-
-		// Gate outputs (not in current hardware)
-		// for (auto [i, gate_out] : countzip(aux_.gate_out))
-		// 	gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
 }
 
