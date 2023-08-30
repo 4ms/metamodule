@@ -1,16 +1,7 @@
 #pragma once
+#include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_player.hh"
 #include "printf.h"
-
-#ifdef SIMULATOR
-// #include "uart_log.hh" //doesn't work with simulator because uart_log.hh exists in same dir as this file, so preprocessor picks ./uart_log.hh it instead of stubs/uart_log.hh
-#include "stubs/patch_file/patch_storage_proxy.hh"
-#else
-#include "patch_file/patch_storage_proxy.hh"
-#endif
-
-//FIXME: temp use patches_default instead of patch_storage
-#include "patch_file/patches_default.hh"
 
 namespace MetaModule
 {
@@ -23,27 +14,39 @@ struct PatchPlayLoader {
 	}
 
 	void load_initial_patch() {
-		// TODO:this loads a default patch, not a patch from NOR Flash
-		// Instead, we should load the last patch that was loaded before power-down
+		// TODO: load the last patch that was loaded before power-down
+		auto initial_patch = 0;
 
-		auto initial_patch = 11;
-		// TODO: Test the below.. do we need an escape hatch
-		// to avoid infinite loop?
+		uint32_t tries = 10000;
+		while (--tries) {
+			if (storage_.request_viewpatch(Volume::NorFlash, initial_patch))
+				break;
+		}
+		if (tries == 0) {
+			pr_err("ERROR: sending request to load initial patch timed out.\n");
+			return;
+		}
 
-		// while (!storage_.request_viewpatch(initial_patch))
-		// 	;
-		// InterCoreCommMessage msg;
-		// while (msg = storage_.get_message(); msg.message_type != InterCoreCommMessage::None)
-		// ;
-		// if (msg.message_type == InterCoreCommMessage::PatchFailedLoad)
-		// .... try another patch?
-		//
-		// if (_load_patch()) {
-		if (_load_default_patch(initial_patch)) {
-			printf_("Loaded default patch\n");
-			loading_new_patch_ = false;
-		} else
-			printf_("FAILED to load initial patch.\n");
+		tries = 200000;
+		while (--tries) {
+			auto message = storage_.get_message();
+
+			if (message.message_type == PatchStorageProxy::PatchDataLoaded) {
+				if (!storage_.parse_view_patch(message.bytes_read))
+					pr_err("ERROR: could not parse initial patch\n");
+				else
+					_load_patch();
+				break;
+			}
+			if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
+				pr_err("ERROR: initial patch failed to load from NOR flash\n");
+				break;
+			}
+		}
+		if (tries == 0) {
+			pr_err("ERROR: timed out while waiting for response to request to load initial patch.\n");
+			return;
+		}
 	}
 
 	// loading_new_patch_:
@@ -113,24 +116,6 @@ private:
 				loaded_patch_vol_ = vol;
 				return true;
 			}
-		}
-		return false;
-	}
-
-	bool _load_default_patch(uint32_t patchid) {
-		if (patchid >= DefaultPatches::num_patches())
-			patchid = 0;
-
-		auto rawpatch = DefaultPatches::get_patch(patchid);
-
-		PatchData patch;
-		yaml_raw_to_patch(rawpatch, patch);
-		auto patchname = patch.patch_name;
-		printf_("Attempting play patch #%d, %s\n", patchid, patchname.data());
-
-		if (player_.load_patch(patch)) {
-			loaded_patch_index_ = patchid;
-			return true;
 		}
 		return false;
 	}
