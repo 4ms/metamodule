@@ -6,6 +6,7 @@
 #include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/update.hh"
+#include "gui/helpers/lv_helpers.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cables.hh"
@@ -68,8 +69,11 @@ struct PatchViewPage : PageBase {
 		if (displayed_patch_id == PageList::get_selected_patch_id()) {
 			return;
 		}
-		clear();
 		displayed_patch_id = PageList::get_selected_patch_id();
+
+		lv_hide(modules_cont);
+
+		clear();
 
 		patch = patch_storage.get_view_patch();
 
@@ -93,6 +97,8 @@ struct PatchViewPage : PageBase {
 		lv_group_add_obj(group, ui_AddButton);
 		lv_group_add_obj(group, ui_InfoButton);
 		lv_group_add_obj(group, ui_SettingsButton);
+
+		lv_show(modules_cont);
 
 		auto module_drawer = ModuleDrawer{modules_cont, Height};
 

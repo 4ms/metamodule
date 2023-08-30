@@ -34,7 +34,6 @@ struct ModuleViewPage : PageBase {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
-		// lv_group_set_editing(group, false);
 
 		lv_draw_img_dsc_init(&img_dsc);
 
