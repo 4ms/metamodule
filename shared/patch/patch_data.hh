@@ -66,4 +66,25 @@ struct PatchData {
 		}
 		return nullptr;
 	}
+
+	const char *validate_knob_set_name(unsigned set_i) {
+		if (set_i >= knob_sets.size())
+			return "";
+
+		if (knob_sets[set_i].name.length() > 0)
+			return knob_sets[set_i].name.c_str();
+		else
+			return default_knob_set_name[set_i];
+	}
+
+	const char *default_knob_set_name[MaxKnobSets] = {
+		"Knob Set 1",
+		"Knob Set 2",
+		"Knob Set 3",
+		"Knob Set 4",
+		"Knob Set 5",
+		"Knob Set 6",
+		"Knob Set 7",
+		"Knob Set 8",
+	};
 };
