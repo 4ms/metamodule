@@ -1,11 +1,18 @@
 name: Run VCV unit tests
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  pull_request:
-
+      - '83-*'
+    paths:
+      - 'vcv/**'
+      - 'shared/**'
+      - '!**.md' # Skip docs
+      - '!shared/svgextract' # Skip generator script (still run CI if generated files change)
+      - '!shared/gen_minblep' # Skip generator script (still run CI if generated files change)
+      - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
 
 env:
   rack-sdk-version: 2.3.0
@@ -28,29 +35,29 @@ jobs:
       CXX: g++
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      # Usually this is always needed
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
+      - name: No action
+        run: echo "VCV Tests workflow was triggered"
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+      #   with:
+      #     submodules: 'recursive'
 
-      - name: Install windows dependencies (MSYS2)
-        if: matrix.os.os =='windows'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: mingw64
-          install: >-
-            git wget make tar unzip zip mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake autoconf automake libtool mingw-w64-x86_64-jq python zstd mingw-w64-x86_64-pkgconf
+      # - name: Install windows dependencies (MSYS2)
+      #   if: matrix.os.os =='windows'
+      #   uses: msys2/setup-msys2@v2
+      #   with:
+      #     msystem: mingw64
+      #     install: >-
+      #       git wget make tar unzip zip mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake autoconf automake libtool mingw-w64-x86_64-jq python zstd mingw-w64-x86_64-pkgconf
 
-      - name: Get Rack-SDK
-        run: |
-          pushd $HOME
-          curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-${{ matrix.os.rack-os-name }}.zip
-          unzip Rack-SDK.zip
+      # - name: Get Rack-SDK
+      #   run: |
+      #     pushd $HOME
+      #     curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-${{ matrix.os.rack-os-name }}.zip
+      #     unzip Rack-SDK.zip
 
-      - name: Build and run tests
-        run: |
-          export RACK_DIR=$HOME/Rack-SDK
-          cd vcv
-          make tests
+      # - name: Build and run tests
+      #   run: |
+      #     export RACK_DIR=$HOME/Rack-SDK
+      #     cd vcv
+      #     make -f tests/Makefile

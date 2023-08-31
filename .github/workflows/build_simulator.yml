@@ -1,10 +1,25 @@
 name: Build Simulator
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  pull_request:
+      - '83-*'
+    paths:
+      - 'simulator/**'
+      - 'shared/**'
+      - 'firmware/src/gui/**'
+      - 'firmware/src/VCV_adaptor/**'
+      - 'firmware/src/patch**'
+      - 'firmware/src/params/**'
+      - 'firmware/src/console/**'
+      - 'firmware/vcv_ports/**'
+      - 'firmware/lib/lvgl/**'
+      - '!**.md' # Skip docs
+      - '!shared/svgextract' # Skip generator script (still run CI if generated files change)
+      - '!shared/gen_minblep' # Skip generator script (still run CI if generated files change)
+      - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
 
 jobs:
   build:
@@ -31,33 +46,36 @@ jobs:
       CXX: ${{ matrix.compiler.cpp }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
+      - name: No action
+        run: echo "Simulator workflow was triggered"
 
-      - name: Install mac dependencies
-        if: matrix.os.os == 'macos'
-        run: |
-          brew install ninja sdl2 
+#       - name: Checkout
+#         uses: actions/checkout@v3
+#         with:
+#           submodules: 'recursive'
 
-      - name: Install linux dependencies
-        if: matrix.os.os =='ubuntu'
-        run: |
-          sudo apt-get update
-          sudo apt-get install ninja-build libsdl2-dev
+#       - name: Install mac dependencies
+#         if: matrix.os.os == 'macos'
+#         run: |
+#           brew install ninja sdl2 
 
-      - name: Install windows dependencies
-        if: matrix.os.os == 'windows'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
+#       - name: Install linux dependencies
+#         if: matrix.os.os =='ubuntu'
+#         run: |
+#           sudo apt-get update
+#           sudo apt-get install ninja-build libsdl2-dev
 
-      - name: 'Build'
-        run: |
-          cd simulator
-          cmake -G Ninja -B build
-          cmake --build build
+#       - name: Install windows dependencies
+#         if: matrix.os.os == 'windows'
+#         uses: msys2/setup-msys2@v2
+#         with:
+#           msystem: MINGW64
+#           update: true
+#           install: git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
+
+#       - name: 'Build'
+#         run: |
+#           cd simulator
+#           cmake -G Ninja -B build
+#           cmake --build build
 

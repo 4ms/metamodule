@@ -49,6 +49,7 @@ add_custom_target(
   COMMAND cd ${PROJECT_SOURCE_DIR} && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/patch_convert && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/CoreModules && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${SHARED}/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
   BYPRODUCTS ${PROJECT_SOURCE_DIR}/tests/build/*
   VERBATIM USES_TERMINAL
 )
