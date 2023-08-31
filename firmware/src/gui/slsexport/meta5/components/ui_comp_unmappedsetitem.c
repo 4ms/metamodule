@@ -78,6 +78,8 @@ lv_obj_set_align( cui_KnobSetNameText, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(cui_KnobSetNameText,LV_LABEL_LONG_SCROLL);
 lv_label_set_text(cui_KnobSetNameText,"Knob Set 23456");
 lv_obj_clear_flag( cui_KnobSetNameText, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_text_color(cui_KnobSetNameText, lv_color_hex(0xBBBBBB), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(cui_KnobSetNameText, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(cui_KnobSetNameText, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(cui_KnobSetNameText, 5, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(cui_KnobSetNameText, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
