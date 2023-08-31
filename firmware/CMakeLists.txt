@@ -146,27 +146,24 @@ foreach(brand ${brands})
 
   # for faceplates, we get branded lists from glue cmake files
   if(NOT ${brand} STREQUAL "4ms" AND NOT ${brand} STREQUAL "Rack")
-    # each brand should define the faceplate paths in modules.cmake in ${brand}_faceplate_svgs
+    # each brand should define the faceplate paths in modules.cmake in ${BRAND}_FACEPLATE_SVGS
     include(${PROJECT_SOURCE_DIR}/vcv_ports/glue/${brand}/modules.cmake)
 
     if(NOT DEFINED ${BRAND}_FACEPLATE_SVGS)
       message(FATAL_ERROR "No faceplate svgs for ${BRAND}, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_FACEPLATE_SVGS!")
     endif()
 
-    # we modify this list to prepend the full path
-    list(TRANSFORM ${brand}_faceplate_svgs PREPEND ${PROJECT_SOURCE_DIR}/vcv_ports/${brand}/)
-
-    set(${brand}_faceplate_lvgls)
   elseif(${brand} STREQUAL "4ms")
-    file(GLOB ${brand}_faceplate_svgs ${PROJECT_SOURCE_DIR}/../vcv/res/modules/*.svg)
+    file(GLOB ${BRAND}_FACEPLATE_SVGS ${PROJECT_SOURCE_DIR}/../vcv/res/modules/*.svg)
     # The Hub is only needed in VCV Rack, not Meta Module so remove from firmware
-    list(REMOVE_ITEM ${brand}_faceplate_svgs ${PROJECT_SOURCE_DIR}/../vcv/res/modules/HubMedium_artwork.svg)
+    list(REMOVE_ITEM ${BRAND}_FACEPLATE_SVGS ${PROJECT_SOURCE_DIR}/../vcv/res/modules/HubMedium_artwork.svg)
+
   elseif(${brand} STREQUAL "Rack")    
     message(STATUS "Rack modules not yet supported, skipping!")
-    set(${brand}_faceplate_lvgls)
+    set(${BRAND}_FACEPLATE_SVGS)
   endif()
 
-  foreach(svg ${${brand}_faceplate_svgs})
+  foreach(svg ${${BRAND}_FACEPLATE_SVGS})
     get_filename_component(svg_name ${svg} NAME_WE)
     set(c240_name ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/modules/${svg_name}_240.c)
 
@@ -186,9 +183,9 @@ foreach(brand ${brands})
       COMMENT "Adding to image-list: ${svg_name}_240.c"
     )
 
-  endforeach()
+  endforeach() # loop over faceplates
  
-endforeach()
+endforeach() # loop over brands
 
 
  # for processing 4ms info svgs, we assume we want all modules so use a glob
@@ -221,5 +218,5 @@ set_source_files_properties(imagelist-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(vcvimages-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(moduleinfos-cmd PROPERTIES SYMBOLIC "true")
 
-# minblep generation 
+# TODO: minblep generation, following doesn't work as needs a different compiler (non-arm)
 # add_subdirectory(${SHARED}/gen_minblep ${SHARED}/gen_minblep/build)

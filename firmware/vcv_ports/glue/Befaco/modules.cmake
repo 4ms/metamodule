@@ -24,7 +24,7 @@ list(APPEND BefacoModules
 )
 
 # svg paths
-list(TRANSFORM BefacoModules PREPEND res/panels/ OUTPUT_VARIABLE BEFACO_FACEPLATE_SVGS)
+list(TRANSFORM BefacoModules PREPEND ${BEFACO_DIR}/res/panels/ OUTPUT_VARIABLE BEFACO_FACEPLATE_SVGS)
 list(TRANSFORM BEFACO_FACEPLATE_SVGS APPEND .svg)
 
 # cpp paths
