@@ -137,7 +137,7 @@ lv_obj_set_style_shadow_ofs_y(ui_ElementRoller, 0, LV_PART_SELECTED| LV_STATE_DE
 lv_obj_set_style_blend_mode(ui_ElementRoller, LV_BLEND_MODE_NORMAL, LV_PART_SELECTED| LV_STATE_DEFAULT);
 
 ui_MappingParameters = lv_obj_create(ui_MappingFlexZone);
-lv_obj_set_width( ui_MappingParameters, 100);
+lv_obj_set_width( ui_MappingParameters, 220);
 lv_obj_set_height( ui_MappingParameters, 240);
 lv_obj_set_align( ui_MappingParameters, LV_ALIGN_RIGHT_MID );
 lv_obj_set_flex_flow(ui_MappingParameters,LV_FLEX_FLOW_ROW_WRAP);
@@ -274,6 +274,16 @@ lv_obj_set_style_pad_bottom(ui_MappedPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_MappedPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_MappedPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_MappedInfo = lv_label_create(ui_MappedPanel);
+lv_obj_set_height( ui_MappedInfo, 18);
+lv_obj_set_width( ui_MappedInfo, lv_pct(100));
+lv_obj_set_align( ui_MappedInfo, LV_ALIGN_TOP_MID );
+lv_label_set_long_mode(ui_MappedInfo,LV_LABEL_LONG_CLIP);
+lv_label_set_text(ui_MappedInfo,"Mappings:");
+lv_obj_set_style_text_color(ui_MappedInfo, lv_color_hex(0xF78619), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_MappedInfo, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_MappedInfo, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+
 ui_MappedInfoPane = lv_obj_create(ui_MappedPanel);
 lv_obj_set_width( ui_MappedInfoPane, lv_pct(100));
 lv_obj_set_height( ui_MappedInfoPane, LV_SIZE_CONTENT);   /// 1
@@ -291,24 +301,16 @@ lv_obj_set_style_pad_left(ui_MappedInfoPane, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_MappedInfoPane, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MappedInfoPane, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MappedInfoPane, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_MappedInfoPane, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_MappedInfoPane, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_MappedInfoPane, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_color(ui_MappedInfoPane, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_MappedInfoPane, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_MappedInfo = lv_label_create(ui_MappedInfoPane);
-lv_obj_set_height( ui_MappedInfo, 18);
-lv_obj_set_width( ui_MappedInfo, lv_pct(100));
-lv_obj_set_align( ui_MappedInfo, LV_ALIGN_TOP_MID );
-lv_label_set_long_mode(ui_MappedInfo,LV_LABEL_LONG_CLIP);
-lv_label_set_text(ui_MappedInfo,"Mappings:");
-lv_obj_set_style_text_font(ui_MappedInfo, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_AddMap = lv_btn_create(ui_MappedInfoPane);
 lv_obj_set_width( ui_AddMap, 21);
 lv_obj_set_height( ui_AddMap, 21);
 lv_obj_set_align( ui_AddMap, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_AddMap, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
+lv_obj_add_flag( ui_AddMap, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
 lv_obj_clear_flag( ui_AddMap, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_AddMap, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_AddMap, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -335,6 +337,59 @@ lv_obj_set_style_pad_right(ui_PlusText1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PlusText1, -1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_PlusText1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_MappedItemHeader = lv_obj_create(ui_MappedInfoPane);
+lv_obj_set_height( ui_MappedItemHeader, 20);
+lv_obj_set_width( ui_MappedItemHeader, lv_pct(100));
+lv_obj_set_align( ui_MappedItemHeader, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_MappedItemHeader, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_radius(ui_MappedItemHeader, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_MappedItemHeader, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_MappedItemHeader, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_color(ui_MappedItemHeader, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_border_opa(ui_MappedItemHeader, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_MappedItemHeader, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_side(ui_MappedItemHeader, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_MappedItemHeader, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_MappedItemHeader, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_MappedItemHeader, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_MappedItemHeader, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_MappedItemHeaderMapText = lv_label_create(ui_MappedItemHeader);
+lv_obj_set_height( ui_MappedItemHeaderMapText, 18);
+lv_obj_set_width( ui_MappedItemHeaderMapText, LV_SIZE_CONTENT);  /// 100
+lv_obj_set_align( ui_MappedItemHeaderMapText, LV_ALIGN_LEFT_MID );
+lv_label_set_long_mode(ui_MappedItemHeaderMapText,LV_LABEL_LONG_CLIP);
+lv_label_set_text(ui_MappedItemHeaderMapText,"Map");
+lv_obj_clear_flag( ui_MappedItemHeaderMapText, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_text_color(ui_MappedItemHeaderMapText, lv_color_hex(0xDF7D1A), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_MappedItemHeaderMapText, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_MappedItemHeaderMapText, &ui_font_MuseoSansRounded50012, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_MappedItemHeaderKnobSetText = lv_label_create(ui_MappedItemHeader);
+lv_obj_set_height( ui_MappedItemHeaderKnobSetText, 18);
+lv_obj_set_width( ui_MappedItemHeaderKnobSetText, LV_SIZE_CONTENT);  /// 100
+lv_obj_set_x( ui_MappedItemHeaderKnobSetText, 35 );
+lv_obj_set_y( ui_MappedItemHeaderKnobSetText, 0 );
+lv_obj_set_align( ui_MappedItemHeaderKnobSetText, LV_ALIGN_LEFT_MID );
+lv_label_set_long_mode(ui_MappedItemHeaderKnobSetText,LV_LABEL_LONG_CLIP);
+lv_label_set_text(ui_MappedItemHeaderKnobSetText,"KnobSet");
+lv_obj_clear_flag( ui_MappedItemHeaderKnobSetText, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_text_color(ui_MappedItemHeaderKnobSetText, lv_color_hex(0xDF7D1A), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_MappedItemHeaderKnobSetText, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_MappedItemHeaderKnobSetText, &ui_font_MuseoSansRounded50012, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_MappedItemHeaderAddText = lv_label_create(ui_MappedItemHeader);
+lv_obj_set_height( ui_MappedItemHeaderAddText, 18);
+lv_obj_set_width( ui_MappedItemHeaderAddText, LV_SIZE_CONTENT);  /// 100
+lv_obj_set_align( ui_MappedItemHeaderAddText, LV_ALIGN_RIGHT_MID );
+lv_label_set_long_mode(ui_MappedItemHeaderAddText,LV_LABEL_LONG_CLIP);
+lv_label_set_text(ui_MappedItemHeaderAddText,"Add");
+lv_obj_add_flag( ui_MappedItemHeaderAddText, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_MappedItemHeaderAddText, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_text_color(ui_MappedItemHeaderAddText, lv_color_hex(0xDF7D1A), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_MappedItemHeaderAddText, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_MappedItemHeaderAddText, &ui_font_MuseoSansRounded50012, LV_PART_MAIN| LV_STATE_DEFAULT);
+
 ui_MapList = lv_obj_create(ui_MappedInfoPane);
 lv_obj_set_width( ui_MapList, lv_pct(100));
 lv_obj_set_height( ui_MapList, LV_SIZE_CONTENT);   /// 1
@@ -351,14 +406,24 @@ lv_obj_set_style_pad_left(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_MapList, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_MapList, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_MapCircle1 = ui_MappedKnobSetItem_create(ui_MapList);
+lv_obj_set_x( ui_MapCircle1, 0 );
+lv_obj_set_y( ui_MapCircle1, 0 );
+
+lv_label_set_text(ui_comp_get_child(ui_MapCircle1, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT),"Knob Set 1");
+
+ui_UnmappedSet = ui_UnmappedKnobSetItem_create(ui_MapList);
+lv_obj_set_x( ui_UnmappedSet, 0 );
+lv_obj_set_y( ui_UnmappedSet, 0 );
 
 ui_ControlAlert = lv_obj_create(ui_MappingParameters);
 lv_obj_set_height( ui_ControlAlert, 135);
 lv_obj_set_width( ui_ControlAlert, lv_pct(100));
 lv_obj_set_align( ui_ControlAlert, LV_ALIGN_BOTTOM_MID );
-lv_obj_add_flag( ui_ControlAlert, LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_add_flag( ui_ControlAlert, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_ControlAlert, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_ControlAlert, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_ControlAlert, lv_color_hex(0x80440C), LV_PART_MAIN | LV_STATE_DEFAULT );

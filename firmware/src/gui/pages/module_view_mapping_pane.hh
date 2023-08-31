@@ -51,7 +51,7 @@ struct ModuleViewMappingPane {
 
 		// Knob name label
 		lv_label_set_text(ui_Module_Name, slug.c_str());
-		auto nm = std::visit([&](auto &el) -> std::string_view { return el.short_name; }, drawn_el.element);
+		auto nm = std::visit([](auto &el) -> std::string_view { return el.short_name; }, drawn_el.element);
 		lv_label_set_text(ui_Element_Name, nm.data());
 
 		drawn_element = &drawn_el;
@@ -119,13 +119,28 @@ private:
 		}
 	}
 
-	lv_obj_t *create_map_circle(std::string_view name, std::string_view knobset_name, unsigned color_id) {
-		auto obj = ui_MapCircle_create(ui_MapList);
-		auto circle = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE);
-		auto label = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE_KNOBLETTER);
-		auto setname = ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_KNOBSETNAMETEXT);
+	lv_obj_t *create_map_list_item(std::string_view name, std::string_view knobset_name, unsigned color_id) {
+		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
+		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
+		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
+		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id], LV_STATE_DEFAULT);
 		lv_label_set_text(label, name.data());
+		lv_label_set_text(setname, knobset_name.data());
+		return obj;
+	}
+
+	lv_obj_t *create_unmapped_list_item(std::string_view knobset_name) {
+		// auto obj = ui_UnmappedKnobSetItem_create(ui_MapList);
+		// auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		// lv_label_set_text(setname, knobset_name.data());
+		// return obj;
+		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
+		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
+		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
+		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		lv_obj_set_style_bg_color(circle, Gui::knob_palette[6], LV_STATE_DEFAULT);
+		lv_label_set_text(label, "+");
 		lv_label_set_text(setname, knobset_name.data());
 		return obj;
 	}
@@ -153,7 +168,7 @@ private:
 		lv_show(ui_MappedPanel);
 
 		if (jack_id) {
-			auto obj = create_map_circle("", name.data(), jack_id.value());
+			auto obj = create_map_list_item("", name.data(), jack_id.value());
 
 			lv_group_add_obj(pane_group, obj);
 			num_mappings = 1;
@@ -167,7 +182,7 @@ private:
 
 	void prepare_for_element(const ParamElement &) {
 		lv_show(ui_MappedPanel);
-		lv_show(ui_AddMap);
+		lv_hide(ui_AddMap);
 
 		if (is_patch_playing)
 			lv_show(ui_ControlButton);
@@ -175,22 +190,35 @@ private:
 			lv_hide(ui_ControlButton);
 
 		lv_group_add_obj(pane_group, ui_ControlButton);
-		lv_group_add_obj(pane_group, ui_AddMap);
 
 		auto &patch = patch_storage.get_view_patch();
 		auto this_module_id = PageList::get_selected_module_id();
 
 		num_mappings = 0;
 
-		for (auto &set : patch.knob_sets) {
+		for (unsigned set_i = 0; auto &set : patch.knob_sets) {
+			bool has_mapping = false;
 			for (auto &map : set.set) {
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					auto name = PanelDef::get_map_param_name(map.panel_knob_id);
-					auto obj = create_map_circle(name, set.name.c_str(), map.panel_knob_id % 6);
-					lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_MAPCIRCLE_CIRCLE));
+					auto obj = create_map_list_item(name, set.name.c_str(), map.panel_knob_id % 6);
+					lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE));
 					num_mappings++;
+					has_mapping = true;
 				}
 			}
+			if (!has_mapping) {
+				auto setname = set.name.c_str();
+				if (set.name.length() == 0) {
+					char n[12];
+					snprintf_(n, 12, "Knob Set %d", set_i + 1);
+					setname = n;
+				}
+				auto obj = create_unmapped_list_item(setname);
+				lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE));
+				// lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_UNMAPPEDKNOBSETITEM_ADDMAPBUTTON));
+			}
+			set_i++;
 		}
 
 		lv_group_focus_obj(ui_ControlButton);

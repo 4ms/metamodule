@@ -9,6 +9,10 @@ void ui_comp_KnobSetGroup_create_hook( lv_obj_t * comp)
 {
 }
 
-void ui_comp_MapCircle_create_hook( lv_obj_t * comp)
+void ui_comp_MappedKnobSetItem_create_hook( lv_obj_t * comp)
+{
+}
+
+void ui_comp_UnmappedKnobSetItem_create_hook( lv_obj_t * comp)
 {
 }
