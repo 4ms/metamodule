@@ -232,3 +232,67 @@ These are located on the back of the PCB, under the screen near the rotary encod
 They are labeled "BOOT0_2". There are two switches. Look at the diagram printed on the PCB.
 To boot with the SD, both switches should be pushed to the left.
 If you want to back to booting from Flash (internal Flash chip), then flip the bottom switch to the right.
+
+### Automatically generated materials
+
+Several files are automatically generated using python scripts, e.g. faceplate LVGL code. These generated files are already committed for a few reasons: 1) the conversion process uses some specific external programs (inkscape CLI, and a particular version of node); 2) generating all the assets takes a long time; 3) the assets don't change very often (if ever) and are completely orthogonal to the code. Also conversion from SVG to PNG can generate a file that is visually the same but has a different binary representation, causing lots of noise in the git diffs. However if you wish to (re)-generate these files, the following commands can be run:
+
+```
+# Generating LVGL image files for components
+make comp-cmd
+
+# Generating LVGL image files for faceplates
+make faceplate-cmd
+
+# Update image_list.hh
+make imagelist-cmd
+
+# Updating/creating 4ms VCV artwork SVGs files from *_info.svg files
+make vcvimages-cmd
+
+# Updating/creating CoreModule *_info.hh files from *_info.svg
+make moduleinfos-cmd
+
+# All of the above
+make regenerate-all
+```
+
+### Instructions for adding a new module (WIP)
+
+First step is add the module code as a git submodule:
+
+```
+git submodule https://github.com/<user>/<repo> firmware/vcv_ports/<Brand>
+```
+
+Create folder:
+
+```
+firmware/src/gui/images/<Brand>/modules/
+```
+
+TODO which glue files to make/how, currently too complicated:
+
+* `firmware/vcv_ports/glue/<Brand>/modules.cmake` - list of modules mainly + list of svgs
+* `firmware/vcv_ports/glue/<Brand>/CMakeLists.txt` - creates library, include directories, compile arguments
+
+
+Add the following to `firmware\CMakeLists.txt`:
+
+```
+# List of brands
+set(brands
+  <Brand>
+  ...
+)
+```
+
+and the following to `firmware\src\CMakeLists.txt`:
+
+```
+#
+# <Brand>
+#
+add_subdirectory(${FWDIR}/vcv_ports/glue/<Brand> ${CMAKE_CURRENT_BINARY_DIR}/<Brand>)
+target_link_libraries(<Brand>Modules PUBLIC VCV_adaptor)
+```
