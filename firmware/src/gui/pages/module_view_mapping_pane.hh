@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
+#include "gui/elements/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
@@ -58,7 +59,7 @@ struct ModuleViewMappingPane {
 
 		// Knob name label
 		lv_label_set_text(ui_Module_Name, slug.c_str());
-		auto nm = std::visit([](auto &el) -> std::string_view { return el.short_name; }, drawn_el.element);
+		auto nm = base_element(drawn_el.element).short_name;
 		if (nm.size() == 0)
 			nm = "(no name)";
 		lv_label_set_text(ui_Element_Name, nm.data());
@@ -121,49 +122,45 @@ private:
 		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id], LV_STATE_DEFAULT);
 		lv_label_set_text(label, name.data());
 		lv_label_set_text(setname, knobset_name.data());
-		lv_group_add_obj(pane_group, circle);
+		lv_group_add_obj(pane_group, obj);
 	}
 
 	void create_unmapped_list_item(std::string_view knobset_name) {
 		auto obj = ui_UnmappedSetItem_create(ui_MapList);
 		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
-		auto addbut = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_ADDMAPBUTTON);
 		lv_label_set_text(setname, knobset_name.data());
-		lv_group_add_obj(pane_group, addbut);
+		lv_group_add_obj(pane_group, obj);
 	}
 
-	void create_injack_list_item(Jack jack) {
-		auto obj = ui_UnmappedSetItem_create(ui_MapList);
-		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
-		auto addbut = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_ADDMAPBUTTON);
-		auto &patch = patch_storage.get_view_patch();
-		std::string_view module_name = "?";
-		std::string_view jack_name = "?";
-		if (jack.module_id < patch.module_slugs.size()) {
-			module_name = patch.module_slugs[jack.module_id];
-			// auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[jack.module_id]);
-			// if (info.width_hp) {
-			// }
-		}
-		lv_label_set_text_fmt(label, "-> %.32s %.16s", module_name.data(), jack_name.data());
-		lv_group_add_obj(pane_group, addbut);
+	void create_panelcable_item(std::string_view panel_jack_name, unsigned color_id) {
+		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
+		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
+		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
+		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
+		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id], LV_STATE_DEFAULT);
+		lv_label_set_text(label, "");
+		lv_label_set_text_fmt(setname, "Panel %.16s", panel_jack_name.data());
+		lv_group_add_obj(pane_group, obj);
 	}
 
-	void create_outjack_list_item(Jack jack) {
+	void create_cable_item(Jack jack, JackDir dir) {
 		auto obj = ui_UnmappedSetItem_create(ui_MapList);
 		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
-		auto addbut = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_ADDMAPBUTTON);
+		lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
 		auto &patch = patch_storage.get_view_patch();
-		std::string_view module_name = "?";
-		std::string_view jack_name = "?";
-		if (jack.module_id < patch.module_slugs.size()) {
-			module_name = patch.module_slugs[jack.module_id];
-			// auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[jack.module_id]);
-			// if (info.width_hp) {
-			// }
+		auto name = get_full_jack_name(jack, dir, patch);
+		lv_label_set_text_fmt(
+			label, "%s %.16s %.16s", dir == JackDir::In ? "->" : "<-", name.module_name.data(), name.jack_name.data());
+		lv_group_add_obj(pane_group, obj);
+	}
+
+	void create_jack_map_item(std::string_view name, std::optional<uint16_t> jack_id) {
+		if (jack_id) {
+			create_panelcable_item(name.data(), jack_id.value());
 		}
-		lv_label_set_text_fmt(label, "<- %.32s %.16s", module_name.data(), jack_name.data());
-		lv_group_add_obj(pane_group, addbut);
+		create_unmapped_list_item("Add cable...");
 	}
 
 	void prepare_for_element(const BaseElement &) {
@@ -171,48 +168,56 @@ private:
 		lv_hide(ui_MappedPanel);
 	}
 
-	void prepare_for_element(const JackOutput &) {
-		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
-		std::string_view name = panel_jack_id ? PanelDef::get_map_outjack_name(panel_jack_id.value()) : "";
-		prepare_for_jack(name, panel_jack_id);
-
-		auto outjack = Jack{.module_id = (uint16_t)PageList::get_selected_module_id(),
-							.jack_id = drawn_element->gui_element.idx.output_idx};
-		for (auto &cable : patch_storage.get_view_patch().int_cables) {
-			if (cable.out == outjack) {
-				//list this jack
-				for (auto &injack : cable.ins)
-					create_injack_list_item(injack);
-			}
-		}
-	}
-
-	void prepare_for_element(const JackInput &) {
-		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
-		std::string_view name = panel_jack_id ? PanelDef::get_map_injack_name(panel_jack_id.value()) : "";
-		prepare_for_jack(name, panel_jack_id);
-	}
-
-	void prepare_for_jack(std::string_view name, std::optional<uint16_t> jack_id) {
+	void prepare_for_jack() {
 		lv_hide(ui_ControlButton);
 		lv_show(ui_MappedPanel);
 		lv_hide(ui_MappedItemHeader);
+		lv_label_set_text(ui_MappedListTitle, "Cables:");
+	}
 
-		if (jack_id) {
-			create_map_list_item("", name.data(), jack_id.value());
-		} else {
-			create_unmapped_list_item("(Not mapped)");
+	void prepare_for_element(const JackOutput &) {
+		prepare_for_jack();
+
+		auto thisjack = Jack{.module_id = (uint16_t)PageList::get_selected_module_id(),
+							 .jack_id = drawn_element->gui_element.idx.output_idx};
+		for (auto &cable : patch_storage.get_view_patch().int_cables) {
+			if (cable.out == thisjack) {
+				for (auto &injack : cable.ins)
+					create_cable_item(injack, JackDir::In);
+			}
 		}
+
+		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
+		std::string_view name = panel_jack_id ? PanelDef::get_map_outjack_name(panel_jack_id.value()) : "";
+		create_jack_map_item(name, panel_jack_id);
+
+		lv_group_focus_next(pane_group);
+	}
+
+	void prepare_for_element(const JackInput &) {
+		prepare_for_jack();
+
+		auto thisjack = Jack{.module_id = (uint16_t)PageList::get_selected_module_id(),
+							 .jack_id = drawn_element->gui_element.idx.input_idx};
+		for (auto &cable : patch_storage.get_view_patch().int_cables) {
+			for (auto &injack : cable.ins) {
+				if (injack == thisjack)
+					create_cable_item(cable.out, JackDir::Out);
+			}
+		}
+
+		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
+		std::string_view name = panel_jack_id ? PanelDef::get_map_injack_name(panel_jack_id.value()) : "";
+		create_jack_map_item(name, panel_jack_id);
+
+		lv_group_focus_next(pane_group);
 	}
 
 	void prepare_for_element(const ParamElement &) {
 		lv_show(ui_MappedPanel);
 		lv_show(ui_MappedItemHeader);
-
-		if (is_patch_playing)
-			lv_show(ui_ControlButton);
-		else
-			lv_hide(ui_ControlButton);
+		lv_show(ui_ControlButton, is_patch_playing);
+		lv_label_set_text(ui_MappedListTitle, "Mappings:");
 
 		lv_group_add_obj(pane_group, ui_ControlButton);
 

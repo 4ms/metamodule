@@ -22,21 +22,20 @@ lv_obj_clear_flag( cui_MappedKnobSetItem, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_C
 lv_obj_set_style_radius(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(cui_MappedKnobSetItem, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_color(cui_MappedKnobSetItem, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_border_opa(cui_MappedKnobSetItem, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_width(cui_MappedKnobSetItem, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_side(cui_MappedKnobSetItem, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(cui_MappedKnobSetItem, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(cui_MappedKnobSetItem, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(cui_MappedKnobSetItem, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(cui_MappedKnobSetItem, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_color(cui_MappedKnobSetItem, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(cui_MappedKnobSetItem, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(cui_MappedKnobSetItem, LV_TEXT_ALIGN_AUTO, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_decor(cui_MappedKnobSetItem, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(cui_MappedKnobSetItem, &ui_font_MuseoSansRounded90018, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(cui_MappedKnobSetItem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_bg_opa(cui_MappedKnobSetItem, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 
 lv_obj_t *cui_Circle;
 cui_Circle = lv_btn_create(cui_MappedKnobSetItem);
@@ -47,10 +46,6 @@ lv_obj_add_flag( cui_Circle, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_SCROLL_O
 lv_obj_clear_flag( cui_Circle, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(cui_Circle, 22, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(cui_Circle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(cui_Circle, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUSED );
-lv_obj_set_style_outline_opa(cui_Circle, 128, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_color(cui_Circle, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
-lv_obj_set_style_outline_opa(cui_Circle, 128, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 lv_obj_t *cui_KnobLetter;
 cui_KnobLetter = lv_label_create(cui_Circle);
@@ -67,10 +62,9 @@ lv_obj_set_style_pad_bottom(cui_KnobLetter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_t *cui_KnobSetNameText;
 cui_KnobSetNameText = lv_label_create(cui_MappedKnobSetItem);
-lv_obj_set_height( cui_KnobSetNameText, 15);
+lv_obj_set_height( cui_KnobSetNameText, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_flex_grow( cui_KnobSetNameText, 1);
 lv_obj_set_align( cui_KnobSetNameText, LV_ALIGN_RIGHT_MID );
-lv_label_set_long_mode(cui_KnobSetNameText,LV_LABEL_LONG_SCROLL);
 lv_label_set_text(cui_KnobSetNameText,"Knob Set 1");
 lv_obj_clear_flag( cui_KnobSetNameText, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(cui_KnobSetNameText, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);

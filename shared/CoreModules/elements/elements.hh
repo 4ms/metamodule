@@ -93,7 +93,7 @@ using Element = std::variant<
 	AltParamToggle3>;
 
 // helper:
-inline BaseElement base_element(Element &el) {
+inline BaseElement base_element(const Element &el) {
 	return std::visit([](auto e) { return BaseElement{e}; }, el);
 }
 } // namespace MetaModule
