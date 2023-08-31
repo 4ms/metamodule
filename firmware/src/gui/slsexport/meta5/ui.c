@@ -90,18 +90,14 @@ lv_obj_t *ui_MappedItemHeaderMapText;
 lv_obj_t *ui_MappedItemHeaderKnobSetText;
 lv_obj_t *ui_MappedItemHeaderAddText;
 lv_obj_t *ui_MapList;
-lv_obj_t *ui_MapCircle1;
-lv_obj_t *ui_UnmappedSetLeft;
 lv_obj_t *ui_ControlAlert;
 lv_obj_t *ui_ControlArc;
 lv_obj_t *ui_ControlAlertLabel;
 lv_obj_t *ui_AddMapPopUp;
 lv_obj_t *ui_AddModuleName;
 lv_obj_t *ui_MapDetected;
-void ui_event_CancelAdd( lv_event_t * e);
 lv_obj_t *ui_CancelAdd;
 lv_obj_t *ui_CancelAddLabel;
-void ui_event_OkAdd( lv_event_t * e);
 lv_obj_t *ui_OkAdd;
 lv_obj_t *ui_OkAddLabel;
 lv_obj_t *ui____initial_actions0;
@@ -172,18 +168,6 @@ lv_anim_start(&PropertyAnimation_0);
 }
 
 ///////////////////// FUNCTIONS ////////////////////
-void ui_event_CancelAdd( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_flag_modify( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-}
-}
-void ui_event_OkAdd( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_flag_modify( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-}
-}
 
 ///////////////////// SCREENS ////////////////////
 
