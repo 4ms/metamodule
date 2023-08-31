@@ -415,9 +415,9 @@ lv_obj_set_y( ui_MapCircle1, 0 );
 
 lv_label_set_text(ui_comp_get_child(ui_MapCircle1, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT),"Knob Set 1");
 
-ui_UnmappedSet = ui_UnmappedKnobSetItem_create(ui_MapList);
-lv_obj_set_x( ui_UnmappedSet, 0 );
-lv_obj_set_y( ui_UnmappedSet, 0 );
+ui_UnmappedSetLeft = ui_UnmappedSetItem_create(ui_MapList);
+lv_obj_set_x( ui_UnmappedSetLeft, 0 );
+lv_obj_set_y( ui_UnmappedSetLeft, 0 );
 
 ui_ControlAlert = lv_obj_create(ui_MappingParameters);
 lv_obj_set_height( ui_ControlAlert, 135);

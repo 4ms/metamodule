@@ -127,22 +127,24 @@ private:
 		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id], LV_STATE_DEFAULT);
 		lv_label_set_text(label, name.data());
 		lv_label_set_text(setname, knobset_name.data());
-		return obj;
+		return circle;
 	}
 
 	lv_obj_t *create_unmapped_list_item(std::string_view knobset_name) {
-		// auto obj = ui_UnmappedKnobSetItem_create(ui_MapList);
-		// auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		// lv_label_set_text(setname, knobset_name.data());
-		// return obj;
-		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
-		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
-		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
-		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[6], LV_STATE_DEFAULT);
-		lv_label_set_text(label, "+");
+		auto obj = ui_UnmappedSetItem_create(ui_MapList);
+		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
+		auto add = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_ADDMAPBUTTON);
 		lv_label_set_text(setname, knobset_name.data());
-		return obj;
+		return add;
+		// auto obj = ui_MappedKnobSetItem_create(ui_MapList);
+		// auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
+		// auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
+		// auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		// lv_obj_set_style_bg_opa(circle, LV_OPA_0, LV_STATE_DEFAULT);
+		// lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded50012, LV_STATE_DEFAULT);
+		// lv_label_set_text(label, "Add");
+		// lv_label_set_text(setname, knobset_name.data());
+		// return circle;
 	}
 
 	void prepare_for_element(const BaseElement &) {
@@ -202,7 +204,7 @@ private:
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					auto name = PanelDef::get_map_param_name(map.panel_knob_id);
 					auto obj = create_map_list_item(name, set.name.c_str(), map.panel_knob_id % 6);
-					lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE));
+					lv_group_add_obj(pane_group, obj);
 					num_mappings++;
 					has_mapping = true;
 				}
@@ -215,7 +217,7 @@ private:
 					setname = n;
 				}
 				auto obj = create_unmapped_list_item(setname);
-				lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE));
+				lv_group_add_obj(pane_group, obj);
 				// lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_UNMAPPEDKNOBSETITEM_ADDMAPBUTTON));
 			}
 			set_i++;

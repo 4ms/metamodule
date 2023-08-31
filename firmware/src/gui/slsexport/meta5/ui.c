@@ -91,7 +91,7 @@ lv_obj_t *ui_MappedItemHeaderKnobSetText;
 lv_obj_t *ui_MappedItemHeaderAddText;
 lv_obj_t *ui_MapList;
 lv_obj_t *ui_MapCircle1;
-lv_obj_t *ui_UnmappedSet;
+lv_obj_t *ui_UnmappedSetLeft;
 lv_obj_t *ui_ControlAlert;
 lv_obj_t *ui_ControlArc;
 lv_obj_t *ui_ControlAlertLabel;

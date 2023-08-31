@@ -97,7 +97,7 @@ extern lv_obj_t *ui_MappedItemHeaderKnobSetText;
 extern lv_obj_t *ui_MappedItemHeaderAddText;
 extern lv_obj_t *ui_MapList;
 extern lv_obj_t *ui_MapCircle1;
-extern lv_obj_t *ui_UnmappedSet;
+extern lv_obj_t *ui_UnmappedSetLeft;
 extern lv_obj_t *ui_ControlAlert;
 extern lv_obj_t *ui_ControlArc;
 extern lv_obj_t *ui_ControlAlertLabel;
