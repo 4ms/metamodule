@@ -378,18 +378,6 @@ lv_obj_set_style_pad_bottom(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_MappingMenu_UnmappedSetItem1 = ui_UnmappedSetItem_create(ui_MapList);
-lv_obj_set_x( ui_MappingMenu_UnmappedSetItem1, 0 );
-lv_obj_set_y( ui_MappingMenu_UnmappedSetItem1, 0 );
-
-
-
-ui_MappingMenu_MappedKnobSetItem1 = ui_MappedKnobSetItem_create(ui_MapList);
-lv_obj_set_x( ui_MappingMenu_MappedKnobSetItem1, 0 );
-lv_obj_set_y( ui_MappingMenu_MappedKnobSetItem1, 0 );
-
-
-
 ui_ControlAlert = lv_obj_create(ui_MappingParameters);
 lv_obj_set_height( ui_ControlAlert, 135);
 lv_obj_set_width( ui_ControlAlert, lv_pct(100));

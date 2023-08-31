@@ -132,6 +132,40 @@ private:
 		lv_group_add_obj(pane_group, addbut);
 	}
 
+	void create_injack_list_item(Jack jack) {
+		auto obj = ui_UnmappedSetItem_create(ui_MapList);
+		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
+		auto addbut = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_ADDMAPBUTTON);
+		auto &patch = patch_storage.get_view_patch();
+		std::string_view module_name = "?";
+		std::string_view jack_name = "?";
+		if (jack.module_id < patch.module_slugs.size()) {
+			module_name = patch.module_slugs[jack.module_id];
+			// auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[jack.module_id]);
+			// if (info.width_hp) {
+			// }
+		}
+		lv_label_set_text_fmt(label, "-> %.32s %.16s", module_name.data(), jack_name.data());
+		lv_group_add_obj(pane_group, addbut);
+	}
+
+	void create_outjack_list_item(Jack jack) {
+		auto obj = ui_UnmappedSetItem_create(ui_MapList);
+		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
+		auto addbut = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_ADDMAPBUTTON);
+		auto &patch = patch_storage.get_view_patch();
+		std::string_view module_name = "?";
+		std::string_view jack_name = "?";
+		if (jack.module_id < patch.module_slugs.size()) {
+			module_name = patch.module_slugs[jack.module_id];
+			// auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[jack.module_id]);
+			// if (info.width_hp) {
+			// }
+		}
+		lv_label_set_text_fmt(label, "<- %.32s %.16s", module_name.data(), jack_name.data());
+		lv_group_add_obj(pane_group, addbut);
+	}
+
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_ControlButton);
 		lv_hide(ui_MappedPanel);
@@ -141,6 +175,16 @@ private:
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
 		std::string_view name = panel_jack_id ? PanelDef::get_map_outjack_name(panel_jack_id.value()) : "";
 		prepare_for_jack(name, panel_jack_id);
+
+		auto outjack = Jack{.module_id = (uint16_t)PageList::get_selected_module_id(),
+							.jack_id = drawn_element->gui_element.idx.output_idx};
+		for (auto &cable : patch_storage.get_view_patch().int_cables) {
+			if (cable.out == outjack) {
+				//list this jack
+				for (auto &injack : cable.ins)
+					create_injack_list_item(injack);
+			}
+		}
 	}
 
 	void prepare_for_element(const JackInput &) {
