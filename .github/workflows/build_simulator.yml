@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - '83-*'
     paths:
       - 'simulator/**'
       - 'shared/**'
@@ -46,36 +45,33 @@ jobs:
       CXX: ${{ matrix.compiler.cpp }}
 
     steps:
-      - name: No action
-        run: echo "Simulator workflow was triggered"
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
 
-#       - name: Checkout
-#         uses: actions/checkout@v3
-#         with:
-#           submodules: 'recursive'
+      - name: Install mac dependencies
+        if: matrix.os.os == 'macos'
+        run: |
+          brew install ninja sdl2 
 
-#       - name: Install mac dependencies
-#         if: matrix.os.os == 'macos'
-#         run: |
-#           brew install ninja sdl2 
+      - name: Install linux dependencies
+        if: matrix.os.os =='ubuntu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build libsdl2-dev
 
-#       - name: Install linux dependencies
-#         if: matrix.os.os =='ubuntu'
-#         run: |
-#           sudo apt-get update
-#           sudo apt-get install ninja-build libsdl2-dev
+      - name: Install windows dependencies
+        if: matrix.os.os == 'windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
 
-#       - name: Install windows dependencies
-#         if: matrix.os.os == 'windows'
-#         uses: msys2/setup-msys2@v2
-#         with:
-#           msystem: MINGW64
-#           update: true
-#           install: git make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2
-
-#       - name: 'Build'
-#         run: |
-#           cd simulator
-#           cmake -G Ninja -B build
-#           cmake --build build
+      - name: 'Build'
+        run: |
+          cd simulator
+          cmake -G Ninja -B build
+          cmake --build build
 
