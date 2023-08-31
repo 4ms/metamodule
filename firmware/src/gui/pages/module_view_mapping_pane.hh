@@ -19,7 +19,7 @@ struct ModuleViewMappingPane {
 	}
 
 	void init() {
-		lv_obj_add_event_cb(ui_AddMap, add_button_cb, LV_EVENT_PRESSED, this);
+		// lv_obj_add_event_cb(ui_AddMap, add_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_top_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ControlArc, arc_change_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -29,8 +29,15 @@ struct ModuleViewMappingPane {
 		visible = false;
 	}
 
-	void show(lv_group_t *group, const DrawnElement &drawn_el) {
+	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
 		base_group = group;
+
+		is_patch_playing = patch_playing;
+		lv_obj_set_width(ui_MappingParameters, width);
+		lv_hide(ui_ControlAlert);
+	}
+
+	void show(const DrawnElement &drawn_el) {
 		pane_group = lv_group_create();
 		lv_group_remove_all_objs(pane_group);
 		lv_group_set_editing(pane_group, false);
@@ -52,27 +59,14 @@ struct ModuleViewMappingPane {
 		// Knob name label
 		lv_label_set_text(ui_Module_Name, slug.c_str());
 		auto nm = std::visit([](auto &el) -> std::string_view { return el.short_name; }, drawn_el.element);
+		if (nm.size() == 0)
+			nm = "(no name)";
 		lv_label_set_text(ui_Element_Name, nm.data());
 
 		drawn_element = &drawn_el;
 
 		std::visit([this](auto &el) { prepare_for_element(el); }, drawn_el.element);
 
-		// display_num_mappings();
-
-		show();
-	}
-
-	void prepare_focus(uint32_t width, bool patch_playing) {
-		is_patch_playing = patch_playing;
-		lv_obj_set_width(ui_MappingParameters, width);
-		lv_hide(ui_ControlAlert);
-	}
-
-	void blur() {
-	}
-
-	void show() {
 		if (!visible) {
 			lv_hide(ui_ElementRoller);
 			lv_show(ui_MappingParameters);
@@ -119,7 +113,7 @@ private:
 		}
 	}
 
-	lv_obj_t *create_map_list_item(std::string_view name, std::string_view knobset_name, unsigned color_id) {
+	void create_map_list_item(std::string_view name, std::string_view knobset_name, unsigned color_id) {
 		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
@@ -127,30 +121,20 @@ private:
 		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id], LV_STATE_DEFAULT);
 		lv_label_set_text(label, name.data());
 		lv_label_set_text(setname, knobset_name.data());
-		return circle;
+		lv_group_add_obj(pane_group, circle);
 	}
 
-	lv_obj_t *create_unmapped_list_item(std::string_view knobset_name) {
+	void create_unmapped_list_item(std::string_view knobset_name) {
 		auto obj = ui_UnmappedSetItem_create(ui_MapList);
 		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
-		auto add = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_ADDMAPBUTTON);
+		auto addbut = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_ADDMAPBUTTON);
 		lv_label_set_text(setname, knobset_name.data());
-		return add;
-		// auto obj = ui_MappedKnobSetItem_create(ui_MapList);
-		// auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
-		// auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
-		// auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		// lv_obj_set_style_bg_opa(circle, LV_OPA_0, LV_STATE_DEFAULT);
-		// lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded50012, LV_STATE_DEFAULT);
-		// lv_label_set_text(label, "Add");
-		// lv_label_set_text(setname, knobset_name.data());
-		// return circle;
+		lv_group_add_obj(pane_group, addbut);
 	}
 
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_ControlButton);
 		lv_hide(ui_MappedPanel);
-		num_mappings = 0;
 	}
 
 	void prepare_for_element(const JackOutput &) {
@@ -168,23 +152,18 @@ private:
 	void prepare_for_jack(std::string_view name, std::optional<uint16_t> jack_id) {
 		lv_hide(ui_ControlButton);
 		lv_show(ui_MappedPanel);
+		lv_hide(ui_MappedItemHeader);
 
 		if (jack_id) {
-			auto obj = create_map_list_item("", name.data(), jack_id.value());
-
-			lv_group_add_obj(pane_group, obj);
-			num_mappings = 1;
-			lv_hide(ui_AddMap);
-
+			create_map_list_item("", name.data(), jack_id.value());
 		} else {
-			lv_show(ui_AddMap);
-			lv_group_focus_obj(ui_AddMap);
+			create_unmapped_list_item("(Not mapped)");
 		}
 	}
 
 	void prepare_for_element(const ParamElement &) {
 		lv_show(ui_MappedPanel);
-		lv_hide(ui_AddMap);
+		lv_show(ui_MappedItemHeader);
 
 		if (is_patch_playing)
 			lv_show(ui_ControlButton);
@@ -196,29 +175,18 @@ private:
 		auto &patch = patch_storage.get_view_patch();
 		auto this_module_id = PageList::get_selected_module_id();
 
-		num_mappings = 0;
-
 		for (unsigned set_i = 0; auto &set : patch.knob_sets) {
 			bool has_mapping = false;
 			for (auto &map : set.set) {
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					auto name = PanelDef::get_map_param_name(map.panel_knob_id);
-					auto obj = create_map_list_item(name, set.name.c_str(), map.panel_knob_id % 6);
-					lv_group_add_obj(pane_group, obj);
-					num_mappings++;
+					create_map_list_item(name, set.name.c_str(), map.panel_knob_id % 6);
 					has_mapping = true;
 				}
 			}
 			if (!has_mapping) {
-				auto setname = set.name.c_str();
-				if (set.name.length() == 0) {
-					char n[12];
-					snprintf_(n, 12, "Knob Set %d", set_i + 1);
-					setname = n;
-				}
-				auto obj = create_unmapped_list_item(setname);
-				lv_group_add_obj(pane_group, obj);
-				// lv_group_add_obj(pane_group, ui_comp_get_child(obj, UI_COMP_UNMAPPEDKNOBSETITEM_ADDMAPBUTTON));
+				auto setname = patch.validate_knob_set_name(set_i);
+				create_unmapped_list_item(setname);
 			}
 			set_i++;
 		}
@@ -289,7 +257,6 @@ private:
 
 	PatchStorageProxy &patch_storage;
 	PatchModQueue &patch_mod_queue;
-	uint32_t num_mappings = 0;
 	lv_group_t *base_group;
 	lv_group_t *pane_group = nullptr;
 	const DrawnElement *drawn_element;

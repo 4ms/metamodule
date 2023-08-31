@@ -141,7 +141,7 @@ struct ModuleViewPage : PageBase {
 		lv_group_focus_obj(roller);
 		// lv_group_set_editing(group, true); //why does setting edit to true make the roller not be in the edit state?
 
-		mapping_pane.prepare_focus(roller_width, is_patch_playing);
+		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 	}
 
 	void update() override {
@@ -270,7 +270,7 @@ private:
 
 		if (cur_sel < module_controls.size()) {
 			page->mode = ViewMode::Knob;
-			page->mapping_pane.show(page->group, page->drawn_elements[cur_sel]);
+			page->mapping_pane.show(page->drawn_elements[cur_sel]);
 		}
 	}
 
