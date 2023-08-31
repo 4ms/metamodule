@@ -1,6 +1,4 @@
-# TODO: This is only used by makefiles/makefile_component_images.mk
-# Delete this once we convert that to CMake
-
+set(BEFACO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../Befaco)
 
 list(APPEND BefacoModules
   EvenVCO
@@ -25,5 +23,11 @@ list(APPEND BefacoModules
   # NoisePlethora
 )
 
-list(TRANSFORM BefacoModules PREPEND res/panels/ OUTPUT_VARIABLE Befaco_faceplate_svgs)
-list(TRANSFORM Befaco_faceplate_svgs APPEND .svg)
+# svg paths
+list(TRANSFORM BefacoModules PREPEND res/panels/ OUTPUT_VARIABLE BEFACO_FACEPLATE_SVGS)
+list(TRANSFORM BEFACO_FACEPLATE_SVGS APPEND .svg)
+
+# cpp paths
+list(TRANSFORM BefacoModules PREPEND ${BEFACO_DIR}/src/ 
+     OUTPUT_VARIABLE BEFACO_SOURCE_PATHS)
+list(TRANSFORM BEFACO_SOURCE_PATHS APPEND .cpp)

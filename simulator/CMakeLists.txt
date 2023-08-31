@@ -48,12 +48,23 @@ set_source_files_properties(${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c
 # #################### CoreModules ##################################
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
 
-# #################### Befaco ######################################
-include(${MM_ROOT}/firmware/vcv_ports/glue/Befaco/modules.cmake)
-list(TRANSFORM BefacoModules PREPEND ${MM_ROOT}/firmware/vcv_ports/Befaco/src/
-     OUTPUT_VARIABLE BEFACO_SOURCE_PATHS)
-list(TRANSFORM BEFACO_SOURCE_PATHS APPEND .cpp)
-
+# for each of the following brands, load the required source files from their respective "glue" folders
+set(brands
+    Befaco 
+    AudibleInstruments
+)
+set(BRAND_SOURCE_PATHS)
+foreach(brand ${brands})
+  string(TOUPPER ${brand} BRAND)
+  
+  # modules.cmake should define ${BRAND}_SOURCE_PATHS (e.g. BEFACO_SOURCE_PATHS for Befaco)
+  include(${MM_ROOT}/firmware/vcv_ports/glue/${brand}/modules.cmake)
+  if(NOT DEFINED ${BRAND}_SOURCE_PATHS)
+    message(FATAL_ERROR "No source, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_SOURCE_PATHS!")
+  else()
+    list(APPEND BRAND_SOURCE_PATHS ${${BRAND}_SOURCE_PATHS})
+  endif()
+endforeach()
 
 set(CORE_MODULES
     ${CORE_MODULES}
@@ -61,23 +72,14 @@ set(CORE_MODULES
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
     #
-    # Befaco
-    ${BEFACO_SOURCE_PATHS}
-    #
-    # AudibleInstruments
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/src/Braids.cpp
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/utils/random.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/atan.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/units.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/analog_oscillator.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
+    # non-4ms modules
+    ${BRAND_SOURCE_PATHS}
     #
     # support files
     ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
     ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
-    ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
+    ${MM_ROOT}/shared/cpputil/util/math_tables.cc
+)
 
 # Fixups for compiler warnings in AudibleInstruments:
 set_source_files_properties(

@@ -126,11 +126,12 @@ set(brands
     Rack
 )
 foreach(brand ${brands})
+  string(TOUPPER ${brand} BRAND)
 
   # for components, we just want _all_ components so use a glob
   file(GLOB ${brand}_comp_svgs ${PROJECT_SOURCE_DIR}/../graphics/${brand}/components/*.svg)
 
-  # for each svg, add_custom_command (...) to convert to lvgl
+  # for each component svg, add_custom_command (...) to convert to lvgl
   foreach(svg ${${brand}_comp_svgs})
     get_filename_component(svg_name ${svg} NAME_WE)
     set(c_name ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/components/${svg_name}.c)
@@ -146,8 +147,14 @@ foreach(brand ${brands})
   if(NOT ${brand} STREQUAL "4ms" AND NOT ${brand} STREQUAL "Rack")
     # each brand should define the faceplate paths in modules.cmake in ${brand}_faceplate_svgs
     include(${PROJECT_SOURCE_DIR}/vcv_ports/glue/${brand}/modules.cmake)
+
+    if(NOT DEFINED ${BRAND}_FACEPLATE_SVGS)
+      message(FATAL_ERROR "No faceplate svgs for ${BRAND}, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_FACEPLATE_SVGS!")
+    endif()
+
     # we modify this list to prepend the full path
     list(TRANSFORM ${brand}_faceplate_svgs PREPEND ${PROJECT_SOURCE_DIR}/vcv_ports/${brand}/)
+
     set(${brand}_faceplate_lvgls)
   elseif(${brand} STREQUAL "4ms")
     file(GLOB ${brand}_faceplate_svgs ${PROJECT_SOURCE_DIR}/../vcv/res/modules/*.svg)
