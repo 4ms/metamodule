@@ -46,7 +46,7 @@ defaults:
 
 jobs:  
   build-lin-x64:
-    if: ${{ github.event_name == "push" || inputs.linux_x64 || startsWith(github.ref, 'refs/tags/vcv-v') }}
+    if: ${{ github.event_name == 'push' || inputs.linux_x64 || startsWith(github.ref, 'refs/tags/vcv-v') }}
     name: lin-x64
     runs-on: ubuntu-latest
     container:
