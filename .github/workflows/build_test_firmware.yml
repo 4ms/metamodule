@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - '83-*'
     tags:
       - 'firmware-v[0-9]+.[0-9]+.[0-9]+'
     paths:
@@ -25,40 +24,37 @@ jobs:
     name: "Build firmware"
     runs-on: ubuntu-latest
     steps:
-      - name: No action
-        run: echo "Firmware workflow was triggered"
+      - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: ${{ matrix.gcc }}
 
-      # - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
-      #   uses: carlosperate/arm-none-eabi-gcc-action@v1
-      #   with:
-      #     release: ${{ matrix.gcc }}
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
 
-      # - name: Checkout
-      #   uses: actions/checkout@v3
-      #   with:
-      #     submodules: 'recursive'
+      - name: Install linux dependencies
+        run: |
+          sudo apt install -y ninja-build 
 
-      # - name: Install linux dependencies
-      #   run: |
-      #     sudo apt install -y ninja-build 
+      - name: Build and test
+        run: cd firmware && make configure && make all
 
-      # - name: Build and test
-      #   run: cd firmware && make configure && make all
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware
+          path: |
+            firmware/build/mp1corea7/medium/main.elf
+            firmware/build/mp1corea7/medium/main.uimg
 
-      # - name: Upload artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: firmware
-      #     path: |
-      #       firmware/build/mp1corea7/medium/main.elf
-      #       firmware/build/mp1corea7/medium/main.uimg
-
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   if: startsWith(github.ref, 'refs/tags/firmware-v')
-      #   with:
-      #     name: "Firmware Version: ${{ env.CI_REF_NAME }}"
-      #     files: |
-      #       firmware/build/mp1corea7/medium/main.elf
-      #       firmware/build/mp1corea7/medium/main.uimg
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/firmware-v')
+        with:
+          name: "Firmware Version: ${{ env.CI_REF_NAME }}"
+          files: |
+            firmware/build/mp1corea7/medium/main.elf
+            firmware/build/mp1corea7/medium/main.uimg
 
