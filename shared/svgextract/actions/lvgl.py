@@ -70,7 +70,7 @@ def determine_dpi(filename):
     # Some need to be exported at 47.44 DPI (which makes sense since 240px screen = 5.059" module)
     # But it seems some are scaled by a factor of 96/75, so they need to be exported at 60.72 DPI
     # I don't know the reason, but the common factor seems to be width="*mm" in the file
-    if "4ms" in filename:
+    if "4ms/components/" in filename:
         return 60.72
 
     with open(filename, 'r') as fp:
