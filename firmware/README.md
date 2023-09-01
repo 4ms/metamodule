@@ -296,3 +296,5 @@ and the following to `firmware\src\CMakeLists.txt`:
 add_subdirectory(${FWDIR}/vcv_ports/glue/<Brand> ${CMAKE_CURRENT_BINARY_DIR}/<Brand>)
 target_link_libraries(<Brand>Modules PUBLIC VCV_adaptor)
 ```
+
+You will also need to add the plugin to the Hub whitelist (see `vcv/src/mapping/module_directory.hh`).

@@ -120,12 +120,8 @@ add_custom_target(module-infos DEPENDS moduleinfos-cmd)
 add_custom_target(regenerate-all DEPENDS comp-images faceplate-images image-list vcv-images module-infos)
 
 # List of brands
-set(brands
-    4ms
-    Befaco
-    AudibleInstruments
-    Rack
-)
+include(vcv_ports/brands.cmake)
+
 foreach(brand ${brands})
   string(TOUPPER ${brand} BRAND)
 
@@ -162,6 +158,9 @@ foreach(brand ${brands})
     message(STATUS "Rack modules not yet supported, skipping!")
     set(${BRAND}_FACEPLATE_SVGS)
   endif()
+
+  # generation script will fail if this folder doesn't exist
+  file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/modules)
 
   foreach(svg ${${BRAND}_FACEPLATE_SVGS})
     get_filename_component(svg_name ${svg} NAME_WE)

@@ -25,13 +25,8 @@ include(${LVGL_DIR}/CMakeLists.txt)
 file(
   GLOB
   GUI_IMAGES
-  ${MM_ROOT}/firmware/src/gui/images/4ms/modules/*.c
-  ${MM_ROOT}/firmware/src/gui/images/4ms/components/*.c
-  ${MM_ROOT}/firmware/src/gui/images/Befaco/modules/*.c
-  ${MM_ROOT}/firmware/src/gui/images/Befaco/components/*.c
-  ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/modules/*.c
-  ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/components/*.c
-  ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
+  ${MM_ROOT}/firmware/src/gui/images/*/modules/*.c
+  ${MM_ROOT}/firmware/src/gui/images/*/components/*.c
   ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
 
 # #################### SLS Export ##################################
@@ -49,10 +44,10 @@ set_source_files_properties(${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
 
 # for each of the following brands, load the required source files from their respective "glue" folders
-set(brands
-    Befaco 
-    AudibleInstruments
-)
+include(${MM_ROOT}/firmware/vcv_ports/brands.cmake)
+# following is only for custom modules (not 4ms)
+list(REMOVE_ITEM brands 4ms Rack)
+
 set(BRAND_SOURCE_PATHS)
 foreach(brand ${brands})
   string(TOUPPER ${brand} BRAND)

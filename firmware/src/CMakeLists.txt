@@ -89,12 +89,8 @@ target_link_libraries(AudibleInstrumentsModules PUBLIC VCV_adaptor)
 file(
   GLOB
   ARTWORK_SOURCES
-  ${FWDIR}/src/gui/images/4ms/modules/*_artwork_240.c
-  ${FWDIR}/src/gui/images/4ms/components/*.c
-  ${FWDIR}/src/gui/images/Befaco/modules/*_240.c
-  ${FWDIR}/src/gui/images/Befaco/components/*.c
-  ${FWDIR}/src/gui/images/AudibleInstruments/modules/*_240.c
-  ${FWDIR}/src/gui/images/AudibleInstruments/components/*.c
+  ${FWDIR}/src/gui/images/*/modules/*_240.c
+  ${FWDIR}/src/gui/images/*/components/*.c
 )
 
 #
