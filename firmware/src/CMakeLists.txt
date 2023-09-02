@@ -72,26 +72,31 @@ target_include_directories(
 )
 
 #
-# Befaco
-#
-add_subdirectory(${FWDIR}/vcv_ports/glue/Befaco ${CMAKE_CURRENT_BINARY_DIR}/Befaco)
-target_link_libraries(BefacoModules PUBLIC VCV_adaptor)
-
-#
-# AudibleInstruments
-#
-add_subdirectory(${FWDIR}/vcv_ports/glue/AudibleInstruments ${CMAKE_CURRENT_BINARY_DIR}/AudibleInstruments)
-target_link_libraries(AudibleInstrumentsModules PUBLIC VCV_adaptor)
-
-#
-# Artwork
+# Core Artwork files
 #
 file(
   GLOB
   ARTWORK_SOURCES
-  ${FWDIR}/src/gui/images/*/modules/*_240.c
-  ${FWDIR}/src/gui/images/*/components/*.c
+  ${FWDIR}/src/gui/images/4ms/modules/*_artwork_240.c
+  ${FWDIR}/src/gui/images/4ms/components/*.c
 )
+
+# load list of brands, but remove 4ms and Rack
+include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
+list(REMOVE_ITEM brands 4ms Rack)
+
+foreach(brand ${brands})
+  file (GLOB 
+    BRAND_ARTWORK_SOURCES 
+    ${FWDIR}/src/gui/images/${brand}/components/*.c 
+    ${FWDIR}/src/gui/images/${brand}/modules/*.c) 
+  list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
+
+  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
+  target_link_libraries(${brand}Modules PUBLIC VCV_adaptor)
+
+endforeach()
+
 
 #
 # RYML
