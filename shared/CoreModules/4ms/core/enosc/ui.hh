@@ -8,14 +8,6 @@
 #include "easiglib/event_handler.hh"
 #include "polyptic_oscillator.hh"
 
-constexpr u1_7 kLedAdjustMin = 0.5_u1_7;
-constexpr u1_7 kLedAdjustMax = 1.5_u1_7;
-
-constexpr u1_7 kLedAdjustValidMin = kLedAdjustMin.pred();
-constexpr u1_7 kLedAdjustValidMax = kLedAdjustMax.succ();
-constexpr f kLedAdjustRange = (f)(kLedAdjustMax - kLedAdjustMin);
-constexpr f kLedAdjustOffset = (f)(kLedAdjustMin);
-
 template<int update_rate>
 struct LedManager {
 
@@ -152,12 +144,7 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 		Color::Adjustment led_freeze_adjust;
 
 		bool validate() {
-			return led_learn_adjust.r <= kLedAdjustValidMax && led_learn_adjust.r >= kLedAdjustValidMin &&
-				   led_learn_adjust.g <= kLedAdjustValidMax && led_learn_adjust.g >= kLedAdjustValidMin &&
-				   led_learn_adjust.b <= kLedAdjustValidMax && led_learn_adjust.b >= kLedAdjustValidMin &&
-				   led_freeze_adjust.r <= kLedAdjustValidMax && led_freeze_adjust.r >= kLedAdjustValidMin &&
-				   led_freeze_adjust.g <= kLedAdjustValidMax && led_freeze_adjust.g >= kLedAdjustValidMin &&
-				   led_freeze_adjust.b <= kLedAdjustValidMax && led_freeze_adjust.b >= kLedAdjustValidMin;
+			return true;
 		}
 	};
 	LedCalibrationData led_calibration_data_;
@@ -183,8 +170,6 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 		SHIFT,
 		LEARN,
 		MANUAL_LEARN,
-		CALIBRATE_CV,
-		CALIBRATE_LEDS,
 	} mode_ = NORMAL;
 
 	Bitfield<32> active_catchups_{0};
@@ -274,16 +259,6 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 							control_.all_main_function();
 						}
 					} break;
-					case ButtonTimeout: {
-						if (e2.type == ButtonPush && e1.data == BUTTON_FREEZE && e2.data == BUTTON_FREEZE) {
-							// long-press on Freeze = Calibrate
-							mode_ = CALIBRATE_CV;
-							learn_led_.set_background(Colors::black);
-							freeze_led_.set_background(Colors::black);
-							control_.calibration_reset();
-							control_.next_calibration();
-						}
-					} break;
 					case AltParamChange: {
 						freeze_led_.flash(Colors::white);
 					} break;
@@ -333,84 +308,6 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 					mode_ = LEARN;
 				}
 			} break;
-
-			case CALIBRATE_CV: {
-				if (e1.type == CalibrationFailed) {
-					learn_led_.flash(Colors::magenta, 0.5_f);
-					freeze_led_.flash(Colors::magenta, 0.5_f);
-					reset_leds();
-					mode_ = NORMAL;
-				} else if (e1.type == CalibrationStepDone) {
-					switch (control_.calibration_state()) {
-						case CALIBRATING_PITCH_UNPATCHED:
-							control_.next_calibration(); //special-case: go directly to next step
-							break;
-						case CALIBRATING_ROOT_UNPATCHED:
-							learn_led_.set_glow(Colors::blue, 2_f);
-							freeze_led_.reset_glow();
-							break;
-						case CALIBRATING_PITCH_OFFSET:
-							learn_led_.set_glow(Colors::blue, 6_f);
-							freeze_led_.reset_glow();
-							break;
-						case CALIBRATING_PITCH_SLOPE:
-							learn_led_.reset_glow();
-							freeze_led_.set_glow(Colors::blue, 2_f);
-							break;
-						case CALIBRATING_ROOT_OFFSET:
-							learn_led_.reset_glow();
-							freeze_led_.set_glow(Colors::blue, 6_f);
-							break;
-						case CALIBRATING_ROOT_SLOPE:
-							if (control_.calibrate_offsets()) {
-								control_.SaveCalibration();
-								learn_led_.flash(Colors::green, 0.5_f); //success
-								freeze_led_.flash(Colors::green, 0.5_f);
-							} else {
-								learn_led_.flash(Colors::magenta, 0.5_f); //fail
-								freeze_led_.flash(Colors::magenta, 0.5_f);
-							}
-							reset_leds();
-							mode_ = NORMAL;
-							break;
-						default:
-							break;
-					}
-				} else //wait for button press to advance to next step
-					if (e1.type == ButtonRelease && e2.type == ButtonPush && e1.data == e2.data &&
-						!control_.calibration_busy())
-					{
-						learn_led_.set_glow(Colors::dark_cyan, 10_f); //busy lights
-						freeze_led_.set_glow(Colors::dark_cyan, 10_f);
-						control_.next_calibration();
-					}
-			} break;
-
-			case CALIBRATE_LEDS: {
-				if (e1.type == ButtonRelease && e1.data == BUTTON_FREEZE && e2.type == ButtonPush &&
-					e2.data == BUTTON_FREEZE)
-				{
-					mode_ = NORMAL; //Freeze => save led calibration
-					learn_led_.set_background(Colors::lemon);
-					freeze_led_.set_background(Colors::lemon);
-					led_calibration_data_storage_.Save();
-				} else {
-					learn_led_.set_cal(control_.scale_pot() * kLedAdjustRange + kLedAdjustOffset,
-									   control_.balance_pot() * kLedAdjustRange + kLedAdjustOffset,
-									   control_.twist_pot() * kLedAdjustRange + kLedAdjustOffset);
-
-					freeze_led_.set_cal(control_.pitch_pot() * kLedAdjustRange + kLedAdjustOffset,
-										control_.modulation_pot() * kLedAdjustRange + kLedAdjustOffset,
-										control_.warp_pot() * kLedAdjustRange + kLedAdjustOffset);
-					if (switches_.scale_.get() == 1) { //Scale switch selects color to use for calibrating
-						learn_led_.set_background(Colors::lemon);
-						freeze_led_.set_background(Colors::lemon);
-					} else {
-						learn_led_.set_background(Colors::grey50);
-						freeze_led_.set_background(Colors::grey50);
-					}
-				}
-			} break;
 		}
 	}
 
@@ -423,16 +320,9 @@ public:
 		Base::put({SwitchWarp, switches_.warp_.get()});
 		Base::Process();
 
-		// Enter LED calibration if Freeze is pushed and all switches are centered
-		if (buttons_.freeze_.pushed() && switches_.scale_.get() == 3 && switches_.mod_.get() == 3 &&
-			switches_.twist_.get() == 3 && switches_.warp_.get() == 3)
-		{
-			mode_ = CALIBRATE_LEDS;
-		} else {
-			mode_ = NORMAL;
-			learn_led_.set_background(Colors::lemon);
-			freeze_led_.set_background(Colors::lemon);
-		}
+		mode_ = NORMAL;
+		learn_led_.set_background(Colors::lemon);
+		freeze_led_.set_background(Colors::lemon);
 	}
 
 	PolypticOscillator<block_size> &osc() {
