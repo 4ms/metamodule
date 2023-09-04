@@ -89,26 +89,31 @@ add_custom_target(
 add_custom_command(
   OUTPUT comp-cmd
   COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for components"
+  VERBATIM USES_TERMINAL
 )
 
 add_custom_command(
   OUTPUT faceplate-cmd
   COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for faceplates"
+  VERBATIM USES_TERMINAL
 )
 
 add_custom_command(
   OUTPUT imagelist-cmd
   COMMAND ${CMAKE_COMMAND} -E echo "Updating image_list.hh"
+  VERBATIM USES_TERMINAL
 )
 
 add_custom_command(
   OUTPUT vcvimages-cmd
   COMMAND ${CMAKE_COMMAND} -E echo "Updating/creating 4ms VCV artwork SVGs files from *_info.svg files"
+  VERBATIM USES_TERMINAL
 )
 
 add_custom_command(
   OUTPUT moduleinfos-cmd
   COMMAND ${CMAKE_COMMAND} -E echo "Updating/creating CoreModule *_info.hh files from *_info.svg"
+  VERBATIM USES_TERMINAL
 )
 
 add_custom_target(comp-images DEPENDS comp-cmd)

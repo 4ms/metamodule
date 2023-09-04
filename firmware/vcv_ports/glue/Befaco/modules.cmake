@@ -1,6 +1,6 @@
 set(BEFACO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../Befaco)
 
-list(APPEND BefacoModules
+set(BefacoModules
   EvenVCO
   DualAtenuverter
   SpringReverb

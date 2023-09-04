@@ -1,7 +1,7 @@
 set(AUDIBLE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../AudibleInstruments)
 
 # Add modules to be included
-list(APPEND AudibleInstrumentsModules
+set(AudibleInstrumentsModules
   Braids 
   # Plaits etc
 )

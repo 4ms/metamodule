@@ -93,7 +93,7 @@ foreach(brand ${brands})
   list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_link_libraries(${brand}Modules PUBLIC VCV_adaptor)
+  target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
 
 endforeach()
 
@@ -223,9 +223,11 @@ target_link_libraries(
           ui
           ryml
           VCV_adaptor
-          BefacoModules
-          AudibleInstrumentsModules
 )
+
+foreach(brand ${brands})
+  target_link_libraries(main.elf PRIVATE ${brand}Library)
+endforeach()
 
 target_link_script(
   main

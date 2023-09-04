@@ -239,19 +239,19 @@ Several files are automatically generated using python scripts, e.g. faceplate L
 
 ```
 # Generating LVGL image files for components
-make comp-cmd
+make comp-images
 
 # Generating LVGL image files for faceplates
-make faceplate-cmd
+make faceplate-images
 
 # Update image_list.hh
-make imagelist-cmd
+make image-list
 
 # Updating/creating 4ms VCV artwork SVGs files from *_info.svg files
-make vcvimages-cmd
+make vcv-images
 
 # Updating/creating CoreModule *_info.hh files from *_info.svg
-make moduleinfos-cmd
+make module-infos
 
 # All of the above
 make regenerate-all
