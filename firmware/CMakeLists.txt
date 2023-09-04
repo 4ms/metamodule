@@ -222,5 +222,9 @@ set_source_files_properties(imagelist-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(vcvimages-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(moduleinfos-cmd PROPERTIES SYMBOLIC "true")
 
-# TODO: minblep generation, following doesn't work as needs a different compiler (non-arm)
-# add_subdirectory(${SHARED}/gen_minblep ${SHARED}/gen_minblep/build)
+add_custom_target(
+  gen_minblep
+  COMMAND cd ${PROJECT_SOURCE_DIR}/../shared/gen_minblep && cmake -B build -GNinja && cmake --build build --target generate_minblep_files
+  COMMENT "Regenerating minBlep tables"
+  VERBATIM USES_TERMINAL
+)

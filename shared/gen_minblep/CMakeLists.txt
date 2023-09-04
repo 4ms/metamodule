@@ -8,12 +8,10 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../cpputil/util/math_tables.cc
 )
 
-set(CXX c++)
 set(CMAKE_CXX_STANDARD 20)
 set(DEPFLAGS -MMD -MP -MF) 
 
 set(FW_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../firmware/)
-message(STATUS "FW_ROOT: ${FW_ROOT}")
 
 add_executable(gen_minblep ${SOURCES})
 
