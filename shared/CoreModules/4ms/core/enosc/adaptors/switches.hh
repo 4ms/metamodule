@@ -4,11 +4,6 @@
 
 struct Switches : Nocopy {
 
-	Switches() {
-		for (int i = 0; i < 16; i++)
-			Debounce();
-	}
-
 	enum Switch { SCALE, MOD, TWIST, WARP };
 	enum State { UP = 1, DOWN = 2, MID = 3 };
 
@@ -34,8 +29,6 @@ struct Switches : Nocopy {
 		}
 
 		State get() {
-			//We don't want to call Debounce() here, right? It'll mess up just_switched_*():
-			//Debounce();
 			return state_;
 		}
 
@@ -56,10 +49,4 @@ struct Switches : Nocopy {
 	struct Warp : ThreePosSwitch {
 	} warp_;
 
-	void Debounce() {
-		scale_.Debounce();
-		mod_.Debounce();
-		twist_.Debounce();
-		warp_.Debounce();
-	}
 };

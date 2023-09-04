@@ -2,7 +2,7 @@
 
 #include "buffer.hh"
 
-constexpr int kEventBufferSize = 16;
+constexpr int kEventBufferSize = 64;
 
 template<class Event>
 struct EventSource : Nocopy {
