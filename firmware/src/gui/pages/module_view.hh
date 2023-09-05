@@ -152,6 +152,7 @@ struct ModuleViewPage : PageBase {
 				}
 			} else {
 				mode = ViewMode::List;
+				lv_show(ui_ElementRoller);
 				mapping_pane.hide();
 				lv_group_focus_obj(roller);
 				lv_obj_clear_state(roller, LV_STATE_PRESSED);
@@ -168,6 +169,9 @@ struct ModuleViewPage : PageBase {
 				}
 			}
 		}
+
+		if (mode == ViewMode::Knob)
+			mapping_pane.update(params);
 	}
 
 	// This gets called after map_ring_style changes
@@ -270,6 +274,7 @@ private:
 
 		if (cur_sel < module_controls.size()) {
 			page->mode = ViewMode::Knob;
+			lv_hide(ui_ElementRoller);
 			page->mapping_pane.show(page->drawn_elements[cur_sel]);
 		}
 	}

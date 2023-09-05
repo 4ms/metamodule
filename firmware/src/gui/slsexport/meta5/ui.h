@@ -94,8 +94,6 @@ extern lv_obj_t *ui_MappedItemHeaderMapText;
 extern lv_obj_t *ui_MappedItemHeaderKnobSetText;
 extern lv_obj_t *ui_MappedItemHeaderAddText;
 extern lv_obj_t *ui_MapList;
-extern lv_obj_t *ui_MappedKnobSetItem1;
-extern lv_obj_t *ui_UnmappedSetItem1;
 extern lv_obj_t *ui_ControlAlert;
 extern lv_obj_t *ui_ControlArc;
 extern lv_obj_t *ui_ControlAlertLabel;

@@ -20,6 +20,7 @@ struct ModuleParam {
 		std::visit([&](auto &el) { set_type(el, idx); }, element);
 	}
 
+private:
 	void set_type(const BaseElement &el, ElementCount::Indices idx) {
 		type = Type::None;
 		id = 0;
