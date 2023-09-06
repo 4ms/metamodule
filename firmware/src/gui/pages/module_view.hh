@@ -7,7 +7,6 @@
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/knob_edit.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
