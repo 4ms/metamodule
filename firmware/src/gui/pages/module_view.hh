@@ -50,6 +50,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		mapping_pane.hide();
 
 		patch = patch_storage.get_view_patch();
 
