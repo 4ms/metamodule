@@ -66,13 +66,14 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		if (patch_revision == PageList::get_patch_revision() && displayed_patch_id == PageList::get_selected_patch_id())
+		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
+			displayed_patch_id == PageList::get_selected_patch_id())
 		{
 			return;
 		}
 		displayed_patch_id = PageList::get_selected_patch_id();
 		patch_revision = PageList::get_patch_revision();
-		printf_("Reloading patch\n");
+		active_knob_set = PageList::get_active_knobset();
 
 		lv_hide(modules_cont);
 
@@ -84,8 +85,6 @@ struct PatchViewPage : PageBase {
 
 		if (patch.patch_name.length() == 0)
 			return;
-
-		active_knob_set = PageList::get_active_knobset();
 
 		lv_label_set_text(patchname, patch.patch_name.c_str());
 
@@ -153,8 +152,6 @@ struct PatchViewPage : PageBase {
 		knobset_menu.hide();
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_FOCUSED);
-
-		// clear();
 	}
 
 	void clear() {
@@ -205,7 +202,6 @@ struct PatchViewPage : PageBase {
 			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
 			if (was_redrawn) {
 				auto &gui_el = drawn_el.gui_element;
-				printf_("Redraw m%d p%d\n", gui_el.module_idx, gui_el.idx.param_idx);
 				if (view_settings.map_ring_flash_active)
 					MapRingDisplay::flash_once(
 						gui_el.map_ring, view_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
@@ -238,9 +234,8 @@ struct PatchViewPage : PageBase {
 
 	void update_active_knobset() {
 		blur();
-		active_knob_set = knobset_settings.active_knobset;
-		PageList::set_active_knobset(active_knob_set);
-		patch_mod_queue.put(ChangeKnobSet{active_knob_set});
+		PageList::set_active_knobset(knobset_settings.active_knobset);
+		patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
 		prepare_focus();
 	}
 
