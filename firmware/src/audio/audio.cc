@@ -8,6 +8,7 @@
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "param_block.hh"
+#include "patch_play/patch_mods.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
 #include "sync_params.hh"
@@ -33,15 +34,6 @@ __attribute__((optimize("O0"))) void output_silence(AudioOutBuffer &out) {
 }
 
 using namespace mdrivlib;
-
-constexpr bool DEBUG_PASSTHRU_AUDIO = false;
-constexpr bool DEBUG_SINEOUT_AUDIO = false;
-constexpr bool DEBUG_NE10_FFT = false;
-// static FFTfx fftfx;
-// static Convolver fftfx;
-
-static constexpr unsigned block_0 = 1; //TargetName == Targets::stm32h7x5 ? 0 : 1;
-static constexpr unsigned block_1 = 1 - block_0;
 
 AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
@@ -122,6 +114,12 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	incal[3].calibrate_chan<2, 4, 10>(6352.f / 32768.f, 12603.f / 32768.f);
 }
 
+void AudioStream::start() {
+	codec_.start();
+	if (ext_audio_connected)
+		codec_ext_.start();
+}
+
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	auto raw_out = -1.f * player.get_panel_output(output_id) * mute_ctr;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
@@ -156,7 +154,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		return;
 	}
 
-	handle_patch_mods();
+	handle_patch_mods(patch_mod_queue, player);
 
 	// TODO: handle second codec
 	if (ext_audio_connected)
@@ -212,24 +210,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		// Get outputs from modules
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
-	}
-}
-
-void AudioStream::start() {
-	codec_.start();
-	if (ext_audio_connected)
-		codec_ext_.start();
-}
-
-void AudioStream::handle_patch_mods() {
-	if (auto patch_mod = patch_mod_queue.get()) {
-		std::visit(overloaded{
-					   [this](SetStaticParam &mod) { player.apply_static_param(mod.param); },
-					   [this](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
-					   [](AddMapping &mod) { /*TODO*/ },
-					   [](ModifyMapping &mod) { /*TODO*/ },
-				   },
-				   patch_mod.value());
 	}
 }
 
