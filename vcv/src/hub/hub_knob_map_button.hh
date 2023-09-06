@@ -26,11 +26,16 @@ public:
 
 		// Check if a ParamWidget was touched
 		auto touchedParam = APP->scene->rack->getTouchedParam();
+
 		if (touchedParam && touchedParam->getParamQuantity()) {
 			int param_id = touchedParam->getParamQuantity()->paramId;
-			APP->scene->rack->setTouchedParam(nullptr);
+			auto m = touchedParam->module;
 
-			hub->registerMap(hubParamObj.objID, touchedParam->module, param_id);
+			APP->scene->rack->setTouchedParam(nullptr);
+			hub->registerMap(hubParamObj.objID, m, param_id);
+
+		} else {
+			hub->endMapping();
 		}
 	}
 
