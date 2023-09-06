@@ -82,6 +82,7 @@ public:
 		if (setId == activeSetId || setId >= MaxKnobSets)
 			return;
 
+		updateMapsFromParamHandles();
 		activeSetId = setId;
 		refreshParamHandles();
 	}
@@ -182,6 +183,7 @@ public:
 		// Iterate mappings x MaxKnobSets times
 
 		removeMapsToDeletedModules();
+		updateMapsFromParamHandles();
 
 		for (unsigned knobSetId = 0; knobSetId < MaxKnobSets; knobSetId++) {
 			json_t *mapsJ = json_array();
@@ -273,7 +275,7 @@ public:
 						}
 					}
 
-					refreshParamHandles();
+					// refreshParamHandles();
 				}
 			}
 		}
@@ -315,15 +317,20 @@ private:
 		return map.moduleId >= 0 && map.paramId >= 0;
 	}
 
+	void updateMapsFromParamHandles() {
+		for (auto &knob : mappings) {
+			for (auto &mapset : knob) {
+				mapset.maps[activeSetId].moduleId = mapset.paramHandle.moduleId;
+				mapset.maps[activeSetId].paramId = mapset.paramHandle.paramId;
+			}
+		}
+	}
+
 	void refreshParamHandles() {
 		for (auto &knob : mappings) {
 			for (auto &mapset : knob) {
-				Mapping map = mapset.maps[activeSetId];
+				Mapping &map = mapset.maps[activeSetId];
 				APP->engine->updateParamHandle(&mapset.paramHandle, map.moduleId, map.paramId, true);
-				if (!mapset.paramHandle.module) {
-					// clear the map if VCV fails to update the paramHandle
-					map.clear();
-				}
 			}
 		}
 	}
@@ -348,28 +355,8 @@ public:
 				for (auto &map : mapset.maps) {
 					if (map.moduleId >= 0) {
 						if (APP->engine->getModule(map.moduleId) == nullptr) {
-							printf("Removed map (m:%lld p: %d)\n", map.moduleId, map.paramId);
 							map.clear();
 						}
-					}
-				}
-			}
-		}
-	}
-
-	// Removes maps in the active Knob Set with a paramHandle that was unmapped by VCV engine
-	void removeUnmappedActiveMaps() {
-		for (auto &knob : mappings) {
-			for (auto &mapset : knob) {
-
-				bool paramHandleValid = mapset.paramHandle.module && mapset.paramHandle.moduleId >= 0;
-				if (!paramHandleValid) {
-					auto &map = mapset.maps[activeSetId];
-					if (map.moduleId >= 0) {
-						// VCV invalidated the paramHandle (user selected unmap, or removed module)
-						printf(
-							"Removed map (m:%lld p: %d) in active set (%d)\n", map.moduleId, map.paramId, activeSetId);
-						map.clear();
 					}
 				}
 			}
