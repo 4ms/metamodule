@@ -29,7 +29,7 @@ struct ModuleViewPage : PageBase {
 		, patch{patch_storage.get_view_patch()}
 		, base{ui_MappingMenu}
 		, roller{ui_ElementRoller}
-		, mapping_pane{info.patch_storage, info.patch_mod_queue} {
+		, mapping_pane{info.patch_storage, module_mods} {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
@@ -138,7 +138,6 @@ struct ModuleViewPage : PageBase {
 		lv_group_add_obj(group, roller);
 
 		lv_group_focus_obj(roller);
-		// lv_group_set_editing(group, true); //why does setting edit to true make the roller not be in the edit state?
 
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 	}
@@ -171,6 +170,25 @@ struct ModuleViewPage : PageBase {
 
 		if (mode == ViewMode::Knob)
 			mapping_pane.update(params);
+
+		if (auto patch_mod = module_mods.get(); patch_mod.has_value()) {
+			PageList::increment_patch_revision();
+
+			std::visit(overloaded{
+						   [this](AddMapping &mod) { apply_add_mapping(mod); },
+						   [](auto &m) {},
+					   },
+					   patch_mod.value());
+
+			// Forward the mod to the audio/patch_player queue
+			patch_mod_queue.put(patch_mod.value());
+		}
+	}
+
+	void apply_add_mapping(AddMapping &mod) {
+		if (patch.add_update_mapped_knob(mod.set_id, mod.map)) {
+			prepare_focus();
+		}
 	}
 
 	// This gets called after map_ring_style changes
@@ -279,6 +297,7 @@ private:
 	}
 
 	ModuleInfoView moduleinfo;
+	PatchModQueue module_mods;
 
 	std::string opts;
 	uint16_t this_module_id;

@@ -26,6 +26,30 @@ struct PatchData {
 		return nullptr;
 	}
 
+	// Adds the knob mapping if and only if it does not exist
+	bool add_unique_mapped_knob(uint32_t set_id, MappedKnob const &map) {
+		if (!find_mapped_knob(set_id, map.module_id, map.param_id)) {
+			knob_sets[set_id].set.push_back(map);
+			return true;
+		}
+
+		return false;
+	}
+
+	// Updates an existing mapped knob, or adds it if it doesn't exist yet
+	bool add_update_mapped_knob(uint32_t set_id, MappedKnob const &map) {
+		if (set_id >= knob_sets.size())
+			return false;
+
+		if (auto *m = _get_mapped_knob(set_id, map.module_id, map.param_id)) {
+			*m = map;
+		} else {
+			knob_sets[set_id].set.push_back(map);
+		}
+
+		return true;
+	}
+
 	const StaticParam *find_static_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : static_knobs) {
 			if (m.module_id == module_id && m.param_id == param_id)
@@ -87,4 +111,16 @@ struct PatchData {
 		"Knob Set 7",
 		"Knob Set 8",
 	};
+
+private:
+	//non-const version for private use only
+	MappedKnob *_get_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) {
+		if (set_id < knob_sets.size()) {
+			for (auto &m : knob_sets[set_id].set) {
+				if (m.module_id == module_id && m.param_id == param_id)
+					return &m;
+			}
+		}
+		return nullptr;
+	}
 };

@@ -66,10 +66,13 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		if (displayed_patch_id == PageList::get_selected_patch_id()) {
+		if (patch_revision == PageList::get_patch_revision() && displayed_patch_id == PageList::get_selected_patch_id())
+		{
 			return;
 		}
 		displayed_patch_id = PageList::get_selected_patch_id();
+		patch_revision = PageList::get_patch_revision();
+		printf_("Reloading patch\n");
 
 		lv_hide(modules_cont);
 
@@ -77,7 +80,7 @@ struct PatchViewPage : PageBase {
 
 		patch = patch_storage.get_view_patch();
 
-		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
+		is_patch_playing = displayed_patch_id == patch_playloader.cur_patch_index();
 
 		if (patch.patch_name.length() == 0)
 			return;
@@ -168,7 +171,7 @@ struct PatchViewPage : PageBase {
 
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
-		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
+		is_patch_playing = displayed_patch_id == patch_playloader.cur_patch_index();
 
 		if (is_patch_playing != last_is_patch_playing || view_settings.changed) {
 			view_settings.changed = false;
@@ -202,6 +205,7 @@ struct PatchViewPage : PageBase {
 			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
 			if (was_redrawn) {
 				auto &gui_el = drawn_el.gui_element;
+				printf_("Redraw m%d p%d\n", gui_el.module_idx, gui_el.idx.param_idx);
 				if (view_settings.map_ring_flash_active)
 					MapRingDisplay::flash_once(
 						gui_el.map_ring, view_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
@@ -319,6 +323,7 @@ private:
 	bool is_patch_playing = false;
 
 	uint32_t displayed_patch_id = 0xFFFFFFFF;
+	uint32_t patch_revision = 0xFFFFFFFF;
 
 	unsigned active_knob_set = 0;
 

@@ -25,7 +25,8 @@ class PageList {
 	static inline uint32_t selected_patch_id = 0;
 	static inline uint32_t selected_module_id = 0;
 	static inline uint32_t active_knobset_id = 0;
-	static inline ModuleParam selected_control_id{};
+	// static inline ModuleParam selected_control_id{};
+	static inline uint32_t patch_revision = 0;
 
 public:
 	static void set_selected_patch_id(uint32_t id) {
@@ -52,12 +53,12 @@ public:
 		return selected_module_id;
 	}
 
-	static void set_selected_control(ModuleParam id) {
-		selected_control_id = id;
+	static void increment_patch_revision() {
+		patch_revision++;
 	}
 
-	static ModuleParam get_selected_control() {
-		return selected_control_id;
+	static uint32_t get_patch_revision() {
+		return patch_revision;
 	}
 
 	// Associates a pointer to a Page with an id
@@ -71,11 +72,6 @@ public:
 		_pages[idx] = page;
 		return true;
 	}
-
-	// static PageBase *get_page(PageId id) {
-	// 	auto idx = static_cast<uint32_t>(id);
-	// 	return _pages[idx];
-	// }
 
 	static void request_new_page(PageId id) {
 		auto idx = static_cast<uint32_t>(id);

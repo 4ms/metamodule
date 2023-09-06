@@ -98,11 +98,11 @@ public:
 			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
-				printf_("Module %s not found\n", pd.module_slugs[i].data());
+				pr_err("Module %s not found\n", pd.module_slugs[i].data());
 				is_loaded = false;
 				return false;
 			}
-			printf_("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
+			pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
@@ -193,11 +193,8 @@ public:
 	}
 
 	void add_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
-		if (knobset_id < pd.knob_sets.size()) {
-			if (!pd.find_mapped_knob(knobset_id, map.module_id, map.param_id)) {
-				pd.knob_sets[knobset_id].set.push_back(map);
-				cache_knob_mapping(knobset_id, map);
-			}
+		if (pd.add_update_mapped_knob(knobset_id, map)) {
+			cache_knob_mapping(knobset_id, map);
 		}
 	}
 
@@ -359,17 +356,17 @@ public:
 					if (cable.is_monophonic_note()) {
 						// in_conns[MidiMonoNoteJack].push_back(input_jack);
 						update_or_add(in_conns[MidiMonoNoteJack], input_jack);
-						printf_("Mapping midi monophonic note to jack: m=%d, p=%d\n",
-								input_jack.module_id,
-								input_jack.jack_id);
+						pr_trace("Mapping midi monophonic note to jack: m=%d, p=%d\n",
+								 input_jack.module_id,
+								 input_jack.jack_id);
 						continue;
 					}
 					if (cable.is_monophonic_gate()) {
 						// in_conns[MidiMonoGateJack].push_back(input_jack);
 						update_or_add(in_conns[MidiMonoGateJack], input_jack);
-						printf_("Mapping midi monophonic gate to jack: m=%d, p=%d\n",
-								input_jack.module_id,
-								input_jack.jack_id);
+						pr_trace("Mapping midi monophonic gate to jack: m=%d, p=%d\n",
+								 input_jack.module_id,
+								 input_jack.jack_id);
 						continue;
 					}
 					if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
@@ -377,9 +374,9 @@ public:
 						// in_conns[panel_jack_id].push_back(input_jack);
 						continue;
 					}
-					printf_("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
+					pr_err("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
 				} else {
-					printf_("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
+					pr_warn("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
 							panel_jack_id,
 							dup_int_cable);
 					// TODO: When panel input jack is mapped to a jack containing a cable (to an output)
