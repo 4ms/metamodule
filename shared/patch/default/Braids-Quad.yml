@@ -29,19 +29,19 @@ PatchData:
   static_knobs:
     - module_id: 1
       param_id: 0
-      value: 0.5
+      value: 0
     - module_id: 1
       param_id: 1
-      value: 0.5
+      value: -1
     - module_id: 1
       param_id: 2
-      value: 0.5
+      value: 0
     - module_id: 1
       param_id: 3
       value: 0.5
     - module_id: 1
       param_id: 4
-      value: 0.5
+      value: 0
     - module_id: 1
       param_id: 5
       value: 0.5
@@ -50,19 +50,19 @@ PatchData:
       value: 0.5
     - module_id: 2
       param_id: 0
-      value: 0.5
+      value: 0
     - module_id: 2
       param_id: 1
-      value: 0.5
+      value: -1
     - module_id: 2
       param_id: 2
-      value: 0.5
+      value: 0
     - module_id: 2
       param_id: 3
       value: 0.5
     - module_id: 2
       param_id: 4
-      value: 0.5
+      value: 0
     - module_id: 2
       param_id: 5
       value: 0.5
@@ -71,19 +71,19 @@ PatchData:
       value: 0.5
     - module_id: 3
       param_id: 0
-      value: 0.5
+      value: 0
     - module_id: 3
       param_id: 1
-      value: 0.5
+      value: -1
     - module_id: 3
       param_id: 2
-      value: 0.5
+      value: 0
     - module_id: 3
       param_id: 3
       value: 0.5
     - module_id: 3
       param_id: 4
-      value: 0.5
+      value: 0
     - module_id: 3
       param_id: 5
       value: 0.5
@@ -92,19 +92,19 @@ PatchData:
       value: 0.5
     - module_id: 4
       param_id: 0
-      value: 0.5
+      value: 0
     - module_id: 4
       param_id: 1
-      value: 0.5
+      value: -1
     - module_id: 4
       param_id: 2
-      value: 0.5
+      value: 0
     - module_id: 4
       param_id: 3
       value: 0.5
     - module_id: 4
       param_id: 4
-      value: 0.5
+      value: 0
     - module_id: 4
       param_id: 5
       value: 0.5

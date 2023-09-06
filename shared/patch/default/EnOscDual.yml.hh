@@ -80,16 +80,16 @@ PatchData:
       value: 0.5
     - module_id: 1
       param_id: 9
-      value: 0.5
+      value: 1
     - module_id: 1
       param_id: 10
-      value: 0.5
+      value: 1
     - module_id: 1
       param_id: 11
-      value: 0.5
+      value: 1
     - module_id: 1
       param_id: 12
-      value: 0.5
+      value: 1
     - module_id: 1
       param_id: 13
       value: 1
@@ -125,16 +125,16 @@ PatchData:
       value: 0.5
     - module_id: 2
       param_id: 9
-      value: 0.5
+      value: 1
     - module_id: 2
       param_id: 10
-      value: 0.5
+      value: 1
     - module_id: 2
       param_id: 11
-      value: 0.5
+      value: 1
     - module_id: 2
       param_id: 12
-      value: 0.5
+      value: 1
     - module_id: 2
       param_id: 13
       value: 1
