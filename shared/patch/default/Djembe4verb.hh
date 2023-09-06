@@ -117,6 +117,22 @@ PatchData:
       out:
         module_id: 11
         jack_id: 0
+    - panel_jack_id: 0
+      out:
+        module_id: 15
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 13
+        jack_id: 0
+    - panel_jack_id: 2
+      out:
+        module_id: 4
+        jack_id: 0
+    - panel_jack_id: 3
+      out:
+        module_id: 4
+        jack_id: 1
   static_knobs:
     - module_id: 1
       param_id: 0
@@ -156,10 +172,10 @@ PatchData:
       value: 0.43109
     - module_id: 4
       param_id: 0
-      value: 0.7315
+      value: 0.308608
     - module_id: 4
       param_id: 1
-      value: 0.513554
+      value: 0.297891
     - module_id: 4
       param_id: 2
       value: 0.619476
@@ -189,7 +205,7 @@ PatchData:
       value: 0
     - module_id: 6
       param_id: 0
-      value: 0.200367
+      value: 0.299162
     - module_id: 6
       param_id: 1
       value: 0
@@ -222,16 +238,16 @@ PatchData:
       value: 0.96506
     - module_id: 9
       param_id: 0
-      value: 0.0410903
+      value: 0.223018
     - module_id: 10
       param_id: 0
       value: 0.45
     - module_id: 11
       param_id: 0
-      value: 0.304162
+      value: 0.365608
     - module_id: 12
       param_id: 0
-      value: 0.334868
+      value: 0.446916
     - module_id: 13
       param_id: 0
       value: 0.308608
@@ -249,13 +265,13 @@ PatchData:
       value: 0.223018
     - module_id: 13
       param_id: 5
-      value: 0.806024
+      value: 0.96506
     - module_id: 13
       param_id: 6
       value: 0
     - module_id: 14
       param_id: 0
-      value: 0.4335
+      value: 0.508199
     - module_id: 15
       param_id: 0
       value: 0.446916
@@ -267,7 +283,7 @@ PatchData:
       value: 0.45
     - module_id: 15
       param_id: 3
-      value: 0.96506
+      value: 0.806024
   mapped_knobs:
     - name: Clocks
       set:
@@ -358,12 +374,6 @@ PatchData:
           min: 0
           max: 1
         - panel_knob_id: 2
-          module_id: 7
-          param_id: 0
-          curve_type: 0
-          min: 0
-          max: 1
-        - panel_knob_id: 2
           module_id: 2
           param_id: 3
           curve_type: 0
@@ -428,12 +438,6 @@ PatchData:
         - panel_knob_id: 0
           module_id: 13
           param_id: 1
-          curve_type: 0
-          min: 0
-          max: 1
-        - panel_knob_id: 1
-          module_id: 13
-          param_id: 2
           curve_type: 0
           min: 0
           max: 1
