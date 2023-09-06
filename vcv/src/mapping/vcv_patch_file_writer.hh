@@ -37,9 +37,9 @@ struct VCVPatchFileWriter {
 					printf("Warning: module slug truncated to 31 chars\n");
 
 				if (!ModuleDirectory::isHub(module)) {
-					for (int i = 0; auto &p : module->params) {
-						paramData.push_back({.value = p.value, .paramID = i, .moduleID = moduleID});
-						i++;
+					for (size_t i = 0; i < module->paramQuantities.size(); i++) { //auto &p : module->params) {
+						float val = module->getParamQuantity(i)->getScaledValue();
+						paramData.push_back({.value = val, .paramID = (int)i, .moduleID = moduleID});
 					}
 				}
 			}
