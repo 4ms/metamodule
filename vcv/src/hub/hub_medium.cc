@@ -4,7 +4,6 @@
 #include "comm/comm_module.hh"
 #include "hub/hub_elements.hh"
 #include "hub_module_widget.hh"
-#include "mapping/Mapping.h"
 #include "mapping/patch_writer.hh"
 #include "widgets/4ms/4ms_widgets.hh"
 #include "widgets/vcv_module_creator.hh"
