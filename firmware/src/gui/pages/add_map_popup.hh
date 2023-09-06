@@ -100,11 +100,6 @@ struct AddMapPopUp {
 						},
 					.set_id = page->set_id,
 				});
-				printf_("Map panel %d to m %d p %d, in set %d\n",
-						page->selected_knob.value(),
-						module_id,
-						page->param_idx,
-						page->set_id);
 			}
 			page->hide();
 		}

@@ -197,11 +197,6 @@ public:
 			if (!pd.find_mapped_knob(knobset_id, map.module_id, map.param_id)) {
 				pd.knob_sets[knobset_id].set.push_back(map);
 				cache_knob_mapping(knobset_id, map);
-				printf_("Added Map panel %d to m %d p %d, in set %d\n",
-						map.panel_knob_id,
-						map.module_id,
-						map.param_id,
-						knobset_id);
 			}
 		}
 	}
@@ -387,12 +382,8 @@ public:
 					printf_("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
 							panel_jack_id,
 							dup_int_cable);
-					// error: Panel input jack is mapped to a jack containing a cable (to an output)
-					// - ? Create a module that outputs the sum of two inputs, and adjust int_cables and in_mappings?
-					// - ? Keep the mapping and remove the int_cable entry?
-					// - ? Keep it as-is (ignore the mapping and keep the int_cable)
-					// ->>>Create a normalized mapping: Use the int_cable when panel jack is unpatched
-					// - ? Error out: don't load patch, it's malformed
+					// TODO: When panel input jack is mapped to a jack containing a cable (to an output)
+					// ->>> Create a normalized mapping: Use the int_cable when panel jack is unpatched
 				}
 			}
 		}
