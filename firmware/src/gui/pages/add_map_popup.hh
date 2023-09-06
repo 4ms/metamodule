@@ -26,7 +26,7 @@ struct AddMapPopUp {
 		base_group = group;
 	}
 
-	void show(uint16_t param_id) {
+	void show(uint32_t knobset_id, uint16_t param_id) {
 		selected_knob = std::nullopt;
 
 		popup_group = lv_group_create();
@@ -46,6 +46,7 @@ struct AddMapPopUp {
 		lv_indev_set_group(indev, popup_group);
 
 		param_idx = param_id;
+		set_id = knobset_id;
 		visible = true;
 	}
 
@@ -71,7 +72,7 @@ struct AddMapPopUp {
 			for (unsigned i = 0; auto const &knob : params.knobs) {
 				if (knob.changed) {
 					auto name = PanelDef::get_map_param_name(i);
-					lv_label_set_text_fmt(ui_MapDetected, "Knob: %.4s", name);
+					lv_label_set_text_fmt(ui_MapDetected, "Knob: %.4s", name.data());
 					selected_knob = i;
 				}
 				i++;
@@ -85,32 +86,42 @@ struct AddMapPopUp {
 		auto page = static_cast<AddMapPopUp *>(event->user_data);
 
 		if (event->target == ui_OkAdd) {
-			if (page->selected_knob) {
+			if (page->selected_knob.has_value()) {
 				uint16_t module_id = PageList::get_selected_module_id();
-				auto ctl = PageList::get_selected_control();
+
 				page->patch_mod_queue.put(AddMapping{
 					.map =
 						{
 							.panel_knob_id = page->selected_knob.value(),
 							.module_id = module_id,
-							.param_id = (uint16_t)ctl.id,
-							// float min;
-							// float max;
+							.param_id = page->param_idx,
+							.min = 0.f,
+							.max = 1.f,
 						},
+					.set_id = page->set_id,
 				});
+				printf_("Map panel %d to m %d p %d, in set %d\n",
+						page->selected_knob.value(),
+						module_id,
+						page->param_idx,
+						page->set_id);
 			}
+			page->hide();
+		}
 
-			if (event->target == ui_CancelAdd) {
-				page->hide();
-			}
+		else if (event->target == ui_CancelAdd)
+		{
+			page->hide();
 		}
 	}
+
 	PatchStorageProxy &patch_storage;
 	PatchModQueue &patch_mod_queue;
 	lv_group_t *base_group;
 	lv_group_t *popup_group = nullptr;
 
 	uint16_t param_idx = 0;
+	uint32_t set_id = 0;
 	bool visible = false;
 	std::optional<uint16_t> selected_knob{};
 };

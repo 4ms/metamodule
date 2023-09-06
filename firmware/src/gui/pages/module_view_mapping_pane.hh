@@ -107,6 +107,9 @@ struct ModuleViewMappingPane {
 	}
 
 private:
+	// used to work with lvgl object void* user_data
+	static inline uint32_t knobset_indices[MaxKnobSets]{0, 1, 2, 3, 4, 5, 6, 7};
+
 	void remove_all_items() {
 		auto num_circles = lv_obj_get_child_cnt(ui_MapList);
 		for (unsigned i = 0; i < num_circles; i++) {
@@ -115,16 +118,24 @@ private:
 		}
 	}
 
-	void group_add_button(lv_obj_t *obj) {
+	void group_add_button(lv_obj_t *obj, std::optional<uint32_t> set_i = std::nullopt) {
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
 		lv_obj_add_event_cb(obj, add_button_cb, LV_EVENT_PRESSED, this);
+		if (set_i.has_value())
+			lv_obj_set_user_data(obj, &(knobset_indices[set_i.value()]));
+		else
+			lv_obj_set_user_data(obj, nullptr);
 	}
 
-	void group_edit_button(lv_obj_t *obj) {
+	void group_edit_button(lv_obj_t *obj, std::optional<uint32_t> set_i = std::nullopt) {
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
 		lv_obj_add_event_cb(obj, edit_button_cb, LV_EVENT_PRESSED, this);
+		if (set_i.has_value())
+			lv_obj_set_user_data(obj, &(knobset_indices[set_i.value()]));
+		else
+			lv_obj_set_user_data(obj, nullptr);
 	}
 
 	void prepare_for_element(const BaseElement &) {
@@ -193,20 +204,20 @@ private:
 		auto &patch = patch_storage.get_view_patch();
 		auto this_module_id = PageList::get_selected_module_id();
 
-		for (unsigned set_i = 0; auto &set : patch.knob_sets) {
+		for (uint32_t set_i = 0; auto &set : patch.knob_sets) {
 			bool has_mapping = false;
 			for (auto &map : set.set) {
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					auto name = PanelDef::get_map_param_name(map.panel_knob_id);
 					auto obj = list.create_map_list_item(name, set.name.c_str(), map.panel_knob_id % 6);
-					group_edit_button(obj);
+					group_edit_button(obj, set_i);
 					has_mapping = true;
 				}
 			}
 			if (!has_mapping) {
 				auto setname = patch.validate_knob_set_name(set_i);
 				auto obj = list.create_unmapped_list_item(setname);
-				group_add_button(obj);
+				group_add_button(obj, set_i);
 			}
 			set_i++;
 		}
@@ -227,7 +238,12 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		page->add_map_popup.show(page->drawn_element->gui_element.idx.param_idx);
+		uint32_t knobset_id = 0; //FIXME
+		auto obj = event->target;
+		if (auto knobset_ptr = lv_obj_get_user_data(obj)) {
+			knobset_id = *static_cast<uint32_t *>(knobset_ptr);
+		}
+		page->add_map_popup.show(knobset_id, page->drawn_element->gui_element.idx.param_idx);
 	}
 
 	static void control_button_cb(lv_event_t *event) {

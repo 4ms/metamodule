@@ -83,7 +83,7 @@ public:
 			std::visit(overloaded{
 						   [this](SetStaticParam &mod) { player.apply_static_param(mod.param); },
 						   [this](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
-						   [](AddMapping &mod) { /*TODO*/ },
+						   [this](AddMapping &mod) { player.add_mapped_knob(mod.set_id, mod.map); },
 						   [](ModifyMapping &mod) { /*TODO*/ },
 					   },
 					   patch_mod.value());

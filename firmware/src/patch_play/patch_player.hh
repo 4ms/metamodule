@@ -192,8 +192,18 @@ public:
 		//Also set it in the patch?
 	}
 
-	void add_mapped_knob(const MappedKnob &map) {
-		//TODO
+	void add_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
+		if (knobset_id < pd.knob_sets.size()) {
+			if (!pd.find_mapped_knob(knobset_id, map.module_id, map.param_id)) {
+				pd.knob_sets[knobset_id].set.push_back(map);
+				cache_knob_mapping(knobset_id, map);
+				printf_("Added Map panel %d to m %d p %d, in set %d\n",
+						map.panel_knob_id,
+						map.module_id,
+						map.param_id,
+						knobset_id);
+			}
+		}
 	}
 
 	void set_active_knob_set(unsigned num) {
