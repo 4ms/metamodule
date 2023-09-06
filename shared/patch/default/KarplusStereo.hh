@@ -11,6 +11,7 @@ PatchData:
     4: Freeverb
     5: PitchShift
     6: PitchShift
+    7: Mixer
   int_cables:
     - out:
         module_id: 2
@@ -36,6 +37,18 @@ PatchData:
       ins:
         - module_id: 6
           jack_id: 0
+    - out:
+        module_id: 5
+        jack_id: 0
+      ins:
+        - module_id: 7
+          jack_id: 0
+    - out:
+        module_id: 6
+        jack_id: 0
+      ins:
+        - module_id: 7
+          jack_id: 1
   mapped_ins:
     - panel_jack_id: 6
       ins:
@@ -45,44 +58,50 @@ PatchData:
       ins:
         - module_id: 1
           jack_id: 1
-    - panel_jack_id: 0
-      ins:
-        - module_id: 2
-          jack_id: 0
-    - panel_jack_id: 1
-      ins:
-        - module_id: 1
-          jack_id: 0
   mapped_outs:
     - panel_jack_id: 0
       out:
-        module_id: 3
+        module_id: 7
         jack_id: 0
     - panel_jack_id: 1
       out:
-        module_id: 4
-        jack_id: 0
-    - panel_jack_id: 2
-      out:
         module_id: 5
         jack_id: 0
-    - panel_jack_id: 3
+    - panel_jack_id: 2
       out:
         module_id: 6
         jack_id: 0
   static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0
+    - module_id: 1
+      param_id: 1
+      value: 0
+    - module_id: 1
+      param_id: 2
+      value: 0
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 0
+    - module_id: 2
+      param_id: 2
+      value: 0
     - module_id: 3
       param_id: 0
       value: 0
     - module_id: 3
       param_id: 1
-      value: 0
+      value: 0.173494
     - module_id: 3
       param_id: 2
-      value: 0.25
+      value: 0
     - module_id: 3
       param_id: 3
-      value: 0.875
+      value: 0.195181
     - module_id: 4
       param_id: 0
       value: 0
@@ -94,7 +113,7 @@ PatchData:
       value: 0.25
     - module_id: 4
       param_id: 3
-      value: 0.875
+      value: 0
     - module_id: 5
       param_id: 0
       value: 0
@@ -119,98 +138,104 @@ PatchData:
     - module_id: 6
       param_id: 3
       value: 0.875
-    - module_id: 1
+    - module_id: 7
       param_id: 0
-      value: 0
-    - module_id: 1
+      value: 0.975904
+    - module_id: 7
       param_id: 1
-      value: 0
-    - module_id: 1
+      value: 1
+    - module_id: 7
       param_id: 2
       value: 0
-    - module_id: 2
-      param_id: 0
-      value: 0
-    - module_id: 2
-      param_id: 1
-      value: 0
-    - module_id: 2
-      param_id: 2
+    - module_id: 7
+      param_id: 3
       value: 0
   mapped_knobs:
     - name: Default
       set:
-      - panel_knob_id: 6
-        module_id: 2
-        param_id: 0
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 7
-        module_id: 2
-        param_id: 1
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 8
-        module_id: 2
-        param_id: 2
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 9
-        module_id: 1
-        param_id: 0
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 10
-        module_id: 1
-        param_id: 1
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 11
-        module_id: 1
-        param_id: 2
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 0
-        module_id: 3
-        param_id: 0
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 1
-        module_id: 3
-        param_id: 1
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 2
-        module_id: 4
-        param_id: 0
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 3
-        module_id: 4
-        param_id: 1
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 4
-        module_id: 5
-        param_id: 0
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 5
-        module_id: 6
-        param_id: 0
-        curve_type: 0
-        min: 0
-        max: 1
+        - panel_knob_id: 0
+          module_id: 3
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 3
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 3
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 5
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 4
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 4
+          module_id: 4
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 6
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 2
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 2
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 2
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 1
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 1
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
 
 )";

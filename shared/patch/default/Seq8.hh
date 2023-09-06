@@ -2,30 +2,26 @@ static char Seq8_patch[] =
 	R"(
 PatchData:
   patch_name: Seq8
-  description: '8-step seq'
+  description: '8-step seq. Patch clock into Gate1, or use internal LFO  (Out8)'
   module_slugs:
     0: HubMedium
     1: Seq8
     2: MultiLFO
   int_cables: []
   mapped_ins:
-    - panel_jack_id: 6
-      ins:
-        - module_id: 1
-          jack_id: 0
     - panel_jack_id: 7
       ins:
         - module_id: 1
           jack_id: 1
+    - panel_jack_id: 6
+      ins:
+        - module_id: 1
+          jack_id: 0
   mapped_outs:
     - panel_jack_id: 7
       out:
         module_id: 2
         jack_id: 1
-    - panel_jack_id: 6
-      out:
-        module_id: 2
-        jack_id: 2
     - panel_jack_id: 0
       out:
         module_id: 1
@@ -35,15 +31,6 @@ PatchData:
         module_id: 1
         jack_id: 0
   static_knobs:
-    - module_id: 2
-      param_id: 0
-      value: 0.4485
-    - module_id: 2
-      param_id: 1
-      value: 0
-    - module_id: 2
-      param_id: 2
-      value: 0
     - module_id: 1
       param_id: 0
       value: 0
@@ -64,12 +51,21 @@ PatchData:
       value: 0
     - module_id: 1
       param_id: 6
-      value: 0
+      value: 0.4485
     - module_id: 1
       param_id: 7
       value: 0
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 0
+    - module_id: 2
+      param_id: 2
+      value: 0.240964
   mapped_knobs:
-    - name: Default
+    - name: ''
       set:
         - panel_knob_id: 0
           module_id: 1
@@ -107,7 +103,19 @@ PatchData:
           curve_type: 0
           min: 0
           max: 1
-        - panel_knob_id: 11
+        - panel_knob_id: 6
+          module_id: 2
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 2
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
           module_id: 1
           param_id: 6
           curve_type: 0
@@ -119,11 +127,11 @@ PatchData:
           curve_type: 0
           min: 0
           max: 1
-        - panel_knob_id: 9
-          module_id: 2
-          param_id: 0
-          curve_type: 0
-          min: 0
-          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
 
 )";

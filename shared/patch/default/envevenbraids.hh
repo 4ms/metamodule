@@ -9,7 +9,7 @@ PatchData:
     2: EvenVCO
     3: Braids
     4: Braids
-    5: DualAtenuverter
+    5: Braids
   int_cables:
     - out:
         module_id: 1
@@ -88,19 +88,19 @@ PatchData:
       value: 1
     - module_id: 2
       param_id: 0
-      value: -0
+      value: 0
     - module_id: 2
       param_id: 1
-      value: -0.303614
+      value: 0.4
     - module_id: 2
       param_id: 2
-      value: -1
+      value: 0
     - module_id: 3
       param_id: 0
       value: 0
     - module_id: 3
       param_id: 1
-      value: -5
+      value: 0.44444
     - module_id: 3
       param_id: 2
       value: 0
@@ -121,7 +121,7 @@ PatchData:
       value: 0
     - module_id: 4
       param_id: 1
-      value: -1
+      value: 0
     - module_id: 4
       param_id: 2
       value: 0
@@ -142,86 +142,93 @@ PatchData:
       value: 0
     - module_id: 5
       param_id: 1
-      value: -1
+      value: 0
     - module_id: 5
       param_id: 2
       value: 0
     - module_id: 5
       param_id: 3
       value: 0.5
+    - module_id: 5
+      param_id: 4
+      value: 0
+    - module_id: 5
+      param_id: 5
+      value: 0.5
+    - module_id: 5
+      param_id: 6
+      value: 0
   mapped_knobs:
-    - name: 'Default'
-      set:
-      - panel_knob_id: 0
-        module_id: 1
-        param_id: 0
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 1
-        module_id: 1
-        param_id: 1
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 2
-        module_id: 2
-        param_id: 1
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 3
-        module_id: 2
-        param_id: 0
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 4
-        module_id: 1
-        param_id: 2
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 5
-        module_id: 3
-        param_id: 3
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 6
-        module_id: 1
-        param_id: 5
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 7
-        module_id: 1
-        param_id: 6
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 8
-        module_id: 1
-        param_id: 7
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 9
-        module_id: 3
-        param_id: 6
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 10
-        module_id: 3
-        param_id: 1
-        curve_type: 0
-        min: 0
-        max: 1
-      - panel_knob_id: 11
-        module_id: 3
-        param_id: 5
-        curve_type: 0
-        min: 0
-        max: 1
+    - panel_knob_id: 0
+      module_id: 1
+      param_id: 0
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 1
+      module_id: 1
+      param_id: 1
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 2
+      module_id: 2
+      param_id: 1
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 3
+      module_id: 2
+      param_id: 0
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 4
+      module_id: 1
+      param_id: 2
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 5
+      module_id: 3
+      param_id: 3
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 6
+      module_id: 1
+      param_id: 5
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 7
+      module_id: 1
+      param_id: 6
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 8
+      module_id: 1
+      param_id: 7
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 9
+      module_id: 3
+      param_id: 6
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 10
+      module_id: 3
+      param_id: 1
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 11
+      module_id: 3
+      param_id: 5
+      curve_type: 0
+      min: 0
+      max: 1
 )";
