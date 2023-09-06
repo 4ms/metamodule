@@ -1,3 +1,5 @@
+static char EnOsc8StepSeq_patch[] =
+	R"(
 PatchData:
   patch_name: 'EnOsc-8-step-seq'
   description: '8-step seq driving an EnOsc. Patch clock into Gate1, or use internal LFO  (Out8) into Gate1.'
@@ -528,3 +530,5 @@ PatchData:
           max: 1
     - name: ''
       set: []
+
+)";
