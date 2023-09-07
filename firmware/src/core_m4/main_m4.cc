@@ -22,7 +22,7 @@
 namespace MetaModule
 {
 
-constexpr bool reload_default_patches = true;
+constexpr bool reload_default_patches = false;
 
 using namespace mdrivlib;
 
