@@ -15,10 +15,13 @@ CompileFlags:
 		"-mthumb-interwork",
 		"-ffold-simple-inlines",
         "-std=gnu++23",
+        "-DSIMULATOR",
 	]
 	Add: [
 		"--target=arm-none-eabi", 
         "-std=gnu++2b",
+        "-I../src/console", #Needed because clangd16 infers compilation of some headers with a file from a different cmake target
+        "-I../src/medium",
 	]
 ---
 If:
