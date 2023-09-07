@@ -4,6 +4,8 @@
 #include <span>
 
 ///
+
+#include "patch/default/Befaco4msPlayground.hh"
 #include "patch/default/BefacoVCOs.hh"
 #include "patch/default/Braids-Quad.hh"
 #include "patch/default/Djembe4verb.hh"
@@ -16,6 +18,7 @@
 struct DefaultPatches {
 
 	static inline std::array patch_raw_data = std::to_array<std::span<char>>({
+		Befaco4msPlayground_patch,
 		Djembe4verb_patch,
 		EnOsc_Dual_patch,
 		BefacoVCOs_patch,
@@ -38,20 +41,22 @@ struct DefaultPatches {
 
 	static ModuleTypeSlug get_filename(uint32_t id) {
 		if (id == 0)
-			return "Djembe4verb.yml";
+			return "Befaco4msPlayground.yml";
 		if (id == 1)
-			return "EnOsc_Dual.yml";
+			return "Djembe4verb.yml";
 		if (id == 2)
-			return "BefacoVCOs.yml";
+			return "EnOsc_Dual.yml";
 		if (id == 3)
-			return "KarplusStereo.yml";
+			return "BefacoVCOs.yml";
 		if (id == 4)
-			return "EnOsc_8_step_seq.yml";
+			return "KarplusStereo.yml";
 		if (id == 5)
-			return "twosimpleosc.yml";
+			return "EnOsc_8_step_seq.yml";
 		if (id == 6)
-			return "EnvVCA_knobsets.yml";
+			return "twosimpleosc.yml";
 		if (id == 7)
+			return "EnvVCA_knobsets.yml";
+		if (id == 8)
 			return "Braids-Quad.yml";
 
 		ModuleTypeSlug s;
