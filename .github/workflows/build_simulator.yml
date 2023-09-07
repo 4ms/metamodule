@@ -1,10 +1,24 @@
 name: Build Simulator
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  pull_request:
+    paths:
+      - 'simulator/**'
+      - 'shared/**'
+      - 'firmware/src/gui/**'
+      - 'firmware/src/VCV_adaptor/**'
+      - 'firmware/src/patch**'
+      - 'firmware/src/params/**'
+      - 'firmware/src/console/**'
+      - 'firmware/vcv_ports/**'
+      - 'firmware/lib/lvgl/**'
+      - '!**.md' # Skip docs
+      - '!shared/svgextract' # Skip generator script (still run CI if generated files change)
+      - '!shared/gen_minblep' # Skip generator script (still run CI if generated files change)
+      - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
 
 jobs:
   build:

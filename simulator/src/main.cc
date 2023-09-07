@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 	audio_out.set_callback([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
 	audio_out.unpause();
 
-	// Run until get QUIT event
+	// Run until get Quit event
 	while (ui.update()) {
 	}
 

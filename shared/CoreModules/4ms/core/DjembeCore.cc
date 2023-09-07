@@ -221,7 +221,7 @@ public:
 	}
 
 	void update_params() {
-		strike0 = MathTools::min<float>((float(strikeCV) + float(strikeKnob)), 1.0f);
+		strike0 = MathTools::constrain(strikeCV + strikeKnob, 0.f, 1.f);
 		strike1 = MathTools::tan_close(fConst1 * ((15000.0f * strike0) + 500.0f));
 		strike2 = (1.0f / strike1);
 		strike3 = (((strike2 + 1.41421354f) / strike1) + 1.0f);

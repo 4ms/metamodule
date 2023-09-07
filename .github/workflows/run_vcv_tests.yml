@@ -1,11 +1,17 @@
 name: Run VCV unit tests
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  pull_request:
-
+    paths:
+      - 'vcv/**'
+      - 'shared/**'
+      - '!**.md' # Skip docs
+      - '!shared/svgextract' # Skip generator script (still run CI if generated files change)
+      - '!shared/gen_minblep' # Skip generator script (still run CI if generated files change)
+      - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
 
 env:
   rack-sdk-version: 2.3.0
@@ -28,8 +34,6 @@ jobs:
       CXX: g++
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      # Usually this is always needed
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -53,4 +57,4 @@ jobs:
         run: |
           export RACK_DIR=$HOME/Rack-SDK
           cd vcv
-          make tests
+          make -f tests/Makefile
