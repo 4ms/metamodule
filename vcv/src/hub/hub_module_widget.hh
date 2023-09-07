@@ -5,7 +5,6 @@
 #include "hub_knob.hh"
 #include "hub_midi.hh"
 #include "hub_module.hh"
-#include "mapping/Mapping.h"
 #include "mapping/ModuleID.h"
 #include "mapping/map_palette.hh"
 #include "mapping/module_directory.hh"

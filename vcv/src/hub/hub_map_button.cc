@@ -42,6 +42,7 @@ void HubMapButton::onDragStart(const rack::event::DragStart &e) {
 		hub->endMapping();
 	}
 	if (!currentSourceIsThisButton) {
+		APP->scene->rack->setTouchedParam(nullptr);
 		hub->startMappingFrom(hubParamObj.objID);
 	}
 
