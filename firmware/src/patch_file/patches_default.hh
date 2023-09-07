@@ -4,25 +4,25 @@
 #include <span>
 
 ///
+#include "patch/default/BefacoVCOs.hh"
 #include "patch/default/Braids-Quad.hh"
 #include "patch/default/Djembe4verb.hh"
 #include "patch/default/EnOscDual.hh"
 #include "patch/default/EnOsc_8_step_seq.hh"
 #include "patch/default/EnvVCA_knobsets.hh"
 #include "patch/default/KarplusStereo.hh"
-#include "patch/default/envevenbraids.hh"
 #include "patch/default/twosimpleosc.hh"
 
 struct DefaultPatches {
 
 	static inline std::array patch_raw_data = std::to_array<std::span<char>>({
-		env_even_braids,
+		Djembe4verb_patch,
+		EnOsc_Dual_patch,
+		BefacoVCOs_patch,
 		KarplusStereo_patch,
 		EnOsc8StepSeq_patch,
-		Djembe4verb_patch,
 		twosimpleosc_patch,
 		EnvVCA_knobsets_patch,
-		EnOsc_Dual_patch,
 		BraidsQuad_patch,
 	});
 
@@ -38,19 +38,19 @@ struct DefaultPatches {
 
 	static ModuleTypeSlug get_filename(uint32_t id) {
 		if (id == 0)
-			return "EnvEvenVCO.yml";
-		if (id == 1)
-			return "KarplusStereo.yml";
-		if (id == 2)
-			return "EnOsc_8_step_seq.yml";
-		if (id == 3)
 			return "Djembe4verb.yml";
-		if (id == 4)
-			return "twosimpleosc.yml";
-		if (id == 5)
-			return "EnvVCA_knobsets.yml";
-		if (id == 6)
+		if (id == 1)
 			return "EnOsc_Dual.yml";
+		if (id == 2)
+			return "BefacoVCOs.yml";
+		if (id == 3)
+			return "KarplusStereo.yml";
+		if (id == 4)
+			return "EnOsc_8_step_seq.yml";
+		if (id == 5)
+			return "twosimpleosc.yml";
+		if (id == 6)
+			return "EnvVCA_knobsets.yml";
 		if (id == 7)
 			return "Braids-Quad.yml";
 

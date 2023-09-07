@@ -9,6 +9,7 @@ PatchData:
     2: HexmixVCA
     3: Rampage
     4: PonyVCO
+    5: PonyVCO
   int_cables:
     - out:
         module_id: 1
@@ -34,6 +35,14 @@ PatchData:
       ins:
         - module_id: 2
           jack_id: 7
+    - out:
+        module_id: 5
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 2
+        - module_id: 3
+          jack_id: 3
   mapped_ins: []
   mapped_outs:
     - panel_jack_id: 0
@@ -122,10 +131,10 @@ PatchData:
       value: 0.434
     - module_id: 3
       param_id: 10
-      value: 1
+      value: 0
     - module_id: 3
       param_id: 11
-      value: 1
+      value: 0
     - module_id: 3
       param_id: 12
       value: 0.5
@@ -144,6 +153,21 @@ PatchData:
     - module_id: 4
       param_id: 4
       value: 0.333333
+    - module_id: 5
+      param_id: 0
+      value: 0.463855
+    - module_id: 5
+      param_id: 1
+      value: 1
+    - module_id: 5
+      param_id: 2
+      value: 0
+    - module_id: 5
+      param_id: 3
+      value: 0.666667
+    - module_id: 5
+      param_id: 4
+      value: 1
   mapped_knobs:
     - name: ''
       set:
@@ -185,19 +209,13 @@ PatchData:
           max: 1
         - panel_knob_id: 6
           module_id: 3
-          param_id: 5
-          curve_type: 0
-          min: 0
-          max: 1
-        - panel_knob_id: 6
-          module_id: 3
-          param_id: 4
-          curve_type: 0
-          min: 0
-          max: 1
-        - panel_knob_id: 6
-          module_id: 3
           param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 5
+          param_id: 0
           curve_type: 0
           min: 0
           max: 1
