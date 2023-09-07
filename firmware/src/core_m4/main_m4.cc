@@ -22,6 +22,8 @@
 namespace MetaModule
 {
 
+constexpr bool reload_default_patches = false;
+
 using namespace mdrivlib;
 
 static void app_startup() {
@@ -69,7 +71,8 @@ void main() {
 	usb.start();
 
 	auto usb_fileio = usb.get_msc_fileio();
-	PatchStorage patch_storage{*raw_patch_span, *shared_message, *shared_patch_file_list, usb_fileio};
+	PatchStorage patch_storage{
+		*raw_patch_span, *shared_message, *shared_patch_file_list, usb_fileio, reload_default_patches};
 
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
