@@ -231,11 +231,5 @@ PatchData:
           curve_type: 0
           min: 0
           max: 1
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
 
 )";
