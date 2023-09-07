@@ -169,7 +169,7 @@ struct PatchViewKnobsetMenu {
 		}
 	}
 
-	lv_group_t *base_group;
+	lv_group_t *base_group = nullptr;
 	lv_group_t *knobset_menu_group = nullptr;
 	bool visible = false;
 	Settings &settings;

@@ -204,7 +204,7 @@ struct PatchViewSettingsMenu {
 		}
 	}
 
-	lv_group_t *base_group;
+	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
 	bool visible = false;
 	ViewSettings &settings;

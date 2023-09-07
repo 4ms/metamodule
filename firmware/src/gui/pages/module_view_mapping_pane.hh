@@ -288,7 +288,7 @@ private:
 
 	PatchStorageProxy &patch_storage;
 	PatchModQueue &patch_mod_queue;
-	lv_group_t *base_group;
+	lv_group_t *base_group = nullptr;
 	lv_group_t *pane_group = nullptr;
 	const DrawnElement *drawn_element;
 	bool is_patch_playing = false;

@@ -11,7 +11,6 @@
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
-#include <string>
 
 namespace MetaModule
 {
