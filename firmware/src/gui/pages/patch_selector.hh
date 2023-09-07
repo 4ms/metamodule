@@ -38,6 +38,11 @@ struct PatchSelectorPage : PageBase {
 		state = State::TryingToRequestPatchList;
 		lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
 		lv_group_set_editing(group, true);
+
+		auto patchname = patch_playloader.cur_patch_name(); // auto patchplaying_idx = patch_storage
+		if (patchname.length() == 0)
+			patchname = "(none)";
+		lv_label_set_text_fmt(ui_PatchSelectorTitle, "Now Playing: %.31s", patchname.c_str());
 	}
 
 	void refresh_patchlist(PatchFileList &patchfiles) {
