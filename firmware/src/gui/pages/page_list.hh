@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/elements/module_param.hh"
+#include "patch_file/patch_location.hh"
 #include "util/circular_stack.hh"
 #include <array>
 #include <cstdint>
@@ -22,19 +23,18 @@ class PageList {
 	static inline std::array<PageBase *, MaxPages> _pages;
 
 	//TODO: these need to be in PageManager or somewhere else...
-	static inline uint32_t selected_patch_id = 0;
+	static inline PatchLocation selected_patch_loc{};
 	static inline uint32_t selected_module_id = 0;
 	static inline uint32_t active_knobset_id = 0;
-	// static inline ModuleParam selected_control_id{};
 	static inline uint32_t patch_revision = 0;
 
 public:
-	static void set_selected_patch_id(uint32_t id) {
-		selected_patch_id = id;
+	static void set_selected_patch_loc(PatchLocation loc) {
+		selected_patch_loc = loc;
 	}
 
-	static uint32_t get_selected_patch_id() {
-		return selected_patch_id;
+	static PatchLocation get_selected_patch_location() {
+		return selected_patch_loc;
 	}
 
 	static void set_active_knobset(uint32_t id) {

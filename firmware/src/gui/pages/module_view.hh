@@ -54,7 +54,7 @@ struct ModuleViewPage : PageBase {
 
 		patch = patch_storage.get_view_patch();
 
-		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
+		is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
 		mode = ViewMode::List;
 
 		this_module_id = PageList::get_selected_module_id();

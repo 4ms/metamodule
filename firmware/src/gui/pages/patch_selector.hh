@@ -202,7 +202,7 @@ struct PatchSelectorPage : PageBase {
 					if (patch_storage.parse_view_patch(message.bytes_read)) {
 						auto view_patch = patch_storage.get_view_patch();
 						pr_dbg("Parsed patch: %.31s\n", view_patch.patch_name.data());
-						PageList::set_selected_patch_id(selected_patch);
+						PageList::set_selected_patch_loc({selected_patch, selected_patch_vol});
 						PageList::request_new_page(PageId::PatchView);
 						state = State::Closing;
 						hide_spinner();

@@ -67,11 +67,11 @@ struct PatchViewPage : PageBase {
 
 	void prepare_focus() override {
 		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
-			displayed_patch_id == PageList::get_selected_patch_id())
+			displayed_patch_loc == PageList::get_selected_patch_location())
 		{
 			return;
 		}
-		displayed_patch_id = PageList::get_selected_patch_id();
+		displayed_patch_loc = PageList::get_selected_patch_location();
 		patch_revision = PageList::get_patch_revision();
 		active_knob_set = PageList::get_active_knobset();
 
@@ -81,7 +81,7 @@ struct PatchViewPage : PageBase {
 
 		patch = patch_storage.get_view_patch();
 
-		is_patch_playing = displayed_patch_id == patch_playloader.cur_patch_index();
+		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
 
 		if (patch.patch_name.length() == 0)
 			return;
@@ -168,7 +168,7 @@ struct PatchViewPage : PageBase {
 
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
-		is_patch_playing = displayed_patch_id == patch_playloader.cur_patch_index();
+		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
 
 		if (is_patch_playing != last_is_patch_playing || view_settings.changed) {
 			view_settings.changed = false;
@@ -317,7 +317,7 @@ private:
 	std::vector<DrawnElement> drawn_elements;
 	bool is_patch_playing = false;
 
-	uint32_t displayed_patch_id = 0xFFFFFFFF;
+	PatchLocation displayed_patch_loc{0xFFFFFFFF, Volume::MaxVolumes};
 	uint32_t patch_revision = 0xFFFFFFFF;
 
 	unsigned active_knob_set = 0;
