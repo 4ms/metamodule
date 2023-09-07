@@ -62,8 +62,7 @@ target_link_libraries(VCV_adaptor PUBLIC mdrivlib_interface lvgl::lvgl)
 set_source_files_properties(${FWDIR}/src/VCV_adaptor/pffft/pffft.c COMPILE_FLAGS -Wno-double-promotion)
 
 target_include_directories(
-  VCV_adaptor SYSTEM
-  PUBLIC ${FWDIR}/src/VCV_adaptor
+  VCV_adaptor
   PUBLIC ${FWDIR}/src/VCV_adaptor
          ${FWDIR}/src
          ${FWDIR}
