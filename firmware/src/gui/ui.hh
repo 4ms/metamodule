@@ -49,22 +49,22 @@ public:
 		Gui::init_lvgl_styles();
 		page_manager.init();
 
-		page_update_tm.init(
-			{
-				.TIMx = TIM17,
-				.period_ns = 1000000000 / 60, // =  60Hz = 16ms
-				.priority1 = 2,
-				.priority2 = 0,
-			},
-			[&] { page_update_task(); });
-		page_update_tm.start();
+		// page_update_tm.init(
+		// 	{
+		// 		.TIMx = TIM17,
+		// 		.period_ns = 1000000000 / 60, // =  60Hz = 16ms
+		// 		.priority1 = 2,
+		// 		.priority2 = 0,
+		// 	},
+		// 	[&] { page_update_task(); });
+		// page_update_tm.start();
 
 		ui_event_tm.init(
 			{
 				.TIMx = TIM16,
 				.period_ns = 1000000000 / 600, // =  600Hz = 1.6ms
-				.priority1 = 3,
-				.priority2 = 3,
+				.priority1 = 2,
+				.priority2 = 0,
 			},
 			[&] { lvgl_update_task(); });
 		ui_event_tm.start();
@@ -74,15 +74,24 @@ public:
 
 private:
 	void lvgl_update_task() {
-		page_update_tm.stop();
+		Debug::Pin2::high();
 		lv_timer_handler();
-		page_update_tm.start();
+		Debug::Pin2::low();
 
+		Debug::Pin1::high();
+		if (throttle_ctr-- <= 0) {
+			throttle_ctr = throttle_amt;
+			page_update_task();
+		}
+		Debug::Pin1::low();
+
+		Debug::Pin0::high();
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
-			printf_("%s", msg.data());
+			// printf_("%s", msg.data());
 			msg_queue.clear_message();
 		}
+		Debug::Pin0::low();
 
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
@@ -97,7 +106,10 @@ private:
 		patch_playloader.handle_sync_patch_loading();
 	}
 
-	mdrivlib::Timekeeper page_update_tm;
+	static constexpr int32_t throttle_amt = 10;
+	int32_t throttle_ctr = 0;
+
+	// mdrivlib::Timekeeper page_update_tm;
 	mdrivlib::Timekeeper ui_event_tm;
 };
 
