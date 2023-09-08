@@ -18,9 +18,9 @@ const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 };
 
 using mdrivlib::GPIO;
-using mdrivlib::PinNum;
 using mdrivlib::PinAF;
 using mdrivlib::PinDef;
+using mdrivlib::PinNum;
 using mdrivlib::PinPull;
 
 struct MMControlPins {
@@ -68,5 +68,7 @@ constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::C, PinNum::_3}, mdrivlib::AdcChanNum::_13, PotY, AdcSampTime},
 	AdcChannelConf{{GPIO::A, PinNum::_4}, mdrivlib::AdcChanNum::_18, PotZ, AdcSampTime},
 });
+
+constexpr int32_t MinPotValue = 72; // more like 69
 
 } // namespace MetaModule
