@@ -7,7 +7,7 @@ constexpr inline UartConf UartConfig{
 	.TXPin = {mdrivlib::GPIO::B, mdrivlib::PinNum::_4, mdrivlib::PinAF::AltFunc13},
 	.RXPin = {mdrivlib::GPIO::B, mdrivlib::PinNum::_3, mdrivlib::PinAF::AltFunc13},
 	.mode = UartConf::Mode::TXRX,
-	.baud = 115200,
+	.baud = 230400, // 921600, //115200,
 	.wordlen = 8,
 	.parity = UartConf::Parity::None,
 	.stopbits = UartConf::StopBits::_1,

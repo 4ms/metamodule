@@ -80,7 +80,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	}
 
 	auto audio_callback = [this]<unsigned block>() {
-		Debug::Pin0::high();
+		// Debug::Pin0::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -95,7 +95,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof(SyncParams));
 
-		Debug::Pin0::low();
+		// Debug::Pin0::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
