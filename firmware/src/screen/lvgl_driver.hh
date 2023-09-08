@@ -94,9 +94,6 @@ public:
 		// 	px.full = (1 << 10);
 	}
 
-	static void start() {
-	}
-
 	static void end_flush() {
 		lv_disp_flush_ready(last_used_disp_drv);
 	}
