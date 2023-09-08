@@ -14,6 +14,11 @@
 
 namespace MetaModule
 {
+
+using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
+static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1;
+static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
+
 class Ui {
 private:
 	SyncParams &sync_params;
@@ -27,8 +32,7 @@ private:
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
 	static inline UartLog init_uart;
-	static inline LVGLDriver gui{
-		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
+	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, framebuf1, framebuf2};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
@@ -45,7 +49,7 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, StaticBuffers::framebuf2);
+		MMDisplay::init(metaparams, framebuf2);
 		Gui::init_lvgl_styles();
 		page_manager.init();
 	}
@@ -69,8 +73,8 @@ public:
 			// printf_("%s", msg.data());
 			msg_queue.clear_message();
 		}
-		Debug::Pin0::low();
 
+		Debug::Pin2::low();
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());
