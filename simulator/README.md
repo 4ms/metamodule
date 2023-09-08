@@ -1,8 +1,10 @@
-## MetaModule Simulator
+## Meta Module Simulator
 
 This simulates the screen and the audio outputs. The pixels should be identical to the actual hardware's pixels.
 
 The audio should be the same as in hardware (though, your sound card might be AC-coupled, vs. the hardware is DC-coupled).
+
+For information on building this firmware simulator, please see [Setup.md](./Setup.md).
 
 ### Keyboard Control
 

@@ -14,23 +14,7 @@ const f kRootPotRange = 9_f * 12_f;
 const f kNewNoteRange = 6_f * 12_f;
 const f kFineTuneRange = 4_f;
 const f kSpreadRange = 12_f;
-const f kCalibration2Volts = 2_f;
-const f kCalibration4Volts = 4_f;
-const f kCalibrationSuccessTolerance = 0.3_f;
-const f kCalibrationSuccessToleranceOffset = 0.1_f;
 const f kPotMoveThreshold = 0.01_f;
-
-const int kIntCVCalibrationIterations = 16;
-const int kExtCVCalibrationIterations = 1024;
-
-enum CalibrationStepResult {
-	CAL_STEP_RESULT_NOT_BEGUN,
-	CAL_STEP_RESULT_IN_PROGRESS,
-	CAL_STEP_RESULT_SUCCESS,
-	CAL_STEP_RESULT_FAILURE,
-};
-
-enum CalibrationStep { CALIBRATE_UNPATCHED, CALIBRATE_C2, CALIBRATE_C4 };
 
 template<int CHAN, class FILTER>
 class ExtCVConditioner {
@@ -41,14 +25,6 @@ class ExtCVConditioner {
 	FILTER lp_;
 	SpiAdc &spi_adc_;
 
-	f reading_at_C2;
-	f reading_unpatched;
-	int cal_i_;
-	bool is_calibrating_ = false;
-	f cal_running_total_;
-
-	CalibrationStep cal_step_;
-
 	f last_raw_reading_;
 
 public:
@@ -58,68 +34,6 @@ public:
 		, slope_(s)
 		, nominal_slope_(s)
 		, spi_adc_(spi_adc) {
-	}
-
-	void reset_calibration() {
-		is_calibrating_ = false;
-		cal_step_ = CALIBRATE_UNPATCHED;
-	}
-
-	void start_calibration(CalibrationStep step) {
-		cal_i_ = 0;
-		cal_step_ = step;
-		cal_running_total_ = 0_f;
-		is_calibrating_ = true;
-	}
-	auto process_calibration() {
-		CalibrationStepResult res = CAL_STEP_RESULT_IN_PROGRESS;
-
-		cal_running_total_ += last_raw_reading_;
-
-		if (++cal_i_ >= kExtCVCalibrationIterations) {
-			is_calibrating_ = false;
-			cal_running_total_ /= f(kExtCVCalibrationIterations);
-
-			switch (cal_step_) {
-
-				case (CALIBRATE_UNPATCHED): {
-					reading_unpatched = cal_running_total_;
-					if ((reading_unpatched - nominal_offset_).abs() < kCalibrationSuccessToleranceOffset) {
-						res = CAL_STEP_RESULT_SUCCESS;
-					} else
-						res = CAL_STEP_RESULT_FAILURE;
-				} break;
-
-				case (CALIBRATE_C2): {
-					reading_at_C2 = cal_running_total_;
-					f octave = (reading_at_C2 - reading_unpatched) / kCalibration2Volts;
-					f slope = 12_f / octave;
-
-					if ((slope / nominal_slope_ - 1_f).abs() < kCalibrationSuccessTolerance)
-						res = CAL_STEP_RESULT_SUCCESS;
-					else
-						res = CAL_STEP_RESULT_FAILURE;
-				} break;
-
-				case (CALIBRATE_C4): {
-					f octave = (cal_running_total_ - reading_at_C2) / kCalibration2Volts;
-					f slope = 12_f / octave;
-
-					if ((slope / nominal_slope_ - 1_f).abs() < kCalibrationSuccessTolerance) {
-						slope_ = slope;
-						offset_ = reading_at_C2 - (kCalibration2Volts * 12_f / slope_);
-						res = CAL_STEP_RESULT_SUCCESS;
-					} else
-						res = CAL_STEP_RESULT_FAILURE;
-				} break;
-			}
-		} 
-
-		return res;
-	}
-
-	bool calibration_busy() {
-		return is_calibrating_;
 	}
 
 	void Process() {
@@ -146,26 +60,6 @@ public:
 	CVConditioner(Adc &adc, f &offset)
 		: adc_(adc)
 		, offset_(offset) {
-	}
-
-	bool calibrate_offset() {
-		f reading = 0_f;
-
-		for (int i = 0; i < kIntCVCalibrationIterations; i++) {
-			u0_16 in = adc_.get(INPUT);
-			s1_15 x = in.to_signed_scale();
-			reading += f::inclusive(x);
-			// HAL_Delay(1);
-		}
-
-		reading /= f(kIntCVCalibrationIterations);
-
-		if (reading.abs() < kCalibrationSuccessToleranceOffset) {
-			offset_ = reading;
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	f Process() {
@@ -387,16 +281,7 @@ class Control : public EventSource<Event> {
 
 		// on load, checks that calibration data are within bounds
 		bool validate() {
-			return (pitch_offset - 0.50_f).abs() <= kCalibrationSuccessToleranceOffset &&
-				   (pitch_slope / -120._f - 1_f).abs() <= kCalibrationSuccessTolerance && pitch_slope < 0.0_f &&
-				   (root_offset - 0.50_f).abs() <= kCalibrationSuccessToleranceOffset &&
-				   (root_slope / -120._f - 1_f).abs() <= kCalibrationSuccessTolerance && root_slope < 0.0_f &&
-				   warp_offset.abs() <= kCalibrationSuccessToleranceOffset &&
-				   balance_offset.abs() <= kCalibrationSuccessToleranceOffset &&
-				   twist_offset.abs() <= kCalibrationSuccessToleranceOffset &&
-				   scale_offset.abs() <= kCalibrationSuccessToleranceOffset &&
-				   modulation_offset.abs() <= kCalibrationSuccessToleranceOffset &&
-				   spread_offset.abs() <= kCalibrationSuccessToleranceOffset;
+			return true;
 		}
 	};
 	CalibrationData calibration_data_;
@@ -434,34 +319,6 @@ class Control : public EventSource<Event> {
 	PotConditioner<POT_ROOT, Law::LINEAR, QuadraticOnePoleLp<1>> root_pot_{adc_};
 
 	PotCVCombiner<PotConditioner<POT_DETUNE, Law::LINEAR, NoFilter>, NoCVInput, QuadraticOnePoleLp<1>> detune_{adc_};
-
-	// PotCVCombiner<DualFunctionPotConditioner<POT_WARP, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
-	// 			  CVConditioner<CV_WARP>,
-	// 			  QuadraticOnePoleLp<1>>
-	// 	warp_{adc_, calibration_data_.warp_offset};
-
-	// PotCVCombiner<DualFunctionPotConditioner<POT_BALANCE, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
-	// 			  CVConditioner<CV_BALANCE>,
-	// 			  QuadraticOnePoleLp<2>>
-	// 	balance_{adc_, calibration_data_.balance_offset};
-
-	// PotCVCombiner<DualFunctionPotConditioner<POT_TWIST, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
-	// 			  CVConditioner<CV_TWIST>,
-	// 			  QuadraticOnePoleLp<1>>
-	// 	twist_{adc_, calibration_data_.twist_offset};
-
-	// PotCVCombiner<PotConditioner<POT_SCALE, Law::LINEAR, NoFilter>, CVConditioner<CV_SCALE>, QuadraticOnePoleLp<1>>
-	// 	scale_{adc_, calibration_data_.twist_offset};
-
-	// PotCVCombiner<PotConditioner<POT_MOD, Law::LINEAR, NoFilter>, CVConditioner<CV_MOD>, QuadraticOnePoleLp<1>>
-	// 	modulation_{adc_, calibration_data_.modulation_offset};
-	// PotCVCombiner<DualFunctionPotConditioner<POT_SPREAD, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
-	// 			  CVConditioner<CV_SPREAD>,
-	// 			  QuadraticOnePoleLp<1>>
-	// 	spread_{adc_, calibration_data_.spread_offset};
-
-	// DualFunctionPotConditioner<POT_PITCH, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT> pitch_pot_;
-	// DualFunctionPotConditioner<POT_ROOT, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT> root_pot_{adc_};
 
 	ExtCVConditioner<CV_PITCH, Average<4, 4>> pitch_cv_{
 		calibration_data_.pitch_offset, calibration_data_.pitch_slope, spi_adc_};
@@ -650,13 +507,6 @@ public:
 			pitch -= kPitchPotRange * 0.5_f; // -range/2..range/2
 			f pitch_cv = pitch_cv_.last();
 
-			if (pitch_cv_.calibration_busy()) {
-				auto cal_result = pitch_cv_.process_calibration();
-				if (cal_result == CAL_STEP_RESULT_FAILURE)
-					put({CalibrationFailed, 0});
-				else if (cal_result == CAL_STEP_RESULT_SUCCESS)
-					put({CalibrationStepDone, 0});
-			}
 			pitch_cv = pitch_cv_sampler_.Process(pitch_cv);
 			pitch += pitch_cv;
 
@@ -672,14 +522,6 @@ public:
 
 			root *= kRootPotRange;
 			root += root_cv_.last();
-
-			if (root_cv_.calibration_busy()) {
-				auto cal_result = root_cv_.process_calibration();
-				if (cal_result == CAL_STEP_RESULT_FAILURE)
-					put({CalibrationFailed, 0});
-				else if (cal_result == CAL_STEP_RESULT_SUCCESS)
-					put({CalibrationStepDone, 0});
-			}
 
 			params_.root = root.max(0_f);
 
@@ -788,67 +630,6 @@ public:
 		warp_pot_main_function();
 		balance_pot_main_function();
 		pitch_pot_main_function();
-	}
-
-	CalibratorState calibration_state_;
-
-	void calibration_reset() {
-		calibration_state_ = NOT_CALIBRATING;
-		pitch_cv_.reset_calibration();
-		root_cv_.reset_calibration();
-	}
-
-	bool calibration_busy() {
-		return (pitch_cv_.calibration_busy() || root_cv_.calibration_busy());
-	}
-
-	auto calibration_state() {
-		return calibration_state_;
-	}
-
-	void next_calibration() {
-		switch (calibration_state_) {
-			case NOT_CALIBRATING: {
-				calibration_state_ = CALIBRATING_PITCH_UNPATCHED;
-				pitch_cv_.start_calibration(CALIBRATE_UNPATCHED);
-			} break;
-
-			case CALIBRATING_PITCH_UNPATCHED: {
-				calibration_state_ = CALIBRATING_ROOT_UNPATCHED;
-				root_cv_.start_calibration(CALIBRATE_UNPATCHED);
-			} break;
-
-			case CALIBRATING_ROOT_UNPATCHED: {
-				calibration_state_ = CALIBRATING_PITCH_OFFSET;
-				pitch_cv_.start_calibration(CALIBRATE_C2);
-			} break;
-
-			case CALIBRATING_PITCH_OFFSET: {
-				calibration_state_ = CALIBRATING_PITCH_SLOPE;
-				pitch_cv_.start_calibration(CALIBRATE_C4);
-			} break;
-
-			case CALIBRATING_PITCH_SLOPE: {
-				calibration_state_ = CALIBRATING_ROOT_OFFSET;
-				root_cv_.start_calibration(CALIBRATE_C2);
-			} break;
-
-			case CALIBRATING_ROOT_OFFSET: {
-				calibration_state_ = CALIBRATING_ROOT_SLOPE;
-				root_cv_.start_calibration(CALIBRATE_C4);
-			} break;
-			case CALIBRATING_ROOT_SLOPE:
-				break;
-		}
-	}
-
-	bool calibrate_offsets() {
-		return warp_.cv_.calibrate_offset() && balance_.cv_.calibrate_offset() && twist_.cv_.calibrate_offset() &&
-			   scale_.cv_.calibrate_offset() && modulation_.cv_.calibrate_offset() && spread_.cv_.calibrate_offset();
-	}
-
-	void SaveCalibration() {
-		calibration_data_storage_.Save();
 	}
 
 	// Hardware model setters:

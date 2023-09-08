@@ -91,21 +91,9 @@ enum EventType {
 	AltParamChange,
 	StartCatchup,
 	EndOfCatchup,
-	CalibrationFailed,
-	CalibrationStepDone,
 };
 
 struct Event {
 	EventType type;
 	int data;
-};
-
-enum CalibratorState {
-	NOT_CALIBRATING,
-	CALIBRATING_PITCH_UNPATCHED,
-	CALIBRATING_ROOT_UNPATCHED,
-	CALIBRATING_PITCH_OFFSET,
-	CALIBRATING_PITCH_SLOPE,
-	CALIBRATING_ROOT_OFFSET,
-	CALIBRATING_ROOT_SLOPE,
 };
