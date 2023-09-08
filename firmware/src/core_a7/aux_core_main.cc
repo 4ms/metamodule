@@ -5,6 +5,7 @@
 #include "drivers/hsem.hh"
 #include "drivers/smp.hh"
 #include "drivers/timekeeper.hh"
+#include "gui/ui.hh"
 #include "lvgl.h"
 #include "patch_play/patch_player.hh"
 
@@ -16,6 +17,10 @@ extern "C" void aux_core_main() {
 		;
 
 	auto patch_player = SharedMemoryS::ptrs.patch_player;
+	auto patch_playloader = SharedMemoryS::ptrs.patch_playloader;
+	auto patch_storage_proxy = SharedMemoryS::ptrs.patch_storage;
+	auto sync_params = SharedMemoryS::ptrs.sync_params;
+	auto patch_mod_queue = SharedMemoryS::ptrs.patch_mod_queue;
 
 	struct AuxCorePlayerContext {
 		uint32_t starting_idx;
@@ -48,6 +53,9 @@ extern "C" void aux_core_main() {
 
 	// CallFunction
 	InterruptManager::register_and_start_isr(SGI3_IRQn, 0, 0, []() { SMPThread::execute(); });
+
+	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
+	ui.start();
 
 	while (true) {
 		__WFI();
