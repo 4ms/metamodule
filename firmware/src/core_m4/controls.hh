@@ -53,7 +53,7 @@ struct Controls {
 	void start();
 	void update_params();
 
-	uint32_t get_pot_reading(uint32_t pot_id);
+	float get_pot_reading(uint32_t pot_id);
 	uint32_t get_patchcv_reading();
 	uint32_t get_jacksense_reading();
 

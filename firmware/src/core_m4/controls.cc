@@ -25,7 +25,7 @@ void Controls::update_params() {
 	// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
 	if (_new_adc_data_ready) {
 		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
-			_knobs[i].set_new_value(get_pot_reading(i) / 4095.0f);
+			_knobs[i].set_new_value(get_pot_reading(i));
 		}
 		_new_adc_data_ready = false;
 	}
@@ -197,9 +197,14 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 	// Debug::Pin2::low();
 }
 
-uint32_t Controls::get_pot_reading(uint32_t pot_id) {
-	if (pot_id < NumPotAdcs)
-		return pot_vals[pot_id];
+float Controls::get_pot_reading(uint32_t pot_id) {
+	if (pot_id < NumPotAdcs) {
+		auto raw = (int32_t)pot_vals[pot_id];
+		int32_t val = raw - MinPotValue;
+		if (val < 0)
+			val = 0;
+		return (float)val / (4096.f - MinPotValue);
+	}
 	return 0;
 }
 
