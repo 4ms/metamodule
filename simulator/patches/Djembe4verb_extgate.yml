@@ -18,6 +18,7 @@ PatchData:
     13: CLKD
     14: Freeverb
     15: CLKD
+    16: MultiLFO
   int_cables:
     - out:
         module_id: 3
@@ -105,6 +106,16 @@ PatchData:
           jack_id: 1
         - module_id: 11
           jack_id: 1
+    - out:
+        module_id: 16
+        jack_id: 1
+      ins:
+        - module_id: 15
+          jack_id: 1
+        - module_id: 10
+          jack_id: 1
+        - module_id: 13
+          jack_id: 1
   mapped_ins:
     - panel_jack_id: 0
       ins:
@@ -130,16 +141,6 @@ PatchData:
       ins:
         - module_id: 9
           jack_id: 0
-    - panel_jack_id: 7
-      ins:
-        - module_id: 13
-          jack_id: 1
-        - module_id: 10
-          jack_id: 1
-    - panel_jack_id: 6
-      ins:
-        - module_id: 15
-          jack_id: 1
   mapped_outs:
     - panel_jack_id: 7
       out:
@@ -188,7 +189,7 @@ PatchData:
       value: 1
     - module_id: 2
       param_id: 0
-      value: 0.344578
+      value: 0.449398
     - module_id: 2
       param_id: 1
       value: 0.4335
@@ -197,13 +198,13 @@ PatchData:
       value: 1
     - module_id: 2
       param_id: 3
-      value: 0.325428
+      value: 0.753012
     - module_id: 3
       param_id: 0
-      value: 0.259036
+      value: 0.36988
     - module_id: 3
       param_id: 1
-      value: 0.583133
+      value: 0.436145
     - module_id: 3
       param_id: 2
       value: 0.648193
@@ -212,16 +213,16 @@ PatchData:
       value: 0.43109
     - module_id: 4
       param_id: 0
-      value: 0.457831
+      value: 0.433735
     - module_id: 4
       param_id: 1
-      value: 0.427711
+      value: 0.4
     - module_id: 4
       param_id: 2
-      value: 0.529115
+      value: 0.595181
     - module_id: 4
       param_id: 3
-      value: 0.431325
+      value: 0.515663
     - module_id: 4
       param_id: 4
       value: 0.3755
@@ -236,16 +237,16 @@ PatchData:
       value: 0.6115
     - module_id: 5
       param_id: 0
-      value: 0.519
+      value: 0.506952
     - module_id: 5
       param_id: 1
-      value: 0.3255
+      value: 0.450602
     - module_id: 5
       param_id: 2
       value: 0
     - module_id: 6
       param_id: 0
-      value: 0.0710844
+      value: 0.383133
     - module_id: 6
       param_id: 1
       value: 0.673494
@@ -254,10 +255,10 @@ PatchData:
       value: 1
     - module_id: 6
       param_id: 3
-      value: 0.207229
+      value: 0.0795181
     - module_id: 7
       param_id: 0
-      value: 0.407229
+      value: 0.574699
     - module_id: 7
       param_id: 1
       value: 0.3885
@@ -266,58 +267,67 @@ PatchData:
       value: 1
     - module_id: 7
       param_id: 3
-      value: 0.36506
+      value: 0
     - module_id: 8
       param_id: 0
-      value: 0.13253
+      value: 0.113253
     - module_id: 9
       param_id: 0
-      value: 0.126506
+      value: 0.159036
     - module_id: 10
       param_id: 0
-      value: 0.13253
+      value: 0.16506
     - module_id: 11
       param_id: 0
-      value: 0.159036
+      value: 0
     - module_id: 12
       param_id: 0
-      value: 0.259036
+      value: 0.280723
     - module_id: 12
       param_id: 1
-      value: 0.246988
+      value: 0.489157
     - module_id: 12
       param_id: 2
-      value: 0.413379
+      value: 0.753012
     - module_id: 12
       param_id: 3
-      value: 0.183132
+      value: 0
     - module_id: 12
       param_id: 4
-      value: 0.151807
+      value: 0.457831
     - module_id: 12
       param_id: 5
-      value: 0.36506
+      value: 0
     - module_id: 12
       param_id: 6
       value: 0
     - module_id: 13
       param_id: 0
-      value: 0.115663
+      value: 0.0710843
     - module_id: 14
       param_id: 0
-      value: 0.0710844
+      value: 0.383133
     - module_id: 14
       param_id: 1
-      value: 0.207229
+      value: 0.0795181
     - module_id: 14
       param_id: 2
-      value: 0.407229
+      value: 0.574699
     - module_id: 14
       param_id: 3
-      value: 0.346988
+      value: 0.138554
     - module_id: 15
       param_id: 0
-      value: 0.162651
+      value: 0
+    - module_id: 16
+      param_id: 0
+      value: 0.174699
+    - module_id: 16
+      param_id: 1
+      value: 0.5
+    - module_id: 16
+      param_id: 2
+      value: 0.5
   mapped_knobs:
     - name: Clocks
       set:
