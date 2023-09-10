@@ -59,45 +59,51 @@ public:
 		// 	[&] { page_update_task(); });
 		// page_update_tm.start();
 
-		ui_event_tm.init(
-			{
-				.TIMx = TIM16,
-				.period_ns = 1000000000 / 600, // =  600Hz = 1.6ms
-				.priority1 = 2,
-				.priority2 = 0,
-			},
-			[&] { lvgl_update_task(); });
-		ui_event_tm.start();
+		// ui_event_tm.init(
+		// 	{
+		// 		.TIMx = TIM16,
+		// 		.period_ns = 1000000000 / 600, // =  600Hz = 1.6ms
+		// 		.priority1 = 2,
+		// 		.priority2 = 0,
+		// 	},
+		// 	[&] { lvgl_update_task(); });
+		// ui_event_tm.start();
 
 		MMDisplay::start();
 	}
 
-private:
 	void lvgl_update_task() {
-		Debug::Pin2::high();
-		lv_timer_handler();
-		Debug::Pin2::low();
+		auto now = HAL_GetTick();
+		if ((now - last_call) <= 2)
+			return;
 
-		Debug::Pin1::high();
+		last_call = now;
+
+		// Debug::Pin2::high();
+		lv_timer_handler();
+		// Debug::Pin2::low();
+
+		// Debug::Pin1::high();
 		if (throttle_ctr-- <= 0) {
 			throttle_ctr = throttle_amt;
 			page_update_task();
 		}
-		Debug::Pin1::low();
+		// Debug::Pin1::low();
 
-		Debug::Pin0::high();
+		// Debug::Pin0::high();
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
 			// printf_("%s", msg.data());
 			msg_queue.clear_message();
 		}
-		Debug::Pin0::low();
+		// Debug::Pin0::low();
 
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
+private:
 	void page_update_task() { //60Hz
 		//This returns false when audio stops
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
@@ -110,7 +116,9 @@ private:
 	int32_t throttle_ctr = 0;
 
 	// mdrivlib::Timekeeper page_update_tm;
-	mdrivlib::Timekeeper ui_event_tm;
+	// mdrivlib::Timekeeper ui_event_tm;
+
+	uint32_t last_call = 0;
 };
 
 } // namespace MetaModule
