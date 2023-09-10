@@ -106,16 +106,6 @@ PatchData:
           jack_id: 1
         - module_id: 11
           jack_id: 1
-    - out:
-        module_id: 16
-        jack_id: 1
-      ins:
-        - module_id: 15
-          jack_id: 1
-        - module_id: 10
-          jack_id: 1
-        - module_id: 13
-          jack_id: 1
   mapped_ins:
     - panel_jack_id: 0
       ins:
@@ -141,6 +131,16 @@ PatchData:
       ins:
         - module_id: 9
           jack_id: 0
+    - panel_jack_id: 7
+      ins:
+        - module_id: 13
+          jack_id: 1
+        - module_id: 10
+          jack_id: 1
+    - panel_jack_id: 6
+      ins:
+        - module_id: 15
+          jack_id: 1
   mapped_outs:
     - panel_jack_id: 7
       out:
