@@ -7,11 +7,11 @@ else
 GEN := Ninja
 endif
 
-configure:
-	cmake --fresh --preset ${PRESET} -G ${GEN}
-
 all:
 	cmake --build --preset ${PRESET} 
+
+configure:
+	cmake --fresh --preset ${PRESET} -G ${GEN}
 
 bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images image-list flash-bootloader-sd flash-app-sd flash-dfu jprog:
 	cmake --build --preset ${PRESET} -- $(MAKECMDGOALS)
