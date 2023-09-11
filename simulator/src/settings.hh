@@ -8,7 +8,7 @@ namespace MetaModuleSim
 struct Settings {
 	unsigned zoom = 100;
 	std::string patch_path = "patches/";
-	unsigned audioout_dev = 0;
+	int audioout_dev = 0;
 
 	void parse(int argc, char *argv[]) {
 
@@ -37,7 +37,7 @@ struct Settings {
 				patch_path = args["patchdir"].as<std::string>();
 
 			if (args.count("audioout") > 0)
-				audioout_dev = args["audioout"].as<unsigned>();
+				audioout_dev = args["audioout"].as<int>();
 
 			if (args.count("help") || args.count("?") || args.count("h")) {
 				std::cout << options.help() << std::endl;

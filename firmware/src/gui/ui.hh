@@ -48,35 +48,21 @@ public:
 		MMDisplay::init(metaparams, StaticBuffers::framebuf2);
 		Gui::init_lvgl_styles();
 		page_manager.init();
-
-		page_update_tm.init(
-			{
-				.TIMx = TIM17,
-				.period_ns = 1000000000 / 60, // =  60Hz = 16ms
-				.priority1 = 2,
-				.priority2 = 0,
-			},
-			[&] { page_update_task(); });
-		page_update_tm.start();
-
-		ui_event_tm.init(
-			{
-				.TIMx = TIM16,
-				.period_ns = 1000000000 / 600, // =  600Hz = 1.6ms
-				.priority1 = 3,
-				.priority2 = 3,
-			},
-			[&] { lvgl_update_task(); });
-		ui_event_tm.start();
-
-		MMDisplay::start();
 	}
 
-private:
-	void lvgl_update_task() {
-		page_update_tm.stop();
+	void update() {
+		auto now = HAL_GetTick();
+		if ((now - last_update_tm) <= 2)
+			return;
+
+		last_update_tm = now;
+
 		lv_timer_handler();
-		page_update_tm.start();
+
+		if (throttle_ctr-- <= 0) {
+			throttle_ctr = throttle_amt;
+			page_update_task();
+		}
 
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
@@ -89,7 +75,8 @@ private:
 		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
-	void page_update_task() { //60Hz
+private:
+	void page_update_task() {
 		//This returns false when audio stops
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 		//if (!read_ok) ... restart audio
@@ -97,8 +84,9 @@ private:
 		patch_playloader.handle_sync_patch_loading();
 	}
 
-	mdrivlib::Timekeeper page_update_tm;
-	mdrivlib::Timekeeper ui_event_tm;
+	static constexpr int32_t throttle_amt = 10;
+	int32_t throttle_ctr = 0;
+	uint32_t last_update_tm = 0;
 };
 
 } // namespace MetaModule

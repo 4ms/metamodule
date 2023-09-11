@@ -17,7 +17,9 @@ struct Engine {
 	}
 
 	// void setSuggestedSampleRate(float suggestedSampleRate);
-	// float getSampleTime();
+	float getSampleTime() {
+		return 1.f / getSampleRate();
+	}
 	// void yieldWorkers();
 	// int64_t getBlock();
 	// int64_t getFrame();

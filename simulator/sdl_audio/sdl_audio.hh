@@ -10,7 +10,7 @@ struct SDLAudio {
 	using Callback = std::function<void(std::span<Frame>)>;
 	enum { SDLPlayback = 0, SDLRecording = 1 };
 
-	SDLAudio(unsigned dev_id = 0) {
+	SDLAudio(int dev_id = 0) {
 
 		auto num_dev = SDL_GetNumAudioDevices(SDLPlayback);
 

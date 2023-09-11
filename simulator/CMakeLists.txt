@@ -22,19 +22,9 @@ add_subdirectory(lvgl_drv)
 include(${LVGL_DIR}/CMakeLists.txt)
 
 # #################### Gui Assets ############################################
-file(
-  GLOB
-  GUI_IMAGES
-  ${MM_ROOT}/firmware/src/gui/images/4ms/modules/*.c
-  ${MM_ROOT}/firmware/src/gui/images/4ms/components/*.c
-  ${MM_ROOT}/firmware/src/gui/images/Befaco/modules/*.c
-  ${MM_ROOT}/firmware/src/gui/images/Befaco/components/*.c
-  ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/modules/*.c
-  ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/components/*.c
-  ${MM_ROOT}/firmware/src/gui/images/hetrickcv/modules/*.c
-  ${MM_ROOT}/firmware/src/gui/images/hetrickcv/components/*.c
-  ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
-  ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
+
+file(GLOB GUI_IMAGES ${MM_ROOT}/firmware/src/gui/images/4ms/modules/*.c
+     ${MM_ROOT}/firmware/src/gui/images/4ms/components/*.c)
 
 # #################### SLS Export ##################################
 
@@ -48,131 +38,40 @@ set_source_files_properties(${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c
                             PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
 
 # #################### CoreModules ##################################
+
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
 
 set(CORE_MODULES
     ${CORE_MODULES}
-    ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
     #
-    # Befaco
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/StereoStrip.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SlewLimiter.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SamplingModulator.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/STMix.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Rampage.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/PonyVCO.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Percall.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/MotionMTR.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Morphader.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Mixer.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/Kickall.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/HexmixVCA.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ChoppingKinky.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ABC.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/ADSR.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/SpringReverb.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/DualAtenuverter.cpp
-    ${MM_ROOT}/firmware/vcv_ports/Befaco/src/EvenVCO.cpp
-    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/NoisePlethora.cpp
-    # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Muxslicer.cpp
-    #
-    # AudibleInstruments
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/src/Braids.cpp
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/utils/random.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/atan.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/units.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/analog_oscillator.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
-    ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
-    #
-    # HetrickCV
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ASR.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/AToD.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/BinaryGate.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/BinaryNoise.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Bitshift.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Boolean3.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Chaos1Op.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Chaos2Op.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Chaos3Op.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ChaoticAttractors.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/ClockedNoise.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Comparator.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Contrast.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Crackle.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DToA.cpp
-    # ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DataCompander.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Delta.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Dust.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Exponent.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/FBSineChaos.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/FlipFlop.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/FlipPan.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/GateDelay.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/GateJunction.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/GateJunctionExp.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Gingerbread.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/LogicCombine.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/MidSide.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/MinMax.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhaseDrivenSequencer.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhaseDrivenSequencer32.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorAnalyzer.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorBurstGen.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorDivMult.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorEuclidean.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGates.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGates32.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGates64.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGen.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorGeometry.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorHumanizer.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorOctature.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorQuadrature.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorRandom.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorRanger.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorReset.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorRhythmGroup.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorShape.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorShift.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorStutter.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorSubstepShape.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorSwing.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorTimetable.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToClock.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToLFO.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/PhasorToWaveforms.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Polar.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Probability.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/RandomGates.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Rotator.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Rungler.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Scanner.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/TwoToFour.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/VectorMix.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/Waveshape.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/arr.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/Domain.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma/src/scl.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/HetrickUtilities.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/HCVChaos.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/Phasors/HCVPhasorEffects.cpp
-    ${MM_ROOT}/firmware/vcv_ports/hetrickcv/src/DSP/Phasors/HCVPhasorAnalyzers.cpp
-    #
     # support files
-    ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
-    ${MM_ROOT}/simulator/stubs/random.cpp
     ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
     ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
 
-# Fixups for compiler warnings in AudibleInstruments:
-set_source_files_properties(
-  ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
-  PROPERTIES COMPILE_OPTIONS
-             "-Wno-unused-const-variable;-Wno-unused-but-set-variable")
+# #################### VCV Adaptor ##################################
+
+add_subdirectory(${MM_ROOT}/firmware/src/VCV_adaptor
+                 ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
+
+# #################### Other brands ##################################
+
+include(${MM_ROOT}/firmware/vcv_ports/brands.cmake)
+# following is only for custom modules (not 4ms or Rack)
+list(REMOVE_ITEM brands 4ms Rack)
+
+foreach(brand ${brands})
+
+  add_subdirectory(${MM_ROOT}/firmware/vcv_ports/glue/${brand}
+                   ${CMAKE_CURRENT_BINARY_DIR}/${brand})
+  target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
+
+  file(GLOB BRAND_GUI_IMAGES
+       ${MM_ROOT}/firmware/src/gui/images/${brand}/components/*.c
+       ${MM_ROOT}/firmware/src/gui/images/${brand}/modules/*.c)
+  list(APPEND GUI_IMAGES ${BRAND_GUI_IMAGES})
+endforeach()
 
 # #################### RYML + Patch Convert ##################################
 
@@ -219,33 +118,20 @@ target_include_directories(
           ${MM_ROOT}/shared/cpputil
           ${MM_ROOT}/shared/patch
           ${MM_ROOT}/shared/CoreModules
-          ${MM_ROOT}/shared/CoreModules/4ms
-          ${MM_ROOT}/shared/CoreModules/Befaco
-          ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack
-          ${MM_ROOT}/firmware/vcv_ports/hetrickcv/Gamma
-          ${MM_ROOT}/firmware/src/VCV_adaptor
-          ${MM_ROOT}/firmware/src/VCV_adaptor/pffft)
+          ${MM_ROOT}/shared/CoreModules/4ms)
 
-target_compile_options(
-  simulator PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
-                    ${SDL2_CFLAGS_OTHER})
-target_compile_options(simulator PRIVATE -Wno-missing-braces)
-
-target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
-# Define TEST so braids dsp/dsp.h works (since it contains raw Cortex-M4
-# assembly)
+target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        ryml SDL2)
+                                        ryml SDL2 VCV_adaptor)
 
-# these link commands are provided by vcpkg as recommended for SDL2. leaving
-# these here temporarily in case linking fails when we get there.
-# target_link_libraries(simulator PRIVATE
-# $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-# $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static> )
+foreach(brand ${brands})
+  target_link_libraries(simulator PRIVATE ${brand}Library)
+endforeach()
+
+set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
-
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_options(simulator PUBLIC "-Wl,-map,simulator.map")
