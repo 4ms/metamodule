@@ -70,7 +70,7 @@ public:
 			w3 = SHAPE((uint32_t)(P1 << 3), param_modshape);
 
 			w3 += (___SMMUL(w1 - w3, mix) << 1) + w2;
-			r = w3;
+			int32_t r = w3;
 
 			w1 = SHAPE((uint32_t)(P1 << 2) + phs2, param_modshape);
 			w2 = SHAPE((uint32_t)(P1 << 3) + phs2, param_modshape);
@@ -92,7 +92,6 @@ public:
 
 		int32_t Pitch = param_pitch + inlet_pitch;
 
-		// int32_t r; //commented out because only used in S-rate code
 		Ppitch += __SSAT(Pitch - Ppitch, 20);
 		int64_t pitch = Ppitch;
 
@@ -342,7 +341,6 @@ private:
 	int32_t fbass;
 	int32_t fm;
 	uint32_t mix;
-	int32_t r;
 
 	///////////////////////////////////////
 	// MARK: Local Data
@@ -381,7 +379,7 @@ private:
 	};
 
 	int32_t SHAPE(uint32_t ps, int sel) {
-		int32_t r;
+		int32_t r = 0;
 		switch (sel) {
 			case 0:
 				r = sinet[ps >> 22] << 11;

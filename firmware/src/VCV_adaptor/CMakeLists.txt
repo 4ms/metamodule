@@ -17,6 +17,6 @@ target_include_directories(
 )
 
 # Fixup for pffft compiler warnings
-set_source_files_properties(pffft/pffft.c COMPILE_FLAGS -Wno-double-promotion)
+set_source_files_properties(pffft/pffft.c PROPERTIES COMPILE_OPTIONS "-Wno-double-promotion;-Wno-pointer-to-int-cast")
 
 set_property(TARGET VCV_adaptor PROPERTY CXX_STANDARD 20)
