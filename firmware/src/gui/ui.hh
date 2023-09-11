@@ -48,21 +48,15 @@ public:
 		MMDisplay::init(metaparams, StaticBuffers::framebuf2);
 		Gui::init_lvgl_styles();
 		page_manager.init();
-
-		ui_event_tm.init(
-			{
-				.TIMx = TIM16,
-				.period_ns = 1000000000 / 600, // =  600Hz = 1.6ms
-				.priority1 = 2,
-				.priority2 = 0,
-			},
-			[&] { lvgl_update_task(); });
-		ui_event_tm.start();
 	}
 
-private:
-	void lvgl_update_task() {
-		Debug::Pin2::high();
+	void update() {
+		auto now = HAL_GetTick();
+		if ((now - last_update_tm) <= 2)
+			return;
+
+		last_update_tm = now;
+
 		lv_timer_handler();
 
 		if (throttle_ctr-- <= 0) {
@@ -79,10 +73,10 @@ private:
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());
-		Debug::Pin2::low();
 	}
 
-	void page_update_task() { //60Hz
+private:
+	void page_update_task() {
 		//This returns false when audio stops
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 		//if (!read_ok) ... restart audio
@@ -92,9 +86,7 @@ private:
 
 	static constexpr int32_t throttle_amt = 10;
 	int32_t throttle_ctr = 0;
-
-	// mdrivlib::Timekeeper page_update_tm;
-	mdrivlib::Timekeeper ui_event_tm;
+	uint32_t last_update_tm = 0;
 };
 
 } // namespace MetaModule

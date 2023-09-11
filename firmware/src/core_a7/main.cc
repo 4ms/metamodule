@@ -90,6 +90,7 @@ void main() {
 	audio.start();
 
 	while (true) {
-		__WFI();
+		ui.update();
+		__NOP();
 	}
 }
