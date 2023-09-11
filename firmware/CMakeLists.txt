@@ -228,3 +228,5 @@ add_custom_target(
   COMMENT "Regenerating minBlep tables"
   VERBATIM USES_TERMINAL
 )
+
+file(TOUCH ${CMAKE_CURRENT_BINARY_DIR}/cmake-ok)
