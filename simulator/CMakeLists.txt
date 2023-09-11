@@ -120,12 +120,7 @@ target_include_directories(
           ${MM_ROOT}/shared/CoreModules
           ${MM_ROOT}/shared/CoreModules/4ms)
 
-target_compile_options(simulator PRIVATE -Wall -Og -g2 > ${SDL2_CFLAGS_OTHER})
-target_compile_options(simulator PRIVATE -Wno-missing-braces)
-
-target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
-# Define TEST so braids dsp/dsp.h works (since it contains raw Cortex-M4
-# assembly)
+target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
                                         ryml SDL2 VCV_adaptor)

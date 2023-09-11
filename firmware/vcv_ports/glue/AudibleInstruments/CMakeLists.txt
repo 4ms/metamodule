@@ -19,4 +19,7 @@ set_source_files_properties(
   ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc PROPERTIES COMPILE_OPTIONS "-Wno-asm-operand-widths"
 )
 
+# Define TEST so braids dsp/dsp.h works (since it contains raw Cortex-M4 assembly)
+target_compile_definitions(AudibleInstrumentsLibrary PRIVATE SIMULATOR TEST)
+
 set_property(TARGET AudibleInstrumentsLibrary PROPERTY CXX_STANDARD 20)
