@@ -56,8 +56,6 @@ void main() {
 	auto shared_message = SharedMemoryS::ptrs.icc_message;
 	auto shared_patch_file_list = SharedMemoryS::ptrs.patch_file_list;
 
-	PatchModQueue patch_mod_queue; //TODO: share with A7
-
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
 	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander
 	i2c.enable_IT(a7m4_shared_i2c_codec_conf.priority1, a7m4_shared_i2c_codec_conf.priority2);
