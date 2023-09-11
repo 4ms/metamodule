@@ -20,7 +20,7 @@ struct Random {
 	}
 	// float between 0 and 1
 	static Float Float01() {
-		return f(Word()) / f(UINT32_MAX);
+		return f(Word()) / f(4294967296ULL);
 	}
 	static bool Bool() {
 		return Word() & 1;

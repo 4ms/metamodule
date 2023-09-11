@@ -47,55 +47,42 @@ target_link_libraries(core4ms PUBLIC mp15xa7_arch)
 #
 # VCV Adaptor
 #
-file(GLOB RACKARTWORK_SOURCES ${FWDIR}/src/gui/images/Rack/components/*.c)
-
-add_library(
-  VCV_adaptor OBJECT
-  ${FWDIR}/src/VCV_adaptor/plugin_instance.cc
-  ${FWDIR}/src/VCV_adaptor/pffft/pffft.c
-  ${FWDIR}/src/VCV_adaptor/random.cpp
-  ${RACKARTWORK_SOURCES}
-)
-
-target_link_libraries(VCV_adaptor PUBLIC mdrivlib_interface lvgl::lvgl)
-
-set_source_files_properties(${FWDIR}/src/VCV_adaptor/pffft/pffft.c COMPILE_FLAGS -Wno-double-promotion)
-
-target_include_directories(
-  VCV_adaptor SYSTEM
-  PUBLIC ${FWDIR}/src/VCV_adaptor
-  PUBLIC ${FWDIR}/src/VCV_adaptor
-         ${FWDIR}/src
-         ${FWDIR}
-         ${SHARED}
-         ${SHARED}/cpputil
-)
+add_subdirectory(VCV_adaptor)
+target_link_libraries(VCV_adaptor PUBLIC mdrivlib_interface)
 
 #
-# Befaco
-#
-add_subdirectory(${FWDIR}/vcv_ports/glue/Befaco ${CMAKE_CURRENT_BINARY_DIR}/Befaco)
-target_link_libraries(BefacoModules PUBLIC VCV_adaptor)
-
-#
-# AudibleInstruments
-#
-add_subdirectory(${FWDIR}/vcv_ports/glue/AudibleInstruments ${CMAKE_CURRENT_BINARY_DIR}/AudibleInstruments)
-target_link_libraries(AudibleInstrumentsModules PUBLIC VCV_adaptor)
-
-#
-# Artwork
+# Core Artwork files
 #
 file(
   GLOB
   ARTWORK_SOURCES
   ${FWDIR}/src/gui/images/4ms/modules/*_artwork_240.c
   ${FWDIR}/src/gui/images/4ms/components/*.c
-  ${FWDIR}/src/gui/images/Befaco/modules/*_240.c
-  ${FWDIR}/src/gui/images/Befaco/components/*.c
-  ${FWDIR}/src/gui/images/AudibleInstruments/modules/*_240.c
-  ${FWDIR}/src/gui/images/AudibleInstruments/components/*.c
 )
+
+# load list of brands, but remove 4ms and Rack
+include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
+list(
+  REMOVE_ITEM
+  brands
+  4ms
+  Rack
+)
+
+foreach(brand ${brands})
+  file(
+    GLOB
+    BRAND_ARTWORK_SOURCES
+    ${FWDIR}/src/gui/images/${brand}/components/*.c
+    ${FWDIR}/src/gui/images/${brand}/modules/*.c
+  )
+  list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
+
+  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
+  target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
+  target_compile_options(${brand}Library PRIVATE -Wno-attributes)
+
+endforeach()
 
 #
 # RYML
@@ -222,9 +209,11 @@ target_link_libraries(
           ui
           ryml
           VCV_adaptor
-          BefacoModules
-          AudibleInstrumentsModules
 )
+
+foreach(brand ${brands})
+  target_link_libraries(main.elf PRIVATE ${brand}Library)
+endforeach()
 
 target_link_script(
   main
