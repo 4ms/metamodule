@@ -97,8 +97,8 @@ private:
 	PatchPlayer &player_;
 	PatchStorageProxy &storage_;
 
-	bool loading_new_patch_ = false;
-	bool audio_is_muted_ = false;
+	std::atomic<bool> loading_new_patch_ = false;
+	std::atomic<bool> audio_is_muted_ = false;
 
 	uint32_t loaded_patch_index_;
 	Volume loaded_patch_vol_;
