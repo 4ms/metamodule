@@ -47,29 +47,8 @@ target_link_libraries(core4ms PUBLIC mp15xa7_arch)
 #
 # VCV Adaptor
 #
-file(GLOB RACKARTWORK_SOURCES ${FWDIR}/src/gui/images/Rack/components/*.c)
-
-add_library(
-  VCV_adaptor OBJECT
-  ${FWDIR}/src/VCV_adaptor/plugin_instance.cc
-  ${FWDIR}/src/VCV_adaptor/pffft/pffft.c
-  ${FWDIR}/src/VCV_adaptor/random.cpp
-  ${RACKARTWORK_SOURCES}
-)
-
-target_link_libraries(VCV_adaptor PUBLIC mdrivlib_interface lvgl::lvgl)
-
-set_source_files_properties(${FWDIR}/src/VCV_adaptor/pffft/pffft.c COMPILE_FLAGS -Wno-double-promotion)
-
-target_include_directories(
-  VCV_adaptor
-  PUBLIC ${FWDIR}/src/VCV_adaptor
-         ${FWDIR}/src/VCV_adaptor/pffft
-         ${FWDIR}/src
-         ${FWDIR}
-         ${SHARED}
-         ${SHARED}/cpputil
-)
+add_subdirectory(VCV_adaptor)
+target_link_libraries(VCV_adaptor PUBLIC mdrivlib_interface)
 
 #
 # Core Artwork files
@@ -83,20 +62,26 @@ file(
 
 # load list of brands, but remove 4ms and Rack
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
-list(REMOVE_ITEM brands 4ms Rack)
+list(
+  REMOVE_ITEM
+  brands
+  4ms
+  Rack
+)
 
 foreach(brand ${brands})
-  file (GLOB 
-    BRAND_ARTWORK_SOURCES 
-    ${FWDIR}/src/gui/images/${brand}/components/*.c 
-    ${FWDIR}/src/gui/images/${brand}/modules/*.c) 
+  file(
+    GLOB
+    BRAND_ARTWORK_SOURCES
+    ${FWDIR}/src/gui/images/${brand}/components/*.c
+    ${FWDIR}/src/gui/images/${brand}/modules/*.c
+  )
   list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
   target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
 
 endforeach()
-
 
 #
 # RYML
