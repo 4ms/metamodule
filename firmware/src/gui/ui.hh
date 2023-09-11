@@ -1,5 +1,4 @@
 #pragma once
-#include "core_a7/static_buffers.hh"
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "gui/pages/page_manager.hh"
@@ -43,9 +42,7 @@ public:
 		, patch_playloader{patch_playloader}
 		, msg_queue{1024}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
-	}
 
-	void start() {
 		params.clear();
 		metaparams.clear();
 
@@ -70,11 +67,10 @@ public:
 
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
-			// printf_("%s", msg.data());
+			printf_("%s", msg.data());
 			msg_queue.clear_message();
 		}
 
-		Debug::Pin2::low();
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());

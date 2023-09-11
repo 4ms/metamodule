@@ -55,9 +55,9 @@ extern "C" void aux_core_main() {
 	InterruptManager::register_and_start_isr(SGI3_IRQn, 0, 0, []() { SMPThread::execute(); });
 
 	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
-	ui.start();
 
 	while (true) {
-		__WFI();
+		ui.update();
+		__NOP();
 	}
 }
