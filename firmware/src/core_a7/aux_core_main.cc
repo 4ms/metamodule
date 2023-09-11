@@ -35,6 +35,7 @@ extern "C" void aux_core_main() {
 		}
 		SMPThread::signal_done();
 	});
+	GIC_SetConfiguration(SGI4_IRQn, InterruptControl::LevelTriggered);
 
 	// NewModuleList
 	InterruptManager::register_and_start_isr(SGI2_IRQn, 0, 0, [&context]() {
@@ -43,6 +44,7 @@ extern "C" void aux_core_main() {
 		context.idx_increment = SMPControl::read<SMPRegister::UpdateModuleOffset>();
 		SMPThread::signal_done();
 	});
+	GIC_SetConfiguration(SGI2_IRQn, InterruptControl::LevelTriggered);
 
 	// UpdateModule
 	InterruptManager::register_and_start_isr(SGI1_IRQn, 0, 0, [&patch_player]() {
@@ -50,9 +52,11 @@ extern "C" void aux_core_main() {
 		patch_player->modules[module_idx]->update();
 		SMPThread::signal_done();
 	});
+	GIC_SetConfiguration(SGI1_IRQn, InterruptControl::LevelTriggered);
 
 	// CallFunction
 	InterruptManager::register_and_start_isr(SGI3_IRQn, 0, 0, []() { SMPThread::execute(); });
+	GIC_SetConfiguration(SGI3_IRQn, InterruptControl::LevelTriggered);
 
 	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
 
