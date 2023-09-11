@@ -3,6 +3,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(mm_sim LANGUAGES C CXX)
 
+set(CMAKE_CXX_STANDARD 20)
+
 set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
 set(SIM_ROOT ${PROJECT_SOURCE_DIR})
 set(LVGL_DIR ${MM_ROOT}/firmware/lib/lvgl/lvgl)
@@ -44,29 +46,42 @@ set_source_files_properties(${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c
 # #################### CoreModules ##################################
 file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
 
+# #################### VCV Adaptor ##################################
+
+file(GLOB RACKARTWORK_SOURCES
+     ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c)
+
+add_library(
+  VCV_adaptor OBJECT
+  ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
+  ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c ${RACKARTWORK_SOURCES})
+
+target_link_libraries(VCV_adaptor PUBLIC lvgl::lvgl)
+
+target_include_directories(
+  VCV_adaptor
+  PUBLIC ${MM_ROOT}/firmware/src/VCV_adaptor ${MM_ROOT}/firmware/src
+         ${MM_ROOT}/firmware ${MM_ROOT}/shared ${MM_ROOT}/shared/cpputil)
+
+# Fixup for pffft compiler warnings
+set_source_files_properties(${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
+                            COMPILE_FLAGS -Wno-double-promotion)
 
 # #################### Other brands ##################################
-# for each of the following brands, load the required source files from their respective "glue" folders
+
 include(${MM_ROOT}/firmware/vcv_ports/brands.cmake)
 # following is only for custom modules (not 4ms or Rack)
 list(REMOVE_ITEM brands 4ms Rack)
 
-set(BRAND_SOURCE_PATHS)
 foreach(brand ${brands})
-  string(TOUPPER ${brand} BRAND)
-  
-  # modules.cmake should define ${BRAND}_SOURCE_PATHS (e.g. BEFACO_SOURCE_PATHS for Befaco)
-  add_subdirectory(${MM_ROOT}/firmware/vcv_ports/glue/${brand} ${brand})
-  if(NOT DEFINED ${BRAND}_SOURCE_PATHS)
-    message(FATAL_ERROR "No source, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_SOURCE_PATHS!")
-  else()
-    list(APPEND BRAND_SOURCE_PATHS ${${BRAND}_SOURCE_PATHS})
-  endif()
 
-  file (GLOB 
-    BRAND_GUI_IMAGES 
-    ${MM_ROOT}/firmware/src/gui/images/${brand}/components/*.c 
-    ${MM_ROOT}/firmware/src/gui/images/${brand}/modules/*.c) 
+  add_subdirectory(${MM_ROOT}/firmware/vcv_ports/glue/${brand}
+                   ${CMAKE_CURRENT_BINARY_DIR}/${brand})
+  target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
+
+  file(GLOB BRAND_GUI_IMAGES
+       ${MM_ROOT}/firmware/src/gui/images/${brand}/components/*.c
+       ${MM_ROOT}/firmware/src/gui/images/${brand}/modules/*.c)
   list(APPEND GUI_IMAGES ${BRAND_GUI_IMAGES})
 endforeach()
 
@@ -76,14 +91,10 @@ set(CORE_MODULES
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
     #
-    # non-4ms modules
-    ${BRAND_SOURCE_PATHS}
-    #
     # support files
     ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
     ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
-    ${MM_ROOT}/shared/cpputil/util/math_tables.cc
-)
+    ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
 
 # Fixups for compiler warnings in AudibleInstruments:
 set_source_files_properties(
@@ -140,11 +151,7 @@ target_include_directories(
           ${MM_ROOT}/shared/cpputil
           ${MM_ROOT}/shared/patch
           ${MM_ROOT}/shared/CoreModules
-          ${MM_ROOT}/shared/CoreModules/4ms
-          ${MM_ROOT}/shared/CoreModules/Befaco
-          ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack
-          ${MM_ROOT}/firmware/src/VCV_adaptor
-          ${MM_ROOT}/firmware/src/VCV_adaptor/pffft)
+          ${MM_ROOT}/shared/CoreModules/4ms)
 
 target_compile_options(
   simulator PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
@@ -158,8 +165,11 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
                                         ryml SDL2)
 
-message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
+foreach(brand ${brands})
+  target_link_libraries(simulator PRIVATE ${brand}Library)
+endforeach()
 
+message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_options(simulator PUBLIC "-Wl,-map,simulator.map")
