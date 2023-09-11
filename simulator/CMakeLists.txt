@@ -52,9 +52,8 @@ file(GLOB RACKARTWORK_SOURCES
      ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c)
 
 add_library(
-  VCV_adaptor OBJECT
-  ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
-  ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c ${RACKARTWORK_SOURCES})
+  VCV_adaptor OBJECT ${MM_ROOT}/firmware/src/VCV_adaptor/plugin_instance.cc
+                     ${RACKARTWORK_SOURCES})
 
 target_link_libraries(VCV_adaptor PUBLIC lvgl::lvgl)
 
@@ -62,10 +61,6 @@ target_include_directories(
   VCV_adaptor
   PUBLIC ${MM_ROOT}/firmware/src/VCV_adaptor ${MM_ROOT}/firmware/src
          ${MM_ROOT}/firmware ${MM_ROOT}/shared ${MM_ROOT}/shared/cpputil)
-
-# Fixup for pffft compiler warnings
-set_source_files_properties(${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
-                            COMPILE_FLAGS -Wno-double-promotion)
 
 # #################### Other brands ##################################
 
@@ -92,7 +87,6 @@ set(CORE_MODULES
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
     #
     # support files
-    ${MM_ROOT}/firmware/src/VCV_adaptor/pffft/pffft.c
     ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
     ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
 
