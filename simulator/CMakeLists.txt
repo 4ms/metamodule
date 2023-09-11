@@ -56,7 +56,7 @@ foreach(brand ${brands})
   string(TOUPPER ${brand} BRAND)
   
   # modules.cmake should define ${BRAND}_SOURCE_PATHS (e.g. BEFACO_SOURCE_PATHS for Befaco)
-  include(${MM_ROOT}/firmware/vcv_ports/glue/${brand}/modules.cmake)
+  add_subdirectory(${MM_ROOT}/firmware/vcv_ports/glue/${brand} ${brand})
   if(NOT DEFINED ${BRAND}_SOURCE_PATHS)
     message(FATAL_ERROR "No source, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_SOURCE_PATHS!")
   else()
