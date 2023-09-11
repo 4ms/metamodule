@@ -80,6 +80,7 @@ foreach(brand ${brands})
 
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
   target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
+  target_compile_options(${brand}Library PRIVATE -Wno-attributes)
 
 endforeach()
 

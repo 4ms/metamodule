@@ -9,4 +9,14 @@ target_include_directories(AudibleInstrumentsLibrary PRIVATE ${AUDIBLE_DIR}/src 
 
 target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-double-promotion -Wno-deprecated-enum-float-conversion)
 
+# Fixups for compiler warnings in AudibleInstruments:
+set_source_files_properties(
+  ${AUDIBLE_DIR}/eurorack/braids/digital_oscillator.cc
+  PROPERTIES COMPILE_OPTIONS "-Wno-unused-const-variable;-Wno-unused-but-set-variable"
+)
+
+set_source_files_properties(
+  ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc PROPERTIES COMPILE_OPTIONS "-Wno-asm-operand-widths"
+)
+
 set_property(TARGET AudibleInstrumentsLibrary PROPERTY CXX_STANDARD 20)
