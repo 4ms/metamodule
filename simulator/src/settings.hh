@@ -19,9 +19,8 @@ struct Settings {
 			options.add_options()(
 				"z,zoom", "Initial display zoom percentage", cxxopts::value<unsigned>()->default_value("100"));
 
-			options.add_options()("a,audioout",
-								  "Audio output device ID (as seen by SDL)",
-								  cxxopts::value<unsigned>()->default_value("0"));
+			options.add_options()(
+				"a,audioout", "Audio output device ID (as seen by SDL)", cxxopts::value<int>()->default_value("0"));
 
 			options.add_options()(
 				"p,patchdir", "Directory with patch files", cxxopts::value<std::string>()->default_value("patches/"));
