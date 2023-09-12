@@ -1,4 +1,3 @@
-
 ### Building Firmware
 
 This requires `arm-none-eabi-gcc` version 12.2 or later installed on your PATH.
