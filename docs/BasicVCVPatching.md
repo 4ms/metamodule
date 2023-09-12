@@ -3,6 +3,7 @@
 ### Adding Modules to Your Library
 To get started, you will need to add the free 4msCompany MetaModule to your VCV Library. If you aren't familiar with adding modules to your VCV Library, it is an easy process.
 
+#### Via VCV Library
 1) Go to [the VCV Library](https://library.vcvrack.com/) and make sure that you are signed into your account (top-right corner).
 2) On the top of the Library are a number of filters. You can search for "MetaModule" or "4ms". Alternatively, you can use [the 4msCompany Brand Filter](https://library.vcvrack.com/?query=&brand=4msCompany&tag=&license=) to list all modules by 4ms.
 3) Aside from the MetaModule, you will want to add modules from other supported brands for creating your patches. Currently, the MetaModule supports modules from 4msCompany, Befaco, HetrickCV, and Nonlinear Circuits, along with the Macro Oscillator by Audible Instruments. (TODO: Add a link to a supported list of modules)
@@ -10,6 +11,13 @@ To get started, you will need to add the free 4msCompany MetaModule to your VCV 
 5) After adding modules to your account, open VCV Rack (or restart it if it's currently open). If you are not signed in to your VCV account on VCV Rack itself, click the "Library" menu on the top file bar and sign in there.
 
 ![Audible Macro Oscillator](./images/AudibleMacro.png)
+
+#### Via GitHub Releases
+1) Go to the [GitHub Releases Page](https://github.com/4ms/metamodule/releases/).
+2) Find the latest VCV (.vcvplugin) release and download the appropriate build for your machine type.
+3) Place the .vcvplugin file in your Documents/Rack2/plugins folder.
+4) Open VCV (or restart it if it's already open). This will unzip the contents of the .vcvplugin package and install it. The modules should now be visible in your local VCV library.
+![Releases](./images/GHReleases.png)
 
 ### Saving the Basic Patch
 
@@ -71,12 +79,9 @@ Aside from knob mappings, we will also want to add CV control of the Ensemble Os
 
 We can now send this patch to the hardware MetaModule. To export your patch, click the big red SAVE button on the top-right of the software MetaModule's interface. This will bring up a dialogue to save the current patch as a MetaModule-compatible .yml file. Make sure your put the file in a place that you'll remember.
 
-You can now upload the patch to the hardware MetaModule via USB, WiFi, or MicroSD.
+You can now upload the patch to the hardware MetaModule via USB or MicroSD (WiFi is coming later with an expander module).
 
 #### USB
-TODO
-
-#### WiFi
 TODO
 
 #### MicroSD
