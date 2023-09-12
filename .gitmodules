@@ -19,9 +19,6 @@
 [submodule "firmware/bootloader/mp1-boot"]
 	path = firmware/bootloader/mp1-boot
 	url = https://github.com/4ms/mp1-boot.git
-[submodule "firmware/vcv_ports/AudibleInstruments"]
-	path = firmware/vcv_ports/AudibleInstruments
-	url = https://github.com/VCVRack/AudibleInstruments.git
 [submodule "firmware/vcv_ports/Befaco"]
 	path = firmware/vcv_ports/Befaco
 	url = https://github.com/hemmer/Befaco.git
@@ -34,9 +31,3 @@
 [submodule "firmware/vcv_ports/AudibleInstruments"]
 	path = firmware/vcv_ports/AudibleInstruments
 	url = https://github.com/VCVRack/AudibleInstruments.git
-[submodule "firmware/vcv_ports/Befaco"]
-	path = firmware/vcv_ports/Befaco
-	url = https://github.com/hemmer/Befaco.git
-[submodule "firmware/src/VCV_adaptor/simde"]
-	path = firmware/src/VCV_adaptor/simde
-	url = https://github.com/simd-everywhere/simde.git
