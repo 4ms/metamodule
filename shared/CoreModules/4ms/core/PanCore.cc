@@ -41,7 +41,7 @@ public:
 				return leftOut;
 
 			case Info::OutputOut_2:
-				return leftOut;
+				return rightOut;
 		}
 		return 0.f;
 	}
