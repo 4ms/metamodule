@@ -15,7 +15,7 @@ To get started, you will need to add the free 4msCompany Meta Module to your VCV
 #### Via GitHub Releases
 1) Go to the [GitHub Releases Page](https://github.com/4ms/metamodule/releases/).
 2) Find the latest VCV (.vcvplugin) release and download the appropriate build for your machine type.
-3) Place the .vcvplugin file in your Documents/Rack2/plugins folder.
+3) Place the .vcvplugin file in your VCV Rack User Folder. To find the User Folder, open VCV Rack, and selected "Open User Folder" from the Help menu.
 4) Open VCV (or restart it if it's already open). This will unzip the contents of the .vcvplugin package and install it. The modules should now be visible in your local VCV library.
 ![Releases](./images/GHReleases.png)
 
