@@ -12,9 +12,6 @@ struct Engine {
 	float getSampleRate() {
 		return 48000;
 	}
-	float getSampleTime() {
-		return 1.f / 48000.f;
-	}
 
 	// void setSuggestedSampleRate(float suggestedSampleRate);
 	float getSampleTime() {
