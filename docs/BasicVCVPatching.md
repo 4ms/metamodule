@@ -79,11 +79,16 @@ Aside from knob mappings, we will also want to add CV control of the Ensemble Os
 
 We can now send this patch to the hardware MetaModule. To export your patch, click the big red SAVE button on the top-right of the software MetaModule's interface. This will bring up a dialogue to save the current patch as a MetaModule-compatible .yml file. Make sure your put the file in a place that you'll remember.
 
-You can now upload the patch to the hardware MetaModule via USB or MicroSD (WiFi is coming later with an expander module).
+You can now upload the patch to the hardware MetaModule via USB drive or microSD (WiFi is coming later with an expander module).
 
-#### USB
-TODO
-
-#### MicroSD
-Copy the .yml patch file to the MicroSD card on your MetaModule. If you are a MetaModule developer, use a regular microSD card for this instead of the developer microSD card, otherwise the patch won't be visible.
+Copy the .yml patch file to a microSD card or a USB drive. The card or
+drive must be formatted as FAT32 or ExFAT, with just a single partition. If you
+are a MetaModule developer, use a regular microSD card for this instead of the
+developer microSD card, otherwise the patch won't be visible. Insert the card
+or drive into the MetaModule and in a moment it will appear in the Patch
+Selector page (press the Back button repeatedly to get back to the Patch
+Selector page). You can open a patch just by selecting it and clicking on it.
+Play it by clicking the Play button. Once you have a patch opened or playing,
+you are free to remove the microSD card or USB drive -- the patch file is
+loaded into memory and will stay there until you open or play another patch.
 
