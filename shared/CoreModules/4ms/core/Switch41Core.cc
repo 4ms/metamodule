@@ -69,7 +69,7 @@ public:
 		if (output_id != Info::OutputOut)
 			return 0;
 
-		int output = 0;
+		float output = 0.0f;
 		if (cvMode) {
 			for (int i = 0; i < 4; i++) {
 				output += signalInputs[i] * scanLevels[i];
@@ -106,8 +106,8 @@ public:
 private:
 	int stepNum = 0;
 	float signalInputs[4] = {0, 0, 0, 0};
-	float cvInput;
-	float scanLevels[4];
+	float cvInput = 0.0f;
+	float scanLevels[4] = {0, 0, 0, 0};
 	bool cvMode = false;
 	ClockPhase cp;
 };
