@@ -26,7 +26,7 @@ Initialize and update the submodules recursively:
 git submodule update --init --recursive
 ```
 
-Next, setup your development environment by [following the instructions on this page](Setup.md).
+Next, setup your development environment by [following the instructions on this page](./docs/Setup.md).
 
 ### Next Steps
 
@@ -34,11 +34,15 @@ The Meta Module environment is built using three separate components: The VCV Ra
 
 To build these components, please follow the separate build guides:
 - [VCV Rack Plugin](./vcv/README.md)
-- [Firmware Simulator](./simulator/Setup.md)
+- [Simulator](./simulator/Building.md)
 - [Firmware](./firmware/README.md)
+
+### Usage
+
+- [Creating Meta Module Patches With VCV](./docs/BasicVCVPatching.md)
 
 
 ### Contributing
 
-If you would like to port your own VCV modules to the Meta Module platform, please see the [Porting Guide](./Porting.md).
+If you would like to port your own VCV modules to the Meta Module platform, please see the [Porting Guide](./docs/Porting.md).
 

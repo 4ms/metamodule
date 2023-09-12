@@ -1,7 +1,7 @@
 ### Building Firmware
 
 This requires `arm-none-eabi-gcc` version 12.2 or later installed on your PATH.
-Please see the [setup guide](../Setup.md) for some important notes about this.
+Please see the [setup guide](../docs/Setup.md) for some important notes about this.
 
 Make sure you are in the right branch and you already updated the submodules.
 
