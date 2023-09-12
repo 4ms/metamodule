@@ -48,6 +48,7 @@ target_link_libraries(core4ms PUBLIC mp15xa7_arch)
 # VCV Adaptor
 #
 add_subdirectory(VCV_adaptor)
+target_sources(VCV_adaptor PRIVATE VCV_adaptor/random.cpp)
 target_link_libraries(VCV_adaptor PUBLIC mdrivlib_interface)
 
 #
