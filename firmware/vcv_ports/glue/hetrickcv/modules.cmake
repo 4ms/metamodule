@@ -1,0 +1,132 @@
+set(HETRICKCV_DIR ${CMAKE_CURRENT_LIST_DIR}/../../hetrickcv)
+
+set(hetrickcvModules
+    ASR
+    AToD
+    BinaryGate
+    BinaryNoise
+    Bitshift
+    Boolean3
+    Chaos1Op
+    Chaos2Op
+    Chaos3Op
+    ChaoticAttractors
+    ClockedNoise
+    Contrast
+    Crackle
+    DToA
+    Dust
+    Exponent
+    FBSineChaos
+    FlipFlop
+    FlipPan
+    GateDelay
+    GateJunction
+    GateJunctionExp
+    Gingerbread
+    LogicCombine
+    MidSide
+    MinMax
+    PhaseDrivenSequencer
+    PhaseDrivenSequencer32
+    PhasorAnalyzer
+    PhasorBurstGen
+    PhasorDivMult
+    PhasorEuclidean
+    PhasorGates
+    PhasorGates32
+    PhasorGates64
+    PhasorGen
+    PhasorGeometry
+    PhasorHumanizer
+    PhasorOctature
+    PhasorQuadrature
+    PhasorRandom
+    PhasorRanger
+    PhasorReset
+    PhasorRhythmGroup
+    PhasorShape
+    PhasorShift
+    PhasorStutter
+    PhasorSubstepShape
+    PhasorSwing
+    PhasorTimetable
+    PhasorToClock
+    PhasorToLFO
+    PhasorToWaveforms
+    Polar
+    Probability
+    Scanner
+    TwoToFour
+    VectorMix
+    Waveshape
+)
+
+# cpp paths
+list(TRANSFORM hetrickcvModules PREPEND ${HETRICKCV_DIR}/src/ OUTPUT_VARIABLE HETRICKCV_SOURCE_PATHS)
+list(TRANSFORM HETRICKCV_SOURCE_PATHS APPEND .cpp)
+
+# svg paths
+set(HETRICKCV_FACEPLATE_SVGS
+    ASR
+    AToD
+    BinaryGate
+    BinaryNoise
+    Bitshift
+    Boolean3
+    1OpChaos
+    2OpChaos
+    3OpChaos
+    ChaoticAttractors
+    ClockedNoise
+    Contrast
+    Crackle
+    DToA
+    Dust
+    Exponent
+    FBSineChaos
+    FlipFlop
+    FlipPan
+    GateDelay
+    GateJunction
+    GateJunctionExpanded
+    Gingerbread
+    LogicCombiner
+    MidSide
+    MinMax
+    PhaseDrivenSequencer
+    PhaseDrivenSequencer32
+    PhasorAnalyzer
+    PhasorBurstGen
+    PhasorDivMult
+    PhasorEuclidean
+    PhasorGates
+    PhasorGates32
+    PhasorGates64
+    PhasorGen
+    PhasorGeometry
+    PhasorHumanizer
+    PhasorOctature
+    PhasorQuadrature
+    PhasorRandom
+    PhasorRanger
+    PhasorReset
+    PhasorRhythmGroup
+    PhasorShape
+    PhasorShift
+    PhasorStutter
+    PhasorSubstepShape
+    PhasorSwing
+    PhasorTimetable
+    PhasorToClock
+    PhasorToLFO
+    PhasorToWaveforms
+    XYToPolar
+    Probability
+    Scanner
+    2To4
+    VectorMix
+    Waveshape
+)
+list(TRANSFORM HETRICKCV_FACEPLATE_SVGS PREPEND ${HETRICKCV_DIR}/res/)
+list(TRANSFORM HETRICKCV_FACEPLATE_SVGS APPEND .svg)
