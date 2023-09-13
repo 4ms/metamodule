@@ -1,10 +1,8 @@
 #pragma once
-
 #include <rack.hpp>
 
 extern rack::Plugin *pluginInstance;
 
-// Declare each Model, defined in each module source file
 //////////////// Auto generated ///////////////////////
 // Add models below here
 extern rack::Model *modelOctave;
@@ -16,7 +14,6 @@ extern rack::Model *modelFreeverb;
 extern rack::Model *modelSTS;
 extern rack::Model *modelVCAM;
 extern rack::Model *modelTapo;
-extern rack::Model *modelShift;
 extern rack::Model *modelSISM;
 extern rack::Model *modelSH;
 extern rack::Model *modelSCM;
@@ -27,7 +24,6 @@ extern rack::Model *modelPI;
 extern rack::Model *modelPEG;
 extern rack::Model *modelMixer;
 extern rack::Model *modelLPG;
-extern rack::Model *modelLIO;
 extern rack::Model *modelL4;
 extern rack::Model *modelGate8;
 extern rack::Model *modelGate32;
@@ -66,7 +62,6 @@ extern rack::Model *modelKPLS;
 extern rack::Model *modelMultiLFO;
 extern rack::Model *modelPan;
 extern rack::Model *modelPitchShift;
-extern rack::Model *modelSMR;
 extern rack::Model *modelSlew;
 extern rack::Model *modelSource;
 extern rack::Model *modelStMix;

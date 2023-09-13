@@ -35,12 +35,10 @@ LV_IMG_DECLARE(Switch14_artwork_240);
 LV_IMG_DECLARE(StMix_artwork_240);
 LV_IMG_DECLARE(Source_artwork_240);
 LV_IMG_DECLARE(Slew_artwork_240);
-LV_IMG_DECLARE(Shift_artwork_240);
 LV_IMG_DECLARE(Sequant_artwork_240);
 LV_IMG_DECLARE(Seq8_artwork_240);
 LV_IMG_DECLARE(Seq4_artwork_240);
 LV_IMG_DECLARE(STS_artwork_240);
-LV_IMG_DECLARE(SMR_artwork_240);
 LV_IMG_DECLARE(SISM_artwork_240);
 LV_IMG_DECLARE(SH_artwork_240);
 LV_IMG_DECLARE(SHEV_artwork_240);
@@ -61,7 +59,6 @@ LV_IMG_DECLARE(Mixer4_artwork_240);
 LV_IMG_DECLARE(MNMX_artwork_240);
 LV_IMG_DECLARE(LPG_artwork_240);
 LV_IMG_DECLARE(LPF_artwork_240);
-LV_IMG_DECLARE(LIO_artwork_240);
 LV_IMG_DECLARE(L4_artwork_240);
 LV_IMG_DECLARE(KPLS_artwork_240);
 LV_IMG_DECLARE(InfOsc_artwork_240);
@@ -179,9 +176,6 @@ struct ModuleImages {
 		if (slug == "Slew")
 			return &Slew_artwork_240;
 
-		if (slug == "Shift")
-			return &Shift_artwork_240;
-
 		if (slug == "Sequant")
 			return &Sequant_artwork_240;
 
@@ -193,9 +187,6 @@ struct ModuleImages {
 
 		if (slug == "STS")
 			return &STS_artwork_240;
-
-		if (slug == "SMR")
-			return &SMR_artwork_240;
 
 		if (slug == "SISM")
 			return &SISM_artwork_240;
@@ -256,9 +247,6 @@ struct ModuleImages {
 
 		if (slug == "LPF")
 			return &LPF_artwork_240;
-
-		if (slug == "LIO")
-			return &LIO_artwork_240;
 
 		if (slug == "L4")
 			return &L4_artwork_240;

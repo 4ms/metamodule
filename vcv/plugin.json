@@ -50,12 +50,6 @@
       "tags": ["Effect", "Reverb"]
     },
     {
-      "slug": "Shift",
-      "name": "Shift",
-      "description": "Shift",
-      "tags": ["Effect"]
-    },
-    {
       "slug": "CLKM",
       "name": "Clock Multiplier [CLKM]",
       "description": "Outputs a clock signal at a multiple of an incoming clock signal's tempo.",
@@ -76,7 +70,7 @@
     {
       "slug": "Verb",
       "name": "Verb",
-      "description": "Verb",
+      "description": "Experimental reverb using comb filters and all-pass filters",
       "tags": ["Reverb"]
     },
     {
@@ -99,14 +93,14 @@
     },
     {
       "slug": "KPLS",
-      "name": "KPLS",
+      "name": "Karplus",
       "description": "Karplus-Strong string sound oscillator",
       "tags": ["Oscillator"]
     },
     {
       "slug": "InfOsc",
       "name": "InfOsc",
-      "description": "InfOsc",
+      "description": "Infinite Oscillator (partially functional)",
       "tags": ["Oscillator"]
     },
     {
@@ -118,7 +112,7 @@
     {
       "slug": "Djembe",
       "name": "Djembe",
-      "description": "Djembe",
+      "description": "Physically modeled Djembe based on FAUST models by Romain Michon, Pierre-Amaury Grumiaux, and Yann Orlarey",
       "tags": ["Drum"]
     },
     {
@@ -185,7 +179,7 @@
       "slug": "PI",
       "name": "Percussion Interface + Expander [PI]",
       "description": "PI (not implemented)",
-      "tags": ["Envelope follower"]
+      "tags": ["Envelope follower", "Hardware clone"]
     },
     {
       "slug": "PEG",
@@ -198,12 +192,6 @@
       "name": "LPG",
       "description": "LPG (not implemented)",
       "tags": ["Low-pass gate"]
-    },
-    {
-      "slug": "LIO",
-      "name": "Listen IO [LIO]",
-      "description": "LIO (not implemented)",
-      "tags": ["External"]
     },
     {
       "slug": "L4",
@@ -328,7 +316,7 @@
     {
       "slug": "Noise",
       "name": "Noise",
-      "description": "Noise (not implemented)",
+      "description": "Noise (partially implemented)",
       "tags": ["Noise"]
     },
     {
@@ -340,13 +328,13 @@
     {
       "slug": "Gate",
       "name": "Gate",
-      "description": "Gate (not implemented)",
+      "description": "Gate/trigger delay with pulse width control",
       "tags": []
     },
     {
       "slug": "Follow",
       "name": "Follow",
-      "description": "Follow (not implemented)",
+      "description": "Envelope follower with gate output",
       "tags": ["Envelope follower"]
     },
     {
@@ -364,20 +352,14 @@
     {
       "slug": "BPF",
       "name": "BPF",
-      "description": "BPF",
+      "description": "Band-pass filter",
       "tags": ["Filter"]
     },
     {
       "slug": "Atvert2",
       "name": "Atvert2",
-      "description": "Two-channel attenuverter.",
+      "description": "Two-channel attenuverter",
       "tags": ["Attenuator", "Dual", "Utility"]
-    },
-    {
-      "slug": "SMR",
-      "name": "Spectral Multiband Resonator [SMR]",
-      "description": "Spectral Multiband Resonator (not implemented)",
-      "tags": ["Effect", "Filter", "Digital", "Hardware clone", "Oscillator", "Equalizer", "Envelope follower"]
     },
 	{
       "slug": "BuffMult",

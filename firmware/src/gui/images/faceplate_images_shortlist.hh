@@ -38,7 +38,6 @@ LV_IMG_DECLARE(KPLS_artwork_240);
 LV_IMG_DECLARE(MultiLFO_artwork_240);
 LV_IMG_DECLARE(PEG_artwork_240);
 LV_IMG_DECLARE(PitchShift_artwork_240);
-LV_IMG_DECLARE(SMR_artwork_240);
 LV_IMG_DECLARE(Seq8_artwork_240);
 LV_IMG_DECLARE(StMix_artwork_240);
 }
@@ -124,9 +123,6 @@ struct ModuleImages {
 
 		if (slug == "StMix")
 			return &StMix_artwork_240;
-
-		if (slug == "SMR")
-			return &SMR_artwork_240;
 
 		if (slug == "InfOsc")
 			return &InfOsc_artwork_240;
