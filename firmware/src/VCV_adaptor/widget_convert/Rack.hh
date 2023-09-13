@@ -72,6 +72,11 @@ struct ElementConvert<componentlibrary::Rogan1PRed> {
 };
 
 template<>
+struct ElementConvert<componentlibrary::Rogan> {
+	using ElementType = MetaModule::Rogan1PRed;
+};
+
+template<>
 struct ElementConvert<componentlibrary::Rogan2PSRed> {
 	using ElementType = MetaModule::Rogan2PSRed;
 };
@@ -123,6 +128,12 @@ struct ElementConvert<componentlibrary::SmallLight<componentlibrary::GreenRedLig
 
 template<>
 struct ElementConvert<componentlibrary::PJ301MPort> {
+	using ElementTypeInput = MetaModule::PJ301MPortIn;
+	using ElementTypeOutput = MetaModule::PJ301MPortOut;
+};
+
+template<>
+struct ElementConvert<componentlibrary::ThemedPJ301MPort> {
 	using ElementTypeInput = MetaModule::PJ301MPortIn;
 	using ElementTypeOutput = MetaModule::PJ301MPortOut;
 };

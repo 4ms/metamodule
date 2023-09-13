@@ -31,8 +31,8 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 #include "window.hpp"
 // #include "audio.hpp"
 // #include "midi.hpp"
-// #include "settings.hpp"
 #include "helpers.hpp"
+#include "settings.hpp"
 // #include "componentlibrary.hpp"
 
 // #include "widget/TransparentWidget.hpp"
