@@ -118,7 +118,7 @@ public:
 		CableDrawer::draw_bezier<8>(start, end, control);
 	}
 
-	static lv_color_t get_cable_color(Jack jack) {		
+	static lv_color_t get_cable_color(Jack jack) {
 		return Gui::cable_palette[(jack.jack_id + jack.module_id) % Gui::cable_palette.size()];
 	}
 

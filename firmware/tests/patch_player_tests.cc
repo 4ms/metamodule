@@ -73,7 +73,6 @@ PatchData:
         ins: 
           - module_id: 2
             jack_id: 0
-        color: 0
       - out: 
           module_id: 1
           jack_id: 1
@@ -82,7 +81,6 @@ PatchData:
             jack_id: 1
           - module_id: 2
             jack_id: 2
-        color: 1		
   mapped_ins: 
   mapped_outs: 
     - panel_jack_id: 1
@@ -280,7 +278,6 @@ PatchData:
         ins: 
           - module_id: 1
             jack_id: 0
-        color: 0
   mapped_ins: 
       - panel_jack_id: 2
         ins: 
