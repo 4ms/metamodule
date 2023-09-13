@@ -108,6 +108,7 @@ target_include_directories(
           ${USBHOST_LIBDIR}/Class/MSC/Inc
           ${USBDEV_LIBDIR}/Core/Inc
           ${USBDEV_LIBDIR}/Class/MSC/Inc
+          ${FWDIR}/lib/lvgl/lvgl
 )
 
 set(MCU_FLAGS
@@ -148,6 +149,8 @@ target_compile_options(
           -Wno-register
           -Wno-volatile
           -fno-threadsafe-statics
+          -Wno-deprecated-enum-enum-conversion
+
           >
 )
 

@@ -7,6 +7,7 @@
 #include "mapping/patch_writer.hh"
 #include <fstream>
 #include <rack.hpp>
+#include "lv_color.h"
 
 // Adpats VCVRack-format of patch data to a format PatchFileWriter can use
 template<size_t NumKnobs, size_t MaxMapsPerPot, size_t MaxKnobSets>
@@ -50,6 +51,14 @@ struct VCVPatchFileWriter {
 			auto cable = engine->getCable(cableID);
 			auto out = cable->outputModule;
 			auto in = cable->inputModule;
+			
+			lv_color_t color = {{0, 0, 0}};
+			for (auto cableWidget : APP->scene->rack->getCompleteCables()) {
+				if (cableWidget->cable == cable) {
+					color = lv_color_make((int)(255*cableWidget->color.r), (int)(255*cableWidget->color.g), (int)(255*cableWidget->color.b));
+					break;
+				}
+			}
 
 			// Both modules on a cable must be in the plugin
 			if (!ModuleDirectory::isInPlugin(out) || !ModuleDirectory::isInPlugin(in))
@@ -70,6 +79,7 @@ struct VCVPatchFileWriter {
 				.receivedJackId = cable->inputId,
 				.sendingModuleId = out->getId(),
 				.receivedModuleId = in->getId(),
+				.color = color.full,
 			});
 		}
 

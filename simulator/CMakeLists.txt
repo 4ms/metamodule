@@ -91,7 +91,8 @@ target_include_directories(
           ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/ext/c4core/src
           ${MM_ROOT}/shared/cpputil
           ${MM_ROOT}/simulator/stubs
-          ${MM_ROOT}/shared)
+          ${MM_ROOT}/shared
+          ${MM_ROOT}/firmware/lib/lvgl/lvgl)
 
 target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 

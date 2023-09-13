@@ -55,7 +55,7 @@ public:
 
 				for (const auto &in : cable.ins) {
 					if (auto inpos = find_injack_xy(in)) {
-						draw_cable({outpos->x, outpos->y}, {inpos->x, inpos->y}, cable.out);
+						draw_cable({outpos->x, outpos->y}, {inpos->x, inpos->y}, cable);
 					}
 				}
 			}
@@ -106,8 +106,8 @@ public:
 		return Vec2{x, y};
 	}
 
-	void draw_cable(Vec2 start, Vec2 end, const Jack &outjack) {
-		drawline_dsc.color = get_cable_color(outjack);
+	void draw_cable(Vec2 start, Vec2 end, const InternalCable &cable) {		
+		drawline_dsc.color.full = cable.color;
 		draw_cable(start, end);
 	}
 
@@ -117,7 +117,7 @@ public:
 		CableDrawer::draw_bezier<8>(start, end, control);
 	}
 
-	static lv_color_t get_cable_color(Jack jack) {
+	static lv_color_t get_cable_color(Jack jack) {		
 		return Gui::cable_palette[(jack.jack_id + jack.module_id) % Gui::cable_palette.size()];
 	}
 

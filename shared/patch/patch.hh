@@ -2,6 +2,8 @@
 #include "midi_def.hh"
 #include "util/static_string.hh"
 #include <vector>
+#include "lvgl.h"
+#include "src/misc/lv_color.h"
 
 constexpr int MAX_MODULES_IN_PATCH = 32;
 constexpr unsigned MaxKnobSets = 8;
@@ -66,6 +68,7 @@ struct MappedKnobSet {
 struct InternalCable {
 	Jack out;
 	std::vector<Jack> ins;
+	uint16_t color = 0; // {{0, 0, 0}};	TODO, could be a lv_color_t
 };
 
 struct MappedInputJack {

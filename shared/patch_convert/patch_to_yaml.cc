@@ -40,6 +40,7 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 		ryml::NodeRef el = int_cables.append_child({ryml::MAP});
 		el["out"] << x.out;
 		el["ins"] << x.ins;
+		el["color"] << x.color;
 	}
 
 	ryml::NodeRef mapped_ins = data["mapped_ins"];

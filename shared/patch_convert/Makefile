@@ -1,12 +1,13 @@
 RYMLDIR = ryml/rapidyaml
-
+LVGLDIR = ../../firmware/lib/lvgl/lvgl
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
 			-Iryml \
 			-I../\
-			-I../etl/include\
+			-I../etl/include \
 			-I$(RYMLDIR)/src \
-			-I$(RYMLDIR)/ext/c4core/src
+			-I$(RYMLDIR)/ext/c4core/src \			
+			-I$(LVGLDIR)
 
 
 SOURCES =

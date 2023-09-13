@@ -5,6 +5,7 @@ TEST_DIR ?= tests
 DOCTESTHEADER_DIR = $(TEST_DIR)
 BUILDDIR = $(TEST_DIR)/build
 RYMLDIR = ../shared/patch_convert/ryml/rapidyaml
+LVGLDIR = lib/lvgl/lvgl
 
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
@@ -38,6 +39,7 @@ CXXFLAGS = 	-Wall \
 			-I../shared/CoreModules \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
+			-I${LVGLDIR} \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:
