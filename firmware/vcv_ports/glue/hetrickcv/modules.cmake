@@ -54,7 +54,7 @@ set(hetrickcvModules
     PhasorToClock
     PhasorToLFO
     PhasorToWaveforms
-    Polar
+    XYToPolar
     Probability
     Scanner
     TwoToFour
