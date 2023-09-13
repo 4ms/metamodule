@@ -4,7 +4,7 @@ This simulates the screen and the audio outputs. The pixels should be identical 
 
 The audio should be the same as in hardware (though, your sound card might be AC-coupled, vs. the hardware is DC-coupled).
 
-For information on building this firmware simulator, please see [Setup.md](./Setup.md).
+For information on building the simulator, please see [Building.md](./Building.md).
 
 ### Keyboard Control
 

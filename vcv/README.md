@@ -1,6 +1,6 @@
 This folder contains emulations of [4ms Company's](https://4mscompany.com/) Eurorack modules for the [VCV Rack](https://vcvrack.com/) platform.
 
-If you have not previously built plugins for VCV Rack before, you will want to setup a build environment by following the instructions [here](https://vcvrack.com/manual/Building).
+Make sure to install all prerequisites as described on the [Setup guide](../docs/Setup.md).
 
 ### Building VCV Rack Plugin
 

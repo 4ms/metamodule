@@ -56,8 +56,8 @@ struct PatchViewKnobsetMenu {
 				if (knobset.name.length())
 					lv_label_set_text(label, knobset.name.c_str());
 				else {
-					char text[12];
-					snprintf_(text, 12, "KnobSet: %d", (int)knobset_list.size() + 1);
+					char text[32];
+					snprintf_(text, 32, "KnobSet: %d", (int)knobset_list.size() + 1);
 					lv_label_set_text(label, text);
 				}
 

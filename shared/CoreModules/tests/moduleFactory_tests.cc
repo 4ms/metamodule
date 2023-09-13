@@ -1,4 +1,4 @@
-#include "CoreModules/4ms/info/SMR_info.hh"
+#include "CoreModules/4ms/info/EnOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "doctest.h"
 #include <iostream>
@@ -158,7 +158,7 @@ TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView")
 
 TEST_CASE("ModuleInfoView::makeView<T>() matches T:: fields") {
 
-	auto v = MetaModule::ModuleInfoView::makeView<MetaModule::SMRInfo>();
-	CHECK(v.width_hp == MetaModule::SMRInfo::width_hp);
-	CHECK(v.elements.size() == MetaModule::SMRInfo::Elements.size());
+	auto v = MetaModule::ModuleInfoView::makeView<MetaModule::EnOscInfo>();
+	CHECK(v.width_hp == MetaModule::EnOscInfo::width_hp);
+	CHECK(v.elements.size() == MetaModule::EnOscInfo::Elements.size());
 }

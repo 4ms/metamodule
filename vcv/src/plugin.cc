@@ -1,14 +1,6 @@
 #include "plugin.hh"
-#include "generic_module.hh"
 
 rack::Plugin *pluginInstance;
-using namespace MetaModule;
-
-//////////////// Auto generated ///////////////////////
-// include and define models below here
-
-
-///////////////////////////////////////////////////////
 
 void init(rack::Plugin *p) {
 	pluginInstance = p;
@@ -22,7 +14,6 @@ void init(rack::Plugin *p) {
 	p->addModel(modelSTS);
 	p->addModel(modelVCAM);
 	p->addModel(modelTapo);
-	p->addModel(modelShift);
 	p->addModel(modelSISM);
 	p->addModel(modelSH);
 	p->addModel(modelSCM);
@@ -33,7 +24,6 @@ void init(rack::Plugin *p) {
 	p->addModel(modelPEG);
 	p->addModel(modelMixer);
 	p->addModel(modelLPG);
-	p->addModel(modelLIO);
 	p->addModel(modelL4);
 	p->addModel(modelGate8);
 	p->addModel(modelGate32);
@@ -44,7 +34,6 @@ void init(rack::Plugin *p) {
 	p->addModel(modelCLKM);
 	p->addModel(modelCLKD);
 	p->addModel(modelADEnv);
-
 	p->addModel(modelSequant);
 	p->addModel(modelVerb);
 	p->addModel(modelSwitch41);
@@ -75,7 +64,6 @@ void init(rack::Plugin *p) {
 	p->addModel(modelNoise);
 	p->addModel(modelPan);
 	p->addModel(modelPitchShift);
-	p->addModel(modelSMR);
 	p->addModel(modelSlew);
 	p->addModel(modelSource);
 	p->addModel(modelStMix);

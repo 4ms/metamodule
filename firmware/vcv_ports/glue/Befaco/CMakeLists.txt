@@ -1,28 +1,13 @@
-set(BEFACO_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../Befaco)
+include(modules.cmake)
 
-add_library(
-  BefacoModules OBJECT
-  ${BEFACO_DIR}/src/EvenVCO.cpp
-  ${BEFACO_DIR}/src/DualAtenuverter.cpp
-  ${BEFACO_DIR}/src/SpringReverb.cpp
-  ${BEFACO_DIR}/src/ABC.cpp
-  ${BEFACO_DIR}/src/ADSR.cpp
-  ${BEFACO_DIR}/src/ChoppingKinky.cpp
-  ${BEFACO_DIR}/src/HexmixVCA.cpp
-  ${BEFACO_DIR}/src/Kickall.cpp
-  ${BEFACO_DIR}/src/Mixer.cpp
-  ${BEFACO_DIR}/src/Morphader.cpp
-  ${BEFACO_DIR}/src/MotionMTR.cpp
-  ${BEFACO_DIR}/src/Percall.cpp
-  ${BEFACO_DIR}/src/PonyVCO.cpp
-  ${BEFACO_DIR}/src/Rampage.cpp
-  ${BEFACO_DIR}/src/STMix.cpp
-  ${BEFACO_DIR}/src/SamplingModulator.cpp
-  ${BEFACO_DIR}/src/SlewLimiter.cpp
-  ${BEFACO_DIR}/src/StereoStrip.cpp
-  # ${BEFACO_DIR}/src/Muxlicer.cpp ${BEFACO_DIR}/src/NoisePlethora.cpp
-)
+# the above should define ${BEFACO_SOURCE_PATHS}, the list of sources to add to the BefacoLibrary OBJECT
+add_library(BefacoLibrary OBJECT ${BEFACO_SOURCE_PATHS})
 
-target_include_directories(BefacoModules PRIVATE ${BEFACO_DIR}/src ${PROJECT_SOURCE_DIR}/src/VCV_adaptor/pffft)
+target_include_directories(BefacoLibrary PRIVATE ${BEFACO_DIR}/src)
 
-target_compile_options(BefacoModules PRIVATE -Wno-double-promotion -Wno-deprecated-enum-float-conversion)
+target_compile_options(BefacoLibrary PRIVATE -Wno-double-promotion -Wno-deprecated-enum-float-conversion)
+
+set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 20)
+
+# Fixup for pffft compiler warnings
+set_source_files_properties(${FW_ROOT}/src/VCV_adaptor/pffft/pffft.c COMPILE_FLAGS -Wno-double-promotion)

@@ -1,5 +1,4 @@
 #pragma once
-#include "core_a7/static_buffers.hh"
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "gui/pages/page_manager.hh"
@@ -14,6 +13,11 @@
 
 namespace MetaModule
 {
+
+using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
+static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1;
+static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
+
 class Ui {
 private:
 	SyncParams &sync_params;
@@ -27,8 +31,7 @@ private:
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
 	static inline UartLog init_uart;
-	static inline LVGLDriver gui{
-		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
+	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, framebuf1, framebuf2};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
@@ -39,58 +42,29 @@ public:
 		, patch_playloader{patch_playloader}
 		, msg_queue{1024}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
-	}
 
-	void start() {
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, StaticBuffers::framebuf2);
+		MMDisplay::init(metaparams, framebuf2);
 		Gui::init_lvgl_styles();
 		page_manager.init();
-
-		// page_update_tm.init(
-		// 	{
-		// 		.TIMx = TIM17,
-		// 		.period_ns = 1000000000 / 60, // =  60Hz = 16ms
-		// 		.priority1 = 2,
-		// 		.priority2 = 0,
-		// 	},
-		// 	[&] { page_update_task(); });
-		// page_update_tm.start();
-
-		// ui_event_tm.init(
-		// 	{
-		// 		.TIMx = TIM16,
-		// 		.period_ns = 1000000000 / 600, // =  600Hz = 1.6ms
-		// 		.priority1 = 2,
-		// 		.priority2 = 0,
-		// 	},
-		// 	[&] { lvgl_update_task(); });
-		// ui_event_tm.start();
-
-		MMDisplay::start();
 	}
 
-	void lvgl_update_task() {
+	void update() {
 		auto now = HAL_GetTick();
-		if ((now - last_call) <= 2)
+		if ((now - last_update_tm) <= 2)
 			return;
 
-		last_call = now;
+		last_update_tm = now;
 
-		// Debug::Pin2::high();
 		lv_timer_handler();
-		// Debug::Pin2::low();
 
-		// Debug::Pin1::high();
 		if (throttle_ctr-- <= 0) {
 			throttle_ctr = throttle_amt;
 			page_update_task();
 		}
-		// Debug::Pin1::low();
 
-		// Debug::Pin0::high();
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
 			// printf_("%s", msg.data());
@@ -104,7 +78,7 @@ public:
 	}
 
 private:
-	void page_update_task() { //60Hz
+	void page_update_task() {
 		//This returns false when audio stops
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 		//if (!read_ok) ... restart audio
@@ -114,11 +88,7 @@ private:
 
 	static constexpr int32_t throttle_amt = 10;
 	int32_t throttle_ctr = 0;
-
-	// mdrivlib::Timekeeper page_update_tm;
-	// mdrivlib::Timekeeper ui_event_tm;
-
-	uint32_t last_call = 0;
+	uint32_t last_update_tm = 0;
 };
 
 } // namespace MetaModule
