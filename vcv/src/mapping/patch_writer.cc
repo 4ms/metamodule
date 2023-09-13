@@ -88,7 +88,7 @@ void PatchFileWriter::setCableList(std::vector<CableMap> &jacks) {
 						.jack_id = static_cast<uint16_t>(in_jack),
 					},
 				}},
-				.color = cable.color
+				.color = cable.lv_color_full
 			});
 		}
 	}

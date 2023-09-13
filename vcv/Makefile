@@ -1,5 +1,5 @@
 # If RACK_DIR is not defined when calling the Makefile, default to two directories above
-#RACK_DIR ?= ../..
+RACK_DIR ?= ../..
 
 SHARED_DIR = ../shared
 SHARED = $(SHARED_DIR)

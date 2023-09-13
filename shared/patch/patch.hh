@@ -3,8 +3,6 @@
 #include "util/static_string.hh"
 #include <vector>
 #include <optional>
-#include "lvgl.h"
-#include "src/misc/lv_color.h"
 
 constexpr int MAX_MODULES_IN_PATCH = 32;
 constexpr unsigned MaxKnobSets = 8;

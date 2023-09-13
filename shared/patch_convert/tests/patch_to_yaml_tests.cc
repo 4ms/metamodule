@@ -19,9 +19,6 @@ TEST_CASE("Correct yaml output produced") {
 	Jack in4{55, 66};
 	Jack in5{77, 88};
 
-  MESSAGE("Starting conversion");
-
-
 	pd.int_cables.push_back({out1, {{in1, in2}}, std::nullopt});
 	pd.int_cables.push_back({out2, {{in3, in4, in5}}, 1});
 

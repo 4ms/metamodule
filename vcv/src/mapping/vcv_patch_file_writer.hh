@@ -79,7 +79,7 @@ struct VCVPatchFileWriter {
 				.receivedJackId = cable->inputId,
 				.sendingModuleId = out->getId(),
 				.receivedModuleId = in->getId(),
-				.color = color.full,
+				.lv_color_full = color.full,
 			});
 		}
 
