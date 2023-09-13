@@ -28,35 +28,21 @@ extern "C" void aux_core_main() {
 		uint32_t idx_increment;
 	} context;
 
-	// UpdateListOfModules
-	InterruptManager::register_and_start_isr(SGI4_IRQn, 0, 0, [&context, &patch_player]() {
+	constexpr auto UpdateListOfModulesIRQn = SMPControl::IRQn(SMPCommand::UpdateListOfModules);
+	InterruptManager::register_and_start_isr(UpdateListOfModulesIRQn, 1, 0, [&context, &patch_player]() {
 		for (unsigned i = context.starting_idx; i < context.num_modules; i += context.idx_increment) {
 			patch_player->modules[i]->update();
 		}
 		SMPThread::signal_done();
 	});
-	GIC_SetConfiguration(SGI4_IRQn, InterruptControl::LevelTriggered);
 
-	// NewModuleList
-	InterruptManager::register_and_start_isr(SGI2_IRQn, 0, 0, [&context]() {
+	constexpr auto NewModuleListIRQn = SMPControl::IRQn(SMPCommand::NewModuleList);
+	InterruptManager::register_and_start_isr(NewModuleListIRQn, 0, 0, [&context]() {
 		context.starting_idx = SMPControl::read<SMPRegister::ModuleID>();
 		context.num_modules = SMPControl::read<SMPRegister::NumModulesInPatch>();
 		context.idx_increment = SMPControl::read<SMPRegister::UpdateModuleOffset>();
 		SMPThread::signal_done();
 	});
-	GIC_SetConfiguration(SGI2_IRQn, InterruptControl::LevelTriggered);
-
-	// UpdateModule
-	InterruptManager::register_and_start_isr(SGI1_IRQn, 0, 0, [&patch_player]() {
-		auto module_idx = SMPControl::read<SMPRegister::ModuleID>();
-		patch_player->modules[module_idx]->update();
-		SMPThread::signal_done();
-	});
-	GIC_SetConfiguration(SGI1_IRQn, InterruptControl::LevelTriggered);
-
-	// CallFunction
-	InterruptManager::register_and_start_isr(SGI3_IRQn, 0, 0, []() { SMPThread::execute(); });
-	GIC_SetConfiguration(SGI3_IRQn, InterruptControl::LevelTriggered);
 
 	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
 
