@@ -28,8 +28,8 @@ extern "C" void aux_core_main() {
 		uint32_t idx_increment;
 	} context;
 
-	constexpr auto UpdateListOfModulesIRQn = SMPControl::IRQn(SMPCommand::UpdateListOfModules);
-	InterruptManager::register_and_start_isr(UpdateListOfModulesIRQn, 1, 0, [&context, &patch_player]() {
+	constexpr auto PlayModuleListIRQn = SMPControl::IRQn(SMPCommand::PlayModuleList);
+	InterruptManager::register_and_start_isr(PlayModuleListIRQn, 1, 0, [&context, &patch_player]() {
 		for (unsigned i = context.starting_idx; i < context.num_modules; i += context.idx_increment) {
 			patch_player->modules[i]->update();
 		}
