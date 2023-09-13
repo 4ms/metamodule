@@ -93,7 +93,7 @@ target_include_directories(
           ${MM_ROOT}/simulator/stubs
           ${MM_ROOT}/shared)
 
-target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20 -Wno-deprecated-anon-enum-enum-conversion> )
+target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
