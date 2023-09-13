@@ -22,7 +22,7 @@ TEST_CASE("Correct yaml output produced") {
   MESSAGE("Starting conversion");
 
 
-	pd.int_cables.push_back({out1, {{in1, in2}}, 0});
+	pd.int_cables.push_back({out1, {{in1, in2}}, std::nullopt});
 	pd.int_cables.push_back({out2, {{in3, in4, in5}}, 1});
 
 	pd.mapped_ins.push_back({1, {{in1}}, "MapIn1"});
@@ -103,7 +103,6 @@ R"(PatchData:
           jack_id: 4
         - module_id: 5
           jack_id: 6
-      color: 0
     - out:
         module_id: 11
         jack_id: 22

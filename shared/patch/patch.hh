@@ -2,6 +2,7 @@
 #include "midi_def.hh"
 #include "util/static_string.hh"
 #include <vector>
+#include <optional>
 #include "lvgl.h"
 #include "src/misc/lv_color.h"
 
@@ -68,7 +69,7 @@ struct MappedKnobSet {
 struct InternalCable {
 	Jack out;
 	std::vector<Jack> ins;
-	uint16_t color = 0; // {{0, 0, 0}};	TODO, could be a lv_color_t
+	std::optional<uint16_t> color;
 };
 
 struct MappedInputJack {

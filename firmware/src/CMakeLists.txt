@@ -180,6 +180,12 @@ add_executable(
   ${ARTWORK_SOURCES}
 )
 
+target_compile_options(main.elf PRIVATE
+  $<$<COMPILE_LANGUAGE:CXX>:
+  -Wno-deprecated-enum-enum-conversion
+  >
+)
+
 target_include_directories(
   main.elf
   PRIVATE $<TARGET_FILE_DIR:main_m4.elf>

@@ -106,8 +106,9 @@ public:
 		return Vec2{x, y};
 	}
 
-	void draw_cable(Vec2 start, Vec2 end, const InternalCable &cable) {		
-		drawline_dsc.color.full = cable.color;
+	void draw_cable(Vec2 start, Vec2 end, const InternalCable &cable) {	
+		uint16_t default_color = get_cable_color(cable.out).full;	
+		drawline_dsc.color.full = cable.color.value_or(default_color);
 		draw_cable(start, end);
 	}
 

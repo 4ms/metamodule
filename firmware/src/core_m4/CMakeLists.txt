@@ -150,7 +150,6 @@ target_compile_options(
           -Wno-volatile
           -fno-threadsafe-statics
           -Wno-deprecated-enum-enum-conversion
-
           >
 )
 

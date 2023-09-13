@@ -2,6 +2,7 @@ RYMLDIR = ryml/rapidyaml
 LVGLDIR = ../../firmware/lib/lvgl/lvgl
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
+			-Wdeprecated-anon-enum-enum-conversion \
 			-Iryml \
 			-I../\
 			-I../etl/include \

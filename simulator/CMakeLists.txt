@@ -94,7 +94,7 @@ target_include_directories(
           ${MM_ROOT}/shared
           ${MM_ROOT}/firmware/lib/lvgl/lvgl)
 
-target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
+target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20 -Wno-deprecated-anon-enum-enum-conversion> )
 
 # #################### Application ############################################
 

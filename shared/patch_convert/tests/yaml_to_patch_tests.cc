@@ -27,7 +27,6 @@ PatchData:
           jack_id: 4
         - module_id: 5
           jack_id: 6
-      color: 0
     - out:
         module_id: 11
         jack_id: 22
@@ -133,12 +132,12 @@ PatchData:
 	CHECK(pd.int_cables[0].out == Jack{1, 2});
 	CHECK(pd.int_cables[0].ins[0] == Jack{3, 4});
 	CHECK(pd.int_cables[0].ins[1] == Jack{5, 6});
-	CHECK(pd.int_cables[0].color == 0);
+	CHECK(pd.int_cables[0].color.has_value() == false);
 	CHECK(pd.int_cables[1].out == Jack{11, 22});
 	CHECK(pd.int_cables[1].ins[0] == Jack{33, 44});
 	CHECK(pd.int_cables[1].ins[1] == Jack{55, 66});
 	CHECK(pd.int_cables[1].ins[2] == Jack{77, 88});
-	CHECK(pd.int_cables[1].color == 1);
+	CHECK(pd.int_cables[1].color.value() == 1);
 
 	CHECK(pd.mapped_ins.size() == 3);
 	CHECK(pd.mapped_ins[0].alias_name.is_equal("MappedInJ1"));
