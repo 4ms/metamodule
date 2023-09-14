@@ -6,241 +6,228 @@
   "brand": "4msCompany",
   "author": "",
   "authorEmail": "",
-  "authorUrl": "",
+  "authorUrl": "https://4mscompany.com",
   "pluginUrl": "",
   "manualUrl": "",
-  "sourceUrl": "",
+  "sourceUrl": "https://github.com/4ms/metamodule/",
   "donateUrl": "",
-  "changelogUrl": "",
+  "changelogUrl": "https://github.com/4ms/metamodule/vcv/CHANGELOG.md",
   "modules": [
 	{
       "slug": "HubMedium",
-      "name": "MetaModule",
-      "description": "MetaModule",
-      "tags": []
+      "name": "Meta Module",
+      "description": "Meta Module",
+      "tags": ["Hardware clone", "Utility", "External"]
 	},
 	{
       "slug": "EnOsc",
-      "name": "EnOsc",
-      "description": "Ensemble Oscillator",
-      "tags": []
+      "name": "Ensemble Oscillator [ENOSC]",
+      "description": "The Ensemble Oscillator is a unified polyphonic voice of sixteen complex oscillators combining additive, FM, phase-distortion and wavefolding synthesis techniques in new unorthodox ways.",
+      "tags": ["Oscillator", "Digital", "Hardware clone"]
 	},
     {
       "slug": "ENVVCA",
-      "name": "ENVVCA",
-      "description": "ENVVCA",
-      "tags": []
+      "name": "EnvVCA",
+      "description": "A compact envelope generator with a built-in exponential VCA.",
+      "tags": ["Envelope Generator", "Voltage-controlled amplifier", "LFO", "Hardware clone", "Slew limiter"]
     },
     {
       "slug": "DEV",
-      "name": "DEV",
+      "name": "Dual EnvVCA [DEV]",
       "description": "DEV (not implemented)",
-      "tags": []
+      "tags": ["Envelope Generator", "Voltage-controlled amplifier", "LFO", "Hardware clone", "Dual", "Slew limiter"]
     },
     {
       "slug": "SHEV",
-      "name": "SHEV",
+      "name": "Shaped Dual EnvVCA [ShEV]",
       "description": "SHEV (not implemented)",
-      "tags": []
+      "tags": ["Envelope Generator", "Voltage-controlled amplifier", "LFO", "Hardware clone", "Dual", "Slew limiter"]
     },
     {
       "slug": "Freeverb",
       "name": "Freeverb",
       "description": "Freeverb",
-      "tags": []
-    },
-    {
-      "slug": "Shift",
-      "name": "Shift",
-      "description": "Shift",
-      "tags": []
+      "tags": ["Effect", "Reverb"]
     },
     {
       "slug": "CLKM",
-      "name": "CLKM",
-      "description": "CLKM",
-      "tags": []
+      "name": "Clock Multiplier [CLKM]",
+      "description": "Outputs a clock signal at a multiple of an incoming clock signal's tempo.",
+      "tags": ["Clock modulator"]
     },
-
     {
       "slug": "CLKD",
-      "name": "CLKD",
-      "description": "CLKD",
-      "tags": []
+      "name": "Clock Divider [CLKD]",
+      "description": "Outputs a clock signal as a division of an incoming clock signal's tempo.",
+      "tags": ["Clock modulator"]
     },
     {
       "slug": "Seq8",
       "name": "Seq8",
-      "description": "Seq8",
-      "tags": []
+      "description": "An 8-step unipolar voltage sequencer.",
+      "tags": ["Sequencer"]
     },
     {
       "slug": "Verb",
       "name": "Verb",
-      "description": "Verb",
-      "tags": []
+      "description": "Experimental reverb using comb filters and all-pass filters",
+      "tags": ["Reverb"]
     },
     {
       "slug": "StMix",
-      "name": "StMix",
-      "description": "StMix",
-      "tags": []
+      "name": "Stereo Mixer [StMix]",
+      "description": "A mixer with four stereo channels and variable panning per-channel.",
+      "tags": ["Mixer", "Panning"]
     },
     {
       "slug": "PitchShift",
       "name": "PitchShift",
       "description": "PitchShift",
-      "tags": []
+      "tags": ["Effect"]
     },
     {
       "slug": "MultiLFO",
       "name": "MultiLFO",
       "description": "MultiLFO",
-      "tags": []
+      "tags": ["LFO"]
     },
     {
       "slug": "KPLS",
-      "name": "KPLS",
-      "description": "KPLS",
-      "tags": []
+      "name": "Karplus",
+      "description": "Karplus-Strong string sound oscillator",
+      "tags": ["Oscillator"]
     },
     {
       "slug": "InfOsc",
       "name": "InfOsc",
-      "description": "InfOsc",
-      "tags": []
+      "description": "Infinite Oscillator (partially functional)",
+      "tags": ["Oscillator"]
     },
     {
       "slug": "Drum",
       "name": "Drum",
       "description": "Drum",
-      "tags": []
+      "tags": ["Drum"]
     },
     {
       "slug": "Djembe",
       "name": "Djembe",
-      "description": "Djembe",
-      "tags": []
+      "description": "Physically modeled Djembe based on FAUST models by Romain Michon, Pierre-Amaury Grumiaux, and Yann Orlarey",
+      "tags": ["Drum"]
     },
     {
       "slug": "Detune",
       "name": "Detune",
       "description": "Detune",
-      "tags": []
+      "tags": ["Effect"]
     },
     {
       "slug": "STS",
-      "name": "STS",
+      "name": "Stereo Triggered Sampler [STS]",
       "description": "STS (not implemented)",
-      "tags": []
+      "tags": ["Sampler", "Hardware clone", "Digital"]
     },
     {
       "slug": "VCAM",
-      "name": "VCAM",
+      "name": "VCA Matrix [VCAM]",
       "description": "VCAM (not implemented)",
-      "tags": []
+      "tags": ["Voltage-controlled amplifier", "Hardware clone", "Mixer"]
     },
     {
       "slug": "Tapo",
-      "name": "Tapo",
+      "name": "Tapographic Delay [TAPO]",
       "description": "Tapo (not implemented)",
-      "tags": []
+      "tags": ["Effect", "Delay", "Digital", "Hardware clone"]
     },
     {
       "slug": "SISM",
-      "name": "SISM",
+      "name": "Shifting Inverting Signal Mingler [SISM]",
       "description": "SISM (not implemented)",
-      "tags": []
+      "tags": ["Utility", "Mixer", "Hardware clone"]
     },
     {
       "slug": "SH",
-      "name": "SH",
+      "name": "Sample and Hold",
       "description": "SH (not implemented)",
-      "tags": []
+      "tags": ["Random", "Sample and hold"]
     },
     {
       "slug": "SCM",
-      "name": "SCM",
+      "name": "Shuffling Clock Multiplier [SCM]",
       "description": "SCM (not implemented)",
-      "tags": []
+      "tags": ["Clock modulator", "Hardware clone"]
     },
     {
       "slug": "RCD",
-      "name": "RCD",
+      "name": "Rotating Clock Divider [RCD]",
       "description": "RCD (not implemented)",
-      "tags": []
+      "tags": ["Clock modulator", "Hardware clone"]
     },
     {
       "slug": "QPLFO",
-      "name": "QPLFO",
+      "name": "Quad Pingable LFO [QPLFO]",
       "description": "QPLFO (not implemented)",
-      "tags": []
+      "tags": ["LFO", "Hardware clone", "Quad"]
     },
     {
       "slug": "QCD",
-      "name": "QCD",
+      "name": "Quad Clock Distributor [QCD]",
       "description": "QCD (not implemented)",
-      "tags": []
+      "tags": ["Clock generator", "Clock modulator", "Quad", "Hardware clone"]
     },
     {
       "slug": "PI",
-      "name": "PI",
+      "name": "Percussion Interface + Expander [PI]",
       "description": "PI (not implemented)",
-      "tags": []
+      "tags": ["Envelope follower", "Hardware clone"]
     },
     {
       "slug": "PEG",
-      "name": "PEG",
+      "name": "Pingable Envelope Generator [PEG]",
       "description": "PEG (not implemented)",
-      "tags": []
+      "tags": ["Clock generator", "Clock modulator", "Envelope Generator", "Dual", "Hardware clone"]
     },
     {
       "slug": "LPG",
       "name": "LPG",
       "description": "LPG (not implemented)",
-      "tags": []
-    },
-    {
-      "slug": "LIO",
-      "name": "LIO",
-      "description": "LIO (not implemented)",
-      "tags": []
+      "tags": ["Low-pass gate"]
     },
     {
       "slug": "L4",
-      "name": "L4",
+      "name": "Listen Four [L4]",
       "description": "L4 (not implemented)",
-      "tags": []
+      "tags": ["Mixer"]
     },
     {
       "slug": "Gate8",
       "name": "Gate8",
       "description": "Gate8 (not implemented)",
-      "tags": []
+      "tags": ["Sequencer"]
     },
     {
       "slug": "Gate32",
       "name": "Gate32",
       "description": "Gate32 (not implemented)",
-      "tags": []
+      "tags": ["Sequencer"]
     },
     {
       "slug": "GRev",
       "name": "GRev",
       "description": "GRev (not implemented)",
-      "tags": []
+      "tags": ["Effect", "Granular"]
     },
     {
       "slug": "Fade",
       "name": "Fade",
       "description": "Fade (not implemented)",
-      "tags": []
+      "tags": ["Utility"]
     },
     {
       "slug": "DLD",
-      "name": "DLD",
+      "name": "Dual Looping Delay [DLD]",
       "description": "DLD (not implemented)",
-      "tags": []
+      "tags": ["Dual", "Digital", "Delay", "Effect", "Hardware clone"]
     },
     {
       "slug": "Comp",
@@ -252,43 +239,43 @@
       "slug": "ADEnv",
       "name": "ADEnv",
       "description": "ADEnv (not implemented)",
-      "tags": []
+      "tags": ["Envelope Generator"]
     },
     {
       "slug": "Sequant",
       "name": "Sequant",
       "description": "Sequant (not implemented)",
-      "tags": []
+      "tags": ["Sequencer", "Quantizer"]
     },
     {
       "slug": "Switch41",
       "name": "Switch41",
-      "description": "Switch41 (not implemented)",
-      "tags": []
+      "description": "Switch 4:1",
+      "tags": ["Switch", "Quad"]
     },
     {
       "slug": "Switch14",
       "name": "Switch14",
-      "description": "Switch14 (not implemented)",
-      "tags": []
+      "description": "Switch 1:4",
+      "tags": ["Switch", "Quad"]
     },
     {
       "slug": "Seq4",
       "name": "Seq4",
-      "description": "Seq4 (not implemented)",
-      "tags": []
+      "description": "Seq4",
+      "tags": ["Sequencer"]
     },
     {
       "slug": "Quant",
       "name": "Quant",
       "description": "Quant (not implemented)",
-      "tags": []
+      "tags": ["Quantizer"]
     },
     {
       "slug": "Prob8",
       "name": "Prob8",
-      "description": "Prob8 (not implemented)",
-      "tags": []
+      "description": "Prob8",
+      "tags": ["Clock modulator", "Sequencer"]
     },
     {
       "slug": "Octave",
@@ -298,99 +285,93 @@
     },
     {
       "slug": "MNMX",
-      "name": "MNMX",
-      "description": "MNMX (not implemented)",
-      "tags": []
+      "name": "Min-Max [MNMX]",
+      "description": "Takes in two signals and outputs the minimum and maximum voltages.",
+      "tags": ["Utility"]
     },
     {
       "slug": "LPF",
       "name": "LPF",
       "description": "LPF (not implemented)",
-      "tags": []
+      "tags": ["Filter"]
     },
     {
       "slug": "Source",
       "name": "Source",
-      "description": "Source (not implemented)",
-      "tags": []
+      "description": "Generates two outputs voltages based on knob positions.",
+      "tags": ["Utility"]
     },
     {
       "slug": "Slew",
       "name": "Slew",
       "description": "Slew (not implemented)",
-      "tags": []
+      "tags": ["Slew limiter"]
     },
     {
       "slug": "Pan",
       "name": "Pan",
-      "description": "Pan (not implemented)",
-      "tags": []
+      "description": "Mono-to-stereo panner.",
+      "tags": ["Panning"]
     },
     {
       "slug": "Noise",
       "name": "Noise",
-      "description": "Noise (not implemented)",
-      "tags": []
+      "description": "Noise (partially implemented)",
+      "tags": ["Noise"]
     },
     {
       "slug": "HPF",
       "name": "HPF",
-      "description": "HPF (not implemented)",
-      "tags": []
+      "description": "HPF",
+      "tags": ["Filter"]
     },
     {
       "slug": "Gate",
       "name": "Gate",
-      "description": "Gate (not implemented)",
+      "description": "Gate/trigger delay with pulse width control",
       "tags": []
     },
     {
       "slug": "Follow",
       "name": "Follow",
-      "description": "Follow (not implemented)",
-      "tags": []
+      "description": "Envelope follower with gate output",
+      "tags": ["Envelope follower"]
     },
     {
       "slug": "FM",
       "name": "FM",
-      "description": "FM (not implemented)",
-      "tags": []
+      "description": "FM Oscillator",
+      "tags": ["Oscillator"]
     },
     {
       "slug": "ComplexEG",
       "name": "ComplexEG",
       "description": "ComplexEG (not implemented)",
-      "tags": []
+      "tags": ["Envelope Generator"]
     },
     {
       "slug": "BPF",
       "name": "BPF",
-      "description": "BPF (not implemented)",
-      "tags": []
+      "description": "Band-pass filter",
+      "tags": ["Filter"]
     },
     {
       "slug": "Atvert2",
       "name": "Atvert2",
-      "description": "Atvert2 (not implemented)",
-      "tags": []
-    },
-    {
-      "slug": "SMR",
-      "name": "SMR",
-      "description": "Spectral Multiband Resonator (not implemented)",
-      "tags": []
+      "description": "Two-channel attenuverter",
+      "tags": ["Attenuator", "Dual", "Utility"]
     },
 	{
       "slug": "BuffMult",
-      "name": "BuffMult",
-      "description": "Buffered Multiple (not implemented)",
-      "tags": []
+      "name": "Buffered Multiple [BuffMult]",
+      "description": "Takes one signal and outputs four identical copies. Useful for cleaning up cables and repatching.",
+      "tags": ["Multiple", "Dual", "Utility"]
 	},
     {
       "slug": "Mixer4",
       "name": "Mixer4",
       "description": "Mixer4 (not implemented)",
-      "tags": []
+      "tags": ["Mixer"]
     }
   ]
 }
