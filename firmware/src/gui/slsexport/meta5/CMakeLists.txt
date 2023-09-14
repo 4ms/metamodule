@@ -8,21 +8,13 @@ SET(SOURCES components/ui_comp_knobsetgroup.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
-    images/ui_img_1x_play8_png.c
-    images/ui_img_1x_knob2_png.c
-    images/ui_img_1x_knob3pressed_png.c
-    images/ui_img_final_icons_1x_add1_png.c
-    images/ui_img_final_icons_1x_info1_png.c
-    images/ui_img_final_icons_1x_settings1_png.c
+    images/ui_img_1x_play1_png.c
     images/ui_img_1x_knob1_png.c
-    images/ui_img_1x_play3_png.c
-    images/ui_img_1x_addmap1_png.c
-    images/ui_img_1x_control1_png.c
-    images/ui_img_1x_editmap2_png.c
-    images/ui_img_final_icons_1x_knobpip1_png.c
-    images/ui_img_final_icons_1x_knobpip2_png.c
-    images/ui_img_final_icons_1x_knobpressed1_png.c
-    images/ui_img_final_icons_1x_knobreleased1_png.c
+    images/ui_img_1x_knob1pressed_png.c
+    images/ui_img_1x_add1_png.c
+    images/ui_img_1x_info1_png.c
+    images/ui_img_1x_settings1_png.c
+    images/ui_img_1x_daviesbig_png.c
     fonts/ui_font_MuseoSansRounded50012.c
     fonts/ui_font_MuseoSansRounded70014.c
     fonts/ui_font_MuseoSansRounded70016.c

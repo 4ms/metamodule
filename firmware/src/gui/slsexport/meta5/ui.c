@@ -14,7 +14,10 @@ void Dropup_Animation( lv_obj_t *TargetObject, int delay);
 // SCREEN: ui_PatchSelectorPage
 void ui_PatchSelectorPage_screen_init(void);
 lv_obj_t *ui_PatchSelectorPage;
+lv_obj_t *ui_PatchSelectorTitlePanel;
 lv_obj_t *ui_PatchSelectorTitle;
+lv_obj_t *ui_NowPlayingName;
+lv_obj_t *ui_LoadMeter;
 lv_obj_t *ui_DrivesPanel;
 lv_obj_t *ui_USBbut;
 lv_obj_t *ui_USBlabel;
@@ -102,17 +105,11 @@ lv_obj_t *ui_CancelAddLabel;
 lv_obj_t *ui_OkAdd;
 lv_obj_t *ui_OkAddLabel;
 lv_obj_t *ui____initial_actions0;
-const lv_img_dsc_t *ui_imgset_knob[2] = {&ui_img_1x_knob1_png, &ui_img_1x_knob2_png};
-const lv_img_dsc_t *ui_imgset_play[2] = {&ui_img_1x_play3_png, &ui_img_1x_play8_png};
-const lv_img_dsc_t *ui_imgset_addmap[1] = {&ui_img_1x_addmap1_png};
-const lv_img_dsc_t *ui_imgset_control[1] = {&ui_img_1x_control1_png};
-const lv_img_dsc_t *ui_imgset_editmap[1] = {&ui_img_1x_editmap2_png};
-const lv_img_dsc_t *ui_imgset_add[1] = {&ui_img_final_icons_1x_add1_png};
-const lv_img_dsc_t *ui_imgset_info[1] = {&ui_img_final_icons_1x_info1_png};
-const lv_img_dsc_t *ui_imgset_knobpip[2] = {&ui_img_final_icons_1x_knobpip1_png, &ui_img_final_icons_1x_knobpip2_png};
-const lv_img_dsc_t *ui_imgset_knobpressed[1] = {&ui_img_final_icons_1x_knobpressed1_png};
-const lv_img_dsc_t *ui_imgset_knobreleased[1] = {&ui_img_final_icons_1x_knobreleased1_png};
-const lv_img_dsc_t *ui_imgset_settings[1] = {&ui_img_final_icons_1x_settings1_png};
+const lv_img_dsc_t *ui_imgset_add[1] = {&ui_img_1x_add1_png};
+const lv_img_dsc_t *ui_imgset_info[1] = {&ui_img_1x_info1_png};
+const lv_img_dsc_t *ui_imgset_knob[1] = {&ui_img_1x_knob1_png};
+const lv_img_dsc_t *ui_imgset_play[1] = {&ui_img_1x_play1_png};
+const lv_img_dsc_t *ui_imgset_settings[1] = {&ui_img_1x_settings1_png};
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
@@ -133,7 +130,7 @@ lv_anim_init(&PropertyAnimation_0);
 lv_anim_set_time(&PropertyAnimation_0, 250);
 lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
 lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_x );
-lv_anim_set_values(&PropertyAnimation_0, 220, 0 );
+lv_anim_set_values(&PropertyAnimation_0, 230, 0 );
 lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_linear);
 lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
 lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );

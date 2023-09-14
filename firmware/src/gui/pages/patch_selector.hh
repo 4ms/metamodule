@@ -40,9 +40,13 @@ struct PatchSelectorPage : PageBase {
 		lv_group_set_editing(group, true);
 
 		auto patchname = patch_playloader.cur_patch_name(); // auto patchplaying_idx = patch_storage
-		if (patchname.length() == 0)
-			patchname = "(none)";
-		lv_label_set_text_fmt(ui_PatchSelectorTitle, "Now Playing: %.31s", patchname.c_str());
+		if (patchname.length() == 0) {
+			lv_label_set_text(ui_NowPlayingName, "none");
+			lv_label_set_text(ui_LoadMeter, "");
+		} else {
+			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", patchname.c_str());
+			lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
+		}
 	}
 
 	void refresh_patchlist(PatchFileList &patchfiles) {
@@ -184,6 +188,8 @@ struct PatchSelectorPage : PageBase {
 				if (now - last_refresh_check_tm > 1000) { //poll media once per second
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
+
+					lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
 				}
 			} break;
 

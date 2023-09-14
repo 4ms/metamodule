@@ -82,7 +82,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin0::high();
 
-		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
+		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 		load_measure.start_measurement();
 
