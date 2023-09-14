@@ -4,7 +4,6 @@ RACK_DIR ?= ../..
 SHARED_DIR = ../shared
 SHARED = $(SHARED_DIR)
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
-LGVLDIR = ../firmware/lib/lvgl/lvgl
 
 INCLUDES = -Isrc
 INCLUDES += -I$(SHARED_DIR)/cpputil
@@ -16,8 +15,6 @@ INCLUDES += -I$(SHARED_DIR)/axoloti-wrapper
 INCLUDES += -I$(SHARED_DIR)/etl/include
 INCLUDES += -I$(RYMLDIR)/src
 INCLUDES += -I$(RYMLDIR)/ext/c4core/src
-INCLUDES += -I$(LGVLDIR)
-INCLUDES += -I$(LGVLDIR)/src/misc
 
 
 # FLAGS will be passed to both the C and C++ compiler
