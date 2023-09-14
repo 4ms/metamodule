@@ -10,16 +10,26 @@ struct PortWidget : widget::Widget {
 };
 
 struct SvgPort : PortWidget {
-	widget::FramebufferWidget* fb;
+	widget::FramebufferWidget *fb;
 	// CircularShadow* shadow;
-	widget::SvgWidget* sw;
+	widget::SvgWidget *sw;
 
-	void setSvg(std::shared_ptr<window::Svg> svg){
+	void setSvg(std::shared_ptr<window::Svg> svg) {
 	}
 	void setSVG(std::shared_ptr<window::Svg> svg) {
 		setSvg(svg);
 	}
+};
 
+struct ThemedSvgPort : SvgPort {
+	std::shared_ptr<window::Svg> lightSvg;
+	std::shared_ptr<window::Svg> darkSvg;
+
+	void setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
+	}
+
+	void step() override {
+	}
 };
 
 // Lights

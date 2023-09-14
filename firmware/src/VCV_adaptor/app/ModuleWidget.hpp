@@ -11,6 +11,7 @@ namespace rack
 
 struct ModuleWidget : widget::Widget {
 	engine::Module *module;
+	widget::Widget panel;
 
 	void setModule(engine::Module *m) {
 		module = m;
@@ -20,6 +21,10 @@ struct ModuleWidget : widget::Widget {
 	}
 
 	void setPanel(std::shared_ptr<window::Svg> svg) {
+	}
+
+	widget::Widget *getPanel() {
+		return &panel;
 	}
 
 	void place_at(std::vector<MetaModule::Element> &elements, int id, const MetaModule::Element &el) {
