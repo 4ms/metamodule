@@ -6,7 +6,6 @@
 #include "drivers/smp.hh"
 #include "drivers/timekeeper.hh"
 #include "gui/ui.hh"
-#include "lvgl.h"
 #include "patch_play/patch_player.hh"
 
 extern "C" void aux_core_main() {

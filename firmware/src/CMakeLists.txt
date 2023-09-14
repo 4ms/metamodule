@@ -121,6 +121,7 @@ add_executable(
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_a7/main.cc
+  ${FWDIR}/src/gui/ui.cc
   ${FWDIR}/src/audio/audio.cc
   ${FWDIR}/src/gui/pages/page_manager.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
