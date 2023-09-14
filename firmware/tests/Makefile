@@ -21,7 +21,6 @@ TEST_SOURCES += src/fs/time_convert.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
-			-Wno-deprecated-anon-enum-enum-conversion \
 			-I$(DOCTEST_DIR) \
 			-I$(TEST_DIR) \
 			-I$(TEST_DIR)/stubs \
