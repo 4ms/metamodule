@@ -12,6 +12,7 @@
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <vector>
 
