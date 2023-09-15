@@ -17,6 +17,7 @@
 struct MetaModuleHubWidget : rack::app::ModuleWidget {
 
 	rack::Label *statusText;
+	rack::Label *knobSetText;
 	MetaModuleHubBase *hubModule;
 
 	MetaModuleHubWidget() = default;
@@ -101,9 +102,21 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 				string::f("Knob Set %d", i + 1),
 				"",
 				[=]() { return hubModule->mappings.getActiveKnobSetIdx() == i; },
-				[=]() { hubModule->mappings.setActiveKnobSetIdx(i); }));
+				[=]() {
+					hubModule->mappings.setActiveKnobSetIdx(i);
+					updateKnobSetLabel();
+				}));
 
 			menu->addChild(new KnobSetNameMenuItem{hubModule, i});
+		}
+	}
+
+	void updateKnobSetLabel() {
+		knobSetText->text = "Knob Set ";
+		knobSetText->text += std::to_string(hubModule->mappings.getActiveKnobSetIdx() + 1);
+		if (auto name = hubModule->mappings.getActiveKnobSetName(); name.length() > 0) {
+			knobSetText->text += "\n";
+			knobSetText->text += name;
 		}
 	}
 };

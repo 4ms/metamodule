@@ -69,6 +69,13 @@ public:
 			return "";
 	}
 
+	std::string_view getActiveKnobSetName() {
+		if (activeSetId < knobSetNames.size())
+			return knobSetNames[activeSetId];
+		else
+			return "";
+	}
+
 	void setKnobSetName(unsigned idx, std::string &name) {
 		if (idx < knobSetNames.size())
 			knobSetNames[idx] = name;

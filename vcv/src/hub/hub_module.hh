@@ -9,8 +9,8 @@
 #include <osdialog.h>
 #include <span>
 
-#define pr_dbg printf
-// #define pr_dbg()
+// #define pr_dbg printf
+#define pr_dbg(x, ...)
 
 struct MetaModuleHubBase : public rack::Module {
 
@@ -19,7 +19,7 @@ struct MetaModuleHubBase : public rack::Module {
 	std::string patchNameText = "";
 	std::string patchDescText = "";
 	std::string lastPatchFilePath = "";
-	std::function<void(void)> updateDisplay;
+	std::function<void()> updateDisplay;
 
 	EdgeStateDetector patchWriteButton;
 	bool ready_to_write_patch = false;
@@ -30,7 +30,7 @@ struct MetaModuleHubBase : public rack::Module {
 	// We then need a common base class widgets can point to
 	static constexpr uint32_t NumPots = 12;
 	static constexpr uint32_t MaxMapsPerPot = 8;
-	static constexpr uint32_t MaxKnobSets = 4;
+	static constexpr uint32_t MaxKnobSets = 8;
 	HubKnobMappings<NumPots, MaxMapsPerPot, MaxKnobSets> mappings;
 
 	// Mapping State/Progress

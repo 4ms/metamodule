@@ -3,6 +3,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "comm/comm_module.hh"
 #include "hub/hub_elements.hh"
+#include "hub/knob_set_buttons.hh"
 #include "hub_module_widget.hh"
 #include "mapping/patch_writer.hh"
 #include "widgets/4ms/4ms_widgets.hh"
@@ -55,11 +56,12 @@ struct HubMediumWidget : MetaModuleHubWidget {
 
 		if (hubModule != nullptr) {
 			hubModule->updateDisplay = [this] {
-				this->statusText->text = this->hubModule->labelText;
+				statusText->text = hubModule->labelText;
 			};
+
 			hubModule->updatePatchName = [this] {
-				this->hubModule->patchNameText = this->patchName->text;
-				this->hubModule->patchDescText = this->patchDesc->text;
+				hubModule->patchNameText = patchName->text;
+				hubModule->patchDescText = patchDesc->text;
 			};
 		}
 
@@ -95,6 +97,20 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		patchDesc->box.size = {rack::mm2px(rack::math::Vec(57.7f, 31.3f))};
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
+
+		knobSetText = createWidget<Label>(rack::mm2px(rack::Vec(100, 2)));
+		knobSetText->color = rack::color::WHITE;
+		knobSetText->text = "Knob Set 1";
+		knobSetText->fontSize = 10;
+		addChild(knobSetText);
+
+		auto knobSetButtons = new KnobSetButtonGroup(
+			[this](unsigned idx) {
+				hubModule->mappings.setActiveKnobSetIdx(idx);
+				updateKnobSetLabel();
+			},
+			rack::mm2px(rack::Vec(100, 12)));
+		addChild(knobSetButtons);
 
 		// create widgets from all elements
 		MetaModule::HubWidgetCreator<INFO> creator(this, module);
