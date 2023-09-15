@@ -88,7 +88,6 @@ void main() {
 	audio.start();
 
 	while (true) {
-		ui.update();
 		__NOP();
 	}
 }
