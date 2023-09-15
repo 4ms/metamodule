@@ -180,11 +180,14 @@ add_executable(
   ${ARTWORK_SOURCES}
 )
 
-target_compile_options(main.elf PRIVATE
-  $<$<COMPILE_LANGUAGE:CXX>:
-  -Wno-deprecated-enum-enum-conversion
-  >
+# Fixup for compiler warning on files that include LVGL 8.3.4 headers:
+set_source_files_properties(
+  ${FWDIR}/src/core_a7/aux_core_main.cc
+  PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
+
+# Fixup for compiler warning for LittleFS
+set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 
 target_include_directories(
   main.elf
