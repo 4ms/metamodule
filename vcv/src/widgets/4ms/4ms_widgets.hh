@@ -1,6 +1,4 @@
 #pragma once
-
-#include "hub/knob_set_menu.hh"
 #include "plugin.hh"
 
 class MetaModuleTextBox : public rack::LedDisplayTextField {
