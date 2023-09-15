@@ -49,8 +49,6 @@ bool read(ryml::ConstNodeRef const &n, Jack *jack) {
 }
 
 bool read(ryml::ConstNodeRef const &n, InternalCable *cable) {
-	if (n.num_children() < 2)
-		return false;
 	if (!n.is_map())
 		return false;
 	if (!n.has_child("out"))
@@ -65,6 +63,14 @@ bool read(ryml::ConstNodeRef const &n, InternalCable *cable) {
 		return false;
 	cable->ins.reserve(num_ins);
 	n["ins"] >> cable->ins;
+	
+	if (n.has_child("color")) {
+		uint16_t color;
+		n["color"] >> color;
+		cable->color = color;
+	} else {
+		cable->color = std::nullopt;
+	}
 
 	return true;
 }

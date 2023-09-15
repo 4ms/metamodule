@@ -19,8 +19,8 @@ TEST_CASE("Correct yaml output produced") {
 	Jack in4{55, 66};
 	Jack in5{77, 88};
 
-	pd.int_cables.push_back({out1, {{in1, in2}}});
-	pd.int_cables.push_back({out2, {{in3, in4, in5}}});
+	pd.int_cables.push_back({out1, {{in1, in2}}, std::nullopt});
+	pd.int_cables.push_back({out2, {{in3, in4, in5}}, 1});
 
 	pd.mapped_ins.push_back({1, {{in1}}, "MapIn1"});
 	pd.mapped_ins.push_back({2, {{in2, in3}}});
@@ -110,6 +110,7 @@ R"(PatchData:
           jack_id: 66
         - module_id: 77
           jack_id: 88
+      color: 1
   mapped_ins:
     - panel_jack_id: 1
       ins:

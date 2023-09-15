@@ -3,6 +3,7 @@
 #include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_player.hh"
 #include "pr_dbg.hh"
+#include <atomic>
 
 namespace MetaModule
 {
@@ -90,7 +91,7 @@ struct PatchPlayLoader {
 	void handle_sync_patch_loading() {
 		if (is_loading_new_patch() && is_audio_muted()) {
 			if (_load_patch())
-				pr_trace("Patch loaded\n");
+				pr_dbg("Patch loaded\n");
 			else
 				pr_err("Failed to load patch!\n");
 
