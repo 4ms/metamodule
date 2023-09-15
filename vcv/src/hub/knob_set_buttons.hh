@@ -23,14 +23,16 @@ struct KnobSetButtonGroup : rack::OpaqueWidget {
 	KnobSetButtonGroup(std::function<void(unsigned)> &&onChangeCallback, rack::Vec pos)
 		: onChange{std::move(onChangeCallback)} {
 		box.pos = pos;
-		box.size = rack::mm2px(rack::Vec(80, 20));
-		const int num_sets = 8;
+		const unsigned num_sets = 8;
+		const unsigned cols = 2;
+		const unsigned rows = num_sets / cols;
 
-		const float spacing = rack::mm2px(3);
-		const float size = rack::mm2px(3);
+		const float spacing = rack::mm2px(6);
+
+		box.size = rack::mm2px(rack::Vec(spacing * cols, spacing * rows));
 
 		rack::math::Rect bbox;
-		bbox.size = rack::math::Vec(size + spacing, size + spacing);
+		bbox.size = rack::math::Vec(spacing, spacing);
 		bbox.pos = rack::math::Vec(0, 0);
 
 		for (unsigned i = 0; i < num_sets; i++) {
@@ -38,11 +40,11 @@ struct KnobSetButtonGroup : rack::OpaqueWidget {
 			button->box = bbox;
 			button->set_idx = i;
 			addChild(button);
-			if (i % 2 == 1) {
+			if ((i % cols) == (cols - 1)) {
 				bbox.pos.x = 0;
-				bbox.pos.y += spacing + size;
+				bbox.pos.y += spacing;
 			} else
-				bbox.pos.x += spacing + size;
+				bbox.pos.x += spacing;
 		}
 	}
 };
