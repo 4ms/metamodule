@@ -3,32 +3,32 @@
 #include <rack.hpp>
 
 struct KnobSetNameTextBox : rack::ui::TextField {
-	MetaModuleHubBase *hub;
+	using CallbackT = std::function<void(unsigned, std::string const &)>;
+	CallbackT onChangeCb;
 	unsigned idx;
 
-	KnobSetNameTextBox(MetaModuleHubBase *hub, unsigned knobSetIdx)
-		: hub{hub}
+	KnobSetNameTextBox(CallbackT onChangeCallback, unsigned knobSetIdx)
+		: onChangeCb{onChangeCallback}
 		, idx{knobSetIdx} {
 	}
 
 	void onChange(const rack::event::Change &e) override {
-		hub->mappings.setKnobSetName(idx, text);
+		onChangeCb(idx, text);
 	}
 };
 
 struct KnobSetNameMenuItem : rack::widget::Widget {
-	MetaModuleHubBase *hub;
 	KnobSetNameTextBox *txt;
 
-	KnobSetNameMenuItem(MetaModuleHubBase *hub, unsigned knobSetIdx)
-		: hub{hub} {
+	KnobSetNameMenuItem(KnobSetNameTextBox::CallbackT onChangeCallback,
+						unsigned knobSetIdx,
+						std::string_view initialText) {
 		box.pos = {0, 0};
 		box.size = {120, BND_WIDGET_HEIGHT};
-		txt = new KnobSetNameTextBox{hub, knobSetIdx};
+		txt = new KnobSetNameTextBox{onChangeCallback, knobSetIdx};
 		txt->box.pos = {45, 0};
 		txt->box.size = {120 - txt->box.pos.x, BND_WIDGET_HEIGHT};
-		txt->text = "";
-		txt->text = hub->mappings.getKnobSetName(knobSetIdx);
+		txt->text = initialText;
 		addChild(txt);
 	}
 

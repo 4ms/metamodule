@@ -1,19 +1,21 @@
 #pragma once
 #include <rack.hpp>
 
+struct KnobSetButtonGroup;
+
 struct KnobSetButton : rack::Widget {
 	int set_idx;
+	KnobSetButtonGroup *parent_group;
+
+	KnobSetButton(int index, KnobSetButtonGroup *parent)
+		: set_idx{index}
+		, parent_group{parent} {
+	}
 
 	void drawLayer(const DrawArgs &args, int layer) override;
 	void onDragEnter(const rack::event::DragEnter &e) override;
 	void onButton(const rack::event::Button &e) override;
-
-	void onDragHover(const rack::event::DragHover &e) override {
-		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-			e.consume(this);
-		}
-		Widget::onDragHover(e);
-	}
+	void onDragHover(const rack::event::DragHover &e) override;
 };
 
 struct KnobSetButtonGroup : rack::OpaqueWidget {
@@ -36,9 +38,8 @@ struct KnobSetButtonGroup : rack::OpaqueWidget {
 		bbox.pos = rack::math::Vec(0, 0);
 
 		for (unsigned i = 0; i < num_sets; i++) {
-			auto button = new KnobSetButton();
+			auto button = new KnobSetButton(i, this);
 			button->box = bbox;
-			button->set_idx = i;
 			addChild(button);
 			if ((i % cols) == (cols - 1)) {
 				bbox.pos.x = 0;
@@ -53,28 +54,22 @@ inline void KnobSetButton::drawLayer(const DrawArgs &args, int layer) {
 	if (layer != 1)
 		return;
 
-	rack::Vec c = box.size.div(2);
-	float r = rack::mm2px(2); //(box.size.x + box.size.y) / 2;
-
-	auto *group = getAncestorOfType<KnobSetButtonGroup>();
-	int active_idx = group ? group->active_idx : 0;
-
+	const rack::Vec center = box.size.div(2);
+	const float radius = rack::mm2px(2);
+	int active_idx = parent_group ? parent_group->active_idx : 0;
 	auto color = (active_idx == set_idx) ? rack::SCHEME_YELLOW : rack::color::alpha(rack::color::WHITE, 0.33);
+
 	nvgBeginPath(args.vg);
-	nvgCircle(args.vg, c.x, c.y, r);
+	nvgCircle(args.vg, center.x, center.y, radius);
 	nvgFillColor(args.vg, color);
 	nvgFill(args.vg);
 }
 
 inline void KnobSetButton::onDragEnter(const rack::event::DragEnter &e) {
 	if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-		auto origin = dynamic_cast<KnobSetButtonGroup *>(e.origin);
-		if (origin) {
-			KnobSetButtonGroup *group = getAncestorOfType<KnobSetButtonGroup>();
-			if (group) {
-				group->active_idx = set_idx;
-				group->onChange(set_idx);
-			}
+		if (parent_group && e.origin == parent_group) {
+			parent_group->active_idx = set_idx;
+			parent_group->onChange(set_idx);
 		}
 	}
 	Widget::onDragEnter(e);
@@ -82,11 +77,17 @@ inline void KnobSetButton::onDragEnter(const rack::event::DragEnter &e) {
 
 inline void KnobSetButton::onButton(const rack::event::Button &e) {
 	if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-		KnobSetButtonGroup *group = getAncestorOfType<KnobSetButtonGroup>();
-		if (group) {
-			group->active_idx = set_idx;
-			group->onChange(set_idx);
+		if (parent_group) {
+			parent_group->active_idx = set_idx;
+			parent_group->onChange(set_idx);
 		}
 	}
 	Widget::onButton(e);
+}
+
+inline void KnobSetButton::onDragHover(const rack::event::DragHover &e) {
+	if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+		e.consume(this);
+	}
+	Widget::onDragHover(e);
 }

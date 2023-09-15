@@ -98,19 +98,20 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
 
-		knobSetText = createWidget<Label>(rack::mm2px(rack::Vec(100, 2)));
+		knobSetText = createWidget<Label>(rack::mm2px(rack::Vec(99, 2)));
 		knobSetText->color = rack::color::WHITE;
 		knobSetText->text = "Knob Set 1";
 		knobSetText->fontSize = 10;
 		addChild(knobSetText);
 
-		auto knobSetButtons = new KnobSetButtonGroup(
+		knobSetButtons = new KnobSetButtonGroup(
 			[this](unsigned idx) {
 				hubModule->mappings.setActiveKnobSetIdx(idx);
 				updateKnobSetLabel();
 			},
 			rack::mm2px(rack::Vec(100, 12)));
 		addChild(knobSetButtons);
+		updateKnobSetLabel();
 
 		// create widgets from all elements
 		MetaModule::HubWidgetCreator<INFO> creator(this, module);

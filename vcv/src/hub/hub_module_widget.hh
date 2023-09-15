@@ -1,6 +1,7 @@
 #pragma once
 #include "../comm/comm_module.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "hub/knob_set_buttons.hh"
 #include "hub/knob_set_menu.hh"
 #include "hub_knob.hh"
 #include "hub_midi.hh"
@@ -19,6 +20,7 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 	rack::Label *statusText;
 	rack::Label *knobSetText;
 	MetaModuleHubBase *hubModule;
+	KnobSetButtonGroup *knobSetButtons;
 
 	MetaModuleHubWidget() = default;
 
@@ -96,27 +98,37 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 		menu->addChild(new MenuSeparator());
 		menu->addChild(createMenuLabel<MenuLabel>("Mapped Knob Sets"));
 
-		for (unsigned i = 0; i < hubModule->MaxKnobSets; i++) {
+		for (unsigned knobset_idx = 0; knobset_idx < hubModule->MaxKnobSets; knobset_idx++) {
 			menu->addChild(new MenuSeparator());
 			menu->addChild(createCheckMenuItem(
-				string::f("Knob Set %d", i + 1),
+				string::f("Knob Set %d", knobset_idx + 1),
 				"",
-				[=]() { return hubModule->mappings.getActiveKnobSetIdx() == i; },
+				[=]() { return hubModule->mappings.getActiveKnobSetIdx() == knobset_idx; },
 				[=]() {
-					hubModule->mappings.setActiveKnobSetIdx(i);
+					hubModule->mappings.setActiveKnobSetIdx(knobset_idx);
 					updateKnobSetLabel();
 				}));
 
-			menu->addChild(new KnobSetNameMenuItem{hubModule, i});
+			menu->addChild(new KnobSetNameMenuItem{[this](unsigned idx, std::string const &text) {
+													   hubModule->mappings.setKnobSetName(idx, text);
+													   updateKnobSetLabel();
+												   },
+												   knobset_idx,
+												   hubModule->mappings.getKnobSetName(knobset_idx)});
 		}
 	}
 
 	void updateKnobSetLabel() {
+		if (!hubModule || !knobSetText || !knobSetButtons)
+			return;
+
+		auto activeKnobSetIdx = hubModule->mappings.getActiveKnobSetIdx();
 		knobSetText->text = "Knob Set ";
-		knobSetText->text += std::to_string(hubModule->mappings.getActiveKnobSetIdx() + 1);
+		knobSetText->text += std::to_string(activeKnobSetIdx + 1);
 		if (auto name = hubModule->mappings.getActiveKnobSetName(); name.length() > 0) {
 			knobSetText->text += "\n";
 			knobSetText->text += name;
 		}
+		knobSetButtons->active_idx = activeKnobSetIdx;
 	}
 };

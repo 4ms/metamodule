@@ -76,7 +76,7 @@ public:
 			return "";
 	}
 
-	void setKnobSetName(unsigned idx, std::string &name) {
+	void setKnobSetName(unsigned idx, std::string const &name) {
 		if (idx < knobSetNames.size())
 			knobSetNames[idx] = name;
 	}
