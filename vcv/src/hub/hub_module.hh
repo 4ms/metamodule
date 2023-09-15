@@ -15,11 +15,11 @@
 struct MetaModuleHubBase : public rack::Module {
 
 	std::function<void()> updatePatchName;
+	std::function<void()> updateDisplay;
 	std::string labelText = "";
 	std::string patchNameText = "";
 	std::string patchDescText = "";
 	std::string lastPatchFilePath = "";
-	std::function<void()> updateDisplay;
 
 	EdgeStateDetector patchWriteButton;
 	bool ready_to_write_patch = false;
@@ -132,6 +132,9 @@ struct MetaModuleHubBase : public rack::Module {
 
 			json_t *patchDescJ = json_string(patchDescText.c_str());
 			json_object_set_new(rootJ, "PatchDesc", patchDescJ);
+
+			json_t *defaultKnobSetJ = json_integer(mappings.getActiveKnobSetIdx());
+			json_object_set_new(rootJ, "DefaultKnobSet", defaultKnobSetJ);
 		} else
 			printf("Error: Widget has not been constructed, but dataToJson is being called\n");
 		return rootJ;
@@ -147,6 +150,12 @@ struct MetaModuleHubBase : public rack::Module {
 		auto patchDescJ = json_object_get(rootJ, "PatchDesc");
 		if (json_is_string(patchDescJ)) {
 			patchDescText = json_string_value(patchDescJ);
+		}
+
+		auto defaultKnobSetJ = json_object_get(rootJ, "DefaultKnobSet");
+		if (json_is_integer(defaultKnobSetJ)) {
+			unsigned idx = json_integer_value(defaultKnobSetJ);
+			mappings.setActiveKnobSetIdx(idx);
 		}
 
 		mappings.decodeJson(rootJ);

@@ -243,7 +243,6 @@ public:
 				auto mapsJ = json_array_get(knobSetsJ, set_i);
 
 				if (json_is_array(mapsJ)) {
-					setActiveKnobSetIdx(set_i);
 
 					for (size_t i = 0; i < json_array_size(mapsJ); i++) {
 						auto mappingJ = json_array_get(mapsJ, i);
@@ -286,7 +285,6 @@ public:
 				}
 			}
 		}
-		setActiveKnobSetIdx(0); //TODO: save the default in json
 
 		auto namesJ = json_object_get(rootJ, "KnobSetNames");
 		for (unsigned set_i = 0; auto &name : knobSetNames) {
