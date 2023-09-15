@@ -173,6 +173,9 @@ target_link_script(
   ${MCU_FLAGS}
 )
 
+# Fixup for compiler warning for LittleFS
+set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
+
 set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_target(
