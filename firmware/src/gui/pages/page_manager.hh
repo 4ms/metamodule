@@ -37,8 +37,20 @@ public:
 		: info{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
-	void init();
-	void update_current_page();
+	void init() {
+		PageList::request_new_page(page_patchsel);
+	}
+
+	void update_current_page() {
+		if (auto newpage = PageList::get_requested_page()) {
+			cur_page->blur();
+			cur_page = newpage.value();
+			cur_page->focus();
+		}
+
+		else
+			cur_page->update();
+	}
 };
 
 } // namespace MetaModule
