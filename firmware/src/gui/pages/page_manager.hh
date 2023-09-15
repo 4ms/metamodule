@@ -19,7 +19,7 @@ class PageManager {
 	SlsComponentInit sls_comp_init;
 
 	PatchInfo info;
-	ModuleViewPage page_module{info, ""};
+	ModuleViewPage page_module{info};
 	PatchSelectorPage page_patchsel{info};
 	PatchViewPage page_patchview{info};
 

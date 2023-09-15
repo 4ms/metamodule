@@ -22,9 +22,8 @@ struct ModuleViewPage : PageBase {
 	};
 	ViewSettings settings;
 
-	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
+	ModuleViewPage(PatchInfo info)
 		: PageBase{info}
-		, slug(module_slug)
 		, patch{patch_storage.get_view_patch()}
 		, base{ui_MappingMenu}
 		, roller{ui_ElementRoller}
@@ -302,7 +301,7 @@ private:
 	std::string opts;
 	uint16_t this_module_id;
 	uint32_t cur_selected = 0;
-	std::string_view slug;
+	std::string_view slug = "";
 	bool is_patch_playing = false;
 	PatchData &patch;
 
