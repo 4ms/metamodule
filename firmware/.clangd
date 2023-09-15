@@ -22,6 +22,9 @@ CompileFlags:
         "-std=gnu++2b",
         "-I../src/console", #Needed because clangd16 infers compilation of some headers with a file from a different cmake target
         "-I../src/medium",
+        "-I../lib/lvgl/lvgl",
+        "-DSTM32MP1",
+        "-DCORE_CA7",
 	]
 ---
 If:
