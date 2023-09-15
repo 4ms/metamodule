@@ -98,7 +98,7 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
 
-		knobSetText = createWidget<Label>(rack::mm2px(rack::Vec(99, 2)));
+		knobSetText = createWidget<Label>(rack::mm2px(rack::Vec(98, 1.5)));
 		knobSetText->color = rack::color::WHITE;
 		knobSetText->text = "Knob Set 1";
 		knobSetText->fontSize = 10;
