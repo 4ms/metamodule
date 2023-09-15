@@ -3,8 +3,8 @@
 #include "core_a7/static_buffers.hh"
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
+#include "drivers/cache.hh"
 #include "fs/time_convert.hh"
-#include "gui/ui.hh"
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_file/patch_storage_proxy.hh"
@@ -58,15 +58,17 @@ void main() {
 					  patch_mod_queue};
 
 	StaticBuffers::raw_patch_span = {StaticBuffers::raw_patch_data.data(), StaticBuffers::raw_patch_data.size()};
-	SharedMemoryS::ptrs = {
-		&StaticBuffers::param_blocks,
-		&StaticBuffers::auxsignal_block,
-		&StaticBuffers::virtdrive,
-		&patch_player,
-		&StaticBuffers::icc_shared_message,
-		&StaticBuffers::shared_patch_file_list,
-		&StaticBuffers::raw_patch_span,
-	};
+	SharedMemoryS::ptrs = {&StaticBuffers::param_blocks,
+						   &StaticBuffers::auxsignal_block,
+						   &StaticBuffers::virtdrive,
+						   &StaticBuffers::icc_shared_message,
+						   &StaticBuffers::shared_patch_file_list,
+						   &StaticBuffers::raw_patch_span,
+						   &patch_player,
+						   &patch_playloader,
+						   &patch_storage_proxy,
+						   &sync_params,
+						   &patch_mod_queue};
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
@@ -74,23 +76,18 @@ void main() {
 	printf_("A7 initialized. Unlocking M4\n");
 
 	// Tell M4 we're done with init
-	HWSemaphore<MainCoreReady>::unlock();
+	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for M4 to be ready
-	while (HWSemaphore<M4_ready>::is_locked())
+	while (mdrivlib::HWSemaphore<M4_ready>::is_locked())
 		;
 
-	Ui ui{patch_playloader, patch_storage_proxy, sync_params, patch_mod_queue};
 	sync_params.clear();
-	//TODO: load the initial patch by getting patch_storage_proxy to make requests
-	//to patch_storage...
 	patch_playloader.load_initial_patch();
 
-	ui.start();
 	audio.start();
 
 	while (true) {
-		ui.update();
 		__NOP();
 	}
 }
