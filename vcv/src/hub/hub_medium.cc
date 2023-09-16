@@ -72,46 +72,48 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		addChild(createWidget<ScrewBlack>(
 			rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		patchName = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.1, 10.5)));
+		patchName = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.1, 9.5)));
 		if (hubModule != nullptr && hubModule->patchNameText.length() > 0)
-			patchName->text = this->hubModule->patchNameText;
+			patchName->setText(this->hubModule->patchNameText);
 		else
-			patchName->text = "Enter Patch Name";
+			patchName->setText("Enter Patch Name");
+		patchName->placeholder = "Enter Patch Name";
 		patchName->color = rack::color::BLACK;
 		patchName->box.size = {rack::mm2px(rack::math::Vec(57.7f, 10.0f))};
 		patchName->cursor = 0;
 		addChild(patchName);
 
-		statusText = createWidget<Label>(rack::mm2px(rack::math::Vec(34.1, 17.8)));
+		statusText = createWidget<Label>(rack::mm2px(rack::math::Vec(10, 1.5)));
 		statusText->color = rack::color::WHITE;
 		statusText->text = "";
 		statusText->fontSize = 10;
 		addChild(statusText);
 
-		patchDesc = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36, 22.98)));
+		patchDesc = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.4, 18.f)));
 		if (hubModule != nullptr && hubModule->patchDescText.length() > 0)
-			patchDesc->text = this->hubModule->patchDescText;
+			patchDesc->setText(this->hubModule->patchDescText);
 		else
-			patchDesc->text = "Patch Description";
+			patchDesc->setText("Patch Description");
+		patchDesc->placeholder = "Patch Description";
 		patchDesc->color = rack::color::BLACK;
 		patchDesc->box.size = {rack::mm2px(rack::math::Vec(57.7f, 31.3f))};
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
 
-		auto knobSetTitle = createWidget<Label>(rack::mm2px(rack::math::Vec(96, 1.2)));
-		knobSetTitle->color = rack::color::WHITE;
-		knobSetTitle->text = "Knob Set";
+		auto knobSetTitle = createWidget<Label>(rack::mm2px(rack::math::Vec(36.4, 50.5)));
+		knobSetTitle->color = rack::color::BLACK;
+		knobSetTitle->text = "Knob Set:";
 		knobSetTitle->fontSize = 10;
-
 		addChild(knobSetTitle);
+
 		knobSetNameField = new MetaModuleTextField{[this](std::string const &text) {
 			auto idx = hubModule->mappings.getActiveKnobSetIdx();
 			hubModule->mappings.setKnobSetName(idx, text);
 		}};
-		knobSetNameField->box.pos = rack::mm2px(rack::math::Vec(96, 3.5));
-		knobSetNameField->box.size = {rack::mm2px(rack::math::Vec(38.f, 7.f))};
+		knobSetNameField->box.pos = rack::mm2px(rack::math::Vec(52.0, 49.0));
+		knobSetNameField->box.size = {rack::mm2px(rack::math::Vec(59.f, 7.f))};
 		knobSetNameField->text = "";
-		knobSetNameField->color = rack::color::WHITE;
+		knobSetNameField->color = rack::color::BLACK;
 		knobSetNameField->bgColor = nvgRGB(0x66, 0x66, 0x66);
 		knobSetNameField->cursor = 0;
 		addChild(knobSetNameField);
@@ -121,7 +123,7 @@ struct HubMediumWidget : MetaModuleHubWidget {
 				hubModule->mappings.setActiveKnobSetIdx(idx);
 				updateKnobSetLabel();
 			},
-			rack::mm2px(rack::Vec(100, 12)));
+			rack::mm2px(rack::Vec(39.5, 57.5)));
 		addChild(knobSetButtons);
 		updateKnobSetLabel();
 

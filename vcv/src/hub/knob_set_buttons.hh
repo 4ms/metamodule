@@ -26,10 +26,10 @@ struct KnobSetButtonGroup : rack::OpaqueWidget {
 		: onChange{std::move(onChangeCallback)} {
 		box.pos = pos;
 		const unsigned num_sets = 8;
-		const unsigned cols = 2;
+		const unsigned cols = 8;
 		const unsigned rows = num_sets / cols;
 
-		const float spacing = rack::mm2px(6);
+		const float spacing = rack::mm2px(6.5f);
 
 		box.size = rack::mm2px(rack::Vec(spacing * cols, spacing * rows));
 
