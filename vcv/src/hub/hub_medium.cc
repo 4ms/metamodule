@@ -98,11 +98,23 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
 
-		knobSetText = createWidget<Label>(rack::mm2px(rack::Vec(98, 1.5)));
-		knobSetText->color = rack::color::WHITE;
-		knobSetText->text = "Knob Set 1";
-		knobSetText->fontSize = 10;
-		addChild(knobSetText);
+		auto knobSetTitle = createWidget<Label>(rack::mm2px(rack::math::Vec(96, 1.2)));
+		knobSetTitle->color = rack::color::WHITE;
+		knobSetTitle->text = "Knob Set";
+		knobSetTitle->fontSize = 10;
+
+		addChild(knobSetTitle);
+		knobSetNameField = new MetaModuleTextField{[this](std::string const &text) {
+			auto idx = hubModule->mappings.getActiveKnobSetIdx();
+			hubModule->mappings.setKnobSetName(idx, text);
+		}};
+		knobSetNameField->box.pos = rack::mm2px(rack::math::Vec(96, 3.5));
+		knobSetNameField->box.size = {rack::mm2px(rack::math::Vec(38.f, 7.f))};
+		knobSetNameField->text = "";
+		knobSetNameField->color = rack::color::WHITE;
+		knobSetNameField->bgColor = nvgRGB(0x66, 0x66, 0x66);
+		knobSetNameField->cursor = 0;
+		addChild(knobSetNameField);
 
 		knobSetButtons = new KnobSetButtonGroup(
 			[this](unsigned idx) {

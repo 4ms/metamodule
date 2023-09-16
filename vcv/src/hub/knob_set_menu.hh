@@ -27,7 +27,7 @@ struct KnobSetNameMenuItem : rack::widget::Widget {
 		box.size = {120, BND_WIDGET_HEIGHT};
 		txt = new KnobSetNameTextBox{onChangeCallback, knobSetIdx};
 		txt->box.pos = {45, 0};
-		txt->box.size = {120 - txt->box.pos.x, BND_WIDGET_HEIGHT};
+		txt->box.size = {250 - txt->box.pos.x, BND_WIDGET_HEIGHT};
 		txt->text = initialText;
 		addChild(txt);
 	}

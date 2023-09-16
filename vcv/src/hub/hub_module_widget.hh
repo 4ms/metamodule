@@ -3,6 +3,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "hub/knob_set_buttons.hh"
 #include "hub/knob_set_menu.hh"
+#include "hub/text_field.hh"
 #include "hub_knob.hh"
 #include "hub_midi.hh"
 #include "hub_module.hh"
@@ -16,13 +17,13 @@
 #include <string>
 
 struct MetaModuleHubWidget : rack::app::ModuleWidget {
+	MetaModuleHubWidget() = default;
+
+	MetaModuleHubBase *hubModule;
 
 	rack::Label *statusText;
-	rack::Label *knobSetText;
-	MetaModuleHubBase *hubModule;
 	KnobSetButtonGroup *knobSetButtons;
-
-	MetaModuleHubWidget() = default;
+	MetaModuleTextField *knobSetNameField;
 
 	static constexpr float kKnobSpacingY = 17;
 	static constexpr float kKnobSpacingX = 18;
@@ -119,16 +120,16 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 	}
 
 	void updateKnobSetLabel() {
-		if (!hubModule || !knobSetText || !knobSetButtons)
+		if (!hubModule || !knobSetNameField || !knobSetButtons)
 			return;
 
 		auto activeKnobSetIdx = hubModule->mappings.getActiveKnobSetIdx();
-		knobSetText->text = "Knob Set ";
-		knobSetText->text += std::to_string(activeKnobSetIdx + 1);
 		if (auto name = hubModule->mappings.getActiveKnobSetName(); name.length() > 0) {
-			knobSetText->text += "\n";
-			knobSetText->text += name;
+			knobSetNameField->text = name;
+		} else {
+			knobSetNameField->text = rack::string::f("Knob Set %d", activeKnobSetIdx + 1);
 		}
+
 		knobSetButtons->active_idx = activeKnobSetIdx;
 	}
 };
