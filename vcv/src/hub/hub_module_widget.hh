@@ -106,8 +106,8 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 			menu->addChild(createCheckMenuItem(
 				string::f("Knob Set %d", knobset_idx + 1),
 				"",
-				[=]() { return hubModule->mappings.getActiveKnobSetIdx() == knobset_idx; },
-				[=]() {
+				[=, this]() { return hubModule->mappings.getActiveKnobSetIdx() == knobset_idx; },
+				[=, this]() {
 					hubModule->mappings.setActiveKnobSetIdx(knobset_idx);
 					updateKnobSetLabel();
 				}));
