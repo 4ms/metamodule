@@ -170,7 +170,7 @@
 /  const char* VolumeStr[FF_VOLUMES] = {"ram","flash","sd","usb",...
 */
 
-#define FF_MULTI_PARTITION 0
+#define FF_MULTI_PARTITION 1
 /* This option switches support for multiple volumes on the physical drive.
 /  By default (0), each logical drive number is bound to the same physical drive
 /  number and only an FAT volume found on the physical drive will be mounted.
@@ -187,7 +187,7 @@
 /  for variable sector size mode and disk_ioctl() function needs to implement
 /  GET_SECTOR_SIZE command. */
 
-#define FF_LBA64 0
+#define FF_LBA64 1
 /* This option switches support for 64-bit LBA. (0:Disable or 1:Enable)
 /  To enable the 64-bit LBA, also exFAT needs to be enabled. (FF_FS_EXFAT == 1) */
 
