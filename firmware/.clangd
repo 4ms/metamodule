@@ -23,6 +23,7 @@ CompileFlags:
         "-I../src/console", #Needed because clangd16 infers compilation of some headers with a file from a different cmake target
         "-I../src/medium",
         "-I../lib/lvgl/lvgl",
+        "-I../lib/cmsis/Core_A/Include",
         "-DSTM32MP1",
         "-DCORE_CA7",
 	]
