@@ -4,38 +4,40 @@
 namespace
 {
 
+/////////////////////////////////////////////////
 // Change these to enable/disable logging levels
 static constexpr bool PRINT_ERROR = true;
 static constexpr bool PRINT_WARN = true;
 static constexpr bool PRINT_DEBUG = false;
-static constexpr bool PRINT_TRACE = false;
+static constexpr bool PRINT_TRACE = true;
+/////////////////////////////////////////////////
 
-inline void do_printf_(auto str) {
+inline void _do_printf_impl(const char *str) {
 	printf_("%s", str);
 }
 
-inline void do_printf_(auto... args) {
+inline void _do_printf_impl(auto... args) {
 	printf_(args...);
 }
 
 inline void pr_err(auto... args) {
 	if constexpr (PRINT_ERROR)
-		do_printf_(args...);
+		_do_printf_impl(args...);
 }
 
 inline void pr_warn(auto... args) {
 	if constexpr (PRINT_WARN)
-		do_printf_(args...);
+		_do_printf_impl(args...);
 }
 
 inline void pr_dbg(auto... args) {
 	if constexpr (PRINT_DEBUG)
-		do_printf_(args...);
+		_do_printf_impl(args...);
 }
 
 inline void pr_trace(auto... args) {
 	if constexpr (PRINT_TRACE)
-		do_printf_(args...);
+		_do_printf_impl(args...);
 }
 
 } // namespace
