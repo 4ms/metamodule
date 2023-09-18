@@ -23,7 +23,7 @@ struct ModuleDrawer {
 	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
 		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
 		if (!img) {
-			if (!slug.is_equal("PanelMedium"))
+			if (!slug.is_equal("HubMedium"))
 				pr_warn("Image not found for %s\n", slug.c_str());
 			return nullptr;
 		}

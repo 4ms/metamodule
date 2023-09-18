@@ -55,7 +55,7 @@ public:
 
 				for (const auto &in : cable.ins) {
 					if (auto inpos = find_injack_xy(in)) {
-						draw_cable({outpos->x, outpos->y}, {inpos->x, inpos->y}, cable.out);
+						draw_cable({outpos->x, outpos->y}, {inpos->x, inpos->y}, cable);
 					}
 				}
 			}
@@ -106,8 +106,9 @@ public:
 		return Vec2{x, y};
 	}
 
-	void draw_cable(Vec2 start, Vec2 end, const Jack &outjack) {
-		drawline_dsc.color = get_cable_color(outjack);
+	void draw_cable(Vec2 start, Vec2 end, const InternalCable &cable) {	
+		uint16_t default_color = get_cable_color(cable.out).full;	
+		drawline_dsc.color.full = cable.color.value_or(default_color);
 		draw_cable(start, end);
 	}
 

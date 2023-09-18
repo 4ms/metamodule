@@ -2,6 +2,7 @@
 #include "midi_def.hh"
 #include "util/static_string.hh"
 #include <vector>
+#include <optional>
 
 constexpr int MAX_MODULES_IN_PATCH = 32;
 constexpr unsigned MaxKnobSets = 8;
@@ -66,6 +67,7 @@ struct MappedKnobSet {
 struct InternalCable {
 	Jack out;
 	std::vector<Jack> ins;
+	std::optional<uint16_t> color;
 };
 
 struct MappedInputJack {

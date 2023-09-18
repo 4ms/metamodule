@@ -12,6 +12,7 @@
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <vector>
 
@@ -41,7 +42,7 @@ public:
 
 	std::array<KnobSet, MaxKnobSets> knob_conns;
 
-	bool is_loaded = false;
+	std::atomic<bool> is_loaded = false;
 
 	MulticorePlayer smp;
 
@@ -122,11 +123,11 @@ public:
 		for (auto &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
 
-		is_loaded = true;
-
 		calc_multiple_module_indicies();
 
 		set_active_knob_set(0);
+
+		is_loaded = true;
 		return true;
 	}
 

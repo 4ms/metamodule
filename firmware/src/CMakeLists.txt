@@ -123,7 +123,6 @@ add_executable(
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/audio/audio.cc
-  ${FWDIR}/src/gui/pages/page_manager.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
@@ -180,6 +179,15 @@ add_executable(
   #
   ${ARTWORK_SOURCES}
 )
+
+# Fixup for compiler warning on files that include LVGL 8.3.4 headers:
+set_source_files_properties(
+  ${FWDIR}/src/core_a7/aux_core_main.cc
+  PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
+)
+
+# Fixup for compiler warning for LittleFS
+set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 
 target_include_directories(
   main.elf

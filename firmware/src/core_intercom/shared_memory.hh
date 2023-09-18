@@ -3,7 +3,10 @@
 #include "conf/ramdisk_conf.hh"
 #include "core_intercom/patch_icc_message.hh"
 #include "param_block.hh"
+#include "params/sync_params.hh"
 #include "patch_file/patch_file.hh"
+#include "patch_play/patch_mod_queue.hh"
+#include "patch_play/patch_playloader.hh"
 #include <cstdint>
 #include <span>
 
@@ -18,10 +21,14 @@ struct SharedMemoryS {
 		DoubleBufParamBlock *param_block;
 		DoubleAuxStreamBlock *auxsignal_block;
 		RamDrive *ramdrive;
-		PatchPlayer *patch_player;
 		volatile PatchICCMessage *icc_message;
 		PatchFileList *patch_file_list;
 		std::span<char> *raw_patch_span;
+		PatchPlayer *patch_player;
+		PatchPlayLoader *patch_playloader;
+		PatchStorageProxy *patch_storage;
+		SyncParams *sync_params;
+		PatchModQueue *patch_mod_queue;
 	};
 
 	static Ptrs ptrs;

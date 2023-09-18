@@ -4,6 +4,9 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/smp.hh"
+#include "drivers/timekeeper.hh"
+#include "gui/ui.hh"
+#include "lvgl.h"
 #include "patch_play/patch_player.hh"
 
 extern "C" void aux_core_main() {
@@ -14,50 +17,37 @@ extern "C" void aux_core_main() {
 		;
 
 	auto patch_player = SharedMemoryS::ptrs.patch_player;
+	auto patch_playloader = SharedMemoryS::ptrs.patch_playloader;
+	auto patch_storage_proxy = SharedMemoryS::ptrs.patch_storage;
+	auto sync_params = SharedMemoryS::ptrs.sync_params;
+	auto patch_mod_queue = SharedMemoryS::ptrs.patch_mod_queue;
 
-	uint32_t starting_idx;
-	uint32_t num_modules;
-	uint32_t idx_increment;
+	struct AuxCorePlayerContext {
+		uint32_t starting_idx;
+		uint32_t num_modules;
+		uint32_t idx_increment;
+	} context;
+
+	constexpr auto PlayModuleListIRQn = SMPControl::IRQn(SMPCommand::PlayModuleList);
+	InterruptManager::register_and_start_isr(PlayModuleListIRQn, 1, 0, [&context, &patch_player]() {
+		for (unsigned i = context.starting_idx; i < context.num_modules; i += context.idx_increment) {
+			patch_player->modules[i]->update();
+		}
+		SMPThread::signal_done();
+	});
+
+	constexpr auto NewModuleListIRQn = SMPControl::IRQn(SMPCommand::NewModuleList);
+	InterruptManager::register_and_start_isr(NewModuleListIRQn, 0, 0, [&context]() {
+		context.starting_idx = SMPControl::read<SMPRegister::ModuleID>();
+		context.num_modules = SMPControl::read<SMPRegister::NumModulesInPatch>();
+		context.idx_increment = SMPControl::read<SMPRegister::UpdateModuleOffset>();
+		SMPThread::signal_done();
+	});
+
+	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
 
 	while (true) {
-		using namespace SMPRegister;
-
-		__DSB();
-		__WFI();
-		auto irqnum = GIC_AcknowledgePending();
-		GIC_EndInterrupt(irqnum);
-		uint32_t command = irqnum;
-
-		switch (command) {
-			case SMPCommand::UpdateModule: {
-				auto module_idx = SMPControl::read<ModuleID>();
-				patch_player->modules[module_idx]->update();
-				SMPThread::signal_done();
-			} break;
-
-			case SMPCommand::UpdateListOfModules: {
-				// Debug::Pin3::high();
-				for (unsigned i = starting_idx; i < num_modules; i += idx_increment) {
-					patch_player->modules[i]->update();
-				}
-				// Debug::Pin3::low();
-
-				SMPThread::signal_done();
-			} break;
-
-			case SMPCommand::NewModuleList: {
-				starting_idx = SMPControl::read<ModuleID>();
-				num_modules = SMPControl::read<NumModulesInPatch>();
-				idx_increment = SMPControl::read<UpdateModuleOffset>();
-				SMPThread::signal_done();
-			} break;
-
-			case SMPThread::CallFunction:
-				SMPThread::execute();
-				break;
-
-			default:
-				break;
-		}
+		ui.update();
+		__NOP();
 	}
 }

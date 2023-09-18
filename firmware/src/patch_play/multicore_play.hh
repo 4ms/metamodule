@@ -29,7 +29,7 @@ public:
 
 	void split() {
 		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
-			mdrivlib::SMPThread::split_with_command<SMPCommand::UpdateListOfModules>();
+			mdrivlib::SMPThread::split_with_command<SMPCommand::PlayModuleList>();
 		}
 	}
 
