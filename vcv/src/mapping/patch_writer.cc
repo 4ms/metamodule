@@ -134,7 +134,7 @@ void PatchFileWriter::addKnobMaps(unsigned panelKnobId, unsigned knobSetId, cons
 
 	for (const auto &m : maps) {
 		if (!idMap.contains(m.moduleId)) {
-			printf("Skipping knob mapping to module not supported by MetaModule: %lld\n", m.moduleId);
+			printf("Skipping knob mapping to module not supported by MetaModule: %lld\n", (long long)m.moduleId);
 			continue;
 		}
 		pd.knob_sets[knobSetId].set.push_back({
@@ -175,6 +175,7 @@ void PatchFileWriter::mapInputJack(const CableMap &map) {
 					.jack_id = static_cast<uint16_t>(map.receivedJackId),
 				},
 			}},
+			.alias_name = "",
 		});
 	}
 }
@@ -206,6 +207,7 @@ void PatchFileWriter::mapOutputJack(const CableMap &map) {
 					.module_id = static_cast<uint16_t>(idMap[map.sendingModuleId]),
 					.jack_id = static_cast<uint16_t>(map.sendingJackId),
 				},
+			.alias_name = "",
 		});
 	}
 }

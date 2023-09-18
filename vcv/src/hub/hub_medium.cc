@@ -3,6 +3,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "comm/comm_module.hh"
 #include "hub/hub_elements.hh"
+#include "hub/knob_set_buttons.hh"
 #include "hub_module_widget.hh"
 #include "mapping/patch_writer.hh"
 #include "widgets/4ms/4ms_widgets.hh"
@@ -55,11 +56,12 @@ struct HubMediumWidget : MetaModuleHubWidget {
 
 		if (hubModule != nullptr) {
 			hubModule->updateDisplay = [this] {
-				this->statusText->text = this->hubModule->labelText;
+				statusText->text = hubModule->labelText;
 			};
+
 			hubModule->updatePatchName = [this] {
-				this->hubModule->patchNameText = this->patchName->text;
-				this->hubModule->patchDescText = this->patchDesc->text;
+				hubModule->patchNameText = patchName->text;
+				hubModule->patchDescText = patchDesc->text;
 			};
 		}
 
@@ -70,55 +72,66 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		addChild(createWidget<ScrewBlack>(
 			rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		patchName = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.1, 10.5)));
+		patchName = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.1, 9.5)));
 		if (hubModule != nullptr && hubModule->patchNameText.length() > 0)
-			patchName->text = this->hubModule->patchNameText;
+			patchName->setText(this->hubModule->patchNameText);
 		else
-			patchName->text = "Enter Patch Name";
+			patchName->setText("Enter Patch Name");
+		patchName->placeholder = "Enter Patch Name";
 		patchName->color = rack::color::BLACK;
 		patchName->box.size = {rack::mm2px(rack::math::Vec(57.7f, 10.0f))};
 		patchName->cursor = 0;
 		addChild(patchName);
 
-		statusText = createWidget<Label>(rack::mm2px(rack::math::Vec(34.1, 17.8)));
+		statusText = createWidget<Label>(rack::mm2px(rack::math::Vec(10, 1.5)));
 		statusText->color = rack::color::WHITE;
 		statusText->text = "";
 		statusText->fontSize = 10;
 		addChild(statusText);
 
-		patchDesc = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36, 22.98)));
+		patchDesc = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.4, 18.f)));
 		if (hubModule != nullptr && hubModule->patchDescText.length() > 0)
-			patchDesc->text = this->hubModule->patchDescText;
+			patchDesc->setText(this->hubModule->patchDescText);
 		else
-			patchDesc->text = "Patch Description";
+			patchDesc->setText("Patch Description");
+		patchDesc->placeholder = "Patch Description";
 		patchDesc->color = rack::color::BLACK;
 		patchDesc->box.size = {rack::mm2px(rack::math::Vec(57.7f, 31.3f))};
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
+
+		auto knobSetTitle = createWidget<Label>(rack::mm2px(rack::math::Vec(36.4, 50.5)));
+		knobSetTitle->color = rack::color::BLACK;
+		knobSetTitle->text = "Knob Set:";
+		knobSetTitle->fontSize = 10;
+		addChild(knobSetTitle);
+
+		knobSetNameField = new MetaModuleTextField{[this](std::string &text) {
+													   auto idx = hubModule->mappings.getActiveKnobSetIdx();
+													   hubModule->mappings.setKnobSetName(idx, text);
+												   },
+												   kMaxKnobSetNameChars};
+		knobSetNameField->box.pos = rack::mm2px(rack::math::Vec(52.0, 49.0));
+		knobSetNameField->box.size = {rack::mm2px(rack::math::Vec(40.f, 7.f))};
+		knobSetNameField->text = "";
+		knobSetNameField->color = rack::color::BLACK;
+		knobSetNameField->cursor = 0;
+		addChild(knobSetNameField);
+
+		knobSetButtons = new KnobSetButtonGroup(
+			[this](unsigned idx) {
+				hubModule->mappings.setActiveKnobSetIdx(idx);
+				updateKnobSetLabel();
+			},
+			rack::mm2px(rack::Vec(39.5, 57.5)));
+		addChild(knobSetButtons);
+		updateKnobSetLabel();
 
 		// create widgets from all elements
 		MetaModule::HubWidgetCreator<INFO> creator(this, module);
 		for (auto &element : INFO::Elements) {
 			std::visit([&creator](auto &el) { creator.create(el); }, element);
 		}
-
-		// auto &midinote = MetaModuleInfo::Switches[MetaModuleInfo::SwitchNote];
-		// addMidiValueMapSrc("MidiNote",
-		// 				   HubMedium::MIDI_MONO_NOTE,
-		// 				   rack::mm2px({midinote.x_mm, midinote.y_mm}),
-		// 				   MappableObj::Type::MidiNote);
-
-		// auto &midigate = MetaModuleInfo::Switches[MetaModuleInfo::SwitchGate];
-		// addMidiValueMapSrc("MidiGate",
-		// 				   HubMedium::MIDI_MONO_GATE,
-		// 				   rack::mm2px({midigate.x_mm, midigate.y_mm}),
-		// 				   MappableObj::Type::MidiGate);
-
-		// auto &midicc = MetaModuleInfo::Switches[MetaModuleInfo::SwitchCc];
-		// addMidiValueMapPt("MidiCC",
-		// 				  HubMedium::MIDI_CC,
-		// 				  rack::mm2px({midigate.x_mm, midigate.y_mm}),
-		// 				  LabelButtonID::Types::MidiCC);
 	}
 };
 
