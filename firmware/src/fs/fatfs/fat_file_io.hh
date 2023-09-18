@@ -9,6 +9,11 @@
 // defined in fatfs/diskio.cc:
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
+PARTITION VolToPart[FF_VOLUMES] = {
+	{0, 0}, /* "0:" ==> Auto detect partition on USB */
+	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
+};
+
 class FatFileIO {
 	using Volume = MetaModule::Volume;
 
@@ -38,10 +43,19 @@ public:
 	}
 
 	bool mount_disk() {
-		uint8_t err;
-		if (err = f_mount(&fs, _fatvol, 1); err == FR_OK)
-			return true;
-		printf_("Could not mount volume %s. err:%d\n", _volname, err);
+		// Try mounting previously mounted partition, then auto-detect, then each partition 1 - 8.
+		for (uint8_t part_num = 0; part_num <= 9; part_num++) {
+			uint8_t err;
+
+			if (err = f_mount(&fs, _fatvol, 1); err == FR_OK)
+				return true;
+
+			printf_("Could not mount volume %d, partition %d. err:%d\n", _vol, VolToPart[(unsigned)_vol].pt, err);
+
+			// Try 1 - 8
+			VolToPart[(unsigned)_vol].pt = part_num;
+		}
+
 		return false;
 	}
 
