@@ -1,7 +1,7 @@
 #pragma once
 #include "disk_ops.hh"
 #include "fs/volumes.hh"
-#include "printf.h"
+#include "pr_dbg.hh"
 #include <cstdint>
 #include <span>
 #include <string_view>
@@ -9,6 +9,7 @@
 // defined in fatfs/diskio.cc:
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
+// required by fatfs:
 PARTITION VolToPart[FF_VOLUMES] = {
 	{0, 0}, /* "0:" ==> Auto detect partition on USB */
 	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
@@ -38,24 +39,38 @@ public:
 		, _fatvol{char(char(_vol) + '0'), ':', '\0'}
 		, _volname{'F', 'A', 'T', 'F', 'S', ':', char(char(_vol) + '0'), '\0'} {
 		if (!fatfs_register_disk(diskops, static_cast<unsigned>(_vol))) {
-			printf_("Failed to register FAT FS Disk %d\n", _vol);
+			pr_err("Failed to register FAT FS Disk %d\n", _vol);
 		}
 	}
 
 	bool mount_disk() {
-		// Try mounting previously mounted partition, then auto-detect, then each partition 1 - 8.
-		for (uint8_t part_num = 0; part_num <= 9; part_num++) {
-			uint8_t err;
+		// Try mounting previously mounted partition,
+		// if that fails, try auto-detect, then each partition 1 - 8.
 
-			if (err = f_mount(&fs, _fatvol, 1); err == FR_OK)
+		uint8_t err = 0;
+
+		// Don't try auto-scan twice in a row
+		uint8_t first_part_num = (VolToPart[(unsigned)_vol].pt == 0) ? 1 : 0;
+
+		for (uint8_t part_num = first_part_num; part_num <= 9; part_num++) {
+
+			if (err = f_mount(&fs, _fatvol, 1); err == FR_OK) {
+				pr_trace("Mounted partition %d on volume %d\n", VolToPart[(unsigned)_vol].pt, _vol);
 				return true;
+			}
 
-			printf_("Could not mount volume %d, partition %d. err:%d\n", _vol, VolToPart[(unsigned)_vol].pt, err);
+			pr_trace("Tried and failed to mount vol %d, part %d. err:%d\n", _vol, VolToPart[(unsigned)_vol].pt, err);
 
-			// Try 1 - 8
 			VolToPart[(unsigned)_vol].pt = part_num;
 		}
 
+		if (VolToPart[(unsigned)_vol].pt == 9) {
+			VolToPart[(unsigned)_vol].pt = 0;
+		}
+
+		pr_err("Could not mount volume %d, tried auto scanning and manually loading partitions 1-8. last err: %d\n",
+			   _vol,
+			   err);
 		return false;
 	}
 
@@ -87,10 +102,10 @@ public:
 
 		res = f_mount(&fs, _fatvol, 1);
 		if (res != FR_OK) {
-			printf_("Disk not formatted, err %d\n", res);
+			pr_err("Disk not formatted, err %d\n", res);
 			return false;
 		}
-		printf_("Disk formatted\n");
+		pr_trace("Disk formatted\n");
 		return true;
 	}
 
@@ -123,7 +138,7 @@ public:
 		FILINFO fno;
 
 		if (!get_fat_filinfo(filename, fno)) {
-			printf_("Could not read file %s\n", filename.data());
+			pr_err("Could not read file %s\n", filename.data());
 			return;
 		}
 
@@ -131,7 +146,7 @@ public:
 		fno.ftime = timestamp & 0xFFFF;
 
 		if (f_utime(filename.data(), &fno) != FR_OK)
-			printf_("Could not update timestamp of %s\n", filename.data());
+			pr_err("Could not update timestamp of %s\n", filename.data());
 	}
 
 	uint32_t get_file_timestamp(std::string_view filename) {
