@@ -106,15 +106,15 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		knobSetTitle->fontSize = 10;
 		addChild(knobSetTitle);
 
-		knobSetNameField = new MetaModuleTextField{[this](std::string const &text) {
-			auto idx = hubModule->mappings.getActiveKnobSetIdx();
-			hubModule->mappings.setKnobSetName(idx, text);
-		}};
+		knobSetNameField = new MetaModuleTextField{[this](std::string &text) {
+													   auto idx = hubModule->mappings.getActiveKnobSetIdx();
+													   hubModule->mappings.setKnobSetName(idx, text);
+												   },
+												   kMaxKnobSetNameChars};
 		knobSetNameField->box.pos = rack::mm2px(rack::math::Vec(52.0, 49.0));
-		knobSetNameField->box.size = {rack::mm2px(rack::math::Vec(59.f, 7.f))};
+		knobSetNameField->box.size = {rack::mm2px(rack::math::Vec(40.f, 7.f))};
 		knobSetNameField->text = "";
 		knobSetNameField->color = rack::color::BLACK;
-		knobSetNameField->bgColor = nvgRGB(0x66, 0x66, 0x66);
 		knobSetNameField->cursor = 0;
 		addChild(knobSetNameField);
 
@@ -132,24 +132,6 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		for (auto &element : INFO::Elements) {
 			std::visit([&creator](auto &el) { creator.create(el); }, element);
 		}
-
-		// auto &midinote = MetaModuleInfo::Switches[MetaModuleInfo::SwitchNote];
-		// addMidiValueMapSrc("MidiNote",
-		// 				   HubMedium::MIDI_MONO_NOTE,
-		// 				   rack::mm2px({midinote.x_mm, midinote.y_mm}),
-		// 				   MappableObj::Type::MidiNote);
-
-		// auto &midigate = MetaModuleInfo::Switches[MetaModuleInfo::SwitchGate];
-		// addMidiValueMapSrc("MidiGate",
-		// 				   HubMedium::MIDI_MONO_GATE,
-		// 				   rack::mm2px({midigate.x_mm, midigate.y_mm}),
-		// 				   MappableObj::Type::MidiGate);
-
-		// auto &midicc = MetaModuleInfo::Switches[MetaModuleInfo::SwitchCc];
-		// addMidiValueMapPt("MidiCC",
-		// 				  HubMedium::MIDI_CC,
-		// 				  rack::mm2px({midigate.x_mm, midigate.y_mm}),
-		// 				  LabelButtonID::Types::MidiCC);
 	}
 };
 

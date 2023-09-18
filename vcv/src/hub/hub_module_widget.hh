@@ -29,6 +29,8 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 	static constexpr float kKnobSpacingX = 18;
 	static constexpr float kTextOffset = 5;
 
+	static constexpr unsigned kMaxKnobSetNameChars = 16;
+
 	template<typename KnobType>
 	void addLabeledKnobPx(std::string_view labelText,
 						  int knobId,
@@ -115,7 +117,8 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 													   updateKnobSetLabel();
 												   },
 												   knobset_idx,
-												   hubModule->mappings.getKnobSetName(knobset_idx)});
+												   hubModule->mappings.getKnobSetName(knobset_idx),
+												   kMaxKnobSetNameChars});
 		}
 	}
 
