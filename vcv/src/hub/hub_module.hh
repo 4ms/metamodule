@@ -71,6 +71,11 @@ struct MetaModuleHubBase : public rack::Module {
 
 		mappings.linkToModule(id);
 		auto *map = mappings.addMap(hubParamId, module->id, moduleParamId);
+		if (!map) {
+			printf("Error: could not create mapping\n");
+			return false;
+		}
+
 		map->range_max = 1.f;
 		map->range_min = 0.0f;
 		endMapping();
