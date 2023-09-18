@@ -1,5 +1,4 @@
 #pragma once
-
 #include "plugin.hh"
 
 class MetaModuleTextBox : public rack::LedDisplayTextField {

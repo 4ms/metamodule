@@ -1,7 +1,9 @@
 #pragma once
 #include "../comm/comm_module.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "hub/knob_set_buttons.hh"
 #include "hub/knob_set_menu.hh"
+#include "hub/text_field.hh"
 #include "hub_knob.hh"
 #include "hub_midi.hh"
 #include "hub_module.hh"
@@ -15,15 +17,19 @@
 #include <string>
 
 struct MetaModuleHubWidget : rack::app::ModuleWidget {
+	MetaModuleHubWidget() = default;
 
-	rack::Label *statusText;
 	MetaModuleHubBase *hubModule;
 
-	MetaModuleHubWidget() = default;
+	rack::Label *statusText;
+	KnobSetButtonGroup *knobSetButtons;
+	MetaModuleTextField *knobSetNameField;
 
 	static constexpr float kKnobSpacingY = 17;
 	static constexpr float kKnobSpacingX = 18;
 	static constexpr float kTextOffset = 5;
+
+	static constexpr unsigned kMaxKnobSetNameChars = 16;
 
 	template<typename KnobType>
 	void addLabeledKnobPx(std::string_view labelText,
@@ -95,15 +101,38 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 		menu->addChild(new MenuSeparator());
 		menu->addChild(createMenuLabel<MenuLabel>("Mapped Knob Sets"));
 
-		for (unsigned i = 0; i < hubModule->MaxKnobSets; i++) {
+		for (unsigned knobset_idx = 0; knobset_idx < hubModule->MaxKnobSets; knobset_idx++) {
 			menu->addChild(new MenuSeparator());
 			menu->addChild(createCheckMenuItem(
-				string::f("Knob Set %d", i + 1),
+				string::f("Knob Set %d", knobset_idx + 1),
 				"",
-				[=]() { return hubModule->mappings.getActiveKnobSetIdx() == i; },
-				[=]() { hubModule->mappings.setActiveKnobSetIdx(i); }));
+				[=, this]() { return hubModule->mappings.getActiveKnobSetIdx() == knobset_idx; },
+				[=, this]() {
+					hubModule->mappings.setActiveKnobSetIdx(knobset_idx);
+					updateKnobSetLabel();
+				}));
 
-			menu->addChild(new KnobSetNameMenuItem{hubModule, i});
+			menu->addChild(new KnobSetNameMenuItem{[this](unsigned idx, std::string const &text) {
+													   hubModule->mappings.setKnobSetName(idx, text);
+													   updateKnobSetLabel();
+												   },
+												   knobset_idx,
+												   hubModule->mappings.getKnobSetName(knobset_idx),
+												   kMaxKnobSetNameChars});
 		}
+	}
+
+	void updateKnobSetLabel() {
+		if (!hubModule || !knobSetNameField || !knobSetButtons)
+			return;
+
+		auto activeKnobSetIdx = hubModule->mappings.getActiveKnobSetIdx();
+		if (auto name = hubModule->mappings.getActiveKnobSetName(); name.length() > 0) {
+			knobSetNameField->text = name;
+		} else {
+			knobSetNameField->text = rack::string::f("Knob Set %d", activeKnobSetIdx + 1);
+		}
+
+		knobSetButtons->active_idx = activeKnobSetIdx;
 	}
 };

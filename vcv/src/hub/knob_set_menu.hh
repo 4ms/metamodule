@@ -3,32 +3,43 @@
 #include <rack.hpp>
 
 struct KnobSetNameTextBox : rack::ui::TextField {
-	MetaModuleHubBase *hub;
+	using CallbackT = std::function<void(unsigned, std::string const &)>;
+	CallbackT onChangeCallback;
 	unsigned idx;
+	unsigned max_chars;
 
-	KnobSetNameTextBox(MetaModuleHubBase *hub, unsigned knobSetIdx)
-		: hub{hub}
-		, idx{knobSetIdx} {
+	KnobSetNameTextBox(CallbackT &&callback, unsigned knobSetIdx, unsigned max_chars)
+		: onChangeCallback{callback}
+		, idx{knobSetIdx}
+		, max_chars{max_chars} {
 	}
 
 	void onChange(const rack::event::Change &e) override {
-		hub->mappings.setKnobSetName(idx, text);
+		if (text.size() >= max_chars)
+			text = text.substr(0, max_chars);
+
+		onChangeCallback(idx, text);
+
+		if (cursor > (int)text.size())
+			cursor = text.size();
+		if (selection > (int)text.size())
+			selection = text.size();
 	}
 };
 
 struct KnobSetNameMenuItem : rack::widget::Widget {
-	MetaModuleHubBase *hub;
 	KnobSetNameTextBox *txt;
 
-	KnobSetNameMenuItem(MetaModuleHubBase *hub, unsigned knobSetIdx)
-		: hub{hub} {
+	KnobSetNameMenuItem(KnobSetNameTextBox::CallbackT &&onChangeCallback,
+						unsigned knobSetIdx,
+						std::string_view initialText,
+						unsigned max_chars) {
 		box.pos = {0, 0};
-		box.size = {120, BND_WIDGET_HEIGHT};
-		txt = new KnobSetNameTextBox{hub, knobSetIdx};
+		box.size = {250, BND_WIDGET_HEIGHT};
+		txt = new KnobSetNameTextBox{std::move(onChangeCallback), knobSetIdx, max_chars};
 		txt->box.pos = {45, 0};
-		txt->box.size = {120 - txt->box.pos.x, BND_WIDGET_HEIGHT};
-		txt->text = "";
-		txt->text = hub->mappings.getKnobSetName(knobSetIdx);
+		txt->box.size = {230 - txt->box.pos.x, BND_WIDGET_HEIGHT};
+		txt->text = initialText;
 		addChild(txt);
 	}
 
