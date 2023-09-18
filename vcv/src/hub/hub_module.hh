@@ -10,16 +10,16 @@
 #include <span>
 
 // #define pr_dbg printf
-#define pr_dbg(...)
+#define pr_dbg(x, ...)
 
 struct MetaModuleHubBase : public rack::Module {
 
 	std::function<void()> updatePatchName;
+	std::function<void()> updateDisplay;
 	std::string labelText = "";
 	std::string patchNameText = "";
 	std::string patchDescText = "";
 	std::string lastPatchFilePath = "";
-	std::function<void(void)> updateDisplay;
 
 	EdgeStateDetector patchWriteButton;
 	bool ready_to_write_patch = false;
@@ -30,7 +30,7 @@ struct MetaModuleHubBase : public rack::Module {
 	// We then need a common base class widgets can point to
 	static constexpr uint32_t NumPots = 12;
 	static constexpr uint32_t MaxMapsPerPot = 8;
-	static constexpr uint32_t MaxKnobSets = 4;
+	static constexpr uint32_t MaxKnobSets = 8;
 	HubKnobMappings<NumPots, MaxMapsPerPot, MaxKnobSets> mappings;
 
 	// Mapping State/Progress
@@ -71,6 +71,11 @@ struct MetaModuleHubBase : public rack::Module {
 
 		mappings.linkToModule(id);
 		auto *map = mappings.addMap(hubParamId, module->id, moduleParamId);
+		if (!map) {
+			printf("Error: could not create mapping\n");
+			return false;
+		}
+
 		map->range_max = 1.f;
 		map->range_min = 0.0f;
 		endMapping();
@@ -132,6 +137,9 @@ struct MetaModuleHubBase : public rack::Module {
 
 			json_t *patchDescJ = json_string(patchDescText.c_str());
 			json_object_set_new(rootJ, "PatchDesc", patchDescJ);
+
+			json_t *defaultKnobSetJ = json_integer(mappings.getActiveKnobSetIdx());
+			json_object_set_new(rootJ, "DefaultKnobSet", defaultKnobSetJ);
 		} else
 			printf("Error: Widget has not been constructed, but dataToJson is being called\n");
 		return rootJ;
@@ -147,6 +155,12 @@ struct MetaModuleHubBase : public rack::Module {
 		auto patchDescJ = json_object_get(rootJ, "PatchDesc");
 		if (json_is_string(patchDescJ)) {
 			patchDescText = json_string_value(patchDescJ);
+		}
+
+		auto defaultKnobSetJ = json_object_get(rootJ, "DefaultKnobSet");
+		if (json_is_integer(defaultKnobSetJ)) {
+			unsigned idx = json_integer_value(defaultKnobSetJ);
+			mappings.setActiveKnobSetIdx(idx);
 		}
 
 		mappings.decodeJson(rootJ);
