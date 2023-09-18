@@ -9,8 +9,8 @@
 #include <osdialog.h>
 #include <span>
 
-#define pr_dbg printf
-// #define pr_dbg()
+// #define pr_dbg printf
+#define pr_dbg(...)
 
 struct MetaModuleHubBase : public rack::Module {
 
