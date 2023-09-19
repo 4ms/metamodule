@@ -1,14 +1,13 @@
 #pragma once
-#include "VCV_adaptor/engine/Param.hpp"
 #include "VCV_adaptor/json.hpp"
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace rack::engine
 {
 
 struct Module;
+struct Param;
 
 struct ParamQuantity {
 	virtual ~ParamQuantity() = default;
@@ -50,8 +49,7 @@ struct ParamQuantity {
 	}
 	virtual void setDisplayValue(float displayValue) {
 	}
-	void setImmediateValue(float displayValue) {
-	}
+	void setImmediateValue(float displayValue);
 	float getImmediateValue() {
 		return {};
 	}
