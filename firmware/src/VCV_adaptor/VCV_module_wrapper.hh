@@ -37,8 +37,11 @@ struct VCVModuleWrapper : CoreProcessor {
 		if (id < (int)paramQuantities.size()) {
 			val *= (paramQuantities[id]->maxValue - paramQuantities[id]->minValue);
 			val += paramQuantities[id]->minValue;
+
 			if (paramQuantities[id]->snapEnabled)
 				val = std::round(val);
+
+			paramQuantities[id]->setDisplayValue(val);
 		}
 		params[id].setValue(val);
 	}
