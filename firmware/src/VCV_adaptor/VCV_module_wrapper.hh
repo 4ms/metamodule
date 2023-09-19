@@ -1,8 +1,8 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
 #include "VCV_adaptor/engine/Light.hpp"
-// #include "VCV_adaptor/math.hpp"
 #include "VCV_adaptor/engine/Param.hpp"
+#include "VCV_adaptor/engine/ParamQuantity.hpp"
 #include "VCV_adaptor/engine/Port.hpp"
 #include <array>
 #include <memory>
@@ -14,6 +14,7 @@ struct ParamScale {
 };
 
 struct VCVModuleWrapper : CoreProcessor {
+
 	struct ProcessArgs {
 		float sampleRate;
 		float sampleTime;
@@ -33,9 +34,11 @@ struct VCVModuleWrapper : CoreProcessor {
 	}
 
 	void set_param(int id, float val) override {
-		if (id < (int)param_scales.size()) {
-			val *= param_scales[id].range;
-			val += param_scales[id].offset;
+		if (id < (int)paramQuantities.size()) {
+			val *= (paramQuantities[id]->maxValue - paramQuantities[id]->minValue);
+			val += paramQuantities[id]->minValue;
+			if (paramQuantities[id]->snapEnabled)
+				val = std::round(val);
 		}
 		params[id].setValue(val);
 	}
@@ -78,7 +81,8 @@ struct VCVModuleWrapper : CoreProcessor {
 	std::vector<rack::engine::Input> inputs;
 	std::vector<rack::engine::Output> outputs;
 	std::vector<rack::engine::Light> lights;
-	std::vector<ParamScale> param_scales;
+
+	std::vector<std::unique_ptr<rack::engine::ParamQuantity>> paramQuantities;
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
 };
