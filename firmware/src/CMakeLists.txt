@@ -223,6 +223,8 @@ foreach(brand ${brands})
   target_link_libraries(main.elf PRIVATE ${brand}Library)
 endforeach()
 
+add_dependencies(main.elf m4_firmware)
+
 target_link_script(
   main
   ${FWDIR}/system/linker/stm32mp15xx_ca7.ld

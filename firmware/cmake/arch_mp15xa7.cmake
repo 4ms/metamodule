@@ -14,6 +14,7 @@ target_compile_definitions(
 
 # Note: MCU_FLAGS is used with linking as well
 set(MCU_FLAGS
+    -fno-math-errno
     -mcpu=cortex-a7
     -mlittle-endian
     -mfpu=neon-vfpv4
