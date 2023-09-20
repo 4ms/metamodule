@@ -37,7 +37,7 @@ public:
 				filterQ = val;
 				break;
 			case (static_cast<unsigned>(Info::SwitchMode) + static_cast<unsigned>(Info::NumKnobs)):
-				mode = val;
+				mode = val > 0.5f ? 1 : 0;
 				break;
 		}
 	}

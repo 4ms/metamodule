@@ -21,7 +21,7 @@ public:
 		cp.setDivide(map_value(finalDivide, 0.0f, 1.0f, 1.0f, 16.99f));
 		cp.update();
 		if ((cp.getWrappedPhase() < pulseWidth) && clockInit) {
-			clockOutput = 1;
+			clockOutput = gateVoltage;
 		} else {
 			clockOutput = 0;
 		}
@@ -72,6 +72,8 @@ private:
 	float clockDivideCV = 0;
 
 	ClockPhase cp;
+
+	static constexpr float gateVoltage = 8.0f;
 };
 
 } // namespace MetaModule

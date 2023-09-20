@@ -21,7 +21,7 @@ public:
 		cp.setMultiply(map_value(finalMultiply, 0.0f, 1.0f, 1.0f, 16.99f));
 		cp.update();
 		if (cp.getWrappedPhase() < pulseWidth) {
-			clockOutput = 1;
+			clockOutput = gateVoltage;
 		} else {
 			clockOutput = 0;
 		}
@@ -69,6 +69,7 @@ private:
 	float multiplyCV = 0;
 
 	ClockPhase cp;
+	static constexpr float gateVoltage = 8.0f;
 };
 
 } // namespace MetaModule
