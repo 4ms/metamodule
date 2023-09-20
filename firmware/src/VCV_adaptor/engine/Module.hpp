@@ -308,6 +308,10 @@ struct Module : VCVModuleWrapper {
 	virtual void onSampleRateChange() {
 	}
 	virtual void onSampleRateChange(const SampleRateChangeEvent &e) {
+		onSampleRateChange();
+	}
+	void set_samplerate(float sampleRate) final {
+		onSampleRateChange(SampleRateChangeEvent{sampleRate, 1.f / sampleRate});
 	}
 
 	struct ExpanderChangeEvent {
