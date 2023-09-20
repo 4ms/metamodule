@@ -55,12 +55,5 @@ struct MappingPaneList {
 
 		return obj;
 	}
-
-	lv_obj_t *create_jack_map_item(std::string_view name, std::optional<uint16_t> jack_id) {
-		if (jack_id) {
-			return create_panelcable_item(name.data(), jack_id.value());
-		}
-		return create_unmapped_list_item("Add cable...");
-	}
 };
 } // namespace MetaModule

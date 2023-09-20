@@ -165,9 +165,14 @@ private:
 		}
 
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
-		std::string_view name = panel_jack_id ? PanelDef::get_map_outjack_name(panel_jack_id.value()) : "";
-		auto obj = list.create_jack_map_item(name, panel_jack_id);
-		group_edit_button(obj);
+		if (panel_jack_id) {
+			std::string_view name = PanelDef::get_map_outjack_name(panel_jack_id.value());
+			auto obj = list.create_panelcable_item(name, panel_jack_id.value());
+			group_edit_button(obj);
+		} else {
+			auto obj = list.create_unmapped_list_item("Add cable...");
+			group_add_button(obj);
+		}
 	}
 
 	void prepare_for_element(const JackInput &) {
@@ -185,9 +190,14 @@ private:
 		}
 
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
-		std::string_view name = panel_jack_id ? PanelDef::get_map_injack_name(panel_jack_id.value()) : "";
-		auto obj = list.create_jack_map_item(name, panel_jack_id);
-		group_edit_button(obj);
+		if (panel_jack_id) {
+			std::string_view name = PanelDef::get_map_injack_name(panel_jack_id.value());
+			auto obj = list.create_panelcable_item(name, panel_jack_id.value());
+			group_edit_button(obj);
+		} else {
+			auto obj = list.create_unmapped_list_item("Add cable...");
+			group_add_button(obj);
+		}
 	}
 
 	void prepare_for_element(const ParamElement &) {
