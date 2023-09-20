@@ -42,7 +42,7 @@ public:
 				clockInit = true;
 				break;
 			case Info::InputCv:
-				clockDivideCV = val;
+				clockDivideCV = val / cvRange;
 				break;
 		}
 	}
@@ -74,6 +74,7 @@ private:
 	ClockPhase cp;
 
 	static constexpr float gateVoltage = 8.0f;
+	static constexpr float cvRange = 5.0f;
 };
 
 } // namespace MetaModule

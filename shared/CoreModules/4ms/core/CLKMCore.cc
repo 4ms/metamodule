@@ -41,7 +41,7 @@ public:
 				cp.updateClock(val);
 				break;
 			case Info::InputCv:
-				multiplyCV = val;
+				multiplyCV = val / cvRange;
 		}
 	}
 
@@ -69,7 +69,9 @@ private:
 	float multiplyCV = 0;
 
 	ClockPhase cp;
+
 	static constexpr float gateVoltage = 8.0f;
+	static constexpr float cvRange = 5.0f;
 };
 
 } // namespace MetaModule
