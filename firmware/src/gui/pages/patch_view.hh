@@ -181,6 +181,11 @@ struct PatchViewPage : PageBase {
 			update_active_knobset();
 		}
 
+		if (auto knobset = knobset_menu.requested_knobset_view) {
+			PageList::set_viewing_knobset(knobset.value());
+			PageList::request_new_page(PageId::KnobSetView);
+		}
+
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (settings_menu.visible) {
 				settings_menu.hide();

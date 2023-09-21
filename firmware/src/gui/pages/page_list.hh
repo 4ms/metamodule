@@ -12,7 +12,7 @@ namespace MetaModule
 //forward declare
 struct PageBase;
 
-enum PageId : uint32_t { PatchSel, PatchView, ModuleView, ControlView, Settings, KnobEdit };
+enum PageId : uint32_t { PatchSel, PatchView, ModuleView, Settings, KnobSetView };
 
 class PageList {
 	static constexpr uint32_t MaxPages = 8;
@@ -26,6 +26,7 @@ class PageList {
 	static inline PatchLocation selected_patch_loc{};
 	static inline uint32_t selected_module_id = 0;
 	static inline uint32_t active_knobset_id = 0;
+	static inline uint32_t view_knobset_id = 0;
 	static inline uint32_t patch_revision = 0;
 
 public:
@@ -43,6 +44,14 @@ public:
 
 	static uint32_t get_active_knobset() {
 		return active_knobset_id;
+	}
+
+	static void set_viewing_knobset(uint32_t id) {
+		view_knobset_id = id;
+	}
+
+	static uint32_t get_viewing_knobset() {
+		return view_knobset_id;
 	}
 
 	static void set_selected_module_id(uint32_t id) {

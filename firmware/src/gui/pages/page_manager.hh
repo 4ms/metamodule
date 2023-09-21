@@ -7,6 +7,7 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 
+#include "gui/pages/knobset_view.hh"
 #include "gui/pages/module_view.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector.hh"
@@ -22,6 +23,7 @@ class PageManager {
 	ModuleViewPage page_module{info};
 	PatchSelectorPage page_patchsel{info};
 	PatchViewPage page_patchview{info};
+	KnobSetViewPage page_knobsetview{info};
 
 public:
 	PageBase *cur_page = &page_patchsel;
