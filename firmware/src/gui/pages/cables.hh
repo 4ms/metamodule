@@ -128,26 +128,22 @@ public:
 	}
 
 	void draw_cable(Vec2 start, Vec2 end) {
-		float dist = std::abs(start.x - end.x);
-		CableDrawer::Vec2 control{(start.x + end.x) / 2, ((start.y + end.y) / 2) + (int32_t)dist};
-		CableDrawer::draw_bezier<20>(start, end, control);
+		float dist_x = std::abs(start.x - end.x);
+		CableDrawer::Vec2 control{(start.x + end.x) / 2, ((start.y + end.y) / 2) + (int32_t)dist_x};
+		unsigned steps = dist_x / 16;
+		CableDrawer::draw_bezier(start, end, control, steps);
 	}
 
 	static lv_color_t get_cable_color(Jack jack) {
 		return Gui::cable_palette[(jack.jack_id + jack.module_id) % Gui::cable_palette.size()];
 	}
 
-	template<size_t steps>
-	void draw_bezier(Vec2 start, Vec2 end, Vec2 control) {
-		constexpr float step_size = 1.0f / steps;
+	void draw_bezier(Vec2 start, Vec2 end, Vec2 control, unsigned steps) {
+		float step_size = 1.0f / steps;
 		lv_point_t points[steps + 1];
-		// lv_point_t points_out1[steps + 1];
-		// lv_point_t points_out2[steps + 1];
 		for (unsigned i = 0; i <= steps; i++) {
 			auto newpt = CableDrawer::get_quadratic_bezier_pt(start, end, control, (float)i * step_size);
 			points[i] = {(int16_t)newpt.x, (int16_t)newpt.y};
-			// points_out1[i] = {(int16_t)(newpt.x - 1), (int16_t)(newpt.y - 1)};
-			// points_out2[i] = {(int16_t)(newpt.x + 1), (int16_t)(newpt.y + 1)};
 		}
 
 		// outlines to make cable stand out on a black or white background
