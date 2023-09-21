@@ -129,8 +129,9 @@ public:
 
 	void draw_cable(Vec2 start, Vec2 end) {
 		float dist_x = std::abs(start.x - end.x);
+		float dist_y = std::abs(start.y - end.y);
 		CableDrawer::Vec2 control{(start.x + end.x) / 2, ((start.y + end.y) / 2) + (int32_t)dist_x};
-		unsigned steps = dist_x / 16;
+		auto steps = std::max<unsigned>(dist_x * dist_y / 1000, 8);
 		CableDrawer::draw_bezier(start, end, control, steps);
 	}
 
