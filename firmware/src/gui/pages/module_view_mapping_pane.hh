@@ -158,7 +158,7 @@ private:
 		for (auto &cable : patch_storage.get_view_patch().int_cables) {
 			if (cable.out == thisjack) {
 				for (auto &injack : cable.ins) {
-					auto obj = list.create_cable_item(injack, JackDir::In, patch_storage.get_view_patch());
+					auto obj = list.create_cable_item(injack, ElementType::Input, patch_storage.get_view_patch());
 					group_edit_button(obj);
 				}
 			}
@@ -183,7 +183,7 @@ private:
 		for (auto &cable : patch_storage.get_view_patch().int_cables) {
 			for (auto &injack : cable.ins) {
 				if (injack == thisjack) {
-					auto obj = list.create_cable_item(cable.out, JackDir::Out, patch_storage.get_view_patch());
+					auto obj = list.create_cable_item(cable.out, ElementType::Output, patch_storage.get_view_patch());
 					group_edit_button(obj);
 				}
 			}

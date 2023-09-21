@@ -44,14 +44,17 @@ struct MappingPaneList {
 		return obj;
 	}
 
-	lv_obj_t *create_cable_item(Jack jack, JackDir dir, PatchData const &patch) {
+	lv_obj_t *create_cable_item(Jack jack, ElementType dir, PatchData const &patch) {
 		auto obj = ui_UnmappedSetItem_create(ui_MapList);
 		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
 		lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
-		auto name = get_full_jack_name(jack, dir, patch);
-		lv_label_set_text_fmt(
-			label, "%s %.16s %.16s", dir == JackDir::In ? "->" : "<-", name.module_name.data(), name.jack_name.data());
+		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, patch);
+		lv_label_set_text_fmt(label,
+							  "%s %.16s %.16s",
+							  dir == ElementType::Input ? ">>" : "<<",
+							  name.module_name.data(),
+							  name.element_name.data());
 
 		return obj;
 	}
