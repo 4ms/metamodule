@@ -94,6 +94,8 @@ struct KnobSetViewPage : PageBase {
 		for (auto [container, label] : zip(containers, labels)) {
 			if (lv_label_get_text(label)[0] != '\0')
 				lv_group_add_obj(group, container);
+			if (container == ui_KnobContainerU)
+				lv_group_add_obj(group, ui_KnobContainerU1);
 		}
 		lv_group_set_editing(group, false);
 	}
