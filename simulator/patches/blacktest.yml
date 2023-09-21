@@ -1,0 +1,247 @@
+PatchData:
+  patch_name: black test
+  description: Patch Description
+  module_slugs:
+    0: HubMedium
+    1: ENVVCA
+    2: Rampage
+    3: EvenVCO
+    4: EnOsc
+    5: Freeverb
+    6: StMix
+  int_cables:
+    - out:
+        module_id: 2
+        jack_id: 10
+      ins:
+        - module_id: 1
+          jack_id: 1
+      color: 65535
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 6
+      color: 0
+    - out:
+        module_id: 1
+        jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 5
+      color: 0
+    - out:
+        module_id: 3
+        jack_id: 2
+      ins:
+        - module_id: 2
+          jack_id: 2
+      color: 0
+    - out:
+        module_id: 2
+        jack_id: 1
+      ins:
+        - module_id: 3
+          jack_id: 4
+      color: 0
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 1
+      color: 0
+    - out:
+        module_id: 5
+        jack_id: 0
+      ins:
+        - module_id: 6
+          jack_id: 0
+      color: 65535
+    - out:
+        module_id: 4
+        jack_id: 0
+      ins:
+        - module_id: 6
+          jack_id: 2
+      color: 65535
+    - out:
+        module_id: 6
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 4
+      color: 65535
+    - out:
+        module_id: 6
+        jack_id: 1
+      ins:
+        - module_id: 4
+          jack_id: 0
+      color: 65535
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0.5
+    - module_id: 1
+      param_id: 2
+      value: 0.5
+    - module_id: 1
+      param_id: 3
+      value: 0.5
+    - module_id: 1
+      param_id: 4
+      value: 0.5
+    - module_id: 1
+      param_id: 5
+      value: 0
+    - module_id: 1
+      param_id: 6
+      value: 0
+    - module_id: 1
+      param_id: 7
+      value: 1
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 0.5
+    - module_id: 2
+      param_id: 2
+      value: 0.5
+    - module_id: 2
+      param_id: 3
+      value: 0.5
+    - module_id: 2
+      param_id: 4
+      value: 0
+    - module_id: 2
+      param_id: 5
+      value: 0
+    - module_id: 2
+      param_id: 6
+      value: 0
+    - module_id: 2
+      param_id: 7
+      value: 0
+    - module_id: 2
+      param_id: 8
+      value: 0
+    - module_id: 2
+      param_id: 9
+      value: 0
+    - module_id: 2
+      param_id: 10
+      value: 0
+    - module_id: 2
+      param_id: 11
+      value: 0
+    - module_id: 2
+      param_id: 12
+      value: 0.5
+    - module_id: 3
+      param_id: 0
+      value: 0.555556
+    - module_id: 3
+      param_id: 1
+      value: 0.5
+    - module_id: 3
+      param_id: 2
+      value: 0.5
+    - module_id: 4
+      param_id: 0
+      value: 0.5
+    - module_id: 4
+      param_id: 1
+      value: 0.5
+    - module_id: 4
+      param_id: 2
+      value: 0.5
+    - module_id: 4
+      param_id: 3
+      value: 0.5
+    - module_id: 4
+      param_id: 4
+      value: 0.5
+    - module_id: 4
+      param_id: 5
+      value: 0.5
+    - module_id: 4
+      param_id: 6
+      value: 0.5
+    - module_id: 4
+      param_id: 7
+      value: 0.5
+    - module_id: 4
+      param_id: 8
+      value: 0.5
+    - module_id: 4
+      param_id: 9
+      value: 0
+    - module_id: 4
+      param_id: 10
+      value: 0
+    - module_id: 4
+      param_id: 11
+      value: 0
+    - module_id: 4
+      param_id: 12
+      value: 0
+    - module_id: 4
+      param_id: 13
+      value: 0
+    - module_id: 4
+      param_id: 14
+      value: 0
+    - module_id: 5
+      param_id: 0
+      value: 0.5
+    - module_id: 5
+      param_id: 1
+      value: 0.5
+    - module_id: 5
+      param_id: 2
+      value: 0.5
+    - module_id: 5
+      param_id: 3
+      value: 0.5
+    - module_id: 6
+      param_id: 0
+      value: 0.5
+    - module_id: 6
+      param_id: 1
+      value: 0.5
+    - module_id: 6
+      param_id: 2
+      value: 0.5
+    - module_id: 6
+      param_id: 3
+      value: 0.5
+    - module_id: 6
+      param_id: 4
+      value: 0.5
+    - module_id: 6
+      param_id: 5
+      value: 0.5
+    - module_id: 6
+      param_id: 6
+      value: 0.5
+    - module_id: 6
+      param_id: 7
+      value: 0.5
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []

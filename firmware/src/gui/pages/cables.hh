@@ -14,7 +14,9 @@ class CableDrawer {
 	const std::vector<DrawnElement> &drawn;
 
 	lv_obj_t *canvas;
-	lv_draw_line_dsc_t drawline_dsc;
+	lv_draw_line_dsc_t cable_dsc;
+	lv_draw_line_dsc_t inner_outline_dsc;
+	lv_draw_line_dsc_t outer_outline_dsc;
 
 	static constexpr uint32_t Height = 4 * 240 + 8;
 	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, Height)> cable_buf;
@@ -34,10 +36,23 @@ public:
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
 		lv_canvas_set_buffer(canvas, cable_buf.data(), 320, Height, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
-		lv_draw_line_dsc_init(&drawline_dsc);
-		drawline_dsc.width = 4;
-		drawline_dsc.opa = LV_OPA_100;
-		drawline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
+		lv_draw_line_dsc_init(&cable_dsc);
+		cable_dsc.width = 3;
+		cable_dsc.opa = LV_OPA_100;
+		cable_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
+
+		lv_draw_line_dsc_init(&inner_outline_dsc);
+		inner_outline_dsc.width = 5;
+		inner_outline_dsc.opa = LV_OPA_100;
+		inner_outline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
+		inner_outline_dsc.color = lv_color_white();
+
+		lv_draw_line_dsc_init(&outer_outline_dsc);
+		outer_outline_dsc.width = 7;
+		outer_outline_dsc.opa = LV_OPA_100;
+		outer_outline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
+		outer_outline_dsc.color = lv_color_black();
+
 		set_opacity(LV_OPA_60);
 	}
 
@@ -106,16 +121,16 @@ public:
 		return Vec2{x, y};
 	}
 
-	void draw_cable(Vec2 start, Vec2 end, const InternalCable &cable) {	
-		uint16_t default_color = get_cable_color(cable.out).full;	
-		drawline_dsc.color.full = cable.color.value_or(default_color);
+	void draw_cable(Vec2 start, Vec2 end, const InternalCable &cable) {
+		uint16_t default_color = get_cable_color(cable.out).full;
+		cable_dsc.color.full = cable.color.value_or(default_color);
 		draw_cable(start, end);
 	}
 
 	void draw_cable(Vec2 start, Vec2 end) {
 		float dist = std::abs(start.x - end.x);
 		CableDrawer::Vec2 control{(start.x + end.x) / 2, ((start.y + end.y) / 2) + (int32_t)dist};
-		CableDrawer::draw_bezier<8>(start, end, control);
+		CableDrawer::draw_bezier<20>(start, end, control);
 	}
 
 	static lv_color_t get_cable_color(Jack jack) {
@@ -126,11 +141,21 @@ public:
 	void draw_bezier(Vec2 start, Vec2 end, Vec2 control) {
 		constexpr float step_size = 1.0f / steps;
 		lv_point_t points[steps + 1];
+		// lv_point_t points_out1[steps + 1];
+		// lv_point_t points_out2[steps + 1];
 		for (unsigned i = 0; i <= steps; i++) {
 			auto newpt = CableDrawer::get_quadratic_bezier_pt(start, end, control, (float)i * step_size);
 			points[i] = {(int16_t)newpt.x, (int16_t)newpt.y};
+			// points_out1[i] = {(int16_t)(newpt.x - 1), (int16_t)(newpt.y - 1)};
+			// points_out2[i] = {(int16_t)(newpt.x + 1), (int16_t)(newpt.y + 1)};
 		}
-		lv_canvas_draw_line(canvas, points, steps + 1, &drawline_dsc);
+
+		// outlines to make cable stand out on a black or white background
+		lv_canvas_draw_line(canvas, points, steps + 1, &outer_outline_dsc);
+		lv_canvas_draw_line(canvas, points, steps + 1, &inner_outline_dsc);
+
+		//colored center:
+		lv_canvas_draw_line(canvas, points, steps + 1, &cable_dsc);
 	}
 
 	static Vec2 get_quadratic_bezier_pt(Vec2 start, Vec2 end, Vec2 control, float step) {
