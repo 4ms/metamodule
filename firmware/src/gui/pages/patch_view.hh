@@ -28,7 +28,6 @@ struct PatchViewPage : PageBase {
 	PatchViewPage(PatchInfo info)
 		: PageBase{info}
 		, base(ui_PatchViewPage)
-		, patchname(ui_PatchName)
 		, module_name(lv_label_create(base))
 		, modules_cont(lv_obj_create(base))
 		, cable_drawer{modules_cont, drawn_elements} {
@@ -86,7 +85,7 @@ struct PatchViewPage : PageBase {
 		if (patch.patch_name.length() == 0)
 			return;
 
-		lv_label_set_text(patchname, patch.patch_name.c_str());
+		lv_label_set_text(ui_PatchName, patch.patch_name.c_str());
 
 		module_canvases.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
@@ -181,8 +180,9 @@ struct PatchViewPage : PageBase {
 			update_active_knobset();
 		}
 
-		if (auto knobset = knobset_menu.requested_knobset_view) {
+		if (auto &knobset = knobset_menu.requested_knobset_view) {
 			PageList::set_viewing_knobset(knobset.value());
+			knobset = std::nullopt;
 			PageList::request_new_page(PageId::KnobSetView);
 		}
 
@@ -304,7 +304,6 @@ struct PatchViewPage : PageBase {
 private:
 	// lv_obj_t *description;
 	lv_obj_t *base;
-	lv_obj_t *patchname;
 	lv_obj_t *module_name;
 	lv_obj_t *modules_cont;
 	CableDrawer cable_drawer;
