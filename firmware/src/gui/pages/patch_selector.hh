@@ -42,10 +42,10 @@ struct PatchSelectorPage : PageBase {
 		auto patchname = patch_playloader.cur_patch_name(); // auto patchplaying_idx = patch_storage
 		if (patchname.length() == 0) {
 			lv_label_set_text(ui_NowPlayingName, "none");
-			lv_label_set_text(ui_LoadMeter, "");
+			lv_label_set_text(ui_Load_Meter, "");
 		} else {
 			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", patchname.c_str());
-			lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
+			lv_label_set_text_fmt(ui_Load_Meter, "%d%%", metaparams.audio_load);
 		}
 	}
 
@@ -189,7 +189,7 @@ struct PatchSelectorPage : PageBase {
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
 
-					lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
+					lv_label_set_text_fmt(ui_Load_Meter, "%d%%", metaparams.audio_load);
 				}
 			} break;
 
