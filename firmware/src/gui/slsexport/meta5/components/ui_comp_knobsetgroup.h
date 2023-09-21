@@ -16,7 +16,8 @@ extern "C" {
 #define UI_COMP_KNOBSETGROUP_KNOBSETGROUP 0
 #define UI_COMP_KNOBSETGROUP_KNOBSETNAME 1
 #define UI_COMP_KNOBSETGROUP_KNOBSETBUTTON 2
-#define _UI_COMP_KNOBSETGROUP_NUM 3
+#define UI_COMP_KNOBSETGROUP_KNOBSETITEMVIEW 3
+#define _UI_COMP_KNOBSETGROUP_NUM 4
 lv_obj_t *ui_KnobSetGroup_create(lv_obj_t *comp_parent);
 
 #ifdef __cplusplus
