@@ -11,25 +11,25 @@ public:
 
 	void update(float input) {
 		if (input > highThresh)
-			output = true;
+			out = true;
 		if (input < lowThresh)
-			output = false;
+			out = false;
 	}
 
-	bool get_output() {
-		return output;
+	bool output() {
+		return out;
 	}
 
-	void set_lowThreshhold(float lowVal) {
+	void setLowThreshhold(float lowVal) {
 		lowThresh = lowVal;
 	}
 
-	void set_highThreshold(float highVal) {
+	void setHighThreshold(float highVal) {
 		highThresh = highVal;
 	}
 
 private:
 	float lowThresh = 0.1f;
 	float highThresh = 0.5f;
-	bool output = false;
+	bool out = false;
 };

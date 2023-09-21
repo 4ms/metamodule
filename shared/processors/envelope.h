@@ -67,14 +67,14 @@ public:
 	}
 
 	float update(float input) {
-		lastGate = gateInput.get_output();
+		lastGate = gateInput.output();
 		gateInput.update(input);
-		if (gateInput.get_output() > lastGate) {
+		if (gateInput.output() > lastGate) {
 			phaccu = 0;
 			stage = 0;
 			attackSample = lastSample;
 		}
-		if (gateInput.get_output() < lastGate) {
+		if (gateInput.output() < lastGate) {
 			if (sustainEnable) {
 				phaccu = 0;
 				stage = 4;

@@ -69,29 +69,29 @@ public:
 	void set_input(int input_id, float val) override {
 		switch (input_id) {
 			case Info::InputInput:
-				gateInput = val;
+				gateInput = val / cvRangeVolts;
 				break;
 			case Info::InputAttack_Cv:
-				attackCv = val;
+				attackCv = val / cvRangeVolts;
 				break;
 			case Info::InputHold_Cv:
-				holdCv = val;
+				holdCv = val / cvRangeVolts;
 				break;
 			case Info::InputDecay_Cv:
-				decayCv = val;
+				decayCv = val / cvRangeVolts;
 				break;
 			case Info::InputSustain_Cv:
-				sustainCv = val;
+				sustainCv = val / cvRangeVolts;
 				break;
 			case Info::InputRelease_Cv:
-				releaseCv = val;
+				releaseCv = val / cvRangeVolts;
 				break;
 		}
 	}
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut) {
-			return envelopeOutput;
+			return envelopeOutput * maxOutputVolts;
 		} else {
 			//FIXME: This only works because OutputOut is 5, and the others are 0-4 in AHDSR order
 			return (currentStage == output_id) ? 1 : 0;
@@ -125,6 +125,9 @@ private:
 	float releaseCv = 0;
 	int currentStage = 0;
 	Envelope e;
+
+	static constexpr float cvRangeVolts = 5.0f;
+	static constexpr float maxOutputVolts = 8.0f;
 };
 
 } // namespace MetaModule

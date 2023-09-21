@@ -297,34 +297,34 @@ public:
 	void set_input(int input_id, float val) override {
 		switch (input_id) {
 			case 0:
-				freqCV = exp5Table.interp(MathTools::constrain(val, 0.f, 1.0f));
+				freqCV = exp5Table.interp(MathTools::constrain(val / 5.f, 0.f, 1.0f));
 				paramsNeedUpdating = true;
 				break;
 
 			case 1:
-				gainCV = val;
+				gainCV = val / cvRangeVolts;
 				paramsNeedUpdating = true;
 				break;
 
 			case 2:
-				sharpCV = val;
+				sharpCV = val / cvRangeVolts;
 				paramsNeedUpdating = true;
 				break;
 
 			case 3:
-				strikeCV = val;
+				strikeCV = val / cvRangeVolts;
 				paramsNeedUpdating = true;
 				break;
 
 			case 4:
-				trigIn = val;
+				trigIn = val / cvRangeVolts;
 				paramsNeedUpdating = true;
 				break;
 		}
 	}
 
 	float get_output(const int output_id) const override {
-		return signalOut;
+		return signalOut * outputScalingVolts;
 	}
 
 private:
@@ -512,6 +512,9 @@ private:
 	static constexpr float fConst61 = gcem::pow(0.00100000005f, (33.3333321f / SAMPLERATE));
 	static constexpr float fConst62 = (0.0f - (2.0f * fConst61));
 	static constexpr float fConst63 = (fConst61 * fConst61);
+
+	static constexpr float cvRangeVolts = 5.f;
+	static constexpr float outputScalingVolts = 5.f;
 
 public:
 	// Boilerplate to auto-register in ModuleFactory

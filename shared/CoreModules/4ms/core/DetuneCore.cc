@@ -92,7 +92,7 @@ public:
 				signalInput = val;
 				break;
 			case Info::InputDetune:
-				cvAmount = val;
+				cvAmount = val / cvRangeVolts;
 				break;
 		}
 	}
@@ -136,6 +136,8 @@ private:
 
 	InterpRandomGenerator flutterGen;
 	InterpRandomGenerator wowGen;
+
+	static constexpr float cvRangeVolts = 5.f;
 };
 
 } // namespace MetaModule
