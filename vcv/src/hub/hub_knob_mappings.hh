@@ -69,7 +69,14 @@ public:
 			return "";
 	}
 
-	void setKnobSetName(unsigned idx, std::string &name) {
+	std::string_view getActiveKnobSetName() {
+		if (activeSetId < knobSetNames.size())
+			return knobSetNames[activeSetId];
+		else
+			return "";
+	}
+
+	void setKnobSetName(unsigned idx, std::string const &name) {
 		if (idx < knobSetNames.size())
 			knobSetNames[idx] = name;
 	}
@@ -142,15 +149,26 @@ public:
 	}
 
 	// Add mappings to a knob in the active set:
-	Mapping *addMap(unsigned hubParamId, int64_t destModuleId, int destParamId) {
-		auto &knob = nextFreeMap(hubParamId, activeSetId);
+	Mapping *addMap(unsigned hubParamId, int64_t destModuleId, int destParamId, unsigned set_id) {
+		if (set_id >= MaxKnobSets) {
+			// Recover from error if set_is is out of range
+			set_id = activeSetId;
+		}
 
-		APP->engine->updateParamHandle(&knob.paramHandle, destModuleId, destParamId, true);
+		auto &knob = nextFreeMap(hubParamId, set_id);
 
-		auto *map = &knob.maps[activeSetId];
+		if (set_id == activeSetId) {
+			APP->engine->updateParamHandle(&knob.paramHandle, destModuleId, destParamId, true);
+		}
+
+		auto *map = &knob.maps[set_id];
 		map->moduleId = destModuleId;
 		map->paramId = destParamId;
 		return map;
+	}
+
+	Mapping *addMap(unsigned hubParamId, int64_t destModuleId, int destParamId) {
+		return addMap(hubParamId, destModuleId, destParamId, activeSetId);
 	}
 
 	// Return a reference to an array of KnobMappingSets of a knob
@@ -236,7 +254,6 @@ public:
 				auto mapsJ = json_array_get(knobSetsJ, set_i);
 
 				if (json_is_array(mapsJ)) {
-					setActiveKnobSetIdx(set_i);
 
 					for (size_t i = 0; i < json_array_size(mapsJ); i++) {
 						auto mappingJ = json_array_get(mapsJ, i);
@@ -262,7 +279,7 @@ public:
 							val = json_object_get(mappingJ, "DstObjID");
 							auto destModuleParamId = json_is_integer(val) ? json_integer_value(val) : -1;
 
-							auto *map = addMap(hubParamId, destModuleId, destModuleParamId);
+							auto *map = addMap(hubParamId, destModuleId, destModuleParamId, set_i);
 
 							val = json_object_get(mappingJ, "RangeMin");
 							map->range_min = json_is_real(val) ? json_real_value(val) : 0.f;
@@ -279,7 +296,6 @@ public:
 				}
 			}
 		}
-		setActiveKnobSetIdx(0); //TODO: save the default in json
 
 		auto namesJ = json_object_get(rootJ, "KnobSetNames");
 		for (unsigned set_i = 0; auto &name : knobSetNames) {
@@ -294,12 +310,13 @@ public:
 
 private:
 	KnobMappingSet &nextFreeMap(unsigned hubParamId, unsigned set_idx) {
-		// Find first unused paramHandle
+		// Find first unused mapping slot
 		for (auto &mapset : mappings[hubParamId]) {
-			if (mapset.paramHandle.moduleId < 0) {
+			if (mapset.maps[set_idx].moduleId < 0) {
 				return mapset;
 			}
 		}
+
 		// If all are used, then overwrite the last one
 		return mappings[hubParamId][MaxMapsPerPot - 1];
 	}
