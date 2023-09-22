@@ -198,7 +198,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		for (auto [i, gatein] : countzip(params_.gate_ins)) {
 			if (gatein.just_went_high())
-				player.set_panel_input(i + FirstGateInput, 1.f);
+				player.set_panel_input(i + FirstGateInput, 8.f);
 			if (gatein.just_went_low())
 				player.set_panel_input(i + FirstGateInput, 0.f);
 		}
