@@ -98,6 +98,7 @@ public:
 
 				else if (stage == Decay)
 					stage = gateInput.output() ? Sustain : Release;
+
 				else
 					stage++;
 

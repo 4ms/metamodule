@@ -180,6 +180,8 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
+		val /= cvRangeVolts;
+
 		switch (input_id) {
 			case Info::InputTrigger:
 				gateIn = val;
@@ -217,7 +219,7 @@ public:
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return drumOutput;
+			return drumOutput * maxOutputVolts;
 		return 0.f;
 	}
 
@@ -231,6 +233,9 @@ public:
 			pitchConnected = true;
 		}
 	}
+
+	static constexpr float cvRangeVolts = 5.0f;
+	static constexpr float maxOutputVolts = 8.0f;
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off

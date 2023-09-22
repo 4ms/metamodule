@@ -223,9 +223,9 @@ public:
 	void update_params() {
 		strike0 = MathTools::constrain(strikeCV + strikeKnob, 0.f, 1.f);
 		strike1 = MathTools::tan_close(fConst1 * ((15000.0f * strike0) + 500.0f));
-		strike2 = (1.0f / strike1);
-		strike3 = (((strike2 + 1.41421354f) / strike1) + 1.0f);
-		fSlow4 = (MathTools::min<float>((float(gainCV) + float(gainKnob)), 1.0f) / strike3);
+		strike2 = 1.0f / strike1;
+		strike3 = ((strike2 + 1.41421354f) / strike1) + 1.0f;
+		fSlow4 = MathTools::min<float>(gainCV + gainKnob, 1.0f) / strike3;
 		fSlow5 = MathTools::tan_close(fConst1 * ((500.0f * strike0) + 40.0f));
 		fSlow6 = (1.0f / fSlow5);
 		fSlow7 = (1.0f / (((fSlow6 + 1.41421354f) / fSlow5) + 1.0f));
@@ -238,10 +238,9 @@ public:
 		fSlow14 = (((strike2 + -1.41421354f) / strike1) + 1.0f);
 		fSlow15 = (2.0f * (1.0f - (1.0f / (strike1 * strike1))));
 		adEnvRate =
-			(1.0f / MathTools::max<float>(
-						1.0f, (fConst2 * MathTools::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
+			(1.0f / MathTools::max<float>(1.0f, (fConst2 * MathTools::min<float>(sharpCV + sharpnessKnob, 1.0f))));
 		slowTrig = trigIn > 0.f ? 1.f : 0.f;
-		slowFreq = (float(freqCV) * float(freqKnob));
+		slowFreq = freqCV * freqKnob;
 
 		// Coef: a1
 		fSlow19 = (fConst4 * MathTools::cos_close((fConst5 * slowFreq)));

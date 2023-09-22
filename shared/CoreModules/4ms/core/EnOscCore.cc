@@ -155,7 +155,7 @@ public:
 
 	float get_output(int output_id) const override {
 		s9_23 sample = output_id == 0 ? out_block_[block_ctr].l : out_block_[block_ctr].r;
-		auto s = f::inclusive(sample).repr() * 2.f; //0..1 is mapped to 0-5V
+		auto s = f::inclusive(sample).repr();
 		return s;
 	}
 
