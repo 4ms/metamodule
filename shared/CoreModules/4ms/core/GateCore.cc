@@ -18,7 +18,7 @@ public:
 
 	void update() override {
 		lastGate = currentGate;
-		currentGate = wc.get_output();
+		currentGate = wc.output();
 		if (currentGate && !lastGate) {
 			finalDelay =
 				MathTools::map_value(MathTools::constrain(delayCV + delayTime, 0.0f, 1.0f), 0.0f, 1.0f, 0.0f, 1000.0f) /

@@ -5,10 +5,10 @@
 class ClockPhase {
 public:
 	void updateClock(float val) {
-		lastClock = currentClock.get_output();
+		lastClock = currentClock.output();
 		currentClock.update(val);
 
-		if (currentClock.get_output() > lastClock) {
+		if (currentClock.output() > lastClock) {
 			multiply = queueMultiply;
 			divide = queueDivide;
 			duration = sinceClock;
@@ -18,9 +18,9 @@ public:
 	}
 
 	void updateReset(float val) {
-		lastReset = currentReset.get_output();
+		lastReset = currentReset.output();
 		currentReset.update(val);
-		if (currentReset.get_output() > lastReset)
+		if (currentReset.output() > lastReset)
 			wholeCount = 0;
 	}
 

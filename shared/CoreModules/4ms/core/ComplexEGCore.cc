@@ -94,7 +94,7 @@ public:
 			return envelopeOutput * maxOutputVolts;
 		} else {
 			//FIXME: This only works because OutputOut is 5, and the others are 0-4 in AHDSR order
-			return (currentStage == output_id) ? 1 : 0;
+			return (currentStage == output_id) ? maxOutputVolts : 0;
 		}
 	}
 

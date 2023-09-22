@@ -21,7 +21,7 @@ public:
 			rectSignal *= -1.0f;
 		envOutput = slew.update(rectSignal);
 		wc.update(envOutput);
-		gateOutput = wc.get_output();
+		gateOutput = wc.output();
 	}
 
 	void set_param(int param_id, float val) override {
@@ -37,8 +37,8 @@ public:
 				bottomThresh = val - errorAmount;
 				if (bottomThresh < 0)
 					bottomThresh = 0;
-				wc.set_highThreshold(topThresh);
-				wc.set_lowThreshhold(bottomThresh);
+				wc.setHighThreshold(topThresh);
+				wc.setLowThreshhold(bottomThresh);
 			} break;
 			case Info::KnobRise: //rise
 				slew.attackTime = MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 2000.f);
