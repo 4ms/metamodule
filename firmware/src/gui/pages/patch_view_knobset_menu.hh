@@ -52,7 +52,7 @@ struct PatchViewKnobsetMenu {
 			if (knobset.set.size()) {
 				auto panel = ui_KnobSetGroup_create(ui_KnobsetMenu);
 				auto check = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETBUTTON);
-				auto view = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETITEMVIEW);
+				auto view = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETINFO);
 				auto label = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETNAME);
 				if (knobset.name.length())
 					lv_label_set_text(label, knobset.name.c_str());
@@ -184,7 +184,7 @@ struct PatchViewKnobsetMenu {
 			auto page = static_cast<PatchViewKnobsetMenu *>(event->user_data);
 
 			for (unsigned i = 0; auto *panel : page->knobset_list) {
-				auto view = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETITEMVIEW);
+				auto view = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETINFO);
 
 				if (view == obj) {
 					page->requested_knobset_view = i;

@@ -17,6 +17,8 @@ void del_component_child_event_cb(lv_event_t* e);
 
 lv_obj_t * ui_comp_get_child(lv_obj_t *comp, uint32_t child_idx);
 extern uint32_t LV_EVENT_GET_COMP_CHILD;
+#include "ui_comp_knobcontainer.h"
+#include "ui_comp_knobcontainerbig.h"
 #include "ui_comp_knobsetgroup.h"
 #include "ui_comp_mappedknobsetitem.h"
 #include "ui_comp_unmappedsetitem.h"

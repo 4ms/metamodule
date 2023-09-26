@@ -16,6 +16,9 @@ namespace MetaModule
 {
 struct KnobSetViewPage : PageBase {
 
+	constexpr static unsigned min_arc = 160;
+	constexpr static unsigned max_arc = 20;
+
 	KnobSetViewPage(PatchInfo info)
 		: PageBase{info}
 		, base{ui_KnobSetViewPage}
@@ -25,21 +28,33 @@ struct KnobSetViewPage : PageBase {
 		lv_group_set_editing(group, false);
 	}
 
+	void set_for_knob(lv_obj_t *cont, unsigned knob_i) {
+		auto knob = get_knob(cont);
+		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
+
+		auto circle = get_circle(cont);
+		lv_obj_set_style_bg_color(circle, Gui::knob_palette[knob_i % 6], LV_STATE_DEFAULT);
+
+		auto circle_letter = get_circle_letter(cont);
+		lv_label_set_text(circle_letter, PanelDef::get_map_param_name(knob_i).data());
+	}
+
 	void prepare_focus() override {
-		for (auto cont : containers) {
-			lv_obj_set_style_radius(cont, 8, LV_STATE_FOCUSED);
-			lv_obj_set_style_border_color(cont, lv_color_hex(0xFF9D41), LV_STATE_FOCUSED);
-			lv_obj_set_style_border_opa(cont, LV_OPA_50, LV_STATE_FOCUSED);
-			lv_obj_set_style_border_width(cont, 2, LV_STATE_FOCUSED);
-			lv_obj_add_flag(cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		}
-		for (auto label : labels)
-			lv_label_set_text(label, "");
-		for (auto knob : knobs) {
+
+		for (unsigned i = 0; auto cont : containers) {
+			set_for_knob(cont, i);
+
+			auto knob = get_knob(cont);
 			lv_arc_set_mode(knob, LV_ARC_MODE_NORMAL);
-			lv_arc_set_bg_angles(knob, 120, 60);
+			lv_arc_set_bg_angles(knob, min_arc, max_arc);
 			lv_arc_set_value(knob, 0);
-			lv_obj_add_state(knob, LV_STATE_DISABLED);
+
+			auto label = get_label(cont);
+			lv_label_set_text(label, "");
+
+			disable(cont);
+
+			i++;
 		}
 
 		lv_group_remove_all_objs(group);
@@ -53,17 +68,31 @@ struct KnobSetViewPage : PageBase {
 
 		knobset = &patch.knob_sets[ks_idx];
 		if (knobset->name.length())
-			lv_label_set_text(ui_KnobSetNameText1, knobset->name.c_str());
+			lv_label_set_text(ui_KnobSetNameText, knobset->name.c_str());
 		else
-			lv_label_set_text_fmt(ui_KnobSetNameText1, "Knob Set %d", (int)ks_idx);
+			lv_label_set_text_fmt(ui_KnobSetNameText, "Knob Set %d", (int)ks_idx);
 
 		if (patch.patch_name.length())
-			lv_label_set_text(ui_KnobSetDescript1, patch.patch_name.c_str());
+			lv_label_set_text(ui_KnobSetDescript, patch.patch_name.c_str());
 		else
-			lv_label_set_text(ui_KnobSetDescript1, "");
+			lv_label_set_text(ui_KnobSetDescript, "");
+
+		unsigned num_maps[PanelDef::NumKnobs]{};
 
 		for (auto map : knobset->set) {
-			auto label = get_label(map.panel_knob_id);
+			if (map.panel_knob_id >= PanelDef::NumKnobs)
+				continue;
+
+			lv_obj_t *cont;
+			if (num_maps[map.panel_knob_id] == 0) {
+				cont = get_container(map.panel_knob_id);
+			} else {
+				cont = (map.panel_knob_id < 6) ? ui_KnobContainerBig_create(panes[map.panel_knob_id]) :
+												 ui_KnobContainer_create(panes[map.panel_knob_id]);
+			}
+			num_maps[map.panel_knob_id]++;
+
+			auto label = get_label(cont);
 			if (label) {
 				std::string_view name = map.alias_name;
 				if (name.length()) {
@@ -74,10 +103,9 @@ struct KnobSetViewPage : PageBase {
 				}
 			}
 
-			auto knob = get_knob(map.panel_knob_id);
+			auto knob = get_knob(cont);
 			if (knob) {
 				// Set min/max of arc
-				lv_obj_clear_state(knob, LV_STATE_DISABLED);
 				lv_arc_set_mode(knob, (map.min < map.max) ? LV_ARC_MODE_NORMAL : LV_ARC_MODE_REVERSE);
 				float left = std::min<float>(map.min, map.max);
 				float right = std::max<float>(map.min, map.max);
@@ -89,18 +117,18 @@ struct KnobSetViewPage : PageBase {
 					lv_arc_set_value(knob, (uint16_t)(val * 120));
 				}
 			}
+
+			set_for_knob(cont, map.panel_knob_id);
+
+			enable(cont);
+			lv_group_add_obj(group, cont);
 		}
 
-		for (auto [container, label] : zip(containers, labels)) {
-			if (lv_label_get_text(label)[0] != '\0')
-				lv_group_add_obj(group, container);
-			if (container == ui_KnobContainerU)
-				lv_group_add_obj(group, ui_KnobContainerU1);
-		}
 		lv_group_set_editing(group, false);
 	}
 
 	void update() override {
+		lv_group_set_editing(group, false);
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (PageList::request_last_page()) {
 				blur();
@@ -113,7 +141,6 @@ struct KnobSetViewPage : PageBase {
 				if (auto val = ElementUpdate::get_mapped_param_value(params, i); val.has_value()) {
 					unsigned lv_pos = val.value() * 120.f;
 					lv_arc_set_value(get_knob(i), lv_pos);
-					printf_("Updated %d\n", i);
 				}
 			}
 		}
@@ -127,41 +154,18 @@ private:
 	MappedKnobSet *knobset = nullptr;
 	PatchData &patch;
 
-	std::array<lv_obj_t *, 12> labels{ui_LabelA,
-									  ui_LabelB,
-									  ui_LabelC,
-									  ui_LabelD,
-									  ui_LabelE,
-									  ui_LabelF,
-									  ui_LabelU,
-									  ui_LabelV,
-									  ui_LabelW,
-									  ui_LabelX,
-									  ui_LabelY,
-									  ui_LabelZ};
-	lv_obj_t *get_label(unsigned panel_knob_id) {
-		if (panel_knob_id >= 12)
-			return nullptr;
-		return labels[panel_knob_id];
-	}
-
-	std::array<lv_obj_t *, 12> knobs{ui_KnobA,
-									 ui_KnobB,
-									 ui_KnobC,
-									 ui_KnobD,
-									 ui_KnobE,
-									 ui_KnobF,
-									 ui_KnobU,
-									 ui_KnobV,
-									 ui_KnobW,
-									 ui_KnobX,
-									 ui_KnobY,
-									 ui_KnobZ};
-	auto get_knob(unsigned panel_knob_id) -> lv_obj_t * {
-		if (panel_knob_id >= 12)
-			return nullptr;
-		return knobs[panel_knob_id];
-	}
+	std::array<lv_obj_t *, 12> panes{ui_KnobPanelA,
+									 ui_KnobPanelB,
+									 ui_KnobPanelC,
+									 ui_KnobPanelD,
+									 ui_KnobPanelE,
+									 ui_KnobPanelF,
+									 ui_KnobPanelU,
+									 ui_KnobPanelV,
+									 ui_KnobPanelW,
+									 ui_KnobPanelX,
+									 ui_KnobPanelY,
+									 ui_KnobPanelZ};
 
 	std::array<lv_obj_t *, 12> containers{ui_KnobContainerA,
 										  ui_KnobContainerB,
@@ -175,15 +179,87 @@ private:
 										  ui_KnobContainerX,
 										  ui_KnobContainerY,
 										  ui_KnobContainerZ};
-	auto get_container(unsigned panel_knob_id) -> lv_obj_t * {
+	lv_obj_t *get_container(unsigned panel_knob_id) {
+		return containers[panel_knob_id];
+	}
+
+	lv_obj_t *get_knob(unsigned panel_knob_id) {
 		if (panel_knob_id >= 12)
 			return nullptr;
-		return containers[panel_knob_id];
+		if (panel_knob_id >= 6)
+			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINER_KNOB);
+		else
+			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINERBIG_KNOB);
+	}
+
+	lv_obj_t *get_knob(lv_obj_t *container) {
+		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_KNOB);
+	}
+
+	lv_obj_t *get_label(unsigned panel_knob_id) {
+		if (panel_knob_id >= 12)
+			return nullptr;
+		if (panel_knob_id >= 6)
+			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINER_LABEL);
+		else
+			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINERBIG_LABEL);
+	}
+
+	lv_obj_t *get_label(lv_obj_t *container) {
+		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_LABEL);
+	}
+
+	lv_obj_t *get_circle(unsigned panel_knob_id) {
+		if (panel_knob_id >= 12)
+			return nullptr;
+		if (panel_knob_id >= 6)
+			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINER_CIRCLE);
+		else
+			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINERBIG_CIRCLE);
+	}
+
+	lv_obj_t *get_circle(lv_obj_t *container) {
+		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_CIRCLE);
+	}
+
+	lv_obj_t *get_circle_letter(unsigned panel_knob_id) {
+		if (panel_knob_id >= 12)
+			return nullptr;
+		if (panel_knob_id >= 6)
+			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINER_CIRCLE_KNOBLETTER);
+		else
+			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINERBIG_CIRCLE_KNOBLETTER);
+	}
+
+	lv_obj_t *get_circle_letter(lv_obj_t *container) {
+		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINERBIG_CIRCLE_KNOBLETTER);
+	}
+
+	void disable(lv_obj_t *container) {
+		auto knob = get_knob(container);
+		auto circle = get_circle(container);
+		auto label = get_label(container);
+		if (!knob || !circle || !label)
+			return;
+		lv_obj_add_state(knob, LV_STATE_DISABLED);
+		lv_obj_add_state(circle, LV_STATE_DISABLED);
+		lv_obj_add_state(label, LV_STATE_DISABLED);
+	}
+
+	void enable(lv_obj_t *container) {
+		auto knob = get_knob(container);
+		auto circle = get_circle(container);
+		auto label = get_label(container);
+		if (!knob || !circle || !label)
+			return;
+		lv_obj_clear_state(knob, LV_STATE_DISABLED);
+		lv_obj_clear_state(circle, LV_STATE_DISABLED);
+		lv_obj_clear_state(label, LV_STATE_DISABLED);
 	}
 
 	uint16_t lvgl_knob_angle(float knob_pos) {
 		knob_pos = std::clamp<float>(knob_pos, 0.f, 1.f);
-		uint16_t angle = knob_pos * 300.f + 120.f; //120 .. 359, 0 .. 60
+		uint16_t angle = knob_pos * (360 + max_arc - min_arc) + min_arc;
 		if (angle > 360)
 			angle -= 360;
 		return angle;

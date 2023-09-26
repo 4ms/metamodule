@@ -1,4 +1,6 @@
-SET(SOURCES components/ui_comp_knobsetgroup.c
+SET(SOURCES components/ui_comp_knobcontainer.c
+    components/ui_comp_knobcontainerbig.c
+    components/ui_comp_knobsetgroup.c
     components/ui_comp_mappedknobsetitem.c
     components/ui_comp_unmappedsetitem.c
     components/ui_comp.c
@@ -15,6 +17,7 @@ SET(SOURCES components/ui_comp_knobsetgroup.c
     images/ui_img_1x_add1_png.c
     images/ui_img_1x_info1_png.c
     images/ui_img_1x_settings1_png.c
+    images/ui_img_1x_infosmall2_png.c
     fonts/ui_font_MuseoSansRounded50012.c
     fonts/ui_font_MuseoSansRounded70014.c
     fonts/ui_font_MuseoSansRounded70016.c
