@@ -3,7 +3,7 @@
 #include "info/Gate_info.hh"
 
 #include "processors/tools/delayLine.h"
-#include "processors/tools/windowComparator.h"
+#include "processors/tools/schmittTrigger.h"
 #include "util/math.hh"
 
 namespace MetaModule
@@ -104,7 +104,7 @@ private:
 	float finalDelay = 0;
 
 	DelayLine<96000> del;
-	WindowComparator wc;
+	SchmittTrigger wc;
 };
 
 } // namespace MetaModule

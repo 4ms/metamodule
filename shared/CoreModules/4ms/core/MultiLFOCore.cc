@@ -49,6 +49,8 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
+		val = val / cvRangeVolts;
+
 		switch (input_id) {
 			case Info::InputRate_Cv:
 				rawRateCV = val;
@@ -61,6 +63,7 @@ public:
 				pwCV = val;
 				break;
 			case Info::InputReset:
+				//TODO: use schmitt-trigger
 				lastReset = currentReset;
 				currentReset = val > 0.2f;
 				if (currentReset > lastReset) {
@@ -73,16 +76,16 @@ public:
 	float get_output(int output_id) const override {
 		switch (output_id) {
 			case Info::OutputSine:
-				return sinTable.interp_wrap(modPhase);
+				return sinTable.interp_wrap(modPhase) * outputScalingVolts;
 				break;
 			case Info::OutputSaw:
-				return (modPhase * 2.f - 1.f);
+				return (modPhase * 2.f - 1.f) * outputScalingVolts;
 				break;
 			case Info::OutputInv_Saw:
-				return (1.f - modPhase * 2.f);
+				return (1.f - modPhase * 2.f) * outputScalingVolts;
 				break;
 			case Info::OutputPulse:
-				return (modPhase < (pwOffset + pwCV)) ? 1.f : -1.f;
+				return (modPhase < (pwOffset + pwCV)) ? outputScalingVolts : -outputScalingVolts;
 				break;
 		}
 		return 0.f;
@@ -116,6 +119,9 @@ private:
 	float phaseOffset = 0.f;
 	bool currentReset = 0.f;
 	bool lastReset = 0.f;
+
+	static constexpr float cvRangeVolts = 5.f;
+	static constexpr float outputScalingVolts = 8.f;
 };
 
 } // namespace MetaModule

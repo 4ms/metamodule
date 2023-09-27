@@ -1,6 +1,6 @@
 #pragma once
 
-#include "windowComparator.h"
+#include "schmittTrigger.h"
 
 class ClockPhase {
 public:
@@ -54,10 +54,10 @@ public:
 	}
 
 private:
-	WindowComparator currentClock;
+	SchmittTrigger currentClock;
 	int lastClock = 0;
 
-	WindowComparator currentReset;
+	SchmittTrigger currentReset;
 	int lastReset = 0;
 
 	long wholeCount = 0;

@@ -2,7 +2,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "info/Follow_info.hh"
 #include "processors/tools/expDecay.h"
-#include "processors/tools/windowComparator.h"
+#include "processors/tools/schmittTrigger.h"
 #include "util/math.hh"
 
 namespace MetaModule
@@ -82,7 +82,7 @@ private:
 	float signalInput = 0;
 	float envOutput = 0;
 	float gateOutput = 0;
-	WindowComparator wc;
+	SchmittTrigger wc;
 	ExpDecay slew;
 };
 

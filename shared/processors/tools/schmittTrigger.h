@@ -1,19 +1,22 @@
 #pragma once
 
-class WindowComparator {
+class SchmittTrigger {
 public:
-	WindowComparator() = default;
+	SchmittTrigger() = default;
 
-	WindowComparator(float lowThreshold, float highThreshold)
+	SchmittTrigger(float lowThreshold, float highThreshold)
 		: lowThresh{lowThreshold}
 		, highThresh{highThreshold} {
+		if (lowThresh > highThresh)
+			highThresh = lowThresh;
 	}
 
-	void update(float input) {
+	bool update(float input) {
 		if (input > highThresh)
 			out = true;
-		if (input < lowThresh)
+		else if (input < lowThresh)
 			out = false;
+		return out;
 	}
 
 	bool output() {
@@ -22,10 +25,14 @@ public:
 
 	void setLowThreshhold(float lowVal) {
 		lowThresh = lowVal;
+		if (lowThresh > highThresh)
+			highThresh = lowThresh;
 	}
 
 	void setHighThreshold(float highVal) {
 		highThresh = highVal;
+		if (lowThresh > highThresh)
+			highThresh = lowThresh;
 	}
 
 private:

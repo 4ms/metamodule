@@ -1,6 +1,6 @@
 #pragma once
 
-#include "processors/tools/windowComparator.h"
+#include "processors/tools/schmittTrigger.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
@@ -21,7 +21,7 @@ private:
 	float attackSample = 0;
 
 	bool lastGate;
-	WindowComparator gateInput;
+	SchmittTrigger gateInput;
 
 	float calcRise(float curve) {
 		float rise = 0;
