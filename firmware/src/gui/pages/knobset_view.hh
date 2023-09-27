@@ -196,39 +196,12 @@ private:
 		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_KNOB);
 	}
 
-	lv_obj_t *get_label(unsigned panel_knob_id) {
-		if (panel_knob_id >= 12)
-			return nullptr;
-		if (panel_knob_id >= 6)
-			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINER_LABEL);
-		else
-			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINERBIG_LABEL);
-	}
-
 	lv_obj_t *get_label(lv_obj_t *container) {
 		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_LABEL);
 	}
 
-	lv_obj_t *get_circle(unsigned panel_knob_id) {
-		if (panel_knob_id >= 12)
-			return nullptr;
-		if (panel_knob_id >= 6)
-			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINER_CIRCLE);
-		else
-			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINERBIG_CIRCLE);
-	}
-
 	lv_obj_t *get_circle(lv_obj_t *container) {
 		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_CIRCLE);
-	}
-
-	lv_obj_t *get_circle_letter(unsigned panel_knob_id) {
-		if (panel_knob_id >= 12)
-			return nullptr;
-		if (panel_knob_id >= 6)
-			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINER_CIRCLE_KNOBLETTER);
-		else
-			return ui_comp_get_child(get_container(panel_knob_id), UI_COMP_KNOBCONTAINERBIG_CIRCLE_KNOBLETTER);
 	}
 
 	lv_obj_t *get_circle_letter(lv_obj_t *container) {
