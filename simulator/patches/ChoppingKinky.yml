@@ -46,38 +46,30 @@ PatchData:
   static_knobs:
     - module_id: 1
       param_id: 0
-      value: 1.11566
+      value: 0.557831
     - module_id: 1
       param_id: 1
-      value: 1.28916
+      value: 0.644578
     - module_id: 1
       param_id: 2
-      value: 0.0385543
+      value: 0.519277
     - module_id: 1
       param_id: 3
-      value: 0.455422
+      value: 0.727711
   mapped_knobs:
-    - panel_knob_id: 0
-      module_id: 1
-      param_id: 0
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 1
-      module_id: 1
-      param_id: 1
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 2
-      module_id: 1
-      param_id: 2
-      curve_type: 0
-      min: 0
-      max: 1
-    - panel_knob_id: 3
-      module_id: 1
-      param_id: 3
-      curve_type: 0
-      min: 0
-      max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []

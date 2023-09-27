@@ -1,60 +1,35 @@
 PatchData:
-  patch_name: ComplexEG
+  patch_name: evenenv
   description: Patch Description
   module_slugs:
     0: HubMedium
-    1: ComplexEG
-  int_cables: []
-  mapped_ins:
-    - panel_jack_id: 6
+    1: ENVVCA
+    2: EvenVCO
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
       ins:
-        - module_id: 1
-          jack_id: 0
-    - panel_jack_id: 0
-      ins:
-        - module_id: 1
-          jack_id: 1
-    - panel_jack_id: 1
-      ins:
-        - module_id: 1
-          jack_id: 2
-    - panel_jack_id: 2
-      ins:
-        - module_id: 1
-          jack_id: 3
-    - panel_jack_id: 3
+        - module_id: 2
+          jack_id: 4
+      color: 0
+    - out:
+        module_id: 2
+        jack_id: 4
       ins:
         - module_id: 1
           jack_id: 4
-    - panel_jack_id: 4
-      ins:
-        - module_id: 1
-          jack_id: 5
+      color: 63488
+  mapped_ins: []
   mapped_outs:
     - panel_jack_id: 0
       out:
         module_id: 1
-        jack_id: 5
+        jack_id: 2
     - panel_jack_id: 1
       out:
-        module_id: 1
-        jack_id: 0
-    - panel_jack_id: 3
-      out:
-        module_id: 1
-        jack_id: 2
-    - panel_jack_id: 2
-      out:
-        module_id: 1
+        module_id: 2
         jack_id: 1
-    - panel_jack_id: 4
-      out:
-        module_id: 1
-        jack_id: 3
-    - panel_jack_id: 5
-      out:
-        module_id: 1
-        jack_id: 4
   static_knobs:
     - module_id: 1
       param_id: 0
@@ -79,10 +54,16 @@ PatchData:
       value: 0.5
     - module_id: 1
       param_id: 7
-      value: 0.5
-    - module_id: 1
-      param_id: 8
       value: 0
+    - module_id: 2
+      param_id: 0
+      value: 0.444444
+    - module_id: 2
+      param_id: 1
+      value: 0.5
+    - module_id: 2
+      param_id: 2
+      value: 0.5
   mapped_knobs:
     - name: ''
       set:
@@ -94,25 +75,25 @@ PatchData:
           max: 1
         - panel_knob_id: 1
           module_id: 1
-          param_id: 2
+          param_id: 1
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 2
-          module_id: 1
-          param_id: 4
+          module_id: 2
+          param_id: 1
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 3
-          module_id: 1
-          param_id: 1
+          module_id: 2
+          param_id: 0
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 4
           module_id: 1
-          param_id: 3
+          param_id: 2
           curve_type: 0
           min: 0
           max: 1
@@ -125,12 +106,6 @@ PatchData:
         - panel_knob_id: 7
           module_id: 1
           param_id: 6
-          curve_type: 0
-          min: 0
-          max: 1
-        - panel_knob_id: 8
-          module_id: 1
-          param_id: 7
           curve_type: 0
           min: 0
           max: 1
