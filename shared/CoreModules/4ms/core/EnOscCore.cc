@@ -115,7 +115,7 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
-		//val: -5V..+5V converted to -1..1 by CommModule
+		val /= 5.f;	  //-5V to +5V => -1..1
 		val *= -0.5f; //-1..1 => 0.5..-0.5
 		val += 0.5f;  // => 1..0
 					  // Ui::set_potcv will clamp
@@ -155,7 +155,7 @@ public:
 
 	float get_output(int output_id) const override {
 		s9_23 sample = output_id == 0 ? out_block_[block_ctr].l : out_block_[block_ctr].r;
-		auto s = f::inclusive(sample).repr();
+		auto s = f::inclusive(sample).repr() * 4.5f; //hardware model is about 4.5Vpp for one osc
 		return s;
 	}
 
@@ -214,9 +214,11 @@ public:
 		for (unsigned i = 0; i < 10; /*Info::NumInJacks*/ i++)
 			set_input(i, 0.f);
 	}
+
 	void mark_input_unpatched(const int input_id) override {
 		set_input(input_id, 0.f);
 	}
+
 	void mark_input_patched(const int input_id) override {
 	}
 
