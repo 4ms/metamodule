@@ -113,24 +113,14 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	//TODO: User/factory routine to calibrate jacks
 	for (auto &inc : incal)
-		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(-AudioInFrame::kMaxValue,
-																					AudioInFrame::kMaxValue - 1);
+		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
+			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	auto raw_out = player.get_panel_output(output_id) * mute_ctr;
-	raw_out = raw_out * (-5.f / OutputHighRangeVolts);
+	raw_out = raw_out / OutputHighRangeVolts;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
-	return scaled_out;
-}
-
-// Todo: the scaling and offset shouold be part of the AuxStream, so we can support different types of DACs
-uint32_t AudioStream::get_dac_output(int output_id) {
-	auto raw_out = player.get_panel_output(output_id);
-	raw_out *= -1.f;
-	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
-	scaled_out *= AuxStream::DACscaling;
-	scaled_out += 0x00800000;
 	return scaled_out;
 }
 
@@ -187,6 +177,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [codec_chan_i, inchan] : countzip(in_.chan)) {
 			auto panel_jack_i = PanelDef::audioin_order[codec_chan_i];
 
+			// Skip unpatched jacks
 			if (((jack_sense >> jacksense_pin_order[panel_jack_i]) & 1) == 0)
 				continue;
 
