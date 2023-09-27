@@ -192,7 +192,9 @@ public:
 		// Todo!
 	}
 
-	void set_input(const int input_id, const float val) override {
+	void set_input(const int input_id, const float v) override {
+		float val = v / cvRangeVolts;
+
 		switch (input_id) {
 			case 0:
 				freqCV = exp5Table.interp(MathTools::constrain(val, 0.f, 1.0f));
@@ -222,7 +224,7 @@ public:
 	}
 
 	float get_output(const int output_id) const override {
-		return signalOut;
+		return signalOut * outputScalingVolts;
 	}
 
 private:
@@ -329,6 +331,9 @@ private:
 		fConst4,  fConst8,	fConst11, fConst14, fConst17, fConst20, fConst23, fConst26, fConst29, fConst32,
 		fConst35, fConst38, fConst41, fConst44, fConst47, fConst50, fConst53, fConst56, fConst59, fConst62,
 	};
+
+	static constexpr float cvRangeVolts = 5.f;
+	static constexpr float outputScalingVolts = 5.f;
 
 public:
 	// Boilerplate to auto-register in ModuleFactory

@@ -293,30 +293,32 @@ public:
 		// Todo!
 	}
 
-	void set_input(int input_id, float val) override {
+	void set_input(int input_id, float v) override {
+		float val = v / cvRangeVolts;
+
 		switch (input_id) {
 			case 0:
-				freqCV = exp5Table.interp(MathTools::constrain(val / 5.f, 0.f, 1.0f));
+				freqCV = exp5Table.interp(MathTools::constrain(val, 0.f, 1.0f));
 				paramsNeedUpdating = true;
 				break;
 
 			case 1:
-				gainCV = val / cvRangeVolts;
+				gainCV = val;
 				paramsNeedUpdating = true;
 				break;
 
 			case 2:
-				sharpCV = val / cvRangeVolts;
+				sharpCV = val;
 				paramsNeedUpdating = true;
 				break;
 
 			case 3:
-				strikeCV = val / cvRangeVolts;
+				strikeCV = val;
 				paramsNeedUpdating = true;
 				break;
 
 			case 4:
-				trigIn = val / cvRangeVolts;
+				trigIn = val;
 				paramsNeedUpdating = true;
 				break;
 		}
