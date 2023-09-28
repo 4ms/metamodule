@@ -16,8 +16,9 @@ std::unique_ptr<CoreProcessor> create_vcv_module() {
 }
 
 template<typename ModuleT, typename WidgetT>
-requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
-plugin::Model *createModel(std::string_view slug) {
+plugin::Model *createModel(std::string_view slug)
+	requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
+{
 
 	if (slug == "Braids") {
 		ModuleFactory::registerModuleType(
@@ -29,10 +30,10 @@ plugin::Model *createModel(std::string_view slug) {
 	ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
 
 	if (!ModuleFactory::isValidSlug(slug)) {
-		ModuleT module;
-		WidgetT mw{&module};
-
 		// static storage: each calls to createModel has unique ModuleT/WidgetT
+		// ModuleT holds the strings, pointed to by Elements, pointed to by ModuleInfoView
+		static ModuleT module;
+		WidgetT mw{&module};
 		static std::vector<MetaModule::Element> elements;
 
 		mw.populate_elements(elements);
@@ -42,6 +43,8 @@ plugin::Model *createModel(std::string_view slug) {
 		info.width_hp = 1; //TODO: deprecate width_hp
 
 		ModuleFactory::registerModuleType(slug, info);
+
+		// TODO: create a Model type which refers to ModuleT and WidgetT, and return a ptr to a static instance of it
 		return nullptr;
 	}
 

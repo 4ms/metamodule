@@ -2,7 +2,13 @@ set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
 
 file(GLOB RACKARTWORK_SOURCES ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c)
 
-add_library(VCV_adaptor OBJECT plugin_instance.cc pffft/pffft.c ${RACKARTWORK_SOURCES})
+add_library(
+  VCV_adaptor OBJECT
+  plugin_instance.cc
+  pffft/pffft.c
+  string.cpp
+  ${RACKARTWORK_SOURCES}
+)
 
 target_link_libraries(VCV_adaptor PUBLIC lvgl::lvgl)
 

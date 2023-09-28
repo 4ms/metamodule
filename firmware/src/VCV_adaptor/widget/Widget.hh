@@ -61,23 +61,15 @@ struct FramebufferWidget : Widget {};
 
 // Should be called SvgParamWidget
 struct SvgWidget : Widget {
-	SvgWidget *bg /*= this*/;
+	SvgWidget *bg = this;
 	NVGcolor bgColor;
 	bool visible;
-	engine::ParamQuantity *pq = &_pq;
 
 	void setSvg(std::shared_ptr<window::Svg>) {
 	}
 
 	void setSVG(std::shared_ptr<window::Svg>) {
 	}
-
-	engine::ParamQuantity *getParamQuantity() {
-		return pq;
-	}
-
-private:
-	engine::ParamQuantity _pq;
 };
 
 } // namespace widget
