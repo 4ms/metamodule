@@ -67,34 +67,36 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
+		val = val / CvRangeVolts;
+
 		switch (input_id) {
 			case Info::InputInput:
-				gateInput = val / cvRangeVolts;
+				gateInput = val;
 				break;
 			case Info::InputAttack_Cv:
-				attackCv = val / cvRangeVolts;
+				attackCv = val;
 				break;
 			case Info::InputHold_Cv:
-				holdCv = val / cvRangeVolts;
+				holdCv = val;
 				break;
 			case Info::InputDecay_Cv:
-				decayCv = val / cvRangeVolts;
+				decayCv = val;
 				break;
 			case Info::InputSustain_Cv:
-				sustainCv = val / cvRangeVolts;
+				sustainCv = val;
 				break;
 			case Info::InputRelease_Cv:
-				releaseCv = val / cvRangeVolts;
+				releaseCv = val;
 				break;
 		}
 	}
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut) {
-			return envelopeOutput * maxOutputVolts;
+			return envelopeOutput * MaxOutputVolts;
 		} else {
 			//FIXME: This only works because OutputOut is 5, and the others are 0-4 in AHDSR order
-			return (currentStage == output_id) ? maxOutputVolts : 0;
+			return (currentStage == output_id) ? MaxOutputVolts : 0;
 		}
 	}
 
@@ -125,9 +127,6 @@ private:
 	float releaseCv = 0;
 	int currentStage = 0;
 	Envelope e;
-
-	static constexpr float cvRangeVolts = 5.0f;
-	static constexpr float maxOutputVolts = 8.0f;
 };
 
 } // namespace MetaModule

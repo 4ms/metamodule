@@ -294,7 +294,7 @@ public:
 	}
 
 	void set_input(int input_id, float v) override {
-		float val = v / cvRangeVolts;
+		float val = v / CvRangeVolts;
 
 		switch (input_id) {
 			case 0:
@@ -514,7 +514,6 @@ private:
 	static constexpr float fConst62 = (0.0f - (2.0f * fConst61));
 	static constexpr float fConst63 = (fConst61 * fConst61);
 
-	static constexpr float cvRangeVolts = 5.f;
 	static constexpr float outputScalingVolts = 5.f;
 
 public:

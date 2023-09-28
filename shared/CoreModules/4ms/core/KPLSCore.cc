@@ -50,6 +50,8 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
+		val = val / CvRangeVolts;
+
 		switch (input_id) {
 			case Info::InputTrig:
 				gateInput = val;
@@ -62,7 +64,7 @@ public:
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return karpOut;
+			return karpOut * MaxOutputVolts;
 		return 0.f;
 	}
 

@@ -52,7 +52,7 @@ public:
 				signalInput = val;
 				break;
 			case Info::InputCv:
-				cutoffCV = val / cvRange;
+				cutoffCV = val / CvRangeVolts;
 				break;
 		}
 	}
@@ -80,8 +80,6 @@ private:
 	float cutoffOffset = 0;
 	float signalInput = 0;
 	float signalOutput = 0;
-
-	static constexpr float cvRange = 5.0f;
 };
 
 } // namespace MetaModule

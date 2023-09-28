@@ -55,17 +55,17 @@ public:
 				signalInput = val;
 				break;
 			case Info::InputLength_Cv:
-				lengthCV = val;
+				lengthCV = val / CvRangeVolts;
 				break;
 			case Info::InputDelay_Cv:
-				delayCV = val;
+				delayCV = val / CvRangeVolts;
 				break;
 		}
 	}
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return gateOutput ? 1.f : 0.f;
+			return gateOutput ? MaxOutputVolts : 0.f;
 		return 0.f;
 	}
 

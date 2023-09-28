@@ -51,15 +51,15 @@ public:
 
 	void set_input(int input_id, float val) override {
 		if (input_id == Info::InputInput)
-			signalInput = val;
+			signalInput = val / maxOutputVolts;
 	}
 
 	float get_output(int output_id) const override {
 		switch (output_id) {
 			case Info::OutputEnv:
-				return envOutput;
+				return envOutput * maxOutputVolts;
 			case Info::OutputGate:
-				return gateOutput;
+				return gateOutput * maxOutputVolts;
 			default:
 				return 0.f;
 		}
@@ -84,6 +84,9 @@ private:
 	float gateOutput = 0;
 	SchmittTrigger wc;
 	ExpDecay slew;
+
+	static constexpr float cvRangeVolts = 5.0f;
+	static constexpr float maxOutputVolts = 8.0f;
 };
 
 } // namespace MetaModule

@@ -88,6 +88,7 @@ private:
 
 	bool in1Connected = false;
 	bool in2Connected = false;
+
 	static constexpr float defaultVoltage = 5.f;
 };
 

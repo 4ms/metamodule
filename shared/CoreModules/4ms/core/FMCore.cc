@@ -66,6 +66,7 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
+		val = val / cvRangeVolts;
 		switch (input_id) {
 			case Info::InputIndex_Cv_In:
 				indexCV = val;
@@ -87,7 +88,7 @@ public:
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return mainOutput;
+			return mainOutput * maxOutputVolts;
 		return 0.f;
 	}
 
@@ -133,6 +134,9 @@ private:
 	float pitchInput = 0;
 	float shapeAmount = 0;
 	float indexAmount = 0;
+
+	static constexpr float cvRangeVolts = 5.0f;
+	static constexpr float maxOutputVolts = 8.0f;
 
 	const float ratioTable[8] = {0.125f, 0.25f, 0.5f, 1, 2, 4, 8, 16};
 };

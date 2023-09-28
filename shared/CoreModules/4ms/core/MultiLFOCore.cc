@@ -1,6 +1,8 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "core/helpers/EdgeDetector.h"
 #include "info/MultiLFO_info.hh"
+#include "processors/tools/schmittTrigger.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
@@ -49,7 +51,7 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
-		val = val / cvRangeVolts;
+		val = val / CvRangeVolts;
 
 		switch (input_id) {
 			case Info::InputRate_Cv:
@@ -63,12 +65,8 @@ public:
 				pwCV = val;
 				break;
 			case Info::InputReset:
-				//TODO: use schmitt-trigger
-				lastReset = currentReset;
-				currentReset = val > 0.2f;
-				if (currentReset > lastReset) {
+				if (reset_edge(reset.update(val)))
 					phaccu = 0;
-				}
 				break;
 		}
 	}
@@ -76,16 +74,16 @@ public:
 	float get_output(int output_id) const override {
 		switch (output_id) {
 			case Info::OutputSine:
-				return sinTable.interp_wrap(modPhase) * outputScalingVolts;
+				return sinTable.interp_wrap(modPhase) * MaxOutputVolts;
 				break;
 			case Info::OutputSaw:
-				return (modPhase * 2.f - 1.f) * outputScalingVolts;
+				return (modPhase * 2.f - 1.f) * MaxOutputVolts;
 				break;
 			case Info::OutputInv_Saw:
-				return (1.f - modPhase * 2.f) * outputScalingVolts;
+				return (1.f - modPhase * 2.f) * MaxOutputVolts;
 				break;
 			case Info::OutputPulse:
-				return (modPhase < (pwOffset + pwCV)) ? outputScalingVolts : -outputScalingVolts;
+				return (modPhase < (pwOffset + pwCV)) ? MaxOutputVolts : -MaxOutputVolts;
 				break;
 		}
 		return 0.f;
@@ -117,11 +115,12 @@ private:
 	float pwCV = 0.f;
 	float modPhase = 0.f;
 	float phaseOffset = 0.f;
-	bool currentReset = 0.f;
-	bool lastReset = 0.f;
 
-	static constexpr float cvRangeVolts = 5.f;
-	static constexpr float outputScalingVolts = 8.f;
+	// bool currentReset = 0.f;
+	// bool lastReset = 0.f;
+
+	SchmittTrigger reset;
+	EdgeDetector reset_edge;
 };
 
 } // namespace MetaModule
