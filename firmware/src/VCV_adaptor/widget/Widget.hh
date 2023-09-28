@@ -61,7 +61,7 @@ struct FramebufferWidget : Widget {};
 
 // Should be called SvgParamWidget
 struct SvgWidget : Widget {
-	SvgWidget *bg /*= this*/;
+	SvgWidget *bg = this;
 	NVGcolor bgColor;
 	bool visible;
 

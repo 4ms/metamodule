@@ -10,7 +10,7 @@ namespace rack::app
 struct PortWidget : widget::Widget {
 	int portId = -1;
 	engine::Port::Type type = engine::Port::INPUT;
-	engine::Module *module;
+	engine::Module *module = nullptr;
 
 	engine::PortInfo *getPortInfo() {
 		if (!module)
@@ -23,9 +23,9 @@ struct PortWidget : widget::Widget {
 };
 
 struct SvgPort : PortWidget {
-	widget::FramebufferWidget *fb;
+	widget::FramebufferWidget *fb = nullptr;
 	// CircularShadow* shadow;
-	widget::SvgWidget *sw;
+	widget::SvgWidget *sw = nullptr;
 
 	void setSvg(std::shared_ptr<window::Svg> svg) {
 	}
@@ -51,13 +51,19 @@ struct ModuleLightWidget : widget::Widget {
 // Params
 struct ParamWidget : widget::SvgWidget {
 	int paramId = -1;
-	engine::Module *module;
+	engine::Module *module = nullptr;
+
+	widget::SvgWidget *fg = &_bg;
+	widget::SvgWidget *bg = &_bg;
 
 	engine::ParamQuantity *getParamQuantity() {
 		if (!module)
 			return nullptr;
 		return module->getParamQuantity(paramId);
 	}
+
+private:
+	widget::SvgWidget _bg;
 };
 
 struct SvgSlider : ParamWidget {
