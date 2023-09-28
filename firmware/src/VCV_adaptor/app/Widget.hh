@@ -1,4 +1,6 @@
 #pragma once
+#include "VCV_adaptor/engine/Module.hpp"
+#include "VCV_adaptor/engine/PortInfo.hpp"
 #include "VCV_adaptor/widget/Widget.hh"
 
 namespace rack::app
@@ -7,19 +9,29 @@ namespace rack::app
 // Ports
 struct PortWidget : widget::Widget {
 	int portId = -1;
+	engine::Port::Type type = engine::Port::INPUT;
+	engine::Module *module;
+
+	engine::PortInfo *getPortInfo() {
+		if (!module)
+			return nullptr;
+		if (type == engine::Port::INPUT)
+			return (size_t)portId < module->inputInfos.size() ? module->inputInfos[portId].get() : nullptr;
+		else
+			return (size_t)portId < module->outputInfos.size() ? module->outputInfos[portId].get() : nullptr;
+	}
 };
 
 struct SvgPort : PortWidget {
-	widget::FramebufferWidget* fb;
+	widget::FramebufferWidget *fb;
 	// CircularShadow* shadow;
-	widget::SvgWidget* sw;
+	widget::SvgWidget *sw;
 
-	void setSvg(std::shared_ptr<window::Svg> svg){
+	void setSvg(std::shared_ptr<window::Svg> svg) {
 	}
 	void setSVG(std::shared_ptr<window::Svg> svg) {
 		setSvg(svg);
 	}
-
 };
 
 // Lights
@@ -39,6 +51,13 @@ struct ModuleLightWidget : widget::Widget {
 // Params
 struct ParamWidget : widget::SvgWidget {
 	int paramId = -1;
+	engine::Module *module;
+
+	engine::ParamQuantity *getParamQuantity() {
+		if (!module)
+			return nullptr;
+		return module->getParamQuantity(paramId);
+	}
 };
 
 struct SvgSlider : ParamWidget {

@@ -1,7 +1,7 @@
 #pragma once
 #include "VCV_adaptor/common.hpp"
 #include "VCV_adaptor/engine/Port.hpp"
-#include <string_view>
+#include <string>
 
 namespace rack::engine
 {
@@ -13,17 +13,17 @@ struct PortInfo {
 	Port::Type type = Port::INPUT;
 	int portId = -1;
 
-	std::string_view name;
-	std::string_view description;
+	std::string name;
+	std::string description;
 
-	std::string_view getName() {
-		return "";
+	std::string getName() {
+		return name;
 	}
-	std::string_view getFullName() {
-		return "";
+	std::string getFullName() {
+		return name;
 	}
-	std::string_view getDescription() {
-		return "";
+	std::string getDescription() {
+		return description;
 	}
 };
 

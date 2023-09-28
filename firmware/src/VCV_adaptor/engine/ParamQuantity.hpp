@@ -19,13 +19,13 @@ struct ParamQuantity {
 	float maxValue = 1.f;
 	float defaultValue = 0.f;
 
-	std::string_view name = "";
-	std::string_view unit = "";
+	std::string name = "";
+	std::string unit = "";
 	float displayBase = 0.f;
 	float displayMultiplier = 1.f;
 	float displayOffset = 0.f;
 	int displayPrecision = 5;
-	std::string_view description = "";
+	std::string description = "";
 	bool resetEnabled = true;
 	bool randomizeEnabled = true;
 	bool smoothEnabled = false;
