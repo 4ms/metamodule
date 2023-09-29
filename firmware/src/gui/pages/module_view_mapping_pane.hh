@@ -219,7 +219,8 @@ private:
 			for (auto &map : set.set) {
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					auto name = PanelDef::get_map_param_name(map.panel_knob_id);
-					auto obj = list.create_map_list_item(name, set.name.c_str(), map.panel_knob_id % 6);
+					auto setname = patch.validate_knob_set_name(set_i);
+					auto obj = list.create_map_list_item(name, setname, map.panel_knob_id % 6);
 					group_edit_button(obj, set_i);
 					has_mapping = true;
 				}
