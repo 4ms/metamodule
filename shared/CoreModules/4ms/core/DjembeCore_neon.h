@@ -111,7 +111,6 @@ public:
 		signalOut += iirs[2].calc_4iir(noiseBurst);
 		signalOut += iirs[3].calc_4iir(noiseBurst);
 		signalOut += iirs[4].calc_4iir(noiseBurst);
-		signalOut *= 0.05f;
 		// Debug::Pin1::low();
 	}
 
@@ -224,7 +223,8 @@ public:
 	}
 
 	float get_output(const int output_id) const override {
-		return signalOut * outputScalingVolts;
+		constexpr float algorithmScale = 8.f;
+		return signalOut * (outputScalingVolts / algorithmScale);
 	}
 
 private:

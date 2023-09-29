@@ -219,7 +219,7 @@ public:
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return drumOutput * MaxOutputVolts;
+			return drumOutput * outputVolts;
 		return 0.f;
 	}
 
@@ -239,6 +239,8 @@ public:
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
+
+	static constexpr float outputVolts = 5.f;
 };
 
 } // namespace MetaModule

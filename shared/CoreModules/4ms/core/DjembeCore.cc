@@ -176,7 +176,6 @@ public:
 		signalOut += 0.00308641978f * (fRec21[0] - fRec21[2]);
 		signalOut += 0.00277008303f * (fRec22[0] - fRec22[2]);
 		signalOut += 0.00249999994f * (fRec23[0] - fRec23[2]);
-		signalOut *= 0.05f;
 
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
@@ -325,7 +324,8 @@ public:
 	}
 
 	float get_output(const int output_id) const override {
-		return signalOut * outputScalingVolts;
+		constexpr float algorithmScale = 8.f;
+		return signalOut * (outputScalingVolts / algorithmScale);
 	}
 
 private:
