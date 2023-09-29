@@ -135,7 +135,7 @@ struct KnobSetViewPage : PageBase {
 			}
 		}
 
-		bool is_patch_playing = true;
+		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
 		if (is_patch_playing) {
 			for (unsigned i = 0; i < params.knobs.size(); i++) {
 				if (auto val = ElementUpdate::get_mapped_param_value(params, i); val.has_value()) {
