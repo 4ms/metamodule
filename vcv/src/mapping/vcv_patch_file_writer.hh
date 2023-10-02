@@ -93,9 +93,10 @@ struct VCVPatchFileWriter {
 		pw.setCableList(cableData);
 		pw.setParamList(paramData);
 
+		// Add module state from Module::dataToJson()
 		for (auto moduleID : engine->getModuleIds()) {
 			auto *module = engine->getModule(moduleID);
-			if (ModuleDirectory::isInPlugin(module)) {
+			if (ModuleDirectory::isInPlugin(module) && !ModuleDirectory::isHub(module)) {
 				pw.addModuleStateJson(module);
 			}
 		}
