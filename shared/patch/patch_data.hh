@@ -15,6 +15,8 @@ struct PatchData {
 	std::vector<MappedOutputJack> mapped_outs;
 	std::vector<StaticParam> static_knobs;
 	std::vector<MappedKnobSet> knob_sets;
+	std::vector<ModuleInitState> module_states;
+
 	// TODO: update:
 	// ryml_tests/patchlist_ryml_tests
 	// firmware/../patch_player and tests

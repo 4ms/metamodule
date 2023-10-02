@@ -33,6 +33,19 @@ void write(ryml::NodeRef *n, MappedKnobSet const &knob_set) {
 	n->append_child() << ryml::key("set") << knob_set.set;
 }
 
+// TODO:
+// void write(ryml::NodeRef *n, InternalCable const &cable){
+// }
+
+// void write(ryml::NodeRef *n, MappedInputJack const &j){
+// }
+
+// void write(ryml::NodeRef *n, MappedOutputJack const &j){
+// }
+
+// void write(ryml::NodeRef *n, StaticParam const &k){
+// }
+
 bool read(ryml::ConstNodeRef const &n, Jack *jack) {
 	if (n.num_children() < 2)
 		return false;
@@ -180,6 +193,28 @@ bool read(ryml::ConstNodeRef const &n, StaticParam *k) {
 	n["module_id"] >> k->module_id;
 	n["param_id"] >> k->param_id;
 	n["value"] >> k->value;
+
+	return true;
+}
+
+bool read(ryml::ConstNodeRef const &n, ModuleInitState *m) {
+	if (n.num_children() < 2)
+		return false;
+
+	if (!n.is_map())
+		return false;
+	if (!n.has_child("id"))
+		return false;
+	if (!n.has_child("data"))
+		return false;
+
+	n["id"] >> m->module_id;
+
+	// The "data" field is stored as raw json string
+	// because vcv-native modules need to be passed a jansson object
+	ryml::ConstNodeRef data_node = n["data"];
+	m->data_json = ryml::emitrs_json<std::string>(data_node);
+	m->data_json = "{" + m->data_json + "}";
 
 	return true;
 }
