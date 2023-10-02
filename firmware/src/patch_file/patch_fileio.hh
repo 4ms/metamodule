@@ -185,10 +185,10 @@ private:
 		_buf[63] = 0;
 
 		auto header = std::string_view{_buf.data(), _buf.size()};
-		const std::string_view name_tag{"patch_name: "};
+		std::string_view name_tag{"patch_name"};
 		auto startpos = header.find(name_tag);
 		if (startpos == header.npos) {
-			pr_log("File does not contain with '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
+			pr_log("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
 			return "";
 		}
 
@@ -196,7 +196,7 @@ private:
 		header.remove_prefix(startpos + name_tag.length());
 
 		//Remove leading quotes
-		header.remove_prefix(std::min(header.find_first_not_of("'\""), header.size()));
+		header.remove_prefix(std::min(header.find_first_not_of(" :'\""), header.size()));
 
 		auto endpos = header.find_first_of("'\"\n\r");
 		if (endpos == header.npos) {
@@ -206,6 +206,7 @@ private:
 			return "";
 		}
 		header.remove_suffix(header.size() - endpos);
+
 		return ModuleTypeSlug{header};
 	}
 
