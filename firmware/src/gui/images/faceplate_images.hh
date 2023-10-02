@@ -160,7 +160,7 @@ struct ModuleImages {
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
 
-		if (slug == "Waveshape")
+		if (slug == "Waveshaper")
 			return &Waveshape_240;
 
 		if (slug == "VectorMix")
