@@ -82,7 +82,21 @@ foreach(brand ${brands})
   list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_link_libraries(${brand}Library PRIVATE VCV_adaptor)
+  # target_link_libraries(${brand}Library PRIVATE VCV_adaptor)
+  target_link_libraries(${brand}Library PRIVATE mp15xa7_arch)
+
+  target_include_directories(
+    ${brand}Library
+    PUBLIC ${FWDIR}/src/VCV_adaptor
+           ${FWDIR}/src/VCV_adaptor/pffft
+           ${FWDIR}/lib/jansson
+           ${FWDIR}/lib/jansson/jansson/src
+           ${FWDIR}/src
+           ${FWDIR}
+           ${SHARED}
+           ${SHARED}/cpputil
+  )
+
   target_compile_options(${brand}Library PRIVATE -Wno-attributes)
 
 endforeach()
@@ -180,6 +194,7 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/startup_ca7.s
   #
   ${FWDIR}/src/VCV_adaptor/random.cpp
+  ${FWDIR}/src/VCV_adaptor/engine/Module.cpp
   #
   ${ARTWORK_SOURCES}
 )
@@ -211,6 +226,9 @@ target_include_directories(
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
+          #
+          ${FWDIR}/lib/jansson
+          ${FWDIR}/lib/jansson/jansson/src
 )
 
 target_link_libraries(
@@ -221,6 +239,7 @@ target_link_libraries(
           core4ms
           ui
           ryml
+          VCV_adaptor
 )
 
 foreach(brand ${brands})

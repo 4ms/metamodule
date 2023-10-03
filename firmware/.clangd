@@ -19,6 +19,8 @@ CompileFlags:
 	Add: [
 		"--target=arm-none-eabi", 
         "-std=gnu++2b",
+        "-I../src/medium",
+        "-I../src/console",
 	]
 ---
 If:
