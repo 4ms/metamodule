@@ -17,10 +17,10 @@ void ui_comp_KnobSetGroup_create_hook( lv_obj_t * comp)
 {
 }
 
-void ui_comp_UnmappedSetItem_create_hook( lv_obj_t * comp)
+void ui_comp_MappedKnobSetItem_create_hook( lv_obj_t * comp)
 {
 }
 
-void ui_comp_MappedKnobSetItem_create_hook( lv_obj_t * comp)
+void ui_comp_UnmappedSetItem_create_hook( lv_obj_t * comp)
 {
 }

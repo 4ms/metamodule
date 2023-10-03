@@ -297,7 +297,7 @@ lv_obj_set_y( ui_MappedListPane, 1 );
 lv_obj_set_align( ui_MappedListPane, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_MappedListPane,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_MappedListPane, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
-lv_obj_clear_flag( ui_MappedListPane, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_clear_flag( ui_MappedListPane, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_MappedListPane, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_MappedListPane, lv_color_hex(0x555555), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_MappedListPane, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -372,17 +372,6 @@ lv_obj_set_style_pad_top(ui_MapList, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_MapList, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_MappedKnobSetItem1 = ui_MappedKnobSetItem_create(ui_MapList);
-lv_obj_set_x( ui_MappedKnobSetItem1, 0 );
-lv_obj_set_y( ui_MappedKnobSetItem1, 0 );
-
-
-
-ui_UnmappedSetItem1 = ui_UnmappedSetItem_create(ui_MapList);
-lv_obj_set_x( ui_UnmappedSetItem1, 0 );
-lv_obj_set_y( ui_UnmappedSetItem1, 0 );
-
 
 ui_ControlAlert = lv_obj_create(ui_MappingParameters);
 lv_obj_set_height( ui_ControlAlert, 142);

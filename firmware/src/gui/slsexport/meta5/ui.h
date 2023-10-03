@@ -80,6 +80,8 @@ extern lv_obj_t *ui_KnobsetHeaderLabel;
 extern lv_obj_t *ui_KnobsetCloseButton;
 extern lv_obj_t *ui_KnobsetHeaderLine;
 extern lv_obj_t *ui_ModuleName;
+extern lv_obj_t *ui_DescriptionPanel;
+extern lv_obj_t *ui_Description;
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
 extern lv_obj_t *ui_MappingMenu;
@@ -98,8 +100,6 @@ extern lv_obj_t *ui_MappedItemHeader;
 extern lv_obj_t *ui_MappedItemHeaderMapText;
 extern lv_obj_t *ui_MappedItemHeaderKnobSetText;
 extern lv_obj_t *ui_MapList;
-extern lv_obj_t *ui_MappedKnobSetItem1;
-extern lv_obj_t *ui_UnmappedSetItem1;
 extern lv_obj_t *ui_ControlAlert;
 extern lv_obj_t *ui_ControlArc;
 extern lv_obj_t *ui_ControlAlertLabel;

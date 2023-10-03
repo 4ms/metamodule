@@ -75,6 +75,8 @@ lv_obj_t *ui_KnobsetHeaderLabel;
 lv_obj_t *ui_KnobsetCloseButton;
 lv_obj_t *ui_KnobsetHeaderLine;
 lv_obj_t *ui_ModuleName;
+lv_obj_t *ui_DescriptionPanel;
+lv_obj_t *ui_Description;
 
 
 // SCREEN: ui_MappingMenu
@@ -95,8 +97,6 @@ lv_obj_t *ui_MappedItemHeader;
 lv_obj_t *ui_MappedItemHeaderMapText;
 lv_obj_t *ui_MappedItemHeaderKnobSetText;
 lv_obj_t *ui_MapList;
-lv_obj_t *ui_MappedKnobSetItem1;
-lv_obj_t *ui_UnmappedSetItem1;
 lv_obj_t *ui_ControlAlert;
 lv_obj_t *ui_ControlArc;
 lv_obj_t *ui_ControlAlertLabel;

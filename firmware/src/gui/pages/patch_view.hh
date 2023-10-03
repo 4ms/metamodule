@@ -30,13 +30,15 @@ struct PatchViewPage : PageBase {
 		: PageBase{info}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
-		, cable_drawer{modules_cont, drawn_elements} {
+		, cable_drawer{modules_cont, drawn_elements}
+		, info_group(lv_group_create()) {
 		PageList::register_page(this, PageId::PatchView);
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_InfoButton, infobut_cb, LV_EVENT_PRESSED, this);
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -51,10 +53,16 @@ struct PatchViewPage : PageBase {
 
 		lv_obj_add_style(ui_ModuleName, &Gui::header_style, LV_PART_MAIN);
 		lv_label_set_text(ui_ModuleName, "");
-		lv_obj_add_flag(ui_ModuleName, LV_OBJ_FLAG_HIDDEN);
+		lv_hide(ui_ModuleName);
+
+		lv_hide(ui_DescriptionPanel);
+		lv_group_add_obj(info_group, ui_DescriptionPanel);
 	}
 
 	void prepare_focus() override {
+		lv_hide(ui_DescriptionPanel);
+		lv_label_set_text(ui_Description, patch.description.c_str());
+
 		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
 			displayed_patch_loc == PageList::get_selected_patch_location())
 		{
@@ -145,6 +153,8 @@ struct PatchViewPage : PageBase {
 		knobset_menu.hide();
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_FOCUSED);
+		lv_obj_clear_state(ui_InfoButton, LV_STATE_PRESSED);
+		lv_obj_clear_state(ui_InfoButton, LV_STATE_FOCUSED);
 	}
 
 	void clear() {
@@ -185,6 +195,11 @@ struct PatchViewPage : PageBase {
 				settings_menu.hide();
 			} else if (knobset_menu.visible) {
 				knobset_menu.hide();
+			} else if (showing_info) {
+				showing_info = false;
+				lv_hide(ui_DescriptionPanel);
+				lv_indev_set_group(lv_indev_get_next(nullptr), group);
+				lv_obj_clear_state(ui_InfoButton, LV_STATE_PRESSED);
 			} else if (PageList::request_last_page()) {
 				blur();
 			}
@@ -273,7 +288,7 @@ struct PatchViewPage : PageBase {
 		const auto this_slug = page->patch.module_slugs[module_id];
 		auto module_x = lv_obj_get_x(this_module_obj);
 
-		lv_obj_clear_flag(ui_ModuleName, LV_OBJ_FLAG_HIDDEN);
+		lv_show(ui_ModuleName);
 		lv_label_set_text(ui_ModuleName, this_slug.c_str());
 		lv_obj_set_x(ui_ModuleName, module_x);
 
@@ -290,10 +305,17 @@ struct PatchViewPage : PageBase {
 		page->start_changing_patch();
 	}
 
+	static void infobut_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		lv_show(ui_DescriptionPanel);
+		page->showing_info = true;
+		lv_indev_set_group(lv_indev_get_act(), page->info_group);
+	}
+
 	static void button_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_label_set_text(ui_ModuleName, "");
-		lv_obj_add_flag(ui_ModuleName, LV_OBJ_FLAG_HIDDEN);
+		lv_hide(ui_ModuleName);
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 		page->highlighted_module_id = std::nullopt;
 		page->settings_menu.hide();
@@ -305,6 +327,9 @@ private:
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
 	CableDrawer cable_drawer;
+
+	lv_group_t *info_group;
+	bool showing_info = false;
 
 	PatchViewSettingsMenu::ViewSettings view_settings;
 	PatchViewSettingsMenu settings_menu{view_settings};
