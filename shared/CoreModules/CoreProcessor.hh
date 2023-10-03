@@ -36,4 +36,8 @@ public:
 	}
 
 	virtual ~CoreProcessor() = default;
+
+	// common default values, OK to override or ignored
+	static constexpr float CvRangeVolts = 5.0f;
+	static constexpr float MaxOutputVolts = 8.0f;
 };

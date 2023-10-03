@@ -30,7 +30,7 @@ public:
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return seq.output;
+			return seq.output * CVOutVolts;
 		return 0.f;
 	}
 
@@ -49,6 +49,7 @@ public:
 
 private:
 	StepSequencer seq{4};
+	static constexpr float CVOutVolts = 10.f;
 };
 
 } // namespace MetaModule

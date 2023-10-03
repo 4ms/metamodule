@@ -36,10 +36,10 @@ public:
 	float get_output(const int output_id) const override {
 		switch (output_id) {
 			case Info::Output_1:
-				return output1;
+				return output1 * OutputVoltageRange;
 				break;
 			case Info::Output_2:
-				return output2;
+				return output2 * OutputVoltageRange;
 				break;
 		}
 		return 0;
@@ -58,6 +58,8 @@ public:
 private:
 	float output1;
 	float output2;
+
+	static constexpr float OutputVoltageRange = 10.f;
 };
 
 } // namespace MetaModule

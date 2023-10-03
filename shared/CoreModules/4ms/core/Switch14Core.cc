@@ -57,16 +57,16 @@ public:
 	void set_input(int input_id, float val) override {
 		switch (input_id) {
 			case Info::InputClock: // clock
-				cp.updateClock(val);
+				cp.updateClock(val / CvRangeVolts);
 				break;
 			case Info::InputReset: // reset
-				cp.updateReset(val);
+				cp.updateReset(val / CvRangeVolts);
 				break;
 			case Info::InputIn: // signal
 				inputSignal = val;
 				break;
 			case Info::InputCv:
-				cvSignal = MathTools::constrain(val, 0.0f, 1.0f);
+				cvSignal = MathTools::constrain(val / CvRangeVolts, 0.0f, 1.0f);
 				break;
 		}
 	}

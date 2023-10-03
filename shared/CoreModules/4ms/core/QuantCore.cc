@@ -1,12 +1,14 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "conf/scaling_config.hh"
 #include "info/Quant_info.hh"
-#include "scaling_config.hh"
 #include "util/math.hh"
 #include <cmath>
 
 //FIXME:
-// The code below is for a module with 12 on/off buttons that set the scale
+// This code is broken
+//
+// Also, it's for a module with 12 on/off buttons that set the scale
 // But the current module is three knobs: Scale, Root, Transpose
 // So we need to make Scale select a pre-set scale pattern,
 // And Root transposes it by semitones ("modes")
@@ -21,14 +23,7 @@ class QuantCore : public CoreProcessor {
 	using ThisCore = QuantCore;
 
 public:
-	QuantCore() {
-		outputRangeNotes = (OutputHighRangeVolts - OutputLowRangeVolts) * 12.f;
-		inputRangeNotes = (InputHighRangeVolts - InputLowRangeVolts) * 12.f;
-		rangeScaling = 2.0f * outputRangeNotes / inputRangeNotes;
-		for (int i = 0; i < 12; i++) {
-			keyStatus[i] = false;
-		}
-	}
+	QuantCore() = default;
 
 	void update() override {
 		// Todo: base all values on Low/HighRangeVolts
@@ -74,6 +69,9 @@ public:
 	}
 
 	float get_led_brightness(int led_id) const override {
+		if (led_id < 0 || led_id >= 12)
+			return 0;
+
 		return keyStatus[led_id] ? 1.0f : 0.0f;
 	}
 
@@ -84,14 +82,14 @@ public:
 	// clang-format on
 
 private:
-	bool keyStatus[12];
+	bool keyStatus[12]{};
 
 	float currentNote = 0;
 	float lastNote = 0;
 
-	float outputRangeNotes;
-	float inputRangeNotes;
-	float rangeScaling;
+	static constexpr float outputRangeNotes = 120.f;
+	static constexpr float inputRangeNotes = 120.f;
+	static constexpr float rangeScaling = 2.f * (outputRangeNotes / inputRangeNotes);
 
 	bool scaleChanged = false;
 

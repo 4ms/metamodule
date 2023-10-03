@@ -78,18 +78,17 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
-		switch (input_id) {
-			case Info::InputInput:
-				signalIn = val;
-				break;
+		if (input_id == Info::InputInput)
+			signalIn = val / MaxOutputVolts;
+
+		else {
+			val = val / CvRangeVolts;
 			//TODO handle other CV inputs
-			default:
-				break;
 		}
 	}
 
 	float get_output(int output_id) const override {
-		return signalOut;
+		return signalOut * MaxOutputVolts;
 	}
 
 	void set_samplerate(float sr) override {

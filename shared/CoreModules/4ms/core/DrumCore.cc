@@ -180,6 +180,8 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
+		val = val / CvRangeVolts;
+
 		switch (input_id) {
 			case Info::InputTrigger:
 				gateIn = val;
@@ -217,7 +219,7 @@ public:
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return drumOutput;
+			return drumOutput * outputVolts;
 		return 0.f;
 	}
 
@@ -237,6 +239,8 @@ public:
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
+
+	static constexpr float outputVolts = 5.f;
 };
 
 } // namespace MetaModule

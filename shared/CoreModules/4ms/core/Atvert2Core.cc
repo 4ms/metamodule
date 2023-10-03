@@ -14,18 +14,18 @@ public:
 	Atvert2Core() = default;
 
 	void update(void) override {
-		out1 = (in1Connected ? in1 : 1.f) * level1;
-		out2 = (in2Connected ? in2 : 1.f) * level2;
+		out1 = (in1Connected ? in1 : defaultVoltage) * level1;
+		out2 = (in2Connected ? in2 : defaultVoltage) * level2;
 	}
 
 	void set_param(int param_id, float val) override {
-		float mappedVal = MathTools::map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
+		float bipolarKnob = MathTools::map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 		switch (param_id) {
 			case Info::Knob_1:
-				level1 = mappedVal;
+				level1 = bipolarKnob;
 				break;
 			case Info::Knob_2:
-				level2 = mappedVal;
+				level2 = bipolarKnob;
 				break;
 		}
 	}
@@ -39,7 +39,7 @@ public:
 				in1 = val;
 				break;
 			case Info::InputIn_2:
-				in2 = 1.0f;
+				in2 = val;
 				break;
 		}
 	}
@@ -66,9 +66,9 @@ public:
 	}
 
 	void mark_input_patched(int input_id) override {
-		if (input_id == 0)
+		if (input_id == Info::InputIn_1)
 			in1Connected = true;
-		else if (input_id == 1)
+		else if (input_id == Info::InputIn_2)
 			in2Connected = true;
 	}
 
@@ -88,6 +88,8 @@ private:
 
 	bool in1Connected = false;
 	bool in2Connected = false;
+
+	static constexpr float defaultVoltage = 5.f;
 };
 
 } // namespace MetaModule

@@ -3,6 +3,7 @@
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
+#include "conf/scaling_config.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
@@ -110,31 +111,16 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
 
-	// Do this, then we don't have to also scale.
-	// But we still need to clamp
-	// constexpr uint32_t TenVolts = 0x007FFFFF;
-	// constexpr uint32_t TwoVolts = TenVolts / 5;
-	// constexpr uint32_t FourVolts = TwoVolts * 2;
-	// // use the raw int value read when calibrating (can be a float since we'll probably average it over 200ms or
-	// whatever) incal[3].calibrate_chan<TwoVolts, FourVolts>(6352.f / 32768.f * 83886308..., 12610.f / 32768.f);
-	//
-	// This converts float to volts
-	incal[3].calibrate_chan<2, 4, 10>(6352.f / 32768.f, 12603.f / 32768.f);
+	//TODO: User/factory routine to calibrate jacks
+	for (auto &inc : incal)
+		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
+			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
-	auto raw_out = -1.f * player.get_panel_output(output_id) * mute_ctr;
+	auto raw_out = player.get_panel_output(output_id) * mute_ctr;
+	raw_out = -raw_out / OutputHighRangeVolts;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
-	return scaled_out;
-}
-
-// Todo: the scaling and offset shouold be part of the AuxStream, so we can support different types of DACs
-uint32_t AudioStream::get_dac_output(int output_id) {
-	auto raw_out = player.get_panel_output(output_id);
-	raw_out *= -1.f;
-	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
-	scaled_out *= AuxStream::DACscaling;
-	scaled_out += 0x00800000;
 	return scaled_out;
 }
 
@@ -191,23 +177,21 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [codec_chan_i, inchan] : countzip(in_.chan)) {
 			auto panel_jack_i = PanelDef::audioin_order[codec_chan_i];
 
+			// Skip unpatched jacks
 			if (((jack_sense >> jacksense_pin_order[panel_jack_i]) & 1) == 0)
 				continue;
 
-			float scaled_input = incal[panel_jack_i].adjust(AudioInFrame::scaleInput(inchan));
-			// TODO: bake the unsigned=>float conversion into Calibrate::adjust(), and then use sign_extend instead of scaleInput
+			float scaled_input = incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
 
 			player.set_panel_input(panel_jack_i, scaled_input);
 			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
 		}
 
-		// Pass CV values to modules (not in current version)
-		// for (auto [i, cv] : countzip(params_.cvjacks))
-		// 	player.set_panel_input(i + FirstCVInput, cv);
-
 		for (auto [i, gatein] : countzip(params_.gate_ins)) {
-			player.set_panel_input(i + FirstGateInput, gatein.is_high() ? 1.f : 0.f);
-			//TODO: set param_state.gate_ins if it changed
+			if (gatein.just_went_high())
+				player.set_panel_input(i + FirstGateInput, 8.f);
+			if (gatein.just_went_low())
+				player.set_panel_input(i + FirstGateInput, 0.f);
 		}
 
 		// Pass Knob values to modules
@@ -234,14 +218,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		// Get outputs from modules
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
-
-		// DAC output (not in current hardware)
-		// for (unsigned i = 0; i < PanelDef::NumDACOut; i++)
-		// 	aux_.set_output(i, get_dac_output(i + PanelDef::NumAudioOut));
-
-		// Gate outputs (not in current hardware)
-		// for (auto [i, gate_out] : countzip(aux_.gate_out))
-		// 	gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
 }
 

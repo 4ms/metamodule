@@ -58,7 +58,7 @@ public:
 		} else if (input_id == Info::InputReset) {
 			cp.updateReset(val);
 		} else if (input_id == Info::InputCv) {
-			cvInput = MathTools::constrain(val, 0.0f, 1.0f);
+			cvInput = MathTools::constrain(val / CvRangeVolts, 0.0f, 1.0f);
 		} else if (input_id >= Info::InputIn_1 && input_id <= Info::InputIn_4) {
 			auto inputNum = input_id - Info::InputIn_1;
 			signalInputs[inputNum] = val;

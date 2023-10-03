@@ -67,6 +67,8 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
+		val = val / CvRangeVolts;
+
 		switch (input_id) {
 			case Info::InputInput:
 				gateInput = val;
@@ -91,10 +93,10 @@ public:
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut) {
-			return envelopeOutput;
+			return envelopeOutput * MaxOutputVolts;
 		} else {
 			//FIXME: This only works because OutputOut is 5, and the others are 0-4 in AHDSR order
-			return (currentStage == output_id) ? 1 : 0;
+			return (currentStage == output_id) ? MaxOutputVolts : 0;
 		}
 	}
 
