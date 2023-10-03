@@ -274,3 +274,55 @@ R"(SomeStruct:
 	CHECK(ph.num_static_knobs == 8);
 	CHECK(ph.num_mapped_knobs == 9);
 }
+
+TEST_CASE("Multiple root-level siblings") {
+	char yml_buf[] = R"(
+Sibling0:
+  data1: 1
+'Sibling1':
+  'data3': 'ABCD'
+  'data4': 9
+  'data5': UNQUOTED 
+  data2: "test123"
+'Sibling2':
+)";
+
+	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yml_buf));
+
+	CHECK(tree.size() == 9); // Root + 8 elements (essentially 1 + Number of Lines)
+
+	// Different ways of seeing how many root-level siblings
+	CHECK(tree.num_children(0) == 3); //number of children of node 0 (root node)
+	CHECK(tree.num_siblings(1) == 3); //number of siblings of node 1 (Sibling0)
+
+	auto root = tree.rootref();
+	CHECK(root.num_children() == 3);
+
+	CHECK(root.has_child("Sibling0"));
+	CHECK(root.has_child("Sibling1"));
+	CHECK(root.has_child("Sibling2"));
+	CHECK(!root.has_child("Sibling3"));
+
+	ryml::ConstNodeRef sib0 = root["Sibling0"];
+	ryml::ConstNodeRef sib1 = root["Sibling1"];
+	ryml::ConstNodeRef sib2 = root["Sibling2"];
+
+	CHECK(sib0.key() == "Sibling0");
+	CHECK(sib0.num_children() == 1);
+	CHECK(sib0.child(0).key() == "data1");
+	CHECK(sib0.child(0).val() == "1");
+
+	CHECK(sib1.key() == "Sibling1");
+	CHECK(sib1.num_children() == 4);
+	CHECK(sib1.child(0).key() == "data3");
+	CHECK(sib1.child(0).val() == "ABCD");
+	CHECK(sib1.child(1).key() == "data4");
+	CHECK(sib1.child(1).val() == "9");
+	CHECK(sib1.child(2).key() == "data5");
+	CHECK(sib1.child(2).val() == "UNQUOTED");
+	CHECK(sib1.child(3).key() == "data2");
+	CHECK(sib1.child(3).val() == "test123");
+
+	CHECK(sib2.key() == "Sibling2");
+	CHECK(sib2.num_children() == 0);
+}

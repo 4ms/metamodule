@@ -33,6 +33,19 @@ void write(ryml::NodeRef *n, MappedKnobSet const &knob_set) {
 	n->append_child() << ryml::key("set") << knob_set.set;
 }
 
+// TODO:
+// void write(ryml::NodeRef *n, InternalCable const &cable){
+// }
+
+// void write(ryml::NodeRef *n, MappedInputJack const &j){
+// }
+
+// void write(ryml::NodeRef *n, MappedOutputJack const &j){
+// }
+
+// void write(ryml::NodeRef *n, StaticParam const &k){
+// }
+
 bool read(ryml::ConstNodeRef const &n, Jack *jack) {
 	if (n.num_children() < 2)
 		return false;
@@ -63,7 +76,7 @@ bool read(ryml::ConstNodeRef const &n, InternalCable *cable) {
 		return false;
 	cable->ins.reserve(num_ins);
 	n["ins"] >> cable->ins;
-	
+
 	if (n.has_child("color")) {
 		uint16_t color;
 		n["color"] >> color;
@@ -93,8 +106,12 @@ bool read(ryml::ConstNodeRef const &n, MappedInputJack *j) {
 	j->ins.reserve(num_ins);
 	n["ins"] >> j->ins;
 
-	if (n.has_child("alias_name"))
-		n["alias_name"] >> j->alias_name;
+	if (n.has_child("alias_name")) {
+		if (n["alias_name"].val().size())
+			n["alias_name"] >> j->alias_name;
+		else
+			j->alias_name = "";
+	}
 
 	return true;
 }
@@ -112,8 +129,12 @@ bool read(ryml::ConstNodeRef const &n, MappedOutputJack *j) {
 	n["panel_jack_id"] >> j->panel_jack_id;
 	n["out"] >> j->out;
 
-	if (n.has_child("alias_name"))
-		n["alias_name"] >> j->alias_name;
+	if (n.has_child("alias_name")) {
+		if (n["alias_name"].val().size())
+			n["alias_name"] >> j->alias_name;
+		else
+			j->alias_name = "";
+	}
 
 	return true;
 }
@@ -143,8 +164,12 @@ bool read(ryml::ConstNodeRef const &n, MappedKnob *k) {
 	n["min"] >> k->min;
 	n["max"] >> k->max;
 
-	if (n.has_child("alias_name"))
-		n["alias_name"] >> k->alias_name;
+	if (n.has_child("alias_name")) {
+		if (n["alias_name"].val().size())
+			n["alias_name"] >> k->alias_name;
+		else
+			k->alias_name = "";
+	}
 
 	return true;
 }
@@ -157,8 +182,12 @@ bool read(ryml::ConstNodeRef const &n, MappedKnobSet *ks) {
 	if (!n.has_child("set"))
 		return false;
 
-	if (n.has_child("name"))
-		n["name"] >> ks->name;
+	if (n.has_child("name")) {
+		if (n["name"].val().size())
+			n["name"] >> ks->name;
+		else
+			ks->name = "";
+	}
 
 	n["set"] >> ks->set;
 
@@ -180,6 +209,28 @@ bool read(ryml::ConstNodeRef const &n, StaticParam *k) {
 	n["module_id"] >> k->module_id;
 	n["param_id"] >> k->param_id;
 	n["value"] >> k->value;
+
+	return true;
+}
+
+bool read(ryml::ConstNodeRef const &n, ModuleInitState *m) {
+	if (n.num_children() < 2)
+		return false;
+
+	if (!n.is_map())
+		return false;
+	if (!n.has_child("id"))
+		return false;
+	if (!n.has_child("data"))
+		return false;
+
+	n["id"] >> m->module_id;
+
+	// The "data" field is stored as raw json string
+	// because vcv-native modules need to be passed a jansson object
+	ryml::ConstNodeRef data_node = n["data"];
+	m->data_json = ryml::emitrs_json<std::string>(data_node);
+	m->data_json = "{" + m->data_json + "}";
 
 	return true;
 }
