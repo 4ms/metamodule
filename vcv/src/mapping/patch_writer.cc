@@ -4,8 +4,6 @@
 #include "patch_convert/ryml/ryml_serial.hh"
 #include <algorithm>
 
-#include <iostream>
-
 PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId)
 	: hubModuleId{hubModuleId} {
 	setModuleList(modules);
