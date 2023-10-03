@@ -24,6 +24,7 @@ struct ModuleViewMappingPane {
 
 	void init() {
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ControlArc, arc_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		//RELEASE = click on arc when done turning it
 		lv_obj_add_event_cb(ui_ControlArc, control_button_cb, LV_EVENT_RELEASED, this);
@@ -255,6 +256,12 @@ private:
 			knobset_id = *static_cast<uint32_t *>(knobset_ptr);
 		}
 		page->add_map_popup.show(knobset_id, page->drawn_element->gui_element.idx.param_idx);
+	}
+
+	static void scroll_to_top(lv_event_t *event) {
+		if (event->target == ui_ControlButton) {
+			lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_ON);
+		}
 	}
 
 	static void control_button_cb(lv_event_t *event) {

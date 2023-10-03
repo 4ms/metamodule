@@ -30,7 +30,7 @@ public:
 	CableDrawer(lv_obj_t *parent, const std::vector<DrawnElement> &drawn_elements)
 		: drawn{drawn_elements}
 		, canvas(lv_canvas_create(parent)) {
-		lv_obj_set_size(canvas, 320, Height); //TODO: same as modules_cont height
+		lv_obj_set_size(canvas, 320, Height);
 		lv_obj_set_align(canvas, LV_ALIGN_TOP_LEFT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_IGNORE_LAYOUT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
@@ -58,6 +58,10 @@ public:
 
 	void clear() {
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
+	}
+
+	void set_height(int16_t height) {
+		lv_obj_set_height(canvas, height);
 	}
 
 	void draw(const PatchData &patch) {

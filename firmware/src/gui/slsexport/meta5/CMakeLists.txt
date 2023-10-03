@@ -1,8 +1,8 @@
 SET(SOURCES components/ui_comp_knobcontainer.c
     components/ui_comp_knobcontainerbig.c
     components/ui_comp_knobsetgroup.c
-    components/ui_comp_mappedknobsetitem.c
     components/ui_comp_unmappedsetitem.c
+    components/ui_comp_mappedknobsetitem.c
     components/ui_comp.c
     screens/ui_PatchSelectorPage.c
     screens/ui_PatchViewPage.c

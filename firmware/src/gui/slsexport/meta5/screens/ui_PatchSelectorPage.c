@@ -61,7 +61,7 @@ lv_obj_set_style_radius(ui_PatchSelectorTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT
 lv_obj_set_style_pad_left(ui_PatchSelectorTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_PatchSelectorTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PatchSelectorTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_PatchSelectorTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_PatchSelectorTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_PlayIcon = lv_label_create(ui_PatchSelectorTitlePanel);
 lv_obj_set_width( ui_PlayIcon, LV_SIZE_CONTENT);  /// 1

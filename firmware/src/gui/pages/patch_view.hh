@@ -17,6 +17,7 @@
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
+#include "src/core/lv_obj_scroll.h"
 #include "util/countzip.hh"
 
 namespace MetaModule
@@ -28,8 +29,7 @@ struct PatchViewPage : PageBase {
 	PatchViewPage(PatchInfo info)
 		: PageBase{info}
 		, base(ui_PatchViewPage)
-		, module_name(lv_label_create(base))
-		, modules_cont(lv_obj_create(base))
+		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements} {
 		PageList::register_page(this, PageId::PatchView);
 
@@ -49,19 +49,9 @@ struct PatchViewPage : PageBase {
 		settings_menu.init();
 		knobset_menu.init();
 
-		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
-		lv_label_set_text(module_name, "Select a module:");
-
-		lv_obj_set_size(modules_cont, 320, 4 * Height + 8);
-		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
-		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
-		lv_obj_set_style_border_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
-		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW_WRAP);
-		lv_obj_set_style_pad_gap(modules_cont, 3, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_all(modules_cont, 2, LV_STATE_DEFAULT);
-		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
-		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_add_style(ui_ModuleName, &Gui::header_style, LV_PART_MAIN);
+		lv_label_set_text(ui_ModuleName, "");
+		lv_obj_add_flag(ui_ModuleName, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void prepare_focus() override {
@@ -104,6 +94,7 @@ struct PatchViewPage : PageBase {
 		auto module_drawer = ModuleDrawer{modules_cont, Height};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
+		int bottom = 0;
 
 		for (auto [module_idx, slug] : enumerate(patch.module_slugs)) {
 			module_ids.push_back(module_idx);
@@ -118,6 +109,8 @@ struct PatchViewPage : PageBase {
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
 			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) * Height);
+			int this_bottom = lv_obj_get_y(canvas) + lv_obj_get_height(canvas);
+			bottom = std::max(bottom, this_bottom);
 
 			module_canvases.push_back(canvas);
 
@@ -138,6 +131,7 @@ struct PatchViewPage : PageBase {
 
 		highlighted_module_id = std::nullopt;
 		update_map_ring_style();
+		cable_drawer.set_height(bottom + 30);
 		cable_drawer.draw(patch);
 
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
@@ -277,7 +271,11 @@ struct PatchViewPage : PageBase {
 		page->highlighted_module_id = module_id;
 
 		const auto this_slug = page->patch.module_slugs[module_id];
-		lv_label_set_text(page->module_name, this_slug.c_str());
+		auto module_x = lv_obj_get_x(this_module_obj);
+
+		lv_obj_clear_flag(ui_ModuleName, LV_OBJ_FLAG_HIDDEN);
+		lv_label_set_text(ui_ModuleName, this_slug.c_str());
+		lv_obj_set_x(ui_ModuleName, module_x);
 
 		page->update_map_ring_style();
 	}
@@ -294,7 +292,8 @@ struct PatchViewPage : PageBase {
 
 	static void button_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		lv_label_set_text(page->module_name, "Select a module:");
+		lv_label_set_text(ui_ModuleName, "");
+		lv_obj_add_flag(ui_ModuleName, LV_OBJ_FLAG_HIDDEN);
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 		page->highlighted_module_id = std::nullopt;
 		page->settings_menu.hide();
@@ -304,7 +303,6 @@ struct PatchViewPage : PageBase {
 private:
 	// lv_obj_t *description;
 	lv_obj_t *base;
-	lv_obj_t *module_name;
 	lv_obj_t *modules_cont;
 	CableDrawer cable_drawer;
 

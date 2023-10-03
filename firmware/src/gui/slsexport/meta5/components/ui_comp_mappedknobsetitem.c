@@ -23,10 +23,10 @@ lv_obj_set_style_radius(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT
 lv_obj_set_style_bg_color(cui_MappedKnobSetItem, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(cui_MappedKnobSetItem, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(cui_MappedKnobSetItem, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(cui_MappedKnobSetItem, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(cui_MappedKnobSetItem, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(cui_MappedKnobSetItem, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_color(cui_MappedKnobSetItem, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -36,6 +36,9 @@ lv_obj_set_style_text_decor(cui_MappedKnobSetItem, LV_TEXT_DECOR_NONE, LV_PART_M
 lv_obj_set_style_text_font(cui_MappedKnobSetItem, &ui_font_MuseoSansRounded90018, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(cui_MappedKnobSetItem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_bg_opa(cui_MappedKnobSetItem, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_border_width(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(cui_MappedKnobSetItem, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 lv_obj_t *cui_Circle;
 cui_Circle = lv_btn_create(cui_MappedKnobSetItem);
