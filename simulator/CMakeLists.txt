@@ -54,6 +54,8 @@ set(CORE_MODULES
 
 add_subdirectory(${MM_ROOT}/firmware/src/VCV_adaptor
                  ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
+target_sources(VCV_adaptor PRIVATE stubs/random.cpp)
+target_include_directories(VCV_adaptor PRIVATE stubs/)
 
 # #################### Other brands ##################################
 

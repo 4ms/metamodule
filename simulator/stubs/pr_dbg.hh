@@ -5,10 +5,10 @@ namespace
 {
 
 // Change these to enable/disable logging levels
-inline constexpr bool PRINT_ERROR = true;
-inline constexpr bool PRINT_WARN = true;
-inline constexpr bool PRINT_DEBUG = false;
-inline constexpr bool PRINT_TRACE = false;
+constexpr inline bool PRINT_ERROR = true;
+constexpr inline bool PRINT_WARN = true;
+constexpr inline bool PRINT_DEBUG = true;
+constexpr inline bool PRINT_TRACE = false;
 
 inline void do_printf_(auto str) {
 	printf_("%s", str);
@@ -39,3 +39,4 @@ inline void pr_trace(auto... args) {
 }
 
 } // namespace
+

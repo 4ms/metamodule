@@ -49,7 +49,8 @@ target_link_libraries(core4ms PUBLIC mp15xa7_arch)
 # VCV Adaptor
 #
 add_subdirectory(VCV_adaptor)
-target_link_libraries(VCV_adaptor PUBLIC mp15xa7_arch mdrivlib_interface)
+target_link_libraries(VCV_adaptor PUBLIC mp15xa7_arch)
+target_include_directories(VCV_adaptor PRIVATE console/) # For pr_dbg, etc
 target_link_libraries(jansson PUBLIC mp15xa7_arch)
 
 #
