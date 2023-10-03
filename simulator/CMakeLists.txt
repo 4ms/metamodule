@@ -21,11 +21,6 @@ add_subdirectory(lvgl_drv)
 
 include(${LVGL_DIR}/CMakeLists.txt)
 
-# #################### Gui Assets ############################################
-
-file(GLOB GUI_IMAGES ${MM_ROOT}/firmware/src/gui/images/4ms/modules/*.c
-     ${MM_ROOT}/firmware/src/gui/images/4ms/components/*.c)
-
 # #################### SLS Export ##################################
 
 file(STRINGS ${MM_ROOT}/firmware/src/gui/slsexport/meta5/filelist.txt
@@ -60,8 +55,6 @@ target_include_directories(VCV_adaptor PRIVATE stubs/)
 # #################### Other brands ##################################
 
 include(${MM_ROOT}/firmware/vcv_ports/brands.cmake)
-# following is only for custom modules (not 4ms or Rack)
-list(REMOVE_ITEM brands 4ms Rack)
 
 foreach(brand ${brands})
 

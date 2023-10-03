@@ -54,24 +54,9 @@ target_include_directories(VCV_adaptor PRIVATE console/) # For pr_dbg, etc
 target_link_libraries(jansson PUBLIC mp15xa7_arch)
 
 #
-# Core Artwork files
+# Brands
 #
-file(
-  GLOB
-  ARTWORK_SOURCES
-  ${FWDIR}/src/gui/images/4ms/modules/*_artwork_240.c
-  ${FWDIR}/src/gui/images/4ms/components/*.c
-)
-
-# load list of brands, but remove 4ms and Rack
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
-list(
-  REMOVE_ITEM
-  brands
-  4ms
-  Rack
-)
-
 foreach(brand ${brands})
   file(
     GLOB
