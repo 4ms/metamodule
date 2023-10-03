@@ -49,7 +49,8 @@ target_link_libraries(core4ms PUBLIC mp15xa7_arch)
 # VCV Adaptor
 #
 add_subdirectory(VCV_adaptor)
-target_link_libraries(VCV_adaptor PUBLIC mdrivlib_interface)
+target_link_libraries(VCV_adaptor PUBLIC mp15xa7_arch mdrivlib_interface)
+target_link_libraries(jansson PUBLIC mp15xa7_arch)
 
 #
 # Core Artwork files
@@ -80,7 +81,7 @@ foreach(brand ${brands})
   list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
+  target_link_libraries(${brand}Library PRIVATE VCV_adaptor)
   target_compile_options(${brand}Library PRIVATE -Wno-attributes)
 
 endforeach()
@@ -177,6 +178,8 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/startup_ca7.s
   #
+  ${FWDIR}/src/VCV_adaptor/random.cpp
+  #
   ${ARTWORK_SOURCES}
 )
 
@@ -217,7 +220,6 @@ target_link_libraries(
           core4ms
           ui
           ryml
-          VCV_adaptor
 )
 
 foreach(brand ${brands})
