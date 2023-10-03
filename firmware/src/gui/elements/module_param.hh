@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/elements.hh"
 #include <cstdint>
 
@@ -6,27 +7,43 @@ namespace MetaModule
 {
 
 struct ModuleParam {
-	enum class Type { Knob, Switch, InJack, OutJack } type{Type::OutJack};
-	uint32_t id;
+	const Element *el{nullptr};
 
-	static auto get_type(const BaseElement &) {
-		return Type::Knob;
+	//Are type and id needed?
+	enum class Type { None, Knob, Switch, InJack, OutJack, Light } type{Type::None};
+	uint32_t id{};
+
+	ModuleParam() = default;
+
+	ModuleParam(const Element &element, ElementCount::Indices idx)
+		: el{&element} {
+		std::visit([&](auto &el) { set_type(el, idx); }, element);
 	}
 
-	static auto get_type(const Pot &) {
-		return Type::Knob;
+private:
+	void set_type(const BaseElement &el, ElementCount::Indices idx) {
+		type = Type::None;
+		id = 0;
 	}
-
-	static auto get_type(const Switch &) {
-		return Type::Switch;
+	void set_type(const Pot &el, ElementCount::Indices idx) {
+		type = Type::Knob;
+		id = idx.param_idx;
 	}
-
-	static auto get_type(const JackInput &) {
-		return Type::InJack;
+	void set_type(const Switch &el, ElementCount::Indices idx) {
+		type = Type::Switch;
+		id = idx.param_idx;
 	}
-
-	static auto get_type(const JackOutput &) {
-		return Type::OutJack;
+	void set_type(const JackInput &el, ElementCount::Indices idx) {
+		type = Type::InJack;
+		id = idx.input_idx;
+	}
+	void set_type(const JackOutput &el, ElementCount::Indices idx) {
+		type = Type::OutJack;
+		id = idx.output_idx;
+	}
+	void set_type(const LightElement &el, ElementCount::Indices idx) {
+		type = Type::Light;
+		id = idx.light_idx;
 	}
 };
 

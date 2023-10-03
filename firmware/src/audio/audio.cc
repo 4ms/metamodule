@@ -9,6 +9,7 @@
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "param_block.hh"
+#include "patch_play/patch_mods.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
 #include "sync_params.hh"
@@ -34,15 +35,6 @@ __attribute__((optimize("O0"))) void output_silence(AudioOutBuffer &out) {
 }
 
 using namespace mdrivlib;
-
-constexpr bool DEBUG_PASSTHRU_AUDIO = false;
-constexpr bool DEBUG_SINEOUT_AUDIO = false;
-constexpr bool DEBUG_NE10_FFT = false;
-// static FFTfx fftfx;
-// static Convolver fftfx;
-
-static constexpr unsigned block_0 = 1; //TargetName == Targets::stm32h7x5 ? 0 : 1;
-static constexpr unsigned block_1 = 1 - block_0;
 
 AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
@@ -91,7 +83,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin0::high();
 
-		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
+		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 		load_measure.start_measurement();
 
@@ -117,6 +109,12 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
 }
 
+void AudioStream::start() {
+	codec_.start();
+	if (ext_audio_connected)
+		codec_ext_.start();
+}
+
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	auto raw_out = player.get_panel_output(output_id) * mute_ctr;
 	raw_out = -raw_out / OutputHighRangeVolts;
@@ -127,14 +125,6 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxStreamBlock &aux) {
 	auto &in = audio_block.in_codec;
 	auto &out = audio_block.out_codec;
-
-	if constexpr (DEBUG_PASSTHRU_AUDIO) {
-		AudioTestSignal::passthrough(in, out, aux);
-		return;
-	} else if (DEBUG_SINEOUT_AUDIO) {
-		AudioTestSignal::sines_out(in, out);
-		return;
-	}
 
 	if (patch_loader.is_loading_new_patch()) {
 		if (mute_ctr > 0.f)
@@ -160,7 +150,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		return;
 	}
 
-	handle_patch_mods();
+	handle_patch_mods(patch_mod_queue, player);
 
 	// TODO: handle second codec
 	if (ext_audio_connected)
@@ -218,24 +208,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		// Get outputs from modules
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
-	}
-}
-
-void AudioStream::start() {
-	codec_.start();
-	if (ext_audio_connected)
-		codec_ext_.start();
-}
-
-void AudioStream::handle_patch_mods() {
-	if (auto patch_mod = patch_mod_queue.get()) {
-		std::visit(overloaded{
-					   [this](SetStaticParam &mod) { player.apply_static_param(mod.param); },
-					   [this](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
-					   [](AddMapping &mod) { /*TODO*/ },
-					   [](ModifyMapping &mod) { /*TODO*/ },
-				   },
-				   patch_mod.value());
 	}
 }
 

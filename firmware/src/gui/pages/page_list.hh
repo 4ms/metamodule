@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/elements/module_param.hh"
+#include "patch_file/patch_location.hh"
 #include "util/circular_stack.hh"
 #include <array>
 #include <cstdint>
@@ -11,7 +12,7 @@ namespace MetaModule
 //forward declare
 struct PageBase;
 
-enum PageId : uint32_t { PatchSel, PatchView, ModuleView, ControlView, Settings, KnobEdit };
+enum PageId : uint32_t { PatchSel, PatchView, ModuleView, Settings, KnobSetView };
 
 class PageList {
 	static constexpr uint32_t MaxPages = 8;
@@ -22,18 +23,19 @@ class PageList {
 	static inline std::array<PageBase *, MaxPages> _pages;
 
 	//TODO: these need to be in PageManager or somewhere else...
-	static inline uint32_t selected_patch_id = 0;
+	static inline PatchLocation selected_patch_loc{};
 	static inline uint32_t selected_module_id = 0;
 	static inline uint32_t active_knobset_id = 0;
-	static inline ModuleParam selected_control_id{};
+	static inline uint32_t view_knobset_id = 0;
+	static inline uint32_t patch_revision = 0;
 
 public:
-	static void set_selected_patch_id(uint32_t id) {
-		selected_patch_id = id;
+	static void set_selected_patch_loc(PatchLocation loc) {
+		selected_patch_loc = loc;
 	}
 
-	static uint32_t get_selected_patch_id() {
-		return selected_patch_id;
+	static PatchLocation get_selected_patch_location() {
+		return selected_patch_loc;
 	}
 
 	static void set_active_knobset(uint32_t id) {
@@ -44,6 +46,14 @@ public:
 		return active_knobset_id;
 	}
 
+	static void set_viewing_knobset(uint32_t id) {
+		view_knobset_id = id;
+	}
+
+	static uint32_t get_viewing_knobset() {
+		return view_knobset_id;
+	}
+
 	static void set_selected_module_id(uint32_t id) {
 		selected_module_id = id;
 	}
@@ -52,12 +62,12 @@ public:
 		return selected_module_id;
 	}
 
-	static void set_selected_control(ModuleParam id) {
-		selected_control_id = id;
+	static void increment_patch_revision() {
+		patch_revision++;
 	}
 
-	static ModuleParam get_selected_control() {
-		return selected_control_id;
+	static uint32_t get_patch_revision() {
+		return patch_revision;
 	}
 
 	// Associates a pointer to a Page with an id
@@ -71,11 +81,6 @@ public:
 		_pages[idx] = page;
 		return true;
 	}
-
-	// static PageBase *get_page(PageId id) {
-	// 	auto idx = static_cast<uint32_t>(id);
-	// 	return _pages[idx];
-	// }
 
 	static void request_new_page(PageId id) {
 		auto idx = static_cast<uint32_t>(id);

@@ -3,13 +3,8 @@
 #include "lv_port_indev.h"
 #define printf_ printf
 ///
-
+#include "gui/message_queue.hh"
 #include "gui/pages/page_manager.hh"
-#include "params/params_state.hh"
-#include "patch_file/patch_storage_proxy.hh"
-#include "patch_file/patchlist.hh"
-#include "patch_play/patch_mod_queue.hh"
-#include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
 {

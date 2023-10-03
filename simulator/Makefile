@@ -4,13 +4,16 @@ all: | $(BUILDDIR)
 	cmake --build $(BUILDDIR) 
 
 $(BUILDDIR):
-	cmake -B $(BUILDDIR) -GNinja
+	cmake --fresh --preset Default
 
 clean:
+	cmake --fresh --preset Default
+
+realclean:
 	rm -rf $(BUILDDIR)
 
-warnings: clean
-	cmake --preset gcc-warn -B $(BUILDDIR)
+warnings: 
+	cmake --fresh --preset gcc-warn
 
 run: all
 	build/simulator

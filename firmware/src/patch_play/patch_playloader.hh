@@ -1,4 +1,5 @@
 #pragma once
+#include "patch_file/patch_location.hh"
 #include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_player.hh"
 #include "pr_dbg.hh"
@@ -61,11 +62,15 @@ struct PatchPlayLoader {
 		return loading_new_patch_;
 	}
 
-	// loaded_patch_index_:
+	// loaded_patch_:
 	// UI thread READ (KnobEditPage, ModuleViewPage)
 	// UI thread WRITE (via handle_sync_patch_loading() => _load_patch())
-	uint32_t cur_patch_index() {
-		return loaded_patch_index_;
+	PatchLocation cur_patch_location() {
+		return {loaded_patch_.index, loaded_patch_.vol};
+	}
+
+	auto cur_patch_name() {
+		return loaded_patch_name_;
 	}
 
 	// audio_is_muted_:
@@ -101,20 +106,23 @@ private:
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
 
-	uint32_t loaded_patch_index_;
-	Volume loaded_patch_vol_;
+	PatchLocation loaded_patch_;
+	// uint32_t loaded_patch_index_;
+	// Volume loaded_patch_vol_;
+	ModuleTypeSlug loaded_patch_name_ = "";
 
 	bool _load_patch() {
 		auto patch = storage_.get_view_patch();
 		auto patchid = storage_.get_view_patch_id();
 		auto vol = storage_.get_view_patch_vol();
 
-		printf_("Attempting play patch #%d from vol %d, %.31s\n", patchid, (uint32_t)vol, patch.patch_name.data());
+		pr_dbg("Attempting play patch #%d from vol %d, %.31s\n", patchid, (uint32_t)vol, patch.patch_name.data());
 
 		if (patch.module_slugs.size() > 1) {
 			if (player_.load_patch(patch)) {
-				loaded_patch_index_ = patchid;
-				loaded_patch_vol_ = vol;
+				loaded_patch_.index = patchid;
+				loaded_patch_.vol = vol;
+				loaded_patch_name_ = patch.patch_name;
 				return true;
 			}
 		}

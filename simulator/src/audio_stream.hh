@@ -2,6 +2,7 @@
 #include "frame.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
+#include "patch_play/patch_mods.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
 #include "stream_conf.hh"
@@ -35,7 +36,7 @@ public:
 		if (mute_on_patch_load(out_buff))
 			return;
 
-		handle_patch_mods();
+		handle_patch_mods(patch_mod_queue, player);
 
 		if (in_buff.size() != out_buff.size()) {
 			std::cout << "Buffer size mis-match!\n";
@@ -75,18 +76,6 @@ public:
 					player.set_output_jack_patched_status(i, false);
 				}
 			}
-		}
-	}
-
-	void handle_patch_mods() {
-		if (auto patch_mod = patch_mod_queue.get()) {
-			std::visit(overloaded{
-						   [this](SetStaticParam &mod) { player.apply_static_param(mod.param); },
-						   [this](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
-						   [](AddMapping &mod) { /*TODO*/ },
-						   [](ModifyMapping &mod) { /*TODO*/ },
-					   },
-					   patch_mod.value());
 		}
 	}
 
