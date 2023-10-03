@@ -19,12 +19,15 @@ public:
 	}
 
 	void set_param(int param_id, float val) override {
+		if (val < 0)
+			val = 0.f;
+
 		switch (param_id) {
 			case Info::KnobRise:
-				slew.attackTime = MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 2000.0f);
+				slew.attackTime = MathTools::map_value(val, 0.0f, CvRangeVolts, 1.0f, 2000.0f);
 				break;
 			case Info::KnobFall:
-				slew.decayTime = MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 2000.0f);
+				slew.decayTime = MathTools::map_value(val, 0.0f, CvRangeVolts, 1.0f, 2000.0f);
 				break;
 		}
 	}

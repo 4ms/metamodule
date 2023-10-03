@@ -28,3 +28,6 @@
 [submodule "firmware/src/VCV_adaptor/simde"]
 	path = firmware/src/VCV_adaptor/simde
 	url = https://github.com/simd-everywhere/simde.git
+[submodule "firmware/lib/jansson/jansson"]
+	path = firmware/lib/jansson/jansson
+	url = https://github.com/4ms/jansson.git

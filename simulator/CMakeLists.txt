@@ -54,6 +54,8 @@ set(CORE_MODULES
 
 add_subdirectory(${MM_ROOT}/firmware/src/VCV_adaptor
                  ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
+target_sources(VCV_adaptor PRIVATE stubs/random.cpp)
+target_include_directories(VCV_adaptor PRIVATE stubs/)
 
 # #################### Other brands ##################################
 
@@ -65,7 +67,17 @@ foreach(brand ${brands})
 
   add_subdirectory(${MM_ROOT}/firmware/vcv_ports/glue/${brand}
                    ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
+
+  target_include_directories(
+    ${brand}Library
+    PUBLIC ${MM_ROOT}/firmware/src/VCV_adaptor
+           ${MM_ROOT}/firmware/src/VCV_adaptor/pffft
+           ${MM_ROOT}/firmware/lib/jansson
+           ${MM_ROOT}/firmware/lib/jansson/jansson/src
+           ${MM_ROOT}/firmware/src
+           ${MM_ROOT}/firmware
+           ${MM_ROOT}/shared
+           ${MM_ROOT}/shared/cpputil)
 
   file(GLOB BRAND_GUI_IMAGES
        ${MM_ROOT}/firmware/src/gui/images/${brand}/components/*.c

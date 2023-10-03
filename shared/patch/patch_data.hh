@@ -15,6 +15,7 @@ struct PatchData {
 	std::vector<MappedOutputJack> mapped_outs;
 	std::vector<StaticParam> static_knobs;
 	std::vector<MappedKnobSet> knob_sets;
+	std::vector<ModuleInitState> module_states;
 
 	const MappedKnob *find_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) const {
 		if (set_id < knob_sets.size()) {

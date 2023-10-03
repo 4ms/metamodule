@@ -67,18 +67,6 @@ public:
 
 		//Copy so that the currently playing PatchData is immune to edits of the saved version
 		pd = patchdata;
-
-		//TODO: don't keep a local copy
-		//Instead, copy everything to a cache.
-		//If we edit the patch while playing it, update PatchPlayer caches and the PatchData in PatchList
-		//Save patch: store PatchList -> flash
-		//Revert patch: load flash->PatchList->PatchPlayer
-		//Not cached and used during playing:
-		// - module_slugs
-		// - int_cables
-		// - patch_name
-		// - mapped_knobs[].alias_name
-		// We could use a pointer (weak/const) to the patch data
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
@@ -122,6 +110,13 @@ public:
 		// Set static (non-mapped) knobs
 		for (auto &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
+
+		for (auto const &ms : pd.module_states) {
+			if (ms.module_id >= modules.size())
+				continue;
+
+			modules[ms.module_id]->initialize_state(ms.data_json);
+		}
 
 		calc_multiple_module_indicies();
 

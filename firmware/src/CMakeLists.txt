@@ -41,6 +41,7 @@ target_include_directories(
          ${SHARED}/CoreModules/4ms
          ${SHARED}/cpputil
          ${FWDIR}/src
+         ${FWDIR}/src/medium
 )
 target_link_libraries(core4ms PUBLIC mp15xa7_arch)
 
@@ -48,7 +49,9 @@ target_link_libraries(core4ms PUBLIC mp15xa7_arch)
 # VCV Adaptor
 #
 add_subdirectory(VCV_adaptor)
-target_link_libraries(VCV_adaptor PUBLIC mdrivlib_interface)
+target_link_libraries(VCV_adaptor PUBLIC mp15xa7_arch)
+target_include_directories(VCV_adaptor PRIVATE console/) # For pr_dbg, etc
+target_link_libraries(jansson PUBLIC mp15xa7_arch)
 
 #
 # Core Artwork files
@@ -79,7 +82,20 @@ foreach(brand ${brands})
   list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
+  target_link_libraries(${brand}Library PRIVATE mp15xa7_arch)
+
+  target_include_directories(
+    ${brand}Library
+    PUBLIC ${FWDIR}/src/VCV_adaptor
+           ${FWDIR}/src/VCV_adaptor/pffft
+           ${FWDIR}/lib/jansson
+           ${FWDIR}/lib/jansson/jansson/src
+           ${FWDIR}/src
+           ${FWDIR}
+           ${SHARED}
+           ${SHARED}/cpputil
+  )
+
   target_compile_options(${brand}Library PRIVATE -Wno-attributes)
 
 endforeach()
@@ -176,6 +192,8 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/startup_ca7.s
   #
+  ${FWDIR}/src/VCV_adaptor/random.cpp
+  #
   ${ARTWORK_SOURCES}
 )
 
@@ -206,6 +224,9 @@ target_include_directories(
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
+          #
+          ${FWDIR}/lib/jansson
+          ${FWDIR}/lib/jansson/jansson/src
 )
 
 target_link_libraries(

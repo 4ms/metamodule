@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "mapping/patch_writer.hh"
-#include <iostream>
 
 TEST_CASE("squash_ids() works") {
 	SUBCASE("y = id[x]  transforms to squashed[y] = x") {

@@ -1,0 +1,51 @@
+PatchData:
+  patch_name: SH
+  description: ''
+  module_slugs:
+    0: HubMedium
+    1: SH
+  int_cables: []
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 1
+    - panel_jack_id: 3
+      ins:
+        - module_id: 1
+          jack_id: 3
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 2
+      ins:
+        - module_id: 1
+          jack_id: 2
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 1
+  static_knobs: []
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []

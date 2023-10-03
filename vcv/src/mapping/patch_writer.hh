@@ -2,6 +2,7 @@
 #include "JackMap.hh"
 #include "ModuleID.h"
 #include "ParamMap.hh"
+#include "jansson.h"
 #include "mapping/mapping.hh"
 #include "patch/patch.hh"
 #include "patch_convert/patch_to_yaml.hh"
@@ -17,10 +18,13 @@ class PatchFileWriter {
 
 public:
 	PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId);
+	~PatchFileWriter();
+
 	void setPatchName(std::string patchName);
 	void setPatchDesc(std::string patchDesc);
 	void setCableList(std::vector<CableMap> &jacks);
 	void setParamList(std::vector<ParamMap> &params);
+	void addModuleStateJson(rack::Module *module);
 
 	void addKnobMaps(unsigned panelKnobId, unsigned knobSetId, const std::span<const Mapping> maps);
 	void addKnobMapSet(unsigned knobSetId, std::string_view knobSetName);
@@ -34,4 +38,7 @@ private:
 	void mapInputJack(const CableMap &map);
 	void mapOutputJack(const CableMap &map);
 	void setModuleList(std::vector<ModuleID> &modules);
+
+	json_t *moduleStateDataJ;
+	json_t *moduleArrayJ;
 };

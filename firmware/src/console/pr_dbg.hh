@@ -9,7 +9,7 @@ namespace
 static constexpr bool PRINT_ERROR = true;
 static constexpr bool PRINT_WARN = true;
 static constexpr bool PRINT_DEBUG = false;
-static constexpr bool PRINT_TRACE = true;
+inline constexpr bool PRINT_TRACE = false;
 /////////////////////////////////////////////////
 
 inline void _do_printf_impl(const char *str) {

@@ -58,3 +58,11 @@ CompileFlags:
 		"-Ilib/mdrivlib/target/stm32mp1_ca7",
 		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
 	]
+---
+If:
+	PathMatch: .*\.c
+CompileFlags:
+	Remove: [
+		"-std=gnu++2b", 
+	]
+---

@@ -1,4 +1,5 @@
 #pragma once
+#include "jansson.h"
 #include <array>
 #include <string>
 #include <vector>
@@ -27,6 +28,7 @@ namespace rack
 {
 struct Plugin {
 	std::string slug;
+	std::string version;
 };
 struct Model {
 	std::string slug;
@@ -36,6 +38,9 @@ struct Module {
 	long dummy;
 	Model *model;
 	uint64_t id;
+	json_t *dataToJson() {
+		return nullptr;
+	}
 };
 
 struct ParamHandle {

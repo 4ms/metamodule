@@ -17,7 +17,7 @@ public:
 	void update() override {
 		auto finalWindow = MathTools::constrain(windowOffset + windowCV, 0.0f, 1.0f);
 		p.windowSize = MathTools::map_value(finalWindow, 0.0f, 1.0f, 20.0f, static_cast<float>(maxWindowSize));
-		p.shiftAmount = coarseShift + fineShift + (shiftCV * 12.0f);
+		p.shiftAmount = coarseShift + fineShift + shiftCV * 12.f;
 		p.mix = MathTools::constrain(mixOffset + mixCV, 0.0f, 1.0f);
 		signalOutput = p.update(signalInput);
 	}
@@ -45,21 +45,19 @@ public:
 				signalInput = val;
 				break;
 			case Info::InputPitch_Cv:
-				shiftCV = val;
+				shiftCV = MathTools::constrain(val, -5.f, +5.f);
 				break;
 			case Info::InputWindow_Cv:
-				windowCV = val;
+				windowCV = val / CvRangeVolts;
 				break;
 			case Info::InputMix_Cv:
-				mixCV = val;
+				mixCV = val / CvRangeVolts;
 				break;
 		}
 	}
 
 	float get_output(int output_id) const override {
-		if (output_id == Info::OutputOut)
-			return signalOutput;
-		return 0.f;
+		return signalOutput;
 	}
 
 	void set_samplerate(float sr) override {

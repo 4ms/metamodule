@@ -46,10 +46,10 @@ public:
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return gateOutput;
+			return gateOutput * MaxOutputVolts;
 
 		if (output_id == Info::OutputInv)
-			return 1 - gateOutput;
+			return (1 - gateOutput) * MaxOutputVolts;
 
 		return 0.f;
 	}

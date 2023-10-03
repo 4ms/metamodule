@@ -34,7 +34,7 @@ void CommModule::process(const ProcessArgs &args) {
 		}
 
 		if (injack.isConnected()) {
-			auto scaledIn = injack.getValue() / 5.f; // TODO: Move scaling to SmartCoreProcessor or other wrapper
+			auto scaledIn = injack.getValue();
 			core->set_input(id, scaledIn);
 		}
 	}
@@ -48,7 +48,7 @@ void CommModule::process(const ProcessArgs &args) {
 
 	for (auto &out : outJacks) {
 		auto raw_value = core->get_output(out.getId());
-		out.setValue(raw_value * 5.f); // TODO: Move scaling to SmartCoreProcessor or other wrapper
+		out.setValue(raw_value);
 	}
 
 	for (unsigned i = 0; auto &light : lights) {
