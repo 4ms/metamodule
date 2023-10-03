@@ -3,8 +3,10 @@
 
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR ?= $(TEST_DIR)
-BUILDDIR = $(TEST_DIR)/build
+BUILDDIR = $(TEST_DIR)/build/obj
 RYMLDIR = src/shared/patch_convert/ryml/rapidyaml
+JANSSON_CONF_DIR = ../firmware/lib/jansson
+JANSSON_DIR = ../firmware/lib/jansson/jansson/src
 
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
@@ -18,31 +20,37 @@ TEST_SOURCES += src/shared/patch_convert/ryml/ryml_serial.cc
 TEST_SOURCES += src/mapping/patch_writer.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+TEST_SOURCES += $(wildcard $(JANSSON_DIR)/*.c)
 
 
-CXXFLAGS = 	-Wall \
-		 	-std=gnu++2a \
-			-I$(DOCTEST_DIR) \
+INCLUDES = -I$(DOCTEST_DIR) \
 			-I../src\
 			-Isrc\
 			-Isrc/hub\
 			-Isrc/mapping\
-			-Isrc/shared \
-			-Isrc/shared/cpputil \
-			-Isrc/shared/patch_convert/ryml \
-			-Isrc/shared/etl/include \
+			-I../shared \
+			-I../shared/cpputil \
+			-I../shared/patch_convert/ryml \
+			-I$(JANSSON_DIR) \
+			-I$(JANSSON_CONF_DIR) \
 			-I$(TEST_DIR) \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
+
+CFLAGS = -DHAVE_CONFIG_H \
+		 -DTESTPROJECT \
+
+CXXFLAGS = 	-Wall \
+		 	-std=gnu++2a \
 			-DTESTPROJECT \
 			-Wno-missing-braces \
 
 ### Boilerplate below here:
 
 LDFLAGS = -lstdc++
-OBJECTS = $(addprefix $(BUILDDIR)/, $(subst ../,,$(addsuffix .o, $(basename $(TEST_SOURCES)))))
+OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
 DEPDIR := $(BUILDDIR)
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(subst ../,,$(basename $<).d)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
 
 .PHONY: all tests clean
 
@@ -53,17 +61,17 @@ all: $(DOCTESTHEADER_DIR)/doctest.h tests
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CC) -c $(DEPFLAGS) $(CFLAGS) $< -o $@
+	@$(CC) -c $(DEPFLAGS) $(INCLUDES) $(CFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cc
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+	@$(CXX) -c $(DEPFLAGS) $(INCLUDES) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+	@$(CXX) -c $(DEPFLAGS) $(INCLUDES) $(CXXFLAGS) $< -o $@
 
 tests: $(BUILDDIR)/runtests
 	@$(BUILDDIR)/runtests --out=$(TMPFILE) && echo "[√] Unit tests passed: $(notdir $(PWD))" || cat $(TMPFILE)
