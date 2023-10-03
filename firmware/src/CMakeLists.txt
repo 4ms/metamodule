@@ -41,6 +41,7 @@ target_include_directories(
          ${SHARED}/CoreModules/4ms
          ${SHARED}/cpputil
          ${FWDIR}/src
+         ${FWDIR}/src/medium
 )
 target_link_libraries(core4ms PUBLIC mp15xa7_arch)
 

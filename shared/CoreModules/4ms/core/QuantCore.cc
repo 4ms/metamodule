@@ -1,7 +1,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "conf/scaling_config.hh"
 #include "info/Quant_info.hh"
-#include "scaling_config.hh"
 #include "util/math.hh"
 #include <cmath>
 
