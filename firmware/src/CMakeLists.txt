@@ -82,7 +82,6 @@ foreach(brand ${brands})
   list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  # target_link_libraries(${brand}Library PRIVATE VCV_adaptor)
   target_link_libraries(${brand}Library PRIVATE mp15xa7_arch)
 
   target_include_directories(
@@ -194,7 +193,6 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/startup_ca7.s
   #
   ${FWDIR}/src/VCV_adaptor/random.cpp
-  ${FWDIR}/src/VCV_adaptor/engine/Module.cpp
   #
   ${ARTWORK_SOURCES}
 )
