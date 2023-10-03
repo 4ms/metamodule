@@ -25,7 +25,7 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 		auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[module_id]);
 
 		if (info.width_hp) {
-			auto res = std::ranges::find_if(info.indices, [=](auto idx) {
+			auto res = std::find_if(info.indices.begin(), info.indices.end(), [=](auto idx) {
 				return (type == ElementType::Param)	 ? element_idx == idx.param_idx :
 					   (type == ElementType::Input)	 ? element_idx == idx.input_idx :
 					   (type == ElementType::Output) ? element_idx == idx.output_idx :
