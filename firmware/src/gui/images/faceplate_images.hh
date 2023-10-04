@@ -2,10 +2,6 @@
 #include "lvgl.h"
 #include <string_view>
 
-#if defined(USE_FEWER_MODULES) //&& USE_FEWER_MODULES == 1
-#include "faceplate_images_shortlist.hh"
-#else
-
 extern "C" {
 // DECLARE HERE
 LV_IMG_DECLARE(Braids_240);
@@ -332,5 +328,3 @@ struct ModuleImages {
 		return nullptr;
 	}
 };
-
-#endif
