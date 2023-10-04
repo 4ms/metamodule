@@ -1,4 +1,4 @@
 include(modules.cmake)
-add_library(RackLibrary STATIC empty.cc)
-# Cmake requires at least one source
 
+# Cmake requires at least one source
+add_library(RackLibrary OBJECT ../empty.cc)
