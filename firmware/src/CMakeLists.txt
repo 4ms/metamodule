@@ -58,7 +58,7 @@ foreach(brand ${brands})
   # Faceplate artwork
   include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
   foreach(module IN LISTS ${brand}Modules)
-    if(NOT DEFINED LIMITED_MODULES OR module IN_LIST LIMITED_MODULES)
+    if(NOT USE_LIMITED_MODULES OR module IN_LIST LIMITED_MODULE_SLUGS)
       if(brand EQUAL "4ms")
         list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${module}_artwork_240.c)
       else()
