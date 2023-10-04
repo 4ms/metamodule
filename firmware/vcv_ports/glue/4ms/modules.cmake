@@ -63,6 +63,9 @@ set(4msModules
     Verb
 )
 
+include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
+limit_modules_built(4msModules)
+
 # svg paths
 list(TRANSFORM 4msModules PREPEND ${MM_ROOT}/vcv/res/modules/ OUTPUT_VARIABLE 4MS_FACEPLATE_SVGS)
 list(TRANSFORM 4MS_FACEPLATE_SVGS APPEND _artwork.svg)

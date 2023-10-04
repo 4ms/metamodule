@@ -58,12 +58,11 @@ foreach(brand ${brands})
   # Faceplate artwork
   include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
   foreach(module IN LISTS ${brand}Modules)
-    if(NOT USE_LIMITED_MODULES OR module IN_LIST LIMITED_MODULE_SLUGS)
-      if(brand EQUAL "4ms")
-        list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${module}_artwork_240.c)
-      else()
-        list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${module}_240.c)
-      endif()
+    # TODO: use _240.c for 4ms faceplates
+    if(brand EQUAL "4ms")
+      list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${module}_artwork_240.c)
+    else()
+      list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${module}_240.c)
     endif()
   endforeach()
 
@@ -204,7 +203,6 @@ target_link_libraries(
   PRIVATE lvgl::lvgl
           mp15xa7_arch
           mdrivlib_interface
-          # core4ms
           ui
           ryml
           VCV_adaptor
