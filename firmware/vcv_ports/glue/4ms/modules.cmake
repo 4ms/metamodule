@@ -66,7 +66,11 @@ set(4msModules
 include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
 limit_modules_built(4msModules)
 
-# svg paths
+# Info svgs (used to generate info.hh files and VCV svgs)
+list(TRANSFORM 4msModules PREPEND ${MM_ROOT}/shared/CoreModules/4ms/svg/ OUTPUT_VARIABLE 4MS_INFO_SVGS)
+list(TRANSFORM 4MS_INFO_SVGS APPEND _info.svg)
+
+# VCV svgs (used in VCV and also to create LVGL images)
 list(TRANSFORM 4msModules PREPEND ${MM_ROOT}/vcv/res/modules/ OUTPUT_VARIABLE 4MS_FACEPLATE_SVGS)
 list(TRANSFORM 4MS_FACEPLATE_SVGS APPEND _artwork.svg)
 
