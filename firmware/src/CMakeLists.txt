@@ -22,30 +22,6 @@ target_include_directories(
 )
 
 #
-# CoreModules 4ms
-#
-# TODO: CMake file in CoreModules/4ms
-file(
-  GLOB
-  CORE4MS_SOURCES
-  ${SHARED}/CoreModules/4ms/core/*Core.cc
-  ${SHARED}/CoreModules/4ms/core/enosc/data.cc
-  ${SHARED}/CoreModules/4ms/core/enosc/dynamic_data.cc
-  ${SHARED}/axoloti-wrapper/axoloti_math.cpp
-)
-
-add_library(core4ms OBJECT ${CORE4MS_SOURCES})
-target_include_directories(
-  core4ms
-  PUBLIC ${SHARED}
-         ${SHARED}/CoreModules/4ms
-         ${SHARED}/cpputil
-         ${FWDIR}/src
-         ${FWDIR}/src/medium
-)
-target_link_libraries(core4ms PUBLIC mp15xa7_arch)
-
-#
 # VCV Adaptor
 #
 add_subdirectory(VCV_adaptor)
@@ -57,18 +33,15 @@ target_link_libraries(jansson PUBLIC mp15xa7_arch)
 # Brands
 #
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
-foreach(brand ${brands})
-  file(
-    GLOB
-    BRAND_ARTWORK_SOURCES
-    ${FWDIR}/src/gui/images/${brand}/components/*.c
-    ${FWDIR}/src/gui/images/${brand}/modules/*.c
-  )
-  list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
+foreach(brand ${brands})
+  # Component artwork
+  file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
+  list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
+
+  # Module Library
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
   target_link_libraries(${brand}Library PRIVATE mp15xa7_arch)
-
   target_include_directories(
     ${brand}Library
     PUBLIC ${FWDIR}/src/VCV_adaptor
@@ -80,8 +53,19 @@ foreach(brand ${brands})
            ${SHARED}
            ${SHARED}/cpputil
   )
-
   target_compile_options(${brand}Library PRIVATE -Wno-attributes)
+
+  # Faceplate artwork
+  include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
+  foreach(module IN LISTS ${brand}Modules)
+    if(NOT DEFINED LIMITED_MODULES OR module IN_LIST LIMITED_MODULES)
+      if(brand EQUAL "4ms")
+        list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${module}_artwork_240.c)
+      else()
+        list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${module}_240.c)
+      endif()
+    endif()
+  endforeach()
 
 endforeach()
 
@@ -179,7 +163,8 @@ add_executable(
   #
   ${FWDIR}/src/VCV_adaptor/random.cpp
   #
-  ${ARTWORK_SOURCES}
+  ${COMP_ARTWORK_SOURCES}
+  ${FACEPLATE_ARTWORK_SOURCES}
 )
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
@@ -219,7 +204,7 @@ target_link_libraries(
   PRIVATE lvgl::lvgl
           mp15xa7_arch
           mdrivlib_interface
-          core4ms
+          # core4ms
           ui
           ryml
           VCV_adaptor
