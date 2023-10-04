@@ -6,6 +6,7 @@ add_library(
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
   ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
+  ${MM_ROOT}/shared/cpputil/util/math_tables.cc
 )
 
 target_include_directories(
