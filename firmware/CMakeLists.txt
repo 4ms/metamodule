@@ -50,9 +50,18 @@ add_custom_target(
   COMMAND cd ${SHARED}/patch_convert && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/CoreModules && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
-  BYPRODUCTS ${PROJECT_SOURCE_DIR}/tests/build/*
   VERBATIM USES_TERMINAL
 )
+file(
+  GLOB
+  tests_clean_files
+  CONFIGURE_DEPENDS
+  "${PROJECT_SOURCE_DIR}/tests/build/*"
+  "${SHARED}/patch_convert/tests/build/*"
+  "${SHARED}/CoreModules/tests/build/*"
+  "${SHARED}/axoloti-wrapper/tests/build/*"
+)
+set_target_properties(tests PROPERTIES ADDITIONAL_CLEAN_FILES "${tests_clean_files}")
 
 add_custom_target(
   dep_tests

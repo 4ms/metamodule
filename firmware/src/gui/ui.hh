@@ -67,9 +67,10 @@ public:
 
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
-			printf_("%s", msg.data());
+			// printf_("%s", msg.data());
 			msg_queue.clear_message();
 		}
+		// Debug::Pin0::low();
 
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());

@@ -31,7 +31,7 @@ public:
 				signalInput = val;
 				break;
 			case Info::InputCv:
-				panCV = val;
+				panCV = val / CvRangeVolts;
 		}
 	}
 

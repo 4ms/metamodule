@@ -9,15 +9,15 @@ struct Module;
 struct LightInfo {
 	Module *module = nullptr;
 	int lightId = -1;
-	std::string_view name;
-	std::string_view description;
+	std::string name;
+	std::string description;
 
 	virtual ~LightInfo() = default;
-	virtual std::string_view getName() {
-		return "";
+	virtual std::string getName() {
+		return name;
 	}
-	virtual std::string_view getDescription() {
-		return "";
+	virtual std::string getDescription() {
+		return description;
 	}
 };
 

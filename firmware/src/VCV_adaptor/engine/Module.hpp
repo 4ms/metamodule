@@ -73,8 +73,8 @@ struct Module : VCVModuleWrapper {
 								float minValue,
 								float maxValue,
 								float defaultValue,
-								std::string_view name = "",
-								std::string_view unit = "",
+								std::string name = "",
+								std::string unit = "",
 								float displayBase = 0.f,
 								float displayMultiplier = 1.f,
 								float displayOffset = 0.f) {
@@ -110,7 +110,7 @@ struct Module : VCVModuleWrapper {
 								  float minValue,
 								  float maxValue,
 								  float defaultValue,
-								  std::string_view name = "",
+								  std::string name = "",
 								  std::vector<std::string> labels = {}) {
 		TSwitchQuantity *sq = configParam<TSwitchQuantity>(paramId, minValue, maxValue, defaultValue, name);
 		sq->snapEnabled = true;
@@ -119,7 +119,7 @@ struct Module : VCVModuleWrapper {
 	}
 
 	template<class TSwitchQuantity = SwitchQuantity>
-	TSwitchQuantity *configButton(int paramId, std::string_view name = "") {
+	TSwitchQuantity *configButton(int paramId, std::string name = "") {
 		TSwitchQuantity *sq = configParam<TSwitchQuantity>(paramId, 0.f, 1.f, 0.f, name);
 		// sq->randomizeEnabled = false;
 		sq->snapEnabled = true;
@@ -127,7 +127,7 @@ struct Module : VCVModuleWrapper {
 	}
 
 	template<class TPortInfo = PortInfo>
-	TPortInfo *configInput(int portId, std::string_view name = "") {
+	TPortInfo *configInput(int portId, std::string name = "") {
 		if (portId >= (int)inputs.size() || portId >= (int)inputInfos.size())
 			return nullptr;
 
@@ -145,7 +145,7 @@ struct Module : VCVModuleWrapper {
 	}
 
 	template<class TPortInfo = PortInfo>
-	TPortInfo *configOutput(int portId, std::string_view name = "") {
+	TPortInfo *configOutput(int portId, std::string name = "") {
 		if (portId >= (int)outputs.size() || portId >= (int)outputInfos.size())
 			return nullptr;
 
@@ -163,7 +163,7 @@ struct Module : VCVModuleWrapper {
 	}
 
 	template<class TLightInfo = LightInfo>
-	TLightInfo *configLight(int lightId, std::string_view name = "") {
+	TLightInfo *configLight(int lightId, std::string name = "") {
 		if (lightId >= (int)lights.size() || lightId >= (int)lightInfos.size())
 			return nullptr;
 
@@ -356,6 +356,8 @@ struct Module : VCVModuleWrapper {
 	// PRIVATE int meterIndex();
 	// PRIVATE void doProcess(const ProcessArgs &args);
 	// PRIVATE static void jsonStripIds(json_t *rootJ);
+
+	void initialize_state(std::string_view state_string) override;
 };
 
 } // namespace rack::engine

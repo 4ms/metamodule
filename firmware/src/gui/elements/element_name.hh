@@ -11,7 +11,7 @@ std::string get_panel_name(const BaseElement &, uint16_t) {
 }
 
 template<typename PanelDef>
-std::string get_panel_name(const Knob &, uint16_t panel_id) {
+std::string get_panel_name(const ParamElement &, uint16_t panel_id) {
 	std::string name{8};
 	name += PanelDef::get_map_param_name(panel_id);
 	return name;

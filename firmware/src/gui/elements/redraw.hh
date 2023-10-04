@@ -15,7 +15,7 @@ inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
 	constexpr int32_t threshold_centidegrees = 30; // = 3.0 degrees
 
 	int32_t angle = val * 3000.f - 1500.f;
-	if (angle < 0)
+	while (angle < 0)
 		angle += 3600;
 	int32_t cur_angle = lv_img_get_angle(gui_el.obj);
 
@@ -71,7 +71,7 @@ inline bool redraw_element(const Toggle3pos &element, const GuiElement &gui_el, 
 
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {
-		printf_("No handle sub-object for toggle3pos\n");
+		pr_err("No handle sub-object for toggle3pos\n");
 		return false;
 	}
 	auto height = lv_obj_get_height(gui_el.obj);
@@ -112,7 +112,7 @@ inline bool redraw_element(const Toggle2pos &element, const GuiElement &gui_el, 
 
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {
-		printf_("No handle sub-object for toggle2pos\n");
+		pr_err("No handle sub-object for toggle2pos\n");
 		return false;
 	}
 	auto height = lv_obj_get_height(gui_el.obj);

@@ -67,18 +67,6 @@ public:
 
 		//Copy so that the currently playing PatchData is immune to edits of the saved version
 		pd = patchdata;
-
-		//TODO: don't keep a local copy
-		//Instead, copy everything to a cache.
-		//If we edit the patch while playing it, update PatchPlayer caches and the PatchData in PatchList
-		//Save patch: store PatchList -> flash
-		//Revert patch: load flash->PatchList->PatchPlayer
-		//Not cached and used during playing:
-		// - module_slugs
-		// - int_cables
-		// - patch_name
-		// - mapped_knobs[].alias_name
-		// We could use a pointer (weak/const) to the patch data
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
@@ -99,11 +87,11 @@ public:
 			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
-				printf_("Module %s not found\n", pd.module_slugs[i].data());
+				pr_err("Module %s not found\n", pd.module_slugs[i].data());
 				is_loaded = false;
 				return false;
 			}
-			printf_("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
+			pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
@@ -122,6 +110,13 @@ public:
 		// Set static (non-mapped) knobs
 		for (auto &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
+
+		for (auto const &ms : pd.module_states) {
+			if (ms.module_id >= modules.size())
+				continue;
+
+			modules[ms.module_id]->initialize_state(ms.data_json);
+		}
 
 		calc_multiple_module_indicies();
 
@@ -193,8 +188,10 @@ public:
 		//Also set it in the patch?
 	}
 
-	void add_mapped_knob(const MappedKnob &map) {
-		//TODO
+	void add_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
+		if (pd.add_update_mapped_knob(knobset_id, map)) {
+			cache_knob_mapping(knobset_id, map);
+		}
 	}
 
 	void set_active_knob_set(unsigned num) {
@@ -355,17 +352,17 @@ public:
 					if (cable.is_monophonic_note()) {
 						// in_conns[MidiMonoNoteJack].push_back(input_jack);
 						update_or_add(in_conns[MidiMonoNoteJack], input_jack);
-						printf_("Mapping midi monophonic note to jack: m=%d, p=%d\n",
-								input_jack.module_id,
-								input_jack.jack_id);
+						pr_trace("Mapping midi monophonic note to jack: m=%d, p=%d\n",
+								 input_jack.module_id,
+								 input_jack.jack_id);
 						continue;
 					}
 					if (cable.is_monophonic_gate()) {
 						// in_conns[MidiMonoGateJack].push_back(input_jack);
 						update_or_add(in_conns[MidiMonoGateJack], input_jack);
-						printf_("Mapping midi monophonic gate to jack: m=%d, p=%d\n",
-								input_jack.module_id,
-								input_jack.jack_id);
+						pr_trace("Mapping midi monophonic gate to jack: m=%d, p=%d\n",
+								 input_jack.module_id,
+								 input_jack.jack_id);
 						continue;
 					}
 					if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
@@ -373,17 +370,13 @@ public:
 						// in_conns[panel_jack_id].push_back(input_jack);
 						continue;
 					}
-					printf_("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
+					pr_err("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
 				} else {
-					printf_("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
+					pr_warn("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
 							panel_jack_id,
 							dup_int_cable);
-					// error: Panel input jack is mapped to a jack containing a cable (to an output)
-					// - ? Create a module that outputs the sum of two inputs, and adjust int_cables and in_mappings?
-					// - ? Keep the mapping and remove the int_cable entry?
-					// - ? Keep it as-is (ignore the mapping and keep the int_cable)
-					// ->>>Create a normalized mapping: Use the int_cable when panel jack is unpatched
-					// - ? Error out: don't load patch, it's malformed
+					// TODO: When panel input jack is mapped to a jack containing a cable (to an output)
+					// ->>> Create a normalized mapping: Use the int_cable when panel jack is unpatched
 				}
 			}
 		}

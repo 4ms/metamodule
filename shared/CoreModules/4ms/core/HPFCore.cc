@@ -50,7 +50,7 @@ public:
 				signalInput = val;
 				break;
 			case Info::InputCv:
-				cutoffCV = val;
+				cutoffCV = val / CvRangeVolts;
 				break;
 		}
 	}

@@ -2,7 +2,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "info/Follow_info.hh"
 #include "processors/tools/expDecay.h"
-#include "processors/tools/windowComparator.h"
+#include "processors/tools/schmittTrigger.h"
 #include "util/math.hh"
 
 namespace MetaModule
@@ -21,7 +21,7 @@ public:
 			rectSignal *= -1.0f;
 		envOutput = slew.update(rectSignal);
 		wc.update(envOutput);
-		gateOutput = wc.get_output();
+		gateOutput = wc.output();
 	}
 
 	void set_param(int param_id, float val) override {
@@ -37,8 +37,8 @@ public:
 				bottomThresh = val - errorAmount;
 				if (bottomThresh < 0)
 					bottomThresh = 0;
-				wc.set_highThreshold(topThresh);
-				wc.set_lowThreshhold(bottomThresh);
+				wc.setHighThreshold(topThresh);
+				wc.setLowThreshhold(bottomThresh);
 			} break;
 			case Info::KnobRise: //rise
 				slew.attackTime = MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 2000.f);
@@ -51,15 +51,15 @@ public:
 
 	void set_input(int input_id, float val) override {
 		if (input_id == Info::InputInput)
-			signalInput = val;
+			signalInput = val / maxOutputVolts;
 	}
 
 	float get_output(int output_id) const override {
 		switch (output_id) {
 			case Info::OutputEnv:
-				return envOutput;
+				return envOutput * maxOutputVolts;
 			case Info::OutputGate:
-				return gateOutput;
+				return gateOutput * maxOutputVolts;
 			default:
 				return 0.f;
 		}
@@ -82,8 +82,11 @@ private:
 	float signalInput = 0;
 	float envOutput = 0;
 	float gateOutput = 0;
-	WindowComparator wc;
+	SchmittTrigger wc;
 	ExpDecay slew;
+
+	static constexpr float cvRangeVolts = 5.0f;
+	static constexpr float maxOutputVolts = 8.0f;
 };
 
 } // namespace MetaModule

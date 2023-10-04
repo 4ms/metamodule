@@ -2,9 +2,21 @@ set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
 
 file(GLOB RACKARTWORK_SOURCES ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c)
 
-add_library(VCV_adaptor OBJECT plugin_instance.cc pffft/pffft.c ${RACKARTWORK_SOURCES})
+add_library(VCV_adaptor STATIC)
 
-target_link_libraries(VCV_adaptor PUBLIC lvgl::lvgl)
+# These sources are used by other libraries indirectly linked to VCV_adaptor, so they need to be public
+target_sources(
+  VCV_adaptor
+  PUBLIC string.cpp
+         plugin_instance.cc
+         pffft/pffft.c
+         engine/Module.cpp
+         ${RACKARTWORK_SOURCES}
+)
+
+add_subdirectory(${MM_ROOT}/firmware/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
+
+target_link_libraries(VCV_adaptor PUBLIC lvgl::lvgl jansson)
 
 target_include_directories(
   VCV_adaptor

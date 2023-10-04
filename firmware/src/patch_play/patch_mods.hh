@@ -1,0 +1,20 @@
+#pragma once
+#include "patch_mod_queue.hh"
+#include "patch_player.hh"
+
+namespace MetaModule
+{
+
+inline void handle_patch_mods(PatchModQueue &patch_mod_queue, PatchPlayer &player) {
+	if (auto patch_mod = patch_mod_queue.get()) {
+		std::visit(overloaded{
+					   [&player](SetStaticParam &mod) { player.apply_static_param(mod.param); },
+					   [&player](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
+					   [&player](AddMapping &mod) { player.add_mapped_knob(mod.set_id, mod.map); },
+					   [](ModifyMapping &mod) { /*TODO*/ },
+				   },
+				   patch_mod.value());
+	}
+}
+
+} // namespace MetaModule

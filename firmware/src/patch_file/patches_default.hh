@@ -29,6 +29,18 @@ struct DefaultPatches {
 		BraidsQuad_patch,
 	});
 
+	static inline std::array patch_filenames = std::to_array<ModuleTypeSlug>({
+		"Befaco4msPlayground.yml",
+		"Djembe4verb.yml",
+		"EnOsc_Dual.yml",
+		"BefacoVCOs.yml",
+		"KarplusStereo.yml",
+		"EnOsc8StepSeq.yml",
+		"twosimpleosc.yml",
+		"EnvVCA_knobsets.yml",
+		"BraidsQuad.yml",
+	});
+
 	static constexpr uint32_t num_patches() {
 		return patch_raw_data.size();
 	}
@@ -40,32 +52,18 @@ struct DefaultPatches {
 	}
 
 	static ModuleTypeSlug get_filename(uint32_t id) {
-		if (id == 0)
-			return "Befaco4msPlayground.yml";
-		if (id == 1)
-			return "Djembe4verb.yml";
-		if (id == 2)
-			return "EnOsc_Dual.yml";
-		if (id == 3)
-			return "BefacoVCOs.yml";
-		if (id == 4)
-			return "KarplusStereo.yml";
-		if (id == 5)
-			return "EnOsc_8_step_seq.yml";
-		if (id == 6)
-			return "twosimpleosc.yml";
-		if (id == 7)
-			return "EnvVCA_knobsets.yml";
-		if (id == 8)
-			return "Braids-Quad.yml";
-
-		ModuleTypeSlug s;
-		s._data[0] = ((id / 10) % 10) + '0';
-		s._data[1] = (id % 10) + '0';
-		s._data[2] = '.';
-		s._data[3] = 'y';
-		s._data[4] = 'm';
-		s._data[5] = 'l';
-		return s;
+		if (id < patch_filenames.size())
+			return patch_filenames[id];
+		else {
+			ModuleTypeSlug s;
+			s._data[0] = ((id / 10) % 10) + '0';
+			s._data[1] = (id % 10) + '0';
+			s._data[2] = '.';
+			s._data[3] = 'y';
+			s._data[4] = 'm';
+			s._data[5] = 'l';
+			s._data[6] = '\0';
+			return s;
+		}
 	}
 };

@@ -3,7 +3,7 @@
 #include "info/Gate_info.hh"
 
 #include "processors/tools/delayLine.h"
-#include "processors/tools/windowComparator.h"
+#include "processors/tools/schmittTrigger.h"
 #include "util/math.hh"
 
 namespace MetaModule
@@ -18,7 +18,7 @@ public:
 
 	void update() override {
 		lastGate = currentGate;
-		currentGate = wc.get_output();
+		currentGate = wc.output();
 		if (currentGate && !lastGate) {
 			finalDelay =
 				MathTools::map_value(MathTools::constrain(delayCV + delayTime, 0.0f, 1.0f), 0.0f, 1.0f, 0.0f, 1000.0f) /
@@ -55,17 +55,17 @@ public:
 				signalInput = val;
 				break;
 			case Info::InputLength_Cv:
-				lengthCV = val;
+				lengthCV = val / CvRangeVolts;
 				break;
 			case Info::InputDelay_Cv:
-				delayCV = val;
+				delayCV = val / CvRangeVolts;
 				break;
 		}
 	}
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return gateOutput ? 1.f : 0.f;
+			return gateOutput ? MaxOutputVolts : 0.f;
 		return 0.f;
 	}
 
@@ -104,7 +104,7 @@ private:
 	float finalDelay = 0;
 
 	DelayLine<96000> del;
-	WindowComparator wc;
+	SchmittTrigger wc;
 };
 
 } // namespace MetaModule

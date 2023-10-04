@@ -142,6 +142,7 @@ public:
 			return 0;
 		}
 
+		view_patch_vol_ = vol;
 		std::cout << "Read patch id " << patch_id << " " << raw_patch.size_bytes() << " bytes\n";
 		return raw_patch.size_bytes();
 	}

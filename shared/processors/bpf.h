@@ -28,7 +28,7 @@ public:
 		output = float(((fSlow4 * fRec0[0]) + (fSlow8 * fRec0[2])));
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
-		return constrain(output, -1.0f, 1.0f);
+		return output; //constrain(output, -10.0f, 10.0f);
 	}
 
 	BandPassFilter() {

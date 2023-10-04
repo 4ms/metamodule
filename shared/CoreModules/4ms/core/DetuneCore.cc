@@ -92,7 +92,7 @@ public:
 				signalInput = val;
 				break;
 			case Info::InputDetune:
-				cvAmount = val;
+				cvAmount = val / CvRangeVolts;
 				break;
 		}
 	}

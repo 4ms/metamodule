@@ -78,3 +78,12 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 
 	return ryml::emitrs_yaml<std::string>(tree);
 }
+
+std::string json_to_yml(std::string json) {
+	if (json.back() == '\0')
+		json.pop_back();
+
+	ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(json));
+
+	return ryml::emitrs_yaml<std::string>(tree);
+}

@@ -34,14 +34,19 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
 	}
 
-	void init() override {
-		state = State::TryingToRequestPatchList;
-	}
-
 	void prepare_focus() override {
-
 		state = State::TryingToRequestPatchList;
 		lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+		lv_group_set_editing(group, true);
+
+		auto patchname = patch_playloader.cur_patch_name(); // auto patchplaying_idx = patch_storage
+		if (patchname.length() == 0) {
+			lv_label_set_text(ui_NowPlayingName, "none");
+			lv_label_set_text(ui_Load_Meter, "");
+		} else {
+			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", patchname.c_str());
+			lv_label_set_text_fmt(ui_Load_Meter, "%d%%", metaparams.audio_load);
+		}
 	}
 
 	void refresh_patchlist(PatchFileList &patchfiles) {
@@ -183,6 +188,8 @@ struct PatchSelectorPage : PageBase {
 				if (now - last_refresh_check_tm > 1000) { //poll media once per second
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
+
+					lv_label_set_text_fmt(ui_Load_Meter, "%d%%", metaparams.audio_load);
 				}
 			} break;
 
@@ -201,7 +208,7 @@ struct PatchSelectorPage : PageBase {
 					if (patch_storage.parse_view_patch(message.bytes_read)) {
 						auto view_patch = patch_storage.get_view_patch();
 						pr_dbg("Parsed patch: %.31s\n", view_patch.patch_name.data());
-						PageList::set_selected_patch_id(selected_patch);
+						PageList::set_selected_patch_loc({selected_patch, selected_patch_vol});
 						PageList::request_new_page(PageId::PatchView);
 						state = State::Closing;
 						hide_spinner();
@@ -316,7 +323,7 @@ private:
 		RequestedPatchData,
 
 		Closing,
-	} state;
+	} state{State::TryingToRequestPatchList};
 
 	uint32_t last_refresh_check_tm = 0;
 };

@@ -3,12 +3,14 @@
 
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR ?= $(TEST_DIR)
+
 OUTERBUILDDIR = $(TEST_DIR)/build
 BUILDDIR = $(OUTERBUILDDIR)/build
 
 SHARED_DIR = ../shared
 RYMLDIR = $(SHARED_DIR)/patch_convert/ryml/rapidyaml
-
+JANSSON_CONF_DIR = ../firmware/lib/jansson
+JANSSON_DIR = ../firmware/lib/jansson/jansson/src
 
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
@@ -22,11 +24,10 @@ TEST_SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
 TEST_SOURCES += src/mapping/patch_writer.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+TEST_SOURCES += $(wildcard $(JANSSON_DIR)/*.c)
 
 
-CXXFLAGS = 	-Wall \
-		 	-std=gnu++2a \
-			-I$(DOCTEST_DIR) \
+INCLUDES = -I$(DOCTEST_DIR) \
 			-I../src\
 			-Isrc\
 			-Isrc/hub\
@@ -34,10 +35,17 @@ CXXFLAGS = 	-Wall \
 			-I$(SHARED_DIR) \
 			-I$(SHARED_DIR)/cpputil \
 			-I$(SHARED_DIR)/patch_convert/ryml \
-			-I$(SHARED_DIR)/etl/include \
+			-I$(JANSSON_DIR) \
+			-I$(JANSSON_CONF_DIR) \
 			-I$(TEST_DIR) \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
+
+CFLAGS = -DHAVE_CONFIG_H \
+		 -DTESTPROJECT \
+
+CXXFLAGS = 	-Wall \
+		 	-std=gnu++2a \
 			-DTESTPROJECT \
 			-Wno-missing-braces \
 
@@ -57,17 +65,17 @@ all: $(DOCTESTHEADER_DIR)/doctest.h tests
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CC) -c $(DEPFLAGS) $(CFLAGS) $< -o $@
+	@$(CC) -c $(DEPFLAGS) $(INCLUDES) $(CFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cc
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+	@$(CXX) -c $(DEPFLAGS) $(INCLUDES) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+	@$(CXX) -c $(DEPFLAGS) $(INCLUDES) $(CXXFLAGS) $< -o $@
 
 tests: $(BUILDDIR)/runtests
 	@$(BUILDDIR)/runtests --out=$(TMPFILE) && echo "[√] Unit tests passed: $(notdir $(PWD))" || cat $(TMPFILE)
