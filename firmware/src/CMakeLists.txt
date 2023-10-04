@@ -60,10 +60,14 @@ foreach(brand ${brands})
   foreach(module IN LISTS ${brand}Modules)
     # TODO: use _240.c for 4ms faceplates
     if(brand EQUAL "4ms")
-      list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${module}_artwork_240.c)
+	  set(IMGNAME "${module}_artwork")
     else()
-      list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${module}_240.c)
+	  set(IMGNAME ${module})
     endif()
+
+	configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
+	list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
+	list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
   endforeach()
 
 endforeach()
