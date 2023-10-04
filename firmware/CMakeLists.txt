@@ -125,6 +125,12 @@ add_custom_command(
 )
 
 add_custom_command(
+  OUTPUT faceplatemap-cmd
+  COMMAND ${CMAKE_COMMAND} -E echo "Mapping slugs to faceplate images"
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_command(
   OUTPUT vcvimages-cmd
   COMMAND ${CMAKE_COMMAND} -E echo "Updating/creating 4ms VCV artwork SVGs files from *_info.svg files"
   VERBATIM USES_TERMINAL
@@ -141,6 +147,8 @@ add_custom_target(faceplate-images DEPENDS faceplate-cmd)
 add_custom_target(image-list DEPENDS imagelist-cmd)
 add_custom_target(vcv-images DEPENDS vcvimages-cmd)
 add_custom_target(module-infos DEPENDS moduleinfos-cmd)
+add_custom_target(faceplate-maps DEPENDS faceplatemap-cmd)
+
 # meta command to do all processing
 add_custom_target(
   regenerate-all
@@ -177,11 +185,7 @@ foreach(brand ${brands})
   if(NOT
      ${brand}
      STREQUAL
-     "4ms"
-     AND NOT
-         ${brand}
-         STREQUAL
-         "Rack"
+     "Rack"
   )
     # each brand should define the faceplate paths in modules.cmake in ${BRAND}_FACEPLATE_SVGS
     include(${PROJECT_SOURCE_DIR}/vcv_ports/glue/${brand}/modules.cmake)
@@ -193,8 +197,6 @@ foreach(brand ${brands})
       )
     endif()
 
-  elseif(${brand} STREQUAL "4ms")
-    file(GLOB ${BRAND}_FACEPLATE_SVGS ${PROJECT_SOURCE_DIR}/../vcv/res/modules/*.svg)
     # The Hub is only needed in VCV Rack, not Meta Module so remove from firmware
     list(REMOVE_ITEM ${BRAND}_FACEPLATE_SVGS ${PROJECT_SOURCE_DIR}/../vcv/res/modules/HubMedium_artwork.svg)
 
@@ -227,6 +229,14 @@ foreach(brand ${brands})
               ${PROJECT_SOURCE_DIR}/src/gui/images/faceplate_images.hh
       DEPENDS ${svg}
       COMMENT "Adding to image-list: ${svg_name}_240.c"
+    )
+
+    add_custom_command(
+      OUTPUT faceplatemap-cmd
+      APPEND
+      COMMAND ${CMAKE_COMMAND} -E echo "faceplate_map.insert(\"${svg_name}\") = &${svg_name}_240;"
+      DEPENDS ${svg}
+      COMMENT "Mapping slug ${svg_name} to image ${svg_name}_240"
     )
 
   endforeach() # loop over faceplates
@@ -270,6 +280,7 @@ set_source_files_properties(faceplate-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(imagelist-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(vcvimages-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(moduleinfos-cmd PROPERTIES SYMBOLIC "true")
+set_source_files_properties(faceplatemap-cmd PROPERTIES SYMBOLIC "true")
 
 add_custom_target(
   gen_minblep
