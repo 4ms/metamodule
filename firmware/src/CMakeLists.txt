@@ -60,14 +60,14 @@ foreach(brand ${brands})
   foreach(module IN LISTS ${brand}Modules)
     # TODO: use _240.c for 4ms faceplates
     if(brand EQUAL "4ms")
-	  set(IMGNAME "${module}_artwork")
+      set(IMGNAME "${module}_artwork")
     else()
-	  set(IMGNAME ${module})
+      set(IMGNAME ${module})
     endif()
 
-	configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
-	list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
-	list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
+    configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
+    list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
+    list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
   endforeach()
 
 endforeach()
@@ -119,7 +119,6 @@ add_executable(
   ${SHARED}/CoreModules/hub/hub_medium.cc
   ${SHARED}/patch_convert/yaml_to_patch.cc
   ${SHARED}/patch_convert/ryml/ryml_serial.cc
-  ${SHARED}/cpputil/util/math_tables.cc
   #
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
