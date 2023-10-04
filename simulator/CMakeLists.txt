@@ -4,8 +4,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(mm_sim LANGUAGES C CXX)
 
 set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
+set(FWDIR ${PROJECT_SOURCE_DIR}/../firmware)
+set(SHARED ${PROJECT_SOURCE_DIR}/../shared)
 set(SIM_ROOT ${PROJECT_SOURCE_DIR})
-set(LVGL_DIR ${MM_ROOT}/firmware/lib/lvgl/lvgl)
+set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
 
 set(LV_CONF_PATH
     ${SIM_ROOT}/lv_conf.h
@@ -21,51 +23,29 @@ add_subdirectory(lvgl_drv)
 
 include(${LVGL_DIR}/CMakeLists.txt)
 
-# #################### Gui Assets ############################################
-
-file(GLOB GUI_IMAGES ${MM_ROOT}/firmware/src/gui/images/4ms/modules/*.c
-     ${MM_ROOT}/firmware/src/gui/images/4ms/components/*.c)
-
 # #################### SLS Export ##################################
 
-file(STRINGS ${MM_ROOT}/firmware/src/gui/slsexport/meta5/filelist.txt
-     SLS_SOURCES)
-list(TRANSFORM SLS_SOURCES
-     PREPEND "${MM_ROOT}/firmware/src/gui/slsexport/meta5/")
+file(STRINGS ${FWDIR}/src/gui/slsexport/meta5/filelist.txt SLS_SOURCES)
+list(TRANSFORM SLS_SOURCES PREPEND "${FWDIR}/src/gui/slsexport/meta5/")
 
 # Fixup for compiler warning in LVGL 8.3.4:
-set_source_files_properties(${MM_ROOT}/firmware/src/gui/slsexport/meta5/ui.c
+set_source_files_properties(${FWDIR}/src/gui/slsexport/meta5/ui.c
                             PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
-
-# #################### CoreModules ##################################
-
-file(GLOB CORE_MODULES ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc)
-
-set(CORE_MODULES
-    ${CORE_MODULES}
-    ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
-    #
-    # support files
-    ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
-    ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
 
 # #################### VCV Adaptor ##################################
 
-add_subdirectory(${MM_ROOT}/firmware/src/VCV_adaptor
+add_subdirectory(${FWDIR}/src/VCV_adaptor
                  ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
 target_sources(VCV_adaptor PRIVATE stubs/random.cpp)
 target_include_directories(VCV_adaptor PRIVATE stubs/)
 
 # #################### Other brands ##################################
 
-include(${MM_ROOT}/firmware/vcv_ports/brands.cmake)
-# following is only for custom modules (not 4ms or Rack)
-list(REMOVE_ITEM brands 4ms Rack)
+include(${FWDIR}/vcv_ports/brands.cmake)
 
 foreach(brand ${brands})
 
-  add_subdirectory(${MM_ROOT}/firmware/vcv_ports/glue/${brand}
+  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand}
                    ${CMAKE_CURRENT_BINARY_DIR}/${brand})
 
   target_include_directories(
@@ -79,38 +59,63 @@ foreach(brand ${brands})
            ${MM_ROOT}/shared
            ${MM_ROOT}/shared/cpputil)
 
-  file(GLOB BRAND_GUI_IMAGES
-       ${MM_ROOT}/firmware/src/gui/images/${brand}/components/*.c
-       ${MM_ROOT}/firmware/src/gui/images/${brand}/modules/*.c)
-  list(APPEND GUI_IMAGES ${BRAND_GUI_IMAGES})
+  target_include_directories(
+    ${brand}Library
+    PUBLIC ${FWDIR}/src/VCV_adaptor
+           ${FWDIR}/src/VCV_adaptor/pffft
+           ${FWDIR}/lib/jansson
+           ${FWDIR}/lib/jansson/jansson/src
+           ${FWDIR}/src
+           ${FWDIR}
+           ${SHARED}
+           ${SHARED}/cpputil)
+
+  file(GLOB BRAND_ARTWORK_SOURCES
+       ${FWDIR}/src/gui/images/${brand}/components/*.c)
+  list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
+
+  include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
+  foreach(module IN LISTS ${brand}Modules)
+    if(brand EQUAL "4ms")
+      set(IMGNAME "${module}_artwork")
+    else()
+      set(IMGNAME ${module})
+    endif()
+
+    configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in
+                   ${brand}/${module}_register.cc)
+    list(APPEND FACEPLATE_ARTWORK_SOURCES
+         ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
+    list(APPEND FACEPLATE_ARTWORK_SOURCES
+         ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
+  endforeach()
+
 endforeach()
 
 # #################### RYML + Patch Convert ##################################
 
-file(GLOB RYML_SOURCES
-     ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp
-     ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
+file(GLOB RYML_SOURCES ${SHARED}/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp
+     ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
 
-add_library(
-  ryml ${MM_ROOT}/shared/patch_convert/ryml/ryml_serial.cc
-       ${MM_ROOT}/shared/patch_convert/yaml_to_patch.cc ${RYML_SOURCES})
+add_library(ryml ${SHARED}/patch_convert/ryml/ryml_serial.cc
+                 ${SHARED}/patch_convert/yaml_to_patch.cc ${RYML_SOURCES})
 
 target_include_directories(
   ryml
-  PRIVATE ${MM_ROOT}/shared/patch_convert
-          ${MM_ROOT}/shared/patch_convert/ryml
-          ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/src
-          ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/ext/c4core/src
-          ${MM_ROOT}/shared/cpputil
-          ${MM_ROOT}/simulator/stubs
-          ${MM_ROOT}/shared)
+  PRIVATE ${SHARED}/patch_convert
+          ${SHARED}/patch_convert/ryml
+          ${SHARED}/patch_convert/ryml/rapidyaml/src
+          ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src
+          ${SHARED}/cpputil
+          ${SIM_ROOT}/stubs
+          ${SHARED})
 
 target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(simulator src/main.cc src/ui.cc ${CORE_MODULES} ${GUI_IMAGES}
-                         ${SLS_SOURCES})
+add_executable(simulator src/main.cc src/ui.cc ${FACEPLATE_ARTWORK_SOURCES}
+                         ${COMP_ARTWORK_SOURCES} ${SLS_SOURCES})
 
 target_include_directories(
   simulator
@@ -119,17 +124,17 @@ target_include_directories(
           lvgl_drv
           sdl_audio
           ${SDL2_INCLUDE_DIRS}
-          ${MM_ROOT}
-          ${MM_ROOT}/firmware
-          ${MM_ROOT}/firmware/src
-          ${MM_ROOT}/firmware/src/console
-          ${MM_ROOT}/firmware/src/params
-          ${MM_ROOT}/firmware/src/medium
-          ${MM_ROOT}/shared
-          ${MM_ROOT}/shared/cpputil
-          ${MM_ROOT}/shared/patch
-          ${MM_ROOT}/shared/CoreModules
-          ${MM_ROOT}/shared/CoreModules/4ms)
+          ${SIM_ROOT}
+          ${FWDIR}
+          ${FWDIR}/src
+          ${FWDIR}/src/console
+          ${FWDIR}/src/params
+          ${FWDIR}/src/medium
+          ${SHARED}
+          ${SHARED}/cpputil
+          ${SHARED}/patch
+          ${SHARED}/CoreModules
+          ${SHARED}/CoreModules/4ms)
 
 target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
 
@@ -142,6 +147,7 @@ endforeach()
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 
+# Arch-dependent Link options:
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

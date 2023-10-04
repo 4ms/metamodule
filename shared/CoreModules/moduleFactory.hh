@@ -4,12 +4,18 @@
 #include "CoreModules/module_type_slug.hh"
 #include "cpputil/util/seq_map.hh"
 #include "cpputil/util/static_string.hh"
-#include <array>
 #include <memory>
+
+// Why does this not work?
+// extern "C" {
+//typedef struct lv_img_dsc_t lv_img_dsc_t;
+// // struct lv_img_dsc_t;
+// }
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
 	using ModuleInfoView = MetaModule::ModuleInfoView;
+	using FaceplatePtr = void *;
 
 public:
 	ModuleFactory() = delete;
@@ -34,6 +40,14 @@ public:
 		return already_exists;
 	}
 
+	static bool registerModuleFaceplate(const ModuleTypeSlug &typeslug, FaceplatePtr faceplate) {
+		if (faceplates.key_exists(typeslug)) {
+			return false;
+		} else {
+			return faceplates.insert(typeslug, faceplate);
+		}
+	}
+
 	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug &typeslug) {
 		if (auto f_create = creation_funcs.get(typeslug))
 			return (*f_create)();
@@ -54,6 +68,13 @@ public:
 			return nullinfo;
 	}
 
+	static FaceplatePtr getModuleFaceplate(const ModuleTypeSlug &typeslug) {
+		if (auto m = faceplates.get(typeslug))
+			return *m;
+		else
+			return nullptr;
+	}
+
 	// Returns true if slug is valid and registered.
 	static bool isValidSlug(const ModuleTypeSlug &typeslug) {
 		return infos.key_exists(typeslug) && creation_funcs.key_exists(typeslug);
@@ -66,6 +87,7 @@ private:
 
 	static inline SeqMap<ModuleTypeSlug, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> infos;
+	static inline SeqMap<ModuleTypeSlug, FaceplatePtr, MAX_MODULE_TYPES> faceplates;
 
 	// static constexpr auto _sz_creation_funcs = sizeof(creation_funcs); //48k
 	// static constexpr auto _sz_infos = sizeof(infos);				   //112k
