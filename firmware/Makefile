@@ -25,11 +25,11 @@ endif
 limit:
 	cmake --fresh --preset ${PRESET} -G ${GEN} -DLIMITED_MODULES_FILE=$(LIMITFILE)
 
-bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images image-list faceplate-map flash-bootloader-sd flash-app-sd flash-dfu jprog:
+bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images image-list flash-bootloader-sd flash-app-sd flash-dfu jprog:
 	cmake --build --preset ${PRESET} -- $(MAKECMDGOALS)
 
 # Forward any other arguments
 %:
 	cmake --build --preset ${PRESET} -- $(MAKECMDGOALS)
 
-.PHONY: configure all bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images faceplate-map image-list flash-bootloader-sd flash-app-sd flash-dfu jprog
+.PHONY: configure all bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images image-list flash-bootloader-sd flash-app-sd flash-dfu jprog
