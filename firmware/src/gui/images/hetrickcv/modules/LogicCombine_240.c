@@ -17,11 +17,11 @@
 #define LV_ATTRIBUTE_MEM_ALIGN
 #endif
 
-#ifndef LV_ATTRIBUTE_IMG_LOGICCOMBINER_240
-#define LV_ATTRIBUTE_IMG_LOGICCOMBINER_240
+#ifndef LV_ATTRIBUTE_IMG_LOGICCOMBINE_240
+#define LV_ATTRIBUTE_IMG_LOGICCOMBINE_240
 #endif
 
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_LOGICCOMBINER_240 uint8_t LogicCombiner_240_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_LOGICCOMBINE_240 uint8_t LogicCombine_240_map[] = {
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 
     0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x4c, 0x00, 0x00, 0x00, 0xf0, 0x08, 0x06, 
     0x00, 0x00, 0x00, 0xaa, 0x9f, 0x82, 0x25, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 
@@ -441,12 +441,12 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_LOGICCOMB
     0x42, 0x60, 0x82
 };
 
-const lv_img_dsc_t LogicCombiner_240 = {
+const lv_img_dsc_t LogicCombine_240 = {
   .header.cf = LV_IMG_CF_RAW_ALPHA,
   .header.always_zero = 0,
   .header.reserved = 0,
   .header.w = 76,
   .header.h = 240,
   .data_size = 5411,
-  .data = LogicCombiner_240_map,
+  .data = LogicCombine_240_map,
 };

@@ -17,11 +17,11 @@
 #define LV_ATTRIBUTE_MEM_ALIGN
 #endif
 
-#ifndef LV_ATTRIBUTE_IMG_GATEJUNCTIONEXPANDED_240
-#define LV_ATTRIBUTE_IMG_GATEJUNCTIONEXPANDED_240
+#ifndef LV_ATTRIBUTE_IMG_GATEJUNCTIONEXP_240
+#define LV_ATTRIBUTE_IMG_GATEJUNCTIONEXP_240
 #endif
 
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_GATEJUNCTIONEXPANDED_240 uint8_t GateJunctionExpanded_240_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_GATEJUNCTIONEXP_240 uint8_t GateJunctionExp_240_map[] = {
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 
     0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0xd0, 0x00, 0x00, 0x00, 0xf0, 0x08, 0x06, 
     0x00, 0x00, 0x00, 0x71, 0x08, 0xea, 0x42, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 
@@ -685,12 +685,12 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_GATEJUNCT
     0xae, 0x42, 0x60, 0x82
 };
 
-const lv_img_dsc_t GateJunctionExpanded_240 = {
+const lv_img_dsc_t GateJunctionExp_240 = {
   .header.cf = LV_IMG_CF_RAW_ALPHA,
   .header.always_zero = 0,
   .header.reserved = 0,
   .header.w = 208,
   .header.h = 240,
   .data_size = 8584,
-  .data = GateJunctionExpanded_240_map,
+  .data = GateJunctionExp_240_map,
 };
