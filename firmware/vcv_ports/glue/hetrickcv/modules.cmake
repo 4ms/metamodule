@@ -14,6 +14,7 @@ set(hetrickcvModules
     ClockedNoise
     Contrast
     Crackle
+    # skip: DataCompander, Delta
     DToA
     Dust
     Exponent
@@ -62,6 +63,18 @@ set(hetrickcvModules
     Waveshape
 )
 
+# TODO: use this. List is in pairs (SVG name, VCV slug)
+set(hetrickcvAltNames
+    AToD
+    AnalogToDigital
+    DToA
+    DigitalToAnalog
+    2To4
+    TwoToFour
+    Waveshaper
+    Waveshape
+)
+
 include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
 limit_modules_built(hetrickcvModules)
 
@@ -70,5 +83,5 @@ list(TRANSFORM hetrickcvModules PREPEND ${HETRICKCV_DIR}/src/ OUTPUT_VARIABLE HE
 list(TRANSFORM HETRICKCV_SOURCE_PATHS APPEND .cpp)
 
 # svg paths
-list(TRANSFORM hetrickcvModules PREPEND ${HETRICKCV_DIR}/res/ OUTPUT_VARIABLE HETRICKCV_FACEPLATE_SVGS )
+list(TRANSFORM hetrickcvModules PREPEND ${HETRICKCV_DIR}/res/ OUTPUT_VARIABLE HETRICKCV_FACEPLATE_SVGS)
 list(TRANSFORM HETRICKCV_FACEPLATE_SVGS APPEND .svg)
