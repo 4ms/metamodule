@@ -35,6 +35,8 @@ target_link_libraries(jansson PUBLIC mp15xa7_arch)
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
 
 foreach(brand ${brands})
+  string(TOUPPER ${brand} BRAND)
+
   # Component artwork
   file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
   list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
@@ -57,17 +59,22 @@ foreach(brand ${brands})
 
   # Faceplate artwork
   include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
+  set(IDX 0)
   foreach(module IN LISTS ${brand}Modules)
-    # TODO: use _240.c for 4ms faceplates
-    if(brand EQUAL "4ms")
-      set(IMGNAME "${module}_artwork")
-    else()
-      set(IMGNAME ${module})
-    endif()
+    list(
+      GET
+      ${BRAND}_FACEPLATE_SVGS
+      ${IDX}
+      SVG_PATH
+    )
+    get_filename_component(IMGNAME ${SVG_PATH} NAME_WE)
 
     configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
-    list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
     list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
+
+    list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
+
+    math(EXPR IDX "${IDX}+1")
   endforeach()
 
 endforeach()
