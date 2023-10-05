@@ -35,6 +35,8 @@ target_link_libraries(jansson PUBLIC mp15xa7_arch)
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
 
 foreach(brand ${brands})
+  string(TOUPPER ${brand} BRAND)
+
   # Component artwork
   file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
   list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
@@ -57,18 +59,36 @@ foreach(brand ${brands})
 
   # Faceplate artwork
   include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
-  foreach(module IN LISTS ${brand}Modules)
-    # TODO: use _240.c for 4ms faceplates
-    if(brand EQUAL "4ms")
-      set(IMGNAME "${module}_artwork")
-    else()
-      set(IMGNAME ${module})
-    endif()
 
-    configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
-    list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
-    list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
-  endforeach()
+  if(USE_LIMITED_MODULES)
+    # Use provided module list file. If a module image is missing, Cmake will give an error.
+    foreach(module IN LISTS ${brand}Modules)
+
+      if(brand EQUAL "4ms")
+        set(IMGNAME "${module}_artwork")
+      else()
+        set(IMGNAME ${module})
+      endif()
+
+      configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
+
+      list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
+      list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
+    endforeach()
+
+  else()
+    file(GLOB ${brand}Paths ${FWDIR}/src/gui/images/${brand}/modules/*_240.c)
+    list(APPEND FACEPLATE_ARTWORK_SOURCES ${${brand}Paths})
+
+    foreach(modpath IN LISTS ${brand}Paths)
+      get_filename_component(module_240 ${modpath} NAME_WE)
+      string(REGEX REPLACE "_240$" "" IMGNAME ${module_240})
+      string(REGEX REPLACE "_artwork$" "" module ${IMGNAME})
+
+      configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
+      list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
+    endforeach()
+  endif()
 
 endforeach()
 
@@ -76,12 +96,7 @@ endforeach()
 # RYML
 #
 set(RYMLDIR ${SHARED}/patch_convert/ryml/rapidyaml)
-file(
-  GLOB
-  RYML_SOURCES
-  ${RYMLDIR}/src/c4/yml/*.cpp
-  ${RYMLDIR}/ext/c4core/src/c4/*.cpp
-)
+file(GLOB RYML_SOURCES ${RYMLDIR}/src/c4/yml/*.cpp ${RYMLDIR}/ext/c4core/src/c4/*.cpp)
 add_library(ryml OBJECT ${RYML_SOURCES})
 target_link_libraries(ryml PUBLIC mp15xa7_arch)
 target_include_directories(ryml PUBLIC ${RYMLDIR}/src ${RYMLDIR}/ext/c4core/src)
@@ -201,15 +216,7 @@ target_include_directories(
           ${FWDIR}/lib/jansson/jansson/src
 )
 
-target_link_libraries(
-  main.elf
-  PRIVATE lvgl::lvgl
-          mp15xa7_arch
-          mdrivlib_interface
-          ui
-          ryml
-          VCV_adaptor
-)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mp15xa7_arch mdrivlib_interface ui ryml VCV_adaptor)
 
 foreach(brand ${brands})
   target_link_libraries(main.elf PRIVATE ${brand}Library)
