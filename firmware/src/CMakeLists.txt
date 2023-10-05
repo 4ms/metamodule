@@ -60,35 +60,26 @@ foreach(brand ${brands})
   # Faceplate artwork
   include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
 
-  if(USE_LIMITED_MODULES)
-    # Use provided module list file. If a module image is missing, Cmake will give an error.
-    foreach(module IN LISTS ${brand}Modules)
+  # Use provided module list file.
+  foreach(module IN LISTS ${brand}Modules)
 
-      if(brand EQUAL "4ms")
-        set(IMGNAME "${module}_artwork")
-      else()
-        set(IMGNAME ${module})
-      endif()
+    # Workaround for 4ms
+    if(brand EQUAL "4ms")
+      set(IMGNAME "${module}_artwork")
+    else()
+      set(IMGNAME ${module})
+    endif()
 
-      configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
+    configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
 
+    # Skip files that aren't generated yet. Otherwise we can't run the faceplate-images target to generate images
+    # because CMake fails to configure the project
+    set(image_path ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
+    if(EXISTS "${image_path}")
       list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
-      list(APPEND FACEPLATE_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
-    endforeach()
-
-  else()
-    file(GLOB ${brand}Paths ${FWDIR}/src/gui/images/${brand}/modules/*_240.c)
-    list(APPEND FACEPLATE_ARTWORK_SOURCES ${${brand}Paths})
-
-    foreach(modpath IN LISTS ${brand}Paths)
-      get_filename_component(module_240 ${modpath} NAME_WE)
-      string(REGEX REPLACE "_240$" "" IMGNAME ${module_240})
-      string(REGEX REPLACE "_artwork$" "" module ${IMGNAME})
-
-      configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
-      list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
-    endforeach()
-  endif()
+      list(APPEND FACEPLATE_ARTWORK_SOURCES ${image_path})
+    endif()
+  endforeach()
 
 endforeach()
 
