@@ -2,7 +2,7 @@ set(HETRICKCV_DIR ${CMAKE_CURRENT_LIST_DIR}/../../hetrickcv)
 
 set(hetrickcvModules
     ASR
-    AToD
+    AnalogToDigital
     BinaryGate
     BinaryNoise
     Bitshift
@@ -15,7 +15,7 @@ set(hetrickcvModules
     Contrast
     Crackle
     # skip: DataCompander, Delta
-    DToA
+    DigitalToAnalog
     Dust
     Exponent
     FBSineChaos
@@ -58,21 +58,9 @@ set(hetrickcvModules
     XYToPolar
     Probability
     Scanner
-    TwoToFour
-    VectorMix
-    Waveshape
-)
-
-# TODO: use this. List is in pairs (SVG name, VCV slug)
-set(hetrickcvAltNames
-    AToD
-    AnalogToDigital
-    DToA
-    DigitalToAnalog
     2To4
-    TwoToFour
+    VectorMix
     Waveshaper
-    Waveshape
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)

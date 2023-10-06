@@ -17,11 +17,11 @@
 #define LV_ATTRIBUTE_MEM_ALIGN
 #endif
 
-#ifndef LV_ATTRIBUTE_IMG_TWOTOFOUR_240
-#define LV_ATTRIBUTE_IMG_TWOTOFOUR_240
+#ifndef LV_ATTRIBUTE_IMG_2TO4_240
+#define LV_ATTRIBUTE_IMG_2TO4_240
 #endif
 
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_TWOTOFOUR_240 uint8_t TwoToFour_240_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_2TO4_240 uint8_t img_2To4_240_map[] = {
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 
     0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x39, 0x00, 0x00, 0x00, 0xf0, 0x08, 0x06, 
     0x00, 0x00, 0x00, 0xba, 0xff, 0xcc, 0xf9, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 
@@ -425,12 +425,12 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_TWOTOFOUR
     0x82
 };
 
-const lv_img_dsc_t TwoToFour_240 = {
+const lv_img_dsc_t img_2To4_240 = {
   .header.cf = LV_IMG_CF_RAW_ALPHA,
   .header.always_zero = 0,
   .header.reserved = 0,
   .header.w = 57,
   .header.h = 240,
   .data_size = 5201,
-  .data = TwoToFour_240_map,
+  .data = img_2To4_240_map,
 };
