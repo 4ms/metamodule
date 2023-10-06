@@ -41,6 +41,13 @@ target_include_directories(VCV_adaptor PRIVATE stubs/)
 
 # #################### Other brands ##################################
 
+# Only build a limited set of modules, defined in an external file
+include(${FWDIR}/vcv_ports/glue/filter.cmake)
+unset(USE_LIMITED_MODULES)
+if(DEFINED LIMITED_MODULES_FILE)
+  validate_limited_modules_file(${LIMITED_MODULES_FILE})
+endif()
+
 include(${FWDIR}/vcv_ports/brands.cmake)
 
 foreach(brand ${brands})

@@ -25,26 +25,11 @@ target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
 #
 # Only build a limited set of modules, defined in an external file
 #
+include(vcv_ports/glue/filter.cmake)
+
+unset(USE_LIMITED_MODULES)
 if(DEFINED LIMITED_MODULES_FILE)
-  if(LIMITED_MODULES_FILE STREQUAL "")
-    message(FATAL_ERROR "Empty filename given for limit file")
-  endif()
-
-  # Relative -> Abs path (is relative to firmware/ dir)
-  get_filename_component(LIMITED_MODULES_FILE ${LIMITED_MODULES_FILE} ABSOLUTE)
-
-  if(EXISTS "${LIMITED_MODULES_FILE}")
-    set(USE_LIMITED_MODULES ON)
-    file(STRINGS ${LIMITED_MODULES_FILE} LIMITED_MODULE_SLUGS)
-    message("Building limited set of modules:")
-    foreach(m IN LISTS LIMITED_MODULE_SLUGS)
-      message("${m}")
-    endforeach()
-  else()
-    message(FATAL_ERROR "The file `${LIMITED_MODULES_FILE}` does not exist.")
-  endif()
-else()
-  unset(USE_LIMITED_MODULES)
+  validate_limited_modules_file(${LIMITED_MODULES_FILE})
 endif()
 
 #
@@ -153,7 +138,6 @@ add_custom_target(
   regenerate-all
   DEPENDS comp-images
           faceplate-images
-          image-list
           vcv-images
           module-infos
 )

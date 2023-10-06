@@ -24,7 +24,7 @@ set(BefacoModules
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
-limit_modules_built(BefacoModules)
+limit_modules_built("Befaco" BefacoModules)
 
 # svg paths
 list(TRANSFORM BefacoModules PREPEND ${BEFACO_DIR}/res/panels/ OUTPUT_VARIABLE BEFACO_FACEPLATE_SVGS)
