@@ -1,14 +1,31 @@
-macro(limit_modules_built ModuleList)
-
+macro(limit_modules_built BRAND MODULE_LIST)
   if(USE_LIMITED_MODULES)
-    foreach(m IN LISTS ${ModuleList})
-      if(m IN_LIST LIMITED_MODULE_SLUGS)
-        # message(${m} " will be built")
+    foreach(module IN LISTS ${MODULE_LIST})
+      set(combinedslug "${BRAND}:${module}")
+      if(combinedslug IN_LIST LIMITED_MODULE_SLUGS)
+          # message("WILL build: ${module} (${combinedslug})")
       else()
-        # message(${m} " not be built")
-        list(REMOVE_ITEM ${ModuleList} ${m})
+          # message("NOT build: ${module} (${combinedslug})")
+        list(REMOVE_ITEM ${MODULE_LIST} ${module})
       endif()
     endforeach()
   endif()
-
 endmacro()
+
+function(parse_brandmodule COMBINEDSLUG)
+  string(REPLACE ":" ";" BRANDMODULELIST "${COMBINEDSLUG}")
+
+  list(LENGTH BRANDMODULELIST len)
+
+  if(len EQUAL 2)
+    list(GET BRANDMODULELIST 0 P_BRAND)
+    list(GET BRANDMODULELIST 1 P_MODULE)
+  else()
+    unset(P_BRAND)
+    unset(P_MODULE)
+  endif()
+
+  set(P_BRAND "${P_BRAND}" PARENT_SCOPE)
+  set(P_MODULE "${P_MODULE}" PARENT_SCOPE)
+endfunction()
+
