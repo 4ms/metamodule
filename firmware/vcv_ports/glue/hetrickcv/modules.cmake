@@ -64,7 +64,7 @@ set(hetrickcvModules
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
-limit_modules_built(hetrickcvModules)
+limit_modules_built("hetrickcv" hetrickcvModules)
 
 # cpp paths
 list(TRANSFORM hetrickcvModules PREPEND ${HETRICKCV_DIR}/src/ OUTPUT_VARIABLE HETRICKCV_SOURCE_PATHS)
