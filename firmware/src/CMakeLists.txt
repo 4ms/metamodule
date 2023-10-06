@@ -58,9 +58,8 @@ foreach(brand ${brands})
   target_compile_options(${brand}Library PRIVATE -Wno-attributes)
 
   # Faceplate artwork
-  include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
-
   # Use provided module list file.
+  include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
   foreach(module IN LISTS ${brand}Modules)
 
     # Workaround for 4ms
@@ -74,19 +73,13 @@ foreach(brand ${brands})
     # because CMake fails to configure the project
     set(image_path ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
     if(EXISTS "${image_path}")
-
-      # Handle slugs that start with a number by prefixing "img_" to it
-      # This matches what svgextract does in svgextract/actions/lvgl.py
-      string(REGEX REPLACE "^([0-9])" "img_\\1" IMGNAME "${IMGNAME}")
+      cleanup_imgname(${IMGNAME})
 
       # Generate a .cc file that will register the map from slug to lvgl image data
       configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
 
       list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
       list(APPEND FACEPLATE_ARTWORK_SOURCES ${image_path})
-
-    else()
-      message("Warning: file ${image_path} does not exist, not building a faceplate for this module")
     endif()
 
   endforeach()
