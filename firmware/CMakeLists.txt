@@ -153,7 +153,6 @@ add_custom_target(
   regenerate-all
   DEPENDS comp-images
           faceplate-images
-          image-list
           vcv-images
           module-infos
 )
