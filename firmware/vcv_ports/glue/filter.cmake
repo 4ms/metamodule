@@ -37,6 +37,10 @@ function(parse_brandmodule COMBINEDSLUG)
   set(P_MODULE "${P_MODULE}" PARENT_SCOPE)
 endfunction()
 
+# Parses a file containing Brand:Module slugs and returns:
+# USE_LIMITED_MODULES is set if the file is found
+# LIMITED_MODULE_SLUGS is set to a list of Brand:Module slugs
+# Note that this only checks syntax, the brands and modules given do not have to exist
 function (validate_limited_modules_file LIMITED_MODULES_FILE)
   if("${LIMITED_MODULES_FILE}" STREQUAL "")
     message(FATAL_ERROR "Empty filename given for limit file")
@@ -66,3 +70,16 @@ function (validate_limited_modules_file LIMITED_MODULES_FILE)
   set(USE_LIMITED_MODULES ON PARENT_SCOPE)
   set(LIMITED_MODULE_SLUGS "${LIMITED_MODULE_SLUGS}" PARENT_SCOPE)
 endfunction()
+
+
+# Given IMGNAME, applies cleanups so we can use it
+# as the name of an array in the LVGL image .c file
+# Returns the result in variable IMGNAME
+function (cleanup_imgname IMGNAME)
+  # Handle slugs that start with a number by prefixing "img_" to it
+  # This matches what svgextract does in svgextract/actions/lvgl.py
+  string(REGEX REPLACE "^([0-9])" "img_\\1" IMGNAME "${IMGNAME}")
+
+  set(IMGNAME ${IMGNAME} PARENT_SCOPE)
+endfunction()
+

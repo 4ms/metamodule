@@ -9,9 +9,7 @@ set(SHARED ${PROJECT_SOURCE_DIR}/../shared)
 set(SIM_ROOT ${PROJECT_SOURCE_DIR})
 set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
 
-set(LV_CONF_PATH
-    ${SIM_ROOT}/lv_conf.h
-    CACHE STRING "" FORCE)
+set(LV_CONF_PATH ${SIM_ROOT}/lv_conf.h CACHE STRING "" FORCE)
 
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 
@@ -77,8 +75,7 @@ foreach(brand ${brands})
            ${SHARED}
            ${SHARED}/cpputil)
 
-  file(GLOB BRAND_ARTWORK_SOURCES
-       ${FWDIR}/src/gui/images/${brand}/components/*.c)
+  file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
   list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
   include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
@@ -89,12 +86,16 @@ foreach(brand ${brands})
       set(IMGNAME ${module})
     endif()
 
-    configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in
-                   ${brand}/${module}_register.cc)
-    list(APPEND FACEPLATE_ARTWORK_SOURCES
-         ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
-    list(APPEND FACEPLATE_ARTWORK_SOURCES
-         ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
+    set(image_path ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
+    if(EXISTS "${image_path}")
+      cleanup_imgname(${IMGNAME})
+
+      # Generate a .cc file that will register the map from slug to lvgl image data
+      configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
+
+      list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
+      list(APPEND FACEPLATE_ARTWORK_SOURCES ${image_path})
+    endif()
   endforeach()
 
 endforeach()
@@ -102,10 +103,11 @@ endforeach()
 # #################### RYML + Patch Convert ##################################
 
 file(GLOB RYML_SOURCES ${SHARED}/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp
-     ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
+                       ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
 
 add_library(ryml ${SHARED}/patch_convert/ryml/ryml_serial.cc
-                 ${SHARED}/patch_convert/yaml_to_patch.cc ${RYML_SOURCES})
+                 ${SHARED}/patch_convert/yaml_to_patch.cc 
+                 ${RYML_SOURCES})
 
 target_include_directories(
   ryml
@@ -121,8 +123,11 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(simulator src/main.cc src/ui.cc ${FACEPLATE_ARTWORK_SOURCES}
-                         ${COMP_ARTWORK_SOURCES} ${SLS_SOURCES})
+add_executable(simulator src/main.cc 
+                         src/ui.cc 
+                         ${FACEPLATE_ARTWORK_SOURCES}
+                         ${COMP_ARTWORK_SOURCES} 
+                         ${SLS_SOURCES})
 
 target_include_directories(
   simulator
@@ -145,8 +150,7 @@ target_include_directories(
 
 target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        ryml SDL2 VCV_adaptor)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl ryml SDL2 VCV_adaptor)
 
 foreach(brand ${brands})
   target_link_libraries(simulator PRIVATE ${brand}Library)
