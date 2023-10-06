@@ -27,34 +27,9 @@ target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
 #
 include(vcv_ports/glue/filter.cmake)
 
+unset(USE_LIMITED_MODULES)
 if(DEFINED LIMITED_MODULES_FILE)
-  if(LIMITED_MODULES_FILE STREQUAL "")
-    message(FATAL_ERROR "Empty filename given for limit file")
-  endif()
-
-  # Relative -> Abs path (is relative to firmware/ dir)
-  get_filename_component(LIMITED_MODULES_FILE ${LIMITED_MODULES_FILE} ABSOLUTE)
-
-  if(EXISTS "${LIMITED_MODULES_FILE}")
-    set(USE_LIMITED_MODULES ON)
-    file(STRINGS ${LIMITED_MODULES_FILE} RAW_LIMITED_MODULE_SLUGS)
-    message("Building limited set of modules:")
-
-    # Fill LIMITED_MODULE_SLUGS list with valid entries
-    foreach(m IN LISTS RAW_LIMITED_MODULE_SLUGS)
-      parse_brandmodule(${m})
-      if("${P_BRAND}" STREQUAL "" AND "${P_MODULE}" STREQUAL "")
-        message("   \"${m}\" not valid. Must be in format Brand:ModuleSlug")
-      else()
-        message("   ${P_BRAND}:${P_MODULE}")
-        list(APPEND LIMITED_MODULE_SLUGS "${P_BRAND}:${P_MODULE}")
-      endif()
-    endforeach()
-  else()
-    message(FATAL_ERROR "The file `${LIMITED_MODULES_FILE}` does not exist.")
-  endif()
-else()
-  unset(USE_LIMITED_MODULES)
+  validate_limited_modules_file(${LIMITED_MODULES_FILE})
 endif()
 
 #

@@ -1,3 +1,8 @@
+# Reads the given MODULE_LIST.
+# If a match for the given BRAND:MODULE is NOT found in the
+# global list LIMITED_MODULE_SLUGS, then the item is removed
+# from MODULE_LIST.
+# Nothing is done if the global var USE_LIMITED_MODULES is not set
 macro(limit_modules_built BRAND MODULE_LIST)
   if(USE_LIMITED_MODULES)
     foreach(module IN LISTS ${MODULE_LIST})
@@ -12,6 +17,9 @@ macro(limit_modules_built BRAND MODULE_LIST)
   endif()
 endmacro()
 
+# Given a combined slug of the format brand:module, 
+# return the brand in P_BRAND, and the module in P_MODULE.
+# If the combined slug is not valid, unset P_BRAND and P_MODULE.
 function(parse_brandmodule COMBINEDSLUG)
   string(REPLACE ":" ";" BRANDMODULELIST "${COMBINEDSLUG}")
 
@@ -29,3 +37,32 @@ function(parse_brandmodule COMBINEDSLUG)
   set(P_MODULE "${P_MODULE}" PARENT_SCOPE)
 endfunction()
 
+function (validate_limited_modules_file LIMITED_MODULES_FILE)
+  if("${LIMITED_MODULES_FILE}" STREQUAL "")
+    message(FATAL_ERROR "Empty filename given for limit file")
+  endif()
+
+  # Relative -> Abs path (is relative to firmware/ dir)
+  get_filename_component(LIMITED_MODULES_FILE "${LIMITED_MODULES_FILE}" ABSOLUTE)
+
+  if(NOT EXISTS "${LIMITED_MODULES_FILE}")
+      message(FATAL_ERROR "The file `${LIMITED_MODULES_FILE}` does not exist.")
+  endif()
+
+  file(STRINGS ${LIMITED_MODULES_FILE} RAW_LIMITED_MODULE_SLUGS)
+  message("Building limited set of modules:")
+
+  # Fill LIMITED_MODULE_SLUGS list with valid entries
+  foreach(m IN LISTS RAW_LIMITED_MODULE_SLUGS)
+    parse_brandmodule(${m})
+    if("${P_BRAND}" STREQUAL "" AND "${P_MODULE}" STREQUAL "")
+      message(WARNING "   \"${m}\" not valid. Must be in format Brand:ModuleSlug")
+    else()
+      message("   ${P_BRAND}:${P_MODULE}")
+      list(APPEND LIMITED_MODULE_SLUGS "${P_BRAND}:${P_MODULE}")
+    endif()
+  endforeach()
+
+  set(USE_LIMITED_MODULES ON PARENT_SCOPE)
+  set(LIMITED_MODULE_SLUGS "${LIMITED_MODULE_SLUGS}" PARENT_SCOPE)
+endfunction()
