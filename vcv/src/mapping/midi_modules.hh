@@ -1,11 +1,64 @@
 #pragma once
-#include "patch/patch.hh"
+#include "mapping/JackMap.hh"
 #include <rack.hpp>
 
-namespace MetaModule::MIDIMapping
+namespace MetaModule::MIDI
 {
 
-std::vector<MappedKnob> mapMidiMaps(rack::Module *module);
-std::vector<MappedInputJack> mapMidiToCV(rack::Module *module);
+struct MidiCVSettings {
+	float pwRange = 0;
+	unsigned channels = 0;
+	enum PolyMode { ROTATE_MODE, REUSE_MODE, RESET_MODE, MPE_MODE };
+	PolyMode polyMode = ROTATE_MODE;
+};
 
-} // namespace MetaModule::MIDIMapping
+struct MidiGateSettings {
+	std::array<int8_t, 16> notes{};
+	bool velocity_mode = false;
+	bool mpe_mode = false;
+};
+
+struct MidiCCCVSettings {};
+
+struct MidiCCKnobSettings {};
+
+struct Settings {
+	MidiCVSettings CV;
+	MidiGateSettings gate;
+	MidiCCCVSettings CCCV;
+	MidiCCKnobSettings CCKnob;
+};
+
+std::optional<MidiCVSettings> readMidiCVModule(int64_t module_id);
+std::optional<MidiGateSettings> readMidiGateModule(int64_t module_id);
+std::optional<MidiCCCVSettings> readMidiCCCVModule(int64_t module_id);
+std::optional<MidiCCKnobSettings> readMidiMapModule(int64_t module_id);
+
+} // namespace MetaModule::MIDI
+
+// namespace MetaModule::MIDIMapping
+// {
+
+// struct MidiCVSettings {
+// 	float pwRange = 0;
+// 	unsigned channels = 0;
+// 	enum PolyMode { ROTATE_MODE, REUSE_MODE, RESET_MODE, MPE_MODE };
+// 	PolyMode polyMode = ROTATE_MODE;
+// };
+
+// struct MidiGateSettings {
+// 	std::array<int8_t, 16> notes{};
+// 	bool velocity_mode = false;
+// 	bool mpe_mode = false;
+// };
+
+// struct MidiCCCVSettings {};
+
+// struct MidiCCKnobSettings {};
+
+// std::optional<MidiCVSettings> mapMidiToCV(CableMap *cable);
+// std::optional<MidiGateSettings> mapMidiToGate(CableMap *cable);
+// std::optional<MidiCCCVSettings> mapMidiCCToCV(CableMap *cable);
+// std::optional<MidiCCKnobSettings> mapMidiCCToKnob(int64_t module_id);
+
+// } // namespace MetaModule::MIDIMapping

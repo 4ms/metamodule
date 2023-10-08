@@ -33,6 +33,8 @@ struct VCVPatchFileWriter {
 		std::vector<ParamMap> paramData;
 		auto moduleIDs = engine->getModuleIds();
 		PatchFileWriter::MidiModuleIds midiModuleIds;
+		MetaModule::MIDI::Settings midiSettings;
+
 		for (auto moduleID : moduleIDs) {
 
 			auto *module = engine->getModule(moduleID);
@@ -50,17 +52,31 @@ struct VCVPatchFileWriter {
 				}
 			}
 
-			if (module->model->slug == "MIDIToCVInterface")
-				midiModuleIds.midiCV = module->id;
-
-			if (module->model->slug == "MIDI-Map")
-				midiModuleIds.midiMaps = module->id;
-
-			if (module->model->slug == "MIDITriggerToCVInterface")
-				midiModuleIds.midiGate = module->id;
-
-			if (module->model->slug == "MIDICCToCVInterface")
-				midiModuleIds.midiCC = module->id;
+			if (module->model->slug == "MIDIToCVInterface") {
+				auto settings = MetaModule::MIDI::readMidiCVModule(module->id);
+				if (settings) {
+					midiSettings.CV = settings.value();
+					midiModuleIds.midiCV = module->id;
+				}
+			} else if (module->model->slug == "MIDI-Map") {
+				auto settings = MetaModule::MIDI::readMidiMapModule(module->id);
+				if (settings) {
+					midiSettings.CCKnob = settings.value();
+					midiModuleIds.midiMaps = module->id;
+				}
+			} else if (module->model->slug == "MIDITriggerToCVInterface") {
+				auto settings = MetaModule::MIDI::readMidiGateModule(module->id);
+				if (settings) {
+					midiSettings.gate = settings.value();
+					midiModuleIds.midiGate = module->id;
+				}
+			} else if (module->model->slug == "MIDICCToCVInterface") {
+				auto settings = MetaModule::MIDI::readMidiCCCVModule(module->id);
+				if (settings) {
+					midiSettings.CCCV = settings.value();
+					midiModuleIds.midiCC = module->id;
+				}
+			}
 		}
 
 		std::vector<CableMap> cableData;
@@ -69,8 +85,14 @@ struct VCVPatchFileWriter {
 			auto out = cable->outputModule;
 			auto in = cable->inputModule;
 
-			// Both modules on a cable must be in the plugin
-			if (!(ModuleDirectory::isInPlugin(out) && ModuleDirectory::isInPlugin(in)))
+			// Both modules on a cable must be in the plugin (including hub)
+			// Exception: A MIDI module (not in plugin) can be the output, going to a plugin module
+			if (!(ModuleDirectory::isInPluginOrMIDI(out) && ModuleDirectory::isInPlugin(in))) {
+				continue;
+			}
+
+			// MIDI module cannot connect directly to the hub
+			if (ModuleDirectory::isCoreMIDI(out) && ModuleDirectory::isHub(in))
 				continue;
 
 			// Ignore cables that are connected to a different hub
@@ -104,7 +126,7 @@ struct VCVPatchFileWriter {
 		}
 
 		PatchFileWriter pw{moduleData, hubModuleId};
-		pw.setMidiModuleIds(midiModuleIds);
+		pw.setMidiSettings(midiModuleIds, midiSettings);
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
 		pw.setCableList(cableData);

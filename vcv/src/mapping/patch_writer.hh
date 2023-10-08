@@ -4,6 +4,7 @@
 #include "ParamMap.hh"
 #include "jansson.h"
 #include "mapping/mapping.hh"
+#include "mapping/midi_modules.hh"
 #include "patch/patch.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include <map>
@@ -25,10 +26,10 @@ public:
 
 	void setPatchName(std::string patchName);
 	void setPatchDesc(std::string patchDesc);
-	void setCableList(std::vector<CableMap> &jacks);
+	void setCableList(std::vector<CableMap> &cables);
 	void setParamList(std::vector<ParamMap> &params);
+	void setMidiSettings(MidiModuleIds &ids, MetaModule::MIDI::Settings const &settings);
 	void addModuleStateJson(rack::Module *module);
-	void setMidiModuleIds(MidiModuleIds &ids);
 
 	void addKnobMaps(unsigned panelKnobId, unsigned knobSetId, const std::span<const Mapping> maps);
 	void addKnobMapSet(unsigned knobSetId, std::string_view knobSetName);
@@ -49,5 +50,6 @@ private:
 	PatchData pd;
 	int64_t hubModuleId = -1;
 	MidiModuleIds midiModuleIds;
+	MetaModule::MIDI::Settings midiSettings;
 	std::map<int64_t, uint16_t> idMap; // idMap[64 bit VCV module id] -> 16 bit MM-patch module id
 };

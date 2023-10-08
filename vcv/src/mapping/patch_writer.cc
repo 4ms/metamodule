@@ -1,4 +1,5 @@
 #include "patch_writer.hh"
+#include "mapping/midi_modules.hh"
 #include "mapping/module_directory.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include "patch_convert/ryml/ryml_serial.hh"
@@ -27,8 +28,9 @@ void PatchFileWriter::setPatchDesc(std::string patchDesc) {
 	pd.description = patchDesc.c_str();
 }
 
-void PatchFileWriter::setMidiModuleIds(MidiModuleIds &ids) {
+void PatchFileWriter::setMidiSettings(MidiModuleIds &ids, MetaModule::MIDI::Settings const &settings) {
 	midiModuleIds = ids;
+	midiSettings = settings;
 }
 
 void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
@@ -54,15 +56,10 @@ void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
 	idMap = squash_ids(vcv_mod_ids);
 }
 
-void PatchFileWriter::setCableList(std::vector<CableMap> &jacks) {
+void PatchFileWriter::setCableList(std::vector<CableMap> &cables) {
 	pd.int_cables.clear();
 
-	for (auto &cable : jacks) {
-		if (!idMap.contains(cable.receivedModuleId) || !idMap.contains(cable.sendingModuleId))
-			continue;
-
-		auto in_mod = idMap[cable.receivedModuleId];
-		auto out_mod = idMap[cable.sendingModuleId];
+	for (auto &cable : cables) {
 		auto in_jack = cable.receivedJackId;
 		auto out_jack = cable.sendingJackId;
 
@@ -72,11 +69,41 @@ void PatchFileWriter::setCableList(std::vector<CableMap> &jacks) {
 		if (cable.sendingModuleId == hubModuleId) {
 			mapInputJack(cable);
 			continue;
-		}
-		if (cable.receivedModuleId == hubModuleId) {
+
+		} else if (cable.receivedModuleId == hubModuleId) {
 			mapOutputJack(cable);
 			continue;
+
+		} else if (cable.sendingModuleId == midiModuleIds.midiCV) {
+			auto midicv_settings = MetaModule::MIDIMapping::mapMidiToCV(&cable);
+			if (midicv_settings)
+				mapInputJack(cable);
+			continue;
+
+		} else if (cable.sendingModuleId == midiModuleIds.midiGate) {
+			auto midigate_settings = MetaModule::MIDIMapping::mapMidiToGate(&cable);
+			if (midigate_settings)
+				mapInputJack(cable);
+			continue;
+
+		} else if (cable.sendingModuleId == midiModuleIds.midiCC) {
+			auto midicc_settings = MetaModule::MIDIMapping::mapMidiCCToCV(&cable);
+			if (midicc_settings)
+				mapInputJack(cable);
+			continue;
+
+		} else if (cable.sendingModuleId == midiModuleIds.midiMaps) {
+			auto midiknob_settings = MetaModule::MIDIMapping::mapMidiCCToKnob(cable.sendingModuleId);
+			if (midiknob_settings)
+				mapInputJack(cable);
+			continue;
 		}
+
+		if (!idMap.contains(cable.receivedModuleId) || !idMap.contains(cable.sendingModuleId))
+			continue;
+
+		auto in_mod = idMap[cable.receivedModuleId];
+		auto out_mod = idMap[cable.sendingModuleId];
 
 		// Look for an existing entry:
 		auto found = std::find_if(pd.int_cables.begin(), pd.int_cables.end(), [=](const auto &x) {
@@ -144,23 +171,6 @@ void PatchFileWriter::addModuleStateJson(rack::Module *module) {
 
 	json_array_append_new(moduleArrayJ, moduleJ);
 }
-
-// void rectify_midi_maps(std::vector<Mapping> &maps)
-//{
-//	int num_midinote_mappings = std::count_if(
-//		maps.begin(), maps.end(), [](auto &m) { return m.src.objType == LabelButtonID::Types::MidiNote; });
-//	int num_midigate_mappings = std::count_if(
-//		maps.begin(), maps.end(), [](auto &m) { return m.src.objType == LabelButtonID::Types::MidiGate; });
-
-//	int num_midi_mappings = std::max(num_midinote_mappings, num_midigate_mappings);
-//	//polyphony number
-
-//	uint16_t note_src_id = 256;//first MidiNote
-//	for(auto &m :maps) {
-//		if (m.src.objType == LabelButtonID::Types::MidiNote)
-//			m.src.objID = note_src_id;
-//	}
-//}
 
 void PatchFileWriter::addKnobMapSet(unsigned knobSetId, std::string_view knobSetName) {
 	if (knobSetId >= pd.knob_sets.size())

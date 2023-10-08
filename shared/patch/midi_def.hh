@@ -2,14 +2,45 @@
 #include "CoreModules/hub/panel_medium_defs.hh"
 
 enum {
-	MidiMonoNoteJack = PanelDef::NumUserFacingInJacks,
-	MidiMonoGateJack,
+
+	MidiMonoNoteJack = 0x100,
+	MidiNote2Jack,
+	MidiNote3Jack,
+	MidiNote4Jack,
+	MidiNote5Jack,
+	MidiNote6Jack,
+	MidiNote7Jack,
+	MidiNote8Jack,
+
+	MidiMonoGateJack = 0x110,
+	MidiGate2Jack,
+	MidiGate3Jack,
+	MidiGate4Jack,
+	MidiGate5Jack,
+	MidiGate6Jack,
+	MidiGate7Jack,
+	MidiGate8Jack,
+
+	MidiVelocityJack = 0x200,
+	MidiAftertouchJack,
+	MidiPitchWheelJack,
+	MidiModWheelJack,
+	MidiRetriggerJack,
+	MidiClockJack,
+	MidiClockDivJack,
+	MidiStartJack,
+	MidiStopJack,
+	MidiContinueJack,
+
+	MidiCCGate0 = 0x300, //CC#0 -> Gate
+	//...
+	MidiCCGate127 = 0x37F, //CC#2 -> Gate
 
 	LastMidiJack
 };
 
 enum {
-	MidiMonoNoteParam = PanelDef::NumKnobs,
+	MidiMonoNoteParam = 0x100,
 	MidiMonoGateParam,
 
 	// DuoNote1Param,
