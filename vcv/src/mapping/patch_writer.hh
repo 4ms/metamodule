@@ -42,6 +42,9 @@ public:
 private:
 	void mapInputJack(const CableMap &map);
 	void mapOutputJack(const CableMap &map);
+	void mapMidiCVJack(CableMap &map);
+	void mapMidiGateJack(CableMap &map);
+
 	void setModuleList(std::vector<ModuleID> &modules);
 
 	json_t *moduleStateDataJ;

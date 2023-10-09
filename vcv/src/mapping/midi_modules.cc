@@ -18,7 +18,6 @@ std::optional<MidiCVSettings> readMidiCVModule(int64_t module_id) {
 	json_t *pwRangeJ = json_object_get(rootJ, "pwRange");
 	json_t *channelsJ = json_object_get(rootJ, "channels");
 	json_t *polyModeJ = json_object_get(rootJ, "polyMode");
-	json_decref(rootJ);
 
 	MidiCVSettings settings;
 	settings.pwRange = pwRangeJ ? json_number_value(pwRangeJ) : -1;
@@ -29,6 +28,7 @@ std::optional<MidiCVSettings> readMidiCVModule(int64_t module_id) {
 	else
 		settings.polyMode = MidiCVSettings::ROTATE_MODE;
 
+	json_decref(rootJ);
 	return settings;
 }
 
@@ -45,19 +45,21 @@ std::optional<MidiGateSettings> readMidiGateModule(int64_t module_id) {
 	json_t *notesJ = json_object_get(rootJ, "notes");
 	json_t *velocityJ = json_object_get(rootJ, "velocity");
 	json_t *mpeModeJ = json_object_get(rootJ, "mpeMode");
-	json_decref(rootJ);
 
 	if (!notesJ)
 		return std::nullopt;
 
 	for (int i = 0; auto &note : settings.notes) {
 		json_t *noteJ = json_array_get(notesJ, i);
-		if (noteJ)
+		if (noteJ) {
 			note = json_integer_value(noteJ);
+		}
 		i++;
 	}
 	settings.velocity_mode = velocityJ ? json_boolean_value(velocityJ) : false;
 	settings.mpe_mode = mpeModeJ ? json_boolean_value(mpeModeJ) : false;
+
+	json_decref(rootJ);
 
 	return settings;
 }
