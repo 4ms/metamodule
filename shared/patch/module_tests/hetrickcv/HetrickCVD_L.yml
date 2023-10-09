@@ -1,0 +1,262 @@
+PatchData:
+  patch_name: 'HetrickCV D-L'
+  description: Patch Description
+  module_slugs:
+    0: HubMedium
+    1: DataCompander
+    2: Delta
+    3: DigitalToAnalog
+    4: Dust
+    5: Exponent
+    6: FBSineChaos
+    7: FlipFlop
+    8: FlipPan
+    9: GateDelay
+    10: GateJunction
+    11: GateJunctionExp
+    12: Gingerbread
+    13: LogicCombine
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0
+    - module_id: 1
+      param_id: 1
+      value: 0
+    - module_id: 1
+      param_id: 2
+      value: 0
+    - module_id: 1
+      param_id: 3
+      value: 0
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 1
+    - module_id: 3
+      param_id: 0
+      value: 0.2
+    - module_id: 3
+      param_id: 1
+      value: 0
+    - module_id: 3
+      param_id: 2
+      value: 0
+    - module_id: 3
+      param_id: 3
+      value: 0
+    - module_id: 4
+      param_id: 0
+      value: 0
+    - module_id: 4
+      param_id: 1
+      value: 0
+    - module_id: 5
+      param_id: 0
+      value: 0
+    - module_id: 5
+      param_id: 1
+      value: 1
+    - module_id: 5
+      param_id: 2
+      value: 0
+    - module_id: 6
+      param_id: 0
+      value: 1
+    - module_id: 6
+      param_id: 1
+      value: 1
+    - module_id: 6
+      param_id: 2
+      value: -3
+    - module_id: 6
+      param_id: 3
+      value: 1
+    - module_id: 6
+      param_id: 4
+      value: 0.1
+    - module_id: 6
+      param_id: 5
+      value: 1
+    - module_id: 6
+      param_id: 6
+      value: -5
+    - module_id: 6
+      param_id: 7
+      value: 1
+    - module_id: 6
+      param_id: 8
+      value: 0
+    - module_id: 6
+      param_id: 9
+      value: 1
+    - module_id: 6
+      param_id: 10
+      value: 0
+    - module_id: 6
+      param_id: 11
+      value: 1
+    - module_id: 6
+      param_id: 12
+      value: 0
+    - module_id: 6
+      param_id: 13
+      value: 0
+    - module_id: 8
+      param_id: 0
+      value: 2.5
+    - module_id: 8
+      param_id: 1
+      value: 1
+    - module_id: 8
+      param_id: 2
+      value: 0
+    - module_id: 9
+      param_id: 0
+      value: 0.1
+    - module_id: 9
+      param_id: 1
+      value: 1
+    - module_id: 9
+      param_id: 2
+      value: 0.1
+    - module_id: 9
+      param_id: 3
+      value: 1
+    - module_id: 9
+      param_id: 4
+      value: 0
+    - module_id: 10
+      param_id: 0
+      value: 0
+    - module_id: 10
+      param_id: 1
+      value: 0
+    - module_id: 10
+      param_id: 2
+      value: 0
+    - module_id: 10
+      param_id: 3
+      value: 0
+    - module_id: 10
+      param_id: 4
+      value: 0
+    - module_id: 10
+      param_id: 5
+      value: 0
+    - module_id: 10
+      param_id: 6
+      value: 0
+    - module_id: 10
+      param_id: 7
+      value: 0
+    - module_id: 10
+      param_id: 8
+      value: 0
+    - module_id: 10
+      param_id: 9
+      value: 0
+    - module_id: 10
+      param_id: 10
+      value: 0
+    - module_id: 10
+      param_id: 11
+      value: 0
+    - module_id: 10
+      param_id: 12
+      value: 0
+    - module_id: 10
+      param_id: 13
+      value: 0
+    - module_id: 10
+      param_id: 14
+      value: 0
+    - module_id: 10
+      param_id: 15
+      value: 0
+    - module_id: 11
+      param_id: 0
+      value: 0
+    - module_id: 11
+      param_id: 1
+      value: 0
+    - module_id: 11
+      param_id: 2
+      value: 0
+    - module_id: 11
+      param_id: 3
+      value: 0
+    - module_id: 11
+      param_id: 4
+      value: 0
+    - module_id: 11
+      param_id: 5
+      value: 0
+    - module_id: 11
+      param_id: 6
+      value: 0
+    - module_id: 11
+      param_id: 7
+      value: 0
+    - module_id: 11
+      param_id: 8
+      value: 0
+    - module_id: 11
+      param_id: 9
+      value: 0
+    - module_id: 11
+      param_id: 10
+      value: 0
+    - module_id: 11
+      param_id: 11
+      value: 0
+    - module_id: 11
+      param_id: 12
+      value: 0
+    - module_id: 11
+      param_id: 13
+      value: 0
+    - module_id: 11
+      param_id: 14
+      value: 0
+    - module_id: 11
+      param_id: 15
+      value: 0
+    - module_id: 12
+      param_id: 0
+      value: 0.5
+    - module_id: 12
+      param_id: 1
+      value: 1
+    - module_id: 12
+      param_id: 2
+      value: -5
+    - module_id: 12
+      param_id: 3
+      value: 1
+    - module_id: 12
+      param_id: 4
+      value: 1
+    - module_id: 12
+      param_id: 5
+      value: 0
+    - module_id: 12
+      param_id: 6
+      value: 0
+    - module_id: 12
+      param_id: 7
+      value: 0
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []

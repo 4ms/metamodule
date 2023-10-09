@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
 
 	lv_init();
 	lv_port_disp_init(320, 240, settings.zoom);
+	ui_init();
 
 	SDLAudio<Frame> audio_out{settings.audioout_dev};
 

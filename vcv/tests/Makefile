@@ -3,8 +3,12 @@
 
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR ?= $(TEST_DIR)
-BUILDDIR = $(TEST_DIR)/build/obj
-RYMLDIR = src/shared/patch_convert/ryml/rapidyaml
+
+OUTERBUILDDIR = $(TEST_DIR)/build
+BUILDDIR = $(OUTERBUILDDIR)/build
+
+SHARED_DIR = ../shared
+RYMLDIR = $(SHARED_DIR)/patch_convert/ryml/rapidyaml
 JANSSON_CONF_DIR = ../firmware/lib/jansson
 JANSSON_DIR = ../firmware/lib/jansson/jansson/src
 
@@ -15,8 +19,8 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
-TEST_SOURCES += src/shared/patch_convert/patch_to_yaml.cc
-TEST_SOURCES += src/shared/patch_convert/ryml/ryml_serial.cc
+TEST_SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
+TEST_SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
 TEST_SOURCES += src/mapping/patch_writer.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
@@ -28,9 +32,9 @@ INCLUDES = -I$(DOCTEST_DIR) \
 			-Isrc\
 			-Isrc/hub\
 			-Isrc/mapping\
-			-I../shared \
-			-I../shared/cpputil \
-			-I../shared/patch_convert/ryml \
+			-I$(SHARED_DIR) \
+			-I$(SHARED_DIR)/cpputil \
+			-I$(SHARED_DIR)/patch_convert/ryml \
 			-I$(JANSSON_DIR) \
 			-I$(JANSSON_CONF_DIR) \
 			-I$(TEST_DIR) \
@@ -83,7 +87,7 @@ $(DOCTESTHEADER_DIR)/doctest.h:
 	wget https://raw.githubusercontent.com/onqtam/doctest/master/doctest/doctest.h -P $(DOCTESTHEADER_DIR)/
 
 clean:
-	rm -rf $(BUILDDIR)
+	rm -rf $(OUTERBUILDDIR)
 
 $(DEPDIR): ; @mkdir -p $@
 
