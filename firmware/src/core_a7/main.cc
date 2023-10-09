@@ -12,7 +12,6 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
-#include "system/time.hh"
 // #include "core_intercom/semaphore_action.hh" //TODO use this
 
 namespace MetaModule
@@ -30,8 +29,16 @@ void main() {
 
 	StaticBuffers::init();
 
-	HAL_Delay(50);
-	print_time();
+	HAL_Delay(200);
+
+	auto now = ticks_to_fattime(HAL_GetTick());
+	printf_("Current Time: %u/%u/%u %u:%02u:%02u\n",
+			now.year(),
+			now.month(),
+			now.day(),
+			now.hour(),
+			now.minute(),
+			now.second());
 
 	PatchPlayer patch_player;
 	PatchStorageProxy patch_storage_proxy{
@@ -79,7 +86,6 @@ void main() {
 	patch_playloader.load_initial_patch();
 
 	audio.start();
-	print_time();
 
 	while (true) {
 		__NOP();
