@@ -43,4 +43,3 @@ target_compile_options(
           -Wno-unused-variable
 )
 
-target_compile_definitions(hetrickcvLibrary PRIVATE GAMMA_EMBEDDED_COMPILE)
