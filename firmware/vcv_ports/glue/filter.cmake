@@ -58,12 +58,14 @@ function (validate_limited_modules_file LIMITED_MODULES_FILE)
 
   # Fill LIMITED_MODULE_SLUGS list with valid entries
   foreach(m IN LISTS RAW_LIMITED_MODULE_SLUGS)
-    parse_brandmodule(${m})
-    if("${P_BRAND}" STREQUAL "" AND "${P_MODULE}" STREQUAL "")
-      message(WARNING "   \"${m}\" not valid. Must be in format Brand:ModuleSlug")
-    else()
-      message("   ${P_BRAND}:${P_MODULE}")
-      list(APPEND LIMITED_MODULE_SLUGS "${P_BRAND}:${P_MODULE}")
+    if(NOT "${m}" STREQUAL "") #Skip blank lines
+      parse_brandmodule(${m})
+      if("${P_BRAND}" STREQUAL "" AND "${P_MODULE}" STREQUAL "")
+        message(WARNING "   \"${m}\" not valid. Must be in format Brand:ModuleSlug")
+      else()
+        message("   ${P_BRAND}:${P_MODULE}")
+        list(APPEND LIMITED_MODULE_SLUGS "${P_BRAND}:${P_MODULE}")
+      endif()
     endif()
   endforeach()
 
