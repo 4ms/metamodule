@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
-#include "VCV_adaptor/widget_convert/base.hh"
 #include "VCV_adaptor/widgets.hh"
+#include "VCV_adaptor/widget_convert/base.hh"
 
 namespace rack
 {
@@ -32,8 +32,8 @@ struct ElementConvert<componentlibrary::BefacoPush> {
 };
 
 template<>
-struct ElementConvert<componentlibrary::CKSS> {
-	using ElementType = MetaModule::CKSS;
+struct ElementConvert<componentlibrary::CKSS> { // TODO: What is CKSS? Is this the right element?
+	using ElementType = MetaModule::Toggle2pos;
 };
 
 template<>
@@ -67,16 +67,6 @@ struct ElementConvert<componentlibrary::Rogan2PSWhite> {
 };
 
 template<>
-struct ElementConvert<componentlibrary::Rogan1PRed> {
-	using ElementType = MetaModule::Rogan1PRed;
-};
-
-template<>
-struct ElementConvert<componentlibrary::Rogan> {
-	using ElementType = MetaModule::Rogan1PRed;
-};
-
-template<>
 struct ElementConvert<componentlibrary::Rogan2PSRed> {
 	using ElementType = MetaModule::Rogan2PSRed;
 };
@@ -87,53 +77,7 @@ struct ElementConvert<componentlibrary::Rogan2PSGreen> {
 };
 
 template<>
-struct ElementConvert<componentlibrary::Trimpot> {
-	using ElementType = MetaModule::Trimpot;
-};
-
-template<>
-struct ElementConvert<componentlibrary::CKD6> {
-	using ElementType = MetaModule::CKD6;
-};
-
-template<>
-struct ElementConvert<componentlibrary::TL1105> {
-	using ElementType = MetaModule::TL1105;
-};
-
-template<>
-struct ElementConvert<componentlibrary::LEDBezel> {
-	using ElementType = MetaModule::LEDBezel;
-};
-
-template<>
-struct ElementConvert<componentlibrary::VCVLightBezel<componentlibrary::RedGreenBlueLight>> {
-	using ElementType = MetaModule::VCVLightBezel<MetaModule::RedGreenBlueLight>;
-};
-
-template<>
-struct ElementConvert<componentlibrary::SmallLight<componentlibrary::RedLight>> {
-	using ElementType = MetaModule::SmallLight<MetaModule::RedLight>;
-};
-
-template<>
-struct ElementConvert<componentlibrary::SmallLight<componentlibrary::GreenLight>> {
-	using ElementType = MetaModule::SmallLight<MetaModule::GreenLight>;
-};
-
-template<>
-struct ElementConvert<componentlibrary::SmallLight<componentlibrary::GreenRedLight>> {
-	using ElementType = MetaModule::SmallLight<MetaModule::GreenRedLight>;
-};
-
-template<>
 struct ElementConvert<componentlibrary::PJ301MPort> {
-	using ElementTypeInput = MetaModule::PJ301MPortIn;
-	using ElementTypeOutput = MetaModule::PJ301MPortOut;
-};
-
-template<>
-struct ElementConvert<componentlibrary::ThemedPJ301MPort> {
 	using ElementTypeInput = MetaModule::PJ301MPortIn;
 	using ElementTypeOutput = MetaModule::PJ301MPortOut;
 };

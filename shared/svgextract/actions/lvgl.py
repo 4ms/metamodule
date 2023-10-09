@@ -65,17 +65,6 @@ def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=Non
         "     Might have to install n with `npm i -g n`, and do `brew unlink node` first\n")
         return
 
-    # Search and replace for invalid c tokens
-    # Fixes names staring with number by prefixing img_
-    # TODO: remove dashes and other invalid chars
-    with open(cFilename,  "r+") as f:
-      filedata = f.read()
-      filedata = re.sub(r" ([0-9][A-Za-z0-9_-]*_240)", r" img_\1", filedata)
-      f.seek(0)
-      f.truncate(0)
-      f.write(filedata)
-
-
 def determine_dpi(filename):
     # Workaround for different SVGs;
     # Some need to be exported at 47.44 DPI (which makes sense since 240px screen = 5.059" module)

@@ -5,9 +5,6 @@ set(AudibleInstrumentsModules Braids
                               # Plaits etc
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
-limit_modules_built("AudibleInstruments" AudibleInstrumentsModules)
-
 # svgs
 list(TRANSFORM AudibleInstrumentsModules PREPEND ${AUDIBLE_DIR}/res/ OUTPUT_VARIABLE AUDIBLEINSTRUMENTS_FACEPLATE_SVGS)
 list(TRANSFORM AUDIBLEINSTRUMENTS_FACEPLATE_SVGS APPEND .svg)
