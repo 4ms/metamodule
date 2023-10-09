@@ -50,8 +50,8 @@ include(${FWDIR}/vcv_ports/brands.cmake)
 
 foreach(brand ${brands})
 
-  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand}
-                   ${CMAKE_CURRENT_BINARY_DIR}/${brand})
+  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
+  target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
 
   target_include_directories(
     ${brand}Library

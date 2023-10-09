@@ -1,4 +1,3 @@
 include(modules.cmake)
+add_library(RackLibrary OBJECT)
 
-# Cmake requires at least one source
-add_library(RackLibrary OBJECT ../empty.cc)

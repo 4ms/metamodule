@@ -56,6 +56,7 @@ foreach(brand ${brands})
            ${SHARED}/cpputil
   )
   target_compile_options(${brand}Library PRIVATE -Wno-attributes)
+  target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
 
   # Faceplate artwork
   # Use provided module list file.
