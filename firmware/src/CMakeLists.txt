@@ -22,6 +22,30 @@ target_include_directories(
 )
 
 #
+# CoreModules 4ms
+#
+# TODO: CMake file in CoreModules/4ms
+file(
+  GLOB
+  CORE4MS_SOURCES
+  ${SHARED}/CoreModules/4ms/core/*Core.cc
+  ${SHARED}/CoreModules/4ms/core/enosc/data.cc
+  ${SHARED}/CoreModules/4ms/core/enosc/dynamic_data.cc
+  ${SHARED}/axoloti-wrapper/axoloti_math.cpp
+)
+
+add_library(core4ms OBJECT ${CORE4MS_SOURCES})
+target_include_directories(
+  core4ms
+  PUBLIC ${SHARED}
+         ${SHARED}/CoreModules/4ms
+         ${SHARED}/cpputil
+         ${FWDIR}/src
+         ${FWDIR}/src/medium
+)
+target_link_libraries(core4ms PUBLIC mp15xa7_arch)
+
+#
 # VCV Adaptor
 #
 add_subdirectory(VCV_adaptor)
@@ -30,20 +54,36 @@ target_include_directories(VCV_adaptor PRIVATE console/) # For pr_dbg, etc
 target_link_libraries(jansson PUBLIC mp15xa7_arch)
 
 #
-# Brands
+# Core Artwork files
 #
+file(
+  GLOB
+  ARTWORK_SOURCES
+  ${FWDIR}/src/gui/images/4ms/modules/*_artwork_240.c
+  ${FWDIR}/src/gui/images/4ms/components/*.c
+)
+
+# load list of brands, but remove 4ms and Rack
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
+list(
+  REMOVE_ITEM
+  brands
+  4ms
+  Rack
+)
 
 foreach(brand ${brands})
-  string(TOUPPER ${brand} BRAND)
+  file(
+    GLOB
+    BRAND_ARTWORK_SOURCES
+    ${FWDIR}/src/gui/images/${brand}/components/*.c
+    ${FWDIR}/src/gui/images/${brand}/modules/*.c
+  )
+  list(APPEND ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
-  # Component artwork
-  file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
-  list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
-
-  # Module Library
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
   target_link_libraries(${brand}Library PRIVATE mp15xa7_arch)
+
   target_include_directories(
     ${brand}Library
     PUBLIC ${FWDIR}/src/VCV_adaptor
@@ -55,6 +95,7 @@ foreach(brand ${brands})
            ${SHARED}
            ${SHARED}/cpputil
   )
+
   target_compile_options(${brand}Library PRIVATE -Wno-attributes)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
 
@@ -91,7 +132,12 @@ endforeach()
 # RYML
 #
 set(RYMLDIR ${SHARED}/patch_convert/ryml/rapidyaml)
-file(GLOB RYML_SOURCES ${RYMLDIR}/src/c4/yml/*.cpp ${RYMLDIR}/ext/c4core/src/c4/*.cpp)
+file(
+  GLOB
+  RYML_SOURCES
+  ${RYMLDIR}/src/c4/yml/*.cpp
+  ${RYMLDIR}/ext/c4core/src/c4/*.cpp
+)
 add_library(ryml OBJECT ${RYML_SOURCES})
 target_link_libraries(ryml PUBLIC mp15xa7_arch)
 target_include_directories(ryml PUBLIC ${RYMLDIR}/src ${RYMLDIR}/ext/c4core/src)
@@ -129,6 +175,7 @@ add_executable(
   ${SHARED}/CoreModules/hub/hub_medium.cc
   ${SHARED}/patch_convert/yaml_to_patch.cc
   ${SHARED}/patch_convert/ryml/ryml_serial.cc
+  ${SHARED}/cpputil/util/math_tables.cc
   #
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
@@ -175,8 +222,7 @@ add_executable(
   #
   ${FWDIR}/src/VCV_adaptor/random.cpp
   #
-  ${COMP_ARTWORK_SOURCES}
-  ${FACEPLATE_ARTWORK_SOURCES}
+  ${ARTWORK_SOURCES}
 )
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
@@ -211,7 +257,16 @@ target_include_directories(
           ${FWDIR}/lib/jansson/jansson/src
 )
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mp15xa7_arch mdrivlib_interface ui ryml VCV_adaptor)
+target_link_libraries(
+  main.elf
+  PRIVATE lvgl::lvgl
+          mp15xa7_arch
+          mdrivlib_interface
+          core4ms
+          ui
+          ryml
+          VCV_adaptor
+)
 
 foreach(brand ${brands})
   target_link_libraries(main.elf PRIVATE ${brand}Library)

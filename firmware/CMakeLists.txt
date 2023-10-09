@@ -23,16 +23,6 @@ target_link_libraries(lvgl PRIVATE mdrivlib_interface)
 target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
 
 #
-# Only build a limited set of modules, defined in an external file
-#
-include(vcv_ports/glue/filter.cmake)
-
-unset(USE_LIMITED_MODULES)
-if(DEFINED LIMITED_MODULES_FILE)
-  validate_limited_modules_file(${LIMITED_MODULES_FILE})
-endif()
-
-#
 # Main Application
 #
 add_subdirectory(src/core_m4 ${CMAKE_CURRENT_BINARY_DIR}/mp1corem4/medium)
@@ -104,6 +94,7 @@ add_custom_target(
   VERBATIM USES_TERMINAL
 )
 
+
 add_custom_command(
   OUTPUT comp-cmd
   COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for components"
@@ -113,6 +104,12 @@ add_custom_command(
 add_custom_command(
   OUTPUT faceplate-cmd
   COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for faceplates"
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_command(
+  OUTPUT imagelist-cmd
+  COMMAND ${CMAKE_COMMAND} -E echo "Updating image_list.hh"
   VERBATIM USES_TERMINAL
 )
 
@@ -130,17 +127,11 @@ add_custom_command(
 
 add_custom_target(comp-images DEPENDS comp-cmd)
 add_custom_target(faceplate-images DEPENDS faceplate-cmd)
+add_custom_target(image-list DEPENDS imagelist-cmd)
 add_custom_target(vcv-images DEPENDS vcvimages-cmd)
 add_custom_target(module-infos DEPENDS moduleinfos-cmd)
-
 # meta command to do all processing
-add_custom_target(
-  regenerate-all
-  DEPENDS comp-images
-          faceplate-images
-          vcv-images
-          module-infos
-)
+add_custom_target(regenerate-all DEPENDS comp-images faceplate-images image-list vcv-images module-infos)
 
 # List of brands
 include(vcv_ports/brands.cmake)
@@ -156,23 +147,30 @@ foreach(brand ${brands})
     get_filename_component(svg_name ${svg} NAME_WE)
     set(c_name ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/components/${svg_name}.c)
     add_custom_command(
-      OUTPUT comp-cmd
-      APPEND
+      OUTPUT comp-cmd APPEND
       COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py convertSvgToLvgl ${svg} ${c_name}
       DEPENDS ${svg}
       COMMENT "Converting component: ${svg_name} to ${svg_name}.c"
     )
   endforeach()
 
-  # For faceplates, we get branded lists from glue/BRAND/modules.cmake. In this file, each brand should set
-  # ${BRAND}_FACEPLATE_SVGS to be the paths to all the faceplate SVGs
-  include(${PROJECT_SOURCE_DIR}/vcv_ports/glue/${brand}/modules.cmake)
+  # for faceplates, we get branded lists from glue cmake files
+  if(NOT ${brand} STREQUAL "4ms" AND NOT ${brand} STREQUAL "Rack")
+    # each brand should define the faceplate paths in modules.cmake in ${BRAND}_FACEPLATE_SVGS
+    include(${PROJECT_SOURCE_DIR}/vcv_ports/glue/${brand}/modules.cmake)
 
-  if(NOT DEFINED ${BRAND}_FACEPLATE_SVGS)
-    message(
-      FATAL_ERROR
-        "No faceplate svgs for ${BRAND}, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_FACEPLATE_SVGS!"
-    )
+    if(NOT DEFINED ${BRAND}_FACEPLATE_SVGS)
+      message(FATAL_ERROR "No faceplate svgs for ${BRAND}, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_FACEPLATE_SVGS!")
+    endif()
+
+  elseif(${brand} STREQUAL "4ms")
+    file(GLOB ${BRAND}_FACEPLATE_SVGS ${PROJECT_SOURCE_DIR}/../vcv/res/modules/*.svg)
+    # The Hub is only needed in VCV Rack, not Meta Module so remove from firmware
+    list(REMOVE_ITEM ${BRAND}_FACEPLATE_SVGS ${PROJECT_SOURCE_DIR}/../vcv/res/modules/HubMedium_artwork.svg)
+
+  elseif(${brand} STREQUAL "Rack")    
+    message(STATUS "Rack modules not yet supported, skipping!")
+    set(${BRAND}_FACEPLATE_SVGS)
   endif()
 
   # generation script will fail if this folder doesn't exist
@@ -184,55 +182,58 @@ foreach(brand ${brands})
 
     # for each module svg, convert to .c version
     add_custom_command(
-      OUTPUT faceplate-cmd
-      APPEND
+      OUTPUT faceplate-cmd APPEND
       COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createLvglFaceplate ${svg} ${c240_name}
       DEPENDS ${svg}
       COMMENT "Creating 240px-height lvgl img from full-sized svg artwork: ${svg_name}_240.c"
     )
-  endforeach() # loop over faceplates
 
+    # for each module, append to imagelist
+    add_custom_command(
+      OUTPUT imagelist-cmd APPEND
+      COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py appendImgList ${svg_name} ${PROJECT_SOURCE_DIR}/src/gui/images/faceplate_images.hh
+      DEPENDS ${svg}
+      COMMENT "Adding to image-list: ${svg_name}_240.c"
+    )
+
+  endforeach() # loop over faceplates
+ 
 endforeach() # loop over brands
 
-# 4ms Info SVGs for each info svg, add_custom_command (...) to convert get the VCV svg and generate the _info.hh
-foreach(info_svg ${4MS_INFO_SVGS})
-  get_filename_component(slug ${info_svg} NAME_WE) # e.g. Verb_info
 
-  string(
-    REPLACE "_info"
-            "_artwork"
-            svg_name_artwork
-            ${slug}
-  )
-  set(vcv_svg ${PROJECT_SOURCE_DIR}/../vcv/res/modules/${svg_name_artwork}.svg)
+ # for processing 4ms info svgs, we assume we want all modules so use a glob
+ file(GLOB 4ms_info_svgs ${PROJECT_SOURCE_DIR}/../shared/CoreModules/4ms/svg/*.svg)
 
-  add_custom_command(
-    OUTPUT vcvimages-cmd
-    APPEND
-    COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createVcvSvg ${info_svg} ${vcv_svg}
-    DEPENDS ${info_svg}
-    COMMENT "Creating VCV SVG: ${slug}"
-  )
+ # for each info svg, add_custom_command (...) to convert get the VCV svg and generate the _info.hh
+ foreach(svg ${4ms_info_svgs})
+   get_filename_component(svg_name ${svg} NAME_WE)
+   STRING(REPLACE "_info" "_artwork" svg_name_artwork ${svg_name})   
+   set(svg_name ${PROJECT_SOURCE_DIR}/../vcv/res/modules/${svg_name_artwork}.svg)
+   
+   add_custom_command(
+     OUTPUT vcvimages-cmd APPEND
+     COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createVcvSvg ${svg} ${svg_name}
+     DEPENDS ${svg}
+     COMMENT "Converting component: ${svg_name} to ${svg_name}.c"
+   )
 
-  add_custom_command(
-    OUTPUT moduleinfos-cmd
-    APPEND
-    COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createInfo ${info_svg}
-            ${PROJECT_SOURCE_DIR}/../shared/CoreModules/4ms/info
-    DEPENDS ${info_svg}
-    COMMENT "Creating info header: ${slug}"
+   add_custom_command(
+    OUTPUT moduleinfos-cmd APPEND
+    COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createInfo ${svg} ${PROJECT_SOURCE_DIR}/../shared/CoreModules/4ms/info
+    DEPENDS ${svg}
+    COMMENT "Converting component: ${svg_name} to ${svg_name}.c"
   )
-endforeach()
+ endforeach()
 
 set_source_files_properties(comp-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(faceplate-cmd PROPERTIES SYMBOLIC "true")
+set_source_files_properties(imagelist-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(vcvimages-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(moduleinfos-cmd PROPERTIES SYMBOLIC "true")
 
 add_custom_target(
   gen_minblep
-  COMMAND cd ${PROJECT_SOURCE_DIR}/../shared/gen_minblep && cmake -B build -GNinja && cmake --build build --target
-          generate_minblep_files
+  COMMAND cd ${PROJECT_SOURCE_DIR}/../shared/gen_minblep && cmake -B build -GNinja && cmake --build build --target generate_minblep_files
   COMMENT "Regenerating minBlep tables"
   VERBATIM USES_TERMINAL
 )

@@ -1,5 +1,4 @@
 include(modules.cmake)
-# the above should define ${BEFACO_SOURCE_PATHS}, the list of sources to add to the BefacoLibrary OBJECT
 
 add_library(BefacoLibrary OBJECT ${BEFACO_SOURCE_PATHS})
 
