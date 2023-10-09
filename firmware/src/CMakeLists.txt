@@ -116,6 +116,7 @@ add_executable(
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/mmu_ca7.c
+  ${FWDIR}/system/time.cc
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_a7/main.cc
