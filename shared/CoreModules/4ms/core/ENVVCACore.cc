@@ -20,6 +20,7 @@ struct VoltageToFreqTableRange {
 	static constexpr float min = -0.2f;
 	static constexpr float max = 0.5f;
 };
+
 constinit auto VoltageToFrequencyTable =
 	Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage) {
 		// voltage offset to not calculate with negative values during fitting
@@ -91,9 +92,9 @@ public:
 
 		runOscillator();
 
-		displayOscillatorState(osc.getState());
+		displayOscillatorState(osc.getSlopeState());
 
-		displayEnvelope(osc.getOutput(), osc.getState());
+		displayEnvelope(osc.getOutput(), osc.getSlopeState());
 		runAudioPath(osc.getOutput());
 	}
 
@@ -125,19 +126,19 @@ public:
 		// Ignoring output impedance and inverting 400kHz lowpass
 	}
 
-	void displayEnvelope(float val, TriangleOscillator::State_t state) {
+	void displayEnvelope(float val, TriangleOscillator::SlopeState_t slopeState) {
 		val = val / VoltageDivider(100e3f, 100e3f);
 		val *= getState<EnvLevelSlider>();
 		setOutput<EnvOut>(val);
 		setLED<EnvLevelSlider>(val / 8.f);
 		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
 		// even during State_t::FOLLOW
-		setLED<RiseSlider>(state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
-		setLED<FallSlider>(state == TriangleOscillator::State_t::FALLING ? val / 8.f : 0);
+		setLED<RiseSlider>(slopeState == TriangleOscillator::SlopeState_t::RISING ? val / 8.f : 0);
+		setLED<FallSlider>(slopeState == TriangleOscillator::SlopeState_t::FALLING ? val / 8.f : 0);
 	}
 
-	void displayOscillatorState(TriangleOscillator::State_t state) {
-		if (state == TriangleOscillator::State_t::FALLING) {
+	void displayOscillatorState(TriangleOscillator::SlopeState_t slopeState) {
+		if (slopeState == TriangleOscillator::SlopeState_t::FALLING) {
 			setOutput<EorOut>(8.f);
 			// setLED<EorLight>(true);
 		} else {
@@ -230,9 +231,6 @@ public:
 	void set_samplerate(float sr) override {
 		timeStepInS = 1.0f / sr;
 	}
-
-	// TODO: Here we could also set slider LEDs once they are defined
-	// TODO: Rise and Fall LEDs are actually biploar but defined as single color
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
