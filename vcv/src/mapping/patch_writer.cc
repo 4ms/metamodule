@@ -27,6 +27,10 @@ void PatchFileWriter::setPatchDesc(std::string patchDesc) {
 	pd.description = patchDesc.c_str();
 }
 
+void PatchFileWriter::setMidiModuleIds(MidiModuleIds &ids) {
+	midiModuleIds = ids;
+}
+
 void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
 	std::vector<int64_t> vcv_mod_ids;
 

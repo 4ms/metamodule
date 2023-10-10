@@ -12,11 +12,14 @@
 #include <vector>
 
 class PatchFileWriter {
-	PatchData pd;
-	int64_t hubModuleId;
-	std::map<int64_t, uint16_t> idMap; // idMap[64 bit VCV module id] -> 16 bit MM-patch module id
-
 public:
+	struct MidiModuleIds {
+		int64_t midiCV = -1;
+		int64_t midiMaps = -1;
+		int64_t midiGate = -1;
+		int64_t midiCC = -1;
+	};
+
 	PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId);
 	~PatchFileWriter();
 
@@ -25,6 +28,7 @@ public:
 	void setCableList(std::vector<CableMap> &jacks);
 	void setParamList(std::vector<ParamMap> &params);
 	void addModuleStateJson(rack::Module *module);
+	void setMidiModuleIds(MidiModuleIds &ids);
 
 	void addKnobMaps(unsigned panelKnobId, unsigned knobSetId, const std::span<const Mapping> maps);
 	void addKnobMapSet(unsigned knobSetId, std::string_view knobSetName);
@@ -41,4 +45,9 @@ private:
 
 	json_t *moduleStateDataJ;
 	json_t *moduleArrayJ;
+
+	PatchData pd;
+	int64_t hubModuleId = -1;
+	MidiModuleIds midiModuleIds;
+	std::map<int64_t, uint16_t> idMap; // idMap[64 bit VCV module id] -> 16 bit MM-patch module id
 };

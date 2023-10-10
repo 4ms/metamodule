@@ -4,8 +4,10 @@
 #include "mapping/JackMap.hh"
 #include "mapping/ModuleID.h"
 #include "mapping/ParamMap.hh"
+#include "mapping/midi_modules.hh"
 #include "mapping/module_directory.hh"
 #include "mapping/patch_writer.hh"
+#include "patch/midi_def.hh"
 #include <fstream>
 #include <rack.hpp>
 
@@ -29,11 +31,13 @@ struct VCVPatchFileWriter {
 		// Find all knobs on those modules (static knobs)
 		std::vector<ModuleID> moduleData;
 		std::vector<ParamMap> paramData;
+		auto moduleIDs = engine->getModuleIds();
+		PatchFileWriter::MidiModuleIds midiModuleIds;
+		for (auto moduleID : moduleIDs) {
 
-		for (auto moduleID : engine->getModuleIds()) {
 			auto *module = engine->getModule(moduleID);
-			if (ModuleDirectory::isInPlugin(module)) {
 
+			if (ModuleDirectory::isInPlugin(module)) {
 				moduleData.push_back({moduleID, module->model->slug.c_str()});
 				if (module->model->slug.size() > 31)
 					printf("Warning: module slug truncated to 31 chars\n");
@@ -45,6 +49,18 @@ struct VCVPatchFileWriter {
 					}
 				}
 			}
+
+			if (module->model->slug == "MIDIToCVInterface")
+				midiModuleIds.midiCV = module->id;
+
+			if (module->model->slug == "MIDI-Map")
+				midiModuleIds.midiMaps = module->id;
+
+			if (module->model->slug == "MIDITriggerToCVInterface")
+				midiModuleIds.midiGate = module->id;
+
+			if (module->model->slug == "MIDICCToCVInterface")
+				midiModuleIds.midiCC = module->id;
 		}
 
 		std::vector<CableMap> cableData;
@@ -53,19 +69,8 @@ struct VCVPatchFileWriter {
 			auto out = cable->outputModule;
 			auto in = cable->inputModule;
 
-			uint16_t color = 0;
-			for (auto cableWidget : APP->scene->rack->getCompleteCables()) {
-				if (cableWidget->cable == cable) {
-					uint8_t r_amt = (uint8_t)rack::clamp(cableWidget->color.r, 0.0, 1.0) * 255;
-					uint8_t g_amt = (uint8_t)rack::clamp(cableWidget->color.g, 0.0, 1.0) * 255;
-					uint8_t b_amt = (uint8_t)rack::clamp(cableWidget->color.b, 0.0, 1.0) * 255;
-					color = Color(r_amt, g_amt, b_amt).Rgb565();
-					break;
-				}
-			}
-
 			// Both modules on a cable must be in the plugin
-			if (!ModuleDirectory::isInPlugin(out) || !ModuleDirectory::isInPlugin(in))
+			if (!(ModuleDirectory::isInPlugin(out) && ModuleDirectory::isInPlugin(in)))
 				continue;
 
 			// Ignore cables that are connected to a different hub
@@ -78,6 +83,17 @@ struct VCVPatchFileWriter {
 			if (ModuleDirectory::isHub(out) && ModuleDirectory::isHub(in))
 				continue;
 
+			uint16_t color = 0;
+			for (auto cableWidget : APP->scene->rack->getCompleteCables()) {
+				if (cableWidget->cable == cable) {
+					uint8_t r_amt = (uint8_t)rack::clamp(cableWidget->color.r, 0.0, 1.0) * 255;
+					uint8_t g_amt = (uint8_t)rack::clamp(cableWidget->color.g, 0.0, 1.0) * 255;
+					uint8_t b_amt = (uint8_t)rack::clamp(cableWidget->color.b, 0.0, 1.0) * 255;
+					color = Color(r_amt, g_amt, b_amt).Rgb565();
+					break;
+				}
+			}
+
 			cableData.push_back({
 				.sendingJackId = cable->outputId,
 				.receivedJackId = cable->inputId,
@@ -88,6 +104,7 @@ struct VCVPatchFileWriter {
 		}
 
 		PatchFileWriter pw{moduleData, hubModuleId};
+		pw.setMidiModuleIds(midiModuleIds);
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
 		pw.setCableList(cableData);
