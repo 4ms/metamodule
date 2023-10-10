@@ -150,6 +150,23 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
+  ${FWDIR}/src/wifi/wifi_interface.cc
+  ${FWDIR}/src/wifi/flasher/flasher.cpp
+  ${FWDIR}/src/wifi/flasher/flasher.h
+  ${FWDIR}/src/wifi/flasher/implementation.cpp
+  ${FWDIR}/src/wifi/flasher/BufferedUSART.h
+  ${FWDIR}/src/wifi/flasher/BufferedUSART.cpp
+  ${FWDIR}/src/wifi/comm/BufferedUSART2.h
+  ${FWDIR}/src/wifi/comm/BufferedUSART2.cpp
+  ${FWDIR}/src/wifi/comm/framing/Configuration.h
+  ${FWDIR}/src/wifi/comm/framing/Deframer.cpp
+  ${FWDIR}/src/wifi/comm/framing/Deframer.h
+  ${FWDIR}/src/wifi/comm/framing/DynamicDeframer.cpp
+  ${FWDIR}/src/wifi/comm/framing/DynamicDeframer.h
+  ${FWDIR}/src/wifi/comm/framing/Framer.cpp
+  ${FWDIR}/src/wifi/comm/framing/Framer.h
+  ${FWDIR}/src/wifi/comm/framing/StaticDeframer.h
+
   #
   ${SHARED}/CoreModules/hub/hub_medium.cc
   ${SHARED}/patch_convert/yaml_to_patch.cc
