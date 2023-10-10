@@ -190,16 +190,29 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 				player.set_panel_param(i, knob);
 		}
 
-		// TODO: add more MIDI mappings (duo/quad/octophonic, CC=>gate, CC=>param, CC=>jack)
 		if (param_block.metaparams.midi_connected) {
-			player.set_panel_param(MidiMonoNoteParam, params_.midi_note);
-			//TODO: set param_state.midi_note if it changed
 
-			// player.set_panel_param(MidiMonoGateParam, params_.midi_gate);
+			// Notes (pitch, gate, velocity)
+			for (auto [i, note, note_state] : countzip(params_.midi.notes, param_state.notes)) {
+				if (note_state.pitch.store_changed(note.pitch))
+					player.set_midi_note_pitch(i, note.pitch);
 
-			// player.set_panel_input(FirstMidiNoteInput, params_.midi_note);
-			player.set_panel_input(MidiMonoGateJack, params_.midi_gate);
-			//TODO: set param_state.midi_gate if it changed
+				if (note_state.gate.store_changed(note.gate))
+					player.set_midi_note_gate(i, note.gate);
+
+				if (note_state.gate.store_changed(note.vel))
+					player.set_midi_note_velocity(i, note.vel);
+			}
+
+			// for (auto const &gate : params_.midi.gate_events) {
+			// 	gate.notenum;
+			// 	gate.gateamp;
+			// }
+			// Gate Events (note on/off -> gate on/off)
+			// for (auto [i, gate, gate_state] : countzip(params_.midi.gate_events, param_state.gate_events)) {
+			// if (gate_state.notenum.store_changed(gate.notenum))
+			// 	player.set_panel_input(MidiMonoNoteJack + i, note.vel);
+			// }
 		}
 
 		// Run each module

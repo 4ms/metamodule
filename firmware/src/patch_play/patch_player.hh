@@ -25,6 +25,7 @@ class PatchPlayer {
 		NumInConns = PanelDef::NumUserFacingInJacks,
 		NumOutConns = PanelDef::NumUserFacingOutJacks,
 	};
+	static constexpr size_t MidiPolyphony = 4;
 
 public:
 	//TODO: why not use a vector here?
@@ -33,11 +34,15 @@ public:
 	// out_conns[]: Out1-Out8
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}};
 
-	// in_conns[]: In1-In6, GateIn1, GateIn2, MidiMonoNoteJack, MidiMonoGateJack
-	std::array<std::vector<Jack>, NumInConns + PanelDef::NumMidiJackMaps> in_conns;
+	// in_conns[]: In1-In6, GateIn1, GateIn2
+	std::array<std::vector<Jack>, NumInConns> in_conns;
+
+	std::array<std::vector<Jack>, MidiPolyphony> midi_note_pitch_conns;
+	std::array<std::vector<Jack>, MidiPolyphony> midi_note_gate_conns;
+	std::array<std::vector<Jack>, MidiPolyphony> midi_note_vel_conns;
 
 	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
-	static constexpr size_t NumParams = PanelDef::NumKnobs + PanelDef::NumMidiParams;
+	static constexpr size_t NumParams = PanelDef::NumKnobs; // + PanelDef::NumMidiParams;
 	using KnobSet = std::array<std::vector<MappedKnob>, NumParams>;
 
 	std::array<KnobSet, MaxKnobSets> knob_conns;
@@ -175,6 +180,21 @@ public:
 			modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
+	void set_midi_note_pitch(int midi_poly_note, float val) {
+		for (auto const &jack : midi_note_pitch_conns[midi_poly_note])
+			modules[jack.module_id]->set_input(jack.jack_id, val);
+	}
+
+	void set_midi_note_gate(int midi_poly_note, float val) {
+		for (auto const &jack : midi_note_gate_conns[midi_poly_note])
+			modules[jack.module_id]->set_input(jack.jack_id, val);
+	}
+
+	void set_midi_note_velocity(int midi_poly_note, float val) {
+		for (auto const &jack : midi_note_vel_conns[midi_poly_note])
+			modules[jack.module_id]->set_input(jack.jack_id, val);
+	}
+
 	float get_panel_output(int jack_id) {
 		auto const &jack = out_conns[jack_id];
 		if (jack.module_id > 0)
@@ -269,9 +289,6 @@ public:
 		return PanelDef::NumUserFacingInJacks;
 	}
 
-	// float get_param_val(int module_id, int param_id) {
-	// 	return 0.5f;
-	// }
 	// Jack patched/unpatched status
 
 	void mark_patched_jacks() {

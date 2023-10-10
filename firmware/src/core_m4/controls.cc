@@ -69,32 +69,45 @@ void Controls::update_params() {
 		cur_metaparams->meta_buttons[0].transfer_events(button0);
 	}
 
-	// Monophonic MIDI CV/Gate
+	unsigned gate_evt_num = 0;
+
 	if (_midi_rx_buf.num_filled()) {
 		auto msg = _midi_rx_buf.get();
 
+		// Monophonic MIDI CV/Gate
 		if (msg.is_command<MidiCommand::NoteOn>()) {
 			if (msg.velocity()) {
 				int32_t note = msg.note();
-				midi_note = (note - 60) / 60.f;
-				midi_gate = true;
+				midi_note.pitch = (note - 24) / 12.f; //60 = C3 = 3V. 72 = C4 = 4V etc...
+				midi_note.gate = true;
 			} else {
-				midi_gate = false;
+				midi_note.gate = false;
 			}
+
+			midi_note.vel = msg.velocity();
+			if (gate_evt_num < Params::MaxSimulGates) {
+				cur_params->midi.gate_events[gate_evt_num].notenum = msg.note();
+				cur_params->midi.gate_events[gate_evt_num].gateamp = msg.velocity();
+				gate_evt_num++;
+			}
+
 		} else if (msg.is_command<MidiCommand::NoteOff>()) {
-			midi_gate = false;
+			midi_note.gate = false;
 		}
+
 	} else {
 		if (!_midi_host.is_connected()) {
 			//if rx buffer is empty AND we've disconnected, turn off the midi gate
 			//so we don't end up with stuck notes
-			midi_note = 0.f;
-			midi_gate = false;
+			midi_note.pitch = 0.f;
+			midi_note.gate = false;
+			midi_note.vel = 0.f;
+			//TODO: handle all possible note offs
 		}
 	}
-	cur_params->midi_note = midi_note;
-	cur_params->midi_gate = midi_gate;
-	Debug::red_LED1::set(midi_gate);
+	cur_params->midi.notes[0] = midi_note;
+
+	Debug::red_LED1::set(midi_note.gate);
 
 	cur_params++;
 	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())

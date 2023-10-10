@@ -22,16 +22,16 @@ struct PanelDef {
 	static constexpr std::array<std::string_view, NumKnobs> KnobNames{
 		"A", "B", "C", "D", "E", "F", "u", "v", "w", "x", "y", "z"};
 
-	static constexpr std::array<std::string_view, 2> MidiParamNames{"MidiNote", "MidiGate"};
-	static constexpr std::array<std::string_view, 2> MidiParamAbbrev{"MN", "MG"};
-	static constexpr uint32_t NumMidiParams = MidiParamNames.size();
+	// static constexpr std::array<std::string_view, 2> MidiParamNames{"MidiNote", "MidiGate"};
+	// static constexpr std::array<std::string_view, 2> MidiParamAbbrev{"MN", "MG"};
+	// static constexpr uint32_t NumMidiParams = MidiParamNames.size();
 
 	static constexpr std::string_view get_map_param_name(uint32_t id) {
 		if (id < KnobNames.size())
 			return KnobNames[id];
 		id -= NumKnobs;
-		if (id < MidiParamNames.size())
-			return MidiParamNames[id];
+		// if (id < MidiParamNames.size())
+		// 	return MidiParamNames[id];
 		return "?";
 	}
 
@@ -44,16 +44,16 @@ struct PanelDef {
 	static constexpr std::array<std::string_view, NumUserFacingInJacks> InJackAbbrev{
 		"1", "2", "3", "4", "5", "6", "G1", "G2"};
 
-	static constexpr std::array<std::string_view, 2> MidiJackMapNames{"MIDIGate", "MIDINote"};
-	static constexpr std::array<std::string_view, 2> MidiJackMapAbbrev{"MG", "MN"};
-	static constexpr int NumMidiJackMaps = MidiJackMapNames.size();
+	// static constexpr std::array<std::string_view, 2> MidiJackMapNames{"MIDIGate", "MIDINote"};
+	// static constexpr std::array<std::string_view, 2> MidiJackMapAbbrev{"MG", "MN"};
+	// static constexpr int NumMidiJackMaps = MidiJackMapNames.size();
 
 	static constexpr std::string_view get_map_injack_name(uint32_t id) {
 		if (id < NumUserFacingInJacks)
 			return InJackNames[id];
 		id -= NumUserFacingInJacks;
-		if (id < NumMidiJackMaps)
-			return MidiJackMapAbbrev[id];
+		// if (id < NumMidiJackMaps)
+		// 	return MidiJackMapAbbrev[id];
 		return "?";
 	}
 
@@ -61,8 +61,8 @@ struct PanelDef {
 		if (id < NumUserFacingInJacks)
 			return InJackAbbrev[id];
 		id -= NumUserFacingInJacks;
-		if (id < NumMidiJackMaps)
-			return MidiJackMapNames[id];
+		// if (id < NumMidiJackMaps)
+		// 	return MidiJackMapNames[id];
 		return "?";
 	}
 

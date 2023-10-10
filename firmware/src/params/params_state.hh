@@ -2,6 +2,7 @@
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
 #include "util/debouncer.hh"
+#include "util/parameter.hh"
 #include "util/zip.hh"
 #include <array>
 #include <cmath>
@@ -11,38 +12,27 @@ namespace MetaModule
 {
 
 struct ParamsState {
-	static constexpr float min_change = 2.5f / 4096.f;
+	static constexpr unsigned Polyphony = 4;
+	static constexpr unsigned MaxSimulGates = 8;
 
-	struct LatchedKnob {
-		float val{0};
-		bool changed{false};
-		// TODO: if only updating changes of 2.5/4096 is too steppy,
-		// then use a tracking_ctr to track value 1:1 for N number
-		// of reads after a change >2.5/4096
-
-		bool store_changed(float new_val) {
-			if (std::abs(new_val - val) > min_change) {
-				val = new_val;
-				changed = true;
-				return true;
-			} else
-				return false;
-		}
-
-		// Allow LatchedKnob to functionally be a float
-		void operator=(float x) {
-			val = x;
-		}
-		operator float() {
-			return val;
-		}
-	};
-	std::array<LatchedKnob, PanelDef::NumPot> knobs{};
-
+	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
-	float midi_note;
-	bool midi_gate;
+
 	uint32_t jack_senses;
+
+	//MIDI
+	struct Note {
+		LatchedParam<float, 3, 1000> pitch;
+		LatchedParam<uint8_t, 1> gate;
+		LatchedParam<float, 1, 128> vel;
+	};
+	std::array<Note, Polyphony> notes{};
+
+	struct GateEvent {
+		LatchedParam<uint8_t, 1> notenum;
+		LatchedParam<uint8_t, 1> gateamp;
+	};
+	std::array<GateEvent, MaxSimulGates> gate_events;
 
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
 		if (plugged)
@@ -75,38 +65,71 @@ struct ParamsState {
 		for (auto &knob : knobs)
 			knob = {0.f, false};
 
-		midi_note = 0.f;
-		midi_gate = false;
+		for (auto &note : notes) {
+			note.pitch = {0.f, false};
+			note.gate = {0, false};
+			note.vel = {0.f, false};
+		}
+
+		for (auto &gate : gate_events) {
+			gate.notenum = {0, false};
+			gate.gateamp = {0, false};
+		}
+
 		jack_senses = 0;
 	}
 
+	// Copy values, but clear the changed flag after moving it
 	void move_from(ParamsState &that) {
 		for (auto [gate_in, that_gate_in] : zip(gate_ins, that.gate_ins))
 			gate_in.copy_state(that_gate_in);
 
-		// Copy values, but clear the changed flag after moving it
 		for (auto [knob, that_knob] : zip(knobs, that.knobs)) {
 			knob.changed = that_knob.changed;
 			knob.val = that_knob.val;
 			that_knob.changed = false;
 		}
 
-		midi_note = that.midi_note;
-		midi_gate = that.midi_gate;
+		for (auto [note, that_note] : zip(notes, that.notes)) {
+			note = that_note;
+			// note.pitch.changed = that_note.pitch.changed;
+			// note.pitch.val = that_note.pitch.val;
+			that_note.pitch.changed = false;
+
+			// note.gate.changed = that_note.gate.changed;
+			// note.gate.val = that_note.gate.val;
+			that_note.gate.changed = false;
+
+			// note.vel.changed = that_note.vel.changed;
+			// note.vel.val = that_note.vel.val;
+			that_note.vel.changed = false;
+		}
+
+		for (auto [gate, that_gate] : zip(gate_events, that.gate_events)) {
+			gate = that_gate;
+			that_gate.gateamp.changed = false;
+			that_gate.notenum.changed = false;
+		}
+
 		jack_senses = that.jack_senses;
 	}
 
-	void copy_to(ParamsState &that) {
+	void copy_to(ParamsState &that) const {
 		for (auto [gate_in, that_gate_in] : zip(gate_ins, that.gate_ins))
 			that_gate_in.copy_state(gate_in);
 
 		for (auto [knob, that_knob] : zip(knobs, that.knobs)) {
-			that_knob.changed = knob.changed;
-			that_knob.val = knob.val;
+			that_knob = knob;
 		}
 
-		that.midi_note = midi_note;
-		that.midi_gate = midi_gate;
+		for (auto [note, that_note] : zip(notes, that.notes)) {
+			that_note = note;
+		}
+
+		for (auto [gate, that_gate] : zip(gate_events, that.gate_events)) {
+			that_gate = gate;
+		}
+
 		that.jack_senses = jack_senses;
 	}
 };

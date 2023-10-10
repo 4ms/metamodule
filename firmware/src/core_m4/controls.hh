@@ -88,8 +88,8 @@ private:
 
 	MidiHost &_midi_host;
 	CircularBuffer<MidiMessage, 256> _midi_rx_buf;
-	float midi_note = 0.f;
-	bool midi_gate = false;
+
+	Params::Midi::Note midi_note;
 
 	bool _rotary_moved_while_pressed = false;
 

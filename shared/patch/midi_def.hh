@@ -21,7 +21,15 @@ enum {
 	MidiGate7Jack,
 	MidiGate8Jack,
 
-	MidiVelocityJack = 0x200,
+	MidiMonoVelJack = 0x120,
+	MidiVel2Jack,
+	MidiVel3Jack,
+	MidiVel4Jack,
+	MidiVel5Jack,
+	MidiVel6Jack,
+	MidiVel7Jack,
+	MidiVel8Jack,
+
 	MidiAftertouchJack,
 	MidiPitchWheelJack,
 	MidiModWheelJack,
