@@ -40,6 +40,7 @@ public:
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_gate_conns;
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_vel_conns;
+	std::array<std::vector<Jack>, 128> midi_gate_conns;
 
 	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
 	static constexpr size_t NumParams = PanelDef::NumKnobs; // + PanelDef::NumMidiParams;
@@ -175,24 +176,40 @@ public:
 		}
 	}
 
-	void set_panel_input(int jack_id, float val) {
-		for (auto const &jack : in_conns[jack_id])
+	void set_all_jacks(std::vector<Jack> const &jacks, float val) {
+		for (auto const &jack : jacks)
 			modules[jack.module_id]->set_input(jack.jack_id, val);
+	}
+
+	void set_panel_input(int jack_id, float val) {
+		set_all_jacks(in_conns[jack_id], val);
+		// for (auto const &jack : in_conns[jack_id])
+		// 	modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
 	void set_midi_note_pitch(int midi_poly_note, float val) {
-		for (auto const &jack : midi_note_pitch_conns[midi_poly_note])
-			modules[jack.module_id]->set_input(jack.jack_id, val);
+		set_all_jacks(midi_note_pitch_conns[midi_poly_note], val);
+		// for (auto const &jack : midi_note_pitch_conns[midi_poly_note])
+		// 	modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
 	void set_midi_note_gate(int midi_poly_note, float val) {
-		for (auto const &jack : midi_note_gate_conns[midi_poly_note])
-			modules[jack.module_id]->set_input(jack.jack_id, val);
+		set_all_jacks(midi_note_gate_conns[midi_poly_note], val);
+		// for (auto const &jack : midi_note_gate_conns[midi_poly_note])
+		// 	modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
 	void set_midi_note_velocity(int midi_poly_note, float val) {
-		for (auto const &jack : midi_note_vel_conns[midi_poly_note])
-			modules[jack.module_id]->set_input(jack.jack_id, val);
+		set_all_jacks(midi_note_vel_conns[midi_poly_note], val);
+		// for (auto const &jack : midi_note_vel_conns[midi_poly_note])
+		// 	modules[jack.module_id]->set_input(jack.jack_id, val);
+	}
+
+	void set_midi_gate(unsigned note_num, float vel) {
+		if (note_num > 127)
+			return;
+
+		set_all_jacks(midi_gate_conns[note_num], vel);
 	}
 
 	float get_panel_output(int jack_id) {
@@ -364,29 +381,42 @@ public:
 			for (auto const &input_jack : cable.ins) {
 				if (input_jack.module_id < 0 || input_jack.jack_id < 0)
 					break;
+
 				int dup_int_cable = find_int_cable_input_jack(input_jack);
 				if (dup_int_cable == -1) {
-					if (cable.is_monophonic_note()) {
-						// in_conns[MidiMonoNoteJack].push_back(input_jack);
-						update_or_add(in_conns[MidiMonoNoteJack], input_jack);
-						pr_trace("Mapping midi monophonic note to jack: m=%d, p=%d\n",
+
+					if (auto num = cable.midi_note_pitch(); num.has_value()) {
+						update_or_add(midi_note_pitch_conns[num.value()], input_jack);
+						pr_dbg("MIDI note pitch to jack: m=%d, p=%d\n", input_jack.module_id, input_jack.jack_id);
+						continue;
+					}
+
+					if (auto num = cable.midi_note_gate(); num.has_value()) {
+						update_or_add(midi_note_gate_conns[num.value()], input_jack);
+						pr_trace("MIDI gate to jack: m=%d, p=%d\n", input_jack.module_id, input_jack.jack_id);
+						continue;
+					}
+
+					if (auto num = cable.midi_note_vel(); num.has_value()) {
+						update_or_add(midi_note_vel_conns[num.value()], input_jack);
+						pr_trace("MIDI vel to jack: m=%d, p=%d\n", input_jack.module_id, input_jack.jack_id);
+						continue;
+					}
+
+					if (auto num = cable.midi_gate(); num.has_value()) {
+						update_or_add(midi_gate_conns[num.value()], input_jack);
+						pr_trace("MIDI note %d on/off to gate to jack:  m=%d, p=%d\n",
+								 num.value(),
 								 input_jack.module_id,
 								 input_jack.jack_id);
 						continue;
 					}
-					if (cable.is_monophonic_gate()) {
-						// in_conns[MidiMonoGateJack].push_back(input_jack);
-						update_or_add(in_conns[MidiMonoGateJack], input_jack);
-						pr_trace("Mapping midi monophonic gate to jack: m=%d, p=%d\n",
-								 input_jack.module_id,
-								 input_jack.jack_id);
-						continue;
-					}
+
 					if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
 						update_or_add(in_conns[panel_jack_id], input_jack);
-						// in_conns[panel_jack_id].push_back(input_jack);
 						continue;
 					}
+
 					pr_err("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
 				} else {
 					pr_warn("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
@@ -422,15 +452,15 @@ public:
 		if (knob_set >= knob_conns.size())
 			return;
 
-		if (k.is_monophonic_note()) {
-			update_or_add(knob_conns[knob_set][MidiMonoNoteParam], k);
-			pr_dbg("Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+		// if (k.is_monophonic_note()) {
+		// 	update_or_add(knob_conns[knob_set][MidiMonoNoteParam], k);
+		// 	pr_dbg("Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 
-		} else if (k.is_monophonic_gate()) {
-			update_or_add(knob_conns[knob_set][MidiMonoGateParam], k);
-			pr_dbg("Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
-
-		} else if (k.panel_knob_id < PanelDef::NumKnobs) {
+		// } else if (k.is_monophonic_gate()) {
+		// 	update_or_add(knob_conns[knob_set][MidiMonoGateParam], k);
+		// 	pr_dbg("Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+		// } else
+		if (k.panel_knob_id < PanelDef::NumKnobs) {
 			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
 		}
 	}

@@ -75,12 +75,36 @@ struct MappedInputJack {
 	std::vector<Jack> ins;
 	AliasNameString alias_name;
 
-	bool is_monophonic_note() const {
-		return (panel_jack_id == static_cast<uint16_t>(MidiMonoNoteJack));
+	std::optional<uint32_t> midi_note_pitch() const {
+		return is_midi_note_pitch() ? std::optional<uint32_t>{panel_jack_id - MidiMonoNoteJack} : std::nullopt;
 	}
 
-	bool is_monophonic_gate() const {
-		return (panel_jack_id == static_cast<uint16_t>(MidiMonoGateJack));
+	std::optional<uint32_t> midi_note_gate() const {
+		return is_midi_note_gate() ? std::optional<uint32_t>{panel_jack_id - MidiMonoGateJack} : std::nullopt;
+	}
+
+	std::optional<uint32_t> midi_note_vel() const {
+		return is_midi_note_vel() ? std::optional<uint32_t>{panel_jack_id - MidiMonoVelJack} : std::nullopt;
+	}
+
+	std::optional<uint32_t> midi_gate() const {
+		return std::nullopt;
+		// return is_midi_note_vel() ? std::optional<uint32_t>{panel_jack_id - MidiMonoVelJack} : std::nullopt;
+	}
+
+	bool is_midi_note_pitch() const {
+		return (panel_jack_id >= static_cast<uint16_t>(MidiMonoNoteJack)) &&
+			   (panel_jack_id <= static_cast<uint16_t>(MidiNote8Jack));
+	}
+
+	bool is_midi_note_gate() const {
+		return (panel_jack_id >= static_cast<uint16_t>(MidiMonoGateJack)) &&
+			   (panel_jack_id <= static_cast<uint16_t>(MidiGate8Jack));
+	}
+
+	bool is_midi_note_vel() const {
+		return (panel_jack_id >= static_cast<uint16_t>(MidiMonoVelJack)) &&
+			   (panel_jack_id <= static_cast<uint16_t>(MidiVel8Jack));
 	}
 };
 
