@@ -35,6 +35,28 @@ The `make all` command is a shortcut for running:
 cmake --build --preset base
 ```
 
+### Limiting the modules built
+
+You also can limit the modules built to substantially reduce the compilation
+and link times, as well as binary size. Create a text file with the modules
+you want built, one per line. Each line should contain an
+entry in the form `Brand:Module`. For example:
+
+```
+echo "4ms:EnOsc" >> quickbuild.txt
+echo "Befaco:EvenVCO" >> quickbuild.txt
+echo "hetrickcv:PhasorGen" >> quickbuild.txt
+
+make limit quickbuild.txt
+```
+
+This would tell CMake to re-configure the project and just build those three modules.
+You can still open patches containing other modules, but their artwork won't be shown
+and you can't play them.
+
+
+### Using an SD Card
+
 *Optional*: If you plan to flash firmware to an SD Card, then you can specify the
 path the SD Card device to save time. If you don't do this, then the system
 will prompt you whenever you run one of the SD Card flashing scripts. The
@@ -49,6 +71,9 @@ export SD_DISK_DEV=/dev/disk4
 The firmware is built as `firmware/build/mp1corea7/medium/main.elf` and `main.uimg` 
 in the same directory. The .elf file is used when debugging, and the .uimg file
 is used when copying firmware to NOR Flash or an SD card.
+
+
+### Specifying the toolchain
 
 *Optional*: if you have multiple versions of the gcc arm toolchain installed and don't want to 
 change your PATH for this project, you can set the METAMODULE_ARM_NONE_EABI_PATH var like this:
@@ -234,7 +259,15 @@ If you want to back to booting from Flash (internal Flash chip), then flip the b
 
 ### Automatically generated materials
 
-Several files are automatically generated using python scripts, e.g. faceplate LVGL code. These generated files are already committed for a few reasons: 1) the conversion process uses some specific external programs (inkscape CLI, and a particular version of node); 2) generating all the assets takes a long time; 3) the assets don't change very often (if ever) and are completely orthogonal to the code. Also conversion from SVG to PNG can generate a file that is visually the same but has a different binary representation, causing lots of noise in the git diffs. However if you wish to (re)-generate these files, the following commands can be run:
+Several files are automatically generated using python scripts, e.g. faceplate
+LVGL code. These generated files are already committed for a few reasons: 1)
+the conversion process uses some specific external programs (inkscape CLI, and
+a particular version of node); 2) generating all the assets takes a long time;
+3) the assets don't change very often (if ever) and are completely orthogonal
+to the code. Also conversion from SVG to PNG can generate a file that is
+visually the same but has a different binary representation, causing lots of
+noise in the git diffs. However if you wish to (re)-generate these files, the
+following commands can be run:
 
 ```
 # Generating LVGL image files for components
@@ -242,9 +275,6 @@ make comp-images
 
 # Generating LVGL image files for faceplates
 make faceplate-images
-
-# Update image_list.hh
-make image-list
 
 # Updating/creating 4ms VCV artwork SVGs files from *_info.svg files
 make vcv-images
@@ -256,34 +286,33 @@ make module-infos
 make regenerate-all
 ```
 
-### Instructions for adding a new module (WIP)
-
-First step is add the module code as a git submodule:
+If you just want to re-generate one image (that is, convert one SVG to a PNG and LVGL format), then you can invoke the python script directly.
 
 ```
-git submodule https://github.com/<user>/<repo> firmware/vcv_ports/<Brand>
+# These commands can be run from anywhere, but for example we'll show it from the firmware dir
+cd firmware/
+
+# View the available commands for svgextract script:
+../shared/svgextract/svgextract.py 
+
+# Make sure the output directories exist first
+mkdir -p src/gui/images/BRANDNAME/components/
+mkdir -p src/gui/images/BRANDNAME/modules/
+
+# Convert a component SVG
+# The DPI will be automatically detected and the output will be rescaled properly
+../shared/svgextract/svgextract.py convertSvgToLvgl path/to/newcomponent.svg src/gui/images/BRANDNAME/components/newcomponent.c
+
+# Convert a faceplate SVG;
+# This is the same as converting a component SVG, except for Alpha blending is disabled, and the height is fixed at 240px.
+../shared/svgextract/svgextract.py createLvglFaceplate path/to/newfaceplate.svg src/gui/images/BRANDNAME/modules/newfaceplate.c
+ 
+# Optionally, you can only export one layer from a faceplate SVG file by specifying the layer name as a 3rd argument
+../shared/svgextract/svgextract.py createLvglFaceplate path/to/newfaceplate.svg src/gui/images/BRANDNAME/modules/newfaceplate.c artworklayer
+
+
 ```
 
-Create folder:
-
-```
-firmware/src/gui/images/<Brand>/modules/
-```
-
-TODO which glue files to make/how, currently too complicated:
-
-* `firmware/vcv_ports/glue/<Brand>/modules.cmake` - list of modules mainly + list of svgs
-* `firmware/vcv_ports/glue/<Brand>/CMakeLists.txt` - creates library, include directories, compile arguments
 
 
-Add the following to `firmware\CMakeLists.txt`:
 
-```
-# List of brands
-set(brands
-  <Brand>
-  ...
-)
-```
-
-You will also need to add the plugin to the Hub whitelist (see `vcv/src/mapping/module_directory.hh`).
