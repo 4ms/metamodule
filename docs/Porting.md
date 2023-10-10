@@ -18,7 +18,7 @@ Look at other brands examples and copy what's done there.
 
 `modules.cmake` must do a few things:
 
-- Create a list of module names. By convention, this is named `<Brand>Modules`.
+- Create a list of module names call `<Brand>Modules`.
   These names should be the VCV Rack module slugs. Ideally, these names are
   also the names of the SVG faceplate files (without the .svg extension) and
   also the names of the C++ source files (without the .cpp or .cc extension),
@@ -69,7 +69,24 @@ set(brands
 )
 ```
 
+
 5) Add the plugin to the VCV whitelist (see `vcv/src/mapping/module_directory.hh`).
 
-6) 
+6) Generate faceplate artwork. 
+   You can now run `make faceplate-image` to generate the faceplate artwork. This will 
+   also re-generate all other brands artwork, so it's recommend that you a
+   limit file (see [Firmware README.md](../firmware/README.md) ) to just
+   specify your brands' modules, or perhaps even a subset of them just to
+   start. This works by reading the cmake list you created `BRAND_FACEPLATE_SVGS`
+
+7) Generate component artwork.
+   Put all SVG files for components into a folder (from the repo root) `graphics/<Brand>/components/`.
+   Then run `make comp-images` to generate the component images. This will regenerate all brand's component images.
+   (TODO: allow limiting this). Please only commit actually changed images.
+
+8) Connect VCV Widgets to MetaModule Elements and LVGL images.
+(TODO). For an example, see [this commit](https://github.com/4ms/metamodule/pull/135/commits/3d5a721e7c9beea818e58401e82ba4faf5d52321)
+Also, see issue #47
+   
+
 
