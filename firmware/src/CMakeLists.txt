@@ -104,6 +104,30 @@ target_link_libraries(ui PRIVATE lvgl::lvgl mp15xa7_arch)
 # Fix for SLS generated files (See https://forum.squareline.io/t/unused-variable-target-warning-when-compiling/1610/3 )
 target_compile_options(ui PRIVATE -Wno-unused-variable)
 
+
+#
+# ESP Serial Flasher
+#
+
+set(ESP_SERIAL_FLASHER_PORT "CUSTOM")
+add_subdirectory(${FWDIR}/lib/esp-serial-flasher ${CMAKE_CURRENT_BINARY_DIR}/esp-serial-flasher)
+target_link_libraries(flasher PRIVATE mp15xa7_arch)
+
+# 
+# Lockfree
+# 
+
+add_subdirectory(${FWDIR}/lib/lockfree ${CMAKE_CURRENT_BINARY_DIR}/lockfree)
+target_link_libraries(lockfree INTERFACE mp15xa7_arch)
+
+# 
+# Flatbuffers
+# (Manually create a target because original cmake includes the flatc compiler)
+# 
+
+add_library(flatbuffers INTERFACE)
+target_include_directories(flatbuffers INTERFACE ${FWDIR}/lib/flatbuffers/include/)
+
 #
 # Main App
 #
@@ -212,7 +236,7 @@ target_include_directories(
           ${FWDIR}/lib/jansson/jansson/src
 )
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mp15xa7_arch mdrivlib_interface ui ryml VCV_adaptor)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mp15xa7_arch mdrivlib_interface ui ryml VCV_adaptor flasher lockfree flatbuffers)
 
 foreach(brand ${brands})
   target_link_libraries(main.elf PRIVATE ${brand}Library)
