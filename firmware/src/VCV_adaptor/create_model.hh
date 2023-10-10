@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "CoreModules/AudibleInstruments/info/Braids_info.hh"
+#include "CoreModules/AudibleInstruments/info/Clouds_info.hh"
 
 namespace rack
 {
@@ -23,6 +24,11 @@ plugin::Model *createModel(std::string_view slug)
 	if (slug == "Braids") {
 		ModuleFactory::registerModuleType(
 			slug, create_vcv_module<ModuleT>, MetaModule::ModuleInfoView::makeView<MetaModule::BraidsInfo>());
+		return nullptr;
+	}
+	if (slug == "Clouds") {
+		ModuleFactory::registerModuleType(
+			slug, create_vcv_module<ModuleT>, MetaModule::ModuleInfoView::makeView<MetaModule::CloudsInfo>());
 		return nullptr;
 	}
 

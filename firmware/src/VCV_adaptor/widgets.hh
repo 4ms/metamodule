@@ -97,9 +97,6 @@ struct VCVSliderHorizontal : app::ParamWidget {};
 
 // Jacks
 
-struct CKD6 : app::ParamWidget {};
-struct TL1105 : app::ParamWidget {};
-
 struct PJ301MPort : app::PortWidget{};
 struct ThemedPJ301MPort : app::ThemedSvgPort {};
 
@@ -111,6 +108,8 @@ struct CKSS : app::ParamWidget {};
 template <typename TBase> struct VCVLightBezel : app::SvgSwitch {};
 struct VCVBezel : app::SvgSwitch {};
 using LEDBezel = VCVBezel;
+struct CKD6 : app::ParamWidget {};
+struct TL1105 : app::ParamWidget {};
 
 // Lights
 

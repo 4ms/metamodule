@@ -1,8 +1,11 @@
 set(AUDIBLE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../AudibleInstruments)
 
 # Add modules to be included
-set(AudibleInstrumentsModules Braids
-                              # Plaits etc
+set(
+  AudibleInstrumentsModules
+  Braids
+  Clouds
+  # Plaits etc
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
@@ -27,4 +30,11 @@ list(
   ${AUDIBLE_DIR}/eurorack/braids/digital_oscillator.cc
   ${AUDIBLE_DIR}/eurorack/braids/macro_oscillator.cc
   ${AUDIBLE_DIR}/eurorack/braids/resources.cc
+  ${AUDIBLE_DIR}/eurorack/clouds/dsp/correlator.cc
+  ${AUDIBLE_DIR}/eurorack/clouds/dsp/granular_processor.cc
+  ${AUDIBLE_DIR}/eurorack/clouds/dsp/mu_law.cc
+  ${AUDIBLE_DIR}/eurorack/clouds/dsp/pvoc/frame_transformation.cc
+  ${AUDIBLE_DIR}/eurorack/clouds/dsp/pvoc/phase_vocoder.cc
+  ${AUDIBLE_DIR}/eurorack/clouds/dsp/pvoc/stft.cc
+  ${AUDIBLE_DIR}/eurorack/clouds/resources.cc
 )

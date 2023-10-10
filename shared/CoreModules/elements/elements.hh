@@ -31,10 +31,16 @@ using Element = std::variant<
 	BefacoTinyKnobDarkGrey,
 	BefacoTinyKnobLightGrey,
 	Rogan1PRed,
+	Rogan1PSGreen,
+	Rogan1PSRed,
+	Rogan1PSWhite,
 	Rogan2SGray,
 	Rogan2PSWhite,
 	Rogan2PSGreen,
 	Rogan2PSRed,
+	Rogan3PSGreen,
+	Rogan3PSRed,
+	Rogan3PSWhite,
 	Trimpot,
 
 	// Sliders

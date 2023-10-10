@@ -13,10 +13,16 @@ struct Davies1900hWhiteKnob : Knob {};
 struct Davies1900hRedKnob : Knob {};
 struct Davies1900hLargeWhiteKnob : Knob {};
 struct Rogan1PRed : Knob {};
+struct Rogan1PSGreen : Knob {};
+struct Rogan1PSRed : Knob {};
+struct Rogan1PSWhite : Knob {};
 struct Rogan2SGray : Knob {};
 struct Rogan2PSWhite : Knob {};
 struct Rogan2PSRed : Knob {};
 struct Rogan2PSGreen : Knob {};
+struct Rogan3PSGreen : Knob {};
+struct Rogan3PSRed : Knob {};
+struct Rogan3PSWhite : Knob {};
 struct Trimpot : Knob {};
 
 struct PJ301MPortIn : JackInput {};

@@ -8,4 +8,3 @@ struct ModuleImages {
 		return static_cast<lv_img_dsc_t *>(ModuleFactory::getModuleFaceplate(slug));
 	}
 };
-
