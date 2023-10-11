@@ -23,6 +23,7 @@ struct ParamsState {
 		LatchedParam<float, 3, 1000> pitch;
 		LatchedParam<uint8_t, 1> gate;
 		LatchedParam<float, 1, 128> vel;
+		LatchedParam<float, 1, 128> aft;
 	};
 	std::array<Note, MidiPolyphony> notes{};
 
@@ -61,6 +62,7 @@ struct ParamsState {
 			note.pitch = {0.f, false};
 			note.gate = {0, false};
 			note.vel = {0.f, false};
+			note.aft = {0.f, false};
 		}
 
 		jack_senses = 0;
@@ -82,6 +84,7 @@ struct ParamsState {
 			that_note.pitch.changed = false;
 			that_note.gate.changed = false;
 			that_note.vel.changed = false;
+			that_note.aft.changed = false;
 		}
 
 		jack_senses = that.jack_senses;

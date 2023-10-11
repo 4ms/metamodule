@@ -40,6 +40,7 @@ public:
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_gate_conns;
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_vel_conns;
+	std::array<std::vector<Jack>, MidiPolyphony> midi_note_aft_conns;
 	std::array<std::vector<Jack>, 128> midi_gate_conns;
 
 	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
@@ -192,6 +193,8 @@ public:
 		set_all_input_jacks(midi_note_vel_conns[midi_poly_note], val);
 	}
 
+	void set_midi_note_aftertouch(int midi_poly_note, float val) {
+		set_all_input_jacks(midi_note_aft_conns[midi_poly_note], val);
 	}
 
 	void set_midi_gate(unsigned note_num, float vel) {
@@ -403,6 +406,12 @@ public:
 					if (auto num = cable.midi_note_vel(); num.has_value()) {
 						update_or_add(midi_note_vel_conns[num.value()], input_jack);
 						pr_dbg("MIDI vel to jack: m=%d, p=%d\n", input_jack.module_id, input_jack.jack_id);
+						continue;
+					}
+
+					if (auto num = cable.midi_note_aft(); num.has_value()) {
+						update_or_add(midi_note_aft_conns[num.value()], input_jack);
+						pr_dbg("MIDI aftertouch to jack: m=%d, p=%d\n", input_jack.module_id, input_jack.jack_id);
 						continue;
 					}
 

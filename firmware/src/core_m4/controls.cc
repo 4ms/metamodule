@@ -97,6 +97,13 @@ void Controls::update_params() {
 				cur_params->midi.gate_events[gate_evt_num].gateamp = msg.velocity() / 12;
 				gate_evt_num++;
 			}
+
+		} else if (msg.is_command<MidiCommand::PolyKeyPressure>()) { //aka Aftertouch
+			if (msg.note() == midi_note.pitch)
+				midi_note.aft = msg.aftertouch();
+
+		} else if (msg.is_command<MidiCommand::ChannelPressure>()) {
+			midi_note.aft = (float)msg.chan_pressure() / 12.7f;
 		}
 	}
 
@@ -106,6 +113,7 @@ void Controls::update_params() {
 		midi_note.pitch = 0.f;
 		midi_note.gate = false;
 		midi_note.vel = 0.f;
+
 		//TODO: handle all possible note offs for gate_events
 	}
 
@@ -157,7 +165,7 @@ void Controls::start() {
 		// Debug::Pin0::high();
 		auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 		_midi_rx_buf.put(msg);
-		// msg.print();
+		msg.print();
 		// Debug::Pin0::low();
 
 		_midi_host.receive();

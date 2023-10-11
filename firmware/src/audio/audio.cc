@@ -202,6 +202,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 				if (note_state.vel.store_changed(note.vel))
 					player.set_midi_note_velocity(i, note.vel);
+
+				if (note_state.aft.store_changed(note.aft))
+					player.set_midi_note_aftertouch(i, note.aft);
 			}
 
 			for (auto &gate : params_.midi.gate_events) {
