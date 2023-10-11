@@ -26,12 +26,6 @@ struct ParamsState {
 	};
 	std::array<Note, MidiPolyphony> notes{};
 
-	// struct GateEvent {
-	// 	LatchedParam<uint8_t, 1> notenum;
-	// 	LatchedParam<uint8_t, 1> gateamp;
-	// };
-	// std::array<GateEvent, MaxSimulGates> gate_events;
-
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
 		if (plugged)
 			jack_senses |= (1 << jacksense_pin_order[panel_injack_idx]);
@@ -69,11 +63,6 @@ struct ParamsState {
 			note.vel = {0.f, false};
 		}
 
-		// for (auto &gate : gate_events) {
-		// 	gate.notenum = {0, false};
-		// 	gate.gateamp = {0, false};
-		// }
-
 		jack_senses = 0;
 	}
 
@@ -95,12 +84,6 @@ struct ParamsState {
 			that_note.vel.changed = false;
 		}
 
-		// for (auto [gate, that_gate] : zip(gate_events, that.gate_events)) {
-		// 	gate = that_gate;
-		// 	that_gate.gateamp.changed = false;
-		// 	that_gate.notenum.changed = false;
-		// }
-
 		jack_senses = that.jack_senses;
 	}
 
@@ -115,10 +98,6 @@ struct ParamsState {
 		for (auto [note, that_note] : zip(notes, that.notes)) {
 			that_note = note;
 		}
-
-		// for (auto [gate, that_gate] : zip(gate_events, that.gate_events)) {
-		// 	that_gate = gate;
-		// }
 
 		that.jack_senses = jack_senses;
 	}
