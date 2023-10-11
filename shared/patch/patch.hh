@@ -1,5 +1,6 @@
 #pragma once
 #include "midi_def.hh"
+#include "util/math.hh"
 #include "util/static_string.hh"
 #include <optional>
 #include <vector>
@@ -76,35 +77,19 @@ struct MappedInputJack {
 	AliasNameString alias_name;
 
 	std::optional<uint32_t> midi_note_pitch() const {
-		return is_midi_note_pitch() ? std::optional<uint32_t>{panel_jack_id - MidiMonoNoteJack} : std::nullopt;
+		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoNoteJack, MidiNote8Jack);
 	}
 
 	std::optional<uint32_t> midi_note_gate() const {
-		return is_midi_note_gate() ? std::optional<uint32_t>{panel_jack_id - MidiMonoGateJack} : std::nullopt;
+		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoGateJack, MidiGate8Jack);
 	}
 
 	std::optional<uint32_t> midi_note_vel() const {
-		return is_midi_note_vel() ? std::optional<uint32_t>{panel_jack_id - MidiMonoVelJack} : std::nullopt;
+		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoVelJack, MidiVel8Jack);
 	}
 
 	std::optional<uint32_t> midi_gate() const {
-		return std::nullopt;
-		// return is_midi_note_vel() ? std::optional<uint32_t>{panel_jack_id - MidiMonoVelJack} : std::nullopt;
-	}
-
-	bool is_midi_note_pitch() const {
-		return (panel_jack_id >= static_cast<uint16_t>(MidiMonoNoteJack)) &&
-			   (panel_jack_id <= static_cast<uint16_t>(MidiNote8Jack));
-	}
-
-	bool is_midi_note_gate() const {
-		return (panel_jack_id >= static_cast<uint16_t>(MidiMonoGateJack)) &&
-			   (panel_jack_id <= static_cast<uint16_t>(MidiGate8Jack));
-	}
-
-	bool is_midi_note_vel() const {
-		return (panel_jack_id >= static_cast<uint16_t>(MidiMonoVelJack)) &&
-			   (panel_jack_id <= static_cast<uint16_t>(MidiVel8Jack));
+		return MathTools::between<uint32_t>(panel_jack_id, MidiGateNote0, MidiGateNote127);
 	}
 };
 

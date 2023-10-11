@@ -1,14 +1,12 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "patch/midi_def.hh"
 #include "util/debouncer.hh"
 #include <array>
 
 namespace MetaModule
 {
 struct Params {
-	static constexpr unsigned Polyphony = 4;
-	static constexpr unsigned MaxSimulGates = 8;
-
 	std::array<float, PanelDef::NumCVIn> cvjacks{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
 	std::array<Toggler, PanelDef::NumRgbButton> buttons{};
@@ -20,16 +18,14 @@ struct Params {
 			float gate = 0;
 			float vel = 0;
 		};
-		std::array<Note, Polyphony> notes{};
+		std::array<Note, MidiPolyphony> notes{};
 
 		struct GateEvent {
 			uint8_t notenum = 0;
 			uint8_t gateamp = 0;
+			enum { None = 0xFF };
 		};
-		std::array<GateEvent, MaxSimulGates> gate_events;
-
-		// OR (bitmask for if gate is high/low, no velocity)
-		// uint32_t gate_bits[4]{};
+		std::array<GateEvent, MidiMaxSimulGates> gate_events;
 	};
 	Midi midi;
 

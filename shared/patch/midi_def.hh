@@ -30,7 +30,15 @@ enum {
 	MidiVel7Jack,
 	MidiVel8Jack,
 
-	MidiAftertouchJack,
+	MidiMonoAftertouchJack = 0x130,
+	MidiAftertouch2Jack,
+	MidiAftertouch3Jack,
+	MidiAftertouch4Jack,
+	MidiAftertouch5Jack,
+	MidiAftertouch6Jack,
+	MidiAftertouch7Jack,
+	MidiAftertouch8Jack,
+
 	MidiPitchWheelJack,
 	MidiModWheelJack,
 	MidiRetriggerJack,
@@ -40,12 +48,15 @@ enum {
 	MidiStopJack,
 	MidiContinueJack,
 
-	MidiCCGate0 = 0x300, //CC#0 -> Gate
+	MidiGateNote0 = 0x300, //CC#0 -> Gate
 	//...
-	MidiCCGate127 = 0x37F, //CC#2 -> Gate
+	MidiGateNote127 = 0x37F, //CC#2 -> Gate
 
 	LastMidiJack
 };
+
+static constexpr unsigned MidiMaxSimulGates = 8;
+static constexpr unsigned MidiPolyphony = 4;
 
 enum {
 	MidiMonoNoteParam = 0x100,

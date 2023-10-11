@@ -264,9 +264,15 @@ void PatchFileWriter::mapMidiCVJack(CableMap &cable) {
 	else if (cable.sendingJackId == 1)
 		cable.sendingJackId = MidiMonoGateJack;
 
+	else if (cable.sendingJackId == 2)
+		cable.sendingJackId = MidiMonoVelJack;
+
+	else if (cable.sendingJackId == 3)
+		cable.sendingJackId = MidiMonoAftertouchJack;
+
+	//MidiPitchWheelJack (VCV module jack 4) to MidiContinueJack (VCV module jack 11)
 	else if (cable.sendingJackId < 12)
-		cable.sendingJackId = MidiVelocityJack + (cable.sendingJackId - 2);
-	//MidiVelocityJack to MidiContinueJack
+		cable.sendingJackId = MidiPitchWheelJack + (cable.sendingJackId - 4);
 
 	mapInputJack(cable);
 	// }
@@ -276,7 +282,7 @@ void PatchFileWriter::mapMidiCVJack(CableMap &cable) {
 void PatchFileWriter::mapMidiGateJack(CableMap &cable) {
 	if (cable.sendingJackId <= (int)midiSettings.gate.notes.size()) {
 		printf("Gate module: jack %d is note %d\n", cable.sendingJackId, midiSettings.gate.notes[cable.sendingJackId]);
-		cable.sendingJackId = MidiCCGate0 + midiSettings.gate.notes[cable.sendingJackId];
+		cable.sendingJackId = MidiGateNote0 + midiSettings.gate.notes[cable.sendingJackId];
 		mapInputJack(cable);
 	}
 }

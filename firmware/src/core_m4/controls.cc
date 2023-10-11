@@ -3,6 +3,7 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "hsem_handler.hh"
+#include "patch/midi_def.hh"
 
 namespace MetaModule
 {
@@ -71,40 +72,43 @@ void Controls::update_params() {
 
 	unsigned gate_evt_num = 0;
 
-	if (_midi_rx_buf.num_filled()) {
+	while (_midi_rx_buf.num_filled()) {
 		auto msg = _midi_rx_buf.get();
 
 		// Monophonic MIDI CV/Gate
-		if (msg.is_command<MidiCommand::NoteOn>()) {
-			if (msg.velocity()) {
-				int32_t note = msg.note();
-				midi_note.pitch = (note - 24) / 12.f; //60 = C3 = 3V. 72 = C4 = 4V etc...
-				midi_note.gate = true;
-			} else {
-				midi_note.gate = false;
+		if (msg.is_command<MidiCommand::NoteOff>() || (msg.is_command<MidiCommand::NoteOn>() && msg.velocity() == 0)) {
+			midi_note.gate = false;
+			midi_note.vel = 0;
+
+			if (gate_evt_num < MidiMaxSimulGates) {
+				cur_params->midi.gate_events[gate_evt_num].notenum = msg.note();
+				cur_params->midi.gate_events[gate_evt_num].gateamp = 0;
+				gate_evt_num++;
 			}
 
-			midi_note.vel = msg.velocity();
-			if (gate_evt_num < Params::MaxSimulGates) {
+		} else if (msg.is_command<MidiCommand::NoteOn>()) {
+
+			midi_note.pitch = (msg.note() - 24) / 12.f; //60 = C3 = 3V. 72 = C4 = 4V etc...
+			midi_note.vel = msg.velocity() / 12.7f;		//0..127 => 0..10V
+			midi_note.gate = true;
+
+			if (gate_evt_num < MidiMaxSimulGates) {
 				cur_params->midi.gate_events[gate_evt_num].notenum = msg.note();
 				cur_params->midi.gate_events[gate_evt_num].gateamp = msg.velocity();
 				gate_evt_num++;
 			}
-
-		} else if (msg.is_command<MidiCommand::NoteOff>()) {
-			midi_note.gate = false;
-		}
-
-	} else {
-		if (!_midi_host.is_connected()) {
-			//if rx buffer is empty AND we've disconnected, turn off the midi gate
-			//so we don't end up with stuck notes
-			midi_note.pitch = 0.f;
-			midi_note.gate = false;
-			midi_note.vel = 0.f;
-			//TODO: handle all possible note offs
 		}
 	}
+
+	if (!_midi_host.is_connected()) {
+		//if rx buffer is empty AND we've disconnected, turn off the midi gate
+		//so we don't end up with stuck notes
+		midi_note.pitch = 0.f;
+		midi_note.gate = false;
+		midi_note.vel = 0.f;
+		//TODO: handle all possible note offs for gate_events
+	}
+
 	cur_params->midi.notes[0] = midi_note;
 
 	Debug::red_LED1::set(midi_note.gate);

@@ -400,22 +400,22 @@ public:
 
 					if (auto num = cable.midi_note_gate(); num.has_value()) {
 						update_or_add(midi_note_gate_conns[num.value()], input_jack);
-						pr_trace("MIDI gate to jack: m=%d, p=%d\n", input_jack.module_id, input_jack.jack_id);
+						pr_dbg("MIDI gate to jack: m=%d, p=%d\n", input_jack.module_id, input_jack.jack_id);
 						continue;
 					}
 
 					if (auto num = cable.midi_note_vel(); num.has_value()) {
 						update_or_add(midi_note_vel_conns[num.value()], input_jack);
-						pr_trace("MIDI vel to jack: m=%d, p=%d\n", input_jack.module_id, input_jack.jack_id);
+						pr_dbg("MIDI vel to jack: m=%d, p=%d\n", input_jack.module_id, input_jack.jack_id);
 						continue;
 					}
 
 					if (auto num = cable.midi_gate(); num.has_value()) {
 						update_or_add(midi_gate_conns[num.value()], input_jack);
-						pr_trace("MIDI note %d on/off to gate to jack:  m=%d, p=%d\n",
-								 num.value(),
-								 input_jack.module_id,
-								 input_jack.jack_id);
+						pr_dbg("MIDI note %d on/off to gate to jack:  m=%d, p=%d\n",
+							   num.value(),
+							   input_jack.module_id,
+							   input_jack.jack_id);
 						continue;
 					}
 

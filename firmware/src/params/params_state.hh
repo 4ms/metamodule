@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
+#include "patch/midi_def.hh"
 #include "util/debouncer.hh"
 #include "util/parameter.hh"
 #include "util/zip.hh"
@@ -12,9 +13,6 @@ namespace MetaModule
 {
 
 struct ParamsState {
-	static constexpr unsigned Polyphony = 4;
-	static constexpr unsigned MaxSimulGates = 8;
-
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
 
@@ -26,13 +24,13 @@ struct ParamsState {
 		LatchedParam<uint8_t, 1> gate;
 		LatchedParam<float, 1, 128> vel;
 	};
-	std::array<Note, Polyphony> notes{};
+	std::array<Note, MidiPolyphony> notes{};
 
-	struct GateEvent {
-		LatchedParam<uint8_t, 1> notenum;
-		LatchedParam<uint8_t, 1> gateamp;
-	};
-	std::array<GateEvent, MaxSimulGates> gate_events;
+	// struct GateEvent {
+	// 	LatchedParam<uint8_t, 1> notenum;
+	// 	LatchedParam<uint8_t, 1> gateamp;
+	// };
+	// std::array<GateEvent, MaxSimulGates> gate_events;
 
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
 		if (plugged)
@@ -71,10 +69,10 @@ struct ParamsState {
 			note.vel = {0.f, false};
 		}
 
-		for (auto &gate : gate_events) {
-			gate.notenum = {0, false};
-			gate.gateamp = {0, false};
-		}
+		// for (auto &gate : gate_events) {
+		// 	gate.notenum = {0, false};
+		// 	gate.gateamp = {0, false};
+		// }
 
 		jack_senses = 0;
 	}
@@ -92,24 +90,16 @@ struct ParamsState {
 
 		for (auto [note, that_note] : zip(notes, that.notes)) {
 			note = that_note;
-			// note.pitch.changed = that_note.pitch.changed;
-			// note.pitch.val = that_note.pitch.val;
 			that_note.pitch.changed = false;
-
-			// note.gate.changed = that_note.gate.changed;
-			// note.gate.val = that_note.gate.val;
 			that_note.gate.changed = false;
-
-			// note.vel.changed = that_note.vel.changed;
-			// note.vel.val = that_note.vel.val;
 			that_note.vel.changed = false;
 		}
 
-		for (auto [gate, that_gate] : zip(gate_events, that.gate_events)) {
-			gate = that_gate;
-			that_gate.gateamp.changed = false;
-			that_gate.notenum.changed = false;
-		}
+		// for (auto [gate, that_gate] : zip(gate_events, that.gate_events)) {
+		// 	gate = that_gate;
+		// 	that_gate.gateamp.changed = false;
+		// 	that_gate.notenum.changed = false;
+		// }
 
 		jack_senses = that.jack_senses;
 	}
@@ -126,9 +116,9 @@ struct ParamsState {
 			that_note = note;
 		}
 
-		for (auto [gate, that_gate] : zip(gate_events, that.gate_events)) {
-			that_gate = gate;
-		}
+		// for (auto [gate, that_gate] : zip(gate_events, that.gate_events)) {
+		// 	that_gate = gate;
+		// }
 
 		that.jack_senses = jack_senses;
 	}

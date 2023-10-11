@@ -198,21 +198,17 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 					player.set_midi_note_pitch(i, note.pitch);
 
 				if (note_state.gate.store_changed(note.gate))
-					player.set_midi_note_gate(i, note.gate);
+					player.set_midi_note_gate(i, note.gate ? 8.f : 0.f);
 
 				if (note_state.gate.store_changed(note.vel))
 					player.set_midi_note_velocity(i, note.vel);
 			}
 
-			// for (auto const &gate : params_.midi.gate_events) {
-			// 	gate.notenum;
-			// 	gate.gateamp;
-			// }
-			// Gate Events (note on/off -> gate on/off)
-			// for (auto [i, gate, gate_state] : countzip(params_.midi.gate_events, param_state.gate_events)) {
-			// if (gate_state.notenum.store_changed(gate.notenum))
-			// 	player.set_panel_input(MidiMonoNoteJack + i, note.vel);
-			// }
+			for (auto &gate : params_.midi.gate_events) {
+				player.set_midi_gate(gate.notenum, gate.gateamp / 12);
+				// clear the event
+				gate.notenum = Params::Midi::GateEvent::None;
+			}
 		}
 
 		// Run each module
