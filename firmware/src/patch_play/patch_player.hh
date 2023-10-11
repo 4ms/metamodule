@@ -176,42 +176,38 @@ public:
 		}
 	}
 
-	void set_all_jacks(std::vector<Jack> const &jacks, float val) {
-		for (auto const &jack : jacks)
-			modules[jack.module_id]->set_input(jack.jack_id, val);
-	}
-
 	void set_panel_input(int jack_id, float val) {
-		set_all_jacks(in_conns[jack_id], val);
-		// for (auto const &jack : in_conns[jack_id])
-		// 	modules[jack.module_id]->set_input(jack.jack_id, val);
+		set_all_input_jacks(in_conns[jack_id], val);
 	}
 
 	void set_midi_note_pitch(int midi_poly_note, float val) {
-		set_all_jacks(midi_note_pitch_conns[midi_poly_note], val);
-		// for (auto const &jack : midi_note_pitch_conns[midi_poly_note])
-		// 	modules[jack.module_id]->set_input(jack.jack_id, val);
+		set_all_input_jacks(midi_note_pitch_conns[midi_poly_note], val);
 	}
 
 	void set_midi_note_gate(int midi_poly_note, float val) {
-		set_all_jacks(midi_note_gate_conns[midi_poly_note], val);
-		// for (auto const &jack : midi_note_gate_conns[midi_poly_note])
-		// 	modules[jack.module_id]->set_input(jack.jack_id, val);
+		set_all_input_jacks(midi_note_gate_conns[midi_poly_note], val);
 	}
 
 	void set_midi_note_velocity(int midi_poly_note, float val) {
-		set_all_jacks(midi_note_vel_conns[midi_poly_note], val);
-		// for (auto const &jack : midi_note_vel_conns[midi_poly_note])
-		// 	modules[jack.module_id]->set_input(jack.jack_id, val);
+		set_all_input_jacks(midi_note_vel_conns[midi_poly_note], val);
+	}
+
 	}
 
 	void set_midi_gate(unsigned note_num, float vel) {
 		if (note_num > 127)
 			return;
 
-		set_all_jacks(midi_gate_conns[note_num], vel);
+		set_all_input_jacks(midi_gate_conns[note_num], vel);
 	}
 
+private:
+	void set_all_input_jacks(std::vector<Jack> const &jacks, float val) {
+		for (auto const &jack : jacks)
+			modules[jack.module_id]->set_input(jack.jack_id, val);
+	}
+
+public:
 	float get_panel_output(int jack_id) {
 		auto const &jack = out_conns[jack_id];
 		if (jack.module_id > 0)

@@ -12,7 +12,7 @@
 enum class MidiCommand : uint8_t {
 	NoteOff = 0x8,
 	NoteOn = 0x9,
-	PolyKeyPressue = 0xA,
+	PolyKeyPressure = 0xA,
 	ControlChange = 0xB,
 	ProgramChange = 0xC,
 	ChannelPressure = 0xD,
@@ -107,27 +107,44 @@ struct MidiMessage {
 		return data.byte[1];
 	}
 
+	uint8_t aftertouch() const {
+		return data.byte[1];
+	}
+
+	uint8_t chan_pressure() const {
+		return data.byte[0];
+	}
+
 	static void print(MidiMessage msg) {
 #if defined(MIDIDEBUG)
 		using enum MidiCommand;
 		if (msg.is_command<NoteOn>()) {
-			printf_("Note: %d Vel: %d\n", msg.data.byte[0], msg.data.byte[1]);
+			printf_("Note: %d Vel: %d\n", msg.note(), msg.velocity());
+
 		} else if (msg.is_command<NoteOff>()) {
-			printf_("Note: %d OFF\n", msg.data.byte[0]);
-		} else if (msg.is_command<PolyKeyPressue>()) {
-			printf_("Poly Key Pressure: %d %d\n", msg.data.byte[0], msg.data.byte[1]);
+			printf_("Note: %d OFF\n", msg.note());
+
+		} else if (msg.is_command<PolyKeyPressure>()) {
+			printf_("Poly Key Pressure: %d %d\n", msg.note(), msg.aftertouch());
+
 		} else if (msg.is_command<ControlChange>()) {
 			printf_("CC: #%d = %d\n", msg.data.byte[0], msg.data.byte[1]);
+
 		} else if (msg.is_command<ProgramChange>()) {
 			printf_("PC: #%d\n", msg.data.byte[0]);
+
 		} else if (msg.is_command<ChannelPressure>()) {
-			printf_("CP: #%d\n", msg.data.byte[0]);
-		} else if (msg.is_command<ChannelPressure>()) {
+			printf_("CP: #%d\n", msg.chan_pressure());
+
+		} else if (msg.is_command<PitchBend>()) {
 			printf_("Bend: #%d\n", (msg.data.byte[0] | (msg.data.byte[1] << 7)) - 8192);
+
 		} else if (msg.is_system_realtime<TimingClock>()) {
 			// printf_("Clk\n");
+
 		} else if (msg.is_sysex()) {
 			printf_("SYSEX: 0x%02x%02x\n", msg.data.byte[0], msg.data.byte[1]);
+
 		} else if (msg.raw()) {
 			printf_("Raw: %06x\n", msg.raw());
 		}

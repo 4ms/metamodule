@@ -94,7 +94,7 @@ void Controls::update_params() {
 
 			if (gate_evt_num < MidiMaxSimulGates) {
 				cur_params->midi.gate_events[gate_evt_num].notenum = msg.note();
-				cur_params->midi.gate_events[gate_evt_num].gateamp = msg.velocity();
+				cur_params->midi.gate_events[gate_evt_num].gateamp = msg.velocity() / 12;
 				gate_evt_num++;
 			}
 		}

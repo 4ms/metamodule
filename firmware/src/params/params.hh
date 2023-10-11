@@ -2,6 +2,7 @@
 #include "conf/panel_conf.hh"
 #include "patch/midi_def.hh"
 #include "util/debouncer.hh"
+#include "util/zip.hh"
 #include <array>
 
 namespace MetaModule
@@ -27,6 +28,7 @@ struct Params {
 		};
 		std::array<GateEvent, MidiMaxSimulGates> gate_events;
 	};
+
 	Midi midi;
 
 	uint32_t jack_senses;
@@ -61,6 +63,11 @@ struct Params {
 			buttons[i].copy_state(that.buttons[i]);
 		for (unsigned i = 0; i < PanelDef::NumPot; i++)
 			knobs[i] = that.knobs[i];
+		for (auto [note, that_note] : zip(midi.notes, that.midi.notes))
+			note = that_note;
+		for (auto [gate, that_gate] : zip(midi.gate_events, that.midi.gate_events))
+			gate = that_gate;
+
 		jack_senses = that.jack_senses;
 	}
 };
