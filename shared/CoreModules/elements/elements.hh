@@ -30,10 +30,12 @@ using Element = std::variant<
 	BefacoTinyKnobWhite,
 	BefacoTinyKnobDarkGrey,
 	BefacoTinyKnobLightGrey,
+	Rogan1PRed,
 	Rogan2SGray,
 	Rogan2PSWhite,
 	Rogan2PSGreen,
 	Rogan2PSRed,
+	Trimpot,
 
 	// Sliders
 	Slider25mmVert,
@@ -55,6 +57,12 @@ using Element = std::variant<
 	Toggle3posHoriz,
 	BefacoSwitch,
 	BefacoSwitchHorizontal,
+	VCVLightBezel<RedGreenBlueLight>,
+	LEDBezel,
+	CKSS,
+	CKSSRot,
+	TL1105,
+	CKD6,
 
 	//Encoders
 	Encoder,
@@ -77,6 +85,10 @@ using Element = std::variant<
 	MediumLight<RedLight>,
 	MediumLight<YellowLight>,
 	MediumLight<GreenLight>,
+	SmallLight<BlueLight>,
+	SmallLight<RedLight>,
+	SmallLight<GreenLight>,
+	SmallLight<GreenRedLight>,
 	RedGreenBlueLight,
 	RedLight,
 	OrangeLight,
@@ -92,4 +104,8 @@ using Element = std::variant<
 	AltParamToggle2,
 	AltParamToggle3>;
 
+// helper:
+inline BaseElement base_element(const Element &el) {
+	return std::visit([](auto e) { return BaseElement{e}; }, el);
+}
 } // namespace MetaModule

@@ -285,6 +285,8 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
+		val = val / CvRangeVolts;
+
 		switch (input_id) {
 			case Info::InputAbs_Cv:
 				inlet_abs.set_from_float(val);
@@ -318,7 +320,7 @@ public:
 
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut)
-			return outlet_wave.to_float();
+			return outlet_wave.to_float() * MaxOutputVolts;
 		return 0.f;
 	}
 

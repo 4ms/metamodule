@@ -35,7 +35,7 @@ public:
 		if (input_id == Info::InputInput)
 			signalIn = val;
 		if (input_id == Info::InputCv)
-			cvInput = val;
+			cvInput = val / CvRangeVolts;
 	}
 
 	float get_output(int output_id) const override {

@@ -13,11 +13,9 @@
 #include "pr_dbg.hh"
 #include "util/edge_detector.hh"
 
-// TODO:
-// - In Patch View, user can click "Save" or "copy" and give the patch a name and destination (including NORFlash)
-
 namespace MetaModule
 {
+
 // PatchStorage manages all patch filesystems <--> PatchList
 class PatchStorage {
 
@@ -25,7 +23,6 @@ class PatchStorage {
 	FatFileIO sdcard_{&sdcard_ops_, Volume::SDCard};
 	EdgeStateDetector sdcard_mounted_;
 	bool sdcard_needs_rescan_ = true;
-	// bool sdcard_mounted_ = false;
 
 	uint32_t last_poll_tm_;
 
@@ -141,8 +138,6 @@ public:
 		if (now - last_poll_tm_ > 2000) { //poll media once per second
 			last_poll_tm_ = now;
 			poll_media_change();
-			// printf_("SD Card mounted: %d\n", sdcard.is_mounted());
-			// printf_("USB Drive mounted: %d\n", usbdrive.is_mounted());
 		}
 	}
 
@@ -158,21 +153,17 @@ private:
 	}
 
 	void rescan_sdcard() {
-		pr_dbg("Updating patchlist from SD Card.\n");
+		pr_trace("Updating patchlist from SD Card.\n");
 		PatchFileIO::add_all_to_patchlist(sdcard_, patch_list_);
-		pr_dbg(
+		pr_trace(
 			"SD Patchlist updated. filelist data: %p, size: %d.\n", filelist_.sdcard.data(), filelist_.sdcard.size());
 	}
 
 	void rescan_usbdrive() {
-		pr_dbg("Updating patchlist from USB Drive.\n");
+		pr_trace("Updating patchlist from USB Drive.\n");
 		PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
-		pr_dbg("USB Patchlist updated. filelist data: %p, size: %d.\n", filelist_.usb.data(), filelist_.usb.size());
+		pr_trace("USB Patchlist updated. filelist data: %p, size: %d.\n", filelist_.usb.data(), filelist_.usb.size());
 	}
-
-	// std::optional<uint32_t> find_by_name(std::string_view &patchname) const {
-	// 	return patch_list_.find_by_name(patchname);
-	// }
 
 	uint32_t load_patch_file(Volume vol, uint32_t patch_id) {
 		auto filename = patch_list_.get_patch_filename(vol, patch_id);

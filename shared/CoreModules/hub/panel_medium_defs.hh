@@ -23,6 +23,7 @@ struct PanelDef {
 		"A", "B", "C", "D", "E", "F", "u", "v", "w", "x", "y", "z"};
 
 	static constexpr std::array<std::string_view, 2> MidiParamNames{"MidiNote", "MidiGate"};
+	static constexpr std::array<std::string_view, 2> MidiParamAbbrev{"MN", "MG"};
 	static constexpr uint32_t NumMidiParams = MidiParamNames.size();
 
 	static constexpr std::string_view get_map_param_name(uint32_t id) {
@@ -40,12 +41,25 @@ struct PanelDef {
 	static constexpr std::array<std::string_view, NumUserFacingInJacks> InJackNames{
 		"In1", "In2", "In3", "In4", "In5", "In6", "GateIn1", "GateIn2"};
 
+	static constexpr std::array<std::string_view, NumUserFacingInJacks> InJackAbbrev{
+		"1", "2", "3", "4", "5", "6", "G1", "G2"};
+
 	static constexpr std::array<std::string_view, 2> MidiJackMapNames{"MIDIGate", "MIDINote"};
+	static constexpr std::array<std::string_view, 2> MidiJackMapAbbrev{"MG", "MN"};
 	static constexpr int NumMidiJackMaps = MidiJackMapNames.size();
 
 	static constexpr std::string_view get_map_injack_name(uint32_t id) {
 		if (id < NumUserFacingInJacks)
 			return InJackNames[id];
+		id -= NumUserFacingInJacks;
+		if (id < NumMidiJackMaps)
+			return MidiJackMapAbbrev[id];
+		return "?";
+	}
+
+	static constexpr std::string_view get_map_injack_abbrev(uint32_t id) {
+		if (id < NumUserFacingInJacks)
+			return InJackAbbrev[id];
 		id -= NumUserFacingInJacks;
 		if (id < NumMidiJackMaps)
 			return MidiJackMapNames[id];
@@ -58,7 +72,16 @@ struct PanelDef {
 	static constexpr std::array<std::string_view, NumUserFacingOutJacks> OutJackNames{
 		"Out1", "Out2", "Out3", "Out4", "Out5", "Out6", "Out7", "Out8"};
 
+	static constexpr std::array<std::string_view, NumUserFacingOutJacks> OutJackAbbrevs{
+		"1", "2", "3", "4", "5", "6", "7", "8"};
+
 	static constexpr std::string_view get_map_outjack_name(uint32_t id) {
+		if (id < NumUserFacingOutJacks)
+			return OutJackNames[id];
+		return "?";
+	}
+
+	static constexpr std::string_view get_map_outjack_abbrev(uint32_t id) {
 		if (id < NumUserFacingOutJacks)
 			return OutJackNames[id];
 		return "?";

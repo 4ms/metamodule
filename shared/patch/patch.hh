@@ -1,6 +1,7 @@
 #pragma once
 #include "midi_def.hh"
 #include "util/static_string.hh"
+#include <optional>
 #include <vector>
 
 constexpr int MAX_MODULES_IN_PATCH = 32;
@@ -66,6 +67,7 @@ struct MappedKnobSet {
 struct InternalCable {
 	Jack out;
 	std::vector<Jack> ins;
+	std::optional<uint16_t> color;
 };
 
 struct MappedInputJack {
@@ -90,3 +92,12 @@ struct MappedOutputJack {
 };
 
 static_assert(sizeof(MappedOutputJack) == 24, "MappedOutputJack should be 24B");
+
+struct ModuleInitState {
+	uint32_t module_id;
+	// StaticString<31> plugin_slug;
+	// StaticString<31> module_slug;
+	// StaticString<15> version;
+	std::string data_json;
+	// json_t *data_json;
+};

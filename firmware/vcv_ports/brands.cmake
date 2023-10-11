@@ -4,5 +4,6 @@ set(brands
     Rack
     # other
     Befaco
-    AudibleInstruments    
+    AudibleInstruments
+    hetrickcv
 )

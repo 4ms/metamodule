@@ -1,15 +1,14 @@
 #pragma once
 
-#include "windowComparator.h"
+#include "schmittTrigger.h"
 
 class ClockPhase {
 public:
-	void updateClock(float val)
-	{
-		lastClock = currentClock.get_output();
+	void updateClock(float val) {
+		lastClock = currentClock.output();
 		currentClock.update(val);
 
-		if (currentClock.get_output() > lastClock) {
+		if (currentClock.output() > lastClock) {
 			multiply = queueMultiply;
 			divide = queueDivide;
 			duration = sinceClock;
@@ -18,70 +17,56 @@ public:
 		}
 	}
 
-	void updateReset(float val)
-	{
-		lastReset = currentReset.get_output();
+	void updateReset(float val) {
+		lastReset = currentReset.output();
 		currentReset.update(val);
-		if (currentReset.get_output() > lastReset)
+		if (currentReset.output() > lastReset)
 			wholeCount = 0;
 	}
 
-	void update()
-	{
+	void update() {
 		tempPhase = (float)sinceClock / (float)duration;
 		if (tempPhase < 1.0f) {
-			auto ratio = (float)multiply / (float)divide;
+			auto ratio = multiply / divide;
 			phase = (wholeCount + tempPhase) * ratio;
 		}
-		sinceClock = sinceClock + 1;
+		sinceClock++;
 	}
 
-	float getPhase()
-	{
+	float getPhase() {
 		return (phase);
 	}
 
-	float getWrappedPhase()
-	{
+	float getWrappedPhase() {
 		return (phase - (long)phase);
 	}
 
-	long getCount()
-	{
+	long getCount() {
 		return wholeCount;
 	}
 
-	void setMultiply(int val)
-	{
-		queueMultiply = val;
+	void setMultiply(int val) {
+		queueMultiply = static_cast<float>(val);
 	}
 
-	void setDivide(int val)
-	{
-		queueDivide = val;
+	void setDivide(int val) {
+		queueDivide = static_cast<float>(val);
 	}
 
 private:
-	WindowComparator currentClock;
+	SchmittTrigger currentClock;
 	int lastClock = 0;
 
-	WindowComparator currentReset;
+	SchmittTrigger currentReset;
 	int lastReset = 0;
 
 	long wholeCount = 0;
-
 	long sinceClock = 0;
-
 	float phase = 0;
-
 	long duration = 1000;
-
 	float tempPhase = 0;
-
-	int multiply = 1;
-
-	int divide = 1;
-
-	int queueDivide = 1;
-	int queueMultiply = 1;
+	float multiply = 1;
+	float divide = 1;
+	float queueDivide = 1;
+	float queueMultiply = 1;
 };

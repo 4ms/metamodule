@@ -48,6 +48,21 @@ struct Widget {
 	}
 	virtual void onDoubleClick(const DoubleClickEvent &e) {
 	}
+	bool hasChild(Widget *child) {
+		return false;
+	}
+	void addChild(Widget *child) {
+	}
+	void addChildBottom(Widget *child) {
+	}
+	void addChildBelow(Widget *child, Widget *sibling) {
+	}
+	void addChildAbove(Widget *child, Widget *sibling) {
+	}
+	void removeChild(Widget *child) {
+	}
+	void clearChildren() {
+	}
 
 	MetaModule::Element element;
 
@@ -57,27 +72,44 @@ struct Widget {
 
 struct OpaqueWidget : Widget {};
 struct TransparentWidget : Widget {};
-struct FramebufferWidget : Widget {};
+struct FramebufferWidget : Widget {
+	bool dirty = true;
+	bool bypassed = false;
+	float oversample = 1.0;
+	bool dirtyOnSubpixelChange = true;
+	math::Vec viewportMargin = math::Vec(INFINITY, INFINITY);
+	void setDirty(bool dirty = true) {
+	}
+	int getImageHandle() {
+		return 0;
+	}
+	NVGLUframebuffer *getFramebuffer() {
+		return nullptr;
+	}
+	math::Vec getFramebufferSize() {
+		return {0, 0};
+	}
+	void deleteFramebuffer() {
+	}
+	void render(math::Vec scale = math::Vec(1, 1),
+				math::Vec offsetF = math::Vec(0, 0),
+				math::Rect clipBox = math::Rect::inf()) {
+	}
+	virtual void drawFramebuffer() {
+	}
+};
 
 // Should be called SvgParamWidget
 struct SvgWidget : Widget {
-	SvgWidget *bg /*= this*/;
+	SvgWidget *bg = this;
 	NVGcolor bgColor;
 	bool visible;
-	engine::ParamQuantity *pq = &_pq;
 
 	void setSvg(std::shared_ptr<window::Svg>) {
 	}
 
 	void setSVG(std::shared_ptr<window::Svg>) {
 	}
-
-	engine::ParamQuantity *getParamQuantity() {
-		return pq;
-	}
-
-private:
-	engine::ParamQuantity _pq;
 };
 
 } // namespace widget

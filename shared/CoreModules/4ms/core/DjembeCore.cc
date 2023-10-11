@@ -176,7 +176,6 @@ public:
 		signalOut += 0.00308641978f * (fRec21[0] - fRec21[2]);
 		signalOut += 0.00277008303f * (fRec22[0] - fRec22[2]);
 		signalOut += 0.00249999994f * (fRec23[0] - fRec23[2]);
-		signalOut *= 0.05f;
 
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
@@ -223,9 +222,9 @@ public:
 	void update_params() {
 		strike0 = MathTools::constrain(strikeCV + strikeKnob, 0.f, 1.f);
 		strike1 = MathTools::tan_close(fConst1 * ((15000.0f * strike0) + 500.0f));
-		strike2 = (1.0f / strike1);
-		strike3 = (((strike2 + 1.41421354f) / strike1) + 1.0f);
-		fSlow4 = (MathTools::min<float>((float(gainCV) + float(gainKnob)), 1.0f) / strike3);
+		strike2 = 1.0f / strike1;
+		strike3 = ((strike2 + 1.41421354f) / strike1) + 1.0f;
+		fSlow4 = MathTools::min<float>(gainCV + gainKnob, 1.0f) / strike3;
 		fSlow5 = MathTools::tan_close(fConst1 * ((500.0f * strike0) + 40.0f));
 		fSlow6 = (1.0f / fSlow5);
 		fSlow7 = (1.0f / (((fSlow6 + 1.41421354f) / fSlow5) + 1.0f));
@@ -238,10 +237,9 @@ public:
 		fSlow14 = (((strike2 + -1.41421354f) / strike1) + 1.0f);
 		fSlow15 = (2.0f * (1.0f - (1.0f / (strike1 * strike1))));
 		adEnvRate =
-			(1.0f / MathTools::max<float>(
-						1.0f, (fConst2 * MathTools::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
+			(1.0f / MathTools::max<float>(1.0f, (fConst2 * MathTools::min<float>(sharpCV + sharpnessKnob, 1.0f))));
 		slowTrig = trigIn > 0.f ? 1.f : 0.f;
-		slowFreq = (float(freqCV) * float(freqKnob));
+		slowFreq = freqCV * freqKnob;
 
 		// Coef: a1
 		fSlow19 = (fConst4 * MathTools::cos_close((fConst5 * slowFreq)));
@@ -294,7 +292,9 @@ public:
 		// Todo!
 	}
 
-	void set_input(int input_id, float val) override {
+	void set_input(int input_id, float v) override {
+		float val = v / CvRangeVolts;
+
 		switch (input_id) {
 			case 0:
 				freqCV = exp5Table.interp(MathTools::constrain(val, 0.f, 1.0f));
@@ -324,7 +324,8 @@ public:
 	}
 
 	float get_output(const int output_id) const override {
-		return signalOut;
+		constexpr float algorithmScale = 8.f;
+		return signalOut * (outputScalingVolts / algorithmScale);
 	}
 
 private:
@@ -512,6 +513,8 @@ private:
 	static constexpr float fConst61 = gcem::pow(0.00100000005f, (33.3333321f / SAMPLERATE));
 	static constexpr float fConst62 = (0.0f - (2.0f * fConst61));
 	static constexpr float fConst63 = (fConst61 * fConst61);
+
+	static constexpr float outputScalingVolts = 5.f;
 
 public:
 	// Boilerplate to auto-register in ModuleFactory

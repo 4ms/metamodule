@@ -1,12 +1,9 @@
 #pragma once
-
 #include "util/math.hh"
 #include "util/math_tables.hh"
 #include "util/parameter.hh"
 #include <algorithm>
 #include <cmath>
-
-using namespace MathTools;
 
 class OberBPF {
 public:
@@ -17,15 +14,16 @@ public:
 	float update(float input) {
 		float output = 0;
 		if (sampleRate.isChanged()) {
-			auto tempSamplerate = constrain(sampleRate.getValue(), 1.0f, 192000.0f);
-			fConst0 = (3.14159274f / min<float>(192000.0f, max<float>(1.0f, float(tempSamplerate))));
+			auto tempSamplerate = MathTools::constrain(sampleRate.getValue(), 1.0f, 192000.0f);
+			fConst0 = (3.14159274f / std::min<float>(192000.0f, std::max<float>(1.0f, float(tempSamplerate))));
 		}
 		if (q.isChanged() || cutoff.isChanged()) {
 			calcFilterVariables();
 		}
-		float fTemp0 = (float(input) - (fRec1[1] + (fSlow1 * fRec2[1])));
-		float fTemp1 = (fSlow3 * fTemp0);
-		float fTemp2 = std::max<float>(-1.0f, std::min<float>(1.0f, (fRec2[1] + fTemp1)));
+		input = input / MaxAudioValue;
+		float fTemp0 = input - (fRec1[1] + (fSlow1 * fRec2[1]));
+		float fTemp1 = fSlow3 * fTemp0;
+		float fTemp2 = std::clamp<float>(fRec2[1] + fTemp1, MinAudioValue, MaxAudioValue);
 		float fTemp3 = (fTemp2 * (1.0f - (0.333333343f * mydsp_faustpower2_f(fTemp2))));
 		float fRec0 = fTemp3;
 		fRec1[0] = (fRec1[1] + (fSlow4 * fTemp3));
@@ -34,7 +32,7 @@ public:
 		fRec1[1] = fRec1[0];
 		fRec2[1] = fRec2[0];
 
-		return constrain(output, -1.0f, 1.0f);
+		return output * MaxAudioValue;
 	}
 
 	OberBPF() {
@@ -67,4 +65,7 @@ private:
 		fSlow3 = (fSlow0 / fSlow2);
 		fSlow4 = (2.0f * fSlow0);
 	}
+
+	static constexpr float MinAudioValue = -10.f;
+	static constexpr float MaxAudioValue = 10.f;
 };

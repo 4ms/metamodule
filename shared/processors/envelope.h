@@ -1,6 +1,6 @@
 #pragma once
 
-#include "processors/tools/windowComparator.h"
+#include "processors/tools/schmittTrigger.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
@@ -19,10 +19,9 @@ private:
 	float releaseCurve = 0;
 	bool holdEnable = true;
 	float attackSample = 0;
-	float releaseSample = 0;
 
 	bool lastGate;
-	WindowComparator gateInput;
+	SchmittTrigger gateInput;
 
 	float calcRise(float curve) {
 		float rise = 0;
@@ -59,88 +58,73 @@ private:
 
 public:
 	bool sustainEnable = true;
-	Envelope() {
-	}
+
+	Envelope() = default;
 
 	int getStage() {
 		return stage;
 	}
 
 	float update(float input) {
-		lastGate = gateInput.get_output();
+		lastGate = gateInput.output();
 		gateInput.update(input);
-		if (gateInput.get_output() > lastGate) {
+
+		// Rising edge
+		if (gateInput.output() > lastGate) {
 			phaccu = 0;
-			stage = 0;
+			stage = Attack;
 			attackSample = lastSample;
 		}
-		if (gateInput.get_output() < lastGate) {
-			if (sustainEnable) {
-				phaccu = 0;
-				stage = 4;
-			}
-		}
 
-		int stageSelect = 0;
-		if (sustainEnable) {
-			if (stage < 3)
-				stageSelect = stage;
-			else
-				stageSelect = 3;
+		if (stage == Sustain) {
+			envOut = sustainLevel;
+
+			// End Sustain if gate is low
+			if (!gateInput.output())
+				stage = Release;
+
+		} else if (stage > Release) {
+			envOut = 0.f;
+
 		} else {
-			stageSelect = stage;
-		}
+			int stageSelect = stage == Release ? 3 : stage;
+			increment = 1000.0f / envTimes[stageSelect] / sampleRate;
 
-		increment = 1000.0f / envTimes[stageSelect] / sampleRate;
+			phaccu += increment;
+			if (phaccu >= 1.0f) {
 
-		phaccu += increment;
-		if (phaccu >= 1.0f) // overflow
-		{
-			if (stage == 0) {
-				if (holdEnable) {
-					stage = 1;
-				} else {
-					stage = 2;
-				}
+				if (stage == Attack)
+					stage = holdEnable ? Hold : Decay;
 
-			} else {
-				if (sustainEnable) {
-					if (stage < 3 || stage == 4)
-						stage++;
-				} else {
+				else if (stage == Decay)
+					stage = gateInput.output() ? Sustain : Release;
+
+				else
 					stage++;
-				}
+
+				phaccu = 0;
 			}
-			phaccu = 0;
-		}
-		if (stage == 0) { // attack stage
-			envOut = calcRise(attackCurve);
-		} else if (stage == 1) { // hold stage
-			envOut = 1.0f;
-		} else if (stage == 2) { // decay stage
-			envOut = calcFall(1.0f, sustainLevel, decayCurve);
+
+			if (stage == Attack)
+				envOut = calcRise(attackCurve);
+
+			else if (stage == Hold)
+				envOut = 1.0f;
+
+			else if (stage == Decay)
+				envOut = calcFall(1.0f, sustainLevel, decayCurve);
+
+			else if (stage == Release)
+				envOut = calcFall(sustainLevel, 0.0f, releaseCurve);
 		}
 
-		if (sustainEnable) {
-			if (stage == 3) { // sustain stage
-				envOut = sustainLevel;
-			} else if (stage == 4) { // release stage
-				envOut = calcFall(releaseSample, 0.0f, releaseCurve);
-			}
-		} else { // release
-			if (stage == 3) {
-				envOut = calcFall(sustainLevel, 0.0f, releaseCurve);
-			}
-		}
-		if (stage < 4)
-			releaseSample = envOut;
 		lastSample = envOut;
 		return envOut;
 	}
 
 	void set_envelope_time(int _envStage, float milliseconds) {
 		envTimes[_envStage] = milliseconds;
-		if (_envStage == 1) // hold stage
+		if (_envStage == Hold) // hold stage
 		{
 			if (milliseconds < 0.1f) {
 				holdEnable = false;
@@ -169,4 +153,12 @@ public:
 	void set_release_curve(float val) {
 		releaseCurve = val;
 	}
+
+	enum {
+		Attack = 0,
+		Hold = 1,
+		Decay = 2,
+		Sustain = 3,
+		Release = 4,
+	};
 };

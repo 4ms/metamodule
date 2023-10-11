@@ -47,10 +47,10 @@ public:
 	float get_output(int output_id) const override {
 		switch (output_id) {
 			case Info::OutputGate:
-				return seq.endOutput;
+				return seq.endOutput * GateOutVolts;
 
 			case Info::OutputOut:
-				return seq.output;
+				return seq.output * CVOutVolts;
 		}
 		return 0.f;
 	}
@@ -70,6 +70,9 @@ public:
 
 private:
 	StepSequencer seq{8};
+
+	static constexpr float GateOutVolts = 8.f;
+	static constexpr float CVOutVolts = 10.f;
 };
 
 } // namespace MetaModule

@@ -1,39 +1,26 @@
-SET(SOURCES components/ui_comp_knobsetgroup.c
+SET(SOURCES components/ui_comp_knobcontainer.c
+    components/ui_comp_knobcontainerbig.c
+    components/ui_comp_knobsetgroup.c
+    components/ui_comp_mappedknobsetitem.c
+    components/ui_comp_unmappedsetitem.c
     components/ui_comp.c
     screens/ui_PatchSelectorPage.c
     screens/ui_PatchViewPage.c
     screens/ui_MappingMenu.c
+    screens/ui_KnobSetViewPage.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
-    images/ui_img_1x_play8_png.c
-    images/ui_img_1x_knob2_png.c
-    images/ui_img_1x_knob3pressed_png.c
-    images/ui_img_final_icons_1x_add1_png.c
-    images/ui_img_final_icons_1x_info1_png.c
-    images/ui_img_final_icons_1x_settings1_png.c
-    images/ui_img_complexeg_mockup_png.c
-    images/ui_img_button_circles_z_symbol_png.c
+    images/ui_img_1x_play1_png.c
     images/ui_img_1x_knob1_png.c
-    images/ui_img_1x_play3_png.c
-    images/ui_img_1x_addmap1_png.c
-    images/ui_img_1x_control1_png.c
-    images/ui_img_1x_editmap2_png.c
-    images/ui_img_final_icons_1x_knobpip1_png.c
-    images/ui_img_final_icons_1x_knobpip2_png.c
-    images/ui_img_final_icons_1x_knobpressed1_png.c
-    images/ui_img_final_icons_1x_knobreleased1_png.c
+    images/ui_img_1x_knob1pressed_png.c
+    images/ui_img_1x_add1_png.c
+    images/ui_img_1x_info1_png.c
+    images/ui_img_1x_settings1_png.c
+    images/ui_img_1x_infosmall2_png.c
     fonts/ui_font_MuseoSansRounded50012.c
     fonts/ui_font_MuseoSansRounded70014.c
     fonts/ui_font_MuseoSansRounded70016.c
-    fonts/ui_font_MuseoSansRounded90018.c
-    fonts/ui_font_Arial11bpp4.c
-    fonts/ui_font_Arial12bpp4.c
-    fonts/ui_font_ArialBl16.c
-    fonts/ui_font_ArialNB14.c
-    fonts/ui_font_ArialNB16.c
-    fonts/ui_font_ArialNB18.c
-    fonts/ui_font_Arial_16_bpp4.c
-    fonts/ui_font_Arial_bpp2.c)
+    fonts/ui_font_MuseoSansRounded90018.c)
 
 add_library(ui ${SOURCES})

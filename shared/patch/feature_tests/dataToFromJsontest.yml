@@ -1,0 +1,143 @@
+PatchData:
+  patch_name: dataToFromJson test
+  description: 'Turn knob A and B. Out 1 should move DC offset, and have large overshoots on corners. Out 2 should not move DC offset and have small/no overshoots at some frequencies. Turn C and D. Out 1 settles back on same freq. Out 2 has wide freq range'
+  module_slugs:
+    0: HubMedium
+    1: PonyVCO
+    2: PonyVCO
+    3: DualAtenuverter
+  int_cables:
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 0
+      color: 63488
+    - out:
+        module_id: 3
+        jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 0
+      color: 0
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 2
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 2
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 2
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 0
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0.333333
+    - module_id: 1
+      param_id: 2
+      value: 0.142169
+    - module_id: 1
+      param_id: 3
+      value: 0.5
+    - module_id: 1
+      param_id: 4
+      value: 1
+    - module_id: 2
+      param_id: 0
+      value: 0.5
+    - module_id: 2
+      param_id: 1
+      value: 0.333333
+    - module_id: 2
+      param_id: 2
+      value: 0
+    - module_id: 2
+      param_id: 3
+      value: 0.5
+    - module_id: 2
+      param_id: 4
+      value: 1
+    - module_id: 3
+      param_id: 0
+      value: 0.5
+    - module_id: 3
+      param_id: 1
+      value: 0
+    - module_id: 3
+      param_id: 2
+      value: 0.5
+    - module_id: 3
+      param_id: 3
+      value: 0.5
+  mapped_knobs:
+    - name: ''
+      set:
+        - panel_knob_id: 0
+          module_id: 2
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 3
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 3
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+
+'vcvModuleStates':
+  - 'id': 1
+    'plugin': 'Befaco'
+    'model': 'PonyVCO'
+    'version': '2.4.0'
+    'data':
+      'blockTZFMDC': false
+      'removePulseDC': false
+      'oversamplingIndex': 0
+  - 'id': 2
+    'plugin': 'Befaco'
+    'model': 'PonyVCO'
+    'version': '2.4.0'
+    'data':
+      'blockTZFMDC': true
+      'removePulseDC': true
+      'oversamplingIndex': 3

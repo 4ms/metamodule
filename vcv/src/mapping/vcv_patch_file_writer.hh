@@ -1,4 +1,5 @@
 #pragma once
+#include "cpputil/util/colors.hh"
 #include "hub/hub_knob_mappings.hh"
 #include "mapping/JackMap.hh"
 #include "mapping/ModuleID.h"
@@ -28,6 +29,7 @@ struct VCVPatchFileWriter {
 		// Find all knobs on those modules (static knobs)
 		std::vector<ModuleID> moduleData;
 		std::vector<ParamMap> paramData;
+
 		for (auto moduleID : engine->getModuleIds()) {
 			auto *module = engine->getModule(moduleID);
 			if (ModuleDirectory::isInPlugin(module)) {
@@ -37,7 +39,7 @@ struct VCVPatchFileWriter {
 					printf("Warning: module slug truncated to 31 chars\n");
 
 				if (!ModuleDirectory::isHub(module)) {
-					for (size_t i = 0; i < module->paramQuantities.size(); i++) { //auto &p : module->params) {
+					for (size_t i = 0; i < module->paramQuantities.size(); i++) {
 						float val = module->getParamQuantity(i)->getScaledValue();
 						paramData.push_back({.value = val, .paramID = (int)i, .moduleID = moduleID});
 					}
@@ -50,6 +52,17 @@ struct VCVPatchFileWriter {
 			auto cable = engine->getCable(cableID);
 			auto out = cable->outputModule;
 			auto in = cable->inputModule;
+
+			uint16_t color = 0;
+			for (auto cableWidget : APP->scene->rack->getCompleteCables()) {
+				if (cableWidget->cable == cable) {
+					uint8_t r_amt = (uint8_t)rack::clamp(cableWidget->color.r, 0.0, 1.0) * 255;
+					uint8_t g_amt = (uint8_t)rack::clamp(cableWidget->color.g, 0.0, 1.0) * 255;
+					uint8_t b_amt = (uint8_t)rack::clamp(cableWidget->color.b, 0.0, 1.0) * 255;
+					color = Color(r_amt, g_amt, b_amt).Rgb565();
+					break;
+				}
+			}
 
 			// Both modules on a cable must be in the plugin
 			if (!ModuleDirectory::isInPlugin(out) || !ModuleDirectory::isInPlugin(in))
@@ -70,6 +83,7 @@ struct VCVPatchFileWriter {
 				.receivedJackId = cable->inputId,
 				.sendingModuleId = out->getId(),
 				.receivedModuleId = in->getId(),
+				.lv_color_full = color,
 			});
 		}
 
@@ -78,6 +92,14 @@ struct VCVPatchFileWriter {
 		pw.setPatchDesc(patchDesc);
 		pw.setCableList(cableData);
 		pw.setParamList(paramData);
+
+		// Add module state from Module::dataToJson()
+		for (auto moduleID : engine->getModuleIds()) {
+			auto *module = engine->getModule(moduleID);
+			if (ModuleDirectory::isInPlugin(module) && !ModuleDirectory::isHub(module)) {
+				pw.addModuleStateJson(module);
+			}
+		}
 
 		// Iterate mappings, by MaxKnobSets times
 		for (unsigned set_i = 0; set_i < MaxKnobSets; set_i++) {

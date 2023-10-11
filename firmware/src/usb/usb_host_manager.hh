@@ -2,7 +2,7 @@
 #include "drivers/pin.hh"
 #include "midi_host.hh"
 #include "msc_host.hh"
-#include "printf.h"
+#include "pr_dbg.hh"
 #include <cstring>
 
 class UsbHostManager {
@@ -34,19 +34,19 @@ public:
 
 		auto status = USBH_Init(&usbhost, usbh_state_change_callback, 0);
 		if (status != USBH_OK) {
-			printf_("Error init USB Host: %d\n", status);
+			pr_err("Error init USB Host: %d\n", status);
 			return;
 		}
 		midi_host.init();
 		msc_host.init();
 
-		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [this] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
 		auto err = USBH_Start(&usbhost);
 		if (err != USBH_OK)
-			printf_("Error starting host\n");
+			pr_err("Error starting host\n");
 
 		src_enable.high();
-		printf_("VBus high, starting host\n");
+		pr_trace("VBus high, starting host\n");
 		// HAL_Delay(500);
 	}
 	void stop() {
@@ -68,39 +68,39 @@ public:
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
-				printf_("Select config\n");
+				pr_trace("Select config\n");
 				break;
 
 			case HOST_USER_CONNECTION:
-				printf_("Connected\n");
+				pr_trace("Connected\n");
 				break;
 
 			case HOST_USER_CLASS_SELECTED:
-				printf_("Class selected\n");
+				pr_trace("Class selected\n");
 				break;
 
 			case HOST_USER_CLASS_ACTIVE: {
 				uint8_t classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
-				printf_("Class active: %.8s code %d\n", classname, classcode);
+				pr_trace("Class active: %.8s code %d\n", classname, classcode);
 				if (classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
 					_midihost_instance->connect();
 					auto mshandle = host.get_class_handle<MidiStreamingHandle>();
 					if (!mshandle) {
-						printf_("Error, no MSHandle\n");
+						pr_err("Error, no MSHandle\n");
 						return;
 					}
 					USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				}
 				if (classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
-					printf_("MSC connected\n");
+					pr_trace("MSC connected\n");
 					_mschost_instance->connect();
 				}
 			} break;
 
 			case HOST_USER_DISCONNECTION: {
 				uint8_t classcode = host.get_active_class_code();
-				printf_("Disconnected class code %d\n", classcode);
+				pr_trace("Disconnected class code %d\n", classcode);
 				if (classcode == AudioClassCode)
 					_midihost_instance->disconnect();
 				if (classcode == USB_MSC_CLASS)
@@ -108,7 +108,7 @@ public:
 			} break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
-				printf_("Error\n");
+				pr_err("USB Host Manager Error\n");
 				break;
 		}
 	}

@@ -7,11 +7,10 @@
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/knob_edit.hh"
+#include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
-#include <string>
 
 namespace MetaModule
 {
@@ -19,43 +18,41 @@ struct ModuleViewPage : PageBase {
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true;
-		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::ShowAll, .opa = LV_OPA_50};
+		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::HideAlways, .opa = LV_OPA_50};
 	};
 	ViewSettings settings;
 
-	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
+	ModuleViewPage(PatchInfo info)
 		: PageBase{info}
-		, slug(module_slug)
 		, patch{patch_storage.get_view_patch()}
-		, base(lv_obj_create(nullptr))
-		, roller(lv_roller_create(base))
-		, edit_pane(lv_obj_create(base))
-		, knob_edit_pane{info, edit_pane} {
+		, base{ui_MappingMenu}
+		, roller{ui_ElementRoller}
+		, mapping_pane{info.patch_storage, module_mods} {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
 
 		lv_draw_img_dsc_init(&img_dsc);
 
-		lv_group_add_obj(group, roller);
-		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		lv_obj_add_style(roller,
-						 &Gui::plain_border_style,
-						 /*LV_PART_MAIN |*/ LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
-		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
+		lv_obj_remove_style(roller, nullptr, LV_STATE_EDITED);
+		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
 
-		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
-		lv_obj_add_style(edit_pane, &Gui::plain_border_style, LV_PART_MAIN);
-		lv_obj_set_style_pad_all(edit_pane, 0, LV_STATE_DEFAULT);
+		lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
 
 		button.clear();
 		module_controls.clear();
+		mapping_pane.init();
+
+		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
+		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_PRESSED, this);
 	}
 
 	void prepare_focus() override {
+		mapping_pane.hide();
+
 		patch = patch_storage.get_view_patch();
 
-		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
+		is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
 		mode = ViewMode::List;
 
 		this_module_id = PageList::get_selected_module_id();
@@ -64,7 +61,6 @@ struct ModuleViewPage : PageBase {
 			msg_queue.append_message("Module View page cannot read module slug.\n");
 			return;
 		}
-		printf_("ModuleViewPage module %s\n", slug.data());
 
 		moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
@@ -80,11 +76,13 @@ struct ModuleViewPage : PageBase {
 		drawn_elements.reserve(num_elements);
 		module_controls.reserve(num_elements);
 
-		auto module_drawer = ModuleDrawer{base, 240};
+		auto module_drawer = ModuleDrawer{ui_ModuleImage, 240};
 		canvas = module_drawer.draw_faceplate(slug, buffer);
 
 		lv_obj_refr_size(canvas);
 		auto width_px = lv_obj_get_width(canvas);
+
+		active_knob_set = PageList::get_active_knobset();
 
 		module_drawer.draw_mapped_elements(
 			patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
@@ -100,17 +98,15 @@ struct ModuleViewPage : PageBase {
 					opts += el.short_name;
 					if (drawn.mapped_panel_id) {
 						opts += " [";
-						opts += get_panel_name<PanelDef>(el, *(drawn.mapped_panel_id));
+						opts += get_panel_name<PanelDef>(el, drawn.mapped_panel_id.value());
 						opts += "]";
 					}
 					opts += "\n";
 
 					add_button(drawn.obj);
-					//FIXME: don't just save the param_idx, we will need all indices
-					//use ModuleParam{el}?
-					module_controls.push_back({ModuleParam::get_type(el), (uint32_t)drawn.idx.param_idx});
 				},
 				drawn_element.element);
+			module_controls.emplace_back(drawn_element.element, drawn_element.gui_element.idx);
 		}
 
 		// remove final \n
@@ -118,15 +114,14 @@ struct ModuleViewPage : PageBase {
 			opts.pop_back();
 
 		//Show Roller and select it
-		lv_obj_set_pos(roller, width_px, 0);
-		lv_obj_set_size(roller, 320 - width_px, 240);
+		lv_obj_set_pos(roller, 0, 0);
+		auto roller_width = std::min(320 - width_px, 220);
+		lv_obj_set_size(roller, roller_width, 240);
 		lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
 
 		// Add text list to roller options
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_visible_row_count(roller, 11);
-		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_PRESSED, this);
 
 		// Select first element
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
@@ -138,13 +133,12 @@ struct ModuleViewPage : PageBase {
 
 		update_map_ring_style();
 
-		// Hide Edit pane
-		lv_obj_set_pos(edit_pane, width_px, 0);
-		lv_obj_set_size(edit_pane, 320 - width_px, 240);
-		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
+		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, roller);
 
 		lv_group_focus_obj(roller);
-		lv_group_set_editing(group, false);
+
+		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 	}
 
 	void update() override {
@@ -155,9 +149,10 @@ struct ModuleViewPage : PageBase {
 				}
 			} else {
 				mode = ViewMode::List;
-				lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
-				lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
+				lv_show(ui_ElementRoller);
+				mapping_pane.hide();
 				lv_group_focus_obj(roller);
+				lv_obj_clear_state(roller, LV_STATE_PRESSED);
 				lv_group_set_editing(group, true);
 			}
 		}
@@ -170,6 +165,28 @@ struct ModuleViewPage : PageBase {
 					MapRingDisplay::flash_once(drawn_el.gui_element.map_ring, settings.map_ring_style, true);
 				}
 			}
+		}
+
+		if (mode == ViewMode::Knob)
+			mapping_pane.update(params);
+
+		if (auto patch_mod = module_mods.get(); patch_mod.has_value()) {
+			PageList::increment_patch_revision();
+
+			std::visit(overloaded{
+						   [this](AddMapping &mod) { apply_add_mapping(mod); },
+						   [](auto &m) {},
+					   },
+					   patch_mod.value());
+
+			// Forward the mod to the audio/patch_player queue
+			patch_mod_queue.put(patch_mod.value());
+		}
+	}
+
+	void apply_add_mapping(AddMapping &mod) {
+		if (patch.add_update_mapped_knob(mod.set_id, mod.map)) {
+			prepare_focus();
 		}
 	}
 
@@ -202,23 +219,24 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
-	// void blur() final {
-	// drawn_elements.clear();
-	// }
+	void blur() final {
+		// drawn_elements.clear(); // doing this might lead to fragmentation?
+	}
 
 private:
 	void add_button(lv_obj_t *obj) {
-		auto c_x = lv_obj_get_x(obj) + lv_obj_get_width(obj) / 2;
-		auto c_y = lv_obj_get_y(obj) + lv_obj_get_height(obj) / 2;
-		add_button(c_x, c_y, (float)lv_obj_get_width(obj) * 1.5f);
-	}
-
-	void add_button(int x, int y, int size = 20) {
 		auto &b = button.emplace_back();
-		b = lv_btn_create(base);
+		b = lv_btn_create(ui_ModuleImage);
 		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
-		lv_obj_set_pos(b, x - size / 2, y - size / 2);
-		lv_obj_set_size(b, size, size);
+
+		float width = lv_obj_get_width(obj) / 2.f;
+		float height = lv_obj_get_height(obj) / 2.f;
+		float c_x = (float)lv_obj_get_x(obj) + width;
+		float c_y = (float)lv_obj_get_y(obj) + height;
+
+		lv_obj_set_pos(b, std::round(c_x - width * 1.5f), std::round(c_y - height * 1.5f));
+		lv_obj_set_size(b, (width * 3.f), (height * 3.f));
+		lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 	}
 
 	void reset_module_page() {
@@ -271,72 +289,22 @@ private:
 		auto &module_controls = page->module_controls;
 
 		if (cur_sel < module_controls.size()) {
-			printf_("Click %d\n", cur_sel);
-			PageList::set_selected_control(module_controls[cur_sel]);
-
-			// Hide roller, show edit pane
 			page->mode = ViewMode::Knob;
-			lv_obj_add_flag(page->roller, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
-			page->knob_edit_pane.prepare_focus();
-			page->knob_edit_pane.set_group(page->group);
-
-			// Show manual knob
-			// auto patch_id = PageList::get_selected_patch_id();
-			// auto &patch = page->patch_list.get_patch(patch_id);
-			// auto mappedknob =
-			// patch.find_mapped_knob(PageList::get_selected_module_id(),
-			// module_controls[cur_sel].id); if (!mappedknob) { 	auto static_knob =
-			// patch.get_static_knob_value(page->this_module_id,
-			// module_controls[cur_sel].id); 	if (static_knob) {
-			// 		lv_obj_clear_flag(page->manual_knob,
-			// LV_OBJ_FLAG_HIDDEN); 		lv_arc_set_value(page->manual_knob,
-			// static_knob.value() * 100); 		lv_group_focus_obj(page->manual_knob);
-			// 		lv_group_set_editing(page->group, true);
-			// 		printf_("Initial knob value set to %f\n",
-			// (double)static_knob.value() * 100);
-			// 	}
-			// } else {
-			// 	lv_obj_add_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
-			// 	printf_("Knob is mapped\n");
-			// }
-
-			// PageList::request_new_page(PageId::KnobEdit);
-			// page->blur();
-		}
-	}
-
-	static void manual_knob_adjust(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto this_control_id = static_cast<uint16_t>(PageList::get_selected_control().id);
-		lv_obj_t *arc = lv_event_get_target(event);
-
-		StaticParam sp{
-			.module_id = page->this_module_id,
-			.param_id = this_control_id,
-			.value = lv_arc_get_value(arc) / 100.f,
-		};
-
-		if (page->is_patch_playing) {
-			page->patch_mod_queue.put(SetStaticParam{.param = sp});
-		} else {
-
-			// FIXME: this just modifies PatchStoage::_view_patch which will get
-			//  overwritten if we select a new patch in PatchSelector
-			page->patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
+			lv_hide(ui_ElementRoller);
+			page->mapping_pane.show(page->drawn_elements[cur_sel]);
 		}
 	}
 
 	ModuleInfoView moduleinfo;
+	PatchModQueue module_mods;
 
 	std::string opts;
 	uint16_t this_module_id;
 	uint32_t cur_selected = 0;
-	std::string_view slug;
+	std::string_view slug = "";
 	bool is_patch_playing = false;
 	PatchData &patch;
 
-	// TODO:put this in PageList
 	unsigned active_knob_set = 0;
 
 	std::vector<lv_obj_t *> button;
@@ -346,8 +314,7 @@ private:
 	lv_obj_t *base = nullptr;
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *roller = nullptr;
-	lv_obj_t *edit_pane = nullptr;
-	KnobEditPage knob_edit_pane;
+	ModuleViewMappingPane mapping_pane;
 
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_draw_img_dsc_t img_dsc;

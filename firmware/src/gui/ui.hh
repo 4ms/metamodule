@@ -1,5 +1,4 @@
 #pragma once
-#include "core_a7/static_buffers.hh"
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "gui/pages/page_manager.hh"
@@ -14,6 +13,11 @@
 
 namespace MetaModule
 {
+
+using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
+static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1;
+static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
+
 class Ui {
 private:
 	SyncParams &sync_params;
@@ -27,8 +31,7 @@ private:
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
 	static inline UartLog init_uart;
-	static inline LVGLDriver gui{
-		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
+	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, framebuf1, framebuf2};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
@@ -39,13 +42,11 @@ public:
 		, patch_playloader{patch_playloader}
 		, msg_queue{1024}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
-	}
 
-	void start() {
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, StaticBuffers::framebuf2);
+		MMDisplay::init(metaparams, framebuf2);
 		Gui::init_lvgl_styles();
 		page_manager.init();
 	}
@@ -66,9 +67,10 @@ public:
 
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
-			printf_("%s", msg.data());
+			// printf_("%s", msg.data());
 			msg_queue.clear_message();
 		}
+		// Debug::Pin0::low();
 
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());

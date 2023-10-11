@@ -4,7 +4,6 @@
 #include "VCV_adaptor/engine/Light.hpp"
 #include "VCV_adaptor/engine/LightInfo.hpp"
 #include "VCV_adaptor/engine/Param.hpp"
-#include "VCV_adaptor/engine/ParamQuantity.hpp"
 #include "VCV_adaptor/engine/Port.hpp"
 #include "VCV_adaptor/engine/PortInfo.hpp"
 #include "VCV_adaptor/json.hpp"
@@ -18,7 +17,6 @@ struct Module : VCVModuleWrapper {
 	plugin::Model *model = nullptr;
 	int64_t id = -1;
 
-	std::vector<std::unique_ptr<ParamQuantity>> paramQuantities;
 	std::vector<std::unique_ptr<PortInfo>> inputInfos;
 	std::vector<std::unique_ptr<PortInfo>> outputInfos;
 	std::vector<std::unique_ptr<LightInfo>> lightInfos;
@@ -61,23 +59,11 @@ struct Module : VCVModuleWrapper {
 		for (auto &x : lights)
 			x.value = 0;
 
-		param_scales.resize(num_params);
-		for (auto &x : param_scales) {
-			x.range = 1;
-			x.offset = 0;
-		}
-
 		paramQuantities.resize(num_params);
-		// for (unsigned i = 0; i < num_params; i++)
-		// 	configParam(i, 0.f, 1.f, 0.f);
 
 		inputInfos.resize(num_inputs);
-		// for (unsigned i = 0; i < num_inputs; i++)
-		// 	configInput(i);
 
 		outputInfos.resize(num_outputs);
-		// for (unsigned i = 0; i < num_outputs; i++)
-		// 	configOutput(i);
 
 		lightInfos.resize(num_lights);
 	}
@@ -87,17 +73,14 @@ struct Module : VCVModuleWrapper {
 								float minValue,
 								float maxValue,
 								float defaultValue,
-								std::string_view name = "",
-								std::string_view unit = "",
+								std::string name = "",
+								std::string unit = "",
 								float displayBase = 0.f,
 								float displayMultiplier = 1.f,
 								float displayOffset = 0.f) {
 
-		if (paramId >= (int)param_scales.size() || (paramId >= (int)paramQuantities.size()))
+		if (paramId >= (int)paramQuantities.size())
 			return nullptr;
-
-		param_scales[paramId].range = maxValue - minValue;
-		param_scales[paramId].offset = minValue;
 
 		if (paramQuantities[paramId])
 			paramQuantities[paramId].reset();
@@ -127,22 +110,24 @@ struct Module : VCVModuleWrapper {
 								  float minValue,
 								  float maxValue,
 								  float defaultValue,
-								  std::string_view name = "",
+								  std::string name = "",
 								  std::vector<std::string> labels = {}) {
 		TSwitchQuantity *sq = configParam<TSwitchQuantity>(paramId, minValue, maxValue, defaultValue, name);
+		sq->snapEnabled = true;
 		// sq->labels = labels;
 		return sq;
 	}
 
 	template<class TSwitchQuantity = SwitchQuantity>
-	TSwitchQuantity *configButton(int paramId, std::string_view name = "") {
+	TSwitchQuantity *configButton(int paramId, std::string name = "") {
 		TSwitchQuantity *sq = configParam<TSwitchQuantity>(paramId, 0.f, 1.f, 0.f, name);
-		sq->randomizeEnabled = false;
+		// sq->randomizeEnabled = false;
+		sq->snapEnabled = true;
 		return sq;
 	}
 
 	template<class TPortInfo = PortInfo>
-	TPortInfo *configInput(int portId, std::string_view name = "") {
+	TPortInfo *configInput(int portId, std::string name = "") {
 		if (portId >= (int)inputs.size() || portId >= (int)inputInfos.size())
 			return nullptr;
 
@@ -160,7 +145,7 @@ struct Module : VCVModuleWrapper {
 	}
 
 	template<class TPortInfo = PortInfo>
-	TPortInfo *configOutput(int portId, std::string_view name = "") {
+	TPortInfo *configOutput(int portId, std::string name = "") {
 		if (portId >= (int)outputs.size() || portId >= (int)outputInfos.size())
 			return nullptr;
 
@@ -178,7 +163,7 @@ struct Module : VCVModuleWrapper {
 	}
 
 	template<class TLightInfo = LightInfo>
-	TLightInfo *configLight(int lightId, std::string_view name = "") {
+	TLightInfo *configLight(int lightId, std::string name = "") {
 		if (lightId >= (int)lights.size() || lightId >= (int)lightInfos.size())
 			return nullptr;
 
@@ -323,6 +308,10 @@ struct Module : VCVModuleWrapper {
 	virtual void onSampleRateChange() {
 	}
 	virtual void onSampleRateChange(const SampleRateChangeEvent &e) {
+		onSampleRateChange();
+	}
+	void set_samplerate(float sampleRate) final {
+		onSampleRateChange(SampleRateChangeEvent{sampleRate, 1.f / sampleRate});
 	}
 
 	struct ExpanderChangeEvent {
@@ -367,6 +356,8 @@ struct Module : VCVModuleWrapper {
 	// PRIVATE int meterIndex();
 	// PRIVATE void doProcess(const ProcessArgs &args);
 	// PRIVATE static void jsonStripIds(json_t *rootJ);
+
+	void initialize_state(std::string_view state_string) override;
 };
 
 } // namespace rack::engine

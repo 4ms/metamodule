@@ -52,6 +52,7 @@ struct PatchViewKnobsetMenu {
 			if (knobset.set.size()) {
 				auto panel = ui_KnobSetGroup_create(ui_KnobsetMenu);
 				auto check = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETBUTTON);
+				auto view = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETINFO);
 				auto label = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETNAME);
 				if (knobset.name.length())
 					lv_label_set_text(label, knobset.name.c_str());
@@ -60,6 +61,10 @@ struct PatchViewKnobsetMenu {
 					snprintf_(text, 32, "KnobSet: %d", (int)knobset_list.size() + 1);
 					lv_label_set_text(label, text);
 				}
+
+				// View/info button;
+				lv_obj_add_event_cb(view, knobset_view_button_cb, LV_EVENT_PRESSED, this);
+				lv_group_add_obj(knobset_menu_group, view);
 
 				// Switch checkbox
 				if (settings.active_knobset == knobset_list.size())
@@ -169,11 +174,35 @@ struct PatchViewKnobsetMenu {
 		}
 	}
 
-	lv_group_t *base_group;
+	static void knobset_view_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		lv_event_code_t event_code = lv_event_get_code(event);
+		auto obj = lv_event_get_target(event);
+
+		if (event_code == LV_EVENT_PRESSED) {
+			auto page = static_cast<PatchViewKnobsetMenu *>(event->user_data);
+
+			for (unsigned i = 0; auto *panel : page->knobset_list) {
+				auto view = ui_comp_get_child(panel, UI_COMP_KNOBSETGROUP_KNOBSETINFO);
+
+				if (view == obj) {
+					page->requested_knobset_view = i;
+					printf_("View knob set %d\n", i);
+				}
+
+				i++;
+			}
+		}
+	}
+
+	lv_group_t *base_group = nullptr;
 	lv_group_t *knobset_menu_group = nullptr;
 	bool visible = false;
 	Settings &settings;
 	std::vector<lv_obj_t *> knobset_list;
+
+	std::optional<unsigned> requested_knobset_view = std::nullopt;
 };
 
 } // namespace MetaModule

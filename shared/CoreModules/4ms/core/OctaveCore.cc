@@ -14,21 +14,21 @@ public:
 	OctaveCore() = default;
 
 	void update() override {
-		auto cvSum = MathTools::constrain<float>(octaveOffset + cvInput, 0.0f, 1.0f);
-		int octave = MathTools::map_value(cvSum, 0.0f, 1.0f, 0, 5);
-		voltOutput = voltInput + octave / 5.0f;
+		auto octave = static_cast<int>(octaveOffset + cvInput + 0.5f); //round
+		voltOutput = voltInput + octave;
 	}
 
 	void set_param(int param_id, float val) override {
 		if (param_id == Info::KnobOctave)
-			octaveOffset = val;
+			octaveOffset = (val - 0.5f) * KnobOctaveRange;
 	}
 
 	void set_input(int input_id, float val) override {
 		if (input_id == Info::InputInput)
 			voltInput = val;
+
 		if (input_id == Info::InputCv)
-			cvInput = val;
+			cvInput = val; //Note: volts!
 	}
 
 	float get_output(int output_id) const override {
@@ -53,6 +53,8 @@ private:
 	float cvInput = 0;
 	float voltInput = 0;
 	float voltOutput = 0;
+
+	static constexpr float KnobOctaveRange = 8.f;
 };
 
 } // namespace MetaModule

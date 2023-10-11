@@ -9,22 +9,32 @@ bool yaml_raw_to_patch(char *yaml, size_t size, PatchData &pd) {
 	if (tree.num_children(0) == 0)
 		return false;
 
-	ryml::ConstNodeRef data_root = tree[0];
-	if (data_root.key() != "PatchData")
+	ryml::ConstNodeRef root = tree.rootref();
+
+	if (!root.has_child("PatchData"))
 		return false;
 
-	data_root["patch_name"] >> pd.patch_name;
+	ryml::ConstNodeRef patchdata = root["PatchData"];
 
-	if (data_root.has_child("description"))
-		data_root["description"] >> pd.description;
+	if (!patchdata.has_child("patch_name"))
+		return false;
 
-	data_root["module_slugs"] >> pd.module_slugs;
-	data_root["int_cables"] >> pd.int_cables;
-	data_root["mapped_ins"] >> pd.mapped_ins;
+	patchdata["patch_name"] >> pd.patch_name;
 
-	data_root["mapped_outs"] >> pd.mapped_outs;
-	data_root["static_knobs"] >> pd.static_knobs;
-	data_root["mapped_knobs"] >> pd.knob_sets;
+	if (patchdata.has_child("description"))
+		patchdata["description"] >> pd.description;
+
+	patchdata["module_slugs"] >> pd.module_slugs;
+	patchdata["int_cables"] >> pd.int_cables;
+	patchdata["mapped_ins"] >> pd.mapped_ins;
+
+	patchdata["mapped_outs"] >> pd.mapped_outs;
+	patchdata["static_knobs"] >> pd.static_knobs;
+	patchdata["mapped_knobs"] >> pd.knob_sets;
+
+	// Check for VCV Module State data
+	if (root.has_child("vcvModuleStates"))
+		root["vcvModuleStates"] >> pd.module_states;
 
 	return true;
 }

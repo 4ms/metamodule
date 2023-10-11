@@ -40,6 +40,9 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 		ryml::NodeRef el = int_cables.append_child({ryml::MAP});
 		el["out"] << x.out;
 		el["ins"] << x.ins;
+		if (x.color.has_value()) {
+			el["color"] << x.color.value();
+		}
 	}
 
 	ryml::NodeRef mapped_ins = data["mapped_ins"];
@@ -72,6 +75,15 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 	}
 
 	data["mapped_knobs"] << pd.knob_sets;
+
+	return ryml::emitrs_yaml<std::string>(tree);
+}
+
+std::string json_to_yml(std::string json) {
+	if (json.back() == '\0')
+		json.pop_back();
+
+	ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(json));
 
 	return ryml::emitrs_yaml<std::string>(tree);
 }
