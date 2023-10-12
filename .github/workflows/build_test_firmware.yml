@@ -37,7 +37,11 @@ jobs:
 
       - name: Install linux dependencies
         run: |
-          sudo apt install -y ninja-build 
+          sudo apt install -y ninja-build
+
+      - name: Build and install flatbuffer compiler
+        run: |
+          cd firmware/lib/flatbuffers && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -GNinja && cmake --build build
 
       - name: Build and test
         run: cd firmware && make configure && make all
