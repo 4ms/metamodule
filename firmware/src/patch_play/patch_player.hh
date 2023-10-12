@@ -46,9 +46,15 @@ public:
 
 	//TODO: compare performance of vector vs sparse map:
 	// std::vector<std::pair<unsigned /*ccnum*/, std::vector<Jack>>> midi_cc_conns;
-	std::array<std::vector<Jack>, 129> midi_cc_conns; // 128 CCs plus Pitch Wheel
-	std::array<std::vector<Jack>, 128> midi_gate_conns;
-	std::array<std::vector<Jack>, 2> midi_clk_conns; //Clk, and Div Clk
+	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
+	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
+	std::vector<Jack> midi_clk_conns;
+	std::vector<Jack> midi_divclk_conns;
+
+	uint32_t midi_clk_pulse_ctr = 0;
+	uint32_t midi_divclk_pulse_ctr = 0;
+	uint32_t midi_divclk_ctr = 0;
+	uint32_t midi_divclk_div_amt = 0;
 
 	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
 	static constexpr size_t NumParams = PanelDef::NumKnobs; // + PanelDef::NumMidiParams;
@@ -158,6 +164,8 @@ public:
 				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
 			}
 		}
+
+		update_midi_pulses();
 	}
 
 	void unload_patch() {
@@ -205,24 +213,44 @@ public:
 	}
 
 	void set_midi_cc(unsigned ccnum, float val) {
-		if (ccnum < 129)
+		if (ccnum < midi_cc_conns.size())
 			set_all_connected_jacks(midi_cc_conns[ccnum], val);
 	}
 
 	void set_midi_gate(unsigned note_num, float val) {
-		if (note_num < 128)
+		if (note_num < midi_gate_conns.size())
 			set_all_connected_jacks(midi_gate_conns[note_num], val);
 	}
 
-	void set_midi_clk(unsigned clk_type, float val) {
-		if (clk_type <= 1)
-			set_all_connected_jacks(midi_clk_conns[clk_type], val);
+	void set_midi_clk(float val) {
+		set_all_connected_jacks(midi_clk_conns, val);
+		midi_clk_pulse_ctr = 240; //TODO: base this on samplerate
+
+		midi_divclk_ctr++;
+		if (midi_divclk_ctr >= midi_divclk_div_amt) {
+			set_all_connected_jacks(midi_divclk_conns, val);
+			midi_divclk_ctr = 0;
+			midi_divclk_pulse_ctr = 240; //TODO: base this on samplerate
+		}
 	}
 
 private:
 	void set_all_connected_jacks(std::vector<Jack> const &jacks, float val) {
 		for (auto const &jack : jacks)
 			modules[jack.module_id]->set_input(jack.jack_id, val);
+	}
+
+	void update_midi_pulses() {
+		if (midi_clk_pulse_ctr) {
+			if (--midi_clk_pulse_ctr == 0) {
+				set_all_connected_jacks(midi_clk_conns, 0);
+			}
+		}
+		if (midi_divclk_pulse_ctr) {
+			if (--midi_divclk_pulse_ctr == 0) {
+				set_all_connected_jacks(midi_divclk_conns, 0);
+			}
+		}
 	}
 
 public:
@@ -434,14 +462,19 @@ public:
 						pr_dbg("MIDI CC/PW %d", num.value());
 
 					} else if (auto num = cable.midi_clk(); num.has_value()) {
-						update_or_add(midi_clk_conns[num.value()], input_jack);
-						pr_dbg("MIDI Clk %s", num.value() == 1 ? "Divided" : "");
+						update_or_add(midi_clk_conns, input_jack);
+						pr_dbg("MIDI Clk");
+
+					} else if (auto num = cable.midi_divclk(); num.has_value()) {
+						update_or_add(midi_divclk_conns, input_jack);
+						midi_divclk_div_amt = num.value() + 1;
+						pr_dbg("MIDI Div %d Clk", num.value() + 1);
 
 					} else if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
 						update_or_add(in_conns[panel_jack_id], input_jack);
 
 					} else
-						pr_err("Bad panel jack mapping: panel_jack_id=%d", panel_jack_id);
+						pr_err("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
 
 					pr_dbg(" to jack: m=%d, p=%d\n", module_id, jack_id);
 

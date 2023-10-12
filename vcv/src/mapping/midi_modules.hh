@@ -8,6 +8,7 @@ namespace MetaModule::MIDI
 struct MidiCVSettings {
 	float pwRange = 0;
 	unsigned channels = 0;
+	unsigned clockDivJack = 0;
 	enum PolyMode { ROTATE_MODE, REUSE_MODE, RESET_MODE, MPE_MODE };
 	PolyMode polyMode = ROTATE_MODE;
 };

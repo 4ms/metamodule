@@ -7,6 +7,19 @@
 namespace MetaModule::MIDI
 {
 
+unsigned clockDivToMidiClockJack(unsigned clockDiv) {
+	return clockDiv == 0  ? MidiClockJack :
+		   clockDiv == 1  ? MidiClockJack :
+		   clockDiv == 2  ? MidiClockDiv2Jack :
+		   clockDiv == 3  ? MidiClockDiv3Jack :
+		   clockDiv == 6  ? MidiClockDiv6Jack :
+		   clockDiv == 12 ? MidiClockDiv12Jack :
+		   clockDiv == 24 ? MidiClockDiv24Jack :
+		   clockDiv == 48 ? MidiClockDiv48Jack :
+		   clockDiv == 96 ? MidiClockDiv96Jack :
+							MidiClockDiv96Jack;
+}
+
 std::optional<MidiCVSettings> readMidiCVModule(int64_t module_id) {
 	auto context = rack::contextGet();
 	auto engine = context->engine;
@@ -21,10 +34,14 @@ std::optional<MidiCVSettings> readMidiCVModule(int64_t module_id) {
 	json_t *pwRangeJ = json_object_get(rootJ, "pwRange");
 	json_t *channelsJ = json_object_get(rootJ, "channels");
 	json_t *polyModeJ = json_object_get(rootJ, "polyMode");
+	json_t *clockDivisionJ = json_object_get(rootJ, "clockDivision");
 
 	MidiCVSettings settings;
 	settings.pwRange = pwRangeJ ? json_number_value(pwRangeJ) : -1;
 	settings.channels = channelsJ ? json_integer_value(channelsJ) : 1;
+	settings.clockDivJack =
+		clockDivisionJ ? clockDivToMidiClockJack(json_integer_value(clockDivisionJ)) : MidiClockDiv96Jack;
+
 	auto polyMode = polyModeJ ? json_integer_value(polyModeJ) : 0;
 	if (polyMode >= 0 && polyMode <= 3)
 		settings.polyMode = static_cast<MidiCVSettings::PolyMode>(polyMode);

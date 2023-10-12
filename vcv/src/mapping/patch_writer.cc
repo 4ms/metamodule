@@ -278,9 +278,27 @@ void PatchFileWriter::mapMidiCVJack(CableMap &cable) {
 	else if (cable.sendingJackId == 5)
 		cable.sendingJackId = MidiModWheelJack;
 
-	//MidiRetriggerJack (896 = VCV module jack 6) to MidiContinueJack (901 = VCV module jack 11)
-	else if (cable.sendingJackId < 12)
-		cable.sendingJackId = MidiRetriggerJack + (cable.sendingJackId - 6);
+	else if (cable.sendingJackId == 6)
+		cable.sendingJackId = MidiRetriggerJack;
+
+	else if (cable.sendingJackId == 7)
+		cable.sendingJackId = MidiClockJack;
+
+	else if (cable.sendingJackId == 8) {
+		if (midiSettings.CV.clockDivJack >= MidiClockJack && midiSettings.CV.clockDivJack <= MidiClockDiv96Jack)
+			cable.sendingJackId = midiSettings.CV.clockDivJack;
+		else
+			cable.sendingJackId = MidiClockDiv96Jack; //safe default on range error
+	}
+
+	else if (cable.sendingJackId == 9)
+		cable.sendingJackId = MidiStartJack;
+
+	else if (cable.sendingJackId == 10)
+		cable.sendingJackId = MidiStopJack;
+
+	else if (cable.sendingJackId == 11)
+		cable.sendingJackId = MidiContinueJack;
 
 	mapInputJack(cable);
 }
@@ -288,7 +306,6 @@ void PatchFileWriter::mapMidiCVJack(CableMap &cable) {
 void PatchFileWriter::mapMidiGateJack(CableMap &cable) {
 	if (cable.sendingJackId <= (int)midiSettings.gate.notes.size()) {
 		auto notenum = midiSettings.gate.notes[cable.sendingJackId];
-		printf("Gate module: jack %d is note %d\n", cable.sendingJackId, notenum);
 		cable.sendingJackId = MidiGateNote0 + notenum;
 		mapInputJack(cable);
 	}
@@ -297,7 +314,6 @@ void PatchFileWriter::mapMidiGateJack(CableMap &cable) {
 void PatchFileWriter::mapMidiCCJack(CableMap &cable) {
 	if (cable.sendingJackId <= (int)midiSettings.CCCV.CCnums.size()) {
 		auto ccnum = midiSettings.CCCV.CCnums[cable.sendingJackId];
-		printf("CC CV module: jack %d is CC %d\n", cable.sendingJackId, ccnum);
 		cable.sendingJackId = MidiCC0 + ccnum;
 		mapInputJack(cable);
 	}

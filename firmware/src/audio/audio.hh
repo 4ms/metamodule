@@ -65,8 +65,6 @@ private:
 	Calibrator incal[PanelDef::NumAudioIn];
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
-	std::array<uint32_t, 2> midi_clk_ctr;
-
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()
 
@@ -83,7 +81,6 @@ private:
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
-	void update_midi_pulses();
 
 	// void output_silence(AudioOutBuffer &out, AuxStreamBlock &aux);
 

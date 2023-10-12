@@ -101,7 +101,11 @@ struct MappedInputJack {
 	}
 
 	std::optional<uint32_t> midi_clk() const {
-		return MathTools::between<uint32_t>(panel_jack_id, MidiClockJack, MidiClockDivJack);
+		return panel_jack_id == MidiClockJack ? std::optional<uint32_t>{0} : std::nullopt;
+	}
+
+	std::optional<uint32_t> midi_divclk() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiClockDiv1Jack, MidiClockDiv96Jack);
 	}
 };
 

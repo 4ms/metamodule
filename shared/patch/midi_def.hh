@@ -49,12 +49,20 @@ enum {
 	//...
 	MidiGateNote127 = 0x37F, //Note 127 (G8) -> Gate
 
-	MidiRetriggerJack,
-	MidiClockJack,
-	MidiClockDivJack,
-	MidiStartJack,
+	MidiClockJack = 0x400,			 // 24 PPQN clock (not divided)
+	MidiClockDiv1Jack = 0x400 + 1,	 // 24 PPQN (alias for MidiClockJack)
+	MidiClockDiv2Jack = 0x400 + 2,	 // 12 PPQN
+	MidiClockDiv3Jack = 0x400 + 3,	 // 32nd note = 3 pulses
+	MidiClockDiv6Jack = 0x400 + 6,	 // 16th note = 6 pulses
+	MidiClockDiv12Jack = 0x400 + 12, // 8th note = 12 pulses
+	MidiClockDiv24Jack = 0x400 + 24, // Quarter note = 24 pulses
+	MidiClockDiv48Jack = 0x400 + 48, // Half notes = 2 quarter notes
+	MidiClockDiv96Jack = 0x400 + 96, // Whole note = 4 quarter notes
+
+	MidiStartJack = 0x500,
 	MidiStopJack,
 	MidiContinueJack,
+	MidiRetriggerJack,
 
 	LastMidiJack
 };
@@ -63,6 +71,11 @@ enum { MidiModWheelJack = MidiCC1 };
 
 static constexpr unsigned MidiMaxSimulGates = 8;
 static constexpr unsigned MidiPolyphony = 4;
+
+static constexpr size_t NumMidiNotes = 128;
+static constexpr size_t NumMidiCCs = 128;
+static constexpr size_t NumMidiCCsPW = NumMidiCCs + 1; //plus pitch wheel (aka bend)
+static constexpr size_t NumMidiClockJacks = MidiClockDiv96Jack - MidiClockJack + 1;
 
 enum {
 	MidiMonoNoteParam = 0x100,
