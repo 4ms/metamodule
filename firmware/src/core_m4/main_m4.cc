@@ -75,7 +75,7 @@ void main() {
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
-	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
+	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
 	controls.start();
 
