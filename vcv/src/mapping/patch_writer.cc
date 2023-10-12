@@ -83,7 +83,7 @@ void PatchFileWriter::setCableList(std::vector<CableMap> &cables) {
 			continue;
 
 		} else if (cable.sendingModuleId == midiModuleIds.midiCC) {
-			mapInputJack(cable);
+			mapMidiCCJack(cable);
 			continue;
 
 		} else if (cable.sendingModuleId == midiModuleIds.midiMaps) {
@@ -269,20 +269,36 @@ void PatchFileWriter::mapMidiCVJack(CableMap &cable) {
 
 	else if (cable.sendingJackId == 3)
 		cable.sendingJackId = MidiMonoAftertouchJack;
-
-	//MidiPitchWheelJack (VCV module jack 4) to MidiContinueJack (VCV module jack 11)
-	else if (cable.sendingJackId < 12)
-		cable.sendingJackId = MidiPitchWheelJack + (cable.sendingJackId - 4);
-
-	mapInputJack(cable);
 	// }
 	//TODO handle polyphony (midiSettings.CV.channels > 1)
+
+	else if (cable.sendingJackId == 4)
+		cable.sendingJackId = MidiPitchWheelJack;
+
+	else if (cable.sendingJackId == 5)
+		cable.sendingJackId = MidiModWheelJack;
+
+	//MidiRetriggerJack (896 = VCV module jack 6) to MidiContinueJack (901 = VCV module jack 11)
+	else if (cable.sendingJackId < 12)
+		cable.sendingJackId = MidiRetriggerJack + (cable.sendingJackId - 6);
+
+	mapInputJack(cable);
 }
 
 void PatchFileWriter::mapMidiGateJack(CableMap &cable) {
 	if (cable.sendingJackId <= (int)midiSettings.gate.notes.size()) {
-		printf("Gate module: jack %d is note %d\n", cable.sendingJackId, midiSettings.gate.notes[cable.sendingJackId]);
-		cable.sendingJackId = MidiGateNote0 + midiSettings.gate.notes[cable.sendingJackId];
+		auto notenum = midiSettings.gate.notes[cable.sendingJackId];
+		printf("Gate module: jack %d is note %d\n", cable.sendingJackId, notenum);
+		cable.sendingJackId = MidiGateNote0 + notenum;
+		mapInputJack(cable);
+	}
+}
+
+void PatchFileWriter::mapMidiCCJack(CableMap &cable) {
+	if (cable.sendingJackId <= (int)midiSettings.CCCV.CCnums.size()) {
+		auto ccnum = midiSettings.CCCV.CCnums[cable.sendingJackId];
+		printf("CC CV module: jack %d is CC %d\n", cable.sendingJackId, ccnum);
+		cable.sendingJackId = MidiCC0 + ccnum;
 		mapInputJack(cable);
 	}
 }

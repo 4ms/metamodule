@@ -1,6 +1,6 @@
 PatchData:
   patch_name: MIDI Enosc
-  description: ''
+  description: Patch Description
   module_slugs:
     0: HubMedium
     1: EnOsc
@@ -55,11 +55,11 @@ PatchData:
       ins:
         - module_id: 3
           jack_id: 7
-    - panel_jack_id: 522
+    - panel_jack_id: 554
       ins:
         - module_id: 1
           jack_id: 3
-    - panel_jack_id: 563
+    - panel_jack_id: 551
       ins:
         - module_id: 3
           jack_id: 3

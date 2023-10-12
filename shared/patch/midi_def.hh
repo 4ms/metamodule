@@ -58,6 +58,8 @@ enum {
 	LastMidiJack
 };
 
+enum { MidiModWheelJack = MidiCC0 };
+
 static constexpr unsigned MidiMaxSimulGates = 8;
 static constexpr unsigned MidiPolyphony = 4;
 

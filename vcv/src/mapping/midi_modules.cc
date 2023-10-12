@@ -15,6 +15,9 @@ std::optional<MidiCVSettings> readMidiCVModule(int64_t module_id) {
 		return std::nullopt;
 
 	json_t *rootJ = module->dataToJson();
+	if (!rootJ)
+		return std::nullopt;
+
 	json_t *pwRangeJ = json_object_get(rootJ, "pwRange");
 	json_t *channelsJ = json_object_get(rootJ, "channels");
 	json_t *polyModeJ = json_object_get(rootJ, "polyMode");
@@ -42,6 +45,9 @@ std::optional<MidiGateSettings> readMidiGateModule(int64_t module_id) {
 	MidiGateSettings settings;
 
 	json_t *rootJ = module->dataToJson();
+	if (!rootJ)
+		return std::nullopt;
+
 	json_t *notesJ = json_object_get(rootJ, "notes");
 	json_t *velocityJ = json_object_get(rootJ, "velocity");
 	json_t *mpeModeJ = json_object_get(rootJ, "mpeMode");
@@ -72,9 +78,34 @@ std::optional<MidiCCCVSettings> readMidiCCCVModule(int64_t module_id) {
 		return std::nullopt;
 
 	json_t *rootJ = module->dataToJson();
-	json_decref(rootJ);
+	if (!rootJ)
+		return std::nullopt;
+
+	json_t *ccsJ = json_object_get(rootJ, "ccs");
+	json_t *valuesJ = json_object_get(rootJ, "values");
+	json_t *smoothJ = json_object_get(rootJ, "smooth");
+	json_t *mpeModeJ = json_object_get(rootJ, "mpeMode");
+	json_t *lsbModeJ = json_object_get(rootJ, "lsbMode");
 
 	MidiCCCVSettings settings;
+
+	for (int i = 0; auto &cc : settings.CCnums) {
+		json_t *ccJ = json_array_get(ccsJ, i);
+		cc = ccJ ? json_integer_value(ccJ) : -1;
+		i++;
+	}
+
+	for (int i = 0; auto &val : settings.values) {
+		json_t *valJ = json_array_get(valuesJ, i);
+		val = valJ ? json_integer_value(valJ) : 0;
+		i++;
+	}
+
+	settings.smooth = smoothJ ? json_boolean_value(smoothJ) : false;
+	settings.mpe_mode = mpeModeJ ? json_boolean_value(mpeModeJ) : false;
+	settings.lsb_mode = lsbModeJ ? json_boolean_value(lsbModeJ) : false;
+
+	json_decref(rootJ);
 
 	return settings;
 }

@@ -44,6 +44,7 @@ private:
 	void mapOutputJack(const CableMap &map);
 	void mapMidiCVJack(CableMap &map);
 	void mapMidiGateJack(CableMap &map);
+	void mapMidiCCJack(CableMap &cable);
 
 	void setModuleList(std::vector<ModuleID> &modules);
 
