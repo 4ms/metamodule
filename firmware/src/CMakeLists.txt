@@ -253,16 +253,18 @@ target_include_directories(
           ${FWDIR}/lib/jansson/jansson/src
 )
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mp15xa7_arch mdrivlib_interface ui ryml VCV_adaptor flasher lockfree flatbuffers)
-
-# Compile flat buffer definitions to cpp headers and add them
-# as include directories
+# Compile flat buffer definitions to cpp headers
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${FWDIR}/lib/flatbuffers/CMake)
 set(FLATBUFFERS_FLATC_EXECUTABLE flatc)
 include(BuildFlatBuffers)
+build_flatbuffers("${CMAKE_CURRENT_LIST_DIR}/wifi/flat/all.fbs" "" flatbuffer_messages_utils "" ${CMAKE_CURRENT_BINARY_DIR}/flat "" "")
 
-build_flatbuffers("${CMAKE_CURRENT_LIST_DIR}/wifi/flat/all.fbs" "" flatbuffer_messages "" ${CMAKE_CURRENT_BINARY_DIR}/flat "" "")
-target_include_directories(main.elf PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/flat)
+# Create library with generated flatbuffer headers
+add_library(flatbuffer_messages INTERFACE)
+add_dependencies(flatbuffer_messages flatbuffer_messages_utils)
+target_include_directories(flatbuffer_messages INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/flat)
+
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mp15xa7_arch mdrivlib_interface ui ryml VCV_adaptor flasher lockfree flatbuffers flatbuffer_messages)
 
 foreach(brand ${brands})
   target_link_libraries(main.elf PRIVATE ${brand}Library)
