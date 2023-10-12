@@ -15,6 +15,21 @@ using namespace Framing;
 
 #include <console/pr_dbg.hh>
 
+Configuration_t FrameConfig
+{
+    .start=0x01,
+    .end=0x02,
+    .escape=0x03
+};
+
+StaticDeframer<100> deframer(FrameConfig, [](auto frame)
+{
+    auto message = GetMessage(frame.data());
+
+    printf_("Val: %u\n", message->state());
+
+});
+
 namespace MetaModule
 {
 
@@ -25,29 +40,15 @@ void WifiInterface::init()
     // auto result = Flasher::init(230400);
 
     BufferedUSART2::init();
+}
 
-    Configuration_t FrameConfig
+
+void WifiInterface::handle_messages()
+{
+    auto val = BufferedUSART2::receive();
+    if (val)
     {
-        .start=0x01,
-        .end=0x02,
-        .escape=0x03
-    };
-
-    StaticDeframer<100> deframer(FrameConfig, [](auto frame)
-    {
-        auto message = GetMessage(frame.data());
-
-        printf_("Val: %u\n", message->state());
-
-    });
-
-    while (true)
-    {
-        auto val = BufferedUSART2::receive();
-        if (val)
-        {
-            deframer.parse(*val);
-        }
+        deframer.parse(*val);
     }
 
 }

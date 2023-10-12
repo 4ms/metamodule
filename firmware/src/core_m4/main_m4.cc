@@ -18,6 +18,7 @@
 #include "patch_file/patch_storage.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "usb/usb_manager.hh"
+#include "wifi/wifi_interface.hh"
 
 namespace MetaModule
 {
@@ -65,6 +66,10 @@ void main() {
 
 	RamDiskOps ramdiskops{*virtdrive};
 
+	#ifdef ENABLE_WIFI_BRIDGE
+	WifiInterface::init();
+	#endif
+
 	UsbManager usb{ramdiskops};
 	usb.start();
 
@@ -95,6 +100,11 @@ void main() {
 
 		usb.process();
 		patch_storage.handle_messages();
+
+		#ifdef ENABLE_WIFI_BRIDGE
+		WifiInterface::handle_messages();
+		#endif
+		
 		__NOP();
 	}
 }
