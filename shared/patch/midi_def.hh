@@ -39,18 +39,21 @@ enum {
 	MidiAftertouch7Jack,
 	MidiAftertouch8Jack,
 
-	MidiPitchWheelJack,
-	MidiModWheelJack,
+	MidiCC0 = 0x200, // MidiModWheelJack,
+	//...
+	MidiCC127 = 0x27F,
+	MidiPitchWheelJack = 0x280,
+
+	MidiGateNote0 = 0x300, //Note 0 (C-2) -> Gate
+	//...
+	MidiGateNote127 = 0x37F, //Note 127 (G8) -> Gate
+
 	MidiRetriggerJack,
 	MidiClockJack,
 	MidiClockDivJack,
 	MidiStartJack,
 	MidiStopJack,
 	MidiContinueJack,
-
-	MidiGateNote0 = 0x300, //CC#0 -> Gate
-	//...
-	MidiGateNote127 = 0x37F, //CC#2 -> Gate
 
 	LastMidiJack
 };

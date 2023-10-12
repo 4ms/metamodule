@@ -207,10 +207,16 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 					player.set_midi_note_aftertouch(i, note.aft);
 			}
 
-			for (auto &gate : params_.midi.gate_events) {
-				player.set_midi_gate(gate.notenum, gate.gateamp);
+			for (auto &event : params_.midi.events) {
+
+				if (event.type == Params::Midi::Event::Type::GateNote)
+					player.set_midi_gate(event.chan, event.val);
+
+				else if (event.type == Params::Midi::Event::Type::CC)
+					player.set_midi_cc(event.chan, event.val);
+
 				// clear the event
-				gate.notenum = Params::Midi::GateEvent::None;
+				event.type = Params::Midi::Event::None;
 			}
 		}
 

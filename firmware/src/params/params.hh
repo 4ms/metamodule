@@ -22,12 +22,12 @@ struct Params {
 		};
 		std::array<Note, MidiPolyphony> notes{};
 
-		struct GateEvent {
-			uint8_t notenum = 0;
-			uint8_t gateamp = 0;
-			enum { None = 0xFF };
+		struct Event {
+			uint8_t chan = 0;
+			uint8_t val = 0;
+			enum Type : uint8_t { None, GateNote, CC } type = None;
 		};
-		std::array<GateEvent, MidiMaxSimulGates> gate_events;
+		std::array<Event, MidiMaxSimulGates> events;
 	};
 
 	Midi midi;
@@ -49,8 +49,8 @@ struct Params {
 			knob = 0.f;
 		for (auto &note : midi.notes)
 			note = Midi::Note{};
-		for (auto &note : midi.gate_events)
-			note = Midi::GateEvent{};
+		for (auto &e : midi.events)
+			e = Midi::Event{};
 
 		jack_senses = 0;
 	}
@@ -66,11 +66,13 @@ struct Params {
 			knobs[i] = that.knobs[i];
 		for (auto [note, that_note] : zip(midi.notes, that.midi.notes))
 			note = that_note;
-		for (auto [gate, that_gate] : zip(midi.gate_events, that.midi.gate_events))
-			gate = that_gate;
+		for (auto [event, that_event] : zip(midi.events, that.midi.events))
+			event = that_event;
 
 		jack_senses = that.jack_senses;
 	}
 };
+
+static constexpr auto Params_Size = sizeof(Params);
 
 } // namespace MetaModule

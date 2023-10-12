@@ -3,6 +3,7 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "hsem_handler.hh"
+// #include "midi_controls.hh"
 #include "patch/midi_def.hh"
 
 namespace MetaModule
@@ -70,20 +71,23 @@ void Controls::update_params() {
 		cur_metaparams->meta_buttons[0].transfer_events(button0);
 	}
 
-	unsigned gate_evt_num = 0;
+	unsigned event_count = 0;
 
 	while (_midi_rx_buf.num_filled()) {
 		auto msg = _midi_rx_buf.get();
+
+		// process_midi(msg, &midi_note, &cur_params->midi.gate_events[gate_evt_num]);
 
 		// Monophonic MIDI CV/Gate
 		if (msg.is_command<MidiCommand::NoteOff>() || (msg.is_command<MidiCommand::NoteOn>() && msg.velocity() == 0)) {
 			midi_note.gate = false;
 			midi_note.vel = 0;
 
-			if (gate_evt_num < MidiMaxSimulGates) {
-				cur_params->midi.gate_events[gate_evt_num].notenum = msg.note();
-				cur_params->midi.gate_events[gate_evt_num].gateamp = 0;
-				gate_evt_num++;
+			if (event_count < MidiMaxSimulGates) {
+				cur_params->midi.events[event_count].type = Params::Midi::Event::Type::GateNote;
+				cur_params->midi.events[event_count].chan = msg.note();
+				cur_params->midi.events[event_count].val = 0;
+				event_count++;
 			}
 
 		} else if (msg.is_command<MidiCommand::NoteOn>()) {
@@ -92,18 +96,35 @@ void Controls::update_params() {
 			midi_note.vel = msg.velocity() / 12.7f;		//0..127 => 0..10V
 			midi_note.gate = true;
 
-			if (gate_evt_num < MidiMaxSimulGates) {
-				cur_params->midi.gate_events[gate_evt_num].notenum = msg.note();
-				cur_params->midi.gate_events[gate_evt_num].gateamp = msg.velocity() / 12;
-				gate_evt_num++;
+			if (event_count < MidiMaxSimulGates) {
+				cur_params->midi.events[event_count].type = Params::Midi::Event::Type::GateNote;
+				cur_params->midi.events[event_count].chan = msg.note();
+				cur_params->midi.events[event_count].val = msg.velocity() / 12;
+				event_count++;
 			}
 
 		} else if (msg.is_command<MidiCommand::PolyKeyPressure>()) { //aka Aftertouch
-			if (msg.note() == midi_note.pitch)
+			if (((msg.note() - 24) / 12.f) == midi_note.pitch)
 				midi_note.aft = msg.aftertouch();
 
 		} else if (msg.is_command<MidiCommand::ChannelPressure>()) {
 			midi_note.aft = (float)msg.chan_pressure() / 12.7f;
+
+		} else if (msg.is_command<MidiCommand::ControlChange>()) {
+			if (event_count < MidiMaxSimulGates) {
+				cur_params->midi.events[event_count].type = Params::Midi::Event::Type::CC;
+				cur_params->midi.events[event_count].chan = msg.ccnum();
+				cur_params->midi.events[event_count].val = msg.ccval();
+				event_count++;
+			}
+
+		} else if (msg.is_command<MidiCommand::PitchBend>()) {
+			// if (event_count < MidiMaxSimulGates) {
+			// 	cur_params->midi.events[event_count].type = Params::Midi::Event::Type::CC;
+			// 	cur_params->midi.events[event_count].chan = msg.ccnum();
+			// 	cur_params->midi.events[event_count].val = msg.ccval();
+			// 	event_count++;
+			// }
 		}
 	}
 

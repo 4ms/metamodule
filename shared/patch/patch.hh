@@ -95,6 +95,10 @@ struct MappedInputJack {
 	std::optional<uint32_t> midi_gate() const {
 		return MathTools::between<uint32_t>(panel_jack_id, MidiGateNote0, MidiGateNote127);
 	}
+
+	std::optional<uint32_t> midi_cc() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiCC0, MidiPitchWheelJack);
+	}
 };
 
 // 24 Bytes

@@ -103,6 +103,10 @@ struct MidiMessage {
 		return data.byte[0];
 	}
 
+	uint8_t ccnum() const {
+		return data.byte[0];
+	}
+
 	uint8_t velocity() const {
 		return data.byte[1];
 	}
@@ -113,6 +117,14 @@ struct MidiMessage {
 
 	uint8_t chan_pressure() const {
 		return data.byte[0];
+	}
+
+	uint8_t ccval() const {
+		return data.byte[1];
+	}
+
+	int16_t bend() const {
+		return ((int16_t)data.byte[0] | ((int16_t)data.byte[1] << 7)) - 8192;
 	}
 
 	static void print(MidiMessage msg) {
@@ -137,7 +149,7 @@ struct MidiMessage {
 			printf_("CP: #%d\n", msg.chan_pressure());
 
 		} else if (msg.is_command<PitchBend>()) {
-			printf_("Bend: #%d\n", (msg.data.byte[0] | (msg.data.byte[1] << 7)) - 8192);
+			printf_("Bend: #%d\n", msg.bend());
 
 		} else if (msg.is_system_realtime<TimingClock>()) {
 			// printf_("Clk\n");
