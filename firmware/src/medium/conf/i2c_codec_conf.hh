@@ -5,8 +5,6 @@ using mdrivlib::GPIO;
 using mdrivlib::PinAF;
 using mdrivlib::PinNum;
 
-constexpr uint32_t LEDUpdateHz = 100;
-
 // I2C for main (internal) and aux (external/expander) codec, and internal and aux (ext/exp) GPIO Expander
 const mdrivlib::I2CConfig a7m4_shared_i2c_codec_conf = {
 	.I2Cx = I2C5,
@@ -19,7 +17,7 @@ const mdrivlib::I2CConfig a7m4_shared_i2c_codec_conf = {
 		.SCLH = 0x58,
 		.SCLL = 0x74,
 	},
-	.priority1 = 0,
+	.priority1 = 2,
 	.priority2 = 1,
 };
 
@@ -35,6 +33,6 @@ const mdrivlib::I2CConfig aux_i2c_conf = {
 			.SCLH = 0x58,
 			.SCLL = 0x74,
 		},
-	.priority1 = 0,
-	.priority2 = 1,
+	.priority1 = 1,
+	.priority2 = 2,
 };

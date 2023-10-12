@@ -40,7 +40,7 @@ public:
 		midi_host.init();
 		msc_host.init();
 
-		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 3, 0, [] { HAL_HCD_IRQHandler(&hhcd); });
 		auto err = USBH_Start(&usbhost);
 		if (err != USBH_OK)
 			pr_err("Error starting host\n");
