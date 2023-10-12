@@ -28,7 +28,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr PinDef CIPO = {GPIO::Unused, PinNum::_0};
 		static constexpr PinDef CS0 = {GPIO::E, PinNum::_11, PinAF::AltFunc5};
 		static constexpr bool use_hardware_ss = true;
-		static constexpr uint16_t clock_division = 4;
+		static constexpr uint16_t clock_division = 2;
 		static constexpr uint16_t data_size = 8;
 		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
 		static constexpr uint8_t FifoThreshold = 2;
@@ -39,9 +39,9 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 
 	struct DMAConf : mdrivlib::DefaultDMAConf {
 		static constexpr auto DMAx = 1;
-		static constexpr auto StreamNum = 3;
+		static constexpr auto StreamNum = 0;
 		static constexpr auto RequestNum = DMA_REQUEST_SPI4_TX;
-		static constexpr auto IRQn = DMA1_Stream3_IRQn;
+		static constexpr auto IRQn = DMA1_Stream0_IRQn;
 		static constexpr auto pri = 0;
 		static constexpr auto subpri = 0;
 		static constexpr auto dir = Mem2Periph;

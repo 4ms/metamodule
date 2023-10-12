@@ -15,8 +15,8 @@ namespace MetaModule
 {
 
 using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
-static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1;
-static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
+static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1 alignas(64);
+static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2 alignas(64);
 
 class Ui {
 private:
@@ -31,7 +31,8 @@ private:
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
 	static inline UartLog init_uart;
-	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, framebuf1, framebuf2};
+	static inline LVGLDriver gui{
+		MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
