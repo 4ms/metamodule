@@ -8,6 +8,7 @@ set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp1)
 set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
 set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
 set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
+set(WIFI_DIR ${FWDIR}/src/wifi)
 
 add_executable(
   main_m4.elf
@@ -117,6 +118,9 @@ set(MCU_FLAGS
     -mfloat-abi=hard
 )
 
+add_library(mp15xm4_arch INTERFACE)
+target_compile_options(mp15xm4_arch INTERFACE ${MCU_FLAGS})
+
 target_compile_features(main_m4.elf PUBLIC cxx_std_23)
 
 target_compile_options(
@@ -172,6 +176,76 @@ target_link_script(
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
+
+if (ENABLE_WIFI_BRIDGE)
+
+  target_compile_definitions(main_m4.elf PRIVATE
+    ENABLE_WIFI_BRIDGE=1
+  )
+
+  target_sources(main_m4.elf PRIVATE
+    ${WIFI_DIR}/wifi_interface.cc
+    ${WIFI_DIR}/flasher/flasher.cpp
+    ${WIFI_DIR}/flasher/flasher.h
+    ${WIFI_DIR}/flasher/implementation.cpp
+    ${WIFI_DIR}/flasher/BufferedUSART.h
+    ${WIFI_DIR}/flasher/BufferedUSART.cpp
+    ${WIFI_DIR}/comm/BufferedUSART2.h
+    ${WIFI_DIR}/comm/BufferedUSART2.cpp
+    ${WIFI_DIR}/comm/framing/Configuration.h
+    ${WIFI_DIR}/comm/framing/Deframer.cpp
+    ${WIFI_DIR}/comm/framing/Deframer.h
+    ${WIFI_DIR}/comm/framing/DynamicDeframer.cpp
+    ${WIFI_DIR}/comm/framing/DynamicDeframer.h
+    ${WIFI_DIR}/comm/framing/Framer.cpp
+    ${WIFI_DIR}/comm/framing/Framer.h
+    ${WIFI_DIR}/comm/framing/StaticDeframer.h
+  )
+
+  #
+  # ESP Serial Flasher
+  #
+
+  set(ESP_SERIAL_FLASHER_PORT "CUSTOM")
+  add_subdirectory(${FWDIR}/lib/esp-serial-flasher ${CMAKE_CURRENT_BINARY_DIR}/esp-serial-flasher)
+  target_link_libraries(flasher PRIVATE mp15xm4_arch)
+
+  # 
+  # Lockfree
+  # 
+
+  add_subdirectory(${FWDIR}/lib/lockfree ${CMAKE_CURRENT_BINARY_DIR}/lockfree)
+  target_link_libraries(lockfree INTERFACE mp15xm4_arch)
+
+  # 
+  # Flatbuffers
+  # (Manually create a target because original cmake includes the flatc compiler)
+  # 
+
+  add_library(flatbuffers INTERFACE)
+  target_include_directories(flatbuffers INTERFACE ${FWDIR}/lib/flatbuffers/include/)
+
+  # Locate flatbuffer compiler
+  # This falls back to the local flatabuffers repository if not found on PATH
+  find_program(FLATBUFFERS_FLATC_EXECUTABLE flatc
+    PATHS ${FWDIR}/lib/flatbuffers/build
+    REQUIRED)
+  message("Found flatbuffers compiler at " ${FLATBUFFERS_FLATC_EXECUTABLE})
+
+  # Compile flat buffer definitions to cpp headers
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${FWDIR}/lib/flatbuffers/CMake)
+  include(BuildFlatBuffers)
+  build_flatbuffers("${FWDIR}/src/wifi/flat/all.fbs" "" flatbuffer_messages_utils "" ${CMAKE_CURRENT_BINARY_DIR}/flat "" "")
+
+  # Create library with generated flatbuffer headers
+  add_library(flatbuffer_messages INTERFACE)
+  add_dependencies(flatbuffer_messages flatbuffer_messages_utils)
+  target_include_directories(flatbuffer_messages INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/flat)
+
+  ## Add dependencies to firmware
+  target_link_libraries(main_m4.elf PUBLIC flasher lockfree flatbuffers flatbuffer_messages)
+
+endif()
 
 set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
