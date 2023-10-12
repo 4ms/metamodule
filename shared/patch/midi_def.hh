@@ -39,7 +39,8 @@ enum {
 	MidiAftertouch7Jack,
 	MidiAftertouch8Jack,
 
-	MidiCC0 = 0x200, // MidiModWheelJack,
+	MidiCC0 = 0x200,
+	MidiCC1, // MidiModWheelJack,
 	//...
 	MidiCC127 = 0x27F,
 	MidiPitchWheelJack = 0x280,
@@ -58,7 +59,7 @@ enum {
 	LastMidiJack
 };
 
-enum { MidiModWheelJack = MidiCC0 };
+enum { MidiModWheelJack = MidiCC1 };
 
 static constexpr unsigned MidiMaxSimulGates = 8;
 static constexpr unsigned MidiPolyphony = 4;

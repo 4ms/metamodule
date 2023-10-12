@@ -23,11 +23,13 @@ struct Params {
 		std::array<Note, MidiPolyphony> notes{};
 
 		struct Event {
+			enum class Type : uint8_t { None, GateNote, CC, Bend } type = Type::None;
 			uint8_t chan = 0;
-			uint8_t val = 0;
-			enum Type : uint8_t { None, GateNote, CC } type = None;
+			// int16_t val = 0; //Fixed point S4.11
+			float val = 0;
 		};
-		std::array<Event, MidiMaxSimulGates> events;
+		Event event;
+		static constexpr auto sizeofEvent = sizeof(Event);
 	};
 
 	Midi midi;
@@ -49,8 +51,8 @@ struct Params {
 			knob = 0.f;
 		for (auto &note : midi.notes)
 			note = Midi::Note{};
-		for (auto &e : midi.events)
-			e = Midi::Event{};
+
+		midi.event = Midi::Event{};
 
 		jack_senses = 0;
 	}
@@ -66,8 +68,8 @@ struct Params {
 			knobs[i] = that.knobs[i];
 		for (auto [note, that_note] : zip(midi.notes, that.midi.notes))
 			note = that_note;
-		for (auto [event, that_event] : zip(midi.events, that.midi.events))
-			event = that_event;
+
+		midi.event = that.midi.event;
 
 		jack_senses = that.jack_senses;
 	}

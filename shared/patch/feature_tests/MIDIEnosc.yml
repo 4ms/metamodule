@@ -55,14 +55,18 @@ PatchData:
       ins:
         - module_id: 3
           jack_id: 7
-    - panel_jack_id: 554
+    - panel_jack_id: 522
       ins:
         - module_id: 1
           jack_id: 3
-    - panel_jack_id: 551
+    - panel_jack_id: 563
       ins:
         - module_id: 3
           jack_id: 3
+    - panel_jack_id: 513
+      ins:
+        - module_id: 1
+          jack_id: 2
   mapped_outs:
     - panel_jack_id: 0
       out:

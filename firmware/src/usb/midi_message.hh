@@ -95,6 +95,10 @@ struct MidiMessage {
 		return status == SysEx;
 	}
 
+	bool is_noteoff() const {
+		return is_command<MidiCommand::NoteOff>() || (is_command<MidiCommand::NoteOn>() && velocity() == 0);
+	}
+
 	uint32_t raw() const {
 		return (status << 16) | data;
 	}
@@ -123,6 +127,7 @@ struct MidiMessage {
 		return data.byte[1];
 	}
 
+	// -8192 .. 8191
 	int16_t bend() const {
 		return ((int16_t)data.byte[0] | ((int16_t)data.byte[1] << 7)) - 8192;
 	}

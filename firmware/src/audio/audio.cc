@@ -207,17 +207,19 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 					player.set_midi_note_aftertouch(i, note.aft);
 			}
 
-			for (auto &event : params_.midi.events) {
+			auto &event = params_.midi.event;
 
-				if (event.type == Params::Midi::Event::Type::GateNote)
-					player.set_midi_gate(event.chan, event.val);
+			if (event.type == Params::Midi::Event::Type::GateNote)
+				player.set_midi_gate(event.chan, event.val);
 
-				else if (event.type == Params::Midi::Event::Type::CC)
-					player.set_midi_cc(event.chan, event.val);
+			else if (event.type == Params::Midi::Event::Type::CC)
+				player.set_midi_cc(event.chan, event.val);
 
-				// clear the event
-				event.type = Params::Midi::Event::None;
-			}
+			else if (event.type == Params::Midi::Event::Type::Bend)
+				player.set_midi_cc(128, event.val);
+
+			// clear the event
+			event.type = Params::Midi::Event::Type::None;
 		}
 
 		// Run each module

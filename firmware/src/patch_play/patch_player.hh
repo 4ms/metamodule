@@ -204,11 +204,8 @@ public:
 	}
 
 	void set_midi_cc(unsigned ccnum, float val) {
-		if (ccnum < 129) {
-			Debug::Pin0::high();
+		if (ccnum < 129)
 			set_all_connected_jacks(midi_cc_conns[ccnum], val);
-			Debug::Pin0::low();
-		}
 	}
 
 	void set_midi_gate(unsigned note_num, float vel) {
