@@ -91,6 +91,22 @@ struct MidiMessage {
 		return status == cmd;
 	}
 
+	bool is_clock() const {
+		return is_system_realtime<MidiSystemRealTimeCommand::TimingClock>();
+	}
+
+	bool is_start() const {
+		return is_system_realtime<MidiSystemRealTimeCommand::Start>();
+	}
+
+	bool is_stop() const {
+		return is_system_realtime<MidiSystemRealTimeCommand::Stop>();
+	}
+
+	bool is_continue() const {
+		return is_system_realtime<MidiSystemRealTimeCommand::Continue>();
+	}
+
 	bool is_sysex() const {
 		return status == SysEx;
 	}

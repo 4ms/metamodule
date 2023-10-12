@@ -218,9 +218,17 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			else if (event.type == Params::Midi::Event::Type::Bend)
 				player.set_midi_cc(128, event.val);
 
+			else if (event.type == Params::Midi::Event::Type::Clock) {
+				if (event.chan <= 2) {
+					player.set_midi_clk(event.chan, 8.f);
+					midi_clk_ctr[event.chan] = 240;
+				}
+			}
 			// clear the event
 			event.type = Params::Midi::Event::Type::None;
 		}
+
+		update_midi_pulses();
 
 		// Run each module
 		player.update_patch();
@@ -228,6 +236,16 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		// Get outputs from modules
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
+	}
+}
+
+void AudioStream::update_midi_pulses() {
+	for (auto [i, clk] : enumerate(midi_clk_ctr)) {
+		if (clk) {
+			if (--clk == 0) {
+				player.set_midi_clk(i, 0);
+			}
+		}
 	}
 }
 

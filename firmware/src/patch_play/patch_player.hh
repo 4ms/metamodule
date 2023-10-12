@@ -48,6 +48,7 @@ public:
 	// std::vector<std::pair<unsigned /*ccnum*/, std::vector<Jack>>> midi_cc_conns;
 	std::array<std::vector<Jack>, 129> midi_cc_conns; // 128 CCs plus Pitch Wheel
 	std::array<std::vector<Jack>, 128> midi_gate_conns;
+	std::array<std::vector<Jack>, 2> midi_clk_conns; //Clk, and Div Clk
 
 	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
 	static constexpr size_t NumParams = PanelDef::NumKnobs; // + PanelDef::NumMidiParams;
@@ -208,9 +209,14 @@ public:
 			set_all_connected_jacks(midi_cc_conns[ccnum], val);
 	}
 
-	void set_midi_gate(unsigned note_num, float vel) {
+	void set_midi_gate(unsigned note_num, float val) {
 		if (note_num < 128)
-			set_all_connected_jacks(midi_gate_conns[note_num], vel);
+			set_all_connected_jacks(midi_gate_conns[note_num], val);
+	}
+
+	void set_midi_clk(unsigned clk_type, float val) {
+		if (clk_type <= 1)
+			set_all_connected_jacks(midi_clk_conns[clk_type], val);
 	}
 
 private:
@@ -426,6 +432,10 @@ public:
 					} else if (auto num = cable.midi_cc(); num.has_value()) {
 						update_or_add(midi_cc_conns[num.value()], input_jack);
 						pr_dbg("MIDI CC/PW %d", num.value());
+
+					} else if (auto num = cable.midi_clk(); num.has_value()) {
+						update_or_add(midi_clk_conns[num.value()], input_jack);
+						pr_dbg("MIDI Clk %s", num.value() == 1 ? "Divided" : "");
 
 					} else if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
 						update_or_add(in_conns[panel_jack_id], input_jack);

@@ -31,6 +31,7 @@ static_assert(note_to_volts(72) == 4);
 } // namespace Midi
 
 void process_midi(MidiMessage msg, Params::Midi::Note &midi_note, Params::Midi::Event &event) {
+
 	// Monophonic MIDI CV/Gate
 	if (msg.is_noteoff()) {
 		midi_note.gate = false;
@@ -66,6 +67,10 @@ void process_midi(MidiMessage msg, Params::Midi::Note &midi_note, Params::Midi::
 		event.type = Params::Midi::Event::Type::Bend;
 		event.chan = 0;
 		event.val = Midi::s14_to_semitones<2>(msg.bend());
+
+	} else if (msg.is_clock()) {
+		event.type = Params::Midi::Event::Type::Clock;
+		event.chan = 0;
 	}
 }
 

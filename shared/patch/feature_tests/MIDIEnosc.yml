@@ -9,6 +9,7 @@ PatchData:
     4: ENVVCA
     5: Atvert2
     6: Atvert2
+    7: ENVVCA
   int_cables:
     - out:
         module_id: 1
@@ -24,13 +25,20 @@ PatchData:
         - module_id: 4
           jack_id: 4
       color: 63488
+    - out:
+        module_id: 7
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 7
+      color: 0
   mapped_ins:
     - panel_jack_id: 256
       ins:
         - module_id: 1
           jack_id: 0
         - module_id: 3
-          jack_id: 0
+          jack_id: 5
     - panel_jack_id: 272
       ins:
         - module_id: 2
@@ -67,6 +75,16 @@ PatchData:
       ins:
         - module_id: 1
           jack_id: 2
+    - panel_jack_id: 640
+      ins:
+        - module_id: 3
+          jack_id: 0
+    - panel_jack_id: 897
+      ins:
+        - module_id: 7
+          jack_id: 1
+        - module_id: 6
+          jack_id: 1
   mapped_outs:
     - panel_jack_id: 0
       out:
@@ -96,6 +114,10 @@ PatchData:
       out:
         module_id: 6
         jack_id: 0
+    - panel_jack_id: 7
+      out:
+        module_id: 6
+        jack_id: 1
   static_knobs:
     - module_id: 1
       param_id: 0
@@ -132,7 +154,7 @@ PatchData:
       value: 0
     - module_id: 1
       param_id: 11
-      value: 0
+      value: 0.5
     - module_id: 1
       param_id: 12
       value: 0
@@ -246,7 +268,31 @@ PatchData:
       value: 1
     - module_id: 6
       param_id: 1
+      value: 1
+    - module_id: 7
+      param_id: 0
+      value: 0.218
+    - module_id: 7
+      param_id: 1
+      value: 0.108
+    - module_id: 7
+      param_id: 2
       value: 0.5
+    - module_id: 7
+      param_id: 3
+      value: 0.5
+    - module_id: 7
+      param_id: 4
+      value: 0.5
+    - module_id: 7
+      param_id: 5
+      value: 0
+    - module_id: 7
+      param_id: 6
+      value: 0
+    - module_id: 7
+      param_id: 7
+      value: 0
   mapped_knobs:
     - name: ''
       set:
