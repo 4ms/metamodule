@@ -40,15 +40,16 @@ private:
 	// in_conns[]: In1-In6, GateIn1, GateIn2
 	std::array<std::vector<Jack>, NumInConns> in_conns;
 
+	// MIDI
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_gate_conns;
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_vel_conns;
 	std::array<std::vector<Jack>, MidiPolyphony> midi_note_aft_conns;
-
 	//TODO: compare performance of vector vs sparse map:
 	// std::vector<std::pair<unsigned /*ccnum*/, std::vector<Jack>>> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
+	std::array<std::vector<MappedKnob>, NumMidiCCs> midi_knob_conns;
 
 	struct MidiPulse {
 		OneShot pulse;
@@ -61,9 +62,7 @@ private:
 	uint32_t midi_divclk_div_amt = 0;
 
 	// knob_conns[]: ABCDEFuvwxyz
-	static constexpr size_t NumParams = PanelDef::NumKnobs;
-	using KnobSet = std::array<std::vector<MappedKnob>, NumParams>;
-
+	using KnobSet = std::array<std::vector<MappedKnob>, PanelDef::NumKnobs>;
 	std::array<KnobSet, MaxKnobSets> knob_conns;
 
 	MulticorePlayer smp;
@@ -131,6 +130,11 @@ public:
 			}
 		}
 
+		for (auto const &mm : pd.midi_maps.set) {
+			pr_dbg("Midi Map: CC%d to m:%d p:%d\n", mm.panel_knob_id, mm.module_id, mm.param_id);
+			cache_midi_mapping(mm);
+		}
+
 		// Set static (non-mapped) knobs
 		for (auto &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
@@ -184,15 +188,19 @@ public:
 		pd.mapped_outs.clear();
 		pd.static_knobs.clear();
 		pd.module_slugs.clear();
+		pd.midi_maps.set.clear();
+		pd.midi_maps.name = "";
 
 		clear_cache();
 	}
 
 	// K-rate setters/getters:
 
-	void set_panel_param(int param_id, float val) {
-		for (auto const &k : knob_conns[active_knob_set][param_id]) {
-			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
+	void set_panel_param(unsigned param_id, float val) {
+		if (param_id < PanelDef::NumKnobs) {
+			for (auto const &k : knob_conns[active_knob_set][param_id]) {
+				modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
+			}
 		}
 	}
 
@@ -224,6 +232,11 @@ public:
 	void set_midi_cc(unsigned ccnum, float val) {
 		if (ccnum < midi_cc_conns.size())
 			set_all_connected_jacks(midi_cc_conns[ccnum], val);
+
+		if (ccnum < NumMidiCCs) {
+			for (auto &mm : midi_knob_conns[ccnum])
+				modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val / 10.f));
+		}
 	}
 
 	void set_midi_gate(unsigned note_num, float val) {
@@ -598,6 +611,11 @@ private:
 		if (k.panel_knob_id < PanelDef::NumKnobs) {
 			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
 		}
+	}
+
+	void cache_midi_mapping(const MappedKnob &k) {
+		if (k.panel_knob_id < NumMidiCCs)
+			update_or_add(midi_knob_conns[k.panel_knob_id], k);
 	}
 };
 } // namespace MetaModule
