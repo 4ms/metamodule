@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <span>
 
 #define MIDIDEBUG
 #if defined(MIDIDEBUG)
@@ -95,6 +96,10 @@ struct MidiMessage {
 		return status == SysEx;
 	}
 
+	bool has_sysex_end() const {
+		return status == EndExclusive || data.byte[0] == EndExclusive || data.byte[1] == EndExclusive;
+	}
+
 	bool is_noteoff() const {
 		return is_command<MidiCommand::NoteOff>() || (is_command<MidiCommand::NoteOn>() && velocity() == 0);
 	}
@@ -157,15 +162,31 @@ struct MidiMessage {
 			printf_("Bend: #%d\n", msg.bend());
 
 		} else if (msg.is_system_realtime<TimingClock>()) {
-			// printf_("Clk\n");
+			printf_("Clk\n");
+
+		} else if (msg.is_system_realtime<Start>()) {
+			printf_("Start\n");
+
+		} else if (msg.is_system_realtime<Stop>()) {
+			printf_("Stop\n");
+
+		} else if (msg.is_system_realtime<Continue>()) {
+			printf_("Continue\n");
 
 		} else if (msg.is_sysex()) {
 			printf_("SYSEX: 0x%02x%02x\n", msg.data.byte[0], msg.data.byte[1]);
 
-		} else if (msg.raw()) {
+		} else {
 			printf_("Raw: %06x\n", msg.raw());
 		}
 #endif
+	}
+
+	static void dump_raw(std::span<uint8_t> buffer) {
+		printf_("%d bytes ", buffer.size());
+		for (auto byte : buffer)
+			printf_("0x%02x ", byte);
+		printf_("\n");
 	}
 
 	void print() const {
