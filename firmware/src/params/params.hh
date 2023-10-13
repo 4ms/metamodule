@@ -19,6 +19,7 @@ struct Params {
 			float gate = 0;
 			float vel = 0;
 			float aft = 0; //aftertouch
+			bool retrig = false;
 		};
 		std::array<Note, MidiPolyphony> notes{};
 

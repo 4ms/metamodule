@@ -32,6 +32,9 @@ static_assert(note_to_volts(72) == 4);
 
 void process_midi(MidiMessage msg, Params::Midi::Note &midi_note, Params::Midi::Event &event) {
 
+	// Only allow retrig to be true on a NoteOn event
+	midi_note.retrig = false;
+
 	// Monophonic MIDI CV/Gate
 	if (msg.is_noteoff()) {
 		midi_note.gate = false;
@@ -42,17 +45,17 @@ void process_midi(MidiMessage msg, Params::Midi::Note &midi_note, Params::Midi::
 		event.val = 0;
 
 	} else if (msg.is_command<MidiCommand::NoteOn>()) {
-
 		midi_note.pitch = Midi::note_to_volts(msg.note());
 		midi_note.vel = Midi::u7_to_volts<10>(msg.velocity());
 		midi_note.gate = true;
+		midi_note.retrig = true;
 
 		event.type = Params::Midi::Event::Type::GateNote;
 		event.chan = msg.note();
 		event.val = Midi::u7_to_volts<10>(msg.velocity());
 
 	} else if (msg.is_command<MidiCommand::PolyKeyPressure>()) { //aka Aftertouch
-		if (((msg.note() - 24) / 12.f) == midi_note.pitch)
+		if (midi_note.pitch == Midi::note_to_volts(msg.note()))
 			midi_note.aft = Midi::u7_to_volts<10>(msg.aftertouch());
 
 	} else if (msg.is_command<MidiCommand::ChannelPressure>()) {

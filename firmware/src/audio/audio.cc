@@ -205,6 +205,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 				if (note_state.aft.store_changed(note.aft))
 					player.set_midi_note_aftertouch(i, note.aft);
+
+				if (note.retrig)
+					player.set_midi_note_retrig(i, 10.f);
 			}
 
 			auto &event = params_.midi.event;

@@ -39,6 +39,15 @@ enum {
 	MidiAftertouch7Jack,
 	MidiAftertouch8Jack,
 
+	MidiMonoRetrigJack = 0x140,
+	MidiRetrig2Jack,
+	MidiRetrig3Jack,
+	MidiRetrig4Jack,
+	MidiRetrig5Jack,
+	MidiRetrig6Jack,
+	MidiRetrig7Jack,
+	MidiRetrig8Jack,
+
 	MidiCC0 = 0x200,
 	MidiCC1, // MidiModWheelJack,
 	//...
@@ -62,7 +71,6 @@ enum {
 	MidiStartJack = 0x500,
 	MidiStopJack,
 	MidiContinueJack,
-	MidiRetriggerJack,
 
 	LastMidiJack
 };

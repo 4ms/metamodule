@@ -55,6 +55,7 @@ private:
 		std::vector<Jack> conns;
 	};
 	std::array<MidiPulse, 5> midi_pulses;
+	std::array<MidiPulse, MidiPolyphony> midi_note_retrig;
 
 	uint32_t midi_divclk_ctr = 0;
 	uint32_t midi_divclk_div_amt = 0;
@@ -199,20 +200,25 @@ public:
 		set_all_connected_jacks(in_conns[jack_id], val);
 	}
 
-	void set_midi_note_pitch(int midi_poly_note, float val) {
+	void set_midi_note_pitch(unsigned midi_poly_note, float val) {
 		set_all_connected_jacks(midi_note_pitch_conns[midi_poly_note], val);
 	}
 
-	void set_midi_note_gate(int midi_poly_note, float val) {
+	void set_midi_note_gate(unsigned midi_poly_note, float val) {
 		set_all_connected_jacks(midi_note_gate_conns[midi_poly_note], val);
 	}
 
-	void set_midi_note_velocity(int midi_poly_note, float val) {
+	void set_midi_note_velocity(unsigned midi_poly_note, float val) {
 		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], val);
 	}
 
-	void set_midi_note_aftertouch(int midi_poly_note, float val) {
+	void set_midi_note_aftertouch(unsigned midi_poly_note, float val) {
 		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], val);
+	}
+
+	void set_midi_note_retrig(unsigned midi_poly_note, float val) {
+		set_all_connected_jacks(midi_note_retrig[midi_poly_note].conns, val);
+		midi_note_retrig[midi_poly_note].pulse.start(0.01);
 	}
 
 	void set_midi_cc(unsigned ccnum, float val) {
@@ -231,6 +237,10 @@ public:
 
 		set_all_connected_jacks(midi_pulses[event].conns, val);
 		midi_pulses[event].pulse.start(0.01);
+
+		if (event == TimingEvents::Start) {
+			midi_divclk_ctr = 0;
+		}
 
 		if (event == TimingEvents::Clock) {
 			midi_divclk_ctr++;
@@ -252,6 +262,11 @@ private:
 		for (auto &mp : midi_pulses) {
 			if (!mp.pulse.update())
 				set_all_connected_jacks(mp.conns, 0);
+		}
+
+		for (auto &ret : midi_note_retrig) {
+			if (!ret.pulse.update())
+				set_all_connected_jacks(ret.conns, 0);
 		}
 	}
 
@@ -424,6 +439,8 @@ private:
 			conn.clear();
 		for (auto &conn : midi_note_aft_conns)
 			conn.clear();
+		for (auto &ret : midi_note_retrig)
+			ret.conns.clear();
 		for (auto &conn : midi_cc_conns)
 			conn.clear();
 		for (auto &conn : midi_gate_conns)
@@ -477,6 +494,10 @@ public:
 					} else if (auto num = cable.midi_note_aft(); num.has_value()) {
 						update_or_add(midi_note_aft_conns[num.value()], input_jack);
 						pr_dbg("MIDI aftertouch");
+
+					} else if (auto num = cable.midi_note_retrig(); num.has_value()) {
+						update_or_add(midi_note_retrig[num.value()].conns, input_jack);
+						pr_dbg("MIDI retrig");
 
 					} else if (auto num = cable.midi_gate(); num.has_value()) {
 						update_or_add(midi_gate_conns[num.value()], input_jack);

@@ -26,18 +26,6 @@ PatchData:
           jack_id: 4
       color: 63488
   mapped_ins:
-    - panel_jack_id: 256
-      ins:
-        - module_id: 1
-          jack_id: 0
-        - module_id: 3
-          jack_id: 5
-    - panel_jack_id: 272
-      ins:
-        - module_id: 2
-          jack_id: 1
-        - module_id: 4
-          jack_id: 3
     - panel_jack_id: 288
       ins:
         - module_id: 1
@@ -66,25 +54,43 @@ PatchData:
       ins:
         - module_id: 1
           jack_id: 2
+    - panel_jack_id: 256
+      ins:
+        - module_id: 3
+          jack_id: 5
+        - module_id: 1
+          jack_id: 0
     - panel_jack_id: 640
       ins:
         - module_id: 3
-          jack_id: 0
-    - panel_jack_id: 1048
-      ins:
-        - module_id: 6
           jack_id: 0
     - panel_jack_id: 1280
       ins:
         - module_id: 7
           jack_id: 0
+    - panel_jack_id: 1024
+      ins:
+        - module_id: 6
+          jack_id: 1
     - panel_jack_id: 1281
       ins:
         - module_id: 7
           jack_id: 1
-    - panel_jack_id: 1024
+    - panel_jack_id: 1048
       ins:
         - module_id: 6
+          jack_id: 0
+    - panel_jack_id: 1282
+      ins:
+        - module_id: 3
+          jack_id: 9
+    - panel_jack_id: 272
+      ins:
+        - module_id: 4
+          jack_id: 3
+    - panel_jack_id: 1283
+      ins:
+        - module_id: 2
           jack_id: 1
   mapped_outs:
     - panel_jack_id: 0

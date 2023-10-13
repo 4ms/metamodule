@@ -92,6 +92,10 @@ struct MappedInputJack {
 		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoAftertouchJack, MidiAftertouch8Jack);
 	}
 
+	std::optional<uint32_t> midi_note_retrig() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoRetrigJack, MidiRetrig8Jack);
+	}
+
 	std::optional<uint32_t> midi_gate() const {
 		return MathTools::between<uint32_t>(panel_jack_id, MidiGateNote0, MidiGateNote127);
 	}
