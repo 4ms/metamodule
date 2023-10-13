@@ -67,6 +67,11 @@ enum {
 	LastMidiJack
 };
 
+namespace TimingEvents
+{
+enum : uint8_t { Clock = 0, DivClock = 1, Start = 2, Stop = 3, Cont = 4 };
+}
+
 enum { MidiModWheelJack = MidiCC1 };
 
 static constexpr unsigned MidiMaxSimulGates = 8;

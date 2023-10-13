@@ -218,17 +218,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			else if (event.type == Params::Midi::Event::Type::Bend)
 				player.set_midi_cc(128, event.val);
 
-			else if (event.type == Params::Midi::Event::Type::Clock)
-				player.send_midi_time_event(PatchPlayer::Clock, 10.f);
-
-			else if (event.type == Params::Midi::Event::Type::Start)
-				player.send_midi_time_event(PatchPlayer::Start, 10.f);
-
-			else if (event.type == Params::Midi::Event::Type::Stop)
-				player.send_midi_time_event(PatchPlayer::Stop, 10.f);
-
-			else if (event.type == Params::Midi::Event::Type::Continue)
-				player.send_midi_time_event(PatchPlayer::Cont, 10.f);
+			else if (event.type == Params::Midi::Event::Type::Time)
+				player.send_midi_time_event(event.chan, 10.f);
 
 			// clear the event
 			event.type = Params::Midi::Event::Type::None;

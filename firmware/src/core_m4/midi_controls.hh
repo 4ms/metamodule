@@ -68,21 +68,13 @@ void process_midi(MidiMessage msg, Params::Midi::Note &midi_note, Params::Midi::
 		event.chan = 0;
 		event.val = Midi::s14_to_semitones<2>(msg.bend());
 
-	} else if (msg.is_system_realtime<MidiSystemRealTimeCommand::TimingClock>()) {
-		event.type = Params::Midi::Event::Type::Clock;
-		event.chan = 0;
-
-	} else if (msg.is_system_realtime<MidiSystemRealTimeCommand::Start>()) {
-		event.type = Params::Midi::Event::Type::Start;
-		event.chan = 0;
-
-	} else if (msg.is_system_realtime<MidiSystemRealTimeCommand::Stop>()) {
-		event.type = Params::Midi::Event::Type::Stop;
-		event.chan = 0;
-
-	} else if (msg.is_system_realtime<MidiSystemRealTimeCommand::Continue>()) {
-		event.type = Params::Midi::Event::Type::Continue;
-		event.chan = 0;
+	} else if (msg.is_timing_transport()) {
+		event.type = Params::Midi::Event::Type::Time;
+		event.chan = msg.status == MidiSystemRealTimeCommand::TimingClock ? TimingEvents::Clock :
+					 msg.status == MidiSystemRealTimeCommand::Start		  ? TimingEvents::Start :
+					 msg.status == MidiSystemRealTimeCommand::Stop		  ? TimingEvents::Stop :
+					 msg.status == MidiSystemRealTimeCommand::Continue	  ? TimingEvents::Cont :
+																			0xFF; //unsupported
 	}
 }
 

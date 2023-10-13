@@ -92,6 +92,10 @@ struct MidiMessage {
 		return status == cmd;
 	}
 
+	bool is_timing_transport() const {
+		return status == TimingClock || status == Start || status == Stop || status == Continue;
+	}
+
 	bool is_sysex() const {
 		return status == SysEx;
 	}

@@ -27,7 +27,6 @@ public:
 	//TODO: why not use a vector here?
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 	std::atomic<bool> is_loaded = false;
-	enum { Clock, DivClock, Start, Stop, Cont };
 
 private:
 	enum {
@@ -226,19 +225,19 @@ public:
 			set_all_connected_jacks(midi_gate_conns[note_num], val);
 	}
 
-	void send_midi_time_event(unsigned event, float val) {
-		if (event == DivClock || event >= Cont)
+	void send_midi_time_event(uint8_t event, float val) {
+		if (event > TimingEvents::Cont || event == TimingEvents::DivClock)
 			return;
 
 		set_all_connected_jacks(midi_pulses[event].conns, val);
 		midi_pulses[event].pulse.start(0.01);
 
-		if (event == Clock) {
+		if (event == TimingEvents::Clock) {
 			midi_divclk_ctr++;
 			if (midi_divclk_ctr >= midi_divclk_div_amt) {
-				set_all_connected_jacks(midi_pulses[DivClock].conns, val);
+				set_all_connected_jacks(midi_pulses[TimingEvents::DivClock].conns, val);
 				midi_divclk_ctr = 0;
-				midi_pulses[DivClock].pulse.start(0.01);
+				midi_pulses[TimingEvents::DivClock].pulse.start(0.01);
 			}
 		}
 	}
@@ -488,16 +487,16 @@ public:
 						pr_dbg("MIDI CC/PW %d", num.value());
 
 					} else if (auto num = cable.midi_clk(); num.has_value()) {
-						update_or_add(midi_pulses[Clock].conns, input_jack);
+						update_or_add(midi_pulses[TimingEvents::Clock].conns, input_jack);
 						pr_dbg("MIDI Clk");
 
 					} else if (auto num = cable.midi_divclk(); num.has_value()) {
-						update_or_add(midi_pulses[DivClock].conns, input_jack);
+						update_or_add(midi_pulses[TimingEvents::DivClock].conns, input_jack);
 						midi_divclk_div_amt = num.value() + 1;
 						pr_dbg("MIDI Div %d Clk", num.value() + 1);
 
 					} else if (auto num = cable.midi_transport(); num.has_value()) {
-						update_or_add(midi_pulses[num.value() + Start].conns, input_jack);
+						update_or_add(midi_pulses[num.value() + TimingEvents::Start].conns, input_jack);
 						pr_dbg("MIDI %s", num.value() == 0 ? "Start" : num.value() == 1 ? "Stop" : "Cont");
 
 					} else if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
