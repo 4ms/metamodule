@@ -1,22 +1,24 @@
 /* Author: Lennart@binarylabs.dev */
 
-#include "Deframer.h"
-
 namespace Framing
 {
 
-Deframer::Deframer(const Configuration_t& config, const FUNC func_) : func(func_), Configuration(config)
+template <typename IMPL>
+Deframer<IMPL>::Deframer(const Configuration_t& config, IMPL* impl_) : Configuration(config), impl(impl_)
 {
 	state = WAIT_HEADER;
 }
 
-void Deframer::reset()
+template <typename IMPL>
+void Deframer<IMPL>::reset()
 {
-	doReset();
+	impl->doReset();
 	state = WAIT_HEADER;
 }
 
-void Deframer::parse(uint8_t thisByte)
+template <typename IMPL>
+template <typename FUNC>
+void Deframer<IMPL>::parse(uint8_t thisByte, const FUNC&& func)
 {
 	if (state == WAIT_HEADER)
 	{
@@ -29,13 +31,13 @@ void Deframer::parse(uint8_t thisByte)
 	{
 		if (thisByte == Configuration.start)
 		{
-			doReset();
+			impl->doReset(func);
 			state = WAIT_HEADER;
 		}
 		else if (thisByte == Configuration.end)
 		{
-			doComplete();
-			doReset();
+			impl->doComplete(func);
+			impl->doReset(func);
 			state = WAIT_HEADER;
 		}
 		else if (thisByte == Configuration.escape)
@@ -44,12 +46,12 @@ void Deframer::parse(uint8_t thisByte)
 		}
 		else
 		{
-			doAdd(thisByte);
+			impl->doAdd(thisByte, func);
 		}
 	}
 	else if (state == ESCAPE)
 	{
-		doAdd(thisByte);
+		impl->doAdd(thisByte, func);
 		state = IN_MESSAGE;
 	}
 }
