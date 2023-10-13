@@ -131,14 +131,25 @@ void Controls::start() {
 	}
 
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
-		if (rxbuffer.size() < 4)
-			return;
-		// Debug::Pin0::high();
-		auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
-		_midi_rx_buf.put(msg);
-		msg.print();
-		// Debug::Pin0::low();
+		bool ignore = false;
 
+		while (rxbuffer.size() >= 4) {
+			auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
+
+			//Starting ignoring from SysEx Start (F0)...
+			if (msg.is_sysex())
+				ignore = true;
+
+			//...until SysEx End (F7) received
+			if (ignore && msg.has_sysex_end())
+				ignore = false;
+
+			if (!ignore)
+				_midi_rx_buf.put(msg);
+
+			rxbuffer = rxbuffer.subspan(4);
+			// msg.print();
+		}
 		_midi_host.receive();
 	});
 }
@@ -177,12 +188,10 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 
 	// mp1 m4: every ~20us + 60us gap every 64 pulses (1.3ms), width= 2.8us ... ~14% load
 	read_controls_task.init(control_read_tim_conf, [this]() {
-		// Debug::Pin3::high();
 		if (_buffer_full)
 			return;
 		update_debouncers();
 		update_params();
-		// Debug::Pin3::low();
 	});
 
 	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {

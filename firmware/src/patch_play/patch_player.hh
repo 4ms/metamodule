@@ -23,16 +23,17 @@ namespace MetaModule
 {
 
 class PatchPlayer {
+public:
+	//TODO: why not use a vector here?
+	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
+	std::atomic<bool> is_loaded = false;
+	enum { Clock, DivClock, Start, Stop, Cont };
 
+private:
 	enum {
 		NumInConns = PanelDef::NumUserFacingInJacks,
 		NumOutConns = PanelDef::NumUserFacingOutJacks,
 	};
-	static constexpr size_t MidiPolyphony = 4;
-
-public:
-	//TODO: why not use a vector here?
-	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
 	// out_conns[]: Out1-Out8
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}};
@@ -50,7 +51,6 @@ public:
 	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
 
-	enum { Clock, DivClock, Start, Stop, Cont };
 	struct MidiPulse {
 		OneShot pulse;
 		std::vector<Jack> conns;
@@ -60,13 +60,11 @@ public:
 	uint32_t midi_divclk_ctr = 0;
 	uint32_t midi_divclk_div_amt = 0;
 
-	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
-	static constexpr size_t NumParams = PanelDef::NumKnobs; // + PanelDef::NumMidiParams;
+	// knob_conns[]: ABCDEFuvwxyz
+	static constexpr size_t NumParams = PanelDef::NumKnobs;
 	using KnobSet = std::array<std::vector<MappedKnob>, NumParams>;
 
 	std::array<KnobSet, MaxKnobSets> knob_conns;
-
-	std::atomic<bool> is_loaded = false;
 
 	MulticorePlayer smp;
 
@@ -285,8 +283,8 @@ public:
 	void set_samplerate(float hz) {
 		samplerate = hz;
 
-		for (auto &pulse : midi_pulse)
-			pulse.set_update_rate_hz(samplerate);
+		for (auto &mp : midi_pulses)
+			mp.pulse.set_update_rate_hz(samplerate);
 
 		for (auto &module : modules)
 			module->set_samplerate(samplerate);
@@ -418,6 +416,21 @@ private:
 		for (auto &knob_set : knob_conns)
 			for (auto &mappings : knob_set)
 				mappings.clear();
+
+		for (auto &conn : midi_note_pitch_conns)
+			conn.clear();
+		for (auto &conn : midi_note_gate_conns)
+			conn.clear();
+		for (auto &conn : midi_note_vel_conns)
+			conn.clear();
+		for (auto &conn : midi_note_aft_conns)
+			conn.clear();
+		for (auto &conn : midi_cc_conns)
+			conn.clear();
+		for (auto &conn : midi_gate_conns)
+			conn.clear();
+		for (auto &mp : midi_pulses)
+			mp.conns.clear();
 	}
 
 	// Returns the index in int_cables[] for a cable that has the given Jack as an input
@@ -432,6 +445,7 @@ private:
 		return -1;
 	}
 
+public:
 	// Map all the panel jack connections into in_conns[] and out_conns[]
 	// which are indexed by panel_jack_id.
 	// This speeds up propagating I/O from user to virtual modules
@@ -474,13 +488,17 @@ private:
 						pr_dbg("MIDI CC/PW %d", num.value());
 
 					} else if (auto num = cable.midi_clk(); num.has_value()) {
-						update_or_add(midi_clk_conns, input_jack);
+						update_or_add(midi_pulses[Clock].conns, input_jack);
 						pr_dbg("MIDI Clk");
 
 					} else if (auto num = cable.midi_divclk(); num.has_value()) {
-						update_or_add(midi_divclk_conns, input_jack);
+						update_or_add(midi_pulses[DivClock].conns, input_jack);
 						midi_divclk_div_amt = num.value() + 1;
 						pr_dbg("MIDI Div %d Clk", num.value() + 1);
+
+					} else if (auto num = cable.midi_transport(); num.has_value()) {
+						update_or_add(midi_pulses[num.value() + Start].conns, input_jack);
+						pr_dbg("MIDI %s", num.value() == 0 ? "Start" : num.value() == 1 ? "Stop" : "Cont");
 
 					} else if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
 						update_or_add(in_conns[panel_jack_id], input_jack);
@@ -505,27 +523,6 @@ private:
 			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingOutJacks)
 				break;
 			out_conns[panel_jack_id] = cable.out;
-		}
-	}
-
-	template<typename T>
-	void update_or_add(std::vector<T> &v, const T &d) {
-		for (auto &el : v) {
-			if (el == d) { //if (T::operator==(el, d)) {
-				el = d;
-				return;
-			}
-		}
-		v.push_back(d);
-	}
-
-	// Cache a panel knob mapping into knob_conns[]
-	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
-		if (knob_set >= knob_conns.size())
-			return;
-
-		if (k.panel_knob_id < PanelDef::NumKnobs) {
-			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
 		}
 	}
 
@@ -554,12 +551,33 @@ private:
 		}
 	}
 
-public:
 	// Return the mulitple-module-same-type index of the given module index
 	// 0 ==> this is the only module of its type
 	// >0 ==> a number to append to the module name, e.g. 1 ==> LFO#1, 2 ==> LFO#2, etc
 	uint8_t get_multiple_module_index(uint8_t idx) {
 		return dup_module_index[idx];
+	}
+
+private:
+	template<typename T>
+	void update_or_add(std::vector<T> &v, const T &d) {
+		for (auto &el : v) {
+			if (el == d) { //if (T::operator==(el, d)) {
+				el = d;
+				return;
+			}
+		}
+		v.push_back(d);
+	}
+
+	// Cache a panel knob mapping into knob_conns[]
+	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
+		if (knob_set >= knob_conns.size())
+			return;
+
+		if (k.panel_knob_id < PanelDef::NumKnobs) {
+			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
+		}
 	}
 };
 } // namespace MetaModule
