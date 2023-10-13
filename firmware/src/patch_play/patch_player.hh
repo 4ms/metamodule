@@ -11,6 +11,7 @@
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
+#include "util/oscs.hh"
 #include <array>
 #include <atomic>
 #include <cstdint>
@@ -48,11 +49,14 @@ public:
 	// std::vector<std::pair<unsigned /*ccnum*/, std::vector<Jack>>> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
-	std::vector<Jack> midi_clk_conns;
-	std::vector<Jack> midi_divclk_conns;
 
-	uint32_t midi_clk_pulse_ctr = 0;
-	uint32_t midi_divclk_pulse_ctr = 0;
+	enum { Clock, DivClock, Start, Stop, Cont };
+	struct MidiPulse {
+		OneShot pulse;
+		std::vector<Jack> conns;
+	};
+	std::array<MidiPulse, 5> midi_pulses;
+
 	uint32_t midi_divclk_ctr = 0;
 	uint32_t midi_divclk_div_amt = 0;
 
@@ -65,6 +69,8 @@ public:
 	std::atomic<bool> is_loaded = false;
 
 	MulticorePlayer smp;
+
+	float samplerate = 48000.f;
 
 private:
 	// Index of each module that appears more than once.
@@ -115,7 +121,7 @@ public:
 
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
-			modules[i]->set_samplerate(48000.f); //Fixed SR for now
+			modules[i]->set_samplerate(samplerate);
 		}
 
 		mark_patched_jacks();
@@ -222,15 +228,20 @@ public:
 			set_all_connected_jacks(midi_gate_conns[note_num], val);
 	}
 
-	void set_midi_clk(float val) {
-		set_all_connected_jacks(midi_clk_conns, val);
-		midi_clk_pulse_ctr = 240; //TODO: base this on samplerate
+	void send_midi_time_event(unsigned event, float val) {
+		if (event == DivClock || event >= Cont)
+			return;
 
-		midi_divclk_ctr++;
-		if (midi_divclk_ctr >= midi_divclk_div_amt) {
-			set_all_connected_jacks(midi_divclk_conns, val);
-			midi_divclk_ctr = 0;
-			midi_divclk_pulse_ctr = 240; //TODO: base this on samplerate
+		set_all_connected_jacks(midi_pulses[event].conns, val);
+		midi_pulses[event].pulse.start(0.01);
+
+		if (event == Clock) {
+			midi_divclk_ctr++;
+			if (midi_divclk_ctr >= midi_divclk_div_amt) {
+				set_all_connected_jacks(midi_pulses[DivClock].conns, val);
+				midi_divclk_ctr = 0;
+				midi_pulses[DivClock].pulse.start(0.01);
+			}
 		}
 	}
 
@@ -241,15 +252,9 @@ private:
 	}
 
 	void update_midi_pulses() {
-		if (midi_clk_pulse_ctr) {
-			if (--midi_clk_pulse_ctr == 0) {
-				set_all_connected_jacks(midi_clk_conns, 0);
-			}
-		}
-		if (midi_divclk_pulse_ctr) {
-			if (--midi_divclk_pulse_ctr == 0) {
-				set_all_connected_jacks(midi_divclk_conns, 0);
-			}
+		for (auto &mp : midi_pulses) {
+			if (!mp.pulse.update())
+				set_all_connected_jacks(mp.conns, 0);
 		}
 	}
 
@@ -277,6 +282,16 @@ public:
 		active_knob_set = std::min(num, MaxKnobSets - 1);
 	}
 
+	void set_samplerate(float hz) {
+		samplerate = hz;
+
+		for (auto &pulse : midi_pulse)
+			pulse.set_update_rate_hz(samplerate);
+
+		for (auto &module : modules)
+			module->set_samplerate(samplerate);
+	}
+
 	// General info getters:
 
 	const ModuleTypeSlug &get_patch_name() {
@@ -296,10 +311,6 @@ public:
 			return 0;
 		return pd.int_cables[int_cable_idx].ins.size();
 	}
-
-	// int get_num_mapped_knobs() {
-	// 	return is_loaded ? pd.mapped_knobs.size() : 0;
-	// }
 
 	const ModuleTypeSlug &get_module_name(unsigned idx) {
 		return (is_loaded && idx < pd.module_slugs.size()) ? pd.module_slugs[idx] : no_patch_loaded;
@@ -392,6 +403,7 @@ public:
 		}
 	}
 
+private:
 	// Cache functions:
 	void clear_cache() {
 		for (auto &d : dup_module_index)

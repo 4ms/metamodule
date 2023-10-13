@@ -76,7 +76,8 @@ void Controls::update_params() {
 		process_midi(msg, midi_note, cur_params->midi.event);
 	}
 
-	if (!_midi_host.is_connected()) {
+	else if (!_midi_host.is_connected())
+	{
 		//if rx buffer is empty AND we've disconnected, turn off the midi gate
 		//so we don't end up with stuck notes
 		midi_note.pitch = 0.f;

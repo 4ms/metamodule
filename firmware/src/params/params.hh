@@ -23,7 +23,7 @@ struct Params {
 		std::array<Note, MidiPolyphony> notes{};
 
 		struct Event {
-			enum class Type : uint8_t { None, GateNote, CC, Bend, Clock } type = Type::None;
+			enum class Type : uint8_t { None, GateNote, CC, Bend, Clock, Start, Stop, Continue } type = Type::None;
 			uint8_t chan = 0;
 			// int16_t val = 0; //Fixed point S4.11
 			float val = 0;
