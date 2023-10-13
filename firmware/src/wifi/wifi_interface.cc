@@ -7,6 +7,7 @@
 #include "comm/BufferedUSART2.h"
 #include "comm/framing/Configuration.h"
 #include "comm/framing/StaticDeframer.h"
+#include "comm/framing/Framer.h"
 using namespace Framing;
 
 #include <stm32mp1xx_hal.h>
@@ -15,6 +16,10 @@ using namespace Framing;
 
 #include <console/pr_dbg.hh>
 
+
+namespace MetaModule
+{
+
 Configuration_t FrameConfig
 {
     .start=0x01,
@@ -22,16 +27,9 @@ Configuration_t FrameConfig
     .escape=0x03
 };
 
-StaticDeframer<100> deframer(FrameConfig, [](auto frame)
-{
-    auto message = GetMessage(frame.data());
+StaticDeframer<100> deframer(FrameConfig);
+Framer framer(FrameConfig);
 
-    printf_("Val: %u\n", message->state());
-
-});
-
-namespace MetaModule
-{
 
 void WifiInterface::init()
 {
@@ -42,15 +40,54 @@ void WifiInterface::init()
     BufferedUSART2::init();
 }
 
-
-void WifiInterface::handle_messages()
+void WifiInterface::send_frame(std::span<uint8_t> payload)
 {
-    auto val = BufferedUSART2::receive();
-    if (val)
-    {
-        deframer.parse(*val);
-    }
-
+    framer.send(payload, BufferedUSART2::transmit);
 }
+
+void WifiInterface::run()
+{
+    if (auto val = BufferedUSART2::receive(); val)
+    {
+        deframer.parse(*val, handle_received_frame);
+    }
+}
+
+void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
+{
+    auto message = GetMessage(frame.data());
+
+    if (auto content = message->content(); content)
+    {
+        if (auto presenceDetection = message->content_as_PresenceDetection(); presenceDetection)
+        {
+            if (presenceDetection->phase() == Phase::Phase_REQUEST)
+            {
+                printf_("Request\n");
+            }
+            else
+            {
+                printf_("Answer\n");
+            }
+        }
+        else if (auto switchMessage = message->content_as_Switch(); switchMessage)
+        {
+            printf_("State: %u\n", switchMessage->state());
+
+            // Just echo back raw
+            send_frame(frame);
+        }
+        else
+        {
+            printf_("Other option\n");
+        }
+    }
+    else
+    {
+        printf_("Invalid message\n");
+    }
+}
+
+
 
 } // namespace MetaModule
