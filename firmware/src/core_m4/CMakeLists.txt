@@ -193,11 +193,9 @@ if (ENABLE_WIFI_BRIDGE)
     ${WIFI_DIR}/comm/BufferedUSART2.h
     ${WIFI_DIR}/comm/BufferedUSART2.cpp
     ${WIFI_DIR}/comm/framing/Configuration.h
-    ${WIFI_DIR}/comm/framing/Deframer.cpp
+    ${WIFI_DIR}/comm/framing/Deframer.hpp
     ${WIFI_DIR}/comm/framing/Deframer.h
-    ${WIFI_DIR}/comm/framing/DynamicDeframer.cpp
     ${WIFI_DIR}/comm/framing/DynamicDeframer.h
-    ${WIFI_DIR}/comm/framing/Framer.cpp
     ${WIFI_DIR}/comm/framing/Framer.h
     ${WIFI_DIR}/comm/framing/StaticDeframer.h
   )
