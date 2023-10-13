@@ -55,6 +55,8 @@ void WifiInterface::run()
 
 void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
 {
+    printf("Frame\n");
+
     auto message = GetMessage(frame.data());
 
     if (auto content = message->content(); content)
@@ -63,11 +65,17 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
         {
             if (presenceDetection->phase() == Phase::Phase_REQUEST)
             {
-                printf_("Request\n");
+                // Answer presence detection
+                flatbuffers::FlatBufferBuilder fbb;
+                auto answer = fbb.CreateStruct(PresenceDetection(Phase::Phase_ANSWER));
+                auto message = CreateMessage(fbb, AnyMessage_PresenceDetection, answer.Union());
+                fbb.Finish(message);
+
+                send_frame(fbb.GetBufferSpan());
             }
             else
             {
-                printf_("Answer\n");
+                printf_("Unexpected detection\n");
             }
         }
         else if (auto switchMessage = message->content_as_Switch(); switchMessage)
@@ -76,6 +84,19 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
 
             // Just echo back raw
             send_frame(frame);
+        }
+        else if (auto patchNameMessage = message->content_as_PatchNames(); patchNameMessage)
+        {
+                // Answer presence detection
+                flatbuffers::FlatBufferBuilder fbb;
+                auto str1 = fbb.CreateString("First Name");
+                auto str2 = fbb.CreateString("Second Name");
+                auto names = fbb.CreateVector({str1, str2});
+                auto patchNames = CreatePatchNames(fbb, false, names);
+                auto message = CreateMessage(fbb, AnyMessage_PatchNames, patchNames.Union());
+                fbb.Finish(message);
+
+                send_frame(fbb.GetBufferSpan());
         }
         else
         {
