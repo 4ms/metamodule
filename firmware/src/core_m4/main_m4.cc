@@ -102,7 +102,7 @@ void main() {
 		patch_storage.handle_messages();
 
 		#ifdef ENABLE_WIFI_BRIDGE
-		WifiInterface::handle_messages();
+		WifiInterface::run();
 		#endif
 		
 		__NOP();
