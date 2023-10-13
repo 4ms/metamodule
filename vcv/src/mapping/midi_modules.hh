@@ -1,5 +1,4 @@
 #pragma once
-#include "mapping/JackMap.hh"
 #include <rack.hpp>
 
 namespace MetaModule::MIDI
@@ -27,7 +26,16 @@ struct MidiCCCVSettings {
 	bool lsb_mode = false;
 };
 
-struct MidiCCKnobSettings {};
+struct CCKnobMap {
+	int8_t CCnum;
+	uint16_t param_id;
+	int64_t module_id;
+};
+
+struct MidiCCKnobSettings {
+	std::array<CCKnobMap, 16> ccs{};
+	bool smooth = false;
+};
 
 struct Settings {
 	MidiCVSettings CV;

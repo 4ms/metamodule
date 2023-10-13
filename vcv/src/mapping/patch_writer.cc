@@ -31,6 +31,25 @@ void PatchFileWriter::setPatchDesc(std::string patchDesc) {
 void PatchFileWriter::setMidiSettings(MidiModuleIds &ids, MetaModule::MIDI::Settings const &settings) {
 	midiModuleIds = ids;
 	midiSettings = settings;
+
+	// Handle MIDI CC->Knob maps
+
+	for (auto cc : midiSettings.CCKnob.ccs) {
+		if (cc.CCnum > 0) {
+			pd.midi_maps.set.emplace_back(MappedKnob{
+				.panel_knob_id = (uint16_t)cc.CCnum,
+				.module_id = idMap[cc.module_id],
+				.param_id = cc.param_id,
+				.curve_type = 0,
+				.min = 0,
+				.max = 1.f,
+				.alias_name = "",
+			});
+			printf("Added midi cc map: %d -> %d %d\n", cc.CCnum, idMap[cc.module_id], cc.param_id);
+		}
+	}
+	if (pd.midi_maps.set.size())
+		pd.midi_maps.name = "MIDI";
 }
 
 void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
@@ -257,6 +276,7 @@ void PatchFileWriter::mapOutputJack(const CableMap &map) {
 }
 
 void PatchFileWriter::mapMidiCVJack(CableMap &cable) {
+	//TODO handle polyphony (midiSettings.CV.channels > 1)
 	// if (midiSettings.CV.channels == 1) {
 	if (cable.sendingJackId == 0)
 		cable.sendingJackId = MidiMonoNoteJack;
@@ -269,17 +289,16 @@ void PatchFileWriter::mapMidiCVJack(CableMap &cable) {
 
 	else if (cable.sendingJackId == 3)
 		cable.sendingJackId = MidiMonoAftertouchJack;
+
+	else if (cable.sendingJackId == 6)
+		cable.sendingJackId = MidiMonoRetrigJack;
 	// }
-	//TODO handle polyphony (midiSettings.CV.channels > 1)
 
 	else if (cable.sendingJackId == 4)
 		cable.sendingJackId = MidiPitchWheelJack;
 
 	else if (cable.sendingJackId == 5)
 		cable.sendingJackId = MidiModWheelJack;
-
-	else if (cable.sendingJackId == 6)
-		cable.sendingJackId = MidiRetriggerJack;
 
 	else if (cable.sendingJackId == 7)
 		cable.sendingJackId = MidiClockJack;
