@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/module_type_slug.hh"
 #include "patch/patch.hh"
 #include "ryml_std.hpp"
 
@@ -9,12 +10,11 @@
 void write(ryml::NodeRef *n, Jack const &jack);
 void write(ryml::NodeRef *n, MappedKnob const &mapped_knob);
 void write(ryml::NodeRef *n, MappedKnobSet const &knob_set);
-
-// TODO:
-// void write(ryml::NodeRef *n, InternalCable const &cable);
-// void write(ryml::NodeRef *n, MappedInputJack const &j);
-// void write(ryml::NodeRef *n, MappedOutputJack const &j);
-// void write(ryml::NodeRef *n, StaticParam const &k);
+void write(ryml::NodeRef *n, InternalCable const &cable);
+void write(ryml::NodeRef *n, MappedInputJack const &j);
+void write(ryml::NodeRef *n, MappedOutputJack const &j);
+void write(ryml::NodeRef *n, StaticParam const &k);
+void write(ryml::NodeRef *n, std::vector<ModuleTypeSlug> const &slugs);
 
 bool read(ryml::ConstNodeRef const &n, Jack *jack);
 bool read(ryml::ConstNodeRef const &n, InternalCable *cable);
@@ -28,4 +28,4 @@ bool read(ryml::ConstNodeRef const &n, ModuleInitState *m);
 namespace RymlInit
 {
 void init_once();
-};
+}
