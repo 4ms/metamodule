@@ -73,22 +73,25 @@ void Controls::update_params() {
 
 	if (_midi_rx_buf.num_filled()) {
 		auto msg = _midi_rx_buf.get();
-		process_midi(msg, midi_note, cur_params->midi.event);
+		process_midi(msg, midi_notes, cur_params->midi.event, cur_metaparams->midi_poly_chans);
 	}
 
 	else if (!_midi_host.is_connected())
 	{
 		//if rx buffer is empty AND we've disconnected, turn off the midi gate
 		//so we don't end up with stuck notes
-		midi_note.pitch = 0.f;
-		midi_note.gate = false;
-		midi_note.vel = 0.f;
+		for (auto &midi_note : midi_notes) {
+			midi_note.pitch = 0.f;
+			midi_note.gate = false;
+			midi_note.vel = 0.f;
+		}
 
 		//TODO: handle all possible note offs for gate_events
 	}
 
-	//TODO; polyphony (which is why Controls stores note states, and doesn't send Note events)
-	cur_params->midi.notes[0] = midi_note;
+	for (auto [params_note, controls_note] : zip(cur_params->midi.notes, midi_notes)) {
+		params_note = controls_note;
+	}
 
 	//	Debug::red_LED1::set(midi_note.gate);
 

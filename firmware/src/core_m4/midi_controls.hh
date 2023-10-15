@@ -28,24 +28,42 @@ constexpr float note_to_volts(uint8_t note) {
 static_assert(note_to_volts(60) == 3);
 static_assert(note_to_volts(72) == 4);
 
+Params::Midi::Note *find_polyphonic_slot(std::span<Params::Midi::Note> midi_notes, float pitch);
+
 } // namespace Midi
 
-void process_midi(MidiMessage msg, Params::Midi::Note &midi_note, Params::Midi::Event &event) {
+void process_midi(MidiMessage msg,
+				  std::span<Params::Midi::Note> all_midi_notes,
+				  Params::Midi::Event &event,
+				  uint32_t poly_chans) {
+
+	auto midi_notes = all_midi_notes.subspan(0, poly_chans);
 
 	// Only allow retrig to be true on a NoteOn event
-	midi_note.retrig = false;
+	for (auto &midi_note : midi_notes)
+		midi_note.retrig = false;
 
 	// Monophonic MIDI CV/Gate
 	if (msg.is_noteoff()) {
-		midi_note.gate = false;
-		midi_note.vel = 0;
+		auto pitch = Midi::note_to_volts(msg.note());
+
+		for (auto &midi_note : midi_notes) {
+			if (midi_note.pitch == pitch) {
+				midi_note.gate = false;
+				midi_note.vel = 0;
+			}
+		}
 
 		event.type = Params::Midi::Event::Type::GateNote;
 		event.chan = msg.note();
 		event.val = 0;
 
 	} else if (msg.is_command<MidiCommand::NoteOn>()) {
-		midi_note.pitch = Midi::note_to_volts(msg.note());
+		auto pitch = Midi::note_to_volts(msg.note());
+
+		auto empty_slot = Midi::find_polyphonic_slot(midi_notes, pitch);
+		Params::Midi::Note &midi_note = empty_slot ? *empty_slot : midi_notes.back();
+		midi_note.pitch = pitch;
 		midi_note.vel = Midi::u7_to_volts<10>(msg.velocity());
 		midi_note.gate = true;
 		midi_note.retrig = true;
@@ -55,11 +73,14 @@ void process_midi(MidiMessage msg, Params::Midi::Note &midi_note, Params::Midi::
 		event.val = Midi::u7_to_volts<10>(msg.velocity());
 
 	} else if (msg.is_command<MidiCommand::PolyKeyPressure>()) { //aka Aftertouch
-		if (midi_note.pitch == Midi::note_to_volts(msg.note()))
-			midi_note.aft = Midi::u7_to_volts<10>(msg.aftertouch());
+		for (auto &midi_note : midi_notes) {
+			if (midi_note.pitch == Midi::note_to_volts(msg.note()))
+				midi_note.aft = Midi::u7_to_volts<10>(msg.aftertouch());
+		}
 
 	} else if (msg.is_command<MidiCommand::ChannelPressure>()) {
-		midi_note.aft = Midi::u7_to_volts<10>(msg.chan_pressure());
+		for (auto &midi_note : midi_notes)
+			midi_note.aft = Midi::u7_to_volts<10>(msg.chan_pressure());
 
 	} else if (msg.is_command<MidiCommand::ControlChange>()) {
 		event.type = Params::Midi::Event::Type::CC;
@@ -80,5 +101,20 @@ void process_midi(MidiMessage msg, Params::Midi::Note &midi_note, Params::Midi::
 																			0xFF; //unsupported
 	}
 }
+
+namespace Midi
+{
+
+Params::Midi::Note *find_polyphonic_slot(std::span<Params::Midi::Note> midi_notes, float pitch) {
+	Params::Midi::Note *empty_slot = nullptr;
+
+	for (auto &midi_note : midi_notes) {
+		if (midi_note.gate == false)
+			empty_slot = &midi_note;
+	}
+	return empty_slot;
+}
+
+} // namespace Midi
 
 } // namespace MetaModule

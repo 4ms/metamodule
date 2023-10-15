@@ -89,7 +89,7 @@ private:
 	MidiHost &_midi_host;
 	CircularBuffer<MidiMessage, 256> _midi_rx_buf;
 
-	Params::Midi::Note midi_note;
+	std::array<Params::Midi::Note, MaxMidiPolyphony> midi_notes;
 
 	bool _rotary_moved_while_pressed = false;
 
