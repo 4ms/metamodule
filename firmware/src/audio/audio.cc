@@ -85,16 +85,23 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
-		load_measure.start_measurement();
 
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
-		process(audio_blocks[1 - block], param_blocks[block], auxsigs[block]);
 
+		// 100us for a 128 block size, or 48us for a 64 block size = +0.75us/frame
+		// Makes midi poly 4 note loop go from 2.2us to 600ns per frame = -1.6us/frame => net 0.85us/frame = 4%
+		// Plus, probably benefits from knob mappings
+		mdrivlib::SystemCache::invalidate_dcache_by_range(&param_blocks[block], sizeof(ParamBlock));
+
+		load_measure.start_measurement();
+		process(audio_blocks[1 - block], param_blocks[block], auxsigs[block]);
 		load_measure.end_measurement();
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof(SyncParams));
+
+		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
 		Debug::Pin0::low();
 	};
@@ -240,8 +247,6 @@ void AudioStream::handle_midi(Params::Midi const &midi, unsigned poly_num) {
 	if (event.type == Params::Midi::Event::Type::None)
 		return;
 
-	Debug::Pin2::high();
-
 	if (event.type == Params::Midi::Event::Type::GateNote)
 		player.set_midi_gate(event.chan, event.val);
 
@@ -253,10 +258,6 @@ void AudioStream::handle_midi(Params::Midi const &midi, unsigned poly_num) {
 
 	else if (event.type == Params::Midi::Event::Type::Time)
 		player.send_midi_time_event(event.chan, 10.f);
-
-	Debug::Pin2::low();
-	// clear the event
-	// midi.event.type = Params::Midi::Event::Type::None;
 }
 
 void AudioStream::propagate_sense_pins(Params &params) {
