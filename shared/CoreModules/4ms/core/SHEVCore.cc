@@ -69,7 +69,7 @@ struct LogTableRange {
 
 constinit auto LogTableSHEV =
 	Mapping::LookupTable_t<50>::generate<LogTableRange>([](auto voltage) {
-		auto log = std::log10(29.6f * voltage + 1.0f);
+		auto log = std::log(29.6f * voltage + 1.0f);
 
 		return log;
 	});
@@ -143,12 +143,14 @@ private:
 
 			runOscillator();
 
-			displayEnvelope(osc.getOutput(), osc.getSlopeState());
+			auto shapedEnv = shapeEnvelope(osc.getOutput());
+
+			displayEnvelope(shapedEnv, osc.getOutput(), osc.getSlopeState());
 
 			if(auto vcaCV = parent->getInput<Mapping::VcaCvIn>(); vcaCV) {
 				runAudioPath(*vcaCV, input);
 			} else {
-				runAudioPath(osc.getOutput(), input);
+				runAudioPath(shapedEnv, input);
 			}		
 			
 		}
@@ -177,17 +179,38 @@ private:
 			}
 		}
 
-		void displayEnvelope(float val, TriangleOscillator::SlopeState_t slopeState) {
+		auto shapeEnvelope(float val)
+		{
+			auto shapeControl = parent->getState<Mapping::ShapeSlider>();
+
+			if(auto shapeCV = parent->getInput<Mapping::ShapeCVIn>(); shapeCV) {
+				shapeControl += (parent->getState<Mapping::ShapeKnob>() * 2.0f - 1.0f) * *shapeCV / 10.0f;
+				shapeControl = std::clamp(shapeControl, 0.0f, 1.0f);
+			}
+
+			float shapedEnv;
+
+			if(shapeControl > 0.5f) {
+				auto mixFactor = 2.0f * shapeControl - 1.0f;
+				shapedEnv = (1.0f - mixFactor) * val + mixFactor * LogTableSHEV.lookup(val);
+			} else {
+				auto mixFactor = 2.0f * shapeControl;
+				shapedEnv = (1.0f - mixFactor) * ExpTableSHEV.lookup(val) + mixFactor * val;
+			}
+
+			return shapedEnv;
+		}
+
+		void displayEnvelope(float shapedEnv, float val, TriangleOscillator::SlopeState_t slopeState) {
 			parent->setLED<Mapping::RiseSlider>(slopeState == TriangleOscillator::SlopeState_t::RISING ? val / 8.f : 0);
 			parent->setLED<Mapping::FallSlider>(slopeState == TriangleOscillator::SlopeState_t::FALLING ? val / 8.f : 0);
 
-			envOut = ExpTableSHEV.lookup(val);
-			// envOut *= parent->getState<Mapping::LevelKnob>() * 2.0f - 1.0f;
-			// envOut += parent->getState<Mapping::OffsetKnob>() * 20.0f - 10.0f;
+			envOut = shapedEnv / VoltageDivider(100e3f, 100e3f);
+			envOut *= parent->getState<Mapping::LevelKnob>() * 2.0f - 1.0f;
+			envOut += parent->getState<Mapping::OffsetKnob>() * 20.0f - 10.0f;
 			parent->setOutput<Mapping::EnvOut>(envOut);
 			parent->setOutput<Mapping::Lin5VOut>(val);
 			// setLED<Mapping::EnvLedLight>(val / 8.f);
-
 		}
 
 		auto getEnvOut() {
@@ -309,6 +332,9 @@ private:
 		const static Info::Elem FallLedLight = FallLedALight;
 		const static Info::Elem VcaCvIn = VcaCvAIn;
 		const static Info::Elem Lin5VOut = Lin5VAOut;
+		const static Info::Elem ShapeCVIn = ShapeCvAIn;
+		const static Info::Elem ShapeSlider = ShapeASlider;
+		const static Info::Elem ShapeKnob = ShapeAKnob;
 	};
 
 	struct MappingB
@@ -333,6 +359,9 @@ private:
 		const static Info::Elem FallLedLight = FallLedBLight;
 		const static Info::Elem VcaCvIn = VcaCvBIn;
 		const static Info::Elem Lin5VOut = Lin5VBOut;
+		const static Info::Elem ShapeCVIn = ShapeCvBIn;
+		const static Info::Elem ShapeSlider = ShapeBSlider;
+		const static Info::Elem ShapeKnob = ShapeBKnob;
 	};
 
 	Channel<MappingA> channelA;
