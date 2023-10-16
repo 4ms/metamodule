@@ -81,7 +81,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	}
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin0::high();
+		Debug::Pin0::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -96,7 +96,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof(SyncParams));
 
-		// Debug::Pin0::low();
+		Debug::Pin0::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -192,7 +192,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// MIDI
 		if (param_block.metaparams.midi_connected)
-			handle_midi(params_);
+			handle_midi(params_.midi, param_block.metaparams.midi_poly_chans);
 
 		// Run each module
 		player.update_patch();
@@ -203,27 +203,44 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	}
 }
 
-void AudioStream::handle_midi(Params &params_) {
+void AudioStream::handle_midi(Params::Midi const &midi, unsigned poly_num) {
 	// Notes (pitch, gate, velocity)
-	for (auto [i, note, note_state] : countzip(params_.midi.notes, param_state.notes)) {
-		if (note_state.pitch.store_changed(note.pitch))
-			player.set_midi_note_pitch(i, note.pitch);
+	// 0.5us per poly note ... poly 4 = 2.2us every sample just to check if any note events
+	for (auto [i, note, note_state] : countzip(midi.notes, param_state.notes)) {
+		if (i >= poly_num)
+			break;
+
+		Debug::Pin1::high();
+
+		if (note_state.pitch.store_changed(note.pitch)) {
+			player.set_midi_note_pitch(i, note_state.pitch);
+		}
 
 		if (note_state.gate.store_changed(note.gate))
-			player.set_midi_note_gate(i, note.gate ? 10.f : 0.f);
+			player.set_midi_note_gate(i, note_state.gate ? 10.f : 0.f);
 
-		if (note_state.vel.store_changed(note.vel))
-			player.set_midi_note_velocity(i, note.vel);
+		if (note_state.vel.store_changed(note.vel)) {
+			player.set_midi_note_velocity(i, note_state.vel);
+		}
 
-		if (note_state.aft.store_changed(note.aft))
-			player.set_midi_note_aftertouch(i, note.aft);
+		if (note_state.aft.store_changed(note.aft)) {
+			player.set_midi_note_aftertouch(i, note_state.aft);
+		}
 
-		if (note.retrig)
+		if (note.retrig) {
 			player.set_midi_note_retrig(i, 10.f);
+		}
+
+		Debug::Pin1::low();
 	}
 
 	// Events (clock, transport, CC, PW, note=>gate)
-	auto &event = params_.midi.event;
+	auto &event = midi.event;
+
+	if (event.type == Params::Midi::Event::Type::None)
+		return;
+
+	Debug::Pin2::high();
 
 	if (event.type == Params::Midi::Event::Type::GateNote)
 		player.set_midi_gate(event.chan, event.val);
@@ -237,8 +254,9 @@ void AudioStream::handle_midi(Params &params_) {
 	else if (event.type == Params::Midi::Event::Type::Time)
 		player.send_midi_time_event(event.chan, 10.f);
 
+	Debug::Pin2::low();
 	// clear the event
-	event.type = Params::Midi::Event::Type::None;
+	// midi.event.type = Params::Midi::Event::Type::None;
 }
 
 void AudioStream::propagate_sense_pins(Params &params) {
