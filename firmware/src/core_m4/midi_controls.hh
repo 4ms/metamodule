@@ -43,6 +43,9 @@ void process_midi(MidiMessage msg,
 	for (auto &midi_note : midi_notes)
 		midi_note.retrig = false;
 
+	// Clear events from previous
+	event.type = Params::Midi::Event::Type::None;
+
 	// Monophonic MIDI CV/Gate
 	if (msg.is_noteoff()) {
 		auto pitch = Midi::note_to_volts(msg.note());
@@ -63,6 +66,7 @@ void process_midi(MidiMessage msg,
 
 		auto empty_slot = Midi::find_polyphonic_slot(midi_notes, pitch);
 		Params::Midi::Note &midi_note = empty_slot ? *empty_slot : midi_notes.back();
+		// printf_("%p %f\n", empty_slot, pitch);
 		midi_note.pitch = pitch;
 		midi_note.vel = Midi::u7_to_volts<10>(msg.velocity());
 		midi_note.gate = true;

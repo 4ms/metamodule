@@ -34,8 +34,13 @@ void Controls::update_params() {
 	for (unsigned i = 0; i < PanelDef::NumPot; i++)
 		cur_params->knobs[i] = _knobs[i].next();
 
+	bool midi_just_disconnected = false;
+
 	if (_first_param) {
 		_first_param = false;
+
+		if (cur_metaparams->midi_connected && !_midi_host.is_connected())
+			midi_just_disconnected = true;
 
 		cur_metaparams->midi_connected = _midi_host.is_connected();
 		cur_params->jack_senses = get_jacksense_reading();
@@ -71,29 +76,26 @@ void Controls::update_params() {
 		cur_metaparams->meta_buttons[0].transfer_events(button0);
 	}
 
+	// < 1us, every 20.83us
 	if (_midi_rx_buf.num_filled()) {
 		auto msg = _midi_rx_buf.get();
 		process_midi(msg, midi_notes, cur_params->midi.event, cur_metaparams->midi_poly_chans);
-	}
 
-	else if (!_midi_host.is_connected())
-	{
-		//if rx buffer is empty AND we've disconnected, turn off the midi gate
-		//so we don't end up with stuck notes
+	} else if (midi_just_disconnected) {
+		//TODO: keep midi_just_disconnected true until we cleared both param buffers (notes and events)
+		// And only then set cur_metaparams->midi_connected to false
+
+		//if rx buffer is empty AND we've disconnected, turn off all notes
 		for (auto &midi_note : midi_notes) {
-			midi_note.pitch = 0.f;
 			midi_note.gate = false;
-			midi_note.vel = 0.f;
 		}
-
-		//TODO: handle all possible note offs for gate_events
+	} else {
+		cur_params->midi.event.type = Params::Midi::Event::Type::None;
 	}
 
 	for (auto [params_note, controls_note] : zip(cur_params->midi.notes, midi_notes)) {
 		params_note = controls_note;
 	}
-
-	//	Debug::red_LED1::set(midi_note.gate);
 
 	cur_params++;
 	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
@@ -134,6 +136,7 @@ void Controls::start() {
 	}
 
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
+		// Debug::Pin0::high();
 		bool ignore = false;
 
 		while (rxbuffer.size() >= 4) {
@@ -154,6 +157,7 @@ void Controls::start() {
 			// msg.print();
 		}
 		_midi_host.receive();
+		// Debug::Pin0::low();
 	});
 }
 
@@ -201,8 +205,6 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 		auxstream.init();
 		auxstream_updater.init([&]() { auxstream.output_next(); });
 	}
-
-	// Debug::Pin2::low();
 }
 
 float Controls::get_pot_reading(uint32_t pot_id) {
