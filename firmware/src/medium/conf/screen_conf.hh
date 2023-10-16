@@ -28,7 +28,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr PinDef CIPO = {GPIO::Unused, PinNum::_0};
 		static constexpr PinDef CS0 = {GPIO::E, PinNum::_11, PinAF::AltFunc5};
 		static constexpr bool use_hardware_ss = true;
-		static constexpr uint16_t clock_division = 2;
+		static constexpr uint16_t clock_division = 4;
 		static constexpr uint16_t data_size = 8;
 		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
 		static constexpr uint8_t FifoThreshold = 2;
