@@ -16,32 +16,30 @@ on:
       - '!shared/gen_minblep' # Skip generator script (still run CI if generated files change)
       - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
 
-jobs:  
+jobs:
   build:
     strategy:
         matrix:
           gcc: ['12.2.Rel1']  # can add other versions if needed
     name: "Build firmware"
     runs-on: ubuntu-latest
+    container: ghcr.io/lnnrts/metamodule:latest
     steps:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
           release: ${{ matrix.gcc }}
 
+      - name: Install cmake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.26.x'
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
           token: ${{ secrets.CHECKOUT_TOKEN }}
-
-      - name: Install linux dependencies
-        run: |
-          sudo apt install -y ninja-build
-
-      - name: Build and install flatbuffer compiler
-        run: |
-          cd firmware/lib/flatbuffers && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -GNinja && cmake --build build
 
       - name: Build and test
         run: cd firmware && make configure && make all
