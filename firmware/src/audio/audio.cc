@@ -190,43 +190,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 				player.set_panel_param(i, knob);
 		}
 
-		if (param_block.metaparams.midi_connected) {
-
-			// Notes (pitch, gate, velocity)
-			for (auto [i, note, note_state] : countzip(params_.midi.notes, param_state.notes)) {
-				if (note_state.pitch.store_changed(note.pitch))
-					player.set_midi_note_pitch(i, note.pitch);
-
-				if (note_state.gate.store_changed(note.gate))
-					player.set_midi_note_gate(i, note.gate ? 8.f : 0.f);
-
-				if (note_state.vel.store_changed(note.vel))
-					player.set_midi_note_velocity(i, note.vel);
-
-				if (note_state.aft.store_changed(note.aft))
-					player.set_midi_note_aftertouch(i, note.aft);
-
-				if (note.retrig)
-					player.set_midi_note_retrig(i, 10.f);
-			}
-
-			auto &event = params_.midi.event;
-
-			if (event.type == Params::Midi::Event::Type::GateNote)
-				player.set_midi_gate(event.chan, event.val);
-
-			else if (event.type == Params::Midi::Event::Type::CC)
-				player.set_midi_cc(event.chan, event.val);
-
-			else if (event.type == Params::Midi::Event::Type::Bend)
-				player.set_midi_cc(128, event.val);
-
-			else if (event.type == Params::Midi::Event::Type::Time)
-				player.send_midi_time_event(event.chan, 10.f);
-
-			// clear the event
-			event.type = Params::Midi::Event::Type::None;
-		}
+		// MIDI
+		if (param_block.metaparams.midi_connected)
+			handle_midi(params_);
 
 		// Run each module
 		player.update_patch();
@@ -235,6 +201,44 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
 	}
+}
+
+void AudioStream::handle_midi(Params &params_) {
+	// Notes (pitch, gate, velocity)
+	for (auto [i, note, note_state] : countzip(params_.midi.notes, param_state.notes)) {
+		if (note_state.pitch.store_changed(note.pitch))
+			player.set_midi_note_pitch(i, note.pitch);
+
+		if (note_state.gate.store_changed(note.gate))
+			player.set_midi_note_gate(i, note.gate ? 10.f : 0.f);
+
+		if (note_state.vel.store_changed(note.vel))
+			player.set_midi_note_velocity(i, note.vel);
+
+		if (note_state.aft.store_changed(note.aft))
+			player.set_midi_note_aftertouch(i, note.aft);
+
+		if (note.retrig)
+			player.set_midi_note_retrig(i, 10.f);
+	}
+
+	// Events (clock, transport, CC, PW, note=>gate)
+	auto &event = params_.midi.event;
+
+	if (event.type == Params::Midi::Event::Type::GateNote)
+		player.set_midi_gate(event.chan, event.val);
+
+	else if (event.type == Params::Midi::Event::Type::CC)
+		player.set_midi_cc(event.chan, event.val);
+
+	else if (event.type == Params::Midi::Event::Type::Bend)
+		player.set_midi_cc(128, event.val);
+
+	else if (event.type == Params::Midi::Event::Type::Time)
+		player.send_midi_time_event(event.chan, 10.f);
+
+	// clear the event
+	event.type = Params::Midi::Event::Type::None;
 }
 
 void AudioStream::propagate_sense_pins(Params &params) {

@@ -81,6 +81,7 @@ private:
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
+	void handle_midi(Params &params_);
 
 	// void output_silence(AudioOutBuffer &out, AuxStreamBlock &aux);
 
