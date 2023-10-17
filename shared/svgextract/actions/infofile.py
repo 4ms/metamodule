@@ -135,8 +135,9 @@ def panel_to_components(tree):
             print(f"Error: {shape} shape with no style found at {c['cx']}, {c['cy']}")
             continue
 
-        color_match = re.search(r'fill:\s*(.*)', style)
-        color = ''
+        color_match = re.search(r'fill:\s*(.*?);', style)
+        if color_match is None:
+            color_match = re.search(r'fill:\s*(.*)', style)
         color = color_match.group(1).lower() if color_match is not None else ''
         color = color.strip(";")
         color = expand_color_synonyms(color)
@@ -144,7 +145,6 @@ def panel_to_components(tree):
 
         # TODO: detect Center or TopLeft coords
         c['coord_ref'] = "Center";
-
         default_val_int = int(color[-2:], 16)
         #Red: Knob or slider
         if color.startswith("#ff00") and default_val_int <= 128:
