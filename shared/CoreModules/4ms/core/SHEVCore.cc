@@ -69,7 +69,7 @@ struct LogTableRange {
 
 constinit auto LogTableSHEV =
 	Mapping::LookupTable_t<50>::generate<LogTableRange>([](auto voltage) {
-		auto log = std::log(29.6f * voltage + 1.0f);
+		auto log = gcem::log(29.6f * voltage + 1.0f);
 
 		return log;
 	});
@@ -81,7 +81,7 @@ struct ExpTableRange {
 
 constinit auto ExpTableSHEV =
 	Mapping::LookupTable_t<50>::generate<ExpTableRange>([](auto voltage) {
-		auto exp = (std::exp(voltage) - 1.0f) / 29.682631f;
+		auto exp = (gcem::exp(voltage) - 1.0f) / 29.682631f;
 
 		return exp;
 	});
@@ -343,7 +343,7 @@ private:
 		const static Info::Elem RiseSlider = RiseASlider;
 		const static Info::Elem FallSlider = FallASlider;
 		const static Info::Elem EnvOut = EnvAOut;
-		const static Info::Elem EnvLedLight = EnvALedLight;
+		const static Info::Elem EnvLedLight = EnvALight;
 		const static Info::Elem LevelKnob = LevelAKnob;
 		const static Info::Elem OffsetKnob = OffsetAKnob;
 		const static Info::Elem CycleButton = CycleAButton;
@@ -352,16 +352,16 @@ private:
 		const static Info::Elem RiseKnob = RiseAKnob;
 		const static Info::Elem FallKnob = FallAKnob;
 		const static Info::Elem TimeCvIn = TimeCvAIn;
-		const static Info::Elem SlowMedFastRiseSwitch = SlowMedFastRiseASwitch;
-		const static Info::Elem SlowMedFastFallSwitch = SlowMedFastFallASwitch;
-		const static Info::Elem RiseLedLight = RiseLedALight;
-		const static Info::Elem FallLedLight = FallLedALight;
+		const static Info::Elem SlowMedFastRiseSwitch = RiseASwitch;
+		const static Info::Elem SlowMedFastFallSwitch = FallASwitch;
+		const static Info::Elem RiseLedLight = RiseALight;
+		const static Info::Elem FallLedLight = FallALight;
 		const static Info::Elem VcaCvIn = VcaCvAIn;
 		const static Info::Elem Lin5VOut = Lin5VAOut;
 		const static Info::Elem ShapeCVIn = ShapeCvAIn;
 		const static Info::Elem ShapeSlider = ShapeASlider;
 		const static Info::Elem ShapeKnob = ShapeAKnob;
-		const static Info::Elem CycleArAsrSwitch = CycleArAsrASwitch;
+		const static Info::Elem CycleArAsrSwitch = TrigModeASwitch;
 	};
 
 	struct MappingB
@@ -371,7 +371,7 @@ private:
 		const static Info::Elem RiseSlider = RiseBSlider;
 		const static Info::Elem FallSlider = FallBSlider;
 		const static Info::Elem EnvOut = EnvBOut;
-		const static Info::Elem EnvLedLight = EnvBLedLight;
+		const static Info::Elem EnvLedLight = EnvBLight;
 		const static Info::Elem LevelKnob = LevelBKnob;
 		const static Info::Elem OffsetKnob = OffsetBKnob;
 		const static Info::Elem CycleButton = CycleBButton;
@@ -380,16 +380,16 @@ private:
 		const static Info::Elem RiseKnob = RiseBKnob;
 		const static Info::Elem FallKnob = FallBKnob;
 		const static Info::Elem TimeCvIn = TimeCvBIn;
-		const static Info::Elem SlowMedFastRiseSwitch = SlowMedFastRiseBSwitch;
-		const static Info::Elem SlowMedFastFallSwitch = SlowMedFastFallBSwitch;
-		const static Info::Elem RiseLedLight = RiseLedBLight;
-		const static Info::Elem FallLedLight = FallLedBLight;
+		const static Info::Elem SlowMedFastRiseSwitch = RiseBSwitch;
+		const static Info::Elem SlowMedFastFallSwitch = FallBSwitch;
+		const static Info::Elem RiseLedLight = RiseBLight;
+		const static Info::Elem FallLedLight = FallBLight;
 		const static Info::Elem VcaCvIn = VcaCvBIn;
 		const static Info::Elem Lin5VOut = Lin5VBOut;
 		const static Info::Elem ShapeCVIn = ShapeCvBIn;
 		const static Info::Elem ShapeSlider = ShapeBSlider;
 		const static Info::Elem ShapeKnob = ShapeBKnob;
-		const static Info::Elem CycleArAsrSwitch = CycleArAsrBSwitch;
+		const static Info::Elem CycleArAsrSwitch = TrigModeBSwitch;
 	};
 
 	Channel<MappingA> channelA;
