@@ -110,6 +110,8 @@ private:
 		float rScaleLEDs = 0.f;
 		float fScaleLEDs = 0.f;
 		float envOut;
+		enum TriggerMode_t {CYCLE, ASR, AR};
+		TriggerMode_t triggerMode;
 
 	private:
 		float timeStepInS = 1.f / 48000.f;
@@ -217,24 +219,48 @@ private:
 			return envOut;
 		}
 
-		void runOscillator() {
-			bool isCycling =
-				(parent->getState<Mapping::CycleButton>() == LatchingButton::State_t::DOWN);
+		void runOscillator() {		
+			auto toggleState = parent->getState<Mapping::CycleArAsrSwitch>();
+
+			if (toggleState == Toggle3pos::State_t::UP) {
+				triggerMode = TriggerMode_t::CYCLE;
+			} else if (toggleState == Toggle3pos::State_t::DOWN) {
+				triggerMode = TriggerMode_t::ASR;
+			} else {
+				triggerMode = TriggerMode_t::AR;
+			}
+
+			auto triggerInputValue = parent->getInput<Mapping::TrigIn>();
+
+			bool isCycling;
+
+			if(triggerMode == TriggerMode_t::CYCLE) {
+				isCycling = (parent->getState<Mapping::CycleButton>() == LatchingButton::State_t::DOWN) ^ CVToBool(triggerInputValue.value_or(0.0f));
+			} else {
+				isCycling = (parent->getState<Mapping::CycleButton>() == LatchingButton::State_t::DOWN);
+			};
 
 			osc.setCycling(isCycling);
+
 			if (cycleLED != isCycling) {
 				cycleLED = isCycling;
 				parent->setLED<Mapping::CycleButton>(cycleLED);
 			}
 
-			if (auto inputFollowValue = parent->getInput<Mapping::FollowIn>(); inputFollowValue) {
-				osc.setTargetVoltage(*inputFollowValue);
-			}
-
-			if (auto triggerInputValue = parent->getInput<Mapping::TrigIn>(); triggerInputValue) {
+			if(triggerMode != TriggerMode_t::CYCLE && triggerInputValue) {
 				if (triggerEdgeDetector(triggerDetector(*triggerInputValue))) {
 					osc.doRetrigger();
 				}
+			}
+
+			if(triggerMode == TriggerMode_t::ASR && triggerDetector(*triggerInputValue)) {
+				osc.holdMax(true);
+			} else {
+				osc.holdMax(false);
+			}
+
+			if (auto inputFollowValue = parent->getInput<Mapping::FollowIn>(); inputFollowValue) {
+				osc.setTargetVoltage(*inputFollowValue);
 			}
 
 			osc.proceed(timeStepInS);
@@ -335,6 +361,7 @@ private:
 		const static Info::Elem ShapeCVIn = ShapeCvAIn;
 		const static Info::Elem ShapeSlider = ShapeASlider;
 		const static Info::Elem ShapeKnob = ShapeAKnob;
+		const static Info::Elem CycleArAsrSwitch = CycleArAsrASwitch;
 	};
 
 	struct MappingB
@@ -362,6 +389,7 @@ private:
 		const static Info::Elem ShapeCVIn = ShapeCvBIn;
 		const static Info::Elem ShapeSlider = ShapeBSlider;
 		const static Info::Elem ShapeKnob = ShapeBKnob;
+		const static Info::Elem CycleArAsrSwitch = CycleArAsrBSwitch;
 	};
 
 	Channel<MappingA> channelA;

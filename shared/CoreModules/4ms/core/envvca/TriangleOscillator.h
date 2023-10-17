@@ -10,7 +10,7 @@ public:
     enum SlopeState_t {IDLE, RISING, FALLING};
 
 public:
-    TriangleOscillator() : outputInV(0.0f), state(State_t::FOLLOW), slopeState(SlopeState_t::RISING), cycling(false), retriggerPending(false), targetVoltage(0.0f)
+    TriangleOscillator() : outputInV(0.0f), state(State_t::FOLLOW), slopeState(SlopeState_t::RISING), cycling(false), retriggerPending(false), sustainMax(false), targetVoltage(0.0f)
     {
     }
 
@@ -78,7 +78,9 @@ public:
                 if (outputInV > MaxValInV)
                 {
                     outputInV = MaxValInV - (outputInV - MaxValInV);
-                    slopeState = SlopeState_t::FALLING;
+                    if(!sustainMax) {
+                        slopeState = SlopeState_t::FALLING;
+                    }
                 }
             }
             else
@@ -98,6 +100,11 @@ public:
         }
     }
 
+    void holdMax(bool val) 
+    {
+        sustainMax = val;
+    }
+
     SlopeState_t getSlopeState() const
     {
         return slopeState;
@@ -113,12 +120,13 @@ public:
         return outputInV;
     }
 
-// private:
+private:
     float outputInV;
     State_t state;
     SlopeState_t slopeState;
     bool cycling;
     bool retriggerPending;
+    bool sustainMax;
     float targetVoltage;
 
     float slopeFalling = 0.5f;
