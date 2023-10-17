@@ -6,6 +6,75 @@
 
 namespace MetaModule::MIDI
 {
+static std::optional<MidiCVSettings> readMidiCVModule(int64_t module_id);
+static std::optional<MidiGateSettings> readMidiGateModule(int64_t module_id);
+static std::optional<MidiCCCVSettings> readMidiCCCVModule(int64_t module_id);
+static std::optional<MidiCCKnobSettings> readMidiMapModule(int64_t module_id);
+
+void Modules::addMidiModule(rack::Module *module) {
+	if (module->model->slug == "MIDIToCVInterface") {
+		auto read_settings = readMidiCVModule(module->id);
+		if (read_settings) {
+			settings.CV = read_settings.value();
+			moduleIds.midiCV = module->id;
+		}
+	} else if (module->model->slug == "MIDI-Map") {
+		auto read_settings = readMidiMapModule(module->id);
+		if (read_settings) {
+			settings.CCKnob = read_settings.value();
+			moduleIds.midiMaps = module->id;
+		}
+	} else if (module->model->slug == "MIDITriggerToCVInterface") {
+		auto read_settings = readMidiGateModule(module->id);
+		if (read_settings) {
+			settings.gate = read_settings.value();
+			moduleIds.midiGate = module->id;
+		}
+	} else if (module->model->slug == "MIDICCToCVInterface") {
+		auto read_settings = readMidiCCCVModule(module->id);
+		if (read_settings) {
+			settings.CCCV = read_settings.value();
+			moduleIds.midiCC = module->id;
+		}
+	} else if (module->model->slug == "MIDICCToCVInterface") {
+		auto read_settings = readMidiCCCVModule(module->id);
+		if (read_settings) {
+			settings.CCCV = read_settings.value();
+			moduleIds.midiCC = module->id;
+		}
+	}
+}
+
+// Check if cable goes out from MIDICV module to a Split module
+void Modules::addPolySplitCable(rack::Cable *cable) {
+	auto out = cable->outputModule;
+	auto in = cable->inputModule;
+
+	if (out->getId() == moduleIds.midiCV && in->model->slug == "Split") {
+		if (cable->outputId == CoreMidiJacks::VoctJack)
+			settings.CV.voctSplitModuleId = in->getId();
+
+		else if (cable->outputId == CoreMidiJacks::GateJack)
+			settings.CV.gateSplitModuleId = in->getId();
+
+		else if (cable->outputId == CoreMidiJacks::VelJack)
+			settings.CV.velSplitModuleId = in->getId();
+
+		else if (cable->outputId == CoreMidiJacks::AftJack)
+			settings.CV.aftSplitModuleId = in->getId();
+
+		else if (cable->outputId == CoreMidiJacks::RetrigJack)
+			settings.CV.retrigSplitModuleId = in->getId();
+	}
+}
+
+bool Modules::isPolySplitModule(rack::Module *module) {
+	auto id = module->getId();
+
+	return (id > 0) && ((id == settings.CV.voctSplitModuleId) || (id == settings.CV.gateSplitModuleId) ||
+						(id == settings.CV.velSplitModuleId) || (id == settings.CV.aftSplitModuleId) ||
+						(id == settings.CV.retrigSplitModuleId));
+}
 
 unsigned clockDivToMidiClockJack(unsigned clockDiv) {
 	return clockDiv == 0  ? MidiClockJack :
@@ -160,11 +229,6 @@ std::optional<MidiCCKnobSettings> readMidiMapModule(int64_t module_id) {
 			settings.ccs[i].CCnum = json_integer_value(ccJ);
 			settings.ccs[i].module_id = json_integer_value(moduleIdJ);
 			settings.ccs[i].param_id = json_integer_value(paramIdJ);
-
-			printf("MIDI MAP: CC%d -> m:%lld p:%lld\n",
-				   settings.ccs[i].CCnum,
-				   settings.ccs[i].module_id,
-				   settings.ccs[i].param_id);
 		}
 	}
 

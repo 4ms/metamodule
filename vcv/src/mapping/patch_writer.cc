@@ -28,7 +28,7 @@ void PatchFileWriter::setPatchDesc(std::string patchDesc) {
 	pd.description = patchDesc.c_str();
 }
 
-void PatchFileWriter::setMidiSettings(MidiModuleIds &ids, MetaModule::MIDI::Settings const &settings) {
+void PatchFileWriter::setMidiSettings(MetaModule::MIDI::ModuleIds &ids, MetaModule::MIDI::Settings const &settings) {
 	midiModuleIds = ids;
 	midiSettings = settings;
 
@@ -45,7 +45,6 @@ void PatchFileWriter::setMidiSettings(MidiModuleIds &ids, MetaModule::MIDI::Sett
 				.max = 1.f,
 				.alias_name = "",
 			});
-			printf("Added midi cc map: %d -> %d %d\n", cc.CCnum, idMap[cc.module_id], cc.param_id);
 		}
 	}
 	if (pd.midi_maps.set.size())
@@ -82,7 +81,7 @@ void PatchFileWriter::setCableList(std::vector<CableMap> &cables) {
 		auto in_jack = cable.receivedJackId;
 		auto out_jack = cable.sendingJackId;
 
-		if (out_jack < 0 || in_jack < 0)
+		if (out_jack < 0 || in_jack < 0 || cable.sendingModuleId < 0 || cable.receivedModuleId < 0)
 			continue;
 
 		if (cable.sendingModuleId == hubModuleId) {
@@ -107,6 +106,26 @@ void PatchFileWriter::setCableList(std::vector<CableMap> &cables) {
 
 		} else if (cable.sendingModuleId == midiModuleIds.midiMaps) {
 			//MIDI Maps has no jacks!
+			continue;
+
+		} else if (cable.sendingModuleId == midiSettings.CV.voctSplitModuleId) {
+			mapMidiCVPolySplitJack(cable, MidiMonoNoteJack);
+			continue;
+
+		} else if (cable.sendingModuleId == midiSettings.CV.gateSplitModuleId) {
+			mapMidiCVPolySplitJack(cable, MidiMonoGateJack);
+			continue;
+
+		} else if (cable.sendingModuleId == midiSettings.CV.velSplitModuleId) {
+			mapMidiCVPolySplitJack(cable, MidiMonoVelJack);
+			continue;
+
+		} else if (cable.sendingModuleId == midiSettings.CV.aftSplitModuleId) {
+			mapMidiCVPolySplitJack(cable, MidiMonoAftertouchJack);
+			continue;
+
+		} else if (cable.sendingModuleId == midiSettings.CV.retrigSplitModuleId) {
+			mapMidiCVPolySplitJack(cable, MidiMonoRetrigJack);
 			continue;
 		}
 
@@ -275,48 +294,54 @@ void PatchFileWriter::mapOutputJack(const CableMap &map) {
 	}
 }
 
+void PatchFileWriter::mapMidiCVPolySplitJack(CableMap &cable, unsigned monoJackId) {
+	if (cable.sendingJackId >= 8)
+		return; //skip poly > 8
+	cable.sendingJackId = monoJackId + cable.sendingJackId;
+	mapInputJack(cable);
+}
+
 void PatchFileWriter::mapMidiCVJack(CableMap &cable) {
-	//TODO handle polyphony (midiSettings.CV.channels > 1)
-	// if (midiSettings.CV.channels == 1) {
-	if (cable.sendingJackId == 0)
+	using enum MetaModule::MIDI::CoreMidiJacks;
+
+	if (cable.sendingJackId == VoctJack)
 		cable.sendingJackId = MidiMonoNoteJack;
 
-	else if (cable.sendingJackId == 1)
+	else if (cable.sendingJackId == GateJack)
 		cable.sendingJackId = MidiMonoGateJack;
 
-	else if (cable.sendingJackId == 2)
+	else if (cable.sendingJackId == VelJack)
 		cable.sendingJackId = MidiMonoVelJack;
 
-	else if (cable.sendingJackId == 3)
+	else if (cable.sendingJackId == AftJack)
 		cable.sendingJackId = MidiMonoAftertouchJack;
 
-	else if (cable.sendingJackId == 6)
+	else if (cable.sendingJackId == RetrigJack)
 		cable.sendingJackId = MidiMonoRetrigJack;
-	// }
 
-	else if (cable.sendingJackId == 4)
+	else if (cable.sendingJackId == PWJack)
 		cable.sendingJackId = MidiPitchWheelJack;
 
-	else if (cable.sendingJackId == 5)
+	else if (cable.sendingJackId == MWJack)
 		cable.sendingJackId = MidiModWheelJack;
 
-	else if (cable.sendingJackId == 7)
+	else if (cable.sendingJackId == ClockJack)
 		cable.sendingJackId = MidiClockJack;
 
-	else if (cable.sendingJackId == 8) {
+	else if (cable.sendingJackId == ClockDivJack) {
 		if (midiSettings.CV.clockDivJack >= MidiClockJack && midiSettings.CV.clockDivJack <= MidiClockDiv96Jack)
 			cable.sendingJackId = midiSettings.CV.clockDivJack;
 		else
 			cable.sendingJackId = MidiClockDiv96Jack; //safe default on range error
 	}
 
-	else if (cable.sendingJackId == 9)
+	else if (cable.sendingJackId == StartJack)
 		cable.sendingJackId = MidiStartJack;
 
-	else if (cable.sendingJackId == 10)
+	else if (cable.sendingJackId == StopJack)
 		cable.sendingJackId = MidiStopJack;
 
-	else if (cable.sendingJackId == 11)
+	else if (cable.sendingJackId == ContJack)
 		cable.sendingJackId = MidiContinueJack;
 
 	mapInputJack(cable);

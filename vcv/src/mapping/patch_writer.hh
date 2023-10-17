@@ -14,13 +14,6 @@
 
 class PatchFileWriter {
 public:
-	struct MidiModuleIds {
-		int64_t midiCV = -1;
-		int64_t midiMaps = -1;
-		int64_t midiGate = -1;
-		int64_t midiCC = -1;
-	};
-
 	PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId);
 	~PatchFileWriter();
 
@@ -28,7 +21,7 @@ public:
 	void setPatchDesc(std::string patchDesc);
 	void setCableList(std::vector<CableMap> &cables);
 	void setParamList(std::vector<ParamMap> &params);
-	void setMidiSettings(MidiModuleIds &ids, MetaModule::MIDI::Settings const &settings);
+	void setMidiSettings(MetaModule::MIDI::ModuleIds &ids, MetaModule::MIDI::Settings const &settings);
 	void addModuleStateJson(rack::Module *module);
 
 	void addKnobMaps(unsigned panelKnobId, unsigned knobSetId, const std::span<const Mapping> maps);
@@ -46,6 +39,8 @@ private:
 	void mapMidiGateJack(CableMap &map);
 	void mapMidiCCJack(CableMap &cable);
 
+	void mapMidiCVPolySplitJack(CableMap &cable, unsigned monoJackId);
+
 	void setModuleList(std::vector<ModuleID> &modules);
 
 	json_t *moduleStateDataJ;
@@ -53,7 +48,9 @@ private:
 
 	PatchData pd;
 	int64_t hubModuleId = -1;
-	MidiModuleIds midiModuleIds;
+
+	MetaModule::MIDI::ModuleIds midiModuleIds;
 	MetaModule::MIDI::Settings midiSettings;
+
 	std::map<int64_t, uint16_t> idMap; // idMap[64 bit VCV module id] -> 16 bit MM-patch module id
 };
