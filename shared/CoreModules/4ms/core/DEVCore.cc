@@ -267,20 +267,20 @@ private:
 		const static Info::Elem RiseSlider = RiseASlider;
 		const static Info::Elem FallSlider = FallASlider;
 		const static Info::Elem EnvOut = EnvAOut;
-		const static Info::Elem EnvLedLight = EnvALedLight;
+		const static Info::Elem EnvLedLight = EnvALight;
 		const static Info::Elem LevelKnob = LevelAKnob;
 		const static Info::Elem OffsetKnob = OffsetAKnob;
 		const static Info::Elem CycleButton = CycleAButton;
-		const static Info::Elem CycleTrig = CycleTrig_In;
+		const static Info::Elem CycleTrig = CycleGateIn;
 		const static Info::Elem FollowIn = FollowAIn;
 		const static Info::Elem TrigIn = TrigAIn;
 		const static Info::Elem RiseKnob = RiseAKnob;
 		const static Info::Elem FallKnob = FallAKnob;
 		const static Info::Elem TimeCvIn = TimeCvAIn;
-		const static Info::Elem SlowMedFastRiseSwitch = SlowMedFastRiseASwitch;
-		const static Info::Elem SlowMedFastFallSwitch = SlowMedFastFallASwitch;
-		const static Info::Elem RiseLedLight = RiseLedALight;
-		const static Info::Elem FallLedLight = FallLedALight;
+		const static Info::Elem SlowMedFastRiseSwitch = RiseASwitch;
+		const static Info::Elem SlowMedFastFallSwitch = FallASwitch;
+		const static Info::Elem RiseLedLight = RiseALight;
+		const static Info::Elem FallLedLight = FallALight;
 		const static Info::Elem VcaCvIn = VcaCvAIn;
 	};
 
@@ -291,20 +291,20 @@ private:
 		const static Info::Elem RiseSlider = RiseBSlider;
 		const static Info::Elem FallSlider = FallBSlider;
 		const static Info::Elem EnvOut = EnvBOut;
-		const static Info::Elem EnvLedLight = EnvBLedLight;
+		const static Info::Elem EnvLedLight = EnvBLight;
 		const static Info::Elem LevelKnob = LevelBKnob;
 		const static Info::Elem OffsetKnob = OffsetBKnob;
 		const static Info::Elem CycleButton = CycleBButton;
-		const static Info::Elem CycleTrig = CycleTrig_In;
+		const static Info::Elem CycleTrig = CycleGateIn;
 		const static Info::Elem FollowIn = FollowBIn;
 		const static Info::Elem TrigIn = TrigBIn;
 		const static Info::Elem RiseKnob = RiseBKnob;
 		const static Info::Elem FallKnob = FallBKnob;
 		const static Info::Elem TimeCvIn = TimeCvBIn;
-		const static Info::Elem SlowMedFastRiseSwitch = SlowMedFastRiseBSwitch;
-		const static Info::Elem SlowMedFastFallSwitch = SlowMedFastFallBSwitch;
-		const static Info::Elem RiseLedLight = RiseLedBLight;
-		const static Info::Elem FallLedLight = FallLedBLight;
+		const static Info::Elem SlowMedFastRiseSwitch = RiseBSwitch;
+		const static Info::Elem SlowMedFastFallSwitch = FallBSwitch;
+		const static Info::Elem RiseLedLight = RiseBLight;
+		const static Info::Elem FallLedLight = FallBLight;
 		const static Info::Elem VcaCvIn = VcaCvBIn;
 	};
 
@@ -321,7 +321,7 @@ public:
 	}
 
 	void update() override {
-		bool cycleTriggerIn = CVToBool(getInput<CycleTrig_In>().value_or(0.0f));
+		bool cycleTriggerIn = CVToBool(getInput<CycleGateIn>().value_or(0.0f));
 
 		auto inputA = getInput<MappingA::AudioIn>();
 		channelA.update(cycleTriggerIn, inputA);
