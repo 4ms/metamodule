@@ -255,7 +255,7 @@ target_include_directories(
 
 # Compile flat buffer definitions to cpp headers
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${FWDIR}/lib/flatbuffers/CMake)
-set(FLATBUFFERS_FLATC_EXECUTABLE ${FWDIR}/lib/flatbuffers/build/flatc)
+set(FLATBUFFERS_FLATC_EXECUTABLE flatc)
 include(BuildFlatBuffers)
 build_flatbuffers("${CMAKE_CURRENT_LIST_DIR}/wifi/flat/all.fbs" "" flatbuffer_messages_utils "" ${CMAKE_CURRENT_BINARY_DIR}/flat "" "")
 
