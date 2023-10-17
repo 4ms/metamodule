@@ -12,6 +12,7 @@
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 #include "metaparams.hh"
+#include "midi_controls.hh"
 #include "param_block.hh"
 #include "params.hh"
 #include "usb/midi_host.hh"
@@ -88,8 +89,8 @@ private:
 
 	MidiHost &_midi_host;
 	CircularBuffer<MidiMessage, 256> _midi_rx_buf;
-
-	std::array<Params::Midi::Note, MaxMidiPolyphony> midi_notes;
+	Midi::MessageParser _midi_parser;
+	Toggler midi_connected;
 
 	bool _rotary_moved_while_pressed = false;
 

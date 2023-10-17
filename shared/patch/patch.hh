@@ -46,14 +46,6 @@ struct MappedKnob {
 		return (max - min) * panel_val + min;
 	}
 
-	bool is_monophonic_note() const {
-		return (panel_knob_id == static_cast<uint16_t>(MidiMonoNoteParam));
-	}
-
-	bool is_monophonic_gate() const {
-		return (panel_knob_id == static_cast<uint16_t>(MidiMonoGateParam));
-	}
-
 	bool operator==(const MappedKnob &other) {
 		return (module_id == other.module_id) && (param_id == other.param_id);
 	}

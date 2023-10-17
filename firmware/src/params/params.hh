@@ -15,19 +15,27 @@ struct Params {
 
 	struct Midi {
 		struct Note {
-			float pitch = 0;
+			uint8_t note = 0;
 			float gate = 0;
-			float vel = 0;
-			float aft = 0; //aftertouch
-			bool retrig = false;
 		};
-		std::array<Note, MaxMidiPolyphony> notes{};
 
 		struct Event {
-			enum class Type : uint8_t { None, GateNote, CC, Bend, Time } type = Type::None;
-			uint8_t chan = 0;
-			// int16_t val = 0; //Fixed point S4.11
-			float val = 0;
+			enum class Type : uint8_t {
+				None,
+				NoteOn,
+				NoteOff,
+				Aft,
+				ChanPress,
+				Retrig,
+				GateNote,
+				CC,
+				Bend,
+				Time
+			} type = Type::None;
+			uint8_t midi_chan = 0; //currently not implemented
+			uint8_t poly_chan = 0;
+			uint8_t note = 0; // GateNote: note value; CC: ccnum; Time: event type
+			float val = 0;	  //velocity or on/off
 		};
 		Event event;
 		static constexpr auto sizeofEvent = sizeof(Event);
@@ -50,8 +58,6 @@ struct Params {
 			button.reset();
 		for (float &knob : knobs)
 			knob = 0.f;
-		for (auto &note : midi.notes)
-			note = Midi::Note{};
 
 		midi.event = Midi::Event{};
 
@@ -67,8 +73,6 @@ struct Params {
 			buttons[i].copy_state(that.buttons[i]);
 		for (unsigned i = 0; i < PanelDef::NumPot; i++)
 			knobs[i] = that.knobs[i];
-		for (auto [note, that_note] : zip(midi.notes, that.midi.notes))
-			note = that_note;
 
 		midi.event = that.midi.event;
 

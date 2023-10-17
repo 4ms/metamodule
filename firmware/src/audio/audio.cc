@@ -201,7 +201,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// MIDI
 		if (param_block.metaparams.midi_connected)
-			handle_midi(params_.midi, param_block.metaparams.midi_poly_chans);
+			handle_midi(params_.midi.event, param_block.metaparams.midi_poly_chans);
 
 		// Run each module
 		player.update_patch();
@@ -212,54 +212,37 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	}
 }
 
-void AudioStream::handle_midi(Params::Midi const &midi, unsigned poly_num) {
-	// Notes (pitch, gate, velocity)
-	// 0.5us per poly note ... poly 4 = 2.2us every sample just to check if any note events
-	for (auto [i, note, note_state] : countzip(midi.notes, param_state.notes)) {
-		if (i >= poly_num)
-			break;
-
-		Debug::Pin1::high();
-
-		if (note_state.pitch.store_changed(note.pitch)) {
-			player.set_midi_note_pitch(i, note_state.pitch);
-		}
-
-		if (note_state.gate.store_changed(note.gate))
-			player.set_midi_note_gate(i, note_state.gate ? 10.f : 0.f);
-
-		if (note_state.vel.store_changed(note.vel)) {
-			player.set_midi_note_velocity(i, note_state.vel);
-		}
-
-		if (note_state.aft.store_changed(note.aft)) {
-			player.set_midi_note_aftertouch(i, note_state.aft);
-		}
-
-		if (note.retrig) {
-			player.set_midi_note_retrig(i, 10.f);
-		}
-
-		Debug::Pin1::low();
-	}
-
-	// Events (clock, transport, CC, PW, note=>gate)
-	auto &event = midi.event;
-
+void AudioStream::handle_midi(Params::Midi::Event const &event, unsigned poly_num) {
 	if (event.type == Params::Midi::Event::Type::None)
 		return;
 
-	if (event.type == Params::Midi::Event::Type::GateNote)
-		player.set_midi_gate(event.chan, event.val);
+	if (event.type == Params::Midi::Event::Type::NoteOn) {
+		player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note));
+		player.set_midi_note_gate(event.poly_chan, 10.f);
+		player.set_midi_note_velocity(event.poly_chan, event.val);
+		player.set_midi_note_retrig(event.poly_chan, 10.f);
+		player.set_midi_gate(event.note, event.val); //TODO: if not velocity mode, then event.val => 10
 
-	else if (event.type == Params::Midi::Event::Type::CC)
-		player.set_midi_cc(event.chan, event.val);
+	} else if (event.type == Params::Midi::Event::Type::NoteOff) {
+		player.set_midi_note_gate(event.poly_chan, 0);
+		player.set_midi_gate(event.note, 0);
 
-	else if (event.type == Params::Midi::Event::Type::Bend)
+	} else if (event.type == Params::Midi::Event::Type::Aft) {
+		player.set_midi_note_aftertouch(event.poly_chan, event.val);
+
+	} else if (event.type == Params::Midi::Event::Type::ChanPress) {
+		for (unsigned i = 0; i < poly_num; i++)
+			player.set_midi_note_aftertouch(i, event.val);
+
+	} else if (event.type == Params::Midi::Event::Type::CC) {
+		player.set_midi_cc(event.note, event.val);
+
+	} else if (event.type == Params::Midi::Event::Type::Bend) {
 		player.set_midi_cc(128, event.val);
 
-	else if (event.type == Params::Midi::Event::Type::Time)
-		player.send_midi_time_event(event.chan, 10.f);
+	} else if (event.type == Params::Midi::Event::Type::Time) {
+		player.send_midi_time_event(event.note, 10.f);
+	}
 }
 
 void AudioStream::propagate_sense_pins(Params &params) {

@@ -89,40 +89,25 @@ static constexpr size_t NumMidiCCs = 128;
 static constexpr size_t NumMidiCCsPW = NumMidiCCs + 1; //plus pitch wheel (aka bend)
 static constexpr size_t NumMidiClockJacks = MidiClockDiv96Jack - MidiClockJack + 1;
 
-enum {
-	MidiMonoNoteParam = 0x100,
-	MidiMonoGateParam,
+namespace MetaModule::Midi
+{
+// Converts MIDI 7-bit to volts
+template<unsigned MaxVolts>
+constexpr float u7_to_volts(uint8_t val) {
+	return (float)val / (127.f / (float)MaxVolts);
+}
 
-	// DuoNote1Param,
-	// DuoNote2Param,
-	// DuoGate1Param,
-	// DuoGate2Param,
+template<unsigned NumSemitones>
+constexpr float s14_to_semitones(int16_t val) {
+	return (float)val / (8192.f / ((float)NumSemitones / 12.f));
+}
+static_assert(s14_to_semitones<2>(-8192) == -0.16666667f);
+static_assert(s14_to_semitones<2>(8192) == 0.16666667f);
 
-	// QuadNote1Param,
-	// QuadNote2Param,
-	// QuadNote3Param,
-	// QuadNote4Param,
-	// QuadGate1Param,
-	// QuadGate2Param,
-	// QuadGate3Param,
-	// QuadGate4Param,
+constexpr float note_to_volts(uint8_t note) {
+	return (note - 24) / 12.f;
+}
+static_assert(note_to_volts(60) == 3);
+static_assert(note_to_volts(72) == 4);
 
-	// OctNote1Param,
-	// OctNote2Param,
-	// OctNote3Param,
-	// OctNote4Param,
-	// OctNote5Param,
-	// OctNote6Param,
-	// OctNote7Param,
-	// OctNote8Param,
-	// OctGate1Param,
-	// OctGate2Param,
-	// OctGate3Param,
-	// OctGate4Param,
-	// OctGate5Param,
-	// OctGate6Param,
-	// OctGate7Param,
-	// OctGate8Param,
-
-	LastMidiParam,
-};
+}; // namespace MetaModule::Midi

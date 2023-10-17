@@ -31,16 +31,17 @@ void Controls::update_params() {
 		}
 		_new_adc_data_ready = false;
 	}
+
 	for (unsigned i = 0; i < PanelDef::NumPot; i++)
 		cur_params->knobs[i] = _knobs[i].next();
-
-	bool midi_just_disconnected = false;
 
 	if (_first_param) {
 		_first_param = false;
 
-		if (cur_metaparams->midi_connected && !_midi_host.is_connected())
-			midi_just_disconnected = true;
+		// if (cur_metaparams->midi_connected && !_midi_host.is_connected())
+		// 	midi_just_disconnected = true;
+
+		_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
 
 		cur_metaparams->midi_connected = _midi_host.is_connected();
 		cur_params->jack_senses = get_jacksense_reading();
@@ -79,21 +80,13 @@ void Controls::update_params() {
 	// < 1us, every 20.83us
 	if (_midi_rx_buf.num_filled()) {
 		auto msg = _midi_rx_buf.get();
-		process_midi(msg, midi_notes, cur_params->midi.event, cur_metaparams->midi_poly_chans);
-	} else if (midi_just_disconnected) {
+		cur_params->midi.event = _midi_parser.parse(msg);
+
+		// } else if (midi_just_disconnected) {
 		//TODO: keep midi_just_disconnected true until we cleared both param buffers (notes and events)
 		// And only then set cur_metaparams->midi_connected to false
-
-		//if rx buffer is empty AND we've disconnected, turn off all notes
-		for (auto &midi_note : midi_notes) {
-			midi_note.gate = false;
-		}
 	} else {
 		cur_params->midi.event.type = Params::Midi::Event::Type::None;
-	}
-
-	for (auto [params_note, controls_note] : zip(cur_params->midi.notes, midi_notes)) {
-		params_note = controls_note;
 	}
 
 	cur_params++;
