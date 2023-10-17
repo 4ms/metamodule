@@ -22,6 +22,7 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 	data["static_knobs"] << pd.static_knobs;
 	data["mapped_knobs"] << pd.knob_sets;
 	data["midi_maps"] << pd.midi_maps;
+	data["midi_poly_num"] << pd.midi_poly_num;
 
 	return ryml::emitrs_yaml<std::string>(tree);
 }

@@ -80,7 +80,6 @@ void Controls::update_params() {
 	if (_midi_rx_buf.num_filled()) {
 		auto msg = _midi_rx_buf.get();
 		process_midi(msg, midi_notes, cur_params->midi.event, cur_metaparams->midi_poly_chans);
-
 	} else if (midi_just_disconnected) {
 		//TODO: keep midi_just_disconnected true until we cleared both param buffers (notes and events)
 		// And only then set cur_metaparams->midi_connected to false

@@ -25,7 +25,7 @@ struct ParamsState {
 		LatchedParam<float, 1, 128> vel;
 		LatchedParam<float, 1, 128> aft;
 	};
-	std::array<Note, MidiPolyphony> notes{};
+	std::array<Note, MaxMidiPolyphony> notes{};
 
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
 		if (plugged)

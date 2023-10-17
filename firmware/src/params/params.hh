@@ -21,7 +21,7 @@ struct Params {
 			float aft = 0; //aftertouch
 			bool retrig = false;
 		};
-		std::array<Note, MidiPolyphony> notes{};
+		std::array<Note, MaxMidiPolyphony> notes{};
 
 		struct Event {
 			enum class Type : uint8_t { None, GateNote, CC, Bend, Time } type = Type::None;

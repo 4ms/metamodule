@@ -82,8 +82,7 @@ enum : uint8_t { Clock = 0, DivClock = 1, Start = 2, Stop = 3, Cont = 4 };
 
 enum { MidiModWheelJack = MidiCC1 };
 
-static constexpr unsigned MidiMaxSimulGates = 8;
-static constexpr unsigned MidiPolyphony = 4;
+static constexpr unsigned MaxMidiPolyphony = 8;
 
 static constexpr size_t NumMidiNotes = 128;
 static constexpr size_t NumMidiCCs = 128;

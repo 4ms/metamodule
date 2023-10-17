@@ -41,10 +41,10 @@ private:
 	std::array<std::vector<Jack>, NumInConns> in_conns;
 
 	// MIDI
-	std::array<std::vector<Jack>, MidiPolyphony> midi_note_pitch_conns;
-	std::array<std::vector<Jack>, MidiPolyphony> midi_note_gate_conns;
-	std::array<std::vector<Jack>, MidiPolyphony> midi_note_vel_conns;
-	std::array<std::vector<Jack>, MidiPolyphony> midi_note_aft_conns;
+	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_pitch_conns;
+	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_gate_conns;
+	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_vel_conns;
+	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_aft_conns;
 	//TODO: compare performance of vector vs sparse map:
 	// std::vector<std::pair<unsigned /*ccnum*/, std::vector<Jack>>> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
@@ -56,7 +56,7 @@ private:
 		std::vector<Jack> conns;
 	};
 	std::array<MidiPulse, 5> midi_pulses;
-	std::array<MidiPulse, MidiPolyphony> midi_note_retrig;
+	std::array<MidiPulse, MaxMidiPolyphony> midi_note_retrig;
 
 	uint32_t midi_divclk_ctr = 0;
 	uint32_t midi_divclk_div_amt = 0;
@@ -290,6 +290,10 @@ public:
 			return modules[jack.module_id]->get_output(jack.jack_id);
 		else
 			return 0.f;
+	}
+
+	uint32_t get_midi_poly_num() {
+		return pd.midi_poly_num;
 	}
 
 	void apply_static_param(const StaticParam &sparam) {

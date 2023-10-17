@@ -168,6 +168,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	const auto jack_sense = param_block.params[0].jack_senses;
 	param_state.jack_senses = jack_sense;
 
+	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
+
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 
 		// Pass audio inputs to modules

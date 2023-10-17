@@ -49,6 +49,8 @@ void PatchFileWriter::setMidiSettings(MetaModule::MIDI::ModuleIds &ids, MetaModu
 	}
 	if (pd.midi_maps.set.size())
 		pd.midi_maps.name = "MIDI";
+
+	pd.midi_poly_num = std::min<uint32_t>(midiSettings.CV.channels, 8U);
 }
 
 void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {

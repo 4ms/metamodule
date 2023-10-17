@@ -80,6 +80,8 @@ TEST_CASE("Correct yaml output produced") {
 	pd.static_knobs.push_back({4, 5, 0.6f});
 	pd.static_knobs.push_back({5, 6, 0.7f});
 
+	pd.midi_poly_num = 4;
+
 	auto yaml = patch_to_yaml_string(pd);
 	CHECK(yaml ==
 		  // clang-format off
@@ -183,6 +185,10 @@ R"(PatchData:
           curve_type: 4
           min: 0.4
           max: 0.65
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 4
 )");
 	// clang-format on
 }
