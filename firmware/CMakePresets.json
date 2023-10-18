@@ -22,6 +22,16 @@
           "value": "cmake/arm-none-eabi-gcc.cmake"
         }
       }
+    },
+    {
+      "name": "full",
+      "inherits": "base",
+      "cacheVariables": {
+        "ENABLE_WIFI_BRIDGE":{
+          "type": "BOOL",
+          "value": "ON"
+        }
+      }
     }
   ],
   "buildPresets": [
