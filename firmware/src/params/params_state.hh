@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
+#include "midi_params.hh"
 #include "patch/midi_def.hh"
 #include "util/debouncer.hh"
 #include "util/parameter.hh"
@@ -18,14 +19,10 @@ struct ParamsState {
 
 	uint32_t jack_senses;
 
-	//MIDI
-	struct Note {
-		LatchedParam<float, 3, 1000> pitch;
-		LatchedParam<uint8_t, 1> gate;
-		LatchedParam<float, 1, 128> vel;
-		LatchedParam<float, 1, 128> aft;
-	};
-	std::array<Note, MaxMidiPolyphony> notes{};
+	// LatchedParam<uint8_t, 1> last_midi_note;
+
+	LatchedParam<uint8_t, 1> midi_cc_chan;
+	LatchedParam<uint8_t, 1> midi_cc_val;
 
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
 		if (plugged)
@@ -58,12 +55,9 @@ struct ParamsState {
 		for (auto &knob : knobs)
 			knob = {0.f, false};
 
-		for (auto &note : notes) {
-			note.pitch = {0.f, false};
-			note.gate = {0, false};
-			note.vel = {0.f, false};
-			note.aft = {0.f, false};
-		}
+		// last_midi_note = 0xFF;
+		midi_cc_chan = 0xFF;
+		midi_cc_val = 0xFF;
 
 		jack_senses = 0;
 	}
@@ -79,18 +73,13 @@ struct ParamsState {
 			that_knob.changed = false;
 		}
 
-		for (auto [note, that_note] : zip(notes, that.notes)) {
-			note = that_note;
-			that_note.pitch.changed = false;
-			that_note.gate.changed = false;
-			that_note.vel.changed = false;
-			that_note.aft.changed = false;
-		}
+		midi_cc_chan.store_changed(that.midi_cc_chan.val);
+		midi_cc_val.store_changed(that.midi_cc_val.val);
 
 		jack_senses = that.jack_senses;
 	}
 
-	void copy_to(ParamsState &that) const {
+	void copy_to(ParamsState &that) {
 		for (auto [gate_in, that_gate_in] : zip(gate_ins, that.gate_ins))
 			that_gate_in.copy_state(gate_in);
 
@@ -98,9 +87,15 @@ struct ParamsState {
 			that_knob = knob;
 		}
 
-		for (auto [note, that_note] : zip(notes, that.notes)) {
-			that_note = note;
-		}
+		// that.midi_cc_chan.store_changed(midi_cc_chan.val);
+		// that.midi_cc_val.store_changed(midi_cc_val.val);
+		that.midi_cc_chan.val = midi_cc_chan.val;
+		if (midi_cc_chan.did_change())
+			that.midi_cc_chan.changed = true;
+
+		that.midi_cc_val.val = midi_cc_val.val;
+		if (midi_cc_val.did_change())
+			that.midi_cc_val.changed = true;
 
 		that.jack_senses = jack_senses;
 	}

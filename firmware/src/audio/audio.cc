@@ -201,7 +201,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// MIDI
 		if (param_block.metaparams.midi_connected)
-			handle_midi(params_.midi.event, param_block.metaparams.midi_poly_chans);
+			handle_midi(params_.midi_event, param_block.metaparams.midi_poly_chans);
 
 		// Run each module
 		player.update_patch();
@@ -212,35 +212,42 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	}
 }
 
-void AudioStream::handle_midi(Params::Midi::Event const &event, unsigned poly_num) {
-	if (event.type == Params::Midi::Event::Type::None)
+void AudioStream::handle_midi(Midi::Event const &event, unsigned poly_num) {
+	if (event.type == Midi::Event::Type::None)
 		return;
 
-	if (event.type == Params::Midi::Event::Type::NoteOn) {
+	if (event.type == Midi::Event::Type::NoteOn) {
 		player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note));
 		player.set_midi_note_gate(event.poly_chan, 10.f);
 		player.set_midi_note_velocity(event.poly_chan, event.val);
 		player.set_midi_note_retrig(event.poly_chan, 10.f);
 		player.set_midi_gate(event.note, event.val); //TODO: if not velocity mode, then event.val => 10
+		// param_state.last_midi_note.store_changed(event.note);
+		printf_(">%d %d\n", event.poly_chan, event.note);
 
-	} else if (event.type == Params::Midi::Event::Type::NoteOff) {
+	} else if (event.type == Midi::Event::Type::NoteOff) {
 		player.set_midi_note_gate(event.poly_chan, 0);
 		player.set_midi_gate(event.note, 0);
+		// param_state.last_midi_note.store_changed(event.note);
+		printf_("_%d %d\n", event.poly_chan, event.note);
 
-	} else if (event.type == Params::Midi::Event::Type::Aft) {
+	} else if (event.type == Midi::Event::Type::Aft) {
 		player.set_midi_note_aftertouch(event.poly_chan, event.val);
 
-	} else if (event.type == Params::Midi::Event::Type::ChanPress) {
+	} else if (event.type == Midi::Event::Type::ChanPress) {
 		for (unsigned i = 0; i < poly_num; i++)
 			player.set_midi_note_aftertouch(i, event.val);
 
-	} else if (event.type == Params::Midi::Event::Type::CC) {
+	} else if (event.type == Midi::Event::Type::CC) {
 		player.set_midi_cc(event.note, event.val);
+		param_state.midi_cc_chan = event.note;
+		param_state.midi_cc_val = event.val;
+		// printf_("cc %d %d %d\n", event.note, event.val, param_state.midi_cc_val.val);
 
-	} else if (event.type == Params::Midi::Event::Type::Bend) {
+	} else if (event.type == Midi::Event::Type::Bend) {
 		player.set_midi_cc(128, event.val);
 
-	} else if (event.type == Params::Midi::Event::Type::Time) {
+	} else if (event.type == Midi::Event::Type::Time) {
 		player.send_midi_time_event(event.note, 10.f);
 	}
 }
