@@ -61,8 +61,8 @@ struct VCVPatchFileWriter {
 
 		// Scan cables
 		std::vector<CableMap> cableData;
-		for (auto cableID : engine->getCableIds()) {
-			auto cable = engine->getCable(cableID);
+		for (auto cableWidget : APP->scene->rack->getCompleteCables()) {
+			auto cable = cableWidget->cable;
 			auto out = cable->outputModule;
 			auto in = cable->inputModule;
 
@@ -88,16 +88,10 @@ struct VCVPatchFileWriter {
 			if (ModuleDirectory::isHub(out) && ModuleDirectory::isHub(in))
 				continue;
 
-			uint16_t color = 0;
-			for (auto cableWidget : APP->scene->rack->getCompleteCables()) {
-				if (cableWidget->cable == cable) {
-					uint8_t r_amt = (uint8_t)rack::clamp(cableWidget->color.r, 0.0, 1.0) * 255;
-					uint8_t g_amt = (uint8_t)rack::clamp(cableWidget->color.g, 0.0, 1.0) * 255;
-					uint8_t b_amt = (uint8_t)rack::clamp(cableWidget->color.b, 0.0, 1.0) * 255;
-					color = Color(r_amt, g_amt, b_amt).Rgb565();
-					break;
-				}
-			}
+			uint8_t r_amt = (uint8_t)(rack::clamp(cableWidget->color.r) * 255);
+			uint8_t g_amt = (uint8_t)(rack::clamp(cableWidget->color.g) * 255);
+			uint8_t b_amt = (uint8_t)(rack::clamp(cableWidget->color.b) * 255);
+			uint16_t color = Color(r_amt, g_amt, b_amt).Rgb565();
 
 			cableData.push_back({
 				.sendingJackId = cable->outputId,
