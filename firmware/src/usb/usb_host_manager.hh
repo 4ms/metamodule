@@ -65,6 +65,7 @@ public:
 
 	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {
 		USBHostHelper host{phost};
+		static uint8_t connected_classcode = 0xFF;
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
@@ -75,15 +76,16 @@ public:
 				pr_trace("Connected\n");
 				break;
 
-			case HOST_USER_CLASS_SELECTED:
-				pr_trace("Class selected\n");
-				break;
+			case HOST_USER_CLASS_SELECTED: {
+				connected_classcode = host.get_active_class_code();
+				pr_trace("Class selected: %d\n", connected_classcode);
+			} break;
 
 			case HOST_USER_CLASS_ACTIVE: {
-				uint8_t classcode = host.get_active_class_code();
+				connected_classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
-				pr_trace("Class active: %.8s code %d\n", classname, classcode);
-				if (classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
+				pr_trace("Class active: %.8s code %d\n", classname, connected_classcode);
+				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
 					_midihost_instance->connect();
 					auto mshandle = host.get_class_handle<MidiStreamingHandle>();
 					if (!mshandle) {
@@ -92,19 +94,19 @@ public:
 					}
 					USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				}
-				if (classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
+				if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
 					pr_trace("MSC connected\n");
 					_mschost_instance->connect();
 				}
 			} break;
 
 			case HOST_USER_DISCONNECTION: {
-				uint8_t classcode = host.get_active_class_code();
-				pr_trace("Disconnected class code %d\n", classcode);
-				if (classcode == AudioClassCode)
+				pr_trace("Disconnected class code %d\n", connected_classcode);
+				if (connected_classcode == AudioClassCode)
 					_midihost_instance->disconnect();
-				if (classcode == USB_MSC_CLASS)
+				if (connected_classcode == USB_MSC_CLASS)
 					_mschost_instance->disconnect();
+				connected_classcode = 0xFF;
 			} break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
