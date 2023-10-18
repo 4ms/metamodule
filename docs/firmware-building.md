@@ -1,4 +1,4 @@
-### Building Firmware
+## Building Firmware
 
 This requires `arm-none-eabi-gcc` version 12.2 or later installed on your PATH.
 Please see the [setup guide](../docs/Setup.md) for some important notes about this.
@@ -155,7 +155,6 @@ Optionally, you can only export one layer from a faceplate SVG file by specifyin
                                    path/to/newfaceplate.svg \
                                    src/gui/images/BRANDNAME/modules/newfaceplate.c \
                                    artworklayer
-
 ```
 
 The svgextract script can do more, to see its help and view available commands:

@@ -5,7 +5,7 @@ toolchain, and then loaded onto the MetaModule.
 
 The following guides are available:
 
-- [Setup guide](../docs/Setup.md): required software for your host computer.
+- [Setting up your environment](../docs/Setup.md): required software for your host computer.
 
 - [Building firmware](../docs/firmware-building.md)
 

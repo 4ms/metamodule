@@ -58,3 +58,16 @@ pin). The bottom four pins are all GND. Settings are 115200, 8N1.
 Use `pr_dbg()`, `pr_warn()`, `pr_err()`, and `pr_trace()` for debug output. These
 require the `console/pr_dbg.hh` header.
 
+
+## Using VSCode
+
+VSCode can be used to debug, using OpenOCD and gdb.
+
+
+Some configuration files (for the mp1 bootloader, so they will need to be adapted to MetaModule):
+[here](https://github.com/danngreen/stm32mp1-baremetal/tree/vscode/bootloaders/mp1-boot/.vscode)
+and [here](https://github.com/kamejoko80/stm32mp1-baremetal-1/tree/vscode/bootloaders/mp1-boot/.vscode)
+
+And also [some discussion:](https://github.com/4ms/stm32mp1-baremetal/issues/20)
+
+TODO: Adapt this to MetaModule.
