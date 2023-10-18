@@ -69,13 +69,19 @@ struct AddMapPopUp {
 
 	void update(ParamsState &params) {
 		if (visible) {
-			for (unsigned i = 0; auto const &knob : params.knobs) {
-				if (knob.changed) {
+			for (unsigned i = 0; auto &knob : params.knobs) {
+				if (knob.did_change()) {
 					auto name = PanelDef::get_map_param_name(i);
 					lv_label_set_text_fmt(ui_MapDetected, "Knob: %.4s", name.data());
 					selected_knob = i;
 				}
 				i++;
+			}
+			if (params.midi_cc_val.did_change() || params.midi_cc_chan.did_change()) {
+				lv_label_set_text_fmt(ui_MapDetected, "MIDI CC: %d", params.midi_cc_chan.val);
+				selected_knob = MidiCC0 + params.midi_cc_chan.val;
+				params.midi_cc_chan.changed = false;
+				params.midi_cc_val.changed = false;
 			}
 		}
 	}
@@ -87,19 +93,34 @@ struct AddMapPopUp {
 
 		if (event->target == ui_OkAdd) {
 			if (page->selected_knob.has_value()) {
+				auto mapped_knob = page->selected_knob.value();
 				uint16_t module_id = PageList::get_selected_module_id();
+				if (mapped_knob <= PanelDef::NumKnobs) {
+					// TODO: just have AddMapping and set_id to indicate MidiMap?
+					page->patch_mod_queue.put(AddMapping{
+						.map =
+							{
+								.panel_knob_id = mapped_knob,
+								.module_id = module_id,
+								.param_id = page->param_idx,
+								.min = 0.f,
+								.max = 1.f,
+							},
+						.set_id = page->set_id,
+					});
 
-				page->patch_mod_queue.put(AddMapping{
-					.map =
-						{
-							.panel_knob_id = page->selected_knob.value(),
-							.module_id = module_id,
-							.param_id = page->param_idx,
-							.min = 0.f,
-							.max = 1.f,
-						},
-					.set_id = page->set_id,
-				});
+				} else if (mapped_knob >= MidiCC0 && mapped_knob <= MidiCC127) {
+					page->patch_mod_queue.put(AddMidiMap{
+						.map =
+							{
+								.panel_knob_id = mapped_knob,
+								.module_id = module_id,
+								.param_id = page->param_idx,
+								.min = 0.f,
+								.max = 1.f,
+							},
+					});
+				}
 			}
 			page->hide();
 		}

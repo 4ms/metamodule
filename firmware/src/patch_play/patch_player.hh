@@ -307,6 +307,12 @@ public:
 		}
 	}
 
+	void add_midi_mapped_knob(const MappedKnob &map) {
+		if (pd.add_update_midi_map(map)) {
+			cache_midi_mapping(map);
+		}
+	}
+
 	void set_active_knob_set(unsigned num) {
 		active_knob_set = std::min(num, MaxKnobSets - 1);
 	}

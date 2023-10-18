@@ -44,10 +44,32 @@ struct PatchData {
 		if (set_id >= knob_sets.size())
 			return false;
 
+		if (map.module_id >= module_slugs.size())
+			return false;
+
+		if (map.param_id >= PanelDef::NumKnobs)
+			return false;
+
 		if (auto *m = _get_mapped_knob(set_id, map.module_id, map.param_id)) {
 			*m = map;
 		} else {
 			knob_sets[set_id].set.push_back(map);
+		}
+
+		return true;
+	}
+
+	bool add_update_midi_map(MappedKnob const &map) {
+		if (map.param_id >= NumMidiCCs)
+			return false;
+
+		if (map.module_id >= module_slugs.size())
+			return false;
+
+		if (auto *m = _get_midi_map(map.module_id, map.param_id)) {
+			*m = map;
+		} else {
+			midi_maps.set.push_back(map);
 		}
 
 		return true;
@@ -123,6 +145,14 @@ private:
 				if (m.module_id == module_id && m.param_id == param_id)
 					return &m;
 			}
+		}
+		return nullptr;
+	}
+
+	MappedKnob *_get_midi_map(uint32_t module_id, uint32_t param_id) {
+		for (auto &m : midi_maps.set) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				return &m;
 		}
 		return nullptr;
 	}

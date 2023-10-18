@@ -175,6 +175,7 @@ struct ModuleViewPage : PageBase {
 
 			std::visit(overloaded{
 						   [this](AddMapping &mod) { apply_add_mapping(mod); },
+						   [this](AddMidiMap &mod) { apply_add_midi_map(mod); },
 						   [](auto &m) {},
 					   },
 					   patch_mod.value());
@@ -186,6 +187,12 @@ struct ModuleViewPage : PageBase {
 
 	void apply_add_mapping(AddMapping &mod) {
 		if (patch.add_update_mapped_knob(mod.set_id, mod.map)) {
+			prepare_focus();
+		}
+	}
+
+	void apply_add_midi_map(AddMidiMap &mod) {
+		if (patch.add_update_midi_map(mod.map)) {
 			prepare_focus();
 		}
 	}
