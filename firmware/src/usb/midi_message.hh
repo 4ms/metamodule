@@ -11,6 +11,7 @@
 // https://www.midi.org/specifications/midi1-specifications/m1-v4-2-1-midi-1-0-detailed-specification-96-1-4
 
 enum class MidiCommand : uint8_t {
+	None = 0,
 	NoteOff = 0x8,
 	NoteOn = 0x9,
 	PolyKeyPressure = 0xA,
@@ -67,8 +68,8 @@ enum MidiSystemExclusiveCommand : uint8_t {
 };
 
 struct MidiMessage {
-	MidiStatusByte status;
-	MidiDataBytes data;
+	MidiStatusByte status{MidiCommand::None, 0};
+	MidiDataBytes data{0, 0};
 
 	MidiMessage() = default;
 
