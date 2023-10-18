@@ -92,6 +92,31 @@ class SHEVCore : public SmartCoreProcessor<SHEVInfo> {
 	using ThisCore = SHEVCore;
 	using enum Info::Elem;
 
+public:
+	template<Info::Elem EL>
+	void setOutput(auto val)
+	{
+		return SmartCoreProcessor<Info>::setOutput<EL>(val);
+	}
+
+	template<Info::Elem EL>
+	auto getInput()
+	{
+		return SmartCoreProcessor<Info>::getInput<EL>();
+	}
+
+	template<Info::Elem EL, typename VAL>
+	void setLED(const VAL &value)
+	{
+		return SmartCoreProcessor<Info>::setLED<EL>(value);
+	}
+
+	template<Info::Elem EL>
+	auto getState()
+	{
+		return SmartCoreProcessor<Info>::getState<EL>();
+	}
+
 private:
 	template <class Mapping>
 	class Channel
@@ -117,10 +142,10 @@ private:
 		float timeStepInS = 1.f / 48000.f;
 
 	private:
-		SmartCoreProcessor<SHEVInfo>* parent;
+		SHEVCore* parent;
 
 	public:
-		Channel(SmartCoreProcessor<SHEVInfo>* parent_)
+		Channel(SHEVCore* parent_)
 			: triggerDetector(1.0f, 2.0f), parent(parent_){
 		}
 
