@@ -46,6 +46,14 @@ struct MappedKnob {
 		return (max - min) * panel_val + min;
 	}
 
+	bool is_midi_cc() const {
+		return (panel_knob_id >= MidiCC0 && panel_knob_id <= MidiCC127);
+	}
+
+	uint16_t cc_num() const {
+		return panel_knob_id - MidiCC0;
+	}
+
 	bool operator==(const MappedKnob &other) {
 		return (module_id == other.module_id) && (param_id == other.param_id);
 	}

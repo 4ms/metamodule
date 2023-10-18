@@ -13,6 +13,8 @@ PatchData:
     8: EnOsc
     9: Atvert2
     10: Atvert2
+    11: Atvert2
+    12: Atvert2
   int_cables:
     - out:
         module_id: 5
@@ -70,6 +72,62 @@ PatchData:
         - module_id: 8
           jack_id: 8
       color: 0
+    - out:
+        module_id: 11
+        jack_id: 0
+      ins:
+        - module_id: 5
+          jack_id: 7
+      color: 0
+    - out:
+        module_id: 11
+        jack_id: 1
+      ins:
+        - module_id: 6
+          jack_id: 7
+      color: 0
+    - out:
+        module_id: 12
+        jack_id: 0
+      ins:
+        - module_id: 7
+          jack_id: 7
+      color: 0
+    - out:
+        module_id: 12
+        jack_id: 1
+      ins:
+        - module_id: 8
+          jack_id: 7
+      color: 0
+    - out:
+        module_id: 4
+        jack_id: 0
+      ins:
+        - module_id: 8
+          jack_id: 3
+      color: 0
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 7
+          jack_id: 3
+      color: 0
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 5
+          jack_id: 3
+      color: 0
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 6
+          jack_id: 3
+      color: 0
   mapped_ins:
     - panel_jack_id: 275
       ins:
@@ -103,22 +161,6 @@ PatchData:
       ins:
         - module_id: 5
           jack_id: 0
-    - panel_jack_id: 307
-      ins:
-        - module_id: 8
-          jack_id: 7
-    - panel_jack_id: 304
-      ins:
-        - module_id: 5
-          jack_id: 7
-    - panel_jack_id: 305
-      ins:
-        - module_id: 6
-          jack_id: 7
-    - panel_jack_id: 306
-      ins:
-        - module_id: 7
-          jack_id: 7
     - panel_jack_id: 291
       ins:
         - module_id: 10
@@ -135,6 +177,22 @@ PatchData:
       ins:
         - module_id: 10
           jack_id: 0
+    - panel_jack_id: 304
+      ins:
+        - module_id: 11
+          jack_id: 0
+    - panel_jack_id: 305
+      ins:
+        - module_id: 11
+          jack_id: 1
+    - panel_jack_id: 306
+      ins:
+        - module_id: 12
+          jack_id: 0
+    - panel_jack_id: 307
+      ins:
+        - module_id: 12
+          jack_id: 1
   mapped_outs:
     - panel_jack_id: 0
       out:
@@ -161,7 +219,7 @@ PatchData:
       value: 0.5
     - module_id: 1
       param_id: 2
-      value: 0.5
+      value: 0
     - module_id: 1
       param_id: 3
       value: 0.5
@@ -185,13 +243,13 @@ PatchData:
       value: 0.5
     - module_id: 2
       param_id: 2
-      value: 0.5
+      value: 0
     - module_id: 2
       param_id: 3
-      value: 0.5
+      value: 0.318072
     - module_id: 2
       param_id: 4
-      value: 0.5
+      value: 0.691566
     - module_id: 2
       param_id: 5
       value: 0
@@ -209,7 +267,7 @@ PatchData:
       value: 0.5
     - module_id: 3
       param_id: 2
-      value: 0.5
+      value: 0
     - module_id: 3
       param_id: 3
       value: 0.5
@@ -233,7 +291,7 @@ PatchData:
       value: 0.5
     - module_id: 4
       param_id: 2
-      value: 0.5
+      value: 0
     - module_id: 4
       param_id: 3
       value: 0.5
@@ -260,7 +318,7 @@ PatchData:
       value: 0.5
     - module_id: 5
       param_id: 3
-      value: 0.5
+      value: 0.0629921
     - module_id: 5
       param_id: 4
       value: 0.5
@@ -272,7 +330,7 @@ PatchData:
       value: 0
     - module_id: 5
       param_id: 7
-      value: 0
+      value: 0.165354
     - module_id: 5
       param_id: 8
       value: 0
@@ -287,7 +345,7 @@ PatchData:
       value: 0.5
     - module_id: 5
       param_id: 12
-      value: 0.5
+      value: 0
     - module_id: 5
       param_id: 13
       value: 0
@@ -332,7 +390,7 @@ PatchData:
       value: 0.5
     - module_id: 6
       param_id: 12
-      value: 0.5
+      value: 0
     - module_id: 6
       param_id: 13
       value: 0
@@ -377,7 +435,7 @@ PatchData:
       value: 0.5
     - module_id: 7
       param_id: 12
-      value: 0.5
+      value: 0
     - module_id: 7
       param_id: 13
       value: 0
@@ -422,7 +480,7 @@ PatchData:
       value: 0.5
     - module_id: 8
       param_id: 12
-      value: 0.5
+      value: 0
     - module_id: 8
       param_id: 13
       value: 0
@@ -431,16 +489,28 @@ PatchData:
       value: 0
     - module_id: 9
       param_id: 0
-      value: 0.5
+      value: 0.466265
     - module_id: 9
       param_id: 1
-      value: 0.5
+      value: 0.466265
     - module_id: 10
       param_id: 0
-      value: 0.5
+      value: 0.466265
     - module_id: 10
       param_id: 1
-      value: 0.5
+      value: 0.466265
+    - module_id: 11
+      param_id: 0
+      value: 0.490362
+    - module_id: 11
+      param_id: 1
+      value: 0.490362
+    - module_id: 12
+      param_id: 0
+      value: 0.490362
+    - module_id: 12
+      param_id: 1
+      value: 0.490362
   mapped_knobs:
     - name: ''
       set:
@@ -685,26 +755,26 @@ PatchData:
           min: 0
           max: 1
         - panel_knob_id: 10
-          module_id: 6
-          param_id: 12
+          module_id: 11
+          param_id: 0
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 10
-          module_id: 5
-          param_id: 12
+          module_id: 11
+          param_id: 1
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 10
-          module_id: 7
-          param_id: 12
+          module_id: 12
+          param_id: 0
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 10
-          module_id: 8
-          param_id: 12
+          module_id: 12
+          param_id: 1
           curve_type: 0
           min: 0
           max: 1
@@ -747,8 +817,20 @@ PatchData:
     - name: ''
       set: []
   midi_maps:
-    name: ''
-    set: []
+    name: MIDI
+    set:
+      - panel_knob_id: 522
+        module_id: 5
+        param_id: 7
+        curve_type: 0
+        min: 0
+        max: 1
+      - panel_knob_id: 586
+        module_id: 5
+        param_id: 3
+        curve_type: 0
+        min: 0
+        max: 1
   midi_poly_num: 4
 
 'vcvModuleStates': []

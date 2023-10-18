@@ -47,8 +47,8 @@ struct PatchData {
 		if (map.module_id >= module_slugs.size())
 			return false;
 
-		if (map.param_id >= PanelDef::NumKnobs)
-			return false;
+		// if (map.param_id >= PanelDef::NumKnobs)
+		// 	return false;
 
 		if (auto *m = _get_mapped_knob(set_id, map.module_id, map.param_id)) {
 			*m = map;
@@ -60,7 +60,7 @@ struct PatchData {
 	}
 
 	bool add_update_midi_map(MappedKnob const &map) {
-		if (map.param_id >= NumMidiCCs)
+		if (!map.is_midi_cc())
 			return false;
 
 		if (map.module_id >= module_slugs.size())

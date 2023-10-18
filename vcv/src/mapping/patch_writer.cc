@@ -37,7 +37,7 @@ void PatchFileWriter::setMidiSettings(MetaModule::MIDI::ModuleIds &ids, MetaModu
 	for (auto cc : midiSettings.CCKnob.ccs) {
 		if (cc.CCnum > 0) {
 			pd.midi_maps.set.emplace_back(MappedKnob{
-				.panel_knob_id = (uint16_t)cc.CCnum,
+				.panel_knob_id = (uint16_t)(cc.CCnum + MidiCC0),
 				.module_id = idMap[cc.module_id],
 				.param_id = cc.param_id,
 				.curve_type = 0,

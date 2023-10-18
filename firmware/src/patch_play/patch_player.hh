@@ -131,7 +131,6 @@ public:
 		}
 
 		for (auto const &mm : pd.midi_maps.set) {
-			pr_dbg("Midi Map: CC%d to m:%d p:%d\n", mm.panel_knob_id, mm.module_id, mm.param_id);
 			cache_midi_mapping(mm);
 		}
 
@@ -624,8 +623,12 @@ private:
 	}
 
 	void cache_midi_mapping(const MappedKnob &k) {
-		if (k.panel_knob_id < NumMidiCCs)
-			update_or_add(midi_knob_conns[k.panel_knob_id], k);
+		if (k.is_midi_cc()) {
+			pr_dbg("Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
+			update_or_add(midi_knob_conns[k.cc_num()], k);
+		} else {
+			pr_warn("Bad Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
+		}
 	}
 };
 } // namespace MetaModule
