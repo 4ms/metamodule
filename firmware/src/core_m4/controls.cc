@@ -38,8 +38,12 @@ void Controls::update_params() {
 	if (_first_param) {
 		_first_param = false;
 
-		// if (cur_metaparams->midi_connected && !_midi_host.is_connected())
-		// 	midi_just_disconnected = true;
+		_midi_connected.update(_midi_host.is_connected());
+		if (_midi_connected.went_low())
+			_transmitting_all_notes_off = true;
+
+		if (!_transmitting_all_notes_off && _midi_connected.is_high())
+			cur_metaparams->midi_connected = true;
 
 		_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
 
@@ -77,7 +81,7 @@ void Controls::update_params() {
 		cur_metaparams->meta_buttons[0].transfer_events(button0);
 	}
 
-	// < 1us, every 20.83us
+	// Parse a MIDI message if available
 	if (_midi_rx_buf.num_filled()) {
 		auto msg = _midi_rx_buf.get();
 		cur_params->midi.event = _midi_parser.parse(msg);
@@ -128,7 +132,6 @@ void Controls::start() {
 	}
 
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
-		// Debug::Pin0::high();
 		bool ignore = false;
 
 		while (rxbuffer.size() >= 4) {
@@ -149,7 +152,6 @@ void Controls::start() {
 			// msg.print();
 		}
 		_midi_host.receive();
-		// Debug::Pin0::low();
 	});
 }
 
