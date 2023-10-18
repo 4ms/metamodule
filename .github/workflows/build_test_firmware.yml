@@ -48,7 +48,7 @@ jobs:
 
       - name: Build and test
         if: ${{ ! inputs.limited_modules }}
-        run: cd firmware && make configure && make all
+        run: cd firmware && make configure PRESET=full && make all
 
       - name: Build and test
         if: ${{ inputs.limited_modules }}
