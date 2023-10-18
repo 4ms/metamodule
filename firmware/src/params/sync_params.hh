@@ -3,6 +3,7 @@
 #include "drivers/hsem.hh"
 #include "metaparams.hh"
 #include "params_state.hh"
+#include "util/lockfree_fifo_spsc.hh"
 
 namespace MetaModule
 {
@@ -15,6 +16,7 @@ namespace MetaModule
 struct SyncParams {
 	ParamsState p;
 	MetaParams m;
+	LockFreeFifoSpsc<Midi::Event, 64> midi_events;
 
 	static constexpr uint32_t WriteProcID = 1;
 	static constexpr uint32_t ReadProcID = 2;
@@ -23,7 +25,6 @@ struct SyncParams {
 		clear();
 	}
 
-	// Writes the ParamCache
 	void write_sync(ParamsState &p_, MetaParams &m_) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
@@ -33,7 +34,6 @@ struct SyncParams {
 		}
 	}
 
-	// Writes the ParamCache
 	bool read_sync(ParamsState &params, MetaParams &metaparams) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(ReadProcID) == HWSemaphoreFlag::LockedOk) {

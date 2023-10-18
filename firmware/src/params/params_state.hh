@@ -19,10 +19,7 @@ struct ParamsState {
 
 	uint32_t jack_senses;
 
-	// LatchedParam<uint8_t, 1> last_midi_note;
-
-	LatchedParam<uint8_t, 1> midi_cc_chan;
-	LatchedParam<uint8_t, 1> midi_cc_val;
+	std::array<LatchedParam<int8_t, 1>, NumMidiCCs> midi_ccs;
 
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
 		if (plugged)
@@ -55,9 +52,10 @@ struct ParamsState {
 		for (auto &knob : knobs)
 			knob = {0.f, false};
 
-		// last_midi_note = 0xFF;
-		midi_cc_chan = 0xFF;
-		midi_cc_val = 0xFF;
+		for (auto &cc : midi_ccs) {
+			cc = 0;
+			cc.changed = false;
+		}
 
 		jack_senses = 0;
 	}
@@ -73,9 +71,6 @@ struct ParamsState {
 			that_knob.changed = false;
 		}
 
-		midi_cc_chan.store_changed(that.midi_cc_chan.val);
-		midi_cc_val.store_changed(that.midi_cc_val.val);
-
 		jack_senses = that.jack_senses;
 	}
 
@@ -86,16 +81,6 @@ struct ParamsState {
 		for (auto [knob, that_knob] : zip(knobs, that.knobs)) {
 			that_knob = knob;
 		}
-
-		// that.midi_cc_chan.store_changed(midi_cc_chan.val);
-		// that.midi_cc_val.store_changed(midi_cc_val.val);
-		that.midi_cc_chan.val = midi_cc_chan.val;
-		if (midi_cc_chan.did_change())
-			that.midi_cc_chan.changed = true;
-
-		that.midi_cc_val.val = midi_cc_val.val;
-		if (midi_cc_val.did_change())
-			that.midi_cc_val.changed = true;
 
 		that.jack_senses = jack_senses;
 	}

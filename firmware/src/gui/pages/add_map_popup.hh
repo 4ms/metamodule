@@ -77,11 +77,12 @@ struct AddMapPopUp {
 				}
 				i++;
 			}
-			if (params.midi_cc_val.did_change() || params.midi_cc_chan.did_change()) {
-				lv_label_set_text_fmt(ui_MapDetected, "MIDI CC: %d", params.midi_cc_chan.val);
-				selected_knob = MidiCC0 + params.midi_cc_chan.val;
-				params.midi_cc_chan.changed = false;
-				params.midi_cc_val.changed = false;
+			for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
+				if (cc.did_change()) {
+					lv_label_set_text_fmt(ui_MapDetected, "MIDI CC: %d", ccnum);
+					selected_knob = MidiCC0 + ccnum;
+				}
+				ccnum++;
 			}
 		}
 	}

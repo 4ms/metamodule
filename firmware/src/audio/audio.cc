@@ -240,9 +240,7 @@ void AudioStream::handle_midi(Midi::Event const &event, unsigned poly_num) {
 
 	} else if (event.type == Midi::Event::Type::CC) {
 		player.set_midi_cc(event.note, event.val);
-		param_state.midi_cc_chan = event.note;
-		param_state.midi_cc_val = event.val;
-		// printf_("cc %d %d %d\n", event.note, event.val, param_state.midi_cc_val.val);
+		sync_params.midi_events.put(event);
 
 	} else if (event.type == Midi::Event::Type::Bend) {
 		player.set_midi_cc(128, event.val);
