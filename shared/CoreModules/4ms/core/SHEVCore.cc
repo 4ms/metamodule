@@ -149,6 +149,7 @@ private:
 				shapeControl += (parent->getState<Mapping::ShapeKnob>() * 2.0f - 1.0f) * *shapeCV / 10.0f;
 				shapeControl = std::clamp(shapeControl, 0.0f, 1.0f);
 			}
+			parent->setLED<Mapping::ShapeLight>(FullColor_t{shapeControl});
 
 			float shapedEnv;
 
@@ -323,7 +324,7 @@ private:
 		const static Info::Elem ShapeSlider = ShapeASlider;
 		const static Info::Elem ShapeKnob = ShapeAKnob;
 		const static Info::Elem CycleArAsrSwitch = TrigModeASwitch;
-		const static Info::Elem ShapeLight = ShapeBLight;
+		const static Info::Elem ShapeLight = ShapeALight;
 	};
 
 	struct MappingB
