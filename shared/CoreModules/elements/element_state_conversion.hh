@@ -85,4 +85,21 @@ constexpr std::array<float, T::NumLights> convertLED(const T &, BipolarColor_t c
 	return {-std::min(color.value, 0.0f), std::max(color.value, 0.f)};
 }
 
+template<typename T>
+constexpr std::array<float, T::NumLights> convertLED(const T &, FullColor_t color)
+	requires(std::derived_from<T, RgbLed>)
+{
+	//fades from green to red to blue
+	float green = 1.f - 2.f * color.value;
+	float blue = -green;
+
+	green = std::clamp(green, 0.f, 1.f);
+	blue = std::clamp(blue, 0.f, 1.f);
+
+	float red = 1.f - (green + blue);
+	red = std::clamp(red, 0.f, 1.f);
+
+	return {red, green, blue};
+}
+
 } // namespace MetaModule::StateConversion
