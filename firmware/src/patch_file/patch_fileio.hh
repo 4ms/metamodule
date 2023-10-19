@@ -1,9 +1,9 @@
 #pragma once
-#include "console/pr_dbg.hh"
 #include "fs/fileio_t.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patches_default.hh"
 #include "patchlist.hh"
+#include "pr_dbg.hh"
 
 namespace MetaModule
 {
