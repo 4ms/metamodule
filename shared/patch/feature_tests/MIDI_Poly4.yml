@@ -1,5 +1,5 @@
 PatchData:
-  patch_name: 'MIDI-Poly4'
+  patch_name: MIDI_Poly4
   description: Patch Description
   module_slugs:
     0: HubMedium
