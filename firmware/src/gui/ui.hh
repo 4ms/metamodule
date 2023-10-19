@@ -88,7 +88,7 @@ private:
 		if (auto event = sync_params.midi_events.get(); event.has_value()) {
 			auto e = event.value();
 			if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs)
-				params.midi_ccs[e.note].store_changed((e.val / 10.f) * 127);
+				params.midi_ccs[e.note].store_changed(e.val / 10.f);
 		}
 
 		page_manager.update_current_page();

@@ -28,7 +28,7 @@ struct SyncParams {
 	void write_sync(ParamsState &p_, MetaParams &m_) {
 		using namespace mdrivlib;
 		if (HWSemaphore<ParamCacheLock>::lock(WriteProcID) == HWSemaphoreFlag::LockedOk) {
-			p.move_from(p_);
+			p.copy_from(p_);
 			m.update_with(m_);
 			HWSemaphore<ParamCacheLock>::unlock(WriteProcID);
 		}

@@ -5,12 +5,12 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/add_map_popup.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/module_view_mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "params/params_state.hh"
-#include <gui/pages/module_view_mapping_pane_list.hh>
 
 namespace MetaModule
 {
@@ -109,7 +109,7 @@ struct ModuleViewMappingPane {
 
 private:
 	// used to work with lvgl object void* user_data
-	static inline uint32_t knobset_indices[MaxKnobSets]{0, 1, 2, 3, 4, 5, 6, 7};
+	static inline uint32_t knobset_indices[MaxKnobSets + 1]{PatchData::MIDIKnobSet, 0, 1, 2, 3, 4, 5, 6, 7};
 
 	void remove_all_items() {
 		auto num_circles = lv_obj_get_child_cnt(ui_MapList);
@@ -123,9 +123,12 @@ private:
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
 		lv_obj_add_event_cb(obj, add_button_cb, LV_EVENT_PRESSED, this);
-		if (set_i.has_value())
-			lv_obj_set_user_data(obj, &(knobset_indices[set_i.value()]));
-		else
+		if (set_i.has_value()) {
+			if (set_i.value() == PatchData::MIDIKnobSet)
+				lv_obj_set_user_data(obj, &(knobset_indices[0]));
+			else
+				lv_obj_set_user_data(obj, &(knobset_indices[set_i.value() + 1]));
+		} else
 			lv_obj_set_user_data(obj, nullptr);
 	}
 
@@ -134,7 +137,10 @@ private:
 		lv_group_focus_obj(obj);
 		lv_obj_add_event_cb(obj, edit_button_cb, LV_EVENT_PRESSED, this);
 		if (set_i.has_value())
-			lv_obj_set_user_data(obj, &(knobset_indices[set_i.value()]));
+			if (set_i.value() == PatchData::MIDIKnobSet)
+				lv_obj_set_user_data(obj, &(knobset_indices[0]));
+			else
+				lv_obj_set_user_data(obj, &(knobset_indices[set_i.value() + 1]));
 		else
 			lv_obj_set_user_data(obj, nullptr);
 	}
@@ -167,8 +173,7 @@ private:
 
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
 		if (panel_jack_id) {
-			std::string_view name = PanelDef::get_map_outjack_name(panel_jack_id.value());
-			auto obj = list.create_panelcable_item(name, panel_jack_id.value());
+			auto obj = list.create_panel_outcable_item(panel_jack_id.value());
 			group_edit_button(obj);
 		} else {
 			auto obj = list.create_unmapped_list_item("Add cable...");
@@ -192,8 +197,7 @@ private:
 
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
 		if (panel_jack_id) {
-			std::string_view name = PanelDef::get_map_injack_name(panel_jack_id.value());
-			auto obj = list.create_panelcable_item(name, panel_jack_id.value());
+			auto obj = list.create_panel_incable_item(panel_jack_id.value());
 			group_edit_button(obj);
 		} else {
 			auto obj = list.create_unmapped_list_item("Add cable...");
@@ -215,13 +219,15 @@ private:
 		auto &patch = patch_storage.get_view_patch();
 		auto this_module_id = PageList::get_selected_module_id();
 
-		for (uint32_t set_i = 0; auto &set : patch.knob_sets) {
+		for (uint32_t i = 0; i <= patch.knob_sets.size(); i++) {
+			uint32_t set_i = i == 0 ? PatchData::MIDIKnobSet : i - 1;
+			auto &set = i == 0 ? patch.midi_maps : patch.knob_sets[set_i];
+
 			bool has_mapping = false;
 			for (auto &map : set.set) {
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
-					auto name = PanelDef::get_map_param_name(map.panel_knob_id);
 					auto setname = patch.validate_knob_set_name(set_i);
-					auto obj = list.create_map_list_item(name, setname, map.panel_knob_id % 6);
+					auto obj = list.create_map_list_item(map, setname);
 					group_edit_button(obj, set_i);
 					has_mapping = true;
 				}
@@ -231,7 +237,6 @@ private:
 				auto obj = list.create_unmapped_list_item(setname);
 				group_add_button(obj, set_i);
 			}
-			set_i++;
 		}
 	}
 
@@ -242,7 +247,7 @@ private:
 
 		//TODO
 		(void)page;
-		printf_("Edit\n");
+		pr_err("Edit Map not implemented yet\n");
 	}
 
 	static void add_button_cb(lv_event_t *event) {

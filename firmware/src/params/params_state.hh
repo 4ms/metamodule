@@ -16,10 +16,22 @@ namespace MetaModule
 struct ParamsState {
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
-
 	uint32_t jack_senses;
 
-	std::array<LatchedParam<int8_t, 1>, NumMidiCCs> midi_ccs;
+	void clear() {
+		for (auto &gate_in : gate_ins)
+			gate_in.reset();
+
+		for (auto &knob : knobs)
+			knob = {0.f, false};
+
+		jack_senses = 0;
+	}
+
+	void reset_change_flags() {
+		for (auto &knob : knobs)
+			knob.changed = false;
+	}
 
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
 		if (plugged)
@@ -45,44 +57,37 @@ struct ParamsState {
 		return jack_senses & (1 << jacksense_pin_order[jack_idx]);
 	}
 
-	void clear() {
-		for (auto &gate_in : gate_ins)
-			gate_in.reset();
-
-		for (auto &knob : knobs)
-			knob = {0.f, false};
-
-		jack_senses = 0;
-	}
-
-	// Copy values, but clear the changed flag after moving it
-	void move_from(ParamsState &that) {
+	void copy_from(ParamsState const &that) {
 		for (auto [gate_in, that_gate_in] : zip(gate_ins, that.gate_ins))
-			gate_in.copy_state(that_gate_in);
+			gate_in = that_gate_in;
 
 		for (auto [knob, that_knob] : zip(knobs, that.knobs)) {
-			knob.changed = that_knob.changed;
-			knob.val = that_knob.val;
-			that_knob.changed = false;
+			knob = that_knob;
 		}
 
 		jack_senses = that.jack_senses;
 	}
 
-	void copy_to(ParamsState &that) {
+	void copy_to(ParamsState &that) const {
 		for (auto [gate_in, that_gate_in] : zip(gate_ins, that.gate_ins))
-			that_gate_in.copy_state(gate_in);
+			that_gate_in = gate_in;
 
-		for (auto [knob, that_knob] : zip(knobs, that.knobs)) {
+		for (auto [knob, that_knob] : zip(knobs, that.knobs))
 			that_knob = knob;
-		}
 
 		that.jack_senses = jack_senses;
 	}
 };
 
 struct ParamsMidiState : ParamsState {
-	std::array<LatchedParam<int8_t, 1>, NumMidiCCs> midi_ccs;
+	std::array<LatchedParam<float, 1, 127>, NumMidiCCs> midi_ccs;
+
+	void clear() {
+		ParamsState::clear();
+
+		for (auto &cc : midi_ccs)
+			cc = 0;
+	}
 };
 
 } // namespace MetaModule

@@ -14,22 +14,17 @@ namespace MetaModule
 
 namespace ElementUpdate
 {
+
 inline std::optional<float> get_mapped_param_value(const ParamsMidiState &params, unsigned mapped_panel_id) {
 	if (mapped_panel_id < params.knobs.size()) {
 		auto latched = params.knobs[mapped_panel_id];
-		if (latched.did_change())
-			return latched.val;
-		else
-			return {};
+		return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
 	}
 
 	else if (auto mk = MappedKnob{.panel_knob_id = (uint16_t)mapped_panel_id}; mk.is_midi_cc())
 	{
 		auto latched = params.midi_ccs[mk.cc_num()];
-		if (latched.did_change())
-			return (float)latched.val / 127.f;
-		else
-			return {};
+		return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
 	}
 	return {};
 }

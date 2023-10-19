@@ -45,6 +45,11 @@ struct AddMapPopUp {
 
 		lv_indev_set_group(indev, popup_group);
 
+		if (knobset_id == PatchData::MIDIKnobSet)
+			lv_label_set_text(ui_AddModuleName, "Send MIDI CC");
+		else
+			lv_label_set_text(ui_AddModuleName, "Wiggle a knob");
+
 		param_idx = param_id;
 		set_id = knobset_id;
 		visible = true;

@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/panel_conf.hh"
 #include "midi_def.hh"
 #include "util/math.hh"
 #include "util/static_string.hh"
@@ -44,6 +45,10 @@ struct MappedKnob {
 	// If max < min then mapping will be reversed direction
 	float get_mapped_val(float panel_val) const {
 		return (max - min) * panel_val + min;
+	}
+
+	bool is_panel_knob() const {
+		return panel_knob_id < PanelDef::NumKnobs;
 	}
 
 	bool is_midi_cc() const {

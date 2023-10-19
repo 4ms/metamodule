@@ -19,7 +19,7 @@ struct PatchData {
 	MappedKnobSet midi_maps;
 	uint32_t midi_poly_num = 1;
 
-	// static constexpr uint32_t MIDIMaps = 0xFFFFFFFF;
+	static constexpr uint32_t MIDIKnobSet = 0xFFFFFFFF;
 
 	const MappedKnob *find_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) const {
 		if (set_id < knob_sets.size()) {
@@ -127,6 +127,9 @@ struct PatchData {
 	}
 
 	const char *validate_knob_set_name(unsigned set_i) {
+		if (set_i == MIDIKnobSet)
+			return "MIDI";
+
 		if (set_i >= knob_sets.size())
 			return "";
 
