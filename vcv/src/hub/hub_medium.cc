@@ -72,7 +72,7 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		addChild(createWidget<ScrewBlack>(
 			rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		patchName = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.1, 9.5)));
+		patchName = createWidget<MetaModule::MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.1, 9.5)));
 		if (hubModule != nullptr && hubModule->patchNameText.length() > 0)
 			patchName->setText(this->hubModule->patchNameText);
 		else
@@ -89,7 +89,7 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		statusText->fontSize = 10;
 		addChild(statusText);
 
-		patchDesc = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.4, 18.f)));
+		patchDesc = createWidget<MetaModule::MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.4, 18.f)));
 		if (hubModule != nullptr && hubModule->patchDescText.length() > 0)
 			patchDesc->setText(this->hubModule->patchDescText);
 		else

@@ -1,6 +1,9 @@
 #pragma once
 #include "plugin.hh"
 
+namespace MetaModule
+{
+
 class MetaModuleTextBox : public rack::LedDisplayTextField {
 	void draw(const DrawArgs &args) override {
 		rack::LedDisplayTextField::draw(args);
@@ -126,3 +129,22 @@ struct FourmsLightSliderHorizontal :
 			rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/FourmsSliderHorizontalHandle.svg")));
 	}
 };
+
+template<typename TBase = rack::GrayModuleLightWidget>
+struct TRedBlueLight : TBase {
+	TRedBlueLight() {
+		this->addBaseColor(rack::SCHEME_RED);
+		this->addBaseColor(rack::SCHEME_BLUE);
+	}
+};
+using RedBlueLightWidget = TRedBlueLight<>;
+
+template<typename TBase = rack::GrayModuleLightWidget>
+struct TOrangeLight : TBase {
+	TOrangeLight() {
+		this->addBaseColor(rack::SCHEME_YELLOW);
+	}
+};
+using OrangeLightWidget = TOrangeLight<>;
+
+} // namespace MetaModule
