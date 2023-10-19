@@ -99,8 +99,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		load_measure.end_measurement();
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
-		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof(SyncParams));
-
+		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof sync_params);
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
 		Debug::Pin0::low();
@@ -222,14 +221,12 @@ void AudioStream::handle_midi(Midi::Event const &event, unsigned poly_num) {
 		player.set_midi_note_velocity(event.poly_chan, event.val);
 		player.set_midi_note_retrig(event.poly_chan, 10.f);
 		player.set_midi_gate(event.note, event.val); //TODO: if not velocity mode, then event.val => 10
-		// param_state.last_midi_note.store_changed(event.note);
-		printf_(">%d %d\n", event.poly_chan, event.note);
+													 // printf_(">%d %d\n", event.poly_chan, event.note);
 
 	} else if (event.type == Midi::Event::Type::NoteOff) {
 		player.set_midi_note_gate(event.poly_chan, 0);
 		player.set_midi_gate(event.note, 0);
-		// param_state.last_midi_note.store_changed(event.note);
-		printf_("_%d %d\n", event.poly_chan, event.note);
+		// printf_("_%d %d\n", event.poly_chan, event.note);
 
 	} else if (event.type == Midi::Event::Type::Aft) {
 		player.set_midi_note_aftertouch(event.poly_chan, event.val);

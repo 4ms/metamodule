@@ -22,112 +22,112 @@ PatchData:
       ins:
         - module_id: 1
           jack_id: 4
-      color: 0
+      color: 1453
     - out:
         module_id: 6
         jack_id: 0
       ins:
         - module_id: 2
           jack_id: 4
-      color: 0
+      color: 13501
     - out:
         module_id: 7
         jack_id: 0
       ins:
         - module_id: 3
           jack_id: 4
-      color: 0
+      color: 35419
     - out:
         module_id: 8
         jack_id: 0
       ins:
         - module_id: 4
           jack_id: 4
-      color: 0
+      color: 61865
     - out:
         module_id: 9
         jack_id: 0
       ins:
         - module_id: 5
           jack_id: 8
-      color: 0
+      color: 1453
     - out:
         module_id: 9
         jack_id: 1
       ins:
         - module_id: 6
           jack_id: 8
-      color: 0
+      color: 13501
     - out:
         module_id: 10
         jack_id: 0
       ins:
         - module_id: 7
           jack_id: 8
-      color: 0
+      color: 35419
     - out:
         module_id: 10
         jack_id: 1
       ins:
         - module_id: 8
           jack_id: 8
-      color: 0
+      color: 61865
     - out:
         module_id: 11
         jack_id: 0
       ins:
         - module_id: 5
           jack_id: 7
-      color: 0
+      color: 1453
     - out:
         module_id: 11
         jack_id: 1
       ins:
         - module_id: 6
           jack_id: 7
-      color: 0
+      color: 13501
     - out:
         module_id: 12
         jack_id: 0
       ins:
         - module_id: 7
           jack_id: 7
-      color: 0
+      color: 35419
     - out:
         module_id: 12
         jack_id: 1
       ins:
         - module_id: 8
           jack_id: 7
-      color: 0
+      color: 61865
     - out:
         module_id: 4
         jack_id: 0
       ins:
         - module_id: 8
           jack_id: 3
-      color: 0
+      color: 61865
     - out:
         module_id: 3
         jack_id: 0
       ins:
         - module_id: 7
           jack_id: 3
-      color: 0
+      color: 35419
     - out:
         module_id: 1
         jack_id: 0
       ins:
         - module_id: 5
           jack_id: 3
-      color: 0
+      color: 1453
     - out:
         module_id: 2
         jack_id: 0
       ins:
         - module_id: 6
           jack_id: 3
-      color: 0
+      color: 13501
   mapped_ins:
     - panel_jack_id: 275
       ins:

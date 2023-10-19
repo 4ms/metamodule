@@ -103,7 +103,7 @@ struct ModuleViewMappingPane {
 		remove_all_items();
 	}
 
-	void update(ParamsState &params) {
+	void update(ParamsMidiState &params) {
 		add_map_popup.update(params);
 	}
 

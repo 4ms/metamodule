@@ -52,11 +52,6 @@ struct ParamsState {
 		for (auto &knob : knobs)
 			knob = {0.f, false};
 
-		for (auto &cc : midi_ccs) {
-			cc = 0;
-			cc.changed = false;
-		}
-
 		jack_senses = 0;
 	}
 
@@ -84,6 +79,10 @@ struct ParamsState {
 
 		that.jack_senses = jack_senses;
 	}
+};
+
+struct ParamsMidiState : ParamsState {
+	std::array<LatchedParam<int8_t, 1>, NumMidiCCs> midi_ccs;
 };
 
 } // namespace MetaModule

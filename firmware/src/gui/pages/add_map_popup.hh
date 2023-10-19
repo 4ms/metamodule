@@ -67,7 +67,7 @@ struct AddMapPopUp {
 		}
 	}
 
-	void update(ParamsState &params) {
+	void update(ParamsMidiState &params) {
 		if (visible) {
 			for (unsigned i = 0; auto &knob : params.knobs) {
 				if (knob.did_change()) {
