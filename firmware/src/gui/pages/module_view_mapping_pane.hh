@@ -16,9 +16,11 @@ namespace MetaModule
 {
 
 struct ModuleViewMappingPane {
-	ModuleViewMappingPane(PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
+	ModuleViewMappingPane(PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue, ParamsMidiState &params)
 		: patch_storage{patch_storage}
 		, patch_mod_queue{patch_mod_queue}
+		, patch{patch_storage.get_view_patch()}
+		, params{params}
 		, add_map_popup{patch_storage, patch_mod_queue} {
 	}
 
@@ -45,13 +47,13 @@ struct ModuleViewMappingPane {
 		lv_group_remove_all_objs(pane_group);
 		lv_group_set_editing(pane_group, false);
 
-		auto &patch = patch_storage.get_view_patch();
+		patch = patch_storage.get_view_patch();
 		if (patch.patch_name.length() == 0) {
 			pr_warn("Patch name empty\n");
 			return;
 		}
 
-		auto this_module_id = PageList::get_selected_module_id();
+		this_module_id = PageList::get_selected_module_id();
 		if (this_module_id >= patch.module_slugs.size()) {
 			pr_warn("Module has invalid ID\n");
 			return;
@@ -83,6 +85,13 @@ struct ModuleViewMappingPane {
 		add_map_popup.prepare_focus(pane_group);
 	}
 
+	void refresh() {
+		if (drawn_element) {
+			remove_all_items();
+			show(*drawn_element);
+		}
+	}
+
 	void hide() {
 		lv_hide(ui_MappingParameters);
 		lv_hide(ui_ControlAlert);
@@ -103,8 +112,16 @@ struct ModuleViewMappingPane {
 		remove_all_items();
 	}
 
-	void update(ParamsMidiState &params) {
+	void update() {
 		add_map_popup.update(params);
+	}
+
+	void hide_addmap() {
+		add_map_popup.hide();
+	}
+
+	bool addmap_visible() {
+		return add_map_popup.visible;
 	}
 
 private:
@@ -217,27 +234,52 @@ private:
 		}
 
 		auto &patch = patch_storage.get_view_patch();
-		auto this_module_id = PageList::get_selected_module_id();
+		this_module_id = PageList::get_selected_module_id();
 
-		for (uint32_t i = 0; i <= patch.knob_sets.size(); i++) {
-			uint32_t set_i = i == 0 ? PatchData::MIDIKnobSet : i - 1;
-			auto &set = i == 0 ? patch.midi_maps : patch.knob_sets[set_i];
+		// Show MIDI set first
+		show_knobset(patch.midi_maps, PatchData::MIDIKnobSet);
 
-			bool has_mapping = false;
-			for (auto &map : set.set) {
+		// Show all knobsets with a mapping
+		std::optional<unsigned> first_empty_set = std::nullopt;
+		for (uint32_t set_i = 0; set_i < patch.knob_sets.size(); set_i++) {
+			auto &set = patch.knob_sets[set_i];
+
+			auto set_is_empty = show_knobset(set, set_i);
+			if (set_is_empty && !first_empty_set.has_value())
+				first_empty_set = set_i;
+		}
+
+		// Show the first empty knobset (if there is one)
+		if (first_empty_set.has_value()) {
+			unsigned set_i = first_empty_set.value();
+			auto setname = patch.validate_knob_set_name(set_i);
+			auto obj = list.create_unmapped_list_item(setname);
+			group_add_button(obj, set_i);
+		}
+	}
+
+	bool show_knobset(MappedKnobSet const &set, unsigned set_i) {
+		bool set_is_empty = true;
+		bool has_mapping_in_set = false;
+		auto setname = patch.validate_knob_set_name(set_i);
+
+		for (auto &map : set.set) {
+			if (map.module_id > 0 && map.module_id < patch.module_slugs.size()) {
+				set_is_empty = false;
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
-					auto setname = patch.validate_knob_set_name(set_i);
 					auto obj = list.create_map_list_item(map, setname);
 					group_edit_button(obj, set_i);
-					has_mapping = true;
+					has_mapping_in_set = true;
 				}
 			}
-			if (!has_mapping) {
-				auto setname = patch.validate_knob_set_name(set_i);
-				auto obj = list.create_unmapped_list_item(setname);
-				group_add_button(obj, set_i);
-			}
 		}
+
+		if (!set_is_empty && !has_mapping_in_set) {
+			auto obj = list.create_unmapped_list_item(setname);
+			group_add_button(obj, set_i);
+		}
+
+		return set_is_empty;
 	}
 
 	static void edit_button_cb(lv_event_t *event) {
@@ -259,6 +301,12 @@ private:
 		auto obj = event->target;
 		if (auto knobset_ptr = lv_obj_get_user_data(obj)) {
 			knobset_id = *static_cast<uint32_t *>(knobset_ptr);
+		}
+
+		// Clear all CC events
+		if (knobset_id == PatchData::MIDIKnobSet) {
+			for (auto &cc : page->params.midi_ccs)
+				cc.changed = false;
 		}
 		page->add_map_popup.show(knobset_id, page->drawn_element->gui_element.idx.param_idx);
 	}
@@ -315,6 +363,9 @@ private:
 	lv_group_t *pane_group = nullptr;
 	const DrawnElement *drawn_element;
 	bool is_patch_playing = false;
+	PatchData &patch;
+	ParamsMidiState &params;
+	unsigned this_module_id = 0;
 
 	MappingPaneList list;
 	AddMapPopUp add_map_popup;

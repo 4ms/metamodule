@@ -45,7 +45,6 @@ void Controls::update_params() {
 		}
 
 		if (_midi_connected.is_high() && !cur_metaparams->midi_connected) {
-			printf_("mp->mc = true\n");
 			cur_metaparams->midi_connected = true;
 		}
 
@@ -92,9 +91,7 @@ void Controls::update_params() {
 	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence(); noteoff.has_value()) {
 		if (noteoff.value().type == Midi::Event::Type::None) {
 			cur_metaparams->midi_connected = false;
-			printf_("mp->mc = false\n");
 		}
-		// printf_(">%d<\n", noteoff.value().poly_chan);
 		cur_params->midi_event = noteoff.value();
 
 	} else {

@@ -49,7 +49,6 @@ struct MessageParser {
 			event.poly_chan = poly_chan;
 			event.note = msg.note();
 			event.val = Midi::u7_to_volts<10>(msg.velocity());
-			printf_("On[%d] %d\n", poly_chan, msg.note());
 
 		} else if (msg.is_command<MidiCommand::PolyKeyPressure>()) { //aka Aftertouch
 			for (unsigned i = 0; auto &midi_note : midi_notes) {
@@ -104,7 +103,6 @@ struct MessageParser {
 	void start_all_notes_off_sequence() {
 		noteoff_seq_in_progress = true;
 		noteoff_seq_cur_step = 0;
-		printf_("start noteoff\n");
 	}
 
 	// Sends NoteOff to all poly channels, one by one, each time it's called
@@ -117,14 +115,12 @@ struct MessageParser {
 			auto event = Midi::Event{.type = Midi::Event::Type::NoteOff, .poly_chan = noteoff_seq_cur_step};
 			midi_notes[noteoff_seq_cur_step].gate = false;
 
-			printf_("off%d\n", noteoff_seq_cur_step);
 			noteoff_seq_cur_step++;
 			return event;
 		}
 
 		noteoff_seq_in_progress = false;
 		noteoff_seq_cur_step = 0;
-		printf_("off done\n");
 		return Midi::Event{.type = Midi::Event::Type::None};
 	}
 };

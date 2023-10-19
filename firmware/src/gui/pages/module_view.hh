@@ -18,7 +18,8 @@ struct ModuleViewPage : PageBase {
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true;
-		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::HideAlways, .opa = LV_OPA_50};
+		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::CurModuleIfPlaying,
+												.opa = LV_OPA_50};
 	};
 	ViewSettings settings;
 
@@ -27,7 +28,7 @@ struct ModuleViewPage : PageBase {
 		, patch{patch_storage.get_view_patch()}
 		, base{ui_MappingMenu}
 		, roller{ui_ElementRoller}
-		, mapping_pane{info.patch_storage, module_mods} {
+		, mapping_pane{info.patch_storage, module_mods, params} {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
@@ -68,6 +69,19 @@ struct ModuleViewPage : PageBase {
 			return;
 		}
 
+		redraw_module();
+
+		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, roller);
+
+		lv_group_focus_obj(roller);
+
+		// auto width_px = lv_obj_get_width(canvas);
+		// auto roller_width = std::min(320 - width_px, 220);
+		// mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
+	}
+
+	void redraw_module() {
 		reset_module_page();
 
 		size_t num_elements = moduleinfo.elements.size();
@@ -133,11 +147,6 @@ struct ModuleViewPage : PageBase {
 
 		update_map_ring_style();
 
-		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, roller);
-
-		lv_group_focus_obj(roller);
-
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 	}
 
@@ -147,6 +156,8 @@ struct ModuleViewPage : PageBase {
 				if (PageList::request_last_page()) {
 					blur();
 				}
+			} else if (mapping_pane.addmap_visible()) {
+				mapping_pane.hide_addmap();
 			} else {
 				mode = ViewMode::List;
 				lv_show(ui_ElementRoller);
@@ -158,7 +169,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		if (mode == ViewMode::Knob)
-			mapping_pane.update(params);
+			mapping_pane.update();
 
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
@@ -183,19 +194,21 @@ struct ModuleViewPage : PageBase {
 
 			// Forward the mod to the audio/patch_player queue
 			if (is_patch_playing)
-			patch_mod_queue.put(patch_mod.value());
+				patch_mod_queue.put(patch_mod.value());
 		}
 	}
 
 	void apply_add_mapping(AddMapping &mod) {
 		if (patch.add_update_mapped_knob(mod.set_id, mod.map)) {
-			prepare_focus();
+			redraw_module();
+			mapping_pane.refresh();
 		}
 	}
 
 	void apply_add_midi_map(AddMidiMap &mod) {
 		if (patch.add_update_midi_map(mod.map)) {
-			prepare_focus();
+			redraw_module();
+			mapping_pane.refresh();
 		}
 	}
 

@@ -6,9 +6,9 @@ namespace
 
 /////////////////////////////////////////////////
 // Change these to enable/disable logging levels
-static constexpr bool PRINT_ERROR = true;
-static constexpr bool PRINT_WARN = true;
-static constexpr bool PRINT_DEBUG = true;
+inline constexpr bool PRINT_ERROR = true;
+inline constexpr bool PRINT_WARN = true;
+inline constexpr bool PRINT_DEBUG = false;
 inline constexpr bool PRINT_TRACE = false;
 /////////////////////////////////////////////////
 
