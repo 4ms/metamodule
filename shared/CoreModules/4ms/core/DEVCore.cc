@@ -125,8 +125,7 @@ private:
 			envOut *= parent->getState<Mapping::LevelKnob>() * 2.0f - 1.0f;
 			envOut += parent->getState<Mapping::OffsetKnob>() * 20.0f - 10.0f;
 			parent->setOutput<Mapping::EnvOut>(envOut);
-			// setLED<Mapping::EnvLedLight>(val / 8.f);
-
+			parent->setLED<Mapping::EnvLedLight>(BipolarColor_t{envOut / 8.f});
 		}
 
 		auto getEnvOut() {
@@ -306,18 +305,18 @@ public:
 	{
 		if(auto slopeStateA = channelA.getOscillatorSlopeState(); slopeStateA == TriangleOscillator::SlopeState_t::FALLING) {
 			setOutput<EorAOut>(8.f);
-			// setLED<EorLedLight>(true);
+			setLED<EorLight>(true);
 		} else {
 			setOutput<EorAOut>(0);
-			// setLED<EorLedLight>(false);
+			setLED<EorLight>(false);
 		}
 
 		if(auto slopeStateB = channelB.getOscillatorSlopeState(); slopeStateB == TriangleOscillator::SlopeState_t::RISING) {
 			setOutput<EofBOut>(8.f);
-			// setLED<EofLedLight>(true);
+			setLED<EofLight>(true);
 		} else {
 			setOutput<EofBOut>(0);
-			// setLED<EofLedLight>(false);
+			setLED<EofLight>(false);
 		}
 	}
 
