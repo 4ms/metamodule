@@ -157,6 +157,9 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		if (mode == ViewMode::Knob)
+			mapping_pane.update(params);
+
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
 				auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
@@ -167,12 +170,10 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		if (mode == ViewMode::Knob)
-			mapping_pane.update(params);
-
 		if (auto patch_mod = module_mods.get(); patch_mod.has_value()) {
 			PageList::increment_patch_revision();
 
+			// Apply to this thread's copy of patch
 			std::visit(overloaded{
 						   [this](AddMapping &mod) { apply_add_mapping(mod); },
 						   [this](AddMidiMap &mod) { apply_add_midi_map(mod); },
@@ -181,6 +182,7 @@ struct ModuleViewPage : PageBase {
 					   patch_mod.value());
 
 			// Forward the mod to the audio/patch_player queue
+			if (is_patch_playing)
 			patch_mod_queue.put(patch_mod.value());
 		}
 	}

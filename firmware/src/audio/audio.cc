@@ -24,16 +24,6 @@
 namespace MetaModule
 {
 
-//FIXME: Setting an opt level other than O0 here causes a DMA Fifo Error for DMA1Stream3 (SPI4 TX)
-//Sometimes/often while executing output_silence and it's compiled to use vstr d16/d17
-//But also sometimes when the DMA1Stream3 IRQ interrupts DMA2Stream? IRQ for the audio SAI (the DMA1Stream3 IRQ returns into the body of DMA2Stream? IRQhandler, not into audio:;process()
-__attribute__((optimize("O0"))) void output_silence(AudioOutBuffer &out) {
-	for (auto &out_ : out) {
-		for (auto &outchan : out_.chan)
-			outchan = 0;
-	}
-}
-
 using namespace mdrivlib;
 
 AudioStream::AudioStream(PatchPlayer &patchplayer,
@@ -138,12 +128,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			mute_ctr -= 0.1f;
 		else {
 			if (!patch_loader.is_audio_muted()) {
-				output_silence(out);
 				halves_muted++;
 				if (halves_muted == 2)
 					patch_loader.audio_is_muted();
 			}
-			return;
 		}
 	} else {
 		patch_loader.audio_not_muted();
@@ -153,8 +141,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	// TODO: check with patch_loader, not patch_player
 	if (!player.is_loaded) {
-		output_silence(out);
-		return;
+		mute_ctr = 0;
 	}
 
 	handle_patch_mods(patch_mod_queue, player);
