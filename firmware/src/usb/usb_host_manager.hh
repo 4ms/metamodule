@@ -104,8 +104,10 @@ public:
 				pr_trace("Disconnected class code %d\n", connected_classcode);
 				if (connected_classcode == AudioClassCode)
 					_midihost_instance->disconnect();
-				if (connected_classcode == USB_MSC_CLASS)
+				else if (connected_classcode == USB_MSC_CLASS)
 					_mschost_instance->disconnect();
+				else
+					pr_warn("Unknown disconnected class code %d\n", connected_classcode);
 				connected_classcode = 0xFF;
 			} break;
 
