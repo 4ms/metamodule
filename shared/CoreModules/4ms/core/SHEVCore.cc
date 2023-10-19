@@ -166,6 +166,7 @@ private:
 		void displayEnvelope(float shapedEnv, float val, TriangleOscillator::SlopeState_t slopeState) {
 			parent->setLED<Mapping::RiseSlider>(slopeState == TriangleOscillator::SlopeState_t::RISING ? val / 8.f : 0);
 			parent->setLED<Mapping::FallSlider>(slopeState == TriangleOscillator::SlopeState_t::FALLING ? val / 8.f : 0);
+			parent->setLED<Mapping::ShapeSlider>(val / 8.f);
 
 			envOut = shapedEnv / VoltageDivider(100e3f, 100e3f);
 			envOut *= parent->getState<Mapping::LevelKnob>() * 2.0f - 1.0f;
@@ -322,6 +323,7 @@ private:
 		const static Info::Elem ShapeSlider = ShapeASlider;
 		const static Info::Elem ShapeKnob = ShapeAKnob;
 		const static Info::Elem CycleArAsrSwitch = TrigModeASwitch;
+		const static Info::Elem ShapeLight = ShapeBLight;
 	};
 
 	struct MappingB
@@ -350,6 +352,7 @@ private:
 		const static Info::Elem ShapeSlider = ShapeBSlider;
 		const static Info::Elem ShapeKnob = ShapeBKnob;
 		const static Info::Elem CycleArAsrSwitch = TrigModeBSwitch;
+		const static Info::Elem ShapeLight = ShapeBLight;
 	};
 
 	Channel<MappingA> channelA;
