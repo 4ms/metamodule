@@ -1,0 +1,115 @@
+#include "flasher.h"
+
+#include "custom_port.h"
+#include "esp_loader.h"
+#include "esp_loader_io.h"
+
+#include <console/pr_dbg.hh>
+
+#include <cstring>
+
+namespace Flasher
+{
+
+esp_loader_error_t init(uint32_t baudrate)
+{
+    loader_port_init();
+
+    esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
+
+    esp_loader_error_t err = esp_loader_connect(&connect_config);
+    if (err != ESP_LOADER_SUCCESS)
+    {
+        pr_err("Flasher: Cannot connect to target. Error: %u\n", err);
+    }
+    else
+    {
+        pr_dbg("Flasher: Connected to target\n");
+
+        err = esp_loader_change_transmission_rate(baudrate);
+        if (err == ESP_LOADER_ERROR_UNSUPPORTED_FUNC)
+        {
+            pr_err("Flasher: ESP does not support change transmission rate command.\n");
+        }
+        else if (err != ESP_LOADER_SUCCESS)
+        {
+            pr_err("Flasher: Unable to change transmission rate on target.\n");
+        }
+        else
+        {
+            err = loader_port_change_transmission_rate(baudrate);
+            if (err != ESP_LOADER_SUCCESS)
+            {
+                pr_err("Flasher: Unable to change transmission rate.\n");
+            }
+            else
+            {
+                pr_dbg("Flasher: Transmission rate changed changed\n");
+            }
+        }
+    }
+
+    return err;
+}
+
+esp_loader_error_t flash(uint32_t address, std::span<uint8_t> buffer)
+{
+    esp_loader_error_t err;
+
+    const std::size_t BatchSize = 1024;
+    std::array<uint8_t, BatchSize> BatchBuffer;
+
+    pr_dbg("Flasher: Erasing flash (this may take a while)...\n");
+    err = esp_loader_flash_start(address, buffer.size(), BatchBuffer.size());
+
+    if (err != ESP_LOADER_SUCCESS)
+    {
+        pr_err("Flasher: Erasing flash failed with error %d\n", err);
+        return err;
+    }
+    pr_dbg("Flasher: Start programming\n");
+
+    const uint8_t* bin_addr = buffer.data();
+    const std::size_t binary_size = buffer.size();
+    size_t written = 0;    
+
+    while (written < binary_size)
+    {
+        size_t to_read = std::min(binary_size - written, BatchBuffer.size());
+        std::memcpy(BatchBuffer.data(), bin_addr, to_read);
+
+        err = esp_loader_flash_write(BatchBuffer.data(), to_read);
+        if (err != ESP_LOADER_SUCCESS)
+        {
+            pr_err("Packet could not be written! Error %d\n", err);
+            return err;
+        }
+
+        bin_addr += to_read;
+        written += to_read;
+
+        int progress = (int)(((float)written / float(binary_size)) * 100);
+        pr_dbg("Flasher: Progress: %d %%\n", progress);
+    };
+
+    pr_dbg("Flasher: Finished programming\n");
+
+    #ifdef MD5_ENABLED
+    err = esp_loader_flash_verify();
+    if (err == ESP_LOADER_ERROR_UNSUPPORTED_FUNC)
+    {
+        pr_err("Flasher: ESP8266 does not support flash verify command.\n");
+        return err;
+    }
+    else if (err != ESP_LOADER_SUCCESS)
+    {
+        pr_err("Flasher: MD5 does not match. err: %d\n", err);
+        return err;
+    }
+    pr_dbg("Flasher: Flash verified\n");
+    #endif
+
+    return ESP_LOADER_SUCCESS;
+}
+
+}
