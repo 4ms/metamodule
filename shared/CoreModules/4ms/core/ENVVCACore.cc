@@ -84,8 +84,6 @@ public:
 		val *= getState<EnvLevelSlider>();
 		setOutput<EnvOut>(val);
 		setLED<EnvLevelSlider>(val / 8.f);
-		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
-		// even during State_t::FOLLOW
 		setLED<RiseSlider>(slopeState == TriangleOscillator::SlopeState_t::RISING ? val / 8.f : 0);
 		setLED<FallSlider>(slopeState == TriangleOscillator::SlopeState_t::FALLING ? val / 8.f : 0);
 	}
@@ -93,10 +91,10 @@ public:
 	void displayOscillatorState(TriangleOscillator::SlopeState_t slopeState) {
 		if (slopeState == TriangleOscillator::SlopeState_t::FALLING) {
 			setOutput<EorOut>(8.f);
-			// setLED<EorLight>(true);
+			setLED<EorLight>(true);
 		} else {
 			setOutput<EorOut>(0);
-			// setLED<EorLight>(false);
+			setLED<EorLight>(false);
 		}
 	}
 
