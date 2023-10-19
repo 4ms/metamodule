@@ -39,15 +39,19 @@ void Controls::update_params() {
 		_first_param = false;
 
 		_midi_connected.update(_midi_host.is_connected());
-		if (_midi_connected.went_low())
-			_transmitting_all_notes_off = true;
 
-		if (!_transmitting_all_notes_off && _midi_connected.is_high())
+		if (_midi_connected.went_low()) {
+			_midi_parser.start_all_notes_off_sequence();
+		}
+
+		if (_midi_connected.is_high() && !cur_metaparams->midi_connected) {
+			printf_("mp->mc = true\n");
 			cur_metaparams->midi_connected = true;
+		}
 
-		_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
+		if (cur_metaparams->midi_poly_chans > 0)
+			_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
 
-		cur_metaparams->midi_connected = _midi_host.is_connected();
 		cur_params->jack_senses = get_jacksense_reading();
 
 		// PatchCV
@@ -82,15 +86,19 @@ void Controls::update_params() {
 	}
 
 	// Parse a MIDI message if available
-	if (_midi_rx_buf.num_filled()) {
-		auto msg = _midi_rx_buf.get();
-		cur_params->midi.event = _midi_parser.parse(msg);
+	if (auto msg = _midi_rx_buf.get(); msg.has_value()) {
+		cur_params->midi_event = _midi_parser.parse(msg.value());
 
-		// } else if (midi_just_disconnected) {
-		//TODO: keep midi_just_disconnected true until we cleared both param buffers (notes and events)
-		// And only then set cur_metaparams->midi_connected to false
+	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence(); noteoff.has_value()) {
+		if (noteoff.value().type == Midi::Event::Type::None) {
+			cur_metaparams->midi_connected = false;
+			printf_("mp->mc = false\n");
+		}
+		// printf_(">%d<\n", noteoff.value().poly_chan);
+		cur_params->midi_event = noteoff.value();
+
 	} else {
-		cur_params->midi.event.type = Params::Midi::Event::Type::None;
+		cur_params->midi_event.type = Midi::Event::Type::None;
 	}
 
 	cur_params++;

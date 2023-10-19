@@ -17,8 +17,9 @@
 #include "params.hh"
 #include "usb/midi_host.hh"
 #include "usb/midi_message.hh"
-#include "util/circular_buffer.hh"
+#include "util/edge_detector.hh"
 #include "util/interp_param.hh"
+#include "util/lockfree_fifo_spsc.hh"
 
 namespace MetaModule
 {
@@ -88,9 +89,9 @@ private:
 	bool _new_adc_data_ready = false;
 
 	MidiHost &_midi_host;
-	CircularBuffer<MidiMessage, 256> _midi_rx_buf;
+	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
 	Midi::MessageParser _midi_parser;
-	Toggler midi_connected;
+	EdgeStateDetector _midi_connected;
 
 	bool _rotary_moved_while_pressed = false;
 

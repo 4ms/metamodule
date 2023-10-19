@@ -3,26 +3,25 @@
 #include "midi_message.hh"
 #include "params.hh"
 #include <algorithm>
+#include <optional>
 
 namespace MetaModule::Midi
 {
 
 struct MessageParser {
-	std::array<Params::Midi::Note, MaxMidiPolyphony> all_midi_notes;
-	std::span<Params::Midi::Note> midi_notes{all_midi_notes};
+	std::array<Midi::Note, MaxMidiPolyphony> all_midi_notes;
+	std::span<Midi::Note> midi_notes{all_midi_notes};
 
 	void set_poly_num(uint32_t poly_chans) {
 		poly_chans = std::clamp<uint32_t>(poly_chans, 1U, all_midi_notes.size());
 
-		if (poly_chans != midi_notes.size())
-			midi_notes = std::span<Params::Midi::Note>{all_midi_notes.begin(), poly_chans - 1};
+		if (poly_chans != midi_notes.size()) {
+			midi_notes = std::span{all_midi_notes.begin(), poly_chans};
+		}
 	}
 
-	Params::Midi::Event parse(MidiMessage msg) {
-		Params::Midi::Event event;
-
-		// Clear events from previous
-		event.type = Params::Midi::Event::Type::None;
+	Midi::Event parse(MidiMessage msg) {
+		Midi::Event event{};
 
 		// Monophonic MIDI CV/Gate
 		if (msg.is_noteoff()) {
@@ -31,7 +30,8 @@ struct MessageParser {
 				if (midi_note.note == msg.note() && midi_note.gate) {
 					midi_note.gate = false;
 
-					event.type = Params::Midi::Event::Type::NoteOff;
+					event.type = Midi::Event::Type::NoteOff;
+					event.note = msg.note();
 					event.poly_chan = i;
 					break;
 				}
@@ -41,20 +41,20 @@ struct MessageParser {
 		} else if (msg.is_command<MidiCommand::NoteOn>()) {
 
 			auto poly_chan = find_polyphonic_slot(midi_notes, msg.note());
-			Params::Midi::Note &midi_note = midi_notes[poly_chan];
+			Midi::Note &midi_note = midi_notes[poly_chan];
 			midi_note.note = msg.note();
 			midi_note.gate = true;
 
-			event.type = Params::Midi::Event::Type::NoteOn;
+			event.type = Midi::Event::Type::NoteOn;
 			event.poly_chan = poly_chan;
 			event.note = msg.note();
 			event.val = Midi::u7_to_volts<10>(msg.velocity());
-			printf_("On[%d] %d v%d\n", event.poly_chan, event.note, msg.velocity());
+			printf_("On[%d] %d\n", poly_chan, msg.note());
 
 		} else if (msg.is_command<MidiCommand::PolyKeyPressure>()) { //aka Aftertouch
 			for (unsigned i = 0; auto &midi_note : midi_notes) {
 				if (midi_note.note == msg.note()) {
-					event.type = Params::Midi::Event::Type::Aft;
+					event.type = Midi::Event::Type::Aft;
 					event.poly_chan = i;
 					event.val = Midi::u7_to_volts<10>(msg.aftertouch());
 					break;
@@ -63,20 +63,20 @@ struct MessageParser {
 			}
 
 		} else if (msg.is_command<MidiCommand::ChannelPressure>()) {
-			event.type = Params::Midi::Event::Type::ChanPress;
+			event.type = Midi::Event::Type::ChanPress;
 			event.val = Midi::u7_to_volts<10>(msg.chan_pressure());
 
 		} else if (msg.is_command<MidiCommand::ControlChange>()) {
-			event.type = Params::Midi::Event::Type::CC;
+			event.type = Midi::Event::Type::CC;
 			event.note = msg.ccnum();
 			event.val = Midi::u7_to_volts<10>(msg.ccval());
 
 		} else if (msg.is_command<MidiCommand::PitchBend>()) {
-			event.type = Params::Midi::Event::Type::Bend;
+			event.type = Midi::Event::Type::Bend;
 			event.val = Midi::s14_to_semitones<2>(msg.bend());
 
 		} else if (msg.is_timing_transport()) {
-			event.type = Params::Midi::Event::Type::Time;
+			event.type = Midi::Event::Type::Time;
 			event.note = msg.status == MidiSystemRealTimeCommand::TimingClock ? TimingEvents::Clock :
 						 msg.status == MidiSystemRealTimeCommand::Start		  ? TimingEvents::Start :
 						 msg.status == MidiSystemRealTimeCommand::Stop		  ? TimingEvents::Stop :
@@ -87,7 +87,7 @@ struct MessageParser {
 		return event;
 	}
 
-	size_t find_polyphonic_slot(std::span<Params::Midi::Note> midi_notes, uint8_t note) {
+	size_t find_polyphonic_slot(std::span<Midi::Note> midi_notes, uint8_t note) {
 		size_t empty_slot = midi_notes.size() - 1;
 
 		for (unsigned i = 0; auto &midi_note : midi_notes) {
@@ -96,6 +96,36 @@ struct MessageParser {
 			i++;
 		}
 		return empty_slot;
+	}
+
+	bool noteoff_seq_in_progress = false;
+	uint8_t noteoff_seq_cur_step = 0;
+
+	void start_all_notes_off_sequence() {
+		noteoff_seq_in_progress = true;
+		noteoff_seq_cur_step = 0;
+		printf_("start noteoff\n");
+	}
+
+	// Sends NoteOff to all poly channels, one by one, each time it's called
+	// Returns Event Type None when done, and returns nullopt if not running
+	std::optional<Midi::Event> step_all_notes_off_sequence() {
+		if (!noteoff_seq_in_progress)
+			return std::nullopt;
+
+		if (noteoff_seq_cur_step < MaxMidiPolyphony) {
+			auto event = Midi::Event{.type = Midi::Event::Type::NoteOff, .poly_chan = noteoff_seq_cur_step};
+			midi_notes[noteoff_seq_cur_step].gate = false;
+
+			printf_("off%d\n", noteoff_seq_cur_step);
+			noteoff_seq_cur_step++;
+			return event;
+		}
+
+		noteoff_seq_in_progress = false;
+		noteoff_seq_cur_step = 0;
+		printf_("off done\n");
+		return Midi::Event{.type = Midi::Event::Type::None};
 	}
 };
 
