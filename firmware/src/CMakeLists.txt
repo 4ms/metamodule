@@ -306,6 +306,10 @@ foreach(brand ${brands})
   target_link_libraries(main.elf PRIVATE ${brand}Library)
 endforeach()
 
+if (METAMODULE_PCB_VERSION)
+    target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
+endif()
+
 add_dependencies(main.elf m4_firmware)
 
 target_link_script(

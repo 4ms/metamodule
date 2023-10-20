@@ -1,4 +1,4 @@
-PRESET := base
+PRESET ?= base
 
 # Detect MinGW and use Make
 ifdef SYSTEMROOT

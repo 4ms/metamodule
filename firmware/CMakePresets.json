@@ -32,6 +32,14 @@
           "value": "ON"
         }
       }
+    },
+    {
+      "name": "pcb-p12",
+      "description": "PCB p11 with mods (aka p12)",
+      "inherits": "base",
+      "cacheVariables": {
+        "METAMODULE_PCB_VERSION": "12"
+      }
     }
   ],
   "buildPresets": [
