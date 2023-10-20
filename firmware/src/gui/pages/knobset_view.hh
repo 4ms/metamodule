@@ -147,6 +147,15 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void blur() final {
+		// Clear all containers except for the original ones
+		for (auto [pane, cont] : zip(panes, containers)) {
+			auto num_children = lv_obj_get_child_cnt(pane);
+			for (auto i = 0u; i < num_children; i++) {
+				auto child = lv_obj_get_child(pane, i);
+				if (child != cont)
+					lv_obj_del_async(child);
+			}
+		}
 	}
 
 private:
