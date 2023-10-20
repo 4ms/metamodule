@@ -1,5 +1,7 @@
 #pragma once
+#include "CoreModules/hub/panel_medium_defs.hh"
 #include "midi_def.hh"
+#include "util/math.hh"
 #include "util/static_string.hh"
 #include <optional>
 #include <vector>
@@ -45,12 +47,16 @@ struct MappedKnob {
 		return (max - min) * panel_val + min;
 	}
 
-	bool is_monophonic_note() const {
-		return (panel_knob_id == static_cast<uint16_t>(MidiMonoNoteParam));
+	bool is_panel_knob() const {
+		return panel_knob_id < PanelDef::NumKnobs;
 	}
 
-	bool is_monophonic_gate() const {
-		return (panel_knob_id == static_cast<uint16_t>(MidiMonoGateParam));
+	bool is_midi_cc() const {
+		return (panel_knob_id >= MidiCC0 && panel_knob_id <= MidiCC127);
+	}
+
+	uint16_t cc_num() const {
+		return panel_knob_id - MidiCC0;
 	}
 
 	bool operator==(const MappedKnob &other) {
@@ -75,12 +81,44 @@ struct MappedInputJack {
 	std::vector<Jack> ins;
 	AliasNameString alias_name;
 
-	bool is_monophonic_note() const {
-		return (panel_jack_id == static_cast<uint16_t>(MidiMonoNoteJack));
+	std::optional<uint32_t> midi_note_pitch() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoNoteJack, MidiNote8Jack);
 	}
 
-	bool is_monophonic_gate() const {
-		return (panel_jack_id == static_cast<uint16_t>(MidiMonoGateJack));
+	std::optional<uint32_t> midi_note_gate() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoGateJack, MidiGate8Jack);
+	}
+
+	std::optional<uint32_t> midi_note_vel() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoVelJack, MidiVel8Jack);
+	}
+
+	std::optional<uint32_t> midi_note_aft() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoAftertouchJack, MidiAftertouch8Jack);
+	}
+
+	std::optional<uint32_t> midi_note_retrig() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoRetrigJack, MidiRetrig8Jack);
+	}
+
+	std::optional<uint32_t> midi_gate() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiGateNote0, MidiGateNote127);
+	}
+
+	std::optional<uint32_t> midi_cc() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiCC0, MidiPitchWheelJack);
+	}
+
+	std::optional<uint32_t> midi_clk() const {
+		return panel_jack_id == MidiClockJack ? std::optional<uint32_t>{0} : std::nullopt;
+	}
+
+	std::optional<uint32_t> midi_divclk() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiClockDiv1Jack, MidiClockDiv96Jack);
+	}
+
+	std::optional<uint32_t> midi_transport() const {
+		return MathTools::between<uint32_t>(panel_jack_id, MidiStartJack, MidiContinueJack);
 	}
 };
 

@@ -1,3 +1,4 @@
+
 #include "ryml_std.hpp"
 //
 #include "patch/patch.hh"
@@ -8,6 +9,9 @@
 #endif
 #include "ryml.hpp"
 #include "ryml_serial_chars.hh"
+
+#include "CoreModules/module_type_slug.hh"
+#include "cpputil/util/countzip.hh"
 
 void write(ryml::NodeRef *n, Jack const &jack) {
 	*n |= ryml::MAP;
@@ -33,18 +37,47 @@ void write(ryml::NodeRef *n, MappedKnobSet const &knob_set) {
 	n->append_child() << ryml::key("set") << knob_set.set;
 }
 
-// TODO:
-// void write(ryml::NodeRef *n, InternalCable const &cable){
-// }
+void write(ryml::NodeRef *n, InternalCable const &cable) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("out") << cable.out;
+	n->append_child() << ryml::key("ins") << cable.ins;
+	if (cable.color.has_value()) {
+		n->append_child() << ryml::key("color") << cable.color.value();
+	}
+}
 
-// void write(ryml::NodeRef *n, MappedInputJack const &j){
-// }
+void write(ryml::NodeRef *n, MappedInputJack const &j) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("panel_jack_id") << j.panel_jack_id;
+	n->append_child() << ryml::key("ins") << j.ins;
+	if (j.alias_name.length())
+		n->append_child() << ryml::key("alias_name") << j.alias_name;
+}
 
-// void write(ryml::NodeRef *n, MappedOutputJack const &j){
-// }
+void write(ryml::NodeRef *n, MappedOutputJack const &j) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("panel_jack_id") << j.panel_jack_id;
+	n->append_child() << ryml::key("out") << j.out;
+	if (j.alias_name.length())
+		n->append_child() << ryml::key("alias_name") << j.alias_name;
+}
 
-// void write(ryml::NodeRef *n, StaticParam const &k){
-// }
+void write(ryml::NodeRef *n, StaticParam const &k) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("module_id") << k.module_id;
+	n->append_child() << ryml::key("param_id") << k.param_id;
+	n->append_child() << ryml::key("value") << k.value;
+}
+
+void write(ryml::NodeRef *n, std::vector<ModuleTypeSlug> const &slugs) {
+	*n |= ryml::MAP;
+	for (auto [i, x] : enumerate(slugs)) {
+		auto idx_s = std::to_string(i);
+		ryml::csubstr idx(idx_s.c_str(), idx_s.length());
+		ryml::csubstr slug(x.c_str(), x.length());
+		n->append_child() << ryml::key(idx) << slug;
+	}
+}
 
 bool read(ryml::ConstNodeRef const &n, Jack *jack) {
 	if (n.num_children() < 2)

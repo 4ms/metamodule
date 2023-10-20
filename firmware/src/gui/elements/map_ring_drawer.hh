@@ -3,6 +3,7 @@
 #include "gui/helpers/units_conversion.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
+#include "patch/midi_def.hh"
 #include <cstdint>
 #include <optional>
 
@@ -17,17 +18,26 @@ inline lv_obj_t *draw_mapped_ring(const BaseElement &,
 	if (!panel_el_id.has_value() || !element_obj)
 		return nullptr;
 
+	auto panel_id = panel_el_id.value();
+
 	//TODO: color and thickness set by variant type
-	auto color = Gui::knob_palette[panel_el_id.value() % 6];
+	lv_color_t color;
 	uint16_t gap;
 	float ring_thickness;
-	if (module_height == 240) {
-		ring_thickness = (panel_el_id.value() >= 6) ? 2 : 4;
-		gap = 2;
-
+	if (panel_id >= MidiCC0) {
+		ring_thickness = 1;
+		gap = 3;
+		color = Gui::palette_main[4];
 	} else {
-		ring_thickness = (panel_el_id.value() >= 6) ? 2 : 3;
-		gap = 0;
+		color = Gui::knob_palette[panel_id % 6];
+		if (module_height == 240) {
+			ring_thickness = (panel_id >= 6) ? 2 : 4;
+			gap = 2;
+
+		} else {
+			ring_thickness = (panel_id >= 6) ? 2 : 3;
+			gap = 0;
+		}
 	}
 
 	lv_obj_refr_size(element_obj);

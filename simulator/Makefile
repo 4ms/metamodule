@@ -17,5 +17,17 @@ warnings:
 
 run: all
 	build/simulator
+	
+# "make limit filename.txt" --> only build modules whose names are in the text file
+ifeq (limit,$(firstword $(MAKECMDGOALS)))
+LIMITFILE := $(filter-out limit,$(MAKECMDGOALS))
+# silence messages about filename.txt target
+.PHONY: $(LIMITFILE)
+$(LIMITFILE): 
+	@echo ""
+endif
+
+limit:
+	cmake --fresh --preset Default -DLIMITED_MODULES_FILE=$(LIMITFILE)
 
 .PHONY: all clean warnings run

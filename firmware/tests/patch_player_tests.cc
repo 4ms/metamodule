@@ -32,6 +32,7 @@ R"(PatchData:
   static_knobs: 
   mapped_knobs: 
   midi_maps:
+  midi_poly_num: 1
 )"};
 						 // clang-format on
 	PatchData pd;
@@ -98,6 +99,7 @@ PatchData:
   static_knobs: 
   mapped_knobs: 
   midi_maps:
+  midi_poly_num: 1
 	)"};
 	// clang-format on
 

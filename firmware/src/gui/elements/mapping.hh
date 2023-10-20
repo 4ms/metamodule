@@ -23,6 +23,8 @@ inline std::optional<uint16_t> find_mapping(const ParamElement &,
 											ElementCount::Indices indices) {
 	if (auto panel_map = patch.find_mapped_knob(active_set, module_idx, indices.param_idx))
 		return panel_map->panel_knob_id;
+	else if (auto panel_map = patch.find_midi_map(module_idx, indices.param_idx))
+		return panel_map->panel_knob_id;
 	else
 		return {};
 }

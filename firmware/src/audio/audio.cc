@@ -24,16 +24,6 @@
 namespace MetaModule
 {
 
-//FIXME: Setting an opt level other than O0 here causes a DMA Fifo Error for DMA1Stream3 (SPI4 TX)
-//Sometimes/often while executing output_silence and it's compiled to use vstr d16/d17
-//But also sometimes when the DMA1Stream3 IRQ interrupts DMA2Stream? IRQ for the audio SAI (the DMA1Stream3 IRQ returns into the body of DMA2Stream? IRQhandler, not into audio:;process()
-__attribute__((optimize("O0"))) void output_silence(AudioOutBuffer &out) {
-	for (auto &out_ : out) {
-		for (auto &outchan : out_.chan)
-			outchan = 0;
-	}
-}
-
 using namespace mdrivlib;
 
 AudioStream::AudioStream(PatchPlayer &patchplayer,
@@ -81,22 +71,29 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	}
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin0::high();
+		Debug::Pin0::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
-		load_measure.start_measurement();
 
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
-		process(audio_blocks[1 - block], param_blocks[block], auxsigs[block]);
 
+		// 100us for a 128 block size, or 48us for a 64 block size = +0.75us/frame
+		// Makes midi poly 4 note loop go from 2.2us to 600ns per frame = -1.6us/frame => net 0.85us/frame = 4%
+		// Plus, probably benefits from knob mappings
+		mdrivlib::SystemCache::invalidate_dcache_by_range(&param_blocks[block], sizeof(ParamBlock));
+
+		load_measure.start_measurement();
+		process(audio_blocks[1 - block], param_blocks[block], auxsigs[block]);
 		load_measure.end_measurement();
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
-		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof(SyncParams));
+		param_state.reset_change_flags();
+		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof sync_params);
+		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
-		// Debug::Pin0::low();
+		Debug::Pin0::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -131,12 +128,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			mute_ctr -= 0.1f;
 		else {
 			if (!patch_loader.is_audio_muted()) {
-				output_silence(out);
 				halves_muted++;
 				if (halves_muted == 2)
 					patch_loader.audio_is_muted();
 			}
-			return;
 		}
 	} else {
 		patch_loader.audio_not_muted();
@@ -146,8 +141,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	// TODO: check with patch_loader, not patch_player
 	if (!player.is_loaded) {
-		output_silence(out);
-		return;
+		mute_ctr = 0;
 	}
 
 	handle_patch_mods(patch_mod_queue, player);
@@ -160,6 +154,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	propagate_sense_pins(param_block.params[0]);
 	const auto jack_sense = param_block.params[0].jack_senses;
 	param_state.jack_senses = jack_sense;
+
+	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 
@@ -190,16 +186,15 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 				player.set_panel_param(i, knob);
 		}
 
-		// TODO: add more MIDI mappings (duo/quad/octophonic, CC=>gate, CC=>param, CC=>jack)
-		if (param_block.metaparams.midi_connected) {
-			player.set_panel_param(MidiMonoNoteParam, params_.midi_note);
-			//TODO: set param_state.midi_note if it changed
+		// MIDI
+		if (param_block.metaparams.midi_connected)
+			handle_midi(params_.midi_event, param_block.metaparams.midi_poly_chans);
 
-			// player.set_panel_param(MidiMonoGateParam, params_.midi_gate);
-
-			// player.set_panel_input(FirstMidiNoteInput, params_.midi_note);
-			player.set_panel_input(MidiMonoGateJack, params_.midi_gate);
-			//TODO: set param_state.midi_gate if it changed
+		// Skip updating patch and just set outputs to 0, if no patch is loaded
+		if (!player.is_loaded) {
+			for (auto &outchan : out_.chan)
+				outchan = 0;
+			continue;
 		}
 
 		// Run each module
@@ -208,6 +203,40 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		// Get outputs from modules
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
+	}
+}
+
+void AudioStream::handle_midi(Midi::Event const &event, unsigned poly_num) {
+	if (event.type == Midi::Event::Type::None)
+		return;
+
+	if (event.type == Midi::Event::Type::NoteOn) {
+		player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note));
+		player.set_midi_note_gate(event.poly_chan, 10.f);
+		player.set_midi_note_velocity(event.poly_chan, event.val);
+		player.set_midi_note_retrig(event.poly_chan, 10.f);
+		player.set_midi_gate(event.note, event.val); //TODO: if not velocity mode, then event.val => 10
+
+	} else if (event.type == Midi::Event::Type::NoteOff) {
+		player.set_midi_note_gate(event.poly_chan, 0);
+		player.set_midi_gate(event.note, 0);
+
+	} else if (event.type == Midi::Event::Type::Aft) {
+		player.set_midi_note_aftertouch(event.poly_chan, event.val);
+
+	} else if (event.type == Midi::Event::Type::ChanPress) {
+		for (unsigned i = 0; i < poly_num; i++)
+			player.set_midi_note_aftertouch(i, event.val);
+
+	} else if (event.type == Midi::Event::Type::CC) {
+		player.set_midi_cc(event.note, event.val);
+		sync_params.midi_events.put(event);
+
+	} else if (event.type == Midi::Event::Type::Bend) {
+		player.set_midi_cc(128, event.val);
+
+	} else if (event.type == Midi::Event::Type::Time) {
+		player.send_midi_time_event(event.note, 10.f);
 	}
 }
 

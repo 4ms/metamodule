@@ -25,7 +25,7 @@ private:
 
 	MessageQueue msg_queue;
 	PageManager page_manager;
-	ParamsState params;
+	ParamsMidiState params;
 	MetaParams metaparams;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
@@ -79,9 +79,18 @@ public:
 
 private:
 	void page_update_task() {
+
 		//This returns false when audio stops
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
-		//if (!read_ok) ... restart audio
+		//TODO: if (!read_ok) ... restart audio
+
+		// Unpack midi queue into midi state array
+		if (auto event = sync_params.midi_events.get(); event.has_value()) {
+			auto e = event.value();
+			if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs)
+				params.midi_ccs[e.note].store_changed(e.val / 10.f);
+		}
+
 		page_manager.update_current_page();
 		patch_playloader.handle_sync_patch_loading();
 	}

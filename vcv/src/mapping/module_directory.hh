@@ -4,7 +4,7 @@
 
 struct ModuleDirectory {
 
-	// True if module is in the 4ms or MetaModule compatible plugin
+	// True if module is in the 4ms or MetaModule compatible plugin, including the Hub
 	static bool isInPlugin(rack::Module *module) {
 		if (!module)
 			return false;
@@ -15,6 +15,7 @@ struct ModuleDirectory {
 
 		if (module->model->plugin->slug == "4msCompany")
 			return true;
+
 		if (module->model->plugin->slug == "Befaco") {
 			if (module->model->slug == "NoisePlethora")
 				return false;
@@ -22,7 +23,11 @@ struct ModuleDirectory {
 				return false;
 			return true;
 		}
+
 		if (module->model->plugin->slug == "AudibleInstruments")
+			return true;
+
+		if (module->model->plugin->slug == "HetrickCV")
 			return true;
 
 		return false;
@@ -48,5 +53,31 @@ struct ModuleDirectory {
 
 	static bool isModuleInPlugin(rack::Module *module) {
 		return isInPlugin(module) && !isHub(module);
+	}
+
+	static bool isCoreMIDI(rack::Module *module) {
+		if (!module)
+			return false;
+		if (!module->model)
+			return false;
+		if (!module->model->plugin)
+			return false;
+
+		if (module->model->plugin->slug == "Core") {
+			if (module->model->slug == "MIDIToCVInterface")
+				return true;
+			if (module->model->slug == "MIDICCToCVInterface")
+				return true;
+			if (module->model->slug == "MIDI-Map")
+				return true;
+			if (module->model->slug == "MIDITriggerToCVInterface")
+				return true;
+		}
+
+		return false;
+	}
+
+	static bool isInPluginOrMIDI(rack::Module *module) {
+		return isInPlugin(module) || isCoreMIDI(module);
 	}
 };

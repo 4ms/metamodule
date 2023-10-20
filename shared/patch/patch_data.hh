@@ -16,6 +16,10 @@ struct PatchData {
 	std::vector<StaticParam> static_knobs;
 	std::vector<MappedKnobSet> knob_sets;
 	std::vector<ModuleInitState> module_states;
+	MappedKnobSet midi_maps;
+	uint32_t midi_poly_num = 1;
+
+	static constexpr uint32_t MIDIKnobSet = 0xFFFFFFFF;
 
 	const MappedKnob *find_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) const {
 		if (set_id < knob_sets.size()) {
@@ -23,6 +27,14 @@ struct PatchData {
 				if (m.module_id == module_id && m.param_id == param_id)
 					return &m;
 			}
+		}
+		return nullptr;
+	}
+
+	const MappedKnob *find_midi_map(uint32_t module_id, uint32_t param_id) const {
+		for (auto &m : midi_maps.set) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				return &m;
 		}
 		return nullptr;
 	}
@@ -42,10 +54,32 @@ struct PatchData {
 		if (set_id >= knob_sets.size())
 			return false;
 
+		if (map.module_id >= module_slugs.size())
+			return false;
+
+		// if (map.param_id >= PanelDef::NumKnobs)
+		// 	return false;
+
 		if (auto *m = _get_mapped_knob(set_id, map.module_id, map.param_id)) {
 			*m = map;
 		} else {
 			knob_sets[set_id].set.push_back(map);
+		}
+
+		return true;
+	}
+
+	bool add_update_midi_map(MappedKnob const &map) {
+		if (!map.is_midi_cc())
+			return false;
+
+		if (map.module_id >= module_slugs.size())
+			return false;
+
+		if (auto *m = _get_midi_map(map.module_id, map.param_id)) {
+			*m = map;
+		} else {
+			midi_maps.set.push_back(map);
 		}
 
 		return true;
@@ -92,7 +126,10 @@ struct PatchData {
 		return nullptr;
 	}
 
-	const char *validate_knob_set_name(unsigned set_i) {
+	const char *validate_knob_set_name(unsigned set_i) const {
+		if (set_i == MIDIKnobSet)
+			return "MIDI";
+
 		if (set_i >= knob_sets.size())
 			return "";
 
@@ -121,6 +158,14 @@ private:
 				if (m.module_id == module_id && m.param_id == param_id)
 					return &m;
 			}
+		}
+		return nullptr;
+	}
+
+	MappedKnob *_get_midi_map(uint32_t module_id, uint32_t param_id) {
+		for (auto &m : midi_maps.set) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				return &m;
 		}
 		return nullptr;
 	}

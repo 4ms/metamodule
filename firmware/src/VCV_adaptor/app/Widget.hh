@@ -34,6 +34,17 @@ struct SvgPort : PortWidget {
 	}
 };
 
+struct ThemedSvgPort : SvgPort {
+	std::shared_ptr<window::Svg> lightSvg;
+	std::shared_ptr<window::Svg> darkSvg;
+
+	void setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
+	}
+
+	void step() override {
+	}
+};
+
 // Lights
 
 struct ModuleLightWidget : widget::Widget {

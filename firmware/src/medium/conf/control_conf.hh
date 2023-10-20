@@ -13,7 +13,7 @@ namespace MetaModule
 const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
 	.period_ns = 20000, // must be just a hair faster than 48kHz
-	.priority1 = 2,		// same group as global Semaphore unlock, so that
+	.priority1 = 0,		// same group as global Semaphore unlock, so that
 	.priority2 = 3,
 };
 
