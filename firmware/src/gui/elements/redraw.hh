@@ -29,6 +29,9 @@ inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
 
 // Slider update
 inline bool redraw_element(const Slider &element, const GuiElement &gui_el, float val) {
+	if (!gui_el.obj)
+		return false;
+
 	bool did_update_position = false;
 
 	auto handle = lv_obj_get_child(gui_el.obj, 0);

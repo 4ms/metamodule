@@ -82,6 +82,8 @@ struct ModuleDrawer {
 				[height = height, &el_drawer, &patch, &indices, module_idx, canvas, active_knob_set](
 					auto &el) -> GuiElement {
 					auto obj = el_drawer.draw_element(el);
+					if (obj == nullptr)
+						pr_warn("Fail to draw element %.*s\n", (int)el.short_name.size(), el.short_name.data());
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, indices);
 					auto mapped_ring = MapRingDrawer::draw_mapped_ring(el, obj, canvas, mapping_id, height);
 
