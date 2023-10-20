@@ -1,11 +1,7 @@
 #pragma once
-#include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
-#include <algorithm>
-
-#include "printf.h"
 
 namespace MetaModule
 {
@@ -17,6 +13,7 @@ struct FullElementName {
 
 enum class ElementType { Param, Input, Output, Light };
 
+// return the module name and element name, when all we have is the IDs and type (not the Element)
 inline FullElementName
 get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type, PatchData const &patch) {
 	FullElementName fullname{"?", "?"};

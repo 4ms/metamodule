@@ -71,6 +71,12 @@ TEST_CASE("Can get param index") {
 	CHECK(ElementCount::get_indices<TestInfo>(Light2).value().light_idx == 4);
 	CHECK(ElementCount::get_indices<TestInfo>(SliderLED).value().light_idx == 6);
 
+	// This is weird... TODO; change how this works?
+	// get_indices<>(BaseElement) is not called except in tests, so doesn't matter really
+	SUBCASE("Some indices are invalid if the type does not match") {
+		CHECK(ElementCount::get_indices<TestInfo>(SliderLED).value().output_idx == 2);
+	}
+
 	CHECK(ElementCount::get_indices<TestInfo>(NonExistingKnob) == std::nullopt);
 
 	// Make sure it can be done at compile-time
@@ -102,7 +108,7 @@ struct DEVInfo : ModuleInfoBase {
 
 	using enum Coords;
 
-	static constexpr std::array<Element, 44> Elements{{
+	static constexpr std::array<Element, 45> Elements{{
 		Slider25mmVertLED{to_mm<72>(22.415), to_mm<72>(108.25), Center, "Rise A Slider", ""},
 		Slider25mmVertLED{to_mm<72>(56.265), to_mm<72>(108.25), Center, "Fall A Slider", ""},
 		Slider25mmVertLED{to_mm<72>(174.115), to_mm<72>(108.25), Center, "Rise B Slider", ""},
@@ -147,28 +153,50 @@ struct DEVInfo : ModuleInfoBase {
 		Toggle3pos{to_mm<72>(212.77), to_mm<72>(41.905), Center, "Fall B Switch", ""},
 		LatchingButtonMonoLight{to_mm<72>(82.8), to_mm<72>(41.64), Center, "Cycle A", ""},
 		LatchingButtonMonoLight{to_mm<72>(147.61), to_mm<72>(41.68), Center, "Cycle B", ""},
+
+		OrangeLight{to_mm<72>(130.68), to_mm<72>(261.07), Center, "extra", ""},
 	}};
 };
 } // namespace MetaModule
 
 TEST_CASE("get_indices()") {
-	using Info = MetaModule::DEVInfo;
-	std::array<ElementCount::Indices, Info::Elements.size()> indices{};
+	auto indices = ElementCount::get_indices<MetaModule::DEVInfo>();
 
-	ElementCount::Indices running_total{};
-
-	for (unsigned i = 0; auto el : Info::Elements) {
-		indices[i++] = running_total;
-		ElementCount::Counts el_cnt = ElementCount::count(el);
-		running_total = running_total + el_cnt;
-	}
-
-	CHECK(indices[11].param_idx == 11);
-	CHECK(indices[12].param_idx == 12);
-	CHECK(indices[13].param_idx == 12);
+	CHECK(indices[11].param_idx == 11);										//Fall B
+	CHECK(indices[12].param_idx == ElementCount::Indices::NoElementMarker); //Cycle Gate, not a param
+	CHECK(indices[13].param_idx == ElementCount::Indices::NoElementMarker);
 
 	CHECK(indices[38].param_idx == 12); //Rise A Switch = 12
 	CHECK(indices[39].param_idx == 13); //Fall A Switch = 13
 
-	CHECK(indices[43].param_idx == 17); //Cycle B = 17 (last element)
+	CHECK(indices[42].param_idx == 16);										//Cycle A = 16
+	CHECK(indices[43].param_idx == 17);										//Cycle B = 17
+	CHECK(indices[44].param_idx == ElementCount::Indices::NoElementMarker); //extra light, not a param
+	CHECK(indices[44].light_idx == 20);
+
+	// Check only one element has the matching index
+	for (auto i = 0; auto ind : indices) {
+		if (i == 42)
+			CHECK(ind.param_idx == 16);
+		else
+			CHECK_FALSE(ind.param_idx == 16);
+
+		if (i == 11)
+			CHECK(ind.param_idx == 11);
+		else
+			CHECK_FALSE(ind.param_idx == 11);
+
+		if (i == 0)
+			CHECK(ind.param_idx == 0);
+		else
+			CHECK_FALSE(ind.param_idx == 0);
+
+		i++;
+	}
+
+	constexpr auto CycleA = get<MetaModule::LatchingButtonMonoLight>(MetaModule::DEVInfo::Elements[42]);
+	constexpr auto CycleB = get<MetaModule::LatchingButtonMonoLight>(MetaModule::DEVInfo::Elements[43]);
+
+	static_assert(ElementCount::get_indices<MetaModule::DEVInfo>(CycleA).value().param_idx == 16);
+	static_assert(ElementCount::get_indices<MetaModule::DEVInfo>(CycleB).value().param_idx == 17);
 }
