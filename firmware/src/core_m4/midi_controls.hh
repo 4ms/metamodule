@@ -40,7 +40,7 @@ struct MessageParser {
 
 		} else if (msg.is_command<MidiCommand::NoteOn>()) {
 
-			auto poly_chan = find_polyphonic_slot(midi_notes, msg.note());
+			auto poly_chan = find_polyphonic_slot_rotate(midi_notes, msg.note());
 			Midi::Note &midi_note = midi_notes[poly_chan];
 			midi_note.note = msg.note();
 			midi_note.gate = true;
@@ -86,7 +86,26 @@ struct MessageParser {
 		return event;
 	}
 
-	size_t find_polyphonic_slot(std::span<Midi::Note> midi_notes, uint8_t note) {
+	size_t last_poly_chan = MaxMidiPolyphony;
+
+	size_t find_polyphonic_slot_rotate(std::span<Midi::Note> midi_notes, uint8_t note) {
+		auto next = last_poly_chan + 1;
+		if (next >= midi_notes.size())
+			next = 0;
+
+		while (midi_notes[next].gate == true) {
+			if (next == last_poly_chan)
+				break;
+
+			next++;
+			if (next >= midi_notes.size())
+				next = 0;
+		}
+		last_poly_chan = next;
+		return next;
+	}
+
+	size_t find_polyphonic_slot_first_available(std::span<Midi::Note> midi_notes, uint8_t note) {
 		size_t empty_slot = midi_notes.size() - 1;
 
 		for (unsigned i = 0; auto &midi_note : midi_notes) {
