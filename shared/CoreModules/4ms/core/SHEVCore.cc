@@ -268,8 +268,8 @@ private:
 			fallCV = -fScaleLEDs - ProcessCVOffset(parent->getState<Mapping::FallSlider>(), fallRange);
 
 			// TODO: LEDs only need to be updated ~60Hz instead of 48kHz
-			parent->setLED<Mapping::RiseLedLight>(BipolarColor_t{rScaleLEDs / 10.f});
-			parent->setLED<Mapping::FallLedLight>(BipolarColor_t{fScaleLEDs / 10.f});
+			parent->setLED<Mapping::RiseLedLight>(BipolarColor_t{-rScaleLEDs / 10.f});
+			parent->setLED<Mapping::FallLedLight>(BipolarColor_t{-fScaleLEDs / 10.f});
 
 			// TODO: low pass filter
 
