@@ -28,6 +28,8 @@ struct Indices {
 	uint8_t input_idx = 0;
 	uint8_t output_idx = 0;
 
+	static constexpr uint8_t NoElementMarker = 0xFF;
+
 	// Indices + Counts -> Indices
 	constexpr Indices operator+(const Counts rhs) {
 		return {static_cast<uint8_t>(param_idx + rhs.num_params),
@@ -81,8 +83,14 @@ consteval auto get_indices() {
 	Indices running_total{};
 
 	for (unsigned i = 0; auto el : Info::Elements) {
-		indices[i++] = running_total;
 		Counts el_cnt = count(el);
+		Indices masked_total = {
+			.param_idx = el_cnt.num_params > 0 ? running_total.param_idx : Indices::NoElementMarker,
+			.light_idx = el_cnt.num_lights > 0 ? running_total.light_idx : Indices::NoElementMarker,
+			.input_idx = el_cnt.num_inputs > 0 ? running_total.input_idx : Indices::NoElementMarker,
+			.output_idx = el_cnt.num_outputs > 0 ? running_total.output_idx : Indices::NoElementMarker,
+		};
+		indices[i++] = masked_total;
 		running_total = running_total + el_cnt;
 	}
 
