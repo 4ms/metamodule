@@ -64,14 +64,27 @@ draw_element(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, u
 // Draw slider with its handle as a sub-object
 inline lv_obj_t *draw_element(const Slider &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
+	if (!obj)
+		return nullptr;
 
-	auto *handle = lv_obj_create(obj);
-	// TODO: horizontal handle
-	lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
-	lv_obj_set_width(handle, img->header.w);
-	lv_obj_set_height(handle, module_height / 24);
-	lv_obj_set_pos(handle, 0, 0);
-	lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+	lv_coord_t w = img ? img->header.w : 5;
+	lv_coord_t h = img ? img->header.h : 5;
+	auto handle = lv_obj_create(obj);
+	if (w <= h) {
+		// Vertical
+		lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
+		lv_obj_set_width(handle, w);
+		lv_obj_set_height(handle, module_height / 24);
+		lv_obj_set_pos(handle, 0, 0);
+		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+	} else {
+		// Horizontal
+		lv_obj_set_align(handle, LV_ALIGN_LEFT_MID);
+		lv_obj_set_width(handle, module_height / 24); //10px at full scale
+		lv_obj_set_height(handle, h);
+		lv_obj_set_pos(handle, 0, 0);
+		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+	}
 	return obj;
 }
 

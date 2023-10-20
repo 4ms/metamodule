@@ -52,7 +52,7 @@ inline bool redraw_element(const Slider &element, const GuiElement &gui_el, floa
 	} else {
 		// Horizontal Slider
 		auto handle_width = lv_obj_get_width(handle);
-		int32_t pos = (1.f - val) * (width - handle_width);
+		int32_t pos = val * (width - handle_width);
 		int32_t cur_pos = lv_obj_get_x(handle);
 		if (pos != cur_pos) {
 			lv_obj_set_x(handle, pos);
