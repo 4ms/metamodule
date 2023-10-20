@@ -117,7 +117,7 @@ void AudioStream::start() {
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	auto raw_out = player.get_panel_output(output_id) * mute_ctr;
-	raw_out = -raw_out / OutputHighRangeVolts;
+	raw_out = -raw_out / OutputMaxVolts;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
 	return scaled_out;
 }

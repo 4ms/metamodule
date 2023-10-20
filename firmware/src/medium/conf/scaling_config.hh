@@ -8,7 +8,8 @@ static inline constexpr int32_t InputHighRangeMillivolts = 10310;
 static inline constexpr float InputRangeVolts = InputHighRangeVolts - InputLowRangeVolts;
 static inline constexpr float InputRangeCenterVolts = (InputHighRangeVolts + InputLowRangeVolts) / 2.f;
 
-static inline constexpr float OutputLowRangeVolts = -8.59f;
-static inline constexpr float OutputHighRangeVolts = 8.59f;
-static inline constexpr float OutputRangeVolts = OutputHighRangeVolts - OutputLowRangeVolts;
-static inline constexpr float OutputRangeCenterVolts = (OutputHighRangeVolts + OutputLowRangeVolts) / 2.f;
+#if defined(METAMODULE_PCB_VERSION) && (METAMODULE_PCB_VERSION == 12)
+static inline constexpr float OutputMaxVolts = 10.4f;
+#else
+static inline constexpr float OutputMaxVolts = 8.59f;
+#endif
