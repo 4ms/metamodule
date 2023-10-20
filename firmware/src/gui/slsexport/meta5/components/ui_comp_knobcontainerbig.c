@@ -13,7 +13,7 @@ lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent) {
 lv_obj_t *cui_KnobContainerBig;
 cui_KnobContainerBig = lv_obj_create(comp_parent);
 lv_obj_set_width( cui_KnobContainerBig, 60);
-lv_obj_set_height( cui_KnobContainerBig, 84);
+lv_obj_set_height( cui_KnobContainerBig, 82);
 lv_obj_set_align( cui_KnobContainerBig, LV_ALIGN_CENTER );
 lv_obj_add_flag( cui_KnobContainerBig, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( cui_KnobContainerBig, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
@@ -29,7 +29,7 @@ lv_obj_set_style_pad_top(cui_KnobContainerBig, 0, LV_PART_MAIN| LV_STATE_DEFAULT
 lv_obj_set_style_pad_bottom(cui_KnobContainerBig, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(cui_KnobContainerBig, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(cui_KnobContainerBig, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_radius(cui_KnobContainerBig, 6, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_radius(cui_KnobContainerBig, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_border_width(cui_KnobContainerBig, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_color(cui_KnobContainerBig, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(cui_KnobContainerBig, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
@@ -109,9 +109,11 @@ lv_obj_set_style_pad_bottom(cui_KnobLetter, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_t *cui_Label;
 cui_Label = lv_label_create(cui_KnobContainerBig);
-lv_obj_set_width( cui_Label, 54);
-lv_obj_set_height( cui_Label, 37);
-lv_obj_set_align( cui_Label, LV_ALIGN_BOTTOM_MID );
+lv_obj_set_width( cui_Label, 60);
+lv_obj_set_height( cui_Label, 36);
+lv_obj_set_x( cui_Label, 0 );
+lv_obj_set_y( cui_Label, 43 );
+lv_obj_set_align( cui_Label, LV_ALIGN_TOP_MID );
 lv_label_set_text(cui_Label,"");
 lv_obj_clear_flag( cui_Label, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_color(cui_Label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );

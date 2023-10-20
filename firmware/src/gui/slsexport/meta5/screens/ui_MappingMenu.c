@@ -138,7 +138,7 @@ lv_obj_set_style_shadow_ofs_y(ui_ElementRoller, 0, LV_PART_SELECTED| LV_STATE_DE
 lv_obj_set_style_blend_mode(ui_ElementRoller, LV_BLEND_MODE_NORMAL, LV_PART_SELECTED| LV_STATE_DEFAULT);
 
 ui_MappingParameters = lv_obj_create(ui_MappingFlexZone);
-lv_obj_set_width( ui_MappingParameters, 150);
+lv_obj_set_width( ui_MappingParameters, 130);
 lv_obj_set_height( ui_MappingParameters, 232);
 lv_obj_set_x( ui_MappingParameters, -4 );
 lv_obj_set_y( ui_MappingParameters, 0 );
@@ -161,7 +161,7 @@ lv_obj_set_style_pad_left(ui_MappingParameters, 10, LV_PART_MAIN| LV_STATE_DEFAU
 lv_obj_set_style_pad_right(ui_MappingParameters, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MappingParameters, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MappingParameters, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_MappingParameters, 5, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_MappingParameters, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_MappingParameters, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_set_style_pad_left(ui_MappingParameters, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
@@ -288,6 +288,10 @@ lv_label_set_text(ui_MappedListTitle,"Mappings:");
 lv_obj_set_style_text_color(ui_MappedListTitle, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_MappedListTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_MappedListTitle, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_MappedListTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_MappedListTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_MappedListTitle, -2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_MappedListTitle, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_MappedListPane = lv_obj_create(ui_MappedPanel);
 lv_obj_set_width( ui_MappedListPane, lv_pct(100));
@@ -431,7 +435,7 @@ lv_obj_set_style_pad_top(ui_ControlAlertLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT
 lv_obj_set_style_pad_bottom(ui_ControlAlertLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_AddMapPopUp = lv_obj_create(ui_MappingParameters);
-lv_obj_set_height( ui_AddMapPopUp, 174);
+lv_obj_set_height( ui_AddMapPopUp, 175);
 lv_obj_set_width( ui_AddMapPopUp, lv_pct(100));
 lv_obj_set_x( ui_AddMapPopUp, 0 );
 lv_obj_set_y( ui_AddMapPopUp, 8 );
@@ -446,7 +450,7 @@ lv_obj_set_style_bg_opa(ui_AddMapPopUp, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_AddMapPopUp, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_AddMapPopUp, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_AddMapPopUp, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_AddMapPopUp, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_AddMapPopUp, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_AddMapPopUp, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_AddMapPopUp, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_AddMapPopUp, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -513,6 +517,8 @@ lv_obj_set_style_pad_left(ui_AddMapButtonPanel, 4, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_right(ui_AddMapButtonPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_AddMapButtonPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_AddMapButtonPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_AddMapButtonPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_AddMapButtonPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CancelAdd = lv_btn_create(ui_AddMapButtonPanel);
 lv_obj_set_width( ui_CancelAdd, 60);

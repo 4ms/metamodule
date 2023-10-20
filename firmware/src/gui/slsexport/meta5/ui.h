@@ -145,6 +145,40 @@ extern lv_obj_t *ui_KnobPanelY;
 extern lv_obj_t *ui_KnobContainerY;
 extern lv_obj_t *ui_KnobPanelZ;
 extern lv_obj_t *ui_KnobContainerZ;
+// SCREEN: ui_EditMappingPage
+void ui_EditMappingPage_screen_init(void);
+extern lv_obj_t *ui_EditMappingPage;
+extern lv_obj_t *ui_EditMappingContainer;
+extern lv_obj_t *ui_EditMapKnob;
+extern lv_obj_t *ui_Knob1;
+extern lv_obj_t *ui_Circle1;
+extern lv_obj_t *ui_KnobLetter1;
+extern lv_obj_t *ui_MinSliderContainer;
+extern lv_obj_t *ui_MinLabel;
+extern lv_obj_t *ui_MinSlider;
+extern lv_obj_t *ui_MaxSliderContainer;
+extern lv_obj_t *ui_MaxLabel;
+extern lv_obj_t *ui_MaxIndex;
+extern lv_obj_t *ui_MaxSlider;
+extern lv_obj_t *ui_IDPanel;
+extern lv_obj_t *ui_AliasTextArea;
+extern lv_obj_t *ui_ModuleMapLabel;
+extern lv_obj_t *ui_ModuleMap;
+extern lv_obj_t *ui_ModuleMapName;
+extern lv_obj_t *ui_KnobMapLabel;
+extern lv_obj_t *ui_KnobMap;
+extern lv_obj_t *ui_KnobMapName;
+extern lv_obj_t *ui_MappedLabel;
+extern lv_obj_t *ui_MappedText;
+extern lv_obj_t *ui_MappedName;
+extern lv_obj_t *ui_MoreMapsIcon;
+extern lv_obj_t *ui_EditMapButtons;
+extern lv_obj_t *ui_ListButton;
+extern lv_obj_t *ui_ListLabel;
+extern lv_obj_t *ui_EditButton;
+extern lv_obj_t *ui_EditLabel;
+extern lv_obj_t *ui_TrashButton;
+extern lv_obj_t *ui_TrashLabel;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png
@@ -153,12 +187,16 @@ LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
 LV_IMG_DECLARE( ui_img_1x_add1_png);   // assets/1x/Add1.png
 LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
 LV_IMG_DECLARE( ui_img_1x_settings1_png);   // assets/1x/Settings1.png
+LV_IMG_DECLARE( ui_img_1x_min_png);   // assets/1x/MIN.png
+LV_IMG_DECLARE( ui_img_1x_asset_1_png);   // assets/1x/Asset 1.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90032);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90040);
 
 void ui_init(void);
 
