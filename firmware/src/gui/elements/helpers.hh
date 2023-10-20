@@ -5,6 +5,8 @@
 #include "patch/patch_data.hh"
 #include <algorithm>
 
+#include "printf.h"
+
 namespace MetaModule
 {
 
@@ -25,17 +27,20 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 		auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[module_id]);
 
 		if (info.width_hp) {
-			auto res = std::find_if(info.indices.begin(), info.indices.end(), [=](auto idx) {
-				return (type == ElementType::Param)	 ? element_idx == idx.param_idx :
-					   (type == ElementType::Input)	 ? element_idx == idx.input_idx :
-					   (type == ElementType::Output) ? element_idx == idx.output_idx :
-					   (type == ElementType::Light)	 ? element_idx == idx.light_idx :
-													   false;
-			});
+			// Search in reverse (the matching element is the last one with the matching index)
+			for (int el_id = info.indices.size() - 1; el_id >= 0; el_id--) {
 
-			if (res != info.indices.end()) {
-				auto el_id = std::distance(info.indices.begin(), res);
-				fullname.element_name = base_element(info.elements[el_id]).short_name;
+				auto idx = info.indices[el_id];
+
+				bool is_found = (type == ElementType::Param)  ? element_idx == idx.param_idx :
+								(type == ElementType::Input)  ? element_idx == idx.input_idx :
+								(type == ElementType::Output) ? element_idx == idx.output_idx :
+								(type == ElementType::Light)  ? element_idx == idx.light_idx :
+																false;
+				if (is_found) {
+					fullname.element_name = base_element(info.elements[el_id]).short_name;
+					break;
+				}
 			}
 		}
 	}
