@@ -3,6 +3,7 @@
 #include <array>
 #include <concepts>
 #include <type_traits>
+#include <algorithm>
 
 namespace MetaModule::StateConversion
 {
