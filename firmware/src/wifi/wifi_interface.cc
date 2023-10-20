@@ -12,6 +12,8 @@ using namespace Framing;
 
 #include <stm32mp1xx_hal.h>
 
+#include "core_intercom/shared_memory.hh"
+
 
 
 #include <console/pr_dbg.hh>
@@ -55,8 +57,6 @@ void WifiInterface::run()
 
 void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
 {
-    printf("Frame\n");
-
     auto message = GetMessage(frame.data());
 
     if (auto content = message->content(); content)
@@ -87,16 +87,24 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
         }
         else if (auto patchNameMessage = message->content_as_PatchNames(); patchNameMessage)
         {
-                // Answer presence detection
-                flatbuffers::FlatBufferBuilder fbb;
-                auto str1 = fbb.CreateString("First Name");
-                auto str2 = fbb.CreateString("Second Name");
-                auto names = fbb.CreateVector({str1, str2});
-                auto patchNames = CreatePatchNames(fbb, false, names);
-                auto message = CreateMessage(fbb, AnyMessage_PatchNames, patchNames.Union());
-                fbb.Finish(message);
+            // take a copy of the current file list
+            auto fileList = SharedMemoryS::ptrs.patch_file_list->norflash;
 
-                send_frame(fbb.GetBufferSpan());
+            flatbuffers::FlatBufferBuilder fbb;
+
+            std::vector<flatbuffers::Offset<flatbuffers::String>> elems(fileList.size());
+            for (std::size_t i=0; i<fileList.size(); i++)
+            {
+                auto str = fbb.CreateString(std::string_view(fileList[i].patchname));
+                elems[i] = str;
+            };
+            auto names = fbb.CreateVector(elems);
+
+            auto patchNames = CreatePatchNames(fbb, false, names);
+            auto message = CreateMessage(fbb, AnyMessage_PatchNames, patchNames.Union());
+            fbb.Finish(message);
+
+            send_frame(fbb.GetBufferSpan());
         }
         else
         {
