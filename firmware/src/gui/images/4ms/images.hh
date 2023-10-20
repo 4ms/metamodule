@@ -9,11 +9,7 @@ LV_IMG_DECLARE(button_x);
 LV_IMG_DECLARE(knob_unlined_x);
 LV_IMG_DECLARE(knob_large_x);
 LV_IMG_DECLARE(slider_x);
-LV_IMG_DECLARE(switch_horiz_left);
-LV_IMG_DECLARE(switch_horiz_right);
-LV_IMG_DECLARE(switch_horiz_center);
-LV_IMG_DECLARE(switch_up);
-LV_IMG_DECLARE(switch_down);
+LV_IMG_DECLARE(slider_horiz_x);
 LV_IMG_DECLARE(switch_center);
 LV_IMG_DECLARE(led_x);
 
@@ -50,6 +46,14 @@ inline const lv_img_dsc_t *get_img(const Slider25mmVertLED &) {
 
 inline const lv_img_dsc_t *get_img(const Slider25mmVert &) {
 	return &slider_x;
+}
+
+inline const lv_img_dsc_t *get_img(const Slider25mmHorizLED &) {
+	return &slider_horiz_x;
+}
+
+inline const lv_img_dsc_t *get_img(const Slider25mmHoriz &) {
+	return &slider_horiz_x;
 }
 
 inline const lv_img_dsc_t *get_img(const Toggle3pos &) {
