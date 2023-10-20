@@ -190,6 +190,13 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		if (param_block.metaparams.midi_connected)
 			handle_midi(params_.midi_event, param_block.metaparams.midi_poly_chans);
 
+		// Skip updating patch and just set outputs to 0, if no patch is loaded
+		if (!player.is_loaded) {
+			for (auto &outchan : out_.chan)
+				outchan = 0;
+			continue;
+		}
+
 		// Run each module
 		player.update_patch();
 
