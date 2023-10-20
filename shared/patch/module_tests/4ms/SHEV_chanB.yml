@@ -181,6 +181,24 @@ PatchData:
           curve_type: 0
           min: 0
           max: 1
+        - panel_knob_id: 9
+          module_id: 1
+          param_id: 10
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 1
+          param_id: 12
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 1
+          param_id: 13
+          curve_type: 0
+          min: 0
+          max: 1
     - name: Channel B
       set:
         - panel_knob_id: 0
