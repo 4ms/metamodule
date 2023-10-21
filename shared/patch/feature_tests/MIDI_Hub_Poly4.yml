@@ -1,0 +1,64 @@
+PatchData:
+  patch_name: 'MIDIHub-Poly4'
+  description: 'Play MIDI notes, should see Polyphonic signals: Out 1,3,5,7 are V/oct CV, Outss 2,4,6,8 are Gates'
+  module_slugs:
+    0: HubMedium
+  int_cables: []
+  mapped_ins:
+    - panel_jack_id: 257
+      ins:
+        - module_id: 0
+          jack_id: 2
+    - panel_jack_id: 272
+      ins:
+        - module_id: 0
+          jack_id: 1
+    - panel_jack_id: 256
+      ins:
+        - module_id: 0
+          jack_id: 0
+    - panel_jack_id: 273
+      ins:
+        - module_id: 0
+          jack_id: 3
+    - panel_jack_id: 258
+      ins:
+        - module_id: 0
+          jack_id: 4
+    - panel_jack_id: 259
+      ins:
+        - module_id: 0
+          jack_id: 6
+    - panel_jack_id: 275
+      ins:
+        - module_id: 0
+          jack_id: 7
+    - panel_jack_id: 274
+      ins:
+        - module_id: 0
+          jack_id: 5
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 4
+
+'vcvModuleStates': []
