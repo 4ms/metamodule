@@ -69,23 +69,15 @@ struct VCVPatchFileWriter {
 			bool isMidiOutput = ModuleDirectory::isCoreMIDI(out) || midimodules.isPolySplitModule(out);
 			bool isKnownOutModule = ModuleDirectory::isInPlugin(out) || isMidiOutput;
 
-			// The output module must be in the plugin, or a MIDI module or a known Split module
-			// The input module must be in the plugin
+			// The output module must be in the plugin, or a Core MIDI module, or a Split module connected to a Core MIDI module.
+			// The input module must be in the plugin.
 			if (!(isKnownOutModule && ModuleDirectory::isInPlugin(in)))
-				continue;
-
-			// MIDI module cannot connect directly to the hub
-			if (isMidiOutput && ModuleDirectory::isHub(in))
 				continue;
 
 			// Ignore cables that are connected to a different hub
 			if (ModuleDirectory::isHub(out) && (out->getId() != hubModuleId))
 				continue;
 			if (ModuleDirectory::isHub(in) && (in->getId() != hubModuleId))
-				continue;
-
-			// Ignore two hub jacks patched together
-			if (ModuleDirectory::isHub(out) && ModuleDirectory::isHub(in))
 				continue;
 
 			uint8_t r_amt = (uint8_t)(rack::clamp(cableWidget->color.r) * 255);

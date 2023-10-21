@@ -52,6 +52,8 @@ struct ParamHandle {
 	NVGcolor color;
 };
 
+struct Cable{};
+
 struct _Engine {
 	void removeParamHandle(rack::ParamHandle *) {
 	}
