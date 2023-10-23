@@ -22,22 +22,25 @@ public:
 		printf_("Error! Hub should not be run\n");
 	}
 
-	void set_samplerate(const float sr) final {
-		printf_("Error! Hub should not be run\n");
+	void set_samplerate(float sr) final {
 	}
 
-	void set_param(const int param_id, const float val) final {
-		printf_("Error! Hub should not be run\n");
+	void set_param(int param_id, float val) final {
 	}
 
-	void set_input(const int jack_id, const float val) final {
-		printf_("Error! Hub should not be run\n");
+	void set_input(int jack_id, float val) final {
+		if (jack_id >= 0 && jack_id < 8)
+			jackvals[jack_id] = val;
 	}
 
-	float get_output(const int jack_id) const final {
-		printf_("Error! Hub should not be run\n");
-		return 0;
+	float get_output(int jack_id) const final {
+		if (jack_id >= 0 && jack_id < 8)
+			return jackvals[jack_id];
+		else
+			return 0;
 	}
+
+	float jackvals[8]{};
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off

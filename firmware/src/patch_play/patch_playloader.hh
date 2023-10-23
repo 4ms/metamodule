@@ -118,7 +118,7 @@ private:
 
 		pr_dbg("Attempting play patch #%d from vol %d, %.31s\n", patchid, (uint32_t)vol, patch.patch_name.data());
 
-		if (patch.module_slugs.size() > 1) {
+		if (patch.module_slugs.size() > 0) {
 			if (player_.load_patch(patch)) {
 				loaded_patch_.index = patchid;
 				loaded_patch_.vol = vol;
