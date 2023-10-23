@@ -1,5 +1,7 @@
 #pragma once
 #include "gui/elements/helpers.hh"
+#include "gui/elements/update.hh"
+#include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/knob_arc.hh"
 #include "gui/pages/page_list.hh"
@@ -20,9 +22,18 @@ struct KnobMapPage : PageBase {
 		PageList::register_page(this, PageId::KnobMap);
 		init_bg(base);
 		lv_group_set_editing(group, false);
+		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
+		lv_obj_add_event_cb(ui_MinSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_MaxSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_hide(ui_Keyboard);
 	}
 
 	void prepare_focus() override {
+		lv_group_remove_all_objs(group);
+		lv_group_set_editing(group, false);
+
 		patch = patch_storage.get_view_patch();
 
 		view_set_idx = PageList::get_viewing_knobset();
@@ -66,12 +77,24 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
 		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
 		lv_label_set_text(ui_EditMappingLetter, panel_name.data());
+
+		lv_group_set_editing(group, false);
 	}
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (PageList::request_last_page()) {
+			if (kb_visible) {
+				hide_keyboard();
+			} else if (PageList::request_last_page()) {
 				blur();
+			}
+		}
+
+		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
+		if (is_patch_playing) {
+			// TODO also call set_knob_arc if max/min changed
+			if (auto val = ElementUpdate::get_mapped_param_value(params, map.panel_knob_id); val.has_value()) {
+				set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, val.value());
 			}
 		}
 	}
@@ -79,11 +102,65 @@ struct KnobMapPage : PageBase {
 	void blur() final {
 	}
 
+	static void slider_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+		auto obj = event->current_target;
+		if (obj != ui_MinSlider && obj != ui_MaxSlider)
+			return;
+
+		auto val = lv_slider_get_value(obj);
+		(obj == ui_MinSlider ? page->map.min : page->map.max) = val / 100.f;
+	}
+
+	static void edit_text_cb(lv_event_t *event) {
+		printf_("Pressed\n");
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+
+		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
+		if (kb_hidden) {
+			printf_("showing keyboard\n");
+			lv_show(ui_Keyboard);
+			page->kb_visible = true;
+			lv_group_add_obj(page->group, ui_Keyboard);
+			lv_group_focus_obj(ui_Keyboard);
+		} else {
+			printf_("hiding keyboard\n");
+			page->hide_keyboard();
+		}
+	}
+
+	static void keyboard_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+		if (event->code == LV_EVENT_READY) {
+			printf_("Ready\n");
+			page->hide_keyboard();
+		}
+		if (event->code == LV_EVENT_CANCEL) {
+			printf_("Cancel\n");
+			page->hide_keyboard();
+		}
+	}
+
+	void hide_keyboard() {
+		lv_group_remove_obj(ui_Keyboard);
+		lv_hide(ui_Keyboard);
+		kb_visible = false;
+	}
+
 private:
 	lv_obj_t *base = nullptr;
 	PatchData &patch;
 	MappedKnob &map{null_map};
 	MappedKnob null_map;
+
+	bool kb_visible = false;
 
 	unsigned map_idx = 0;
 	unsigned view_set_idx = 0;

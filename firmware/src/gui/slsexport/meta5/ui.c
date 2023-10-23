@@ -181,6 +181,7 @@ lv_obj_t *ui_EditButton;
 lv_obj_t *ui_EditLabel;
 lv_obj_t *ui_TrashButton;
 lv_obj_t *ui_TrashLabel;
+lv_obj_t *ui_Keyboard;
 lv_obj_t *ui____initial_actions0;
 const lv_img_dsc_t *ui_imgset_add[1] = {&ui_img_1x_add1_png};
 const lv_img_dsc_t *ui_imgset_asset_[1] = {&ui_img_1x_asset_1_png};

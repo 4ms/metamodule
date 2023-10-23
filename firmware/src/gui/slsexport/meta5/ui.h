@@ -180,6 +180,7 @@ extern lv_obj_t *ui_EditButton;
 extern lv_obj_t *ui_EditLabel;
 extern lv_obj_t *ui_TrashButton;
 extern lv_obj_t *ui_TrashLabel;
+extern lv_obj_t *ui_Keyboard;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png

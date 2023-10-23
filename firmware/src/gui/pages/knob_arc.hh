@@ -25,5 +25,5 @@ void set_knob_arc(MappedKnob const &map, lv_obj_t *arc, float val) {
 	lv_arc_set_bg_angles(arc, lvgl_knob_angle<min_arc, max_arc>(left), lvgl_knob_angle<min_arc, max_arc>(right));
 
 	// Set initial value
-	lv_arc_set_value(arc, (uint16_t)(val * 120));
+	lv_arc_set_value(arc, (uint16_t)(val * 120)); //for some reason we have a standard arc range of 120.
 }
