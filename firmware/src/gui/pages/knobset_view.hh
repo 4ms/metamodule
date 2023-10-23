@@ -28,17 +28,6 @@ struct KnobSetViewPage : PageBase {
 		lv_group_set_editing(group, false);
 	}
 
-	void set_for_knob(lv_obj_t *cont, unsigned knob_i) {
-		auto knob = get_knob(cont);
-		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
-
-		auto circle = get_circle(cont);
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[knob_i % 6], LV_STATE_DEFAULT);
-
-		auto circle_letter = get_circle_letter(cont);
-		lv_label_set_text(circle_letter, PanelDef::get_map_param_name(knob_i).data());
-	}
-
 	void prepare_focus() override {
 
 		for (unsigned i = 0; auto cont : containers) {
@@ -67,10 +56,11 @@ struct KnobSetViewPage : PageBase {
 			return;
 
 		knobset = &patch.knob_sets[ks_idx];
-		if (knobset->name.length())
-			lv_label_set_text(ui_KnobSetNameText, knobset->name.c_str());
-		else
-			lv_label_set_text_fmt(ui_KnobSetNameText, "Knob Set %d", (int)ks_idx);
+		lv_label_set_text(ui_KnobSetNameText, patch.validate_knob_set_name(ks_idx));
+		// if (knobset->name.length())
+		// 	lv_label_set_text(ui_KnobSetNameText, knobset->name.c_str());
+		// else
+		// 	lv_label_set_text_fmt(ui_KnobSetNameText, "Knob Set %d", (int)ks_idx);
 
 		if (patch.patch_name.length())
 			lv_label_set_text(ui_KnobSetDescript, patch.patch_name.c_str());
@@ -79,8 +69,8 @@ struct KnobSetViewPage : PageBase {
 
 		unsigned num_maps[PanelDef::NumKnobs]{};
 
-		for (auto map : knobset->set) {
-			if (map.panel_knob_id >= PanelDef::NumKnobs)
+		for (auto [idx, map] : enumerate(knobset->set)) {
+			if (!map.is_panel_knob())
 				continue;
 
 			lv_obj_t *cont;
@@ -122,7 +112,11 @@ struct KnobSetViewPage : PageBase {
 
 			enable(cont);
 			lv_group_add_obj(group, cont);
+
+			lv_obj_remove_event_cb(cont, mapping_cb);
 			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_PRESSED, this);
+
+			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx)); //Dangerous? "ptr" is actually an integer
 		}
 
 		lv_group_set_editing(group, false);
@@ -162,11 +156,37 @@ struct KnobSetViewPage : PageBase {
 	static void mapping_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
-		printf_("click\n");
-		PageList::request_new_page(PageId::KnobMap);
+
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+
+		auto obj = event->current_target;
+		if (!obj)
+			return;
+
+		auto map_idx = reinterpret_cast<uintptr_t>(obj->user_data);
+		auto view_set_idx = PageList::get_viewing_knobset();
+
+		if (map_idx < page->patch.knob_sets[view_set_idx].set.size()) {
+			PageList::set_selected_mappedknob_id(map_idx);
+			printf_("Mapped knob idx: %d\n", map_idx);
+			auto &mk = page->patch.knob_sets[view_set_idx].set[map_idx];
+			printf_("%d %d %d\n", mk.panel_knob_id, mk.module_id, mk.param_id);
+			PageList::request_new_page(PageId::KnobMap);
+		}
 	}
 
 private:
+	void set_for_knob(lv_obj_t *cont, unsigned knob_i) {
+		auto knob = get_knob(cont);
+		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
+
+		auto circle = get_circle(cont);
+		lv_obj_set_style_bg_color(circle, Gui::knob_palette[knob_i % 6], LV_STATE_DEFAULT);
+
+		auto circle_letter = get_circle_letter(cont);
+		lv_label_set_text(circle_letter, PanelDef::get_map_param_name(knob_i).data());
+	}
+
 	lv_obj_t *base = nullptr;
 	MappedKnobSet *knobset = nullptr;
 	PatchData &patch;
@@ -196,6 +216,7 @@ private:
 										  ui_KnobContainerX,
 										  ui_KnobContainerY,
 										  ui_KnobContainerZ};
+
 	lv_obj_t *get_container(unsigned panel_knob_id) {
 		return containers[panel_knob_id];
 	}
