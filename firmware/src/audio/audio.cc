@@ -83,7 +83,12 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		mdrivlib::SystemCache::invalidate_dcache_by_range(&param_blocks[block], sizeof(ParamBlock));
 
 		load_measure.start_measurement();
-		process(audio_blocks[1 - block], param_blocks[block]);
+
+		if (check_patch_loading())
+			process_nopatch(audio_blocks[1 - block], param_blocks[block]);
+		else
+			process(audio_blocks[1 - block], param_blocks[block]);
+
 		load_measure.end_measurement();
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
@@ -117,19 +122,15 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	return scaled_out;
 }
 
-void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
-	auto &in = audio_block.in_codec;
-	auto &out = audio_block.out_codec;
-
+bool AudioStream::check_patch_loading() {
 	if (patch_loader.is_loading_new_patch()) {
-		if (mute_ctr > 0.f)
+		if (mute_ctr > 0.f) {
+			// Fade down
 			mute_ctr -= 0.1f;
-		else {
-			if (!patch_loader.is_audio_muted()) {
-				halves_muted++;
-				if (halves_muted == 2)
-					patch_loader.audio_is_muted();
-			}
+		} else {
+			// We only process half an audio buffer at a time, so make sure both halves are muted
+			if (++halves_muted == 2)
+				patch_loader.notify_audio_is_muted();
 		}
 	} else {
 		patch_loader.audio_not_muted();
@@ -137,32 +138,28 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		halves_muted = 0;
 	}
 
-	// TODO: check with patch_loader, not patch_player
-	if (!player.is_loaded) {
-		mute_ctr = 0;
-	}
+	return !player.is_loaded || patch_loader.is_audio_muted();
+}
 
+void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	handle_patch_mods(patch_mod_queue, player);
+
+	// Handle jacks being plugged/unplugged
+	propagate_sense_pins(param_block.params[0]);
 
 	// TODO: handle second codec
 	if (ext_audio_connected)
 		AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
 
-	// Handle jacks being plugged/unplugged
-	propagate_sense_pins(param_block.params[0]);
-	const auto jack_sense = param_block.params[0].jack_senses;
-	param_state.jack_senses = jack_sense;
-
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
-	for (auto [in_, out_, params_] : zip(in, out, param_block.params)) {
+	for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
 
-		// Pass audio inputs to modules
-		for (auto [codec_chan_i, inchan] : countzip(in_.chan)) {
-			auto panel_jack_i = PanelDef::audioin_order[codec_chan_i];
+		// Audio inputs
+		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
 
 			// Skip unpatched jacks
-			if (((jack_sense >> jacksense_pin_order[panel_jack_i]) & 1) == 0)
+			if (((param_state.jack_senses >> jacksense_pin_order[panel_jack_i]) & 1) == 0)
 				continue;
 
 			float scaled_input = incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
@@ -171,7 +168,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
 		}
 
-		for (auto [i, gatein] : countzip(params_.gate_ins)) {
+		// Gate inputs
+		for (auto [i, gatein] : countzip(params.gate_ins)) {
 			if (gatein.just_went_high())
 				player.set_panel_input(i + FirstGateInput, 8.f);
 			if (gatein.just_went_low())
@@ -179,28 +177,45 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// Pass Knob values to modules
-		for (auto [i, knob, latch] : countzip(params_.knobs, param_state.knobs)) {
+		for (auto [i, knob, latch] : countzip(params.knobs, param_state.knobs)) {
 			if (latch.store_changed(knob))
 				player.set_panel_param(i, knob);
 		}
 
 		// MIDI
 		if (param_block.metaparams.midi_connected)
-			handle_midi(params_.midi_event, param_block.metaparams.midi_poly_chans);
-
-		// Skip updating patch and just set outputs to 0, if no patch is loaded
-		if (!player.is_loaded) {
-			for (auto &outchan : out_.chan)
-				outchan = 0;
-			continue;
-		}
+			handle_midi(params.midi_event, param_block.metaparams.midi_poly_chans);
 
 		// Run each module
 		player.update_patch();
 
 		// Get outputs from modules
-		for (auto [i, outchan] : countzip(out_.chan))
+		for (auto [i, outchan] : countzip(out.chan))
 			outchan = get_audio_output(i);
+	}
+}
+
+void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
+	param_state.jack_senses = param_block.params[0].jack_senses;
+
+	for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
+
+		// Set metaparams.ins with input signals
+		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
+			float scaled_input = ((param_state.jack_senses >> jacksense_pin_order[panel_jack_i]) & 1) ?
+									 scaled_input = incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
+									 0;
+			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
+		}
+
+		for (auto [knob, latch] : zip(params.knobs, param_state.knobs))
+			latch.store_changed(knob);
+
+		if (params.midi_event.type == Midi::Event::Type::CC)
+			sync_params.midi_events.put(params.midi_event);
+
+		for (auto &outchan : out.chan)
+			outchan = 0;
 	}
 }
 
@@ -255,6 +270,8 @@ void AudioStream::propagate_sense_pins(Params &params) {
 		if (plug_detects[jack_i].changed())
 			player.set_output_jack_patched_status(out_i, sense);
 	}
+
+	param_state.jack_senses = params.jack_senses;
 }
 
 } // namespace MetaModule

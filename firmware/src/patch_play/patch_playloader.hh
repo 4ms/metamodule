@@ -16,6 +16,7 @@ struct PatchPlayLoader {
 	}
 
 	void load_initial_patch() {
+
 		// TODO: load the last patch that was loaded before power-down
 		auto initial_patch = 0;
 
@@ -77,7 +78,7 @@ struct PatchPlayLoader {
 	// Audio thread WRITE
 	// Audio thread READ
 	// UI thread READ (via handle_sync_patch_loading())
-	void audio_is_muted() {
+	void notify_audio_is_muted() {
 		audio_is_muted_ = true;
 	}
 	void audio_not_muted() {
@@ -107,8 +108,6 @@ private:
 	std::atomic<bool> audio_is_muted_ = false;
 
 	PatchLocation loaded_patch_;
-	// uint32_t loaded_patch_index_;
-	// Volume loaded_patch_vol_;
 	ModuleTypeSlug loaded_patch_name_ = "";
 
 	bool _load_patch() {
