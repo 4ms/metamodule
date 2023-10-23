@@ -122,6 +122,7 @@ struct KnobSetViewPage : PageBase {
 
 			enable(cont);
 			lv_group_add_obj(group, cont);
+			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_PRESSED, this);
 		}
 
 		lv_group_set_editing(group, false);
@@ -156,6 +157,13 @@ struct KnobSetViewPage : PageBase {
 					lv_obj_del_async(child);
 			}
 		}
+	}
+
+	static void mapping_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		printf_("click\n");
+		PageList::request_new_page(PageId::KnobMap);
 	}
 
 private:

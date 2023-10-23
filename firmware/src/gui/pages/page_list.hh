@@ -12,7 +12,7 @@ namespace MetaModule
 //forward declare
 struct PageBase;
 
-enum PageId : uint32_t { PatchSel, PatchView, ModuleView, Settings, KnobSetView };
+enum PageId : uint32_t { PatchSel, PatchView, ModuleView, Settings, KnobSetView, KnobMap };
 
 class PageList {
 	static constexpr uint32_t MaxPages = 8;
