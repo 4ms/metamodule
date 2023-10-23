@@ -49,6 +49,7 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
 		lv_group_add_obj(group, ui_TrashButton);
+		lv_group_focus_obj(ui_ListButton);
 		lv_group_set_editing(group, false);
 
 		if (!map.is_panel_knob())
@@ -63,7 +64,7 @@ struct KnobMapPage : PageBase {
 		} else {
 			char name[64]{};
 			snprintf_(name, 64, "%s %s", fullname.module_name.data(), fullname.element_name.data());
-			lv_textarea_set_text(ui_AliasTextArea, name);
+			lv_textarea_set_placeholder_text(ui_AliasTextArea, name);
 		}
 
 		auto panel_name = PanelDef::get_map_param_name(map.panel_knob_id);
@@ -92,10 +93,8 @@ struct KnobMapPage : PageBase {
 
 		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
 		if (is_patch_playing) {
-			// TODO also call set_knob_arc if max/min changed
-			if (auto val = ElementUpdate::get_mapped_param_value(params, map.panel_knob_id); val.has_value()) {
-				set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, val.value());
-			}
+			auto knob_val = params.knobs[map.panel_knob_id].val;
+			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
 		}
 	}
 
@@ -122,13 +121,12 @@ struct KnobMapPage : PageBase {
 
 		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
 		if (kb_hidden) {
-			printf_("showing keyboard\n");
 			lv_show(ui_Keyboard);
 			page->kb_visible = true;
+			lv_obj_add_state(ui_AliasTextArea, LV_STATE_USER_1);
 			lv_group_add_obj(page->group, ui_Keyboard);
 			lv_group_focus_obj(ui_Keyboard);
 		} else {
-			printf_("hiding keyboard\n");
 			page->hide_keyboard();
 		}
 	}
@@ -139,16 +137,16 @@ struct KnobMapPage : PageBase {
 
 		auto page = static_cast<KnobMapPage *>(event->user_data);
 		if (event->code == LV_EVENT_READY) {
-			printf_("Ready\n");
 			page->hide_keyboard();
 		}
 		if (event->code == LV_EVENT_CANCEL) {
-			printf_("Cancel\n");
 			page->hide_keyboard();
 		}
 	}
 
 	void hide_keyboard() {
+		lv_obj_clear_state(ui_AliasTextArea, LV_STATE_USER_1);
+		lv_group_focus_obj(ui_AliasTextArea);
 		lv_group_remove_obj(ui_Keyboard);
 		lv_hide(ui_Keyboard);
 		kb_visible = false;
