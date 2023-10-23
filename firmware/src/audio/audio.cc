@@ -32,7 +32,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 SyncParams &sync_p,
 						 PatchPlayLoader &patchloader,
 						 DoubleBufParamBlock &pblk,
-						 DoubleAuxStreamBlock &auxs,
 						 PatchModQueue &patch_mod_queue)
 	: sync_params{sync_p}
 	, patch_loader{patchloader}
@@ -45,7 +44,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 					.out_codec = audio_out_block.codec[1],
 					.in_ext_codec = audio_in_block.ext_codec[1],
 					.out_ext_codec = audio_out_block.ext_codec[1]}}
-	, auxsigs{auxs}
 	, patch_mod_queue{patch_mod_queue}
 	, codec_{Hardware::codec}
 	, codec_ext_{Hardware::codec_ext}
@@ -85,7 +83,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		mdrivlib::SystemCache::invalidate_dcache_by_range(&param_blocks[block], sizeof(ParamBlock));
 
 		load_measure.start_measurement();
-		process(audio_blocks[1 - block], param_blocks[block], auxsigs[block]);
+		process(audio_blocks[1 - block], param_blocks[block]);
 		load_measure.end_measurement();
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
@@ -119,7 +117,7 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	return scaled_out;
 }
 
-void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxStreamBlock &aux) {
+void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	auto &in = audio_block.in_codec;
 	auto &out = audio_block.out_codec;
 
@@ -157,7 +155,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
-	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
+	for (auto [in_, out_, params_] : zip(in, out, param_block.params)) {
 
 		// Pass audio inputs to modules
 		for (auto [codec_chan_i, inchan] : countzip(in_.chan)) {
