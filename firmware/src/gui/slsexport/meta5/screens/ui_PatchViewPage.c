@@ -1185,7 +1185,7 @@ lv_obj_set_width( ui_Description, lv_pct(100));
 lv_obj_set_height( ui_Description, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Description, LV_ALIGN_LEFT_MID );
 lv_label_set_text(ui_Description,"");
-lv_obj_add_flag( ui_Description, LV_OBJ_FLAG_CLICKABLE );   /// Flags
+lv_obj_add_flag( ui_Description, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_CLICKABLE );   /// Flags
 lv_obj_clear_flag( ui_Description, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
 lv_obj_set_scrollbar_mode(ui_Description, LV_SCROLLBAR_MODE_ON);
 lv_obj_set_scroll_dir(ui_Description, LV_DIR_VER);

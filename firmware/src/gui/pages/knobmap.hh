@@ -1,5 +1,7 @@
 #pragma once
+#include "gui/elements/helpers.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/knob_arc.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -7,6 +9,9 @@
 namespace MetaModule
 {
 struct KnobMapPage : PageBase {
+
+	constexpr static unsigned min_arc = 160;
+	constexpr static unsigned max_arc = 20;
 
 	KnobMapPage(PatchInfo info)
 		: PageBase{info}
@@ -18,8 +23,49 @@ struct KnobMapPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		patch = patch_storage.get_view_patch();
 
+		view_set_idx = PageList::get_viewing_knobset();
+		map_idx = PageList::get_selected_mappedknob_id();
+		if (view_set_idx >= patch.knob_sets.size())
+			return;
+
+		map = patch.knob_sets[view_set_idx].set[map_idx];
+
+		lv_group_add_obj(group, ui_MinSlider);
+		lv_group_add_obj(group, ui_MaxSlider);
+		lv_group_add_obj(group, ui_AliasTextArea);
+		lv_group_add_obj(group, ui_ListButton);
+		lv_group_add_obj(group, ui_EditButton);
+		lv_group_add_obj(group, ui_TrashButton);
 		lv_group_set_editing(group, false);
+
+		if (!map.is_panel_knob())
+			return;
+
+		auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, patch);
+		lv_label_set_text(ui_ModuleMapName, fullname.module_name.data());
+		lv_label_set_text(ui_KnobMapName, fullname.element_name.data());
+
+		if (map.alias_name.length()) {
+			lv_textarea_set_text(ui_AliasTextArea, map.alias_name.data());
+		} else {
+			char name[64]{};
+			snprintf_(name, 64, "%s %s", fullname.module_name.data(), fullname.element_name.data());
+			lv_textarea_set_text(ui_AliasTextArea, name);
+		}
+
+		auto panel_name = PanelDef::get_map_param_name(map.panel_knob_id);
+		lv_label_set_text_fmt(
+			ui_MappedName, "Knob %s in '%s'", panel_name.data(), patch.valid_knob_set_name(view_set_idx));
+
+		float val = params.knobs[map.panel_knob_id];
+		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, val);
+
+		auto color = Gui::knob_palette[map.panel_knob_id % 6];
+		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
+		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
+		lv_label_set_text(ui_EditMappingLetter, panel_name.data());
 	}
 
 	void update() override {
@@ -36,6 +82,11 @@ struct KnobMapPage : PageBase {
 private:
 	lv_obj_t *base = nullptr;
 	PatchData &patch;
+	MappedKnob &map{null_map};
+	MappedKnob null_map;
+
+	unsigned map_idx = 0;
+	unsigned view_set_idx = 0;
 };
 
 } // namespace MetaModule

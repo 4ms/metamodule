@@ -252,7 +252,7 @@ private:
 		// Show the first empty knobset (if there is one)
 		if (first_empty_set.has_value()) {
 			unsigned set_i = first_empty_set.value();
-			auto setname = patch.validate_knob_set_name(set_i);
+			auto setname = patch.valid_knob_set_name(set_i);
 			auto obj = list.create_unmapped_list_item(setname);
 			group_add_button(obj, set_i);
 		}
@@ -261,7 +261,7 @@ private:
 	bool show_knobset(MappedKnobSet const &set, unsigned set_i) {
 		bool set_is_empty = true;
 		bool has_mapping_in_set = false;
-		auto setname = patch.validate_knob_set_name(set_i);
+		auto setname = patch.valid_knob_set_name(set_i);
 
 		for (auto &map : set.set) {
 			if (map.module_id > 0 && map.module_id < patch.module_slugs.size()) {

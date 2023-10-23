@@ -7,6 +7,7 @@
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/knob_arc.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -56,11 +57,7 @@ struct KnobSetViewPage : PageBase {
 			return;
 
 		knobset = &patch.knob_sets[ks_idx];
-		lv_label_set_text(ui_KnobSetNameText, patch.validate_knob_set_name(ks_idx));
-		// if (knobset->name.length())
-		// 	lv_label_set_text(ui_KnobSetNameText, knobset->name.c_str());
-		// else
-		// 	lv_label_set_text_fmt(ui_KnobSetNameText, "Knob Set %d", (int)ks_idx);
+		lv_label_set_text(ui_KnobSetNameText, patch.valid_knob_set_name(ks_idx));
 
 		if (patch.patch_name.length())
 			lv_label_set_text(ui_KnobSetDescript, patch.patch_name.c_str());
@@ -93,20 +90,8 @@ struct KnobSetViewPage : PageBase {
 				}
 			}
 
-			auto knob = get_knob(cont);
-			if (knob) {
-				// Set min/max of arc
-				lv_arc_set_mode(knob, (map.min < map.max) ? LV_ARC_MODE_NORMAL : LV_ARC_MODE_REVERSE);
-				float left = std::min<float>(map.min, map.max);
-				float right = std::max<float>(map.min, map.max);
-				lv_arc_set_bg_angles(knob, lvgl_knob_angle(left), lvgl_knob_angle(right));
-
-				// Set initial value
-				if (map.panel_knob_id < params.knobs.size()) {
-					float val = params.knobs[map.panel_knob_id];
-					lv_arc_set_value(knob, (uint16_t)(val * 120));
-				}
-			}
+			float val = params.knobs[map.panel_knob_id];
+			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), val);
 
 			set_for_knob(cont, map.panel_knob_id);
 
@@ -163,16 +148,21 @@ struct KnobSetViewPage : PageBase {
 		if (!obj)
 			return;
 
-		auto map_idx = reinterpret_cast<uintptr_t>(obj->user_data);
 		auto view_set_idx = PageList::get_viewing_knobset();
+		if (view_set_idx >= page->patch.knob_sets.size())
+			return;
 
-		if (map_idx < page->patch.knob_sets[view_set_idx].set.size()) {
-			PageList::set_selected_mappedknob_id(map_idx);
-			printf_("Mapped knob idx: %d\n", map_idx);
-			auto &mk = page->patch.knob_sets[view_set_idx].set[map_idx];
-			printf_("%d %d %d\n", mk.panel_knob_id, mk.module_id, mk.param_id);
-			PageList::request_new_page(PageId::KnobMap);
-		}
+		auto map_idx = reinterpret_cast<uintptr_t>(obj->user_data);
+		if (map_idx >= page->patch.knob_sets[view_set_idx].set.size())
+			return;
+
+		PageList::set_selected_mappedknob_id(map_idx);
+
+		auto &mk = page->patch.knob_sets[view_set_idx].set[map_idx];
+		printf_("set[] MappedKnob idx: %d\n", (unsigned)map_idx);
+		printf_("panel: %d -> m:%d p:%d\n", mk.panel_knob_id, mk.module_id, mk.param_id);
+
+		PageList::request_new_page(PageId::KnobMap);
 	}
 
 private:
@@ -266,14 +256,6 @@ private:
 		lv_obj_clear_state(knob, LV_STATE_DISABLED);
 		lv_obj_clear_state(circle, LV_STATE_DISABLED);
 		lv_obj_clear_state(label, LV_STATE_DISABLED);
-	}
-
-	uint16_t lvgl_knob_angle(float knob_pos) {
-		knob_pos = std::clamp<float>(knob_pos, 0.f, 1.f);
-		uint16_t angle = knob_pos * (360 + max_arc - min_arc) + min_arc;
-		if (angle > 360)
-			angle -= 360;
-		return angle;
 	}
 };
 

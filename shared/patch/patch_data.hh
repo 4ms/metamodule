@@ -126,7 +126,7 @@ struct PatchData {
 		return nullptr;
 	}
 
-	const char *validate_knob_set_name(unsigned set_i) const {
+	const char *valid_knob_set_name(unsigned set_i) const {
 		if (set_i == MIDIKnobSet)
 			return "MIDI";
 

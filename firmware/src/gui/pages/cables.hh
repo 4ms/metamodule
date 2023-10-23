@@ -144,8 +144,10 @@ public:
 	}
 
 	void draw_bezier(Vec2 start, Vec2 end, Vec2 control, unsigned steps) {
+		constexpr size_t MAX_STEPS = 128;
+
 		float step_size = 1.0f / steps;
-		lv_point_t points[steps + 1];
+		lv_point_t points[MAX_STEPS];
 		for (unsigned i = 0; i <= steps; i++) {
 			auto newpt = CableDrawer::get_quadratic_bezier_pt(start, end, control, (float)i * step_size);
 			points[i] = {(int16_t)newpt.x, (int16_t)newpt.y};
