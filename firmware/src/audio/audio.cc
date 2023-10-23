@@ -170,6 +170,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// Gate inputs
 		for (auto [i, gatein] : countzip(params.gate_ins)) {
+			if (((param_state.jack_senses >> jacksense_pin_order[i + FirstGateInput]) & 1) == 0)
+				gatein.register_state(false);
 			if (gatein.just_went_high())
 				player.set_panel_input(i + FirstGateInput, 8.f);
 			if (gatein.just_went_low())
