@@ -63,6 +63,8 @@ struct PatchViewPage : PageBase {
 		lv_hide(ui_DescriptionPanel);
 		lv_label_set_text(ui_Description, patch.description.c_str());
 
+		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
+
 		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
 			displayed_patch_loc == PageList::get_selected_patch_location())
 		{
@@ -77,8 +79,6 @@ struct PatchViewPage : PageBase {
 		clear();
 
 		patch = patch_storage.get_view_patch();
-
-		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
 
 		if (patch.patch_name.length() == 0)
 			return;
@@ -208,6 +208,14 @@ struct PatchViewPage : PageBase {
 		if (is_patch_playing) {
 			update_changed_params();
 		}
+
+		if (is_patch_playing) {
+			lv_obj_set_style_bg_color(ui_PlayButton, lv_color_hex(0x00DD33), LV_STATE_DEFAULT);
+			lv_obj_set_style_bg_opa(ui_PlayButton, 255, LV_STATE_DEFAULT);
+		} else {
+			lv_obj_set_style_bg_opa(ui_PlayButton, 0, LV_STATE_DEFAULT);
+			lv_obj_set_style_border_opa(ui_PlayButton, 0, LV_STATE_DEFAULT);
+		}
 	}
 
 	void update_changed_params() {
@@ -308,6 +316,7 @@ struct PatchViewPage : PageBase {
 	static void infobut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_show(ui_DescriptionPanel);
+		lv_show(ui_Description);
 		page->showing_info = true;
 		lv_indev_set_group(lv_indev_get_act(), page->info_group);
 	}
