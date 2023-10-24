@@ -65,6 +65,11 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
 
+		if (is_patch_playing)
+			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_1);
+		else
+			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_1);
+
 		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
 			displayed_patch_loc == PageList::get_selected_patch_location())
 		{
@@ -210,11 +215,13 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (is_patch_playing) {
-			lv_obj_set_style_bg_color(ui_PlayButton, lv_color_hex(0x00DD33), LV_STATE_DEFAULT);
-			lv_obj_set_style_bg_opa(ui_PlayButton, 255, LV_STATE_DEFAULT);
+			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_1);
+			// lv_obj_set_style_bg_color(ui_PlayButton, lv_color_hex(0x00DD33), LV_STATE_DEFAULT);
+			// lv_obj_set_style_bg_opa(ui_PlayButton, 255, LV_STATE_DEFAULT);
 		} else {
-			lv_obj_set_style_bg_opa(ui_PlayButton, 0, LV_STATE_DEFAULT);
-			lv_obj_set_style_border_opa(ui_PlayButton, 0, LV_STATE_DEFAULT);
+			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_1);
+			// lv_obj_set_style_bg_opa(ui_PlayButton, 0, LV_STATE_DEFAULT);
+			// lv_obj_set_style_border_opa(ui_PlayButton, 0, LV_STATE_DEFAULT);
 		}
 	}
 
