@@ -65,15 +65,14 @@ Debug::Pin1::set(false); //same as ::low()
 ```
 
 The pins and pads are located on the PCB as shown here:
-![PCB header locations](./images/pcb-headers.jpg)
-
+![PCB header locations](./images/pcb-headers.png)
 
 
 ## Console output (printf debugging)
 
 You can view the console output by connecting a USB-UART cable to the TX pin of
 the debug header (next to the SWD header). The TX pin is labeled (upper-right
-pin). The bottom four pins are all GND. Settings are 115200, 8N1.
+pin). The bottom four pins are all GND. Settings are 115200, 8N1. See image above.
 
 Use `pr_dbg()`, `pr_warn()`, `pr_err()`, and `pr_trace()` for debug output. These
 require the `console/pr_dbg.hh` header.

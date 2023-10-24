@@ -12,6 +12,8 @@ in a section below:
 
 ### Load in RAM over SWD/JTAG
 
+![PCB header locations](./images/pcb-headers.png)
+
 This is the preferred method for active firmware development. It requires a
 JTAG programmer.
 
@@ -24,7 +26,7 @@ attach without loading.
 
 If you need to load new firmware, then do this:
 
-1) Install a jumper on `Control Expander` header that bridges the top-left pin
+1) Install a "Freeze jumper" on `Control Expander` header that bridges the top-left pin
 and the pin just to the right of it. Make sure you use the right header, it's
 the one above the Wifi header, near the `y` and `z` pots. The jumper should be
 horizontal, not vertical, on the top row of pins all the way to the left:
@@ -35,6 +37,8 @@ horizontal, not vertical, on the top row of pins all the way to the left:
           [====] o  o 
            o  o  o  o
 ```
+
+See image above for reference.
 
 2) Power off and back on (full power-cycle is required).
 
