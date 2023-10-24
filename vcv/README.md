@@ -4,7 +4,7 @@ Make sure to install all prerequisites as described on the [Setup guide](../docs
 
 ### Building VCV Rack Plugin
 
-You must have the Rack-SDK on your computer already. Version 2.2.3 is known to
+You must have the Rack-SDK on your computer already. Version 2.4.1 is known to
 work. Set the environment variable `RACK_DIR` equal to the path to the
 location of Rack-SDK. For instance, add this to your .bashrc or .zshrc:
 
