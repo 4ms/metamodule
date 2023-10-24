@@ -33,7 +33,7 @@ build/simulator
 build/simulator --help
 ```
 
-See the simulator [README.md](./README.md) for arguments details.
+See the [Simulator Usage guide](simulator-usage.md) for arguments details.
 
 When adding/removing assets, sometimes you need to clean the build:
 
