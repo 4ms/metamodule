@@ -1,4 +1,5 @@
 ## MetaModule Users Guide:
+
 ### How to upgrade firmware
 
 1) Download the latest firmware release from the [MetaModule Github releases](https://github.com/4ms/metamodule/releases). You only need the main.uimg file, the other files are just for doing debugging.
