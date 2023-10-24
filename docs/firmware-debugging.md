@@ -48,6 +48,26 @@ Make sure the Control Expander "freeze" jumper is installed, as described in
 After re-compiling, power cycle before loading the new .elf file. The Freeze jumper
 makes this possible.
 
+## GPIO pin debugging (pin flipping)
+
+You can toggle some GPIO pins to indicate states from firmware with minimal impact on firmware timing.
+Typically you would read the pins using an oscilloscope or logic probe.
+
+There are 6 header pins and two SMD pads on the PCB dedicated to this. They can be used like this:
+
+```
+#include "debug.hh"   // Found in firmware/src/medium/
+
+Debug::Pin0::high();
+Debug::Pin0::low();
+Debug::Pin1::set(true); //same as ::high()
+Debug::Pin1::set(false); //same as ::low()
+```
+
+The pins and pads are located on the PCB as shown here:
+![PCB header locations](./images/pcb-headers.jpg)
+
+
 
 ## Console output (printf debugging)
 
