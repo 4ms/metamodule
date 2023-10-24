@@ -27,6 +27,11 @@ struct KnobMapPage : PageBase {
 		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
 		lv_obj_add_event_cb(ui_MinSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MaxSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
+
+		lv_obj_add_event_cb(ui_EditButton, edit_cb, LV_EVENT_RELEASED, this);
+		lv_obj_add_event_cb(ui_ListButton, list_cb, LV_EVENT_RELEASED, this);
+		lv_obj_add_event_cb(ui_TrashButton, trash_cb, LV_EVENT_RELEASED, this);
+
 		lv_hide(ui_Keyboard);
 	}
 
@@ -49,8 +54,6 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
 		lv_group_add_obj(group, ui_TrashButton);
-		lv_group_focus_obj(ui_ListButton);
-		lv_group_set_editing(group, false);
 
 		if (!map.is_panel_knob())
 			return;
@@ -142,6 +145,24 @@ struct KnobMapPage : PageBase {
 		if (event->code == LV_EVENT_CANCEL) {
 			page->hide_keyboard();
 		}
+	}
+
+	static void edit_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+	}
+
+	static void list_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+	}
+
+	static void trash_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
 	}
 
 	void hide_keyboard() {

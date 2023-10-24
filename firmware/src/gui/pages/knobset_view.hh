@@ -99,7 +99,7 @@ struct KnobSetViewPage : PageBase {
 			lv_group_add_obj(group, cont);
 
 			lv_obj_remove_event_cb(cont, mapping_cb);
-			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_PRESSED, this);
+			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_RELEASED, this);
 
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx)); //Dangerous? "ptr" is actually an integer
 
@@ -120,10 +120,23 @@ struct KnobSetViewPage : PageBase {
 
 		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
 		if (is_patch_playing) {
-			for (unsigned i = 0; i < params.knobs.size(); i++) {
-				if (auto val = ElementUpdate::get_mapped_param_value(params, i); val.has_value()) {
-					unsigned lv_pos = val.value() * 120.f;
-					lv_arc_set_value(get_knob(i), lv_pos);
+			// Iterate all knobs
+			for (auto knob_i = 0u; knob_i < params.knobs.size(); knob_i++) {
+				// Find the knobs that have moved
+				if (auto knobpos = ElementUpdate::get_mapped_param_value(params, knob_i); knobpos.has_value()) {
+					// Iterate all containers in the pane for this knob
+					auto pane = panes[knob_i];
+					auto num_children = lv_obj_get_child_cnt(pane);
+					for (unsigned i = 0; i < num_children; i++) {
+						auto cont = lv_obj_get_child(pane, i);
+						if (!cont)
+							continue;
+						auto map_idx = reinterpret_cast<uintptr_t>(lv_obj_get_user_data(cont));
+						if (map_idx < knobset->set.size()) {
+							unsigned lv_pos = knobpos.value() * 120.f;
+							lv_arc_set_value(get_knob(cont), lv_pos);
+						}
+					}
 				}
 			}
 		}
