@@ -102,6 +102,9 @@ struct KnobSetViewPage : PageBase {
 			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_PRESSED, this);
 
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx)); //Dangerous? "ptr" is actually an integer
+
+			if (idx == PageList::get_selected_mappedknob_id())
+				lv_group_focus_obj(cont);
 		}
 
 		lv_group_set_editing(group, false);
@@ -158,9 +161,9 @@ struct KnobSetViewPage : PageBase {
 
 		PageList::set_selected_mappedknob_id(map_idx);
 
-		auto &mk = page->patch.knob_sets[view_set_idx].set[map_idx];
-		printf_("set[] MappedKnob idx: %d\n", (unsigned)map_idx);
-		printf_("panel: %d -> m:%d p:%d\n", mk.panel_knob_id, mk.module_id, mk.param_id);
+		// auto &mk = page->patch.knob_sets[view_set_idx].set[map_idx];
+		// printf_("set[] MappedKnob idx: %d\n", (unsigned)map_idx);
+		// printf_("panel: %d -> m:%d p:%d\n", mk.panel_knob_id, mk.module_id, mk.param_id);
 
 		PageList::request_new_page(PageId::KnobMap);
 	}
