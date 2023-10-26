@@ -41,7 +41,7 @@ struct LvglEncoderSimulatorDriver {
 
 private:
 	void set_quit(QuitEvent);
-	void handle_key_press(SDL_Keycode key, lv_indev_data_t *data);
+	void handle_key_up(SDL_Keycode key, lv_indev_data_t *data);
 
 	static void keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *);
 	static inline LvglEncoderSimulatorDriver *_instance;
