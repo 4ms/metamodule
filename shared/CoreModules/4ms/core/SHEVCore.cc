@@ -394,7 +394,7 @@ public:
 			setLED<EorALight>(false);
 		}
 
-		if(auto slopeStateB = channelB.getOscillatorSlopeState(); slopeStateB == TriangleOscillator::SlopeState_t::RISING) {
+		if(auto slopeStateB = channelB.getOscillatorSlopeState(); slopeStateB != TriangleOscillator::SlopeState_t::FALLING) {
 			setOutput<EofBOut>(8.f);
 			setLED<EofBLight>(true);
 		} else {
