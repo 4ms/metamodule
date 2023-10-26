@@ -23,6 +23,7 @@ struct KnobMapPage : PageBase {
 		init_bg(base);
 		lv_group_set_editing(group, false);
 		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
 		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
 		lv_obj_add_event_cb(ui_MinSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -117,7 +118,10 @@ struct KnobMapPage : PageBase {
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
-		printf_("Pressed\n");
+		if (event->code == LV_EVENT_PRESSED)
+			printf_("Edit Text Pressed\n");
+		else
+			printf_("Edit Text Released\n");
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<KnobMapPage *>(event->user_data);
