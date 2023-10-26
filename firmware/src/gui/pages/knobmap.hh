@@ -3,6 +3,7 @@
 #include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/knob_arc.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -34,6 +35,8 @@ struct KnobMapPage : PageBase {
 		lv_obj_add_event_cb(ui_TrashButton, trash_cb, LV_EVENT_RELEASED, this);
 
 		lv_hide(ui_Keyboard);
+
+		del_popup.init(base, group);
 	}
 
 	void prepare_focus() override {
@@ -91,6 +94,8 @@ struct KnobMapPage : PageBase {
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
 		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
 		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
+
+		// del_popup.init(base, group);
 	}
 
 	void update() override {
@@ -181,6 +186,14 @@ struct KnobMapPage : PageBase {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<KnobMapPage *>(event->user_data);
+		if (!page)
+			return;
+
+		page->del_popup.show([page](bool ok) {
+			bool removed_ok = page->patch.remove_mapping(page->view_set_idx, page->map);
+			if (!removed_ok)
+				pr_err("Could not delete mapping\n");
+		});
 	}
 
 	void hide_keyboard() {
@@ -196,6 +209,8 @@ private:
 	PatchData &patch;
 	MappedKnob &map{null_map};
 	MappedKnob null_map;
+
+	ConfirmPopup del_popup;
 
 	bool kb_visible = false;
 
