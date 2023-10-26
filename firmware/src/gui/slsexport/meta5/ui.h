@@ -158,7 +158,6 @@ extern lv_obj_t *ui_MinLabel;
 extern lv_obj_t *ui_MinSlider;
 extern lv_obj_t *ui_MaxSliderContainer;
 extern lv_obj_t *ui_MaxLabel;
-extern lv_obj_t *ui_MaxIndex;
 extern lv_obj_t *ui_MaxSlider;
 extern lv_obj_t *ui_IDPanel;
 extern lv_obj_t *ui_AliasTextArea;
@@ -181,6 +180,16 @@ extern lv_obj_t *ui_EditLabel;
 extern lv_obj_t *ui_TrashButton;
 extern lv_obj_t *ui_TrashLabel;
 extern lv_obj_t *ui_Keyboard;
+// SCREEN: ui_DeleteMappingPopUp
+void ui_DeleteMappingPopUp_screen_init(void);
+extern lv_obj_t *ui_DeleteMappingPopUp;
+extern lv_obj_t *ui_DelMapPopUpPanel;
+extern lv_obj_t *ui_DelMapLabel;
+extern lv_obj_t *ui_DelMapButtonPanel;
+extern lv_obj_t *ui_CancelButton;
+extern lv_obj_t *ui_CancelLabel;
+extern lv_obj_t *ui_TrashButton2;
+extern lv_obj_t *ui_TrashLabel2;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png
@@ -190,7 +199,7 @@ LV_IMG_DECLARE( ui_img_1x_add1_png);   // assets/1x/Add1.png
 LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
 LV_IMG_DECLARE( ui_img_1x_settings1_png);   // assets/1x/Settings1.png
 LV_IMG_DECLARE( ui_img_1x_min_png);   // assets/1x/MIN.png
-LV_IMG_DECLARE( ui_img_1x_asset_1_png);   // assets/1x/Asset 1.png
+LV_IMG_DECLARE( ui_img_1x_max_png);   // assets/1x/MAX.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);

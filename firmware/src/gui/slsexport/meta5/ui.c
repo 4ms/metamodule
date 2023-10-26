@@ -159,7 +159,6 @@ lv_obj_t *ui_MinLabel;
 lv_obj_t *ui_MinSlider;
 lv_obj_t *ui_MaxSliderContainer;
 lv_obj_t *ui_MaxLabel;
-lv_obj_t *ui_MaxIndex;
 lv_obj_t *ui_MaxSlider;
 lv_obj_t *ui_IDPanel;
 lv_obj_t *ui_AliasTextArea;
@@ -182,9 +181,20 @@ lv_obj_t *ui_EditLabel;
 lv_obj_t *ui_TrashButton;
 lv_obj_t *ui_TrashLabel;
 lv_obj_t *ui_Keyboard;
+
+
+// SCREEN: ui_DeleteMappingPopUp
+void ui_DeleteMappingPopUp_screen_init(void);
+lv_obj_t *ui_DeleteMappingPopUp;
+lv_obj_t *ui_DelMapPopUpPanel;
+lv_obj_t *ui_DelMapLabel;
+lv_obj_t *ui_DelMapButtonPanel;
+lv_obj_t *ui_CancelButton;
+lv_obj_t *ui_CancelLabel;
+lv_obj_t *ui_TrashButton2;
+lv_obj_t *ui_TrashLabel2;
 lv_obj_t *ui____initial_actions0;
 const lv_img_dsc_t *ui_imgset_add[1] = {&ui_img_1x_add1_png};
-const lv_img_dsc_t *ui_imgset_asset_[1] = {&ui_img_1x_asset_1_png};
 const lv_img_dsc_t *ui_imgset_info[1] = {&ui_img_1x_info1_png};
 const lv_img_dsc_t *ui_imgset_infosmall[1] = {&ui_img_1x_infosmall2_png};
 const lv_img_dsc_t *ui_imgset_knob[1] = {&ui_img_1x_knob1_png};
@@ -260,6 +270,7 @@ ui_PatchViewPage_screen_init();
 ui_MappingMenu_screen_init();
 ui_KnobSetViewPage_screen_init();
 ui_EditMappingPage_screen_init();
+ui_DeleteMappingPopUp_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_PatchSelectorPage);
 }

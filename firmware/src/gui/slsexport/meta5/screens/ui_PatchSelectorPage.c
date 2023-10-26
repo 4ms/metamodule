@@ -8,6 +8,7 @@
 void ui_PatchSelectorPage_screen_init(void)
 {
 ui_PatchSelectorPage = lv_obj_create(NULL);
+lv_obj_add_flag( ui_PatchSelectorPage, LV_OBJ_FLAG_SCROLL_WITH_ARROW );   /// Flags
 lv_obj_clear_flag( ui_PatchSelectorPage, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_scrollbar_mode(ui_PatchSelectorPage, LV_SCROLLBAR_MODE_OFF);
 lv_obj_set_flex_flow(ui_PatchSelectorPage,LV_FLEX_FLOW_ROW);

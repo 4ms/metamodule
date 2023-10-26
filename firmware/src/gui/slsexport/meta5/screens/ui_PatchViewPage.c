@@ -89,6 +89,12 @@ lv_obj_set_style_outline_width(ui_PlayButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED)
 lv_obj_set_style_outline_pad(ui_PlayButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_img_recolor(ui_PlayButton, lv_color_hex(0xFD8B18), LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_img_recolor_opa(ui_PlayButton, 200, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_PlayButton, lv_color_hex(0x23973C), LV_PART_MAIN | LV_STATE_USER_1 );
+lv_obj_set_style_outline_opa(ui_PlayButton, 255, LV_PART_MAIN| LV_STATE_USER_1);
+lv_obj_set_style_outline_width(ui_PlayButton, 2, LV_PART_MAIN| LV_STATE_USER_1);
+lv_obj_set_style_outline_pad(ui_PlayButton, 2, LV_PART_MAIN| LV_STATE_USER_1);
+lv_obj_set_style_img_recolor(ui_PlayButton, lv_color_hex(0x23973C), LV_PART_MAIN| LV_STATE_USER_1);
+lv_obj_set_style_img_recolor_opa(ui_PlayButton, 200, LV_PART_MAIN| LV_STATE_USER_1);
 
 ui_KnobButton = lv_btn_create(ui_ButtonsContainer);
 lv_obj_set_width( ui_KnobButton, 32);
