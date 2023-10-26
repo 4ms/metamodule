@@ -2,6 +2,7 @@
 #include "CoreModules/module_type_slug.hh"
 #include "patch.hh"
 #include "util/static_string.hh"
+#include <algorithm>
 #include <optional>
 #include <vector>
 
@@ -92,7 +93,7 @@ struct PatchData {
 		if (map.module_id >= module_slugs.size())
 			return false;
 
-		auto found = std::find_if(knob_sets[set_id].set.begin(), knob_sets[set_id].set.end(), [map](auto m) {
+		auto found = std::find_if(knob_sets[set_id].set.begin(), knob_sets[set_id].set.end(), [&map](auto m) {
 			return (m.module_id == map.module_id && m.param_id == map.param_id);
 		});
 		if (found != knob_sets[set_id].set.end()) {
