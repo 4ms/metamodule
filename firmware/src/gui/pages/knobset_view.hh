@@ -90,7 +90,8 @@ struct KnobSetViewPage : PageBase {
 				}
 			}
 
-			float val = params.knobs[map.panel_knob_id];
+			auto s_param = patch.find_static_knob(map.module_id, map.param_id);
+			float val = s_param ? s_param->value : 0;
 			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), val);
 
 			set_for_knob(cont, map.panel_knob_id);

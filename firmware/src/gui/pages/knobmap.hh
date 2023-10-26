@@ -84,6 +84,13 @@ struct KnobMapPage : PageBase {
 		lv_label_set_text(ui_EditMappingLetter, panel_name.data());
 
 		lv_group_set_editing(group, false);
+
+		// Set initial positions of arcs and sliders
+		auto s_param = patch.find_static_knob(map.module_id, map.param_id);
+		float knob_val = s_param ? s_param->value : 0;
+		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
+		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
+		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
 	}
 
 	void update() override {
@@ -96,6 +103,7 @@ struct KnobMapPage : PageBase {
 		}
 
 		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
+
 		if (is_patch_playing) {
 			auto knob_val = params.knobs[map.panel_knob_id].val;
 			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
@@ -122,6 +130,7 @@ struct KnobMapPage : PageBase {
 			printf_("Edit Text Pressed\n");
 		else
 			printf_("Edit Text Released\n");
+
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<KnobMapPage *>(event->user_data);
