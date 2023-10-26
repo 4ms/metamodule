@@ -49,7 +49,7 @@ struct ThemedSvgPort : SvgPort {
 
 struct ModuleLightWidget : widget::Widget {
 	int firstLightId = -1;
-	// NVGcolor bgColor = nvgRGBA(0, 0, 0, 0);
+	NVGcolor bgColor = nvgRGBA(0, 0, 0, 0);
 	// NVGcolor color = nvgRGBA(0, 0, 0, 0);
 	// NVGcolor borderColor = nvgRGBA(0, 0, 0, 0);
 
