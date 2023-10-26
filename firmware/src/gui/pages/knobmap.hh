@@ -192,10 +192,21 @@ struct KnobMapPage : PageBase {
 			return;
 
 		page->del_popup.show([page](bool ok) {
-			bool removed_ok = page->patch.remove_mapping(page->view_set_idx, *page->map);
-			if (!removed_ok)
-				pr_err("Could not delete mapping\n");
+			if (!ok)
+				return;
+
+			// Copy page->map to the queue BEFORE we remove it from the vector
 			page->patch_mod_queue.put(RemoveMapping{.map = *page->map, .set_id = page->view_set_idx});
+
+			if (!page->patch.remove_mapping(page->view_set_idx, *page->map))
+				pr_err("Could not delete mapping\n");
+			else {
+				// invalidate the ptr, because we erased what it pointed to
+				page->map = nullptr;
+				if (PageList::request_last_page()) {
+					page->blur();
+				}
+			}
 		});
 	}
 

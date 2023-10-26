@@ -93,15 +93,11 @@ struct PatchData {
 		if (map.module_id >= module_slugs.size())
 			return false;
 
-		auto found = std::find_if(knob_sets[set_id].set.begin(), knob_sets[set_id].set.end(), [&map](auto m) {
+		auto num_erased = std::erase_if(knob_sets[set_id].set, [&map](auto m) {
 			return (m.module_id == map.module_id && m.param_id == map.param_id);
 		});
-		if (found != knob_sets[set_id].set.end()) {
-			knob_sets[set_id].set.erase(found);
-			return true;
-		}
 
-		return false;
+		return num_erased > 0;
 	}
 
 	const StaticParam *find_static_knob(uint32_t module_id, uint32_t param_id) const {

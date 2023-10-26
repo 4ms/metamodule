@@ -306,6 +306,12 @@ public:
 		}
 	}
 
+	void remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
+		if (pd.remove_mapping(knobset_id, map)) {
+			uncache_knob_mapping(knobset_id, map);
+		}
+	}
+
 	void add_midi_mapped_knob(const MappedKnob &map) {
 		if (pd.add_update_midi_map(map)) {
 			cache_midi_mapping(map);
@@ -616,10 +622,19 @@ private:
 	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
 		if (knob_set >= knob_conns.size())
 			return;
-
 		if (k.panel_knob_id < PanelDef::NumKnobs) {
 			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
 		}
+	}
+
+	//Remove a mapping
+	void uncache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
+		if (knob_set >= knob_conns.size())
+			return;
+		if (k.panel_knob_id >= knob_conns[knob_set].size())
+			return;
+		std::erase_if(knob_conns[knob_set][k.panel_knob_id],
+					  [&k](auto m) { return (k.module_id == m.module_id && k.param_id == m.param_id); });
 	}
 
 	void cache_midi_mapping(const MappedKnob &k) {
