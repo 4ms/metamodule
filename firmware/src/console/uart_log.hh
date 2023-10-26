@@ -8,7 +8,7 @@ namespace MetaModule
 {
 
 struct UartLog {
-	static inline mdrivlib::Uart<UartConfig> log_uart;
+	static inline mdrivlib::Uart<LogUartConfig> log_uart;
 
 	UartLog() {
 		init();

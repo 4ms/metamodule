@@ -82,6 +82,10 @@ public:
 		, _colstart{ScreenWriterConfT::colstart} {
 	}
 
+	void reinit() {
+		SpiDmaDataCmdDriver<ScreenWriterConfT, ScreenTransferDriverT>::reinit();
+	}
+
 	void init() {
 		SpiDmaDataCmdDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
 		_reset();

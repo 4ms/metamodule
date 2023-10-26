@@ -2,7 +2,7 @@
 #include "drivers/uart_conf.hh"
 
 //p11:
-constexpr inline UartConf UartConfig{
+constexpr inline UartConf LogUartConfig{
 	.base_addr = UART7_BASE,
 	.TXPin = {mdrivlib::GPIO::B, mdrivlib::PinNum::_4, mdrivlib::PinAF::AltFunc13},
 	.RXPin = {mdrivlib::GPIO::B, mdrivlib::PinNum::_3, mdrivlib::PinAF::AltFunc13},
