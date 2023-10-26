@@ -12,6 +12,7 @@
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include "util/oscs.hh"
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <cstdint>
@@ -304,6 +305,20 @@ public:
 		if (pd.add_update_mapped_knob(knobset_id, map)) {
 			cache_knob_mapping(knobset_id, map);
 		}
+	}
+
+	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
+		// if (pd.add_update_mapped_knob(knobset_id, map)) {
+		auto found =
+			std::find_if(knob_conns[knobset_id][map.panel_knob_id].begin(),
+						 knob_conns[knobset_id][map.panel_knob_id].end(),
+						 [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
+		if (found != knob_conns[knobset_id][map.panel_knob_id].end()) {
+			found->min = map.min;
+			found->max = map.max;
+			found->curve_type = map.curve_type;
+		}
+		// }
 	}
 
 	void remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {

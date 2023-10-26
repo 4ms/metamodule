@@ -20,6 +20,11 @@ struct AddMapping {
 	uint32_t set_id;
 };
 
+struct EditMappingMinMax {
+	MappedKnob map;
+	uint32_t set_id;
+};
+
 struct RemoveMapping {
 	MappedKnob map;
 	uint32_t set_id;
@@ -33,8 +38,8 @@ struct AddMidiMap {
 	MappedKnob map;
 };
 
-using PatchModRequest =
-	std::variant<SetStaticParam, AddMapping, RemoveMapping, AddMidiMap, ModifyMapping, ChangeKnobSet>;
+using PatchModRequest = std::
+	variant<SetStaticParam, AddMapping, EditMappingMinMax, RemoveMapping, AddMidiMap, ModifyMapping, ChangeKnobSet>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
 
