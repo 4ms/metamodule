@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <numeric>
 #include <optional>
+#include <span>
 
 namespace ElementCount
 {
@@ -95,6 +96,22 @@ consteval auto get_indices() {
 	}
 
 	return indices;
+}
+
+inline void get_indices(std::span<const MetaModule::Element> elements, std::span<Indices> indices) {
+	Indices running_total{};
+
+	for (unsigned i = 0; auto el : elements) {
+		Counts el_cnt = count(el);
+		Indices masked_total = {
+			.param_idx = el_cnt.num_params > 0 ? running_total.param_idx : Indices::NoElementMarker,
+			.light_idx = el_cnt.num_lights > 0 ? running_total.light_idx : Indices::NoElementMarker,
+			.input_idx = el_cnt.num_inputs > 0 ? running_total.input_idx : Indices::NoElementMarker,
+			.output_idx = el_cnt.num_outputs > 0 ? running_total.output_idx : Indices::NoElementMarker,
+		};
+		indices[i++] = masked_total;
+		running_total = running_total + el_cnt;
+	}
 }
 
 // This isn't used (yet?) TODO: Remove when done with refactoring if still not used
