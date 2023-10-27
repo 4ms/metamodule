@@ -159,7 +159,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
 
 			// Skip unpatched jacks
-			if (((param_state.jack_senses >> jacksense_pin_order[panel_jack_i]) & 1) == 0)
+			if (!jack_is_patched(param_state.jack_senses, panel_jack_i))
 				continue;
 
 			float scaled_input = incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
@@ -170,7 +170,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// Gate inputs
 		for (auto [i, gatein] : countzip(params.gate_ins)) {
-			if (((param_state.jack_senses >> jacksense_pin_order[i + FirstGateInput]) & 1) == 0)
+			if (!jack_is_patched(param_state.jack_senses, i + FirstGateInput))
 				gatein.register_state(false);
 			if (gatein.just_went_high())
 				player.set_panel_input(i + FirstGateInput, 8.f);
@@ -204,8 +204,8 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 
 		// Set metaparams.ins with input signals
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
-			float scaled_input = ((param_state.jack_senses >> jacksense_pin_order[panel_jack_i]) & 1) ?
-									 scaled_input = incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
+			float scaled_input = jack_is_patched(param_state.jack_senses, panel_jack_i) ?
+									 incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
 									 0;
 			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
 		}
@@ -258,7 +258,7 @@ void AudioStream::handle_midi(Midi::Event const &event, unsigned poly_num) {
 void AudioStream::propagate_sense_pins(Params &params) {
 	for (int i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
 		auto pin_bit = jacksense_pin_order[i];
-		bool sense = params.jack_senses & (1 << pin_bit);
+		bool sense = jack_is_patched(params.jack_senses, pin_bit);
 		plug_detects[i].update(sense);
 		if (plug_detects[i].changed())
 			player.set_input_jack_patched_status(i, sense);
@@ -267,7 +267,7 @@ void AudioStream::propagate_sense_pins(Params &params) {
 	for (int out_i = 0; out_i < PanelDef::NumUserFacingOutJacks; out_i++) {
 		auto jack_i = out_i + PanelDef::NumUserFacingInJacks;
 		auto pin_bit = jacksense_pin_order[jack_i];
-		bool sense = params.jack_senses & (1 << pin_bit);
+		bool sense = jack_is_patched(params.jack_senses, pin_bit);
 		plug_detects[jack_i].update(sense);
 		if (plug_detects[jack_i].changed())
 			player.set_output_jack_patched_status(out_i, sense);
