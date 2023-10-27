@@ -205,7 +205,7 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		// Set metaparams.ins with input signals
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
 			float scaled_input = ((param_state.jack_senses >> jacksense_pin_order[panel_jack_i]) & 1) ?
-									 scaled_input = incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
+									 incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
 									 0;
 			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
 		}
