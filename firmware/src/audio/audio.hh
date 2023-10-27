@@ -1,5 +1,4 @@
 #pragma once
-#include "audio/auxsignal.hh"
 #include "conf/board_codec_conf.hh"
 #include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
@@ -42,12 +41,11 @@ public:
 				SyncParams &sync_params,
 				PatchPlayLoader &patchloader,
 				DoubleBufParamBlock &p,
-				DoubleAuxStreamBlock &auxs,
 				PatchModQueue &patch_mod_queue);
 
 	void start();
 
-	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxStreamBlock &aux);
+	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 
 private:
 	SyncParams &sync_params;
@@ -55,7 +53,6 @@ private:
 	PatchPlayLoader &patch_loader;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
-	DoubleAuxStreamBlock &auxsigs;
 	PatchModQueue &patch_mod_queue;
 
 	CodecT &codec_;
@@ -81,8 +78,9 @@ private:
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
-
-	// void output_silence(AudioOutBuffer &out, AuxStreamBlock &aux);
+	void handle_midi(Midi::Event const &event, unsigned poly_num);
+	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
+	bool check_patch_loading();
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;

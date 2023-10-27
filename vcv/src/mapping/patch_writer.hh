@@ -4,6 +4,7 @@
 #include "ParamMap.hh"
 #include "jansson.h"
 #include "mapping/mapping.hh"
+#include "mapping/midi_modules.hh"
 #include "patch/patch.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include <map>
@@ -12,18 +13,15 @@
 #include <vector>
 
 class PatchFileWriter {
-	PatchData pd;
-	int64_t hubModuleId;
-	std::map<int64_t, uint16_t> idMap; // idMap[64 bit VCV module id] -> 16 bit MM-patch module id
-
 public:
 	PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId);
 	~PatchFileWriter();
 
 	void setPatchName(std::string patchName);
 	void setPatchDesc(std::string patchDesc);
-	void setCableList(std::vector<CableMap> &jacks);
+	void setCableList(std::vector<CableMap> &cables);
 	void setParamList(std::vector<ParamMap> &params);
+	void setMidiSettings(MetaModule::MIDI::ModuleIds &ids, MetaModule::MIDI::Settings const &settings);
 	void addModuleStateJson(rack::Module *module);
 
 	void addKnobMaps(unsigned panelKnobId, unsigned knobSetId, const std::span<const Mapping> maps);
@@ -37,8 +35,22 @@ public:
 private:
 	void mapInputJack(const CableMap &map);
 	void mapOutputJack(const CableMap &map);
+	void mapMidiCVJack(CableMap &map);
+	void mapMidiGateJack(CableMap &map);
+	void mapMidiCCJack(CableMap &cable);
+
+	void mapMidiCVPolySplitJack(CableMap &cable, unsigned monoJackId);
+
 	void setModuleList(std::vector<ModuleID> &modules);
 
 	json_t *moduleStateDataJ;
 	json_t *moduleArrayJ;
+
+	PatchData pd;
+	int64_t hubModuleId = -1;
+
+	MetaModule::MIDI::ModuleIds midiModuleIds;
+	MetaModule::MIDI::Settings midiSettings;
+
+	std::map<int64_t, uint16_t> idMap; // idMap[64 bit VCV module id] -> 16 bit MM-patch module id
 };

@@ -45,6 +45,12 @@ struct AddMapPopUp {
 
 		lv_indev_set_group(indev, popup_group);
 
+		if (knobset_id == PatchData::MIDIKnobSet) {
+			lv_label_set_text(ui_AddModuleName, "Send MIDI CC");
+		} else
+			lv_label_set_text(ui_AddModuleName, "Wiggle a knob");
+
+		lv_label_set_text(ui_MapDetected, "");
 		param_idx = param_id;
 		set_id = knobset_id;
 		visible = true;
@@ -52,6 +58,9 @@ struct AddMapPopUp {
 
 	void hide() {
 		visible = false;
+		lv_obj_clear_state(ui_CancelAdd, LV_STATE_PRESSED);
+		lv_obj_clear_state(ui_OkAdd, LV_STATE_PRESSED);
+
 		lv_hide(ui_AddMapPopUp);
 
 		auto indev = lv_indev_get_next(nullptr);
@@ -67,15 +76,25 @@ struct AddMapPopUp {
 		}
 	}
 
-	void update(ParamsState &params) {
+	void update(ParamsMidiState &params) {
 		if (visible) {
-			for (unsigned i = 0; auto const &knob : params.knobs) {
-				if (knob.changed) {
-					auto name = PanelDef::get_map_param_name(i);
-					lv_label_set_text_fmt(ui_MapDetected, "Knob: %.4s", name.data());
-					selected_knob = i;
+			if (set_id == PatchData::MIDIKnobSet) {
+				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
+					if (cc.did_change()) {
+						lv_label_set_text_fmt(ui_MapDetected, "MIDI CC: %d", ccnum);
+						selected_knob = MidiCC0 + ccnum;
+					}
+					ccnum++;
 				}
-				i++;
+			} else {
+				for (unsigned i = 0; auto &knob : params.knobs) {
+					if (knob.did_change()) {
+						auto name = PanelDef::get_map_param_name(i);
+						lv_label_set_text_fmt(ui_MapDetected, "Knob: %.4s", name.data());
+						selected_knob = i;
+					}
+					i++;
+				}
 			}
 		}
 	}
@@ -86,26 +105,40 @@ struct AddMapPopUp {
 		auto page = static_cast<AddMapPopUp *>(event->user_data);
 
 		if (event->target == ui_OkAdd) {
-			if (page->selected_knob.has_value()) {
-				uint16_t module_id = PageList::get_selected_module_id();
 
-				page->patch_mod_queue.put(AddMapping{
-					.map =
-						{
-							.panel_knob_id = page->selected_knob.value(),
-							.module_id = module_id,
-							.param_id = page->param_idx,
-							.min = 0.f,
-							.max = 1.f,
-						},
-					.set_id = page->set_id,
-				});
+			if (page->selected_knob.has_value()) {
+				auto mapped_knob = page->selected_knob.value();
+				uint16_t module_id = PageList::get_selected_module_id();
+				if (mapped_knob <= PanelDef::NumKnobs) {
+					// TODO: just have AddMapping type (not AddMidiMap) and use set_id to indicate MidiMap?
+					page->patch_mod_queue.put(AddMapping{
+						.map =
+							{
+								.panel_knob_id = mapped_knob,
+								.module_id = module_id,
+								.param_id = page->param_idx,
+								.min = 0.f,
+								.max = 1.f,
+							},
+						.set_id = page->set_id,
+					});
+
+				} else if (mapped_knob >= MidiCC0 && mapped_knob <= MidiCC127) {
+					page->patch_mod_queue.put(AddMidiMap{
+						.map =
+							{
+								.panel_knob_id = mapped_knob,
+								.module_id = module_id,
+								.param_id = page->param_idx,
+								.min = 0.f,
+								.max = 1.f,
+							},
+					});
+				}
 			}
 			page->hide();
-		}
 
-		else if (event->target == ui_CancelAdd)
-		{
+		} else if (event->target == ui_CancelAdd) {
 			page->hide();
 		}
 	}

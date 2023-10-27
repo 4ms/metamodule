@@ -4,8 +4,10 @@
 #include "mapping/JackMap.hh"
 #include "mapping/ModuleID.h"
 #include "mapping/ParamMap.hh"
+#include "mapping/midi_modules.hh"
 #include "mapping/module_directory.hh"
 #include "mapping/patch_writer.hh"
+#include "patch/midi_def.hh"
 #include <fstream>
 #include <rack.hpp>
 
@@ -29,11 +31,15 @@ struct VCVPatchFileWriter {
 		// Find all knobs on those modules (static knobs)
 		std::vector<ModuleID> moduleData;
 		std::vector<ParamMap> paramData;
+		std::vector<int64_t> splitModuleIds;
+		MetaModule::MIDI::Modules midimodules;
 
-		for (auto moduleID : engine->getModuleIds()) {
+		auto moduleIDs = engine->getModuleIds();
+		for (auto moduleID : moduleIDs) {
+
 			auto *module = engine->getModule(moduleID);
-			if (ModuleDirectory::isInPlugin(module)) {
 
+			if (ModuleDirectory::isInPlugin(module)) {
 				moduleData.push_back({moduleID, module->model->slug.c_str()});
 				if (module->model->slug.size() > 31)
 					printf("Warning: module slug truncated to 31 chars\n");
@@ -45,27 +51,27 @@ struct VCVPatchFileWriter {
 					}
 				}
 			}
+			midimodules.addMidiModule(module);
 		}
 
-		std::vector<CableMap> cableData;
+		// Scan cables for MIDICV -> Split connections
 		for (auto cableID : engine->getCableIds()) {
-			auto cable = engine->getCable(cableID);
+			midimodules.addPolySplitCable(engine->getCable(cableID));
+		}
+
+		// Scan cables
+		std::vector<CableMap> cableData;
+		for (auto cableWidget : APP->scene->rack->getCompleteCables()) {
+			auto cable = cableWidget->cable;
 			auto out = cable->outputModule;
 			auto in = cable->inputModule;
 
-			uint16_t color = 0;
-			for (auto cableWidget : APP->scene->rack->getCompleteCables()) {
-				if (cableWidget->cable == cable) {
-					uint8_t r_amt = (uint8_t)rack::clamp(cableWidget->color.r, 0.0, 1.0) * 255;
-					uint8_t g_amt = (uint8_t)rack::clamp(cableWidget->color.g, 0.0, 1.0) * 255;
-					uint8_t b_amt = (uint8_t)rack::clamp(cableWidget->color.b, 0.0, 1.0) * 255;
-					color = Color(r_amt, g_amt, b_amt).Rgb565();
-					break;
-				}
-			}
+			bool isMidiOutput = ModuleDirectory::isCoreMIDI(out) || midimodules.isPolySplitModule(out);
+			bool isKnownOutModule = ModuleDirectory::isInPlugin(out) || isMidiOutput;
 
-			// Both modules on a cable must be in the plugin
-			if (!ModuleDirectory::isInPlugin(out) || !ModuleDirectory::isInPlugin(in))
+			// The output module must be in the plugin, or a Core MIDI module, or a Split module connected to a Core MIDI module.
+			// The input module must be in the plugin.
+			if (!(isKnownOutModule && ModuleDirectory::isInPlugin(in)))
 				continue;
 
 			// Ignore cables that are connected to a different hub
@@ -74,9 +80,10 @@ struct VCVPatchFileWriter {
 			if (ModuleDirectory::isHub(in) && (in->getId() != hubModuleId))
 				continue;
 
-			// Ignore two hub jacks patched together
-			if (ModuleDirectory::isHub(out) && ModuleDirectory::isHub(in))
-				continue;
+			uint8_t r_amt = (uint8_t)(rack::clamp(cableWidget->color.r) * 255);
+			uint8_t g_amt = (uint8_t)(rack::clamp(cableWidget->color.g) * 255);
+			uint8_t b_amt = (uint8_t)(rack::clamp(cableWidget->color.b) * 255);
+			uint16_t color = Color(r_amt, g_amt, b_amt).Rgb565();
 
 			cableData.push_back({
 				.sendingJackId = cable->outputId,
@@ -88,6 +95,7 @@ struct VCVPatchFileWriter {
 		}
 
 		PatchFileWriter pw{moduleData, hubModuleId};
+		pw.setMidiSettings(midimodules.moduleIds, midimodules.settings);
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
 		pw.setCableList(cableData);

@@ -3,7 +3,7 @@
 #include "patch_convert/yaml_to_patch.hh"
 #include "patches_default.hh"
 #include "patchlist.hh"
-#include "printf.h"
+#include "pr_dbg.hh"
 
 namespace MetaModule
 {
@@ -27,11 +27,6 @@ public:
 			return false;
 		}
 
-		// if (!trim_buf_leading_newlines(buffer).starts_with("PatchData:")) {
-		// 	pr_log("File does not start with 'PatchData:', skipping\n");
-		// 	return false;
-		// }
-
 		buffer = buffer.subspan(0, bytes_read);
 		return true;
 	}
@@ -44,11 +39,11 @@ public:
 				if (filesize < 12) // || filename.starts_with("."))
 					return;
 
-				pr_log("Found patch file on %s: %s (%zu B) Timestamp: 0x%x, Reading... \n",
-					   fileio.volname().data(),
-					   filename.data(),
-					   filesize,
-					   timestamp);
+				pr_trace("Found patch file on %s: %s (%zu B) Timestamp: 0x%x, Reading... \n",
+						 fileio.volname().data(),
+						 filename.data(),
+						 filesize,
+						 timestamp);
 
 				auto patchname = _read_patch_name(fileio, filename);
 				if (patchname.data()[0] == 0)
@@ -60,17 +55,9 @@ public:
 		// patch_list.set_status(PatchList::Status::Ready);
 
 		if (!ok)
-			pr_log("Failed to read patches on %s\n", fileio.volname().data());
+			pr_dbg("Failed to read patches on %s\n", fileio.volname().data());
 		return ok;
 	}
-
-	// static bool load_patch_data(PatchData &p, FileIoC auto &fileio, std::string_view filename) {
-	// 	auto contents = _read_patch_to_local_buffer(fileio, filename);
-	// 	if (contents.size() == 0)
-	// 		return false;
-	// 	pr_log("Read patch file %s.\n", filename.data());
-	// 	return yaml_raw_to_patch(contents, p);
-	// }
 
 	static bool delete_all_patches(FileIoC auto &fileio) {
 		return fileio.foreach_file_with_ext(
@@ -90,7 +77,7 @@ public:
 	// 		if (filesize < 12 || filename.starts_with("."))
 	// 			return;
 
-	// 		pr_log("Found patch file on %s: %s, size: %d, timestamp 0x%x, copying to %s\n",
+	// 		pr_dbg("Found patch file on %s: %s, size: %d, timestamp 0x%x, copying to %s\n",
 	// 			   from.volname().data(),
 	// 			   filename.data(),
 	// 			   filesize,
@@ -100,12 +87,12 @@ public:
 	// 		if (filter == FileFilter::NewerTimestamp) {
 	// 			auto to_file_tmstmp = to.get_file_timestamp(filename);
 	// 			if (to_file_tmstmp == 0) {
-	// 				pr_log("File %s does not exist on dest FS, creating\n", filename.data());
+	// 				pr_dbg("File %s does not exist on dest FS, creating\n", filename.data());
 	// 			} else if (to_file_tmstmp == timestamp) {
-	// 				pr_log("File %s timestamp (0x%x) not changed, skipping\n", filename.data(), timestamp);
+	// 				pr_dbg("File %s timestamp (0x%x) not changed, skipping\n", filename.data(), timestamp);
 	// 				return;
 	// 			} else
-	// 				pr_log(
+	// 				pr_dbg(
 	// 					"File %s timestamps differ. from: 0x%x to: 0x%x\n", filename.data(), timestamp, to_file_tmstmp);
 	// 		}
 
@@ -145,7 +132,7 @@ public:
 			const auto filename = DefaultPatches::get_filename(i);
 			const auto patch = DefaultPatches::get_patch(i);
 
-			pr_log("Creating default patch file: %s\n", filename.c_str());
+			pr_dbg("Creating default patch file: %s\n", filename.c_str());
 
 			// Remove trailing null terminator that we get from storing default patches as strings
 			if (patch.back() == '\0')
@@ -188,7 +175,7 @@ private:
 		std::string_view name_tag{"patch_name"};
 		auto startpos = header.find(name_tag);
 		if (startpos == header.npos) {
-			pr_log("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
+			pr_dbg("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
 			return "";
 		}
 
@@ -200,7 +187,7 @@ private:
 
 		auto endpos = header.find_first_of("'\"\n\r");
 		if (endpos == header.npos) {
-			pr_log("File does not contain a quote or newline after '%s' in the first %d chars, ignoring\n",
+			pr_dbg("File does not contain a quote or newline after '%s' in the first %d chars, ignoring\n",
 				   name_tag.data(),
 				   HEADER_SIZE);
 			return "";
@@ -208,14 +195,6 @@ private:
 		header.remove_suffix(header.size() - endpos);
 
 		return ModuleTypeSlug{header};
-	}
-
-	static void pr_err(const char *s, auto... d) {
-		printf_(s, d...);
-	}
-
-	static void pr_log(const char *s, auto... d) {
-		printf_(s, d...);
 	}
 };
 } // namespace MetaModule

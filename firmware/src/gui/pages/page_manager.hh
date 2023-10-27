@@ -30,7 +30,7 @@ public:
 
 	PageManager(PatchStorageProxy &patch_storage,
 				PatchPlayLoader &patch_playloader,
-				ParamsState &params,
+				ParamsMidiState &params,
 				MetaParams &metaparams,
 				MessageQueue &msg_queue,
 				PatchModQueue &patch_mod_queue)

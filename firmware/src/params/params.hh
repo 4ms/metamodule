@@ -1,6 +1,9 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "midi_params.hh"
+#include "patch/midi_def.hh"
 #include "util/debouncer.hh"
+#include "util/zip.hh"
 #include <array>
 
 namespace MetaModule
@@ -10,13 +13,9 @@ struct Params {
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
 	std::array<Toggler, PanelDef::NumRgbButton> buttons{};
 	std::array<float, PanelDef::NumPot> knobs{};
-	//Note 0 => -1.0 => should become -5V or -5oct on modules
-	//Note 60 => 0
-	//Note 120 => 1.0 => should become 5V or +5oct on modules
-	//Note 121-127.. => ..?1.0?
-	//monophonic -1..1 => notes 0..127 => C-2..G8 => 4.0875Hz..6271.93Hz => -2V..~8.5V
-	float midi_note;
-	bool midi_gate; //monophonic on/off
+
+	Midi::Event midi_event;
+
 	uint32_t jack_senses;
 
 	Params() {
@@ -32,6 +31,9 @@ struct Params {
 			button.reset();
 		for (float &knob : knobs)
 			knob = 0.f;
+
+		midi_event = Midi::Event{};
+
 		jack_senses = 0;
 	}
 
@@ -44,8 +46,13 @@ struct Params {
 			buttons[i].copy_state(that.buttons[i]);
 		for (unsigned i = 0; i < PanelDef::NumPot; i++)
 			knobs[i] = that.knobs[i];
+
+		midi_event = that.midi_event;
+
 		jack_senses = that.jack_senses;
 	}
 };
+
+static constexpr auto Params_Size = sizeof(Params);
 
 } // namespace MetaModule
