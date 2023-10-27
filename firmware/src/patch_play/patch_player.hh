@@ -301,7 +301,6 @@ public:
 	}
 
 	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
-		// if (pd.add_update_mapped_knob(knobset_id, map)) {
 		auto found =
 			std::find_if(knob_conns[knobset_id][map.panel_knob_id].begin(),
 						 knob_conns[knobset_id][map.panel_knob_id].end(),
@@ -311,7 +310,6 @@ public:
 			found->max = map.max;
 			found->curve_type = map.curve_type;
 		}
-		// }
 	}
 
 	void remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {

@@ -136,6 +136,7 @@ struct KnobMapPage : PageBase {
 			page->map->max = val / 100.f;
 
 		set_knob_arc<min_arc, max_arc>(*page->map, ui_EditMappingArc, {});
+		page->patch_mod_queue.put(EditMappingMinMax{.map = *page->map, .set_id = page->view_set_idx});
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
