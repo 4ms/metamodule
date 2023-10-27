@@ -30,6 +30,9 @@ struct ModuleDirectory {
 		if (module->model->plugin->slug == "HetrickCV")
 			return true;
 
+		if (module->model->plugin->slug == "NonlinearCircuits")
+			return true;
+
 		return false;
 	}
 
