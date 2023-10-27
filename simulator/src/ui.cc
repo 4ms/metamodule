@@ -15,7 +15,7 @@ Ui::Ui(std::string_view patch_path, size_t block_size)
 	Gui::init_lvgl_styles();
 	page_manager.init();
 
-	patch_playloader.audio_is_muted();
+	patch_playloader.notify_audio_is_muted();
 	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";
 
 	params.jack_senses = 0x0;

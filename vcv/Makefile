@@ -22,7 +22,7 @@ FLAGS += $(INCLUDES)
 FLAGS += -g2
 
 CFLAGS +=
-CXXFLAGS += -DVCVRACK -Wno-missing-braces
+CXXFLAGS += -DVCVRACK
 
 # Careful about linking to shared libraries, since you can't assume much about the user's environment and library search path.
 # Static libraries are fine, but they should be added to this plugin's build system.
@@ -65,9 +65,6 @@ ifeq ($(UNAME_S),Darwin)
 CXXFLAGS += -mmacosx-version-min=10.15 
 endif
 
-./build/src/plugin.cc.o: CXXFLAGS+=-Wno-missing-braces
-./build/src/hub/hub_medium.cc.o: CXXFLAGS+=-Wno-missing-braces
-./build/src/shared/CoreModules/%Core.cc.o: CXXFLAGS+=-Wno-missing-braces
 ./build/src/shared/CoreModules/enosc/dynamic_data.cc.o: CXXFLAGS+=-Wno-unknown-pragmas
 
 all: plugin res

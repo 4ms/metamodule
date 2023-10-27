@@ -26,8 +26,8 @@ CXXFLAGS = 	-Wall \
 			-I$(DOCTEST_DIR) \
 			-I \
 			-Iryml \
+			-I../../firmware/src/medium \
 			-I.. \
-			-I../etl/include \
 			-I../cpputil \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \

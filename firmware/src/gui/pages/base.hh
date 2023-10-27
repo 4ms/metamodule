@@ -18,7 +18,7 @@ enum class PageChangeDirection { Back, Forward, Jump };
 struct PatchInfo {
 	PatchStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
-	ParamsState &params;
+	ParamsMidiState &params;
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
@@ -27,7 +27,7 @@ struct PatchInfo {
 struct PageBase {
 	PatchStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
-	ParamsState &params;
+	ParamsMidiState &params;
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;

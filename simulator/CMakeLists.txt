@@ -105,6 +105,7 @@ target_include_directories(
           ${SHARED}/patch_convert/ryml/rapidyaml/src
           ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src
           ${SHARED}/cpputil
+          ${FWDIR}/src/medium
           ${SIM_ROOT}/stubs
           ${SHARED})
 
@@ -139,7 +140,7 @@ target_include_directories(
 
 target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl ryml SDL2 VCV_adaptor)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 VCV_adaptor)
 
 foreach(brand ${brands})
   target_link_libraries(simulator PRIVATE ${brand}Library)

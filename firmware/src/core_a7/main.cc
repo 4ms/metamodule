@@ -47,7 +47,6 @@ void main() {
 					  sync_params,
 					  patch_playloader,
 					  StaticBuffers::param_blocks,
-					  StaticBuffers::auxsignal_block,
 					  patch_mod_queue};
 
 	StaticBuffers::raw_patch_span = {StaticBuffers::raw_patch_data.data(), StaticBuffers::raw_patch_data.size()};

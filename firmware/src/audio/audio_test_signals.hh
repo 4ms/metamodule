@@ -20,21 +20,6 @@ struct AudioTestSignal {
 		}
 	}
 
-	static void passthrough(AudioInBuffer &in, AudioOutBuffer &out, AuxStreamBlock &aux) {
-
-		for (auto [i, o, a] : zip(in, out, aux)) {
-			o.chan[0] = i.chan[0];
-			o.chan[1] = i.chan[1];
-			o.chan[2] = i.chan[2];
-			o.chan[3] = i.chan[3];
-			o.chan[4] = i.chan[4];
-			o.chan[5] = i.chan[5];
-			o.chan[6] = 0x00100000;
-			o.chan[7] = 0x00400000;
-			// a.clock_out = 0;
-		}
-	}
-
 	static void sines_out(AudioInBuffer &in, AudioOutBuffer &out) {
 		static PhaseAccum<48000> phase0{80};
 		static PhaseAccum<48000> phase1{200};
@@ -93,14 +78,13 @@ struct AudioTestSignal {
 		// using refavg/refref (inverted): deviates 260Hz (obviously, math is bad)
 	}
 
-	static void dual_passthrough(
-		AudioInBuffer &inA, AudioOutBuffer &outA, AudioInBuffer &inB, AudioOutBuffer &outB, AuxStreamBlock &aux) {
+	static void dual_passthrough(AudioInBuffer &inA, AudioOutBuffer &outA, AudioInBuffer &inB, AudioOutBuffer &outB) {
 
 		static PhaseAccum<48000> phase0{80};
 		static PhaseAccum<48000> phase1{200};
 		static PhaseAccum<48000> phase2{250};
 		static PhaseAccum<48000> phase3{700};
-		for (auto [ina, inb, outa, outb, a] : zip(inA, inB, outA, outB, aux)) {
+		for (auto [ina, inb, outa, outb] : zip(inA, inB, outA, outB)) {
 			outa.chan[0] = ina.chan[0];
 			outa.chan[1] = ina.chan[1];
 			outa.chan[2] = ina.chan[2];

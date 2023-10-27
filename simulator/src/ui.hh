@@ -35,7 +35,7 @@ private:
 
 	MessageQueue msg_queue;
 	PageManager page_manager;
-	ParamsState params;
+	ParamsMidiState params;
 	MetaParams metaparams;
 	AudioStream audio_stream{params, patch_player, patch_playloader, patch_mod_queue};
 	LvglEncoderSimulatorDriver input_driver{keys};

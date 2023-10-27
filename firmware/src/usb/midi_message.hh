@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <span>
 
 #define MIDIDEBUG
 #if defined(MIDIDEBUG)
@@ -10,9 +11,10 @@
 // https://www.midi.org/specifications/midi1-specifications/m1-v4-2-1-midi-1-0-detailed-specification-96-1-4
 
 enum class MidiCommand : uint8_t {
+	None = 0,
 	NoteOff = 0x8,
 	NoteOn = 0x9,
-	PolyKeyPressue = 0xA,
+	PolyKeyPressure = 0xA,
 	ControlChange = 0xB,
 	ProgramChange = 0xC,
 	ChannelPressure = 0xD,
@@ -66,8 +68,8 @@ enum MidiSystemExclusiveCommand : uint8_t {
 };
 
 struct MidiMessage {
-	MidiStatusByte status;
-	MidiDataBytes data;
+	MidiStatusByte status{MidiCommand::None, 0};
+	MidiDataBytes data{0, 0};
 
 	MidiMessage() = default;
 
@@ -91,8 +93,20 @@ struct MidiMessage {
 		return status == cmd;
 	}
 
+	bool is_timing_transport() const {
+		return status == TimingClock || status == Start || status == Stop || status == Continue;
+	}
+
 	bool is_sysex() const {
 		return status == SysEx;
+	}
+
+	bool has_sysex_end() const {
+		return status == EndExclusive || data.byte[0] == EndExclusive || data.byte[1] == EndExclusive;
+	}
+
+	bool is_noteoff() const {
+		return is_command<MidiCommand::NoteOff>() || (is_command<MidiCommand::NoteOn>() && velocity() == 0);
 	}
 
 	uint32_t raw() const {
@@ -103,35 +117,81 @@ struct MidiMessage {
 		return data.byte[0];
 	}
 
+	uint8_t ccnum() const {
+		return data.byte[0];
+	}
+
 	uint8_t velocity() const {
 		return data.byte[1];
+	}
+
+	uint8_t aftertouch() const {
+		return data.byte[1];
+	}
+
+	uint8_t chan_pressure() const {
+		return data.byte[0];
+	}
+
+	uint8_t ccval() const {
+		return data.byte[1];
+	}
+
+	// -8192 .. 8191
+	int16_t bend() const {
+		return ((int16_t)data.byte[0] | ((int16_t)data.byte[1] << 7)) - 8192;
 	}
 
 	static void print(MidiMessage msg) {
 #if defined(MIDIDEBUG)
 		using enum MidiCommand;
 		if (msg.is_command<NoteOn>()) {
-			printf_("Note: %d Vel: %d\n", msg.data.byte[0], msg.data.byte[1]);
+			printf_("Note: %d Vel: %d\n", msg.note(), msg.velocity());
+
 		} else if (msg.is_command<NoteOff>()) {
-			printf_("Note: %d OFF\n", msg.data.byte[0]);
-		} else if (msg.is_command<PolyKeyPressue>()) {
-			printf_("Poly Key Pressure: %d %d\n", msg.data.byte[0], msg.data.byte[1]);
+			printf_("Note: %d OFF\n", msg.note());
+
+		} else if (msg.is_command<PolyKeyPressure>()) {
+			printf_("Poly Key Pressure: %d %d\n", msg.note(), msg.aftertouch());
+
 		} else if (msg.is_command<ControlChange>()) {
 			printf_("CC: #%d = %d\n", msg.data.byte[0], msg.data.byte[1]);
+
 		} else if (msg.is_command<ProgramChange>()) {
 			printf_("PC: #%d\n", msg.data.byte[0]);
+
 		} else if (msg.is_command<ChannelPressure>()) {
-			printf_("CP: #%d\n", msg.data.byte[0]);
-		} else if (msg.is_command<ChannelPressure>()) {
-			printf_("Bend: #%d\n", (msg.data.byte[0] | (msg.data.byte[1] << 7)) - 8192);
+			printf_("CP: #%d\n", msg.chan_pressure());
+
+		} else if (msg.is_command<PitchBend>()) {
+			printf_("Bend: #%d\n", msg.bend());
+
 		} else if (msg.is_system_realtime<TimingClock>()) {
-			// printf_("Clk\n");
+			printf_("Clk\n");
+
+		} else if (msg.is_system_realtime<Start>()) {
+			printf_("Start\n");
+
+		} else if (msg.is_system_realtime<Stop>()) {
+			printf_("Stop\n");
+
+		} else if (msg.is_system_realtime<Continue>()) {
+			printf_("Continue\n");
+
 		} else if (msg.is_sysex()) {
 			printf_("SYSEX: 0x%02x%02x\n", msg.data.byte[0], msg.data.byte[1]);
-		} else if (msg.raw()) {
+
+		} else {
 			printf_("Raw: %06x\n", msg.raw());
 		}
 #endif
+	}
+
+	static void dump_raw(std::span<uint8_t> buffer) {
+		printf_("%d bytes ", buffer.size());
+		for (auto byte : buffer)
+			printf_("0x%02x ", byte);
+		printf_("\n");
 	}
 
 	void print() const {

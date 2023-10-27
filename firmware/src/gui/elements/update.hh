@@ -14,35 +14,40 @@ namespace MetaModule
 
 namespace ElementUpdate
 {
-inline std::optional<float> get_mapped_param_value(const ParamsState &params, unsigned mapped_panel_id) {
-	if (mapped_panel_id >= params.knobs.size())
-		return {};
 
-	auto latched = params.knobs[mapped_panel_id];
-	if (latched.changed)
-		return latched.val;
-	else
-		return {};
+inline std::optional<float> get_mapped_param_value(const ParamsMidiState &params, unsigned mapped_panel_id) {
+	if (mapped_panel_id < params.knobs.size()) {
+		auto latched = params.knobs[mapped_panel_id];
+		return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
+	}
+
+	else if (auto mk = MappedKnob{.panel_knob_id = (uint16_t)mapped_panel_id}; mk.is_midi_cc())
+	{
+		auto latched = params.midi_ccs[mk.cc_num()];
+		return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
+	}
+	return {};
 }
 
 inline void
-update_element_value(const ParamElement &, const ParamsState &params, PatchData &patch, const GuiElement &gui_el) {
+update_element_value(const ParamElement &, const ParamsMidiState &params, PatchData &patch, const GuiElement &gui_el) {
 	if (!gui_el.obj || !gui_el.mapped_panel_id.has_value())
 		return;
 
 	auto val = ElementUpdate::get_mapped_param_value(params, gui_el.mapped_panel_id.value());
 
-	if (val.has_value())
+	if (val.has_value()) {
 		patch.set_static_knob_value(gui_el.module_idx, gui_el.idx.param_idx, val.value());
+	}
 }
 
-inline void update_element_value(const BaseElement &, const ParamsState &, PatchData &, const GuiElement &) {
+inline void update_element_value(const BaseElement &, const ParamsMidiState &, PatchData &, const GuiElement &) {
 	//Catch-all
 }
 } // namespace ElementUpdate
 
 struct UpdateElement {
-	ParamsState &params;
+	ParamsMidiState &params;
 	PatchData &patch;
 	GuiElement &gui_el;
 

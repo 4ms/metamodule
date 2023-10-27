@@ -19,11 +19,11 @@
 
 #pragma once
 
+#include "drivers/callable.hh"
 #include "usb_host_helper.hh"
 #include "usbh_core.h"
-// #include <functional>
-#include "drivers/callable.hh"
 #include <span>
+
 
 constexpr uint8_t AudioClassCode = 0x01;
 constexpr uint8_t AudioControlSubclassCode = 0x01;
@@ -119,10 +119,7 @@ enum class MidiStreamingState {
 };
 
 using MidiStreamRxCallbackType = Function<void(std::span<uint8_t>)>;
-// using MidiStreamRxCallbackType = Function<void(uint8_t *, uint32_t)>;
 using MidiStreamTxCallbackType = Callback;
-// using MidiStreamRxCallbackType = std::function<void(uint8_t *, uint32_t)>;
-// using MidiStreamTxCallbackType = std::function<void()>;
 
 struct MidiStreamingHandle {
 	AudioControlItf ControlItf;
