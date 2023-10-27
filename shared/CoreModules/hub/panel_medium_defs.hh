@@ -75,5 +75,5 @@ struct PanelDef {
 	//Array index is codec channel number 0-5
 	//Value is panel jack number (Audio In 0 - 5)
 	//This is hardware-dependant
-	static constexpr uint32_t audioin_order[NumAudioIn] = {3, 2, 1, 0, 5, 4};
+	static constexpr std::array<uint32_t, 6> audioin_order{3, 2, 1, 0, 5, 4};
 };

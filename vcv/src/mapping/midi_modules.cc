@@ -2,6 +2,7 @@
 #include "mapping/JackMap.hh"
 #include "mapping/module_directory.hh"
 #include "patch/midi_def.hh"
+#include <optional>
 #include <rack.hpp>
 
 namespace MetaModule::MIDI

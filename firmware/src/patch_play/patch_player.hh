@@ -25,35 +25,27 @@ namespace MetaModule
 
 class PatchPlayer {
 public:
-	//TODO: why not use a vector here?
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 	std::atomic<bool> is_loaded = false;
 
 private:
-	enum {
-		NumInConns = PanelDef::NumUserFacingInJacks,
-		NumOutConns = PanelDef::NumUserFacingOutJacks,
-	};
-
 	// out_conns[]: Out1-Out8
-	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}};
+	std::array<Jack, PanelDef::NumUserFacingOutJacks> out_conns __attribute__((aligned(4))) = {{{0, 0}}};
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2
-	std::array<std::vector<Jack>, NumInConns> in_conns;
+	std::array<std::vector<Jack>, PanelDef::NumUserFacingInJacks> in_conns;
 
 	// MIDI
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_gate_conns;
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_vel_conns;
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_aft_conns;
-	//TODO: compare performance of vector vs sparse map:
-	// std::vector<std::pair<unsigned /*ccnum*/, std::vector<Jack>>> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
 	std::array<std::vector<MappedKnob>, NumMidiCCs> midi_knob_conns;
 
 	struct MidiPulse {
-		OneShot pulse;
+		OneShot pulse{};
 		std::vector<Jack> conns;
 	};
 	std::array<MidiPulse, 5> midi_pulses;
@@ -74,7 +66,7 @@ private:
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
 	// 1 => reads "LFO #1", 2=> "LFO #2", etc.
-	uint8_t dup_module_index[MAX_MODULES_IN_PATCH] = {0};
+	std::array<uint8_t, MAX_MODULES_IN_PATCH> dup_module_index{};
 
 	PatchData pd;
 	unsigned active_knob_set = 0;
@@ -104,7 +96,7 @@ public:
 		// Tell the other core about the patch
 		smp.load_patch(pd.module_slugs.size());
 
-		// First module is the hub, ignore it.
+		// First module is the hub
 		modules[0] = ModuleFactory::create(PanelDef::typeID);
 
 		for (size_t i = 1; i < pd.module_slugs.size(); i++) {
@@ -204,7 +196,7 @@ public:
 		}
 	}
 
-	void set_panel_input(int jack_id, float val) {
+	void set_panel_input(unsigned jack_id, float val) {
 		set_all_connected_jacks(in_conns[jack_id], val);
 	}
 
@@ -284,9 +276,9 @@ private:
 	}
 
 public:
-	float get_panel_output(int jack_id) {
+	float get_panel_output(uint32_t jack_id) {
 		auto const &jack = out_conns[jack_id];
-		if (jack.module_id > 0)
+		if (jack.module_id < pd.module_slugs.size())
 			return modules[jack.module_id]->get_output(jack.jack_id);
 		else
 			return 0.f;
@@ -297,7 +289,8 @@ public:
 	}
 
 	void apply_static_param(const StaticParam &sparam) {
-		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
+		if (sparam.module_id < pd.module_slugs.size() && modules[sparam.module_id])
+			modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
 		//Also set it in the patch?
 	}
 
@@ -349,71 +342,6 @@ public:
 
 	// General info getters:
 
-	const ModuleTypeSlug &get_patch_name() {
-		return is_loaded ? pd.patch_name : no_patch_loaded;
-	}
-
-	unsigned get_num_modules() {
-		return is_loaded ? pd.module_slugs.size() : 0;
-	}
-
-	int get_num_int_cables() {
-		return is_loaded ? pd.int_cables.size() : 0;
-	}
-
-	unsigned get_num_int_cable_ins(unsigned int_cable_idx) {
-		if (int_cable_idx >= pd.int_cables.size())
-			return 0;
-		return pd.int_cables[int_cable_idx].ins.size();
-	}
-
-	const ModuleTypeSlug &get_module_name(unsigned idx) {
-		return (is_loaded && idx < pd.module_slugs.size()) ? pd.module_slugs[idx] : no_patch_loaded;
-	}
-
-	StaticString<15> const &get_panel_knob_name(int param_id) {
-		return pd.knob_sets[active_knob_set].set[param_id].alias_name;
-	}
-
-	InternalCable &get_int_cable(unsigned idx) {
-		if (idx < pd.int_cables.size())
-			return pd.int_cables[idx];
-		else
-			return pd.int_cables[0]; //error
-	}
-
-	// Given the user-facing output jack id (0 = Audio Out L, 1 = Audio Out R, etc)
-	// Return the Jack {module_id, jack_id} that it's connected to
-	// {0,0} means not connected, or index out of range
-	Jack get_panel_output_connection(unsigned jack_id) {
-		if (jack_id >= PanelDef::NumUserFacingOutJacks)
-			return {.module_id = 0, .jack_id = 0};
-
-		return out_conns[jack_id];
-	}
-
-	// Given the user-facing panel input jack id (0 = Audio In L, 1 = Audio In R, etc)
-	// return the Jack {module_id, jack_id} that it's connected to.
-	// The optional multiple_connection_id is used if multiple jacks are connected to the panel jack (defaults to 0).
-	// {0,0} means not connected, or index out of range
-	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0) {
-		// Todo: support multiple jacks connected to one net
-		if ((jack_id >= PanelDef::NumUserFacingInJacks) || (multiple_connection_id >= in_conns[jack_id].size()))
-			return {.module_id = 0, .jack_id = 0};
-
-		return in_conns[jack_id][multiple_connection_id];
-	}
-
-	static constexpr unsigned get_num_panel_knobs() {
-		return PanelDef::NumKnobs;
-	}
-	static constexpr unsigned get_num_panel_inputs() {
-		return PanelDef::NumUserFacingOutJacks;
-	}
-	static constexpr unsigned get_num_panel_outputs() {
-		return PanelDef::NumUserFacingInJacks;
-	}
-
 	// Jack patched/unpatched status
 
 	void mark_patched_jacks() {
@@ -433,8 +361,8 @@ public:
 		}
 	}
 
-	void set_input_jack_patched_status(int panel_in_jack_id, bool is_patched) {
-		if (panel_in_jack_id >= NumInConns)
+	void set_input_jack_patched_status(uint32_t panel_in_jack_id, bool is_patched) {
+		if (panel_in_jack_id >= in_conns.size())
 			return;
 		for (auto const &jack : in_conns[panel_in_jack_id]) {
 			if (jack.module_id > 0) {
@@ -446,11 +374,11 @@ public:
 		}
 	}
 
-	void set_output_jack_patched_status(int panel_out_jack_id, bool is_patched) {
-		if (panel_out_jack_id >= NumOutConns)
+	void set_output_jack_patched_status(uint32_t panel_out_jack_id, bool is_patched) {
+		if (panel_out_jack_id >= out_conns.size())
 			return;
 		auto const &jack = out_conns[panel_out_jack_id];
-		if (jack.module_id > 0) {
+		if (jack.module_id < pd.module_slugs.size()) {
 			if (is_patched)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
 			else
@@ -465,7 +393,7 @@ private:
 			d = 0;
 
 		for (auto &out_conn : out_conns)
-			out_conn = {0, 0};
+			out_conn = {0xFFFF, 0xFFFF};
 
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
@@ -520,72 +448,82 @@ public:
 					break;
 
 				int dup_int_cable = find_int_cable_input_jack(input_jack);
-				if (dup_int_cable == -1) {
-
-					if (auto num = cable.midi_note_pitch(); num.has_value()) {
-						update_or_add(midi_note_pitch_conns[num.value()], input_jack);
-						pr_dbg("MIDI note");
-
-					} else if (auto num = cable.midi_note_gate(); num.has_value()) {
-						update_or_add(midi_note_gate_conns[num.value()], input_jack);
-						pr_dbg("MIDI gate");
-
-					} else if (auto num = cable.midi_note_vel(); num.has_value()) {
-						update_or_add(midi_note_vel_conns[num.value()], input_jack);
-						pr_dbg("MIDI vel");
-
-					} else if (auto num = cable.midi_note_aft(); num.has_value()) {
-						update_or_add(midi_note_aft_conns[num.value()], input_jack);
-						pr_dbg("MIDI aftertouch");
-
-					} else if (auto num = cable.midi_note_retrig(); num.has_value()) {
-						update_or_add(midi_note_retrig[num.value()].conns, input_jack);
-						pr_dbg("MIDI retrig");
-
-					} else if (auto num = cable.midi_gate(); num.has_value()) {
-						update_or_add(midi_gate_conns[num.value()], input_jack);
-						pr_dbg("MIDI note %d gate", num.value());
-
-					} else if (auto num = cable.midi_cc(); num.has_value()) {
-						update_or_add(midi_cc_conns[num.value()], input_jack);
-						pr_dbg("MIDI CC/PW %d", num.value());
-
-					} else if (auto num = cable.midi_clk(); num.has_value()) {
-						update_or_add(midi_pulses[TimingEvents::Clock].conns, input_jack);
-						pr_dbg("MIDI Clk");
-
-					} else if (auto num = cable.midi_divclk(); num.has_value()) {
-						update_or_add(midi_pulses[TimingEvents::DivClock].conns, input_jack);
-						midi_divclk_div_amt = num.value() + 1;
-						pr_dbg("MIDI Div %d Clk", num.value() + 1);
-
-					} else if (auto num = cable.midi_transport(); num.has_value()) {
-						update_or_add(midi_pulses[num.value() + TimingEvents::Start].conns, input_jack);
-						pr_dbg("MIDI %s", num.value() == 0 ? "Start" : num.value() == 1 ? "Stop" : "Cont");
-
-					} else if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
-						update_or_add(in_conns[panel_jack_id], input_jack);
-
-					} else
-						pr_err("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
-
-					pr_dbg(" to jack: m=%d, p=%d\n", module_id, jack_id);
-
-				} else {
+				if (dup_int_cable >= 0) {
 					pr_warn("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
 							panel_jack_id,
 							dup_int_cable);
 					// TODO: When panel input jack is mapped to a jack containing a cable (to an output)
 					// ->>> Create a normalized mapping: Use the int_cable when panel jack is unpatched
+					continue;
+				}
+
+				if (auto num = cable.midi_note_pitch(); num.has_value()) {
+					update_or_add(midi_note_pitch_conns[num.value()], input_jack);
+					pr_dbg("MIDI note (poly %d)", num.value());
+
+				} else if (auto num = cable.midi_note_gate(); num.has_value()) {
+					update_or_add(midi_note_gate_conns[num.value()], input_jack);
+					pr_dbg("MIDI gate (poly %d)", num.value());
+
+				} else if (auto num = cable.midi_note_vel(); num.has_value()) {
+					update_or_add(midi_note_vel_conns[num.value()], input_jack);
+					pr_dbg("MIDI vel (poly %d)", num.value());
+
+				} else if (auto num = cable.midi_note_aft(); num.has_value()) {
+					update_or_add(midi_note_aft_conns[num.value()], input_jack);
+					pr_dbg("MIDI aftertouch (poly %d)", num.value());
+
+				} else if (auto num = cable.midi_note_retrig(); num.has_value()) {
+					update_or_add(midi_note_retrig[num.value()].conns, input_jack);
+					pr_dbg("MIDI retrig (poly %d)", num.value());
+
+				} else if (auto num = cable.midi_gate(); num.has_value()) {
+					update_or_add(midi_gate_conns[num.value()], input_jack);
+					pr_dbg("MIDI note %d gate", num.value());
+
+				} else if (auto num = cable.midi_cc(); num.has_value()) {
+					update_or_add(midi_cc_conns[num.value()], input_jack);
+					pr_dbg("MIDI CC/PW %d", num.value());
+
+				} else if (auto num = cable.midi_clk(); num.has_value()) {
+					update_or_add(midi_pulses[TimingEvents::Clock].conns, input_jack);
+					pr_dbg("MIDI Clk");
+
+				} else if (auto num = cable.midi_divclk(); num.has_value()) {
+					update_or_add(midi_pulses[TimingEvents::DivClock].conns, input_jack);
+					midi_divclk_div_amt = num.value() + 1;
+					pr_dbg("MIDI Div %d Clk", num.value() + 1);
+
+				} else if (auto num = cable.midi_transport(); num.has_value()) {
+					update_or_add(midi_pulses[num.value() + TimingEvents::Start].conns, input_jack);
+					pr_dbg("MIDI %s", num.value() == 0 ? "Start" : num.value() == 1 ? "Stop" : "Cont");
+
+				} else if (panel_jack_id >= 0 && panel_jack_id < in_conns.size()) {
+					update_or_add(in_conns[panel_jack_id], input_jack);
+					pr_dbg("Map %d", panel_jack_id);
+
+				} else
+					pr_err("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
+
+				pr_dbg(" to jack: m=%d, p=%d\n", module_id, jack_id);
+
+				// Handle MIDI->Hub and Hub->Hub cables by connecting Hub input to output
+				if (input_jack.module_id == 0) {
+					out_conns[input_jack.jack_id] = input_jack;
+					pr_dbg("Connect hub module out jack %d to panel out %d\n", input_jack.jack_id, input_jack.jack_id);
 				}
 			}
 		}
 
 		for (auto const &cable : pd.mapped_outs) {
 			auto panel_jack_id = cable.panel_jack_id;
-			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingOutJacks)
+			if (panel_jack_id >= PanelDef::NumUserFacingOutJacks)
 				break;
 			out_conns[panel_jack_id] = cable.out;
+			pr_dbg("Connect module %d out jack %d to panel out %d\n",
+				   cable.out.module_id,
+				   cable.out.jack_id,
+				   panel_jack_id);
 		}
 	}
 
@@ -612,13 +550,6 @@ public:
 				this_index = 0;
 			dup_module_index[i] = this_index;
 		}
-	}
-
-	// Return the mulitple-module-same-type index of the given module index
-	// 0 ==> this is the only module of its type
-	// >0 ==> a number to append to the module name, e.g. 1 ==> LFO#1, 2 ==> LFO#2, etc
-	uint8_t get_multiple_module_index(uint8_t idx) {
-		return dup_module_index[idx];
 	}
 
 private:
@@ -659,6 +590,47 @@ private:
 		} else {
 			pr_warn("Bad Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
 		}
+	}
+
+	///////////////////////////////////////
+public:
+	//Used in unit tests
+	unsigned get_num_int_cable_ins(unsigned int_cable_idx) {
+		if (int_cable_idx >= pd.int_cables.size())
+			return 0;
+		return pd.int_cables[int_cable_idx].ins.size();
+	}
+
+	//Used in unit tests
+	InternalCable &get_int_cable(unsigned idx) {
+		if (idx < pd.int_cables.size())
+			return pd.int_cables[idx];
+		else
+			return pd.int_cables[0]; //error
+	}
+
+	//Used in unit tests
+	Jack get_panel_output_connection(unsigned jack_id) {
+		if (jack_id >= PanelDef::NumUserFacingOutJacks)
+			return {.module_id = 0, .jack_id = 0};
+
+		return out_conns[jack_id];
+	}
+
+	//Used in unit tests
+	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0) {
+		if ((jack_id >= PanelDef::NumUserFacingInJacks) || (multiple_connection_id >= in_conns[jack_id].size()))
+			return {.module_id = 0, .jack_id = 0};
+
+		return in_conns[jack_id][multiple_connection_id];
+	}
+
+	// Unit tests:
+	// Return the mulitple-module-same-type index of the given module index
+	// 0 ==> this is the only module of its type
+	// >0 ==> a number to append to the module name, e.g. 1 ==> LFO#1, 2 ==> LFO#2, etc
+	uint8_t get_multiple_module_index(uint8_t idx) {
+		return dup_module_index[idx];
 	}
 };
 } // namespace MetaModule

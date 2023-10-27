@@ -47,6 +47,11 @@ struct ModuleDirectory {
 			return false;
 		if (!module->model)
 			return false;
+		if (!module->model->plugin)
+			return false;
+
+		if (module->model->plugin->slug != "4msCompany")
+			return false;
 
 		return isHub(module->model->slug);
 	}

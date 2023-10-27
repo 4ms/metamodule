@@ -1,0 +1,64 @@
+PatchData:
+  patch_name: Passthrough
+  description: 'Jacks connected in Reverse order:In 1 -> Out 8. In 2 -> Out 7, In 43 -> Out 6, In 4->Out %, Gate In 1 -> Out 4, Gate In 2 -> Out 3, In 5 -> Out 2, In 6 -> Out 1'
+  module_slugs:
+    0: HubMedium
+  int_cables: []
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 0
+          jack_id: 7
+    - panel_jack_id: 1
+      ins:
+        - module_id: 0
+          jack_id: 6
+    - panel_jack_id: 2
+      ins:
+        - module_id: 0
+          jack_id: 5
+    - panel_jack_id: 3
+      ins:
+        - module_id: 0
+          jack_id: 4
+    - panel_jack_id: 6
+      ins:
+        - module_id: 0
+          jack_id: 3
+    - panel_jack_id: 7
+      ins:
+        - module_id: 0
+          jack_id: 2
+    - panel_jack_id: 5
+      ins:
+        - module_id: 0
+          jack_id: 0
+    - panel_jack_id: 4
+      ins:
+        - module_id: 0
+          jack_id: 1
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+
+'vcvModuleStates': []

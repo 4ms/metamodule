@@ -86,15 +86,7 @@ void PatchFileWriter::setCableList(std::vector<CableMap> &cables) {
 		if (out_jack < 0 || in_jack < 0 || cable.sendingModuleId < 0 || cable.receivedModuleId < 0)
 			continue;
 
-		if (cable.sendingModuleId == hubModuleId) {
-			mapInputJack(cable);
-			continue;
-
-		} else if (cable.receivedModuleId == hubModuleId) {
-			mapOutputJack(cable);
-			continue;
-
-		} else if (cable.sendingModuleId == midiModuleIds.midiCV) {
+		if (cable.sendingModuleId == midiModuleIds.midiCV) {
 			mapMidiCVJack(cable);
 			continue;
 
@@ -128,6 +120,14 @@ void PatchFileWriter::setCableList(std::vector<CableMap> &cables) {
 
 		} else if (cable.sendingModuleId == midiSettings.CV.retrigSplitModuleId) {
 			mapMidiCVPolySplitJack(cable, MidiMonoRetrigJack);
+			continue;
+
+		} else if (cable.sendingModuleId == hubModuleId) {
+			mapInputJack(cable);
+			continue;
+
+		} else if (cable.receivedModuleId == hubModuleId) {
+			mapOutputJack(cable);
 			continue;
 		}
 

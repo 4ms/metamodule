@@ -84,7 +84,7 @@ public:
 		if (patch_loader.is_loading_new_patch()) {
 			output_silence(out_buff);
 			// Acknowlegde patch loader's request to mute audio
-			patch_loader.audio_is_muted();
+			patch_loader.notify_audio_is_muted();
 			return true;
 		} else {
 			patch_loader.audio_not_muted();
