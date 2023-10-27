@@ -47,6 +47,8 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SettingsButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 
+		lv_obj_add_event_cb(ui_PatchViewPage, scroll_end_cb, LV_EVENT_SCROLL, this);
+
 		// Settings menu
 		settings_menu.init();
 		knobset_menu.init();
@@ -139,10 +141,10 @@ struct PatchViewPage : PageBase {
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_PRESSED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
-			lv_obj_add_event_cb(canvas, module_defocus_cb, LV_EVENT_DEFOCUSED, (void *)this);
 		}
 
 		highlighted_module_id = std::nullopt;
+		highlighted_module_obj = nullptr;
 		update_map_ring_style();
 		cable_drawer.set_height(bottom + 30);
 		cable_drawer.draw(patch);
@@ -216,12 +218,8 @@ struct PatchViewPage : PageBase {
 
 		if (is_patch_playing) {
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_1);
-			// lv_obj_set_style_bg_color(ui_PlayButton, lv_color_hex(0x00DD33), LV_STATE_DEFAULT);
-			// lv_obj_set_style_bg_opa(ui_PlayButton, 255, LV_STATE_DEFAULT);
 		} else {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_1);
-			// lv_obj_set_style_bg_opa(ui_PlayButton, 0, LV_STATE_DEFAULT);
-			// lv_obj_set_style_border_opa(ui_PlayButton, 0, LV_STATE_DEFAULT);
 		}
 	}
 
@@ -299,20 +297,46 @@ struct PatchViewPage : PageBase {
 			return;
 
 		page->highlighted_module_id = module_id;
+		page->highlighted_module_obj = this_module_obj;
 
 		const auto this_slug = page->patch.module_slugs[module_id];
-		auto module_x = lv_obj_get_x(this_module_obj);
-
-		lv_show(ui_ModuleName);
 		lv_label_set_text(ui_ModuleName, this_slug.c_str());
+
+		auto module_x = lv_obj_get_x(page->highlighted_module_obj);
 		lv_obj_set_x(ui_ModuleName, module_x);
+
+		page->redraw_modulename();
 
 		page->update_map_ring_style();
 	}
 
-	static void module_defocus_cb(lv_event_t *event) {
-		// auto page = static_cast<PatchViewPage *>(event->user_data);
-		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+	void redraw_modulename() {
+		auto module_id = highlighted_module_id.value_or(0xFFFFFFFF);
+		if (module_id >= patch.module_slugs.size())
+			return;
+
+		if (highlighted_module_obj == nullptr)
+			return;
+
+		lv_show(ui_ModuleName);
+
+		auto module_y = lv_obj_get_y(highlighted_module_obj);
+		auto scroll_y = lv_obj_get_scroll_top(ui_PatchViewPage);
+		auto header_y = lv_obj_get_y(ui_ModulesPanel);
+		int16_t module_top_on_screen = header_y - scroll_y + module_y;
+		int16_t module_bot_on_screen = module_top_on_screen + Height;
+		int16_t space_above = module_top_on_screen;
+		int16_t space_below = 240 - module_bot_on_screen;
+		if (space_below > space_above) {
+			lv_obj_set_y(ui_ModuleName, module_bot_on_screen - 120 + 16);
+		} else {
+			lv_obj_set_y(ui_ModuleName, module_top_on_screen - 120 - 9);
+		}
+	}
+
+	static void scroll_end_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		page->redraw_modulename();
 	}
 
 	static void playbut_cb(lv_event_t *event) {
@@ -354,6 +378,7 @@ private:
 	PatchViewKnobsetMenu knobset_menu{knobset_settings};
 
 	std::optional<uint32_t> highlighted_module_id{};
+	lv_obj_t *highlighted_module_obj = nullptr;
 
 	PatchData &patch = patch_storage.get_view_patch();
 
