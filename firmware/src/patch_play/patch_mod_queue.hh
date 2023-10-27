@@ -23,6 +23,7 @@ struct AddMapping {
 struct EditMappingMinMax {
 	MappedKnob map;
 	uint32_t set_id;
+	float cur_val;
 };
 
 struct RemoveMapping {

@@ -32,12 +32,18 @@ struct ConfirmPopup {
 		lv_show(ui_DelMapPopUpPanel);
 		lv_indev_set_group(lv_indev_get_next(nullptr), group);
 		lv_group_focus_obj(ui_CancelButton);
+		visible = true;
 	}
 
 	void hide() {
 		lv_hide(ui_DelMapPopUpPanel);
 		if (orig_group)
 			lv_indev_set_group(lv_indev_get_next(nullptr), orig_group);
+		visible = false;
+	}
+
+	bool is_visible() {
+		return visible;
 	}
 
 	static void button_callback(lv_event_t *event) {
@@ -61,6 +67,8 @@ private:
 	lv_obj_t *base;
 	lv_group_t *group;
 	lv_group_t *orig_group;
+
+	bool visible = false;
 
 	std::function<void(bool)> callback;
 };

@@ -101,6 +101,8 @@ struct KnobMapPage : PageBase {
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (kb_visible) {
 				hide_keyboard();
+			} else if (del_popup.is_visible()) {
+				del_popup.hide();
 			} else if (PageList::request_last_page()) {
 				blur();
 			}
@@ -136,7 +138,8 @@ struct KnobMapPage : PageBase {
 			page->map->max = val / 100.f;
 
 		set_knob_arc<min_arc, max_arc>(*page->map, ui_EditMappingArc, {});
-		page->patch_mod_queue.put(EditMappingMinMax{.map = *page->map, .set_id = page->view_set_idx});
+		page->patch_mod_queue.put(
+			EditMappingMinMax{.map = *page->map, .set_id = page->view_set_idx, .cur_val = val / 100.f});
 	}
 
 	static void edit_text_cb(lv_event_t *event) {

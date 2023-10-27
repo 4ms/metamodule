@@ -11,7 +11,7 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue, PatchPlayer &playe
 					   [&player](SetStaticParam &mod) { player.apply_static_param(mod.param); },
 					   [&player](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
 					   [&player](AddMapping &mod) { player.add_mapped_knob(mod.set_id, mod.map); },
-					   [&player](EditMappingMinMax &mod) { player.edit_mapped_knob(mod.set_id, mod.map); },
+					   [&player](EditMappingMinMax &mod) { player.edit_mapped_knob(mod.set_id, mod.map, mod.cur_val); },
 					   [&player](RemoveMapping &mod) { player.remove_mapped_knob(mod.set_id, mod.map); },
 					   [&player](AddMidiMap &mod) { player.add_midi_mapped_knob(mod.map); },
 					   [](ModifyMapping &mod) { /*TODO*/ },
