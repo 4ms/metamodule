@@ -6,15 +6,33 @@ struct SlsComponentInit {
 	SlsComponentInit() {
 		ui_init();
 		lv_disp_t *dispp = lv_disp_get_default();
-		lv_theme_t *theme = lv_theme_default_init(dispp,
-												  lv_palette_main(LV_PALETTE_ORANGE),
-												  lv_palette_main(LV_PALETTE_BLUE),
-												  LV_THEME_DEFAULT_DARK,
-												  LV_FONT_DEFAULT);
+		lv_theme_t *theme = lv_theme_default_init(
+			dispp, lv_color_hex(0xFD8B18), lv_palette_main(LV_PALETTE_BLUE), LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
 		lv_disp_set_theme(dispp, theme);
 
-		lv_obj_set_style_text_color(ui_Keyboard, lv_color_white(), LV_PART_ITEMS | LV_STATE_EDITED);
-		lv_obj_set_style_bg_opa(ui_Keyboard, LV_OPA_0, LV_PART_ITEMS | LV_STATE_EDITED);
+		// Fixes for SLS not allowing us to set styles for the EDITED state
+		// TODO; custom theme?
+
+		// Keyboard buttons:
+		lv_obj_set_style_text_color(ui_Keyboard, lv_color_white(), (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
+		lv_obj_set_style_bg_opa(ui_Keyboard, LV_OPA_0, (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
+
+		// Keyboard itself (not outlined when active)
 		lv_obj_set_style_outline_opa(ui_Keyboard, LV_OPA_0, LV_STATE_EDITED);
+
+		// Sliders
+		lv_obj_set_style_outline_color(ui_MinSlider, lv_color_hex(0xFD8B18), LV_STATE_EDITED);
+		lv_obj_set_style_outline_opa(ui_MinSlider, 255, LV_STATE_EDITED);
+		lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_STATE_EDITED);
+		lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_STATE_EDITED);
+		lv_obj_set_style_bg_color(ui_MinSlider, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
+		lv_obj_set_style_bg_opa(ui_MinSlider, 255, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
+
+		lv_obj_set_style_outline_color(ui_MaxSlider, lv_color_hex(0xFD8B18), LV_STATE_EDITED);
+		lv_obj_set_style_outline_opa(ui_MaxSlider, 255, LV_STATE_EDITED);
+		lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_STATE_EDITED);
+		lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_STATE_EDITED);
+		lv_obj_set_style_bg_color(ui_MaxSlider, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
+		lv_obj_set_style_bg_opa(ui_MaxSlider, 255, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
 	}
 };
