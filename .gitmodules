@@ -46,3 +46,6 @@
 [submodule "firmware/src/wifi/flat"]
 	path = firmware/src/wifi/flat
 	url = https://github.com/4ms/metamodule-bridge-protocol.git
+[submodule "firmware/vcv_ports/nonlinearcircuits"]
+	path = firmware/vcv_ports/nonlinearcircuits
+	url = https://github.com/mhetrick/nonlinearcircuits

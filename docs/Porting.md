@@ -3,7 +3,7 @@
 1) First step is add the module code as a git submodule:
 
 ```bash
-git submodule https://github.com/<user>/<repo> firmware/vcv_ports/<Brand>
+git submodule add https://github.com/<user>/<repo> firmware/vcv_ports/<Brand>
 ```
 
 2) Create artwork folders:
