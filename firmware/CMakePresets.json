@@ -22,6 +22,24 @@
           "value": "cmake/arm-none-eabi-gcc.cmake"
         }
       }
+    },
+    {
+      "name": "full",
+      "inherits": "base",
+      "cacheVariables": {
+        "ENABLE_WIFI_BRIDGE":{
+          "type": "BOOL",
+          "value": "ON"
+        }
+      }
+    },
+    {
+      "name": "pcb-p12",
+      "description": "PCB p11 with mods (aka p12)",
+      "inherits": "base",
+      "cacheVariables": {
+        "METAMODULE_PCB_VERSION": "12"
+      }
     }
   ],
   "buildPresets": [

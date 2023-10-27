@@ -16,38 +16,41 @@ on:
       - '!shared/gen_minblep' # Skip generator script (still run CI if generated files change)
       - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
 
-jobs:  
+jobs:
   build:
     strategy:
         matrix:
           gcc: ['12.2.Rel1']  # can add other versions if needed
     name: "Build firmware"
     runs-on: ubuntu-latest
+    container: ghcr.io/lnnrts/metamodule:latest
     steps:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
           release: ${{ matrix.gcc }}
 
+      - name: Install cmake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.26.x'
+
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-
-      - name: Install linux dependencies
-        run: |
-          sudo apt install -y ninja-build 
+          token: ${{ secrets.CHECKOUT_TOKEN }}
 
       - name: Build and test
         run: cd firmware && make configure && make all
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: firmware
-          path: |
-            firmware/build/mp1corea7/medium/main.elf
-            firmware/build/mp1corea7/medium/main.uimg
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: firmware
+      #     path: |
+      #       firmware/build/mp1corea7/medium/main.elf
+      #       firmware/build/mp1corea7/medium/main.uimg
 
       - name: Release
         uses: softprops/action-gh-release@v1
