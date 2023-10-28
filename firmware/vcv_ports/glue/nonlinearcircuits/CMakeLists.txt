@@ -8,7 +8,7 @@ add_library(
   ${EXTRA_SOURCES}
 )
 
-target_include_directories(nonlinearcircuitsLibrary PRIVATE ${NONLINEARCIRCUITS_DIR}/Gamma ${NONLINEARCIRCUITS_DIR}/src)
+target_include_directories(nonlinearcircuitsLibrary PRIVATE ${NONLINEARCIRCUITS_DIR}/src)
 
 set_property(TARGET nonlinearcircuitsLibrary PROPERTY CXX_STANDARD 20)
 
