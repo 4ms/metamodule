@@ -87,6 +87,12 @@ struct ElementConvert<componentlibrary::Rogan2PSGreen> {
 };
 
 template<>
+struct ElementConvert<componentlibrary::Rogan3PSWhite> {
+	using ElementType = MetaModule::Rogan3PSWhite;
+};
+
+
+template<>
 struct ElementConvert<componentlibrary::Trimpot> {
 	using ElementType = MetaModule::Trimpot;
 };

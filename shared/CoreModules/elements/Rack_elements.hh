@@ -17,6 +17,7 @@ struct Rogan2SGray : Knob {};
 struct Rogan2PSWhite : Knob {};
 struct Rogan2PSRed : Knob {};
 struct Rogan2PSGreen : Knob {};
+struct Rogan3PSWhite : Knob {};
 struct Trimpot : Knob {};
 
 struct PJ301MPortIn : JackInput {};

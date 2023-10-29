@@ -1,8 +1,29 @@
 set(AUDIBLE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../AudibleInstruments)
 
 # Add modules to be included
-set(AudibleInstrumentsModules Braids
-                              # Plaits etc
+set(
+  AudibleInstrumentsModules
+  # Blinds
+  Braids
+  # Branches
+  # Clouds
+  # Elements
+  # Frames
+  # Kinks
+  # Links
+  # Marbles
+  # Plaits
+  # Rings
+  Ripples
+  # Shades
+  # Shelves
+  # Stages
+  # Streams
+  # Tides
+  # Tides2
+  # Veils
+  # Warps
+  # Edges, Grids, and Peaks don't have Audible Instruments equivalents
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)

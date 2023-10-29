@@ -9,6 +9,7 @@ LV_IMG_DECLARE(Rogan2SGray);
 LV_IMG_DECLARE(Rogan2PSWhite);
 LV_IMG_DECLARE(Rogan2PSGreen);
 LV_IMG_DECLARE(Rogan2PSRed);
+LV_IMG_DECLARE(Rogan3PSWhite);
 LV_IMG_DECLARE(Davies1900hRed);
 LV_IMG_DECLARE(Davies1900hWhite);
 LV_IMG_DECLARE(MediumLight);
@@ -40,6 +41,10 @@ const lv_img_dsc_t *get_img(const SmallLight<T> &) {
 	return &::MediumLight;
 }
 
+inline const lv_img_dsc_t *get_img(const Rogan1PRed &) {
+	return &::Rogan1PRed;
+}
+
 inline const lv_img_dsc_t *get_img(const Rogan2SGray &) {
 	return &::Rogan2SGray;
 }
@@ -56,8 +61,8 @@ inline const lv_img_dsc_t *get_img(const Rogan2PSGreen &) {
 	return &::Rogan2PSGreen;
 }
 
-inline const lv_img_dsc_t *get_img(const Rogan1PRed &) {
-	return &::Rogan1PRed;
+inline const lv_img_dsc_t *get_img(const Rogan3PSWhite &) {
+	return &::Rogan3PSWhite;
 }
 
 inline const lv_img_dsc_t *get_img(const Trimpot &) {
