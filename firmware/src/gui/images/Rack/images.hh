@@ -5,6 +5,8 @@
 LV_IMG_DECLARE(jack_x);
 LV_IMG_DECLARE(Trimpot);
 LV_IMG_DECLARE(Rogan1PRed);
+LV_IMG_DECLARE(Rogan1PSGreen);
+LV_IMG_DECLARE(Rogan1PSRed);
 LV_IMG_DECLARE(Rogan1PSWhite);
 LV_IMG_DECLARE(Rogan2SGray);
 LV_IMG_DECLARE(Rogan2PSWhite);
@@ -13,8 +15,6 @@ LV_IMG_DECLARE(Rogan2PSRed);
 LV_IMG_DECLARE(Rogan3PSWhite);
 LV_IMG_DECLARE(Davies1900hRed);
 LV_IMG_DECLARE(Davies1900hWhite);
-// TODO - will this work?
-LV_IMG_DECLARE(SmallLight);
 LV_IMG_DECLARE(MediumLight);
 LV_IMG_DECLARE(BefacoPush_0);
 LV_IMG_DECLARE(BefacoSlidePot);
@@ -47,6 +47,14 @@ const lv_img_dsc_t *get_img(const SmallLight<T> &) {
 
 inline const lv_img_dsc_t *get_img(const Rogan1PRed &) {
 	return &::Rogan1PRed;
+}
+
+inline const lv_img_dsc_t *get_img(const Rogan1PSGreen &) {
+	return &::Rogan1PSGreen;
+}
+
+inline const lv_img_dsc_t *get_img(const Rogan1PSRed &) {
+	return &::Rogan1PSRed;
 }
 
 inline const lv_img_dsc_t *get_img(const Rogan1PSWhite &) {

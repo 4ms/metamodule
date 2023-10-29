@@ -15,8 +15,8 @@ set(
   # Plaits
   # Rings
   Ripples
-  # Shades
-  # Shelves
+  Shades
+  Shelves
   # Stages
   # Streams
   # Tides
