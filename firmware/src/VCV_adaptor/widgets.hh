@@ -126,6 +126,7 @@ struct BlueLight : app::ModuleLightWidget {};
 struct YellowLight : app::ModuleLightWidget {};
 struct GreenLight : app::ModuleLightWidget {};
 struct RedGreenBlueLight : app::ModuleLightWidget {};
+struct GrayModuleLightWidget : app::ModuleLightWidget {};
 // clang-format off
 
 } // namespace rack
