@@ -2,6 +2,11 @@ name: Build and test firmware
 
 on:
   workflow_dispatch:
+    inputs:
+      limited_modules:
+        description: 'Build only a subset of modules'
+        default: false
+        type: boolean
   push:
     branches:
       - main
@@ -42,7 +47,18 @@ jobs:
           token: ${{ secrets.CHECKOUT_TOKEN }}
 
       - name: Build and test
+        if: ${{ ! inputs.limited_modules }}
         run: cd firmware && make configure && make all
+
+      - name: Build and test
+        if: ${{ inputs.limited_modules }}
+        run: |
+          echo "4ms:EnOsc" >> firmware/lim
+          echo "4ms:ENVCA" >> firmware/lim
+          echo "Befaco:EvenVCO" >> firmware/lim
+          echo "HetrickCV:PhasorGen" >> firmware/lim
+          echo "AudibleInstruments:Braids" >> firmware/lim
+          cd firmware && make limit lim && make all
 
       # - name: Upload artifact
       #   uses: actions/upload-artifact@v3
