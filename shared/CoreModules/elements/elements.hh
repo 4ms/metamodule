@@ -31,6 +31,7 @@ using Element = std::variant<
 	BefacoTinyKnobDarkGrey,
 	BefacoTinyKnobLightGrey,
 	Rogan1PRed,
+	Rogan1PSWhite,
 	Rogan2SGray,
 	Rogan2PSWhite,
 	Rogan2PSGreen,

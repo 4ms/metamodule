@@ -3,14 +3,14 @@ set(AUDIBLE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../AudibleInstruments)
 # Add modules to be included
 set(
   AudibleInstrumentsModules
-  # Blinds
+  Blinds
   Braids
   # Branches
   # Clouds
   # Elements
   # Frames
-  # Kinks
-  # Links
+  Kinks
+  Links
   # Marbles
   # Plaits
   # Rings
@@ -21,7 +21,7 @@ set(
   # Streams
   # Tides
   # Tides2
-  # Veils
+  Veils
   # Warps
   # Edges, Grids, and Peaks don't have Audible Instruments equivalents
 )
