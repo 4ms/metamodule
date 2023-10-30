@@ -7,7 +7,10 @@ add_library(AudibleInstrumentsLibrary OBJECT ${AUDIBLEINSTRUMENTS_SOURCE_PATHS})
 
 target_include_directories(AudibleInstrumentsLibrary PRIVATE ${AUDIBLE_DIR}/src ${AUDIBLE_DIR}/eurorack)
 
-target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-double-promotion -Wno-deprecated-enum-float-conversion)
+target_compile_options(AudibleInstrumentsLibrary PRIVATE 
+    -Wno-double-promotion 
+    -Wno-deprecated-enum-float-conversion
+    -Wno-unused-local-typedefs)
 
 # Fixups for compiler warnings in AudibleInstruments:
 set_source_files_properties(
