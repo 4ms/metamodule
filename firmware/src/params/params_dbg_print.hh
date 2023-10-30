@@ -49,22 +49,22 @@ struct ParamDbgPrint {
 
 		if ((now_ticks - last_dbg_output_tm) > 2000) {
 			printf_("%s", Term::ClearScreen);
-			printf_("\r\nnumber of readings: %d\r\n", readings);
+			printf_("\r\nnumber of readings: %d\r\n", (int)readings);
 			readings = 0;
 
 			for (auto [i, pot] : enumerate(params.knobs)) {
 				printf_("Pot %zu: iir=%d min=%d max=%d range=%d\r\n",
 						i,
-						(int32_t)(4096.f * pot_iir[i]),
-						(int32_t)(4096.f * pot_min[i]),
-						(int32_t)(4096.f * pot_max[i]),
-						(int32_t)(4096.f * (pot_max[i] - pot_min[i])));
+						(int)(4096.f * pot_iir[i]),
+						(int)(4096.f * pot_min[i]),
+						(int)(4096.f * pot_max[i]),
+						(int)(4096.f * (pot_max[i] - pot_min[i])));
 				pot_iir[i] = pot;
 				pot_min[i] = 4096.f;
 				pot_max[i] = 0.f;
 			}
 
-			auto b = [j = params.jack_senses](uint32_t bit) -> uint32_t {
+			auto b = [j = params.jack_senses](uint32_t bit) -> int {
 				return (j >> (jacksense_pin_order[bit])) & 1;
 			};
 
@@ -81,10 +81,10 @@ struct ParamDbgPrint {
 				printf_("AIN %zu: [%d] iir=%d min=%d max=%d range=%d\r\n",
 						i,
 						b(i),
-						(int32_t)(ain.iir * 32768.f),
-						(int32_t)(ain.min * 32768.f),
-						(int32_t)(ain.max * 32768.f),
-						(int32_t)((ain.max - ain.min) * 32768.f));
+						(int)(ain.iir * 32768.f),
+						(int)(ain.min * 32768.f),
+						(int)(ain.max * 32768.f),
+						(int)((ain.max - ain.min) * 32768.f));
 				ain.reset_to(ain.iir);
 			}
 
