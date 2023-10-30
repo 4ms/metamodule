@@ -5,8 +5,8 @@
 #include "VCV_adaptor/plugin/Model.hpp"
 #include <string_view>
 
-#include "CoreModules/AudibleInstruments/info/Braids_info.hh"
 #include "CoreModules/AudibleInstruments/info/Clouds_info.hh"
+#include "../vcv_ports/glue/AudibleInstruments/fixup_elements.hh"
 
 namespace rack
 {
@@ -21,11 +21,6 @@ plugin::Model *createModel(std::string_view slug)
 	requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
 {
 
-	if (slug == "Braids") {
-		ModuleFactory::registerModuleType(
-			slug, create_vcv_module<ModuleT>, MetaModule::ModuleInfoView::makeView<MetaModule::BraidsInfo>());
-		return nullptr;
-	}
 	if (slug == "Clouds") {
 		ModuleFactory::registerModuleType(
 			slug, create_vcv_module<ModuleT>, MetaModule::ModuleInfoView::makeView<MetaModule::CloudsInfo>());
@@ -43,6 +38,11 @@ plugin::Model *createModel(std::string_view slug)
 		static std::vector<MetaModule::Element> elements;
 
 		mw.populate_elements(elements);
+
+		if (slug == "Braids") {
+			MetaModule::AudibleInstruments::fixup_elements(elements);
+		}
+
 		MetaModule::ModuleInfoView info;
 		info.elements = elements;
 		info.description = slug;
