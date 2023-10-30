@@ -118,7 +118,7 @@ public:
 
 		file.timestamp = timestamp ? timestamp : get_fattime();
 
-		printf_("Littlefs: updating or creating file %s, timestamp 0x%x\n", filename.data(), (unsigned)file.timestamp);
+		pr_dbg("Littlefs: updating or creating file %s, timestamp 0x%x\n", filename.data(), (unsigned)file.timestamp);
 		if (int err = lfs_file_write(&lfs, &file.file, data.data(), data.size_bytes()); err < 0) {
 			pr_err("Write failed with err %d\n", err);
 			return false;

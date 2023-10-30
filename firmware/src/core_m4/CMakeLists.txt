@@ -38,7 +38,7 @@ add_executable(
   ${DRIVERLIB}/drivers/qspi_flash_driver.cc
   ${DRIVERLIB}/drivers/tim.cc
   ${DRIVERLIB}/drivers/timekeeper.cc
-  ${DRIVERLIB}/target/stm32mp1_cm4/drivers/interrupt_handler.cc
+  ${DRIVERLIB}/target/stm32mP1_cm4/drivers/interrupt_handler.cc
   ${HALDIR}/src/stm32mp1xx_hal.c
   ${HALDIR}/src/stm32mp1xx_hal_adc.c
   ${HALDIR}/src/stm32mp1xx_hal_adc_ex.c

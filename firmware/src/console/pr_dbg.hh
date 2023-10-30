@@ -1,5 +1,5 @@
 #pragma once
-#include "printf.h"
+#include <cstdio>
 
 namespace
 {
@@ -8,16 +8,17 @@ namespace
 // Change these to enable/disable logging levels
 inline constexpr bool PRINT_ERROR = true;
 inline constexpr bool PRINT_WARN = true;
+inline constexpr bool PRINT_INFO = true;
 inline constexpr bool PRINT_DEBUG = false;
 inline constexpr bool PRINT_TRACE = false;
 /////////////////////////////////////////////////
 
 inline void _do_printf_impl(const char *str) {
-	printf_("%s", str);
+	printf("%s", str);
 }
 
 inline void _do_printf_impl(auto... args) {
-	printf_(args...);
+	printf(args...);
 }
 
 inline void pr_err(auto... args) {
@@ -27,6 +28,11 @@ inline void pr_err(auto... args) {
 
 inline void pr_warn(auto... args) {
 	if constexpr (PRINT_WARN)
+		_do_printf_impl(args...);
+}
+
+inline void pr_info(auto... args) {
+	if constexpr (PRINT_INFO)
 		_do_printf_impl(args...);
 }
 

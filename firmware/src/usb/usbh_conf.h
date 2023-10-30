@@ -55,12 +55,12 @@ void msc_free(void *);
 
 /* DEBUG macros */
 #if (USBH_DEBUG_LEVEL > 0U)
-#include "printf.h"
+#include <stdio.h>
 
 #define USBH_UsrLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf_(__VA_ARGS__);                                                                                          \
-		printf_("\n");                                                                                                 \
+		printf(__VA_ARGS__);                                                                                           \
+		printf("\n");                                                                                                  \
 	} while (0)
 #else
 #define USBH_UsrLog(...)                                                                                               \
@@ -72,9 +72,9 @@ void msc_free(void *);
 
 #define USBH_ErrLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf_("ERROR: ");                                                                                            \
-		printf_(__VA_ARGS__);                                                                                          \
-		printf_("\n");                                                                                                 \
+		printf("ERROR: ");                                                                                             \
+		printf(__VA_ARGS__);                                                                                           \
+		printf("\n");                                                                                                  \
 	} while (0)
 #else
 #define USBH_ErrLog(...)                                                                                               \
@@ -85,9 +85,9 @@ void msc_free(void *);
 #if (USBH_DEBUG_LEVEL > 2U)
 #define USBH_DbgLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf_("DEBUG : ");                                                                                           \
-		printf_(__VA_ARGS__);                                                                                          \
-		printf_("\n");                                                                                                 \
+		printf("DEBUG : ");                                                                                            \
+		printf(__VA_ARGS__);                                                                                           \
+		printf("\n");                                                                                                  \
 	} while (0)
 #else
 #define USBH_DbgLog(...)                                                                                               \

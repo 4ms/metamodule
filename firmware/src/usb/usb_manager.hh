@@ -1,13 +1,11 @@
 #pragma once
 #include "conf/fusb30x_conf.hh"
+#include "debug.hh"
 #include "drivers/fusb302.hh"
 #include "drivers/pin_change.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "usb/usb_drive_device.hh"
 #include "usb/usb_host_manager.hh"
-
-#include "debug.hh"
-#include "printf.h"
 
 namespace MetaModule
 {
@@ -38,14 +36,14 @@ public:
 
 	void start() {
 		if (found_fusb)
-			printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
+			pr_dbg("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
 		else
-			printf_("Can't communicate with FUSB302\n");
+			pr_err("Can't communicate with FUSB302\n");
 
 		// tm = HAL_GetTick();
 		Debug::blue_LED1::low();
 		Debug::green_LED1::low();
-		printf_("Starting DRP polling\n");
+		pr_dbg("Starting DRP polling\n");
 		usbctl.start_drp_polling();
 	}
 
@@ -60,7 +58,7 @@ public:
 				// Debug::Pin3::low();
 				Debug::green_LED1::high();
 				Debug::blue_LED1::low();
-				printf_("Connected as a device\n");
+				pr_info("Connected as a device\n");
 				usb_drive.start();
 
 			} else if (newstate == AsHost) {
@@ -68,7 +66,7 @@ public:
 				// Debug::Pin3::high();
 				Debug::green_LED1::low();
 				Debug::blue_LED1::high();
-				printf_("Starting host\n");
+				pr_info("Starting host\n");
 				usb_host.start();
 
 			} else if (newstate == None) {

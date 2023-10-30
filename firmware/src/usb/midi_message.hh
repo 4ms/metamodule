@@ -4,7 +4,7 @@
 
 #define MIDIDEBUG
 #if defined(MIDIDEBUG)
-#include "printf.h"
+#include "pr_dbg.hh"
 #endif
 
 // Specifications from
@@ -146,52 +146,52 @@ struct MidiMessage {
 #if defined(MIDIDEBUG)
 		using enum MidiCommand;
 		if (msg.is_command<NoteOn>()) {
-			printf_("Note: %d Vel: %d\n", msg.note(), msg.velocity());
+			pr_dbg("Note: %d Vel: %d\n", msg.note(), msg.velocity());
 
 		} else if (msg.is_command<NoteOff>()) {
-			printf_("Note: %d OFF\n", msg.note());
+			pr_dbg("Note: %d OFF\n", msg.note());
 
 		} else if (msg.is_command<PolyKeyPressure>()) {
-			printf_("Poly Key Pressure: %d %d\n", msg.note(), msg.aftertouch());
+			pr_dbg("Poly Key Pressure: %d %d\n", msg.note(), msg.aftertouch());
 
 		} else if (msg.is_command<ControlChange>()) {
-			printf_("CC: #%d = %d\n", msg.data.byte[0], msg.data.byte[1]);
+			pr_dbg("CC: #%d = %d\n", msg.data.byte[0], msg.data.byte[1]);
 
 		} else if (msg.is_command<ProgramChange>()) {
-			printf_("PC: #%d\n", msg.data.byte[0]);
+			pr_dbg("PC: #%d\n", msg.data.byte[0]);
 
 		} else if (msg.is_command<ChannelPressure>()) {
-			printf_("CP: #%d\n", msg.chan_pressure());
+			pr_dbg("CP: #%d\n", msg.chan_pressure());
 
 		} else if (msg.is_command<PitchBend>()) {
-			printf_("Bend: #%d\n", msg.bend());
+			pr_dbg("Bend: #%d\n", msg.bend());
 
 		} else if (msg.is_system_realtime<TimingClock>()) {
-			printf_("Clk\n");
+			pr_dbg("Clk\n");
 
 		} else if (msg.is_system_realtime<Start>()) {
-			printf_("Start\n");
+			pr_dbg("Start\n");
 
 		} else if (msg.is_system_realtime<Stop>()) {
-			printf_("Stop\n");
+			pr_dbg("Stop\n");
 
 		} else if (msg.is_system_realtime<Continue>()) {
-			printf_("Continue\n");
+			pr_dbg("Continue\n");
 
 		} else if (msg.is_sysex()) {
-			printf_("SYSEX: 0x%02x%02x\n", msg.data.byte[0], msg.data.byte[1]);
+			pr_dbg("SYSEX: 0x%02x%02x\n", msg.data.byte[0], msg.data.byte[1]);
 
 		} else {
-			printf_("Raw: %06x\n", (unsigned)msg.raw());
+			pr_dbg("Raw: %06x\n", (unsigned)msg.raw());
 		}
 #endif
 	}
 
 	static void dump_raw(std::span<uint8_t> buffer) {
-		printf_("%d bytes ", buffer.size());
+		pr_dbg("%d bytes ", buffer.size());
 		for (auto byte : buffer)
-			printf_("0x%02x ", byte);
-		printf_("\n");
+			pr_dbg("0x%02x ", byte);
+		pr_dbg("\n");
 	}
 
 	void print() const {
