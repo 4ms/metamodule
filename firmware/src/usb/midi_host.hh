@@ -10,6 +10,7 @@
 #pragma once
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
+#include "pr_dbg.hh"
 #include "usbh_midi.hh"
 
 class MidiHost {
@@ -40,7 +41,7 @@ public:
 	}
 
 	bool init() {
-		printf_("Registered MIDI Host\n");
+		pr_info("Registered MIDI Host\n");
 		USBH_RegisterClass(&usbhost, &midi_class_ops);
 		return true;
 	}

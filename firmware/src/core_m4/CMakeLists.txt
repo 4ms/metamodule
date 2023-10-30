@@ -28,7 +28,6 @@ add_executable(
   ${FWDIR}/lib//fatfs/source/ffunicode.c
   ${FWDIR}/lib//littlefs/lfs.c
   ${FWDIR}/lib//littlefs/lfs_util.c
-  ${FWDIR}/lib/printf/printf.c
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
@@ -131,7 +130,6 @@ target_compile_options(
           -fno-common
           -fdata-sections
           -ffunction-sections
-          -nostdlib
           -nostartfiles
           -ffreestanding
           -fno-unwind-tables
@@ -168,7 +166,6 @@ target_link_script(
   -Wl,--gc-sections
   -ffreestanding
   -nostartfiles
-  -nostdlib
   -flto=auto
   ${MCU_FLAGS}
 )

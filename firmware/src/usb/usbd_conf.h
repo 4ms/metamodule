@@ -50,7 +50,7 @@ extern "C" {
 #define USBD_DEBUG_LEVEL 3U
 
 #if (USBD_DEBUG_LEVEL > 0U)
-#include "printf.h"
+#include <stdio.h>
 #endif
 
 /* ECM, RNDIS, DFU Class Config */

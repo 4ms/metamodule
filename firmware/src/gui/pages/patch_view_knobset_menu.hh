@@ -3,7 +3,6 @@
 #include "lvgl.h"
 #include "page_list.hh"
 #include "patch/patch_data.hh"
-#include "printf.h"
 #include <vector>
 
 extern "C" {
@@ -58,7 +57,7 @@ struct PatchViewKnobsetMenu {
 					lv_label_set_text(label, knobset.name.c_str());
 				else {
 					char text[32];
-					snprintf_(text, 32, "KnobSet: %d", (int)knobset_list.size() + 1);
+					snprintf(text, 32, "KnobSet: %d", (int)knobset_list.size() + 1);
 					lv_label_set_text(label, text);
 				}
 
@@ -188,7 +187,6 @@ struct PatchViewKnobsetMenu {
 
 				if (view == obj) {
 					page->requested_knobset_view = i;
-					printf_("View knob set %d\n", i);
 				}
 
 				i++;
