@@ -114,6 +114,7 @@ using LEDBezel = VCVBezel;
 
 // Lights
 
+template<typename T> struct LargeLight : app::ModuleLightWidget {};
 template<typename T> struct MediumLight : app::ModuleLightWidget {};
 template<typename T> struct SmallLight : app::ModuleLightWidget {};
 template <typename TBase> struct VCVBezelLight : TBase {};

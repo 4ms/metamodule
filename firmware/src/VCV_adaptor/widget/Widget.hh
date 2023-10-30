@@ -19,6 +19,7 @@ namespace widget
 {
 struct Widget {
 	math::Rect box;
+	MetaModule::Element element;
 
 	virtual ~Widget() = default;
 
@@ -63,9 +64,6 @@ struct Widget {
 	}
 	void clearChildren() {
 	}
-
-	MetaModule::Element element;
-
 	void hide() {
 	}
 };
