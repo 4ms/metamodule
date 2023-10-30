@@ -42,7 +42,6 @@ target_compile_options(
             -fno-common
             -fdata-sections
             -ffunction-sections
-            -nostdlib
             -nostartfiles
             -ffreestanding
             -fno-unwind-tables

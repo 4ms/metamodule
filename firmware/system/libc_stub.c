@@ -13,8 +13,6 @@ void _kill(int x) {
 int _getpid() {
 	return -1;
 }
-void _write(char x) {
-}
 void _close() {
 }
 void _fstat() {
@@ -23,9 +21,9 @@ void _isatty() {
 }
 void _lseek() {
 }
-void _read() {
+int _read(int file, char *ptr, int len) {
+	return 0;
 }
-
 int *__errno() {
 	static int errno = 0;
 	return &errno;

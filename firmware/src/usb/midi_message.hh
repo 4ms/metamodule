@@ -182,7 +182,7 @@ struct MidiMessage {
 			printf_("SYSEX: 0x%02x%02x\n", msg.data.byte[0], msg.data.byte[1]);
 
 		} else {
-			printf_("Raw: %06x\n", msg.raw());
+			printf_("Raw: %06x\n", (unsigned)msg.raw());
 		}
 #endif
 	}

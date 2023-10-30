@@ -224,7 +224,7 @@ public:
 	}
 
 	void debug_print_fileinfo(FileInfo info) {
-		printf_("Sz: %zu, Tm: %04u/%02u/%02u, %02u:%02u:%02u\n",
+		printf_("Sz: %lu, Tm: %04u/%02u/%02u, %02u:%02u:%02u\n",
 				info.size,
 				info.year + 1980,
 				info.month,
