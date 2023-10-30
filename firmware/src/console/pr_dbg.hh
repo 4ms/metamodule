@@ -9,7 +9,7 @@ namespace
 inline constexpr bool PRINT_ERROR = true;
 inline constexpr bool PRINT_WARN = true;
 inline constexpr bool PRINT_INFO = true;
-inline constexpr bool PRINT_DEBUG = false;
+inline constexpr bool PRINT_DEBUG = true;
 inline constexpr bool PRINT_TRACE = false;
 /////////////////////////////////////////////////
 
