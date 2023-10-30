@@ -98,6 +98,10 @@ struct ModuleWidget : widget::Widget {
 		elements.insert(elements.end(), inputElements.begin(), inputElements.end());
 		elements.insert(elements.end(), outputElements.begin(), outputElements.end());
 		elements.insert(elements.end(), lightElements.begin(), lightElements.end());
+		paramElements.clear();
+		inputElements.clear();
+		outputElements.clear();
+		lightElements.clear();
 	}
 
 private:
