@@ -19,8 +19,6 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     images/ui_img_1x_add1_png.c
     images/ui_img_1x_info1_png.c
     images/ui_img_1x_settings1_png.c
-    images/ui_img_1x_min_png.c
-    images/ui_img_1x_max_png.c
     images/ui_img_1x_infosmall2_png.c
     fonts/ui_font_MuseoSansRounded50012.c
     fonts/ui_font_MuseoSansRounded70014.c

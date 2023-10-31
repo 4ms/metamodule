@@ -20,19 +20,26 @@ struct SlsComponentInit {
 		// Keyboard itself (not outlined when active)
 		lv_obj_set_style_outline_opa(ui_Keyboard, LV_OPA_0, LV_STATE_EDITED);
 
-		// Sliders
 		lv_obj_set_style_outline_color(ui_MinSlider, lv_color_hex(0xFD8B18), LV_STATE_EDITED);
 		lv_obj_set_style_outline_opa(ui_MinSlider, 255, LV_STATE_EDITED);
 		lv_obj_set_style_outline_width(ui_MinSlider, 2, LV_STATE_EDITED);
 		lv_obj_set_style_outline_pad(ui_MinSlider, 1, LV_STATE_EDITED);
+		lv_obj_set_style_radius(ui_MinSlider, 20, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
 		lv_obj_set_style_bg_color(ui_MinSlider, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
 		lv_obj_set_style_bg_opa(ui_MinSlider, 255, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
+		lv_obj_set_style_radius(ui_MinSlider, 15, (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
+		lv_obj_set_style_bg_color(ui_MinSlider, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
+		lv_obj_set_style_bg_opa(ui_MinSlider, 255, (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
 
 		lv_obj_set_style_outline_color(ui_MaxSlider, lv_color_hex(0xFD8B18), LV_STATE_EDITED);
 		lv_obj_set_style_outline_opa(ui_MaxSlider, 255, LV_STATE_EDITED);
 		lv_obj_set_style_outline_width(ui_MaxSlider, 2, LV_STATE_EDITED);
 		lv_obj_set_style_outline_pad(ui_MaxSlider, 1, LV_STATE_EDITED);
+		lv_obj_set_style_radius(ui_MaxSlider, 20, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
 		lv_obj_set_style_bg_color(ui_MaxSlider, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
 		lv_obj_set_style_bg_opa(ui_MaxSlider, 255, (uint32_t)LV_PART_INDICATOR | LV_STATE_EDITED);
+		lv_obj_set_style_radius(ui_MaxSlider, 15, (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
+		lv_obj_set_style_bg_color(ui_MaxSlider, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
+		lv_obj_set_style_bg_opa(ui_MaxSlider, 255, (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
 	}
 };

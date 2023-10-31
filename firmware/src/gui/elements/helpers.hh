@@ -26,7 +26,6 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 
 		if (info.width_hp) {
 			// Search in reverse (the matching element is the last one with the matching index)
-			printf_("Searching %zu indices for element_idx %d (type %d)\n", info.indices.size(), element_idx, type);
 			for (int el_id = info.indices.size() - 1; el_id >= 0; el_id--) {
 
 				auto idx = info.indices[el_id];
@@ -38,7 +37,6 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 																false;
 				if (is_found) {
 					fullname.element_name = base_element(info.elements[el_id]).short_name;
-					printf_("Found long name = %.16s\n", base_element(info.elements[el_id]).long_name.data());
 					break;
 				}
 			}

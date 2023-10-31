@@ -155,9 +155,11 @@ extern lv_obj_t *ui_EditMappingCircle;
 extern lv_obj_t *ui_EditMappingLetter;
 extern lv_obj_t *ui_MinSliderContainer;
 extern lv_obj_t *ui_MinLabel;
+extern lv_obj_t *ui_MinValue;
 extern lv_obj_t *ui_MinSlider;
 extern lv_obj_t *ui_MaxSliderContainer;
 extern lv_obj_t *ui_MaxLabel;
+extern lv_obj_t *ui_MaxValue;
 extern lv_obj_t *ui_MaxSlider;
 extern lv_obj_t *ui_IDPanel;
 extern lv_obj_t *ui_AliasTextArea;
@@ -198,8 +200,6 @@ LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
 LV_IMG_DECLARE( ui_img_1x_add1_png);   // assets/1x/Add1.png
 LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
 LV_IMG_DECLARE( ui_img_1x_settings1_png);   // assets/1x/Settings1.png
-LV_IMG_DECLARE( ui_img_1x_min_png);   // assets/1x/MIN.png
-LV_IMG_DECLARE( ui_img_1x_max_png);   // assets/1x/MAX.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
