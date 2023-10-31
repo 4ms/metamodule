@@ -1,0 +1,157 @@
+PatchData:
+  patch_name: All NLC (gui demo)
+  description: 'For demo only, not a patch'
+  module_slugs:
+    0: HubMedium
+    1: BOOLs
+    2: 4Seq
+    3: 8BitCipher
+    4: SquidAxon
+    5: DivideConquer
+    6: DivineCMOS
+    7: DoubleNeuron
+    8: GENiE
+    9: LetsSplosh
+    10: Neuron
+    11: Numberwang
+    12: Router
+    13: Segue
+    14: Statues
+  int_cables: []
+  mapped_ins: []
+  mapped_outs: []
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 0
+    - module_id: 2
+      param_id: 2
+      value: 0
+    - module_id: 2
+      param_id: 3
+      value: 0
+    - module_id: 4
+      param_id: 0
+      value: 0
+    - module_id: 4
+      param_id: 1
+      value: 0
+    - module_id: 6
+      param_id: 0
+      value: 0
+    - module_id: 6
+      param_id: 1
+      value: 0
+    - module_id: 6
+      param_id: 2
+      value: 0
+    - module_id: 6
+      param_id: 3
+      value: 0
+    - module_id: 6
+      param_id: 4
+      value: 0
+    - module_id: 7
+      param_id: 0
+      value: 0
+    - module_id: 7
+      param_id: 1
+      value: 0
+    - module_id: 7
+      param_id: 2
+      value: 0
+    - module_id: 7
+      param_id: 3
+      value: 0
+    - module_id: 8
+      param_id: 0
+      value: 0
+    - module_id: 8
+      param_id: 1
+      value: 0
+    - module_id: 8
+      param_id: 2
+      value: 0
+    - module_id: 8
+      param_id: 3
+      value: 0
+    - module_id: 8
+      param_id: 4
+      value: 0
+    - module_id: 8
+      param_id: 5
+      value: 0
+    - module_id: 8
+      param_id: 6
+      value: 0
+    - module_id: 8
+      param_id: 7
+      value: 0
+    - module_id: 8
+      param_id: 8
+      value: 0
+    - module_id: 10
+      param_id: 0
+      value: 0
+    - module_id: 10
+      param_id: 1
+      value: 0
+    - module_id: 12
+      param_id: 0
+      value: 0.5
+    - module_id: 12
+      param_id: 1
+      value: 0.5
+    - module_id: 12
+      param_id: 2
+      value: 0.5
+    - module_id: 12
+      param_id: 3
+      value: 0.5
+    - module_id: 13
+      param_id: 0
+      value: 0.5
+    - module_id: 13
+      param_id: 1
+      value: 1
+    - module_id: 13
+      param_id: 2
+      value: 1
+    - module_id: 13
+      param_id: 3
+      value: 1
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+
+'vcvModuleStates':
+  - 'id': 1
+    'plugin': 'NonlinearCircuits'
+    'model': 'BOOLs'
+    'version': '2.2.0'
+    'data':
+      'logicmode': 2
