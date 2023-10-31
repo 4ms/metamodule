@@ -47,7 +47,6 @@ void main() {
 					  sync_params,
 					  patch_playloader,
 					  StaticBuffers::param_blocks,
-					  StaticBuffers::auxsignal_block,
 					  patch_mod_queue};
 
 	StaticBuffers::raw_patch_span = {StaticBuffers::raw_patch_data.data(), StaticBuffers::raw_patch_data.size()};
@@ -66,7 +65,7 @@ void main() {
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
-	printf_("A7 initialized. Unlocking M4\n");
+	pr_info("A7 initialized. Unlocking M4\n");
 
 	// Tell M4 we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();

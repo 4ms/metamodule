@@ -39,9 +39,9 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 
 	struct DMAConf : mdrivlib::DefaultDMAConf {
 		static constexpr auto DMAx = 1;
-		static constexpr auto StreamNum = 3;
+		static constexpr auto StreamNum = 0;
 		static constexpr auto RequestNum = DMA_REQUEST_SPI4_TX;
-		static constexpr auto IRQn = DMA1_Stream3_IRQn;
+		static constexpr auto IRQn = DMA1_Stream0_IRQn;
 		static constexpr auto pri = 0;
 		static constexpr auto subpri = 0;
 		static constexpr auto dir = Mem2Periph;

@@ -224,14 +224,14 @@ public:
 	}
 
 	void debug_print_fileinfo(FileInfo info) {
-		printf_("Sz: %zu, Tm: %04u/%02u/%02u, %02u:%02u:%02u\n",
-				info.size,
-				info.year + 1980,
-				info.month,
-				info.day,
-				info.hour,
-				info.minute,
-				info.second);
+		pr_dbg("Sz: %lu, Tm: %04u/%02u/%02u, %02u:%02u:%02u\n",
+			   info.size,
+			   info.year + 1980,
+			   info.month,
+			   info.day,
+			   info.hour,
+			   info.minute,
+			   info.second);
 	}
 
 	// Returns false if dir cannot be opened

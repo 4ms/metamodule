@@ -1,4 +1,5 @@
 #include "uart_log.hh"
+#include <cstdarg>
 
 namespace MetaModule
 {
@@ -13,11 +14,20 @@ void UartLog::putchar(char c) {
 void UartLog::log(const char *format, ...) {
 	va_list va;
 	va_start(va, format);
-	vprintf_(format, va);
+	vprintf(format, va);
 	va_end(va);
 }
 
 extern "C" void _putchar(char c) {
-	UartLog::putchar(c);
 }
+
+extern "C" int _write(int file, char *ptr, int len) {
+	// TODO: make this more efficient using UART DMA
+	for (auto idx = 0; idx < len; idx++) {
+		UartLog::putchar(*ptr++);
+	}
+
+	return len;
+}
+
 } // namespace MetaModule

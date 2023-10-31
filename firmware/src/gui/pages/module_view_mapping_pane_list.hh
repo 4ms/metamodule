@@ -1,4 +1,6 @@
 #pragma once
+#include "conf/panel_conf.hh"
+#include "gui/elements/element_name.hh"
 #include "gui/elements/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -7,6 +9,8 @@
 #include "patch.hh"
 #include <string_view>
 
+#include "pr_dbg.hh"
+
 namespace MetaModule
 {
 
@@ -14,37 +18,78 @@ namespace MetaModule
 // Or Add/edit callbacks live here and they only use some other clasS (not ModuleViewMappingPane)
 struct MappingPaneList {
 
-	lv_obj_t *create_map_list_item(std::string_view name, std::string_view knobset_name, unsigned color_id) {
+	static lv_obj_t *create_map_list_item(MappedKnob const &map, std::string_view knobset_name) {
 		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
+		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
-		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id], LV_STATE_DEFAULT);
-		lv_label_set_text(label, name.data());
 		lv_label_set_text(setname, knobset_name.data());
+
+		auto name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
+		lv_label_set_text(label, name.c_str());
+
+		if (map.is_panel_knob())
+			format_knob_map_circle(map.panel_knob_id, circle, label);
+
+		else if (map.is_midi_cc())
+			format_cc_map_circle(map.cc_num(), circle, label);
+
+		else
+			pr_err("Unknown mapping panel_knob_id: %d\n", map.panel_knob_id);
+
 		return obj;
 	}
 
-	lv_obj_t *create_unmapped_list_item(std::string_view knobset_name) {
-		auto obj = ui_UnmappedSetItem_create(ui_MapList);
-		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
-		lv_label_set_text(setname, knobset_name.data());
-		return obj;
-	}
-
-	lv_obj_t *create_panelcable_item(std::string_view panel_jack_name, unsigned color_id) {
+	static lv_obj_t *create_panel_incable_item(uint16_t panel_jack_id) {
 		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[color_id], LV_STATE_DEFAULT);
-		lv_label_set_text(label, "");
-		lv_label_set_text_fmt(setname, "Panel %.16s", panel_jack_name.data());
+
+		auto name = get_panel_name<PanelDef>(JackInput{}, panel_jack_id);
+
+		if (panel_jack_id < PanelDef::NumUserFacingInJacks) {
+			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
+			lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
+			lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
+			lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
+
+		} else {
+			lv_obj_set_style_border_color(circle, Gui::palette_main[LV_PALETTE_GREY], LV_STATE_DEFAULT);
+			lv_label_set_text(setname, name.c_str());
+			lv_label_set_text(label, "");
+		}
+
+		lv_obj_set_style_border_width(circle, 3, LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(circle, LV_OPA_0, LV_STATE_DEFAULT);
+
 		return obj;
 	}
 
-	lv_obj_t *create_cable_item(Jack jack, ElementType dir, PatchData const &patch) {
+	static lv_obj_t *create_panel_outcable_item(uint16_t panel_jack_id) {
+		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
+		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
+		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
+		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
+
+		auto name = get_panel_name<PanelDef>(JackOutput{}, panel_jack_id);
+
+		if (panel_jack_id < Gui::knob_palette.size())
+			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
+
+		lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
+		lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
+		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
+
+		lv_obj_set_style_border_width(circle, 3, LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(circle, LV_OPA_0, LV_STATE_DEFAULT);
+
+		return obj;
+	}
+
+	static lv_obj_t *create_cable_item(Jack jack, ElementType dir, PatchData const &patch) {
 		auto obj = ui_UnmappedSetItem_create(ui_MapList);
 		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
 		lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
@@ -57,6 +102,41 @@ struct MappingPaneList {
 							  name.element_name.data());
 
 		return obj;
+	}
+
+	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name) {
+		auto obj = ui_UnmappedSetItem_create(ui_MapList);
+		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
+		lv_label_set_text(setname, knobset_name.data());
+		return obj;
+	}
+
+private:
+	static void format_knob_map_circle(uint16_t panel_knob_id, lv_obj_t *circle, lv_obj_t *label) {
+		//workaround for lowercase letter positions off-center
+		if (panel_knob_id >= 6)
+			lv_obj_set_style_pad_bottom(label, 3, LV_STATE_DEFAULT);
+		format_label(label, 0, &ui_font_MuseoSansRounded90018);
+		format_circle(circle, Gui::knob_palette[panel_knob_id % 6], 22);
+	}
+
+	static void format_cc_map_circle(uint16_t cc_num, lv_obj_t *circle, lv_obj_t *label) {
+		//Workaround to make two lines
+		// std::string name{lv_label_get_text(label)};
+		// name.insert(name[2], "\n");
+		// lv_label_set_text(label, name.c_str());
+		format_label(label, -2, &ui_font_MuseoSansRounded50012);
+		format_circle(circle, Gui::palette_main[LV_PALETTE_GREY], 2);
+	}
+
+	static void format_circle(lv_obj_t *circle, lv_color_t bg_color, lv_coord_t bg_radius) {
+		lv_obj_set_style_bg_color(circle, bg_color, LV_STATE_DEFAULT);
+		lv_obj_set_style_radius(circle, bg_radius, LV_STATE_DEFAULT);
+	}
+
+	static void format_label(lv_obj_t *label, lv_coord_t line_spacing, const lv_font_t *font) {
+		lv_obj_set_style_text_font(label, font, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_line_space(label, line_spacing, LV_STATE_DEFAULT);
 	}
 };
 } // namespace MetaModule

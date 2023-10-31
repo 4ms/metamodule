@@ -1,9 +1,6 @@
 #include "conf/screen_buffer_conf.hh"
 #include "conf/screen_conf.hh"
 #include "drivers/screen_ST77XX.hh"
-//#include "drivers/screen_ILI9341.hh"
-//#include "drivers/screen_ltdc.hh"
-//#include "drivers/screen_ltdc_setup.hh"
 #include "drivers/timekeeper.hh"
 #include "lvgl/lvgl.h"
 #include "params/metaparams.hh"
@@ -11,6 +8,8 @@
 #include "screen/screen_writer.hh"
 #include "uart_log.hh"
 #include <span>
+
+// #define MONKEYROTARY
 
 namespace MetaModule
 {
@@ -25,6 +24,7 @@ class LVGLDriver {
 	// Callbacks
 	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
 	using indev_cb_t = void(lv_indev_drv_t *indev, lv_indev_data_t *data);
+	using wait_cb_t = void(lv_disp_drv_t *);
 
 	// Display driver
 	lv_disp_drv_t disp_drv;
@@ -32,7 +32,11 @@ class LVGLDriver {
 	// lv_theme_t *theme;
 
 public:
-	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb, std::span<lv_color_t> buffer1, std::span<lv_color_t> buffer2) {
+	LVGLDriver(flush_cb_t flush_cb,
+			   indev_cb_t indev_cb,
+			   wait_cb_t wait_cb,
+			   std::span<lv_color_t> buffer1,
+			   std::span<lv_color_t> buffer2) {
 		UartLog::log("\n\nLVGLDriver started\n");
 
 		lv_init();
@@ -40,6 +44,7 @@ public:
 		lv_disp_drv_init(&disp_drv);
 		disp_drv.draw_buf = &disp_buf;
 		disp_drv.flush_cb = flush_cb;
+		disp_drv.wait_cb = wait_cb;
 		disp_drv.hor_res = ScreenWidth;
 		disp_drv.ver_res = ScreenHeight;
 		display = lv_disp_drv_register(&disp_drv); // NOLINT
@@ -66,8 +71,6 @@ class MMDisplay {
 
 private:
 	static inline ScreenFrameWriter _spi_driver;
-	// static inline ScreenParallelWriter<ScreenConf> _ltdc_driver;
-	// static inline mdrivlib::LTDCParallelSetup<ScreenControlConf> _screen_configure;
 
 	static inline std::array<lv_color_t, BufferSize> testbuf;
 
@@ -78,21 +81,11 @@ public:
 		_spi_driver.init();
 		_spi_driver.register_partial_frame_cb(end_flush);
 		_spi_driver.clear_overrun_on_interrupt();
-
-		// LTDC mode:
-		// _screen_configure.setup_driver_chip(mdrivlib::ST77XX::ST7789InitLTDC<ScreenConf>::cmds);
-		// _ltdc_driver.init(buf.data());
-
-		// for (int i = 0; i < 16; i++) {
-		// 	for (auto &px : testbuf)
-		// 		px.full = (1 << i);
-		// 	// _ltdc_driver.set_buffer(buf.data());
-		// 	_spi_driver.transfer_partial_frame(0, 0, 320, 240, reinterpret_cast<uint16_t *>(testbuf.data()));
-		// 	__BKPT();
-		// }
-		// for (auto &px : testbuf)
-		// 	px.full = (1 << 10);
 	}
+
+	static inline uint32_t last_transfer_start_time = 0;
+	static inline lv_area_t last_area{0, 0, 0, 0};
+	static inline uint16_t *last_pixbuf = nullptr;
 
 	static void end_flush() {
 		lv_disp_flush_ready(last_used_disp_drv);
@@ -102,9 +95,32 @@ public:
 		last_used_disp_drv = disp_drv;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
-		// LTDC mode:
-		// _ltdc_driver.set_buffer((void *)color_p);
-		// lv_disp_flush_ready(disp_drv);
+
+		last_transfer_start_time = HAL_GetTick();
+		last_area = *area;
+		last_pixbuf = pixbuf;
+	}
+
+	static void wait_cb(lv_disp_drv_t *disp_drv) {
+		if (disp_drv->draw_buf->flushing) {
+			if (_spi_driver.had_transfer_error()) {
+				disp_drv->draw_buf->flushing = 0;
+			}
+
+			if (_spi_driver.had_fifo_error()) {
+				HAL_Delay(1);
+			}
+
+			//Timeout
+			if (HAL_GetTick() - last_transfer_start_time > 200) {
+				disp_drv->draw_buf->flushing = 0;
+				// Doesn't seem to matter:
+				// _spi_driver.reinit();
+				// HAL_Delay(1);
+				// Doesn't work at all (screen is still expecting data from previous command):
+				// _spi_driver.transfer_partial_frame(last_area.x1, last_area.y1, last_area.x2, last_area.y2, last_pixbuf);
+			}
+		}
 	}
 
 	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
@@ -134,7 +150,19 @@ public:
 #else
 		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
 #endif
+
+#ifdef MONKEYROTARY
+		static uint32_t last_tm = 0;
+		static uint32_t count = 100;
+		if (HAL_GetTick() - last_tm >= count) {
+			data->enc_diff = HAL_GetTick() & 0b01 ? 1 : -1;
+			last_tm = HAL_GetTick();
+			count = HAL_GetTick() % count + 100;
+		} else
+			data->enc_diff = m->rotary.use_motion();
+#else
 		data->enc_diff = m->rotary.use_motion();
+#endif
 	}
 };
 } // namespace MetaModule

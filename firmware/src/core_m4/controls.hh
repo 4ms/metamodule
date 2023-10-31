@@ -12,12 +12,14 @@
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 #include "metaparams.hh"
+#include "midi_controls.hh"
 #include "param_block.hh"
 #include "params.hh"
 #include "usb/midi_host.hh"
 #include "usb/midi_message.hh"
-#include "util/circular_buffer.hh"
+#include "util/edge_detector.hh"
 #include "util/interp_param.hh"
+#include "util/lockfree_fifo_spsc.hh"
 
 namespace MetaModule
 {
@@ -87,9 +89,9 @@ private:
 	bool _new_adc_data_ready = false;
 
 	MidiHost &_midi_host;
-	CircularBuffer<MidiMessage, 256> _midi_rx_buf;
-	float midi_note = 0.f;
-	bool midi_gate = false;
+	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;
+	Midi::MessageParser _midi_parser;
+	EdgeStateDetector _midi_connected;
 
 	bool _rotary_moved_while_pressed = false;
 

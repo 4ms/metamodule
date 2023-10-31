@@ -23,6 +23,8 @@ struct CKSSHoriz4;
 struct CKSSNarrow3;
 struct Davies1900hLargeLightGreyKnob;
 struct BefacoSlidePotSmall;
+// From StereoStrip.cpp
+struct ThreeStateBefacoSwitchMomentary;
 
 // Conversions from Befaco widgets to MetaModule Elements:
 
@@ -127,6 +129,11 @@ struct ElementConvert<Davies1900hLargeLightGreyKnob> {
 template<>
 struct ElementConvert<BefacoSlidePotSmall> {
 	using ElementType = MetaModule::BefacoSlidePotSmall;
+};
+
+template<>
+struct ElementConvert<ThreeStateBefacoSwitchMomentary> {
+	using ElementType = MetaModule::Toggle3pos;
 };
 
 } // namespace rack

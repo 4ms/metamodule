@@ -89,8 +89,8 @@ struct Gui {
 		lv_color_make_rgb565(0xFF, 0x57, 0x22), // DEEP_ORANGE,
 		lv_color_make_rgb565(0x79, 0x55, 0x48), // BROWN,
 		lv_color_make_rgb565(0x60, 0x7D, 0x8B), // BLUE_GREY,
-		lv_color_make_rgb565(0x9E, 0x9E, 0x9E),
-	}; // GREY,
+		lv_color_make_rgb565(0x9E, 0x9E, 0x9E), // GREY
+	};
 
 	static inline std::array<lv_color_t, 8> knob_palette{
 		palette_main[LV_PALETTE_RED],

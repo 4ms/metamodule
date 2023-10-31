@@ -4,6 +4,7 @@
 #include "conf/screen_buffer_conf.hh"
 #include "conf/stream_conf.hh"
 #include "core_intercom/patch_icc_message.hh"
+#include "drivers/cache.hh"
 #include "fs/ramdisk.hh"
 #include "lvgl/src/misc/lv_color.h" // for lv_color_t
 #include "metaparams.hh"
@@ -32,7 +33,7 @@ static inline volatile __attribute__((section(".ddma"))) PatchICCMessage icc_sha
 static inline __attribute__((section(".ddma"))) PatchFileList shared_patch_file_list;
 //^^^ shared_patch_file_list is just a span (ptr and size)
 
-static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
+static inline /*__attribute__((section(".sysram")))*/ DoubleBufParamBlock param_blocks; // 4380 * 2
 static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block;
 
 static inline __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
@@ -45,6 +46,7 @@ static void init() {
 		}
 		block.metaparams.clear();
 	}
+	mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks, sizeof param_blocks);
 }
 }; // namespace StaticBuffers
 

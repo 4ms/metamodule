@@ -32,6 +32,7 @@ R"(PatchData:
   static_knobs: 
   mapped_knobs: 
   midi_maps:
+  midi_poly_num: 1
 )"};
 						 // clang-format on
 	PatchData pd;
@@ -49,9 +50,9 @@ R"(PatchData:
 			CHECK(player.get_panel_output_connection(1) == Jack{1, 1});
 			CHECK(player.get_panel_output_connection(2) == Jack{2, 1});
 
-			SUBCASE("Unmapped jacks are connected to 0,0") {
-				CHECK(player.get_panel_output_connection(3) == Jack{0, 0});
-				CHECK(player.get_panel_output_connection(4) == Jack{0, 0});
+			SUBCASE("Unmapped jacks are connected to 0xFFFF,0xFFFF") {
+				CHECK(player.get_panel_output_connection(3) == Jack{0xFFFF, 0xFFFF});
+				CHECK(player.get_panel_output_connection(4) == Jack{0xFFFF, 0xFFFF});
 			}
 		}
 	}
@@ -98,6 +99,7 @@ PatchData:
   static_knobs: 
   mapped_knobs: 
   midi_maps:
+  midi_poly_num: 1
 	)"};
 	// clang-format on
 
@@ -175,8 +177,8 @@ PatchData:
 			CHECK(player.get_panel_output_connection(2) == Jack{2, 1});
 
 			SUBCASE("Unmapped jack is connected to -1,-1") {
-				CHECK(player.get_panel_output_connection(3) == Jack{0, 0});
-				CHECK(player.get_panel_output_connection(4) == Jack{0, 0});
+				CHECK(player.get_panel_output_connection(3) == Jack{0xFFFF, 0xFFFF});
+				CHECK(player.get_panel_output_connection(4) == Jack{0xFFFF, 0xFFFF});
 			}
 		}
 	}
