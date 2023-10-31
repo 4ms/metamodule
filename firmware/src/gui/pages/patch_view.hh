@@ -67,10 +67,13 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
 
-		if (is_patch_playing)
+		if (is_patch_playing) {
+			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_1);
-		else
+		} else {
+			lv_label_set_text(ui_LoadMeter2, "");
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_1);
+		}
 
 		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
 			displayed_patch_loc == PageList::get_selected_patch_location())
@@ -214,6 +217,10 @@ struct PatchViewPage : PageBase {
 
 		if (is_patch_playing) {
 			update_changed_params();
+			if (metaparams.audio_load != last_audio_load) {
+				metaparams.audio_load = last_audio_load;
+				lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
+			}
 		}
 
 		if (is_patch_playing) {
@@ -391,6 +398,8 @@ private:
 	uint32_t patch_revision = 0xFFFFFFFF;
 
 	unsigned active_knob_set = 0;
+
+	unsigned last_audio_load = 0;
 
 	struct focussed_context {
 		PatchViewPage *page;

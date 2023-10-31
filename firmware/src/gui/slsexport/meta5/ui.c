@@ -43,6 +43,7 @@ lv_obj_t *ui_AddButton;
 lv_obj_t *ui_InfoButton;
 lv_obj_t *ui_SettingsButton;
 lv_obj_t *ui_PatchName;
+lv_obj_t *ui_LoadMeter2;
 lv_obj_t *ui_ModulesPanel;
 lv_obj_t *ui_SettingsMenu;
 lv_obj_t *ui_SettingsClosePanel;
@@ -195,6 +196,24 @@ lv_obj_t *ui_CancelButton;
 lv_obj_t *ui_CancelLabel;
 lv_obj_t *ui_TrashButton2;
 lv_obj_t *ui_TrashLabel2;
+
+
+// SCREEN: ui_CableMapPage
+void ui_CableMapPage_screen_init(void);
+lv_obj_t *ui_CableMapPage;
+lv_obj_t *ui_CableMapPagePane;
+lv_obj_t *ui_CableMapPageTitle;
+lv_obj_t *ui_CableFromTitle;
+lv_obj_t *ui_CableFromEditButton;
+lv_obj_t *ui_CableFromLabel;
+lv_obj_t *ui_CableToTitle;
+lv_obj_t *ui_CableToPanel;
+lv_obj_t *ui_CableToEditButton1;
+lv_obj_t *ui_CableTo1;
+lv_obj_t *ui_CableToEditButton2;
+lv_obj_t *ui_CableTo2;
+lv_obj_t *ui_CableDeleteButton;
+lv_obj_t *ui_CableDeleteIcon;
 lv_obj_t *ui____initial_actions0;
 const lv_img_dsc_t *ui_imgset_add[1] = {&ui_img_1x_add1_png};
 const lv_img_dsc_t *ui_imgset_info[1] = {&ui_img_1x_info1_png};
@@ -273,6 +292,7 @@ ui_MappingMenu_screen_init();
 ui_KnobSetViewPage_screen_init();
 ui_EditMappingPage_screen_init();
 ui_DeleteMappingPopUp_screen_init();
+ui_CableMapPage_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_PatchSelectorPage);
 }

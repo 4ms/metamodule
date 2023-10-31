@@ -10,6 +10,7 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     screens/ui_KnobSetViewPage.c
     screens/ui_EditMappingPage.c
     screens/ui_DeleteMappingPopUp.c
+    screens/ui_CableMapPage.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
