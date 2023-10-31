@@ -2,7 +2,6 @@
 #include "conf/console_uart_conf.hh"
 #include "drivers/uart.hh"
 #include "drivers/uart_conf.hh"
-#include "printf.h"
 
 namespace MetaModule
 {

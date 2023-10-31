@@ -170,8 +170,6 @@ add_executable(
   ${FWDIR}/lib/littlefs/lfs.c
   ${FWDIR}/lib/littlefs/lfs_util.c
   #
-  ${FWDIR}/lib/printf/printf.c
-  #
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc_ex.c
@@ -321,7 +319,7 @@ target_link_script(
   -Wno-psabi
   -ffreestanding
   -nostartfiles
-  -nostdlib
+  # -nostdlib
   -flto=auto
 )
 

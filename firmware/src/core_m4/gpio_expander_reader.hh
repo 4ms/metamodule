@@ -16,7 +16,7 @@ public:
 		, ext_jacksense_reader(ext_gpioexpander)
 		, num_jacksense_readers{ext_gpioexpander.is_present() ? 2 : 1} {
 		if (!main_jacksense_reader.is_present())
-			pr_dbg("Jack sense GPIO Expander failed to start\n");	
+			pr_dbg("Jack sense GPIO Expander failed to start\n");
 		else {
 			pr_dbg("Main Jack sense GPIO Expander present\n");
 			main_jacksense_reader.start();
@@ -107,7 +107,7 @@ private:
 
 	void handle_error() {
 		//TODO: handle this: printf...?
-		printf_("I2C Error\n");
+		pr_err("I2C Error\n");
 	}
 };
 

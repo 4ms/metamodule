@@ -1,9 +1,6 @@
 [submodule "firmware/lib/mdrivlib"]
 	path = firmware/lib/mdrivlib
 	url = https://github.com/4ms/mdrivlib.git
-[submodule "firmware/lib/printf"]
-	path = firmware/lib/printf
-	url = https://github.com/mpaland/printf.git
 [submodule "firmware/lib/lvgl/lvgl"]
 	path = firmware/lib/lvgl/lvgl
 	url = https://github.com/lvgl/lvgl.git

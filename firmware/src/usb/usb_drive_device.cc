@@ -3,10 +3,9 @@
 #include "drivers/hsem.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
-#include "printf.h"
+#include "pr_dbg.hh"
 #include "usbd_desc.h"
 #include "usbd_msc.h"
-
 
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
 
@@ -26,7 +25,7 @@ void UsbDriveDevice::init_usb_device() {
 void UsbDriveDevice::start() {
 	// TODO: try for 3 seconds before failing
 	if (HWSemaphore<MetaModule::RamDiskLock>::lock(3) == HWSemaphoreFlag::LockFailed) {
-		printf_("Cannot get lock on RamDisk, aborting usb device start\n");
+		pr_err("Cannot get lock on RamDisk, aborting usb device start\n");
 		return;
 	}
 	nordisk->set_status(RamDiskOps::Status::InUse);
@@ -34,8 +33,8 @@ void UsbDriveDevice::start() {
 	init_fops();
 	auto init_ok = USBD_Init(&pdev, &MSC_Desc, 0);
 	if (init_ok != USBD_OK) {
-		printf_("USB Device failed to initialize!\r\n");
-		printf_("Error code: %d", static_cast<int>(init_ok));
+		pr_err("USB Device failed to initialize!\r\n");
+		pr_err("Error code: %d", static_cast<int>(init_ok));
 		return;
 	}
 
@@ -51,7 +50,7 @@ void UsbDriveDevice::stop() {
 	USBD_Stop(&pdev);
 	USBD_DeInit(&pdev);
 
-	printf_("M4 is unlocking RamDisk Lock\n");
+	pr_info("M4 is unlocking RamDisk Lock\n");
 	HWSemaphore<MetaModule::RamDiskLock>::unlock(3);
 	nordisk->set_status(RamDiskOps::Status::WritingBack);
 }
@@ -62,7 +61,7 @@ int8_t UsbDriveDevice::init(uint8_t lun) {
 	if (lun == 0) {
 		if (!nordisk)
 			return USBD_FAIL;
-		printf_("USB MSC connected to host\r\n");
+		pr_info("USB MSC connected to host\r\n");
 		nordisk->set_status(RamDiskOps::Status::Mounted);
 	}
 	return USBD_OK;
@@ -72,7 +71,7 @@ int8_t UsbDriveDevice::eject(uint8_t lun) {
 	if (lun == 0) {
 		if (!nordisk)
 			return USBD_FAIL;
-		printf_("USB MSC device got Eject event from host\r\n");
+		pr_info("USB MSC device got Eject event from host\r\n");
 		nordisk->set_status(RamDiskOps::Status::Unmounted);
 	}
 	return USBD_OK;

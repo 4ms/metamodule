@@ -47,7 +47,7 @@ void main() {
 
 	app_startup();
 
-	printf_("M4 starting\n");
+	pr_info("M4 starting\n");
 
 	auto param_block_base = SharedMemoryS::ptrs.param_block;
 	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
@@ -86,7 +86,7 @@ void main() {
 			i2cqueue.update();
 	}
 
-	printf_("M4 initialized\n");
+	pr_info("M4 initialized\n");
 	HWSemaphore<MetaModule::M4_ready>::unlock();
 
 	while (true) {

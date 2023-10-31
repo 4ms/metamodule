@@ -3,7 +3,7 @@
 ### Adding Modules to Your Library
 To get started, you will need to add the free 4msCompany Meta Module to your VCV Library. If you aren't familiar with adding modules to your VCV Library, it is an easy process.
 
-#### Via VCV Library
+#### Via VCV Library (NOT YET AVAILABLE)
 1) Go to [the VCV Library](https://library.vcvrack.com/) and make sure that you are signed into your account (top-right corner).
 2) On the top of the Library are a number of filters. You can search for "Meta Module" or "4ms". Alternatively, you can use [the 4msCompany Brand Filter](https://library.vcvrack.com/?query=&brand=4msCompany&tag=&license=) to list all modules by 4ms.
 3) Aside from the Meta Module, you will want to add modules from other supported brands for creating your patches. Currently, the Meta Module supports modules from 4msCompany, Befaco, HetrickCV, and Nonlinear Circuits, along with the Macro Oscillator by Audible Instruments. (TODO: Add a link to a supported list of modules)
@@ -35,7 +35,7 @@ Additionally, you can add modules to your Favorites by control-clicking the mdou
 
 For the most basic patch, you will need at least two modules: the 4ms Meta Module and a VCV Audio module. The Audio module is used to send signals to your speakers while patching. Additionally, it is needed by most modules in VCV as it establishes a sample rate clock source for audio callbacks. Adding the two modules to your rack will look like this:
 
-![BasicPatch](./images/Meta Module.png)
+![BasicPatch](./images/MetaModule.png)
 
 It is worth saving this patch so that you can come back to it quickly. Go to File->Save at the top of VCV and save this as something like "MetamoduleTemplate.vcv".
 
@@ -82,9 +82,8 @@ We can now send this patch to the hardware Meta Module. To export your patch, cl
 You can now upload the patch to the hardware Meta Module via USB drive or microSD (WiFi is coming later with an expander module).
 
 Copy the .yml patch file to a microSD card or a USB drive. The card or
-drive must be formatted as FAT32 or ExFAT, with just a single partition. If you
-are a Meta Module developer, use a regular microSD card for this instead of the
-developer microSD card, otherwise the patch won't be visible. Insert the card
+drive must be formatted as FAT32 or ExFAT. The drive may have multiple partitions,
+but only the first FAT partition found will be used. Insert the card
 or drive into the Meta Module and in a moment it will appear in the Patch
 Selector page (press the Back button repeatedly to get back to the Patch
 Selector page). You can open a patch just by selecting it and clicking on it.
@@ -92,3 +91,134 @@ Play it by clicking the Play button. Once you have a patch opened or playing,
 you are free to remove the microSD card or USB drive -- the patch file is
 loaded into memory and will stay there until you open or play another patch.
 
+
+## MIDI
+
+You can map MIDI events (note pitch, note velocity, CC values, Pitch Bend, etc)
+to knobs and jacks. This is done by using the VCV Core MIDI modules (included
+with every VCV Rack installation).
+
+The following modules are supported by the MetaModule:
+
+- MIDI Map 
+- MIDI to CV
+- MIDI CC to CV
+- MIDI Gate to CV
+- SPLIT (see Polyphony section below)
+
+To use MIDI, include any these modules in your patch and connect cables
+normally (monophonically). Use the MIDI "learn" features of these modules to
+set CC or note numbers, just like you would if making a VCV Rack patch.
+
+For example, create a patch in VCV Rack with an Ensemble Oscillator OUT A going
+to an ENVVCA Audio In. Then patch the ENVVCA Audio Out to the Meta Module's Out
+1 jack. Adjust the ENVVCA sliders and switches so that it plays "notes" at a
+reasonable tempo when you have the ENVVCA Cycle button on. Now, turn Cycle off
+and add a MIDI-CV module to the patch. Patch the Voct output to the Ensemble's
+Pitch input, and patch the Gate output to the ENVVCA's Trigger (or Follow) input. Map
+whatever knobs you want to the Ensemble and ENVVCA's controls.
+
+Right-click the MIDI-CV module and select monophonic for the polyphony channels
+setting. 
+
+![MIDI Basic patch](./images/MIDI-monophonic.png)
+![MIDI monophonic setting](./images/MIDI-poly-setting.png)
+
+Now, transfer the patch to the Meta Module and attach a USB-MIDI keyboard to
+the USB-C jack. Playing notes on the MIDI keyboard should play them in your
+patch.
+
+### MIDI to CV module
+
+This module handles a variety of things, most of which function the same on the MetaModule as they do in VCV Rack.
+
+Polyphony is the major difference (see below). The polyphonic outputs are:
+- Voct
+- Gate
+- Vel (velocity)
+- Aft (aftertouch)
+- Ret (retrigger)
+
+The Polyphonic Mode right-click menu option has no effect, but an algorithm
+similar to Rotate is used. There are differences, however, and the MetaModule
+algorithm will likely improve over time.
+
+MIDI Divided Clock (CLK/N) is handled similarly, and the right-click menu option
+for it will work to select the division number. The MetaModule supports any
+integral division number from /1 to /96, but there is currently no GUI
+interface to choose a division number other that what the MIDI to CV module
+offers (you must manually edit the patch yaml file to get something other than Whole,
+Half, Quarter, 8th, 16th, 32nd, 12PPQN, or 24PPQN).
+
+MIDI Channels are ignored, all events on all channels are forwared to modules.
+This will likely change in future versions.
+
+No smoothness algorithms are used currently. MIDI events are queued and forwarded to 
+virtual modules with a maximum of one MIDI event per audio frame (i.e. sample rate 48kHz).
+
+SysEx messages are ignored.
+
+### Polyphony
+
+Currently, polyphony of MIDI note events up to 8 voices is supported, but
+polyphonic cables are NOT supported by MetaModule. So to create a polyphonic
+MIDI patch, a SPLIT module must be used to convert each polyphonic cable into a
+set of monophonic cables. These monophonic cables then run to multiple
+VCO/EG/VCA/voice modules.
+
+To try this out, right-click on the MIDI to CV module and select a polyphonic number 
+of 2 or greater. Patch the MIDI to CV module's Voct output jack to a SPLIT
+module, and then patch the individual SPLIT outputs to the multiple VCO V/oct
+inputs (or whatever modules you want to be controlled by MIDI notes). Do the
+same thing for Gate, Vel, Aft (aftertouch), and/or Ret (retrigger) outputs.
+
+Notice that the only polyphonic cables (thick cables, as drawn by VCV Rack) in the entire
+patch are between the MIDI to CV module and the SPLIT module -- all other
+cables are monophonic. This is the only way that the MetaModule will recognize
+polyphonic cables. If you were to patch the polyphonic output of the MIDI to CV
+module directly to the V/oct input of a VCO (even if that VCO is polyphonic),
+the MetaModule will interpret that as a monophonic signal. Future versions of
+MetaModule firmware may support polyphonic cables, but currently only
+monophonic cables are supported (with the single exception of polyphonic cables
+patched directly from a MIDI to CV module to a SPLIT module).
+
+Here's an example patch showing Duophonic MIDI:
+
+![MIDI Duophonic patch](./images/MIDI-duophonic.png)
+
+
+### Caveats and limits
+
+Besides polyphonic cables not being supported, there are a few other limits:
+
+- A patch may contain multiple MIDI modules, but no more than one of each type.
+  That is, a patch may have one MIDI to CV module and one MIDI Map module, but
+  it cannot have two MIDI to CV modules. If there are multiple instances of a
+  particular type of MIDI module, one of the modules will probably be ignored,
+  but do not rely on this behavior.
+
+- The polyphony number is set by the right-click menu option on the MIDI to CV 
+  module. The number of cables patched into a connected SPLIT module does NOT 
+  set the polyphonic number. This is also how VCV Rack works, but may not be
+  obvious if you are not experienced with MIDI in VCV Rack. This fact can be
+  exploited to make non-standard behaviors such as making only every Nth note
+  fire an envelope.
+
+- MIDI output is not supported. Any CV to MIDI, Gate to MIDI, or CV to MIDI CC
+  modules will be ignored.
+
+- The settings in the right-click menu for all MIDI moduels are currently ignored,
+  except for the polyphonic channels and clock divider settings of the MIDI to
+  CV module. This will probably change as more features are added to MetaModule
+  MIDI. Likewise the MIDI Driver, MIDI Device, and MIDI Channel selections made from
+  the front panel of the MIDI modules are also ignored.
+
+- The MetaModule can power a USB device up to 500mA, so if your device needs
+  more than that, you will need to power it separately.
+
+- Sharing the USB port with a USB thumb drive and a MIDI controller is
+  possible, though not ideal. You will need to unplug the MIDI device in order
+  to plug in the thumb drive and load a new patch. Then you may unplug the
+  thumb drive and plug the MIDI device back in. If you find yourself doing this
+  a lot, using a self-powered MIDI keyboard helps a lot. There is a TODO item
+  for support MIDI Hubs, but as of yet it is not possible to use a hub.

@@ -32,10 +32,9 @@ set_source_files_properties(${FWDIR}/src/gui/slsexport/meta5/ui.c
 
 # #################### VCV Adaptor ##################################
 
-add_subdirectory(${FWDIR}/src/VCV_adaptor
-                 ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
+add_subdirectory(${FWDIR}/src/VCV_adaptor ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
 target_sources(VCV_adaptor PRIVATE stubs/random.cpp)
-target_include_directories(VCV_adaptor PRIVATE stubs/)
+target_include_directories(VCV_adaptor PRIVATE stubs/ ${FWDIR}/src/console)
 
 # #################### Other brands ##################################
 
