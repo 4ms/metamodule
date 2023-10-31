@@ -114,7 +114,6 @@ inline void get_indices(std::span<const MetaModule::Element> elements, std::span
 	}
 }
 
-// This isn't used (yet?) TODO: Remove when done with refactoring if still not used
 template<typename Info>
 constexpr std::optional<size_t> get_element_id(const MetaModule::BaseElement &element) {
 	for (unsigned i = 0; auto el : Info::Elements) {

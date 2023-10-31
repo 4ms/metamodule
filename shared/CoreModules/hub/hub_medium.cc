@@ -5,7 +5,7 @@
 #ifdef VCVRACK
 #define printf_(...)
 #else
-#include "printf.h"
+#include "pr_dbg.hh"
 #endif
 
 namespace MetaModule
@@ -19,7 +19,7 @@ public:
 	HubMedium() = default;
 
 	void update() final {
-		printf_("Error! Hub should not be run\n");
+		pr_err("Error! Hub should not be run\n");
 	}
 
 	void set_samplerate(float sr) final {

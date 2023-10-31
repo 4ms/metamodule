@@ -112,7 +112,7 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT faceplate-cmd
-  COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for faceplates"
+  COMMAND ${CMAKE_COMMAND} -E echo "Generated LVGL image files for faceplates (all brands)"
   VERBATIM USES_TERMINAL
 )
 
@@ -147,6 +147,14 @@ include(vcv_ports/brands.cmake)
 
 foreach(brand ${brands})
   string(TOUPPER ${brand} BRAND)
+
+  add_custom_command(
+    OUTPUT faceplate-cmd-${brand}
+    COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for ${brand} faceplates"
+    VERBATIM USES_TERMINAL
+  )
+  add_custom_target(faceplate-images-${brand} DEPENDS faceplate-cmd-${brand})
+  add_dependencies(faceplate-images faceplate-images-${brand})
 
   # for components, we just want _all_ components so use a glob
   file(GLOB ${brand}_comp_svgs ${PROJECT_SOURCE_DIR}/../graphics/${brand}/components/*.svg)
@@ -184,7 +192,7 @@ foreach(brand ${brands})
 
     # for each module svg, convert to .c version
     add_custom_command(
-      OUTPUT faceplate-cmd
+      OUTPUT faceplate-cmd-${brand}
       APPEND
       COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createLvglFaceplate ${svg} ${c240_name}
       DEPENDS ${svg}

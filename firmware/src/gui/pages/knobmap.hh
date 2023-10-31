@@ -70,7 +70,7 @@ struct KnobMapPage : PageBase {
 			lv_textarea_set_text(ui_AliasTextArea, map->alias_name.data());
 		} else {
 			char name[64]{};
-			snprintf_(name, 64, "%s %s", fullname.module_name.data(), fullname.element_name.data());
+			snprintf(name, 64, "%s %s", fullname.module_name.data(), fullname.element_name.data());
 			lv_textarea_set_text(ui_AliasTextArea, "");
 			lv_textarea_set_placeholder_text(ui_AliasTextArea, name);
 		}

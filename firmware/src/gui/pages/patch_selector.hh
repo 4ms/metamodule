@@ -114,7 +114,7 @@ struct PatchSelectorPage : PageBase {
 		highlighted_vol = num_usb ? Volume::USB : num_sdcard ? Volume::SDCard : Volume::NorFlash;
 		lv_roller_set_selected(roller, highlighted_idx, LV_ANIM_ON);
 
-		printf_("Patch Selector refreshed:\nUSB: %zu patches\nSD: %zu patches\nNOR: %zu patches\n",
+		pr_info("Patch Selector refreshed:\nUSB: %zu patches\nSD: %zu patches\nNOR: %zu patches\n",
 				patchfiles.usb.size(),
 				patchfiles.sdcard.size(),
 				patchfiles.norflash.size());
