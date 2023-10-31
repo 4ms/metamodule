@@ -162,6 +162,13 @@ private:
 			lv_obj_set_user_data(obj, nullptr);
 	}
 
+	void group_edit_cable_button(lv_obj_t *obj, uint32_t cable_idx) {
+		lv_group_add_obj(pane_group, obj);
+		lv_group_focus_obj(obj);
+		lv_obj_add_event_cb(obj, edit_cable_button_cb, LV_EVENT_PRESSED, this);
+		lv_obj_set_user_data(obj, reinterpret_cast<void *>(cable_idx));
+	}
+
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_ControlButton);
 		lv_hide(ui_MappedPanel);
@@ -179,13 +186,14 @@ private:
 
 		auto thisjack = Jack{.module_id = (uint16_t)PageList::get_selected_module_id(),
 							 .jack_id = drawn_element->gui_element.idx.output_idx};
-		for (auto &cable : patch_storage.get_view_patch().int_cables) {
+		for (unsigned idx = 0; auto &cable : patch_storage.get_view_patch().int_cables) {
 			if (cable.out == thisjack) {
 				for (auto &injack : cable.ins) {
 					auto obj = list.create_cable_item(injack, ElementType::Input, patch_storage.get_view_patch());
-					group_edit_button(obj);
+					group_edit_cable_button(obj, idx);
 				}
 			}
+			idx++;
 		}
 
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
@@ -292,6 +300,18 @@ private:
 		pr_err("Edit Map not implemented yet\n");
 	}
 
+	static void edit_cable_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		if (!event->target)
+			return;
+
+		auto cable_idx = reinterpret_cast<uint32_t>(event->target->user_data);
+		pr_err("Edit Cable %d -- not implemented yet\n", cable_idx);
+	}
+
 	static void add_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -309,6 +329,19 @@ private:
 				cc.changed = false;
 		}
 		page->add_map_popup.show(knobset_id, page->drawn_element->gui_element.idx.param_idx);
+	}
+
+	static void add_cable_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		if (!event->target)
+			return;
+
+		pr_err("Add Cable %d -- not implemented yet\n",
+			   page->drawn_element->gui_element.idx.input_idx,
+			   page->drawn_element->gui_element.idx.output_idx);
 	}
 
 	static void scroll_to_top(lv_event_t *event) {
