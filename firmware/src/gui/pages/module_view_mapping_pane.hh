@@ -59,6 +59,9 @@ struct ModuleViewMappingPane {
 			return;
 		}
 
+		PageList::set_selected_element_counts(drawn_el.gui_element.count);
+		PageList::set_selected_element_indices(drawn_el.gui_element.idx);
+
 		auto slug = patch.module_slugs[this_module_id];
 
 		// Knob name label
@@ -162,11 +165,11 @@ private:
 			lv_obj_set_user_data(obj, nullptr);
 	}
 
-	void group_edit_cable_button(lv_obj_t *obj, uint32_t cable_idx) {
+	void group_edit_cable_button(lv_obj_t *obj) {
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
 		lv_obj_add_event_cb(obj, edit_cable_button_cb, LV_EVENT_PRESSED, this);
-		lv_obj_set_user_data(obj, reinterpret_cast<void *>(cable_idx));
+		// lv_obj_set_user_data(obj, reinterpret_cast<void *>(cable_idx));
 	}
 
 	void prepare_for_element(const BaseElement &) {
@@ -186,23 +189,23 @@ private:
 
 		auto thisjack = Jack{.module_id = (uint16_t)PageList::get_selected_module_id(),
 							 .jack_id = drawn_element->gui_element.idx.output_idx};
-		for (unsigned idx = 0; auto &cable : patch_storage.get_view_patch().int_cables) {
+		for (auto &cable : patch_storage.get_view_patch().int_cables) {
 			if (cable.out == thisjack) {
 				for (auto &injack : cable.ins) {
 					auto obj = list.create_cable_item(injack, ElementType::Input, patch_storage.get_view_patch());
-					group_edit_cable_button(obj, idx);
+					group_edit_cable_button(obj);
+					//TODO: what is the user data, so that the cable page can load the right cable/node?
 				}
 			}
-			idx++;
 		}
 
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
 		if (panel_jack_id) {
 			auto obj = list.create_panel_outcable_item(panel_jack_id.value());
-			group_edit_button(obj);
+			group_edit_button(obj); //TODO: user data
 		} else {
 			auto obj = list.create_unmapped_list_item("Add cable...");
-			group_add_button(obj);
+			group_add_button(obj); //TODO: user data
 		}
 	}
 
