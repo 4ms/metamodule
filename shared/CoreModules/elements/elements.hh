@@ -39,6 +39,8 @@ using Element = std::variant<
 	Rogan2PSGreen,
 	Rogan2PSRed,
 	Rogan3PSWhite,
+	Rogan3PSRed,
+	Rogan3PSGreen,
 	Trimpot,
 
 	// Sliders

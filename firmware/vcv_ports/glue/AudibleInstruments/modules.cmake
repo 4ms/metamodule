@@ -5,9 +5,9 @@ set(
   AudibleInstrumentsModules
   Blinds
   Braids
-  # Branches
+  Branches
   # Clouds
-  # Elements
+  Elements
   # Frames
   Kinks
   Links
@@ -48,4 +48,14 @@ list(
   ${AUDIBLE_DIR}/eurorack/braids/digital_oscillator.cc
   ${AUDIBLE_DIR}/eurorack/braids/macro_oscillator.cc
   ${AUDIBLE_DIR}/eurorack/braids/resources.cc
+
+  ${AUDIBLE_DIR}/eurorack/elements/dsp/exciter.cc
+  ${AUDIBLE_DIR}/eurorack/elements/dsp/ominous_voice.cc
+  ${AUDIBLE_DIR}/eurorack/elements/dsp/resonator.cc
+  ${AUDIBLE_DIR}/eurorack/elements/dsp/tube.cc
+  ${AUDIBLE_DIR}/eurorack/elements/dsp/multistage_envelope.cc
+  ${AUDIBLE_DIR}/eurorack/elements/dsp/part.cc
+  ${AUDIBLE_DIR}/eurorack/elements/dsp/string.cc
+  ${AUDIBLE_DIR}/eurorack/elements/dsp/voice.cc
+  ${AUDIBLE_DIR}/eurorack/elements/resources.cc
 )
