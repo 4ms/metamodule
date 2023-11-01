@@ -11,7 +11,7 @@ set(
   # Frames
   Kinks
   Links
-  # Marbles
+  Marbles
   # Plaits
   Rings
   Ripples
@@ -59,6 +59,14 @@ list(
   ${AUDIBLE_DIR}/eurorack/elements/dsp/string.cc
   ${AUDIBLE_DIR}/eurorack/elements/dsp/voice.cc
   ${AUDIBLE_DIR}/eurorack/elements/resources.cc
+
+  ${AUDIBLE_DIR}/eurorack/marbles/random/t_generator.cc
+  ${AUDIBLE_DIR}/eurorack/marbles/random/x_y_generator.cc
+  ${AUDIBLE_DIR}/eurorack/marbles/random/output_channel.cc
+  ${AUDIBLE_DIR}/eurorack/marbles/random/lag_processor.cc
+  ${AUDIBLE_DIR}/eurorack/marbles/random/quantizer.cc
+  ${AUDIBLE_DIR}/eurorack/marbles/ramp/ramp_extractor.cc
+  ${AUDIBLE_DIR}/eurorack/marbles/resources.cc
 
   ${AUDIBLE_DIR}/eurorack/rings/dsp/fm_voice.cc
   ${AUDIBLE_DIR}/eurorack/rings/dsp/part.cc
