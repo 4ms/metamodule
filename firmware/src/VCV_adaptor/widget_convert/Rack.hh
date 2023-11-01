@@ -168,6 +168,11 @@ struct ElementConvert<componentlibrary::MediumLight<componentlibrary::RedLight>>
 };
 
 template<>
+struct ElementConvert<componentlibrary::MediumLight<componentlibrary::GreenLight>> {
+	using ElementType = MetaModule::MediumLight<MetaModule::GreenLight>;
+};
+
+template<>
 struct ElementConvert<componentlibrary::PJ301MPort> {
 	using ElementTypeInput = MetaModule::PJ301MPortIn;
 	using ElementTypeOutput = MetaModule::PJ301MPortOut;
