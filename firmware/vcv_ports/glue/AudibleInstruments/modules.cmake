@@ -20,7 +20,7 @@ set(
   # Stages
   # Streams
   # Tides
-  # Tides2
+  Tides2
   Veils
   # Warps
   # Edges, Grids, and Peaks don't have Audible Instruments equivalents
@@ -74,4 +74,8 @@ list(
   ${AUDIBLE_DIR}/eurorack/rings/dsp/string.cc
   ${AUDIBLE_DIR}/eurorack/rings/dsp/resonator.cc
   ${AUDIBLE_DIR}/eurorack/rings/resources.cc
+
+  ${AUDIBLE_DIR}/eurorack/tides2/poly_slope_generator.cc
+  ${AUDIBLE_DIR}/eurorack/tides2/ramp_extractor.cc
+  ${AUDIBLE_DIR}/eurorack/tides2/resources.cc
 )
