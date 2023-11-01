@@ -13,7 +13,7 @@ set(
   Links
   # Marbles
   # Plaits
-  # Rings
+  Rings
   Ripples
   Shades
   Shelves
@@ -44,6 +44,7 @@ list(
   ${AUDIBLE_DIR}/eurorack/stmlib/utils/random.cc
   ${AUDIBLE_DIR}/eurorack/stmlib/dsp/atan.cc
   ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc
+
   ${AUDIBLE_DIR}/eurorack/braids/analog_oscillator.cc
   ${AUDIBLE_DIR}/eurorack/braids/digital_oscillator.cc
   ${AUDIBLE_DIR}/eurorack/braids/macro_oscillator.cc
@@ -58,4 +59,11 @@ list(
   ${AUDIBLE_DIR}/eurorack/elements/dsp/string.cc
   ${AUDIBLE_DIR}/eurorack/elements/dsp/voice.cc
   ${AUDIBLE_DIR}/eurorack/elements/resources.cc
+
+  ${AUDIBLE_DIR}/eurorack/rings/dsp/fm_voice.cc
+  ${AUDIBLE_DIR}/eurorack/rings/dsp/part.cc
+  ${AUDIBLE_DIR}/eurorack/rings/dsp/string_synth_part.cc
+  ${AUDIBLE_DIR}/eurorack/rings/dsp/string.cc
+  ${AUDIBLE_DIR}/eurorack/rings/dsp/resonator.cc
+  ${AUDIBLE_DIR}/eurorack/rings/resources.cc
 )
