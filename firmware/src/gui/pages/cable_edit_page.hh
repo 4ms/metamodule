@@ -4,7 +4,7 @@
 #include "gui/elements/helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "pr_dbg.hh"
 
@@ -21,10 +21,17 @@ struct CableEditPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		lv_group_remove_all_objs(group);
+
 		num_inputs = 0;
-		// lv_label_set_text(ui_CableTo1, "");
-		// lv_label_set_text(ui_CableTo2, "");
+		auto num_tos = lv_obj_get_child_cnt(ui_CableToPanel);
+		for (unsigned i = 0; i < num_tos; i++) {
+			auto child = lv_obj_get_child(ui_CableToPanel, i);
+			lv_obj_del_async(child);
+		}
+
 		lv_label_set_text(ui_CableFromLabel, "");
+		lv_group_add_obj(group, ui_CableFromEditButton);
 
 		module_id = (uint16_t)PageList::get_selected_module_id();
 		counts = PageList::get_selected_element_counts();
@@ -63,10 +70,6 @@ struct CableEditPage : PageBase {
 		} else
 			return; //not an input or output
 
-		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, ui_CableFromEditButton);
-		// lv_group_add_obj(group, ui_CableToEditButton1);
-		// lv_group_add_obj(group, ui_CableToEditButton2);
 		lv_group_add_obj(group, ui_CableDeleteButton);
 	}
 
@@ -79,15 +82,19 @@ struct CableEditPage : PageBase {
 	}
 
 	void blur() override {
+		for (auto *c : in_jack_objs) {
+			lv_obj_del(c);
+		}
+		in_jack_objs.clear();
 	}
 
 	void add_mapped_in(const MappedInputJack *mapped_in) {
 		if (!mapped_in)
 			return;
 
-		if (mapped_in->alias_name.size())
+		if (mapped_in->alias_name.size()) {
 			lv_label_set_text_fmt(ui_CableFromLabel, "Panel %s", mapped_in->alias_name.c_str());
-		else {
+		} else {
 			auto name = get_panel_name<PanelDef>(JackInput{}, mapped_in->panel_jack_id);
 			lv_label_set_text_fmt(ui_CableFromLabel, "Panel %s", name.c_str());
 		}
@@ -100,15 +107,16 @@ struct CableEditPage : PageBase {
 		if (!mapped_out)
 			return;
 
-		//TODO add a new component
-		if (num_inputs < 2) {
-			if (mapped_out->alias_name.size()) {
-				// lv_label_set_text_fmt(cable_to_labels[num_inputs], "Panel %s", mapped_out->alias_name.c_str());
-			} else {
-				auto name = get_panel_name<PanelDef>(JackOutput{}, mapped_out->panel_jack_id);
-				// lv_label_set_text_fmt(cable_to_labels[num_inputs], "Panel %s", name.c_str());
-			}
-			num_inputs++;
+		auto button = ui_CableToEditButton_create(ui_CableToPanel);
+		auto label = ui_comp_get_child(button, UI_COMP_CABLETOEDITBUTTON_CABLETOLABEL);
+		lv_group_add_obj(group, button);
+		in_jack_objs.push_back(button);
+
+		if (mapped_out->alias_name.size()) {
+			lv_label_set_text_fmt(label, "Panel %s", mapped_out->alias_name.c_str());
+		} else {
+			auto name = get_panel_name<PanelDef>(JackOutput{}, mapped_out->panel_jack_id);
+			lv_label_set_text_fmt(label, "Panel %s", name.c_str());
 		}
 	}
 
@@ -117,28 +125,28 @@ struct CableEditPage : PageBase {
 			return;
 
 		for (auto in : int_cable->ins) {
-			//TODO add a new component
+			auto button = ui_CableToEditButton_create(ui_CableToPanel);
+			auto label = ui_comp_get_child(button, UI_COMP_CABLETOEDITBUTTON_CABLETOLABEL);
+			lv_group_add_obj(group, button);
+			in_jack_objs.push_back(button);
+
 			auto inname = get_full_element_name(in.module_id, in.jack_id, ElementType::Input, patch);
-			// lv_label_set_text_fmt(cable_to_labels[num_inputs], "%s %s", inname.module_name.data(), inname.element_name.data());
-			num_inputs++;
-			if (num_inputs == 2)
-				break; //until we do components
+			lv_label_set_text_fmt(label, "%s %s", inname.module_name.data(), inname.element_name.data());
 		}
 	}
 
 private:
 	PatchData &patch;
 
+	std::vector<lv_obj_t *> in_jack_objs;
 	Jack out_jack;
-	std::array<Jack, 8> in_jacks;
+	// std::array<Jack, 8> in_jacks;
 	size_t num_inputs = 0;
 
 	// The jack that brought us to this page:
 	uint16_t module_id = 0;
 	ElementCount::Counts counts{};
 	ElementCount::Indices indices{};
-
-	// std::array<lv_obj_t *, 2> cable_to_labels{ui_CableTo1, ui_CableTo2};
 };
 
 } // namespace MetaModule
