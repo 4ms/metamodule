@@ -204,12 +204,18 @@ extern lv_obj_t *ui_CableFromLabel;
 extern lv_obj_t *ui_CableToTitle;
 extern lv_obj_t *ui_CableToPanel;
 extern lv_obj_t *ui_CableToEditButton1;
+extern lv_obj_t *ui_CableToLabel1;
 extern lv_obj_t *ui_CableDeleteButton;
 extern lv_obj_t *ui_CableDeleteIcon;
 extern lv_obj_t *ui_CableSave;
 extern lv_obj_t *ui_CableSaveLabel;
 extern lv_obj_t *ui_CableCancel;
 extern lv_obj_t *ui_CableCancelLabel;
+// SCREEN: ui_CableInputJackComponent
+void ui_CableInputJackComponent_screen_init(void);
+extern lv_obj_t *ui_CableInputJackComponent;
+extern lv_obj_t *ui_CableToEditButton;
+extern lv_obj_t *ui_CableToLabel;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png

@@ -11,6 +11,7 @@ SET(SOURCES components/ui_comp_cabletoeditbutton.c
     screens/ui_EditMappingPage.c
     screens/ui_DeleteMappingPopUp.c
     screens/ui_CableMapPage.c
+    screens/ui_CableInputJackComponent.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c

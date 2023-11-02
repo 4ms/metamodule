@@ -104,9 +104,34 @@ lv_obj_set_style_outline_opa(ui_CableToPanel, 255, LV_PART_MAIN| LV_STATE_FOCUSE
 lv_obj_set_style_outline_width(ui_CableToPanel, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_pad(ui_CableToPanel, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
 
-ui_CableToEditButton1 = ui_CableToEditButton_create(ui_CableToPanel);
-lv_obj_set_x( ui_CableToEditButton1, 0 );
-lv_obj_set_y( ui_CableToEditButton1, 0 );
+ui_CableToEditButton1 = lv_btn_create(ui_CableToPanel);
+lv_obj_set_width( ui_CableToEditButton1, lv_pct(100));
+lv_obj_set_height( ui_CableToEditButton1, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_CableToEditButton1, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_CableToEditButton1, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
+lv_obj_clear_flag( ui_CableToEditButton1, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_CableToEditButton1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_CableToEditButton1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_CableToEditButton1, 128, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_CableToEditButton1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CableToEditButton1, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CableToEditButton1, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CableToEditButton1, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CableToEditButton1, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_CableToEditButton1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_CableToEditButton1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_CableToEditButton1, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_bg_opa(ui_CableToEditButton1, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_bg_color(ui_CableToEditButton1, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_bg_opa(ui_CableToEditButton1, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_CableToLabel1 = lv_label_create(ui_CableToEditButton1);
+lv_obj_set_width( ui_CableToLabel1, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CableToLabel1, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_CableToLabel1, LV_ALIGN_LEFT_MID );
+lv_label_set_text(ui_CableToLabel1,"Stereo Mixer, Input Channel 1 Left");
+lv_obj_add_flag( ui_CableToLabel1, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
+lv_obj_clear_flag( ui_CableToLabel1, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 
 ui_CableDeleteButton = lv_btn_create(ui_CableMapPagePane);
 lv_obj_set_width( ui_CableDeleteButton, 30);

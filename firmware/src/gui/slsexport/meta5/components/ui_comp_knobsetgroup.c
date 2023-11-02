@@ -112,7 +112,7 @@ lv_obj_set_style_outline_pad(cui_KnobSetInfo, 1, LV_PART_MAIN| LV_STATE_CHECKED|
 lv_obj_set_style_radius(cui_KnobSetInfo, 20, LV_PART_INDICATOR| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(cui_KnobSetInfo, lv_color_hex(0x202328), LV_PART_INDICATOR | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(cui_KnobSetInfo, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_img_src( cui_KnobSetInfo, &TemporaryImage, LV_PART_INDICATOR | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_img_src( cui_KnobSetInfo, &ui_img_1x_infosmall2_png, LV_PART_INDICATOR | LV_STATE_DEFAULT );
 lv_obj_set_style_radius(cui_KnobSetInfo, 20, LV_PART_INDICATOR| LV_STATE_CHECKED);
 lv_obj_set_style_bg_color(cui_KnobSetInfo, lv_color_hex(0x4067D3), LV_PART_INDICATOR | LV_STATE_CHECKED );
 lv_obj_set_style_bg_opa(cui_KnobSetInfo, 255, LV_PART_INDICATOR| LV_STATE_CHECKED);
