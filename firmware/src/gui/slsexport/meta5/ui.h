@@ -25,7 +25,7 @@ extern lv_obj_t *ui_PatchSelectorTitlePanel;
 extern lv_obj_t *ui_PatchSelectorTitle;
 extern lv_obj_t *ui_PlayIcon;
 extern lv_obj_t *ui_NowPlayingName;
-extern lv_obj_t *ui_Load_Meter;
+extern lv_obj_t *ui_LoadMeter;
 extern lv_obj_t *ui_DrivesPanel;
 extern lv_obj_t *ui_USBbut;
 extern lv_obj_t *ui_USBlabel;
@@ -193,22 +193,6 @@ extern lv_obj_t *ui_CancelButton;
 extern lv_obj_t *ui_CancelLabel;
 extern lv_obj_t *ui_TrashButton2;
 extern lv_obj_t *ui_TrashLabel2;
-// SCREEN: ui_CableMapPage
-void ui_CableMapPage_screen_init(void);
-extern lv_obj_t *ui_CableMapPage;
-extern lv_obj_t *ui_CableMapPagePane;
-extern lv_obj_t *ui_CableMapPageTitle;
-extern lv_obj_t *ui_CableFromTitle;
-extern lv_obj_t *ui_CableFromEditButton;
-extern lv_obj_t *ui_CableFromLabel;
-extern lv_obj_t *ui_CableToTitle;
-extern lv_obj_t *ui_CableToPanel;
-extern lv_obj_t *ui_CableToEditButton1;
-extern lv_obj_t *ui_CableTo1;
-extern lv_obj_t *ui_CableToEditButton2;
-extern lv_obj_t *ui_CableTo2;
-extern lv_obj_t *ui_CableDeleteButton;
-extern lv_obj_t *ui_CableDeleteIcon;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png

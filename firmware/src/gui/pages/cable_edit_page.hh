@@ -14,14 +14,14 @@ struct CableEditPage : PageBase {
 		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchSel);
 
-		init_bg(ui_CableMapPage);
+		// init_bg(ui_CableMapPage);
 	}
 
 	void prepare_focus() override {
-		lv_group_add_obj(group, ui_CableFromEditButton);
-		lv_group_add_obj(group, ui_CableToEditButton1);
-		lv_group_add_obj(group, ui_CableToEditButton2);
-		lv_group_add_obj(group, ui_CableDeleteButton);
+		// lv_group_add_obj(group, ui_CableFromEditButton);
+		// lv_group_add_obj(group, ui_CableToEditButton1);
+		// lv_group_add_obj(group, ui_CableToEditButton2);
+		// lv_group_add_obj(group, ui_CableDeleteButton);
 	}
 
 	void update() override {
