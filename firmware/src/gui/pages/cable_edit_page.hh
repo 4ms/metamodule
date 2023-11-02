@@ -1,5 +1,7 @@
 
 #pragma once
+#include "gui/elements/element_name.hh"
+#include "gui/elements/helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -13,60 +15,130 @@ struct CableEditPage : PageBase {
 	CableEditPage(PatchInfo info)
 		: PageBase{info}
 		, patch{patch_storage.get_view_patch()} {
-		PageList::register_page(this, PageId::PatchSel);
+		PageList::register_page(this, PageId::CableEdit);
 
 		init_bg(ui_CableMapPage);
 	}
 
 	void prepare_focus() override {
+		num_inputs = 0;
+		// lv_label_set_text(ui_CableTo1, "");
+		// lv_label_set_text(ui_CableTo2, "");
+		lv_label_set_text(ui_CableFromLabel, "");
+
 		module_id = (uint16_t)PageList::get_selected_module_id();
 		counts = PageList::get_selected_element_counts();
 		indices = PageList::get_selected_element_indices();
 
-		// std::vector<Jack> in_jacks;
-
-		InternalCable cable;
-
 		if (counts.num_inputs > 0) {
-			// base_jack.jack_id = indices.input_idx;
+			printf("Node with input jack %d on module %d\n", indices.input_idx, module_id);
+			Jack in_jack = {.module_id = module_id, .jack_id = indices.input_idx};
+			auto *cable = patch.find_internal_cable_with_injack(in_jack);
+
+			if (cable) {
+				auto outname =
+					get_full_element_name(cable->out.module_id, cable->out.jack_id, ElementType::Output, patch);
+				lv_label_set_text_fmt(
+					ui_CableFromLabel, "%s %s", outname.module_name.data(), outname.element_name.data());
+				add_connected_inputs(cable);
+			}
+
+			add_mapped_in(patch.find_mapped_injack(in_jack));
+
+			lv_label_set_text(ui_CableMapPageTitle, num_inputs ? "Edit Connections" : "Add Cable");
 
 		} else if (counts.num_outputs > 0) {
 			// We know the output jack, scan int_cables and mapped_outs
-			Jack out_jack{.module_id = module_id, .jack_id = indices.output_idx};
+			out_jack = {.module_id = module_id, .jack_id = indices.output_idx};
+			num_inputs = 0;
 
-			bool found = false;
-			for (auto &c : patch_storage.get_view_patch().int_cables) {
-				if (c.out == out_jack) {
-					cable = c;
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				// Handle add cable from out_jack
-			}
+			add_connected_inputs(patch.find_internal_cable_with_outjack(out_jack));
+
+			add_mapped_out(patch.find_mapped_outjack(out_jack));
+
+			auto outname = get_full_element_name(module_id, indices.output_idx, ElementType::Output, patch);
+			lv_label_set_text_fmt(ui_CableFromLabel, "%s %s", outname.module_name.data(), outname.element_name.data());
+			lv_label_set_text(ui_CableMapPageTitle, num_inputs ? "Edit Connections" : "Add Cable");
 
 		} else
 			return; //not an input or output
 
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_CableFromEditButton);
-		lv_group_add_obj(group, ui_CableToEditButton1);
-		lv_group_add_obj(group, ui_CableToEditButton2);
+		// lv_group_add_obj(group, ui_CableToEditButton1);
+		// lv_group_add_obj(group, ui_CableToEditButton2);
 		lv_group_add_obj(group, ui_CableDeleteButton);
 	}
 
 	void update() override {
+		if (metaparams.meta_buttons[0].is_just_released()) {
+			if (PageList::request_last_page()) {
+				blur();
+			}
+		}
 	}
 
 	void blur() override {
 	}
 
+	void add_mapped_in(const MappedInputJack *mapped_in) {
+		if (!mapped_in)
+			return;
+
+		if (mapped_in->alias_name.size())
+			lv_label_set_text_fmt(ui_CableFromLabel, "Panel %s", mapped_in->alias_name.c_str());
+		else {
+			auto name = get_panel_name<PanelDef>(JackInput{}, mapped_in->panel_jack_id);
+			lv_label_set_text_fmt(ui_CableFromLabel, "Panel %s", name.c_str());
+		}
+
+		InternalCable cable{.out = {}, .ins = mapped_in->ins};
+		add_connected_inputs(&cable);
+	}
+
+	void add_mapped_out(const MappedOutputJack *mapped_out) {
+		if (!mapped_out)
+			return;
+
+		//TODO add a new component
+		if (num_inputs < 2) {
+			if (mapped_out->alias_name.size()) {
+				// lv_label_set_text_fmt(cable_to_labels[num_inputs], "Panel %s", mapped_out->alias_name.c_str());
+			} else {
+				auto name = get_panel_name<PanelDef>(JackOutput{}, mapped_out->panel_jack_id);
+				// lv_label_set_text_fmt(cable_to_labels[num_inputs], "Panel %s", name.c_str());
+			}
+			num_inputs++;
+		}
+	}
+
+	void add_connected_inputs(InternalCable const *int_cable) {
+		if (!int_cable)
+			return;
+
+		for (auto in : int_cable->ins) {
+			//TODO add a new component
+			auto inname = get_full_element_name(in.module_id, in.jack_id, ElementType::Input, patch);
+			// lv_label_set_text_fmt(cable_to_labels[num_inputs], "%s %s", inname.module_name.data(), inname.element_name.data());
+			num_inputs++;
+			if (num_inputs == 2)
+				break; //until we do components
+		}
+	}
+
 private:
 	PatchData &patch;
+
+	Jack out_jack;
+	std::array<Jack, 8> in_jacks;
+	size_t num_inputs = 0;
+
+	// The jack that brought us to this page:
 	uint16_t module_id = 0;
 	ElementCount::Counts counts{};
 	ElementCount::Indices indices{};
+
+	// std::array<lv_obj_t *, 2> cable_to_labels{ui_CableTo1, ui_CableTo2};
 };
 
 } // namespace MetaModule

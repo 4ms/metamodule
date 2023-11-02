@@ -4,6 +4,7 @@
 #include "gui/elements/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "patch.hh"
@@ -45,14 +46,17 @@ struct MappingPaneList {
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
+		// lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
 
 		auto name = get_panel_name<PanelDef>(JackInput{}, panel_jack_id);
 
 		if (panel_jack_id < PanelDef::NumUserFacingInJacks) {
 			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
-			lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
-			lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
+			lv_label_set_text_fmt(setname, "Panel %.16s <<", name.c_str());
+			if (panel_jack_id < 6)
+				lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
+			else
+				lv_label_set_text_fmt(label, "G%d", panel_jack_id - 5);
 			lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
 
 		} else {
@@ -72,14 +76,14 @@ struct MappingPaneList {
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
+		// lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
 
 		auto name = get_panel_name<PanelDef>(JackOutput{}, panel_jack_id);
 
 		if (panel_jack_id < Gui::knob_palette.size())
 			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
 
-		lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
+		lv_label_set_text_fmt(setname, "Panel %.16s <<", name.c_str());
 		lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
 		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
 
@@ -97,7 +101,7 @@ struct MappingPaneList {
 		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, patch);
 		lv_label_set_text_fmt(label,
 							  "%s %.16s %.16s",
-							  dir == ElementType::Input ? ">>" : "<<",
+							  dir == ElementType::Input ? " >>" : " <<",
 							  name.module_name.data(),
 							  name.element_name.data());
 
