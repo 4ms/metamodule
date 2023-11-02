@@ -33,28 +33,28 @@ inline std::string_view getParamName(engine::Module *module, int id) {
 	if (auto pq = module->getParamQuantity(id)) {
 		return pq->name;
 	}
-	return "";
+	return "(Param)";
 }
 
 inline std::string_view getInputName(engine::Module *module, int id) {
 	if (auto info = module->getInputInfo(id)) {
 		return info->name;
 	}
-	return "";
+	return "(In)";
 }
 
 inline std::string_view getOutputName(engine::Module *module, int id) {
 	if (auto info = module->getOutputInfo(id)) {
 		return info->name;
 	}
-	return "";
+	return "(Out)";
 }
 
 inline std::string_view getLightName(engine::Module *module, int id) {
 	if (auto info = module->getLightInfo(id)) {
 		return info->name;
 	}
-	return "";
+	return "(Light)";
 }
 
 template<class TWidget>
