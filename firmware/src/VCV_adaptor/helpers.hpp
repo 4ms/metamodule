@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
-#include "CoreModules/elements/element_setters.hh"
+#include "CoreModules/elements/element_strings.hh"
 #include "VCV_adaptor/app/Menu.hpp"
 #include "VCV_adaptor/app/SvgPanel.hpp"
 #include "VCV_adaptor/engine/Module.hpp"
@@ -9,6 +9,7 @@
 #include "VCV_adaptor/widget_convert/widget_element_convert.hh"
 #include <functional>
 #include <string_view>
+
 // #include "pr_dbg.hh"
 
 namespace rack
@@ -31,28 +32,40 @@ T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_
 
 inline std::string_view getParamName(engine::Module *module, int id) {
 	if (auto pq = module->getParamQuantity(id)) {
-		return pq->name;
+		if (pq->name.size()) {
+			remove_extended_chars(pq->name);
+			return pq->name;
+		}
 	}
 	return "(Param)";
 }
 
 inline std::string_view getInputName(engine::Module *module, int id) {
 	if (auto info = module->getInputInfo(id)) {
-		return info->name;
+		if (info->name.size()) {
+			remove_extended_chars(info->name);
+			return info->name;
+		}
 	}
 	return "(In)";
 }
 
 inline std::string_view getOutputName(engine::Module *module, int id) {
 	if (auto info = module->getOutputInfo(id)) {
-		return info->name;
+		if (info->name.size()) {
+			remove_extended_chars(info->name);
+			return info->name;
+		}
 	}
 	return "(Out)";
 }
 
 inline std::string_view getLightName(engine::Module *module, int id) {
 	if (auto info = module->getLightInfo(id)) {
-		return info->name;
+		if (info->name.size()) {
+			remove_extended_chars(info->name);
+			return info->name;
+		}
 	}
 	return "(Light)";
 }
