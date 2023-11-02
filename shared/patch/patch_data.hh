@@ -141,6 +141,26 @@ struct PatchData {
 		return nullptr;
 	}
 
+	const InternalCable *find_internal_cable_with_outjack(Jack out_jack) const {
+		for (auto &c : int_cables) {
+			if (c.out == out_jack && c.ins.size() > 0) {
+				return &c;
+			}
+		}
+		return nullptr;
+	}
+
+	const InternalCable *find_internal_cable_with_injack(Jack in_jack) const {
+		for (auto &c : int_cables) {
+			for (auto &in : c.ins) {
+				if (in == in_jack) {
+					return &c;
+				}
+			}
+		}
+		return nullptr;
+	}
+
 	const char *valid_knob_set_name(unsigned set_i) const {
 		if (set_i == MIDIKnobSet)
 			return "MIDI";
