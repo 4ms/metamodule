@@ -69,7 +69,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	}
 
 	auto audio_callback = [this]<unsigned block>() {
-		Debug::Pin0::high();
+		Debug::Pin4::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -77,26 +77,27 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
-		// 100us for a 128 block size, or 48us for a 64 block size = +0.75us/frame
-		// Makes midi poly 4 note loop go from 2.2us to 600ns per frame = -1.6us/frame => net 0.85us/frame = 4%
-		// Plus, probably benefits from knob mappings
-		mdrivlib::SystemCache::invalidate_dcache_by_range(&param_blocks[block], sizeof(ParamBlock));
+		// Copy from non-cacheable SYSRAM to cachable DDR: improves performance
+		local_p = param_blocks[block];
 
 		load_measure.start_measurement();
 
 		if (check_patch_loading())
-			process_nopatch(audio_blocks[1 - block], param_blocks[block]);
+			process_nopatch(audio_blocks[1 - block], local_p);
 		else
-			process(audio_blocks[1 - block], param_blocks[block]);
+			process(audio_blocks[1 - block], local_p);
 
 		load_measure.end_measurement();
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
 		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof sync_params);
+
+		// copy analyzed signals back to shared param block (so GUI thread can access it)
+		param_blocks[block].metaparams.ins = local_p.metaparams.ins;
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
-		Debug::Pin0::low();
+		Debug::Pin4::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },

@@ -72,6 +72,7 @@ private:
 	float mute_ctr = 1.f;
 	uint32_t halves_muted = 0;
 	bool ext_audio_connected = false;
+	ParamBlock local_p;
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
