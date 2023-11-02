@@ -308,7 +308,7 @@ private:
 		if (!event->target)
 			return;
 
-		auto cable_idx = reinterpret_cast<uint32_t>(event->target->user_data);
+		auto cable_idx = reinterpret_cast<uintptr_t>(event->target->user_data);
 		pr_err("Edit Cable %d -- not implemented yet\n", cable_idx);
 	}
 
