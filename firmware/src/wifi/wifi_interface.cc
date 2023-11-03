@@ -57,7 +57,23 @@ void WifiInterface::run()
 
 void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
 {
-    auto message = GetMessage(frame.data());
+    auto destination = frame[0];
+    auto payload = frame.subspan(1, frame.size()-1);
+
+    auto sendResponse = [destination](auto payload)
+    {
+        framer.sendStart(BufferedUSART2::transmit);
+        framer.sendPayload(destination, BufferedUSART2::transmit);
+        for (auto p : payload)
+        {
+            framer.sendPayload(p, BufferedUSART2::transmit);
+        }
+        framer.sendStop(BufferedUSART2::transmit);
+    };
+
+    // Parse message
+
+    auto message = GetMessage(payload.data());
 
     if (auto content = message->content(); content)
     {
@@ -71,7 +87,7 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
                 auto message = CreateMessage(fbb, AnyMessage_PresenceDetection, answer.Union());
                 fbb.Finish(message);
 
-                send_frame(fbb.GetBufferSpan());
+                sendResponse(fbb.GetBufferSpan());
             }
             else
             {
@@ -83,7 +99,7 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
             printf_("State: %u\n", switchMessage->state());
 
             // Just echo back raw
-            send_frame(frame);
+            sendResponse(payload);
         }
         else if (auto patchNameMessage = message->content_as_PatchNames(); patchNameMessage)
         {
@@ -100,11 +116,26 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
             };
             auto names = fbb.CreateVector(elems);
 
-            auto patchNames = CreatePatchNames(fbb, false, names);
+            auto patchNames = CreatePatchNames(fbb, names);
             auto message = CreateMessage(fbb, AnyMessage_PatchNames, patchNames.Union());
             fbb.Finish(message);
 
-            send_frame(fbb.GetBufferSpan());
+            sendResponse(fbb.GetBufferSpan());
+        }
+        else if (auto uploadPatchMessage = message->content_as_UploadPatch(); uploadPatchMessage)
+        {
+            assert(uploadPatchMessage->content()->is_span_observable);
+
+            auto receivedPatchData = std::span(uploadPatchMessage->content()->data(), uploadPatchMessage->content()->size());
+
+            printf_("Received Patch of %u bytes\n", receivedPatchData.size());
+
+            flatbuffers::FlatBufferBuilder fbb;
+            auto result = CreateResult(fbb, true);
+            auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
+            fbb.Finish(message);
+
+            sendResponse(fbb.GetBufferSpan());
         }
         else
         {
