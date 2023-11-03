@@ -29,6 +29,8 @@ class PageList {
 	static inline uint32_t active_knobset_id = 0;
 	static inline uint32_t view_knobset_id = 0;
 	static inline uint32_t patch_revision = 0;
+	static inline ElementCount::Counts selected_element_counts{};
+	static inline ElementCount::Indices selected_element_indices{};
 
 public:
 	static void set_selected_patch_loc(PatchLocation loc) {
@@ -37,6 +39,22 @@ public:
 
 	static PatchLocation get_selected_patch_location() {
 		return selected_patch_loc;
+	}
+
+	static ElementCount::Counts get_selected_element_counts() {
+		return selected_element_counts;
+	}
+
+	static ElementCount::Indices get_selected_element_indices() {
+		return selected_element_indices;
+	}
+
+	static void set_selected_element_counts(ElementCount::Counts counts) {
+		selected_element_counts = counts;
+	}
+
+	static void set_selected_element_indices(ElementCount::Indices indices) {
+		selected_element_indices = indices;
 	}
 
 	static void set_active_knobset(uint32_t id) {

@@ -9,7 +9,9 @@ set(SHARED ${PROJECT_SOURCE_DIR}/../shared)
 set(SIM_ROOT ${PROJECT_SOURCE_DIR})
 set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
 
-set(LV_CONF_PATH ${SIM_ROOT}/lv_conf.h CACHE STRING "" FORCE)
+set(LV_CONF_PATH
+    ${SIM_ROOT}/lv_conf.h
+    CACHE STRING "" FORCE)
 
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 
@@ -25,6 +27,7 @@ include(${LVGL_DIR}/CMakeLists.txt)
 
 file(STRINGS ${FWDIR}/src/gui/slsexport/meta5/filelist.txt SLS_SOURCES)
 list(TRANSFORM SLS_SOURCES PREPEND "${FWDIR}/src/gui/slsexport/meta5/")
+list(APPEND SLS_SOURCES "${FWDIR}/src/gui/slsexport/ui_comp_unmappedsetitem.c")
 
 # Fixup for compiler warning in LVGL 8.3.4:
 set_source_files_properties(${FWDIR}/src/gui/slsexport/meta5/ui.c
@@ -32,7 +35,8 @@ set_source_files_properties(${FWDIR}/src/gui/slsexport/meta5/ui.c
 
 # #################### VCV Adaptor ##################################
 
-add_subdirectory(${FWDIR}/src/VCV_adaptor ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
+add_subdirectory(${FWDIR}/src/VCV_adaptor
+                 ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
 target_sources(VCV_adaptor PRIVATE stubs/random.cpp)
 target_include_directories(VCV_adaptor PRIVATE stubs/ ${FWDIR}/src/console)
 
@@ -49,7 +53,8 @@ include(${FWDIR}/vcv_ports/brands.cmake)
 
 foreach(brand ${brands})
 
-  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
+  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand}
+                   ${CMAKE_CURRENT_BINARY_DIR}/${brand})
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
 
   target_include_directories(
@@ -63,7 +68,8 @@ foreach(brand ${brands})
            ${SHARED}
            ${SHARED}/cpputil)
 
-  file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
+  file(GLOB BRAND_ARTWORK_SOURCES
+       ${FWDIR}/src/gui/images/${brand}/components/*.c)
   list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
 
   include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
@@ -78,10 +84,13 @@ foreach(brand ${brands})
     if(EXISTS "${image_path}")
       cleanup_imgname(${IMGNAME})
 
-      # Generate a .cc file that will register the map from slug to lvgl image data
-      configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
+      # Generate a .cc file that will register the map from slug to lvgl image
+      # data
+      configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in
+                     ${brand}/${module}_register.cc)
 
-      list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
+      list(APPEND FACEPLATE_ARTWORK_SOURCES
+           ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
       list(APPEND FACEPLATE_ARTWORK_SOURCES ${image_path})
     endif()
   endforeach()
@@ -91,11 +100,10 @@ endforeach()
 # #################### RYML + Patch Convert ##################################
 
 file(GLOB RYML_SOURCES ${SHARED}/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp
-                       ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
+     ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
 
 add_library(ryml ${SHARED}/patch_convert/ryml/ryml_serial.cc
-                 ${SHARED}/patch_convert/yaml_to_patch.cc 
-                 ${RYML_SOURCES})
+                 ${SHARED}/patch_convert/yaml_to_patch.cc ${RYML_SOURCES})
 
 target_include_directories(
   ryml
@@ -112,11 +120,8 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(simulator src/main.cc 
-                         src/ui.cc 
-                         ${FACEPLATE_ARTWORK_SOURCES}
-                         ${COMP_ARTWORK_SOURCES} 
-                         ${SLS_SOURCES})
+add_executable(simulator src/main.cc src/ui.cc ${FACEPLATE_ARTWORK_SOURCES}
+                         ${COMP_ARTWORK_SOURCES} ${SLS_SOURCES})
 
 target_include_directories(
   simulator
@@ -139,7 +144,8 @@ target_include_directories(
 
 target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 VCV_adaptor)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2
+                                        VCV_adaptor)
 
 foreach(brand ${brands})
   target_link_libraries(simulator PRIVATE ${brand}Library)

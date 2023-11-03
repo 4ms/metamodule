@@ -1,8 +1,8 @@
-SET(SOURCES components/ui_comp_knobcontainer.c
+SET(SOURCES components/ui_comp_cabletoeditbutton.c
+    components/ui_comp_knobcontainer.c
     components/ui_comp_knobcontainerbig.c
     components/ui_comp_knobsetgroup.c
     components/ui_comp_mappedknobsetitem.c
-    components/ui_comp_unmappedsetitem.c
     components/ui_comp.c
     screens/ui_PatchSelectorPage.c
     screens/ui_PatchViewPage.c
@@ -10,6 +10,8 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     screens/ui_KnobSetViewPage.c
     screens/ui_EditMappingPage.c
     screens/ui_DeleteMappingPopUp.c
+    screens/ui_CableMapPage.c
+    screens/ui_CableInputJackComponent.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
