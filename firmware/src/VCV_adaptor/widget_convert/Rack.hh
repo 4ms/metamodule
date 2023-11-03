@@ -57,6 +57,21 @@ struct ElementConvert<componentlibrary::Davies1900hLargeWhiteKnob> {
 };
 
 template<>
+struct ElementConvert<componentlibrary::Rogan1PSGreen> {
+	using ElementType = MetaModule::Rogan1PSGreen;
+};
+
+template<>
+struct ElementConvert<componentlibrary::Rogan1PSRed> {
+	using ElementType = MetaModule::Rogan1PSRed;
+};
+
+template<>
+struct ElementConvert<componentlibrary::Rogan1PSWhite> {
+	using ElementType = MetaModule::Rogan1PSWhite;
+};
+
+template<>
 struct ElementConvert<componentlibrary::Rogan2SGray> {
 	using ElementType = MetaModule::Rogan2SGray;
 };
@@ -85,6 +100,22 @@ template<>
 struct ElementConvert<componentlibrary::Rogan2PSGreen> {
 	using ElementType = MetaModule::Rogan2PSGreen;
 };
+
+template<>
+struct ElementConvert<componentlibrary::Rogan3PSWhite> {
+	using ElementType = MetaModule::Rogan3PSWhite;
+};
+
+template<>
+struct ElementConvert<componentlibrary::Rogan3PSRed> {
+	using ElementType = MetaModule::Rogan3PSRed;
+};
+
+template<>
+struct ElementConvert<componentlibrary::Rogan3PSGreen> {
+	using ElementType = MetaModule::Rogan3PSGreen;
+};
+
 
 template<>
 struct ElementConvert<componentlibrary::Trimpot> {
@@ -124,6 +155,21 @@ struct ElementConvert<componentlibrary::SmallLight<componentlibrary::GreenLight>
 template<>
 struct ElementConvert<componentlibrary::SmallLight<componentlibrary::GreenRedLight>> {
 	using ElementType = MetaModule::SmallLight<MetaModule::GreenRedLight>;
+};
+
+template<>
+struct ElementConvert<componentlibrary::MediumLight<componentlibrary::GreenRedLight>> {
+	using ElementType = MetaModule::MediumLight<MetaModule::GreenRedLight>;
+};
+
+template<>
+struct ElementConvert<componentlibrary::MediumLight<componentlibrary::RedLight>> {
+	using ElementType = MetaModule::MediumLight<MetaModule::RedLight>;
+};
+
+template<>
+struct ElementConvert<componentlibrary::MediumLight<componentlibrary::GreenLight>> {
+	using ElementType = MetaModule::MediumLight<MetaModule::GreenLight>;
 };
 
 template<>

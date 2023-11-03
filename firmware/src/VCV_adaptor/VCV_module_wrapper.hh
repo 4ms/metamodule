@@ -4,6 +4,7 @@
 #include "VCV_adaptor/engine/Param.hpp"
 #include "VCV_adaptor/engine/ParamQuantity.hpp"
 #include "VCV_adaptor/engine/Port.hpp"
+#include "VCV_adaptor/random.hpp"
 #include <array>
 #include <memory>
 #include <vector>
@@ -20,6 +21,10 @@ struct VCVModuleWrapper : CoreProcessor {
 		float sampleTime;
 		int64_t frame;
 	};
+
+	VCVModuleWrapper() {
+		rack::random::init();
+	}
 
 	virtual void process(const ProcessArgs &) = 0;
 

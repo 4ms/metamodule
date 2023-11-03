@@ -320,7 +320,6 @@ target_link_script(
   -Wno-psabi
   -ffreestanding
   -nostartfiles
-  # -nostdlib
   -flto=auto
 )
 
