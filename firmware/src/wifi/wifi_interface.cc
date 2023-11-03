@@ -29,7 +29,7 @@ Configuration_t FrameConfig
     .escape=0x03
 };
 
-StaticDeframer<100> deframer(FrameConfig);
+StaticDeframer<16000> deframer(FrameConfig);
 Framer framer(FrameConfig);
 
 
