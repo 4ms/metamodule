@@ -8,7 +8,7 @@
 #include "gui/styles.hh"
 #include "pr_dbg.hh"
 
-lv_obj_t *lv_obj_create_copy(lv_obj_t *parent, lv_obj_t *copy) {
+inline lv_obj_t *lv_obj_create_copy(lv_obj_t *parent, lv_obj_t *copy) {
 
 	if (copy == nullptr)
 		return nullptr;
@@ -18,6 +18,10 @@ lv_obj_t *lv_obj_create_copy(lv_obj_t *parent, lv_obj_t *copy) {
 	if (new_obj == nullptr)
 		return nullptr;
 
+	lv_obj_class_init_obj(new_obj);
+
+	lv_obj_allocate_spec_attr(new_obj);
+
 	new_obj->spec_attr->scroll = copy->spec_attr->scroll;
 	new_obj->spec_attr->ext_click_pad = copy->spec_attr->ext_click_pad;
 	new_obj->spec_attr->ext_draw_size = copy->spec_attr->ext_draw_size;
@@ -25,32 +29,59 @@ lv_obj_t *lv_obj_create_copy(lv_obj_t *parent, lv_obj_t *copy) {
 	new_obj->spec_attr->scroll_snap_x = copy->spec_attr->scroll_snap_x;
 	new_obj->spec_attr->scroll_snap_y = copy->spec_attr->scroll_snap_y;
 	new_obj->spec_attr->scroll_dir = copy->spec_attr->scroll_dir;
-	new_obj->spec_attr->event_dsc_cnt = copy->spec_attr->event_dsc_cnt;
+	new_obj->spec_attr->event_dsc_cnt = 0; //copy->spec_attr->event_dsc_cnt;
 	new_obj->spec_attr->layer_type = copy->spec_attr->layer_type;
 
-	// _lv_obj_style_t * styles; //array of style_cnt elements
+	new_obj->style_cnt = 0;
 	for (unsigned i = 0; i < copy->style_cnt; i++) {
 		lv_style_t *copy_style = copy->styles[i].style;
-		uint32_t copy_selector = copy->styles[i].selector;
+		lv_style_selector_t copy_selector = copy->styles[i].selector;
 		// uint32_t copy_is_local = copy->styles[i].is_local;
 		// uint32_t copy_is_trans = copy->styles[i].is_trans;
-		lv_obj_add_style(new_obj, copy_style, copy_selector);
+
+		//get style props and values
+		printf("Style %d has %d prop_cnt\n", i, copy_style->prop_cnt);
+		if (copy_style->prop_cnt > 0) {
+			uint8_t *tmp = copy_style->v_p.values_and_props + copy_style->prop_cnt * sizeof(lv_style_value_t);
+			auto *props = (uint16_t *)tmp;
+			for (uint32_t propi = 0; propi < copy_style->prop_cnt; propi++) {
+				auto *values = (lv_style_value_t *)copy_style->v_p.values_and_props;
+
+				lv_style_value_t value = values[propi];
+				auto prop = static_cast<lv_style_prop_t>(props[propi]);
+
+				//seems to crash the same way regardless of these conditionals (even if no lcoal style is set)
+				if (prop != LV_STYLE_COLOR_FILTER_DSC && prop != LV_STYLE_BG_GRAD && prop != LV_STYLE_BG_IMG_SRC &&
+					prop != LV_STYLE_TEXT_FONT && prop != LV_STYLE_ANIM && prop != LV_STYLE_TRANSITION &&
+					prop != LV_STYLE_BG_GRAD)
+				{
+					printf("Prop %d: prop=%d value=%x\n", propi, (int)prop, value.num);
+					lv_obj_set_local_style_prop(new_obj, prop, value, copy_selector);
+				} else {
+					printf("Skip Prop %d: prop=%d value=%x\n", propi, (int)prop, value.num);
+				}
+			}
+		}
+		// lv_obj_add_style(new_obj, copy_style, copy_selector);
+
+		// new_obj->styles[i].is_local = copy_is_local;
+		// new_obj->styles[i].is_trans = copy_is_trans;
 	}
 
 	new_obj->coords = copy->coords;
 	new_obj->flags = copy->flags;
 	new_obj->state = copy->state;
-	new_obj->layout_inv = copy->layout_inv;
-	new_obj->scr_layout_inv = copy->scr_layout_inv;
-	new_obj->skip_trans = copy->skip_trans;
+	new_obj->layout_inv = 1; //copy->layout_inv;
+	new_obj->scr_layout_inv = 0;
+	copy->scr_layout_inv;
+	new_obj->skip_trans = 0; //copy->skip_trans;
 	// new_obj->style_cnt = copy->style_cnt;
 	new_obj->h_layout = copy->h_layout;
 	new_obj->w_layout = copy->w_layout;
-	new_obj->being_deleted = copy->being_deleted;
+	new_obj->being_deleted = 0; //copy->being_deleted;
 
 	for (unsigned i = 0; i < copy->spec_attr->child_cnt; i++) {
 		lv_obj_create_copy(new_obj, copy->spec_attr->children[i]);
-		// lv_obj_class_create_obj(copy->spec_attr->children[i]->class_p, new_obj);
 	}
 
 	//Need to set the group manually
@@ -184,7 +215,7 @@ struct CableEditPage : PageBase {
 			return;
 
 		for (auto in : int_cable->ins) {
-			auto button = lv_obj_create_copy(ui_CableToPanel, ui_CableToEditButton1);
+			auto button = lv_obj_create_copy(ui_CableToPanel, ui_CableToEditButton);
 			auto label = lv_obj_get_child(button, 0);
 			// auto button = ui_CableToEditButton_create(ui_CableToPanel);
 			// auto label = ui_comp_get_child(button, UI_COMP_CABLETOEDITBUTTON_CABLETOLABEL);
