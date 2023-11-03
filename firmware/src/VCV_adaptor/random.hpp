@@ -120,7 +120,8 @@ inline float uniform() {
 
 /** Returns a normal random number with mean 0 and standard deviation 1 */
 //TODO: replace with something less processor-intensive (no std::sqrt, std::log)
-[[deprecated("This is too processor-heavy for use on Cortex-A7")]] inline float normal() {
+// [[deprecated("This is too processor-heavy for use on Cortex-A7")]]
+inline float normal() {
 	// Box-Muller transform
 	float radius = std::sqrt(-2.f * std::log(1.f - get<float>()));
 	float theta = 2.f * M_PI * get<float>();

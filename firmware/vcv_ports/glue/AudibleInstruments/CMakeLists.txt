@@ -16,7 +16,7 @@ set_source_files_properties(
 )
 
 # Fix for stmlib STATIC_ASSERT creating typedefs that aren't used
-target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs)
+target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs -Wno-deprecated-volatile)
 
 set_source_files_properties(
   ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc PROPERTIES COMPILE_OPTIONS "-Wno-asm-operand-widths"
