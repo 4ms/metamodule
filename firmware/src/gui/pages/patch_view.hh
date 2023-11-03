@@ -69,10 +69,12 @@ struct PatchViewPage : PageBase {
 
 		if (is_patch_playing) {
 			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
-			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_1);
+			lv_show(ui_LoadMeter2);
+			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
 			lv_label_set_text(ui_LoadMeter2, "");
-			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_1);
+			lv_hide(ui_LoadMeter2);
+			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
 		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
@@ -220,13 +222,14 @@ struct PatchViewPage : PageBase {
 			if (metaparams.audio_load != last_audio_load) {
 				metaparams.audio_load = last_audio_load;
 				lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
+				lv_show(ui_LoadMeter2);
 			}
 		}
 
 		if (is_patch_playing) {
-			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_1);
+			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
-			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_1);
+			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 	}
 
