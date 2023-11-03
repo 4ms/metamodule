@@ -89,7 +89,7 @@ struct CableEditPage : PageBase {
 		, patch{patch_storage.get_view_patch()} {
 		PageList::register_page(this, PageId::CableEdit);
 
-		// init_bg(ui_CableMapPage);
+		init_bg(ui_CableMapPage);
 	}
 
 	void prepare_focus() override {
