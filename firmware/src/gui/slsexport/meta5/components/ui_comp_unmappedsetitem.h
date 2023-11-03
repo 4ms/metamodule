@@ -6,7 +6,7 @@
 #ifndef _UI_COMP_UNMAPPEDSETITEM_H
 #define _UI_COMP_UNMAPPEDSETITEM_H
 
-#include "meta5/ui.h"
+#include "../ui.h"
 
 #ifdef __cplusplus
 extern "C" {

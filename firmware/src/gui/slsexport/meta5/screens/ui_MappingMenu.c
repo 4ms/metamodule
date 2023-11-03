@@ -147,8 +147,8 @@ lv_obj_set_style_outline_color(ui_MappingParameters, lv_color_hex(0x777777), LV_
 lv_obj_set_style_outline_opa(ui_MappingParameters, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_width(ui_MappingParameters, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_pad(ui_MappingParameters, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_MappingParameters, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_MappingParameters, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_MappingParameters, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_MappingParameters, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MappingParameters, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MappingParameters, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_MappingParameters, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -233,12 +233,14 @@ lv_obj_set_style_outline_color(ui_ControlButton, lv_color_hex(0x000000), LV_PART
 lv_obj_set_style_outline_opa(ui_ControlButton, 255, LV_PART_MAIN| LV_STATE_PRESSED);
 lv_obj_set_style_outline_width(ui_ControlButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
 lv_obj_set_style_outline_pad(ui_ControlButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
-lv_obj_set_style_outline_color(ui_ControlButton, lv_color_hex(0xBBBBBB), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_color(ui_ControlButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_ControlButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_width(ui_ControlButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_pad(ui_ControlButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_color(ui_ControlButton, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_color(ui_ControlButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
 lv_obj_set_style_outline_opa(ui_ControlButton, 128, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_ControlButton, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_ControlButton, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 ui_ControlButtonLabel = lv_label_create(ui_ControlButton);
 lv_obj_set_width( ui_ControlButtonLabel, LV_SIZE_CONTENT);  /// 42
@@ -530,10 +532,14 @@ lv_obj_set_style_pad_row(ui_CancelAdd, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_CancelAdd, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_color(ui_CancelAdd, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_PRESSED );
 lv_obj_set_style_outline_opa(ui_CancelAdd, 0, LV_PART_MAIN| LV_STATE_PRESSED);
-lv_obj_set_style_outline_color(ui_CancelAdd, lv_color_hex(0xBBBBBB), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_color(ui_CancelAdd, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_CancelAdd, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_width(ui_CancelAdd, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_pad(ui_CancelAdd, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_CancelAdd, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_CancelAdd, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_CancelAdd, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_CancelAdd, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 ui_CancelAddLabel = lv_label_create(ui_CancelAdd);
 lv_obj_set_width( ui_CancelAddLabel, LV_SIZE_CONTENT);  /// 1
@@ -574,6 +580,10 @@ lv_obj_set_style_outline_color(ui_OkAdd, lv_color_hex(0xFD8B18), LV_PART_MAIN | 
 lv_obj_set_style_outline_opa(ui_OkAdd, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_width(ui_OkAdd, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_pad(ui_OkAdd, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_OkAdd, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_OkAdd, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_OkAdd, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_OkAdd, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 ui_OkAddLabel = lv_label_create(ui_OkAdd);
 lv_obj_set_width( ui_OkAddLabel, LV_SIZE_CONTENT);  /// 1

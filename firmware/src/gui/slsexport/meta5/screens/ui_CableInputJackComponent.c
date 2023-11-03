@@ -8,7 +8,24 @@
 void ui_CableInputJackComponent_screen_init(void)
 {
 ui_CableInputJackComponent = lv_obj_create(NULL);
-lv_obj_clear_flag( ui_CableInputJackComponent, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_clear_flag( ui_CableInputJackComponent, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
+lv_obj_set_scrollbar_mode(ui_CableInputJackComponent, LV_SCROLLBAR_MODE_ACTIVE);
+lv_obj_set_scroll_dir(ui_CableInputJackComponent, LV_DIR_VER);
+lv_obj_set_flex_flow(ui_CableInputJackComponent,LV_FLEX_FLOW_ROW_WRAP);
+lv_obj_set_flex_align(ui_CableInputJackComponent, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_set_style_radius(ui_CableInputJackComponent, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_CableInputJackComponent, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_CableInputJackComponent, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_shadow_color(ui_CableInputJackComponent, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_shadow_opa(ui_CableInputJackComponent, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_shadow_width(ui_CableInputJackComponent, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_shadow_spread(ui_CableInputJackComponent, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CableInputJackComponent, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CableInputJackComponent, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CableInputJackComponent, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CableInputJackComponent, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_CableInputJackComponent, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_CableInputJackComponent, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CableToEditButton = lv_btn_create(ui_CableInputJackComponent);
 lv_obj_set_width( ui_CableToEditButton, lv_pct(100));

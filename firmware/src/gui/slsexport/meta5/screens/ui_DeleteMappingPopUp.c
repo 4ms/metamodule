@@ -113,10 +113,14 @@ lv_obj_set_style_pad_row(ui_CancelButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_CancelButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_color(ui_CancelButton, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_PRESSED );
 lv_obj_set_style_outline_opa(ui_CancelButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
-lv_obj_set_style_outline_color(ui_CancelButton, lv_color_hex(0xBBBBBB), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_color(ui_CancelButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_CancelButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_width(ui_CancelButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_pad(ui_CancelButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_CancelButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_CancelButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_CancelButton, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_CancelButton, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 ui_CancelLabel = lv_label_create(ui_CancelButton);
 lv_obj_set_width( ui_CancelLabel, LV_SIZE_CONTENT);  /// 1
@@ -157,6 +161,10 @@ lv_obj_set_style_outline_color(ui_TrashButton2, lv_color_hex(0xE91C25), LV_PART_
 lv_obj_set_style_outline_opa(ui_TrashButton2, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_width(ui_TrashButton2, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_pad(ui_TrashButton2, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_TrashButton2, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_TrashButton2, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_TrashButton2, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_TrashButton2, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 ui_TrashLabel2 = lv_label_create(ui_TrashButton2);
 lv_obj_set_width( ui_TrashLabel2, LV_SIZE_CONTENT);  /// 1

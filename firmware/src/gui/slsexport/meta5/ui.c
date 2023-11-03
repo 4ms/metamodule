@@ -208,8 +208,6 @@ lv_obj_t *ui_CableFromEditButton;
 lv_obj_t *ui_CableFromLabel;
 lv_obj_t *ui_CableToTitle;
 lv_obj_t *ui_CableToPanel;
-lv_obj_t *ui_CableToEditButton1;
-lv_obj_t *ui_CableToLabel1;
 lv_obj_t *ui_CableDeleteButton;
 lv_obj_t *ui_CableDeleteIcon;
 lv_obj_t *ui_CableSave;

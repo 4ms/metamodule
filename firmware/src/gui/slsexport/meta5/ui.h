@@ -203,8 +203,6 @@ extern lv_obj_t *ui_CableFromEditButton;
 extern lv_obj_t *ui_CableFromLabel;
 extern lv_obj_t *ui_CableToTitle;
 extern lv_obj_t *ui_CableToPanel;
-extern lv_obj_t *ui_CableToEditButton1;
-extern lv_obj_t *ui_CableToLabel1;
 extern lv_obj_t *ui_CableDeleteButton;
 extern lv_obj_t *ui_CableDeleteIcon;
 extern lv_obj_t *ui_CableSave;
