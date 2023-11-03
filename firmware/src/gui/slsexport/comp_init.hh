@@ -1,7 +1,6 @@
 #pragma once
-#include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
-#include "meta5/components/ui_comp.h"
+#include "ui_local.h"
 
 struct SlsComponentInit {
 	SlsComponentInit() {

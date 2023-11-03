@@ -102,7 +102,6 @@ target_include_directories(ryml PUBLIC ${RYMLDIR}/src ${RYMLDIR}/ext/c4core/src)
 # SLS Exported GUI (meta5)
 #
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
-target_sources(ui PRIVATE ${FWDIR}/src/gui/slsexport/ui_comp_unmappedsetitem.c)
 target_link_libraries(ui PRIVATE lvgl::lvgl mp15xa7_arch)
 # Fix for SLS generated files (See https://forum.squareline.io/t/unused-variable-target-warning-when-compiling/1610/3 )
 target_compile_options(ui PRIVATE -Wno-unused-variable)

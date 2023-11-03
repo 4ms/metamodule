@@ -27,7 +27,6 @@ include(${LVGL_DIR}/CMakeLists.txt)
 
 file(STRINGS ${FWDIR}/src/gui/slsexport/meta5/filelist.txt SLS_SOURCES)
 list(TRANSFORM SLS_SOURCES PREPEND "${FWDIR}/src/gui/slsexport/meta5/")
-list(APPEND SLS_SOURCES "${FWDIR}/src/gui/slsexport/ui_comp_unmappedsetitem.c")
 
 # Fixup for compiler warning in LVGL 8.3.4:
 set_source_files_properties(${FWDIR}/src/gui/slsexport/meta5/ui.c
