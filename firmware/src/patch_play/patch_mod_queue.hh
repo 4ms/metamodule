@@ -1,7 +1,7 @@
 #pragma once
-
 #include "patch/patch.hh"
 #include "util/lockfree_fifo_spsc.hh"
+#include "util/overloaded.hh"
 #include <variant>
 
 namespace MetaModule
@@ -32,13 +32,5 @@ using PatchModRequest = std::variant<SetStaticParam, AddMapping, AddMidiMap, Mod
 static_assert(sizeof(PatchModRequest) == 40);
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
-
-template<class... Ts>
-struct overloaded : Ts... {
-	using Ts::operator()...;
-};
-// Not needed in gcc 11, but needed for clangd 15
-template<class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
 
 } // namespace MetaModule
