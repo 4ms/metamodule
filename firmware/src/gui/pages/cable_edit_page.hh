@@ -29,56 +29,40 @@ inline lv_obj_t *lv_obj_create_copy(lv_obj_t *parent, lv_obj_t *copy) {
 	new_obj->spec_attr->scroll_snap_x = copy->spec_attr->scroll_snap_x;
 	new_obj->spec_attr->scroll_snap_y = copy->spec_attr->scroll_snap_y;
 	new_obj->spec_attr->scroll_dir = copy->spec_attr->scroll_dir;
-	new_obj->spec_attr->event_dsc_cnt = 0; //copy->spec_attr->event_dsc_cnt;
+	new_obj->spec_attr->event_dsc_cnt = 0; //events must be added manually
 	new_obj->spec_attr->layer_type = copy->spec_attr->layer_type;
 
 	new_obj->style_cnt = 0;
 	for (unsigned i = 0; i < copy->style_cnt; i++) {
 		lv_style_t *copy_style = copy->styles[i].style;
 		lv_style_selector_t copy_selector = copy->styles[i].selector;
-		// uint32_t copy_is_local = copy->styles[i].is_local;
-		// uint32_t copy_is_trans = copy->styles[i].is_trans;
 
-		//get style props and values
+		//copy style props and values
 		printf("Style %d has %d prop_cnt\n", i, copy_style->prop_cnt);
 		if (copy_style->prop_cnt > 0) {
 			uint8_t *tmp = copy_style->v_p.values_and_props + copy_style->prop_cnt * sizeof(lv_style_value_t);
 			auto *props = (uint16_t *)tmp;
 			for (uint32_t propi = 0; propi < copy_style->prop_cnt; propi++) {
 				auto *values = (lv_style_value_t *)copy_style->v_p.values_and_props;
-
 				lv_style_value_t value = values[propi];
 				auto prop = static_cast<lv_style_prop_t>(props[propi]);
-
-				//seems to crash the same way regardless of these conditionals (even if no lcoal style is set)
-				if (prop != LV_STYLE_COLOR_FILTER_DSC && prop != LV_STYLE_BG_GRAD && prop != LV_STYLE_BG_IMG_SRC &&
-					prop != LV_STYLE_TEXT_FONT && prop != LV_STYLE_ANIM && prop != LV_STYLE_TRANSITION &&
-					prop != LV_STYLE_BG_GRAD)
-				{
-					printf("Prop %d: prop=%d value=%x\n", propi, (int)prop, value.num);
-					lv_obj_set_local_style_prop(new_obj, prop, value, copy_selector);
-				} else {
-					printf("Skip Prop %d: prop=%d value=%x\n", propi, (int)prop, value.num);
-				}
+				lv_obj_set_local_style_prop(new_obj, prop, value, copy_selector);
 			}
 		}
-		// lv_obj_add_style(new_obj, copy_style, copy_selector);
-
-		// new_obj->styles[i].is_local = copy_is_local;
-		// new_obj->styles[i].is_trans = copy_is_trans;
 	}
 
 	new_obj->coords = copy->coords;
+
+	// TODO: better if we call lv_obj_add_flag(new_obj, flag_bit)?
 	new_obj->flags = copy->flags;
+
 	new_obj->state = copy->state;
-	new_obj->layout_inv = 1; //copy->layout_inv;
-	new_obj->scr_layout_inv = 0;
-	copy->scr_layout_inv;
-	new_obj->skip_trans = 0; //copy->skip_trans;
-	// new_obj->style_cnt = copy->style_cnt;
-	new_obj->h_layout = copy->h_layout;
-	new_obj->w_layout = copy->w_layout;
-	new_obj->being_deleted = 0; //copy->being_deleted;
+	new_obj->layout_inv = 1;				//"dirty", needs redrawing
+	new_obj->scr_layout_inv = 0;			//seems to only apply to screens?
+	new_obj->skip_trans = copy->skip_trans; //??
+	new_obj->h_layout = copy->h_layout;		//1 if height is set by layout (flex, grid)
+	new_obj->w_layout = copy->w_layout;		//1 if width is set by layout
+	new_obj->being_deleted = 0;
 
 	for (unsigned i = 0; i < copy->spec_attr->child_cnt; i++) {
 		lv_obj_create_copy(new_obj, copy->spec_attr->children[i]);
@@ -111,7 +95,6 @@ struct CableEditPage : PageBase {
 	void prepare_focus() override {
 		lv_group_remove_all_objs(group);
 
-		num_inputs = 0;
 		auto num_tos = lv_obj_get_child_cnt(ui_CableToPanel);
 		for (unsigned i = 0; i < num_tos; i++) {
 			auto child = lv_obj_get_child(ui_CableToPanel, i);
@@ -126,7 +109,7 @@ struct CableEditPage : PageBase {
 		indices = PageList::get_selected_element_indices();
 
 		if (counts.num_inputs > 0) {
-			printf("Node with input jack %d on module %d\n", indices.input_idx, module_id);
+
 			Jack in_jack = {.module_id = module_id, .jack_id = indices.input_idx};
 			auto *cable = patch.find_internal_cable_with_injack(in_jack);
 
@@ -140,25 +123,24 @@ struct CableEditPage : PageBase {
 
 			add_mapped_in(patch.find_mapped_injack(in_jack));
 
-			lv_label_set_text(ui_CableMapPageTitle, num_inputs ? "Edit Connections" : "Add Cable");
-
 		} else if (counts.num_outputs > 0) {
-			// We know the output jack, scan int_cables and mapped_outs
-			out_jack = {.module_id = module_id, .jack_id = indices.output_idx};
-			num_inputs = 0;
 
+			out_jack = {.module_id = module_id, .jack_id = indices.output_idx};
 			add_connected_inputs(patch.find_internal_cable_with_outjack(out_jack));
 
 			add_mapped_out(patch.find_mapped_outjack(out_jack));
 
 			auto outname = get_full_element_name(module_id, indices.output_idx, ElementType::Output, patch);
 			lv_label_set_text_fmt(ui_CableFromLabel, "%s %s", outname.module_name.data(), outname.element_name.data());
-			lv_label_set_text(ui_CableMapPageTitle, num_inputs ? "Edit Connections" : "Add Cable");
 
 		} else
 			return; //not an input or output
 
+		lv_label_set_text(ui_CableMapPageTitle, in_jack_objs.size() > 0 ? "Edit Connections" : "Add Cable");
+
 		lv_group_add_obj(group, ui_CableDeleteButton);
+		lv_group_add_obj(group, ui_CableSave);
+		lv_group_add_obj(group, ui_CableCancel);
 	}
 
 	void update() override {
@@ -171,7 +153,7 @@ struct CableEditPage : PageBase {
 
 	void blur() override {
 		for (auto *c : in_jack_objs) {
-			lv_obj_del(c);
+			lv_obj_del_async(c);
 		}
 		in_jack_objs.clear();
 	}
@@ -195,7 +177,7 @@ struct CableEditPage : PageBase {
 		if (!mapped_out)
 			return;
 
-		auto button = lv_obj_create_copy(ui_CableToPanel, ui_CableToEditButton1);
+		auto button = lv_obj_create_copy(ui_CableToPanel, ui_CableToEditButton);
 		auto label = lv_obj_get_child(button, 0);
 		// auto button = ui_CableToEditButton_create(ui_CableToPanel);
 		// auto label = ui_comp_get_child(button, UI_COMP_CABLETOEDITBUTTON_CABLETOLABEL);
@@ -233,7 +215,6 @@ private:
 	std::vector<lv_obj_t *> in_jack_objs;
 	Jack out_jack;
 	// std::array<Jack, 8> in_jacks;
-	size_t num_inputs = 0;
 
 	// The jack that brought us to this page:
 	uint16_t module_id = 0;
