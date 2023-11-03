@@ -32,7 +32,7 @@ private:
 		}
 		else
 		{
-			pr_err("StaticDeframer: Frame larger than maximum size");
+			pr_err("StaticDeframer: Frame larger than maximum size\n");
 			doReset(func);
 		}
 	}
