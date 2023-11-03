@@ -30,6 +30,29 @@ public:
 		func(Configuration.end);
 	}
 
+	template <typename FUNC>
+	void sendStart(const FUNC&& func)
+	{
+		func(Configuration.start);
+	}
+
+	template <typename FUNC>
+	void sendStop(const FUNC&& func)
+	{
+		func(Configuration.end);
+	}
+
+	template <typename FUNC>
+	void sendPayload(uint8_t byte, const FUNC&& func)
+	{
+		if (byte == Configuration.start || byte == Configuration.end || byte == Configuration.escape)
+		{
+			func(Configuration.escape);
+		}
+
+		func(byte);
+	}
+
 private:
 	const Configuration_t Configuration;
 };
