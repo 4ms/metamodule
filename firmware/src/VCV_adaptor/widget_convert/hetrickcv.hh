@@ -5,17 +5,21 @@
 struct CKSSRot;
 struct HCVThemedRogan;
 
-namespace rack
+struct lv_img_dsc_t;
+extern lv_img_dsc_t *CKSS_rot_fg;
+extern lv_img_dsc_t *CKSS_rot_bg;
+
+namespace MetaModule
 {
 
 template<>
-struct ElementConvert<::CKSSRot> {
-	using ElementType = MetaModule::CKSSRot;
-};
+inline Element make_element<::CKSSRot>(BaseElement &&b) {
+	return MetaModule::SlideSwitchNPos{{b}, 2, (void *)&::CKSS_rot_bg, (void *)&::CKSS_rot_fg};
+}
 
 template<>
-struct ElementConvert<HCVThemedRogan> {
-	using ElementType = MetaModule::Rogan1PRed;
-};
+inline Element make_element<HCVThemedRogan>(BaseElement &&b) {
+	return MetaModule::Rogan1PRed{b};
+}
 
 } // namespace rack

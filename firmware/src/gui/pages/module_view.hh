@@ -18,8 +18,7 @@ struct ModuleViewPage : PageBase {
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true;
-		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::CurModuleIfPlaying,
-												.opa = LV_OPA_50};
+		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::HideAlways, .opa = LV_OPA_50};
 	};
 	ViewSettings settings;
 

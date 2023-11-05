@@ -12,8 +12,8 @@ LV_IMG_DECLARE(Davies1900hLightGrey);
 LV_IMG_DECLARE(Davies1900hLargeLightGrey);
 LV_IMG_DECLARE(Davies1900hDarkGrey);
 LV_IMG_DECLARE(Davies1900hLargeGrey);
-LV_IMG_DECLARE(SwitchTallVert);
-LV_IMG_DECLARE(SwitchTallVertHandle);
+// LV_IMG_DECLARE(SwitchTallVert);
+// LV_IMG_DECLARE(SwitchTallVertHandle);
 
 namespace MetaModule::ElementImageImpl
 {
@@ -58,19 +58,8 @@ inline const lv_img_dsc_t *get_img(const BefacoSlidePotSmall &) {
 	return &::BefacoSlidePotSmall;
 }
 
-//TODO: this is not used. Remove it or use it
-inline const lv_img_dsc_t *get_img_handle(const BefacoSlidePotSmall &) {
-	return &::BefacoSlidePotHandleSmall;
-}
-
-inline const lv_img_dsc_t *get_img(const SlideSwitchNPos &) {
-	//TODO: if el.horiz...
-	return &::SwitchTallVert;
-}
-
-//TODO: this is not used. Remove it or use it
-inline const lv_img_dsc_t *get_img_handle(const SlideSwitchNPos &) {
-	return &::SwitchTallVertHandle;
+inline const lv_img_dsc_t *get_img(const SlideSwitchNPos &el) {
+	return static_cast<lv_img_dsc_t *>(el.image_bg);
 }
 
 } // namespace MetaModule::ElementImageImpl

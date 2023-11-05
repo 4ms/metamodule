@@ -29,7 +29,6 @@ struct PJ301MPortIn : JackInput {};
 struct PJ301MPortOut : JackOutput {};
 
 struct CKSS : Toggle2pos {};
-struct CKSSRot : Toggle2pos {};
 
 struct LEDBezel : MomentaryButton {};
 struct TL1105 : MomentaryButton {}; //is this right?

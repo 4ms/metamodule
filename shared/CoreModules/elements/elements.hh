@@ -9,11 +9,22 @@
 
 namespace MetaModule
 {
+
+// Criteria for being a member of the variant. Either:
+// - Unique NumParams/NumLights/NumInputs/NumOutputs values (because these are static constexpr).
+// - Unique data members (avoid unused data members in types)
+//
+// Also, if any of the following are true, it is not strictly required to have entry in Elements,
+// but it should be considered to avoid too many "type" fields.
+// - Unique animation or drawing method (e.g.: Having two types Slider and Knob is preferred to having Pot::is_slider).
+// - Unique set of values or method of interpreting values (e.g. Momentary vs Latched buttons)
+
 using Element = std::variant<
 	// Placeholder for unknown element
 	NullElement,
 
 	// Knobs
+	// TODO: all these become just `Knob`
 	Knob9mm,
 	Davies1900hRedKnob,
 	Davies1900hBlackKnob,
@@ -44,6 +55,7 @@ using Element = std::variant<
 	Trimpot,
 
 	// Sliders
+	// TODO: all these become just `Slider`
 	Slider25mmVert,
 	Slider25mmHoriz,
 	Slider25mmVertLED,
@@ -53,11 +65,14 @@ using Element = std::variant<
 	Crossfader,
 
 	// Switches/Buttons
+	// TODO: how to break these up? Mom/Latched * 0/1/2/3LEDs = 8 types?
+	// Or is Mom/Latched a data members?
 	MomentaryButtonRGB,
 	MomentaryButtonWhiteLight,
 	LatchingButtonMonoLight,
 	BefacoPush,
-	//TODO: All four toggles replaced by Toggle, with members for num_pos and horiz/vert
+
+	//TODO: All four toggles replaced by Toggle, with members for num_pos. Horiz/vert deduced from image dimensions
 	Toggle2pos,
 	Toggle3pos,
 	Toggle2posHoriz,
@@ -67,10 +82,6 @@ using Element = std::variant<
 
 	BefacoSwitch,
 	BefacoSwitchHorizontal,
-	VCVLightBezel<RedGreenBlueLight>,
-	LEDBezel,
-	CKSS,
-	CKSSRot,
 	TL1105,
 	CKD6,
 
@@ -90,6 +101,8 @@ using Element = std::variant<
 	PJ301MPortOut,
 
 	//	Lights
+	VCVLightBezel<RedGreenBlueLight>,
+	LEDBezel,
 	MediumLight<RedGreenBlueLight>,
 	MediumLight<GreenRedLight>,
 	MediumLight<RedLight>,

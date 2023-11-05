@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include "VCV_adaptor/widget_convert/base.hh"
+// #include "lvgl.h"
 
 // Forward declare widgets from Befaco/src/plugin.hpp
 struct Knurlie;
@@ -25,6 +26,46 @@ struct Davies1900hLargeLightGreyKnob;
 struct BefacoSlidePotSmall;
 // From StereoStrip.cpp
 struct ThreeStateBefacoSwitchMomentary;
+
+struct lv_img_dsc_t;
+extern const lv_img_dsc_t SwitchNarrowHoriz_bg;
+extern const lv_img_dsc_t SwitchWideHoriz_bg;
+extern const lv_img_dsc_t SwitchTallVert;
+extern const lv_img_dsc_t SwitchNarrow;
+
+namespace MetaModule
+{
+
+struct CKSSHoriz2 : SlideSwitchNPos {
+	constexpr CKSSHoriz2(BaseElement b)
+		: SlideSwitchNPos{{b}, 2, (void *)&SwitchNarrowHoriz_bg} {
+	}
+};
+struct CKSSHoriz4 : SlideSwitchNPos {
+	constexpr CKSSHoriz4(BaseElement b)
+		: SlideSwitchNPos{{b}, 4, (void *)&SwitchWideHoriz_bg} {
+	}
+};
+
+struct CKSSVert7 : SlideSwitchNPos {
+	constexpr CKSSVert7(BaseElement b)
+		: SlideSwitchNPos{{b}, 7, (void *)&SwitchTallVert} {
+	}
+};
+
+struct CKSSNarrow : SlideSwitchNPos {
+	constexpr CKSSNarrow(BaseElement b)
+		: SlideSwitchNPos{{b}, 2, (void *)&SwitchNarrow} {
+	}
+};
+
+struct CKSSNarrow3 : SlideSwitchNPos {
+	constexpr CKSSNarrow3(BaseElement b)
+		: SlideSwitchNPos{{b}, 3, (void *)&SwitchNarrow} {
+	}
+};
+
+} // namespace MetaModule
 
 // Conversions from Befaco widgets to MetaModule Elements:
 

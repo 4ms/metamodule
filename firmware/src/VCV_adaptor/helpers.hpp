@@ -26,7 +26,7 @@ T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_
 	auto *o = new T;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element = typename ElementConvert<T>::ElementType{pos.x, pos.y, coord_ref, name, name};
+	o->element = typename ElementConvert<T>::ElementType({pos.x, pos.y, coord_ref, name, name});
 	return o;
 }
 

@@ -18,7 +18,7 @@ namespace ElementDrawerImpl
 inline void
 draw_image(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t *obj, uint32_t module_height) {
 	if (!img) {
-		pr_dbg("draw_knob: image not found\n");
+		pr_dbg("draw_image: image not found\n");
 		return;
 	}
 	lv_img_set_src(obj, img);
@@ -58,6 +58,9 @@ draw_element(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, u
 	draw_image(x, y, el.coords, img, obj, module_height);
 	lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
 	lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
+	lv_obj_set_size(obj, img->header.w, img->header.h);
+	lv_obj_set_style_pad_all(obj, 0, LV_STATE_DEFAULT);
+	lv_obj_add_flag(obj, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 	return obj;
 }
 
@@ -81,12 +84,41 @@ inline lv_obj_t *
 draw_element(const ToggleSwitch &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
 
+	//TODO check for el.image_fg
 	auto *handle = lv_obj_create(obj);
+	lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 	lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
 	lv_obj_set_width(handle, img->header.w / 3);
 	lv_obj_set_height(handle, img->header.h / 4);
 	lv_obj_set_pos(handle, 0, img->header.h / 2);
-	lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+	return obj;
+}
+
+inline lv_obj_t *
+draw_element(const SlideSwitchNPos &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
+
+	lv_obj_t *handle;
+
+	if (el.image_fg) {
+		handle = lv_img_create(obj);
+		draw_image(0, 0, Coords::TopLeft, (lv_img_dsc_t *)el.image_fg, handle, module_height);
+
+	} else {
+		// If there's no fg img, draw a handle with LVGL styles:
+		handle = lv_obj_create(obj);
+		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+		if (img->header.h > img->header.w) //vertical
+			lv_obj_set_size(handle, img->header.w - 2, img->header.h / el.num_pos);
+		else
+			lv_obj_set_size(handle, img->header.w / el.num_pos, img->header.h - 2);
+
+		lv_obj_set_style_pad_all(handle, 0, LV_STATE_DEFAULT);
+	}
+
+	bool vert = img->header.w < img->header.h;
+	lv_obj_set_align(handle, vert ? LV_ALIGN_TOP_MID : LV_ALIGN_LEFT_MID);
+	lv_obj_set_pos(handle, 0, 0);
 	return obj;
 }
 

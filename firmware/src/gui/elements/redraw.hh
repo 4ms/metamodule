@@ -150,26 +150,35 @@ inline bool redraw_element(const SlideSwitchNPos &element, const GuiElement &gui
 
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {
-		pr_err("No handle sub-object for toggleNpos\n");
+		pr_err("No handle object for SlideSwitchNPos\n");
 		return false;
 	}
+	// major axis = height if vertical, width if horizontal.
+
 	auto height = lv_obj_get_height(gui_el.obj);
+	auto width = lv_obj_get_width(gui_el.obj);
+	bool vert = height > width;
+	auto major_dim = vert ? height : width;
 
 	lv_obj_refr_size(handle);
 	lv_obj_refr_pos(handle);
-	int32_t y = lv_obj_get_y(handle);
+	int32_t cur_pos = vert ? lv_obj_get_y(handle) : lv_obj_get_x(handle);
 
-	auto handle_height = height / element.num_pos;
-	lv_obj_set_height(handle, handle_height);
-	lv_coord_t height_range = height - handle_height;
+	auto handle_major_dim = major_dim / element.num_pos;
+	lv_coord_t major_range = major_dim - handle_major_dim;
 
-	auto cur_state = StateConversion::convertState(element, (float)y / (float)height_range);
-	auto state = StateConversion::convertState(element, val); //1..N
+	// cur_pos ranges from 0 to major_range
+	auto cur_state = StateConversion::convertState(element, (float)cur_pos / (float)major_range) - 1;
+	auto state = StateConversion::convertState(element, val) - 1; //0..N-1 0..6
 
 	bool did_update_position = false;
 
 	if (state != cur_state) {
-		lv_obj_set_y(handle, ((float)state / (float)element.num_pos) * height_range);
+		lv_coord_t new_pos = ((float)state / (float)(element.num_pos - 1)) * major_range;
+		if (vert)
+			lv_obj_set_y(handle, new_pos);
+		else
+			lv_obj_set_x(handle, new_pos);
 		did_update_position = true;
 	}
 

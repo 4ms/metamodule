@@ -83,6 +83,8 @@ struct Toggle3posHoriz : Toggle3pos {
 struct SlideSwitchNPos : ToggleSwitch {
 	using State_t = unsigned;
 	State_t num_pos = 2;
+	void *image_bg = nullptr; //TODO: replace void* with std::string_view of filename.png
+	void *image_fg = nullptr;
 };
 
 // Encoders
