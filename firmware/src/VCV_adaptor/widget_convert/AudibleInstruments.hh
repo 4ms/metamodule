@@ -8,18 +8,20 @@ namespace rack::componentlibrary
 struct RedGreenBlueLight;
 }
 
+// Used in Frames and Warps
 template<typename Base>
 struct Rogan6PSLight;
-
 template<>
 struct Rogan6PSLight<rack::componentlibrary::RedGreenBlueLight>;
 
-namespace rack
+// Convert Widgets to MetaModule Elements
+
+namespace MetaModule
 {
 
 template<>
-struct ElementConvert<Rogan6PSLight<rack::componentlibrary::RedGreenBlueLight>> {
-	using ElementType = MetaModule::NullElement;
+inline Element make_element<Rogan6PSLight<rack::componentlibrary::RedGreenBlueLight>>(BaseElement &&b) {
+	return NullElement{};
 };
 
-} // namespace rack
+} // namespace MetaModule

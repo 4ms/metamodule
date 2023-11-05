@@ -22,4 +22,4 @@ inline Element make_element<HCVThemedRogan>(BaseElement &&b) {
 	return MetaModule::Rogan1PRed{b};
 }
 
-} // namespace rack
+} // namespace MetaModule

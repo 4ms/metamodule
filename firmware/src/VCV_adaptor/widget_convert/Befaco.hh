@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include "VCV_adaptor/widget_convert/base.hh"
-// #include "lvgl.h"
 
 // Forward declare widgets from Befaco/src/plugin.hpp
 struct Knurlie;
@@ -27,154 +26,122 @@ struct BefacoSlidePotSmall;
 // From StereoStrip.cpp
 struct ThreeStateBefacoSwitchMomentary;
 
+// Forward declare lvgl images
+// This will go away once we replae lv_img_dsc_t with string for filename.png
 struct lv_img_dsc_t;
 extern const lv_img_dsc_t SwitchNarrowHoriz_bg;
 extern const lv_img_dsc_t SwitchWideHoriz_bg;
 extern const lv_img_dsc_t SwitchTallVert;
 extern const lv_img_dsc_t SwitchNarrow;
 
+// Conversions from Befaco widgets to MetaModule Elements:
+
 namespace MetaModule
 {
 
-struct CKSSHoriz2 : SlideSwitchNPos {
-	constexpr CKSSHoriz2(BaseElement b)
-		: SlideSwitchNPos{{b}, 2, (void *)&SwitchNarrowHoriz_bg} {
-	}
-};
-struct CKSSHoriz4 : SlideSwitchNPos {
-	constexpr CKSSHoriz4(BaseElement b)
-		: SlideSwitchNPos{{b}, 4, (void *)&SwitchWideHoriz_bg} {
-	}
+template<>
+inline Element make_element<::CKSSVert7>(BaseElement &&b) {
+	return SlideSwitchNPos{{b}, 7, (void *)&SwitchTallVert};
+}
+
+template<>
+inline Element make_element<::CKSSHoriz2>(BaseElement &&b) {
+	return SlideSwitchNPos{{b}, 2, (void *)&SwitchNarrowHoriz_bg};
+}
+
+template<>
+inline Element make_element<::CKSSHoriz4>(BaseElement &&b) {
+	return SlideSwitchNPos{{b}, 4, (void *)&SwitchWideHoriz_bg};
+}
+
+template<>
+inline Element make_element<::CKSSNarrow>(BaseElement &&b) {
+	return SlideSwitchNPos{{b}, 2, (void *)&SwitchNarrow};
+}
+
+template<>
+inline Element make_element<::CKSSNarrow3>(BaseElement &&b) {
+	return SlideSwitchNPos{{b}, 3, (void *)&SwitchNarrow};
+}
+
+template<>
+inline Element make_element<::Knurlie>(BaseElement &&b) {
+	return NullElement{b};
 };
 
-struct CKSSVert7 : SlideSwitchNPos {
-	constexpr CKSSVert7(BaseElement b)
-		: SlideSwitchNPos{{b}, 7, (void *)&SwitchTallVert} {
-	}
+template<>
+inline Element make_element<::BefacoTinyKnobWhite>(BaseElement &&b) {
+	return BefacoTinyKnobWhite{b};
 };
 
-struct CKSSNarrow : SlideSwitchNPos {
-	constexpr CKSSNarrow(BaseElement b)
-		: SlideSwitchNPos{{b}, 2, (void *)&SwitchNarrow} {
-	}
+template<>
+inline Element make_element<::BefacoTinyKnobRed>(BaseElement &&b) {
+	return BefacoTinyKnobRed{b};
 };
 
-struct CKSSNarrow3 : SlideSwitchNPos {
-	constexpr CKSSNarrow3(BaseElement b)
-		: SlideSwitchNPos{{b}, 3, (void *)&SwitchNarrow} {
-	}
+template<>
+inline Element make_element<::BefacoTinyKnobDarkGrey>(BaseElement &&b) {
+	return BefacoTinyKnobDarkGrey{b};
+};
+
+template<>
+inline Element make_element<::BefacoTinyKnobLightGrey>(BaseElement &&b) {
+	return BefacoTinyKnobLightGrey{b};
+};
+
+template<>
+inline Element make_element<::BefacoTinyKnobBlack>(BaseElement &&b) {
+	return BefacoTinyKnobBlack{b};
+};
+
+template<>
+inline Element make_element<::Davies1900hLargeGreyKnob>(BaseElement &&b) {
+	return Davies1900hLargeGreyKnob{b};
+};
+
+template<>
+inline Element make_element<::Davies1900hLightGreyKnob>(BaseElement &&b) {
+	return Davies1900hLightGreyKnob{b};
+};
+
+template<>
+inline Element make_element<::Davies1900hDarkGreyKnob>(BaseElement &&b) {
+	return Davies1900hDarkGreyKnob{b};
+};
+
+template<>
+inline Element make_element<::Crossfader>(BaseElement &&b) {
+	return Crossfader{b};
+};
+
+template<>
+inline Element make_element<::BefacoSwitchHorizontal>(BaseElement &&b) {
+	return BefacoSwitchHorizontal{b};
+};
+
+template<>
+inline Element make_element<::Davies1900hLargeLightGreyKnob>(BaseElement &&b) {
+	return Davies1900hLargeLightGreyKnob{b};
+};
+
+template<>
+inline Element make_element<::BefacoSlidePotSmall>(BaseElement &&b) {
+	return BefacoSlidePotSmall{b};
+};
+
+template<>
+inline Element make_element<::ThreeStateBefacoSwitchMomentary>(BaseElement &&b) {
+	return Toggle3pos{b};
+};
+
+template<>
+inline Element make_element_output<::BananutRed>(BaseElement b) {
+	return BefacoOutputPort{b};
+};
+
+template<>
+inline Element make_element_input<::BananutBlack>(BaseElement b) {
+	return BefacoInputPort{b};
 };
 
 } // namespace MetaModule
-
-// Conversions from Befaco widgets to MetaModule Elements:
-
-namespace rack
-{
-
-template<>
-struct ElementConvert<Knurlie> {
-	using ElementType = MetaModule::NullElement;
-};
-
-template<>
-struct ElementConvert<BefacoTinyKnobWhite> {
-	using ElementType = MetaModule::BefacoTinyKnobWhite;
-};
-
-template<>
-struct ElementConvert<BefacoTinyKnobRed> {
-	using ElementType = MetaModule::BefacoTinyKnobRed;
-};
-
-template<>
-struct ElementConvert<BefacoTinyKnobDarkGrey> {
-	using ElementType = MetaModule::BefacoTinyKnobDarkGrey;
-};
-
-template<>
-struct ElementConvert<BefacoTinyKnobLightGrey> {
-	using ElementType = MetaModule::BefacoTinyKnobLightGrey;
-};
-
-template<>
-struct ElementConvert<BefacoTinyKnobBlack> {
-	using ElementType = MetaModule::BefacoTinyKnobBlack;
-};
-
-template<>
-struct ElementConvert<Davies1900hLargeGreyKnob> {
-	using ElementType = MetaModule::Davies1900hLargeGreyKnob;
-};
-
-template<>
-struct ElementConvert<Davies1900hLightGreyKnob> {
-	using ElementType = MetaModule::Davies1900hLightGreyKnob;
-};
-
-template<>
-struct ElementConvert<Davies1900hDarkGreyKnob> {
-	using ElementType = MetaModule::Davies1900hDarkGreyKnob;
-};
-
-template<>
-struct ElementConvert<BananutRed> {
-	using ElementTypeOutput = MetaModule::BefacoOutputPort;
-};
-
-template<>
-struct ElementConvert<BananutBlack> {
-	using ElementTypeInput = MetaModule::BefacoInputPort;
-};
-
-template<>
-struct ElementConvert<CKSSNarrow> {
-	using ElementType = MetaModule::CKSSNarrow;
-};
-
-template<>
-struct ElementConvert<Crossfader> {
-	using ElementType = MetaModule::Crossfader;
-};
-
-template<>
-struct ElementConvert<BefacoSwitchHorizontal> {
-	using ElementType = MetaModule::BefacoSwitchHorizontal;
-};
-
-template<>
-struct ElementConvert<CKSSHoriz2> {
-	using ElementType = MetaModule::CKSSHoriz2;
-};
-
-template<>
-struct ElementConvert<CKSSVert7> {
-	using ElementType = MetaModule::CKSSVert7;
-};
-
-template<>
-struct ElementConvert<CKSSHoriz4> {
-	using ElementType = MetaModule::CKSSHoriz4;
-};
-
-template<>
-struct ElementConvert<CKSSNarrow3> {
-	using ElementType = MetaModule::CKSSNarrow3;
-};
-
-template<>
-struct ElementConvert<Davies1900hLargeLightGreyKnob> {
-	using ElementType = MetaModule::Davies1900hLargeLightGreyKnob;
-};
-
-template<>
-struct ElementConvert<BefacoSlidePotSmall> {
-	using ElementType = MetaModule::BefacoSlidePotSmall;
-};
-
-template<>
-struct ElementConvert<ThreeStateBefacoSwitchMomentary> {
-	using ElementType = MetaModule::Toggle3pos;
-};
-
-} // namespace rack

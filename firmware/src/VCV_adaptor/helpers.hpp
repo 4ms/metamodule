@@ -10,15 +10,8 @@
 #include <functional>
 #include <string_view>
 
-// #include "pr_dbg.hh"
-
 namespace rack
 {
-
-// namespace engine
-// {
-// struct Module;
-// }
 
 // Creates a Widget that has an Element
 template<typename T>
@@ -26,7 +19,7 @@ T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_
 	auto *o = new T;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element = typename ElementConvert<T>::ElementType({pos.x, pos.y, coord_ref, name, name});
+	o->element = MetaModule::make_element<T>({pos.x, pos.y, coord_ref, name, name});
 	return o;
 }
 
@@ -110,8 +103,7 @@ TPortWidget *createInput(math::Vec pos, engine::Module *module, int inputId) {
 	auto *o = new TPortWidget;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element =
-		typename ElementConvert<TPortWidget>::ElementTypeInput{pos.x, pos.y, MetaModule::Coords::TopLeft, name, name};
+	o->element = MetaModule::make_element_input<TPortWidget>({pos.x, pos.y, MetaModule::Coords::TopLeft, name, name});
 	o->portId = inputId;
 	if (o->getPortInfo())
 		o->getPortInfo()->name = name;
@@ -124,8 +116,7 @@ TPortWidget *createInputCentered(math::Vec pos, engine::Module *module, int inpu
 	auto *o = new TPortWidget;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element =
-		typename ElementConvert<TPortWidget>::ElementTypeInput{pos.x, pos.y, MetaModule::Coords::Center, name, name};
+	o->element = MetaModule::make_element_input<TPortWidget>({pos.x, pos.y, MetaModule::Coords::Center, name, name});
 	o->portId = inputId;
 	if (o->getPortInfo())
 		o->getPortInfo()->name = name;
@@ -138,8 +129,7 @@ TPortWidget *createOutput(math::Vec pos, engine::Module *module, int outputId) {
 	auto *o = new TPortWidget;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element =
-		typename ElementConvert<TPortWidget>::ElementTypeOutput{pos.x, pos.y, MetaModule::Coords::TopLeft, name, name};
+	o->element = MetaModule::make_element_output<TPortWidget>({pos.x, pos.y, MetaModule::Coords::TopLeft, name, name});
 	o->portId = outputId;
 	if (o->getPortInfo())
 		o->getPortInfo()->name = name;
@@ -152,8 +142,7 @@ TPortWidget *createOutputCentered(math::Vec pos, engine::Module *module, int out
 	auto *o = new TPortWidget;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element =
-		typename ElementConvert<TPortWidget>::ElementTypeOutput{pos.x, pos.y, MetaModule::Coords::Center, name, name};
+	o->element = MetaModule::make_element_output<TPortWidget>({pos.x, pos.y, MetaModule::Coords::Center, name, name});
 	o->portId = outputId;
 	if (o->getPortInfo())
 		o->getPortInfo()->name = name;
