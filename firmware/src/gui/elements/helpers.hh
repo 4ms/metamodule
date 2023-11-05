@@ -1,7 +1,9 @@
 #pragma once
+#include "CoreModules/elements/element_state_conversion.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
+#include "util/overloaded.hh"
 
 namespace MetaModule
 {
@@ -42,6 +44,35 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 		}
 	}
 	return fullname;
+}
+
+//TODO: use StateConversion, then convert State_t to string
+inline std::string get_element_value_string(Element const &element, float value) {
+	std::string s;
+
+	std::visit(overloaded{
+				   [=, &s](Pot const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
+
+				   [=, &s](Switch const &) { s = value < 0.5f ? "Down" : "Up"; },
+
+				   [=, &s](MomentaryButton const &) { s = value < 0.5f ? "Released" : "Pressed"; },
+
+				   [=, &s](LatchingButton const &) { s = value < 0.5f ? "Off" : "On"; },
+
+				   [=, &s](Toggle2posHoriz const &) { s = value < 0.5f ? "Left" : "Right"; },
+
+				   [=, &s](Toggle3pos const &) { s = value < 0.25f ? "Down" :
+													 value < 0.75f ? "Mid" :
+																	 "Up"; },
+
+				   [=, &s](Toggle3posHoriz const &) { s = value < 0.25f ? "Left" :
+														  value < 0.75f ? "Mid" :
+																		  "Right"; },
+				   [&s](BaseElement const &) { s = "?"; },
+			   },
+			   element);
+
+	return s;
 }
 
 } // namespace MetaModule

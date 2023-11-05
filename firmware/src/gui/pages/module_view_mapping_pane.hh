@@ -28,6 +28,7 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ControlArc, arc_change_cb, LV_EVENT_VALUE_CHANGED, this);
+
 		//RELEASE = click on arc when done turning it
 		lv_obj_add_event_cb(ui_ControlArc, control_button_cb, LV_EVENT_RELEASED, this);
 	}
@@ -83,6 +84,8 @@ struct ModuleViewMappingPane {
 		lv_indev_set_group(indev, pane_group);
 
 		add_map_popup.prepare_focus(pane_group);
+
+		prepare_control_arc(drawn_element->element);
 	}
 
 	void refresh() {
@@ -287,7 +290,7 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		//TODO
+		//TODO: go to EditMapping page
 		(void)page;
 		pr_err("Edit Map not implemented yet\n");
 	}
@@ -331,8 +334,11 @@ private:
 			auto param_id = page->drawn_element->gui_element.idx.param_idx;
 			auto module_id = PageList::get_selected_module_id();
 			auto cur_val = page->patch_storage.get_view_patch().get_static_knob_value(module_id, param_id);
-			if (cur_val)
-				lv_arc_set_value(ui_ControlArc, cur_val.value() * 100);
+			if (cur_val) {
+				float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
+				lv_arc_set_value(ui_ControlArc, cur_val.value() * range);
+				page->update_control_arc_text();
+			}
 		}
 
 		if (event->target == ui_ControlArc) {
@@ -348,13 +354,44 @@ private:
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 		auto &patch = page->patch_storage.get_view_patch();
 
+		float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
+		auto value = lv_arc_get_value(ui_ControlArc);
+
 		StaticParam sp{
 			.module_id = (uint16_t)PageList::get_selected_module_id(),
 			.param_id = page->drawn_element->gui_element.idx.param_idx,
-			.value = lv_arc_get_value(ui_ControlArc) / 100.f,
+			.value = (float)value / range,
 		};
 		page->patch_mod_queue.put(SetStaticParam{.param = sp});
 		patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
+
+		page->update_control_arc_text();
+	}
+
+	void update_control_arc_text() {
+		auto range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
+		auto value = lv_arc_get_value(ui_ControlArc);
+
+		float val = (float)value / (float)range;
+
+		auto strval = get_element_value_string(drawn_element->element, val);
+		lv_label_set_text(ui_ControlAlertAmount, strval.c_str());
+	}
+
+	void prepare_control_arc(const Element &el) {
+		std::visit(overloaded{
+					   [](const BaseElement &) {},
+					   [](const Switch &) { lv_arc_set_range(ui_ControlArc, 0, 1); },
+					   [](const Toggle3pos &) { lv_arc_set_range(ui_ControlArc, 0, 2); },
+					   [](const Pot &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
+				   },
+				   el);
+
+		auto name = base_element(el).short_name;
+		if (name.size() == 0)
+			name = "the control";
+		lv_label_set_text_fmt(ui_ControlAlertLabel, "Turn rotary to adjust %.*s", (int)name.size(), name.data());
+		lv_label_set_text(ui_ControlAlertAmount, "");
 	}
 
 	PatchStorageProxy &patch_storage;
