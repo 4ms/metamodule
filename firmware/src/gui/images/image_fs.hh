@@ -12,6 +12,9 @@ extern const lv_img_dsc_t switch_horiz_left;
 extern const lv_img_dsc_t switch_horiz_right;
 extern const lv_img_dsc_t switch_horiz_center;
 extern const lv_img_dsc_t button_x;
+LV_IMG_DECLARE(knob9mm_x);
+LV_IMG_DECLARE(knob_x);
+LV_IMG_DECLARE(knob_large_x);
 
 extern const lv_img_dsc_t CKSS_rot_fg;
 extern const lv_img_dsc_t CKSS_rot_bg;
@@ -57,6 +60,9 @@ struct PNGFileSystem {
 		{"switch_horiz_right.png", &switch_horiz_right},
 		{"switch_horiz_center.png", &switch_horiz_center},
 		{"button_x.png", &button_x},
+		{"knob_x.png", &knob_x},
+		{"knob9mm_x.png", &knob9mm_x},
+		{"knob_large_x.png", &knob_large_x},
 
 		// Befaco/
 		{"SwitchWideHoriz_bg.png", &SwitchWideHoriz_bg},

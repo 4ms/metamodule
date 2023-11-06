@@ -381,7 +381,7 @@ private:
 	void prepare_control_arc(const Element &el) {
 		std::visit(overloaded{
 					   [](const BaseElement &) {},
-					   [](const Switch &) { lv_arc_set_range(ui_ControlArc, 0, 1); },
+					   [](const Button &el) { lv_arc_set_range(ui_ControlArc, 0, 1); },
 					   [](const FlipSwitch &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
 					   [](const Pot &) { lv_arc_set_range(ui_ControlArc, 0, 100); },

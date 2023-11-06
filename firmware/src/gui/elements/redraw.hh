@@ -10,6 +10,24 @@
 namespace MetaModule::ElementRedrawDetails
 {
 
+inline bool redraw_element(const KnobE &, const GuiElement &gui_el, float val) {
+	bool did_update_position = false;
+
+	constexpr int32_t threshold_centidegrees = 30; // = 3.0 degrees
+
+	int32_t angle = val * 3000.f - 1500.f;
+	while (angle < 0)
+		angle += 3600;
+	int32_t cur_angle = lv_img_get_angle(gui_el.obj);
+
+	if (std::abs(angle - cur_angle) > threshold_centidegrees) {
+		lv_img_set_angle(gui_el.obj, angle);
+		did_update_position = true;
+	}
+
+	return did_update_position;
+}
+
 inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
 	bool did_update_position = false;
 

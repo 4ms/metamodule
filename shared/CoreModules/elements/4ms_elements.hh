@@ -6,12 +6,33 @@ namespace MetaModule
 
 using Color565 = uint16_t;
 
-//Knobs
-struct Knob9mm : Knob {};
-struct DaviesLargeKnob : Knob {};
-struct Davies1900hBlackKnob : Knob {};
+//
+// Knobs
+//
+struct Knob9mm : KnobE {
+	constexpr Knob9mm() = default;
+	constexpr Knob9mm(BaseElement b)
+		: KnobE{{b}, "knob9mm_x.png"} {
+	}
+};
 
-//Sliders
+struct DaviesLargeKnob : KnobE {
+	constexpr DaviesLargeKnob() = default;
+	constexpr DaviesLargeKnob(BaseElement b)
+		: KnobE{{b}, "knob_large_x.png"} {
+	}
+};
+
+struct Davies1900hBlackKnob : KnobE {
+	constexpr Davies1900hBlackKnob() = default;
+	constexpr Davies1900hBlackKnob(BaseElement b)
+		: KnobE{{b}, "knob_x.png"} {
+	}
+};
+
+//
+// Sliders
+//
 struct SliderMonoLight : Slider {
 	static constexpr size_t NumLights = 1;
 };
@@ -24,7 +45,6 @@ struct Slider25mmVertLED : SliderMonoLight {};
 // Buttons
 //
 struct OrangeButton : LatchingButton {
-	constexpr OrangeButton() = default;
 	constexpr OrangeButton(BaseElement b)
 		: LatchingButton{{{b}, "button_x.png"}, 0xfd40} {
 	}

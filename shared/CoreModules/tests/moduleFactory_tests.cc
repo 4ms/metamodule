@@ -64,9 +64,9 @@ struct TestInfo : MetaModule::ModuleInfoBase {
 	static constexpr std::string_view slug{"HIJ"};
 	static constexpr uint32_t width_hp = 2;
 	static constexpr std::array<MetaModule::Element, 2> Elements{{
-		MetaModule::Knob9mm{to_mm<72>(114.85f), to_mm<72>(61.59f), MetaModule::Coords::Center, "Spread", "Spread"},
+		MetaModule::Knob9mm{{to_mm<72>(114.85f), to_mm<72>(61.59f), MetaModule::Coords::Center, "Spread", "Spread"}},
 		MetaModule::Davies1900hBlackKnob{
-			to_mm<72>(53.68f), to_mm<72>(78.08f), MetaModule::Coords::Center, "Scale", "Scale"},
+			{to_mm<72>(53.68f), to_mm<72>(78.08f), MetaModule::Coords::Center, "Scale", "Scale"}},
 	}};
 };
 
