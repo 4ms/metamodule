@@ -99,7 +99,7 @@ jobs:
 
       - name: Get Rack-SDK
         run: |
-          pushd $HOME
+          pacman -Su --noconfirm wget
           wget https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-win-x64.zip
           unzip Rack-SDK-${{ env.rack-sdk-version }}-win-x64.zip
 
