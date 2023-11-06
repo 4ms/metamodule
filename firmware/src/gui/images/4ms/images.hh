@@ -5,16 +5,10 @@
 LV_IMG_DECLARE(jack_x);
 LV_IMG_DECLARE(knob9mm_x);
 LV_IMG_DECLARE(knob_x);
-LV_IMG_DECLARE(button_x);
+// LV_IMG_DECLARE(button_x);
 LV_IMG_DECLARE(knob_unlined_x);
 LV_IMG_DECLARE(knob_large_x);
 LV_IMG_DECLARE(slider_x);
-LV_IMG_DECLARE(switch_horiz_left);
-LV_IMG_DECLARE(switch_horiz_right);
-LV_IMG_DECLARE(switch_horiz_center);
-LV_IMG_DECLARE(switch_up);
-LV_IMG_DECLARE(switch_down);
-LV_IMG_DECLARE(switch_center);
 LV_IMG_DECLARE(led_x);
 
 namespace MetaModule::ElementImageImpl
@@ -52,21 +46,13 @@ inline const lv_img_dsc_t *get_img(const Slider25mmVert &) {
 	return &slider_x;
 }
 
-inline const lv_img_dsc_t *get_img(const Toggle3pos &) {
-	return &switch_center;
-}
+// inline const lv_img_dsc_t *get_img(const LatchingButton &) {
+// 	return &button_x;
+// }
 
-inline const lv_img_dsc_t *get_img(const Toggle2pos &) {
-	return &switch_center;
-}
-
-inline const lv_img_dsc_t *get_img(const LatchingButton &) {
-	return &button_x;
-}
-
-inline const lv_img_dsc_t *get_img(const MomentaryButton &) {
-	return &button_x;
-}
+// inline const lv_img_dsc_t *get_img(const MomentaryButton &) {
+// 	return &button_x;
+// }
 
 inline const lv_img_dsc_t *get_img(const LightElement &) {
 	return &led_x;

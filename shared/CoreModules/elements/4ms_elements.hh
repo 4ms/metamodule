@@ -4,6 +4,8 @@
 namespace MetaModule
 {
 
+using Color565 = uint16_t;
+
 //Knobs
 struct Knob9mm : Knob {};
 struct DaviesLargeKnob : Knob {};
@@ -18,20 +20,65 @@ struct Slider25mmHoriz : Slider {};
 struct Slider25mmHorizLED : SliderMonoLight {};
 struct Slider25mmVertLED : SliderMonoLight {};
 
-//Buttons
-struct MomentaryButtonRGB : MomentaryButton {
-	static constexpr size_t NumLights = 3;
-};
-struct MomentaryButtonWhiteLight : MomentaryButton {
-	static constexpr size_t NumLights = 1;
-};
-
-struct LatchingButtonMonoLight : LatchingButton {
-	static constexpr size_t NumLights = 1;
-};
-
 //Switches
-//TODO: specialize Toggle2pos/3pos
+struct OrangeButton : LatchingButton {
+	constexpr OrangeButton() = default;
+	constexpr OrangeButton(BaseElement b)
+		: LatchingButton{{{b}, "button_x.png"}, 0xfd40} {
+	}
+};
+
+struct Toggle2pos : FlipSwitch {
+	enum State_t : FlipSwitch::State_t { DOWN = 0, UP = 1 };
+
+	constexpr Toggle2pos() = default;
+	constexpr Toggle2pos(BaseElement b)
+		: FlipSwitch{{b}, 2, {"switch_down.png", "switch_up.png"}} {
+	}
+	constexpr Toggle2pos(BaseElement b, std::array<std::string_view, 2> names)
+		: FlipSwitch{{b}, 2, {"switch_down.png", "switch_up.png"}, {names[0], names[1]}} {
+	}
+};
+
+struct Toggle3pos : FlipSwitch {
+	enum State_t : FlipSwitch::State_t { DOWN = 0, CENTER = 1, UP = 2 };
+
+	constexpr Toggle3pos() = default;
+	constexpr Toggle3pos(BaseElement b)
+		: FlipSwitch{{b}, 3, {"switch_down.png", "switch_center.png", "switch_up.png"}} {
+	}
+	constexpr Toggle3pos(BaseElement b, std::array<std::string_view, 3> names)
+		: FlipSwitch{
+			  {b}, 3, {"switch_down.png", "switch_center.png", "switch_up.png"}, {names[0], names[1], names[2]}} {
+	}
+};
+
+struct Toggle2posHoriz : FlipSwitch {
+	enum State_t : FlipSwitch::State_t { DOWN = 0, UP = 1 };
+
+	constexpr Toggle2posHoriz() = default;
+	constexpr Toggle2posHoriz(BaseElement b)
+		: FlipSwitch{{b}, 2, {"switch_horiz_down.png", "switch_horiz_up.png"}} {
+	}
+	constexpr Toggle2posHoriz(BaseElement b, std::array<std::string_view, 2> names)
+		: FlipSwitch{{b}, 2, {"switch_horiz_down.png", "switch_horiz_up.png"}, {names[0], names[1]}} {
+	}
+};
+
+struct Toggle3posHoriz : FlipSwitch {
+	enum State_t : FlipSwitch::State_t { DOWN = 0, CENTER = 1, UP = 2 };
+
+	constexpr Toggle3posHoriz() = default;
+	constexpr Toggle3posHoriz(BaseElement b)
+		: FlipSwitch{{b}, 3, {"switch_horiz_down.png", "switch_horiz_center.png", "switch_horiz_up.png"}} {
+	}
+	constexpr Toggle3posHoriz(BaseElement b, std::array<std::string_view, 3> names)
+		: FlipSwitch{{b},
+					 3,
+					 {"switch_horiz_down.png", "switch_horiz_center.png", "switch_horiz_up.png"},
+					 {names[0], names[1], names[2]}} {
+	}
+};
 
 // Encoders
 struct EncoderMonoLight : Encoder {

@@ -82,18 +82,9 @@ inline lv_obj_t *draw_element(const Slider &el, const lv_img_dsc_t *img, lv_obj_
 	return obj;
 }
 
-// Draw toggle switch with its handle as a sub-object
-// TODO: horizontal
-inline lv_obj_t *
-draw_element(const ToggleSwitch &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+inline lv_obj_t *draw_element(const Button &el, const lv_img_dsc_t *, lv_obj_t *canvas, uint32_t module_height) {
+	auto img = PNGFileSystem::read(el.image);
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
-
-	auto *handle = lv_obj_create(obj);
-	lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
-	lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
-	lv_obj_set_width(handle, img->header.w / 3);
-	lv_obj_set_height(handle, img->header.h / 4);
-	lv_obj_set_pos(handle, 0, img->header.h / 2);
 	return obj;
 }
 

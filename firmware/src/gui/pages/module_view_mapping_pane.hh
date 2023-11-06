@@ -384,7 +384,6 @@ private:
 					   [](const Switch &) { lv_arc_set_range(ui_ControlArc, 0, 1); },
 					   [](const FlipSwitch &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
-					   [](const Toggle3pos &) { lv_arc_set_range(ui_ControlArc, 0, 2); },
 					   [](const Pot &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
 				   },
 				   el);

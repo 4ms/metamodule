@@ -19,8 +19,6 @@ struct Davies1900hLargeLightGreyKnob : Knob {};
 struct BefacoSlidePotSmall : Slider {};
 struct Crossfader : Slider {};
 
-struct BefacoSwitchHorizontal : Toggle2posHoriz {};
-
 struct BefacoInputPort : JackInput {};
 using BananutBlack = BefacoInputPort;
 

@@ -170,7 +170,7 @@ public:
 	}
 
 	std::pair<float, float> getRiseAndFallCV() {
-		auto ProcessCVOffset = [](auto slider, Toggle3pos::State_t range) -> float {
+		auto ProcessCVOffset = [](auto slider, auto range) -> float {
 			// Slider plus resistor in parallel to tweak curve
 			const float SliderImpedance = 100e3f;
 			auto offset = 5.0f * VoltageDivider(slider * SliderImpedance + 17.4e3f,

@@ -55,44 +55,58 @@ struct Pot : ParamElement {
 struct Knob : Pot {};
 struct Slider : Pot {};
 
-// Switches/Buttons
-struct Switch : ParamElement {};
+//
+// Buttons
+//
+struct Button : ParamElement {
+	std::string_view image = "";
+};
 
-struct MomentaryButton : Switch {
+struct MomentaryButton : Button {
 	enum class State_t { PRESSED, RELEASED };
 };
 
-struct LatchingButton : Switch {
-	enum class State_t { DOWN, UP };
+struct MomentaryButtonRGB : MomentaryButton {
+	static constexpr size_t NumLights = 3;
+};
+struct MomentaryButtonWhiteLight : MomentaryButton {
+	static constexpr size_t NumLights = 1;
 };
 
-struct ToggleSwitch : Switch {};
+// LatchingButton always has a single color LED
+// It's drawn with a single frame, and the color is applied as a filled circle,
+// whose alpha value equals the LED value
+struct LatchingButton : Button {
+	enum class State_t { DOWN, UP };
+	static constexpr size_t NumLights = 1;
+	uint16_t color = 0xfd40;
+	//float color_radius_ratio?
+};
 
-//FlipSwitch has up to 3 frames
-//Frame n is drawn to indicate value == n/(num_pos-1)
+//TODO: change svg script to use LatchingButton, not the alias
+// using LatchingButtonMonoLight = LatchingButton;
+struct LatchingButtonMonoLight : ParamElement {
+	enum class State_t { DOWN, UP };
+	static constexpr size_t NumLights = 1;
+};
+
+//
+// Switches
+//
+struct Switch : ParamElement {};
+
+// FlipSwitch has up to 3 frames
+// Frame n is drawn to indicate value == n/(num_pos-1)
 struct FlipSwitch : Switch {
 	using State_t = unsigned;
-	State_t num_pos = 2;
+	unsigned num_pos = 3;
 	std::array<std::string_view, 3> frames{};
 	std::array<std::string_view, 3> pos_names{"Down", "Center", "Up"};
 };
 
-struct Toggle2pos : ToggleSwitch {
-	enum class State_t { DOWN, UP };
-};
-struct Toggle3pos : ToggleSwitch {
-	enum class State_t { DOWN, CENTER, UP };
-};
-struct Toggle2posHoriz : Toggle2pos {
-	enum class State_t { LEFT, RIGHT };
-};
-struct Toggle3posHoriz : Toggle3pos {
-	enum class State_t { LEFT, CENTER, RIGHT };
-};
-
 // SlideSwitch has a bg (body) image and a fg (handle) image
 // The handle is drawn at evenly spaced positions to indicate the switch's value
-struct SlideSwitch : ToggleSwitch {
+struct SlideSwitch : Switch {
 	using State_t = unsigned;
 	State_t num_pos = 2;
 	std::string_view image_bg = "";

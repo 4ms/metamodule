@@ -71,15 +71,6 @@ inline std::string get_element_value_string(Element const &element, float value)
 
 				   [=, &s](LatchingButton const &) { s = value < 0.5f ? "Off" : "On"; },
 
-				   [=, &s](Toggle2posHoriz const &) { s = value < 0.5f ? "Left" : "Right"; },
-
-				   [=, &s](Toggle3pos const &) { s = value < 0.25f ? "Down" :
-													 value < 0.75f ? "Mid" :
-																	 "Up"; },
-
-				   [=, &s](Toggle3posHoriz const &) { s = value < 0.25f ? "Left" :
-														  value < 0.75f ? "Mid" :
-																		  "Right"; },
 				   [&s](BaseElement const &) { s = "?"; },
 			   },
 			   element);

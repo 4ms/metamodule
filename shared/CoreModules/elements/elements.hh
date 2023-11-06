@@ -65,25 +65,21 @@ using Element = std::variant<
 	Crossfader,
 
 	// Switches/Buttons
-	// TODO: how to break these up? Mom/Latched * 0/1/2/3LEDs = 8 types?
-	// Or is Mom/Latched a data members?
-	MomentaryButtonRGB,
-	MomentaryButtonWhiteLight,
-	LatchingButtonMonoLight,
-	BefacoPush,
-
 	FlipSwitch,
-	//TODO: Convert these to FlipSwitch
-	ToggleSwitch,
-	Toggle2pos,
-	Toggle3pos,
-	Toggle2posHoriz,
-	Toggle3posHoriz,
-
 	SlideSwitch,
 
-	BefacoSwitch,
-	BefacoSwitchHorizontal,
+	// TODO: how to break these up? Mom/Latched * 0/1/2/3LEDs = 8 types?
+	// Or is Mom/Latched a data members?
+	MomentaryButton,		   //no light
+	MomentaryButtonWhiteLight, //one light
+	MomentaryButtonRGB,		   //three lights
+
+	LatchingButton,
+	// TODO REMOVE;
+	LatchingButtonMonoLight,
+
+	// MomentaryButton:
+	BefacoPush,
 	TL1105,
 	CKD6,
 

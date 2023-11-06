@@ -8,12 +8,6 @@
 namespace MetaModule::StateConversion
 {
 
-//TODO: try using overloaded set like in gui/elements/helpers.hh
-
-// Here we provide a non-ambigous set of fallbacks
-// For all element types that need a custom behaviour, a specialization for that particular type needs to be created
-// Since overload resolution does not work for template parameters, just inheriting from a specialized type (and expecting the method to fall back to the parent's) will not work
-
 //TODO: This generates a compiler error for gcc < 12.3
 template<typename T>
 constexpr typename T::State_t convertState(const T &, float val) requires(std::is_same_v<typename T::State_t, void>)
@@ -64,7 +58,8 @@ constexpr SlideSwitch::State_t convertState(const T &element, float val) require
 }
 
 template<typename T>
-constexpr FlipSwitch::State_t convertState(const T &element, float val) requires(std::derived_from<T, FlipSwitch>)
+constexpr FlipSwitch::State_t convertState(const T &element, float val)
+	requires(std::derived_from<T, FlipSwitch> && !std::same_as<T, Toggle3pos>)
 {
 	//maps 0..1 -> 0..(num_pos-1)
 	return FlipSwitch::State_t(std::round(val * (float)(element.num_pos - 1)));
