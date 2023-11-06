@@ -9,12 +9,12 @@ namespace MetaModule
 {
 
 template<>
-inline Element make_element<::CKSSRot>(BaseElement &&b) {
+inline Element make_element<::CKSSRot>(BaseElement b) {
 	return MetaModule::SlideSwitch{{b}, 2, "CKSS_rot_bg.png", "CKSS_rot_fg.png"};
 }
 
 template<>
-inline Element make_element<HCVThemedRogan>(BaseElement &&b) {
+inline Element make_element<HCVThemedRogan>(BaseElement b) {
 	return MetaModule::Rogan1PRed{b};
 }
 

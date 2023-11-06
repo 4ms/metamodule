@@ -20,7 +20,7 @@ namespace MetaModule
 {
 
 template<>
-inline Element make_element<Rogan6PSLight<rack::componentlibrary::RedGreenBlueLight>>(BaseElement &&b) {
+inline Element make_element<Rogan6PSLight<rack::componentlibrary::RedGreenBlueLight>>(BaseElement b) {
 	return NullElement{};
 };
 

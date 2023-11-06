@@ -5,10 +5,8 @@
 namespace MetaModule
 {
 
-//TODO decide on BaseElement && or BaseElement
-
 template<typename RackWidgetT>
-Element make_element(BaseElement &&) {
+Element make_element(BaseElement) {
 	return NullElement{};
 }
 
