@@ -5,6 +5,8 @@
 namespace MetaModule
 {
 
+//TODO decide on BaseElement && or BaseElement
+
 template<typename RackWidgetT>
 Element make_element(BaseElement &&) {
 	return NullElement{};
@@ -16,8 +18,7 @@ Element make_element_output(BaseElement) {
 }
 
 template<typename RackWidgetT>
-Element make_element_input(BaseElement b) {
-	printf("%s", "NullElement\n");
+Element make_element_input(BaseElement) {
 	return NullElement{};
 }
 

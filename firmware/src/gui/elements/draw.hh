@@ -53,6 +53,9 @@ draw_image(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t
 // Returns the object
 inline lv_obj_t *
 draw_element(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+	if (img == nullptr)
+		return nullptr;
+
 	lv_obj_t *obj = lv_img_create(canvas);
 	float x = ModuleInfoBase::mm_to_px(el.x_mm, module_height);
 	float y = ModuleInfoBase::mm_to_px(el.y_mm, module_height);
@@ -102,6 +105,9 @@ inline lv_obj_t *draw_element(const FlipSwitch &el, const lv_img_dsc_t *, lv_obj
 
 inline lv_obj_t *draw_element(const SlideSwitch &el, const lv_img_dsc_t *, lv_obj_t *canvas, uint32_t module_height) {
 	auto body_img = PNGFileSystem::read(el.image_bg);
+	if (body_img == nullptr)
+		return nullptr;
+
 	auto obj = draw_element(BaseElement(el), body_img, canvas, module_height);
 
 	lv_obj_t *handle;
@@ -143,8 +149,8 @@ struct ElementDrawer {
 
 		//TODO: once all image ptrs are moved into the types, remove this (and all the gui/images/BRAND/images.hh files)
 		auto img = ElementImage::get_img(element);
-		if (img == nullptr)
-			return nullptr;
+		// if (img == nullptr)
+		// 	return nullptr;
 
 		return ElementDrawerImpl::draw_element(element, img, canvas, module_height);
 	}

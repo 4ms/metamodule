@@ -8,6 +8,8 @@
 namespace MetaModule::StateConversion
 {
 
+//TODO: try using overloaded set like in gui/elements/helpers.hh
+
 // Here we provide a non-ambigous set of fallbacks
 // For all element types that need a custom behaviour, a specialization for that particular type needs to be created
 // Since overload resolution does not work for template parameters, just inheriting from a specialized type (and expecting the method to fall back to the parent's) will not work
@@ -20,7 +22,6 @@ constexpr typename T::State_t convertState(const T &, float val) requires(std::i
 	// All types that inherit from BaseElement but do not define their own State_t will be caught
 }
 
-// to be defined for all kinds of elements
 template<typename T>
 constexpr MomentaryButton::State_t convertState(const T &, float val) requires(std::derived_from<T, MomentaryButton>)
 {
