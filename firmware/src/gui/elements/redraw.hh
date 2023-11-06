@@ -2,6 +2,7 @@
 #include "CoreModules/elements/element_state_conversion.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
+#include "gui/images/image_fs.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include <cmath>
@@ -141,8 +142,24 @@ inline bool redraw_element(const Toggle2pos &element, const GuiElement &gui_el, 
 	return did_update_position;
 }
 
-inline bool redraw_element(const SlideSwitch &element, const GuiElement &gui_el, float val) {
+inline bool redraw_element(const FlipSwitch &element, const GuiElement &gui_el, float val) {
+	bool did_change_frame = false;
 
+	unsigned frame_num = StateConversion::convertState(element, val);
+
+	if (frame_num < element.frames.size()) {
+		auto img = PNGFileSystem::read(element.frames[frame_num]);
+		auto cur_img = lv_img_get_src(gui_el.obj);
+		if (img && img != cur_img) {
+			lv_img_set_src(gui_el.obj, img);
+			did_change_frame = true;
+		}
+	}
+
+	return did_change_frame;
+}
+
+inline bool redraw_element(const SlideSwitch &element, const GuiElement &gui_el, float val) {
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {
 		pr_err("No handle object for SlideSwitch\n");

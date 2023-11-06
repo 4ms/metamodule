@@ -72,7 +72,8 @@ using Element = std::variant<
 	LatchingButtonMonoLight,
 	BefacoPush,
 
-	//TODO: All four toggles replaced by Toggle, with members for num_pos. Horiz/vert deduced from image dimensions
+	FlipSwitch,
+	//TODO: Convert these to FlipSwitch
 	ToggleSwitch,
 	Toggle2pos,
 	Toggle3pos,

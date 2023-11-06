@@ -85,7 +85,6 @@ inline lv_obj_t *
 draw_element(const ToggleSwitch &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
 
-	//TODO check for el.image_fg
 	auto *handle = lv_obj_create(obj);
 	lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 	lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
@@ -95,9 +94,15 @@ draw_element(const ToggleSwitch &el, const lv_img_dsc_t *img, lv_obj_t *canvas, 
 	return obj;
 }
 
-inline lv_obj_t *
-draw_element(const SlideSwitch &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+inline lv_obj_t *draw_element(const FlipSwitch &el, const lv_img_dsc_t *, lv_obj_t *canvas, uint32_t module_height) {
+	auto img = PNGFileSystem::read(el.frames[0]);
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
+	return obj;
+}
+
+inline lv_obj_t *draw_element(const SlideSwitch &el, const lv_img_dsc_t *, lv_obj_t *canvas, uint32_t module_height) {
+	auto body_img = PNGFileSystem::read(el.image_bg);
+	auto obj = draw_element(BaseElement(el), body_img, canvas, module_height);
 
 	lv_obj_t *handle;
 
@@ -113,15 +118,15 @@ draw_element(const SlideSwitch &el, const lv_img_dsc_t *img, lv_obj_t *canvas, u
 		// If there's no fg img, draw a handle with LVGL styles:
 		handle = lv_obj_create(obj);
 		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
-		if (img->header.h > img->header.w) //vertical
-			lv_obj_set_size(handle, img->header.w - 2, img->header.h / el.num_pos);
+		if (body_img->header.h > body_img->header.w) //vertical
+			lv_obj_set_size(handle, body_img->header.w - 2, body_img->header.h / el.num_pos);
 		else
-			lv_obj_set_size(handle, img->header.w / el.num_pos, img->header.h - 2);
+			lv_obj_set_size(handle, body_img->header.w / el.num_pos, body_img->header.h - 2);
 
 		lv_obj_set_style_pad_all(handle, 0, LV_STATE_DEFAULT);
 	}
 
-	bool vert = img->header.w < img->header.h;
+	bool vert = body_img->header.w < body_img->header.h;
 	lv_obj_set_align(handle, vert ? LV_ALIGN_TOP_MID : LV_ALIGN_LEFT_MID);
 	lv_obj_set_pos(handle, 0, 0);
 	return obj;
@@ -135,6 +140,8 @@ struct ElementDrawer {
 
 	template<typename T>
 	lv_obj_t *draw_element(T element) {
+
+		//TODO: once all image ptrs are moved into the types, remove this (and all the gui/images/BRAND/images.hh files)
 		auto img = ElementImage::get_img(element);
 		if (img == nullptr)
 			return nullptr;

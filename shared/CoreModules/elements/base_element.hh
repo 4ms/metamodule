@@ -68,15 +68,13 @@ struct LatchingButton : Switch {
 
 struct ToggleSwitch : Switch {};
 
-//FlipSwitch has up to 4 frames
+//FlipSwitch has up to 3 frames
 //Frame n is drawn to indicate value == n/num_pos
 //e.g. For num_pos=2: frame[0] -> value=0, frame[1] -> value=0.5, frame[2] -> value = 1
-// Here we are experimenting with using a string_view of a png name, which will be
-// used to load image data using a mock filesystem
 struct FlipSwitch : Switch {
 	using State_t = unsigned;
 	State_t num_pos = 2;
-	std::array<std::string_view, 4> frames;
+	std::array<std::string_view, 3> frames;
 };
 
 struct Toggle2pos : ToggleSwitch {

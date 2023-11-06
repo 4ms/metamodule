@@ -2,7 +2,7 @@
 #include "CoreModules/elements/elements_index.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "gui/elements/context.hh"
-#include "gui/elements/element_drawer.hh"
+#include "gui/elements/draw.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
 #include "gui/images/component_images.hh"
