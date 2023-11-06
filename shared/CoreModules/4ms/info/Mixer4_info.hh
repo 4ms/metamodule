@@ -13,16 +13,16 @@ struct Mixer4Info : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 10> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(46.42), Center, "Level 1", ""},
-		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(46.42), Center, "Level 2", ""},
-		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(104.62), Center, "Level 3", ""},
-		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(104.62), Center, "Level 4", ""},
-		AnalogJackInput4ms{to_mm<72>(29.94), to_mm<72>(272.23), Center, "In 1", ""},
-		AnalogJackInput4ms{to_mm<72>(72.13), to_mm<72>(272.23), Center, "In 2", ""},
-		AnalogJackInput4ms{to_mm<72>(115.17), to_mm<72>(272.23), Center, "In 3", ""},
-		AnalogJackInput4ms{to_mm<72>(72.13), to_mm<72>(313.84), Center, "In 4", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.94), to_mm<72>(313.84), Center, "Inv", ""},
-		AnalogJackOutput4ms{to_mm<72>(115.17), to_mm<72>(313.84), Center, "Out", ""},
+		Davies1900hBlackKnob{{to_mm<72>(37.85), to_mm<72>(46.42), Center, "Level 1", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(106.4), to_mm<72>(46.42), Center, "Level 2", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(37.85), to_mm<72>(104.62), Center, "Level 3", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(106.4), to_mm<72>(104.62), Center, "Level 4", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.94), to_mm<72>(272.23), Center, "In 1", ""}},
+		AnalogJackInput4ms{{to_mm<72>(72.13), to_mm<72>(272.23), Center, "In 2", ""}},
+		AnalogJackInput4ms{{to_mm<72>(115.17), to_mm<72>(272.23), Center, "In 3", ""}},
+		AnalogJackInput4ms{{to_mm<72>(72.13), to_mm<72>(313.84), Center, "In 4", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.94), to_mm<72>(313.84), Center, "Inv", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(115.17), to_mm<72>(313.84), Center, "Out", ""}},
 }};
 
     enum class Elem {

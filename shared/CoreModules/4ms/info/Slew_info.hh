@@ -13,10 +13,10 @@ struct SlewInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{to_mm<72>(28.92), to_mm<72>(46.76), Center, "Rise", ""},
-		Knob9mm{to_mm<72>(28.92), to_mm<72>(94.44), Center, "Fall", ""},
-		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(263.82), Center, "In", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(312.04), Center, "Out", ""},
+		Knob9mm{{to_mm<72>(28.92), to_mm<72>(46.76), Center, "Rise", ""}},
+		Knob9mm{{to_mm<72>(28.92), to_mm<72>(94.44), Center, "Fall", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.28), to_mm<72>(263.82), Center, "In", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.28), to_mm<72>(312.04), Center, "Out", ""}},
 }};
 
     enum class Elem {

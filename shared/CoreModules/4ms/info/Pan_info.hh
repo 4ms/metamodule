@@ -13,11 +13,11 @@ struct PanInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 5> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(47.42), Center, "Pan", ""},
-		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(166.45), Center, "CV", ""},
-		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(214.54), Center, "In", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(263.64), Center, "Out 1", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(311.23), Center, "Out 2", ""},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(47.42), Center, "Pan", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.28), to_mm<72>(166.45), Center, "CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.28), to_mm<72>(214.54), Center, "In", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.28), to_mm<72>(263.64), Center, "Out 1", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.28), to_mm<72>(311.23), Center, "Out 2", ""}},
 }};
 
     enum class Elem {

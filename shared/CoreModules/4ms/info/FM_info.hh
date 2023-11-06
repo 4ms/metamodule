@@ -13,20 +13,20 @@ struct FMInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 14> Elements{{
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(40.33), Center, "Pitch", ""},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(40.33), Center, "Mix", ""},
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(83.47), Center, "Index", ""},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(83.47), Center, "Index CV", ""},
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(126.62), Center, "Ratio C", ""},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(126.62), Center, "Ratio F", ""},
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(169.76), Center, "Shape", ""},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(169.76), Center, "Shape CV", ""},
-		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(214.56), Center, "V/Oct P", ""},
-		AnalogJackInput4ms{to_mm<72>(83.49), to_mm<72>(214.56), Center, "V/Oct S", ""},
-		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(263.28), Center, "Mix CV", ""},
-		AnalogJackInput4ms{to_mm<72>(83.49), to_mm<72>(263.28), Center, "Index CV In", ""},
-		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(312.0), Center, "Shape CV", ""},
-		AnalogJackOutput4ms{to_mm<72>(83.49), to_mm<72>(312.0), Center, "Out", ""},
+		Knob9mm{{to_mm<72>(31.96), to_mm<72>(40.33), Center, "Pitch", ""}},
+		Knob9mm{{to_mm<72>(83.49), to_mm<72>(40.33), Center, "Mix", ""}},
+		Knob9mm{{to_mm<72>(31.96), to_mm<72>(83.47), Center, "Index", ""}},
+		Knob9mm{{to_mm<72>(83.49), to_mm<72>(83.47), Center, "Index CV", ""}},
+		Knob9mm{{to_mm<72>(31.96), to_mm<72>(126.62), Center, "Ratio C", ""}},
+		Knob9mm{{to_mm<72>(83.49), to_mm<72>(126.62), Center, "Ratio F", ""}},
+		Knob9mm{{to_mm<72>(31.96), to_mm<72>(169.76), Center, "Shape", ""}},
+		Knob9mm{{to_mm<72>(83.49), to_mm<72>(169.76), Center, "Shape CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(31.96), to_mm<72>(214.56), Center, "V/Oct P", ""}},
+		AnalogJackInput4ms{{to_mm<72>(83.49), to_mm<72>(214.56), Center, "V/Oct S", ""}},
+		AnalogJackInput4ms{{to_mm<72>(31.96), to_mm<72>(263.28), Center, "Mix CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(83.49), to_mm<72>(263.28), Center, "Index CV In", ""}},
+		AnalogJackInput4ms{{to_mm<72>(31.96), to_mm<72>(312.0), Center, "Shape CV", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(83.49), to_mm<72>(312.0), Center, "Out", ""}},
 }};
 
     enum class Elem {

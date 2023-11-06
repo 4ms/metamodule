@@ -13,14 +13,14 @@ struct DetuneInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 8> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(31.96), to_mm<72>(57.97), Center, "W Speed", ""},
-		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(57.97), Center, "F Speed", ""},
-		Davies1900hBlackKnob{to_mm<72>(31.96), to_mm<72>(119.21), Center, "W Depth", ""},
-		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(119.21), Center, "F Depth", ""},
-		AnalogJackInput4ms{to_mm<72>(32.13), to_mm<72>(272.09), Center, "Input", ""},
-		AnalogJackInput4ms{to_mm<72>(83.32), to_mm<72>(272.09), Center, "Detune", ""},
-		AnalogJackInput4ms{to_mm<72>(32.13), to_mm<72>(313.7), Center, "Depth", ""},
-		AnalogJackOutput4ms{to_mm<72>(83.32), to_mm<72>(313.7), Center, "Out", ""},
+		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(57.97), Center, "W Speed", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(57.97), Center, "F Speed", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(119.21), Center, "W Depth", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(119.21), Center, "F Depth", ""}},
+		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(272.09), Center, "Input", ""}},
+		AnalogJackInput4ms{{to_mm<72>(83.32), to_mm<72>(272.09), Center, "Detune", ""}},
+		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(313.7), Center, "Depth", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(83.32), to_mm<72>(313.7), Center, "Out", ""}},
 }};
 
     enum class Elem {

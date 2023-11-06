@@ -13,12 +13,12 @@ struct FollowInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.67), Center, "Rise", ""},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.35), Center, "Fall", ""},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(142.56), Center, "Thresh", ""},
-		AnalogJackInput4ms{to_mm<72>(28.93), to_mm<72>(214.97), Center, "Input", ""},
-		AnalogJackOutput4ms{to_mm<72>(28.93), to_mm<72>(264.07), Center, "Gate", ""},
-		AnalogJackOutput4ms{to_mm<72>(28.93), to_mm<72>(312.29), Center, "Env", ""},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(46.67), Center, "Rise", ""}},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(94.35), Center, "Fall", ""}},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(142.56), Center, "Thresh", ""}},
+		AnalogJackInput4ms{{to_mm<72>(28.93), to_mm<72>(214.97), Center, "Input", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(28.93), to_mm<72>(264.07), Center, "Gate", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(28.93), to_mm<72>(312.29), Center, "Env", ""}},
 }};
 
     enum class Elem {

@@ -13,10 +13,10 @@ struct MNMXInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 4> Elements{{
-		AnalogJackInput4ms{to_mm<72>(28.92), to_mm<72>(168.85), Center, "In A", ""},
-		AnalogJackInput4ms{to_mm<72>(28.92), to_mm<72>(214.97), Center, "In B", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(264.61), Center, "Min", ""},
-		AnalogJackOutput4ms{to_mm<72>(28.92), to_mm<72>(312.29), Center, "Max", ""},
+		AnalogJackInput4ms{{to_mm<72>(28.92), to_mm<72>(168.85), Center, "In A", ""}},
+		AnalogJackInput4ms{{to_mm<72>(28.92), to_mm<72>(214.97), Center, "In B", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.14), to_mm<72>(264.61), Center, "Min", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(28.92), to_mm<72>(312.29), Center, "Max", ""}},
 }};
 
     enum class Elem {

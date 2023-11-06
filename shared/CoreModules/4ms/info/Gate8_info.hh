@@ -13,18 +13,18 @@ struct Gate8Info : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 12> Elements{{
-		GateJackInput4ms{to_mm<72>(32.07), to_mm<72>(262.57), Center, "Clock", ""},
-		GateJackInput4ms{to_mm<72>(83.61), to_mm<72>(262.57), Center, "Reset", ""},
-		GateJackOutput4ms{to_mm<72>(32.07), to_mm<72>(310.16), Center, "End", ""},
-		GateJackOutput4ms{to_mm<72>(83.61), to_mm<72>(310.16), Center, "Out", ""},
-		LatchingButtonMonoLight{to_mm<72>(31.96), to_mm<72>(45.78), Center, "Step 1", ""},
-		LatchingButtonMonoLight{to_mm<72>(83.49), to_mm<72>(45.78), Center, "Step 2", ""},
-		LatchingButtonMonoLight{to_mm<72>(31.96), to_mm<72>(88.3), Center, "Step 3", ""},
-		LatchingButtonMonoLight{to_mm<72>(83.49), to_mm<72>(88.3), Center, "Step 4", ""},
-		LatchingButtonMonoLight{to_mm<72>(31.96), to_mm<72>(130.82), Center, "Step 5", ""},
-		LatchingButtonMonoLight{to_mm<72>(83.49), to_mm<72>(130.82), Center, "Step 6", ""},
-		LatchingButtonMonoLight{to_mm<72>(31.96), to_mm<72>(173.25), Center, "Step 7", ""},
-		LatchingButtonMonoLight{to_mm<72>(83.49), to_mm<72>(173.34), Center, "Step 8", ""},
+		GateJackInput4ms{{to_mm<72>(32.07), to_mm<72>(262.57), Center, "Clock", ""}},
+		GateJackInput4ms{{to_mm<72>(83.61), to_mm<72>(262.57), Center, "Reset", ""}},
+		GateJackOutput4ms{{to_mm<72>(32.07), to_mm<72>(310.16), Center, "End", ""}},
+		GateJackOutput4ms{{to_mm<72>(83.61), to_mm<72>(310.16), Center, "Out", ""}},
+		OrangeButton{{to_mm<72>(31.96), to_mm<72>(45.78), Center, "Step 1", ""}},
+		OrangeButton{{to_mm<72>(83.49), to_mm<72>(45.78), Center, "Step 2", ""}},
+		OrangeButton{{to_mm<72>(31.96), to_mm<72>(88.3), Center, "Step 3", ""}},
+		OrangeButton{{to_mm<72>(83.49), to_mm<72>(88.3), Center, "Step 4", ""}},
+		OrangeButton{{to_mm<72>(31.96), to_mm<72>(130.82), Center, "Step 5", ""}},
+		OrangeButton{{to_mm<72>(83.49), to_mm<72>(130.82), Center, "Step 6", ""}},
+		OrangeButton{{to_mm<72>(31.96), to_mm<72>(173.25), Center, "Step 7", ""}},
+		OrangeButton{{to_mm<72>(83.49), to_mm<72>(173.34), Center, "Step 8", ""}},
 }};
 
     enum class Elem {

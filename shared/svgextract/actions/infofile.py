@@ -199,7 +199,7 @@ def panel_to_components(tree):
 
         #Orange: Button - Latching
         elif color == '#ff8000':
-            set_class_if_not_set(c, "LatchingButtonMonoLight")
+            set_class_if_not_set(c, "OrangeButton")
             components['switches'].append(c)
             c['category'] = "Button"
 
@@ -286,18 +286,20 @@ struct {slug}Info : ModuleInfoBase {{
 
 
 def list_elem_definitions(elems, DPI):
+    #TODO: Toggle3pos/2pos have extra set of { } and possibly string values for positions
+    #TODO: OrangeButton has extra set of { }
     if len(elems) == 0:
         return ""
     source = ""
     for k in elems:
         source += "\t\t"
-        source += f"{k['class']}{{"
+        source += f"{k['class']}{{{{"
         source += f"to_mm<{DPI}>({k['cx']}), "
         source += f"to_mm<{DPI}>({k['cy']}), "
         source += f"{k['coord_ref']}, "
         source += f"\"{k['display_name']}\", "
         source += f"\"\"" #long name
-        source += f"""}},
+        source += f"""}}}},
 """
     return source
 
