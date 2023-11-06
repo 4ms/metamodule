@@ -46,7 +46,8 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 	return fullname;
 }
 
-//TODO: use StateConversion, then convert State_t to string
+//TODO:
+// Put this in CoreModules?
 inline std::string get_element_value_string(Element const &element, float value) {
 	std::string s;
 
@@ -56,8 +57,14 @@ inline std::string get_element_value_string(Element const &element, float value)
 				   [=, &s](Switch const &) { s = value < 0.5f ? "Down" : "Up"; },
 
 				   [=, &s](SlideSwitch const &el) {
-					   s = std::to_string(StateConversion::convertState(el, value)) + std::string("/") +
-						   std::to_string(el.num_pos);
+					   auto v = StateConversion::convertState(el, value);
+					   s = std::to_string(v) + std::string("/") + std::to_string(el.num_pos);
+				   },
+
+				   [=, &s](FlipSwitch const &el) {
+					   auto v = StateConversion::convertState(el, value);
+					   if (v < el.pos_names.size())
+						   s = el.pos_names[v];
 				   },
 
 				   [=, &s](MomentaryButton const &) { s = value < 0.5f ? "Released" : "Pressed"; },

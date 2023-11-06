@@ -69,12 +69,12 @@ struct LatchingButton : Switch {
 struct ToggleSwitch : Switch {};
 
 //FlipSwitch has up to 3 frames
-//Frame n is drawn to indicate value == n/num_pos
-//e.g. For num_pos=2: frame[0] -> value=0, frame[1] -> value=0.5, frame[2] -> value = 1
+//Frame n is drawn to indicate value == n/(num_pos-1)
 struct FlipSwitch : Switch {
 	using State_t = unsigned;
 	State_t num_pos = 2;
-	std::array<std::string_view, 3> frames;
+	std::array<std::string_view, 3> frames{};
+	std::array<std::string_view, 3> pos_names{"Down", "Center", "Up"};
 };
 
 struct Toggle2pos : ToggleSwitch {
