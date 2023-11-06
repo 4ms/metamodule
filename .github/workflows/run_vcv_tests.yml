@@ -46,7 +46,7 @@ jobs:
       fail-fast: false
     defaults:
       run:
-        shell: 'bash {0}'
+        shell: bash
     env:
       CC: gcc
       CXX: g++
