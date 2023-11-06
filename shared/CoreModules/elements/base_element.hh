@@ -101,7 +101,7 @@ struct FlipSwitch : Switch {
 	using State_t = unsigned;
 	unsigned num_pos = 3;
 	std::array<std::string_view, 3> frames{};
-	std::array<std::string_view, 3> pos_names{"Down", "Center", "Up"};
+	std::array<std::string_view, 3> pos_names{"0", "1", "2"};
 };
 
 // SlideSwitch has a bg (body) image and a fg (handle) image

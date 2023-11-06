@@ -5,7 +5,6 @@
 LV_IMG_DECLARE(jack_x);
 LV_IMG_DECLARE(knob9mm_x);
 LV_IMG_DECLARE(knob_x);
-// LV_IMG_DECLARE(button_x);
 LV_IMG_DECLARE(knob_unlined_x);
 LV_IMG_DECLARE(knob_large_x);
 LV_IMG_DECLARE(slider_x);
@@ -45,14 +44,6 @@ inline const lv_img_dsc_t *get_img(const Slider25mmVertLED &) {
 inline const lv_img_dsc_t *get_img(const Slider25mmVert &) {
 	return &slider_x;
 }
-
-// inline const lv_img_dsc_t *get_img(const LatchingButton &) {
-// 	return &button_x;
-// }
-
-// inline const lv_img_dsc_t *get_img(const MomentaryButton &) {
-// 	return &button_x;
-// }
 
 inline const lv_img_dsc_t *get_img(const LightElement &) {
 	return &led_x;
