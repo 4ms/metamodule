@@ -78,7 +78,7 @@ jobs:
       fail-fast: false
     defaults:
       run:
-        shell: bash
+        shell: msys2
     env:
       CC: gcc
       CXX: g++
@@ -99,7 +99,6 @@ jobs:
 
       - name: Get Rack-SDK
         run: |
-          pacman -Su --noconfirm wget
           wget https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-win-x64.zip
           unzip Rack-SDK-${{ env.rack-sdk-version }}-win-x64.zip
 
