@@ -60,9 +60,8 @@ jobs:
 
       - name: Get Rack-SDK
         run: |
-          pushd $HOME
-          curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-lin-x64.zip
-          unzip Rack-SDK.zip
+          wget https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-lin-x64.zip
+          unzip Rack-SDK-${{ env.rack-sdk-version }}-lin-x64.zip
 
       - name: Build and run tests
         run: |
