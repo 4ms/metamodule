@@ -2,6 +2,27 @@ name: Run VCV unit tests
 
 on:
   workflow_dispatch:
+    inputs:
+      linux_x64:
+        description: 'Run tests on Linux x64'
+        required: true
+        default: true
+        type: boolean
+      win_x64:
+        description: 'Run tests on Windows x64'
+        required: true
+        default: true
+        type: boolean
+      # mac_x64:
+      #   description: 'Run tests on Mac x64'
+      #   required: true
+      #   default: false
+      #   type: boolean
+      # mac_arm64:
+      #   description: 'Run tests on Mac arm64'
+      #   required: true
+      #   default: false
+      #   type: boolean
   push:
     branches:
       - main
@@ -14,21 +35,53 @@ on:
       - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
 
 env:
-  rack-sdk-version: 2.3.0
+  rack-sdk-version: latest
+ 
+# - { os: windows, shell: msys2, rack-os-name: win-x64 }    # runs out of memory - "cc1plus.exe: out of memory allocating 65536 bytes"
+#- { os: ubuntu,  shell: bash, rack-os-name: lin-x64  }      
 
 jobs:
-  build:
-    
+  build-tests-lin-x64:
+    if: ${{ github.event_name == 'push' || inputs.linux_x64 }}
+    name: lin-x64
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        os: 
-          # - { os: windows, shell: msys2, rack-os-name: win-x64 }    # runs out of memory - "cc1plus.exe: out of memory allocating 65536 bytes"
-          - { os: ubuntu,  shell: bash, rack-os-name: lin-x64  }      
-    runs-on: '${{ matrix.os.os }}-latest'
     defaults:
       run:
-        shell: '${{ matrix.os.shell }} {0}'
+        shell: bash
+    env:
+      CC: gcc
+      CXX: g++
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+
+      - name: Get Rack-SDK
+        run: |
+          pushd $HOME
+          curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-lin-x64.zip
+          unzip Rack-SDK.zip
+
+      - name: Build and run tests
+        run: |
+          export RACK_DIR=$HOME/Rack-SDK
+          cd vcv
+          make -f tests/Makefile
+
+  build-tests-win-x64:
+    if: ${{ inputs.win_x64 }} #Only run msys2 test manually
+    name: win-x64
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    defaults:
+      run:
+        shell: bash
     env:
       CC: gcc
       CXX: g++
@@ -41,7 +94,6 @@ jobs:
           token: ${{ secrets.CHECKOUT_TOKEN }}
 
       - name: Install windows dependencies (MSYS2)
-        if: matrix.os.os =='windows'
         uses: msys2/setup-msys2@v2
         with:
           msystem: mingw64
@@ -51,7 +103,7 @@ jobs:
       - name: Get Rack-SDK
         run: |
           pushd $HOME
-          curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-${{ matrix.os.rack-os-name }}.zip
+          curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-win-x64.zip
           unzip Rack-SDK.zip
 
       - name: Build and run tests
@@ -59,3 +111,5 @@ jobs:
           export RACK_DIR=$HOME/Rack-SDK
           cd vcv
           make -f tests/Makefile
+
+
