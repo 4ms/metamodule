@@ -11,7 +11,7 @@ on:
       win_x64:
         description: 'Run tests on Windows x64'
         required: true
-        default: true
+        default: false
         type: boolean
       # mac_x64:
       #   description: 'Run tests on Mac x64'
@@ -76,7 +76,7 @@ jobs:
   build-tests-win-x64:
     if: ${{ inputs.win_x64 }} #Only run msys2 test manually
     name: win-x64
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       fail-fast: false
     defaults:
