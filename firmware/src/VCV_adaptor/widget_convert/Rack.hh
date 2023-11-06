@@ -7,6 +7,36 @@ namespace MetaModule
 {
 
 template<>
+inline Element make_element<rack::componentlibrary::BefacoSwitch>(BaseElement b) {
+	return FlipSwitch{{b}, 2, {"BefacoSwitch_0.png", "BefacoSwitch_2.png"}, {"Down", "Up"}};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::CKSS>(BaseElement b) {
+	return FlipSwitch{{b}, 2, {"CKSS_0.png", "CKSS_1.png"}};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::BefacoPush>(BaseElement b) {
+	return MomentaryButton{{{b}, "BefacoPush_0.png"}};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::CKD6>(BaseElement b) {
+	return MomentaryButton{{{b}, "CKD6_0.png"}};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::TL1105>(BaseElement b) {
+	return MomentaryButton{{{b}, "TL1105.png"}};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::LEDBezel>(BaseElement b) {
+	return LEDBezel{{{{b}}}}; //TODO
+};
+
+template<>
 inline Element make_element<rack::componentlibrary::BefacoBigKnob>(BaseElement b) {
 	return BefacoBigKnob{b};
 };
@@ -19,21 +49,6 @@ inline Element make_element<rack::componentlibrary::BefacoTinyKnob>(BaseElement 
 template<>
 inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement b) {
 	return BefacoSlidePot{b};
-};
-
-template<>
-inline Element make_element<rack::componentlibrary::BefacoSwitch>(BaseElement b) {
-	return BefacoSwitch{b};
-};
-
-template<>
-inline Element make_element<rack::componentlibrary::BefacoPush>(BaseElement b) {
-	return BefacoPush{b};
-};
-
-template<>
-inline Element make_element<rack::componentlibrary::CKSS>(BaseElement b) {
-	return CKSS{b};
 };
 
 template<>
@@ -121,24 +136,9 @@ inline Element make_element<rack::componentlibrary::Trimpot>(BaseElement b) {
 	return Trimpot{b};
 };
 
-template<>
-inline Element make_element<rack::componentlibrary::CKD6>(BaseElement b) {
-	return CKD6{b};
-};
-
-template<>
-inline Element make_element<rack::componentlibrary::TL1105>(BaseElement b) {
-	return TL1105{b};
-};
-
 //
 // Lights
 //
-
-template<>
-inline Element make_element<rack::componentlibrary::LEDBezel>(BaseElement b) {
-	return LEDBezel{b};
-};
 
 template<>
 inline Element

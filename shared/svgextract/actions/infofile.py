@@ -205,7 +205,7 @@ def panel_to_components(tree):
 
         #Light Orange: Button - Momentary
         elif color == '#ffc000':
-            set_class_if_not_set(c, "MomentaryButtonWhiteLight")
+            set_class_if_not_set(c, "WhiteMomentary7mm")
             components['switches'].append(c)
             c['category'] = "Button"
 

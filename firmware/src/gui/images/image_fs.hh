@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/images/Rack/images.hh"
 #include "lvgl.h"
 #include <cstdio>
 #include <map>
@@ -25,6 +26,12 @@ extern const lv_img_dsc_t SwitchNarrowHoriz_bg;
 extern const lv_img_dsc_t BefacoSwitch_0;
 extern const lv_img_dsc_t BefacoSwitch_1;
 extern const lv_img_dsc_t BefacoSwitch_2;
+
+extern const lv_img_dsc_t TL1105;
+extern const lv_img_dsc_t CKD6_0;
+extern const lv_img_dsc_t BefacoPush_0;
+extern const lv_img_dsc_t CKSS_0;
+extern const lv_img_dsc_t CKSS_1;
 
 // These are only used in Muxslicer
 // extern const lv_img_dsc_t BefacoSwitchHoriz_0;
@@ -63,6 +70,11 @@ struct PNGFileSystem {
 		{"BefacoSwitch_0.png", &BefacoSwitch_0},
 		{"BefacoSwitch_1.png", &BefacoSwitch_1},
 		{"BefacoSwitch_2.png", &BefacoSwitch_2},
+		{"TL1105.png", &TL1105},
+		{"CKD6_0.png", &CKD6_0},
+		{"BefacoPush_0.png", &BefacoPush_0},
+		{"CKSS_0.png", &CKSS_0},
+		{"CKSS_1.png", &CKSS_1},
 
 		// HetrickCV/ and AudibleInstruments/ ???
 		{"CKSS_rot_bg.png", &CKSS_rot_bg},

@@ -79,9 +79,9 @@ using Element = std::variant<
 	LatchingButtonMonoLight,
 
 	// MomentaryButton:
-	BefacoPush,
-	TL1105,
-	CKD6,
+	// BefacoPush,
+	// TL1105,
+	// CKD6,
 
 	//Encoders
 	Encoder,

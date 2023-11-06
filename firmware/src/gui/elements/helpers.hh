@@ -54,8 +54,6 @@ inline std::string get_element_value_string(Element const &element, float value)
 	std::visit(overloaded{
 				   [=, &s](Pot const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
 
-				   [=, &s](Switch const &) { s = value < 0.5f ? "Down" : "Up"; },
-
 				   [=, &s](SlideSwitch const &el) {
 					   auto v = StateConversion::convertState(el, value);
 					   s = std::to_string(v) + std::string("/") + std::to_string(el.num_pos);

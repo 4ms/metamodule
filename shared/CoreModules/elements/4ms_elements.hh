@@ -20,7 +20,9 @@ struct Slider25mmHoriz : Slider {};
 struct Slider25mmHorizLED : SliderMonoLight {};
 struct Slider25mmVertLED : SliderMonoLight {};
 
-//Switches
+//
+// Buttons
+//
 struct OrangeButton : LatchingButton {
 	constexpr OrangeButton() = default;
 	constexpr OrangeButton(BaseElement b)
@@ -28,6 +30,30 @@ struct OrangeButton : LatchingButton {
 	}
 };
 
+struct WhiteMomentary7mm : MomentaryButtonWhiteLight {
+	constexpr WhiteMomentary7mm() = default;
+	constexpr WhiteMomentary7mm(BaseElement b)
+		: MomentaryButtonWhiteLight{{{{b}, "button_x.png"}}} {
+	}
+};
+
+struct MomentaryRGB7mm : MomentaryButtonRGB {
+	constexpr MomentaryRGB7mm() = default;
+	constexpr MomentaryRGB7mm(BaseElement b)
+		: MomentaryButtonRGB{{{{b}, "button_x.png"}}} {
+	}
+};
+
+struct MomentaryRGB5mm : MomentaryButtonRGB {
+	constexpr MomentaryRGB5mm() = default;
+	constexpr MomentaryRGB5mm(BaseElement b)
+		: MomentaryButtonRGB{{{{b}, "button_x.png"}}} {
+	}
+};
+
+//
+// Switches
+//
 struct Toggle2pos : FlipSwitch {
 	enum State_t : FlipSwitch::State_t { DOWN = 0, UP = 1 };
 
