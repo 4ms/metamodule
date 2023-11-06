@@ -142,7 +142,7 @@ inline bool redraw_element(const Toggle2pos &element, const GuiElement &gui_el, 
 }
 
 // TODO: Use this for all veritcal toggles/switches
-inline bool redraw_element(const SlideSwitchNPos &element, const GuiElement &gui_el, float val) {
+inline bool redraw_element(const SlideSwitch &element, const GuiElement &gui_el, float val) {
 
 	if (!gui_el.obj) {
 		return false;
@@ -150,7 +150,7 @@ inline bool redraw_element(const SlideSwitchNPos &element, const GuiElement &gui
 
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {
-		pr_err("No handle object for SlideSwitchNPos\n");
+		pr_err("No handle object for SlideSwitch\n");
 		return false;
 	}
 	// major axis = height if vertical, width if horizontal.

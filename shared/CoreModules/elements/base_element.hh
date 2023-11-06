@@ -80,7 +80,7 @@ struct Toggle3posHoriz : Toggle3pos {
 	enum class State_t { LEFT, CENTER, RIGHT };
 };
 
-struct SlideSwitchNPos : ToggleSwitch {
+struct SlideSwitch : ToggleSwitch {
 	using State_t = unsigned;
 	State_t num_pos = 2;
 	void *image_bg = nullptr; //TODO: replace void* with std::string_view of filename.png

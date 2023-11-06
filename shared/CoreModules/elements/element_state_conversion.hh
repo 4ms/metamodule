@@ -56,11 +56,10 @@ constexpr Toggle3pos::State_t convertState(const T &, float val) requires(std::d
 }
 
 template<typename T>
-constexpr SlideSwitchNPos::State_t convertState(const T &element, float val)
-	requires(std::derived_from<T, SlideSwitchNPos>)
+constexpr SlideSwitch::State_t convertState(const T &element, float val) requires(std::derived_from<T, SlideSwitch>)
 {
 	//maps 0..1 -> 1..N
-	return SlideSwitchNPos::State_t(1 + std::round(val * (float)(element.num_pos - 1)));
+	return SlideSwitch::State_t(1 + std::round(val * (float)(element.num_pos - 1)));
 }
 
 template<typename T>

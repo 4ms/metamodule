@@ -382,7 +382,7 @@ private:
 		std::visit(overloaded{
 					   [](const BaseElement &) {},
 					   [](const Switch &) { lv_arc_set_range(ui_ControlArc, 0, 1); },
-					   [](const SlideSwitchNPos &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
+					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
 					   [](const Toggle3pos &) { lv_arc_set_range(ui_ControlArc, 0, 2); },
 					   [](const Pot &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
 				   },

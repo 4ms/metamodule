@@ -78,7 +78,7 @@ using Element = std::variant<
 	Toggle2posHoriz,
 	Toggle3posHoriz,
 
-	SlideSwitchNPos,
+	SlideSwitch,
 
 	BefacoSwitch,
 	BefacoSwitchHorizontal,

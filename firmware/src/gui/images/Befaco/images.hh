@@ -58,7 +58,7 @@ inline const lv_img_dsc_t *get_img(const BefacoSlidePotSmall &) {
 	return &::BefacoSlidePotSmall;
 }
 
-inline const lv_img_dsc_t *get_img(const SlideSwitchNPos &el) {
+inline const lv_img_dsc_t *get_img(const SlideSwitch &el) {
 	return static_cast<lv_img_dsc_t *>(el.image_bg);
 }
 

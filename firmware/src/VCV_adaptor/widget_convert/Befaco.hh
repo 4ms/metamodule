@@ -45,27 +45,27 @@ namespace MetaModule
 
 template<>
 inline Element make_element<::CKSSVert7>(BaseElement &&b) {
-	return SlideSwitchNPos{{b}, 7, (void *)&SwitchTallVert, (void *)&SwitchTallVertHandle};
+	return SlideSwitch{{b}, 7, (void *)&SwitchTallVert, (void *)&SwitchTallVertHandle};
 }
 
 template<>
 inline Element make_element<::CKSSHoriz4>(BaseElement &&b) {
-	return SlideSwitchNPos{{b}, 4, (void *)&SwitchWideHoriz_bg, (void *)&SwitchWideHoriz_fg};
+	return SlideSwitch{{b}, 4, (void *)&SwitchWideHoriz_bg, (void *)&SwitchWideHoriz_fg};
 }
 
 template<>
 inline Element make_element<::CKSSHoriz2>(BaseElement &&b) {
-	return SlideSwitchNPos{{b}, 2, (void *)&SwitchNarrowHoriz_bg};
+	return SlideSwitch{{b}, 2, (void *)&SwitchNarrowHoriz_bg};
 }
 
 template<>
 inline Element make_element<::CKSSNarrow>(BaseElement &&b) {
-	return SlideSwitchNPos{{b}, 2, (void *)&SwitchNarrow};
+	return SlideSwitch{{b}, 2, (void *)&SwitchNarrow};
 }
 
 template<>
 inline Element make_element<::CKSSNarrow3>(BaseElement &&b) {
-	return SlideSwitchNPos{{b}, 3, (void *)&SwitchNarrow};
+	return SlideSwitch{{b}, 3, (void *)&SwitchNarrow};
 }
 
 template<>

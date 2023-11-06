@@ -14,7 +14,7 @@ namespace MetaModule
 
 template<>
 inline Element make_element<::CKSSRot>(BaseElement &&b) {
-	return MetaModule::SlideSwitchNPos{{b}, 2, (void *)&::CKSS_rot_bg, (void *)&::CKSS_rot_fg};
+	return MetaModule::SlideSwitch{{b}, 2, (void *)&::CKSS_rot_bg, (void *)&::CKSS_rot_fg};
 }
 
 template<>

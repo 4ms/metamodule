@@ -95,7 +95,7 @@ draw_element(const ToggleSwitch &el, const lv_img_dsc_t *img, lv_obj_t *canvas, 
 }
 
 inline lv_obj_t *
-draw_element(const SlideSwitchNPos &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+draw_element(const SlideSwitch &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
 
 	lv_obj_t *handle;

@@ -4,7 +4,7 @@
 TEST_CASE("Convert State SlideSwitch 7 pos") {
 
 	unsigned num_pos = 7;
-	auto sw = MetaModule::SlideSwitchNPos{MetaModule::BaseElement{}, num_pos};
+	auto sw = MetaModule::SlideSwitch{MetaModule::BaseElement{}, num_pos};
 
 	//Positions:
 	//  1/7     2/7    3/7     4/7     5/7     6/7     7/7
@@ -39,7 +39,7 @@ TEST_CASE("Convert State SlideSwitch 7 pos") {
 TEST_CASE("Convert State SlideSwitch 2 pos") {
 
 	unsigned num_pos = 2;
-	auto sw = MetaModule::SlideSwitchNPos{MetaModule::BaseElement{}, num_pos};
+	auto sw = MetaModule::SlideSwitch{MetaModule::BaseElement{}, num_pos};
 
 	//Positions:
 	//  1/2    2/2
