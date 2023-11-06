@@ -29,10 +29,14 @@ struct ThreeStateBefacoSwitchMomentary;
 // Forward declare lvgl images
 // This will go away once we replae lv_img_dsc_t with string for filename.png
 struct lv_img_dsc_t;
-extern const lv_img_dsc_t SwitchNarrowHoriz_bg;
+
 extern const lv_img_dsc_t SwitchWideHoriz_bg;
+extern const lv_img_dsc_t SwitchWideHoriz_fg;
 extern const lv_img_dsc_t SwitchTallVert;
+extern const lv_img_dsc_t SwitchTallVertHandle;
+
 extern const lv_img_dsc_t SwitchNarrow;
+extern const lv_img_dsc_t SwitchNarrowHoriz_bg;
 
 // Conversions from Befaco widgets to MetaModule Elements:
 
@@ -41,17 +45,17 @@ namespace MetaModule
 
 template<>
 inline Element make_element<::CKSSVert7>(BaseElement &&b) {
-	return SlideSwitchNPos{{b}, 7, (void *)&SwitchTallVert};
+	return SlideSwitchNPos{{b}, 7, (void *)&SwitchTallVert, (void *)&SwitchTallVertHandle};
+}
+
+template<>
+inline Element make_element<::CKSSHoriz4>(BaseElement &&b) {
+	return SlideSwitchNPos{{b}, 4, (void *)&SwitchWideHoriz_bg, (void *)&SwitchWideHoriz_fg};
 }
 
 template<>
 inline Element make_element<::CKSSHoriz2>(BaseElement &&b) {
 	return SlideSwitchNPos{{b}, 2, (void *)&SwitchNarrowHoriz_bg};
-}
-
-template<>
-inline Element make_element<::CKSSHoriz4>(BaseElement &&b) {
-	return SlideSwitchNPos{{b}, 4, (void *)&SwitchWideHoriz_bg};
 }
 
 template<>
