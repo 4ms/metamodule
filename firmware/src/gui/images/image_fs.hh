@@ -14,6 +14,10 @@ extern const lv_img_dsc_t SwitchTallVertHandle;
 extern const lv_img_dsc_t SwitchNarrow_bg;
 extern const lv_img_dsc_t SwitchNarrowHoriz_bg;
 
+extern const lv_img_dsc_t BefacoSwitch_0;
+extern const lv_img_dsc_t BefacoSwitch_1;
+extern const lv_img_dsc_t BefacoSwitch_2;
+
 // Mock filesystem -- TODO replace with littlefs or SD Card FATFS
 struct PNGFileSystem {
 
@@ -33,5 +37,8 @@ struct PNGFileSystem {
 		{"SwitchTallVertHandle.png", &SwitchTallVertHandle},
 		{"SwitchNarrow.png", &SwitchNarrow_bg},
 		{"SwitchNarrowHoriz_bg.png", &SwitchNarrowHoriz_bg},
+		{"BefacoSwitch_0.png", &BefacoSwitch_0},
+		{"BefacoSwitch_1.png", &BefacoSwitch_1},
+		{"BefacoSwitch_2.png", &BefacoSwitch_2},
 	};
 };

@@ -57,6 +57,12 @@ inline Element make_element<::CKSSNarrow3>(BaseElement &&b) {
 }
 
 template<>
+inline Element make_element<::ThreeStateBefacoSwitchMomentary>(BaseElement &&b) {
+	return FlipSwitch{
+		{b}, 3, {"BefacoSwitch_0.png", "BefacoSwitch_1.png", "BefacoSwitch_2.png"}, {"Off(m)", "On", "Off"}};
+};
+
+template<>
 inline Element make_element<::Knurlie>(BaseElement &&b) {
 	return NullElement{b};
 };
@@ -119,11 +125,6 @@ inline Element make_element<::Davies1900hLargeLightGreyKnob>(BaseElement &&b) {
 template<>
 inline Element make_element<::BefacoSlidePotSmall>(BaseElement &&b) {
 	return BefacoSlidePotSmall{b};
-};
-
-template<>
-inline Element make_element<::ThreeStateBefacoSwitchMomentary>(BaseElement &&b) {
-	return Toggle3pos{b};
 };
 
 template<>
