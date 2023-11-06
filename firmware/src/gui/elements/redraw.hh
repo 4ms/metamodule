@@ -141,12 +141,7 @@ inline bool redraw_element(const Toggle2pos &element, const GuiElement &gui_el, 
 	return did_update_position;
 }
 
-// TODO: Use this for all veritcal toggles/switches
 inline bool redraw_element(const SlideSwitch &element, const GuiElement &gui_el, float val) {
-
-	if (!gui_el.obj) {
-		return false;
-	}
 
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {
