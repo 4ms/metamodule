@@ -3,6 +3,7 @@
 #include "CoreModules/elements/elements.hh"
 #include "gui/helpers/units_conversion.hh"
 #include "gui/images/component_images.hh"
+#include "gui/images/image_fs.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
@@ -100,9 +101,13 @@ draw_element(const SlideSwitch &el, const lv_img_dsc_t *img, lv_obj_t *canvas, u
 
 	lv_obj_t *handle;
 
-	if (el.image_fg) {
+	if (el.image_fg.size()) {
 		handle = lv_img_create(obj);
-		draw_image(0, 0, Coords::TopLeft, (lv_img_dsc_t *)el.image_fg, handle, module_height);
+		auto handle_img = PNGFileSystem::read(el.image_fg);
+		if (handle_img)
+			draw_image(0, 0, Coords::TopLeft, handle_img, handle, module_height);
+		else
+			pr_err("No handle image found for %.*s!\n", (int)el.image_fg.size(), el.image_fg.data());
 
 	} else {
 		// If there's no fg img, draw a handle with LVGL styles:

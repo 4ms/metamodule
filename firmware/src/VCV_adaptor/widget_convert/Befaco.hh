@@ -26,18 +26,6 @@ struct BefacoSlidePotSmall;
 // From StereoStrip.cpp
 struct ThreeStateBefacoSwitchMomentary;
 
-// Forward declare lvgl images
-// This will go away once we replae lv_img_dsc_t with string for filename.png
-struct lv_img_dsc_t;
-
-extern const lv_img_dsc_t SwitchWideHoriz_bg;
-extern const lv_img_dsc_t SwitchWideHoriz_fg;
-extern const lv_img_dsc_t SwitchTallVert;
-extern const lv_img_dsc_t SwitchTallVertHandle;
-
-extern const lv_img_dsc_t SwitchNarrow;
-extern const lv_img_dsc_t SwitchNarrowHoriz_bg;
-
 // Conversions from Befaco widgets to MetaModule Elements:
 
 namespace MetaModule
@@ -45,27 +33,27 @@ namespace MetaModule
 
 template<>
 inline Element make_element<::CKSSVert7>(BaseElement &&b) {
-	return SlideSwitch{{b}, 7, (void *)&SwitchTallVert, (void *)&SwitchTallVertHandle};
+	return SlideSwitch{{b}, 7, "SwitchTallVert.png", "SwitchTallVertHandle.png"};
 }
 
 template<>
 inline Element make_element<::CKSSHoriz4>(BaseElement &&b) {
-	return SlideSwitch{{b}, 4, (void *)&SwitchWideHoriz_bg, (void *)&SwitchWideHoriz_fg};
+	return SlideSwitch{{b}, 4, "SwitchWideHoriz_bg.png", "SwitchWideHoriz_fg.png"};
 }
 
 template<>
 inline Element make_element<::CKSSHoriz2>(BaseElement &&b) {
-	return SlideSwitch{{b}, 2, (void *)&SwitchNarrowHoriz_bg};
+	return SlideSwitch{{b}, 2, "SwitchNarrowHoriz_bg.png"};
 }
 
 template<>
 inline Element make_element<::CKSSNarrow>(BaseElement &&b) {
-	return SlideSwitch{{b}, 2, (void *)&SwitchNarrow};
+	return SlideSwitch{{b}, 2, "SwitchNarrow.png"};
 }
 
 template<>
 inline Element make_element<::CKSSNarrow3>(BaseElement &&b) {
-	return SlideSwitch{{b}, 3, (void *)&SwitchNarrow};
+	return SlideSwitch{{b}, 3, "SwitchNarrow.png"};
 }
 
 template<>

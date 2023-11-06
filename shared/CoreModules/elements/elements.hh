@@ -73,6 +73,7 @@ using Element = std::variant<
 	BefacoPush,
 
 	//TODO: All four toggles replaced by Toggle, with members for num_pos. Horiz/vert deduced from image dimensions
+	ToggleSwitch,
 	Toggle2pos,
 	Toggle3pos,
 	Toggle2posHoriz,

@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
+#include "gui/images/image_fs.hh"
 #include "lvgl.h"
 
 LV_IMG_DECLARE(BananutBlack);
@@ -12,8 +13,6 @@ LV_IMG_DECLARE(Davies1900hLightGrey);
 LV_IMG_DECLARE(Davies1900hLargeLightGrey);
 LV_IMG_DECLARE(Davies1900hDarkGrey);
 LV_IMG_DECLARE(Davies1900hLargeGrey);
-// LV_IMG_DECLARE(SwitchTallVert);
-// LV_IMG_DECLARE(SwitchTallVertHandle);
 
 namespace MetaModule::ElementImageImpl
 {
@@ -59,7 +58,8 @@ inline const lv_img_dsc_t *get_img(const BefacoSlidePotSmall &) {
 }
 
 inline const lv_img_dsc_t *get_img(const SlideSwitch &el) {
-	return static_cast<lv_img_dsc_t *>(el.image_bg);
+	return PNGFileSystem::read(el.image_bg);
+	// return static_cast<lv_img_dsc_t *>(el.image_bg);
 }
 
 } // namespace MetaModule::ElementImageImpl

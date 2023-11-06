@@ -5,16 +5,12 @@
 struct CKSSRot;
 struct HCVThemedRogan;
 
-struct lv_img_dsc_t;
-extern lv_img_dsc_t *CKSS_rot_fg;
-extern lv_img_dsc_t *CKSS_rot_bg;
-
 namespace MetaModule
 {
 
 template<>
 inline Element make_element<::CKSSRot>(BaseElement &&b) {
-	return MetaModule::SlideSwitch{{b}, 2, (void *)&::CKSS_rot_bg, (void *)&::CKSS_rot_fg};
+	return MetaModule::SlideSwitch{{b}, 2, "CKSS_rot_bg.png", "CKSS_rot_fg.png"};
 }
 
 template<>

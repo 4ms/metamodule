@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <string_view>
 
 // Heirarchy:
@@ -67,6 +68,17 @@ struct LatchingButton : Switch {
 
 struct ToggleSwitch : Switch {};
 
+//FlipSwitch has up to 4 frames
+//Frame n is drawn to indicate value == n/num_pos
+//e.g. For num_pos=2: frame[0] -> value=0, frame[1] -> value=0.5, frame[2] -> value = 1
+// Here we are experimenting with using a string_view of a png name, which will be
+// used to load image data using a mock filesystem
+struct FlipSwitch : Switch {
+	using State_t = unsigned;
+	State_t num_pos = 2;
+	std::array<std::string_view, 4> frames;
+};
+
 struct Toggle2pos : ToggleSwitch {
 	enum class State_t { DOWN, UP };
 };
@@ -80,11 +92,13 @@ struct Toggle3posHoriz : Toggle3pos {
 	enum class State_t { LEFT, CENTER, RIGHT };
 };
 
+// SlideSwitch has a bg (body) image and a fg (handle) image
+// The handle is drawn at evenly spaced positions to indicate the switch's value
 struct SlideSwitch : ToggleSwitch {
 	using State_t = unsigned;
 	State_t num_pos = 2;
-	void *image_bg = nullptr; //TODO: replace void* with std::string_view of filename.png
-	void *image_fg = nullptr;
+	std::string_view image_bg = "";
+	std::string_view image_fg = "";
 };
 
 // Encoders
