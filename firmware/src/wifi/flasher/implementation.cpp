@@ -24,20 +24,20 @@ static void serial_debug_print(const uint8_t* data, uint16_t size, bool write)
     #ifdef LOG_TRANSACTIONS
     if (write)
     {
-        printf_("WRITE ");
+        printf("WRITE ");
     }
     else
     {
-        printf_("Read ");
+        printf("Read ");
     }
-    printf_("Len %u\n", size);
+    printf("Len %u\n", size);
     
 
     for (uint32_t i=0; i<size; i++)
     {
-        printf_("0x%02x ", data[i]);
+        printf("0x%02x ", data[i]);
     }
-    printf_("\n");
+    printf("\n");
     #endif
 }
 

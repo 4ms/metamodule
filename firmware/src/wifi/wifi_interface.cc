@@ -35,7 +35,7 @@ Framer framer(FrameConfig);
 
 void WifiInterface::init()
 {
-    printf_("Initializing Wifi\n");
+    printf("Initializing Wifi\n");
 
     // auto result = Flasher::init(230400);
 
@@ -91,12 +91,12 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
             }
             else
             {
-                printf_("Unexpected detection\n");
+                printf("Unexpected detection\n");
             }
         }
         else if (auto switchMessage = message->content_as_Switch(); switchMessage)
         {
-            printf_("State: %u\n", switchMessage->state());
+            printf("State: %u\n", switchMessage->state());
 
             // Just echo back raw
             sendResponse(payload);
@@ -128,7 +128,7 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
 
             auto receivedPatchData = std::span(uploadPatchMessage->content()->data(), uploadPatchMessage->content()->size());
 
-            printf_("Received Patch of %u bytes\n", receivedPatchData.size());
+            printf("Received Patch of %u bytes\n", receivedPatchData.size());
 
             flatbuffers::FlatBufferBuilder fbb;
             auto result = CreateResult(fbb, true);
@@ -139,12 +139,12 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
         }
         else
         {
-            printf_("Other option\n");
+            printf("Other option\n");
         }
     }
     else
     {
-        printf_("Invalid message\n");
+        printf("Invalid message\n");
     }
 }
 
