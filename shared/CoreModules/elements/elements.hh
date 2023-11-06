@@ -57,10 +57,14 @@ using Element = std::variant<
 	MomentaryButtonWhiteLight,
 	LatchingButtonMonoLight,
 	BefacoPush,
+	//TODO: All four toggles replaced by Toggle, with members for num_pos and horiz/vert
 	Toggle2pos,
 	Toggle3pos,
 	Toggle2posHoriz,
 	Toggle3posHoriz,
+
+	SlideSwitchNPos,
+
 	BefacoSwitch,
 	BefacoSwitchHorizontal,
 	VCVLightBezel<RedGreenBlueLight>,

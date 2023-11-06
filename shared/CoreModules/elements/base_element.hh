@@ -73,8 +73,17 @@ struct Toggle2pos : ToggleSwitch {
 struct Toggle3pos : ToggleSwitch {
 	enum class State_t { DOWN, CENTER, UP };
 };
-struct Toggle2posHoriz : Toggle2pos {};
-struct Toggle3posHoriz : Toggle3pos {};
+struct Toggle2posHoriz : Toggle2pos {
+	enum class State_t { LEFT, RIGHT };
+};
+struct Toggle3posHoriz : Toggle3pos {
+	enum class State_t { LEFT, CENTER, RIGHT };
+};
+
+struct SlideSwitchNPos : ToggleSwitch {
+	using State_t = unsigned;
+	State_t num_pos = 2;
+};
 
 // Encoders
 struct Encoder : ParamElement {};

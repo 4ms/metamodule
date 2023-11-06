@@ -21,7 +21,13 @@ struct Crossfader : Slider {};
 
 struct BefacoSwitchHorizontal : Toggle2posHoriz {};
 struct CKSSHoriz2 : Toggle2posHoriz {};
-struct CKSSVert7 : Toggle2pos {};
+
+struct CKSSVert7 : SlideSwitchNPos {
+	constexpr CKSSVert7(float x, float y, Coords c, std::string_view s, std::string_view l)
+		: SlideSwitchNPos{{x, y, c, s, l}, 7} {
+	}
+};
+
 struct CKSSHoriz4 : Toggle2posHoriz {};
 struct CKSSNarrow : Toggle2pos {};
 struct CKSSNarrow3 : Toggle2pos {};

@@ -63,12 +63,13 @@ inline const lv_img_dsc_t *get_img_handle(const BefacoSlidePotSmall &) {
 	return &::BefacoSlidePotHandleSmall;
 }
 
-inline const lv_img_dsc_t *get_img(const ToggleNpos &) { //CK77Vert7 is not in the variant
+inline const lv_img_dsc_t *get_img(const SlideSwitchNPos &) {
+	//TODO: if el.horiz...
 	return &::SwitchTallVert;
 }
 
 //TODO: this is not used. Remove it or use it
-inline const lv_img_dsc_t *get_img_handle(const ToggleNpos &) {
+inline const lv_img_dsc_t *get_img_handle(const SlideSwitchNPos &) {
 	return &::SwitchTallVertHandle;
 }
 

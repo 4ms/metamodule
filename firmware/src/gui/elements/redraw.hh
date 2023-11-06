@@ -141,6 +141,41 @@ inline bool redraw_element(const Toggle2pos &element, const GuiElement &gui_el, 
 	return did_update_position;
 }
 
+// TODO: Use this for all veritcal toggles/switches
+inline bool redraw_element(const SlideSwitchNPos &element, const GuiElement &gui_el, float val) {
+
+	if (!gui_el.obj) {
+		return false;
+	}
+
+	auto handle = lv_obj_get_child(gui_el.obj, 0);
+	if (!handle) {
+		pr_err("No handle sub-object for toggleNpos\n");
+		return false;
+	}
+	auto height = lv_obj_get_height(gui_el.obj);
+
+	lv_obj_refr_size(handle);
+	lv_obj_refr_pos(handle);
+	int32_t y = lv_obj_get_y(handle);
+
+	auto handle_height = height / element.num_pos;
+	lv_obj_set_height(handle, handle_height);
+	lv_coord_t height_range = height - handle_height;
+
+	auto cur_state = StateConversion::convertState(element, (float)y / (float)height_range);
+	auto state = StateConversion::convertState(element, val); //1..N
+
+	bool did_update_position = false;
+
+	if (state != cur_state) {
+		lv_obj_set_y(handle, ((float)state / (float)element.num_pos) * height_range);
+		did_update_position = true;
+	}
+
+	return did_update_position;
+}
+
 inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }

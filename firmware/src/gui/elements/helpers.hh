@@ -55,6 +55,11 @@ inline std::string get_element_value_string(Element const &element, float value)
 
 				   [=, &s](Switch const &) { s = value < 0.5f ? "Down" : "Up"; },
 
+				   [=, &s](SlideSwitchNPos const &el) {
+					   s = std::to_string(StateConversion::convertState(el, value)) + std::string("/") +
+						   std::to_string(el.num_pos);
+				   },
+
 				   [=, &s](MomentaryButton const &) { s = value < 0.5f ? "Released" : "Pressed"; },
 
 				   [=, &s](LatchingButton const &) { s = value < 0.5f ? "Off" : "On"; },

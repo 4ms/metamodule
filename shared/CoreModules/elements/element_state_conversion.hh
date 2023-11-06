@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include <array>
+#include <cmath>
 #include <concepts>
 #include <type_traits>
 
@@ -52,6 +53,14 @@ constexpr Toggle3pos::State_t convertState(const T &, float val) requires(std::d
 	} else {
 		return Toggle3pos::State_t::UP;
 	}
+}
+
+template<typename T>
+constexpr SlideSwitchNPos::State_t convertState(const T &element, float val)
+	requires(std::derived_from<T, SlideSwitchNPos>)
+{
+	//maps 0..1 -> 1..N
+	return SlideSwitchNPos::State_t(1 + std::round(val * ((float)element.num_pos - 1)));
 }
 
 template<typename T>
