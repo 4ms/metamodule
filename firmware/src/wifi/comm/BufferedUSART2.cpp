@@ -50,7 +50,7 @@ void BufferedUSART2::initPeripheral()
         }
         else
         {
-            printf_("No flag\n");
+            printf("No flag\n");
         }
     });
 
