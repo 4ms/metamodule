@@ -50,6 +50,17 @@ LV_IMG_DECLARE(Rogan3PSGreen);
 LV_IMG_DECLARE(Rogan3PSWhite);
 LV_IMG_DECLARE(Davies1900hRed);
 LV_IMG_DECLARE(Davies1900hWhite);
+LV_IMG_DECLARE(BefacoBigKnob);
+LV_IMG_DECLARE(BefacoTinyKnobWhite);
+LV_IMG_DECLARE(BefacoTinyKnobBlack);
+LV_IMG_DECLARE(BefacoTinyKnobRed);
+LV_IMG_DECLARE(BefacoTinyKnobLightGrey);
+LV_IMG_DECLARE(BefacoTinyKnobDarkGrey);
+LV_IMG_DECLARE(Davies1900hLightGrey);
+LV_IMG_DECLARE(Davies1900hLargeLightGrey);
+LV_IMG_DECLARE(Davies1900hLargeWhite);
+LV_IMG_DECLARE(Davies1900hDarkGrey);
+LV_IMG_DECLARE(Davies1900hLargeGrey);
 
 // These are only used in Muxslicer
 // extern const lv_img_dsc_t BefacoSwitchHoriz_0;
@@ -86,6 +97,16 @@ struct PNGFileSystem {
 		{"SwitchTallVertHandle.png", &SwitchTallVertHandle},
 		{"SwitchNarrow.png", &SwitchNarrow_bg},
 		{"SwitchNarrowHoriz_bg.png", &SwitchNarrowHoriz_bg},
+		{"BefacoTinyKnobWhite.png", &BefacoTinyKnobWhite},
+		{"BefacoTinyKnobRed.png", &BefacoTinyKnobRed},
+		{"BefacoTinyKnobDarkGrey.png", &BefacoTinyKnobDarkGrey},
+		{"BefacoTinyKnobLightGrey.png", &BefacoTinyKnobLightGrey},
+		{"BefacoTinyKnobBlack.png", &BefacoTinyKnobBlack},
+		{"BefacoBigKnob.png", &BefacoBigKnob},
+		{"Davies1900hDarkGreyKnob.png", &Davies1900hDarkGrey},
+		{"Davies1900hLightGreyKnob.png", &Davies1900hLightGrey},
+		{"Davies1900hLargeGreyKnob.png", &Davies1900hLargeGrey},
+		{"Davies1900hLargeLightGreyKnob.png", &Davies1900hLargeLightGrey},
 
 		// Rack/
 		{"BefacoSwitch_0.png", &BefacoSwitch_0},
@@ -108,8 +129,10 @@ struct PNGFileSystem {
 		{"Rogan3PSRed.png", &Rogan3PSRed},
 		{"Rogan3PSGreen.png", &Rogan3PSGreen},
 		{"Rogan3PSWhite.png", &Rogan3PSWhite},
-		{"Davies1900hRed.png", &Davies1900hRed},
-		{"Davies1900hWhite.png", &Davies1900hWhite},
+		{"Davies1900hRedKnob.png", &Davies1900hRed},
+		{"Davies1900hWhiteKnob.png", &Davies1900hWhite},
+		{"Davies1900hBlackKnob.png", &knob_x}, //??
+		{"Davies1900hLargeWhiteKnob.png", &Davies1900hLargeWhite},
 
 		// HetrickCV/ and AudibleInstruments/ ???
 		{"CKSS_rot_bg.png", &CKSS_rot_bg},

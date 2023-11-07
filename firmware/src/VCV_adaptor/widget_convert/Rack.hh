@@ -47,11 +47,6 @@ inline Element make_element<rack::componentlibrary::BefacoTinyKnob>(BaseElement 
 };
 
 template<>
-inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement b) {
-	return KnobE{{b}, "BefacoSlidePot.png"};
-};
-
-template<>
 inline Element make_element<rack::componentlibrary::Davies1900hBlackKnob>(BaseElement b) {
 	return KnobE{{b}, "Davies1900hBlackKnob.png"};
 };
@@ -68,7 +63,7 @@ inline Element make_element<rack::componentlibrary::Davies1900hRedKnob>(BaseElem
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hLargeWhiteKnob>(BaseElement b) {
-	return KnobE{{b}, "Davies1900hLargeWhiteKnob.png"};
+	return KnobE{{b}, "Davies1900hLargeWhite.png"};
 };
 
 template<>
@@ -134,6 +129,14 @@ inline Element make_element<rack::componentlibrary::Rogan3PSGreen>(BaseElement b
 template<>
 inline Element make_element<rack::componentlibrary::Trimpot>(BaseElement b) {
 	return KnobE{{b}, "Trimpot.png"};
+};
+
+//
+// Sliders
+//
+template<>
+inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement b) {
+	return MetaModule::BefacoSlidePot{};
 };
 
 //

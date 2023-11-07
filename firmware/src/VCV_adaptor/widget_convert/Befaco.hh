@@ -75,61 +75,52 @@ inline Element make_element<::Knurlie>(BaseElement b) {
 
 template<>
 inline Element make_element<::BefacoTinyKnobWhite>(BaseElement b) {
-	return BefacoTinyKnobWhite{b};
+	return KnobE{{b}, "BefacoTinyKnobWhite.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobRed>(BaseElement b) {
-	return BefacoTinyKnobRed{b};
+	return KnobE{{b}, "BefacoTinyKnobRed.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobDarkGrey>(BaseElement b) {
-	return BefacoTinyKnobDarkGrey{b};
+	return KnobE{{b}, "BefacoTinyKnobDarkGrey.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobLightGrey>(BaseElement b) {
-	return BefacoTinyKnobLightGrey{b};
+	return KnobE{{b}, "BefacoTinyKnobLightGrey.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobBlack>(BaseElement b) {
-	return BefacoTinyKnobBlack{b};
+	return KnobE{{b}, "BefacoTinyKnobBlack.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hLargeGreyKnob>(BaseElement b) {
-	return Davies1900hLargeGreyKnob{b};
+	return KnobE{{b}, "Davies1900hLargeGreyKnob.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hLightGreyKnob>(BaseElement b) {
-	return Davies1900hLightGreyKnob{b};
+	return KnobE{{b}, "Davies1900hLightGreyKnob.png"};
+};
+
+template<>
+inline Element make_element<::Davies1900hLargeLightGreyKnob>(BaseElement b) {
+	return KnobE{{b}, "Davies1900hLargeLightGreyKnob.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hDarkGreyKnob>(BaseElement b) {
-	return Davies1900hDarkGreyKnob{b};
+	return KnobE{{b}, "Davies1900hDarkGreyKnob.png"};
 };
 
 template<>
 inline Element make_element<::Crossfader>(BaseElement b) {
 	return Crossfader{b};
-};
-
-// Only used in Muxslicer, remove the images?
-// template<>
-// inline Element make_element<::BefacoSwitchHorizontal>(BaseElement b) {
-// 	return FlipSwitch{{b},
-// 					  3,
-// 					  {"BefacoSwitchHoriz_0.png", "BefacoSwitchHoriz_1.png", "BefacoSwitchHoriz_2.png"},
-// 					  {"Left", "Center", "Right"}};
-// };
-
-template<>
-inline Element make_element<::Davies1900hLargeLightGreyKnob>(BaseElement b) {
-	return Davies1900hLargeLightGreyKnob{b};
 };
 
 template<>
@@ -146,5 +137,14 @@ template<>
 inline Element make_element_input<::BananutBlack>(BaseElement b) {
 	return BefacoInputPort{b};
 };
+
+// Only used in Muxslicer, remove the images?
+// template<>
+// inline Element make_element<::BefacoSwitchHorizontal>(BaseElement b) {
+// 	return FlipSwitch{{b},
+// 					  3,
+// 					  {"BefacoSwitchHoriz_0.png", "BefacoSwitchHoriz_1.png", "BefacoSwitchHoriz_2.png"},
+// 					  {"Left", "Center", "Right"}};
+// };
 
 } // namespace MetaModule
