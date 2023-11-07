@@ -37,13 +37,13 @@ struct QPLFOInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(45.23), to_mm<72>(152.55), Center, "LED 2", ""}},
 		RedGreenBlueLight{{to_mm<72>(45.23), to_mm<72>(228.15), Center, "LED 3", ""}},
 		RedGreenBlueLight{{to_mm<72>(45.23), to_mm<72>(303.75), Center, "LED 4", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(154.79), to_mm<72>(43.18), Center, "Ping 1", ""}},
+		WhiteMomentary7mm{{to_mm<72>(154.79), to_mm<72>(43.18), Center, "Ping 1", ""}},
 		OrangeButton{{to_mm<72>(154.79), to_mm<72>(81.06), Center, "On 1", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(154.79), to_mm<72>(118.78), Center, "Ping 2", ""}},
+		WhiteMomentary7mm{{to_mm<72>(154.79), to_mm<72>(118.78), Center, "Ping 2", ""}},
 		OrangeButton{{to_mm<72>(154.79), to_mm<72>(156.66), Center, "On 2", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(154.79), to_mm<72>(194.38), Center, "Ping 3", ""}},
+		WhiteMomentary7mm{{to_mm<72>(154.79), to_mm<72>(194.38), Center, "Ping 3", ""}},
 		OrangeButton{{to_mm<72>(154.79), to_mm<72>(232.26), Center, "On 3", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(154.79), to_mm<72>(269.98), Center, "Ping 4", ""}},
+		WhiteMomentary7mm{{to_mm<72>(154.79), to_mm<72>(269.98), Center, "Ping 4", ""}},
 		OrangeButton{{to_mm<72>(154.79), to_mm<72>(307.86), Center, "On 4", ""}},
 }};
 

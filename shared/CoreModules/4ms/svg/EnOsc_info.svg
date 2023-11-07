@@ -25,9 +25,9 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.1131277"
-     inkscape:cx="23.898224"
-     inkscape:cy="243.00472"
-     inkscape:window-width="1390"
+     inkscape:cx="180.53807"
+     inkscape:cy="244.89765"
+     inkscape:window-width="1916"
      inkscape:window-height="1205"
      inkscape:window-x="50"
      inkscape:window-y="25"
@@ -1860,7 +1860,7 @@
        style="fill: lime;" />
     <rect
        id="Warp_Switch"
-       data-name="Warp Switch"
+       data-name="Warp Switch@Segment@Cheb@Fold"
        x="208.56"
        y="193.22"
        width="11.34"
@@ -1886,7 +1886,7 @@
        style="fill: red;" />
     <rect
        id="Twist_Switch"
-       data-name="Twist Switch"
+       data-name="Twist Switch@Crush@Pulsar@Ramp"
        x="11.26"
        y="206.56"
        width="11.34"
@@ -1913,7 +1913,7 @@
        style="fill: red;" />
     <rect
        id="Cross_FM_Switch"
-       data-name="Cross FM Switch"
+       data-name="Cross FM Switch@Down@All@Up"
        x="208.56"
        y="94.44"
        width="11.34"
@@ -1939,7 +1939,7 @@
        style="fill: red;" />
     <rect
        id="Scale_Switch"
-       data-name="Scale Switch"
+       data-name="Scale Switch@Free@Oct.@12TET"
        x="11.26"
        y="94.52"
        width="11.34"
@@ -1951,16 +1951,14 @@
        cx="209.56"
        cy="42.53"
        r="11.34"
-       style="fill: #ffc000;"
-       inkscape:label="Freeze_MomentaryRGB7mm" />
+       style="fill: #ffc000;" />
     <circle
        id="Learn_MomentaryRGB7mm"
        data-name="Learn#MomentaryRGB7mm"
        cx="21.63"
        cy="42.53"
        r="11.34"
-       style="fill: #ffc000;"
-       inkscape:label="Learn_MomentaryRGB7mm" />
+       style="fill: #ffc000;" />
     <text
        id="slug"
        transform="translate(80.36 8.09)"

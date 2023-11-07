@@ -62,7 +62,7 @@ struct QCDInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(273.46), to_mm<72>(228.27), Center, "LED 3", ""}},
 		RedGreenBlueLight{{to_mm<72>(47.87), to_mm<72>(316.71), Center, "Inv LED 4", ""}},
 		RedGreenBlueLight{{to_mm<72>(273.46), to_mm<72>(303.87), Center, "LED 4", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(192.73), to_mm<72>(42.56), Center, "Tap Button", ""}},
+		WhiteMomentary7mm{{to_mm<72>(192.73), to_mm<72>(42.56), Center, "Tap Button", ""}},
 }};
 
     enum class Elem {

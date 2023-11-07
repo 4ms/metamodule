@@ -55,8 +55,8 @@ struct SequantInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(164.79), to_mm<72>(118.26), Center, "Step 6 LED", ""}},
 		RedGreenBlueLight{{to_mm<72>(193.13), to_mm<72>(118.26), Center, "Step 7 LED", ""}},
 		RedGreenBlueLight{{to_mm<72>(221.48), to_mm<72>(118.26), Center, "Step 8 LED", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(22.96), to_mm<72>(46.59), Center, "Start/Stop", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(221.38), to_mm<72>(46.59), Center, "Select", ""}},
+		WhiteMomentary7mm{{to_mm<72>(22.96), to_mm<72>(46.59), Center, "Start/Stop", ""}},
+		WhiteMomentary7mm{{to_mm<72>(221.38), to_mm<72>(46.59), Center, "Select", ""}},
 }};
 
     enum class Elem {

@@ -49,12 +49,12 @@ struct PEGInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(111.11), to_mm<72>(258.36), Center, "EOF LED 1", ""}},
 		RedGreenBlueLight{{to_mm<72>(177.5), to_mm<72>(258.36), Center, "EOF LED 2", ""}},
 		RedGreenBlueLight{{to_mm<72>(215.46), to_mm<72>(258.36), Center, "Half R", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(68.06), to_mm<72>(45.56), Center, "Ping 1", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(120.9), to_mm<72>(41.96), Center, "Cycle 1", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(167.48), to_mm<72>(41.9), Center, "Cycle 2", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(220.56), to_mm<72>(45.56), Center, "Ping 2", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(21.56), to_mm<72>(213.99), Center, "Bi-polar 1", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(267.04), to_mm<72>(213.99), Center, "Bi-polar 2", ""}},
+		WhiteMomentary7mm{{to_mm<72>(68.06), to_mm<72>(45.56), Center, "Ping 1", ""}},
+		WhiteMomentary7mm{{to_mm<72>(120.9), to_mm<72>(41.96), Center, "Cycle 1", ""}},
+		WhiteMomentary7mm{{to_mm<72>(167.48), to_mm<72>(41.9), Center, "Cycle 2", ""}},
+		WhiteMomentary7mm{{to_mm<72>(220.56), to_mm<72>(45.56), Center, "Ping 2", ""}},
+		WhiteMomentary7mm{{to_mm<72>(21.56), to_mm<72>(213.99), Center, "Bi-polar 1", ""}},
+		WhiteMomentary7mm{{to_mm<72>(267.04), to_mm<72>(213.99), Center, "Bi-polar 2", ""}},
 }};
 
     enum class Elem {

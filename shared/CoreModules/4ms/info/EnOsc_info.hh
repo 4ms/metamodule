@@ -34,12 +34,12 @@ struct EnOscInfo : ModuleInfoBase {
 		GateJackInput4ms{{to_mm<72>(171.75), to_mm<72>(319.03), Center, "Freeze Jack", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(209.12), to_mm<72>(262.78), Center, "Out A", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(209.12), to_mm<72>(305.91), Center, "Out B", ""}},
-		Toggle3pos{{to_mm<72>(16.93), to_mm<72>(103.025), Center, "Scale Switch", ""}},
-		Toggle3pos{{to_mm<72>(214.23), to_mm<72>(102.945), Center, "Cross FM Switch", ""}},
-		Toggle3pos{{to_mm<72>(16.93), to_mm<72>(215.065), Center, "Twist Switch", ""}},
-		Toggle3pos{{to_mm<72>(214.23), to_mm<72>(201.725), Center, "Warp Switch", ""}},
-		MomentaryButtonRGB{{to_mm<72>(21.63), to_mm<72>(42.53), Center, "Learn", ""}},
-		MomentaryButtonRGB{{to_mm<72>(209.56), to_mm<72>(42.53), Center, "Freeze", ""}},
+		Toggle3pos{{to_mm<72>(16.93), to_mm<72>(103.025), Center, "Scale Switch", ""}, {"Free", "Oct.", "12TET"}},
+		Toggle3pos{{to_mm<72>(214.23), to_mm<72>(102.945), Center, "Cross FM Switch", ""}, {"Down", "All", "Up"}},
+		Toggle3pos{{to_mm<72>(16.93), to_mm<72>(215.065), Center, "Twist Switch", ""}, {"Crush", "Pulsar", "Ramp"}},
+		Toggle3pos{{to_mm<72>(214.23), to_mm<72>(201.725), Center, "Warp Switch", ""}, {"Segment", "Cheb", "Fold"}},
+		MomentaryRGB7mm{{to_mm<72>(21.63), to_mm<72>(42.53), Center, "Learn", ""}},
+		MomentaryRGB7mm{{to_mm<72>(209.56), to_mm<72>(42.53), Center, "Freeze", ""}},
 }};
 
     enum class Elem {

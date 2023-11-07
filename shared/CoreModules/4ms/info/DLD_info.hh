@@ -47,11 +47,11 @@ struct DLDInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(222.2), to_mm<72>(34.94), Center, "Time B LED", ""}},
 		Toggle3pos{{to_mm<72>(84.11), to_mm<72>(51.455), Center, "+16 | 1/8th A", ""}},
 		Toggle3pos{{to_mm<72>(205.35), to_mm<72>(51.455), Center, "+16 | 1/8th B", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(124.03), to_mm<72>(42.51), Center, "Ping Button", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(81.85), to_mm<72>(123.11), Center, "Reverse A", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(118.44), to_mm<72>(135.74), Center, "Hold A", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(169.66), to_mm<72>(135.74), Center, "Hold B", ""}},
-		MomentaryButtonWhiteLight{{to_mm<72>(206.08), to_mm<72>(123.11), Center, "Reverse B", ""}},
+		WhiteMomentary7mm{{to_mm<72>(124.03), to_mm<72>(42.51), Center, "Ping Button", ""}},
+		WhiteMomentary7mm{{to_mm<72>(81.85), to_mm<72>(123.11), Center, "Reverse A", ""}},
+		WhiteMomentary7mm{{to_mm<72>(118.44), to_mm<72>(135.74), Center, "Hold A", ""}},
+		WhiteMomentary7mm{{to_mm<72>(169.66), to_mm<72>(135.74), Center, "Hold B", ""}},
+		WhiteMomentary7mm{{to_mm<72>(206.08), to_mm<72>(123.11), Center, "Reverse B", ""}},
 }};
 
     enum class Elem {
