@@ -12,10 +12,11 @@ extern const lv_img_dsc_t switch_horiz_left;
 extern const lv_img_dsc_t switch_horiz_right;
 extern const lv_img_dsc_t switch_horiz_center;
 extern const lv_img_dsc_t button_x;
-LV_IMG_DECLARE(knob9mm_x);
-LV_IMG_DECLARE(knob_x);
-LV_IMG_DECLARE(knob_large_x);
-LV_IMG_DECLARE(slider_x);
+extern const lv_img_dsc_t knob9mm_x;
+extern const lv_img_dsc_t knob_x;
+extern const lv_img_dsc_t knob_large_x;
+extern const lv_img_dsc_t slider_x;
+extern const lv_img_dsc_t slider_horiz_x;
 
 extern const lv_img_dsc_t CKSS_rot_fg;
 extern const lv_img_dsc_t CKSS_rot_bg;
@@ -30,6 +31,13 @@ extern const lv_img_dsc_t SwitchNarrowHoriz_bg;
 extern const lv_img_dsc_t BefacoSwitch_0;
 extern const lv_img_dsc_t BefacoSwitch_1;
 extern const lv_img_dsc_t BefacoSwitch_2;
+
+extern const lv_img_dsc_t BefacoSlidePot;
+extern const lv_img_dsc_t BefacoSlidePotHandle;
+extern const lv_img_dsc_t BefacoSlidePotSmall;
+extern const lv_img_dsc_t BefacoSlidePotHandleSmall;
+extern const lv_img_dsc_t Crossfader;
+extern const lv_img_dsc_t CrossfaderHandle;
 
 extern const lv_img_dsc_t TL1105;
 extern const lv_img_dsc_t CKD6_0;
@@ -91,7 +99,7 @@ struct PNGFileSystem {
 		{"knob9mm_x.png", &knob9mm_x},
 		{"knob_large_x.png", &knob_large_x},
 		{"slider_x.png", &slider_x},
-		// {"slider_horiz_x.png", &slider_horiz_x},
+		{"slider_horiz_x.png", &slider_horiz_x},
 
 		// Befaco/
 		{"SwitchWideHoriz_bg.png", &SwitchWideHoriz_bg},
@@ -110,6 +118,12 @@ struct PNGFileSystem {
 		{"Davies1900hLightGreyKnob.png", &Davies1900hLightGrey},
 		{"Davies1900hLargeGreyKnob.png", &Davies1900hLargeGrey},
 		{"Davies1900hLargeLightGreyKnob.png", &Davies1900hLargeLightGrey},
+		{"BefacoSlidePot.png", &BefacoSlidePot},
+		{"BefacoSlidePotHandle.png", &BefacoSlidePotHandle},
+		{"BefacoSlidePotSmall.png", &BefacoSlidePotSmall},
+		{"BefacoSlidePotHandleSmall.png", &BefacoSlidePotHandleSmall},
+		{"Crossfader.png", &Crossfader},
+		{"CrossfaderHandle.png", &CrossfaderHandle},
 
 		// Rack/
 		{"BefacoSwitch_0.png", &BefacoSwitch_0},

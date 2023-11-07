@@ -70,11 +70,12 @@ draw_element(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, u
 
 // Draw slider with its handle as a sub-object
 inline lv_obj_t *draw_element(const Slider &el, const lv_img_dsc_t *, lv_obj_t *canvas, uint32_t module_height) {
-	auto img = PNGFileSystem::read(el.image_bg);
+	auto img = PNGFileSystem::read(el.image);
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
 	if (!obj)
 		return nullptr;
 
+	//todo: el.image_handle
 	lv_coord_t w = img ? img->header.w : 5;
 	lv_coord_t h = img ? img->header.h : 5;
 	auto handle = lv_obj_create(obj);

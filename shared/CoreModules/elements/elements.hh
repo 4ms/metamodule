@@ -22,48 +22,12 @@ namespace MetaModule
 using Element = std::variant<
 	// Placeholder for unknown element
 	NullElement,
-
 	Knob,
-	// Knob9mm,
-	// Davies1900hRedKnob,
-	// Davies1900hBlackKnob,
-	// Davies1900hWhiteKnob,
-	// Davies1900hDarkGreyKnob,
-	// Davies1900hLightGreyKnob,
-	// DaviesLargeKnob,
-	// Davies1900hLargeGreyKnob,
-	// Davies1900hLargeWhiteKnob,
-	// Davies1900hLargeLightGreyKnob,
-	// BefacoBigKnob,
-	// BefacoTinyKnobRed,
-	// BefacoTinyKnobBlack,
-	// BefacoTinyKnobWhite,
-	// BefacoTinyKnobDarkGrey,
-	// BefacoTinyKnobLightGrey,
-	// Rogan1PRed,
-	// Rogan1PSGreen,
-	// Rogan1PSRed,
-	// Rogan1PSWhite,
-	// Rogan2SGray,
-	// Rogan2PSWhite,
-	// Rogan2PSGreen,
-	// Rogan2PSRed,
-	// Rogan3PSWhite,
-	// Rogan3PSRed,
-	// Rogan3PSGreen,
-	// Trimpot,
-
-	// Sliders
-	// TODO: all these become just `Slider`
 	Slider,
 	SliderLight,
 
-	// Slider25mmVert,
-	// Slider25mmHoriz,
-	// Slider25mmVertLED,
-	// Slider25mmHorizLED,
 	BefacoSlidePotSmall,
-	BefacoSlidePot,
+	// BefacoSlidePot,
 	Crossfader,
 
 	// Switches/Buttons

@@ -120,12 +120,12 @@ inline Element make_element<::Davies1900hDarkGreyKnob>(BaseElement b) {
 
 template<>
 inline Element make_element<::Crossfader>(BaseElement b) {
-	return Crossfader{b};
+	return Slider{{b}, "Crossfader.png", "CrossfaderHandle.png"};
 };
 
 template<>
 inline Element make_element<::BefacoSlidePotSmall>(BaseElement b) {
-	return BefacoSlidePotSmall{b};
+	return Slider{{b}, "BefacoSlidePotSmall.png", "BefacoSlidePotHandleSmall.png"};
 };
 
 template<>
@@ -137,14 +137,5 @@ template<>
 inline Element make_element_input<::BananutBlack>(BaseElement b) {
 	return BefacoInputPort{b};
 };
-
-// Only used in Muxslicer, remove the images?
-// template<>
-// inline Element make_element<::BefacoSwitchHorizontal>(BaseElement b) {
-// 	return FlipSwitch{{b},
-// 					  3,
-// 					  {"BefacoSwitchHoriz_0.png", "BefacoSwitchHoriz_1.png", "BefacoSwitchHoriz_2.png"},
-// 					  {"Left", "Center", "Right"}};
-// };
 
 } // namespace MetaModule

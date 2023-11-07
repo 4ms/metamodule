@@ -58,7 +58,8 @@ struct Knob : Pot {
 };
 
 struct Slider : Pot {
-	std::string_view image_bg = "";
+	std::string_view image = "";
+	std::string_view image_handle = "";
 };
 
 struct SliderLight : Slider {
