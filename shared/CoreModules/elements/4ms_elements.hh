@@ -9,24 +9,24 @@ using Color565 = uint16_t;
 //
 // Knobs
 //
-struct Knob9mm : KnobE {
+struct Knob9mm : Knob {
 	constexpr Knob9mm() = default;
 	constexpr Knob9mm(BaseElement b)
-		: KnobE{{b}, "knob9mm_x.png"} {
+		: Knob{{b}, "knob9mm_x.png"} {
 	}
 };
 
-struct DaviesLargeKnob : KnobE {
+struct DaviesLargeKnob : Knob {
 	constexpr DaviesLargeKnob() = default;
 	constexpr DaviesLargeKnob(BaseElement b)
-		: KnobE{{b}, "knob_large_x.png"} {
+		: Knob{{b}, "knob_large_x.png"} {
 	}
 };
 
-struct Davies1900hBlackKnob : KnobE {
+struct Davies1900hBlackKnob : Knob {
 	constexpr Davies1900hBlackKnob() = default;
 	constexpr Davies1900hBlackKnob(BaseElement b)
-		: KnobE{{b}, "knob_x.png"} {
+		: Knob{{b}, "knob_x.png"} {
 	}
 };
 

@@ -52,12 +52,10 @@ struct Pot : ParamElement {
 	using State_t = float;
 };
 
-//TODO: rename KnobE => Knob and remove current "Knob"
-struct KnobE : Pot {
+struct Knob : Pot {
 	std::string_view image = "";
 };
 
-struct Knob : Pot {};
 struct Slider : Pot {};
 
 //

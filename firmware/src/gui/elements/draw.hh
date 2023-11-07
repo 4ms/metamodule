@@ -82,7 +82,7 @@ inline lv_obj_t *draw_element(const Slider &el, const lv_img_dsc_t *img, lv_obj_
 	return obj;
 }
 
-inline lv_obj_t *draw_element(const KnobE &el, const lv_img_dsc_t *, lv_obj_t *canvas, uint32_t module_height) {
+inline lv_obj_t *draw_element(const Knob &el, const lv_img_dsc_t *, lv_obj_t *canvas, uint32_t module_height) {
 	auto img = PNGFileSystem::read(el.image);
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
 	return obj;

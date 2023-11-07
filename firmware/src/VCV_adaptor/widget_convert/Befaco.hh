@@ -75,47 +75,47 @@ inline Element make_element<::Knurlie>(BaseElement b) {
 
 template<>
 inline Element make_element<::BefacoTinyKnobWhite>(BaseElement b) {
-	return KnobE{{b}, "BefacoTinyKnobWhite.png"};
+	return Knob{{b}, "BefacoTinyKnobWhite.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobRed>(BaseElement b) {
-	return KnobE{{b}, "BefacoTinyKnobRed.png"};
+	return Knob{{b}, "BefacoTinyKnobRed.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobDarkGrey>(BaseElement b) {
-	return KnobE{{b}, "BefacoTinyKnobDarkGrey.png"};
+	return Knob{{b}, "BefacoTinyKnobDarkGrey.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobLightGrey>(BaseElement b) {
-	return KnobE{{b}, "BefacoTinyKnobLightGrey.png"};
+	return Knob{{b}, "BefacoTinyKnobLightGrey.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobBlack>(BaseElement b) {
-	return KnobE{{b}, "BefacoTinyKnobBlack.png"};
+	return Knob{{b}, "BefacoTinyKnobBlack.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hLargeGreyKnob>(BaseElement b) {
-	return KnobE{{b}, "Davies1900hLargeGreyKnob.png"};
+	return Knob{{b}, "Davies1900hLargeGreyKnob.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hLightGreyKnob>(BaseElement b) {
-	return KnobE{{b}, "Davies1900hLightGreyKnob.png"};
+	return Knob{{b}, "Davies1900hLightGreyKnob.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hLargeLightGreyKnob>(BaseElement b) {
-	return KnobE{{b}, "Davies1900hLargeLightGreyKnob.png"};
+	return Knob{{b}, "Davies1900hLargeLightGreyKnob.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hDarkGreyKnob>(BaseElement b) {
-	return KnobE{{b}, "Davies1900hDarkGreyKnob.png"};
+	return Knob{{b}, "Davies1900hDarkGreyKnob.png"};
 };
 
 template<>
