@@ -100,12 +100,12 @@ TParamWidget *createParamImpl(MetaModule::Coords coords, math::Vec pos, engine::
 		if (pq->labels.size() > 0) {
 			std::visit(overloaded{
 						   [](BaseElement &) {},
-						   [](FlipSwitch &el) {
-							   el.num_pos = std::clamp(pq->maxValue - pq->minValue, 2, 3);
+						   [&pq](FlipSwitch &el) {
+							   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue, 2, 3);
 							   set_labels(el.pos_names, pq->labels);
 						   },
-						   [](SlideSwitch &el) {
-							   el.num_pos = std::clamp(pq->maxValue - pq->minValue, 2, 8);
+						   [&pq](SlideSwitch &el) {
+							   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue, 2, 8);
 							   set_labels(el.pos_names, pq->labels);
 						   },
 					   },
