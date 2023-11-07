@@ -55,10 +55,13 @@ using Element = std::variant<
 
 	// Sliders
 	// TODO: all these become just `Slider`
-	Slider25mmVert,
-	Slider25mmHoriz,
-	Slider25mmVertLED,
-	Slider25mmHorizLED,
+	Slider,
+	SliderLight,
+
+	// Slider25mmVert,
+	// Slider25mmHoriz,
+	// Slider25mmVertLED,
+	// Slider25mmHorizLED,
 	BefacoSlidePotSmall,
 	BefacoSlidePot,
 	Crossfader,
