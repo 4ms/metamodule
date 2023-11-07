@@ -29,6 +29,7 @@ struct QCDInfo : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(108.76), to_mm<72>(286.84), Center, "Gate PW 4", ""}},
 		Knob9mm{{to_mm<72>(153.48), to_mm<72>(288.47), Center, "Div Mult CV 4", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(202.43), to_mm<72>(292.41), Center, "Div Mult 4", ""}},
+		WhiteMomentary7mm{{to_mm<72>(192.73), to_mm<72>(42.56), Center, "Tap Button", ""}},
 		AnalogJackInput4ms{{to_mm<72>(23.39), to_mm<72>(55.0), Center, "Gate PW CV 1", ""}},
 		AnalogJackInput4ms{{to_mm<72>(249.58), to_mm<72>(76.7), Center, "Div Mult CV 1 Jack", ""}},
 		GateJackInput4ms{{to_mm<72>(296.32), to_mm<72>(42.31), Center, "Clk In 1", ""}},
@@ -62,7 +63,6 @@ struct QCDInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(273.46), to_mm<72>(228.27), Center, "LED 3", ""}},
 		RedGreenBlueLight{{to_mm<72>(47.87), to_mm<72>(316.71), Center, "Inv LED 4", ""}},
 		RedGreenBlueLight{{to_mm<72>(273.46), to_mm<72>(303.87), Center, "LED 4", ""}},
-		WhiteMomentary7mm{{to_mm<72>(192.73), to_mm<72>(42.56), Center, "Tap Button", ""}},
 }};
 
     enum class Elem {
@@ -82,6 +82,7 @@ struct QCDInfo : ModuleInfoBase {
         GatePw4Knob,
         DivMultCv4Knob,
         DivMult4Knob,
+        TapButton,
         GatePwCv1In,
         DivMultCv1JackIn,
         ClkIn1In,
@@ -115,7 +116,6 @@ struct QCDInfo : ModuleInfoBase {
         Led3Light,
         InvLed4Light,
         Led4Light,
-        TapButton,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

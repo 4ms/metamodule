@@ -13,6 +13,12 @@ struct RCDInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 26> Elements{{
+		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(93.345), Center, "Counting", ""}},
+		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(133.445), Center, "Gate Trig", ""}},
+		Toggle2posHoriz{{to_mm<72>(108.61), to_mm<72>(181.245), Center, "Max Div 1", ""}},
+		Toggle2posHoriz{{to_mm<72>(108.61), to_mm<72>(220.965), Center, "Max Div 2", ""}},
+		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(266.615), Center, "Spread", ""}},
+		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(306.335), Center, "Auto-Reset", ""}},
 		GateJackInput4ms{{to_mm<72>(48.19), to_mm<72>(56.31), Center, "Clk In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(92.61), to_mm<72>(56.31), Center, "Rotate", ""}},
 		GateJackInput4ms{{to_mm<72>(123.98), to_mm<72>(56.31), Center, "Reset", ""}},
@@ -33,15 +39,15 @@ struct RCDInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(19.98), to_mm<72>(246.01), Center, "LED d6", ""}},
 		RedGreenBlueLight{{to_mm<72>(19.98), to_mm<72>(277.62), Center, "LED d7", ""}},
 		RedGreenBlueLight{{to_mm<72>(19.98), to_mm<72>(309.24), Center, "LED d8", ""}},
-		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(93.345), Center, "Counting", ""}},
-		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(133.445), Center, "Gate Trig", ""}},
-		Toggle2posHoriz{{to_mm<72>(108.61), to_mm<72>(181.245), Center, "Max Div 1", ""}},
-		Toggle2posHoriz{{to_mm<72>(108.61), to_mm<72>(220.965), Center, "Max Div 2", ""}},
-		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(266.615), Center, "Spread", ""}},
-		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(306.335), Center, "Auto-Reset", ""}},
 }};
 
     enum class Elem {
+        CountingSwitch,
+        GateTrigSwitch,
+        MaxDiv1Switch,
+        MaxDiv2Switch,
+        SpreadSwitch,
+        AutoNResetSwitch,
         ClkIn,
         RotateIn,
         ResetIn,
@@ -62,12 +68,6 @@ struct RCDInfo : ModuleInfoBase {
         LedD6Light,
         LedD7Light,
         LedD8Light,
-        CountingSwitch,
-        GateTrigSwitch,
-        MaxDiv1Switch,
-        MaxDiv2Switch,
-        SpreadSwitch,
-        AutoNResetSwitch,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

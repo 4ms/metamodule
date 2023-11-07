@@ -25,6 +25,12 @@ struct DEVInfo : ModuleInfoBase {
 		Knob9mm{{to_mm<72>(94.11), to_mm<72>(183.67), Center, "Fall A", ""}},
 		Knob9mm{{to_mm<72>(136.27), to_mm<72>(184.03), Center, "Rise B", ""}},
 		Knob9mm{{to_mm<72>(206.87), to_mm<72>(184.03), Center, "Fall B", ""}},
+		Toggle3pos{{to_mm<72>(17.6), to_mm<72>(41.905), Center, "Slow Med Fast Rise A", ""}},
+		Toggle3pos{{to_mm<72>(50.49), to_mm<72>(41.905), Center, "Slow Med Fast Fall A", ""}},
+		Toggle3pos{{to_mm<72>(179.89), to_mm<72>(41.905), Center, "Slow Med Fast Rise B", ""}},
+		Toggle3pos{{to_mm<72>(212.77), to_mm<72>(41.905), Center, "Slow Med Fast Fall B", ""}},
+		OrangeButton{{to_mm<72>(82.8), to_mm<72>(41.64), Center, "Cycle A", ""}},
+		OrangeButton{{to_mm<72>(147.61), to_mm<72>(41.68), Center, "Cycle B", ""}},
 		GateJackInput4ms{{to_mm<72>(115.19), to_mm<72>(60.85), Center, "Cycle Trig?", ""}},
 		AnalogJackInput4ms{{to_mm<72>(58.56), to_mm<72>(208.68), Center, "Time CV A", ""}},
 		AnalogJackInput4ms{{to_mm<72>(171.86), to_mm<72>(208.68), Center, "Time CV B", ""}},
@@ -51,12 +57,6 @@ struct DEVInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(130.68), to_mm<72>(261.07), Center, "EOF LED", ""}},
 		RedGreenBlueLight{{to_mm<72>(65.92), to_mm<72>(327.45), Center, "Env A LED", ""}},
 		RedGreenBlueLight{{to_mm<72>(164.39), to_mm<72>(327.52), Center, "Env B LED", ""}},
-		Toggle3pos{{to_mm<72>(17.6), to_mm<72>(41.905), Center, "Slow Med Fast Rise A", ""}},
-		Toggle3pos{{to_mm<72>(50.49), to_mm<72>(41.905), Center, "Slow Med Fast Fall A", ""}},
-		Toggle3pos{{to_mm<72>(179.89), to_mm<72>(41.905), Center, "Slow Med Fast Rise B", ""}},
-		Toggle3pos{{to_mm<72>(212.77), to_mm<72>(41.905), Center, "Slow Med Fast Fall B", ""}},
-		OrangeButton{{to_mm<72>(82.8), to_mm<72>(41.64), Center, "Cycle A", ""}},
-		OrangeButton{{to_mm<72>(147.61), to_mm<72>(41.68), Center, "Cycle B", ""}},
 }};
 
     enum class Elem {
@@ -72,6 +72,12 @@ struct DEVInfo : ModuleInfoBase {
         FallAKnob,
         RiseBKnob,
         FallBKnob,
+        SlowMedFastRiseASwitch,
+        SlowMedFastFallASwitch,
+        SlowMedFastRiseBSwitch,
+        SlowMedFastFallBSwitch,
+        CycleAButton,
+        CycleBButton,
         CycleTrig_In,
         TimeCvAIn,
         TimeCvBIn,
@@ -98,12 +104,6 @@ struct DEVInfo : ModuleInfoBase {
         EofLedLight,
         EnvALedLight,
         EnvBLedLight,
-        SlowMedFastRiseASwitch,
-        SlowMedFastFallASwitch,
-        SlowMedFastRiseBSwitch,
-        SlowMedFastFallBSwitch,
-        CycleAButton,
-        CycleBButton,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

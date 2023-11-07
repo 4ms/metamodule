@@ -19,6 +19,7 @@ struct VerbInfo : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(106.4), to_mm<72>(104.62), Center, "AP Ratio", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(37.85), to_mm<72>(162.82), Center, "Comb", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(106.4), to_mm<72>(162.82), Center, "Mix", ""}},
+		OrangeButton{{to_mm<72>(72.13), to_mm<72>(199.9), Center, "Hold", ""}},
 		AnalogJackInput4ms{{to_mm<72>(29.94), to_mm<72>(232.1), Center, "Input", ""}},
 		AnalogJackInput4ms{{to_mm<72>(72.13), to_mm<72>(232.1), Center, "Size CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(115.17), to_mm<72>(232.1), Center, "Time CV", ""}},
@@ -28,7 +29,6 @@ struct VerbInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(29.94), to_mm<72>(313.84), Center, "Mix CV", ""}},
 		GateJackInput4ms{{to_mm<72>(72.13), to_mm<72>(313.84), Center, "Hold Gate", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(115.17), to_mm<72>(313.84), Center, "Out", ""}},
-		OrangeButton{{to_mm<72>(72.13), to_mm<72>(199.9), Center, "Hold", ""}},
 }};
 
     enum class Elem {
@@ -38,6 +38,7 @@ struct VerbInfo : ModuleInfoBase {
         ApRatioKnob,
         CombKnob,
         MixKnob,
+        HoldButton,
         InputIn,
         SizeCvIn,
         TimeCvIn,
@@ -47,7 +48,6 @@ struct VerbInfo : ModuleInfoBase {
         MixCvIn,
         HoldGateIn,
         Out,
-        HoldButton,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

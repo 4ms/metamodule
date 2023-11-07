@@ -18,6 +18,8 @@ struct SCMInfo : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(154.07), Center, "Shuffle", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(204.04), Center, "Skip", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(254.01), Center, "PW", ""}},
+		OrangeButton{{to_mm<72>(148.84), to_mm<72>(291.85), Center, "4x Fast", ""}},
+		OrangeButton{{to_mm<72>(148.84), to_mm<72>(325.47), Center, "Mute", ""}},
 		GateJackInput4ms{{to_mm<72>(46.48), to_mm<72>(56.3), Center, "Clk In", ""}},
 		GateJackInput4ms{{to_mm<72>(81.45), to_mm<72>(55.11), Center, "Resync", ""}},
 		AnalogJackInput4ms{{to_mm<72>(81.45), to_mm<72>(90.12), Center, "Rotate Jack", ""}},
@@ -44,8 +46,6 @@ struct SCMInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(17.3), to_mm<72>(245.95), Center, "LED S6", ""}},
 		RedGreenBlueLight{{to_mm<72>(17.3), to_mm<72>(277.56), Center, "LED S8", ""}},
 		RedGreenBlueLight{{to_mm<72>(17.3), to_mm<72>(309.17), Center, "LED x8", ""}},
-		OrangeButton{{to_mm<72>(148.84), to_mm<72>(291.85), Center, "4x Fast", ""}},
-		OrangeButton{{to_mm<72>(148.84), to_mm<72>(325.47), Center, "Mute", ""}},
 }};
 
     enum class Elem {
@@ -54,6 +54,8 @@ struct SCMInfo : ModuleInfoBase {
         ShuffleKnob,
         SkipKnob,
         PwKnob,
+        _4XFastButton,
+        MuteButton,
         ClkIn,
         ResyncIn,
         RotateJackIn,
@@ -80,8 +82,6 @@ struct SCMInfo : ModuleInfoBase {
         LedS6Light,
         LedS8Light,
         LedX8Light,
-        _4XFastButton,
-        MuteButton,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

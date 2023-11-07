@@ -13,10 +13,6 @@ struct Gate8Info : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 12> Elements{{
-		GateJackInput4ms{{to_mm<72>(32.07), to_mm<72>(262.57), Center, "Clock", ""}},
-		GateJackInput4ms{{to_mm<72>(83.61), to_mm<72>(262.57), Center, "Reset", ""}},
-		GateJackOutput4ms{{to_mm<72>(32.07), to_mm<72>(310.16), Center, "End", ""}},
-		GateJackOutput4ms{{to_mm<72>(83.61), to_mm<72>(310.16), Center, "Out", ""}},
 		OrangeButton{{to_mm<72>(31.96), to_mm<72>(45.78), Center, "Step 1", ""}},
 		OrangeButton{{to_mm<72>(83.49), to_mm<72>(45.78), Center, "Step 2", ""}},
 		OrangeButton{{to_mm<72>(31.96), to_mm<72>(88.3), Center, "Step 3", ""}},
@@ -25,13 +21,13 @@ struct Gate8Info : ModuleInfoBase {
 		OrangeButton{{to_mm<72>(83.49), to_mm<72>(130.82), Center, "Step 6", ""}},
 		OrangeButton{{to_mm<72>(31.96), to_mm<72>(173.25), Center, "Step 7", ""}},
 		OrangeButton{{to_mm<72>(83.49), to_mm<72>(173.34), Center, "Step 8", ""}},
+		GateJackInput4ms{{to_mm<72>(32.07), to_mm<72>(262.57), Center, "Clock", ""}},
+		GateJackInput4ms{{to_mm<72>(83.61), to_mm<72>(262.57), Center, "Reset", ""}},
+		GateJackOutput4ms{{to_mm<72>(32.07), to_mm<72>(310.16), Center, "End", ""}},
+		GateJackOutput4ms{{to_mm<72>(83.61), to_mm<72>(310.16), Center, "Out", ""}},
 }};
 
     enum class Elem {
-        ClockIn,
-        ResetIn,
-        EndOut,
-        Out,
         Step1Button,
         Step2Button,
         Step3Button,
@@ -40,6 +36,10 @@ struct Gate8Info : ModuleInfoBase {
         Step6Button,
         Step7Button,
         Step8Button,
+        ClockIn,
+        ResetIn,
+        EndOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

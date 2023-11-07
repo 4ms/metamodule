@@ -21,6 +21,7 @@ struct ComplexEGInfo : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(43.62), to_mm<72>(104.51), Center, "A Curve", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(108.12), to_mm<72>(104.51), Center, "D Curve", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(172.62), to_mm<72>(104.51), Center, "R Curve", ""}},
+		OrangeButton{{to_mm<72>(108.12), to_mm<72>(159.77), Center, "Loop", ""}},
 		AnalogJackInput4ms{{to_mm<72>(36.45), to_mm<72>(214.13), Center, "Input", ""}},
 		AnalogJackInput4ms{{to_mm<72>(83.96), to_mm<72>(214.13), Center, "Attack CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(83.96), to_mm<72>(265.71), Center, "Hold CV", ""}},
@@ -33,7 +34,6 @@ struct ComplexEGInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(131.96), to_mm<72>(309.84), Center, "Sustain Out", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(179.96), to_mm<72>(265.71), Center, "Release Out", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(179.96), to_mm<72>(309.84), Center, "Out", ""}},
-		OrangeButton{{to_mm<72>(108.12), to_mm<72>(159.77), Center, "Loop", ""}},
 }};
 
     enum class Elem {
@@ -45,6 +45,7 @@ struct ComplexEGInfo : ModuleInfoBase {
         ACurveKnob,
         DCurveKnob,
         RCurveKnob,
+        LoopButton,
         InputIn,
         AttackCvIn,
         HoldCvIn,
@@ -57,7 +58,6 @@ struct ComplexEGInfo : ModuleInfoBase {
         SustainOut,
         ReleaseOut,
         Out,
-        LoopButton,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

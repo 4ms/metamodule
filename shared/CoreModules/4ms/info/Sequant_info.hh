@@ -37,6 +37,8 @@ struct SequantInfo : ModuleInfoBase {
 		Knob9mm{{to_mm<72>(212.77), to_mm<72>(170.27), Center, "Chance", ""}},
 		Knob9mm{{to_mm<72>(31.99), to_mm<72>(211.46), Center, "Root", ""}},
 		Knob9mm{{to_mm<72>(212.77), to_mm<72>(211.46), Center, "Repeat", ""}},
+		WhiteMomentary7mm{{to_mm<72>(22.96), to_mm<72>(46.59), Center, "Start/Stop", ""}},
+		WhiteMomentary7mm{{to_mm<72>(221.38), to_mm<72>(46.59), Center, "Select", ""}},
 		GateJackInput4ms{{to_mm<72>(31.99), to_mm<72>(263.37), Center, "Clock", ""}},
 		GateJackInput4ms{{to_mm<72>(77.19), to_mm<72>(263.37), Center, "Start/Reset", ""}},
 		GateJackInput4ms{{to_mm<72>(122.38), to_mm<72>(263.37), Center, "Stop", ""}},
@@ -55,8 +57,6 @@ struct SequantInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(164.79), to_mm<72>(118.26), Center, "Step 6 LED", ""}},
 		RedGreenBlueLight{{to_mm<72>(193.13), to_mm<72>(118.26), Center, "Step 7 LED", ""}},
 		RedGreenBlueLight{{to_mm<72>(221.48), to_mm<72>(118.26), Center, "Step 8 LED", ""}},
-		WhiteMomentary7mm{{to_mm<72>(22.96), to_mm<72>(46.59), Center, "Start/Stop", ""}},
-		WhiteMomentary7mm{{to_mm<72>(221.38), to_mm<72>(46.59), Center, "Select", ""}},
 }};
 
     enum class Elem {
@@ -84,6 +84,8 @@ struct SequantInfo : ModuleInfoBase {
         ChanceKnob,
         RootKnob,
         RepeatKnob,
+        Start_StopButton,
+        SelectButton,
         ClockIn,
         Start_ResetIn,
         StopIn,
@@ -102,8 +104,6 @@ struct SequantInfo : ModuleInfoBase {
         Step6LedLight,
         Step7LedLight,
         Step8LedLight,
-        Start_StopButton,
-        SelectButton,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

@@ -241,10 +241,10 @@ def panel_to_components(tree):
 
     components['elements'] = []
     components['elements'] += components['params']
+    components['elements'] += components['switches']
     components['elements'] += components['inputs']
     components['elements'] += components['outputs']
     components['elements'] += components['lights']
-    components['elements'] += components['switches']
 
     return components
 

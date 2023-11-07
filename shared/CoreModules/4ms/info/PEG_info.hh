@@ -21,6 +21,12 @@ struct PEGInfo : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(254.75), to_mm<72>(170.82), Center, "Scale 2", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(106.67), to_mm<72>(215.41), Center, "Curve 1", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(182.51), to_mm<72>(215.41), Center, "Curve 2", ""}},
+		WhiteMomentary7mm{{to_mm<72>(68.06), to_mm<72>(45.56), Center, "Ping 1", ""}},
+		WhiteMomentary7mm{{to_mm<72>(120.9), to_mm<72>(41.96), Center, "Cycle 1", ""}},
+		WhiteMomentary7mm{{to_mm<72>(167.48), to_mm<72>(41.9), Center, "Cycle 2", ""}},
+		WhiteMomentary7mm{{to_mm<72>(220.56), to_mm<72>(45.56), Center, "Ping 2", ""}},
+		WhiteMomentary7mm{{to_mm<72>(21.56), to_mm<72>(213.99), Center, "Bi-polar 1", ""}},
+		WhiteMomentary7mm{{to_mm<72>(267.04), to_mm<72>(213.99), Center, "Bi-polar 2", ""}},
 		GateJackInput4ms{{to_mm<72>(21.57), to_mm<72>(45.55), Center, "Ping 1 Jack", ""}},
 		GateJackInput4ms{{to_mm<72>(267.05), to_mm<72>(45.55), Center, "Ping 2 Jack", ""}},
 		GateJackInput4ms{{to_mm<72>(97.57), to_mm<72>(74.03), Center, "Qnt 1", ""}},
@@ -49,12 +55,6 @@ struct PEGInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(111.11), to_mm<72>(258.36), Center, "EOF LED 1", ""}},
 		RedGreenBlueLight{{to_mm<72>(177.5), to_mm<72>(258.36), Center, "EOF LED 2", ""}},
 		RedGreenBlueLight{{to_mm<72>(215.46), to_mm<72>(258.36), Center, "Half R", ""}},
-		WhiteMomentary7mm{{to_mm<72>(68.06), to_mm<72>(45.56), Center, "Ping 1", ""}},
-		WhiteMomentary7mm{{to_mm<72>(120.9), to_mm<72>(41.96), Center, "Cycle 1", ""}},
-		WhiteMomentary7mm{{to_mm<72>(167.48), to_mm<72>(41.9), Center, "Cycle 2", ""}},
-		WhiteMomentary7mm{{to_mm<72>(220.56), to_mm<72>(45.56), Center, "Ping 2", ""}},
-		WhiteMomentary7mm{{to_mm<72>(21.56), to_mm<72>(213.99), Center, "Bi-polar 1", ""}},
-		WhiteMomentary7mm{{to_mm<72>(267.04), to_mm<72>(213.99), Center, "Bi-polar 2", ""}},
 }};
 
     enum class Elem {
@@ -66,6 +66,12 @@ struct PEGInfo : ModuleInfoBase {
         Scale2Knob,
         Curve1Knob,
         Curve2Knob,
+        Ping1Button,
+        Cycle1Button,
+        Cycle2Button,
+        Ping2Button,
+        BiNPolar1Button,
+        BiNPolar2Button,
         Ping1JackIn,
         Ping2JackIn,
         Qnt1In,
@@ -94,12 +100,6 @@ struct PEGInfo : ModuleInfoBase {
         EofLed1Light,
         EofLed2Light,
         HalfRLight,
-        Ping1Button,
-        Cycle1Button,
-        Cycle2Button,
-        Ping2Button,
-        BiNPolar1Button,
-        BiNPolar2Button,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

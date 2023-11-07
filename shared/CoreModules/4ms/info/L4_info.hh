@@ -21,6 +21,7 @@ struct L4Info : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(111.89), to_mm<72>(232.15), Center, "Level 4", ""}},
 		Knob9mm{{to_mm<72>(23.27), to_mm<72>(318.85), Center, "Headphone Level", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(71.7), to_mm<72>(302.94), Center, "Main Level", ""}},
+		Toggle2posHoriz{{to_mm<72>(67.265), to_mm<72>(258.19), Center, "Mod. | Line", ""}},
 		AnalogJackInput4ms{{to_mm<72>(23.31), to_mm<72>(46.17), Center, "In 1", ""}},
 		AnalogJackInput4ms{{to_mm<72>(23.31), to_mm<72>(103.92), Center, "In 2", ""}},
 		AnalogJackInput4ms{{to_mm<72>(23.31), to_mm<72>(161.52), Center, "In 3 L", ""}},
@@ -36,7 +37,6 @@ struct L4Info : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(87.38), to_mm<72>(221.73), Center, "Level 4 LED", ""}},
 		RedGreenBlueLight{{to_mm<72>(98.07), to_mm<72>(284.23), Center, "Out L LED", ""}},
 		RedGreenBlueLight{{to_mm<72>(98.07), to_mm<72>(316.53), Center, "Out R LED", ""}},
-		Toggle2posHoriz{{to_mm<72>(67.265), to_mm<72>(258.19), Center, "Mod. | Line", ""}},
 }};
 
     enum class Elem {
@@ -48,6 +48,7 @@ struct L4Info : ModuleInfoBase {
         Level4Knob,
         HeadphoneLevelKnob,
         MainLevelKnob,
+        Mod__OR_LineSwitch,
         In1In,
         In2In,
         In3LIn,
@@ -63,7 +64,6 @@ struct L4Info : ModuleInfoBase {
         Level4LedLight,
         OutLLedLight,
         OutRLedLight,
-        Mod__OR_LineSwitch,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
