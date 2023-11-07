@@ -38,102 +38,102 @@ inline Element make_element<rack::componentlibrary::LEDBezel>(BaseElement b) {
 
 template<>
 inline Element make_element<rack::componentlibrary::BefacoBigKnob>(BaseElement b) {
-	return BefacoBigKnob{b};
+	return KnobE{{b}, "BefacoBigKnob.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::BefacoTinyKnob>(BaseElement b) {
-	return BefacoTinyKnobBlack{b};
+	return KnobE{{b}, "BefacoTinyKnobBlack.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement b) {
-	return BefacoSlidePot{b};
+	return KnobE{{b}, "BefacoSlidePot.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hBlackKnob>(BaseElement b) {
-	return Davies1900hBlackKnob{b};
+	return KnobE{{b}, "Davies1900hBlackKnob.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hWhiteKnob>(BaseElement b) {
-	return Davies1900hWhiteKnob{b};
+	return KnobE{{b}, "Davies1900hWhiteKnob.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hRedKnob>(BaseElement b) {
-	return Davies1900hRedKnob{b};
+	return KnobE{{b}, "Davies1900hRedKnob.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hLargeWhiteKnob>(BaseElement b) {
-	return Davies1900hLargeWhiteKnob{b};
+	return KnobE{{b}, "Davies1900hLargeWhiteKnob.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan1PSGreen>(BaseElement b) {
-	return Rogan1PSGreen{b};
+	return KnobE{{b}, "Rogan1PSGreen.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan1PSRed>(BaseElement b) {
-	return Rogan1PSRed{b};
+	return KnobE{{b}, "Rogan1PSRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan1PSWhite>(BaseElement b) {
-	return Rogan1PSWhite{b};
+	return KnobE{{b}, "Rogan1PSWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan2SGray>(BaseElement b) {
-	return Rogan2SGray{b};
+	return KnobE{{b}, "Rogan2SGray.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan2PSWhite>(BaseElement b) {
-	return Rogan2PSWhite{b};
+	return KnobE{{b}, "Rogan2PSWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan1PRed>(BaseElement b) {
-	return Rogan1PRed{b};
+	return KnobE{{b}, "Rogan1PRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan>(BaseElement b) {
-	return Rogan1PRed{b};
+	return KnobE{{b}, "Rogan1PRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan2PSRed>(BaseElement b) {
-	return Rogan2PSRed{b};
+	return KnobE{{b}, "Rogan2PSRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan2PSGreen>(BaseElement b) {
-	return Rogan2PSGreen{b};
+	return KnobE{{b}, "Rogan2PSGreen.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan3PSWhite>(BaseElement b) {
-	return Rogan3PSWhite{b};
+	return KnobE{{b}, "Rogan3PSWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan3PSRed>(BaseElement b) {
-	return Rogan3PSRed{b};
+	return KnobE{{b}, "Rogan3PSRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan3PSGreen>(BaseElement b) {
-	return Rogan3PSGreen{b};
+	return KnobE{{b}, "Rogan3PSGreen.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Trimpot>(BaseElement b) {
-	return Trimpot{b};
+	return KnobE{{b}, "Trimpot.png"};
 };
 
 //

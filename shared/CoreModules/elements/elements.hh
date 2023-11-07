@@ -25,6 +25,7 @@ using Element = std::variant<
 
 	// Knobs
 	// TODO: all these become just `Knob`
+	KnobE,
 	Knob9mm,
 	Davies1900hRedKnob,
 	Davies1900hBlackKnob,

@@ -36,6 +36,21 @@ extern const lv_img_dsc_t BefacoPush_0;
 extern const lv_img_dsc_t CKSS_0;
 extern const lv_img_dsc_t CKSS_1;
 
+LV_IMG_DECLARE(Trimpot);
+LV_IMG_DECLARE(Rogan1PRed);
+LV_IMG_DECLARE(Rogan1PSGreen);
+LV_IMG_DECLARE(Rogan1PSRed);
+LV_IMG_DECLARE(Rogan1PSWhite);
+LV_IMG_DECLARE(Rogan2SGray);
+LV_IMG_DECLARE(Rogan2PSWhite);
+LV_IMG_DECLARE(Rogan2PSGreen);
+LV_IMG_DECLARE(Rogan2PSRed);
+LV_IMG_DECLARE(Rogan3PSRed);
+LV_IMG_DECLARE(Rogan3PSGreen);
+LV_IMG_DECLARE(Rogan3PSWhite);
+LV_IMG_DECLARE(Davies1900hRed);
+LV_IMG_DECLARE(Davies1900hWhite);
+
 // These are only used in Muxslicer
 // extern const lv_img_dsc_t BefacoSwitchHoriz_0;
 // extern const lv_img_dsc_t BefacoSwitchHoriz_1;
@@ -81,6 +96,20 @@ struct PNGFileSystem {
 		{"BefacoPush_0.png", &BefacoPush_0},
 		{"CKSS_0.png", &CKSS_0},
 		{"CKSS_1.png", &CKSS_1},
+		{"Trimpot.png", &Trimpot},
+		{"Rogan1PRed.png", &Rogan1PRed},
+		{"Rogan1PSGreen.png", &Rogan1PSGreen},
+		{"Rogan1PSRed.png", &Rogan1PSRed},
+		{"Rogan1PSWhite.png", &Rogan1PSWhite},
+		{"Rogan2SGray.png", &Rogan2SGray},
+		{"Rogan2PSWhite.png", &Rogan2PSWhite},
+		{"Rogan2PSGreen.png", &Rogan2PSGreen},
+		{"Rogan2PSRed.png", &Rogan2PSRed},
+		{"Rogan3PSRed.png", &Rogan3PSRed},
+		{"Rogan3PSGreen.png", &Rogan3PSGreen},
+		{"Rogan3PSWhite.png", &Rogan3PSWhite},
+		{"Davies1900hRed.png", &Davies1900hRed},
+		{"Davies1900hWhite.png", &Davies1900hWhite},
 
 		// HetrickCV/ and AudibleInstruments/ ???
 		{"CKSS_rot_bg.png", &CKSS_rot_bg},
