@@ -101,34 +101,44 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
             // Just echo back raw
             sendResponse(payload);
         }
-        else if (auto patchNameMessage = message->content_as_PatchNames(); patchNameMessage)
+        else if (auto patchNameMessage = message->content_as_Patches(); patchNameMessage)
         {
-            // take a copy of the current file list
-            auto fileList = SharedMemoryS::ptrs.patch_file_list->norflash;
-
             flatbuffers::FlatBufferBuilder fbb;
 
-            std::vector<flatbuffers::Offset<flatbuffers::String>> elems(fileList.size());
-            for (std::size_t i=0; i<fileList.size(); i++)
+            auto CreateVector = [&fbb](auto fileList)
             {
-                auto str = fbb.CreateString(std::string_view(fileList[i].patchname));
-                elems[i] = str;
-            };
-            auto names = fbb.CreateVector(elems);
+                std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.size());
+                for (std::size_t i=0; i<fileList.size(); i++)
+                {
+                    auto thisName = fbb.CreateString(std::string_view(fileList[i].patchname));
 
-            auto patchNames = CreatePatchNames(fbb, names);
-            auto message = CreateMessage(fbb, AnyMessage_PatchNames, patchNames.Union());
+                    printf("%s\n", fileList[i].patchname.c_str());
+
+                    auto thisFilename = fbb.CreateString(std::string_view(fileList[i].filename));
+                    auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename);
+                    elems[i] = thisInfo;
+                };
+                return fbb.CreateVector(elems);
+            };
+
+            auto usbList = CreateVector(SharedMemoryS::ptrs.patch_file_list->usb);
+            auto flashList = CreateVector(SharedMemoryS::ptrs.patch_file_list->norflash);
+            auto sdcardList = CreateVector(SharedMemoryS::ptrs.patch_file_list->sdcard);
+
+            auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
+            auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
             fbb.Finish(message);
 
             sendResponse(fbb.GetBufferSpan());
         }
         else if (auto uploadPatchMessage = message->content_as_UploadPatch(); uploadPatchMessage)
         {
-            assert(uploadPatchMessage->content()->is_span_observable);
+            auto destination = uploadPatchMessage->destination();
 
+            assert(uploadPatchMessage->content()->is_span_observable);
             auto receivedPatchData = std::span(uploadPatchMessage->content()->data(), uploadPatchMessage->content()->size());
 
-            printf("Received Patch of %u bytes\n", receivedPatchData.size());
+            printf("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
 
             flatbuffers::FlatBufferBuilder fbb;
             auto result = CreateResult(fbb, true);
