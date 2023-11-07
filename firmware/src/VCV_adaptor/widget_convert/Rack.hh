@@ -8,7 +8,8 @@ namespace MetaModule
 
 template<>
 inline Element make_element<rack::componentlibrary::BefacoSwitch>(BaseElement b) {
-	return FlipSwitch{{b}, 2, {"BefacoSwitch_0.png", "BefacoSwitch_2.png"}, {"Down", "Up"}};
+	return FlipSwitch{
+		{b}, 3, {"BefacoSwitch_0.png", "BefacoSwitch_1.png", "BefacoSwitch_2.png"}, {"Down", "Center", "Up"}};
 };
 
 template<>
@@ -43,7 +44,7 @@ inline Element make_element<rack::componentlibrary::BefacoBigKnob>(BaseElement b
 
 template<>
 inline Element make_element<rack::componentlibrary::BefacoTinyKnob>(BaseElement b) {
-	return Knob{{b}, "BefacoTinyKnobBlack.png"};
+	return Knob{{b}, "BefacoTinyKnobWhite.png"};
 };
 
 template<>

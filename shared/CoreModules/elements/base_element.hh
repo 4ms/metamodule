@@ -1,18 +1,18 @@
 #pragma once
 #include <array>
 #include <string_view>
+#include <vector>
 
 // Heirarchy:
-//                                                         BaseElement
-//                     |---------------------------------------'------------|---------------------------|
-//              ParamElement                                          JackElement                  LightElement
-//     |--------------'----------------|------------------|         |------'-----|          |---------|-'------|---------|
-//    Pot          Button           Switch             Encoder    JackInput    JackOutput   MonoLight DualLight RGBLight Display
-//  |--'---|     |----'----|          '|----------|        |
-// Knob Slider  MomB       LatB   LatchingBut Toggle       |
-//          |    |           |          |                  |
-//        +LED  +RGB/+White +White                         |
-//                                                  EncoderRGB
+//                                                   BaseElement
+//                     |---------------------------------'-------|-----------------------------|
+//              ParamElement                                 JackElement                  LightElement
+//     |------------|-'--|--------|-----------|           |------'-----|         |---------|---'----|---------|
+//    Pot    FlipSwitch  |  SlideSwitch     Button    JackInput  JackOutput  MonoLight DualLight RGBLight Display
+//  |--'--|          Encoder             |----'----|
+// Knob  Slider         |              MomBut     LatchingBut
+//        |        EncoderRGB        |---'---|          |
+//    SliderLight              MomButWhite MomButRGB LatButMonoLight
 //
 
 namespace MetaModule
@@ -123,10 +123,15 @@ struct SlideSwitch : Switch {
 	State_t num_pos = 2;
 	std::string_view image_bg = "";
 	std::string_view image_fg = "";
+	std::array<std::string_view, 8> pos_names{};
 };
 
 // Encoders
 struct Encoder : ParamElement {};
+
+struct EncoderRGB : Encoder {
+	static constexpr size_t NumLights = 3;
+};
 
 // Jacks
 struct JackElement : BaseElement {};

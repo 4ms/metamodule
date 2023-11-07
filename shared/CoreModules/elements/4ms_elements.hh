@@ -132,18 +132,9 @@ struct Toggle3posHoriz : FlipSwitch {
 	}
 };
 
-// Encoders
-struct EncoderMonoLight : Encoder {
-	static constexpr size_t NumLights = 1;
+struct Encoder9mmRGB : EncoderRGB {
+	//...image
 };
-
-struct EncoderRGB : Encoder {
-	static constexpr size_t NumLights = 3;
-};
-
-struct EncoderWhiteLight : EncoderMonoLight {};
-struct SmallEncoder : Encoder {};
-struct SmallLEDEncoder : EncoderMonoLight {};
 
 // Input Jacks
 struct JackInput4ms : JackInput {};
