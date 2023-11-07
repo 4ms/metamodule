@@ -15,6 +15,7 @@ extern const lv_img_dsc_t button_x;
 LV_IMG_DECLARE(knob9mm_x);
 LV_IMG_DECLARE(knob_x);
 LV_IMG_DECLARE(knob_large_x);
+LV_IMG_DECLARE(slider_x);
 
 extern const lv_img_dsc_t CKSS_rot_fg;
 extern const lv_img_dsc_t CKSS_rot_bg;
@@ -89,6 +90,8 @@ struct PNGFileSystem {
 		{"knob_x.png", &knob_x},
 		{"knob9mm_x.png", &knob9mm_x},
 		{"knob_large_x.png", &knob_large_x},
+		{"slider_x.png", &slider_x},
+		// {"slider_horiz_x.png", &slider_horiz_x},
 
 		// Befaco/
 		{"SwitchWideHoriz_bg.png", &SwitchWideHoriz_bg},

@@ -33,13 +33,19 @@ struct Davies1900hBlackKnob : Knob {
 //
 // Sliders
 //
-struct SliderMonoLight : Slider {
-	static constexpr size_t NumLights = 1;
+struct Slider25mmHorizLED : SliderLight {
+	constexpr Slider25mmHorizLED() = default;
+	constexpr Slider25mmHorizLED(BaseElement b)
+		: SliderLight{{{b}, "slider_x.png"}, 0xFFFF} {
+	}
 };
-struct Slider25mmVert : Slider {};
-struct Slider25mmHoriz : Slider {};
-struct Slider25mmHorizLED : SliderMonoLight {};
-struct Slider25mmVertLED : SliderMonoLight {};
+
+struct Slider25mmVertLED : SliderLight {
+	constexpr Slider25mmVertLED() = default;
+	constexpr Slider25mmVertLED(BaseElement b)
+		: SliderLight{{{b}, "slider_x.png"}, 0xFFFF} {
+	}
+};
 
 //
 // Buttons

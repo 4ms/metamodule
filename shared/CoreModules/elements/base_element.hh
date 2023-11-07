@@ -7,11 +7,12 @@
 //                     |---------------------------------------'------------|---------------------------|
 //              ParamElement                                          JackElement                  LightElement
 //     |--------------'----------------|------------------|         |------'-----|          |---------|-'------|---------|
-//    Pot                           Switch             Encoder    JackInput    JackOutput   MonoLight DualLight RGBLight Display
-//  |--'---|                 |--------'|----------|        |
-// Knob Slider             MomBut LatchingBut Toggle       |
-//  |       |                 |       |                    |
-// ...    ...,SliderLED     *MonoLight/RGB          EncoderRGB
+//    Pot          Button           Switch             Encoder    JackInput    JackOutput   MonoLight DualLight RGBLight Display
+//  |--'---|     |----'----|          '|----------|        |
+// Knob Slider  MomB       LatB   LatchingBut Toggle       |
+//          |    |           |          |                  |
+//        +LED  +RGB/+White +White                         |
+//                                                  EncoderRGB
 //
 
 namespace MetaModule
@@ -56,7 +57,14 @@ struct Knob : Pot {
 	std::string_view image = "";
 };
 
-struct Slider : Pot {};
+struct Slider : Pot {
+	std::string_view image_bg = "";
+};
+
+struct SliderLight : Slider {
+	static constexpr size_t NumLights = 1;
+	uint16_t color = 0xFFFF;
+};
 
 //
 // Buttons
