@@ -76,9 +76,9 @@ def panel_to_components(tree):
     for el in circles + rects:
         c = {}
         # Get name
-        name = el.get('{http://www.inkscape.org/namespaces/inkscape}label')
-        if name is None:
-            name = el.get('data-name')
+        # name = el.get('{http://www.inkscape.org/namespaces/inkscape}label')
+        # if name is None:
+        name = el.get('data-name')
         if name is None:
             name = el.get('id')
             if name is not None:
@@ -94,6 +94,12 @@ def panel_to_components(tree):
         if len(split) > 1:
             name = split[0]
             c['class'] = split[1]
+
+        # If name is ElementName@pos1@pos2, then extract pos names
+        split = name.split("@")
+        if len(split) > 1:
+            name = split[0]
+            c['pos_names'] = split[1:]
 
         c['display_name'] = format_for_display(name)
         c['legacy_enum_name'] = format_as_legacy_enum_item(name)
@@ -286,8 +292,7 @@ struct {slug}Info : ModuleInfoBase {{
 
 
 def list_elem_definitions(elems, DPI):
-    #TODO: Toggle3pos/2pos have extra set of { } and possibly string values for positions
-    #TODO: OrangeButton has extra set of { }
+    #TODO: Toggle3pos/2pos can have string values for positions
     if len(elems) == 0:
         return ""
     source = ""
@@ -299,7 +304,10 @@ def list_elem_definitions(elems, DPI):
         source += f"{k['coord_ref']}, "
         source += f"\"{k['display_name']}\", "
         source += f"\"\"" #long name
-        source += f"""}}}},
+        source += f"""}}"""
+        if k['class'] == "Toggle3pos" and "pos_names" in k.keys() and len(k['pos_names']) == 3:
+            source += f""", {{"{k['pos_names'][0]}", "{k['pos_names'][1]}", "{k['pos_names'][2]}"}}""" 
+        source += f"""}},
 """
     return source
 
