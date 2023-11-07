@@ -1,35 +1,43 @@
 PatchData:
-  patch_name: HexMixVCA
-  description: Only ch 1 CV is patched. Ch6 in is unpatched
+  patch_name: Morphader1
+  description: Not using CV inputs
   module_slugs:
     0: HubMedium
-    1: HexmixVCA
+    1: Morphader
   int_cables: []
   mapped_ins:
     - panel_jack_id: 0
       ins:
         - module_id: 1
-          jack_id: 0
+          jack_id: 4
     - panel_jack_id: 1
       ins:
         - module_id: 1
-          jack_id: 1
+          jack_id: 8
     - panel_jack_id: 2
       ins:
         - module_id: 1
-          jack_id: 2
+          jack_id: 5
     - panel_jack_id: 3
       ins:
         - module_id: 1
-          jack_id: 3
+          jack_id: 9
     - panel_jack_id: 4
       ins:
         - module_id: 1
-          jack_id: 4
+          jack_id: 6
     - panel_jack_id: 5
       ins:
         - module_id: 1
-          jack_id: 6
+          jack_id: 10
+    - panel_jack_id: 7
+      ins:
+        - module_id: 1
+          jack_id: 11
+    - panel_jack_id: 6
+      ins:
+        - module_id: 1
+          jack_id: 7
   mapped_outs:
     - panel_jack_id: 0
       out:
@@ -47,81 +55,76 @@ PatchData:
       out:
         module_id: 1
         jack_id: 3
-    - panel_jack_id: 4
-      out:
-        module_id: 1
-        jack_id: 4
-    - panel_jack_id: 5
-      out:
-        module_id: 1
-        jack_id: 5
   static_knobs:
     - module_id: 1
       param_id: 0
-      value: 0.557831
+      value: 0.422892
     - module_id: 1
       param_id: 1
-      value: 0.519277
+      value: 0.379518
     - module_id: 1
       param_id: 2
-      value: 0.487952
+      value: 0.854217
     - module_id: 1
       param_id: 3
-      value: 0
+      value: 0.973494
     - module_id: 1
       param_id: 4
-      value: 0
+      value: 0.120482
     - module_id: 1
       param_id: 5
-      value: 0
+      value: 0.637349
     - module_id: 1
       param_id: 6
-      value: 0.644578
+      value: 0.678313
     - module_id: 1
       param_id: 7
-      value: 0.727711
+      value: 0.761446
     - module_id: 1
       param_id: 8
-      value: 0
+      value: 0.5
     - module_id: 1
       param_id: 9
-      value: 0
+      value: 1
     - module_id: 1
       param_id: 10
-      value: 0
+      value: 1
     - module_id: 1
       param_id: 11
-      value: 0.363855
+      value: 1
+    - module_id: 1
+      param_id: 12
+      value: 1
+    - module_id: 1
+      param_id: 13
+      value: 0.5
+    - module_id: 1
+      param_id: 14
+      value: 0.655422
   mapped_knobs:
-    - name: ''
+    - name: Knobs
       set:
         - panel_knob_id: 0
           module_id: 1
-          param_id: 0
+          param_id: 4
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 1
           module_id: 1
-          param_id: 6
+          param_id: 0
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 2
           module_id: 1
-          param_id: 1
+          param_id: 13
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 3
           module_id: 1
-          param_id: 7
-          curve_type: 0
-          min: 0
-          max: 1
-        - panel_knob_id: 4
-          module_id: 1
-          param_id: 2
+          param_id: 14
           curve_type: 0
           min: 0
           max: 1
@@ -133,31 +136,57 @@ PatchData:
           max: 1
         - panel_knob_id: 6
           module_id: 1
-          param_id: 3
+          param_id: 1
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 7
           module_id: 1
-          param_id: 9
+          param_id: 2
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 8
           module_id: 1
-          param_id: 4
+          param_id: 3
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 9
           module_id: 1
-          param_id: 10
+          param_id: 5
           curve_type: 0
           min: 0
           max: 1
         - panel_knob_id: 10
           module_id: 1
-          param_id: 5
+          param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 1
+          param_id: 7
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: CV/Audio Switch
+      set:
+        - panel_knob_id: 5
+          module_id: 1
+          param_id: 12
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
+          module_id: 1
+          param_id: 9
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 1
+          param_id: 10
           curve_type: 0
           min: 0
           max: 1
@@ -179,17 +208,9 @@ PatchData:
       set: []
     - name: ''
       set: []
-    - name: ''
-      set: []
   midi_maps:
     name: ''
     set: []
   midi_poly_num: 0
 
-'vcvModuleStates':
-  - 'id': 1
-    'plugin': 'Befaco'
-    'model': 'HexmixVCA'
-    'version': '2.4.0'
-    'data':
-      'finalRowIsMix': true
+'vcvModuleStates': []

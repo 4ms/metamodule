@@ -52,7 +52,43 @@ PatchData:
       value: 0.727711
   mapped_knobs:
     - name: ''
-      set: []
+      set:
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 1
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 1
+          param_id: 5
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 4
+          module_id: 1
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 1
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
     - name: ''
       set: []
     - name: ''
@@ -67,3 +103,9 @@ PatchData:
       set: []
     - name: ''
       set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+
+'vcvModuleStates': []
