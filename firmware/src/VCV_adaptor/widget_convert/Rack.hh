@@ -63,7 +63,7 @@ inline Element make_element<rack::componentlibrary::Davies1900hRedKnob>(BaseElem
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hLargeWhiteKnob>(BaseElement b) {
-	return KnobE{{b}, "Davies1900hLargeWhite.png"};
+	return KnobE{{b}, "Davies1900hLargeWhiteKnob.png"};
 };
 
 template<>
