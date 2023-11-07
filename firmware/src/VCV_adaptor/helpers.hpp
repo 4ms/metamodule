@@ -7,7 +7,9 @@
 #include "VCV_adaptor/math.hpp"
 #include "VCV_adaptor/plugin/Model.hpp"
 #include "VCV_adaptor/widget_convert/widget_element_convert.hh"
+#include "util/overloaded.hh"
 #include <functional>
+#include <span>
 #include <string_view>
 
 namespace rack
@@ -77,24 +79,50 @@ inline app::SvgPanel *createPanel(std::string_view svgPath) {
 	return nullptr;
 }
 
+inline void set_labels(std::span<std::string_view> pos_names, std::vector<std::string> &labels) {
+	for (unsigned i = 0; auto &label : labels) {
+		if (i >= pos_names.size())
+			break;
+		pos_names[i++] = label;
+	}
+}
+
+template<class TParamWidget>
+requires(std::derived_from<TParamWidget, app::ParamWidget>)
+TParamWidget *createParamImpl(MetaModule::Coords coords, math::Vec pos, engine::Module *module, int paramId) {
+	using namespace MetaModule;
+	auto name = getParamName(module, paramId);
+	auto widget = createElementWidget<TParamWidget>(pos, coords, name);
+	widget->module = module;
+	widget->paramId = paramId;
+	if (auto pq = widget->getParamQuantity()) {
+		pq->name = name;
+		if (pq->labels.size() > 0) {
+			std::visit(overloaded{
+						   [](BaseElement &) {},
+						   [](FlipSwitch &el) {
+							   el.num_pos = std::clamp(pq->maxValue - pq->minValue, 2, 3);
+							   set_labels(el.pos_names, pq->labels);
+						   },
+						   [](SlideSwitch &el) {
+							   el.num_pos = std::clamp(pq->maxValue - pq->minValue, 2, 8);
+							   set_labels(el.pos_names, pq->labels);
+						   },
+					   },
+					   widget->element);
+		}
+	}
+	return widget;
+}
+
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
-	auto name = getParamName(module, paramId);
-	auto o = createElementWidget<TParamWidget>(pos, MetaModule::Coords::TopLeft, name);
-	o->paramId = paramId;
-	if (o->getParamQuantity())
-		o->getParamQuantity()->name = name;
-	return o;
+	return createParamImpl<TParamWidget>(MetaModule::Coords::TopLeft, pos, module, paramId);
 }
 
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
-	auto name = getParamName(module, paramId);
-	auto o = createElementWidget<TParamWidget>(pos, MetaModule::Coords::Center, name);
-	o->paramId = paramId;
-	if (o->getParamQuantity())
-		o->getParamQuantity()->name = name;
-	return o;
+	return createParamImpl<TParamWidget>(MetaModule::Coords::Center, pos, module, paramId);
 }
 
 template<class TPortWidget>

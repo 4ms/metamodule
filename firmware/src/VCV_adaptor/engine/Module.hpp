@@ -114,7 +114,7 @@ struct Module : VCVModuleWrapper {
 								  std::vector<std::string> labels = {}) {
 		TSwitchQuantity *sq = configParam<TSwitchQuantity>(paramId, minValue, maxValue, defaultValue, name);
 		sq->snapEnabled = true;
-		// sq->labels = labels;
+		sq->labels = labels;
 		return sq;
 	}
 
