@@ -75,24 +75,33 @@ inline lv_obj_t *draw_element(const Slider &el, const lv_img_dsc_t *, lv_obj_t *
 	if (!obj)
 		return nullptr;
 
-	//todo: el.image_handle
-	lv_coord_t w = img ? img->header.w : 5;
-	lv_coord_t h = img ? img->header.h : 5;
-	auto handle = lv_obj_create(obj);
-	if (w <= h) {
-		// Vertical
-		lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
-		lv_obj_set_width(handle, w);
-		lv_obj_set_height(handle, module_height / 24);
-		lv_obj_set_pos(handle, 0, 0);
-		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+	lv_obj_t *handle;
+	if (el.image_handle.size()) {
+		handle = lv_img_create(obj);
+		auto handle_img = PNGFileSystem::read(el.image_handle);
+		if (handle_img)
+			draw_image(0, 0, Coords::TopLeft, handle_img, handle, module_height);
+		else
+			pr_err("No handle image found for %.*s!\n", (int)el.image_handle.size(), el.image_handle.data());
 	} else {
-		// Horizontal
-		lv_obj_set_align(handle, LV_ALIGN_LEFT_MID);
-		lv_obj_set_width(handle, module_height / 24); //10px at full scale
-		lv_obj_set_height(handle, h);
-		lv_obj_set_pos(handle, 0, 0);
-		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+		lv_coord_t w = img ? img->header.w : 5;
+		lv_coord_t h = img ? img->header.h : 5;
+		handle = lv_obj_create(obj);
+		if (w <= h) {
+			// Vertical
+			lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
+			lv_obj_set_width(handle, w);
+			lv_obj_set_height(handle, module_height / 24);
+			lv_obj_set_pos(handle, 0, 0);
+			lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+		} else {
+			// Horizontal
+			lv_obj_set_align(handle, LV_ALIGN_LEFT_MID);
+			lv_obj_set_width(handle, module_height / 24); //10px at full scale
+			lv_obj_set_height(handle, h);
+			lv_obj_set_pos(handle, 0, 0);
+			lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+		}
 	}
 	return obj;
 }
