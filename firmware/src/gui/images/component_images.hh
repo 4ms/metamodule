@@ -3,10 +3,9 @@
 #include "lvgl.h"
 #include "pr_dbg.hh"
 
-#include "4ms/images.hh"
-#include "AudibleInstruments/images.hh"
-#include "Befaco/images.hh"
-#include "Rack/images.hh"
+#include "4ms/images.hh"				//TODO: LightElement
+#include "AudibleInstruments/images.hh" //TODO: BraidsDisplay
+#include "Rack/images.hh"				//TODO: MediumLight, LEDBezel
 
 namespace MetaModule::ElementImageImpl
 {

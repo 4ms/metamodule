@@ -96,9 +96,11 @@ TParamWidget *createParamImpl(MetaModule::Coords coords, math::Vec pos, engine::
 	widget->module = module;
 	widget->paramId = paramId;
 	auto base = base_element(widget->element);
-	printf("createParam: %s %f %f -> %f %f\n", name.data(), pos.x, pos.y, base.x_mm, base.y_mm);
+	// printf("createParam: %s %f %f -> %f %f\n", name.data(), pos.x, pos.y, base.x_mm, base.y_mm);
 	if (auto pq = widget->getParamQuantity()) {
 		pq->name = name;
+
+		// Switches with strings for each position
 		if (pq->labels.size() > 0) {
 			std::visit(overloaded{
 						   [](BaseElement &) {},

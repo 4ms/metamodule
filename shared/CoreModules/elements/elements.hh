@@ -1,7 +1,6 @@
 #pragma once
 #include "4ms_elements.hh"
 #include "AudibleInstruments_elements.hh"
-#include "Befaco_elements.hh"
 #include "Rack_elements.hh"
 #include "base_element.hh"
 #include <string_view>
@@ -40,16 +39,16 @@ using Element = std::variant<NullElement,
 							 EncoderRGB,
 
 							 // Jacks: TODO: specify nut image, and signal type?
-							 //JackInput
-							 //JackOutput
-							 GateJackInput4ms,
-							 AnalogJackInput4ms,
-							 BefacoInputPort,
-							 GateJackOutput4ms,
-							 AnalogJackOutput4ms,
-							 BefacoOutputPort,
-							 PJ301MPortIn,
-							 PJ301MPortOut,
+							 JackInput,
+							 JackOutput,
+							 // GateJackInput4ms,
+							 // AnalogJackInput4ms,
+							 // BefacoInputPort,
+							 // GateJackOutput4ms,
+							 // AnalogJackOutput4ms,
+							 // BefacoOutputPort,
+							 // PJ301MPortIn,
+							 // PJ301MPortOut,
 
 							 //	Lights:TODO! specify image, color(s), and radius ratio for coloration
 							 VCVLightBezel<RedGreenBlueLight>,

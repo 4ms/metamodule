@@ -15,8 +15,11 @@ extern const lv_img_dsc_t button_x;
 extern const lv_img_dsc_t knob9mm_x;
 extern const lv_img_dsc_t knob_x;
 extern const lv_img_dsc_t knob_large_x;
+extern const lv_img_dsc_t knob_unlined_x;
 extern const lv_img_dsc_t slider_x;
 extern const lv_img_dsc_t slider_horiz_x;
+extern const lv_img_dsc_t jack_x;
+extern const lv_img_dsc_t led_x;
 
 extern const lv_img_dsc_t CKSS_rot_fg;
 extern const lv_img_dsc_t CKSS_rot_bg;
@@ -38,6 +41,8 @@ extern const lv_img_dsc_t BefacoSlidePotSmall;
 extern const lv_img_dsc_t BefacoSlidePotHandleSmall;
 extern const lv_img_dsc_t Crossfader;
 extern const lv_img_dsc_t CrossfaderHandle;
+extern const lv_img_dsc_t BananutBlack;
+extern const lv_img_dsc_t BananutRed;
 
 extern const lv_img_dsc_t TL1105;
 extern const lv_img_dsc_t CKD6_0;
@@ -71,15 +76,14 @@ extern const lv_img_dsc_t Davies1900hLargeWhite;
 extern const lv_img_dsc_t Davies1900hDarkGrey;
 extern const lv_img_dsc_t Davies1900hLargeGrey;
 
-// These are only used in Muxslicer
-// extern const lv_img_dsc_t BefacoSwitchHoriz_0;
-// extern const lv_img_dsc_t BefacoSwitchHoriz_1;
-// extern const lv_img_dsc_t BefacoSwitchHoriz_2;
-
-// Mock filesystem -- TODO replace with littlefs or SD Card FATFS
+// Mock read-only filesystem: given a file name, return the file contents
+// TODO: replace with real filesystem (LittleFS for NORFlash)
+// TODO: use /plugin/BRAND/res/components/ directories
+// TODO: integrate this with module faceplates (/plugin/BRAND/res/modules/)
 struct PNGFileSystem {
 
 	static lv_img_dsc_t const *read(std::string_view filename) {
+		printf("load %s\n", filename.data());
 		if (mock_fs.contains(filename))
 			return mock_fs[filename];
 		else
@@ -96,10 +100,13 @@ struct PNGFileSystem {
 		{"switch_horiz_center.png", &switch_horiz_center},
 		{"button_x.png", &button_x},
 		{"knob_x.png", &knob_x},
+		{"knob_unlined_x.png", &knob_unlined_x},
 		{"knob9mm_x.png", &knob9mm_x},
 		{"knob_large_x.png", &knob_large_x},
 		{"slider_x.png", &slider_x},
 		{"slider_horiz_x.png", &slider_horiz_x},
+		{"jack_x.png", &jack_x},
+		{"led_x.png", &led_x},
 
 		// Befaco/
 		{"SwitchWideHoriz_bg.png", &SwitchWideHoriz_bg},
@@ -124,6 +131,8 @@ struct PNGFileSystem {
 		{"BefacoSlidePotHandleSmall.png", &BefacoSlidePotHandleSmall},
 		{"Crossfader.png", &Crossfader},
 		{"CrossfaderHandle.png", &CrossfaderHandle},
+		{"BananutRed.png", &BananutRed},
+		{"BananutBlack.png", &BananutBlack},
 
 		// Rack/
 		{"BefacoSwitch_0.png", &BefacoSwitch_0},

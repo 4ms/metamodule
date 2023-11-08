@@ -130,12 +130,12 @@ inline Element make_element<::BefacoSlidePotSmall>(BaseElement b) {
 
 template<>
 inline Element make_element_output<::BananutRed>(BaseElement b) {
-	return BefacoOutputPort{b};
+	return JackOutput{{{b}, "BananutRed.png"}};
 };
 
 template<>
 inline Element make_element_input<::BananutBlack>(BaseElement b) {
-	return BefacoInputPort{b};
+	return JackInput{{{b}, "BananutBlack.png"}};
 };
 
 } // namespace MetaModule

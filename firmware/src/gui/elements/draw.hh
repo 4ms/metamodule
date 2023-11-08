@@ -46,9 +46,9 @@ draw_image(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t
 	//DEBUG positions:
 	// lv_obj_set_style_outline_color(obj, lv_palette_main(LV_PALETTE_BLUE), LV_STATE_DEFAULT);
 	// lv_obj_set_style_outline_width(obj, 1, LV_STATE_DEFAULT);
-	if (img == &::BefacoSlidePotSmall) {
-		printf("Draw: %f, %f -> %d, %d img:[%d x %d]\n", x, y, pos_x, pos_y, (int)width, (int)height);
-	}
+	// if (img == &::BefacoSlidePotSmall) {
+	// 	printf("Draw: %f, %f -> %d, %d img:[%d x %d]\n", x, y, pos_x, pos_y, (int)width, (int)height);
+	// }
 }
 
 // Create an object as a sub-object of the canvas, and draw img in it
@@ -108,6 +108,12 @@ inline lv_obj_t *draw_element(const Slider &el, const lv_img_dsc_t *, lv_obj_t *
 	return obj;
 }
 
+inline lv_obj_t *draw_element(const JackElement &el, const lv_img_dsc_t *, lv_obj_t *canvas, uint32_t module_height) {
+	auto img = PNGFileSystem::read(el.image);
+	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
+	return obj;
+}
+
 inline lv_obj_t *draw_element(const Knob &el, const lv_img_dsc_t *, lv_obj_t *canvas, uint32_t module_height) {
 	auto img = PNGFileSystem::read(el.image);
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
@@ -135,6 +141,7 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, const lv_img_dsc_t *, lv_ob
 
 	lv_obj_t *handle;
 
+	// Use image for handle, if image exists
 	if (el.image_fg.size()) {
 		handle = lv_img_create(obj);
 		auto handle_img = PNGFileSystem::read(el.image_fg);
@@ -144,7 +151,7 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, const lv_img_dsc_t *, lv_ob
 			pr_err("No handle image found for %.*s!\n", (int)el.image_fg.size(), el.image_fg.data());
 
 	} else {
-		// If there's no fg img, draw a handle with LVGL styles:
+		// If there's no handle img, draw a handle with LVGL styles:
 		handle = lv_obj_create(obj);
 		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 		if (body_img->header.h > body_img->header.w) //vertical

@@ -15,7 +15,7 @@ inline Element make_element<::CKSSRot>(BaseElement b) {
 
 template<>
 inline Element make_element<HCVThemedRogan>(BaseElement b) {
-	return MetaModule::Rogan1PRed{b};
+	return MetaModule::Knob{{b}, "Rogan1PRed.png"};
 }
 
 } // namespace MetaModule

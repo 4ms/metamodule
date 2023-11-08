@@ -133,17 +133,39 @@ struct Toggle3posHoriz : FlipSwitch {
 };
 
 struct Encoder9mmRGB : EncoderRGB {
-	//...image
+	constexpr Encoder9mmRGB(BaseElement b)
+		: EncoderRGB{{{b}, "knob_unlined_x.png"}} {
+	}
 };
 
+//
 // Input Jacks
-struct JackInput4ms : JackInput {};
-struct GateJackInput4ms : JackInput4ms {};
-struct AnalogJackInput4ms : JackInput4ms {};
+//
 
+struct GateJackInput4ms : JackInput {
+	constexpr GateJackInput4ms(BaseElement b)
+		: JackInput{{{b}, "jack_x.png"}} {
+	}
+};
+struct AnalogJackInput4ms : JackInput {
+	constexpr AnalogJackInput4ms(BaseElement b)
+		: JackInput{{{b}, "jack_x.png"}} {
+	}
+};
+
+//
 // Output jacks
-struct JackOutput4ms : JackOutput {};
-struct GateJackOutput4ms : JackOutput4ms {};
-struct AnalogJackOutput4ms : JackOutput4ms {};
+//
+
+struct GateJackOutput4ms : JackOutput {
+	constexpr GateJackOutput4ms(BaseElement b)
+		: JackOutput{{{b}, "jack_x.png"}} {
+	}
+};
+struct AnalogJackOutput4ms : JackOutput {
+	constexpr AnalogJackOutput4ms(BaseElement b)
+		: JackOutput{{{b}, "jack_x.png"}} {
+	}
+};
 
 } // namespace MetaModule

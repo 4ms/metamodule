@@ -3,16 +3,17 @@
 #include <string_view>
 #include <vector>
 
-// Heirarchy:
+// Hierarchy:
 //                                                   BaseElement
-//                     |---------------------------------'-------|-----------------------------|
-//              ParamElement                                 JackElement                  LightElement
-//     |------------|-'--|--------|-----------|           |------'-----|         |---------|---'----|---------|
-//    Pot    FlipSwitch  |  SlideSwitch     Button    JackInput  JackOutput  MonoLight DualLight RGBLight Display
-//  |--'--|          Encoder             |----'----|
-// Knob  Slider         |              MomBut     LatchingBut
-//        |        EncoderRGB        |---'---|          |
-//    SliderLight              MomButWhite MomButRGB LatButMonoLight
+//                     |---------------------------------'--------------|----------------------------|
+//              ParamElement                                        JackElement                  LightElement
+//     |----------|---'----|----------|-----------|                |------'-----|         |---------|'-------|---------|
+//     |          |        |          |           |                |            |         |         |        |         |
+//    Pot    FlipSwitch Encoder  SlideSwitch    Button          JackInput  JackOutput  MonoLight DualLight RGBLight Display
+//  |--'--|                |                 |----'---------|
+// Knob  Slider            |              MomBut       LatchingBut
+//        |                |             |---'---|          |
+//    SliderLight     EncoderRGB  MomButWhite MomButRGB LatButMonoLight
 //
 
 namespace MetaModule
@@ -127,18 +128,23 @@ struct SlideSwitch : Switch {
 };
 
 // Encoders
-struct Encoder : ParamElement {};
+struct Encoder : ParamElement {
+	std::string_view image = "";
+};
 
 struct EncoderRGB : Encoder {
 	static constexpr size_t NumLights = 3;
 };
 
 // Jacks
-struct JackElement : BaseElement {};
+struct JackElement : BaseElement {
+	std::string_view image = "";
+};
 
 struct JackInput : JackElement {
 	static constexpr size_t NumInputs = 1;
 };
+
 struct JackOutput : JackElement {
 	static constexpr size_t NumOutputs = 1;
 };
