@@ -375,7 +375,7 @@ lv_obj_set_width( ui_ControlAlert, lv_pct(100));
 lv_obj_set_x( ui_ControlAlert, 0 );
 lv_obj_set_y( ui_ControlAlert, 6 );
 lv_obj_set_align( ui_ControlAlert, LV_ALIGN_BOTTOM_MID );
-lv_obj_add_flag( ui_ControlAlert, LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_add_flag( ui_ControlAlert, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_ControlAlert, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_ControlAlert, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_ControlAlert, lv_color_hex(0x80440C), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -451,7 +451,7 @@ ui_AddModuleName = lv_label_create(ui_AddMapPopUp);
 lv_obj_set_width( ui_AddModuleName, lv_pct(98));
 lv_obj_set_height( ui_AddModuleName, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_AddModuleName, LV_ALIGN_CENTER );
-lv_label_set_text(ui_AddModuleName,"Wiggle a knob or send MIDI ");
+lv_label_set_text(ui_AddModuleName,"Wiggle a knob or send MIDI");
 lv_obj_set_style_text_color(ui_AddModuleName, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_AddModuleName, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_AddModuleName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);

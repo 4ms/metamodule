@@ -36,6 +36,24 @@ lv_obj_set_style_pad_top(ui_PatchViewPage, 3, LV_PART_SCROLLBAR| LV_STATE_DEFAUL
 lv_obj_set_style_pad_bottom(ui_PatchViewPage, 4, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_radius(ui_PatchViewPage, 3, LV_PART_SCROLLBAR| LV_STATE_FOCUSED);
+lv_obj_set_style_bg_color(ui_PatchViewPage, lv_color_hex(0xDF7D1A), LV_PART_SCROLLBAR | LV_STATE_FOCUSED );
+lv_obj_set_style_bg_opa(ui_PatchViewPage, 255, LV_PART_SCROLLBAR| LV_STATE_FOCUSED);
+lv_obj_set_style_pad_left(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOCUSED);
+lv_obj_set_style_pad_right(ui_PatchViewPage, 4, LV_PART_SCROLLBAR| LV_STATE_FOCUSED);
+lv_obj_set_style_pad_top(ui_PatchViewPage, 3, LV_PART_SCROLLBAR| LV_STATE_FOCUSED);
+lv_obj_set_style_pad_bottom(ui_PatchViewPage, 4, LV_PART_SCROLLBAR| LV_STATE_FOCUSED);
+lv_obj_set_style_pad_row(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOCUSED);
+lv_obj_set_style_pad_column(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOCUSED);
+lv_obj_set_style_radius(ui_PatchViewPage, 3, LV_PART_SCROLLBAR| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_bg_color(ui_PatchViewPage, lv_color_hex(0xDF7D1A), LV_PART_SCROLLBAR | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_bg_opa(ui_PatchViewPage, 255, LV_PART_SCROLLBAR| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_pad_left(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_pad_right(ui_PatchViewPage, 4, LV_PART_SCROLLBAR| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_pad_top(ui_PatchViewPage, 3, LV_PART_SCROLLBAR| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_pad_bottom(ui_PatchViewPage, 4, LV_PART_SCROLLBAR| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_pad_row(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_pad_column(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOCUS_KEY);
 
 ui_ButtonsContainer = lv_obj_create(ui_PatchViewPage);
 lv_obj_set_height( ui_ButtonsContainer, 50);

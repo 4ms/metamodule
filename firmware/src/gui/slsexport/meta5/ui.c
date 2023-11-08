@@ -208,12 +208,11 @@ lv_obj_t *ui_CableFromEditButton;
 lv_obj_t *ui_CableFromLabel;
 lv_obj_t *ui_CableToTitle;
 lv_obj_t *ui_CableToPanel;
+lv_obj_t *ui_EditCblButtonPanel2;
 lv_obj_t *ui_CableDeleteButton;
-lv_obj_t *ui_CableDeleteIcon;
-lv_obj_t *ui_CableSave;
-lv_obj_t *ui_CableSaveLabel;
-lv_obj_t *ui_CableCancel;
-lv_obj_t *ui_CableCancelLabel;
+lv_obj_t *ui_CableDeleteIcon2;
+lv_obj_t *ui_CableUndo;
+lv_obj_t *ui_CableUndoLabel1;
 
 
 // SCREEN: ui_CableInputJackComponent

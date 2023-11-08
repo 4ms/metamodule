@@ -203,12 +203,11 @@ extern lv_obj_t *ui_CableFromEditButton;
 extern lv_obj_t *ui_CableFromLabel;
 extern lv_obj_t *ui_CableToTitle;
 extern lv_obj_t *ui_CableToPanel;
+extern lv_obj_t *ui_EditCblButtonPanel2;
 extern lv_obj_t *ui_CableDeleteButton;
-extern lv_obj_t *ui_CableDeleteIcon;
-extern lv_obj_t *ui_CableSave;
-extern lv_obj_t *ui_CableSaveLabel;
-extern lv_obj_t *ui_CableCancel;
-extern lv_obj_t *ui_CableCancelLabel;
+extern lv_obj_t *ui_CableDeleteIcon2;
+extern lv_obj_t *ui_CableUndo;
+extern lv_obj_t *ui_CableUndoLabel1;
 // SCREEN: ui_CableInputJackComponent
 void ui_CableInputJackComponent_screen_init(void);
 extern lv_obj_t *ui_CableInputJackComponent;
