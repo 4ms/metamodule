@@ -34,7 +34,7 @@ inline Element make_element<rack::componentlibrary::TL1105>(BaseElement b) {
 
 template<>
 inline Element make_element<rack::componentlibrary::LEDBezel>(BaseElement b) {
-	return LEDBezel{{{{b}}}}; //TODO... is this a MomentaryButton with LED?
+	return MomentaryButton{{{b}, "VCVBezel.png"}};
 };
 
 template<>

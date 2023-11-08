@@ -1,10 +1,9 @@
 #pragma once
-#include "gui/images/Rack/images.hh"
 #include "lvgl.h"
-#include <cstdio>
 #include <map>
 #include <string_view>
 
+// 4ms
 extern const lv_img_dsc_t switch_up;
 extern const lv_img_dsc_t switch_down;
 extern const lv_img_dsc_t switch_center;
@@ -21,8 +20,11 @@ extern const lv_img_dsc_t slider_horiz_x;
 extern const lv_img_dsc_t jack_x;
 extern const lv_img_dsc_t led_x;
 
+// HetrickCV/Audible
 extern const lv_img_dsc_t CKSS_rot_fg;
 extern const lv_img_dsc_t CKSS_rot_bg;
+
+// Befaco/Rack
 extern const lv_img_dsc_t SwitchWideHoriz_bg;
 extern const lv_img_dsc_t SwitchWideHoriz_fg;
 extern const lv_img_dsc_t SwitchTallVert;
@@ -49,6 +51,7 @@ extern const lv_img_dsc_t CKD6_0;
 extern const lv_img_dsc_t BefacoPush_0;
 extern const lv_img_dsc_t CKSS_0;
 extern const lv_img_dsc_t CKSS_1;
+extern const lv_img_dsc_t VCVBezel;
 
 extern const lv_img_dsc_t Trimpot;
 extern const lv_img_dsc_t Rogan1PRed;
@@ -83,7 +86,6 @@ extern const lv_img_dsc_t Davies1900hLargeGrey;
 struct PNGFileSystem {
 
 	static lv_img_dsc_t const *read(std::string_view filename) {
-		printf("load %s\n", filename.data());
 		if (mock_fs.contains(filename))
 			return mock_fs[filename];
 		else
@@ -91,7 +93,7 @@ struct PNGFileSystem {
 	}
 
 	static inline std::map<std::string_view, lv_img_dsc_t const *> mock_fs{
-		// 4ms/
+		// /plugin/4ms/res/components/
 		{"switch_down.png", &switch_down},
 		{"switch_up.png", &switch_up},
 		{"switch_center.png", &switch_center},
@@ -108,33 +110,37 @@ struct PNGFileSystem {
 		{"jack_x.png", &jack_x},
 		{"led_x.png", &led_x},
 
-		// Befaco/
-		{"SwitchWideHoriz_bg.png", &SwitchWideHoriz_bg},
-		{"SwitchWideHoriz_fg.png", &SwitchWideHoriz_fg},
-		{"SwitchTallVert.png", &SwitchTallVert},
-		{"SwitchTallVertHandle.png", &SwitchTallVertHandle},
-		{"SwitchNarrow.png", &SwitchNarrow_bg},
-		{"SwitchNarrowHoriz_bg.png", &SwitchNarrowHoriz_bg},
-		{"BefacoTinyKnobWhite.png", &BefacoTinyKnobWhite},
-		{"BefacoTinyKnobRed.png", &BefacoTinyKnobRed},
+		// /plugin/Befaco/res/components/
+		{"BananutBlack.png", &BananutBlack},
+		{"BananutRed.png", &BananutRed},
+		//BefacoButton_0/1
+		{"BefacoSlidePotHandleSmall.png", &BefacoSlidePotHandleSmall},
+		{"BefacoSlidePotSmall.png", &BefacoSlidePotSmall},
+		//BefacoSwitchHoriz_0/1/2: only used in Muxlicer
+		{"BefacoTinyKnobBlack.png", &BefacoTinyKnobBlack},
 		{"BefacoTinyKnobDarkGrey.png", &BefacoTinyKnobDarkGrey},
 		{"BefacoTinyKnobLightGrey.png", &BefacoTinyKnobLightGrey},
-		{"BefacoTinyKnobBlack.png", &BefacoTinyKnobBlack},
-		{"BefacoBigKnob.png", &BefacoBigKnob},
-		{"Davies1900hDarkGreyKnob.png", &Davies1900hDarkGrey},
-		{"Davies1900hLightGreyKnob.png", &Davies1900hLightGrey},
-		{"Davies1900hLargeGreyKnob.png", &Davies1900hLargeGrey},
-		{"Davies1900hLargeLightGreyKnob.png", &Davies1900hLargeLightGrey},
-		{"BefacoSlidePot.png", &BefacoSlidePot},
-		{"BefacoSlidePotHandle.png", &BefacoSlidePotHandle},
-		{"BefacoSlidePotSmall.png", &BefacoSlidePotSmall},
-		{"BefacoSlidePotHandleSmall.png", &BefacoSlidePotHandleSmall},
+		{"BefacoTinyKnobRed.png", &BefacoTinyKnobRed},
+		{"BefacoTinyKnobWhite.png", &BefacoTinyKnobWhite},
+		//CKSSThree_bg/fg
 		{"Crossfader.png", &Crossfader},
 		{"CrossfaderHandle.png", &CrossfaderHandle},
-		{"BananutRed.png", &BananutRed},
-		{"BananutBlack.png", &BananutBlack},
+		{"Davies1900hBlackKnob.png", &knob_x}, //??
+		{"Davies1900hDarkGreyKnob.png", &Davies1900hDarkGrey},
+		{"Davies1900hLargeGreyKnob.png", &Davies1900hLargeGrey},
+		{"Davies1900hLargeLightGreyKnob.png", &Davies1900hLargeLightGrey},
+		{"Davies1900hLightGreyKnob.png", &Davies1900hLightGrey},
+		{"SwitchNarrow.png", &SwitchNarrow_bg},
+		{"SwitchNarrowHoriz_bg.png", &SwitchNarrowHoriz_bg},
+		{"SwitchTallVert.png", &SwitchTallVert},
+		{"SwitchTallVertHandle.png", &SwitchTallVertHandle},
+		{"SwitchWideHoriz_bg.png", &SwitchWideHoriz_bg},
+		{"SwitchWideHoriz_fg.png", &SwitchWideHoriz_fg},
 
-		// Rack/
+		// {system}/ -> /plugin/Rack/ComponentLibrary
+		{"BefacoSlidePot.png", &BefacoSlidePot},
+		{"BefacoSlidePotHandle.png", &BefacoSlidePotHandle},
+		{"BefacoBigKnob.png", &BefacoBigKnob},
 		{"BefacoSwitch_0.png", &BefacoSwitch_0},
 		{"BefacoSwitch_1.png", &BefacoSwitch_1},
 		{"BefacoSwitch_2.png", &BefacoSwitch_2},
@@ -157,10 +163,10 @@ struct PNGFileSystem {
 		{"Rogan3PSWhite.png", &Rogan3PSWhite},
 		{"Davies1900hRedKnob.png", &Davies1900hRed},
 		{"Davies1900hWhiteKnob.png", &Davies1900hWhite},
-		{"Davies1900hBlackKnob.png", &knob_x}, //??
 		{"Davies1900hLargeWhiteKnob.png", &Davies1900hLargeWhite},
+		{"VCVBezel.png", &VCVBezel},
 
-		// HetrickCV/ and AudibleInstruments/ ???
+		// hetrickcv/res/ (and/or AudibleInstruments/res?)
 		{"CKSS_rot_bg.png", &CKSS_rot_bg},
 		{"CKSS_rot_fg.png", &CKSS_rot_fg},
 	};

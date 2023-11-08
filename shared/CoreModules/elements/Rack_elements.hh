@@ -4,8 +4,6 @@
 namespace MetaModule
 {
 
-struct LEDBezel : MomentaryButton {};
-
 template<typename LedT>
 struct VCVLightBezel : LedT {};
 

@@ -17,11 +17,11 @@
 #define LV_ATTRIBUTE_MEM_ALIGN
 #endif
 
-#ifndef LV_ATTRIBUTE_IMG_LEDBEZEL
-#define LV_ATTRIBUTE_IMG_LEDBEZEL
+#ifndef LV_ATTRIBUTE_IMG_VCVBEZEL
+#define LV_ATTRIBUTE_IMG_VCVBEZEL
 #endif
 
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_LEDBEZEL uint8_t LEDBezel_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_VCVBEZEL uint8_t VCVBezel_map[] = {
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 
     0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00, 0x0e, 0x08, 0x06, 
     0x00, 0x00, 0x00, 0x1f, 0x48, 0x2d, 0xd1, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 
@@ -62,12 +62,12 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_LEDBEZEL 
     0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
 };
 
-const lv_img_dsc_t LEDBezel = {
+const lv_img_dsc_t VCVBezel = {
   .header.cf = LV_IMG_CF_RAW_ALPHA,
   .header.always_zero = 0,
   .header.reserved = 0,
   .header.w = 14,
   .header.h = 14,
   .data_size = 490,
-  .data = LEDBezel_map,
+  .data = VCVBezel_map,
 };

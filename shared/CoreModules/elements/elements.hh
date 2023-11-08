@@ -34,25 +34,14 @@ using Element = std::variant<NullElement,
 							 LatchingButton,
 							 LatchingButtonMonoLight,
 
-							 //Encoders: TODO: specify knob image
 							 Encoder,
 							 EncoderRGB,
 
-							 // Jacks: TODO: specify nut image, and signal type?
 							 JackInput,
 							 JackOutput,
-							 // GateJackInput4ms,
-							 // AnalogJackInput4ms,
-							 // BefacoInputPort,
-							 // GateJackOutput4ms,
-							 // AnalogJackOutput4ms,
-							 // BefacoOutputPort,
-							 // PJ301MPortIn,
-							 // PJ301MPortOut,
 
 							 //	Lights:TODO! specify image, color(s), and radius ratio for coloration
 							 VCVLightBezel<RedGreenBlueLight>,
-							 LEDBezel,
 							 MediumLight<RedGreenBlueLight>,
 							 MediumLight<GreenRedLight>,
 							 MediumLight<RedLight>,
