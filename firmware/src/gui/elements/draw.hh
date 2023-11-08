@@ -46,7 +46,9 @@ draw_image(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t
 	//DEBUG positions:
 	// lv_obj_set_style_outline_color(obj, lv_palette_main(LV_PALETTE_BLUE), LV_STATE_DEFAULT);
 	// lv_obj_set_style_outline_width(obj, 1, LV_STATE_DEFAULT);
-	// printf_("Draw el img pos:%d, %d img:[%d x %d]\n", pos_x, pos_y, (int)width, (int)height);
+	if (img == &::BefacoSlidePotSmall) {
+		printf("Draw: %f, %f -> %d, %d img:[%d x %d]\n", x, y, pos_x, pos_y, (int)width, (int)height);
+	}
 }
 
 // Create an object as a sub-object of the canvas, and draw img in it
