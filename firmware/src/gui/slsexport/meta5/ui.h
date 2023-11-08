@@ -200,7 +200,6 @@ extern lv_obj_t *ui_CableMapPagePane;
 extern lv_obj_t *ui_CableMapPageTitle;
 extern lv_obj_t *ui_CableFromTitle;
 extern lv_obj_t *ui_CableFromEditButton;
-extern lv_obj_t *ui_CableFromLabel;
 extern lv_obj_t *ui_CableToTitle;
 extern lv_obj_t *ui_CableToPanel;
 extern lv_obj_t *ui_EditCblButtonPanel2;

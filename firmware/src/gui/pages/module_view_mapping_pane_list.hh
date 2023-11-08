@@ -19,11 +19,12 @@ namespace MetaModule
 // Or Add/edit callbacks live here and they only use some other clasS (not ModuleViewMappingPane)
 struct MappingPaneList {
 
-	static lv_obj_t *create_map_list_item(MappedKnob const &map, std::string_view knobset_name) {
-		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
+	static lv_obj_t *create_map_list_item(MappedKnob const &map, std::string_view knobset_name, lv_obj_t *parent) {
+		auto obj = ui_MappedKnobSetItem_create(parent);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
+		lv_show(circle);
 		lv_label_set_text(setname, knobset_name.data());
 
 		auto name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
@@ -41,12 +42,18 @@ struct MappingPaneList {
 		return obj;
 	}
 
-	static lv_obj_t *create_panel_incable_item(uint16_t panel_jack_id) {
-		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
+	static lv_obj_t *create_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *parent) {
+		auto obj = ui_MappedKnobSetItem_create(parent);
+		style_panel_incable_item(panel_jack_id, obj);
+		return obj;
+	}
+
+	static void style_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *obj) {
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		// lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
+		lv_show(circle);
 
 		auto name = get_panel_name<PanelDef>(JackInput{}, panel_jack_id);
 
@@ -67,16 +74,20 @@ struct MappingPaneList {
 
 		lv_obj_set_style_border_width(circle, 3, LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(circle, LV_OPA_0, LV_STATE_DEFAULT);
+	}
 
+	static lv_obj_t *create_panel_outcable_item(uint16_t panel_jack_id, lv_obj_t *parent) {
+		auto obj = ui_MappedKnobSetItem_create(parent);
+		style_panel_outcable_item(panel_jack_id, obj);
 		return obj;
 	}
 
-	static lv_obj_t *create_panel_outcable_item(uint16_t panel_jack_id) {
-		auto obj = ui_MappedKnobSetItem_create(ui_MapList);
+	static void style_panel_outcable_item(uint16_t panel_jack_id, lv_obj_t *obj) {
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		// lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW_WRAP_REVERSE);
+		lv_show(circle);
 
 		auto name = get_panel_name<PanelDef>(JackOutput{}, panel_jack_id);
 
@@ -89,12 +100,29 @@ struct MappingPaneList {
 
 		lv_obj_set_style_border_width(circle, 3, LV_STATE_DEFAULT);
 		lv_obj_set_style_bg_opa(circle, LV_OPA_0, LV_STATE_DEFAULT);
+	}
 
+	static void style_mappedcable_item(Jack jack, ElementType dir, PatchData const &patch, lv_obj_t *obj) {
+		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
+		lv_hide(circle);
+		lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
+		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, patch);
+		lv_label_set_text_fmt(label,
+							  "%s %.16s %.16s",
+							  dir == ElementType::Input ? " >>" : " <<",
+							  name.module_name.data(),
+							  name.element_name.data());
+	}
+
+	static lv_obj_t *create_cable_item(Jack jack, ElementType dir, PatchData const &patch, lv_obj_t *parent) {
+		auto obj = ui_UnmappedSetItem_create(parent);
+		style_unmappedcable_item(jack, dir, patch, obj);
 		return obj;
 	}
 
-	static lv_obj_t *create_cable_item(Jack jack, ElementType dir, PatchData const &patch) {
-		auto obj = ui_UnmappedSetItem_create(ui_MapList);
+	static void style_unmappedcable_item(Jack jack, ElementType dir, PatchData const &patch, lv_obj_t *obj) {
 		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
 		lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
@@ -104,12 +132,10 @@ struct MappingPaneList {
 							  dir == ElementType::Input ? " >>" : " <<",
 							  name.module_name.data(),
 							  name.element_name.data());
-
-		return obj;
 	}
 
-	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name) {
-		auto obj = ui_UnmappedSetItem_create(ui_MapList);
+	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name, lv_obj_t *parent) {
+		auto obj = ui_UnmappedSetItem_create(parent);
 		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
 		lv_label_set_text(setname, knobset_name.data());
 		return obj;

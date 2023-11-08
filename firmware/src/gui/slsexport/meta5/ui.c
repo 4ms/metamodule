@@ -205,7 +205,6 @@ lv_obj_t *ui_CableMapPagePane;
 lv_obj_t *ui_CableMapPageTitle;
 lv_obj_t *ui_CableFromTitle;
 lv_obj_t *ui_CableFromEditButton;
-lv_obj_t *ui_CableFromLabel;
 lv_obj_t *ui_CableToTitle;
 lv_obj_t *ui_CableToPanel;
 lv_obj_t *ui_EditCblButtonPanel2;

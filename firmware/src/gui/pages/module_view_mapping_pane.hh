@@ -192,7 +192,8 @@ private:
 		for (auto &cable : patch_storage.get_view_patch().int_cables) {
 			if (cable.out == thisjack) {
 				for (auto &injack : cable.ins) {
-					auto obj = list.create_cable_item(injack, ElementType::Input, patch_storage.get_view_patch());
+					auto obj =
+						list.create_cable_item(injack, ElementType::Input, patch_storage.get_view_patch(), ui_MapList);
 					group_edit_cable_button(obj);
 				}
 			}
@@ -200,10 +201,10 @@ private:
 
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
 		if (panel_jack_id) {
-			auto obj = list.create_panel_outcable_item(panel_jack_id.value());
+			auto obj = list.create_panel_outcable_item(panel_jack_id.value(), ui_MapList);
 			group_edit_cable_button(obj);
 		} else {
-			auto obj = list.create_unmapped_list_item("Add cable...");
+			auto obj = list.create_unmapped_list_item("Add cable...", ui_MapList);
 			group_edit_cable_button(obj);
 		}
 	}
@@ -216,7 +217,8 @@ private:
 		for (auto &cable : patch_storage.get_view_patch().int_cables) {
 			for (auto &injack : cable.ins) {
 				if (injack == thisjack) {
-					auto obj = list.create_cable_item(cable.out, ElementType::Output, patch_storage.get_view_patch());
+					auto obj = list.create_cable_item(
+						cable.out, ElementType::Output, patch_storage.get_view_patch(), ui_MapList);
 					group_edit_cable_button(obj);
 				}
 			}
@@ -224,10 +226,10 @@ private:
 
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
 		if (panel_jack_id) {
-			auto obj = list.create_panel_incable_item(panel_jack_id.value());
+			auto obj = list.create_panel_incable_item(panel_jack_id.value(), ui_MapList);
 			group_edit_cable_button(obj);
 		} else {
-			auto obj = list.create_unmapped_list_item("Add cable...");
+			auto obj = list.create_unmapped_list_item("Add cable...", ui_MapList);
 			group_edit_cable_button(obj);
 		}
 	}
@@ -263,7 +265,7 @@ private:
 		if (first_empty_set.has_value()) {
 			unsigned set_i = first_empty_set.value();
 			auto setname = patch.valid_knob_set_name(set_i);
-			auto obj = list.create_unmapped_list_item(setname);
+			auto obj = list.create_unmapped_list_item(setname, ui_MapList);
 			group_add_button(obj, set_i);
 		}
 	}
@@ -277,7 +279,7 @@ private:
 			if (map.module_id > 0 && map.module_id < patch.module_slugs.size()) {
 				set_is_empty = false;
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
-					auto obj = list.create_map_list_item(map, setname);
+					auto obj = list.create_map_list_item(map, setname, ui_MapList);
 					group_edit_button(obj, set_i);
 					has_mapping_in_set = true;
 				}
@@ -285,7 +287,7 @@ private:
 		}
 
 		if (!set_is_empty && !has_mapping_in_set) {
-			auto obj = list.create_unmapped_list_item(setname);
+			auto obj = list.create_unmapped_list_item(setname, ui_MapList);
 			group_add_button(obj, set_i);
 		}
 
