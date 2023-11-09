@@ -1247,6 +1247,9 @@ private:
 			CatchupParam f{};
 			f.mode = catchup_manager.get_default_mode();
 			knob_maps[knob_set][k.panel_knob_id].push_back({k, f});
+
+		} else if (k.is_button()) {
+			// TODO
 		}
 	}
 
