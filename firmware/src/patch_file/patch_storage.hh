@@ -28,6 +28,7 @@ class PatchStorage {
 
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
 	LfsFileIO norflash_{flash_};
+	bool flash_needs_rescan_ = true;
 
 	FatFileIO &usbdrive_;
 	EdgeStateDetector usbdrive_mounted_;
@@ -109,10 +110,16 @@ public:
 					rescan_usbdrive();
 				filelist_.usb = patch_list_.get_patchfile_list(Volume::USB);
 			}
+			if (flash_needs_rescan_) {
+				patch_list_.clear_patches(Volume::NorFlash);
+				rescan_flash();
+				filelist_.norflash = patch_list_.get_patchfile_list(Volume::NorFlash);
+			}
 
-			if (sdcard_needs_rescan_ | usbdrive_needs_rescan_) {
+			if (sdcard_needs_rescan_ | usbdrive_needs_rescan_ | flash_needs_rescan_) {
 				sdcard_needs_rescan_ = false;
 				usbdrive_needs_rescan_ = false;
+				flash_needs_rescan_ = false;
 				pending_send_message.message_type = PatchListChanged;
 			} else
 				pending_send_message.message_type = PatchListUnchanged;
@@ -163,6 +170,12 @@ private:
 		pr_trace("Updating patchlist from USB Drive.\n");
 		PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
 		pr_trace("USB Patchlist updated. filelist data: %p, size: %d.\n", filelist_.usb.data(), filelist_.usb.size());
+	}
+
+	void rescan_flash() {
+		pr_trace("Updating patchlist from Flash.\n");
+		PatchFileIO::add_all_to_patchlist(norflash_, patch_list_);
+		pr_trace("Norflash Patchlist updated. filelist data: %p, size: %d.\n", filelist_.norflash.data(), filelist_.norflash.size());
 	}
 
 	uint32_t load_patch_file(Volume vol, uint32_t patch_id) {
