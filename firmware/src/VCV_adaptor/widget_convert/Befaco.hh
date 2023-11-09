@@ -49,17 +49,17 @@ inline Element make_element<::CKSSHoriz4>(BaseElement b) {
 
 template<>
 inline Element make_element<::CKSSHoriz2>(BaseElement b) {
-	return SlideSwitch{{b}, 2, "SwitchNarrowHoriz_bg.png"};
+	return FlipSwitch{{b}, 2, {"SwitchNarrowHoriz_0.png", "SwitchNarrowHoriz_1.svg"}};
 }
 
 template<>
 inline Element make_element<::CKSSNarrow>(BaseElement b) {
-	return SlideSwitch{{b}, 2, "SwitchNarrow.png"};
+	return FlipSwitch{{b}, 2, {"SwitchNarrow_0.png", "SwitchNarrow_2.png"}};
 }
 
 template<>
 inline Element make_element<::CKSSNarrow3>(BaseElement b) {
-	return SlideSwitch{{b}, 3, "SwitchNarrow.png"};
+	return FlipSwitch{{b}, 3, {"SwitchNarrow_0.png", "SwitchNarrow_1.png", "SwitchNarrow_2.png"}};
 }
 
 template<>
