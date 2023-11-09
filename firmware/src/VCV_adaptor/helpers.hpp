@@ -15,7 +15,7 @@
 namespace rack
 {
 
-// Creates a Widget that has an Element
+// Creates a Widget and makes the right Element in the Widget
 template<typename T>
 T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_view name) {
 	auto *o = new T;
@@ -95,7 +95,7 @@ TParamWidget *createParamImpl(MetaModule::Coords coords, math::Vec pos, engine::
 	auto widget = createElementWidget<TParamWidget>(pos, coords, name);
 	widget->module = module;
 	widget->paramId = paramId;
-	auto base = base_element(widget->element);
+	// auto base = base_element(widget->element);
 	// printf("createParam: %s %f %f -> %f %f\n", name.data(), pos.x, pos.y, base.x_mm, base.y_mm);
 	if (auto pq = widget->getParamQuantity()) {
 		pq->name = name;

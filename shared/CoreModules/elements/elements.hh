@@ -1,7 +1,5 @@
 #pragma once
-#include "4ms_elements.hh"
-#include "AudibleInstruments_elements.hh"
-#include "Rack_elements.hh"
+#include "4ms_elements.hh" //TODO: don't put this here, put it in info files
 #include "base_element.hh"
 #include <string_view>
 #include <variant>
@@ -9,12 +7,9 @@
 namespace MetaModule
 {
 
-// Criteria for being a member of the variant. Either:
+// Criteria for being a member of the variant.
 // - Unique NumParams/NumLights/NumInputs/NumOutputs values (because these are static constexpr).
-// - Unique data members (avoid unused data members in types)
-//
-// Also, if any of the following are true, it is not strictly required to have entry in Elements,
-// but it should be considered to avoid too many "type" fields.
+// - Unique data members (e.g. SlideSwitch::num_pos)
 // - Unique animation or drawing method (e.g.: Having two types Slider and Knob is preferred to having Pot::is_slider).
 // - Unique set of values or method of interpreting values (e.g. Momentary vs Latched buttons)
 
@@ -41,26 +36,33 @@ using Element = std::variant<NullElement,
 							 JackOutput,
 
 							 //	Lights:TODO! specify image, color(s), and radius ratio for coloration
-							 VCVLightBezel<RedGreenBlueLight>,
-							 MediumLight<RedGreenBlueLight>,
-							 MediumLight<GreenRedLight>,
-							 MediumLight<RedLight>,
-							 MediumLight<YellowLight>,
-							 MediumLight<GreenLight>,
-							 SmallLight<BlueLight>,
-							 SmallLight<RedLight>,
-							 SmallLight<GreenLight>,
-							 SmallLight<GreenRedLight>,
-							 RedGreenBlueLight,
-							 RedLight,
-							 OrangeLight,
-							 GreenLight,
-							 BlueLight,
-							 WhiteLight,
-							 RedBlueLight,
+							 //Rack:
+							 MonoLight,
+							 DualLight,
+							 RgbLight,
+
+							 // VCVLightBezel<RedGreenBlueLight>,
+							 // MediumLight<RedGreenBlueLight>,
+							 // MediumLight<GreenRedLight>,
+							 // MediumLight<RedLight>,
+							 // MediumLight<YellowLight>,
+							 // MediumLight<GreenLight>,
+							 // SmallLight<BlueLight>,
+							 // SmallLight<RedLight>,
+							 // SmallLight<GreenLight>,
+							 // SmallLight<GreenRedLight>,
+
+							 // 							 RedGreenBlueLight,
+							 // 							 RedLight,
+							 // 							 OrangeLight,
+							 // 							 GreenLight,
+							 // 							 BlueLight,
+							 // 							 WhiteLight,
+							 // 							 RedBlueLight,
 
 							 // Displays; TODO? Specify a callback for drawing?
-							 BraidsDisplay148x56,
+							 Display,
+							 // BraidsDisplay148x56,
 
 							 // Alt Params
 							 AltParamToggle2,

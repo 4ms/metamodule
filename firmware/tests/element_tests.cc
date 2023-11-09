@@ -1,5 +1,6 @@
 #include "doctest.h"
 
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
@@ -10,12 +11,12 @@ struct TestInfo : MetaModule::ModuleInfoBase {
 	static constexpr std::array<MetaModule::Element, 9> Elements{
 		MetaModule::Slider{{{{1, 2, Center, "Slider1", ""}}}},				//Param 0
 		MetaModule::GateJackInput4ms{{5, 6, Center, "Gate In 1", ""}},		//Input 0
-		MetaModule::RedLight{{{{5, 6, Center, "Gate In 1", ""}}}},			//Light 0
+		MetaModule::RedLight{{5, 6, Center, "Gate In 1", ""}},				//Light 0
 		MetaModule::EncoderRGB{{{{3, 4, Center, "Encoder RGB 1", ""}}}},	//Param 1, Lights 1,2,3
 		MetaModule::AnalogJackOutput4ms{{5, 6, Center, "Audio Out 1", ""}}, //Output 0
 		MetaModule::AnalogJackOutput4ms{{5, 7, Center, "Audio Out 2", ""}}, //Output 1
 		MetaModule::AnalogJackInput4ms{{4, 6, Center, "Audio In 1", ""}},	//Input 1
-		MetaModule::RedBlueLight{{{{5, 6, Center, "", ""}}}},				//Lights 4,5
+		MetaModule::RedBlueLight{{5, 6, Center, "", ""}},					//Lights 4,5
 		MetaModule::Slider25mmVertLED{{5, 6, Center, "Slider2", ""}},		//Param 2, Lights 6
 	};
 };
@@ -46,12 +47,12 @@ TEST_CASE("Can get element index") {
 TEST_CASE("Can get param index") {
 	constexpr auto Slider1 = get<MetaModule::Slider>(TestInfo::Elements[0]);
 	constexpr auto InJack1 = get<MetaModule::JackInput>(TestInfo::Elements[1]);
-	constexpr auto Light1 = get<MetaModule::RedLight>(TestInfo::Elements[2]);
+	constexpr auto Light1 = get<MetaModule::MonoLight>(TestInfo::Elements[2]);
 	constexpr auto Encoder1 = get<MetaModule::EncoderRGB>(TestInfo::Elements[3]);
 	constexpr auto Out1 = get<MetaModule::JackOutput>(TestInfo::Elements[4]);
 	constexpr auto Out2 = get<MetaModule::JackOutput>(TestInfo::Elements[5]);
 	constexpr auto InJack2 = get<MetaModule::JackInput>(TestInfo::Elements[6]);
-	constexpr auto Light2 = get<MetaModule::RedBlueLight>(TestInfo::Elements[7]);
+	constexpr auto Light2 = get<MetaModule::DualLight>(TestInfo::Elements[7]);
 	constexpr auto SliderLED = get<MetaModule::SliderLight>(TestInfo::Elements[8]);
 
 	constexpr auto NonExistingKnob = MetaModule::EncoderRGB{{{{1, 2, MetaModule::Coords::Center, "DNE", ""}}}};

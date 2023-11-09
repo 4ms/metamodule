@@ -151,27 +151,23 @@ struct JackOutput : JackElement {
 
 // Lights
 struct LightElement : BaseElement {
-	static constexpr size_t NumLights = 1;
+	std::string_view image = "";
 };
-struct MonoLight : LightElement {};
+
+struct MonoLight : LightElement {
+	static constexpr size_t NumLights = 1;
+	uint16_t color = 0xFFFF;
+};
+
 struct DualLight : LightElement {
 	static constexpr size_t NumLights = 2;
+	std::array<uint16_t, 2> color = {0xFFFF, 0xFFFF};
 };
-struct RgbLed : LightElement {
+struct RgbLight : LightElement {
 	static constexpr size_t NumLights = 3;
 };
 
-struct RedLight : MonoLight {};
-struct OrangeLight : MonoLight {};
-struct YellowLight : MonoLight {};
-struct GreenLight : MonoLight {};
-struct BlueLight : MonoLight {};
-struct WhiteLight : MonoLight {};
-struct RedBlueLight : DualLight {};
-struct GreenRedLight : DualLight {};
-struct RedGreenBlueLight : RgbLed {};
-
-// Displays
+// // Displays
 struct Display : LightElement {}; //TODO: does this need its own category?
 
 // AltParams: TODO

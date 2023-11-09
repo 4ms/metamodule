@@ -5,7 +5,6 @@
 #include "gui/elements/draw.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
-#include "gui/images/component_images.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"

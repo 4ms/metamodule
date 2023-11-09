@@ -53,6 +53,9 @@ extern const lv_img_dsc_t CKSS_0;
 extern const lv_img_dsc_t CKSS_1;
 extern const lv_img_dsc_t VCVBezel;
 
+extern const lv_img_dsc_t MediumLight;
+// extern const lv_img_dsc_t SmallLight;
+
 extern const lv_img_dsc_t Trimpot;
 extern const lv_img_dsc_t Rogan1PRed;
 extern const lv_img_dsc_t Rogan1PSGreen;
@@ -165,6 +168,8 @@ struct PNGFileSystem {
 		{"Davies1900hWhiteKnob.png", &Davies1900hWhite},
 		{"Davies1900hLargeWhiteKnob.png", &Davies1900hLargeWhite},
 		{"VCVBezel.png", &VCVBezel},
+		{"MediumLight.png", &MediumLight},
+		{"SmallLight.png", &MediumLight}, //TODO: SmallLight image
 
 		// hetrickcv/res/ (and/or AudibleInstruments/res?)
 		{"CKSS_rot_bg.png", &CKSS_rot_bg},

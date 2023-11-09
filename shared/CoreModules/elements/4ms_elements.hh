@@ -168,4 +168,38 @@ struct AnalogJackOutput4ms : JackOutput {
 	}
 };
 
+//
+// Lights
+//
+
+struct RedLight : MonoLight {
+	constexpr RedLight(BaseElement b)
+		: MonoLight{{{b}, "led_x.png"}, 0xF800} {
+	}
+};
+
+struct BlueLight : MonoLight {
+	constexpr BlueLight(BaseElement b)
+		: MonoLight{{{b}, "led_x.png"}, 0x07E0} {
+	}
+};
+
+struct OrangeLight : MonoLight {
+	constexpr OrangeLight(BaseElement b)
+		: MonoLight{{{b}, "led_x.png"}, 0xFD40} {
+	}
+};
+
+struct RedBlueLight : DualLight {
+	constexpr RedBlueLight(BaseElement b)
+		: DualLight{{{b}, "led_x.png"}, {0xF800, 0x001F}} {
+	}
+};
+
+struct RedGreenBlueLight : RgbLight {
+	constexpr RedGreenBlueLight(BaseElement b)
+		: RgbLight{{{b}, "led_x.png"}} {
+	}
+};
+
 } // namespace MetaModule
