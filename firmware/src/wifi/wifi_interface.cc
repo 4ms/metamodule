@@ -22,6 +22,8 @@ using namespace Framing;
 namespace MetaModule
 {
 
+PatchStorage* WifiInterface::patchStorage;
+
 Configuration_t FrameConfig
 {
     .start=0x01,
@@ -33,9 +35,11 @@ StaticDeframer<16000> deframer(FrameConfig);
 Framer framer(FrameConfig);
 
 
-void WifiInterface::init()
+void WifiInterface::init(PatchStorage* storage)
 {
     printf("Initializing Wifi\n");
+
+    patchStorage = storage;
 
     // auto result = Flasher::init(230400);
 
@@ -112,8 +116,6 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
                 {
                     auto thisName = fbb.CreateString(std::string_view(fileList[i].patchname));
 
-                    printf("%s\n", fileList[i].patchname.c_str());
-
                     auto thisFilename = fbb.CreateString(std::string_view(fileList[i].filename));
                     auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename);
                     elems[i] = thisInfo;
@@ -140,12 +142,47 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
 
             printf("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
 
+            auto LocationToVolume = [](auto location) -> std::optional<Volume>
+            {
+                switch (location)
+                {
+                    case StorageLocation::StorageLocation_USB:    return Volume::USB;
+                    case StorageLocation::StorageLocation_FLASH:  return Volume::NorFlash;
+                    case StorageLocation::StorageLocation_SDCARD: return Volume::SDCard;
+                    default:                                      return std::nullopt;
+                }
+            };
+
             flatbuffers::FlatBufferBuilder fbb;
-            auto result = CreateResult(fbb, true);
-            auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
-            fbb.Finish(message);
+
+            if (auto thisVolume = LocationToVolume(destination); thisVolume)
+            {
+                auto success = patchStorage->add_patch_file(*thisVolume, "tmp.yml", receivedPatchData);
+
+                if (success)
+                {
+                    auto result = CreateResult(fbb, true);
+                    auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
+                    fbb.Finish(message);
+                }
+                else
+                {
+                    auto description = fbb.CreateString("Saving failed");
+                    auto result = CreateResult(fbb, false, description);
+                    auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
+                    fbb.Finish(message);
+                }
+            }
+            else
+            {
+                auto description = fbb.CreateString("Invalid volume id");
+                auto result = CreateResult(fbb, false, description);
+                auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
+                fbb.Finish(message);
+            }
 
             sendResponse(fbb.GetBufferSpan());
+
         }
         else
         {

@@ -31,6 +31,12 @@ public:
 		return true;
 	}
 
+	static bool add_file(std::span<const uint8_t> buffer, FileIoC auto &fileio, std::string_view filename)
+	{
+		auto success = fileio.update_or_create_file(filename, {(const char*)buffer.data(), buffer.size()});
+		return success;
+	}
+
 	static bool add_all_to_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
 		// patch_list.set_status(PatchList::Status::Loading);
 

@@ -66,10 +66,6 @@ void main() {
 
 	RamDiskOps ramdiskops{*virtdrive};
 
-	#ifdef ENABLE_WIFI_BRIDGE
-	WifiInterface::init();
-	#endif
-
 	UsbManager usb{ramdiskops};
 	usb.start();
 
@@ -79,6 +75,10 @@ void main() {
 
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
+
+	#ifdef ENABLE_WIFI_BRIDGE
+	WifiInterface::init(&patch_storage);
+	#endif
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
