@@ -1,4 +1,5 @@
 #include "doctest.h"
+#include "elements/4ms_elements.hh"
 #include "elements/element_state_conversion.hh"
 
 TEST_CASE("Convert State SlideSwitch 7 pos") {

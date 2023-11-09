@@ -1,5 +1,4 @@
 #pragma once
-#include "4ms_elements.hh" //TODO: don't put this here, put it in info files
 #include "base_element.hh"
 #include <string_view>
 #include <variant>
@@ -35,36 +34,12 @@ using Element = std::variant<NullElement,
 							 JackInput,
 							 JackOutput,
 
-							 //	Lights:TODO! specify image, color(s), and radius ratio for coloration
-							 //Rack:
 							 MonoLight,
 							 DualLight,
 							 RgbLight,
 
-							 // VCVLightBezel<RedGreenBlueLight>,
-							 // MediumLight<RedGreenBlueLight>,
-							 // MediumLight<GreenRedLight>,
-							 // MediumLight<RedLight>,
-							 // MediumLight<YellowLight>,
-							 // MediumLight<GreenLight>,
-							 // SmallLight<BlueLight>,
-							 // SmallLight<RedLight>,
-							 // SmallLight<GreenLight>,
-							 // SmallLight<GreenRedLight>,
+							 Display, //TODO
 
-							 // 							 RedGreenBlueLight,
-							 // 							 RedLight,
-							 // 							 OrangeLight,
-							 // 							 GreenLight,
-							 // 							 BlueLight,
-							 // 							 WhiteLight,
-							 // 							 RedBlueLight,
-
-							 // Displays; TODO? Specify a callback for drawing?
-							 Display,
-							 // BraidsDisplay148x56,
-
-							 // Alt Params
 							 AltParamToggle2,
 							 AltParamToggle3>;
 

@@ -1,7 +1,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
-// #include "info/EnOsc_info.hh"
-#include "enosc/altparam_EnOsc_info.hh"
+#include "info/EnOsc_info.hh"
+// #include "enosc/altparam_EnOsc_info.hh"
 #include "enosc/ui.hh"
 
 namespace MetaModule
@@ -97,18 +97,27 @@ public:
 		}
 	}
 
+	static constexpr int NumAltParams = 4;
+
+	enum {
+		AltCrossfade_Time = 0,
+		AltStereo_Split = 1,
+		AltNum_Oscs = 2,
+		AltFreeze_Split = 3,
+	};
+
 	void set_alt_param(const int alt_param_id, const float val) override {
 		switch (alt_param_id) {
-			case Info::AltStereo_Split:
+			case AltStereo_Split:
 				enosc.set_stereo_mode(static_cast<SplitMode>(val));
 				break;
-			case Info::AltNum_Oscs:
+			case AltNum_Oscs:
 				enosc.set_num_osc(val);
 				break;
-			case Info::AltCrossfade_Time:
+			case AltCrossfade_Time:
 				enosc.set_crossfade(val);
 				break;
-			case Info::AltFreeze_Split:
+			case AltFreeze_Split:
 				enosc.set_freeze_mode(static_cast<SplitMode>(val));
 				break;
 		}
@@ -187,23 +196,23 @@ public:
 
 	constexpr std::string_view get_alt_param_value(unsigned alt_id, float val) override {
 		switch (alt_id) {
-			case Info::AltStereo_Split:
+			case AltStereo_Split:
 				return val < 0.5f ? "Even/Odd" : val < 1.5f ? "Low/High" : "Root/Others";
 				break;
 
-			case Info::AltNum_Oscs:
+			case AltNum_Oscs:
 				if (val < 1 || val > 16)
 					return "";
 				return NumString[((int)val) - 1];
 				break;
 
-			case Info::AltCrossfade_Time:
+			case AltCrossfade_Time:
 				if (val < 0 || val > 1)
 					return "";
 				return NumString[(int)(val * 10.f)];
 				break;
 
-			case Info::AltFreeze_Split:
+			case AltFreeze_Split:
 				return val < 0.5f ? "Even/Odd" : val < 1.5f ? "Low/High" : "Root/Others";
 				break;
 		}
