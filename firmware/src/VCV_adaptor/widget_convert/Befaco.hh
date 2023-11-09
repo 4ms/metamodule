@@ -32,7 +32,8 @@ struct ThreeStateBefacoSwitchMomentary;
 // Only used in Muxslicer:
 // struct BefacoSwitchHorizontal;
 
-// Conversions from Befaco widgets to MetaModule Elements:
+// From MotionMTR.cpp
+struct CKSSThreeDragable;
 
 namespace MetaModule
 {
@@ -60,6 +61,11 @@ inline Element make_element<::CKSSNarrow>(BaseElement b) {
 template<>
 inline Element make_element<::CKSSNarrow3>(BaseElement b) {
 	return FlipSwitch{{b}, 3, {"SwitchNarrow_0.png", "SwitchNarrow_1.png", "SwitchNarrow_2.png"}};
+}
+
+template<>
+inline Element make_element<::CKSSThreeDragable>(BaseElement b) {
+	return SlideSwitch{{b}, 3, "CKSSThree_bg.png", "CKSSThree_fg.png"};
 }
 
 template<>

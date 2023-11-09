@@ -239,5 +239,27 @@ inline Element make_element<::Cool3PosSwitch>(BaseElement b) {
 };
 ```
 
+  Some tips:
+
+  - FlipSwitch is a switch rendered with an image for each value (or frame). So, this works well
+    with a toggle switch if you have an image for the up and down positions (and center, if it has that).
+    There are a maximum of 3 images/frames.
+    Each position can also have string name, which
+    will be extracted from your VCV code if you set the SwitchQuantity::label field. You also could specify
+    the labels in the make_element function by putting the array of string literals after the file paths.
+
+  - SlideSwitch is a switch rendered with a background image for the body of the switch, and a foreground
+    image for the handle. This can have up to 8 positions. The same technique for position strings is used here
+    as in the FlipSwitch (see above). If the body image is wider than it is tall, then the switch will automatically
+    be rendered horizontally. Otherwise, vertically.
+
+  - Slider is rendered by a handle and a body image, like SlideSwitch. but it's
+    continuous and doesn't have labels for each position. Like SlideSwitch, this will automatically be 
+    rendered vertically or horizontally depending on the dimensions of the body/bg image.
+
+  - Knob is rendered by a single image, which is rotated around its center.
+
+  - There are lots of other elements (lights, etc).. TODO: summarize them here.
+
    Take a look at the other brand files in `firmware/VCV_adaptor/widget_convert/` for more examples.
 
