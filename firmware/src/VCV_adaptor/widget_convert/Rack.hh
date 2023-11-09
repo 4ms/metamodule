@@ -49,22 +49,22 @@ inline Element make_element<rack::componentlibrary::BefacoTinyKnob>(BaseElement 
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hBlackKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hBlackKnob.png"};
+	return Knob{{b}, "Davies1900hBlack.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hWhiteKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hWhiteKnob.png"};
+	return Knob{{b}, "Davies1900hWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hRedKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hRedKnob.png"};
+	return Knob{{b}, "Davies1900hRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hLargeWhiteKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hLargeWhiteKnob.png"};
+	return Knob{{b}, "Davies1900hLargeWhite.png"};
 };
 
 template<>
