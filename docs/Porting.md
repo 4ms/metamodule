@@ -14,53 +14,89 @@ mkdir -p firmware/src/gui/images/<Brand>/components/
 ```
 
 3) **Create a modules.cmake file**
-   Make a new file: `firmware/vcv_ports/glue/<Brand>/modules.cmake` 
-   Look at other brands examples and copy what's done there.
 
-   `modules.cmake` must do a few things:
+   Make a new file called `firmware/vcv_ports/glue/<Brand>/modules.cmake`.
+   It'll be helpful look at other brands examples and copy what's done there.
+   Here's an example where the <Brand> is "MyBrand"
+
+```cmake
+# MyBrandModules is a list of VCV Rack module slugs
+# This cmake variable must be spelled exactly like that because it's used
+# in the MetaModule build system
+set(MyBrandModules
+    SomeModule
+    AnotherModule
+    #... more modules
+)
+
+# Invoke the module list filtering function on the list.
+# This allows devs to filter out modules when building (faster, smaller binaries)
+include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
+limit_modules_built("MyBrand" MyBrandModules)
+
+# Just a helper variable, this is optional
+set(MYBRAND_DIR ${CMAKE_CURRENT_LIST_DIR}/../../MyBrand)
+
+# Create a list of faceplate SVGs to convert
+# Typically the SVG file for a module has the same name as the slug, with .svg appended 
+# (which is what this cmake code is assuming)
+# This variable MYBRAND_FACEPLATE_SVGS must be named exactly that, since it's used
+# in the MetaModule build system
+list(TRANSFORM MyBrandModules PREPEND ${MYBRAND_DIR}/res/panels/ OUTPUT_VARIABLE MYBRAND_FACEPLATE_SVGS)
+list(TRANSFORM MYBRAND_FACEPLATE_SVGS APPEND .svg)
+
+# Create a list of c++ files to compile for your brand
+# Typically the .cpp files have the same name as the module slug, which this cmake code assumes.
+# This variable will be used in your brand's CMakeLists.txt file, but is not used
+# anywhere else, so you are free to name it however you like.
+list(TRANSFORM MyBrandModules PREPEND ${MYBRAND_DIR}/src/ OUTPUT_VARIABLE MYBRAND_SOURCE_PATHS)
+list(TRANSFORM MYBRAND_SOURCE_PATHS APPEND .cpp)
+```
+
+   `modules.cmake` must do three things:
 
    - Create a list of module names call `<Brand>Modules`.
      These names should be the VCV Rack module slugs. Ideally, these names are
      also the names of the SVG faceplate files (without the .svg extension) and
      also the names of the C++ source files (without the .cpp or .cc extension),
      but if that's not the case you will just need to manually specify the SVGs
-     and source file names manually.
-   
-   - Invoke the module list filtering function on the list, like this:
-       ```cmake
-       include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
-       limit_modules_built("<Brand>" <Brand>Modules)
-       ```
-       This allows developers to speed up build times and reduce binary sizes
-       by specifying a white-list of modules to include in the build.
+     and source file names (and filtering won't work, so avoid this if possible).
    
    - Set a list called `<BRAND>_FACEPLATE_SVGS` (<BRAND> is all caps), which
      contains full paths to the faceplate .svg files. This is used when
      (re-)generating all artwork files (convering SVG files to PNG and LVGL
      format).
 
+   - Invoke the module list filtering function on the list.
+     This allows developers to speed up build times and reduce binary sizes
+     by specifying a white-list of modules to include in the build.
+
 
 4) *Create a brand `CMakeLists.txt` file*
    Make a new file: `firmware/vcv_ports/glue/<Brand>/CMakeLists.txt`
    This file tells CMake how to build your modules. Look at other brands do it,
-   it's a fairly simple CMake file.
+   it's a fairly simple CMake file. The only thing it must do is create a new
+   target named <Brand>Library.
 
-   - Typically at the top of the CMakeLists file, you will `include()` the
-     `modules.cmake` file, and use the list of module names to generate the
-     list of source files needed to compile, but that's not a strict requirement.
-   
-   - The CMakeLists.txt must create a CMake target OBJECT library named
-     <Brand>Library, like this: 
+   Here's an example:
+
 ```cmake
-     add_library(
-       <Brand>Library OBJECT
-       ${BRAND_SOURCE_PATHS}
-       ${OTHER_SOURCES}
-       more_source_files.cpp
-     )
- ```
-   You can then use normal CMake commands like `target_include_directories`,
-   `target_compile_options`, etc to specify how your modules should be built.
+include(modules.cmake)
+
+# ${MYBRAND_SOURCE_PATHS} was defined in modules.cmake
+add_library(MyBrandLibrary OBJECT ${MYBRAND_SOURCE_PATHS}
+            # Add any other sources you need here (3rd party libs, etc)
+)
+
+# Put whatever dirs you need to include here:
+target_include_directories(MyBrandLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../../MyBrand/src)
+
+# Put whatever compile options you need here
+target_compile_options(MyBrandLibrary PRIVATE -Wno-double-promotion)
+
+# Set properites here (at least c++20 is required)
+set_property(TARGET MyBrandLibrary PROPERTY CXX_STANDARD 20)
+```
 
 
 5) Add the brand name to `firmware/vcv_ports/brands.cmake`
@@ -72,7 +108,6 @@ set(brands
   <Brand>
 )
 ```
-
 
 6) **Add the plugin to the VCV whitelist** 
    Add an entry for your brand in `vcv/src/mapping/module_directory.hh`. 
@@ -144,34 +179,7 @@ shared/svgextract/svgextract.py convertSvgToLvgl \
 
    For more details on svgextract usage, see [Firmware Building](./firmware-building.md). 
 
-9) **Add new component artwork files to "filesystem".**
-   Skip this if you didn't add any components in step 8.
-
-   We need to add the new artwork to the mock read-only "filesystem". This is 
-   just a std::map in `firmware/src/gui/images/image_fs.hh`. Eventually we
-   will use a real filesystem, but for now this lets the rest of the code use
-   a filesystem-like interface. To add an image, just add a line in 
-   the map like this:
-
-```c++
-    {"NewWidget.png", &NewWidget},
-```
-   The first element is a string which is the "filename". You'll use this later
-   in the next step. Best practice is to use the actual PNG filename. The second
-   element is a pointer to the generated LVGL .c file.  It's 
-   most likely going to be the same as the filename without the ".png", but 
-   if the file contains characters that C++ doesn't like, then it may be different.
-   You can double-check by looking for the `lv_img_dsc_t` struct that's defined
-   at the bottom of the .c file you generated in 
-   `firmware/src/gui/images/<Brand>/components/`.
-
-   You need to extern declare that struct, so add a line at the top like this:
-
-```c++
-    extern const lv_img_dsc_t NewWidget;
-```
-
-10) **Connect any new components to the MetaModule Element**
+9) **Connect any new components to the MetaModule Element**
     Skip this if you didn't add any components in step 8.
 
    The final step is to create a function that takes your VCV Rack Widget type
