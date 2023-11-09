@@ -140,6 +140,8 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
             assert(uploadPatchMessage->content()->is_span_observable);
             auto receivedPatchData = std::span(uploadPatchMessage->content()->data(), uploadPatchMessage->content()->size());
 
+            auto filename = flatbuffers::GetStringView(uploadPatchMessage->filename());
+
             printf("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
 
             auto LocationToVolume = [](auto location) -> std::optional<Volume>
@@ -157,7 +159,7 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
 
             if (auto thisVolume = LocationToVolume(destination); thisVolume)
             {
-                auto success = patchStorage->add_patch_file(*thisVolume, "tmp.yml", receivedPatchData);
+                auto success = patchStorage->add_patch_file(*thisVolume, filename, receivedPatchData);
 
                 if (success)
                 {
