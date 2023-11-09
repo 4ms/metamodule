@@ -42,6 +42,12 @@ foreach(brand ${brands})
   # Component artwork
   file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
   list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
+  foreach(component ${BRAND_ARTWORK_SOURCES})
+    cmake_path(GET component STEM LAST_ONLY COMPIMGNAME)
+    set(COMPFILENAME "${COMPIMGNAME}.png")
+    configure_file(${FWDIR}/src/gui/images/component_register.cc.in ${brand}/${COMPIMGNAME}_register.cc)
+    list(APPEND COMP_ARTWORK_SOURCES ${brand}/${COMPIMGNAME}_register.cc)
+  endforeach()
 
   # Module Library
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
@@ -88,6 +94,7 @@ foreach(brand ${brands})
   endforeach()
 
 endforeach()
+
 
 #
 # RYML
