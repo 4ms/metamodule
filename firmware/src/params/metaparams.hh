@@ -31,6 +31,10 @@ struct MetaParams {
 	// Controls -> Audio
 	bool midi_connected = false;
 
+	uint8_t num_button_exp_connected = 0;
+	uint32_t ext_buttons_high_events{};
+	uint32_t ext_buttons_low_events{};
+
 	// Controls -> Audio, Audio -> GUI (via ParamsState in SyncParams)
 	uint32_t jack_senses{};
 
@@ -58,6 +62,8 @@ struct MetaParams {
 		audio_load = 0;
 		audio_overruns = 0;
 		jack_senses = 0;
+		ext_buttons_high_events = 0;
+		ext_buttons_low_events = 0;
 	}
 
 	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
@@ -72,6 +78,12 @@ struct MetaParams {
 		rotary.add_motion(that.rotary);
 		rotary_pushed.add_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
+
+		// Check this:
+		ext_buttons_low_events = that.ext_buttons_low_events;
+		ext_buttons_high_events = that.ext_buttons_high_events;
+		that.ext_buttons_low_events = 0;
+		that.ext_buttons_high_events = 0;
 
 		audio_overruns = std::max(that.audio_overruns, audio_overruns);
 
@@ -95,6 +107,12 @@ struct MetaParams {
 		rotary.transfer_motion(that.rotary);
 		rotary_pushed.transfer_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
+
+		// Check this:
+		ext_buttons_low_events |= that.ext_buttons_low_events;
+		ext_buttons_high_events |= that.ext_buttons_high_events;
+		that.ext_buttons_low_events = 0;
+		that.ext_buttons_high_events = 0;
 
 		// transfer
 		if (that.audio_overruns > 0) {
