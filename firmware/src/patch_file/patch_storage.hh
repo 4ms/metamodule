@@ -87,6 +87,41 @@ public:
 		poll_media_change();
 	}
 
+	bool add_patch_file(const Volume vol, std::string_view filename, std::span<const uint8_t> data)
+	{
+		if (vol == Volume::USB)
+		{
+			auto success = PatchFileIO::add_file(data, usbdrive_, filename);
+			if (success)
+			{
+				usbdrive_needs_rescan_ = true;
+			}
+			return success;
+		}
+		else if (vol == Volume::SDCard)
+		{
+			auto success =  PatchFileIO::add_file(data, sdcard_, filename);
+			if (success)
+			{
+				sdcard_needs_rescan_ = true;
+			}
+			return success;
+		}
+		else if (vol == Volume::NorFlash)
+		{
+			auto success =  PatchFileIO::add_file(data, norflash_, filename);
+			if (success)
+			{
+				flash_needs_rescan_ = true;
+			}
+			return success;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	void handle_messages() {
 		if (pending_send_message.message_type != None) {
 			// Keep trying to send message until suceeds
