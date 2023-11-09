@@ -57,6 +57,8 @@ void Controls::update_params() {
 
 		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
 
+		update_control_expander();
+
 		update_rotary();
 
 		// Meta button
@@ -108,6 +110,29 @@ void Controls::update_midi_connected() {
 
 	if (cur_metaparams->midi_poly_chans > 0)
 		_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
+}
+
+void Controls::update_control_expander() {
+	// Control expander
+	cur_metaparams->num_button_exp_connected = control_expander.num_button_expanders_connected();
+	// Method 1:
+	// cur_metaparams->ext_button_states = control_expander.get_buttons();
+	// Method 2:
+	// uint32_t buttons_state = control_expander.get_buttons();
+	// for (auto [i, extbut, mp_extbut] : enumerate(ext_buttons, cur_metaparams->ext_buttons)) {
+	// 	extbut.register_state(buttons_state & (1 << i));
+	// 	mp_extbut.transfer_events(extbut);
+	// }
+	uint32_t buttons_state = control_expander.get_buttons();
+	cur_metaparams->ext_buttons_high_events = 0;
+	cur_metaparams->ext_buttons_low_events = 0;
+	for (auto [i, extbut] : enumerate(ext_buttons)) {
+		extbut.register_state(buttons_state & (1 << i));
+		if (extbut.just_went_high())
+			cur_metaparams->ext_buttons_high_events |= (1 << i);
+		if (extbut.just_went_low())
+			cur_metaparams->ext_buttons_low_events |= (1 << i);
+	}
 }
 
 void Controls::parse_midi() {
@@ -197,6 +222,7 @@ void Controls::start() {
 
 void Controls::process() {
 	sense_pin_reader.update();
+	control_expander.update();
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
