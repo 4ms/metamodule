@@ -1,8 +1,10 @@
 #pragma once
+#include "CoreModules/hub/button_expander_defs.hh"
 #include "conf/control_conf.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/i2c_codec_conf.hh"
 #include "conf/pin_conf.hh"
+#include "control_expander.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
@@ -49,6 +51,7 @@ private:
 
 	void parse_midi();
 	void update_midi_connected();
+	void update_control_expander();
 	void update_rotary();
 
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
@@ -71,6 +74,8 @@ private:
 	bool _new_adc_data_ready = false;
 
 	SensePinReader sense_pin_reader;
+	ControlExpanderManager control_expander;
+	std::array<Toggler, ButtonExpander::NumTotalButtons> ext_buttons{};
 
 	// MIDI
 	MidiHost &_midi_host;

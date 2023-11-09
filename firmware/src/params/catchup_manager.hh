@@ -1,8 +1,8 @@
 #pragma once
+#include "CoreModules/hub/button_expander_defs.hh"
 #include "catchup_param.hh"
 #include "conf/panel_conf.hh"
 #include "patch-serial/patch/patch.hh"
-#include "util/countzip.hh"
 #include <vector>
 
 namespace MetaModule
@@ -12,7 +12,9 @@ struct MappedParam {
 	MappedKnob map;
 	CatchupParam catchup;
 };
-using ParamSet = std::array<std::vector<MappedParam>, PanelDef::NumKnobs>;
+//[0-11] knobs
+//[12-43] buttons
+using ParamSet = std::array<std::vector<MappedParam>, PanelDef::NumKnobs + ButtonExpander::NumTotalButtons>;
 
 class CatchupManager {
 
