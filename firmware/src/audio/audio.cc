@@ -1,5 +1,6 @@
 #include "audio/audio.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
+#include "audio/audio_buttonexp.hh"
 #include "calibrate/calibration_data_reader.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
