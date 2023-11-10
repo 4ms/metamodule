@@ -89,6 +89,12 @@ private:
 						   arc_change_value();
 					   },
 
+					   // latching button: toggle state
+					   [=](const LatchingButton &) {
+						   lv_arc_set_value(ui_ControlArc, lv_arc_get_value(ui_ControlArc) ? 0 : 1);
+						   arc_change_value();
+					   },
+
 					   // MomentaryButton: encoder press/release translated to button press/release
 					   [=](const MomentaryButton &el) {
 						   lv_arc_set_value(ui_ControlArc, 1);
