@@ -37,7 +37,6 @@ target_link_libraries(jansson PUBLIC mp15xa7_arch)
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
 
 foreach(brand ${brands})
-  string(TOUPPER ${brand} BRAND)
 
   # Component artwork
   file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
