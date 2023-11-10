@@ -175,7 +175,7 @@ struct MyBrandNewWidget : app::SvgKnob {
 
 ```bash
 shared/svgextract/svgextract.py convertSvgToLvgl graphics/<Brand>/components/NewWidget.svg  \
-                                  firmware/src/gui/images/<Brand>/components/NewWidget.c
+                                  firmware/src/gui/images/<Brand>/components/
 ```
 
    For sanity, use the same filename for the .svg and the .c files.

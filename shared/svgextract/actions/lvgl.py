@@ -8,17 +8,17 @@ from helpers.util import *
 def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="all"):
     if exportLayer=="all":
         exportLayer = None
-    png240Filename = outputBaseName.rstrip(".c")
+    png240Filename = outputBaseName.rstrip(".c") + ".png"
     svgToLVGL(artworkSvgFilename, png240Filename, 240, False, exportLayer)
 
 
-def componentSvgToLVGL(svgFilename, outputBaseName, scale):
-    scale = float(scale)
-    png240Filename = outputBaseName.rstrip(".c")
+def componentSvgToLVGL(svgFilename, outputDir):
+    outputDir = outputDir.rstrip("/") + "/"
+    png240Filename = outputDir + os.path.splitext(os.path.basename(svgFilename))[0] + ".png"
     svgToLVGL(svgFilename, png240Filename)
 
 
-def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=None):
+def svgToLVGL(svgFilename, pngFilename, resize=0, alpha=True, exportLayer=None):
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
     if inkscapeBin is None:
         Log("inkscape is not found. Please put it in your shell PATH, or set INKSCAPE_BIN_PATH to the path to the binary")
@@ -26,7 +26,6 @@ def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=Non
         return
 
     # SVG ==> PNG
-    pngFilename = outputBaseName + ".png"
     exportLayer = f"--export-id=\"{exportLayer}\" --export-id-only" if exportLayer else ""
 
 
