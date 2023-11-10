@@ -154,12 +154,17 @@ struct ModuleViewPage : PageBase {
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (mode == ViewMode::List) {
+			if (mapping_pane.manual_control_visible()) {
+				mapping_pane.hide_manual_control();
+
+			} else if (mode == ViewMode::List) {
 				if (PageList::request_last_page()) {
 					blur();
 				}
+
 			} else if (mapping_pane.addmap_visible()) {
 				mapping_pane.hide_addmap();
+
 			} else {
 				mode = ViewMode::List;
 				lv_show(ui_ElementRoller);
