@@ -9,10 +9,10 @@ struct TestInfo : MetaModule::ModuleInfoBase {
 
 	using enum MetaModule::Coords;
 	static constexpr std::array<MetaModule::Element, 9> Elements{
-		MetaModule::Slider{{{{1, 2, Center, "Slider1", ""}}}},				//Param 0
+		MetaModule::Slider{{{{{1, 2, Center, "Slider1", ""}}}}},			//Param 0
 		MetaModule::GateJackInput4ms{{5, 6, Center, "Gate In 1", ""}},		//Input 0
 		MetaModule::RedLight{{5, 6, Center, "Gate In 1", ""}},				//Light 0
-		MetaModule::EncoderRGB{{{{3, 4, Center, "Encoder RGB 1", ""}}}},	//Param 1, Lights 1,2,3
+		MetaModule::EncoderRGB{{{{{3, 4, Center, "Encoder RGB 1", ""}}}}},	//Param 1, Lights 1,2,3
 		MetaModule::AnalogJackOutput4ms{{5, 6, Center, "Audio Out 1", ""}}, //Output 0
 		MetaModule::AnalogJackOutput4ms{{5, 7, Center, "Audio Out 2", ""}}, //Output 1
 		MetaModule::AnalogJackInput4ms{{4, 6, Center, "Audio In 1", ""}},	//Input 1
@@ -55,7 +55,7 @@ TEST_CASE("Can get param index") {
 	constexpr auto Light2 = get<MetaModule::DualLight>(TestInfo::Elements[7]);
 	constexpr auto SliderLED = get<MetaModule::SliderLight>(TestInfo::Elements[8]);
 
-	constexpr auto NonExistingKnob = MetaModule::EncoderRGB{{{{1, 2, MetaModule::Coords::Center, "DNE", ""}}}};
+	constexpr auto NonExistingKnob = MetaModule::EncoderRGB{{{{{1, 2, MetaModule::Coords::Center, "DNE", ""}}}}};
 
 	CHECK(ElementCount::get_indices<TestInfo>(Slider1).value().param_idx == 0);
 	CHECK(ElementCount::get_indices<TestInfo>(Encoder1).value().param_idx == 1);
@@ -152,8 +152,8 @@ struct DEVInfo : ModuleInfoBase {
 		Toggle3pos{{to_mm<72>(50.49), to_mm<72>(41.905), Center, "Fall A Switch", ""}},
 		Toggle3pos{{to_mm<72>(179.89), to_mm<72>(41.905), Center, "Rise B Switch", ""}},
 		Toggle3pos{{to_mm<72>(212.77), to_mm<72>(41.905), Center, "Fall B Switch", ""}},
-		LatchingButtonMonoLight{{to_mm<72>(82.8), to_mm<72>(41.64), Center, "Cycle A", ""}},
-		LatchingButtonMonoLight{{to_mm<72>(147.61), to_mm<72>(41.68), Center, "Cycle B", ""}},
+		LatchingButtonMonoLight{{{{to_mm<72>(82.8), to_mm<72>(41.64), Center, "Cycle A", ""}}}},
+		LatchingButtonMonoLight{{{{to_mm<72>(147.61), to_mm<72>(41.68), Center, "Cycle B", ""}}}},
 
 		OrangeLight{{to_mm<72>(130.68), to_mm<72>(261.07), Center, "extra", ""}},
 	}};

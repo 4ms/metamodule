@@ -12,21 +12,21 @@ using Color565 = uint16_t;
 struct Knob9mm : Knob {
 	constexpr Knob9mm() = default;
 	constexpr Knob9mm(BaseElement b)
-		: Knob{{b}, "knob9mm_x.png"} {
+		: Knob{b, "knob9mm_x.png"} {
 	}
 };
 
 struct DaviesLargeKnob : Knob {
 	constexpr DaviesLargeKnob() = default;
 	constexpr DaviesLargeKnob(BaseElement b)
-		: Knob{{b}, "knob_large_x.png"} {
+		: Knob{b, "knob_large_x.png"} {
 	}
 };
 
 struct Davies1900hBlackKnob : Knob {
 	constexpr Davies1900hBlackKnob() = default;
 	constexpr Davies1900hBlackKnob(BaseElement b)
-		: Knob{{b}, "knob_x.png"} {
+		: Knob{b, "knob_x.png"} {
 	}
 };
 
@@ -36,14 +36,14 @@ struct Davies1900hBlackKnob : Knob {
 struct Slider25mmHorizLED : SliderLight {
 	constexpr Slider25mmHorizLED() = default;
 	constexpr Slider25mmHorizLED(BaseElement b)
-		: SliderLight{{{b}, "slider_horiz_x.png", ""}, 0xFFFF} {
+		: SliderLight{{{b, "slider_horiz_x.png"}, ""}, 0xFFFF} {
 	}
 };
 
 struct Slider25mmVertLED : SliderLight {
 	constexpr Slider25mmVertLED() = default;
 	constexpr Slider25mmVertLED(BaseElement b)
-		: SliderLight{{{b}, "slider_x.png", ""}, 0xFFFF} {
+		: SliderLight{{{b, "slider_x.png"}, ""}, 0xFFFF} {
 	}
 };
 
@@ -52,28 +52,28 @@ struct Slider25mmVertLED : SliderLight {
 //
 struct OrangeButton : LatchingButton {
 	constexpr OrangeButton(BaseElement b)
-		: LatchingButton{{{b}, "button_x.png"}, 0xfd40} {
+		: LatchingButton{{b, "button_x.png"}, 0xfd40} {
 	}
 };
 
 struct WhiteMomentary7mm : MomentaryButtonWhiteLight {
 	constexpr WhiteMomentary7mm() = default;
 	constexpr WhiteMomentary7mm(BaseElement b)
-		: MomentaryButtonWhiteLight{{{{b}, "button_x.png"}}} {
+		: MomentaryButtonWhiteLight{b, "button_x.png"} {
 	}
 };
 
 struct MomentaryRGB7mm : MomentaryButtonRGB {
 	constexpr MomentaryRGB7mm() = default;
 	constexpr MomentaryRGB7mm(BaseElement b)
-		: MomentaryButtonRGB{{{{b}, "button_x.png"}}} {
+		: MomentaryButtonRGB{b, "button_x.png"} {
 	}
 };
 
 struct MomentaryRGB5mm : MomentaryButtonRGB {
 	constexpr MomentaryRGB5mm() = default;
 	constexpr MomentaryRGB5mm(BaseElement b)
-		: MomentaryButtonRGB{{{{b}, "button_x.png"}}} {
+		: MomentaryButtonRGB{b, "button_x.png"} {
 	}
 };
 
@@ -134,7 +134,7 @@ struct Toggle3posHoriz : FlipSwitch {
 
 struct Encoder9mmRGB : EncoderRGB {
 	constexpr Encoder9mmRGB(BaseElement b)
-		: EncoderRGB{{{b}, "knob_unlined_x.png"}} {
+		: EncoderRGB{b, "knob_unlined_x.png"} {
 	}
 };
 
@@ -144,12 +144,12 @@ struct Encoder9mmRGB : EncoderRGB {
 
 struct GateJackInput4ms : JackInput {
 	constexpr GateJackInput4ms(BaseElement b)
-		: JackInput{{{b}, "jack_x.png"}} {
+		: JackInput{b, "jack_x.png"} {
 	}
 };
 struct AnalogJackInput4ms : JackInput {
 	constexpr AnalogJackInput4ms(BaseElement b)
-		: JackInput{{{b}, "jack_x.png"}} {
+		: JackInput{b, "jack_x.png"} {
 	}
 };
 
@@ -159,12 +159,12 @@ struct AnalogJackInput4ms : JackInput {
 
 struct GateJackOutput4ms : JackOutput {
 	constexpr GateJackOutput4ms(BaseElement b)
-		: JackOutput{{{b}, "jack_x.png"}} {
+		: JackOutput{b, "jack_x.png"} {
 	}
 };
 struct AnalogJackOutput4ms : JackOutput {
 	constexpr AnalogJackOutput4ms(BaseElement b)
-		: JackOutput{{{b}, "jack_x.png"}} {
+		: JackOutput{b, "jack_x.png"} {
 	}
 };
 
@@ -174,31 +174,31 @@ struct AnalogJackOutput4ms : JackOutput {
 
 struct RedLight : MonoLight {
 	constexpr RedLight(BaseElement b)
-		: MonoLight{{{b}, "led_x.png"}, 0xF800} {
+		: MonoLight{{b, "led_x.png"}, 0xF800} {
 	}
 };
 
 struct BlueLight : MonoLight {
 	constexpr BlueLight(BaseElement b)
-		: MonoLight{{{b}, "led_x.png"}, 0x07E0} {
+		: MonoLight{{b, "led_x.png"}, 0x07E0} {
 	}
 };
 
 struct OrangeLight : MonoLight {
 	constexpr OrangeLight(BaseElement b)
-		: MonoLight{{{b}, "led_x.png"}, 0xFD40} {
+		: MonoLight{{b, "led_x.png"}, 0xFD40} {
 	}
 };
 
 struct RedBlueLight : DualLight {
 	constexpr RedBlueLight(BaseElement b)
-		: DualLight{{{b}, "led_x.png"}, {0xF800, 0x001F}} {
+		: DualLight{{b, "led_x.png"}, {0xF800, 0x001F}} {
 	}
 };
 
 struct RedGreenBlueLight : RgbLight {
 	constexpr RedGreenBlueLight(BaseElement b)
-		: RgbLight{{{b}, "led_x.png"}} {
+		: RgbLight{{b, "led_x.png"}} {
 	}
 };
 

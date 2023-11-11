@@ -40,12 +40,17 @@ namespace MetaModule
 
 template<>
 inline Element make_element<::CKSSVert7>(BaseElement b) {
-	return SlideSwitch{{b}, 7, "SwitchTallVert.png", "SwitchTallVertHandle.png", SlideSwitch::Ascend::UpLeft};
+	return SlideSwitch{{b, "SwitchTallVert.png"}, 7, "SwitchTallVertHandle.png", SlideSwitch::Ascend::UpLeft};
 }
 
 template<>
 inline Element make_element<::CKSSHoriz4>(BaseElement b) {
-	return SlideSwitch{{b}, 4, "SwitchWideHoriz_bg.png", "SwitchWideHoriz_fg.png"};
+	return SlideSwitch{{b, "SwitchWideHoriz_bg.png"}, 4, "SwitchWideHoriz_fg.png", SlideSwitch::Ascend::DownRight};
+}
+
+template<>
+inline Element make_element<::CKSSThreeDragable>(BaseElement b) {
+	return SlideSwitch{{b, "CKSSThree_bg.png"}, 3, "CKSSThree_fg.png", SlideSwitch::Ascend::UpLeft};
 }
 
 template<>
@@ -64,11 +69,6 @@ inline Element make_element<::CKSSNarrow3>(BaseElement b) {
 }
 
 template<>
-inline Element make_element<::CKSSThreeDragable>(BaseElement b) {
-	return SlideSwitch{{b}, 3, "CKSSThree_bg.png", "CKSSThree_fg.png", SlideSwitch::Ascend::UpLeft};
-}
-
-template<>
 inline Element make_element<::ThreeStateBefacoSwitchMomentary>(BaseElement b) {
 	return FlipSwitch{
 		{b}, 3, {"BefacoSwitch_0.png", "BefacoSwitch_1.png", "BefacoSwitch_2.png"}, {"Off(m)", "On", "Off"}};
@@ -81,67 +81,67 @@ inline Element make_element<::Knurlie>(BaseElement b) {
 
 template<>
 inline Element make_element<::BefacoTinyKnobWhite>(BaseElement b) {
-	return Knob{{b}, "BefacoTinyKnobWhite.png"};
+	return Knob{b, "BefacoTinyKnobWhite.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobRed>(BaseElement b) {
-	return Knob{{b}, "BefacoTinyKnobRed.png"};
+	return Knob{b, "BefacoTinyKnobRed.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobDarkGrey>(BaseElement b) {
-	return Knob{{b}, "BefacoTinyKnobDarkGrey.png"};
+	return Knob{b, "BefacoTinyKnobDarkGrey.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobLightGrey>(BaseElement b) {
-	return Knob{{b}, "BefacoTinyKnobLightGrey.png"};
+	return Knob{b, "BefacoTinyKnobLightGrey.png"};
 };
 
 template<>
 inline Element make_element<::BefacoTinyKnobBlack>(BaseElement b) {
-	return Knob{{b}, "BefacoTinyKnobBlack.png"};
+	return Knob{b, "BefacoTinyKnobBlack.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hLargeGreyKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hLargeGrey.png"};
+	return Knob{b, "Davies1900hLargeGrey.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hLightGreyKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hLightGrey.png"};
+	return Knob{b, "Davies1900hLightGrey.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hLargeLightGreyKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hLargeLightGrey.png"};
+	return Knob{b, "Davies1900hLargeLightGrey.png"};
 };
 
 template<>
 inline Element make_element<::Davies1900hDarkGreyKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hDarkGrey.png"};
+	return Knob{b, "Davies1900hDarkGrey.png"};
 };
 
 template<>
 inline Element make_element<::Crossfader>(BaseElement b) {
-	return Slider{{b}, "Crossfader.png", "CrossfaderHandle.png"};
+	return Slider{{b, "Crossfader.png"}, "CrossfaderHandle.png"};
 };
 
 template<>
 inline Element make_element<::BefacoSlidePotSmall>(BaseElement b) {
-	return Slider{{b}, "BefacoSlidePotSmall.png", "BefacoSlidePotHandleSmall.png"};
+	return Slider{{b, "BefacoSlidePotSmall.png"}, "BefacoSlidePotHandleSmall.png"};
 };
 
 template<>
 inline Element make_element_output<::BananutRed>(BaseElement b) {
-	return JackOutput{{{b}, "BananutRed.png"}};
+	return JackOutput{b, "BananutRed.png"};
 };
 
 template<>
 inline Element make_element_input<::BananutBlack>(BaseElement b) {
-	return JackInput{{{b}, "BananutBlack.png"}};
+	return JackInput{b, "BananutBlack.png"};
 };
 
 } // namespace MetaModule

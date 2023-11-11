@@ -9,45 +9,29 @@
 #include <cmath>
 #include <cstdint>
 
-namespace MetaModule
-{
-
-namespace ElementDrawerImpl
+namespace MetaModule::ElementDrawer
 {
 
 inline lv_obj_t *draw_element(const BaseElement &, lv_obj_t *, uint32_t) {
 	return nullptr;
 }
 
-//TODO: once we move image into BaseElement, all these overloads go away
-inline lv_obj_t *draw_element(const JackElement &el, lv_obj_t *canvas, uint32_t module_height) {
+inline lv_obj_t *draw_element(const ImageElement &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto img = PNGFileSystem::read(el.image);
-	auto obj = draw_image(BaseElement(el), img, canvas, module_height);
-	return obj;
-}
-
-inline lv_obj_t *draw_element(const Knob &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto img = PNGFileSystem::read(el.image);
-	auto obj = draw_image(BaseElement(el), img, canvas, module_height);
-	return obj;
-}
-
-inline lv_obj_t *draw_element(const Button &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto img = PNGFileSystem::read(el.image);
-	auto obj = draw_image(BaseElement(el), img, canvas, module_height);
+	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), img, canvas, module_height);
 	return obj;
 }
 
 inline lv_obj_t *draw_element(const FlipSwitch &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto img = PNGFileSystem::read(el.frames[0]);
-	auto obj = draw_image(BaseElement(el), img, canvas, module_height);
+	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), img, canvas, module_height);
 	return obj;
 }
 
 // Draw slider with its handle as a sub-object
 inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto img = PNGFileSystem::read(el.image);
-	auto obj = draw_image(BaseElement(el), img, canvas, module_height);
+	auto body_img = PNGFileSystem::read(el.image);
+	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), body_img, canvas, module_height);
 	if (!obj)
 		return nullptr;
 
@@ -56,12 +40,12 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 		handle = lv_img_create(obj);
 		auto handle_img = PNGFileSystem::read(el.image_handle);
 		if (handle_img)
-			draw_image(0, 0, Coords::TopLeft, handle_img, handle, module_height);
+			ElementDrawerImpl::draw_image(0, 0, Coords::TopLeft, handle_img, handle, module_height);
 		else
 			pr_err("No handle image found for %.*s!\n", (int)el.image_handle.size(), el.image_handle.data());
 	} else {
-		lv_coord_t w = img ? img->header.w : 5;
-		lv_coord_t h = img ? img->header.h : 5;
+		lv_coord_t w = body_img ? body_img->header.w : 5;
+		lv_coord_t h = body_img ? body_img->header.h : 5;
 		handle = lv_obj_create(obj);
 		if (w <= h) {
 			// Vertical
@@ -84,22 +68,22 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 
 //Draw slide switch with handle as a sub-object
 inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto body_img = PNGFileSystem::read(el.image_bg);
+	auto body_img = PNGFileSystem::read(el.image);
 	if (body_img == nullptr)
 		return nullptr;
 
-	auto obj = draw_image(BaseElement(el), body_img, canvas, module_height);
+	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), body_img, canvas, module_height);
 
 	lv_obj_t *handle;
 
 	// Use image for handle, if image exists
-	if (el.image_fg.size()) {
+	if (el.image_handle.size()) {
 		handle = lv_img_create(obj);
-		auto handle_img = PNGFileSystem::read(el.image_fg);
+		auto handle_img = PNGFileSystem::read(el.image_handle);
 		if (handle_img)
-			draw_image(0, 0, Coords::TopLeft, handle_img, handle, module_height);
+			ElementDrawerImpl::draw_image(0, 0, Coords::TopLeft, handle_img, handle, module_height);
 		else
-			pr_err("No handle image found for %.*s!\n", (int)el.image_fg.size(), el.image_fg.data());
+			pr_err("No handle image found for %.*s!\n", (int)el.image_handle.size(), el.image_handle.data());
 
 	} else {
 		// If there's no handle img, draw a handle with LVGL styles:
@@ -119,16 +103,4 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t 
 	return obj;
 }
 
-} // namespace ElementDrawerImpl
-
-struct ElementDrawer {
-	uint32_t module_height;
-	lv_obj_t *canvas;
-
-	template<typename T>
-	lv_obj_t *draw_element(T element) {
-		return ElementDrawerImpl::draw_element(element, canvas, module_height);
-	}
-};
-
-} // namespace MetaModule
+} // namespace MetaModule::ElementDrawer

@@ -45,10 +45,14 @@ struct BaseElement {
 	using State_t = void;
 };
 
+struct ImageElement : BaseElement {
+	std::string_view image = "";
+};
+
 struct NullElement : BaseElement {};
 
 // ParamElement: base class for pot, encoder, switch/button
-struct ParamElement : BaseElement {
+struct ParamElement : ImageElement {
 	static constexpr size_t NumParams = 1;
 };
 
@@ -57,12 +61,9 @@ struct Pot : ParamElement {
 	using State_t = float;
 };
 
-struct Knob : Pot {
-	std::string_view image = "";
-};
+struct Knob : Pot {};
 
 struct Slider : Pot {
-	std::string_view image = "";
 	std::string_view image_handle = "";
 };
 
@@ -74,9 +75,7 @@ struct SliderLight : Slider {
 //
 // Buttons
 //
-struct Button : ParamElement {
-	std::string_view image = "";
-};
+struct Button : ParamElement {};
 
 struct MomentaryButton : Button {
 	enum class State_t { PRESSED, RELEASED };
@@ -125,25 +124,20 @@ struct FlipSwitch : Switch {
 struct SlideSwitch : Switch {
 	using State_t = unsigned;
 	State_t num_pos = 2;
-	std::string_view image_bg = "";
-	std::string_view image_fg = "";
+	std::string_view image_handle = "";
 	enum class Ascend { UpLeft, DownRight } direction = Ascend::DownRight;
 	std::array<std::string_view, 8> pos_names{};
 };
 
 // Encoders
-struct Encoder : ParamElement {
-	std::string_view image = "";
-};
+struct Encoder : ParamElement {};
 
 struct EncoderRGB : Encoder {
 	static constexpr size_t NumLights = 3;
 };
 
 // Jacks
-struct JackElement : BaseElement {
-	std::string_view image = "";
-};
+struct JackElement : ImageElement {};
 
 struct JackInput : JackElement {
 	static constexpr size_t NumInputs = 1;
@@ -154,9 +148,7 @@ struct JackOutput : JackElement {
 };
 
 // Lights
-struct LightElement : BaseElement {
-	std::string_view image = "";
-};
+struct LightElement : ImageElement {};
 
 struct MonoLight : LightElement {
 	static constexpr size_t NumLights = 1;

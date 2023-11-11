@@ -19,117 +19,117 @@ inline Element make_element<rack::componentlibrary::CKSS>(BaseElement b) {
 
 template<>
 inline Element make_element<rack::componentlibrary::BefacoPush>(BaseElement b) {
-	return MomentaryButton{{{b}, "BefacoPush_0.png"}};
+	return MomentaryButton{b, "BefacoPush_0.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::CKD6>(BaseElement b) {
-	return MomentaryButton{{{b}, "CKD6_0.png"}};
+	return MomentaryButton{b, "CKD6_0.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::TL1105>(BaseElement b) {
-	return MomentaryButton{{{b}, "TL1105.png"}};
+	return MomentaryButton{b, "TL1105.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::LEDBezel>(BaseElement b) {
-	return MomentaryButton{{{b}, "VCVBezel.png"}};
+	return MomentaryButton{b, "VCVBezel.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::BefacoBigKnob>(BaseElement b) {
-	return Knob{{b}, "BefacoBigKnob.png"};
+	return Knob{b, "BefacoBigKnob.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::BefacoTinyKnob>(BaseElement b) {
-	return Knob{{b}, "BefacoTinyKnobWhite.png"};
+	return Knob{b, "BefacoTinyKnobWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hBlackKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hBlack.png"};
+	return Knob{b, "Davies1900hBlack.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hWhiteKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hWhite.png"};
+	return Knob{b, "Davies1900hWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hRedKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hRed.png"};
+	return Knob{b, "Davies1900hRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Davies1900hLargeWhiteKnob>(BaseElement b) {
-	return Knob{{b}, "Davies1900hLargeWhite.png"};
+	return Knob{b, "Davies1900hLargeWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan1PSGreen>(BaseElement b) {
-	return Knob{{b}, "Rogan1PSGreen.png"};
+	return Knob{b, "Rogan1PSGreen.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan1PSRed>(BaseElement b) {
-	return Knob{{b}, "Rogan1PSRed.png"};
+	return Knob{b, "Rogan1PSRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan1PSWhite>(BaseElement b) {
-	return Knob{{b}, "Rogan1PSWhite.png"};
+	return Knob{b, "Rogan1PSWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan2SGray>(BaseElement b) {
-	return Knob{{b}, "Rogan2SGray.png"};
+	return Knob{b, "Rogan2SGray.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan2PSWhite>(BaseElement b) {
-	return Knob{{b}, "Rogan2PSWhite.png"};
+	return Knob{b, "Rogan2PSWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan1PRed>(BaseElement b) {
-	return Knob{{b}, "Rogan1PRed.png"};
+	return Knob{b, "Rogan1PRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan>(BaseElement b) {
-	return Knob{{b}, "Rogan1PRed.png"};
+	return Knob{b, "Rogan1PRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan2PSRed>(BaseElement b) {
-	return Knob{{b}, "Rogan2PSRed.png"};
+	return Knob{b, "Rogan2PSRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan2PSGreen>(BaseElement b) {
-	return Knob{{b}, "Rogan2PSGreen.png"};
+	return Knob{b, "Rogan2PSGreen.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan3PSWhite>(BaseElement b) {
-	return Knob{{b}, "Rogan3PSWhite.png"};
+	return Knob{b, "Rogan3PSWhite.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan3PSRed>(BaseElement b) {
-	return Knob{{b}, "Rogan3PSRed.png"};
+	return Knob{b, "Rogan3PSRed.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Rogan3PSGreen>(BaseElement b) {
-	return Knob{{b}, "Rogan3PSGreen.png"};
+	return Knob{b, "Rogan3PSGreen.png"};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::Trimpot>(BaseElement b) {
-	return Knob{{b}, "Trimpot.png"};
+	return Knob{b, "Trimpot.png"};
 };
 
 //
@@ -137,7 +137,7 @@ inline Element make_element<rack::componentlibrary::Trimpot>(BaseElement b) {
 //
 template<>
 inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement b) {
-	return Slider{{b}, "BefacoSlidePot.png", "BefacoSlidePotHandle.png"};
+	return Slider{{b, "BefacoSlidePot.png"}, "BefacoSlidePotHandle.png"};
 };
 
 //
@@ -147,37 +147,37 @@ inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement 
 template<>
 inline Element
 make_element<rack::componentlibrary::VCVLightBezel<rack::componentlibrary::RedGreenBlueLight>>(BaseElement b) {
-	return RgbLight{{{b}, "VCVBezel.png"}};
+	return RgbLight{{b, "VCVBezel.png"}};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::RedLight>>(BaseElement b) {
-	return MonoLight{{{b}, "SmallLight.png"}, 0xF800};
+	return MonoLight{{b, "SmallLight.png"}, 0xF800};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::GreenLight>>(BaseElement b) {
-	return MonoLight{{{b}, "SmallLight.png"}, 0x07E0};
+	return MonoLight{{b, "SmallLight.png"}, 0x07E0};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::GreenRedLight>>(BaseElement b) {
-	return DualLight{{{b}, "SmallLight.png"}, {0x07E0, 0xF800}};
+	return DualLight{{b, "SmallLight.png"}, {0x07E0, 0xF800}};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::GreenRedLight>>(BaseElement b) {
-	return DualLight{{{b}, "MediumLight.png"}, {0x07E0, 0xF800}};
+	return DualLight{{b, "MediumLight.png"}, {0x07E0, 0xF800}};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::RedLight>>(BaseElement b) {
-	return MonoLight{{{b}, "MediumLight.png"}, 0xF800};
+	return MonoLight{{b, "MediumLight.png"}, 0xF800};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::GreenLight>>(BaseElement b) {
-	return MonoLight{{{b}, "MediumLight.png"}, 0x07E0};
+	return MonoLight{{b, "MediumLight.png"}, 0x07E0};
 };
 
 //
@@ -188,24 +188,24 @@ inline Element make_element<rack::componentlibrary::MediumLight<rack::componentl
 
 template<>
 inline Element make_element_input<rack::componentlibrary::PJ301MPort>(BaseElement b) {
-	return JackInput{{{b}, "jack_x.png"}};
+	return JackInput{b, "jack_x.png"};
 };
 
 template<>
 inline Element make_element_input<rack::componentlibrary::ThemedPJ301MPort>(BaseElement b) {
-	return JackInput{{{b}, "jack_x.png"}};
+	return JackInput{b, "jack_x.png"};
 };
 
 // Outputs
 
 template<>
 inline Element make_element_output<rack::componentlibrary::PJ301MPort>(BaseElement b) {
-	return JackOutput{{{b}, "jack_x.png"}};
+	return JackOutput{b, "jack_x.png"};
 };
 
 template<>
 inline Element make_element_output<rack::componentlibrary::ThemedPJ301MPort>(BaseElement b) {
-	return JackOutput{{{b}, "jack_x.png"}};
+	return JackOutput{b, "jack_x.png"};
 };
 
 } // namespace MetaModule

@@ -78,10 +78,10 @@ private:
 
 		std::visit(overloaded{
 					   // default: do nothing
-					   [=](const BaseElement &) {},
+					   [](const BaseElement &) {},
 
 					   // switches: increment value, wrapping
-					   [=](const Switch &) {
+					   [this](const Switch &) {
 						   auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
 						   if (new_value > lv_arc_get_max_value(ui_ControlArc))
 							   new_value = lv_arc_get_min_value(ui_ControlArc);
@@ -90,13 +90,13 @@ private:
 					   },
 
 					   // latching button: toggle state
-					   [=](const LatchingButton &) {
+					   [this](const LatchingButton &) {
 						   lv_arc_set_value(ui_ControlArc, lv_arc_get_value(ui_ControlArc) ? 0 : 1);
 						   arc_change_value();
 					   },
 
 					   // MomentaryButton: encoder press/release translated to button press/release
-					   [=](const MomentaryButton &el) {
+					   [this](const MomentaryButton &el) {
 						   lv_arc_set_value(ui_ControlArc, 1);
 						   arc_change_value();
 					   },
@@ -112,7 +112,7 @@ private:
 
 		std::visit(overloaded{
 					   [](const BaseElement &) {},
-					   [=](const MomentaryButton &el) {
+					   [this](const MomentaryButton &el) {
 						   lv_arc_set_value(ui_ControlArc, 0);
 						   arc_change_value();
 					   },
