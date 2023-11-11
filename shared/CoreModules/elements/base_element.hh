@@ -5,15 +5,18 @@
 
 // Hierarchy:
 //                                                   BaseElement
-//                     |---------------------------------'--------------|----------------------------|
+//                     +---------------------------------'--------------+---------------------------+
+//                     |                                                |                           |
 //              ParamElement                                        JackElement                  LightElement
-//     |----------|---'----|----------|-----------|                |------'-----|         |---------|'-------|---------|
-//     |          |        |          |           |                |            |         |         |        |         |
-//    Pot    FlipSwitch Encoder  SlideSwitch    Button          JackInput  JackOutput  MonoLight DualLight RGBLight Display
-//  |--'--|                |                 |----'---------|
-// Knob  Slider            |              MomBut       LatchingBut
-//        |                |             |---'---|          |
-//    SliderLight     EncoderRGB  MomButWhite MomButRGB LatButMonoLight
+//     +----------+---'--------+------------------+                +------'-----+         +---------+'-------+---------+
+//     |          |            |                  |                |            |         |         |        |         |
+//    Pot     Encoder       Switch              Button          JackInput  JackOutput  MonoLight DualLight RGBLight Display
+//  +--'--+        |     +----'---+          +----'---------+
+//  |     |        |     |        |          |              |
+// Knob  Slider    |   FlipSw  SlideSw    MomBut         LatchingBut
+//        |        |                     +---'---+          |
+//        |        |                     |       |          |
+//   SliderLight  EncoderRGB      MomButWhite MomButRGB   LatButMonoLight
 //
 
 namespace MetaModule
@@ -124,6 +127,7 @@ struct SlideSwitch : Switch {
 	State_t num_pos = 2;
 	std::string_view image_bg = "";
 	std::string_view image_fg = "";
+	enum class Ascend { UpLeft, DownRight } direction = Ascend::DownRight;
 	std::array<std::string_view, 8> pos_names{};
 };
 

@@ -93,22 +93,28 @@ inline bool redraw_element(const SlideSwitch &element, const GuiElement &gui_el,
 	auto width = lv_obj_get_width(gui_el.obj);
 	bool vert = height > width;
 	auto major_dim = vert ? height : width;
+	auto handle_major_dim = major_dim / element.num_pos;
+	lv_coord_t major_range = major_dim - handle_major_dim;
 
 	lv_obj_refr_size(handle);
 	lv_obj_refr_pos(handle);
 	int32_t cur_pos = vert ? lv_obj_get_y(handle) : lv_obj_get_x(handle);
 
-	auto handle_major_dim = major_dim / element.num_pos;
-	lv_coord_t major_range = major_dim - handle_major_dim;
+	if (element.direction == SlideSwitch::Ascend::UpLeft)
+		cur_pos = major_range - cur_pos;
 
 	// cur_pos ranges from 0 to major_range
 	auto cur_state = StateConversion::convertState(element, (float)cur_pos / (float)major_range) - 1;
-	auto state = StateConversion::convertState(element, val) - 1; //0..N-1 0..6
+	auto new_state = StateConversion::convertState(element, val) - 1; //0..N-1 0..6
 
 	bool did_update_position = false;
 
-	if (state != cur_state) {
-		lv_coord_t new_pos = ((float)state / (float)(element.num_pos - 1)) * major_range;
+	if (new_state != cur_state) {
+		lv_coord_t new_pos = ((float)new_state / (float)(element.num_pos - 1)) * major_range;
+
+		if (element.direction == SlideSwitch::Ascend::UpLeft)
+			new_pos = major_range - new_pos;
+
 		if (vert)
 			lv_obj_set_y(handle, new_pos);
 		else

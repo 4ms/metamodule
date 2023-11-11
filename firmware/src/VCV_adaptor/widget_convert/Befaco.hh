@@ -40,7 +40,7 @@ namespace MetaModule
 
 template<>
 inline Element make_element<::CKSSVert7>(BaseElement b) {
-	return SlideSwitch{{b}, 7, "SwitchTallVert.png", "SwitchTallVertHandle.png"};
+	return SlideSwitch{{b}, 7, "SwitchTallVert.png", "SwitchTallVertHandle.png", SlideSwitch::Ascend::UpLeft};
 }
 
 template<>
@@ -65,7 +65,7 @@ inline Element make_element<::CKSSNarrow3>(BaseElement b) {
 
 template<>
 inline Element make_element<::CKSSThreeDragable>(BaseElement b) {
-	return SlideSwitch{{b}, 3, "CKSSThree_bg.png", "CKSSThree_fg.png"};
+	return SlideSwitch{{b}, 3, "CKSSThree_bg.png", "CKSSThree_fg.png", SlideSwitch::Ascend::UpLeft};
 }
 
 template<>

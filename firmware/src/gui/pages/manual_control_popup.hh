@@ -1,5 +1,5 @@
 #pragma once
-#include "elements/elements.hh"
+#include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/state_names.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -161,7 +161,6 @@ private:
 	}
 
 	void update_control_arc_text() {
-		printf("update text\n");
 		auto range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 		auto value = lv_arc_get_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 
