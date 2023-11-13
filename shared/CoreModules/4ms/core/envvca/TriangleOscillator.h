@@ -70,7 +70,7 @@ public:
             {
                 slopeState = SlopeState_t::IDLE;
 
-                if(cycling)
+                if(cycling && targetVoltage == MinValInV)
                 {
                     state = State_t::TRIGGERED;
                 }
@@ -105,7 +105,7 @@ public:
                 {
                     outputInV = lowerLimitInV + (lowerLimitInV - outputInV);
                     slopeState = SlopeState_t::RISING;
-                    if(!cycling)
+                    if(!cycling || targetVoltage != MinValInV)
                     {
                         state = State_t::FOLLOW;
                     }                
