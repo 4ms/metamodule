@@ -31,7 +31,14 @@ public:
 
     void setTargetVoltage(float val)
     {
-        targetVoltage = val;
+        if (val > FollowTresholdInV)
+        {
+            targetVoltage = val;
+        }
+        else
+        {
+            targetVoltage = MinValInV;
+        }
     }
 
     void proceed(float timeInS)
@@ -43,7 +50,7 @@ public:
 			retriggerPending = false;
 		}
 
-        if (state == State_t::FOLLOW)
+        if (state != State_t::TRIGGERED)
         {
             if (outputInV < targetVoltage)
             {
@@ -87,9 +94,16 @@ public:
             {
                 outputInV += slopeFalling * timeInS;
 
-                if (outputInV < MinValInV)
+                auto lowerLimitInV = MinValInV;
+
+                if (targetVoltage != MinValInV)
                 {
-                    outputInV = MinValInV + (MinValInV - outputInV);
+                    lowerLimitInV = targetVoltage;
+                }
+
+                if (outputInV < lowerLimitInV)
+                {
+                    outputInV = lowerLimitInV + (lowerLimitInV - outputInV);
                     slopeState = SlopeState_t::RISING;
                     if(!cycling)
                     {
@@ -134,4 +148,5 @@ private:
 
     static constexpr float MaxValInV = 5.0f;
     static constexpr float MinValInV = 0.0f;
+    static constexpr float FollowTresholdInV = 0.1f;
 };
