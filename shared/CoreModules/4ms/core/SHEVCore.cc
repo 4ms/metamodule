@@ -209,7 +209,7 @@ private:
 				parent->setLED<Mapping::CycleButton>(cycleLED);
 			}
 
-			if(triggerMode != TriggerMode_t::CYCLE && triggerInputValue) {
+			if(triggerInputValue) {
 				if (triggerEdgeDetector(triggerDetector(*triggerInputValue))) {
 					osc.doRetrigger();
 				}
