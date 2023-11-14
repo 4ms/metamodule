@@ -1,36 +1,142 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Generator: Adobe Illustrator 25.4.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 width="11.7px" height="19.27px" viewBox="0 0 11.7 19.27" enable-background="new 0 0 11.7 19.27" xml:space="preserve">
-<g>
-	<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="5.85" y1="0.00002" x2="5.85" y2="19.26998">
-		<stop  offset="0" style="stop-color:#C40D0D"/>
-		<stop  offset="1" style="stop-color:#730000"/>
+
+<svg
+   version="1.0"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   width="10.061287"
+   height="16.572172"
+   viewBox="0 0 10.061287 16.572172"
+   enable-background="new 0 0 11.7 19.27"
+   xml:space="preserve"
+   sodipodi:docname="BefacoSlidePotHandleSmall.svg"
+   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs1320" /><sodipodi:namedview
+   id="namedview1318"
+   pagecolor="#ffffff"
+   bordercolor="#000000"
+   borderopacity="0.25"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1"
+   showgrid="false"
+   inkscape:zoom="53.295276"
+   inkscape:cx="5.0192065"
+   inkscape:cy="8.3027996"
+   inkscape:window-width="2510"
+   inkscape:window-height="1387"
+   inkscape:window-x="50"
+   inkscape:window-y="25"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="Layer_1" />
+<g
+   id="g1315"
+   transform="matrix(0.86,0,0,0.86,-3.526e-4,-1.72e-5)">
+	<linearGradient
+   id="SVGID_1_"
+   gradientUnits="userSpaceOnUse"
+   x1="5.8499999"
+   y1="1.9999999e-05"
+   x2="5.8499999"
+   y2="19.269979">
+		<stop
+   offset="0"
+   style="stop-color:#C40D0D"
+   id="stop1287" />
+		<stop
+   offset="1"
+   style="stop-color:#730000"
+   id="stop1289" />
 	</linearGradient>
-	<path fill="url(#SVGID_1_)" d="M5.99089,0.00002c-4.54181,0-5.99048,4.39062-5.99048,9.72565
-		c0,5.42615,1.62805,9.56366,6.08649,9.54425c4.35376-0.01935,5.54059-4.25189,5.61041-9.63348V9.63356
-		C11.76616,4.30532,10.27874,0.00002,5.99089,0.00002z"/>
+	<path
+   fill="url(#SVGID_1_)"
+   d="m 5.99089,2e-5 c -4.54181,0 -5.99048,4.39062 -5.99048,9.72565 0,5.42615 1.62805,9.56366 6.08649,9.54425 4.35376,-0.01935 5.54059,-4.25189 5.61041,-9.63348 V 9.63356 C 11.76616,4.30532 10.27874,2e-5 5.99089,2e-5 Z"
+   id="path1292"
+   style="fill:url(#SVGID_1_)" />
 	
-		<linearGradient id="SVGID_00000005981792839563570410000005624999559760348816_" gradientUnits="userSpaceOnUse" x1="5.85" y1="0.31135" x2="5.85" y2="18.60765">
-		<stop  offset="0" style="stop-color:#ED0000"/>
-		<stop  offset="1" style="stop-color:#A10000"/>
+		<linearGradient
+   id="SVGID_00000005981792839563570410000005624999559760348816_"
+   gradientUnits="userSpaceOnUse"
+   x1="5.8499999"
+   y1="0.31134999"
+   x2="5.8499999"
+   y2="18.607651">
+		<stop
+   offset="0"
+   style="stop-color:#ED0000"
+   id="stop1294" />
+		<stop
+   offset="1"
+   style="stop-color:#A10000"
+   id="stop1296" />
 	</linearGradient>
-	<path fill="url(#SVGID_00000005981792839563570410000005624999559760348816_)" d="M5.98196,0.31135
-		c-4.25385,0-5.61068,4.16878-5.61068,9.23423c0,5.15198,1.52483,9.08043,5.7006,9.062
-		c4.07773-0.01837,5.18931-4.03705,5.25471-9.14672V9.45813C11.39107,4.39911,9.99795,0.31135,5.98196,0.31135z"/>
+	<path
+   fill="url(#SVGID_00000005981792839563570410000005624999559760348816_)"
+   d="m 5.98196,0.31135 c -4.25385,0 -5.61068,4.16878 -5.61068,9.23423 0,5.15198 1.52483,9.08043 5.7006,9.062 4.07773,-0.01837 5.18931,-4.03705 5.25471,-9.14672 V 9.45813 C 11.39107,4.39911 9.99795,0.31135 5.98196,0.31135 Z"
+   id="path1299"
+   style="fill:url(#SVGID_00000005981792839563570410000005624999559760348816_)" />
 	
-		<linearGradient id="SVGID_00000166637737070165468880000001400135779107130813_" gradientUnits="userSpaceOnUse" x1="51.79285" y1="150.06172" x2="51.79285" y2="156.50661" gradientTransform="matrix(0 -1 -0.50871 0 87.35653 61.24197)">
-		<stop  offset="0" style="stop-color:#FDFDFF"/>
-		<stop  offset="1" style="stop-color:#FCFEFF;stop-opacity:0"/>
+		<linearGradient
+   id="SVGID_00000166637737070165468880000001400135779107130813_"
+   gradientUnits="userSpaceOnUse"
+   x1="51.79285"
+   y1="150.06172"
+   x2="51.79285"
+   y2="156.50661"
+   gradientTransform="matrix(0,-1,-0.50871,0,87.35653,61.24197)">
+		<stop
+   offset="0"
+   style="stop-color:#FDFDFF"
+   id="stop1301" />
+		<stop
+   offset="1"
+   style="stop-color:#FCFEFF;stop-opacity:0"
+   id="stop1303" />
 	</linearGradient>
 	
-		<ellipse opacity="0.29" fill="url(#SVGID_00000166637737070165468880000001400135779107130813_)" cx="9.37883" cy="9.44912" rx="1.6393" ry="5.64087"/>
+		<ellipse
+   opacity="0.29"
+   fill="url(#SVGID_00000166637737070165468880000001400135779107130813_)"
+   cx="9.37883"
+   cy="9.4491196"
+   rx="1.6393"
+   ry="5.6408701"
+   id="ellipse1306"
+   style="fill:url(#SVGID_00000166637737070165468880000001400135779107130813_)" />
 	
-		<linearGradient id="SVGID_00000065062046531620287420000014186053846948254592_" gradientUnits="userSpaceOnUse" x1="103.38602" y1="-136.56932" x2="103.38602" y2="-130.93109" gradientTransform="matrix(0 1 0.50871 0 70.1237 -93.8822)">
-		<stop  offset="0" style="stop-color:#FDFDFF"/>
-		<stop  offset="1" style="stop-color:#FCFEFF;stop-opacity:0"/>
+		<linearGradient
+   id="SVGID_00000065062046531620287420000014186053846948254592_"
+   gradientUnits="userSpaceOnUse"
+   x1="103.38602"
+   y1="-136.56932"
+   x2="103.38602"
+   y2="-130.93109"
+   gradientTransform="matrix(0,1,0.50871,0,70.1237,-93.8822)">
+		<stop
+   offset="0"
+   style="stop-color:#FDFDFF"
+   id="stop1308" />
+		<stop
+   offset="1"
+   style="stop-color:#FCFEFF;stop-opacity:0"
+   id="stop1310" />
 	</linearGradient>
 	
-		<ellipse opacity="0.29" fill="url(#SVGID_00000065062046531620287420000014186053846948254592_)" cx="2.08318" cy="9.50382" rx="1.43412" ry="5.64087"/>
+		<ellipse
+   opacity="0.29"
+   fill="url(#SVGID_00000065062046531620287420000014186053846948254592_)"
+   cx="2.08318"
+   cy="9.5038204"
+   rx="1.4341201"
+   ry="5.6408701"
+   id="ellipse1313"
+   style="fill:url(#SVGID_00000065062046531620287420000014186053846948254592_)" />
 </g>
 </svg>

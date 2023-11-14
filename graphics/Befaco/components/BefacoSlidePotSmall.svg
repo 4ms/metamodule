@@ -4,7 +4,7 @@
 <svg
    version="1.0"
    id="svg1579"
-   inkscape:version="1.1.1 (c3084ef, 2021-09-22)"
+   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
    x="0px"
    y="0px"
    width="2.2731254mm"
@@ -27,25 +27,27 @@
    fit-margin-top="0"
    id="base"
    inkscape:current-layer="svg1579"
-   inkscape:cx="-2.8571429"
-   inkscape:cy="35.625"
+   inkscape:cx="-27.767857"
+   inkscape:cy="35.803571"
    inkscape:document-units="mm"
    inkscape:pageopacity="0.0"
    inkscape:pageshadow="2"
    inkscape:window-height="1081"
    inkscape:window-maximized="0"
    inkscape:window-width="1296"
-   inkscape:window-x="0"
+   inkscape:window-x="50"
    inkscape:window-y="25"
    inkscape:zoom="5.6"
    pagecolor="#ffffff"
    showgrid="false"
    units="mm"
-   inkscape:pagecheckerboard="0">
+   inkscape:pagecheckerboard="0"
+   inkscape:showpageshadow="2"
+   inkscape:deskcolor="#d1d1d1">
 	</sodipodi:namedview>
 <path
    d="M 4.29567,98.309289 C 2.2706741,98.309289 0,95.683298 0,92.443966 V 5.8653233 C 0,2.6259913 1.92323,0 4.29566,0 h 1e-5 C 6.6681,0 8.59134,2.6259913 8.59134,5.8653233 V 92.443966 c 0,3.239332 -2.2706741,5.865323 -4.29567,5.865323 z"
    id="path1112"
    sodipodi:nodetypes="zssssssz"
-   style="stroke-width:1.16851" />
+   style="stroke-width:1.16851;fill:#454545;fill-opacity:1" />
 </svg>
