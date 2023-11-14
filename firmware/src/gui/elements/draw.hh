@@ -35,15 +35,16 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 	if (!obj)
 		return nullptr;
 
-	lv_coord_t w = body_img ? body_img->header.w : 5;
-	lv_coord_t h = body_img ? body_img->header.h : 5;
+	float w = body_img->header.w;
+	float h = body_img->header.h;
 
 	lv_obj_t *handle;
 	if (el.image_handle.size()) {
 		handle = lv_img_create(obj);
 		auto handle_img = PNGFileSystem::read(el.image_handle);
 		if (handle_img) {
-			ElementDrawerImpl::draw_image(w / 2, h / 2, Coords::Center, handle_img, handle, module_height);
+			ElementDrawerImpl::draw_image(
+				std::round(w / 2), std::round(h / 2), Coords::Center, handle_img, handle, module_height);
 		} else
 			pr_err("No handle image found for %.*s!\n", (int)el.image_handle.size(), el.image_handle.data());
 	} else {
@@ -59,7 +60,7 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 			// Horizontal
 			lv_obj_set_align(handle, LV_ALIGN_LEFT_MID);
 			lv_obj_set_width(handle, module_height / 24); //10px at full scale
-			lv_obj_set_height(handle, h);
+			lv_obj_set_height(handle, std::round(h));
 			lv_obj_set_pos(handle, 0, 0);
 			lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 		}
