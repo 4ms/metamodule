@@ -71,8 +71,11 @@ private:
 		DEVCore* parent;
 
 	private:
-		static constexpr float followInputHysteresisInV = 0.025f;
+		static constexpr float followInputHysteresisInV = 0.01f;
 		float previousFollowInputValue;
+
+		static constexpr float followInputFilterCoeff = 0.01f;
+		float previousFollowInputFilterOutput;
 	
 	public:
 		Channel(DEVCore* parent_)
@@ -147,10 +150,21 @@ private:
 			}
 
 			if (auto inputFollowValue = parent->getInput<Mapping::FollowIn>(); inputFollowValue) {
+				float filterInput;
+				
 				if (gcem::abs(*inputFollowValue - previousFollowInputValue) >= followInputHysteresisInV) {
-					osc.setTargetVoltage(*inputFollowValue);
+					filterInput = *inputFollowValue;
 					previousFollowInputValue = *inputFollowValue;
 				}
+				else {
+					filterInput = previousFollowInputValue;
+				}
+
+				auto filterOutput = followInputFilterCoeff * filterInput + (1.0f - followInputFilterCoeff) * previousFollowInputFilterOutput;
+
+				osc.setTargetVoltage(filterOutput);
+
+				previousFollowInputFilterOutput = filterOutput;
 			}
 
 			if (auto triggerInputValue = parent->getInput<Mapping::TrigIn>(); triggerInputValue) {

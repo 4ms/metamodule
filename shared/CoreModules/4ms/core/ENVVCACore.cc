@@ -109,10 +109,21 @@ public:
 		}
 
 		if (auto inputFollowValue = getInput<FollowIn>(); inputFollowValue) {
+			float filterInput;
+			
 			if (gcem::abs(*inputFollowValue - previousFollowInputValue) >= followInputHysteresisInV) {
-				osc.setTargetVoltage(*inputFollowValue);
+				filterInput = *inputFollowValue;
 				previousFollowInputValue = *inputFollowValue;
 			}
+			else {
+				filterInput = previousFollowInputValue;
+			}
+
+			auto filterOutput = followInputFilterCoeff * filterInput + (1.0f - followInputFilterCoeff) * previousFollowInputFilterOutput;
+
+			osc.setTargetVoltage(filterOutput);
+
+			previousFollowInputFilterOutput = filterOutput;
 		}
 
 		if (auto triggerInputValue = getInput<TriggerIn>(); triggerInputValue) {
@@ -213,6 +224,9 @@ private:
 private:
 	static constexpr float followInputHysteresisInV = 0.025f;
 	float previousFollowInputValue;
+
+	static constexpr float followInputFilterCoeff = 0.01f;
+	float previousFollowInputFilterOutput;
 
 };
 
