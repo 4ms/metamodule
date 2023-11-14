@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
 
+option(ENABLE_LTO "Enable Link-Time Optimizations" ON)
+
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 project(
@@ -10,6 +12,17 @@ project(
   DESCRIPTION "MetaModule"
   LANGUAGES C CXX ASM
 )
+
+if (ENABLE_LTO)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
+  # This is needed to avoid lto to generate individual functions that are too large
+  # and will fail during linking
+  add_compile_options(-finline-limit=1024)
+else()
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)
+endif()
+
 
 #
 # LVGL

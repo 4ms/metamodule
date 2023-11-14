@@ -49,7 +49,6 @@ target_compile_options(
             -Werror=return-type
             -Wsign-compare
             $<$<COMPILE_LANGUAGE:CXX>:
-            -flto=auto
             -ffold-simple-inlines
             -Wno-psabi
             -fno-rtti

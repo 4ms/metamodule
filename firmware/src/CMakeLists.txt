@@ -328,7 +328,6 @@ target_link_script(
   -Wno-psabi
   -ffreestanding
   -nostartfiles
-  -flto=auto
 )
 
 add_bin_hex_command(main)
