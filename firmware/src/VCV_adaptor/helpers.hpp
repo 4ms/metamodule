@@ -25,6 +25,25 @@ T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_
 	return o;
 }
 
+// Special case for slide widgets because they sometimes offset their position
+// manually in VCV Rack class constructors. Apply those manual adjustments here.
+template<typename T>
+T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_view name)
+	requires(std::derived_from<T, app::SvgSlider>)
+{
+	auto *o = new T;
+	if (coord_ref == MetaModule::Coords::TopLeft) {
+		if (o->background->box.pos.x != 0.f)
+			pos.x += o->background->box.pos.x;
+		if (o->background->box.pos.y != 0.f)
+			pos.y += o->background->box.pos.y;
+	}
+	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	o->element = MetaModule::make_element<T>({pos.x, pos.y, coord_ref, name, name});
+	return o;
+}
+
 inline std::string_view getParamName(engine::Module *module, int id) {
 	if (auto pq = module->getParamQuantity(id)) {
 		if (pq->name.size()) {
@@ -95,8 +114,6 @@ TParamWidget *createParamImpl(MetaModule::Coords coords, math::Vec pos, engine::
 	auto widget = createElementWidget<TParamWidget>(pos, coords, name);
 	widget->module = module;
 	widget->paramId = paramId;
-	// auto base = base_element(widget->element);
-	// printf("createParam: %s %f %f -> %f %f\n", name.data(), pos.x, pos.y, base.x_mm, base.y_mm);
 	if (auto pq = widget->getParamQuantity()) {
 		pq->name = name;
 
