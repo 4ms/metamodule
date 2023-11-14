@@ -33,10 +33,8 @@ T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_
 {
 	auto *o = new T;
 	if (coord_ref == MetaModule::Coords::TopLeft) {
-		if (o->background->box.pos.x != 0.f)
-			pos.x += o->background->box.pos.x;
-		if (o->background->box.pos.y != 0.f)
-			pos.y += o->background->box.pos.y;
+		pos.x += o->background->box.pos.x;
+		pos.y += o->background->box.pos.y;
 	}
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);

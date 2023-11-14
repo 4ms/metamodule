@@ -34,8 +34,8 @@ draw_image(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t
 	lv_img_set_antialias(obj, true);
 	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
 
-	uint16_t pos_x = std::round(x);
-	uint16_t pos_y = std::round(y);
+	int16_t pos_x = std::round(x);
+	int16_t pos_y = std::round(y);
 	lv_obj_set_pos(obj, pos_x, pos_y);
 	lv_img_set_pivot(obj, width / 2.f, height / 2.f);
 
