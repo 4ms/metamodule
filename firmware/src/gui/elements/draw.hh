@@ -35,17 +35,18 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 	if (!obj)
 		return nullptr;
 
+	lv_coord_t w = body_img ? body_img->header.w : 5;
+	lv_coord_t h = body_img ? body_img->header.h : 5;
+
 	lv_obj_t *handle;
 	if (el.image_handle.size()) {
 		handle = lv_img_create(obj);
 		auto handle_img = PNGFileSystem::read(el.image_handle);
-		if (handle_img)
-			ElementDrawerImpl::draw_image(0, 0, Coords::TopLeft, handle_img, handle, module_height);
-		else
+		if (handle_img) {
+			ElementDrawerImpl::draw_image(w / 2, h / 2, Coords::Center, handle_img, handle, module_height);
+		} else
 			pr_err("No handle image found for %.*s!\n", (int)el.image_handle.size(), el.image_handle.data());
 	} else {
-		lv_coord_t w = body_img ? body_img->header.w : 5;
-		lv_coord_t h = body_img ? body_img->header.h : 5;
 		handle = lv_obj_create(obj);
 		if (w <= h) {
 			// Vertical
