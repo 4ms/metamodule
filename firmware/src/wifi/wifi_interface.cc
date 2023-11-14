@@ -34,6 +34,43 @@ Configuration_t FrameConfig
 StaticDeframer<16000> deframer(FrameConfig);
 Framer framer(FrameConfig);
 
+flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder& fbb)
+{
+    auto CreateVector = [&fbb](auto fileList)
+    {
+        std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.size());
+        for (std::size_t i=0; i<fileList.size(); i++)
+        {
+            auto thisName = fbb.CreateString(std::string_view(fileList[i].patchname));
+
+            auto thisFilename = fbb.CreateString(std::string_view(fileList[i].filename));
+            auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename);
+            elems[i] = thisInfo;
+        };
+        return fbb.CreateVector(elems);
+    };
+
+    auto usbList = CreateVector(SharedMemoryS::ptrs.patch_file_list->usb);
+    auto flashList = CreateVector(SharedMemoryS::ptrs.patch_file_list->norflash);
+    auto sdcardList = CreateVector(SharedMemoryS::ptrs.patch_file_list->sdcard);
+
+    auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
+    auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
+
+    return message;
+}
+
+void sendBroadcast(std::span<uint8_t> payload)
+{
+    framer.sendStart(BufferedUSART2::transmit);
+    framer.sendPayload(0, BufferedUSART2::transmit);
+    for (auto p : payload)
+    {
+        framer.sendPayload(p, BufferedUSART2::transmit);
+    }
+    framer.sendStop(BufferedUSART2::transmit);
+}
+
 
 void WifiInterface::init(PatchStorage* storage)
 {
@@ -108,27 +145,7 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
         else if (auto patchNameMessage = message->content_as_Patches(); patchNameMessage)
         {
             flatbuffers::FlatBufferBuilder fbb;
-
-            auto CreateVector = [&fbb](auto fileList)
-            {
-                std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.size());
-                for (std::size_t i=0; i<fileList.size(); i++)
-                {
-                    auto thisName = fbb.CreateString(std::string_view(fileList[i].patchname));
-
-                    auto thisFilename = fbb.CreateString(std::string_view(fileList[i].filename));
-                    auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename);
-                    elems[i] = thisInfo;
-                };
-                return fbb.CreateVector(elems);
-            };
-
-            auto usbList = CreateVector(SharedMemoryS::ptrs.patch_file_list->usb);
-            auto flashList = CreateVector(SharedMemoryS::ptrs.patch_file_list->norflash);
-            auto sdcardList = CreateVector(SharedMemoryS::ptrs.patch_file_list->sdcard);
-
-            auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
-            auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
+            auto message = constructPatchesMessage(fbb);
             fbb.Finish(message);
 
             sendResponse(fbb.GetBufferSpan());
@@ -156,6 +173,7 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
             };
 
             flatbuffers::FlatBufferBuilder fbb;
+            bool filesUpdated = false;
 
             if (auto thisVolume = LocationToVolume(destination); thisVolume)
             {
@@ -166,6 +184,8 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
                     auto result = CreateResult(fbb, true);
                     auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
                     fbb.Finish(message);
+
+                    filesUpdated = true;
                 }
                 else
                 {
@@ -185,6 +205,16 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
 
             sendResponse(fbb.GetBufferSpan());
 
+            if (filesUpdated)
+            {
+                flatbuffers::FlatBufferBuilder fbb;
+                auto message = constructPatchesMessage(fbb);
+                fbb.Finish(message);
+
+                sendBroadcast(fbb.GetBufferSpan());
+
+            }
+
         }
         else
         {
@@ -195,6 +225,7 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
     {
         printf("Invalid message\n");
     }
+
 }
 
 
