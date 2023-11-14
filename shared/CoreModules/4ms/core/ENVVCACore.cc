@@ -109,7 +109,10 @@ public:
 		}
 
 		if (auto inputFollowValue = getInput<FollowIn>(); inputFollowValue) {
-			osc.setTargetVoltage(*inputFollowValue);
+			if (gcem::abs(*inputFollowValue - previousFollowInputValue) >= followInputHysteresisInV) {
+				osc.setTargetVoltage(*inputFollowValue);
+				previousFollowInputValue = *inputFollowValue;
+			}
 		}
 
 		if (auto triggerInputValue = getInput<TriggerIn>(); triggerInputValue) {
@@ -206,6 +209,11 @@ private:
 
 private:
 	float timeStepInS = 1.f / 48000.f;
+
+private:
+	static constexpr float followInputHysteresisInV = 0.025f;
+	float previousFollowInputValue;
+
 };
 
 } // namespace MetaModule

@@ -70,6 +70,10 @@ private:
 	private:
 		DEVCore* parent;
 
+	private:
+		static constexpr float followInputHysteresisInV = 0.025f;
+		float previousFollowInputValue;
+	
 	public:
 		Channel(DEVCore* parent_)
 			: triggerDetector(1.0f, 2.0f), parent(parent_){
@@ -143,7 +147,10 @@ private:
 			}
 
 			if (auto inputFollowValue = parent->getInput<Mapping::FollowIn>(); inputFollowValue) {
-				osc.setTargetVoltage(*inputFollowValue);
+				if (gcem::abs(*inputFollowValue - previousFollowInputValue) >= followInputHysteresisInV) {
+					osc.setTargetVoltage(*inputFollowValue);
+					previousFollowInputValue = *inputFollowValue;
+				}
 			}
 
 			if (auto triggerInputValue = parent->getInput<Mapping::TrigIn>(); triggerInputValue) {
