@@ -117,8 +117,7 @@ inline void do_create(JackInput el, const Indices &indices, const WidgetContext_
 inline void do_create(DualLight el, const Indices &indices, const WidgetContext_t &context) {
 	auto ctr_pos = rack::Vec(el.x_mm, el.y_mm).mult(Fix4msScaling);
 
-	// FIXME: create our own Red/Blue light, VCV only has Red/Green
-	using LightT = rack::LEDBezelLight<rack::GreenRedLight>;
+	using LightT = rack::MediumLight<MetaModule::RedBlueLightWidget>;
 	context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 }
 
@@ -127,8 +126,9 @@ inline void do_create(MonoLight el, const Indices &indices, const WidgetContext_
 
 	// FIXME: create our own Orange light
 	if (el.color == 0xFD40) {
-		using LightT = rack::LEDBezelLight<rack::YellowLight>;
+		using LightT = rack::MediumLight<MetaModule::OrangeLightWidget>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
+
 	} else if (el.color == 0xF800) {
 		using LightT = rack::LEDBezelLight<rack::RedLight>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
@@ -142,7 +142,7 @@ inline void do_create(MonoLight el, const Indices &indices, const WidgetContext_
 inline void do_create(RgbLight el, const Indices &indices, const WidgetContext_t &context) {
 	auto ctr_pos = rack::Vec(el.x_mm, el.y_mm).mult(Fix4msScaling);
 
-	using LightT = rack::LEDBezelLight<rack::RedGreenBlueLight>;
+	using LightT = rack::MediumLight<rack::RedGreenBlueLight>;
 	context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 }
 
