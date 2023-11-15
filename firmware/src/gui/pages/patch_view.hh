@@ -232,9 +232,33 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update_changed_params() {
+		std::array<std::vector<float>, MAX_MODULES_IN_PATCH> light_vals; //384B on the stack
+
+		// copy light values from params
+		// indexed by module id and light element id
+		for (auto &wl : params.lights.watch_lights) {
+			if (wl.is_active()) {
+				auto &vec = light_vals[wl.module_id];
+				if (vec.size() <= wl.light_id)
+					vec.resize(wl.light_id + 1);
+				vec[wl.light_id] = wl.value;
+			}
+		}
+
 		// Redraw all knobs
 		for (auto &drawn_el : drawn_elements) {
-			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
+			std::span<float> these_lights{};
+			auto num_lights = drawn_el.gui_element.count.num_lights;
+
+			if (num_lights) {
+				auto first_light = drawn_el.gui_element.idx.light_idx;
+				auto &vec = light_vals[drawn_el.gui_element.module_idx];
+				if (vec.size() >= (first_light + num_lights))
+					these_lights = std::span<float>{&vec[first_light], &vec[first_light + num_lights]};
+			}
+
+			auto was_redrawn =
+				std::visit(UpdateElement{params, patch, drawn_el.gui_element, these_lights}, drawn_el.element);
 			if (was_redrawn) {
 				auto &gui_el = drawn_el.gui_element;
 				if (view_settings.map_ring_flash_active)

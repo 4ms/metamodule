@@ -4,6 +4,7 @@
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/module_param.hh"
+#include "gui/elements/redraw_light.hh"
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
@@ -186,10 +187,28 @@ struct ModuleViewPage : PageBase {
 			mapping_pane.update();
 
 		if (is_patch_playing) {
-			for (auto &drawn_el : drawn_elements) {
-				auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
+			std::array<float, 128> light_vals{}; //... TODO;number of lights in module
 
-				if (was_redrawn && settings.map_ring_flash_active) {
+			// copy light values from params, indexed by light element id
+			for (auto &wl : params.lights.watch_lights) {
+				if (wl.is_active() && wl.module_id == this_module_id) {
+					light_vals[wl.light_id] = wl.value;
+				}
+			}
+
+			for (auto &drawn_el : drawn_elements) {
+				std::span<float> these_lights{};
+				auto num_lights = drawn_el.gui_element.count.num_lights;
+
+				if (num_lights) {
+					auto first_light = drawn_el.gui_element.idx.light_idx;
+					these_lights = std::span<float>{&light_vals[first_light], &light_vals[first_light + num_lights]};
+				}
+
+				auto did_move =
+					std::visit(UpdateElement{params, patch, drawn_el.gui_element, these_lights}, drawn_el.element);
+
+				if (did_move && settings.map_ring_flash_active) {
 					MapRingDisplay::flash_once(drawn_el.gui_element.map_ring, settings.map_ring_style, true);
 				}
 			}
