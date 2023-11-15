@@ -22,6 +22,17 @@ inline lv_obj_t *draw_element(const ImageElement &el, lv_obj_t *canvas, uint32_t
 	return obj;
 }
 
+inline lv_obj_t *draw_element(const LightElement &el, lv_obj_t *canvas, uint32_t module_height) {
+	auto obj = draw_element(ImageElement(el), canvas, module_height);
+	if (!obj)
+		return nullptr;
+
+	lv_obj_set_style_radius(obj, 20, LV_PART_MAIN);
+	lv_obj_set_style_shadow_width(obj, module_height == 240 ? 16 : 4, LV_PART_MAIN);
+	lv_obj_set_style_shadow_spread(obj, module_height == 240 ? 4 : 1, LV_PART_MAIN);
+	return obj;
+}
+
 inline lv_obj_t *draw_element(const FlipSwitch &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto img = PNGFileSystem::read(el.frames[0]);
 	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), img, canvas, module_height);
@@ -43,28 +54,49 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 		handle = lv_img_create(obj);
 		auto handle_img = PNGFileSystem::read(el.image_handle);
 		if (handle_img) {
-			ElementDrawerImpl::draw_image(
-				std::round(w / 2), std::round(h / 2), Coords::Center, handle_img, handle, module_height);
+			ElementDrawerImpl::draw_image(0, 0, Coords::Center, handle_img, handle, module_height);
 		} else
 			pr_err("No handle image found for %.*s!\n", (int)el.image_handle.size(), el.image_handle.data());
 	} else {
 		handle = lv_obj_create(obj);
 		if (w <= h) {
 			// Vertical
-			lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
 			lv_obj_set_width(handle, w);
 			lv_obj_set_height(handle, module_height / 24);
-			lv_obj_set_pos(handle, 0, 0);
 			lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 		} else {
 			// Horizontal
-			lv_obj_set_align(handle, LV_ALIGN_LEFT_MID);
 			lv_obj_set_width(handle, module_height / 24); //10px at full scale
 			lv_obj_set_height(handle, std::round(h));
-			lv_obj_set_pos(handle, 0, 0);
 			lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 		}
 	}
+	lv_obj_set_pos(handle, 0, 0);
+	lv_obj_set_align(handle, (w <= h) ? LV_ALIGN_TOP_MID : LV_ALIGN_LEFT_MID);
+	return obj;
+}
+
+inline lv_obj_t *draw_element(const SliderLight &el, lv_obj_t *canvas, uint32_t module_height) {
+	auto obj = draw_element(Slider(el), canvas, module_height);
+	auto handle = lv_obj_get_child(obj, 0);
+	if (handle) {
+		lv_color_t color{.full = el.color};
+		lv_obj_set_style_bg_color(handle, color, 0);
+		lv_obj_set_style_radius(handle, 20, 0);
+		lv_obj_set_style_shadow_width(handle, 16, 0);
+		lv_obj_set_style_shadow_spread(handle, module_height == 240 ? 4 : 0, 0);
+		lv_obj_set_style_shadow_opa(handle, LV_OPA_0, LV_PART_MAIN);
+	}
+	return obj;
+}
+
+inline lv_obj_t *draw_element(const Button &el, lv_obj_t *canvas, uint32_t module_height) {
+	auto obj = draw_element(ImageElement(el), canvas, module_height);
+	lv_obj_set_style_radius(obj, 20, LV_PART_MAIN);
+	lv_obj_set_style_shadow_width(obj, module_height >= 240 ? 16 : 0, LV_PART_MAIN);
+	lv_obj_set_style_shadow_spread(obj, module_height >= 240 ? 3 : 0, LV_PART_MAIN);
+	lv_obj_set_style_shadow_opa(obj, LV_OPA_0, LV_PART_MAIN);
+
 	return obj;
 }
 
