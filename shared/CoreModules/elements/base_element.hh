@@ -1,4 +1,5 @@
 #pragma once
+#include "util/colors_rgb565.hh"
 #include <array>
 #include <cstdint>
 #include <string_view>
@@ -70,7 +71,7 @@ struct Slider : Pot {
 
 struct SliderLight : Slider {
 	static constexpr size_t NumLights = 1;
-	uint16_t color = 0xFFFF;
+	RGB565 color = Colors565::White;
 };
 
 //
@@ -95,7 +96,7 @@ struct MomentaryButtonWhiteLight : MomentaryButton {
 struct LatchingButton : Button {
 	enum class State_t { DOWN, UP };
 	static constexpr size_t NumLights = 1;
-	uint16_t color = 0xfd40;
+	RGB565 color = Colors565::White;
 	//float color_radius_ratio?
 };
 
@@ -153,12 +154,12 @@ struct LightElement : ImageElement {};
 
 struct MonoLight : LightElement {
 	static constexpr size_t NumLights = 1;
-	uint16_t color = 0xFFFF;
+	RGB565 color = Colors565::White;
 };
 
 struct DualLight : LightElement {
 	static constexpr size_t NumLights = 2;
-	std::array<uint16_t, 2> color = {0xFFFF, 0xFFFF};
+	std::array<RGB565, 2> color = {Colors565::White, Colors565::White};
 };
 struct RgbLight : LightElement {
 	static constexpr size_t NumLights = 3;

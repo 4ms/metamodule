@@ -152,17 +152,17 @@ make_element<rack::componentlibrary::VCVLightBezel<rack::componentlibrary::RedGr
 
 template<>
 inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::RedLight>>(BaseElement b) {
-	return MonoLight{{b, "SmallLight.png"}, 0xF800};
+	return MonoLight{{b, "SmallLight.png"}, Colors565::Red};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::GreenLight>>(BaseElement b) {
-	return MonoLight{{b, "SmallLight.png"}, 0x07E0};
+	return MonoLight{{b, "SmallLight.png"}, Colors565::Green};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::GreenRedLight>>(BaseElement b) {
-	return DualLight{{b, "SmallLight.png"}, {0x07E0, 0xF800}};
+	return DualLight{{b, "SmallLight.png"}, {Colors565::Green, Colors565::Red}};
 };
 
 template<>
@@ -172,12 +172,12 @@ inline Element make_element<rack::componentlibrary::MediumLight<rack::componentl
 
 template<>
 inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::RedLight>>(BaseElement b) {
-	return MonoLight{{b, "MediumLight.png"}, 0xF800};
+	return MonoLight{{b, "MediumLight.png"}, Colors565::Red};
 };
 
 template<>
 inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::GreenLight>>(BaseElement b) {
-	return MonoLight{{b, "MediumLight.png"}, 0x07E0};
+	return MonoLight{{b, "MediumLight.png"}, Colors565::Green};
 };
 
 //

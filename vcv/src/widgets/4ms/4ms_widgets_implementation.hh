@@ -125,15 +125,15 @@ inline void do_create(MonoLight el, const Indices &indices, const WidgetContext_
 	auto ctr_pos = rack::Vec(el.x_mm, el.y_mm).mult(Fix4msScaling);
 
 	// FIXME: create our own Orange light
-	if (el.color == 0xFD40) {
+	if (el.color == Colors565::Orange) {
 		using LightT = rack::MediumLight<MetaModule::OrangeLightWidget>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 
-	} else if (el.color == 0xF800) {
+	} else if (el.color == Colors565::Red) {
 		using LightT = rack::LEDBezelLight<rack::RedLight>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 
-	} else if (el.color == 0x07E0) {
+	} else if (el.color == Colors565::Blue) {
 		using LightT = rack::LEDBezelLight<rack::BlueLight>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 	}
