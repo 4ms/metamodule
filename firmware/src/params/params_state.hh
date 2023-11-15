@@ -3,6 +3,7 @@
 #include "conf/panel_conf.hh"
 #include "midi_params.hh"
 #include "patch/midi_def.hh"
+#include "patch_play/lights.hh"
 #include "util/debouncer.hh"
 #include "util/parameter.hh"
 #include "util/zip.hh"
@@ -82,8 +83,12 @@ struct ParamsState {
 struct ParamsMidiState : ParamsState {
 	std::array<LatchedParam<float, 1, 127>, NumMidiCCs> midi_ccs;
 
+	LightWatcher lights;
+
 	void clear() {
 		ParamsState::clear();
+
+		lights.clear();
 
 		for (auto &cc : midi_ccs)
 			cc = 0;

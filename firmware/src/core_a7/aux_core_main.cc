@@ -45,6 +45,17 @@ extern "C" void aux_core_main() {
 	});
 
 	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
+	auto &lights = ui.lights();
+
+	constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchLights);
+	InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [patch_player, &lights]() {
+		for (auto &w : lights.watch_lights) {
+			if (w.is_active())
+				w.value = patch_player->get_module_light(w.module_id, w.light_id);
+		}
+
+		SMPThread::signal_done();
+	});
 
 	while (true) {
 		ui.update();

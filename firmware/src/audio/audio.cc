@@ -209,6 +209,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, outchan] : countzip(out.chan))
 			outchan = get_audio_output(i);
 	}
+
+	player.update_lights();
 }
 
 void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {

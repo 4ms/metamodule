@@ -78,6 +78,10 @@ public:
 		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
+	LightWatcher &lights() {
+		return params.lights;
+	}
+
 private:
 	void page_update_task() {
 

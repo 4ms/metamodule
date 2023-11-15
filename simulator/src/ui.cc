@@ -62,6 +62,11 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 	audio_stream.process(in_buffer, out_buffer);
 
+	for (auto &w : params.lights.watch_lights) {
+		if (w.is_active())
+			w.value = patch_player.get_module_light(w.module_id, w.light_id);
+	}
+
 	for (size_t i = 0; auto &frame : out_buffer) {
 		auto &out = soundcard_out[i++];
 
