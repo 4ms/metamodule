@@ -18,7 +18,7 @@ inline void do_config_element(Pot el, const Indices &indices, const ModuleContex
 	context.module->configParam(indices.param_idx, 0.f, 1.f, 0.5f, el.short_name.data());
 };
 
-inline void do_config_element(SliderMonoLight el, const Indices &indices, const ModuleContext_t &context) {
+inline void do_config_element(SliderLight el, const Indices &indices, const ModuleContext_t &context) {
 	context.module->configParam(indices.param_idx, 0.f, 1.f, 0.5f, el.short_name.data());
 	context.module->configLight(indices.light_idx, el.short_name.data());
 };
@@ -32,17 +32,17 @@ inline void do_config_element(MomentaryButtonRGB el, const Indices &indices, con
 	context.module->configLight(indices.light_idx, el.short_name.data());
 }
 
-inline void do_config_element(LatchingButtonMonoLight el, const Indices &indices, const ModuleContext_t &context) {
+inline void do_config_element(LatchingButton el, const Indices &indices, const ModuleContext_t &context) {
 	context.module->configParam(indices.param_idx, 0, 1, 0, el.short_name.data());
 	context.module->configLight(indices.light_idx, el.short_name.data());
 }
 
-inline void do_config_element(Switch el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0, 1, 0, el.short_name.data());
+inline void do_config_element(SlideSwitch el, const Indices &indices, const ModuleContext_t &context) {
+	context.module->configParam(indices.param_idx, 0, el.num_pos, 0, el.short_name.data());
 };
 
-inline void do_config_element(Toggle3pos el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0, 2, 0, el.short_name.data());
+inline void do_config_element(FlipSwitch el, const Indices &indices, const ModuleContext_t &context) {
+	context.module->configParam(indices.param_idx, 0, el.num_pos, 0, el.short_name.data());
 };
 
 inline void do_config_element(Encoder el, const Indices &indices, const ModuleContext_t &context) {
@@ -50,11 +50,6 @@ inline void do_config_element(Encoder el, const Indices &indices, const ModuleCo
 };
 
 inline void do_config_element(EncoderRGB el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, -INFINITY, INFINITY, 0, el.short_name.data());
-	context.module->configLight(indices.light_idx, el.short_name.data());
-};
-
-inline void do_config_element(EncoderWhiteLight el, const Indices &indices, const ModuleContext_t &context) {
 	context.module->configParam(indices.param_idx, -INFINITY, INFINITY, 0, el.short_name.data());
 	context.module->configLight(indices.light_idx, el.short_name.data());
 };
