@@ -41,9 +41,16 @@ struct ModuleWidget : widget::Widget {
 	void addChild(Widget *w) {
 		if (!w)
 			return;
-		lightElements.push_back(w->element);
-		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
 		delete w;
+	}
+
+	void addChild(app::ModuleLightWidget *lightWidget) {
+		if (!lightWidget)
+			return;
+		place_at(lightElements, lightWidget->firstLightId, lightWidget->element);
+		lightElements.push_back(lightWidget->element);
+		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
+		delete lightWidget;
 	}
 
 	void addParam(app::ParamWidget *paramWidget) {
