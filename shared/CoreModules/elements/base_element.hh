@@ -97,14 +97,6 @@ struct LatchingButton : Button {
 	enum class State_t { DOWN, UP };
 	static constexpr size_t NumLights = 1;
 	RGB565 color = Colors565::White;
-	//float color_radius_ratio?
-};
-
-//TODO: change svg script to use LatchingButton, not the alias
-// using LatchingButtonMonoLight = LatchingButton;
-struct LatchingButtonMonoLight : ParamElement {
-	enum class State_t { DOWN, UP };
-	static constexpr size_t NumLights = 1;
 };
 
 //

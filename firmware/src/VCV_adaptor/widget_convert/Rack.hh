@@ -147,7 +147,7 @@ inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement 
 template<>
 inline Element
 make_element<rack::componentlibrary::VCVLightBezel<rack::componentlibrary::RedGreenBlueLight>>(BaseElement b) {
-	return RgbLight{{b, "VCVBezel.png"}};
+	return MomentaryButtonRGB{b, "VCVBezel.png"};
 };
 
 template<>
@@ -166,8 +166,9 @@ inline Element make_element<rack::componentlibrary::SmallLight<rack::componentli
 };
 
 template<>
-inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::GreenRedLight>>(BaseElement b) {
-	return DualLight{{b, "MediumLight.png"}, {0x07E0, 0xF800}};
+inline Element
+make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::RedGreenBlueLight>>(BaseElement b) {
+	return RgbLight{{b, "SmallLight.png"}};
 };
 
 template<>
@@ -178,6 +179,17 @@ inline Element make_element<rack::componentlibrary::MediumLight<rack::componentl
 template<>
 inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::GreenLight>>(BaseElement b) {
 	return MonoLight{{b, "MediumLight.png"}, Colors565::Green};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::GreenRedLight>>(BaseElement b) {
+	return DualLight{{b, "MediumLight.png"}, {Colors565::Green, Colors565::Red}};
+};
+
+template<>
+inline Element
+make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::RedGreenBlueLight>>(BaseElement b) {
+	return RgbLight{{b, "MediumLight.png"}};
 };
 
 //

@@ -26,7 +26,6 @@ using Element = std::variant<NullElement,
 							 MomentaryButtonRGB,
 
 							 LatchingButton,
-							 LatchingButtonMonoLight,
 
 							 Encoder,
 							 EncoderRGB,
