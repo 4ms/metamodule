@@ -41,7 +41,7 @@ struct HubMediumInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(150.84), to_mm<72>(282.34), Center, "in6", ""}},
 		GateJackOutput4ms{{to_mm<72>(21.74), to_mm<72>(274.18), Center, "gatein1", ""}},
 		GateJackOutput4ms{{to_mm<72>(65.25), to_mm<72>(274.2), Center, "gatein2", ""}},
-		LatchingButtonMonoLight{{to_mm<72>(344.18), to_mm<72>(38.57), Center, "SavePatch", ""}},
+		LatchingButton{{{{{to_mm<72>(344.18), to_mm<72>(38.57), Center, "SavePatch", ""}}}}},
 	}};
 
 	enum class Elem {
