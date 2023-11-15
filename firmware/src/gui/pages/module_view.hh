@@ -106,8 +106,14 @@ struct ModuleViewPage : PageBase {
 		lv_obj_update_layout(canvas);
 
 		for (const auto &drawn_element : drawn_elements) {
+			auto &drawn = drawn_element.gui_element;
+			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
+				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
+				// printf("Watching Light: m:%d idx %d\n", this_module_id, drawn.idx.light_idx + i);
+			}
+
 			std::visit(
-				[this, drawn = drawn_element.gui_element](auto &el) {
+				[this, drawn = drawn](auto &el) {
 					if (!drawn.obj)
 						return;
 
@@ -159,7 +165,8 @@ struct ModuleViewPage : PageBase {
 
 			} else if (mode == ViewMode::List) {
 				if (PageList::request_last_page()) {
-					blur();
+					;
+					// blur();
 				}
 
 			} else if (mapping_pane.addmap_visible()) {
@@ -249,7 +256,8 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
-		// drawn_elements.clear(); // doing this might lead to fragmentation?
+		// printf("Clear light watches\n");
+		params.lights.clear();
 	}
 
 private:
