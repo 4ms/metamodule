@@ -1,6 +1,5 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
-#include "gui/elements/element_drawer.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"

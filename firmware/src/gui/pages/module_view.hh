@@ -18,8 +18,7 @@ struct ModuleViewPage : PageBase {
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true;
-		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::CurModuleIfPlaying,
-												.opa = LV_OPA_50};
+		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::HideAlways, .opa = LV_OPA_50};
 	};
 	ViewSettings settings;
 
@@ -155,12 +154,17 @@ struct ModuleViewPage : PageBase {
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (mode == ViewMode::List) {
+			if (mapping_pane.manual_control_visible()) {
+				mapping_pane.hide_manual_control();
+
+			} else if (mode == ViewMode::List) {
 				if (PageList::request_last_page()) {
 					blur();
 				}
+
 			} else if (mapping_pane.addmap_visible()) {
 				mapping_pane.hide_addmap();
+
 			} else {
 				mode = ViewMode::List;
 				lv_show(ui_ElementRoller);

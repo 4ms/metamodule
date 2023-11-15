@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -13,10 +14,10 @@ struct SourceInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.85), Center, "1", ""},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.68), Center, "2", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(264.74), Center, "1", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(312.33), Center, "2", ""},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(46.85), Center, "1", ""}},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(94.68), Center, "2", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.14), to_mm<72>(264.74), Center, "1", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.14), to_mm<72>(312.33), Center, "2", ""}},
 }};
 
     enum class Elem {

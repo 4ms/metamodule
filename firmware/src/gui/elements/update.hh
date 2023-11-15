@@ -56,7 +56,8 @@ struct UpdateElement {
 		ElementUpdate::update_element_value(el, params, patch, gui_el);
 
 		auto val = patch.get_static_knob_value(gui_el.module_idx, gui_el.idx.param_idx);
-		if (!val.has_value())
+
+		if (!val.has_value() || !gui_el.obj)
 			return false;
 
 		return ElementRedrawDetails::redraw_element(el, gui_el, val.value());

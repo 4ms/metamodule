@@ -7,26 +7,38 @@
 #include "VCV_adaptor/math.hpp"
 #include "VCV_adaptor/plugin/Model.hpp"
 #include "VCV_adaptor/widget_convert/widget_element_convert.hh"
+#include "util/overloaded.hh"
 #include <functional>
+#include <span>
 #include <string_view>
-
-// #include "pr_dbg.hh"
 
 namespace rack
 {
 
-// namespace engine
-// {
-// struct Module;
-// }
-
-// Creates a Widget that has an Element
+// Creates a Widget and makes the right Element in the Widget
 template<typename T>
 T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_view name) {
 	auto *o = new T;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element = typename ElementConvert<T>::ElementType{pos.x, pos.y, coord_ref, name, name};
+	o->element = MetaModule::make_element<T>({pos.x, pos.y, coord_ref, name, name});
+	return o;
+}
+
+// Special case for slide widgets because they sometimes offset their position
+// manually in VCV Rack class constructors. Apply those manual adjustments here.
+template<typename T>
+T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_view name)
+	requires(std::derived_from<T, app::SvgSlider>)
+{
+	auto *o = new T;
+	if (coord_ref == MetaModule::Coords::TopLeft) {
+		pos.x += o->background->box.pos.x;
+		pos.y += o->background->box.pos.y;
+	}
+	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	o->element = MetaModule::make_element<T>({pos.x, pos.y, coord_ref, name, name});
 	return o;
 }
 
@@ -84,24 +96,52 @@ inline app::SvgPanel *createPanel(std::string_view svgPath) {
 	return nullptr;
 }
 
+inline void set_labels(std::span<std::string_view> pos_names, std::vector<std::string> &labels) {
+	for (unsigned i = 0; auto &label : labels) {
+		if (i >= pos_names.size())
+			break;
+		pos_names[i++] = label;
+	}
+}
+
+template<class TParamWidget>
+requires(std::derived_from<TParamWidget, app::ParamWidget>)
+TParamWidget *createParamImpl(MetaModule::Coords coords, math::Vec pos, engine::Module *module, int paramId) {
+	using namespace MetaModule;
+	auto name = getParamName(module, paramId);
+	auto widget = createElementWidget<TParamWidget>(pos, coords, name);
+	widget->module = module;
+	widget->paramId = paramId;
+	if (auto pq = widget->getParamQuantity()) {
+		pq->name = name;
+
+		// Switches with strings for each position
+		if (pq->labels.size() > 0) {
+			std::visit(overloaded{
+						   [](BaseElement &) {},
+						   [&pq](FlipSwitch &el) {
+							   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, 3);
+							   set_labels(el.pos_names, pq->labels);
+						   },
+						   [&pq](SlideSwitch &el) {
+							   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, 8);
+							   set_labels(el.pos_names, pq->labels);
+						   },
+					   },
+					   widget->element);
+		}
+	}
+	return widget;
+}
+
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
-	auto name = getParamName(module, paramId);
-	auto o = createElementWidget<TParamWidget>(pos, MetaModule::Coords::TopLeft, name);
-	o->paramId = paramId;
-	if (o->getParamQuantity())
-		o->getParamQuantity()->name = name;
-	return o;
+	return createParamImpl<TParamWidget>(MetaModule::Coords::TopLeft, pos, module, paramId);
 }
 
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
-	auto name = getParamName(module, paramId);
-	auto o = createElementWidget<TParamWidget>(pos, MetaModule::Coords::Center, name);
-	o->paramId = paramId;
-	if (o->getParamQuantity())
-		o->getParamQuantity()->name = name;
-	return o;
+	return createParamImpl<TParamWidget>(MetaModule::Coords::Center, pos, module, paramId);
 }
 
 template<class TPortWidget>
@@ -110,8 +150,7 @@ TPortWidget *createInput(math::Vec pos, engine::Module *module, int inputId) {
 	auto *o = new TPortWidget;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element =
-		typename ElementConvert<TPortWidget>::ElementTypeInput{pos.x, pos.y, MetaModule::Coords::TopLeft, name, name};
+	o->element = MetaModule::make_element_input<TPortWidget>({pos.x, pos.y, MetaModule::Coords::TopLeft, name, name});
 	o->portId = inputId;
 	if (o->getPortInfo())
 		o->getPortInfo()->name = name;
@@ -124,8 +163,7 @@ TPortWidget *createInputCentered(math::Vec pos, engine::Module *module, int inpu
 	auto *o = new TPortWidget;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element =
-		typename ElementConvert<TPortWidget>::ElementTypeInput{pos.x, pos.y, MetaModule::Coords::Center, name, name};
+	o->element = MetaModule::make_element_input<TPortWidget>({pos.x, pos.y, MetaModule::Coords::Center, name, name});
 	o->portId = inputId;
 	if (o->getPortInfo())
 		o->getPortInfo()->name = name;
@@ -138,8 +176,7 @@ TPortWidget *createOutput(math::Vec pos, engine::Module *module, int outputId) {
 	auto *o = new TPortWidget;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element =
-		typename ElementConvert<TPortWidget>::ElementTypeOutput{pos.x, pos.y, MetaModule::Coords::TopLeft, name, name};
+	o->element = MetaModule::make_element_output<TPortWidget>({pos.x, pos.y, MetaModule::Coords::TopLeft, name, name});
 	o->portId = outputId;
 	if (o->getPortInfo())
 		o->getPortInfo()->name = name;
@@ -152,8 +189,7 @@ TPortWidget *createOutputCentered(math::Vec pos, engine::Module *module, int out
 	auto *o = new TPortWidget;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element =
-		typename ElementConvert<TPortWidget>::ElementTypeOutput{pos.x, pos.y, MetaModule::Coords::Center, name, name};
+	o->element = MetaModule::make_element_output<TPortWidget>({pos.x, pos.y, MetaModule::Coords::Center, name, name});
 	o->portId = outputId;
 	if (o->getPortInfo())
 		o->getPortInfo()->name = name;

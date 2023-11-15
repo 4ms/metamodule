@@ -37,11 +37,19 @@ target_link_libraries(jansson PUBLIC mp15xa7_arch)
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
 
 foreach(brand ${brands})
-  string(TOUPPER ${brand} BRAND)
 
   # Component artwork
   file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
   list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
+  foreach(component ${BRAND_ARTWORK_SOURCES})
+    cmake_path(GET component STEM LAST_ONLY COMPIMGNAME)
+    set(COMPFILENAME "${COMPIMGNAME}.png")
+    configure_file(${FWDIR}/src/gui/images/component_register.cc.in ${brand}/${COMPIMGNAME}_register.cc)
+    list(APPEND COMP_ARTWORK_SOURCES ${brand}/${COMPIMGNAME}_register.cc)
+    # Fixup for compiler warning on files that include LVGL 8.3 headers:
+    set_source_files_properties(${brand}/${COMPIMGNAME}_register.cc
+      PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;")
+  endforeach()
 
   # Module Library
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
@@ -57,7 +65,7 @@ foreach(brand ${brands})
            ${SHARED}
            ${SHARED}/cpputil
   )
-  target_compile_options(${brand}Library PRIVATE -Wno-attributes)
+  target_compile_options(${brand}Library PRIVATE -Wno-attributes -Wno-deprecated-enum-enum-conversion)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
 
   # Faceplate artwork
@@ -88,6 +96,7 @@ foreach(brand ${brands})
   endforeach()
 
 endforeach()
+
 
 #
 # RYML

@@ -23,7 +23,7 @@ def get_encoder_class_from_radius(radius):
     if r < 10 and r > 3:
         return "Encoder" #<10: 8.5 typical
     if r < 20:
-        return "EncodeerRGB" #10-20: 17.01 typical
+        return "EncoderRGB" #10-20: 17.01 typical
     if r < 40:
         return "EncoderWhiteLight" #15-40: 31.18 typical
 
