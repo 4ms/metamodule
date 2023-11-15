@@ -2,12 +2,12 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="2.24087mm"
-   height="21.845301mm"
-   viewBox="0 0 2.24087 21.845301"
+   width="2.0126238mm"
+   height="4.0880027mm"
+   viewBox="0 0 2.0126238 4.0880027"
    version="1.1"
    id="svg163547"
-   sodipodi:docname="slider_x.svg"
+   sodipodi:docname="slider_handle_x.svg"
    inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.6408534"
-     inkscape:cx="-13.3845"
-     inkscape:cy="23.134797"
+     inkscape:zoom="73.81485"
+     inkscape:cx="5.6560435"
+     inkscape:cy="5.9811813"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -37,8 +37,8 @@
      fit-margin-bottom="0"
      inkscape:window-width="2510"
      inkscape:window-height="1387"
-     inkscape:window-x="50"
-     inkscape:window-y="58"
+     inkscape:window-x="66"
+     inkscape:window-y="25"
      inkscape:window-maximized="0"
      inkscape:showpageshadow="2"
      inkscape:pagecheckerboard="0"
@@ -58,19 +58,15 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-107.73671,-98.053155)">
-    <path
-       style="fill:none;stroke:#3f3f3f;stroke-width:2.24087;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal;fill-opacity:1"
-       d="m 108.85714,99.17359 v 19.60443"
-       id="path946"
-       sodipodi:nodetypes="cc" />
+     transform="translate(-107.75288,-98.05857)">
     <rect
-       style="fill:#818181;fill-opacity:1;stroke:none;stroke-width:1.85993;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
-       id="rect3528"
-       width="1.1005343"
-       height="19.716846"
-       x="108.30688"
-       y="99.117378"
-       ry="0.55026716" />
+       style="fill:#cfcfcf;fill-opacity:1;stroke:#555555;stroke-width:0.560411;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:0.6;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       id="rect7197"
+       width="1.4522127"
+       height="3.5275915"
+       x="108.03309"
+       y="98.338776"
+       rx="0.55627"
+       ry="0.61761391" />
   </g>
 </svg>
