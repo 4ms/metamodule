@@ -3,25 +3,16 @@
 
 // Defined in linker scripts:
 
-extern uint32_t _UNUSED0[];
-extern uint32_t _UNUSED0_SZ[];
-extern uint32_t _UNUSED0_END[];
-
 extern uint32_t _TTB[];
 extern uint32_t _TTB_SZ[];
 extern uint32_t _TTB_END[];
 
-//not used
-extern uint32_t _M4_EXTCODE[];
-extern uint32_t _M4_EXTCODE_SZ[];
-extern uint32_t _M4_EXTCODE_END[];
+// SO
+extern uint32_t _M4_RODATA[];
+extern uint32_t _M4_RODATA_SZ[];
+extern uint32_t _M4_RODATA_END[];
 
-//SO
-extern uint32_t _M4_EXTDATA[];
-extern uint32_t _M4_EXTDATA_SZ[];
-extern uint32_t _M4_EXTDATA_END[];
-
-//N
+// N
 extern uint32_t _A7_CODE[];
 extern uint32_t _A7_CODE_SZ[];
 extern uint32_t _A7_CODE_END[];
@@ -56,7 +47,12 @@ extern uint32_t _M4_CODE[];
 extern uint32_t _M4_CODE_SZ[];
 extern uint32_t _M4_CODE_END[];
 
-//SRAM4: Device-RW
+// RETRAM
+extern uint32_t _M4_VECT[];
+extern uint32_t _M4_VECT_A7[];
+extern uint32_t _M4_VECT_SZ[];
+extern uint32_t _M4_VECT_END[];
+
 extern uint32_t _M4_STACK[];
 extern uint32_t _M4_STACK_SZ[];
 extern uint32_t _M4_STACK_END[];
@@ -85,8 +81,8 @@ static uint32_t TTB = (uint32_t)_TTB;
 // static uint32_t M4_EXTCODE_SZ = (uint32_t)_M4_EXTCODE_SZ;
 // static uint32_t M4_EXTCODE_END = (uint32_t)_M4_EXTCODE_END;
 
-static uint32_t M4_EXTDATA = (uint32_t)_M4_EXTDATA;
-static uint32_t M4_EXTDATA_SZ = (uint32_t)_M4_EXTDATA_SZ;
+static uint32_t M4_RODATA = (uint32_t)_M4_RODATA;
+static uint32_t M4_RODATA_SZ = (uint32_t)_M4_RODATA_SZ;
 // static uint32_t M4_EXTDATA_END = (uint32_t)_M4_EXTDATA_END;
 
 static uint32_t A7_CODE = (uint32_t)_A7_CODE;

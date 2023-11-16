@@ -183,23 +183,19 @@ add_custom_command(
   TARGET main_m4.elf
   POST_BUILD
   COMMAND arm-none-eabi-objcopy -O binary -j .rodata $<TARGET_FILE:main_m4.elf> ${GEN_PATH}/m4_rodata.bin
-  COMMAND /bin/sh ${FWDIR}/flashing/bin_to_ld.sh m4_rodata.bin m4_rodata.ld
-  COMMAND rm m4_rodata.bin
-  BYPRODUCTS ${GEN_PATH}/m4_rodata.ld
+  BYPRODUCTS ${GEN_PATH}/m4_rodata.bin
   WORKING_DIRECTORY ${GEN_PATH}
-  COMMENT "Converting read-only data section of main_m4.elf to .ld file"
+  COMMENT "Converting read-only data section of main_m4.elf to m4_rodata.bin"
   VERBATIM
 )
 
 add_custom_command(
   TARGET main_m4.elf
   POST_BUILD
-  COMMAND arm-none-eabi-objcopy -O binary -j .isr_vector $<TARGET_FILE:main_m4.elf> vectors.bin
-  COMMAND xxd -i -c 8 vectors.bin firmware_m4_vectors.h
-  COMMAND rm vectors.bin
-  BYPRODUCTS ${GEN_PATH}/firmware_m4_vectors.h
+  COMMAND arm-none-eabi-objcopy -O binary -j .isr_vector $<TARGET_FILE:main_m4.elf> m4_vectors.bin
+  BYPRODUCTS ${GEN_PATH}/m4_vectors.bin
   WORKING_DIRECTORY ${GEN_PATH}
-  COMMENT "Converting ISR vector section of main_m4.elf to .h file"
+  COMMENT "Converting ISR vector section of main_m4.elf to m4_vectors.bin"
   VERBATIM
 )
 
@@ -207,11 +203,9 @@ add_custom_command(
   TARGET main_m4.elf
   POST_BUILD
   COMMAND arm-none-eabi-objcopy -O binary -j .text -j .startup_copro_fw.Reset_Handler -j .init_array -j .data
-          $<TARGET_FILE:main_m4.elf> firmware.bin
-  COMMAND xxd -i -c 8 firmware.bin firmware_m4.h
-  COMMAND rm firmware.bin
-  BYPRODUCTS ${GEN_PATH}/firmware_m4.h
+          $<TARGET_FILE:main_m4.elf> m4_code.bin
+  BYPRODUCTS ${GEN_PATH}/m4_code.bin
   WORKING_DIRECTORY ${GEN_PATH}
-  COMMENT "Converting firmware code and data sections of main_m4.elf to .h file "
+  COMMENT "Converting firmware code and data sections of main_m4.elf to m4_code.bin"
   VERBATIM
 )

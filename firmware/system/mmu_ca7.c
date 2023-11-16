@@ -121,7 +121,7 @@ void MMU_CreateTranslationTable(void) {
 	MMU_TTSection(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ / 0x100000, Sect_StronglyOrdered);
 
 	//M4 heap/data
-	MMU_TTSection(TTB_BASE, M4_EXTDATA, M4_EXTDATA_SZ / 0x100000, Sect_StronglyOrdered);
+	MMU_TTSection(TTB_BASE, M4_RODATA, M4_RODATA_SZ / 0x100000, Sect_StronglyOrdered);
 	MMU_TTSection(TTB_BASE, M4_HEAP, M4_HEAP_SZ / 0x100000, Sect_StronglyOrdered);
 
 	//.shared_memory and m4 codespace: 0x30000000, or 0x10000000 as seen by M4

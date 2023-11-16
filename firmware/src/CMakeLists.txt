@@ -150,9 +150,6 @@ endif()
 #
 add_executable(
   main.elf
-  $<TARGET_FILE_DIR:main_m4.elf>/m4_rodata.ld
-  $<TARGET_FILE_DIR:main_m4.elf>/firmware_m4.h
-  $<TARGET_FILE_DIR:main_m4.elf>/firmware_m4_vectors.h
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
@@ -337,7 +334,7 @@ add_custom_command(
   TARGET main.elf
   POST_BUILD
   COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:main.elf>/main.bin $<TARGET_FILE_DIR:main.elf>/main.uimg
-          0xC1FBFFC0 0xC2000040
+          0xC2000000 0xC2000040
   COMMAND ls -l $<TARGET_FILE_DIR:main.elf>/main.uimg
   COMMENT "Creating uimg file"
   VERBATIM
