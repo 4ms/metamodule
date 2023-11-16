@@ -183,9 +183,11 @@ add_custom_command(
   TARGET main_m4.elf
   POST_BUILD
   COMMAND arm-none-eabi-objcopy -O binary -j .rodata $<TARGET_FILE:main_m4.elf> ${GEN_PATH}/m4_rodata.bin
-  BYPRODUCTS ${GEN_PATH}/m4_rodata.bin
+  COMMAND ${FWDIR}/flashing/uimg_header.py ${GEN_PATH}/m4_rodata.bin ${GEN_PATH}/m4_rodata.uimg 0xC1FC0000 #M4_RODATA
+  COMMAND rm ${GEN_PATH}/m4_rodata.bin
+  BYPRODUCTS ${GEN_PATH}/m4_rodata.uimg
   WORKING_DIRECTORY ${GEN_PATH}
-  COMMENT "Converting read-only data section of main_m4.elf to m4_rodata.bin"
+  COMMENT "Converting read-only data section of main_m4.elf to m4_rodata.uimg"
   VERBATIM
 )
 
@@ -193,9 +195,11 @@ add_custom_command(
   TARGET main_m4.elf
   POST_BUILD
   COMMAND arm-none-eabi-objcopy -O binary -j .isr_vector $<TARGET_FILE:main_m4.elf> m4_vectors.bin
-  BYPRODUCTS ${GEN_PATH}/m4_vectors.bin
+  COMMAND ${FWDIR}/flashing/uimg_header.py ${GEN_PATH}/m4_vectors.bin ${GEN_PATH}/m4_vectors.uimg 0x38000000 #M4_VECT_A7
+  COMMAND rm ${GEN_PATH}/m4_vectors.bin
+  BYPRODUCTS ${GEN_PATH}/m4_vectors.uimg
   WORKING_DIRECTORY ${GEN_PATH}
-  COMMENT "Converting ISR vector section of main_m4.elf to m4_vectors.bin"
+  COMMENT "Converting ISR vector section of main_m4.elf to m4_vectors.uimg"
   VERBATIM
 )
 
@@ -204,8 +208,10 @@ add_custom_command(
   POST_BUILD
   COMMAND arm-none-eabi-objcopy -O binary -j .text -j .startup_copro_fw.Reset_Handler -j .init_array -j .data
           $<TARGET_FILE:main_m4.elf> m4_code.bin
-  BYPRODUCTS ${GEN_PATH}/m4_code.bin
+          COMMAND ${FWDIR}/flashing/uimg_header.py ${GEN_PATH}/m4_code.bin ${GEN_PATH}/m4_code.uimg 0x30000000 #M4_CODE_A7
+  COMMAND rm ${GEN_PATH}/m4_code.bin
+  BYPRODUCTS ${GEN_PATH}/m4_code.uimg
   WORKING_DIRECTORY ${GEN_PATH}
-  COMMENT "Converting firmware code and data sections of main_m4.elf to m4_code.bin"
+  COMMENT "Converting firmware code and data sections of main_m4.elf to m4_code.uimg"
   VERBATIM
 )
