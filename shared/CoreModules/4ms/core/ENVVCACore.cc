@@ -139,10 +139,10 @@ public:
 	void displayOscillatorState(TriangleOscillator::State_t state) {
 		if (state == TriangleOscillator::State_t::FALLING) {
 			setOutput<EorOut>(8.f);
-			// setLED<EorLight>(true);
+			setLED<EorLight>(1.f);
 		} else {
 			setOutput<EorOut>(0);
-			// setLED<EorLight>(false);
+			setLED<EorLight>(0.f);
 		}
 	}
 
@@ -209,8 +209,8 @@ public:
 		fallCV = -fScaleLEDs - ProcessCVOffset(getState<FallSlider>(), fallRange);
 
 		// TODO: LEDs only need to be updated ~60Hz instead of 48kHz
-		setLED<RiseLight>(BipolarColor_t{rScaleLEDs / 10.f});
-		setLED<FallLight>(BipolarColor_t{fScaleLEDs / 10.f});
+		setLED<RiseLight>(BipolarColor_t{rScaleLEDs / 7.5f});
+		setLED<FallLight>(BipolarColor_t{fScaleLEDs / 7.5f});
 
 		// TODO: low pass filter
 
