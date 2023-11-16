@@ -2,7 +2,7 @@
 #include "conf/screen_conf.hh"
 #include "drivers/screen_ST77XX.hh"
 #include "drivers/timekeeper.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params.hh"
 #include "screen/screen_writer.hh"
