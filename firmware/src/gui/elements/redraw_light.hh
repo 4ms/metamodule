@@ -14,9 +14,13 @@ inline void style_rgb(lv_obj_t *obj, std::span<float> vals, float max_brightness
 	if (!obj || vals.size() < 3)
 		return;
 
-	auto max = std::min(1.f, std::max(vals[0], std::max(vals[1], vals[2])));
+	auto r_amt = std::clamp(vals[0], 0.f, 1.f);
+	auto g_amt = std::clamp(vals[1], 0.f, 1.f);
+	auto b_amt = std::clamp(vals[2], 0.f, 1.f);
+
+	auto max = std::max(r_amt, std::max(g_amt, b_amt));
 	float gain = 1.f / max;
-	Color normalized = Color(vals[0] * gain * 255, vals[1] * gain * 255, vals[2] * gain * 255);
+	Color normalized = Color(r_amt * gain * 255, g_amt * gain * 255, b_amt * gain * 255);
 	lv_color_t color{.full = normalized.Rgb565()};
 
 	uint8_t opa = std::clamp<unsigned>(std::min(max, max_brightness) * 255.f, 0u, 255u);
@@ -32,12 +36,15 @@ inline void style_dual_color(lv_obj_t *obj, std::array<RGB565, 2> colors, std::s
 	if (!obj || vals.size() < 2)
 		return;
 
-	auto max = std::min(1.f, std::max(vals[0], vals[1]));
+	auto c1_amt = std::clamp(vals[0], 0.f, 1.f);
+	auto c2_amt = std::clamp(vals[1], 0.f, 1.f);
+
+	auto max = std::max(c1_amt, c2_amt);
 	float gain = 1.f / max;
 
-	auto c1 = Colors::black.blend(Color{colors[0]}, vals[0] * gain);
-	auto c2 = Colors::black.blend(Color{colors[1]}, vals[1] * gain);
-	auto normalized = c1.combine(c2);
+	auto col1 = Colors::black.blend(Color{colors[0]}, c1_amt * gain);
+	auto col2 = Colors::black.blend(Color{colors[1]}, c2_amt * gain);
+	auto normalized = col1.combine(col2);
 	lv_color_t color{.full = normalized.Rgb565()};
 
 	uint8_t opa = std::clamp<unsigned>(max * 255.f, 0u, 255u);
