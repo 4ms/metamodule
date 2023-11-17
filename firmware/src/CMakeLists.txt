@@ -343,6 +343,7 @@ add_custom_command(
 
 set_source_files_properties($<TARGET_FILE_DIR:main.elf>/main.uimg PROPERTIES GENERATED TRUE)
 
+# FIXME: does not automatically run if just m4 sources changed
 add_custom_command(
   TARGET main.elf
   POST_BUILD
