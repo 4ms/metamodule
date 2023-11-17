@@ -50,14 +50,6 @@
 
 #define A7_SYSRAM_BASE 0x2FFC0000
 #define A7_SYSRAM_SZ 0x00040000 /* 256kB */
-#define A7_SYSRAM_1MB_SECTION_BASE 0x2FF00000
-
-#define A7_SRAM1_BASE (0x30000000UL)
-#define A7_SRAM2_BASE (0x30020000UL)
-#define A7_SRAM3_BASE (0x30040000UL)
-#define A7_SRAM4_BASE (0x30050000UL)
-#define RETRAM (0x38000000UL)
-#define A7_M4VECTOR_BASE RETRAM
 
 // TTB base address
 #define TTB_BASE ((uint32_t *)__TTB_BASE)
@@ -88,6 +80,26 @@ static uint32_t Page_L1_64k = 0x0;	// generic
 static uint32_t Page_4k_Device_RW;	// Shared device, not executable, rw, domain 0
 static uint32_t Page_64k_Device_RW; // Shared device, not executable, rw, domain 0
 
+uint32_t align_down_1M(uint32_t addr) {
+	return addr & ~(OFFSET_1M - 1);
+}
+
+uint32_t align_up_1M(uint32_t size) {
+	uint32_t aligned = align_down_1M(size);
+	if (aligned == size)
+		return size;
+
+	return aligned + OFFSET_1M;
+}
+
+
+void create_aligned_section(uint32_t *ttb, uint32_t base_address, uint32_t size, uint32_t descriptor_l1) {
+	uint32_t end_address = align_up_1M(base_address + size);
+	base_address = align_down_1M(base_address);
+	uint32_t count = (end_address - base_address) / 0x100000;
+	MMU_TTSection(ttb, base_address, count, descriptor_l1);
+}
+
 void MMU_CreateTranslationTable(void) {
 	mmu_region_attributes_Type region;
 
@@ -105,33 +117,31 @@ void MMU_CreateTranslationTable(void) {
 	page64k_device_rw(Page_L1_64k, Page_64k_Device_RW, region);
 	page4k_device_rw(Page_L1_4k, Page_4k_Device_RW, region);
 
-	// ROM should be Cod (RO), but that seems to interfere with debugger loading an elf file, so setting it to Normal:
-	// Todo: Investigate this
-	MMU_TTSection(TTB_BASE, A7_CODE, A7_CODE_SZ / 0x100000, Sect_Normal);
+	create_aligned_section(TTB_BASE, A7_CODE, A7_CODE_SZ, Sect_Normal);
 
-	MMU_TTSection(TTB_BASE, A7_RAM, A7_RAM_SZ / 0x100000, Sect_Normal_RW);
-	// MMU_TTSection(TTB_BASE, __RAM2_BASE, __RAM2_SZ / 0x100000, Sect_Normal_RW);
-	MMU_TTSection(TTB_BASE, A7_HEAP, A7_HEAP_SZ / 0x100000, Sect_Normal_RW);
+	create_aligned_section(TTB_BASE, A7_RAM, A7_RAM_SZ, Sect_Normal_RW);
+
+	create_aligned_section(TTB_BASE, A7_HEAP, A7_HEAP_SZ, Sect_Normal_RW);
 
 	//.ddma: non-cacheable
 	// Note: section_so is quite a bit faster than section_normal_nc
-	MMU_TTSection(TTB_BASE, DMABUF, DMABUF_SZ / 0x100000, Sect_StronglyOrdered);
+	create_aligned_section(TTB_BASE, DMABUF, DMABUF_SZ, Sect_StronglyOrdered);
 
 	//.virtdrive: non-cacheable
-	MMU_TTSection(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ / 0x100000, Sect_StronglyOrdered);
+	create_aligned_section(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ, Sect_StronglyOrdered);
 
 	//M4 heap/data
-	MMU_TTSection(TTB_BASE, M4_RODATA, M4_RODATA_SZ / 0x100000, Sect_StronglyOrdered);
-	MMU_TTSection(TTB_BASE, M4_HEAP, M4_HEAP_SZ / 0x100000, Sect_StronglyOrdered);
+	create_aligned_section(TTB_BASE, M4_RODATA, M4_RODATA_SZ, Sect_StronglyOrdered);
+	create_aligned_section(TTB_BASE, M4_HEAP, M4_HEAP_SZ, Sect_StronglyOrdered);
 
 	//.shared_memory and m4 codespace: 0x30000000, or 0x10000000 as seen by M4
-	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Device_RW); // 1MB (actually is only 384kB)
+	create_aligned_section(TTB_BASE, M4_CODE_A7, M4_CODE_SZ, Sect_Device_RW); // 1MB (actually is only 384kB)
 
 	// M4 vector table (RETRAM: 0x38000000, or 0x00000000 as seen by M4)
-	MMU_TTSection(TTB_BASE, A7_M4VECTOR_BASE, 1, Sect_Device_RW); // 1MB (actually is only 64kB)
+	create_aligned_section(TTB_BASE, M4_VECT_A7, M4_VECT_SZ, Sect_Device_RW); // 1MB (actually is only 64kB)
 
 	//.sysram
-	MMU_TTSection(TTB_BASE, A7_SYSRAM_1MB_SECTION_BASE, 1, Sect_StronglyOrdered);
+	create_aligned_section(TTB_BASE, A7_SYSRAM_BASE, A7_SYSRAM_SZ, Sect_StronglyOrdered);
 
 	// Peripheral memory
 	// For better security: be more specific and use 4k tables to cover only actual peripherals, as in example file in

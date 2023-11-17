@@ -44,6 +44,7 @@ extern uint32_t _DMABUF_END[];
 
 //SRAM1-3: Device-RW
 extern uint32_t _M4_CODE[];
+extern uint32_t _M4_CODE_A7[];
 extern uint32_t _M4_CODE_SZ[];
 extern uint32_t _M4_CODE_END[];
 
@@ -66,58 +67,37 @@ extern uint32_t _M4_SHARED_LIST_END[];
 //Not listed:
 //SYSRAM is SO
 
-// as uint32_t's:
-// (some are commented to prevent unused-variable warnings)
+static const uint32_t TTB = (uint32_t)_TTB;
+static const uint32_t TTB_END = (uint32_t)_TTB_END;
 
-// static uint32_t UNUSED0 = (uint32_t)_UNUSED0;
-// static uint32_t UNUSED0_SZ = (uint32_t)_UNUSED0_SZ;
-// static uint32_t UNUSED0_END = (uint32_t)_UNUSED0_END;
+static const uint32_t M4_RODATA = (uint32_t)_M4_RODATA;
+static const uint32_t M4_RODATA_SZ = (uint32_t)_M4_RODATA_SZ;
 
-static uint32_t TTB = (uint32_t)_TTB;
-// static uint32_t TTB_SZ = (uint32_t)_TTB_SZ;
-// static uint32_t TTB_END = (uint32_t)_TTB_END;
+static const uint32_t A7_CODE = (uint32_t)_A7_CODE;
+static const uint32_t A7_CODE_SZ = (uint32_t)_A7_CODE_SZ;
+static const uint32_t A7_CODE_END = (uint32_t)_A7_CODE_END;
 
-// static uint32_t M4_EXTCODE = (uint32_t)_M4_EXTCODE;
-// static uint32_t M4_EXTCODE_SZ = (uint32_t)_M4_EXTCODE_SZ;
-// static uint32_t M4_EXTCODE_END = (uint32_t)_M4_EXTCODE_END;
+static const uint32_t A7_RAM = (uint32_t)_A7_RAM;
+static const uint32_t A7_RAM_SZ = (uint32_t)_A7_RAM_SZ;
 
-static uint32_t M4_RODATA = (uint32_t)_M4_RODATA;
-static uint32_t M4_RODATA_SZ = (uint32_t)_M4_RODATA_SZ;
-// static uint32_t M4_EXTDATA_END = (uint32_t)_M4_EXTDATA_END;
+static const uint32_t M4_HEAP = (uint32_t)_M4_HEAP;
+static const uint32_t M4_HEAP_SZ = (uint32_t)_M4_HEAP_SZ;
 
-static uint32_t A7_CODE = (uint32_t)_A7_CODE;
-static uint32_t A7_CODE_SZ = (uint32_t)_A7_CODE_SZ;
-// static uint32_t A7_CODE_END = (uint32_t)_A7_CODE_END;
+static const uint32_t VIRTDRIVE = (uint32_t)_VIRTDRIVE;
+static const uint32_t VIRTDRIVE_SZ = (uint32_t)_VIRTDRIVE_SZ;
 
-static uint32_t A7_RAM = (uint32_t)_A7_RAM;
-static uint32_t A7_RAM_SZ = (uint32_t)_A7_RAM_SZ;
-// static uint32_t A7_RAM_END = (uint32_t)_A7_RAM_END;
+static const uint32_t A7_HEAP = (uint32_t)_A7_HEAP;
+static const uint32_t A7_HEAP_SZ = (uint32_t)_A7_HEAP_SZ;
 
-static uint32_t M4_HEAP = (uint32_t)_M4_HEAP;
-static uint32_t M4_HEAP_SZ = (uint32_t)_M4_HEAP_SZ;
-// static uint32_t M4_HEAP_END = (uint32_t)_M4_HEAP_END;
+static const uint32_t DMABUF = (uint32_t)_DMABUF;
+static const uint32_t DMABUF_SZ = (uint32_t)_DMABUF_SZ;
 
-static uint32_t VIRTDRIVE = (uint32_t)_VIRTDRIVE;
-static uint32_t VIRTDRIVE_SZ = (uint32_t)_VIRTDRIVE_SZ;
-// static uint32_t VIRTDRIVE_END = (uint32_t)_VIRTDRIVE_END;
+static const uint32_t M4_VECT = (uint32_t)_M4_VECT;
+static const uint32_t M4_VECT_A7 = (uint32_t)_M4_VECT_A7;
+static const uint32_t M4_VECT_SZ = (uint32_t)_M4_VECT_SZ;
+static const uint32_t M4_VECT_END = (uint32_t)_M4_VECT_END;
 
-static uint32_t A7_HEAP = (uint32_t)_A7_HEAP;
-static uint32_t A7_HEAP_SZ = (uint32_t)_A7_HEAP_SZ;
-// static uint32_t A7_HEAP_END = (uint32_t)_A7_HEAP_END;
-
-static uint32_t DMABUF = (uint32_t)_DMABUF;
-static uint32_t DMABUF_SZ = (uint32_t)_DMABUF_SZ;
-// static uint32_t DMABUF_END = (uint32_t)_DMABUF_END;
-
-// static uint32_t M4_CODE = (uint32_t)_M4_CODE;
-// static uint32_t M4_CODE_SZ = (uint32_t)_M4_CODE_SZ;
-// static uint32_t M4_CODE_END = (uint32_t)_M4_CODE_END;
-
-// static uint32_t M4_STACK = (uint32_t)_M4_STACK;
-// static uint32_t M4_STACK_SZ = (uint32_t)_M4_STACK_SZ;
-// static uint32_t M4_STACK_END = (uint32_t)_M4_STACK_END;
-
-// static uint32_t M4_SHARED_LIST = (uint32_t)_M4_SHARED_LIST;
-// static uint32_t A7_SHARED_LIST = (uint32_t)_A7_SHARED_LIST;
-// static uint32_t SHARED_LIST_SZ = (uint32_t)_SHARED_LIST_SZ;
-// static uint32_t M4_SHARED_LIST_END = (uint32_t)_M4_SHARED_LIST_END;
+static const uint32_t M4_CODE = (uint32_t)_M4_CODE;
+static const uint32_t M4_CODE_A7 = (uint32_t)_M4_CODE_A7;
+static const uint32_t M4_CODE_SZ = (uint32_t)_M4_CODE_SZ;
+static const uint32_t M4_CODE_END = (uint32_t)_M4_CODE_END;
