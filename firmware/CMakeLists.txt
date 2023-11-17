@@ -35,8 +35,26 @@ endif()
 #
 # Main Application
 #
-add_subdirectory(src/core_m4 ${CMAKE_CURRENT_BINARY_DIR}/mp1corem4/medium)
-add_subdirectory(src ${CMAKE_CURRENT_BINARY_DIR}/mp1corea7/medium)
+set(M4_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corem4/medium)
+set(A7_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corea7/medium)
+
+add_subdirectory(src/core_m4 ${M4_BIN_PATH})
+add_subdirectory(src ${A7_BIN_PATH})
+
+add_custom_command(
+  OUTPUT ${A7_BIN_PATH}/main.uimg
+  COMMAND cat ${A7_BIN_PATH}/main_a7.uimg ${M4_BIN_PATH}/m4_vectors.uimg ${M4_BIN_PATH}/m4_code.uimg ${M4_BIN_PATH}/m4_rodata.uimg > ${A7_BIN_PATH}/main.uimg
+  COMMAND ls -l ${A7_BIN_PATH}/main.uimg
+  DEPENDS main.elf main_m4.elf ${M4_BIN_PATH}/m4_vectors.uimg ${M4_BIN_PATH}/m4_code.uimg ${M4_BIN_PATH}/m4_rodata.uimg
+  COMMENT "Creating combined uimg file"
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_target(
+  combined-uimg ALL
+  DEPENDS ${A7_BIN_PATH}/main.uimg
+)
+
 
 #
 # Bootloader (MP1-Boot)

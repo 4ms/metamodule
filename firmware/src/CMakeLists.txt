@@ -258,7 +258,7 @@ set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIO
 
 target_include_directories(
   main.elf
-  PRIVATE $<TARGET_FILE_DIR:main_m4.elf>
+  PRIVATE 
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
@@ -314,15 +314,12 @@ if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
 endif()
 
-set(M4_BIN_PATH $<TARGET_FILE_DIR:main_m4.elf>)
 
-add_dependencies(main.elf main_m4.elf m4_firmware)
 
 target_link_script(
   main
   ${FWDIR}/system/linker/stm32mp15xx_ca7.ld
   -L${FWDIR}
-  -L$<TARGET_FILE_DIR:main_m4.elf>
   -Wl,--gc-sections
   -Wno-psabi
   -ffreestanding
@@ -338,19 +335,6 @@ add_custom_command(
   COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:main.elf>/main.bin $<TARGET_FILE_DIR:main.elf>/main_a7.uimg
           0xC2000000 0xC2000040
   COMMENT "Creating main a7 uimg file"
-  VERBATIM
-)
-
-set_source_files_properties($<TARGET_FILE_DIR:main.elf>/main.uimg PROPERTIES GENERATED TRUE)
-
-# FIXME: does not automatically run if just m4 sources changed
-add_custom_command(
-  TARGET main.elf
-  POST_BUILD
-  DEPENDS ${M4_BIN_PATH}/m4_code.uimg
-  COMMAND cat $<TARGET_FILE_DIR:main.elf>/main_a7.uimg ${M4_BIN_PATH}/m4_vectors.uimg ${M4_BIN_PATH}/m4_code.uimg ${M4_BIN_PATH}/m4_rodata.uimg > $<TARGET_FILE_DIR:main.elf>/main.uimg
-  COMMAND ls -l $<TARGET_FILE_DIR:main.elf>/main_a7.uimg
-  COMMENT "Creating uimg file"
   VERBATIM
 )
 
