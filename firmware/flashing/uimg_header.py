@@ -40,10 +40,15 @@ if len(sys.argv) > 4:
 else:
     entryaddr = loadaddr
 
+if len(sys.argv) > 5:
+    image_name_str = sys.argv[5]
+else:
+    image_name_str = "stm32mp1-baremetal image"
+
 os = os_linux
 image_type = image_type_kernel
 compress = compress_none
-image_name = bytes("stm32mp1-baremetal image", "ascii")
+image_name = bytes(image_name_str, "ascii")
 
 # Calculate some header entries:
 header_size = 64

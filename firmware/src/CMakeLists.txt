@@ -333,7 +333,7 @@ add_custom_command(
   TARGET main.elf
   POST_BUILD
   COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:main.elf>/main.bin $<TARGET_FILE_DIR:main.elf>/main_a7.uimg
-          0xC2000000 0xC2000040
+      0xC2000000 0xC2000040 "MetaModule A7 firmware"
   COMMENT "Creating main a7 uimg file"
   VERBATIM
 )
