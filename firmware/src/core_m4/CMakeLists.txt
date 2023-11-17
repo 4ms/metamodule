@@ -176,7 +176,7 @@ set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIO
 set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_target(
-  m4_firmware DEPENDS ${GEN_PATH}/m4_rodata.ld ${GEN_PATH}/firmware_m4.h ${GEN_PATH}/firmware_m4_vectors.h
+  m4_firmware DEPENDS ${GEN_PATH}/m4_rodata.uimg ${GEN_PATH}/m4_vectors.uimg ${GEN_PATH}/m4_code.uimg
 )
 
 add_custom_command(

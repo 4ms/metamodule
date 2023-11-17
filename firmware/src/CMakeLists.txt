@@ -314,7 +314,9 @@ if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
 endif()
 
-add_dependencies(main.elf m4_firmware)
+set(M4_BIN_PATH $<TARGET_FILE_DIR:main_m4.elf>)
+
+add_dependencies(main.elf main_m4.elf m4_firmware)
 
 target_link_script(
   main
@@ -333,11 +335,21 @@ add_bin_hex_command(main)
 add_custom_command(
   TARGET main.elf
   POST_BUILD
-  COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:main.elf>/main.bin $<TARGET_FILE_DIR:main.elf>/main.uimg
+  COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:main.elf>/main.bin $<TARGET_FILE_DIR:main.elf>/main_a7.uimg
           0xC2000000 0xC2000040
-  COMMAND ls -l $<TARGET_FILE_DIR:main.elf>/main.uimg
-  COMMENT "Creating uimg file"
+  COMMENT "Creating main a7 uimg file"
   VERBATIM
 )
 
 set_source_files_properties($<TARGET_FILE_DIR:main.elf>/main.uimg PROPERTIES GENERATED TRUE)
+
+add_custom_command(
+  TARGET main.elf
+  POST_BUILD
+  DEPENDS ${M4_BIN_PATH}/m4_code.uimg
+  COMMAND cat $<TARGET_FILE_DIR:main.elf>/main_a7.uimg ${M4_BIN_PATH}/m4_vectors.uimg ${M4_BIN_PATH}/m4_code.uimg ${M4_BIN_PATH}/m4_rodata.uimg > $<TARGET_FILE_DIR:main.elf>/main.uimg
+  COMMAND ls -l $<TARGET_FILE_DIR:main.elf>/main_a7.uimg
+  COMMENT "Creating uimg file"
+  VERBATIM
+)
+
