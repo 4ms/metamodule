@@ -1,4 +1,3 @@
----
 Diagnostics:
     ClangTidy:
         Add: [modernize*, cppcoreguidelines-prefer-member-initializer, readability-suspicious-call-argument]
@@ -65,4 +64,3 @@ CompileFlags:
 	Remove: [
 		"-std=gnu++2b", 
 	]
----
