@@ -42,17 +42,19 @@ add_subdirectory(src/core_m4 ${M4_BIN_PATH})
 add_subdirectory(src ${A7_BIN_PATH})
 
 add_custom_command(
-  OUTPUT ${A7_BIN_PATH}/main.uimg
-  COMMAND cat ${A7_BIN_PATH}/main_a7.uimg ${M4_BIN_PATH}/m4_vectors.uimg ${M4_BIN_PATH}/m4_code.uimg ${M4_BIN_PATH}/m4_rodata.uimg > ${A7_BIN_PATH}/main.uimg
-  COMMAND ls -l ${A7_BIN_PATH}/main.uimg
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg
+  COMMAND cat ${A7_BIN_PATH}/main_a7.uimg ${M4_BIN_PATH}/m4_vectors.uimg ${M4_BIN_PATH}/m4_code.uimg ${M4_BIN_PATH}/m4_rodata.uimg > ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND flashing/uimg_header.py ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg 0xC1FFFFC0 0xC2000040 "MetaModule usb-dfu firmware"
+  COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg
   DEPENDS main.elf main_m4.elf ${M4_BIN_PATH}/m4_vectors.uimg ${M4_BIN_PATH}/m4_code.uimg ${M4_BIN_PATH}/m4_rodata.uimg
-  COMMENT "Creating combined uimg file"
+  COMMENT "Creating combined uimg files"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
 )
 
 add_custom_target(
   combined-uimg ALL
-  DEPENDS ${A7_BIN_PATH}/main.uimg
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg
 )
 
 
