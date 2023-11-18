@@ -137,7 +137,7 @@ inline Element make_element<rack::componentlibrary::Trimpot>(BaseElement b) {
 //
 template<>
 inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement b) {
-	return Slider{{b, "BefacoSlidePot.png"}, "BefacoSlidePotHandle.png"};
+	return Slider{{b, "BefacoSlidePot_bg.png"}, "BefacoSlidePot_fg.png"};
 };
 
 //
