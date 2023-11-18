@@ -65,7 +65,7 @@ ifeq ($(UNAME_S),Darwin)
 CXXFLAGS += -mmacosx-version-min=10.15 
 endif
 
-./build/src/shared/CoreModules/enosc/dynamic_data.cc.o: CXXFLAGS+=-Wno-unknown-pragmas
+dynamic_data.cc.o: CXXFLAGS+=-Wno-unknown-pragmas
 
 all: plugin res
 

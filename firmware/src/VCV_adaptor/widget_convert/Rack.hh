@@ -3,139 +3,209 @@
 #include "VCV_adaptor/widget_convert/base.hh"
 #include "VCV_adaptor/widgets.hh"
 
-namespace rack
+namespace MetaModule
 {
 
 template<>
-struct ElementConvert<componentlibrary::BefacoBigKnob> {
-	using ElementType = MetaModule::BefacoBigKnob;
+inline Element make_element<rack::componentlibrary::BefacoSwitch>(BaseElement b) {
+	return FlipSwitch{
+		{b}, 3, {"BefacoSwitch_0.png", "BefacoSwitch_1.png", "BefacoSwitch_2.png"}, {"Down", "Center", "Up"}};
 };
 
 template<>
-struct ElementConvert<componentlibrary::BefacoTinyKnob> {
-	using ElementType = MetaModule::BefacoTinyKnobBlack;
+inline Element make_element<rack::componentlibrary::CKSS>(BaseElement b) {
+	return FlipSwitch{{b}, 2, {"CKSS_0.png", "CKSS_1.png"}};
 };
 
 template<>
-struct ElementConvert<componentlibrary::BefacoSlidePot> {
-	using ElementType = MetaModule::BefacoSlidePot;
+inline Element make_element<rack::componentlibrary::BefacoPush>(BaseElement b) {
+	return MomentaryButton{b, "BefacoPush_0.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::BefacoSwitch> {
-	using ElementType = MetaModule::BefacoSwitch;
+inline Element make_element<rack::componentlibrary::CKD6>(BaseElement b) {
+	return MomentaryButton{b, "CKD6_0.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::BefacoPush> {
-	using ElementType = MetaModule::BefacoPush;
+inline Element make_element<rack::componentlibrary::TL1105>(BaseElement b) {
+	return MomentaryButton{b, "TL1105.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::CKSS> {
-	using ElementType = MetaModule::CKSS;
+inline Element make_element<rack::componentlibrary::LEDBezel>(BaseElement b) {
+	return MomentaryButton{b, "VCVBezel.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Davies1900hBlackKnob> {
-	using ElementType = MetaModule::Davies1900hBlackKnob;
+inline Element make_element<rack::componentlibrary::BefacoBigKnob>(BaseElement b) {
+	return Knob{b, "BefacoBigKnob.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Davies1900hWhiteKnob> {
-	using ElementType = MetaModule::Davies1900hWhiteKnob;
+inline Element make_element<rack::componentlibrary::BefacoTinyKnob>(BaseElement b) {
+	return Knob{b, "BefacoTinyKnobWhite.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Davies1900hRedKnob> {
-	using ElementType = MetaModule::Davies1900hRedKnob;
+inline Element make_element<rack::componentlibrary::Davies1900hBlackKnob>(BaseElement b) {
+	return Knob{b, "Davies1900hBlack.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Davies1900hLargeWhiteKnob> {
-	using ElementType = MetaModule::Davies1900hLargeWhiteKnob;
+inline Element make_element<rack::componentlibrary::Davies1900hWhiteKnob>(BaseElement b) {
+	return Knob{b, "Davies1900hWhite.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Rogan2SGray> {
-	using ElementType = MetaModule::Rogan2SGray;
+inline Element make_element<rack::componentlibrary::Davies1900hRedKnob>(BaseElement b) {
+	return Knob{b, "Davies1900hRed.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Rogan2PSWhite> {
-	using ElementType = MetaModule::Rogan2PSWhite;
+inline Element make_element<rack::componentlibrary::Davies1900hLargeWhiteKnob>(BaseElement b) {
+	return Knob{b, "Davies1900hLargeWhite.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Rogan1PRed> {
-	using ElementType = MetaModule::Rogan1PRed;
+inline Element make_element<rack::componentlibrary::Rogan1PSGreen>(BaseElement b) {
+	return Knob{b, "Rogan1PSGreen.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Rogan> {
-	using ElementType = MetaModule::Rogan1PRed;
+inline Element make_element<rack::componentlibrary::Rogan1PSRed>(BaseElement b) {
+	return Knob{b, "Rogan1PSRed.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Rogan2PSRed> {
-	using ElementType = MetaModule::Rogan2PSRed;
+inline Element make_element<rack::componentlibrary::Rogan1PSWhite>(BaseElement b) {
+	return Knob{b, "Rogan1PSWhite.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Rogan2PSGreen> {
-	using ElementType = MetaModule::Rogan2PSGreen;
+inline Element make_element<rack::componentlibrary::Rogan2SGray>(BaseElement b) {
+	return Knob{b, "Rogan2SGray.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::Trimpot> {
-	using ElementType = MetaModule::Trimpot;
+inline Element make_element<rack::componentlibrary::Rogan2PSWhite>(BaseElement b) {
+	return Knob{b, "Rogan2PSWhite.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::CKD6> {
-	using ElementType = MetaModule::CKD6;
+inline Element make_element<rack::componentlibrary::Rogan1PRed>(BaseElement b) {
+	return Knob{b, "Rogan1PRed.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::TL1105> {
-	using ElementType = MetaModule::TL1105;
+inline Element make_element<rack::componentlibrary::Rogan>(BaseElement b) {
+	return Knob{b, "Rogan1PRed.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::LEDBezel> {
-	using ElementType = MetaModule::LEDBezel;
+inline Element make_element<rack::componentlibrary::Rogan2PSRed>(BaseElement b) {
+	return Knob{b, "Rogan2PSRed.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::VCVLightBezel<componentlibrary::RedGreenBlueLight>> {
-	using ElementType = MetaModule::VCVLightBezel<MetaModule::RedGreenBlueLight>;
+inline Element make_element<rack::componentlibrary::Rogan2PSGreen>(BaseElement b) {
+	return Knob{b, "Rogan2PSGreen.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::SmallLight<componentlibrary::RedLight>> {
-	using ElementType = MetaModule::SmallLight<MetaModule::RedLight>;
+inline Element make_element<rack::componentlibrary::Rogan3PSWhite>(BaseElement b) {
+	return Knob{b, "Rogan3PSWhite.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::SmallLight<componentlibrary::GreenLight>> {
-	using ElementType = MetaModule::SmallLight<MetaModule::GreenLight>;
+inline Element make_element<rack::componentlibrary::Rogan3PSRed>(BaseElement b) {
+	return Knob{b, "Rogan3PSRed.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::SmallLight<componentlibrary::GreenRedLight>> {
-	using ElementType = MetaModule::SmallLight<MetaModule::GreenRedLight>;
+inline Element make_element<rack::componentlibrary::Rogan3PSGreen>(BaseElement b) {
+	return Knob{b, "Rogan3PSGreen.png"};
 };
 
 template<>
-struct ElementConvert<componentlibrary::PJ301MPort> {
-	using ElementTypeInput = MetaModule::PJ301MPortIn;
-	using ElementTypeOutput = MetaModule::PJ301MPortOut;
+inline Element make_element<rack::componentlibrary::Trimpot>(BaseElement b) {
+	return Knob{b, "Trimpot.png"};
+};
+
+//
+// Sliders
+//
+template<>
+inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement b) {
+	return Slider{{b, "BefacoSlidePot.png"}, "BefacoSlidePotHandle.png"};
+};
+
+//
+// Lights
+//
+
+template<>
+inline Element
+make_element<rack::componentlibrary::VCVLightBezel<rack::componentlibrary::RedGreenBlueLight>>(BaseElement b) {
+	return RgbLight{{b, "VCVBezel.png"}};
 };
 
 template<>
-struct ElementConvert<componentlibrary::ThemedPJ301MPort> {
-	using ElementTypeInput = MetaModule::PJ301MPortIn;
-	using ElementTypeOutput = MetaModule::PJ301MPortOut;
+inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::RedLight>>(BaseElement b) {
+	return MonoLight{{b, "SmallLight.png"}, 0xF800};
 };
 
-} // namespace rack
+template<>
+inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::GreenLight>>(BaseElement b) {
+	return MonoLight{{b, "SmallLight.png"}, 0x07E0};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::GreenRedLight>>(BaseElement b) {
+	return DualLight{{b, "SmallLight.png"}, {0x07E0, 0xF800}};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::GreenRedLight>>(BaseElement b) {
+	return DualLight{{b, "MediumLight.png"}, {0x07E0, 0xF800}};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::RedLight>>(BaseElement b) {
+	return MonoLight{{b, "MediumLight.png"}, 0xF800};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::MediumLight<rack::componentlibrary::GreenLight>>(BaseElement b) {
+	return MonoLight{{b, "MediumLight.png"}, 0x07E0};
+};
+
+//
+// Jacks
+//
+
+// Inputs
+
+template<>
+inline Element make_element_input<rack::componentlibrary::PJ301MPort>(BaseElement b) {
+	return JackInput{b, "jack_x.png"};
+};
+
+template<>
+inline Element make_element_input<rack::componentlibrary::ThemedPJ301MPort>(BaseElement b) {
+	return JackInput{b, "jack_x.png"};
+};
+
+// Outputs
+
+template<>
+inline Element make_element_output<rack::componentlibrary::PJ301MPort>(BaseElement b) {
+	return JackOutput{b, "jack_x.png"};
+};
+
+template<>
+inline Element make_element_output<rack::componentlibrary::ThemedPJ301MPort>(BaseElement b) {
+	return JackOutput{b, "jack_x.png"};
+};
+
+} // namespace MetaModule

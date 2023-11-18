@@ -1,87 +1,47 @@
 #pragma once
-#include "CoreModules/elements/elements.hh"
+#include "CoreModules/moduleFactory.hh"
 #include "patch/patch.hh"
-#include <string>
+#include "patch/patch_data.hh"
 
 namespace MetaModule
 {
 
-template<typename PanelDef>
-std::string get_panel_name(const BaseElement &, uint16_t) {
-	return "";
-}
+struct FullElementName {
+	std::string_view module_name;
+	std::string_view element_name;
+};
 
-template<typename PanelDef>
-std::string get_panel_name(const ParamElement &, uint16_t panel_id) {
-	std::string name{8};
-	auto mk = MappedKnob{.panel_knob_id = panel_id};
+enum class ElementType { Param, Input, Output, Light };
 
-	if (mk.is_panel_knob())
-		name = PanelDef::get_map_param_name(panel_id);
+// Return the module name and element name, given the IDs and type (not the Element)
+inline FullElementName
+get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type, PatchData const &patch) {
+	FullElementName fullname{"?", "?"};
 
-	else if (mk.is_midi_cc())
-		name = "CC" + std::to_string(mk.cc_num());
+	if (module_id < patch.module_slugs.size()) {
+		fullname.module_name = patch.module_slugs[module_id];
 
-	return name;
-}
+		auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[module_id]);
 
-template<typename PanelDef>
-std::string get_panel_name(const JackInput &, uint16_t panel_id) {
-	std::string name{16};
+		if (info.width_hp) {
+			// Search in reverse (the matching element is the last one with the matching index)
+			for (int el_id = info.indices.size() - 1; el_id >= 0; el_id--) {
 
-	if (panel_id < PanelDef::NumUserFacingInJacks)
-		name = PanelDef::get_map_injack_name(panel_id);
+				auto idx = info.indices[el_id];
 
-	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack)
-		name = "MIDI Note " + std::to_string(panel_id + 1 - MidiMonoNoteJack);
-
-	else if (panel_id >= MidiMonoGateJack && panel_id <= MidiGate8Jack)
-		name = "MIDI Gate " + std::to_string(panel_id + 1 - MidiMonoGateJack);
-
-	else if (panel_id >= MidiMonoVelJack && panel_id <= MidiVel8Jack)
-		name = "MIDI Vel. " + std::to_string(panel_id + 1 - MidiMonoVelJack);
-
-	else if (panel_id >= MidiMonoAftertouchJack && panel_id <= MidiAftertouch8Jack)
-		name = "MIDI Aft. " + std::to_string(panel_id + 1 - MidiMonoAftertouchJack);
-
-	else if (panel_id >= MidiMonoRetrigJack && panel_id <= MidiRetrig8Jack)
-		name = "MIDI Ret " + std::to_string(panel_id + 1 - MidiMonoRetrigJack);
-
-	else if (panel_id >= MidiCC0 && panel_id <= MidiCC127)
-		name = "MIDI CC " + std::to_string(panel_id - MidiCC0);
-
-	else if (panel_id == MidiPitchWheelJack)
-		name = "MIDI Bend";
-
-	else if (panel_id >= MidiGateNote0 && panel_id <= MidiGateNote127)
-		name = "MIDI Gate " + std::to_string(panel_id - MidiGateNote0); //TODO: C4
-
-	else if (panel_id == MidiClockJack)
-		name = "MIDI Clk";
-
-	else if (panel_id >= MidiClockDiv1Jack && panel_id <= MidiClockDiv96Jack)
-		name = "MIDI Clk/" + std::to_string(panel_id - MidiClockDiv1Jack + 1);
-
-	else if (panel_id == MidiStartJack)
-		name = "MIDI Start";
-
-	else if (panel_id == MidiStopJack)
-		name = "MIDI Stop";
-
-	else if (panel_id == MidiContinueJack)
-		name = "MIDI Cont.";
-
-	else
-		name = "?";
-
-	return name;
-}
-
-template<typename PanelDef>
-std::string get_panel_name(const JackOutput &, uint16_t panel_id) {
-	std::string name{8};
-	name += PanelDef::get_map_outjack_name(panel_id);
-	return name;
+				bool is_found = (type == ElementType::Param)  ? element_idx == idx.param_idx :
+								(type == ElementType::Input)  ? element_idx == idx.input_idx :
+								(type == ElementType::Output) ? element_idx == idx.output_idx :
+								(type == ElementType::Light)  ? element_idx == idx.light_idx :
+																false;
+				if (is_found) {
+					fullname.element_name = base_element(info.elements[el_id]).short_name;
+					break;
+				}
+			}
+		}
+	}
+	return fullname;
 }
 
 } // namespace MetaModule

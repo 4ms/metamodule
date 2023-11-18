@@ -72,6 +72,7 @@ private:
 	float mute_ctr = 1.f;
 	uint32_t halves_muted = 0;
 	bool ext_audio_connected = false;
+	ParamBlock local_p;
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
@@ -81,6 +82,7 @@ private:
 	void handle_midi(Midi::Event const &event, unsigned poly_num);
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool check_patch_loading();
+	void handle_patch_just_loaded();
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;

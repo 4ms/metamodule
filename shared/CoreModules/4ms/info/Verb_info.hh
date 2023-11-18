@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -13,22 +14,22 @@ struct VerbInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 16> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(46.42), Center, "Size", ""},
-		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(46.42), Center, "Time", ""},
-		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(104.62), Center, "Damp", ""},
-		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(104.62), Center, "AP Ratio", ""},
-		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(162.82), Center, "Comb", ""},
-		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(162.82), Center, "Mix", ""},
-		AnalogJackInput4ms{to_mm<72>(29.94), to_mm<72>(232.1), Center, "Input", ""},
-		AnalogJackInput4ms{to_mm<72>(72.13), to_mm<72>(232.1), Center, "Size CV", ""},
-		AnalogJackInput4ms{to_mm<72>(115.17), to_mm<72>(232.1), Center, "Time CV", ""},
-		AnalogJackInput4ms{to_mm<72>(29.94), to_mm<72>(272.23), Center, "Damp CV", ""},
-		AnalogJackInput4ms{to_mm<72>(72.13), to_mm<72>(272.23), Center, "Ratio CV", ""},
-		AnalogJackInput4ms{to_mm<72>(115.17), to_mm<72>(272.23), Center, "Comb CV", ""},
-		AnalogJackInput4ms{to_mm<72>(29.94), to_mm<72>(313.84), Center, "Mix CV", ""},
-		GateJackInput4ms{to_mm<72>(72.13), to_mm<72>(313.84), Center, "Hold Gate", ""},
-		AnalogJackOutput4ms{to_mm<72>(115.17), to_mm<72>(313.84), Center, "Out", ""},
-		LatchingButtonMonoLight{to_mm<72>(72.13), to_mm<72>(199.9), Center, "Hold", ""},
+		Davies1900hBlackKnob{{to_mm<72>(37.85), to_mm<72>(46.42), Center, "Size", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(106.4), to_mm<72>(46.42), Center, "Time", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(37.85), to_mm<72>(104.62), Center, "Damp", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(106.4), to_mm<72>(104.62), Center, "AP Ratio", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(37.85), to_mm<72>(162.82), Center, "Comb", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(106.4), to_mm<72>(162.82), Center, "Mix", ""}},
+		OrangeButton{{to_mm<72>(72.13), to_mm<72>(199.9), Center, "Hold", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.94), to_mm<72>(232.1), Center, "Input", ""}},
+		AnalogJackInput4ms{{to_mm<72>(72.13), to_mm<72>(232.1), Center, "Size CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(115.17), to_mm<72>(232.1), Center, "Time CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.94), to_mm<72>(272.23), Center, "Damp CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(72.13), to_mm<72>(272.23), Center, "Ratio CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(115.17), to_mm<72>(272.23), Center, "Comb CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.94), to_mm<72>(313.84), Center, "Mix CV", ""}},
+		GateJackInput4ms{{to_mm<72>(72.13), to_mm<72>(313.84), Center, "Hold Gate", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(115.17), to_mm<72>(313.84), Center, "Out", ""}},
 }};
 
     enum class Elem {
@@ -38,6 +39,7 @@ struct VerbInfo : ModuleInfoBase {
         ApRatioKnob,
         CombKnob,
         MixKnob,
+        HoldButton,
         InputIn,
         SizeCvIn,
         TimeCvIn,
@@ -47,7 +49,6 @@ struct VerbInfo : ModuleInfoBase {
         MixCvIn,
         HoldGateIn,
         Out,
-        HoldButton,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

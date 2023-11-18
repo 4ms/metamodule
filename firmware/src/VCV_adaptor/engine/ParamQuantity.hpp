@@ -31,6 +31,8 @@ struct ParamQuantity {
 	bool smoothEnabled = false;
 	bool snapEnabled = false;
 
+	std::vector<std::string> labels;
+
 	void setValue(float value) {
 	}
 	float getValue() {

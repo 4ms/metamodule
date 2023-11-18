@@ -5,17 +5,17 @@
 struct CKSSRot;
 struct HCVThemedRogan;
 
-namespace rack
+namespace MetaModule
 {
 
 template<>
-struct ElementConvert<::CKSSRot> {
-	using ElementType = MetaModule::CKSSRot;
-};
+inline Element make_element<::CKSSRot>(BaseElement b) {
+	return MetaModule::SlideSwitch{{b, "CKSS_rot_bg.png"}, 2, "CKSS_rot_fg.png"};
+}
 
 template<>
-struct ElementConvert<HCVThemedRogan> {
-	using ElementType = MetaModule::Rogan1PRed;
-};
+inline Element make_element<HCVThemedRogan>(BaseElement b) {
+	return MetaModule::Knob{b, "Rogan1PRed.png"};
+}
 
-} // namespace rack
+} // namespace MetaModule

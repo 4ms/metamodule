@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <rack.hpp>
 
 namespace MetaModule::MIDI

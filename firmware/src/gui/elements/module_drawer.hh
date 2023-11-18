@@ -2,10 +2,9 @@
 #include "CoreModules/elements/elements_index.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "gui/elements/context.hh"
-#include "gui/elements/element_drawer.hh"
+#include "gui/elements/draw.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
-#include "gui/images/component_images.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
@@ -71,7 +70,6 @@ struct ModuleDrawer {
 
 		// Draw module controls
 		const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-		auto el_drawer = ElementDrawer{height, canvas};
 
 		//Reserve enough for what we will append
 		drawn_elements.reserve(drawn_elements.size() + moduleinfo.elements.size());
@@ -79,9 +77,8 @@ struct ModuleDrawer {
 		ElementCount::Indices indices{};
 		for (const auto &element : moduleinfo.elements) {
 			auto element_ctx = std::visit(
-				[height = height, &el_drawer, &patch, &indices, module_idx, canvas, active_knob_set](
-					auto &el) -> GuiElement {
-					auto obj = el_drawer.draw_element(el);
+				[height = height, &patch, &indices, module_idx, canvas, active_knob_set](auto &el) -> GuiElement {
+					auto obj = ElementDrawer::draw_element(el, canvas, height);
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, indices);
 					auto mapped_ring = MapRingDrawer::draw_mapped_ring(el, obj, canvas, mapping_id, height);
 

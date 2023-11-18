@@ -1,16 +1,23 @@
 #pragma once
+#include <array>
+#include <cstdint>
 #include <string_view>
+#include <vector>
 
-// Heirarchy:
-//                                                         BaseElement
-//                     |---------------------------------------'------------|---------------------------|
-//              ParamElement                                          JackElement                  LightElement
-//     |--------------'----------------|------------------|         |------'-----|          |---------|-'------|---------|
-//    Pot                           Switch             Encoder    JackInput    JackOutput   MonoLight DualLight RGBLight Display
-//  |--'---|                 |--------'|----------|        |
-// Knob Slider             MomBut LatchingBut Toggle       |
-//  |       |                 |       |                    |
-// ...    ...,SliderLED     *MonoLight/RGB          EncoderRGB
+// Hierarchy:
+//                                                   BaseElement
+//                     +---------------------------------'--------------+---------------------------+
+//                     |                                                |                           |
+//              ParamElement                                        JackElement                  LightElement
+//     +----------+---'--------+------------------+                +------'-----+         +---------+'-------+---------+
+//     |          |            |                  |                |            |         |         |        |         |
+//    Pot     Encoder       Switch              Button          JackInput  JackOutput  MonoLight DualLight RGBLight Display
+//  +--'--+        |     +----'---+          +----'---------+
+//  |     |        |     |        |          |              |
+// Knob  Slider    |   FlipSw  SlideSw    MomBut         LatchingBut
+//        |        |                     +---'---+          |
+//        |        |                     |       |          |
+//   SliderLight  EncoderRGB      MomButWhite MomButRGB   LatButMonoLight
 //
 
 namespace MetaModule
@@ -39,10 +46,14 @@ struct BaseElement {
 	using State_t = void;
 };
 
+struct ImageElement : BaseElement {
+	std::string_view image = "";
+};
+
 struct NullElement : BaseElement {};
 
 // ParamElement: base class for pot, encoder, switch/button
-struct ParamElement : BaseElement {
+struct ParamElement : ImageElement {
 	static constexpr size_t NumParams = 1;
 };
 
@@ -52,66 +63,108 @@ struct Pot : ParamElement {
 };
 
 struct Knob : Pot {};
-struct Slider : Pot {};
 
-// Switches/Buttons
-struct Switch : ParamElement {};
+struct Slider : Pot {
+	std::string_view image_handle = "";
+};
 
-struct MomentaryButton : Switch {
+struct SliderLight : Slider {
+	static constexpr size_t NumLights = 1;
+	uint16_t color = 0xFFFF;
+};
+
+//
+// Buttons
+//
+struct Button : ParamElement {};
+
+struct MomentaryButton : Button {
 	enum class State_t { PRESSED, RELEASED };
 };
 
-struct LatchingButton : Switch {
-	enum class State_t { DOWN, UP };
+struct MomentaryButtonRGB : MomentaryButton {
+	static constexpr size_t NumLights = 3;
+};
+struct MomentaryButtonWhiteLight : MomentaryButton {
+	static constexpr size_t NumLights = 1;
 };
 
-struct ToggleSwitch : Switch {};
-
-struct Toggle2pos : ToggleSwitch {
+// LatchingButton always has a single color LED
+// It's drawn with a single frame, and the color is applied as a filled circle,
+// whose alpha value equals the LED value
+struct LatchingButton : Button {
 	enum class State_t { DOWN, UP };
+	static constexpr size_t NumLights = 1;
+	uint16_t color = 0xfd40;
+	//float color_radius_ratio?
 };
-struct Toggle3pos : ToggleSwitch {
-	enum class State_t { DOWN, CENTER, UP };
+
+//TODO: change svg script to use LatchingButton, not the alias
+// using LatchingButtonMonoLight = LatchingButton;
+struct LatchingButtonMonoLight : ParamElement {
+	enum class State_t { DOWN, UP };
+	static constexpr size_t NumLights = 1;
 };
-struct Toggle2posHoriz : Toggle2pos {};
-struct Toggle3posHoriz : Toggle3pos {};
+
+//
+// Switches
+//
+struct Switch : ParamElement {};
+
+// FlipSwitch has up to 3 frames
+// Frame n is drawn to indicate value == n/(num_pos-1)
+struct FlipSwitch : Switch {
+	using State_t = unsigned;
+	unsigned num_pos = 3;
+	std::array<std::string_view, 3> frames{};
+	std::array<std::string_view, 3> pos_names{"0", "1", "2"};
+};
+
+// SlideSwitch has a bg (body) image and a fg (handle) image
+// The handle is drawn at evenly spaced positions to indicate the switch's value
+struct SlideSwitch : Switch {
+	using State_t = unsigned;
+	State_t num_pos = 2;
+	std::string_view image_handle = "";
+	enum class Ascend { UpLeft, DownRight } direction = Ascend::DownRight;
+	std::array<std::string_view, 8> pos_names{};
+};
 
 // Encoders
 struct Encoder : ParamElement {};
 
+struct EncoderRGB : Encoder {
+	static constexpr size_t NumLights = 3;
+};
+
 // Jacks
-struct JackElement : BaseElement {};
+struct JackElement : ImageElement {};
 
 struct JackInput : JackElement {
 	static constexpr size_t NumInputs = 1;
 };
+
 struct JackOutput : JackElement {
 	static constexpr size_t NumOutputs = 1;
 };
 
 // Lights
-struct LightElement : BaseElement {
+struct LightElement : ImageElement {};
+
+struct MonoLight : LightElement {
 	static constexpr size_t NumLights = 1;
+	uint16_t color = 0xFFFF;
 };
-struct MonoLight : LightElement {};
+
 struct DualLight : LightElement {
 	static constexpr size_t NumLights = 2;
+	std::array<uint16_t, 2> color = {0xFFFF, 0xFFFF};
 };
-struct RgbLed : LightElement {
+struct RgbLight : LightElement {
 	static constexpr size_t NumLights = 3;
 };
 
-struct RedLight : MonoLight {};
-struct OrangeLight : MonoLight {};
-struct YellowLight : MonoLight {};
-struct GreenLight : MonoLight {};
-struct BlueLight : MonoLight {};
-struct WhiteLight : MonoLight {};
-struct RedBlueLight : DualLight {};
-struct GreenRedLight : DualLight {};
-struct RedGreenBlueLight : RgbLed {};
-
-// Displays
+// // Displays
 struct Display : LightElement {}; //TODO: does this need its own category?
 
 // AltParams: TODO

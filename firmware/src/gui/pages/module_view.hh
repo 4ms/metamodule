@@ -18,8 +18,7 @@ struct ModuleViewPage : PageBase {
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true;
-		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::CurModuleIfPlaying,
-												.opa = LV_OPA_50};
+		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::HideAlways, .opa = LV_OPA_50};
 	};
 	ViewSettings settings;
 
@@ -95,6 +94,9 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_refr_size(canvas);
 		auto width_px = lv_obj_get_width(canvas);
+		auto display_widthpx = std::min<lv_coord_t>(width_px + 8, 180); //module img is no more than 180px wide
+		lv_obj_set_width(ui_ModuleImage, display_widthpx);
+		lv_obj_refr_size(ui_ModuleImage);
 
 		active_knob_set = PageList::get_active_knobset();
 
@@ -129,7 +131,7 @@ struct ModuleViewPage : PageBase {
 
 		//Show Roller and select it
 		lv_obj_set_pos(roller, 0, 0);
-		auto roller_width = std::min(320 - width_px, 220);
+		auto roller_width = std::min(320 - display_widthpx, 220); //roller is no more than 220px wide
 		lv_obj_set_size(roller, roller_width, 240);
 		lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
 
@@ -152,12 +154,17 @@ struct ModuleViewPage : PageBase {
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (mode == ViewMode::List) {
+			if (mapping_pane.manual_control_visible()) {
+				mapping_pane.hide_manual_control();
+
+			} else if (mode == ViewMode::List) {
 				if (PageList::request_last_page()) {
 					blur();
 				}
+
 			} else if (mapping_pane.addmap_visible()) {
 				mapping_pane.hide_addmap();
+
 			} else {
 				mode = ViewMode::List;
 				lv_show(ui_ElementRoller);
@@ -303,6 +310,7 @@ private:
 		// Turn on new button
 		lv_obj_add_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
 		lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
+		lv_obj_scroll_to_view(but[cur_sel], LV_ANIM_ON);
 	}
 
 	static void roller_click_cb(lv_event_t *event) {

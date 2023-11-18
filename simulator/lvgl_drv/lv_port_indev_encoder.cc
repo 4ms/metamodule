@@ -39,12 +39,12 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 		}
 	}
 
-	if (e.type == SDL_KEYDOWN) {
+	if (e.type == SDL_KEYDOWN && e.key.state == SDL_PRESSED) {
 		if (e.key.keysym.sym == keys.click) {
 			if (rotary_pressed != ButtonEvent::Pressed) {
 				rotary_pressed = ButtonEvent::Pressed;
-				data->state = LV_INDEV_STATE_REL;
-				// printf("click down\n");
+				data->state = LV_INDEV_STATE_PR;
+				// printf("rotary pressed\n");
 			}
 		}
 
@@ -55,17 +55,26 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 				// printf("aux down\n");
 			}
 		}
+
+		if (e.key.keysym.sym == keys.turn_cw) {
+			data->enc_diff += 1;
+		}
+
+		if (e.key.keysym.sym == keys.turn_ccw) {
+			data->enc_diff -= 1;
+		}
 	}
 
-	if (e.type == SDL_KEYUP) {
-		_instance->handle_key_press(e.key.keysym.sym, data);
+	else if (e.type == SDL_KEYUP && e.key.state == SDL_RELEASED)
+	{
+		_instance->handle_key_up(e.key.keysym.sym, data);
 	}
 
 	//Is there more input events?
 	data->continue_reading = (SDL_PollEvent(NULL) != 0);
 }
 
-void LvglEncoderSimulatorDriver::handle_key_press(SDL_Keycode key, lv_indev_data_t *data) {
+void LvglEncoderSimulatorDriver::handle_key_up(SDL_Keycode key, lv_indev_data_t *data) {
 	if (key == keys.quit) {
 		_instance->set_quit(LV_QUIT);
 	}
@@ -80,17 +89,9 @@ void LvglEncoderSimulatorDriver::handle_key_press(SDL_Keycode key, lv_indev_data
 	if (key == keys.click) {
 		if (rotary_pressed != ButtonEvent::Released) {
 			rotary_pressed = ButtonEvent::Released;
-			data->state = LV_INDEV_STATE_PR;
-			// printf("click up\n");
+			data->state = LV_INDEV_STATE_REL;
+			// printf("rotary released\n");
 		}
-	}
-
-	if (key == keys.turn_cw) {
-		data->enc_diff = 1;
-	}
-
-	if (key == keys.turn_ccw) {
-		data->enc_diff = -1;
 	}
 
 	if (key == keys.param_inc) {

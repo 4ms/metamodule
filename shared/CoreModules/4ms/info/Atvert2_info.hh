@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -13,12 +14,12 @@ struct Atvert2Info : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.99), Center, "1", ""},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.67), Center, "2", ""},
-		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(168.85), Center, "In 1", ""},
-		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(214.97), Center, "In 2", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(264.07), Center, "Out 1", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(312.29), Center, "Out 2", ""},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(46.99), Center, "1", ""}},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(94.67), Center, "2", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.28), to_mm<72>(168.85), Center, "In 1", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.28), to_mm<72>(214.97), Center, "In 2", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.28), to_mm<72>(264.07), Center, "Out 1", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.28), to_mm<72>(312.29), Center, "Out 2", ""}},
 }};
 
     enum class Elem {

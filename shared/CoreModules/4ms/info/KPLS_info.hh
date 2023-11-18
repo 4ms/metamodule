@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -13,12 +14,12 @@ struct KPLSInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(47.15), Center, "Pitch", ""},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.83), Center, "Decay", ""},
-		Knob9mm{to_mm<72>(29.1), to_mm<72>(143.04), Center, "Spread", ""},
-		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(215.22), Center, "V/Oct", ""},
-		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.32), Center, "Trig", ""},
-		AnalogJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.54), Center, "Out", ""},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(47.15), Center, "Pitch", ""}},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(94.83), Center, "Decay", ""}},
+		Knob9mm{{to_mm<72>(29.1), to_mm<72>(143.04), Center, "Spread", ""}},
+		AnalogJackInput4ms{{to_mm<72>(28.63), to_mm<72>(215.22), Center, "V/Oct", ""}},
+		AnalogJackInput4ms{{to_mm<72>(28.63), to_mm<72>(264.32), Center, "Trig", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(28.63), to_mm<72>(312.54), Center, "Out", ""}},
 }};
 
     enum class Elem {

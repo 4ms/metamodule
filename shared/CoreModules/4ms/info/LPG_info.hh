@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -13,13 +14,13 @@ struct LPGInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 7> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(57.94), to_mm<72>(57.97), Center, "Level", ""},
-		Davies1900hBlackKnob{to_mm<72>(31.96), to_mm<72>(119.21), Center, "CV", ""},
-		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(119.21), Center, "Decay", ""},
-		AnalogJackInput4ms{to_mm<72>(32.13), to_mm<72>(272.09), Center, "Input", ""},
-		GateJackInput4ms{to_mm<72>(83.32), to_mm<72>(272.09), Center, "Ping", ""},
-		AnalogJackInput4ms{to_mm<72>(32.13), to_mm<72>(313.7), Center, "CV Jack", ""},
-		AnalogJackOutput4ms{to_mm<72>(83.32), to_mm<72>(313.7), Center, "Out", ""},
+		Davies1900hBlackKnob{{to_mm<72>(57.94), to_mm<72>(57.97), Center, "Level", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(119.21), Center, "CV", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(119.21), Center, "Decay", ""}},
+		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(272.09), Center, "Input", ""}},
+		GateJackInput4ms{{to_mm<72>(83.32), to_mm<72>(272.09), Center, "Ping", ""}},
+		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(313.7), Center, "CV Jack", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(83.32), to_mm<72>(313.7), Center, "Out", ""}},
 }};
 
     enum class Elem {

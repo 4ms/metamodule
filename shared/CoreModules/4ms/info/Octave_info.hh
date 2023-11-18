@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -13,21 +14,21 @@ struct OctaveInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), Center, "Octave", ""},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.22), Center, "Filter", ""},
-		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), Center, "CV", ""},
-		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), Center, "Input", ""},
-		AnalogJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), Center, "Out", ""},
-		LatchingButtonMonoLight{to_mm<72>(28.65), to_mm<72>(166.04), Center, "Sub", ""},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(46.53), Center, "Octave", ""}},
+		Knob9mm{{to_mm<72>(28.93), to_mm<72>(94.22), Center, "Filter", ""}},
+		OrangeButton{{to_mm<72>(28.65), to_mm<72>(166.04), Center, "Sub", ""}},
+		AnalogJackInput4ms{{to_mm<72>(28.63), to_mm<72>(214.97), Center, "CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(28.63), to_mm<72>(264.07), Center, "Input", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(28.63), to_mm<72>(312.29), Center, "Out", ""}},
 }};
 
     enum class Elem {
         OctaveKnob,
         FilterKnob,
+        SubButton,
         CvIn,
         InputIn,
         Out,
-        SubButton,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

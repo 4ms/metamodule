@@ -1,10 +1,11 @@
 #pragma once
 #include "gui/elements/context.hh"
 #include "gui/elements/element_name.hh"
-#include "gui/elements/helpers.hh"
+#include "gui/elements/state_names.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/add_map_popup.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/manual_control_popup.hh"
 #include "gui/pages/module_view_mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -18,18 +19,15 @@ namespace MetaModule
 struct ModuleViewMappingPane {
 	ModuleViewMappingPane(PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue, ParamsMidiState &params)
 		: patch_storage{patch_storage}
-		, patch_mod_queue{patch_mod_queue}
 		, patch{patch_storage.get_view_patch()}
 		, params{params}
-		, add_map_popup{patch_storage, patch_mod_queue} {
+		, add_map_popup{patch_storage, patch_mod_queue}
+		, control_popup{patch, patch_mod_queue} {
 	}
 
 	void init() {
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(ui_ControlArc, arc_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		//RELEASE = click on arc when done turning it
-		lv_obj_add_event_cb(ui_ControlArc, control_button_cb, LV_EVENT_RELEASED, this);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -83,6 +81,7 @@ struct ModuleViewMappingPane {
 		lv_indev_set_group(indev, pane_group);
 
 		add_map_popup.prepare_focus(pane_group);
+		control_popup.prepare_focus(pane_group);
 	}
 
 	void refresh() {
@@ -96,6 +95,7 @@ struct ModuleViewMappingPane {
 		lv_hide(ui_MappingParameters);
 		lv_hide(ui_ControlAlert);
 		add_map_popup.hide();
+		control_popup.hide();
 
 		auto indev = lv_indev_get_next(nullptr);
 		if (!indev)
@@ -122,6 +122,14 @@ struct ModuleViewMappingPane {
 
 	bool addmap_visible() {
 		return add_map_popup.visible;
+	}
+
+	void hide_manual_control() {
+		control_popup.hide();
+	}
+
+	bool manual_control_visible() {
+		return control_popup.visible;
 	}
 
 private:
@@ -287,7 +295,7 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		//TODO
+		//TODO: go to EditMapping page
 		(void)page;
 		pr_err("Edit Map not implemented yet\n");
 	}
@@ -323,44 +331,16 @@ private:
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
 		if (event->target == ui_ControlButton) {
-			lv_show(ui_ControlAlert);
 			lv_obj_clear_state(ui_ControlButton, LV_STATE_PRESSED);
-			lv_group_add_obj(page->pane_group, ui_ControlArc);
-			lv_group_focus_obj(ui_ControlArc);
-
-			auto param_id = page->drawn_element->gui_element.idx.param_idx;
-			auto module_id = PageList::get_selected_module_id();
-			auto cur_val = page->patch_storage.get_view_patch().get_static_knob_value(module_id, param_id);
-			if (cur_val)
-				lv_arc_set_value(ui_ControlArc, cur_val.value() * 100);
+			page->control_popup.show(page->drawn_element);
 		}
-
-		if (event->target == ui_ControlArc) {
-			//defocus
-			lv_hide(ui_ControlAlert);
-			lv_group_focus_next(page->pane_group);
-		}
-	}
-
-	static void arc_change_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-		auto &patch = page->patch_storage.get_view_patch();
-
-		StaticParam sp{
-			.module_id = (uint16_t)PageList::get_selected_module_id(),
-			.param_id = page->drawn_element->gui_element.idx.param_idx,
-			.value = lv_arc_get_value(ui_ControlArc) / 100.f,
-		};
-		page->patch_mod_queue.put(SetStaticParam{.param = sp});
-		patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 	}
 
 	PatchStorageProxy &patch_storage;
-	PatchModQueue &patch_mod_queue;
+
 	lv_group_t *base_group = nullptr;
 	lv_group_t *pane_group = nullptr;
+
 	const DrawnElement *drawn_element;
 	bool is_patch_playing = false;
 	PatchData &patch;
@@ -369,6 +349,7 @@ private:
 
 	MappingPaneList list;
 	AddMapPopUp add_map_popup;
+	ManualControlPopUp control_popup;
 };
 
 } // namespace MetaModule

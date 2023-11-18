@@ -91,6 +91,10 @@ struct SvgSlider : ParamWidget {
 	}
 	void setHandleSvg(auto) {
 	}
+	void setHandlePos(math::Vec minHandlePos, math::Vec maxHandlePos) {
+	}
+	void setHandlePosCentered(math::Vec minHandlePosCentered, math::Vec maxHandlePosCentered) {
+	}
 
 private:
 	widget::SvgWidget _background;

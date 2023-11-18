@@ -4,129 +4,144 @@
 
 // Forward declare widgets from Befaco/src/plugin.hpp
 struct Knurlie;
+
 struct BefacoTinyKnobWhite;
 struct BefacoTinyKnobRed;
 struct BefacoTinyKnobDarkGrey;
 struct BefacoTinyKnobLightGrey;
 struct BefacoTinyKnobBlack;
 struct Davies1900hLargeGreyKnob;
+struct Davies1900hLargeLightGreyKnob;
 struct Davies1900hLightGreyKnob;
 struct Davies1900hDarkGreyKnob;
+struct Crossfader;
+struct BefacoSlidePotSmall;
+
 struct BananutRed;
 struct BananutBlack;
+
 struct CKSSNarrow;
-struct Crossfader;
-struct BefacoSwitchHorizontal;
 struct CKSSHoriz2;
 struct CKSSVert7;
 struct CKSSHoriz4;
 struct CKSSNarrow3;
-struct Davies1900hLargeLightGreyKnob;
-struct BefacoSlidePotSmall;
 
-// Conversions from Befaco widgets to MetaModule Elements:
+// From StereoStrip.cpp:
+struct ThreeStateBefacoSwitchMomentary;
 
-namespace rack
+// Only used in Muxslicer:
+// struct BefacoSwitchHorizontal;
+
+// From MotionMTR.cpp
+struct CKSSThreeDragable;
+
+namespace MetaModule
 {
 
 template<>
-struct ElementConvert<Knurlie> {
-	using ElementType = MetaModule::NullElement;
+inline Element make_element<::CKSSVert7>(BaseElement b) {
+	return SlideSwitch{{b, "SwitchTallVert.png"}, 7, "SwitchTallVertHandle.png", SlideSwitch::Ascend::UpLeft};
+}
+
+template<>
+inline Element make_element<::CKSSHoriz4>(BaseElement b) {
+	return SlideSwitch{{b, "SwitchWideHoriz_bg.png"}, 4, "SwitchWideHoriz_fg.png", SlideSwitch::Ascend::DownRight};
+}
+
+template<>
+inline Element make_element<::CKSSThreeDragable>(BaseElement b) {
+	return SlideSwitch{{b, "CKSSThree_bg.png"}, 3, "CKSSThree_fg.png", SlideSwitch::Ascend::UpLeft};
+}
+
+template<>
+inline Element make_element<::CKSSHoriz2>(BaseElement b) {
+	return FlipSwitch{{b}, 2, {"SwitchNarrowHoriz_0.png", "SwitchNarrowHoriz_1.svg"}};
+}
+
+template<>
+inline Element make_element<::CKSSNarrow>(BaseElement b) {
+	return FlipSwitch{{b}, 2, {"SwitchNarrow_0.png", "SwitchNarrow_2.png"}};
+}
+
+template<>
+inline Element make_element<::CKSSNarrow3>(BaseElement b) {
+	return FlipSwitch{{b}, 3, {"SwitchNarrow_0.png", "SwitchNarrow_1.png", "SwitchNarrow_2.png"}};
+}
+
+template<>
+inline Element make_element<::ThreeStateBefacoSwitchMomentary>(BaseElement b) {
+	return FlipSwitch{
+		{b}, 3, {"BefacoSwitch_0.png", "BefacoSwitch_1.png", "BefacoSwitch_2.png"}, {"Off(m)", "On", "Off"}};
 };
 
 template<>
-struct ElementConvert<BefacoTinyKnobWhite> {
-	using ElementType = MetaModule::BefacoTinyKnobWhite;
+inline Element make_element<::Knurlie>(BaseElement b) {
+	return NullElement{b};
 };
 
 template<>
-struct ElementConvert<BefacoTinyKnobRed> {
-	using ElementType = MetaModule::BefacoTinyKnobRed;
+inline Element make_element<::BefacoTinyKnobWhite>(BaseElement b) {
+	return Knob{b, "BefacoTinyKnobWhite.png"};
 };
 
 template<>
-struct ElementConvert<BefacoTinyKnobDarkGrey> {
-	using ElementType = MetaModule::BefacoTinyKnobDarkGrey;
+inline Element make_element<::BefacoTinyKnobRed>(BaseElement b) {
+	return Knob{b, "BefacoTinyKnobRed.png"};
 };
 
 template<>
-struct ElementConvert<BefacoTinyKnobLightGrey> {
-	using ElementType = MetaModule::BefacoTinyKnobLightGrey;
+inline Element make_element<::BefacoTinyKnobDarkGrey>(BaseElement b) {
+	return Knob{b, "BefacoTinyKnobDarkGrey.png"};
 };
 
 template<>
-struct ElementConvert<BefacoTinyKnobBlack> {
-	using ElementType = MetaModule::BefacoTinyKnobBlack;
+inline Element make_element<::BefacoTinyKnobLightGrey>(BaseElement b) {
+	return Knob{b, "BefacoTinyKnobLightGrey.png"};
 };
 
 template<>
-struct ElementConvert<Davies1900hLargeGreyKnob> {
-	using ElementType = MetaModule::Davies1900hLargeGreyKnob;
+inline Element make_element<::BefacoTinyKnobBlack>(BaseElement b) {
+	return Knob{b, "BefacoTinyKnobBlack.png"};
 };
 
 template<>
-struct ElementConvert<Davies1900hLightGreyKnob> {
-	using ElementType = MetaModule::Davies1900hLightGreyKnob;
+inline Element make_element<::Davies1900hLargeGreyKnob>(BaseElement b) {
+	return Knob{b, "Davies1900hLargeGrey.png"};
 };
 
 template<>
-struct ElementConvert<Davies1900hDarkGreyKnob> {
-	using ElementType = MetaModule::Davies1900hDarkGreyKnob;
+inline Element make_element<::Davies1900hLightGreyKnob>(BaseElement b) {
+	return Knob{b, "Davies1900hLightGrey.png"};
 };
 
 template<>
-struct ElementConvert<BananutRed> {
-	using ElementTypeOutput = MetaModule::BefacoOutputPort;
+inline Element make_element<::Davies1900hLargeLightGreyKnob>(BaseElement b) {
+	return Knob{b, "Davies1900hLargeLightGrey.png"};
 };
 
 template<>
-struct ElementConvert<BananutBlack> {
-	using ElementTypeInput = MetaModule::BefacoInputPort;
+inline Element make_element<::Davies1900hDarkGreyKnob>(BaseElement b) {
+	return Knob{b, "Davies1900hDarkGrey.png"};
 };
 
 template<>
-struct ElementConvert<CKSSNarrow> {
-	using ElementType = MetaModule::CKSSNarrow;
+inline Element make_element<::Crossfader>(BaseElement b) {
+	return Slider{{b, "Crossfader.png"}, "CrossfaderHandle.png"};
 };
 
 template<>
-struct ElementConvert<Crossfader> {
-	using ElementType = MetaModule::Crossfader;
+inline Element make_element<::BefacoSlidePotSmall>(BaseElement b) {
+	return Slider{{b, "BefacoSlidePotSmall.png"}, "BefacoSlidePotHandleSmall.png"};
 };
 
 template<>
-struct ElementConvert<BefacoSwitchHorizontal> {
-	using ElementType = MetaModule::BefacoSwitchHorizontal;
+inline Element make_element_output<::BananutRed>(BaseElement b) {
+	return JackOutput{b, "BananutRed.png"};
 };
 
 template<>
-struct ElementConvert<CKSSHoriz2> {
-	using ElementType = MetaModule::CKSSHoriz2;
+inline Element make_element_input<::BananutBlack>(BaseElement b) {
+	return JackInput{b, "BananutBlack.png"};
 };
 
-template<>
-struct ElementConvert<CKSSVert7> {
-	using ElementType = MetaModule::CKSSVert7;
-};
-
-template<>
-struct ElementConvert<CKSSHoriz4> {
-	using ElementType = MetaModule::CKSSHoriz4;
-};
-
-template<>
-struct ElementConvert<CKSSNarrow3> {
-	using ElementType = MetaModule::CKSSNarrow3;
-};
-
-template<>
-struct ElementConvert<Davies1900hLargeLightGreyKnob> {
-	using ElementType = MetaModule::Davies1900hLargeLightGreyKnob;
-};
-
-template<>
-struct ElementConvert<BefacoSlidePotSmall> {
-	using ElementType = MetaModule::BefacoSlidePotSmall;
-};
-
-} // namespace rack
+} // namespace MetaModule

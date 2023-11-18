@@ -1,6 +1,6 @@
 PatchData:
   patch_name: HexMixVCA
-  description: Patch Description
+  description: Only ch 1 CV is patched. Ch6 in is unpatched
   module_slugs:
     0: HubMedium
     1: HexmixVCA
@@ -94,7 +94,79 @@ PatchData:
       value: 0.363855
   mapped_knobs:
     - name: ''
-      set: []
+      set:
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 1
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 1
+          param_id: 7
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 4
+          module_id: 1
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 1
+          param_id: 8
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 1
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 1
+          param_id: 9
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 1
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
+          module_id: 1
+          param_id: 10
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 1
+          param_id: 5
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 1
+          param_id: 11
+          curve_type: 0
+          min: 0
+          max: 1
     - name: ''
       set: []
     - name: ''
@@ -109,3 +181,15 @@ PatchData:
       set: []
     - name: ''
       set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+
+'vcvModuleStates':
+  - 'id': 1
+    'plugin': 'Befaco'
+    'model': 'HexmixVCA'
+    'version': '2.4.0'
+    'data':
+      'finalRowIsMix': true

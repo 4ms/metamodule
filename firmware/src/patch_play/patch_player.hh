@@ -331,13 +331,6 @@ public:
 					modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
 			}
 		}
-
-		for (auto const &cable : pd.mapped_ins) {
-			for (auto const &input_jack : cable.ins) {
-				if (input_jack.module_id > 0)
-					modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
-			}
-		}
 	}
 
 	void set_input_jack_patched_status(uint32_t panel_in_jack_id, bool is_patched) {

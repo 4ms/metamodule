@@ -60,6 +60,7 @@ jobs:
           echo "AudibleInstruments:Braids" >> firmware/lim
           cd firmware && make limit lim && make all
 
+      # Don't upload artifacts for each build, uses too much space on our account
       # - name: Upload artifact
       #   uses: actions/upload-artifact@v3
       #   with:
@@ -74,6 +75,5 @@ jobs:
         with:
           name: "Firmware Version: ${{ env.CI_REF_NAME }}"
           files: |
-            firmware/build/mp1corea7/medium/main.elf
             firmware/build/mp1corea7/medium/main.uimg
 

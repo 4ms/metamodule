@@ -1,6 +1,7 @@
 #pragma once
 #include "VCV_adaptor/app/SvgScrew.hpp"
 #include "VCV_adaptor/app/Widget.hh"
+#include "VCV_adaptor/asset.hpp"
 //TODO Replace this with Rack/include/componentlibrary.hpp
 
 namespace rack::componentlibrary
@@ -90,10 +91,40 @@ struct Trimpot : app::ParamWidget {};
 
 struct BefacoBigKnob : app::ParamWidget {};
 struct BefacoTinyKnob : app::ParamWidget {};
-struct BefacoSlidePot : app::ParamWidget {};
 
-struct VCVSlider : app::ParamWidget {};
-struct VCVSliderHorizontal : app::ParamWidget {};
+struct BefacoSlidePot : app::SvgSlider {
+	BefacoSlidePot() {
+		setBackgroundSvg(window::Svg::load(asset::system("res/ComponentLibrary/BefacoSlidePot.svg")));
+		setHandleSvg(window::Svg::load(asset::system("res/ComponentLibrary/BefacoSlidePotHandle.svg")));
+		math::Vec margin = math::Vec(3.5, 3.5);
+		setHandlePos(math::Vec(-1, 87).plus(margin), math::Vec(-1, -2).plus(margin));
+		background->box.pos = margin;
+		box.size = background->box.size.plus(margin.mult(2));
+	}
+};
+
+struct VCVSlider : app::SvgSlider {
+	VCVSlider() {
+		setBackgroundSvg(window::Svg::load(asset::system("res/ComponentLibrary/VCVSlider.svg")));
+		setHandleSvg(window::Svg::load(asset::system("res/ComponentLibrary/VCVSliderHandle.svg")));
+		setHandlePosCentered(
+			math::Vec(19.84260/2, 76.53517 - 11.74218/2),
+			math::Vec(19.84260/2, 0.0 + 11.74218/2)
+		);
+	}
+};
+using LEDSlider = VCVSlider;
+
+struct VCVSliderHorizontal : app::SvgSlider {
+	VCVSliderHorizontal() {
+		horizontal = true;
+		setBackgroundSvg(window::Svg::load(asset::system("res/ComponentLibrary/VCVSliderHorizontal.svg")));
+		setHandlePos(window::mm2px(math::Vec(0.738, 0.738).plus(math::Vec(0, 2))), window::mm2px(math::Vec(22.078, 0.738).plus(math::Vec(0, 2))));
+	}
+};
+using LEDSliderHorizontal = VCVSliderHorizontal;
+
+
 
 // Jacks
 

@@ -1,15 +1,13 @@
 #pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/elements.hh"
 #include <array>
+#include <cmath>
 #include <concepts>
 #include <type_traits>
 
 namespace MetaModule::StateConversion
 {
-
-// Here we provide a non-ambigous set of fallbacks
-// For all element types that need a custom behaviour, a specialization for that particular type needs to be created
-// Since overload resolution does not work for template parameters, just inheriting from a specialized type (and expecting the method to fall back to the parent's) will not work
 
 //TODO: This generates a compiler error for gcc < 12.3
 template<typename T>
@@ -19,7 +17,6 @@ constexpr typename T::State_t convertState(const T &, float val) requires(std::i
 	// All types that inherit from BaseElement but do not define their own State_t will be caught
 }
 
-// to be defined for all kinds of elements
 template<typename T>
 constexpr MomentaryButton::State_t convertState(const T &, float val) requires(std::derived_from<T, MomentaryButton>)
 {
@@ -52,6 +49,21 @@ constexpr Toggle3pos::State_t convertState(const T &, float val) requires(std::d
 	} else {
 		return Toggle3pos::State_t::UP;
 	}
+}
+
+template<typename T>
+constexpr SlideSwitch::State_t convertState(const T &element, float val) requires(std::derived_from<T, SlideSwitch>)
+{
+	//maps 0..1 -> 1..N
+	return SlideSwitch::State_t(1 + std::round(val * (float)(element.num_pos - 1)));
+}
+
+template<typename T>
+constexpr FlipSwitch::State_t convertState(const T &element, float val)
+	requires(std::derived_from<T, FlipSwitch> && !std::same_as<T, Toggle2pos> && !std::same_as<T, Toggle3pos>)
+{
+	//maps 0..1 -> 0..(num_pos-1)
+	return FlipSwitch::State_t(std::round(val * (float)(element.num_pos - 1)));
 }
 
 template<typename T>
