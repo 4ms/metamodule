@@ -40,7 +40,7 @@ namespace MetaModule
 
 template<>
 inline Element make_element<::CKSSVert7>(BaseElement b) {
-	return SlideSwitch{{b, "SwitchTallVert.png"}, 7, "SwitchTallVertHandle.png", SlideSwitch::Ascend::UpLeft};
+	return SlideSwitch{{b, "SwitchTallVert_bg.png"}, 7, "SwitchTallVert_fg.png", SlideSwitch::Ascend::UpLeft};
 }
 
 template<>
@@ -126,12 +126,12 @@ inline Element make_element<::Davies1900hDarkGreyKnob>(BaseElement b) {
 
 template<>
 inline Element make_element<::Crossfader>(BaseElement b) {
-	return Slider{{b, "Crossfader.png"}, "CrossfaderHandle.png"};
+	return Slider{{b, "Crossfader_bg.png"}, "Crossfader_fg.png"};
 };
 
 template<>
 inline Element make_element<::BefacoSlidePotSmall>(BaseElement b) {
-	return Slider{{b, "BefacoSlidePotSmall.png"}, "BefacoSlidePotHandleSmall.png"};
+	return Slider{{b, "BefacoSlidePotSmall_bg.png"}, "BefacoSlidePotSmall_fg.png"};
 };
 
 template<>
