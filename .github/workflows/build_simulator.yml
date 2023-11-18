@@ -101,7 +101,7 @@ jobs:
 
   build-win-gcc:
     if: ${{ github.event_name == 'push' || inputs.win_gcc }}
-    name: wib-gcc
+    name: win-gcc
     strategy:
       fail-fast: false
     runs-on: 'windows-latest'
