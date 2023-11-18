@@ -1,0 +1,186 @@
+PatchData:
+  patch_name: Chaos Plaits
+  description: 'Out 1+2 - Plaits main/aux Out 3+4 - Chaos x/y       Ins 1,2,3, 5 - Plaits      In 4 - Chaos'
+  module_slugs:
+    0: HubMedium
+    1: StMix
+    2: Plaits
+    3: Shades
+  int_cables:
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - out:
+        module_id: 2
+        jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 1
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 4
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 1
+    - panel_jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 2
+    - panel_jack_id: 2
+      ins:
+        - module_id: 2
+          jack_id: 3
+    - panel_jack_id: 4
+      ins:
+        - module_id: 3
+          jack_id: 0
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 1
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0.5
+    - module_id: 1
+      param_id: 2
+      value: 0.5
+    - module_id: 1
+      param_id: 3
+      value: 0.5
+    - module_id: 1
+      param_id: 4
+      value: 0.5
+    - module_id: 1
+      param_id: 5
+      value: 0.5
+    - module_id: 1
+      param_id: 6
+      value: 0.5
+    - module_id: 1
+      param_id: 7
+      value: 0.5
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 0
+    - module_id: 2
+      param_id: 2
+      value: -1.4843364
+    - module_id: 2
+      param_id: 3
+      value: 0.40000007
+    - module_id: 2
+      param_id: 4
+      value: 0.4614458
+    - module_id: 2
+      param_id: 5
+      value: 0.56746995
+    - module_id: 2
+      param_id: 6
+      value: -0.016867995
+    - module_id: 2
+      param_id: 7
+      value: -0.04337436
+    - module_id: 2
+      param_id: 8
+      value: 0
+    - module_id: 2
+      param_id: 9
+      value: 0.5
+    - module_id: 2
+      param_id: 10
+      value: 0.5
+    - module_id: 3
+      param_id: 0
+      value: 0.5
+    - module_id: 3
+      param_id: 1
+      value: 0.5
+    - module_id: 3
+      param_id: 2
+      value: 0.5
+    - module_id: 3
+      param_id: 3
+      value: 1
+    - module_id: 3
+      param_id: 4
+      value: 1
+    - module_id: 3
+      param_id: 5
+      value: 1
+  mapped_knobs:
+    - name: ''
+      set:
+        - panel_knob_id: 0
+          module_id: 2
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 2
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 2
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 2
+          param_id: 5
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 2
+          param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 2
+          param_id: 7
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 2
+          param_id: 8
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
+          module_id: 3
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
