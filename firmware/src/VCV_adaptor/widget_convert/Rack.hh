@@ -137,7 +137,7 @@ inline Element make_element<rack::componentlibrary::Trimpot>(BaseElement b) {
 //
 template<>
 inline Element make_element<rack::componentlibrary::BefacoSlidePot>(BaseElement b) {
-	return Slider{{b, "BefacoSlidePot.png"}, "BefacoSlidePotHandle.png"};
+	return Slider{{b, "BefacoSlidePot_bg.png"}, "BefacoSlidePot_fg.png"};
 };
 
 //
@@ -158,6 +158,11 @@ inline Element make_element<rack::componentlibrary::SmallLight<rack::componentli
 template<>
 inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::GreenLight>>(BaseElement b) {
 	return MonoLight{{b, "SmallLight.png"}, Colors565::Green};
+};
+
+template<>
+inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::BlueLight>>(BaseElement b) {
+	return MonoLight{{b, "SmallLight.png"}, 0x07FF};
 };
 
 template<>

@@ -14,8 +14,7 @@ struct SvgPanel : widget::Widget {
 	PanelBorder *panelBorder;
 	window::Svg *svg;
 
-	void step() override;
-	void setBackground(window::Svg *svg) {
+	void setBackground(std::shared_ptr<window::Svg> svg) {
 	}
 };
 

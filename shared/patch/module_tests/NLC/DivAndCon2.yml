@@ -1,0 +1,73 @@
+PatchData:
+  patch_name: DivAndCon 2
+  description: Upper outputs patched
+  module_slugs:
+    0: HubMedium
+    1: DivideConquer
+  int_cables: []
+  mapped_ins:
+    - panel_jack_id: 6
+      ins:
+        - module_id: 1
+          jack_id: 1
+    - panel_jack_id: 7
+      ins:
+        - module_id: 1
+          jack_id: 2
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 3
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 0
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 9
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 8
+    - panel_jack_id: 2
+      out:
+        module_id: 1
+        jack_id: 11
+    - panel_jack_id: 3
+      out:
+        module_id: 1
+        jack_id: 10
+    - panel_jack_id: 4
+      out:
+        module_id: 1
+        jack_id: 13
+    - panel_jack_id: 5
+      out:
+        module_id: 1
+        jack_id: 12
+  static_knobs: []
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+
+'vcvModuleStates': []
