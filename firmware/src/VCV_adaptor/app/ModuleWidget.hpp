@@ -48,7 +48,6 @@ struct ModuleWidget : widget::Widget {
 		if (!lightWidget)
 			return;
 		place_at(lightElements, lightWidget->firstLightId, lightWidget->element);
-		lightElements.push_back(lightWidget->element);
 		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
 		delete lightWidget;
 	}
