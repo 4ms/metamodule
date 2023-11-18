@@ -12,7 +12,7 @@ namespace MetaModule
 
 template<>
 inline Element make_element<rack::componentlibrary::LargeLight<SlothRedGreenLightWidget>>(BaseElement b) {
-	return DualLight{{b, "LargeLight.png"}, {0xF800, 0x07E0}};
+	return DualLight{{b, "LargeLight.png"}, {Colors565::Red, Colors565::Green}};
 };
 
 } // namespace MetaModule
