@@ -161,6 +161,11 @@ inline Element make_element<rack::componentlibrary::SmallLight<rack::componentli
 };
 
 template<>
+inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::BlueLight>>(BaseElement b) {
+	return MonoLight{{b, "SmallLight.png"}, 0x07FF};
+};
+
+template<>
 inline Element make_element<rack::componentlibrary::SmallLight<rack::componentlibrary::GreenRedLight>>(BaseElement b) {
 	return DualLight{{b, "SmallLight.png"}, {0x07E0, 0xF800}};
 };

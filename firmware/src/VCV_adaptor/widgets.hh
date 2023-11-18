@@ -4,7 +4,9 @@
 #include "VCV_adaptor/asset.hpp"
 //TODO Replace this with Rack/include/componentlibrary.hpp
 
-namespace rack::componentlibrary
+namespace rack
+{
+namespace componentlibrary
 {
 
 ////////////////////
@@ -145,9 +147,9 @@ using LEDBezel = VCVBezel;
 
 // Lights
 
-template<typename T> struct LargeLight : app::ModuleLightWidget {};
-template<typename T> struct MediumLight : app::ModuleLightWidget {};
-template<typename T> struct SmallLight : app::ModuleLightWidget {};
+template<typename T> struct LargeLight : T {};
+template<typename T> struct MediumLight : T {};
+template<typename T> struct SmallLight : T {};
 template <typename TBase> struct VCVBezelLight : TBase {};
 template <typename TBase> using LEDBezelLight = VCVBezelLight<TBase>;
 
@@ -160,6 +162,10 @@ struct GreenLight : app::ModuleLightWidget {};
 struct RedGreenBlueLight : app::ModuleLightWidget {};
 struct GrayModuleLightWidget : app::ModuleLightWidget {};
 // clang-format off
+
+} // namespace componentlibrary
+
+struct GrayModuleLightWidget : app::ModuleLightWidget {};
 
 } // namespace rack
 
