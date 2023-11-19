@@ -95,6 +95,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		// copy analyzed signals back to shared param block (so GUI thread can access it)
 		param_blocks[block].metaparams.ins = local_p.metaparams.ins;
+
+		// copy this value back so Controls can read it
+		param_blocks[block].metaparams.midi_poly_chans = local_p.metaparams.midi_poly_chans;
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
 		// Debug::Pin4::low();
