@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import struct
-import sys
 import time
 import zlib
 import argparse
@@ -49,13 +48,13 @@ if __name__ == "__main__":
         os = os_linux
         image_type = image_type_kernel
         compress = compress_none
-        image_name = bytes(image_name_str, "ascii")
+        image_name = image_name_str.encode("ascii")
 
         # Calculate some header entries:
         header_size = 64
         datalen = len(payload) + header_size
         tmstamp = int(time.time())
-        data_crc = zlib.crc32(payload) & 0xffffffff
+        data_crc = zlib.crc32(payload)
 
         # To calc the header CRC, we generate a header with the CRC zero'ed out.
         # Then we calc the CRC of that, add fill the CRC value back in
@@ -74,12 +73,10 @@ if __name__ == "__main__":
             image_name,                                 # Image Name		
             )
 
-        hcrc = (zlib.crc32(header_no_crc) & 0xffffffff).to_bytes(4, 'big')
+        # Calculate and set header checksum
+        hcrc = struct.pack(">I", zlib.crc32(header_no_crc))
         header = bytearray(header_no_crc)
-        header[4] = hcrc[0]
-        header[5] = hcrc[1]
-        header[6] = hcrc[2]
-        header[7] = hcrc[3]
+        header[4:8] = hcrc
 
         with open(args.image_file, "wb") as uimg_file:
             uimg_file.write(header + payload)
