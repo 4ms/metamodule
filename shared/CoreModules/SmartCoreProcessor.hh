@@ -133,10 +133,10 @@ private:
 		return indices[element_idx];
 	}
 
-	std::array<float, counts.num_params> paramValues;
-	std::array<std::optional<float>, counts.num_inputs> inputValues;
-	std::array<float, counts.num_outputs> outputValues;
-	std::array<float, counts.num_lights> ledValues;
+	std::array<float, counts.num_params> paramValues{};
+	std::array<std::optional<float>, counts.num_inputs> inputValues{0};
+	std::array<float, counts.num_outputs> outputValues{};
+	std::array<float, counts.num_lights> ledValues{};
 };
 
 } // namespace MetaModule
