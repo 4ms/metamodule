@@ -21,13 +21,13 @@ constexpr typename T::State_t convertState(const T &, float val) requires(std::i
 template<typename T>
 constexpr MomentaryButton::State_t convertState(const T &, float val) requires(std::derived_from<T, MomentaryButton>)
 {
-	return val > 0 ? MomentaryButton::State_t::PRESSED : MomentaryButton::State_t::RELEASED;
+	return val > 0.5f ? MomentaryButton::State_t::PRESSED : MomentaryButton::State_t::RELEASED;
 }
 
 template<typename T>
 constexpr LatchingButton::State_t convertState(const T &, float val) requires(std::derived_from<T, LatchingButton>)
 {
-	return val > 0 ? LatchingButton::State_t::DOWN : LatchingButton::State_t::UP;
+	return val > 0.5f ? LatchingButton::State_t::DOWN : LatchingButton::State_t::UP;
 }
 
 template<typename T>
