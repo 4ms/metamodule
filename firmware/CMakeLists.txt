@@ -43,9 +43,9 @@ add_subdirectory(src ${A7_BIN_PATH})
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
-  COMMAND cat ${A7_BIN_PATH}/main_a7.uimg ${M4_BIN_PATH}/m4_vectors.uimg ${M4_BIN_PATH}/m4_code.uimg ${M4_BIN_PATH}/m4_rodata.uimg > ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND flashing/elf_to_uimg.py --m4 $<TARGET_FILE:main_m4.elf> --a7 $<TARGET_FILE:main.elf> ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
   COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
-  DEPENDS main.elf main_m4.elf ${M4_BIN_PATH}/m4_vectors.uimg ${M4_BIN_PATH}/m4_code.uimg ${M4_BIN_PATH}/m4_rodata.uimg
+  DEPENDS main.elf main_m4.elf
   COMMENT "Creating combined uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
