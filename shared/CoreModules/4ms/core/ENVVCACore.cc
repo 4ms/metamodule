@@ -127,9 +127,9 @@ public:
 
 	void displayEnvelope(float val, TriangleOscillator::State_t state) {
 		val = val / VoltageDivider(100e3f, 100e3f);
-		val *= getState<EnvLevelSlider>();
-		setOutput<EnvOut>(val);
-		setLED<EnvLevelSlider>(val / 8.f);
+		float outval = val * getState<EnvLevelSlider>();
+		setOutput<EnvOut>(outval);
+		setLED<EnvLevelSlider>(outval / 8.f);
 		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
 		// even during State_t::FOLLOW
 		setLED<RiseSlider>(state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
