@@ -5,6 +5,7 @@
 #include "CoreModules/4ms/core/envvca/SSI2162.h"
 #include "CoreModules/4ms/core/envvca/TriangleOscillator.h"
 #include "CoreModules/4ms/core/envvca/Tables.h"
+#include "CoreModules/4ms/core/envvca/FollowInput.h"
 #include "CoreModules/4ms/core/helpers/EdgeDetector.h"
 #include "CoreModules/4ms/core/helpers/circuit_elements.h"
 #include "CoreModules/4ms/core/helpers/FlipFlop.h"
@@ -75,6 +76,8 @@ private:
 
 		FlipFlop triggerDetector;
 		EdgeDetector triggerEdgeDetector;
+
+		FollowInput followInput;
 
 	private:
 		float cycleLED;
@@ -229,21 +232,7 @@ private:
 			}
 
 			if (auto inputFollowValue = parent->getInput<Mapping::FollowIn>(); inputFollowValue) {
-				float filterInput;
-				
-				if (gcem::abs(*inputFollowValue - previousFollowInputValue) >= followInputHysteresisInV) {
-					filterInput = *inputFollowValue;
-					previousFollowInputValue = *inputFollowValue;
-				}
-				else {
-					filterInput = previousFollowInputValue;
-				}
-
-				auto filterOutput = followInputFilterCoeff * filterInput + (1.0f - followInputFilterCoeff) * previousFollowInputFilterOutput;
-
-				osc.setTargetVoltage(filterOutput);
-
-				previousFollowInputFilterOutput = filterOutput;
+				osc.setTargetVoltage(followInput.process(*inputFollowValue));
 			}
 
 			osc.proceed(timeStepInS);

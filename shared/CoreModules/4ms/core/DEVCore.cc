@@ -5,6 +5,7 @@
 #include "CoreModules/4ms/core/envvca/SSI2162.h"
 #include "CoreModules/4ms/core/envvca/TriangleOscillator.h"
 #include "CoreModules/4ms/core/envvca/Tables.h"
+#include "CoreModules/4ms/core/envvca/FollowInput.h"
 #include "CoreModules/4ms/core/helpers/EdgeDetector.h"
 #include "CoreModules/4ms/core/helpers/circuit_elements.h"
 #include "CoreModules/4ms/core/helpers/FlipFlop.h"
@@ -56,6 +57,8 @@ private:
 		FlipFlop triggerDetector;
 		EdgeDetector triggerEdgeDetector;
 
+		FollowInput followInput;
+
 	private:
 		float cycleLED;
 		float riseCV;
@@ -69,37 +72,6 @@ private:
 
 	private:
 		DEVCore* parent;
-
-	private:
-		static constexpr float inputHysteresisInV = 0.1f;
-		std::pair<float, uint32_t> applyHysteresis(float input) {
-			static float previousInput = 0.0f;
-			static uint32_t count = 0;
-			static uint32_t maxcount = 0;
-
-			count++;
-
-			if (gcem::abs(input - previousInput) >= inputHysteresisInV)
-			{
-				previousInput = input;
-				maxcount = count;
-				count = 0;
-			}
-
-			return {previousInput, maxcount};
-		}
-
-	private:
-		static constexpr float followInputFilterCoeff = 0.8f;
-		float filterFollowInput(float input, float filterCoeff) {
-			static float previousFollowInputFilterOutput = 0.0f;
-
-			float filterOutput = filterCoeff * input + (1.0f - filterCoeff) * previousFollowInputFilterOutput;
-
-			previousFollowInputFilterOutput = filterOutput;
-
-			return filterOutput;
-		};
 	
 	public:
 		Channel(DEVCore* parent_)
@@ -174,21 +146,7 @@ private:
 			}
 
 			if (auto inputFollowValue = parent->getInput<Mapping::FollowIn>(); inputFollowValue) {
-				// the follow input is rather sensitive to noise. in order to prevent oscillations around a noisy follow voltage some hysteresis is added to the input
-				auto hystOutput = applyHysteresis(*inputFollowValue);
-
-				/*
-				the hysteresis transforms a slow continious modulation into a stepped voltage. this can cause frequent state transitions of the internal oscillator from rising/falling to idle. 
-				as this results in erratic behavior of the eor/eof jacks the stepped voltage has to be filtered in order to create a continious modulation.
-				this is done by an adjustable low pass filter. its filter coefficient is calculated based on the gradient of the incoming follow voltage,
-				which is identified by the number of processing steps which were necessary to cross the hysteresis threshold.
-				*/
-				auto hystCounter = std::get<1>(hystOutput);
-				float filterCoeff = hystCounter == 0 ? followInputFilterCoeff : followInputFilterCoeff / float(hystCounter);
-
-				float filterOutput = filterFollowInput(std::get<0>(hystOutput), filterCoeff);
-
-				osc.setTargetVoltage(filterOutput);
+				osc.setTargetVoltage(followInput.process(*inputFollowValue));
 			}
 			else
 			{
