@@ -6,10 +6,11 @@ class TriangleOscillator
 {
 public:
 	// FIXME: FOLLOW state is orthagonal to [RISE or FALL] state
-    enum State_t {RISING, FALLING, FOLLOW};
+    enum State_t {TRIGGERED, FOLLOW};
+    enum SlopeState_t {IDLE, RISING, FALLING};
 
 public:
-    TriangleOscillator() : outputInV(0.0f), state(State_t::FOLLOW), cycling(false), retriggerPending(false), targetVoltage(0.0f)
+    TriangleOscillator() : outputInV(0.0f), state(State_t::FOLLOW), slopeState(SlopeState_t::RISING), cycling(false), retriggerPending(false), sustainMax(false), targetVoltage(0.0f)
     {
     }
 
@@ -30,70 +31,97 @@ public:
 
     void setTargetVoltage(float val)
     {
-        targetVoltage = val;
+        if (val > FollowTresholdInV)
+        {
+            targetVoltage = val;
+        }
+        else
+        {
+            targetVoltage = MinValInV;
+        }
     }
 
     void proceed(float timeInS)
     {
 		if (retriggerPending)
 		{
-			state = State_t::RISING;
+			slopeState = SlopeState_t::RISING;
+            state = State_t::TRIGGERED;
 			retriggerPending = false;
 		}
 
-        if (state == State_t::FOLLOW)
+        if (state != State_t::TRIGGERED)
         {
-            if (cycling)
+            if (outputInV < targetVoltage)
             {
-                state = State_t::RISING;
+                slopeState = SlopeState_t::RISING;
+
+                outputInV += slopeRising * timeInS;
+                outputInV = std::min(targetVoltage, outputInV);
+            }
+            else if (outputInV > targetVoltage)
+            {
+                slopeState = SlopeState_t::FALLING;
+
+                outputInV += slopeFalling * timeInS;
+                outputInV = std::max(targetVoltage, outputInV);
             }
             else
             {
-                if (outputInV < targetVoltage)
-                {
-                    outputInV += slopeRising * timeInS;
-                    outputInV = std::min(targetVoltage, outputInV);
-                }
-                else
-                {
-                    outputInV += slopeFalling * timeInS;
-                    outputInV = std::max(targetVoltage, outputInV);
-                }
-            }
-        }
-        else if (state == State_t::RISING)
-        {
-            outputInV += slopeRising * timeInS;
+                slopeState = SlopeState_t::IDLE;
 
-            if (outputInV > MaxValInV)
-            {
-                outputInV = MaxValInV - (outputInV - MaxValInV);
-                state = State_t::FALLING;
+                if(cycling && targetVoltage == MinValInV)
+                {
+                    state = State_t::TRIGGERED;
+                }
             }
         }
         else
         {
-            outputInV += slopeFalling * timeInS;
-
-            if (outputInV < MinValInV)
+            if (slopeState == SlopeState_t::RISING)
             {
-                if (cycling)
+                outputInV += slopeRising * timeInS;
+
+                if (outputInV > MaxValInV)
                 {
-                    outputInV = MinValInV + (MinValInV - outputInV);
-                    state = State_t::RISING;
+                    outputInV = MaxValInV - (outputInV - MaxValInV);
+                    if(!sustainMax) {
+                        slopeState = SlopeState_t::FALLING;
+                    }
                 }
-                else
+            }
+            else
+            {
+                outputInV += slopeFalling * timeInS;
+
+                auto lowerLimitInV = MinValInV;
+
+                if (targetVoltage != MinValInV)
                 {
-                    outputInV = MinValInV;
-                    state = State_t::FOLLOW;
+                    lowerLimitInV = targetVoltage;
+                }
+
+                if (outputInV < lowerLimitInV)
+                {
+                    outputInV = lowerLimitInV + (lowerLimitInV - outputInV);
+                    slopeState = SlopeState_t::RISING;
+                    if(!cycling || targetVoltage != MinValInV)
+                    {
+                        state = State_t::FOLLOW;
+                    }                
                 }
             }
         }
     }
 
-    State_t getState() const
+    void holdMax(bool val) 
     {
-        return state;
+        sustainMax = val;
+    }
+
+    SlopeState_t getSlopeState() const
+    {
+        return slopeState;
     }
 
     void setCycling(bool val)
@@ -106,11 +134,13 @@ public:
         return outputInV;
     }
 
-// private:
+private:
     float outputInV;
     State_t state;
+    SlopeState_t slopeState;
     bool cycling;
     bool retriggerPending;
+    bool sustainMax;
     float targetVoltage;
 
     float slopeFalling = 0.5f;
@@ -118,4 +148,5 @@ public:
 
     static constexpr float MaxValInV = 5.0f;
     static constexpr float MinValInV = 0.0f;
+    static constexpr float FollowTresholdInV = 0.1f;
 };

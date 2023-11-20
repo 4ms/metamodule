@@ -29,6 +29,10 @@ struct BipolarColor_t {
 	float value;
 };
 
+struct FullColor_t {
+	float value;
+};
+
 struct BaseElement {
 	float x_mm = 0;
 	float y_mm = 0;

@@ -124,7 +124,6 @@ inline void do_create(DualLight el, const Indices &indices, const WidgetContext_
 inline void do_create(MonoLight el, const Indices &indices, const WidgetContext_t &context) {
 	auto ctr_pos = rack::Vec(el.x_mm, el.y_mm).mult(Fix4msScaling);
 
-	// FIXME: create our own Orange light
 	if (el.color == 0xFD40) {
 		using LightT = rack::MediumLight<MetaModule::OrangeLightWidget>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));

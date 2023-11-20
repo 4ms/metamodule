@@ -1,64 +1,19 @@
-#include "CoreModules/4ms/core/envvca/SSI2162.h"
-#include "CoreModules/4ms/core/envvca/TriangleOscillator.h"
-#include "CoreModules/4ms/core/helpers/EdgeDetector.h"
-#include "CoreModules/4ms/core/helpers/circuit_elements.h"
 #include "CoreModules/4ms/info/ENVVCA_info.hh"
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "gcem/include/gcem.hpp"
-#include "helpers/FlipFlop.h"
-#include "helpers/mapping.h"
+
+#include "CoreModules/4ms/core/envvca/SSI2162.h"
+#include "CoreModules/4ms/core/envvca/TriangleOscillator.h"
+#include "CoreModules/4ms/core/envvca/Tables.h"
+#include "CoreModules/4ms/core/envvca/FollowInput.h"
+#include "CoreModules/4ms/core/helpers/EdgeDetector.h"
+#include "CoreModules/4ms/core/helpers/circuit_elements.h"
+#include "CoreModules/4ms/core/helpers/FlipFlop.h"
+#include "CoreModules/4ms/core/helpers/quantization.h"
+
 
 namespace MetaModule
 {
-
-inline auto CVToBool = [](float val) -> bool {
-	return val >= 0.5f;
-};
-
-struct VoltageToFreqTableRange {
-	static constexpr float min = -0.2f;
-	static constexpr float max = 0.5f;
-};
-constinit auto VoltageToFrequencyTable =
-	Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage) {
-		// voltage offset to not calculate with negative values during fitting
-		// once the table is created, we can lookup negative voltages values just fine
-		constexpr double VoltageOffset = 0.1;
-
-		// two points in the V->f curve
-		// taken from voltages from the model at specific switch positions and expected frequencies from the manual
-		constexpr double V_1 = 0.31527 + VoltageOffset;
-		constexpr double f_1 = 1.0 / (5 * 60) / 2;
-		constexpr double V_2 = -0.055331 + VoltageOffset;
-		constexpr double f_2 = 800 * 2;
-
-		// helper constant to limit ranges of intermediate values and improve precision
-		constexpr double ArgScalingFactor = 100.0;
-
-		// This does not work in clang because math functions are not constexpr
-		// It doesn't work with gcem either because of numeric problems
-		// constexpr double arg = std::log2(f_1 / f_2) / (V_1 - V_2);
-		// constexpr double b = std::pow(2.0f, arg / ArgScalingFactor);
-		// constexpr double a = f_1 / std::pow(std::pow(2.0, arg), V_1);
-
-		// So we just hardcode the factors that GCC produces for now
-		constexpr double a = 8.4172569220933146e+3;
-		constexpr double b = 6.8957132479261685e-1;
-
-		auto coreFunc = [](double voltage) -> float {
-			return float(gcem::pow(b, voltage * ArgScalingFactor) * a);
-		};
-
-		// make sure the fitting is correct
-		static_assert(gcem::abs(coreFunc(V_1) - f_1) / f_1 < 1e-2f);
-		static_assert(gcem::abs(coreFunc(V_2) - f_2) / f_2 < 1e-2f);
-
-		// interpolate
-		auto frequency = coreFunc((double)voltage + VoltageOffset);
-
-		return frequency;
-	});
 
 class ENVVCACore : public SmartCoreProcessor<ENVVCAInfo> {
 	using Info = ENVVCAInfo;
@@ -91,9 +46,9 @@ public:
 
 		runOscillator();
 
-		displayOscillatorState(osc.getState());
+		displayOscillatorState(osc.getSlopeState());
 
-		displayEnvelope(osc.getOutput(), osc.getState());
+		displayEnvelope(osc.getOutput(), osc.getSlopeState());
 		runAudioPath(osc.getOutput());
 	}
 
@@ -125,24 +80,22 @@ public:
 		// Ignoring output impedance and inverting 400kHz lowpass
 	}
 
-	void displayEnvelope(float val, TriangleOscillator::State_t state) {
+	void displayEnvelope(float val, TriangleOscillator::SlopeState_t slopeState) {
 		val = val / VoltageDivider(100e3f, 100e3f);
 		val *= getState<EnvLevelSlider>();
 		setOutput<EnvOut>(val);
 		setLED<EnvLevelSlider>(val / 8.f);
-		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
-		// even during State_t::FOLLOW
-		setLED<RiseSlider>(state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
-		setLED<FallSlider>(state == TriangleOscillator::State_t::FALLING ? val / 8.f : 0);
+		setLED<RiseSlider>(slopeState == TriangleOscillator::SlopeState_t::RISING ? val / 8.f : 0);
+		setLED<FallSlider>(slopeState == TriangleOscillator::SlopeState_t::FALLING ? val / 8.f : 0);
 	}
 
-	void displayOscillatorState(TriangleOscillator::State_t state) {
-		if (state == TriangleOscillator::State_t::FALLING) {
+	void displayOscillatorState(TriangleOscillator::SlopeState_t slopeState) {
+		if (slopeState == TriangleOscillator::SlopeState_t::FALLING) {
 			setOutput<EorOut>(8.f);
-			// setLED<EorLight>(true);
+			setLED<EorLight>(true);
 		} else {
 			setOutput<EorOut>(0);
-			// setLED<EorLight>(false);
+			setLED<EorLight>(false);
 		}
 	}
 
@@ -157,7 +110,7 @@ public:
 		}
 
 		if (auto inputFollowValue = getInput<FollowIn>(); inputFollowValue) {
-			osc.setTargetVoltage(*inputFollowValue);
+			osc.setTargetVoltage(followInput.process(*inputFollowValue));
 		}
 
 		if (auto triggerInputValue = getInput<TriggerIn>(); triggerInputValue) {
@@ -209,8 +162,8 @@ public:
 		fallCV = -fScaleLEDs - ProcessCVOffset(getState<FallSlider>(), fallRange);
 
 		// TODO: LEDs only need to be updated ~60Hz instead of 48kHz
-		setLED<RiseLight>(BipolarColor_t{rScaleLEDs / 10.f});
-		setLED<FallLight>(BipolarColor_t{fScaleLEDs / 10.f});
+		setLED<RiseLight>(BipolarColor_t{-rScaleLEDs / 10.f});
+		setLED<FallLight>(BipolarColor_t{-fScaleLEDs / 10.f});
 
 		// TODO: low pass filter
 
@@ -231,9 +184,6 @@ public:
 		timeStepInS = 1.0f / sr;
 	}
 
-	// TODO: Here we could also set slider LEDs once they are defined
-	// TODO: Rise and Fall LEDs are actually biploar but defined as single color
-
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
@@ -250,6 +200,7 @@ private:
 
 	FlipFlop triggerDetector;
 	EdgeDetector triggerEdgeDetector;
+	FollowInput followInput;
 
 private:
 	SSI2162 vca;
@@ -257,6 +208,14 @@ private:
 
 private:
 	float timeStepInS = 1.f / 48000.f;
+
+private:
+	static constexpr float followInputHysteresisInV = 0.025f;
+	float previousFollowInputValue;
+
+	static constexpr float followInputFilterCoeff = 0.01f;
+	float previousFollowInputFilterOutput;
+
 };
 
 } // namespace MetaModule
