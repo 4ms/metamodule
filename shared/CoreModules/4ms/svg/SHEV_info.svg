@@ -752,19 +752,19 @@
     <circle id="Offset_B" data-name="Offset B" cx="263.42" cy="132.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Offset_A" data-name="Offset A" cx="23.67" cy="132.68" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Level_B" data-name="Level B" cx="263.62" cy="86.05" r="8.5" style="fill: #ff0080; stroke-width: 0px;"/>
-    <rect id="Trig_Mode_B" data-name="Trig Mode B" x="219.76" y="88.13" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Trig_Mode_B_ASR_AR_Cycle" data-name="Trig Mode B@ASR@AR@Cycle" x="219.76" y="88.13" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
     <rect id="Fall_B_Slider" data-name="Fall B Slider" x="189.51" y="66.51" width="5.67" height="76.54" style="fill: #ff0040; stroke-width: 0px;"/>
     <rect id="Rise_B_Slider" data-name="Rise B Slider" x="157.11" y="66.51" width="5.67" height="76.54" style="fill: #ff0040; stroke-width: 0px;"/>
     <rect id="Fall_A_Slider" data-name="Fall A Slider" x="124.23" y="66.51" width="5.67" height="76.54" style="fill: #ff0040; stroke-width: 0px;"/>
     <rect id="Rise_A_Slider" data-name="Rise A Slider" x="91.83" y="66.51" width="5.67" height="76.54" style="fill: #ff0040; stroke-width: 0px;"/>
-    <rect id="Trig_Mode_A" data-name="Trig Mode A" x="55.91" y="88.13" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Trig_Mode_A_ASR_AR_Cycle" data-name="Trig Mode A@ASR@AR@Cycle" x="55.91" y="88.13" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
     <circle id="Level_A" data-name="Level A" cx="23.59" cy="86.1" r="8.5" style="fill: #ff0080; stroke-width: 0px;"/>
     <circle id="Cycle_B" data-name="Cycle B" cx="267.89" cy="41.55" r="11.34" style="fill: #ff8000; stroke-width: 0px;"/>
     <circle id="Trig_B" data-name="Trig B" cx="227.77" cy="41.53" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
-    <rect id="Fall_B_Switch" data-name="Fall B Switch" x="187.16" y="32.78" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
-    <rect id="Rise_B_Switch" data-name="Rise B Switch" x="154.28" y="32.77" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
-    <rect id="Fall_A_Switch" data-name="Fall A Switch" x="121.39" y="32.77" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
-    <rect id="Rise_A_Switch" data-name="Rise A Switch" x="88.51" y="32.78" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Fall_B_Switch_Fast_Med_Slow" data-name="Fall B Switch@Fast@Med@Slow" x="187.16" y="32.78" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Rise_B_Switch_Fast_Med_Slow" data-name="Rise B Switch@Fast@Med@Slow" x="154.28" y="32.77" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Fall_A_Switch_Fast_Med_Slow" data-name="Fall A Switch@Fast@Med@Slow" x="121.39" y="32.77" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Rise_A_Switch_Fast_Med_Slow" data-name="Rise A Switch@Fast@Med@Slow" x="88.51" y="32.78" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
     <circle id="Trig_A" data-name="Trig A" cx="59.23" cy="41.53" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
     <circle id="Cycle_A" data-name="Cycle A" cx="21.16" cy="41.89" r="11.34" style="fill: #ff8000; stroke-width: 0px;"/>
     <text id="slug" transform="translate(167.02 360.65)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 6px;"><tspan x="0" y="0">SH</tspan><tspan x="6.87" y="0" style="letter-spacing: 0em;">E</tspan><tspan x="9.88" y="0">V</tspan></text>

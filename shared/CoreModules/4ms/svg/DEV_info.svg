@@ -704,13 +704,13 @@
     <circle id="Level_A" data-name="Level A" cx="93.13" cy="95.86" r="8.5" style="fill: #ff0080; stroke-width: 0px;"/>
     <rect id="Fall_A_Slider" data-name="Fall A Slider" x="53.43" y="69.98" width="5.67" height="76.54" style="fill: #ff0040; stroke-width: 0px;"/>
     <rect id="Rise_A_Slider" data-name="Rise A Slider" x="19.58" y="69.98" width="5.67" height="76.54" style="fill: #ff0040; stroke-width: 0px;"/>
-    <rect id="Fall_B_Switch" data-name="Fall B Switch" x="207.1" y="33.4" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
-    <rect id="Rise_B_Switch" data-name="Rise B Switch" x="174.22" y="33.4" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Fall_B_Switch_Fast_Med_Slow" data-name="Fall B Switch@Fast@Med@Slow" x="207.1" y="33.4" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Rise_B_Switch_Fast_Med_Slow" data-name="Rise B Switch@Fast@Med@Slow" x="174.22" y="33.4" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
     <circle id="Cycle_B" data-name="Cycle B" cx="147.61" cy="41.68" r="11.34" style="fill: #ff8000; stroke-width: 0px;"/>
     <circle id="Cycle_Gate" data-name="Cycle Gate" cx="115.19" cy="60.85" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
     <circle id="Cycle_A" data-name="Cycle A" cx="82.8" cy="41.64" r="11.34" style="fill: #ff8000; stroke-width: 0px;"/>
-    <rect id="Fall_A_Switch" data-name="Fall A Switch" x="44.82" y="33.4" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
-    <rect id="Rise_A_Switch" data-name="Rise A Switch" x="11.93" y="33.4" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Fall_A_Switch_Fast_Med_Slow" data-name="Fall A Switch@Fast@Med@Slow" x="44.82" y="33.4" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Rise_A_Switch_Fast_Med_Slow" data-name="Rise A Switch@Fast@Med@Slow" x="11.93" y="33.4" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
     <g>
       <text id="slug" transform="translate(141.37 360.58)" style="fill: #020202; font-family: ArialMT, Arial; font-size: 6px;"><tspan x="0" y="0">DEV</tspan></text>
       <text id="modulename" transform="translate(161.49 360.53)" style="fill: #020202; font-family: ArialMT, Arial; font-size: 6px;"><tspan x="0" y="0">Dual EnvVC</tspan><tspan x="32.68" y="0" style="letter-spacing: -.06em;">A</tspan></text>
