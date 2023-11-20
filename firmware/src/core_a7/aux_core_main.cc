@@ -50,8 +50,10 @@ extern "C" void aux_core_main() {
 	InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [patch_player, &ui]() {
 		if (ui.new_patch_data == false) {
 			for (auto &w : ui.lights().watch_lights) {
-				if (w.is_active())
-					w.value = patch_player->get_module_light(w.module_id, w.light_id);
+				if (w.is_active()) {
+					auto val = patch_player->get_module_light(w.module_id, w.light_id);
+					w.value = val;
+				}
 			}
 			ui.new_patch_data = true;
 		}

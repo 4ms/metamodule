@@ -4,11 +4,35 @@
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include "util/colors.hh"
+#include "util/math.hh"
 #include <algorithm>
 #include <cmath>
 
 namespace MetaModule
 {
+
+inline void update_light_style(lv_obj_t *obj, lv_color_t color, lv_opa_t opa) {
+	using namespace MathTools;
+
+	constexpr uint16_t ColorThresh = 8;
+	auto cur_color = lv_obj_get_style_img_recolor(obj, LV_PART_MAIN);
+	if (abs_diff(color.ch.red, cur_color.ch.red) > ColorThresh ||
+		abs_diff(color.ch.blue, cur_color.ch.blue) > ColorThresh ||
+		abs_diff(color.ch.green, cur_color.ch.green) > ColorThresh)
+	{
+		lv_obj_set_style_img_recolor(obj, color, LV_PART_MAIN);
+		if (lv_obj_get_style_shadow_spread(obj, LV_PART_MAIN) > 0)
+			lv_obj_set_style_shadow_color(obj, color, LV_PART_MAIN);
+	}
+
+	constexpr int OpaThresh = 15;
+	int cur_opa = lv_obj_get_style_img_recolor_opa(obj, LV_PART_MAIN);
+	if (abs_diff(cur_opa, (int)opa) > OpaThresh) {
+		lv_obj_set_style_img_recolor_opa(obj, opa, LV_PART_MAIN);
+		if (lv_obj_get_style_shadow_spread(obj, LV_PART_MAIN) > 0)
+			lv_obj_set_style_shadow_opa(obj, opa, LV_PART_MAIN);
+	}
+}
 
 inline void style_rgb(lv_obj_t *obj, std::span<float> vals, float max_brightness = 1.f) {
 	if (!obj || vals.size() < 3)
@@ -22,14 +46,9 @@ inline void style_rgb(lv_obj_t *obj, std::span<float> vals, float max_brightness
 	float gain = 1.f / max;
 	Color normalized = Color(r_amt * gain * 255, g_amt * gain * 255, b_amt * gain * 255);
 	lv_color_t color{.full = normalized.Rgb565()};
-
 	uint8_t opa = std::clamp<unsigned>(std::min(max, max_brightness) * 255.f, 0u, 255u);
 
-	lv_obj_set_style_img_recolor_opa(obj, opa, LV_PART_MAIN);
-	lv_obj_set_style_img_recolor(obj, color, LV_PART_MAIN);
-
-	lv_obj_set_style_shadow_opa(obj, opa, LV_PART_MAIN);
-	lv_obj_set_style_shadow_color(obj, color, LV_PART_MAIN);
+	update_light_style(obj, color, opa);
 }
 
 inline void style_dual_color(lv_obj_t *obj, std::array<RGB565, 2> colors, std::span<float> vals) {
@@ -45,15 +64,11 @@ inline void style_dual_color(lv_obj_t *obj, std::array<RGB565, 2> colors, std::s
 	auto col1 = Colors::black.blend(Color{colors[0]}, c1_amt * gain);
 	auto col2 = Colors::black.blend(Color{colors[1]}, c2_amt * gain);
 	auto normalized = col1.combine(col2);
-	lv_color_t color{.full = normalized.Rgb565()};
 
+	lv_color_t color{.full = normalized.Rgb565()};
 	uint8_t opa = std::clamp<unsigned>(max * 255.f, 0u, 255u);
 
-	lv_obj_set_style_img_recolor_opa(obj, opa, LV_PART_MAIN);
-	lv_obj_set_style_img_recolor(obj, color, LV_PART_MAIN);
-
-	lv_obj_set_style_shadow_opa(obj, opa, LV_PART_MAIN);
-	lv_obj_set_style_shadow_color(obj, color, LV_PART_MAIN);
+	update_light_style(obj, color, opa);
 }
 
 inline void style_mono(lv_obj_t *obj, RGB565 col, std::span<float> vals) {
@@ -63,11 +78,7 @@ inline void style_mono(lv_obj_t *obj, RGB565 col, std::span<float> vals) {
 	lv_color_t color{.full = col.raw()};
 	lv_opa_t opa = std::clamp<uint16_t>(vals[0] * 255.f, 0, 255);
 
-	lv_obj_set_style_img_recolor_opa(obj, opa, LV_PART_MAIN);
-	lv_obj_set_style_img_recolor(obj, color, LV_PART_MAIN);
-
-	lv_obj_set_style_shadow_opa(obj, opa, LV_PART_MAIN);
-	lv_obj_set_style_shadow_color(obj, color, LV_PART_MAIN);
+	update_light_style(obj, color, opa);
 }
 
 /////////////////////////////
