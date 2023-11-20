@@ -1,5 +1,6 @@
 #pragma once
-#include <cstdio>
+#include <cmath>
+#include <cstdint>
 
 class FollowInput
 {
@@ -17,11 +18,11 @@ public:
         this is done by an adjustable low pass filter. its filter coefficient is calculated based on the gradient of the incoming follow voltage,
         which is identified by the number of processing steps which were necessary to cross the hysteresis threshold.
         */
-        if(hystOutput.differenceToLastOuput >= inputHysteresisInV) {
+        if(hystOutput.differenceToLastOutput >= inputHysteresisInV) {
 
-            const auto gradient = hystOutput.differenceToLastOuput / hystOutput.timeToLastOutputOverThreshold;
+            const auto gradient = hystOutput.differenceToLastOutput / hystOutput.timeToLastOutputOverThreshold;
 
-            if(gradient >= inputHysteresisInV || hystOutput.differenceToLastOuput >= 0.5f) {
+            if(gradient >= inputHysteresisInV || hystOutput.differenceToLastOutput >= 0.5f) {
                 filterCoeff = 1.0f;
             }
             else
@@ -38,7 +39,7 @@ public:
 private:
     struct hysteresisOutput_t {
         float output;
-        float differenceToLastOuput;
+        float differenceToLastOutput;
         uint32_t timeToLastOutputOverThreshold;
     };
     
@@ -53,9 +54,9 @@ private:
 
         hysteresisOutput_t output;
 
-        output.differenceToLastOuput = gcem::abs(input - previousInput);
+        output.differenceToLastOutput = std::fabs(input - previousInput);
 
-        if (output.differenceToLastOuput >= inputHysteresisInV)
+        if (output.differenceToLastOutput >= inputHysteresisInV)
         {
             previousInput = input;
             output.timeToLastOutputOverThreshold = count;
