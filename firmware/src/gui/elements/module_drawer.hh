@@ -51,7 +51,9 @@ struct ModuleDrawer {
 		lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
 		draw_img_dsc.zoom = zoom * 256;
-		pr_dbg("Drawing faceplate %s (%d x %d)\n", slug.data(), widthpx, height);
+
+		pr_trace("Drawing faceplate %s (%d x %d)\n", slug.data(), widthpx, height);
+
 		lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
 		// Overflow visible: requires too much processing when zoomed-out to view lots of modules
 		if (height == 240)

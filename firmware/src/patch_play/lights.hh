@@ -28,8 +28,9 @@ struct WatchedLight {
 };
 
 struct LightWatcher {
+	static constexpr size_t MaxLightsToWatch = 256;
 
-	std::array<WatchedLight, 128> watch_lights;
+	std::array<WatchedLight, MaxLightsToWatch> watch_lights;
 
 	void start_watching_light(uint16_t module_id, uint16_t light_id) {
 		// First search for existing light:

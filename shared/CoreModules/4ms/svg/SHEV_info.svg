@@ -725,7 +725,7 @@
     <circle id="Env_B_Out" data-name="Env B Out" cx="165.48" cy="286.16" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Env_A_Out" data-name="Env A Out" cx="121.52" cy="286.16" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="EOR_A" data-name="EOR A" cx="77.47" cy="286.09" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
-    <circle id="EOR_A_OrangeLight" data-name="EOR A#OrangeLight" cx="50.99" cy="275.79" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="EOR_A_Light_OrangeLight" data-name="EOR A Light#OrangeLight" cx="50.99" cy="275.79" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Audio_A_In" data-name="Audio A In" cx="22.13" cy="280.66" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Follow_B" data-name="Follow B" cx="232.3" cy="251.52" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Time_CV_B" data-name="Time CV B" cx="185.42" cy="249.1" r="11.34" style="fill: lime; stroke-width: 0px;"/>

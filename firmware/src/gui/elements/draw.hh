@@ -30,6 +30,7 @@ inline lv_obj_t *draw_element(const LightElement &el, lv_obj_t *canvas, uint32_t
 	lv_obj_set_style_radius(obj, 20, LV_PART_MAIN);
 	lv_obj_set_style_shadow_width(obj, module_height == 240 ? 16 : 0, LV_PART_MAIN);
 	lv_obj_set_style_shadow_spread(obj, module_height == 240 ? 4 : 0, LV_PART_MAIN);
+	lv_obj_set_style_shadow_opa(obj, LV_OPA_0, LV_PART_MAIN);
 	return obj;
 }
 

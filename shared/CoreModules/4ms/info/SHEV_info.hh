@@ -67,7 +67,7 @@ struct SHEVInfo : ModuleInfoBase {
 		RedBlueLight{{to_mm<72>(198.15), to_mm<72>(219.09), Center, "Fall B Light", ""}},
 		RedBlueLight{{to_mm<72>(133.59), to_mm<72>(263.06), Center, "Env A Light", ""}},
 		RedBlueLight{{to_mm<72>(153.41), to_mm<72>(263.06), Center, "Env B Light", ""}},
-		OrangeLight{{to_mm<72>(50.99), to_mm<72>(275.79), Center, "EOR A", ""}},
+		OrangeLight{{to_mm<72>(50.99), to_mm<72>(275.79), Center, "EOR A Light", ""}},
 		OrangeLight{{to_mm<72>(236.01), to_mm<72>(275.79), Center, "EOF B Light", ""}},
 }};
 
@@ -201,7 +201,7 @@ struct SHEVInfo : ModuleInfoBase {
         LedFall_B_Light = 5,
         LedEnv_A_Light = 6,
         LedEnv_B_Light = 7,
-        LedEor_A = 8,
+        LedEor_A_Light = 8,
         LedEof_B_Light = 9,
         NumDiscreteLeds,
     };

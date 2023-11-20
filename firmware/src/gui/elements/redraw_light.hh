@@ -135,7 +135,7 @@ struct UpdateLightElement {
 	}
 };
 
-inline void update_light(DrawnElement &drawn_el, std::vector<float> const &light_vals) {
+inline void update_light(DrawnElement &drawn_el, std::span<const float> light_vals) {
 	auto &gui_el = drawn_el.gui_element;
 
 	auto num_lights = gui_el.count.num_lights;

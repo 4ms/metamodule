@@ -95,7 +95,8 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_refr_size(canvas);
 		auto width_px = lv_obj_get_width(canvas);
-		auto display_widthpx = std::min<lv_coord_t>(width_px + 8, 180); //module img is no more than 180px wide
+		auto display_widthpx =
+			std::min<lv_coord_t>(width_px + 4, 190); //module img + padding is no more than 190px wide
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
 
@@ -187,11 +188,11 @@ struct ModuleViewPage : PageBase {
 			mapping_pane.update();
 
 		if (is_patch_playing) {
-			auto num_lights = moduleinfo.indices.last(1)[0].light_idx;
-			std::vector<float> light_vals(num_lights);
-
 			// copy light values from params, indexed by light element id
 			for (auto &wl : params.lights.watch_lights) {
+				if (wl.light_id >= MAX_LIGHTS_PER_MODULE)
+					continue;
+
 				if (wl.is_active() && wl.module_id == this_module_id) {
 					light_vals[wl.light_id] = wl.value;
 				}
@@ -363,6 +364,7 @@ private:
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_controls;
 	std::vector<DrawnElement> drawn_elements;
+	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals;
 
 	lv_obj_t *base = nullptr;
 	lv_obj_t *canvas = nullptr;
