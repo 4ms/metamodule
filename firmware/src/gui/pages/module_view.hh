@@ -187,7 +187,8 @@ struct ModuleViewPage : PageBase {
 			mapping_pane.update();
 
 		if (is_patch_playing) {
-			std::array<float, 128> light_vals{}; //... TODO;number of lights in module
+			auto num_lights = moduleinfo.indices.last(1)[0].light_idx;
+			std::vector<float> light_vals(num_lights);
 
 			// copy light values from params, indexed by light element id
 			for (auto &wl : params.lights.watch_lights) {
@@ -197,20 +198,15 @@ struct ModuleViewPage : PageBase {
 			}
 
 			for (auto &drawn_el : drawn_elements) {
-				std::span<float> these_lights{};
-				auto num_lights = drawn_el.gui_element.count.num_lights;
+				auto &gui_el = drawn_el.gui_element;
 
-				if (num_lights) {
-					auto first_light = drawn_el.gui_element.idx.light_idx;
-					these_lights = std::span<float>{&light_vals[first_light], &light_vals[first_light + num_lights]};
-				}
-
-				auto did_move =
-					std::visit(UpdateElement{params, patch, drawn_el.gui_element, these_lights}, drawn_el.element);
+				auto did_move = std::visit(UpdateElement{params, patch, gui_el}, drawn_el.element);
 
 				if (did_move && settings.map_ring_flash_active) {
-					MapRingDisplay::flash_once(drawn_el.gui_element.map_ring, settings.map_ring_style, true);
+					MapRingDisplay::flash_once(gui_el.map_ring, settings.map_ring_style, true);
 				}
+
+				update_light(drawn_el, light_vals);
 			}
 		}
 
@@ -276,7 +272,7 @@ struct ModuleViewPage : PageBase {
 
 	void blur() final {
 		// printf("Clear light watches\n");
-		params.lights.clear();
+		params.lights.stop_watching_all();
 	}
 
 private:

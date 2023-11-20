@@ -78,7 +78,7 @@ struct ParamsMidiState : ParamsState {
 	void clear() {
 		ParamsState::clear();
 
-		lights.clear();
+		lights.stop_watching_all();
 
 		for (auto &cc : midi_ccs)
 			cc = 0;

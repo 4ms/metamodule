@@ -34,7 +34,7 @@ inline void update_light_style(lv_obj_t *obj, lv_color_t color, lv_opa_t opa) {
 	}
 }
 
-inline void style_rgb(lv_obj_t *obj, std::span<float> vals, float max_brightness = 1.f) {
+inline void style_rgb(lv_obj_t *obj, std::span<const float> vals, float max_brightness = 1.f) {
 	if (!obj || vals.size() < 3)
 		return;
 
@@ -51,7 +51,7 @@ inline void style_rgb(lv_obj_t *obj, std::span<float> vals, float max_brightness
 	update_light_style(obj, color, opa);
 }
 
-inline void style_dual_color(lv_obj_t *obj, std::array<RGB565, 2> colors, std::span<float> vals) {
+inline void style_dual_color(lv_obj_t *obj, std::array<RGB565, 2> colors, std::span<const float> vals) {
 	if (!obj || vals.size() < 2)
 		return;
 
@@ -71,7 +71,7 @@ inline void style_dual_color(lv_obj_t *obj, std::array<RGB565, 2> colors, std::s
 	update_light_style(obj, color, opa);
 }
 
-inline void style_mono(lv_obj_t *obj, RGB565 col, std::span<float> vals) {
+inline void style_mono(lv_obj_t *obj, RGB565 col, std::span<const float> vals) {
 	if (!obj || vals.size() < 1)
 		return;
 
@@ -83,32 +83,33 @@ inline void style_mono(lv_obj_t *obj, RGB565 col, std::span<float> vals) {
 
 /////////////////////////////
 
-inline void redraw_light_element(const MonoLight &element, const GuiElement &gui_el, std::span<float> vals) {
+inline void redraw_light_element(const MonoLight &element, const GuiElement &gui_el, std::span<const float> vals) {
 	style_mono(gui_el.obj, element.color, vals);
 }
 
-inline void redraw_light_element(const DualLight &element, const GuiElement &gui_el, std::span<float> vals) {
+inline void redraw_light_element(const DualLight &element, const GuiElement &gui_el, std::span<const float> vals) {
 	style_dual_color(gui_el.obj, element.color, vals);
 }
 
-inline void redraw_light_element(const RgbLight &element, const GuiElement &gui_el, std::span<float> vals) {
+inline void redraw_light_element(const RgbLight &element, const GuiElement &gui_el, std::span<const float> vals) {
 	style_rgb(gui_el.obj, vals);
 }
 
-inline void redraw_light_element(const LatchingButton &element, const GuiElement &gui_el, std::span<float> vals) {
+inline void redraw_light_element(const LatchingButton &element, const GuiElement &gui_el, std::span<const float> vals) {
 	style_mono(gui_el.obj, element.color, vals);
 }
 
 inline void
-redraw_light_element(const MomentaryButtonWhiteLight &element, const GuiElement &gui_el, std::span<float> vals) {
+redraw_light_element(const MomentaryButtonWhiteLight &element, const GuiElement &gui_el, std::span<const float> vals) {
 	style_mono(gui_el.obj, Colors565::White, vals);
 }
 
-inline void redraw_light_element(const MomentaryButtonRGB &element, const GuiElement &gui_el, std::span<float> vals) {
+inline void
+redraw_light_element(const MomentaryButtonRGB &element, const GuiElement &gui_el, std::span<const float> vals) {
 	style_rgb(gui_el.obj, vals, 0.75f);
 }
 
-inline void redraw_light_element(const SliderLight &element, const GuiElement &gui_el, std::span<float> vals) {
+inline void redraw_light_element(const SliderLight &element, const GuiElement &gui_el, std::span<const float> vals) {
 	if (!gui_el.obj || vals.size() < 1)
 		return;
 
@@ -120,7 +121,33 @@ inline void redraw_light_element(const SliderLight &element, const GuiElement &g
 	return;
 }
 
-inline void redraw_light_element(const BaseElement &, const GuiElement &, std::span<float>) {
+inline void redraw_light_element(const BaseElement &, const GuiElement &, std::span<const float>) {
+}
+
+////////////////////////////
+
+struct UpdateLightElement {
+	GuiElement &gui_el;
+	std::span<const float> lights;
+
+	void operator()(auto &el) {
+		redraw_light_element(el, gui_el, lights);
+	}
+};
+
+inline void update_light(DrawnElement &drawn_el, std::vector<float> const &light_vals) {
+	auto &gui_el = drawn_el.gui_element;
+
+	auto num_lights = gui_el.count.num_lights;
+	auto first_light = gui_el.idx.light_idx;
+
+	if (num_lights > 0) {
+		if (light_vals.size() >= (first_light + num_lights)) {
+			auto these_lights = std::span<const float>{&light_vals[first_light], &light_vals[first_light + num_lights]};
+
+			std::visit(UpdateLightElement{gui_el, these_lights}, drawn_el.element);
+		}
+	}
 }
 
 } // namespace MetaModule

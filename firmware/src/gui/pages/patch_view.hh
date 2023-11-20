@@ -4,6 +4,7 @@
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
+#include "gui/elements/redraw_light.hh"
 #include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/images/faceplate_images.hh"
@@ -221,8 +222,7 @@ struct PatchViewPage : PageBase {
 				lv_obj_clear_state(ui_InfoButton, LV_STATE_PRESSED);
 			} else if (PageList::request_last_page()) {
 				blur();
-				params.lights.clear();
-				// printf("Clear light watches\n");
+				params.lights.stop_watching_all();
 			}
 		}
 
@@ -251,16 +251,11 @@ struct PatchViewPage : PageBase {
 			auto num_lights = drawn_el.gui_element.count.num_lights;
 
 			if (num_lights) {
-				auto first_light = drawn_el.gui_element.idx.light_idx;
-				auto &vec = light_vals[drawn_el.gui_element.module_idx];
-				if (vec.size() >= (first_light + num_lights))
-					these_lights = std::span<float>{&vec[first_light], &vec[first_light + num_lights]};
-			}
 
-			auto was_redrawn =
-				std::visit(UpdateElement{params, patch, drawn_el.gui_element, these_lights}, drawn_el.element);
+			auto &gui_el = drawn_el.gui_element;
+
+			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
 			if (was_redrawn) {
-				auto &gui_el = drawn_el.gui_element;
 				if (view_settings.map_ring_flash_active)
 					MapRingDisplay::flash_once(
 						gui_el.map_ring, view_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
@@ -268,6 +263,8 @@ struct PatchViewPage : PageBase {
 				if (view_settings.scroll_to_active_param)
 					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 			}
+
+			update_light(drawn_el, light_vals[gui_el.module_idx]);
 		}
 	}
 

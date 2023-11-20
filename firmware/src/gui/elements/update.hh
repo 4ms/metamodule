@@ -55,7 +55,6 @@ struct UpdateElement {
 	ParamsMidiState &params;
 	PatchData &patch;
 	GuiElement &gui_el;
-	std::span<float> lights;
 
 	bool operator()(auto &el) {
 		bool did_move = false;
@@ -65,10 +64,6 @@ struct UpdateElement {
 
 		if (param_val.has_value())
 			did_move = redraw_element(el, gui_el, param_val.value());
-
-		if (lights.size()) {
-			redraw_light_element(el, gui_el, lights);
-		}
 
 		return did_move;
 	}

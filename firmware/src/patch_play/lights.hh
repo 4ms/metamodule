@@ -68,7 +68,7 @@ struct LightWatcher {
 		}
 	}
 
-	void clear() {
+	void stop_watching_all() {
 		for (auto &w : watch_lights)
 			w.deactivate();
 	}
