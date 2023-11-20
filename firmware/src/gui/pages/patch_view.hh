@@ -245,12 +245,22 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
-		// Redraw all knobs
-		for (auto &drawn_el : drawn_elements) {
-			std::span<float> these_lights{};
-			auto num_lights = drawn_el.gui_element.count.num_lights;
+		// Redraw all elements that have changed state (knobs, lights, etc)
+		auto is_visible = [](lv_coord_t pos) {
+			auto visible_top = lv_obj_get_scroll_y(ui_PatchViewPage);
+			auto visible_bot = visible_top + 240;
+			return pos >= visible_top && pos < visible_bot;
+		};
 
-			if (num_lights) {
+		for (auto &drawn_el : drawn_elements) {
+			auto module_top_to_obj = lv_obj_get_y(drawn_el.gui_element.obj);
+			auto panel_top_to_module_top = lv_obj_get_y(lv_obj_get_parent(drawn_el.gui_element.obj));
+			auto panel_top_pos = lv_obj_get_y(ui_ModulesPanel);
+			auto ypos = module_top_to_obj + panel_top_to_module_top + panel_top_pos;
+			auto y2pos = ypos + lv_obj_get_height(drawn_el.gui_element.obj);
+
+			if (!is_visible(ypos) && !is_visible(y2pos))
+				continue;
 
 			auto &gui_el = drawn_el.gui_element;
 
