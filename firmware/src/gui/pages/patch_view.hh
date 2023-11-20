@@ -161,7 +161,7 @@ struct PatchViewPage : PageBase {
 				auto &gui_el = drawn_element.gui_element;
 				for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
 					params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
-					printf("Watching Light: m:%d idx %d\n", gui_el.module_idx, gui_el.idx.light_idx + i);
+					// printf("Watching Light: m:%d idx %d\n", gui_el.module_idx, gui_el.idx.light_idx + i);
 				}
 			}
 		}
@@ -253,6 +253,9 @@ struct PatchViewPage : PageBase {
 		};
 
 		for (auto &drawn_el : drawn_elements) {
+			if (!drawn_el.gui_element.obj)
+				continue;
+
 			auto module_top_to_obj = lv_obj_get_y(drawn_el.gui_element.obj);
 			auto panel_top_to_module_top = lv_obj_get_y(lv_obj_get_parent(drawn_el.gui_element.obj));
 			auto panel_top_pos = lv_obj_get_y(ui_ModulesPanel);
