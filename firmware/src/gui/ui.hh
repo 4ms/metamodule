@@ -82,6 +82,8 @@ public:
 		return params.lights;
 	}
 
+	bool new_patch_data = false;
+
 private:
 	void page_update_task() {
 
@@ -91,6 +93,8 @@ private:
 
 		page_manager.update_current_page();
 		patch_playloader.handle_sync_patch_loading();
+
+		new_patch_data = false;
 	}
 
 	static constexpr int32_t throttle_amt = 10;
