@@ -24,7 +24,7 @@ class UImg:
     # compress_bzip2 = 2
 
 
-def create_uimg_header(payload, *, loadaddr, entryaddr, name):
+def create_uimg_header(payload, *, loadaddr, entryaddr, name, type):
 
     image_name = name.encode("ascii")
 
@@ -32,7 +32,6 @@ def create_uimg_header(payload, *, loadaddr, entryaddr, name):
     # MP1-Boot ignores these, but if you're using this script with
     # U-Boot, then it might matter:
     os = UImg.os_linux
-    image_type = UImg.image_type_kernel
     compress = UImg.compress_none
     arch = UImg.arch_arm
 
@@ -54,7 +53,7 @@ def create_uimg_header(payload, *, loadaddr, entryaddr, name):
         data_crc,                                   # Image Data CRC Checksum	
         os,                                         # Operating System		
         arch,                                       # CPU architecture		
-        image_type,                                 # Image Type			
+        type,                                       # Image Type			
         compress,                                   # Compression Type		
         image_name,                                 # Image Name		
         )
@@ -74,6 +73,7 @@ if __name__ == "__main__":
     parser.add_argument("image_file", help="Output image file")
     parser.add_argument("--load_addr", help="Address to load binary file to", type=lambda x: int(x,0), default=0xC2000040)
     parser.add_argument("--entry_point_offset", help="Entry point of the binary file", type=lambda x: int(x,0), default=0)
+    parser.add_argument("--bootable", help="Can this image be used to boot (by jumping to entry offset)?")
     parser.add_argument("--name", help="Encoded name of the image", type=str, default="stm32mp1-baremetal image")
     args = parser.parse_args()
 
@@ -82,7 +82,13 @@ if __name__ == "__main__":
 
         payload = bin_file.read()
 
-        header = create_uimg_header(payload, loadaddr=args.load_addr, entryaddr=args.load_addr + args.entry_point_offset, name=args.name)
+        header = create_uimg_header(
+                    payload,
+                    loadaddr=args.load_addr,
+                    entryaddr=args.load_addr + args.entry_point_offset,
+                    name=args.name,
+                    type=UImg.image_type_kernel if args.bootable else UImg.image_type_firmware
+                    )
 
         with open(args.image_file, "wb") as uimg_file:
             uimg_file.write(header + payload)

@@ -4,7 +4,7 @@ import argparse
 import logging
 
 from elftools.elf.elffile import ELFFile
-from uimg_header import create_uimg_header
+from uimg_header import create_uimg_header, UImg
 
 class CoreType:
     A7 = 'A7'
@@ -49,6 +49,7 @@ def get_images_for_elf(filename, *, destination, loader):
                 
                 payload = segment.data()
                 name = "{}_0x{:08x}".format(destination, vma)
+                type = UImg.image_type_firmware
 
                 # The core that does the loading has different memory mapping than the core that executes
                 # Remap relevant sections from what is given in the elf file to where the loader core has that mapped
@@ -62,7 +63,7 @@ def get_images_for_elf(filename, *, destination, loader):
                             lma = new_lma
 
                 print("Creating {} at 0x{:08x} with size {}".format(name, lma, lma_size))
-                header = create_uimg_header(payload, loadaddr=lma, entryaddr=0, name=name)
+                header = create_uimg_header(payload, loadaddr=lma, entryaddr=0, name=name, type=type)
 
                 # Just concatenate generated images
                 output = output + header + payload
