@@ -49,9 +49,12 @@ def get_images_for_elf(filename, *, destination, loader):
                 
                 payload = segment.data()
                 name = "{}_0x{:08x}".format(destination, vma)
-                type = UImg.image_type_firmware
 
-                # The core that does the loading has different memory mapping than the core that executes
+                # Default settings for type and entry point that should be ignored by the bootloader
+                type = UImg.image_type_copro if destination == CoreType.M4 else UImg.image_type_firmware
+                entry_point = 0
+
+                # The core that does the loading has different memory mappings than the core that executes
                 # Remap relevant sections from what is given in the elf file to where the loader core has that mapped
                 if destination != loader:
                     dest_col = 0 if destination == CoreType.A7 else 1
@@ -62,8 +65,22 @@ def get_images_for_elf(filename, *, destination, loader):
                             logger.debug("Remap 0x{:08x} -> 0x{:08x}".format(lma, new_lma))
                             lma = new_lma
 
+                # Define if this image can be booted. This includes
+                # - It is for the A7 core (since that one always needs to start execution)
+                # - It contains the entry point for the whole elf file
+                if destination == CoreType.A7:
+                    image_entry_point = elf_file.header.e_entry
+                    if image_entry_point >= vma and image_entry_point <= vma + vma_size:
+
+                        # Set the file's entry point and assign a special image type
+                        type = UImg.image_type_kernel
+                        entry_addr = image_entry_point
+
                 print("Creating {} at 0x{:08x} with size {}".format(name, lma, lma_size))
-                header = create_uimg_header(payload, loadaddr=lma, entryaddr=0, name=name, type=type)
+                if type == UImg.image_type_kernel:
+                    print("Contains entry point at 0x{:08x}".format(entry_addr))
+
+                header = create_uimg_header(payload, loadaddr=lma, entryaddr=entry_point, name=name, type=type)
 
                 # Just concatenate generated images
                 output = output + header + payload

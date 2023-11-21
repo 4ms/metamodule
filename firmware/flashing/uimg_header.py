@@ -18,6 +18,7 @@ class UImg:
 
     image_type_kernel = 2    # U-Boot uses this for Linux OS images
     image_type_firmware = 5  # U-Boot uses this for SSBL images
+    image_type_copro = 40
 
     compress_none = 0        # MP1-Boot only supports uncompressed kernels, for now
     # compress_gzip = 1
