@@ -53,52 +53,50 @@ public:
 	}
 
 	void update() {
+
 		auto now = HAL_GetTick();
-		if ((now - last_update_tm) <= 2)
-			return;
+		if ((now - last_lv_update_tm) > 2) {
+			last_lv_update_tm = now;
+			lv_timer_handler();
+		}
 
-		last_update_tm = now;
-
-		lv_timer_handler();
-
-		if (throttle_ctr-- <= 0) {
-			throttle_ctr = throttle_amt;
+		now = HAL_GetTick();
+		if ((now - last_page_update_tm) > 30) {
+			last_page_update_tm = now;
 			page_update_task();
 		}
 
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
-			// printf_("%s", msg.data());
+			pr_info("%s", msg.data());
 			msg_queue.clear_message();
 		}
-		// Debug::Pin0::low();
 
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
+	LightWatcher &lights() {
+		return params.lights;
+	}
+
+	bool new_patch_data = false;
+
 private:
 	void page_update_task() {
-
 		//This returns false when audio stops
-		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 		//TODO: if (!read_ok) ... restart audio
-
-		// Unpack midi queue into midi state array
-		if (auto event = sync_params.midi_events.get(); event.has_value()) {
-			auto e = event.value();
-			if (e.type == Midi::Event::Type::CC && e.note < NumMidiCCs)
-				params.midi_ccs[e.note].store_changed(e.val / 10.f);
-		}
+		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		page_manager.update_current_page();
 		patch_playloader.handle_sync_patch_loading();
+
+		new_patch_data = false;
 	}
 
-	static constexpr int32_t throttle_amt = 10;
-	int32_t throttle_ctr = 0;
-	uint32_t last_update_tm = 0;
+	uint32_t last_page_update_tm = 0;
+	uint32_t last_lv_update_tm = 0;
 };
 
 } // namespace MetaModule

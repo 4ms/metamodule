@@ -152,8 +152,8 @@ struct DEVInfo : ModuleInfoBase {
 		Toggle3pos{{to_mm<72>(50.49), to_mm<72>(41.905), Center, "Fall A Switch", ""}},
 		Toggle3pos{{to_mm<72>(179.89), to_mm<72>(41.905), Center, "Rise B Switch", ""}},
 		Toggle3pos{{to_mm<72>(212.77), to_mm<72>(41.905), Center, "Fall B Switch", ""}},
-		LatchingButtonMonoLight{{{{to_mm<72>(82.8), to_mm<72>(41.64), Center, "Cycle A", ""}}}},
-		LatchingButtonMonoLight{{{{to_mm<72>(147.61), to_mm<72>(41.68), Center, "Cycle B", ""}}}},
+		LatchingButton{{{{{to_mm<72>(82.8), to_mm<72>(41.64), Center, "Cycle A", ""}}}}},
+		LatchingButton{{{{{to_mm<72>(147.61), to_mm<72>(41.68), Center, "Cycle B", ""}}}}},
 
 		OrangeLight{{to_mm<72>(130.68), to_mm<72>(261.07), Center, "extra", ""}},
 	}};
@@ -195,8 +195,8 @@ TEST_CASE("get_indices()") {
 		i++;
 	}
 
-	constexpr auto CycleA = get<MetaModule::LatchingButtonMonoLight>(MetaModule::DEVInfo::Elements[42]);
-	constexpr auto CycleB = get<MetaModule::LatchingButtonMonoLight>(MetaModule::DEVInfo::Elements[43]);
+	constexpr auto CycleA = get<MetaModule::LatchingButton>(MetaModule::DEVInfo::Elements[42]);
+	constexpr auto CycleB = get<MetaModule::LatchingButton>(MetaModule::DEVInfo::Elements[43]);
 
 	static_assert(ElementCount::get_indices<MetaModule::DEVInfo>(CycleA).value().param_idx == 16);
 	static_assert(ElementCount::get_indices<MetaModule::DEVInfo>(CycleB).value().param_idx == 17);

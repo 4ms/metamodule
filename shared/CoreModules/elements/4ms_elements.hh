@@ -1,10 +1,9 @@
 #pragma once
 #include "base_element.hh"
+#include "util/colors_rgb565.hh"
 
 namespace MetaModule
 {
-
-using Color565 = uint16_t;
 
 //
 // Knobs
@@ -36,14 +35,14 @@ struct Davies1900hBlackKnob : Knob {
 struct Slider25mmHorizLED : SliderLight {
 	constexpr Slider25mmHorizLED() = default;
 	constexpr Slider25mmHorizLED(BaseElement b)
-		: SliderLight{{{b, "slider_horiz_x.png"}, ""}, 0xFFFF} {
+		: SliderLight{{{b, "slider_horiz_x.png"}, "slider_horiz_handle_x.png"}, Colors565::White} {
 	}
 };
 
 struct Slider25mmVertLED : SliderLight {
 	constexpr Slider25mmVertLED() = default;
 	constexpr Slider25mmVertLED(BaseElement b)
-		: SliderLight{{{b, "slider_x.png"}, ""}, 0xFFFF} {
+		: SliderLight{{{b, "slider_x.png"}, "slider_handle_x.png"}, Colors565::White} {
 	}
 };
 
@@ -52,7 +51,7 @@ struct Slider25mmVertLED : SliderLight {
 //
 struct OrangeButton : LatchingButton {
 	constexpr OrangeButton(BaseElement b)
-		: LatchingButton{{b, "button_x.png"}, 0xfd40} {
+		: LatchingButton{{b, "button_x.png"}, Colors565::Orange} {
 	}
 };
 
@@ -174,25 +173,25 @@ struct AnalogJackOutput4ms : JackOutput {
 
 struct RedLight : MonoLight {
 	constexpr RedLight(BaseElement b)
-		: MonoLight{{b, "led_x.png"}, 0xF800} {
+		: MonoLight{{b, "led_x.png"}, Colors565::Red} {
 	}
 };
 
 struct BlueLight : MonoLight {
 	constexpr BlueLight(BaseElement b)
-		: MonoLight{{b, "led_x.png"}, 0x07E0} {
+		: MonoLight{{b, "led_x.png"}, Colors565::Blue} {
 	}
 };
 
 struct OrangeLight : MonoLight {
 	constexpr OrangeLight(BaseElement b)
-		: MonoLight{{b, "led_x.png"}, 0xFD40} {
+		: MonoLight{{b, "led_x.png"}, Colors565::Orange} {
 	}
 };
 
 struct RedBlueLight : DualLight {
 	constexpr RedBlueLight(BaseElement b)
-		: DualLight{{b, "led_x.png"}, {0xF800, 0x001F}} {
+		: DualLight{{b, "led_x.png"}, {Colors565::Red, Colors565::Blue}} {
 	}
 };
 

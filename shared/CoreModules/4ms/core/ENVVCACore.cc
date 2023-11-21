@@ -2,15 +2,14 @@
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 
-#include "CoreModules/4ms/core/envvca/SSI2162.h"
-#include "CoreModules/4ms/core/envvca/TriangleOscillator.h"
-#include "CoreModules/4ms/core/envvca/Tables.h"
 #include "CoreModules/4ms/core/envvca/FollowInput.h"
+#include "CoreModules/4ms/core/envvca/SSI2162.h"
+#include "CoreModules/4ms/core/envvca/Tables.h"
+#include "CoreModules/4ms/core/envvca/TriangleOscillator.h"
 #include "CoreModules/4ms/core/helpers/EdgeDetector.h"
-#include "CoreModules/4ms/core/helpers/circuit_elements.h"
 #include "CoreModules/4ms/core/helpers/FlipFlop.h"
+#include "CoreModules/4ms/core/helpers/circuit_elements.h"
 #include "CoreModules/4ms/core/helpers/quantization.h"
-
 
 namespace MetaModule
 {
@@ -81,12 +80,12 @@ public:
 	}
 
 	void displayEnvelope(float val, TriangleOscillator::SlopeState_t slopeState) {
+		setLED<RiseSlider>(slopeState == TriangleOscillator::SlopeState_t::RISING ? val / 8.f : 0);
+		setLED<FallSlider>(slopeState == TriangleOscillator::SlopeState_t::FALLING ? val / 8.f : 0);
 		val = val / VoltageDivider(100e3f, 100e3f);
 		val *= getState<EnvLevelSlider>();
 		setOutput<EnvOut>(val);
 		setLED<EnvLevelSlider>(val / 8.f);
-		setLED<RiseSlider>(slopeState == TriangleOscillator::SlopeState_t::RISING ? val / 8.f : 0);
-		setLED<FallSlider>(slopeState == TriangleOscillator::SlopeState_t::FALLING ? val / 8.f : 0);
 	}
 
 	void displayOscillatorState(TriangleOscillator::SlopeState_t slopeState) {
@@ -162,8 +161,8 @@ public:
 		fallCV = -fScaleLEDs - ProcessCVOffset(getState<FallSlider>(), fallRange);
 
 		// TODO: LEDs only need to be updated ~60Hz instead of 48kHz
-		setLED<RiseLight>(BipolarColor_t{-rScaleLEDs / 10.f});
-		setLED<FallLight>(BipolarColor_t{-fScaleLEDs / 10.f});
+		setLED<RiseLight>(BipolarColor_t{-rScaleLEDs / 7.5f});
+		setLED<FallLight>(BipolarColor_t{-fScaleLEDs / 7.5f});
 
 		// TODO: low pass filter
 
@@ -215,7 +214,6 @@ private:
 
 	static constexpr float followInputFilterCoeff = 0.01f;
 	float previousFollowInputFilterOutput;
-
 };
 
 } // namespace MetaModule

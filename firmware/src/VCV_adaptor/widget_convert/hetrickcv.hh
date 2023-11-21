@@ -1,9 +1,13 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include "VCV_adaptor/widget_convert/base.hh"
+#include "widgets.hh"
 
 struct CKSSRot;
 struct HCVThemedRogan;
+
+template<typename BASE>
+struct MuteLight;
 
 namespace MetaModule
 {
@@ -16,6 +20,16 @@ inline Element make_element<::CKSSRot>(BaseElement b) {
 template<>
 inline Element make_element<HCVThemedRogan>(BaseElement b) {
 	return MetaModule::Knob{b, "Rogan1PRed.png"};
+}
+
+template<>
+inline Element make_element<MuteLight<rack::componentlibrary::RedLight>>(BaseElement b) {
+	return MetaModule::MonoLight{{b, "MuteLight.png"}, Colors565::Red};
+}
+
+template<>
+inline Element make_element<MuteLight<rack::componentlibrary::BlueLight>>(BaseElement b) {
+	return MetaModule::MonoLight{{b, "MuteLight.png"}, Colors565::Cyan};
 }
 
 } // namespace MetaModule

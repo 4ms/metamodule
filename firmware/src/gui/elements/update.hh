@@ -29,20 +29,25 @@ inline std::optional<float> get_mapped_param_value(const ParamsMidiState &params
 	return {};
 }
 
-inline void
+inline std::optional<float>
 update_element_value(const ParamElement &, const ParamsMidiState &params, PatchData &patch, const GuiElement &gui_el) {
-	if (!gui_el.obj || !gui_el.mapped_panel_id.has_value())
-		return;
+	if (!gui_el.obj)
+		return std::nullopt;
 
-	auto val = ElementUpdate::get_mapped_param_value(params, gui_el.mapped_panel_id.value());
+	if (gui_el.mapped_panel_id.has_value()) {
+		auto val = ElementUpdate::get_mapped_param_value(params, gui_el.mapped_panel_id.value());
 
-	if (val.has_value()) {
-		patch.set_static_knob_value(gui_el.module_idx, gui_el.idx.param_idx, val.value());
+		if (val.has_value()) {
+			patch.set_static_knob_value(gui_el.module_idx, gui_el.idx.param_idx, val.value());
+			return val;
+		}
 	}
+	return patch.get_static_knob_value(gui_el.module_idx, gui_el.idx.param_idx);
 }
 
-inline void update_element_value(const BaseElement &, const ParamsMidiState &, PatchData &, const GuiElement &) {
-	//Catch-all
+inline std::optional<float>
+update_element_value(const BaseElement &, const ParamsMidiState &, PatchData &, const GuiElement &) {
+	return std::nullopt;
 }
 } // namespace ElementUpdate
 
@@ -52,15 +57,15 @@ struct UpdateElement {
 	GuiElement &gui_el;
 
 	bool operator()(auto &el) {
+		bool did_move = false;
+
 		// Update mapped knob values -> store in patch (static_knobs)
-		ElementUpdate::update_element_value(el, params, patch, gui_el);
+		auto param_val = ElementUpdate::update_element_value(el, params, patch, gui_el);
 
-		auto val = patch.get_static_knob_value(gui_el.module_idx, gui_el.idx.param_idx);
+		if (param_val.has_value())
+			did_move = redraw_element(el, gui_el, param_val.value());
 
-		if (!val.has_value() || !gui_el.obj)
-			return false;
-
-		return ElementRedrawDetails::redraw_element(el, gui_el, val.value());
+		return did_move;
 	}
 };
 

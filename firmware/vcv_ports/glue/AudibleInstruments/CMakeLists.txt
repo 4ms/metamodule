@@ -1,18 +1,24 @@
 include(modules.cmake)
 
-# the above should define ${AUDIBLE_INSTRUMENTS_SOURCE_PATHS}, the list of sources to add to the
-# AudibleInstrumentsLibrary OBJECT
-
 add_library(AudibleInstrumentsLibrary OBJECT ${AUDIBLEINSTRUMENTS_SOURCE_PATHS})
 
 target_include_directories(AudibleInstrumentsLibrary PRIVATE ${AUDIBLE_DIR}/src ${AUDIBLE_DIR}/eurorack)
 
 target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-double-promotion -Wno-deprecated-enum-float-conversion)
 
-# Fixups for compiler warnings in AudibleInstruments:
+# Fixes for compiler warnings in AudibleInstruments:
 set_source_files_properties(
   ${AUDIBLE_DIR}/eurorack/braids/digital_oscillator.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-unused-const-variable;-Wno-unused-but-set-variable"
+)
+
+# Fix warning for volatile read/write in ring_buffer.h 
+set_source_files_properties(
+    ${AUDIBLE_DIR}/src/Marbles.cpp
+    ${AUDIBLE_DIR}/eurorack/marbles/random/t_generator.cc
+    ${AUDIBLE_DIR}/eurorack/marbles/random/x_y_generator.cc
+    ${AUDIBLE_DIR}/eurorack/marbles/random/output_channel.cc
+  PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-volatile"
 )
 
 # Fix for stmlib STATIC_ASSERT creating typedefs that aren't used

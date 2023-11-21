@@ -123,11 +123,9 @@ private:
 	}
 
 	void prepare_control_arc() {
-		printf("prepare\n");
 		if (!drawn_el)
 			return;
 
-		printf("visit\n");
 		std::visit(overloaded{
 					   [](const BaseElement &) {},
 					   [](const Button &el) { lv_arc_set_range(ui_ControlArc, 0, 1); },
@@ -142,7 +140,6 @@ private:
 			name = "the control";
 		lv_label_set_text_fmt(ui_ControlAlertLabel, "Turn rotary to adjust %.*s", (int)name.size(), name.data());
 		lv_label_set_text(ui_ControlAlertAmount, "");
-		printf("set text done\n");
 	}
 
 	void arc_change_value() {

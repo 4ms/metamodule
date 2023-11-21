@@ -7,7 +7,7 @@
 #include "pr_dbg.hh"
 #include <cmath>
 
-namespace MetaModule::ElementRedrawDetails
+namespace MetaModule
 {
 
 inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
@@ -129,4 +129,4 @@ inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }
 
-} // namespace MetaModule::ElementRedrawDetails
+} // namespace MetaModule

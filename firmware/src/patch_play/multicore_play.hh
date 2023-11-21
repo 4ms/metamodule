@@ -27,9 +27,15 @@ public:
 		}
 	}
 
-	void split() {
+	void update_modules() {
 		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
 			mdrivlib::SMPThread::split_with_command<SMPCommand::PlayModuleList>();
+		}
+	}
+
+	void read_patch_state() {
+		if constexpr (mdrivlib::SMPControl::NumCores > 1) {
+			mdrivlib::SMPThread::split_with_command<SMPCommand::ReadPatchLights>();
 		}
 	}
 

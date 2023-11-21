@@ -4,6 +4,7 @@
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/module_param.hh"
+#include "gui/elements/redraw_light.hh"
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
@@ -94,7 +95,8 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_refr_size(canvas);
 		auto width_px = lv_obj_get_width(canvas);
-		auto display_widthpx = std::min<lv_coord_t>(width_px + 8, 180); //module img is no more than 180px wide
+		auto display_widthpx =
+			std::min<lv_coord_t>(width_px + 4, 190); //module img + padding is no more than 190px wide
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
 
@@ -106,8 +108,14 @@ struct ModuleViewPage : PageBase {
 		lv_obj_update_layout(canvas);
 
 		for (const auto &drawn_element : drawn_elements) {
+			auto &drawn = drawn_element.gui_element;
+			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
+				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
+				// printf("Watching Light: m:%d idx %d\n", this_module_id, drawn.idx.light_idx + i);
+			}
+
 			std::visit(
-				[this, drawn = drawn_element.gui_element](auto &el) {
+				[this, drawn = drawn](auto &el) {
 					if (!drawn.obj)
 						return;
 
@@ -159,7 +167,8 @@ struct ModuleViewPage : PageBase {
 
 			} else if (mode == ViewMode::List) {
 				if (PageList::request_last_page()) {
-					blur();
+					;
+					// blur();
 				}
 
 			} else if (mapping_pane.addmap_visible()) {
@@ -179,12 +188,26 @@ struct ModuleViewPage : PageBase {
 			mapping_pane.update();
 
 		if (is_patch_playing) {
-			for (auto &drawn_el : drawn_elements) {
-				auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
+			// copy light values from params, indexed by light element id
+			for (auto &wl : params.lights.watch_lights) {
+				if (wl.light_id >= MAX_LIGHTS_PER_MODULE)
+					continue;
 
-				if (was_redrawn && settings.map_ring_flash_active) {
-					MapRingDisplay::flash_once(drawn_el.gui_element.map_ring, settings.map_ring_style, true);
+				if (wl.is_active() && wl.module_id == this_module_id) {
+					light_vals[wl.light_id] = wl.value;
 				}
+			}
+
+			for (auto &drawn_el : drawn_elements) {
+				auto &gui_el = drawn_el.gui_element;
+
+				auto did_move = std::visit(UpdateElement{params, patch, gui_el}, drawn_el.element);
+
+				if (did_move && settings.map_ring_flash_active) {
+					MapRingDisplay::flash_once(gui_el.map_ring, settings.map_ring_style, true);
+				}
+
+				update_light(drawn_el, light_vals);
 			}
 		}
 
@@ -249,7 +272,8 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
-		// drawn_elements.clear(); // doing this might lead to fragmentation?
+		// printf("Clear light watches\n");
+		params.lights.stop_watching_all();
 	}
 
 private:
@@ -340,6 +364,7 @@ private:
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_controls;
 	std::vector<DrawnElement> drawn_elements;
+	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals;
 
 	lv_obj_t *base = nullptr;
 	lv_obj_t *canvas = nullptr;
