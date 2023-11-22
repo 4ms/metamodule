@@ -1,5 +1,5 @@
 #pragma once
-#include "gui/elements/helpers.hh"
+#include "gui/elements/element_name.hh"
 #include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"

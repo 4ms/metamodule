@@ -1,6 +1,5 @@
 #pragma once
 #include "gui/elements/element_name.hh"
-#include "gui/elements/helpers.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/module_view_mapping_pane_list.hh"
