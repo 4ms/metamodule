@@ -12,9 +12,8 @@ namespace MetaModule
 {
 
 struct AddMapPopUp {
-	AddMapPopUp(PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
-		: patch_storage{patch_storage}
-		, patch_mod_queue{patch_mod_queue} {
+	AddMapPopUp(PatchModQueue &patch_mod_queue)
+		: patch_mod_queue{patch_mod_queue} {
 
 		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_PRESSED, this);
@@ -45,9 +44,9 @@ struct AddMapPopUp {
 		lv_indev_set_group(indev, popup_group);
 
 		if (knobset_id == PatchData::MIDIKnobSet) {
-			lv_label_set_text(ui_AddModuleName, "Send MIDI CC");
+			lv_label_set_text(ui_AddModuleName, "Add a map: Send MIDI CC");
 		} else
-			lv_label_set_text(ui_AddModuleName, "Wiggle a knob");
+			lv_label_set_text(ui_AddModuleName, "Add a map: Wiggle a knob");
 
 		lv_label_set_text(ui_MapDetected, "");
 		param_idx = param_id;
@@ -142,7 +141,6 @@ struct AddMapPopUp {
 		}
 	}
 
-	PatchStorageProxy &patch_storage;
 	PatchModQueue &patch_mod_queue;
 	lv_group_t *base_group = nullptr;
 	lv_group_t *popup_group = nullptr;
