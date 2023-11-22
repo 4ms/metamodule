@@ -248,32 +248,41 @@ private:
 
 		this_module_id = PageList::get_selected_module_id();
 
-		// Show MIDI set first
-		show_knobset(patch.midi_maps, PatchData::MIDIKnobSet);
+		// Show MIDI set first (always show, even if set is empty)
+		auto [_, added_list_item] = show_knobset(patch.midi_maps, PatchData::MIDIKnobSet);
+		if (!added_list_item)
+			show_unmapped_knobset(PatchData::MIDIKnobSet, patch.valid_knob_set_name(PatchData::MIDIKnobSet));
 
-		// Show all knobsets with a mapping
+		// Show all non-empty knobsets
 		std::optional<unsigned> first_empty_set = std::nullopt;
 		for (uint32_t set_i = 0; set_i < patch.knob_sets.size(); set_i++) {
 			auto &set = patch.knob_sets[set_i];
 
-			auto set_is_empty = show_knobset(set, set_i);
-			if (set_is_empty && !first_empty_set.has_value())
+			// Show non-empty knobset if it has a mapping
+			// If it's not mapped, only show it if the knobset is not empty
+			auto [set_is_empty, added_list_item] = show_knobset(set, set_i);
+			if (!set_is_empty && !added_list_item)
+				show_unmapped_knobset(set_i, patch.valid_knob_set_name(set_i));
+
+			else if (set_is_empty && !first_empty_set.has_value())
 				first_empty_set = set_i;
 		}
 
-		// Show at least one empty knobset (if there is one)
+		// Show the first empty knobset (if there is one)
 		if (first_empty_set.has_value()) {
 			unsigned set_i = first_empty_set.value();
-			auto setname = patch.valid_knob_set_name(set_i);
-			auto obj = list.create_unmapped_list_item(setname, ui_MapList);
-			activate_list_item(obj, set_i, std::nullopt);
-			lv_obj_add_event_cb(obj, add_button_cb, LV_EVENT_PRESSED, this);
+			show_unmapped_knobset(set_i, "(new knobset)");
 		}
 	}
 
-	bool show_knobset(MappedKnobSet const &set, unsigned set_i) {
+	struct KnobSetStatus {
+		bool set_is_empty;
+		bool added_list_item;
+	};
+
+	KnobSetStatus show_knobset(MappedKnobSet const &set, unsigned set_i) {
 		bool set_is_empty = true;
-		bool has_mapping_in_set = false;
+		bool added_list_item = false;
 		auto setname = patch.valid_knob_set_name(set_i);
 
 		for (auto &map : set.set) {
@@ -283,18 +292,17 @@ private:
 					auto obj = list.create_map_list_item(map, setname, ui_MapList);
 					activate_list_item(obj, set_i, map.panel_knob_id);
 					lv_obj_add_event_cb(obj, edit_button_cb, LV_EVENT_PRESSED, this);
-					has_mapping_in_set = true;
+					added_list_item = true;
 				}
 			}
 		}
+		return {set_is_empty, added_list_item};
+	}
 
-		if (!set_is_empty && !has_mapping_in_set) {
-			auto obj = list.create_unmapped_list_item(setname, ui_MapList);
-			activate_list_item(obj, set_i, std::nullopt);
-			lv_obj_add_event_cb(obj, add_button_cb, LV_EVENT_PRESSED, this);
-		}
-
-		return set_is_empty;
+	void show_unmapped_knobset(unsigned set_i, const char *setname) {
+		auto obj = list.create_unmapped_list_item(setname, ui_MapList);
+		activate_list_item(obj, set_i, std::nullopt);
+		lv_obj_add_event_cb(obj, add_button_cb, LV_EVENT_PRESSED, this);
 	}
 
 	static void edit_button_cb(lv_event_t *event) {
