@@ -1,10 +1,10 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
-#include "gui/elements/element_drawer.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
+#include "gui/elements/redraw_light.hh"
 #include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/images/faceplate_images.hh"
@@ -62,6 +62,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		is_ready = false;
 		lv_hide(ui_DescriptionPanel);
 		lv_label_set_text(ui_Description, patch.description.c_str());
 
@@ -80,15 +81,17 @@ struct PatchViewPage : PageBase {
 		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
 			displayed_patch_loc == PageList::get_selected_patch_location())
 		{
+			watch_lights();
+			is_ready = true;
 			return;
 		}
 		displayed_patch_loc = PageList::get_selected_patch_location();
 		patch_revision = PageList::get_patch_revision();
 		active_knob_set = PageList::get_active_knobset();
 
-		lv_hide(modules_cont);
-
 		clear();
+
+		lv_hide(modules_cont);
 
 		patch = patch_storage.get_view_patch();
 
@@ -148,6 +151,8 @@ struct PatchViewPage : PageBase {
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 		}
 
+		watch_lights();
+
 		highlighted_module_id = std::nullopt;
 		highlighted_module_obj = nullptr;
 		update_map_ring_style();
@@ -158,9 +163,24 @@ struct PatchViewPage : PageBase {
 
 		settings_menu.focus(group);
 		knobset_menu.focus(group, patch.knob_sets);
+		is_ready = true;
+	}
+
+	void watch_lights() {
+		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
+		if (is_patch_playing) {
+			for (const auto &drawn_element : drawn_elements) {
+				auto &gui_el = drawn_element.gui_element;
+				for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
+					params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
+					// printf("Watching Light: m:%d idx %d\n", gui_el.module_idx, gui_el.idx.light_idx + i);
+				}
+			}
+		}
 	}
 
 	void blur() override {
+		// printf("Blur patchview page\n");
 		settings_menu.hide();
 		knobset_menu.hide();
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
@@ -214,6 +234,7 @@ struct PatchViewPage : PageBase {
 				lv_obj_clear_state(ui_InfoButton, LV_STATE_PRESSED);
 			} else if (PageList::request_last_page()) {
 				blur();
+				params.lights.stop_watching_all();
 			}
 		}
 
@@ -234,11 +255,43 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update_changed_params() {
-		// Redraw all knobs
+		std::array<std::vector<float>, MAX_MODULES_IN_PATCH> light_vals; //384B on the stack
+
+		// copy light values from params
+		// indexed by module id and light element id
+		for (auto &wl : params.lights.watch_lights) {
+			if (wl.is_active()) {
+				auto &vec = light_vals[wl.module_id];
+				if (vec.size() <= wl.light_id)
+					vec.resize(wl.light_id + 1);
+				vec[wl.light_id] = wl.value;
+			}
+		}
+
+		// Redraw all elements that have changed state (knobs, lights, etc)
+		auto is_visible = [](lv_coord_t pos) {
+			auto visible_top = lv_obj_get_scroll_y(ui_PatchViewPage);
+			auto visible_bot = visible_top + 240;
+			return pos >= visible_top && pos < visible_bot;
+		};
+
 		for (auto &drawn_el : drawn_elements) {
+			if (!drawn_el.gui_element.obj)
+				continue;
+
+			auto module_top_to_obj = lv_obj_get_y(drawn_el.gui_element.obj);
+			auto panel_top_to_module_top = lv_obj_get_y(lv_obj_get_parent(drawn_el.gui_element.obj));
+			auto panel_top_pos = lv_obj_get_y(ui_ModulesPanel);
+			auto ypos = module_top_to_obj + panel_top_to_module_top + panel_top_pos;
+			auto y2pos = ypos + lv_obj_get_height(drawn_el.gui_element.obj);
+
+			if (!is_visible(ypos) && !is_visible(y2pos))
+				continue;
+
+			auto &gui_el = drawn_el.gui_element;
+
 			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
 			if (was_redrawn) {
-				auto &gui_el = drawn_el.gui_element;
 				if (view_settings.map_ring_flash_active)
 					MapRingDisplay::flash_once(
 						gui_el.map_ring, view_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
@@ -246,10 +299,15 @@ struct PatchViewPage : PageBase {
 				if (view_settings.scroll_to_active_param)
 					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 			}
+
+			update_light(drawn_el, light_vals[gui_el.module_idx]);
 		}
 	}
 
 	void update_map_ring_style() {
+		if (!is_ready)
+			return;
+
 		for (auto &drawn_el : drawn_elements) {
 			auto map_ring = drawn_el.gui_element.map_ring;
 			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
@@ -368,6 +426,7 @@ struct PatchViewPage : PageBase {
 		lv_hide(ui_ModuleName);
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 		page->highlighted_module_id = std::nullopt;
+		page->update_map_ring_style();
 		page->settings_menu.hide();
 		page->knobset_menu.hide();
 	}
@@ -396,6 +455,7 @@ private:
 	std::vector<uint32_t> module_ids;
 	std::vector<DrawnElement> drawn_elements;
 	bool is_patch_playing = false;
+	bool is_ready = false;
 
 	PatchLocation displayed_patch_loc{0xFFFFFFFF, Volume::MaxVolumes};
 	uint32_t patch_revision = 0xFFFFFFFF;

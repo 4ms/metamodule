@@ -10,6 +10,8 @@
 
 template<int update_rate>
 struct LedManager {
+	using Color = EnOsc::Color;
+	using Colors = EnOsc::Colors;
 
 	LedManager(Color::Adjustment &color_cal, Color initial)
 		: color_cal_(color_cal)
@@ -126,6 +128,8 @@ struct SwitchesEventSource : EventSource<Event>, Switches {
 template<int update_rate, int block_size>
 class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 	using Base = EventHandler<Ui, Event>;
+	using Color = EnOsc::Color;
+	using Colors = EnOsc::Colors;
 	friend Base;
 
 	Parameters params_;

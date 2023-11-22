@@ -19,14 +19,12 @@ inline void do_create(BaseElement element, const ElementCount::Indices &, const 
 	printf("Hub Widget not found\n");
 }
 
-inline void do_create(Knob9mm el, const ElementCount::Indices &idx, const HubWidgetContext &ctx) {
+inline void do_create(Knob el, const ElementCount::Indices &idx, const HubWidgetContext &ctx) {
 	auto ctr_pos = rack::mm2px({el.x_mm, el.y_mm});
-	ctx.module_widget->addLabeledKnobPx<Small9mmKnob>(el.short_name, idx.param_idx, ctr_pos, 14.f);
-}
-
-inline void do_create(Davies1900hBlackKnob el, const ElementCount::Indices &idx, const HubWidgetContext &ctx) {
-	auto ctr_pos = rack::mm2px({el.x_mm, el.y_mm});
-	ctx.module_widget->addLabeledKnobPx<Davies1900hBlackKnob4ms>(el.short_name, idx.param_idx, ctr_pos, 19.f);
+	if (el.image == "knob_x.png")
+		ctx.module_widget->addLabeledKnobPx<Davies1900hBlackKnob4ms>(el.short_name, idx.param_idx, ctr_pos, 19.f);
+	else
+		ctx.module_widget->addLabeledKnobPx<Small9mmKnob>(el.short_name, idx.param_idx, ctr_pos, 14.f);
 }
 
 inline void do_create(JackInput el, const ElementCount::Indices &idx, const HubWidgetContext &ctx) {
@@ -39,7 +37,7 @@ inline void do_create(JackOutput el, const ElementCount::Indices &idx, const Hub
 		rack::createOutputCentered<rack::PJ301MPort>(rack::mm2px({el.x_mm, el.y_mm}), ctx.module, idx.output_idx));
 }
 
-inline void do_create(LatchingButtonMonoLight el, const ElementCount::Indices &idx, const HubWidgetContext &ctx) {
+inline void do_create(LatchingButton el, const ElementCount::Indices &idx, const HubWidgetContext &ctx) {
 	ctx.module_widget->addParam(
 		rack::createParamCentered<rack::BefacoPush>(rack::mm2px({el.x_mm, el.y_mm}), ctx.module, idx.param_idx));
 }

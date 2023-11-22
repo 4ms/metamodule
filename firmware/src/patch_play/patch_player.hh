@@ -151,7 +151,7 @@ public:
 		if (pd.module_slugs.size() == 2)
 			modules[1]->update();
 		else {
-			smp.split();
+			smp.update_modules();
 			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += smp.ModuleStride) {
 				modules[module_i]->update();
 			}
@@ -166,6 +166,11 @@ public:
 		}
 
 		update_midi_pulses();
+	}
+
+	void update_lights() {
+		smp.read_patch_state();
+		smp.join();
 	}
 
 	void unload_patch() {
@@ -284,6 +289,13 @@ public:
 			return 0.f;
 	}
 
+	float get_module_light(uint16_t module_id, uint16_t light_id) const {
+		if (module_id < pd.module_slugs.size())
+			return modules[module_id]->get_led_brightness(light_id);
+		else
+			return 0;
+	}
+
 	uint32_t get_midi_poly_num() {
 		return pd.midi_poly_num;
 	}
@@ -346,13 +358,6 @@ public:
 	void mark_patched_jacks() {
 		for (auto const &cable : pd.int_cables) {
 			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
-			for (auto const &input_jack : cable.ins) {
-				if (input_jack.module_id > 0)
-					modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
-			}
-		}
-
-		for (auto const &cable : pd.mapped_ins) {
 			for (auto const &input_jack : cable.ins) {
 				if (input_jack.module_id > 0)
 					modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);

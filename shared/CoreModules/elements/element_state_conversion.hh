@@ -1,15 +1,14 @@
 #pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/elements.hh"
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <concepts>
 #include <type_traits>
 
 namespace MetaModule::StateConversion
 {
-
-// Here we provide a non-ambigous set of fallbacks
-// For all element types that need a custom behaviour, a specialization for that particular type needs to be created
-// Since overload resolution does not work for template parameters, just inheriting from a specialized type (and expecting the method to fall back to the parent's) will not work
 
 //TODO: This generates a compiler error for gcc < 12.3
 template<typename T>
@@ -19,17 +18,16 @@ constexpr typename T::State_t convertState(const T &, float val) requires(std::i
 	// All types that inherit from BaseElement but do not define their own State_t will be caught
 }
 
-// to be defined for all kinds of elements
 template<typename T>
 constexpr MomentaryButton::State_t convertState(const T &, float val) requires(std::derived_from<T, MomentaryButton>)
 {
-	return val > 0 ? MomentaryButton::State_t::PRESSED : MomentaryButton::State_t::RELEASED;
+	return val > 0.5f ? MomentaryButton::State_t::PRESSED : MomentaryButton::State_t::RELEASED;
 }
 
 template<typename T>
 constexpr LatchingButton::State_t convertState(const T &, float val) requires(std::derived_from<T, LatchingButton>)
 {
-	return val > 0 ? LatchingButton::State_t::DOWN : LatchingButton::State_t::UP;
+	return val > 0.5f ? LatchingButton::State_t::DOWN : LatchingButton::State_t::UP;
 }
 
 template<typename T>
@@ -52,6 +50,21 @@ constexpr Toggle3pos::State_t convertState(const T &, float val) requires(std::d
 	} else {
 		return Toggle3pos::State_t::UP;
 	}
+}
+
+template<typename T>
+constexpr SlideSwitch::State_t convertState(const T &element, float val) requires(std::derived_from<T, SlideSwitch>)
+{
+	//maps 0..1 -> 1..N
+	return SlideSwitch::State_t(1 + std::round(val * (float)(element.num_pos - 1)));
+}
+
+template<typename T>
+constexpr FlipSwitch::State_t convertState(const T &element, float val)
+	requires(std::derived_from<T, FlipSwitch> && !std::same_as<T, Toggle2pos> && !std::same_as<T, Toggle3pos>)
+{
+	//maps 0..1 -> 0..(num_pos-1)
+	return FlipSwitch::State_t(std::round(val * (float)(element.num_pos - 1)));
 }
 
 template<typename T>
@@ -83,6 +96,23 @@ constexpr std::array<float, T::NumLights> convertLED(const T &, BipolarColor_t c
 	requires(std::derived_from<T, DualLight>)
 {
 	return {-std::min(color.value, 0.0f), std::max(color.value, 0.f)};
+}
+
+template<typename T>
+constexpr std::array<float, T::NumLights> convertLED(const T &, FullColor_t color)
+	requires(std::derived_from<T, RgbLight>)
+{
+	//fades from green to red to blue
+	float green = 1.f - 2.f * color.value;
+	float blue = -green;
+
+	green = std::clamp(green, 0.f, 1.f);
+	blue = std::clamp(blue, 0.f, 1.f);
+
+	float red = 1.f - (green + blue);
+	red = std::clamp(red, 0.f, 1.f);
+
+	return {red, green, blue};
 }
 
 } // namespace MetaModule::StateConversion

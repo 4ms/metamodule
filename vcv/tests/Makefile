@@ -4,7 +4,7 @@
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR ?= $(TEST_DIR)
 BUILDDIR = $(TEST_DIR)/build/obj
-RYMLDIR = src/shared/patch_convert/ryml/rapidyaml
+RYMLDIR = ../shared/patch_convert/ryml/rapidyaml
 JANSSON_CONF_DIR = ../firmware/lib/jansson
 JANSSON_DIR = ../firmware/lib/jansson/jansson/src
 
@@ -15,8 +15,8 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
-TEST_SOURCES += src/shared/patch_convert/patch_to_yaml.cc
-TEST_SOURCES += src/shared/patch_convert/ryml/ryml_serial.cc
+TEST_SOURCES += ../shared/patch_convert/patch_to_yaml.cc
+TEST_SOURCES += ../shared/patch_convert/ryml/ryml_serial.cc
 TEST_SOURCES += src/mapping/patch_writer.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)

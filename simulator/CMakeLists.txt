@@ -52,10 +52,23 @@ include(${FWDIR}/vcv_ports/brands.cmake)
 
 foreach(brand ${brands})
 
-  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand}
-                   ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
+  # Component artwork
+  file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
+  list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
+  foreach(component ${BRAND_ARTWORK_SOURCES})
+    cmake_path(GET component STEM LAST_ONLY COMPIMGNAME)
+    set(COMPFILENAME "${COMPIMGNAME}.png")
+    configure_file(${FWDIR}/src/gui/images/component_register.cc.in ${brand}/${COMPIMGNAME}_register.cc)
+    list(APPEND COMP_ARTWORK_SOURCES ${brand}/${COMPIMGNAME}_register.cc)
 
+    # Fixup for compiler warning on files that include LVGL 8.3 headers:
+    set_source_files_properties(${brand}/${COMPIMGNAME}_register.cc
+      PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;")
+  endforeach()
+
+  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
+  #target_link_libraries(${brand}Library PRIVATE mp15xa7_arch)
+  # Module Library
   target_include_directories(
     ${brand}Library
     PUBLIC ${FWDIR}/src/VCV_adaptor
@@ -66,11 +79,11 @@ foreach(brand ${brands})
            ${FWDIR}
            ${SHARED}
            ${SHARED}/cpputil)
+  target_compile_options(${brand}Library PRIVATE -Wno-attributes -Wno-deprecated-enum-enum-conversion)
+  target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
 
-  file(GLOB BRAND_ARTWORK_SOURCES
-       ${FWDIR}/src/gui/images/${brand}/components/*.c)
-  list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
-
+  # Faceplate artwork
+  # Use provided module list file.
   include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
   foreach(module IN LISTS ${brand}Modules)
     if(brand EQUAL "4ms")
@@ -98,11 +111,13 @@ endforeach()
 
 # #################### RYML + Patch Convert ##################################
 
-file(GLOB RYML_SOURCES ${SHARED}/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp
-     ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
+file(GLOB RYML_SOURCES 
+	${SHARED}/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp
+    ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
 
 add_library(ryml ${SHARED}/patch_convert/ryml/ryml_serial.cc
-                 ${SHARED}/patch_convert/yaml_to_patch.cc ${RYML_SOURCES})
+                 ${SHARED}/patch_convert/yaml_to_patch.cc 
+				 ${RYML_SOURCES})
 
 target_include_directories(
   ryml
@@ -143,8 +158,7 @@ target_include_directories(
 
 target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2
-                                        VCV_adaptor)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 VCV_adaptor)
 
 foreach(brand ${brands})
   target_link_libraries(simulator PRIVATE ${brand}Library)

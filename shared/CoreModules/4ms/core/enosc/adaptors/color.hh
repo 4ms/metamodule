@@ -2,6 +2,8 @@
 
 #include "../easiglib/dsp.hh"
 
+namespace EnOsc
+{
 struct Color {
 	struct Adjustment {
 		u1_7 r, g, b;
@@ -56,7 +58,8 @@ struct Colors {
 	//primary/secondary
 	static constexpr Color red = Color(max_val<u0_8>, 0._u0_8, 0.1_u0_8);
 	static constexpr Color green = Color(0._u0_8, max_val<u0_8>, 0._u0_8);
-	static constexpr Color blue = Color(0._u0_8, 0._u0_8, max_val<u0_8>);
+	// static constexpr Color blue = Color(0._u0_8, 0._u0_8, max_val<u0_8>);
+	static constexpr Color blue = Color(0._u0_8, 0._u0_8, 0.8_u0_8);
 	static constexpr Color yellow = Color(max_val<u0_8>, max_val<u0_8>, 0._u0_8);
 	static constexpr Color magenta = Color(max_val<u0_8>, 0._u0_8, max_val<u0_8>);
 	static constexpr Color cyan = Color(0._u0_8, max_val<u0_8>, max_val<u0_8>);
@@ -65,7 +68,8 @@ struct Colors {
 	static constexpr Color orange = red.blend(yellow);
 	static constexpr Color pink = Color(max_val<u0_8>, 0.32_u0_8, 0.24_u0_8);
 	static constexpr Color peach = Color(0.6_u0_8, 0.1_u0_8, 0.03_u0_8);
-	static constexpr Color lemon = Color(max_val<u0_8>, 0.42_u0_8, 0._u0_8);
+	// static constexpr Color lemon = Color(max_val<u0_8>, 0.42_u0_8, 0._u0_8);
+	static constexpr Color lemon = Color(0.5_u0_8, 0.5_u0_8, 0._u0_8);
 	static constexpr Color hotpink = Color(max_val<u0_8>, 0._u0_8, 0.5_u0_8);
 	static constexpr Color mint = Color(0.34_u0_8, 0.29_u0_8, 0.66_u0_8);
 	static constexpr Color ice = Color(0._u0_8, max_val<u0_8>, 0.27_u0_8);
@@ -81,3 +85,4 @@ struct Colors {
 	static constexpr Color dark_magenta = magenta.blend(black);
 	static constexpr Color dark_cyan = cyan.blend(black);
 };
+} // namespace EnOsc

@@ -1,5 +1,6 @@
 #include "../vcv_creation_context.hh"
 #include "4ms_widgets.hh"
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/elements.hh"
 
@@ -30,51 +31,44 @@ void create_4ms_light_param(float x_mm, float y_mm, const Indices &indices, cons
 
 /////////////// Params
 
-inline void do_create(DaviesLargeKnob el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<DaviesLarge4ms>(el.x_mm, el.y_mm, indices, context);
+inline void do_create(Knob el, const Indices &indices, const WidgetContext_t &context) {
+	if (el.image == "knob9mm_x.png")
+		create_4ms_param<Small9mmKnob>(el.x_mm, el.y_mm, indices, context);
+	else if (el.image == "knob_x.png")
+		create_4ms_param<Davies1900hBlackKnob4ms>(el.x_mm, el.y_mm, indices, context);
+	else if (el.image == "knob_large_x.png")
+		create_4ms_param<DaviesLarge4ms>(el.x_mm, el.y_mm, indices, context);
 }
 
-inline void do_create(Davies1900hBlackKnob el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<Davies1900hBlackKnob4ms>(el.x_mm, el.y_mm, indices, context);
+inline void do_create(Slider el, const Indices &indices, const WidgetContext_t &context) {
+	if (el.image == "slider_x.png")
+		create_4ms_param<FourmsSlider>(el.x_mm, el.y_mm, indices, context);
+	else if (el.image == "slider_horiz_x.png")
+		create_4ms_param<FourmsSliderHorizontal>(el.x_mm, el.y_mm, indices, context);
 }
 
-inline void do_create(Knob9mm el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<Small9mmKnob>(el.x_mm, el.y_mm, indices, context);
+inline void do_create(SliderLight el, const Indices &indices, const WidgetContext_t &context) {
+	if (el.image == "slider_x.png")
+		create_4ms_light_param<FourmsLightSlider<rack::WhiteLight>>(el.x_mm, el.y_mm, indices, context);
+	else if (el.image == "slider_horiz_x.png")
+		create_4ms_light_param<FourmsLightSliderHorizontal<rack::WhiteLight>>(el.x_mm, el.y_mm, indices, context);
 }
 
-inline void do_create(Slider25mmVert el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<FourmsSlider>(el.x_mm, el.y_mm, indices, context);
+inline void do_create(FlipSwitch el, const Indices &indices, const WidgetContext_t &context) {
+	if (el.frames[0] == "switch_down.png") {
+		if (el.num_pos == 2)
+			create_4ms_param<SubMiniToggle2pos>(el.x_mm, el.y_mm, indices, context);
+		else if (el.num_pos == 3)
+			create_4ms_param<SubMiniToggle3pos>(el.x_mm, el.y_mm, indices, context);
+	} else if (el.frames[0] == "switch_horiz_down.png") {
+		if (el.num_pos == 2)
+			create_4ms_param<SubMiniToggleHoriz2pos>(el.x_mm, el.y_mm, indices, context);
+		else if (el.num_pos == 3)
+			create_4ms_param<SubMiniToggleHoriz3pos>(el.x_mm, el.y_mm, indices, context);
+	}
 }
 
-inline void do_create(Slider25mmHoriz el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<FourmsSliderHorizontal>(el.x_mm, el.y_mm, indices, context);
-}
-
-inline void do_create(Slider25mmVertLED el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_light_param<FourmsLightSlider<rack::WhiteLight>>(el.x_mm, el.y_mm, indices, context);
-}
-
-inline void do_create(Slider25mmHorizLED el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_light_param<FourmsLightSliderHorizontal<rack::WhiteLight>>(el.x_mm, el.y_mm, indices, context);
-}
-
-inline void do_create(Toggle2pos el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<SubMiniToggle2pos>(el.x_mm, el.y_mm, indices, context);
-}
-
-inline void do_create(Toggle3pos el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<SubMiniToggle3pos>(el.x_mm, el.y_mm, indices, context);
-}
-
-inline void do_create(Toggle2posHoriz el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<SubMiniToggleHoriz2pos>(el.x_mm, el.y_mm, indices, context);
-}
-
-inline void do_create(Toggle3posHoriz el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<SubMiniToggleHoriz3pos>(el.x_mm, el.y_mm, indices, context);
-}
-
-inline void do_create(LatchingButtonMonoLight el, const Indices &indices, const WidgetContext_t &context) {
+inline void do_create(LatchingButton el, const Indices &indices, const WidgetContext_t &context) {
 	using WidgetT = LatchingSwitch<rack::LEDBezel>;
 	using LightT = rack::LEDBezelLight<rack::YellowLight>;
 	create_4ms_param<WidgetT, LightT>(el.x_mm, el.y_mm, indices, context);
@@ -97,20 +91,9 @@ inline void do_create(Encoder el, const Indices &indices, const WidgetContext_t 
 	create_4ms_param<Davies1900hBlackKnobUnlined4ms>(el.x_mm, el.y_mm, indices, context);
 }
 
-inline void do_create(SmallEncoder el, const Indices &indices, const WidgetContext_t &context) {
-	create_4ms_param<Small9mmUnlinedKnob>(el.x_mm, el.y_mm, indices, context);
-}
-
 // TODO: does this look OK when rendered?
 inline void do_create(EncoderRGB el, const Indices &indices, const WidgetContext_t &context) {
 	using WidgetT = Davies1900hBlackKnobUnlined4ms;
-	using LightT = rack::LEDBezelLight<rack::RedGreenBlueLight>;
-	create_4ms_param<WidgetT, LightT>(el.x_mm, el.y_mm, indices, context);
-}
-
-// TODO: does this look OK when rendered?
-inline void do_create(SmallLEDEncoder el, const Indices &indices, const WidgetContext_t &context) {
-	using WidgetT = Small9mmUnlinedKnob;
 	using LightT = rack::LEDBezelLight<rack::RedGreenBlueLight>;
 	create_4ms_param<WidgetT, LightT>(el.x_mm, el.y_mm, indices, context);
 }
@@ -131,19 +114,35 @@ inline void do_create(JackInput el, const Indices &indices, const WidgetContext_
 
 /////// Lights
 
-inline void do_create(RedBlueLight el, const Indices &indices, const WidgetContext_t &context) {
+inline void do_create(DualLight el, const Indices &indices, const WidgetContext_t &context) {
 	auto ctr_pos = rack::Vec(el.x_mm, el.y_mm).mult(Fix4msScaling);
 
-	// FIXME: create our own Red/Blue light, VCV only has Red/Green
-	using LightT = rack::LEDBezelLight<rack::GreenRedLight>;
+	using LightT = rack::MediumLight<MetaModule::RedBlueLightWidget>;
 	context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 }
 
-inline void do_create(OrangeLight el, const Indices &indices, const WidgetContext_t &context) {
+inline void do_create(MonoLight el, const Indices &indices, const WidgetContext_t &context) {
 	auto ctr_pos = rack::Vec(el.x_mm, el.y_mm).mult(Fix4msScaling);
 
-	// FIXME: create our own Orange light
-	using LightT = rack::LEDBezelLight<rack::YellowLight>;
+	if (el.color == Colors565::Orange) {
+		using LightT = rack::MediumLight<MetaModule::OrangeLightWidget>;
+		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
+
+	} else if (el.color == Colors565::Red) {
+		using LightT = rack::LEDBezelLight<rack::RedLight>;
+		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
+
+	} else if (el.color == Colors565::Blue) {
+		using LightT = rack::LEDBezelLight<rack::BlueLight>;
+		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
+	}
+}
+
+inline void do_create(RgbLight el, const Indices &indices, const WidgetContext_t &context) {
+	auto ctr_pos = rack::Vec(el.x_mm, el.y_mm).mult(Fix4msScaling);
+
+	using LightT = rack::MediumLight<rack::RedGreenBlueLight>;
 	context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 }
+
 } // namespace MetaModule::VCVImplementation::Widget

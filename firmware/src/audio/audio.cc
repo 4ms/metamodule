@@ -69,7 +69,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	}
 
 	auto audio_callback = [this]<unsigned block>() {
-		Debug::Pin4::high();
+		// Debug::Pin4::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -95,9 +95,12 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		// copy analyzed signals back to shared param block (so GUI thread can access it)
 		param_blocks[block].metaparams.ins = local_p.metaparams.ins;
+
+		// copy this value back so Controls can read it
+		param_blocks[block].metaparams.midi_poly_chans = local_p.metaparams.midi_poly_chans;
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
-		Debug::Pin4::low();
+		// Debug::Pin4::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -130,22 +133,35 @@ bool AudioStream::check_patch_loading() {
 			mute_ctr -= 0.1f;
 		} else {
 			// We only process half an audio buffer at a time, so make sure both halves are muted
-			if (++halves_muted == 2)
+			mute_ctr = 0.f;
+			if (++halves_muted == 2) {
 				patch_loader.notify_audio_is_muted();
+			}
 		}
 	} else {
-		patch_loader.audio_not_muted();
-		mute_ctr = 1.f;
-		halves_muted = 0;
+		// Patch was just loaded --> unmute audio
+		if (patch_loader.is_audio_muted()) {
+			patch_loader.audio_not_muted();
+			mute_ctr = 1.f;
+			halves_muted = 0;
+			handle_patch_just_loaded();
+		}
 	}
 
 	return !player.is_loaded || patch_loader.is_audio_muted();
 }
 
+void AudioStream::handle_patch_just_loaded() {
+	// Reset the plug detects
+	// this ensures any patched jacks will be detected as a new event
+	// and will propagate to the patch player
+	for (auto &p : plug_detects)
+		p.reset();
+}
+
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	handle_patch_mods(patch_mod_queue, player);
 
-	// Handle jacks being plugged/unplugged
 	propagate_sense_pins(param_block.params[0]);
 
 	// TODO: handle second codec
@@ -196,6 +212,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, outchan] : countzip(out.chan))
 			outchan = get_audio_output(i);
 	}
+
+	player.update_lights();
 }
 
 void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
@@ -257,21 +275,16 @@ void AudioStream::handle_midi(Midi::Event const &event, unsigned poly_num) {
 }
 
 void AudioStream::propagate_sense_pins(Params &params) {
-	for (int i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
-		auto pin_bit = jacksense_pin_order[i];
-		bool sense = jack_is_patched(params.jack_senses, pin_bit);
-		plug_detects[i].update(sense);
-		if (plug_detects[i].changed())
-			player.set_input_jack_patched_status(i, sense);
-	}
-
-	for (int out_i = 0; out_i < PanelDef::NumUserFacingOutJacks; out_i++) {
-		auto jack_i = out_i + PanelDef::NumUserFacingInJacks;
-		auto pin_bit = jacksense_pin_order[jack_i];
-		bool sense = jack_is_patched(params.jack_senses, pin_bit);
-		plug_detects[jack_i].update(sense);
-		if (plug_detects[jack_i].changed())
-			player.set_output_jack_patched_status(out_i, sense);
+	for (unsigned i = 0; auto &plug_detect : plug_detects) {
+		bool sense = jack_is_patched(params.jack_senses, i);
+		plug_detect.update(sense);
+		if (plug_detect.changed()) {
+			if (i < PanelDef::NumUserFacingInJacks)
+				player.set_input_jack_patched_status(i, sense);
+			else
+				player.set_output_jack_patched_status(i - PanelDef::NumUserFacingInJacks, sense);
+		}
+		i++;
 	}
 
 	param_state.jack_senses = params.jack_senses;

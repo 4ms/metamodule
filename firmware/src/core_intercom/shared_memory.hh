@@ -1,19 +1,20 @@
 #pragma once
 #include "audio/auxsignal.hh"
 #include "conf/ramdisk_conf.hh"
-#include "core_intercom/patch_icc_message.hh"
-#include "param_block.hh"
-#include "params/sync_params.hh"
-#include "patch_file/patch_file.hh"
+#include "params/param_block.hh"
 #include "patch_play/patch_mod_queue.hh"
-#include "patch_play/patch_playloader.hh"
 #include <cstdint>
 #include <span>
 
 namespace MetaModule
 {
-//fwd declare so that main-m4.cc doesn't have to #include "patch_player.hh"
+//fwd declare to reduce dependencies
+class PatchICCMessage;
+class PatchFileList;
 class PatchPlayer;
+class PatchPlayLoader;
+class PatchStorageProxy;
+class SyncParams;
 
 //TODO: Move this structure to static_buffers.hh and declar static inline ptrs there too
 struct SharedMemoryS {

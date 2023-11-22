@@ -162,11 +162,11 @@ foreach(brand ${brands})
   # for each component svg, add_custom_command (...) to convert to lvgl
   foreach(svg ${${brand}_comp_svgs})
     get_filename_component(svg_name ${svg} NAME_WE)
-    set(c_name ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/components/${svg_name}.c)
+    set(outpath ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/components/)
     add_custom_command(
       OUTPUT comp-cmd
       APPEND
-      COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py convertSvgToLvgl ${svg} ${c_name}
+      COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py convertSvgToLvgl ${svg} ${outpath}
       DEPENDS ${svg}
       COMMENT "Converting component: ${svg_name} to ${svg_name}.c"
     )

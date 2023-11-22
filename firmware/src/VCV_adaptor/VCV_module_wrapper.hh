@@ -56,6 +56,14 @@ struct VCVModuleWrapper : CoreProcessor {
 		return outputs[output_id].getVoltage();
 	}
 
+	float get_led_brightness(const int led_id) const override {
+		if (led_id >= 0 && led_id < (int)lights.size()) {
+			auto l = std::clamp(lights[led_id].value, 0.f, 1.f);
+			return l;
+		}
+		return 0;
+	}
+
 	void mark_all_inputs_unpatched() override {
 		for (auto &in : inputs)
 			in.connected = false;

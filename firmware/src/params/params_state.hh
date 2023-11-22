@@ -3,6 +3,7 @@
 #include "conf/panel_conf.hh"
 #include "midi_params.hh"
 #include "patch/midi_def.hh"
+#include "patch_play/lights.hh"
 #include "util/debouncer.hh"
 #include "util/parameter.hh"
 #include "util/zip.hh"
@@ -57,33 +58,27 @@ struct ParamsState {
 		return jack_senses & (1 << jacksense_pin_order[jack_idx]);
 	}
 
-	void copy_from(ParamsState const &that) {
-		for (auto [gate_in, that_gate_in] : zip(gate_ins, that.gate_ins))
+	friend void copy(ParamsState &dst, ParamsState const &src) {
+		for (auto [gate_in, that_gate_in] : zip(dst.gate_ins, src.gate_ins))
 			gate_in = that_gate_in;
 
-		for (auto [knob, that_knob] : zip(knobs, that.knobs)) {
+		for (auto [knob, that_knob] : zip(dst.knobs, src.knobs)) {
 			knob = that_knob;
 		}
 
-		jack_senses = that.jack_senses;
-	}
-
-	void copy_to(ParamsState &that) const {
-		for (auto [gate_in, that_gate_in] : zip(gate_ins, that.gate_ins))
-			that_gate_in = gate_in;
-
-		for (auto [knob, that_knob] : zip(knobs, that.knobs))
-			that_knob = knob;
-
-		that.jack_senses = jack_senses;
+		dst.jack_senses = src.jack_senses;
 	}
 };
 
 struct ParamsMidiState : ParamsState {
 	std::array<LatchedParam<float, 1, 127>, NumMidiCCs> midi_ccs;
 
+	LightWatcher lights;
+
 	void clear() {
 		ParamsState::clear();
+
+		lights.stop_watching_all();
 
 		for (auto &cc : midi_ccs)
 			cc = 0;

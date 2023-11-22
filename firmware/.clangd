@@ -1,8 +1,11 @@
----
 Diagnostics:
+
+    UnusedIncludes: None #too many false positives in clangd 17.0.5
+      #MissingIncludes: Strict
+
     ClangTidy:
         Add: [modernize*, cppcoreguidelines-prefer-member-initializer, readability-suspicious-call-argument]
-        Remove: [modernize-use-trailing-return-type, modernize-avoid-c-arrays,modernize-use-nodiscard]
+        Remove: [modernize-use-std-print, modernize-use-trailing-return-type, modernize-avoid-c-arrays,modernize-use-nodiscard]
         CheckOptions:
             readability-identifier-naming.VariableCase: CamelCase
 
@@ -65,4 +68,3 @@ CompileFlags:
 	Remove: [
 		"-std=gnu++2b", 
 	]
----

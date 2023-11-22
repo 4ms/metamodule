@@ -22,10 +22,12 @@ extern "C" void aux_core_main() {
 	auto sync_params = SharedMemoryS::ptrs.sync_params;
 	auto patch_mod_queue = SharedMemoryS::ptrs.patch_mod_queue;
 
+	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
+
 	struct AuxCorePlayerContext {
-		uint32_t starting_idx;
-		uint32_t num_modules;
-		uint32_t idx_increment;
+		uint32_t starting_idx = 1;
+		uint32_t num_modules = 0;
+		uint32_t idx_increment = 2;
 	} context;
 
 	constexpr auto PlayModuleListIRQn = SMPControl::IRQn(SMPCommand::PlayModuleList);
@@ -44,7 +46,20 @@ extern "C" void aux_core_main() {
 		SMPThread::signal_done();
 	});
 
-	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
+	constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchLights);
+	InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [patch_player, &ui]() {
+		if (ui.new_patch_data == false) {
+			for (auto &w : ui.lights().watch_lights) {
+				if (w.is_active()) {
+					auto val = patch_player->get_module_light(w.module_id, w.light_id);
+					w.value = val;
+				}
+			}
+			ui.new_patch_data = true;
+		}
+
+		SMPThread::signal_done();
+	});
 
 	while (true) {
 		ui.update();

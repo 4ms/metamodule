@@ -2,11 +2,12 @@
 #include "CoreModules/elements/element_state_conversion.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
+#include "gui/images/image_fs.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include <cmath>
 
-namespace MetaModule::ElementRedrawDetails
+namespace MetaModule
 {
 
 inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
@@ -52,7 +53,7 @@ inline bool redraw_element(const Slider &element, const GuiElement &gui_el, floa
 	} else {
 		// Horizontal Slider
 		auto handle_width = lv_obj_get_width(handle);
-		int32_t pos = (1.f - val) * (width - handle_width);
+		int32_t pos = val * (width - handle_width);
 		int32_t cur_pos = lv_obj_get_x(handle);
 		if (pos != cur_pos) {
 			lv_obj_set_x(handle, pos);
@@ -63,78 +64,61 @@ inline bool redraw_element(const Slider &element, const GuiElement &gui_el, floa
 	return did_update_position;
 }
 
-// Toggle update
-inline bool redraw_element(const Toggle3pos &element, const GuiElement &gui_el, float val) {
-	using enum Toggle3pos::State_t;
+inline bool redraw_element(const FlipSwitch &element, const GuiElement &gui_el, float val) {
+	bool did_change_frame = false;
 
-	bool did_update_position = false;
+	unsigned frame_num = StateConversion::convertState(element, val);
 
-	auto handle = lv_obj_get_child(gui_el.obj, 0);
-	if (!handle) {
-		pr_err("No handle sub-object for toggle3pos\n");
-		return false;
-	}
-	auto height = lv_obj_get_height(gui_el.obj);
-	//auto width = lv_obj_get_width(drawn.obj);
-
-	// if (height > width) {
-	// Vertical Toggle
-	lv_obj_refr_size(handle);
-	lv_obj_refr_pos(handle);
-	int32_t y = lv_obj_get_y(handle);
-	Toggle3pos::State_t cur_state = (y >= height / 2) ? DOWN : (y == 0) ? UP : CENTER;
-	auto state = StateConversion::convertState(element, val);
-
-	if (state != cur_state) {
-		if (state == UP) {
-			lv_obj_set_y(handle, 0);
-			lv_obj_set_height(handle, height / 2);
+	if (frame_num < element.frames.size()) {
+		auto img = PNGFileSystem::read(element.frames[frame_num]);
+		auto cur_img = lv_img_get_src(gui_el.obj);
+		if (img && img != cur_img) {
+			lv_img_set_src(gui_el.obj, img);
+			did_change_frame = true;
 		}
-		if (state == CENTER) {
-			lv_obj_set_y(handle, height / 2 - height / 8);
-			lv_obj_set_height(handle, height / 4);
-		}
-		if (state == DOWN) {
-			lv_obj_set_y(handle, height / 2);
-			lv_obj_set_height(handle, height / 2);
-		}
-		did_update_position = true;
 	}
 
-	return did_update_position;
-	// TODO: Horizontal Toggle
+	return did_change_frame;
 }
 
-// Toggle 2pos update
-inline bool redraw_element(const Toggle2pos &element, const GuiElement &gui_el, float val) {
-	bool did_update_position = false;
-	using enum Toggle2pos::State_t;
-
+inline bool redraw_element(const SlideSwitch &element, const GuiElement &gui_el, float val) {
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {
-		pr_err("No handle sub-object for toggle2pos\n");
+		pr_err("No handle object for SlideSwitch\n");
 		return false;
 	}
-	auto height = lv_obj_get_height(gui_el.obj);
-	//auto width = lv_obj_get_width(drawn.obj);
+	// major axis = height if vertical, width if horizontal.
 
-	// if (height > width) {
-	// Vertical Toggle
+	auto height = lv_obj_get_height(gui_el.obj);
+	auto width = lv_obj_get_width(gui_el.obj);
+	bool vert = height > width;
+	auto major_dim = vert ? height : width;
+	auto handle_major_dim = major_dim / element.num_pos;
+	lv_coord_t major_range = major_dim - handle_major_dim;
+
 	lv_obj_refr_size(handle);
 	lv_obj_refr_pos(handle);
-	int32_t y = lv_obj_get_y(handle);
-	auto cur_state = (y >= height / 2) ? DOWN : UP;
-	auto state = StateConversion::convertState(element, val);
+	int32_t cur_pos = vert ? lv_obj_get_y(handle) : lv_obj_get_x(handle);
 
-	if (state != cur_state) {
-		if (state == UP) {
-			lv_obj_set_y(handle, 0);
-			lv_obj_set_height(handle, height / 2);
-		}
-		if (state == DOWN) {
-			lv_obj_set_y(handle, height / 2);
-			lv_obj_set_height(handle, height / 2);
-		}
+	if (element.direction == SlideSwitch::Ascend::UpLeft)
+		cur_pos = major_range - cur_pos;
+
+	// cur_pos ranges from 0 to major_range
+	auto cur_state = StateConversion::convertState(element, (float)cur_pos / (float)major_range) - 1;
+	auto new_state = StateConversion::convertState(element, val) - 1; //0..N-1 0..6
+
+	bool did_update_position = false;
+
+	if (new_state != cur_state) {
+		lv_coord_t new_pos = ((float)new_state / (float)(element.num_pos - 1)) * major_range;
+
+		if (element.direction == SlideSwitch::Ascend::UpLeft)
+			new_pos = major_range - new_pos;
+
+		if (vert)
+			lv_obj_set_y(handle, new_pos);
+		else
+			lv_obj_set_x(handle, new_pos);
 		did_update_position = true;
 	}
 
@@ -145,4 +129,4 @@ inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }
 
-} // namespace MetaModule::ElementRedrawDetails
+} // namespace MetaModule

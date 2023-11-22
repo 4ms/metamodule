@@ -2,10 +2,9 @@
 #include "CoreModules/elements/elements_index.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "gui/elements/context.hh"
-#include "gui/elements/element_drawer.hh"
+#include "gui/elements/draw.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
-#include "gui/images/component_images.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
@@ -52,8 +51,15 @@ struct ModuleDrawer {
 		lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
 		draw_img_dsc.zoom = zoom * 256;
-		pr_dbg("Drawing faceplate %s (%d x %d)\n", slug.data(), widthpx, height);
+
+		pr_trace("Drawing faceplate %s (%d x %d)\n", slug.data(), widthpx, height);
+
 		lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
+		// Overflow visible: requires too much processing when zoomed-out to view lots of modules
+		if (height == 240)
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+		else
+			lv_obj_clear_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
 		return canvas;
 	}
@@ -71,7 +77,6 @@ struct ModuleDrawer {
 
 		// Draw module controls
 		const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-		auto el_drawer = ElementDrawer{height, canvas};
 
 		//Reserve enough for what we will append
 		drawn_elements.reserve(drawn_elements.size() + moduleinfo.elements.size());
@@ -79,9 +84,8 @@ struct ModuleDrawer {
 		ElementCount::Indices indices{};
 		for (const auto &element : moduleinfo.elements) {
 			auto element_ctx = std::visit(
-				[height = height, &el_drawer, &patch, &indices, module_idx, canvas, active_knob_set](
-					auto &el) -> GuiElement {
-					auto obj = el_drawer.draw_element(el);
+				[height = height, &patch, &indices, module_idx, canvas, active_knob_set](auto &el) -> GuiElement {
+					auto obj = ElementDrawer::draw_element(el, canvas, height);
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, indices);
 					auto mapped_ring = MapRingDrawer::draw_mapped_ring(el, obj, canvas, mapping_id, height);
 

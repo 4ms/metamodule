@@ -5,7 +5,6 @@ import actions.vcv as vcv
 import actions.infofile as infofile
 import actions.coreModule as coreModule
 import actions.lvgl as lvgl
-import actions.imageList as imageList
 
 # Version check
 f"Python 3.6+ is required"
@@ -43,21 +42,12 @@ createLvglFaceplate [input faceplate SVG file name] [output C file name] {{optio
     (e.g. for 4ms SVG info files, the layer to extract is called `faceplate`).
     Requires inkscape v1.2.2 and for the command to be present on PATH, or found at the env var INKSCAPE_BIN_PATH
 
-convertSvgToLvgl [input SVG file name] [output C file name] {{optional scale 1-100}}
-    Converts the SVG to a 47dpi LVGL format .c files.
-    The scale parameter must be an integer or floating-point value
-    and defaults to 63% if omitted.
+convertSvgToLvgl [input SVG file name] [path for generated files]
+    Converts the SVG to a 47dpi LVGL format .c files. An intermediate PNG file is also created.
+    The generated PNG and .c files will be put into the specified dir. The filenames
+    will be the same as the .svg base filename, with .png and .c extensions.
     Requires the same inkscape and convert programs/paths as createLvglFaceplate
 
-appendImgList [C struct name] [path/to/image_list.hh]
-    Add the given image name to the faceplate LVGL image list.
-    C struct name is the prefix for an image struct in c format, created by 
-    lv_img_conv, without the _### size suffix. Example: `EnOsc_artwork`.
-    The second argument is the path to the image_list.hh file that should be 
-    update. Does not update the image_list.hh file if the
-    exact string to be inserted is already found. Note that the slug is the 
-    first part of the C array name, up to the first underscore 
-    (EnOsc_artwork => EnOsc)
 """)
 
     extended_help = f"""
@@ -132,12 +122,8 @@ def parse_args(args):
         lvgl.faceplateSvgToLVGL(inputfile, output, layer)
         return
 
-    elif cmd == 'appendimglist':
-        imageList.appendImageList(inputfile, output)
-
     elif cmd == 'convertsvgtolvgl':
-        scale = args.pop(0) if len(args) > 0 else 63.25
-        lvgl.componentSvgToLVGL(inputfile, output, scale)
+        lvgl.componentSvgToLVGL(inputfile, output)
         return
 
     else:

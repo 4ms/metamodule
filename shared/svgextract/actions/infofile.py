@@ -76,9 +76,9 @@ def panel_to_components(tree):
     for el in circles + rects:
         c = {}
         # Get name
-        name = el.get('{http://www.inkscape.org/namespaces/inkscape}label')
-        if name is None:
-            name = el.get('data-name')
+        # name = el.get('{http://www.inkscape.org/namespaces/inkscape}label')
+        # if name is None:
+        name = el.get('data-name')
         if name is None:
             name = el.get('id')
             if name is not None:
@@ -94,6 +94,12 @@ def panel_to_components(tree):
         if len(split) > 1:
             name = split[0]
             c['class'] = split[1]
+
+        # If name is ElementName@pos1@pos2, then extract pos names
+        split = name.split("@")
+        if len(split) > 1:
+            name = split[0]
+            c['pos_names'] = split[1:]
 
         c['display_name'] = format_for_display(name)
         c['legacy_enum_name'] = format_as_legacy_enum_item(name)
@@ -135,8 +141,9 @@ def panel_to_components(tree):
             print(f"Error: {shape} shape with no style found at {c['cx']}, {c['cy']}")
             continue
 
-        color_match = re.search(r'fill:\s*(.*)', style)
-        color = ''
+        color_match = re.search(r'fill:\s*(.*?);', style)
+        if color_match is None:
+            color_match = re.search(r'fill:\s*(.*)', style)
         color = color_match.group(1).lower() if color_match is not None else ''
         color = color.strip(";")
         color = expand_color_synonyms(color)
@@ -144,7 +151,6 @@ def panel_to_components(tree):
 
         # TODO: detect Center or TopLeft coords
         c['coord_ref'] = "Center";
-
         default_val_int = int(color[-2:], 16)
         #Red: Knob or slider
         if color.startswith("#ff00") and default_val_int <= 128:
@@ -199,13 +205,13 @@ def panel_to_components(tree):
 
         #Orange: Button - Latching
         elif color == '#ff8000':
-            set_class_if_not_set(c, "LatchingButtonMonoLight")
+            set_class_if_not_set(c, "OrangeButton")
             components['switches'].append(c)
             c['category'] = "Button"
 
         #Light Orange: Button - Momentary
         elif color == '#ffc000':
-            set_class_if_not_set(c, "MomentaryButtonWhiteLight")
+            set_class_if_not_set(c, "WhiteMomentary7mm")
             components['switches'].append(c)
             c['category'] = "Button"
 
@@ -235,10 +241,10 @@ def panel_to_components(tree):
 
     components['elements'] = []
     components['elements'] += components['params']
+    components['elements'] += components['switches']
     components['elements'] += components['inputs']
     components['elements'] += components['outputs']
     components['elements'] += components['lights']
-    components['elements'] += components['switches']
 
     return components
 
@@ -254,6 +260,7 @@ def components_to_infofile(components):
 
     #TODO: embed knob long name vs short name in svg
     source = f"""#pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -286,17 +293,21 @@ struct {slug}Info : ModuleInfoBase {{
 
 
 def list_elem_definitions(elems, DPI):
+    #TODO: Toggle3pos/2pos can have string values for positions
     if len(elems) == 0:
         return ""
     source = ""
     for k in elems:
         source += "\t\t"
-        source += f"{k['class']}{{"
+        source += f"{k['class']}{{{{"
         source += f"to_mm<{DPI}>({k['cx']}), "
         source += f"to_mm<{DPI}>({k['cy']}), "
         source += f"{k['coord_ref']}, "
         source += f"\"{k['display_name']}\", "
         source += f"\"\"" #long name
+        source += f"""}}"""
+        if k['class'] == "Toggle3pos" and "pos_names" in k.keys() and len(k['pos_names']) == 3:
+            source += f""", {{"{k['pos_names'][0]}", "{k['pos_names'][1]}", "{k['pos_names'][2]}"}}""" 
         source += f"""}},
 """
     return source

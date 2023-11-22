@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/panel_conf.hh"
 #include "gui/elements/element_name.hh"
-#include "gui/elements/helpers.hh"
+#include "gui/elements/panel_name.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
@@ -16,7 +16,7 @@ namespace MetaModule
 {
 
 //TODO: construct MappingPaneList with ptrs to callbacks?
-// Or Add/edit callbacks live here and they only use some other clasS (not ModuleViewMappingPane)
+// Or Add/edit callbacks live here and they only use some other class (not ModuleViewMappingPane)
 struct MappingPaneList {
 
 	static lv_obj_t *create_map_list_item(MappedKnob const &map, std::string_view knobset_name, lv_obj_t *parent) {

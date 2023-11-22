@@ -2,23 +2,24 @@ import os
 from shutil import which
 import subprocess
 import re
+from . import lvgl_png
 
 from helpers.util import *
 
 def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="all"):
     if exportLayer=="all":
         exportLayer = None
-    png240Filename = outputBaseName.rstrip(".c")
+    png240Filename = outputBaseName.rstrip(".c") + ".png"
     svgToLVGL(artworkSvgFilename, png240Filename, 240, False, exportLayer)
 
 
-def componentSvgToLVGL(svgFilename, outputBaseName, scale):
-    scale = float(scale)
-    png240Filename = outputBaseName.rstrip(".c")
+def componentSvgToLVGL(svgFilename, outputDir):
+    outputDir = outputDir.rstrip("/") + "/"
+    png240Filename = outputDir + os.path.splitext(os.path.basename(svgFilename))[0] + ".png"
     svgToLVGL(svgFilename, png240Filename)
 
 
-def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=None):
+def svgToLVGL(svgFilename, pngFilename, resize=0, alpha=True, exportLayer=None):
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
     if inkscapeBin is None:
         Log("inkscape is not found. Please put it in your shell PATH, or set INKSCAPE_BIN_PATH to the path to the binary")
@@ -26,7 +27,6 @@ def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=Non
         return
 
     # SVG ==> PNG
-    pngFilename = outputBaseName + ".png"
     exportLayer = f"--export-id=\"{exportLayer}\" --export-id-only" if exportLayer else ""
 
 
@@ -47,34 +47,15 @@ def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=Non
         return
 
     # PNG ==> LVGL image (C file with array)
-    lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/../lv_img_conv/lv_img_conv.js"
-    colorFormat = "CF_RAW_ALPHA"
-    # colorFormat = "CF_TRUE_COLOR_ALPHA" if alpha else "CF_TRUE_COLOR"
+    cfiledata = lvgl_png.generate_lvgl_png_img(pngFilename)
+    cFilename = os.path.realpath(os.path.splitext(pngFilename)[0]+".c")
     try:
-        cFilename = os.path.realpath(os.path.splitext(pngFilename)[0]+".c")
-        subprocess.run([lv_img_conv, '-c', colorFormat, '-t', 'c', '--force', pngFilename, '-o', cFilename], check=True)
-        #Log(f"Converted {pngFilename} to {cFilename}")
-
-    except subprocess.CalledProcessError:
-        Log("lv_img_conv.js failed. Try \n"
-        " 1) `git submodule update --init` and/or \n"
-        " 2) `cd ../shared/svgextract/lv_img_conv && npm install` and/or\n"
-        " 3) `cd ../shared/svgextract/lv_img_conv && docker build -t lv_img_conv` \n"
-        "     and then use the docker container (or not -- docker container is broken???)\n"
-        " 4) `sudo n 16` to use node v16 (required) and then `cd ../shared/svgextract/lv_img_conv && npm install`.\n"
-        "     Might have to install n with `npm i -g n`, and do `brew unlink node` first\n")
+        with open(cFilename, "w") as f:
+            f.write(cfiledata)
+        Log(f"Converted {pngFilename} to {os.path.basename(cFilename)} at {dpi} dpi.")
+    except:
+        Log(f"Failed to write {cFilename}. Aborting")
         return
-
-    # Search and replace for invalid c tokens
-    # Fixes names staring with number by prefixing img_
-    # TODO: remove dashes and other invalid chars
-    with open(cFilename,  "r+") as f:
-      filedata = f.read()
-      filedata = re.sub(r" ([0-9][A-Za-z0-9_-]*_240)", r" img_\1", filedata)
-      f.seek(0)
-      f.truncate(0)
-      f.write(filedata)
-
 
 def determine_dpi(filename):
     # Workaround for different SVGs;

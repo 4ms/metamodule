@@ -82,6 +82,7 @@ private:
 	void handle_midi(Midi::Event const &event, unsigned poly_num);
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool check_patch_loading();
+	void handle_patch_just_loaded();
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;

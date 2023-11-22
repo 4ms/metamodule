@@ -131,12 +131,22 @@ mkdir -p src/gui/images/BRANDNAME/modules/
 ```
 
 Convert a component SVG:
-(The DPI will be automatically detected and the output will be rescaled properly)
+The first argument is `convertSvgToLvgl` which is the command to execute.
+The second argument is the SVG file you want to convert.
+The third argument is the path where you want the generated files to be saved.
+
+In the following example, two files will be generated in
+`src/gui/images/BRANDNAME/components`: newcomponent.c and newcomponent.png.
+Also, the component image struct will be named `newcomponent`, which is how the
+code accesses the image. So, make sure the base name of the svg file is a valid C token
+(doesn't start with a number, no special characters, etc). Look inside the generated .c 
+file if you want to see under the hood.
+
 
 ```
 ../shared/svgextract/svgextract.py convertSvgToLvgl \
                                    path/to/newcomponent.svg  \
-                                   src/gui/images/BRANDNAME/components/newcomponent.c
+                                   src/gui/images/BRANDNAME/components
 ```
 
 Convert a faceplate SVG:

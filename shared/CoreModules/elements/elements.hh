@@ -1,114 +1,51 @@
 #pragma once
-#include "4ms_elements.hh"
-#include "AudibleInstruments_elements.hh"
-#include "Befaco_elements.hh"
-#include "Rack_elements.hh"
 #include "base_element.hh"
 #include <string_view>
 #include <variant>
 
 namespace MetaModule
 {
-using Element = std::variant<
-	// Placeholder for unknown element
-	NullElement,
 
-	// Knobs
-	Knob9mm,
-	Davies1900hRedKnob,
-	Davies1900hBlackKnob,
-	Davies1900hWhiteKnob,
-	Davies1900hDarkGreyKnob,
-	Davies1900hLightGreyKnob,
-	DaviesLargeKnob,
-	Davies1900hLargeGreyKnob,
-	Davies1900hLargeWhiteKnob,
-	Davies1900hLargeLightGreyKnob,
-	BefacoBigKnob,
-	BefacoTinyKnobRed,
-	BefacoTinyKnobBlack,
-	BefacoTinyKnobWhite,
-	BefacoTinyKnobDarkGrey,
-	BefacoTinyKnobLightGrey,
-	Rogan1PRed,
-	Rogan1PSGreen,
-	Rogan1PSRed,
-	Rogan1PSWhite,
-	Rogan2SGray,
-	Rogan2PSWhite,
-	Rogan2PSGreen,
-	Rogan2PSRed,
-	Rogan3PSWhite,
-	Rogan3PSRed,
-	Rogan3PSGreen,
-	Trimpot,
+// Criteria for being a member of the variant.
+// - Unique NumParams/NumLights/NumInputs/NumOutputs values (because these are static constexpr).
+// - Unique data members (e.g. SlideSwitch::num_pos)
+// - Unique animation or drawing method (e.g.: Having two types Slider and Knob is preferred to having Pot::is_slider).
+// - Unique set of values or method of interpreting values (e.g. Momentary vs Latched buttons)
 
-	// Sliders
-	Slider25mmVert,
-	Slider25mmHoriz,
-	Slider25mmVertLED,
-	Slider25mmHorizLED,
-	BefacoSlidePotSmall,
-	BefacoSlidePot,
-	Crossfader,
+using Element = std::variant<NullElement,
 
-	// Switches/Buttons
-	MomentaryButtonRGB,
-	MomentaryButtonWhiteLight,
-	LatchingButtonMonoLight,
-	BefacoPush,
-	Toggle2pos,
-	Toggle3pos,
-	Toggle2posHoriz,
-	Toggle3posHoriz,
-	BefacoSwitch,
-	BefacoSwitchHorizontal,
-	VCVLightBezel<RedGreenBlueLight>,
-	LEDBezel,
-	CKSS,
-	CKSSRot,
-	TL1105,
-	CKD6,
+							 Knob,
+							 Slider,
+							 SliderLight,
 
-	//Encoders
-	Encoder,
-	EncoderWhiteLight,
-	EncoderRGB,
+							 FlipSwitch,
+							 SlideSwitch,
 
-	// Jacks
-	GateJackInput4ms,
-	AnalogJackInput4ms,
-	BefacoInputPort,
-	GateJackOutput4ms,
-	AnalogJackOutput4ms,
-	BefacoOutputPort,
-	PJ301MPortIn,
-	PJ301MPortOut,
+							 MomentaryButton,
+							 MomentaryButtonWhiteLight,
+							 MomentaryButtonRGB,
 
-	//	Lights
-	MediumLight<RedGreenBlueLight>,
-	MediumLight<GreenRedLight>,
-	MediumLight<RedLight>,
-	MediumLight<YellowLight>,
-	MediumLight<GreenLight>,
-	SmallLight<BlueLight>,
-	SmallLight<RedLight>,
-	SmallLight<GreenLight>,
-	SmallLight<GreenRedLight>,
-	RedGreenBlueLight,
-	RedLight,
-	OrangeLight,
-	GreenLight,
-	BlueLight,
-	WhiteLight,
-	RedBlueLight,
+							 LatchingButton,
 
-	// Displays
-	BraidsDisplay148x56,
+							 Encoder,
+							 EncoderRGB,
 
-	// Alt Params
-	AltParamToggle2,
-	AltParamToggle3>;
+							 JackInput,
+							 JackOutput,
+
+							 MonoLight,
+							 DualLight,
+							 RgbLight,
+
+							 Display, //TODO
+
+							 AltParamToggle2,
+							 AltParamToggle3>;
+
+namespace
+{
+inline constexpr auto ElementSize = sizeof(Element);
+}
 
 // helper:
 inline BaseElement base_element(const Element &el) {

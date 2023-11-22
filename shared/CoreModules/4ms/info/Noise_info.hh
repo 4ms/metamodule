@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -13,8 +14,8 @@ struct NoiseInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 2> Elements{{
-		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(264.61), Center, "White", ""},
-		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(312.2), Center, "Pink", ""},
+		AnalogJackOutput4ms{{to_mm<72>(29.14), to_mm<72>(264.61), Center, "White", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.14), to_mm<72>(312.2), Center, "Pink", ""}},
 }};
 
     enum class Elem {
