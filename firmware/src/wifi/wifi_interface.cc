@@ -14,9 +14,12 @@ using namespace Framing;
 
 #include "core_intercom/shared_memory.hh"
 
-
-
 #include <console/pr_dbg.hh>
+
+extern unsigned int _binary_firmware_bin_start;
+extern unsigned int _binary_firmware_bin_end;
+extern unsigned int _binary_littlefs_img_start;
+extern unsigned int _binary_littlefs_img_end;
 
 
 namespace MetaModule
@@ -76,12 +79,27 @@ void WifiInterface::init(PatchStorage* storage)
 {
     printf("Initializing Wifi\n");
 
-    patchStorage = storage;
+    checkForUpdate();
 
-    // auto result = Flasher::init(230400);
+    patchStorage = storage;
 
     BufferedUSART2::init();
 }
+
+void WifiInterface::checkForUpdate()
+{
+    printf("Firmware image at %p-%p\n", &_binary_firmware_bin_start, &_binary_firmware_bin_end);
+    printf("Filesystem image at %p-%p\n", &_binary_littlefs_img_start, &_binary_littlefs_img_end);
+
+    auto result = Flasher::init(230400);
+
+    if (result == ESP_LOADER_SUCCESS)
+    {
+        printf("Bootloader ready\n");
+    }
+}
+
+
 
 void WifiInterface::send_frame(std::span<uint8_t> payload)
 {
