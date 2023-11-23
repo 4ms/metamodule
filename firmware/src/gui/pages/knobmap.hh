@@ -104,7 +104,7 @@ struct KnobMapPage : PageBase {
 			} else if (del_popup.is_visible()) {
 				del_popup.hide();
 			} else if (PageList::request_last_page()) {
-				blur();
+				;
 			}
 		}
 
@@ -208,7 +208,7 @@ struct KnobMapPage : PageBase {
 				// invalidate the ptr, because we erased what it pointed to
 				page->map = nullptr;
 				if (PageList::request_last_page()) {
-					page->blur();
+					;
 				}
 			}
 		});

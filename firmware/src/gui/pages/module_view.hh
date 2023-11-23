@@ -44,17 +44,18 @@ struct ModuleViewPage : PageBase {
 		module_controls.clear();
 		mapping_pane.init();
 
+		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, roller);
+		lv_group_focus_obj(roller);
+
 		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
 		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_PRESSED, this);
 	}
 
 	void prepare_focus() override {
-		mapping_pane.hide();
-
 		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
-		mode = ViewMode::List;
 
 		this_module_id = PageList::get_selected_module_id();
 
@@ -71,14 +72,15 @@ struct ModuleViewPage : PageBase {
 
 		redraw_module();
 
-		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, roller);
-
-		lv_group_focus_obj(roller);
-
-		// auto width_px = lv_obj_get_width(canvas);
-		// auto roller_width = std::min(320 - width_px, 220);
-		// mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
+		if (mode == ViewMode::Mapping) {
+			lv_hide(roller);
+			mapping_pane.hide();
+			mapping_pane.show();
+		} else {
+			lv_show(roller);
+			mapping_pane.hide();
+			lv_group_focus_obj(roller);
+		}
 	}
 
 	void redraw_module() {
@@ -178,13 +180,10 @@ struct ModuleViewPage : PageBase {
 				mode = ViewMode::List;
 				lv_show(ui_ElementRoller);
 				mapping_pane.hide();
-				lv_group_focus_obj(roller);
-				lv_obj_clear_state(roller, LV_STATE_PRESSED);
-				lv_group_set_editing(group, true);
 			}
 		}
 
-		if (mode == ViewMode::Knob)
+		if (mode == ViewMode::Mapping)
 			mapping_pane.update();
 
 		if (is_patch_playing) {
@@ -343,7 +342,7 @@ private:
 		auto &module_controls = page->module_controls;
 
 		if (cur_sel < module_controls.size()) {
-			page->mode = ViewMode::Knob;
+			page->mode = ViewMode::Mapping;
 			lv_hide(ui_ElementRoller);
 			page->mapping_pane.show(page->drawn_elements[cur_sel]);
 		}
@@ -374,7 +373,7 @@ private:
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_draw_img_dsc_t img_dsc;
 
-	enum class ViewMode { List, Knob } mode;
+	enum class ViewMode { List, Mapping } mode;
 };
 
 } // namespace MetaModule

@@ -27,6 +27,7 @@ struct ModuleViewMappingPane {
 	void init() {
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
+		pane_group = lv_group_create();
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -37,10 +38,13 @@ struct ModuleViewMappingPane {
 		lv_hide(ui_ControlAlert);
 	}
 
+	void show() {
+		show(*drawn_element);
+	}
+
 	void show(const DrawnElement &drawn_el) {
 		add_map_popup.hide();
 
-		pane_group = lv_group_create();
 		lv_group_remove_all_objs(pane_group);
 		lv_group_set_editing(pane_group, false);
 
@@ -84,6 +88,8 @@ struct ModuleViewMappingPane {
 
 		add_map_popup.prepare_focus(pane_group);
 		control_popup.prepare_focus(pane_group);
+
+		is_shown = true;
 	}
 
 	void refresh() {
@@ -99,19 +105,12 @@ struct ModuleViewMappingPane {
 		add_map_popup.hide();
 		control_popup.hide();
 
-		auto indev = lv_indev_get_next(nullptr);
-		if (!indev)
-			return;
-
-		if (base_group)
-			lv_indev_set_group(indev, base_group);
-
-		if (pane_group) {
-			lv_group_del(pane_group);
-			pane_group = nullptr;
+		if (base_group) {
+			lv_indev_set_group(lv_indev_get_next(nullptr), base_group);
 		}
 
 		remove_all_items();
+		is_shown = false;
 	}
 
 	void update() {
@@ -132,6 +131,10 @@ struct ModuleViewMappingPane {
 
 	bool manual_control_visible() {
 		return control_popup.visible;
+	}
+
+	bool is_visible() {
+		return is_shown;
 	}
 
 private:
@@ -376,6 +379,7 @@ private:
 
 	const DrawnElement *drawn_element;
 	bool is_patch_playing = false;
+	bool is_shown = false;
 	PatchData &patch;
 	ParamsMidiState &params;
 	unsigned this_module_id = 0;

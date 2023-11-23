@@ -67,8 +67,9 @@ struct PageBase {
 
 		metaparams.rotary_button.clear_events();
 
-		if (group)
+		if (group) {
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		}
 
 		prepare_focus();
 
