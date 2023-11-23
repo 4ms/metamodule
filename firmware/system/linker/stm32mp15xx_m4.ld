@@ -24,6 +24,11 @@ SECTIONS
     . = ALIGN(4);
   } > m_interrupts
 
+  .ddr_code :
+  {
+    *(.binary*)
+  } > ddr_code
+
   .text :
   {
     . = ALIGN(4);
