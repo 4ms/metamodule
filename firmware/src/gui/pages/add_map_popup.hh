@@ -12,9 +12,9 @@ namespace MetaModule
 {
 
 struct AddMapPopUp {
+
 	AddMapPopUp(PatchModQueue &patch_mod_queue)
 		: patch_mod_queue{patch_mod_queue} {
-
 		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_PRESSED, this);
 	}
@@ -107,31 +107,20 @@ struct AddMapPopUp {
 			if (page->selected_knob.has_value()) {
 				auto mapped_knob = page->selected_knob.value();
 				uint16_t module_id = PageList::get_selected_module_id();
-				if (mapped_knob <= PanelDef::NumKnobs) {
-					// TODO: just have AddMapping type (not AddMidiMap) and use set_id to indicate MidiMap?
-					page->patch_mod_queue.put(AddMapping{
-						.map =
-							{
-								.panel_knob_id = mapped_knob,
-								.module_id = module_id,
-								.param_id = page->param_idx,
-								.min = 0.f,
-								.max = 1.f,
-							},
-						.set_id = page->set_id,
-					});
 
-				} else if (mapped_knob >= MidiCC0 && mapped_knob <= MidiCC127) {
-					page->patch_mod_queue.put(AddMidiMap{
-						.map =
-							{
-								.panel_knob_id = mapped_knob,
-								.module_id = module_id,
-								.param_id = page->param_idx,
-								.min = 0.f,
-								.max = 1.f,
-							},
-					});
+				auto map = MappedKnob{
+					.panel_knob_id = mapped_knob,
+					.module_id = module_id,
+					.param_id = page->param_idx,
+					.min = 0.f,
+					.max = 1.f,
+				};
+				if (map.is_panel_knob()) {
+					// TODO: just have AddMapping type (not AddMidiMap) and use set_id to indicate MidiMap?
+					page->patch_mod_queue.put(AddMapping{.map = map, .set_id = page->set_id});
+
+				} else if (map.is_midi_cc()) {
+					page->patch_mod_queue.put(AddMidiMap{.map = map});
 				}
 			}
 			page->hide();

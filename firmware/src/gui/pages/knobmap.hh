@@ -47,10 +47,12 @@ struct KnobMapPage : PageBase {
 
 		view_set_idx = PageList::get_viewing_knobset();
 		map_idx = PageList::get_selected_mappedknob_id();
-		if (view_set_idx >= patch.knob_sets.size())
-			return;
 
-		map = &patch.knob_sets[view_set_idx].set[map_idx];
+		auto map = patch.find_mapped_knob(view_set_idx, map_idx);
+		if (!map) {
+			pr_err("Mapping not found\n");
+			return;
+		}
 
 		lv_group_add_obj(group, ui_MinSlider);
 		lv_group_add_obj(group, ui_MaxSlider);
@@ -58,9 +60,6 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
 		lv_group_add_obj(group, ui_TrashButton);
-
-		if (!map->is_panel_knob())
-			return;
 
 		auto fullname = get_full_element_name(map->module_id, map->param_id, ElementType::Param, patch);
 		lv_label_set_text(ui_ModuleMapName, fullname.module_name.data());
