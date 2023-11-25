@@ -144,6 +144,7 @@ struct KnobMapPage : PageBase {
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});
 		page->patch_mod_queue.put(
 			EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx, .cur_val = val / 100.f});
+		page->patch.add_update_mapped_knob(page->view_set_idx, page->map);
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
@@ -168,11 +169,10 @@ struct KnobMapPage : PageBase {
 			return;
 
 		auto page = static_cast<KnobMapPage *>(event->user_data);
-		if (event->code == LV_EVENT_READY) {
+		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
 			page->hide_keyboard();
-		}
-		if (event->code == LV_EVENT_CANCEL) {
-			page->hide_keyboard();
+			page->map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
+			page->patch.add_update_mapped_knob(page->view_set_idx, page->map);
 		}
 	}
 
@@ -203,7 +203,6 @@ struct KnobMapPage : PageBase {
 			if (!ok)
 				return;
 
-			// Copy page->map to the queue BEFORE we remove it from the vector
 			page->patch_mod_queue.put(RemoveMapping{.map = page->map, .set_id = page->view_set_idx});
 
 			if (!page->patch.remove_mapping(page->view_set_idx, page->map))
