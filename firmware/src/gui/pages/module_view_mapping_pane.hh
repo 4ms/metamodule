@@ -38,9 +38,10 @@ struct ModuleViewMappingPane {
 		lv_hide(ui_ControlAlert);
 	}
 
-	void show() {
-		show(*drawn_element);
-	}
+	// void refresh() {
+	// 	hide();
+	// 	show(*drawn_element);
+	// }
 
 	void show(const DrawnElement &drawn_el) {
 		add_map_popup.hide();
@@ -77,7 +78,6 @@ struct ModuleViewMappingPane {
 		std::visit([this](auto &el) { prepare_for_element(el); }, drawn_el.element);
 
 		lv_show(ui_MappingParameters);
-		lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_OFF);
 
 		auto indev = lv_indev_get_next(nullptr);
 		if (!indev)
@@ -90,6 +90,8 @@ struct ModuleViewMappingPane {
 		control_popup.prepare_focus(pane_group);
 
 		is_shown = true;
+
+		lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_OFF);
 	}
 
 	void refresh() {

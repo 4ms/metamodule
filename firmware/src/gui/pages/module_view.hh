@@ -74,8 +74,7 @@ struct ModuleViewPage : PageBase {
 
 		if (mode == ViewMode::Mapping) {
 			lv_hide(roller);
-			mapping_pane.hide();
-			mapping_pane.show();
+			mapping_pane.refresh();
 		} else {
 			lv_show(roller);
 			mapping_pane.hide();
