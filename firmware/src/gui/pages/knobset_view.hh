@@ -30,6 +30,7 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
 
 		for (unsigned i = 0; auto cont : containers) {
 			set_for_knob(cont, i);
@@ -38,6 +39,7 @@ struct KnobSetViewPage : PageBase {
 			lv_arc_set_mode(knob, LV_ARC_MODE_NORMAL);
 			lv_arc_set_bg_angles(knob, min_arc, max_arc);
 			lv_arc_set_value(knob, 0);
+			lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
 
 			auto label = get_label(cont);
 			lv_label_set_text(label, "");
@@ -79,8 +81,7 @@ struct KnobSetViewPage : PageBase {
 			}
 			num_maps[map.panel_knob_id]++;
 
-			auto label = get_label(cont);
-			if (label) {
+			if (auto label = get_label(cont)) {
 				std::string_view name = map.alias_name;
 				if (name.length()) {
 					lv_label_set_text(label, name.data());
@@ -91,8 +92,9 @@ struct KnobSetViewPage : PageBase {
 			}
 
 			auto s_param = patch.find_static_knob(map.module_id, map.param_id);
-			float val = s_param ? s_param->value : 0;
+			float val = s_param && is_patch_playing ? s_param->value : 0;
 			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), val);
+			lv_obj_set_style_opa(get_knob(cont), is_patch_playing ? LV_OPA_100 : LV_OPA_0, LV_PART_KNOB);
 
 			set_for_knob(cont, map.panel_knob_id);
 
@@ -119,7 +121,7 @@ struct KnobSetViewPage : PageBase {
 			}
 		}
 
-		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
+		is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
 		if (is_patch_playing) {
 			// Iterate all knobs
 			for (auto knob_i = 0u; knob_i < params.knobs.size(); knob_i++) {
@@ -271,6 +273,8 @@ private:
 		lv_obj_clear_state(circle, LV_STATE_DISABLED);
 		lv_obj_clear_state(label, LV_STATE_DISABLED);
 	}
+
+	bool is_patch_playing = false;
 };
 
 } // namespace MetaModule

@@ -86,9 +86,12 @@ struct KnobMapPage : PageBase {
 		lv_label_set_text(ui_EditMappingLetter, panel_name.data());
 
 		// Set initial positions of arcs and sliders
+		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
 		auto s_param = patch.find_static_knob(map.module_id, map.param_id);
-		float knob_val = s_param ? s_param->value : 0;
+		float knob_val = s_param && is_patch_playing ? s_param->value : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
+		lv_obj_set_style_opa(ui_EditMappingArc, is_patch_playing ? LV_OPA_100 : LV_OPA_0, LV_PART_KNOB);
+
 		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
 		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
 
@@ -110,12 +113,6 @@ struct KnobMapPage : PageBase {
 
 		auto knob_val = params.knobs[map.panel_knob_id].val;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
-		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
-		if (!is_patch_playing) {
-			lv_obj_set_style_opa(ui_EditMappingArc, 0, LV_PART_KNOB);
-		} else {
-			lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_100, LV_PART_KNOB);
-		}
 	}
 
 	void blur() final {
