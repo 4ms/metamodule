@@ -147,7 +147,7 @@ struct PatchViewPage : PageBase {
 
 			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
-			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_PRESSED, (void *)this);
+			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_CLICKED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 		}
 
@@ -166,39 +166,13 @@ struct PatchViewPage : PageBase {
 		is_ready = true;
 	}
 
-	void watch_lights() {
-		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
-		if (is_patch_playing) {
-			for (const auto &drawn_element : drawn_elements) {
-				auto &gui_el = drawn_element.gui_element;
-				for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
-					params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
-					// printf("Watching Light: m:%d idx %d\n", gui_el.module_idx, gui_el.idx.light_idx + i);
-				}
-			}
-		}
-	}
-
 	void blur() override {
-		// printf("Blur patchview page\n");
 		settings_menu.hide();
 		knobset_menu.hide();
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_FOCUSED);
 		lv_obj_clear_state(ui_InfoButton, LV_STATE_PRESSED);
 		lv_obj_clear_state(ui_InfoButton, LV_STATE_FOCUSED);
-	}
-
-	void clear() {
-		for (auto &m : module_canvases)
-			lv_obj_del(m);
-
-		module_canvases.clear();
-		drawn_elements.clear();
-		module_ids.clear();
-
-		settings_menu.blur();
-		knobset_menu.blur();
 	}
 
 	void update() override {
@@ -251,6 +225,19 @@ struct PatchViewPage : PageBase {
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
+		}
+	}
+
+private:
+	void watch_lights() {
+		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
+		if (is_patch_playing) {
+			for (const auto &drawn_element : drawn_elements) {
+				auto &gui_el = drawn_element.gui_element;
+				for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
+					params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
+				}
+			}
 		}
 	}
 
@@ -334,6 +321,42 @@ struct PatchViewPage : PageBase {
 		prepare_focus();
 	}
 
+	void redraw_modulename() {
+		auto module_id = highlighted_module_id.value_or(0xFFFFFFFF);
+		if (module_id >= patch.module_slugs.size())
+			return;
+
+		if (highlighted_module_obj == nullptr)
+			return;
+
+		lv_show(ui_ModuleName);
+
+		auto module_y = lv_obj_get_y(highlighted_module_obj);
+		auto scroll_y = lv_obj_get_scroll_top(ui_PatchViewPage);
+		auto header_y = lv_obj_get_y(ui_ModulesPanel);
+		int16_t module_top_on_screen = header_y - scroll_y + module_y;
+		int16_t module_bot_on_screen = module_top_on_screen + Height;
+		int16_t space_above = module_top_on_screen;
+		int16_t space_below = 240 - module_bot_on_screen;
+		if (space_below > space_above) {
+			lv_obj_set_y(ui_ModuleName, module_bot_on_screen - 120 + 16);
+		} else {
+			lv_obj_set_y(ui_ModuleName, module_top_on_screen - 120 - 9);
+		}
+	}
+
+	void clear() {
+		for (auto &m : module_canvases)
+			lv_obj_del(m);
+
+		module_canvases.clear();
+		drawn_elements.clear();
+		module_ids.clear();
+
+		settings_menu.blur();
+		knobset_menu.blur();
+	}
+
 	static void module_pressed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page)
@@ -378,30 +401,6 @@ struct PatchViewPage : PageBase {
 		page->update_map_ring_style();
 	}
 
-	void redraw_modulename() {
-		auto module_id = highlighted_module_id.value_or(0xFFFFFFFF);
-		if (module_id >= patch.module_slugs.size())
-			return;
-
-		if (highlighted_module_obj == nullptr)
-			return;
-
-		lv_show(ui_ModuleName);
-
-		auto module_y = lv_obj_get_y(highlighted_module_obj);
-		auto scroll_y = lv_obj_get_scroll_top(ui_PatchViewPage);
-		auto header_y = lv_obj_get_y(ui_ModulesPanel);
-		int16_t module_top_on_screen = header_y - scroll_y + module_y;
-		int16_t module_bot_on_screen = module_top_on_screen + Height;
-		int16_t space_above = module_top_on_screen;
-		int16_t space_below = 240 - module_bot_on_screen;
-		if (space_below > space_above) {
-			lv_obj_set_y(ui_ModuleName, module_bot_on_screen - 120 + 16);
-		} else {
-			lv_obj_set_y(ui_ModuleName, module_top_on_screen - 120 - 9);
-		}
-	}
-
 	static void scroll_end_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		page->redraw_modulename();
@@ -409,7 +408,7 @@ struct PatchViewPage : PageBase {
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		page->start_changing_patch();
+		page->patch_playloader.request_load_view_patch();
 	}
 
 	static void infobut_cb(lv_event_t *event) {
@@ -431,8 +430,6 @@ struct PatchViewPage : PageBase {
 		page->knobset_menu.hide();
 	}
 
-private:
-	// lv_obj_t *description;
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
 	CableDrawer cable_drawer;
@@ -468,10 +465,6 @@ private:
 		PatchViewPage *page;
 		uint32_t selected_module_id;
 	};
-
-	void start_changing_patch() {
-		patch_playloader.request_load_view_patch();
-	}
 };
 
 } // namespace MetaModule

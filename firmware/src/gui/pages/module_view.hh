@@ -49,7 +49,7 @@ struct ModuleViewPage : PageBase {
 		lv_group_focus_obj(roller);
 
 		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() override {
@@ -76,9 +76,7 @@ struct ModuleViewPage : PageBase {
 			lv_hide(roller);
 			mapping_pane.refresh();
 		} else {
-			lv_show(roller);
-			mapping_pane.hide();
-			lv_group_focus_obj(roller);
+			show_roller();
 		}
 	}
 
@@ -112,7 +110,6 @@ struct ModuleViewPage : PageBase {
 			auto &drawn = drawn_element.gui_element;
 			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
 				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
-				// printf("Watching Light: m:%d idx %d\n", this_module_id, drawn.idx.light_idx + i);
 			}
 
 			std::visit(
@@ -177,8 +174,7 @@ struct ModuleViewPage : PageBase {
 
 			} else {
 				mode = ViewMode::List;
-				lv_show(ui_ElementRoller);
-				mapping_pane.hide();
+				show_roller();
 			}
 		}
 
@@ -270,11 +266,17 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void blur() final {
-		// printf("Clear light watches\n");
 		params.lights.stop_watching_all();
 	}
 
 private:
+	void show_roller() {
+		lv_show(roller);
+		mapping_pane.hide();
+		lv_group_focus_obj(roller);
+		lv_group_set_editing(group, true);
+	}
+
 	void add_button(lv_obj_t *obj) {
 		auto &b = button.emplace_back();
 		b = lv_btn_create(ui_ModuleImage);

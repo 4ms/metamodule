@@ -73,20 +73,8 @@ struct PatchData {
 
 		if (auto *m = _get_mapped_knob(set_id, map.module_id, map.param_id)) {
 			*m = map;
-			printf("%p Update map (m:%d p:%d -> %d) to set %d\n",
-				   this,
-				   map.module_id,
-				   map.param_id,
-				   map.panel_knob_id,
-				   set_id);
 		} else {
 			knob_sets[set_id].set.push_back(map);
-			printf("%p Add map (m:%d p:%d -> %d) to set %d\n",
-				   this,
-				   map.module_id,
-				   map.param_id,
-				   map.panel_knob_id,
-				   set_id);
 		}
 
 		return true;

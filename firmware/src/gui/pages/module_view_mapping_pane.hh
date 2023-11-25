@@ -25,7 +25,7 @@ struct ModuleViewMappingPane {
 	}
 
 	void init() {
-		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
 		pane_group = lv_group_create();
 	}
@@ -176,7 +176,7 @@ private:
 	void group_edit_cable_button(lv_obj_t *obj) {
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
-		lv_obj_add_event_cb(obj, edit_cable_button_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(obj, edit_cable_button_cb, LV_EVENT_RELEASED, this);
 		// lv_obj_set_user_data(obj, reinterpret_cast<void *>(cable_idx));
 	}
 
@@ -296,7 +296,7 @@ private:
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					auto obj = list.create_map_list_item(map, setname, ui_MapList);
 					activate_list_item(obj, set_i, map.panel_knob_id);
-					lv_obj_add_event_cb(obj, edit_button_cb, LV_EVENT_PRESSED, this);
+					lv_obj_add_event_cb(obj, edit_button_cb, LV_EVENT_RELEASED, this);
 					added_list_item = true;
 				}
 			}
@@ -307,7 +307,7 @@ private:
 	void show_unmapped_knobset(unsigned set_i, const char *setname) {
 		auto obj = list.create_unmapped_list_item(setname, ui_MapList);
 		activate_list_item(obj, set_i, std::nullopt);
-		lv_obj_add_event_cb(obj, add_button_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(obj, add_button_cb, LV_EVENT_RELEASED, this);
 	}
 
 	static void edit_button_cb(lv_event_t *event) {
