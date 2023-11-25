@@ -37,8 +37,8 @@ struct PatchViewPage : PageBase {
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
-		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_PRESSED, this);
-		lv_obj_add_event_cb(ui_InfoButton, infobut_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_InfoButton, infobut_cb, LV_EVENT_CLICKED, this);
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);

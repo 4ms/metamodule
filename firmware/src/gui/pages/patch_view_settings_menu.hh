@@ -24,8 +24,8 @@ struct PatchViewSettingsMenu {
 	void init() {
 		//Must be called after ui_PatchViewPage_screen_init(), so this can't be in the constructor:
 		lv_obj_set_parent(ui_SettingsMenu, lv_layer_top());
-		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_PRESSED, this);
-		lv_obj_add_event_cb(ui_SettingsCloseButton, settings_button_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_SettingsCloseButton, settings_button_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_ShowAllMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_ShowSelectedMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);

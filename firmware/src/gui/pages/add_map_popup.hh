@@ -15,8 +15,8 @@ struct AddMapPopUp {
 
 	AddMapPopUp(PatchModQueue &patch_mod_queue)
 		: patch_mod_queue{patch_mod_queue} {
-		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_PRESSED, this);
-		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_CLICKED, this);
 	}
 	//
 
