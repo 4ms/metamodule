@@ -124,16 +124,21 @@ public:
 	}
 
 	// Requests that we jump to the given page
-	// Another client should use get_new_page() to get this page and jump to it
+	// Maintains a history stack (breadcrumbs)
 	static void request_new_page(PageBase &page) {
-		_history.push_back(_requested_page);
+		// Requesting the same page that's most recent page in history
+		// is just like going back, so pop -- don't push
+		if (_history.back().has_value() && _history.back().value() == &page)
+			_history.pop_back();
+		else
+			_history.push_back(_requested_page);
+
 		_requested_page = &page;
 		_new_page_requested = true;
 	}
 
 	// Requests to jump to the last page in history
-	// Returns false if history is empty, otherwise true
-	// Another client should use get_requested_page() to get this page and jump to it
+	// Returns false if history is empty
 	static bool request_last_page() {
 		auto lastpage = PageList::_get_last_page().value_or(nullptr);
 		if (!lastpage)
