@@ -106,6 +106,9 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_update_layout(canvas);
 
+		auto selected_knob = PageList::get_selected_knob_id();
+		unsigned roller_idx = 0;
+
 		for (const auto &drawn_element : drawn_elements) {
 			auto &drawn = drawn_element.gui_element;
 			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
@@ -129,6 +132,11 @@ struct ModuleViewPage : PageBase {
 				},
 				drawn_element.element);
 			module_controls.emplace_back(drawn_element.element, drawn_element.gui_element.idx);
+
+			if (selected_knob == drawn.idx.param_idx && drawn.count.num_params > 0) {
+				cur_selected = roller_idx;
+			}
+			roller_idx++;
 		}
 
 		// remove final \n
@@ -146,8 +154,7 @@ struct ModuleViewPage : PageBase {
 		lv_roller_set_visible_row_count(roller, 11);
 
 		// Select first element
-		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
-		cur_selected = 0;
+		lv_roller_set_selected(roller, cur_selected, LV_ANIM_OFF);
 
 		if (button.size() > 0) {
 			lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);

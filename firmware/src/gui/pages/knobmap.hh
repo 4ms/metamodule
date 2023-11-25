@@ -52,8 +52,7 @@ struct KnobMapPage : PageBase {
 		patch = patch_storage.get_view_patch();
 
 		view_set_idx = PageList::get_viewing_knobset();
-		map_idx = PageList::get_selected_mappedknob_id();
-
+		auto map_idx = PageList::get_selected_mappedknob_id();
 		auto findmap = patch.find_mapped_knob(view_set_idx, map_idx);
 		if (!findmap) {
 			pr_err("Mapping not found\n");
@@ -190,6 +189,10 @@ struct KnobMapPage : PageBase {
 		auto page = static_cast<KnobMapPage *>(event->user_data);
 		if (!page)
 			return;
+
+		PageList::set_selected_module_id(page->map.module_id);
+		PageList::set_selected_knob_id(page->map.param_id);
+		PageList::request_new_page(PageId::ModuleView);
 	}
 
 	static void trash_cb(lv_event_t *event) {
@@ -234,7 +237,6 @@ private:
 
 	bool kb_visible = false;
 
-	unsigned map_idx = 0;
 	unsigned view_set_idx = 0;
 };
 

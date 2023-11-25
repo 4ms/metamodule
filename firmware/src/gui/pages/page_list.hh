@@ -26,6 +26,7 @@ class PageList {
 	static inline PatchLocation selected_patch_loc{};
 	static inline uint32_t selected_module_id = 0;
 	static inline uint32_t selected_mappedknob_id = 0;
+	static inline uint32_t selected_knob_id = 0;
 	static inline uint32_t active_knobset_id = 0;
 	static inline uint32_t view_knobset_id = 0;
 	static inline uint32_t patch_revision = 0;
@@ -87,6 +88,14 @@ public:
 
 	static uint32_t get_selected_mappedknob_id() {
 		return selected_mappedknob_id;
+	}
+
+	static void set_selected_knob_id(uint32_t id) {
+		selected_knob_id = id;
+	}
+
+	static uint32_t get_selected_knob_id() {
+		return selected_knob_id;
 	}
 
 	static void increment_patch_revision() {
