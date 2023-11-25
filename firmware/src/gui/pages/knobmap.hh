@@ -92,7 +92,6 @@ struct KnobMapPage : PageBase {
 		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
 		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
 
-		// lv_group_focus_obj(ui_MinSlider);
 		lv_obj_clear_state(ui_MinSlider, LV_STATE_PRESSED);
 		lv_obj_clear_state(ui_MinSlider, LV_STATE_EDITED);
 		lv_group_set_editing(group, false);
@@ -160,6 +159,8 @@ struct KnobMapPage : PageBase {
 			lv_group_focus_obj(ui_Keyboard);
 		} else {
 			page->hide_keyboard();
+			page->map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
+			page->patch.add_update_mapped_knob(page->view_set_idx, page->map);
 		}
 	}
 
@@ -181,6 +182,10 @@ struct KnobMapPage : PageBase {
 		auto page = static_cast<KnobMapPage *>(event->user_data);
 		if (!page)
 			return;
+
+		PageList::set_viewing_knobset(page->view_set_idx);
+		PageList::set_selected_mappedknob_id(page->map.panel_knob_id);
+		PageList::request_new_page(PageId::KnobSetView);
 	}
 
 	static void list_cb(lv_event_t *event) {
@@ -210,13 +215,8 @@ struct KnobMapPage : PageBase {
 
 			if (!page->patch.remove_mapping(page->view_set_idx, page->map))
 				pr_err("Could not delete mapping\n");
-			else {
-				// invalidate the ptr, because we erased what it pointed to
-				// page->map = nullptr;
-				if (PageList::request_last_page()) {
-					;
-				}
-			}
+			else
+				PageList::request_last_page();
 		});
 	}
 
