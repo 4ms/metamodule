@@ -55,7 +55,7 @@ struct KnobMapPage : PageBase {
 		auto map_idx = PageList::get_selected_mappedknob_id();
 		auto findmap = patch.find_mapped_knob(view_set_idx, map_idx);
 		if (!findmap) {
-			pr_err("Mapping not found\n");
+			pr_err("Mapping not found for set %d, panel_knob_id %d\n", view_set_idx, map_idx);
 			return;
 		}
 		map = *findmap;
