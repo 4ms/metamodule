@@ -80,6 +80,9 @@ struct KnobMapPage : PageBase {
 		float val = params.knobs[map.panel_knob_id];
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, val);
 
+		lv_label_set_text_fmt(ui_MinValue, "%d%%", unsigned(map.min * 100));
+		lv_label_set_text_fmt(ui_MaxValue, "%d%%", unsigned(map.max * 100));
+
 		auto color = Gui::knob_palette[map.panel_knob_id % 6];
 		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
 		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
@@ -131,10 +134,13 @@ struct KnobMapPage : PageBase {
 			return;
 
 		auto val = lv_slider_get_value(obj);
-		if (obj == ui_MinSlider)
+		if (obj == ui_MinSlider) {
 			page->map.min = val / 100.f;
-		else
+			lv_label_set_text_fmt(ui_MinValue, "%d%%", val);
+		} else {
 			page->map.max = val / 100.f;
+			lv_label_set_text_fmt(ui_MaxValue, "%d%%", val);
+		}
 
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});
 		page->patch_mod_queue.put(
