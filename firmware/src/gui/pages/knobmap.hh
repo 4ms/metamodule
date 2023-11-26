@@ -98,8 +98,6 @@ struct KnobMapPage : PageBase {
 		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
 		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
 
-		lv_obj_clear_state(ui_MinSlider, LV_STATE_PRESSED);
-		lv_obj_clear_state(ui_MinSlider, LV_STATE_EDITED);
 		lv_group_set_editing(group, false);
 	}
 
