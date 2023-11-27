@@ -5,18 +5,11 @@ INCLUDE system/linker/memory.ld
 
 MEMORY
 {
-	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
-	m_text       (RX)  	: ORIGIN = _M4_CODE, LENGTH = _M4_CODE_SZ
-
-	SHAREDMEMINDEX (RW) : ORIGIN = _M4_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
-
-	/* m_data is for .data (ro and rw) and .bss: all global vars: hopefully all UI assets, default patches */
-	/* startup.s copies from somewhre in the middle of .text (probably .rodata) to m_data */
-	/* TODO: no need for startup to copy them, just link them to the right place */
-
-	m_data	     (RW)	: ORIGIN = _M4_EXTDATA, LENGTH = _M4_EXTDATA_SZ
-	ddr_code     (RX)   : ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ
-	HEAP         (RW)   : ORIGIN = _M4_HEAP, 	LENGTH = _M4_HEAP_SZ
+    m_interrupts   (RX) : ORIGIN = _M4_VECT,        LENGTH = _M4_VECT_SZ
+    m_text         (RX) : ORIGIN = _M4_CODE,        LENGTH = _M4_CODE_SZ
+    SHAREDMEMINDEX (RW) : ORIGIN = _M4_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
+    m_data         (RW) : ORIGIN = _M4_RODATA,      LENGTH = _M4_RODATA_SZ
+    HEAP           (RW) : ORIGIN = _M4_HEAP,        LENGTH = _M4_HEAP_SZ
 }
 
 _estack = _M4_STACK_END;
@@ -30,14 +23,6 @@ SECTIONS
     KEEP(*(.isr_vector))
     . = ALIGN(4);
   } > m_interrupts
-
-  .ddr_code :
-  {
-	/* *lfs.o(.text.lfs_*) */
-	/* *lfs_*.o(.text.lfs_*) */
-	/* *(.text.lv_*) */ 
-	/* *(.text.*c43yml*) */
-  } > ddr_code
 
   .text :
   {

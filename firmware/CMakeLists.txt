@@ -35,8 +35,37 @@ endif()
 #
 # Main Application
 #
-add_subdirectory(src/core_m4 ${CMAKE_CURRENT_BINARY_DIR}/mp1corem4/medium)
-add_subdirectory(src ${CMAKE_CURRENT_BINARY_DIR}/mp1corea7/medium)
+set(M4_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corem4/medium)
+set(A7_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corea7/medium)
+
+add_subdirectory(src/core_m4 ${M4_BIN_PATH})
+add_subdirectory(src ${A7_BIN_PATH})
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND flashing/elf_to_uimg.py --m4 $<TARGET_FILE:main_m4.elf> --a7 $<TARGET_FILE:main.elf> ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  DEPENDS main.elf main_m4.elf
+  COMMENT "Creating combined uimg file"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg
+  COMMAND flashing/uimg_header.py ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg --load_addr 0xC1FFFFC0 --entry_point_offset 0x80 --name "MetaModule usb-dfu firmware"
+  COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMENT "Creating combined dfu uimg file"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_target(
+  combined-uimg ALL
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg
+)
+
 
 #
 # Bootloader (MP1-Boot)
