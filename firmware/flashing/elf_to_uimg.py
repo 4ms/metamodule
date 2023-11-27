@@ -48,7 +48,8 @@ def get_images_for_elf(filename, *, destination, loader):
                     logger.debug("Contains {} at 0x{:08x} - 0x{:08x} ".format(section.name, section.header.sh_addr, section.header.sh_addr + section.header.sh_size))
                 
                 payload = segment.data()
-                name = "{}_0x{:08x}".format(destination, vma)
+                sectnames = "+".join([section.name for section in contained_sections])[:32]
+                name = "{}_{}".format(destination, sectnames)
 
                 # Default settings for type and entry point that should be ignored by the bootloader
                 type = UImg.image_type_copro if destination == CoreType.M4 else UImg.image_type_firmware
