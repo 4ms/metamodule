@@ -327,14 +327,3 @@ target_link_script(
   -flto=auto
 )
 
-add_bin_hex_command(main)
-
-add_custom_command(
-  TARGET main.elf
-  POST_BUILD
-  COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:main.elf>/main.bin $<TARGET_FILE_DIR:main.elf>/main_a7.uimg
-      --load_addr 0xC2000000 --entry_point_offset 0x40 --name "MetaModule A7 firmware"
-  COMMENT "Creating main a7 uimg file"
-  VERBATIM
-)
-

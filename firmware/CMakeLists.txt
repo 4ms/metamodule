@@ -51,19 +51,9 @@ add_custom_command(
   VERBATIM USES_TERMINAL
 )
 
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg
-  COMMAND flashing/uimg_header.py ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg --load_addr 0xC1FFFFC0 --entry_point_offset 0x80 --name "MetaModule usb-dfu firmware"
-  COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
-  COMMENT "Creating combined dfu uimg file"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  VERBATIM USES_TERMINAL
-)
-
 add_custom_target(
   combined-uimg ALL
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-dfu.uimg
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg 
 )
 
 
