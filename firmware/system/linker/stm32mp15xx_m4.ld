@@ -24,11 +24,6 @@ SECTIONS
     . = ALIGN(4);
   } > m_interrupts
 
-  .ddr_code :
-  {
-    *(.binary*)
-  } > ddr_code
-
   .text :
   {
     . = ALIGN(4);
@@ -95,6 +90,7 @@ SECTIONS
     . = ALIGN(4);
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+    *(.binary*)
     . = ALIGN(4);
   } > m_data
 
