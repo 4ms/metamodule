@@ -65,13 +65,13 @@ void main() {
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
-	pr_info("A7 initialized. Unlocking M4\n");
+	pr_info("A7 initialized.\n");
 
-	// Tell M4 we're done with init
+	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
-	// wait for M4 to be ready
-	while (mdrivlib::HWSemaphore<M4_ready>::is_locked())
+	// wait for other cores to be ready
+	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() && mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
 
 	sync_params.clear();

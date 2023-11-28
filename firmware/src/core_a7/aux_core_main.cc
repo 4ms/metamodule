@@ -13,8 +13,12 @@ extern "C" void aux_core_main() {
 	using namespace MetaModule;
 	using namespace mdrivlib;
 
+	// Wait for main core to be ready
 	while (HWSemaphore<MainCoreReady>::is_locked())
 		;
+
+	// Make main core wait for this core to be ready
+	HWSemaphore<AuxCoreReady>::lock();
 
 	auto patch_player = SharedMemoryS::ptrs.patch_player;
 	auto patch_playloader = SharedMemoryS::ptrs.patch_playloader;
@@ -60,6 +64,9 @@ extern "C" void aux_core_main() {
 
 		SMPThread::signal_done();
 	});
+
+	// Signal that we're ready
+	HWSemaphore<AuxCoreReady>::unlock();
 
 	while (true) {
 		ui.update();
