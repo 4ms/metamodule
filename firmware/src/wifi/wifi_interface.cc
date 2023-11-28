@@ -96,6 +96,18 @@ void WifiInterface::checkForUpdate()
     if (result == ESP_LOADER_SUCCESS)
     {
         printf("Bootloader ready\n");
+
+        result = Flasher::flash(0x0, std::span<uint8_t>((uint8_t*)&_binary_firmware_bin_start, (uint8_t*)&_binary_firmware_bin_end - (uint8_t*)&_binary_firmware_bin_start));
+
+        if (result == ESP_LOADER_SUCCESS)
+        {
+            printf("Firmware flashed\n");
+        }
+        else
+        {
+            printf("Flashing failed with %u\n", result);
+        }
+
     }
 }
 
