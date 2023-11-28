@@ -75,11 +75,11 @@ def get_images_for_elf(filename, *, destination, loader):
 
                         # Set the file's entry point and assign a special image type
                         type = UImg.image_type_kernel
-                        entry_addr = image_entry_point
+                        entry_point = image_entry_point
 
                 print("Creating {} at 0x{:08x} with size {}".format(name, lma, lma_size))
                 if type == UImg.image_type_kernel:
-                    print("Contains entry point at 0x{:08x}".format(entry_addr))
+                    print("Contains entry point at 0x{:08x}".format(entry_point))
 
                 header = create_uimg_header(payload, loadaddr=lma, entryaddr=entry_point, name=name, type=type)
 
