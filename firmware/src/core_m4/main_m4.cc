@@ -30,7 +30,7 @@ static void app_startup() {
 	core_m4::RCC_Enable::HSEM_::set();
 
 	// Tell A7 we're not ready yet
-	HWSemaphore<M4_ready>::lock();
+	HWSemaphore<M4CoreReady>::lock();
 
 	// Wait until A7 is ready
 	while (HWSemaphore<MainCoreReady>::is_locked())
@@ -87,7 +87,7 @@ void main() {
 	}
 
 	pr_info("M4 initialized\n");
-	HWSemaphore<MetaModule::M4_ready>::unlock();
+	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
 	while (true) {
 		if (i2c.is_ready())

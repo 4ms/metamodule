@@ -6,9 +6,9 @@ enum SemaphoreLocks {
 	MainCoreReady = 1,
 	ParamsBuf1Lock,
 	ParamsBuf2Lock,
-	ScreenFrameBufLock,
+	AuxCoreReady,
 	ScreenFrameWriteLock,
-	M4_ready,
+	M4CoreReady,
 	ParamCacheLock,
 	RamDiskLock,
 };
