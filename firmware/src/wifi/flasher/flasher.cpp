@@ -52,7 +52,7 @@ esp_loader_error_t init(uint32_t baudrate)
     return err;
 }
 
-esp_loader_error_t flash(uint32_t address, std::span<uint8_t> buffer)
+esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
 {
     esp_loader_error_t err;
 
@@ -67,7 +67,7 @@ esp_loader_error_t flash(uint32_t address, std::span<uint8_t> buffer)
         pr_err("Flasher: Erasing flash failed with error %d\n", err);
         return err;
     }
-    pr_dbg("Flasher: Start programming\n");
+    pr_dbg("Flasher: Start programming %08x - %08x\n", address, address + buffer.size());
 
     const uint8_t* bin_addr = buffer.data();
     const std::size_t binary_size = buffer.size();
@@ -110,6 +110,34 @@ esp_loader_error_t flash(uint32_t address, std::span<uint8_t> buffer)
     #endif
 
     return ESP_LOADER_SUCCESS;
+}
+
+esp_loader_error_t verify(uint32_t address, uint32_t length, std::string_view checksum)
+{
+    pr_dbg("Flasher: Getting checksum form %08x-%08x\n", address, address + length);
+
+    std::array<uint8_t,32> readValue;
+
+    auto result = esp_loader_get_md5_hex(address, length, readValue.data());
+
+    if (result == ESP_LOADER_SUCCESS)
+    {
+        if (std::memcmp(checksum.data(), readValue.data(), checksum.size()) == 0)
+        {
+            return ESP_LOADER_SUCCESS;
+        }
+        else
+        {
+            pr_err("Flasher: Mismatch: Expected %.*s vs Read %.*s\n", checksum.size(), checksum.data(), readValue.size(), readValue.data());
+            return ESP_LOADER_ERROR_INVALID_MD5;
+        }
+    }
+    else
+    {
+        pr_err("Flasher: Failed to get checksum: %u\n", result);
+    }
+
+    return result;
 }
 
 }
