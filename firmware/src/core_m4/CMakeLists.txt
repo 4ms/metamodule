@@ -240,9 +240,14 @@ if (ENABLE_WIFI_BRIDGE)
     get_filename_component(IMAGE_BASE_NAME ${WIFI_IMAGE_FILE} NAME)
     set(IMAGE_TARGET_FILE ${CMAKE_CURRENT_BINARY_DIR}/wifi-images/${IMAGE_BASE_NAME}.obj)
 
+    # Convert binary to object file and add to library
     make_binary_object(${WIFI_IMAGE_FILE} ${IMAGE_TARGET_FILE})
-
     target_sources(wifi_images PRIVATE ${IMAGE_TARGET_FILE})
+
+    # Provide expected hash
+    file(MD5 ${WIFI_IMAGE_FILE} THIS_HASH)
+    get_filename_component(IMAGE_BASE_NAME_NO_EXT ${WIFI_IMAGE_FILE} NAME_WE)
+    target_compile_definitions(wifi_images PUBLIC ${IMAGE_BASE_NAME_NO_EXT}_MD5="${THIS_HASH}")
   endforeach() 
   
 
