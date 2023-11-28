@@ -88,24 +88,46 @@ void WifiInterface::init(PatchStorage* storage)
 
 void WifiInterface::checkForUpdate()
 {
-    printf("Firmware image at %p-%p\n", &_binary_firmware_bin_start, &_binary_firmware_bin_end);
-    printf("Filesystem image at %p-%p\n", &_binary_littlefs_img_start, &_binary_littlefs_img_end);
-
     auto result = Flasher::init(230400);
 
     if (result == ESP_LOADER_SUCCESS)
     {
         printf("Bootloader ready\n");
 
-        result = Flasher::flash(0x0, std::span<uint8_t>((uint8_t*)&_binary_firmware_bin_start, (uint8_t*)&_binary_firmware_bin_end - (uint8_t*)&_binary_firmware_bin_start));
+        const uint32_t FirmwareStartAddress = 0x0;
+        std::span<const uint8_t> Firmware ((uint8_t*)&_binary_firmware_bin_start, std::size_t((uint8_t*)&_binary_firmware_bin_end - (uint8_t*)&_binary_firmware_bin_start));
+        const auto FirmwareChecksum = "f70d403246cb27a84eb0c428a49245ad";
+
+        const uint32_t FilesystemStartAddress = 0x200000;
+        std::span<const uint8_t> Filesystem ((uint8_t*)&_binary_littlefs_img_start, std::size_t((uint8_t*)&_binary_littlefs_img_end - (uint8_t*)&_binary_littlefs_img_start));
+        const auto FileystemChecksum = "f70d403246cb27a84eb0c428a49245ad";
+
+        printf("Firmware image at   %p-%p\n", &_binary_firmware_bin_start, &_binary_firmware_bin_end);
+        printf("Filesystem image at %p-%p\n", &_binary_littlefs_img_start, &_binary_littlefs_img_end);
+
+        result = Flasher::verify(FirmwareStartAddress, Firmware.size(), FirmwareChecksum);
 
         if (result == ESP_LOADER_SUCCESS)
         {
-            printf("Firmware flashed\n");
+            printf("Firmware binary already matches\n");
+            return;
+        }
+        else if (result == ESP_LOADER_ERROR_INVALID_MD5)
+        {
+            result = Flasher::flash(FirmwareStartAddress, Firmware);
+
+            if (result == ESP_LOADER_SUCCESS)
+            {
+                printf("Firmware flashed\n");
+            }
+            else
+            {
+                printf("Flashing failed with %u\n", result);
+            }
         }
         else
         {
-            printf("Flashing failed with %u\n", result);
+            printf("Cannot get md5\n");
         }
 
     }
