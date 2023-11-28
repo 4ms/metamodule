@@ -20,7 +20,7 @@ add_custom_target(
   VERBATIM USES_TERMINAL
 )
 
-set(MAIN_UIMG $<TARGET_FILE_DIR:main.elf>/main.uimg)
+set(MAIN_UIMG ${CMAKE_CURRENT_BINARY_DIR}/main.uimg)
 
 add_custom_target(
   flash-app-sd
