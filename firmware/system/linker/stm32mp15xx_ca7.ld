@@ -144,7 +144,7 @@ SECTIONS
     _fiq_stack_end = _fiq_stack_start + 0x100;
 
     _auxcore_user_stack_start = _fiq_stack_end;
-    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x1000;
+    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x80000;
 
 
 	.sharedmemindex (NOLOAD) :
