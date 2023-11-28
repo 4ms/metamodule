@@ -205,6 +205,7 @@ if (ENABLE_WIFI_BRIDGE)
   #
 
   set(ESP_SERIAL_FLASHER_PORT "CUSTOM")
+  set(ESP_SERIAL_FLASHER_ENABLE_MD5 ON)
   add_subdirectory(${FWDIR}/lib/esp-serial-flasher ${CMAKE_CURRENT_BINARY_DIR}/esp-serial-flasher)
   target_link_libraries(flasher PRIVATE mp15xm4_arch)
 
