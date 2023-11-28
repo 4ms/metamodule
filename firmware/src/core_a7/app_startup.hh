@@ -7,7 +7,6 @@
 #include "drivers/secondary_core_control.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system_clocks.hh"
-#include "uimg_loader.hh"
 
 namespace MetaModule
 {
@@ -26,11 +25,10 @@ struct AppStartup {
 
 		SecondaryCore::start();
 
-		UimgLoader::load();
-
 		L1C_CleanDCacheAll();
 		__DSB();
 		__ISB();
+
 		Copro::start();
 	}
 };
