@@ -68,9 +68,10 @@ cmake --preset base -DSD_DISK_DEV=/dev/disk4
 export SD_DISK_DEV=/dev/disk4
 ```
 
-The firmware is built as `firmware/build/mp1corea7/medium/main.elf` and `main.uimg` 
-in the same directory. The .elf file is used when debugging, and the .uimg file
-is used when copying firmware to NOR Flash or an SD card.
+The firmware is built as `firmware/build/main.uimg`. This binary file contains
+images for the M4 and A7 cores. For debugging, the symbols are in
+`firmware/build/mp1corea7/medium/main.elf` and
+`firmware/build/mp1corem4/medium/main_m4.elf`..
 
 
 ### Specifying the toolchain
