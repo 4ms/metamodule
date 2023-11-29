@@ -27,7 +27,7 @@ attach without loading.
 If you need to load new firmware and then debug it, then follow the guide in
 [Debugging with gdb](firmware-debugging.md).
 
-To load firmware (without debugging), do this:
+To load firmware (without debugging) with a JLink programmer, do this:
 
 1) Install a "Freeze jumper" on `Control Expander` header that bridges the top-left pin
 and the pin just to the right of it. Make sure you use the right header, it's
@@ -60,7 +60,7 @@ Connect a Jlink programmer and run this:
 make jprog
 ```
 
-This should take 15-30 seconds.
+This should take 15-30 seconds. 
  
 ### Load into NOR Flash over DFU-USB
 
