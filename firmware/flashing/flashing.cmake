@@ -57,3 +57,23 @@ add_custom_target(
   VERBATIM USES_TERMINAL
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
+
+add_custom_target(
+  debug
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND arm-none-eabi-gdb --command=flashing/multi.gdbinit
+  VERBATIM USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
+
+add_custom_target(
+  start-jlinkgdb
+  COMMAND JLinkGDBServer -select USB=0 -device STM32MP15xx_A7 -endian little -if JTAG -speed 25000 -noir -noLocalhostOnly -nologtofile -port 3333 
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_target(
+  start-openocd
+  COMMAND openocd -f board/stm32mp15x_dk2.cfg
+  VERBATIM USES_TERMINAL
+)
