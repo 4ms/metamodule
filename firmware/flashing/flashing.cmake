@@ -46,7 +46,7 @@ add_custom_target(
 
 add_custom_target(
   jprog
-  DEPENDS main.elf
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
   COMMENT "Using JLinkExe to program via JTAG (Note: JLinkExe must be on your PATH)"
   COMMAND time -p JLinkExe -device STM32MP15XX_A7 -if JTAG -speed 25000 -jtagconf -1,-1 -nogui 1 -AutoConnect 1
           -CommandFile ${PROJECT_SOURCE_DIR}/flashing/program.jlink

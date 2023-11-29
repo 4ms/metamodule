@@ -45,6 +45,7 @@ add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
   COMMAND flashing/elf_to_uimg.py --m4 $<TARGET_FILE:main_m4.elf> --a7 $<TARGET_FILE:main.elf> ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
   COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
   DEPENDS main.elf main_m4.elf
   COMMENT "Creating combined uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
