@@ -155,6 +155,7 @@ add_executable(
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
+  ${FWDIR}/system/startup_ca7.s
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_a7/main.cc
@@ -209,7 +210,6 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/startup_ca7.s
   #
   ${FWDIR}/src/VCV_adaptor/random.cpp
   #
