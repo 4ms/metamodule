@@ -100,34 +100,39 @@ overridden via the project file.
 
 Lauterbach TRACE32 can be used to debug as well.
 
-After power-cycling with the Freeze jumper installed, 
-run the `flashing/mm-a7-t32.cmm` script to load the firmware and symbols.
+After power-cycling with the Freeze jumper installed, run the
+`flashing/mm-a7-t32.cmm` script to load the firmware and symbols.
 
-Both A7 cores can be accessed (use the command `Core 0` for the main core, or `Core 1` for switch to the secondary A7 core).
-To debug the M4 core, you can use the `flashing/switch-to-m4.cmm` script.
+Both A7 cores can be accessed (use the command `Core 0` for the main core, or
+`Core 1` for switch to the secondary A7 core). To debug the M4 core, you can
+use the `flashing/switch-to-m4.cmm` script.
 
 
 ## Using VSCode
 
-VSCode can be used to debug, using OpenOCD and gdb.
+VSCode can be used to debug, using OpenOCD or JLinkGDBServer.
 
+An example `launch.json` file is in the `flashing/vscode-example/` directory.
+Put this file into your `.vscode` directory, or otherwise merge its contents
+with your existing `launch.json` file. You will probably want to customize this
+configuration file, but it should work as-is.
 
-Some configuration files (for the mp1 bootloader, so they will need to be adapted to MetaModule):
-[here](https://github.com/danngreen/stm32mp1-baremetal/tree/vscode/bootloaders/mp1-boot/.vscode)
-and [here](https://github.com/kamejoko80/stm32mp1-baremetal-1/tree/vscode/bootloaders/mp1-boot/.vscode)
+After rebooting with the Freeze jumper installed, start a debugging session,
+and it will load the firmware and then break at main.
 
-And also [some discussion:](https://github.com/4ms/stm32mp1-baremetal/issues/20)
-
-TODO: Adapt this to MetaModule.
-
+The Cortex-Debug plugin is required. The example configuration is for Jlink,
+but Cortex-Debug also works with openocd. See the [Cortex-Debug
+wiki](https://github.com/Marus/cortex-debug/wiki) for details.
 
 
 ## GPIO pin debugging (pin flipping)
 
-You can toggle some GPIO pins to indicate states from firmware with minimal impact on firmware timing.
-Typically you would read the pins using an oscilloscope or logic probe.
+You can toggle some GPIO pins to indicate states from firmware with minimal
+impact on firmware timing. Typically you would read the pins using an
+oscilloscope or logic probe.
 
-There are 6 header pins and two SMD pads on the PCB dedicated to this. They can be used like this:
+There are 6 header pins and two SMD pads on the PCB dedicated to this. They can
+be used like this:
 
 ```
 #include "debug.hh"   // Found in firmware/src/medium/
