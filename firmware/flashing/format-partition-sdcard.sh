@@ -32,7 +32,7 @@ case "$(uname -s)" in
 		;;
 	Linux)
 		set -x
-		mkfs.fat -F 32 $DISK
+		sudo mkfs.fat -F 32 $DISK
 		set +x
 		;;
 	*)
