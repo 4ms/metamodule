@@ -21,22 +21,16 @@ fi
 
 echo ""
 echo "Device $DISK found"
-echo "Formatting"
 
 echo ""
 case "$(uname -s)" in
 	Darwin)
+		echo "Formatting"
 		set -x
 		diskutil eraseDisk FAT32 TMPDISK $DISK
 		set +x
 		;;
-	Linux)
-		set -x
-		sudo mkfs.fat -F 32 $DISK
-		set +x
-		;;
 	*)
-		echo 'OS not supported: please format $DISK'
 		;;
 esac
 
@@ -61,7 +55,7 @@ sudo sgdisk --resize-table=128 -a 1 \
 set +x
 
 echo ""
-echo "Formatting partition 5 as FAT32"
+echo "Formatting partition 5 as FAT32 (for patch storage)"
 
 echo ""
 case "$(uname -s)" in
@@ -74,8 +68,9 @@ case "$(uname -s)" in
 		set +x
 		;;
 	Linux)
+		read -p "You must eject and re-insert the SD Card now. Press enter when ready." READY
 		set -x
-		sudo umount ${DISKSTEM}5 
+		sudo umount ${DISKSTEM}5
 		sudo mkfs.fat -F 32 -n METAMOD ${DISKSTEM}5 || exit
 		set +x
 		;;
