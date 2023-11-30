@@ -1,26 +1,33 @@
 #!/usr/bin/env bash
 # Script to format and partition an SD card to prepare for mp1-boot and an app
 
-if [ $# -lt 1 ]; then
-	read -p "What is the disk device to format: " DISK
+if [ $# -lt 2 ]; then
+	read -p "What is the disk device to format (e.g. /dev/disk4): " DISK
+	read -p "What is the disk partition stem (e.g. /dev/disk4s): " DISKSTEM
 else
 	DISK=$1
+	DISKSTEM=$2
 fi
 
 if [ ! -b $DISK ]; then
-	echo "Device $DISK does not exist";
+	echo "Error: Device $DISK does not exist";
+	exit 1;
+fi
+
+if [[ "$DISKSTEM" != *"$DISK"* ]]; then
+	echo "Error: Disk device name $DISK must be a substring of the disk partition stem $DISKSTEM";
 	exit 1;
 fi
 
 echo ""
 echo "Device $DISK found"
-echo "Formatting..."
+echo "Formatting"
 
 echo ""
 case "$(uname -s)" in
 	Darwin)
 		set -x
-		diskutil eraseDisk FAT32 BAREMETA $DISK
+		diskutil eraseDisk FAT32 TMPDISK $DISK
 		set +x
 		;;
 	Linux)
@@ -29,14 +36,17 @@ case "$(uname -s)" in
 		set +x
 		;;
 	*)
-		echo 'OS not supported: please format $DISK as FAT32'
+		echo 'OS not supported: please format $DISK'
+		exit 1
 		;;
 esac
 
 echo ""
+echo "Clearing partition table and converting MBR to GPT if present..."
+echo ""
+
 set -x
-sudo sgdisk -g $DISK || exit
-sudo sgdisk -o $DISK || exit
+sudo sgdisk -go $DISK || exit
 set +x
 
 echo ""
@@ -48,7 +58,7 @@ sudo sgdisk --resize-table=128 -a 1 \
 	-n 3:1058:17441 -c 3:ssbl \
 	-n 4:17442:33825 -c 4:prog \
 	-N 5 -c 5:fatfs \
-	-p $DISK
+	-p $DISK || exit
 set +x
 
 echo ""
@@ -58,16 +68,16 @@ echo ""
 case "$(uname -s)" in
 	Darwin)
 		set -x
-		diskutil eraseVolume FAT32 METAMOD ${DISK}s5
-		sleep 3
-		diskutil unmountDisk $DISK
+		diskutil eraseVolume FAT32 METAMOD ${DISKSTEM}5 || exit
+		sleep 1
+		diskutil unmountDisk $DISK || exit
 		set +x
 		;;
 	Linux)
 		set -x
-		sudo mkfs.fat -F 32 ${DISK}p5
-		sleep 3
-		sudo umount ${DISK}
+		sudo mkfs.fat -F 32 ${DISKSTEM}5 || exit
+		sleep 1
+		sudo umount $DISK
 		set +x
 		;;
 	*)

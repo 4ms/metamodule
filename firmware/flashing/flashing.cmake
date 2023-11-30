@@ -1,19 +1,17 @@
-set(SD_DISK_DEV
-    ""
-    CACHE STRING "SD Card device (e.g. /dev/disk4)"
-)
+set(SD_DISK_DEV "" CACHE STRING "SD Card device (e.g. /dev/disk4 or /dev/mmcblk0 or /dev/sdc)")
+set(SD_DISK_STEM "" CACHE STRING "SD Card partition stem (e.g. /dev/disk4s or /dev/mmcblk0p or /dev/sdc)")
 
 add_custom_target(
   format-sd
-  COMMAND ./format-partition-sdcard.sh ${SD_DISK_DEV}
-  COMMENT "Formatting and partitioning SD Card: ${SD_DISK_DEV}"
+  COMMAND ./format-partition-sdcard.sh ${SD_DISK_DEV} ${SD_DISK_STEM}
+  COMMENT "Formatting and partitioning SD Card '${SD_DISK_DEV}' with partition stem '${SD_DISK_STEM}'"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
   VERBATIM USES_TERMINAL
 )
 
 add_custom_target(
   flash-bootloader-sd
-  COMMAND make load SD_DISK_DEV=${SD_DISK_DEV}
+  COMMAND make load SD_DISK_STEM=${SD_DISK_STEM}
   DEPENDS bootloader
   COMMENT "Copy bootloader to SD Card"
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/bootloader/mp1-boot
