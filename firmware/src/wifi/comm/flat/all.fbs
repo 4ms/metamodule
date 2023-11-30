@@ -1,0 +1,50 @@
+enum Phase : byte {REQUEST = 0, ANSWER}
+
+struct PresenceDetection
+{
+    phase: Phase;
+}
+
+struct Switch
+{
+    state: bool;
+}
+
+table PatchInfo
+{
+    name: string;
+    filename: string;
+    size: uint;
+    timestamp: uint;
+}
+
+enum StorageLocation : byte {USB, SDCARD, FLASH}
+
+table Patches
+{
+    usb:[PatchInfo];
+    flash:[PatchInfo];
+    sdcard:[PatchInfo];
+}
+
+table UploadPatch
+{
+    content:[ubyte];
+    destination: StorageLocation;
+    filename: string;
+}
+
+table Result
+{
+    success: bool;
+    message: string;
+}
+
+union AnyMessage {Switch, PresenceDetection, UploadPatch, Patches, Result}
+
+table Message
+{
+    content: AnyMessage;
+}
+
+root_type Message;

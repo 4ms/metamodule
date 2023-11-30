@@ -17,9 +17,6 @@ private:
 	static void send_frame(std::span<uint8_t>);
 
 private:
-	static void checkForUpdate();
-
-private:
 	static PatchStorage* patchStorage;
 
 };
