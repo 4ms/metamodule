@@ -15,6 +15,10 @@
 #include "system/time.hh"
 // #include "core_intercom/semaphore_action.hh" //TODO use this
 
+#ifdef ENABLE_WIFI_BRIDGE
+#include <wifi_update.hh>
+#endif
+
 namespace MetaModule
 {
 
@@ -65,9 +69,11 @@ void main() {
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
-	pr_info("A7 initialized.\n");
+	#ifdef ENABLE_WIFI_BRIDGE
+	WifiUpdate::checkForUpdate();
+	#endif
 
-	// Tell other cores we're done with init
+	pr_info("A7 initialized.\n");
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for other cores to be ready

@@ -90,7 +90,6 @@ SECTIONS
     . = ALIGN(4);
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
-    *(.binary*)
     . = ALIGN(4);
   } > m_data
 

@@ -27,17 +27,20 @@ target_include_directories(flatbuffer_messages INTERFACE ${COMPILED_FLATBUFFER_O
 # Sources
 
 target_sources(main_m4.elf PRIVATE
-    ${WIFI_DIR}/comm/wifi_interface.cc
-    ${WIFI_DIR}/comm/BufferedUSART2.h
-    ${WIFI_DIR}/comm/BufferedUSART2.cpp
-    ${WIFI_DIR}/comm/framing/Configuration.h
-    ${WIFI_DIR}/comm/framing/Deframer.hpp
-    ${WIFI_DIR}/comm/framing/Deframer.h
-    ${WIFI_DIR}/comm/framing/DynamicDeframer.h
-    ${WIFI_DIR}/comm/framing/Framer.h
-    ${WIFI_DIR}/comm/framing/StaticDeframer.h
+    wifi_interface.cc
+    BufferedUSART2.h
+    BufferedUSART2.cpp
+    framing/Configuration.h
+    framing/Deframer.hpp
+    framing/Deframer.h
+    framing/DynamicDeframer.h
+    framing/Framer.h
+    framing/StaticDeframer.h
 )
+
+target_include_directories(main_m4.elf PRIVATE .)
 
 
 ## Add dependencies to firmware
-target_link_libraries(main_m4.elf PUBLIC flatbuffers flatbuffer_messages)
+
+target_link_libraries(main_m4.elf PUBLIC flatbuffers flatbuffer_messages lockfree)
