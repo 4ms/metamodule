@@ -37,7 +37,6 @@ case "$(uname -s)" in
 		;;
 	*)
 		echo 'OS not supported: please format $DISK'
-		exit 1
 		;;
 esac
 
@@ -70,12 +69,13 @@ case "$(uname -s)" in
 		set -x
 		diskutil eraseVolume FAT32 METAMOD ${DISKSTEM}5 || exit
 		sleep 1
+		echo "Unmounting so macOS sees the new partitions"
 		diskutil unmountDisk $DISK || exit
 		set +x
 		;;
 	Linux)
 		set -x
-		sudo umount ${DISKSTEM}5
+		sudo umount ${DISKSTEM}5 
 		sudo mkfs.fat -F 32 -n METAMOD ${DISKSTEM}5 || exit
 		set +x
 		;;
@@ -84,5 +84,5 @@ case "$(uname -s)" in
 		;;
 esac
 
-echo "Done! Remove and re-insert the card now."
+echo "Success!"
 
