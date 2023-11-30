@@ -183,117 +183,17 @@ if (ENABLE_WIFI_BRIDGE)
     ENABLE_WIFI_BRIDGE=1
   )
 
-  target_sources(main_m4.elf PRIVATE
-    ${WIFI_DIR}/wifi_interface.cc
-    ${WIFI_DIR}/flasher/flasher.cpp
-    ${WIFI_DIR}/flasher/flasher.h
-    ${WIFI_DIR}/flasher/implementation.cpp
-    ${WIFI_DIR}/flasher/BufferedUSART.h
-    ${WIFI_DIR}/flasher/BufferedUSART.cpp
-    ${WIFI_DIR}/comm/BufferedUSART2.h
-    ${WIFI_DIR}/comm/BufferedUSART2.cpp
-    ${WIFI_DIR}/comm/framing/Configuration.h
-    ${WIFI_DIR}/comm/framing/Deframer.hpp
-    ${WIFI_DIR}/comm/framing/Deframer.h
-    ${WIFI_DIR}/comm/framing/DynamicDeframer.h
-    ${WIFI_DIR}/comm/framing/Framer.h
-    ${WIFI_DIR}/comm/framing/StaticDeframer.h
-  )
-
   #
-  # Embedded images
-  #
-  set(WIFI_IMAGES ${WIFI_DIR}/images/firmware.bin ${WIFI_DIR}/images/littlefs.img)
-
-  # Create empty target to be filled with images
-  add_library(wifi_images)
-  set_target_properties(wifi_images PROPERTIES LINKER_LANGUAGE CXX)
-  target_link_libraries(main_m4.elf PRIVATE wifi_images)
-
-  # Convert a binary file into an object file without absolute paths embedded in symbol names
-  # Adapted from https://stackoverflow.com/a/62152985
-  function(make_binary_object __file __object)
-    get_filename_component(__file_name ${__file} NAME)
-    string(MAKE_C_IDENTIFIER ${__file_name} __file_c_identifier)
-    add_custom_command(OUTPUT ${__object}
-        COMMAND ${CMAKE_OBJCOPY}
-            --input-format binary
-            --output-format elf32-littlearm
-            --binary-architecture arm
-            --prefix-sections .binary
-            /dev/stdin
-            ${__object} < ${__file}
-        COMMAND ${CMAKE_OBJCOPY}
-            --redefine-sym _binary__dev_stdin_start=_binary_${__file_c_identifier}_start
-            --redefine-sym _binary__dev_stdin_end=_binary_${__file_c_identifier}_end
-            --redefine-sym _binary__dev_stdin_size=_binary_${__file_c_identifier}_size
-            ${__object}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DEPENDS ${__file})
-    set_source_files_properties(${__object} PROPERTIES EXTERNAL_OBJECT TRUE)
-  endfunction()
-
-  # Convert all images to object files and add them to the images target
-  foreach(WIFI_IMAGE_FILE ${WIFI_IMAGES})
-
-    # Set locations for target files
-    get_filename_component(IMAGE_BASE_NAME ${WIFI_IMAGE_FILE} NAME)
-    set(IMAGE_TARGET_FILE ${CMAKE_CURRENT_BINARY_DIR}/wifi-images/${IMAGE_BASE_NAME}.obj)
-
-    # Convert binary to object file and add to library
-    make_binary_object(${WIFI_IMAGE_FILE} ${IMAGE_TARGET_FILE})
-    target_sources(wifi_images PRIVATE ${IMAGE_TARGET_FILE})
-
-    # Provide expected hash
-    file(MD5 ${WIFI_IMAGE_FILE} THIS_HASH)
-    get_filename_component(IMAGE_BASE_NAME_NO_EXT ${WIFI_IMAGE_FILE} NAME_WE)
-    target_compile_definitions(wifi_images PUBLIC ${IMAGE_BASE_NAME_NO_EXT}_MD5="${THIS_HASH}")
-  endforeach() 
-  
-
-  #
-  # ESP Serial Flasher
-  #
-
-  set(ESP_SERIAL_FLASHER_PORT "CUSTOM")
-  set(ESP_SERIAL_FLASHER_ENABLE_MD5 ON)
-  add_subdirectory(${FWDIR}/lib/esp-serial-flasher ${CMAKE_CURRENT_BINARY_DIR}/esp-serial-flasher)
-  target_link_libraries(flasher PRIVATE mp15xm4_arch)
-
-  # 
   # Lockfree
   # 
 
   add_subdirectory(${FWDIR}/lib/lockfree ${CMAKE_CURRENT_BINARY_DIR}/lockfree)
   target_link_libraries(lockfree INTERFACE mp15xm4_arch)
+  target_link_libraries(main_m4.elf PRIVATE lockfree)
 
-  # 
-  # Flatbuffers
-  # (Manually create a target because original cmake includes the flatc compiler)
-  # 
-
-  add_library(flatbuffers INTERFACE)
-  target_include_directories(flatbuffers INTERFACE ${FWDIR}/lib/flatbuffers/include/)
-
-  # Locate flatbuffer compiler
-  # This falls back to the local flatabuffers repository if not found on PATH
-  find_program(FLATBUFFERS_FLATC_EXECUTABLE flatc
-    PATHS ${FWDIR}/lib/flatbuffers/build
-    REQUIRED)
-  message("Found flatbuffers compiler at " ${FLATBUFFERS_FLATC_EXECUTABLE})
-
-  # Compile flat buffer definitions to cpp headers
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${FWDIR}/lib/flatbuffers/CMake)
-  include(BuildFlatBuffers)
-  build_flatbuffers("${FWDIR}/src/wifi/flat/all.fbs" "" flatbuffer_messages_utils "" ${CMAKE_CURRENT_BINARY_DIR}/flat "" "")
-
-  # Create library with generated flatbuffer headers
-  add_library(flatbuffer_messages INTERFACE)
-  add_dependencies(flatbuffer_messages flatbuffer_messages_utils)
-  target_include_directories(flatbuffer_messages INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/flat)
-
-  ## Add dependencies to firmware
-  target_link_libraries(main_m4.elf PUBLIC flasher lockfree flatbuffers flatbuffer_messages)
+  # Add comm and flasher functionality
+  add_subdirectory(${FWDIR}/src/wifi/comm ${CMAKE_BINARY_DIR}/wifi_comm)
+  add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
 
 endif()
 
