@@ -61,7 +61,7 @@ add_custom_target(
 add_custom_target(
   debug
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
-  COMMAND arm-none-eabi-gdb --command=flashing/multi.gdbinit
+  COMMAND ${CMAKE_GDB} --command=flashing/multi.gdbinit
   VERBATIM USES_TERMINAL
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
