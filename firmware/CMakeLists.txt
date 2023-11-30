@@ -63,7 +63,7 @@ add_custom_target(
 #
 add_custom_target(
   bootloader
-  COMMAND make BOARD_CONF=../board_conf/mmp11_conf.hh
+  COMMAND make BOARD_CONF=../board_conf/mmp11_conf.hh TOOLCHAIN_DIR=${TOOLCHAIN_BASE_DIR}/
   COMMENT "Building MP1-Boot (FSBL)"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot
   VERBATIM
