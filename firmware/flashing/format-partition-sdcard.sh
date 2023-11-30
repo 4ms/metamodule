@@ -35,13 +35,20 @@ esac
 
 echo ""
 set -x
-sudo sgdisk -o $DISK 
+sudo sgdisk -g $DISK || exit
+sudo sgdisk -o $DISK || exit
 set +x
 
 echo ""
 echo "Partitioning..."
 set -x
-sudo sgdisk --resize-table=128 -a 1 -n 1:34:545 -c 1:fsbl1 -n 2:546:1057 -c 2:fsbl2 -n 3:1058:17441 -c 3:ssbl -n 4:17442:33825 -c 4:prog -N 5 -c 5:fatfs -p $DISK
+sudo sgdisk --resize-table=128 -a 1 \
+	-n 1:34:545 -c 1:fsbl1 \
+	-n 2:546:1057 -c 2:fsbl2 \
+	-n 3:1058:17441 -c 3:ssbl \
+	-n 4:17442:33825 -c 4:prog \
+	-N 5 -c 5:fatfs \
+	-p $DISK
 set +x
 
 echo ""
@@ -60,6 +67,7 @@ case "$(uname -s)" in
 		set -x
 		sudo mkfs.fat -F 32 ${DISK}p5
 		sleep 3
+		sudo umount ${DISK}
 		set +x
 		;;
 	*)
