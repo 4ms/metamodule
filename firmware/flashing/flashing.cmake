@@ -23,8 +23,7 @@ set(MAIN_UIMG ${CMAKE_CURRENT_BINARY_DIR}/main.uimg)
 add_custom_target(
   flash-app-sd
   DEPENDS main.elf
-  COMMAND ./flash-app-sd.sh ${MAIN_UIMG} ${SD_DISK_DEV}
-  COMMAND ./unmount.sh ${SD_DISK_DEV}
+  COMMAND ./flash-app-sd.sh ${MAIN_UIMG} ${SD_DISK_STEM}
   COMMENT "Copy app to SD Card"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
   VERBATIM USES_TERMINAL
