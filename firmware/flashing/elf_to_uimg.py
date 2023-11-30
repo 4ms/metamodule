@@ -24,6 +24,7 @@ def get_images_for_elf(filename, *, destination, loader):
 
         elf_file = ELFFile(file)
         output = bytearray()
+        target_areas = []
 
         sections = [section for section in elf_file.iter_sections()]
 
@@ -85,11 +86,14 @@ def get_images_for_elf(filename, *, destination, loader):
 
                 # Just concatenate generated images
                 output = output + header + payload
+
+                # Remember target area for overlap check later on
+                target_areas.append((lma, lma + len(payload)))
                 
             else:
                 logger.debug("Skipping empty segment (VMA: 0x{:08x}-0x{:08x} Sections: {})".format(vma, vma+vma_size, ', '.join([s.name for s in contained_sections])))
 
-        return output
+        return output, target_areas
 
 
 if __name__ == "__main__":
@@ -107,11 +111,26 @@ if __name__ == "__main__":
 
     with open(args.out_file, "wb") as out_file:
 
+        target_areas = []
+
         if args.a7_file:
-            out_file.write(get_images_for_elf(args.a7_file, destination=CoreType.A7, loader=args.loader))
+            output, areas = get_images_for_elf(args.a7_file, destination=CoreType.A7, loader=args.loader)
+            out_file.write(output)
+            target_areas.extend(areas)
 
         if args.m4_file:
-            out_file.write(get_images_for_elf(args.m4_file, destination=CoreType.M4, loader=args.loader))
+            output, areas = get_images_for_elf(args.m4_file, destination=CoreType.M4, loader=args.loader)
+            out_file.write(output)
+            target_areas.extend(areas)
+
+        # Check if any sections overlap
+        for i in range(len(target_areas)):
+            for j in range(len(target_areas)):
+                if i != j:
+                    a = target_areas[i]
+                    b = target_areas[j]
+                    if (a[1] >= b[0] and a[1] <= b[1]) or (b[1] >= a[0] and b[1] <= a[1]):
+                        raise ValueError("Sections 0x{:08x}-0x{:08x} and 0x{:08x}-0x{:08x} overlap".format(a[0], a[1], b[0], b[1]))
 
 
 
