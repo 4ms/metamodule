@@ -58,9 +58,8 @@ case "$(uname -s)" in
 		;;
 	Linux)
 		set -x
-		mkfs.fat -F 32 ${DISK}5
+		sudo mkfs.fat -F 32 ${DISK}p5
 		sleep 3
-		sudo umount $DISK
 		set +x
 		;;
 	*)
