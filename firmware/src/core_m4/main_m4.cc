@@ -18,8 +18,10 @@
 #include "patch_file/patch_storage.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "usb/usb_manager.hh"
-#include "wifi/comm/wifi_interface.hh"
-#include "wifi/flasher/wifi_update.hh"
+
+#ifdef ENABLE_WIFI_BRIDGE
+#include <wifi_interface.hh>
+#endif
 
 namespace MetaModule
 {
@@ -78,7 +80,6 @@ void main() {
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
 	#ifdef ENABLE_WIFI_BRIDGE
-	WifiUpdate::checkForUpdate();
 	WifiInterface::init(&patch_storage);
 	#endif
 

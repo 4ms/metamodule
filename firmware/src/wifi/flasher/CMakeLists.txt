@@ -9,20 +9,22 @@ add_subdirectory(images ${CMAKE_BINARY_DIR}/wifi_images)
 #
 
 set(ESP_SERIAL_FLASHER_PORT "CUSTOM")
-set(ESP_SERIAL_FLASHER_ENABLE_MD5 ON)
+set(ESP_SERIAL_FLASHER_ENABLE_MD5 ON CACHE INTERNAL "")
 add_subdirectory(${FWDIR}/lib/esp-serial-flasher ${CMAKE_CURRENT_BINARY_DIR}/esp-serial-flasher)
-target_link_libraries(flasher PRIVATE mp15xm4_arch)
+target_link_libraries(flasher PRIVATE mp15xa7_arch)
 
 # Sources
 
-target_sources(main_m4.elf PRIVATE
-    ${WIFI_DIR}/flasher/wifi_update.cc
-    ${WIFI_DIR}/flasher/flasher.cpp
-    ${WIFI_DIR}/flasher/flasher.h
-    ${WIFI_DIR}/flasher/implementation.cpp
-    ${WIFI_DIR}/flasher/BufferedUSART.h
-    ${WIFI_DIR}/flasher/BufferedUSART.cpp
+target_sources(main.elf PRIVATE
+    wifi_update.cc
+    flasher.cpp
+    flasher.h
+    implementation.cpp
+    BufferedUSART.h
+    BufferedUSART.cpp
 )
 
-target_link_libraries(main_m4.elf PUBLIC lockfree flasher wifi_images)
+target_include_directories(main.elf PRIVATE .)
+
+target_link_libraries(main.elf PUBLIC lockfree flasher wifi_images)
 

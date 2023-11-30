@@ -197,6 +197,24 @@ set_source_files_properties(
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 
+if (ENABLE_WIFI_BRIDGE)
+  target_compile_definitions(main.elf PRIVATE
+    ENABLE_WIFI_BRIDGE=1
+  )
+
+  #
+  # Lockfree
+  # 
+
+  add_subdirectory(${FWDIR}/lib/lockfree ${CMAKE_CURRENT_BINARY_DIR}/lockfree)
+  target_link_libraries(lockfree INTERFACE mp15xm4_arch)
+  target_link_libraries(main.elf PRIVATE lockfree)
+
+
+  add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
+
+endif()
+
 target_include_directories(
   main.elf
   PRIVATE 
