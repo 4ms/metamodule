@@ -75,9 +75,8 @@ case "$(uname -s)" in
 		;;
 	Linux)
 		set -x
-		sudo mkfs.fat -F 32 ${DISKSTEM}5 || exit
-		sleep 1
-		sudo umount $DISK
+		sudo umount ${DISKSTEM}5
+		sudo mkfs.fat -F 32 -n METAMOD ${DISKSTEM}5 || exit
 		set +x
 		;;
 	*)
