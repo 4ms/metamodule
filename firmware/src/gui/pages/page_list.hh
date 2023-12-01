@@ -13,7 +13,7 @@ namespace MetaModule
 //forward declare
 struct PageBase;
 
-enum class PageId { PatchSel, PatchView, ModuleView, Settings, KnobSetView, KnobMap, CableEdit, None };
+enum class PageId { PatchSel, PatchView, ModuleView, Settings, KnobSetView, KnobMap, CableEdit };
 
 struct PageWithArgs {
 	PageBase *page;
@@ -38,7 +38,7 @@ class PageList {
 	};
 
 	static inline CircularStack<PageHistory, 64> _page_history;
-	static inline PageHistory _request{PageId::None};
+	static inline PageHistory _request{};
 
 	///////////////////////// old history:
 	static inline PatchLocation selected_patch_loc{};
@@ -144,14 +144,20 @@ public:
 
 	//////////////////////////
 
+	static void request_initial_page(PageId id, PageArguments args) {
+		_request = {id, args};
+		_new_page_requested = true;
+	}
+
 	static void request_new_page(PageId id, PageArguments args) {
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop -- don't push
-		if (auto last = _page_history.back()) {
-			if (last->page == id) // && last->args == args)
-				_page_history.pop_back();
-		} else
-			_page_history.push_back(_request);
+		// if (auto last = _page_history.back()) {
+		// 	if (last->page == id && last->args == args) {
+		// 		_page_history.pop_back();
+		// 	}
+		// } else
+		_page_history.push_back(_request);
 
 		_request = {id, args};
 		_new_page_requested = true;
@@ -161,10 +167,13 @@ public:
 	// Returns false if history is empty
 	static bool request_last_page() {
 		auto last = _page_history.pop_back();
-		if (!last)
+		if (!last) {
 			return false;
-		if (last.value().page == PageId::None) // marks end of history
-			return false;
+		}
+		// if (last.value().page == PageId::None) { // marks end of history
+		// 	printf("Last page is start of history\n");
+		// 	return false;
+		// }
 
 		_request = last.value();
 		_new_page_requested = true;
@@ -185,7 +194,7 @@ public:
 	static void clear_history() {
 		_page_history.clear();
 		// _request = {};
-		_new_page_requested = false;
+		// _new_page_requested = false;
 	}
 
 private:

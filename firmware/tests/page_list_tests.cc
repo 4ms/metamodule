@@ -13,7 +13,6 @@ public:
 } // namespace MetaModule
 
 TEST_CASE("typical use case") {
-	PageList::clear_history();
 
 	PageBase pagea{PageId::PatchSel};
 	PageBase pageb{PageId::PatchView};
@@ -35,7 +34,8 @@ TEST_CASE("typical use case") {
 	std::optional<PageWithArgs> pwa;
 
 	// printf("start at page a\n");
-	PageList::request_new_page(pagea.id, args);
+	PageList::request_initial_page(pagea.id, args);
+
 	pwa = PageList::get_requested_page();
 	CHECK(pwa);
 	CHECK(pwa->page == &pagea);

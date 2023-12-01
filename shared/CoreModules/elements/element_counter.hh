@@ -21,6 +21,8 @@ struct Counts {
 				num_inputs + rhs.num_inputs,
 				num_outputs + rhs.num_outputs};
 	}
+
+	bool operator==(const Counts &rhs) const = default;
 };
 
 struct Indices {
@@ -38,6 +40,8 @@ struct Indices {
 				static_cast<uint8_t>(input_idx + rhs.num_inputs),
 				static_cast<uint8_t>(output_idx + rhs.num_outputs)};
 	}
+
+	bool operator==(const Indices &rhs) const = default;
 };
 
 constexpr bool operator==(MetaModule::BaseElement a, MetaModule::BaseElement b) {

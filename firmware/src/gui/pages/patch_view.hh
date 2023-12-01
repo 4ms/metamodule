@@ -78,17 +78,18 @@ struct PatchViewPage : PageBase {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
-		if (active_knob_set == args.active_knobset_id && patch_revision == PageList::get_patch_revision() &&
+		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
 			displayed_patch_loc == args.selected_patch_loc)
 		{
 			watch_lights();
 			is_ready = true;
 			return;
 		}
+
 		if (args.selected_patch_loc)
 			displayed_patch_loc = args.selected_patch_loc.value();
-		if (args.active_knobset_id)
-			active_knob_set = args.active_knobset_id.value();
+
+		active_knob_set = PageList::get_active_knobset();
 		patch_revision = PageList::get_patch_revision();
 
 		clear();
