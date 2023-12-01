@@ -167,6 +167,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	void blur() override {
+		// printf("Blur patchview page\n");
 		settings_menu.hide();
 		knobset_menu.hide();
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
