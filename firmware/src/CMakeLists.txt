@@ -1,7 +1,8 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
-option(ENABLE_WIFI_BRIDGE "Enable serial bridge to wifi module" OFF)
+option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" OFF)
+option(ENABLE_WIFI_BRIDGE_UPDATE "Enable updating firmware of wifi bridge module" ON)
 
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(SHARED ${FWDIR}/../shared)
@@ -201,6 +202,10 @@ if (ENABLE_WIFI_BRIDGE)
   target_compile_definitions(main.elf PRIVATE
     ENABLE_WIFI_BRIDGE=1
   )
+
+  if (ENABLE_WIFI_BRIDGE_UPDATE)
+    target_compile_definitions(main.elf PRIVATE ENABLE_WIFI_BRIDGE_UPDATE=1)
+  endif()
 
   add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
 

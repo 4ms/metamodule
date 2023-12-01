@@ -96,6 +96,12 @@ void loader_port_init()
     bootSelectPin.init(WifiBootloaderBootSelectConfig, mdrivlib::PinMode::Output, mdrivlib::PinPull::Up);
 }
 
+void loader_port_deinit()
+{
+    BufferedUSART::deinit();
+    bootSelectPin.high();
+}
+
 // Set GPIO0 LOW, then
 // assert reset pin for 100 milliseconds.
 void loader_port_enter_bootloader(void)

@@ -53,6 +53,16 @@ esp_loader_error_t init(uint32_t baudrate)
     return err;
 }
 
+void deinit()
+{
+    loader_port_deinit();
+}
+
+void reboot()
+{
+    esp_loader_reset_target();
+}
+
 esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
 {
     esp_loader_error_t err;

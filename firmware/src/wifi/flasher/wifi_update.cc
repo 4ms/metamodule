@@ -20,20 +20,44 @@ const auto FileystemChecksum = littlefs_MD5;
 namespace MetaModule
 {
 
-void WifiUpdate::checkForUpdate()
+void WifiUpdate::run()
 {
     auto result = Flasher::init(230400);
 
     if (result == ESP_LOADER_SUCCESS)
     {
-        pr_dbg("Update firmware partition\n");
+        #ifdef ENABLE_WIFI_BRIDGE_UPDATE
+        checkForUpdate();
+        #else
+        pr_dbg("Updating wifi module disabled\n");
+        Flasher::reboot();
+        #endif
+    }
 
-        result = Flasher::conditional_flash(FirmwareStartAddress, Firmware, FirmwareChecksum);
+    Flasher::deinit();
+}
 
+void WifiUpdate::checkForUpdate()
+{
+    pr_dbg("Update firmware partition\n");
+
+    auto result = Flasher::conditional_flash(FirmwareStartAddress, Firmware, FirmwareChecksum);
+
+    if (result == ESP_LOADER_SUCCESS)
+    {
         pr_dbg("Update filesystem partition\n");
 
         result = Flasher::conditional_flash(FilesystemStartAddress, Filesystem, FileystemChecksum);
+
+        if (result == ESP_LOADER_SUCCESS)
+        {
+            pr_dbg("Reboot wifi bridge\n");
+            Flasher::reboot();
+            return;
+        }
     }
+
+    pr_err("Keeping wifi bridge in reset since integrity cannot be verifed\n");
 }
 
 }
