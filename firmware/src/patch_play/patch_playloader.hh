@@ -18,11 +18,11 @@ struct PatchPlayLoader {
 	void load_initial_patch() {
 
 		// TODO: load the last patch that was loaded before power-down
-		auto initial_patch = 0;
+		uint32_t initial_patch = 0;
 
 		uint32_t tries = 10000;
 		while (--tries) {
-			if (storage_.request_viewpatch(Volume::NorFlash, initial_patch))
+			if (storage_.request_viewpatch({initial_patch, Volume::NorFlash}))
 				break;
 		}
 		if (tries == 0) {

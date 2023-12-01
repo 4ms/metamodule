@@ -4,6 +4,7 @@
 #include "patch/patch_data.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_file.hh"
+#include "patch_file/patch_location.hh"
 #include "patchlist.hh"
 
 namespace MetaModule
@@ -22,17 +23,17 @@ public:
 		, raw_patch_data_{raw_patch_data} {
 	}
 
-	[[nodiscard]] bool request_viewpatch(Volume vol, uint32_t patch_id) {
+	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
 		PatchICCMessage message{
 			.message_type = RequestPatchData,
-			.patch_id = patch_id,
-			.vol_id = vol,
+			.patch_id = patch_loc.index,
+			.vol_id = patch_loc.vol,
 		};
 		if (!comm_.send_message(message))
 			return false;
 
-		requested_view_patch_id_ = patch_id;
-		requested_view_patch_vol_ = vol;
+		requested_view_patch_id_ = patch_loc.index;
+		requested_view_patch_vol_ = patch_loc.vol;
 		return true;
 	}
 

@@ -194,7 +194,7 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::TryingToRequestPatchData:
-				if (patch_storage.request_viewpatch(selected_patch_vol, selected_patch)) {
+				if (patch_storage.request_viewpatch(selected_patch)) {
 					state = State::RequestedPatchData;
 					show_spinner();
 				}
@@ -208,8 +208,9 @@ struct PatchSelectorPage : PageBase {
 					if (patch_storage.parse_view_patch(message.bytes_read)) {
 						auto view_patch = patch_storage.get_view_patch();
 						pr_dbg("Parsed patch: %.31s\n", view_patch.patch_name.data());
-						PageList::set_selected_patch_loc({selected_patch, selected_patch_vol});
-						PageList::request_new_page(PageId::PatchView);
+
+						PageList::request_new_page(PageId::PatchView, {.selected_patch_loc{selected_patch}});
+
 						state = State::Closing;
 						hide_spinner();
 					} else {
@@ -244,35 +245,35 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
-		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
-		auto idx = lv_roller_get_selected(_instance->roller);
+		auto page = static_cast<PatchSelectorPage *>(event->user_data);
+		auto idx = lv_roller_get_selected(page->roller);
 
-		if (idx == _instance->usb_hdr || idx == _instance->sd_hdr || idx == _instance->nor_hdr) {
+		if (idx == page->usb_hdr || idx == page->sd_hdr || idx == page->nor_hdr) {
 			if (idx == 0)
-				lv_roller_set_selected(_instance->roller, 1, LV_ANIM_OFF);
-			else if (idx > _instance->highlighted_idx)
-				lv_roller_set_selected(_instance->roller, idx + 1, LV_ANIM_OFF);
-			else if (idx < _instance->highlighted_idx)
-				lv_roller_set_selected(_instance->roller, idx - 1, LV_ANIM_OFF);
-			idx = lv_roller_get_selected(_instance->roller);
+				lv_roller_set_selected(page->roller, 1, LV_ANIM_OFF);
+			else if (idx > page->highlighted_idx)
+				lv_roller_set_selected(page->roller, idx + 1, LV_ANIM_OFF);
+			else if (idx < page->highlighted_idx)
+				lv_roller_set_selected(page->roller, idx - 1, LV_ANIM_OFF);
+			idx = lv_roller_get_selected(page->roller);
 		}
 
-		auto [_, vol] = _instance->calc_patch_id_vol(idx);
-		_instance->highlighted_vol = vol;
-		_instance->highlighted_idx = idx;
-		_instance->refresh_volume_labels();
+		auto [_, vol] = page->calc_patch_id_vol(idx);
+		page->highlighted_vol = vol;
+		page->highlighted_idx = idx;
+		page->refresh_volume_labels();
 	}
 
 	static void patchlist_select_cb(lv_event_t *event) {
-		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
+		auto page = static_cast<PatchSelectorPage *>(event->user_data);
 		patchlist_scroll_cb(event);
 
-		auto [patch_id, vol] = _instance->calc_patch_id_vol(_instance->highlighted_idx);
-		_instance->selected_patch_vol = vol;
-		_instance->selected_patch = patch_id;
-		_instance->state = State::TryingToRequestPatchData;
+		auto [patch_id, vol] = page->calc_patch_id_vol(page->highlighted_idx);
+		page->selected_patch.vol = vol;
+		page->selected_patch.index = patch_id;
+		page->state = State::TryingToRequestPatchData;
 
-		pr_dbg("Selected vol %d, patch %d\n", (uint32_t)_instance->selected_patch_vol, _instance->selected_patch);
+		pr_dbg("Selected vol %d, patch %d\n", (uint32_t)page->selected_patch.vol, page->selected_patch.index);
 	}
 
 	std::pair<uint32_t, Volume> calc_patch_id_vol(uint32_t roller_idx) {
@@ -289,8 +290,10 @@ struct PatchSelectorPage : PageBase {
 	}
 
 private:
-	uint32_t selected_patch = 0;
-	Volume selected_patch_vol = Volume::NorFlash;
+	PatchLocation selected_patch{0, Volume::NorFlash};
+	// uint32_t selected_patch = 0;
+	// Volume selected_patch_vol = Volume::NorFlash;
+
 	uint32_t highlighted_idx = 0;
 	Volume highlighted_vol = Volume::NorFlash;
 
