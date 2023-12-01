@@ -70,7 +70,7 @@ void main() {
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
 	#ifdef ENABLE_WIFI_BRIDGE
-	WifiUpdate::checkForUpdate();
+	WifiUpdate::run();
 	#endif
 
 	pr_info("A7 initialized.\n");
