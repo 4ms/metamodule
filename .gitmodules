@@ -43,3 +43,6 @@
 [submodule "firmware/vcv_ports/nonlinearcircuits"]
 	path = firmware/vcv_ports/nonlinearcircuits
 	url = https://github.com/mhetrick/nonlinearcircuits
+[submodule "firmware/bootloader/mp1-usb-dfu"]
+	path = firmware/bootloader/mp1-usb-dfu
+	url = https://github.com/4ms/mp1-usb-dfu

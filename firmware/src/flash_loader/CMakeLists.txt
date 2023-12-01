@@ -1,0 +1,80 @@
+include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
+
+set(FWDIR ${CMAKE_SOURCE_DIR})
+set(SHARED ${FWDIR}/../shared)
+
+add_executable(
+  flash_loader.elf
+  ${FWDIR}/system/libc_stub.c
+  ${FWDIR}/system/libcpp_stub.cc
+  ${FWDIR}/system/new.cc
+  ${FWDIR}/system/mmu_ca7.c
+  ${FWDIR}/system/startup_ca7.s
+  ${FWDIR}/src/console/uart_log.cc
+  ${FWDIR}/src/flash_loader/flash_loader.cc
+  #
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_mdma.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_usart.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_usart_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_uart.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_uart_ex.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_dma.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_ll_rcc.c
+  ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_qspi.c
+  #
+  ${FWDIR}/lib/mdrivlib/drivers/pin.cc
+  ${FWDIR}/lib/mdrivlib/drivers/qspi_flash_driver.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/system_ca7.c
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
+  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
+  #
+)
+
+target_include_directories(
+  flash_loader.elf
+  PRIVATE ${FWDIR}/src
+          ${FWDIR}/src/console
+          ${FWDIR}/src/core_a7
+          ${FWDIR}/src/flash_loader
+          ${FWDIR}/src/medium
+          ${FWDIR}/lib/mdrivlib
+          ${FWDIR}/lib/mdrivlib/target/stm32mp1
+          ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
+          ${SHARED}
+          ${SHARED}/cpputil
+          ${FWDIR}/lib/cmsis-device/stm32mp157c/include
+          ${FWDIR}/lib/cmsis/Core_A/Include
+          ${FWDIR}/lib/cmsis/Include
+          ${FWDIR}/lib/stm32-hal/stm32mp1/include
+)
+
+target_link_libraries(flash_loader.elf PRIVATE mp15xa7_arch)
+
+target_link_script(
+  flash_loader
+  ${FWDIR}/system/linker/stm32mp15xx_ca7_flashloader.ld
+  -L${FWDIR}
+  -Wl,--gc-sections
+  -Wno-psabi
+  -ffreestanding
+  -nostartfiles
+  -nostdlib
+  -flto=auto
+)
+
+add_bin_hex_command(flash_loader)
+
+add_custom_command(
+  TARGET flash_loader.elf
+  POST_BUILD
+  COMMAND ${FWDIR}/flashing/elf_to_uimg.py --a7 $<TARGET_FILE:flash_loader.elf> $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg
+  COMMAND ls -l $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg
+  COMMENT "Creating uimg file"
+  VERBATIM
+)
+
+set_source_files_properties($<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg PROPERTIES GENERATED TRUE)

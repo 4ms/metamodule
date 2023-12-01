@@ -14,10 +14,10 @@ struct Debug {
 	using Pin6 = mdrivlib::FPin<mdrivlib::GPIO::B, 14, mdrivlib::PinMode::Output>; //DEBUG2 pad
 	using Pin7 = mdrivlib::FPin<mdrivlib::GPIO::G, 6, mdrivlib::PinMode::Output>;  //DEBUG3 pad (p11)
 
-	using red_LED1 = mdrivlib::FPin<mdrivlib::GPIO::B, 15, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted>;
-	using blue_LED1 = mdrivlib::FPin<mdrivlib::GPIO::A, 9, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted>;
 	using green_LED1 =
-		mdrivlib::FPin<mdrivlib::GPIO::E, 14, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted>;
+		mdrivlib::FPin<mdrivlib::GPIO::B, 15, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted>;
+	using blue_LED1 = mdrivlib::FPin<mdrivlib::GPIO::A, 9, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted>;
+	using red_LED1 = mdrivlib::FPin<mdrivlib::GPIO::E, 14, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted>;
 
 	static inline red_LED1 red_LED1_init;
 	static inline blue_LED1 blue_LED1_init;
