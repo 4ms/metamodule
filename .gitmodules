@@ -35,7 +35,7 @@
 	path = firmware/lib/flatbuffers
 	url = https://github.com/google/flatbuffers.git
 [submodule "firmware/src/wifi/flat"]
-	path = firmware/src/wifi/flat
+	path = firmware/src/wifi/comm/flat
 	url = https://github.com/4ms/metamodule-bridge-protocol.git
 [submodule "firmware/vcv_ports/nonlinearcircuits"]
 	path = firmware/vcv_ports/nonlinearcircuits
