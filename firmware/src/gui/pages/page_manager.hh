@@ -42,14 +42,16 @@ public:
 	}
 
 	void init() {
-		PageList::request_new_page(page_patchsel);
+		PageList::request_new_page(PageId::PatchSel);
 	}
 
 	void update_current_page() {
 		if (auto newpage = PageList::get_requested_page()) {
-			cur_page->blur();
-			cur_page = newpage.value();
-			cur_page->focus();
+			if (newpage->page) {
+				cur_page->blur();
+				cur_page = newpage->page;
+				cur_page->focus(newpage->args);
+			}
 		}
 
 		else

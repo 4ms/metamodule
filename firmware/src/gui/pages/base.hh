@@ -1,6 +1,8 @@
 #pragma once
 #include "conf/panel_conf.hh"
 #include "gui/message_queue.hh"
+// #include "gui/pages/page_list.hh"
+#include "gui/pages/page_args.hh"
 #include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
@@ -22,6 +24,7 @@ struct PatchInfo {
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
+	// PageList &page_list;
 };
 
 struct PageBase {
@@ -31,6 +34,9 @@ struct PageBase {
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
+	// PageList &page_list;
+
+	PageArguments args;
 
 	static constexpr uint32_t MaxBufferWidth = 320 * 4;
 	static constexpr uint32_t MaxBufferHeight = 240 * 4;
@@ -49,7 +55,8 @@ struct PageBase {
 		, params{info.params}
 		, metaparams{info.metaparams}
 		, msg_queue{info.msg_queue}
-		, patch_mod_queue{info.patch_mod_queue} {
+		, patch_mod_queue{info.patch_mod_queue} // , page_list{info.page_list}
+	{
 	}
 
 	virtual ~PageBase() = default;
@@ -61,7 +68,7 @@ struct PageBase {
 		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_STATE_DEFAULT);
 	}
 
-	void focus() {
+	void focus(PageArguments const *args) {
 		for (auto &b : metaparams.meta_buttons)
 			b.clear_events();
 
@@ -71,6 +78,9 @@ struct PageBase {
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
 		}
 
+		// copy args to the PageBase instance
+		if (args)
+			this->args = *args;
 		prepare_focus();
 
 		if (screen)

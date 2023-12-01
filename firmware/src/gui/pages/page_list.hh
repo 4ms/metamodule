@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/elements/module_param.hh"
+#include "page_args.hh"
 #include "patch_file/patch_location.hh"
 #include "util/circular_stack.hh"
 #include <array>
@@ -12,28 +13,46 @@ namespace MetaModule
 //forward declare
 struct PageBase;
 
-enum PageId : uint32_t { PatchSel, PatchView, ModuleView, Settings, KnobSetView, KnobMap, CableEdit };
+enum class PageId { PatchSel, PatchView, ModuleView, Settings, KnobSetView, KnobMap, CableEdit, None };
+
+struct PageWithArgs {
+	PageBase *page;
+	PageArguments *args;
+};
 
 class PageList {
 	static constexpr uint32_t MaxPages = 8;
 
-	static inline PageBase *_requested_page = nullptr;
+	// static inline PageBase *_requested_page = nullptr;
 	static inline bool _new_page_requested = false;
-	static inline CircularStack<PageBase *, 16> _history;
+
 	static inline std::array<PageBase *, MaxPages> _pages;
 
-	//TODO: these need to be in PageManager or somewhere else...
+	static inline uint32_t patch_revision = 0;
+
+	///////////// new history
+
+	struct PageHistory {
+		PageId page;
+		PageArguments args;
+	};
+
+	static inline CircularStack<PageHistory, 64> _page_history;
+	static inline PageHistory _request{PageId::None};
+
+	///////////////////////// old history:
 	static inline PatchLocation selected_patch_loc{};
 	static inline uint32_t selected_module_id = 0;
 	static inline uint32_t selected_mappedknob_id = 0;
 	static inline uint32_t selected_knob_id = 0;
 	static inline uint32_t active_knobset_id = 0;
 	static inline uint32_t view_knobset_id = 0;
-	static inline uint32_t patch_revision = 0;
 	static inline ElementCount::Counts selected_element_counts{};
 	static inline ElementCount::Indices selected_element_indices{};
 
 public:
+	static inline CircularStack<PageBase *, 16> _history;
+
 	static void set_selected_patch_loc(PatchLocation loc) {
 		selected_patch_loc = loc;
 	}
@@ -97,7 +116,9 @@ public:
 	static uint32_t get_selected_knob_id() {
 		return selected_knob_id;
 	}
+	//////////////////////////
 
+public:
 	static void increment_patch_revision() {
 		patch_revision++;
 	}
@@ -119,56 +140,58 @@ public:
 	}
 
 	static void request_new_page(PageId id) {
-		auto idx = static_cast<uint32_t>(id);
-		request_new_page(*_pages[idx]);
 	}
 
-	// Requests that we jump to the given page
-	// Maintains a history stack (breadcrumbs)
-	static void request_new_page(PageBase &page) {
+	//////////////////////////
+
+	static void request_new_page(PageId id, PageArguments args) {
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop -- don't push
-		if (_history.back().has_value() && _history.back().value() == &page)
-			_history.pop_back();
-		else
-			_history.push_back(_requested_page);
+		if (auto last = _page_history.back()) {
+			if (last->page == id) // && last->args == args)
+				_page_history.pop_back();
+		} else
+			_page_history.push_back(_request);
 
-		_requested_page = &page;
+		_request = {id, args};
 		_new_page_requested = true;
 	}
 
-	// Requests to jump to the last page in history
+	// Requests to jump to the previous page in history
 	// Returns false if history is empty
 	static bool request_last_page() {
-		auto lastpage = PageList::_get_last_page().value_or(nullptr);
-		if (!lastpage)
+		auto last = _page_history.pop_back();
+		if (!last)
+			return false;
+		if (last.value().page == PageId::None) // marks end of history
 			return false;
 
-		_requested_page = lastpage;
+		_request = last.value();
 		_new_page_requested = true;
 		return true;
 	}
 
 	// Returns the requested page, or else nullopt if no new page is requested
-	static std::optional<PageBase *> get_requested_page() {
+	static std::optional<PageWithArgs> get_requested_page() {
 		if (_new_page_requested) {
 			_new_page_requested = false;
-			return _requested_page;
+			return PageWithArgs{page(_request.page), &_request.args};
+
 		} else
 			return std::nullopt;
 	}
 
 	// Clears history and resets internal state
 	static void clear_history() {
-		_history.clear();
-		_requested_page = nullptr;
+		_page_history.clear();
+		// _request = {};
 		_new_page_requested = false;
 	}
 
 private:
-	// Returns the last page in the history, or else nullopt if history is empty
-	static std::optional<PageBase *> _get_last_page() {
-		return _history.pop_back();
+	static PageBase *page(PageId id) {
+		return _pages[static_cast<std::underlying_type_t<PageId>>(id)];
 	}
 };
+
 } // namespace MetaModule
