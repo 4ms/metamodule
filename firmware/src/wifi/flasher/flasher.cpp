@@ -7,6 +7,7 @@
 #include <console/pr_dbg.hh>
 
 #include <cstring>
+#include <optional>
 
 namespace Flasher
 {
@@ -71,7 +72,9 @@ esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
 
     const uint8_t* bin_addr = buffer.data();
     const std::size_t binary_size = buffer.size();
-    size_t written = 0;    
+    size_t written = 0;
+
+    std::optional<int> lastPrintedProgress;
 
     while (written < binary_size)
     {
@@ -89,7 +92,12 @@ esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
         written += to_read;
 
         int progress = (int)(((float)written / float(binary_size)) * 100);
-        pr_dbg("Flasher: Progress: %d %%\n", progress);
+
+        if (not lastPrintedProgress or lastPrintedProgress != progress)
+        {
+            pr_dbg("Flasher: Progress: %d %%\n", progress);
+            lastPrintedProgress = progress;
+        }        
     };
 
     pr_dbg("Flasher: Finished programming\n");
