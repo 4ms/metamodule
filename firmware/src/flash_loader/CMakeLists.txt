@@ -9,10 +9,9 @@ add_executable(
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/mmu_ca7.c
+  ${FWDIR}/system/startup_ca7.s
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
-  #
-  ${FWDIR}/lib/printf/printf.c
   #
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
@@ -32,7 +31,6 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/irq_ctrl.c
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/startup_ca7.s
   #
 )
 
@@ -43,7 +41,6 @@ target_include_directories(
           ${FWDIR}/src/core_a7
           ${FWDIR}/src/flash_loader
           ${FWDIR}/src/medium
-          ${FWDIR}/lib/printf
           ${FWDIR}/lib/mdrivlib
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
@@ -74,8 +71,7 @@ add_bin_hex_command(flash_loader)
 add_custom_command(
   TARGET flash_loader.elf
   POST_BUILD
-  COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.bin
-          $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg 0xC2000000 0xC2000040
+  COMMAND ${FWDIR}/flashing/elf_to_uimg.py --a7 $<TARGET_FILE:flash_loader.elf> $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg
   COMMAND ls -l $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg
   COMMENT "Creating uimg file"
   VERBATIM

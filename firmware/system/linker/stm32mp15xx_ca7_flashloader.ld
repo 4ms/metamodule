@@ -8,7 +8,6 @@ INCLUDE system/linker/memory.ld
 MEMORY
 {
     ROM (rx)			: ORIGIN = _A7_CODE,		LENGTH = _A7_CODE_SZ
-    RAM (rw)			: ORIGIN = _A7_RAM,			LENGTH = _A7_RAM_SZ
 	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
 	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
 
@@ -76,9 +75,7 @@ SECTIONS
 	} > ROM
 
 
-    _text_end = .;
-
-    .data : AT(_text_end)
+    .data : 
     {
         . = ALIGN(8);
         _data_start = .;
@@ -86,7 +83,7 @@ SECTIONS
         *(.data*)
         . = ALIGN(8);
         _data_end = .;
-    } > RAM
+    } > ROM
 
     .bss : {
         _bss_start = .;
@@ -97,7 +94,7 @@ SECTIONS
         _bss_end = .;
 		. = ALIGN(256);
 		_ram_aligned_end = .;
-    } > RAM
+    } > ROM
 
 	.heap (NOLOAD):
 	{
