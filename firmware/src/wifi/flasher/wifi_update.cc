@@ -26,38 +26,14 @@ void WifiUpdate::checkForUpdate()
 
     if (result == ESP_LOADER_SUCCESS)
     {
-        printf("Bootloader ready\n");
+        pr_dbg("Update firmware partition\n");
 
-        printf("Firmware image at   %p-%p\n", &_binary_firmware_bin_start, &_binary_firmware_bin_end);
-        printf("Filesystem image at %p-%p\n", &_binary_littlefs_img_start, &_binary_littlefs_img_end);
+        result = Flasher::conditional_flash(FirmwareStartAddress, Firmware, FirmwareChecksum);
 
-        result = Flasher::verify(FirmwareStartAddress, Firmware.size(), FirmwareChecksum);
+        pr_dbg("Update filesystem partition\n");
 
-        if (result == ESP_LOADER_SUCCESS)
-        {
-            printf("Firmware binary already matches\n");
-            return;
-        }
-        else if (result == ESP_LOADER_ERROR_INVALID_MD5)
-        {
-            result = Flasher::flash(FirmwareStartAddress, Firmware);
-
-            if (result == ESP_LOADER_SUCCESS)
-            {
-                printf("Firmware flashed\n");
-            }
-            else
-            {
-                printf("Flashing failed with %u\n", result);
-            }
-        }
-        else
-        {
-            printf("Cannot get md5\n");
-        }
+        result = Flasher::conditional_flash(FilesystemStartAddress, Filesystem, FileystemChecksum);
     }
 }
-
-
 
 }
