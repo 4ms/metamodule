@@ -94,7 +94,7 @@ struct CableEditPage : PageBase {
 		if (!mapped_out)
 			return;
 
-		printf("Create panel item (Out %ld) in CableToPanel\n", mapped_out->panel_jack_id);
+		printf("Create panel item (Out %u) in CableToPanel\n", (unsigned)mapped_out->panel_jack_id);
 		auto button = MappingPaneList::create_panel_outcable_item(mapped_out->panel_jack_id, ui_CableToPanel);
 
 		lv_obj_add_flag(button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);

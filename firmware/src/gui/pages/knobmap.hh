@@ -134,10 +134,10 @@ struct KnobMapPage : PageBase {
 		auto val = lv_slider_get_value(obj);
 		if (obj == ui_MinSlider) {
 			page->map.min = val / 100.f;
-			lv_label_set_text_fmt(ui_MinValue, "%ld%%", val);
+			lv_label_set_text_fmt(ui_MinValue, "%d%%", (int)val);
 		} else {
 			page->map.max = val / 100.f;
-			lv_label_set_text_fmt(ui_MaxValue, "%ld%%", val);
+			lv_label_set_text_fmt(ui_MaxValue, "%d%%", (int)val);
 		}
 
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});
