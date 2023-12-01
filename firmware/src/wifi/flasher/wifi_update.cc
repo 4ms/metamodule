@@ -8,7 +8,7 @@ extern unsigned int _binary_firmware_bin_end;
 extern unsigned int _binary_littlefs_img_start;
 extern unsigned int _binary_littlefs_img_end;
 
-const uint32_t FirmwareStartAddress = 0x0;
+const uint32_t FirmwareStartAddress = 0x10000;
 std::span<const uint8_t> Firmware ((uint8_t*)&_binary_firmware_bin_start, std::size_t((uint8_t*)&_binary_firmware_bin_end - (uint8_t*)&_binary_firmware_bin_start));
 const auto FirmwareChecksum = firmware_MD5;
 
