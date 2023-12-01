@@ -11,7 +11,7 @@
 #include <console/pr_dbg.hh>
 
 static mdrivlib::Uart<WifiBootloaderUartConfig> commBoot;
-Queue<uint8_t,256> BufferedUSART::queue;
+LockFreeFifoSpsc<uint8_t,256> BufferedUSART::queue;
 
 #define USART_PERIPH        USART6
 #define USART_IRQ           USART6_IRQn
@@ -39,7 +39,7 @@ void BufferedUSART::initPeripheral()
             {
                 auto val = USART_PERIPH->RDR;
 
-                auto result = queue.Push(val);
+                auto result = queue.put(val);
                 if (not result)
                 {
                     pr_err("RX Overrun\n");
@@ -66,7 +66,7 @@ void BufferedUSART::transmit(uint8_t val)
 
 std::optional<uint8_t> BufferedUSART::receive()
 {
-    return queue.PopOptional();
+    return queue.get();
 }
 
 
