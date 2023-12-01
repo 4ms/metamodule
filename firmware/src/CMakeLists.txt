@@ -202,15 +202,6 @@ if (ENABLE_WIFI_BRIDGE)
     ENABLE_WIFI_BRIDGE=1
   )
 
-  #
-  # Lockfree
-  # 
-
-  add_subdirectory(${FWDIR}/lib/lockfree ${CMAKE_CURRENT_BINARY_DIR}/lockfree)
-  target_link_libraries(lockfree INTERFACE mp15xm4_arch)
-  target_link_libraries(main.elf PRIVATE lockfree)
-
-
   add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
 
 endif()

@@ -43,4 +43,4 @@ target_include_directories(main_m4.elf PRIVATE .)
 
 ## Add dependencies to firmware
 
-target_link_libraries(main_m4.elf PUBLIC flatbuffers flatbuffer_messages lockfree)
+target_link_libraries(main_m4.elf PUBLIC flatbuffers flatbuffer_messages)
