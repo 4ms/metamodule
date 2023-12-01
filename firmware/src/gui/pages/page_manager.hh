@@ -42,7 +42,7 @@ public:
 	}
 
 	void init() {
-		PageList::request_new_page(PageId::PatchSel);
+		PageList::request_new_page(PageId::PatchSel, {});
 	}
 
 	void update_current_page() {
