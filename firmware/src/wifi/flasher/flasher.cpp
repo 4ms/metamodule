@@ -122,7 +122,7 @@ esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
 
 esp_loader_error_t verify(uint32_t address, uint32_t length, std::string_view checksum)
 {
-    pr_dbg("Flasher: Getting checksum form %08x-%08x\n", address, address + length);
+    pr_dbg("Flasher: Getting checksum from %08x-%08x\n", address, address + length);
 
     std::array<uint8_t,32> readValue;
 
@@ -143,6 +143,39 @@ esp_loader_error_t verify(uint32_t address, uint32_t length, std::string_view ch
     else
     {
         pr_err("Flasher: Failed to get checksum: %u\n", result);
+    }
+
+    return result;
+}
+
+esp_loader_error_t conditional_flash(uint32_t address, std::span<const uint8_t> payload, std::string_view checksum)
+{
+    pr_dbg("Flasher: Conditionally flash %p-%p with checksum %.*s to %p\n", &payload.front(), &payload.back(), checksum.size(), checksum.data(), address);
+
+    auto result = verify(address, payload.size(), checksum);
+
+    if (result == ESP_LOADER_SUCCESS)
+    {
+        pr_dbg("Flasher: Checksum already matches\n");
+        return ESP_LOADER_SUCCESS;
+    }
+    else if (result == ESP_LOADER_ERROR_INVALID_MD5)
+    {
+        result = flash(address, payload);
+
+        if (result == ESP_LOADER_SUCCESS)
+        {
+            pr_dbg("Flasher: Payload flashed successfully\n");
+            return ESP_LOADER_SUCCESS;
+        }
+        else
+        {
+            pr_err("Flasher: Flashing failed with result: %u\n", result);
+        }
+    }
+    else
+    {
+        pr_err("Flasher: Failed to read checksum of destination area\n");
     }
 
     return result;
