@@ -9,7 +9,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/cables.hh"
+#include "gui/pages/cable_drawer.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_knobset_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
