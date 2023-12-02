@@ -108,8 +108,8 @@ struct KnobMapPage : PageBase {
 				hide_keyboard();
 			} else if (del_popup.is_visible()) {
 				del_popup.hide();
-			} else if (PageList::request_last_page()) {
-				;
+			} else {
+				PageList::request_last_page();
 			}
 		}
 
@@ -198,7 +198,7 @@ struct KnobMapPage : PageBase {
 			return;
 
 		page->args.module_id = page->map.module_id;
-		page->args.knob_id = page->map.param_id;
+		page->args.element_indices = ElementCount::Indices{.param_idx = (uint8_t)page->map.param_id};
 		PageList::request_new_page(PageId::ModuleView, page->args);
 	}
 

@@ -11,7 +11,7 @@ struct PageArguments {
 	std::optional<PatchLocation> patch_loc{};
 	std::optional<uint16_t> module_id{};
 	std::optional<uint16_t> mappedknob_id{};
-	std::optional<uint16_t> knob_id{};
+	// std::optional<uint16_t> knob_id{};
 	std::optional<uint16_t> view_knobset_id{};
 	std::optional<ElementCount::Counts> element_counts{};
 	std::optional<ElementCount::Indices> element_indices{};

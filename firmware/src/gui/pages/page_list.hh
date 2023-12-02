@@ -70,6 +70,10 @@ public:
 		_new_page_requested = true;
 	}
 
+	static void stash_state(PageArguments args) {
+		_request.args = args;
+	}
+
 	static void request_new_page(PageId id, PageArguments args) {
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop -- don't push

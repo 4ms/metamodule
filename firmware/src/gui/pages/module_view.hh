@@ -106,8 +106,8 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_update_layout(canvas);
 
-		auto selected_knob = args.knob_id.value_or(0);
 		unsigned roller_idx = 0;
+		DrawnElement const *cur_el = nullptr;
 
 		for (const auto &drawn_element : drawn_elements) {
 			auto &drawn = drawn_element.gui_element;
@@ -133,8 +133,14 @@ struct ModuleViewPage : PageBase {
 				drawn_element.element);
 			module_controls.emplace_back(drawn_element.element, drawn_element.gui_element.idx);
 
-			if (selected_knob == drawn.idx.param_idx && drawn.count.num_params > 0) {
-				cur_selected = roller_idx;
+			if (args.element_indices.has_value()) {
+				if (args.element_indices->param_idx == drawn.idx.param_idx &&
+					//TODO: check for light, input, output...
+					drawn.idx.param_idx != ElementCount::Indices::NoElementMarker)
+				{
+					cur_selected = roller_idx;
+					cur_el = &drawn_element;
+				}
 			}
 			roller_idx++;
 		}
@@ -153,7 +159,6 @@ struct ModuleViewPage : PageBase {
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_visible_row_count(roller, 11);
 
-		// Select first element
 		lv_roller_set_selected(roller, cur_selected, LV_ANIM_OFF);
 
 		if (button.size() > 0) {
@@ -163,14 +168,23 @@ struct ModuleViewPage : PageBase {
 		update_map_ring_style();
 
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
+		if (cur_el) {
+			printf("Show mapping pane\n");
+			mapping_pane.show(*cur_el);
+		} else {
+			printf("Hide mapping pane\n");
+			mapping_pane.hide();
+		}
 	}
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
+			printf("Back button\n");
 			if (mapping_pane.manual_control_visible()) {
 				mapping_pane.hide_manual_control();
 
 			} else if (mode == ViewMode::List) {
+				PageList::stash_state(args);
 				PageList::request_last_page();
 
 			} else if (mapping_pane.addmap_visible()) {

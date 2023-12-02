@@ -371,6 +371,7 @@ private:
 		if (!obj)
 			return;
 		page->args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+		page->args.element_indices = {};
 		PageList::request_new_page(PageId::ModuleView, page->args);
 	}
 

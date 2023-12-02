@@ -324,6 +324,7 @@ private:
 		if (!data.mapped_panel_id.has_value())
 			return;
 
+		PageList::stash_state(page->args);
 		page->args.mappedknob_id = data.mapped_panel_id;
 		page->args.view_knobset_id = data.set_i;
 		PageList::request_new_page(PageId::KnobMap, page->args);
@@ -337,6 +338,7 @@ private:
 		if (!event->target)
 			return;
 
+		PageList::stash_state(page->args);
 		PageList::request_new_page(PageId::CableEdit, page->args);
 		page->hide();
 	}

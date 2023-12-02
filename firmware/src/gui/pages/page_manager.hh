@@ -50,6 +50,19 @@ public:
 			if (newpage->page) {
 				cur_page->blur();
 				cur_page = newpage->page;
+				printf("Args: mod: %d, panel: %d, set: %d, patchidx: %d\n",
+					   newpage->args->module_id.value_or(88),
+					   newpage->args->mappedknob_id.value_or(88),
+					   newpage->args->view_knobset_id.value_or(88),
+					   newpage->args->patch_loc.value_or(PatchLocation{}).index);
+				if (newpage->args->element_indices) {
+					auto i = newpage->args->element_indices.value();
+					printf("Ind: %d %d %d %d\n", i.param_idx, i.input_idx, i.output_idx, i.light_idx);
+				}
+				if (newpage->args->element_counts) {
+					auto i = newpage->args->element_counts.value();
+					printf("Cnt: %d %d %d %d\n", i.num_params, i.num_inputs, i.num_outputs, i.num_lights);
+				}
 				cur_page->focus(newpage->args);
 			}
 		}
