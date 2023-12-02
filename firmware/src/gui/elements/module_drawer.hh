@@ -93,15 +93,17 @@ struct ModuleDrawer {
 
 					// For each member of count that's 0, mark the corresponding member of indices as not being an element of that type
 					// See tests/element_tests.cc SUBCASE("Some indices are invalid if the type does not match")
+					auto el_idx = indices;
 					if (count.num_params == 0)
-						indices.param_idx = ElementCount::Indices::NoElementMarker;
+						el_idx.param_idx = ElementCount::Indices::NoElementMarker;
 					if (count.num_inputs == 0)
-						indices.input_idx = ElementCount::Indices::NoElementMarker;
+						el_idx.input_idx = ElementCount::Indices::NoElementMarker;
 					if (count.num_outputs == 0)
-						indices.output_idx = ElementCount::Indices::NoElementMarker;
+						el_idx.output_idx = ElementCount::Indices::NoElementMarker;
 					if (count.num_lights == 0)
-						indices.light_idx = ElementCount::Indices::NoElementMarker;
-					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, indices, mapping_id};
+						el_idx.light_idx = ElementCount::Indices::NoElementMarker;
+
+					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, el_idx, mapping_id};
 
 					indices = indices + count;
 					return element_ctx;
