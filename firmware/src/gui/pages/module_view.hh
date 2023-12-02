@@ -121,27 +121,28 @@ struct ModuleViewPage : PageBase {
 						return;
 
 					opts += el.short_name;
+
 					if (drawn.mapped_panel_id) {
 						opts += " [";
 						opts += get_panel_name<PanelDef>(el, drawn.mapped_panel_id.value());
 						opts += "]";
 					}
-					opts += "\n";
+					append_connected_jack_name(opts, drawn, patch);
 
+					opts += "\n";
 					add_button(drawn.obj);
 				},
 				drawn_element.element);
 			module_controls.emplace_back(drawn_element.element, drawn_element.gui_element.idx);
 
-			if (args.element_indices.has_value()) {
-				if (args.element_indices->param_idx == drawn.idx.param_idx &&
-					//TODO: check for light, input, output...
-					drawn.idx.param_idx != ElementCount::Indices::NoElementMarker)
-				{
-					cur_selected = roller_idx;
-					cur_el = &drawn_element;
-				}
+			// if (args.element_indices.has_value()) {
+			// if (args.element_indices->param_idx == drawn.idx.param_idx &&
+			// 	drawn.idx.param_idx != ElementCount::Indices::NoElementMarker)
+			if (args.element_indices == drawn.idx) {
+				cur_selected = roller_idx;
+				cur_el = &drawn_element;
 			}
+			// }
 			roller_idx++;
 		}
 
@@ -169,17 +170,16 @@ struct ModuleViewPage : PageBase {
 
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 		if (cur_el) {
-			printf("Show mapping pane\n");
+			mode = ViewMode::Mapping;
 			mapping_pane.show(*cur_el);
 		} else {
-			printf("Hide mapping pane\n");
+			mode = ViewMode::List;
 			mapping_pane.hide();
 		}
 	}
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			printf("Back button\n");
 			if (mapping_pane.manual_control_visible()) {
 				mapping_pane.hide_manual_control();
 
