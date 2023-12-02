@@ -128,4 +128,22 @@ constexpr std::optional<size_t> get_element_id(const MetaModule::BaseElement &el
 	return {}; //element not found
 }
 
+// For each member of count that's 0, mark the corresponding member of indices as not being an element of that type
+// See tests/element_tests.cc SUBCASE("Some indices are invalid if the type does not match")
+inline Indices mark_unused_indices(Indices indices, Counts count) {
+	if (count.num_params == 0)
+		indices.param_idx = ElementCount::Indices::NoElementMarker;
+
+	if (count.num_inputs == 0)
+		indices.input_idx = ElementCount::Indices::NoElementMarker;
+
+	if (count.num_outputs == 0)
+		indices.output_idx = ElementCount::Indices::NoElementMarker;
+
+	if (count.num_lights == 0)
+		indices.light_idx = ElementCount::Indices::NoElementMarker;
+
+	return indices;
+}
+
 }; // namespace ElementCount
