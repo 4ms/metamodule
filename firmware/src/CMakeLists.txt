@@ -168,6 +168,8 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
 
+  ${FWDIR}/src/gui/elements/element_name.cc
+
   #
   ${SHARED}/CoreModules/hub/hub_medium.cc
   ${SHARED}/patch_convert/yaml_to_patch.cc

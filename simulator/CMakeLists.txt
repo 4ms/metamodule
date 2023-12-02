@@ -134,8 +134,14 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(simulator src/main.cc src/ui.cc ${FACEPLATE_ARTWORK_SOURCES}
-                         ${COMP_ARTWORK_SOURCES} ${SLS_SOURCES})
+add_executable(
+	simulator 
+	src/main.cc 
+	src/ui.cc
+    ${FWDIR}/src/gui/elements/element_name.cc
+	${FACEPLATE_ARTWORK_SOURCES}
+    ${COMP_ARTWORK_SOURCES} 
+	${SLS_SOURCES})
 
 target_include_directories(
   simulator
