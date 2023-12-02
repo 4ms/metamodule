@@ -28,7 +28,7 @@ struct ModuleViewPage : PageBase {
 		, patch{patch_storage.get_view_patch()}
 		, base{ui_MappingMenu}
 		, roller{ui_ElementRoller}
-		, mapping_pane{info.patch_storage, module_mods, params} {
+		, mapping_pane{info.patch_storage, module_mods, params, args} {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
@@ -55,9 +55,9 @@ struct ModuleViewPage : PageBase {
 	void prepare_focus() override {
 		patch = patch_storage.get_view_patch();
 
-		is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
+		is_patch_playing = args.patch_loc.value_or(PatchLocation{}) == patch_playloader.cur_patch_location();
 
-		this_module_id = PageList::get_selected_module_id();
+		this_module_id = args.module_id.value_or(this_module_id);
 
 		if (!read_slug()) {
 			msg_queue.append_message("Module View page cannot read module slug.\n");
@@ -106,7 +106,7 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_update_layout(canvas);
 
-		auto selected_knob = PageList::get_selected_knob_id();
+		auto selected_knob = args.knob_id.value_or(0);
 		unsigned roller_idx = 0;
 
 		for (const auto &drawn_element : drawn_elements) {
@@ -171,10 +171,7 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.hide_manual_control();
 
 			} else if (mode == ViewMode::List) {
-				if (PageList::request_last_page()) {
-					;
-					// blur();
-				}
+				PageList::request_last_page();
 
 			} else if (mapping_pane.addmap_visible()) {
 				mapping_pane.hide_addmap();
@@ -313,9 +310,10 @@ private:
 	}
 
 	bool read_slug() {
-		auto module_id = PageList::get_selected_module_id();
-		if (patch.patch_name.length() == 0)
+		if (!args.module_id)
 			return false;
+		auto module_id = args.module_id.value();
+
 		if (module_id >= patch.module_slugs.size())
 			return false;
 

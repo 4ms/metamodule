@@ -51,8 +51,8 @@ struct KnobMapPage : PageBase {
 	void prepare_focus() override {
 		patch = patch_storage.get_view_patch();
 
-		view_set_idx = PageList::get_viewing_knobset();
-		auto map_idx = PageList::get_selected_mappedknob_id();
+		view_set_idx = args.view_knobset_id.value_or(view_set_idx);
+		auto map_idx = args.mappedknob_id.value_or(-1); //fail
 		auto findmap = patch.find_mapped_knob(view_set_idx, map_idx);
 		if (!findmap) {
 			pr_err("Mapping not found for set %d, panel_knob_id %d\n", view_set_idx, map_idx);
@@ -89,7 +89,8 @@ struct KnobMapPage : PageBase {
 		lv_label_set_text(ui_EditMappingLetter, panel_name.data());
 
 		// Set initial positions of arcs and sliders
-		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
+		bool is_patch_playing = args.patch_loc ? (*args.patch_loc == patch_playloader.cur_patch_location()) : false;
+
 		auto s_param = patch.find_static_knob(map.module_id, map.param_id);
 		float knob_val = s_param && is_patch_playing ? s_param->value : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
@@ -184,9 +185,9 @@ struct KnobMapPage : PageBase {
 		if (!page)
 			return;
 
-		PageList::set_viewing_knobset(page->view_set_idx);
-		PageList::set_selected_mappedknob_id(page->map.panel_knob_id);
-		PageList::request_new_page(PageId::KnobSetView);
+		page->args.mappedknob_id = page->map.panel_knob_id;
+		page->args.view_knobset_id = page->view_set_idx;
+		PageList::request_new_page(PageId::KnobSetView, page->args);
 	}
 
 	static void list_cb(lv_event_t *event) {
@@ -196,9 +197,9 @@ struct KnobMapPage : PageBase {
 		if (!page)
 			return;
 
-		PageList::set_selected_module_id(page->map.module_id);
-		PageList::set_selected_knob_id(page->map.param_id);
-		PageList::request_new_page(PageId::ModuleView);
+		page->args.module_id = page->map.module_id;
+		page->args.knob_id = page->map.param_id;
+		PageList::request_new_page(PageId::ModuleView, page->args);
 	}
 
 	static void trash_cb(lv_event_t *event) {

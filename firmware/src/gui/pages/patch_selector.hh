@@ -209,7 +209,8 @@ struct PatchSelectorPage : PageBase {
 						auto view_patch = patch_storage.get_view_patch();
 						pr_dbg("Parsed patch: %.31s\n", view_patch.patch_name.data());
 
-						PageList::request_new_page(PageId::PatchView, {.selected_patch_loc{selected_patch}});
+						args.patch_loc = selected_patch;
+						PageList::request_new_page(PageId::PatchView, args);
 
 						state = State::Closing;
 						hide_spinner();

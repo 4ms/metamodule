@@ -50,7 +50,7 @@ struct ManualControlPopUp {
 		lv_group_set_editing(controlarc_group, true);
 
 		auto param_id = drawn_el->gui_element.idx.param_idx;
-		auto module_id = PageList::get_selected_module_id();
+		auto module_id = drawn_el->gui_element.module_idx;
 		auto cur_val = patch.get_static_knob_value(module_id, param_id);
 		if (cur_val) {
 			float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
@@ -147,7 +147,7 @@ private:
 		auto value = lv_arc_get_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 
 		StaticParam sp{
-			.module_id = (uint16_t)PageList::get_selected_module_id(),
+			.module_id = drawn_el->gui_element.module_idx,
 			.param_id = drawn_el->gui_element.idx.param_idx,
 			.value = (float)value / range, //0/6 1/6 ... 6/6 => 1 2 ... 7
 		};

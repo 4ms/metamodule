@@ -34,9 +34,14 @@ struct CableEditPage : PageBase {
 
 		lv_group_add_obj(group, ui_CableFromEditButton);
 
-		module_id = (uint16_t)PageList::get_selected_module_id();
-		counts = PageList::get_selected_element_counts();
-		indices = PageList::get_selected_element_indices();
+		if (!args.module_id || !args.element_counts || !args.element_indices) {
+			pr_err("Missing page argument for cable edit page\n");
+			return;
+		}
+
+		module_id = args.module_id.value();
+		counts = args.element_counts.value();
+		indices = args.element_indices.value();
 
 		if (counts.num_inputs > 0) {
 			Jack in_jack = {.module_id = module_id, .jack_id = indices.input_idx};
@@ -67,9 +72,7 @@ struct CableEditPage : PageBase {
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (PageList::request_last_page()) {
-				blur();
-			}
+			PageList::request_last_page();
 		}
 	}
 

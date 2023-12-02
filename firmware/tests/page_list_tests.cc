@@ -130,44 +130,44 @@ TEST_CASE("Push arguments") {
 	// Can use empty args
 	PageList::request_new_page(pagea.id, {});
 	pwa = PageList::get_requested_page();
-	CHECK(pwa->args->selected_patch_loc == std::nullopt);
-	CHECK(pwa->args->selected_module_id == std::nullopt);
+	CHECK(pwa->args->patch_loc == std::nullopt);
+	CHECK(pwa->args->module_id == std::nullopt);
 
 	// Can set some args
-	PageList::request_new_page(pagea.id, {.selected_module_id = 2});
+	PageList::request_new_page(pagea.id, {.module_id = 2});
 	pwa = PageList::get_requested_page();
-	CHECK(pwa->args->selected_patch_loc == std::nullopt);
-	CHECK(pwa->args->selected_module_id == 2);
-	CHECK(pwa->args->selected_knob_id == std::nullopt);
+	CHECK(pwa->args->patch_loc == std::nullopt);
+	CHECK(pwa->args->module_id == 2);
+	CHECK(pwa->args->knob_id == std::nullopt);
 
-	PageList::request_new_page(pagea.id, {.selected_module_id = 3, .selected_knob_id = 5});
+	PageList::request_new_page(pagea.id, {.module_id = 3, .knob_id = 5});
 	pwa = PageList::get_requested_page();
-	CHECK(pwa->args->selected_patch_loc == std::nullopt);
-	CHECK(pwa->args->selected_module_id == 3);
-	CHECK(pwa->args->selected_knob_id == 5);
+	CHECK(pwa->args->patch_loc == std::nullopt);
+	CHECK(pwa->args->module_id == 3);
+	CHECK(pwa->args->knob_id == 5);
 
 	PageList::request_new_page(pagea.id, {.view_knobset_id = 9});
 	pwa = PageList::get_requested_page();
-	CHECK(pwa->args->selected_patch_loc == std::nullopt);
-	CHECK(pwa->args->selected_module_id == std::nullopt);
-	CHECK(pwa->args->selected_knob_id == std::nullopt);
+	CHECK(pwa->args->patch_loc == std::nullopt);
+	CHECK(pwa->args->module_id == std::nullopt);
+	CHECK(pwa->args->knob_id == std::nullopt);
 	CHECK(pwa->args->view_knobset_id == 9);
 
 	//History works
 	PageList::request_last_page();
 	pwa = PageList::get_requested_page();
-	CHECK(pwa->args->selected_patch_loc == std::nullopt);
-	CHECK(pwa->args->selected_module_id == 3);
-	CHECK(pwa->args->selected_knob_id == 5);
+	CHECK(pwa->args->patch_loc == std::nullopt);
+	CHECK(pwa->args->module_id == 3);
+	CHECK(pwa->args->knob_id == 5);
 
 	PageList::request_last_page();
 	pwa = PageList::get_requested_page();
-	CHECK(pwa->args->selected_patch_loc == std::nullopt);
-	CHECK(pwa->args->selected_module_id == 2);
-	CHECK(pwa->args->selected_knob_id == std::nullopt);
+	CHECK(pwa->args->patch_loc == std::nullopt);
+	CHECK(pwa->args->module_id == 2);
+	CHECK(pwa->args->knob_id == std::nullopt);
 
 	PageList::request_last_page();
 	pwa = PageList::get_requested_page();
-	CHECK(pwa->args->selected_patch_loc == std::nullopt);
-	CHECK(pwa->args->selected_module_id == std::nullopt);
+	CHECK(pwa->args->patch_loc == std::nullopt);
+	CHECK(pwa->args->module_id == std::nullopt);
 }

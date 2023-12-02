@@ -24,7 +24,7 @@ struct AddMapPopUp {
 		base_group = group;
 	}
 
-	void show(uint32_t knobset_id, uint16_t param_id) {
+	void show(uint32_t knobset_id, uint16_t param_id, uint16_t module_id) {
 		selected_knob = std::nullopt;
 
 		popup_group = lv_group_create();
@@ -49,7 +49,10 @@ struct AddMapPopUp {
 			lv_label_set_text(ui_AddModuleName, "Add a map: Wiggle a knob");
 
 		lv_label_set_text(ui_MapDetected, "");
+
 		param_idx = param_id;
+		module_idx = module_id;
+
 		set_id = knobset_id;
 		visible = true;
 	}
@@ -105,12 +108,9 @@ struct AddMapPopUp {
 		if (event->target == ui_OkAdd) {
 
 			if (page->selected_knob.has_value()) {
-				auto mapped_knob = page->selected_knob.value();
-				uint16_t module_id = PageList::get_selected_module_id();
-
 				auto map = MappedKnob{
-					.panel_knob_id = mapped_knob,
-					.module_id = module_id,
+					.panel_knob_id = page->selected_knob.value(),
+					.module_id = page->module_idx,
 					.param_id = page->param_idx,
 					.min = 0.f,
 					.max = 1.f,
@@ -134,6 +134,7 @@ struct AddMapPopUp {
 	lv_group_t *base_group = nullptr;
 	lv_group_t *popup_group = nullptr;
 
+	uint16_t module_idx = 0;
 	uint16_t param_idx = 0;
 	uint32_t set_id = 0;
 	bool visible = false;

@@ -17,9 +17,13 @@ namespace MetaModule
 {
 
 struct ModuleViewMappingPane {
-	ModuleViewMappingPane(PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue, ParamsMidiState &params)
+	ModuleViewMappingPane(PatchStorageProxy &patch_storage,
+						  PatchModQueue &patch_mod_queue,
+						  ParamsMidiState &params,
+						  PageArguments &args)
 		: patch{patch_storage.get_view_patch()}
 		, params{params}
+		, args{args}
 		, add_map_popup{patch_mod_queue}
 		, control_popup{patch, patch_mod_queue} {
 	}
@@ -38,11 +42,6 @@ struct ModuleViewMappingPane {
 		lv_hide(ui_ControlAlert);
 	}
 
-	// void refresh() {
-	// 	hide();
-	// 	show(*drawn_element);
-	// }
-
 	void show(const DrawnElement &drawn_el) {
 		add_map_popup.hide();
 
@@ -54,14 +53,15 @@ struct ModuleViewMappingPane {
 			return;
 		}
 
-		this_module_id = PageList::get_selected_module_id();
-		if (this_module_id >= patch.module_slugs.size()) {
-			pr_warn("Module has invalid ID\n");
+		auto module_id = args.module_id;
+		if (!module_id.has_value() || *module_id >= patch.module_slugs.size()) {
+			pr_warn("Module has missing or invalid ID\n");
 			return;
 		}
+		this_module_id = module_id.value();
 
-		PageList::set_selected_element_counts(drawn_el.gui_element.count);
-		PageList::set_selected_element_indices(drawn_el.gui_element.idx);
+		args.element_counts = drawn_el.gui_element.count;
+		args.element_indices = drawn_el.gui_element.idx;
 
 		auto slug = patch.module_slugs[this_module_id];
 
@@ -195,8 +195,9 @@ private:
 	void prepare_for_element(const JackOutput &) {
 		prepare_for_jack();
 
-		auto thisjack = Jack{.module_id = (uint16_t)PageList::get_selected_module_id(),
-							 .jack_id = drawn_element->gui_element.idx.output_idx};
+		Jack thisjack = {.module_id = (uint16_t)this->this_module_id,
+						 .jack_id = drawn_element->gui_element.idx.output_idx};
+
 		for (auto &cable : patch.int_cables) {
 			if (cable.out == thisjack) {
 				for (auto &injack : cable.ins) {
@@ -219,8 +220,9 @@ private:
 	void prepare_for_element(const JackInput &) {
 		prepare_for_jack();
 
-		auto thisjack = Jack{.module_id = (uint16_t)PageList::get_selected_module_id(),
-							 .jack_id = drawn_element->gui_element.idx.input_idx};
+		Jack thisjack = {.module_id = (uint16_t)this->this_module_id,
+						 .jack_id = drawn_element->gui_element.idx.input_idx};
+
 		for (auto &cable : patch.int_cables) {
 			for (auto &injack : cable.ins) {
 				if (injack == thisjack) {
@@ -250,8 +252,6 @@ private:
 			lv_group_add_obj(pane_group, ui_ControlButton);
 			lv_group_focus_obj(ui_ControlButton);
 		}
-
-		this_module_id = PageList::get_selected_module_id();
 
 		// Show MIDI set first (always show, even if set is empty)
 		auto [_, added_list_item] = show_knobset(patch.midi_maps, PatchData::MIDIKnobSet);
@@ -313,6 +313,8 @@ private:
 	static void edit_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data || !event->target)
 			return;
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
 		auto obj = event->target;
 		auto objdata = lv_obj_get_user_data(obj);
 		if (!objdata)
@@ -322,9 +324,9 @@ private:
 		if (!data.mapped_panel_id.has_value())
 			return;
 
-		PageList::set_selected_mappedknob_id(data.mapped_panel_id.value());
-		PageList::set_viewing_knobset(data.set_i);
-		PageList::request_new_page(PageId::KnobMap);
+		page->args.mappedknob_id = data.mapped_panel_id;
+		page->args.view_knobset_id = data.set_i;
+		PageList::request_new_page(PageId::KnobMap, page->args);
 	}
 
 	static void edit_cable_button_cb(lv_event_t *event) {
@@ -335,7 +337,7 @@ private:
 		if (!event->target)
 			return;
 
-		PageList::request_new_page(PageId::CableEdit);
+		PageList::request_new_page(PageId::CableEdit, page->args);
 		page->hide();
 	}
 
@@ -355,7 +357,10 @@ private:
 			for (auto &cc : page->params.midi_ccs)
 				cc.changed = false;
 		}
-		page->add_map_popup.show(knobset_id, page->drawn_element->gui_element.idx.param_idx);
+
+		auto module_id = page->drawn_element->gui_element.module_idx;
+		auto param_id = page->drawn_element->gui_element.idx.param_idx;
+		page->add_map_popup.show(knobset_id, param_id, module_id);
 	}
 
 	static void scroll_to_top(lv_event_t *event) {
@@ -384,6 +389,9 @@ private:
 	bool is_shown = false;
 	PatchData &patch;
 	ParamsMidiState &params;
+
+	PageArguments &args;
+
 	unsigned this_module_id = 0;
 	unsigned displayed_knobsets = 0;
 

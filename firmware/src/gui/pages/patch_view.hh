@@ -79,15 +79,14 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
-			displayed_patch_loc == args.selected_patch_loc)
+			displayed_patch_loc == args.patch_loc)
 		{
 			watch_lights();
 			is_ready = true;
 			return;
 		}
 
-		if (args.selected_patch_loc)
-			displayed_patch_loc = args.selected_patch_loc.value();
+		displayed_patch_loc = args.patch_loc.value_or(displayed_patch_loc);
 
 		active_knob_set = PageList::get_active_knobset();
 		patch_revision = PageList::get_patch_revision();
@@ -195,7 +194,8 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (auto &knobset = knobset_menu.requested_knobset_view) {
-			PageList::request_new_page(PageId::KnobSetView, {.view_knobset_id = knobset.value()});
+			args.view_knobset_id = knobset;
+			PageList::request_new_page(PageId::KnobSetView, args);
 			knobset = std::nullopt;
 		}
 
@@ -370,9 +370,8 @@ private:
 		auto obj = event->current_target;
 		if (!obj)
 			return;
-		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
-		// PageList::set_selected_module_id(module_id);
-		PageList::request_new_page(PageId::ModuleView, {.selected_module_id = module_id});
+		page->args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+		PageList::request_new_page(PageId::ModuleView, page->args);
 	}
 
 	static void module_focus_cb(lv_event_t *event) {

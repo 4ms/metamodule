@@ -21,110 +21,36 @@ struct PageWithArgs {
 };
 
 class PageList {
-	static constexpr uint32_t MaxPages = 8;
-
-	// static inline PageBase *_requested_page = nullptr;
 	static inline bool _new_page_requested = false;
 
+	static constexpr uint32_t MaxPages = 8;
 	static inline std::array<PageBase *, MaxPages> _pages;
 
-	static inline uint32_t patch_revision = 0;
-
-	///////////// new history
+	static inline uint32_t _active_knobset_id = 0;
+	static inline uint32_t _patch_revision = 0;
 
 	struct PageHistory {
 		PageId page;
 		PageArguments args;
 	};
-
 	static inline CircularStack<PageHistory, 64> _page_history;
 	static inline PageHistory _request{};
 
-	///////////////////////// old history:
-	static inline PatchLocation selected_patch_loc{};
-	static inline uint32_t selected_module_id = 0;
-	static inline uint32_t selected_mappedknob_id = 0;
-	static inline uint32_t selected_knob_id = 0;
-	static inline uint32_t active_knobset_id = 0;
-	static inline uint32_t view_knobset_id = 0;
-	static inline ElementCount::Counts selected_element_counts{};
-	static inline ElementCount::Indices selected_element_indices{};
-
 public:
-	static inline CircularStack<PageBase *, 16> _history;
-
-	static void set_selected_patch_loc(PatchLocation loc) {
-		selected_patch_loc = loc;
-	}
-
-	static PatchLocation get_selected_patch_location() {
-		return selected_patch_loc;
-	}
-
-	static ElementCount::Counts get_selected_element_counts() {
-		return selected_element_counts;
-	}
-
-	static ElementCount::Indices get_selected_element_indices() {
-		return selected_element_indices;
-	}
-
-	static void set_selected_element_counts(ElementCount::Counts counts) {
-		selected_element_counts = counts;
-	}
-
-	static void set_selected_element_indices(ElementCount::Indices indices) {
-		selected_element_indices = indices;
-	}
-
 	static void set_active_knobset(uint32_t id) {
-		active_knobset_id = id;
+		_active_knobset_id = id;
 	}
 
 	static uint32_t get_active_knobset() {
-		return active_knobset_id;
+		return _active_knobset_id;
 	}
 
-	static void set_viewing_knobset(uint32_t id) {
-		view_knobset_id = id;
-	}
-
-	static uint32_t get_viewing_knobset() {
-		return view_knobset_id;
-	}
-
-	static void set_selected_module_id(uint32_t id) {
-		selected_module_id = id;
-	}
-
-	static uint32_t get_selected_module_id() {
-		return selected_module_id;
-	}
-
-	static void set_selected_mappedknob_id(uint32_t id) {
-		selected_mappedknob_id = id;
-	}
-
-	static uint32_t get_selected_mappedknob_id() {
-		return selected_mappedknob_id;
-	}
-
-	static void set_selected_knob_id(uint32_t id) {
-		selected_knob_id = id;
-	}
-
-	static uint32_t get_selected_knob_id() {
-		return selected_knob_id;
-	}
-	//////////////////////////
-
-public:
 	static void increment_patch_revision() {
-		patch_revision++;
+		_patch_revision++;
 	}
 
 	static uint32_t get_patch_revision() {
-		return patch_revision;
+		return _patch_revision;
 	}
 
 	// Associates a pointer to a Page with an id
@@ -138,11 +64,6 @@ public:
 		_pages[idx] = page;
 		return true;
 	}
-
-	static void request_new_page(PageId id) {
-	}
-
-	//////////////////////////
 
 	static void request_initial_page(PageId id, PageArguments args) {
 		_request = {id, args};
@@ -170,10 +91,6 @@ public:
 		if (!last) {
 			return false;
 		}
-		// if (last.value().page == PageId::None) { // marks end of history
-		// 	printf("Last page is start of history\n");
-		// 	return false;
-		// }
 
 		_request = last.value();
 		_new_page_requested = true;
@@ -193,8 +110,7 @@ public:
 	// Clears history and resets internal state
 	static void clear_history() {
 		_page_history.clear();
-		// _request = {};
-		// _new_page_requested = false;
+		_new_page_requested = false;
 	}
 
 private:

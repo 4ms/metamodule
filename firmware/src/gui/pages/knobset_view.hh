@@ -30,7 +30,7 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
+		is_patch_playing = args.patch_loc ? (*args.patch_loc == patch_playloader.cur_patch_location()) : false;
 
 		for (unsigned i = 0; auto cont : containers) {
 			set_for_knob(cont, i);
@@ -54,7 +54,9 @@ struct KnobSetViewPage : PageBase {
 		knobset = nullptr;
 		patch = patch_storage.get_view_patch();
 
-		auto ks_idx = PageList::get_viewing_knobset();
+		if (!args.view_knobset_id)
+			return;
+		auto ks_idx = args.view_knobset_id.value();
 		if (ks_idx >= patch.knob_sets.size())
 			return;
 
@@ -106,7 +108,7 @@ struct KnobSetViewPage : PageBase {
 
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx)); //Dangerous? "ptr" is actually an integer
 
-			if (map.panel_knob_id == PageList::get_selected_mappedknob_id())
+			if (map.panel_knob_id == args.mappedknob_id)
 				lv_group_focus_obj(cont);
 		}
 
@@ -121,7 +123,8 @@ struct KnobSetViewPage : PageBase {
 			}
 		}
 
-		is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
+		is_patch_playing = args.patch_loc ? (*args.patch_loc == patch_playloader.cur_patch_location()) : false;
+
 		if (is_patch_playing) {
 			// Iterate all knobs
 			for (auto knob_i = 0u; knob_i < params.knobs.size(); knob_i++) {
@@ -167,7 +170,7 @@ struct KnobSetViewPage : PageBase {
 		if (!obj)
 			return;
 
-		auto view_set_idx = PageList::get_viewing_knobset();
+		auto view_set_idx = page->args.view_knobset_id.value_or(0xFFFF);
 		if (view_set_idx >= page->patch.knob_sets.size())
 			return;
 
@@ -177,8 +180,8 @@ struct KnobSetViewPage : PageBase {
 
 		auto &mk = page->patch.knob_sets[view_set_idx].set[map_idx];
 
-		PageList::set_selected_mappedknob_id(mk.panel_knob_id);
-		PageList::request_new_page(PageId::KnobMap);
+		page->args.mappedknob_id = mk.panel_knob_id;
+		PageList::request_new_page(PageId::KnobMap, page->args);
 	}
 
 private:
