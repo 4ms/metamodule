@@ -41,14 +41,14 @@ extern lv_obj_t *ui_waitspinner;
 // SCREEN: ui_PatchViewPage
 void ui_PatchViewPage_screen_init(void);
 extern lv_obj_t *ui_PatchViewPage;
+extern lv_obj_t *ui_PatchName;
+extern lv_obj_t *ui_LoadMeter2;
 extern lv_obj_t *ui_ButtonsContainer;
 extern lv_obj_t *ui_PlayButton;
 extern lv_obj_t *ui_KnobButton;
 extern lv_obj_t *ui_AddButton;
 extern lv_obj_t *ui_InfoButton;
 extern lv_obj_t *ui_SettingsButton;
-extern lv_obj_t *ui_PatchName;
-extern lv_obj_t *ui_LoadMeter2;
 extern lv_obj_t *ui_ModulesPanel;
 extern lv_obj_t *ui_SettingsMenu;
 extern lv_obj_t *ui_SettingsClosePanel;
