@@ -29,7 +29,7 @@ lv_obj_set_style_pad_column(ui_DeleteMappingPopUp, 0, LV_PART_MAIN| LV_STATE_DEF
 
 ui_DelMapPopUpPanel = lv_obj_create(ui_DeleteMappingPopUp);
 lv_obj_set_height( ui_DelMapPopUpPanel, 52);
-lv_obj_set_width( ui_DelMapPopUpPanel, lv_pct(98));
+lv_obj_set_width( ui_DelMapPopUpPanel, lv_pct(94));
 lv_obj_set_align( ui_DelMapPopUpPanel, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_DelMapPopUpPanel,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_DelMapPopUpPanel, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -49,7 +49,7 @@ lv_obj_set_style_pad_right(ui_DelMapPopUpPanel, 0, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_top(ui_DelMapPopUpPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_DelMapPopUpPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_DelMapPopUpPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_DelMapPopUpPanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_DelMapPopUpPanel, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_DelMapLabel = lv_label_create(ui_DelMapPopUpPanel);
 lv_obj_set_width( ui_DelMapLabel, 180);
@@ -165,6 +165,10 @@ lv_obj_set_style_outline_color(ui_TrashButton2, lv_color_hex(0xE91C25), LV_PART_
 lv_obj_set_style_outline_opa(ui_TrashButton2, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 lv_obj_set_style_outline_width(ui_TrashButton2, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 lv_obj_set_style_outline_pad(ui_TrashButton2, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_color(ui_TrashButton2, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_USER_1 );
+lv_obj_set_style_outline_opa(ui_TrashButton2, 255, LV_PART_MAIN| LV_STATE_USER_1);
+lv_obj_set_style_outline_width(ui_TrashButton2, 2, LV_PART_MAIN| LV_STATE_USER_1);
+lv_obj_set_style_outline_pad(ui_TrashButton2, 3, LV_PART_MAIN| LV_STATE_USER_1);
 
 ui_TrashLabel2 = lv_label_create(ui_TrashButton2);
 lv_obj_set_width( ui_TrashLabel2, LV_SIZE_CONTENT);  /// 1

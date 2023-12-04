@@ -67,7 +67,7 @@ struct CableEditPage : PageBase {
 		lv_label_set_text(ui_CableMapPageTitle, in_jack_objs.size() > 0 ? "Edit Connections" : "Add Cable");
 
 		lv_group_add_obj(group, ui_CableDeleteButton);
-		lv_group_add_obj(group, ui_CableUndo);
+		lv_group_add_obj(group, ui_CableCancel);
 	}
 
 	void update() override {
