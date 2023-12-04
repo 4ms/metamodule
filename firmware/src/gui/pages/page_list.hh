@@ -13,7 +13,7 @@ namespace MetaModule
 //forward declare
 struct PageBase;
 
-enum class PageId { PatchSel, PatchView, ModuleView, Settings, KnobSetView, KnobMap, CableEdit };
+enum class PageId { MainMenu, PatchSel, PatchView, ModuleView, Settings, KnobSetView, KnobMap, CableEdit };
 
 struct PageWithArgs {
 	PageBase *page;
