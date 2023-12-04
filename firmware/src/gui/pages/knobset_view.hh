@@ -21,10 +21,9 @@ struct KnobSetViewPage : PageBase {
 	constexpr static unsigned max_arc = 20;
 
 	KnobSetViewPage(PatchInfo info)
-		: PageBase{info}
+		: PageBase{info, PageId::KnobSetView}
 		, base{ui_KnobSetViewPage}
 		, patch{patch_storage.get_view_patch()} {
-		PageList::register_page(this, PageId::KnobSetView);
 		init_bg(base);
 		lv_group_set_editing(group, false);
 	}
@@ -118,7 +117,7 @@ struct KnobSetViewPage : PageBase {
 	void update() override {
 		lv_group_set_editing(group, false);
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (PageList::request_last_page()) {
+			if (page_list.request_last_page()) {
 				blur();
 			}
 		}
@@ -181,7 +180,7 @@ struct KnobSetViewPage : PageBase {
 		auto &mk = page->patch.knob_sets[view_set_idx].set[map_idx];
 
 		page->args.mappedknob_id = mk.panel_knob_id;
-		PageList::request_new_page(PageId::KnobMap, page->args);
+		page->page_list.request_new_page(PageId::KnobMap, page->args);
 	}
 
 private:

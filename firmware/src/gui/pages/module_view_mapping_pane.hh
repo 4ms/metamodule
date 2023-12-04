@@ -20,10 +20,12 @@ struct ModuleViewMappingPane {
 	ModuleViewMappingPane(PatchStorageProxy &patch_storage,
 						  PatchModQueue &patch_mod_queue,
 						  ParamsMidiState &params,
-						  PageArguments &args)
+						  PageArguments &args,
+						  PageList &page_list)
 		: patch{patch_storage.get_view_patch()}
 		, params{params}
 		, args{args}
+		, page_list{page_list}
 		, add_map_popup{patch_mod_queue}
 		, control_popup{patch, patch_mod_queue} {
 	}
@@ -324,10 +326,10 @@ private:
 		if (!data.mapped_panel_id.has_value())
 			return;
 
-		PageList::stash_state(page->args);
+		page->page_list.stash_state(page->args);
 		page->args.mappedknob_id = data.mapped_panel_id;
 		page->args.view_knobset_id = data.set_i;
-		PageList::request_new_page(PageId::KnobMap, page->args);
+		page->page_list.request_new_page(PageId::KnobMap, page->args);
 	}
 
 	static void edit_cable_button_cb(lv_event_t *event) {
@@ -338,8 +340,8 @@ private:
 		if (!event->target)
 			return;
 
-		PageList::stash_state(page->args);
-		PageList::request_new_page(PageId::CableEdit, page->args);
+		page->page_list.stash_state(page->args);
+		page->page_list.request_new_page(PageId::CableEdit, page->args);
 		page->hide();
 	}
 
@@ -393,6 +395,7 @@ private:
 	ParamsMidiState &params;
 
 	PageArguments &args;
+	PageList &page_list;
 
 	unsigned this_module_id = 0;
 	unsigned displayed_knobsets = 0;

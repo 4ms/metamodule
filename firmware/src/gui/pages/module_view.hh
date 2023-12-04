@@ -24,12 +24,11 @@ struct ModuleViewPage : PageBase {
 	ViewSettings settings;
 
 	ModuleViewPage(PatchInfo info)
-		: PageBase{info}
+		: PageBase{info, PageId::ModuleView}
 		, patch{patch_storage.get_view_patch()}
 		, base{ui_MappingMenu}
 		, roller{ui_ElementRoller}
-		, mapping_pane{info.patch_storage, module_mods, params, args} {
-		PageList::register_page(this, PageId::ModuleView);
+		, mapping_pane{info.patch_storage, module_mods, params, args, page_list} {
 
 		init_bg(base);
 
@@ -99,7 +98,7 @@ struct ModuleViewPage : PageBase {
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
 
-		active_knob_set = PageList::get_active_knobset();
+		active_knob_set = page_list.get_active_knobset();
 
 		module_drawer.draw_mapped_elements(
 			patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
@@ -182,8 +181,8 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.hide_manual_control();
 
 			} else if (mode == ViewMode::List) {
-				PageList::stash_state(args);
-				PageList::request_last_page();
+				page_list.stash_state(args);
+				page_list.request_last_page();
 
 			} else if (mapping_pane.addmap_visible()) {
 				mapping_pane.hide_addmap();
@@ -222,7 +221,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		if (auto patch_mod = module_mods.get(); patch_mod.has_value()) {
-			PageList::increment_patch_revision();
+			page_list.increment_patch_revision();
 
 			// Apply to this thread's copy of patch
 			std::visit(overloaded{

@@ -133,9 +133,9 @@ inline lv_obj_t *draw_mapped_ring(const JackInput &el,
 	lv_obj_set_style_outline_color(circle, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
 	lv_obj_set_style_text_color(label, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
 	if (panel_id < 6)
-		lv_label_set_text_fmt(label, "%d", panel_id + 1);
+		lv_label_set_text_fmt(label, "%d", int(panel_id + 1));
 	else
-		lv_label_set_text_fmt(label, "G%d", panel_id - 5);
+		lv_label_set_text_fmt(label, "G%d", int(panel_id - 5));
 	lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded50012, LV_STATE_DEFAULT);
 
 	return circle;

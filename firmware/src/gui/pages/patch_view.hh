@@ -27,12 +27,11 @@ struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
 	PatchViewPage(PatchInfo info)
-		: PageBase{info}
+		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
 		, info_group(lv_group_create()) {
-		PageList::register_page(this, PageId::PatchView);
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -78,7 +77,7 @@ struct PatchViewPage : PageBase {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
-		if (active_knob_set == PageList::get_active_knobset() && patch_revision == PageList::get_patch_revision() &&
+		if (active_knob_set == page_list.get_active_knobset() && patch_revision == page_list.get_patch_revision() &&
 			displayed_patch_loc == args.patch_loc)
 		{
 			watch_lights();
@@ -88,8 +87,8 @@ struct PatchViewPage : PageBase {
 
 		displayed_patch_loc = args.patch_loc.value_or(displayed_patch_loc);
 
-		active_knob_set = PageList::get_active_knobset();
-		patch_revision = PageList::get_patch_revision();
+		active_knob_set = page_list.get_active_knobset();
+		patch_revision = page_list.get_patch_revision();
 
 		clear();
 
@@ -195,7 +194,7 @@ struct PatchViewPage : PageBase {
 
 		if (auto &knobset = knobset_menu.requested_knobset_view) {
 			args.view_knobset_id = knobset;
-			PageList::request_new_page(PageId::KnobSetView, args);
+			page_list.request_new_page(PageId::KnobSetView, args);
 			knobset = std::nullopt;
 		}
 
@@ -209,7 +208,7 @@ struct PatchViewPage : PageBase {
 				lv_hide(ui_DescriptionPanel);
 				lv_indev_set_group(lv_indev_get_next(nullptr), group);
 				lv_obj_clear_state(ui_InfoButton, LV_STATE_PRESSED);
-			} else if (PageList::request_last_page()) {
+			} else if (page_list.request_last_page()) {
 				blur();
 				params.lights.stop_watching_all();
 			} else {
@@ -321,7 +320,7 @@ private:
 
 	void update_active_knobset() {
 		blur();
-		PageList::set_active_knobset(knobset_settings.active_knobset);
+		page_list.set_active_knobset(knobset_settings.active_knobset);
 		patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
 		prepare_focus();
 	}
@@ -372,7 +371,7 @@ private:
 			return;
 		page->args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
 		page->args.element_indices = {};
-		PageList::request_new_page(PageId::ModuleView, page->args);
+		page->page_list.request_new_page(PageId::ModuleView, page->args);
 	}
 
 	static void module_focus_cb(lv_event_t *event) {

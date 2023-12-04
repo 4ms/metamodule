@@ -15,8 +15,7 @@ namespace MetaModule
 //And restore that after a refresh:
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
-		: PageBase{info} {
-		PageList::register_page(this, PageId::PatchSel);
+		: PageBase{info, PageId::PatchSel} {
 
 		base = ui_PatchSelectorPage; //NOLINT
 		roller = ui_PatchListRoller; //NOLINT
@@ -210,7 +209,7 @@ struct PatchSelectorPage : PageBase {
 						pr_dbg("Parsed patch: %.31s\n", view_patch.patch_name.data());
 
 						args.patch_loc = selected_patch;
-						PageList::request_new_page(PageId::PatchView, args);
+						page_list.request_new_page(PageId::PatchView, args);
 
 						state = State::Closing;
 						hide_spinner();

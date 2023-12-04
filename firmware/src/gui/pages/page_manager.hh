@@ -22,9 +22,11 @@ class PageManager {
 	SlsComponentInit sls_comp_init;
 
 	PatchInfo info;
-	ModuleViewPage page_module{info};
+	PageList page_list;
+
 	PatchSelectorPage page_patchsel{info};
 	PatchViewPage page_patchview{info};
+	ModuleViewPage page_module{info};
 	KnobSetViewPage page_knobsetview{info};
 	KnobMapPage page_knobmap{info};
 	CableEditPage page_cableedit{info};
@@ -38,19 +40,19 @@ public:
 				MetaParams &metaparams,
 				MessageQueue &msg_queue,
 				PatchModQueue &patch_mod_queue)
-		: info{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
+		: info{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue, page_list} {
 	}
 
 	void init() {
-		PageList::request_initial_page(PageId::PatchSel, {});
+		page_list.request_initial_page(PageId::PatchSel, {});
 	}
 
 	void update_current_page() {
-		if (auto newpage = PageList::get_requested_page()) {
+		if (auto newpage = page_list.get_requested_page()) {
 			if (newpage->page) {
 				cur_page->blur();
 				cur_page = newpage->page;
-				printf("Args: mod: %d, panel: %d, set: %d, patchidx: %d\n",
+				printf("Args: mod: %d, panel: %d, set: %d, patchidx: %u\n",
 					   newpage->args->module_id.value_or(88),
 					   newpage->args->mappedknob_id.value_or(88),
 					   newpage->args->view_knobset_id.value_or(88),
@@ -61,7 +63,7 @@ public:
 				}
 				if (newpage->args->element_counts) {
 					auto i = newpage->args->element_counts.value();
-					printf("Cnt: %d %d %d %d\n", i.num_params, i.num_inputs, i.num_outputs, i.num_lights);
+					printf("Cnt: %zu %zu %zu %zu\n", i.num_params, i.num_inputs, i.num_outputs, i.num_lights);
 				}
 				cur_page->focus(newpage->args);
 			}

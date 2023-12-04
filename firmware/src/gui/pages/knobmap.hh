@@ -17,10 +17,10 @@ struct KnobMapPage : PageBase {
 	constexpr static unsigned max_arc = 20;
 
 	KnobMapPage(PatchInfo info)
-		: PageBase{info}
+		: PageBase{info, PageId::KnobMap}
 		, base{ui_EditMappingPage}
 		, patch{patch_storage.get_view_patch()} {
-		PageList::register_page(this, PageId::KnobMap);
+
 		init_bg(base);
 		lv_group_set_editing(group, false);
 		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_PRESSED, this);
@@ -109,7 +109,7 @@ struct KnobMapPage : PageBase {
 			} else if (del_popup.is_visible()) {
 				del_popup.hide();
 			} else {
-				PageList::request_last_page();
+				page_list.request_last_page();
 			}
 		}
 
@@ -187,7 +187,7 @@ struct KnobMapPage : PageBase {
 
 		page->args.mappedknob_id = page->map.panel_knob_id;
 		page->args.view_knobset_id = page->view_set_idx;
-		PageList::request_new_page(PageId::KnobSetView, page->args);
+		page->page_list.request_new_page(PageId::KnobSetView, page->args);
 	}
 
 	static void list_cb(lv_event_t *event) {
@@ -199,7 +199,7 @@ struct KnobMapPage : PageBase {
 
 		page->args.module_id = page->map.module_id;
 		page->args.element_indices = ElementCount::Indices{.param_idx = (uint8_t)page->map.param_id};
-		PageList::request_new_page(PageId::ModuleView, page->args);
+		page->page_list.request_new_page(PageId::ModuleView, page->args);
 	}
 
 	static void trash_cb(lv_event_t *event) {
@@ -218,7 +218,7 @@ struct KnobMapPage : PageBase {
 			if (!page->patch.remove_mapping(page->view_set_idx, page->map))
 				pr_err("Could not delete mapping\n");
 			else
-				PageList::request_last_page();
+				page->page_list.request_last_page();
 		});
 	}
 

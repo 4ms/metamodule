@@ -12,10 +12,10 @@ namespace MetaModule
 {
 
 struct CableEditPage : PageBase {
+
 	CableEditPage(PatchInfo info)
-		: PageBase{info}
+		: PageBase{info, PageId::CableEdit}
 		, patch{patch_storage.get_view_patch()} {
-		PageList::register_page(this, PageId::CableEdit);
 
 		init_bg(ui_CableMapPage);
 	}
@@ -72,7 +72,7 @@ struct CableEditPage : PageBase {
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			PageList::request_last_page();
+			page_list.request_last_page();
 		}
 	}
 
