@@ -103,6 +103,10 @@ extern lv_obj_t *ui_KnobsetHeaderLine;
 extern lv_obj_t *ui_ModuleName;
 extern lv_obj_t *ui_DescriptionPanel;
 extern lv_obj_t *ui_Description;
+extern lv_obj_t *ui_DescriptionEdit;
+extern lv_obj_t *ui_DescriptionEditLabel;
+extern lv_obj_t *ui_DescriptionClose;
+extern lv_obj_t *ui_DescriptionCloseLabel;
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
 extern lv_obj_t *ui_MappingMenu;

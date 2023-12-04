@@ -100,6 +100,10 @@ lv_obj_t *ui_KnobsetHeaderLine;
 lv_obj_t *ui_ModuleName;
 lv_obj_t *ui_DescriptionPanel;
 lv_obj_t *ui_Description;
+lv_obj_t *ui_DescriptionEdit;
+lv_obj_t *ui_DescriptionEditLabel;
+lv_obj_t *ui_DescriptionClose;
+lv_obj_t *ui_DescriptionCloseLabel;
 
 
 // SCREEN: ui_MappingMenu
