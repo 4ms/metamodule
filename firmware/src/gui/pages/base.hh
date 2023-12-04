@@ -91,10 +91,15 @@ struct PageBase {
 			lv_scr_load(screen);
 	}
 
-	// void load_page(PageId next_page, PageArguments new_args) {
-	// PageList::stash_state(id, args);
-	// PageList::request_new_page(next_page, new_args);
-	// }
+	void load_prev_page() {
+		page_list.stash_state(id, args);
+		page_list.request_last_page();
+	}
+
+	void load_page(PageId next_page, PageArguments new_args) {
+		page_list.stash_state(id, args);
+		page_list.request_new_page(next_page, new_args);
+	}
 
 	virtual void prepare_focus() {
 	}

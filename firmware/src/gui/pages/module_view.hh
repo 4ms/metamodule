@@ -26,11 +26,10 @@ struct ModuleViewPage : PageBase {
 	ModuleViewPage(PatchInfo info)
 		: PageBase{info, PageId::ModuleView}
 		, patch{patch_storage.get_view_patch()}
-		, base{ui_MappingMenu}
 		, roller{ui_ElementRoller}
 		, mapping_pane{info.patch_storage, module_mods, params, args, page_list} {
 
-		init_bg(base);
+		init_bg(ui_MappingMenu);
 
 		lv_draw_img_dsc_init(&img_dsc);
 
@@ -181,8 +180,7 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.hide_manual_control();
 
 			} else if (mode == ViewMode::List) {
-				page_list.stash_state(id, args);
-				page_list.request_last_page();
+				load_prev_page();
 
 			} else if (mapping_pane.addmap_visible()) {
 				mapping_pane.hide_addmap();
@@ -382,7 +380,6 @@ private:
 	std::vector<DrawnElement> drawn_elements;
 	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals;
 
-	lv_obj_t *base = nullptr;
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *roller = nullptr;
 	ModuleViewMappingPane mapping_pane;
