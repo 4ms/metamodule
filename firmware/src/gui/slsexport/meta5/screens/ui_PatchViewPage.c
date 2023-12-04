@@ -741,7 +741,7 @@ ui_MapsTransparencyTitle = lv_label_create(ui_SettingsMenu);
 lv_obj_set_width( ui_MapsTransparencyTitle, 180);
 lv_obj_set_height( ui_MapsTransparencyTitle, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_MapsTransparencyTitle, LV_ALIGN_CENTER );
-lv_label_set_text(ui_MapsTransparencyTitle,"Transparency");
+lv_label_set_text(ui_MapsTransparencyTitle,"Opacity");
 lv_obj_set_style_text_color(ui_MapsTransparencyTitle, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_MapsTransparencyTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_MapsTransparencyTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -939,7 +939,7 @@ ui_CablesTransparencyTitle = lv_label_create(ui_SettingsMenu);
 lv_obj_set_width( ui_CablesTransparencyTitle, 180);
 lv_obj_set_height( ui_CablesTransparencyTitle, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_CablesTransparencyTitle, LV_ALIGN_CENTER );
-lv_label_set_text(ui_CablesTransparencyTitle,"Transparency");
+lv_label_set_text(ui_CablesTransparencyTitle,"Opacity");
 lv_obj_set_style_text_color(ui_CablesTransparencyTitle, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_CablesTransparencyTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_CablesTransparencyTitle, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
