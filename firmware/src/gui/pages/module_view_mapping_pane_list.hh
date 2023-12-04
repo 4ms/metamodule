@@ -20,7 +20,7 @@ namespace MetaModule
 struct MappingPaneList {
 
 	static lv_obj_t *create_map_list_item(MappedKnob const &map, std::string_view knobset_name, lv_obj_t *parent) {
-		auto obj = ui_MappedKnobSetItem_create(parent);
+		auto obj = ui_MappedKnobsetitem_create(parent);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
@@ -43,7 +43,7 @@ struct MappingPaneList {
 	}
 
 	static lv_obj_t *create_panel_incable_item(uint16_t panel_jack_id, lv_obj_t *parent) {
-		auto obj = ui_MappedKnobSetItem_create(parent);
+		auto obj = ui_MappedKnobsetitem_create(parent);
 		style_panel_incable_item(panel_jack_id, obj);
 		return obj;
 	}
@@ -77,7 +77,7 @@ struct MappingPaneList {
 	}
 
 	static lv_obj_t *create_panel_outcable_item(uint16_t panel_jack_id, lv_obj_t *parent) {
-		auto obj = ui_MappedKnobSetItem_create(parent);
+		auto obj = ui_MappedKnobsetitem_create(parent);
 		style_panel_outcable_item(panel_jack_id, obj);
 		return obj;
 	}
