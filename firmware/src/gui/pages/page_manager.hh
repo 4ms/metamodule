@@ -56,7 +56,7 @@ public:
 					   newpage->args->module_id.value_or(88),
 					   newpage->args->mappedknob_id.value_or(88),
 					   newpage->args->view_knobset_id.value_or(88),
-					   newpage->args->patch_loc.value_or(PatchLocation{}).index);
+					   (unsigned)newpage->args->patch_loc.value_or(PatchLocation{}).index);
 				if (newpage->args->element_indices) {
 					auto i = newpage->args->element_indices.value();
 					printf("Ind: %d %d %d %d\n", i.param_idx, i.input_idx, i.output_idx, i.light_idx);

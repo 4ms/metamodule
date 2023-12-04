@@ -54,11 +54,7 @@ void append_connected_jack_name(std::string &opts, GuiElement const &drawn, Patc
 		}
 	}
 	if (name.module_name.size() || name.element_name.size()) {
-		opts += " [";
-		opts += name.module_name;
-		opts += " ";
-		opts += name.element_name;
-		opts += "]";
+		opts = opts + " [" + std::string(name.module_name) + " " + std::string(name.element_name) + "]";
 	}
 }
 

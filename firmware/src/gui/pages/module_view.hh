@@ -181,7 +181,7 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.hide_manual_control();
 
 			} else if (mode == ViewMode::List) {
-				page_list.stash_state(args);
+				page_list.stash_state(id, args);
 				page_list.request_last_page();
 
 			} else if (mapping_pane.addmap_visible()) {

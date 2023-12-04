@@ -65,16 +65,16 @@ public:
 		return true;
 	}
 
-	void request_initial_page(PageId id, PageArguments args) {
-		_request = {id, args};
+	void request_initial_page(PageId pageid, PageArguments args) {
+		_request = {pageid, args};
 		_new_page_requested = true;
 	}
 
-	void stash_state(PageArguments args) {
-		_request.args = args;
+	void stash_state(PageId pageid, PageArguments args) {
+		_request = {pageid, args};
 	}
 
-	void request_new_page(PageId id, PageArguments args) {
+	void request_new_page(PageId pageid, PageArguments args) {
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop -- don't push
 		// if (auto last = _page_history.back()) {
@@ -84,7 +84,7 @@ public:
 		// } else
 		_page_history.push_back(_request);
 
-		_request = {id, args};
+		_request = {pageid, args};
 		_new_page_requested = true;
 	}
 
