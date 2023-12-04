@@ -11,6 +11,25 @@ void Dropdown_Animation( lv_obj_t *TargetObject, int delay);
 void Dropup_Animation( lv_obj_t *TargetObject, int delay);
 
 
+// SCREEN: ui_MainMenu
+void ui_MainMenu_screen_init(void);
+lv_obj_t *ui_MainMenu;
+lv_obj_t *ui_PatchSelectorTitlePanel1;
+lv_obj_t *ui_PatchSelectorTitle1;
+lv_obj_t *ui_NowPlayingName1;
+lv_obj_t *ui_LoadMeter1;
+lv_obj_t *ui_MainMenuPanel;
+lv_obj_t *ui_MenuPanelPatches;
+lv_obj_t *ui_MenuImagePatches;
+lv_obj_t *ui_MenuLabelPatches;
+lv_obj_t *ui_MenuPanelSave;
+lv_obj_t *ui_MenuImageSave;
+lv_obj_t *ui_MenuLabelSave;
+lv_obj_t *ui_MenuPanelSettings;
+lv_obj_t *ui_MenuImageSettings;
+lv_obj_t *ui_MenuLabelSetings;
+
+
 // SCREEN: ui_PatchSelectorPage
 void ui_PatchSelectorPage_screen_init(void);
 lv_obj_t *ui_PatchSelectorPage;
@@ -285,6 +304,7 @@ void ui_init( void )
 lv_disp_t *dispp = lv_disp_get_default();
 lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), true, LV_FONT_DEFAULT);
 lv_disp_set_theme(dispp, theme);
+ui_MainMenu_screen_init();
 ui_PatchSelectorPage_screen_init();
 ui_PatchViewPage_screen_init();
 ui_MappingMenu_screen_init();
@@ -293,5 +313,5 @@ ui_EditMappingPage_screen_init();
 ui_DeleteMappingPopUp_screen_init();
 ui_CableMapPage_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
-lv_disp_load_scr( ui_PatchSelectorPage);
+lv_disp_load_scr( ui_MainMenu);
 }
