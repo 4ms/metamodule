@@ -84,7 +84,7 @@ struct ModuleViewPage : PageBase {
 		reset_module_page();
 
 		size_t num_elements = moduleinfo.elements.size();
-		opts.reserve(num_elements * 16); // 16 chars per roller item
+		opts.reserve(num_elements * 32); // 32 chars per roller item
 		button.reserve(num_elements);
 		drawn_elements.reserve(num_elements);
 		module_controls.reserve(num_elements);
@@ -94,8 +94,8 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_refr_size(canvas);
 		auto width_px = lv_obj_get_width(canvas);
-		auto display_widthpx =
-			std::min<lv_coord_t>(width_px + 4, 190); //module img + padding is no more than 190px wide
+		//module img + padding is no more than 190px wide
+		auto display_widthpx = std::min<lv_coord_t>(width_px + 4, 190);
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
 
@@ -106,43 +106,41 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_update_layout(canvas);
 
+		// Populate Roller and highlighter buttons
 		unsigned roller_idx = 0;
 		DrawnElement const *cur_el = nullptr;
 
 		for (const auto &drawn_element : drawn_elements) {
 			auto &drawn = drawn_element.gui_element;
+
 			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
 				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
 			}
 
+			if (!drawn.obj)
+				continue;
+
 			std::visit(
 				[this, drawn = drawn](auto &el) {
-					if (!drawn.obj)
-						return;
-
 					opts += el.short_name;
 
-					if (drawn.mapped_panel_id) {
-						opts += " [";
-						opts += get_panel_name<PanelDef>(el, drawn.mapped_panel_id.value());
-						opts += "]";
-					}
+					if (drawn.mapped_panel_id)
+						opts = opts + " [" + get_panel_name<PanelDef>(el, drawn.mapped_panel_id.value()) + ']';
+
 					append_connected_jack_name(opts, drawn, patch);
 
 					opts += "\n";
 					add_button(drawn.obj);
 				},
 				drawn_element.element);
+
 			module_controls.emplace_back(drawn_element.element, drawn_element.gui_element.idx);
 
-			// if (args.element_indices.has_value()) {
-			// if (args.element_indices->param_idx == drawn.idx.param_idx &&
-			// 	drawn.idx.param_idx != ElementCount::Indices::NoElementMarker)
 			if (args.element_indices == drawn.idx) {
 				cur_selected = roller_idx;
 				cur_el = &drawn_element;
 			}
-			// }
+
 			roller_idx++;
 		}
 
