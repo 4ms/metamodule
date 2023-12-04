@@ -51,10 +51,18 @@ private:
 		page->load_page(PageId::PatchSel, {});
 	}
 
+	static void savepatch_cb(lv_event_t *event) {
+		auto page = static_cast<MainMenuPage *>(event->user_data);
+		if (!page)
+			return;
+		printf("Not implemented\n");
+		page->load_page(PageId::PatchSel, {});
+	}
+
 	unsigned last_audio_load = 0;
 
-	lv_obj_t *patchname_label = ui_NowPlayingName1;
-	lv_obj_t *load_label = ui_LoadMeter1;
+	lv_obj_t *patchname_label = ui_MainMenuNowPlayingName;
+	lv_obj_t *load_label = ui_MainMenuLoadMeter;
 };
 
 } // namespace MetaModule

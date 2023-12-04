@@ -21,10 +21,10 @@ void Dropup_Animation( lv_obj_t *TargetObject, int delay);
 // SCREEN: ui_MainMenu
 void ui_MainMenu_screen_init(void);
 extern lv_obj_t *ui_MainMenu;
-extern lv_obj_t *ui_PatchSelectorTitlePanel1;
-extern lv_obj_t *ui_PatchSelectorTitle1;
-extern lv_obj_t *ui_NowPlayingName1;
-extern lv_obj_t *ui_LoadMeter1;
+extern lv_obj_t *ui_MainMenuNowPlayingPanel;
+extern lv_obj_t *ui_MainMenuNowPlaying;
+extern lv_obj_t *ui_MainMenuNowPlayingName;
+extern lv_obj_t *ui_MainMenuLoadMeter;
 extern lv_obj_t *ui_MainMenuPanel;
 extern lv_obj_t *ui_MenuPanelPatches;
 extern lv_obj_t *ui_MenuImagePatches;
@@ -234,11 +234,11 @@ extern lv_obj_t *ui_CableDeleteIcon;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png
+LV_IMG_DECLARE( ui_img_1x_add1_png);   // assets/1x/Add1.png
+LV_IMG_DECLARE( ui_img_1x_settings1_png);   // assets/1x/Settings1.png
+LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
 LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
 LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
-LV_IMG_DECLARE( ui_img_1x_add1_png);   // assets/1x/Add1.png
-LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
-LV_IMG_DECLARE( ui_img_1x_settings1_png);   // assets/1x/Settings1.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);

@@ -14,10 +14,10 @@ void Dropup_Animation( lv_obj_t *TargetObject, int delay);
 // SCREEN: ui_MainMenu
 void ui_MainMenu_screen_init(void);
 lv_obj_t *ui_MainMenu;
-lv_obj_t *ui_PatchSelectorTitlePanel1;
-lv_obj_t *ui_PatchSelectorTitle1;
-lv_obj_t *ui_NowPlayingName1;
-lv_obj_t *ui_LoadMeter1;
+lv_obj_t *ui_MainMenuNowPlayingPanel;
+lv_obj_t *ui_MainMenuNowPlaying;
+lv_obj_t *ui_MainMenuNowPlayingName;
+lv_obj_t *ui_MainMenuLoadMeter;
 lv_obj_t *ui_MainMenuPanel;
 lv_obj_t *ui_MenuPanelPatches;
 lv_obj_t *ui_MenuImagePatches;
