@@ -17,14 +17,13 @@ struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info, PageId::PatchSel} {
 
-		base = ui_PatchSelectorPage; //NOLINT
 		roller = ui_PatchListRoller; //NOLINT
 		nor_but = ui_Flashbut;		 //NOLINT
 		usb_but = ui_USBbut;		 //NOLINT
 		sd_but = ui_SDbut;			 //NOLINT
 		spinner = ui_waitspinner;	 //NOLINT
 
-		init_bg(base);
+		init_bg(ui_PatchSelectorPage);
 
 		lv_group_add_obj(group, roller);
 		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -298,9 +297,6 @@ private:
 	Volume highlighted_vol = Volume::NorFlash;
 
 	lv_obj_t *roller;
-	// lv_obj_t *png_image;
-	// lv_img_dsc_t img_dsc;
-	lv_obj_t *base;
 	lv_obj_t *usb_but;
 	lv_obj_t *sd_but;
 	lv_obj_t *nor_but;
