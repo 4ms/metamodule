@@ -71,10 +71,11 @@ add_bin_hex_command(flash_loader)
 add_custom_command(
   TARGET flash_loader.elf
   POST_BUILD
-  COMMAND ${FWDIR}/flashing/elf_to_uimg.py --a7 $<TARGET_FILE:flash_loader.elf> $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg
+  COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.bin $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg --load_addr 0xC2000000 --entry_point_offset 0x40
   COMMAND ls -l $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg
   COMMENT "Creating uimg file"
   VERBATIM
 )
 
 set_property(TARGET flash_loader.elf PROPERTY EXCLUDE_FROM_ALL TRUE)
+
