@@ -21,8 +21,8 @@ namespace MetaModule
 struct Gui {
 
 	// standard roller
-	static inline lv_style_t roller_style;
-	static inline lv_style_t roller_sel_style;
+	static inline lv_style_t roller_style;	   //X
+	static inline lv_style_t roller_sel_style; //X
 
 	// removes border, outline, shadow
 	static inline lv_style_t plain_border_style;
@@ -36,26 +36,19 @@ struct Gui {
 	// highlight a selected knob, jack, etc on a faceplate
 	static inline lv_style_t panel_highlight_style;
 
-	// highlight of a mapped knob, jack, etc on a faceplate
-	static inline lv_style_t mapped_knob_style;
-	static inline lv_draw_arc_dsc_t mapped_knob_arcdsc;
-	static inline lv_draw_arc_dsc_t mapped_knob_small_arcdsc;
-	static inline lv_draw_arc_dsc_t mapped_jack_arcdsc;
-	static inline lv_draw_arc_dsc_t mapped_jack_small_arcdsc;
-
 	// module selected in patch view
 	static inline lv_style_t selected_module_style;
 
 	// text
-	static inline lv_style_t header_style;
-	static inline lv_style_t button_label_style;
-	static inline lv_style_t text_block_style;
+	static inline lv_style_t header_style;		 //X
+	static inline lv_style_t button_label_style; //X
+	static inline lv_style_t text_block_style;	 //X
 
-	// popup dialog box
-	static inline lv_style_t popup_box_style;
+	static inline lv_style_t mapped_circle_style;
+	static inline lv_style_t mapped_jack_circle_label_style;
 
 	// COLORS
-	static inline lv_color_t orange_highlight = lv_palette_lighten(LV_PALETTE_ORANGE, 2);
+	static inline lv_color_t orange_highlight = lv_palette_lighten(LV_PALETTE_ORANGE, 2); //X
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
@@ -129,30 +122,6 @@ struct Gui {
 		lv_style_set_radius(&panel_highlight_style, 120);
 		lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
 		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_50);
-
-		// mapped_knob_style
-		lv_style_init(&mapped_knob_style);
-
-		// Mapped arcs:
-		lv_draw_arc_dsc_init(&mapped_knob_arcdsc);
-		mapped_knob_arcdsc.width = 4;
-		mapped_knob_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
-		mapped_knob_arcdsc.opa = LV_OPA_50;
-
-		lv_draw_arc_dsc_init(&mapped_knob_small_arcdsc);
-		mapped_knob_small_arcdsc.width = 2;
-		mapped_knob_small_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
-		mapped_knob_small_arcdsc.opa = LV_OPA_50;
-
-		lv_draw_arc_dsc_init(&mapped_jack_arcdsc);
-		mapped_jack_arcdsc.width = 2;
-		mapped_jack_arcdsc.color = palette_main[LV_PALETTE_RED];
-		mapped_jack_arcdsc.opa = LV_OPA_50;
-
-		lv_draw_arc_dsc_init(&mapped_jack_small_arcdsc);
-		mapped_jack_small_arcdsc.width = 2;
-		mapped_jack_small_arcdsc.color = lv_palette_main(LV_PALETTE_RED);
-		mapped_jack_small_arcdsc.opa = LV_OPA_50;
 
 		// selected_module_style
 		lv_style_init(&selected_module_style);
@@ -232,16 +201,6 @@ struct Gui {
 		lv_style_set_pad_all(&module_border_style, 0);
 		lv_style_set_pad_gap(&module_border_style, 0);
 
-		//popup_box_style
-		lv_style_init(&popup_box_style);
-		lv_style_set_radius(&popup_box_style, 0);
-		lv_style_set_bg_color(&popup_box_style, lv_palette_lighten(LV_PALETTE_GREY, 2));
-		lv_style_set_bg_opa(&popup_box_style, 255);
-		lv_style_set_border_width(&popup_box_style, 0);
-		lv_style_set_border_opa(&popup_box_style, 0);
-		lv_style_set_pad_gap(&popup_box_style, 10);
-		lv_style_set_pad_all(&popup_box_style, 4);
-
 		// display = ...
 		// theme = lv_theme_default_init(display, // NOLINT
 		// 							  lv_palette_main(LV_PALETTE_BLUE),
@@ -249,6 +208,43 @@ struct Gui {
 		// 							  true,
 		// 							  &lv_font_MuseoSansRounded_700_12);
 		// lv_disp_set_theme(display, theme);
+
+		// Map circle
+		lv_style_init(&mapped_circle_style);
+		lv_style_set_radius(&mapped_circle_style, 40);
+		// lv_style_set_border_width(&mapped_circle_style, 3);
+		// lv_style_set_border_opa(&mapped_circle_style, LV_OPA_TRANSP);
+		lv_style_set_bg_color(&mapped_circle_style, lv_color_white());
+		lv_style_set_bg_opa(&mapped_circle_style, LV_OPA_50);
+		lv_style_set_outline_opa(&mapped_circle_style, LV_OPA_100);
+		lv_style_set_outline_width(&mapped_circle_style, 3);
+		lv_style_set_outline_pad(&mapped_circle_style, 0);
+		lv_style_set_radius(&mapped_circle_style, 40);
+
+		// Map circle label style for jacks
+		lv_style_init(&mapped_jack_circle_label_style);
+		lv_style_set_text_color(&mapped_jack_circle_label_style, lv_color_hex(0x000000));
+		lv_style_set_text_opa(&mapped_jack_circle_label_style, 255);
+		lv_style_set_pad_all(&mapped_jack_circle_label_style, 0);
+	}
+
+	static lv_obj_t *create_map_circle(lv_obj_t *parent) {
+		lv_obj_t *circle = lv_btn_create(parent);
+		lv_obj_set_align(circle, LV_ALIGN_TOP_LEFT);
+		lv_obj_add_flag(circle, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_clear_flag(circle,
+						  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE |
+							  LV_OBJ_FLAG_SCROLL_CHAIN);
+		lv_obj_add_style(circle, &mapped_circle_style, LV_PART_MAIN);
+
+		lv_obj_t *label = lv_label_create(circle);
+		lv_obj_set_width(label, LV_SIZE_CONTENT);
+		lv_obj_set_height(label, LV_SIZE_CONTENT);
+		lv_obj_set_align(label, LV_ALIGN_CENTER);
+
+		lv_obj_add_style(label, &mapped_jack_circle_label_style, LV_PART_MAIN);
+
+		return circle;
 	}
 };
 } // namespace MetaModule
