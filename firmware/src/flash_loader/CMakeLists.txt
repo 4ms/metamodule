@@ -78,3 +78,15 @@ add_custom_command(
 )
 
 set_property(TARGET flash_loader.elf PROPERTY EXCLUDE_FROM_ALL TRUE)
+
+add_custom_target(
+  flash_loader_dfu
+  DEPENDS flash_loader.elf
+  COMMAND echo "---------------------------------------------------"
+  COMMAND echo "|        Flashing MetaModule via DFU USB          |"
+  COMMAND echo "| You must power-up with the Encoder pushed down. |"
+  COMMAND echo "|      Connect a USB cable to the MetaModule      |"
+  COMMAND echo "---------------------------------------------------"
+  COMMAND dfu-util -a 0 -s 0x70080000 -D $<TARGET_FILE:flash_loader.elf>
+  VERBATIM USES_TERMINAL
+)
