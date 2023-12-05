@@ -103,9 +103,6 @@ inline lv_obj_t *draw_mapped_ring(const JackInput &el,
 						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
 	lv_obj_set_style_radius(circle, 40, LV_PART_MAIN);
 
-	// lv_obj_set_style_border_width(circle, 3, LV_PART_MAIN);
-	// lv_obj_set_style_border_opa(circle, LV_OPA_TRANSP, LV_STATE_DEFAULT);
-
 	lv_obj_set_style_bg_color(circle, lv_color_white(), LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(circle, LV_OPA_50, LV_STATE_DEFAULT);
 
