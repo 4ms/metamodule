@@ -241,6 +241,7 @@ LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
 LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);

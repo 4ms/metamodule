@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Size: 10 px
  * Bpp: 4
- * Opts: --bpp 4 --size 10 --font /Users/dann/4ms/stm32/meta-module/LOCAL/metamodule-guis/4ms META 10-31 JQb/assets/Museo Sans Rounded/MuseoSansRounded-500 2.ttf -o /Users/dann/4ms/stm32/meta-module/LOCAL/metamodule-guis/4ms META 10-31 JQb/assets/Museo Sans Rounded/ui_font_MuseoSansRounded50010.c --format lvgl -r 0x20-0x7f --no-compress --no-prefilter
+ * Opts: --bpp 4 --size 10 --font /Users/dann/4ms/stm32/metamodule-guis/4ms META 12-4 JQ/assets/Museo Sans Rounded/MuseoSansRounded-500.ttf -o /Users/dann/4ms/stm32/metamodule-guis/4ms META 12-4 JQ/assets/Museo Sans Rounded/ui_font_MuseoSansRounded50010.c --format lvgl -r 0x20-0x7f --no-compress --no-prefilter
  ******************************************************************************/
 
 #include "../ui.h"
