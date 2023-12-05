@@ -77,4 +77,4 @@ add_custom_command(
   VERBATIM
 )
 
-set_source_files_properties($<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg PROPERTIES GENERATED TRUE)
+set_property(TARGET flash_loader.elf PROPERTY EXCLUDE_FROM_ALL TRUE)
