@@ -87,6 +87,6 @@ add_custom_target(
   COMMAND echo "| You must power-up with the Encoder pushed down. |"
   COMMAND echo "|      Connect a USB cable to the MetaModule      |"
   COMMAND echo "---------------------------------------------------"
-  COMMAND dfu-util -a 0 -s 0x70080000 -D $<TARGET_FILE:flash_loader.elf>
+  COMMAND dfu-util -a 0 -s 0x70080000 -D $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg
   VERBATIM USES_TERMINAL
 )
