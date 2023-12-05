@@ -50,6 +50,8 @@ struct ModuleViewMappingPane {
 		lv_group_remove_all_objs(pane_group);
 		lv_group_set_editing(pane_group, false);
 
+		//remove_all_items();
+
 		if (patch.patch_name.length() == 0) {
 			pr_warn("Patch name empty\n");
 			return;
@@ -98,12 +100,21 @@ struct ModuleViewMappingPane {
 
 	void refresh() {
 		if (drawn_element) {
-			remove_all_items();
+			// remove_all_items();
+			auto num_circles = lv_obj_get_child_cnt(ui_MapList);
+			for (unsigned i = 0; i < num_circles; i++) {
+				auto child = lv_obj_get_child(ui_MapList, i);
+				if (child) {
+					printf("Del a %p\n", child);
+					lv_obj_del_async(child);
+				}
+			}
 			show(*drawn_element);
 		}
 	}
 
 	void hide() {
+		printf("MappingPane::hide()\n");
 		lv_hide(ui_MappingParameters);
 		lv_hide(ui_ControlAlert);
 		add_map_popup.hide();
@@ -157,7 +168,8 @@ private:
 		auto num_circles = lv_obj_get_child_cnt(ui_MapList);
 		for (unsigned i = 0; i < num_circles; i++) {
 			auto child = lv_obj_get_child(ui_MapList, i);
-			// lv_obj_del_async(child);
+			printf("Del %p\n", child);
+			lv_obj_del_async(child);
 		}
 	}
 

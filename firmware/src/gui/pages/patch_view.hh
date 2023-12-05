@@ -52,7 +52,6 @@ struct PatchViewPage : PageBase {
 		settings_menu.init();
 		knobset_menu.init();
 
-		lv_obj_add_style(ui_ModuleName, &Gui::header_style, LV_PART_MAIN);
 		lv_label_set_text(ui_ModuleName, "");
 		lv_hide(ui_ModuleName);
 

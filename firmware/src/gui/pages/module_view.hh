@@ -70,15 +70,16 @@ struct ModuleViewPage : PageBase {
 
 		redraw_module();
 
-		if (mode == ViewMode::Mapping) {
-			lv_hide(roller);
-			mapping_pane.refresh();
-		} else {
-			show_roller();
-		}
+		// if (mode == ViewMode::Mapping) {
+		// 	// lv_hide(roller);
+		// 	// mapping_pane.refresh();
+		// } else {
+		// 	show_roller();
+		// }
 	}
 
 	void redraw_module() {
+		printf("Redraw module\n");
 		reset_module_page();
 
 		size_t num_elements = moduleinfo.elements.size();
@@ -165,12 +166,18 @@ struct ModuleViewPage : PageBase {
 		update_map_ring_style();
 
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
+
 		if (cur_el) {
 			mode = ViewMode::Mapping;
+			mapping_pane.hide();
 			mapping_pane.show(*cur_el);
+			printf("mapping_pane.show()\n");
 		} else {
 			mode = ViewMode::List;
 			mapping_pane.hide();
+			show_roller();
+			printf("show_roller()\n");
+			// mapping_pane.hide();
 		}
 	}
 
@@ -187,6 +194,7 @@ struct ModuleViewPage : PageBase {
 
 			} else {
 				mode = ViewMode::List;
+				mapping_pane.hide();
 				show_roller();
 			}
 		}
@@ -285,7 +293,6 @@ struct ModuleViewPage : PageBase {
 private:
 	void show_roller() {
 		lv_show(roller);
-		mapping_pane.hide();
 		lv_group_focus_obj(roller);
 		lv_group_set_editing(group, true);
 	}
