@@ -20,7 +20,7 @@ namespace MetaModule
 
 struct Gui {
 
-	// standard roller
+	// standard roller: keep this to apply to DIY lists
 	static inline lv_style_t roller_style;	   //X
 	static inline lv_style_t roller_sel_style; //X
 
@@ -39,16 +39,11 @@ struct Gui {
 	// module selected in patch view
 	static inline lv_style_t selected_module_style;
 
-	// text
-	static inline lv_style_t header_style;		 //X
-	static inline lv_style_t button_label_style; //X
-	static inline lv_style_t text_block_style;	 //X
-
 	static inline lv_style_t mapped_circle_style;
 	static inline lv_style_t mapped_jack_circle_label_style;
 
 	// COLORS
-	static inline lv_color_t orange_highlight = lv_palette_lighten(LV_PALETTE_ORANGE, 2); //X
+	static inline lv_color_t orange_highlight = lv_palette_lighten(LV_PALETTE_ORANGE, 2);
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
@@ -121,7 +116,10 @@ struct Gui {
 		lv_style_init(&panel_highlight_style);
 		lv_style_set_radius(&panel_highlight_style, 120);
 		lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
-		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_50);
+		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_20);
+		lv_style_set_border_opa(&panel_highlight_style, LV_OPA_50);
+		lv_style_set_border_width(&panel_highlight_style, 3);
+		lv_style_set_border_color(&panel_highlight_style, orange_highlight);
 
 		// selected_module_style
 		lv_style_init(&selected_module_style);
@@ -129,38 +127,6 @@ struct Gui {
 		lv_style_set_outline_width(&selected_module_style, 3);
 		lv_style_set_outline_opa(&selected_module_style, LV_OPA_100);
 		lv_style_set_radius(&selected_module_style, 0);
-
-		// header_style (text)
-		lv_style_init(&header_style);
-		lv_style_set_text_align(&header_style, LV_TEXT_ALIGN_CENTER);
-		// lv_style_set_text_font(&header_style, &lv_font_montserrat_14);
-		lv_style_set_text_font(&header_style, &ui_font_MuseoSansRounded70016);
-		lv_style_set_text_color(&header_style, lv_color_white());
-		lv_style_set_text_opa(&header_style, LV_OPA_COVER);
-		lv_style_set_bg_opa(&header_style, LV_OPA_COVER);
-		lv_style_set_bg_color(&header_style, lv_color_black());
-		lv_style_set_text_line_space(&header_style, 5);
-		lv_style_set_pad_hor(&header_style, 6);
-		lv_style_set_pad_ver(&header_style, 2);
-
-		// text_block_style
-		lv_style_init(&text_block_style);
-		lv_style_set_text_align(&text_block_style, LV_TEXT_ALIGN_LEFT);
-		lv_style_set_text_font(&text_block_style, &ui_font_MuseoSansRounded50012);
-		lv_style_set_text_color(&text_block_style, lv_color_white());
-		lv_style_set_text_opa(&text_block_style, LV_OPA_COVER);
-		lv_style_set_bg_opa(&text_block_style, LV_OPA_COVER);
-		lv_style_set_bg_color(&text_block_style, lv_color_black());
-		lv_style_set_text_line_space(&text_block_style, 2);
-		lv_style_set_pad_hor(&text_block_style, 8);
-		lv_style_set_pad_ver(&text_block_style, 4);
-
-		// button_label_style
-		lv_style_init(&button_label_style);
-		lv_style_set_text_font(&button_label_style, &ui_font_MuseoSansRounded70014);
-		lv_style_set_text_color(&button_label_style, lv_color_white());
-		lv_style_set_text_opa(&button_label_style, LV_OPA_COVER);
-		lv_style_set_pad_ver(&button_label_style, 1);
 
 		// roller_style
 		lv_style_init(&roller_style);
