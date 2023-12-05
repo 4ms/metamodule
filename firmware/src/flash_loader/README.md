@@ -19,15 +19,21 @@ If something goes wrong (i.e. power disconnected) while this firmware is running
 will not boot from NOR Flash. It still will boot from SD Card, so it's not bricked!
 
 
-To use this, load the `build/src/flash_loader/flash_loader.uimg` file to a working, bootable SD Card like this:
+To use this build the flash loader and copy the `build/src/flash_loader/flash_loader.uimg` file to a working, bootable SD Card like this:
 
 ```
+make flash_loader.elf
 sudo dd if=build/src/flash_loader/flash_loader.uimg of=/dev/disk4s4
 ```
 
-Replace /dev/disk4s4 with the 4th partition of your SD Card device.
+Replace `/dev/disk4s4`` with the 4th partition of your SD Card device.
 
-Alternatively, you can load this firmware to your unit via USB-DFU, either via the command-line `dfu-util`
+Alternatively, you can load this firmware to your unit via USB-DFU, either via the command-line
+
+```
+make flash_loader_dfu
+```
+
 or via the Web-DFU page in your browser. Follow the normal firmware updating procedure for how to do that.
 
 Once it's loaded, just reboot and it'll update the flash automatically. The button light will flash green/blue
