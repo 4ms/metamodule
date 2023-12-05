@@ -90,3 +90,5 @@ add_custom_target(
   COMMAND dfu-util -a 0 -s 0x70080000 -D $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg
   VERBATIM USES_TERMINAL
 )
+
+add_custom_target(flash_loader DEPENDS flash_loader.elf)
