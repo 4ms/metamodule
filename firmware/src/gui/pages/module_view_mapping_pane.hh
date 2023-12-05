@@ -157,7 +157,7 @@ private:
 		auto num_circles = lv_obj_get_child_cnt(ui_MapList);
 		for (unsigned i = 0; i < num_circles; i++) {
 			auto child = lv_obj_get_child(ui_MapList, i);
-			lv_obj_del_async(child);
+			// lv_obj_del_async(child);
 		}
 	}
 
