@@ -106,7 +106,6 @@ struct ModuleViewMappingPane {
 	}
 
 	void hide() {
-		printf("MappingPane::hide()\n");
 		lv_hide(ui_MappingParameters);
 		lv_hide(ui_ControlAlert);
 		add_map_popup.hide();
@@ -159,14 +158,12 @@ private:
 	void remove_all_items() {
 		for (auto &obj : map_list_items) {
 			lv_obj_del_async(obj);
-			printf("Delete    %p\n", obj);
 		}
 		map_list_items.clear();
 	}
 
 	void activate_list_item(lv_obj_t *obj, uint32_t set_i, std::optional<uint16_t> mapped_panel_id) {
 		map_list_items.push_back(obj);
-		printf("Push back %p\n", obj);
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
 		if (displayed_knobsets < mapped_item_user_data.size()) {
