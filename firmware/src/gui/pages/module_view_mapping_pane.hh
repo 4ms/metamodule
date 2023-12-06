@@ -100,15 +100,7 @@ struct ModuleViewMappingPane {
 
 	void refresh() {
 		if (drawn_element) {
-			// remove_all_items();
-			auto num_circles = lv_obj_get_child_cnt(ui_MapList);
-			for (unsigned i = 0; i < num_circles; i++) {
-				auto child = lv_obj_get_child(ui_MapList, i);
-				if (child) {
-					printf("Del a %p\n", child);
-					lv_obj_del_async(child);
-				}
-			}
+			remove_all_items();
 			show(*drawn_element);
 		}
 	}
@@ -165,15 +157,16 @@ private:
 	static inline std::array<MapItemUserData, MaxKnobSets + 1> mapped_item_user_data{};
 
 	void remove_all_items() {
-		auto num_circles = lv_obj_get_child_cnt(ui_MapList);
-		for (unsigned i = 0; i < num_circles; i++) {
-			auto child = lv_obj_get_child(ui_MapList, i);
-			printf("Del %p\n", child);
-			lv_obj_del_async(child);
+		for (auto &obj : map_list_items) {
+			lv_obj_del_async(obj);
+			printf("Delete    %p\n", obj);
 		}
+		map_list_items.clear();
 	}
 
 	void activate_list_item(lv_obj_t *obj, uint32_t set_i, std::optional<uint16_t> mapped_panel_id) {
+		map_list_items.push_back(obj);
+		printf("Push back %p\n", obj);
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
 		if (displayed_knobsets < mapped_item_user_data.size()) {
@@ -188,6 +181,7 @@ private:
 	}
 
 	void group_edit_cable_button(lv_obj_t *obj) {
+		map_list_items.push_back(obj);
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
 		lv_obj_add_event_cb(obj, edit_cable_button_cb, LV_EVENT_RELEASED, this);
@@ -209,8 +203,7 @@ private:
 	void prepare_for_element(const JackOutput &) {
 		prepare_for_jack();
 
-		Jack thisjack = {.module_id = (uint16_t)this->this_module_id,
-						 .jack_id = drawn_element->gui_element.idx.output_idx};
+		Jack thisjack = {.module_id = (uint16_t)this_module_id, .jack_id = drawn_element->gui_element.idx.output_idx};
 
 		for (auto &cable : patch.int_cables) {
 			if (cable.out == thisjack) {
@@ -234,8 +227,7 @@ private:
 	void prepare_for_element(const JackInput &) {
 		prepare_for_jack();
 
-		Jack thisjack = {.module_id = (uint16_t)this->this_module_id,
-						 .jack_id = drawn_element->gui_element.idx.input_idx};
+		Jack thisjack = {.module_id = (uint16_t)this_module_id, .jack_id = drawn_element->gui_element.idx.input_idx};
 
 		for (auto &cable : patch.int_cables) {
 			for (auto &injack : cable.ins) {
@@ -415,6 +407,8 @@ private:
 	MappingPaneList list;
 	AddMapPopUp add_map_popup;
 	ManualControlPopUp control_popup;
+
+	std::vector<lv_obj_t *> map_list_items;
 };
 
 } // namespace MetaModule
