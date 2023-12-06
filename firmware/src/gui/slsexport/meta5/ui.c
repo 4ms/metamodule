@@ -238,6 +238,24 @@ lv_obj_t *ui_CableCancel;
 lv_obj_t *ui_CableCancelLabel;
 lv_obj_t *ui_CableDeleteButton;
 lv_obj_t *ui_CableDeleteIcon;
+
+
+// SCREEN: ui_SystemMenu
+void ui_SystemMenu_screen_init(void);
+lv_obj_t *ui_SystemMenu;
+lv_obj_t *ui_TabView1;
+lv_obj_t *ui_SystemMenuInfoTab;
+lv_obj_t *ui_SystemMenuMetaModule;
+lv_obj_t *ui_SystemMenuPCBversion;
+lv_obj_t *ui_SystemMenuFWversion;
+lv_obj_t *ui_SystemMenuExpanders;
+lv_obj_t *ui_SystemMenuUpdateTab;
+lv_obj_t *ui_SystemMenuUpdateFWversion;
+lv_obj_t *ui_SystemMenuUpdateSDStatus;
+lv_obj_t *ui_SystemMenuUpdateUSBStatus;
+lv_obj_t *ui_SystemMenuUpdateMessage;
+lv_obj_t *ui_SystemMenuUpdateFWBut;
+lv_obj_t *ui_SystemMenuUpdateFWlabel;
 lv_obj_t *ui____initial_actions0;
 const lv_img_dsc_t *ui_imgset_add[1] = {&ui_img_1x_add1_png};
 const lv_img_dsc_t *ui_imgset_info[1] = {&ui_img_1x_info1_png};
@@ -318,6 +336,7 @@ ui_KnobSetViewPage_screen_init();
 ui_EditMappingPage_screen_init();
 ui_DeleteMappingPopUp_screen_init();
 ui_CableMapPage_screen_init();
+ui_SystemMenu_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_MainMenu);
 }
