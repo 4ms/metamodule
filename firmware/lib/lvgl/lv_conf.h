@@ -520,7 +520,7 @@ LV_FONT_DECLARE( ui_font_MuseoSansRounded70016)\
 
 #define LV_USE_SPINNER    1
 
-#define LV_USE_TABVIEW    0
+#define LV_USE_TABVIEW    1
 
 #define LV_USE_TILEVIEW   0
 

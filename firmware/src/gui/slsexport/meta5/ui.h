@@ -236,7 +236,7 @@ extern lv_obj_t *ui_CableDeleteIcon;
 // SCREEN: ui_SystemMenu
 void ui_SystemMenu_screen_init(void);
 extern lv_obj_t *ui_SystemMenu;
-extern lv_obj_t *ui_TabView1;
+extern lv_obj_t *ui_SystemMenuTabView;
 extern lv_obj_t *ui_SystemMenuInfoTab;
 extern lv_obj_t *ui_SystemMenuMetaModule;
 extern lv_obj_t *ui_SystemMenuPCBversion;

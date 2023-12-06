@@ -10,11 +10,11 @@ namespace MetaModule
 
 struct SystemMenuPage : PageBase {
 	SystemMenuPage(PatchInfo info)
-		: PageBase{info, PageId::SystemMenu} {
+		: PageBase{info, PageId::SystemMenu}
+		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
 		init_bg(ui_SystemMenu);
 
-		tabs = lv_tabview_get_tab_btns(ui_TabView1); //NOLINT
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, tabs);
 		lv_group_set_editing(group, true);

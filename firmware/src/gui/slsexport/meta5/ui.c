@@ -245,7 +245,7 @@ lv_obj_t *ui_CableDeleteIcon;
 // SCREEN: ui_SystemMenu
 void ui_SystemMenu_screen_init(void);
 lv_obj_t *ui_SystemMenu;
-lv_obj_t *ui_TabView1;
+lv_obj_t *ui_SystemMenuTabView;
 lv_obj_t *ui_SystemMenuInfoTab;
 lv_obj_t *ui_SystemMenuMetaModule;
 lv_obj_t *ui_SystemMenuPCBversion;

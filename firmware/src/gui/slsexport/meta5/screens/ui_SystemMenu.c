@@ -10,14 +10,14 @@ void ui_SystemMenu_screen_init(void)
 ui_SystemMenu = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_SystemMenu, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_TabView1 = lv_tabview_create(ui_SystemMenu, LV_DIR_LEFT, 75);
-lv_obj_set_width( ui_TabView1, lv_pct(100));
-lv_obj_set_height( ui_TabView1, lv_pct(100));
-lv_obj_set_align( ui_TabView1, LV_ALIGN_CENTER );
-lv_obj_clear_flag( ui_TabView1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+ui_SystemMenuTabView = lv_tabview_create(ui_SystemMenu, LV_DIR_LEFT, 75);
+lv_obj_set_width( ui_SystemMenuTabView, lv_pct(100));
+lv_obj_set_height( ui_SystemMenuTabView, lv_pct(100));
+lv_obj_set_align( ui_SystemMenuTabView, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_SystemMenuTabView, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 
-ui_SystemMenuInfoTab = lv_tabview_add_tab(ui_TabView1, "Info");
+ui_SystemMenuInfoTab = lv_tabview_add_tab(ui_SystemMenuTabView, "Info");
 lv_obj_set_flex_flow(ui_SystemMenuInfoTab,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_SystemMenuInfoTab, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_clear_flag( ui_SystemMenuInfoTab, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
@@ -50,7 +50,7 @@ lv_obj_set_align( ui_SystemMenuExpanders, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemMenuExpanders,"Expanders connected:\n- Audio\n- Button x 4\n- Slider x 2\n- Knob x 2\n- Wifi");
 lv_obj_set_style_text_font(ui_SystemMenuExpanders, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuUpdateTab = lv_tabview_add_tab(ui_TabView1, "Update");
+ui_SystemMenuUpdateTab = lv_tabview_add_tab(ui_SystemMenuTabView, "Update");
 lv_obj_set_flex_flow(ui_SystemMenuUpdateTab,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_SystemMenuUpdateTab, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 
