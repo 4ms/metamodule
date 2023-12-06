@@ -223,6 +223,8 @@ lv_obj_t *ui_CancelButton;
 lv_obj_t *ui_CancelLabel;
 lv_obj_t *ui_TrashButton2;
 lv_obj_t *ui_TrashLabel2;
+lv_obj_t *ui_ConfirmButton;
+lv_obj_t *ui_ConfirmLabel;
 
 
 // SCREEN: ui_CableMapPage
