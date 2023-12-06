@@ -326,9 +326,14 @@ private:
 			return;
 
 		page->page_list.stash_state(PageId::ModuleView, page->args);
-		page->args.mappedknob_id = data.mapped_panel_id;
-		page->args.view_knobset_id = data.set_i;
-		page->page_list.request_new_page(PageId::KnobMap, page->args);
+		page->page_list.request_new_page(PageId::KnobMap,
+										 {
+											 .mappedknob_id = data.mapped_panel_id,
+											 .view_knobset_id = data.set_i,
+										 });
+		// page->args.mappedknob_id = data.mapped_panel_id;
+		// page->args.view_knobset_id = data.set_i;
+		//page->args);
 	}
 
 	static void edit_cable_button_cb(lv_event_t *event) {
@@ -341,7 +346,7 @@ private:
 
 		page->page_list.stash_state(PageId::ModuleView, page->args);
 		page->page_list.request_new_page(PageId::CableEdit, page->args);
-		page->hide();
+		// page->hide();
 	}
 
 	static void add_button_cb(lv_event_t *event) {

@@ -192,8 +192,9 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (auto &knobset = knobset_menu.requested_knobset_view) {
-			args.view_knobset_id = knobset;
-			page_list.request_new_page(PageId::KnobSetView, args);
+			load_page(PageId::KnobSetView, {.patch_loc = args.patch_loc, .view_knobset_id = knobset});
+			// args.view_knobset_id = knobset;
+			// page_list.request_new_page(PageId::KnobSetView, args);
 			knobset = std::nullopt;
 		}
 

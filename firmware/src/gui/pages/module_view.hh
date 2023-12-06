@@ -72,7 +72,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void redraw_module() {
-		printf("Redraw module\n");
 		reset_module_page();
 
 		size_t num_elements = moduleinfo.elements.size();
@@ -128,9 +127,15 @@ struct ModuleViewPage : PageBase {
 
 			module_controls.emplace_back(drawn_element.element, drawn_element.gui_element.idx);
 
-			if (args.element_indices == drawn.idx) {
-				cur_selected = roller_idx;
-				cur_el = &drawn_element;
+			if (args.element_indices.has_value()) {
+				if (args.element_indices->param_idx == drawn.idx.param_idx ||
+					args.element_indices->input_idx == drawn.idx.input_idx ||
+					args.element_indices->output_idx == drawn.idx.output_idx ||
+					args.element_indices->light_idx == drawn.idx.light_idx)
+				{
+					cur_selected = roller_idx;
+					cur_el = &drawn_element;
+				}
 			}
 
 			roller_idx++;
