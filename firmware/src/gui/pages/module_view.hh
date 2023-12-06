@@ -69,13 +69,6 @@ struct ModuleViewPage : PageBase {
 		}
 
 		redraw_module();
-
-		// if (mode == ViewMode::Mapping) {
-		// 	// lv_hide(roller);
-		// 	// mapping_pane.refresh();
-		// } else {
-		// 	show_roller();
-		// }
 	}
 
 	void redraw_module() {
@@ -171,13 +164,9 @@ struct ModuleViewPage : PageBase {
 			mode = ViewMode::Mapping;
 			mapping_pane.hide();
 			mapping_pane.show(*cur_el);
-			printf("mapping_pane.show()\n");
 		} else {
 			mode = ViewMode::List;
-			mapping_pane.hide();
 			show_roller();
-			printf("show_roller()\n");
-			// mapping_pane.hide();
 		}
 	}
 
@@ -194,7 +183,6 @@ struct ModuleViewPage : PageBase {
 
 			} else {
 				mode = ViewMode::List;
-				mapping_pane.hide();
 				show_roller();
 			}
 		}
@@ -292,6 +280,7 @@ struct ModuleViewPage : PageBase {
 
 private:
 	void show_roller() {
+		mapping_pane.hide();
 		lv_show(roller);
 		lv_group_focus_obj(roller);
 		lv_group_set_editing(group, true);
@@ -302,13 +291,17 @@ private:
 		b = lv_btn_create(ui_ModuleImage);
 		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 
-		float width = lv_obj_get_width(obj) / 2.f;
-		float height = lv_obj_get_height(obj) / 2.f;
-		float c_x = (float)lv_obj_get_x(obj) + width;
-		float c_y = (float)lv_obj_get_y(obj) + height;
+		float width = lv_obj_get_width(obj);
+		float height = lv_obj_get_height(obj);
+		float c_x = (float)lv_obj_get_x(obj) + width / 2.f;
+		float c_y = (float)lv_obj_get_y(obj) + height / 2.f;
 
-		lv_obj_set_pos(b, std::round(c_x - width * 1.5f), std::round(c_y - height * 1.5f));
-		lv_obj_set_size(b, (width * 3.f), (height * 3.f));
+		auto x_padding = std::min(width * 0.75f, 12.f);
+		auto y_padding = std::min(height * 0.75f, 12.f);
+		auto x_size = x_padding + width;
+		auto y_size = y_padding + height;
+		lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
+		lv_obj_set_size(b, std::round(x_size), std::round(y_size));
 		lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 	}
 

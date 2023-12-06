@@ -118,7 +118,7 @@ struct Gui {
 		lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
 		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_20);
 		lv_style_set_border_opa(&panel_highlight_style, LV_OPA_50);
-		lv_style_set_border_width(&panel_highlight_style, 3);
+		lv_style_set_border_width(&panel_highlight_style, 1);
 		lv_style_set_border_color(&panel_highlight_style, orange_highlight);
 
 		// selected_module_style
@@ -191,6 +191,7 @@ struct Gui {
 		lv_style_init(&mapped_jack_circle_label_style);
 		lv_style_set_text_color(&mapped_jack_circle_label_style, lv_color_hex(0x000000));
 		lv_style_set_text_opa(&mapped_jack_circle_label_style, 255);
+		lv_style_set_text_font(&mapped_jack_circle_label_style, &ui_font_MuseoSansRounded50010);
 		lv_style_set_pad_all(&mapped_jack_circle_label_style, 0);
 	}
 

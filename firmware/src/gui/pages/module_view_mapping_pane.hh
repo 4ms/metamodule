@@ -50,8 +50,6 @@ struct ModuleViewMappingPane {
 		lv_group_remove_all_objs(pane_group);
 		lv_group_set_editing(pane_group, false);
 
-		//remove_all_items();
-
 		if (patch.patch_name.length() == 0) {
 			pr_warn("Patch name empty\n");
 			return;
