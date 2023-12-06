@@ -27,12 +27,18 @@ struct MapRingDisplay {
 		if (!map_ring)
 			return;
 		lv_obj_set_style_outline_opa(map_ring, opa, LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(map_ring, opa, LV_STATE_DEFAULT);
+		lv_obj_set_style_border_opa(map_ring, opa, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_opa(map_ring, opa, LV_STATE_DEFAULT);
 	}
 
 	static void hide(lv_obj_t *map_ring) {
 		if (!map_ring)
 			return;
 		lv_obj_set_style_outline_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
+		lv_obj_set_style_border_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
 	}
 
 	//TODO:
@@ -112,7 +118,10 @@ struct MapRingDisplay {
 		lv_anim_init(&a);
 		lv_anim_set_exec_cb(
 			&a, (lv_anim_exec_xcb_t)[](void *var, int32_t val) {
+				lv_obj_set_style_text_opa((lv_obj_t *)var, val, LV_STATE_DEFAULT);
 				lv_obj_set_style_outline_opa((lv_obj_t *)var, val, LV_STATE_DEFAULT);
+				lv_obj_set_style_bg_opa((lv_obj_t *)var, val, LV_STATE_DEFAULT);
+				lv_obj_set_style_border_opa((lv_obj_t *)var, val, LV_STATE_DEFAULT);
 			});
 		lv_anim_set_var(&a, map_ring);
 		lv_anim_set_time(&a, time);

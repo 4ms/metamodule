@@ -192,7 +192,10 @@ struct Gui {
 		lv_style_set_text_color(&mapped_jack_circle_label_style, lv_color_hex(0x000000));
 		lv_style_set_text_opa(&mapped_jack_circle_label_style, 255);
 		lv_style_set_text_font(&mapped_jack_circle_label_style, &ui_font_MuseoSansRounded50010);
-		lv_style_set_pad_all(&mapped_jack_circle_label_style, 0);
+		lv_style_set_pad_left(&mapped_jack_circle_label_style, -2);
+		lv_style_set_pad_right(&mapped_jack_circle_label_style, 0);
+		lv_style_set_pad_top(&mapped_jack_circle_label_style, -1);
+		lv_style_set_pad_bottom(&mapped_jack_circle_label_style, 0);
 	}
 
 	static lv_obj_t *create_map_circle(lv_obj_t *parent) {
