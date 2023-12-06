@@ -14,24 +14,39 @@ struct ConfirmPopup {
 		orig_group = current_group;
 
 		group = lv_group_create();
-		lv_group_add_obj(group, ui_CancelButton);
-		lv_group_add_obj(group, ui_TrashButton2);
-		lv_group_set_editing(group, false);
 
-		lv_obj_add_event_cb(ui_CancelButton, button_callback, LV_EVENT_RELEASED, this);
-		lv_obj_add_event_cb(ui_TrashButton2, button_callback, LV_EVENT_RELEASED, this);
+		lv_obj_add_event_cb(ui_CancelButton, button_callback, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ConfirmButton, button_callback, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_TrashButton2, button_callback, LV_EVENT_CLICKED, this);
 
 		lv_hide(ui_DelMapPopUpPanel);
 	}
 
-	void show(auto cb) {
+	void show(auto cb, const char *button_text = "Trash") {
 		callback = std::move(cb);
 
 		lv_obj_set_parent(ui_DelMapPopUpPanel, base);
 
 		lv_show(ui_DelMapPopUpPanel);
+
+		if (strcmp(button_text, "Trash") != 0) {
+			lv_show(ui_ConfirmButton);
+			lv_hide(ui_TrashButton2);
+			lv_label_set_text(ui_ConfirmLabel, button_text);
+			lv_group_remove_all_objs(group);
+			lv_group_add_obj(group, ui_CancelButton);
+			lv_group_add_obj(group, ui_ConfirmButton);
+		} else {
+			lv_hide(ui_ConfirmButton);
+			lv_show(ui_TrashButton2);
+			lv_group_remove_all_objs(group);
+			lv_group_add_obj(group, ui_CancelButton);
+			lv_group_add_obj(group, ui_TrashButton2);
+		}
+
 		lv_indev_set_group(lv_indev_get_next(nullptr), group);
 		lv_group_focus_obj(ui_CancelButton);
+
 		visible = true;
 	}
 
@@ -56,7 +71,7 @@ struct ConfirmPopup {
 		if (page->callback) {
 			if (event->target == ui_CancelButton)
 				page->callback(false);
-			else if (event->target == ui_TrashButton2)
+			else if (event->target == ui_TrashButton2 || event->target == ui_ConfirmButton)
 				page->callback(true);
 		}
 
