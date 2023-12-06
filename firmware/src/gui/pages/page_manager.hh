@@ -15,6 +15,7 @@
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector.hh"
 #include "gui/pages/patch_view.hh"
+#include "gui/pages/system_menu.hh"
 
 namespace MetaModule
 {
@@ -32,6 +33,7 @@ class PageManager {
 	KnobSetViewPage page_knobsetview{info};
 	KnobMapPage page_knobmap{info};
 	CableEditPage page_cableedit{info};
+	SystemMenuPage page_systemmenu{info};
 
 public:
 	PageBase *cur_page = &page_patchsel;

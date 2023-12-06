@@ -13,7 +13,7 @@ namespace MetaModule
 //forward declare
 struct PageBase;
 
-enum class PageId { MainMenu, PatchSel, PatchView, ModuleView, Settings, KnobSetView, KnobMap, CableEdit };
+enum class PageId { MainMenu, PatchSel, PatchView, ModuleView, Settings, KnobSetView, KnobMap, CableEdit, SystemMenu };
 
 struct PageWithArgs {
 	PageBase *page;
@@ -23,7 +23,7 @@ struct PageWithArgs {
 class PageList {
 	bool _new_page_requested = false;
 
-	static constexpr uint32_t MaxPages = 8;
+	static constexpr uint32_t MaxPages = 9;
 	std::array<PageBase *, MaxPages> _pages;
 
 	uint32_t _active_knobset_id = 0;

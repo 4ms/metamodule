@@ -20,6 +20,7 @@ struct MainMenuPage : PageBase {
 		lv_group_focus_obj(ui_MenuPanelPatches);
 
 		lv_obj_add_event_cb(ui_MenuPanelPatches, patchsel_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_MenuPanelSystem, system_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() final {
@@ -57,8 +58,14 @@ private:
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		printf("Not implemented\n");
-		page->load_page(PageId::PatchSel, {});
+		pr_err("Not implemented\n");
+	}
+
+	static void system_cb(lv_event_t *event) {
+		auto page = static_cast<MainMenuPage *>(event->user_data);
+		if (!page)
+			return;
+		page->load_page(PageId::SystemMenu, {});
 	}
 
 	unsigned last_audio_load = 0;
