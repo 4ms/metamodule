@@ -2,6 +2,7 @@
 #include "core_intercom/patch_icc_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "fat_file_io.hh"
+#include "poll_change.hh"
 #include <cstring>
 #include <optional>
 
@@ -14,27 +15,27 @@ struct FirmwareFileFinder {
 
 	FirmwareFileFinder(std::span<char> &raw_buffer, FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
 		: sdcard_{sdcard_fileio}
-		, usb_{usb_fileio}
+		, usbdrive_{usb_fileio}
 		, read_buffer_{raw_buffer} {
 	}
 
 	void handle_message(IntercoreStorageMessage &message) {
+
 		if (message.message_type == RequestFirmwareFile) {
 			printf("M4 will scan for firmware files\n");
 
 			std::optional<Volume> fw_file_vol{};
 
-			if (usb_needs_rescan_) {
-				if (usb_.is_mounted()) {
-					usb_needs_rescan_ = false;
-					if (scan(usb_))
+			if (usb_changes_.take_change()) {
+				if (usbdrive_.is_mounted()) {
+					if (scan(usbdrive_))
 						fw_file_vol = Volume::USB;
 				}
 			}
 
-			if (sdcard_needs_rescan_) {
+			else if (sd_changes_.take_change())
+			{
 				if (sdcard_.is_mounted()) {
-					sdcard_needs_rescan_ = false;
 					if (scan(sdcard_))
 						fw_file_vol = Volume::SDCard;
 				}
@@ -43,6 +44,7 @@ struct FirmwareFileFinder {
 			if (fw_file_vol) {
 				pending_send_message.message_type = FirmwareFileFound;
 				pending_send_message.filename = found_filename;
+				pending_send_message.bytes_read = found_filesize;
 				pending_send_message.vol_id = fw_file_vol.value();
 			} else {
 				pending_send_message.message_type = FirmwareFileNotFound;
@@ -51,11 +53,7 @@ struct FirmwareFileFinder {
 			message.message_type = None;
 		}
 
-		uint32_t now = HAL_GetTick();
-		if (now - last_poll_tm_ > 1000) { //poll media once per second
-			last_poll_tm_ = now;
-			poll_media_change();
-		}
+		poll_media_change();
 	}
 
 	void send_pending_message(InterCoreComm2 &comm) {
@@ -67,10 +65,15 @@ struct FirmwareFileFinder {
 	}
 
 private:
+	void poll_media_change() {
+		sd_changes_.poll(HAL_GetTick(), sdcard_.is_mounted());
+		usb_changes_.poll(HAL_GetTick(), usbdrive_.is_mounted());
+	}
+
 	bool scan(FatFileIO &fileio) {
 		found_filename[0] = '\0';
 		bool ok = fileio.foreach_file_with_ext(
-			".uimg", [&fileio, this](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
+			".uimg", [&fileio, this](const std::string_view filename, uint32_t tm, uint32_t filesize) {
 				pr_dbg("File %.255s\n", filename.data());
 
 				if (filename.starts_with("metamodule-fw-") && filesize > 100 * 1024) {
@@ -86,7 +89,9 @@ private:
 					auto magic = *reinterpret_cast<uint32_t *>(buf.data());
 					if (magic == UIMG_MAGIC) {
 						pr_dbg("Found uimg file: %.255s\n", filename.data());
-						strncpy(found_filename.data(), filename.data(), filename.size());
+						auto max_chars = std::min(filename.size(), found_filename.size());
+						strncpy(found_filename.data(), filename.data(), max_chars);
+						found_filesize = filesize;
 						return;
 					}
 				}
@@ -99,17 +104,16 @@ private:
 	}
 
 	FatFileIO &sdcard_;
-	FatFileIO &usb_;
-	bool sdcard_needs_rescan_ = true;
-	bool usb_needs_rescan_ = true;
+	FatFileIO &usbdrive_;
+	PollChange sd_changes_{2000};
+	PollChange usb_changes_{2000};
 
 	const std::span<char> &read_buffer_;
 
 	IntercoreStorageMessage pending_send_message{.message_type = None};
 
 	std::array<char, 255> found_filename;
-
-	uint32_t last_poll_tm_ = 0;
+	uint32_t found_filesize;
 };
 
 } // namespace MetaModule

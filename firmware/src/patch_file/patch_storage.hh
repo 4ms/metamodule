@@ -22,8 +22,6 @@ class PatchStorage {
 	FatFileIO &sdcard_;
 	PollChange sd_changes_{1000};
 
-	uint32_t last_poll_tm_;
-
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
 	LfsFileIO norflash_{flash_};
 
@@ -76,7 +74,6 @@ public:
 			patch_list_.clear_patches(Volume::USB);
 			PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
 			usb_changes_.reset();
-			// usbdrive_needs_rescan_ = true;
 		}
 		filelist_.usb = patch_list_.get_patchfile_list(Volume::USB);
 
