@@ -10,8 +10,8 @@
 #include "fs/littlefs/norflash_lfs.hh"
 #include "fs/volumes.hh"
 #include "patch_file/patch_fileio.hh"
+#include "poll_change.hh"
 #include "pr_dbg.hh"
-#include "util/edge_detector.hh"
 
 namespace MetaModule
 {
@@ -20,8 +20,7 @@ namespace MetaModule
 class PatchStorage {
 
 	FatFileIO &sdcard_;
-	EdgeStateDetector sdcard_mounted_;
-	bool sdcard_needs_rescan_ = true;
+	PollChange sd_changes_{1000};
 
 	uint32_t last_poll_tm_;
 
@@ -29,8 +28,7 @@ class PatchStorage {
 	LfsFileIO norflash_{flash_};
 
 	FatFileIO &usbdrive_;
-	EdgeStateDetector usbdrive_mounted_;
-	bool usbdrive_needs_rescan_ = true;
+	PollChange usb_changes_{1000};
 
 	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
 	using enum IntercoreStorageMessage::MessageType;
@@ -69,7 +67,7 @@ public:
 		if (sdcard_.is_mounted()) {
 			patch_list_.clear_patches(Volume::SDCard);
 			PatchFileIO::add_all_to_patchlist(sdcard_, patch_list_);
-			sdcard_needs_rescan_ = true;
+			sd_changes_.reset();
 		}
 		filelist_.sdcard = patch_list_.get_patchfile_list(Volume::SDCard);
 
@@ -77,7 +75,8 @@ public:
 		if (usbdrive_.is_mounted()) {
 			patch_list_.clear_patches(Volume::USB);
 			PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
-			usbdrive_needs_rescan_ = true;
+			usb_changes_.reset();
+			// usbdrive_needs_rescan_ = true;
 		}
 		filelist_.usb = patch_list_.get_patchfile_list(Volume::USB);
 
@@ -94,25 +93,25 @@ public:
 
 	void handle_message(IntercoreStorageMessage &message) {
 		if (message.message_type == RequestRefreshPatchList) {
-			if (sdcard_needs_rescan_) {
+			pending_send_message.message_type = PatchListUnchanged;
+
+			if (sd_changes_.take_change()) {
 				patch_list_.clear_patches(Volume::SDCard);
 				if (sdcard_.is_mounted())
 					rescan_sdcard();
 				filelist_.sdcard = patch_list_.get_patchfile_list(Volume::SDCard);
+
+				pending_send_message.message_type = PatchListChanged;
 			}
-			if (usbdrive_needs_rescan_) {
+
+			if (usb_changes_.take_change()) {
 				patch_list_.clear_patches(Volume::USB);
 				if (usbdrive_.is_mounted())
 					rescan_usbdrive();
 				filelist_.usb = patch_list_.get_patchfile_list(Volume::USB);
-			}
 
-			if (sdcard_needs_rescan_ | usbdrive_needs_rescan_) {
-				sdcard_needs_rescan_ = false;
-				usbdrive_needs_rescan_ = false;
 				pending_send_message.message_type = PatchListChanged;
-			} else
-				pending_send_message.message_type = PatchListUnchanged;
+			}
 
 			message.message_type = None; //mark as handled
 		}
@@ -134,22 +133,13 @@ public:
 			message.message_type = None; //mark as handled
 		}
 
-		uint32_t now = HAL_GetTick();
-		if (now - last_poll_tm_ > 1000) { //poll media once per second
-			last_poll_tm_ = now;
-			poll_media_change();
-		}
+		poll_media_change();
 	}
 
 private:
 	void poll_media_change() {
-		sdcard_mounted_.update(sdcard_.is_mounted());
-		if (sdcard_mounted_.changed())
-			sdcard_needs_rescan_ = true;
-
-		usbdrive_mounted_.update(usbdrive_.is_mounted());
-		if (usbdrive_mounted_.changed())
-			usbdrive_needs_rescan_ = true;
+		sd_changes_.poll(HAL_GetTick(), sdcard_.is_mounted());
+		usb_changes_.poll(HAL_GetTick(), usbdrive_.is_mounted());
 	}
 
 	void rescan_sdcard() {

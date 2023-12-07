@@ -18,25 +18,43 @@ struct FirmwareFileFinder {
 		, read_buffer_{raw_buffer} {
 	}
 
-	// Return optional message that needs to be sent
 	void handle_message(IntercoreStorageMessage &message) {
 		if (message.message_type == RequestFirmwareFile) {
 			printf("M4 will scan for firmware files\n");
-			pending_send_message.message_type = FirmwareFileNotFound;
-			pending_send_message.patch_id = 0;
-			pending_send_message.vol_id = Volume::MaxVolumes;
-			pending_send_message.bytes_read = 0;
 
-			if (scan(usb_)) {
-				pending_send_message.message_type = FirmwareFileFound;
-				pending_send_message.filename = found_filename;
-				pending_send_message.vol_id = Volume::USB;
-			} else if (scan(sdcard_)) {
-				pending_send_message.message_type = FirmwareFileFound;
-				pending_send_message.filename = found_filename;
-				pending_send_message.vol_id = Volume::SDCard;
+			std::optional<Volume> fw_file_vol{};
+
+			if (usb_needs_rescan_) {
+				if (usb_.is_mounted()) {
+					usb_needs_rescan_ = false;
+					if (scan(usb_))
+						fw_file_vol = Volume::USB;
+				}
 			}
+
+			if (sdcard_needs_rescan_) {
+				if (sdcard_.is_mounted()) {
+					sdcard_needs_rescan_ = false;
+					if (scan(sdcard_))
+						fw_file_vol = Volume::SDCard;
+				}
+			}
+
+			if (fw_file_vol) {
+				pending_send_message.message_type = FirmwareFileFound;
+				pending_send_message.filename = found_filename;
+				pending_send_message.vol_id = fw_file_vol.value();
+			} else {
+				pending_send_message.message_type = FirmwareFileNotFound;
+			}
+
 			message.message_type = None;
+		}
+
+		uint32_t now = HAL_GetTick();
+		if (now - last_poll_tm_ > 1000) { //poll media once per second
+			last_poll_tm_ = now;
+			poll_media_change();
 		}
 	}
 
@@ -82,12 +100,16 @@ private:
 
 	FatFileIO &sdcard_;
 	FatFileIO &usb_;
+	bool sdcard_needs_rescan_ = true;
+	bool usb_needs_rescan_ = true;
 
 	const std::span<char> &read_buffer_;
 
 	IntercoreStorageMessage pending_send_message{.message_type = None};
 
 	std::array<char, 255> found_filename;
+
+	uint32_t last_poll_tm_ = 0;
 };
 
 } // namespace MetaModule
