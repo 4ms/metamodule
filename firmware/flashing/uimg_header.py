@@ -74,7 +74,7 @@ if __name__ == "__main__":
     parser.add_argument("image_file", help="Output image file")
     parser.add_argument("--load_addr", help="Address to load binary file to", type=lambda x: int(x,0), default=0xC2000040)
     parser.add_argument("--entry_point_offset", help="Entry point of the binary file", type=lambda x: int(x,0), default=0)
-    parser.add_argument("--bootable", help="Can this image be used to boot (by jumping to entry offset)?")
+    parser.add_argument("--bootable", help="Can this image be used to boot (by jumping to entry offset)?", action='store_true')
     parser.add_argument("--name", help="Encoded name of the image", type=str, default="stm32mp1-baremetal image")
     args = parser.parse_args()
 
