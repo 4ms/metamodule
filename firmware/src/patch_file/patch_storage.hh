@@ -19,8 +19,7 @@ namespace MetaModule
 // PatchStorage manages all patch filesystems <--> PatchList
 class PatchStorage {
 
-	SDCardOps<SDCardConf> sdcard_ops_;
-	FatFileIO sdcard_{&sdcard_ops_, Volume::SDCard};
+	FatFileIO &sdcard_;
 	EdgeStateDetector sdcard_mounted_;
 	bool sdcard_needs_rescan_ = true;
 
@@ -35,7 +34,6 @@ class PatchStorage {
 
 	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, PatchICCMessage>;
 	using enum PatchICCMessage::MessageType;
-	InterCoreComm2 comm_;
 	PatchICCMessage pending_send_message{.message_type = None};
 
 	PatchList patch_list_;
@@ -46,12 +44,12 @@ class PatchStorage {
 
 public:
 	PatchStorage(std::span<char> &raw_patch_buffer,
-				 volatile PatchICCMessage &shared_message,
 				 PatchFileList &filelist,
+				 FatFileIO &sdcard_fileio,
 				 FatFileIO &usb_fileio,
 				 bool reset_to_factory_patches = false)
-		: usbdrive_{usb_fileio}
-		, comm_{shared_message}
+		: sdcard_{sdcard_fileio}
+		, usbdrive_{usb_fileio}
 		, raw_patch_buffer_{raw_patch_buffer}
 		, filelist_{filelist} {
 
@@ -86,16 +84,15 @@ public:
 		poll_media_change();
 	}
 
-	void handle_messages() {
+	void send_pending_message(InterCoreComm2 &comm) {
 		if (pending_send_message.message_type != None) {
 			// Keep trying to send message until suceeds
-			// TODO: why would this fail? The answer informs us how to handle this situation
-			if (comm_.send_message(pending_send_message))
+			if (comm.send_message(pending_send_message))
 				pending_send_message.message_type = None;
 		}
+	}
 
-		auto message = comm_.get_new_message();
-
+	void handle_message(PatchICCMessage &message) {
 		if (message.message_type == RequestRefreshPatchList) {
 			if (sdcard_needs_rescan_) {
 				patch_list_.clear_patches(Volume::SDCard);
@@ -116,6 +113,8 @@ public:
 				pending_send_message.message_type = PatchListChanged;
 			} else
 				pending_send_message.message_type = PatchListUnchanged;
+
+			message.message_type = None; //mark as handled
 		}
 
 		if (message.message_type == RequestPatchData) {
@@ -132,10 +131,11 @@ public:
 					pending_send_message.bytes_read = bytes_read;
 				}
 			}
+			message.message_type = None; //mark as handled
 		}
 
 		uint32_t now = HAL_GetTick();
-		if (now - last_poll_tm_ > 2000) { //poll media once per second
+		if (now - last_poll_tm_ > 1000) { //poll media once per second
 			last_poll_tm_ = now;
 			poll_media_change();
 		}

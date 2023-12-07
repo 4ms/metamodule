@@ -1,5 +1,6 @@
 #pragma once
 #include "fs/volumes.hh"
+#include <array>
 #include <cstdint>
 
 namespace MetaModule
@@ -17,11 +18,16 @@ struct PatchICCMessage {
 		PatchDataLoadFail,
 		PatchDataLoaded,
 
+		RequestFirmwareFile,
+		FirmwareFileNotFound,
+		FirmwareFileFound,
+
 		NumRequests,
 	};
 	MessageType message_type;
 	uint32_t bytes_read;
 	uint32_t patch_id;
+	std::array<char, 255> filename;
 	Volume vol_id;
 
 	// Note: return type is void because gcc gives a warning for `volatile T&operator=(const T&){...}`

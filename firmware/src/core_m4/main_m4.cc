@@ -10,6 +10,7 @@
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
 #include "drivers/system_clocks.hh"
+#include "firmware_files.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "fs/ramdisk.hh"
 #include "gpio_expander_reader.hh"
@@ -44,6 +45,7 @@ static void app_startup() {
 
 void main() {
 	using namespace MetaModule;
+	using namespace mdrivlib;
 
 	app_startup();
 
@@ -65,13 +67,22 @@ void main() {
 
 	RamDiskOps ramdiskops{*virtdrive};
 
+	// USB
 	UsbManager usb{ramdiskops};
 	usb.start();
-
 	auto usb_fileio = usb.get_msc_fileio();
-	PatchStorage patch_storage{
-		*raw_patch_span, *shared_message, *shared_patch_file_list, usb_fileio, reload_default_patches};
 
+	// SD Card
+	SDCardOps<SDCardConf> sdcard_ops;
+	FatFileIO sdcard_fileio{&sdcard_ops, Volume::SDCard};
+
+	// IO with USB and SD Card
+	InterCoreComm<ICCCoreType::Responder, PatchICCMessage> intercore_comm{*shared_message};
+	PatchStorage patch_storage{
+		*raw_patch_span, *shared_patch_file_list, sdcard_fileio, usb_fileio, reload_default_patches};
+	FirmwareFileFinder firmware_files{*raw_patch_span, sdcard_fileio, usb_fileio};
+
+	// Controls
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
@@ -94,7 +105,14 @@ void main() {
 			i2cqueue.update();
 
 		usb.process();
-		patch_storage.handle_messages();
+
+		auto message = intercore_comm.get_new_message();
+		patch_storage.handle_message(message);
+		firmware_files.handle_message(message);
+
+		patch_storage.send_pending_message(intercore_comm);
+		firmware_files.send_pending_message(intercore_comm);
+
 		__NOP();
 	}
 }

@@ -6,6 +6,7 @@
 #include "patch_file.hh"
 #include "patch_file/patch_location.hh"
 #include "patchlist.hh"
+#include "pr_dbg.hh"
 
 namespace MetaModule
 {
@@ -81,6 +82,23 @@ public:
 		//Maybe transform get_message() into s.t. that returns
 		//remote_patch_list if message is PatchListChanged?
 		return remote_patch_list_;
+	}
+
+	[[nodiscard]] bool request_firmware_file() {
+		pr_dbg("Request FW file scan\n");
+		PatchICCMessage message{.message_type = RequestFirmwareFile};
+		if (!comm_.send_message(message))
+			return false;
+		return true;
+	}
+
+	std::string get_firmware_filename() {
+		std::string_view name_view{raw_patch_data_};
+		if (name_view.length() <= 256) {
+			std::string name{name_view};
+			return name;
+		} else
+			return "";
 	}
 
 private:

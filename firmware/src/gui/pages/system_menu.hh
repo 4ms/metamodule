@@ -38,6 +38,52 @@ struct SystemMenuPage : PageBase {
 				page_list.request_last_page();
 			}
 		}
+
+		switch (state) {
+			case State::Idle: {
+				uint32_t now = lv_tick_get();
+				if (now - last_refresh_check_tm > 2000) { //poll media once per second
+					printf("Scanning...\n");
+					last_refresh_check_tm = now;
+					if (patch_storage.request_firmware_file())
+						state = State::ScanningForUpdates;
+				}
+			} break;
+
+			case State::ScanningForUpdates: {
+				printf("Scanning...\n");
+				auto message = patch_storage.get_message().message_type;
+				if (message == PatchStorageProxy::FirmwareFileFound) {
+					printf("Messgae = found\n");
+					update_filename = patch_storage.get_firmware_filename();
+					if (update_filename.length()) {
+						state = State::UpdateFound;
+						lv_label_set_text_fmt(
+							ui_SystemMenuUpdateMessage, "Firmware update file found: %s", update_filename.c_str());
+					} else
+						state = State::UpdateNotFound;
+
+				} else if (message == PatchStorageProxy::FirmwareFileNotFound) {
+					printf("Message = not found\n");
+					state = State::UpdateNotFound;
+					lv_label_set_text(ui_SystemMenuUpdateMessage,
+									  "Insert an SD card or USB drive containing a firmware update file.");
+				}
+			} break;
+
+			case State::UpdateFound:
+				printf("Found...\n");
+				break;
+
+			case State::UpdateNotFound:
+				state = State::Idle;
+				// printf("Not Found...\n");
+				break;
+
+			case State::StartUpdate:
+				printf("Start update...\n");
+				break;
+		}
 	}
 
 	void blur() final {
@@ -46,6 +92,9 @@ struct SystemMenuPage : PageBase {
 
 private:
 	void update_firmware() {
+		if (state == State::UpdateFound)
+			state = State::StartUpdate;
+		//
 		printf("Update firmware would begin here...\n");
 	}
 
@@ -82,12 +131,13 @@ private:
 	}
 
 	ConfirmPopup confirm_popup;
-
-	// lv_obj_t *confirmbox = nullptr;
 	lv_obj_t *tabs = nullptr;
-	// lv_group_t *confirm_group;
 
-	// const char *btns[3] = {"Update", "Cancel", ""};
+	uint32_t last_refresh_check_tm = 0;
+	std::string update_filename = "";
+	Volume update_file_vol;
+
+	enum class State { Idle, ScanningForUpdates, UpdateFound, UpdateNotFound, StartUpdate } state = State::Idle;
 };
 
 } // namespace MetaModule
