@@ -43,7 +43,7 @@ struct FirmwareFileFinder {
 
 			if (fw_file_vol) {
 				pending_send_message.message_type = FirmwareFileFound;
-				pending_send_message.filename = found_filename;
+				pending_send_message.filename.copy(found_filename);
 				pending_send_message.bytes_read = found_filesize;
 				pending_send_message.vol_id = fw_file_vol.value();
 			} else {
@@ -71,30 +71,38 @@ private:
 	}
 
 	bool scan(FatFileIO &fileio) {
-		found_filename[0] = '\0';
+		found_filename.copy("");
+
 		bool ok = fileio.foreach_file_with_ext(
 			".uimg", [&fileio, this](const std::string_view filename, uint32_t tm, uint32_t filesize) {
-				pr_dbg("File %.255s\n", filename.data());
+				pr_dbg("M4: file %.255s\n", filename.data());
 
-				if (filename.starts_with("metamodule-fw-") && filesize > 100 * 1024) {
-					constexpr uint32_t UIMG_MAGIC = 0x27051956;
-					std::array<char, sizeof(UIMG_MAGIC)> buf;
-
-					auto bytes_read = fileio.read_file(filename, buf);
-					if (bytes_read != sizeof(UIMG_MAGIC)) {
-						pr_err("Error reading file %.255s\n", filename.data());
-						return;
-					}
-
-					auto magic = *reinterpret_cast<uint32_t *>(buf.data());
-					if (magic == UIMG_MAGIC) {
-						pr_dbg("Found uimg file: %.255s\n", filename.data());
-						auto max_chars = std::min(filename.size(), found_filename.size());
-						strncpy(found_filename.data(), filename.data(), max_chars);
-						found_filesize = filesize;
-						return;
-					}
+				if (!filename.starts_with("metamodule-fw-")) {
+					pr_dbg("M4: does not start with `metamodule-fw-`\n");
+					return;
 				}
+				if (filesize < 100 * 1024) {
+					pr_dbg("M4: file is too small (%u)\n", filesize);
+					return;
+				}
+
+				constexpr uint32_t UIMG_MAGIC = 0x56190527;
+				std::array<char, sizeof(UIMG_MAGIC)> buf;
+
+				auto bytes_read = fileio.read_file(filename, buf);
+				if (bytes_read != sizeof(UIMG_MAGIC)) {
+					pr_err("Error reading file %.255s\n", filename.data());
+					return;
+				}
+
+				auto magic = *reinterpret_cast<uint32_t *>(buf.data());
+				if (magic == UIMG_MAGIC) {
+					auto max_chars = std::min(filename.length(), found_filename.size() - 1);
+					found_filename.copy(filename);
+					found_filesize = filesize;
+					pr_dbg("M4: Found uimg file: %s [%u] (%u B)\n", found_filename.c_str(), max_chars, found_filesize);
+				} else
+					pr_dbg("M4: Wrong magic: 0x%08x\n", magic);
 			});
 
 		if (!ok || found_filename[0] == '\0')
@@ -109,10 +117,11 @@ private:
 	PollChange usb_changes_{2000};
 
 	const std::span<char> &read_buffer_;
+	// const std::span<char> &read_buffer_;
 
 	IntercoreStorageMessage pending_send_message{.message_type = None};
 
-	std::array<char, 255> found_filename;
+	StaticString<255> found_filename;
 	uint32_t found_filesize;
 };
 
