@@ -72,6 +72,7 @@ add_custom_command(
   TARGET flash_loader.elf
   POST_BUILD
   COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.bin $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg --load_addr 0xC2000000 --entry_point_offset 0x40
+  COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.bin $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader_nonlegacy.uimg --bootable --load_addr 0xC2000040 --entry_point_offset 0x0
   COMMAND ls -l $<TARGET_FILE_DIR:flash_loader.elf>/flash_loader.uimg
   COMMENT "Creating uimg file"
   VERBATIM
