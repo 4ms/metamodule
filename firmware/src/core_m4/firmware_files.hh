@@ -9,8 +9,8 @@ namespace MetaModule
 {
 
 struct FirmwareFileFinder {
-	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, PatchICCMessage>;
-	using enum PatchICCMessage::MessageType;
+	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
+	using enum IntercoreStorageMessage::MessageType;
 
 	FirmwareFileFinder(std::span<char> &raw_buffer, FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
 		: sdcard_{sdcard_fileio}
@@ -19,7 +19,7 @@ struct FirmwareFileFinder {
 	}
 
 	// Return optional message that needs to be sent
-	void handle_message(PatchICCMessage &message) {
+	void handle_message(IntercoreStorageMessage &message) {
 		if (message.message_type == RequestFirmwareFile) {
 			printf("M4 will scan for firmware files\n");
 			pending_send_message.message_type = FirmwareFileNotFound;
@@ -85,7 +85,7 @@ private:
 
 	const std::span<char> &read_buffer_;
 
-	PatchICCMessage pending_send_message{.message_type = None};
+	IntercoreStorageMessage pending_send_message{.message_type = None};
 
 	std::array<char, 255> found_filename;
 };

@@ -77,7 +77,7 @@ void main() {
 	FatFileIO sdcard_fileio{&sdcard_ops, Volume::SDCard};
 
 	// IO with USB and SD Card
-	InterCoreComm<ICCCoreType::Responder, PatchICCMessage> intercore_comm{*shared_message};
+	InterCoreComm<ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm{*shared_message};
 	PatchStorage patch_storage{
 		*raw_patch_span, *shared_patch_file_list, sdcard_fileio, usb_fileio, reload_default_patches};
 	FirmwareFileFinder firmware_files{*raw_patch_span, sdcard_fileio, usb_fileio};

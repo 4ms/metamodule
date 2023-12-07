@@ -17,7 +17,7 @@ namespace MetaModule
 {
 
 struct ModuleViewMappingPane {
-	ModuleViewMappingPane(PatchStorageProxy &patch_storage,
+	ModuleViewMappingPane(FileStorageProxy &patch_storage,
 						  PatchModQueue &patch_mod_queue,
 						  ParamsMidiState &params,
 						  PageArguments &args,

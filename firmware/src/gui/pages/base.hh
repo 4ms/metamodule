@@ -6,7 +6,7 @@
 #include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
-#include "patch_file/patch_storage_proxy.hh"
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 
@@ -18,7 +18,7 @@ namespace MetaModule
 enum class PageChangeDirection { Back, Forward, Jump };
 
 struct PatchInfo {
-	PatchStorageProxy &patch_storage;
+	FileStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
 	ParamsMidiState &params;
 	MetaParams &metaparams;
@@ -28,7 +28,7 @@ struct PatchInfo {
 };
 
 struct PageBase {
-	PatchStorageProxy &patch_storage;
+	FileStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
 	ParamsMidiState &params;
 	MetaParams &metaparams;

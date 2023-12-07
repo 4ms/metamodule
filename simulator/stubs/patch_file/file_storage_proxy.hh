@@ -13,7 +13,7 @@
 namespace MetaModule
 {
 
-struct InterCoreCommMessage {
+struct IntercoreStorageMessage {
 	enum MessageType : uint32_t {
 		None,
 
@@ -25,23 +25,28 @@ struct InterCoreCommMessage {
 		PatchDataLoadFail,
 		PatchDataLoaded,
 
+		RequestFirmwareFile,
+		FirmwareFileNotFound,
+		FirmwareFileFound,
+
 		NumRequests,
 	};
 	MessageType message_type;
 	uint32_t bytes_read;
 	uint32_t patch_id;
+	std::array<char, 255> filename;
 	uint32_t vol_id;
 };
 
-// This is a mock for firmware's PatchStorage and PatchStorageProxy classes
+// This is a mock for firmware's PatchStorage and FileStorageProxy classes
 // It reads from a directory on the host filesystem and also treats the
 // Default patches as a file system
-class PatchStorageProxy {
+class FileStorageProxy {
 
 public:
-	using enum InterCoreCommMessage::MessageType;
+	using enum IntercoreStorageMessage::MessageType;
 
-	PatchStorageProxy(std::string_view path)
+	FileStorageProxy(std::string_view path)
 		: hostfs_{MetaModule::Volume::SDCard, path}
 		, defaultpatchfs_{MetaModule::Volume::NorFlash} {
 		PatchFileIO::add_all_to_patchlist(defaultpatchfs_, patch_list_);
@@ -82,16 +87,16 @@ public:
 		return view_patch_vol_;
 	}
 
-	InterCoreCommMessage get_message() {
+	IntercoreStorageMessage get_message() {
 
 		if (msg_state_ == MsgState::ViewPatchRequested) {
 			msg_state_ = MsgState::Idle;
 
 			auto bytes_read = load_patch_file(requested_view_patch_vol_, requested_view_patch_id_);
 			if (bytes_read)
-				return {PatchDataLoaded, bytes_read, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
+				return {PatchDataLoaded, bytes_read, requested_view_patch_id_, {}, (uint32_t)requested_view_patch_vol_};
 			else
-				return {PatchDataLoadFail, 0, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
+				return {PatchDataLoadFail, 0, requested_view_patch_id_, {}, (uint32_t)requested_view_patch_vol_};
 		}
 
 		if (msg_state_ == MsgState::PatchListRequested) {
@@ -148,6 +153,10 @@ public:
 		return raw_patch.size_bytes();
 	}
 
+	[[nodiscard]] bool request_firmware_file() {
+		return true;
+	}
+
 private:
 	PatchFileList remote_patch_list_;
 	PatchList patch_list_;
@@ -166,7 +175,7 @@ private:
 
 	enum class MsgState { Idle, ViewPatchRequested, PatchListRequested } msg_state_ = MsgState::Idle;
 
-	InterCoreCommMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
+	IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
 		if (list.size() == 0) {
 			list = patch_list_.get_patchfile_list(vol);
 			if (list.size() > 0)

@@ -6,7 +6,7 @@
 #include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
-#include "patch_file/patch_storage_proxy.hh"
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_file/patchlist.hh"
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
@@ -36,7 +36,7 @@ private:
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
-	   PatchStorageProxy &patch_storage,
+	   FileStorageProxy &patch_storage,
 	   SyncParams &sync_params,
 	   PatchModQueue &patch_mod_queue)
 		: sync_params{sync_params}

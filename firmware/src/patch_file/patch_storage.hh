@@ -32,9 +32,9 @@ class PatchStorage {
 	EdgeStateDetector usbdrive_mounted_;
 	bool usbdrive_needs_rescan_ = true;
 
-	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, PatchICCMessage>;
-	using enum PatchICCMessage::MessageType;
-	PatchICCMessage pending_send_message{.message_type = None};
+	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
+	using enum IntercoreStorageMessage::MessageType;
+	IntercoreStorageMessage pending_send_message{.message_type = None};
 
 	PatchList patch_list_;
 
@@ -92,7 +92,7 @@ public:
 		}
 	}
 
-	void handle_message(PatchICCMessage &message) {
+	void handle_message(IntercoreStorageMessage &message) {
 		if (message.message_type == RequestRefreshPatchList) {
 			if (sdcard_needs_rescan_) {
 				patch_list_.clear_patches(Volume::SDCard);

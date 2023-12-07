@@ -28,6 +28,7 @@ struct SystemMenuPage : PageBase {
 	void prepare_focus() final {
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
+		lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
 	}
 
 	void update() final {
@@ -43,7 +44,7 @@ struct SystemMenuPage : PageBase {
 			case State::Idle: {
 				uint32_t now = lv_tick_get();
 				if (now - last_refresh_check_tm > 2000) { //poll media once per second
-					printf("Scanning...\n");
+					printf("Scanning...");
 					last_refresh_check_tm = now;
 					if (patch_storage.request_firmware_file())
 						state = State::ScanningForUpdates;
@@ -51,33 +52,40 @@ struct SystemMenuPage : PageBase {
 			} break;
 
 			case State::ScanningForUpdates: {
-				printf("Scanning...\n");
-				auto message = patch_storage.get_message().message_type;
-				if (message == PatchStorageProxy::FirmwareFileFound) {
-					printf("Messgae = found\n");
-					update_filename = patch_storage.get_firmware_filename();
+				auto message = patch_storage.get_message();
+
+				if (message.message_type == FileStorageProxy::FirmwareFileFound) {
+					printf("Message received: fw file found\n");
+					update_filename = std::string{message.filename.data()};
 					if (update_filename.length()) {
 						state = State::UpdateFound;
-						lv_label_set_text_fmt(
-							ui_SystemMenuUpdateMessage, "Firmware update file found: %s", update_filename.c_str());
+						update_filesize = message.bytes_read;
+						update_file_vol = message.vol_id;
 					} else
 						state = State::UpdateNotFound;
 
-				} else if (message == PatchStorageProxy::FirmwareFileNotFound) {
-					printf("Message = not found\n");
+				} else if (message.message_type == FileStorageProxy::FirmwareFileNotFound) {
+					printf("Message received: no fw file found\n");
+
 					state = State::UpdateNotFound;
-					lv_label_set_text(ui_SystemMenuUpdateMessage,
-									  "Insert an SD card or USB drive containing a firmware update file.");
 				}
 			} break;
 
 			case State::UpdateFound:
-				printf("Found...\n");
+				lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
+									  "Firmware update file found on %s: %s, %u bytes",
+									  update_file_vol == Volume::USB ? "USB" : "SD",
+									  update_filename.c_str(),
+									  update_filesize);
+				lv_obj_clear_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+				state = State::Idle;
 				break;
 
 			case State::UpdateNotFound:
+				lv_label_set_text(ui_SystemMenuUpdateMessage,
+								  "Insert an SD card or USB drive containing a firmware update file.");
+				lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
 				state = State::Idle;
-				// printf("Not Found...\n");
 				break;
 
 			case State::StartUpdate:
@@ -135,6 +143,7 @@ private:
 
 	uint32_t last_refresh_check_tm = 0;
 	std::string update_filename = "";
+	uint32_t update_filesize = 0;
 	Volume update_file_vol;
 
 	enum class State { Idle, ScanningForUpdates, UpdateFound, UpdateNotFound, StartUpdate } state = State::Idle;

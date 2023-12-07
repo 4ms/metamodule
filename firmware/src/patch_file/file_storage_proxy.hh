@@ -11,21 +11,21 @@
 namespace MetaModule
 {
 
-class PatchStorageProxy {
+class FileStorageProxy {
 
 public:
-	using enum PatchICCMessage::MessageType;
+	using enum IntercoreStorageMessage::MessageType;
 
-	PatchStorageProxy(std::span<char> raw_patch_data,
-					  volatile PatchICCMessage &shared_message,
-					  PatchFileList &remote_patch_list)
+	FileStorageProxy(std::span<char> raw_patch_data,
+					 volatile IntercoreStorageMessage &shared_message,
+					 PatchFileList &remote_patch_list)
 		: remote_patch_list_{remote_patch_list}
 		, comm_{shared_message}
 		, raw_patch_data_{raw_patch_data} {
 	}
 
 	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
-		PatchICCMessage message{
+		IntercoreStorageMessage message{
 			.message_type = RequestPatchData,
 			.patch_id = patch_loc.index,
 			.vol_id = patch_loc.vol,
@@ -65,12 +65,12 @@ public:
 		return view_patch_vol_;
 	}
 
-	PatchICCMessage get_message() {
+	IntercoreStorageMessage get_message() {
 		return comm_.get_new_message();
 	}
 
 	[[nodiscard]] bool request_patchlist() {
-		PatchICCMessage message{.message_type = RequestRefreshPatchList};
+		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList};
 		if (!comm_.send_message(message))
 			return false;
 		return true;
@@ -85,25 +85,15 @@ public:
 	}
 
 	[[nodiscard]] bool request_firmware_file() {
-		pr_dbg("Request FW file scan\n");
-		PatchICCMessage message{.message_type = RequestFirmwareFile};
+		IntercoreStorageMessage message{.message_type = RequestFirmwareFile};
 		if (!comm_.send_message(message))
 			return false;
 		return true;
 	}
 
-	std::string get_firmware_filename() {
-		std::string_view name_view{raw_patch_data_};
-		if (name_view.length() <= 256) {
-			std::string name{name_view};
-			return name;
-		} else
-			return "";
-	}
-
 private:
 	PatchFileList &remote_patch_list_;
-	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, PatchICCMessage> comm_;
+	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, IntercoreStorageMessage> comm_;
 
 	std::span<char> raw_patch_data_;
 	PatchData view_patch_;

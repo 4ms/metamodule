@@ -1,5 +1,4 @@
 #pragma once
-#include "frame.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_mods.hh"
@@ -7,7 +6,6 @@
 #include "patch_play/patch_playloader.hh"
 #include "stream_conf.hh"
 #include "util/countzip.hh"
-#include "util/zip.hh"
 #include <iostream>
 #include <span>
 

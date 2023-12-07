@@ -1,6 +1,6 @@
 #pragma once
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_file/patch_location.hh"
-#include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_player.hh"
 #include "pr_dbg.hh"
 #include <atomic>
@@ -10,7 +10,7 @@ namespace MetaModule
 
 // PatchLoader handles loading of patches from storage into PatchPlayer
 struct PatchPlayLoader {
-	PatchPlayLoader(PatchStorageProxy &patch_storage, PatchPlayer &patchplayer)
+	PatchPlayLoader(FileStorageProxy &patch_storage, PatchPlayer &patchplayer)
 		: player_{patchplayer}
 		, storage_{patch_storage} {
 	}
@@ -34,14 +34,14 @@ struct PatchPlayLoader {
 		while (--tries) {
 			auto message = storage_.get_message();
 
-			if (message.message_type == PatchStorageProxy::PatchDataLoaded) {
+			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
 				if (!storage_.parse_view_patch(message.bytes_read))
 					pr_err("ERROR: could not parse initial patch\n");
 				else
 					_load_patch();
 				break;
 			}
-			if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
+			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
 				pr_err("ERROR: initial patch failed to load from NOR flash\n");
 				break;
 			}
@@ -102,7 +102,7 @@ struct PatchPlayLoader {
 
 private:
 	PatchPlayer &player_;
-	PatchStorageProxy &storage_;
+	FileStorageProxy &storage_;
 
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
