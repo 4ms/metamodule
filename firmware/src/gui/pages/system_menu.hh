@@ -43,8 +43,8 @@ struct SystemMenuPage : PageBase {
 		switch (state) {
 			case State::Idle: {
 				uint32_t now = lv_tick_get();
-				if (now - last_refresh_check_tm > 2000) { //poll media once per second
-					printf("\nA7: send message request_firmware_file\n");
+				if (now - last_refresh_check_tm > 2000) {
+					pr_dbg("\nA7: send message request_firmware_file\n");
 					last_refresh_check_tm = now;
 					if (patch_storage.request_firmware_file())
 						state = State::ScanningForUpdates;
@@ -55,7 +55,7 @@ struct SystemMenuPage : PageBase {
 				auto message = patch_storage.get_message();
 
 				if (message.message_type == FileStorageProxy::FirmwareFileFound) {
-					printf("A7: Message received: fw file found: %.255s\n", message.filename.data());
+					pr_dbg("A7: Message received: fw file found: %.255s\n", message.filename.data());
 					update_filename = std::string{message.filename.data()};
 					if (update_filename.length()) {
 						state = State::UpdateFound;
@@ -67,9 +67,13 @@ struct SystemMenuPage : PageBase {
 					}
 
 				} else if (message.message_type == FileStorageProxy::FirmwareFileNotFound) {
-					printf("Message received: no fw file found\n");
+					pr_dbg("A7: Message received: no fw file found\n");
 
 					state = State::UpdateNotFound;
+
+				} else if (message.message_type == FileStorageProxy::FirmwareFileUnchanged) {
+					pr_dbg("A7: Message received: no change in fw file status\n");
+					state = State::Idle;
 				}
 			} break;
 
@@ -91,7 +95,7 @@ struct SystemMenuPage : PageBase {
 				break;
 
 			case State::StartUpdate:
-				printf("Start update...\n");
+				pr_dbg("Start update...\n");
 				break;
 		}
 	}

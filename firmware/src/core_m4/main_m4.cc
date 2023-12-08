@@ -108,12 +108,10 @@ void main() {
 		sd.process();
 
 		auto message = intercore_comm.get_new_message();
-		patch_storage.handle_message(message);
 		firmware_files.handle_message(message);
+		patch_storage.handle_message(message);
 
-		patch_storage.send_pending_message(intercore_comm);
 		firmware_files.send_pending_message(intercore_comm);
-
-		__NOP();
+		patch_storage.send_pending_message(intercore_comm);
 	}
 }
