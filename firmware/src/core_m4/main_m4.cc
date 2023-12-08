@@ -35,7 +35,7 @@ static void app_startup() {
 	HWSemaphore<M4CoreReady>::lock();
 
 	// Wait until A7 is ready
-	while (HWSemaphore<MainCoreReady>::is_locked())
+	while (HWSemaphore<AuxCoreReady>::is_locked())
 		;
 
 	SystemClocks init_system_clocks{};
