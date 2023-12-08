@@ -12,11 +12,11 @@ public:
 		change_detected = true;
 	}
 
-	void poll(int now, bool current_state) {
+	void poll(int now, bool state) {
 		if (now - last_update_time >= update_ticks) {
 			last_update_time = now;
 
-			if (state != current_state) {
+			if (current_state != state) {
 				current_state = state;
 				change_detected = true;
 			}
@@ -32,7 +32,7 @@ public:
 	}
 
 private:
-	bool state;
+	bool current_state;
 	bool change_detected = false;
 	int last_update_time = 0;
 	int update_ticks;
