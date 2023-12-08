@@ -153,6 +153,11 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void update() override {
+
+		if (metaparams.meta_buttons[0].is_just_released()) {
+			page_list.request_last_page();
+		}
+
 		// Check if M4 sent us a message:
 
 		switch (state) {
