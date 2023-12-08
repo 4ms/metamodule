@@ -3,7 +3,7 @@
 #include "conf/ramdisk_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "conf/stream_conf.hh"
-#include "core_intercom/patch_icc_message.hh"
+#include "core_intercom/intercore_message.hh"
 #include "drivers/cache.hh"
 #include "fs/ramdisk.hh"
 #include "lvgl/src/misc/lv_color.h" // for lv_color_t

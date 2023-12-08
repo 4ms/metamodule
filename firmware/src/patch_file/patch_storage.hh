@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdcard_conf.hh"
-#include "core_intercom/patch_icc_message.hh"
+#include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "fs/fatfs/fat_file_io.hh"

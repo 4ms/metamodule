@@ -20,6 +20,7 @@ struct IntercoreStorageMessage {
 		PatchDataLoaded,
 
 		RequestFirmwareFile,
+		FirmwareFileUnchanged,
 		FirmwareFileNotFound,
 		FirmwareFileFound,
 

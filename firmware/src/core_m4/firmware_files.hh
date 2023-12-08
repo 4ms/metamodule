@@ -1,5 +1,5 @@
 #pragma once
-#include "core_intercom/patch_icc_message.hh"
+#include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "fat_file_io.hh"
 #include "poll_change.hh"
