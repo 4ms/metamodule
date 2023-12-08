@@ -12,6 +12,7 @@
 #include "drivers/system_clocks.hh"
 #include "firmware_files.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
+#include "fs/fatfs/sd_host.hh"
 #include "fs/ramdisk.hh"
 #include "gpio_expander_reader.hh"
 #include "hsem_handler.hh"
@@ -65,16 +66,15 @@ void main() {
 	mdrivlib::GPIOExpander ext_gpio_expander{i2c, extaudio_gpio_expander_conf};
 	mdrivlib::GPIOExpander main_gpio_expander{i2c, mainboard_gpio_expander_conf};
 
-	RamDiskOps ramdiskops{*virtdrive};
-
 	// USB
+	RamDiskOps ramdiskops{*virtdrive};
 	UsbManager usb{ramdiskops};
 	usb.start();
 	auto usb_fileio = usb.get_msc_fileio();
 
 	// SD Card
-	SDCardOps<SDCardConf> sdcard_ops;
-	FatFileIO sdcard_fileio{&sdcard_ops, Volume::SDCard};
+	SDCardHost sd;
+	auto sdcard_fileio = sd.get_fileio();
 
 	// IO with USB and SD Card
 	InterCoreComm<ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm{*shared_message};
@@ -105,6 +105,7 @@ void main() {
 			i2cqueue.update();
 
 		usb.process();
+		sd.process();
 
 		auto message = intercore_comm.get_new_message();
 		patch_storage.handle_message(message);
