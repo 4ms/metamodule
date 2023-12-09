@@ -18,6 +18,8 @@ struct FirmwareFileFinder {
 		: sdcard_{sdcard_fileio}
 		, usbdrive_{usb_fileio} // , read_buffer_{raw_buffer}
 	{
+		sd_changes_.reset();
+		usb_changes_.reset();
 	}
 
 	void handle_message(IntercoreStorageMessage &message) {
@@ -28,18 +30,16 @@ struct FirmwareFileFinder {
 			std::optional<Volume> fw_file_vol{};
 
 			bool media_changed = false;
-			if (usb_changes_.take_change()) {
+			if (usb_changes_.take_change() || sd_changes_.take_change()) {
 				media_changed = true;
+
 				if (usbdrive_.is_mounted()) {
 					if (scan(usbdrive_))
 						fw_file_vol = Volume::USB;
 				}
-			}
 
-			else if (sd_changes_.take_change())
-			{
-				media_changed = true;
-				if (sdcard_.is_mounted()) {
+				// Files found on USB take precedence over SD Card
+				if (!fw_file_vol && sdcard_.is_mounted()) {
 					if (scan(sdcard_))
 						fw_file_vol = Volume::SDCard;
 				}
@@ -50,8 +50,10 @@ struct FirmwareFileFinder {
 				pending_send_message.filename.copy(found_filename);
 				pending_send_message.bytes_read = found_filesize;
 				pending_send_message.vol_id = fw_file_vol.value();
+
 			} else if (media_changed) {
 				pending_send_message.message_type = FirmwareFileNotFound;
+
 			} else {
 				pending_send_message.message_type = FirmwareFileUnchanged;
 			}
@@ -59,6 +61,9 @@ struct FirmwareFileFinder {
 			message.message_type = None;
 		}
 
+		// Check for changes in media plugged/unplugged even when there are no messages (i.e. GUI page is not making requests)
+		// That way, when a GUI page is loaded that starts making requests, we'll automatically scan() if and only if
+		// something was plugged/unplugged recently
 		poll_media_change();
 	}
 
@@ -72,8 +77,8 @@ struct FirmwareFileFinder {
 
 private:
 	void poll_media_change() {
-		sd_changes_.poll(HAL_GetTick(), sdcard_.is_mounted());
-		usb_changes_.poll(HAL_GetTick(), usbdrive_.is_mounted());
+		sd_changes_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
+		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
 	}
 
 	bool scan(FatFileIO &fileio) {
@@ -115,8 +120,8 @@ private:
 
 	FatFileIO &sdcard_;
 	FatFileIO &usbdrive_;
-	PollChange sd_changes_{2000};
-	PollChange usb_changes_{2000};
+	PollChange sd_changes_{1000};
+	PollChange usb_changes_{1000};
 
 	// const std::span<char> &read_buffer_;
 

@@ -135,8 +135,8 @@ public:
 
 private:
 	void poll_media_change() {
-		sd_changes_.poll(HAL_GetTick(), sdcard_.is_mounted());
-		usb_changes_.poll(HAL_GetTick(), usbdrive_.is_mounted());
+		sd_changes_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
+		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
 	}
 
 	void rescan_sdcard() {
