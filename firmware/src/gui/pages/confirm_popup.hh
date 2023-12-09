@@ -22,12 +22,14 @@ struct ConfirmPopup {
 		lv_hide(ui_DelMapPopUpPanel);
 	}
 
-	void show(auto cb, const char *button_text = "Trash") {
+	void show(auto cb, const char *message, const char *button_text = "Trash") {
 		callback = std::move(cb);
 
 		lv_obj_set_parent(ui_DelMapPopUpPanel, base);
 
 		lv_show(ui_DelMapPopUpPanel);
+
+		lv_label_set_text(ui_DelMapLabel, message);
 
 		if (strcmp(button_text, "Trash") != 0) {
 			lv_show(ui_ConfirmButton);
