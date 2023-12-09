@@ -82,7 +82,7 @@ struct SystemMenuPage : PageBase {
 									  "Firmware update file found on %s: %s, %u bytes",
 									  update_file_vol == Volume::USB ? "USB" : "SD",
 									  update_filename.c_str(),
-									  update_filesize);
+									  (unsigned)update_filesize);
 				lv_obj_clear_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
 				state = State::Idle;
 				break;
