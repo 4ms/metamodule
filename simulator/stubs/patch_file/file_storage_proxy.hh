@@ -1,4 +1,5 @@
 #pragma once
+#include "../src/core_intercom/intercore_message.hh"
 #include "fs/volumes.hh"
 #include "patch/patch_data.hh"
 #include "patch_file/patch_file.hh"
@@ -12,31 +13,6 @@
 
 namespace MetaModule
 {
-
-struct IntercoreStorageMessage {
-	enum MessageType : uint32_t {
-		None,
-
-		RequestRefreshPatchList,
-		PatchListChanged,
-		PatchListUnchanged,
-
-		RequestPatchData,
-		PatchDataLoadFail,
-		PatchDataLoaded,
-
-		RequestFirmwareFile,
-		FirmwareFileNotFound,
-		FirmwareFileFound,
-
-		NumRequests,
-	};
-	MessageType message_type;
-	uint32_t bytes_read;
-	uint32_t patch_id;
-	std::array<char, 255> filename;
-	uint32_t vol_id;
-};
 
 // This is a mock for firmware's PatchStorage and FileStorageProxy classes
 // It reads from a directory on the host filesystem and also treats the
@@ -94,9 +70,9 @@ public:
 
 			auto bytes_read = load_patch_file(requested_view_patch_vol_, requested_view_patch_id_);
 			if (bytes_read)
-				return {PatchDataLoaded, bytes_read, requested_view_patch_id_, {}, (uint32_t)requested_view_patch_vol_};
+				return {PatchDataLoaded, bytes_read, requested_view_patch_id_, {}, requested_view_patch_vol_};
 			else
-				return {PatchDataLoadFail, 0, requested_view_patch_id_, {}, (uint32_t)requested_view_patch_vol_};
+				return {PatchDataLoadFail, 0, requested_view_patch_id_, {}, requested_view_patch_vol_};
 		}
 
 		if (msg_state_ == MsgState::PatchListRequested) {
@@ -112,6 +88,16 @@ public:
 				return {PatchListChanged};
 
 			return {PatchListUnchanged};
+		}
+
+		if (msg_state_ == MsgState::FirmwareUpdateFileRequested) {
+			msg_state_ = MsgState::Idle;
+			mock_file_found_ctr++;
+
+			if ((mock_file_found_ctr % 8) < 4)
+				return {FirmwareFileFound, mock_file_found_ctr + 1, 0, "metamodule-fw-1.23.45.uimg", Volume::USB};
+			else
+				return {FirmwareFileNotFound};
 		}
 
 		return {};
@@ -154,6 +140,7 @@ public:
 	}
 
 	[[nodiscard]] bool request_firmware_file() {
+		msg_state_ = MsgState::FirmwareUpdateFileRequested;
 		return true;
 	}
 
@@ -173,7 +160,14 @@ private:
 	uint32_t view_patch_id_ = 0;
 	Volume view_patch_vol_ = Volume::NorFlash;
 
-	enum class MsgState { Idle, ViewPatchRequested, PatchListRequested } msg_state_ = MsgState::Idle;
+	enum class MsgState {
+		Idle,
+		ViewPatchRequested,
+		PatchListRequested,
+		FirmwareUpdateFileRequested,
+	} msg_state_ = MsgState::Idle;
+
+	unsigned mock_file_found_ctr = 0;
 
 	IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
 		if (list.size() == 0) {
