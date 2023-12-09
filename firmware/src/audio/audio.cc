@@ -127,7 +127,7 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 }
 
 bool AudioStream::check_patch_loading() {
-	if (patch_loader.is_loading_new_patch()) {
+	if (patch_loader.should_fade_down_audio()) {
 		if (mute_ctr > 0.f) {
 			// Fade down
 			mute_ctr -= 0.1f;
@@ -140,7 +140,7 @@ bool AudioStream::check_patch_loading() {
 		}
 	} else {
 		// Patch was just loaded --> unmute audio
-		if (patch_loader.is_audio_muted()) {
+		if (mute_ctr == 0.f) {
 			patch_loader.audio_not_muted();
 			mute_ctr = 1.f;
 			halves_muted = 0;
@@ -148,7 +148,7 @@ bool AudioStream::check_patch_loading() {
 		}
 	}
 
-	return !player.is_loaded || patch_loader.is_audio_muted();
+	return !(patch_loader.ready_to_play());
 }
 
 void AudioStream::handle_patch_just_loaded() {

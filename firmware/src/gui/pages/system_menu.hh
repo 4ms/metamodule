@@ -110,7 +110,8 @@ struct SystemMenuPage : PageBase {
 				state = State::Idle;
 				break;
 
-			case State::StartUpdate:
+			case State::Updating:
+
 				pr_dbg("Start update...\n");
 				break;
 		}
@@ -123,9 +124,12 @@ struct SystemMenuPage : PageBase {
 private:
 	void update_firmware() {
 		if (state == State::UpdateFound)
-			state = State::StartUpdate;
-		//
-		printf("Update firmware would begin here...\n");
+			state = State::Updating;
+
+		patch_playloader.stop_audio();
+		HAL_Delay(100); //let audio stop in bg
+
+		patch_storage.request_load_fw_to_ram();
 	}
 
 	static void tab_cb(lv_event_t *event) {
@@ -178,7 +182,7 @@ private:
 	uint32_t update_filesize = 0;
 	Volume update_file_vol;
 
-	enum class State { Idle, ScanningForUpdates, UpdateFound, UpdateNotFound, StartUpdate } state = State::Idle;
+	enum class State { Idle, ScanningForUpdates, UpdateFound, UpdateNotFound, Updating } state = State::Idle;
 };
 
 } // namespace MetaModule
