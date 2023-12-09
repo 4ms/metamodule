@@ -10,14 +10,28 @@ void ui_SystemMenu_screen_init(void)
 ui_SystemMenu = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_SystemMenu, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_SystemMenuTabView = lv_tabview_create(ui_SystemMenu, LV_DIR_LEFT, 75);
+ui_SystemMenuTabView = lv_tabview_create(ui_SystemMenu, LV_DIR_LEFT, 70);
 lv_obj_set_width( ui_SystemMenuTabView, lv_pct(100));
 lv_obj_set_height( ui_SystemMenuTabView, lv_pct(100));
 lv_obj_set_align( ui_SystemMenuTabView, LV_ALIGN_CENTER );
 lv_obj_clear_flag( ui_SystemMenuTabView, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
+lv_obj_set_style_bg_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0x777777),  LV_PART_ITEMS | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_ITEMS| LV_STATE_DEFAULT);
+lv_obj_set_style_border_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0x444444),  LV_PART_ITEMS | LV_STATE_DEFAULT );
+lv_obj_set_style_border_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_ITEMS| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 3,  LV_PART_ITEMS| LV_STATE_DEFAULT);
+lv_obj_set_style_border_side(lv_tabview_get_tab_btns(ui_SystemMenuTabView), LV_BORDER_SIDE_BOTTOM,  LV_PART_ITEMS| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_ITEMS| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_ITEMS| LV_STATE_DEFAULT);
+lv_obj_set_style_text_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0x000000),  LV_PART_ITEMS | LV_STATE_CHECKED );
+lv_obj_set_style_text_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_ITEMS| LV_STATE_CHECKED);
+lv_obj_set_style_bg_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0xFF8918),  LV_PART_ITEMS | LV_STATE_CHECKED );
+lv_obj_set_style_bg_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_ITEMS| LV_STATE_CHECKED);
+lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_ITEMS| LV_STATE_CHECKED);
+lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_ITEMS| LV_STATE_CHECKED);
 
-ui_SystemMenuInfoTab = lv_tabview_add_tab(ui_SystemMenuTabView, "Info");
+ui_SystemMenuInfoTab = lv_tabview_add_tab(ui_SystemMenuTabView, "Status");
 lv_obj_set_flex_flow(ui_SystemMenuInfoTab,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_SystemMenuInfoTab, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_clear_flag( ui_SystemMenuInfoTab, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
@@ -61,24 +75,6 @@ lv_obj_set_align( ui_SystemMenuUpdateFWversion, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemMenuUpdateFWversion,"Firmware version 0.5.1");
 lv_obj_set_style_text_font(ui_SystemMenuUpdateFWversion, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuUpdateSDStatus = lv_label_create(ui_SystemMenuUpdateTab);
-lv_obj_set_width( ui_SystemMenuUpdateSDStatus, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_SystemMenuUpdateSDStatus, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_SystemMenuUpdateSDStatus, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SystemMenuUpdateSDStatus,"SD Card: not present");
-lv_obj_set_style_text_color(ui_SystemMenuUpdateSDStatus, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_SystemMenuUpdateSDStatus, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_SystemMenuUpdateSDStatus, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_SystemMenuUpdateUSBStatus = lv_label_create(ui_SystemMenuUpdateTab);
-lv_obj_set_width( ui_SystemMenuUpdateUSBStatus, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_SystemMenuUpdateUSBStatus, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_SystemMenuUpdateUSBStatus, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SystemMenuUpdateUSBStatus,"USB Drive: not present");
-lv_obj_set_style_text_color(ui_SystemMenuUpdateUSBStatus, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_SystemMenuUpdateUSBStatus, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_SystemMenuUpdateUSBStatus, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
-
 ui_SystemMenuUpdateMessage = lv_label_create(ui_SystemMenuUpdateTab);
 lv_obj_set_width( ui_SystemMenuUpdateMessage, lv_pct(100));
 lv_obj_set_height( ui_SystemMenuUpdateMessage, LV_SIZE_CONTENT);   /// 1
@@ -104,5 +100,8 @@ lv_obj_set_height( ui_SystemMenuUpdateFWlabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuUpdateFWlabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemMenuUpdateFWlabel,"Update Firmware");
 lv_obj_set_style_text_font(ui_SystemMenuUpdateFWlabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemMenuTest = lv_tabview_add_tab(ui_SystemMenuTabView, "Test");
+
 
 }

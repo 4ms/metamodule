@@ -49,7 +49,7 @@ lv_obj_set_style_pad_column(ui_DelMapPopUpPanel, 3, LV_PART_MAIN| LV_STATE_DEFAU
 
 ui_DelMapLabel = lv_label_create(ui_DelMapPopUpPanel);
 lv_obj_set_width( ui_DelMapLabel, 180);
-lv_obj_set_height( ui_DelMapLabel, 30);
+lv_obj_set_height( ui_DelMapLabel, LV_SIZE_CONTENT);   /// 30
 lv_obj_set_align( ui_DelMapLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_DelMapLabel,"Are you sure you want to Delete this mapping?");
 lv_obj_set_style_text_color(ui_DelMapLabel, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT );

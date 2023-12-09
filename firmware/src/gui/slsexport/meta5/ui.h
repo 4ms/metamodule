@@ -244,11 +244,10 @@ extern lv_obj_t *ui_SystemMenuFWversion;
 extern lv_obj_t *ui_SystemMenuExpanders;
 extern lv_obj_t *ui_SystemMenuUpdateTab;
 extern lv_obj_t *ui_SystemMenuUpdateFWversion;
-extern lv_obj_t *ui_SystemMenuUpdateSDStatus;
-extern lv_obj_t *ui_SystemMenuUpdateUSBStatus;
 extern lv_obj_t *ui_SystemMenuUpdateMessage;
 extern lv_obj_t *ui_SystemMenuUpdateFWBut;
 extern lv_obj_t *ui_SystemMenuUpdateFWlabel;
+extern lv_obj_t *ui_SystemMenuTest;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png

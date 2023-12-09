@@ -4,6 +4,7 @@
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/styles.hh"
 
 namespace MetaModule
 {
@@ -22,6 +23,8 @@ struct SystemMenuPage : PageBase {
 		lv_obj_add_event_cb(tabs, tab_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_SystemMenuUpdateFWBut, updatebut_cb, LV_EVENT_CLICKED, this);
+		// lv_obj_add_event_cb(ui_SystemMenuUpdateFWBut, updatebut_cb, LV_EVENT_LEAVE, this);
+
 		confirm_popup.init(ui_SystemMenu, group);
 	}
 
@@ -29,6 +32,7 @@ struct SystemMenuPage : PageBase {
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
 		lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+		state = State::Idle;
 	}
 
 	void update() final {
@@ -41,6 +45,7 @@ struct SystemMenuPage : PageBase {
 		}
 
 		switch (state) {
+
 			case State::Idle: {
 				uint32_t now = lv_tick_get();
 				if (now - last_refresh_check_tm > 2000) {
@@ -52,15 +57,18 @@ struct SystemMenuPage : PageBase {
 			} break;
 
 			case State::ScanningForUpdates: {
+
 				auto message = patch_storage.get_message();
 
 				if (message.message_type == FileStorageProxy::FirmwareFileFound) {
 					pr_dbg("A7: Message received: fw file found: %.255s\n", message.filename.data());
+
 					update_filename = std::string{message.filename.data()};
+
 					if (update_filename.length()) {
-						state = State::UpdateFound;
-						update_filesize = message.bytes_read;
 						update_file_vol = message.vol_id;
+						update_filesize = message.bytes_read;
+						state = State::UpdateFound;
 					} else {
 						pr_dbg("A7: file has blank name\n");
 						state = State::UpdateNotFound;
@@ -68,7 +76,6 @@ struct SystemMenuPage : PageBase {
 
 				} else if (message.message_type == FileStorageProxy::FirmwareFileNotFound) {
 					pr_dbg("A7: Message received: no fw file found\n");
-
 					state = State::UpdateNotFound;
 
 				} else if (message.message_type == FileStorageProxy::FirmwareFileUnchanged) {
@@ -83,14 +90,23 @@ struct SystemMenuPage : PageBase {
 									  update_file_vol == Volume::USB ? "USB" : "SD",
 									  update_filename.c_str(),
 									  (unsigned)update_filesize);
+				lv_obj_set_style_text_color(
+					ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
 				lv_obj_clear_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+				lv_group_set_editing(group, false);
+				lv_group_add_obj(group, ui_SystemMenuUpdateFWBut);
+				lv_group_focus_obj(ui_SystemMenuUpdateFWBut);
 				state = State::Idle;
 				break;
 
 			case State::UpdateNotFound:
 				lv_label_set_text(ui_SystemMenuUpdateMessage,
 								  "Insert an SD card or USB drive containing a firmware update file.");
+				lv_obj_set_style_text_color(
+					ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
 				lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+				lv_group_focus_obj(tabs);
+				lv_group_set_editing(group, true);
 				state = State::Idle;
 				break;
 
@@ -134,13 +150,24 @@ private:
 		if (!page)
 			return;
 
-		page->confirm_popup.show(
-			[page](bool ok) {
-				if (!ok)
-					return;
-				page->update_firmware();
-			},
-			"Update");
+		if (event->code == LV_EVENT_CLICKED) {
+			page->confirm_popup.show(
+				[page](bool ok) {
+					if (!ok)
+						return;
+					page->update_firmware();
+				},
+				"This will take a few minutes and cannot be interrupted. You must keep the unit powered on for the "
+				"entire "
+				"procedure.",
+				"Update");
+		}
+
+		// if (event->code == LV_EVENT_LEAVE) {
+		// 	printf("Defocus\n");
+		// 	lv_group_focus_obj(page->tabs);
+		// 	lv_group_set_editing(page->group, true);
+		// }
 	}
 
 	ConfirmPopup confirm_popup;
