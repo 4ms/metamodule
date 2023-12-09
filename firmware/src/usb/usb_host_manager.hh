@@ -85,7 +85,9 @@ public:
 			case HOST_USER_CLASS_ACTIVE: {
 				connected_classcode = host.get_active_class_code();
 				const char *classname = host.get_active_class_name();
+
 				pr_trace("Class active: %.8s code %d\n", classname, connected_classcode);
+
 				if (connected_classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
 					_midihost_instance->connect();
 					auto mshandle = host.get_class_handle<MidiStreamingHandle>();
@@ -95,6 +97,7 @@ public:
 					}
 					USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				}
+
 				if (connected_classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
 					pr_trace("MSC connected\n");
 					_mschost_instance->connect();
