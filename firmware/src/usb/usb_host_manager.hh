@@ -20,6 +20,7 @@ private:
 public:
 	UsbHostManager(mdrivlib::PinDef enable_5v)
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
+		usbhost.pActiveClass = nullptr;
 		src_enable.low();
 		_midihost_instance = &midi_host;
 		_mschost_instance = &msc_host;
