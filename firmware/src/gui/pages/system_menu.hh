@@ -30,20 +30,15 @@ struct SystemMenuPage : PageBase {
 	}
 
 	void prepare_focus() final {
+		lv_hide(ui_FWUpdateSpinner);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
-		lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+		// lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+		lv_hide(ui_SystemMenuUpdateFWBut);
 		state = State::Idle;
 	}
 
 	void update() final {
-		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (confirm_popup.is_visible()) {
-				confirm_popup.hide();
-			} else {
-				page_list.request_last_page();
-			}
-		}
 
 		switch (state) {
 
@@ -53,6 +48,15 @@ struct SystemMenuPage : PageBase {
 					if (patch_storage.request_find_firmware_file())
 						state = State::Scanning;
 				});
+
+				// Only allow going back when Idle
+				if (metaparams.meta_buttons[0].is_just_released()) {
+					if (confirm_popup.is_visible()) {
+						confirm_popup.hide();
+					} else {
+						page_list.request_last_page();
+					}
+				}
 			} break;
 
 			case State::Scanning: {
@@ -94,9 +98,18 @@ struct SystemMenuPage : PageBase {
 				}
 
 				status_poll.poll(lv_tick_get(), [] {
-					pr_dbg("\nA7: send message request_status\n");
-					// patch_storage.request_firmware_load_status();
+					pr_dbg("Progress...\n");
+					//scan RAM for progress?
+					//zero-init ram_buffer before loading.
+					//read a word from ram_buffer every 16kB starting at end, going to beginning, until
+					//we find a non-zero word
 				});
+			} break;
+
+			case State::Failed: {
+				if (metaparams.meta_buttons[0].is_just_released()) {
+					page_list.request_last_page();
+				}
 			} break;
 		}
 	}
@@ -107,13 +120,14 @@ struct SystemMenuPage : PageBase {
 
 private:
 	void display_file_found() {
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
 							  "Firmware update file found on %s: %s, %u bytes",
 							  update_file_vol == Volume::USB ? "USB" : "SD",
 							  update_filename.c_str(),
 							  (unsigned)update_filesize);
-		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
-		lv_obj_clear_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+		// lv_obj_clear_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+		lv_show(ui_SystemMenuUpdateFWBut);
 		lv_group_set_editing(group, false);
 		lv_group_add_obj(group, ui_SystemMenuUpdateFWBut);
 		lv_group_focus_obj(ui_SystemMenuUpdateFWBut);
@@ -123,16 +137,30 @@ private:
 		lv_label_set_text(ui_SystemMenuUpdateMessage,
 						  "Insert an SD card or USB drive containing a firmware update file.");
 		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
-		lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+		// lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
+		lv_hide(ui_SystemMenuUpdateFWBut);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
 	}
 
 	void display_ram_loaded() {
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
+		lv_label_set_text(ui_SystemMenuUpdateMessage,
+						  "Writing to Flash. DO NOT POWER DOWN. This may take several minutes");
 	}
+
 	void display_ram_load_failed() {
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
+		lv_label_set_text(ui_SystemMenuUpdateMessage, "Loading to RAM failed! Try powering off and back on again.");
+		lv_hide(ui_FWUpdateSpinner);
 	}
+
 	void display_allocate_failed() {
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
+		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
+							  "Not enough free RAM to load file (need %u kB). Try rebooting.",
+							  update_filesize / 1024);
+		lv_hide(ui_FWUpdateSpinner);
 	}
 
 	void start_ram_loading() {
@@ -149,14 +177,23 @@ private:
 			display_allocate_failed();
 			state = State::Failed;
 		}
-		pr_dbg("A7 request load %s on vol %d to RAM 0x%p\n", update_filename.data(), update_file_vol, load_address);
-		if (patch_storage.request_load_fw_to_ram(update_filename, update_file_vol, load_address)) {
-			lv_label_set_text(ui_SystemMenuUpdateMessage, "Updating... Do not power down\n");
-			state = State::Updating;
-		}
+
+		lv_hide(ui_SystemMenuUpdateFWBut);
+
+		// Keep trying to send message
+		while (!patch_storage.request_load_fw_to_ram(update_filename, update_file_vol, load_address))
+			;
+
+		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
+							  "Loading update file %s (%u kB)... Please wait\n",
+							  update_filename.data(),
+							  update_filesize / 1024);
+		lv_show(ui_FWUpdateSpinner);
+		state = State::Updating;
 	}
 
 	void start_flash_loading() {
+		// TODO: Nor Flash Loader: copy ram_buffer to NORFlash at 0x70008000
 	}
 
 	static void tab_cb(lv_event_t *event) {
@@ -171,6 +208,7 @@ private:
 			}
 
 			case Tabs::Update: {
+				lv_hide(ui_FWUpdateSpinner);
 				// lv_group_add_obj(page->group, ui_SystemMenuUpdateFWBut);
 				// lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
 				break;
