@@ -84,8 +84,20 @@ public:
 		return remote_patch_list_;
 	}
 
-	[[nodiscard]] bool request_firmware_file() {
+	[[nodiscard]] bool request_find_firmware_file() {
 		IntercoreStorageMessage message{.message_type = RequestFirmwareFile};
+		if (!comm_.send_message(message))
+			return false;
+		return true;
+	}
+
+	[[nodiscard]] bool request_load_fw_to_ram(std::string_view filename, Volume vol, char *address) {
+		IntercoreStorageMessage message{
+			.message_type = RequestLoadFirmwareToRam,
+			.filename = filename,
+			.vol_id = vol,
+			.address = reinterpret_cast<uintptr_t>(address),
+		};
 		if (!comm_.send_message(message))
 			return false;
 		return true;

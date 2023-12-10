@@ -139,8 +139,14 @@ public:
 		return raw_patch.size_bytes();
 	}
 
-	[[nodiscard]] bool request_firmware_file() {
+	[[nodiscard]] bool request_find_firmware_file() {
 		msg_state_ = MsgState::FirmwareUpdateFileRequested;
+		return true;
+	}
+
+	[[nodiscard]] bool request_load_fw_to_ram(std::string_view filename, Volume vol, uintptr_t address) {
+		mock_firmware_file_size = 5'123'456;
+		msg_state_ = MsgState::FirmwareFileLoadRequested;
 		return true;
 	}
 
@@ -165,9 +171,11 @@ private:
 		ViewPatchRequested,
 		PatchListRequested,
 		FirmwareUpdateFileRequested,
+		FirmwareFileLoadRequested,
 	} msg_state_ = MsgState::Idle;
 
 	unsigned mock_file_found_ctr = 0;
+	unsigned mock_firmware_file_size = 0;
 
 	IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
 		if (list.size() == 0) {

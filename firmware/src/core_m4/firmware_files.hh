@@ -17,8 +17,7 @@ struct FirmwareFileFinder {
 
 	FirmwareFileFinder(std::span<char> &raw_buffer, FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
 		: sdcard_{sdcard_fileio}
-		, usbdrive_{usb_fileio} // , read_buffer_{raw_buffer}
-	{
+		, usbdrive_{usb_fileio} {
 		sd_changes_.reset();
 		usb_changes_.reset();
 	}
@@ -26,47 +25,13 @@ struct FirmwareFileFinder {
 	void handle_message(IntercoreStorageMessage &message) {
 
 		if (message.message_type == RequestFirmwareFile) {
-			printf("M4 will scan for firmware files\n");
-
-			std::optional<Volume> fw_file_vol{};
-
-			bool media_changed = false;
-			if (usb_changes_.take_change() || sd_changes_.take_change()) {
-				media_changed = true;
-
-				if (usbdrive_.is_mounted()) {
-					if (scan(usbdrive_))
-						fw_file_vol = Volume::USB;
-				}
-
-				// Files found on USB take precedence over SD Card
-				if (!fw_file_vol && sdcard_.is_mounted()) {
-					if (scan(sdcard_))
-						fw_file_vol = Volume::SDCard;
-				}
-			}
-
-			if (fw_file_vol) {
-				pending_send_message.message_type = FirmwareFileFound;
-				pending_send_message.filename.copy(found_filename);
-				pending_send_message.bytes_read = found_filesize;
-				pending_send_message.vol_id = fw_file_vol.value();
-
-			} else if (media_changed) {
-				pending_send_message.message_type = FirmwareFileNotFound;
-
-			} else {
-				pending_send_message.message_type = FirmwareFileUnchanged;
-			}
-
+			find_firmware_file();
 			message.message_type = None;
 		}
 
 		if (message.message_type == RequestLoadFirmwareToRam) {
-			FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
-								(message.vol_id == Volume::SDCard) ? &sdcard_ :
-																	 nullptr;
-			ram_loader.load_to_ram(fileio, message.filename, message.bytes_read, message.address);
+			load_firmware_file(message);
+			message.message_type = None;
 		}
 
 		poll_media_change();
@@ -74,7 +39,6 @@ struct FirmwareFileFinder {
 
 	void send_pending_message(InterCoreComm2 &comm) {
 		if (pending_send_message.message_type != None) {
-			// Keep trying to send message until succeeds
 			if (comm.send_message(pending_send_message))
 				pending_send_message.message_type = None;
 		}
@@ -84,6 +48,41 @@ private:
 	void poll_media_change() {
 		sd_changes_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
 		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
+	}
+
+	void find_firmware_file() {
+		printf("M4 scanning for firmware files\n");
+
+		std::optional<Volume> fw_file_vol{};
+
+		bool media_changed = false;
+		if (usb_changes_.take_change() || sd_changes_.take_change()) {
+			media_changed = true;
+
+			if (usbdrive_.is_mounted()) {
+				if (scan(usbdrive_))
+					fw_file_vol = Volume::USB;
+			}
+
+			// Files found on USB take precedence over SD Card
+			if (!fw_file_vol && sdcard_.is_mounted()) {
+				if (scan(sdcard_))
+					fw_file_vol = Volume::SDCard;
+			}
+		}
+
+		if (fw_file_vol) {
+			pending_send_message.message_type = FirmwareFileFound;
+			pending_send_message.filename.copy(found_filename);
+			pending_send_message.bytes_read = found_filesize;
+			pending_send_message.vol_id = fw_file_vol.value();
+
+		} else if (media_changed) {
+			pending_send_message.message_type = FirmwareFileNotFound;
+
+		} else {
+			pending_send_message.message_type = FirmwareFileUnchanged;
+		}
 	}
 
 	bool scan(FatFileIO &fileio) {
@@ -123,12 +122,24 @@ private:
 		return true;
 	}
 
+	void load_firmware_file(IntercoreStorageMessage &message) {
+		FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
+							(message.vol_id == Volume::SDCard) ? &sdcard_ :
+																 nullptr;
+		bool success = ram_loader.load_to_ram(fileio, message.filename, message.bytes_read, message.address);
+		if (success) {
+			pending_send_message.message_type = LoadFirmwareToRamSuccess;
+			pending_send_message.bytes_read = message.bytes_read;
+			pending_send_message.address = message.address;
+		} else {
+			pending_send_message.message_type = LoadFirmwareToRamFailed;
+		}
+	}
+
 	FatFileIO &sdcard_;
 	FatFileIO &usbdrive_;
 	PollChange sd_changes_{1000};
 	PollChange usb_changes_{1000};
-
-	// const std::span<char> &read_buffer_;
 
 	IntercoreStorageMessage pending_send_message{.message_type = None};
 
