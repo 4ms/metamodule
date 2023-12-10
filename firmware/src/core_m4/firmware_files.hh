@@ -2,6 +2,7 @@
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "fat_file_io.hh"
+#include "firmware_ram_loader.hh"
 #include "util/poll_change.hh"
 #include "util/static_string.hh"
 #include <cstring>
@@ -61,9 +62,13 @@ struct FirmwareFileFinder {
 			message.message_type = None;
 		}
 
-		// Check for changes in media plugged/unplugged even when there are no messages (i.e. GUI page is not making requests)
-		// That way, when a GUI page is loaded that starts making requests, we'll automatically scan() if and only if
-		// something was plugged/unplugged recently
+		if (message.message_type == RequestLoadFirmwareToRam) {
+			FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
+								(message.vol_id == Volume::SDCard) ? &sdcard_ :
+																	 nullptr;
+			ram_loader.load_to_ram(fileio, message.filename, message.bytes_read, message.address);
+		}
+
 		poll_media_change();
 	}
 
@@ -129,6 +134,8 @@ private:
 
 	StaticString<255> found_filename;
 	uint32_t found_filesize;
+
+	FirmwareRamLoader ram_loader;
 };
 
 } // namespace MetaModule
