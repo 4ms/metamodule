@@ -256,6 +256,7 @@ lv_obj_t *ui_SystemMenuUpdateFWversion;
 lv_obj_t *ui_SystemMenuUpdateMessage;
 lv_obj_t *ui_SystemMenuUpdateFWBut;
 lv_obj_t *ui_SystemMenuUpdateFWlabel;
+lv_obj_t *ui_FWUpdateSpinner;
 lv_obj_t *ui_SystemMenuTest;
 lv_obj_t *ui____initial_actions0;
 const lv_img_dsc_t *ui_imgset_add[1] = {&ui_img_1x_add1_png};

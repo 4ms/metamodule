@@ -101,6 +101,21 @@ lv_obj_set_align( ui_SystemMenuUpdateFWlabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemMenuUpdateFWlabel,"Update Firmware");
 lv_obj_set_style_text_font(ui_SystemMenuUpdateFWlabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_FWUpdateSpinner = lv_spinner_create(ui_SystemMenuUpdateTab,1000,90);
+lv_obj_set_width( ui_FWUpdateSpinner, 50);
+lv_obj_set_height( ui_FWUpdateSpinner, 50);
+lv_obj_set_align( ui_FWUpdateSpinner, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_FWUpdateSpinner, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_clear_flag( ui_FWUpdateSpinner, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_arc_color(ui_FWUpdateSpinner, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_arc_opa(ui_FWUpdateSpinner, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_arc_width(ui_FWUpdateSpinner, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+lv_obj_set_style_arc_color(ui_FWUpdateSpinner, lv_color_hex(0xFF8918), LV_PART_INDICATOR | LV_STATE_DEFAULT );
+lv_obj_set_style_arc_opa(ui_FWUpdateSpinner, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+lv_obj_set_style_arc_width(ui_FWUpdateSpinner, 10, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+lv_obj_set_style_arc_rounded(ui_FWUpdateSpinner, false, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+
 ui_SystemMenuTest = lv_tabview_add_tab(ui_SystemMenuTabView, "Test");
 
 
