@@ -144,7 +144,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool request_load_fw_to_ram(std::string_view filename, Volume vol, uintptr_t address) {
+	[[nodiscard]] bool request_load_fw_to_ram(std::string_view filename, Volume vol, char *address) {
 		mock_firmware_file_size = 5'123'456;
 		msg_state_ = MsgState::FirmwareFileLoadRequested;
 		return true;

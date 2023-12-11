@@ -79,7 +79,7 @@ public:
 
 	// Communicate with PatchLoader to mute audio when changing patches
 	bool mute_on_patch_load(StreamConfSim::Audio::AudioOutBuffer out_buff) {
-		if (patch_loader.is_loading_new_patch()) {
+		if (patch_loader.should_fade_down_audio()) {
 			output_silence(out_buff);
 			// Acknowlegde patch loader's request to mute audio
 			patch_loader.notify_audio_is_muted();
