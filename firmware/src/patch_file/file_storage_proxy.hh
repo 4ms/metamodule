@@ -17,7 +17,7 @@ public:
 	using enum IntercoreStorageMessage::MessageType;
 
 	FileStorageProxy(std::span<char> raw_patch_data,
-					 volatile IntercoreStorageMessage &shared_message,
+					 IntercoreStorageMessage &shared_message,
 					 PatchFileList &remote_patch_list)
 		: remote_patch_list_{remote_patch_list}
 		, comm_{shared_message}

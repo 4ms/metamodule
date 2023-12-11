@@ -22,7 +22,7 @@ struct SharedMemoryS {
 		DoubleBufParamBlock *param_block;
 		DoubleAuxStreamBlock *auxsignal_block;
 		RamDrive *ramdrive;
-		volatile IntercoreStorageMessage *icc_message;
+		IntercoreStorageMessage *icc_message;
 		PatchFileList *patch_file_list;
 		std::span<char> *raw_patch_span;
 		PatchPlayer *patch_player;
