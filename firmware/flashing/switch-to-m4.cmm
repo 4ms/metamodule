@@ -6,7 +6,7 @@ PRIVATE &builddir
 &builddir=OS.FILE.PATH("&builddir")
 
 PRIVATE &elffile
-&elffile=OS.FILE.JOINPATH("&builddir", "../", "build", "mp1corea7", "medium", "main.elf")
+&elffile=OS.FILE.JOINPATH("&builddir", "../", "build", "mp1corem4", "medium", "main_m4.elf")
 &elffile=OS.FILE.REALPATH("&elffile")
 
 Data.LOAD.Elf "&elffile" /CPP /NoCode
