@@ -17,8 +17,8 @@ struct FirmwareUpdateTab {
 		, patch_playloader{patch_playloader}
 		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
+		lv_hide(ui_SystemMenuUpdateFWBut);
 		lv_obj_add_event_cb(ui_SystemMenuUpdateFWBut, updatebut_cb, LV_EVENT_CLICKED, this);
-		// lv_obj_add_event_cb(ui_SystemMenuUpdateFWBut, updatebut_cb, LV_EVENT_LEAVE, this);
 	}
 
 	void prepare_focus(lv_group_t *group) {
@@ -62,16 +62,18 @@ struct FirmwareUpdateTab {
 					} else {
 						display_file_not_found();
 					}
+					state = State::Idle;
 
 				} else if (message.message_type == FileStorageProxy::FirmwareFileNotFound) {
 					pr_dbg("A7: Message received: no fw file found\n");
 					display_file_not_found();
+					state = State::Idle;
 
 				} else if (message.message_type == FileStorageProxy::FirmwareFileUnchanged) {
 					pr_dbg("A7: Message received: no change in fw file status\n");
+					// 	state = State::Idle;
 				}
 
-				state = State::Idle;
 			} break;
 
 			case State::Loading: {
@@ -79,7 +81,7 @@ struct FirmwareUpdateTab {
 
 				if (message.message_type == FileStorageProxy::LoadFirmwareToRamSuccess) {
 					display_ram_loaded();
-					start_flash_loading();
+					start_flash_writing();
 					state = State::Writing;
 
 				} else if (message.message_type == FileStorageProxy::LoadFirmwareToRamFailed) {
@@ -133,7 +135,6 @@ private:
 							  update_file_vol == Volume::USB ? "USB" : "SD",
 							  update_filename.c_str(),
 							  (unsigned)update_filesize);
-		// lv_obj_clear_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
 		lv_show(ui_SystemMenuUpdateFWBut);
 		lv_group_set_editing(group, false);
 		lv_group_add_obj(group, ui_SystemMenuUpdateFWBut);
@@ -144,7 +145,6 @@ private:
 		lv_label_set_text(ui_SystemMenuUpdateMessage,
 						  "Insert an SD card or USB drive containing a firmware update file.");
 		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
-		// lv_obj_add_state(ui_SystemMenuUpdateFWBut, LV_STATE_DISABLED);
 		lv_hide(ui_SystemMenuUpdateFWBut);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
@@ -210,7 +210,7 @@ private:
 		state = State::Loading;
 	}
 
-	void start_flash_loading() {
+	void start_flash_writing() {
 		lv_show(ui_FWUpdateSpinner);
 
 		auto file_data = std::span<uint8_t>{reinterpret_cast<uint8_t *>(ram_buffer.get()), update_filesize};

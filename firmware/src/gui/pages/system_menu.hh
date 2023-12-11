@@ -30,7 +30,8 @@ struct SystemMenuPage : PageBase {
 		lv_hide(ui_FWUpdateSpinner);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
-		lv_hide(ui_SystemMenuUpdateFWBut);
+
+		fwupdate_page.prepare_focus(group);
 	}
 
 	void update() final {
@@ -40,6 +41,7 @@ struct SystemMenuPage : PageBase {
 			case Tabs::Status: {
 				if (pressed_back)
 					page_list.request_last_page();
+				//TODO: handle Status page
 			} break;
 
 			case Tabs::Update: {
@@ -53,6 +55,7 @@ struct SystemMenuPage : PageBase {
 			case Tabs::Test: {
 				if (pressed_back)
 					page_list.request_last_page();
+				//TODO: handle HW Test page
 			} break;
 		}
 	}
