@@ -108,6 +108,8 @@ public:
 			.vol_id = vol,
 			.buffer = buffer,
 		};
+		pr_dbg("Got buffer = %p %zu\n", buffer.data(), buffer.size());
+		pr_dbg("Send message buffer = %p %zu\n", message.buffer.data(), message.buffer.size());
 		if (!comm_.send_message(message))
 			return false;
 		return true;

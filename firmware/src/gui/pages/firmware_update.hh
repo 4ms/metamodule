@@ -69,8 +69,8 @@ struct FirmwareUpdateTab {
 					display_file_not_found();
 					state = State::Idle;
 
-				} else if (message.message_type == FileStorageProxy::FirmwareFileUnchanged) {
-					pr_dbg("A7: Message received: no change in fw file status\n");
+					// } else if (message.message_type == FileStorageProxy::FirmwareFileUnchanged) {
+					// 	pr_dbg("A7: Message received: no change in fw file status\n");
 					// 	state = State::Idle;
 				}
 

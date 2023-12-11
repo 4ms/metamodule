@@ -55,21 +55,21 @@ private:
 
 		std::optional<Volume> fw_file_vol{};
 
-		bool media_changed = false;
-		if (usb_changes_.take_change() || sd_changes_.take_change()) {
-			media_changed = true;
+		// bool media_changed = false;
+		// if (usb_changes_.take_change() || sd_changes_.take_change()) {
+		// 	media_changed = true;
 
-			if (usbdrive_.is_mounted()) {
-				if (scan(usbdrive_))
-					fw_file_vol = Volume::USB;
-			}
-
-			// Files found on USB take precedence over SD Card
-			if (!fw_file_vol && sdcard_.is_mounted()) {
-				if (scan(sdcard_))
-					fw_file_vol = Volume::SDCard;
-			}
+		if (usbdrive_.is_mounted()) {
+			if (scan(usbdrive_))
+				fw_file_vol = Volume::USB;
 		}
+
+		// Files found on USB take precedence over SD Card
+		if (!fw_file_vol && sdcard_.is_mounted()) {
+			if (scan(sdcard_))
+				fw_file_vol = Volume::SDCard;
+		}
+		// }
 
 		if (fw_file_vol) {
 			pending_send_message.message_type = FirmwareFileFound;
@@ -77,11 +77,11 @@ private:
 			pending_send_message.bytes_read = found_filesize;
 			pending_send_message.vol_id = fw_file_vol.value();
 
-		} else if (media_changed) {
+		} else { //if (media_changed) {
 			pending_send_message.message_type = FirmwareFileNotFound;
 
-		} else {
-			pending_send_message.message_type = FirmwareFileUnchanged;
+			// } else {
+			// 	pending_send_message.message_type = FirmwareFileUnchanged;
 		}
 	}
 
