@@ -7,7 +7,10 @@
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+#include "ld.h"
 #include "util/poll_event.hh"
+
+#include "uimg_header.hh"
 
 namespace MetaModule
 {
@@ -84,25 +87,16 @@ struct FirmwareUpdateTab {
 				auto message = file_storage.get_message();
 
 				if (message.message_type == FileStorageProxy::LoadFirmwareToRamSuccess) {
-					pr_dbg(
-						"First word is: %p: %x\n", ram_buffer.get(), *reinterpret_cast<uint32_t *>(ram_buffer.get()));
 					display_ram_loaded();
 					start_flash_writing();
 					state = State::Writing;
 
 				} else if (message.message_type == FileStorageProxy::LoadFirmwareToRamFailed) {
-					ram_buffer.reset();
 					display_ram_load_failed();
 					state = State::Failed;
 				}
 
-				status_poll.poll(lv_tick_get(), [] {
-					pr_dbg("Progress...\n");
-					//scan RAM for progress?
-					//zero-init ram_buffer before loading.
-					//read a word from ram_buffer every 16kB starting at end, going to beginning, until
-					//we find a non-zero word
-				});
+				status_poll.poll(lv_tick_get(), [] {});
 			} break;
 
 			case State::Writing: {
@@ -115,6 +109,7 @@ struct FirmwareUpdateTab {
 					if (!flash->write_sectors(cur_flash_addr, cur_read_block)) {
 						display_flash_write_failed();
 						state = State::Failed;
+						flash.reset();
 						break;
 					}
 					cur_flash_addr += flash_sector_size;
@@ -218,11 +213,14 @@ private:
 		while ((lv_tick_get() - time) < 100)
 			;
 
-		// Allocate memory for the firmware file
-		ram_buffer = std::make_unique_for_overwrite<char[]>(update_filesize);
-		pr_dbg("allocate %zu at %p\n", update_filesize, ram_buffer.get());
+		pr_dbg("Loading %zu B at %p\n", update_filesize, ram_buffer);
 
-		auto buffer_span = std::span<char>{ram_buffer.get(), update_filesize};
+		auto *uimg_header = reinterpret_cast<BootImageDef::ImageHeader *>(ram_buffer);
+		uimg_header->ih_magic = 0;
+		uimg_header->ih_size = 0;
+		BootImageDef::debug_print_raw_header(*uimg_header);
+
+		auto buffer_span = std::span<char>{reinterpret_cast<char *>(ram_buffer), update_filesize};
 		pr_dbg("span at %p\n", buffer_span.data());
 		if (buffer_span.data() == nullptr) {
 			display_allocate_failed();
@@ -250,12 +248,9 @@ private:
 	void start_flash_writing() {
 		lv_show(ui_FWUpdateSpinner);
 
-		mdrivlib::SystemCache::clean_dcache();
-		mdrivlib::SystemCache::invalidate_dcache();
-
-		uint32_t test_magic = *reinterpret_cast<uint32_t *>(ram_buffer.get());
-		pr_dbg("First word is: %p: %x\n", ram_buffer.get(), test_magic);
-		if (test_magic != 0x56190527) {
+		auto *uimg_header = reinterpret_cast<BootImageDef::ImageHeader *>(ram_buffer);
+		BootImageDef::debug_print_raw_header(*uimg_header);
+		if (uimg_header->ih_magic != 0x56190527) {
 			display_ram_load_failed();
 			state = State::Failed;
 		}
@@ -268,7 +263,7 @@ private:
 		}
 
 		bytes_remaining = update_filesize;
-		cur_read_block = std::span<uint8_t>{reinterpret_cast<uint8_t *>(ram_buffer.get()), flash_sector_size};
+		cur_read_block = std::span<uint8_t>{ram_buffer, flash_sector_size};
 
 		state = State::Writing;
 	}
@@ -292,10 +287,10 @@ private:
 
 	constexpr static uint32_t flash_base_addr = 0x80000;
 	constexpr static uint32_t flash_sector_size = 4096;
-	std::unique_ptr<char[]> ram_buffer;
 	std::unique_ptr<FlashLoader> flash;
 	int bytes_remaining = 0;
 	uint32_t cur_flash_addr = flash_base_addr;
+	uint8_t *ram_buffer = reinterpret_cast<uint8_t *>(_VIRTDRIVE);
 	std::span<uint8_t> cur_read_block;
 };
 } // namespace MetaModule
