@@ -12,7 +12,7 @@ namespace MetaModule
 
 struct FirmwareUpdateTab {
 	FirmwareUpdateTab(FileStorageProxy &patch_storage, PatchPlayLoader &patch_playloader)
-		: patch_storage{patch_storage}
+		: file_storage{patch_storage}
 		, patch_playloader{patch_playloader}
 		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
@@ -44,14 +44,14 @@ struct FirmwareUpdateTab {
 			case State::Idle: {
 				media_poll.poll(lv_tick_get(), [this] {
 					pr_dbg("\nA7: send message request_firmware_file\n");
-					if (patch_storage.request_find_firmware_file())
+					if (file_storage.request_find_firmware_file())
 						state = State::Scanning;
 				});
 
 			} break;
 
 			case State::Scanning: {
-				auto message = patch_storage.get_message();
+				auto message = file_storage.get_message();
 
 				if (message.message_type == FileStorageProxy::FirmwareFileFound) {
 					pr_dbg("A7: Message received: fw file found: %.255s\n", message.filename.data());
@@ -75,7 +75,7 @@ struct FirmwareUpdateTab {
 			} break;
 
 			case State::Updating: {
-				auto message = patch_storage.get_message();
+				auto message = file_storage.get_message();
 
 				if (message.message_type == FileStorageProxy::LoadFirmwareToRamSuccess) {
 					display_ram_loaded();
@@ -162,7 +162,7 @@ private:
 		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
 							  "Not enough free RAM to load file (need %u kB). Try rebooting.",
-							  update_filesize / 1024);
+							  int(update_filesize / 1024));
 		lv_hide(ui_FWUpdateSpinner);
 	}
 
@@ -175,8 +175,9 @@ private:
 
 		// Allocate memory for the firmware file
 		ram_buffer = std::make_unique_for_overwrite<char[]>(update_filesize);
-		char *load_ptr = ram_buffer.get();
-		if (load_ptr == nullptr) {
+
+		auto buffer_span = std::span<char>{ram_buffer.get(), update_filesize};
+		if (buffer_span.data() == nullptr) {
 			display_allocate_failed();
 			state = State::Failed;
 		}
@@ -184,13 +185,13 @@ private:
 		lv_hide(ui_SystemMenuUpdateFWBut);
 
 		// Keep trying to send message
-		while (!patch_storage.request_load_fw_to_ram(update_filename, update_file_vol, load_ptr))
+		while (!file_storage.request_load_file(update_filename, update_file_vol, buffer_span))
 			;
 
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
 							  "Loading update file %s (%u kB)... Please wait\n",
 							  update_filename.data(),
-							  update_filesize / 1024);
+							  int(update_filesize / 1024));
 		lv_show(ui_FWUpdateSpinner);
 		state = State::Updating;
 	}
@@ -199,7 +200,7 @@ private:
 		// TODO: Nor Flash Loader: copy ram_buffer to NORFlash at 0x70008000
 	}
 
-	FileStorageProxy &patch_storage;
+	FileStorageProxy &file_storage;
 	PatchPlayLoader &patch_playloader;
 
 	lv_group_t *group;

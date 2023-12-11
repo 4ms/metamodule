@@ -126,11 +126,10 @@ private:
 		FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
 							(message.vol_id == Volume::SDCard) ? &sdcard_ :
 																 nullptr;
-		bool success = ram_loader.load_to_ram(fileio, message.filename, message.bytes_read, message.address);
+		bool success = ram_loader.load_to_ram(fileio, message.filename, message.buffer);
 		if (success) {
 			pending_send_message.message_type = LoadFirmwareToRamSuccess;
-			pending_send_message.bytes_read = message.bytes_read;
-			pending_send_message.address = message.address;
+			pending_send_message.buffer = message.buffer;
 		} else {
 			pending_send_message.message_type = LoadFirmwareToRamFailed;
 		}

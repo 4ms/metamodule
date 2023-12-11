@@ -3,6 +3,7 @@
 #include "util/static_string.hh"
 #include <array>
 #include <cstdint>
+#include <span>
 
 namespace MetaModule
 {
@@ -35,7 +36,7 @@ struct IntercoreStorageMessage {
 	uint32_t patch_id;
 	StaticString<255> filename;
 	Volume vol_id;
-	uintptr_t address;
+	std::span<char> buffer;
 
 	// Note: return type is void because gcc gives a warning for `volatile T&operator=(const T&){...}`
 	// warning: implicit dereference will not access object of type 'volatile T' in statement

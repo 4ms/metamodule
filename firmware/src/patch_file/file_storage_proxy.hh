@@ -24,6 +24,13 @@ public:
 		, raw_patch_data_{raw_patch_data} {
 	}
 
+	IntercoreStorageMessage get_message() {
+		return comm_.get_new_message();
+	}
+
+	//
+	// viewpatch: Patch we are currently viewing in the GUI:
+	//
 	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
 		IntercoreStorageMessage message{
 			.message_type = RequestPatchData,
@@ -65,10 +72,9 @@ public:
 		return view_patch_vol_;
 	}
 
-	IntercoreStorageMessage get_message() {
-		return comm_.get_new_message();
-	}
-
+	//
+	// patchlist: list of all patches found on all volumes
+	//
 	[[nodiscard]] bool request_patchlist() {
 		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList};
 		if (!comm_.send_message(message))
@@ -84,6 +90,8 @@ public:
 		return remote_patch_list_;
 	}
 
+	//
+	// Firmare file: scanning volumes for firmware update files
 	[[nodiscard]] bool request_find_firmware_file() {
 		IntercoreStorageMessage message{.message_type = RequestFirmwareFile};
 		if (!comm_.send_message(message))
@@ -91,12 +99,13 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool request_load_fw_to_ram(std::string_view filename, Volume vol, char *address) {
+	// loading a file to RAM
+	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
 		IntercoreStorageMessage message{
 			.message_type = RequestLoadFirmwareToRam,
 			.filename = filename,
 			.vol_id = vol,
-			.address = reinterpret_cast<uintptr_t>(address),
+			.buffer = buffer,
 		};
 		if (!comm_.send_message(message))
 			return false;
