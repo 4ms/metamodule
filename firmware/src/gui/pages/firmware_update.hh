@@ -31,12 +31,12 @@ struct FirmwareUpdateTab {
 	bool try_go_back() {
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
-			return false;
+			return false; //do not go back, just hide popup
 		}
 		if (state == State::Idle || state == State::Failed)
-			return true;
+			return true; //OK to go back
 		else
-			return false;
+			return false; //cannot go back: un-interruptable operation in progress
 	}
 
 	void update() {
