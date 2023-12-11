@@ -30,6 +30,7 @@ struct FirmwareFileFinder {
 		}
 
 		if (message.message_type == RequestLoadFirmwareToRam) {
+			pr_dbg("M4: got RequestLoadFirmwareToRam\n");
 			load_firmware_file(message);
 			message.message_type = None;
 		}
@@ -55,10 +56,6 @@ private:
 
 		std::optional<Volume> fw_file_vol{};
 
-		// bool media_changed = false;
-		// if (usb_changes_.take_change() || sd_changes_.take_change()) {
-		// 	media_changed = true;
-
 		if (usbdrive_.is_mounted()) {
 			if (scan(usbdrive_))
 				fw_file_vol = Volume::USB;
@@ -77,11 +74,8 @@ private:
 			pending_send_message.bytes_read = found_filesize;
 			pending_send_message.vol_id = fw_file_vol.value();
 
-		} else { //if (media_changed) {
+		} else {
 			pending_send_message.message_type = FirmwareFileNotFound;
-
-			// } else {
-			// 	pending_send_message.message_type = FirmwareFileUnchanged;
 		}
 	}
 
@@ -127,10 +121,14 @@ private:
 							(message.vol_id == Volume::SDCard) ? &sdcard_ :
 																 nullptr;
 		bool success = ram_loader.load_to_ram(fileio, message.filename, message.buffer);
+
 		if (success) {
+			pr_dbg("M4: Loaded OK. first word is %p: %x\n",
+				   message.buffer.data(),
+				   *reinterpret_cast<uint32_t *>(message.buffer.data()));
 			pending_send_message.message_type = LoadFirmwareToRamSuccess;
-			pending_send_message.buffer = message.buffer;
 		} else {
+			pr_dbg("M4: Failed Load\n");
 			pending_send_message.message_type = LoadFirmwareToRamFailed;
 		}
 	}

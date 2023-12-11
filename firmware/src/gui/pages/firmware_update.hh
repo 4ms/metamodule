@@ -1,4 +1,5 @@
 #pragma once
+#include "drivers/cache.hh"
 #include "flash_loader/flash_loader.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
@@ -43,11 +44,13 @@ struct FirmwareUpdateTab {
 		switch (state) {
 
 			case State::Idle: {
-				media_poll.poll(lv_tick_get(), [this] {
-					pr_dbg("\nA7: send message request_firmware_file\n");
-					if (file_storage.request_find_firmware_file())
-						state = State::Scanning;
-				});
+				if (!confirm_popup.is_visible()) {
+					media_poll.poll(lv_tick_get(), [this] {
+						pr_dbg("\nA7: send message request_firmware_file\n");
+						if (file_storage.request_find_firmware_file())
+							state = State::Scanning;
+					});
+				}
 			} break;
 
 			case State::Scanning: {
@@ -60,6 +63,7 @@ struct FirmwareUpdateTab {
 						update_filesize = message.bytes_read;
 						display_file_found();
 					} else {
+						pr_dbg("Filename empty, skipping\n");
 						display_file_not_found();
 					}
 					state = State::Idle;
@@ -80,6 +84,8 @@ struct FirmwareUpdateTab {
 				auto message = file_storage.get_message();
 
 				if (message.message_type == FileStorageProxy::LoadFirmwareToRamSuccess) {
+					pr_dbg(
+						"First word is: %p: %x\n", ram_buffer.get(), *reinterpret_cast<uint32_t *>(ram_buffer.get()));
 					display_ram_loaded();
 					start_flash_writing();
 					state = State::Writing;
@@ -100,7 +106,28 @@ struct FirmwareUpdateTab {
 			} break;
 
 			case State::Writing: {
-				status_poll.poll(lv_tick_get(), [] { pr_dbg("Writing Progress...\n"); });
+				if (bytes_remaining > 0) {
+					lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
+										  "Writing update file to flash: %u of %u kB... DO NOT POWER OFF",
+										  unsigned((update_filesize - bytes_remaining) / 1024),
+										  unsigned(update_filesize / 1024));
+
+					if (!flash->write_sectors(cur_flash_addr, cur_read_block)) {
+						display_flash_write_failed();
+						state = State::Failed;
+						break;
+					}
+					cur_flash_addr += flash_sector_size;
+					bytes_remaining -= flash_sector_size;
+					cur_read_block =
+						cur_read_block.subspan(flash_sector_size, std::min<int>(flash_sector_size, bytes_remaining));
+				} else {
+					display_success();
+					state = State::Success;
+				}
+			} break;
+
+			case State::Success: {
 			} break;
 
 			case State::Failed: {
@@ -177,6 +204,13 @@ private:
 		lv_hide(ui_FWUpdateSpinner);
 	}
 
+	void display_success() {
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
+		lv_label_set_text(ui_SystemMenuUpdateMessage, "Firmware has been updated! Please power off and back on now");
+
+		lv_hide(ui_FWUpdateSpinner);
+	}
+
 	void start_ram_loading() {
 		patch_playloader.stop_audio();
 		// Pause long enough for audio to stop
@@ -186,8 +220,10 @@ private:
 
 		// Allocate memory for the firmware file
 		ram_buffer = std::make_unique_for_overwrite<char[]>(update_filesize);
+		pr_dbg("allocate %zu at %p\n", update_filesize, ram_buffer.get());
 
 		auto buffer_span = std::span<char>{ram_buffer.get(), update_filesize};
+		pr_dbg("span at %p\n", buffer_span.data());
 		if (buffer_span.data() == nullptr) {
 			display_allocate_failed();
 			state = State::Failed;
@@ -196,6 +232,7 @@ private:
 		lv_hide(ui_SystemMenuUpdateFWBut);
 
 		// Keep trying to send message
+		pr_dbg("\nA7: send message request_load_file to %p %zu\n", buffer_span.data(), buffer_span.size());
 		while (!file_storage.request_load_file(update_filename, update_file_vol, buffer_span)) {
 			auto time = lv_tick_get();
 			while ((lv_tick_get() - time) < 20)
@@ -213,38 +250,27 @@ private:
 	void start_flash_writing() {
 		lv_show(ui_FWUpdateSpinner);
 
-		auto file_data = std::span<uint8_t>{reinterpret_cast<uint8_t *>(ram_buffer.get()), update_filesize};
-		unsigned bytes_written = 0;
-		int bytes_remaining = file_data.size();
+		mdrivlib::SystemCache::clean_dcache();
+		mdrivlib::SystemCache::invalidate_dcache();
 
-		FlashLoader flash;
+		uint32_t test_magic = *reinterpret_cast<uint32_t *>(ram_buffer.get());
+		pr_dbg("First word is: %p: %x\n", ram_buffer.get(), test_magic);
+		if (test_magic != 0x56190527) {
+			display_ram_load_failed();
+			state = State::Failed;
+		}
 
-		if (!flash.check_flash_chip()) {
+		flash = std::make_unique<FlashLoader>();
+
+		if (!flash->check_flash_chip()) {
 			display_flash_write_failed();
 			state = State::Failed;
 		}
 
-		uint32_t flash_base_addr = 0x80000;
+		bytes_remaining = update_filesize;
+		cur_read_block = std::span<uint8_t>{reinterpret_cast<uint8_t *>(ram_buffer.get()), flash_sector_size};
 
-		uint32_t cur_addr = flash_base_addr;
-		std::span<uint8_t> cur_sector{file_data.subspan(0, 4096)};
-
-		while (bytes_remaining > 0) {
-			lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
-								  "Writing update file to flash: %.2f of %.2f kB... DO NOT POWER OFF",
-								  (bytes_written / 1024.f),
-								  (file_data.size() / 1024.f));
-
-			if (!flash.write_sectors(cur_addr, cur_sector)) {
-				display_flash_write_failed();
-				state = State::Failed;
-				break;
-			}
-			cur_addr += 4096;
-			bytes_written += 4096;
-			bytes_remaining -= 4096;
-			cur_sector = cur_sector.subspan(4096, std::min(4096, bytes_remaining));
-		}
+		state = State::Writing;
 	}
 
 	FileStorageProxy &file_storage;
@@ -262,8 +288,14 @@ private:
 	PollEvent media_poll{2000};
 	PollEvent status_poll{200};
 
-	enum class State { Idle, Scanning, Loading, Writing, Failed } state = State::Idle;
+	enum class State { Idle, Scanning, Loading, Writing, Failed, Success } state = State::Idle;
 
+	constexpr static uint32_t flash_base_addr = 0x80000;
+	constexpr static uint32_t flash_sector_size = 4096;
 	std::unique_ptr<char[]> ram_buffer;
+	std::unique_ptr<FlashLoader> flash;
+	int bytes_remaining = 0;
+	uint32_t cur_flash_addr = flash_base_addr;
+	std::span<uint8_t> cur_read_block;
 };
 } // namespace MetaModule
