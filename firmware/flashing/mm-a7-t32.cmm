@@ -1,17 +1,33 @@
+; Load a multi-uimg file to DDR RAM, and then trigger MP1-Boot to process it
+; This assumes this script is in flashing/, and the uimg file is build/main.uimg
+; and the elf file (used for symbols) is build/mp1corea7/medium/main.elf
+
+PRIVATE &builddir
+&builddir=OS.PPF()
+&builddir=OS.FILE.PATH("&builddir")
+
+PRIVATE &binfile
+&binfile=OS.FILE.JOINPATH("&builddir", "../", "build", "main.uimg")
+&binfile=OS.FILE.REALPATH("&binfile")
+
+PRIVATE &elffile
+&elffile=OS.FILE.JOINPATH("&builddir", "../", "build", "mp1corea7", "medium", "main.elf")
+&elffile=OS.FILE.REALPATH("&elffile")
+
 RESet
 SYStem.RESet
 
 SYStem.CPU STM32MP153D-CA7
 SYStem.JtagClock 50MHz
 CORE.ASSIGN 1. 2.
-;SYStem.CONFIG.COREDEBUG.Base DAP:0xE00D0000 DAP:0xE00D2000
-;sys.o.WaitReset 1.s
 
 Trace.DISable
 SYStem.MemAccess DAP
 SYStem.Up
 
-Data.LOAD.Elf /Users/dann/4ms/stm32/meta-module/firmware/build/mp1corea7/medium/main.elf /CPP
+Data.LOAD.Binary "&binfile" 0xC0000000
+Data.LOAD.Elf "&elffile" /CPP /NoCode
+PER.Set.simple AZSD:0x0:0x5C00A118 %Long 0xC0000000
 ;Break main
 Go
 
@@ -19,14 +35,4 @@ Trace.METHOD ONCHIP
 ETM.Trace ON
 ETM.ON
 
-B::sYmbol.AddInfo.Type std::_Vector_base<? TABLE "(#o)._M_impl._M_finish-(#o)._M_impl._M_start" "(#o)._M_impl._M_start"
-B::sYmbol.AddInfo.Type std::vector<? TABLE "(#o)._M_impl._M_finish-(#o)._M_impl._M_start" "(#o)._M_impl._M_start"
-;\callable\main\patch_list
-;\\main\callable\main\patch_list
 ENDDO
-
-
-
-
-
-
