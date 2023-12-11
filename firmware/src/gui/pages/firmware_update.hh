@@ -1,4 +1,5 @@
 #pragma once
+#include "flash_loader/flash_loader.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
@@ -47,7 +48,6 @@ struct FirmwareUpdateTab {
 					if (file_storage.request_find_firmware_file())
 						state = State::Scanning;
 				});
-
 			} break;
 
 			case State::Scanning: {
@@ -74,13 +74,13 @@ struct FirmwareUpdateTab {
 				state = State::Idle;
 			} break;
 
-			case State::Updating: {
+			case State::Loading: {
 				auto message = file_storage.get_message();
 
 				if (message.message_type == FileStorageProxy::LoadFirmwareToRamSuccess) {
 					display_ram_loaded();
 					start_flash_loading();
-					state = State::Updating;
+					state = State::Writing;
 
 				} else if (message.message_type == FileStorageProxy::LoadFirmwareToRamFailed) {
 					ram_buffer.reset();
@@ -95,6 +95,10 @@ struct FirmwareUpdateTab {
 					//read a word from ram_buffer every 16kB starting at end, going to beginning, until
 					//we find a non-zero word
 				});
+			} break;
+
+			case State::Writing: {
+				status_poll.poll(lv_tick_get(), [] { pr_dbg("Writing Progress...\n"); });
 			} break;
 
 			case State::Failed: {
@@ -166,6 +170,13 @@ private:
 		lv_hide(ui_FWUpdateSpinner);
 	}
 
+	void display_flash_write_failed() {
+		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
+		lv_label_set_text(ui_SystemMenuUpdateMessage, "Could not write to internal Flash.");
+
+		lv_hide(ui_FWUpdateSpinner);
+	}
+
 	void start_ram_loading() {
 		patch_playloader.stop_audio();
 		// Pause long enough for audio to stop
@@ -196,11 +207,44 @@ private:
 							  update_filename.data(),
 							  int(update_filesize / 1024));
 		lv_show(ui_FWUpdateSpinner);
-		state = State::Updating;
+		state = State::Loading;
 	}
 
 	void start_flash_loading() {
-		auto buffer_span = std::span<char>{ram_buffer.get(), update_filesize};
+		lv_show(ui_FWUpdateSpinner);
+
+		auto file_data = std::span<uint8_t>{reinterpret_cast<uint8_t *>(ram_buffer.get()), update_filesize};
+		unsigned bytes_written = 0;
+		int bytes_remaining = file_data.size();
+
+		FlashLoader flash;
+
+		if (!flash.check_flash_chip()) {
+			display_flash_write_failed();
+			state = State::Failed;
+		}
+
+		uint32_t flash_base_addr = 0x80000;
+
+		uint32_t cur_addr = flash_base_addr;
+		std::span<uint8_t> cur_sector{file_data.subspan(0, 4096)};
+
+		while (bytes_remaining > 0) {
+			lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
+								  "Writing update file to flash: %.2f of %.2f kB... DO NOT POWER OFF",
+								  (bytes_written / 1024.f),
+								  (file_data.size() / 1024.f));
+
+			if (!flash.write_sectors(cur_addr, cur_sector)) {
+				display_flash_write_failed();
+				state = State::Failed;
+				break;
+			}
+			cur_addr += 4096;
+			bytes_written += 4096;
+			bytes_remaining -= 4096;
+			cur_sector = cur_sector.subspan(4096, std::min(4096, bytes_remaining));
+		}
 	}
 
 	FileStorageProxy &file_storage;
@@ -218,7 +262,7 @@ private:
 	PollEvent media_poll{2000};
 	PollEvent status_poll{200};
 
-	enum class State { Idle, Scanning, Updating, Failed } state = State::Idle;
+	enum class State { Idle, Scanning, Loading, Writing, Failed } state = State::Idle;
 
 	std::unique_ptr<char[]> ram_buffer;
 };
