@@ -11,14 +11,14 @@
 namespace MetaModule::BootloaderUpdater
 {
 
-struct FlashLoaderClocks {
-	FlashLoaderClocks() {
+struct BootloaderUpdaterClocks {
+	BootloaderUpdaterClocks() {
 		using namespace mdrivlib;
 		SystemClocks::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
 	}
 };
 
-struct SystemInit : FlashLoaderClocks, Debug, UartLog {
+struct SystemInit : BootloaderUpdaterClocks, Debug, UartLog {
 } _sysinit;
 
 static void panic();
