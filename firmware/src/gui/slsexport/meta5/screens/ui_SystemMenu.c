@@ -54,7 +54,7 @@ ui_SystemMenuFWversion = lv_label_create(ui_SystemMenuInfoTab);
 lv_obj_set_width( ui_SystemMenuFWversion, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_SystemMenuFWversion, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuFWversion, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SystemMenuFWversion,"Firmware version 0.5.1");
+lv_label_set_text(ui_SystemMenuFWversion,"Update Firmware");
 lv_obj_set_style_text_font(ui_SystemMenuFWversion, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SystemMenuExpanders = lv_label_create(ui_SystemMenuInfoTab);
