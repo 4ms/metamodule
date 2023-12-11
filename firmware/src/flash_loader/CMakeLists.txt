@@ -12,6 +12,7 @@ add_executable(
   ${FWDIR}/system/startup_ca7.s
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
+  ${FWDIR}/src/flash_loader/flash_loader_main.cc
   #
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
