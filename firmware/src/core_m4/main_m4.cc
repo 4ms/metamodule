@@ -10,7 +10,7 @@
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
 #include "drivers/system_clocks.hh"
-#include "firmware_files.hh"
+#include "firmware_file_finder.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "fs/fatfs/sd_host.hh"
 #include "fs/ramdisk.hh"
@@ -55,8 +55,10 @@ void main() {
 	auto param_block_base = SharedMemoryS::ptrs.param_block;
 	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
 	auto virtdrive = SharedMemoryS::ptrs.ramdrive;
-	auto raw_patch_span = SharedMemoryS::ptrs.raw_patch_span;
 	auto shared_message = SharedMemoryS::ptrs.icc_message;
+
+	// TODO: don't need to have raw_patch_span or shared_patch_file_list
+	auto raw_patch_span = SharedMemoryS::ptrs.raw_patch_span;
 	auto shared_patch_file_list = SharedMemoryS::ptrs.patch_file_list;
 
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
@@ -78,9 +80,10 @@ void main() {
 
 	// IO with USB and SD Card
 	InterCoreComm<ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm{*shared_message};
+	// TODO: don't need to send raw_patch_span or shared_patch_file_list
 	PatchStorage patch_storage{
 		*raw_patch_span, *shared_patch_file_list, sdcard_fileio, usb_fileio, reload_default_patches};
-	FirmwareFileFinder firmware_files{*raw_patch_span, sdcard_fileio, usb_fileio};
+	FirmwareFileFinder firmware_files{sdcard_fileio, usb_fileio};
 
 	// Controls
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};

@@ -185,8 +185,11 @@ private:
 		lv_hide(ui_SystemMenuUpdateFWBut);
 
 		// Keep trying to send message
-		while (!file_storage.request_load_file(update_filename, update_file_vol, buffer_span))
-			;
+		while (!file_storage.request_load_file(update_filename, update_file_vol, buffer_span)) {
+			auto time = lv_tick_get();
+			while ((lv_tick_get() - time) < 20)
+				;
+		}
 
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
 							  "Loading update file %s (%u kB)... Please wait\n",
@@ -197,7 +200,7 @@ private:
 	}
 
 	void start_flash_loading() {
-		// TODO: Nor Flash Loader: copy ram_buffer to NORFlash at 0x70008000
+		auto buffer_span = std::span<char>{ram_buffer.get(), update_filesize};
 	}
 
 	FileStorageProxy &file_storage;

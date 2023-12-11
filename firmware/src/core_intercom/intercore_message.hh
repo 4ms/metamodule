@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <span>
+#include <variant>
 
 namespace MetaModule
 {
@@ -32,11 +33,46 @@ struct IntercoreStorageMessage {
 		NumRequests,
 	};
 	MessageType message_type;
+
 	uint32_t bytes_read;
-	uint32_t patch_id;
+	uint32_t patch_id; //DEPRECATE: use filename
 	StaticString<255> filename;
 	Volume vol_id;
 	std::span<char> buffer;
+	uint32_t write_address;
+
+	///////////////////////////////////////
+	// TODO: Use this instead of MessageType
+
+	struct PatchFileList;
+	struct PatchData;
+
+	struct PatchListMsg {
+		PatchFileList &patch_list;
+		enum class Result { Unchanged, Changed } result;
+	};
+	struct PatchDataLoadMsg {
+		PatchData &patch_data;
+		Volume vol;
+		unsigned patch_id; //change to filename
+		// StaticString<255> filename;
+		enum class Result { LoadFailed, LoadOK } result;
+	};
+	struct FirmwareFindMsg {
+		StaticString<255> filename;
+		Volume vol_id;
+		uint32_t filesize;
+		enum class Result { Unchanged, FileFound, NotFound } result;
+	};
+	struct FileLoadMsg {
+		std::span<char> buffer;
+		StaticString<255> filename;
+		Volume vol_id;
+		enum class Result { Failed, Success } result;
+	};
+
+	using Message = std::variant<PatchListMsg, PatchDataLoadMsg, FirmwareFindMsg, FileLoadMsg>;
+	////////////////////////////////////////
 
 	// Note: return type is void because gcc gives a warning for `volatile T&operator=(const T&){...}`
 	// warning: implicit dereference will not access object of type 'volatile T' in statement

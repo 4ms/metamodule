@@ -45,6 +45,7 @@ public:
 		return true;
 	}
 
+	// TODO: pass the span as an arg, not as a member var
 	bool parse_view_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
 
@@ -75,6 +76,7 @@ public:
 	//
 	// patchlist: list of all patches found on all volumes
 	//
+	// TODO: sender passes a reference to a PatchFileList which should be populated
 	[[nodiscard]] bool request_patchlist() {
 		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList};
 		if (!comm_.send_message(message))
@@ -90,7 +92,6 @@ public:
 		return remote_patch_list_;
 	}
 
-	//
 	// Firmare file: scanning volumes for firmware update files
 	[[nodiscard]] bool request_find_firmware_file() {
 		IntercoreStorageMessage message{.message_type = RequestFirmwareFile};
@@ -99,7 +100,7 @@ public:
 		return true;
 	}
 
-	// loading a file to RAM
+	// Load a file to RAM
 	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
 		IntercoreStorageMessage message{
 			.message_type = RequestLoadFirmwareToRam,

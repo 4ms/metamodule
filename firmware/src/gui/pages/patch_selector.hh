@@ -162,6 +162,7 @@ struct PatchSelectorPage : PageBase {
 
 		switch (state) {
 			case State::TryingToRequestPatchList:
+				//TODO: pass in a member var PatchList patch_list
 				if (patch_storage.request_patchlist())
 					state = State::RequestedPatchList;
 				break;
@@ -179,6 +180,7 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::ReloadingPatchList:
+				//TODO: use our member var patch_list, not patch_storage
 				refresh_patchlist(patch_storage.get_patch_list());
 				refresh_volume_labels();
 				hide_spinner();
