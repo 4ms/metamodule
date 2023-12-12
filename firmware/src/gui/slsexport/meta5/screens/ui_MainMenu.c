@@ -99,7 +99,7 @@ lv_obj_set_style_pad_top(ui_MainMenuLoadMeter, 2, LV_PART_MAIN| LV_STATE_DEFAULT
 lv_obj_set_style_pad_bottom(ui_MainMenuLoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_MainMenuPanel = lv_obj_create(ui_MainMenu);
-lv_obj_set_height( ui_MainMenuPanel, 140);
+lv_obj_set_height( ui_MainMenuPanel, 131);
 lv_obj_set_width( ui_MainMenuPanel, lv_pct(100));
 lv_obj_set_align( ui_MainMenuPanel, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_MainMenuPanel,LV_FLEX_FLOW_ROW);
