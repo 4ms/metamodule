@@ -1,3 +1,32 @@
+-------------------------------------------------------
+
+## Important breaking change!
+Firmware releases 0.6.0 and later require a new bootloader.
+If you received your hardware unit prior to Dec 12, 2023 
+then you have the old bootloader and you MUST update your bootloader in order to run new firmware.
+
+If you are booting from Flash (not SD Card), do this:
+- Go to the (GitHub Releases page)[https://github.com/4ms/metamodule/releases]
+- Look for Firmware Version 0.6.0. 
+- Download the `flash_loader.uimg` file.
+- Use Web-DFU or command-line dfu-util to upload this to your device as if it were a normal firmware update. 
+- Reboot so that the flash loader can run once. When the lights blink green and blue, power off.
+- Now download the latest normal firmware update (`main.uimg`) file from GitHub Releases and load it using Web DFU or dfu-util.
+- For instructions using Web-DFU, see the [user firmware update page](../docs/user-firmware-update.md)
+- For more instructions on the Flash Loader, see its [README](src/flash_loader/README.md)
+
+If you are booting from SD Card (not flash), then you need to copy the new bootloader to the SD Card.
+```
+sudo dd if=firmware/src/flash_loader/fsbl.stm32 of=/dev/diskXs1
+sudo dd if=firmware/src/flash_loader/fsbl.stm32 of=/dev/diskXs2
+```
+... where `/dev/diskXs1` and `/dev/diskXs2` are the first and second partitions of your SD Card.
+
+Alternatively, you could create a new SD Card by following the 
+Boot from SD Card instructions below.
+
+-------------------------------------------------------
+
 ## Loading firmware onto the MetaModule
 
 You have several choices for how to load the firmware applcation. Each one is covered 
