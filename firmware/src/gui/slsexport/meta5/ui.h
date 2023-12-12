@@ -35,9 +35,6 @@ extern lv_obj_t *ui_MenuLabelSave;
 extern lv_obj_t *ui_MenuPanelSettings;
 extern lv_obj_t *ui_MenuImageSettings;
 extern lv_obj_t *ui_MenuLabelSettings;
-extern lv_obj_t *ui_MenuPanelSystem;
-extern lv_obj_t *ui_MenuImageSystem;
-extern lv_obj_t *ui_MenuLabelSystem;
 // SCREEN: ui_PatchSelectorPage
 void ui_PatchSelectorPage_screen_init(void);
 extern lv_obj_t *ui_PatchSelectorPage;
@@ -254,9 +251,9 @@ extern lv_obj_t *ui____initial_actions0;
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png
 LV_IMG_DECLARE( ui_img_1x_add1_png);   // assets/1x/Add1.png
 LV_IMG_DECLARE( ui_img_1x_settings1_png);   // assets/1x/Settings1.png
-LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
 LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
 LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
+LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);

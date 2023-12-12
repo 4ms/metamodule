@@ -28,9 +28,6 @@ lv_obj_t *ui_MenuLabelSave;
 lv_obj_t *ui_MenuPanelSettings;
 lv_obj_t *ui_MenuImageSettings;
 lv_obj_t *ui_MenuLabelSettings;
-lv_obj_t *ui_MenuPanelSystem;
-lv_obj_t *ui_MenuImageSystem;
-lv_obj_t *ui_MenuLabelSystem;
 
 
 // SCREEN: ui_PatchSelectorPage
