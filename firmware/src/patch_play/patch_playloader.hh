@@ -52,6 +52,13 @@ struct PatchPlayLoader {
 		}
 	}
 
+	void stop_audio() {
+		stopping_audio_ = true;
+	}
+
+	void start_audio() {
+	}
+
 	// loading_new_patch_:
 	// UI thread WRITE
 	// Audio thread READ
@@ -59,8 +66,8 @@ struct PatchPlayLoader {
 		loading_new_patch_ = true;
 	}
 
-	bool is_loading_new_patch() {
-		return loading_new_patch_;
+	bool should_fade_down_audio() {
+		return loading_new_patch_ || stopping_audio_;
 	}
 
 	// loaded_patch_:
@@ -84,13 +91,14 @@ struct PatchPlayLoader {
 	void audio_not_muted() {
 		audio_is_muted_ = false;
 	}
-	bool is_audio_muted() {
-		return audio_is_muted_;
+
+	bool ready_to_play() {
+		return !stopping_audio_ && !audio_is_muted_ && player_.is_loaded;
 	}
 
 	// Concurrency: Called from UI thread
 	void handle_sync_patch_loading() {
-		if (is_loading_new_patch() && is_audio_muted()) {
+		if (loading_new_patch_ && audio_is_muted_) {
 			if (_load_patch())
 				pr_dbg("Patch loaded\n");
 			else
@@ -106,6 +114,7 @@ private:
 
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
+	std::atomic<bool> stopping_audio_ = false;
 
 	PatchLocation loaded_patch_;
 	ModuleTypeSlug loaded_patch_name_ = "";
