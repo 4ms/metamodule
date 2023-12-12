@@ -2,9 +2,11 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/firmware_update.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+#include "util/poll_event.hh"
 
 namespace MetaModule
 {
@@ -12,6 +14,7 @@ namespace MetaModule
 struct SystemMenuPage : PageBase {
 	SystemMenuPage(PatchInfo info)
 		: PageBase{info, PageId::SystemMenu}
+		, fwupdate_page{patch_storage, patch_playloader}
 		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
 		init_bg(ui_SystemMenu);
@@ -21,17 +24,23 @@ struct SystemMenuPage : PageBase {
 		lv_group_set_editing(group, true);
 
 		lv_obj_add_event_cb(tabs, tab_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_clear_flag(ui_SystemMenuUpdateFWBut, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void prepare_focus() final {
 		lv_hide(ui_FWUpdateSpinner);
+		lv_tabview_set_act(ui_SystemMenuTabView, 0, LV_ANIM_OFF);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
 	}
 
 	void update() final {
 		bool pressed_back = metaparams.meta_buttons[0].is_just_released();
+
+		if (active_tab == Tabs::Update) {
+			fwupdate_page.update();
+			if (pressed_back && !fwupdate_page.consume_back_event())
+				pressed_back = false;
+		}
 
 		if (pressed_back) {
 			if (lv_group_get_focused(group) == tabs)
@@ -54,35 +63,32 @@ private:
 		if (!page)
 			return;
 
-		auto clicked_tab = lv_btnmatrix_get_selected_btn(page->tabs);
-		if (clicked_tab >= 0 && clicked_tab < NumTabs)
-			page->active_tab = static_cast<Tabs>(clicked_tab);
-
-		switch (clicked_tab) {
+		switch (lv_btnmatrix_get_selected_btn(page->tabs)) {
 			case Tabs::Status: {
-				//...
+				page->active_tab = Tabs::Status;
+				lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
 				break;
 			}
 
 			case Tabs::Update: {
-				lv_group_remove_all_objs(page->group);
-				lv_group_add_obj(page->group, ui_SystemMenuUpdateFWBut);
-				lv_label_set_text(ui_SystemMenuUpdateMessage,
-								  "**NOT IMPLEMENTED** Insert an SD card or USB drive containing a firmware update file.");
+				page->active_tab = Tabs::Update;
+				page->fwupdate_page.prepare_focus(page->group);
 				break;
 			}
 
 			case Tabs::Check: {
-				//...
+				page->active_tab = Tabs::Check;
+				lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
 				break;
 			}
 
 			case Tabs::Prefs: {
-				//...
 				break;
 			}
 		}
 	}
+
+	FirmwareUpdateTab fwupdate_page;
 
 	enum Tabs { Status = 0, Prefs = 1, Check = 2, Update = 3, NumTabs };
 	Tabs active_tab = Status;
