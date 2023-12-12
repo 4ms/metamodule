@@ -28,10 +28,7 @@ public:
 	}
 
 	void connect() {
-		if (msc.mount_disk()) {
-			pr_trace("Mounted USB drive\n");
-		} else
-			pr_warn("Did not mount a USB drive\n");
+		// Do nothing: subsequent fileio operations will call mount_disk()
 	}
 
 	void disconnect() {

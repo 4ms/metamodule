@@ -19,11 +19,11 @@ public:
 	}
 
 	DSTATUS status() override {
-		return (is_mounted_ && USBH_MSC_IsReady(&usbh)) ? 0 : STA_NODISK;
+		return (is_mounted_ && msc_isready()) ? 0 : STA_NODISK;
 	}
 
 	DSTATUS initialize() override {
-		return (is_mounted_ && USBH_MSC_IsReady(&usbh)) ? 0 : STA_NODISK | STA_NOINIT;
+		return (is_mounted_ && msc_isready()) ? 0 : STA_NODISK | STA_NOINIT;
 	}
 
 	DRESULT read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) override {
@@ -139,7 +139,7 @@ public:
 				break;
 
 			case MMC_GET_SDSTAT: {
-				uint8_t mounted = USBH_MSC_IsReady(&usbh);
+				uint8_t mounted = msc_isready();
 				if (mounted)
 					is_mounted_ = true;
 				*(uint8_t *)buff = mounted;
@@ -157,5 +157,13 @@ public:
 				return RES_PARERR;
 		}
 		return RES_OK;
+	}
+
+private:
+	bool msc_isready() {
+		if (usbh.pActiveClass)
+			return USBH_MSC_IsReady(&usbh);
+		else
+			return false;
 	}
 };
