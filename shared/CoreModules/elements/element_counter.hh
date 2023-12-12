@@ -146,4 +146,12 @@ inline Indices mark_unused_indices(Indices indices, Counts count) {
 	return indices;
 }
 
+// Returns true if at least one non-empty index matches
+inline bool matched(Indices x, Indices y) {
+	return (x.param_idx == y.param_idx && x.param_idx != ElementCount::Indices::NoElementMarker) ||
+		   (x.input_idx == y.input_idx && x.input_idx != ElementCount::Indices::NoElementMarker) ||
+		   (x.output_idx == y.output_idx && x.output_idx != ElementCount::Indices::NoElementMarker) ||
+		   (x.light_idx == y.light_idx && x.light_idx != ElementCount::Indices::NoElementMarker);
+}
+
 }; // namespace ElementCount
