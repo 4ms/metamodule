@@ -21,6 +21,10 @@ struct SlsComponentInit {
 		// Keyboard itself (not outlined when active)
 		lv_obj_set_style_outline_opa(ui_Keyboard, LV_OPA_0, LV_STATE_EDITED);
 
+		lv_obj_set_style_outline_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0xFF8918),  (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED );
+		lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 2,  (uint32_t)LV_PART_ITEMS| LV_STATE_EDITED);
+		lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 3,  (uint32_t)LV_PART_ITEMS| LV_STATE_EDITED);
+
 		// Sliders
 		for (auto slider : {
 			ui_MinSlider,
