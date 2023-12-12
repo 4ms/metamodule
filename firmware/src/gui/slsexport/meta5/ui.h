@@ -35,9 +35,9 @@ extern lv_obj_t *ui_MenuLabelSave;
 extern lv_obj_t *ui_MenuPanelSettings;
 extern lv_obj_t *ui_MenuImageSettings;
 extern lv_obj_t *ui_MenuLabelSettings;
-extern lv_obj_t *ui_MenuPanelSystem;
-extern lv_obj_t *ui_MenuImageSystem;
-extern lv_obj_t *ui_MenuLabelSystem;
+// extern lv_obj_t *ui_MenuPanelSystem;
+// extern lv_obj_t *ui_MenuImageSystem;
+// extern lv_obj_t *ui_MenuLabelSystem;
 // SCREEN: ui_PatchSelectorPage
 void ui_PatchSelectorPage_screen_init(void);
 extern lv_obj_t *ui_PatchSelectorPage;
