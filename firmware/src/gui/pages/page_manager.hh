@@ -3,7 +3,7 @@
 #include "gui/slsexport/comp_init.hh"
 #include "metaparams.hh"
 #include "params_state.hh"
-#include "patch_file/patch_storage_proxy.hh"
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 
@@ -38,7 +38,7 @@ class PageManager {
 public:
 	PageBase *cur_page = &page_patchsel;
 
-	PageManager(PatchStorageProxy &patch_storage,
+	PageManager(FileStorageProxy &patch_storage,
 				PatchPlayLoader &patch_playloader,
 				ParamsMidiState &params,
 				MetaParams &metaparams,

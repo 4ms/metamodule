@@ -1,4 +1,5 @@
 #pragma once
+#include "../src/core_intercom/intercore_message.hh"
 #include "fs/volumes.hh"
 #include "patch/patch_data.hh"
 #include "patch_file/patch_file.hh"
@@ -13,35 +14,15 @@
 namespace MetaModule
 {
 
-struct InterCoreCommMessage {
-	enum MessageType : uint32_t {
-		None,
-
-		RequestRefreshPatchList,
-		PatchListChanged,
-		PatchListUnchanged,
-
-		RequestPatchData,
-		PatchDataLoadFail,
-		PatchDataLoaded,
-
-		NumRequests,
-	};
-	MessageType message_type;
-	uint32_t bytes_read;
-	uint32_t patch_id;
-	uint32_t vol_id;
-};
-
-// This is a mock for firmware's PatchStorage and PatchStorageProxy classes
+// This is a mock for firmware's PatchStorage and FileStorageProxy classes
 // It reads from a directory on the host filesystem and also treats the
 // Default patches as a file system
-class PatchStorageProxy {
+class FileStorageProxy {
 
 public:
-	using enum InterCoreCommMessage::MessageType;
+	using enum IntercoreStorageMessage::MessageType;
 
-	PatchStorageProxy(std::string_view path)
+	FileStorageProxy(std::string_view path)
 		: hostfs_{MetaModule::Volume::SDCard, path}
 		, defaultpatchfs_{MetaModule::Volume::NorFlash} {
 		PatchFileIO::add_all_to_patchlist(defaultpatchfs_, patch_list_);
@@ -82,16 +63,16 @@ public:
 		return view_patch_vol_;
 	}
 
-	InterCoreCommMessage get_message() {
+	IntercoreStorageMessage get_message() {
 
 		if (msg_state_ == MsgState::ViewPatchRequested) {
 			msg_state_ = MsgState::Idle;
 
 			auto bytes_read = load_patch_file(requested_view_patch_vol_, requested_view_patch_id_);
 			if (bytes_read)
-				return {PatchDataLoaded, bytes_read, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
+				return {PatchDataLoaded, bytes_read, requested_view_patch_id_, {}, requested_view_patch_vol_};
 			else
-				return {PatchDataLoadFail, 0, requested_view_patch_id_, (uint32_t)requested_view_patch_vol_};
+				return {PatchDataLoadFail, 0, requested_view_patch_id_, {}, requested_view_patch_vol_};
 		}
 
 		if (msg_state_ == MsgState::PatchListRequested) {
@@ -107,6 +88,16 @@ public:
 				return {PatchListChanged};
 
 			return {PatchListUnchanged};
+		}
+
+		if (msg_state_ == MsgState::FirmwareUpdateFileRequested) {
+			msg_state_ = MsgState::Idle;
+			mock_file_found_ctr++;
+
+			if ((mock_file_found_ctr % 8) < 4)
+				return {FirmwareFileFound, mock_file_found_ctr + 1, 0, "metamodule-fw-1.23.45.uimg", Volume::USB};
+			else
+				return {FirmwareFileNotFound};
 		}
 
 		return {};
@@ -148,6 +139,17 @@ public:
 		return raw_patch.size_bytes();
 	}
 
+	[[nodiscard]] bool request_find_firmware_file() {
+		msg_state_ = MsgState::FirmwareUpdateFileRequested;
+		return true;
+	}
+
+	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
+		mock_firmware_file_size = 5'123'456;
+		msg_state_ = MsgState::FirmwareFileLoadRequested;
+		return true;
+	}
+
 private:
 	PatchFileList remote_patch_list_;
 	PatchList patch_list_;
@@ -164,9 +166,18 @@ private:
 	uint32_t view_patch_id_ = 0;
 	Volume view_patch_vol_ = Volume::NorFlash;
 
-	enum class MsgState { Idle, ViewPatchRequested, PatchListRequested } msg_state_ = MsgState::Idle;
+	enum class MsgState {
+		Idle,
+		ViewPatchRequested,
+		PatchListRequested,
+		FirmwareUpdateFileRequested,
+		FirmwareFileLoadRequested,
+	} msg_state_ = MsgState::Idle;
 
-	InterCoreCommMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
+	unsigned mock_file_found_ctr = 0;
+	unsigned mock_firmware_file_size = 0;
+
+	IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
 		if (list.size() == 0) {
 			list = patch_list_.get_patchfile_list(vol);
 			if (list.size() > 0)

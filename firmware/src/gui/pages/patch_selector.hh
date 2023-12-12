@@ -156,16 +156,17 @@ struct PatchSelectorPage : PageBase {
 
 		switch (state) {
 			case State::TryingToRequestPatchList:
+				//TODO: pass in a member var PatchList patch_list
 				if (patch_storage.request_patchlist())
 					state = State::RequestedPatchList;
 				break;
 
 			case State::RequestedPatchList: {
 				auto message = patch_storage.get_message().message_type;
-				if (message == PatchStorageProxy::PatchListChanged) {
+				if (message == FileStorageProxy::PatchListChanged) {
 					show_spinner();
 					state = State::ReloadingPatchList;
-				} else if (message == PatchStorageProxy::PatchListUnchanged) {
+				} else if (message == FileStorageProxy::PatchListUnchanged) {
 					hide_spinner();
 					state = State::Idle;
 				}
@@ -173,6 +174,7 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::ReloadingPatchList:
+				//TODO: use our member var patch_list, not patch_storage
 				refresh_patchlist(patch_storage.get_patch_list());
 				refresh_volume_labels();
 				hide_spinner();
@@ -200,7 +202,7 @@ struct PatchSelectorPage : PageBase {
 			case State::RequestedPatchData: {
 				auto message = patch_storage.get_message();
 
-				if (message.message_type == PatchStorageProxy::PatchDataLoaded) {
+				if (message.message_type == FileStorageProxy::PatchDataLoaded) {
 					// Try to parse the patch and open the PatchView page
 					if (patch_storage.parse_view_patch(message.bytes_read)) {
 						auto view_patch = patch_storage.get_view_patch();
@@ -216,7 +218,7 @@ struct PatchSelectorPage : PageBase {
 						state = State::Idle;
 						hide_spinner();
 					}
-				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
+				} else if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
 					pr_warn("Error loading patch id %d\n", selected_patch);
 					state = State::Idle;
 					lv_group_set_editing(group, true);

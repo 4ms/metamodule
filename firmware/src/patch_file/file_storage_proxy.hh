@@ -1,30 +1,38 @@
 #pragma once
-#include "core_intercom/patch_icc_message.hh"
+#include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "patch/patch_data.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_file.hh"
 #include "patch_file/patch_location.hh"
 #include "patchlist.hh"
+#include "pr_dbg.hh"
 
 namespace MetaModule
 {
 
-class PatchStorageProxy {
+class FileStorageProxy {
 
 public:
-	using enum PatchICCMessage::MessageType;
+	using enum IntercoreStorageMessage::MessageType;
 
-	PatchStorageProxy(std::span<char> raw_patch_data,
-					  volatile PatchICCMessage &shared_message,
-					  PatchFileList &remote_patch_list)
+	FileStorageProxy(std::span<char> raw_patch_data,
+					 IntercoreStorageMessage &shared_message,
+					 PatchFileList &remote_patch_list)
 		: remote_patch_list_{remote_patch_list}
 		, comm_{shared_message}
 		, raw_patch_data_{raw_patch_data} {
 	}
 
+	IntercoreStorageMessage get_message() {
+		return comm_.get_new_message();
+	}
+
+	//
+	// viewpatch: Patch we are currently viewing in the GUI:
+	//
 	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
-		PatchICCMessage message{
+		IntercoreStorageMessage message{
 			.message_type = RequestPatchData,
 			.patch_id = patch_loc.index,
 			.vol_id = patch_loc.vol,
@@ -37,6 +45,7 @@ public:
 		return true;
 	}
 
+	// TODO: pass the span as an arg, not as a member var
 	bool parse_view_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
 
@@ -64,12 +73,12 @@ public:
 		return view_patch_vol_;
 	}
 
-	PatchICCMessage get_message() {
-		return comm_.get_new_message();
-	}
-
+	//
+	// patchlist: list of all patches found on all volumes
+	//
+	// TODO: sender passes a reference to a PatchFileList which should be populated
 	[[nodiscard]] bool request_patchlist() {
-		PatchICCMessage message{.message_type = RequestRefreshPatchList};
+		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList};
 		if (!comm_.send_message(message))
 			return false;
 		return true;
@@ -83,9 +92,30 @@ public:
 		return remote_patch_list_;
 	}
 
+	// Firmare file: scanning volumes for firmware update files
+	[[nodiscard]] bool request_find_firmware_file() {
+		IntercoreStorageMessage message{.message_type = RequestFirmwareFile};
+		if (!comm_.send_message(message))
+			return false;
+		return true;
+	}
+
+	// Load a file to RAM
+	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
+		IntercoreStorageMessage message{
+			.message_type = RequestLoadFirmwareToRam,
+			.filename = filename,
+			.vol_id = vol,
+			.buffer = buffer,
+		};
+		if (!comm_.send_message(message))
+			return false;
+		return true;
+	}
+
 private:
 	PatchFileList &remote_patch_list_;
-	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, PatchICCMessage> comm_;
+	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, IntercoreStorageMessage> comm_;
 
 	std::span<char> raw_patch_data_;
 	PatchData view_patch_;
