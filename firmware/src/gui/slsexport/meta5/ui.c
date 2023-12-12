@@ -252,8 +252,6 @@ lv_obj_t *ui_SystemMenuPrefs;
 lv_obj_t *ui_SystemMenuTest;
 lv_obj_t *ui_SystemMenuUpdateTab;
 lv_obj_t *ui_SystemMenuUpdateFWversion;
-lv_obj_t *ui_SystemMenuUpdateSDStatus;
-lv_obj_t *ui_SystemMenuUpdateUSBStatus;
 lv_obj_t *ui_SystemMenuUpdateMessage;
 lv_obj_t *ui_SystemMenuUpdateFWBut;
 lv_obj_t *ui_SystemMenuUpdateFWlabel;

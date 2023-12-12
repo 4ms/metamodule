@@ -243,8 +243,6 @@ extern lv_obj_t *ui_SystemMenuPrefs;
 extern lv_obj_t *ui_SystemMenuTest;
 extern lv_obj_t *ui_SystemMenuUpdateTab;
 extern lv_obj_t *ui_SystemMenuUpdateFWversion;
-extern lv_obj_t *ui_SystemMenuUpdateSDStatus;
-extern lv_obj_t *ui_SystemMenuUpdateUSBStatus;
 extern lv_obj_t *ui_SystemMenuUpdateMessage;
 extern lv_obj_t *ui_SystemMenuUpdateFWBut;
 extern lv_obj_t *ui_SystemMenuUpdateFWlabel;

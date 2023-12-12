@@ -67,6 +67,8 @@ private:
 			case Tabs::Update: {
 				lv_group_remove_all_objs(page->group);
 				lv_group_add_obj(page->group, ui_SystemMenuUpdateFWBut);
+				lv_label_set_text(ui_SystemMenuUpdateMessage,
+								  "**NOT IMPLEMENTED** Insert an SD card or USB drive containing a firmware update file.");
 				break;
 			}
 
@@ -88,4 +90,3 @@ private:
 };
 
 } // namespace MetaModule
-
