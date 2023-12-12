@@ -4,6 +4,7 @@
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/styles.hh"
 
 namespace MetaModule
 {
@@ -20,74 +21,71 @@ struct SystemMenuPage : PageBase {
 		lv_group_set_editing(group, true);
 
 		lv_obj_add_event_cb(tabs, tab_cb, LV_EVENT_VALUE_CHANGED, this);
-
-		lv_obj_add_event_cb(ui_SystemMenuUpdateFWBut, updatebut_cb, LV_EVENT_CLICKED, this);
-		confirm_popup.init(ui_SystemMenu, group);
+		lv_obj_clear_flag(ui_SystemMenuUpdateFWBut, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void prepare_focus() final {
+		lv_hide(ui_FWUpdateSpinner);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
 	}
 
 	void update() final {
-		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (confirm_popup.is_visible()) {
-				confirm_popup.hide();
-			} else {
+		bool pressed_back = metaparams.meta_buttons[0].is_just_released();
+
+		if (pressed_back) {
+			if (lv_group_get_focused(group) == tabs)
 				page_list.request_last_page();
+			else {
+				lv_group_remove_all_objs(group);
+				lv_group_add_obj(group, tabs);
+				lv_group_focus_obj(tabs);
+				lv_group_set_editing(group, true);
 			}
 		}
 	}
 
 	void blur() final {
-		;
 	}
 
 private:
-	void update_firmware() {
-		printf("Update firmware would begin here...\n");
-	}
-
 	static void tab_cb(lv_event_t *event) {
 		auto page = static_cast<SystemMenuPage *>(event->user_data);
 		if (!page)
 			return;
 
-		uint32_t id = lv_btnmatrix_get_selected_btn(page->tabs);
-		pr_dbg("Clicked Tab %d\n", id);
+		auto clicked_tab = lv_btnmatrix_get_selected_btn(page->tabs);
+		if (clicked_tab >= 0 && clicked_tab < NumTabs)
+			page->active_tab = static_cast<Tabs>(clicked_tab);
 
-		if (id == 0) {
-			lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
-		}
-		if (id == 1) {
-			lv_group_add_obj(page->group, ui_SystemMenuUpdateFWBut);
-			lv_group_focus_obj(ui_SystemMenuUpdateFWBut);
-			lv_group_set_editing(page->group, false);
+		switch (clicked_tab) {
+			case Tabs::Status: {
+				//...
+				break;
+			}
+
+			case Tabs::Update: {
+				lv_group_remove_all_objs(page->group);
+				lv_group_add_obj(page->group, ui_SystemMenuUpdateFWBut);
+				break;
+			}
+
+			case Tabs::Check: {
+				//...
+				break;
+			}
+
+			case Tabs::Prefs: {
+				//...
+				break;
+			}
 		}
 	}
 
-	static void updatebut_cb(lv_event_t *event) {
-		auto page = static_cast<SystemMenuPage *>(event->user_data);
-		if (!page)
-			return;
-
-		page->confirm_popup.show(
-			[page](bool ok) {
-				if (!ok)
-					return;
-				page->update_firmware();
-			},
-			"Update");
-	}
-
-	ConfirmPopup confirm_popup;
-
-	// lv_obj_t *confirmbox = nullptr;
+	enum Tabs { Status = 0, Prefs = 1, Check = 2, Update = 3, NumTabs };
+	Tabs active_tab = Status;
 	lv_obj_t *tabs = nullptr;
-	// lv_group_t *confirm_group;
-
-	// const char *btns[3] = {"Update", "Cancel", ""};
 };
 
 } // namespace MetaModule
+
