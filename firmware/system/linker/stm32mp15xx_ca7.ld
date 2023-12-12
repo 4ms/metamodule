@@ -8,16 +8,12 @@ INCLUDE system/linker/memory.ld
 MEMORY
 {
     ROM (rx)			: ORIGIN = _A7_CODE,		LENGTH = _A7_CODE_SZ
-    RAM (rw)			: ORIGIN = _A7_RAM,			LENGTH = _A7_RAM_SZ
 	VIRTDRIVE (rw)		: ORIGIN = _VIRTDRIVE,		LENGTH = _VIRTDRIVE_SZ 
 	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
 	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
 
 	SHAREDMEMINDEX (rw) : ORIGIN = _A7_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
 	SYSRAM (rw)			: ORIGIN = 0x2FFC0000,		LENGTH = 256K
-
-	M4_EXTCODE (rwx)   	: ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ
-	M4_EXTDATA  (rw)   	: ORIGIN = _M4_EXTDATA, LENGTH = _M4_EXTDATA_SZ
 }
 
 /* A7 stacks are at end of RAM */
@@ -82,10 +78,7 @@ SECTIONS
 		. = ALIGN(8);
 	} > ROM
 
-
-    _text_end = .;
-
-    .data : AT(_text_end)
+    .data : 
     {
         . = ALIGN(8);
         _data_start = .;
@@ -93,7 +86,7 @@ SECTIONS
         *(.data*)
         . = ALIGN(8);
         _data_end = .;
-    } > RAM
+    } > ROM
 
     .bss : {
         _bss_start = .;
@@ -104,7 +97,7 @@ SECTIONS
         _bss_end = .;
 		. = ALIGN(256);
 		_ram_aligned_end = .;
-    } > RAM
+    } > ROM
 
 	.heap (NOLOAD):
 	{
@@ -134,20 +127,6 @@ SECTIONS
 		*(.virtdrive)
 	} > VIRTDRIVE
 
-	/* These are disabled until/unless putting m4 code/ddr */
-	/* .m4_extcode : { */
-	/* 	INCLUDE m4_ddr_code.ld */
-	/* } > M4_EXTCODE */
-
-	/* .m4_extdata : { */
-	/* 	INCLUDE m4_data.ld */
-	/* } > M4_EXTDATA */
-
-	.m4_extrodata : {
-		INCLUDE m4_rodata.ld
-	} > M4_EXTDATA
-
-
     _user_stack_start = _ram_aligned_end;
     _user_stack_end = _user_stack_start + 0x80000; /* 512k */
 
@@ -161,7 +140,7 @@ SECTIONS
     _fiq_stack_end = _fiq_stack_start + 0x100;
 
     _auxcore_user_stack_start = _fiq_stack_end;
-    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x1000;
+    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x80000;
 
 
 	.sharedmemindex (NOLOAD) :
