@@ -15,12 +15,11 @@ struct MainMenuPage : PageBase {
 		lv_group_add_obj(group, ui_MenuPanelPatches);
 		lv_group_add_obj(group, ui_MenuPanelSave);
 		lv_group_add_obj(group, ui_MenuPanelSettings);
-		lv_group_add_obj(group, ui_MenuPanelSystem);
 
 		lv_group_focus_obj(ui_MenuPanelPatches);
 
 		lv_obj_add_event_cb(ui_MenuPanelPatches, patchsel_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_MenuPanelSystem, system_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_MenuPanelSettings, system_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() final {
