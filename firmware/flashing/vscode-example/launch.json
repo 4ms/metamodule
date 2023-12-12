@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "cwd": "${workspaceRoot}",
+            "servertype": "jlink",
+            //"jlinkscript": "", // This may be needed 
+            
+            "runToEntryPoint": "main",
+
+            "device": "STM32MP15xx_A7",
+            "toolchainPrefix": "arm-none-eabi",
+            "loadFiles": [], //loading happens in postLaunchCommands
+            "symbolFiles": ["build/mp1corea7/medium/main.elf"],
+            "request": "launch",
+            "type": "cortex-debug",
+            "svdFile": "${workspaceRoot}/flashing/STM32MP157x.svd",
+            "numberOfProcessors": 2,
+            "targetProcessor": 0,
+            "overrideLaunchCommands": [], // required to override the monitor reset command
+            "preLaunchCommands": [
+                // Refer to this thread: https://community.st.com/s/question/0D50X0000AhOC9DSQW/stm32mp157cdk2-uboot-spl-debug-timeout    
+                "set arm abi AAPCS",
+                "set output-radix 16" // Display in hex format
+            ],
+            "postLaunchCommands": [
+                "restore build/main.uimg binary 0xC0000000",
+                "set *((unsigned int)0x5C00A118) = 0xC0000000"
+            ],
+            //"showDevDebugOutput": "raw",
+            //"preLaunchTask": "Build"
+        }
+    ]
+}

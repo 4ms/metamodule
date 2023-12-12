@@ -24,7 +24,10 @@ work since the only difference is the tRST pin instead of NRST.
 If you are already running the application and just need to debug, you can just
 attach without loading.
 
-If you need to load new firmware, then do this:
+If you need to load new firmware and then debug it, then follow the guide in
+[Debugging with gdb](firmware-debugging.md).
+
+To load firmware (without debugging) with a JLink programmer, do this:
 
 1) Install a "Freeze jumper" on `Control Expander` header that bridges the top-left pin
 and the pin just to the right of it. Make sure you use the right header, it's
@@ -45,36 +48,19 @@ See image above for reference.
 The console will show:
 
 ```
-Freeze pin detected active, freezing.
-Ready to load firmware to DDR RAM via SWD/JTAG.
+Freeze pin detected active: booting from DDR
+Please load a multi-uimg binary into an address in DDR RAM.
+Then write the address to the TAMP_BKP6 register at 0x5C00A118
+System will hang until TAMP_BKP6 register is changed...
 ```
 
-Use Jflash, TRACE32, Ozone, openOCD/arm-none-eabi-gdb, etc to load the main.elf file.
-If you have a JLink connected, you can program with this;
+Connect a Jlink programmer and run this:
 
 ```
 make jprog
 ```
 
-This should take 15-30 seconds.
-
-For other methods, just load the .elf file and then start executing from 0xC0200040.
-
-Note: If you are familiar with flashing Cortex-M series MCUs, you will notice
-some differences. One is that Flash is on an external chip. Another difference is
-that the main RAM (DDR RAM) is not available until software initializes it. The
-on-board NOR Flash chip has a bootloader installed
-([MP1-Boot](https://github.com/4ms/mp1-boot), which is the FSBL). This is
-loaded by the BOOTROM on power-up. The MP1-Boot bootloader is responsible for
-initializing the DDR RAM peripheral. Obviously, this must be done before
-loading the firmware into DDR RAM. So, unlike a Cortex-M chip, you must run a
-bootloader before programming the device. However, one of the first things an
-application does when it starts running is to enable the MMU and setup various
-memory regions, some of which are not writable. Thus, the only time in which
-it's possible to load firmware to RAM is after the bootloader has initialized
-RAM but before the application has started. To handle this, MP1-Boot has a
-"Freeze pin" option. When this pin is detected low (jumper is installed), then
-MP1-Boot will halt execution (freeze) after initializing RAM.
+This should take 15-30 seconds. 
  
 ### Load into NOR Flash over DFU-USB
 
@@ -103,7 +89,7 @@ Connect a USB cable from a computer to the module.
 You can use a web-based loader [such as this
 one](https://devanlai.github.io/webdfu/dfu-util/). Click Connect, and then
 select "STM Device in DFU Mode". Then click "Choose File" and select the uimg
-file you just built at `build/mp1corea7/medium/main.uimg`. Then click
+file you just built at `build/main.uimg`. Then click
 "Download". There may be an error `DFU GETSTATUS failed: ControlTransferIn
 failed: NetworkError: Failed to execute 'controlTransferIn' on 'USBDevice': A
 transfer error has occurred.` This is normal, and is not an error. It's safe to
@@ -118,7 +104,7 @@ make flash-dfu
 
 
 This command loads the main.uimg file to the default address (0x70080000).
-It calls `dfu-util -a 0 -s 0x70080000 -D build/mp1corea7/medium/main.uimg`
+It calls `dfu-util -a 0 -s 0x70080000 -D build/main.uimg`
 
 This will take between 60 and 120 seconds.
 When it's done, unplug the USB cable, power-cycle, and the new code will start up.

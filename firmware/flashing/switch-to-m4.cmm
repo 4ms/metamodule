@@ -1,4 +1,14 @@
 SYS.CPU STM32MP153D-CM4
 SYS.Mode Attach
-Data.LOAD.Elf /Users/dann/4ms/stm32/meta-module/firmware/build/mp1corem4/medium/main.elf /CPP /NOCODE
-Break
+
+PRIVATE &builddir
+&builddir=OS.PPF()
+&builddir=OS.FILE.PATH("&builddir")
+
+PRIVATE &elffile
+&elffile=OS.FILE.JOINPATH("&builddir", "../", "build", "mp1corea7", "medium", "main.elf")
+&elffile=OS.FILE.REALPATH("&elffile")
+
+Data.LOAD.Elf "&elffile" /CPP /NoCode
+
+;Break
