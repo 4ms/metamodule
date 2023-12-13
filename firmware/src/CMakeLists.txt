@@ -165,6 +165,7 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
+  ${FWDIR}/src/flash_loader/flash_loader.cc
 
   ${FWDIR}/src/gui/elements/element_name.cc
 

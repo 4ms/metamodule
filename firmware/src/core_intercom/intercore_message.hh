@@ -56,6 +56,7 @@ struct IntercoreStorageMessage {
 		Volume vol;
 		unsigned patch_id; //change to filename
 		// StaticString<255> filename;
+		std::span<char> buffer;
 		enum class Result { LoadFailed, LoadOK } result;
 	};
 	struct FirmwareFindMsg {
