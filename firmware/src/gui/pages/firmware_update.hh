@@ -35,12 +35,12 @@ struct FirmwareUpdateTab {
 	bool consume_back_event() {
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
-			return false; //do not go back, just hide popup
+			return true;
 		}
 		if (state == State::Idle || state == State::Failed)
-			return true; //OK to go back
+			return false;
 		else
-			return false; //cannot go back: un-interruptable operation in progress
+			return true; //Consume back event: un-interruptable operation in progress
 	}
 
 	void update() {
@@ -161,6 +161,7 @@ private:
 							  update_filename.data(),
 							  int(update_filesize / 1024));
 		lv_show(ui_FWUpdateSpinner);
+		lv_hide(ui_SystemMenUpdateProgressBar);
 		lv_hide(ui_SystemMenuUpdateFWBut);
 	}
 
@@ -177,6 +178,7 @@ private:
 
 		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
 		lv_show(ui_FWUpdateSpinner);
+		lv_show(ui_SystemMenUpdateProgressBar);
 		return true;
 	}
 
@@ -215,6 +217,7 @@ private:
 		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
 		lv_label_set_text(ui_SystemMenuUpdateMessage, "Loading to RAM failed! Try powering off and back on again.");
 		lv_hide(ui_FWUpdateSpinner);
+		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
 
 	void display_allocate_failed() {
@@ -223,6 +226,7 @@ private:
 							  "Not enough free RAM to load file (need %u kB). Try rebooting.",
 							  int(update_filesize / 1024));
 		lv_hide(ui_FWUpdateSpinner);
+		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
 
 	void display_flash_write_failed() {
@@ -230,6 +234,7 @@ private:
 		lv_label_set_text(ui_SystemMenuUpdateMessage, "Could not write to internal Flash.");
 
 		lv_hide(ui_FWUpdateSpinner);
+		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
 
 	void display_success() {
@@ -237,6 +242,7 @@ private:
 		lv_label_set_text(ui_SystemMenuUpdateMessage, "Firmware has been updated! Please power off and back on now");
 
 		lv_hide(ui_FWUpdateSpinner);
+		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
 
 	void display_progress(int bytes_remaining) {
@@ -244,7 +250,9 @@ private:
 							  "Writing update file to flash:\n%u of %u kB\nDO NOT POWER OFF",
 							  unsigned((update_filesize - bytes_remaining) / 1024),
 							  unsigned(update_filesize / 1024));
-		//TODO: progress bar
+
+		int percent = 100 * (update_filesize - bytes_remaining) / update_filesize;
+		lv_bar_set_value(ui_SystemMenUpdateProgressBar, percent, LV_ANIM_ON);
 	}
 
 	FileStorageProxy &file_storage;
