@@ -10,6 +10,7 @@
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
 #include "drivers/system_clocks.hh"
+#include "firmware_file_finder.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "fs/fatfs/sd_host.hh"
 #include "fs/ramdisk.hh"
@@ -76,6 +77,7 @@ void main() {
 	// IO with USB and SD Card
 	InterCoreComm<ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm{*shared_message};
 	PatchStorage patch_storage{sdcard_fileio, usb_fileio, reload_default_patches};
+	FirmwareFileFinder firmware_files{sdcard_fileio, usb_fileio};
 
 	// Controls
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
@@ -103,8 +105,10 @@ void main() {
 		sd.process();
 
 		auto message = intercore_comm.get_new_message();
+		firmware_files.handle_message(message);
 		patch_storage.handle_message(message);
 
+		firmware_files.send_pending_message(intercore_comm);
 		patch_storage.send_pending_message(intercore_comm);
 	}
 }
