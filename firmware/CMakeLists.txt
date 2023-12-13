@@ -35,15 +35,45 @@ endif()
 #
 # Main Application
 #
-add_subdirectory(src/core_m4 ${CMAKE_CURRENT_BINARY_DIR}/mp1corem4/medium)
-add_subdirectory(src ${CMAKE_CURRENT_BINARY_DIR}/mp1corea7/medium)
+set(M4_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corem4/medium)
+set(A7_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corea7/medium)
+
+add_subdirectory(src/core_m4 ${M4_BIN_PATH})
+add_subdirectory(src ${A7_BIN_PATH})
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND flashing/elf_to_uimg.py --m4 $<TARGET_FILE:main_m4.elf> --a7 $<TARGET_FILE:main.elf> ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
+  DEPENDS main.elf main_m4.elf
+  COMMENT "Creating combined uimg file"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_target(
+  combined-uimg ALL
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg 
+)
+
+
+#
+# Flash loader
+#
+add_subdirectory(src/flash_loader)
 
 #
 # Bootloader (MP1-Boot)
 #
+if ("${TOOLCHAIN_BASE_DIR}" STREQUAL "")
+	set(BOOTLOADER_TOOLCHAIN_OPT "")
+else()
+	set(BOOTLOADER_TOOLCHAIN_OPT "TOOLCHAIN_DIR=${TOOLCHAIN_BASE_DIR}/")
+endif()
 add_custom_target(
   bootloader
-  COMMAND make BOARD_CONF=../board_conf/mmp11_conf.hh
+  COMMAND make BOARD_CONF=../board_conf/mmp11_conf.hh ${BOOTLOADER_TOOLCHAIN_OPT}
   COMMENT "Building MP1-Boot (FSBL)"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot
   VERBATIM

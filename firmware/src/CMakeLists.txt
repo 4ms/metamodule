@@ -150,14 +150,12 @@ endif()
 #
 add_executable(
   main.elf
-  $<TARGET_FILE_DIR:main_m4.elf>/m4_rodata.ld
-  $<TARGET_FILE_DIR:main_m4.elf>/firmware_m4.h
-  $<TARGET_FILE_DIR:main_m4.elf>/firmware_m4_vectors.h
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
+  ${FWDIR}/system/startup_ca7.s
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_a7/main.cc
@@ -212,7 +210,6 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/interrupt_handler.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
-  ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/boot/startup_ca7.s
   #
   ${FWDIR}/src/VCV_adaptor/random.cpp
   #
@@ -261,7 +258,7 @@ set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIO
 
 target_include_directories(
   main.elf
-  PRIVATE $<TARGET_FILE_DIR:main_m4.elf>
+  PRIVATE 
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
@@ -317,13 +314,12 @@ if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
 endif()
 
-add_dependencies(main.elf m4_firmware)
+
 
 target_link_script(
   main
   ${FWDIR}/system/linker/stm32mp15xx_ca7.ld
   -L${FWDIR}
-  -L$<TARGET_FILE_DIR:main_m4.elf>
   -Wl,--gc-sections
   -Wno-psabi
   -ffreestanding
@@ -331,16 +327,3 @@ target_link_script(
   -flto=auto
 )
 
-add_bin_hex_command(main)
-
-add_custom_command(
-  TARGET main.elf
-  POST_BUILD
-  COMMAND ${FWDIR}/flashing/uimg_header.py $<TARGET_FILE_DIR:main.elf>/main.bin $<TARGET_FILE_DIR:main.elf>/main.uimg
-          0xC1FBFFC0 0xC2000040
-  COMMAND ls -l $<TARGET_FILE_DIR:main.elf>/main.uimg
-  COMMENT "Creating uimg file"
-  VERBATIM
-)
-
-set_source_files_properties($<TARGET_FILE_DIR:main.elf>/main.uimg PROPERTIES GENERATED TRUE)

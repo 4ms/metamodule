@@ -61,7 +61,7 @@ public:
 		}
 
 		now = HAL_GetTick();
-		if ((now - last_page_update_tm) > 30) {
+		if ((now - last_page_update_tm) > 16) {
 			last_page_update_tm = now;
 			page_update_task();
 		}

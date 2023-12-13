@@ -60,20 +60,15 @@ jobs:
           echo "AudibleInstruments:Braids" >> firmware/lim
           cd firmware && make limit lim && make all
 
-      # Don't upload artifacts for each build, uses too much space on our account
-      # - name: Upload artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: firmware
-      #     path: |
-      #       firmware/build/mp1corea7/medium/main.elf
-      #       firmware/build/mp1corea7/medium/main.uimg
+      - name: Set Release Version
+        if: startsWith(github.ref, 'refs/tags/firmware-v')
+        uses: FranzDiebold/github-env-vars-action@v2
 
       - name: Release
-        uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/firmware-v')
+        uses: softprops/action-gh-release@v1
         with:
           name: "Firmware Version: ${{ env.CI_REF_NAME }}"
           files: |
-            firmware/build/mp1corea7/medium/main.uimg
+            firmware/build/main.uimg
 
