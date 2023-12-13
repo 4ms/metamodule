@@ -34,8 +34,6 @@ class PatchStorage {
 
 	PatchList patch_list_;
 
-	PatchFileList filelist_;
-
 public:
 	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio, bool reset_to_factory_patches = false)
 		: sdcard_{sdcard_fileio}
@@ -51,7 +49,6 @@ public:
 		// Populate Patch List from all media present
 		patch_list_.clear_patches(Volume::NorFlash);
 		PatchFileIO::add_all_to_patchlist(norflash_, patch_list_);
-		filelist_.norflash = patch_list_.get_patchfile_list(Volume::NorFlash);
 
 		sdcard_.mount_disk();
 		if (sdcard_.is_mounted()) {
@@ -59,7 +56,6 @@ public:
 			PatchFileIO::add_all_to_patchlist(sdcard_, patch_list_);
 			sd_changes_.reset();
 		}
-		filelist_.sdcard = patch_list_.get_patchfile_list(Volume::SDCard);
 
 		usbdrive_.mount_disk();
 		if (usbdrive_.is_mounted()) {
@@ -67,7 +63,6 @@ public:
 			PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
 			usb_changes_.reset();
 		}
-		filelist_.usb = patch_list_.get_patchfile_list(Volume::USB);
 
 		poll_media_change();
 	}
@@ -84,11 +79,13 @@ public:
 		if (message.message_type == RequestRefreshPatchList) {
 			pending_send_message.message_type = PatchListUnchanged;
 
+			message.patch_file_list->norflash = patch_list_.get_patchfile_list(Volume::NorFlash);
+
 			if (sd_changes_.take_change()) {
 				patch_list_.clear_patches(Volume::SDCard);
 				if (sdcard_.is_mounted())
 					rescan_sdcard();
-				filelist_.sdcard = patch_list_.get_patchfile_list(Volume::SDCard);
+				message.patch_file_list->sdcard = patch_list_.get_patchfile_list(Volume::SDCard);
 
 				pending_send_message.message_type = PatchListChanged;
 			}
@@ -97,7 +94,7 @@ public:
 				patch_list_.clear_patches(Volume::USB);
 				if (usbdrive_.is_mounted())
 					rescan_usbdrive();
-				filelist_.usb = patch_list_.get_patchfile_list(Volume::USB);
+				message.patch_file_list->usb = patch_list_.get_patchfile_list(Volume::USB);
 
 				pending_send_message.message_type = PatchListChanged;
 			}
@@ -134,14 +131,11 @@ private:
 	void rescan_sdcard() {
 		pr_trace("Updating patchlist from SD Card.\n");
 		PatchFileIO::add_all_to_patchlist(sdcard_, patch_list_);
-		pr_trace(
-			"SD Patchlist updated. filelist data: %p, size: %d.\n", filelist_.sdcard.data(), filelist_.sdcard.size());
 	}
 
 	void rescan_usbdrive() {
 		pr_trace("Updating patchlist from USB Drive.\n");
 		PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
-		pr_trace("USB Patchlist updated. filelist data: %p, size: %d.\n", filelist_.usb.data(), filelist_.usb.size());
 	}
 
 	uint32_t load_patch_file(std::span<char> buffer, Volume vol, uint32_t patch_id) {

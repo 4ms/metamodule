@@ -79,7 +79,8 @@ public:
 	//
 	// TODO: sender passes a reference to a PatchFileList which should be populated
 	[[nodiscard]] bool request_patchlist() {
-		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList};
+		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList,
+										.patch_file_list = &remote_patch_list_};
 		if (!comm_.send_message(message))
 			return false;
 		return true;

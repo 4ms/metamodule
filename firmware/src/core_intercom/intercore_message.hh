@@ -8,6 +8,8 @@
 
 namespace MetaModule
 {
+struct PatchFileList;
+
 // ICC = Message passed between A7 and M4 cores using InterCoreComm, to access storage media (SD/USB) from A7
 struct IntercoreStorageMessage {
 	enum MessageType : uint32_t {
@@ -40,17 +42,16 @@ struct IntercoreStorageMessage {
 	Volume vol_id;
 	std::span<char> buffer;
 	uint32_t write_address;
+	PatchFileList *patch_file_list;
 
 	///////////////////////////////////////
 	// TODO: Use this instead of MessageType
-
-	struct PatchFileList;
-	struct PatchData;
 
 	struct PatchListMsg {
 		PatchFileList &patch_list;
 		enum class Result { Unchanged, Changed } result;
 	};
+	struct PatchData;
 	struct PatchDataLoadMsg {
 		PatchData &patch_data;
 		Volume vol;
