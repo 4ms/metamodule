@@ -1,6 +1,6 @@
 PatchData:
   patch_name: Binary Noise
-  description: ''
+  description: Patch Description
   module_slugs:
     0: HubMedium
     1: BinaryNoise
@@ -14,6 +14,10 @@ PatchData:
       ins:
         - module_id: 1
           jack_id: 2
+    - panel_jack_id: 6
+      ins:
+        - module_id: 1
+          jack_id: 0
   mapped_outs:
     - panel_jack_id: 0
       out:

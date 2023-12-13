@@ -14,6 +14,14 @@ PatchData:
       ins:
         - module_id: 1
           jack_id: 3
+    - panel_jack_id: 6
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 7
+      ins:
+        - module_id: 1
+          jack_id: 1
   mapped_outs:
     - panel_jack_id: 0
       out:
