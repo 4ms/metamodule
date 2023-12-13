@@ -11,6 +11,7 @@
 #include "drivers/register_access.hh"
 #include "drivers/system_clocks.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
+#include "fs/fatfs/sd_host.hh"
 #include "fs/ramdisk.hh"
 #include "gpio_expander_reader.hh"
 #include "hsem_handler.hh"
@@ -44,6 +45,7 @@ static void app_startup() {
 
 void main() {
 	using namespace MetaModule;
+	using namespace mdrivlib;
 
 	app_startup();
 
@@ -52,9 +54,7 @@ void main() {
 	auto param_block_base = SharedMemoryS::ptrs.param_block;
 	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
 	auto virtdrive = SharedMemoryS::ptrs.ramdrive;
-	auto raw_patch_span = SharedMemoryS::ptrs.raw_patch_span;
 	auto shared_message = SharedMemoryS::ptrs.icc_message;
-	auto shared_patch_file_list = SharedMemoryS::ptrs.patch_file_list;
 
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
 	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander
@@ -63,15 +63,21 @@ void main() {
 	mdrivlib::GPIOExpander ext_gpio_expander{i2c, extaudio_gpio_expander_conf};
 	mdrivlib::GPIOExpander main_gpio_expander{i2c, mainboard_gpio_expander_conf};
 
+	// USB
 	RamDiskOps ramdiskops{*virtdrive};
-
 	UsbManager usb{ramdiskops};
 	usb.start();
-
 	auto usb_fileio = usb.get_msc_fileio();
-	PatchStorage patch_storage{
-		*raw_patch_span, *shared_message, *shared_patch_file_list, usb_fileio, reload_default_patches};
 
+	// SD Card
+	SDCardHost sd;
+	auto sdcard_fileio = sd.get_fileio();
+
+	// IO with USB and SD Card
+	InterCoreComm<ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm{*shared_message};
+	PatchStorage patch_storage{sdcard_fileio, usb_fileio, reload_default_patches};
+
+	// Controls
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
@@ -94,7 +100,11 @@ void main() {
 			i2cqueue.update();
 
 		usb.process();
-		patch_storage.handle_messages();
-		__NOP();
+		sd.process();
+
+		auto message = intercore_comm.get_new_message();
+		patch_storage.handle_message(message);
+
+		patch_storage.send_pending_message(intercore_comm);
 	}
 }

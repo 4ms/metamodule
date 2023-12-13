@@ -36,6 +36,7 @@ public:
 			.message_type = RequestPatchData,
 			.patch_id = patch_loc.index,
 			.vol_id = patch_loc.vol,
+			.buffer = raw_patch_data_,
 		};
 		if (!comm_.send_message(message))
 			return false;
