@@ -177,7 +177,7 @@ private:
 		}
 
 		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
-		lv_show(ui_FWUpdateSpinner);
+		lv_hide(ui_FWUpdateSpinner);
 		lv_show(ui_SystemMenUpdateProgressBar);
 		return true;
 	}
