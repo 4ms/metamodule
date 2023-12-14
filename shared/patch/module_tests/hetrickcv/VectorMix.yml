@@ -1,9 +1,9 @@
 PatchData:
-  patch_name: Scanner
+  patch_name: VectorMix
   description: Patch Description
   module_slugs:
     0: HubMedium
-    1: Scanner
+    1: VectorMix
   int_cables: []
   mapped_ins:
     - panel_jack_id: 0
@@ -34,35 +34,23 @@ PatchData:
     - panel_jack_id: 0
       out:
         module_id: 1
-        jack_id: 0
+        jack_id: 1
     - panel_jack_id: 1
       out:
         module_id: 1
-        jack_id: 1
+        jack_id: 2
     - panel_jack_id: 2
       out:
         module_id: 1
-        jack_id: 2
+        jack_id: 3
     - panel_jack_id: 3
       out:
         module_id: 1
-        jack_id: 3
+        jack_id: 4
     - panel_jack_id: 4
       out:
         module_id: 1
-        jack_id: 4
-    - panel_jack_id: 5
-      out:
-        module_id: 1
-        jack_id: 5
-    - panel_jack_id: 6
-      out:
-        module_id: 1
-        jack_id: 6
-    - panel_jack_id: 7
-      out:
-        module_id: 1
-        jack_id: 7
+        jack_id: 0
   static_knobs:
     - module_id: 1
       param_id: 0
@@ -81,7 +69,16 @@ PatchData:
       value: 0
     - module_id: 1
       param_id: 5
-      value: 0.125
+      value: 0.190362
+    - module_id: 1
+      param_id: 6
+      value: 0.5
+    - module_id: 1
+      param_id: 7
+      value: 0.5
+    - module_id: 1
+      param_id: 8
+      value: 0
   mapped_knobs:
     - name: ''
       set:
@@ -106,6 +103,30 @@ PatchData:
         - panel_knob_id: 3
           module_id: 1
           param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 4
+          module_id: 1
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 1
+          param_id: 5
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 1
+          param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 1
+          param_id: 7
           curve_type: 0
           min: 0
           max: 1

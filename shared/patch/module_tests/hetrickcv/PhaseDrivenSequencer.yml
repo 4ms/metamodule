@@ -1,0 +1,226 @@
+PatchData:
+  patch_name: PhaseDrivenSequencer
+  description: Patch Description
+  module_slugs:
+    0: HubMedium
+    1: PhaseDrivenSequencer
+  int_cables: []
+  mapped_ins:
+    - panel_jack_id: 6
+      ins:
+        - module_id: 1
+          jack_id: 3
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 2
+    - panel_jack_id: 2
+      ins:
+        - module_id: 1
+          jack_id: 1
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 1
+    - panel_jack_id: 2
+      out:
+        module_id: 1
+        jack_id: 2
+    - panel_jack_id: 3
+      out:
+        module_id: 1
+        jack_id: 3
+    - panel_jack_id: 4
+      out:
+        module_id: 1
+        jack_id: 4
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.466667
+    - module_id: 1
+      param_id: 1
+      value: 0.5
+    - module_id: 1
+      param_id: 2
+      value: 0.206024
+    - module_id: 1
+      param_id: 3
+      value: 0.5
+    - module_id: 1
+      param_id: 4
+      value: 1
+    - module_id: 1
+      param_id: 5
+      value: 0.5
+    - module_id: 1
+      param_id: 6
+      value: 0.5
+    - module_id: 1
+      param_id: 7
+      value: 0.5
+    - module_id: 1
+      param_id: 8
+      value: 0.5
+    - module_id: 1
+      param_id: 9
+      value: 0.5
+    - module_id: 1
+      param_id: 10
+      value: 0.5
+    - module_id: 1
+      param_id: 11
+      value: 0.5
+    - module_id: 1
+      param_id: 12
+      value: 0.5
+    - module_id: 1
+      param_id: 13
+      value: 0.5
+    - module_id: 1
+      param_id: 14
+      value: 0.5
+    - module_id: 1
+      param_id: 15
+      value: 0.5
+    - module_id: 1
+      param_id: 16
+      value: 0.5
+    - module_id: 1
+      param_id: 17
+      value: 0.5
+    - module_id: 1
+      param_id: 18
+      value: 0.5
+    - module_id: 1
+      param_id: 19
+      value: 0.5
+    - module_id: 1
+      param_id: 20
+      value: 0.5
+    - module_id: 1
+      param_id: 21
+      value: 0
+    - module_id: 1
+      param_id: 22
+      value: 0
+    - module_id: 1
+      param_id: 23
+      value: 0
+    - module_id: 1
+      param_id: 24
+      value: 0
+    - module_id: 1
+      param_id: 25
+      value: 0
+    - module_id: 1
+      param_id: 26
+      value: 0
+    - module_id: 1
+      param_id: 27
+      value: 0
+    - module_id: 1
+      param_id: 28
+      value: 0
+    - module_id: 1
+      param_id: 29
+      value: 0
+    - module_id: 1
+      param_id: 30
+      value: 0
+    - module_id: 1
+      param_id: 31
+      value: 0
+    - module_id: 1
+      param_id: 32
+      value: 0
+    - module_id: 1
+      param_id: 33
+      value: 0
+    - module_id: 1
+      param_id: 34
+      value: 0
+    - module_id: 1
+      param_id: 35
+      value: 0
+    - module_id: 1
+      param_id: 36
+      value: 0
+  mapped_knobs:
+    - name: ''
+      set:
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 1
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 1
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+
+'vcvModuleStates':
+  - 'id': 1
+    'plugin': 'HetrickCV'
+    'model': 'PhaseDrivenSequencer'
+    'version': '2.4.0'
+    'data':
+      'gateStates':
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
+        - false
