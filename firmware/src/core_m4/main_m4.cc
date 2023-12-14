@@ -53,20 +53,14 @@ void main() {
 
 	pr_info("M4 starting\n");
 
-	auto param_block_base = SharedMemoryS::ptrs.param_block;
-	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
-	auto virtdrive = SharedMemoryS::ptrs.ramdrive;
-	auto shared_message = SharedMemoryS::ptrs.icc_message;
-
 	// USB
-	RamDiskOps ramdiskops{*virtdrive};
-	UsbManager usb{ramdiskops};
+	UsbManager usb{*SharedMemoryS::ptrs.ramdrive};
 	usb.start();
 
 	// SD Card
 	SDCardHost sd;
 
-	FilesystemManager fs{usb.get_msc_fileio(), sd.get_fileio(), shared_message};
+	FilesystemManager fs{usb.get_msc_fileio(), sd.get_fileio(), SharedMemoryS::ptrs.icc_message};
 	if (reload_default_patches)
 		fs.reload_default_patches();
 
@@ -77,6 +71,8 @@ void main() {
 	mdrivlib::GPIOExpander ext_gpio_expander{i2c, extaudio_gpio_expander_conf};
 	mdrivlib::GPIOExpander main_gpio_expander{i2c, mainboard_gpio_expander_conf};
 
+	auto param_block_base = SharedMemoryS::ptrs.param_block;
+	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
