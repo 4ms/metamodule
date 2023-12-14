@@ -13,6 +13,7 @@
 #include "firmware_file_finder.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "fs/fatfs/sd_host.hh"
+#include "fs/fs_manager.hh"
 #include "fs/ramdisk.hh"
 #include "gpio_expander_reader.hh"
 #include "hsem_handler.hh"
@@ -26,9 +27,9 @@ namespace MetaModule
 
 constexpr bool reload_default_patches = false;
 
-using namespace mdrivlib;
-
 static void app_startup() {
+	using namespace mdrivlib;
+
 	core_m4::RCC_Enable::HSEM_::set();
 
 	// Tell A7 we're not ready yet
@@ -57,29 +58,25 @@ void main() {
 	auto virtdrive = SharedMemoryS::ptrs.ramdrive;
 	auto shared_message = SharedMemoryS::ptrs.icc_message;
 
+	// USB
+	RamDiskOps ramdiskops{*virtdrive};
+	UsbManager usb{ramdiskops};
+	usb.start();
+
+	// SD Card
+	SDCardHost sd;
+
+	FilesystemManager fs{usb.get_msc_fileio(), sd.get_fileio(), shared_message};
+	if (reload_default_patches)
+		fs.reload_default_patches();
+
+	// Controls
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
-	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander
 	i2c.enable_IT(a7m4_shared_i2c_codec_conf.priority1, a7m4_shared_i2c_codec_conf.priority2);
 
 	mdrivlib::GPIOExpander ext_gpio_expander{i2c, extaudio_gpio_expander_conf};
 	mdrivlib::GPIOExpander main_gpio_expander{i2c, mainboard_gpio_expander_conf};
 
-	// USB
-	RamDiskOps ramdiskops{*virtdrive};
-	UsbManager usb{ramdiskops};
-	usb.start();
-	auto usb_fileio = usb.get_msc_fileio();
-
-	// SD Card
-	SDCardHost sd;
-	auto sdcard_fileio = sd.get_fileio();
-
-	// IO with USB and SD Card
-	InterCoreComm<ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm{*shared_message};
-	PatchStorage patch_storage{sdcard_fileio, usb_fileio, reload_default_patches};
-	FirmwareFileFinder firmware_files{sdcard_fileio, usb_fileio};
-
-	// Controls
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
@@ -104,11 +101,6 @@ void main() {
 		usb.process();
 		sd.process();
 
-		auto message = intercore_comm.get_new_message();
-		firmware_files.handle_message(message);
-		patch_storage.handle_message(message);
-
-		firmware_files.send_pending_message(intercore_comm);
-		patch_storage.send_pending_message(intercore_comm);
+		fs.process();
 	}
 }

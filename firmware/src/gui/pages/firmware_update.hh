@@ -269,7 +269,7 @@ private:
 
 	FirmwareFlashLoader flash_writer;
 
-	PollEvent media_poll{2000};
+	PollEvent<uint32_t> media_poll{2000};
 
 	enum class State { Idle, Scanning, Loading, Writing, Failed, Success } state = State::Idle;
 };

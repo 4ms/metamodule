@@ -35,15 +35,14 @@ class PatchStorage {
 	PatchList patch_list_;
 
 public:
-	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio, bool reset_to_factory_patches = false)
+	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
 		: sdcard_{sdcard_fileio}
 		, usbdrive_{usb_fileio} {
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
-		if (status == LfsFileIO::Status::NewlyFormatted || reset_to_factory_patches) {
-			norflash_.reformat();
-			PatchFileIO::create_default_patches(norflash_);
+		if (status == LfsFileIO::Status::NewlyFormatted) {
+			reload_default_patches();
 		}
 
 		// Populate Patch List from all media present
@@ -65,6 +64,11 @@ public:
 		}
 
 		poll_media_change();
+	}
+
+	void reload_default_patches() {
+		norflash_.reformat();
+		PatchFileIO::create_default_patches(norflash_);
 	}
 
 	void send_pending_message(InterCoreComm2 &comm) {
