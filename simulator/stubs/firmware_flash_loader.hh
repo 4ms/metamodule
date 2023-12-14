@@ -18,10 +18,16 @@ public:
 
 	bool verify_image(size_t filesize) {
 		image_size = filesize;
-		return filesize & 0b1; //caller can choose if this fails or succeeds
+
+		if (filesize & 0b01) {
+			printf("Faking failed verification of image\n");
+			return false;
+		}
+		return true;
 	}
 
 	bool start() {
+		bytes_remaining = image_size;
 		return true;
 	}
 

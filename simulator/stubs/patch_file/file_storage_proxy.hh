@@ -95,9 +95,20 @@ public:
 			mock_file_found_ctr++;
 
 			if ((mock_file_found_ctr % 8) < 4)
-				return {FirmwareFileFound, mock_file_found_ctr + 1, 0, "metamodule-fw-1.23.45.uimg", Volume::USB};
+				return {FirmwareFileFound,
+						mock_file_found_ctr + mock_firmware_file_size,
+						0,
+						"metamodule-fw-1.23.45.uimg",
+						Volume::USB};
 			else
 				return {FirmwareFileNotFound};
+		}
+
+		if (msg_state_ == MsgState::FirmwareFileLoadRequested) {
+			if (mock_file_found_ctr++ > 50) {
+				msg_state_ = MsgState::Idle;
+				return {LoadFirmwareToRamSuccess};
+			}
 		}
 
 		return {};
@@ -145,7 +156,6 @@ public:
 	}
 
 	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
-		mock_firmware_file_size = 5'123'456;
 		msg_state_ = MsgState::FirmwareFileLoadRequested;
 		return true;
 	}
@@ -175,7 +185,7 @@ private:
 	} msg_state_ = MsgState::Idle;
 
 	unsigned mock_file_found_ctr = 0;
-	unsigned mock_firmware_file_size = 0;
+	unsigned mock_firmware_file_size = 5'123'456;
 
 	IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
 		if (list.size() == 0) {
