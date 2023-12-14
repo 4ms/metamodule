@@ -2,8 +2,8 @@
 
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
-#include "fat_file_io.hh"
-#include "firmware_file_finder.hh"
+#include "fs/fatfs/fat_file_io.hh"
+#include "fw_update/firmware_file_finder.hh"
 #include "patch_file/patch_storage.hh"
 
 namespace MetaModule

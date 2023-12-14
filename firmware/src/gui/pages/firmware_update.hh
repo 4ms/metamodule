@@ -1,5 +1,5 @@
 #pragma once
-#include "firmware_flash_loader.hh"
+#include "fw_update/firmware_flash_loader.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
