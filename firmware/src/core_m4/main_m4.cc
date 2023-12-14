@@ -65,34 +65,25 @@ void main() {
 		fs.reload_default_patches();
 
 	// Controls
-	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
-	i2c.enable_IT(a7m4_shared_i2c_codec_conf.priority1, a7m4_shared_i2c_codec_conf.priority2);
-
-	mdrivlib::GPIOExpander ext_gpio_expander{i2c, extaudio_gpio_expander_conf};
-	mdrivlib::GPIOExpander main_gpio_expander{i2c, mainboard_gpio_expander_conf};
-
 	auto param_block_base = SharedMemoryS::ptrs.param_block;
 	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
-	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
-	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
+	Controls controls{*param_block_base, *auxsignal_buffer, usb.get_midi_host()};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
 	controls.start();
 
-	// Run the i2c queue a few times before letting A7 start
+	// Read controls a few times before letting A7 start
 	uint32_t startup_delay = 0x10000;
 	while (startup_delay--) {
-		if (i2c.is_ready())
-			i2cqueue.update();
+		controls.process();
 	}
 
 	pr_info("M4 initialized\n");
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
 	while (true) {
-		if (i2c.is_ready())
-			i2cqueue.update();
+		controls.process();
 
 		usb.process();
 		sd.process();

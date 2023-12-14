@@ -1,8 +1,7 @@
 #pragma once
 #include "conf/hsem_conf.hh"
-#include "controls.hh"
+#include "drivers/gpio_expander.hh"
 #include "drivers/hsem.hh"
-#include "params.hh"
 #include "pr_dbg.hh"
 
 namespace MetaModule
@@ -10,6 +9,8 @@ namespace MetaModule
 
 // I2C Bus shared between Codec, main GPIO Expander, and optional external GPIO Expander
 class SharedBusQueue {
+	using GPIOExpander = mdrivlib::GPIOExpander;
+
 public:
 	SharedBusQueue(GPIOExpander &main_gpioexpander, GPIOExpander &ext_gpioexpander)
 		: main_jacksense_reader(main_gpioexpander)
