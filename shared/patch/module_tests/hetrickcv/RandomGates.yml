@@ -1,35 +1,23 @@
 PatchData:
-  patch_name: Scanner
+  patch_name: RandomGates
   description: Patch Description
   module_slugs:
     0: HubMedium
-    1: Scanner
+    1: RandomGates
   int_cables: []
   mapped_ins:
-    - panel_jack_id: 0
+    - panel_jack_id: 6
       ins:
         - module_id: 1
           jack_id: 0
-    - panel_jack_id: 1
+    - panel_jack_id: 0
       ins:
         - module_id: 1
           jack_id: 1
-    - panel_jack_id: 2
+    - panel_jack_id: 1
       ins:
         - module_id: 1
           jack_id: 2
-    - panel_jack_id: 3
-      ins:
-        - module_id: 1
-          jack_id: 3
-    - panel_jack_id: 4
-      ins:
-        - module_id: 1
-          jack_id: 4
-    - panel_jack_id: 5
-      ins:
-        - module_id: 1
-          jack_id: 5
   mapped_outs:
     - panel_jack_id: 0
       out:
@@ -69,19 +57,13 @@ PatchData:
       value: 0
     - module_id: 1
       param_id: 1
-      value: 0.5
+      value: 0.571429
     - module_id: 1
       param_id: 2
-      value: 0.496386
+      value: 0
     - module_id: 1
       param_id: 3
       value: 0
-    - module_id: 1
-      param_id: 4
-      value: 0
-    - module_id: 1
-      param_id: 5
-      value: 0.125
   mapped_knobs:
     - name: ''
       set:
@@ -94,18 +76,6 @@ PatchData:
         - panel_knob_id: 1
           module_id: 1
           param_id: 1
-          curve_type: 0
-          min: 0
-          max: 1
-        - panel_knob_id: 2
-          module_id: 1
-          param_id: 2
-          curve_type: 0
-          min: 0
-          max: 1
-        - panel_knob_id: 3
-          module_id: 1
-          param_id: 3
           curve_type: 0
           min: 0
           max: 1
@@ -128,4 +98,10 @@ PatchData:
     set: []
   midi_poly_num: 0
 
-'vcvModuleStates': []
+'vcvModuleStates':
+  - 'id': 1
+    'plugin': 'HetrickCV'
+    'model': 'RandomGates'
+    'version': '2.4.0'
+    'data':
+      'mode': 0

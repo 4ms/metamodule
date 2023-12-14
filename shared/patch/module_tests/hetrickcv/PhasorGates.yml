@@ -1,9 +1,9 @@
 PatchData:
-  patch_name: GateJunction
+  patch_name: PhasorGates
   description: Patch Description
   module_slugs:
     0: HubMedium
-    1: GateJunction
+    1: PhasorGates
   int_cables: []
   mapped_ins:
     - panel_jack_id: 0
@@ -13,31 +13,11 @@ PatchData:
     - panel_jack_id: 1
       ins:
         - module_id: 1
-          jack_id: 1
+          jack_id: 2
     - panel_jack_id: 2
       ins:
         - module_id: 1
-          jack_id: 2
-    - panel_jack_id: 3
-      ins:
-        - module_id: 1
-          jack_id: 3
-    - panel_jack_id: 4
-      ins:
-        - module_id: 1
-          jack_id: 4
-    - panel_jack_id: 5
-      ins:
-        - module_id: 1
-          jack_id: 5
-    - panel_jack_id: 6
-      ins:
-        - module_id: 1
-          jack_id: 6
-    - panel_jack_id: 7
-      ins:
-        - module_id: 1
-          jack_id: 7
+          jack_id: 1
   mapped_outs:
     - panel_jack_id: 0
       out:
@@ -47,46 +27,22 @@ PatchData:
       out:
         module_id: 1
         jack_id: 1
-    - panel_jack_id: 2
-      out:
-        module_id: 1
-        jack_id: 2
-    - panel_jack_id: 3
-      out:
-        module_id: 1
-        jack_id: 3
-    - panel_jack_id: 4
-      out:
-        module_id: 1
-        jack_id: 4
-    - panel_jack_id: 5
-      out:
-        module_id: 1
-        jack_id: 5
-    - panel_jack_id: 6
-      out:
-        module_id: 1
-        jack_id: 6
-    - panel_jack_id: 7
-      out:
-        module_id: 1
-        jack_id: 7
   static_knobs:
     - module_id: 1
       param_id: 0
-      value: 0
+      value: 0.428571
     - module_id: 1
       param_id: 1
-      value: 0
+      value: 0.5
     - module_id: 1
       param_id: 2
-      value: 0
+      value: 0.5
     - module_id: 1
       param_id: 3
-      value: 0
+      value: 0.5
     - module_id: 1
       param_id: 4
-      value: 0
+      value: 1
     - module_id: 1
       param_id: 5
       value: 0
@@ -111,18 +67,33 @@ PatchData:
     - module_id: 1
       param_id: 12
       value: 0
-    - module_id: 1
-      param_id: 13
-      value: 0
-    - module_id: 1
-      param_id: 14
-      value: 0
-    - module_id: 1
-      param_id: 15
-      value: 0
   mapped_knobs:
     - name: ''
-      set: []
+      set:
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 1
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 1
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
     - name: ''
       set: []
     - name: ''
@@ -145,19 +116,10 @@ PatchData:
 'vcvModuleStates':
   - 'id': 1
     'plugin': 'HetrickCV'
-    'model': 'GateJunction'
+    'model': 'PhasorGates'
     'version': '2.4.0'
     'data':
-      'muteStates':
-        - false
-        - false
-        - false
-        - false
-        - false
-        - false
-        - false
-        - false
-      'invStates':
+      'gateStates':
         - false
         - false
         - false

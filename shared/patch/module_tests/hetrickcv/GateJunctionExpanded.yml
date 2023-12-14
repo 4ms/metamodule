@@ -1,9 +1,9 @@
 PatchData:
-  patch_name: GateJunction
+  patch_name: GateJunctionExpanded
   description: Patch Description
   module_slugs:
     0: HubMedium
-    1: GateJunction
+    1: GateJunctionExp
   int_cables: []
   mapped_ins:
     - panel_jack_id: 0
@@ -145,7 +145,7 @@ PatchData:
 'vcvModuleStates':
   - 'id': 1
     'plugin': 'HetrickCV'
-    'model': 'GateJunction'
+    'model': 'GateJunctionExp'
     'version': '2.4.0'
     'data':
       'muteStates':

@@ -1,9 +1,9 @@
 PatchData:
-  patch_name: GateJunction
+  patch_name: Rotator
   description: Patch Description
   module_slugs:
     0: HubMedium
-    1: GateJunction
+    1: Rotator
   int_cables: []
   mapped_ins:
     - panel_jack_id: 0
@@ -30,14 +30,6 @@ PatchData:
       ins:
         - module_id: 1
           jack_id: 5
-    - panel_jack_id: 6
-      ins:
-        - module_id: 1
-          jack_id: 6
-    - panel_jack_id: 7
-      ins:
-        - module_id: 1
-          jack_id: 7
   mapped_outs:
     - panel_jack_id: 0
       out:
@@ -77,52 +69,22 @@ PatchData:
       value: 0
     - module_id: 1
       param_id: 1
-      value: 0
-    - module_id: 1
-      param_id: 2
-      value: 0
-    - module_id: 1
-      param_id: 3
-      value: 0
-    - module_id: 1
-      param_id: 4
-      value: 0
-    - module_id: 1
-      param_id: 5
-      value: 0
-    - module_id: 1
-      param_id: 6
-      value: 0
-    - module_id: 1
-      param_id: 7
-      value: 0
-    - module_id: 1
-      param_id: 8
-      value: 0
-    - module_id: 1
-      param_id: 9
-      value: 0
-    - module_id: 1
-      param_id: 10
-      value: 0
-    - module_id: 1
-      param_id: 11
-      value: 0
-    - module_id: 1
-      param_id: 12
-      value: 0
-    - module_id: 1
-      param_id: 13
-      value: 0
-    - module_id: 1
-      param_id: 14
-      value: 0
-    - module_id: 1
-      param_id: 15
-      value: 0
+      value: 0.571429
   mapped_knobs:
     - name: ''
-      set: []
+      set:
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
     - name: ''
       set: []
     - name: ''
@@ -142,27 +104,4 @@ PatchData:
     set: []
   midi_poly_num: 0
 
-'vcvModuleStates':
-  - 'id': 1
-    'plugin': 'HetrickCV'
-    'model': 'GateJunction'
-    'version': '2.4.0'
-    'data':
-      'muteStates':
-        - false
-        - false
-        - false
-        - false
-        - false
-        - false
-        - false
-        - false
-      'invStates':
-        - false
-        - false
-        - false
-        - false
-        - false
-        - false
-        - false
-        - false
+'vcvModuleStates': []

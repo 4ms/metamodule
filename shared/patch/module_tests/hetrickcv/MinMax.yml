@@ -1,0 +1,57 @@
+PatchData:
+  patch_name: MinMax
+  description: Patch Description
+  module_slugs:
+    0: HubMedium
+    1: MinMax
+  int_cables: []
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 1
+    - panel_jack_id: 2
+      ins:
+        - module_id: 1
+          jack_id: 2
+    - panel_jack_id: 3
+      ins:
+        - module_id: 1
+          jack_id: 3
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 1
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 0
+  static_knobs: []
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+
+'vcvModuleStates': []
