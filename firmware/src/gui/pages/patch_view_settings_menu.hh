@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/elements/map_ring_animate.hh"
+#include "gui/pages/view_settings.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
 #include <algorithm>
@@ -8,16 +9,6 @@ namespace MetaModule
 {
 
 struct PatchViewSettingsMenu {
-	struct ViewSettings {
-		bool map_ring_flash_active = true;
-		bool scroll_to_active_param = false;
-		bool show_jack_maps = false;
-		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::CurModuleIfPlaying,
-												.opa = LV_OPA_50};
-		MapRingDisplay::Style cable_style = {.mode = MapRingDisplay::StyleMode::ShowAll, .opa = LV_OPA_50};
-		bool changed = true;
-	};
-
 	PatchViewSettingsMenu(ViewSettings &settings)
 		: settings{settings} {
 	}
@@ -57,7 +48,7 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_ShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_CablesTranspSlider);
 
-		using enum MapRingDisplay::StyleMode;
+		using enum MapRingStyle::Mode;
 		switch (settings.map_ring_style.mode) {
 			case ShowAllIfPlaying:
 				lv_obj_add_state(ui_ShowAllMapsCheck, LV_STATE_CHECKED);
@@ -175,7 +166,7 @@ struct PatchViewSettingsMenu {
 
 			auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
 			{
-				using enum MapRingDisplay::StyleMode;
+				using enum MapRingStyle::Mode;
 				auto &style = page->settings.map_ring_style;
 
 				style.mode = show_only_playing ? ShowAllIfPlaying : ShowAll;
@@ -202,9 +193,11 @@ struct PatchViewSettingsMenu {
 		lv_event_code_t event_code = lv_event_get_code(event);
 
 		if (event_code == LV_EVENT_VALUE_CHANGED) {
+			using enum MapRingStyle::Mode;
+
 			auto show_all = lv_obj_has_state(ui_ShowAllCablesCheck, LV_STATE_CHECKED);
 			auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
-			using enum MapRingDisplay::StyleMode;
+
 			page->settings.cable_style.mode = show_all ? ShowAll : HideAlways;
 
 			auto opacity = lv_slider_get_value(ui_CablesTranspSlider); //0..100

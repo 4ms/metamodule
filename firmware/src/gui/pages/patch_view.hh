@@ -62,8 +62,6 @@ struct PatchViewPage : PageBase {
 	void prepare_focus() override {
 		is_ready = false;
 
-		map_ring_display.set_style(view_settings.map_ring_style);
-
 		lv_hide(ui_DescriptionPanel);
 		lv_label_set_text(ui_Description, patch.description.c_str());
 
@@ -183,9 +181,8 @@ struct PatchViewPage : PageBase {
 		bool last_is_patch_playing = is_patch_playing;
 		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
 
-		if (is_patch_playing != last_is_patch_playing || view_settings.changed) {
-			view_settings.changed = false;
-			map_ring_display.set_style(view_settings.map_ring_style);
+		if (is_patch_playing != last_is_patch_playing || settings.changed) {
+			settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
 		}
@@ -287,10 +284,10 @@ private:
 
 			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
 			if (was_redrawn) {
-				if (view_settings.map_ring_flash_active)
+				if (settings.map_ring_flash_active)
 					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
 
-				if (view_settings.scroll_to_active_param)
+				if (settings.scroll_to_active_param)
 					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 			}
 
@@ -309,15 +306,15 @@ private:
 	}
 
 	void update_cable_style() {
-		static MapRingDisplay::Style last_cable_style;
-		if (view_settings.cable_style.mode != last_cable_style.mode) {
-			if (view_settings.cable_style.mode == MapRingDisplay::StyleMode::ShowAll)
+		static MapRingStyle last_cable_style;
+		if (settings.cable_style.mode != last_cable_style.mode) {
+			if (settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
 				cable_drawer.draw(patch);
 			else
 				cable_drawer.clear();
 		}
-		last_cable_style = view_settings.cable_style;
-		cable_drawer.set_opacity(view_settings.cable_style.opa);
+		last_cable_style = settings.cable_style;
+		cable_drawer.set_opacity(settings.cable_style.opa);
 	}
 
 	void update_active_knobset() {
@@ -443,13 +440,13 @@ private:
 	lv_group_t *info_group;
 	bool showing_info = false;
 
-	PatchViewSettingsMenu::ViewSettings view_settings;
-	PatchViewSettingsMenu settings_menu{view_settings};
+	ViewSettings settings;
+	PatchViewSettingsMenu settings_menu{settings};
 
 	PatchViewKnobsetMenu::Settings knobset_settings;
 	PatchViewKnobsetMenu knobset_menu{knobset_settings};
 
-	MapRingDisplay map_ring_display;
+	MapRingDisplay map_ring_display{settings};
 
 	std::optional<uint32_t> highlighted_module_id{};
 	lv_obj_t *highlighted_module_obj = nullptr;

@@ -17,14 +17,11 @@ namespace MetaModule
 {
 struct ModuleViewPage : PageBase {
 
-	struct ViewSettings {
-		bool map_ring_flash_active = true;
-		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::HideAlways, .opa = LV_OPA_50};
-	};
 	ViewSettings settings;
 
 	ModuleViewPage(PatchInfo info)
 		: PageBase{info, PageId::ModuleView}
+		, map_ring_display{settings}
 		, patch{patch_storage.get_view_patch()}
 		, roller{ui_ElementRoller}
 		, mapping_pane{info.patch_storage, module_mods, params, args, page_list} {
@@ -51,8 +48,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		map_ring_display.set_style(settings.map_ring_style);
-
 		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = args.patch_loc.value_or(PatchLocation{}) == patch_playloader.cur_patch_location();

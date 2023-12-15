@@ -754,7 +754,7 @@ lv_obj_set_style_pad_column(ui_ShowJackMapsPanel, 0, LV_PART_MAIN| LV_STATE_DEFA
 ui_ShowJackMapsLabel = lv_label_create(ui_ShowJackMapsPanel);
 lv_obj_set_width( ui_ShowJackMapsLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_ShowJackMapsLabel, LV_SIZE_CONTENT);   /// 1
-lv_label_set_text(ui_ShowJackMapsLabel,"Flash Active Knobs");
+lv_label_set_text(ui_ShowJackMapsLabel,"Show Jack Maps");
 lv_obj_set_style_text_color(ui_ShowJackMapsLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_ShowJackMapsLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 

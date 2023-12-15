@@ -1,9 +1,8 @@
 #pragma once
 #include "lvgl.h"
+#include "slsexport/meta5/ui.h"
 #include <array>
 #include <span>
-
-LV_FONT_DECLARE(ui_font_MuseoSansRounded50010);
 
 // lvgl has prop1 and has_group fields out of order, thus not C++ friendly
 #define LV_STYLE_CONST_CPP(prop_array)                                                                                 \
