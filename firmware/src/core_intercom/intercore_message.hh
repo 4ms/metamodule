@@ -24,13 +24,12 @@ struct IntercoreStorageMessage {
 		PatchDataLoaded,
 
 		RequestFirmwareFile,
-		FirmwareFileUnchanged,
 		FirmwareFileNotFound,
 		FirmwareFileFound,
 
-		RequestLoadFirmwareToRam,
-		LoadFirmwareToRamFailed,
-		LoadFirmwareToRamSuccess,
+		RequestLoadFileToRam,
+		LoadFileToRamFailed,
+		LoadFileToRamSuccess,
 
 		NumRequests,
 	};

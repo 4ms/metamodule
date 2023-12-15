@@ -9,26 +9,21 @@ namespace MetaModule
 
 class FirmwareFlashLoader {
 public:
-	FirmwareFlashLoader() {
-		//Overwrite buffer with 0's in some key places
-		//So we fail unless a valid file is loaded
-		auto *uimg_header = reinterpret_cast<BootImageDef::ImageHeader *>(ram_buffer);
-		uimg_header->ih_magic = 0;
-		uimg_header->ih_size = 0;
-	}
-	uint8_t *buffer() {
-		return ram_buffer;
-	}
+	enum class Error { None, Failed };
 
-	bool verify_image(size_t filesize) {
-		image_size = filesize;
+	bool verify(std::span<uint8_t> file) {
+		file_size = file.size();
 
-		if (image_size > VIRTDRIVE_SZ) {
-			pr_err("image is too large %zu > %zu\n", image_size, VIRTDRIVE_SZ);
+		if (file_size > VIRTDRIVE_SZ) {
+			pr_err("image is too large %zu > %zu\n", file_size, VIRTDRIVE_SZ);
+			return false;
+		}
+		if (file_size < sizeof(BootImageDef::ImageHeader)) {
+			pr_err("image too small to be uimg\n");
 			return false;
 		}
 
-		auto *uimg_header = reinterpret_cast<BootImageDef::ImageHeader *>(ram_buffer);
+		auto *uimg_header = reinterpret_cast<BootImageDef::ImageHeader *>(file.data());
 		BootImageDef::debug_print_raw_header(*uimg_header);
 
 		if (uimg_header->ih_magic != BootImageDef::IH_MAGIC_BE) {
@@ -36,29 +31,28 @@ public:
 			return false;
 		}
 
-		if ((BootImageDef::be_to_le(uimg_header->ih_size)) > (image_size + 64)) {
-			pr_err("header says image size %zu is larger than the file we loaded %zu\n",
+		if ((BootImageDef::be_to_le(uimg_header->ih_size)) > (file_size + 64)) {
+			pr_err("Header says image size is %zu, which is larger than the file size (%zu)\n",
 				   BootImageDef::be_to_le(uimg_header->ih_size),
-				   image_size);
+				   file_size);
 			return false;
 		}
 
 		return true;
 	}
 
-	bool start() {
+	bool start(std::span<uint8_t> file) {
+
 		flash = std::make_unique<FlashLoader>();
 
 		if (!flash || !flash->check_flash_chip())
 			return false;
 
-		bytes_remaining = image_size;
-		cur_read_block = std::span<uint8_t>{ram_buffer, flash_sector_size};
+		bytes_remaining = file_size;
+		cur_read_block = file.subspan(0, flash_sector_size);
 
 		return true;
 	}
-
-	enum class Error { None, Failed };
 
 	std::pair<int, Error> load_next_block() {
 		if (!flash->write_sectors(cur_flash_addr, cur_read_block)) {
@@ -76,11 +70,9 @@ private:
 	constexpr static uint32_t flash_base_addr = 0x80000;
 	constexpr static uint32_t flash_sector_size = 4096;
 
-	uint8_t *ram_buffer = reinterpret_cast<uint8_t *>(_VIRTDRIVE);
-
 	std::unique_ptr<FlashLoader> flash;
 
-	size_t image_size = 0;
+	size_t file_size = 0;
 	int bytes_remaining = 0;
 	uint32_t cur_flash_addr = flash_base_addr;
 	std::span<uint8_t> cur_read_block;

@@ -12,7 +12,7 @@ namespace MetaModule
 {
 
 struct FirmwareFileFinder {
-	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
+	using InterCoreComm = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
 	using enum IntercoreStorageMessage::MessageType;
 
 	FirmwareFileFinder(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
@@ -25,20 +25,20 @@ struct FirmwareFileFinder {
 	void handle_message(IntercoreStorageMessage &message) {
 
 		if (message.message_type == RequestFirmwareFile) {
-			find_firmware_file();
+			scan_all_for_manifest();
 			message.message_type = None;
 		}
 
-		if (message.message_type == RequestLoadFirmwareToRam) {
-			pr_dbg("M4: got RequestLoadFirmwareToRam\n");
-			load_firmware_file(message);
+		if (message.message_type == RequestLoadFileToRam) {
+			pr_dbg("M4: got RequestLoadFileToRam\n");
+			load_file(message);
 			message.message_type = None;
 		}
 
 		poll_media_change();
 	}
 
-	void send_pending_message(InterCoreComm2 &comm) {
+	void send_pending_message(InterCoreComm &comm) {
 		if (pending_send_message.message_type != None) {
 			if (comm.send_message(pending_send_message))
 				pending_send_message.message_type = None;
@@ -51,22 +51,21 @@ private:
 		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
 	}
 
-	void find_firmware_file() {
-		printf("M4 scanning for firmware files\n");
+	void scan_all_for_manifest() {
+		pr_dbg("M4: scanning all volumes for firmware manifest files (metamodule*.json)\n");
 
 		std::optional<Volume> fw_file_vol{};
 
 		if (usbdrive_.is_mounted()) {
-			if (scan(usbdrive_))
+			if (find_manifest(usbdrive_))
 				fw_file_vol = Volume::USB;
 		}
 
 		// Files found on USB take precedence over SD Card
 		if (!fw_file_vol && sdcard_.is_mounted()) {
-			if (scan(sdcard_))
+			if (find_manifest(sdcard_))
 				fw_file_vol = Volume::SDCard;
 		}
-		// }
 
 		if (fw_file_vol) {
 			pending_send_message.message_type = FirmwareFileFound;
@@ -79,44 +78,27 @@ private:
 		}
 	}
 
-	bool scan(FatFileIO &fileio) {
+	bool find_manifest(FatFileIO &fileio) {
 		found_filename.copy("");
 
 		bool ok = fileio.foreach_file_with_ext(
-			".uimg", [&fileio, this](const std::string_view filename, uint32_t tm, uint32_t filesize) {
-				pr_dbg("M4: Check file %.255s\n", filename.data());
+			".json", [this](const std::string_view filename, uint32_t tm, uint32_t filesize) {
+				pr_trace("M4: Checking file %.255s\n", filename.data());
 
-				if (!filename.starts_with("metamodule-fw-"))
-					return;
-
-				if (filesize < 100 * 1024)
-					return;
-
-				constexpr uint32_t UIMG_MAGIC = 0x56190527;
-				std::array<char, sizeof(UIMG_MAGIC)> buf;
-
-				auto bytes_read = fileio.read_file(filename, buf);
-				if (bytes_read != sizeof(UIMG_MAGIC)) {
-					pr_err("Error reading file %.255s\n", filename.data());
-					return;
-				}
-
-				auto magic = *reinterpret_cast<uint32_t *>(buf.data());
-				if (magic == UIMG_MAGIC) {
+				if (filename.starts_with("metamodule") && filesize > 30) {
 					found_filename.copy(filename);
 					found_filesize = filesize;
-					pr_dbg("M4: Found uimg file: %s (%u B)\n", found_filename.c_str(), found_filesize);
-				} else
-					pr_dbg("M4: Wrong magic: 0x%08x\n", magic);
+					pr_dbg("M4: Found manifest file: %s (%u B)\n", found_filename.c_str(), found_filesize);
+				}
 			});
 
-		if (!ok || found_filename[0] == '\0')
+		if (!ok || found_filename.length() == 0)
 			return false;
 
 		return true;
 	}
 
-	void load_firmware_file(IntercoreStorageMessage &message) {
+	void load_file(IntercoreStorageMessage &message) {
 		FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
 							(message.vol_id == Volume::SDCard) ? &sdcard_ :
 																 nullptr;
@@ -126,10 +108,10 @@ private:
 			pr_dbg("M4: Loaded OK. first word is %p: %x\n",
 				   message.buffer.data(),
 				   *reinterpret_cast<uint32_t *>(message.buffer.data()));
-			pending_send_message.message_type = LoadFirmwareToRamSuccess;
+			pending_send_message.message_type = LoadFileToRamSuccess;
 		} else {
 			pr_dbg("M4: Failed Load\n");
-			pending_send_message.message_type = LoadFirmwareToRamFailed;
+			pending_send_message.message_type = LoadFileToRamFailed;
 		}
 	}
 

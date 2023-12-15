@@ -94,7 +94,7 @@ public:
 		return remote_patch_list_;
 	}
 
-	// Firmare file: scanning volumes for firmware update files
+	// Scan all mounted volumes for firmware update files
 	[[nodiscard]] bool request_find_firmware_file() {
 		IntercoreStorageMessage message{.message_type = RequestFirmwareFile};
 		if (!comm_.send_message(message))
@@ -102,10 +102,10 @@ public:
 		return true;
 	}
 
-	// Load a file to RAM
+	// Load a file from filesystem to RAM
 	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
 		IntercoreStorageMessage message{
-			.message_type = RequestLoadFirmwareToRam,
+			.message_type = RequestLoadFileToRam,
 			.filename = filename,
 			.vol_id = vol,
 			.buffer = buffer,
