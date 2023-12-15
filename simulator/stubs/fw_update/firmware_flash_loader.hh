@@ -2,6 +2,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <utility>
 
 namespace MetaModule
@@ -16,8 +17,8 @@ public:
 		return ram_buffer.data();
 	}
 
-	bool verify_image(size_t filesize) {
-		image_size = filesize;
+	bool verify(std::span<uint8_t> file) {
+		filesize = file.size();
 
 		if (filesize & 0b01) {
 			printf("Faking failed verification of image\n");
@@ -26,8 +27,8 @@ public:
 		return true;
 	}
 
-	bool start() {
-		bytes_remaining = image_size;
+	bool start(std::span<uint8_t> file) {
+		bytes_remaining = filesize;
 		return true;
 	}
 
@@ -41,7 +42,7 @@ public:
 private:
 	std::array<uint8_t, 1024> ram_buffer;
 
-	size_t image_size = 0;
+	size_t filesize = 0;
 	int bytes_remaining = 0;
 };
 

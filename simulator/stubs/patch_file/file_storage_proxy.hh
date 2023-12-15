@@ -107,7 +107,7 @@ public:
 		if (msg_state_ == MsgState::FirmwareFileLoadRequested) {
 			if (mock_file_found_ctr++ > 50) {
 				msg_state_ = MsgState::Idle;
-				return {LoadFirmwareToRamSuccess};
+				return {LoadFileToRamSuccess};
 			}
 		}
 
