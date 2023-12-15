@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <span>
@@ -13,11 +12,7 @@ public:
 	FirmwareFlashLoader() {
 	}
 
-	uint8_t *buffer() {
-		return ram_buffer.data();
-	}
-
-	bool verify(std::span<uint8_t> file) {
+	bool verify(std::span<char> file, std::span<uint32_t, 4> md5) {
 		filesize = file.size();
 
 		if (filesize & 0b01) {
@@ -27,7 +22,7 @@ public:
 		return true;
 	}
 
-	bool start(std::span<uint8_t> file) {
+	bool start(std::span<char> file) {
 		bytes_remaining = filesize;
 		return true;
 	}
@@ -40,8 +35,6 @@ public:
 	}
 
 private:
-	std::array<uint8_t, 1024> ram_buffer;
-
 	size_t filesize = 0;
 	int bytes_remaining = 0;
 };
