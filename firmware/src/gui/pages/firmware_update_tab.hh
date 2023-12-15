@@ -65,7 +65,7 @@ struct FirmwareUpdateTab {
 					if (manifest_filename = std::string{message.filename.data()}; manifest_filename.length()) {
 						manifest_file_vol = message.vol_id;
 						manifest_filesize = message.bytes_read;
-						display_file_found();
+						display_manifest_found();
 					} else {
 						pr_dbg("Filename empty, skipping\n");
 						display_file_not_found();
@@ -88,13 +88,13 @@ struct FirmwareUpdateTab {
 					state = State::Failed;
 
 				} else if (status.state == FirmwareUpdater::LoadingFilesToRAM) {
-					display_progress("Loading to RAM", 0);
+					display_progress("Loading to RAM", status.file_size, 0);
 
 				} else if (status.state == FirmwareUpdater::WritingApp) {
-					display_progress("Writing application", status.bytes_remaining);
+					display_progress("Writing application", status.file_size, status.bytes_remaining);
 
 				} else if (status.state == FirmwareUpdater::WritingWifi) {
-					display_progress("Writing wifi firmware", status.bytes_remaining);
+					display_progress("Writing wifi firmware", status.file_size, status.bytes_remaining);
 
 				} else if (status.state == FirmwareUpdater::Success) {
 					display_success();
@@ -139,9 +139,12 @@ private:
 		if (!updater.start(manifest_filename, manifest_file_vol, manifest_filesize)) {
 			display_update_failed("Could not load manifest file\n");
 			state = State::Failed;
-			return;
+		} else {
+			display_reading_manifest();
 		}
+	}
 
+	void display_reading_manifest() {
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
 							  "Reading update file %s (%u kB)... Please wait\n",
 							  manifest_filename.data(),
@@ -152,7 +155,7 @@ private:
 		state = State::Updating;
 	}
 
-	void display_file_found() {
+	void display_manifest_found() {
 		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_GREEN, 1), LV_PART_MAIN);
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
 							  "Firmware update file found on %s: %s, %u bytes",
@@ -199,24 +202,24 @@ private:
 		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
 
-	void display_progress(std::string_view message, int bytes_remaining) {
-		if (bytes_remaining > 0) {
+	void display_progress(std::string_view message, int file_size, int bytes_remaining) {
+		if (file_size > 0 && bytes_remaining > 0) {
 			lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
-								  "Writing update file to flash:\n%u of %u kB\nDO NOT POWER OFF",
-								  unsigned((manifest_filesize - bytes_remaining) / 1024),
-								  unsigned(manifest_filesize / 1024));
+								  "%.*s:\n%u of %u kB\nDO NOT POWER OFF",
+								  (int)message.size(),
+								  message.data(),
+								  unsigned((file_size - bytes_remaining) / 1024),
+								  unsigned(file_size / 1024));
 
-			int percent = 100 * (manifest_filesize - bytes_remaining) / manifest_filesize;
+			int percent = 100 * (file_size - bytes_remaining) / file_size;
 			lv_hide(ui_FWUpdateSpinner);
 			lv_show(ui_SystemMenUpdateProgressBar);
 			lv_bar_set_value(ui_SystemMenUpdateProgressBar, percent, LV_ANIM_ON);
 		} else {
 			lv_show(ui_FWUpdateSpinner);
 			lv_hide(ui_SystemMenUpdateProgressBar);
-			lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
-								  "Writing update file to flash:\n%u of %u kB\nDO NOT POWER OFF",
-								  unsigned((manifest_filesize - bytes_remaining) / 1024),
-								  unsigned(manifest_filesize / 1024));
+			lv_label_set_text_fmt(
+				ui_SystemMenuUpdateMessage, "%.*s:\nDO NOT POWER OFF", (int)message.size(), message.data());
 		}
 	}
 
@@ -229,8 +232,9 @@ private:
 	ConfirmPopup confirm_popup;
 
 	std::string manifest_filename = "";
-	uint32_t manifest_filesize = 0;
 	Volume manifest_file_vol;
+
+	uint32_t manifest_filesize = 0;
 
 	FirmwareUpdater updater;
 

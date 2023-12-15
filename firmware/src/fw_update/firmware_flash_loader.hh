@@ -11,7 +11,7 @@ class FirmwareFlashLoader {
 public:
 	enum class Error { None, Failed };
 
-	bool verify(std::span<uint8_t> file) {
+	bool verify(std::span<char> file, std::span<uint32_t, 4> md5) {
 		file_size = file.size();
 
 		if (file_size > VIRTDRIVE_SZ) {
@@ -23,8 +23,11 @@ public:
 			return false;
 		}
 
+		//TODO: check md5
+		pr_dbg("MD5 is %08x %08x %08x %08x\n", md5[0], md5[1], md5[2], md5[3]);
+
 		auto *uimg_header = reinterpret_cast<BootImageDef::ImageHeader *>(file.data());
-		BootImageDef::debug_print_raw_header(*uimg_header);
+		// BootImageDef::debug_print_raw_header(*uimg_header);
 
 		if (uimg_header->ih_magic != BootImageDef::IH_MAGIC_BE) {
 			pr_err("image magic is wrong %zu != %zu\n", uimg_header->ih_magic, BootImageDef::IH_MAGIC_BE);
@@ -41,7 +44,7 @@ public:
 		return true;
 	}
 
-	bool start(std::span<uint8_t> file) {
+	bool start(std::span<char> file) {
 
 		flash = std::make_unique<FlashLoader>();
 
@@ -49,13 +52,18 @@ public:
 			return false;
 
 		bytes_remaining = file_size;
+
 		cur_read_block = file.subspan(0, flash_sector_size);
 
 		return true;
 	}
 
 	std::pair<int, Error> load_next_block() {
-		if (!flash->write_sectors(cur_flash_addr, cur_read_block)) {
+
+		// flash driver requires uint8_t, but file operations provide us with chars
+		auto block_u8 = std::span<uint8_t>{reinterpret_cast<uint8_t *>(cur_read_block.data()), cur_read_block.size()};
+
+		if (!flash->write_sectors(cur_flash_addr, block_u8)) {
 			return {bytes_remaining, Error::Failed};
 		}
 
@@ -75,7 +83,7 @@ private:
 	size_t file_size = 0;
 	int bytes_remaining = 0;
 	uint32_t cur_flash_addr = flash_base_addr;
-	std::span<uint8_t> cur_read_block;
+	std::span<char> cur_read_block;
 };
 
 } // namespace MetaModule

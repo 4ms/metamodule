@@ -16,16 +16,6 @@ struct FirmwareUpdater {
 
 	FirmwareUpdater(FileStorageProxy &file_storage)
 		: file_storage{file_storage} {
-
-		//Overwrite buffer with 0's in some key places
-		//So we fail unless a valid file is loaded
-		auto *uimg_header = reinterpret_cast<BootImageDef::ImageHeader *>(ram_buffer.data());
-		uimg_header->ih_magic = 0;
-		uimg_header->ih_size = 0;
-	}
-
-	bool verify_update(uint32_t filesize) {
-		return false;
 	}
 
 	bool start(std::string_view manifest_filename, Volume manifest_file_vol, uint32_t manifest_filesize) {
@@ -48,12 +38,13 @@ struct FirmwareUpdater {
 
 	struct Status {
 		State state{State::Idle};
+		int file_size{0};
 		int bytes_remaining{0};
 		std::string error_message{};
 	};
 
-	// return flash_writer.start();
 	Status process() {
+		int bytes_remaining = 0;
 
 		switch (state) {
 			case Idle:
@@ -91,35 +82,50 @@ struct FirmwareUpdater {
 					check_reading_done();
 
 				if (current_file_idx >= files.size())
-					init_writing();
+					current_file_size = write_first_file();
 
 			} break;
 
 			case WritingApp: {
-				auto [bytes_remaining, err] = flash_loader.load_next_block();
+				auto [bytes_rem, err] = flash_loader.load_next_block();
 
 				if (err == FirmwareFlashLoader::Error::Failed) {
 					state = State::Error;
-					return {state, bytes_remaining, "Failed writing app to flash"};
+					bytes_remaining = bytes_rem;
+					error_message = "Failed writing app to flash";
 
-				} else if (bytes_remaining > 0) {
-					return {state, bytes_remaining};
+				} else if (bytes_rem > 0) {
+					bytes_remaining = bytes_rem;
 
 				} else {
-					current_file_idx++;
-					start_writing_file();
+					current_file_size = write_next_file();
 				}
 
 			} break;
 
 			case WritingWifi: {
+				// TODO: wifi loading process happens here:
+				auto [bytes_rem, err] = wifi_loader.load_next_block();
+
+				if (err == FirmwareWifiLoader::Error::Failed) {
+					state = State::Error;
+					bytes_remaining = bytes_rem;
+					error_message = "Failed writing firmware to wifi module";
+
+				} else if (bytes_rem > 0) {
+					bytes_remaining = bytes_rem;
+
+				} else {
+					//Done
+					current_file_size = write_next_file();
+				}
 			} break;
 		};
 
 		if (state == State::Error)
-			return {state, 0, error_message};
+			return {state, current_file_size, bytes_remaining, error_message};
 		else
-			return {state};
+			return {state, current_file_size, bytes_remaining};
 	}
 
 	void init_ram_loading() {
@@ -128,13 +134,17 @@ struct FirmwareUpdater {
 		file_images.reserve(files.size());
 	}
 
+	// reads from disk to RAM
 	void start_reading_file() {
 		auto size = files[current_file_idx].filesize;
 		if (current_file_idx == 0)
 			file_images[current_file_idx] = {(char *)ram_buffer.data(), size};
 		else
-			file_images[current_file_idx] = {file_images[current_file_idx].end(), size};
+			file_images[current_file_idx] = {file_images[current_file_idx - 1].end(), size};
 
+		pr_dbg("A7: request to load %s to 0x%x\n",
+			   files[current_file_idx].filename.c_str(),
+			   file_images[current_file_idx].data());
 		if (file_storage.request_load_file(files[current_file_idx].filename, vol, file_images[current_file_idx]))
 			file_requested = true;
 		else {
@@ -147,6 +157,7 @@ struct FirmwareUpdater {
 		auto message = file_storage.get_message();
 
 		if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
+			pr_dbg("A7: file loaded\n");
 			current_file_idx++;
 			file_requested = false;
 
@@ -156,49 +167,61 @@ struct FirmwareUpdater {
 		}
 	}
 
-	void init_writing() {
+	int write_first_file() {
 		current_file_idx = 0;
-		start_writing_file();
+		return start_writing_file();
 	}
 
-	void start_writing_file() {
+	int write_next_file() {
+		current_file_idx++;
+		return start_writing_file();
+	}
+
+	// writes from RAM to flash/wifi-uart
+	int start_writing_file() {
 		if (current_file_idx > files.size()) {
 			state = State::Success;
-			return;
+			return 0;
 		}
+
+		int file_size = file_images[current_file_idx].size();
 
 		if (files[current_file_idx].type == UpdateType::App) {
 
-			if (!flash_loader.verify(as_u8(file_images[current_file_idx]))) {
+			if (!flash_loader.verify(file_images[current_file_idx], files[current_file_idx].md5)) {
 				state = State::Error;
 				error_message = "App firmware file not valid";
-				return;
+				return file_size;
 			}
 
-			if (!flash_loader.start(as_u8(file_images[current_file_idx]))) {
+			if (!flash_loader.start(file_images[current_file_idx])) {
 				state = State::Error;
-				error_message = "Could not start writing to Flash chip";
+				error_message = "Could not start writing application firmware to flash";
+				return file_size;
 			}
 
 			state = State::WritingApp;
 
 		} else if (files[current_file_idx].type == UpdateType::Wifi) {
-
-			state = State::WritingWifi;
-
-			if (!wifi_loader.verify(as_u8(file_images[current_file_idx]))) {
+			//
+			// TODO: Wifi loading process starts here:
+			//
+			if (!wifi_loader.verify(file_images[current_file_idx], files[current_file_idx].md5)) {
 				state = State::Error;
-				error_message = "App firmware file not valid";
-				return;
+				error_message = "Wifi firmware file not valid";
+				return file_size;
 			}
 
-			if (!wifi_loader.start(as_u8(file_images[current_file_idx]))) {
+			if (!wifi_loader.start(file_images[current_file_idx])) {
 				state = State::Error;
-				error_message = "Could not start writing to Flash chip";
+				error_message = "Could not start writing to Wifi module";
+				return file_size;
 			}
 
 			state = State::WritingWifi;
 		}
+
+		return file_size;
 	}
 
 private:
@@ -213,6 +236,7 @@ private:
 	Volume vol;
 
 	unsigned current_file_idx = 0;
+	int current_file_size = 0;
 	bool file_requested = false;
 
 	std::span<char> manifest_buffer;
@@ -223,10 +247,6 @@ private:
 
 	std::vector<UpdateFile> files;
 	std::vector<std::span<char>> file_images;
-
-	static std::span<uint8_t> as_u8(std::span<char> s) {
-		return {(uint8_t *)s.data(), s.size()};
-	}
 };
 
 } // namespace MetaModule
