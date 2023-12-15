@@ -11,6 +11,7 @@ struct PatchViewSettingsMenu {
 	struct ViewSettings {
 		bool map_ring_flash_active = true;
 		bool scroll_to_active_param = false;
+		bool show_jack_maps = false;
 		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::CurModuleIfPlaying,
 												.opa = LV_OPA_50};
 		MapRingDisplay::Style cable_style = {.mode = MapRingDisplay::StyleMode::ShowAll, .opa = LV_OPA_50};
@@ -31,6 +32,7 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_ShowSelectedMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_ShowPlayingMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_FlashMapCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_ShowJackMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MapTranspSlider, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_ShowAllCablesCheck, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -50,6 +52,7 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_ShowSelectedMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_ShowPlayingMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_FlashMapCheck);
+		lv_group_add_obj(settings_menu_group, ui_ShowJackMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_MapTranspSlider);
 		lv_group_add_obj(settings_menu_group, ui_ShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_CablesTranspSlider);
@@ -91,6 +94,11 @@ struct PatchViewSettingsMenu {
 			lv_obj_add_state(ui_FlashMapCheck, LV_STATE_CHECKED);
 		else
 			lv_obj_clear_state(ui_FlashMapCheck, LV_STATE_CHECKED);
+
+		if (settings.show_jack_maps)
+			lv_obj_add_state(ui_ShowJackMapsCheck, LV_STATE_CHECKED);
+		else
+			lv_obj_clear_state(ui_ShowJackMapsCheck, LV_STATE_CHECKED);
 
 		// 0..100 => 0..255
 		uint32_t opacity = (float)settings.map_ring_style.opa / 2.5f;
@@ -154,6 +162,7 @@ struct PatchViewSettingsMenu {
 			auto show_selected = lv_obj_has_state(ui_ShowSelectedMapsCheck, LV_STATE_CHECKED);
 			auto show_only_playing = lv_obj_has_state(ui_ShowPlayingMapsCheck, LV_STATE_CHECKED);
 			auto flash_active = lv_obj_has_state(ui_FlashMapCheck, LV_STATE_CHECKED);
+			auto show_jack_maps = lv_obj_has_state(ui_ShowJackMapsCheck, LV_STATE_CHECKED);
 
 			// Do not allow both ShowAll and ShowSelected to be checked
 			if (obj == ui_ShowAllMapsCheck && show_all) {
@@ -182,6 +191,7 @@ struct PatchViewSettingsMenu {
 			opacity = (float)opacity * 2.5f;
 			page->settings.map_ring_style.opa = opacity;
 			page->settings.map_ring_flash_active = flash_active;
+			page->settings.show_jack_maps = show_jack_maps;
 			page->settings.changed = true;
 		}
 	}

@@ -692,7 +692,7 @@ lv_obj_set_style_pad_column(ui_FlashMapPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT)
 ui_FlashMapLabel = lv_label_create(ui_FlashMapPanel);
 lv_obj_set_width( ui_FlashMapLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_FlashMapLabel, LV_SIZE_CONTENT);   /// 1
-lv_label_set_text(ui_FlashMapLabel,"Flash Active");
+lv_label_set_text(ui_FlashMapLabel,"Flash Active Knobs");
 lv_obj_set_style_text_color(ui_FlashMapLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_FlashMapLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -729,6 +729,68 @@ lv_obj_set_style_pad_left(ui_FlashMapCheck, -4, LV_PART_KNOB| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_FlashMapCheck, -6, LV_PART_KNOB| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_FlashMapCheck, -5, LV_PART_KNOB| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_FlashMapCheck, -5, LV_PART_KNOB| LV_STATE_DEFAULT);
+
+ui_ShowJackMapsPanel = lv_obj_create(ui_SettingsMenu);
+lv_obj_set_width( ui_ShowJackMapsPanel, 186);
+lv_obj_set_height( ui_ShowJackMapsPanel, 25);
+lv_obj_set_align( ui_ShowJackMapsPanel, LV_ALIGN_RIGHT_MID );
+lv_obj_set_flex_flow(ui_ShowJackMapsPanel,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_ShowJackMapsPanel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_clear_flag( ui_ShowJackMapsPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_ShowJackMapsPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ShowJackMapsPanel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ShowJackMapsPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_color(ui_ShowJackMapsPanel, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_border_opa(ui_ShowJackMapsPanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_ShowJackMapsPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_side(ui_ShowJackMapsPanel, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_ShowJackMapsPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_ShowJackMapsPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_ShowJackMapsPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_ShowJackMapsPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_ShowJackMapsPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_ShowJackMapsPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_ShowJackMapsLabel = lv_label_create(ui_ShowJackMapsPanel);
+lv_obj_set_width( ui_ShowJackMapsLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_ShowJackMapsLabel, LV_SIZE_CONTENT);   /// 1
+lv_label_set_text(ui_ShowJackMapsLabel,"Flash Active Knobs");
+lv_obj_set_style_text_color(ui_ShowJackMapsLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_ShowJackMapsLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_ShowJackMapsCheck = lv_switch_create(ui_ShowJackMapsPanel);
+lv_obj_set_width( ui_ShowJackMapsCheck, 35);
+lv_obj_set_height( ui_ShowJackMapsCheck, 20);
+lv_obj_set_align( ui_ShowJackMapsCheck, LV_ALIGN_TOP_RIGHT );
+lv_obj_add_flag( ui_ShowJackMapsCheck, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_ShowJackMapsCheck, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE );    /// Flags
+lv_obj_set_style_radius(ui_ShowJackMapsCheck, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ShowJackMapsCheck, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ShowJackMapsCheck, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_ShowJackMapsCheck, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_ShowJackMapsCheck, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ShowJackMapsCheck, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ShowJackMapsCheck, 1, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_ShowJackMapsCheck, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_ShowJackMapsCheck, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_ShowJackMapsCheck, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_ShowJackMapsCheck, 1, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_color(ui_ShowJackMapsCheck, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_CHECKED|LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_ShowJackMapsCheck, 200, LV_PART_MAIN| LV_STATE_CHECKED|LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ShowJackMapsCheck, 2, LV_PART_MAIN| LV_STATE_CHECKED|LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ShowJackMapsCheck, 1, LV_PART_MAIN| LV_STATE_CHECKED|LV_STATE_FOCUSED);
+
+lv_obj_set_style_radius(ui_ShowJackMapsCheck, 20, LV_PART_INDICATOR| LV_STATE_CHECKED);
+lv_obj_set_style_bg_color(ui_ShowJackMapsCheck, lv_color_hex(0x4067D3), LV_PART_INDICATOR | LV_STATE_CHECKED );
+lv_obj_set_style_bg_opa(ui_ShowJackMapsCheck, 255, LV_PART_INDICATOR| LV_STATE_CHECKED);
+
+lv_obj_set_style_radius(ui_ShowJackMapsCheck, 20, LV_PART_KNOB| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ShowJackMapsCheck, lv_color_hex(0xFFFFFF), LV_PART_KNOB | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ShowJackMapsCheck, 255, LV_PART_KNOB| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_ShowJackMapsCheck, -4, LV_PART_KNOB| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_ShowJackMapsCheck, -6, LV_PART_KNOB| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_ShowJackMapsCheck, -5, LV_PART_KNOB| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_ShowJackMapsCheck, -5, LV_PART_KNOB| LV_STATE_DEFAULT);
 
 ui_MapsTransparencyTitle = lv_label_create(ui_SettingsMenu);
 lv_obj_set_width( ui_MapsTransparencyTitle, 180);
