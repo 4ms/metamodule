@@ -48,8 +48,8 @@ struct ManifestParser {
 
 	// returns true if file data is valid manifest json file (does not check md5 or if files exist)
 	// creates the list of files we need
-	bool parse(std::span<char> manifest) {
-		files.clear();
+	std::vector<UpdateFile> parse(std::span<char> manifest) {
+		std::vector<UpdateFile> files;
 
 		// ryml has issues with tabs in json sometimes:
 		std::replace(manifest.begin(), manifest.end(), '\t', ' ');
@@ -58,22 +58,20 @@ struct ManifestParser {
 
 		if (tree.num_children(0) == 0) {
 			pr_dbg("Manifest json tree has no children\n");
-			return false;
+			return files;
 		}
 
 		ryml::ConstNodeRef root = tree.rootref();
 
 		if (!root.has_child("updates")) {
 			pr_dbg("Manifest json has no root node with key 'updates'\n");
-			return false;
+			return files;
 		}
 
 		root["updates"] >> files;
 
-		return true;
+		return files;
 	}
-
-	std::vector<UpdateFile> files;
 };
 
 } // namespace MetaModule

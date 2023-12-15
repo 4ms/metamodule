@@ -66,7 +66,9 @@ struct FirmwareUpdater {
 
 				if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
 
-					if (parser.parse(manifest_buffer)) {
+					files = parser.parse(manifest_buffer);
+
+					if (files.size() > 0) {
 						init_ram_loading();
 						state = State::LoadingFilesToRAM;
 
@@ -88,7 +90,7 @@ struct FirmwareUpdater {
 				else
 					check_reading_done();
 
-				if (current_file_idx >= parser.files.size())
+				if (current_file_idx >= files.size())
 					init_writing();
 
 			} break;
@@ -123,17 +125,17 @@ struct FirmwareUpdater {
 	void init_ram_loading() {
 		current_file_idx = 0;
 		file_requested = false;
-		file_images.reserve(parser.files.size());
+		file_images.reserve(files.size());
 	}
 
 	void start_reading_file() {
-		auto size = parser.files[current_file_idx].filesize;
+		auto size = files[current_file_idx].filesize;
 		if (current_file_idx == 0)
 			file_images[current_file_idx] = {(char *)ram_buffer.data(), size};
 		else
 			file_images[current_file_idx] = {file_images[current_file_idx].end(), size};
 
-		if (file_storage.request_load_file(parser.files[current_file_idx].filename, vol, file_images[current_file_idx]))
+		if (file_storage.request_load_file(files[current_file_idx].filename, vol, file_images[current_file_idx]))
 			file_requested = true;
 		else {
 			state = State::Error;
@@ -160,12 +162,12 @@ struct FirmwareUpdater {
 	}
 
 	void start_writing_file() {
-		if (current_file_idx > parser.files.size()) {
+		if (current_file_idx > files.size()) {
 			state = State::Success;
 			return;
 		}
 
-		if (parser.files[current_file_idx].type == UpdateType::App) {
+		if (files[current_file_idx].type == UpdateType::App) {
 
 			if (!flash_loader.verify(as_u8(file_images[current_file_idx]))) {
 				state = State::Error;
@@ -180,7 +182,7 @@ struct FirmwareUpdater {
 
 			state = State::WritingApp;
 
-		} else if (parser.files[current_file_idx].type == UpdateType::Wifi) {
+		} else if (files[current_file_idx].type == UpdateType::Wifi) {
 
 			state = State::WritingWifi;
 
@@ -219,6 +221,7 @@ private:
 
 	const std::span<uint8_t> ram_buffer = get_ram_buffer();
 
+	std::vector<UpdateFile> files;
 	std::vector<std::span<char>> file_images;
 
 	static std::span<uint8_t> as_u8(std::span<char> s) {
