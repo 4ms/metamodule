@@ -3,7 +3,7 @@
 #include "fw_update/firmware_wifi_loader.hh"
 #include "fw_update/manifest_parse.hh"
 #include "fw_update/ram_buffer.hh"
-#include "ld.h"
+#include "fw_update/uimg_header.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include <cstdint>
 
@@ -34,7 +34,7 @@ struct FirmwareUpdater {
 			return false;
 		}
 
-		manifest_buffer.reserve(manifest_filesize);
+		manifest_buffer = std::span<char>{(char *)ram_buffer.data(), manifest_filesize};
 
 		if (file_storage.request_load_file(manifest_filename, manifest_file_vol, manifest_buffer))
 			state = State::LoadingManifest;
@@ -65,6 +65,7 @@ struct FirmwareUpdater {
 				auto message = file_storage.get_message();
 
 				if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
+
 					if (parser.parse(manifest_buffer)) {
 						init_ram_loading();
 						state = State::LoadingFilesToRAM;
@@ -212,7 +213,7 @@ private:
 	unsigned current_file_idx = 0;
 	bool file_requested = false;
 
-	std::string manifest_buffer;
+	std::span<char> manifest_buffer;
 
 	std::string error_message = "";
 
