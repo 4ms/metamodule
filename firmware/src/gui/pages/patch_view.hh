@@ -61,6 +61,9 @@ struct PatchViewPage : PageBase {
 
 	void prepare_focus() override {
 		is_ready = false;
+
+		map_ring_display.set_style(view_settings.map_ring_style);
+
 		lv_hide(ui_DescriptionPanel);
 		lv_label_set_text(ui_Description, patch.description.c_str());
 
@@ -182,6 +185,7 @@ struct PatchViewPage : PageBase {
 
 		if (is_patch_playing != last_is_patch_playing || view_settings.changed) {
 			view_settings.changed = false;
+			map_ring_display.set_style(view_settings.map_ring_style);
 			update_map_ring_style();
 			update_cable_style();
 		}
@@ -284,8 +288,7 @@ private:
 			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
 			if (was_redrawn) {
 				if (view_settings.map_ring_flash_active)
-					MapRingDisplay::flash_once(
-						gui_el.map_ring, view_settings.map_ring_style, highlighted_module_id == gui_el.module_idx);
+					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
 
 				if (view_settings.scroll_to_active_param)
 					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
@@ -300,9 +303,8 @@ private:
 			return;
 
 		for (auto &drawn_el : drawn_elements) {
-			auto map_ring = drawn_el.gui_element.map_ring;
 			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
-			MapRingDisplay::update(map_ring, view_settings.map_ring_style, is_on_highlighted_module, is_patch_playing);
+			map_ring_display.update(drawn_el, is_on_highlighted_module, is_patch_playing);
 		}
 	}
 
@@ -446,6 +448,8 @@ private:
 
 	PatchViewKnobsetMenu::Settings knobset_settings;
 	PatchViewKnobsetMenu knobset_menu{knobset_settings};
+
+	MapRingDisplay map_ring_display;
 
 	std::optional<uint32_t> highlighted_module_id{};
 	lv_obj_t *highlighted_module_obj = nullptr;

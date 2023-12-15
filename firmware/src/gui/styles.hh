@@ -3,6 +3,8 @@
 #include <array>
 #include <span>
 
+LV_FONT_DECLARE(ui_font_MuseoSansRounded50010);
+
 // lvgl has prop1 and has_group fields out of order, thus not C++ friendly
 #define LV_STYLE_CONST_CPP(prop_array)                                                                                 \
 	lv_style_t {                                                                                                       \
@@ -167,31 +169,23 @@ struct Gui {
 		lv_style_set_pad_all(&module_border_style, 0);
 		lv_style_set_pad_gap(&module_border_style, 0);
 
-		// display = ...
-		// theme = lv_theme_default_init(display, // NOLINT
-		// 							  lv_palette_main(LV_PALETTE_BLUE),
-		// 							  lv_palette_main(LV_PALETTE_GREY),
-		// 							  true,
-		// 							  &lv_font_MuseoSansRounded_700_12);
-		// lv_disp_set_theme(display, theme);
-
 		// Map circle
 		lv_style_init(&mapped_circle_style);
 		lv_style_set_radius(&mapped_circle_style, 40);
-		// lv_style_set_border_width(&mapped_circle_style, 3);
-		// lv_style_set_border_opa(&mapped_circle_style, LV_OPA_TRANSP);
-		lv_style_set_bg_color(&mapped_circle_style, lv_color_white());
-		lv_style_set_bg_opa(&mapped_circle_style, LV_OPA_50);
+		lv_style_set_border_color(&mapped_circle_style, lv_color_white());
+		lv_style_set_border_width(&mapped_circle_style, 12);
+		lv_style_set_border_opa(&mapped_circle_style, LV_OPA_50);
+		lv_style_set_bg_opa(&mapped_circle_style, LV_OPA_0);
 		lv_style_set_outline_opa(&mapped_circle_style, LV_OPA_100);
 		lv_style_set_outline_width(&mapped_circle_style, 3);
 		lv_style_set_outline_pad(&mapped_circle_style, 0);
 		lv_style_set_radius(&mapped_circle_style, 40);
+		lv_style_set_text_color(&mapped_circle_style, lv_color_hex(0x000000));
+		lv_style_set_text_opa(&mapped_circle_style, 255);
+		lv_style_set_text_font(&mapped_circle_style, &ui_font_MuseoSansRounded50010);
 
 		// Map circle label style for jacks
 		lv_style_init(&mapped_jack_circle_label_style);
-		lv_style_set_text_color(&mapped_jack_circle_label_style, lv_color_hex(0x000000));
-		lv_style_set_text_opa(&mapped_jack_circle_label_style, 255);
-		lv_style_set_text_font(&mapped_jack_circle_label_style, &ui_font_MuseoSansRounded50010);
 		lv_style_set_pad_left(&mapped_jack_circle_label_style, -2);
 		lv_style_set_pad_right(&mapped_jack_circle_label_style, 0);
 		lv_style_set_pad_top(&mapped_jack_circle_label_style, -1);

@@ -63,6 +63,7 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 	lv_obj_set_size(ring_obj, w, h);
 
 	lv_obj_set_style_bg_opa(ring_obj, LV_OPA_TRANSP, LV_STATE_DEFAULT);
+	lv_obj_set_style_border_width(ring_obj, 0, LV_STATE_DEFAULT);
 	lv_obj_set_style_border_opa(ring_obj, LV_OPA_TRANSP, LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_pad(ring_obj, gap, LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_color(ring_obj, color, LV_STATE_DEFAULT);
@@ -96,6 +97,7 @@ draw_mapped_jack(const JackElement &, lv_obj_t *element_obj, lv_obj_t *canvas, s
 
 	auto panel_id = panel_el_id.value();
 	lv_obj_set_style_outline_color(circle, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
 
 	return circle;
 }
@@ -114,7 +116,6 @@ inline lv_obj_t *draw_mapped_ring(const JackInput &el,
 	if (auto label = lv_obj_get_child(circle, 0)) {
 
 		auto panel_id = panel_el_id.value();
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
 
 		if (panel_id < 6)
 			lv_label_set_text_fmt(label, "%d", int(panel_id + 1));
@@ -139,7 +140,6 @@ inline lv_obj_t *draw_mapped_ring(const JackOutput &el,
 	if (auto label = lv_obj_get_child(circle, 0)) {
 
 		auto panel_id = panel_el_id.value();
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
 		lv_label_set_text_fmt(label, "%d", int(panel_id + 1));
 	}
 
