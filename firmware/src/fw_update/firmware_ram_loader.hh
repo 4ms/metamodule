@@ -19,7 +19,7 @@ struct FirmwareRamLoader {
 		if (actual_size == 0)
 			return false;
 
-		if (actual_size > buffer.size())
+		if (actual_size != buffer.size())
 			return false;
 
 		auto bytes_read = fileio->read_file(filename, buffer);
