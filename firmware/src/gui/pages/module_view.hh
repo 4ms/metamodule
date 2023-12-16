@@ -292,6 +292,7 @@ private:
 		drawn_elements.clear();
 		module_controls.clear();
 		opts.clear();
+		cur_selected = 0;
 	}
 
 	bool read_slug() {
