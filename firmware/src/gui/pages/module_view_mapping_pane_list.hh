@@ -94,7 +94,7 @@ struct MappingPaneList {
 		if (panel_jack_id < Gui::knob_palette.size())
 			lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_jack_id], LV_STATE_DEFAULT);
 
-		lv_label_set_text_fmt(setname, "Panel %.16s <<", name.c_str());
+		lv_label_set_text_fmt(setname, "Panel %.16s", name.c_str());
 		lv_label_set_text_fmt(label, "%d", panel_jack_id + 1);
 		lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
 
@@ -106,14 +106,10 @@ struct MappingPaneList {
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		lv_hide(circle);
-		lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
+		// lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
 		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, patch);
-		lv_label_set_text_fmt(label,
-							  "%s %.16s %.16s",
-							  dir == ElementType::Input ? " >>" : " <<",
-							  name.module_name.data(),
-							  name.element_name.data());
+		lv_label_set_text_fmt(label, "%.16s %.16s", name.module_name.data(), name.element_name.data());
 	}
 
 	static lv_obj_t *create_cable_item(Jack jack, ElementType dir, PatchData const &patch, lv_obj_t *parent) {
@@ -124,14 +120,10 @@ struct MappingPaneList {
 
 	static void style_unmappedcable_item(Jack jack, ElementType dir, PatchData const &patch, lv_obj_t *obj) {
 		auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
-		lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
+		// lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_text_color(label, lv_color_white(), LV_STATE_DEFAULT);
 		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, patch);
-		lv_label_set_text_fmt(label,
-							  "%s %.16s %.16s",
-							  dir == ElementType::Input ? " >>" : " <<",
-							  name.module_name.data(),
-							  name.element_name.data());
+		lv_label_set_text_fmt(label, "%.16s %.16s", name.module_name.data(), name.element_name.data());
 	}
 
 	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name, lv_obj_t *parent) {

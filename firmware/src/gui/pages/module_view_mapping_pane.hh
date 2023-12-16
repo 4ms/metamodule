@@ -16,6 +16,15 @@
 namespace MetaModule
 {
 
+struct MapKnobUserData {
+	uint32_t set_i{};
+	std::optional<uint16_t> mapped_panel_id{};
+};
+struct MapCableUserData {
+	uint16_t module_id;
+	ElementCount::Indices idx;
+};
+
 struct ModuleViewMappingPane {
 	ModuleViewMappingPane(PatchStorageProxy &patch_storage,
 						  PatchModQueue &patch_mod_queue,
@@ -77,6 +86,7 @@ struct ModuleViewMappingPane {
 		drawn_element = &drawn_el;
 
 		displayed_knobsets = 0;
+		displayed_cable_endpts = 0;
 		std::visit([this](auto &el) { prepare_for_element(el); }, drawn_el.element);
 
 		lv_show(ui_MappingParameters);
@@ -142,16 +152,8 @@ struct ModuleViewMappingPane {
 	}
 
 private:
-	struct MapItemUserData {
-		uint32_t set_i; //NOLINT
-		std::optional<uint16_t> mapped_panel_id;
-		MapItemUserData()
-			: set_i{0}
-			, mapped_panel_id{std::nullopt} {
-		}
-	};
-
-	static inline std::array<MapItemUserData, MaxKnobSets + 1> mapped_item_user_data{};
+	static inline std::array<MapKnobUserData, MaxKnobSets + 1> mapped_item_user_data{};
+	static inline std::array<MapCableUserData, 12> mapped_cable_user_data{};
 
 	void remove_all_items() {
 		for (auto &obj : map_list_items) {
@@ -160,7 +162,7 @@ private:
 		map_list_items.clear();
 	}
 
-	void activate_list_item(lv_obj_t *obj, uint32_t set_i, std::optional<uint16_t> mapped_panel_id) {
+	void make_selectable_knobset_item(lv_obj_t *obj, uint32_t set_i, std::optional<uint16_t> mapped_panel_id) {
 		map_list_items.push_back(obj);
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
@@ -175,12 +177,40 @@ private:
 		}
 	}
 
-	void group_edit_cable_button(lv_obj_t *obj) {
+	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
+		auto idx = ElementCount::mark_unused_indices({.output_idx = (uint8_t)dest.jack_id}, {.num_outputs = 1});
+		make_selectable_jack_item(obj, dest.module_id, idx);
+	}
+
+	void make_selectable_injack_item(lv_obj_t *obj, Jack dest) {
+		auto idx = ElementCount::mark_unused_indices({.input_idx = (uint8_t)dest.jack_id}, {.num_inputs = 1});
+		make_selectable_jack_item(obj, dest.module_id, idx);
+	}
+
+	void make_selectable_jack_item(lv_obj_t *obj, uint16_t module_id, ElementCount::Indices idx) {
 		map_list_items.push_back(obj);
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
-		lv_obj_add_event_cb(obj, edit_cable_button_cb, LV_EVENT_RELEASED, this);
-		// lv_obj_set_user_data(obj, reinterpret_cast<void *>(cable_idx));
+		lv_obj_add_event_cb(obj, follow_cable_button_cb, LV_EVENT_CLICKED, this);
+		if (displayed_cable_endpts < mapped_cable_user_data.size()) {
+			mapped_cable_user_data[displayed_cable_endpts] = {module_id, idx};
+			lv_obj_set_user_data(obj, &(mapped_cable_user_data[displayed_cable_endpts]));
+			displayed_cable_endpts++;
+		} else {
+			pr_err("Cannot display more than %d cables\n", mapped_item_user_data.size());
+			lv_obj_set_user_data(obj, nullptr);
+		}
+	}
+
+	void make_selectable_addcable_item(lv_obj_t *obj) {
+		map_list_items.push_back(obj);
+		lv_group_add_obj(pane_group, obj);
+		lv_group_focus_obj(obj);
+		lv_obj_add_event_cb(obj, edit_cable_button_cb, LV_EVENT_CLICKED, this);
+	}
+
+	void make_nonselectable_item(lv_obj_t *obj) {
+		map_list_items.push_back(obj);
 	}
 
 	void prepare_for_element(const BaseElement &) {
@@ -192,7 +222,7 @@ private:
 		lv_hide(ui_ControlButton);
 		lv_show(ui_MappedPanel);
 		lv_hide(ui_MappedItemHeader);
-		lv_label_set_text(ui_MappedListTitle, "Cables:");
+		lv_label_set_text(ui_MappedListTitle, "Connected To:");
 	}
 
 	void prepare_for_element(const JackOutput &) {
@@ -204,7 +234,7 @@ private:
 			if (cable.out == thisjack) {
 				for (auto &injack : cable.ins) {
 					auto obj = list.create_cable_item(injack, ElementType::Input, patch, ui_MapList);
-					group_edit_cable_button(obj);
+					make_selectable_injack_item(obj, injack);
 				}
 			}
 		}
@@ -212,10 +242,10 @@ private:
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
 		if (panel_jack_id) {
 			auto obj = list.create_panel_outcable_item(panel_jack_id.value(), ui_MapList);
-			group_edit_cable_button(obj);
+			make_nonselectable_item(obj);
 		} else {
 			auto obj = list.create_unmapped_list_item("Add cable...", ui_MapList);
-			group_edit_cable_button(obj);
+			make_selectable_addcable_item(obj);
 		}
 	}
 
@@ -228,7 +258,7 @@ private:
 			for (auto &injack : cable.ins) {
 				if (injack == thisjack) {
 					auto obj = list.create_cable_item(cable.out, ElementType::Output, patch, ui_MapList);
-					group_edit_cable_button(obj);
+					make_selectable_outjack_item(obj, cable.out);
 				}
 			}
 		}
@@ -236,10 +266,10 @@ private:
 		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
 		if (panel_jack_id) {
 			auto obj = list.create_panel_incable_item(panel_jack_id.value(), ui_MapList);
-			group_edit_cable_button(obj);
+			make_nonselectable_item(obj);
 		} else {
 			auto obj = list.create_unmapped_list_item("Add cable...", ui_MapList);
-			group_edit_cable_button(obj);
+			make_selectable_addcable_item(obj);
 		}
 	}
 
@@ -296,7 +326,7 @@ private:
 				set_is_empty = false;
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					auto obj = list.create_map_list_item(map, setname, ui_MapList);
-					activate_list_item(obj, set_i, map.panel_knob_id);
+					make_selectable_knobset_item(obj, set_i, map.panel_knob_id);
 					lv_obj_add_event_cb(obj, edit_button_cb, LV_EVENT_RELEASED, this);
 					added_list_item = true;
 				}
@@ -307,7 +337,7 @@ private:
 
 	void show_unmapped_knobset(unsigned set_i, const char *setname) {
 		auto obj = list.create_unmapped_list_item(setname, ui_MapList);
-		activate_list_item(obj, set_i, std::nullopt);
+		make_selectable_knobset_item(obj, set_i, std::nullopt);
 		lv_obj_add_event_cb(obj, add_button_cb, LV_EVENT_RELEASED, this);
 	}
 
@@ -316,24 +346,19 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		auto obj = event->target;
-		auto objdata = lv_obj_get_user_data(obj);
-		if (!objdata)
+		if (!event->target)
 			return;
 
-		auto data = *static_cast<MapItemUserData *>(objdata);
-		if (!data.mapped_panel_id.has_value())
-			return;
+		if (auto objdata = lv_obj_get_user_data(event->target)) {
 
-		page->page_list.stash_state(PageId::ModuleView, page->args);
-		page->page_list.request_new_page(PageId::KnobMap,
-										 {
-											 .mappedknob_id = data.mapped_panel_id,
-											 .view_knobset_id = data.set_i,
-										 });
-		// page->args.mappedknob_id = data.mapped_panel_id;
-		// page->args.view_knobset_id = data.set_i;
-		//page->args);
+			auto data = *static_cast<MapKnobUserData *>(objdata);
+			if (!data.mapped_panel_id.has_value())
+				return;
+
+			page->page_list.stash_state(PageId::ModuleView, page->args);
+			page->page_list.request_new_page(PageId::KnobMap,
+											 {.mappedknob_id = data.mapped_panel_id, .view_knobset_id = data.set_i});
+		}
 	}
 
 	static void edit_cable_button_cb(lv_event_t *event) {
@@ -346,7 +371,21 @@ private:
 
 		page->page_list.stash_state(PageId::ModuleView, page->args);
 		page->page_list.request_new_page(PageId::CableEdit, page->args);
-		// page->hide();
+	}
+
+	static void follow_cable_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		if (!event->target)
+			return;
+
+		if (auto objdata = lv_obj_get_user_data(event->target)) {
+			auto endpoint = *static_cast<MapCableUserData *>(objdata);
+			page->page_list.request_new_page(PageId::ModuleView,
+											 {.module_id = endpoint.module_id, .element_indices = endpoint.idx});
+		}
 	}
 
 	static void add_button_cb(lv_event_t *event) {
@@ -403,6 +442,7 @@ private:
 
 	unsigned this_module_id = 0;
 	unsigned displayed_knobsets = 0;
+	unsigned displayed_cable_endpts = 0;
 
 	MappingPaneList list;
 	AddMapPopUp add_map_popup;
