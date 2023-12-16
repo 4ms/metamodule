@@ -22,7 +22,7 @@ lv_obj_set_style_pad_left(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_
 lv_obj_set_style_pad_right(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 4,  LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 4,  LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_set_style_radius(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 12,  LV_PART_ITEMS| LV_STATE_DEFAULT);

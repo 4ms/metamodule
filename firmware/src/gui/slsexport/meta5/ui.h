@@ -249,6 +249,7 @@ extern lv_obj_t *ui_SystemMenuUpdateFWversion;
 extern lv_obj_t *ui_SystemMenuUpdateMessage;
 extern lv_obj_t *ui_SystemMenuUpdateFWBut;
 extern lv_obj_t *ui_SystemMenuUpdateFWlabel;
+extern lv_obj_t *ui_SystemMenUpdateProgressBar;
 extern lv_obj_t *ui_FWUpdateSpinner;
 extern lv_obj_t *ui____initial_actions0;
 
