@@ -28,7 +28,7 @@ jobs:
           gcc: ['12.2.Rel1']  # can add other versions if needed
     name: "Build firmware"
     runs-on: ubuntu-latest
-    container: ghcr.io/lnnrts/metamodule:latest
+    container: ghcr.io/lnnrts/metamodule:68b5c6386862e5790c08616b29eb94e5ef374e24e11b8ad584cfdb57656c52e9
     steps:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
