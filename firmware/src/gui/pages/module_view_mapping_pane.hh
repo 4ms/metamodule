@@ -40,8 +40,9 @@ struct ModuleViewMappingPane {
 	}
 
 	void init() {
-		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_RELEASED, this);
+		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_CableEditButton, edit_cable_button_cb, LV_EVENT_CLICKED, this);
 		pane_group = lv_group_create();
 	}
 
@@ -81,6 +82,7 @@ struct ModuleViewMappingPane {
 		auto nm = base_element(drawn_el.element).short_name;
 		if (nm.size() == 0)
 			nm = "(no name)";
+		// TODO: hide if jack
 		lv_label_set_text(ui_Element_Name, nm.data());
 
 		drawn_element = &drawn_el;
@@ -202,12 +204,12 @@ private:
 		}
 	}
 
-	void make_selectable_addcable_item(lv_obj_t *obj) {
-		map_list_items.push_back(obj);
-		lv_group_add_obj(pane_group, obj);
-		lv_group_focus_obj(obj);
-		lv_obj_add_event_cb(obj, edit_cable_button_cb, LV_EVENT_CLICKED, this);
-	}
+	// void make_selectable_addcable_item(lv_obj_t *obj) {
+	// 	map_list_items.push_back(obj);
+	// 	lv_group_add_obj(pane_group, obj);
+	// 	lv_group_focus_obj(obj);
+	// 	lv_obj_add_event_cb(obj, edit_cable_button_cb, LV_EVENT_CLICKED, this);
+	// }
 
 	void make_nonselectable_item(lv_obj_t *obj) {
 		map_list_items.push_back(obj);
@@ -215,68 +217,78 @@ private:
 
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_ControlButton);
+		lv_hide(ui_CableEditButton);
 		lv_hide(ui_MappedPanel);
 	}
 
-	void prepare_for_jack() {
+	void prepare_for_jack(bool has_connections) {
 		lv_hide(ui_ControlButton);
-		lv_show(ui_MappedPanel);
+		lv_show(ui_CableEditButton);
 		lv_hide(ui_MappedItemHeader);
-		lv_label_set_text(ui_MappedListTitle, "Connected To:");
+		lv_group_add_obj(pane_group, ui_CableEditButton);
+
+		if (has_connections) {
+			lv_label_set_text(ui_MappedListTitle, "Connected To:");
+			lv_show(ui_MappedPanel);
+			lv_label_set_text(ui_CableEditButtonLabel, "Edit Cable");
+			lv_group_focus_next(pane_group);
+		} else {
+			lv_label_set_text(ui_MappedListTitle, "Not Connected");
+			lv_hide(ui_MappedPanel);
+			lv_label_set_text(ui_CableEditButtonLabel, "Add Cable");
+		}
 	}
 
 	void prepare_for_element(const JackOutput &) {
-		prepare_for_jack();
+
+		bool has_connections = false;
 
 		Jack thisjack = {.module_id = (uint16_t)this_module_id, .jack_id = drawn_element->gui_element.idx.output_idx};
 
-		for (auto &cable : patch.int_cables) {
-			if (cable.out == thisjack) {
-				for (auto &injack : cable.ins) {
-					auto obj = list.create_cable_item(injack, ElementType::Input, patch, ui_MapList);
-					make_selectable_injack_item(obj, injack);
-				}
+		if (auto *cable = patch.find_internal_cable_with_outjack(thisjack)) {
+			for (auto &injack : cable->ins) {
+				auto obj = list.create_cable_item(injack, ElementType::Input, patch, ui_MapList);
+				make_selectable_injack_item(obj, injack);
+				has_connections = true;
 			}
 		}
 
-		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
-		if (panel_jack_id) {
+		if (auto panel_jack_id = drawn_element->gui_element.mapped_panel_id) {
 			auto obj = list.create_panel_outcable_item(panel_jack_id.value(), ui_MapList);
 			make_nonselectable_item(obj);
-		} else {
-			auto obj = list.create_unmapped_list_item("Add cable...", ui_MapList);
-			make_selectable_addcable_item(obj);
+			has_connections = true;
 		}
+
+		prepare_for_jack(has_connections);
 	}
 
 	void prepare_for_element(const JackInput &) {
-		prepare_for_jack();
+
+		bool has_connections = false;
 
 		Jack thisjack = {.module_id = (uint16_t)this_module_id, .jack_id = drawn_element->gui_element.idx.input_idx};
 
-		for (auto &cable : patch.int_cables) {
-			for (auto &injack : cable.ins) {
-				if (injack == thisjack) {
-					auto obj = list.create_cable_item(cable.out, ElementType::Output, patch, ui_MapList);
-					make_selectable_outjack_item(obj, cable.out);
-				}
-			}
+		if (auto *cable = patch.find_internal_cable_with_injack(thisjack)) {
+			auto obj = list.create_cable_item(cable->out, ElementType::Output, patch, ui_MapList);
+			make_selectable_outjack_item(obj, cable->out);
+			has_connections = true;
 		}
 
-		auto panel_jack_id = drawn_element->gui_element.mapped_panel_id;
-		if (panel_jack_id) {
+		if (auto panel_jack_id = drawn_element->gui_element.mapped_panel_id) {
 			auto obj = list.create_panel_incable_item(panel_jack_id.value(), ui_MapList);
 			make_nonselectable_item(obj);
-		} else {
-			auto obj = list.create_unmapped_list_item("Add cable...", ui_MapList);
-			make_selectable_addcable_item(obj);
+			has_connections = true;
 		}
+
+		prepare_for_jack(has_connections);
 	}
 
 	void prepare_for_element(const ParamElement &) {
 		lv_show(ui_MappedPanel);
 		lv_show(ui_MappedItemHeader);
 		lv_show(ui_ControlButton, is_patch_playing);
+		lv_hide(ui_CableEditButton);
+		lv_label_set_text(ui_ControlButtonLabel, "Adjust");
 		lv_label_set_text(ui_MappedListTitle, "Mappings:");
 
 		if (is_patch_playing) {

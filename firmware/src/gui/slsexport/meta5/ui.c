@@ -124,6 +124,8 @@ lv_obj_t *ui_MappedItemHeader;
 lv_obj_t *ui_MappedItemHeaderMapText;
 lv_obj_t *ui_MappedItemHeaderKnobSetText;
 lv_obj_t *ui_MapList;
+lv_obj_t *ui_CableEditButton;
+lv_obj_t *ui_CableEditButtonLabel;
 lv_obj_t *ui_ControlAlert;
 lv_obj_t *ui_ControlArc;
 lv_obj_t *ui_ControlAlertLabel;

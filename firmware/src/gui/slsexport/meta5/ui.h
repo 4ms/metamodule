@@ -125,6 +125,8 @@ extern lv_obj_t *ui_MappedItemHeader;
 extern lv_obj_t *ui_MappedItemHeaderMapText;
 extern lv_obj_t *ui_MappedItemHeaderKnobSetText;
 extern lv_obj_t *ui_MapList;
+extern lv_obj_t *ui_CableEditButton;
+extern lv_obj_t *ui_CableEditButtonLabel;
 extern lv_obj_t *ui_ControlAlert;
 extern lv_obj_t *ui_ControlArc;
 extern lv_obj_t *ui_ControlAlertLabel;
