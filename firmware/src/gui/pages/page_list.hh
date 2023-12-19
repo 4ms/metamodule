@@ -34,7 +34,7 @@ class PageList {
 		PageArguments args;
 	};
 	CircularStack<PageHistory, 64> _page_history;
-	PageHistory _request{};
+	PageHistory _current_state{};
 
 public:
 	void set_active_knobset(uint32_t id) {
@@ -66,12 +66,12 @@ public:
 	}
 
 	void request_initial_page(PageId pageid, PageArguments args) {
-		_request = {pageid, args};
+		_current_state = {pageid, args};
 		_new_page_requested = true;
 	}
 
-	void stash_state(PageId pageid, PageArguments args) {
-		_request = {pageid, args};
+	void update_state(PageId pageid, PageArguments args) {
+		_current_state = {pageid, args};
 	}
 
 	void request_new_page(PageId pageid, PageArguments args) {
@@ -81,10 +81,9 @@ public:
 		if (last.has_value() && last->page == pageid && last->args == args)
 			_page_history.pop_back();
 		else
-		// } else
-		_page_history.push_back(_request);
+			_page_history.push_back(_current_state);
 
-		_request = {pageid, args};
+		_current_state = {pageid, args};
 		_new_page_requested = true;
 	}
 
@@ -96,7 +95,7 @@ public:
 			return false;
 		}
 
-		_request = last.value();
+		_current_state = last.value();
 		_new_page_requested = true;
 		return true;
 	}
@@ -105,7 +104,7 @@ public:
 	std::optional<PageWithArgs> get_requested_page() {
 		if (_new_page_requested) {
 			_new_page_requested = false;
-			return PageWithArgs{page(_request.page), &_request.args};
+			return PageWithArgs{page(_current_state.page), &_current_state.args};
 
 		} else
 			return std::nullopt;

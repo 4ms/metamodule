@@ -92,12 +92,12 @@ struct PageBase {
 	}
 
 	void load_prev_page() {
-		page_list.stash_state(id, args);
+		page_list.update_state(id, args);
 		page_list.request_last_page();
 	}
 
 	void load_page(PageId next_page, PageArguments new_args) {
-		page_list.stash_state(id, args);
+		page_list.update_state(id, args);
 		page_list.request_new_page(next_page, new_args);
 	}
 
