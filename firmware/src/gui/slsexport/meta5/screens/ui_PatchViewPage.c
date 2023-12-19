@@ -1249,11 +1249,9 @@ lv_obj_set_style_pad_bottom(ui_ModuleName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 ui_DescriptionPanel = lv_obj_create(ui_PatchViewPage);
 lv_obj_set_width( ui_DescriptionPanel, lv_pct(100));
 lv_obj_set_height( ui_DescriptionPanel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_DescriptionPanel, -2 );
-lv_obj_set_y( ui_DescriptionPanel, 0 );
 lv_obj_set_flex_flow(ui_DescriptionPanel,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_DescriptionPanel, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_add_flag( ui_DescriptionPanel, LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
+lv_obj_add_flag( ui_DescriptionPanel, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
 lv_obj_clear_flag( ui_DescriptionPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
 lv_obj_set_scroll_dir(ui_DescriptionPanel, LV_DIR_VER);
 lv_obj_set_style_radius(ui_DescriptionPanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -1323,6 +1321,8 @@ lv_obj_clear_flag( ui_DescriptionEdit, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_DescriptionEdit, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_DescriptionEdit, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_DescriptionEdit, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_DescriptionEdit, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_DescriptionEdit, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_color(ui_DescriptionEdit, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
 lv_obj_set_style_outline_opa(ui_DescriptionEdit, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
@@ -1346,8 +1346,8 @@ lv_obj_set_style_bg_color(ui_DescriptionClose, lv_color_hex(0x777777), LV_PART_M
 lv_obj_set_style_bg_opa(ui_DescriptionClose, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_color(ui_DescriptionClose, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_DescriptionClose, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_width(ui_DescriptionClose, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_pad(ui_DescriptionClose, 1, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_DescriptionClose, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_DescriptionClose, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 ui_DescriptionCloseLabel = lv_label_create(ui_DescriptionClose);
 lv_obj_set_width( ui_DescriptionCloseLabel, LV_SIZE_CONTENT);  /// 1

@@ -65,7 +65,7 @@ private:
 	}
 
 	static void editbut_cb(lv_event_t *event) {
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		// auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
 	}
 };
 

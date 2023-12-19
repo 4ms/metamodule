@@ -113,6 +113,8 @@ void ui_MappingMenu_screen_init(void);
 extern lv_obj_t *ui_MappingMenu;
 extern lv_obj_t *ui_MappingFlexZone;
 extern lv_obj_t *ui_ModuleImage;
+extern lv_obj_t *ui_ElementRollerPanel;
+extern lv_obj_t *ui_ElementRollerModuleName;
 extern lv_obj_t *ui_ElementRoller;
 extern lv_obj_t *ui_MappingParameters;
 extern lv_obj_t *ui_Module_Name;

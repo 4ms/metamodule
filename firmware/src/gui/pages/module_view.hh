@@ -65,6 +65,8 @@ struct ModuleViewPage : PageBase {
 			return;
 		}
 
+		lv_label_set_text(ui_ElementRollerModuleName, slug.data());
+
 		redraw_module();
 	}
 
@@ -139,14 +141,14 @@ struct ModuleViewPage : PageBase {
 			opts.pop_back();
 
 		//Show Roller and select it
-		lv_obj_set_pos(roller, 0, 0);
+		lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
 		auto roller_width = std::min(320 - display_widthpx, 220); //roller is no more than 220px wide
-		lv_obj_set_size(roller, roller_width, 240);
-		lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
+		lv_obj_clear_flag(ui_ElementRollerPanel, LV_OBJ_FLAG_HIDDEN);
 
 		// Add text list to roller options
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
-		lv_roller_set_visible_row_count(roller, 11);
+		lv_roller_set_visible_row_count(roller, 10);
 
 		lv_roller_set_selected(roller, cur_selected, LV_ANIM_OFF);
 
@@ -257,7 +259,8 @@ struct ModuleViewPage : PageBase {
 private:
 	void show_roller() {
 		mapping_pane.hide();
-		lv_show(roller);
+		lv_show(ui_ElementRollerPanel);
+		lv_obj_set_height(roller, 210);
 		lv_group_focus_obj(roller);
 		lv_group_set_editing(group, true);
 	}
@@ -309,7 +312,6 @@ private:
 
 	static void roller_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto roller = page->roller;
 		auto &cur_sel = page->cur_selected;
 		auto &but = page->button;
 
@@ -320,7 +322,7 @@ private:
 		}
 
 		// Get the new button
-		cur_sel = lv_roller_get_selected(roller);
+		cur_sel = lv_roller_get_selected(page->roller);
 
 		// Turn on new button
 		lv_obj_add_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
@@ -335,7 +337,7 @@ private:
 
 		if (cur_sel < module_controls.size()) {
 			page->mode = ViewMode::Mapping;
-			lv_hide(ui_ElementRoller);
+			lv_hide(ui_ElementRollerPanel);
 			page->mapping_pane.show(page->drawn_elements[cur_sel]);
 		}
 	}
