@@ -17,12 +17,6 @@ struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info, PageId::PatchSel} {
 
-		roller = ui_PatchListRoller; //NOLINT
-		nor_but = ui_Flashbut;		 //NOLINT
-		usb_but = ui_USBbut;		 //NOLINT
-		sd_but = ui_SDbut;			 //NOLINT
-		spinner = ui_waitspinner;	 //NOLINT
-
 		init_bg(ui_PatchSelectorPage);
 
 		lv_group_add_obj(group, roller);
@@ -301,16 +295,16 @@ private:
 	uint32_t highlighted_idx = 0;
 	Volume highlighted_vol = Volume::NorFlash;
 
-	lv_obj_t *roller;
-	lv_obj_t *usb_but;
-	lv_obj_t *sd_but;
-	lv_obj_t *nor_but;
-	lv_obj_t *spinner;
+	lv_obj_t *roller = ui_PatchListRoller;
+	lv_obj_t *nor_but = ui_Flashbut;
+	lv_obj_t *usb_but = ui_USBbut;
+	lv_obj_t *sd_but = ui_SDbut;
+	lv_obj_t *spinner = ui_waitspinner;
 
 	const std::string_view leader = "   ";
-	uint32_t num_usb;
-	uint32_t num_sdcard;
-	uint32_t num_norflash;
+	uint32_t num_usb{};
+	uint32_t num_sdcard{};
+	uint32_t num_norflash{};
 
 	unsigned usb_hdr = 0;
 	unsigned sd_hdr = 0;

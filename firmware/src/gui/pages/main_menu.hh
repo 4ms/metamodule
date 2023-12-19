@@ -34,8 +34,8 @@ struct MainMenuPage : PageBase {
 	}
 
 	void update() final {
-		if (metaparams.audio_load != last_audio_load) {
-			metaparams.audio_load = last_audio_load;
+		if (last_audio_load != metaparams.audio_load) {
+			last_audio_load = metaparams.audio_load;
 			lv_label_set_text_fmt(load_label, "%d%%", metaparams.audio_load);
 			lv_show(load_label);
 		};

@@ -348,7 +348,7 @@ private:
 	MapRingDisplay map_ring_display;
 
 	std::string opts;
-	uint16_t this_module_id;
+	uint16_t this_module_id = 0;
 	uint32_t cur_selected = 0;
 	std::string_view slug = "";
 	bool is_patch_playing = false;
@@ -359,16 +359,16 @@ private:
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_controls;
 	std::vector<DrawnElement> drawn_elements;
-	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals;
+	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals{};
 
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *roller = nullptr;
 	ModuleViewMappingPane mapping_pane;
 
-	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
-	lv_draw_img_dsc_t img_dsc;
+	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};
+	lv_draw_img_dsc_t img_dsc{};
 
-	enum class ViewMode { List, Mapping } mode;
+	enum class ViewMode { List, Mapping } mode{ViewMode::List};
 };
 
 } // namespace MetaModule

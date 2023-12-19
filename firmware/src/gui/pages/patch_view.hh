@@ -209,8 +209,8 @@ struct PatchViewPage : PageBase {
 
 		if (is_patch_playing) {
 			update_changed_params();
-			if (metaparams.audio_load != last_audio_load) {
-				metaparams.audio_load = last_audio_load;
+			if (last_audio_load != metaparams.audio_load) {
+				last_audio_load = metaparams.audio_load;
 				lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
 				lv_show(ui_LoadMeter2);
 			}
