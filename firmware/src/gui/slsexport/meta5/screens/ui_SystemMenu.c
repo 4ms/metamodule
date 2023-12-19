@@ -41,7 +41,9 @@ lv_obj_set_style_bg_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_
 lv_obj_set_style_border_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_ITEMS| LV_STATE_CHECKED);
 lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_ITEMS| LV_STATE_CHECKED);
 lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_ITEMS| LV_STATE_CHECKED);
-lv_obj_set_style_outline_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0xFF8918),  LV_PART_ITEMS | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0xFD8B18),  LV_PART_ITEMS | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_ITEMS| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0xFD8B18),  LV_PART_ITEMS | LV_STATE_FOCUS_KEY );
 lv_obj_set_style_outline_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_ITEMS| LV_STATE_FOCUS_KEY);
 lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 2,  LV_PART_ITEMS| LV_STATE_FOCUS_KEY);
 lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 1,  LV_PART_ITEMS| LV_STATE_FOCUS_KEY);

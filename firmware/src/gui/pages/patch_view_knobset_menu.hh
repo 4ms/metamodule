@@ -39,7 +39,7 @@ struct PatchViewKnobsetMenu {
 		}
 	}
 
-	void focus(lv_group_t *group, std::vector<MappedKnobSet> &knobsets) {
+	void prepare_focus(lv_group_t *group, std::vector<MappedKnobSet> &knobsets) {
 
 		base_group = group;
 		knobset_menu_group = lv_group_create();

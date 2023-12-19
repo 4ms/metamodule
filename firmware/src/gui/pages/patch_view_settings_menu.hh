@@ -33,7 +33,7 @@ struct PatchViewSettingsMenu {
 		lv_obj_set_x(ui_SettingsMenu, 220);
 	}
 
-	void focus(lv_group_t *group) {
+	void prepare_focus(lv_group_t *group) {
 		base_group = group;
 		settings_menu_group = lv_group_create();
 		lv_group_remove_all_objs(settings_menu_group);

@@ -102,6 +102,7 @@ extern lv_obj_t *ui_KnobsetCloseButton;
 extern lv_obj_t *ui_KnobsetHeaderLine;
 extern lv_obj_t *ui_ModuleName;
 extern lv_obj_t *ui_DescriptionPanel;
+extern lv_obj_t *ui_DescPanelPatchName;
 extern lv_obj_t *ui_Description;
 extern lv_obj_t *ui_DescriptionEdit;
 extern lv_obj_t *ui_DescriptionEditLabel;

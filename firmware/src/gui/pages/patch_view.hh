@@ -10,6 +10,7 @@
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
+#include "gui/pages/description_panel.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_knobset_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
@@ -17,7 +18,6 @@
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
-#include "src/core/lv_obj_scroll.h"
 #include "util/countzip.hh"
 
 namespace MetaModule
@@ -30,14 +30,12 @@ struct PatchViewPage : PageBase {
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
-		, cable_drawer{modules_cont, drawn_elements}
-		, info_group(lv_group_create()) {
+		, cable_drawer{modules_cont, drawn_elements} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_InfoButton, infobut_cb, LV_EVENT_CLICKED, this);
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -51,19 +49,14 @@ struct PatchViewPage : PageBase {
 		// Settings menu
 		settings_menu.init();
 		knobset_menu.init();
+		desc_panel.hide();
 
 		lv_label_set_text(ui_ModuleName, "");
 		lv_hide(ui_ModuleName);
-
-		lv_hide(ui_DescriptionPanel);
-		lv_group_add_obj(info_group, ui_DescriptionPanel);
 	}
 
 	void prepare_focus() override {
 		is_ready = false;
-
-		lv_hide(ui_DescriptionPanel);
-		lv_label_set_text(ui_Description, patch.description.c_str());
 
 		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
 
@@ -80,8 +73,9 @@ struct PatchViewPage : PageBase {
 		if (active_knob_set == page_list.get_active_knobset() && patch_revision == page_list.get_patch_revision() &&
 			displayed_patch_loc == args.patch_loc)
 		{
-			watch_lights();
 			is_ready = true;
+			watch_lights();
+			update_map_ring_style();
 			return;
 		}
 
@@ -152,29 +146,28 @@ struct PatchViewPage : PageBase {
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 		}
 
+		is_ready = true;
+
 		watch_lights();
 
 		highlighted_module_id = std::nullopt;
 		highlighted_module_obj = nullptr;
 		update_map_ring_style();
+
 		cable_drawer.set_height(bottom + 30);
 		cable_drawer.draw(patch);
 
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
-		settings_menu.focus(group);
-		knobset_menu.focus(group, patch.knob_sets);
-		is_ready = true;
+		settings_menu.prepare_focus(group);
+		knobset_menu.prepare_focus(group, patch.knob_sets);
+		desc_panel.prepare_focus(group, patch);
 	}
 
 	void blur() override {
-		// printf("Blur patchview page\n");
 		settings_menu.hide();
 		knobset_menu.hide();
-		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
-		lv_obj_clear_state(ui_SettingsButton, LV_STATE_FOCUSED);
-		lv_obj_clear_state(ui_InfoButton, LV_STATE_PRESSED);
-		lv_obj_clear_state(ui_InfoButton, LV_STATE_FOCUSED);
+		desc_panel.hide();
 	}
 
 	void update() override {
@@ -194,26 +187,23 @@ struct PatchViewPage : PageBase {
 
 		if (auto &knobset = knobset_menu.requested_knobset_view) {
 			load_page(PageId::KnobSetView, {.patch_loc = args.patch_loc, .view_knobset_id = knobset});
-			// args.view_knobset_id = knobset;
-			// page_list.request_new_page(PageId::KnobSetView, args);
 			knobset = std::nullopt;
 		}
 
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (settings_menu.visible) {
 				settings_menu.hide();
+
 			} else if (knobset_menu.visible) {
 				knobset_menu.hide();
-			} else if (showing_info) {
-				showing_info = false;
-				lv_hide(ui_DescriptionPanel);
-				lv_indev_set_group(lv_indev_get_next(nullptr), group);
-				lv_obj_clear_state(ui_InfoButton, LV_STATE_PRESSED);
-			} else if (page_list.request_last_page()) {
+
+			} else if (desc_panel.is_visible()) {
+				desc_panel.hide();
+
+			} else {
+				page_list.request_last_page();
 				blur();
 				params.lights.stop_watching_all();
-			} else {
-				printf("Can't go back\n");
 			}
 		}
 
@@ -296,8 +286,9 @@ private:
 	}
 
 	void update_map_ring_style() {
-		if (!is_ready)
+		if (!is_ready) {
 			return;
+		}
 
 		for (auto &drawn_el : drawn_elements) {
 			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
@@ -414,14 +405,6 @@ private:
 		page->patch_playloader.request_load_view_patch();
 	}
 
-	static void infobut_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
-		lv_show(ui_DescriptionPanel);
-		lv_show(ui_Description);
-		page->showing_info = true;
-		lv_indev_set_group(lv_indev_get_act(), page->info_group);
-	}
-
 	static void button_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_label_set_text(ui_ModuleName, "");
@@ -437,14 +420,13 @@ private:
 	lv_obj_t *modules_cont;
 	CableDrawer cable_drawer;
 
-	lv_group_t *info_group;
-	bool showing_info = false;
-
 	ViewSettings settings;
 	PatchViewSettingsMenu settings_menu{settings};
 
 	PatchViewKnobsetMenu::Settings knobset_settings;
 	PatchViewKnobsetMenu knobset_menu{knobset_settings};
+
+	PatchDescriptionPanel desc_panel;
 
 	MapRingDisplay map_ring_display{settings};
 

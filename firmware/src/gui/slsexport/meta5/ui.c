@@ -99,6 +99,7 @@ lv_obj_t *ui_KnobsetCloseButton;
 lv_obj_t *ui_KnobsetHeaderLine;
 lv_obj_t *ui_ModuleName;
 lv_obj_t *ui_DescriptionPanel;
+lv_obj_t *ui_DescPanelPatchName;
 lv_obj_t *ui_Description;
 lv_obj_t *ui_DescriptionEdit;
 lv_obj_t *ui_DescriptionEditLabel;
