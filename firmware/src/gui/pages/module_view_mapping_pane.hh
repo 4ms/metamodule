@@ -437,7 +437,7 @@ private:
 	lv_group_t *base_group = nullptr;
 	lv_group_t *pane_group = nullptr;
 
-	const DrawnElement *drawn_element;
+	const DrawnElement *drawn_element = nullptr;
 	bool is_patch_playing = false;
 	bool is_shown = false;
 	PatchData &patch;
