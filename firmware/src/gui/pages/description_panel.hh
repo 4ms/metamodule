@@ -50,8 +50,8 @@ struct PatchDescriptionPanel {
 	}
 
 private:
-	lv_group_t *group;
-	lv_group_t *parent_group;
+	lv_group_t *group = nullptr;
+	lv_group_t *parent_group = nullptr;
 	bool is_showing = false;
 
 	static void closebut_cb(lv_event_t *event) {
