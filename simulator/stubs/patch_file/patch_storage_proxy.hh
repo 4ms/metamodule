@@ -3,6 +3,7 @@
 #include "patch/patch_data.hh"
 #include "patch_file/patch_file.hh"
 #include "patch_file/patch_fileio.hh"
+#include "patch_file/patch_location.hh"
 #include "patch_file/patchlist.hh"
 #include "shared/patch_convert/yaml_to_patch.hh"
 #include "stubs/patch_file/default_patch_io.hh"
@@ -47,9 +48,9 @@ public:
 		PatchFileIO::add_all_to_patchlist(hostfs_, patch_list_);
 	}
 
-	[[nodiscard]] bool request_viewpatch(Volume vol, uint32_t patch_id) {
-		requested_view_patch_id_ = patch_id;
-		requested_view_patch_vol_ = vol;
+	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
+		requested_view_patch_id_ = patch_loc.index;
+		requested_view_patch_vol_ = patch_loc.vol;
 		msg_state_ = MsgState::ViewPatchRequested;
 		return true;
 	}

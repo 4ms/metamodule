@@ -1,6 +1,8 @@
 #pragma once
 #include "conf/panel_conf.hh"
 #include "gui/message_queue.hh"
+#include "gui/pages/page_args.hh"
+#include "gui/pages/page_list.hh"
 #include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
@@ -22,6 +24,7 @@ struct PatchInfo {
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
+	PageList &page_list;
 };
 
 struct PageBase {
@@ -31,6 +34,11 @@ struct PageBase {
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
+	PageList &page_list;
+
+	PageArguments args;
+
+	PageId id;
 
 	static constexpr uint32_t MaxBufferWidth = 320 * 4;
 	static constexpr uint32_t MaxBufferHeight = 240 * 4;
@@ -43,13 +51,16 @@ struct PageBase {
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;
 
-	PageBase(PatchInfo info)
+	PageBase(PatchInfo info, PageId id)
 		: patch_storage{info.patch_storage}
 		, patch_playloader{info.patch_playloader}
 		, params{info.params}
 		, metaparams{info.metaparams}
 		, msg_queue{info.msg_queue}
-		, patch_mod_queue{info.patch_mod_queue} {
+		, patch_mod_queue{info.patch_mod_queue}
+		, page_list{info.page_list}
+		, id{id} {
+		page_list.register_page(this, id);
 	}
 
 	virtual ~PageBase() = default;
@@ -61,19 +72,33 @@ struct PageBase {
 		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_STATE_DEFAULT);
 	}
 
-	void focus() {
+	void focus(PageArguments const *args) {
 		for (auto &b : metaparams.meta_buttons)
 			b.clear_events();
 
 		metaparams.rotary_button.clear_events();
 
-		if (group)
+		if (group) {
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		}
 
+		// copy args to the PageBase instance
+		if (args)
+			this->args = *args;
 		prepare_focus();
 
 		if (screen)
 			lv_scr_load(screen);
+	}
+
+	void load_prev_page() {
+		page_list.update_state(id, args);
+		page_list.request_last_page();
+	}
+
+	void load_page(PageId next_page, PageArguments new_args) {
+		page_list.update_state(id, args);
+		page_list.request_new_page(next_page, new_args);
 	}
 
 	virtual void prepare_focus() {

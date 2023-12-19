@@ -18,6 +18,18 @@ struct SetStaticParam {
 struct AddMapping {
 	MappedKnob map;
 	uint32_t set_id;
+	float cur_val;
+};
+
+struct EditMappingMinMax {
+	MappedKnob map;
+	uint32_t set_id;
+	float cur_val;
+};
+
+struct RemoveMapping {
+	MappedKnob map;
+	uint32_t set_id;
 };
 
 struct ModifyMapping {
@@ -28,8 +40,8 @@ struct AddMidiMap {
 	MappedKnob map;
 };
 
-using PatchModRequest = std::variant<SetStaticParam, AddMapping, AddMidiMap, ModifyMapping, ChangeKnobSet>;
-static_assert(sizeof(PatchModRequest) == 40);
+using PatchModRequest = std::
+	variant<SetStaticParam, AddMapping, EditMappingMinMax, RemoveMapping, AddMidiMap, ModifyMapping, ChangeKnobSet>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
 

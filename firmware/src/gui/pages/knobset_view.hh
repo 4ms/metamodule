@@ -7,6 +7,7 @@
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/knob_arc.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -20,26 +21,15 @@ struct KnobSetViewPage : PageBase {
 	constexpr static unsigned max_arc = 20;
 
 	KnobSetViewPage(PatchInfo info)
-		: PageBase{info}
+		: PageBase{info, PageId::KnobSetView}
 		, base{ui_KnobSetViewPage}
 		, patch{patch_storage.get_view_patch()} {
-		PageList::register_page(this, PageId::KnobSetView);
 		init_bg(base);
 		lv_group_set_editing(group, false);
 	}
 
-	void set_for_knob(lv_obj_t *cont, unsigned knob_i) {
-		auto knob = get_knob(cont);
-		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
-
-		auto circle = get_circle(cont);
-		lv_obj_set_style_bg_color(circle, Gui::knob_palette[knob_i % 6], LV_STATE_DEFAULT);
-
-		auto circle_letter = get_circle_letter(cont);
-		lv_label_set_text(circle_letter, PanelDef::get_map_param_name(knob_i).data());
-	}
-
 	void prepare_focus() override {
+		is_patch_playing = args.patch_loc ? (*args.patch_loc == patch_playloader.cur_patch_location()) : false;
 
 		for (unsigned i = 0; auto cont : containers) {
 			set_for_knob(cont, i);
@@ -48,6 +38,7 @@ struct KnobSetViewPage : PageBase {
 			lv_arc_set_mode(knob, LV_ARC_MODE_NORMAL);
 			lv_arc_set_bg_angles(knob, min_arc, max_arc);
 			lv_arc_set_value(knob, 0);
+			lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
 
 			auto label = get_label(cont);
 			lv_label_set_text(label, "");
@@ -62,15 +53,14 @@ struct KnobSetViewPage : PageBase {
 		knobset = nullptr;
 		patch = patch_storage.get_view_patch();
 
-		auto ks_idx = PageList::get_viewing_knobset();
+		if (!args.view_knobset_id)
+			return;
+		auto ks_idx = args.view_knobset_id.value();
 		if (ks_idx >= patch.knob_sets.size())
 			return;
 
 		knobset = &patch.knob_sets[ks_idx];
-		if (knobset->name.length())
-			lv_label_set_text(ui_KnobSetNameText, knobset->name.c_str());
-		else
-			lv_label_set_text_fmt(ui_KnobSetNameText, "Knob Set %d", (int)ks_idx);
+		lv_label_set_text(ui_KnobSetNameText, patch.valid_knob_set_name(ks_idx));
 
 		if (patch.patch_name.length())
 			lv_label_set_text(ui_KnobSetDescript, patch.patch_name.c_str());
@@ -79,8 +69,8 @@ struct KnobSetViewPage : PageBase {
 
 		unsigned num_maps[PanelDef::NumKnobs]{};
 
-		for (auto map : knobset->set) {
-			if (map.panel_knob_id >= PanelDef::NumKnobs)
+		for (auto [idx, map] : enumerate(knobset->set)) {
+			if (!map.is_panel_knob())
 				continue;
 
 			lv_obj_t *cont;
@@ -92,8 +82,7 @@ struct KnobSetViewPage : PageBase {
 			}
 			num_maps[map.panel_knob_id]++;
 
-			auto label = get_label(cont);
-			if (label) {
+			if (auto label = get_label(cont)) {
 				std::string_view name = map.alias_name;
 				if (name.length()) {
 					lv_label_set_text(label, name.data());
@@ -103,25 +92,23 @@ struct KnobSetViewPage : PageBase {
 				}
 			}
 
-			auto knob = get_knob(cont);
-			if (knob) {
-				// Set min/max of arc
-				lv_arc_set_mode(knob, (map.min < map.max) ? LV_ARC_MODE_NORMAL : LV_ARC_MODE_REVERSE);
-				float left = std::min<float>(map.min, map.max);
-				float right = std::max<float>(map.min, map.max);
-				lv_arc_set_bg_angles(knob, lvgl_knob_angle(left), lvgl_knob_angle(right));
-
-				// Set initial value
-				if (map.panel_knob_id < params.knobs.size()) {
-					float val = params.knobs[map.panel_knob_id];
-					lv_arc_set_value(knob, (uint16_t)(val * 120));
-				}
-			}
+			auto s_param = patch.find_static_knob(map.module_id, map.param_id);
+			float val = s_param && is_patch_playing ? s_param->value : 0;
+			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), val);
+			lv_obj_set_style_opa(get_knob(cont), is_patch_playing ? LV_OPA_100 : LV_OPA_0, LV_PART_KNOB);
 
 			set_for_knob(cont, map.panel_knob_id);
 
 			enable(cont);
 			lv_group_add_obj(group, cont);
+
+			lv_obj_remove_event_cb(cont, mapping_cb);
+			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
+
+			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx)); //Dangerous? "ptr" is actually an integer
+
+			if (map.panel_knob_id == args.mappedknob_id)
+				lv_group_focus_obj(cont);
 		}
 
 		lv_group_set_editing(group, false);
@@ -130,26 +117,84 @@ struct KnobSetViewPage : PageBase {
 	void update() override {
 		lv_group_set_editing(group, false);
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (PageList::request_last_page()) {
+			if (page_list.request_last_page()) {
 				blur();
 			}
 		}
 
-		bool is_patch_playing = PageList::get_selected_patch_location() == patch_playloader.cur_patch_location();
+		is_patch_playing = args.patch_loc ? (*args.patch_loc == patch_playloader.cur_patch_location()) : false;
+
 		if (is_patch_playing) {
-			for (unsigned i = 0; i < params.knobs.size(); i++) {
-				if (auto val = ElementUpdate::get_mapped_param_value(params, i); val.has_value()) {
-					unsigned lv_pos = val.value() * 120.f;
-					lv_arc_set_value(get_knob(i), lv_pos);
+			// Iterate all knobs
+			for (auto knob_i = 0u; knob_i < params.knobs.size(); knob_i++) {
+				// Find the knobs that have moved
+				if (auto knobpos = ElementUpdate::get_mapped_param_value(params, knob_i); knobpos.has_value()) {
+					// Iterate all containers in the pane for this knob
+					auto pane = panes[knob_i];
+					auto num_children = lv_obj_get_child_cnt(pane);
+					for (unsigned i = 0; i < num_children; i++) {
+						auto cont = lv_obj_get_child(pane, i);
+						if (!cont)
+							continue;
+						auto map_idx = reinterpret_cast<uintptr_t>(lv_obj_get_user_data(cont));
+						if (map_idx < knobset->set.size()) {
+							unsigned lv_pos = knobpos.value() * 120.f;
+							lv_arc_set_value(get_knob(cont), lv_pos);
+						}
+					}
 				}
 			}
 		}
 	}
 
 	void blur() final {
+		// Clear all containers except for the original ones
+		for (auto [pane, cont] : zip(panes, containers)) {
+			auto num_children = lv_obj_get_child_cnt(pane);
+			for (auto i = 0u; i < num_children; i++) {
+				auto child = lv_obj_get_child(pane, i);
+				if (child != cont)
+					lv_obj_del_async(child);
+			}
+		}
+	}
+
+	static void mapping_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+
+		auto obj = event->current_target;
+		if (!obj)
+			return;
+
+		auto view_set_idx = page->args.view_knobset_id.value_or(0xFFFF);
+		if (view_set_idx >= page->patch.knob_sets.size())
+			return;
+
+		auto map_idx = reinterpret_cast<uintptr_t>(obj->user_data);
+		if (map_idx >= page->patch.knob_sets[view_set_idx].set.size())
+			return;
+
+		auto &mk = page->patch.knob_sets[view_set_idx].set[map_idx];
+
+		page->args.mappedknob_id = mk.panel_knob_id;
+		page->page_list.request_new_page(PageId::KnobMap, page->args);
 	}
 
 private:
+	void set_for_knob(lv_obj_t *cont, unsigned knob_i) {
+		auto knob = get_knob(cont);
+		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
+
+		auto circle = get_circle(cont);
+		lv_obj_set_style_bg_color(circle, Gui::knob_palette[knob_i % 6], LV_STATE_DEFAULT);
+
+		auto circle_letter = get_circle_letter(cont);
+		lv_label_set_text(circle_letter, PanelDef::get_map_param_name(knob_i).data());
+	}
+
 	lv_obj_t *base = nullptr;
 	MappedKnobSet *knobset = nullptr;
 	PatchData &patch;
@@ -179,6 +224,7 @@ private:
 										  ui_KnobContainerX,
 										  ui_KnobContainerY,
 										  ui_KnobContainerZ};
+
 	lv_obj_t *get_container(unsigned panel_knob_id) {
 		return containers[panel_knob_id];
 	}
@@ -230,13 +276,7 @@ private:
 		lv_obj_clear_state(label, LV_STATE_DISABLED);
 	}
 
-	uint16_t lvgl_knob_angle(float knob_pos) {
-		knob_pos = std::clamp<float>(knob_pos, 0.f, 1.f);
-		uint16_t angle = knob_pos * (360 + max_arc - min_arc) + min_arc;
-		if (angle > 360)
-			angle -= 360;
-		return angle;
-	}
+	bool is_patch_playing = false;
 };
 
 } // namespace MetaModule

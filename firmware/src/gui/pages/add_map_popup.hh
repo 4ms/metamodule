@@ -12,12 +12,11 @@ namespace MetaModule
 {
 
 struct AddMapPopUp {
-	AddMapPopUp(PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
-		: patch_storage{patch_storage}
-		, patch_mod_queue{patch_mod_queue} {
 
-		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_PRESSED, this);
-		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_PRESSED, this);
+	AddMapPopUp(PatchModQueue &patch_mod_queue)
+		: patch_mod_queue{patch_mod_queue} {
+		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_CLICKED, this);
 	}
 	//
 
@@ -25,7 +24,7 @@ struct AddMapPopUp {
 		base_group = group;
 	}
 
-	void show(uint32_t knobset_id, uint16_t param_id) {
+	void show(uint32_t knobset_id, uint16_t param_id, uint16_t module_id) {
 		selected_knob = std::nullopt;
 
 		popup_group = lv_group_create();
@@ -45,12 +44,15 @@ struct AddMapPopUp {
 		lv_indev_set_group(indev, popup_group);
 
 		if (knobset_id == PatchData::MIDIKnobSet) {
-			lv_label_set_text(ui_AddModuleName, "Send MIDI CC");
+			lv_label_set_text(ui_AddModuleName, "Add a map: Send MIDI CC");
 		} else
-			lv_label_set_text(ui_AddModuleName, "Wiggle a knob");
+			lv_label_set_text(ui_AddModuleName, "Add a map: Wiggle a knob");
 
 		lv_label_set_text(ui_MapDetected, "");
+
 		param_idx = param_id;
+		module_idx = module_id;
+
 		set_id = knobset_id;
 		visible = true;
 	}
@@ -106,33 +108,19 @@ struct AddMapPopUp {
 		if (event->target == ui_OkAdd) {
 
 			if (page->selected_knob.has_value()) {
-				auto mapped_knob = page->selected_knob.value();
-				uint16_t module_id = PageList::get_selected_module_id();
-				if (mapped_knob <= PanelDef::NumKnobs) {
+				auto map = MappedKnob{
+					.panel_knob_id = page->selected_knob.value(),
+					.module_id = page->module_idx,
+					.param_id = page->param_idx,
+					.min = 0.f,
+					.max = 1.f,
+				};
+				if (map.is_panel_knob()) {
 					// TODO: just have AddMapping type (not AddMidiMap) and use set_id to indicate MidiMap?
-					page->patch_mod_queue.put(AddMapping{
-						.map =
-							{
-								.panel_knob_id = mapped_knob,
-								.module_id = module_id,
-								.param_id = page->param_idx,
-								.min = 0.f,
-								.max = 1.f,
-							},
-						.set_id = page->set_id,
-					});
+					page->patch_mod_queue.put(AddMapping{.map = map, .set_id = page->set_id});
 
-				} else if (mapped_knob >= MidiCC0 && mapped_knob <= MidiCC127) {
-					page->patch_mod_queue.put(AddMidiMap{
-						.map =
-							{
-								.panel_knob_id = mapped_knob,
-								.module_id = module_id,
-								.param_id = page->param_idx,
-								.min = 0.f,
-								.max = 1.f,
-							},
-					});
+				} else if (map.is_midi_cc()) {
+					page->patch_mod_queue.put(AddMidiMap{.map = map});
 				}
 			}
 			page->hide();
@@ -142,11 +130,11 @@ struct AddMapPopUp {
 		}
 	}
 
-	PatchStorageProxy &patch_storage;
 	PatchModQueue &patch_mod_queue;
 	lv_group_t *base_group = nullptr;
 	lv_group_t *popup_group = nullptr;
 
+	uint16_t module_idx = 0;
 	uint16_t param_idx = 0;
 	uint32_t set_id = 0;
 	bool visible = false;

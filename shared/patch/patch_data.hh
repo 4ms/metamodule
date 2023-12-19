@@ -2,6 +2,7 @@
 #include "CoreModules/module_type_slug.hh"
 #include "patch.hh"
 #include "util/static_string.hh"
+#include <algorithm>
 #include <optional>
 #include <vector>
 
@@ -25,6 +26,16 @@ struct PatchData {
 		if (set_id < knob_sets.size()) {
 			for (auto &m : knob_sets[set_id].set) {
 				if (m.module_id == module_id && m.param_id == param_id)
+					return &m;
+			}
+		}
+		return nullptr;
+	}
+
+	const MappedKnob *find_mapped_knob(uint32_t set_id, uint16_t panel_knob_id) const {
+		if (set_id < knob_sets.size()) {
+			for (auto &m : knob_sets[set_id].set) {
+				if (m.panel_knob_id == panel_knob_id)
 					return &m;
 			}
 		}
@@ -85,6 +96,20 @@ struct PatchData {
 		return true;
 	}
 
+	bool remove_mapping(uint32_t set_id, MappedKnob const &map) {
+		if (set_id >= knob_sets.size())
+			return false;
+
+		if (map.module_id >= module_slugs.size())
+			return false;
+
+		auto num_erased = std::erase_if(knob_sets[set_id].set, [&map](auto m) {
+			return (m.module_id == map.module_id && m.param_id == map.param_id);
+		});
+
+		return num_erased > 0;
+	}
+
 	const StaticParam *find_static_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : static_knobs) {
 			if (m.module_id == module_id && m.param_id == param_id)
@@ -126,7 +151,27 @@ struct PatchData {
 		return nullptr;
 	}
 
-	const char *validate_knob_set_name(unsigned set_i) const {
+	const InternalCable *find_internal_cable_with_outjack(Jack out_jack) const {
+		for (auto &c : int_cables) {
+			if (c.out == out_jack && c.ins.size() > 0) {
+				return &c;
+			}
+		}
+		return nullptr;
+	}
+
+	const InternalCable *find_internal_cable_with_injack(Jack in_jack) const {
+		for (auto &c : int_cables) {
+			for (auto &in : c.ins) {
+				if (in == in_jack) {
+					return &c;
+				}
+			}
+		}
+		return nullptr;
+	}
+
+	const char *valid_knob_set_name(unsigned set_i) const {
 		if (set_i == MIDIKnobSet)
 			return "MIDI";
 

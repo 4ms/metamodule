@@ -1,45 +1,47 @@
 #pragma once
+#include "gui/elements/context.hh"
+#include "gui/pages/view_settings.hh"
 #include "lvgl.h"
 #include "src/misc/lv_color.h"
+#include "util/overloaded.hh"
 
 namespace MetaModule
 {
 
-// TODO: consider refactoring this as a class with non-static methods and *map_ring as a data member
-// Downside: this would make MapRingDrawer dependent on MapRingDisplay
 struct MapRingDisplay {
-
-	enum class StyleMode {
-		HideAlways,
-		CurModule,
-		CurModuleIfPlaying,
-		ShowAllIfPlaying,
-		ShowAll,
-	};
-	struct Style {
-		StyleMode mode;
-		uint8_t opa = LV_OPA_50;
-	};
-
 	enum class Flash { On, Brighter };
 
-	static void show(lv_obj_t *map_ring, unsigned opa) {
-		if (!map_ring)
-			return;
-		lv_obj_set_style_outline_opa(map_ring, opa, LV_STATE_DEFAULT);
+	ViewSettings &settings;
+
+	MapRingDisplay(ViewSettings &settings)
+		: settings{settings} {
 	}
 
-	static void hide(lv_obj_t *map_ring) {
-		if (!map_ring)
-			return;
-		lv_obj_set_style_outline_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
-	}
-
-	//TODO:
 	// enum class IsOnHighlightedModule { Yes, No };
 	// enum class IsPatchPlaying { Yes, No };
-	static void update(lv_obj_t *map_ring, Style style, bool on_highlighted_module, bool is_patch_playing) {
-		using enum StyleMode;
+	void update(DrawnElement const &drawn_el, bool on_highlighted_module, bool is_patch_playing) {
+		std::visit(overloaded{
+					   [&](const BaseElement &el) {},
+
+					   [&](const JackElement &el) {
+						   if (settings.show_jack_maps)
+							   update(drawn_el.gui_element.map_ring, on_highlighted_module, is_patch_playing);
+						   else
+							   hide(drawn_el.gui_element.map_ring);
+					   },
+
+					   [&](const ParamElement &el) {
+						   update(drawn_el.gui_element.map_ring, on_highlighted_module, is_patch_playing);
+					   },
+				   },
+				   drawn_el.element);
+
+		// update(drawn_el.gui_element.map_ring, on_highlighted_module, is_patch_playing);
+	}
+
+	void update(lv_obj_t *map_ring, bool on_highlighted_module, bool is_patch_playing) {
+		using enum MapRingStyle::Mode;
+		auto &style = settings.map_ring_style;
 
 		switch (style.mode) {
 			case ShowAllIfPlaying:
@@ -73,8 +75,31 @@ struct MapRingDisplay {
 		}
 	}
 
-	static void flash_once(lv_obj_t *map_ring, Style style, bool on_highlighted_module) {
-		using enum StyleMode;
+	static void show(lv_obj_t *map_ring, unsigned opa) {
+		if (!map_ring)
+			return;
+		lv_obj_set_style_outline_opa(map_ring, opa, LV_STATE_DEFAULT);
+		lv_obj_set_style_border_opa(map_ring, opa, LV_STATE_DEFAULT);
+
+		// Text is only legible if circle opa is > 40%
+		if (opa > LV_OPA_40)
+			lv_obj_set_style_text_opa(map_ring, LV_OPA_100, LV_STATE_DEFAULT);
+		else
+			lv_obj_set_style_text_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
+	}
+
+	static void hide(lv_obj_t *map_ring) {
+		if (!map_ring)
+			return;
+		lv_obj_set_style_outline_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
+		lv_obj_set_style_border_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
+		lv_obj_set_style_text_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
+	}
+
+	void flash_once(lv_obj_t *map_ring, bool on_highlighted_module) {
+		using enum MapRingStyle::Mode;
+		auto &style = settings.map_ring_style;
+
 		if (style.mode == CurModuleIfPlaying && on_highlighted_module)
 			flash_once(map_ring, Flash::Brighter);
 
@@ -95,8 +120,6 @@ struct MapRingDisplay {
 		if (!map_ring)
 			return;
 
-		// auto cur_opa = lv_obj_get_style_outline_opa(map_ring, LV_STATE_DEFAULT);
-
 		auto start = LV_OPA_50;
 		auto end = LV_OPA_0;
 		auto delay = 200;
@@ -112,7 +135,9 @@ struct MapRingDisplay {
 		lv_anim_init(&a);
 		lv_anim_set_exec_cb(
 			&a, (lv_anim_exec_xcb_t)[](void *var, int32_t val) {
+				lv_obj_set_style_text_opa((lv_obj_t *)var, val, LV_STATE_DEFAULT);
 				lv_obj_set_style_outline_opa((lv_obj_t *)var, val, LV_STATE_DEFAULT);
+				lv_obj_set_style_border_opa((lv_obj_t *)var, val, LV_STATE_DEFAULT);
 			});
 		lv_anim_set_var(&a, map_ring);
 		lv_anim_set_time(&a, time);

@@ -21,6 +21,8 @@ struct Counts {
 				num_inputs + rhs.num_inputs,
 				num_outputs + rhs.num_outputs};
 	}
+
+	bool operator==(const Counts &rhs) const = default;
 };
 
 struct Indices {
@@ -38,6 +40,8 @@ struct Indices {
 				static_cast<uint8_t>(input_idx + rhs.num_inputs),
 				static_cast<uint8_t>(output_idx + rhs.num_outputs)};
 	}
+
+	bool operator==(const Indices &rhs) const = default;
 };
 
 constexpr bool operator==(MetaModule::BaseElement a, MetaModule::BaseElement b) {
@@ -122,6 +126,32 @@ constexpr std::optional<size_t> get_element_id(const MetaModule::BaseElement &el
 		i++;
 	}
 	return {}; //element not found
+}
+
+// For each member of count that's 0, mark the corresponding member of indices as not being an element of that type
+// See tests/element_tests.cc SUBCASE("Some indices are invalid if the type does not match")
+inline Indices mark_unused_indices(Indices indices, Counts count) {
+	if (count.num_params == 0)
+		indices.param_idx = ElementCount::Indices::NoElementMarker;
+
+	if (count.num_inputs == 0)
+		indices.input_idx = ElementCount::Indices::NoElementMarker;
+
+	if (count.num_outputs == 0)
+		indices.output_idx = ElementCount::Indices::NoElementMarker;
+
+	if (count.num_lights == 0)
+		indices.light_idx = ElementCount::Indices::NoElementMarker;
+
+	return indices;
+}
+
+// Returns true if at least one non-empty index matches
+inline bool matched(Indices x, Indices y) {
+	return (x.param_idx == y.param_idx && x.param_idx != ElementCount::Indices::NoElementMarker) ||
+		   (x.input_idx == y.input_idx && x.input_idx != ElementCount::Indices::NoElementMarker) ||
+		   (x.output_idx == y.output_idx && x.output_idx != ElementCount::Indices::NoElementMarker) ||
+		   (x.light_idx == y.light_idx && x.light_idx != ElementCount::Indices::NoElementMarker);
 }
 
 }; // namespace ElementCount

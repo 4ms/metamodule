@@ -90,10 +90,9 @@ struct ModuleDrawer {
 					auto mapped_ring = MapRingDrawer::draw_mapped_ring(el, obj, canvas, mapping_id, height);
 
 					auto count = ElementCount::count(el);
-					// TODO: for each member of count that's 0, set the corresponding member of indices to 0xFF (or some flag)
-					// Just to clarify that some members of indices are not to be used (off by one)
-					// See tests/element_tests.cc SUBCASE("Some indices are invalid if the type does not match")
-					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, indices, mapping_id};
+					auto el_idx = ElementCount::mark_unused_indices(indices, count);
+
+					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, el_idx, mapping_id};
 
 					indices = indices + count;
 					return element_ctx;

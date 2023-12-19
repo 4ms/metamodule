@@ -15,17 +15,9 @@ namespace MetaModule
 //And restore that after a refresh:
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
-		: PageBase{info} {
-		PageList::register_page(this, PageId::PatchSel);
+		: PageBase{info, PageId::PatchSel} {
 
-		base = ui_PatchSelectorPage; //NOLINT
-		roller = ui_PatchListRoller; //NOLINT
-		nor_but = ui_Flashbut;		 //NOLINT
-		usb_but = ui_USBbut;		 //NOLINT
-		sd_but = ui_SDbut;			 //NOLINT
-		spinner = ui_waitspinner;	 //NOLINT
-
-		init_bg(base);
+		init_bg(ui_PatchSelectorPage);
 
 		lv_group_add_obj(group, roller);
 		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -42,10 +34,10 @@ struct PatchSelectorPage : PageBase {
 		auto patchname = patch_playloader.cur_patch_name(); // auto patchplaying_idx = patch_storage
 		if (patchname.length() == 0) {
 			lv_label_set_text(ui_NowPlayingName, "none");
-			lv_label_set_text(ui_Load_Meter, "");
+			lv_label_set_text(ui_LoadMeter, "");
 		} else {
 			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", patchname.c_str());
-			lv_label_set_text_fmt(ui_Load_Meter, "%d%%", metaparams.audio_load);
+			lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
 		}
 	}
 
@@ -155,6 +147,11 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void update() override {
+
+		if (metaparams.meta_buttons[0].is_just_released()) {
+			page_list.request_last_page();
+		}
+
 		// Check if M4 sent us a message:
 
 		switch (state) {
@@ -189,12 +186,12 @@ struct PatchSelectorPage : PageBase {
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
 
-					lv_label_set_text_fmt(ui_Load_Meter, "%d%%", metaparams.audio_load);
+					lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
 				}
 			} break;
 
 			case State::TryingToRequestPatchData:
-				if (patch_storage.request_viewpatch(selected_patch_vol, selected_patch)) {
+				if (patch_storage.request_viewpatch(selected_patch)) {
 					state = State::RequestedPatchData;
 					show_spinner();
 				}
@@ -208,8 +205,10 @@ struct PatchSelectorPage : PageBase {
 					if (patch_storage.parse_view_patch(message.bytes_read)) {
 						auto view_patch = patch_storage.get_view_patch();
 						pr_dbg("Parsed patch: %.31s\n", view_patch.patch_name.data());
-						PageList::set_selected_patch_loc({selected_patch, selected_patch_vol});
-						PageList::request_new_page(PageId::PatchView);
+
+						args.patch_loc = selected_patch;
+						page_list.request_new_page(PageId::PatchView, args);
+
 						state = State::Closing;
 						hide_spinner();
 					} else {
@@ -244,35 +243,35 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
-		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
-		auto idx = lv_roller_get_selected(_instance->roller);
+		auto page = static_cast<PatchSelectorPage *>(event->user_data);
+		auto idx = lv_roller_get_selected(page->roller);
 
-		if (idx == _instance->usb_hdr || idx == _instance->sd_hdr || idx == _instance->nor_hdr) {
+		if (idx == page->usb_hdr || idx == page->sd_hdr || idx == page->nor_hdr) {
 			if (idx == 0)
-				lv_roller_set_selected(_instance->roller, 1, LV_ANIM_OFF);
-			else if (idx > _instance->highlighted_idx)
-				lv_roller_set_selected(_instance->roller, idx + 1, LV_ANIM_OFF);
-			else if (idx < _instance->highlighted_idx)
-				lv_roller_set_selected(_instance->roller, idx - 1, LV_ANIM_OFF);
-			idx = lv_roller_get_selected(_instance->roller);
+				lv_roller_set_selected(page->roller, 1, LV_ANIM_OFF);
+			else if (idx > page->highlighted_idx)
+				lv_roller_set_selected(page->roller, idx + 1, LV_ANIM_OFF);
+			else if (idx < page->highlighted_idx)
+				lv_roller_set_selected(page->roller, idx - 1, LV_ANIM_OFF);
+			idx = lv_roller_get_selected(page->roller);
 		}
 
-		auto [_, vol] = _instance->calc_patch_id_vol(idx);
-		_instance->highlighted_vol = vol;
-		_instance->highlighted_idx = idx;
-		_instance->refresh_volume_labels();
+		auto [_, vol] = page->calc_patch_id_vol(idx);
+		page->highlighted_vol = vol;
+		page->highlighted_idx = idx;
+		page->refresh_volume_labels();
 	}
 
 	static void patchlist_select_cb(lv_event_t *event) {
-		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
+		auto page = static_cast<PatchSelectorPage *>(event->user_data);
 		patchlist_scroll_cb(event);
 
-		auto [patch_id, vol] = _instance->calc_patch_id_vol(_instance->highlighted_idx);
-		_instance->selected_patch_vol = vol;
-		_instance->selected_patch = patch_id;
-		_instance->state = State::TryingToRequestPatchData;
+		auto [patch_id, vol] = page->calc_patch_id_vol(page->highlighted_idx);
+		page->selected_patch.vol = vol;
+		page->selected_patch.index = patch_id;
+		page->state = State::TryingToRequestPatchData;
 
-		pr_dbg("Selected vol %d, patch %d\n", (uint32_t)_instance->selected_patch_vol, _instance->selected_patch);
+		pr_dbg("Selected vol %d, patch %d\n", (uint32_t)page->selected_patch.vol, page->selected_patch.index);
 	}
 
 	std::pair<uint32_t, Volume> calc_patch_id_vol(uint32_t roller_idx) {
@@ -289,24 +288,23 @@ struct PatchSelectorPage : PageBase {
 	}
 
 private:
-	uint32_t selected_patch = 0;
-	Volume selected_patch_vol = Volume::NorFlash;
+	PatchLocation selected_patch{0, Volume::NorFlash};
+	// uint32_t selected_patch = 0;
+	// Volume selected_patch_vol = Volume::NorFlash;
+
 	uint32_t highlighted_idx = 0;
 	Volume highlighted_vol = Volume::NorFlash;
 
-	lv_obj_t *roller;
-	// lv_obj_t *png_image;
-	// lv_img_dsc_t img_dsc;
-	lv_obj_t *base;
-	lv_obj_t *usb_but;
-	lv_obj_t *sd_but;
-	lv_obj_t *nor_but;
-	lv_obj_t *spinner;
+	lv_obj_t *roller = ui_PatchListRoller;
+	lv_obj_t *nor_but = ui_Flashbut;
+	lv_obj_t *usb_but = ui_USBbut;
+	lv_obj_t *sd_but = ui_SDbut;
+	lv_obj_t *spinner = ui_waitspinner;
 
 	const std::string_view leader = "   ";
-	uint32_t num_usb;
-	uint32_t num_sdcard;
-	uint32_t num_norflash;
+	uint32_t num_usb{};
+	uint32_t num_sdcard{};
+	uint32_t num_norflash{};
 
 	unsigned usb_hdr = 0;
 	unsigned sd_hdr = 0;
