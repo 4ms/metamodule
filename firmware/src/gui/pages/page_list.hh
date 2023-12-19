@@ -77,10 +77,10 @@ public:
 	void request_new_page(PageId pageid, PageArguments args) {
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop -- don't push
-		// if (auto last = _page_history.back()) {
-		// 	if (last->page == id && last->args == args) {
-		// 		_page_history.pop_back();
-		// 	}
+		auto last = _page_history.back();
+		if (last.has_value() && last->page == pageid && last->args == args)
+			_page_history.pop_back();
+		else
 		// } else
 		_page_history.push_back(_request);
 
