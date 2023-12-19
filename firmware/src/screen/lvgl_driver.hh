@@ -37,7 +37,7 @@ public:
 			   wait_cb_t wait_cb,
 			   std::span<lv_color_t> buffer1,
 			   std::span<lv_color_t> buffer2) {
-		UartLog::log("\n\nLVGLDriver started\n");
+		UartLog::log("LVGLDriver started\n");
 
 		lv_init();
 		lv_disp_draw_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
@@ -54,6 +54,8 @@ public:
 		indev_drv.read_cb = indev_cb;
 		indev = lv_indev_drv_register(&indev_drv); // NOLINT
 		lv_indev_enable(indev, true);
+		lv_indev_set_group(indev, nullptr);
+
 #if LV_USE_LOG == 1
 		lv_log_register_print_cb(log_cb);
 #endif

@@ -71,6 +71,9 @@ extern "C" void aux_core_main() {
 	pr_info("A7 Core 2 initialized\n");
 	HWSemaphore<AuxCoreReady>::unlock();
 
+	while (HWSemaphore<M4CoreReady>::is_locked())
+		;
+
 	while (true) {
 		ui.update();
 		__NOP();

@@ -13,6 +13,7 @@
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
 #include "system/time.hh"
+#include "uart_log.hh"
 // #include "core_intercom/semaphore_action.hh" //TODO use this
 
 namespace MetaModule
@@ -20,7 +21,7 @@ namespace MetaModule
 
 constexpr inline bool reset_to_factory_patches = false;
 
-struct SystemInit : AppStartup, Debug, Hardware {
+struct SystemInit : AppStartup, UartLog, Debug, Hardware {
 } _sysinit;
 
 } // namespace MetaModule

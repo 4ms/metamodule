@@ -20,6 +20,8 @@ static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2 alignas(6
 
 class Ui {
 private:
+	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
+
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
 
@@ -29,10 +31,6 @@ private:
 	MetaParams metaparams;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
-
-	static inline UartLog init_uart;
-	static inline LVGLDriver gui{
-		MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader,
