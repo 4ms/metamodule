@@ -57,9 +57,9 @@ struct FirmwareUpdater {
 
 				if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
 
-					files = parser.parse(manifest_buffer);
+					manifest = parser.parse(manifest_buffer);
 
-					if (files.size() > 0) {
+					if (manifest.files.size() > 0) {
 						init_ram_loading();
 						state = State::LoadingFilesToRAM;
 
@@ -81,7 +81,7 @@ struct FirmwareUpdater {
 				else
 					check_reading_done();
 
-				if (current_file_idx >= files.size())
+				if (current_file_idx >= manifest.files.size())
 					current_file_size = write_first_file();
 
 			} break;
@@ -131,23 +131,27 @@ struct FirmwareUpdater {
 	void init_ram_loading() {
 		current_file_idx = 0;
 		file_requested = false;
-		file_images.reserve(files.size());
+		file_images.reserve(manifest.files.size());
 	}
 
 	// reads from disk to RAM
 	void start_reading_file() {
-		auto size = files[current_file_idx].filesize;
+		auto size = manifest.files[current_file_idx].filesize;
+
 		if (current_file_idx == 0)
 			file_images[current_file_idx] = {(char *)ram_buffer.data(), size};
 		else
 			file_images[current_file_idx] = {file_images[current_file_idx - 1].end(), size};
 
 		pr_dbg("A7: request to load %s to 0x%x\n",
-			   files[current_file_idx].filename.c_str(),
+			   manifest.files[current_file_idx].filename.c_str(),
 			   file_images[current_file_idx].data());
-		if (file_storage.request_load_file(files[current_file_idx].filename, vol, file_images[current_file_idx]))
+
+		if (file_storage.request_load_file(
+				manifest.files[current_file_idx].filename, vol, file_images[current_file_idx]))
+		{
 			file_requested = true;
-		else {
+		} else {
 			state = State::Error;
 			error_message = "Failed to request firmware file";
 		}
@@ -179,16 +183,16 @@ struct FirmwareUpdater {
 
 	// writes from RAM to flash/wifi-uart
 	int start_writing_file() {
-		if (current_file_idx > files.size()) {
+		if (current_file_idx > manifest.files.size()) {
 			state = State::Success;
 			return 0;
 		}
 
 		int file_size = file_images[current_file_idx].size();
 
-		if (files[current_file_idx].type == UpdateType::App) {
+		if (manifest.files[current_file_idx].type == UpdateType::App) {
 
-			if (!flash_loader.verify(file_images[current_file_idx], files[current_file_idx].md5)) {
+			if (!flash_loader.verify(file_images[current_file_idx], manifest.files[current_file_idx].md5)) {
 				state = State::Error;
 				error_message = "App firmware file not valid";
 				return file_size;
@@ -202,11 +206,11 @@ struct FirmwareUpdater {
 
 			state = State::WritingApp;
 
-		} else if (files[current_file_idx].type == UpdateType::Wifi) {
+		} else if (manifest.files[current_file_idx].type == UpdateType::Wifi) {
 			//
 			// TODO: Wifi loading process starts here:
 			//
-			if (!wifi_loader.verify(file_images[current_file_idx], files[current_file_idx].md5)) {
+			if (!wifi_loader.verify(file_images[current_file_idx], manifest.files[current_file_idx].md5)) {
 				state = State::Error;
 				error_message = "Wifi firmware file not valid";
 				return file_size;
@@ -231,9 +235,9 @@ private:
 	ManifestParser parser;
 
 	FileStorageProxy &file_storage;
-	State state;
+	State state = State::Idle;
 
-	Volume vol;
+	Volume vol = Volume::USB;
 
 	unsigned current_file_idx = 0;
 	int current_file_size = 0;
@@ -245,7 +249,7 @@ private:
 
 	const std::span<uint8_t> ram_buffer = get_ram_buffer();
 
-	std::vector<UpdateFile> files;
+	UpdateManifest manifest;
 	std::vector<std::span<char>> file_images;
 };
 

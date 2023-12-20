@@ -8,7 +8,6 @@
 
 #include "ryml.hpp"
 #include "ryml_std.hpp"
-// This must be included after ryml_std.hpp:
 
 namespace MetaModule
 {
@@ -41,6 +40,19 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updatefile) {
 		}
 	}
 
+	if (n.has_child("version")) {
+		auto version = n["version"];
+
+		if (version.has_child("major"))
+			version["major"] >> updatefile->version.major;
+
+		if (version.has_child("minor"))
+			version["minor"] >> updatefile->version.minor;
+
+		if (version.has_child("revision"))
+			version["revision"] >> updatefile->version.revision;
+	}
+
 	return true;
 }
 
@@ -48,29 +60,30 @@ struct ManifestParser {
 
 	// returns true if file data is valid manifest json file (does not check md5 or if files exist)
 	// creates the list of files we need
-	std::vector<UpdateFile> parse(std::span<char> manifest) {
-		std::vector<UpdateFile> files;
+	UpdateManifest parse(std::span<char> json) {
+		UpdateManifest manifest{};
 
 		// ryml has issues with tabs in json sometimes:
-		std::replace(manifest.begin(), manifest.end(), '\t', ' ');
+		std::replace(json.begin(), json.end(), '\t', ' ');
 
-		ryml::Tree tree = ryml::parse_in_place(ryml::substr(manifest.data(), manifest.size()));
-
-		if (tree.num_children(0) == 0) {
-			pr_dbg("Manifest json tree has no children\n");
-			return files;
-		}
+		ryml::Tree tree = ryml::parse_in_place(ryml::substr(json.data(), json.size()));
 
 		ryml::ConstNodeRef root = tree.rootref();
 
-		if (!root.has_child("updates")) {
-			pr_dbg("Manifest json has no root node with key 'updates'\n");
-			return files;
+		if (!root.has_child("version")) {
+			pr_dbg("Manifest json has no root node with key 'version'\n");
+			return manifest;
 		}
 
-		root["updates"] >> files;
+		if (!root.has_child("files")) {
+			pr_dbg("Manifest json has no root node with key 'files'\n");
+			return manifest;
+		}
 
-		return files;
+		root["version"] >> manifest.version;
+		root["files"] >> manifest.files;
+
+		return manifest;
 	}
 };
 
