@@ -30,7 +30,7 @@ struct PatchPlayLoader {
 			return;
 		}
 
-		tries = 200000;
+		tries = 2000;
 		while (--tries) {
 			auto message = storage_.get_message();
 
@@ -45,6 +45,8 @@ struct PatchPlayLoader {
 				pr_err("ERROR: initial patch failed to load from NOR flash\n");
 				break;
 			}
+
+			HAL_Delay(1);
 		}
 		if (tries == 0) {
 			pr_err("ERROR: timed out while waiting for response to request to load initial patch.\n");
