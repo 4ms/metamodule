@@ -30,7 +30,7 @@ struct FirmwareFileFinder {
 		}
 
 		if (message.message_type == RequestLoadFileToRam) {
-			pr_dbg("M4: got RequestLoadFileToRam\n");
+			pr_trace("M4: got RequestLoadFileToRam\n");
 			load_file(message);
 			message.message_type = None;
 		}
@@ -52,7 +52,7 @@ private:
 	}
 
 	void scan_all_for_manifest() {
-		pr_dbg("M4: scanning all volumes for firmware manifest files (metamodule*.json)\n");
+		pr_trace("M4: scanning all volumes for firmware manifest files (metamodule*.json)\n");
 
 		std::optional<Volume> fw_file_vol{};
 
@@ -88,7 +88,7 @@ private:
 				if (filename.starts_with("metamodule") && filesize > 30) {
 					found_filename.copy(filename);
 					found_filesize = filesize;
-					pr_dbg("M4: Found manifest file: %s (%u B)\n", found_filename.c_str(), found_filesize);
+					pr_trace("M4: Found manifest file: %s (%u B)\n", found_filename.c_str(), found_filesize);
 				}
 			});
 
@@ -105,12 +105,10 @@ private:
 		bool success = ram_loader.load_to_ram(fileio, message.filename, message.buffer);
 
 		if (success) {
-			pr_dbg("M4: Loaded OK. first word is %p: %x\n",
-				   message.buffer.data(),
-				   *reinterpret_cast<uint32_t *>(message.buffer.data()));
+			pr_trace("M4: Loaded OK.\n");
 			pending_send_message.message_type = LoadFileToRamSuccess;
 		} else {
-			pr_dbg("M4: Failed Load\n");
+			pr_err("M4: Failed Load\n");
 			pending_send_message.message_type = LoadFileToRamFailed;
 		}
 	}
@@ -123,7 +121,7 @@ private:
 	IntercoreStorageMessage pending_send_message{.message_type = None};
 
 	StaticString<255> found_filename;
-	uint32_t found_filesize;
+	uint32_t found_filesize = 0;
 
 	FirmwareRamLoader ram_loader;
 };

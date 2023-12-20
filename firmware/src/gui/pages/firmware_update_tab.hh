@@ -50,7 +50,7 @@ struct FirmwareUpdateTab {
 			case State::Idle: {
 				if (!confirm_popup.is_visible()) {
 					media_poll.poll(lv_tick_get(), [this] {
-						pr_dbg("\nA7: send message request_firmware_file\n");
+						pr_trace("\nA7: send message request_firmware_file\n");
 						if (file_storage.request_find_firmware_file())
 							state = State::Scanning;
 					});
@@ -61,19 +61,19 @@ struct FirmwareUpdateTab {
 				auto message = file_storage.get_message();
 
 				if (message.message_type == FileStorageProxy::FirmwareFileFound) {
-					pr_dbg("A7: Message received: manifest file found: %.255s\n", message.filename.data());
+					pr_trace("A7: Message received: manifest file found: %.255s\n", message.filename.data());
 					if (manifest_filename = std::string{message.filename.data()}; manifest_filename.length()) {
 						manifest_file_vol = message.vol_id;
 						manifest_filesize = message.bytes_read;
 						display_manifest_found();
 					} else {
-						pr_dbg("Filename empty, skipping\n");
+						pr_trace("Filename empty, skipping\n");
 						display_file_not_found();
 					}
 					state = State::Idle;
 
 				} else if (message.message_type == FileStorageProxy::FirmwareFileNotFound) {
-					pr_dbg("A7: Message received: no manifest file found\n");
+					pr_trace("A7: Message received: no manifest file found\n");
 					display_file_not_found();
 					state = State::Idle;
 				}

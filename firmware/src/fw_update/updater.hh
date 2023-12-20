@@ -144,9 +144,9 @@ private:
 		else
 			file_images[current_file_idx] = {file_images[current_file_idx - 1].end(), size};
 
-		pr_dbg("A7: request to load %s to 0x%x\n",
-			   manifest.files[current_file_idx].filename.c_str(),
-			   file_images[current_file_idx].data());
+		pr_trace("A7: request to load %s to 0x%x\n",
+				 manifest.files[current_file_idx].filename.c_str(),
+				 file_images[current_file_idx].data());
 
 		if (file_storage.request_load_file(
 				manifest.files[current_file_idx].filename, vol, file_images[current_file_idx]))
@@ -162,7 +162,7 @@ private:
 		auto message = file_storage.get_message();
 
 		if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
-			pr_dbg("A7: file loaded\n");
+			pr_trace("A7: file loaded\n");
 			current_file_idx++;
 			file_requested = false;
 
