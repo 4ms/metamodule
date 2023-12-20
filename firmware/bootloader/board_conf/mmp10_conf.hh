@@ -5,17 +5,19 @@
 
 namespace Board
 {
-using RedLED = Led<GPIO::E, PinNum::_2, LedActive::High>;
-using GreenLED = Led<GPIO::D, PinNum::_3, LedActive::High>;
-using RedLED2 = Led<GPIO::B, PinNum::_14, LedActive::High>;
-using GreenLED2 = Led<GPIO::E, PinNum::_1, LedActive::High>;
+using RedLED = Led<GPIO::E, PinNum::_14, LedActive::High>;
+using GreenLED = Led<GPIO::B, PinNum::_15, LedActive::High>;
 
-using OrangeLED = RedLED2;
-using BlueLED = Led<GPIO::A, PinNum::_14, LedActive::Low>;
+using OrangeLED = RedLED;
+using BlueLED = Led<GPIO::A, PinNum::_9, LedActive::Low>;
 
-//EXPANDER: right-most pins shorted
+// Boot select: Encoder button
 constexpr bool UseBootSelect = true;
-constexpr PinConf BootSelectPin{GPIO::G, PinNum::_11};
+constexpr PinConf BootSelectPin{GPIO::E, PinNum::_15};
+
+// Freeze mode: jumper on rightmost pins of the EXPANDER header
+constexpr bool UseFreezePin = true;
+constexpr PinConf FreezePin{GPIO::G, PinNum::_11};
 
 constexpr uint32_t ConsoleUART = USART6_BASE;
 constexpr PinConf UartRX{GPIO::C, PinNum::_7, PinAF::AF_7};
