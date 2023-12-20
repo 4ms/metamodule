@@ -47,9 +47,13 @@ extern "C" {
 #define USBD_MAX_NUM_CONFIGURATION 1U
 #define USBD_MAX_STR_DESC_SIZ 0x100U
 #define USBD_SELF_POWERED 1U
-#define USBD_DEBUG_LEVEL 3U
+#define USBD_DEBUG_LEVEL 1U /*used in usbd lib, so keep this*/
 
-#if (USBD_DEBUG_LEVEL > 0U)
+#define USBD_USER_LOG_OUTPUT 0
+#define USBD_ERR_LOG_OUTPUT 1
+#define USBD_DBG_LOG_OUTPUT 0
+
+#if (USBD_USER_LOG_OUTPUT || USBD_ERR_LOG_OUTPUT || USBD_DBG_LOG_OUTPUT)
 #include <stdio.h>
 #endif
 
@@ -87,9 +91,10 @@ extern "C" {
 #define USBD_Delay HAL_Delay
 
 /* DEBUG macros */
-#if (USBD_DEBUG_LEVEL > 0U)
+#if USBD_USER_LOG_OUTPUT
 #define USBD_UsrLog(...)                                                                                               \
 	do {                                                                                                               \
+		printf("USBD USER: ");                                                                                         \
 		printf(__VA_ARGS__);                                                                                           \
 		printf("\n");                                                                                                  \
 	} while (0)
@@ -99,11 +104,10 @@ extern "C" {
 	} while (0)
 #endif
 
-#if (USBD_DEBUG_LEVEL > 1U)
-
+#if USBD_ERR_LOG_OUTPUT
 #define USBD_ErrLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf("ERROR: ");                                                                                             \
+		printf("USBD ERROR: ");                                                                                        \
 		printf(__VA_ARGS__);                                                                                           \
 		printf("\n");                                                                                                  \
 	} while (0)
@@ -113,10 +117,10 @@ extern "C" {
 	} while (0)
 #endif
 
-#if (USBD_DEBUG_LEVEL > 2U)
+#if USBD_DBG_LOG_OUTPUT
 #define USBD_DbgLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf("DEBUG : ");                                                                                            \
+		printf("USBD DEBUG: ");                                                                                        \
 		printf(__VA_ARGS__);                                                                                           \
 		printf("\n");                                                                                                  \
 	} while (0)

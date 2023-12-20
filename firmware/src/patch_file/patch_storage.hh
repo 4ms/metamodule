@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdcard_conf.hh"
-#include "core_intercom/patch_icc_message.hh"
+#include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "fs/fatfs/fat_file_io.hh"
@@ -11,7 +11,7 @@
 #include "fs/volumes.hh"
 #include "patch_file/patch_fileio.hh"
 #include "pr_dbg.hh"
-#include "util/edge_detector.hh"
+#include "util/poll_change.hh"
 
 namespace MetaModule
 {
@@ -19,103 +19,91 @@ namespace MetaModule
 // PatchStorage manages all patch filesystems <--> PatchList
 class PatchStorage {
 
-	SDCardOps<SDCardConf> sdcard_ops_;
-	FatFileIO sdcard_{&sdcard_ops_, Volume::SDCard};
-	EdgeStateDetector sdcard_mounted_;
-	bool sdcard_needs_rescan_ = true;
-
-	uint32_t last_poll_tm_;
+	FatFileIO &sdcard_;
+	PollChange sd_changes_{1000};
 
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
 	LfsFileIO norflash_{flash_};
 
 	FatFileIO &usbdrive_;
-	EdgeStateDetector usbdrive_mounted_;
-	bool usbdrive_needs_rescan_ = true;
+	PollChange usb_changes_{1000};
 
-	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, PatchICCMessage>;
-	using enum PatchICCMessage::MessageType;
-	InterCoreComm2 comm_;
-	PatchICCMessage pending_send_message{.message_type = None};
+	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
+	using enum IntercoreStorageMessage::MessageType;
+	IntercoreStorageMessage pending_send_message{.message_type = None};
 
 	PatchList patch_list_;
 
-	const std::span<char> &raw_patch_buffer_;
-
-	PatchFileList &filelist_;
-
 public:
-	PatchStorage(std::span<char> &raw_patch_buffer,
-				 volatile PatchICCMessage &shared_message,
-				 PatchFileList &filelist,
-				 FatFileIO &usb_fileio,
-				 bool reset_to_factory_patches = false)
-		: usbdrive_{usb_fileio}
-		, comm_{shared_message}
-		, raw_patch_buffer_{raw_patch_buffer}
-		, filelist_{filelist} {
+	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
+		: sdcard_{sdcard_fileio}
+		, usbdrive_{usb_fileio} {
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
-		if (status == LfsFileIO::Status::NewlyFormatted || reset_to_factory_patches) {
-			norflash_.reformat();
-			PatchFileIO::create_default_patches(norflash_);
+		if (status == LfsFileIO::Status::NewlyFormatted) {
+			reload_default_patches();
 		}
 
 		// Populate Patch List from all media present
 		patch_list_.clear_patches(Volume::NorFlash);
 		PatchFileIO::add_all_to_patchlist(norflash_, patch_list_);
-		filelist_.norflash = patch_list_.get_patchfile_list(Volume::NorFlash);
 
 		sdcard_.mount_disk();
 		if (sdcard_.is_mounted()) {
 			patch_list_.clear_patches(Volume::SDCard);
 			PatchFileIO::add_all_to_patchlist(sdcard_, patch_list_);
-			sdcard_needs_rescan_ = true;
+			sd_changes_.reset();
 		}
-		filelist_.sdcard = patch_list_.get_patchfile_list(Volume::SDCard);
 
 		usbdrive_.mount_disk();
 		if (usbdrive_.is_mounted()) {
 			patch_list_.clear_patches(Volume::USB);
 			PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
-			usbdrive_needs_rescan_ = true;
+			usb_changes_.reset();
 		}
-		filelist_.usb = patch_list_.get_patchfile_list(Volume::USB);
 
 		poll_media_change();
 	}
 
-	void handle_messages() {
+	void reload_default_patches() {
+		norflash_.reformat();
+		PatchFileIO::create_default_patches(norflash_);
+	}
+
+	void send_pending_message(InterCoreComm2 &comm) {
 		if (pending_send_message.message_type != None) {
 			// Keep trying to send message until suceeds
-			// TODO: why would this fail? The answer informs us how to handle this situation
-			if (comm_.send_message(pending_send_message))
+			if (comm.send_message(pending_send_message))
 				pending_send_message.message_type = None;
 		}
+	}
 
-		auto message = comm_.get_new_message();
-
+	void handle_message(IntercoreStorageMessage &message) {
 		if (message.message_type == RequestRefreshPatchList) {
-			if (sdcard_needs_rescan_) {
+			pending_send_message.message_type = PatchListUnchanged;
+
+			message.patch_file_list->norflash = patch_list_.get_patchfile_list(Volume::NorFlash);
+
+			if (sd_changes_.take_change()) {
 				patch_list_.clear_patches(Volume::SDCard);
 				if (sdcard_.is_mounted())
 					rescan_sdcard();
-				filelist_.sdcard = patch_list_.get_patchfile_list(Volume::SDCard);
+				message.patch_file_list->sdcard = patch_list_.get_patchfile_list(Volume::SDCard);
+
+				pending_send_message.message_type = PatchListChanged;
 			}
-			if (usbdrive_needs_rescan_) {
+
+			if (usb_changes_.take_change()) {
 				patch_list_.clear_patches(Volume::USB);
 				if (usbdrive_.is_mounted())
 					rescan_usbdrive();
-				filelist_.usb = patch_list_.get_patchfile_list(Volume::USB);
+				message.patch_file_list->usb = patch_list_.get_patchfile_list(Volume::USB);
+
+				pending_send_message.message_type = PatchListChanged;
 			}
 
-			if (sdcard_needs_rescan_ | usbdrive_needs_rescan_) {
-				sdcard_needs_rescan_ = false;
-				usbdrive_needs_rescan_ = false;
-				pending_send_message.message_type = PatchListChanged;
-			} else
-				pending_send_message.message_type = PatchListUnchanged;
+			message.message_type = None; //mark as handled
 		}
 
 		if (message.message_type == RequestPatchData) {
@@ -126,60 +114,48 @@ public:
 
 			if (message.patch_id < patch_list_.num_patches() && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes)
 			{
-				auto bytes_read = load_patch_file(message.vol_id, message.patch_id);
+				auto bytes_read = load_patch_file(message.buffer, message.vol_id, message.patch_id);
 				if (bytes_read) {
 					pending_send_message.message_type = PatchDataLoaded;
 					pending_send_message.bytes_read = bytes_read;
 				}
 			}
+			message.message_type = None; //mark as handled
 		}
 
-		uint32_t now = HAL_GetTick();
-		if (now - last_poll_tm_ > 2000) { //poll media once per second
-			last_poll_tm_ = now;
-			poll_media_change();
-		}
+		poll_media_change();
 	}
 
 private:
 	void poll_media_change() {
-		sdcard_mounted_.update(sdcard_.is_mounted());
-		if (sdcard_mounted_.changed())
-			sdcard_needs_rescan_ = true;
-
-		usbdrive_mounted_.update(usbdrive_.is_mounted());
-		if (usbdrive_mounted_.changed())
-			usbdrive_needs_rescan_ = true;
+		sd_changes_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
+		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
 	}
 
 	void rescan_sdcard() {
 		pr_trace("Updating patchlist from SD Card.\n");
 		PatchFileIO::add_all_to_patchlist(sdcard_, patch_list_);
-		pr_trace(
-			"SD Patchlist updated. filelist data: %p, size: %d.\n", filelist_.sdcard.data(), filelist_.sdcard.size());
 	}
 
 	void rescan_usbdrive() {
 		pr_trace("Updating patchlist from USB Drive.\n");
 		PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
-		pr_trace("USB Patchlist updated. filelist data: %p, size: %d.\n", filelist_.usb.data(), filelist_.usb.size());
 	}
 
-	uint32_t load_patch_file(Volume vol, uint32_t patch_id) {
+	uint32_t load_patch_file(std::span<char> buffer, Volume vol, uint32_t patch_id) {
 		auto filename = patch_list_.get_patch_filename(vol, patch_id);
 		pr_dbg("load_patch_file() patch_id=%d vol=%d name=%.31s\n", patch_id, (uint32_t)vol, filename.data());
 
 		bool ok = false;
-		std::span<char> raw_patch = raw_patch_buffer_;
 		switch (vol) {
 			case Volume::NorFlash:
-				ok = PatchFileIO::read_file(raw_patch, norflash_, filename);
+				ok = PatchFileIO::read_file(buffer, norflash_, filename);
 				break;
 			case Volume::SDCard:
-				ok = PatchFileIO::read_file(raw_patch, sdcard_, filename);
+				ok = PatchFileIO::read_file(buffer, sdcard_, filename);
 				break;
 			case Volume::USB:
-				ok = PatchFileIO::read_file(raw_patch, usbdrive_, filename);
+				ok = PatchFileIO::read_file(buffer, usbdrive_, filename);
 				break;
 			default:
 				break;
@@ -190,8 +166,8 @@ private:
 			return 0;
 		}
 
-		pr_dbg("Read patch id %d, %d bytes\n", patch_id, raw_patch.size_bytes());
-		return raw_patch.size_bytes();
+		pr_dbg("Read patch id %d, %d bytes\n", patch_id, buffer.size_bytes());
+		return buffer.size_bytes();
 	}
 };
 

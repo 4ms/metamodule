@@ -31,6 +31,9 @@ extern uint32_t _M4_HEAP_END[];
 extern uint32_t _VIRTDRIVE[];
 extern uint32_t _VIRTDRIVE_SZ[];
 extern uint32_t _VIRTDRIVE_END[];
+extern uint32_t _FWBUFFER[];
+extern uint32_t _FWBUFFER_SZ[];
+extern uint32_t _FWBUFFER_END[];
 
 //N-RW
 extern uint32_t _A7_HEAP[];
@@ -85,6 +88,9 @@ static const uint32_t M4_HEAP_SZ = (uint32_t)_M4_HEAP_SZ;
 
 static const uint32_t VIRTDRIVE = (uint32_t)_VIRTDRIVE;
 static const uint32_t VIRTDRIVE_SZ = (uint32_t)_VIRTDRIVE_SZ;
+
+static const uint32_t FWBUFFER = (uint32_t)_FWBUFFER;
+static const uint32_t FWBUFFER_SZ = (uint32_t)_FWBUFFER_SZ;
 
 static const uint32_t A7_HEAP = (uint32_t)_A7_HEAP;
 static const uint32_t A7_HEAP_SZ = (uint32_t)_A7_HEAP_SZ;

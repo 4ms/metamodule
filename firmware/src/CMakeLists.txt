@@ -165,6 +165,7 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
+  ${FWDIR}/src/flash_loader/flash_loader.cc
 
   ${FWDIR}/src/gui/elements/element_name.cc
 
@@ -252,6 +253,7 @@ endif()
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
   ${FWDIR}/src/core_a7/aux_core_main.cc
+  ${FWDIR}/src/gui/elements/element_name.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 

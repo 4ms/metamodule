@@ -3,7 +3,7 @@
 #include "conf/ramdisk_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "conf/stream_conf.hh"
-#include "core_intercom/patch_icc_message.hh"
+#include "core_intercom/intercore_message.hh"
 #include "drivers/cache.hh"
 #include "fs/ramdisk.hh"
 #include "lvgl/src/misc/lv_color.h" // for lv_color_t
@@ -29,7 +29,7 @@ static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlo
 static inline __attribute__((section(".ddma"))) std::array<char, 65536> raw_patch_data;
 static inline __attribute__((section(".ddma"))) std::span<char> raw_patch_span;
 
-static inline volatile __attribute__((section(".ddma"))) PatchICCMessage icc_shared_message;
+static inline __attribute__((section(".ddma"))) IntercoreStorageMessage icc_shared_message;
 static inline __attribute__((section(".ddma"))) PatchFileList shared_patch_file_list;
 //^^^ shared_patch_file_list is just a span (ptr and size)
 

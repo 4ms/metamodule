@@ -8,26 +8,27 @@ namespace MetaModule
 {
 
 struct ConfirmPopup {
+	ConfirmPopup()
+		: group(lv_group_create()) {
+		lv_obj_add_event_cb(ui_CancelButton, button_callback, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ConfirmButton, button_callback, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_TrashButton2, button_callback, LV_EVENT_CLICKED, this);
+	}
 
 	void init(lv_obj_t *page_base, lv_group_t *current_group) {
 		base = page_base;
 		orig_group = current_group;
-
-		group = lv_group_create();
-
-		lv_obj_add_event_cb(ui_CancelButton, button_callback, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_ConfirmButton, button_callback, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_TrashButton2, button_callback, LV_EVENT_CLICKED, this);
-
 		lv_hide(ui_DelMapPopUpPanel);
 	}
 
-	void show(auto cb, const char *button_text = "Trash") {
+	void show(auto cb, const char *message, const char *button_text = "Trash") {
 		callback = std::move(cb);
 
 		lv_obj_set_parent(ui_DelMapPopUpPanel, base);
 
 		lv_show(ui_DelMapPopUpPanel);
+
+		lv_label_set_text(ui_DelMapLabel, message);
 
 		if (strcmp(button_text, "Trash") != 0) {
 			lv_show(ui_ConfirmButton);

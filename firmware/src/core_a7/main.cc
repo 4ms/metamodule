@@ -7,7 +7,7 @@
 #include "fs/time_convert.hh"
 #include "hsem_handler.hh"
 #include "params.hh"
-#include "patch_file/patch_storage_proxy.hh"
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_file/patchlist.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
@@ -35,9 +35,9 @@ void main() {
 	print_time();
 
 	PatchPlayer patch_player;
-	PatchStorageProxy patch_storage_proxy{
+	FileStorageProxy file_storage_proxy{
 		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
-	PatchPlayLoader patch_playloader{patch_storage_proxy, patch_player};
+	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
 
 	SyncParams sync_params;
 	PatchModQueue patch_mod_queue;
@@ -59,7 +59,7 @@ void main() {
 						   &StaticBuffers::raw_patch_span,
 						   &patch_player,
 						   &patch_playloader,
-						   &patch_storage_proxy,
+						   &file_storage_proxy,
 						   &sync_params,
 						   &patch_mod_queue};
 

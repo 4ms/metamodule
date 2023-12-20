@@ -19,7 +19,7 @@ struct MainMenuPage : PageBase {
 		lv_group_focus_obj(ui_MenuPanelPatches);
 
 		lv_obj_add_event_cb(ui_MenuPanelPatches, patchsel_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_MenuPanelSettings, system_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_MenuPanelSettings, settings_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() final {
@@ -60,7 +60,7 @@ private:
 		pr_err("Not implemented\n");
 	}
 
-	static void system_cb(lv_event_t *event) {
+	static void settings_cb(lv_event_t *event) {
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;

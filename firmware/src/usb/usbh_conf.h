@@ -30,7 +30,6 @@ extern "C" {
 #include <string.h> //for memset/memcpy
 
 static inline void Error_Handler() {
-	__BKPT();
 }
 
 #define USBH_MAX_NUM_ENDPOINTS 16U
@@ -40,8 +39,11 @@ static inline void Error_Handler() {
 #define USBH_MAX_NUM_SUPPORTED_CLASS 16U
 #define USBH_MAX_SIZE_CONFIGURATION 0x200U
 #define USBH_MAX_DATA_BUFFER 0x200U
-#define USBH_DEBUG_LEVEL 3U
 #define USBH_USE_OS 0U
+
+#define USBH_USER_LOG_OUTPUT 0
+#define USBH_ERR_LOG_OUTPUT 1
+#define USBH_DBG_LOG_OUTPUT 0
 
 enum { MidiStreamingBufferSize = 256 };
 enum { HOST_HS = 0, HOST_FS = 1 };
@@ -53,12 +55,14 @@ void msc_free(void *);
 #define USBH_memset memset
 #define USBH_memcpy memcpy
 
-/* DEBUG macros */
-#if (USBH_DEBUG_LEVEL > 0U)
+#if (USBH_USER_LOG_OUTPUT || USBH_ERR_LOG_OUTPUT || USBH_DBG_LOG_OUTPUT)
 #include <stdio.h>
+#endif
 
+#if USBH_USER_LOG_OUTPUT
 #define USBH_UsrLog(...)                                                                                               \
 	do {                                                                                                               \
+		printf("USBH USER: ");                                                                                         \
 		printf(__VA_ARGS__);                                                                                           \
 		printf("\n");                                                                                                  \
 	} while (0)
@@ -68,11 +72,10 @@ void msc_free(void *);
 	} while (0)
 #endif
 
-#if (USBH_DEBUG_LEVEL > 1U)
-
+#if USBH_ERR_LOG_OUTPUT
 #define USBH_ErrLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf("ERROR: ");                                                                                             \
+		printf("USBH ERROR: ");                                                                                        \
 		printf(__VA_ARGS__);                                                                                           \
 		printf("\n");                                                                                                  \
 	} while (0)
@@ -82,10 +85,10 @@ void msc_free(void *);
 	} while (0)
 #endif
 
-#if (USBH_DEBUG_LEVEL > 2U)
+#if USBH_DBG_LOG_OUTPUT
 #define USBH_DbgLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf("DEBUG : ");                                                                                            \
+		printf("USBH DEBUG: ");                                                                                        \
 		printf(__VA_ARGS__);                                                                                           \
 		printf("\n");                                                                                                  \
 	} while (0)

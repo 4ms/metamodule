@@ -1,6 +1,7 @@
 #pragma once
+#include "delay.hh"
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_file/patch_location.hh"
-#include "patch_file/patch_storage_proxy.hh"
 #include "patch_play/patch_player.hh"
 #include "pr_dbg.hh"
 #include <atomic>
@@ -10,7 +11,7 @@ namespace MetaModule
 
 // PatchLoader handles loading of patches from storage into PatchPlayer
 struct PatchPlayLoader {
-	PatchPlayLoader(PatchStorageProxy &patch_storage, PatchPlayer &patchplayer)
+	PatchPlayLoader(FileStorageProxy &patch_storage, PatchPlayer &patchplayer)
 		: player_{patchplayer}
 		, storage_{patch_storage} {
 	}
@@ -30,26 +31,35 @@ struct PatchPlayLoader {
 			return;
 		}
 
-		tries = 200000;
+		tries = 2000;
 		while (--tries) {
 			auto message = storage_.get_message();
 
-			if (message.message_type == PatchStorageProxy::PatchDataLoaded) {
+			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
 				if (!storage_.parse_view_patch(message.bytes_read))
 					pr_err("ERROR: could not parse initial patch\n");
 				else
 					_load_patch();
 				break;
 			}
-			if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
+			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
 				pr_err("ERROR: initial patch failed to load from NOR flash\n");
 				break;
 			}
+
+			delay_ms(1);
 		}
 		if (tries == 0) {
 			pr_err("ERROR: timed out while waiting for response to request to load initial patch.\n");
 			return;
 		}
+	}
+
+	void stop_audio() {
+		stopping_audio_ = true;
+	}
+
+	void start_audio() {
 	}
 
 	// loading_new_patch_:
@@ -59,8 +69,8 @@ struct PatchPlayLoader {
 		loading_new_patch_ = true;
 	}
 
-	bool is_loading_new_patch() {
-		return loading_new_patch_;
+	bool should_fade_down_audio() {
+		return loading_new_patch_ || stopping_audio_;
 	}
 
 	// loaded_patch_:
@@ -84,13 +94,14 @@ struct PatchPlayLoader {
 	void audio_not_muted() {
 		audio_is_muted_ = false;
 	}
-	bool is_audio_muted() {
-		return audio_is_muted_;
+
+	bool ready_to_play() {
+		return !stopping_audio_ && !audio_is_muted_ && player_.is_loaded;
 	}
 
 	// Concurrency: Called from UI thread
 	void handle_sync_patch_loading() {
-		if (is_loading_new_patch() && is_audio_muted()) {
+		if (loading_new_patch_ && audio_is_muted_) {
 			if (_load_patch())
 				pr_dbg("Patch loaded\n");
 			else
@@ -102,10 +113,11 @@ struct PatchPlayLoader {
 
 private:
 	PatchPlayer &player_;
-	PatchStorageProxy &storage_;
+	FileStorageProxy &storage_;
 
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
+	std::atomic<bool> stopping_audio_ = false;
 
 	PatchLocation loaded_patch_;
 	ModuleTypeSlug loaded_patch_name_ = "";

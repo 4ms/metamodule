@@ -110,26 +110,10 @@ foreach(brand ${brands})
 endforeach()
 
 # #################### RYML + Patch Convert ##################################
-
-file(GLOB RYML_SOURCES 
-	${SHARED}/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp
-    ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
-
-add_library(ryml ${SHARED}/patch_convert/ryml/ryml_serial.cc
-                 ${SHARED}/patch_convert/yaml_to_patch.cc 
-				 ${RYML_SOURCES})
-
-target_include_directories(
-  ryml
-  PRIVATE ${SHARED}/patch_convert
-          ${SHARED}/patch_convert/ryml
-          ${SHARED}/patch_convert/ryml/rapidyaml/src
-          ${SHARED}/patch_convert/ryml/rapidyaml/ext/c4core/src
-          ${SHARED}/cpputil
-          ${FWDIR}/src/medium
-          ${SIM_ROOT}/stubs
-          ${SHARED})
-
+set(RYMLDIR ${SHARED}/patch_convert/ryml/rapidyaml)
+file(GLOB RYML_SOURCES ${RYMLDIR}/src/c4/yml/*.cpp ${RYMLDIR}/ext/c4core/src/c4/*.cpp)
+add_library(ryml OBJECT ${RYML_SOURCES})
+target_include_directories(ryml PUBLIC ${RYMLDIR}/src ${RYMLDIR}/ext/c4core/src)
 target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
@@ -138,9 +122,11 @@ add_executable(
 	simulator 
 	src/main.cc 
 	src/ui.cc
-    ${FWDIR}/src/gui/elements/element_name.cc
+	${FWDIR}/src/gui/elements/element_name.cc
+	${SHARED}/patch_convert/ryml/ryml_serial.cc
+	${SHARED}/patch_convert/yaml_to_patch.cc 
 	${FACEPLATE_ARTWORK_SOURCES}
-    ${COMP_ARTWORK_SOURCES} 
+	${COMP_ARTWORK_SOURCES} 
 	${SLS_SOURCES})
 
 target_include_directories(
@@ -159,6 +145,7 @@ target_include_directories(
           ${SHARED}
           ${SHARED}/cpputil
           ${SHARED}/patch
+          ${SHARED}/patch_convert/ryml/rapidyaml/src
           ${SHARED}/CoreModules
           ${SHARED}/CoreModules/4ms)
 

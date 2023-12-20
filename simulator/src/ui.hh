@@ -1,10 +1,10 @@
 #pragma once
 #include "audio_stream.hh"
-#include "lv_port_indev.h"
-#define printf_ printf
-///
+#include "frame.hh"
 #include "gui/message_queue.hh"
 #include "gui/pages/page_manager.hh"
+#include "lv_port_indev.h"
+#include "patch_file/file_storage_proxy.hh"
 
 namespace MetaModule
 {
@@ -29,7 +29,7 @@ public:
 
 private:
 	PatchPlayer patch_player;
-	PatchStorageProxy patch_storage;
+	FileStorageProxy patch_storage;
 	PatchPlayLoader patch_playloader{patch_storage, patch_player};
 	PatchModQueue patch_mod_queue;
 

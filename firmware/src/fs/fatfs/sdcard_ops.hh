@@ -85,6 +85,14 @@ public:
 			case MMC_GET_SDSTAT: {
 				uint8_t mounted = sd.detect_card();
 				*(uint8_t *)buff = mounted;
+				if (_status != Status::NotInit)
+					_status = mounted ? Status::Mounted : Status::NoCard;
+			} break;
+
+			case CTRL_EJECT: {
+				if (_status != Status::NotInit)
+					_status = Status::NoCard;
+				return RES_OK;
 			} break;
 
 			default:

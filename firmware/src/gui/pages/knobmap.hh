@@ -210,17 +210,20 @@ struct KnobMapPage : PageBase {
 		if (!page)
 			return;
 
-		page->del_popup.show([page](bool ok) {
-			if (!ok)
-				return;
+		page->del_popup.show(
+			[page](bool ok) {
+				if (!ok)
+					return;
 
-			page->patch_mod_queue.put(RemoveMapping{.map = page->map, .set_id = page->view_set_idx});
+				page->patch_mod_queue.put(RemoveMapping{.map = page->map, .set_id = page->view_set_idx});
 
-			if (!page->patch.remove_mapping(page->view_set_idx, page->map))
-				pr_err("Could not delete mapping\n");
-			else
-				page->page_list.request_last_page();
-		});
+				if (!page->patch.remove_mapping(page->view_set_idx, page->map))
+					pr_err("Could not delete mapping\n");
+				else
+					page->page_list.request_last_page();
+			},
+			"Are you sure you want to delete this mapping?",
+			"Trash");
 	}
 
 	void hide_keyboard() {
