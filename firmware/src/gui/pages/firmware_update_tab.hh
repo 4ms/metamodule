@@ -226,13 +226,13 @@ private:
 	FileStorageProxy &file_storage;
 	PatchPlayLoader &patch_playloader;
 
-	lv_group_t *group;
+	lv_group_t *group = nullptr;
 	lv_obj_t *tabs = nullptr;
 
 	ConfirmPopup confirm_popup;
 
 	std::string manifest_filename = "";
-	Volume manifest_file_vol;
+	Volume manifest_file_vol = Volume::USB;
 
 	uint32_t manifest_filesize = 0;
 

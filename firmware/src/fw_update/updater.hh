@@ -11,12 +11,20 @@ namespace MetaModule
 {
 
 // Handle the process of updating firmware
-struct FirmwareUpdater {
+class FirmwareUpdater {
+public:
 	enum State { Idle, Error, LoadingManifest, LoadingFilesToRAM, WritingApp, WritingWifi, Success };
 
 	FirmwareUpdater(FileStorageProxy &file_storage)
 		: file_storage{file_storage} {
 	}
+
+	struct Status {
+		State state{State::Idle};
+		int file_size{0};
+		int bytes_remaining{0};
+		std::string error_message{};
+	};
 
 	bool start(std::string_view manifest_filename, Volume manifest_file_vol, uint32_t manifest_filesize) {
 		if (manifest_filesize > 4096) {
@@ -35,13 +43,6 @@ struct FirmwareUpdater {
 
 		return state != State::Error;
 	}
-
-	struct Status {
-		State state{State::Idle};
-		int file_size{0};
-		int bytes_remaining{0};
-		std::string error_message{};
-	};
 
 	Status process() {
 		int bytes_remaining = 0;
@@ -104,7 +105,6 @@ struct FirmwareUpdater {
 			} break;
 
 			case WritingWifi: {
-				// TODO: wifi loading process happens here:
 				auto [bytes_rem, err] = wifi_loader.load_next_block();
 
 				if (err == FirmwareWifiLoader::Error::Failed) {
@@ -116,9 +116,9 @@ struct FirmwareUpdater {
 					bytes_remaining = bytes_rem;
 
 				} else {
-					//Done
 					current_file_size = write_next_file();
 				}
+
 			} break;
 		};
 
@@ -128,6 +128,7 @@ struct FirmwareUpdater {
 			return {state, current_file_size, bytes_remaining};
 	}
 
+private:
 	void init_ram_loading() {
 		current_file_idx = 0;
 		file_requested = false;
@@ -198,12 +199,12 @@ struct FirmwareUpdater {
 					state = State::Error;
 					error_message = "App firmware file not valid";
 					return file_size;
-			}
+				}
 
 				if (!flash_loader.start()) {
-				state = State::Error;
-				error_message = "Could not start writing application firmware to flash";
-				return file_size;
+					state = State::Error;
+					error_message = "Could not start writing application firmware to flash";
+					return file_size;
 				}
 
 				state = State::WritingApp;
@@ -216,12 +217,12 @@ struct FirmwareUpdater {
 					state = State::Error;
 					error_message = "Wifi firmware file not valid";
 					return file_size;
-			}
+				}
 
 				if (!wifi_loader.start()) {
-				state = State::Error;
-				error_message = "Could not start writing to Wifi module";
-				return file_size;
+					state = State::Error;
+					error_message = "Could not start writing to Wifi module";
+					return file_size;
 				}
 
 				state = State::WritingWifi;
