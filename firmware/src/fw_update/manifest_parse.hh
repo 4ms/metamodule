@@ -65,15 +65,20 @@ struct ManifestParser {
 
 		ryml::Tree tree = ryml::parse_in_place(ryml::substr(json.data(), json.size()));
 
+		if (tree.num_children(0) == 0) {
+			pr_dbg("Manifest not valid json or yaml\n");
+			return manifest;
+		}
+
 		ryml::ConstNodeRef root = tree.rootref();
 
 		if (!root.has_child("version")) {
-			pr_dbg("Manifest json has no root node with key 'version'\n");
+			pr_dbg("Manifest file has no root node with key 'version'\n");
 			return manifest;
 		}
 
 		if (!root.has_child("files")) {
-			pr_dbg("Manifest json has no root node with key 'files'\n");
+			pr_dbg("Manifest file has no root node with key 'files'\n");
 			return manifest;
 		}
 

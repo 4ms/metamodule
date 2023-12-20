@@ -27,7 +27,8 @@ public:
 	};
 
 	bool start(std::string_view manifest_filename, Volume manifest_file_vol, uint32_t manifest_filesize) {
-		if (manifest_filesize > 4096) {
+		if (manifest_filesize > 4 * 1024 * 1024) {
+			pr_err("manifest file is too large\n");
 			state = State::Error;
 			return false;
 		}

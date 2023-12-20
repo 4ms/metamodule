@@ -98,7 +98,7 @@ public:
 				return {FirmwareFileFound,
 						mock_file_found_ctr + mock_firmware_file_size,
 						0,
-						"metamodule-fw-1.23.45.uimg",
+						"metamodule-fw.json",
 						Volume::USB};
 			else
 				return {FirmwareFileNotFound};
@@ -185,7 +185,7 @@ private:
 	} msg_state_ = MsgState::Idle;
 
 	unsigned mock_file_found_ctr = 0;
-	unsigned mock_firmware_file_size = 5'123'456;
+	unsigned mock_firmware_file_size = 513;
 
 	IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
 		if (list.size() == 0) {
