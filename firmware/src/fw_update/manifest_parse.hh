@@ -33,13 +33,8 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updatefile) {
 
 	if (n.has_child("md5")) {
 		auto md5 = n["md5"].val();
-		if (md5.size() == 32) {
-			std::string_view sv{md5.data(), md5.size()};
-			for (auto i = 0u; i < 4; i++) {
-				std::string s{sv.substr(8 * i, 8)};
-				updatefile->md5[i] = std::strtoul(s.c_str(), nullptr, 16);
-			}
-		}
+		auto md5_sv = std::string_view{md5.data(), md5.size()};
+		updatefile->md5 = md5_sv;
 	}
 
 	if (n.has_child("version")) {

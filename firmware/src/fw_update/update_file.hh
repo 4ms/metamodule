@@ -1,4 +1,5 @@
 #pragma once
+#include "util/static_string.hh"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -12,7 +13,7 @@ struct UpdateFile {
 	UpdateType type = UpdateType::Invalid;
 	std::string filename;
 	uint32_t filesize = 0;
-	uint32_t md5[4]{};
+	StaticString<32> md5{};
 
 	struct Version {
 		uint8_t major = 0;

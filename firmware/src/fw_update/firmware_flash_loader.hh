@@ -12,7 +12,7 @@ class FirmwareFlashLoader {
 public:
 	enum class Error { None, Failed };
 
-	bool verify(std::span<char> filedata, std::span<uint32_t, 4> md5, UpdateType type) {
+	bool verify(std::span<char> filedata, StaticString<32> md5_chars, UpdateType type) {
 		if (type != UpdateType::App) {
 			pr_err("Only app images can be flashed to internal flash\n");
 			return false;
@@ -31,7 +31,12 @@ public:
 		}
 
 		//TODO: check md5
-		pr_dbg("MD5 is %08x %08x %08x %08x\n", md5[0], md5[1], md5[2], md5[3]);
+		uint32_t md5[4];
+		for (auto i = 0u; i < 4; i++) {
+			auto s = std::string{std::string_view{md5_chars}.substr(8 * i, 8)};
+			md5[i] = std::strtoul(s.c_str(), nullptr, 16);
+		}
+		pr_dbg("MD5 is %s (%08x %08x %08x %08x)\n", md5_chars.c_str(), md5[0], md5[1], md5[2], md5[3]);
 
 		auto *uimg_header = reinterpret_cast<BootImageDef::ImageHeader *>(file.data());
 		// BootImageDef::debug_print_raw_header(*uimg_header);

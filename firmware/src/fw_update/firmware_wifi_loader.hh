@@ -11,8 +11,8 @@ class FirmwareWifiLoader {
 public:
 	enum class Error { None, Failed };
 
-	bool verify(std::span<char> filedata, std::span<uint32_t, 4> md5, UpdateType image_type) {
-		pr_dbg("MD5 is %08x %08x %08x %08x\n", md5[0], md5[1], md5[2], md5[3]);
+	bool verify(std::span<char> filedata, StaticString<32> md5, UpdateType image_type) {
+		pr_dbg("MD5 is %s\n", md5.c_str());
 		pr_dbg("Wifi image at %p, size: %zu\n", file.data(), file.size());
 		file = filedata;
 		return true;
