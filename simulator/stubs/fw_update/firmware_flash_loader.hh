@@ -1,6 +1,7 @@
 #pragma once
+#include "fw_update/update_file.hh"
+#include "util/static_string.hh"
 #include <cstddef>
-#include <cstdint>
 #include <span>
 #include <utility>
 
@@ -9,10 +10,13 @@ namespace MetaModule
 
 class FirmwareFlashLoader {
 public:
+	enum class Error { None, Failed };
+
 	FirmwareFlashLoader() {
 	}
 
-	bool verify(std::span<char> file, std::span<uint32_t, 4> md5) {
+	bool verify(std::span<char> filedata, StaticString<32> md5, UpdateType image_type) {
+		file = filedata;
 		filesize = file.size();
 
 		if (filesize & 0b01) {
@@ -22,12 +26,10 @@ public:
 		return true;
 	}
 
-	bool start(std::span<char> file) {
+	bool start() {
 		bytes_remaining = filesize;
 		return true;
 	}
-
-	enum class Error { None, Failed };
 
 	std::pair<int, Error> load_next_block() {
 		bytes_remaining -= 4096;
@@ -37,6 +39,7 @@ public:
 private:
 	size_t filesize = 0;
 	int bytes_remaining = 0;
+	std::span<char> file;
 };
 
 } // namespace MetaModule

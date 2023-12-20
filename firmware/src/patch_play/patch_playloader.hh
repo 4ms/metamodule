@@ -1,4 +1,5 @@
 #pragma once
+#include "delay.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/patch_location.hh"
 #include "patch_play/patch_player.hh"
@@ -46,7 +47,7 @@ struct PatchPlayLoader {
 				break;
 			}
 
-			HAL_Delay(1);
+			delay_ms(1);
 		}
 		if (tries == 0) {
 			pr_err("ERROR: timed out while waiting for response to request to load initial patch.\n");
