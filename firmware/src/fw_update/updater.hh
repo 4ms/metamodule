@@ -198,7 +198,7 @@ struct FirmwareUpdater {
 				return file_size;
 			}
 
-			if (!flash_loader.start(file_images[current_file_idx])) {
+				if (!flash_loader.start()) {
 				state = State::Error;
 				error_message = "Could not start writing application firmware to flash";
 				return file_size;
@@ -216,7 +216,7 @@ struct FirmwareUpdater {
 				return file_size;
 			}
 
-			if (!wifi_loader.start(file_images[current_file_idx])) {
+				if (!wifi_loader.start()) {
 				state = State::Error;
 				error_message = "Could not start writing to Wifi module";
 				return file_size;

@@ -12,6 +12,7 @@ public:
 	enum class Error { None, Failed };
 
 	bool verify(std::span<char> file, std::span<uint32_t, 4> md5) {
+		file = filedata;
 		file_size = file.size();
 
 		if (file_size > VIRTDRIVE_SZ) {
@@ -44,7 +45,7 @@ public:
 		return true;
 	}
 
-	bool start(std::span<char> file) {
+	bool start() {
 
 		flash = std::make_unique<FlashLoader>();
 
@@ -59,17 +60,17 @@ public:
 	}
 
 	std::pair<int, Error> load_next_block() {
+		if (bytes_remaining > 0) {
 
-		// flash driver requires uint8_t, but file operations provide us with chars
-		auto block_u8 = std::span<uint8_t>{reinterpret_cast<uint8_t *>(cur_read_block.data()), cur_read_block.size()};
-
-		if (!flash->write_sectors(cur_flash_addr, block_u8)) {
+			if (!flash->write_sectors(cur_flash_addr, cur_read_block)) {
 			return {bytes_remaining, Error::Failed};
 		}
 
-		cur_flash_addr += flash_sector_size;
-		bytes_remaining -= flash_sector_size;
-		cur_read_block = cur_read_block.subspan(flash_sector_size, std::min<int>(flash_sector_size, bytes_remaining));
+			cur_flash_addr += flash_sector_size;
+			bytes_remaining -= flash_sector_size;
+			cur_read_block =
+				cur_read_block.subspan(flash_sector_size, std::min<int>(flash_sector_size, bytes_remaining));
+		}
 
 		return {bytes_remaining, Error::None};
 	}
@@ -83,6 +84,7 @@ private:
 	size_t file_size = 0;
 	int bytes_remaining = 0;
 	uint32_t cur_flash_addr = flash_base_addr;
+	std::span<char> file;
 	std::span<char> cur_read_block;
 };
 
