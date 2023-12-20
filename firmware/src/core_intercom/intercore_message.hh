@@ -33,73 +33,48 @@ struct IntercoreStorageMessage {
 
 		NumRequests,
 	};
-	MessageType message_type;
+	MessageType message_type = MessageType::None;
 
-	uint32_t bytes_read;
+	uint32_t bytes_read{};
 	uint32_t patch_id; //DEPRECATE: use filename
 	StaticString<255> filename;
 	Volume vol_id;
 	std::span<char> buffer;
-	uint32_t write_address;
+	uint32_t write_address{};
 	PatchFileList *patch_file_list;
-
-	///////////////////////////////////////
-	// TODO: Use this instead of MessageType
-
-	struct PatchListMsg {
-		PatchFileList &patch_list;
-		enum class Result { Unchanged, Changed } result;
-	};
-	struct PatchData;
-	struct PatchDataLoadMsg {
-		PatchData &patch_data;
-		Volume vol;
-		unsigned patch_id; //change to filename
-		// StaticString<255> filename;
-		std::span<char> buffer;
-		enum class Result { LoadFailed, LoadOK } result;
-	};
-	struct FirmwareFindMsg {
-		StaticString<255> filename;
-		Volume vol_id;
-		uint32_t filesize;
-		enum class Result { Unchanged, FileFound, NotFound } result;
-	};
-	struct FileLoadMsg {
-		std::span<char> buffer;
-		StaticString<255> filename;
-		Volume vol_id;
-		enum class Result { Failed, Success } result;
-	};
-
-	using Message = std::variant<PatchListMsg, PatchDataLoadMsg, FirmwareFindMsg, FileLoadMsg>;
-	////////////////////////////////////////
-
-	// Note: return type is void because gcc gives a warning for `volatile T&operator=(const T&){...}`
-	// warning: implicit dereference will not access object of type 'volatile T' in statement
-	// This is because the dereference in `*this` causes a read of memory, but the read value is ignored.
-	// void operator=(const IntercoreStorageMessage &msg) { //NOLINT
-	// 	this->message_type = msg.message_type;
-	// 	this->bytes_read = msg.bytes_read;
-	// 	this->patch_id = msg.patch_id;
-	// 	this->filename.copy(msg.filename);
-	// 	this->vol_id = msg.vol_id;
-	// 	this->buffer = msg.buffer;
-	// 	this->write_address = msg.write_address;
-	// }
-
-	// IntercoreStorageMessage &operator=(IntercoreStorageMessage &msg) { //NOLINT
-	// 	this->message_type = msg.message_type;
-	// 	this->bytes_read = msg.bytes_read;
-	// 	this->patch_id = msg.patch_id;
-	// 	this->filename.copy(msg.filename);
-	// 	this->vol_id = msg.vol_id;
-	// 	this->buffer = msg.buffer;
-	// 	this->write_address = msg.write_address;
-	// 	return *this;
-	// }
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);
+
+///////////////////////////////////////
+// TODO: Use this instead of MessageType
+
+// struct PatchListMsg {
+// 	PatchFileList &patch_list;
+// 	enum class Result { Unchanged, Changed } result;
+// };
+// struct PatchData;
+// struct PatchDataLoadMsg {
+// 	PatchData &patch_data;
+// 	Volume vol;
+// 	unsigned patch_id; //change to filename
+// 	// StaticString<255> filename;
+// 	std::span<char> buffer;
+// 	enum class Result { LoadFailed, LoadOK } result;
+// };
+// struct FirmwareFindMsg {
+// 	StaticString<255> filename;
+// 	Volume vol_id;
+// 	uint32_t filesize;
+// 	enum class Result { Unchanged, FileFound, NotFound } result;
+// };
+// struct FileLoadMsg {
+// 	std::span<char> buffer;
+// 	StaticString<255> filename;
+// 	Volume vol_id;
+// 	enum class Result { Failed, Success } result;
+// };
+
+// using Message = std::variant<PatchListMsg, PatchDataLoadMsg, FirmwareFindMsg, FileLoadMsg>;
 
 } // namespace MetaModule
