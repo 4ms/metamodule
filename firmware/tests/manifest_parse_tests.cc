@@ -20,7 +20,7 @@ TEST_CASE("Parse json") {
 		}
 	},
 	{
-		"type": "wifi",
+		"type": "wifi-app",
 		"filename": "metamodule-wifi-v1.0.2.uimg",
 		"filesize": 7654321,
 		"md5": "1234567890ABCDEFFEDCBA9876543210",
@@ -58,7 +58,7 @@ TEST_CASE("Parse json") {
 	CHECK(files[0].version.minor == 3);
 	CHECK(files[0].version.revision == 0);
 
-	CHECK(files[1].type == MetaModule::UpdateType::Wifi);
+	CHECK(files[1].type == MetaModule::UpdateType::WifiApp);
 	CHECK(files[1].filename == "metamodule-wifi-v1.0.2.uimg");
 	CHECK(files[1].filesize == 7654321);
 	CHECK(files[1].md5[0] == 0x12345678);

@@ -1,5 +1,6 @@
 #pragma once
 #include "flash_loader/flash_loader.hh"
+#include "fw_update/update_file.hh"
 #include "ld.h"
 #include "uimg_header.hh"
 #include <memory>
@@ -11,7 +12,12 @@ class FirmwareFlashLoader {
 public:
 	enum class Error { None, Failed };
 
-	bool verify(std::span<char> file, std::span<uint32_t, 4> md5) {
+	bool verify(std::span<char> filedata, std::span<uint32_t, 4> md5, UpdateType type) {
+		if (type != UpdateType::App) {
+			pr_err("Only app images can be flashed to internal flash\n");
+			return false;
+		}
+
 		file = filedata;
 		file_size = file.size();
 
@@ -63,8 +69,8 @@ public:
 		if (bytes_remaining > 0) {
 
 			if (!flash->write_sectors(cur_flash_addr, cur_read_block)) {
-			return {bytes_remaining, Error::Failed};
-		}
+				return {bytes_remaining, Error::Failed};
+			}
 
 			cur_flash_addr += flash_sector_size;
 			bytes_remaining -= flash_sector_size;

@@ -189,40 +189,46 @@ struct FirmwareUpdater {
 		}
 
 		int file_size = file_images[current_file_idx].size();
+		auto &cur_file = manifest.files[current_file_idx];
 
-		if (manifest.files[current_file_idx].type == UpdateType::App) {
+		switch (cur_file.type) {
 
-			if (!flash_loader.verify(file_images[current_file_idx], manifest.files[current_file_idx].md5)) {
-				state = State::Error;
-				error_message = "App firmware file not valid";
-				return file_size;
+			case UpdateType::App: {
+				if (!flash_loader.verify(file_images[current_file_idx], cur_file.md5, cur_file.type)) {
+					state = State::Error;
+					error_message = "App firmware file not valid";
+					return file_size;
 			}
 
 				if (!flash_loader.start()) {
 				state = State::Error;
 				error_message = "Could not start writing application firmware to flash";
 				return file_size;
-			}
+				}
 
-			state = State::WritingApp;
+				state = State::WritingApp;
+			} break;
 
-		} else if (manifest.files[current_file_idx].type == UpdateType::Wifi) {
-			//
-			// TODO: Wifi loading process starts here:
-			//
-			if (!wifi_loader.verify(file_images[current_file_idx], manifest.files[current_file_idx].md5)) {
-				state = State::Error;
-				error_message = "Wifi firmware file not valid";
-				return file_size;
+			case UpdateType::WifiApp:
+			case UpdateType::WifiFirmware:
+			case UpdateType::WifiFilesystem: {
+				if (!wifi_loader.verify(file_images[current_file_idx], cur_file.md5, cur_file.type)) {
+					state = State::Error;
+					error_message = "Wifi firmware file not valid";
+					return file_size;
 			}
 
 				if (!wifi_loader.start()) {
 				state = State::Error;
 				error_message = "Could not start writing to Wifi module";
 				return file_size;
-			}
+				}
 
-			state = State::WritingWifi;
+				state = State::WritingWifi;
+			} break;
+
+			case UpdateType::Invalid:
+				break;
 		}
 
 		return file_size;

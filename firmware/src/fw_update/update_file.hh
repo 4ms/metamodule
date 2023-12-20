@@ -6,7 +6,7 @@
 namespace MetaModule
 {
 
-enum class UpdateType { App, Wifi, Invalid };
+enum class UpdateType { App, WifiFirmware, WifiFilesystem, WifiApp, Invalid };
 
 struct UpdateFile {
 	UpdateType type = UpdateType::Invalid;

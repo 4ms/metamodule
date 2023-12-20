@@ -25,9 +25,11 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updatefile) {
 	n["filename"] >> updatefile->filename;
 	n["filesize"] >> updatefile->filesize;
 
-	updatefile->type = (n["type"].val() == "app")  ? MetaModule::UpdateType::App :
-					   (n["type"].val() == "wifi") ? MetaModule::UpdateType::Wifi :
-													 MetaModule::UpdateType::Invalid;
+	updatefile->type = (n["type"].val() == "app")			  ? MetaModule::UpdateType::App :
+					   (n["type"].val() == "wifi-app")		  ? MetaModule::UpdateType::WifiApp :
+					   (n["type"].val() == "wifi-firmware")	  ? MetaModule::UpdateType::WifiFirmware :
+					   (n["type"].val() == "wifi-filesystem") ? MetaModule::UpdateType::WifiFilesystem :
+																MetaModule::UpdateType::Invalid;
 
 	if (n.has_child("md5")) {
 		auto md5 = n["md5"].val();
