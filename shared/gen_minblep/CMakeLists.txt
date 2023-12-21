@@ -22,11 +22,12 @@ target_include_directories(gen_minblep PRIVATE
 )
 
 add_custom_command(
-    OUTPUT ${FW_ROOT}/src/VCV_adaptor/dsp/minblep_16_32.h
-    COMMAND gen_minblep 16 32 > ${FW_ROOT}/src/VCV_adaptor/dsp/minblep_16_32.h
+    OUTPUT ${FW_ROOT}/src/VCV_adaptor/dsp/minblep_4_32.h
+    COMMAND gen_minblep 4 32 > ${FW_ROOT}/src/VCV_adaptor/dsp/minblep_4_32.h
     DEPENDS gen_minblep
 )
 
-add_custom_target(generate_minblep_files DEPENDS ${FW_ROOT}/src/VCV_adaptor/dsp/minblep_16_32.h
+add_custom_target(generate_minblep_files DEPENDS 
+    ${FW_ROOT}/src/VCV_adaptor/dsp/minblep_4_32.h
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
