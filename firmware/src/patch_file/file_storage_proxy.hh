@@ -22,6 +22,9 @@ public:
 		: remote_patch_list_{remote_patch_list}
 		, comm_{shared_message}
 		, raw_patch_data_{raw_patch_data} {
+		remote_patch_list_.usb = remote_patch_list_.usb.subspan(0, 0);
+		remote_patch_list_.norflash = remote_patch_list_.norflash.subspan(0, 0);
+		remote_patch_list_.sdcard = remote_patch_list_.sdcard.subspan(0, 0);
 	}
 
 	IntercoreStorageMessage get_message() {

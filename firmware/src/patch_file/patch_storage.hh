@@ -49,16 +49,16 @@ public:
 		patch_list_.clear_patches(Volume::NorFlash);
 		PatchFileIO::add_all_to_patchlist(norflash_, patch_list_);
 
+		patch_list_.clear_patches(Volume::SDCard);
 		sdcard_.mount_disk();
 		if (sdcard_.is_mounted()) {
-			patch_list_.clear_patches(Volume::SDCard);
 			PatchFileIO::add_all_to_patchlist(sdcard_, patch_list_);
 			sd_changes_.reset();
 		}
 
+		patch_list_.clear_patches(Volume::USB);
 		usbdrive_.mount_disk();
 		if (usbdrive_.is_mounted()) {
-			patch_list_.clear_patches(Volume::USB);
 			PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
 			usb_changes_.reset();
 		}

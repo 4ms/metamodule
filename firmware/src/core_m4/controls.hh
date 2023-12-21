@@ -60,7 +60,7 @@ private:
 
 	// Analog controls (pots)
 	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
-	std::array<uint16_t, NumPotAdcs> pot_vals;
+	std::array<uint16_t, NumPotAdcs> pot_vals{};
 	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
 	static constexpr size_t NumParamUpdatesPerAdcReading = 78; // see note below

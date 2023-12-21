@@ -36,7 +36,7 @@ class PageManager {
 	SystemMenuPage page_systemmenu{info};
 
 public:
-	PageBase *cur_page = &page_patchsel;
+	PageBase *cur_page = &page_mainmenu;
 
 	PageManager(FileStorageProxy &patch_storage,
 				PatchPlayLoader &patch_playloader,
@@ -56,25 +56,29 @@ public:
 			if (newpage->page) {
 				cur_page->blur();
 				cur_page = newpage->page;
-				printf("Args: mod: %d, panel: %d, set: %d, patchidx: %u\n",
-					   newpage->args->module_id.value_or(88),
-					   newpage->args->mappedknob_id.value_or(88),
-					   newpage->args->view_knobset_id.value_or(88),
-					   (unsigned)newpage->args->patch_loc.value_or(PatchLocation{}).index);
-				if (newpage->args->element_indices) {
-					auto i = newpage->args->element_indices.value();
-					printf("Ind: %d %d %d %d\n", i.param_idx, i.input_idx, i.output_idx, i.light_idx);
-				}
-				if (newpage->args->element_counts) {
-					auto i = newpage->args->element_counts.value();
-					printf("Cnt: %zu %zu %zu %zu\n", i.num_params, i.num_inputs, i.num_outputs, i.num_lights);
-				}
+				// debug_print_args(newpage);
 				cur_page->focus(newpage->args);
 			}
+		} else
+			cur_page->update();
+	}
+
+	void debug_print_args(auto newpage) {
+		pr_trace("Args: mod: %d, panel: %d, set: %d, patchidx: %u\n",
+				 newpage->args->module_id.value_or(88),
+				 newpage->args->mappedknob_id.value_or(88),
+				 newpage->args->view_knobset_id.value_or(88),
+				 (unsigned)newpage->args->patch_loc.value_or(PatchLocation{}).index);
+
+		if (newpage->args->element_indices) {
+			auto i = newpage->args->element_indices.value();
+			pr_trace("Ind: %d %d %d %d\n", i.param_idx, i.input_idx, i.output_idx, i.light_idx);
 		}
 
-		else
-			cur_page->update();
+		if (newpage->args->element_counts) {
+			auto i = newpage->args->element_counts.value();
+			pr_trace("Cnt: %zu %zu %zu %zu\n", i.num_params, i.num_inputs, i.num_outputs, i.num_lights);
+		}
 	}
 };
 
