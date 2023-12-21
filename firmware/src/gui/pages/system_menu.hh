@@ -29,6 +29,9 @@ struct SystemMenuPage : PageBase {
 	void prepare_focus() final {
 		lv_hide(ui_FWUpdateSpinner);
 		lv_tabview_set_act(ui_SystemMenuTabView, 0, LV_ANIM_OFF);
+
+		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, tabs);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
 	}
@@ -38,7 +41,7 @@ struct SystemMenuPage : PageBase {
 
 		if (active_tab == Tabs::Update) {
 			fwupdate_page.update();
-			if (pressed_back && !fwupdate_page.consume_back_event())
+			if (pressed_back && fwupdate_page.consume_back_event())
 				pressed_back = false;
 		}
 
