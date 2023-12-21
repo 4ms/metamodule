@@ -115,6 +115,11 @@ target_link_libraries(ui PRIVATE lvgl::lvgl mp15xa7_arch)
 # Fix for SLS generated files (See https://forum.squareline.io/t/unused-variable-target-warning-when-compiling/1610/3 )
 target_compile_options(ui PRIVATE -Wno-unused-variable)
 
+#
+# Git commit hash
+#
+include(../cmake/CheckGit.cmake)
+CheckGitSetup()
 
 #
 # ESP Serial Flasher
@@ -166,7 +171,6 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
-
   ${FWDIR}/src/gui/elements/element_name.cc
 
   #
@@ -218,6 +222,8 @@ add_executable(
   #
   ${COMP_ARTWORK_SOURCES}
   ${FACEPLATE_ARTWORK_SOURCES}
+  #
+  ${CMAKE_CURRENT_BINARY_DIR}/generated/git_version.cpp
 )
 
 if (ENABLE_WIFI_BRIDGE)
@@ -281,6 +287,8 @@ target_include_directories(
           #
           ${FWDIR}/lib/jansson
           ${FWDIR}/lib/jansson/jansson/src
+          #
+          ${CMAKE_CURRENT_BINARY_DIR}/generated
 )
 
 if (ENABLE_WIFI_BRIDGE)
