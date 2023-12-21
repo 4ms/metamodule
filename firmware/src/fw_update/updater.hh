@@ -143,7 +143,7 @@ private:
 		if (current_file_idx == 0)
 			file_images[current_file_idx] = {(char *)ram_buffer.data(), size};
 		else
-			file_images[current_file_idx] = {file_images[current_file_idx - 1].end(), size};
+			file_images[current_file_idx] = std::span<char>{file_images[current_file_idx - 1].end(), size};
 
 		pr_trace("A7: request to load %s to 0x%x\n",
 				 manifest.files[current_file_idx].filename.c_str(),
