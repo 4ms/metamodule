@@ -4,7 +4,7 @@ if (NOT DEFINED pre_configure_dir)
 endif ()
 
 if (NOT DEFINED post_configure_dir)
-    set(post_configure_dir ${CMAKE_CURRENT_BINARY_DIR}/generated)
+    set(post_configure_dir ${CMAKE_CURRENT_BINARY_DIR}/checkgit)
 endif ()
 
 set(pre_configure_file ${pre_configure_dir}/git_version.cpp.in)
@@ -47,8 +47,10 @@ function(CheckGitVersion)
         )
 
     execute_process(
-        COMMAND echo "${GIT_HASH} ${GIT_COMMIT_TIME} ${GIT_FIRMWARE_VERSION_TAG}"
+		COMMAND echo "Git hash: ${GIT_HASH}. Commit time: ${GIT_COMMIT_TIME}. Tag: ${GIT_FIRMWARE_VERSION_TAG}"
         )
+
+	set(GIT_FIRMWARE_VERSION_TAG ${GIT_FIRMWARE_VERSION_TAG} PARENT_SCOPE)
 
     CheckGitRead(GIT_HASH_CACHE)
     if (NOT EXISTS ${post_configure_dir})
@@ -86,11 +88,8 @@ function(CheckGitSetup)
         BYPRODUCTS ${post_configure_file}
         )
 
-    add_library(git_version ${CMAKE_CURRENT_BINARY_DIR}/generated/git_version.cpp)
-    target_include_directories(git_version PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated)
-    add_dependencies(git_version AlwaysCheckGit)
-
     CheckGitVersion()
+	set(GIT_FIRMWARE_VERSION_TAG ${GIT_FIRMWARE_VERSION_TAG} PARENT_SCOPE)
 endfunction()
 
 # This is used to run this function from an external cmake process.
