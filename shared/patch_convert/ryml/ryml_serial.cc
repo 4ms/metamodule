@@ -204,12 +204,9 @@ bool read(ryml::ConstNodeRef const &n, MappedKnob *k) {
 }
 
 bool read(ryml::ConstNodeRef const &n, MappedKnobSet *ks) {
-	if (n.num_children() < 1)
-		return false;
+	// Allow empty knob set
 	if (!n.is_map())
-		return false;
-	if (!n.has_child("set"))
-		return false;
+		return true;
 
 	if (n.has_child("name")) {
 		if (n["name"].val().size())
@@ -218,7 +215,8 @@ bool read(ryml::ConstNodeRef const &n, MappedKnobSet *ks) {
 			ks->name = "";
 	}
 
-	n["set"] >> ks->set;
+	if (n.has_child("set"))
+		n["set"] >> ks->set;
 
 	return true;
 }
