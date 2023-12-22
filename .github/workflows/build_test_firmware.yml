@@ -40,6 +40,9 @@ jobs:
         with:
           cmake-version: '3.26.x'
 
+      - name: Git setup
+        run: git config --global --add safe.directory '*'
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
