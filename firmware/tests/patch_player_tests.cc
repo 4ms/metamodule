@@ -262,6 +262,9 @@ PatchData:
 			}
 		}
 	}
+
+	CHECK(pd.midi_maps.set.size() == 0);
+	CHECK(pd.midi_maps.name.size() == 0);
 }
 #include "patches/unittest_inmapping_overlapping.hh"
 TEST_CASE("Input jack is patched and mapped to a panel jack -- for now we ignore the mapping") {
@@ -319,6 +322,9 @@ PatchData:
 			CHECK(player.get_int_cable(0).ins[0] == Jack{1, 0});
 		}
 	}
+
+	CHECK(pd.midi_maps.set.size() == 0);
+	CHECK(pd.midi_maps.name.size() == 0);
 }
 
 //#include "patches/unittest_dup_mod_index.hh"
@@ -375,4 +381,114 @@ PatchData:
 			CHECK(player.get_multiple_module_index(7) == 0);
 		}
 	}
+}
+
+TEST_CASE("Knob and MIDI Maps") {
+	// clang-format off
+	std::string patchyml{R"( 
+PatchData:
+  patch_name: Knob and MIDI Map Test
+  module_slugs:
+    0: PANEL_8
+    1: MULTILFO
+    2: LFOSINE
+  int_cables: []
+  mapped_ins: [] 
+  mapped_outs: []
+  static_knobs: []
+  mapped_knobs:
+    - name: 'Set 1'
+      set:
+        - panel_knob_id: 1
+          module_id: 5
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: 'Set 2'
+      set:
+        - panel_knob_id: 20
+          module_id: 25
+          param_id: 24
+          curve_type: 0
+          min: 20
+          max: 21
+    - name: 'Set 3'
+      set:
+        - panel_knob_id: 30
+          module_id: 35
+          param_id: 34
+          curve_type: 0
+          min: 30
+          max: 31
+        - panel_knob_id: 40
+          module_id: 45
+          param_id: 44
+          curve_type: 0
+          min: 40
+          max: 41
+  midi_maps:
+    name: MIDI
+    set:
+      - panel_knob_id: 522 
+        module_id: 1
+        param_id: 9
+        curve_type: 0
+        min: 0.1
+        max: .9
+      - panel_knob_id: 586
+        module_id: 5
+        param_id: 3
+        curve_type: 0
+        min: 0.75
+        max: 0.25 
+	)"};
+	// clang-format on
+
+	PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	CHECK(pd.knob_sets.size() == 3);
+
+	CHECK(pd.knob_sets[0].name.is_equal("Set 1"));
+	CHECK(pd.knob_sets[0].set.size() == 1);
+	CHECK(pd.knob_sets[0].set[0].panel_knob_id == 1);
+	CHECK(pd.knob_sets[0].set[0].module_id == 5);
+	CHECK(pd.knob_sets[0].set[0].min == 0);
+	CHECK(pd.knob_sets[0].set[0].max == 1);
+
+	CHECK(pd.knob_sets[1].name.is_equal("Set 2"));
+	CHECK(pd.knob_sets[1].set.size() == 1);
+	CHECK(pd.knob_sets[1].set[0].panel_knob_id == 20);
+	CHECK(pd.knob_sets[1].set[0].module_id == 25);
+	CHECK(pd.knob_sets[1].set[0].param_id == 24);
+	CHECK(pd.knob_sets[1].set[0].min == 20);
+	CHECK(pd.knob_sets[1].set[0].max == 21);
+
+	CHECK(pd.knob_sets[2].name.is_equal("Set 3"));
+	CHECK(pd.knob_sets[2].set.size() == 2);
+	CHECK(pd.knob_sets[2].set[0].panel_knob_id == 30);
+	CHECK(pd.knob_sets[2].set[0].module_id == 35);
+	CHECK(pd.knob_sets[2].set[0].param_id == 34);
+	CHECK(pd.knob_sets[2].set[0].min == 30);
+	CHECK(pd.knob_sets[2].set[0].max == 31);
+	CHECK(pd.knob_sets[2].set[1].panel_knob_id == 40);
+	CHECK(pd.knob_sets[2].set[1].module_id == 45);
+	CHECK(pd.knob_sets[2].set[1].param_id == 44);
+	CHECK(pd.knob_sets[2].set[1].min == 40);
+	CHECK(pd.knob_sets[2].set[1].max == 41);
+
+	CHECK(pd.midi_maps.set.size() == 2);
+	CHECK(pd.midi_maps.name.size() == 4);
+	CHECK(pd.midi_maps.set[0].panel_knob_id == 522);
+	CHECK(pd.midi_maps.set[0].module_id == 1);
+	CHECK(pd.midi_maps.set[0].param_id == 9);
+	CHECK(pd.midi_maps.set[0].min == doctest::Approx(0.1));
+	CHECK(pd.midi_maps.set[0].max == doctest::Approx(0.9));
+
+	CHECK(pd.midi_maps.set[1].panel_knob_id == 586);
+	CHECK(pd.midi_maps.set[1].module_id == 5);
+	CHECK(pd.midi_maps.set[1].param_id == 3);
+	CHECK(pd.midi_maps.set[1].min == doctest::Approx(0.75));
+	CHECK(pd.midi_maps.set[1].max == doctest::Approx(0.25));
 }

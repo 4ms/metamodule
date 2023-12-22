@@ -1,0 +1,5 @@
+#include <string_view>
+
+std::string_view GIT_HASH = "@GIT_HASH@";
+std::string_view GIT_COMMIT_TIME = "@GIT_COMMIT_TIME@";
+std::string_view GIT_FIRMWARE_VERSION_TAG = "@GIT_FIRMWARE_VERSION_TAG@";

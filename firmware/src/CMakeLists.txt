@@ -166,7 +166,6 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
-
   ${FWDIR}/src/gui/elements/element_name.cc
 
   #
@@ -218,6 +217,8 @@ add_executable(
   #
   ${COMP_ARTWORK_SOURCES}
   ${FACEPLATE_ARTWORK_SOURCES}
+  #
+  ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
 if (ENABLE_WIFI_BRIDGE)
@@ -281,6 +282,8 @@ target_include_directories(
           #
           ${FWDIR}/lib/jansson
           ${FWDIR}/lib/jansson/jansson/src
+          #
+          ${CMAKE_BINARY_DIR}/checkgit
 )
 
 if (ENABLE_WIFI_BRIDGE)

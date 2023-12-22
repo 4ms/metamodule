@@ -3,7 +3,10 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/firmware_update_tab.hh"
+#include "gui/pages/hardware_test_tab.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/prefs_tab.hh"
+#include "gui/pages/system_status_tab.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "util/poll_event.hh"
@@ -14,7 +17,7 @@ namespace MetaModule
 struct SystemMenuPage : PageBase {
 	SystemMenuPage(PatchInfo info)
 		: PageBase{info, PageId::SystemMenu}
-		, fwupdate_page{patch_storage, patch_playloader}
+		, fwupdate_tab{patch_storage, patch_playloader}
 		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
 		init_bg(ui_SystemMenu);
@@ -29,6 +32,7 @@ struct SystemMenuPage : PageBase {
 	void prepare_focus() final {
 		lv_hide(ui_FWUpdateSpinner);
 		lv_tabview_set_act(ui_SystemMenuTabView, 0, LV_ANIM_OFF);
+		status_tab.prepare_focus(group);
 
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, tabs);
@@ -40,9 +44,18 @@ struct SystemMenuPage : PageBase {
 		bool pressed_back = metaparams.meta_buttons[0].is_just_released();
 
 		if (active_tab == Tabs::Update) {
-			fwupdate_page.update();
-			if (pressed_back && fwupdate_page.consume_back_event())
+			fwupdate_tab.update();
+			if (pressed_back && fwupdate_tab.consume_back_event())
 				pressed_back = false;
+
+		} else if (active_tab == Tabs::Prefs) {
+			prefs_tab.update();
+
+		} else if (active_tab == Tabs::Status) {
+			status_tab.update();
+
+		} else if (active_tab == Tabs::Check) {
+			check_tab.update();
 		}
 
 		if (pressed_back) {
@@ -70,28 +83,36 @@ private:
 			case Tabs::Status: {
 				page->active_tab = Tabs::Status;
 				lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
+				page->status_tab.prepare_focus(page->group);
 				break;
 			}
 
 			case Tabs::Update: {
 				page->active_tab = Tabs::Update;
-				page->fwupdate_page.prepare_focus(page->group);
+				page->fwupdate_tab.prepare_focus(page->group);
 				break;
 			}
 
 			case Tabs::Check: {
 				page->active_tab = Tabs::Check;
 				lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
+				page->check_tab.prepare_focus(page->group);
 				break;
 			}
 
 			case Tabs::Prefs: {
+				page->active_tab = Tabs::Prefs;
+				lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
+				page->prefs_tab.prepare_focus(page->group);
 				break;
 			}
 		}
 	}
 
-	FirmwareUpdateTab fwupdate_page;
+	FirmwareUpdateTab fwupdate_tab;
+	HardwareTestTab check_tab;
+	SystemStatusTab status_tab;
+	PrefsTab prefs_tab;
 
 	enum Tabs { Status = 0, Prefs = 1, Check = 2, Update = 3, NumTabs };
 	Tabs active_tab = Status;
