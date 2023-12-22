@@ -18,12 +18,9 @@ struct PatchPlayLoader {
 
 	void load_initial_patch() {
 
-		// TODO: load the last patch that was loaded before power-down
-		uint32_t initial_patch = 0;
-
 		uint32_t tries = 10000;
 		while (--tries) {
-			if (storage_.request_viewpatch({initial_patch, Volume::NorFlash}))
+			if (storage_.request_viewpatch({"Befaco4msPlayground.yml", Volume::NorFlash}))
 				break;
 		}
 		if (tries == 0) {
@@ -76,8 +73,8 @@ struct PatchPlayLoader {
 	// loaded_patch_:
 	// UI thread READ (KnobEditPage, ModuleViewPage)
 	// UI thread WRITE (via handle_sync_patch_loading() => _load_patch())
-	PatchLocation cur_patch_location() {
-		return {loaded_patch_.index, loaded_patch_.vol};
+	PatchLocHash cur_patch_location() {
+		return {{loaded_patch_.filename, loaded_patch_.vol}};
 	}
 
 	auto cur_patch_name() {
@@ -123,20 +120,21 @@ private:
 	ModuleTypeSlug loaded_patch_name_ = "";
 
 	bool _load_patch() {
-		auto patch = storage_.get_view_patch();
-		auto patchid = storage_.get_view_patch_id();
+		auto &patch = storage_.get_view_patch();
 		auto vol = storage_.get_view_patch_vol();
 
-		pr_dbg("Attempting play patch #%d from vol %d, %.31s\n", patchid, (uint32_t)vol, patch.patch_name.data());
+		pr_trace("Attempting play patch from vol %d: %.31s\n", (uint32_t)vol, patch.patch_name.data());
 
 		if (patch.module_slugs.size() > 0) {
 			if (player_.load_patch(patch)) {
-				loaded_patch_.index = patchid;
+				loaded_patch_.filename = storage_.copy_view_patch_filename();
 				loaded_patch_.vol = vol;
 				loaded_patch_name_ = patch.patch_name;
 				return true;
 			}
-		}
+		} else
+			pr_err("No modules, not playing patch\n");
+
 		return false;
 	}
 };

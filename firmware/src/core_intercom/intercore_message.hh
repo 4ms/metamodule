@@ -1,5 +1,6 @@
 #pragma once
 #include "fs/volumes.hh"
+#include "patch_file/patchlist.hh"
 #include "util/static_string.hh"
 #include <array>
 #include <cstdint>
@@ -36,12 +37,11 @@ struct IntercoreStorageMessage {
 	MessageType message_type = MessageType::None;
 
 	uint32_t bytes_read{};
-	uint32_t patch_id; //DEPRECATE: use filename
 	StaticString<255> filename;
 	Volume vol_id;
 	std::span<char> buffer;
 	uint32_t write_address{};
-	PatchFileList *patch_file_list;
+	PatchList *patch_list;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);

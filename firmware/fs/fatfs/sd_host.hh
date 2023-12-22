@@ -1,4 +1,5 @@
 #pragma once
+#include "debug.hh"
 #include "fat_file_io.hh"
 #include "sdcard_ops.hh"
 
@@ -8,16 +9,22 @@ namespace MetaModule
 class SDCardHost {
 
 public:
+	SDCardHost() {
+		sdcard_ops_.initialize();
+	}
+
 	void process() {
 
 		if (HAL_GetTick() - last_poll_tm_ > 200) {
+			last_poll_tm_ = HAL_GetTick();
+
 			bool card_detected = sd_.is_mounted(); //misnomer: should be sd.is_detected()
 
 			if (is_detected_ && !card_detected) //unmount event
 			{
 				is_detected_ = false;
 				if (sd_.unmount_disk()) {
-					printf("Unmounted SD\n");
+					pr_trace("Unmounted SD\n");
 					is_mounted_ = false;
 				} else
 					pr_err("Failed to unmount sd\n");
@@ -27,7 +34,7 @@ public:
 			{
 				is_detected_ = true;
 				if (sd_.mount_disk()) {
-					printf("Mounted SD\n");
+					pr_trace("Mounted SD\n");
 					is_mounted_ = true;
 				} else
 					pr_err("Failed to mount sd\n");

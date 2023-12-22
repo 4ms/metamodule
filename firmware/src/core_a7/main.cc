@@ -40,7 +40,7 @@ void main() {
 
 	PatchPlayer patch_player;
 	FileStorageProxy file_storage_proxy{
-		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
+		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::patch_list};
 	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
 
 	SyncParams sync_params;
@@ -59,7 +59,6 @@ void main() {
 						   &StaticBuffers::auxsignal_block,
 						   &StaticBuffers::virtdrive,
 						   &StaticBuffers::icc_shared_message,
-						   &StaticBuffers::shared_patch_file_list,
 						   &StaticBuffers::raw_patch_span,
 						   &patch_player,
 						   &patch_playloader,

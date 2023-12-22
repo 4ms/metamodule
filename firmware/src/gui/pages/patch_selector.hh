@@ -41,10 +41,10 @@ struct PatchSelectorPage : PageBase {
 		}
 	}
 
-	void refresh_patchlist(PatchFileList &patchfiles) {
-		num_usb = patchfiles.usb.size();
-		num_sdcard = patchfiles.sdcard.size();
-		num_norflash = patchfiles.norflash.size();
+	void refresh_patchlist(PatchList &patchfiles) {
+		num_usb = patchfiles.num_patches(Volume::USB);
+		num_sdcard = patchfiles.num_patches(Volume::SDCard);
+		num_norflash = patchfiles.num_patches(Volume::NorFlash);
 
 		//TODO: try using pmr::string with monotonic stack buffer
 		std::string patchnames;
@@ -54,8 +54,7 @@ struct PatchSelectorPage : PageBase {
 
 		if (num_usb) {
 			patchnames += "USB Drive\n";
-			// patchnames += LV_SYMBOL_USB;
-			for (auto &p : patchfiles.usb) {
+			for (auto &p : patchfiles.get_patchfile_list(Volume::USB)) {
 				patchnames += leader;
 				patchnames += std::string_view{p.patchname};
 				patchnames += '\n';
@@ -63,7 +62,7 @@ struct PatchSelectorPage : PageBase {
 		}
 		if (num_sdcard) {
 			patchnames += "SD Card\n";
-			for (auto &p : patchfiles.sdcard) {
+			for (auto &p : patchfiles.get_patchfile_list(Volume::SDCard)) {
 				patchnames += leader;
 				patchnames += std::string_view{p.patchname};
 				patchnames += '\n';
@@ -71,7 +70,7 @@ struct PatchSelectorPage : PageBase {
 		}
 		if (num_norflash) {
 			patchnames += "Internal\n";
-			for (auto &p : patchfiles.norflash) {
+			for (auto &p : patchfiles.get_patchfile_list(Volume::NorFlash)) {
 				patchnames += leader;
 				patchnames += std::string_view{p.patchname};
 				patchnames += '\n';
@@ -107,9 +106,9 @@ struct PatchSelectorPage : PageBase {
 		lv_roller_set_selected(roller, highlighted_idx, LV_ANIM_ON);
 
 		pr_info("Patch Selector refreshed:\nUSB: %zu patches\nSD: %zu patches\nNOR: %zu patches\n",
-				patchfiles.usb.size(),
-				patchfiles.sdcard.size(),
-				patchfiles.norflash.size());
+				num_usb,
+				num_sdcard,
+				num_norflash);
 	}
 
 	void refresh_volume_labels() {
@@ -270,10 +269,14 @@ struct PatchSelectorPage : PageBase {
 
 		auto [patch_id, vol] = page->calc_patch_id_vol(page->highlighted_idx);
 		page->selected_patch.vol = vol;
-		page->selected_patch.index = patch_id;
+		page->selected_patch.filename = page->get_roller_item_filename(patch_id, vol);
 		page->state = State::TryingToRequestPatchData;
 
-		pr_dbg("Selected vol %d, patch %d\n", (uint32_t)page->selected_patch.vol, page->selected_patch.index);
+		pr_dbg("Selected vol %d, patch %s\n", (uint32_t)page->selected_patch.vol, page->selected_patch.filename);
+	}
+
+	StaticString<255> get_roller_item_filename(uint32_t patch_index, Volume vol) {
+		return patch_storage.get_patch_list().get_patch_filename(vol, patch_index);
 	}
 
 	std::pair<uint32_t, Volume> calc_patch_id_vol(uint32_t roller_idx) {
@@ -290,9 +293,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 private:
-	PatchLocation selected_patch{0, Volume::NorFlash};
-	// uint32_t selected_patch = 0;
-	// Volume selected_patch_vol = Volume::NorFlash;
+	PatchLocation selected_patch{"", Volume::NorFlash};
 
 	uint32_t highlighted_idx = 0;
 	Volume highlighted_vol = Volume::NorFlash;

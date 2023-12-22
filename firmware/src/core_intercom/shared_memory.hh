@@ -10,7 +10,6 @@ namespace MetaModule
 {
 //fwd declare to reduce dependencies
 class IntercoreStorageMessage;
-class PatchFileList;
 class PatchPlayer;
 class PatchPlayLoader;
 class FileStorageProxy;
@@ -23,7 +22,6 @@ struct SharedMemoryS {
 		DoubleAuxStreamBlock *auxsignal_block;
 		RamDrive *ramdrive;
 		IntercoreStorageMessage *icc_message;
-		PatchFileList *patch_file_list;
 		std::span<char> *raw_patch_span;
 		PatchPlayer *patch_player;
 		PatchPlayLoader *patch_playloader;
