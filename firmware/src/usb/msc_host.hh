@@ -28,10 +28,12 @@ public:
 	}
 
 	void connect() {
-		// Do nothing: subsequent fileio operations will call mount_disk()
+		pr_trace("USB MSC connect(): calling mount_disk()\n");
+		msc.mount_disk();
 	}
 
 	void disconnect() {
+		pr_trace("USB MSC disconnect()\n");
 		msc.unmount_disk();
 	}
 
