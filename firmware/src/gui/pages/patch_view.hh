@@ -58,7 +58,7 @@ struct PatchViewPage : PageBase {
 	void prepare_focus() override {
 		is_ready = false;
 
-		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
+		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
 
 		if (is_patch_playing) {
 			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
@@ -71,7 +71,7 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (active_knob_set == page_list.get_active_knobset() && patch_revision == page_list.get_patch_revision() &&
-			displayed_patch_loc == args.patch_loc)
+			displayed_patch_loc_hash == args.patch_loc_hash)
 		{
 			is_ready = true;
 			watch_lights();
@@ -79,7 +79,8 @@ struct PatchViewPage : PageBase {
 			return;
 		}
 
-		displayed_patch_loc = args.patch_loc.value_or(displayed_patch_loc);
+		if (args.patch_loc_hash)
+			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
 		active_knob_set = page_list.get_active_knobset();
 		patch_revision = page_list.get_patch_revision();
@@ -172,7 +173,8 @@ struct PatchViewPage : PageBase {
 
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
-		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
+
+		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
 
 		if (is_patch_playing != last_is_patch_playing || settings.changed) {
 			settings.changed = false;
@@ -186,7 +188,7 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (auto &knobset = knobset_menu.requested_knobset_view) {
-			load_page(PageId::KnobSetView, {.patch_loc = args.patch_loc, .view_knobset_id = knobset});
+			load_page(PageId::KnobSetView, {.patch_loc_hash = args.patch_loc_hash, .view_knobset_id = knobset});
 			knobset = std::nullopt;
 		}
 
@@ -225,7 +227,7 @@ struct PatchViewPage : PageBase {
 
 private:
 	void watch_lights() {
-		is_patch_playing = displayed_patch_loc == patch_playloader.cur_patch_location();
+
 		if (is_patch_playing) {
 			for (const auto &drawn_element : drawn_elements) {
 				auto &gui_el = drawn_element.gui_element;
@@ -441,7 +443,7 @@ private:
 	bool is_patch_playing = false;
 	bool is_ready = false;
 
-	PatchLocation displayed_patch_loc{0xFFFFFFFF, Volume::MaxVolumes};
+	PatchLocHash displayed_patch_loc_hash;
 	uint32_t patch_revision = 0xFFFFFFFF;
 
 	unsigned active_knob_set = 0;

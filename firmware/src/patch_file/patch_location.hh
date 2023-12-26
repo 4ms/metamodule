@@ -34,7 +34,7 @@ struct PatchLocHash {
 		return h;
 	}
 
-	// bool operator==(PatchLocHash const &that) const = default;
+	bool operator==(PatchLocHash const &that) const = default;
 };
 
 } // namespace MetaModule

@@ -50,7 +50,7 @@ struct ModuleViewPage : PageBase {
 	void prepare_focus() override {
 		patch = patch_storage.get_view_patch();
 
-		is_patch_playing = args.patch_loc.value_or(PatchLocation{}) == patch_playloader.cur_patch_location();
+		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		this_module_id = args.module_id.value_or(this_module_id);
 

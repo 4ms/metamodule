@@ -2,10 +2,9 @@
 #include "../src/core_intercom/intercore_message.hh"
 #include "fs/volumes.hh"
 #include "patch/patch_data.hh"
-#include "patch_file/patch_file.hh"
+#include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_location.hh"
-#include "patch_file/patchlist.hh"
 #include "shared/patch_convert/yaml_to_patch.hh"
 #include "stubs/patch_file/default_patch_io.hh"
 #include "stubs/patch_file/host_file_io.hh"
@@ -25,13 +24,13 @@ public:
 	FileStorageProxy(std::string_view path)
 		: hostfs_{MetaModule::Volume::SDCard, path}
 		, defaultpatchfs_{MetaModule::Volume::NorFlash} {
-		PatchFileIO::add_all_to_patchlist(defaultpatchfs_, patch_list_);
-		PatchFileIO::add_all_to_patchlist(hostfs_, patch_list_);
+		PatchFileIO::add_directory(hostfs_, patch_dir_list_.volume_root(Volume::SDCard));
+		PatchFileIO::add_directory(defaultpatchfs_, patch_dir_list_.volume_root(Volume::NorFlash));
 	}
 
 	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
-		requested_view_patch_id_ = patch_loc.index;
-		requested_view_patch_vol_ = patch_loc.vol;
+		requested_view_patch_loc_.filename = patch_loc.filename;
+		requested_view_patch_loc_.vol = patch_loc.vol;
 		msg_state_ = MsgState::ViewPatchRequested;
 		return true;
 	}
@@ -47,7 +46,7 @@ public:
 
 		view_patch_ = patch;
 
-		view_patch_id_ = requested_view_patch_id_;
+		view_patch_loc_ = requested_view_patch_loc_;
 		return true;
 	}
 
@@ -55,12 +54,12 @@ public:
 		return view_patch_;
 	}
 
-	uint32_t get_view_patch_id() {
-		return view_patch_id_;
+	StaticString<255> get_view_patch_filename() {
+		return view_patch_loc_.filename;
 	}
 
 	Volume get_view_patch_vol() {
-		return view_patch_vol_;
+		return view_patch_loc_.vol;
 	}
 
 	IntercoreStorageMessage get_message() {
@@ -68,26 +67,23 @@ public:
 		if (msg_state_ == MsgState::ViewPatchRequested) {
 			msg_state_ = MsgState::Idle;
 
-			auto bytes_read = load_patch_file(requested_view_patch_vol_, requested_view_patch_id_);
+			auto bytes_read = load_patch_file(requested_view_patch_loc_);
 			if (bytes_read)
-				return {PatchDataLoaded, bytes_read, requested_view_patch_id_, {}, requested_view_patch_vol_};
+				return {PatchDataLoaded, bytes_read, requested_view_patch_loc_.filename, requested_view_patch_loc_.vol};
 			else
-				return {PatchDataLoadFail, 0, requested_view_patch_id_, {}, requested_view_patch_vol_};
+				return {PatchDataLoadFail, 0, requested_view_patch_loc_.filename, requested_view_patch_loc_.vol};
 		}
 
 		if (msg_state_ == MsgState::PatchListRequested) {
 			msg_state_ = MsgState::Idle;
 
-			if (populate_patchlist(remote_patch_list_.norflash, Volume::NorFlash) == PatchListChanged)
+			// TODO: Refresh from all fs, see if anything changed
+			if (filesystem_changed) {
+				filesystem_changed = false;
 				return {PatchListChanged};
-
-			else if (populate_patchlist(remote_patch_list_.sdcard, Volume::SDCard) == PatchListChanged)
-				return {PatchListChanged};
-
-			else if (populate_patchlist(remote_patch_list_.usb, Volume::USB) == PatchListChanged)
-				return {PatchListChanged};
-
-			return {PatchListUnchanged};
+			} else {
+				return {PatchListUnchanged};
+			}
 		}
 
 		if (msg_state_ == MsgState::FirmwareUpdateFileRequested) {
@@ -97,9 +93,8 @@ public:
 			if ((mock_file_found_ctr % 8) < 4)
 				return {FirmwareFileFound,
 						mock_file_found_ctr + mock_firmware_file_size,
-						0,
 						"metamodule-fw.json",
-						Volume::USB};
+						Volume::SDCard};
 			else
 				return {FirmwareFileNotFound};
 		}
@@ -119,34 +114,33 @@ public:
 		return true;
 	}
 
-	PatchFileList &get_patch_list() {
-		return remote_patch_list_;
+	PatchDirList &get_patch_list() {
+		return patch_dir_list_;
 	}
 
-	uint32_t load_patch_file(Volume vol, uint32_t patch_id) {
-		auto filename = patch_list_.get_patch_filename(vol, patch_id);
+	uint32_t load_patch_file(PatchLocation const &loc) {
 
 		raw_patch = raw_patch_buffer_;
 
 		bool ok = false;
 
-		if (vol == Volume::SDCard)
-			ok = PatchFileIO::read_file(raw_patch, hostfs_, filename);
+		if (loc.vol == Volume::SDCard)
+			ok = PatchFileIO::read_file(raw_patch, hostfs_, loc.filename);
 
-		if (vol == Volume::NorFlash)
-			ok = PatchFileIO::read_file(raw_patch, defaultpatchfs_, filename);
+		if (loc.vol == Volume::NorFlash)
+			ok = PatchFileIO::read_file(raw_patch, defaultpatchfs_, loc.filename);
 
 		//TODO: add USB when we have a usb fileio
 		// if (vol == Volume::USB)
 		// ok = PatchFileIO::read_file(raw_patch, usbpatchfs_, filename);
 
 		if (!ok) {
-			std::cout << "Could not load patch " << patch_id << " on vol " << (int)vol << "\n";
+			std::cout << "Could not load patch " << loc.filename << " on vol " << (int)loc.vol << "\n";
 			return 0;
 		}
 
-		view_patch_vol_ = vol;
-		std::cout << "Read patch id " << patch_id << " " << raw_patch.size_bytes() << " bytes\n";
+		view_patch_loc_ = loc;
+		std::cout << "Read patch id " << loc.filename << " " << raw_patch.size_bytes() << " bytes\n";
 		return raw_patch.size_bytes();
 	}
 
@@ -161,8 +155,7 @@ public:
 	}
 
 private:
-	PatchFileList remote_patch_list_;
-	PatchList patch_list_;
+	PatchDirList patch_dir_list_;
 
 	HostFileIO hostfs_;
 	DefaultPatchFileIO defaultpatchfs_;
@@ -171,10 +164,9 @@ private:
 	std::span<char> raw_patch;
 
 	PatchData view_patch_;
-	uint32_t requested_view_patch_id_ = 0;
-	Volume requested_view_patch_vol_;
-	uint32_t view_patch_id_ = 0;
-	Volume view_patch_vol_ = Volume::NorFlash;
+
+	PatchLocation requested_view_patch_loc_;
+	PatchLocation view_patch_loc_;
 
 	enum class MsgState {
 		Idle,
@@ -187,13 +179,15 @@ private:
 	unsigned mock_file_found_ctr = 0;
 	unsigned mock_firmware_file_size = 513;
 
-	IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
-		if (list.size() == 0) {
-			list = patch_list_.get_patchfile_list(vol);
-			if (list.size() > 0)
-				return PatchListChanged;
-		}
-		return PatchListUnchanged;
-	}
+	bool filesystem_changed = true;
+
+	// IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
+	// 	if (list.size() == 0) {
+	// 		list = patch_list_.get_patchfile_list(vol);
+	// 		if (list.size() > 0)
+	// 			return PatchListChanged;
+	// 	}
+	// 	return PatchListUnchanged;
+	// }
 };
 } // namespace MetaModule

@@ -70,18 +70,16 @@ struct PatchPlayLoader {
 		return loading_new_patch_ || stopping_audio_;
 	}
 
-	// loaded_patch_:
 	// UI thread READ (KnobEditPage, ModuleViewPage)
 	// UI thread WRITE (via handle_sync_patch_loading() => _load_patch())
-	PatchLocHash cur_patch_location() {
-		return {{loaded_patch_.filename, loaded_patch_.vol}};
+	PatchLocHash cur_patch_loc_hash() {
+		return loaded_patch_loc_hash;
 	}
 
 	auto cur_patch_name() {
 		return loaded_patch_name_;
 	}
 
-	// audio_is_muted_:
 	// Audio thread WRITE
 	// Audio thread READ
 	// UI thread READ (via handle_sync_patch_loading())
@@ -116,7 +114,8 @@ private:
 	std::atomic<bool> audio_is_muted_ = false;
 	std::atomic<bool> stopping_audio_ = false;
 
-	PatchLocation loaded_patch_;
+	PatchLocHash loaded_patch_loc_hash;
+	// PatchLocation loaded_patch_;
 	ModuleTypeSlug loaded_patch_name_ = "";
 
 	bool _load_patch() {
@@ -127,8 +126,9 @@ private:
 
 		if (patch.module_slugs.size() > 0) {
 			if (player_.load_patch(patch)) {
-				loaded_patch_.filename = storage_.copy_view_patch_filename();
-				loaded_patch_.vol = vol;
+				// loaded_patch_.filename.copy(storage_.get_view_patch_filename());
+				// loaded_patch_.vol = vol;
+				loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
 				loaded_patch_name_ = patch.patch_name;
 				return true;
 			}

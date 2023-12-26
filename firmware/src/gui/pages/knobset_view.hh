@@ -29,7 +29,7 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		is_patch_playing = args.patch_loc ? (*args.patch_loc == patch_playloader.cur_patch_location()) : false;
+		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		for (unsigned i = 0; auto cont : containers) {
 			set_for_knob(cont, i);
@@ -73,7 +73,7 @@ struct KnobSetViewPage : PageBase {
 			if (!map.is_panel_knob())
 				continue;
 
-			lv_obj_t *cont;
+			lv_obj_t *cont{};
 			if (num_maps[map.panel_knob_id] == 0) {
 				cont = get_container(map.panel_knob_id);
 			} else {
@@ -122,7 +122,7 @@ struct KnobSetViewPage : PageBase {
 			}
 		}
 
-		is_patch_playing = args.patch_loc ? (*args.patch_loc == patch_playloader.cur_patch_location()) : false;
+		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playing) {
 			// Iterate all knobs
