@@ -157,7 +157,7 @@ foreach(brand ${brands})
   target_link_libraries(simulator PRIVATE ${brand}Library)
 endforeach()
 
-set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
+set_property(TARGET simulator PROPERTY CXX_STANDARD 23)
 
 # Arch-dependent Link options:
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
