@@ -67,41 +67,34 @@ public:
 		if (message.message_type == RequestRefreshPatchList) {
 			pending_send_message.message_type = PatchListUnchanged;
 
-			auto *patch_list_ = message.patch_list;
+			auto *patch_dir_list_ = message.patch_dir_list;
 
-			if (patch_list_) {
-				// patch_list_->get_patchfile_list(Volume::NorFlash);
+			if (patch_dir_list_) {
 
 				if (sd_changes_.take_change()) {
 					printf("sd update\n");
-					patch_list_->clear_patches(Volume::SDCard);
+					patch_dir_list_->clear_patches(Volume::SDCard);
 
 					if (sdcard_.is_mounted())
-						PatchFileIO::add_all_to_patchlist(sdcard_, *patch_list_);
-
-					patch_list_->get_patchfile_list(Volume::SDCard);
+						PatchFileIO::add_directory(sdcard_, patch_dir_list_->volume_root(Volume::SDCard));
 
 					pending_send_message.message_type = PatchListChanged;
 				}
 
 				if (usb_changes_.take_change()) {
 					printf("usb update\n");
-					patch_list_->clear_patches(Volume::USB);
+					patch_dir_list_->clear_patches(Volume::USB);
 
 					if (usbdrive_.is_mounted())
-						PatchFileIO::add_all_to_patchlist(usbdrive_, *patch_list_);
-
-					patch_list_->get_patchfile_list(Volume::USB);
+						PatchFileIO::add_directory(usbdrive_, patch_dir_list_->volume_root(Volume::USB));
 
 					pending_send_message.message_type = PatchListChanged;
 				}
 
 				if (norflash_changes_.take_change()) {
-					patch_list_->clear_patches(Volume::NorFlash);
+					patch_dir_list_->clear_patches(Volume::NorFlash);
 
-					PatchFileIO::add_all_to_patchlist(norflash_, *patch_list_);
-
-					patch_list_->get_patchfile_list(Volume::NorFlash);
+					PatchFileIO::add_directory(norflash_, patch_dir_list_->volume_root(Volume::NorFlash));
 
 					pending_send_message.message_type = PatchListChanged;
 				}
@@ -115,9 +108,8 @@ public:
 			pending_send_message.filename = message.filename;
 			pending_send_message.vol_id = message.vol_id;
 			pending_send_message.bytes_read = 0;
-			auto *patch_list_ = message.patch_list;
 
-			if (patch_list_ && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
+			if ((uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
 				auto bytes_read = load_patch_file(message.buffer, message.vol_id, message.filename);
 				if (bytes_read) {
 					pending_send_message.message_type = PatchDataLoaded;

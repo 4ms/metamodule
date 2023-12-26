@@ -5,7 +5,6 @@
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_file.hh"
 #include "patch_file/patch_location.hh"
-#include "patchlist.hh"
 #include "pr_dbg.hh"
 
 namespace MetaModule
@@ -16,8 +15,10 @@ class FileStorageProxy {
 public:
 	using enum IntercoreStorageMessage::MessageType;
 
-	FileStorageProxy(std::span<char> raw_patch_data, IntercoreStorageMessage &shared_message, PatchList &patch_list)
-		: patch_list_{patch_list}
+	FileStorageProxy(std::span<char> raw_patch_data,
+					 IntercoreStorageMessage &shared_message,
+					 PatchDirList &patch_dir_list)
+		: patch_dir_list_{patch_dir_list}
 		, comm_{shared_message}
 		, raw_patch_data_{raw_patch_data} {
 	}
@@ -35,7 +36,6 @@ public:
 			.filename = patch_loc.filename,
 			.vol_id = patch_loc.vol,
 			.buffer = raw_patch_data_,
-			.patch_list = &patch_list_, //TODO: don't need this once we send the filename
 		};
 		if (!comm_.send_message(message))
 			return false;
@@ -78,18 +78,18 @@ public:
 	//
 	// TODO: sender passes a reference to a PatchFileList which should be populated
 	[[nodiscard]] bool request_patchlist() {
-		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList, .patch_list = &patch_list_};
+		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList, .patch_dir_list = &patch_dir_list_};
 		if (!comm_.send_message(message))
 			return false;
 		return true;
 	}
 
-	PatchList &get_patch_list() {
+	PatchDirList &get_patch_list() {
 		//FIXME: Ensure this is only called when
 		//we have access to the shared data. Return a ptr,
 		//or return nullptr if we've sent a RequestRefreshPatchList but
 		//haven't gotten a reply yet
-		return patch_list_;
+		return patch_dir_list_;
 	}
 
 	// Scan all mounted volumes for firmware update files
@@ -114,7 +114,7 @@ public:
 	}
 
 private:
-	PatchList &patch_list_;
+	PatchDirList &patch_dir_list_;
 
 	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, IntercoreStorageMessage> comm_;
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "fs/volumes.hh"
-#include "patch_file/patchlist.hh"
+#include "patch_file/patch_dir_list.hh"
 #include "util/static_string.hh"
 #include <array>
 #include <cstdint>
@@ -41,7 +41,7 @@ struct IntercoreStorageMessage {
 	Volume vol_id;
 	std::span<char> buffer;
 	uint32_t write_address{};
-	PatchList *patch_list;
+	PatchDirList *patch_dir_list;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);

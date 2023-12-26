@@ -11,7 +11,6 @@
 #include "param_block.hh"
 #include "params.hh"
 #include "patch_file/patch_file.hh"
-#include "patch_file/patchlist.hh"
 #include <span>
 
 namespace MetaModule
@@ -31,7 +30,7 @@ static inline __attribute__((section(".ddma"))) std::array<char, 65536> raw_patc
 static inline __attribute__((section(".ddma"))) std::span<char> raw_patch_span;
 
 static inline __attribute__((section(".ddma"))) IntercoreStorageMessage icc_shared_message;
-static inline __attribute__((section(".ddma"))) PatchList patch_list;
+static inline __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks;
 static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block;
