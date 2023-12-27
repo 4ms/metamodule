@@ -49,4 +49,16 @@ inline void lv_foreach_child(lv_obj_t *obj, auto action) {
 	}
 }
 
+inline void label_scrolls(lv_obj_t *obj) {
+	if (lv_obj_get_child_cnt(obj) > 0) {
+		lv_label_set_long_mode(lv_obj_get_child(obj, 0), LV_LABEL_LONG_SCROLL);
+	}
+}
+
+inline void label_clips(lv_obj_t *obj) {
+	if (lv_obj_get_child_cnt(obj) > 0) {
+		lv_label_set_long_mode(lv_obj_get_child(obj, 0), LV_LABEL_LONG_CLIP);
+	}
+}
+
 } // namespace MetaModule

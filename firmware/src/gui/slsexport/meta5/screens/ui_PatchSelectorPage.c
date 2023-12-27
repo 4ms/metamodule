@@ -212,7 +212,7 @@ lv_label_set_long_mode(ui_USBlabel,LV_LABEL_LONG_CLIP);
 lv_label_set_text(ui_USBlabel,"");
 lv_obj_set_style_text_letter_space(ui_USBlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_USBlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_USBlabel, &lv_font_montserrat_12, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_USBlabel, &lv_font_montserrat_10, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_USBlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_USBlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_USBlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -283,7 +283,7 @@ lv_obj_set_height( ui_SDlabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SDlabel, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_SDlabel,LV_LABEL_LONG_CLIP);
 lv_label_set_text(ui_SDlabel," ");
-lv_obj_set_style_text_font(ui_SDlabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_SDlabel, &lv_font_montserrat_10, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SDlabel1 = lv_label_create(ui_SDbut);
 lv_obj_set_width( ui_SDlabel1, LV_SIZE_CONTENT);  /// 1
@@ -349,7 +349,7 @@ lv_obj_set_height( ui_Flashlabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Flashlabel, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_Flashlabel,LV_LABEL_LONG_CLIP);
 lv_label_set_text(ui_Flashlabel," ");
-lv_obj_set_style_text_font(ui_Flashlabel, &lv_font_montserrat_12, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_Flashlabel, &lv_font_montserrat_10, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_Flashlabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);

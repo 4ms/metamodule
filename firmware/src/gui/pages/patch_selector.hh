@@ -1,31 +1,24 @@
 #pragma once
 #include "fs/dir_entry_kind.hh"
+#include "gui/helpers/dir_entry_info.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/lvgl_mem_helper.hh"
 #include "gui/helpers/lvgl_string_helper.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "pr_dbg.hh"
-#include "src/core/lv_obj.h"
 
 namespace MetaModule
 {
 
 struct PatchSelectorPage : PageBase {
 
-	struct EntryInfo {
-		DirEntryKind kind;
-		Volume vol;
-		std::string path;
-		std::string name;
-
-		bool operator==(const EntryInfo &that) const = default;
-	};
-
 	PatchSelectorPage(PatchInfo info)
-		: PageBase{info, PageId::PatchSel} {
+		: PageBase{info, PageId::PatchSel}
+		, subdir_panel{roller_item_infos} {
 
 		init_bg(ui_PatchSelectorPage);
 
@@ -34,21 +27,14 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_add_event_cb(ui_PatchListRoller, patchlist_scroll_cb, LV_EVENT_KEY, this);
 		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_FOCUS_KEY);
-
-		for (auto vol_cont : vol_conts) {
-			auto vol_item = lv_obj_get_child(vol_cont, 0);
-			lv_obj_add_event_cb(vol_item, subdir_focus_cb, LV_EVENT_FOCUSED, this);
-			lv_obj_add_event_cb(vol_item, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
-			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
-			lv_obj_set_user_data(vol_item, nullptr);
-		}
 	}
 
 	void prepare_focus() override {
 		state = State::TryingToRequestPatchList;
 		hide_spinner();
-		focus_roller();
+		subdir_panel.blur();
 
+		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
 
 		auto patchname = patch_playloader.cur_patch_name();
@@ -60,69 +46,12 @@ struct PatchSelectorPage : PageBase {
 			lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
 		}
 
-		refresh_subdir_panel();
+		subdir_panel.refresh();
 	}
 
 	void refresh_patchlist(PatchDirList &patchfiles) {
-		populate_subdir_panel(patchfiles);
+		subdir_panel.populate(group, patchfiles);
 		populate_roller(patchfiles);
-	}
-
-	void populate_subdir_panel(PatchDirList &patchfiles) {
-		// populate side bar with volumes and dirs
-		for (auto [vol_cont, root] : zip(vol_conts, patchfiles.vol_root)) {
-
-			// Delete existing dir labels (except first one, which is the volume root)
-			if (auto num_children = lv_obj_get_child_cnt(vol_cont); num_children > 1) {
-				for (unsigned i = 1; i < num_children; i++) {
-					lv_obj_del_async(lv_obj_get_child(vol_cont, i));
-				}
-			}
-
-			// No need to scan if no files or dirs: disable it
-			if (root.files.size() == 0 && root.dirs.size() == 0) {
-				lv_disable(vol_cont);
-				lv_disable_all_children(vol_cont);
-				lv_obj_clear_state(vol_cont, LV_STATE_FOCUSED);
-				continue;
-			}
-
-			// Add root-level dir on volume
-			auto vol_button = lv_obj_get_child(vol_cont, 0);
-			lv_obj_set_user_data(vol_button, &root);
-			lv_group_add_obj(group, vol_button);
-
-			// Add all dirs on volume
-			for (auto &dir : root.dirs)
-				add_subdir_to_panel(dir, vol_cont);
-
-			lv_enable(vol_cont);
-			lv_enable_all_children(vol_cont);
-		}
-	}
-
-	void add_subdir_to_panel(PatchDir &dir, lv_obj_t *vol_label) {
-		if (dir.files.size() == 0)
-			return;
-
-		auto *btn = lv_btn_create(vol_label);
-		auto *name_label = lv_label_create(btn);
-
-		lv_obj_add_style(btn, &Gui::subdir_panel_item_style, LV_STATE_DEFAULT);
-		lv_obj_add_style(btn, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUSED);
-		lv_obj_add_style(btn, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUS_KEY);
-
-		lv_label_set_text_fmt(name_label, "%s", dir.name.c_str());
-		lv_label_set_long_mode(name_label, LV_LABEL_LONG_CLIP);
-		lv_obj_set_width(name_label, LV_PCT(100));
-
-		lv_obj_add_flag(btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_set_user_data(btn, &dir);
-		lv_obj_add_event_cb(btn, subdir_focus_cb, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(btn, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
-		lv_obj_add_event_cb(btn, subdir_click_cb, LV_EVENT_CLICKED, this);
-
-		lv_group_add_obj(group, btn);
 	}
 
 	void populate_roller(PatchDirList &patchfiles) {
@@ -216,7 +145,7 @@ struct PatchSelectorPage : PageBase {
 
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (lv_group_get_focused(group) == ui_PatchListRoller) {
-				focus_subdir_panel();
+				subdir_panel.focus();
 			} else {
 				page_list.request_last_page();
 			}
@@ -257,7 +186,7 @@ struct PatchSelectorPage : PageBase {
 			case State::ReloadingPatchList:
 				//TODO: use our member var patch_list, not patch_storage
 				refresh_patchlist(patch_storage.get_patch_list());
-				refresh_subdir_panel();
+				subdir_panel.refresh();
 				hide_spinner();
 				state = State::Idle;
 				break;
@@ -308,62 +237,6 @@ struct PatchSelectorPage : PageBase {
 		hide_spinner();
 	}
 
-	void focus_subdir_panel() {
-		lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
-		lv_obj_add_state(ui_DrivesPanel, LV_STATE_FOCUSED);
-
-		if (last_subdir_sel) {
-			lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
-			lv_group_focus_obj(last_subdir_sel);
-		} else {
-			lv_group_focus_next(group);
-		}
-	}
-
-	void focus_roller() {
-		lv_obj_clear_state(ui_DrivesPanel, LV_STATE_FOCUSED);
-		lv_obj_clear_state(ui_PatchListRoller, LV_STATE_DISABLED);
-		lv_group_focus_obj(ui_PatchListRoller);
-		lv_group_set_editing(group, true);
-
-		if (last_subdir_sel)
-			lv_obj_add_state(last_subdir_sel, LV_STATE_FOCUSED);
-	}
-
-	void refresh_subdir_panel() {
-		auto idx = lv_roller_get_selected(ui_PatchListRoller);
-		if (idx >= roller_item_infos.size())
-			return;
-
-		auto &entry = roller_item_infos[idx];
-
-		for (auto [vol, vol_name, vol_cont] : zip(vols, vol_names, vol_conts)) {
-			if (vol != entry.vol)
-				continue;
-
-			lv_foreach_child(vol_cont, [this, entry, vol_name](lv_obj_t *obj, unsigned i) {
-				auto label_child = (i == 0) ? 1 : 0;
-				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
-				const char *roller_path = (i == 0) ? vol_name : entry.path.c_str();
-				if (txt == nullptr)
-					return true;
-
-				if (strcmp(txt, roller_path) == 0) {
-					if (last_subdir_sel) {
-						lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
-						label_clips(last_subdir_sel);
-					}
-					last_subdir_sel = obj;
-					lv_obj_add_state(obj, LV_STATE_FOCUSED);
-					label_scrolls(obj);
-					lv_obj_scroll_to_view_recursive(obj, LV_ANIM_ON);
-					return (i == 0) ? true : false;
-				}
-				return true;
-			});
-		}
-	}
-
 	void show_spinner() {
 		// Schedule a time to show spinner if there's not already one scheduled
 		if (!spinner_show_tm)
@@ -398,7 +271,7 @@ struct PatchSelectorPage : PageBase {
 			}
 		}
 
-		page->refresh_subdir_panel();
+		page->subdir_panel.refresh();
 	}
 
 	static void patchlist_click_cb(lv_event_t *event) {
@@ -413,58 +286,6 @@ struct PatchSelectorPage : PageBase {
 		} else {
 			//Do nothing? Close/open directory? Focus subdir panel?
 		}
-	}
-
-	static void subdir_focus_cb(lv_event_t *event) {
-		auto page = static_cast<PatchSelectorPage *>(event->user_data);
-		if (!page || !event->target || !event->target->user_data)
-			return;
-
-		label_scrolls(event->target);
-
-		page->last_subdir_sel = event->target;
-
-		auto *dir = static_cast<PatchDir *>(event->target->user_data);
-
-		auto parent = lv_obj_get_parent(event->target);
-		Volume this_vol{};
-		for (auto [vol, vol_cont] : zip(page->vols, page->vol_conts)) {
-			if (parent == vol_cont)
-				this_vol = vol;
-		}
-
-		uint32_t first_roller_entry = 0;
-		for (auto [i, entry] : enumerate(page->roller_item_infos)) {
-			if (entry.path == dir->name && entry.vol == this_vol) {
-				first_roller_entry = i;
-				break;
-			}
-		}
-		lv_roller_set_selected(ui_PatchListRoller, first_roller_entry + 1, LV_ANIM_ON);
-	}
-
-	static void label_scrolls(lv_obj_t *obj) {
-		if (lv_obj_get_child_cnt(obj) > 0) {
-			lv_label_set_long_mode(lv_obj_get_child(obj, 0), LV_LABEL_LONG_SCROLL);
-		}
-	}
-
-	static void label_clips(lv_obj_t *obj) {
-		if (lv_obj_get_child_cnt(obj) > 0) {
-			lv_label_set_long_mode(lv_obj_get_child(obj, 0), LV_LABEL_LONG_CLIP);
-		}
-	}
-
-	static void subdir_defocus_cb(lv_event_t *event) {
-		if (!event->target)
-			return;
-		label_clips(event->target);
-	}
-
-	static void subdir_click_cb(lv_event_t *event) {
-		auto page = static_cast<PatchSelectorPage *>(event->user_data);
-		if (page)
-			page->focus_roller();
 	}
 
 	std::optional<PatchLocation> get_roller_item_patchloc(uint32_t selected_index) {
@@ -485,12 +306,9 @@ struct PatchSelectorPage : PageBase {
 private:
 	PatchLocation selected_patch{"", Volume::NorFlash};
 
-	std::array<lv_obj_t *, 3> vol_conts = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
-	std::array<Volume, 3> vols = {Volume::USB, Volume::SDCard, Volume::NorFlash};
-	std::array<const char *, 3> vol_names = {"USB", "Card", "Internal"};
 	std::vector<EntryInfo> roller_item_infos;
 
-	lv_obj_t *last_subdir_sel = nullptr;
+	PatchSelectorSubdirPanel subdir_panel;
 
 	static constexpr uint32_t spinner_lag_ms = 200;
 	uint32_t spinner_show_tm = 0;
