@@ -8,6 +8,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "pr_dbg.hh"
+#include "src/core/lv_obj.h"
 
 namespace MetaModule
 {
@@ -37,8 +38,8 @@ struct PatchSelectorPage : PageBase {
 
 	void prepare_focus() override {
 		state = State::TryingToRequestPatchList;
-		lv_obj_add_flag(ui_waitspinner, LV_OBJ_FLAG_HIDDEN);
-		lv_group_set_editing(group, true);
+		hide_spinner();
+		focus_roller();
 
 		auto patchname = patch_playloader.cur_patch_name(); // auto patchplaying_idx = patch_storage
 		if (patchname.length() == 0) {
@@ -82,19 +83,14 @@ struct PatchSelectorPage : PageBase {
 			if (root.files.size() == 0 && root.dirs.size() == 0)
 				continue;
 
-			roller_text += "[" + std::string(vol_name) + "]";
-			if (root.files.size() > 0)
-				roller_text += " (" + std::to_string(root.files.size()) + " files)";
-			if (root.dirs.size() > 0)
-				roller_text += " (" + std::to_string(root.dirs.size()) + " dirs)";
-			roller_text += "\n";
+			roller_text += format_volume_name(vol_name, root);
 
 			roller_item_infos.push_back({DirEntryKind::Dir, vol, "", ""});
 			add_all_files_to_roller(vol, roller_text, " ", root);
 
 			// Subdirs:
 			for (auto &subdir : root.dirs) {
-				roller_text += " " + subdir.name + " (" + std::to_string(subdir.files.size()) + " files)\n";
+				roller_text += format_subdir_name(subdir);
 				roller_item_infos.push_back({DirEntryKind::Dir, vol, subdir.name, ""});
 				add_all_files_to_roller(vol, roller_text, "  ", subdir);
 			}
@@ -122,7 +118,7 @@ struct PatchSelectorPage : PageBase {
 			if (root.files.size() == 0 && root.dirs.size() == 0) {
 				lv_disable(vol_label);
 				lv_disable_all_children(vol_label);
-				lv_obj_clear_state(vol_label, LV_STATE_CHECKED);
+				lv_obj_clear_state(vol_label, LV_STATE_FOCUSED);
 				continue;
 			}
 
@@ -137,14 +133,39 @@ struct PatchSelectorPage : PageBase {
 
 	void add_sub_dir_to_panel(PatchDir &dir, lv_obj_t *vol_label) {
 		auto *name_label = lv_label_create(vol_label);
-		lv_obj_set_size(name_label, LV_PCT(100), 20);
-		lv_obj_set_style_pad_all(name_label, 0, LV_PART_MAIN);
-		lv_obj_set_style_pad_left(name_label, 15, LV_PART_MAIN);
+		lv_obj_add_style(name_label, &Gui::subdir_panel_item_style, LV_STATE_DEFAULT);
+		lv_obj_add_style(name_label, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUSED);
+
 		lv_label_set_text_fmt(name_label, "%s", dir.name.c_str());
 		lv_label_set_long_mode(name_label, LV_LABEL_LONG_CLIP);
+		lv_obj_add_flag(name_label, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+	}
 
-		lv_obj_set_style_bg_color(name_label, Gui::orange_highlight, LV_STATE_CHECKED);
-		lv_obj_set_style_bg_opa(name_label, LV_OPA_100, LV_STATE_CHECKED);
+	std::string format_volume_name(StaticString<31> const &vol_name, PatchDir &root) {
+		std::string roller_text = "[" + std::string(vol_name) + "]";
+
+		add_file_count(roller_text, root);
+		add_dir_count(roller_text, root);
+
+		roller_text += "\n";
+		return roller_text;
+	}
+
+	std::string format_subdir_name(PatchDir const &subdir) {
+		std::string roller_text = " " + subdir.name;
+		add_file_count(roller_text, subdir);
+		roller_text += "\n";
+		return roller_text;
+	}
+
+	void add_file_count(std::string &roller_text, PatchDir const &root) {
+		if (root.files.size() > 0)
+			roller_text += " (" + std::to_string(root.files.size()) + " files)";
+	}
+
+	void add_dir_count(std::string &roller_text, PatchDir const &root) {
+		if (root.dirs.size() > 0)
+			roller_text += " (" + std::to_string(root.dirs.size()) + " dirs)";
 	}
 
 	void add_all_files_to_roller(Volume vol, std::string &roller_text, std::string prefix, PatchDir &dir) {
@@ -154,41 +175,14 @@ struct PatchSelectorPage : PageBase {
 		}
 	}
 
-	void refresh_volume_labels() {
-		auto idx = lv_roller_get_selected(ui_PatchListRoller);
-		if (idx >= roller_item_infos.size())
-			return;
-
-		auto &entry = roller_item_infos[idx];
-
-		for (auto [vol, vol_label] : zip(vols, vol_labels)) {
-			if (vol != entry.vol)
-				continue;
-
-			auto num_children = lv_obj_get_child_cnt(vol_label);
-			for (unsigned i = 0; i < num_children; i++) {
-				auto obj = lv_obj_get_child(vol_label, i);
-				const char *txt = (i == 0) ? "" : lv_label_get_text(obj);
-				if (txt == nullptr)
-					continue;
-				if (strcmp(txt, entry.path.c_str()) == 0) {
-					if (last_checked)
-						lv_obj_clear_state(last_checked, LV_STATE_CHECKED);
-					last_checked = obj;
-					lv_obj_add_state(obj, LV_STATE_CHECKED);
-					break;
-				}
-			}
-		}
-	}
-
 	void update() override {
 
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (lv_group_get_focused(group) == ui_PatchListRoller)
-				lv_group_focus_obj(ui_DrivesPanel);
-			else
+			if (lv_group_get_focused(group) == ui_PatchListRoller) {
+				focus_subdir_panel();
+			} else {
 				page_list.request_last_page();
+			}
 		}
 
 		update_spinner();
@@ -277,6 +271,62 @@ struct PatchSelectorPage : PageBase {
 		hide_spinner();
 	}
 
+	void focus_subdir_panel() {
+		lv_group_remove_all_objs(group);
+		lv_obj_add_state(ui_DrivesPanel, LV_STATE_FOCUSED);
+
+		for (auto &vol_label : vol_labels) {
+
+			auto num_children = lv_obj_get_child_cnt(vol_label);
+
+			for (unsigned i = 0; i < num_children; i++) {
+				auto obj = lv_obj_get_child(vol_label, i);
+				lv_group_add_obj(group, obj);
+				if (lv_obj_has_state(obj, LV_STATE_FOCUSED))
+					lv_group_focus_obj(obj);
+				else
+					lv_obj_clear_state(obj, LV_STATE_FOCUSED);
+			}
+		}
+	}
+
+	void focus_roller() {
+		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, ui_PatchListRoller);
+		lv_group_focus_obj(ui_PatchListRoller);
+		lv_group_set_editing(group, true);
+		lv_obj_clear_state(ui_DrivesPanel, LV_STATE_FOCUSED);
+	}
+
+	void refresh_volume_labels() {
+		auto idx = lv_roller_get_selected(ui_PatchListRoller);
+		if (idx >= roller_item_infos.size())
+			return;
+
+		auto &entry = roller_item_infos[idx];
+
+		for (auto [vol, vol_label] : zip(vols, vol_labels)) {
+			if (vol != entry.vol)
+				continue;
+
+			auto num_children = lv_obj_get_child_cnt(vol_label);
+			for (unsigned i = 0; i < num_children; i++) {
+				auto obj = lv_obj_get_child(vol_label, i);
+				const char *txt = (i == 0) ? "" : lv_label_get_text(obj);
+				if (txt == nullptr)
+					continue;
+				if (strcmp(txt, entry.path.c_str()) == 0) {
+					if (last_checked)
+						lv_obj_clear_state(last_checked, LV_STATE_FOCUSED);
+					last_checked = obj;
+					lv_obj_add_state(obj, LV_STATE_FOCUSED);
+					lv_obj_scroll_to_view_recursive(obj, LV_ANIM_ON);
+					break;
+				}
+			}
+		}
+	}
+
 	void show_spinner() {
 		// Schedule a time to show spinner if there's not already one scheduled
 		if (!spinner_show_tm)
@@ -295,7 +345,21 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
+		static uint32_t prev_idx = 0;
+
 		auto page = static_cast<PatchSelectorPage *>(event->user_data);
+		auto idx = lv_roller_get_selected(ui_PatchListRoller);
+		pr_dbg("%d\n", idx);
+		if (idx < page->roller_item_infos.size()) {
+			auto &entry = page->roller_item_infos[idx];
+			if (entry.kind == DirEntryKind::Dir) {
+				auto max = lv_roller_get_option_cnt(ui_PatchListRoller) - 1;
+				auto new_idx = (idx == 0) ? 1 : (idx == max) ? max - 1 : (idx > prev_idx) ? idx + 1 : idx - 1;
+				lv_roller_set_selected(ui_PatchListRoller, new_idx, LV_ANIM_ON);
+				prev_idx = new_idx;
+			}
+		}
+
 		page->refresh_volume_labels();
 	}
 
@@ -309,11 +373,14 @@ struct PatchSelectorPage : PageBase {
 		if (selected_patch) {
 			page->selected_patch = *selected_patch;
 			page->state = State::TryingToRequestPatchData;
-			pr_dbg("Clicked vol %d, patch %s\n", (uint32_t)selected_patch->vol, selected_patch->filename.c_str());
+			pr_trace("Clicked vol %d, patch %s\n", (uint32_t)selected_patch->vol, selected_patch->filename.c_str());
 		} else {
-			pr_dbg("Clicked index %d, no action\n", idx);
 			//Do nothing? Close/open directory?
 		}
+	}
+
+	static void subdir_select_cb(lv_event_t *event) {
+		auto page = static_cast<PatchSelectorPage *>(event->user_data);
 	}
 
 	std::optional<PatchLocation> get_roller_item_patchloc(uint32_t selected_index) {
