@@ -41,20 +41,45 @@ struct PatchSelectorPage : PageBase {
 		}
 	}
 
-	void refresh_patchlist(PatchList &patchfiles) {
-		num_usb = patchfiles.num_patches(Volume::USB);
-		num_sdcard = patchfiles.num_patches(Volume::SDCard);
-		num_norflash = patchfiles.num_patches(Volume::NorFlash);
+	void refresh_patchlist(PatchDirList &patchfiles) {
+		std::string patchnames;
+
+		for (auto i = 0u; auto &root : patchfiles.vol_root) {
+			if (root.files.size() == 0 && root.dirs.size() == 0)
+				continue;
+
+			patchnames += "[" + std::string(patchfiles.vol_name[i++]) + "]\n";
+			for (auto &p : root.files) {
+				patchnames += " " + std::string{p.patchname} + "\n";
+			}
+			for (auto &p : root.dirs) {
+				patchnames += " > [" + p.name + "]\n";
+				for (auto &p : root.files) {
+					patchnames += " >  " + std::string{p.patchname} + "\n";
+				}
+			}
+		}
+		// remove trailing \n
+		if (patchnames.length() > 0)
+			patchnames.pop_back();
+
+		lv_roller_set_options(roller, patchnames.c_str(), LV_ROLLER_MODE_NORMAL);
+	}
+
+	void old(PatchDirList &patchfiles) {
+		num_usb = patchfiles.volume_root(Volume::USB).num_entries();
+		num_sdcard = patchfiles.volume_root(Volume::SDCard).num_entries();
+		num_norflash = patchfiles.volume_root(Volume::NorFlash).num_entries();
 
 		//TODO: try using pmr::string with monotonic stack buffer
+		auto line_size = (sizeof(PatchFile::patchname) + sizeof(leader) + 1 /*newline*/);
+		auto num_lines = (num_usb + num_norflash + num_sdcard + 3 /*headers*/);
 		std::string patchnames;
-		patchnames.reserve((sizeof(PatchFile::patchname) + sizeof(leader) + 1 /*newline*/) *
-							   (num_usb + num_norflash + num_sdcard + 3 /*headers*/) +
-						   32 /*just in case*/);
+		patchnames.reserve(line_size * num_lines);
 
 		if (num_usb) {
 			patchnames += "USB Drive\n";
-			for (auto &p : patchfiles.get_patchfile_list(Volume::USB)) {
+			for (auto &p : patchfiles.volume_root(Volume::USB).files) {
 				patchnames += leader;
 				patchnames += std::string_view{p.patchname};
 				patchnames += '\n';
@@ -62,7 +87,7 @@ struct PatchSelectorPage : PageBase {
 		}
 		if (num_sdcard) {
 			patchnames += "SD Card\n";
-			for (auto &p : patchfiles.get_patchfile_list(Volume::SDCard)) {
+			for (auto &p : patchfiles.volume_root(Volume::SDCard).files) {
 				patchnames += leader;
 				patchnames += std::string_view{p.patchname};
 				patchnames += '\n';
@@ -70,7 +95,7 @@ struct PatchSelectorPage : PageBase {
 		}
 		if (num_norflash) {
 			patchnames += "Internal\n";
-			for (auto &p : patchfiles.get_patchfile_list(Volume::NorFlash)) {
+			for (auto &p : patchfiles.volume_root(Volume::NorFlash).files) {
 				patchnames += leader;
 				patchnames += std::string_view{p.patchname};
 				patchnames += '\n';
@@ -208,6 +233,7 @@ struct PatchSelectorPage : PageBase {
 						pr_dbg("Parsed patch: %.31s\n", view_patch.patch_name.data());
 
 						args.patch_loc = selected_patch;
+						args.patch_loc_hash = PatchLocHash{selected_patch};
 						page_list.request_new_page(PageId::PatchView, args);
 
 						state = State::Closing;
@@ -276,7 +302,8 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	StaticString<255> get_roller_item_filename(uint32_t patch_index, Volume vol) {
-		return patch_storage.get_patch_list().get_patch_filename(vol, patch_index);
+		return "?";
+		// return patch_storage.get_patch_list().get_patch_filename(vol, patch_index);
 	}
 
 	std::pair<uint32_t, Volume> calc_patch_id_vol(uint32_t roller_idx) {
