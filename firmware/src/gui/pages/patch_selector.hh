@@ -87,6 +87,9 @@ struct PatchSelectorPage : PageBase {
 		if (roller_text.length() > 0)
 			roller_text.pop_back();
 
+		auto roller_label = lv_obj_get_child(ui_PatchListRoller, 0);
+		lv_label_set_recolor(roller_label, true);
+
 		lv_roller_set_options(ui_PatchListRoller, roller_text.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_selected(ui_PatchListRoller, 1, LV_ANIM_OFF);
 
@@ -111,7 +114,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	std::string format_volume_name(StaticString<31> const &vol_name, PatchDir &root) {
-		std::string roller_text = "[" + std::string(vol_name) + "]";
+		std::string roller_text = Gui::orange_highlight_html + std::string(vol_name) + "#";
 
 		add_file_count(roller_text, root);
 		add_dir_count(roller_text, root);
@@ -124,7 +127,7 @@ struct PatchSelectorPage : PageBase {
 		std::string roller_text;
 
 		if (subdir.name.size() > 0) {
-			roller_text += subdir.name;
+			roller_text += Gui::yellow_highlight_html + subdir.name + "#";
 			add_file_count(roller_text, subdir);
 		}
 		roller_text += "\n";
