@@ -1,4 +1,7 @@
 #pragma once
+//TODO: selecting/focussing Internal on subdir panel makes roller jump to SD
+//TODO: SD/Internal does not highlight when navigating roller
+//TODO: clikcing a subdir item goes to roller OK but focusses on Dir entry, not first file
 #include "fs/dir_entry_kind.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/lvgl_mem_helper.hh"
@@ -30,10 +33,21 @@ struct PatchSelectorPage : PageBase {
 		init_bg(ui_PatchSelectorPage);
 
 		lv_group_add_obj(group, ui_PatchListRoller);
-		lv_obj_add_event_cb(ui_PatchListRoller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_PatchListRoller, patchlist_click_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_PatchListRoller, patchlist_scroll_cb, LV_EVENT_KEY, this);
 		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_FOCUS_KEY);
+
+		for (auto vol_cont : vol_conts) {
+			auto vol_item = lv_obj_get_child(vol_cont, 0);
+			lv_obj_add_event_cb(vol_item, subdir_focus_cb, LV_EVENT_FOCUSED, this);
+			lv_obj_add_event_cb(vol_item, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
+			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
+			lv_obj_set_user_data(vol_item, nullptr);
+			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_style, LV_STATE_DEFAULT);
+			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUSED);
+			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUS_KEY);
+		}
 	}
 
 	void prepare_focus() override {
@@ -41,7 +55,9 @@ struct PatchSelectorPage : PageBase {
 		hide_spinner();
 		focus_roller();
 
-		auto patchname = patch_playloader.cur_patch_name(); // auto patchplaying_idx = patch_storage
+		lv_group_set_wrap(group, false);
+
+		auto patchname = patch_playloader.cur_patch_name();
 		if (patchname.length() == 0) {
 			lv_label_set_text(ui_NowPlayingName, "none");
 			lv_label_set_text(ui_LoadMeter, "");
@@ -49,33 +65,74 @@ struct PatchSelectorPage : PageBase {
 			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", patchname.c_str());
 			lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
 		}
+
+		refresh_subdir_panel();
 	}
 
-	// PatchDir *displayed_dir;
-	//PatchDir *first_valid_dir(PatchDirList &patchfiles) {
-	//	// try volume roots
-	//	for (auto &root : patchfiles.vol_root) {
-	//		if (root.files.size() > 0) {
-	//			return &root;
-	//		}
-	//	}
-	//	//try any dir on any volume
-	//	for (auto &root : patchfiles.vol_root) {
-	//		for (auto &dir : root.dirs) {
-	//			if (dir.files.size() > 0) {
-	//				return &root;
-	//			}
-	//		}
-	//	}
-	//	pr_err("No files found on any volume, in any directory\n");
-	//	return nullptr;
-	//}
-
 	void refresh_patchlist(PatchDirList &patchfiles) {
-		// populate side bar with volumes and dirs
-		populate_sub_dir_panel(patchfiles);
+		populate_subdir_panel(patchfiles);
+		populate_roller(patchfiles);
+	}
 
-		// populate roller
+	void populate_subdir_panel(PatchDirList &patchfiles) {
+		// populate side bar with volumes and dirs
+		for (auto [vol_cont, root] : zip(vol_conts, patchfiles.vol_root)) {
+
+			// Delete existing dir labels (except first one, which is the volume root)
+			if (auto num_children = lv_obj_get_child_cnt(vol_cont); num_children > 1) {
+				for (unsigned i = 1; i < num_children; i++) {
+					lv_obj_del_async(lv_obj_get_child(vol_cont, i));
+				}
+			}
+
+			// No need to scan if no files or dirs: disable it
+			if (root.files.size() == 0 && root.dirs.size() == 0) {
+				lv_disable(vol_cont);
+				lv_disable_all_children(vol_cont);
+				lv_obj_clear_state(vol_cont, LV_STATE_FOCUSED);
+				continue;
+			}
+
+			auto vol_button = lv_obj_get_child(vol_cont, 0);
+			lv_obj_set_user_data(vol_button, &root);
+
+			pr_dbg("Add to group: %p [vol]\n", vol_button);
+			lv_group_add_obj(group, vol_button);
+			for (auto &dir : root.dirs) {
+				add_subdir_to_panel(dir, vol_cont);
+			}
+
+			lv_enable(vol_cont);
+			lv_enable_all_children(vol_cont);
+		}
+	}
+
+	void add_subdir_to_panel(PatchDir &dir, lv_obj_t *vol_label) {
+		if (dir.files.size() == 0)
+			return;
+
+		auto *btn = lv_btn_create(vol_label);
+		auto *name_label = lv_label_create(btn);
+
+		lv_obj_add_style(btn, &Gui::subdir_panel_item_style, LV_STATE_DEFAULT);
+		lv_obj_add_style(btn, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUSED);
+		lv_obj_add_style(btn, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUS_KEY);
+
+		lv_label_set_text_fmt(name_label, "%s", dir.name.c_str());
+		lv_label_set_long_mode(name_label, LV_LABEL_LONG_CLIP);
+		lv_obj_set_width(name_label, LV_PCT(100));
+
+		lv_obj_add_flag(btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_set_user_data(btn, &dir);
+		lv_obj_add_event_cb(btn, subdir_focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(btn, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
+		lv_obj_add_event_cb(btn, subdir_click_cb, LV_EVENT_CLICKED, this);
+
+		pr_dbg("Add to group: %p %s\n", btn, dir.name.c_str());
+		lv_group_add_obj(group, btn);
+	}
+
+	void populate_roller(PatchDirList &patchfiles) {
 		std::string roller_text;
 		roller_item_infos.clear();
 
@@ -90,9 +147,11 @@ struct PatchSelectorPage : PageBase {
 
 			// Subdirs:
 			for (auto &subdir : root.dirs) {
-				roller_text += format_subdir_name(subdir);
-				roller_item_infos.push_back({DirEntryKind::Dir, vol, subdir.name, ""});
-				add_all_files_to_roller(vol, roller_text, "  ", subdir);
+				if (subdir.files.size()) {
+					roller_text += format_subdir_name(subdir);
+					roller_item_infos.push_back({DirEntryKind::Dir, vol, subdir.name, ""});
+					add_all_files_to_roller(vol, roller_text, "  ", subdir);
+				}
 			}
 		}
 		// remove trailing \n
@@ -102,43 +161,11 @@ struct PatchSelectorPage : PageBase {
 		lv_roller_set_options(ui_PatchListRoller, roller_text.c_str(), LV_ROLLER_MODE_NORMAL);
 	}
 
-	void populate_sub_dir_panel(PatchDirList &patchfiles) {
-		// populate side bar with volumes and dirs
-		for (auto [vol_label, root] : zip(vol_labels, patchfiles.vol_root)) {
-
-			// Delete existing dir labels (except first one, which is the volume root)
-			if (auto num_children = lv_obj_get_child_cnt(vol_label); num_children > 1) {
-				for (unsigned i = 1; i < num_children; i++) {
-					pr_dbg("Deleting child %d of %p\n", i, vol_label);
-					lv_obj_del_async(lv_obj_get_child(vol_label, i));
-				}
-			}
-
-			// No need to scan if no files or dirs: disable it
-			if (root.files.size() == 0 && root.dirs.size() == 0) {
-				lv_disable(vol_label);
-				lv_disable_all_children(vol_label);
-				lv_obj_clear_state(vol_label, LV_STATE_FOCUSED);
-				continue;
-			}
-
-			for (auto &dir : root.dirs) {
-				add_sub_dir_to_panel(dir, vol_label);
-			}
-
-			lv_enable(vol_label);
-			lv_enable_all_children(vol_label);
+	void add_all_files_to_roller(Volume vol, std::string &roller_text, std::string prefix, PatchDir &dir) {
+		for (auto &p : dir.files) {
+			roller_text += prefix + std::string{p.patchname} + "\n";
+			roller_item_infos.emplace_back(EntryInfo{DirEntryKind::File, vol, dir.name, p.filename});
 		}
-	}
-
-	void add_sub_dir_to_panel(PatchDir &dir, lv_obj_t *vol_label) {
-		auto *name_label = lv_label_create(vol_label);
-		lv_obj_add_style(name_label, &Gui::subdir_panel_item_style, LV_STATE_DEFAULT);
-		lv_obj_add_style(name_label, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUSED);
-
-		lv_label_set_text_fmt(name_label, "%s", dir.name.c_str());
-		lv_label_set_long_mode(name_label, LV_LABEL_LONG_CLIP);
-		lv_obj_add_flag(name_label, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 	}
 
 	std::string format_volume_name(StaticString<31> const &vol_name, PatchDir &root) {
@@ -166,13 +193,6 @@ struct PatchSelectorPage : PageBase {
 	void add_dir_count(std::string &roller_text, PatchDir const &root) {
 		if (root.dirs.size() > 0)
 			roller_text += " (" + std::to_string(root.dirs.size()) + " dirs)";
-	}
-
-	void add_all_files_to_roller(Volume vol, std::string &roller_text, std::string prefix, PatchDir &dir) {
-		for (auto &p : dir.files) {
-			roller_text += prefix + std::string{p.patchname} + "\n";
-			roller_item_infos.emplace_back(EntryInfo{DirEntryKind::File, vol, dir.name, p.filename});
-		}
 	}
 
 	void update() override {
@@ -220,7 +240,7 @@ struct PatchSelectorPage : PageBase {
 			case State::ReloadingPatchList:
 				//TODO: use our member var patch_list, not patch_storage
 				refresh_patchlist(patch_storage.get_patch_list());
-				refresh_volume_labels();
+				refresh_subdir_panel();
 				hide_spinner();
 				state = State::Idle;
 				break;
@@ -272,58 +292,57 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void focus_subdir_panel() {
-		lv_group_remove_all_objs(group);
+		lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
 		lv_obj_add_state(ui_DrivesPanel, LV_STATE_FOCUSED);
 
-		for (auto &vol_label : vol_labels) {
-
-			auto num_children = lv_obj_get_child_cnt(vol_label);
-
-			for (unsigned i = 0; i < num_children; i++) {
-				auto obj = lv_obj_get_child(vol_label, i);
-				lv_group_add_obj(group, obj);
-				if (lv_obj_has_state(obj, LV_STATE_FOCUSED))
-					lv_group_focus_obj(obj);
-				else
-					lv_obj_clear_state(obj, LV_STATE_FOCUSED);
-			}
+		pr_dbg("Focus subdir: sel = %p\n", last_subdir_sel);
+		if (last_subdir_sel) {
+			lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
+			lv_group_focus_obj(last_subdir_sel);
+		} else {
+			lv_group_focus_next(group);
 		}
 	}
 
 	void focus_roller() {
-		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, ui_PatchListRoller);
+		lv_obj_clear_state(ui_DrivesPanel, LV_STATE_FOCUSED);
+		lv_obj_clear_state(ui_PatchListRoller, LV_STATE_DISABLED);
 		lv_group_focus_obj(ui_PatchListRoller);
 		lv_group_set_editing(group, true);
-		lv_obj_clear_state(ui_DrivesPanel, LV_STATE_FOCUSED);
 	}
 
-	void refresh_volume_labels() {
+	void refresh_subdir_panel() {
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
 		if (idx >= roller_item_infos.size())
 			return;
 
 		auto &entry = roller_item_infos[idx];
 
-		for (auto [vol, vol_label] : zip(vols, vol_labels)) {
+		for (auto [vol, vol_name, vol_cont] : zip(vols, vol_names, vol_conts)) {
 			if (vol != entry.vol)
 				continue;
 
-			auto num_children = lv_obj_get_child_cnt(vol_label);
-			for (unsigned i = 0; i < num_children; i++) {
-				auto obj = lv_obj_get_child(vol_label, i);
-				const char *txt = (i == 0) ? "" : lv_label_get_text(obj);
+			lv_foreach_child(vol_cont, [this, entry, vol_name](lv_obj_t *obj, unsigned i) {
+				auto label_child = (i == 0) ? 1 : 0;
+				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
+				const char *roller_path = (i == 0) ? vol_name : entry.path.c_str();
 				if (txt == nullptr)
-					continue;
-				if (strcmp(txt, entry.path.c_str()) == 0) {
-					if (last_checked)
-						lv_obj_clear_state(last_checked, LV_STATE_FOCUSED);
-					last_checked = obj;
+					return true;
+
+				pr_dbg("Compare '%s' to %s\n", roller_path, txt);
+				if (strcmp(txt, roller_path) == 0) {
+					if (last_subdir_sel) {
+						lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
+						label_clips(last_subdir_sel);
+					}
+					last_subdir_sel = obj;
 					lv_obj_add_state(obj, LV_STATE_FOCUSED);
+					label_scrolls(obj);
 					lv_obj_scroll_to_view_recursive(obj, LV_ANIM_ON);
-					break;
+					return (i == 0) ? true : false;
 				}
-			}
+				return true;
+			});
 		}
 	}
 
@@ -349,7 +368,8 @@ struct PatchSelectorPage : PageBase {
 
 		auto page = static_cast<PatchSelectorPage *>(event->user_data);
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
-		pr_dbg("%d\n", idx);
+
+		// Skip over dir entries:
 		if (idx < page->roller_item_infos.size()) {
 			auto &entry = page->roller_item_infos[idx];
 			if (entry.kind == DirEntryKind::Dir) {
@@ -360,14 +380,13 @@ struct PatchSelectorPage : PageBase {
 			}
 		}
 
-		page->refresh_volume_labels();
+		page->refresh_subdir_panel();
 	}
 
-	static void patchlist_select_cb(lv_event_t *event) {
+	static void patchlist_click_cb(lv_event_t *event) {
 		auto page = static_cast<PatchSelectorPage *>(event->user_data);
 
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
-		pr_dbg("Clicked roller idx %d\n", idx);
 
 		auto selected_patch = page->get_roller_item_patchloc(idx);
 		if (selected_patch) {
@@ -375,12 +394,53 @@ struct PatchSelectorPage : PageBase {
 			page->state = State::TryingToRequestPatchData;
 			pr_trace("Clicked vol %d, patch %s\n", (uint32_t)selected_patch->vol, selected_patch->filename.c_str());
 		} else {
-			//Do nothing? Close/open directory?
+			//Do nothing? Close/open directory? Focus subdir panel?
 		}
 	}
 
-	static void subdir_select_cb(lv_event_t *event) {
+	static void subdir_focus_cb(lv_event_t *event) {
 		auto page = static_cast<PatchSelectorPage *>(event->user_data);
+		if (!page || !event->target || !event->target->user_data)
+			return;
+
+		label_scrolls(event->target);
+
+		page->last_subdir_sel = event->target;
+
+		auto *dir = static_cast<PatchDir *>(event->target->user_data);
+
+		uint32_t first_roller_entry = 0;
+		for (auto [i, entry] : enumerate(page->roller_item_infos)) {
+			if (entry.path == dir->name) {
+				first_roller_entry = i;
+				break;
+			}
+		}
+		lv_roller_set_selected(ui_PatchListRoller, first_roller_entry + 1, LV_ANIM_ON);
+	}
+
+	static void label_scrolls(lv_obj_t *obj) {
+		if (lv_obj_get_child_cnt(obj) > 0) {
+			lv_label_set_long_mode(lv_obj_get_child(obj, 0), LV_LABEL_LONG_SCROLL);
+		}
+	}
+
+	static void label_clips(lv_obj_t *obj) {
+		if (lv_obj_get_child_cnt(obj) > 0) {
+			lv_label_set_long_mode(lv_obj_get_child(obj, 0), LV_LABEL_LONG_CLIP);
+		}
+	}
+
+	static void subdir_defocus_cb(lv_event_t *event) {
+		if (!event->target)
+			return;
+		label_clips(event->target);
+	}
+
+	static void subdir_click_cb(lv_event_t *event) {
+		auto page = static_cast<PatchSelectorPage *>(event->user_data);
+		if (page)
+			page->focus_roller();
 	}
 
 	std::optional<PatchLocation> get_roller_item_patchloc(uint32_t selected_index) {
@@ -401,10 +461,12 @@ struct PatchSelectorPage : PageBase {
 private:
 	PatchLocation selected_patch{"", Volume::NorFlash};
 
-	std::array<lv_obj_t *, 3> vol_labels = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
+	std::array<lv_obj_t *, 3> vol_conts = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
 	std::array<Volume, 3> vols = {Volume::USB, Volume::SDCard, Volume::NorFlash};
+	std::array<const char *, 3> vol_names = {"USB", "Card", "Internal"};
 	std::vector<EntryInfo> roller_item_infos;
-	lv_obj_t *last_checked = nullptr;
+
+	lv_obj_t *last_subdir_sel = nullptr;
 
 	static constexpr uint32_t spinner_lag_ms = 200;
 	uint32_t spinner_show_tm = 0;

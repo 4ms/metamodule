@@ -194,6 +194,7 @@ struct Gui {
 		lv_style_set_pad_top(&mapped_jack_circle_label_style, -1);
 		lv_style_set_pad_bottom(&mapped_jack_circle_label_style, 0);
 
+		// Subdir panel
 		lv_style_init(&subdir_panel_item_style);
 		lv_style_set_width(&subdir_panel_item_style, LV_PCT(100));
 		lv_style_set_height(&subdir_panel_item_style, 20);
@@ -201,10 +202,16 @@ struct Gui {
 		lv_style_set_pad_bottom(&subdir_panel_item_style, 0);
 		lv_style_set_pad_right(&subdir_panel_item_style, 0);
 		lv_style_set_pad_left(&subdir_panel_item_style, 15);
+		lv_style_set_bg_opa(&subdir_panel_item_style, LV_OPA_0);
+		lv_style_set_outline_width(&subdir_panel_item_style, 0);
+		lv_style_set_border_width(&subdir_panel_item_style, 0);
+		lv_style_set_radius(&subdir_panel_item_style, 0);
 
 		lv_style_init(&subdir_panel_item_sel_style);
 		lv_style_set_bg_color(&subdir_panel_item_sel_style, Gui::orange_highlight);
 		lv_style_set_bg_opa(&subdir_panel_item_sel_style, LV_OPA_100);
+		lv_style_set_outline_width(&subdir_panel_item_sel_style, 0);
+		lv_style_set_border_width(&subdir_panel_item_sel_style, 0);
 	}
 
 	static lv_obj_t *create_map_circle(lv_obj_t *parent) {

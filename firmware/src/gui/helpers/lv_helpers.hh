@@ -39,4 +39,14 @@ inline void lv_disable_all_children(lv_obj_t *obj) {
 		lv_disable(lv_obj_get_child(obj, i));
 }
 
+inline void lv_foreach_child(lv_obj_t *obj, auto action) {
+	auto num_children = lv_obj_get_child_cnt(obj);
+	for (unsigned i = 0; i < num_children; i++) {
+		auto child = lv_obj_get_child(obj, i);
+		bool should_continue = action(child, i);
+		if (!should_continue)
+			break;
+	}
+}
+
 } // namespace MetaModule

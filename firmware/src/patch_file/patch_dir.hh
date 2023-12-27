@@ -16,7 +16,7 @@ struct PatchDir {
 		: name("") {
 	}
 
-	PatchDir(std::string name)
+	PatchDir(std::string &&name)
 		: name{std::move(name)} {
 	}
 
