@@ -72,31 +72,7 @@ struct PatchSelectorPage : PageBase {
 
 	void refresh_patchlist(PatchDirList &patchfiles) {
 		// populate side bar with volumes and dirs
-		for (auto [vol_label, root] : zip(vol_labels, patchfiles.vol_root)) {
-
-			// Delete existing dir labels (except first one, which is the volume root)
-			if (auto num_children = lv_obj_get_child_cnt(vol_label); num_children > 1) {
-				for (unsigned i = 1; i < num_children; i++) {
-					pr_dbg("Deleting child %d of %p\n", i, vol_label);
-					lv_obj_del_async(lv_obj_get_child(vol_label, i));
-				}
-			}
-
-			// No need to scan if no files or dirs: disable it
-			if (root.files.size() == 0 && root.dirs.size() == 0) {
-				lv_disable(vol_label);
-				lv_disable_all_children(vol_label);
-				lv_obj_clear_state(vol_label, LV_STATE_CHECKED);
-				continue;
-			}
-
-			for (auto &dir : root.dirs) {
-				add_sub_dir(dir, vol_label);
-			}
-
-			lv_enable(vol_label);
-			lv_enable_all_children(vol_label);
-		}
+		populate_sub_dir_panel(patchfiles);
 
 		// populate roller
 		std::string roller_text;
@@ -130,7 +106,36 @@ struct PatchSelectorPage : PageBase {
 		lv_roller_set_options(ui_PatchListRoller, roller_text.c_str(), LV_ROLLER_MODE_NORMAL);
 	}
 
-	void add_sub_dir(PatchDir &dir, lv_obj_t *vol_label) {
+	void populate_sub_dir_panel(PatchDirList &patchfiles) {
+		// populate side bar with volumes and dirs
+		for (auto [vol_label, root] : zip(vol_labels, patchfiles.vol_root)) {
+
+			// Delete existing dir labels (except first one, which is the volume root)
+			if (auto num_children = lv_obj_get_child_cnt(vol_label); num_children > 1) {
+				for (unsigned i = 1; i < num_children; i++) {
+					pr_dbg("Deleting child %d of %p\n", i, vol_label);
+					lv_obj_del_async(lv_obj_get_child(vol_label, i));
+				}
+			}
+
+			// No need to scan if no files or dirs: disable it
+			if (root.files.size() == 0 && root.dirs.size() == 0) {
+				lv_disable(vol_label);
+				lv_disable_all_children(vol_label);
+				lv_obj_clear_state(vol_label, LV_STATE_CHECKED);
+				continue;
+			}
+
+			for (auto &dir : root.dirs) {
+				add_sub_dir_to_panel(dir, vol_label);
+			}
+
+			lv_enable(vol_label);
+			lv_enable_all_children(vol_label);
+		}
+	}
+
+	void add_sub_dir_to_panel(PatchDir &dir, lv_obj_t *vol_label) {
 		auto *name_label = lv_label_create(vol_label);
 		lv_obj_set_size(name_label, LV_PCT(100), 20);
 		lv_obj_set_style_pad_all(name_label, 0, LV_PART_MAIN);
@@ -180,22 +185,36 @@ struct PatchSelectorPage : PageBase {
 	void update() override {
 
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			page_list.request_last_page();
+			if (lv_group_get_focused(group) == ui_PatchListRoller)
+				lv_group_focus_obj(ui_DrivesPanel);
+			else
+				page_list.request_last_page();
 		}
 
-		// Check if M4 sent us a message:
+		update_spinner();
 
 		switch (state) {
+			case State::Idle: {
+				//periodically check if patchlist needs updating:
+				uint32_t now = lv_tick_get();
+				if (now - last_refresh_check_tm > 1000) { //poll media once per second
+					last_refresh_check_tm = now;
+					state = State::TryingToRequestPatchList;
+
+					lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
+				}
+			} break;
+
 			case State::TryingToRequestPatchList:
-				//TODO: pass in a member var PatchList patch_list
-				if (patch_storage.request_patchlist())
+				if (patch_storage.request_patchlist()) {
 					state = State::RequestedPatchList;
+					show_spinner();
+				}
 				break;
 
 			case State::RequestedPatchList: {
 				auto message = patch_storage.get_message().message_type;
 				if (message == FileStorageProxy::PatchListChanged) {
-					show_spinner();
 					state = State::ReloadingPatchList;
 				} else if (message == FileStorageProxy::PatchListUnchanged) {
 					hide_spinner();
@@ -211,17 +230,6 @@ struct PatchSelectorPage : PageBase {
 				hide_spinner();
 				state = State::Idle;
 				break;
-
-			case State::Idle: {
-				//periodically check if patchlist needs updating:
-				uint32_t now = lv_tick_get();
-				if (now - last_refresh_check_tm > 1000) { //poll media once per second
-					last_refresh_check_tm = now;
-					state = State::TryingToRequestPatchList;
-
-					lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
-				}
-			} break;
 
 			case State::TryingToRequestPatchData:
 				if (patch_storage.request_viewpatch(selected_patch)) {
@@ -270,11 +278,20 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void show_spinner() {
-		// lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+		// Schedule a time to show spinner if there's not already one scheduled
+		if (!spinner_show_tm)
+			spinner_show_tm = get_time() + spinner_lag_ms;
+	}
+
+	void update_spinner() {
+		if (spinner_show_tm && get_time() >= spinner_show_tm) {
+			lv_show(ui_waitspinner);
+		}
 	}
 
 	void hide_spinner() {
-		// lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+		spinner_show_tm = 0;
+		lv_hide(ui_waitspinner);
 	}
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
@@ -321,6 +338,9 @@ private:
 	std::array<Volume, 3> vols = {Volume::USB, Volume::SDCard, Volume::NorFlash};
 	std::vector<EntryInfo> roller_item_infos;
 	lv_obj_t *last_checked = nullptr;
+
+	static constexpr uint32_t spinner_lag_ms = 200;
+	uint32_t spinner_show_tm = 0;
 
 	enum class State {
 		Idle,

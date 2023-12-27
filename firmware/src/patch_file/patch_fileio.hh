@@ -138,7 +138,7 @@ private:
 		std::string_view name_tag{"patch_name"};
 		auto startpos = header.find(name_tag);
 		if (startpos == header.npos) {
-			pr_dbg("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
+			pr_trace("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
 			return "";
 		}
 
