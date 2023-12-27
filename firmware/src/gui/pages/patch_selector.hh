@@ -1,7 +1,4 @@
 #pragma once
-//TODO: selecting/focussing Internal on subdir panel makes roller jump to SD
-//TODO: SD/Internal does not highlight when navigating roller
-//TODO: clikcing a subdir item goes to roller OK but focusses on Dir entry, not first file
 #include "fs/dir_entry_kind.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/lvgl_mem_helper.hh"
@@ -16,15 +13,15 @@
 namespace MetaModule
 {
 
-//TODO: keep our place in the list when changing media (if possible)
-//Keep track of hovered_patch_id/vol
-//And restore that after a refresh:
 struct PatchSelectorPage : PageBase {
+
 	struct EntryInfo {
 		DirEntryKind kind;
 		Volume vol;
 		std::string path;
 		std::string name;
+
+		bool operator==(const EntryInfo &that) const = default;
 	};
 
 	PatchSelectorPage(PatchInfo info)
@@ -44,9 +41,6 @@ struct PatchSelectorPage : PageBase {
 			lv_obj_add_event_cb(vol_item, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
 			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
 			lv_obj_set_user_data(vol_item, nullptr);
-			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_style, LV_STATE_DEFAULT);
-			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUSED);
-			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUS_KEY);
 		}
 	}
 
@@ -93,14 +87,14 @@ struct PatchSelectorPage : PageBase {
 				continue;
 			}
 
+			// Add root-level dir on volume
 			auto vol_button = lv_obj_get_child(vol_cont, 0);
 			lv_obj_set_user_data(vol_button, &root);
-
-			pr_dbg("Add to group: %p [vol]\n", vol_button);
 			lv_group_add_obj(group, vol_button);
-			for (auto &dir : root.dirs) {
+
+			// Add all dirs on volume
+			for (auto &dir : root.dirs)
 				add_subdir_to_panel(dir, vol_cont);
-			}
 
 			lv_enable(vol_cont);
 			lv_enable_all_children(vol_cont);
@@ -128,14 +122,20 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_add_event_cb(btn, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
 		lv_obj_add_event_cb(btn, subdir_click_cb, LV_EVENT_CLICKED, this);
 
-		pr_dbg("Add to group: %p %s\n", btn, dir.name.c_str());
 		lv_group_add_obj(group, btn);
 	}
 
 	void populate_roller(PatchDirList &patchfiles) {
-		std::string roller_text;
+		// Save current selection
+		std::optional<EntryInfo> last_entry_info{};
+		auto idx = lv_roller_get_selected(ui_PatchListRoller);
+		if (idx < roller_item_infos.size()) {
+			last_entry_info = roller_item_infos[idx];
+		}
+
 		roller_item_infos.clear();
 
+		std::string roller_text;
 		for (auto [vol, vol_name, root] : zip(patchfiles.vols, patchfiles.vol_name, patchfiles.vol_root)) {
 			if (root.files.size() == 0 && root.dirs.size() == 0)
 				continue;
@@ -159,6 +159,19 @@ struct PatchSelectorPage : PageBase {
 			roller_text.pop_back();
 
 		lv_roller_set_options(ui_PatchListRoller, roller_text.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_selected(ui_PatchListRoller, 1, LV_ANIM_OFF);
+
+		// Try to find the previous select in the new set of data
+		if (last_entry_info) {
+			std::optional<unsigned> match_idx{};
+			for (auto [i, entry] : enumerate(roller_item_infos)) {
+				if (entry == last_entry_info)
+					match_idx = i;
+			}
+
+			if (match_idx)
+				lv_roller_set_selected(ui_PatchListRoller, *match_idx, LV_ANIM_OFF);
+		}
 	}
 
 	void add_all_files_to_roller(Volume vol, std::string &roller_text, std::string prefix, PatchDir &dir) {
@@ -179,8 +192,12 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	std::string format_subdir_name(PatchDir const &subdir) {
-		std::string roller_text = " " + subdir.name;
-		add_file_count(roller_text, subdir);
+		std::string roller_text;
+
+		if (subdir.name.size() > 0) {
+			roller_text += subdir.name;
+			add_file_count(roller_text, subdir);
+		}
 		roller_text += "\n";
 		return roller_text;
 	}
@@ -259,7 +276,7 @@ struct PatchSelectorPage : PageBase {
 					// Try to parse the patch and open the PatchView page
 					if (patch_storage.parse_view_patch(message.bytes_read)) {
 						auto view_patch = patch_storage.get_view_patch();
-						pr_dbg("Parsed patch: %.31s\n", view_patch.patch_name.data());
+						pr_trace("Parsed patch: %.31s\n", view_patch.patch_name.data());
 
 						args.patch_loc = selected_patch;
 						args.patch_loc_hash = PatchLocHash{selected_patch};
@@ -295,7 +312,6 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
 		lv_obj_add_state(ui_DrivesPanel, LV_STATE_FOCUSED);
 
-		pr_dbg("Focus subdir: sel = %p\n", last_subdir_sel);
 		if (last_subdir_sel) {
 			lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
 			lv_group_focus_obj(last_subdir_sel);
@@ -309,6 +325,9 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_clear_state(ui_PatchListRoller, LV_STATE_DISABLED);
 		lv_group_focus_obj(ui_PatchListRoller);
 		lv_group_set_editing(group, true);
+
+		if (last_subdir_sel)
+			lv_obj_add_state(last_subdir_sel, LV_STATE_FOCUSED);
 	}
 
 	void refresh_subdir_panel() {
@@ -329,7 +348,6 @@ struct PatchSelectorPage : PageBase {
 				if (txt == nullptr)
 					return true;
 
-				pr_dbg("Compare '%s' to %s\n", roller_path, txt);
 				if (strcmp(txt, roller_path) == 0) {
 					if (last_subdir_sel) {
 						lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
@@ -392,7 +410,6 @@ struct PatchSelectorPage : PageBase {
 		if (selected_patch) {
 			page->selected_patch = *selected_patch;
 			page->state = State::TryingToRequestPatchData;
-			pr_trace("Clicked vol %d, patch %s\n", (uint32_t)selected_patch->vol, selected_patch->filename.c_str());
 		} else {
 			//Do nothing? Close/open directory? Focus subdir panel?
 		}
@@ -409,9 +426,16 @@ struct PatchSelectorPage : PageBase {
 
 		auto *dir = static_cast<PatchDir *>(event->target->user_data);
 
+		auto parent = lv_obj_get_parent(event->target);
+		Volume this_vol{};
+		for (auto [vol, vol_cont] : zip(page->vols, page->vol_conts)) {
+			if (parent == vol_cont)
+				this_vol = vol;
+		}
+
 		uint32_t first_roller_entry = 0;
 		for (auto [i, entry] : enumerate(page->roller_item_infos)) {
-			if (entry.path == dir->name) {
+			if (entry.path == dir->name && entry.vol == this_vol) {
 				first_roller_entry = i;
 				break;
 			}

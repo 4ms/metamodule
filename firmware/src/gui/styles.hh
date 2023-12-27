@@ -201,7 +201,7 @@ struct Gui {
 		lv_style_set_pad_top(&subdir_panel_item_style, 2);
 		lv_style_set_pad_bottom(&subdir_panel_item_style, 0);
 		lv_style_set_pad_right(&subdir_panel_item_style, 0);
-		lv_style_set_pad_left(&subdir_panel_item_style, 15);
+		lv_style_set_pad_left(&subdir_panel_item_style, 8);
 		lv_style_set_bg_opa(&subdir_panel_item_style, LV_OPA_0);
 		lv_style_set_outline_width(&subdir_panel_item_style, 0);
 		lv_style_set_border_width(&subdir_panel_item_style, 0);
