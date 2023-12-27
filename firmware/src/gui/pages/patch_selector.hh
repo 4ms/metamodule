@@ -1,4 +1,6 @@
 #pragma once
+#include "fs/dir_entry_kind.hh"
+#include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/lvgl_mem_helper.hh"
 #include "gui/helpers/lvgl_string_helper.hh"
 #include "gui/pages/base.hh"
@@ -14,21 +16,28 @@ namespace MetaModule
 //Keep track of hovered_patch_id/vol
 //And restore that after a refresh:
 struct PatchSelectorPage : PageBase {
+	struct EntryInfo {
+		DirEntryKind kind;
+		Volume vol;
+		std::string path;
+		std::string name;
+	};
+
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info, PageId::PatchSel} {
 
 		init_bg(ui_PatchSelectorPage);
 
-		lv_group_add_obj(group, roller);
-		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(roller, patchlist_scroll_cb, LV_EVENT_KEY, this);
-		lv_obj_remove_style(roller, nullptr, LV_STATE_EDITED);
-		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
+		lv_group_add_obj(group, ui_PatchListRoller);
+		lv_obj_add_event_cb(ui_PatchListRoller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_PatchListRoller, patchlist_scroll_cb, LV_EVENT_KEY, this);
+		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_EDITED);
+		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_FOCUS_KEY);
 	}
 
 	void prepare_focus() override {
 		state = State::TryingToRequestPatchList;
-		lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_flag(ui_waitspinner, LV_OBJ_FLAG_HIDDEN);
 		lv_group_set_editing(group, true);
 
 		auto patchname = patch_playloader.cur_patch_name(); // auto patchplaying_idx = patch_storage
@@ -41,133 +50,131 @@ struct PatchSelectorPage : PageBase {
 		}
 	}
 
-	void refresh_patchlist(PatchDirList &patchfiles) {
-		std::string patchnames;
+	// PatchDir *displayed_dir;
+	//PatchDir *first_valid_dir(PatchDirList &patchfiles) {
+	//	// try volume roots
+	//	for (auto &root : patchfiles.vol_root) {
+	//		if (root.files.size() > 0) {
+	//			return &root;
+	//		}
+	//	}
+	//	//try any dir on any volume
+	//	for (auto &root : patchfiles.vol_root) {
+	//		for (auto &dir : root.dirs) {
+	//			if (dir.files.size() > 0) {
+	//				return &root;
+	//			}
+	//		}
+	//	}
+	//	pr_err("No files found on any volume, in any directory\n");
+	//	return nullptr;
+	//}
 
-		for (auto i = 0u; auto &root : patchfiles.vol_root) {
+	void refresh_patchlist(PatchDirList &patchfiles) {
+		// populate side bar with volumes and dirs
+		for (auto [vol_label, root] : zip(vol_labels, patchfiles.vol_root)) {
+
+			// Delete existing dir labels (except first one, which is the volume root)
+			if (auto num_children = lv_obj_get_child_cnt(vol_label); num_children > 1) {
+				for (unsigned i = 1; i < num_children; i++) {
+					pr_dbg("Deleting child %d of %p\n", i, vol_label);
+					lv_obj_del_async(lv_obj_get_child(vol_label, i));
+				}
+			}
+
+			// No need to scan if no files or dirs: disable it
+			if (root.files.size() == 0 && root.dirs.size() == 0) {
+				lv_disable(vol_label);
+				lv_disable_all_children(vol_label);
+				lv_obj_clear_state(vol_label, LV_STATE_CHECKED);
+				continue;
+			}
+
+			for (auto &dir : root.dirs) {
+				add_sub_dir(dir, vol_label);
+			}
+
+			lv_enable(vol_label);
+			lv_enable_all_children(vol_label);
+		}
+
+		// populate roller
+		std::string roller_text;
+		roller_item_infos.clear();
+
+		for (auto [vol, vol_name, root] : zip(patchfiles.vols, patchfiles.vol_name, patchfiles.vol_root)) {
 			if (root.files.size() == 0 && root.dirs.size() == 0)
 				continue;
 
-			patchnames += "[" + std::string(patchfiles.vol_name[i++]) + "]\n";
-			for (auto &p : root.files) {
-				patchnames += " " + std::string{p.patchname} + "\n";
-			}
-			for (auto &p : root.dirs) {
-				patchnames += " > [" + p.name + "]\n";
-				for (auto &p : root.files) {
-					patchnames += " >  " + std::string{p.patchname} + "\n";
-				}
+			roller_text += "[" + std::string(vol_name) + "]";
+			if (root.files.size() > 0)
+				roller_text += " (" + std::to_string(root.files.size()) + " files)";
+			if (root.dirs.size() > 0)
+				roller_text += " (" + std::to_string(root.dirs.size()) + " dirs)";
+			roller_text += "\n";
+
+			roller_item_infos.push_back({DirEntryKind::Dir, vol, "", ""});
+			add_all_files_to_roller(vol, roller_text, " ", root);
+
+			// Subdirs:
+			for (auto &subdir : root.dirs) {
+				roller_text += " " + subdir.name + " (" + std::to_string(subdir.files.size()) + " files)\n";
+				roller_item_infos.push_back({DirEntryKind::Dir, vol, subdir.name, ""});
+				add_all_files_to_roller(vol, roller_text, "  ", subdir);
 			}
 		}
 		// remove trailing \n
-		if (patchnames.length() > 0)
-			patchnames.pop_back();
+		if (roller_text.length() > 0)
+			roller_text.pop_back();
 
-		lv_roller_set_options(roller, patchnames.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_options(ui_PatchListRoller, roller_text.c_str(), LV_ROLLER_MODE_NORMAL);
 	}
 
-	void old(PatchDirList &patchfiles) {
-		num_usb = patchfiles.volume_root(Volume::USB).num_entries();
-		num_sdcard = patchfiles.volume_root(Volume::SDCard).num_entries();
-		num_norflash = patchfiles.volume_root(Volume::NorFlash).num_entries();
+	void add_sub_dir(PatchDir &dir, lv_obj_t *vol_label) {
+		auto *name_label = lv_label_create(vol_label);
+		lv_obj_set_size(name_label, LV_PCT(100), 20);
+		lv_obj_set_style_pad_all(name_label, 0, LV_PART_MAIN);
+		lv_obj_set_style_pad_left(name_label, 15, LV_PART_MAIN);
+		lv_label_set_text_fmt(name_label, "%s", dir.name.c_str());
+		lv_label_set_long_mode(name_label, LV_LABEL_LONG_CLIP);
 
-		//TODO: try using pmr::string with monotonic stack buffer
-		auto line_size = (sizeof(PatchFile::patchname) + sizeof(leader) + 1 /*newline*/);
-		auto num_lines = (num_usb + num_norflash + num_sdcard + 3 /*headers*/);
-		std::string patchnames;
-		patchnames.reserve(line_size * num_lines);
+		lv_obj_set_style_bg_color(name_label, Gui::orange_highlight, LV_STATE_CHECKED);
+		lv_obj_set_style_bg_opa(name_label, LV_OPA_100, LV_STATE_CHECKED);
+	}
 
-		if (num_usb) {
-			patchnames += "USB Drive\n";
-			for (auto &p : patchfiles.volume_root(Volume::USB).files) {
-				patchnames += leader;
-				patchnames += std::string_view{p.patchname};
-				patchnames += '\n';
-			}
+	void add_all_files_to_roller(Volume vol, std::string &roller_text, std::string prefix, PatchDir &dir) {
+		for (auto &p : dir.files) {
+			roller_text += prefix + std::string{p.patchname} + "\n";
+			roller_item_infos.emplace_back(EntryInfo{DirEntryKind::File, vol, dir.name, p.filename});
 		}
-		if (num_sdcard) {
-			patchnames += "SD Card\n";
-			for (auto &p : patchfiles.volume_root(Volume::SDCard).files) {
-				patchnames += leader;
-				patchnames += std::string_view{p.patchname};
-				patchnames += '\n';
-			}
-		}
-		if (num_norflash) {
-			patchnames += "Internal\n";
-			for (auto &p : patchfiles.volume_root(Volume::NorFlash).files) {
-				patchnames += leader;
-				patchnames += std::string_view{p.patchname};
-				patchnames += '\n';
-			}
-		}
-
-		// remove trailing \n
-		if (patchnames.length() > 0)
-			patchnames.pop_back();
-
-		lv_roller_set_options(roller, patchnames.c_str(), LV_ROLLER_MODE_NORMAL);
-
-		//refresh header positions
-		usb_hdr = 0;
-		sd_hdr = 0;
-		if (num_sdcard) {
-			if (num_usb)
-				sd_hdr += 1 + num_usb;
-		}
-
-		nor_hdr = 0;
-		if (num_norflash) {
-			if (num_usb)
-				nor_hdr += 1 + num_usb;
-			if (num_sdcard)
-				nor_hdr += 1 + num_sdcard;
-		}
-
-		//TODO: check if the patch we were on exists (same name, and volume is mounted), and select it instead
-		// For now, we just select the first patch of the first volume
-		highlighted_idx = 1;
-		highlighted_vol = num_usb ? Volume::USB : num_sdcard ? Volume::SDCard : Volume::NorFlash;
-		lv_roller_set_selected(roller, highlighted_idx, LV_ANIM_ON);
-
-		pr_info("Patch Selector refreshed:\nUSB: %zu patches\nSD: %zu patches\nNOR: %zu patches\n",
-				num_usb,
-				num_sdcard,
-				num_norflash);
 	}
 
 	void refresh_volume_labels() {
-		//Disable unmounted media:
-		if (num_usb)
-			lv_obj_clear_state(usb_but, LV_STATE_DISABLED);
-		else
-			lv_obj_add_state(usb_but, LV_STATE_DISABLED);
+		auto idx = lv_roller_get_selected(ui_PatchListRoller);
+		if (idx >= roller_item_infos.size())
+			return;
 
-		if (num_sdcard)
-			lv_obj_clear_state(sd_but, LV_STATE_DISABLED);
-		else
-			lv_obj_add_state(sd_but, LV_STATE_DISABLED);
+		auto &entry = roller_item_infos[idx];
 
-		if (num_norflash)
-			lv_obj_clear_state(nor_but, LV_STATE_DISABLED);
-		else
-			lv_obj_add_state(nor_but, LV_STATE_DISABLED);
+		for (auto [vol, vol_label] : zip(vols, vol_labels)) {
+			if (vol != entry.vol)
+				continue;
 
-		// Highlight (CHECKED) the selected volume
-		if (highlighted_vol == Volume::USB)
-			lv_obj_add_state(usb_but, LV_STATE_CHECKED);
-		else
-			lv_obj_clear_state(usb_but, LV_STATE_CHECKED);
-
-		if (highlighted_vol == Volume::SDCard)
-			lv_obj_add_state(sd_but, LV_STATE_CHECKED);
-		else
-			lv_obj_clear_state(sd_but, LV_STATE_CHECKED);
-
-		if (highlighted_vol == Volume::NorFlash)
-			lv_obj_add_state(nor_but, LV_STATE_CHECKED);
-		else
-			lv_obj_clear_state(nor_but, LV_STATE_CHECKED);
+			auto num_children = lv_obj_get_child_cnt(vol_label);
+			for (unsigned i = 0; i < num_children; i++) {
+				auto obj = lv_obj_get_child(vol_label, i);
+				const char *txt = (i == 0) ? "" : lv_label_get_text(obj);
+				if (txt == nullptr)
+					continue;
+				if (strcmp(txt, entry.path.c_str()) == 0) {
+					if (last_checked)
+						lv_obj_clear_state(last_checked, LV_STATE_CHECKED);
+					last_checked = obj;
+					lv_obj_add_state(obj, LV_STATE_CHECKED);
+					break;
+				}
+			}
+		}
 	}
 
 	void update() override {
@@ -238,13 +245,14 @@ struct PatchSelectorPage : PageBase {
 
 						state = State::Closing;
 						hide_spinner();
+
 					} else {
-						pr_warn("Error parsing patch id %d, bytes_read = %d\n", selected_patch, message.bytes_read);
+						pr_warn("Error parsing %s\n", selected_patch.filename.c_str());
 						state = State::Idle;
 						hide_spinner();
 					}
 				} else if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
-					pr_warn("Error loading patch id %d\n", selected_patch);
+					pr_warn("Error loading patch %s\n", selected_patch.filename.c_str());
 					state = State::Idle;
 					lv_group_set_editing(group, true);
 					hide_spinner();
@@ -271,74 +279,48 @@ struct PatchSelectorPage : PageBase {
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
 		auto page = static_cast<PatchSelectorPage *>(event->user_data);
-		auto idx = lv_roller_get_selected(page->roller);
-
-		if (idx == page->usb_hdr || idx == page->sd_hdr || idx == page->nor_hdr) {
-			if (idx == 0)
-				lv_roller_set_selected(page->roller, 1, LV_ANIM_OFF);
-			else if (idx > page->highlighted_idx)
-				lv_roller_set_selected(page->roller, idx + 1, LV_ANIM_OFF);
-			else if (idx < page->highlighted_idx)
-				lv_roller_set_selected(page->roller, idx - 1, LV_ANIM_OFF);
-			idx = lv_roller_get_selected(page->roller);
-		}
-
-		auto [_, vol] = page->calc_patch_id_vol(idx);
-		page->highlighted_vol = vol;
-		page->highlighted_idx = idx;
 		page->refresh_volume_labels();
 	}
 
 	static void patchlist_select_cb(lv_event_t *event) {
 		auto page = static_cast<PatchSelectorPage *>(event->user_data);
-		patchlist_scroll_cb(event);
 
-		auto [patch_id, vol] = page->calc_patch_id_vol(page->highlighted_idx);
-		page->selected_patch.vol = vol;
-		page->selected_patch.filename = page->get_roller_item_filename(patch_id, vol);
-		page->state = State::TryingToRequestPatchData;
+		auto idx = lv_roller_get_selected(ui_PatchListRoller);
+		pr_dbg("Clicked roller idx %d\n", idx);
 
-		pr_dbg("Selected vol %d, patch %s\n", (uint32_t)page->selected_patch.vol, page->selected_patch.filename);
+		auto selected_patch = page->get_roller_item_patchloc(idx);
+		if (selected_patch) {
+			page->selected_patch = *selected_patch;
+			page->state = State::TryingToRequestPatchData;
+			pr_dbg("Clicked vol %d, patch %s\n", (uint32_t)selected_patch->vol, selected_patch->filename.c_str());
+		} else {
+			pr_dbg("Clicked index %d, no action\n", idx);
+			//Do nothing? Close/open directory?
+		}
 	}
 
-	StaticString<255> get_roller_item_filename(uint32_t patch_index, Volume vol) {
-		return "?";
-		// return patch_storage.get_patch_list().get_patch_filename(vol, patch_index);
-	}
+	std::optional<PatchLocation> get_roller_item_patchloc(uint32_t selected_index) {
+		std::optional<PatchLocation> p{};
 
-	std::pair<uint32_t, Volume> calc_patch_id_vol(uint32_t roller_idx) {
-		auto vol = (num_norflash && roller_idx > nor_hdr) ? Volume::NorFlash :
-				   (num_sdcard && roller_idx > sd_hdr)	  ? Volume::SDCard :
-															Volume::USB;
-		if (vol == Volume::USB)
-			return {roller_idx - 1 - usb_hdr, vol};
-		if (vol == Volume::SDCard)
-			return {roller_idx - 1 - sd_hdr, vol};
-		if (vol == Volume::NorFlash)
-			return {roller_idx - 1 - nor_hdr, vol};
-		return {0, Volume::NorFlash};
+		if (selected_index < roller_item_infos.size()) {
+			auto &entry = roller_item_infos[selected_index];
+			if (entry.kind == DirEntryKind::File) {
+				p = PatchLocation{};
+				p->vol = entry.vol;
+				p->filename.copy(std::string(entry.path + "/" + entry.name));
+			}
+		} else
+			pr_err("Bad roller index: %d, max is %zu\n", selected_index, roller_item_infos.size());
+		return p;
 	}
 
 private:
 	PatchLocation selected_patch{"", Volume::NorFlash};
 
-	uint32_t highlighted_idx = 0;
-	Volume highlighted_vol = Volume::NorFlash;
-
-	lv_obj_t *roller = ui_PatchListRoller;
-	lv_obj_t *nor_but = ui_Flashbut;
-	lv_obj_t *usb_but = ui_USBbut;
-	lv_obj_t *sd_but = ui_SDbut;
-	lv_obj_t *spinner = ui_waitspinner;
-
-	const std::string_view leader = "   ";
-	uint32_t num_usb{};
-	uint32_t num_sdcard{};
-	uint32_t num_norflash{};
-
-	unsigned usb_hdr = 0;
-	unsigned sd_hdr = 0;
-	unsigned nor_hdr = 0;
+	std::array<lv_obj_t *, 3> vol_labels = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
+	std::array<Volume, 3> vols = {Volume::USB, Volume::SDCard, Volume::NorFlash};
+	std::vector<EntryInfo> roller_item_infos;
+	lv_obj_t *last_checked = nullptr;
 
 	enum class State {
 		Idle,

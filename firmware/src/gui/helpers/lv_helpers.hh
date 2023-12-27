@@ -19,4 +19,24 @@ inline void lv_show(lv_obj_t *obj, bool visible) {
 		lv_hide(obj);
 }
 
+inline void lv_disable(lv_obj_t *obj) {
+	lv_obj_add_state(obj, LV_STATE_DISABLED);
+}
+
+inline void lv_enable(lv_obj_t *obj) {
+	lv_obj_clear_state(obj, LV_STATE_DISABLED);
+}
+
+inline void lv_enable_all_children(lv_obj_t *obj) {
+	auto num_children = lv_obj_get_child_cnt(obj);
+	for (unsigned i = 0; i < num_children; i++)
+		lv_enable(lv_obj_get_child(obj, i));
+}
+
+inline void lv_disable_all_children(lv_obj_t *obj) {
+	auto num_children = lv_obj_get_child_cnt(obj);
+	for (unsigned i = 0; i < num_children; i++)
+		lv_disable(lv_obj_get_child(obj, i));
+}
+
 } // namespace MetaModule

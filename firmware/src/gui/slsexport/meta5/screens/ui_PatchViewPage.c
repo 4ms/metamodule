@@ -9,7 +9,6 @@ void ui_PatchViewPage_screen_init(void)
 {
 ui_PatchViewPage = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_PatchViewPage, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
-lv_obj_set_scrollbar_mode(ui_PatchViewPage, LV_SCROLLBAR_MODE_ACTIVE);
 lv_obj_set_scroll_dir(ui_PatchViewPage, LV_DIR_VER);
 lv_obj_set_flex_flow(ui_PatchViewPage,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_PatchViewPage, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -57,13 +56,14 @@ lv_obj_set_style_pad_column(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOC
 
 ui_PatchName = lv_label_create(ui_PatchViewPage);
 lv_obj_set_width( ui_PatchName, 270);
-lv_obj_set_height( ui_PatchName, 20);
+lv_obj_set_height( ui_PatchName, LV_SIZE_CONTENT);   /// 20
 lv_obj_set_x( ui_PatchName, 0 );
 lv_obj_set_y( ui_PatchName, 60 );
 lv_obj_set_align( ui_PatchName, LV_ALIGN_CENTER );
-lv_label_set_long_mode(ui_PatchName,LV_LABEL_LONG_SCROLL_CIRCULAR);
+lv_label_set_long_mode(ui_PatchName,LV_LABEL_LONG_SCROLL);
 lv_label_set_text(ui_PatchName,"Patch Name Here");
 lv_obj_clear_flag( ui_PatchName, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
+lv_obj_set_scroll_dir(ui_PatchName, LV_DIR_HOR);
 lv_obj_set_style_text_color(ui_PatchName, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_PatchName, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_PatchName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -74,7 +74,7 @@ lv_obj_set_style_text_font(ui_PatchName, &ui_font_MuseoSansRounded70016, LV_PART
 lv_obj_set_style_pad_left(ui_PatchName, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_PatchName, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_PatchName, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_PatchName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_PatchName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 

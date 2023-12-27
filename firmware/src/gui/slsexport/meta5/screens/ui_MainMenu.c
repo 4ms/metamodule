@@ -9,6 +9,8 @@ void ui_MainMenu_screen_init(void)
 {
 ui_MainMenu = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_MainMenu, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_bg_color(ui_MainMenu, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_MainMenu, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_MainMenuNowPlayingPanel = lv_obj_create(ui_MainMenu);
 lv_obj_set_height( ui_MainMenuNowPlayingPanel, 24);

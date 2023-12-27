@@ -39,16 +39,22 @@ public:
 
 		bool ok = fileio.foreach_dir_entry(
 			patch_dir.name, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
+				std::string full_path = patch_dir.name + "/" + std::string(entryname);
+
+				// Add dirs:
 				if (kind == DirEntryKind::Dir) {
+					if (entryname.starts_with("."))
+						return;
 					if (recursion_depth < MaxDirRecursion) {
-						pr_dbg("Add dir: '%.*s'\n", entryname.size(), entryname.data());
-						patch_dir.dirs.emplace_back(entryname);
+						pr_trace("Add dir: %s\n", full_path.c_str());
+						patch_dir.dirs.emplace_back(full_path);
 					}
 				}
 
+				// Add files:
 				if (kind == DirEntryKind::File) {
-					if (auto patchname = get_patchname(fileio, entryname, filesize)) {
-						pr_dbg("Add patch: %.*s\n", entryname.size(), entryname.data());
+					if (auto patchname = get_patchname(fileio, full_path, filesize)) {
+						pr_trace("Add patch: %s\n", full_path.c_str());
 						patch_dir.files.push_back(PatchFile{std::string(entryname), filesize, timestamp, *patchname});
 					}
 				}
@@ -60,12 +66,17 @@ public:
 		}
 
 		for (auto &dir : patch_dir.dirs) {
-			pr_dbg("[%d] Entering subdir: %.*s\n", recursion_depth, dir.name.size(), dir.name.data());
+			pr_trace("[%d] Entering subdir: %.*s\n", recursion_depth, dir.name.size(), dir.name.data());
 			ok = add_directory(fileio, dir, recursion_depth + 1);
 			if (!ok) {
 				pr_err("Failed to add subdir\n");
 			}
 		}
+
+		std::sort(patch_dir.files.begin(), patch_dir.files.end(), [](auto a, auto b) {
+			return std::string_view{a.patchname} < std::string_view{b.patchname};
+		});
+		std::sort(patch_dir.dirs.begin(), patch_dir.dirs.end(), [](auto a, auto b) { return a.name < b.name; });
 
 		return ok;
 	}
@@ -97,7 +108,7 @@ public:
 			const auto filename = DefaultPatches::get_filename(i);
 			const auto patch = DefaultPatches::get_patch(i);
 
-			pr_dbg("Creating default patch file: %s\n", filename.c_str());
+			pr_trace("Creating default patch file: %s\n", filename.c_str());
 
 			// Remove trailing null terminator that we get from storing default patches as strings
 			if (patch.back() == '\0')

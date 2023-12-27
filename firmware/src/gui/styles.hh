@@ -44,7 +44,7 @@ struct Gui {
 	static inline lv_style_t mapped_jack_circle_label_style;
 
 	// COLORS
-	static inline lv_color_t orange_highlight = lv_palette_lighten(LV_PALETTE_ORANGE, 2);
+	static inline lv_color_t orange_highlight = lv_color_hex(0xFD8B18); //lv_palette_lighten(LV_PALETTE_ORANGE, 2);
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
