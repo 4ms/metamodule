@@ -70,7 +70,7 @@ struct PatchSelectorSubdirPanel {
 			if (vol != entry.vol)
 				continue;
 
-			lv_foreach_child(vol_cont, [this, entry, vol_name](lv_obj_t *obj, unsigned i) {
+			lv_foreach_child(vol_cont, [this, entry, vol_name = vol_name](lv_obj_t *obj, unsigned i) {
 				auto label_child = (i == 0) ? 1 : 0;
 				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
 				const char *roller_path = (i == 0) ? vol_name : entry.path.c_str();
