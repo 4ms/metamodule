@@ -37,11 +37,10 @@ struct IntercoreStorageMessage {
 	MessageType message_type = MessageType::None;
 
 	uint32_t bytes_read{};
-	StaticString<255> filename;
 	Volume vol_id;
 	std::span<char> buffer;
-	uint32_t write_address{};
 	PatchDirList *patch_dir_list;
+	StaticString<255> filename;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);

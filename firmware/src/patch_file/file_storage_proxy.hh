@@ -33,9 +33,9 @@ public:
 	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
 		IntercoreStorageMessage message{
 			.message_type = RequestPatchData,
-			.filename = patch_loc.filename,
 			.vol_id = patch_loc.vol,
 			.buffer = raw_patch_data_,
+			.filename = patch_loc.filename,
 		};
 		if (!comm_.send_message(message))
 			return false;
@@ -104,9 +104,9 @@ public:
 	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
 		IntercoreStorageMessage message{
 			.message_type = RequestLoadFileToRam,
-			.filename = filename,
 			.vol_id = vol,
 			.buffer = buffer,
+			.filename = filename,
 		};
 		if (!comm_.send_message(message))
 			return false;

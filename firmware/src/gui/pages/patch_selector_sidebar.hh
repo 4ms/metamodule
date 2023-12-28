@@ -66,7 +66,7 @@ struct PatchSelectorSubdirPanel {
 
 		auto &entry = roller_item_infos[idx];
 
-		for (auto [vol, vol_name, vol_cont] : zip(vols, vol_names, vol_conts)) {
+		for (auto [vol, vol_name, vol_cont] : zip(PatchDirList::vols, PatchDirList::vol_name, vol_conts)) {
 			if (vol != entry.vol)
 				continue;
 
@@ -130,7 +130,7 @@ struct PatchSelectorSubdirPanel {
 
 		auto parent = lv_obj_get_parent(event->target);
 		Volume this_vol{};
-		for (auto [vol, vol_cont] : zip(page->vols, page->vol_conts)) {
+		for (auto [vol, vol_cont] : zip(PatchDirList::vols, page->vol_conts)) {
 			if (parent == vol_cont)
 				this_vol = vol;
 		}
@@ -187,8 +187,6 @@ private:
 	lv_group_t *group{};
 
 	const std::array<lv_obj_t *, 3> vol_conts = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
-	static constexpr std::array<Volume, 3> vols = {Volume::USB, Volume::SDCard, Volume::NorFlash};
-	static constexpr std::array<const char *, 3> vol_names = {"USB", "Card", "Internal"};
 
 	std::vector<EntryInfo> &roller_item_infos;
 };

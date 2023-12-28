@@ -21,8 +21,9 @@ struct PatchDirList {
 	}
 
 	std::array<PatchDir, 3> vol_root{};
-	std::array<StaticString<31>, 3> vol_name{{{"USB"}, {"SDCard"}, {"Internal"}}};
-	std::array<Volume, 3> vols{Volume::USB, Volume::SDCard, Volume::NorFlash};
+	// static inline const std::array<StaticString<31>, 3> vol_name{{{"USB"}, {"SDCard"}, {"Internal"}}};
+	static constexpr std::array<const char *, 3> vol_name = {"USB", "Card", "Internal"};
+	static constexpr std::array<Volume, 3> vols{Volume::USB, Volume::SDCard, Volume::NorFlash};
 };
 
 } // namespace MetaModule

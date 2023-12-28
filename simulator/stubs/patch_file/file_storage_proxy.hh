@@ -69,9 +69,15 @@ public:
 
 			auto bytes_read = load_patch_file(requested_view_patch_loc_);
 			if (bytes_read)
-				return {PatchDataLoaded, bytes_read, requested_view_patch_loc_.filename, requested_view_patch_loc_.vol};
+				return {.message_type = PatchDataLoaded,
+						.bytes_read = bytes_read,
+						.vol_id = requested_view_patch_loc_.vol,
+						.filename = requested_view_patch_loc_.filename};
 			else
-				return {PatchDataLoadFail, 0, requested_view_patch_loc_.filename, requested_view_patch_loc_.vol};
+				return {.message_type = PatchDataLoadFail,
+						.bytes_read = 0,
+						.vol_id = requested_view_patch_loc_.vol,
+						.filename = requested_view_patch_loc_.filename};
 		}
 
 		if (msg_state_ == MsgState::PatchListRequested) {
@@ -91,10 +97,12 @@ public:
 			mock_file_found_ctr++;
 
 			if ((mock_file_found_ctr % 8) < 4)
-				return {FirmwareFileFound,
-						mock_file_found_ctr + mock_firmware_file_size,
-						"metamodule-fw.json",
-						Volume::SDCard};
+				return {
+					.message_type = FirmwareFileFound,
+					.bytes_read = mock_file_found_ctr + mock_firmware_file_size,
+					.vol_id = Volume::SDCard,
+					.filename = "metamodule-fw.json",
+				};
 			else
 				return {FirmwareFileNotFound};
 		}
