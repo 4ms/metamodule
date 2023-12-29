@@ -163,11 +163,26 @@ public:
 		return true;
 	}
 
-	bool write_patch(std::string name) {
-		auto patch_yml = patch_to_yaml_string(view_patch_);
+	bool write_patch(std::string_view filename) {
+		if (filename == "")
+			filename = view_patch_loc_.filename;
 
-		// if (!comm_.send_message(message))
-		// 	return false;
+		std::span<char> file_data = raw_patch_buffer_;
+
+		patch_to_yaml_buffer(view_patch_, file_data);
+
+		msg_state_ = MsgState::WritePatchFileRequested;
+
+		auto bytes_written = hostfs_.update_or_create_file(filename, file_data);
+
+		if (bytes_written != file_data.size_bytes()) {
+			pr_err("Error writing file!\n");
+			return false;
+		}
+
+		// printf("size: %zu, %zu\n", file_data.size(), sz);
+		// printf("%.*s\n", (int)sz, file_data.data());
+
 		return true;
 	}
 
@@ -191,6 +206,7 @@ private:
 		PatchListRequested,
 		FirmwareUpdateFileRequested,
 		FirmwareFileLoadRequested,
+		WritePatchFileRequested,
 	} msg_state_ = MsgState::Idle;
 
 	unsigned mock_file_found_ctr = 0;

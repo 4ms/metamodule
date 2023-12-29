@@ -72,7 +72,7 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		page->patch_storage.write_patch("testpatchname");
+		page->patch_storage.write_patch("testpatch.yml");
 	}
 
 	FileStorageProxy &patch_storage;

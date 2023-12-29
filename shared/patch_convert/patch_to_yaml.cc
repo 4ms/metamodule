@@ -1,7 +1,5 @@
 #include "patch_to_yaml.hh"
 #include "ryml/ryml_serial.hh"
-#include "util/byte_block.hh"
-#include "util/countzip.hh"
 #include <span>
 
 static ryml::Tree create_tree(PatchData const &pd, ryml::Tree &tree) {
@@ -34,13 +32,18 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 	return ryml::emitrs_yaml<std::string>(tree);
 }
 
-void patch_to_yaml_buffer(PatchData const &pd, fast_float::span<uint8_t> buffer) {
+size_t patch_to_yaml_buffer(PatchData const &pd, std::span<char> &buffer) {
 	RymlInit::init_once();
 
 	ryml::Tree tree;
 	create_tree(pd, tree);
 
-	ryml::emit_yaml(tree, ryml::to_substr(buffer));
+	ryml::substr s{buffer.data(), buffer.size()};
+	bool emit_error_on_overflow = true;
+	auto res = ryml::emit_yaml(tree, s, emit_error_on_overflow);
+	//resize
+	buffer = buffer.subspan(0, res.size());
+	return res.size();
 }
 
 std::string json_to_yml(std::string json) {

@@ -33,6 +33,17 @@ public:
 		return true;
 	}
 
+	static bool write_file(std::span<const char> &buffer, FileIoC auto &fileio, const std::string_view filename) {
+		auto bytes_written = fileio.update_or_create_file(filename, buffer);
+
+		if (bytes_written != buffer.size_bytes()) {
+			pr_err("Error writing file %.*s\n", (int)filename.size(), filename.data());
+			return false;
+		}
+
+		return true;
+	}
+
 	// Adds all files/dirs to patch_dir
 	static bool add_directory(FileIoC auto &fileio, PatchDir &patch_dir, unsigned recursion_depth = 0) {
 		pr_dbg("Scanning dir: '%s'\n", patch_dir.name.data());

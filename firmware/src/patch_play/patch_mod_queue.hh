@@ -17,19 +17,18 @@ struct SetStaticParam {
 
 struct AddMapping {
 	MappedKnob map;
-	uint32_t set_id;
-	float cur_val;
+	uint32_t set_id{};
 };
 
 struct EditMappingMinMax {
 	MappedKnob map;
-	uint32_t set_id;
-	float cur_val;
+	uint32_t set_id{};
+	float cur_val{};
 };
 
 struct RemoveMapping {
 	MappedKnob map;
-	uint32_t set_id;
+	uint32_t set_id{};
 };
 
 struct ModifyMapping {

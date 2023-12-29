@@ -114,11 +114,27 @@ public:
 		return true;
 	}
 
-	bool write_patch(std::string name) {
-		auto patch_yml = patch_to_yaml_string(view_patch_);
+	bool write_patch(std::string_view filename = "") {
+		if (filename == "")
+			filename = view_patch_loc_.filename;
 
-		// if (!comm_.send_message(message))
-		// 	return false;
+		std::span<char> file_data = raw_patch_data_;
+
+		patch_to_yaml_buffer(view_patch_, file_data);
+
+		// printf("size: %zu, %zu\n", file_data.size(), sz);
+		// printf("%.*s\n", (int)sz, file_data.data());
+
+		IntercoreStorageMessage message{
+			.message_type = RequestWritePatchData,
+			.vol_id = view_patch_loc_.vol,
+			.buffer = file_data,
+			.filename = filename,
+		};
+
+		if (!comm_.send_message(message))
+			return false;
+
 		return true;
 	}
 
