@@ -1,13 +1,10 @@
 #pragma once
+#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "page_list.hh"
 #include "patch/patch_data.hh"
 #include <vector>
-
-extern "C" {
-#include "gui/slsexport/meta5/ui.h"
-}
 
 namespace MetaModule
 {

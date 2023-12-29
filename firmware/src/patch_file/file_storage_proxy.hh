@@ -114,7 +114,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool write_patch(std::string name) {
+	bool write_patch(std::string name) {
 		auto patch_yml = patch_to_yaml_string(view_patch_);
 
 		// if (!comm_.send_message(message))

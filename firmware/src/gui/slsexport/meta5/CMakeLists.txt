@@ -26,11 +26,11 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     images/ui_img_1x_infosmall2_png.c
     fonts/ui_font_MuseoSansRounded50010.c
     fonts/ui_font_MuseoSansRounded50012.c
+    fonts/ui_font_MuseoSansRounded50014.c
+    fonts/ui_font_MuseoSansRounded70014.c
+    fonts/ui_font_MuseoSansRounded70016.c
     fonts/ui_font_MuseoSansRounded90018.c
     fonts/ui_font_MuseoSansRounded90032.c
-    fonts/ui_font_MuseoSansRounded90040.c
-    fonts/ui_font_MuseoSansRounded70014.c
-    fonts/ui_font_MuseoSansRounded50014.c
-    fonts/ui_font_MuseoSansRounded70016.c)
+    fonts/ui_font_MuseoSansRounded90040.c)
 
 add_library(ui ${SOURCES})

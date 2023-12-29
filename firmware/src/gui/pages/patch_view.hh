@@ -12,6 +12,7 @@
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_knobset_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -201,6 +202,9 @@ struct PatchViewPage : PageBase {
 
 			} else if (desc_panel.is_visible()) {
 				desc_panel.hide();
+
+			} else if (file_menu.is_visible()) {
+				file_menu.hide();
 
 			} else {
 				page_list.request_last_page();
@@ -407,14 +411,6 @@ private:
 		page->patch_playloader.request_load_view_patch();
 	}
 
-	static void savebut_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<PatchViewPage *>(event->user_data);
-
-		page->patch_storage.write_patch("testpatchname");
-	}
-
 	static void button_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_label_set_text(ui_ModuleName, "");
@@ -438,6 +434,8 @@ private:
 	PatchViewKnobsetMenu knobset_menu{knobset_settings};
 
 	PatchDescriptionPanel desc_panel;
+
+	PatchViewFileMenu file_menu;
 
 	MapRingDisplay map_ring_display{settings};
 

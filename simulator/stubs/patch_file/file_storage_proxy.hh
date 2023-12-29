@@ -5,6 +5,7 @@
 #include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_location.hh"
+#include "shared/patch_convert/patch_to_yaml.hh"
 #include "shared/patch_convert/yaml_to_patch.hh"
 #include "stubs/patch_file/default_patch_io.hh"
 #include "stubs/patch_file/host_file_io.hh"
@@ -159,6 +160,14 @@ public:
 
 	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
 		msg_state_ = MsgState::FirmwareFileLoadRequested;
+		return true;
+	}
+
+	bool write_patch(std::string name) {
+		auto patch_yml = patch_to_yaml_string(view_patch_);
+
+		// if (!comm_.send_message(message))
+		// 	return false;
 		return true;
 	}
 
