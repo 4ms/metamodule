@@ -10,11 +10,9 @@ namespace MetaModule
 
 struct PatchViewSettingsMenu {
 	PatchViewSettingsMenu(ViewSettings &settings)
-		: settings{settings} {
-	}
+		: settings_menu_group(lv_group_create())
+		, settings{settings} {
 
-	void init() {
-		//Must be called after ui_PatchViewPage_screen_init(), so this can't be in the constructor:
 		lv_obj_set_parent(ui_SettingsMenu, lv_layer_top());
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SettingsCloseButton, settings_button_cb, LV_EVENT_CLICKED, this);
@@ -29,14 +27,8 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_ShowAllCablesCheck, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_CablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
-		visible = false;
 		lv_obj_set_x(ui_SettingsMenu, 220);
-	}
 
-	void prepare_focus(lv_group_t *group) {
-		base_group = group;
-		settings_menu_group = lv_group_create();
-		lv_group_remove_all_objs(settings_menu_group);
 		lv_group_set_editing(settings_menu_group, false);
 		lv_group_add_obj(settings_menu_group, ui_SettingsCloseButton);
 		lv_group_add_obj(settings_menu_group, ui_ShowAllMapsCheck);
@@ -47,7 +39,10 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_MapTranspSlider);
 		lv_group_add_obj(settings_menu_group, ui_ShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_CablesTranspSlider);
+	}
 
+	void prepare_focus(lv_group_t *group) {
+		base_group = group;
 		using enum MapRingStyle::Mode;
 		switch (settings.map_ring_style.mode) {
 			case ShowAllIfPlaying:
@@ -94,13 +89,6 @@ struct PatchViewSettingsMenu {
 		// 0..100 => 0..255
 		uint32_t opacity = (float)settings.map_ring_style.opa / 2.5f;
 		opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
-	}
-
-	void blur() {
-		if (settings_menu_group) {
-			lv_group_del(settings_menu_group);
-			settings_menu_group = nullptr;
-		}
 	}
 
 	void show() {

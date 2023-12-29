@@ -31,7 +31,8 @@ struct PatchViewPage : PageBase {
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
-		, cable_drawer{modules_cont, drawn_elements} {
+		, cable_drawer{modules_cont, drawn_elements}
+		, file_menu{patch_storage} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -48,7 +49,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(ui_PatchViewPage, scroll_end_cb, LV_EVENT_SCROLL, this);
 
 		// Settings menu
-		settings_menu.init();
+		// settings_menu.init();
 		knobset_menu.init();
 		desc_panel.hide();
 
@@ -164,12 +165,14 @@ struct PatchViewPage : PageBase {
 		settings_menu.prepare_focus(group);
 		knobset_menu.prepare_focus(group, patch.knob_sets);
 		desc_panel.prepare_focus(group, patch);
+		file_menu.prepare_focus(group);
 	}
 
 	void blur() override {
 		settings_menu.hide();
 		knobset_menu.hide();
 		desc_panel.hide();
+		file_menu.hide();
 	}
 
 	void update() override {
@@ -353,7 +356,6 @@ private:
 		drawn_elements.clear();
 		module_ids.clear();
 
-		settings_menu.blur();
 		knobset_menu.blur();
 	}
 
@@ -420,6 +422,7 @@ private:
 		page->update_map_ring_style();
 		page->settings_menu.hide();
 		page->knobset_menu.hide();
+		page->file_menu.hide();
 	}
 
 private:
