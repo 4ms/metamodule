@@ -290,7 +290,7 @@ public:
 	}
 
 	float get_module_light(uint16_t module_id, uint16_t light_id) const {
-		if (module_id < pd.module_slugs.size())
+		if (is_loaded && module_id < pd.module_slugs.size())
 			return modules[module_id]->get_led_brightness(light_id);
 		else
 			return 0;
