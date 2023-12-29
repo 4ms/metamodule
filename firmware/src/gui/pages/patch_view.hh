@@ -407,6 +407,14 @@ private:
 		page->patch_playloader.request_load_view_patch();
 	}
 
+	static void savebut_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+
+		page->patch_storage.write_patch("testpatchname");
+	}
+
 	static void button_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_label_set_text(ui_ModuleName, "");
@@ -418,6 +426,7 @@ private:
 		page->knobset_menu.hide();
 	}
 
+private:
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
 	CableDrawer cable_drawer;

@@ -2,6 +2,7 @@
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "patch/patch_data.hh"
+#include "patch_convert/patch_to_yaml.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_file.hh"
 #include "patch_file/patch_location.hh"
@@ -110,6 +111,14 @@ public:
 		};
 		if (!comm_.send_message(message))
 			return false;
+		return true;
+	}
+
+	[[nodiscard]] bool write_patch(std::string name) {
+		auto patch_yml = patch_to_yaml_string(view_patch_);
+
+		// if (!comm_.send_message(message))
+		// 	return false;
 		return true;
 	}
 

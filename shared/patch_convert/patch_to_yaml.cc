@@ -2,11 +2,9 @@
 #include "ryml/ryml_serial.hh"
 #include "util/byte_block.hh"
 #include "util/countzip.hh"
+#include <span>
 
-std::string patch_to_yaml_string(PatchData const &pd) {
-	RymlInit::init_once();
-
-	ryml::Tree tree;
+static ryml::Tree create_tree(PatchData const &pd, ryml::Tree &tree) {
 	ryml::NodeRef root = tree.rootref();
 	root |= ryml::MAP;
 
@@ -24,7 +22,25 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 	data["midi_maps"] << pd.midi_maps;
 	data["midi_poly_num"] << pd.midi_poly_num;
 
+	return tree;
+}
+
+std::string patch_to_yaml_string(PatchData const &pd) {
+	RymlInit::init_once();
+
+	ryml::Tree tree;
+	create_tree(pd, tree);
+
 	return ryml::emitrs_yaml<std::string>(tree);
+}
+
+void patch_to_yaml_buffer(PatchData const &pd, fast_float::span<uint8_t> buffer) {
+	RymlInit::init_once();
+
+	ryml::Tree tree;
+	create_tree(pd, tree);
+
+	ryml::emit_yaml(tree, ryml::to_substr(buffer));
 }
 
 std::string json_to_yml(std::string json) {
