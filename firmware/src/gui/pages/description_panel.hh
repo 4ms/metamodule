@@ -38,7 +38,7 @@ struct PatchDescriptionPanel {
 		// remove all callbacks
 		while (lv_obj_remove_event_cb(ui_Keyboard, nullptr))
 			;
-
+		lv_obj_add_event_cb(ui_Keyboard, lv_keyboard_def_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
 		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
 		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
 	}

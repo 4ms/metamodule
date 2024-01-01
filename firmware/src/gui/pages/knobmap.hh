@@ -50,8 +50,10 @@ struct KnobMapPage : PageBase {
 		// remove all callbacks
 		while (lv_obj_remove_event_cb(ui_Keyboard, nullptr))
 			;
+		lv_obj_add_event_cb(ui_Keyboard, lv_keyboard_def_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
 		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
 		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
+
 		lv_obj_set_parent(ui_Keyboard, ui_EditMappingPage);
 		lv_obj_set_y(ui_Keyboard, 1);
 
@@ -162,6 +164,7 @@ struct KnobMapPage : PageBase {
 		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
 		if (kb_hidden) {
 			lv_show(ui_Keyboard);
+			lv_keyboard_set_textarea(ui_Keyboard, ui_AliasTextArea);
 			page->kb_visible = true;
 			lv_obj_add_state(ui_AliasTextArea, LV_STATE_USER_1);
 			lv_group_add_obj(page->group, ui_Keyboard);
