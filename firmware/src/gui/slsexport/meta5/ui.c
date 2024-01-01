@@ -104,8 +104,8 @@ lv_obj_t *ui_ModuleName;
 lv_obj_t *ui_DescriptionPanel;
 lv_obj_t *ui_DescPanelPatchName;
 lv_obj_t *ui_Description;
-lv_obj_t *ui_DescriptionEdit;
-lv_obj_t *ui_DescriptionEditLabel;
+lv_obj_t *ui_DescriptionEditButton;
+lv_obj_t *ui_DescriptionEditButtonLabel;
 lv_obj_t *ui_DescriptionClose;
 lv_obj_t *ui_DescriptionCloseLabel;
 lv_obj_t *ui_PatchFileMenu;
@@ -122,6 +122,13 @@ lv_obj_t *ui_PatchFileRevertBut;
 lv_obj_t *ui_PatchFileRevertLabel;
 lv_obj_t *ui_PatchFileDeleteBut;
 lv_obj_t *ui_PatchFileDeleteLabel;
+lv_obj_t *ui_DescriptionEditPanel;
+lv_obj_t *ui_PatchNameEditTextArea;
+lv_obj_t *ui_DescriptionEditTextArea;
+lv_obj_t *ui_DescriptionEditEditButton;
+lv_obj_t *ui_DescriptionEditEditLabel;
+lv_obj_t *ui_DescriptionEditCloseButton;
+lv_obj_t *ui_DescriptionEditCloseLabel;
 
 
 // SCREEN: ui_MappingMenu

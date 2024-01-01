@@ -25,8 +25,6 @@ struct KnobMapPage : PageBase {
 		lv_group_set_editing(group, false);
 		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_AliasTextArea, edit_text_cb, LV_EVENT_RELEASED, this);
-		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
-		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
 		lv_obj_add_event_cb(ui_MinSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MaxSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 
@@ -49,6 +47,14 @@ struct KnobMapPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		// remove all callbacks
+		while (lv_obj_remove_event_cb(ui_Keyboard, nullptr))
+			;
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
+		lv_obj_set_parent(ui_Keyboard, ui_EditMappingPage);
+		lv_obj_set_y(ui_Keyboard, 1);
+
 		patch = patch_storage.get_view_patch();
 
 		view_set_idx = args.view_knobset_id.value_or(view_set_idx);
