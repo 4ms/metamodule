@@ -114,7 +114,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	std::string format_volume_name(StaticString<31> const &vol_name, PatchDir &root) {
-		std::string roller_text = Gui::blue_highlight_html + std::string(vol_name) + "#";
+		std::string roller_text = Gui::orange_highlight_html + std::string(vol_name) + "#";
 
 		add_file_count(roller_text, root);
 		add_dir_count(roller_text, root);
