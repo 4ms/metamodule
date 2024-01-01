@@ -373,7 +373,7 @@ lv_label_set_long_mode(ui_Flashlabel1,LV_LABEL_LONG_SCROLL);
 lv_label_set_text(ui_Flashlabel1,"Internal");
 
 ui_PatchListRoller = lv_roller_create(ui_PatchSelectorPage);
-lv_roller_set_options( ui_PatchListRoller, "(loading)", LV_ROLLER_MODE_NORMAL );
+lv_roller_set_options( ui_PatchListRoller, "Loading...", LV_ROLLER_MODE_NORMAL );
 lv_obj_set_height( ui_PatchListRoller, 206);
 lv_obj_set_flex_grow( ui_PatchListRoller, 2);
 lv_obj_set_x( ui_PatchListRoller, -4 );
