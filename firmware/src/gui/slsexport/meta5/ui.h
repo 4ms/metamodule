@@ -111,6 +111,20 @@ extern lv_obj_t *ui_DescriptionEdit;
 extern lv_obj_t *ui_DescriptionEditLabel;
 extern lv_obj_t *ui_DescriptionClose;
 extern lv_obj_t *ui_DescriptionCloseLabel;
+extern lv_obj_t *ui_PatchFileMenu;
+extern lv_obj_t *ui_PatchFileClosePanel;
+extern lv_obj_t *ui_PatchFileMenuHeader;
+extern lv_obj_t *ui_PatchFileMenuCloseButton;
+extern lv_obj_t *ui_PatchFileMenuCloseIcon;
+extern lv_obj_t *ui_PatchFileMenuHeaderLine;
+extern lv_obj_t *ui_PatchFileSaveBut;
+extern lv_obj_t *ui_PatchFileSaveLabel;
+extern lv_obj_t *ui_PatchFileDuplicateBut;
+extern lv_obj_t *ui_PatchFileDuplicateLabel;
+extern lv_obj_t *ui_PatchFileRevertBut;
+extern lv_obj_t *ui_PatchFileRevertLabel;
+extern lv_obj_t *ui_PatchFileDeleteBut;
+extern lv_obj_t *ui_PatchFileDeleteLabel;
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
 extern lv_obj_t *ui_MappingMenu;
@@ -271,12 +285,12 @@ LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50014);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded90032);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded90040);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50014);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
 
 void ui_init(void);
 

@@ -108,6 +108,20 @@ lv_obj_t *ui_DescriptionEdit;
 lv_obj_t *ui_DescriptionEditLabel;
 lv_obj_t *ui_DescriptionClose;
 lv_obj_t *ui_DescriptionCloseLabel;
+lv_obj_t *ui_PatchFileMenu;
+lv_obj_t *ui_PatchFileClosePanel;
+lv_obj_t *ui_PatchFileMenuHeader;
+lv_obj_t *ui_PatchFileMenuCloseButton;
+lv_obj_t *ui_PatchFileMenuCloseIcon;
+lv_obj_t *ui_PatchFileMenuHeaderLine;
+lv_obj_t *ui_PatchFileSaveBut;
+lv_obj_t *ui_PatchFileSaveLabel;
+lv_obj_t *ui_PatchFileDuplicateBut;
+lv_obj_t *ui_PatchFileDuplicateLabel;
+lv_obj_t *ui_PatchFileRevertBut;
+lv_obj_t *ui_PatchFileRevertLabel;
+lv_obj_t *ui_PatchFileDeleteBut;
+lv_obj_t *ui_PatchFileDeleteLabel;
 
 
 // SCREEN: ui_MappingMenu
