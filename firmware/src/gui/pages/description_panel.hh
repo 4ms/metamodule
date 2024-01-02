@@ -58,7 +58,6 @@ struct PatchDescriptionPanel {
 
 	void back_event() {
 		if (kb_visible) {
-			pr_dbg("back->Hide keyboard\n");
 			hide_keyboard();
 		} else if (edit_panel_visible) {
 			show();
@@ -126,8 +125,6 @@ private:
 				lv_obj_add_state(event->target, LV_STATE_USER_1);
 				page->active_ta = event->target;
 			}
-		} else {
-			pr_dbg("Textarea clicked but keyboard is shown?");
 		}
 	}
 
