@@ -125,10 +125,10 @@ lv_obj_t *ui_PatchFileDeleteLabel;
 lv_obj_t *ui_DescriptionEditPanel;
 lv_obj_t *ui_PatchNameEditTextArea;
 lv_obj_t *ui_DescriptionEditTextArea;
-lv_obj_t *ui_DescriptionEditEditButton;
-lv_obj_t *ui_DescriptionEditEditLabel;
-lv_obj_t *ui_DescriptionEditCloseButton;
-lv_obj_t *ui_DescriptionEditCloseLabel;
+lv_obj_t *ui_DescriptionEditSaveButton;
+lv_obj_t *ui_DescriptionEditSaveLabel;
+lv_obj_t *ui_DescriptionEditCancelButton;
+lv_obj_t *ui_DescriptionEditCancelLabel;
 
 
 // SCREEN: ui_MappingMenu

@@ -204,7 +204,7 @@ struct PatchViewPage : PageBase {
 				knobset_menu.hide();
 
 			} else if (desc_panel.is_visible()) {
-				desc_panel.hide();
+				desc_panel.back_event();
 
 			} else if (file_menu.is_visible()) {
 				file_menu.hide();
@@ -214,6 +214,10 @@ struct PatchViewPage : PageBase {
 				blur();
 				params.lights.stop_watching_all();
 			}
+		}
+
+		if (desc_panel.did_update_names()) {
+			lv_label_set_text(ui_PatchName, patch.patch_name.c_str());
 		}
 
 		if (is_patch_playing) {

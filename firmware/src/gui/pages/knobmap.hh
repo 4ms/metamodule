@@ -157,6 +157,7 @@ struct KnobMapPage : PageBase {
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
+		pr_dbg("edit_text_cb\n");
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<KnobMapPage *>(event->user_data);
@@ -237,6 +238,7 @@ struct KnobMapPage : PageBase {
 	}
 
 	void hide_keyboard() {
+		pr_dbg("hide_keyboard\n");
 		lv_obj_clear_state(ui_AliasTextArea, LV_STATE_USER_1);
 		lv_group_focus_obj(ui_AliasTextArea);
 		lv_group_remove_obj(ui_Keyboard);

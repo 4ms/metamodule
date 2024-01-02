@@ -128,10 +128,10 @@ extern lv_obj_t *ui_PatchFileDeleteLabel;
 extern lv_obj_t *ui_DescriptionEditPanel;
 extern lv_obj_t *ui_PatchNameEditTextArea;
 extern lv_obj_t *ui_DescriptionEditTextArea;
-extern lv_obj_t *ui_DescriptionEditEditButton;
-extern lv_obj_t *ui_DescriptionEditEditLabel;
-extern lv_obj_t *ui_DescriptionEditCloseButton;
-extern lv_obj_t *ui_DescriptionEditCloseLabel;
+extern lv_obj_t *ui_DescriptionEditSaveButton;
+extern lv_obj_t *ui_DescriptionEditSaveLabel;
+extern lv_obj_t *ui_DescriptionEditCancelButton;
+extern lv_obj_t *ui_DescriptionEditCancelLabel;
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
 extern lv_obj_t *ui_MappingMenu;
