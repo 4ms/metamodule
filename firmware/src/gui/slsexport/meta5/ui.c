@@ -254,6 +254,8 @@ lv_obj_t *ui_TrashButton2;
 lv_obj_t *ui_TrashLabel2;
 lv_obj_t *ui_ConfirmButton;
 lv_obj_t *ui_ConfirmLabel;
+lv_obj_t *ui_MessagePanel;
+lv_obj_t *ui_MessageLabel;
 
 
 // SCREEN: ui_CableMapPage

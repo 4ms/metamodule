@@ -249,6 +249,8 @@ extern lv_obj_t *ui_TrashButton2;
 extern lv_obj_t *ui_TrashLabel2;
 extern lv_obj_t *ui_ConfirmButton;
 extern lv_obj_t *ui_ConfirmLabel;
+extern lv_obj_t *ui_MessagePanel;
+extern lv_obj_t *ui_MessageLabel;
 // SCREEN: ui_CableMapPage
 void ui_CableMapPage_screen_init(void);
 extern lv_obj_t *ui_CableMapPage;
