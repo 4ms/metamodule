@@ -1,4 +1,5 @@
 #include "ui.hh"
+#include "gui/message_notification.hh"
 
 namespace MetaModule
 {
@@ -80,14 +81,17 @@ void Ui::lvgl_update_task() {
 
 	auto msg = msg_queue.get_message();
 	if (!msg.empty()) {
-		std::cout << "GUI: " << msg << "\n";
+		MessageNotification::show(msg);
 		msg_queue.clear_message();
 	}
 }
 
 void Ui::page_update_task() { //60Hz
 	page_manager.update_current_page();
-	patch_playloader.handle_sync_patch_loading();
+	bool load_status = patch_playloader.handle_sync_patch_loading();
+	if (!load_status) {
+		msg_queue.append_message("Loading patch failed");
+	}
 }
 
 void Ui::transfer_aux_button_events() {

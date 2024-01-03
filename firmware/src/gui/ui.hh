@@ -1,6 +1,7 @@
 #pragma once
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
+#include "gui/message_notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params.hh"
 #include "params/params_dbg_print.hh"
@@ -66,6 +67,7 @@ public:
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
 			pr_info("%s", msg.data());
+			MessageNotification::show(msg);
 			msg_queue.clear_message();
 		}
 
@@ -87,7 +89,9 @@ private:
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		page_manager.update_current_page();
-		patch_playloader.handle_sync_patch_loading();
+		bool load_status = patch_playloader.handle_sync_patch_loading();
+		if (!load_status)
+			msg_queue.append_message("Loading patch failed");
 
 		new_patch_data = false;
 	}

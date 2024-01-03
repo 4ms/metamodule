@@ -95,15 +95,19 @@ struct PatchPlayLoader {
 	}
 
 	// Concurrency: Called from UI thread
-	void handle_sync_patch_loading() {
+	bool handle_sync_patch_loading() {
 		if (loading_new_patch_ && audio_is_muted_) {
 			if (_load_patch())
 				pr_dbg("Patch loaded\n");
-			else
-				pr_err("Failed to load patch!\n");
+			else {
+				pr_err("Failed to load patch\n");
+				loading_new_patch_ = false;
+				return false;
+			}
 
 			loading_new_patch_ = false;
 		}
+		return true;
 	}
 
 private:
