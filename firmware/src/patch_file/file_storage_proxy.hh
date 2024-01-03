@@ -5,7 +5,6 @@
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_file.hh"
 #include "patch_file/patch_location.hh"
-#include "patchlist.hh"
 #include "pr_dbg.hh"
 
 namespace MetaModule
@@ -18,13 +17,10 @@ public:
 
 	FileStorageProxy(std::span<char> raw_patch_data,
 					 IntercoreStorageMessage &shared_message,
-					 PatchFileList &remote_patch_list)
-		: remote_patch_list_{remote_patch_list}
+					 PatchDirList &patch_dir_list)
+		: patch_dir_list_{patch_dir_list}
 		, comm_{shared_message}
 		, raw_patch_data_{raw_patch_data} {
-		remote_patch_list_.usb = remote_patch_list_.usb.subspan(0, 0);
-		remote_patch_list_.norflash = remote_patch_list_.norflash.subspan(0, 0);
-		remote_patch_list_.sdcard = remote_patch_list_.sdcard.subspan(0, 0);
 	}
 
 	IntercoreStorageMessage get_message() {
@@ -37,15 +33,15 @@ public:
 	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
 		IntercoreStorageMessage message{
 			.message_type = RequestPatchData,
-			.patch_id = patch_loc.index,
 			.vol_id = patch_loc.vol,
 			.buffer = raw_patch_data_,
+			.filename = patch_loc.filename,
 		};
 		if (!comm_.send_message(message))
 			return false;
 
-		requested_view_patch_id_ = patch_loc.index;
-		requested_view_patch_vol_ = patch_loc.vol;
+		requested_view_patch_loc_.filename = patch_loc.filename;
+		requested_view_patch_loc_.vol = patch_loc.vol;
 		return true;
 	}
 
@@ -60,8 +56,8 @@ public:
 			return false;
 
 		view_patch_ = patch;
-		view_patch_id_ = requested_view_patch_id_;
-		view_patch_vol_ = requested_view_patch_vol_;
+		view_patch_loc_.filename = requested_view_patch_loc_.filename;
+		view_patch_loc_.vol = requested_view_patch_loc_.vol;
 		return true;
 	}
 
@@ -69,12 +65,12 @@ public:
 		return view_patch_;
 	}
 
-	uint32_t get_view_patch_id() {
-		return view_patch_id_;
+	StaticString<255> get_view_patch_filename() {
+		return view_patch_loc_.filename;
 	}
 
 	Volume get_view_patch_vol() {
-		return view_patch_vol_;
+		return view_patch_loc_.vol;
 	}
 
 	//
@@ -82,19 +78,18 @@ public:
 	//
 	// TODO: sender passes a reference to a PatchFileList which should be populated
 	[[nodiscard]] bool request_patchlist() {
-		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList,
-										.patch_file_list = &remote_patch_list_};
+		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList, .patch_dir_list = &patch_dir_list_};
 		if (!comm_.send_message(message))
 			return false;
 		return true;
 	}
 
-	PatchFileList &get_patch_list() {
-		//FIXME: How can we insure this is only called when
-		//we have access to the shared data?
-		//Maybe transform get_message() into s.t. that returns
-		//remote_patch_list if message is PatchListChanged?
-		return remote_patch_list_;
+	PatchDirList &get_patch_list() {
+		//FIXME: Ensure this is only called when
+		//we have access to the shared data. Return a ptr,
+		//or return nullptr if we've sent a RequestRefreshPatchList but
+		//haven't gotten a reply yet
+		return patch_dir_list_;
 	}
 
 	// Scan all mounted volumes for firmware update files
@@ -109,9 +104,9 @@ public:
 	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
 		IntercoreStorageMessage message{
 			.message_type = RequestLoadFileToRam,
-			.filename = filename,
 			.vol_id = vol,
 			.buffer = buffer,
+			.filename = filename,
 		};
 		if (!comm_.send_message(message))
 			return false;
@@ -119,14 +114,14 @@ public:
 	}
 
 private:
-	PatchFileList &remote_patch_list_;
+	PatchDirList &patch_dir_list_;
+
 	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, IntercoreStorageMessage> comm_;
 
 	std::span<char> raw_patch_data_;
 	PatchData view_patch_;
-	uint32_t requested_view_patch_id_ = 0;
-	Volume requested_view_patch_vol_ = Volume::NorFlash;
-	uint32_t view_patch_id_ = 0;
-	Volume view_patch_vol_ = Volume::NorFlash;
+
+	PatchLocation requested_view_patch_loc_;
+	PatchLocation view_patch_loc_;
 };
 } // namespace MetaModule

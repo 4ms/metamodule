@@ -40,11 +40,19 @@ struct Gui {
 	// module selected in patch view
 	static inline lv_style_t selected_module_style;
 
+	// Volume or subdir name in Drives panel on PatchSelector
+	static inline lv_style_t subdir_panel_item_style;
+	static inline lv_style_t subdir_panel_item_sel_style;
+
 	static inline lv_style_t mapped_circle_style;
 	static inline lv_style_t mapped_jack_circle_label_style;
 
 	// COLORS
-	static inline lv_color_t orange_highlight = lv_palette_lighten(LV_PALETTE_ORANGE, 2);
+	static inline lv_color_t orange_highlight = lv_color_hex(0xfd8b18);
+	static inline const char *orange_highlight_html = "#fd8b18 ";
+	static inline lv_color_t yellow_highlight = lv_color_hex(0x8bfd18);
+	static inline const char *yellow_highlight_html = "#d7ff6a ";
+	static inline const char *brown_highlight_html = "#A26E3E ";
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
@@ -189,6 +197,25 @@ struct Gui {
 		lv_style_set_pad_right(&mapped_jack_circle_label_style, 0);
 		lv_style_set_pad_top(&mapped_jack_circle_label_style, -1);
 		lv_style_set_pad_bottom(&mapped_jack_circle_label_style, 0);
+
+		// Subdir panel
+		lv_style_init(&subdir_panel_item_style);
+		lv_style_set_width(&subdir_panel_item_style, LV_PCT(100));
+		lv_style_set_height(&subdir_panel_item_style, 20);
+		lv_style_set_pad_top(&subdir_panel_item_style, 2);
+		lv_style_set_pad_bottom(&subdir_panel_item_style, 0);
+		lv_style_set_pad_right(&subdir_panel_item_style, 0);
+		lv_style_set_pad_left(&subdir_panel_item_style, 12);
+		lv_style_set_bg_opa(&subdir_panel_item_style, LV_OPA_0);
+		lv_style_set_outline_width(&subdir_panel_item_style, 0);
+		lv_style_set_border_width(&subdir_panel_item_style, 0);
+		lv_style_set_radius(&subdir_panel_item_style, 0);
+
+		lv_style_init(&subdir_panel_item_sel_style);
+		lv_style_set_bg_color(&subdir_panel_item_sel_style, Gui::orange_highlight);
+		lv_style_set_bg_opa(&subdir_panel_item_sel_style, LV_OPA_100);
+		lv_style_set_outline_width(&subdir_panel_item_sel_style, 0);
+		lv_style_set_border_width(&subdir_panel_item_sel_style, 0);
 	}
 
 	static lv_obj_t *create_map_circle(lv_obj_t *parent) {

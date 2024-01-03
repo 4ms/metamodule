@@ -39,12 +39,15 @@ lv_obj_t *ui_PlayIcon;
 lv_obj_t *ui_NowPlayingName;
 lv_obj_t *ui_LoadMeter;
 lv_obj_t *ui_DrivesPanel;
+lv_obj_t *ui_USBVolCont;
 lv_obj_t *ui_USBbut;
 lv_obj_t *ui_USBlabel;
 lv_obj_t *ui_USBlabel1;
+lv_obj_t *ui_SDVolCont;
 lv_obj_t *ui_SDbut;
 lv_obj_t *ui_SDlabel;
 lv_obj_t *ui_SDlabel1;
+lv_obj_t *ui_FlashVolCont;
 lv_obj_t *ui_Flashbut;
 lv_obj_t *ui_Flashlabel;
 lv_obj_t *ui_Flashlabel1;
@@ -105,6 +108,20 @@ lv_obj_t *ui_DescriptionEdit;
 lv_obj_t *ui_DescriptionEditLabel;
 lv_obj_t *ui_DescriptionClose;
 lv_obj_t *ui_DescriptionCloseLabel;
+lv_obj_t *ui_PatchFileMenu;
+lv_obj_t *ui_PatchFileClosePanel;
+lv_obj_t *ui_PatchFileMenuHeader;
+lv_obj_t *ui_PatchFileMenuCloseButton;
+lv_obj_t *ui_PatchFileMenuCloseIcon;
+lv_obj_t *ui_PatchFileMenuHeaderLine;
+lv_obj_t *ui_PatchFileSaveBut;
+lv_obj_t *ui_PatchFileSaveLabel;
+lv_obj_t *ui_PatchFileDuplicateBut;
+lv_obj_t *ui_PatchFileDuplicateLabel;
+lv_obj_t *ui_PatchFileRevertBut;
+lv_obj_t *ui_PatchFileRevertLabel;
+lv_obj_t *ui_PatchFileDeleteBut;
+lv_obj_t *ui_PatchFileDeleteLabel;
 
 
 // SCREEN: ui_MappingMenu

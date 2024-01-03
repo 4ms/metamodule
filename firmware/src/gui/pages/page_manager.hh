@@ -64,11 +64,11 @@ public:
 	}
 
 	void debug_print_args(auto newpage) {
-		pr_trace("Args: mod: %d, panel: %d, set: %d, patchidx: %u\n",
+		pr_trace("Args: mod: %d, panel: %d, set: %d, patchnamehash: %u\n",
 				 newpage->args->module_id.value_or(88),
 				 newpage->args->mappedknob_id.value_or(88),
 				 newpage->args->view_knobset_id.value_or(88),
-				 (unsigned)newpage->args->patch_loc.value_or(PatchLocation{}).index);
+				 (unsigned)newpage->args->patch_loc_hash.value_or(8888).index);
 
 		if (newpage->args->element_indices) {
 			auto i = newpage->args->element_indices.value();

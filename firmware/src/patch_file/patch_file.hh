@@ -12,10 +12,4 @@ struct PatchFile {
 	StaticString<31> patchname;
 };
 
-struct PatchFileList {
-	std::span<const PatchFile> usb{};
-	std::span<const PatchFile> sdcard{};
-	std::span<const PatchFile> norflash{};
-};
-
 } // namespace MetaModule

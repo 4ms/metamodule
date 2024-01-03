@@ -9,7 +9,6 @@
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_file/file_storage_proxy.hh"
-#include "patch_file/patchlist.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
@@ -40,7 +39,7 @@ void main() {
 
 	PatchPlayer patch_player;
 	FileStorageProxy file_storage_proxy{
-		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
+		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::patch_dir_list};
 	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
 
 	SyncParams sync_params;
@@ -59,8 +58,7 @@ void main() {
 						   &StaticBuffers::auxsignal_block,
 						   &StaticBuffers::virtdrive,
 						   &StaticBuffers::icc_shared_message,
-						   &StaticBuffers::shared_patch_file_list,
-						   &StaticBuffers::raw_patch_span,
+						   &StaticBuffers::raw_patch_span, //DEPRECATE
 						   &patch_player,
 						   &patch_playloader,
 						   &file_storage_proxy,

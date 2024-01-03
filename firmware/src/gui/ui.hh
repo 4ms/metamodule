@@ -7,7 +7,6 @@
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
 #include "patch_file/file_storage_proxy.hh"
-#include "patch_file/patchlist.hh"
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
 

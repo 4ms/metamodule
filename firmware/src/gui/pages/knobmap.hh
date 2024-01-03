@@ -89,7 +89,8 @@ struct KnobMapPage : PageBase {
 		lv_label_set_text(ui_EditMappingLetter, panel_name.data());
 
 		// Set initial positions of arcs and sliders
-		bool is_patch_playing = args.patch_loc ? (*args.patch_loc == patch_playloader.cur_patch_location()) : false;
+		bool is_patch_playing =
+			args.patch_loc_hash ? (*args.patch_loc_hash == patch_playloader.cur_patch_loc_hash()) : false;
 
 		auto s_param = patch.find_static_knob(map.module_id, map.param_id);
 		float knob_val = s_param && is_patch_playing ? s_param->value : 0;

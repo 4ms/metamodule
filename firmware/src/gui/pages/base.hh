@@ -109,5 +109,13 @@ struct PageBase {
 
 	virtual void update() {
 	}
+
+	bool patch_is_playing(std::optional<PatchLocHash> patch_loc_hash) {
+		if (patch_loc_hash.has_value())
+			return (patch_loc_hash.value() == patch_playloader.cur_patch_loc_hash());
+		else
+			return false;
+		// return patch_loc_hash.value_or(PatchLocation{}) == patch_playloader.cur_patch_loc_hash();
+	}
 };
 } // namespace MetaModule
