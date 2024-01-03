@@ -1243,12 +1243,12 @@ lv_obj_set_style_pad_top(ui_ModuleName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_ModuleName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_DescriptionPanel = lv_obj_create(ui_PatchViewPage);
-lv_obj_set_width( ui_DescriptionPanel, 306);
+lv_obj_set_width( ui_DescriptionPanel, lv_pct(100));
 lv_obj_set_height( ui_DescriptionPanel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_flex_flow(ui_DescriptionPanel,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_DescriptionPanel, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_add_flag( ui_DescriptionPanel, LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
-lv_obj_clear_flag( ui_DescriptionPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
+lv_obj_add_flag( ui_DescriptionPanel, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_clear_flag( ui_DescriptionPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scroll_dir(ui_DescriptionPanel, LV_DIR_VER);
 lv_obj_set_style_radius(ui_DescriptionPanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_DescriptionPanel, lv_color_hex(0x222222), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -1585,12 +1585,12 @@ lv_obj_set_align( ui_PatchFileDeleteLabel, LV_ALIGN_LEFT_MID );
 lv_label_set_text(ui_PatchFileDeleteLabel,"Delete");
 
 ui_DescriptionEditPanel = lv_obj_create(ui_PatchViewPage);
-lv_obj_set_width( ui_DescriptionEditPanel, 306);
+lv_obj_set_width( ui_DescriptionEditPanel, lv_pct(100));
 lv_obj_set_height( ui_DescriptionEditPanel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_flex_flow(ui_DescriptionEditPanel,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_DescriptionEditPanel, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_add_flag( ui_DescriptionEditPanel, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
-lv_obj_clear_flag( ui_DescriptionEditPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM );    /// Flags
+lv_obj_add_flag( ui_DescriptionEditPanel, LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_clear_flag( ui_DescriptionEditPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scroll_dir(ui_DescriptionEditPanel, LV_DIR_VER);
 lv_obj_set_style_radius(ui_DescriptionEditPanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_DescriptionEditPanel, lv_color_hex(0x222222), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -1599,7 +1599,7 @@ lv_obj_set_style_border_color(ui_DescriptionEditPanel, lv_color_hex(0x777777), L
 lv_obj_set_style_border_opa(ui_DescriptionEditPanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_DescriptionEditPanel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_DescriptionEditPanel, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_DescriptionEditPanel, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_DescriptionEditPanel, 14, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_DescriptionEditPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_DescriptionEditPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -1608,12 +1608,13 @@ lv_obj_set_style_bg_color(ui_DescriptionEditPanel, lv_color_hex(0xFF8918), LV_PA
 lv_obj_set_style_bg_opa(ui_DescriptionEditPanel, 255, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 
 ui_PatchNameEditTextArea = lv_textarea_create(ui_DescriptionEditPanel);
-lv_obj_set_width( ui_PatchNameEditTextArea, 286);
+lv_obj_set_width( ui_PatchNameEditTextArea, 282);
 lv_obj_set_height( ui_PatchNameEditTextArea, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_PatchNameEditTextArea, LV_ALIGN_CENTER );
 lv_textarea_set_max_length(ui_PatchNameEditTextArea,32);
 lv_textarea_set_placeholder_text(ui_PatchNameEditTextArea,"Placeholder...");
 lv_textarea_set_one_line(ui_PatchNameEditTextArea,true);
+lv_obj_add_flag( ui_PatchNameEditTextArea, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_PatchNameEditTextArea, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_color(ui_PatchNameEditTextArea, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_PatchNameEditTextArea, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -1645,11 +1646,12 @@ lv_obj_set_style_text_color(ui_PatchNameEditTextArea, lv_color_hex(0x888888), LV
 lv_obj_set_style_text_opa(ui_PatchNameEditTextArea, 255, LV_PART_TEXTAREA_PLACEHOLDER| LV_STATE_DEFAULT);
 
 ui_DescriptionEditTextArea = lv_textarea_create(ui_DescriptionEditPanel);
-lv_obj_set_width( ui_DescriptionEditTextArea, 286);
+lv_obj_set_width( ui_DescriptionEditTextArea, 282);
 lv_obj_set_height( ui_DescriptionEditTextArea, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_DescriptionEditTextArea, LV_ALIGN_CENTER );
 lv_textarea_set_placeholder_text(ui_DescriptionEditTextArea,"Placeholder...");
-lv_obj_clear_flag( ui_DescriptionEditTextArea, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_add_flag( ui_DescriptionEditTextArea, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_DescriptionEditTextArea, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_color(ui_DescriptionEditTextArea, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_DescriptionEditTextArea, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_DescriptionEditTextArea, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -1680,7 +1682,7 @@ lv_obj_set_x( ui_DescriptionEditSaveButton, -20 );
 lv_obj_set_y( ui_DescriptionEditSaveButton, -6 );
 lv_obj_set_align( ui_DescriptionEditSaveButton, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_DescriptionEditSaveButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_clear_flag( ui_DescriptionEditSaveButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_clear_flag( ui_DescriptionEditSaveButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_DescriptionEditSaveButton, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_DescriptionEditSaveButton, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_DescriptionEditSaveButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -1705,7 +1707,7 @@ lv_obj_set_x( ui_DescriptionEditCancelButton, -20 );
 lv_obj_set_y( ui_DescriptionEditCancelButton, -6 );
 lv_obj_set_align( ui_DescriptionEditCancelButton, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_DescriptionEditCancelButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_clear_flag( ui_DescriptionEditCancelButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_clear_flag( ui_DescriptionEditCancelButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_DescriptionEditCancelButton, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_DescriptionEditCancelButton, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_DescriptionEditCancelButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);

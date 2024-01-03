@@ -74,6 +74,8 @@ struct PatchDescriptionPanel {
 		lv_group_set_editing(group, false);
 		is_showing = true;
 		edit_panel_visible = false;
+
+		set_content_max_height(ui_DescriptionPanel, 230);
 	}
 
 	void hide() {
@@ -109,6 +111,9 @@ private:
 		lv_textarea_set_text(ui_DescriptionEditTextArea, lv_label_get_text(ui_Description));
 		lv_group_focus_obj(ui_PatchNameEditTextArea);
 		lv_group_set_editing(page->group, false);
+
+		set_content_max_height(ui_DescriptionEditPanel, 230);
+
 		page->edit_panel_visible = true;
 	}
 
@@ -119,10 +124,13 @@ private:
 		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
 		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
 		if (kb_hidden) {
-			page->show_keyboard();
 			if (event->target == ui_PatchNameEditTextArea || event->target == ui_DescriptionEditTextArea) {
+				page->show_keyboard();
 				lv_keyboard_set_textarea(ui_Keyboard, event->target);
 				lv_obj_add_state(event->target, LV_STATE_USER_1);
+				set_content_max_height(ui_DescriptionEditPanel, 128);
+				set_content_max_height(event->target, 128);
+				lv_obj_scroll_to_view_recursive(event->target, LV_ANIM_ON);
 				page->active_ta = event->target;
 			}
 		}
@@ -153,6 +161,9 @@ private:
 			lv_group_focus_obj(active_ta);
 		lv_group_remove_obj(ui_Keyboard);
 		lv_hide(ui_Keyboard);
+
+		lv_obj_set_height(ui_DescriptionEditTextArea, LV_SIZE_CONTENT);
+		set_content_max_height(ui_DescriptionEditPanel, 230);
 		kb_visible = false;
 	}
 

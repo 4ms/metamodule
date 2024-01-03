@@ -61,4 +61,12 @@ inline void label_clips(lv_obj_t *obj) {
 	}
 }
 
+inline void set_content_max_height(lv_obj_t *obj, lv_coord_t max) {
+	lv_obj_set_height(obj, LV_SIZE_CONTENT);
+	lv_obj_refr_size(obj);
+	if (lv_obj_get_height(obj) > max) {
+		lv_obj_set_height(obj, max);
+	}
+}
+
 } // namespace MetaModule
