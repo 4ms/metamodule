@@ -175,7 +175,7 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
 
             if (auto thisVolume = LocationToVolume(destination); thisVolume)
             {
-                auto success = patchStorage->add_patch_file(*thisVolume, filename, receivedPatchData);
+                auto success = patchStorage->write_patch_file(*thisVolume, filename, receivedPatchData);
 
                 if (success)
                 {

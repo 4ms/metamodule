@@ -87,39 +87,34 @@ public:
 		poll_media_change();
 	}
 
-	bool add_patch_file(const Volume vol, std::string_view filename, std::span<const uint8_t> data)
-	{
-		if (vol == Volume::USB)
-		{
-			auto success = PatchFileIO::add_file(data, usbdrive_, filename);
-			if (success)
-			{
+	bool write_patch_file(Volume vol, std::string_view filename, std::span<const char> data) {
+		if (vol == Volume::USB) {
+			auto success = PatchFileIO::write_file(data, usbdrive_, filename);
+			if (success) {
 				usbdrive_needs_rescan_ = true;
 			}
 			return success;
-		}
-		else if (vol == Volume::SDCard)
-		{
-			auto success =  PatchFileIO::add_file(data, sdcard_, filename);
-			if (success)
-			{
+
+		} else if (vol == Volume::SDCard) {
+			auto success = PatchFileIO::write_file(data, sdcard_, filename);
+			if (success) {
 				sdcard_needs_rescan_ = true;
 			}
 			return success;
-		}
-		else if (vol == Volume::NorFlash)
-		{
-			auto success =  PatchFileIO::add_file(data, norflash_, filename);
-			if (success)
-			{
+
+		} else if (vol == Volume::NorFlash) {
+			auto success = PatchFileIO::write_file(data, norflash_, filename);
+			if (success) {
 				flash_needs_rescan_ = true;
 			}
 			return success;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
+	}
+
+	bool write_patch_file(Volume vol, std::string_view filename, std::span<const uint8_t> data) {
+		return write_patch_file(vol, filename, {(const char *)data.data(), data.size()});
 	}
 
 	void handle_messages() {

@@ -31,10 +31,15 @@ public:
 		return true;
 	}
 
-	static bool add_file(std::span<const uint8_t> buffer, FileIoC auto &fileio, std::string_view filename)
-	{
-		auto success = fileio.update_or_create_file(filename, {(const char*)buffer.data(), buffer.size()});
-		return success;
+	static bool write_file(std::span<const char> buffer, FileIoC auto &fileio, const std::string_view filename) {
+		auto bytes_written = fileio.update_or_create_file(filename, buffer);
+
+		if (bytes_written != buffer.size_bytes()) {
+			pr_err("Error writing file %.*s\n", (int)filename.size(), filename.data());
+			return false;
+		}
+
+		return true;
 	}
 
 	static bool add_all_to_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
