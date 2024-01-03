@@ -16,8 +16,10 @@ extern "C" {
 #include "components/ui_comp.h"
 #include "components/ui_comp_hook.h"
 #include "ui_events.h"
-void Dropdown_Animation( lv_obj_t *TargetObject, int delay);
-void Dropup_Animation( lv_obj_t *TargetObject, int delay);
+void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay);
+void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay);
+void SlideDown_Animation( lv_obj_t *TargetObject, int delay);
+void SlideUp_Animation( lv_obj_t *TargetObject, int delay);
 // SCREEN: ui_MainMenu
 void ui_MainMenu_screen_init(void);
 extern lv_obj_t *ui_MainMenu;

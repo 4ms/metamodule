@@ -7,8 +7,10 @@
 #include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-void Dropdown_Animation( lv_obj_t *TargetObject, int delay);
-void Dropup_Animation( lv_obj_t *TargetObject, int delay);
+void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay);
+void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay);
+void SlideDown_Animation( lv_obj_t *TargetObject, int delay);
+void SlideUp_Animation( lv_obj_t *TargetObject, int delay);
 
 
 // SCREEN: ui_MainMenu
@@ -308,7 +310,7 @@ const lv_img_dsc_t *ui_imgset_settings[1] = {&ui_img_1x_settings1_png};
 #endif
 
 ///////////////////// ANIMATIONS ////////////////////
-void Dropdown_Animation( lv_obj_t *TargetObject, int delay)
+void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay)
 {
 ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
 PropertyAnimation_0_user_data->target = TargetObject;
@@ -330,7 +332,7 @@ lv_anim_set_early_apply( &PropertyAnimation_0, false );
 lv_anim_start(&PropertyAnimation_0);
 
 }
-void Dropup_Animation( lv_obj_t *TargetObject, int delay)
+void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay)
 {
 ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
 PropertyAnimation_0_user_data->target = TargetObject;
@@ -349,6 +351,51 @@ lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
  lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
 lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
 lv_anim_set_early_apply( &PropertyAnimation_0, false );
+lv_anim_start(&PropertyAnimation_0);
+
+}
+void SlideDown_Animation( lv_obj_t *TargetObject, int delay)
+{
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+PropertyAnimation_0_user_data->target = TargetObject;
+PropertyAnimation_0_user_data->val = -1;
+lv_anim_t PropertyAnimation_0;
+lv_anim_init(&PropertyAnimation_0);
+lv_anim_set_time(&PropertyAnimation_0, 400);
+lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_y );
+lv_anim_set_values(&PropertyAnimation_0, -40, 0 );
+lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_overshoot);
+lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
+lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
+lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+ lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+lv_anim_set_early_apply( &PropertyAnimation_0, false );
+lv_anim_start(&PropertyAnimation_0);
+
+}
+void SlideUp_Animation( lv_obj_t *TargetObject, int delay)
+{
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+PropertyAnimation_0_user_data->target = TargetObject;
+PropertyAnimation_0_user_data->val = -1;
+lv_anim_t PropertyAnimation_0;
+lv_anim_init(&PropertyAnimation_0);
+lv_anim_set_time(&PropertyAnimation_0, 1000);
+lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_y );
+lv_anim_set_values(&PropertyAnimation_0, 0, -80 );
+lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_ease_in);
+lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
+lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
+lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+ lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+lv_anim_set_early_apply( &PropertyAnimation_0, false );
+ lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_y );
 lv_anim_start(&PropertyAnimation_0);
 
 }

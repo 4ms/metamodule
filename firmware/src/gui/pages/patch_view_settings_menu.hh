@@ -93,7 +93,7 @@ struct PatchViewSettingsMenu {
 
 	void show() {
 		if (!visible) {
-			Dropdown_Animation(ui_SettingsMenu, 0);
+			DropInFromLeft_Animation(ui_SettingsMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
 				return;
@@ -107,7 +107,7 @@ struct PatchViewSettingsMenu {
 
 	void hide() {
 		if (visible) {
-			Dropup_Animation(ui_SettingsMenu, 0);
+			DropOutToRight_Animation(ui_SettingsMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
 				return;

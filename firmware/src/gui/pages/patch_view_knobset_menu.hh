@@ -98,7 +98,7 @@ struct PatchViewKnobsetMenu {
 
 	void show() {
 		if (!visible) {
-			Dropdown_Animation(ui_KnobsetMenu, 0);
+			DropInFromLeft_Animation(ui_KnobsetMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
 				return;
@@ -112,7 +112,7 @@ struct PatchViewKnobsetMenu {
 
 	void hide() {
 		if (visible) {
-			Dropup_Animation(ui_KnobsetMenu, 0);
+			DropOutToRight_Animation(ui_KnobsetMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
 				return;

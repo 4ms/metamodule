@@ -33,7 +33,7 @@ struct PatchViewFileMenu {
 
 	void hide() {
 		if (visible) {
-			Dropup_Animation(ui_PatchFileMenu, 0);
+			DropOutToRight_Animation(ui_PatchFileMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (indev && base_group)
 				lv_indev_set_group(indev, base_group);
@@ -43,7 +43,7 @@ struct PatchViewFileMenu {
 
 	void show() {
 		if (!visible) {
-			Dropdown_Animation(ui_PatchFileMenu, 0);
+			DropInFromLeft_Animation(ui_PatchFileMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (indev && group)
 				lv_indev_set_group(indev, group);
