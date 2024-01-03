@@ -150,9 +150,11 @@ private:
 
 	static void format_cc_map_circle(uint16_t cc_num, lv_obj_t *circle, lv_obj_t *label) {
 		//Workaround to make two lines
-		// std::string name{lv_label_get_text(label)};
-		// name.insert(name[2], "\n");
-		// lv_label_set_text(label, name.c_str());
+		std::string name{lv_label_get_text(label)};
+		if (name.size() > 2 && name[0] == 'C' && name[1] == 'C') {
+			name.insert(2, "\n");
+			lv_label_set_text(label, name.c_str());
+		}
 		format_label(label, -2, &ui_font_MuseoSansRounded50012);
 		format_circle(circle, Gui::palette_main[LV_PALETTE_GREY], 2);
 	}

@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/elements/element_name.hh"
+#include "gui/elements/panel_name.hh"
 #include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
@@ -81,9 +82,9 @@ struct KnobMapPage : PageBase {
 			lv_textarea_set_placeholder_text(ui_AliasTextArea, name);
 		}
 
-		auto panel_name = PanelDef::get_map_param_name(map.panel_knob_id);
+		auto panel_name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text_fmt(
-			ui_MappedName, "Knob %s in '%s'", panel_name.data(), patch.valid_knob_set_name(view_set_idx));
+			ui_MappedName, "Knob %s in '%s'", panel_name.c_str(), patch.valid_knob_set_name(view_set_idx));
 
 		float val = params.knobs[map.panel_knob_id];
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, val);
@@ -94,7 +95,11 @@ struct KnobMapPage : PageBase {
 		auto color = Gui::knob_palette[map.panel_knob_id % 6];
 		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
 		lv_obj_set_style_bg_color(ui_EditMappingCircle, color, LV_STATE_DEFAULT);
-		lv_label_set_text(ui_EditMappingLetter, panel_name.data());
+		lv_label_set_text(ui_EditMappingLetter, panel_name.c_str());
+		if (panel_name.size() > 3)
+			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
+		else
+			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
 		// Set initial positions of arcs and sliders
 		bool is_patch_playing =
@@ -157,7 +162,6 @@ struct KnobMapPage : PageBase {
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
-		pr_dbg("edit_text_cb\n");
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<KnobMapPage *>(event->user_data);
@@ -238,7 +242,6 @@ struct KnobMapPage : PageBase {
 	}
 
 	void hide_keyboard() {
-		pr_dbg("hide_keyboard\n");
 		lv_obj_clear_state(ui_AliasTextArea, LV_STATE_USER_1);
 		lv_group_focus_obj(ui_AliasTextArea);
 		lv_group_remove_obj(ui_Keyboard);
@@ -255,7 +258,7 @@ private:
 
 	bool kb_visible = false;
 
-	unsigned view_set_idx = 0;
+	uint32_t view_set_idx = 0;
 };
 
 } // namespace MetaModule

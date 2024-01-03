@@ -23,6 +23,9 @@ struct PatchData {
 	static constexpr uint32_t MIDIKnobSet = 0xFFFFFFFF;
 
 	const MappedKnob *find_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) const {
+		if (set_id == MIDIKnobSet)
+			return find_midi_map(module_id, param_id);
+
 		if (set_id < knob_sets.size()) {
 			for (auto &m : knob_sets[set_id].set) {
 				if (m.module_id == module_id && m.param_id == param_id)
@@ -33,6 +36,9 @@ struct PatchData {
 	}
 
 	const MappedKnob *find_mapped_knob(uint32_t set_id, uint16_t panel_knob_id) const {
+		if (set_id == MIDIKnobSet)
+			return find_midi_map(panel_knob_id);
+
 		if (set_id < knob_sets.size()) {
 			for (auto &m : knob_sets[set_id].set) {
 				if (m.panel_knob_id == panel_knob_id)
@@ -45,6 +51,14 @@ struct PatchData {
 	const MappedKnob *find_midi_map(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : midi_maps.set) {
 			if (m.module_id == module_id && m.param_id == param_id)
+				return &m;
+		}
+		return nullptr;
+	}
+
+	const MappedKnob *find_midi_map(uint16_t panel_knob_id) const {
+		for (auto &m : midi_maps.set) {
+			if (m.panel_knob_id == panel_knob_id)
 				return &m;
 		}
 		return nullptr;
