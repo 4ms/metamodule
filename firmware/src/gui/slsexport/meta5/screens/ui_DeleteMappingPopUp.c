@@ -227,7 +227,7 @@ lv_obj_set_style_text_font(ui_ConfirmLabel, &lv_font_montserrat_14, LV_PART_MAIN
 
 ui_MessagePanel = lv_obj_create(ui_DeleteMappingPopUp);
 lv_obj_set_width( ui_MessagePanel, lv_pct(100));
-lv_obj_set_height( ui_MessagePanel, LV_SIZE_CONTENT);   /// 40
+lv_obj_set_height( ui_MessagePanel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_MessagePanel, LV_ALIGN_TOP_RIGHT );
 lv_obj_set_flex_flow(ui_MessagePanel,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_MessagePanel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -237,16 +237,16 @@ lv_obj_set_style_radius(ui_MessagePanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_MessagePanel, lv_color_hex(0xE1E878), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_MessagePanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_MessagePanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_MessagePanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_MessagePanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_MessagePanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_MessagePanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_MessagePanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_MessagePanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_MessagePanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_MessagePanel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_MessageLabel = lv_label_create(ui_MessagePanel);
-lv_obj_set_width( ui_MessageLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_width( ui_MessageLabel, lv_pct(100));
 lv_obj_set_height( ui_MessageLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_MessageLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_MessageLabel,"Message:");
+lv_label_set_text(ui_MessageLabel,"Welcome to MetaModule. Have fun exploring!");
 lv_obj_set_style_text_color(ui_MessageLabel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_MessageLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_MessageLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
