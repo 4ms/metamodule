@@ -7,6 +7,13 @@ on:
         description: 'Build only a subset of modules'
         default: false
         type: boolean
+      preset:
+        description: 'Select preset'
+        type: choice
+        default: 'full'
+        options:
+        - full
+        - base
   push:
     branches:
       - main
@@ -49,11 +56,7 @@ jobs:
           submodules: 'recursive'
           token: ${{ secrets.CHECKOUT_TOKEN }}
 
-      - name: Build and test
-        if: ${{ ! inputs.limited_modules }}
-        run: cd firmware && make configure PRESET=full && make all
-
-      - name: Build and test
+      - name: Create limit file
         if: ${{ inputs.limited_modules }}
         run: |
           echo "4ms:EnOsc" >> firmware/lim
@@ -61,7 +64,11 @@ jobs:
           echo "Befaco:EvenVCO" >> firmware/lim
           echo "HetrickCV:PhasorGen" >> firmware/lim
           echo "AudibleInstruments:Braids" >> firmware/lim
-          cd firmware && make limit lim && make all
+          cd firmware && make limit lim
+
+      - name: Build and test
+        if: ${{ ! inputs.include_wifi }}
+        run: cd firmware && make configure PRESET=${{ inputs.preset }} && make all
 
       - name: Set Release Version
         if: startsWith(github.ref, 'refs/tags/firmware-v')
