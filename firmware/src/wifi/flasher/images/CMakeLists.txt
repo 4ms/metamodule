@@ -1,6 +1,7 @@
 set(WIFI_IMAGES
-    ${CMAKE_CURRENT_LIST_DIR}/firmware.bin
-    ${CMAKE_CURRENT_LIST_DIR}/littlefs.img
+    ${CMAKE_CURRENT_LIST_DIR}/bootloader.bin
+    ${CMAKE_CURRENT_LIST_DIR}/application.bin
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem.img
     )
 
 # Create empty target to be filled with images
