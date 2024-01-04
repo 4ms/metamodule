@@ -89,9 +89,10 @@ private:
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		page_manager.update_current_page();
-		bool load_status = patch_playloader.handle_sync_patch_loading();
-		if (!load_status)
-			msg_queue.append_message("Loading patch failed");
+		auto load_status = patch_playloader.handle_sync_patch_loading();
+		if (!load_status.success) {
+			msg_queue.append_message(load_status.error_string);
+		}
 
 		new_patch_data = false;
 	}

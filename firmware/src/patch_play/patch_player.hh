@@ -9,6 +9,7 @@
 #include "patch/patch_data.hh"
 #include "patch_play/multicore_play.hh"
 #include "pr_dbg.hh"
+#include "result_t.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include "util/oscs.hh"
@@ -86,10 +87,13 @@ public:
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
-	bool load_patch(const PatchData &patchdata) {
+	Result load_patch(const PatchData &patchdata) {
 
-		if (patchdata.patch_name.length() == 0 || patchdata.module_slugs.size() == 0)
-			return false;
+		if (patchdata.patch_name.length() == 0)
+			return {false, "Cannot load: patch does not have a name"};
+
+		if (patchdata.module_slugs.size() == 0)
+			return {false, "Cannot load: patch does not any modules"};
 
 		copy_patch_data(patchdata);
 
@@ -105,7 +109,7 @@ public:
 			if (modules[i] == nullptr) {
 				pr_err("Module %s not found\n", pd.module_slugs[i].data());
 				is_loaded = false;
-				return false;
+				return {false, "Cannot load: Module " + std::string(pd.module_slugs[i]) + " not known"};
 			}
 			pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
@@ -143,7 +147,7 @@ public:
 		set_active_knob_set(0);
 
 		is_loaded = true;
-		return true;
+		return {true};
 	}
 
 	// Runs the patch
