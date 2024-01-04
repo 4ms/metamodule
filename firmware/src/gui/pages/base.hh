@@ -29,6 +29,7 @@ struct PatchContext {
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
+	GuiState &gui_state;
 };
 
 struct PageBase {
@@ -39,6 +40,7 @@ struct PageBase {
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
+	GuiState &gui_state;
 
 	PageArguments args;
 
@@ -63,6 +65,7 @@ struct PageBase {
 		, msg_queue{info.msg_queue}
 		, patch_mod_queue{info.patch_mod_queue}
 		, page_list{info.page_list}
+		, gui_state{info.gui_state}
 		, id{id} {
 		page_list.register_page(this, id);
 	}

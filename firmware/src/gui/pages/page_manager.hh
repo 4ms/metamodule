@@ -25,6 +25,7 @@ class PageManager {
 
 	PatchContext info;
 	PageList page_list;
+	GuiState gui_state;
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info};
@@ -44,7 +45,7 @@ public:
 				MetaParams &metaparams,
 				MessageQueue &msg_queue,
 				PatchModQueue &patch_mod_queue)
-		: info{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue, page_list} {
+		: info{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue, page_list, gui_state} {
 	}
 
 	void init() {
