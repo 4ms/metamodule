@@ -70,7 +70,8 @@ void WifiUpdate::checkForUpdate()
         }
     }
 
-    pr_err("Keeping wifi bridge in reset since integrity cannot be verifed\n");
+    // pr_err("Keeping wifi bridge in reset since integrity cannot be verifed\n");
+    Flasher::reboot();
 }
 
 }
