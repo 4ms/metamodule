@@ -8,7 +8,7 @@ namespace MetaModule
 {
 
 struct MainMenuPage : PageBase {
-	MainMenuPage(PatchInfo info)
+	MainMenuPage(PatchContext info)
 		: PageBase{info, PageId::MainMenu} {
 		init_bg(ui_MainMenu);
 		lv_group_remove_all_objs(group);

@@ -27,7 +27,7 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
-	PatchViewPage(PatchInfo info)
+	PatchViewPage(PatchContext info)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)

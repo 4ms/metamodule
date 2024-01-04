@@ -17,7 +17,11 @@ namespace MetaModule
 
 enum class PageChangeDirection { Back, Forward, Jump };
 
-struct PatchInfo {
+struct GuiState {
+	std::optional<Jack> new_cable_start;
+};
+
+struct PatchContext {
 	FileStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
 	ParamsMidiState &params;
@@ -51,7 +55,7 @@ struct PageBase {
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;
 
-	PageBase(PatchInfo info, PageId id)
+	PageBase(PatchContext info, PageId id)
 		: patch_storage{info.patch_storage}
 		, patch_playloader{info.patch_playloader}
 		, params{info.params}

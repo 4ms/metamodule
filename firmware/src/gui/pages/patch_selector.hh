@@ -16,7 +16,7 @@ namespace MetaModule
 
 struct PatchSelectorPage : PageBase {
 
-	PatchSelectorPage(PatchInfo info)
+	PatchSelectorPage(PatchContext info)
 		: PageBase{info, PageId::PatchSel}
 		, subdir_panel{roller_item_infos} {
 

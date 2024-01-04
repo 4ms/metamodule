@@ -13,7 +13,7 @@ namespace MetaModule
 
 struct CableEditPage : PageBase {
 
-	CableEditPage(PatchInfo info)
+	CableEditPage(PatchContext info)
 		: PageBase{info, PageId::CableEdit}
 		, patch{patch_storage.get_view_patch()} {
 

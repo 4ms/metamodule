@@ -15,7 +15,7 @@ namespace MetaModule
 {
 
 struct SystemMenuPage : PageBase {
-	SystemMenuPage(PatchInfo info)
+	SystemMenuPage(PatchContext info)
 		: PageBase{info, PageId::SystemMenu}
 		, fwupdate_tab{patch_storage, patch_playloader}
 		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {

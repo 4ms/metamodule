@@ -20,7 +20,7 @@ struct KnobSetViewPage : PageBase {
 	constexpr static unsigned min_arc = 160;
 	constexpr static unsigned max_arc = 20;
 
-	KnobSetViewPage(PatchInfo info)
+	KnobSetViewPage(PatchContext info)
 		: PageBase{info, PageId::KnobSetView}
 		, base{ui_KnobSetViewPage}
 		, patch{patch_storage.get_view_patch()} {

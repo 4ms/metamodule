@@ -23,7 +23,7 @@ namespace MetaModule
 class PageManager {
 	SlsComponentInit sls_comp_init;
 
-	PatchInfo info;
+	PatchContext info;
 	PageList page_list;
 
 	MainMenuPage page_mainmenu{info};

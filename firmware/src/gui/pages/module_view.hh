@@ -19,7 +19,7 @@ struct ModuleViewPage : PageBase {
 
 	ViewSettings settings;
 
-	ModuleViewPage(PatchInfo info)
+	ModuleViewPage(PatchContext info)
 		: PageBase{info, PageId::ModuleView}
 		, map_ring_display{settings}
 		, patch{patch_storage.get_view_patch()}
