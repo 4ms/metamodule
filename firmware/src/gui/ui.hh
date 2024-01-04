@@ -14,9 +14,9 @@
 namespace MetaModule
 {
 
-using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
-static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1 alignas(64);
-static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2 alignas(64);
+using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 4>;
+static inline FrameBufferT framebuf1 alignas(64);
+static inline FrameBufferT framebuf2 alignas(64);
 
 class Ui {
 private:

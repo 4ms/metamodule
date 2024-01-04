@@ -29,7 +29,6 @@ class LVGLDriver {
 	// Display driver
 	lv_disp_drv_t disp_drv;
 	lv_disp_t *display;
-	// lv_theme_t *theme;
 
 public:
 	LVGLDriver(flush_cb_t flush_cb,
@@ -114,7 +113,7 @@ public:
 			}
 
 			//Timeout
-			if (HAL_GetTick() - last_transfer_start_time > 200) {
+			if (HAL_GetTick() - last_transfer_start_time > 20) {
 				disp_drv->draw_buf->flushing = 0;
 				// Doesn't seem to matter:
 				// _spi_driver.reinit();
