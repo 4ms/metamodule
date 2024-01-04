@@ -45,7 +45,7 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, framebuf2);
+		MMDisplay::init(metaparams);
 		Gui::init_lvgl_styles();
 		page_manager.init();
 	}

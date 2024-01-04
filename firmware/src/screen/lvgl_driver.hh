@@ -77,7 +77,7 @@ private:
 	static inline std::array<lv_color_t, BufferSize> testbuf;
 
 public:
-	static void init(MetaParams &metaparams, std::span<lv_color_t> initial_buf) {
+	static void init(MetaParams &metaparams) {
 		m = &metaparams;
 
 		_spi_driver.init();
