@@ -24,7 +24,7 @@ class PageList {
 	bool _new_page_requested = false;
 
 	static constexpr uint32_t MaxPages = 9;
-	std::array<PageBase *, MaxPages> _pages;
+	std::array<PageBase *, MaxPages> _pages{};
 
 	uint32_t _active_knobset_id = 0;
 	uint32_t _patch_revision = 0;

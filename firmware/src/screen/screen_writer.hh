@@ -88,7 +88,7 @@ public:
 
 	void init() {
 		SpiDmaDataCmdDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
-		_reset();
+		reset();
 		using InitCommands =
 			mdrivlib::ST77XX::ST7789Init<ScreenWriterConfT::width,
 										 ScreenWriterConfT::height,
@@ -224,6 +224,16 @@ public:
 		start_dma_transfer();
 	}
 
+	void reset() {
+		Pin reset_pin{ScreenWriterConfT::ResetPin, PinMode::Output};
+		reset_pin.high();
+		HAL_Delay(1);
+		reset_pin.low();
+		HAL_Delay(10);
+		reset_pin.high();
+		HAL_Delay(120);
+	}
+
 protected:
 	const int _rowstart;
 	const int _colstart;
@@ -266,25 +276,6 @@ protected:
 			if (c.delay_ms)
 				HAL_Delay(c.delay_ms);
 		}
-	}
-
-	void _reset() {
-		Pin reset_pin{ScreenWriterConfT::ResetPin, PinMode::Output};
-		// reset_pin.high();
-		// volatile int i = 10000; //10000 = high for 123us
-		// while (i)
-		// 	i = i - 1;
-		// reset_pin.low();
-		// i = 1000; //1000 = low for 12.6us
-		// while (i)
-		// 	i = i - 1;
-		// reset_pin.high();
-		reset_pin.high();
-		HAL_Delay(1);
-		reset_pin.low();
-		HAL_Delay(10);
-		reset_pin.high();
-		HAL_Delay(120);
 	}
 };
 } // namespace MetaModule

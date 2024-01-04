@@ -2,6 +2,7 @@
 #include "conf/panel_conf.hh"
 #include "util/analyzed_signal.hh"
 #include "util/debouncer.hh"
+#include "util/rotary_motion.hh"
 #include "util/zip.hh"
 #include <array>
 #include <cmath>
@@ -11,26 +12,6 @@ namespace MetaModule
 {
 
 struct MetaParams {
-	struct RotaryMotion {
-		int32_t abs_pos = 0;
-		int32_t motion = 0;
-
-		int32_t use_motion() {
-			auto tmp = motion;
-			motion = 0;
-			return tmp;
-		}
-		void add_motion(const RotaryMotion &that) {
-			motion += that.motion;
-			abs_pos += that.motion;
-		}
-		void transfer_motion(RotaryMotion &that) {
-			auto that_motion = that.use_motion();
-			motion += that_motion;
-			abs_pos += that_motion;
-		}
-	};
-
 	float patchcv = 0.f;
 	Toggler rotary_button;
 	RotaryMotion rotary;
