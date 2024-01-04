@@ -137,6 +137,8 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
+  ${FWDIR}/src/flash_loader/flash_loader.cc
+  ${FWDIR}/src/gui/elements/element_name.cc
 
   #
   ${SHARED}/CoreModules/hub/hub_medium.cc
@@ -187,11 +189,14 @@ add_executable(
   #
   ${COMP_ARTWORK_SOURCES}
   ${FACEPLATE_ARTWORK_SOURCES}
+  #
+  ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
   ${FWDIR}/src/core_a7/aux_core_main.cc
+  ${FWDIR}/src/gui/elements/element_name.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 
@@ -232,6 +237,8 @@ target_include_directories(
           #
           ${FWDIR}/lib/jansson
           ${FWDIR}/lib/jansson/jansson/src
+          #
+          ${CMAKE_BINARY_DIR}/checkgit
 )
 
 

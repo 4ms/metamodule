@@ -13,6 +13,7 @@ namespace MetaModule
 class UsbManager {
 	UsbHostManager usb_host{Usb5VSrcEnablePin};
 
+	RamDiskOps ramdiskops;
 	UsbDriveDevice usb_drive;
 
 	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
@@ -26,8 +27,9 @@ class UsbManager {
 	// uint32_t tm;
 
 public:
-	UsbManager(RamDiskOps &ramdiskops)
-		: usb_drive{ramdiskops}
+	UsbManager(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
+		: ramdiskops{rmdisk}
+		, usb_drive{ramdiskops}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		usb_drive.init_usb_device();
 		usb_host.init();

@@ -28,13 +28,12 @@ public:
 	}
 
 	void connect() {
-		if (msc.mount_disk()) {
-			pr_trace("Mounted USB drive\n");
-		} else
-			pr_warn("Did not mount a USB drive\n");
+		pr_trace("USB MSC connect(): calling mount_disk()\n");
+		msc.mount_disk();
 	}
 
 	void disconnect() {
+		pr_trace("USB MSC disconnect()\n");
 		msc.unmount_disk();
 	}
 

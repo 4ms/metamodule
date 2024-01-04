@@ -1,6 +1,7 @@
 #pragma once
 #include "drivers/callable.hh"
 #include "ff.h"
+#include "fs/dir_entry_kind.hh"
 #include "fs/littlefs/norflash_ops.hh"
 #include "fs/time_convert.hh"
 #include "fs/volumes.hh"
@@ -13,7 +14,7 @@ namespace MetaModule
 {
 
 class LfsFileIO {
-	lfs_t lfs;
+	lfs_t lfs{};
 	mdrivlib::QSpiFlash &_flash;
 
 public:
@@ -159,7 +160,7 @@ public:
 
 		lfs_dir_rewind(&lfs, &dir);
 
-		lfs_info info;
+		lfs_info info{};
 		while (int err = lfs_dir_read(&lfs, &dir, &info) != 0) {
 			if (err < 0)
 				return false;
@@ -176,19 +177,44 @@ public:
 		return true;
 	}
 
+	// TODO: Add parameter for dir to search
+	bool foreach_dir_entry(std::string_view path, auto action) {
+		lfs_dir_t dir;
+		if (lfs_dir_open(&lfs, &dir, "/") < 0)
+			return false;
+
+		lfs_dir_rewind(&lfs, &dir);
+
+		lfs_info info{};
+		while (int err = lfs_dir_read(&lfs, &dir, &info) != 0) {
+			if (err < 0)
+				return false;
+
+			auto entry_type = info.type == LFS_TYPE_DIR ? DirEntryKind::Dir : DirEntryKind::File;
+
+			auto timestamp = get_file_timestamp(info.name);
+			if (timestamp)
+				action(info.name, timestamp, info.size, entry_type);
+		}
+
+		lfs_dir_close(&lfs, &dir);
+
+		return true;
+	}
+
 	////// Time Attribute:
 
 	enum { ATTR_TIMESTAMP = 0x74 };
 
 	struct TimeFile {
-		lfs_file_t file;
-		uint32_t timestamp;
-		lfs_attr attrs[1];
+		lfs_file_t file{};
+		uint32_t timestamp{};
+		lfs_attr attrs[1]{};
 		lfs_file_config cfg{.attrs = attrs, .attr_count = 1};
 	};
 
 	uint32_t get_file_timestamp(std::string_view filename) {
-		uint32_t ts;
+		uint32_t ts{};
 		auto res = lfs_getattr(&lfs, filename.data(), ATTR_TIMESTAMP, &ts, sizeof(TimeFile::timestamp));
 		if (res < 0)
 			return 0;

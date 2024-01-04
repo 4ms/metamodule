@@ -4,8 +4,10 @@ Diagnostics:
       #MissingIncludes: Strict
 
     ClangTidy:
-        Add: [modernize*, cppcoreguidelines-prefer-member-initializer, readability-suspicious-call-argument]
-        Remove: [modernize-use-std-print, modernize-use-trailing-return-type, modernize-avoid-c-arrays,modernize-use-nodiscard]
+        Add: [modernize*, cppcoreguidelines-prefer-member-initializer, readability-suspicious-call-argument, 
+              cppcoreguidelines-init-variables, cppcoreguidelines-pro-type-member-init
+              ]
+        Remove: [modernize-use-std-print, modernize-use-trailing-return-type, modernize-avoid-c-arrays, modernize-use-nodiscard]
         CheckOptions:
             readability-identifier-naming.VariableCase: CamelCase
 

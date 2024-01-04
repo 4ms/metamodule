@@ -1,22 +1,15 @@
-#include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
-#include "conf/i2c_codec_conf.hh"
-#include "conf/ramdisk_conf.hh"
 #include "controls.hh"
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
-#include "drivers/arch.hh"
 #include "drivers/hsem.hh"
+#include "drivers/ipcc.hh"
 #include "drivers/pin.hh"
-#include "drivers/register_access.hh"
+#include "drivers/rcc.hh"
 #include "drivers/system_clocks.hh"
-#include "fs/fatfs/ramdisk_ops.hh"
-#include "fs/ramdisk.hh"
-#include "gpio_expander_reader.hh"
+#include "fs/fatfs/sd_host.hh"
+#include "fs/fs_manager.hh"
 #include "hsem_handler.hh"
-#include "params.hh"
-#include "patch_file/patch_storage.hh"
-#include "patch_play/patch_mod_queue.hh"
 #include "usb/usb_manager.hh"
 
 #ifdef ENABLE_WIFI_BRIDGE
@@ -28,16 +21,16 @@ namespace MetaModule
 
 constexpr bool reload_default_patches = false;
 
-using namespace mdrivlib;
-
 static void app_startup() {
+	using namespace mdrivlib;
+
 	core_m4::RCC_Enable::HSEM_::set();
 
 	// Tell A7 we're not ready yet
 	HWSemaphore<M4CoreReady>::lock();
 
 	// Wait until A7 is ready
-	while (HWSemaphore<MainCoreReady>::is_locked())
+	while (HWSemaphore<AuxCoreReady>::is_locked())
 		;
 
 	SystemClocks init_system_clocks{};
@@ -48,66 +41,54 @@ static void app_startup() {
 
 void main() {
 	using namespace MetaModule;
+	using namespace mdrivlib;
 
 	app_startup();
 
 	pr_info("M4 starting\n");
 
-	auto param_block_base = SharedMemoryS::ptrs.param_block;
-	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
-	auto virtdrive = SharedMemoryS::ptrs.ramdrive;
-	auto raw_patch_span = SharedMemoryS::ptrs.raw_patch_span;
-	auto shared_message = SharedMemoryS::ptrs.icc_message;
-	auto shared_patch_file_list = SharedMemoryS::ptrs.patch_file_list;
-
-	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
-	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander
-	i2c.enable_IT(a7m4_shared_i2c_codec_conf.priority1, a7m4_shared_i2c_codec_conf.priority2);
-
-	mdrivlib::GPIOExpander ext_gpio_expander{i2c, extaudio_gpio_expander_conf};
-	mdrivlib::GPIOExpander main_gpio_expander{i2c, mainboard_gpio_expander_conf};
-
-	RamDiskOps ramdiskops{*virtdrive};
-
-	UsbManager usb{ramdiskops};
+	// USB
+	UsbManager usb{*SharedMemoryS::ptrs.ramdrive};
 	usb.start();
 
-	auto usb_fileio = usb.get_msc_fileio();
-	PatchStorage patch_storage{
-		*raw_patch_span, *shared_message, *shared_patch_file_list, usb_fileio, reload_default_patches};
+	// SD Card
+	SDCardHost sd;
 
-	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
-	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
+	FilesystemManager fs{usb.get_msc_fileio(), sd.get_fileio(), SharedMemoryS::ptrs.icc_message};
+	if (reload_default_patches)
+		fs.reload_default_patches();
 
-	#ifdef ENABLE_WIFI_BRIDGE
-	WifiInterface::init(&patch_storage);
-	#endif
+#ifdef ENABLE_WIFI_BRIDGE
+	WifiInterface::init(&fs.get_patch_storage());
+#endif
+
+	// Controls
+	auto param_block_base = SharedMemoryS::ptrs.param_block;
+	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
+	Controls controls{*param_block_base, *auxsignal_buffer, usb.get_midi_host()};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
 	controls.start();
 
-	// Run the i2c queue a few times before letting A7 start
+	// Read controls a few times before letting A7 start
 	uint32_t startup_delay = 0x10000;
 	while (startup_delay--) {
-		if (i2c.is_ready())
-			i2cqueue.update();
+		controls.process();
 	}
 
 	pr_info("M4 initialized\n");
 	HWSemaphore<MetaModule::M4CoreReady>::unlock();
 
 	while (true) {
-		if (i2c.is_ready())
-			i2cqueue.update();
+		controls.process();
 
 		usb.process();
-		patch_storage.handle_messages();
+		sd.process();
+		fs.process();
 
-		#ifdef ENABLE_WIFI_BRIDGE
+#ifdef ENABLE_WIFI_BRIDGE
 		WifiInterface::run();
-		#endif
-		
-		__NOP();
+#endif
 	}
 }

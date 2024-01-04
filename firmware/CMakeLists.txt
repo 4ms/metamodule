@@ -33,6 +33,12 @@ if(DEFINED LIMITED_MODULES_FILE)
 endif()
 
 #
+# Git commit hash
+#
+include(cmake/CheckGit.cmake)
+CheckGitSetup()
+
+#
 # Main Application
 #
 set(M4_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corem4/medium)
@@ -42,8 +48,9 @@ add_subdirectory(src/core_m4 ${M4_BIN_PATH})
 add_subdirectory(src ${A7_BIN_PATH})
 
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/metamodule-firmware.json
   COMMAND flashing/elf_to_uimg.py --m4 $<TARGET_FILE:main_m4.elf> --a7 $<TARGET_FILE:main.elf> ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
+  COMMAND flashing/manifest_generator.py --app "${CMAKE_CURRENT_BINARY_DIR}/main.uimg" --version "${GIT_FIRMWARE_VERSION_TAG}" "${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}.json"
   COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
   COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
   DEPENDS main.elf main_m4.elf
@@ -54,7 +61,7 @@ add_custom_command(
 
 add_custom_target(
   combined-uimg ALL
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg 
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/metamodule-firmware.json
 )
 
 

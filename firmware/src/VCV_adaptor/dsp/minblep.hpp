@@ -1,5 +1,5 @@
 #pragma once
-#include "VCV_adaptor/dsp/minblep_16_32.h"
+#include "VCV_adaptor/dsp/minblep_4_32.h"
 #include "VCV_adaptor/math.hpp"
 
 namespace rack::dsp
@@ -18,7 +18,7 @@ template<int Z, int O, typename T = float>
 struct MinBlepGenerator {
 	T buf[2 * Z] = {};
 	int pos = 0;
-	float impulse[2 * Z * O + 1];
+	float impulse[2 * Z * O + 1]{};
 
 	MinBlepGenerator() {
 		// This call will fail:
@@ -46,9 +46,12 @@ struct MinBlepGenerator {
 	}
 };
 
+// This is actually a MinBlepGenerator<4, 32, float> (Z = 4, not 16)
+// We use the Z=4 version as a fake for the Z=16 version because
+// otherwise processing load reaches 100% with the EvenVCO.
 template<>
 struct MinBlepGenerator<16, 32, float> {
-	static constexpr int Z = 16;
+	static constexpr int Z = 4;
 	static constexpr int O = 32;
 	using T = float;
 
@@ -61,8 +64,8 @@ struct MinBlepGenerator<16, 32, float> {
 			return;
 		for (int j = 0; j < 2 * Z; j++) {
 			float minBlepIndex = ((float)j - p) * O;
-			int index = (pos + j) % (2 * Z);
-			buf[index] += x * (-1.f + math::interpolateLinear(MinBlep_16_32.data(), minBlepIndex));
+			int index = (pos + j) & (2 * Z - 1);
+			buf[index] += x * (-1.f + math::interpolateLinear(MinBlep_4_32.data(), minBlepIndex));
 		}
 	}
 

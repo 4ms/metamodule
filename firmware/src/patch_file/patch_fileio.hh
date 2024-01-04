@@ -1,8 +1,8 @@
 #pragma once
 #include "fs/fileio_t.hh"
 #include "patch_convert/yaml_to_patch.hh"
+#include "patch_file/patch_dir_list.hh"
 #include "patches_default.hh"
-#include "patchlist.hh"
 #include "pr_dbg.hh"
 
 namespace MetaModule
@@ -10,6 +10,8 @@ namespace MetaModule
 
 // PatchFileIO are helpers to transfer patches between filesystems and PatchList
 class PatchFileIO {
+
+	static constexpr unsigned MaxDirRecursion = 1;
 
 public:
 	enum class FileFilter { All, NewerTimestamp };
@@ -42,100 +44,74 @@ public:
 		return true;
 	}
 
-	static bool add_all_to_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
-		// patch_list.set_status(PatchList::Status::Loading);
+	// Adds all files/dirs to patch_dir
+	static bool add_directory(FileIoC auto &fileio, PatchDir &patch_dir, unsigned recursion_depth = 0) {
+		pr_dbg("Scanning dir: '%s'\n", patch_dir.name.data());
 
-		bool ok = fileio.foreach_file_with_ext(
-			".yml", [&fileio, &patch_list](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
-				if (filesize < 12) // || filename.starts_with("."))
-					return;
+		bool ok = fileio.foreach_dir_entry(
+			patch_dir.name, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
+				std::string full_path = patch_dir.name + "/" + std::string(entryname);
 
-				pr_trace("Found patch file on %s: %s (%zu B) Timestamp: 0x%x, Reading... \n",
-						 fileio.volname().data(),
-						 filename.data(),
-						 filesize,
-						 timestamp);
+				// Add dirs:
+				if (kind == DirEntryKind::Dir) {
+					if (entryname.starts_with("."))
+						return;
+					if (recursion_depth < MaxDirRecursion) {
+						pr_trace("Add dir: %s\n", full_path.c_str());
+						patch_dir.dirs.emplace_back(full_path);
+					}
+				}
 
-				auto patchname = _read_patch_name(fileio, filename);
-				if (patchname.data()[0] == 0)
-					return;
-
-				patch_list.add_patch_header(fileio.vol_id(), filename, filesize, timestamp, patchname);
+				// Add files:
+				if (kind == DirEntryKind::File) {
+					if (auto patchname = get_patchname(fileio, full_path, filesize)) {
+						pr_trace("Add patch: %s\n", full_path.c_str());
+						patch_dir.files.push_back(PatchFile{std::string(entryname), filesize, timestamp, *patchname});
+					}
+				}
 			});
 
-		// patch_list.set_status(PatchList::Status::Ready);
+		if (!ok) {
+			pr_err("Failed to read dir on %.32s\n", fileio.volname().data());
+			return false;
+		}
 
-		if (!ok)
-			pr_dbg("Failed to read patches on %s\n", fileio.volname().data());
+		for (auto &dir : patch_dir.dirs) {
+			pr_trace("[%d] Entering subdir: %.*s\n", recursion_depth, dir.name.size(), dir.name.data());
+			ok = add_directory(fileio, dir, recursion_depth + 1);
+			if (!ok) {
+				pr_err("Failed to add subdir\n");
+			}
+		}
+
+		std::sort(patch_dir.files.begin(), patch_dir.files.end(), [](auto a, auto b) {
+			return std::string_view{a.patchname} < std::string_view{b.patchname};
+		});
+		std::sort(patch_dir.dirs.begin(), patch_dir.dirs.end(), [](auto a, auto b) { return a.name < b.name; });
+
 		return ok;
 	}
 
-	static bool delete_all_patches(FileIoC auto &fileio) {
-		return fileio.foreach_file_with_ext(
-			".yml", [&fileio](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
-				fileio.delete_file(filename);
-			});
-	}
+	static std::optional<ModuleTypeSlug>
+	get_patchname(FileIoC auto &fileio, std::string_view entryname, uint32_t filesize) {
 
-	// Copies patch yml files from one FS to another.
-	// If a file with the same name exists:
-	// 		...when filter==All, it is silently overwritten.
-	// 		...when filter==NewerTimestamp, it is overwritten only if the timestamp differs
-	// static bool copy_patches_from_to(FileIoC auto &from, FileIoC auto &to, FileFilter filter = FileFilter::All) {
-	// 	bool ok = from.foreach_file_with_ext(
-	// 		".yml",
-	// 		[&from, &to, filter](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
-	// 		if (filesize < 12 || filename.starts_with("."))
-	// 			return;
+		if (filesize < 12) {
+			return {};
+		}
 
-	// 		pr_dbg("Found patch file on %s: %s, size: %d, timestamp 0x%x, copying to %s\n",
-	// 			   from.volname().data(),
-	// 			   filename.data(),
-	// 			   filesize,
-	// 			   timestamp,
-	// 			   to.volname());
+		if (!entryname.ends_with(".yml")) {
+			return {};
+		}
 
-	// 		if (filter == FileFilter::NewerTimestamp) {
-	// 			auto to_file_tmstmp = to.get_file_timestamp(filename);
-	// 			if (to_file_tmstmp == 0) {
-	// 				pr_dbg("File %s does not exist on dest FS, creating\n", filename.data());
-	// 			} else if (to_file_tmstmp == timestamp) {
-	// 				pr_dbg("File %s timestamp (0x%x) not changed, skipping\n", filename.data(), timestamp);
-	// 				return;
-	// 			} else
-	// 				pr_dbg(
-	// 					"File %s timestamps differ. from: 0x%x to: 0x%x\n", filename.data(), timestamp, to_file_tmstmp);
-	// 		}
+		// if (entryname.starts_with("."))
+		// 	return {};
 
-	// 		auto contents = _read_patch_to_local_buffer(from, filename);
-	// 		if (contents.size() == 0)
-	// 			return;
+		auto patchname = _read_patch_name(fileio, entryname);
 
-	// 		if (to.update_or_create_file(filename, contents) == false) {
-	// 			pr_err("Could not create file %s on ram disk\n", filename.data());
-	// 			return;
-	// 		}
+		if (patchname.data()[0] == 0)
+			return {};
 
-	// 		to.set_file_timestamp(filename, timestamp);
-	// 		});
-
-	// 	if (!ok) {
-	// 		pr_err("PatchStorage failed to copy patches on %s.\n", from.volname().data());
-	// 		return false;
-	// 	}
-	// 	return true;
-	// }
-
-	// Delete all patch files on a FS which are not present on a reference FS
-	static bool remove_patch_files_not_matching(FileIoC auto &reference, FileIoC auto &fileio) {
-		bool ok = reference.foreach_file_with_ext(
-			".yml", [&reference, &fileio](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
-				//TODO: use get_file_info since timestamp might not be working on LFS since it's a custom attribute?
-				auto tm = fileio.get_file_timestamp(filename);
-				if (tm == 0)
-					fileio.delete_file(filename);
-			});
-		return ok;
+		return patchname;
 	}
 
 	static bool create_default_patches(FileIoC auto &fileio) {
@@ -143,7 +119,7 @@ public:
 			const auto filename = DefaultPatches::get_filename(i);
 			const auto patch = DefaultPatches::get_patch(i);
 
-			pr_dbg("Creating default patch file: %s\n", filename.c_str());
+			pr_trace("Creating default patch file: %s\n", filename.c_str());
 
 			// Remove trailing null terminator that we get from storing default patches as strings
 			if (patch.back() == '\0')
@@ -158,19 +134,6 @@ public:
 	}
 
 private:
-	static size_t filename_hash(const std::string_view fname) {
-		unsigned int h = 2166136261;
-		for (auto &c : fname)
-			h = (h * 16777619) ^ c;
-		return h;
-	}
-
-	// static std::string_view trim_buf_leading_newlines(auto &_buf) {
-	// 	std::string_view v{_buf.data(), _buf.size()};
-	// 	v.remove_prefix(std::min(v.find_first_not_of("\n\r"), v.size()));
-	// 	return v;
-	// }
-
 	static ModuleTypeSlug _read_patch_name(FileIoC auto &fileio, const std::string_view filename) {
 		constexpr uint32_t HEADER_SIZE = 64;
 		std::array<char, HEADER_SIZE> _buf;
@@ -186,7 +149,7 @@ private:
 		std::string_view name_tag{"patch_name"};
 		auto startpos = header.find(name_tag);
 		if (startpos == header.npos) {
-			pr_dbg("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
+			pr_trace("File does not contain '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
 			return "";
 		}
 

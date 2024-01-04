@@ -92,7 +92,6 @@ uint32_t align_up_1M(uint32_t size) {
 	return aligned + OFFSET_1M;
 }
 
-
 void create_aligned_section(uint32_t *ttb, uint32_t base_address, uint32_t size, uint32_t descriptor_l1) {
 	uint32_t end_address = align_up_1M(base_address + size);
 	base_address = align_down_1M(base_address);
@@ -124,11 +123,13 @@ void MMU_CreateTranslationTable(void) {
 	create_aligned_section(TTB_BASE, A7_HEAP, A7_HEAP_SZ, Sect_Normal_RW);
 
 	//.ddma: non-cacheable
-	// Note: section_so is quite a bit faster than section_normal_nc
-	create_aligned_section(TTB_BASE, DMABUF, DMABUF_SZ, Sect_StronglyOrdered);
+	// Note: section_so is quite a bit faster than section_normal_nc (sometimes)
+	// But section_normal_* supports unaligned access
+	create_aligned_section(TTB_BASE, DMABUF, DMABUF_SZ, Sect_Normal_NonCache);
 
-	//.virtdrive: non-cacheable
-	create_aligned_section(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ, Sect_StronglyOrdered);
+	//virtdrive and firmware loading buffer: non-cacheable
+	create_aligned_section(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ, Sect_Normal_NonCache);
+	create_aligned_section(TTB_BASE, FWBUFFER, FWBUFFER_SZ, Sect_Normal_NonCache);
 
 	//M4 heap/data
 	create_aligned_section(TTB_BASE, M4_RODATA, M4_RODATA_SZ, Sect_StronglyOrdered);

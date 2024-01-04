@@ -1,0 +1,17 @@
+{
+"version": 123,
+"files": [
+	{
+		"type": "app",
+		"filename": "main.uimg",
+		"filesize": 5298588,
+		"md5": "1f80aea43ae55f64b402b4ff47124797",
+		"version":
+		{
+			"major": 0,
+			"minor": 7,
+			"minor": 0,
+		}
+	}
+]
+}

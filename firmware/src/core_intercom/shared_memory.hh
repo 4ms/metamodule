@@ -2,6 +2,7 @@
 #include "audio/auxsignal.hh"
 #include "conf/ramdisk_conf.hh"
 #include "params/param_block.hh"
+#include "patch_file/patch_dir_list.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include <cstdint>
 #include <span>
@@ -9,11 +10,10 @@
 namespace MetaModule
 {
 //fwd declare to reduce dependencies
-class PatchICCMessage;
-class PatchFileList;
+class IntercoreStorageMessage;
 class PatchPlayer;
 class PatchPlayLoader;
-class PatchStorageProxy;
+class FileStorageProxy;
 class SyncParams;
 
 //TODO: Move this structure to static_buffers.hh and declar static inline ptrs there too
@@ -22,12 +22,12 @@ struct SharedMemoryS {
 		DoubleBufParamBlock *param_block;
 		DoubleAuxStreamBlock *auxsignal_block;
 		RamDrive *ramdrive;
-		volatile PatchICCMessage *icc_message;
-		PatchFileList *patch_file_list;
+		IntercoreStorageMessage *icc_message;
 		std::span<char> *raw_patch_span;
 		PatchPlayer *patch_player;
 		PatchPlayLoader *patch_playloader;
-		PatchStorageProxy *patch_storage;
+		const PatchDirList *patch_dir_list;
+		FileStorageProxy *patch_storage;
 		SyncParams *sync_params;
 		PatchModQueue *patch_mod_queue;
 	};

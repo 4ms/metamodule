@@ -5,14 +5,16 @@
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "fs/time_convert.hh"
+#include "git_version.h"
 #include "hsem_handler.hh"
 #include "params.hh"
-#include "patch_file/patch_storage_proxy.hh"
-#include "patch_file/patchlist.hh"
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_player.hh"
 #include "patch_play/patch_playloader.hh"
 #include "system/time.hh"
+#include "uart_log.hh"
+
 // #include "core_intercom/semaphore_action.hh" //TODO use this
 
 #ifdef ENABLE_WIFI_BRIDGE
@@ -24,7 +26,7 @@ namespace MetaModule
 
 constexpr inline bool reset_to_factory_patches = false;
 
-struct SystemInit : AppStartup, Debug, Hardware {
+struct SystemInit : AppStartup, UartLog, Debug, Hardware {
 } _sysinit;
 
 } // namespace MetaModule
@@ -36,11 +38,13 @@ void main() {
 
 	HAL_Delay(50);
 	print_time();
+	printf("Build: %s (%s)\n", GIT_HASH.data(), GIT_COMMIT_TIME.data());
+	printf("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
 
 	PatchPlayer patch_player;
-	PatchStorageProxy patch_storage_proxy{
-		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
-	PatchPlayLoader patch_playloader{patch_storage_proxy, patch_player};
+	FileStorageProxy file_storage_proxy{
+		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::patch_dir_list};
+	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
 
 	SyncParams sync_params;
 	PatchModQueue patch_mod_queue;
@@ -58,11 +62,11 @@ void main() {
 						   &StaticBuffers::auxsignal_block,
 						   &StaticBuffers::virtdrive,
 						   &StaticBuffers::icc_shared_message,
-						   &StaticBuffers::shared_patch_file_list,
-						   &StaticBuffers::raw_patch_span,
+						   &StaticBuffers::raw_patch_span, //DEPRECATE
 						   &patch_player,
 						   &patch_playloader,
-						   &patch_storage_proxy,
+						   &StaticBuffers::patch_dir_list,
+						   &file_storage_proxy,
 						   &sync_params,
 						   &patch_mod_queue};
 
@@ -73,7 +77,9 @@ void main() {
 	WifiUpdate::run();
 	#endif
 
-	pr_info("A7 initialized.\n");
+	pr_info("A7 Core 1 initialized\n");
+
+	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for other cores to be ready

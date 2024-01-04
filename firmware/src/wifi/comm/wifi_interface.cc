@@ -36,21 +36,22 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
 {
     auto CreateVector = [&fbb](auto fileList)
     {
-        std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.size());
-        for (std::size_t i=0; i<fileList.size(); i++)
+        std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.files.size());
+        for (std::size_t i=0; i<fileList.files.size(); i++)
         {
-            auto thisName = fbb.CreateString(std::string_view(fileList[i].patchname));
+            auto thisName = fbb.CreateString(std::string_view(fileList.files[i].patchname));
 
-            auto thisFilename = fbb.CreateString(std::string_view(fileList[i].filename));
+            auto thisFilename = fbb.CreateString(std::string_view(fileList.files[i].filename));
             auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename);
             elems[i] = thisInfo;
         };
+		//TODO: add directories, and files inside directories
         return fbb.CreateVector(elems);
     };
 
-    auto usbList = CreateVector(SharedMemoryS::ptrs.patch_file_list->usb);
-    auto flashList = CreateVector(SharedMemoryS::ptrs.patch_file_list->norflash);
-    auto sdcardList = CreateVector(SharedMemoryS::ptrs.patch_file_list->sdcard);
+    auto usbList = CreateVector(SharedMemoryS::ptrs.patch_dir_list->volume_root(Volume::USB));
+    auto flashList = CreateVector(SharedMemoryS::ptrs.patch_dir_list->volume_root(Volume::NorFlash));
+    auto sdcardList = CreateVector(SharedMemoryS::ptrs.patch_dir_list->volume_root(Volume::SDCard));
 
     auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
     auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());

@@ -1,4 +1,5 @@
 #pragma once
+#include "fs/dir_entry_kind.hh"
 #include "fs/volumes.hh"
 #include <filesystem>
 #include <fstream>
@@ -9,11 +10,11 @@
 struct HostFileIO {
 	using Volume = MetaModule::Volume;
 	const Volume _vol;
-	const std::string_view _patch_dir;
+	std::filesystem::path _patch_dir;
 
 	HostFileIO(Volume vol_id, std::string_view patch_dir)
 		: _vol{vol_id}
-		, _patch_dir{patch_dir} {
+		, _patch_dir{std::filesystem::absolute(patch_dir)} {
 	}
 
 	bool foreach_file_with_ext(const std::string_view extension, auto action) {
@@ -39,8 +40,58 @@ struct HostFileIO {
 		return true;
 	}
 
+	// Returns false if dir cannot be opened
+	bool foreach_dir_entry(const std::string_view path, auto action) {
+		namespace fs = std::filesystem;
+
+		fs::current_path(_patch_dir);
+
+		std::string f_path;
+
+		if (path == "") {
+			f_path = ".";
+		} else if (path.starts_with("/")) {
+			f_path = std::string(".").append(path);
+		} else {
+			f_path = path;
+		}
+		fs::path full_path{f_path};
+
+		std::cout << "HostFileIO: foreach_dir_entry() in " << full_path << "\n";
+
+		try {
+			for (const auto &entry : fs::directory_iterator(full_path)) {
+				auto fn = entry.path();
+				auto entry_type = (entry.is_directory()) ? DirEntryKind::Dir : DirEntryKind::File;
+
+				auto last_modif = fs::last_write_time(fn);
+				auto timestamp = last_modif.time_since_epoch().count();
+
+				auto sz = entry.is_directory() ? 0 : (uint32_t)fs::file_size(fn);
+				std::string name = fn.filename().string();
+
+				action(std::string_view{name}, (uint32_t)timestamp, (uint32_t)sz, entry_type);
+			}
+		} catch (const fs::filesystem_error &e) {
+			std::cout << "Error: " << e.what() << std::endl;
+			return false;
+		}
+
+		return true;
+	}
+
 	uint64_t read_file(const std::string_view filename, std::span<char> buffer) {
-		std::ifstream ifs(filename.data(), std::ios::in);
+		std::filesystem::current_path(_patch_dir);
+
+		// Interpret "/" root dir as _patch_dir
+		std::string filepath;
+		if (filename.starts_with("/"))
+			filepath = "." + std::string(filename);
+		else
+			filepath = filename;
+
+		std::cout << "HostFileIO: read " << filepath << "\n";
+		std::ifstream ifs(filepath, std::ios::in);
 		uint64_t sz = 0;
 		if (ifs.is_open()) {
 			ifs.seekg(0, std::ios::end);

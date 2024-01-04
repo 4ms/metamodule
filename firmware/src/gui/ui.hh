@@ -6,8 +6,7 @@
 #include "params/params_dbg_print.hh"
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
-#include "patch_file/patch_storage_proxy.hh"
-#include "patch_file/patchlist.hh"
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
 
@@ -20,6 +19,8 @@ static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2 alignas(6
 
 class Ui {
 private:
+	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
+
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
 
@@ -30,13 +31,9 @@ private:
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
-	static inline UartLog init_uart;
-	static inline LVGLDriver gui{
-		MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
-
 public:
 	Ui(PatchPlayLoader &patch_playloader,
-	   PatchStorageProxy &patch_storage,
+	   FileStorageProxy &patch_storage,
 	   SyncParams &sync_params,
 	   PatchModQueue &patch_mod_queue)
 		: sync_params{sync_params}

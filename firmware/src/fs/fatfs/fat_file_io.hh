@@ -1,9 +1,11 @@
 #pragma once
 #include "disk_ops.hh"
+#include "fs/dir_entry_kind.hh"
 #include "fs/volumes.hh"
 #include "pr_dbg.hh"
 #include <cstdint>
 #include <span>
+#include <string>
 #include <string_view>
 
 // defined in fatfs/diskio.cc:
@@ -18,10 +20,10 @@ inline PARTITION VolToPart[FF_VOLUMES] = {
 class FatFileIO {
 	using Volume = MetaModule::Volume;
 
-	FATFS fs;
+	FATFS fs{};
 	const Volume _vol;
-	char _fatvol[3];
-	char _volname[8];
+	const char _fatvol[3];	//NOLINT
+	const char _volname[8]; //NOLINT
 
 public:
 	struct __attribute__((packed)) FileInfo {
@@ -36,8 +38,8 @@ public:
 
 	FatFileIO(DiskOps *diskops, Volume vol_id)
 		: _vol{vol_id}
-		, _fatvol{char(char(_vol) + '0'), ':', '\0'}
-		, _volname{'F', 'A', 'T', 'F', 'S', ':', char(char(_vol) + '0'), '\0'} {
+		, _fatvol{char(char(vol_id) + '0'), ':', '\0'}
+		, _volname{'F', 'A', 'T', 'F', 'S', ':', char(char(vol_id) + '0'), '\0'} {
 		if (!fatfs_register_disk(diskops, static_cast<unsigned>(_vol))) {
 			pr_err("Failed to register FAT FS Disk %d\n", _vol);
 		}
@@ -125,7 +127,7 @@ public:
 				return false;
 		}
 
-		UINT bytes_written;
+		UINT bytes_written = 0;
 		auto res = f_write(&fil, data, sz, &bytes_written);
 		if (res != FR_OK || bytes_written != sz)
 			return false;
@@ -193,7 +195,7 @@ public:
 
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
 		FIL fil;
-		UINT bytes_read;
+		UINT bytes_read = 0;
 
 		f_chdrive(_fatvol);
 
@@ -253,6 +255,37 @@ public:
 				uint32_t timestamp = rawtimestamp(fno);
 				action(fno.fname, timestamp, fno.fsize);
 			}
+		}
+		return true;
+	}
+
+	// Returns false if dir cannot be opened
+	bool foreach_dir_entry(const std::string_view path, auto action) {
+		DIR dj;
+		FILINFO fno;
+
+		f_chdrive(_fatvol);
+
+		auto full_path = std::string(path);
+		pr_trace("FatFS: scanning dir %s\n", full_path.c_str());
+
+		if (f_opendir(&dj, full_path.c_str()) != FR_OK) {
+			if (!mount_disk())
+				return false;
+			if (f_opendir(&dj, full_path.c_str()) != FR_OK)
+				return false;
+		}
+
+		while (f_readdir(&dj, &fno) == FR_OK) {
+			if (fno.fname[0] == '\0')
+				break;
+			auto entry_type = (fno.fattrib & AM_DIR) ? DirEntryKind::Dir : DirEntryKind::File;
+			uint32_t timestamp = rawtimestamp(fno);
+
+			pr_trace("Found dir entry %s type %d\n", fno.fname, entry_type);
+
+			// std::string file_path = full_path + std::string(fno.fname);
+			action(fno.fname, timestamp, fno.fsize, entry_type);
 		}
 		return true;
 	}

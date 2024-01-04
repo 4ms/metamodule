@@ -12,6 +12,7 @@
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include "util/oscs.hh"
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <cstdint>
@@ -289,7 +290,7 @@ public:
 	}
 
 	float get_module_light(uint16_t module_id, uint16_t light_id) const {
-		if (module_id < pd.module_slugs.size())
+		if (is_loaded && module_id < pd.module_slugs.size())
 			return modules[module_id]->get_led_brightness(light_id);
 		else
 			return 0;
@@ -308,6 +309,25 @@ public:
 	void add_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
 		if (pd.add_update_mapped_knob(knobset_id, map)) {
 			cache_knob_mapping(knobset_id, map);
+		}
+	}
+
+	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map, float cur_val) {
+		auto found =
+			std::find_if(knob_conns[knobset_id][map.panel_knob_id].begin(),
+						 knob_conns[knobset_id][map.panel_knob_id].end(),
+						 [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
+		if (found != knob_conns[knobset_id][map.panel_knob_id].end()) {
+			found->min = map.min;
+			found->max = map.max;
+			found->curve_type = map.curve_type;
+			set_panel_param(map.panel_knob_id, cur_val);
+		}
+	}
+
+	void remove_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
+		if (pd.remove_mapping(knobset_id, map)) {
+			uncache_knob_mapping(knobset_id, map);
 		}
 	}
 
@@ -552,10 +572,19 @@ private:
 	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
 		if (knob_set >= knob_conns.size())
 			return;
-
 		if (k.panel_knob_id < PanelDef::NumKnobs) {
 			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
 		}
+	}
+
+	//Remove a mapping
+	void uncache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
+		if (knob_set >= knob_conns.size())
+			return;
+		if (k.panel_knob_id >= knob_conns[knob_set].size())
+			return;
+		std::erase_if(knob_conns[knob_set][k.panel_knob_id],
+					  [&k](auto m) { return (k.module_id == m.module_id && k.param_id == m.param_id); });
 	}
 
 	void cache_midi_mapping(const MappedKnob &k) {

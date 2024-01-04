@@ -298,7 +298,8 @@ typedef struct
 #define SDMMC_SINGLE_BUS_SUPPORT           ((uint32_t)0x00010000U)
 #define SDMMC_CARD_LOCKED                  ((uint32_t)0x02000000U)
 
-#define SDMMC_DATATIMEOUT                  ((uint32_t)0xFFFFFFFFU)
+//#define SDMMC_DATATIMEOUT                  ((uint32_t)0xFFFFFFFFU)
+#define SDMMC_DATATIMEOUT                  ((uint32_t)0x00100000U)
 
 #define SDMMC_0TO7BITS                     ((uint32_t)0x000000FFU)
 #define SDMMC_8TO15BITS                    ((uint32_t)0x0000FF00U)

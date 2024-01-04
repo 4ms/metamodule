@@ -27,8 +27,8 @@ struct PatchViewKnobsetMenu {
 		static bool already_init = false;
 		if (!already_init) {
 			lv_obj_set_parent(ui_KnobsetMenu, lv_layer_top());
-			lv_obj_add_event_cb(ui_KnobButton, knob_button_cb, LV_EVENT_PRESSED, this);
-			lv_obj_add_event_cb(ui_KnobsetCloseButton, knob_button_cb, LV_EVENT_PRESSED, this);
+			lv_obj_add_event_cb(ui_KnobButton, knob_button_cb, LV_EVENT_RELEASED, this);
+			lv_obj_add_event_cb(ui_KnobsetCloseButton, knob_button_cb, LV_EVENT_RELEASED, this);
 
 			visible = false;
 			lv_obj_set_x(ui_KnobsetMenu, 220);
@@ -39,7 +39,7 @@ struct PatchViewKnobsetMenu {
 		}
 	}
 
-	void focus(lv_group_t *group, std::vector<MappedKnobSet> &knobsets) {
+	void prepare_focus(lv_group_t *group, std::vector<MappedKnobSet> &knobsets) {
 
 		base_group = group;
 		knobset_menu_group = lv_group_create();
@@ -62,7 +62,7 @@ struct PatchViewKnobsetMenu {
 				}
 
 				// View/info button;
-				lv_obj_add_event_cb(view, knobset_view_button_cb, LV_EVENT_PRESSED, this);
+				lv_obj_add_event_cb(view, knobset_view_button_cb, LV_EVENT_RELEASED, this);
 				lv_group_add_obj(knobset_menu_group, view);
 
 				// Switch checkbox
@@ -179,7 +179,7 @@ struct PatchViewKnobsetMenu {
 		lv_event_code_t event_code = lv_event_get_code(event);
 		auto obj = lv_event_get_target(event);
 
-		if (event_code == LV_EVENT_PRESSED) {
+		if (event_code == LV_EVENT_RELEASED) {
 			auto page = static_cast<PatchViewKnobsetMenu *>(event->user_data);
 
 			for (unsigned i = 0; auto *panel : page->knobset_list) {
@@ -187,6 +187,7 @@ struct PatchViewKnobsetMenu {
 
 				if (view == obj) {
 					page->requested_knobset_view = i;
+					lv_obj_clear_state(view, LV_STATE_CHECKED); //it's a radio, so clear the checked state
 				}
 
 				i++;

@@ -9,6 +9,7 @@ MEMORY
 {
     ROM (rx)			: ORIGIN = _A7_CODE,		LENGTH = _A7_CODE_SZ
 	VIRTDRIVE (rw)		: ORIGIN = _VIRTDRIVE,		LENGTH = _VIRTDRIVE_SZ 
+	FWBUFFER (rw)		: ORIGIN = _FWBUFFER,		LENGTH = _FWBUFFER_SZ 
 	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
 	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
 
@@ -127,6 +128,11 @@ SECTIONS
 	{
 		*(.virtdrive)
 	} > VIRTDRIVE
+
+	.fwbuffer (NOLOAD):
+	{
+		*(.fwbuffer)
+	} > FWBUFFER
 
     _user_stack_start = _ram_aligned_end;
     _user_stack_end = _user_stack_start + 0x80000; /* 512k */

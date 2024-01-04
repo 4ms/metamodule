@@ -1,8 +1,9 @@
 #pragma once
+#include "fs/dir_entry_kind.hh"
 #include "fs/volumes.hh"
 #include "patch_file/patches_default.hh"
+#include "pr_dbg.hh"
 #include <cstring>
-#include <iostream>
 #include <span>
 #include <string_view>
 
@@ -26,11 +27,25 @@ struct DefaultPatchFileIO {
 		return true;
 	}
 
-	uint64_t read_file(const std::string_view filename, std::span<char> buffer) {
+	bool foreach_dir_entry(const std::string_view path, auto action) {
+		auto num_patches = DefaultPatches::num_patches();
+
+		for (unsigned i = 0; i < num_patches; i++) {
+			auto filename = DefaultPatches::get_filename(i);
+			auto filedata = DefaultPatches::get_patch(i);
+			action(std::string_view{filename}, 0, filedata.size_bytes(), DirEntryKind::File);
+		}
+
+		return true;
+	}
+
+	uint64_t read_file(std::string_view filename, std::span<char> buffer) {
 		uint64_t sz = 0;
 		auto num_patches = DefaultPatches::num_patches();
 
 		for (unsigned i = 0; i < num_patches; i++) {
+			if (filename.starts_with("/"))
+				filename = filename.substr(1);
 
 			if (DefaultPatches::get_filename(i) == filename) {
 				const auto file = DefaultPatches::get_patch(i);
