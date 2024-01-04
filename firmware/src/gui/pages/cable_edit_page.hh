@@ -21,18 +21,16 @@ struct CableEditPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		auto cable_from_label = ui_comp_get_child(ui_CableFromEditButton, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
-		lv_label_set_text(cable_from_label, "(Add connection)");
+		// blur();
 
 		lv_group_remove_all_objs(group);
 
-		auto num_tos = lv_obj_get_child_cnt(ui_CableToPanel);
-		for (unsigned i = 0; i < num_tos; i++) {
-			auto child = lv_obj_get_child(ui_CableToPanel, i);
-			lv_obj_del_async(child);
-		}
+		// lv_foreach_child(ui_CableToPanel, [](auto *obj, unsigned) {
+		// 	lv_obj_del_async(obj);
+		// 	return true;
+		// });
 
-		lv_group_add_obj(group, ui_CableFromEditButton);
+		// lv_group_add_obj(group, ui_CableFromEditButton);
 
 		if (!args.module_id || !args.element_counts || !args.element_indices) {
 			pr_err("Missing page argument for cable edit page\n");
@@ -44,27 +42,19 @@ struct CableEditPage : PageBase {
 		indices = args.element_indices.value();
 
 		if (counts.num_inputs > 0) {
-			Jack in_jack = {.module_id = module_id, .jack_id = indices.input_idx};
-			auto *cable = patch.find_internal_cable_with_injack(in_jack);
-
-			if (cable) {
-				MappingPaneList::style_mappedcable_item(cable->out, ElementType::Output, patch, ui_CableFromEditButton);
-				add_connected_inputs(cable);
-			}
-
-			add_mapped_in(patch.find_mapped_injack(in_jack));
-
+			find_connections_to_input_jack();
 		} else if (counts.num_outputs > 0) {
-			out_jack = {.module_id = module_id, .jack_id = indices.output_idx};
-			add_connected_inputs(patch.find_internal_cable_with_outjack(out_jack));
+			find_connections_to_output_jack();
+		} else {
+			pr_err("Error: no jack specified\n");
+			return;
+		}
 
-			add_mapped_out(patch.find_mapped_outjack(out_jack));
-			MappingPaneList::style_mappedcable_item(out_jack, ElementType::Output, patch, ui_CableFromEditButton);
-
-		} else
-			return; //not an input or output
-
-		lv_label_set_text(ui_CableMapPageTitle, in_jack_objs.size() > 0 ? "Edit Connections" : "Add Cable");
+		if (in_jack_objs.size() == 0) {
+			show_add_cable();
+		} else {
+			show_edit_cable();
+		}
 
 		lv_group_add_obj(group, ui_CableDeleteButton);
 		lv_group_add_obj(group, ui_CableCancel);
@@ -83,17 +73,8 @@ struct CableEditPage : PageBase {
 		in_jack_objs.clear();
 	}
 
-	void add_mapped_in(const MappedInputJack *mapped_in) {
-		if (!mapped_in)
-			return;
-
-		MappingPaneList::style_panel_incable_item(mapped_in->panel_jack_id, ui_CableFromEditButton);
-
-		InternalCable cable{.out = {}, .ins = mapped_in->ins};
-		add_connected_inputs(&cable);
-	}
-
-	void add_mapped_out(const MappedOutputJack *mapped_out) {
+	// Mapped Panel Output == technically an Input jack, so it's in the "To" section
+	void add_panel_output(const MappedOutputJack *mapped_out) {
 		if (!mapped_out)
 			return;
 
@@ -110,25 +91,75 @@ struct CableEditPage : PageBase {
 			return;
 
 		for (auto in : int_cable->ins) {
-			printf("Create item in CableToPanel\n");
-			auto button = MappingPaneList::create_cable_item(in, ElementType::Input, patch, ui_CableToPanel);
-			lv_obj_add_flag(button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
-			lv_group_add_obj(group, button);
-			in_jack_objs.push_back(button);
+			add_input_jack(in);
 		}
+	}
+
+	void add_input_jack(Jack const &in) {
+		pr_trace("Create item in CableToPanel\n");
+		auto button = MappingPaneList::create_cable_item(in, ElementType::Input, patch, ui_CableToPanel);
+		lv_obj_add_flag(button, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_group_add_obj(group, button);
+		in_jack_objs.push_back(button);
 	}
 
 private:
 	PatchData &patch;
 
 	std::vector<lv_obj_t *> in_jack_objs;
-	Jack out_jack;
+	Jack out_jack{};
 	// std::array<Jack, 8> in_jacks;
 
 	// The jack that brought us to this page:
 	uint16_t module_id = 0;
 	ElementCount::Counts counts{};
 	ElementCount::Indices indices{};
+
+	void find_connections_to_input_jack() {
+		no_from_jack(); //default
+
+		Jack in_jack = {.module_id = module_id, .jack_id = indices.input_idx};
+		add_input_jack(in_jack);
+
+		// Look for connected internal cables
+		auto *cable = patch.find_internal_cable_with_injack(in_jack);
+		if (cable) {
+			MappingPaneList::style_mappedcable_item(cable->out, ElementType::Output, patch, ui_CableFromEditButton);
+			add_connected_inputs(cable);
+		}
+
+		// Look for mapped panel jacks
+		auto mapped_cable = patch.find_mapped_injack(in_jack);
+		if (mapped_cable) {
+			MappingPaneList::style_panel_incable_item(mapped_cable->panel_jack_id, ui_CableFromEditButton);
+			InternalCable cable{.out = {}, .ins = mapped_cable->ins};
+			add_connected_inputs(&cable);
+		}
+	}
+
+	void find_connections_to_output_jack() {
+		out_jack = {.module_id = module_id, .jack_id = indices.output_idx};
+		add_connected_inputs(patch.find_internal_cable_with_outjack(out_jack));
+
+		add_panel_output(patch.find_mapped_outjack(out_jack));
+		MappingPaneList::style_mappedcable_item(out_jack, ElementType::Output, patch, ui_CableFromEditButton);
+	}
+
+	void no_from_jack() {
+		auto cable_outjack_label = ui_comp_get_child(ui_CableFromEditButton, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
+		lv_label_set_text(cable_outjack_label, "(Connect to a jack)");
+
+		auto cable_outjack_circle = ui_comp_get_child(ui_CableFromEditButton, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
+		lv_hide(cable_outjack_circle);
+	}
+
+	void show_add_cable() {
+		lv_label_set_text(ui_CableMapPageTitle, "Add Cable");
+	}
+
+	void show_edit_cable() {
+		lv_label_set_text(ui_CableMapPageTitle, "Edit Cable");
+	}
 };
 
 } // namespace MetaModule
