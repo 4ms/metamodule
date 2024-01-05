@@ -13,7 +13,7 @@ struct QCDInfo : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 50> Elements{{
+    static constexpr std::array<Element, 54> Elements{{
 		Knob9mm{{to_mm<72>(67.25), to_mm<72>(58.66), Center, "Gate PW Att 1", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(108.76), to_mm<72>(60.04), Center, "Gate PW 1", ""}},
 		Knob9mm{{to_mm<72>(153.48), to_mm<72>(81.3), Center, "Div Mult CV 1", ""}},
@@ -30,7 +30,11 @@ struct QCDInfo : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(108.76), to_mm<72>(286.84), Center, "Gate PW 4", ""}},
 		Knob9mm{{to_mm<72>(153.48), to_mm<72>(288.47), Center, "Div Mult CV 4", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(202.43), to_mm<72>(292.41), Center, "Div Mult 4", ""}},
-		WhiteMomentary7mm{{to_mm<72>(192.73), to_mm<72>(42.56), Center, "Tap Button", ""}},
+		Toggle3posHoriz{{to_mm<72>(63.54), to_mm<72>(317.445), Center, "Inv Mode 1", ""}},
+		Toggle3posHoriz{{to_mm<72>(63.54), to_mm<72>(241.845), Center, "Inv Mode 2", ""}},
+		Toggle3posHoriz{{to_mm<72>(63.54), to_mm<72>(166.245), Center, "Inv Mode 3", ""}},
+		Toggle3posHoriz{{to_mm<72>(63.54), to_mm<72>(90.655), Center, "Inv Mode 4", ""}},
+		WhiteMomentary7mm{{to_mm<72>(192.73), to_mm<72>(42.56), Center, "Tap Tempo", ""}},
 		AnalogJackInput4ms{{to_mm<72>(23.39), to_mm<72>(55.0), Center, "Gate PW CV 1", ""}},
 		AnalogJackInput4ms{{to_mm<72>(249.58), to_mm<72>(76.7), Center, "Div Mult CV 1 Jack", ""}},
 		GateJackInput4ms{{to_mm<72>(296.32), to_mm<72>(42.31), Center, "Clk In 1", ""}},
@@ -56,14 +60,14 @@ struct QCDInfo : ModuleInfoBase {
 		GateJackOutput4ms{{to_mm<72>(296.32), to_mm<72>(228.07), Center, "Out 3", ""}},
 		GateJackOutput4ms{{to_mm<72>(23.39), to_mm<72>(316.36), Center, "Inv Out 4", ""}},
 		GateJackOutput4ms{{to_mm<72>(296.32), to_mm<72>(303.67), Center, "Out 4", ""}},
-		RedGreenBlueLight{{to_mm<72>(48.06), to_mm<72>(89.91), Center, "Inv LED 1", ""}},
-		RedGreenBlueLight{{to_mm<72>(273.46), to_mm<72>(77.07), Center, "LED 1", ""}},
-		RedGreenBlueLight{{to_mm<72>(48.06), to_mm<72>(165.51), Center, "Inv LED 2", ""}},
-		RedGreenBlueLight{{to_mm<72>(273.46), to_mm<72>(152.67), Center, "LED 2", ""}},
-		RedGreenBlueLight{{to_mm<72>(47.68), to_mm<72>(240.97), Center, "Inv LED 3", ""}},
-		RedGreenBlueLight{{to_mm<72>(273.46), to_mm<72>(228.27), Center, "LED 3", ""}},
-		RedGreenBlueLight{{to_mm<72>(47.87), to_mm<72>(316.71), Center, "Inv LED 4", ""}},
-		RedGreenBlueLight{{to_mm<72>(273.46), to_mm<72>(303.87), Center, "LED 4", ""}},
+		RedLight{{to_mm<72>(43.62), to_mm<72>(83.18), Center, "Inv 1 Light", ""}},
+		RedLight{{to_mm<72>(273.46), to_mm<72>(77.07), Center, "Out 1 Light", ""}},
+		WhiteLight{{to_mm<72>(43.62), to_mm<72>(158.8), Center, "Inv 2 Light", ""}},
+		WhiteLight{{to_mm<72>(273.46), to_mm<72>(152.67), Center, "Out 2 Light", ""}},
+		BlueLight{{to_mm<72>(43.24), to_mm<72>(234.26), Center, "Inv 3 Light", ""}},
+		BlueLight{{to_mm<72>(273.46), to_mm<72>(228.27), Center, "Out 3 Light", ""}},
+		GreenLight{{to_mm<72>(43.43), to_mm<72>(310.0), Center, "Inv 4 Light", ""}},
+		GreenLight{{to_mm<72>(273.46), to_mm<72>(303.87), Center, "Out 4 Light", ""}},
 }};
 
     enum class Elem {
@@ -83,7 +87,11 @@ struct QCDInfo : ModuleInfoBase {
         GatePw4Knob,
         DivMultCv4Knob,
         DivMult4Knob,
-        TapButton,
+        InvMode1Switch,
+        InvMode2Switch,
+        InvMode3Switch,
+        InvMode4Switch,
+        TapTempoButton,
         GatePwCv1In,
         DivMultCv1JackIn,
         ClkIn1In,
@@ -109,14 +117,14 @@ struct QCDInfo : ModuleInfoBase {
         Out3Out,
         InvOut4Out,
         Out4Out,
-        InvLed1Light,
-        Led1Light,
-        InvLed2Light,
-        Led2Light,
-        InvLed3Light,
-        Led3Light,
-        InvLed4Light,
-        Led4Light,
+        Inv1Light,
+        Out1Light,
+        Inv2Light,
+        Out2Light,
+        Inv3Light,
+        Out3Light,
+        Inv4Light,
+        Out4Light,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
@@ -142,7 +150,11 @@ struct QCDInfo : ModuleInfoBase {
     };
     
     enum {
-        SwitchTap_Button = 0,
+        SwitchInv_Mode_1 = 0,
+        SwitchInv_Mode_2 = 1,
+        SwitchInv_Mode_3 = 2,
+        SwitchInv_Mode_4 = 3,
+        SwitchTap_Tempo = 4,
         NumSwitches,
     };
     
@@ -180,14 +192,14 @@ struct QCDInfo : ModuleInfoBase {
     };
     
     enum {
-        LedInv_Led_1 = 0,
-        LedLed_1 = 1,
-        LedInv_Led_2 = 2,
-        LedLed_2 = 3,
-        LedInv_Led_3 = 4,
-        LedLed_3 = 5,
-        LedInv_Led_4 = 6,
-        LedLed_4 = 7,
+        LedInv_1_Light = 0,
+        LedOut_1_Light = 1,
+        LedInv_2_Light = 2,
+        LedOut_2_Light = 3,
+        LedInv_3_Light = 4,
+        LedOut_3_Light = 5,
+        LedInv_4_Light = 6,
+        LedOut_4_Light = 7,
         NumDiscreteLeds,
     };
 };
