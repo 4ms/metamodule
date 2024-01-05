@@ -34,14 +34,13 @@ public:
 	}
 
 	static bool write_file(std::span<const char> buffer, FileIoC auto &fileio, const std::string_view filename) {
-		auto bytes_written = fileio.update_or_create_file(filename, buffer);
+		auto success = fileio.update_or_create_file(filename, buffer);
 
-		if (bytes_written != buffer.size_bytes()) {
+		if (not success) {
 			pr_err("Error writing file %.*s\n", (int)filename.size(), filename.data());
-			return false;
 		}
 
-		return true;
+		return success;
 	}
 
 	// Adds all files/dirs to patch_dir
