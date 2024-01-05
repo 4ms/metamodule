@@ -183,6 +183,18 @@ struct BlueLight : MonoLight {
 	}
 };
 
+struct WhiteLight : MonoLight {
+	constexpr WhiteLight(BaseElement b)
+		: MonoLight{{b, "led_x.png"}, Colors565::White} {
+	}
+};
+
+struct GreenLight : MonoLight {
+	constexpr GreenLight(BaseElement b)
+		: MonoLight{{b, "led_x.png"}, Colors565::Green} {
+	}
+};
+
 struct OrangeLight : MonoLight {
 	constexpr OrangeLight(BaseElement b)
 		: MonoLight{{b, "led_x.png"}, Colors565::Orange} {
