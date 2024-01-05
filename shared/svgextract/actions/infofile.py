@@ -306,11 +306,26 @@ def list_elem_definitions(elems, DPI):
         source += f"\"{k['display_name']}\", "
         source += f"\"\"" #long name
         source += f"""}}"""
-        if k['class'] == "Toggle3pos" and "pos_names" in k.keys() and len(k['pos_names']) == 3:
-            source += f""", {{"{k['pos_names'][0]}", "{k['pos_names'][1]}", "{k['pos_names'][2]}"}}""" 
+        source += generate_switch_position_names(k)
         source += f"""}},
 """
     return source
+
+def generate_switch_position_names(elem):
+    TwoPosSwitches = ["Toggle2pos", "Toggle2posHoriz"]
+    ThreePosSwitches = ["Toggle3pos", "Toggle3posHoriz"]
+
+    if "pos_names" not in elem.keys():
+        return ""
+
+    elif elem['class'] in ThreePosSwitches and len(elem['pos_names']) >= 3:
+        return f""", {{"{elem['pos_names'][0]}", "{elem['pos_names'][1]}", "{elem['pos_names'][2]}"}}""" 
+
+    elif elem['class'] in TwoPosSwitches and len(elem['pos_names']) >= 2:
+        return f""", {{"{elem['pos_names'][0]}", "{elem['pos_names'][1]}"}}""" 
+
+    else:
+        return ""
 
 
 def list_elem_names(elems):
