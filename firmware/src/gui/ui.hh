@@ -1,7 +1,7 @@
 #pragma once
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
-#include "gui/message_notification.hh"
+#include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params.hh"
 #include "params/params_dbg_print.hh"
@@ -25,7 +25,7 @@ private:
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
 
-	MessageQueue msg_queue;
+	NotificationQueue notify_queue;
 	PageManager page_manager;
 	ParamsMidiState params;
 	MetaParams metaparams;
@@ -39,8 +39,7 @@ public:
 	   PatchModQueue &patch_mod_queue)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
-		, msg_queue{1024}
-		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
+		, page_manager{patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue} {
 
 		params.clear();
 		metaparams.clear();
@@ -64,13 +63,6 @@ public:
 			page_update_task();
 		}
 
-		auto msg = msg_queue.get_message();
-		if (!msg.empty()) {
-			pr_info("%s", msg.data());
-			MessageNotification::show(msg);
-			msg_queue.clear_message();
-		}
-
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());
@@ -89,9 +81,10 @@ private:
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		page_manager.update_current_page();
+
 		auto load_status = patch_playloader.handle_sync_patch_loading();
 		if (!load_status.success) {
-			msg_queue.append_message(load_status.error_string);
+			notify_queue.put({load_status.error_string, Notification::Priority::Error, 5000});
 		}
 
 		new_patch_data = false;

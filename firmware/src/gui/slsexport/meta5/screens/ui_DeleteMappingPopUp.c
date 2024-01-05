@@ -255,4 +255,313 @@ lv_obj_set_style_pad_right(ui_MessageLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MessageLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MessageLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_Panel1 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel1, 100);
+lv_obj_set_height( ui_Panel1, 50);
+lv_obj_set_align( ui_Panel1, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel1, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel2 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel2, 100);
+lv_obj_set_height( ui_Panel2, 50);
+lv_obj_set_align( ui_Panel2, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel2, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel3 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel3, 100);
+lv_obj_set_height( ui_Panel3, 50);
+lv_obj_set_align( ui_Panel3, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel3, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel3, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel4 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel4, 100);
+lv_obj_set_height( ui_Panel4, 50);
+lv_obj_set_align( ui_Panel4, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel4, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel4, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel5 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel5, 100);
+lv_obj_set_height( ui_Panel5, 50);
+lv_obj_set_align( ui_Panel5, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel5, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel5, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel6 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel6, 100);
+lv_obj_set_height( ui_Panel6, 50);
+lv_obj_set_align( ui_Panel6, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel6, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel6, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel7 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel7, 100);
+lv_obj_set_height( ui_Panel7, 50);
+lv_obj_set_align( ui_Panel7, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel7, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel7, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel8 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel8, 100);
+lv_obj_set_height( ui_Panel8, 50);
+lv_obj_set_align( ui_Panel8, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel8, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel8, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel9 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel9, 100);
+lv_obj_set_height( ui_Panel9, 50);
+lv_obj_set_align( ui_Panel9, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel9, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel9, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel10 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel10, 100);
+lv_obj_set_height( ui_Panel10, 50);
+lv_obj_set_align( ui_Panel10, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel10, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel10, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel11 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel11, 100);
+lv_obj_set_height( ui_Panel11, 50);
+lv_obj_set_align( ui_Panel11, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel11, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel11, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel12 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Panel12, 100);
+lv_obj_set_height( ui_Panel12, 50);
+lv_obj_set_align( ui_Panel12, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel12, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel12, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container2 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container2);
+lv_obj_set_width( ui_Container2, 100);
+lv_obj_set_height( ui_Container2, 50);
+lv_obj_set_align( ui_Container2, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container2, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container3 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container3);
+lv_obj_set_width( ui_Container3, 100);
+lv_obj_set_height( ui_Container3, 50);
+lv_obj_set_align( ui_Container3, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container3, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container3, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container4 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container4);
+lv_obj_set_width( ui_Container4, 100);
+lv_obj_set_height( ui_Container4, 50);
+lv_obj_set_align( ui_Container4, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container4, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container4, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container5 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container5);
+lv_obj_set_width( ui_Container5, 100);
+lv_obj_set_height( ui_Container5, 50);
+lv_obj_set_align( ui_Container5, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container5, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container5, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container6 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container6);
+lv_obj_set_width( ui_Container6, 100);
+lv_obj_set_height( ui_Container6, 50);
+lv_obj_set_align( ui_Container6, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container6, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container6, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container7 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container7);
+lv_obj_set_width( ui_Container7, 100);
+lv_obj_set_height( ui_Container7, 50);
+lv_obj_set_align( ui_Container7, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container7, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container7, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container8 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container8);
+lv_obj_set_width( ui_Container8, 100);
+lv_obj_set_height( ui_Container8, 50);
+lv_obj_set_align( ui_Container8, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container8, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container8, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container9 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container9);
+lv_obj_set_width( ui_Container9, 100);
+lv_obj_set_height( ui_Container9, 50);
+lv_obj_set_align( ui_Container9, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container9, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container9, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container10 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container10);
+lv_obj_set_width( ui_Container10, 100);
+lv_obj_set_height( ui_Container10, 50);
+lv_obj_set_align( ui_Container10, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container10, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container10, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container11 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container11);
+lv_obj_set_width( ui_Container11, 100);
+lv_obj_set_height( ui_Container11, 50);
+lv_obj_set_align( ui_Container11, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container11, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container11, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Container12 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_remove_style_all(ui_Container12);
+lv_obj_set_width( ui_Container12, 100);
+lv_obj_set_height( ui_Container12, 50);
+lv_obj_set_align( ui_Container12, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Container12, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Container12, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Label3 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label3, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label3, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label3, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label3, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Label4 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label4, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label4, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label4, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label4, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Label5 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label5, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label5, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label5, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label5, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Label6 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label6, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label6, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label6, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label6, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Label7 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label7, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label7, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label7, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label7, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Label8 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label8, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label8, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label8, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label8, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Label9 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label9, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label9, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label9, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label9, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Label10 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label10, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label10, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label10, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label10, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Label11 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label11, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label11, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label11, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label11, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Label12 = lv_label_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Label12, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label12, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label12, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Label12, LV_OBJ_FLAG_HIDDEN );   /// Flags
+
+ui_Button2 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button2, 100);
+lv_obj_set_height( ui_Button2, 50);
+lv_obj_set_align( ui_Button2, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button2, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button3 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button3, 100);
+lv_obj_set_height( ui_Button3, 50);
+lv_obj_set_align( ui_Button3, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button3, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button3, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button4 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button4, 100);
+lv_obj_set_height( ui_Button4, 50);
+lv_obj_set_align( ui_Button4, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button4, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button4, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button5 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button5, 100);
+lv_obj_set_height( ui_Button5, 50);
+lv_obj_set_align( ui_Button5, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button5, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button5, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button6 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button6, 100);
+lv_obj_set_height( ui_Button6, 50);
+lv_obj_set_align( ui_Button6, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button6, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button6, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button7 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button7, 100);
+lv_obj_set_height( ui_Button7, 50);
+lv_obj_set_align( ui_Button7, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button7, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button7, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button8 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button8, 100);
+lv_obj_set_height( ui_Button8, 50);
+lv_obj_set_align( ui_Button8, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button8, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button8, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button9 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button9, 100);
+lv_obj_set_height( ui_Button9, 50);
+lv_obj_set_align( ui_Button9, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button9, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button9, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button10 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button10, 100);
+lv_obj_set_height( ui_Button10, 50);
+lv_obj_set_align( ui_Button10, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button10, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button10, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button11 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button11, 100);
+lv_obj_set_height( ui_Button11, 50);
+lv_obj_set_align( ui_Button11, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button11, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button11, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Button12 = lv_btn_create(ui_DeleteMappingPopUp);
+lv_obj_set_width( ui_Button12, 100);
+lv_obj_set_height( ui_Button12, 50);
+lv_obj_set_align( ui_Button12, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Button12, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Button12, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
 }

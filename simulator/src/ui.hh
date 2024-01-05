@@ -1,7 +1,7 @@
 #pragma once
 #include "audio_stream.hh"
 #include "frame.hh"
-#include "gui/message_queue.hh"
+#include "gui/notify/queue.hh"
 #include "gui/pages/page_manager.hh"
 #include "lv_port_indev.h"
 #include "patch_file/file_storage_proxy.hh"
@@ -33,7 +33,7 @@ private:
 	PatchPlayLoader patch_playloader{patch_storage, patch_player};
 	PatchModQueue patch_mod_queue;
 
-	MessageQueue msg_queue;
+	NotificationQueue notify_queue;
 	PageManager page_manager;
 	ParamsMidiState params;
 	MetaParams metaparams;

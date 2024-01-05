@@ -61,6 +61,11 @@ inline void label_clips(lv_obj_t *obj) {
 	}
 }
 
+inline void remove_all_event_cb(lv_obj_t *obj) {
+	while (lv_obj_remove_event_cb(obj, nullptr))
+		;
+}
+
 inline void set_content_max_height(lv_obj_t *obj, lv_coord_t max) {
 	lv_obj_set_height(obj, LV_SIZE_CONTENT);
 	lv_obj_refr_size(obj);

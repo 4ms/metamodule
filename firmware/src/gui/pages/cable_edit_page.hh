@@ -43,10 +43,13 @@ struct CableEditPage : PageBase {
 		indices = args.element_indices.value();
 
 		if (counts.num_inputs > 0) {
+			initial_jack = {module_id, indices.input_idx};
 			find_connections_to_input_jack();
 		} else if (counts.num_outputs > 0) {
+			initial_jack = {module_id, indices.output_idx};
 			find_connections_to_output_jack();
 		} else {
+			initial_jack = {};
 			pr_err("Error: no jack specified\n");
 			return;
 		}
@@ -92,6 +95,7 @@ private:
 	// std::array<Jack, 8> in_jacks;
 
 	// The jack that brought us to this page:
+	Jack initial_jack{};
 	uint16_t module_id = 0;
 	ElementCount::Counts counts{};
 	ElementCount::Indices indices{};
@@ -176,7 +180,10 @@ private:
 		lv_label_set_text(ui_CableDeleteIcon, "OK");
 		lv_obj_set_style_text_font(ui_CableDeleteIcon, &lv_font_montserrat_14, LV_PART_MAIN);
 
+		remove_all_event_cb(ui_CableDeleteButton);
+		lv_obj_add_event_cb(ui_CableDeleteButton, start_new_cable, LV_EVENT_CLICKED, this);
 		lv_group_add_obj(group, ui_CableDeleteButton);
+
 		lv_group_add_obj(group, ui_CableCancel);
 	}
 
@@ -190,8 +197,35 @@ private:
 		lv_label_set_text(ui_CableDeleteIcon, "");
 		lv_obj_set_style_text_font(ui_CableDeleteIcon, &lv_font_montserrat_20, LV_PART_MAIN);
 
+		remove_all_event_cb(ui_CableDeleteButton);
+		lv_obj_add_event_cb(ui_CableDeleteButton, delete_cable, LV_EVENT_CLICKED, this);
 		lv_group_add_obj(group, ui_CableDeleteButton);
+
 		lv_group_add_obj(group, ui_CableCancel);
+	}
+
+	static void delete_cable(lv_event_t *event) {
+		auto page = static_cast<CableEditPage *>(event->user_data);
+		if (!page)
+			return;
+	}
+
+	static void start_new_cable(lv_event_t *event) {
+		auto page = static_cast<CableEditPage *>(event->user_data);
+		if (!page)
+			return;
+
+		auto &jack = page->initial_jack;
+		auto dir = page->counts.num_inputs > 0 ? ElementType::Input : ElementType::Output;
+		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, page->patch);
+		page->gui_state.new_cable_begin_jack = jack;
+		page->gui_state.new_cable_begin_type = dir;
+		page->notify_queue.put(
+			{"Choose a jack to connect to " + std::string(name.module_name) + " " + std::string(name.element_name),
+			 Notification::Priority::Status,
+			 10000});
+
+		page->page_list.request_new_page(PageId::PatchView, page->args);
 	}
 };
 

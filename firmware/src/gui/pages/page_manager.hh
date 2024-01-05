@@ -1,5 +1,6 @@
 #pragma once
-#include "gui/message_queue.hh"
+#include "gui/notify/display.hh"
+#include "gui/notify/queue.hh"
 #include "gui/slsexport/comp_init.hh"
 #include "metaparams.hh"
 #include "params_state.hh"
@@ -43,9 +44,16 @@ public:
 				PatchPlayLoader &patch_playloader,
 				ParamsMidiState &params,
 				MetaParams &metaparams,
-				MessageQueue &msg_queue,
+				NotificationQueue &notify_queue,
 				PatchModQueue &patch_mod_queue)
-		: info{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue, page_list, gui_state} {
+		: info{patch_storage,
+			   patch_playloader,
+			   params,
+			   metaparams,
+			   notify_queue,
+			   patch_mod_queue,
+			   page_list,
+			   gui_state} {
 	}
 
 	void init() {
@@ -62,6 +70,16 @@ public:
 			}
 		} else
 			cur_page->update();
+
+		handle_notifications();
+	}
+
+	void handle_notifications() {
+		auto msg = info.notify_queue.get();
+		if (msg) {
+			pr_info("%s", msg->message.c_str());
+			DisplayNotification::show(*msg);
+		}
 	}
 
 	void debug_print_args(auto newpage) {

@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/panel_conf.hh"
-#include "gui/message_queue.hh"
+#include "gui/elements/element_name.hh"
+#include "gui/notify/queue.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
 #include "lvgl.h"
@@ -18,7 +19,8 @@ namespace MetaModule
 enum class PageChangeDirection { Back, Forward, Jump };
 
 struct GuiState {
-	std::optional<Jack> new_cable_start;
+	std::optional<Jack> new_cable_begin_jack;
+	ElementType new_cable_begin_type{};
 };
 
 struct PatchContext {
@@ -26,7 +28,7 @@ struct PatchContext {
 	PatchPlayLoader &patch_playloader;
 	ParamsMidiState &params;
 	MetaParams &metaparams;
-	MessageQueue &msg_queue;
+	NotificationQueue &notify_queue;
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
 	GuiState &gui_state;
@@ -37,7 +39,7 @@ struct PageBase {
 	PatchPlayLoader &patch_playloader;
 	ParamsMidiState &params;
 	MetaParams &metaparams;
-	MessageQueue &msg_queue;
+	NotificationQueue &notify_queue;
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
 	GuiState &gui_state;
@@ -62,7 +64,7 @@ struct PageBase {
 		, patch_playloader{info.patch_playloader}
 		, params{info.params}
 		, metaparams{info.metaparams}
-		, msg_queue{info.msg_queue}
+		, notify_queue{info.notify_queue}
 		, patch_mod_queue{info.patch_mod_queue}
 		, page_list{info.page_list}
 		, gui_state{info.gui_state}

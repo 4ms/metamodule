@@ -19,12 +19,12 @@ struct ModuleViewPage : PageBase {
 
 	ViewSettings settings;
 
-	ModuleViewPage(PatchContext info)
-		: PageBase{info, PageId::ModuleView}
+	ModuleViewPage(PatchContext context)
+		: PageBase{context, PageId::ModuleView}
 		, map_ring_display{settings}
 		, patch{patch_storage.get_view_patch()}
 		, roller{ui_ElementRoller}
-		, mapping_pane{info.patch_storage, module_mods, params, args, page_list} {
+		, mapping_pane{context.patch_storage, module_mods, params, args, page_list, notify_queue, gui_state} {
 
 		init_bg(ui_MappingMenu);
 
@@ -37,7 +37,6 @@ struct ModuleViewPage : PageBase {
 
 		button.clear();
 		module_controls.clear();
-		mapping_pane.init();
 
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, roller);
@@ -55,13 +54,15 @@ struct ModuleViewPage : PageBase {
 		this_module_id = args.module_id.value_or(this_module_id);
 
 		if (!read_slug()) {
-			msg_queue.append_message("Module View page cannot read module slug.\n");
+			notify_queue.put(
+				{"Cannot determine module to view. Patch file may be corrupted.", Notification::Priority::Error});
 			return;
 		}
 
 		moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
-			msg_queue.append_message("Module View page got empty module info.\r\n");
+			notify_queue.put(
+				{"Cannot show module " + std::string(slug) + ". Never heard of it!", Notification::Priority::Error});
 			return;
 		}
 
@@ -160,6 +161,7 @@ struct ModuleViewPage : PageBase {
 
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 
+		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
 		if (cur_el) {
 			mode = ViewMode::Mapping;
 			mapping_pane.hide();

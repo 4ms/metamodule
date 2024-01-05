@@ -1,13 +1,12 @@
 #include "ui.hh"
-#include "gui/message_notification.hh"
+#include "gui/notify/queue.hh"
 
 namespace MetaModule
 {
 
 Ui::Ui(std::string_view patch_path, size_t block_size)
 	: patch_storage(patch_path)
-	, msg_queue{1024}
-	, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue}
+	, page_manager{patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue}
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
 	params.clear();
@@ -78,19 +77,13 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 
 void Ui::lvgl_update_task() {
 	lv_timer_handler();
-
-	auto msg = msg_queue.get_message();
-	if (!msg.empty()) {
-		MessageNotification::show(msg);
-		msg_queue.clear_message();
-	}
 }
 
 void Ui::page_update_task() { //60Hz
 	page_manager.update_current_page();
 	auto load_status = patch_playloader.handle_sync_patch_loading();
 	if (!load_status.success) {
-		msg_queue.append_message(load_status.error_string);
+		notify_queue.put({load_status.error_string, Notification::Priority::Error, 5000});
 	}
 }
 
