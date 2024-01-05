@@ -59,10 +59,17 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
     return message;
 }
 
-void sendBroadcast(std::span<uint8_t> payload)
+///////////////////////////
+
+void sendFrame(uint8_t channel, std::span<uint8_t> payload)
 {
+    uint16_t payloadLength = payload.size() + 1;
+
     framer.sendStart(BufferedUSART2::transmit);
-    framer.sendPayload(0, BufferedUSART2::transmit);
+    framer.sendPayload(uint8_t(payloadLength & 0xFF), BufferedUSART2::transmit);
+    framer.sendPayload(uint8_t((payloadLength & 0xFF00) >> 8), BufferedUSART2::transmit);
+    framer.sendPayload(channel, BufferedUSART2::transmit);
+
     for (auto p : payload)
     {
         framer.sendPayload(p, BufferedUSART2::transmit);
@@ -70,6 +77,31 @@ void sendBroadcast(std::span<uint8_t> payload)
     framer.sendStop(BufferedUSART2::transmit);
 }
 
+void receiveFrame(std::span<uint8_t> fullFrame)
+{
+    if (fullFrame.size() >= 2)
+    {
+        uint16_t parsedLength = fullFrame[0] | fullFrame[1] << 8;
+        uint16_t actualLength = fullFrame.size() - 2;
+        if (parsedLength == actualLength)
+        {
+            auto destination = fullFrame[2];
+            auto payload = fullFrame.subspan(3, fullFrame.size()-3);
+            WifiInterface::handle_received_frame(destination, payload);
+        }
+        else
+        {
+            pr_err("Invalid length (parsed %u actual %u)", parsedLength, actualLength);
+        }
+    }
+};
+
+void sendBroadcast(std::span<uint8_t> payload)
+{
+    sendFrame(0, payload);
+}
+
+////////////////////////////////7
 
 void WifiInterface::init(PatchStorage* storage)
 {
@@ -81,34 +113,19 @@ void WifiInterface::init(PatchStorage* storage)
 }
 
 
-
-void WifiInterface::send_frame(std::span<uint8_t> payload)
-{
-    framer.send(payload, BufferedUSART2::transmit);
-}
-
 void WifiInterface::run()
 {
     if (auto val = BufferedUSART2::receive(); val)
     {
-        deframer.parse(*val, handle_received_frame);
+        deframer.parse(*val, receiveFrame);
     }
 }
 
-void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
+void WifiInterface::handle_received_frame(uint8_t destination, std::span<uint8_t> payload)
 {
-    auto destination = frame[0];
-    auto payload = frame.subspan(1, frame.size()-1);
-
     auto sendResponse = [destination](auto payload)
     {
-        framer.sendStart(BufferedUSART2::transmit);
-        framer.sendPayload(destination, BufferedUSART2::transmit);
-        for (auto p : payload)
-        {
-            framer.sendPayload(p, BufferedUSART2::transmit);
-        }
-        framer.sendStop(BufferedUSART2::transmit);
+        sendFrame(destination, payload);
     };
 
     // Parse message
@@ -211,9 +228,7 @@ void WifiInterface::handle_received_frame(std::span<uint8_t> frame)
                 fbb.Finish(message);
 
                 sendBroadcast(fbb.GetBufferSpan());
-
             }
-
         }
         else
         {

@@ -12,9 +12,7 @@ struct WifiInterface {
 
 	static void run();
 
-private:
-	static void handle_received_frame(std::span<uint8_t>);
-	static void send_frame(std::span<uint8_t>);
+	static void handle_received_frame(uint8_t, std::span<uint8_t>);
 
 private:
 	static PatchStorage* patchStorage;
