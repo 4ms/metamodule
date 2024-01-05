@@ -109,10 +109,10 @@ struct Toggle2posHoriz : FlipSwitch {
 
 	constexpr Toggle2posHoriz() = default;
 	constexpr Toggle2posHoriz(BaseElement b)
-		: FlipSwitch{{b}, 2, {"switch_horiz_down.png", "switch_horiz_up.png"}} {
+		: FlipSwitch{{b}, 2, {"switch_horiz_left.png", "switch_horiz_right.png"}} {
 	}
 	constexpr Toggle2posHoriz(BaseElement b, std::array<std::string_view, 2> names)
-		: FlipSwitch{{b}, 2, {"switch_horiz_down.png", "switch_horiz_up.png"}, {names[0], names[1]}} {
+		: FlipSwitch{{b}, 2, {"switch_horiz_left.png", "switch_horiz_right.png"}, {names[0], names[1]}} {
 	}
 };
 
@@ -121,12 +121,12 @@ struct Toggle3posHoriz : FlipSwitch {
 
 	constexpr Toggle3posHoriz() = default;
 	constexpr Toggle3posHoriz(BaseElement b)
-		: FlipSwitch{{b}, 3, {"switch_horiz_down.png", "switch_horiz_center.png", "switch_horiz_up.png"}} {
+		: FlipSwitch{{b}, 3, {"switch_horiz_left.png", "switch_horiz_center.png", "switch_horiz_right.png"}} {
 	}
 	constexpr Toggle3posHoriz(BaseElement b, std::array<std::string_view, 3> names)
 		: FlipSwitch{{b},
 					 3,
-					 {"switch_horiz_down.png", "switch_horiz_center.png", "switch_horiz_up.png"},
+					 {"switch_horiz_left.png", "switch_horiz_center.png", "switch_horiz_right.png"},
 					 {names[0], names[1], names[2]}} {
 	}
 };
