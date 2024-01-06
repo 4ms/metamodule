@@ -48,6 +48,7 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_CableCancelButton, cancel_creating_cable_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_CableFinishButton, finish_cable_button_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -189,6 +190,7 @@ private:
 		bool has_connections = false;
 
 		this_jack = {.module_id = (uint16_t)this_module_id, .jack_id = drawn_element->gui_element.idx.output_idx};
+		this_jack_type = ElementType::Output;
 
 		if (auto *cable = patch.find_internal_cable_with_outjack(this_jack)) {
 			for (auto &injack : cable->ins) {
@@ -205,7 +207,6 @@ private:
 		}
 
 		prepare_for_jack(has_connections);
-		handle_cable_creating(has_connections, ElementType::Output);
 	}
 
 	void prepare_for_element(const JackInput &) {
@@ -213,6 +214,7 @@ private:
 		bool has_connections = false;
 
 		this_jack = {.module_id = (uint16_t)this_module_id, .jack_id = drawn_element->gui_element.idx.input_idx};
+		this_jack_type = ElementType::Input;
 
 		if (auto *cable = patch.find_internal_cable_with_injack(this_jack)) {
 			auto obj = list.create_cable_item(cable->out, ElementType::Output, patch, ui_MapList);
@@ -227,7 +229,6 @@ private:
 		}
 
 		prepare_for_jack(has_connections);
-		handle_cable_creating(has_connections, ElementType::Input);
 	}
 
 	void prepare_for_jack(bool has_connections) {
@@ -253,6 +254,8 @@ private:
 			lv_obj_add_event_cb(ui_CableEditButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
 		}
 		lv_group_focus_next(pane_group);
+
+		handle_cable_creating(has_connections, this_jack_type);
 	}
 
 	void handle_cable_creating(bool has_connections, ElementType jacktype) {
@@ -331,7 +334,31 @@ private:
 
 		page->add_cable_popup.show(
 			[page](bool ok) {
-				pr_dbg("callback\n");
+				if (!ok)
+					return;
+				auto name = get_full_element_name(
+					page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, page->patch);
+				page->gui_state.new_cable_begin_jack = page->this_jack;
+				page->gui_state.new_cable_begin_type = page->this_jack_type;
+				page->notify_queue.put({"Choose a jack to connect to " + std::string(name.module_name) + " " +
+											std::string(name.element_name),
+										Notification::Priority::Status,
+										10000});
+
+				page->page_list.request_new_page(PageId::PatchView, page->args);
+			},
+			"Create a new cable.\nNavigate to the module and jack you want to patch to.",
+			"Start");
+	}
+
+	//TODO:
+	static void finish_cable_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		page->add_cable_popup.show(
+			[page](bool ok) {
 				if (!ok)
 					return;
 
@@ -556,6 +583,7 @@ private:
 	std::vector<lv_obj_t *> map_list_items;
 
 	Jack this_jack{};
+	ElementType this_jack_type{};
 	ConfirmPopup add_cable_popup;
 	PatchModQueue &patch_mod_queue;
 };
