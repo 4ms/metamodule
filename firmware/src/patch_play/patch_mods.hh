@@ -14,6 +14,7 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue, PatchPlayer &playe
 					   [&player](EditMappingMinMax &mod) { player.edit_mapped_knob(mod.set_id, mod.map, mod.cur_val); },
 					   [&player](RemoveMapping &mod) { player.remove_mapped_knob(mod.set_id, mod.map); },
 					   [&player](AddMidiMap &mod) { player.add_midi_mapped_knob(mod.map); },
+					   [&player](AddInternalCable &mod) { player.add_internal_cable(mod.in, mod.out); },
 					   [](ModifyMapping &mod) { /*TODO*/ },
 				   },
 				   patch_mod.value());

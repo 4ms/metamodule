@@ -167,7 +167,6 @@ struct ModuleViewPage : PageBase {
 			mapping_pane.hide();
 			mapping_pane.show(*cur_el);
 		} else {
-			mode = ViewMode::List;
 			show_roller();
 		}
 	}
@@ -184,13 +183,16 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.hide_addmap();
 
 			} else {
-				mode = ViewMode::List;
 				show_roller();
 			}
 		}
 
-		if (mode == ViewMode::Mapping)
+		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
+			if (mapping_pane.wants_to_close()) {
+				show_roller();
+			}
+		}
 
 		if (is_patch_playing) {
 			// copy light values from params, indexed by light element id
@@ -223,6 +225,7 @@ struct ModuleViewPage : PageBase {
 			std::visit(overloaded{
 						   [this](AddMapping &mod) { apply_add_mapping(mod); },
 						   [this](AddMidiMap &mod) { apply_add_midi_map(mod); },
+						   [this](AddInternalCable &mod) { apply_add_internal_cable(mod); },
 						   [](auto &m) {},
 					   },
 					   patch_mod.value());
@@ -247,6 +250,12 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
+	void apply_add_internal_cable(AddInternalCable &mod) {
+		patch.add_internal_cable(mod.in, mod.out);
+		redraw_module();
+		mapping_pane.refresh();
+	}
+
 	// This gets called after map_ring_style changes
 	void update_map_ring_style() {
 		for (auto &drawn_el : drawn_elements) {
@@ -260,6 +269,7 @@ struct ModuleViewPage : PageBase {
 
 private:
 	void show_roller() {
+		mode = ViewMode::List;
 		mapping_pane.hide();
 		lv_show(ui_ElementRollerPanel);
 		lv_obj_set_height(roller, 210);

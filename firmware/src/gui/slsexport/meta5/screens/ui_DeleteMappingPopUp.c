@@ -427,12 +427,6 @@ lv_obj_set_align( ui_Container12, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_Container12, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_Container12, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_Label3 = lv_label_create(ui_DeleteMappingPopUp);
-lv_obj_set_width( ui_Label3, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label3, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_Label3, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_Label3, LV_OBJ_FLAG_HIDDEN );   /// Flags
-
 ui_Label4 = lv_label_create(ui_DeleteMappingPopUp);
 lv_obj_set_width( ui_Label4, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label4, LV_SIZE_CONTENT);   /// 1

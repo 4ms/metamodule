@@ -147,6 +147,10 @@ struct PatchData {
 		}
 	}
 
+	void add_internal_cable(Jack in, Jack out) {
+		int_cables.push_back({out, {in}});
+	}
+
 	const MappedInputJack *find_mapped_injack(Jack jack) const {
 		for (auto &m : mapped_ins) {
 			for (auto &j : m.ins) {

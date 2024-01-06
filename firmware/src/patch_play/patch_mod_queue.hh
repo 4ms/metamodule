@@ -39,8 +39,19 @@ struct AddMidiMap {
 	MappedKnob map;
 };
 
-using PatchModRequest = std::
-	variant<SetStaticParam, AddMapping, EditMappingMinMax, RemoveMapping, AddMidiMap, ModifyMapping, ChangeKnobSet>;
+struct AddInternalCable {
+	Jack out;
+	Jack in;
+};
+
+using PatchModRequest = std::variant<SetStaticParam,
+									 AddMapping,
+									 EditMappingMinMax,
+									 RemoveMapping,
+									 AddMidiMap,
+									 ModifyMapping,
+									 ChangeKnobSet,
+									 AddInternalCable>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
 

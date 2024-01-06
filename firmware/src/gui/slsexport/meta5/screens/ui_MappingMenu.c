@@ -172,8 +172,6 @@ lv_obj_set_style_pad_left(ui_MappingParameters, 8, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_right(ui_MappingParameters, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MappingParameters, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MappingParameters, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_MappingParameters, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_MappingParameters, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_set_style_pad_left(ui_MappingParameters, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_MappingParameters, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
@@ -391,97 +389,12 @@ lv_obj_set_style_pad_bottom(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_MapList, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_CableCreationPanel = lv_obj_create(ui_MappingParameters);
-lv_obj_remove_style_all(ui_CableCreationPanel);
-lv_obj_set_width( ui_CableCreationPanel, lv_pct(100));
-lv_obj_set_height( ui_CableCreationPanel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_CableCreationPanel, LV_ALIGN_CENTER );
-lv_obj_set_flex_flow(ui_CableCreationPanel,LV_FLEX_FLOW_COLUMN);
-lv_obj_set_flex_align(ui_CableCreationPanel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_clear_flag( ui_CableCreationPanel, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-
-ui_CableCreationLabel = lv_label_create(ui_CableCreationPanel);
-lv_obj_set_width( ui_CableCreationLabel, lv_pct(100));
-lv_obj_set_height( ui_CableCreationLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_CableCreationLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_CableCreationLabel,"You have started creating a cable from:");
-lv_obj_set_style_text_color(ui_CableCreationLabel, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_CableCreationLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_CableCreationLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_color(ui_CableCreationLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_border_opa(ui_CableCreationLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_width(ui_CableCreationLabel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_side(ui_CableCreationLabel, LV_BORDER_SIDE_TOP, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_CableCreationLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_CableCreationLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_CableCreationLabel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_CableCreationLabel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_CableFinishButton = lv_btn_create(ui_CableCreationPanel);
-lv_obj_set_width( ui_CableFinishButton, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_CableFinishButton, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_CableFinishButton, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_CableFinishButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_clear_flag( ui_CableFinishButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_set_style_radius(ui_CableFinishButton, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_CableFinishButton, lv_color_hex(0xEE1C20), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_CableFinishButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_CableFinishLabel = lv_label_create(ui_CableFinishButton);
-lv_obj_set_width( ui_CableFinishLabel, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_CableFinishLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_CableFinishLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_CableFinishLabel,"Finish");
-lv_obj_set_style_text_color(ui_CableFinishLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_CableFinishLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_CableFinishLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_CableCancelButton = lv_btn_create(ui_CableCreationPanel);
-lv_obj_set_height( ui_CableCancelButton, 24);
-lv_obj_set_width( ui_CableCancelButton, LV_SIZE_CONTENT);  /// 80
-lv_obj_set_x( ui_CableCancelButton, 0 );
-lv_obj_set_y( ui_CableCancelButton, 88 );
-lv_obj_set_align( ui_CableCancelButton, LV_ALIGN_CENTER );
-lv_obj_clear_flag( ui_CableCancelButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_style_radius(ui_CableCancelButton, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_CableCancelButton, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_color(ui_CableCancelButton, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_CableCancelButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_CableCancelButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_align(ui_CableCancelButton, LV_TEXT_ALIGN_AUTO, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_decor(ui_CableCancelButton, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_CableCancelButton, &lv_font_montserrat_16, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(ui_CableCancelButton, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_PRESSED );
-lv_obj_set_style_outline_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_PRESSED);
-lv_obj_set_style_outline_width(ui_CableCancelButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
-lv_obj_set_style_outline_pad(ui_CableCancelButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
-lv_obj_set_style_outline_color(ui_CableCancelButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
-lv_obj_set_style_outline_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_width(ui_CableCancelButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_pad(ui_CableCancelButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_color(ui_CableCancelButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
-lv_obj_set_style_outline_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-
-ui_CableCancelButtonLabel = lv_label_create(ui_CableCancelButton);
-lv_obj_set_width( ui_CableCancelButtonLabel, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_CableCancelButtonLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_CableCancelButtonLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_CableCancelButtonLabel,"Cancel");
-lv_obj_set_style_text_color(ui_CableCancelButtonLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_CableCancelButtonLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_CableCancelButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_CableCancelButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_CableCancelButtonLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
-
 ui_CableEditButton = lv_btn_create(ui_MappingParameters);
 lv_obj_set_height( ui_CableEditButton, 24);
 lv_obj_set_width( ui_CableEditButton, LV_SIZE_CONTENT);  /// 80
 lv_obj_set_x( ui_CableEditButton, 0 );
 lv_obj_set_y( ui_CableEditButton, 88 );
 lv_obj_set_align( ui_CableEditButton, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_CableEditButton, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_CableEditButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_CableEditButton, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_CableEditButton, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -514,6 +427,115 @@ lv_obj_set_style_text_opa(ui_CableEditButtonLabel, 255, LV_PART_MAIN| LV_STATE_D
 lv_obj_set_style_text_letter_space(ui_CableEditButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_CableEditButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_CableEditButtonLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_CableCreationPanel = lv_obj_create(ui_MappingParameters);
+lv_obj_remove_style_all(ui_CableCreationPanel);
+lv_obj_set_width( ui_CableCreationPanel, lv_pct(100));
+lv_obj_set_height( ui_CableCreationPanel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_CableCreationPanel, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_CableCreationPanel,LV_FLEX_FLOW_ROW_WRAP);
+lv_obj_set_flex_align(ui_CableCreationPanel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_clear_flag( ui_CableCreationPanel, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_pad_left(ui_CableCreationPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CableCreationPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CableCreationPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CableCreationPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_CableCreationPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_CableCreationPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_CableCreationLabel = lv_label_create(ui_CableCreationPanel);
+lv_obj_set_width( ui_CableCreationLabel, lv_pct(100));
+lv_obj_set_height( ui_CableCreationLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_CableCreationLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CableCreationLabel,"You have started creating a cable from:");
+lv_obj_set_style_text_color(ui_CableCreationLabel, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CableCreationLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_CableCreationLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_color(ui_CableCreationLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_border_opa(ui_CableCreationLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_CableCreationLabel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_side(ui_CableCreationLabel, LV_BORDER_SIDE_TOP, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CableCreationLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CableCreationLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CableCreationLabel, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CableCreationLabel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_CableCreationBeginLabel = lv_label_create(ui_CableCreationPanel);
+lv_obj_set_width( ui_CableCreationBeginLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CableCreationBeginLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_add_flag( ui_CableCreationBeginLabel, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_set_style_text_color(ui_CableCreationBeginLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CableCreationBeginLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_align(ui_CableCreationBeginLabel, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_CableCreationBeginLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_CableFinishButton = lv_btn_create(ui_CableCreationPanel);
+lv_obj_set_width( ui_CableFinishButton, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CableFinishButton, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_CableFinishButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_CableFinishButton, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
+lv_obj_clear_flag( ui_CableFinishButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_CableFinishButton, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_CableFinishButton, lv_color_hex(0xEE1C20), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_CableFinishButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CableFinishButton, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CableFinishButton, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CableFinishButton, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CableFinishButton, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_CableFinishButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_CableFinishButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_CableFinishLabel = lv_label_create(ui_CableFinishButton);
+lv_obj_set_width( ui_CableFinishLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CableFinishLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_CableFinishLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CableFinishLabel,"Plug here");
+lv_obj_set_style_text_color(ui_CableFinishLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CableFinishLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_CableFinishLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_CableCancelButton = lv_btn_create(ui_CableCreationPanel);
+lv_obj_set_width( ui_CableCancelButton, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CableCancelButton, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_CableCancelButton, 0 );
+lv_obj_set_y( ui_CableCancelButton, 88 );
+lv_obj_set_align( ui_CableCancelButton, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_CableCancelButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_CableCancelButton, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_CableCancelButton, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CableCancelButton, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CableCancelButton, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CableCancelButton, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CableCancelButton, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_color(ui_CableCancelButton, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_CableCancelButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_line_space(ui_CableCancelButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_align(ui_CableCancelButton, LV_TEXT_ALIGN_AUTO, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_decor(ui_CableCancelButton, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_CableCancelButton, &lv_font_montserrat_16, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_CableCancelButton, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_PRESSED );
+lv_obj_set_style_outline_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_outline_width(ui_CableCancelButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_outline_pad(ui_CableCancelButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_outline_color(ui_CableCancelButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_CableCancelButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_CableCancelButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_CableCancelButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_CableCancelButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_CableCancelButtonLabel = lv_label_create(ui_CableCancelButton);
+lv_obj_set_width( ui_CableCancelButtonLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CableCancelButtonLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_CableCancelButtonLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CableCancelButtonLabel,"Cancel cable");
+lv_obj_set_style_text_color(ui_CableCancelButtonLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CableCancelButtonLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_CableCancelButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_line_space(ui_CableCancelButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_CableCancelButtonLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_ControlAlert = lv_obj_create(ui_MappingParameters);
 lv_obj_set_height( ui_ControlAlert, 142);

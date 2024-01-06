@@ -345,6 +345,10 @@ public:
 		active_knob_set = std::min(num, MaxKnobSets - 1);
 	}
 
+	void add_internal_cable(Jack in, Jack out) {
+		pd.add_internal_cable(in, out);
+	}
+
 	void set_samplerate(float hz) {
 		samplerate = hz;
 
