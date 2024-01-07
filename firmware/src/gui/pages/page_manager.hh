@@ -77,7 +77,7 @@ public:
 	void handle_notifications() {
 		auto msg = info.notify_queue.get();
 		if (msg) {
-			pr_info("%s", msg->message.c_str());
+			pr_info("%s\n", msg->message.c_str());
 			DisplayNotification::show(*msg);
 		}
 	}

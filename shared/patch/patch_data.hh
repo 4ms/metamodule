@@ -148,7 +148,13 @@ struct PatchData {
 	}
 
 	void add_internal_cable(Jack in, Jack out) {
-		int_cables.push_back({out, {in}});
+		if (auto existing_cable_out = _find_internal_cable_with_outjack(out)) {
+			existing_cable_out->ins.push_back(in);
+			printf("adding in jack to existing cable\n");
+		} else {
+			int_cables.push_back({out, {in}});
+			printf("adding new cable\n");
+		}
 	}
 
 	const MappedInputJack *find_mapped_injack(Jack jack) const {
@@ -229,6 +235,15 @@ private:
 		for (auto &m : midi_maps.set) {
 			if (m.module_id == module_id && m.param_id == param_id)
 				return &m;
+		}
+		return nullptr;
+	}
+
+	InternalCable *_find_internal_cable_with_outjack(Jack out_jack) {
+		for (auto &c : int_cables) {
+			if (c.out == out_jack && c.ins.size() > 0) {
+				return &c;
+			}
 		}
 		return nullptr;
 	}

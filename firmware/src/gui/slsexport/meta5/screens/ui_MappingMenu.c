@@ -391,7 +391,7 @@ lv_obj_set_style_pad_column(ui_MapList, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CableEditButton = lv_btn_create(ui_MappingParameters);
 lv_obj_set_height( ui_CableEditButton, 24);
-lv_obj_set_width( ui_CableEditButton, LV_SIZE_CONTENT);  /// 80
+lv_obj_set_width( ui_CableEditButton, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_x( ui_CableEditButton, 0 );
 lv_obj_set_y( ui_CableEditButton, 88 );
 lv_obj_set_align( ui_CableEditButton, LV_ALIGN_CENTER );
@@ -412,13 +412,11 @@ lv_obj_set_style_outline_width(ui_CableEditButton, 0, LV_PART_MAIN| LV_STATE_PRE
 lv_obj_set_style_outline_pad(ui_CableEditButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
 lv_obj_set_style_outline_color(ui_CableEditButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_CableEditButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_width(ui_CableEditButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_pad(ui_CableEditButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_color(ui_CableEditButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
 lv_obj_set_style_outline_opa(ui_CableEditButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 ui_CableEditButtonLabel = lv_label_create(ui_CableEditButton);
-lv_obj_set_width( ui_CableEditButtonLabel, LV_SIZE_CONTENT);  /// 42
+lv_obj_set_width( ui_CableEditButtonLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_CableEditButtonLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_CableEditButtonLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_CableEditButtonLabel,"Edit Cable");
@@ -426,7 +424,29 @@ lv_obj_set_style_text_color(ui_CableEditButtonLabel, lv_color_hex(0xFFFFFF), LV_
 lv_obj_set_style_text_opa(ui_CableEditButtonLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_CableEditButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_CableEditButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_CableEditButtonLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_CableEditButtonLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_CableAddButton = lv_btn_create(ui_MappingParameters);
+lv_obj_set_height( ui_CableAddButton, 24);
+lv_obj_set_width( ui_CableAddButton, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_align( ui_CableAddButton, LV_ALIGN_CENTER );
+lv_obj_add_state( ui_CableAddButton, LV_STATE_FOCUSED );     /// States
+lv_obj_add_flag( ui_CableAddButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_CableAddButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_CableAddButton, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_CableAddButton, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_CableAddButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_CableAddButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_CableAddButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_CableAddLabel = lv_label_create(ui_CableAddButton);
+lv_obj_set_width( ui_CableAddLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CableAddLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_CableAddLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CableAddLabel,"Add Cable");
+lv_obj_set_style_text_color(ui_CableAddLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CableAddLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_CableAddLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CableCreationPanel = lv_obj_create(ui_MappingParameters);
 lv_obj_remove_style_all(ui_CableCreationPanel);
@@ -435,7 +455,8 @@ lv_obj_set_height( ui_CableCreationPanel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_CableCreationPanel, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_CableCreationPanel,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_CableCreationPanel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-lv_obj_clear_flag( ui_CableCreationPanel, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_add_flag( ui_CableCreationPanel, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
+lv_obj_clear_flag( ui_CableCreationPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_pad_left(ui_CableCreationPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_CableCreationPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_CableCreationPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);

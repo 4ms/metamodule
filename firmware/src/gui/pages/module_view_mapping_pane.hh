@@ -49,6 +49,8 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_CableCancelButton, cancel_creating_cable_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableFinishButton, finish_cable_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_CableEditButton, edit_cable_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -234,23 +236,21 @@ private:
 		lv_hide(ui_ControlAlert);
 		lv_hide(ui_AddMapPopUp);
 
-		lv_show(ui_CableEditButton);
-		lv_group_add_obj(pane_group, ui_CableEditButton);
-
 		if (has_connections) {
 			lv_show(ui_MappedPanel);
 			lv_hide(ui_MappedItemHeader);
 			lv_label_set_text(ui_MappedListTitle, "Connected To:");
-			lv_label_set_text(ui_CableEditButtonLabel, "Edit Cable");
-			remove_all_event_cb(ui_CableEditButton);
-			lv_obj_add_event_cb(ui_CableEditButton, edit_cable_button_cb, LV_EVENT_CLICKED, this);
+			lv_show(ui_CableEditButton);
+			lv_group_add_obj(pane_group, ui_CableEditButton);
+			lv_label_set_text(ui_CableAddLabel, "New connection");
 
 		} else {
 			lv_hide(ui_MappedPanel);
-			lv_label_set_text(ui_CableEditButtonLabel, "Add Cable");
-			remove_all_event_cb(ui_CableEditButton);
-			lv_obj_add_event_cb(ui_CableEditButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
+			lv_hide(ui_CableEditButton);
+			lv_label_set_text(ui_CableAddLabel, "New cable");
 		}
+		lv_show(ui_CableAddButton);
+		lv_group_add_obj(pane_group, ui_CableAddButton);
 		lv_group_focus_next(pane_group);
 
 		handle_cable_creating(has_connections, this_jack_type);
@@ -262,7 +262,10 @@ private:
 			return;
 		}
 
+		// Hide "New cable/connection" and "Edit Cable" if already have a cable open
+		lv_hide(ui_CableAddButton);
 		lv_hide(ui_CableEditButton);
+
 		lv_show(ui_CableCreationPanel);
 		auto begin_jack = gui_state.new_cable_begin_jack.value();
 		auto begin_type = gui_state.new_cable_begin_type;
@@ -345,7 +348,7 @@ private:
 
 				page->page_list.request_new_page(PageId::PatchView, page->args);
 			},
-			"Create a new cable.\nNavigate to the module and jack you want to patch to.",
+			"Navigate to the module and jack you want to patch to.",
 			"Start");
 	}
 
@@ -356,8 +359,8 @@ private:
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
 		if (!page->gui_state.new_cable_begin_jack) {
-			page->notify_queue.put({"Error creating cable", Notification::Priority::Error});
-			pr_err("No cable in progress\n");
+			page->notify_queue.put({"Something went wrong... can't finish a cable here because no cable was started",
+									Notification::Priority::Error});
 			return;
 		}
 
@@ -373,7 +376,6 @@ private:
 		page->patch_mod_queue.put(newcable);
 		page->notify_queue.put({"Added cable"});
 		page->gui_state.new_cable_begin_jack = {};
-		pr_dbg("Adding cable\n");
 	}
 
 	static void follow_cable_button_cb(lv_event_t *event) {
@@ -405,6 +407,7 @@ private:
 	// Params
 	//
 	void prepare_for_element(const ParamElement &) {
+		lv_hide(ui_CableAddButton);
 		lv_hide(ui_CableEditButton);
 		lv_hide(ui_CableCreationPanel);
 
