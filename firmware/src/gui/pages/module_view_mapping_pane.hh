@@ -355,30 +355,25 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		page->add_cable_popup.show(
-			[page](bool ok) {
-				if (!ok)
-					return;
+		if (!page->gui_state.new_cable_begin_jack) {
+			page->notify_queue.put({"Error creating cable", Notification::Priority::Error});
+			pr_err("No cable in progress\n");
+			return;
+		}
 
-				if (!page->gui_state.new_cable_begin_jack) {
-					pr_err("No cable in progress\n");
-					return;
-				}
+		AddInternalCable newcable{};
+		if (page->gui_state.new_cable_begin_type == ElementType::Input) {
+			newcable.in = *page->gui_state.new_cable_begin_jack;
+			newcable.out = page->this_jack;
+		} else {
+			newcable.in = page->this_jack;
+			newcable.out = *page->gui_state.new_cable_begin_jack;
+		}
 
-				pr_dbg("Adding cable\n");
-				AddInternalCable newcable{};
-				if (page->gui_state.new_cable_begin_type == ElementType::Input) {
-					newcable.in = *page->gui_state.new_cable_begin_jack;
-					newcable.out = page->this_jack;
-				} else {
-					newcable.in = page->this_jack;
-					newcable.out = *page->gui_state.new_cable_begin_jack;
-				}
-
-				page->patch_mod_queue.put(newcable);
-			},
-			"Create a new cable.\nNavigate to the module and jack you want to patch to.",
-			"Start");
+		page->patch_mod_queue.put(newcable);
+		page->notify_queue.put({"Added cable"});
+		page->gui_state.new_cable_begin_jack = {};
+		pr_dbg("Adding cable\n");
 	}
 
 	static void follow_cable_button_cb(lv_event_t *event) {
