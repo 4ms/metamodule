@@ -173,17 +173,11 @@ struct ModuleViewPage : PageBase {
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (mapping_pane.manual_control_visible()) {
-				mapping_pane.hide_manual_control();
-
-			} else if (mode == ViewMode::List) {
+			if (mode == ViewMode::List) {
 				load_prev_page();
 
-			} else if (mapping_pane.addmap_visible()) {
-				mapping_pane.hide_addmap();
-
-			} else {
-				show_roller();
+			} else if (mode == ViewMode::Mapping) {
+				mapping_pane.back_event();
 			}
 		}
 

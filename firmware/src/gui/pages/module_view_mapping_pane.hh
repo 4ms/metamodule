@@ -138,24 +138,22 @@ struct ModuleViewMappingPane {
 		add_map_popup.update(params);
 	}
 
-	void hide_addmap() {
-		add_map_popup.hide();
-	}
-
-	bool addmap_visible() {
-		return add_map_popup.visible;
-	}
-
-	void hide_manual_control() {
-		control_popup.hide();
-	}
-
-	bool manual_control_visible() {
-		return control_popup.visible;
-	}
-
 	bool wants_to_close() {
 		return should_close;
+	}
+
+	void back_event() {
+		if (add_map_popup.visible)
+			add_map_popup.hide();
+
+		else if (control_popup.visible)
+			control_popup.hide();
+
+		else if (add_cable_popup.is_visible())
+			add_cable_popup.hide();
+
+		else
+			should_close = true;
 	}
 
 private:
