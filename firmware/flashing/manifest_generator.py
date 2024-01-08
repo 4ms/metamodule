@@ -5,6 +5,7 @@ import logging
 import json
 import os
 import hashlib
+import re
 
 ManifestFormatVersion = 1
 
@@ -28,15 +29,19 @@ def parse_file_version(version):
         Or: 2.1.5
         Into: 0.6.2
     """
-    vsplit = version.split("-")
-    if len(vsplit) > 1:
-        v = vsplit[1]
-    else:
-        v = vsplit[0]
+    
+    match = re.match(r".*(?P<major>[0-9]+)\.(?P<minor>[0-9]+)\.(?P<revision>[0-9]+).*", version)
 
-    v = v.strip("v")
-    return v
+    if match is None:
+        raise ValueError(f"'{version}' does not contain a valid version")
 
+    result = match.groupdict()
+
+    for key,value in result.items():
+        result[key] = int(value)
+
+    return result
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Generate firmware update manifest json file")
     parser.add_argument("--app", dest="app_file", help="Input application uimg file")
@@ -51,10 +56,12 @@ if __name__ == "__main__":
     
     j = {'version': ManifestFormatVersion}
 
-    version = parse_file_version(args.version)
+    if args.version:
+        j["metadata"] = {'version': parse_file_version(args.version)}
 
-    j["files"] = []
-    j["files"].append(process_file(args.app_file, "app", version))
+    j["files"] = [
+        process_file(args.app_file, "app"),
+    ]
 
     with open(args.out_file, "w+") as out_file:
         data_json = json.dumps(j, indent=4)
