@@ -56,7 +56,7 @@ add_custom_command(
            --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/bootloader.bin"
            --wifi_app "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
            --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/filesystem.img"
-           "${CMAKE_CURRENT_BINARY_DIR}/metamodule.json"
+           "${CMAKE_CURRENT_BINARY_DIR}/release/metamodule.json"
   COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
   COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
   DEPENDS main.elf main_m4.elf
