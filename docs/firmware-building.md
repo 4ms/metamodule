@@ -54,6 +54,16 @@ This would tell CMake to re-configure the project and just build those three mod
 You can still open patches containing other modules, but their artwork won't be shown
 and you can't play them.
 
+### Build with wifi bridge
+
+To simpilfy development workflow for modules the wifi bridge functionality is not included in the build by default.
+If you want to build with wifi code, you need to install the flatbuffer compiler `flatc` with the correct version as described in the [setup guide](../docs/Setup.md)
+and configure with the `full` preset.
+
+```
+make configure PRESET=full
+```
+
 
 ### Using an SD Card
 

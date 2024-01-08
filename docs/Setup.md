@@ -30,6 +30,7 @@
   - arm-none-eabi-gcc toolchain 12.2 or later
   - xxd
   - python3
+  - optional: flatc according to version of flatbuffers submodule
 
 - Simulator:
   - cmake v3.24 or later
@@ -160,3 +161,18 @@ update `gcc` via the package manager:
 pacman -Syu mingw-w64-x86_64-gcc
 ```
 
+### Flatc
+
+The compiler version needs to match the version of flatbuffers submodule so the easiest way to get it
+is to build it directly from the submodule.
+
+```
+cd lib/flatbuffers
+cmake -S . -B build -G Ninja
+cmake --build build
+```
+
+There is no need to install it since the firmware build scripts will search that output directory automatically
+when locating `flatc`.
+
+Please note that if the flatbuffers submodule gets updated in the future, these step needs to be repeated manually.
