@@ -80,6 +80,5 @@ jobs:
         with:
           name: "Firmware Version: ${{ env.CI_REF_NAME }}"
           files: |
-            firmware/build/main.uimg
-            firmware/build/metamodule-*.json
+            firmware/build/release/*
 
