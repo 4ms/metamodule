@@ -10,7 +10,7 @@ import re
 ManifestFormatVersion = 1
 
 
-def process_file(filename, imagetype):
+def process_file(filename, imagetype, *, name=None, address=None):
 
     with open(filename, 'rb') as file:
 
@@ -20,6 +20,12 @@ def process_file(filename, imagetype):
         entry["type"] = imagetype
         entry["filesize"] = os.stat(filename).st_size
         entry["md5"] = hashlib.md5(file.read()).hexdigest()
+
+        if name is not None:
+            entry["name"] = name
+
+        if address is not None:
+            entry["address"] = int(address)
 
         return entry
 
@@ -45,6 +51,9 @@ def parse_file_version(version):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Generate firmware update manifest json file")
     parser.add_argument("--app", dest="app_file", help="Input application uimg file")
+    parser.add_argument("--wifi_bootloader", dest="wifi_bl_file", help="Wifi bootloader binary")
+    parser.add_argument("--wifi_application", dest="wifi_app_file", help="Wifi application binary")
+    parser.add_argument("--wifi_filesystem", dest="wifi_fs_file", help="Wifi filesystem image")
     parser.add_argument("--version", dest="version", help="Version string e.g. \"1.2.3\"")
     parser.add_argument("out_file", help="Output json file")
     parser.add_argument("-v", dest="verbose", help="Verbose logging", action="store_true")
@@ -60,7 +69,10 @@ if __name__ == "__main__":
         j["metadata"] = {'version': parse_file_version(args.version)}
 
     j["files"] = [
-        process_file(args.app_file, "app"),
+        process_file(args.app_file, "app", name="Main App"),
+        process_file(args.wifi_bl_file, "wifi", name="Wifi Bootloader", address=0x0),
+        process_file(args.wifi_app_file, "wifi", name="Wifi application", address=0x10000),
+        process_file(args.wifi_app_file, "wifi", name="Wifi filesystem", address=0x20000),
     ]
 
     with open(args.out_file, "w+") as out_file:
