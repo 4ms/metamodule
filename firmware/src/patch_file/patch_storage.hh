@@ -152,6 +152,17 @@ public:
 		poll_media_change();
 	}
 
+	PatchDirList getPatchList()
+	{
+		PatchDirList patch_dir_list_;
+
+		if (sdcard_.is_mounted()) PatchFileIO::add_directory(sdcard_, patch_dir_list_.volume_root(Volume::SDCard));
+		if (usbdrive_.is_mounted()) PatchFileIO::add_directory(usbdrive_, patch_dir_list_.volume_root(Volume::USB));
+		PatchFileIO::add_directory(norflash_, patch_dir_list_.volume_root(Volume::NorFlash));
+
+		return patch_dir_list_;
+	}
+
 private:
 	void poll_media_change() {
 		sd_changes_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
