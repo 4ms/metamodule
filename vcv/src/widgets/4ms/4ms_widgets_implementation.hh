@@ -129,11 +129,19 @@ inline void do_create(MonoLight el, const Indices &indices, const WidgetContext_
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 
 	} else if (el.color == Colors565::Red) {
-		using LightT = rack::LEDBezelLight<rack::RedLight>;
+		using LightT = rack::MediumLight<rack::RedLight>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 
 	} else if (el.color == Colors565::Blue) {
-		using LightT = rack::LEDBezelLight<rack::BlueLight>;
+		using LightT = rack::MediumLight<rack::BlueLight>;
+		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
+
+	} else if (el.color == Colors565::Green) {
+		using LightT = rack::MediumLight<rack::GreenLight>;
+		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
+
+	} else if (el.color == Colors565::White) {
+		using LightT = rack::MediumLight<rack::WhiteLight>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 	}
 }
