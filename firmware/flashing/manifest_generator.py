@@ -4,28 +4,23 @@ import argparse
 import logging
 import json
 import os
+import hashlib
 
 ManifestFormatVersion = 1
 
-def process_file(filename, imagetype, version):
-    entry = {}
-    entry["type"] = imagetype
-    entry["filename"] = os.path.basename(filename)
-    entry["filesize"] = os.stat(filename).st_size
 
-    #TODO md5
-    entry["md5"] = "123"
+def process_file(filename, imagetype):
 
-    entry["version"] = {}
-    v = version.split(".")
-    if len(v) > 0:
-        entry["version"]["major"] = v[0]
-    if len(v) > 1:
-        entry["version"]["minor"] = v[1]
-    if len(v) > 2:
-        entry["version"]["revision"] = v[2]
+    with open(filename, 'rb') as file:
 
-    return entry
+        entry = dict()
+
+        entry["filename"] = os.path.basename(filename)
+        entry["type"] = imagetype
+        entry["filesize"] = os.stat(filename).st_size
+        entry["md5"] = hashlib.md5(file.read()).hexdigest()
+
+        return entry
 
 def parse_file_version(version):
     """ Convert a string like: firmware-v0.6.2-278-g52dfd038
