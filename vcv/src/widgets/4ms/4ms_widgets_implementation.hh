@@ -60,7 +60,7 @@ inline void do_create(FlipSwitch el, const Indices &indices, const WidgetContext
 			create_4ms_param<SubMiniToggle2pos>(el.x_mm, el.y_mm, indices, context);
 		else if (el.num_pos == 3)
 			create_4ms_param<SubMiniToggle3pos>(el.x_mm, el.y_mm, indices, context);
-	} else if (el.frames[0] == "switch_horiz_down.png") {
+	} else if (el.frames[0] == "switch_horiz_left.png") {
 		if (el.num_pos == 2)
 			create_4ms_param<SubMiniToggleHoriz2pos>(el.x_mm, el.y_mm, indices, context);
 		else if (el.num_pos == 3)
