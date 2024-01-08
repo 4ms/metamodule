@@ -21,7 +21,7 @@ struct CableEditPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		display = Display::AddCable;
+		// display = Display::AddCable;
 		// blur();
 
 		lv_group_remove_all_objs(group);
@@ -54,11 +54,11 @@ struct CableEditPage : PageBase {
 			return;
 		}
 
-		if (display == Display::AddCable) {
-			show_add_cable();
-		} else {
-			show_edit_cable();
-		}
+		// if (display == Display::AddCable) {
+		// 	show_add_cable();
+		// } else {
+		show_edit_cable();
+		// }
 	}
 
 	void update() override {
@@ -100,7 +100,7 @@ private:
 	ElementCount::Counts counts{};
 	ElementCount::Indices indices{};
 
-	enum class Display { AddCable, EditCable } display{Display::AddCable};
+	// enum class Display { AddCable, EditCable } display{Display::AddCable};
 
 	void find_connections_to_input_jack() {
 		Jack in_jack = {.module_id = module_id, .jack_id = indices.input_idx};
@@ -110,7 +110,7 @@ private:
 		if (cable) {
 			MappingPaneList::style_mappedcable_item(cable->out, ElementType::Output, patch, ui_CableFromEditButton);
 			add_connected_inputs(cable);
-			display = Display::EditCable;
+			// display = Display::EditCable;
 		}
 
 		// Look for mapped panel jacks
@@ -119,7 +119,7 @@ private:
 			MappingPaneList::style_panel_incable_item(mapped_cable->panel_jack_id, ui_CableFromEditButton);
 			InternalCable cable{.out = {}, .ins = mapped_cable->ins};
 			add_connected_inputs(&cable);
-			display = Display::EditCable;
+			// display = Display::EditCable;
 		}
 	}
 
@@ -129,13 +129,13 @@ private:
 		auto cable = patch.find_internal_cable_with_outjack(out_jack);
 		if (cable) {
 			add_connected_inputs(cable);
-			display = Display::EditCable;
+			// display = Display::EditCable;
 		}
 
 		auto mapped_out = patch.find_mapped_outjack(out_jack);
 		if (mapped_out) {
 			add_panel_output(mapped_out);
-			display = Display::EditCable;
+			// display = Display::EditCable;
 		}
 
 		MappingPaneList::style_mappedcable_item(out_jack, ElementType::Output, patch, ui_CableFromEditButton);
@@ -157,35 +157,35 @@ private:
 		return obj;
 	}
 
-	void show_add_cable() {
-		if (counts.num_inputs > 0) {
-			auto obj = add_input_jack({module_id, indices.input_idx});
-			lv_group_remove_obj(obj);
-			lv_label_set_text(ui_CableFromTitle,
-							  "To add a cable, click OK and navigate to the connecting module and jack.");
-			lv_label_set_text(ui_CableToTitle, "Input jack:");
-			lv_hide(ui_CableFromEditButton);
-			lv_show(ui_CableToPanel);
-		} else {
-			lv_label_set_text(ui_CableFromTitle, "Output jack:");
-			lv_label_set_text(ui_CableToTitle,
-							  "To add a cable, click OK and navigate to the connecting module and jack.");
-			lv_show(ui_CableFromEditButton);
-			lv_hide(ui_CableToPanel);
-			lv_group_remove_obj(ui_CableFromEditButton);
-		}
+	// void show_add_cable() {
+	// 	if (counts.num_inputs > 0) {
+	// 		auto obj = add_input_jack({module_id, indices.input_idx});
+	// 		lv_group_remove_obj(obj);
+	// 		lv_label_set_text(ui_CableFromTitle,
+	// 						  "To add a cable, click OK and navigate to the connecting module and jack.");
+	// 		lv_label_set_text(ui_CableToTitle, "Input jack:");
+	// 		lv_hide(ui_CableFromEditButton);
+	// 		lv_show(ui_CableToPanel);
+	// 	} else {
+	// 		lv_label_set_text(ui_CableFromTitle, "Output jack:");
+	// 		lv_label_set_text(ui_CableToTitle,
+	// 						  "To add a cable, click OK and navigate to the connecting module and jack.");
+	// 		lv_show(ui_CableFromEditButton);
+	// 		lv_hide(ui_CableToPanel);
+	// 		lv_group_remove_obj(ui_CableFromEditButton);
+	// 	}
 
-		lv_label_set_text(ui_CableMapPageTitle, "Add Cable");
-		lv_label_set_text(ui_CableCancelLabel, "Cancel");
-		lv_label_set_text(ui_CableDeleteIcon, "OK");
-		lv_obj_set_style_text_font(ui_CableDeleteIcon, &lv_font_montserrat_14, LV_PART_MAIN);
+	// 	lv_label_set_text(ui_CableMapPageTitle, "Add Cable");
+	// 	lv_label_set_text(ui_CableCancelLabel, "Cancel");
+	// 	lv_label_set_text(ui_CableDeleteIcon, "OK");
+	// 	lv_obj_set_style_text_font(ui_CableDeleteIcon, &lv_font_montserrat_14, LV_PART_MAIN);
 
-		remove_all_event_cb(ui_CableDeleteButton);
-		lv_obj_add_event_cb(ui_CableDeleteButton, start_new_cable, LV_EVENT_CLICKED, this);
-		lv_group_add_obj(group, ui_CableDeleteButton);
+	// 	remove_all_event_cb(ui_CableDeleteButton);
+	// 	lv_obj_add_event_cb(ui_CableDeleteButton, start_new_cable, LV_EVENT_CLICKED, this);
+	// 	lv_group_add_obj(group, ui_CableDeleteButton);
 
-		lv_group_add_obj(group, ui_CableCancel);
-	}
+	// 	lv_group_add_obj(group, ui_CableCancel);
+	// }
 
 	void show_edit_cable() {
 		lv_show(ui_CableFromEditButton);
@@ -210,23 +210,23 @@ private:
 			return;
 	}
 
-	static void start_new_cable(lv_event_t *event) {
-		auto page = static_cast<CableEditPage *>(event->user_data);
-		if (!page)
-			return;
+	// static void start_new_cable(lv_event_t *event) {
+	// 	auto page = static_cast<CableEditPage *>(event->user_data);
+	// 	if (!page)
+	// 		return;
 
-		auto &jack = page->initial_jack;
-		auto dir = page->counts.num_inputs > 0 ? ElementType::Input : ElementType::Output;
-		auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, page->patch);
-		page->gui_state.new_cable_begin_jack = jack;
-		page->gui_state.new_cable_begin_type = dir;
-		page->notify_queue.put(
-			{"Choose a jack to connect to " + std::string(name.module_name) + " " + std::string(name.element_name),
-			 Notification::Priority::Status,
-			 10000});
+	// 	auto &jack = page->initial_jack;
+	// 	auto dir = page->counts.num_inputs > 0 ? ElementType::Input : ElementType::Output;
+	// 	auto name = get_full_element_name(jack.module_id, jack.jack_id, dir, page->patch);
+	// 	page->gui_state.new_cable_begin_jack = jack;
+	// 	page->gui_state.new_cable_begin_type = dir;
+	// 	page->notify_queue.put(
+	// 		{"Choose a jack to connect to " + std::string(name.module_name) + " " + std::string(name.element_name),
+	// 		 Notification::Priority::Status,
+	// 		 10000});
 
-		page->page_list.request_new_page(PageId::PatchView, page->args);
-	}
+	// 	page->page_list.request_new_page(PageId::PatchView, page->args);
+	// }
 };
 
 } // namespace MetaModule

@@ -103,13 +103,12 @@ struct ModuleViewPage : PageBase {
 
 		for (const auto &drawn_element : drawn_elements) {
 			auto &drawn = drawn_element.gui_element;
+			if (!drawn.obj)
+				continue;
 
 			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
 				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
 			}
-
-			if (!drawn.obj)
-				continue;
 
 			std::visit(
 				[this, drawn = drawn](auto &el) {
@@ -215,39 +214,29 @@ struct ModuleViewPage : PageBase {
 		if (auto patch_mod = module_mods.get(); patch_mod.has_value()) {
 			page_list.increment_patch_revision();
 
+			bool refresh = true;
 			// Apply to this thread's copy of patch
 			std::visit(overloaded{
-						   [this](AddMapping &mod) { apply_add_mapping(mod); },
-						   [this](AddMidiMap &mod) { apply_add_midi_map(mod); },
-						   [this](AddInternalCable &mod) { apply_add_internal_cable(mod); },
-						   [](auto &m) {},
+						   [&, this](AddMapping &mod) { refresh = patch.add_update_mapped_knob(mod.set_id, mod.map); },
+						   [&, this](AddMidiMap &mod) { refresh = patch.add_update_midi_map(mod.map); },
+						   [&, this](AddInternalCable &mod) { patch.add_internal_cable(mod.in, mod.out); },
+						   [&, this](AddJackMapping &mod) {
+							   mod.type == ElementType::Output ? patch.add_mapped_outjack(mod.panel_jack_id, mod.jack) :
+																 patch.add_mapped_injack(mod.panel_jack_id, mod.jack);
+						   },
+						   [&](auto &m) { refresh = false; },
 					   },
 					   patch_mod.value());
+
+			if (refresh) {
+				redraw_module();
+				mapping_pane.refresh();
+			}
 
 			// Forward the mod to the audio/patch_player queue
 			if (is_patch_playing)
 				patch_mod_queue.put(patch_mod.value());
 		}
-	}
-
-	void apply_add_mapping(AddMapping &mod) {
-		if (patch.add_update_mapped_knob(mod.set_id, mod.map)) {
-			redraw_module();
-			mapping_pane.refresh();
-		}
-	}
-
-	void apply_add_midi_map(AddMidiMap &mod) {
-		if (patch.add_update_midi_map(mod.map)) {
-			redraw_module();
-			mapping_pane.refresh();
-		}
-	}
-
-	void apply_add_internal_cable(AddInternalCable &mod) {
-		patch.add_internal_cable(mod.in, mod.out);
-		redraw_module();
-		mapping_pane.refresh();
 	}
 
 	// This gets called after map_ring_style changes

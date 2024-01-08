@@ -15,6 +15,10 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue, PatchPlayer &playe
 					   [&player](RemoveMapping &mod) { player.remove_mapped_knob(mod.set_id, mod.map); },
 					   [&player](AddMidiMap &mod) { player.add_midi_mapped_knob(mod.map); },
 					   [&player](AddInternalCable &mod) { player.add_internal_cable(mod.in, mod.out); },
+					   [&player](AddJackMapping &mod) {
+						   mod.type == ElementType::Input ? player.add_injack_mapping(mod.panel_jack_id, mod.jack) :
+															player.add_outjack_mapping(mod.panel_jack_id, mod.jack);
+					   },
 					   [](ModifyMapping &mod) { /*TODO*/ },
 				   },
 				   patch_mod.value());

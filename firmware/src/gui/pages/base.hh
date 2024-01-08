@@ -21,6 +21,7 @@ enum class PageChangeDirection { Back, Forward, Jump };
 struct GuiState {
 	std::optional<Jack> new_cable_begin_jack;
 	ElementType new_cable_begin_type{};
+	bool new_cable_begin_connected{};
 };
 
 struct PatchContext {

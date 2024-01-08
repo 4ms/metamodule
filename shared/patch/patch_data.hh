@@ -150,10 +150,17 @@ struct PatchData {
 	void add_internal_cable(Jack in, Jack out) {
 		if (auto existing_cable_out = _find_internal_cable_with_outjack(out)) {
 			existing_cable_out->ins.push_back(in);
-			printf("adding in jack to existing cable\n");
+			printf("adding in jack to existing cable: %d out%d to:\n", out.module_id, out.jack_id);
+			for (auto &in : existing_cable_out->ins)
+				printf(" - %d in%d\n", in.module_id, in.jack_id);
 		} else {
 			int_cables.push_back({out, {in}});
-			printf("adding new cable\n");
+			printf("adding new cable (#%zu): %d out%d to %d in%d\n",
+				   int_cables.size(),
+				   out.module_id,
+				   out.jack_id,
+				   in.module_id,
+				   in.jack_id);
 		}
 	}
 
@@ -173,6 +180,36 @@ struct PatchData {
 				return &m;
 		}
 		return nullptr;
+	}
+
+	void add_mapped_injack(uint16_t panel_jack_id, Jack jack) {
+		bool done = false;
+		for (auto &m : mapped_ins) {
+			if (m.panel_jack_id == panel_jack_id) {
+				for (auto &j : m.ins) {
+					if (j == jack)
+						done = true; //exact match already exists, no further action needed
+				}
+				if (!done) {
+					m.ins.push_back(jack);
+					done = true;
+				}
+			}
+		}
+		if (!done)
+			mapped_ins.push_back({panel_jack_id, {jack}});
+	}
+
+	void add_mapped_outjack(uint16_t panel_jack_id, Jack jack) {
+		bool done = false;
+		for (auto &m : mapped_outs) {
+			if (m.panel_jack_id == panel_jack_id) {
+				m.out = jack;
+				done = true;
+			}
+		}
+		if (!done)
+			mapped_outs.push_back({panel_jack_id, jack});
 	}
 
 	const InternalCable *find_internal_cable_with_outjack(Jack out_jack) const {

@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/elements/element_name.hh"
 #include "patch/patch.hh"
 #include "util/lockfree_fifo_spsc.hh"
 #include "util/overloaded.hh"
@@ -44,6 +45,12 @@ struct AddInternalCable {
 	Jack in;
 };
 
+struct AddJackMapping {
+	uint16_t panel_jack_id;
+	Jack jack;
+	ElementType type;
+};
+
 using PatchModRequest = std::variant<SetStaticParam,
 									 AddMapping,
 									 EditMappingMinMax,
@@ -51,7 +58,8 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 AddMidiMap,
 									 ModifyMapping,
 									 ChangeKnobSet,
-									 AddInternalCable>;
+									 AddInternalCable,
+									 AddJackMapping>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
 
