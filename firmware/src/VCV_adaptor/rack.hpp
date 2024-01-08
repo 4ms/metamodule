@@ -18,7 +18,7 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 #define PRIVATE __attribute__((error("Using internal Rack function or symbol")))
 #endif
 
-#include "medium/debug_raw.h"
+// #include "medium/debug_raw.h"
 
 // #include "common.hpp"
 // #include "math.hpp"

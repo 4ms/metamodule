@@ -1,18 +1,22 @@
-BINARYNAME := Befaco
+BINARYNAME := testbrand
 BUILDDIR := build
 
 SHAREDDIR := ../../../shared
-SCRIPTDIR := ../../../scripts
+FIRMWAREDIR := ../../src
+VCVADAPTORDIR := ../../src/VCV_adaptor
+LIBDIR := ../../lib
 
-SOURCES = Befaco/src/ABC.cpp \
-		   Befaco/src/plugin.cpp \
-		   plugin/libc_stub.c
+SOURCES = src/test_module.cpp \
+		  src/plugin.cpp \
+		  ../plugin/libc_stub.c
 
-INCLUDES := -IBefaco/src \
-			-I../src \
-			-I../src/VCV_adaptor \
-			-I../../shared \
-			-I../../shared/cpputil \
+INCLUDES := -Isrc \
+			-I$(FIRMWAREDIR) \
+			-I$(VCVADAPTORDIR) \
+			-I$(LIBDIR)/jansson \
+			-I$(LIBDIR)/jansson/jansson/src \
+			-I$(SHAREDDIR) \
+			-I$(SHAREDDIR)/cpputil \
 
 LINKSCR := linkscript.ld
 
