@@ -11,16 +11,14 @@ using namespace Framing;
 
 #include <stm32mp1xx_hal.h>
 
-#include "core_intercom/shared_memory.hh"
-
 #include <console/pr_dbg.hh>
 
 
 
-namespace MetaModule
+namespace MetaModule::WifiInterface
 {
 
-PatchStorage* WifiInterface::patchStorage;
+PatchStorage* patchStorage;
 
 Configuration_t FrameConfig
 {
@@ -49,9 +47,11 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
         return fbb.CreateVector(elems);
     };
 
-    auto usbList = CreateVector(SharedMemoryS::ptrs.patch_dir_list->volume_root(Volume::USB));
-    auto flashList = CreateVector(SharedMemoryS::ptrs.patch_dir_list->volume_root(Volume::NorFlash));
-    auto sdcardList = CreateVector(SharedMemoryS::ptrs.patch_dir_list->volume_root(Volume::SDCard));
+    auto patchFileList = patchStorage->getPatchList();
+
+    auto usbList = CreateVector(patchFileList.volume_root(Volume::USB));
+    auto flashList = CreateVector(patchFileList.volume_root(Volume::NorFlash));
+    auto sdcardList = CreateVector(patchFileList.volume_root(Volume::SDCard));
 
     auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
     auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
@@ -87,7 +87,7 @@ void receiveFrame(std::span<uint8_t> fullFrame)
         {
             auto destination = fullFrame[2];
             auto payload = fullFrame.subspan(3, fullFrame.size()-3);
-            WifiInterface::handle_received_frame(destination, payload);
+            handle_received_frame(destination, payload);
         }
         else
         {
@@ -103,7 +103,7 @@ void sendBroadcast(std::span<uint8_t> payload)
 
 ////////////////////////////////7
 
-void WifiInterface::init(PatchStorage* storage)
+void init(PatchStorage* storage)
 {
     printf("Initializing Wifi\n");
 
@@ -113,7 +113,7 @@ void WifiInterface::init(PatchStorage* storage)
 }
 
 
-void WifiInterface::run()
+void run()
 {
     if (auto val = BufferedUSART2::receive(); val)
     {
@@ -121,7 +121,7 @@ void WifiInterface::run()
     }
 }
 
-void WifiInterface::handle_received_frame(uint8_t destination, std::span<uint8_t> payload)
+void handle_received_frame(uint8_t destination, std::span<uint8_t> payload)
 {
     auto sendResponse = [destination](auto payload)
     {

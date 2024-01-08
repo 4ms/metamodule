@@ -4,18 +4,11 @@
 #include <cstdint>
 #include <patch_file/patch_storage.hh>
 
-namespace MetaModule
+namespace MetaModule::WifiInterface
 {
+	void init(PatchStorage*);
 
-struct WifiInterface {
-	static void init(PatchStorage*);
+	void run();
 
-	static void run();
-
-	static void handle_received_frame(uint8_t, std::span<uint8_t>);
-
-private:
-	static PatchStorage* patchStorage;
-
+	void handle_received_frame(uint8_t, std::span<uint8_t>);
 };
-} // namespace MetaModule
