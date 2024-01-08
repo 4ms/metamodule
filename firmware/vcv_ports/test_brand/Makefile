@@ -2,8 +2,8 @@ BINARYNAME := testbrand
 BUILDDIR := build
 
 SHAREDDIR := ../../../shared
-FIRMWAREDIR := ../../src
-VCVADAPTORDIR := ../../src/VCV_adaptor
+VCVADAPTORDIR := ../VCV_adaptor
+VCVADAPTORPARENTDIR := ../
 LIBDIR := ../../lib
 
 SOURCES = src/test_module.cpp \
@@ -11,8 +11,8 @@ SOURCES = src/test_module.cpp \
 		  ../plugin/libc_stub.c
 
 INCLUDES := -Isrc \
-			-I$(FIRMWAREDIR) \
 			-I$(VCVADAPTORDIR) \
+			-I$(VCVADAPTORPARENTDIR) \
 			-I$(LIBDIR)/jansson \
 			-I$(LIBDIR)/jansson/jansson/src \
 			-I$(SHAREDDIR) \
