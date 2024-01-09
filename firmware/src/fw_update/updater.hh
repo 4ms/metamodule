@@ -230,7 +230,8 @@ private:
 				state = State::WritingWifi;
 			} break;
 
-			case UpdateType::Invalid:
+			default:
+				pr_err("Invalid update file type\n");
 				break;
 		}
 

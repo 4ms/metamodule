@@ -36,7 +36,7 @@ TEST_CASE("Parse json") {
 
 	auto &files = manifest.files;
 
-	CHECK(files.size() == 3);
+	CHECK(files.size() == 2);
 
 	using namespace std::string_view_literals;
 
@@ -49,9 +49,4 @@ TEST_CASE("Parse json") {
 	CHECK(files[1].filename == "metamodule-wifi-v1.0.2.uimg");
 	CHECK(files[1].filesize == 7654321);
 	CHECK(files[1].md5 == "1234567890ABCDEFFEDCBA9876543210"sv);
-
-	CHECK(files[2].type == MetaModule::UpdateType::Invalid);
-	CHECK(files[2].filename == "metamodule-nope-v1.0.2.uimg");
-	CHECK(files[2].filesize == 8888);
-	CHECK(files[2].md5 == "AAAABBBBCCCCDDDDEEEEFFFF11112222"sv);
 }

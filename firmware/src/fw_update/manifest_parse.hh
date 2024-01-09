@@ -12,32 +12,42 @@
 namespace MetaModule
 {
 
-inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updatefile) {
-	if (!n.is_map())
-		return false;
-	if (!n.has_child("type"))
-		return false;
-	if (!n.has_child("filename"))
-		return false;
-	if (!n.has_child("filesize"))
-		return false;
+inline std::optional<UpdateFile> parseFile(ryml::ConstNodeRef const &n) {
 
-	n["filename"] >> updatefile->filename;
-	n["filesize"] >> updatefile->filesize;
+	if (n.is_map() && n.has_child("type") && n.has_child("filename") && n.has_child("filesize"))
+	{
+		auto parseFileType = [](const auto& typeString) -> std::optional<UpdateType>
+		{
+			if (typeString.val() == "app") return MetaModule::UpdateType::App;
+			else if (typeString.val() == "wifi-app") return MetaModule::UpdateType::WifiApp;
+			else if (typeString.val() == "wifi-firmware") return MetaModule::UpdateType::WifiFirmware;
+			else if (typeString.val() == "wifi-filesystem") return MetaModule::UpdateType::WifiFilesystem;
+			else return std::nullopt;
+		};
 
-	updatefile->type = (n["type"].val() == "app")			  ? MetaModule::UpdateType::App :
-					   (n["type"].val() == "wifi-app")		  ? MetaModule::UpdateType::WifiApp :
-					   (n["type"].val() == "wifi-firmware")	  ? MetaModule::UpdateType::WifiFirmware :
-					   (n["type"].val() == "wifi-filesystem") ? MetaModule::UpdateType::WifiFilesystem :
-																MetaModule::UpdateType::Invalid;
+		if (auto updateType = parseFileType(n["type"]); updateType)
+		{
+			UpdateFile updateFile;
 
-	if (n.has_child("md5")) {
-		auto md5 = n["md5"].val();
-		auto md5_sv = std::string_view{md5.data(), md5.size()};
-		updatefile->md5 = md5_sv;
+			updateFile.type = *updateType;
+			n["filename"] >> updateFile.filename;
+			n["filesize"] >> updateFile.filesize;
+
+			if (n.has_child("md5")) {
+				auto md5 = n["md5"].val();
+				auto md5_sv = std::string_view{md5.data(), md5.size()};
+				updateFile.md5 = md5_sv;
+			}
+
+			return updateFile;
+		}
+		else
+		{
+			pr_err("Unknown update type\n");
+		}
+
 	}
-
-	return true;
+	return std::nullopt;
 }
 
 struct ManifestParser {
@@ -70,7 +80,14 @@ struct ManifestParser {
 		}
 
 		root["version"] >> manifest.version;
-		root["files"] >> manifest.files;
+
+		for (auto thisNode : root["files"])
+		{
+			if (auto thisFile = parseFile(thisNode); thisFile)
+			{
+				manifest.files.push_back(*thisFile);
+			}
+		}
 
 		return manifest;
 	}

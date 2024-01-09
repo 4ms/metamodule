@@ -7,10 +7,10 @@
 namespace MetaModule
 {
 
-enum class UpdateType { App, WifiFirmware, WifiFilesystem, WifiApp, Invalid };
+enum class UpdateType { App, WifiFirmware, WifiFilesystem, WifiApp};
 
 struct UpdateFile {
-	UpdateType type = UpdateType::Invalid;
+	UpdateType type;
 	std::string filename;
 	uint32_t filesize = 0;
 	StaticString<32> md5{};
