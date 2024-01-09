@@ -27,22 +27,28 @@ public:
 	};
 
 	bool start(std::string_view manifest_filename, Volume manifest_file_vol, uint32_t manifest_filesize) {
-		if (manifest_filesize > 4 * 1024 * 1024) {
-			pr_err("manifest file is too large\n");
-			state = State::Error;
-			return false;
+		if (manifest_filesize <= 4 * 1024 * 1024)
+		{
+			manifest_buffer = std::span<char>{(char *)ram_buffer.data(), manifest_filesize};
+
+			if (file_storage.request_load_file(manifest_filename, manifest_file_vol, manifest_buffer))
+			{
+				vol = manifest_file_vol;
+				state = State::LoadingManifest;
+				return true;
+			}
+			else
+			{
+				abortWithMessage("Cannot request manifest file");
+			}
+		}
+		else
+		{
+			abortWithMessage("Manifest file is too large");
+			
 		}
 
-		manifest_buffer = std::span<char>{(char *)ram_buffer.data(), manifest_filesize};
-
-		if (file_storage.request_load_file(manifest_filename, manifest_file_vol, manifest_buffer))
-			state = State::LoadingManifest;
-		else
-			state = State::Error;
-
-		vol = manifest_file_vol;
-
-		return state != State::Error;
+		return false;		
 	}
 
 	Status process() {
@@ -67,13 +73,11 @@ public:
 						state = State::LoadingFilesToRAM;
 
 					} else {
-						state = State::Error;
-						error_message = "Manifest file is invalid";
+						abortWithMessage("Manifest file is invalid");
 					}
 
 				} else if (message.message_type == FileStorageProxy::LoadFileToRamFailed) {
-					state = State::Error;
-					error_message = "Failed reading manifest file";
+					abortWithMessage("Failed reading manifest file");
 				}
 
 			} break;
@@ -93,9 +97,8 @@ public:
 				auto [bytes_rem, err] = flash_loader.load_next_block();
 
 				if (err == FirmwareFlashLoader::Error::Failed) {
-					state = State::Error;
 					bytes_remaining = bytes_rem;
-					error_message = "Failed writing app to flash";
+					abortWithMessage("Failed writing app to flash");
 
 				} else if (bytes_rem > 0) {
 					bytes_remaining = bytes_rem;
@@ -110,9 +113,8 @@ public:
 				auto [bytes_rem, err] = wifi_loader.load_next_block();
 
 				if (err == FirmwareWifiLoader::Error::Failed) {
-					state = State::Error;
 					bytes_remaining = bytes_rem;
-					error_message = "Failed writing firmware to wifi module";
+					abortWithMessage("Failed writing firmware to wifi module");
 
 				} else if (bytes_rem > 0) {
 					bytes_remaining = bytes_rem;
@@ -156,8 +158,7 @@ private:
 		{
 			file_requested = true;
 		} else {
-			state = State::Error;
-			error_message = "Failed to request firmware file";
+			abortWithMessage("Failed to request firmware file");
 		}
 	}
 
@@ -170,8 +171,7 @@ private:
 			file_requested = false;
 
 		} else if (message.message_type == FileStorageProxy::LoadFileToRamFailed) {
-			state = State::Error;
-			error_message = "Failed to load a firmware file";
+			abortWithMessage("Failed to load a firmware file");
 		}
 	}
 
@@ -199,14 +199,12 @@ private:
 
 			case UpdateType::App: {
 				if (!flash_loader.verify(file_images[current_file_idx], cur_file.md5, cur_file.type)) {
-					state = State::Error;
-					error_message = "App firmware file not valid";
+					abortWithMessage("App firmware file not valid");
 					return file_size;
 				}
 
 				if (!flash_loader.start()) {
-					state = State::Error;
-					error_message = "Could not start writing application firmware to flash";
+					abortWithMessage("Could not start writing application firmware to flash");
 					return file_size;
 				}
 
@@ -215,14 +213,12 @@ private:
 
 			case UpdateType::Wifi:{
 				if (!wifi_loader.verify(file_images[current_file_idx], cur_file.md5, cur_file.type)) {
-					state = State::Error;
-					error_message = "Wifi firmware file not valid";
+					abortWithMessage("Wifi firmware file not valid");
 					return file_size;
 				}
 
 				if (!wifi_loader.start()) {
-					state = State::Error;
-					error_message = "Could not start writing to Wifi module";
+					abortWithMessage("Could not start writing to Wifi module");
 					return file_size;
 				}
 
@@ -235,6 +231,13 @@ private:
 		}
 
 		return file_size;
+	}
+
+private:
+	void abortWithMessage(const char* message)
+	{
+		state = State::Error;
+		error_message = message;
 	}
 
 private:
