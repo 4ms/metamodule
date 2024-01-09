@@ -1,6 +1,7 @@
 BINARYNAME := testbrand
 BUILDDIR := build
 
+RACK_DIR = ./Rack-SDK
 SHAREDDIR := ../../../shared
 VCVADAPTORDIR := $(RACK_DIR)/include
 RACKINCLUDES := -I$(RACK_DIR)/dep/include
@@ -29,7 +30,8 @@ ARCH_CFLAGS := -DSTM32MP157Cxx -DSTM32MP1 -DCORE_CA7
 LFLAGS = $(MCU)  \
 		 -Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
 		 -Wl,--gc-sections \
-		 -nostdlib -nostartfiles -ffreestanding
+		 -nostdlib 
+		#-nostartfiles -ffreestanding
 
 %.diss : %.so
 	arm-none-eabi-objdump -CDz --source $^ > $@
@@ -76,13 +78,13 @@ CFLAGS ?= -g2 \
 		 $(MCU) \
 		 $(INCLUDES) \
 		 -fdata-sections -ffunction-sections \
-		 -nostartfiles \
-		 -ffreestanding \
 		 $(EXTRACFLAGS)\
+
+		 # -nostartfiles \
+		 # -ffreestanding \
 
 CXXFLAGS ?= $(CFLAGS) \
 		-std=c++2a \
-		-fno-rtti \
 		-fno-exceptions \
 		-fno-unwind-tables \
 		-fno-threadsafe-statics \
@@ -92,6 +94,8 @@ CXXFLAGS ?= $(CFLAGS) \
 		-Wno-register \
 		-Wno-volatile \
 		 $(EXTRACXXFLAGS) \
+		 
+		# -fno-rtti \
 
 LINK_STDLIB ?= -nostdlib
 

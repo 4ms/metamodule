@@ -1,4 +1,5 @@
 #pragma once
+#include <window/svg.hpp>
 #include <widget/FramebufferWidget.hpp>
 #include <widget/SvgWidget.hpp>
 #include <app/SvgKnob.hpp>
@@ -281,8 +282,8 @@ struct RoundKnob : app::SvgKnob {
 	widget::SvgWidget* bg;
 
 	RoundKnob() {
-		minAngle = -0.83 * M_PI;
-		maxAngle = 0.83 * M_PI;
+		minAngle = -0.83f * M_PI;
+		maxAngle = 0.83f * M_PI;
 
 		bg = new widget::SvgWidget;
 		fb->addChildBelow(bg, tw);
@@ -335,8 +336,8 @@ struct Davies1900hKnob : app::SvgKnob {
 	widget::SvgWidget* bg;
 
 	Davies1900hKnob() {
-		minAngle = -0.83 * M_PI;
-		maxAngle = 0.83 * M_PI;
+		minAngle = -0.83f * M_PI;
+		maxAngle = 0.83f * M_PI;
 
 		bg = new widget::SvgWidget;
 		fb->addChildBelow(bg, tw);
@@ -391,8 +392,8 @@ struct Rogan : app::SvgKnob {
 	widget::SvgWidget* fg;
 
 	Rogan() {
-		minAngle = -0.83 * M_PI;
-		maxAngle = 0.83 * M_PI;
+		minAngle = -0.83f * M_PI;
+		maxAngle = 0.83f * M_PI;
 
 		bg = new widget::SvgWidget;
 		fb->addChildBelow(bg, tw);
@@ -623,8 +624,8 @@ struct SynthTechAlco : app::SvgKnob {
 	widget::SvgWidget* bg;
 
 	SynthTechAlco() {
-		minAngle = -0.82 * M_PI;
-		maxAngle = 0.82 * M_PI;
+		minAngle = -0.82f * M_PI;
+		maxAngle = 0.82f * M_PI;
 
 		bg = new widget::SvgWidget;
 		fb->addChildBelow(bg, tw);
@@ -638,8 +639,8 @@ struct Trimpot : app::SvgKnob {
 	widget::SvgWidget* bg;
 
 	Trimpot() {
-		minAngle = -0.75 * M_PI;
-		maxAngle = 0.75 * M_PI;
+		minAngle = -0.75f * M_PI;
+		maxAngle = 0.75f * M_PI;
 
 		bg = new widget::SvgWidget;
 		fb->addChildBelow(bg, tw);
@@ -653,8 +654,8 @@ struct BefacoBigKnob : app::SvgKnob {
 	widget::SvgWidget* bg;
 
 	BefacoBigKnob() {
-		minAngle = -0.75 * M_PI;
-		maxAngle = 0.75 * M_PI;
+		minAngle = -0.75f * M_PI;
+		maxAngle = 0.75f * M_PI;
 		setSvg(Svg::load(asset::system("res/ComponentLibrary/BefacoBigKnob.svg")));
 
 		bg = new widget::SvgWidget;
@@ -667,8 +668,8 @@ struct BefacoTinyKnob : app::SvgKnob {
 	widget::SvgWidget* bg;
 
 	BefacoTinyKnob() {
-		minAngle = -0.8 * M_PI;
-		maxAngle = 0.8 * M_PI;
+		minAngle = -0.8f * M_PI;
+		maxAngle = 0.8f * M_PI;
 
 		bg = new widget::SvgWidget;
 		fb->addChildBelow(bg, tw);
@@ -1045,20 +1046,20 @@ struct SegmentDisplay : widget::Widget {
 };
 
 
-struct AudioButton_ADAT : app::AudioButton {
-	AudioButton_ADAT() {
-		addFrame(Svg::load(asset::system("res/ComponentLibrary/ADAT.svg")));
-		shadow->opacity = 0.0;
-	}
-};
+// struct AudioButton_ADAT : app::AudioButton {
+// 	AudioButton_ADAT() {
+// 		addFrame(Svg::load(asset::system("res/ComponentLibrary/ADAT.svg")));
+// 		shadow->opacity = 0.0;
+// 	}
+// };
 
 
-struct AudioButton_USB_B : app::AudioButton {
-	AudioButton_USB_B() {
-		addFrame(Svg::load(asset::system("res/ComponentLibrary/USB_B.svg")));
-		shadow->opacity = 0.0;
-	}
-};
+// struct AudioButton_USB_B : app::AudioButton {
+// 	AudioButton_USB_B() {
+// 		addFrame(Svg::load(asset::system("res/ComponentLibrary/USB_B.svg")));
+// 		shadow->opacity = 0.0;
+// 	}
+// };
 
 
 struct MidiButton_MIDI_DIN : app::MidiButton {

@@ -117,7 +117,7 @@ struct Port {
 		else {
 			float sum = 0.f;
 			for (uint8_t c = 0; c < channels; c++) {
-				sum += std::pow(voltages[c], 2);
+				sum += powf(voltages[c], 2.f);
 			}
 			return std::sqrt(sum);
 		}

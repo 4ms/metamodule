@@ -142,7 +142,7 @@ struct Widget : WeakBase {
 		NVGcontext* vg = NULL;
 		/** Local box representing the visible viewport. */
 		math::Rect clipBox;
-		NVGLUframebuffer* fb = NULL;
+		// NVGLUframebuffer* fb = NULL;
 	};
 
 	/** Draws the widget to the NanoVG context.

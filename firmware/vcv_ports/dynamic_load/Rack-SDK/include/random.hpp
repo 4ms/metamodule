@@ -3,6 +3,19 @@
 #include <random>
 #include <vector>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846f
+#endif
+#ifndef M_SQRT2
+#define M_SQRT2 1.41421356237309504880f
+#endif
+#ifndef M_E
+#define M_E 2.7182818284590452354f
+#endif
+#ifndef M_SQRT1_2
+#define M_SQRT1_2	0.70710678118654752440f
+#endif
+
 
 namespace rack {
 /** Random number generation */
