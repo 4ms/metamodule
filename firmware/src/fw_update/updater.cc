@@ -21,7 +21,7 @@ bool FirmwareUpdater::start(std::string_view manifest_filename, Volume manifest_
         if (file_storage.request_load_file(manifest_filename, manifest_file_vol, manifest_buffer))
         {
             vol = manifest_file_vol;
-            state = State::LoadingManifest;
+            moveToState(State::LoadingManifest);
             return true;
         }
         else
@@ -32,7 +32,6 @@ bool FirmwareUpdater::start(std::string_view manifest_filename, Volume manifest_
     else
     {
         abortWithMessage("Manifest file is too large");
-        
     }
 
     return false;		
@@ -56,8 +55,12 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
 
                 if (parseResult and parseResult->files.size() > 0) {
                     manifest = *parseResult;
-                    init_ram_loading();
-                    state = State::LoadingFilesToRAM;
+
+                    current_file_idx = 0;
+                    file_requested = false;
+                    file_images.reserve(manifest.files.size());
+                    
+                    moveToState(State::LoadingFilesToRAM);
 
                 } else {
                     abortWithMessage("Manifest file is invalid");
@@ -76,7 +79,11 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
                 check_reading_done();
 
             if (current_file_idx >= manifest.files.size())
-                current_file_size = write_first_file();
+            {
+                // Write first file
+                current_file_idx = 0;
+                current_file_size = start_writing_file();
+            }
 
         } break;
 
@@ -91,7 +98,10 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
                 bytes_remaining = bytes_rem;
 
             } else {
-                current_file_size = write_next_file();
+
+                // write next file
+                current_file_idx++;
+                current_file_size = start_writing_file();
             }
 
         } break;
@@ -104,12 +114,6 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
         return {state, current_file_size, bytes_remaining};
 }
 
-
-void FirmwareUpdater::init_ram_loading() {
-    current_file_idx = 0;
-    file_requested = false;
-    file_images.reserve(manifest.files.size());
-}
 
 // reads from disk to RAM
 void FirmwareUpdater::start_reading_file() {
@@ -147,64 +151,68 @@ void FirmwareUpdater::check_reading_done() {
     }
 }
 
-int FirmwareUpdater::write_first_file() {
-    current_file_idx = 0;
-    return start_writing_file();
-}
-
-int FirmwareUpdater::write_next_file() {
-    current_file_idx++;
-    return start_writing_file();
-}
-
 // writes from RAM to flash/wifi-uart
-int FirmwareUpdater::start_writing_file() {
-    if (current_file_idx > manifest.files.size()) {
-        state = State::Success;
+int FirmwareUpdater::start_writing_file()
+{
+    if (current_file_idx > manifest.files.size())
+    {
+        moveToState(State::Success);
         return 0;
     }
+    else {
 
-    int file_size = file_images[current_file_idx].size();
-    auto &cur_file = manifest.files[current_file_idx];
+        int file_size = file_images[current_file_idx].size();
+        auto &cur_file = manifest.files[current_file_idx];
 
-    switch (cur_file.type) {
+        switch (cur_file.type) {
 
-        case UpdateType::App:
-            current_file_loader = std::make_unique<FirmwareFlashLoader>(file_images[current_file_idx]);
-            break;
+            case UpdateType::App:
+                current_file_loader = std::make_unique<FirmwareFlashLoader>(file_images[current_file_idx]);
+                break;
 
-        case UpdateType::Wifi:
-            current_file_loader = std::make_unique<FirmwareWifiLoader>(file_images[current_file_idx]);
-            break;
-            
-        default:
-            current_file_loader.reset();
-            pr_err("Invalid update file type\n");
-            break;
-    }
-
-    if (current_file_loader)
-    {
-        if (!current_file_loader->verify(cur_file.md5)) {
-            abortWithMessage("App firmware file not valid");
-            return file_size;
+            case UpdateType::Wifi:
+                current_file_loader = std::make_unique<FirmwareWifiLoader>(file_images[current_file_idx]);
+                break;
+                
+            default:
+                current_file_loader.reset();
+                pr_err("Invalid update file type\n");
+                break;
         }
 
-        if (!current_file_loader->start()) {
-            abortWithMessage("Could not start writing application firmware to flash");
-            return file_size;
+        if (current_file_loader)
+        {
+            if (current_file_loader->verify(cur_file.md5))
+            {
+                if (current_file_loader->start())
+                {
+                    moveToState(State::Writing);
+                }
+                else
+                {
+                    abortWithMessage("Could not start writing application firmware to flash");
+                }
+            }
+            else
+            {
+                abortWithMessage("App firmware file not valid");
+            }
         }
 
-        state = State::Writing;
+        return file_size;
     }
-
-    return file_size;
 }
 
 void FirmwareUpdater::abortWithMessage(const char* message)
 {
     state = State::Error;
     error_message = message;
+}
+
+void FirmwareUpdater::moveToState(State newState)
+{
+    pr_trace("Update move start %u -> %u\n", state, newState);
+    state = newState;
 }
 
 

@@ -31,15 +31,13 @@ public:
 	Status process();
 
 private:
-	void init_ram_loading();
 	void start_reading_file();
 	void check_reading_done();
-	int write_first_file();
-	int write_next_file();
 	int start_writing_file();
 
 private:
 	void abortWithMessage(const char* message);
+	void moveToState(State);
 
 private:
 	std::unique_ptr<FileLoaderBase> current_file_loader;
