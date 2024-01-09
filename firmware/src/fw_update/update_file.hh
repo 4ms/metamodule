@@ -7,7 +7,7 @@
 namespace MetaModule
 {
 
-enum class UpdateType { App, WifiFirmware, WifiFilesystem, WifiApp};
+enum class UpdateType { App, Wifi};
 
 struct UpdateFile {
 	UpdateType type;

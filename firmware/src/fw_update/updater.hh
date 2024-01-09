@@ -213,9 +213,7 @@ private:
 				state = State::WritingApp;
 			} break;
 
-			case UpdateType::WifiApp:
-			case UpdateType::WifiFirmware:
-			case UpdateType::WifiFilesystem: {
+			case UpdateType::Wifi:{
 				if (!wifi_loader.verify(file_images[current_file_idx], cur_file.md5, cur_file.type)) {
 					state = State::Error;
 					error_message = "Wifi firmware file not valid";

@@ -19,9 +19,7 @@ inline std::optional<UpdateFile> parseFile(ryml::ConstNodeRef const &n) {
 		auto parseFileType = [](const auto& typeString) -> std::optional<UpdateType>
 		{
 			if (typeString.val() == "app") return MetaModule::UpdateType::App;
-			else if (typeString.val() == "wifi-app") return MetaModule::UpdateType::WifiApp;
-			else if (typeString.val() == "wifi-firmware") return MetaModule::UpdateType::WifiFirmware;
-			else if (typeString.val() == "wifi-filesystem") return MetaModule::UpdateType::WifiFilesystem;
+			else if (typeString.val() == "wifi") return MetaModule::UpdateType::Wifi;
 			else return std::nullopt;
 		};
 
@@ -96,7 +94,7 @@ struct ManifestParser {
 		{
 			pr_dbg("Manifest not valid json or yaml\n");
 		}
-		
+
 		return std::nullopt;
 	}
 };
