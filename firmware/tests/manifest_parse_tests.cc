@@ -32,9 +32,11 @@ TEST_CASE("Parse json") {
 
 	auto manifest = p.parse(test_json);
 
-	CHECK(manifest.version == 123);
+	CHECK(manifest.has_value());
 
-	auto &files = manifest.files;
+	CHECK(manifest->version == 123);
+
+	auto &files = manifest->files;
 
 	CHECK(files.size() == 2);
 

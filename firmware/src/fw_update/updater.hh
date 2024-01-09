@@ -59,9 +59,10 @@ public:
 
 				if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
 
-					manifest = parser.parse(manifest_buffer);
+					auto parseResult = parser.parse(manifest_buffer);
 
-					if (manifest.files.size() > 0) {
+					if (parseResult and parseResult->files.size() > 0) {
+						manifest = *parseResult;
 						init_ram_loading();
 						state = State::LoadingFilesToRAM;
 

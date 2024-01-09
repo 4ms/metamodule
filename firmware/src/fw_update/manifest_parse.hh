@@ -54,42 +54,50 @@ struct ManifestParser {
 
 	// returns true if file data is valid manifest json file (does not check md5 or if files exist)
 	// creates the list of files we need
-	UpdateManifest parse(std::span<char> json) {
-		UpdateManifest manifest{};
+	std::optional<UpdateManifest> parse(std::span<char> json) {
 
 		// ryml has issues with tabs in json sometimes:
 		std::replace(json.begin(), json.end(), '\t', ' ');
 
 		ryml::Tree tree = ryml::parse_in_place(ryml::substr(json.data(), json.size()));
 
-		if (tree.num_children(0) == 0) {
-			pr_dbg("Manifest not valid json or yaml\n");
-			return manifest;
-		}
-
-		ryml::ConstNodeRef root = tree.rootref();
-
-		if (!root.has_child("version")) {
-			pr_dbg("Manifest file has no root node with key 'version'\n");
-			return manifest;
-		}
-
-		if (!root.has_child("files")) {
-			pr_dbg("Manifest file has no root node with key 'files'\n");
-			return manifest;
-		}
-
-		root["version"] >> manifest.version;
-
-		for (auto thisNode : root["files"])
+		if (tree.num_children(0) > 0)
 		{
-			if (auto thisFile = parseFile(thisNode); thisFile)
+			ryml::ConstNodeRef root = tree.rootref();
+
+			if (root.has_child("version"))
 			{
-				manifest.files.push_back(*thisFile);
+				UpdateManifest manifest{};
+				root["version"] >> manifest.version;
+
+				if (root.has_child("files"))
+				{
+					for (auto thisNode : root["files"])
+					{
+						if (auto thisFile = parseFile(thisNode); thisFile)
+						{
+							manifest.files.push_back(*thisFile);
+						}
+					}
+
+					return manifest;
+				}
+				else
+				{
+					pr_dbg("Manifest file has no root node with key 'files'\n");
+				}
+			}
+			else
+			{
+				pr_dbg("Manifest has no version\n");
 			}
 		}
-
-		return manifest;
+		else
+		{
+			pr_dbg("Manifest not valid json or yaml\n");
+		}
+		
+		return std::nullopt;
 	}
 };
 
