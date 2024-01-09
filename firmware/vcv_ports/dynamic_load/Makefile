@@ -2,7 +2,10 @@ BINARYNAME := testbrand
 BUILDDIR := build
 
 SHAREDDIR := ../../../shared
-VCVADAPTORDIR := plugin
+VCVADAPTORDIR := $(RACK_DIR)/include
+RACKINCLUDES := -I$(RACK_DIR)/dep/include
+
+# VCVADAPTORDIR := plugin
 # VCVADAPTORDIR := VCV_adaptor
 # VCVADAPTORPARENTDIR := ./
 LIBDIR := ../../lib
@@ -12,11 +15,12 @@ SOURCES = test_brand/src/test_module.cpp \
 		  plugin/libc_stub.c
 
 INCLUDES := -Itest_brand/src \
-			-I$(VCVADAPTORDIR) \
 			-I$(LIBDIR)/jansson \
 			-I$(LIBDIR)/jansson/jansson/src \
 			-I$(SHAREDDIR) \
 			-I$(SHAREDDIR)/cpputil \
+			-I$(VCVADAPTORDIR) \
+			$(RACKINCLUDES)\
 
 LINKSCR := linkscript.ld
 
