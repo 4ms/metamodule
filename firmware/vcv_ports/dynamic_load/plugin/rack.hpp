@@ -5,29 +5,19 @@ struct ProcessArgs {};
 
 namespace rack::engine
 {
+
 struct Param {
 	float value = 0.f;
-
-	float getValue() {
-		return value;
-	}
-
-	void setValue(float value) {
-		this->value = value;
-	}
+	float getValue();
+	void setValue(float value);
 };
 
 struct Port {
 	float voltage = 0.f;
 	bool connected = false;
 
-	void setVoltage(float v, int channel = 0) {
-		voltage = v;
-	}
-
-	float getVoltage(int chan = 0) const {
-		return voltage;
-	}
+	void setVoltage(float v, int channel = 0);
+	float getVoltage(int chan = 0) const;
 };
 
 struct Output : Port {};
@@ -46,16 +36,12 @@ struct Module {
 
 	virtual void process(const ProcessArgs &args) = 0;
 
-	void config(unsigned num_params, unsigned num_inputs, unsigned num_outputs, unsigned num_lights = 0) {
-	}
+	void config(unsigned num_params, unsigned num_inputs, unsigned num_outputs, unsigned num_lights = 0);
 };
 
 struct ModuleWidget {
 	Module *module;
-
-	void setModule(Module *module) {
-		this->module = module;
-	}
+	void setModule(Module *module);
 };
 
 struct Model {
@@ -63,14 +49,9 @@ struct Model {
 };
 
 template<typename ModelT, typename WidgetT>
-Model *createModel(const char *slug) {
-	static Model model{slug};
-	return &model;
-}
+Model *createModel(const char *slug);
 
 struct Plugin {
 	Model *models[2];
-	void addModel(Model *model) {
-		models[0] = model;
-	}
+	void addModel(Model *model);
 };
