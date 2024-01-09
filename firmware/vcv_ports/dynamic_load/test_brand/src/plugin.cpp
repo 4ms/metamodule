@@ -2,7 +2,7 @@
 
 Plugin *pluginInstance;
 
-void init(rack::Plugin *p) {
+void init(Plugin *p) {
 	pluginInstance = p;
 
 	p->addModel(modelTest);

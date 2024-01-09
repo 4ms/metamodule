@@ -19,12 +19,12 @@ struct TestModule : Module {
 struct TestWidget : ModuleWidget {
 	TestWidget(TestModule *module) {
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "not/a/real/path.svg")));
+		// setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "not/a/real/path.svg")));
 
-		addChild(createWidget<ScrewSilver>(Vec(15, 0)));
-		addParam(createParam<Davies1900hRedKnob>(Vec(45, 37), module, TestModule::KNOB1_PARAM));
-		addInput(createInput<PJ301MPort>(Vec(7, 28), module, TestModule::A1_INPUT));
-		addOutput(createOutput<PJ301MPort>(Vec(7, 154), module, TestModule::OUT1_OUTPUT));
+		// addChild(createWidget<ScrewSilver>(Vec(15, 0)));
+		// addParam(createParam<Davies1900hRedKnob>(Vec(45, 37), module, TestModule::KNOB1_PARAM));
+		// addInput(createInput<PJ301MPort>(Vec(7, 28), module, TestModule::A1_INPUT));
+		// addOutput(createOutput<PJ301MPort>(Vec(7, 154), module, TestModule::OUT1_OUTPUT));
 	}
 };
 

@@ -2,17 +2,17 @@ BINARYNAME := testbrand
 BUILDDIR := build
 
 SHAREDDIR := ../../../shared
-VCVADAPTORDIR := ../VCV_adaptor
-VCVADAPTORPARENTDIR := ../
+VCVADAPTORDIR := plugin
+# VCVADAPTORDIR := VCV_adaptor
+# VCVADAPTORPARENTDIR := ./
 LIBDIR := ../../lib
 
-SOURCES = src/test_module.cpp \
-		  src/plugin.cpp \
-		  ../plugin/libc_stub.c
+SOURCES = test_brand/src/test_module.cpp \
+		  test_brand/src/plugin.cpp \
+		  plugin/libc_stub.c
 
-INCLUDES := -Isrc \
+INCLUDES := -Itest_brand/src \
 			-I$(VCVADAPTORDIR) \
-			-I$(VCVADAPTORPARENTDIR) \
 			-I$(LIBDIR)/jansson \
 			-I$(LIBDIR)/jansson/jansson/src \
 			-I$(SHAREDDIR) \
@@ -40,10 +40,6 @@ LFLAGS = $(MCU)  \
 #### Shared lib (-shared), multiple files ##################
 
 EXTRACFLAGS = -fPIC -c
-
-	# @mkdir -p $(OBJDIR)
-	# $(CXX) $(DEPFLAGS) -PIC -c $(CXXFLAGS) plugin-extcall-multifile1.cc -o $(BUILDDIR)/plugin-extcall-multifile1.o
-	# $(CXX) $(DEPFLAGS) -PIC -c $(CXXFLAGS) plugin-extcall-multifile2.cc -o $(BUILDDIR)/plugin-extcall-multifile2.o
 
 ####################################################################
 ####################################################################
