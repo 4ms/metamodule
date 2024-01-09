@@ -42,11 +42,12 @@ inline float sinc(float x) {
 // Conversion functions
 
 template<typename T>
-T amplitudeToDb(T amp) {
-	// return simd::log10(amp) * 20;
-	amp = std::clamp<T>(0, 12, amp);
-	return MetaModule::log10_0V_12V.interp(amp) * 20;
-}
+T amplitudeToDb(T amp); 
+// {
+// 	// return simd::log10(amp) * 20;
+// 	amp = std::clamp<T>(0, 12, amp);
+// 	return MetaModule::log10_0V_12V.interp(amp) * 20;
+// }
 
 //TODO: use LUT
 template<typename T>

@@ -49,58 +49,27 @@ bool isOdd(T x) {
 /** Limits `x` between `a` and `b`.
 If `b < a`, returns a.
 */
-inline int clamp(int x, int a, int b) {
-	return std::max(std::min(x, b), a);
-}
+int clamp(int x, int a, int b);
 
 /** Limits `x` between `a` and `b`.
 If `b < a`, switches the two values.
 */
-inline int clampSafe(int x, int a, int b) {
-	return (a <= b) ? clamp(x, a, b) : clamp(x, b, a);
-}
+int clampSafe(int x, int a, int b);
 
 /** Euclidean modulus. Always returns `0 <= mod < b`.
 `b` must be positive.
 See https://en.wikipedia.org/wiki/Euclidean_division
 */
-inline int eucMod(int a, int b) {
-	int mod = a % b;
-	if (mod < 0) {
-		mod += b;
-	}
-	return mod;
-}
+int eucMod(int a, int b);
 
 /** Euclidean division.
 `b` must be positive.
 */
-inline int eucDiv(int a, int b) {
-	int div = a / b;
-	int mod = a % b;
-	if (mod < 0) {
-		div -= 1;
-	}
-	return div;
-}
-
-inline void eucDivMod(int a, int b, int *div, int *mod) {
-	*div = a / b;
-	*mod = a % b;
-	if (*mod < 0) {
-		*div -= 1;
-		*mod += b;
-	}
-}
+int eucDiv(int a, int b);
+void eucDivMod(int a, int b, int *div, int *mod);
 
 /** Returns `floor(log_2(n))`, or 0 if `n == 1`. */
-inline int log2(int n) {
-	int i = 0;
-	while (n >>= 1) {
-		i++;
-	}
-	return i;
-}
+int log2(int n);
 
 /** Returns whether `n` is a power of 2. */
 template<typename T>
@@ -123,16 +92,12 @@ T sgn(T x) {
 /** Limits `x` between `a` and `b`.
 If `b < a`, returns a.
 */
-inline float clamp(float x, float a = 0.f, float b = 1.f) {
-	return std::fmax(std::fmin(x, b), a);
-}
+float clamp(float x, float a = 0.f, float b = 1.f);
 
 /** Limits `x` between `a` and `b`.
 If `b < a`, switches the two values.
 */
-inline float clampSafe(float x, float a = 0.f, float b = 1.f) {
-	return (a <= b) ? clamp(x, a, b) : clamp(x, b, a);
-}
+float clampSafe(float x, float a = 0.f, float b = 1.f);
 
 /** Converts -0.f to 0.f. Leaves all other values unchanged. */
 #if defined __clang__
@@ -149,44 +114,26 @@ normalizeZero(float x) {
 /** Euclidean modulus. Always returns `0 <= mod < b`.
 See https://en.wikipedia.org/wiki/Euclidean_division.
 */
-inline float eucMod(float a, float b) {
-	float mod = std::fmod(a, b);
-	if (mod < 0.f) {
-		mod += b;
-	}
-	return mod;
-}
+float eucMod(float a, float b);
 
 /** Returns whether `a` is within epsilon distance from `b`. */
-inline bool isNear(float a, float b, float epsilon = 1e-6f) {
-	return std::fabs(a - b) <= epsilon;
-}
+bool isNear(float a, float b, float epsilon = 1e-6f) ;
 
 /** If the magnitude of `x` if less than epsilon, return 0. */
-inline float chop(float x, float epsilon = 1e-6f) {
-	return std::fabs(x) <= epsilon ? 0.f : x;
-}
+float chop(float x, float epsilon = 1e-6f) ;
 
 /** Rescales `x` from the range `[xMin, xMax]` to `[yMin, yMax]`.
 */
-inline float rescale(float x, float xMin, float xMax, float yMin, float yMax) {
-	return yMin + (x - xMin) / (xMax - xMin) * (yMax - yMin);
-}
+float rescale(float x, float xMin, float xMax, float yMin, float yMax) ;
 
 /** Linearly interpolates between `a` and `b`, from `p = 0` to `p = 1`.
 */
-inline float crossfade(float a, float b, float p) {
-	return a + (b - a) * p;
-}
+float crossfade(float a, float b, float p) ;
 
 /** Linearly interpolates an array `p` with index `x`.
 The array at `p` must be at least length `floor(x) + 2`.
 */
-inline float interpolateLinear(const float *p, float x) {
-	int xi = x;
-	float xf = x - xi;
-	return crossfade(p[xi], p[xi + 1], xf);
-}
+float interpolateLinear(const float *p, float x) ;
 
 /** Complex multiplication `c = a * b`.
 Arguments may be the same pointers.
@@ -194,10 +141,7 @@ Example:
 
 	cmultf(ar, ai, br, bi, &ar, &ai);
 */
-inline void complexMult(float ar, float ai, float br, float bi, float *cr, float *ci) {
-	*cr = ar * br - ai * bi;
-	*ci = ar * bi + ai * br;
-}
+void complexMult(float ar, float ai, float br, float bi, float *cr, float *ci) ;
 
 ////////////////////
 // 2D vector and rectangle
@@ -254,12 +198,8 @@ struct Vec {
 	float dot(Vec b) const {
 		return x * b.x + y * b.y;
 	}
-	float arg() const {
-		return std::atan2(y, x);
-	}
-	float norm() const {
-		return std::hypot(x, y);
-	}
+	float arg() const ;
+	float norm() const ;
 	Vec normalize() const {
 		return div(norm());
 	}
@@ -270,49 +210,29 @@ struct Vec {
 		return x * y;
 	}
 	/** Rotates counterclockwise in radians. */
-	Vec rotate(float angle) {
-		float sin = std::sin(angle);
-		float cos = std::cos(angle);
-		return {x * cos - y * sin, x * sin + y * cos};
-	}
+	Vec rotate(float angle) ;
 	/** Swaps the coordinates.
 	Equivalent to a reflection across the `y = x` line.
 	*/
 	Vec flip() const {
 		return {y, x};
 	}
-	Vec min(Vec b) const {
-		return {std::fmin(x, b.x), std::fmin(y, b.y)};
-	}
-	Vec max(Vec b) const {
-		return {std::fmax(x, b.x), std::fmax(y, b.y)};
-	}
-	Vec abs() const {
-		return {std::fabs(x), std::fabs(y)};
-	}
-	Vec round() const {
-		return {std::round(x), std::round(y)};
-	}
-	Vec floor() const {
-		return {std::floor(x), std::floor(y)};
-	}
-	Vec ceil() const {
-		return {std::ceil(x), std::ceil(y)};
-	}
+	Vec min(Vec b) const ;
+	Vec max(Vec b) const ;
+	Vec abs() const ;
+	Vec round() const ;
+	Vec floor() const ;
+	Vec ceil() const ;
 	bool equals(Vec b) const {
 		return x == b.x && y == b.y;
 	}
 	bool isZero() const {
 		return x == 0.f && y == 0.f;
 	}
-	bool isFinite() const {
-		return std::isfinite(x) && std::isfinite(y);
-	}
+	bool isFinite() const ;
 	Vec clamp(Rect bound) const;
 	Vec clampSafe(Rect bound) const;
-	Vec crossfade(Vec b, float p) {
-		return this->plus(b.minus(*this).mult(p));
-	}
+	Vec crossfade(Vec b, float p) ;
 
 	// Method aliases
 	bool isEqual(Vec b) const {
@@ -339,44 +259,26 @@ struct Rect {
 	}
 	/** Constructs a Rect from a top-left and bottom-right vector.
 	*/
-	static Rect fromMinMax(Vec a, Vec b) {
-		return {a, b.minus(a)};
-	}
+	static Rect fromMinMax(Vec a, Vec b) ;
 	/** Constructs a Rect from any two opposite corners.
 	*/
-	static Rect fromCorners(Vec a, Vec b) {
-		return fromMinMax(a.min(b), a.max(b));
-	}
+	static Rect fromCorners(Vec a, Vec b) ;
 	/** Returns the infinite Rect. */
-	static Rect inf() {
-		return {Vec(-INFINITY, -INFINITY), Vec(INFINITY, INFINITY)};
-	}
+	static Rect inf() ;
 
 	/** Returns whether this Rect contains a point, inclusive on the left/top, exclusive on the right/bottom.
 	Correctly handles infinite Rects.
 	*/
-	bool contains(Vec v) const {
-		return (pos.x <= v.x) && (size.x == INFINITY || v.x < pos.x + size.x) && (pos.y <= v.y) &&
-			   (size.y == INFINITY || v.y < pos.y + size.y);
-	}
+	bool contains(Vec v) const ;
 	/** Returns whether this Rect contains (is a superset of) a Rect.
 	Correctly handles infinite Rects.
 	*/
-	bool contains(Rect r) const {
-		return (pos.x <= r.pos.x) && (r.pos.x - size.x <= pos.x - r.size.x) && (pos.y <= r.pos.y) &&
-			   (r.pos.y - size.y <= pos.y - r.size.y);
-	}
+	bool contains(Rect r) const ;
 	/** Returns whether this Rect overlaps with another Rect.
 	Correctly handles infinite Rects.
 	*/
-	bool intersects(Rect r) const {
-		return (r.size.x == INFINITY || pos.x < r.pos.x + r.size.x) &&
-			   (size.x == INFINITY || r.pos.x < pos.x + size.x) &&
-			   (r.size.y == INFINITY || pos.y < r.pos.y + r.size.y) && (size.y == INFINITY || r.pos.y < pos.y + size.y);
-	}
-	bool equals(Rect r) const {
-		return pos.equals(r.pos) && size.equals(r.size);
-	}
+	bool intersects(Rect r) const ;
+	bool equals(Rect r) const ;
 	float getLeft() const {
 		return pos.x;
 	}
@@ -414,84 +316,31 @@ struct Rect {
 		return {getRight(), getBottom()};
 	}
 	/** Clamps the edges of the rectangle to fit within a bound. */
-	Rect clamp(Rect bound) const {
-		Rect r;
-		r.pos.x = math::clampSafe(pos.x, bound.pos.x, bound.pos.x + bound.size.x);
-		r.pos.y = math::clampSafe(pos.y, bound.pos.y, bound.pos.y + bound.size.y);
-		r.size.x = math::clamp(pos.x + size.x, bound.pos.x, bound.pos.x + bound.size.x) - r.pos.x;
-		r.size.y = math::clamp(pos.y + size.y, bound.pos.y, bound.pos.y + bound.size.y) - r.pos.y;
-		return r;
-	}
+	Rect clamp(Rect bound) const ;
 	/** Nudges the position to fix inside a bounding box. */
-	Rect nudge(Rect bound) const {
-		Rect r;
-		r.size = size;
-		r.pos.x = math::clampSafe(pos.x, bound.pos.x, bound.pos.x + bound.size.x - size.x);
-		r.pos.y = math::clampSafe(pos.y, bound.pos.y, bound.pos.y + bound.size.y - size.y);
-		return r;
-	}
+	Rect nudge(Rect bound) const ;
 	/** Returns the bounding box of the union of `this` and `b`. */
-	Rect expand(Rect b) const {
-		Rect r;
-		r.pos.x = std::fmin(pos.x, b.pos.x);
-		r.pos.y = std::fmin(pos.y, b.pos.y);
-		r.size.x = std::fmax(pos.x + size.x, b.pos.x + b.size.x) - r.pos.x;
-		r.size.y = std::fmax(pos.y + size.y, b.pos.y + b.size.y) - r.pos.y;
-		return r;
-	}
+	Rect expand(Rect b) const ;
 	/** Returns the intersection of `this` and `b`. */
-	Rect intersect(Rect b) const {
-		Rect r;
-		r.pos.x = std::fmax(pos.x, b.pos.x);
-		r.pos.y = std::fmax(pos.y, b.pos.y);
-		r.size.x = std::fmin(pos.x + size.x, b.pos.x + b.size.x) - r.pos.x;
-		r.size.y = std::fmin(pos.y + size.y, b.pos.y + b.size.y) - r.pos.y;
-		return r;
-	}
+	Rect intersect(Rect b) const ;
 	/** Returns a Rect with its position set to zero. */
-	Rect zeroPos() const {
-		return {Vec(), size};
-	}
+	Rect zeroPos() const ;
 	/** Expands each corner. */
-	Rect grow(Vec delta) const {
-		Rect r;
-		r.pos = pos.minus(delta);
-		r.size = size.plus(delta.mult(2.f));
-		return r;
-	}
+	Rect grow(Vec delta) const ;
 	/** Contracts each corner. */
-	Rect shrink(Vec delta) const {
-		Rect r;
-		r.pos = pos.plus(delta);
-		r.size = size.minus(delta.mult(2.f));
-		return r;
-	}
+	Rect shrink(Vec delta) const ;
 	/** Returns `pos + size * p` */
-	Vec interpolate(Vec p) {
-		return pos.plus(size.mult(p));
-	}
+	Vec interpolate(Vec p) ;
 
 	// Method aliases
-	bool isContaining(Vec v) const {
-		return contains(v);
-	}
-	bool isIntersecting(Rect r) const {
-		return intersects(r);
-	}
-	bool isEqual(Rect r) const {
-		return equals(r);
-	}
+	bool isContaining(Vec v) const ;
+	bool isIntersecting(Rect r) const ;
+	bool isEqual(Rect r) const ;
 };
 
-inline Vec Vec::clamp(Rect bound) const {
-	return {math::clamp(x, bound.pos.x, bound.pos.x + bound.size.x),
-			math::clamp(y, bound.pos.y, bound.pos.y + bound.size.y)};
-}
+// Vec Vec::clamp(Rect bound) const ;
 
-inline Vec Vec::clampSafe(Rect bound) const {
-	return {math::clampSafe(x, bound.pos.x, bound.pos.x + bound.size.x),
-			math::clampSafe(y, bound.pos.y, bound.pos.y + bound.size.y)};
-}
+// inline Vec Vec::clampSafe(Rect bound) const ;
 
 // Operator overloads for Vec
 inline Vec operator+(const Vec &a) {

@@ -6,31 +6,15 @@ namespace rack::engine
 
 struct Light {
 	float value = 0.f;
-	void setBrightness(float brightness) {
-		value = brightness;
-	}
+	void setBrightness(float brightness) ;
 
-	float getBrightness() {
-		return value;
-	}
+	float getBrightness() ;
 
-	void setBrightnessSmooth(float brightness, float deltaTime, float lambda = 30.f) {
-		if (brightness < value) {
-			// Fade out light
-			value += (brightness - value) * lambda * deltaTime;
-		} else {
-			// Immediately illuminate light
-			value = brightness;
-		}
-	}
+	void setBrightnessSmooth(float brightness, float deltaTime, float lambda = 30.f) ;
 
-	void setSmoothBrightness(float brightness, float deltaTime) {
-		setBrightnessSmooth(brightness, deltaTime);
-	}
+	void setSmoothBrightness(float brightness, float deltaTime) ;
 
-	DEPRECATED void setBrightnessSmooth(float brightness, int frames = 1) {
-		setBrightnessSmooth(brightness, frames / 44100.f);
-	}
+	DEPRECATED void setBrightnessSmooth(float brightness, int frames = 1) ;
 };
 
 } // namespace rack::engine

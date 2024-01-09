@@ -8,13 +8,9 @@ namespace rack::engine
 struct Param {
 	float value = 0.f;
 
-	float getValue() {
-		return value;
-	}
+	float getValue() ;
 
-	void setValue(float value) {
-		this->value = value;
-	}
+	void setValue(float value) ;
 };
 
 } // namespace rack::engine

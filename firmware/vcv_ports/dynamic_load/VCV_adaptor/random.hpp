@@ -24,32 +24,11 @@ Example:
 struct Xoroshiro128Plus {
 	uint64_t state[2] = {};
 
-	void seed(uint64_t s0, uint64_t s1) {
-		state[0] = s0;
-		state[1] = s1;
-		// A bad seed will give a bad first result, so shift the state
-		operator()();
-	}
+	void seed(uint64_t s0, uint64_t s1); 
+	bool isSeeded();
 
-	bool isSeeded() {
-		return state[0] || state[1];
-	}
-
-	static uint64_t rotl(uint64_t x, int k) {
-		return (x << k) | (x >> (64 - k));
-	}
-
-	uint64_t operator()() {
-		uint64_t s0 = state[0];
-		uint64_t s1 = state[1];
-		uint64_t result = s0 + s1;
-
-		s1 ^= s0;
-		state[0] = rotl(s0, 55) ^ s1 ^ (s1 << 14);
-		state[1] = rotl(s1, 36);
-
-		return result;
-	}
+	static uint64_t rotl(uint64_t x, int k);
+	uint64_t operator()(); 
 	constexpr uint64_t min() const {
 		return 0;
 	}
@@ -120,42 +99,12 @@ inline float uniform() {
 
 /** Returns a normal random number with mean 0 and standard deviation 1 */
 //TODO: replace with something less processor-intensive (no std::sqrt, std::log)
-// [[deprecated("This is too processor-heavy for use on Cortex-A7")]]
-inline float normal() {
-	// Box-Muller transform
-	float radius = std::sqrt(-2.f * std::log(1.f - get<float>()));
-	float theta = 2.f * M_PI * get<float>();
-	return radius * std::sin(theta);
-
-	// // Central Limit Theorem
-	// const int n = 8;
-	// float sum = 0.0;
-	// for (int i = 0; i < n; i++) {
-	// 	sum += get<float>();
-	// }
-	// return (sum - n / 2.f) / std::sqrt(n / 12.f);
-}
+float normal(); 
 
 /** Fills an array with random bytes. */
-inline void buffer(uint8_t *out, size_t len) {
-	Xoroshiro128Plus &rng = local();
-	for (size_t i = 0; i < len; i += 4) {
-		uint64_t r = rng();
-		out[i] = r;
-		if (i + 1 < len)
-			out[i + 1] = r >> 8;
-		if (i + 2 < len)
-			out[i + 2] = r >> 16;
-		if (i + 3 < len)
-			out[i + 3] = r >> 24;
-	}
-}
+void buffer(uint8_t *out, size_t len);
 
 /** Creates a vector of random bytes. */
-inline std::vector<uint8_t> vector(size_t len) {
-	std::vector<uint8_t> v(len);
-	buffer(v.data(), len);
-	return v;
-}
+std::vector<uint8_t> vector(size_t len);
 
 } // namespace rack::random

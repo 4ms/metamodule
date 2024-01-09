@@ -3,13 +3,13 @@ BUILDDIR := build
 
 RACK_DIR = ./Rack-SDK
 SHAREDDIR := ../../../shared
-VCVADAPTORDIR := $(RACK_DIR)/include
-RACKINCLUDES := -I$(RACK_DIR)/dep/include
-
-# VCVADAPTORDIR := plugin
-# VCVADAPTORDIR := VCV_adaptor
-# VCVADAPTORPARENTDIR := ./
 LIBDIR := ../../lib
+
+# VCVINCLUDES := -I$(RACK_DIR)/include \
+# 			   -I$(RACK_DIR)/dep/include
+
+VCVINCLUDES := -IVCV_adaptor -I.
+
 
 SOURCES = test_brand/src/test_module.cpp \
 		  test_brand/src/plugin.cpp \
@@ -20,8 +20,7 @@ INCLUDES := -Itest_brand/src \
 			-I$(LIBDIR)/jansson/jansson/src \
 			-I$(SHAREDDIR) \
 			-I$(SHAREDDIR)/cpputil \
-			-I$(VCVADAPTORDIR) \
-			$(RACKINCLUDES)\
+			$(VCVINCLUDES)
 
 LINKSCR := linkscript.ld
 
@@ -66,7 +65,7 @@ ARCH_CFLAGS ?= -DUSE_FULL_LL_DRIVER \
 			   -DCORE_CA7 \
 			   $(EXTRA_ARCH_CFLAGS) \
 
-OPTFLAG ?= -O0
+OPTFLAG ?= -O2
 
 AFLAGS = $(MCU)
 
@@ -94,8 +93,7 @@ CXXFLAGS ?= $(CFLAGS) \
 		-Wno-register \
 		-Wno-volatile \
 		 $(EXTRACXXFLAGS) \
-		 
-		# -fno-rtti \
+		-fno-rtti \
 
 LINK_STDLIB ?= -nostdlib
 
@@ -128,6 +126,8 @@ HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
 BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
 
 all: Makefile $(SO) 
+
+dis: all $(BUILDDIR)/$(BINARYNAME).nm $(BUILDDIR)/$(BINARYNAME).readelf $(BUILDDIR)/$(BINARYNAME).diss 
 
 $(OBJDIR)/%.o: %.s
 	@mkdir -p $(dir $@)
