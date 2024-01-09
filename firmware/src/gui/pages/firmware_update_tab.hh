@@ -87,7 +87,7 @@ struct FirmwareUpdateTab {
 					display_update_failed(status.error_message);
 					state = State::Failed;
 
-				} else if (status.state == FirmwareUpdater::LoadingFilesToRAM) {
+				} else if (status.state == FirmwareUpdater::LoadingFileToRAM or status.state == FirmwareUpdater::StartLoadingFileToRam) {
 					display_progress("Loading to RAM", status.file_size, 0);
 
 				} else if (status.state == FirmwareUpdater::Writing) {

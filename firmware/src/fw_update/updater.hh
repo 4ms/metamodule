@@ -1,9 +1,8 @@
 #pragma once
 
 #include "loaders/abstract_loader.hh"
-#include "fw_update/manifest_parse.hh"
-#include "fw_update/ram_buffer.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "update_file.hh"
 #include <cstdint>
 #include <memory>
 
@@ -13,7 +12,7 @@ namespace MetaModule
 // Handle the process of updating firmware
 class FirmwareUpdater {
 public:
-	enum State { Idle, Error, LoadingManifest, LoadingFilesToRAM, Writing, Success };
+	enum State { Idle, Error, LoadingManifest, StartLoadingFileToRam, LoadingFileToRAM, Writing, Success };
 
 	struct Status {
 		State state{State::Idle};
@@ -31,9 +30,8 @@ public:
 	Status process();
 
 private:
-	void start_reading_file();
-	void check_reading_done();
-	int start_writing_file();
+	bool start_reading_file();
+	bool start_writing_file();
 
 private:
 	void abortWithMessage(const char* message);
@@ -42,8 +40,6 @@ private:
 private:
 	std::unique_ptr<FileLoaderBase> current_file_loader;
 
-	ManifestParser parser;
-
 	FileStorageProxy &file_storage;
 	State state;
 
@@ -51,13 +47,12 @@ private:
 
 	unsigned int current_file_idx;
 	int current_file_size;
-	bool file_requested;
 
 	std::span<char> manifest_buffer;
 
 	std::string error_message;
 
-	const std::span<uint8_t> ram_buffer = get_ram_buffer();
+	const std::span<uint8_t> ram_buffer;
 
 	UpdateManifest manifest;
 	std::vector<std::span<char>> file_images;

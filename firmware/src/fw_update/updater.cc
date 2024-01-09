@@ -1,6 +1,8 @@
 #include "updater.hh"
 #include "loaders/flash/firmware_flash_loader.hh"
 #include "loaders/wifi/firmware_wifi_loader.hh"
+#include "ram_buffer.hh"
+#include "manifest_parse.hh"
 
 namespace MetaModule
 {
@@ -10,10 +12,12 @@ FirmwareUpdater::FirmwareUpdater(FileStorageProxy &file_storage)
     , state(State::Idle)
     , current_file_idx(0)
     , current_file_size(0)
-    , file_requested(false) {
+    , ram_buffer(get_ram_buffer())
+{
 }
 
 bool FirmwareUpdater::start(std::string_view manifest_filename, Volume manifest_file_vol, uint32_t manifest_filesize) {
+
     if (manifest_filesize <= 4 * 1024 * 1024)
     {
         manifest_buffer = std::span<char>{(char *)ram_buffer.data(), manifest_filesize};
@@ -49,7 +53,9 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
         case LoadingManifest: {
             auto message = file_storage.get_message();
 
-            if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
+            if (message.message_type == FileStorageProxy::LoadFileToRamSuccess)
+            {
+                ManifestParser parser;
 
                 auto parseResult = parser.parse(manifest_buffer);
 
@@ -57,10 +63,9 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
                     manifest = *parseResult;
 
                     current_file_idx = 0;
-                    file_requested = false;
                     file_images.reserve(manifest.files.size());
                     
-                    moveToState(State::LoadingFilesToRAM);
+                    moveToState(State::StartLoadingFileToRam);
 
                 } else {
                     abortWithMessage("Manifest file is invalid");
@@ -72,17 +77,47 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
 
         } break;
 
-        case LoadingFilesToRAM: {
-            if (!file_requested)
-                start_reading_file();
-            else
-                check_reading_done();
-
-            if (current_file_idx >= manifest.files.size())
+        case StartLoadingFileToRam:
+        {
+            auto success = start_reading_file();
+            if (success)
             {
-                // Write first file
-                current_file_idx = 0;
-                current_file_size = start_writing_file();
+                moveToState(LoadingFileToRAM);
+            }
+            else
+            {
+                abortWithMessage("Failed to request loading firmware file to RAM");
+            }
+        }
+
+        case LoadingFileToRAM: {
+
+            auto message = file_storage.get_message();
+
+            if (message.message_type == FileStorageProxy::LoadFileToRamSuccess)
+            {
+                pr_trace("A7: file loaded\n");
+
+                if (current_file_idx < manifest.files.size()-1)
+                {
+                    // Load next file
+                    current_file_idx++;
+                    moveToState(StartLoadingFileToRam);
+                }
+                else
+                {
+                    // Write first file
+                    current_file_idx = 0;
+                    if (start_writing_file())
+                    {
+                        moveToState(Writing);
+                    }
+
+                }
+            }
+            else if (message.message_type == FileStorageProxy::LoadFileToRamFailed)
+            {
+                abortWithMessage("Failed to load a firmware file");
             }
 
         } break;
@@ -90,18 +125,27 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
         case Writing: {
             auto [bytes_rem, err] = current_file_loader->load_next_block();
 
-            if (err == FileLoaderBase::Error::Failed) {
+            if (err == FileLoaderBase::Error::Failed)
+            {
                 bytes_remaining = bytes_rem;
                 abortWithMessage("Failed writing app to flash");
-
-            } else if (bytes_rem > 0) {
+            }
+            else if (bytes_rem > 0)
+            {
                 bytes_remaining = bytes_rem;
-
-            } else {
-
-                // write next file
-                current_file_idx++;
-                current_file_size = start_writing_file();
+            }
+            else
+            {
+                if (current_file_idx < manifest.files.size()-1)
+                {
+                    // write next file
+                    current_file_idx++;
+                    start_writing_file();
+                }
+                else
+                {
+                    moveToState(Success);
+                }
             }
 
         } break;
@@ -116,7 +160,7 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
 
 
 // reads from disk to RAM
-void FirmwareUpdater::start_reading_file() {
+bool FirmwareUpdater::start_reading_file() {
     auto size = manifest.files[current_file_idx].filesize;
 
     if (current_file_idx == 0)
@@ -129,78 +173,58 @@ void FirmwareUpdater::start_reading_file() {
                 manifest.files[current_file_idx].filename.c_str(),
                 file_images[current_file_idx].data());
 
-    if (file_storage.request_load_file(
-            manifest.files[current_file_idx].filename, vol, file_images[current_file_idx]))
-    {
-        file_requested = true;
-    } else {
-        abortWithMessage("Failed to request firmware file");
-    }
-}
+    auto success = file_storage.request_load_file(
+            manifest.files[current_file_idx].filename, vol, file_images[current_file_idx]);
 
-void FirmwareUpdater::check_reading_done() {
-    auto message = file_storage.get_message();
-
-    if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
-        pr_trace("A7: file loaded\n");
-        current_file_idx++;
-        file_requested = false;
-
-    } else if (message.message_type == FileStorageProxy::LoadFileToRamFailed) {
-        abortWithMessage("Failed to load a firmware file");
-    }
+    return success;
 }
 
 // writes from RAM to flash/wifi-uart
-int FirmwareUpdater::start_writing_file()
+bool FirmwareUpdater::start_writing_file()
 {
-    if (current_file_idx > manifest.files.size())
-    {
-        moveToState(State::Success);
-        return 0;
+    auto& thisFileImage = file_images[current_file_idx];
+
+    int file_size = thisFileImage.size();
+    auto &cur_file = manifest.files[current_file_idx];
+
+    switch (cur_file.type) {
+
+        case UpdateType::App:
+            current_file_loader = std::make_unique<FirmwareFlashLoader>(thisFileImage);
+            break;
+
+        case UpdateType::Wifi:
+            current_file_loader = std::make_unique<FirmwareWifiLoader>(thisFileImage);
+            break;
+            
+        default:
+            current_file_loader.reset();
+            pr_err("Invalid update file type\n");
+            break;
     }
-    else {
 
-        int file_size = file_images[current_file_idx].size();
-        auto &cur_file = manifest.files[current_file_idx];
-
-        switch (cur_file.type) {
-
-            case UpdateType::App:
-                current_file_loader = std::make_unique<FirmwareFlashLoader>(file_images[current_file_idx]);
-                break;
-
-            case UpdateType::Wifi:
-                current_file_loader = std::make_unique<FirmwareWifiLoader>(file_images[current_file_idx]);
-                break;
-                
-            default:
-                current_file_loader.reset();
-                pr_err("Invalid update file type\n");
-                break;
-        }
-
-        if (current_file_loader)
+    if (current_file_loader)
+    {
+        if (current_file_loader->verify(cur_file.md5))
         {
-            if (current_file_loader->verify(cur_file.md5))
+            if (current_file_loader->start())
             {
-                if (current_file_loader->start())
-                {
-                    moveToState(State::Writing);
-                }
-                else
-                {
-                    abortWithMessage("Could not start writing application firmware to flash");
-                }
+                moveToState(State::Writing);
+                current_file_size = file_size;
+                return true;
             }
             else
             {
-                abortWithMessage("App firmware file not valid");
+                abortWithMessage("Could not start writing application firmware to flash");
             }
         }
-
-        return file_size;
+        else
+        {
+            abortWithMessage("App firmware file not valid");
+        }
     }
+
+    return false; 
 }
 
 void FirmwareUpdater::abortWithMessage(const char* message)
