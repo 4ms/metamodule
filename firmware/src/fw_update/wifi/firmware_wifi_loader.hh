@@ -10,7 +10,9 @@ class FirmwareWifiLoader {
 public:
 	enum class Error { None, Failed };
 
-	bool verify(std::span<char> filedata, StaticString<32> md5, UpdateType image_type);
+	FirmwareWifiLoader(std::span<char> filedata);
+
+	bool verify(StaticString<32> md5);
 
 	bool start();
 

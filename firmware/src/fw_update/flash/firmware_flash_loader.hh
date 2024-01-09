@@ -12,7 +12,9 @@ class FirmwareFlashLoader {
 public:
 	enum class Error { None, Failed };
 
-	bool verify(std::span<char> filedata, StaticString<32> md5_chars, UpdateType type);
+	FirmwareFlashLoader(std::span<char> filedata);
+
+	bool verify(StaticString<32> md5_chars);
 
 	bool start();
 
@@ -24,7 +26,6 @@ private:
 
 	std::unique_ptr<FlashLoader> flash;
 
-	size_t file_size = 0;
 	int bytes_remaining = 0;
 	uint32_t cur_flash_addr = flash_base_addr;
 	std::span<char> file;

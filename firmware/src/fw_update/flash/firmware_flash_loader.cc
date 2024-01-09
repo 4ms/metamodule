@@ -5,20 +5,18 @@
 namespace MetaModule
 {
 
-bool FirmwareFlashLoader::verify(std::span<char> filedata, StaticString<32> md5_chars, UpdateType type) {
-    if (type != UpdateType::App) {
-        pr_err("Only app images can be flashed to internal flash\n");
-        return false;
-    }
-
+FirmwareFlashLoader::FirmwareFlashLoader(std::span<char> filedata)
+{
     file = filedata;
-    file_size = file.size();
+}
 
-    if (file_size > VIRTDRIVE_SZ) {
-        pr_err("image is too large %zu > %zu\n", file_size, VIRTDRIVE_SZ);
+bool FirmwareFlashLoader::verify( StaticString<32> md5_chars) {
+
+    if (file.size() > VIRTDRIVE_SZ) {
+        pr_err("image is too large %zu > %zu\n", file.size(), VIRTDRIVE_SZ);
         return false;
     }
-    if (file_size < sizeof(BootImageDef::ImageHeader)) {
+    if (file.size() < sizeof(BootImageDef::ImageHeader)) {
         pr_err("image too small to be uimg\n");
         return false;
     }
@@ -39,10 +37,10 @@ bool FirmwareFlashLoader::verify(std::span<char> filedata, StaticString<32> md5_
         return false;
     }
 
-    if ((BootImageDef::be_to_le(uimg_header->ih_size)) > (file_size + 64)) {
+    if ((BootImageDef::be_to_le(uimg_header->ih_size)) > (file.size() + 64)) {
         pr_err("Header says image size is %zu, which is larger than the file size (%zu)\n",
                 BootImageDef::be_to_le(uimg_header->ih_size),
-                file_size);
+                file.size());
         return false;
     }
 
@@ -56,7 +54,7 @@ bool FirmwareFlashLoader::start() {
     if (!flash || !flash->check_flash_chip())
         return false;
 
-    bytes_remaining = file_size;
+    bytes_remaining = file.size();
 
     cur_read_block = file.subspan(0, flash_sector_size);
 

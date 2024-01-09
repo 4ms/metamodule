@@ -93,7 +93,7 @@ public:
 			} break;
 
 			case WritingApp: {
-				auto [bytes_rem, err] = flash_loader.load_next_block();
+				auto [bytes_rem, err] = flash_loader->load_next_block();
 
 				if (err == FirmwareFlashLoader::Error::Failed) {
 					bytes_remaining = bytes_rem;
@@ -109,7 +109,7 @@ public:
 			} break;
 
 			case WritingWifi: {
-				auto [bytes_rem, err] = wifi_loader.load_next_block();
+				auto [bytes_rem, err] = wifi_loader->load_next_block();
 
 				if (err == FirmwareWifiLoader::Error::Failed) {
 					bytes_remaining = bytes_rem;
@@ -197,12 +197,15 @@ private:
 		switch (cur_file.type) {
 
 			case UpdateType::App: {
-				if (!flash_loader.verify(file_images[current_file_idx], cur_file.md5, cur_file.type)) {
+
+				flash_loader = std::make_unique<FirmwareFlashLoader>(file_images[current_file_idx]);
+
+				if (!flash_loader->verify(cur_file.md5)) {
 					abortWithMessage("App firmware file not valid");
 					return file_size;
 				}
 
-				if (!flash_loader.start()) {
+				if (!flash_loader->start()) {
 					abortWithMessage("Could not start writing application firmware to flash");
 					return file_size;
 				}
@@ -211,12 +214,14 @@ private:
 			} break;
 
 			case UpdateType::Wifi:{
-				if (!wifi_loader.verify(file_images[current_file_idx], cur_file.md5, cur_file.type)) {
+				wifi_loader = std::make_unique<FirmwareWifiLoader>(file_images[current_file_idx]);
+
+				if (!wifi_loader->verify(cur_file.md5)) {
 					abortWithMessage("Wifi firmware file not valid");
 					return file_size;
 				}
 
-				if (!wifi_loader.start()) {
+				if (!wifi_loader->start()) {
 					abortWithMessage("Could not start writing to Wifi module");
 					return file_size;
 				}
@@ -240,8 +245,8 @@ private:
 	}
 
 private:
-	FirmwareFlashLoader flash_loader;
-	FirmwareWifiLoader wifi_loader;
+	std::unique_ptr<FirmwareFlashLoader> flash_loader;
+	std::unique_ptr<FirmwareWifiLoader> wifi_loader;
 
 	ManifestParser parser;
 
