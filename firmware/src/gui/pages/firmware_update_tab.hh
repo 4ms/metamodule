@@ -90,11 +90,8 @@ struct FirmwareUpdateTab {
 				} else if (status.state == FirmwareUpdater::LoadingFilesToRAM) {
 					display_progress("Loading to RAM", status.file_size, 0);
 
-				} else if (status.state == FirmwareUpdater::WritingApp) {
-					display_progress("Writing application", status.file_size, status.bytes_remaining);
-
-				} else if (status.state == FirmwareUpdater::WritingWifi) {
-					display_progress("Writing wifi firmware", status.file_size, status.bytes_remaining);
+				} else if (status.state == FirmwareUpdater::Writing) {
+					display_progress("Writing file", status.file_size, status.bytes_remaining);
 
 				} else if (status.state == FirmwareUpdater::Success) {
 					display_success();

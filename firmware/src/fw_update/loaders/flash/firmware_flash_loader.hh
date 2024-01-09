@@ -4,14 +4,13 @@
 #include "flash_loader/flash_loader.hh"
 #include <memory>
 #include <span>
+#include "../abstract_loader.hh"
 
 namespace MetaModule
 {
 
-class FirmwareFlashLoader {
+class FirmwareFlashLoader : public FileLoaderBase{
 public:
-	enum class Error { None, Failed };
-
 	FirmwareFlashLoader(std::span<char> filedata);
 
 	bool verify(StaticString<32> md5_chars);

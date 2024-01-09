@@ -2,14 +2,14 @@
 #include "fw_update/update_file.hh"
 #include <cstdint>
 #include <span>
+#include "../abstract_loader.hh"
 
 namespace MetaModule
 {
 
-class FirmwareWifiLoader {
+class FirmwareWifiLoader : public FileLoaderBase
+{
 public:
-	enum class Error { None, Failed };
-
 	FirmwareWifiLoader(std::span<char> filedata);
 
 	bool verify(StaticString<32> md5);
