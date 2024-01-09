@@ -15,6 +15,6 @@ public:
 
 	virtual bool start();
 
-	virtual std::pair<int, Error> load_next_block();
+	virtual std::pair<std::size_t, Error> load_next_block();
 };
 }

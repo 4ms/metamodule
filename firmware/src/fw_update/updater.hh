@@ -16,8 +16,8 @@ public:
 
 	struct Status {
 		State state{State::Idle};
-		int file_size{0};
-		int bytes_remaining{0};
+		std::size_t file_size{0};
+		std::size_t bytes_completed{0};
 		std::string error_message{};
 	};
 
@@ -46,7 +46,7 @@ private:
 	Volume vol;
 
 	unsigned int current_file_idx;
-	int current_file_size;
+	std::size_t current_file_size;
 
 	std::span<char> manifest_buffer;
 

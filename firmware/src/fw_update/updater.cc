@@ -42,7 +42,7 @@ bool FirmwareUpdater::start(std::string_view manifest_filename, Volume manifest_
 }
 
 FirmwareUpdater::Status FirmwareUpdater::process() {
-    int bytes_remaining = 0;
+    std::size_t bytes_completed = 0;
 
     switch (state) {
         case Idle:
@@ -123,16 +123,16 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
         } break;
 
         case Writing: {
-            auto [bytes_rem, err] = current_file_loader->load_next_block();
+            auto [bytes_cmp, err] = current_file_loader->load_next_block();
 
             if (err == FileLoaderBase::Error::Failed)
             {
-                bytes_remaining = bytes_rem;
+                bytes_completed = bytes_cmp;
                 abortWithMessage("Failed writing app to flash");
             }
-            else if (bytes_rem > 0)
+            else if (bytes_cmp < current_file_size)
             {
-                bytes_remaining = bytes_rem;
+                bytes_completed = bytes_cmp;
             }
             else
             {
@@ -153,9 +153,9 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
     };
 
     if (state == State::Error)
-        return {state, current_file_size, bytes_remaining, error_message};
+        return {state, current_file_size, bytes_completed, error_message};
     else
-        return {state, current_file_size, bytes_remaining};
+        return {state, current_file_size, bytes_completed};
 }
 
 

@@ -54,27 +54,27 @@ bool FirmwareFlashLoader::start() {
     if (!flash || !flash->check_flash_chip())
         return false;
 
-    bytes_remaining = file.size();
+    bytes_completed = 0;
 
     cur_read_block = file.subspan(0, flash_sector_size);
 
     return true;
 }
 
-std::pair<int, FirmwareFlashLoader::Error> FirmwareFlashLoader::load_next_block() {
-    if (bytes_remaining > 0) {
+std::pair<std::size_t, FirmwareFlashLoader::Error> FirmwareFlashLoader::load_next_block() {
+    if (bytes_completed < file.size()) {
 
         if (!flash->write_sectors(cur_flash_addr, cur_read_block)) {
-            return {bytes_remaining, Error::Failed};
+            return {bytes_completed, Error::Failed};
         }
 
         cur_flash_addr += flash_sector_size;
-        bytes_remaining -= flash_sector_size;
+        bytes_completed += flash_sector_size;
         cur_read_block =
-            cur_read_block.subspan(flash_sector_size, std::min<int>(flash_sector_size, bytes_remaining));
+            cur_read_block.subspan(flash_sector_size, std::min<int>(flash_sector_size, file.size() - bytes_completed));
     }
 
-    return {bytes_remaining, Error::None};
+    return {bytes_completed, Error::None};
 }
 
 }

@@ -16,10 +16,10 @@ public:
 
 	bool start();
 
-	std::pair<int, Error> load_next_block();
+	std::pair<std::size_t, Error> load_next_block();
 	
 private:
-	int bytes_remaining = 0;
+	std::size_t bytes_completed = 0;
 	std::span<char> file;
 };
 } // namespace MetaModule

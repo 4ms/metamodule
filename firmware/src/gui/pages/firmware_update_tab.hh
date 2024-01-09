@@ -88,10 +88,10 @@ struct FirmwareUpdateTab {
 					state = State::Failed;
 
 				} else if (status.state == FirmwareUpdater::LoadingFileToRAM or status.state == FirmwareUpdater::StartLoadingFileToRam) {
-					display_progress("Loading to RAM", status.file_size, 0);
+					display_progress("Loading to RAM", status.file_size, status.file_size);
 
 				} else if (status.state == FirmwareUpdater::Writing) {
-					display_progress("Writing file", status.file_size, status.bytes_remaining);
+					display_progress("Writing file", status.file_size, status.bytes_completed);
 
 				} else if (status.state == FirmwareUpdater::Success) {
 					display_success();
@@ -199,16 +199,16 @@ private:
 		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
 
-	void display_progress(std::string_view message, int file_size, int bytes_remaining) {
-		if (file_size > 0 && bytes_remaining > 0) {
+	void display_progress(std::string_view message, int file_size, int bytes_completed) {
+		if (file_size > 0 && bytes_completed < file_size) {
 			lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
 								  "%.*s:\n%u of %u kB\nDO NOT POWER OFF",
 								  (int)message.size(),
 								  message.data(),
-								  unsigned((file_size - bytes_remaining) / 1024),
+								  unsigned((bytes_completed) / 1024),
 								  unsigned(file_size / 1024));
 
-			int percent = 100 * (file_size - bytes_remaining) / file_size;
+			int percent = 100 * (bytes_completed) / file_size;
 			lv_hide(ui_FWUpdateSpinner);
 			lv_show(ui_SystemMenUpdateProgressBar);
 			lv_bar_set_value(ui_SystemMenUpdateProgressBar, percent, LV_ANIM_ON);

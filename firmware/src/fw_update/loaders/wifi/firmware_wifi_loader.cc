@@ -15,17 +15,17 @@ bool FirmwareWifiLoader::verify(StaticString<32> md5) {
 }
 
 bool FirmwareWifiLoader::start() {
-    bytes_remaining = file.size();
+    bytes_completed = 0;
     return true;
 }
 
-std::pair<int, FirmwareWifiLoader::Error> FirmwareWifiLoader::load_next_block() {
+std::pair<std::size_t, FirmwareWifiLoader::Error> FirmwareWifiLoader::load_next_block() {
     //simulate activity
-    if (bytes_remaining > 0) {
-        pr_dbg("Wifi bytes remaining: %d\n", bytes_remaining);
-        bytes_remaining -= 4096;
+    if (bytes_completed < file.size()) {
+        pr_dbg("Wifi bytes written: %u\n", bytes_completed);
+        bytes_completed += 4096;
     }
-    return {bytes_remaining, Error::None};
+    return {bytes_completed, Error::None};
 }
 
 }
