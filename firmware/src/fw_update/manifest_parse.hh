@@ -37,19 +37,6 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updatefile) {
 		updatefile->md5 = md5_sv;
 	}
 
-	if (n.has_child("version")) {
-		auto version = n["version"];
-
-		if (version.has_child("major"))
-			version["major"] >> updatefile->version.major;
-
-		if (version.has_child("minor"))
-			version["minor"] >> updatefile->version.minor;
-
-		if (version.has_child("revision"))
-			version["revision"] >> updatefile->version.revision;
-	}
-
 	return true;
 }
 

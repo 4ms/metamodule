@@ -14,12 +14,6 @@ struct UpdateFile {
 	std::string filename;
 	uint32_t filesize = 0;
 	StaticString<32> md5{};
-
-	struct Version {
-		uint8_t major = 0;
-		uint8_t minor = 0;
-		uint8_t revision = 0;
-	} version;
 };
 
 struct UpdateManifest {

@@ -14,22 +14,12 @@ TEST_CASE("Parse json") {
 		"filename": "metamodule-main-v1.2.3.uimg",
 		"filesize": 1234567,
 		"md5": "abaa17e7f9d854b402fc97aa26182f7c",
-		"version":
-		{
-			"major": 5,
-			"minor": 3
-		}
 	},
 	{
 		"type": "wifi-app",
 		"filename": "metamodule-wifi-v1.0.2.uimg",
 		"filesize": 7654321,
 		"md5": "1234567890ABCDEFFEDCBA9876543210",
-		"version":
-		{
-			"minor": 8,
-			"revision": 1
-		}
 	},
 	{
 		"type": "BadFile",
@@ -54,17 +44,11 @@ TEST_CASE("Parse json") {
 	CHECK(files[0].filename == "metamodule-main-v1.2.3.uimg");
 	CHECK(files[0].filesize == 1234567);
 	CHECK(files[0].md5 == "abaa17e7f9d854b402fc97aa26182f7c"sv);
-	CHECK(files[0].version.major == 5);
-	CHECK(files[0].version.minor == 3);
-	CHECK(files[0].version.revision == 0);
 
 	CHECK(files[1].type == MetaModule::UpdateType::WifiApp);
 	CHECK(files[1].filename == "metamodule-wifi-v1.0.2.uimg");
 	CHECK(files[1].filesize == 7654321);
 	CHECK(files[1].md5 == "1234567890ABCDEFFEDCBA9876543210"sv);
-	CHECK(files[1].version.major == 0);
-	CHECK(files[1].version.minor == 8);
-	CHECK(files[1].version.revision == 1);
 
 	CHECK(files[2].type == MetaModule::UpdateType::Invalid);
 	CHECK(files[2].filename == "metamodule-nope-v1.0.2.uimg");
