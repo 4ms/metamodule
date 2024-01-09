@@ -1,0 +1,10 @@
+build/testbrand.elf:000012dc a _DYNAMIC
+build/testbrand.elf:0000137c a _GLOBAL_OFFSET_TABLE_
+build/testbrand.elf:0000025c t _GLOBAL__sub_I_test_module.cpp
+build/testbrand.elf:         U Model* createModel<TestModule, TestWidget>(char const*)
+build/testbrand.elf:00000290 T init(Plugin*)
+build/testbrand.elf:         U Plugin::addModel(Model*)
+build/testbrand.elf:00001398 D __dso_handle
+build/testbrand.elf:00080000 B _stack
+build/testbrand.elf:0000139c B modelTest
+build/testbrand.elf:000013a0 B pluginInstance

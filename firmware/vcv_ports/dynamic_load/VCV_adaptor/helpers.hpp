@@ -7,6 +7,7 @@
 #include "VCV_adaptor/math.hpp"
 #include "VCV_adaptor/plugin/Model.hpp"
 #include "VCV_adaptor/widget_convert/base.hh"
+#include "brand_widget_convert.hh"
 // #include "VCV_adaptor/widget_convert/widget_element_convert.hh"
 #include "util/overloaded.hh"
 #include <functional>
@@ -97,43 +98,51 @@ inline app::SvgPanel *createPanel(std::string_view svgPath) {
 	return nullptr;
 }
 
-inline void set_labels(std::span<std::string_view> pos_names, std::vector<std::string> &labels) {
-	for (unsigned i = 0; auto &label : labels) {
-		if (i >= pos_names.size())
-			break;
-		pos_names[i++] = label;
-	}
-}
-
 template<class TParamWidget>
 requires(std::derived_from<TParamWidget, app::ParamWidget>)
 TParamWidget *createParamImpl(MetaModule::Coords coords, math::Vec pos, engine::Module *module, int paramId) {
 	using namespace MetaModule;
 	auto name = getParamName(module, paramId);
 	auto widget = createElementWidget<TParamWidget>(pos, coords, name);
-	widget->module = module;
-	widget->paramId = paramId;
-	if (auto pq = widget->getParamQuantity()) {
-		pq->name = name;
-
-		// Switches with strings for each position
-		if (pq->labels.size() > 0) {
-			std::visit(overloaded{
-						   [](BaseElement &) {},
-						   [&pq](FlipSwitch &el) {
-							   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, 3);
-							   set_labels(el.pos_names, pq->labels);
-						   },
-						   [&pq](SlideSwitch &el) {
-							   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, 8);
-							   set_labels(el.pos_names, pq->labels);
-						   },
-					   },
-					   widget->element);
-		}
-	}
+	populate_widget(widget, module, paramId, name);
 	return widget;
 }
+
+void populate_widget(app::ParamWidget *widget, engine::Module *module, int paramId, std::string_view name);
+
+//TODO put this in a .cc file:
+// void populate_widget(app::ParamWidget *widget, engine::Module *module, int paramId, std::string_view name) {
+
+// 	auto set_labels = [](std::span<std::string_view> pos_names, std::vector<std::string> &labels) {
+// 		for (unsigned i = 0; auto &label : labels) {
+// 			if (i >= pos_names.size())
+// 				break;
+// 			pos_names[i++] = label;
+// 		}
+// 	};
+
+// 	widget->module = module;
+// 	widget->paramId = paramId;
+// 	if (auto pq = widget->getParamQuantity()) {
+// 		pq->name = name;
+
+// 		// Switches with strings for each position
+// 		if (pq->labels.size() > 0) {
+// 			std::visit(overloaded{
+// 						   [](MetaModule::BaseElement &) {},
+// 						   [&pq, &set_labels](MetaModule::FlipSwitch &el) {
+// 							   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, 3);
+// 							   set_labels(el.pos_names, pq->labels);
+// 						   },
+// 						   [&pq, &set_labels](MetaModule::SlideSwitch &el) {
+// 							   el.num_pos = std::clamp<unsigned>(pq->maxValue - pq->minValue + 1, 2, 8);
+// 							   set_labels(el.pos_names, pq->labels);
+// 						   },
+// 					   },
+// 					   widget->element);
+// 		}
+// 	}
+// }
 
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {

@@ -1,14 +1,16 @@
 BINARYNAME := testbrand
 BUILDDIR := build
 
-RACK_DIR = ./Rack-SDK
 SHAREDDIR := ../../../shared
 LIBDIR := ../../lib
 
+# RACK_DIR = ./Rack-SDK
 # VCVINCLUDES := -I$(RACK_DIR)/include \
 # 			   -I$(RACK_DIR)/dep/include
 
 VCVINCLUDES := -IVCV_adaptor -I.
+
+# VCVINCLUDES := -Iplugin
 
 
 SOURCES = test_brand/src/test_module.cpp \
@@ -16,29 +18,31 @@ SOURCES = test_brand/src/test_module.cpp \
 		  plugin/libc_stub.c
 
 INCLUDES := -Itest_brand/src \
+			-Itest_brand \
 			-I$(LIBDIR)/jansson \
 			-I$(LIBDIR)/jansson/jansson/src \
 			-I$(SHAREDDIR) \
 			-I$(SHAREDDIR)/cpputil \
 			$(VCVINCLUDES)
 
-LINKSCR := linkscript.ld
+# LINKSCR := linkscript.ld
 
 ARCH_CFLAGS := -DSTM32MP157Cxx -DSTM32MP1 -DCORE_CA7
 
 LFLAGS = $(MCU)  \
 		 -Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
 		 -Wl,--gc-sections \
-		 -nostdlib 
+		 -nostdlib \
+		 -shared
 		#-nostartfiles -ffreestanding
 
-%.diss : %.so
+%.diss : %.elf
 	arm-none-eabi-objdump -CDz --source $^ > $@
 
-%.nm : %.so
+%.nm : %.elf
 	arm-none-eabi-nm -CA $^ > $@
 
-%.readelf : %.so
+%.readelf : %.elf
 	arm-none-eabi-readelf --demangle=auto -a -W $^ > $@
 
 
@@ -65,7 +69,7 @@ ARCH_CFLAGS ?= -DUSE_FULL_LL_DRIVER \
 			   -DCORE_CA7 \
 			   $(EXTRA_ARCH_CFLAGS) \
 
-OPTFLAG ?= -O2
+OPTFLAG ?= -O1
 
 AFLAGS = $(MCU)
 
@@ -97,14 +101,17 @@ CXXFLAGS ?= $(CFLAGS) \
 
 LINK_STDLIB ?= -nostdlib
 
-LFLAGS ?= -Wl,--gc-sections \
-		 -Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
-		 $(MCU)  \
-		 -T $(LINKSCR) \
-		 $(LINK_STDLIB) \
-		 -nostartfiles \
-		 -ffreestanding \
-		 $(EXTRALDFLAGS) \
+# LFLAGS ?= -Wl,--gc-sections \
+# 		 -Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
+# 		 $(MCU)  \
+# 		 $(LINK_STDLIB) \
+# 		 -nostartfiles \
+# 		 -ffreestanding \
+# 		 $(EXTRALDFLAGS)
+
+ifneq ("$(LINKSCR)","")
+LFLAGS += -T $(LINKSCR)
+endif
 
 DEPFLAGS = -MMD -MP -MF $(OBJDIR)/$(basename $<).d
 
@@ -120,18 +127,18 @@ SZ 		= $(ARCH)-size
 
 SZOPTS 	= -d
 
-SO 	    = $(BUILDDIR)/$(BINARYNAME).so
+# SO 	    = $(BUILDDIR)/$(BINARYNAME).so
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
 BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
 
-all: Makefile $(SO) 
+all: Makefile $(ELF) 
 
 dis: all $(BUILDDIR)/$(BINARYNAME).nm $(BUILDDIR)/$(BINARYNAME).readelf $(BUILDDIR)/$(BINARYNAME).diss 
 
 $(OBJDIR)/%.o: %.s
 	@mkdir -p $(dir $@)
-	$(info Building $< at $(OPTFLAG))
+	$(info)# Building $<)
 	$(AS) $(AFLAGS) $< -o $@ 
 
 $(OBJDIR)/%.o: %.c $(OBJDIR)/%.d
@@ -145,9 +152,9 @@ $(OBJDIR)/%.o: %.c[cp]* $(OBJDIR)/%.d
 	$(CXX) $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 
-$(SO): $(OBJECTS)
-	$(info Linking shared library...)
-	$(LD) -shared $(LFLAGS) -o $@ $(OBJECTS)
+# $(SO): $(OBJECTS)
+# 	$(info Linking shared library...)
+# 	$(LD) -shared $(LFLAGS) -o $@ $(OBJECTS)
 
 $(ELF): $(OBJECTS) $(LINKSCR)
 	$(info Linking...)
