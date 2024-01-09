@@ -1,9 +1,8 @@
 #pragma once
-#include "fw_update/firmware_flash_loader.hh"
-#include "fw_update/firmware_wifi_loader.hh"
+#include <fw_update/flash/firmware_flash_loader.hh>
+#include <fw_update/wifi/firmware_wifi_loader.hh>
 #include "fw_update/manifest_parse.hh"
 #include "fw_update/ram_buffer.hh"
-#include "fw_update/uimg_header.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include <cstdint>
 
