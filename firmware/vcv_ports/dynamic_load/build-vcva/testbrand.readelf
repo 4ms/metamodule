@@ -1,0 +1,774 @@
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           ARM
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          1356984 (bytes into file)
+  Flags:                             0x5000400, Version5 EABI, hard-float ABI
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         3
+  Size of section headers:           40 (bytes)
+  Number of section headers:         30
+  Section header string table index: 29
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .hash             HASH            00000094 000094 000460 04   A  2   0  4
+  [ 2] .dynsym           DYNSYM          000004f4 0004f4 000930 10   A  3   3  4
+  [ 3] .dynstr           STRTAB          00000e24 000e24 002585 00   A  0   0  1
+  [ 4] .rel.dyn          REL             000033ac 0033ac 000418 08   A  2   0  4
+  [ 5] .rel.plt          REL             000037c4 0037c4 0000e8 08  AI  2  12  4
+  [ 6] .plt              PROGBITS        000038ac 0038ac 000170 04  AX  0   0  4
+  [ 7] .text             PROGBITS        00003a1c 003a1c 002f10 00  AX  0   0  4
+  [ 8] .rodata           PROGBITS        0000692c 00692c 000076 01 AMS  0   0  4
+  [ 9] .init_array       INIT_ARRAY      000079a4 0069a4 000008 04  WA  0   0  4
+  [10] .data.rel.ro      PROGBITS        000079ac 0069ac 00017c 00  WA  0   0  4
+  [11] .dynamic          DYNAMIC         00007b28 006b28 0000a0 08  WA  3   0  4
+  [12] .got              PROGBITS        00007bc8 006bc8 000124 04  WA  0   0  4
+  [13] .data             PROGBITS        00007cec 006cec 000004 00  WA  0   0  4
+  [14] .persistent       PROGBITS        00007cf0 006cf0 000000 00  WA  0   0  1
+  [15] .bss              NOBITS          00007cf0 006cf0 01098c 00  WA  0   0  8
+  [16] .noinit           NOBITS          0001867c 000000 000000 00  WA  0   0  1
+  [17] .comment          PROGBITS        00000000 006cf0 000045 01  MS  0   0  1
+  [18] .debug_aranges    PROGBITS        00000000 006d35 000318 00      0   0  1
+  [19] .debug_info       PROGBITS        00000000 00704d 07475a 00      0   0  1
+  [20] .debug_abbrev     PROGBITS        00000000 07b7a7 002788 00      0   0  1
+  [21] .debug_line       PROGBITS        00000000 07df2f 0070ee 00      0   0  1
+  [22] .debug_frame      PROGBITS        00000000 085020 0008cc 00      0   0  4
+  [23] .debug_str        PROGBITS        00000000 0858ec 0b509f 01  MS  0   0  1
+  [24] .debug_loclists   PROGBITS        00000000 13a98b 00be2b 00      0   0  1
+  [25] .debug_rnglists   PROGBITS        00000000 1467b6 0010e9 00      0   0  1
+  [26] .ARM.attributes   ARM_ATTRIBUTES  00000000 14789f 00003b 00      0   0  1
+  [27] .symtab           SYMTAB          00000000 1478dc 001490 10     28 185  4
+  [28] .strtab           STRTAB          00000000 148d6c 00262c 00      0   0  1
+  [29] .shstrtab         STRTAB          00000000 14b398 00011d 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), y (purecode), p (processor specific)
+
+There are no section groups in this file.
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  LOAD           0x000000 0x00000000 0x00000000 0x069a2 0x069a2 R E 0x1000
+  LOAD           0x0069a4 0x000079a4 0x000079a4 0x0034c 0x10cd8 RW  0x1000
+  DYNAMIC        0x006b28 0x00007b28 0x00007b28 0x000a0 0x000a0 RW  0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .hash .dynsym .dynstr .rel.dyn .rel.plt .plt .text .rodata 
+   01     .init_array .data.rel.ro .dynamic .got .data .bss 
+   02     .dynamic 
+
+Dynamic section at offset 0x6b28 contains 16 entries:
+  Tag        Type                         Name/Value
+ 0x00000019 (INIT_ARRAY)                 0x79a4
+ 0x0000001b (INIT_ARRAYSZ)               8 (bytes)
+ 0x00000004 (HASH)                       0x94
+ 0x00000005 (STRTAB)                     0xe24
+ 0x00000006 (SYMTAB)                     0x4f4
+ 0x0000000a (STRSZ)                      9605 (bytes)
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000003 (PLTGOT)                     0x7bc8
+ 0x00000002 (PLTRELSZ)                   232 (bytes)
+ 0x00000014 (PLTREL)                     REL
+ 0x00000017 (JMPREL)                     0x37c4
+ 0x00000011 (REL)                        0x33ac
+ 0x00000012 (RELSZ)                      1048 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   3
+ 0x00000000 (NULL)                       0x0
+
+Relocation section '.rel.dyn' at offset 0x33ac contains 131 entries:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+000079a4  00000017 R_ARM_RELATIVE        
+000079a8  00000017 R_ARM_RELATIVE        
+00007cec  00000017 R_ARM_RELATIVE        
+000079b4  00008902 R_ARM_ABS32            00003b14   rack::widget::Widget::~Widget()
+000079b8  00004d02 R_ARM_ABS32            00003b24   rack::widget::Widget::~Widget()
+000079bc  00000502 R_ARM_ABS32            00003a1c   rack::widget::Widget::onDragStart(rack::event::DragStartEvent const&)
+00007a00  00000502 R_ARM_ABS32            00003a1c   rack::widget::Widget::onDragStart(rack::event::DragStartEvent const&)
+00007af0  00000502 R_ARM_ABS32            00003a1c   rack::widget::Widget::onDragStart(rack::event::DragStartEvent const&)
+000079c0  00003f02 R_ARM_ABS32            00003a20   rack::widget::Widget::onDragMove(rack::event::DragMoveEvent const&)
+00007a04  00003f02 R_ARM_ABS32            00003a20   rack::widget::Widget::onDragMove(rack::event::DragMoveEvent const&)
+00007af4  00003f02 R_ARM_ABS32            00003a20   rack::widget::Widget::onDragMove(rack::event::DragMoveEvent const&)
+000079c4  00000f02 R_ARM_ABS32            00003a24   rack::widget::Widget::onDragEnd(rack::event::DragEndEvent const&)
+00007a08  00000f02 R_ARM_ABS32            00003a24   rack::widget::Widget::onDragEnd(rack::event::DragEndEvent const&)
+00007af8  00000f02 R_ARM_ABS32            00003a24   rack::widget::Widget::onDragEnd(rack::event::DragEndEvent const&)
+000079c8  00004f02 R_ARM_ABS32            00003a28   rack::widget::Widget::onDoubleClick(rack::event::DoubleClick const&)
+00007a0c  00004f02 R_ARM_ABS32            00003a28   rack::widget::Widget::onDoubleClick(rack::event::DoubleClick const&)
+00007afc  00004f02 R_ARM_ABS32            00003a28   rack::widget::Widget::onDoubleClick(rack::event::DoubleClick const&)
+000079cc  00006d02 R_ARM_ABS32            00003a2c   rack::widget::Widget::onAction(rack::event::ActionEvent const&)
+00007a10  00006d02 R_ARM_ABS32            00003a2c   rack::widget::Widget::onAction(rack::event::ActionEvent const&)
+00007b00  00006d02 R_ARM_ABS32            00003a2c   rack::widget::Widget::onAction(rack::event::ActionEvent const&)
+000079d0  00007902 R_ARM_ABS32            00003a30   rack::widget::Widget::onHover(rack::event::HoverEvent const&)
+00007a14  00007902 R_ARM_ABS32            00003a30   rack::widget::Widget::onHover(rack::event::HoverEvent const&)
+00007b04  00007902 R_ARM_ABS32            00003a30   rack::widget::Widget::onHover(rack::event::HoverEvent const&)
+000079d4  00001f02 R_ARM_ABS32            00003a34   rack::widget::Widget::onHoverKey(rack::event::HoverKeyEvent const&)
+00007a18  00001f02 R_ARM_ABS32            00003a34   rack::widget::Widget::onHoverKey(rack::event::HoverKeyEvent const&)
+00007b08  00001f02 R_ARM_ABS32            00003a34   rack::widget::Widget::onHoverKey(rack::event::HoverKeyEvent const&)
+000079d8  00005802 R_ARM_ABS32            00003a38   rack::widget::Widget::onButton(rack::event::ButtonEvent const&)
+00007a1c  00005802 R_ARM_ABS32            00003a38   rack::widget::Widget::onButton(rack::event::ButtonEvent const&)
+00007b0c  00005802 R_ARM_ABS32            00003a38   rack::widget::Widget::onButton(rack::event::ButtonEvent const&)
+000079dc  00000902 R_ARM_ABS32            00003a3c   rack::widget::Widget::onDragHover(rack::event::DragHoverEvent const&)
+00007a20  00000902 R_ARM_ABS32            00003a3c   rack::widget::Widget::onDragHover(rack::event::DragHoverEvent const&)
+00007b10  00000902 R_ARM_ABS32            00003a3c   rack::widget::Widget::onDragHover(rack::event::DragHoverEvent const&)
+000079e0  00003002 R_ARM_ABS32            00003a40   rack::widget::Widget::step()
+00007a24  00003002 R_ARM_ABS32            00003a40   rack::widget::Widget::step()
+00007b14  00003002 R_ARM_ABS32            00003a40   rack::widget::Widget::step()
+000079e4  00003402 R_ARM_ABS32            00003a44   rack::widget::Widget::draw(rack::DrawArgs const&)
+000079e8  00007a02 R_ARM_ABS32            00003a48   rack::widget::Widget::drawLayer(rack::DrawArgs const&, int)
+000079ec  00007c02 R_ARM_ABS32            00003a4c   rack::widget::Widget::onDoubleClick(rack::event::DoubleClickEvent const&)
+00007a30  00007c02 R_ARM_ABS32            00003a4c   rack::widget::Widget::onDoubleClick(rack::event::DoubleClickEvent const&)
+00007b20  00007c02 R_ARM_ABS32            00003a4c   rack::widget::Widget::onDoubleClick(rack::event::DoubleClickEvent const&)
+000079f8  00002302 R_ARM_ABS32            00003cd4   rack::ModuleWidget::~ModuleWidget()
+000079fc  00001502 R_ARM_ABS32            00003d90   rack::ModuleWidget::~ModuleWidget()
+00007a28  00006a02 R_ARM_ABS32            00003b1c   rack::ModuleWidget::draw(rack::DrawArgs const&)
+00007b18  00006a02 R_ARM_ABS32            00003b1c   rack::ModuleWidget::draw(rack::DrawArgs const&)
+00007a2c  00003302 R_ARM_ABS32            00003b20   rack::ModuleWidget::drawLayer(rack::DrawArgs const&, int)
+00007b1c  00003302 R_ARM_ABS32            00003b20   rack::ModuleWidget::drawLayer(rack::DrawArgs const&, int)
+00007a34  00002e02 R_ARM_ABS32            00003b18   rack::ModuleWidget::appendContextMenu(rack::ui::Menu*)
+00007b24  00002e02 R_ARM_ABS32            00003b18   rack::ModuleWidget::appendContextMenu(rack::ui::Menu*)
+00007a40  00006502 R_ARM_ABS32            00000000   VCVModuleWrapper::update()
+00007a44  00008b02 R_ARM_ABS32            00003ac4   rack::engine::Module::set_samplerate(float)
+00007a48  00002902 R_ARM_ABS32            00000000   VCVModuleWrapper::set_param(int, float)
+00007a4c  00003602 R_ARM_ABS32            00000000   VCVModuleWrapper::set_input(int, float)
+00007a50  00001d02 R_ARM_ABS32            00000000   VCVModuleWrapper::get_output(int) const
+00007a54  00002a02 R_ARM_ABS32            00000000   VCVModuleWrapper::get_led_brightness(int) const
+00007a58  00004e02 R_ARM_ABS32            00003a50   CoreProcessor::set_alt_param(int, float)
+00007a5c  00005602 R_ARM_ABS32            00000000   VCVModuleWrapper::mark_all_inputs_unpatched()
+00007a60  00001002 R_ARM_ABS32            00000000   VCVModuleWrapper::mark_input_unpatched(int)
+00007a64  00004c02 R_ARM_ABS32            00000000   VCVModuleWrapper::mark_input_patched(int)
+00007a68  00006702 R_ARM_ABS32            00000000   VCVModuleWrapper::mark_all_outputs_unpatched()
+00007a6c  00003102 R_ARM_ABS32            00000000   VCVModuleWrapper::mark_output_unpatched(int)
+00007a70  00006f02 R_ARM_ABS32            00000000   VCVModuleWrapper::mark_output_patched(int)
+00007a74  00004402 R_ARM_ABS32            00003a54   CoreProcessor::get_alt_param_value(unsigned int, float)
+00007a78  00000c02 R_ARM_ABS32            00000000   rack::engine::Module::initialize_state(std::basic_string_view<char, std::char_traits<char> >)
+00007a7c  00007e02 R_ARM_ABS32            0000411c   TestModule::~TestModule()
+00007ccc  00007e15 R_ARM_GLOB_DAT         0000411c   TestModule::~TestModule()
+00007a80  00002b02 R_ARM_ABS32            00004150   TestModule::~TestModule()
+00007a84  00007702 R_ARM_ABS32            00003b64   TestModule::process(VCVModuleWrapper::ProcessArgs const&)
+00007a88  00002602 R_ARM_ABS32            00003a70   rack::engine::Module::processBypass(VCVModuleWrapper::ProcessArgs const&)
+00007a8c  00004002 R_ARM_ABS32            00003a74   rack::engine::Module::toJson()
+00007a90  00008c02 R_ARM_ABS32            00003a7c   rack::engine::Module::fromJson(json_t*)
+00007a94  00002802 R_ARM_ABS32            00003a80   rack::engine::Module::paramsToJson()
+00007a98  00006c02 R_ARM_ABS32            00003a88   rack::engine::Module::paramsFromJson(json_t*)
+00007a9c  00003b02 R_ARM_ABS32            00003a8c   rack::engine::Module::dataToJson()
+00007aa0  00005302 R_ARM_ABS32            00003a94   rack::engine::Module::dataFromJson(json_t*)
+00007aa4  00002102 R_ARM_ABS32            00003a98   rack::engine::Module::onAdd(rack::engine::Module::AddEvent const&)
+00007aa8  00005f02 R_ARM_ABS32            00003a9c   rack::engine::Module::onRemove(rack::engine::Module::RemoveEvent const&)
+00007aac  00006902 R_ARM_ABS32            00003aa0   rack::engine::Module::onBypass(rack::engine::Module::BypassEvent const&)
+00007ab0  00005002 R_ARM_ABS32            00003aa4   rack::engine::Module::onUnBypass(rack::engine::Module::UnBypassEvent const&)
+00007ab4  00007b02 R_ARM_ABS32            00003aa8   rack::engine::Module::onPortChange(rack::engine::Module::PortChangeEvent const&)
+00007ab8  00002002 R_ARM_ABS32            00003aac   rack::engine::Module::onSampleRateChange()
+00007abc  00001c02 R_ARM_ABS32            00003ab0   rack::engine::Module::onSampleRateChange(rack::engine::Module::SampleRateChangeEvent const&)
+00007ac0  00001202 R_ARM_ABS32            00003af4   rack::engine::Module::onExpanderChange(rack::engine::Module::ExpanderChangeEvent const&)
+00007ac4  00002c02 R_ARM_ABS32            00003af8   rack::engine::Module::onReset()
+00007ac8  00004302 R_ARM_ABS32            00003afc   rack::engine::Module::onReset(rack::engine::Module::ResetEvent const&)
+00007acc  00001402 R_ARM_ABS32            00003b00   rack::engine::Module::onRandomize(rack::engine::Module::RandomizeEvent const&)
+00007ad0  00000e02 R_ARM_ABS32            00003b04   rack::engine::Module::onRandomize()
+00007ad4  00008a02 R_ARM_ABS32            00003b08   rack::engine::Module::onSave(rack::engine::Module::SaveEvent const&)
+00007ad8  00008302 R_ARM_ABS32            00003b0c   rack::engine::Module::onSetMaster(rack::engine::Module::SetMasterEvent const&)
+00007adc  00007402 R_ARM_ABS32            00003b10   rack::engine::Module::onUnsetMaster(rack::engine::Module::UnsetMasterEvent const&)
+00007ae8  00007302 R_ARM_ABS32            00003c44   TestWidget::~TestWidget()
+00007aec  00001902 R_ARM_ABS32            00003e2c   TestWidget::~TestWidget()
+00007c48  00000715 R_ARM_GLOB_DAT         00007d08   guard variable for rack::settings::recentPatchPaths[abi:cxx11]
+00007c4c  00000815 R_ARM_GLOB_DAT         00007d04   guard variable for rack::settings::cableColors
+00007c50  00000a15 R_ARM_GLOB_DAT         00000000   vtable for VCVModuleWrapper
+00007c54  00000b15 R_ARM_GLOB_DAT         0000c5f8   ModuleFactory::infos
+00007c58  00001115 R_ARM_GLOB_DAT         0001863c   rack::settings::recentPatchPaths[abi:cxx11]
+00007c5c  00001315 R_ARM_GLOB_DAT         00007d28   rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::elements
+00007c60  00001615 R_ARM_GLOB_DAT         00007d14   guard variable for rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::indices
+00007c64  00001b15 R_ARM_GLOB_DAT         00007d10   guard variable for rack::settings::token[abi:cxx11]
+00007c68  00002415 R_ARM_GLOB_DAT         00018648   rack::settings::uiTheme[abi:cxx11]
+00007c6c  00002515 R_ARM_GLOB_DAT         00007df0   modelTest
+00007c70  00002715 R_ARM_GLOB_DAT         00007a38   vtable for TestModule
+00007c74  00002d15 R_ARM_GLOB_DAT         00003b3c   std::vector<NVGcolor, std::allocator<NVGcolor> >::~vector()
+00007c78  00002f15 R_ARM_GLOB_DAT         00000000   vtable for rack::engine::Module
+00007c7c  00003d15 R_ARM_GLOB_DAT         00018618   rack::settings::moduleInfos[abi:cxx11]
+00007c80  00004115 R_ARM_GLOB_DAT         00007df4   ModuleFactory::faceplates
+00007c84  00004615 R_ARM_GLOB_DAT         00018678   pluginInstance
+00007c88  00004915 R_ARM_GLOB_DAT         00018600   rack::settings::moduleWhitelist[abi:cxx11]
+00007c8c  00005115 R_ARM_GLOB_DAT         00007cf4   guard variable for ModuleFactory::infos
+00007c90  00005415 R_ARM_GLOB_DAT         00003bb8   std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >::~vector()
+00007c94  00005915 R_ARM_GLOB_DAT         00007d38   rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::module
+00007c98  00005a15 R_ARM_GLOB_DAT         00003d64   std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string()
+00007c9c  00005c15 R_ARM_GLOB_DAT         00013dfc   ModuleFactory::creation_funcs
+00007ca0  00005d15 R_ARM_GLOB_DAT         00007cf8   guard variable for ModuleFactory::creation_funcs
+00007ca4  00005e15 R_ARM_GLOB_DAT         000079f0   vtable for rack::ModuleWidget
+00007ca8  00006015 R_ARM_GLOB_DAT         00007d00   guard variable for rack::settings::moduleInfos[abi:cxx11]
+00007cac  00006215 R_ARM_GLOB_DAT         00007d18   rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::indices
+00007cb0  00006415 R_ARM_GLOB_DAT         00007d0c   guard variable for rack::settings::uiTheme[abi:cxx11]
+00007cb4  00006815 R_ARM_GLOB_DAT         00007d34   guard variable for rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::module
+00007cb8  00006b15 R_ARM_GLOB_DAT         00007ae0   vtable for TestWidget
+00007cbc  00006e15 R_ARM_GLOB_DAT         00004ddc   std::unique_ptr<CoreProcessor, std::default_delete<CoreProcessor> > rack::create_vcv_module<TestModule>()
+00007cc0  00007115 R_ARM_GLOB_DAT         00018630   rack::settings::cableColors
+00007cc4  00007815 R_ARM_GLOB_DAT         00007cfc   guard variable for rack::settings::moduleWhitelist[abi:cxx11]
+00007cc8  00007d15 R_ARM_GLOB_DAT         00007cf0   guard variable for ModuleFactory::faceplates
+00007cd0  00008215 R_ARM_GLOB_DAT         000062b4   std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > > >::~map()
+00007cd4  00008415 R_ARM_GLOB_DAT         00003be0   std::__cxx11::list<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::~list()
+00007cd8  00008515 R_ARM_GLOB_DAT         000079ac   vtable for rack::widget::Widget
+00007cdc  00008d15 R_ARM_GLOB_DAT         00007d24   guard variable for rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::elements
+00007ce0  00008e15 R_ARM_GLOB_DAT         00006398   std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::PluginWhitelist, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> > >::~map()
+00007ce4  00008f15 R_ARM_GLOB_DAT         00003b90   std::vector<ElementCount::Indices, std::allocator<ElementCount::Indices> >::~vector()
+00007ce8  00009215 R_ARM_GLOB_DAT         00018660   rack::settings::token[abi:cxx11]
+
+Relocation section '.rel.plt' at offset 0x37c4 contains 29 entries:
+ Offset     Info    Type                Sym. Value  Symbol's Name
+00007bd4  00000316 R_ARM_JUMP_SLOT        00005258   rack::ModuleWidget::populate_elements(std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >&)
+00007bd8  00000416 R_ARM_JUMP_SLOT        00000000   ElementCount::get_indices(std::span<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> const, 4294967295u>, std::span<ElementCount::Indices, 4294967295u>)
+00007bdc  00000d16 R_ARM_JUMP_SLOT        00000000   memmove
+00007be0  00001716 R_ARM_JUMP_SLOT        000042d4   std::vector<rack::engine::Input, std::allocator<rack::engine::Input> >::_M_default_append(unsigned int)
+00007be4  00001816 R_ARM_JUMP_SLOT        000041b0   std::vector<rack::engine::Param, std::allocator<rack::engine::Param> >::_M_default_append(unsigned int)
+00007be8  00001a16 R_ARM_JUMP_SLOT        00000000   memcpy
+00007bec  00001e16 R_ARM_JUMP_SLOT        00004688   std::vector<std::unique_ptr<rack::engine::ParamQuantity, std::default_delete<rack::engine::ParamQuantity> >, std::allocator<std::unique_ptr<rack::engine::ParamQuantity, std::default_delete<rack::engine::ParamQuantity> > > >::_M_default_append(unsigned int)
+00007bf0  00002216 R_ARM_JUMP_SLOT        000048e0   std::vector<std::unique_ptr<rack::engine::LightInfo, std::default_delete<rack::engine::LightInfo> >, std::allocator<std::unique_ptr<rack::engine::LightInfo, std::default_delete<rack::engine::LightInfo> > > >::_M_default_append(unsigned int)
+00007bf4  00003216 R_ARM_JUMP_SLOT        00000000   std::__throw_length_error(char const*)
+00007bf8  00003716 R_ARM_JUMP_SLOT        00006248   std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > > >::_M_erase(std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > >*)
+00007bfc  00003816 R_ARM_JUMP_SLOT        00000000   rack::engine::Param::getValue()
+00007c00  00003c16 R_ARM_JUMP_SLOT        000047b4   std::vector<std::unique_ptr<rack::engine::PortInfo, std::default_delete<rack::engine::PortInfo> >, std::allocator<std::unique_ptr<rack::engine::PortInfo, std::default_delete<rack::engine::PortInfo> > > >::_M_default_append(unsigned int)
+00007c04  00003e16 R_ARM_JUMP_SLOT        00000000   operator delete(void*, unsigned int)
+00007c08  00004216 R_ARM_JUMP_SLOT        0000632c   std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> > >::_M_erase(std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> >*)
+00007c0c  00004716 R_ARM_JUMP_SLOT        000061e8   std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > >::_M_erase(std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> >*)
+00007c10  00004816 R_ARM_JUMP_SLOT        0000441c   std::vector<rack::engine::Output, std::allocator<rack::engine::Output> >::_M_default_append(unsigned int)
+00007c14  00004a16 R_ARM_JUMP_SLOT        000062cc   std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::_Identity<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_erase(std::_Rb_tree_node<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >*)
+00007c18  00005516 R_ARM_JUMP_SLOT        00003ec8   rack::engine::Module::~Module()
+00007c1c  00005716 R_ARM_JUMP_SLOT        00000000   memcmp
+00007c20  00005b16 R_ARM_JUMP_SLOT        000055ac   rack::plugin::Model* rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)
+00007c24  00006616 R_ARM_JUMP_SLOT        00004a0c   rack::engine::Module::config(unsigned int, unsigned int, unsigned int, unsigned int)
+00007c28  00007216 R_ARM_JUMP_SLOT        0000542c   std::vector<ElementCount::Indices, std::allocator<ElementCount::Indices> >::_M_default_append(unsigned int)
+00007c2c  00007516 R_ARM_JUMP_SLOT        00000000   VCVModuleWrapper::VCVModuleWrapper()
+00007c30  00007f16 R_ARM_JUMP_SLOT        00000000   operator new(unsigned int)
+00007c34  00008016 R_ARM_JUMP_SLOT        00003ec8   rack::engine::Module::~Module()
+00007c38  00008116 R_ARM_JUMP_SLOT        00004e9c   void std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >::_M_range_insert<__gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > > >(__gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > >, __gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > >, __gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > >, std::forward_iterator_tag)
+00007c3c  00008716 R_ARM_JUMP_SLOT        00000000   strlen
+00007c40  00009016 R_ARM_JUMP_SLOT        00000000   __aeabi_atexit
+00007c44  00009116 R_ARM_JUMP_SLOT        00004564   std::vector<rack::engine::Light, std::allocator<rack::engine::Light> >::_M_default_append(unsigned int)
+
+There are no unwind sections in this file.
+
+Symbol table '.dynsym' contains 147 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 00003a1c     0 SECTION LOCAL  DEFAULT    7 .text
+     2: 00007cec     0 SECTION LOCAL  DEFAULT   13 .data
+     3: 00005258   468 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::populate_elements(std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >&)
+     4: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND ElementCount::get_indices(std::span<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> const, 4294967295u>, std::span<ElementCount::Indices, 4294967295u>)
+     5: 00003a1c     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDragStart(rack::event::DragStartEvent const&)
+     6: 000062b4    24 FUNC    WEAK   DEFAULT    7 std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > > >::~map()
+     7: 00007d08     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::recentPatchPaths[abi:cxx11]
+     8: 00007d04     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::cableColors
+     9: 00003a3c     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDragHover(rack::event::DragHoverEvent const&)
+    10: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND vtable for VCVModuleWrapper
+    11: 0000c5f8 30724 OBJECT  WEAK   DEFAULT   15 ModuleFactory::infos
+    12: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND rack::engine::Module::initialize_state(std::basic_string_view<char, std::char_traits<char> >)
+    13: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memmove
+    14: 00003b04     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onRandomize()
+    15: 00003a24     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDragEnd(rack::event::DragEndEvent const&)
+    16: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_input_unpatched(int)
+    17: 0001863c    12 OBJECT  WEAK   DEFAULT   15 rack::settings::recentPatchPaths[abi:cxx11]
+    18: 00003af4     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onExpanderChange(rack::engine::Module::ExpanderChangeEvent const&)
+    19: 00007d28    12 OBJECT  WEAK   DEFAULT   15 rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::elements
+    20: 00003b00     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onRandomize(rack::engine::Module::RandomizeEvent const&)
+    21: 00003d90   156 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::~ModuleWidget()
+    22: 00007d14     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::indices
+    23: 000042d4   328 FUNC    WEAK   DEFAULT    7 std::vector<rack::engine::Input, std::allocator<rack::engine::Input> >::_M_default_append(unsigned int)
+    24: 000041b0   292 FUNC    WEAK   DEFAULT    7 std::vector<rack::engine::Param, std::allocator<rack::engine::Param> >::_M_default_append(unsigned int)
+    25: 00003e2c   156 FUNC    WEAK   DEFAULT    7 TestWidget::~TestWidget()
+    26: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memcpy
+    27: 00007d10     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::token[abi:cxx11]
+    28: 00003ab0    20 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onSampleRateChange(rack::engine::Module::SampleRateChangeEvent const&)
+    29: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::get_output(int) const
+    30: 00004688   300 FUNC    WEAK   DEFAULT    7 std::vector<std::unique_ptr<rack::engine::ParamQuantity, std::default_delete<rack::engine::ParamQuantity> >, std::allocator<std::unique_ptr<rack::engine::ParamQuantity, std::default_delete<rack::engine::ParamQuantity> > > >::_M_default_append(unsigned int)
+    31: 00003a34     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onHoverKey(rack::event::HoverKeyEvent const&)
+    32: 00003aac     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onSampleRateChange()
+    33: 00003a98     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onAdd(rack::engine::Module::AddEvent const&)
+    34: 000048e0   300 FUNC    WEAK   DEFAULT    7 std::vector<std::unique_ptr<rack::engine::LightInfo, std::default_delete<rack::engine::LightInfo> >, std::allocator<std::unique_ptr<rack::engine::LightInfo, std::default_delete<rack::engine::LightInfo> > > >::_M_default_append(unsigned int)
+    35: 00003cd4   144 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::~ModuleWidget()
+    36: 00018648    24 OBJECT  WEAK   DEFAULT   15 rack::settings::uiTheme[abi:cxx11]
+    37: 00007df0     4 OBJECT  GLOBAL DEFAULT   15 modelTest
+    38: 00003a70     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::processBypass(VCVModuleWrapper::ProcessArgs const&)
+    39: 00007a38   168 OBJECT  WEAK   DEFAULT   10 vtable for TestModule
+    40: 00003a80     8 FUNC    WEAK   DEFAULT    7 rack::engine::Module::paramsToJson()
+    41: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::set_param(int, float)
+    42: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::get_led_brightness(int) const
+    43: 00004150    64 FUNC    WEAK   DEFAULT    7 TestModule::~TestModule()
+    44: 00003af8     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onReset()
+    45: 00003b3c    40 FUNC    WEAK   DEFAULT    7 std::vector<NVGcolor, std::allocator<NVGcolor> >::~vector()
+    46: 00003b18     4 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::appendContextMenu(rack::ui::Menu*)
+    47: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND vtable for rack::engine::Module
+    48: 00003a40     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::step()
+    49: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_output_unpatched(int)
+    50: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND std::__throw_length_error(char const*)
+    51: 00003b20     4 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::drawLayer(rack::DrawArgs const&, int)
+    52: 00003a44     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::draw(rack::DrawArgs const&)
+    53: 000067f8   288 FUNC    GLOBAL DEFAULT    7 init(rack::plugin::Plugin*)
+    54: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::set_input(int, float)
+    55: 00006248   108 FUNC    WEAK   DEFAULT    7 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > > >::_M_erase(std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > >*)
+    56: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND rack::engine::Param::getValue()
+    57: 00003b90    40 FUNC    WEAK   DEFAULT    7 std::vector<ElementCount::Indices, std::allocator<ElementCount::Indices> >::~vector()
+    58: 00003b3c    40 FUNC    WEAK   DEFAULT    7 std::vector<NVGcolor, std::allocator<NVGcolor> >::~vector()
+    59: 00003a8c     8 FUNC    WEAK   DEFAULT    7 rack::engine::Module::dataToJson()
+    60: 000047b4   300 FUNC    WEAK   DEFAULT    7 std::vector<std::unique_ptr<rack::engine::PortInfo, std::default_delete<rack::engine::PortInfo> >, std::allocator<std::unique_ptr<rack::engine::PortInfo, std::default_delete<rack::engine::PortInfo> > > >::_M_default_append(unsigned int)
+    61: 00018618    24 OBJECT  WEAK   DEFAULT   15 rack::settings::moduleInfos[abi:cxx11]
+    62: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND operator delete(void*, unsigned int)
+    63: 00003a20     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDragMove(rack::event::DragMoveEvent const&)
+    64: 00003a74     8 FUNC    WEAK   DEFAULT    7 rack::engine::Module::toJson()
+    65: 00007df4 18436 OBJECT  WEAK   DEFAULT   15 ModuleFactory::faceplates
+    66: 0000632c   108 FUNC    WEAK   DEFAULT    7 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> > >::_M_erase(std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> >*)
+    67: 00003afc     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onReset(rack::engine::Module::ResetEvent const&)
+    68: 00003a54    28 FUNC    WEAK   DEFAULT    7 CoreProcessor::get_alt_param_value(unsigned int, float)
+    69: 00003b14     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::~Widget()
+    70: 00018678     4 OBJECT  GLOBAL DEFAULT   15 pluginInstance
+    71: 000061e8    96 FUNC    WEAK   DEFAULT    7 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > >::_M_erase(std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> >*)
+    72: 0000441c   328 FUNC    WEAK   DEFAULT    7 std::vector<rack::engine::Output, std::allocator<rack::engine::Output> >::_M_default_append(unsigned int)
+    73: 00018600    24 OBJECT  WEAK   DEFAULT   15 rack::settings::moduleWhitelist[abi:cxx11]
+    74: 000062cc    96 FUNC    WEAK   DEFAULT    7 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::_Identity<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_erase(std::_Rb_tree_node<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >*)
+    75: 0000411c    52 FUNC    WEAK   DEFAULT    7 TestModule::~TestModule()
+    76: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_input_patched(int)
+    77: 00003b24    24 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::~Widget()
+    78: 00003a50     4 FUNC    WEAK   DEFAULT    7 CoreProcessor::set_alt_param(int, float)
+    79: 00003a28     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDoubleClick(rack::event::DoubleClick const&)
+    80: 00003aa4     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onUnBypass(rack::engine::Module::UnBypassEvent const&)
+    81: 00007cf4     4 OBJECT  WEAK   DEFAULT   15 guard variable for ModuleFactory::infos
+    82: 00003be0   100 FUNC    WEAK   DEFAULT    7 std::__cxx11::list<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::~list()
+    83: 00003a94     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::dataFromJson(json_t*)
+    84: 00003bb8    40 FUNC    WEAK   DEFAULT    7 std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >::~vector()
+    85: 00003ec8   596 FUNC    WEAK   DEFAULT    7 rack::engine::Module::~Module()
+    86: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_all_inputs_unpatched()
+    87: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memcmp
+    88: 00003a38     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onButton(rack::event::ButtonEvent const&)
+    89: 00007d38   184 OBJECT  WEAK   DEFAULT   15 rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::module
+    90: 00003d64    44 FUNC    WEAK   DEFAULT    7 std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string()
+    91: 000055ac  2004 FUNC    WEAK   DEFAULT    7 rack::plugin::Model* rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)
+    92: 00013dfc 18436 OBJECT  WEAK   DEFAULT   15 ModuleFactory::creation_funcs
+    93: 00007cf8     4 OBJECT  WEAK   DEFAULT   15 guard variable for ModuleFactory::creation_funcs
+    94: 000079f0    72 OBJECT  WEAK   DEFAULT   10 vtable for rack::ModuleWidget
+    95: 00003a9c     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onRemove(rack::engine::Module::RemoveEvent const&)
+    96: 00007d00     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::moduleInfos[abi:cxx11]
+    97: 00003c44   144 FUNC    WEAK   DEFAULT    7 TestWidget::~TestWidget()
+    98: 00007d18    12 OBJECT  WEAK   DEFAULT   15 rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::indices
+    99: 00006398    24 FUNC    WEAK   DEFAULT    7 std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::PluginWhitelist, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> > >::~map()
+   100: 00007d0c     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::uiTheme[abi:cxx11]
+   101: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::update()
+   102: 00004a0c   976 FUNC    WEAK   DEFAULT    7 rack::engine::Module::config(unsigned int, unsigned int, unsigned int, unsigned int)
+   103: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_all_outputs_unpatched()
+   104: 00007d34     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::module
+   105: 00003aa0     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onBypass(rack::engine::Module::BypassEvent const&)
+   106: 00003b1c     4 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::draw(rack::DrawArgs const&)
+   107: 00007ae0    72 OBJECT  WEAK   DEFAULT   10 vtable for TestWidget
+   108: 00003a88     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::paramsFromJson(json_t*)
+   109: 00003a2c     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onAction(rack::event::ActionEvent const&)
+   110: 00004ddc   192 FUNC    WEAK   DEFAULT    7 std::unique_ptr<CoreProcessor, std::default_delete<CoreProcessor> > rack::create_vcv_module<TestModule>()
+   111: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_output_patched(int)
+   112: 00003cd4   144 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::~ModuleWidget()
+   113: 00018630    12 OBJECT  WEAK   DEFAULT   15 rack::settings::cableColors
+   114: 0000542c   384 FUNC    WEAK   DEFAULT    7 std::vector<ElementCount::Indices, std::allocator<ElementCount::Indices> >::_M_default_append(unsigned int)
+   115: 00003c44   144 FUNC    WEAK   DEFAULT    7 TestWidget::~TestWidget()
+   116: 00003b10     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onUnsetMaster(rack::engine::Module::UnsetMasterEvent const&)
+   117: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::VCVModuleWrapper()
+   118: 00004190    32 FUNC    WEAK   DEFAULT    7 rack::engine::Module::~Module()
+   119: 00003b64    44 FUNC    WEAK   DEFAULT    7 TestModule::process(VCVModuleWrapper::ProcessArgs const&)
+   120: 00007cfc     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::moduleWhitelist[abi:cxx11]
+   121: 00003a30     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onHover(rack::event::HoverEvent const&)
+   122: 00003a48     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::drawLayer(rack::DrawArgs const&, int)
+   123: 00003aa8     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onPortChange(rack::engine::Module::PortChangeEvent const&)
+   124: 00003a4c     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDoubleClick(rack::event::DoubleClickEvent const&)
+   125: 00007cf0     4 OBJECT  WEAK   DEFAULT   15 guard variable for ModuleFactory::faceplates
+   126: 0000411c    52 FUNC    WEAK   DEFAULT    7 TestModule::~TestModule()
+   127: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND operator new(unsigned int)
+   128: 00003ec8   596 FUNC    WEAK   DEFAULT    7 rack::engine::Module::~Module()
+   129: 00004e9c   956 FUNC    WEAK   DEFAULT    7 void std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >::_M_range_insert<__gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > > >(__gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > >, __gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > >, __gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > >, std::forward_iterator_tag)
+   130: 000062b4    24 FUNC    WEAK   DEFAULT    7 std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > > >::~map()
+   131: 00003b0c     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onSetMaster(rack::engine::Module::SetMasterEvent const&)
+   132: 00003be0   100 FUNC    WEAK   DEFAULT    7 std::__cxx11::list<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::~list()
+   133: 000079ac    68 OBJECT  WEAK   DEFAULT   10 vtable for rack::widget::Widget
+   134: 00003bb8    40 FUNC    WEAK   DEFAULT    7 std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >::~vector()
+   135: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND strlen
+   136: 00080000     0 NOTYPE  GLOBAL DEFAULT   16 _stack
+   137: 00003b14     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::~Widget()
+   138: 00003b08     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onSave(rack::engine::Module::SaveEvent const&)
+   139: 00003ac4    48 FUNC    WEAK   DEFAULT    7 rack::engine::Module::set_samplerate(float)
+   140: 00003a7c     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::fromJson(json_t*)
+   141: 00007d24     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::elements
+   142: 00006398    24 FUNC    WEAK   DEFAULT    7 std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::PluginWhitelist, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> > >::~map()
+   143: 00003b90    40 FUNC    WEAK   DEFAULT    7 std::vector<ElementCount::Indices, std::allocator<ElementCount::Indices> >::~vector()
+   144: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __aeabi_atexit
+   145: 00004564   292 FUNC    WEAK   DEFAULT    7 std::vector<rack::engine::Light, std::allocator<rack::engine::Light> >::_M_default_append(unsigned int)
+   146: 00018660    24 OBJECT  WEAK   DEFAULT   15 rack::settings::token[abi:cxx11]
+
+Symbol table '.symtab' contains 329 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 00000094     0 SECTION LOCAL  DEFAULT    1 .hash
+     2: 000004f4     0 SECTION LOCAL  DEFAULT    2 .dynsym
+     3: 00000e24     0 SECTION LOCAL  DEFAULT    3 .dynstr
+     4: 000033ac     0 SECTION LOCAL  DEFAULT    4 .rel.dyn
+     5: 000037c4     0 SECTION LOCAL  DEFAULT    5 .rel.plt
+     6: 000038ac     0 SECTION LOCAL  DEFAULT    6 .plt
+     7: 00003a1c     0 SECTION LOCAL  DEFAULT    7 .text
+     8: 0000692c     0 SECTION LOCAL  DEFAULT    8 .rodata
+     9: 000079a4     0 SECTION LOCAL  DEFAULT    9 .init_array
+    10: 000079ac     0 SECTION LOCAL  DEFAULT   10 .data.rel.ro
+    11: 00007b28     0 SECTION LOCAL  DEFAULT   11 .dynamic
+    12: 00007bc8     0 SECTION LOCAL  DEFAULT   12 .got
+    13: 00007cec     0 SECTION LOCAL  DEFAULT   13 .data
+    14: 00007cf0     0 SECTION LOCAL  DEFAULT   14 .persistent
+    15: 00007cf0     0 SECTION LOCAL  DEFAULT   15 .bss
+    16: 0001867c     0 SECTION LOCAL  DEFAULT   16 .noinit
+    17: 00000000     0 SECTION LOCAL  DEFAULT   17 .comment
+    18: 00000000     0 SECTION LOCAL  DEFAULT   18 .debug_aranges
+    19: 00000000     0 SECTION LOCAL  DEFAULT   19 .debug_info
+    20: 00000000     0 SECTION LOCAL  DEFAULT   20 .debug_abbrev
+    21: 00000000     0 SECTION LOCAL  DEFAULT   21 .debug_line
+    22: 00000000     0 SECTION LOCAL  DEFAULT   22 .debug_frame
+    23: 00000000     0 SECTION LOCAL  DEFAULT   23 .debug_str
+    24: 00000000     0 SECTION LOCAL  DEFAULT   24 .debug_loclists
+    25: 00000000     0 SECTION LOCAL  DEFAULT   25 .debug_rnglists
+    26: 00000000     0 SECTION LOCAL  DEFAULT   26 .ARM.attributes
+    27: 00000000     0 FILE    LOCAL  DEFAULT  ABS test_module.cpp
+    28: 00003a1c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    29: 00003a20     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    30: 00003a24     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    31: 00003a28     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    32: 00003a2c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    33: 00003a30     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    34: 00003a34     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    35: 00003a38     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    36: 00003a3c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    37: 00003a40     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    38: 00003a44     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    39: 00003a48     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    40: 00003a4c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    41: 00003a50     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    42: 0000692c     0 NOTYPE  LOCAL  DEFAULT    8 $d
+    43: 00003a54     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    44: 00003a6c     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    45: 00003a70     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    46: 00003a74     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    47: 00003a7c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    48: 00003a80     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    49: 00003a88     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    50: 00003a8c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    51: 00003a94     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    52: 00003a98     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    53: 00003a9c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    54: 00003aa0     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    55: 00003aa4     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    56: 00003aa8     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    57: 00003aac     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    58: 00003ab0     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    59: 00003ac4     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    60: 00003af4     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    61: 00003af8     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    62: 00003afc     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    63: 00003b00     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    64: 00003b04     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    65: 00003b08     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    66: 00003b0c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    67: 00003b10     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    68: 00003b14     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    69: 00003b18     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    70: 00003b1c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    71: 00003b20     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    72: 00003b24     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    73: 00003b3c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    74: 00003b64     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    75: 00003b90     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    76: 00003bb8     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    77: 00003be0     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    78: 00003c44     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    79: 00003ccc     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    80: 00003cd4     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    81: 00003d5c     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    82: 00003d64     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    83: 00003d90     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    84: 00003e24     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    85: 00003e2c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    86: 00003ec0     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    87: 00003ec8     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    88: 00004110     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    89: 0000411c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    90: 00004148     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    91: 00004150     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    92: 00004188     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    93: 00004190     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    94: 00006930     0 NOTYPE  LOCAL  DEFAULT    8 $d
+    95: 000041b0     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    96: 000042d0     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    97: 000042d4     0 NOTYPE  LOCAL  DEFAULT    7 $a
+    98: 00004418     0 NOTYPE  LOCAL  DEFAULT    7 $d
+    99: 0000441c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   100: 00004560     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   101: 00004564     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   102: 00004684     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   103: 00004688     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   104: 000047b0     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   105: 000047b4     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   106: 000048dc     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   107: 000048e0     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   108: 00004a08     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   109: 00004a0c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   110: 00004ddc     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   111: 00004e94     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   112: 0000694c     0 NOTYPE  LOCAL  DEFAULT    8 $d
+   113: 00004e9c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   114: 00005254     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   115: 00006964     0 NOTYPE  LOCAL  DEFAULT    8 $d
+   116: 00005258     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   117: 00005428     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   118: 0000542c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   119: 000055a8     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   120: 000055ac     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   121: 00005d34     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   122: 00006974     0 NOTYPE  LOCAL  DEFAULT    8 $d
+   123: 00005d80     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   124: 00005d80  1128 FUNC    LOCAL  DEFAULT    7 __static_initialization_and_destruction_0(int, int)
+   125: 00006164     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   126: 000061e8     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   127: 00006248     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   128: 000062b4     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   129: 000062cc     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   130: 0000632c     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   131: 00006398     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   132: 000063b0     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   133: 000063b0    20 FUNC    LOCAL  DEFAULT    7 _GLOBAL__sub_I_test_module.cpp
+   134: 000079a4     0 NOTYPE  LOCAL  DEFAULT    9 $d
+   135: 00007cf0     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   136: 00007cf4     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   137: 00007cf8     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   138: 00007cfc     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   139: 00007d00     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   140: 00007d04     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   141: 00007d08     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   142: 00007d0c     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   143: 00007d10     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   144: 000079ac     0 NOTYPE  LOCAL  DEFAULT   10 $d
+   145: 000079f0     0 NOTYPE  LOCAL  DEFAULT   10 $d
+   146: 00007a38     0 NOTYPE  LOCAL  DEFAULT   10 $d
+   147: 00007ae0     0 NOTYPE  LOCAL  DEFAULT   10 $d
+   148: 00007d14     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   149: 00007d18     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   150: 00007d24     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   151: 00007d28     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   152: 00007d34     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   153: 00007d38     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   154: 00007df0     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   155: 00007df4     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   156: 0000c5f8     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   157: 00013dfc     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   158: 00018600     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   159: 00018618     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   160: 00018630     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   161: 0001863c     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   162: 00018648     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   163: 00018660     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   164: 00000000     0 FILE    LOCAL  DEFAULT  ABS plugin.cpp
+   165: 00006974     0 NOTYPE  LOCAL  DEFAULT    8 $d
+   166: 000063c4     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   167: 000063c4  1076 FUNC    LOCAL  DEFAULT    7 __static_initialization_and_destruction_0(int, int)
+   168: 0000677c     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   169: 00006988     0 NOTYPE  LOCAL  DEFAULT    8 $d
+   170: 000067f8     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   171: 00006908     0 NOTYPE  LOCAL  DEFAULT    7 $d
+   172: 00006918     0 NOTYPE  LOCAL  DEFAULT    7 $a
+   173: 00006918    20 FUNC    LOCAL  DEFAULT    7 _GLOBAL__sub_I_plugin.cpp
+   174: 000079a8     0 NOTYPE  LOCAL  DEFAULT    9 $d
+   175: 00018678     0 NOTYPE  LOCAL  DEFAULT   15 $d
+   176: 00000000     0 FILE    LOCAL  DEFAULT  ABS libc_stub.c
+   177: 00007cec     0 NOTYPE  LOCAL  DEFAULT   13 $d
+   178: 00000000     0 FILE    LOCAL  DEFAULT  ABS 
+   179: 00007b28     0 OBJECT  LOCAL  DEFAULT  ABS _DYNAMIC
+   180: 00007cec     4 OBJECT  LOCAL  DEFAULT   13 __dso_handle
+   181: 00007bc8     0 OBJECT  LOCAL  DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
+   182: 000038ac     0 NOTYPE  LOCAL  DEFAULT    6 $a
+   183: 000038bc     0 NOTYPE  LOCAL  DEFAULT    6 $d
+   184: 000038c0     0 NOTYPE  LOCAL  DEFAULT    6 $a
+   185: 00005258   468 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::populate_elements(std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >&)
+   186: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND ElementCount::get_indices(std::span<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> const, 4294967295u>, std::span<ElementCount::Indices, 4294967295u>)
+   187: 00003a1c     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDragStart(rack::event::DragStartEvent const&)
+   188: 000062b4    24 FUNC    WEAK   DEFAULT    7 std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > > >::~map()
+   189: 00007d08     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::recentPatchPaths[abi:cxx11]
+   190: 00007d04     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::cableColors
+   191: 00003a3c     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDragHover(rack::event::DragHoverEvent const&)
+   192: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND vtable for VCVModuleWrapper
+   193: 0000c5f8 30724 OBJECT  WEAK   DEFAULT   15 ModuleFactory::infos
+   194: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND rack::engine::Module::initialize_state(std::basic_string_view<char, std::char_traits<char> >)
+   195: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memmove
+   196: 00003b04     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onRandomize()
+   197: 00003a24     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDragEnd(rack::event::DragEndEvent const&)
+   198: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_input_unpatched(int)
+   199: 0001863c    12 OBJECT  WEAK   DEFAULT   15 rack::settings::recentPatchPaths[abi:cxx11]
+   200: 00003af4     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onExpanderChange(rack::engine::Module::ExpanderChangeEvent const&)
+   201: 00007d28    12 OBJECT  WEAK   DEFAULT   15 rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::elements
+   202: 00003b00     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onRandomize(rack::engine::Module::RandomizeEvent const&)
+   203: 00003d90   156 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::~ModuleWidget()
+   204: 00007d14     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::indices
+   205: 000042d4   328 FUNC    WEAK   DEFAULT    7 std::vector<rack::engine::Input, std::allocator<rack::engine::Input> >::_M_default_append(unsigned int)
+   206: 000041b0   292 FUNC    WEAK   DEFAULT    7 std::vector<rack::engine::Param, std::allocator<rack::engine::Param> >::_M_default_append(unsigned int)
+   207: 00003e2c   156 FUNC    WEAK   DEFAULT    7 TestWidget::~TestWidget()
+   208: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memcpy
+   209: 00007d10     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::token[abi:cxx11]
+   210: 00003ab0    20 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onSampleRateChange(rack::engine::Module::SampleRateChangeEvent const&)
+   211: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::get_output(int) const
+   212: 00004688   300 FUNC    WEAK   DEFAULT    7 std::vector<std::unique_ptr<rack::engine::ParamQuantity, std::default_delete<rack::engine::ParamQuantity> >, std::allocator<std::unique_ptr<rack::engine::ParamQuantity, std::default_delete<rack::engine::ParamQuantity> > > >::_M_default_append(unsigned int)
+   213: 00003a34     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onHoverKey(rack::event::HoverKeyEvent const&)
+   214: 00003aac     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onSampleRateChange()
+   215: 00003a98     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onAdd(rack::engine::Module::AddEvent const&)
+   216: 000048e0   300 FUNC    WEAK   DEFAULT    7 std::vector<std::unique_ptr<rack::engine::LightInfo, std::default_delete<rack::engine::LightInfo> >, std::allocator<std::unique_ptr<rack::engine::LightInfo, std::default_delete<rack::engine::LightInfo> > > >::_M_default_append(unsigned int)
+   217: 00003cd4   144 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::~ModuleWidget()
+   218: 00018648    24 OBJECT  WEAK   DEFAULT   15 rack::settings::uiTheme[abi:cxx11]
+   219: 00007df0     4 OBJECT  GLOBAL DEFAULT   15 modelTest
+   220: 00003a70     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::processBypass(VCVModuleWrapper::ProcessArgs const&)
+   221: 00007a38   168 OBJECT  WEAK   DEFAULT   10 vtable for TestModule
+   222: 00003a80     8 FUNC    WEAK   DEFAULT    7 rack::engine::Module::paramsToJson()
+   223: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::set_param(int, float)
+   224: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::get_led_brightness(int) const
+   225: 00004150    64 FUNC    WEAK   DEFAULT    7 TestModule::~TestModule()
+   226: 00003af8     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onReset()
+   227: 00003b3c    40 FUNC    WEAK   DEFAULT    7 std::vector<NVGcolor, std::allocator<NVGcolor> >::~vector()
+   228: 00003b18     4 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::appendContextMenu(rack::ui::Menu*)
+   229: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND vtable for rack::engine::Module
+   230: 00003a40     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::step()
+   231: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_output_unpatched(int)
+   232: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND std::__throw_length_error(char const*)
+   233: 00003b20     4 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::drawLayer(rack::DrawArgs const&, int)
+   234: 00003a44     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::draw(rack::DrawArgs const&)
+   235: 000067f8   288 FUNC    GLOBAL DEFAULT    7 init(rack::plugin::Plugin*)
+   236: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::set_input(int, float)
+   237: 00006248   108 FUNC    WEAK   DEFAULT    7 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > > >::_M_erase(std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > >*)
+   238: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND rack::engine::Param::getValue()
+   239: 00003b90    40 FUNC    WEAK   DEFAULT    7 std::vector<ElementCount::Indices, std::allocator<ElementCount::Indices> >::~vector()
+   240: 00003b3c    40 FUNC    WEAK   DEFAULT    7 std::vector<NVGcolor, std::allocator<NVGcolor> >::~vector()
+   241: 00003a8c     8 FUNC    WEAK   DEFAULT    7 rack::engine::Module::dataToJson()
+   242: 000047b4   300 FUNC    WEAK   DEFAULT    7 std::vector<std::unique_ptr<rack::engine::PortInfo, std::default_delete<rack::engine::PortInfo> >, std::allocator<std::unique_ptr<rack::engine::PortInfo, std::default_delete<rack::engine::PortInfo> > > >::_M_default_append(unsigned int)
+   243: 00018618    24 OBJECT  WEAK   DEFAULT   15 rack::settings::moduleInfos[abi:cxx11]
+   244: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND operator delete(void*, unsigned int)
+   245: 00003a20     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDragMove(rack::event::DragMoveEvent const&)
+   246: 00003a74     8 FUNC    WEAK   DEFAULT    7 rack::engine::Module::toJson()
+   247: 00007df4 18436 OBJECT  WEAK   DEFAULT   15 ModuleFactory::faceplates
+   248: 0000632c   108 FUNC    WEAK   DEFAULT    7 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> > >::_M_erase(std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> >*)
+   249: 00003afc     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onReset(rack::engine::Module::ResetEvent const&)
+   250: 00003a54    28 FUNC    WEAK   DEFAULT    7 CoreProcessor::get_alt_param_value(unsigned int, float)
+   251: 00003b14     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::~Widget()
+   252: 00018678     4 OBJECT  GLOBAL DEFAULT   15 pluginInstance
+   253: 000061e8    96 FUNC    WEAK   DEFAULT    7 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > >::_M_erase(std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> >*)
+   254: 0000441c   328 FUNC    WEAK   DEFAULT    7 std::vector<rack::engine::Output, std::allocator<rack::engine::Output> >::_M_default_append(unsigned int)
+   255: 00018600    24 OBJECT  WEAK   DEFAULT   15 rack::settings::moduleWhitelist[abi:cxx11]
+   256: 000062cc    96 FUNC    WEAK   DEFAULT    7 std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::_Identity<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_erase(std::_Rb_tree_node<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >*)
+   257: 0000411c    52 FUNC    WEAK   DEFAULT    7 TestModule::~TestModule()
+   258: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_input_patched(int)
+   259: 00003b24    24 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::~Widget()
+   260: 00003a50     4 FUNC    WEAK   DEFAULT    7 CoreProcessor::set_alt_param(int, float)
+   261: 00003a28     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDoubleClick(rack::event::DoubleClick const&)
+   262: 00003aa4     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onUnBypass(rack::engine::Module::UnBypassEvent const&)
+   263: 00007cf4     4 OBJECT  WEAK   DEFAULT   15 guard variable for ModuleFactory::infos
+   264: 00003be0   100 FUNC    WEAK   DEFAULT    7 std::__cxx11::list<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::~list()
+   265: 00003a94     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::dataFromJson(json_t*)
+   266: 00003bb8    40 FUNC    WEAK   DEFAULT    7 std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >::~vector()
+   267: 00003ec8   596 FUNC    WEAK   DEFAULT    7 rack::engine::Module::~Module()
+   268: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_all_inputs_unpatched()
+   269: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND memcmp
+   270: 00003a38     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onButton(rack::event::ButtonEvent const&)
+   271: 00007d38   184 OBJECT  WEAK   DEFAULT   15 rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::module
+   272: 00003d64    44 FUNC    WEAK   DEFAULT    7 std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string()
+   273: 000055ac  2004 FUNC    WEAK   DEFAULT    7 rack::plugin::Model* rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)
+   274: 00013dfc 18436 OBJECT  WEAK   DEFAULT   15 ModuleFactory::creation_funcs
+   275: 00007cf8     4 OBJECT  WEAK   DEFAULT   15 guard variable for ModuleFactory::creation_funcs
+   276: 000079f0    72 OBJECT  WEAK   DEFAULT   10 vtable for rack::ModuleWidget
+   277: 00003a9c     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onRemove(rack::engine::Module::RemoveEvent const&)
+   278: 00007d00     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::moduleInfos[abi:cxx11]
+   279: 00003c44   144 FUNC    WEAK   DEFAULT    7 TestWidget::~TestWidget()
+   280: 00007d18    12 OBJECT  WEAK   DEFAULT   15 rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::indices
+   281: 00006398    24 FUNC    WEAK   DEFAULT    7 std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::PluginWhitelist, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> > >::~map()
+   282: 00007d0c     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::uiTheme[abi:cxx11]
+   283: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::update()
+   284: 00004a0c   976 FUNC    WEAK   DEFAULT    7 rack::engine::Module::config(unsigned int, unsigned int, unsigned int, unsigned int)
+   285: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_all_outputs_unpatched()
+   286: 00007d34     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::module
+   287: 00003aa0     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onBypass(rack::engine::Module::BypassEvent const&)
+   288: 00003b1c     4 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::draw(rack::DrawArgs const&)
+   289: 00007ae0    72 OBJECT  WEAK   DEFAULT   10 vtable for TestWidget
+   290: 00003a88     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::paramsFromJson(json_t*)
+   291: 00003a2c     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onAction(rack::event::ActionEvent const&)
+   292: 00004ddc   192 FUNC    WEAK   DEFAULT    7 std::unique_ptr<CoreProcessor, std::default_delete<CoreProcessor> > rack::create_vcv_module<TestModule>()
+   293: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::mark_output_patched(int)
+   294: 00003cd4   144 FUNC    WEAK   DEFAULT    7 rack::ModuleWidget::~ModuleWidget()
+   295: 00018630    12 OBJECT  WEAK   DEFAULT   15 rack::settings::cableColors
+   296: 0000542c   384 FUNC    WEAK   DEFAULT    7 std::vector<ElementCount::Indices, std::allocator<ElementCount::Indices> >::_M_default_append(unsigned int)
+   297: 00003c44   144 FUNC    WEAK   DEFAULT    7 TestWidget::~TestWidget()
+   298: 00003b10     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onUnsetMaster(rack::engine::Module::UnsetMasterEvent const&)
+   299: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND VCVModuleWrapper::VCVModuleWrapper()
+   300: 00004190    32 FUNC    WEAK   DEFAULT    7 rack::engine::Module::~Module()
+   301: 00003b64    44 FUNC    WEAK   DEFAULT    7 TestModule::process(VCVModuleWrapper::ProcessArgs const&)
+   302: 00007cfc     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::settings::moduleWhitelist[abi:cxx11]
+   303: 00003a30     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onHover(rack::event::HoverEvent const&)
+   304: 00003a48     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::drawLayer(rack::DrawArgs const&, int)
+   305: 00003aa8     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onPortChange(rack::engine::Module::PortChangeEvent const&)
+   306: 00003a4c     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::onDoubleClick(rack::event::DoubleClickEvent const&)
+   307: 00007cf0     4 OBJECT  WEAK   DEFAULT   15 guard variable for ModuleFactory::faceplates
+   308: 0000411c    52 FUNC    WEAK   DEFAULT    7 TestModule::~TestModule()
+   309: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND operator new(unsigned int)
+   310: 00003ec8   596 FUNC    WEAK   DEFAULT    7 rack::engine::Module::~Module()
+   311: 00004e9c   956 FUNC    WEAK   DEFAULT    7 void std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >::_M_range_insert<__gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > > >(__gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > >, __gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > >, __gnu_cxx::__normal_iterator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>*, std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > > >, std::forward_iterator_tag)
+   312: 000062b4    24 FUNC    WEAK   DEFAULT    7 std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::ModuleInfo, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::ModuleInfo> > > > > >::~map()
+   313: 00003b0c     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onSetMaster(rack::engine::Module::SetMasterEvent const&)
+   314: 00003be0   100 FUNC    WEAK   DEFAULT    7 std::__cxx11::list<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::~list()
+   315: 000079ac    68 OBJECT  WEAK   DEFAULT   10 vtable for rack::widget::Widget
+   316: 00003bb8    40 FUNC    WEAK   DEFAULT    7 std::vector<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3>, std::allocator<std::variant<MetaModule::NullElement, MetaModule::Knob, MetaModule::Slider, MetaModule::SliderLight, MetaModule::FlipSwitch, MetaModule::SlideSwitch, MetaModule::MomentaryButton, MetaModule::MomentaryButtonWhiteLight, MetaModule::MomentaryButtonRGB, MetaModule::LatchingButton, MetaModule::Encoder, MetaModule::EncoderRGB, MetaModule::JackInput, MetaModule::JackOutput, MetaModule::MonoLight, MetaModule::DualLight, MetaModule::RgbLight, MetaModule::Display, MetaModule::AltParamToggle2, MetaModule::AltParamToggle3> > >::~vector()
+   317: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND strlen
+   318: 00080000     0 NOTYPE  GLOBAL DEFAULT   16 _stack
+   319: 00003b14     4 FUNC    WEAK   DEFAULT    7 rack::widget::Widget::~Widget()
+   320: 00003b08     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::onSave(rack::engine::Module::SaveEvent const&)
+   321: 00003ac4    48 FUNC    WEAK   DEFAULT    7 rack::engine::Module::set_samplerate(float)
+   322: 00003a7c     4 FUNC    WEAK   DEFAULT    7 rack::engine::Module::fromJson(json_t*)
+   323: 00007d24     4 OBJECT  WEAK   DEFAULT   15 guard variable for rack::createModel<TestModule, TestWidget>(std::basic_string_view<char, std::char_traits<char> >)::elements
+   324: 00006398    24 FUNC    WEAK   DEFAULT    7 std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, rack::settings::PluginWhitelist, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, rack::settings::PluginWhitelist> > >::~map()
+   325: 00003b90    40 FUNC    WEAK   DEFAULT    7 std::vector<ElementCount::Indices, std::allocator<ElementCount::Indices> >::~vector()
+   326: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND __aeabi_atexit
+   327: 00004564   292 FUNC    WEAK   DEFAULT    7 std::vector<rack::engine::Light, std::allocator<rack::engine::Light> >::_M_default_append(unsigned int)
+   328: 00018660    24 OBJECT  WEAK   DEFAULT   15 rack::settings::token[abi:cxx11]
+
+Histogram for bucket list length (total of 131 buckets):
+ Length  Number     % of total  Coverage
+      0  49         ( 37.4%)
+      1  42         ( 32.1%)     29.2%
+      2  24         ( 18.3%)     62.5%
+      3  11         (  8.4%)     85.4%
+      4  4          (  3.1%)     96.5%
+      5  1          (  0.8%)    100.0%
+
+No version information found in this file.
+Attribute Section: aeabi
+File Attributes
+  Tag_CPU_name: "7-A"
+  Tag_CPU_arch: v7
+  Tag_CPU_arch_profile: Application
+  Tag_ARM_ISA_use: Yes
+  Tag_THUMB_ISA_use: Thumb-2
+  Tag_FP_arch: VFPv4
+  Tag_Advanced_SIMD_arch: NEONv1 with Fused-MAC
+  Tag_ABI_PCS_wchar_t: 4
+  Tag_ABI_FP_denormal: Needed
+  Tag_ABI_FP_exceptions: Needed
+  Tag_ABI_FP_number_model: IEEE 754
+  Tag_ABI_align_needed: 8-byte
+  Tag_ABI_align_preserved: 8-byte, except leaf SP
+  Tag_ABI_enum_size: small
+  Tag_ABI_VFP_args: VFP registers
+  Tag_ABI_optimization_goals: Prefer Speed
+  Tag_CPU_unaligned_access: v6
+  Tag_MPextension_use: Allowed
+  Tag_DIV_use: Allowed in v7-A with integer division extension
+  Tag_Virtualization_use: TrustZone and Virtualization Extensions

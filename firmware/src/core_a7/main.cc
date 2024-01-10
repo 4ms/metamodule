@@ -4,6 +4,7 @@
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
+#include "dynload/dynloader.hh"
 #include "fs/time_convert.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
@@ -67,6 +68,10 @@ void main() {
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
+
+	pr_info("Dyn Load Test\n");
+	DynLoadTest dynload;
+	dynload.test();
 
 	pr_info("A7 Core 1 initialized\n");
 
