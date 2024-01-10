@@ -19,12 +19,31 @@ struct DynLoadTest {
 
 	GCC_OPTIMIZE_OFF
 	void test() {
-		elf.print_sec_headers();
+		// elf.print_sec_headers();
+		elf.print_prog_headers();
 		load_executable();
-		find_init_address();
 
-		__BKPT();
-		init_func(&plugin);
+		// Handle .rel.dyn section:
+		// R_ARM_GLOB_DAT: global data needs... a pointer?
+		// Relocation section '.rel.dyn' at offset 0x200 contains 4 entries:
+		//  Offset     Info    Type                Sym. Value  Symbol's Name
+		// 000012d8  00000017 R_ARM_RELATIVE
+		// 00001390  00000415 R_ARM_GLOB_DAT         0000139c   modelTest
+		// 00001394  00000715 R_ARM_GLOB_DAT         000013a0   pluginInstance
+		// 00001398  00000502 R_ARM_ABS32            00001398   __dso_handle
+
+		// run init_array: .dynamic section has types INIT_ARRAY and INIT_ARRAYSZ
+
+		// handle PLT?
+		// handle GOT?
+		// handle REL?
+
+		find_init_plugin_function();
+
+		if (init_func) {
+			__BKPT();
+			init_func(&plugin);
+		}
 
 		while (true) {
 			__NOP();
@@ -33,12 +52,27 @@ struct DynLoadTest {
 
 	GCC_OPTIMIZE_OFF
 	void load_executable() {
-		for (auto &sec : elf.sections) {
-			if (sec.is_code() || sec.is_rodata()) {
-				pr_info("Loading section %s to %p\n", sec.section_name().data(), code.exec_data.end());
-				code.exec_data.insert(code.exec_data.end(), sec.begin(), sec.end());
-				code.elf_offset = sec.offset();
-				pr_info("Section has offset in elf file of 0x%x\n", code.elf_offset);
+
+		uint32_t lowest_addr = 0xFFFFFFFF;
+		uint32_t highest_addr = 0;
+		for (auto &seg : elf.segments) {
+			if (seg.is_loadable()) {
+				lowest_addr = std::min(seg.address(), lowest_addr);
+				highest_addr = std::max(seg.address() + seg.mem_size(), highest_addr);
+			}
+		}
+		size_t load_size = highest_addr - lowest_addr + 1;
+
+		pr_info("Allocating %zu bytes for loading\n", load_size);
+		block.code.resize(load_size);
+
+		for (auto &seg : elf.segments) {
+			if (seg.is_loadable()) {
+				std::ranges::copy(seg, std::next(block.code.begin(), seg.address()));
+
+				pr_info("Loading segment with file offset 0x%x to %p\n",
+						seg.offset(),
+						std::next(block.code.begin(), seg.address()));
 			}
 		}
 	}
@@ -48,26 +82,27 @@ struct DynLoadTest {
 	}
 
 	GCC_OPTIMIZE_OFF
-	void find_init_address() {
+	void find_init_plugin_function() {
 		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initP6Plugin");
+
 		if (init_plugin_symbol) {
-			auto load_address = init_plugin_symbol->offset() - code.elf_offset + code.exec_data.data();
-			pr_info("init(Plugin*) is at offset 0x%x => %08x\n", init_plugin_symbol->offset(), load_address);
+			auto load_address = init_plugin_symbol->offset() - block.elf_offset + block.code.data();
 			init_func = reinterpret_cast<InitPluginFunc *>(load_address);
+
 		} else
-			pr_info("Did not find init(Plugin*)\n");
-		//scan symbols
+			pr_err("Did not find init(Plugin*)\n");
 	}
 
 	ElfFile::Elf elf;
+
 	struct CodeBlock {
 		uint32_t elf_offset{}; //offset where data starts in elf file
-		std::vector<uint8_t> exec_data;
+		std::vector<uint8_t> code;
 	};
+	CodeBlock block;
 
-	CodeBlock code;
 	rack::Plugin plugin;
 
 	using InitPluginFunc = void(rack::Plugin *);
-	InitPluginFunc *init_func;
+	InitPluginFunc *init_func{};
 };

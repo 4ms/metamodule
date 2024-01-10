@@ -11,7 +11,7 @@ inline std::string_view read_string(std::string_view table, uint32_t offset) {
 	return table.substr(offset, endpos);
 }
 
-inline void print_prog_headers(Elf32_Phdr &prog) {
+inline void print_prog_header(Elf32_Phdr &prog) {
 	pr_info("Program header: t:%x o:%x vaddr:%x paddr:%x fsz:%x memz:%x f:%x aln:%x\n",
 			prog.p_type,
 			prog.p_offset,

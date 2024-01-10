@@ -22,6 +22,7 @@ struct Elf {
 		, raw_prog_headers{(Elf32_Phdr *)(elfdata.data() + raw_elf_header->e_phoff), raw_elf_header->e_phnum}
 		, string_table{find_string_table()} {
 
+		populate_segments();
 		populate_sections();
 		find_dyn_strings();
 		symbol_table = find_section(".symtab");
@@ -32,9 +33,13 @@ struct Elf {
 	}
 
 	void print_sec_headers() {
-		for (auto &sec : raw_section_headers) {
+		for (auto &sec : raw_section_headers)
 			print_sec_header(sec, string_table);
-		}
+	}
+
+	void print_prog_headers() {
+		for (auto &sec : raw_prog_headers)
+			print_prog_header(sec);
 	}
 
 	std::optional<ElfSection> find_section(std::string_view name) {
@@ -57,10 +62,8 @@ struct Elf {
 	}
 
 	std::optional<ElfSymbol> find_dyn_symbol(std::string_view name) {
-		auto symbol = std::ranges::find_if(raw_dyn_symbols, [&](Elf32_Sym &sym) {
-			print_symbol(sym, dyn_string_table);
-			return read_string(dyn_string_table, sym.st_name) == name;
-		});
+		auto symbol = std::ranges::find_if(
+			raw_dyn_symbols, [&](Elf32_Sym &sym) { return read_string(dyn_string_table, sym.st_name) == name; });
 		if (symbol != raw_dyn_symbols.end())
 			return *symbol;
 		else
@@ -68,11 +71,18 @@ struct Elf {
 	}
 
 	std::vector<ElfSection> sections;
+	std::vector<ElfProgramSegment> segments;
 
 private:
 	void populate_sections() {
 		for (auto &sec : raw_section_headers) {
 			sections.emplace_back(rawdata.data(), string_table, sec);
+		}
+	}
+
+	void populate_segments() {
+		for (auto &prog_seg : raw_prog_headers) {
+			segments.emplace_back(rawdata.data(), prog_seg);
 		}
 	}
 
