@@ -1,6 +1,5 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
-#include <cstdio>
 
 namespace MetaModule
 {
