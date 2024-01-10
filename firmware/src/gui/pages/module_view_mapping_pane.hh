@@ -199,11 +199,16 @@ private:
 
 		if (auto *cable = find_internal_cable(this_jack_type, this_jack)) {
 			has_connections = true;
-			prepare_cable(cable);
+			list_cable_nodes(cable);
 
 		} else if (auto panel_jack_id = drawn_element->gui_element.mapped_panel_id) {
 			has_connections = true;
-			list_panel_cable(this_jack_type, *panel_jack_id);
+
+			if (this_jack_type == ElementType::Input) {
+				list_panel_in_cable(this_jack);
+			} else {
+				list_panel_out_cable(*panel_jack_id);
+			}
 		}
 
 		this_jack_has_connections = has_connections;
@@ -217,7 +222,7 @@ private:
 			return patch.find_internal_cable_with_injack(jack);
 	}
 
-	void prepare_cable(InternalCable const *cable) {
+	void list_cable_nodes(InternalCable const *cable) {
 		pr_dbg("Cable: out: m%d out%d ->\n", cable->out.module_id, cable->out.jack_id);
 		for (auto &in : cable->ins)
 			printf(" - %d in%d\n", in.module_id, in.jack_id);
@@ -235,37 +240,39 @@ private:
 
 		// Output might be connected to the panel
 		if (auto panel_jack = patch.find_mapped_outjack(cable->out)) {
-			list_panel_cable(ElementType::Output, panel_jack->panel_jack_id);
+			list_panel_out_cable(panel_jack->panel_jack_id);
 		}
 
 		// Each cable has 1 or more inputs:
 		for (auto &injack : cable->ins) {
 			pr_dbg("Check m%d in%d...", injack.module_id, injack.module_id);
+
 			//draw it if NOT (it's this jack and this jack is an input)
 			if (!(injack == this_jack && this_jack_type == ElementType::Input)) {
 				pr_dbg("not (matches this jack AND this jack is input)\n");
 				auto obj = list.create_cable_item(injack, ElementType::Input, patch, ui_MapList);
 				make_selectable_injack_item(obj, injack);
-			} else
-				pr_dbg("SKip: matches this jack AND this jack is input\n");
-
-			// Any input might be connected to the panel
-			if (auto panel_jack = patch.find_mapped_injack(injack)) {
-				list_panel_cable(ElementType::Input, panel_jack->panel_jack_id);
 			}
 		}
 	}
 
-	void list_panel_cable(ElementType dir, uint16_t panel_jack_id) {
-		if (dir == ElementType::Input) {
-			pr_dbg("found panel in cable\n");
-			auto obj = list.create_panel_incable_item(panel_jack_id, ui_MapList);
+	void list_panel_in_cable(Jack injack) {
+		if (auto panel_jack = patch.find_mapped_injack(injack)) {
+			auto obj = list.create_panel_incable_item(panel_jack->panel_jack_id, ui_MapList);
 			make_nonselectable_item(obj);
-		} else {
-			pr_dbg("found panel out cable\n");
-			auto obj = list.create_panel_outcable_item(panel_jack_id, ui_MapList);
-			make_nonselectable_item(obj);
+
+			for (auto &mappedin : panel_jack->ins) {
+				if (mappedin != injack) {
+					auto obj = list.create_cable_item(mappedin, ElementType::Input, patch, ui_MapList);
+					make_selectable_injack_item(obj, mappedin);
+				}
+			}
 		}
+	}
+
+	void list_panel_out_cable(uint16_t panel_jack_id) {
+		auto obj = list.create_panel_outcable_item(panel_jack_id, ui_MapList);
+		make_nonselectable_item(obj);
 	}
 
 	void prepare_jack_gui() {
