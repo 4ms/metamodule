@@ -204,11 +204,10 @@ private:
 		} else if (auto panel_jack_id = drawn_element->gui_element.mapped_panel_id) {
 			has_connections = true;
 
-			if (this_jack_type == ElementType::Input) {
+			if (this_jack_type == ElementType::Input)
 				list_panel_in_cable(this_jack);
-			} else {
+			else
 				list_panel_out_cable(*panel_jack_id);
-			}
 		}
 
 		this_jack_has_connections = has_connections;
@@ -223,17 +222,8 @@ private:
 	}
 
 	void list_cable_nodes(InternalCable const *cable) {
-		pr_dbg("Cable: out: m%d out%d ->\n", cable->out.module_id, cable->out.jack_id);
-		for (auto &in : cable->ins)
-			printf(" - %d in%d\n", in.module_id, in.jack_id);
-		pr_dbg("This jack is m%d %s%d\n",
-			   this_jack.module_id,
-			   this_jack_type == ElementType::Input ? "in" : "out",
-			   this_jack.jack_id);
-
 		// Each cable has an output:
 		if (!(cable->out == this_jack && this_jack_type == ElementType::Output)) {
-			pr_dbg("not (this match the cable output AND this is an output), list output jack\n");
 			auto obj = list.create_cable_item(cable->out, ElementType::Output, patch, ui_MapList);
 			make_selectable_outjack_item(obj, cable->out);
 		}
@@ -245,11 +235,8 @@ private:
 
 		// Each cable has 1 or more inputs:
 		for (auto &injack : cable->ins) {
-			pr_dbg("Check m%d in%d...", injack.module_id, injack.module_id);
-
 			//draw it if NOT (it's this jack and this jack is an input)
 			if (!(injack == this_jack && this_jack_type == ElementType::Input)) {
-				pr_dbg("not (matches this jack AND this jack is input)\n");
 				auto obj = list.create_cable_item(injack, ElementType::Input, patch, ui_MapList);
 				make_selectable_injack_item(obj, injack);
 			}
@@ -327,19 +314,6 @@ private:
 							  "In progress: adding a cable from %s %s",
 							  jackname.module_name.data(),
 							  jackname.element_name.data());
-
-		pr_dbg("begin jack: m%d %s%d. is connected = %d, has output %d\n",
-			   begin_jack.module_id,
-			   begin_type == ElementType::Output ? "out" : "in",
-			   begin_jack.jack_id,
-			   begin_connected,
-			   begin_node_has_output);
-		pr_dbg("this jack: m%d %s%d. is connected = %d, has output %d\n",
-			   this_module_id,
-			   this_jack_type == ElementType::Output ? "out" : "in",
-			   this_jack.jack_id,
-			   this_jack_has_connections,
-			   this_node_has_output);
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
@@ -423,8 +397,6 @@ private:
 
 		// Handle case of starting with a PanelIn->In and finishing on an input
 		if (begin_jack_type == ElementType::Input && page->this_jack_type == ElementType::Input) {
-			pr_dbg("Both jacks are inputs\n");
-
 			AddJackMapping jackmapping{};
 			if (auto panel_jack = page->patch.find_mapped_injack(begin_jack)) {
 				jackmapping.jack = page->this_jack;
@@ -438,8 +410,6 @@ private:
 			}
 
 			if (make_panel_mapping) {
-				pr_dbg("Beginning jack or this jack is panel mapped: adding a panel mapping to panel jack %d\n",
-					   jackmapping.panel_jack_id);
 				jackmapping.type = ElementType::Input;
 				page->patch_mod_queue.put(jackmapping);
 				page->notify_queue.put({"Added cable from panel input"});

@@ -148,20 +148,10 @@ struct PatchData {
 	}
 
 	void add_internal_cable(Jack in, Jack out) {
-		if (auto existing_cable_out = _find_internal_cable_with_outjack(out)) {
+		if (auto existing_cable_out = _find_internal_cable_with_outjack(out))
 			existing_cable_out->ins.push_back(in);
-			printf("adding in jack to existing cable: %d out%d to:\n", out.module_id, out.jack_id);
-			for (auto &in : existing_cable_out->ins)
-				printf(" - %d in%d\n", in.module_id, in.jack_id);
-		} else {
+		else
 			int_cables.push_back({out, {in}});
-			printf("adding new cable (#%zu): %d out%d to %d in%d\n",
-				   int_cables.size(),
-				   out.module_id,
-				   out.jack_id,
-				   in.module_id,
-				   in.jack_id);
-		}
 	}
 
 	const MappedInputJack *find_mapped_injack(Jack jack) const {
