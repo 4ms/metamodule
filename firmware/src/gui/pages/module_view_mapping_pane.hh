@@ -416,12 +416,24 @@ private:
 
 		// Handle case of starting with a PanelIn->In and finishing on an input
 		if (begin_jack_type == ElementType::Input && page->this_jack_type == ElementType::Input) {
+			pr_dbg("Both jacks are inputs\n");
+
+			AddJackMapping jackmapping{};
 			if (auto panel_jack = page->patch.find_mapped_injack(begin_jack)) {
-				make_panel_mapping = true;
-				AddJackMapping jackmapping{};
-				jackmapping.type = ElementType::Input;
-				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
 				jackmapping.jack = page->this_jack;
+				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
+				make_panel_mapping = true;
+
+			} else if (auto panel_jack = page->patch.find_mapped_injack(page->this_jack)) {
+				jackmapping.jack = begin_jack;
+				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
+				make_panel_mapping = true;
+			}
+
+			if (make_panel_mapping) {
+				pr_dbg("Beginning jack or this jack is panel mapped: adding a panel mapping to panel jack %d\n",
+					   jackmapping.panel_jack_id);
+				jackmapping.type = ElementType::Input;
 				page->patch_mod_queue.put(jackmapping);
 				page->notify_queue.put({"Added cable from panel input"});
 				page->gui_state.new_cable_begin_jack = {};
