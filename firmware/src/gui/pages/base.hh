@@ -19,9 +19,16 @@ namespace MetaModule
 enum class PageChangeDirection { Back, Forward, Jump };
 
 struct GuiState {
+	struct CableBegnning {
+		Jack jack;
+		ElementType type;
+		bool has_output;
+	};
+	std::optional<CableBegnning> new_cable;
+
 	std::optional<Jack> new_cable_begin_jack;
 	ElementType new_cable_begin_type{};
-	bool new_cable_begin_connected{};
+	bool new_cable_begin_has_connections{};
 };
 
 struct PatchContext {

@@ -302,41 +302,37 @@ private:
 		// Hide "New cable/connection" and "Edit Cable" if already have a cable open
 		lv_hide(ui_CableAddButton);
 		lv_hide(ui_CableEditButton);
-
 		lv_show(ui_CableCreationPanel);
-		auto begin_jack = gui_state.new_cable_begin_jack.value();
-		auto begin_type = gui_state.new_cable_begin_type;
-		auto begin_connected = gui_state.new_cable_begin_connected;
-		pr_dbg("begin jack: m%d %s%d. is connected = %d\n",
-			   begin_jack.module_id,
-			   begin_type == ElementType::Output ? "out" : "in",
-			   begin_jack.jack_id,
-			   begin_connected);
-		auto already_has_output = (begin_connected || begin_type == ElementType::Output);
 
+		auto begin_type = gui_state.new_cable_begin_type;
+		auto begin_connected = gui_state.new_cable_begin_has_connections;
+		auto begin_node_has_output = begin_connected || begin_type == ElementType::Output;
+		auto this_node_has_output = this_jack_has_connections || this_jack_type == ElementType::Output;
+		bool can_finish_cable = this_node_has_output ^ begin_node_has_output;
+		lv_show(ui_CableFinishButton, can_finish_cable);
+
+		lv_group_add_obj(pane_group, ui_CableFinishButton);
+		lv_group_add_obj(pane_group, ui_CableCancelButton);
+
+		auto begin_jack = gui_state.new_cable_begin_jack.value();
 		auto jackname = get_full_element_name(begin_jack.module_id, begin_jack.jack_id, begin_type, patch);
 		lv_label_set_text_fmt(ui_CableCreationLabel,
 							  "In progress: adding a cable from %s %s",
 							  jackname.module_name.data(),
 							  jackname.element_name.data());
 
-		bool can_finish_cable = false;
-		if (already_has_output) {
-			//Outputs or existing cables (Which have outputs) can only connect to unconnected inputs
-			if (!this_jack_has_connections && this_jack_type == ElementType::Input) {
-				can_finish_cable = true;
-			}
-
-		} else if (begin_type == ElementType::Input && !begin_connected) {
-			//Unconnected inputs can connect to any connected jack or any output
-			if (this_jack_has_connections || this_jack_type == ElementType::Output) {
-				can_finish_cable = true;
-			}
-		}
-
-		lv_show(ui_CableFinishButton, can_finish_cable);
-		lv_group_add_obj(pane_group, ui_CableFinishButton);
-		lv_group_add_obj(pane_group, ui_CableCancelButton);
+		pr_dbg("begin jack: m%d %s%d. is connected = %d, has output %d\n",
+			   begin_jack.module_id,
+			   begin_type == ElementType::Output ? "out" : "in",
+			   begin_jack.jack_id,
+			   begin_connected,
+			   begin_node_has_output);
+		pr_dbg("this jack: m%d %s%d. is connected = %d, has output %d\n",
+			   this_module_id,
+			   this_jack_type == ElementType::Output ? "out" : "in",
+			   this_jack.jack_id,
+			   this_jack_has_connections,
+			   this_node_has_output);
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
@@ -390,7 +386,7 @@ private:
 
 				page->gui_state.new_cable_begin_jack = page->this_jack;
 				page->gui_state.new_cable_begin_type = page->this_jack_type;
-				page->gui_state.new_cable_begin_connected = page->this_jack_has_connections;
+				page->gui_state.new_cable_begin_has_connections = page->this_jack_has_connections;
 
 				page->notify_queue.put({"Choose a jack to connect to " + std::string(name.module_name) + " " +
 											std::string(name.element_name),
@@ -403,7 +399,6 @@ private:
 			"Start");
 	}
 
-	//TODO:
 	static void finish_cable_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -417,37 +412,23 @@ private:
 		auto begin_jack = *page->gui_state.new_cable_begin_jack;
 		auto begin_jack_type = page->gui_state.new_cable_begin_type;
 
+		bool make_panel_mapping = false;
+
+		// Handle case of starting with a PanelIn->In and finishing on an input
 		if (begin_jack_type == ElementType::Input && page->this_jack_type == ElementType::Input) {
-			// Handle case of starting with a PanelIn->In and finishing on an input
-			AddJackMapping jackmapping{};
-			bool error = false;
-
-			if (begin_jack_type == ElementType::Input) {
-				if (auto panel_jack = page->patch.find_mapped_injack(begin_jack)) {
-					jackmapping.type = ElementType::Input;
-					jackmapping.panel_jack_id = panel_jack->panel_jack_id;
-					jackmapping.jack = page->this_jack;
-				} else
-					error = true;
-			} else {
-				if (auto panel_jack = page->patch.find_mapped_outjack(begin_jack)) {
-					jackmapping.type = ElementType::Output;
-					jackmapping.panel_jack_id = panel_jack->panel_jack_id;
-					jackmapping.jack = page->this_jack;
-				} else
-					error = true;
-			}
-
-			if (!error) {
+			if (auto panel_jack = page->patch.find_mapped_injack(begin_jack)) {
+				make_panel_mapping = true;
+				AddJackMapping jackmapping{};
+				jackmapping.type = ElementType::Input;
+				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
+				jackmapping.jack = page->this_jack;
 				page->patch_mod_queue.put(jackmapping);
 				page->notify_queue.put({"Added cable from panel input"});
 				page->gui_state.new_cable_begin_jack = {};
-			} else {
-				page->notify_queue.put({"Error: Cannot connect input to input unless a Panel jack input is mapped",
-										Notification::Priority::Error});
 			}
+		}
 
-		} else {
+		if (!make_panel_mapping) {
 			AddInternalCable newcable{};
 			if (begin_jack_type == ElementType::Input) {
 				newcable.in = begin_jack;
