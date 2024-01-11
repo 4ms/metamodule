@@ -3,13 +3,14 @@
 #include "debug.hh"
 #include "elf_file.hh"
 #include "pr_dbg.hh"
-#include "rack.hpp"
 #include "stm32mp1xx.h"
 #include <cstring>
 #include <elf.h>
 #include <span>
 #include <string>
 #include <vector>
+
+#include "rack.hpp"
 
 struct DynLoadTest {
 
@@ -101,6 +102,16 @@ struct DynLoadTest {
 	}
 
 	GCC_OPTIMIZE_OFF
+	void process_got() {
+		// we write to the got
+		auto got_section = elf.find_section(".got");
+		if (!got_section) {
+			pr_err("No .got section\n");
+			return;
+		}
+		std::span<uint32_t> got{(uint32_t *)got_section->begin(), (uint32_t *)got_section->end()};
+	}
+
 	void process_relocs() {
 	}
 

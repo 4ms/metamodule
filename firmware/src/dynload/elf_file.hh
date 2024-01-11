@@ -86,6 +86,13 @@ private:
 		}
 	}
 
+	void populate_relocations() {
+		auto rel_section = find_section(".rel.dyn");
+		if (rel_section) {
+			raw_rels = {(Elf32_Rel *)rel_section->begin(), rel_section->size()};
+		}
+	}
+
 	std::string_view find_string_table() {
 		auto string_header = &raw_section_headers[raw_elf_header->e_shstrndx];
 		return {(char *)rawdata.subspan(string_header->sh_offset).data(), string_header->sh_size};
@@ -127,6 +134,8 @@ private:
 
 	std::span<Elf32_Sym> raw_symbols{};
 	std::span<Elf32_Sym> raw_dyn_symbols{};
+
+	std::span<Elf32_Rel> raw_rels{};
 };
 
 } // namespace ElfFile
