@@ -32,7 +32,30 @@ struct DynLoadTest {
 		// 00001394  00000715 R_ARM_GLOB_DAT         000013a0   pluginInstance
 		// 00001398  00000502 R_ARM_ABS32            00001398   __dso_handle
 
+		// void init(Plugin *p) {
+		//  290:	e92d4010 	push	{r4, lr}
+		//  294:	e59f3020 	ldr	r3, [pc, #32]	@ 2bc <init(Plugin*)+0x2c> -->
+		//  298:	e08f3003 	add	r3, pc, r3
+		// 	pluginInstance = p;
+		//  29c:	e59f201c 	ldr	r2, [pc, #28]	@ 2c0 <init(Plugin*)+0x30>
+		//  2a0:	e7932002 	ldr	r2, [r3, r2]
+		//  2a4:	e5820000 	str	r0, [r2]
+		// ...
+		// 2bc:	000010dc 	ldrdeq	r1, [r0], -ip
+		// 2c0:	00000018 	andeq	r0, r0, r8, lsl r0
+		// 2c4:	00000014 	andeq	r0, r0, r4, lsl r0
+
+		// pluginInstance is @13a0
+
+		// 000013a0 <pluginInstance>:
+		// Plugin *pluginInstance;
+		//     13a0:	00000000 	andeq	r0, r0, r0
+
 		// run init_array: .dynamic section has types INIT_ARRAY and INIT_ARRAYSZ
+		// .init_array section
+		// [ 9] .init_array       INIT_ARRAY      000012d8 0002d8 000004 04  WA  0   0  4
+		// So we could find that section, load sz/4 values from its address (0x12d8 + block start)
+		// then execute each one (entry is 0x0000025c, which is address offset of createModel call)
 
 		// handle PLT?
 		// handle GOT?
