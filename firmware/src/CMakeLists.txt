@@ -1,7 +1,8 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
-option(ENABLE_WIFI_BRIDGE OFF "Enable serial bridge to wifi module")
+option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" OFF)
+option(ENABLE_WIFI_BRIDGE_UPDATE "Enable updating firmware of wifi bridge module" ON)
 
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(SHARED ${FWDIR}/../shared)
@@ -117,35 +118,6 @@ target_compile_options(ui PRIVATE -Wno-unused-variable)
 
 
 #
-# ESP Serial Flasher
-#
-
-if (ENABLE_WIFI_BRIDGE)
-  set(ESP_SERIAL_FLASHER_PORT "CUSTOM")
-  add_subdirectory(${FWDIR}/lib/esp-serial-flasher ${CMAKE_CURRENT_BINARY_DIR}/esp-serial-flasher)
-  target_link_libraries(flasher PRIVATE mp15xa7_arch)
-endif()
-
-# 
-# Lockfree
-# 
-
-if (ENABLE_WIFI_BRIDGE)
-  add_subdirectory(${FWDIR}/lib/lockfree ${CMAKE_CURRENT_BINARY_DIR}/lockfree)
-  target_link_libraries(lockfree INTERFACE mp15xa7_arch)
-endif()
-
-# 
-# Flatbuffers
-# (Manually create a target because original cmake includes the flatc compiler)
-# 
-
-if (ENABLE_WIFI_BRIDGE)
-  add_library(flatbuffers INTERFACE)
-  target_include_directories(flatbuffers INTERFACE ${FWDIR}/lib/flatbuffers/include/)
-endif()
-
-#
 # Main App
 #
 add_executable(
@@ -221,36 +193,6 @@ add_executable(
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
-if (ENABLE_WIFI_BRIDGE)
-
-  target_compile_definitions(main.elf PRIVATE
-    ENABLE_WIFI_BRIDGE=1
-  ) 
-
-  target_sources(main.elf PRIVATE
-    ${FWDIR}/src/wifi/wifi_interface.cc
-    ${FWDIR}/src/wifi/flasher/flasher.cpp
-    ${FWDIR}/src/wifi/flasher/flasher.h
-    ${FWDIR}/src/wifi/flasher/implementation.cpp
-    ${FWDIR}/src/wifi/flasher/BufferedUSART.h
-    ${FWDIR}/src/wifi/flasher/BufferedUSART.cpp
-    ${FWDIR}/src/wifi/comm/BufferedUSART2.h
-    ${FWDIR}/src/wifi/comm/BufferedUSART2.cpp
-    ${FWDIR}/src/wifi/comm/framing/Configuration.h
-    ${FWDIR}/src/wifi/comm/framing/Deframer.cpp
-    ${FWDIR}/src/wifi/comm/framing/Deframer.h
-    ${FWDIR}/src/wifi/comm/framing/DynamicDeframer.cpp
-    ${FWDIR}/src/wifi/comm/framing/DynamicDeframer.h
-    ${FWDIR}/src/wifi/comm/framing/Framer.cpp
-    ${FWDIR}/src/wifi/comm/framing/Framer.h
-    ${FWDIR}/src/wifi/comm/framing/StaticDeframer.h
-  )
-else()
-  target_compile_definitions(main.elf PRIVATE
-    ENABLE_WIFI_BRIDGE=0
-  ) 
-endif()
-
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
   ${FWDIR}/src/core_a7/aux_core_main.cc
@@ -260,6 +202,19 @@ set_source_files_properties(
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
+
+if (ENABLE_WIFI_BRIDGE)
+  target_compile_definitions(main.elf PRIVATE
+    ENABLE_WIFI_BRIDGE=1
+  )
+
+  if (ENABLE_WIFI_BRIDGE_UPDATE)
+    target_compile_definitions(main.elf PRIVATE ENABLE_WIFI_BRIDGE_UPDATE=1)
+  endif()
+
+  add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
+
+endif()
 
 target_include_directories(
   main.elf
@@ -286,32 +241,9 @@ target_include_directories(
           ${CMAKE_BINARY_DIR}/checkgit
 )
 
-if (ENABLE_WIFI_BRIDGE)
 
-  # Locate flatbuffer compiler
-  # This falls back to the local flatabuffers repository if not found on PATH
-  find_program(FLATBUFFERS_FLATC_EXECUTABLE flatc
-    PATHS ${FWDIR}/lib/flatbuffers/build
-    REQUIRED)
-
-  message("Found flatbuffers compiler at " ${FLATBUFFERS_FLATC_EXECUTABLE})
-
-  # Compile flat buffer definitions to cpp headers
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${FWDIR}/lib/flatbuffers/CMake)
-  include(BuildFlatBuffers)
-  build_flatbuffers("${CMAKE_CURRENT_LIST_DIR}/wifi/flat/all.fbs" "" flatbuffer_messages_utils "" ${CMAKE_CURRENT_BINARY_DIR}/flat "" "")
-
-  # Create library with generated flatbuffer headers
-  add_library(flatbuffer_messages INTERFACE)
-  add_dependencies(flatbuffer_messages flatbuffer_messages_utils)
-  target_include_directories(flatbuffer_messages INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/flat)
-endif()
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mp15xa7_arch mdrivlib_interface ui ryml VCV_adaptor)
-
-if (ENABLE_WIFI_BRIDGE)
-  target_link_libraries(main.elf PRIVATE flasher lockfree flatbuffers flatbuffer_messages)
-endif()
 
 foreach(brand ${brands})
   target_link_libraries(main.elf PRIVATE ${brand}Library)

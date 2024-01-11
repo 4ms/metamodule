@@ -6,7 +6,6 @@
 #include "core_intercom/intercore_message.hh"
 #include "drivers/cache.hh"
 #include "fs/ramdisk.hh"
-#include "lvgl/src/misc/lv_color.h" // for lv_color_t
 #include "metaparams.hh"
 #include "param_block.hh"
 #include "params.hh"

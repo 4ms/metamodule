@@ -54,6 +54,36 @@ public:
 		norflash_.reformat();
 		PatchFileIO::create_default_patches(norflash_);
 	}
+	bool write_patch_file(Volume vol, std::string_view filename, std::span<const char> data) {
+		if (vol == Volume::USB) {
+			auto success = PatchFileIO::write_file(data, usbdrive_, filename);
+			if (success) {
+				usb_changes_.reset();
+			}
+			return success;
+
+		} else if (vol == Volume::SDCard) {
+			auto success = PatchFileIO::write_file(data, sdcard_, filename);
+			if (success) {
+				sd_changes_.reset();
+			}
+			return success;
+
+		} else if (vol == Volume::NorFlash) {
+			auto success = PatchFileIO::write_file(data, norflash_, filename);
+			if (success) {
+				norflash_changes_.reset();
+			}
+			return success;
+		} else {
+			return false;
+		}
+	}
+
+	bool write_patch_file(Volume vol, std::string_view filename, std::span<const uint8_t> data) {
+		return write_patch_file(vol, filename, {(const char *)data.data(), data.size()});
+	}
+
 
 	void send_pending_message(InterCoreComm2 &comm) {
 		if (pending_send_message.message_type != None) {
@@ -120,6 +150,17 @@ public:
 		}
 
 		poll_media_change();
+	}
+
+	PatchDirList getPatchList()
+	{
+		PatchDirList patch_dir_list_;
+
+		if (sdcard_.is_mounted()) PatchFileIO::add_directory(sdcard_, patch_dir_list_.volume_root(Volume::SDCard));
+		if (usbdrive_.is_mounted()) PatchFileIO::add_directory(usbdrive_, patch_dir_list_.volume_root(Volume::USB));
+		PatchFileIO::add_directory(norflash_, patch_dir_list_.volume_root(Volume::NorFlash));
+
+		return patch_dir_list_;
 	}
 
 private:

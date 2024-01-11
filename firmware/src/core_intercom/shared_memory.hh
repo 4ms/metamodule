@@ -2,6 +2,7 @@
 #include "audio/auxsignal.hh"
 #include "conf/ramdisk_conf.hh"
 #include "params/param_block.hh"
+#include "patch_file/patch_dir_list.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include <cstdint>
 #include <span>
@@ -25,6 +26,7 @@ struct SharedMemoryS {
 		std::span<char> *raw_patch_span;
 		PatchPlayer *patch_player;
 		PatchPlayLoader *patch_playloader;
+		const PatchDirList *patch_dir_list;
 		FileStorageProxy *patch_storage;
 		SyncParams *sync_params;
 		PatchModQueue *patch_mod_queue;

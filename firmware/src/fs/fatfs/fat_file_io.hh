@@ -12,7 +12,7 @@
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
 // required by fatfs:
-PARTITION VolToPart[FF_VOLUMES] = {
+inline PARTITION VolToPart[FF_VOLUMES] = {
 	{0, 0}, /* "0:" ==> Auto detect partition on USB */
 	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
 };
