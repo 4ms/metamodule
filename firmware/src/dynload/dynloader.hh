@@ -33,20 +33,31 @@ struct DynLoadTest {
 		// 00001394  00000715 R_ARM_GLOB_DAT         000013a0   pluginInstance
 		// 00001398  00000502 R_ARM_ABS32            00001398   __dso_handle
 
+		// code loaded to 0xd001'6e68
+		// init plugin = +290 = 70f8
+
 		// void init(Plugin *p) {
 		//  290:	e92d4010 	push	{r4, lr}
-		//  294:	e59f3020 	ldr	r3, [pc, #32]	@ 2bc <init(Plugin*)+0x2c> -->
-		//  298:	e08f3003 	add	r3, pc, r3
+		//  294:	e59f3020 	ldr	r3, [pc, #32]	@ 2bc <init(Plugin*)+0x2c> 	--> r3 = 10dc
+		//  298:	e08f3003 	add	r3, pc, r3									--> r3 = +298 + 8 + 10dc = +137c = d001'81e4
 		// 	pluginInstance = p;
-		//  29c:	e59f201c 	ldr	r2, [pc, #28]	@ 2c0 <init(Plugin*)+0x30>
-		//  2a0:	e7932002 	ldr	r2, [r3, r2]
+		//  29c:	e59f201c 	ldr	r2, [pc, #28]	@ 2c0 <init(Plugin*)+0x30>	--> r2 = 18
+		//  2a0:	e7932002 	ldr	r2, [r3, r2]								--> r2 = *(+137c+18) = *(+1394) = *(d001'81fc) (=got[6])
+		//	p->addModel(modelTest);
 		//  2a4:	e5820000 	str	r0, [r2]
-		// ...
-		// 2bc:	000010dc 	ldrdeq	r1, [r0], -ip
-		// 2c0:	00000018 	andeq	r0, r0, r8, lsl r0
-		// 2c4:	00000014 	andeq	r0, r0, r4, lsl r0
+		//  2a8:	e59f2014 	ldr	r2, [pc, #20]	@ 2c4 <init(Plugin*)+0x34>
+		//  2ac:	e7933002 	ldr	r3, [r3, r2]
+		//  2b0:	e5931000 	ldr	r1, [r3]
+		//  2b4:	ebffffe5 	bl	250 <Plugin::addModel(Model*)@plt>
+		//  2b8:	e8bd8010 	pop	{r4, pc}
+		//  2bc:	000010dc 	ldrdeq	r1, [r0], -ip
+		//  2c0:	00000018 	andeq	r0, r0, r8, lsl r0
+		//  2c4:	00000014 	andeq	r0, r0, r4, lsl r0
 
-		// pluginInstance is @13a0
+		// pluginInstance is @13a0,
+		// so we should write 13a0 to got[6] (which is +1394)
+		// -> to do this, we would traverse .rel.dyn and write Value+Offset to +Offset
+		// that is, write 0xd001'8208 to address 0xd001'81fc (+13a0 to address +1394)
 
 		// 000013a0 <pluginInstance>:
 		// Plugin *pluginInstance;
