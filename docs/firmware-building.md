@@ -56,12 +56,22 @@ and you can't play them.
 
 ### Build with wifi bridge
 
-To simpilfy development workflow for modules the wifi bridge functionality is not included in the build by default.
-If you want to build with wifi code, you need to install the flatbuffer compiler `flatc` with the correct version as described in the [setup guide](../docs/Setup.md)
-and configure with the `full` preset.
+To simpilfy development workflow, the wifi bridge functionality is not included in the build by default.
+If you want to build with wifi code, you need to install the flatbuffer
+compiler `flatc` with the correct version as described in the [setup
+guide](../docs/Setup.md) and configure with the `full` preset.
 
 ```
 make configure PRESET=full
+```
+
+Note that currently this generates a binary that's too large to fit onto NOR Flash,
+so it's only suitable for loading firmware via JTAG.
+To build a smaller binary that includes the wifi functionality (but cannot be used to update 
+a wifi module), configure like this;
+
+```
+cmake --fresh --preset full -G Ninja -DENABLE_WIFI_BRIDGE_UPDATE=OFF
 ```
 
 

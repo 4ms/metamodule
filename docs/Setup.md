@@ -163,7 +163,7 @@ pacman -Syu mingw-w64-x86_64-gcc
 
 ### Flatc
 
-The compiler version needs to match the version of flatbuffers submodule so the easiest way to get it
+The flatc version needs to match the version of the flatbuffers submodule so the easiest way to get it
 is to build it directly from the submodule.
 
 ```
