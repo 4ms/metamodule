@@ -12,7 +12,7 @@ namespace MetaModule
 // Handle the process of updating firmware
 class FirmwareUpdater {
 public:
-	enum State { Idle, Error, LoadingManifest, StartLoadingFileToRam, LoadingFileToRAM, Writing, Success };
+	enum State { Idle, Error, LoadingManifest, StartLoadingFileToRam, LoadingFileToRAM, StartVerify, Verifying, StartWriting, Writing, Success };
 
 	struct Status {
 		State state{State::Idle};
@@ -32,13 +32,14 @@ public:
 private:
 	bool start_reading_file();
 	bool start_writing_file();
+	bool start_verifying_file();
 
 private:
 	void abortWithMessage(const char* message);
 	void moveToState(State);
 
 private:
-	std::unique_ptr<FileLoaderBase> current_file_loader;
+	std::unique_ptr<FileWorkerBase> current_file_loader;
 
 	FileStorageProxy &file_storage;
 	State state;

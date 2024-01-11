@@ -90,7 +90,10 @@ struct FirmwareUpdateTab {
 				} else if (status.state == FirmwareUpdater::LoadingFileToRAM or status.state == FirmwareUpdater::StartLoadingFileToRam) {
 					display_progress("Loading to RAM", status.file_size, status.file_size);
 
-				} else if (status.state == FirmwareUpdater::Writing) {
+				} else if (status.state == FirmwareUpdater::Verifying or status.state == FirmwareUpdater::StartVerify) {
+					display_progress("Comparing with target area", status.file_size, status.bytes_completed);
+
+				} else if (status.state == FirmwareUpdater::Writing or status.state == FirmwareUpdater::StartWriting) {
 					display_progress("Writing file", status.file_size, status.bytes_completed);
 
 				} else if (status.state == FirmwareUpdater::Success) {

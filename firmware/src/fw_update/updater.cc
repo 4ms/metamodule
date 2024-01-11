@@ -1,6 +1,8 @@
 #include "updater.hh"
 #include "loaders/flash/firmware_flash_loader.hh"
+#include "loaders/flash/firmware_flash_verifier.hh"
 #include "loaders/wifi/firmware_wifi_loader.hh"
+#include "loaders/wifi/firmware_wifi_verifier.hh"
 #include "ram_buffer.hh"
 #include "manifest_parse.hh"
 
@@ -106,13 +108,9 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
                 }
                 else
                 {
-                    // Write first file
+                    // Proceed with first file
                     current_file_idx = 0;
-                    if (start_writing_file())
-                    {
-                        moveToState(Writing);
-                    }
-
+                    moveToState(StartVerify);
                 }
             }
             else if (message.message_type == FileStorageProxy::LoadFileToRamFailed)
@@ -122,10 +120,68 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
 
         } break;
 
-        case Writing: {
-            auto [bytes_cmp, err] = current_file_loader->load_next_block();
+        case StartVerify:
+        {
+            auto success = start_verifying_file();
+            if (success)
+            {
+                current_file_size = file_images[current_file_idx].size();
+                moveToState(Verifying);
+            }
+            else
+            {
+                abortWithMessage("Cannot start verifying file");
+            }
+        } break;
 
-            if (err == FileLoaderBase::Error::Failed)
+        case Verifying:
+        {
+            auto [bytes_cmp, err] = current_file_loader->process();
+            bytes_completed = bytes_cmp;
+
+            if (err == FileWorkerBase::Error::Failed)
+            {
+                abortWithMessage("Verification failed");
+            }
+            else if (err == FileWorkerBase::Error::Mismatch)
+            {
+                moveToState(StartWriting);
+            }
+            else if (bytes_completed == current_file_size)
+            {
+                if (current_file_idx < manifest.files.size()-1)
+                {
+                    // proceed with next file
+                    current_file_idx++;
+                    moveToState(StartVerify);
+                }
+                else
+                {
+                    moveToState(Success);
+                }
+            }
+            
+        } break;
+
+        case StartWriting:
+        {
+            auto success = start_writing_file();
+            if (success)
+            {
+                current_file_size = file_images[current_file_idx].size();
+                moveToState(Writing);
+            }
+            else
+            {
+                abortWithMessage("Cannot start writing file");
+            }
+
+        } break;
+
+        case Writing: {
+            auto [bytes_cmp, err] = current_file_loader->process();
+
+            if (err == FileWorkerBase::Error::Failed)
             {
                 bytes_completed = bytes_cmp;
                 abortWithMessage("Failed writing app to flash");
@@ -138,9 +194,9 @@ FirmwareUpdater::Status FirmwareUpdater::process() {
             {
                 if (current_file_idx < manifest.files.size()-1)
                 {
-                    // write next file
+                    // proceed with next file
                     current_file_idx++;
-                    start_writing_file();
+                    moveToState(StartVerify);
                 }
                 else
                 {
@@ -184,17 +240,16 @@ bool FirmwareUpdater::start_writing_file()
 {
     auto& thisFileImage = file_images[current_file_idx];
 
-    int file_size = thisFileImage.size();
     auto &cur_file = manifest.files[current_file_idx];
 
     switch (cur_file.type) {
 
         case UpdateType::App:
-            current_file_loader = std::make_unique<FirmwareFlashLoader>(thisFileImage);
+            current_file_loader = std::make_unique<FirmwareFlashLoader>(thisFileImage, 0);
             break;
 
         case UpdateType::Wifi:
-            current_file_loader = std::make_unique<FirmwareWifiLoader>(thisFileImage);
+            current_file_loader = std::make_unique<FirmwareWifiLoader>(thisFileImage, 0);
             break;
             
         default:
@@ -205,26 +260,40 @@ bool FirmwareUpdater::start_writing_file()
 
     if (current_file_loader)
     {
-        if (current_file_loader->verify(cur_file.md5))
-        {
-            if (current_file_loader->start())
-            {
-                moveToState(State::Writing);
-                current_file_size = file_size;
-                return true;
-            }
-            else
-            {
-                abortWithMessage("Could not start writing application firmware to flash");
-            }
-        }
-        else
-        {
-            abortWithMessage("App firmware file not valid");
-        }
+        return current_file_loader->start() == FileWorkerBase::Error::None;
     }
 
     return false; 
+}
+
+bool FirmwareUpdater::start_verifying_file()
+{
+    auto& thisFileImage = file_images[current_file_idx];
+
+    auto &cur_file = manifest.files[current_file_idx];
+
+    switch (cur_file.type) {
+
+        case UpdateType::App:
+            current_file_loader = std::make_unique<FirmwareFlashVerifier>(thisFileImage, cur_file.md5, 0);
+            break;
+
+        case UpdateType::Wifi:
+            current_file_loader = std::make_unique<FirmwareWifiVerifier>(thisFileImage, cur_file.md5, 0);
+            break;
+            
+        default:
+            current_file_loader.reset();
+            pr_err("Invalid update file type\n");
+            break;
+    }
+
+    if (current_file_loader)
+    {
+        return current_file_loader->start() == FileWorkerBase::Error::None;
+    }
+
+    return false;    
 }
 
 void FirmwareUpdater::abortWithMessage(const char* message)

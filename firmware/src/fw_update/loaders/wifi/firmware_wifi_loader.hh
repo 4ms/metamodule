@@ -1,25 +1,21 @@
 #pragma once
-#include "fw_update/update_file.hh"
-#include <cstdint>
-#include <span>
+
 #include "../abstract_loader.hh"
 
 namespace MetaModule
 {
 
-class FirmwareWifiLoader : public FileLoaderBase
+class FirmwareWifiLoader : public FileWorkerBase
 {
 public:
-	FirmwareWifiLoader(std::span<char> filedata);
+	FirmwareWifiLoader(std::span<char> filedata, std::size_t address);
 
-	bool verify(StaticString<32> md5);
+	Error start() override;
 
-	bool start();
-
-	std::pair<std::size_t, Error> load_next_block();
+	std::pair<std::size_t, Error> process();
 	
 private:
-	std::size_t bytes_completed = 0;
 	std::span<char> file;
+	std::size_t bytes_completed = 0;
 };
 } // namespace MetaModule

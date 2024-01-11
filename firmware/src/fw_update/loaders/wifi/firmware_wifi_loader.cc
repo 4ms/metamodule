@@ -4,22 +4,16 @@
 namespace MetaModule
 {
 
-FirmwareWifiLoader::FirmwareWifiLoader(std::span<char> filedata)
+FirmwareWifiLoader::FirmwareWifiLoader(std::span<char> filedata, std::size_t address) : file(filedata), bytes_completed(0)
 {
-    file = filedata;
 }
 
-bool FirmwareWifiLoader::verify(StaticString<32> md5) {
-    pr_dbg("Wifi image at %p + %zu\n", file.data(), file.size());		
-    return true;
+
+FileWorkerBase::Error FirmwareWifiLoader::start() {
+    return Error::None;
 }
 
-bool FirmwareWifiLoader::start() {
-    bytes_completed = 0;
-    return true;
-}
-
-std::pair<std::size_t, FirmwareWifiLoader::Error> FirmwareWifiLoader::load_next_block() {
+std::pair<std::size_t, FirmwareWifiLoader::Error> FirmwareWifiLoader::process() {
     //simulate activity
     if (bytes_completed < file.size()) {
         pr_dbg("Wifi bytes written: %u\n", bytes_completed);
