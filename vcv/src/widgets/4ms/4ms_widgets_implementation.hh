@@ -60,7 +60,7 @@ inline void do_create(FlipSwitch el, const Indices &indices, const WidgetContext
 			create_4ms_param<SubMiniToggle2pos>(el.x_mm, el.y_mm, indices, context);
 		else if (el.num_pos == 3)
 			create_4ms_param<SubMiniToggle3pos>(el.x_mm, el.y_mm, indices, context);
-	} else if (el.frames[0] == "switch_horiz_down.png") {
+	} else if (el.frames[0] == "switch_horiz_left.png") {
 		if (el.num_pos == 2)
 			create_4ms_param<SubMiniToggleHoriz2pos>(el.x_mm, el.y_mm, indices, context);
 		else if (el.num_pos == 3)
@@ -129,11 +129,19 @@ inline void do_create(MonoLight el, const Indices &indices, const WidgetContext_
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 
 	} else if (el.color == Colors565::Red) {
-		using LightT = rack::LEDBezelLight<rack::RedLight>;
+		using LightT = rack::MediumLight<rack::RedLight>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 
 	} else if (el.color == Colors565::Blue) {
-		using LightT = rack::LEDBezelLight<rack::BlueLight>;
+		using LightT = rack::MediumLight<rack::BlueLight>;
+		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
+
+	} else if (el.color == Colors565::Green) {
+		using LightT = rack::MediumLight<rack::GreenLight>;
+		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
+
+	} else if (el.color == Colors565::White) {
+		using LightT = rack::MediumLight<rack::WhiteLight>;
 		context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 	}
 }
