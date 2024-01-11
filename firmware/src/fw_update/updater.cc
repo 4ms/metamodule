@@ -245,11 +245,11 @@ bool FirmwareUpdater::start_writing_file()
     switch (cur_file.type) {
 
         case UpdateType::App:
-            current_file_loader = std::make_unique<FirmwareFlashLoader>(thisFileImage, 0);
+            current_file_loader = std::make_unique<FirmwareFlashLoader>(thisFileImage, cur_file.address);
             break;
 
         case UpdateType::Wifi:
-            current_file_loader = std::make_unique<FirmwareWifiLoader>(thisFileImage, 0);
+            current_file_loader = std::make_unique<FirmwareWifiLoader>(thisFileImage, cur_file.address);
             break;
             
         default:
@@ -275,11 +275,11 @@ bool FirmwareUpdater::start_verifying_file()
     switch (cur_file.type) {
 
         case UpdateType::App:
-            current_file_loader = std::make_unique<FirmwareFlashVerifier>(thisFileImage, cur_file.md5, 0);
+            current_file_loader = std::make_unique<FirmwareFlashVerifier>(thisFileImage, cur_file.md5, cur_file.address);
             break;
 
         case UpdateType::Wifi:
-            current_file_loader = std::make_unique<FirmwareWifiVerifier>(thisFileImage, cur_file.md5, 0);
+            current_file_loader = std::make_unique<FirmwareWifiVerifier>(thisFileImage, cur_file.md5, cur_file.address);
             break;
             
         default:

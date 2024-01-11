@@ -37,6 +37,11 @@ inline std::optional<UpdateFile> parseFile(ryml::ConstNodeRef const &n) {
 				updateFile.md5 = md5_sv;
 			}
 
+			if (n.has_child("address"))
+			{
+				n["address"] >> updateFile.address;
+			}
+
 			return updateFile;
 		}
 		else

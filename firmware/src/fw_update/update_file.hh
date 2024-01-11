@@ -14,6 +14,7 @@ struct UpdateFile {
 	std::string filename;
 	uint32_t filesize = 0;
 	StaticString<32> md5{};
+	uint32_t address;
 };
 
 struct UpdateManifest {
