@@ -103,13 +103,16 @@ struct DynLoadTest {
 
 	GCC_OPTIMIZE_OFF
 	void process_got() {
-		// we write to the got
 		auto got_section = elf.find_section(".got");
 		if (!got_section) {
 			pr_err("No .got section\n");
 			return;
 		}
 		std::span<uint32_t> got{(uint32_t *)got_section->begin(), (uint32_t *)got_section->end()};
+		//now we can write to got like got[3] = ...
+		// but we don't know the index so... :(
+
+		auto reldyn_section = elf.find_section(".rel.dyn");
 	}
 
 	void process_relocs() {

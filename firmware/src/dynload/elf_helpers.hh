@@ -7,7 +7,13 @@ namespace ElfFile
 {
 
 inline std::string_view read_string(std::string_view table, uint32_t offset) {
+	if (offset >= table.size())
+		return "";
+
 	auto endpos = table.substr(offset).find_first_of('\0');
+	if (endpos + offset >= table.size())
+		return "";
+
 	return table.substr(offset, endpos);
 }
 

@@ -23,6 +23,10 @@ public:
 		return raw_symbol->st_shndx;
 	}
 
+	uint32_t name_offset() {
+		return raw_symbol->st_name;
+	}
+
 	uint32_t offset() {
 		return raw_symbol->st_value;
 	}

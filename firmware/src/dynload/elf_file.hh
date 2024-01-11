@@ -1,4 +1,5 @@
 #pragma once
+#include "dynload/elf_reloc.hh"
 #include "elf_helpers.hh"
 #include "elf_section.hh"
 #include "elf_symbol.hh"
@@ -28,6 +29,7 @@ struct Elf {
 		symbol_table = find_section(".symtab");
 		dyn_symbol_table = find_section(".dynsym");
 		find_raw_symbols();
+		populate_relocations();
 
 		pr_dbg("elf data is at %08x++%x\n", elfdata.data(), elfdata.size_bytes());
 	}
@@ -72,6 +74,7 @@ struct Elf {
 
 	std::vector<ElfSection> sections;
 	std::vector<ElfProgramSegment> segments;
+	std::vector<ElfReloc> relocs;
 
 private:
 	void populate_sections() {
@@ -90,6 +93,9 @@ private:
 		auto rel_section = find_section(".rel.dyn");
 		if (rel_section) {
 			raw_rels = {(Elf32_Rel *)rel_section->begin(), rel_section->size()};
+		}
+		for (auto &rel : raw_rels) {
+			relocs.emplace_back(rel, raw_dyn_symbols);
 		}
 	}
 
