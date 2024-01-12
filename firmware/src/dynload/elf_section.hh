@@ -45,6 +45,10 @@ public:
 			   (header->sh_flags & SHF_STRINGS);
 	}
 
+	bool is_init_array() {
+		return header->sh_type == SHT_INIT_ARRAY;
+	}
+
 	uint8_t const *begin() {
 		return elf_data_start + offset();
 	}
