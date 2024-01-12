@@ -38,6 +38,7 @@ CXXFLAGS = 	-Wall \
 			-I../shared/CoreModules \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
+			-isystem $(TEST_DIR) \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:

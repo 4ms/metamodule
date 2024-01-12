@@ -44,12 +44,33 @@ struct Elf {
 			print_prog_header(sec);
 	}
 
+	size_t load_size() {
+		uintptr_t lowest_addr = UINTPTR_MAX;
+		uintptr_t highest_addr = 0;
+		for (auto &seg : segments) {
+			if (seg.is_loadable()) {
+				lowest_addr = std::min(seg.address(), lowest_addr);
+				highest_addr = std::max(seg.address() + seg.mem_size(), highest_addr);
+			}
+		}
+		return highest_addr - lowest_addr + 1;
+	}
+
 	std::optional<ElfSection> find_section(std::string_view name) {
 		auto section = std::ranges::find_if(sections, [&](auto &sec) { return (sec.section_name() == name); });
 		if (section != sections.end())
 			return *section;
 		else {
 			pr_err("Section %.*s not found\n", (int)name.size(), name.data());
+			return {};
+		}
+	}
+
+	std::optional<ElfSection> get_section(size_t index) {
+		if (index <= sections.size())
+			return sections[index];
+		else {
+			pr_err("Section index %d out of range\n", index);
 			return {};
 		}
 	}
@@ -92,10 +113,20 @@ private:
 	void populate_relocations() {
 		auto rel_section = find_section(".rel.dyn");
 		if (rel_section) {
-			raw_rels = {(Elf32_Rel *)rel_section->begin(), rel_section->size()};
+			raw_rels = {(Elf32_Rel *)rel_section->begin(), rel_section->num_entries()};
 		}
+
+		// Technically we should do this:
+		auto linked_symbol_section = get_section(rel_section->linked_section_idx());
+		auto linked_symbols = linked_symbol_section->get_raw_symbols();
+		auto linked_string_table_section = get_section(linked_symbol_section->linked_section_idx());
+		auto linked_string_table = linked_string_table_section->get_string_table();
+
+		// auto &linked_symbols = raw_dyn_symbols;
+		// auto &linked_string_table = dyn_string_table;
+
 		for (auto &rel : raw_rels) {
-			relocs.emplace_back(rel, raw_dyn_symbols);
+			relocs.emplace_back(rel, linked_symbols, linked_string_table);
 		}
 	}
 
@@ -108,9 +139,8 @@ private:
 		auto dyn_string_section = find_section(".dynstr");
 
 		if (dyn_string_section) {
-			pr_info("Dyn strings begin at %p, for %zu\n", dyn_string_table.data(), dyn_string_table.size());
-			dyn_string_table = {(char *)rawdata.subspan(dyn_string_section->offset()).data(),
-								dyn_string_section->size()};
+			dyn_string_table = dyn_string_section->get_string_table();
+			pr_dbg(".dynstr found: %s\n", dyn_string_table.data() + 1);
 		} else {
 			pr_err("No .dynstr section found\n");
 			dyn_string_table = "";
@@ -119,10 +149,10 @@ private:
 
 	void find_raw_symbols() {
 		if (symbol_table)
-			raw_symbols = {(Elf32_Sym *)symbol_table->begin(), symbol_table->size()};
+			raw_symbols = symbol_table->get_raw_symbols();
 
 		if (dyn_symbol_table)
-			raw_dyn_symbols = {(Elf32_Sym *)dyn_symbol_table->begin(), dyn_symbol_table->size()};
+			raw_dyn_symbols = dyn_symbol_table->get_raw_symbols();
 	}
 
 	std::span<uint8_t> rawdata;

@@ -87,16 +87,7 @@ struct DynLoadTest {
 
 	GCC_OPTIMIZE_OFF
 	void load_executable() {
-
-		uint32_t lowest_addr = 0xFFFFFFFF;
-		uint32_t highest_addr = 0;
-		for (auto &seg : elf.segments) {
-			if (seg.is_loadable()) {
-				lowest_addr = std::min(seg.address(), lowest_addr);
-				highest_addr = std::max(seg.address() + seg.mem_size(), highest_addr);
-			}
-		}
-		size_t load_size = highest_addr - lowest_addr + 1;
+		size_t load_size = elf.load_size();
 
 		pr_info("Allocating %zu bytes for loading\n", load_size);
 		block.code.resize(load_size);
@@ -122,11 +113,12 @@ struct DynLoadTest {
 		std::span<uint32_t> got{(uint32_t *)got_section->begin(), (uint32_t *)got_section->end()};
 		//now we can write to got like got[3] = ...
 		// but we don't know the index so... :(
-
-		auto reldyn_section = elf.find_section(".rel.dyn");
 	}
 
 	void process_relocs() {
+		for (auto reloc : elf.relocs) {
+			reloc.write(block.code.data());
+		}
 	}
 
 	GCC_OPTIMIZE_OFF
@@ -134,7 +126,7 @@ struct DynLoadTest {
 		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initP6Plugin");
 
 		if (init_plugin_symbol) {
-			auto load_address = init_plugin_symbol->offset() - block.elf_offset + block.code.data();
+			auto load_address = init_plugin_symbol->offset() /*- block.elf_offset*/ + block.code.data();
 			init_func = reinterpret_cast<InitPluginFunc *>(load_address);
 
 		} else

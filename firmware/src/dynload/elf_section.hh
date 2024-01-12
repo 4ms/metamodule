@@ -1,6 +1,7 @@
 #pragma once
 #include "elf_helpers.hh"
 #include <elf.h>
+#include <span>
 #include <string_view>
 
 namespace ElfFile
@@ -22,8 +23,17 @@ public:
 		return header->sh_offset;
 	}
 
-	uint32_t size() {
+	uint32_t size_bytes() {
 		return header->sh_size;
+	}
+
+	uint32_t num_entries() {
+		return size_bytes() / header->sh_entsize;
+	}
+
+	// The can mean different things for different section types
+	uint32_t linked_section_idx() {
+		return header->sh_link;
 	}
 
 	bool is_code() {
@@ -40,11 +50,19 @@ public:
 	}
 
 	uint8_t const *end() {
-		return elf_data_start + offset() + size();
+		return elf_data_start + offset() + size_bytes();
 	}
 
 	std::string_view section_name() {
 		return read_string(elf_string_table, header->sh_name);
+	}
+
+	std::span<Elf32_Sym> get_raw_symbols() {
+		return {(Elf32_Sym *)begin(), num_entries()};
+	}
+
+	std::string_view get_string_table() {
+		return {(char *)(elf_data_start + offset()), size_bytes()};
 	}
 };
 
@@ -74,7 +92,7 @@ public:
 		return header->p_type == PT_LOAD;
 	}
 
-	uint32_t address() const {
+	uintptr_t address() const {
 		return header->p_vaddr;
 	}
 
