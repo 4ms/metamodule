@@ -28,7 +28,8 @@ private:
 
 public:
 	QCDCore()
-		: triggerDetector(1.0f, 2.0f), ticks(0), clockInCounter(0), invMode(DELAY), clockOutState(LOW) {
+		: triggerDetectorClock(1.0f, 2.0f), triggerDetectorReset(1.0f, 2.0f), ticks(0), 
+		clockInCounter(0), invMode(DELAY), clockOutState(LOW), phase(0.0f), processSyncPulse(false), clockOutRisingEdgeCounter(0) {
 			set_samplerate(48000.f);
 	}
 
@@ -41,32 +42,47 @@ public:
 		invMode = readInvMode();
 
 		if (auto clockInputValue = getInput<ClkIn1In>(); clockInputValue) {
-			if (triggerEdgeDetector(triggerDetector(*clockInputValue))) {
+			if (triggerEdgeDetectorClock(triggerDetectorClock(*clockInputValue))) {
 				calculateClockInPeriod(now);
-				calculateClockOutPeriod(now);
+				calculateClockOutPeriod(now, factor);
+			}
+		} else {
+			resetClocks(now);
+		}		
 
+		
+
+		if(clockIn.lastEventInTicks && clockIn.periodInTicks) {
+			if(auto newPhase = processResetIn(now); newPhase) {
+				phase = *newPhase;
+			}
+
+			uint32_t phaseOffset = uint32_t(std::round(*clockIn.periodInTicks * phase));
+
+			if (now == *clockIn.lastEventInTicks + phaseOffset) {
 				if(factor.operation == DIV) {
 					clockInCounter++;
 
 					if(clockInCounter == factor.factor)
 					{
-						setClockOut(now);
+						processSyncPulse = true;
 						clockInCounter = 0;
 					}
 				} else {
-					setClockOut(now);
+					processSyncPulse = true;
 				}
 			}
 		}
 
-		updateClockOut(now);
+		updateClockOut(now, factor);
 		updateInvOut(now);
 	}
 
 	void set_samplerate(float sr) override {
 		timeStepInS = 1.f /sr;
 
-		triggerLengthMinimumInTicks = uint32_t(std::round(triggerLengthMinimumInS / timeStepInS));
+		// triggerLengthMinimumInTicks = uint32_t(std::round(triggerLengthMinimumInS / timeStepInS));
+		triggerLengthMinimumInTicks = 2;
 	}
 
 private:
@@ -93,7 +109,15 @@ private:
 	}
 
 	invMode_t readInvMode() {
-		return SHUFFLE;
+		auto invMode = getState<InvMode1Switch>();
+		
+		if(invMode == Toggle3posHoriz::State_t::UP) {
+			return DELAY;
+		} else if(invMode == Toggle3posHoriz::State_t::CENTER) {
+			return INVERTED;
+		} else {
+			return SHUFFLE;
+		}
 	}
 
 	uint32_t calculateTriggerlength(float pulsewidth) {
@@ -118,7 +142,7 @@ private:
 		clockIn.lastEventInTicks = timestampInTicks;
 	}
 
-	void calculateClockOutPeriod(uint32_t timestampInTicks) {
+	void calculateClockOutPeriod(uint32_t timestampInTicks, factorType_t factor) {
 		if(clockIn.periodInTicks) {
 			if(factor.operation == MULT) {
 				clockOut.periodInTicks = *clockIn.periodInTicks / factor.factor;
@@ -127,47 +151,59 @@ private:
 			} else {
 				clockOut.periodInTicks.reset();
 			}
+
+			if (!clockOut.lastEventInTicks) {
+				clockOut.lastEventInTicks = timestampInTicks;
+			}
 		}
 	}
 
-	void setClockOut(uint32_t timestampInTicks) {
-		if (clockOutState == LOW) {
-			setOutput<Out1Out>(5.f);
-			setLED<Out1Light>(1.0f);
+	void updateClockOut(uint32_t timestampInTicks, factorType_t factor) {
+		if(clockOut.periodInTicks) {
+			if(clockOutIsLow()) {
+				if (processSyncPulse == true) {
+					clockOutRisingEdgeCounter = 0;
+
+					setClockOutRisingEdge(timestampInTicks);
+
+					processSyncPulse = false;
+				} else if (factor.operation == MULT) {
+					if(timestampInTicks >= (*clockOut.lastEventInTicks + *clockOut.periodInTicks) && clockOutRisingEdgeCounter < factor.factor) {
+						setClockOutRisingEdge(timestampInTicks);
+					}
+				}
+			} else {
+				if (timestampInTicks >= (*clockOut.lastEventInTicks + triggerLengthInTicks)) {
+					setClockOutFallingEdge(timestampInTicks);
+				}
+			}
+		}
+	}
+
+	bool clockOutIsLow() {
+		return clockOutState == LOW;
+	}
+
+	void setClockOutRisingEdge(uint32_t timestampInTicks) {
+		if(clockOutState == LOW) {
+			setOutput<Out1Out>(outputHighVoltageLevel);
+			setLED<Out1Light>(1.f);
 			updateInvOut(timestampInTicks, RISING);
 
 			clockOut.lastEventInTicks = timestampInTicks;
+
+			clockOutRisingEdgeCounter++;
 			clockOutState = HIGH;
 		}
 	}
 
-	void updateClockOut(uint32_t timestampInTicks) {
-		if(clockOut.periodInTicks) {
-			if (!clockOut.lastEventInTicks) {
-				clockOut.lastEventInTicks = 0;
-			}
+	void setClockOutFallingEdge(uint32_t timestampInTicks) {
+		if(clockOutState == HIGH) {
+			setOutput<Out1Out>(0.f);
+			setLED<Out1Light>(0.f);
+			updateInvOut(timestampInTicks, FALLING);
 
-			if (timestampInTicks >= (*clockOut.lastEventInTicks + *clockOut.periodInTicks)) {
-				if(clockOutState == LOW) {
-					setOutput<Out1Out>(outputHighVoltageLevel);
-					setLED<Out1Light>(1.f);
-					updateInvOut(timestampInTicks, RISING);
-
-					clockOut.lastEventInTicks = timestampInTicks;
-
-					clockOutState = HIGH;
-				}
-			}
-
-			if (timestampInTicks >= (*clockOut.lastEventInTicks + triggerLengthInTicks)) {
-				if(clockOutState == HIGH) {
-					setOutput<Out1Out>(0.f);
-					setLED<Out1Light>(0.f);
-					updateInvOut(timestampInTicks, FALLING);
-
-					clockOutState = LOW;
-				}
-			}
+			clockOutState = LOW;
 		}
 	}
 
@@ -205,6 +241,36 @@ private:
 			setLED<Inv1Light>(1.f);
 			clockInvOut.lastEventInTicks = timestamp;
 		}
+	}
+
+	void resetClocks(uint32_t timestampInTicks) {
+		clockIn.lastEventInTicks.reset();
+		clockIn.periodInTicks.reset();
+
+		clockOut.lastEventInTicks.reset();
+		clockOut.periodInTicks.reset();
+
+		if(clockOutState == HIGH) {
+			setOutput<Out1Out>(0.f);
+			setLED<Out1Light>(0.f);
+			updateInvOut(timestampInTicks, FALLING);
+			clockOutState = LOW;
+		}
+	}
+
+	std::optional<float> processResetIn(uint32_t timestamp) {
+		if (auto input = getInput<Reset1In>(); input) {
+			if (triggerEdgeDetectorReset(triggerDetectorReset(*input))) {
+				if(clockIn.periodInTicks) {
+					uint32_t ticksSinceLastEvent = timestamp - *clockIn.lastEventInTicks;
+					float phase = float(ticksSinceLastEvent) / float(*clockIn.periodInTicks);
+
+					return phase;
+				}
+			}
+		}
+
+		return std::nullopt;
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -251,6 +317,9 @@ private:
 	float pulsewidth;
 	invMode_t invMode;
 	outputState_t clockOutState;
+	float phase;
+	bool processSyncPulse;
+	uint32_t clockOutRisingEdgeCounter;
 
 	struct clockMeasures
 	{
@@ -263,8 +332,11 @@ private:
 	clockMeasures clockInvOut;
 
 private:
-	FlipFlop triggerDetector;
-	EdgeDetector triggerEdgeDetector;
+	FlipFlop triggerDetectorClock;
+	EdgeDetector triggerEdgeDetectorClock;
+
+	FlipFlop triggerDetectorReset;
+	EdgeDetector triggerEdgeDetectorReset;
 };
 
 } // namespace MetaModule
