@@ -17,7 +17,6 @@ target_link_libraries(flasher PRIVATE mp15xa7_arch)
 # Sources
 
 target_sources(main.elf PRIVATE
-    wifi_update.cc
     flasher.cpp
     flasher.h
     implementation.cpp
