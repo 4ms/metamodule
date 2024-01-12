@@ -51,7 +51,7 @@ struct Elf {
 		for (auto &seg : segments) {
 			if (seg.is_loadable()) {
 				lowest_addr = std::min(seg.address(), lowest_addr);
-				highest_addr = std::max(seg.address() + seg.mem_size(), highest_addr);
+				highest_addr = std::max(uintptr_t(seg.address() + seg.mem_size()), highest_addr);
 			}
 		}
 		return highest_addr - lowest_addr + 1;
@@ -119,7 +119,7 @@ private:
 				auto linked_symbols = linked_symbol_section->get_raw_symbols();
 
 				if (auto linked_string_table_section = get_section(linked_symbol_section->linked_section_idx())) {
-					auto linked_string_table = linked_string_table_section->get_string_table();
+					auto linked_string_table = linked_string_table_section->as_string_table();
 
 					if (&linked_symbols != &raw_dyn_symbols)
 						pr_err("Error: expecting linked symbol table to be .dynsym\n");
@@ -147,7 +147,7 @@ private:
 		auto dyn_string_section = find_section(".dynstr");
 
 		if (dyn_string_section) {
-			dyn_string_table = dyn_string_section->get_string_table();
+			dyn_string_table = dyn_string_section->as_string_table();
 		} else {
 			pr_err("No .dynstr section found\n");
 			dyn_string_table = "";

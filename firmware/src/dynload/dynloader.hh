@@ -1,6 +1,8 @@
 #pragma once
 #include "build-simple-elf.hh"
 #include "debug.hh"
+#include "dynload/elf_relocator.hh"
+#include "dynload/host_symbol.hh"
 #include "elf_file.hh"
 #include "pr_dbg.hh"
 #include "stm32mp1xx.h"
@@ -117,7 +119,7 @@ struct DynLoadTest {
 
 	void process_relocs() {
 		for (auto reloc : elf.relocs) {
-			reloc.write(block.code.data());
+			relocator.write(reloc);
 		}
 	}
 

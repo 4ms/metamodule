@@ -58,11 +58,17 @@ public:
 	}
 
 	std::span<Elf32_Sym> get_raw_symbols() {
-		return {(Elf32_Sym *)begin(), num_entries()};
+		if (header->sh_type == SHT_SYMTAB || header->sh_type == SHT_DYNSYM)
+			return {(Elf32_Sym *)begin(), num_entries()};
+		else
+			return {};
 	}
 
-	std::string_view get_string_table() {
-		return {(char *)(elf_data_start + offset()), size_bytes()};
+	std::string_view as_string_table() {
+		if (header->sh_type == SHT_STRTAB)
+			return {(char *)(elf_data_start + offset()), size_bytes()};
+		else
+			return "";
 	}
 };
 
