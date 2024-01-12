@@ -9,6 +9,7 @@ TEST_CASE("Relocations") {
 	elf.print_prog_headers();
 
 	auto load_size = elf.load_size();
+	CHECK(load_size == 5029);
 
 	pr_info("Allocating %zu bytes for loading\n", load_size);
 	std::vector<uint8_t> code(load_size);
@@ -36,7 +37,6 @@ TEST_CASE("Relocations") {
 	} else
 		pr_err("Did not find init(Plugin*)\n");
 
-
 	printf("init_func is at %p (+%x)\n", init_func, (uint8_t *)init_func - (uint8_t *)code.data());
 	auto initfunc_mem = std::span<uint32_t>{(uint32_t *)init_func, 16};
 	for (unsigned i = 0; auto byte : initfunc_mem) {
@@ -46,7 +46,10 @@ TEST_CASE("Relocations") {
 	}
 
 	/////
-	std::array<ElfFile::HostSymbol, 2> hostsyms{};
+	std::array<ElfFile::HostSymbol, 2> hostsyms{{
+		{"_ZN6Plugin8addModelEP5Model", 0, 0xAA1234},
+		{"_Z11createModelI10TestModule10TestWidgetEP5ModelPKc", 0, 0x55443322},
+	}};
 	ElfFile::Relocater relocator{code.data(), hostsyms};
 
 	for (auto reloc : elf.relocs) {

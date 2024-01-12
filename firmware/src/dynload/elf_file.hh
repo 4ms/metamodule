@@ -29,7 +29,8 @@ struct Elf {
 		symbol_table = find_section(".symtab");
 		dyn_symbol_table = find_section(".dynsym");
 		find_raw_symbols();
-		populate_relocations();
+		populate_relocations(".rel.dyn");
+		populate_relocations(".rel.plt");
 
 		pr_dbg("elf data is at %08x++%x\n", elfdata.data(), elfdata.size_bytes());
 	}
@@ -110,23 +111,30 @@ private:
 		}
 	}
 
-	void populate_relocations() {
-		auto rel_section = find_section(".rel.dyn");
-		if (rel_section) {
+	void populate_relocations(std::string_view sec_name) {
+		if (auto rel_section = find_section(sec_name)) {
 			raw_rels = {(Elf32_Rel *)rel_section->begin(), rel_section->num_entries()};
-		}
 
-		// Technically we should do this:
-		auto linked_symbol_section = get_section(rel_section->linked_section_idx());
-		auto linked_symbols = linked_symbol_section->get_raw_symbols();
-		auto linked_string_table_section = get_section(linked_symbol_section->linked_section_idx());
-		auto linked_string_table = linked_string_table_section->get_string_table();
+			if (auto linked_symbol_section = get_section(rel_section->linked_section_idx())) {
+				auto linked_symbols = linked_symbol_section->get_raw_symbols();
 
-		// auto &linked_symbols = raw_dyn_symbols;
-		// auto &linked_string_table = dyn_string_table;
+				if (auto linked_string_table_section = get_section(linked_symbol_section->linked_section_idx())) {
+					auto linked_string_table = linked_string_table_section->get_string_table();
 
-		for (auto &rel : raw_rels) {
-			relocs.emplace_back(rel, linked_symbols, linked_string_table);
+					if (&linked_symbols != &raw_dyn_symbols)
+						pr_err("Error: expecting linked symbol table to be .dynsym\n");
+
+					if (&linked_string_table != &dyn_string_table)
+						pr_err("Error: expecting linked symbol table to be .dynstr\n");
+
+					for (auto &rel : raw_rels) {
+						relocs.emplace_back(rel, linked_symbols, linked_string_table);
+					}
+				}
+			}
+
+		} else {
+			pr_err("No %.*s section\n", (int)sec_name.size(), sec_name.data());
 		}
 	}
 
@@ -140,7 +148,6 @@ private:
 
 		if (dyn_string_section) {
 			dyn_string_table = dyn_string_section->get_string_table();
-			pr_dbg(".dynstr found: %s\n", dyn_string_table.data() + 1);
 		} else {
 			pr_err("No .dynstr section found\n");
 			dyn_string_table = "";
