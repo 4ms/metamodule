@@ -1,5 +1,5 @@
 #pragma once
-#include "gui/elements/element_name.hh"
+#include "gui/elements/element_type.hh"
 #include "patch/patch.hh"
 #include "util/lockfree_fifo_spsc.hh"
 #include "util/overloaded.hh"

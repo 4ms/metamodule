@@ -183,6 +183,31 @@ lv_obj_set_style_pad_right(ui_TrashLabel2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_TrashLabel2, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_TrashLabel2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_Choice2Button = lv_btn_create(ui_DelMapButtonPanel);
+lv_obj_set_width( ui_Choice2Button, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Choice2Button, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Choice2Button, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Choice2Button, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_Choice2Button, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_radius(ui_Choice2Button, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_Choice2Button, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_Choice2Button, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_Choice2Button, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_Choice2Button, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_Choice2Button, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_Choice2Button, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_Choice2Button, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_Choice2Button, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_Choice2Label = lv_label_create(ui_Choice2Button);
+lv_obj_set_width( ui_Choice2Label, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Choice2Label, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Choice2Label, LV_ALIGN_CENTER );
+lv_label_set_text(ui_Choice2Label,"Choice");
+lv_obj_set_style_text_color(ui_Choice2Label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_Choice2Label, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_Choice2Label, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+
 ui_ConfirmButton = lv_btn_create(ui_DelMapButtonPanel);
 lv_obj_set_width( ui_ConfirmButton, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_ConfirmButton, LV_SIZE_CONTENT);   /// 1
@@ -425,12 +450,6 @@ lv_obj_set_align( ui_Container12, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_Container12, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_Container12, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_Label5 = lv_label_create(ui_DeleteMappingPopUp);
-lv_obj_set_width( ui_Label5, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label5, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_Label5, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_Label5, LV_OBJ_FLAG_HIDDEN );   /// Flags
-
 ui_Label6 = lv_label_create(ui_DeleteMappingPopUp);
 lv_obj_set_width( ui_Label6, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label6, LV_SIZE_CONTENT);   /// 1
@@ -472,13 +491,6 @@ lv_obj_set_width( ui_Label12, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label12, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label12, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_Label12, LV_OBJ_FLAG_HIDDEN );   /// Flags
-
-ui_Button3 = lv_btn_create(ui_DeleteMappingPopUp);
-lv_obj_set_width( ui_Button3, 100);
-lv_obj_set_height( ui_Button3, 50);
-lv_obj_set_align( ui_Button3, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_Button3, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_clear_flag( ui_Button3, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 ui_Button4 = lv_btn_create(ui_DeleteMappingPopUp);
 lv_obj_set_width( ui_Button4, 100);

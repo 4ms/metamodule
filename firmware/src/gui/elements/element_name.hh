@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/elements/context.hh"
+#include "gui/elements/element_type.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 
@@ -10,8 +11,6 @@ struct FullElementName {
 	std::string_view module_name;
 	std::string_view element_name;
 };
-
-enum class ElementType { Param, Input, Output, Light };
 
 // Return the module name and element name, given the IDs and type (not the Element)
 FullElementName

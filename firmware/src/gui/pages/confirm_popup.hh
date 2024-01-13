@@ -3,6 +3,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
 #include <functional>
+#include <string_view>
 
 namespace MetaModule
 {
@@ -18,14 +19,15 @@ struct ConfirmPopup {
 		lv_hide(ui_DelMapPopUpPanel);
 	}
 
-	void show(auto cb, const char *message, const char *button_text = "Trash") {
+	void show(auto cb, const char *message, std::string_view choice1_text, std::string_view choice2_text = "") {
 		remove_all_event_cb(ui_CancelButton);
 		lv_obj_add_event_cb(ui_CancelButton, button_callback, LV_EVENT_CLICKED, this);
 		remove_all_event_cb(ui_ConfirmButton);
 		lv_obj_add_event_cb(ui_ConfirmButton, button_callback, LV_EVENT_CLICKED, this);
 		remove_all_event_cb(ui_TrashButton2);
 		lv_obj_add_event_cb(ui_TrashButton2, button_callback, LV_EVENT_CLICKED, this);
-		callback = std::move(cb);
+
+		lv_group_remove_all_objs(group);
 
 		lv_obj_set_parent(ui_DelMapPopUpPanel, base);
 
@@ -33,21 +35,28 @@ struct ConfirmPopup {
 
 		lv_label_set_text(ui_DelMapLabel, message);
 
-		if (strcmp(button_text, "Trash") != 0) {
-			lv_show(ui_ConfirmButton);
-			lv_hide(ui_TrashButton2);
-			lv_label_set_text(ui_ConfirmLabel, button_text);
-			lv_group_remove_all_objs(group);
-			lv_group_add_obj(group, ui_CancelButton);
-			lv_group_add_obj(group, ui_ConfirmButton);
-		} else {
+		callback = std::move(cb);
+
+		if (choice1_text == "Trash") {
 			lv_hide(ui_ConfirmButton);
 			lv_show(ui_TrashButton2);
-			lv_group_remove_all_objs(group);
-			lv_group_add_obj(group, ui_CancelButton);
 			lv_group_add_obj(group, ui_TrashButton2);
+		} else {
+			lv_show(ui_ConfirmButton);
+			lv_hide(ui_TrashButton2);
+			lv_label_set_text_fmt(ui_ConfirmLabel, "%.*s", (int)choice1_text.size(), choice1_text.data());
+			lv_group_add_obj(group, ui_ConfirmButton);
 		}
 
+		if (choice2_text.size() > 0) {
+			lv_show(ui_Choice2Button);
+			lv_label_set_text_fmt(ui_Choice2Label, "%.*s", (int)choice2_text.size(), choice2_text.data());
+			lv_group_add_obj(group, ui_Choice2Button);
+		} else {
+			lv_hide(ui_Choice2Button);
+		}
+
+		lv_group_add_obj(group, ui_CancelButton);
 		lv_indev_set_group(lv_indev_get_next(nullptr), group);
 		lv_group_focus_obj(ui_CancelButton);
 
@@ -74,9 +83,13 @@ struct ConfirmPopup {
 
 		if (page->callback) {
 			if (event->target == ui_CancelButton)
-				page->callback(false);
+				page->callback(0);
+
 			else if (event->target == ui_TrashButton2 || event->target == ui_ConfirmButton)
-				page->callback(true);
+				page->callback(1);
+
+			else if (event->target == ui_Choice2Button)
+				page->callback(2);
 		}
 
 		page->hide();
@@ -89,7 +102,7 @@ private:
 
 	bool visible = false;
 
-	std::function<void(bool)> callback;
+	std::function<void(unsigned)> callback;
 };
 
 } // namespace MetaModule
