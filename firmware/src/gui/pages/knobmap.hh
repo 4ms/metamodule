@@ -3,6 +3,7 @@
 #include "gui/elements/panel_name.hh"
 #include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/pages/add_map_popup.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/knob_arc.hh"
@@ -20,7 +21,8 @@ struct KnobMapPage : PageBase {
 	KnobMapPage(PatchContext info)
 		: PageBase{info, PageId::KnobMap}
 		, base{ui_EditMappingPage}
-		, patch{patch_storage.get_view_patch()} {
+		, patch{patch_storage.get_view_patch()}
+		, add_map_popup{patch_mod_queue} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -44,7 +46,8 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_AliasTextArea);
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
-		lv_group_add_obj(group, ui_KnobSetButton);
+		lv_hide(ui_KnobSetButton);
+		// lv_group_add_obj(group, ui_KnobSetButton);
 		lv_group_add_obj(group, ui_TrashButton);
 		lv_group_set_editing(group, false);
 	}
@@ -116,6 +119,9 @@ struct KnobMapPage : PageBase {
 		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
 
 		lv_group_set_editing(group, false);
+
+		add_map_popup.prepare_focus(group, ui_EditMappingPage);
+		add_map_popup.hide();
 	}
 
 	void update() override {
@@ -131,6 +137,8 @@ struct KnobMapPage : PageBase {
 
 		auto knob_val = params.knobs[map.panel_knob_id].val;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
+
+		add_map_popup.update(params);
 	}
 
 	void blur() final {
@@ -202,6 +210,8 @@ struct KnobMapPage : PageBase {
 		if (!page)
 			return;
 
+		// TODO: header says "Change Map", not "Add a map"
+		// page->add_map_popup.show(page->view_set_idx, page->map.param_id, page->map.module_id);
 		page->notify_queue.put({"Not implemented yet :("});
 	}
 
@@ -267,6 +277,8 @@ private:
 	MappedKnob map{};
 
 	ConfirmPopup del_popup;
+
+	AddMapPopUp add_map_popup;
 
 	bool kb_visible = false;
 

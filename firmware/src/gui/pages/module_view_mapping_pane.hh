@@ -104,7 +104,7 @@ struct ModuleViewMappingPane {
 		lv_group_focus_next(pane_group);
 		lv_indev_set_group(lv_indev_get_next(nullptr), pane_group);
 
-		add_map_popup.prepare_focus(pane_group);
+		add_map_popup.prepare_focus(pane_group, ui_MappingParameters);
 		control_popup.prepare_focus(pane_group);
 
 		should_close = false;
