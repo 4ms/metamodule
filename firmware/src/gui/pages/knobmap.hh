@@ -29,8 +29,9 @@ struct KnobMapPage : PageBase {
 		lv_obj_add_event_cb(ui_MinSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MaxSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 
-		lv_obj_add_event_cb(ui_EditButton, edit_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_ListButton, list_cb, LV_EVENT_RELEASED, this);
+		lv_obj_add_event_cb(ui_EditButton, edit_cb, LV_EVENT_RELEASED, this);
+		lv_obj_add_event_cb(ui_KnobSetButton, knobset_cb, LV_EVENT_RELEASED, this);
 		lv_obj_add_event_cb(ui_TrashButton, trash_cb, LV_EVENT_RELEASED, this);
 
 		lv_hide(ui_Keyboard);
@@ -43,6 +44,7 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_AliasTextArea);
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
+		lv_group_add_obj(group, ui_KnobSetButton);
 		lv_group_add_obj(group, ui_TrashButton);
 		lv_group_set_editing(group, false);
 	}
@@ -194,6 +196,16 @@ struct KnobMapPage : PageBase {
 	}
 
 	static void edit_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobMapPage *>(event->user_data);
+		if (!page)
+			return;
+
+		page->notify_queue.put({"Not implemented yet :("});
+	}
+
+	static void knobset_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<KnobMapPage *>(event->user_data);

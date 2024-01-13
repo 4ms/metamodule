@@ -278,13 +278,6 @@ lv_obj_set_style_pad_right(ui_MessageLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MessageLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MessageLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_Panel1 = lv_obj_create(ui_DeleteMappingPopUp);
-lv_obj_set_width( ui_Panel1, 100);
-lv_obj_set_height( ui_Panel1, 50);
-lv_obj_set_align( ui_Panel1, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_Panel1, LV_OBJ_FLAG_HIDDEN );   /// Flags
-lv_obj_clear_flag( ui_Panel1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-
 ui_Panel2 = lv_obj_create(ui_DeleteMappingPopUp);
 lv_obj_set_width( ui_Panel2, 100);
 lv_obj_set_height( ui_Panel2, 50);
@@ -450,12 +443,6 @@ lv_obj_set_align( ui_Container12, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_Container12, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_Container12, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_Label6 = lv_label_create(ui_DeleteMappingPopUp);
-lv_obj_set_width( ui_Label6, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label6, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_Label6, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_Label6, LV_OBJ_FLAG_HIDDEN );   /// Flags
-
 ui_Label7 = lv_label_create(ui_DeleteMappingPopUp);
 lv_obj_set_width( ui_Label7, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label7, LV_SIZE_CONTENT);   /// 1
@@ -491,13 +478,6 @@ lv_obj_set_width( ui_Label12, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label12, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label12, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_Label12, LV_OBJ_FLAG_HIDDEN );   /// Flags
-
-ui_Button4 = lv_btn_create(ui_DeleteMappingPopUp);
-lv_obj_set_width( ui_Button4, 100);
-lv_obj_set_height( ui_Button4, 50);
-lv_obj_set_align( ui_Button4, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_Button4, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_clear_flag( ui_Button4, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 ui_Button5 = lv_btn_create(ui_DeleteMappingPopUp);
 lv_obj_set_width( ui_Button5, 100);
@@ -554,5 +534,13 @@ lv_obj_set_height( ui_Button12, 50);
 lv_obj_set_align( ui_Button12, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_Button12, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_Button12, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+ui_Panel1 = lv_obj_create(ui_DeleteMappingPopUp);
+lv_obj_set_height( ui_Panel1, 50);
+lv_obj_set_width( ui_Panel1, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_align( ui_Panel1, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Panel1, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_Panel1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
 
 }

@@ -41,7 +41,7 @@ struct PatchViewPage : PageBase {
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(ui_AddButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_SaveButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_InfoButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SettingsButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -106,7 +106,7 @@ struct PatchViewPage : PageBase {
 
 		lv_group_add_obj(group, ui_PlayButton);
 		lv_group_add_obj(group, ui_KnobButton);
-		lv_group_add_obj(group, ui_AddButton);
+		lv_group_add_obj(group, ui_SaveButton);
 		lv_group_add_obj(group, ui_InfoButton);
 		lv_group_add_obj(group, ui_SettingsButton);
 

@@ -771,25 +771,24 @@ lv_obj_set_style_bg_color(ui_MoreMapsIcon, lv_color_hex(0xFD8B18), LV_PART_MAIN 
 lv_obj_set_style_bg_opa(ui_MoreMapsIcon, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_EditMapButtons = lv_obj_create(ui_EditMappingContainer);
-lv_obj_set_width( ui_EditMapButtons, 44);
+lv_obj_set_width( ui_EditMapButtons, 45);
 lv_obj_set_height( ui_EditMapButtons, 128);
 lv_obj_set_x( ui_EditMapButtons, 128 );
 lv_obj_set_y( ui_EditMapButtons, 48 );
 lv_obj_set_align( ui_EditMapButtons, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_EditMapButtons,LV_FLEX_FLOW_COLUMN);
-lv_obj_set_flex_align(ui_EditMapButtons, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-lv_obj_add_flag( ui_EditMapButtons, LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_clear_flag( ui_EditMapButtons, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_scrollbar_mode(ui_EditMapButtons, LV_SCROLLBAR_MODE_OFF);
-lv_obj_set_scroll_dir(ui_EditMapButtons, LV_DIR_HOR);
+lv_obj_set_flex_align(ui_EditMapButtons, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_clear_flag( ui_EditMapButtons, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_scrollbar_mode(ui_EditMapButtons, LV_SCROLLBAR_MODE_ON);
+lv_obj_set_scroll_dir(ui_EditMapButtons, LV_DIR_VER);
 lv_obj_set_style_radius(ui_EditMapButtons, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_EditMapButtons, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_EditMapButtons, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_EditMapButtons, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_EditMapButtons, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_EditMapButtons, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_EditMapButtons, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_EditMapButtons, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_EditMapButtons, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_EditMapButtons, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_EditMapButtons, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_EditMapButtons, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_EditMapButtons, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
@@ -799,6 +798,13 @@ lv_obj_set_style_outline_opa(ui_EditMapButtons, 255, LV_PART_MAIN| LV_STATE_FOCU
 lv_obj_set_style_outline_width(ui_EditMapButtons, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_pad(ui_EditMapButtons, 1, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_border_width(ui_EditMapButtons, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+lv_obj_set_style_bg_color(ui_EditMapButtons, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_EditMapButtons, 128, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_EditMapButtons, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_EditMapButtons, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_EditMapButtons, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_EditMapButtons, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 
 ui_ListButton = lv_btn_create(ui_EditMapButtons);
 lv_obj_set_width( ui_ListButton, 32);
@@ -899,6 +905,38 @@ lv_obj_set_style_pad_left(ui_EditLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_EditLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_EditLabel, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_EditLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_KnobSetButton = lv_imgbtn_create(ui_EditMapButtons);
+lv_imgbtn_set_src(ui_KnobSetButton, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_1x_knob1_png, NULL);
+lv_imgbtn_set_src(ui_KnobSetButton, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_1x_knob1_png, NULL);
+lv_imgbtn_set_src(ui_KnobSetButton, LV_IMGBTN_STATE_DISABLED, NULL, &ui_img_1x_knob1_png, NULL);
+lv_obj_set_width( ui_KnobSetButton, 32);
+lv_obj_set_height( ui_KnobSetButton, 32);
+lv_obj_set_align( ui_KnobSetButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_KnobSetButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_KnobSetButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_scrollbar_mode(ui_KnobSetButton, LV_SCROLLBAR_MODE_OFF);
+lv_obj_set_style_radius(ui_KnobSetButton, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_KnobSetButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_KnobSetButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_radius(ui_KnobSetButton, 20, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_bg_color(ui_KnobSetButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_PRESSED );
+lv_obj_set_style_bg_opa(ui_KnobSetButton, 255, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_border_color(ui_KnobSetButton, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_PRESSED );
+lv_obj_set_style_border_opa(ui_KnobSetButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_outline_color(ui_KnobSetButton, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_PRESSED );
+lv_obj_set_style_outline_opa(ui_KnobSetButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_outline_width(ui_KnobSetButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_outline_pad(ui_KnobSetButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_img_recolor(ui_KnobSetButton, lv_color_hex(0x333333), LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_img_recolor_opa(ui_KnobSetButton, 255, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_radius(ui_KnobSetButton, 20, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_KnobSetButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_KnobSetButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_KnobSetButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_KnobSetButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_img_recolor(ui_KnobSetButton, lv_color_hex(0xFD8B18), LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_img_recolor_opa(ui_KnobSetButton, 200, LV_PART_MAIN| LV_STATE_FOCUSED);
 
 ui_TrashButton = lv_btn_create(ui_EditMapButtons);
 lv_obj_set_width( ui_TrashButton, 32);

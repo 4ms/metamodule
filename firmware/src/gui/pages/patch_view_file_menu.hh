@@ -17,7 +17,7 @@ struct PatchViewFileMenu {
 		lv_show(ui_PatchFileMenu);
 		lv_obj_set_x(ui_PatchFileMenu, 140);
 
-		lv_obj_add_event_cb(ui_AddButton, menu_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_SaveButton, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileMenuCloseButton, menu_button_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_PatchFileMenuCloseButton);

@@ -1,6 +1,7 @@
 #pragma once
 #include "patch_mod_queue.hh"
 #include "patch_player.hh"
+#include "util/overloaded.hh"
 
 namespace MetaModule
 {
