@@ -154,8 +154,6 @@ lv_obj_t *ui_MappedItemHeader;
 lv_obj_t *ui_MappedItemHeaderMapText;
 lv_obj_t *ui_MappedItemHeaderKnobSetText;
 lv_obj_t *ui_MapList;
-lv_obj_t *ui_CableEditButton;
-lv_obj_t *ui_CableEditButtonLabel;
 lv_obj_t *ui_CableAddButton;
 lv_obj_t *ui_CableAddLabel;
 lv_obj_t *ui_CableCreationPanel;
@@ -308,6 +306,8 @@ lv_obj_t *ui_Button10;
 lv_obj_t *ui_Button11;
 lv_obj_t *ui_Button12;
 lv_obj_t *ui_Panel1;
+lv_obj_t *ui_CableEditButton;
+lv_obj_t *ui_CableEditButtonLabel;
 
 
 // SCREEN: ui_CableMapPage

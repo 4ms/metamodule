@@ -49,7 +49,6 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_CableCancelButton, cancel_creating_cable_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableFinishButton, finish_cable_button_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_CableEditButton, edit_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
 	}
 
@@ -167,7 +166,6 @@ private:
 
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_ControlButton);
-		lv_hide(ui_CableEditButton);
 		lv_hide(ui_CableCancelButton);
 		lv_hide(ui_MappedPanel);
 	}
@@ -271,13 +269,10 @@ private:
 			lv_show(ui_MappedPanel);
 			lv_hide(ui_MappedItemHeader);
 			lv_label_set_text(ui_MappedListTitle, "Connected To:");
-			lv_show(ui_CableEditButton);
-			lv_group_add_obj(pane_group, ui_CableEditButton);
 			lv_label_set_text(ui_CableAddLabel, "New connection");
 
 		} else {
 			lv_hide(ui_MappedPanel);
-			lv_hide(ui_CableEditButton);
 			lv_label_set_text(ui_CableAddLabel, "New cable");
 		}
 		lv_show(ui_CableAddButton);
@@ -295,7 +290,6 @@ private:
 
 		// Hide "New cable/connection" and "Edit Cable" if already have a cable open
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableEditButton);
 		lv_show(ui_CableCreationPanel);
 
 		auto begin_type = gui_state.new_cable_begin_type;
@@ -339,18 +333,6 @@ private:
 			pr_err("Cannot display more than %d cables\n", mapped_item_user_data.size());
 			lv_obj_set_user_data(obj, nullptr);
 		}
-	}
-
-	static void edit_cable_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-
-		if (!event->target)
-			return;
-
-		page->page_list.update_state(PageId::ModuleView, page->args);
-		page->page_list.request_new_page(PageId::CableEdit, page->args);
 	}
 
 	static void add_cable_button_cb(lv_event_t *event) {
@@ -463,7 +445,6 @@ private:
 	//
 	void prepare_for_element(const ParamElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableEditButton);
 		lv_hide(ui_CableCreationPanel);
 
 		lv_show(ui_MappedPanel);
