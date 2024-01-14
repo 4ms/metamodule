@@ -26,6 +26,8 @@ struct ConfirmPopup {
 		lv_obj_add_event_cb(ui_ConfirmButton, button_callback, LV_EVENT_CLICKED, this);
 		remove_all_event_cb(ui_TrashButton2);
 		lv_obj_add_event_cb(ui_TrashButton2, button_callback, LV_EVENT_CLICKED, this);
+		remove_all_event_cb(ui_Choice2Button);
+		lv_obj_add_event_cb(ui_Choice2Button, button_callback, LV_EVENT_CLICKED, this);
 
 		lv_group_remove_all_objs(group);
 
@@ -95,7 +97,7 @@ struct ConfirmPopup {
 		page->hide();
 	}
 
-private:
+protected:
 	lv_obj_t *base;
 	lv_group_t *group;
 	lv_group_t *orig_group;
