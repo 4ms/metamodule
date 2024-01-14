@@ -44,6 +44,11 @@ struct AddInternalCable {
 	Jack in;
 };
 
+struct DisconnectJack {
+	Jack jack;
+	ElementType type;
+};
+
 struct AddJackMapping {
 	uint16_t panel_jack_id;
 	Jack jack;
@@ -58,7 +63,8 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 ModifyMapping,
 									 ChangeKnobSet,
 									 AddInternalCable,
-									 AddJackMapping>;
+									 AddJackMapping,
+									 DisconnectJack>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
 

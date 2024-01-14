@@ -361,6 +361,14 @@ public:
 			out_conns[panel_jack_id] = jack;
 	}
 
+	void disconnect_injack(Jack jack) {
+		pd.disconnect_injack(jack);
+	}
+
+	void disconnect_outjack(Jack jack) {
+		pd.disconnect_outjack(jack);
+	}
+
 	void set_samplerate(float hz) {
 		samplerate = hz;
 

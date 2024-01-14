@@ -20,6 +20,10 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue, PatchPlayer &playe
 						   mod.type == ElementType::Input ? player.add_injack_mapping(mod.panel_jack_id, mod.jack) :
 															player.add_outjack_mapping(mod.panel_jack_id, mod.jack);
 					   },
+					   [&player](DisconnectJack &mod) {
+						   mod.type == ElementType::Input ? player.disconnect_injack(mod.jack) :
+															player.disconnect_outjack(mod.jack);
+					   },
 					   [](ModifyMapping &mod) { /*TODO*/ },
 				   },
 				   patch_mod.value());

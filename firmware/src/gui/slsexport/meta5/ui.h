@@ -157,6 +157,8 @@ extern lv_obj_t *ui_MappedItemHeaderKnobSetText;
 extern lv_obj_t *ui_MapList;
 extern lv_obj_t *ui_CableAddButton;
 extern lv_obj_t *ui_CableAddLabel;
+extern lv_obj_t *ui_CableRemoveButton;
+extern lv_obj_t *ui_CableRemoveButtonLabel;
 extern lv_obj_t *ui_CableCreationPanel;
 extern lv_obj_t *ui_CableCreationLabel;
 extern lv_obj_t *ui_CableCreationBeginLabel;
@@ -301,8 +303,6 @@ extern lv_obj_t *ui_Button10;
 extern lv_obj_t *ui_Button11;
 extern lv_obj_t *ui_Button12;
 extern lv_obj_t *ui_Panel1;
-extern lv_obj_t *ui_CableEditButton;
-extern lv_obj_t *ui_CableEditButtonLabel;
 // SCREEN: ui_CableMapPage
 void ui_CableMapPage_screen_init(void);
 extern lv_obj_t *ui_CableMapPage;

@@ -224,6 +224,10 @@ struct ModuleViewPage : PageBase {
 							   mod.type == ElementType::Output ? patch.add_mapped_outjack(mod.panel_jack_id, mod.jack) :
 																 patch.add_mapped_injack(mod.panel_jack_id, mod.jack);
 						   },
+						   [&, this](DisconnectJack &mod) {
+							   mod.type == ElementType::Output ? patch.disconnect_outjack(mod.jack) :
+																 patch.disconnect_injack(mod.jack);
+						   },
 						   [&](auto &m) { refresh = false; },
 					   },
 					   patch_mod.value());

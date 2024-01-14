@@ -50,6 +50,7 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_CableCancelButton, cancel_creating_cable_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableFinishButton, finish_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_CableRemoveButton, disconnect_button_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -167,6 +168,7 @@ private:
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_ControlButton);
 		lv_hide(ui_CableCancelButton);
+		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_MappedPanel);
 	}
 
@@ -267,12 +269,15 @@ private:
 
 		if (this_jack_has_connections) {
 			lv_show(ui_MappedPanel);
+			lv_show(ui_CableRemoveButton);
+			lv_group_add_obj(pane_group, ui_CableRemoveButton);
 			lv_hide(ui_MappedItemHeader);
 			lv_label_set_text(ui_MappedListTitle, "Connected To:");
 			lv_label_set_text(ui_CableAddLabel, "New connection");
 
 		} else {
 			lv_hide(ui_MappedPanel);
+			lv_hide(ui_CableRemoveButton);
 			lv_label_set_text(ui_CableAddLabel, "New cable");
 		}
 		lv_show(ui_CableAddButton);
@@ -415,6 +420,17 @@ private:
 		}
 	}
 
+	static void disconnect_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		DisconnectJack disconnect{.jack = page->this_jack, .type = page->this_jack_type};
+		page->patch_mod_queue.put(disconnect);
+		page->notify_queue.put({"Disconnected jack"});
+		page->gui_state.new_cable_begin_jack = {};
+	}
+
 	static void follow_cable_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -446,6 +462,7 @@ private:
 	void prepare_for_element(const ParamElement &) {
 		lv_hide(ui_CableAddButton);
 		lv_hide(ui_CableCreationPanel);
+		lv_hide(ui_CableRemoveButton);
 
 		lv_show(ui_MappedPanel);
 		lv_show(ui_MappedItemHeader);
