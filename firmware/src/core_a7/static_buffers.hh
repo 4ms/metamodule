@@ -6,7 +6,6 @@
 #include "core_intercom/intercore_message.hh"
 #include "drivers/cache.hh"
 #include "fs/ramdisk.hh"
-#include "lvgl/src/misc/lv_color.h" // for lv_color_t
 #include "metaparams.hh"
 #include "param_block.hh"
 #include "params.hh"
@@ -27,13 +26,12 @@ static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioInBloc
 static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block;
 
 static inline __attribute__((section(".ddma"))) std::array<char, 65536> raw_patch_data;
-static inline __attribute__((section(".ddma"))) std::span<char> raw_patch_span;
 
 static inline __attribute__((section(".ddma"))) IntercoreStorageMessage icc_shared_message;
 static inline __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 
-static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks;
-static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block;
+static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};
+static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block{};
 
 static inline __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 
