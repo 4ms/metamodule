@@ -115,7 +115,7 @@ struct ModuleViewPage : PageBase {
 					opts += el.short_name;
 
 					if (drawn.mapped_panel_id)
-						opts = opts + " [" + get_panel_name<PanelDef>(el, drawn.mapped_panel_id.value()) + ']';
+						append_panel_jack_name(opts, el, drawn.mapped_panel_id.value());
 
 					append_connected_jack_name(opts, drawn, patch);
 

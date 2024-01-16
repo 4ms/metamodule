@@ -19,4 +19,8 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 // Append to string `opts` the module and jack names connected to the given GuiElement in the patch
 void append_connected_jack_name(std::string &opts, GuiElement const &drawn, PatchData const &patch);
 
+void append_panel_jack_name(std::string &opts, auto const &el, uint16_t panel_jack_id) {
+	opts = opts + " [" + get_panel_name<PanelDef>(el, panel_jack_id) + ']';
+}
+
 } // namespace MetaModule

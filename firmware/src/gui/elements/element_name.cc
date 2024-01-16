@@ -1,6 +1,7 @@
 #include "element_name.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "gui/elements/context.hh"
+#include "gui/elements/panel_name.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 
@@ -49,6 +50,10 @@ void append_connected_jack_name(std::string &opts, GuiElement const &drawn, Patc
 		Jack in_jack = {.module_id = drawn.module_idx, .jack_id = drawn.idx.input_idx};
 
 		if (auto *cable = patch.find_internal_cable_with_injack(in_jack)) {
+			if (auto out_map = patch.find_mapped_outjack(cable->out)) {
+				append_panel_jack_name(opts, JackOutput{}, out_map->panel_jack_id);
+			}
+
 			append(cable->out, ElementType::Output);
 
 			for (auto &in : cable->ins) {
