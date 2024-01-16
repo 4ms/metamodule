@@ -53,6 +53,7 @@ struct Gui {
 	static inline lv_color_t yellow_highlight = lv_color_hex(0x8bfd18);
 	static inline const char *yellow_highlight_html = "#d7ff6a ";
 	static inline const char *blue_highlight_html = "#188bfd ";
+	static inline const char *brown_highlight_html = "#A26E3E ";
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;

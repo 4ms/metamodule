@@ -31,14 +31,11 @@
 [submodule "firmware/lib/esp-serial-flasher"]
 	path = firmware/lib/esp-serial-flasher
 	url = https://github.com/4ms/esp-serial-flasher.git
-[submodule "firmware/lib/lockfree"]
-	path = firmware/lib/lockfree
-	url = https://github.com/DNedic/lockfree.git
 [submodule "firmware/lib/flatbuffers"]
 	path = firmware/lib/flatbuffers
 	url = https://github.com/google/flatbuffers.git
 [submodule "firmware/src/wifi/flat"]
-	path = firmware/src/wifi/flat
+	path = firmware/src/wifi/comm/flat
 	url = https://github.com/4ms/metamodule-bridge-protocol.git
 [submodule "firmware/vcv_ports/nonlinearcircuits"]
 	path = firmware/vcv_ports/nonlinearcircuits

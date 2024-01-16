@@ -4,40 +4,57 @@
 
 #include "Configuration.h"
 
-#include <functional>
-
 namespace Framing
 {
 
 class Framer
 {
 public:
-	using FUNC = std::function<void(uint8_t)>;
+	Framer(const Configuration_t& conf) : Configuration(conf) {}
 
-	Framer(const Configuration_t&, const FUNC);
-
-	template <typename CONTAINER>
-	void send(const CONTAINER& data)
+	template <typename CONTAINER, typename FUNC>
+	void send(const CONTAINER& data, const FUNC&& func)
 	{
-		doStart();
+		func(Configuration.start);
 
 		for (auto& byte : data)
 		{
-			doPayload(byte);
+			if (byte == Configuration.start || byte == Configuration.end || byte == Configuration.escape)
+			{
+				func(Configuration.escape);
+			}
+
+			func(byte);
 		}
 
-		doEnd();
+		func(Configuration.end);
 	}
 
-	void doStart();
-	void doEnd();
-	void doPayload(uint8_t);
+	template <typename FUNC>
+	void sendStart(const FUNC&& func)
+	{
+		func(Configuration.start);
+	}
+
+	template <typename FUNC>
+	void sendStop(const FUNC&& func)
+	{
+		func(Configuration.end);
+	}
+
+	template <typename FUNC>
+	void sendPayload(uint8_t byte, const FUNC&& func)
+	{
+		if (byte == Configuration.start || byte == Configuration.end || byte == Configuration.escape)
+		{
+			func(Configuration.escape);
+		}
+
+		func(byte);
+	}
 
 private:
 	const Configuration_t Configuration;
-	bool partialPacket;
-	FUNC func;
-
 };
 
 }

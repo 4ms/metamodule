@@ -1242,7 +1242,7 @@ lv_obj_set_style_pad_top(ui_ModuleName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_ModuleName, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_DescriptionPanel = lv_obj_create(ui_PatchViewPage);
-lv_obj_set_width( ui_DescriptionPanel, lv_pct(100));
+lv_obj_set_width( ui_DescriptionPanel, 306);
 lv_obj_set_height( ui_DescriptionPanel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_flex_flow(ui_DescriptionPanel,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_DescriptionPanel, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);

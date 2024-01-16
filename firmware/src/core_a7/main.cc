@@ -16,12 +16,12 @@
 #include "system/time.hh"
 #include "uart_log.hh"
 
-// #include "core_intercom/semaphore_action.hh" //TODO use this
+#ifdef ENABLE_WIFI_BRIDGE
+#include <wifi_update.hh>
+#endif
 
 namespace MetaModule
 {
-
-constexpr inline bool reset_to_factory_patches = false;
 
 struct SystemInit : AppStartup, UartLog, Debug, Hardware {
 } _sysinit;
@@ -35,8 +35,8 @@ void main() {
 
 	HAL_Delay(50);
 	print_time();
-	printf("Build: %s (%s)\n", GIT_HASH.data(), GIT_COMMIT_TIME.data());
-	printf("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
+	pr_info("Build: %s (%s)\n", GIT_HASH.data(), GIT_COMMIT_TIME.data());
+	pr_info("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
 
 	PatchPlayer patch_player;
 	FileStorageProxy file_storage_proxy{
@@ -72,6 +72,10 @@ void main() {
 	mdrivlib::SystemCache::clean_dcache_by_range(&A7SharedMemoryS::ptrs, sizeof(A7SharedMemoryS::ptrs));
 	mdrivlib::SystemCache::clean_dcache_by_range(&SharedMemoryS::ptrs, sizeof(SharedMemoryS::ptrs));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
+
+#ifdef ENABLE_WIFI_BRIDGE
+	WifiUpdate::run();
+#endif
 
 	pr_info("A7 Core 1 initialized\n");
 
