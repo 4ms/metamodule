@@ -156,6 +156,8 @@ lv_obj_t *ui_MappedItemHeaderKnobSetText;
 lv_obj_t *ui_MapList;
 lv_obj_t *ui_CableAddButton;
 lv_obj_t *ui_CableAddLabel;
+lv_obj_t *ui_CablePanelAddButton;
+lv_obj_t *ui_CablePanelAddLabel;
 lv_obj_t *ui_CableRemoveButton;
 lv_obj_t *ui_CableRemoveButtonLabel;
 lv_obj_t *ui_CableCreationPanel;
@@ -319,8 +321,6 @@ lv_obj_t *ui_CableFromTitle;
 lv_obj_t *ui_CableFromEditButton;
 lv_obj_t *ui_CableToTitle;
 lv_obj_t *ui_CableToPanel;
-lv_obj_t *ui_CableCancel;
-lv_obj_t *ui_CableCancelLabel;
 lv_obj_t *ui_CableDeleteButton;
 lv_obj_t *ui_CableDeleteIcon;
 

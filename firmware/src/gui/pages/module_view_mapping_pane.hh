@@ -5,6 +5,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/add_map_popup.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/choice_popup.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/manual_control_popup.hh"
 #include "gui/pages/module_view_mapping_pane_list.hh"
@@ -51,6 +52,7 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_CableFinishButton, finish_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableRemoveButton, disconnect_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_CablePanelAddButton, add_panel_cable_button_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -61,6 +63,7 @@ struct ModuleViewMappingPane {
 		lv_hide(ui_ControlAlert);
 
 		add_cable_popup.init(ui_MappingMenu, pane_group);
+		panel_cable_popup.init(ui_MappingMenu, pane_group);
 	}
 
 	void show(const DrawnElement &drawn_el) {
@@ -150,6 +153,9 @@ struct ModuleViewMappingPane {
 		else if (add_cable_popup.is_visible())
 			add_cable_popup.hide();
 
+		else if (panel_cable_popup.is_visible())
+			panel_cable_popup.hide();
+
 		else
 			should_close = true;
 	}
@@ -169,6 +175,7 @@ private:
 		lv_hide(ui_ControlButton);
 		lv_hide(ui_CableCancelButton);
 		lv_hide(ui_CableRemoveButton);
+		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_MappedPanel);
 	}
 
@@ -196,6 +203,8 @@ private:
 
 	void prepare_for_jack() {
 		bool has_connections = false;
+
+		lv_show(ui_CablePanelAddButton);
 
 		if (auto *cable = find_internal_cable(this_jack_type, this_jack)) {
 			has_connections = true;
@@ -245,6 +254,8 @@ private:
 
 	void list_panel_in_cable(Jack injack) {
 		if (auto panel_jack = patch.find_mapped_injack(injack)) {
+			lv_hide(ui_CablePanelAddButton);
+
 			auto obj = list.create_panel_incable_item(panel_jack->panel_jack_id, ui_MapList);
 			make_nonselectable_item(obj);
 
@@ -258,6 +269,8 @@ private:
 	}
 
 	void list_panel_out_cable(uint16_t panel_jack_id) {
+		lv_hide(ui_CablePanelAddButton);
+
 		auto obj = list.create_panel_outcable_item(panel_jack_id, ui_MapList);
 		make_nonselectable_item(obj);
 	}
@@ -270,7 +283,6 @@ private:
 		if (this_jack_has_connections) {
 			lv_show(ui_MappedPanel);
 			lv_show(ui_CableRemoveButton);
-			lv_group_add_obj(pane_group, ui_CableRemoveButton);
 			lv_hide(ui_MappedItemHeader);
 			lv_label_set_text(ui_MappedListTitle, "Connected To:");
 			lv_label_set_text(ui_CableAddLabel, "New connection");
@@ -282,6 +294,8 @@ private:
 		}
 		lv_show(ui_CableAddButton);
 		lv_group_add_obj(pane_group, ui_CableAddButton);
+		lv_group_add_obj(pane_group, ui_CablePanelAddButton);
+		lv_group_add_obj(pane_group, ui_CableRemoveButton);
 		lv_group_focus_next(pane_group);
 
 		handle_cable_creating();
@@ -346,8 +360,8 @@ private:
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
 		page->add_cable_popup.show(
-			[page](bool ok) {
-				if (!ok)
+			[page](unsigned choice) {
+				if (choice == 0) //Cancel
 					return;
 				auto name = get_full_element_name(
 					page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, page->patch);
@@ -365,6 +379,45 @@ private:
 			},
 			"Navigate to the module and jack you want to patch to.",
 			"Start");
+	}
+
+	static void add_panel_cable_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		const char *choices = page->this_jack_type == ElementType::Input && !page->this_jack_has_connections ?
+								  "In 1\nIn 2\nIn 3\nIn 4\nIn 5\nIn 6\nGateIn 1\nGateIn 2" :
+								  "Out 1\nOut 2\nOut 3\nOut 4\nOut 5\nOut 6\nOut 7\nOut 8";
+
+		auto action = [page](unsigned choice) {
+			if (choice == 0 || choice > 8)
+				return;
+
+			AddJackMapping jackmapping{};
+			jackmapping.panel_jack_id = (uint16_t)(choice - 1);
+
+			if (page->this_jack_type == ElementType::Input) {
+				if (auto *cable = page->patch.find_internal_cable_with_injack(page->this_jack)) {
+					// Input jack that's connected to an output -> Panel Out jack
+					jackmapping.jack = cable->out;
+					jackmapping.type = ElementType::Output;
+				} else {
+					// Input jack that's not connected any output -> Panel In jack
+					jackmapping.jack = page->this_jack;
+					jackmapping.type = ElementType::Input;
+				}
+			} else {
+				jackmapping.jack = page->this_jack;
+				jackmapping.type = ElementType::Output;
+			}
+
+			page->patch_mod_queue.put(jackmapping);
+			page->notify_queue.put({"Connected to panel"});
+			page->gui_state.new_cable_begin_jack = {};
+		};
+
+		page->panel_cable_popup.show(action, "Which panel jack do you want to connect to?", "Connect", choices);
 	}
 
 	static void finish_cable_button_cb(lv_event_t *event) {
@@ -463,6 +516,7 @@ private:
 		lv_hide(ui_CableAddButton);
 		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
+		lv_hide(ui_CablePanelAddButton);
 
 		lv_show(ui_MappedPanel);
 		lv_show(ui_MappedItemHeader);
@@ -636,6 +690,7 @@ private:
 	bool this_jack_has_connections = false;
 
 	ConfirmPopup add_cable_popup;
+	ChoicePopup panel_cable_popup;
 	PatchModQueue &patch_mod_queue;
 };
 

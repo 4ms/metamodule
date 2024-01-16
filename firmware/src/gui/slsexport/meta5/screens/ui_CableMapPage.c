@@ -158,48 +158,6 @@ lv_obj_set_style_outline_opa(ui_CableToPanel, 255, LV_PART_MAIN| LV_STATE_FOCUS_
 lv_obj_set_style_outline_width(ui_CableToPanel, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 lv_obj_set_style_outline_pad(ui_CableToPanel, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
-ui_CableCancel = lv_btn_create(ui_CableMapPagePane);
-lv_obj_set_width( ui_CableCancel, 62);
-lv_obj_set_height( ui_CableCancel, 28);
-lv_obj_set_align( ui_CableCancel, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_CableCancel, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_clear_flag( ui_CableCancel, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_style_radius(ui_CableCancel, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_CableCancel, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_CableCancel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_color(ui_CableCancel, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_border_opa(ui_CableCancel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_width(ui_CableCancel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_CableCancel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_CableCancel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_CableCancel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_CableCancel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_CableCancel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_CableCancel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(ui_CableCancel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_PRESSED );
-lv_obj_set_style_outline_opa(ui_CableCancel, 0, LV_PART_MAIN| LV_STATE_PRESSED);
-lv_obj_set_style_outline_color(ui_CableCancel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
-lv_obj_set_style_outline_opa(ui_CableCancel, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_width(ui_CableCancel, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_pad(ui_CableCancel, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_color(ui_CableCancel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
-lv_obj_set_style_outline_opa(ui_CableCancel, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-lv_obj_set_style_outline_width(ui_CableCancel, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-lv_obj_set_style_outline_pad(ui_CableCancel, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-
-ui_CableCancelLabel = lv_label_create(ui_CableCancel);
-lv_obj_set_width( ui_CableCancelLabel, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_CableCancelLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_CableCancelLabel, -1 );
-lv_obj_set_y( ui_CableCancelLabel, 0 );
-lv_obj_set_align( ui_CableCancelLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_CableCancelLabel,"Undo");
-lv_obj_set_style_text_color(ui_CableCancelLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_CableCancelLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_CableCancelLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_CableCancelLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_CableCancelLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
-
 ui_CableDeleteButton = lv_btn_create(ui_CableMapPagePane);
 lv_obj_set_height( ui_CableDeleteButton, 30);
 lv_obj_set_width( ui_CableDeleteButton, LV_SIZE_CONTENT);  /// 1

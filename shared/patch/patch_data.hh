@@ -154,6 +154,30 @@ struct PatchData {
 			int_cables.push_back({out, {in}});
 	}
 
+	void disconnect_injack(Jack jack) {
+		// Remove from inputs on all internal cables
+		for (auto &cable : int_cables) {
+			std::erase_if(cable.ins, [jack](auto in) { return (in == jack); });
+		}
+		// Remove any cables that now have no inputs
+		std::erase_if(int_cables, [](auto cable) { return (cable.ins.size() == 0); });
+
+		// Remove from inputs on all panel mappings
+		for (auto &map : mapped_ins) {
+			std::erase_if(map.ins, [jack](auto in) { return (in == jack); });
+		}
+		// Remove any panel mappings that now have no inputs
+		std::erase_if(mapped_ins, [](auto map) { return (map.ins.size() == 0); });
+	}
+
+	void disconnect_outjack(Jack jack) {
+		// Remove any cables with this output
+		std::erase_if(int_cables, [jack](auto cable) { return (cable.out == jack); });
+
+		// Remove any panel mappings with this output
+		std::erase_if(mapped_outs, [jack](auto map) { return (map.out == jack); });
+	}
+
 	const MappedInputJack *find_mapped_injack(Jack jack) const {
 		for (auto &m : mapped_ins) {
 			for (auto &j : m.ins) {
