@@ -177,6 +177,9 @@ target_link_script(
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 
+# Fix for ff.c string overfow (false positive?)
+target_link_options(main_m4.elf PUBLIC -Wno-stringop-overflow)
+
 if (ENABLE_WIFI_BRIDGE)
 
   target_compile_definitions(main_m4.elf PRIVATE
