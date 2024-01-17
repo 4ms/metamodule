@@ -188,9 +188,25 @@ struct PatchData {
 		return nullptr;
 	}
 
+	const MappedInputJack *find_mapped_injack(uint16_t panel_jack_id) const {
+		for (auto &m : mapped_ins) {
+			if (m.panel_jack_id == panel_jack_id)
+				return &m;
+		}
+		return nullptr;
+	}
+
 	const MappedOutputJack *find_mapped_outjack(Jack jack) const {
 		for (auto &m : mapped_outs) {
 			if (m.out == jack)
+				return &m;
+		}
+		return nullptr;
+	}
+
+	const MappedOutputJack *find_mapped_outjack(uint16_t panel_jack_id) const {
+		for (auto &m : mapped_outs) {
+			if (m.panel_jack_id == panel_jack_id)
 				return &m;
 		}
 		return nullptr;

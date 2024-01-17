@@ -386,9 +386,26 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		const char *choices = page->this_jack_type == ElementType::Input && !page->this_jack_has_connections ?
-								  "In 1\nIn 2\nIn 3\nIn 4\nIn 5\nIn 6\nGateIn 1\nGateIn 2" :
-								  "Out 1\nOut 2\nOut 3\nOut 4\nOut 5\nOut 6\nOut 7\nOut 8";
+		std::string choices;
+		if (page->this_jack_type == ElementType::Input && !page->this_jack_has_connections) {
+			for (auto i = 0u; i < PanelDef::NumUserFacingInJacks; i++) {
+				if (i >= PanelDef::NumAudioIn)
+					choices += "Gate In " + std::to_string(i);
+				else
+					choices += "In " + std::to_string(i);
+				if (page->patch.find_mapped_injack(i))
+					choices += " (patched)";
+				choices += "\n";
+			}
+		} else {
+			for (auto i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
+				choices += "Out " + std::to_string(i);
+				if (page->patch.find_mapped_outjack(i))
+					choices += " (patched)";
+				choices += "\n";
+			}
+		}
+		choices.pop_back(); //remove trailing \n
 
 		auto action = [page](unsigned choice) {
 			if (choice == 0 || choice > 8)
@@ -417,7 +434,7 @@ private:
 			page->gui_state.new_cable_begin_jack = {};
 		};
 
-		page->panel_cable_popup.show(action, "Which panel jack do you want to connect to?", "Connect", choices);
+		page->panel_cable_popup.show(action, "Which panel jack do you want to connect to?", "Connect", choices.c_str());
 	}
 
 	static void finish_cable_button_cb(lv_event_t *event) {

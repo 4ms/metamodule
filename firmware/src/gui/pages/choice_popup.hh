@@ -34,6 +34,7 @@ struct ChoicePopup : ConfirmPopup {
 		lv_obj_add_style(dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);
 		lv_obj_add_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
 		lv_obj_set_style_text_line_space(lv_dropdown_get_list(dropdown), 6, LV_PART_MAIN);
+		lv_obj_set_width(dropdown, 180);
 
 		lv_show(dropdown);
 		lv_dropdown_set_options(dropdown, options);
