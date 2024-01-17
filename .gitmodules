@@ -40,3 +40,6 @@
 [submodule "firmware/bootloader/mp1-usb-dfu"]
 	path = firmware/bootloader/mp1-usb-dfu
 	url = https://github.com/4ms/mp1-usb-dfu
+[submodule "firmware/src/wifi/comm/flat"]
+	path = firmware/src/wifi/comm/flat
+	url = https://github.com/4ms/metamodule-bridge-protocol.git
