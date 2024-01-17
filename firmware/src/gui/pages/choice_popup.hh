@@ -2,6 +2,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/styles.hh"
 #include "lvgl.h"
 #include "src/core/lv_group.h"
 #include <functional>
@@ -24,12 +25,17 @@ struct ChoicePopup : ConfirmPopup {
 
 	void show(auto cb, const char *message, std::string_view confirm_text, const char *options) {
 		ConfirmPopup::show(std::move(cb), message, confirm_text, "");
+		lv_obj_set_width(ui_DelMapLabel, 220);
 
 		dropdown = lv_dropdown_create(ui_DelMapPopUpPanel);
 		lv_obj_move_to_index(dropdown, 1);
 		lv_dropdown_clear_options(dropdown);
+		lv_obj_add_style(dropdown, &Gui::dropdown_style, LV_PART_MAIN);
+		lv_obj_add_style(dropdown, &Gui::dropdown_style_selected, LV_PART_SELECTED);
+		lv_obj_add_style(dropdown, &Gui::focus_style, LV_STATE_FOCUS_KEY);
+		lv_obj_set_style_text_line_space(lv_dropdown_get_list(dropdown), 6, LV_PART_MAIN);
+
 		lv_show(dropdown);
-		lv_obj_set_style_text_font(dropdown, &lv_font_montserrat_14, LV_PART_MAIN);
 		lv_dropdown_set_options(dropdown, options);
 
 		remove_all_event_cb(ui_CancelButton);
@@ -42,6 +48,7 @@ struct ChoicePopup : ConfirmPopup {
 
 	void hide() {
 		ConfirmPopup::hide();
+		lv_obj_set_width(ui_DelMapLabel, 180);
 		lv_obj_del(dropdown);
 	}
 
