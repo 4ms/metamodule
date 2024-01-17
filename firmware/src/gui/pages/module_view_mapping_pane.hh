@@ -389,17 +389,14 @@ private:
 		std::string choices;
 		if (page->this_jack_type == ElementType::Input && !page->this_jack_has_connections) {
 			for (auto i = 0u; i < PanelDef::NumUserFacingInJacks; i++) {
-				if (i >= PanelDef::NumAudioIn)
-					choices += "Gate In " + std::to_string(i);
-				else
-					choices += "In " + std::to_string(i);
+				choices += get_panel_name<PanelDef>(JackInput{}, i);
 				if (page->patch.find_mapped_injack(i))
 					choices += " (patched)";
 				choices += "\n";
 			}
 		} else {
 			for (auto i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
-				choices += "Out " + std::to_string(i);
+				choices += get_panel_name<PanelDef>(JackOutput{}, i);
 				if (page->patch.find_mapped_outjack(i))
 					choices += " (patched)";
 				choices += "\n";
