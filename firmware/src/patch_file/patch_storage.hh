@@ -84,7 +84,6 @@ public:
 		return write_patch_file(vol, filename, {(const char *)data.data(), data.size()});
 	}
 
-
 	void send_pending_message(InterCoreComm2 &comm) {
 		if (pending_send_message.message_type != None) {
 			// Keep trying to send message until suceeds
@@ -102,7 +101,6 @@ public:
 			if (patch_dir_list_) {
 
 				if (sd_changes_.take_change()) {
-					printf("sd update\n");
 					patch_dir_list_->clear_patches(Volume::SDCard);
 
 					if (sdcard_.is_mounted())
@@ -112,7 +110,6 @@ public:
 				}
 
 				if (usb_changes_.take_change()) {
-					printf("usb update\n");
 					patch_dir_list_->clear_patches(Volume::USB);
 
 					if (usbdrive_.is_mounted())
@@ -165,12 +162,13 @@ public:
 		poll_media_change();
 	}
 
-	PatchDirList getPatchList()
-	{
+	PatchDirList getPatchList() {
 		PatchDirList patch_dir_list_;
 
-		if (sdcard_.is_mounted()) PatchFileIO::add_directory(sdcard_, patch_dir_list_.volume_root(Volume::SDCard));
-		if (usbdrive_.is_mounted()) PatchFileIO::add_directory(usbdrive_, patch_dir_list_.volume_root(Volume::USB));
+		if (sdcard_.is_mounted())
+			PatchFileIO::add_directory(sdcard_, patch_dir_list_.volume_root(Volume::SDCard));
+		if (usbdrive_.is_mounted())
+			PatchFileIO::add_directory(usbdrive_, patch_dir_list_.volume_root(Volume::USB));
 		PatchFileIO::add_directory(norflash_, patch_dir_list_.volume_root(Volume::NorFlash));
 
 		return patch_dir_list_;

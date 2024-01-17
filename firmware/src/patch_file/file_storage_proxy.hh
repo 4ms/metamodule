@@ -77,7 +77,6 @@ public:
 	//
 	// patchlist: list of all patches found on all volumes
 	//
-	// TODO: sender passes a reference to a PatchFileList which should be populated
 	[[nodiscard]] bool request_patchlist() {
 		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList, .patch_dir_list = &patch_dir_list_};
 		if (!comm_.send_message(message))

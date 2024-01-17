@@ -19,6 +19,7 @@ struct PatchViewFileMenu {
 
 		lv_obj_add_event_cb(ui_SaveButton, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileMenuCloseButton, menu_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_PatchFileSaveBut, savebut_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_PatchFileMenuCloseButton);
 		lv_group_add_obj(group, ui_PatchFileSaveBut);
@@ -71,7 +72,7 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		page->patch_storage.write_patch("testpatch.yml");
+		page->patch_storage.write_patch();
 	}
 
 	FileStorageProxy &patch_storage;

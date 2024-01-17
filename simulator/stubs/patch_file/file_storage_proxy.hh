@@ -85,8 +85,8 @@ public:
 			msg_state_ = MsgState::Idle;
 
 			// TODO: Refresh from all fs, see if anything changed
-			if (filesystem_changed) {
-				filesystem_changed = false;
+			if (refresh_required) {
+				refresh_required = false;
 				return {PatchListChanged};
 			} else {
 				return {PatchListUnchanged};
@@ -163,7 +163,7 @@ public:
 		return true;
 	}
 
-	bool write_patch(std::string_view filename) {
+	bool write_patch(std::string_view filename = "") {
 		if (filename == "")
 			filename = view_patch_loc_.filename;
 
@@ -173,9 +173,9 @@ public:
 
 		msg_state_ = MsgState::WritePatchFileRequested;
 
-		auto bytes_written = hostfs_.update_or_create_file(filename, file_data);
+		bool ok = hostfs_.update_or_create_file(filename, file_data);
 
-		if (bytes_written != file_data.size_bytes()) {
+		if (!ok) {
 			pr_err("Error writing file!\n");
 			return false;
 		}
@@ -183,6 +183,7 @@ public:
 		// printf("size: %zu, %zu\n", file_data.size(), sz);
 		// printf("%.*s\n", (int)sz, file_data.data());
 
+		refresh_required = true;
 		return true;
 	}
 
@@ -212,7 +213,7 @@ private:
 	unsigned mock_file_found_ctr = 0;
 	unsigned mock_firmware_file_size = 513;
 
-	bool filesystem_changed = true;
+	bool refresh_required = true;
 
 	// IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
 	// 	if (list.size() == 0) {
