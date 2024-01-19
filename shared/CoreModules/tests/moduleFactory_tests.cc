@@ -1,7 +1,6 @@
 #include "CoreModules/4ms/info/EnOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "doctest.h"
-#include <iostream>
 #include <span>
 #include <stdint.h>
 
@@ -29,7 +28,10 @@ constexpr MetaModule::ModuleInfoView abcabcInfo{
 	.width_hp = 40,
 };
 
+using namespace MetaModule;
+
 class AutoInit {
+
 public:
 	static inline bool g_abcabc_already_exists =
 		ModuleFactory::registerModuleType(abcabc_slug, TestCoreMod::create, abcabcInfo);

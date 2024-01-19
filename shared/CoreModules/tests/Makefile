@@ -4,6 +4,7 @@
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR = $(TEST_DIR)
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
+TEST_SOURCES += moduleFactory.cc
 TEST_SOURCES += $(wildcard ../cpputil/util/*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cpp)
@@ -28,8 +29,6 @@ CXXFLAGS = 	-Wall \
 
 ### Boilerplate below here:
 
-#CXX = clang++
-LDFLAGS = -lstdc++
 OBJECTS = $(addprefix $(BUILDDIR)/, $(subst ../,,$(addsuffix .o, $(basename $(TEST_SOURCES)))))
 DEPDIR := $(BUILDDIR)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(subst ../,,$(basename $<).d)

@@ -11,13 +11,16 @@
 //typedef struct lv_img_dsc_t lv_img_dsc_t;
 // // struct lv_img_dsc_t;
 // }
+namespace MetaModule
+{
 
 class ModuleFactory {
-	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
-	using ModuleInfoView = MetaModule::ModuleInfoView;
-	using FaceplatePtr = void *;
 
 public:
+	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
+	using FaceplatePtr = void *;
+	static constexpr int MAX_MODULE_TYPES = 512;
+
 	ModuleFactory() = delete;
 
 	static bool
@@ -83,13 +86,13 @@ public:
 	static inline ModuleInfoView nullinfo{};
 
 private:
-	static constexpr int MAX_MODULE_TYPES = 512;
-
-	static inline SeqMap<ModuleTypeSlug, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
-	static inline SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> infos;
-	static inline SeqMap<ModuleTypeSlug, FaceplatePtr, MAX_MODULE_TYPES> faceplates;
+	static SeqMap<ModuleTypeSlug, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
+	static SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> infos;
+	static SeqMap<ModuleTypeSlug, FaceplatePtr, MAX_MODULE_TYPES> faceplates;
 
 	// static constexpr auto _sz_creation_funcs = sizeof(creation_funcs); //48k
 	// static constexpr auto _sz_infos = sizeof(infos);				   //112k
 	// static constexpr auto _sz_view = sizeof(ModuleInfoView); //136B
 };
+
+} // namespace MetaModule

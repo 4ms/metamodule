@@ -19,6 +19,7 @@ template<typename ModuleT, typename WidgetT>
 plugin::Model *createModel(std::string_view slug)
 	requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
 {
+	using namespace MetaModule;
 
 	// if (slug == "Braids") {
 	// 	ModuleFactory::registerModuleType(

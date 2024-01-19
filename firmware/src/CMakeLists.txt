@@ -170,6 +170,7 @@ add_executable(
 
   #
   ${SHARED}/CoreModules/hub/hub_medium.cc
+  ${SHARED}/CoreModules/moduleFactory.cc
   ${SHARED}/patch_convert/yaml_to_patch.cc
   ${SHARED}/patch_convert/ryml/ryml_serial.cc
   #
