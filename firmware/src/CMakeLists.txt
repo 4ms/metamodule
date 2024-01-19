@@ -138,6 +138,7 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fw_update/updater.cc
+  ${FWDIR}/src/fw_update/updater_proxy.cc
   ${FWDIR}/src/fw_update/loaders/wifi/firmware_wifi_loader.cc
   ${FWDIR}/src/fw_update/loaders/flash/firmware_flash_loader.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc

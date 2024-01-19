@@ -1,5 +1,5 @@
 #pragma once
-#include "fw_update/updater.hh"
+#include "fw_update/updater_proxy.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
@@ -83,20 +83,17 @@ struct FirmwareUpdateTab {
 			case State::Updating: {
 				auto status = updater.process();
 
-				if (status.state == FirmwareUpdater::Error) {
+				if (status.state == FirmwareUpdaterProxy::Error) {
 					display_update_failed(status.error_message);
 					state = State::Failed;
 
-				} else if (status.state == FirmwareUpdater::LoadingFileToRAM or status.state == FirmwareUpdater::StartLoadingFileToRam) {
-					display_progress("Loading to RAM", status.file_size, status.file_size);
-
-				} else if (status.state == FirmwareUpdater::Verifying or status.state == FirmwareUpdater::StartVerify) {
+				} else if (status.state == FirmwareUpdaterProxy::Verifying) {
 					display_progress("Comparing with target area", status.file_size, status.bytes_completed);
 
-				} else if (status.state == FirmwareUpdater::Writing or status.state == FirmwareUpdater::StartWriting) {
+				} else if (status.state == FirmwareUpdaterProxy::Writing) {
 					display_progress("Writing file", status.file_size, status.bytes_completed);
 
-				} else if (status.state == FirmwareUpdater::Success) {
+				} else if (status.state == FirmwareUpdaterProxy::Success) {
 					display_success();
 					state = State::Success;
 				}
@@ -236,7 +233,7 @@ private:
 
 	uint32_t manifest_filesize = 0;
 
-	FirmwareUpdater updater;
+	FirmwareUpdaterProxy updater;
 
 	PollEvent<uint32_t> media_poll{2000};
 
