@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <optional>
 
 namespace MetaModule
 {
@@ -13,7 +14,7 @@ struct UpdateFile {
 	UpdateType type;
 	std::string filename;
 	uint32_t filesize = 0;
-	StaticString<32> md5{};
+	std::optional<StaticString<32>> md5;
 	uint32_t address;
 };
 
