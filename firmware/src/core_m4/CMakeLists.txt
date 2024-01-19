@@ -188,5 +188,11 @@ if (ENABLE_WIFI_BRIDGE)
 
 endif()
 
+# Always add wifi flashing
+add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
+
+
+
+
 set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
