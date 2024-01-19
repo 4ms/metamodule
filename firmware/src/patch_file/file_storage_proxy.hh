@@ -113,6 +113,35 @@ public:
 		return true;
 	}
 
+	[[nodiscard]] bool request_checksum_compare(StaticString<32> checksum, uint32_t address, uint32_t length, uint32_t* bytes_processed)
+	{
+		IntercoreStorageMessage message{
+			.message_type = StartChecksumCompare,
+			.address = address,
+			.length = length,
+			.checksum = checksum,
+			.bytes_processed = bytes_processed,
+		};
+		if (!comm_.send_message(message))
+			return false;
+		return true;
+	}
+
+	[[nodiscard]] bool request_file_flash(std::string_view filename, Volume vol, uint32_t address, uint32_t length, uint32_t* bytes_processed)
+	{
+		IntercoreStorageMessage message{
+			.message_type = StartFlashing,
+			.vol_id = vol,
+			.filename = filename,
+			.address = address,
+			.length = length,
+			.bytes_processed = bytes_processed,
+		};
+		if (!comm_.send_message(message))
+			return false;
+		return true;
+	}
+
 private:
 	PatchDirList &patch_dir_list_;
 

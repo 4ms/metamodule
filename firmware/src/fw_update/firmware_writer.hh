@@ -1,0 +1,137 @@
+#pragma once
+#include "core_intercom/intercore_message.hh"
+#include "drivers/inter_core_comm.hh"
+#include "fat_file_io.hh"
+#include <cstring>
+#include <optional>
+
+#include <wifi/flasher/flasher.h>
+
+namespace MetaModule
+{
+
+struct FirmwareWriter {
+	using InterCoreComm = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
+	using enum IntercoreStorageMessage::MessageType;
+
+	FirmwareWriter(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
+		: sdcard_{sdcard_fileio}
+		, usbdrive_{usb_fileio} {
+	}
+
+	void handle_message(IntercoreStorageMessage &message)
+	{
+		if (message.message_type == StartChecksumCompare)
+		{
+			message.message_type = None;
+
+			pr_dbg("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
+
+			auto result = Flasher::init(230400);
+
+			if (result == ESP_LOADER_SUCCESS)
+			{
+				result = Flasher::verify(message.address, message.length, {message.checksum.data(), 32});
+				if (result == ESP_LOADER_ERROR_INVALID_MD5)
+				{
+					pending_send_message.message_type = ChecksumMismatch;
+				}
+				else if (result == ESP_LOADER_SUCCESS)
+				{
+					pr_dbg("-> Checksum matches\n");
+					pending_send_message.message_type = ChecksumMatch;
+				}				
+			}
+			else
+			{
+				pr_err("Cannot connect to wifi bootloader\n");
+				pending_send_message.message_type = ChecksumFailed;
+			}
+
+			Flasher::deinit();
+		}
+		else if (message.message_type == StartFlashing)
+		{
+			message.message_type = None;
+
+			pr_dbg("-> Start flashing to 0x%08x\n", message.address);
+
+			auto result = Flasher::init(230400);
+
+			if (result == ESP_LOADER_SUCCESS)
+			{
+				uint32_t& bytesWritten = *message.bytes_processed;
+				const uint32_t bytesTotal = message.length;
+
+				std::array<uint8_t, 1024> BatchBuffer;
+
+				// TODO: open file by volume and filename
+
+				result = esp_loader_flash_start(message.address, message.length, BatchBuffer.size());
+
+				if (result == ESP_LOADER_SUCCESS)
+				{
+					bool error_during_writes = false;
+
+					while (bytesWritten < bytesTotal)
+					{
+						auto to_read = std::min<std::size_t>(bytesTotal - bytesWritten, BatchBuffer.size());
+
+						// TODO: read from file to BatchBuffer
+
+						result = esp_loader_flash_write(BatchBuffer.data(), to_read);
+						if (result != ESP_LOADER_SUCCESS)
+						{
+							error_during_writes = true;
+							break;
+						}
+						else
+						{
+							bytesWritten += to_read;
+						}
+					}
+
+					if (not error_during_writes)
+					{
+						pr_dbg("-> Flashing completed\n");
+						pending_send_message.message_type = FlashingOk;
+					}
+					else
+					{
+						pr_dbg("-> Flashing failed\n");
+						pending_send_message.message_type = FlashingFailed;
+					}
+				}
+				else
+				{
+					pr_err("Cannot start flashing wifi\n");
+					pending_send_message.message_type = FlashingFailed;
+				}
+			}
+			else
+			{
+				pr_err("Cannot connect to wifi bootloader\n");
+				pending_send_message.message_type = FlashingFailed;
+			}
+
+			Flasher::deinit();
+		}
+
+	}
+
+	void send_pending_message(InterCoreComm &comm) {
+		if (pending_send_message.message_type != None) {
+			if (comm.send_message(pending_send_message))
+				pending_send_message.message_type = None;
+		}
+	}
+
+private:
+	FatFileIO &sdcard_;
+	FatFileIO &usbdrive_;
+	
+	IntercoreStorageMessage pending_send_message{.message_type = None};
+
+};
+
+} // namespace MetaModule

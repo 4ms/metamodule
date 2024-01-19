@@ -39,12 +39,20 @@ private:
 	bool justEnteredState;
 
 	Volume vol;
-	std::span<char> manifest_buffer;
+	std::span<char> manifestBuffer;
 	UpdateManifest manifest;
 
 	std::size_t current_file_idx;
 	std::size_t current_file_size;
 
+	struct SharedMem
+	{
+		uint32_t bytes_processed;
+		StaticString<32> checksum;
+		std::array<uint8_t, 4 * 1024 * 1024> manifestBuffer;
+	};
+
+	SharedMem* sharedMem;
 };
 
 } // namespace MetaModule

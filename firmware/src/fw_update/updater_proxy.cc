@@ -2,6 +2,7 @@
 #include "pr_dbg.hh"
 #include "ram_buffer.hh"
 #include "manifest_parse.hh"
+#include <cassert>
 
 namespace MetaModule
 {
@@ -9,18 +10,23 @@ namespace MetaModule
 FirmwareUpdaterProxy::FirmwareUpdaterProxy(FileStorageProxy &file_storage)
     : file_storage{file_storage}
 	, state(Idle)
+	, sharedMem(nullptr)
 {
+	auto ram_buffer = get_ram_buffer();
+	assert(ram_buffer.size() >= sizeof(SharedMem));
+
+	sharedMem = new (ram_buffer.data()) SharedMem;
 }
 
-bool FirmwareUpdaterProxy::start(std::string_view manifest_filename, Volume manifest_file_vol, uint32_t manifest_filesize) {
-
-	auto ram_buffer = get_ram_buffer();
-
-    if (manifest_filesize <= 4 * 1024 * 1024)
+bool FirmwareUpdaterProxy::start(std::string_view manifest_filename, Volume manifest_file_vol, uint32_t manifest_filesize)
+{
+    if (manifest_filesize <= sizeof(SharedMem::manifestBuffer))
     {
-        manifest_buffer = std::span<char>{(char *)ram_buffer.data(), manifest_filesize};
+		manifestBuffer = std::span<char>((char*)sharedMem->manifestBuffer.data(), manifest_filesize);
 
-	    if (file_storage.request_load_file(manifest_filename, manifest_file_vol, manifest_buffer))
+		pr_dbg("%p + %u\n", manifestBuffer.data(), manifestBuffer.size());
+
+	    if (file_storage.request_load_file(manifest_filename, manifest_file_vol, manifestBuffer))
         {
             vol = manifest_file_vol;
             moveToState(State::LoadingManifest);
@@ -41,8 +47,6 @@ bool FirmwareUpdaterProxy::start(std::string_view manifest_filename, Volume mani
 
 FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
 {
-	std::size_t bytes_completed = 0;
-
     switch (state) {
         case Idle:
         case Success:
@@ -57,7 +61,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
             {
                 ManifestParser parser;
 
-                auto parseResult = parser.parse(manifest_buffer);
+                auto parseResult = parser.parse(manifestBuffer);
 
                 if (parseResult and parseResult->files.size() > 0) {
                     manifest = *parseResult;
@@ -79,27 +83,45 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
 		{
 			if (justEnteredState)
 			{
-				pr_dbg("Start verify %u\n", current_file_idx);
+				justEnteredState = false;
+				pr_dbg("Start verifying file %u of %u\n", current_file_idx, manifest.files.size());
+
+				if (auto checksumValue = manifest.files[current_file_idx].md5; checksumValue)
+				{
+					sharedMem->bytes_processed = 0;
+					current_file_size = manifest.files[current_file_idx].filesize;
+
+					auto result = file_storage.request_checksum_compare(*checksumValue, manifest.files[current_file_idx].address, manifest.files[current_file_idx].filesize, &sharedMem->bytes_processed);
+
+					if (not result)
+					{
+						abortWithMessage("Cannot trigger comparing checksums");
+					}	
+				}
+				else
+				{
+					pr_dbg("Skipping verify step because no checksum is defined");
+					moveToState(Writing);
+				}				
 			}
 			else
 			{
-				// TODO: update progress
-
-				bool success = true;
-
-				if (success)
+				switch (file_storage.get_message().message_type)
 				{
-
-					bool checksumAlreadyMatches = false;
-
-					if (checksumAlreadyMatches)
-					{
+					case FileStorageProxy::ChecksumMatch:
 						proceedWithNextFile();
-					}
-					else
-					{
+						break;
+
+					case FileStorageProxy::ChecksumMismatch:
 						moveToState(Writing);
-					}
+						break;
+
+					case FileStorageProxy::ChecksumFailed:
+						abortWithMessage("Error when comparing checksums");
+						break;
+
+					default:
+						break;
 				}
 			}
 		} break;
@@ -108,21 +130,33 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
 		{
 			if (justEnteredState)
 			{
-				pr_dbg("Start writing %u\n", current_file_idx);
+				justEnteredState = false;
+				pr_dbg("Start flashing file %u of %u\n", current_file_idx, manifest.files.size());
+
+				sharedMem->bytes_processed = 0;
+				current_file_size = manifest.files[current_file_idx].filesize;
+
+				auto result = file_storage.request_file_flash(manifest.files[current_file_idx].filename, vol, manifest.files[current_file_idx].address, manifest.files[current_file_idx].filesize, &sharedMem->bytes_processed);
+
+				if (not result)
+				{
+					abortWithMessage("Cannot trigger flashing");
+				}
 			}
 			else
 			{
-				// TODO: update progress
-
-				bool success = true;
-
-				if (success)
+				switch (file_storage.get_message().message_type)
 				{
-					proceedWithNextFile();
-				}
-				else
-				{
-					abortWithMessage("Failed to write file");
+					case FileStorageProxy::FlashingOk:
+						proceedWithNextFile();
+						break;
+
+					case FileStorageProxy::FlashingFailed:
+						abortWithMessage("Error when flashing file");
+						break;
+
+					default:
+						break;
 				}
 			}
 
@@ -133,11 +167,9 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
 			abortWithMessage("Internal Error");
 	}
 
-	justEnteredState = false;
-
 	return state == State::Error ?
-		Status{state, current_file_size, bytes_completed, error_message} :
-		Status{state, current_file_size, bytes_completed};    
+		Status{state, current_file_size, sharedMem->bytes_processed, error_message} :
+		Status{state, current_file_size, sharedMem->bytes_processed};    
 }
 
 void FirmwareUpdaterProxy::abortWithMessage(const char* message)

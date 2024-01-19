@@ -28,6 +28,15 @@ struct IntercoreStorageMessage {
 		FirmwareFileNotFound,
 		FirmwareFileFound,
 
+		StartChecksumCompare,
+		ChecksumMatch,
+		ChecksumMismatch,
+		ChecksumFailed,
+
+		StartFlashing,
+		FlashingOk,
+		FlashingFailed,
+
 		RequestLoadFileToRam,
 		LoadFileToRamFailed,
 		LoadFileToRamSuccess,
@@ -41,6 +50,11 @@ struct IntercoreStorageMessage {
 	std::span<char> buffer;
 	PatchDirList *patch_dir_list;
 	StaticString<255> filename;
+
+	uint32_t address;
+	uint32_t length;
+	StaticString<32> checksum;
+	uint32_t* bytes_processed;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);
