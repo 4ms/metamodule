@@ -22,6 +22,13 @@ struct PatchData {
 
 	static constexpr uint32_t MIDIKnobSet = 0xFFFFFFFF;
 
+	PatchData() = default;
+	PatchData(std::string_view patch_name)
+		: patch_name{patch_name}
+		, module_slugs{"HubMedium"}
+		, knob_sets{{{}, "Knob Set 1"}} {
+	}
+
 	const MappedKnob *find_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) const {
 		if (set_id == MIDIKnobSet)
 			return find_midi_map(module_id, param_id);

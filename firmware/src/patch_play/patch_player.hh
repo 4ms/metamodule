@@ -93,7 +93,7 @@ public:
 			return {false, "Cannot load: patch does not have a name"};
 
 		if (patchdata.module_slugs.size() == 0)
-			return {false, "Cannot load: patch does not any modules"};
+			return {false, "Cannot load: patch does not have any modules"};
 
 		copy_patch_data(patchdata);
 

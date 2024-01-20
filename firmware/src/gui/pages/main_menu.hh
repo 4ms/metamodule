@@ -58,8 +58,8 @@ private:
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		page->patch_playloader.stop_audio();
 		page->patch_storage.new_patch();
+		page->patch_playloader.request_load_view_patch();
 		page->load_page(PageId::PatchView, {});
 	}
 
