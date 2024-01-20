@@ -18,6 +18,7 @@ VCVINCLUDES := -I../../src/VCV_adaptor -I../../src
 # VCVINCLUDES := -Iplugin
 
 
+
 SOURCES = test_brand/src/test_module.cpp \
 		  test_brand/src/plugin.cpp \
 		  plugin/libc_stub.c
@@ -74,7 +75,7 @@ ARCH_CFLAGS ?= -DUSE_FULL_LL_DRIVER \
 			   -DCORE_CA7 \
 			   $(EXTRA_ARCH_CFLAGS) \
 
-OPTFLAG ?= -O1
+OPTFLAG ?= -O0
 
 AFLAGS = $(MCU)
 

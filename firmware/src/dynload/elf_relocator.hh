@@ -37,15 +37,17 @@ public:
 
 			case R_ARM_GLOB_DAT: {
 				//"Resolves to the address of the specified symbol"
-				pr_dbg("R_ARM_GLOB_DAT: %s, write 0x%x (+%x) to address 0x%x (+%x)\n",
-					   rel.symbol_name().data(),
-					   rel.symbol_value() + base_address,
-					   rel.symbol_value(),
-					   rel.reloc_offset() + base_address,
-					   rel.reloc_offset());
+				pr_dbg("R_ARM_GLOB_DAT: %s...", rel.symbol_name().data());
 				if (rel.symbol_value() == 0)
-					pr_warn("Warning: symbol has initial value of 0, may be undefined?\n");
-				*reloc_address = rel.symbol_value() + base_address;
+					pr_warn("Warning: symbol has initial value of 0, TODO: look in host\n");
+				else {
+					*reloc_address = rel.symbol_value() + base_address;
+					pr_dbg("write 0x%x (+%x) to address 0x%x (+%x)\n",
+						   rel.symbol_value() + base_address,
+						   rel.symbol_value(),
+						   rel.reloc_offset() + base_address,
+						   rel.reloc_offset());
+				}
 			} break;
 
 			case R_ARM_ABS32: {
@@ -67,13 +69,22 @@ public:
 			case R_ARM_JUMP_SLOT: {
 				//S+A
 				// "Resolves to the address of the specified symbol"
-				pr_dbg("R_ARM_JUMP_SLOT: %s\n", rel.symbol_name().data());
-				auto sym = std::ranges::find_if(host_syms, [&rel](auto &s) { return s.name == rel.symbol_name(); });
-				if (sym != host_syms.end()) {
-					*reloc_address = sym->address;
-					pr_dbg("Found symbol at 0x%x\n", sym->address);
-				} else
-					pr_err("Symbol not found\n");
+				pr_dbg("R_ARM_JUMP_SLOT: %s... ", rel.symbol_name().data());
+				if (rel.symbol_value() == 0) {
+					auto sym = std::ranges::find_if(host_syms, [&rel](auto &s) { return s.name == rel.symbol_name(); });
+					if (sym != host_syms.end()) {
+						*reloc_address = sym->address;
+						pr_dbg("Found symbol at 0x%x\n", sym->address);
+					} else
+						pr_err("Symbol not found in host symbols\n");
+				} else {
+					pr_dbg("write 0x%x (+%x) to address 0x%x (+%x)\n",
+						   rel.symbol_value() + base_address,
+						   rel.symbol_value(),
+						   rel.reloc_offset() + base_address,
+						   rel.reloc_offset());
+					*reloc_address = rel.symbol_value() + base_address;
+				}
 
 			} break;
 
