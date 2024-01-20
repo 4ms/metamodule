@@ -66,6 +66,15 @@ public:
 		return view_patch_;
 	}
 
+	void new_patch() {
+		view_patch_ = PatchData{};
+		std::string name = "Untitled Patch " + std::to_string((uint8_t)HAL_GetTick());
+		view_patch_.patch_name.copy(name);
+		view_patch_loc_.vol = Volume::RamDisk;
+		name += ".yml";
+		view_patch_loc_.filename.copy(name);
+	}
+
 	StaticString<255> get_view_patch_filename() {
 		return view_patch_loc_.filename;
 	}

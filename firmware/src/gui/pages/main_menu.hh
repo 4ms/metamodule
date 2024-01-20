@@ -13,13 +13,14 @@ struct MainMenuPage : PageBase {
 		init_bg(ui_MainMenu);
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_MenuPanelPatches);
-		lv_group_add_obj(group, ui_MenuPanelSave);
+		lv_group_add_obj(group, ui_MenuPanelSave); //new patch
 		lv_group_add_obj(group, ui_MenuPanelSettings);
 
 		lv_group_focus_obj(ui_MenuPanelPatches);
 
 		lv_obj_add_event_cb(ui_MenuPanelPatches, patchsel_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MenuPanelSettings, settings_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_MenuPanelSave, new_patch_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() final {
@@ -53,11 +54,13 @@ private:
 		page->load_page(PageId::PatchSel, {});
 	}
 
-	static void savepatch_cb(lv_event_t *event) {
+	static void new_patch_cb(lv_event_t *event) {
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		pr_err("Not implemented\n");
+		page->patch_playloader.stop_audio();
+		page->patch_storage.new_patch();
+		page->load_page(PageId::PatchView, {});
 	}
 
 	static void settings_cb(lv_event_t *event) {

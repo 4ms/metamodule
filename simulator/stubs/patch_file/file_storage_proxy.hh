@@ -51,6 +51,15 @@ public:
 		return true;
 	}
 
+	void new_patch() {
+		view_patch_ = PatchData{};
+		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
+		view_patch_.patch_name.copy(name);
+		view_patch_loc_.vol = Volume::RamDisk;
+		name += ".yml";
+		view_patch_loc_.filename.copy(name);
+	}
+
 	PatchData &get_view_patch() {
 		return view_patch_;
 	}
