@@ -8,9 +8,12 @@ LIBDIR := ../../lib
 # VCVINCLUDES := -I$(RACK_DIR)/include \
 # 			   -I$(RACK_DIR)/dep/include
 
-VCVINCLUDES := -IVCV_adaptor -I.
+# VCVINCLUDES := -IVCV_adaptor -I.
+
+VCVINCLUDES := -I../../src/VCV_adaptor -I../../src
 
 # VCVINCLUDES := -Iplugin
+
 
 
 SOURCES = test_brand/src/test_module.cpp \
@@ -69,7 +72,7 @@ ARCH_CFLAGS ?= -DUSE_FULL_LL_DRIVER \
 			   -DCORE_CA7 \
 			   $(EXTRA_ARCH_CFLAGS) \
 
-OPTFLAG ?= -O1
+OPTFLAG ?= -O0
 
 AFLAGS = $(MCU)
 

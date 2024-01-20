@@ -12,9 +12,13 @@
 #include <vector>
 
 // #include "build-simple-elf.hh"
-#include "build-elf.hh"
+// #include "build-elf.hh"
+#include "build-vcva-2.hh"
 
 #include "rack.hpp"
+
+extern "C" void _aeabi_atexit() {
+}
 
 GCC_OPTIMIZE_OFF
 plugin::Model *testHostCall(const char *slug) {
@@ -91,6 +95,8 @@ struct DynLoadTest {
 			auto addr = reinterpret_cast<uint32_t>(ctor);
 			ctor = reinterpret_cast<ctor_func_t>(addr + block.code.data());
 			pr_info("Calling ctor %p\n", ctor);
+			__BKPT();
+			volatile int x = strlen("ABCD");
 			ctor();
 		}
 	}
@@ -110,9 +116,15 @@ struct DynLoadTest {
 	void process_relocs() {
 		auto addmodel_addr = reinterpret_cast<uint32_t>(&testAddModel);
 		auto createmodel_addr = reinterpret_cast<uint32_t>(&testHostCall);
-		std::array<ElfFile::HostSymbol, 2> hostsyms{{
+
+		auto hostsyms = std::vector<ElfFile::HostSymbol>{{
 			{"_ZN6Plugin8addModelEP5Model", 0, addmodel_addr},
 			{"_Z11createModelI10TestModule10TestWidgetEP5ModelPKc", 0, createmodel_addr},
+			{"__aeabi_atexit", 0, reinterpret_cast<uint32_t>(&_aeabi_atexit)},
+			{"strlen", 0, reinterpret_cast<uint32_t>(&strlen)},
+			{"memcpy", 0, reinterpret_cast<uint32_t>(&memcpy)},
+			{"memmove", 0, reinterpret_cast<uint32_t>(&memmove)},
+			{"roundf", 0, reinterpret_cast<uint32_t>(&roundf)},
 		}};
 		ElfFile::Relocater relocator{block.code.data(), hostsyms};
 
