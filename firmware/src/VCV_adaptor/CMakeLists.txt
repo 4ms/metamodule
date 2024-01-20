@@ -9,6 +9,7 @@ target_sources(
          plugin_instance.cc
          pffft/pffft.c
          engine/Module.cpp
+		 VCV_module_wrapper.cc
 )
 
 add_subdirectory(${MM_ROOT}/firmware/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)

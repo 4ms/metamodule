@@ -8,7 +8,12 @@ LIBDIR := ../../lib
 # VCVINCLUDES := -I$(RACK_DIR)/include \
 # 			   -I$(RACK_DIR)/dep/include
 
-VCVINCLUDES := -IVCV_adaptor -I.
+# modified VCV_adaptor: vcva-2
+# VCVINCLUDES := -IVCV_adaptor -I.
+
+# vcva-3 (with moduleFactory statics moved to separate .cc file, and VCVModuleWrapper funcs not defined)
+VCVINCLUDES := -I../../src/VCV_adaptor -I../../src
+
 
 # VCVINCLUDES := -Iplugin
 
