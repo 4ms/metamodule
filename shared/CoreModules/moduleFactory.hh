@@ -80,6 +80,12 @@ public:
 		return infos.key_exists(typeslug) && creation_funcs.key_exists(typeslug);
 	}
 
+	static std::vector<ModuleTypeSlug> getAllSlugs() {
+		std::vector<ModuleTypeSlug> slugs;
+		slugs.assign(infos.keys.begin(), std::next(infos.keys.begin(), infos.size()));
+		return slugs;
+	}
+
 	static inline ModuleInfoView nullinfo{};
 
 private:
