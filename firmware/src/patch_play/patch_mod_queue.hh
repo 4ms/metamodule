@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/module_type_slug.hh"
 #include "gui/elements/element_type.hh"
 #include "patch/patch.hh"
 #include "util/lockfree_fifo_spsc.hh"
@@ -55,6 +56,14 @@ struct AddJackMapping {
 	ElementType type;
 };
 
+struct AddModule {
+	ModuleTypeSlug slug{};
+};
+
+struct RemoveModule {
+	uint16_t module_idx{};
+};
+
 using PatchModRequest = std::variant<SetStaticParam,
 									 AddMapping,
 									 EditMappingMinMax,
@@ -64,7 +73,9 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 ChangeKnobSet,
 									 AddInternalCable,
 									 AddJackMapping,
-									 DisconnectJack>;
+									 DisconnectJack,
+									 AddModule,
+									 RemoveModule>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
 

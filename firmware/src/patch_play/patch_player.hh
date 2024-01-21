@@ -369,6 +369,29 @@ public:
 		pd.disconnect_outjack(jack);
 	}
 
+	void add_module(ModuleTypeSlug slug) {
+		auto module_idx = pd.module_slugs.size();
+		pd.module_slugs.push_back(slug); //only needed to make sure pd.module_slugs.size() is accurate
+
+		modules[module_idx] = ModuleFactory::create(slug);
+		if (modules[module_idx] == nullptr) {
+			pr_err("Module %s not found\n", slug.c_str());
+			return;
+		}
+		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
+
+		modules[module_idx]->mark_all_inputs_unpatched();
+		modules[module_idx]->mark_all_outputs_unpatched();
+		modules[module_idx]->set_samplerate(samplerate);
+
+		calc_multiple_module_indicies();
+		smp.load_patch(pd.module_slugs.size());
+	}
+
+	void remove_module(uint16_t module_idx) {
+		// TODO: remove module and all cables, mappings
+	}
+
 	void set_samplerate(float hz) {
 		samplerate = hz;
 
