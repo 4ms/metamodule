@@ -134,20 +134,26 @@ struct PatchViewPage : PageBase {
 			bottom = std::max(bottom, this_bottom);
 
 			module_canvases.push_back(canvas);
-
-			lv_group_add_obj(group, canvas);
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SNAPPABLE);
-
-			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
-			lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-			lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+			style_module(canvas);
 
 			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_CLICKED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 		}
+
+		// Add Module placeholder
+		auto add_module = lv_obj_create(modules_cont);
+		lv_obj_set_size(add_module, 110, Height);
+		module_canvases.push_back(add_module);
+		style_module(add_module);
+		lv_obj_set_style_border_width(add_module, 2, LV_PART_MAIN);
+		lv_obj_set_style_border_color(add_module, lv_color_hex(0x333333), LV_PART_MAIN);
+		auto add_module_label = lv_label_create(add_module);
+		lv_label_set_text(add_module_label, "Add Module");
+		lv_obj_center(add_module_label);
+		lv_obj_add_event_cb(add_module, add_module_cb, LV_EVENT_CLICKED, (void *)this);
+		lv_obj_add_event_cb(add_module, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 
 		is_ready = true;
 
@@ -363,6 +369,16 @@ private:
 		knobset_menu.blur();
 	}
 
+	void style_module(lv_obj_t *canvas) {
+		lv_group_add_obj(group, canvas);
+		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SNAPPABLE);
+
+		lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
+		lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
+		lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+	}
+
 	static void module_pressed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page)
@@ -386,8 +402,9 @@ private:
 			return;
 
 		auto user_data = lv_obj_get_user_data(this_module_obj);
-		if (!user_data)
+		if (!user_data) {
 			return;
+		}
 
 		uint32_t module_id = *(static_cast<uint32_t *>(user_data));
 		if (module_id >= page->patch.module_slugs.size())
@@ -427,6 +444,13 @@ private:
 		page->settings_menu.hide();
 		page->knobset_menu.hide();
 		page->file_menu.hide();
+	}
+
+	static void add_module_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		if (!page)
+			return;
+		page->load_page(PageId::ModuleList, page->args);
 	}
 
 private:
