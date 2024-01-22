@@ -584,7 +584,8 @@ private:
 			if (map.module_id > 0 && map.module_id < patch.module_slugs.size()) {
 				set_is_empty = false;
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
-					auto obj = list.create_map_list_item(map, setname, ui_MapList);
+					auto obj =
+						list.create_map_list_item(map, setname, ui_MapList, set_i == page_list.get_active_knobset());
 					make_selectable_knobset_item(obj, set_i, map.panel_knob_id);
 					lv_obj_add_event_cb(obj, edit_map_button_cb, LV_EVENT_CLICKED, this);
 					added_list_item = true;
@@ -595,7 +596,7 @@ private:
 	}
 
 	void show_unmapped_knobset(unsigned set_i, const char *setname) {
-		auto obj = list.create_unmapped_list_item(setname, ui_MapList);
+		auto obj = list.create_unmapped_list_item(setname, ui_MapList, set_i == page_list.get_active_knobset());
 		make_selectable_knobset_item(obj, set_i, std::nullopt);
 		lv_obj_add_event_cb(obj, add_map_button_cb, LV_EVENT_CLICKED, this);
 	}
