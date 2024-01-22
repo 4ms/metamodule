@@ -53,7 +53,7 @@ public:
 
 	void new_patch() {
 		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
-		view_patch_ = PatchData{name};
+		view_patch_.blank_patch(name);
 
 		name += ".yml";
 		view_patch_loc_.filename.copy(name);

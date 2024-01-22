@@ -5,6 +5,7 @@
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "src/core/lv_obj_pos.h"
+#include "src/misc/lv_timer.h"
 
 namespace MetaModule
 {
@@ -19,6 +20,7 @@ struct ModuleListPage : PageBase {
 		lv_obj_add_event_cb(ui_ModuleListRoller, scroll_cb, LV_EVENT_KEY, this);
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_FOCUS_KEY);
+		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
 	}
 
 	void populate_slugs() {
@@ -28,13 +30,15 @@ struct ModuleListPage : PageBase {
 			auto all_slugs = ModuleFactory::getAllSlugs();
 
 			// TODO: sort by brand name
-			// std::ranges::sort(all_slugs, [](auto a, auto b) { return std::string_view{a} < std::string_view{b}; });
+			std::ranges::sort(all_slugs, [](auto a, auto b) { return std::string_view{a} < std::string_view{b}; });
 
 			std::string slugs_str;
 			slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
 			for (auto slug : all_slugs) {
-				slugs_str += std::string_view{slug};
-				slugs_str += "\n";
+				if (!slug.is_equal("HubMedium")) {
+					slugs_str += std::string_view{slug};
+					slugs_str += "\n";
+				}
 			}
 			slugs_str.pop_back();
 			lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
@@ -43,7 +47,7 @@ struct ModuleListPage : PageBase {
 
 	void prepare_focus() final {
 		populate_slugs();
-		draw_module();
+		draw_timer = lv_timer_create(draw_module_cb, 200, this);
 
 		show_roller();
 		lv_group_focus_obj(ui_ModuleListRoller);
@@ -75,6 +79,7 @@ struct ModuleListPage : PageBase {
 	}
 
 	void blur() final {
+		lv_timer_del(draw_timer);
 	}
 
 private:
@@ -102,21 +107,31 @@ private:
 		if (!page)
 			return;
 
-		// ModuleTypeSlug slug;
-		// lv_roller_get_selected_str(event->target, slug._data, slug.capacity);
-		page->draw_module();
+		lv_timer_reset(page->draw_timer);
 		page->show_roller();
+	}
+
+	static void draw_module_cb(lv_timer_t *timer) {
+		auto page = static_cast<ModuleListPage *>(timer->user_data);
+		if (!page)
+			return;
+		page->draw_module();
 	}
 
 	void draw_module() {
 		ModuleTypeSlug slug;
-		lv_roller_get_selected_str(ui_ModuleListRoller, slug._data, slug.capacity);
-		draw_module(slug);
+		auto cur_idx = lv_roller_get_selected(ui_ModuleListRoller);
+		if (cur_idx != drawn_module_idx) {
+			drawn_module_idx = cur_idx;
+			lv_roller_get_selected_str(ui_ModuleListRoller, slug._data, slug.capacity);
+			draw_module(slug);
+			pr_dbg("draw\n");
+		}
 	}
 
 	void draw_module(ModuleTypeSlug slug) {
 		ModuleDrawer drawer{ui_ModuleListImage, 240};
-		auto module_canvas = drawer.draw_faceplate(slug, buffer);
+		auto module_canvas = drawer.draw_faceplate(slug, page_pixel_buffer);
 		lv_obj_refr_size(module_canvas);
 		auto width_px = lv_obj_get_width(module_canvas);
 		lv_obj_set_width(ui_ModuleListImage, width_px);
@@ -124,8 +139,9 @@ private:
 		drawer.draw_elements(slug, module_canvas);
 	}
 
-	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, 240)]{};
 	bool roller_shown = true;
+	lv_timer_t *draw_timer{};
+	unsigned drawn_module_idx = -1;
 };
 
 } // namespace MetaModule
