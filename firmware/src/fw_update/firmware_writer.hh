@@ -71,7 +71,7 @@ struct FirmwareWriter {
 
 					std::array<uint8_t, 1024> BatchBuffer;
 
-					result = esp_loader_flash_start(message.address, message.length, BatchBuffer.size());
+					result = Flasher::flash_start(message.address, message.length, BatchBuffer.size());
 
 					if (result == ESP_LOADER_SUCCESS)
 					{
@@ -86,7 +86,7 @@ struct FirmwareWriter {
 
 							if (bytesRead == to_read)
 							{
-								result = esp_loader_flash_write(BatchBuffer.data(), to_read);
+								result = Flasher::flash_process(std::span<uint8_t>((uint8_t*)thisReadBuffer.data(), thisReadBuffer.size()));
 								if (result != ESP_LOADER_SUCCESS)
 								{
 									error_during_writes = true;

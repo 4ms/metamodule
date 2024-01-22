@@ -191,4 +191,14 @@ esp_loader_error_t conditional_flash(uint32_t address, std::span<const uint8_t> 
     return result;
 }
 
+esp_loader_error_t flash_start(uint32_t address, uint32_t length, uint32_t batchSize)
+{
+    return esp_loader_flash_start(address, length, batchSize);
+}
+
+esp_loader_error_t flash_process(std::span<uint8_t> buffer)
+{
+    return esp_loader_flash_write(buffer.data(), buffer.size());
+}
+
 }
