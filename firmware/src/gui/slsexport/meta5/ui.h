@@ -306,6 +306,13 @@ extern lv_obj_t *ui_Button10;
 extern lv_obj_t *ui_Button11;
 extern lv_obj_t *ui_Button12;
 extern lv_obj_t *ui_Panel1;
+// SCREEN: ui_ModuleListPage
+void ui_ModuleListPage_screen_init(void);
+extern lv_obj_t *ui_ModuleListPage;
+extern lv_obj_t *ui_ModuleListImage;
+extern lv_obj_t *ui_ModuleListRollerPanel;
+extern lv_obj_t *ui_ModuleListRollerTitle;
+extern lv_obj_t *ui_ModuleListRoller;
 // SCREEN: ui_CableMapPage
 void ui_CableMapPage_screen_init(void);
 extern lv_obj_t *ui_CableMapPage;

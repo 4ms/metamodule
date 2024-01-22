@@ -11,6 +11,7 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     screens/ui_KnobSetViewPage.c
     screens/ui_EditMappingPage.c
     screens/ui_DeleteMappingPopUp.c
+    screens/ui_ModuleListPage.c
     screens/ui_CableMapPage.c
     screens/ui_SystemMenu.c
     ui.c

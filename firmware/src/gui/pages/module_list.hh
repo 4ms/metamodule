@@ -10,90 +10,7 @@ namespace MetaModule
 
 struct ModuleListPage : PageBase {
 	ModuleListPage(PatchContext info)
-		: PageBase{info, PageId::ModuleList}
-		, ui_ModuleListPage(lv_obj_create(nullptr))
-		, ui_ModuleListImage(lv_obj_create(ui_ModuleListPage))
-		, ui_ModuleListRoller(lv_roller_create(ui_ModuleListPage)) {
-
-		lv_obj_clear_flag(ui_ModuleListPage, LV_OBJ_FLAG_SCROLLABLE); /// Flags
-		lv_obj_set_style_radius(ui_ModuleListPage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_color(ui_ModuleListPage, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_opa(ui_ModuleListPage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(ui_ModuleListPage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(ui_ModuleListPage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_top(ui_ModuleListPage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_bottom(ui_ModuleListPage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_color(ui_ModuleListPage, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_opa(ui_ModuleListPage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_width(ui_ModuleListPage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-		lv_obj_set_style_bg_color(ui_ModuleListPage, lv_color_hex(0x000000), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_opa(ui_ModuleListPage, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(ui_ModuleListPage, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(ui_ModuleListPage, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_top(ui_ModuleListPage, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_bottom(ui_ModuleListPage, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_row(ui_ModuleListPage, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_column(ui_ModuleListPage, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-
-		lv_obj_set_width(ui_ModuleListImage, 180);
-		lv_obj_set_height(ui_ModuleListImage, 240);
-		lv_obj_set_align(ui_ModuleListImage, LV_ALIGN_LEFT_MID);
-		lv_obj_clear_flag(ui_ModuleListImage,
-						  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
-							  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
-							  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN); /// Flags
-		lv_obj_set_style_radius(ui_ModuleListImage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_color(ui_ModuleListImage, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_opa(ui_ModuleListImage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_color(ui_ModuleListImage, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_opa(ui_ModuleListImage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_width(ui_ModuleListImage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_left(ui_ModuleListImage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_right(ui_ModuleListImage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_top(ui_ModuleListImage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_bottom(ui_ModuleListImage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_row(ui_ModuleListImage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_column(ui_ModuleListImage, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_radius(ui_ModuleListImage, 0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_color(ui_ModuleListImage, lv_color_hex(0x000000), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_opa(ui_ModuleListImage, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
-
-		lv_roller_set_options(ui_ModuleListRoller, "Item\nItem2", LV_ROLLER_MODE_NORMAL);
-		lv_obj_set_height(ui_ModuleListRoller, 240);
-		lv_obj_set_width(ui_ModuleListRoller, 320 - 180);
-		lv_obj_set_align(ui_ModuleListRoller, LV_ALIGN_BOTTOM_RIGHT);
-		lv_obj_clear_flag(ui_ModuleListRoller,
-						  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
-							  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE); /// Flags
-		lv_obj_set_style_text_color(ui_ModuleListRoller, lv_color_hex(0x999999), LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_opa(ui_ModuleListRoller, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_letter_space(ui_ModuleListRoller, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_line_space(ui_ModuleListRoller, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_align(ui_ModuleListRoller, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(
-			ui_ModuleListRoller, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_radius(ui_ModuleListRoller, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_color(ui_ModuleListRoller, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_opa(ui_ModuleListRoller, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_width(ui_ModuleListRoller, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_outline_color(ui_ModuleListRoller, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_outline_opa(ui_ModuleListRoller, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_outline_width(ui_ModuleListRoller, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_outline_pad(ui_ModuleListRoller, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_color(ui_ModuleListRoller, lv_color_hex(0xFFFFFF), LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_letter_space(ui_ModuleListRoller, 0, LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_line_space(ui_ModuleListRoller, 6, LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_align(ui_ModuleListRoller, LV_TEXT_ALIGN_LEFT, LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_text_font(
-			ui_ModuleListRoller, &ui_font_MuseoSansRounded70016, LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_radius(ui_ModuleListRoller, 0, LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_color(ui_ModuleListRoller, lv_color_hex(0xFD8B18), LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_bg_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_color(ui_ModuleListRoller, lv_color_hex(0x000000), LV_PART_SELECTED | LV_STATE_DEFAULT);
-		lv_obj_set_style_border_opa(ui_ModuleListRoller, 255, LV_PART_SELECTED | LV_STATE_DEFAULT);
-
+		: PageBase{info, PageId::ModuleList} {
 		init_bg(ui_ModuleListPage);
 
 		lv_group_add_obj(group, ui_ModuleListRoller);
@@ -112,8 +29,10 @@ struct ModuleListPage : PageBase {
 	void populate_slugs() {
 
 		auto all_slugs = ModuleFactory::getAllSlugs();
-		// TODO: sort by
+
+		// TODO: sort by brand name
 		// std::ranges::sort(all_slugs, [](auto a, auto b) { return std::string_view{a} < std::string_view{b}; });
+
 		std::string slugs_str;
 		slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
 		for (auto slug : all_slugs) {
@@ -125,6 +44,7 @@ struct ModuleListPage : PageBase {
 	}
 
 	void prepare_focus() final {
+		show_roller();
 		lv_group_focus_obj(ui_ModuleListRoller);
 		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
@@ -132,8 +52,25 @@ struct ModuleListPage : PageBase {
 
 	void update() final {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			load_prev_page();
+			if (roller_shown) {
+				hide_roller();
+			} else
+				load_prev_page();
 		}
+	}
+
+	bool is_roller_shown() const {
+		return roller_shown;
+	}
+
+	void show_roller() {
+		roller_shown = true;
+		lv_show(ui_ModuleListRollerPanel);
+	}
+
+	void hide_roller() {
+		roller_shown = false;
+		lv_hide(ui_ModuleListRollerPanel);
 	}
 
 	void blur() final {
@@ -145,13 +82,18 @@ private:
 		if (!page)
 			return;
 
-		ModuleTypeSlug slug;
-		lv_roller_get_selected_str(event->target, slug._data, slug.capacity);
-		page->patch_mod_queue.put(AddModule{slug});
-		page->patch_storage.get_view_patch().module_slugs.push_back(slug);
-		page->page_list.increment_patch_revision();
-		page->load_page(PageId::PatchView, page->args);
-		page->notify_queue.put({"Adding module " + std::string{slug}});
+		if (page->is_roller_shown()) {
+			ModuleTypeSlug slug;
+			lv_roller_get_selected_str(event->target, slug._data, slug.capacity);
+			page->patch_mod_queue.put(AddModule{slug});
+			page->patch_storage.get_view_patch().module_slugs.push_back(slug);
+			page->page_list.increment_patch_revision();
+			page->load_page(PageId::PatchView, page->args);
+			page->notify_queue.put({"Adding module " + std::string{slug}});
+		} else {
+			page->show_roller();
+			lv_group_set_editing(page->group, true);
+		}
 	}
 
 	static void scroll_cb(lv_event_t *event) {
@@ -162,6 +104,7 @@ private:
 		ModuleTypeSlug slug;
 		lv_roller_get_selected_str(event->target, slug._data, slug.capacity);
 		page->draw_module(slug);
+		page->show_roller();
 	}
 
 	void draw_module(ModuleTypeSlug slug) {
@@ -174,10 +117,8 @@ private:
 		drawer.draw_elements(slug, module_canvas);
 	}
 
-	lv_obj_t *ui_ModuleListPage;
-	lv_obj_t *ui_ModuleListImage;
-	lv_obj_t *ui_ModuleListRoller;
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, 240)]{};
+	bool roller_shown = true;
 };
 
 } // namespace MetaModule

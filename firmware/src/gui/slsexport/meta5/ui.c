@@ -313,6 +313,15 @@ lv_obj_t *ui_Button12;
 lv_obj_t *ui_Panel1;
 
 
+// SCREEN: ui_ModuleListPage
+void ui_ModuleListPage_screen_init(void);
+lv_obj_t *ui_ModuleListPage;
+lv_obj_t *ui_ModuleListImage;
+lv_obj_t *ui_ModuleListRollerPanel;
+lv_obj_t *ui_ModuleListRollerTitle;
+lv_obj_t *ui_ModuleListRoller;
+
+
 // SCREEN: ui_CableMapPage
 void ui_CableMapPage_screen_init(void);
 lv_obj_t *ui_CableMapPage;
@@ -468,6 +477,7 @@ ui_MappingMenu_screen_init();
 ui_KnobSetViewPage_screen_init();
 ui_EditMappingPage_screen_init();
 ui_DeleteMappingPopUp_screen_init();
+ui_ModuleListPage_screen_init();
 ui_CableMapPage_screen_init();
 ui_SystemMenu_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
