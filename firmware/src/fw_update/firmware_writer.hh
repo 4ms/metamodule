@@ -56,65 +56,85 @@ struct FirmwareWriter {
 
 			pr_dbg("-> Start flashing to 0x%08x\n", message.address);
 
-			auto result = Flasher::init(230400);
+			FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
+								(message.vol_id == Volume::SDCard) ? &sdcard_ :
+																	 nullptr;
 
-			if (result == ESP_LOADER_SUCCESS)
+			if (fileio != nullptr)
 			{
-				uint32_t& bytesWritten = *message.bytes_processed;
-				const uint32_t bytesTotal = message.length;
-
-				std::array<uint8_t, 1024> BatchBuffer;
-
-				// TODO: open file by volume and filename
-
-				result = esp_loader_flash_start(message.address, message.length, BatchBuffer.size());
+				auto result = Flasher::init(230400);
 
 				if (result == ESP_LOADER_SUCCESS)
 				{
-					bool error_during_writes = false;
+					uint32_t& bytesWritten = *message.bytes_processed;
+					const uint32_t bytesTotal = message.length;
 
-					while (bytesWritten < bytesTotal)
+					std::array<uint8_t, 1024> BatchBuffer;
+
+					result = esp_loader_flash_start(message.address, message.length, BatchBuffer.size());
+
+					if (result == ESP_LOADER_SUCCESS)
 					{
-						auto to_read = std::min<std::size_t>(bytesTotal - bytesWritten, BatchBuffer.size());
+						bool error_during_writes = false;
 
-						// TODO: read from file to BatchBuffer
-
-						result = esp_loader_flash_write(BatchBuffer.data(), to_read);
-						if (result != ESP_LOADER_SUCCESS)
+						while (bytesWritten < bytesTotal)
 						{
-							error_during_writes = true;
-							break;
+							auto to_read = std::min<std::size_t>(bytesTotal - bytesWritten, BatchBuffer.size());
+
+							auto thisReadBuffer = std::span<char>((char*)BatchBuffer.data(), to_read);
+							auto bytesRead = fileio->read_file(message.filename, thisReadBuffer, bytesWritten);
+
+							if (bytesRead == to_read)
+							{
+								result = esp_loader_flash_write(BatchBuffer.data(), to_read);
+								if (result != ESP_LOADER_SUCCESS)
+								{
+									error_during_writes = true;
+									break;
+								}
+								else
+								{
+									bytesWritten += to_read;
+								}
+							}
+							else
+							{
+								pr_err("Cannot read from update file in range %u - %u\n", bytesWritten, bytesWritten+to_read);
+								error_during_writes = true;
+								break;
+							}
+						}
+
+						if (not error_during_writes)
+						{
+							pr_dbg("-> Flashing completed\n");
+							pending_send_message.message_type = FlashingOk;
 						}
 						else
 						{
-							bytesWritten += to_read;
+							pr_dbg("-> Flashing failed\n");
+							pending_send_message.message_type = FlashingFailed;
 						}
-					}
-
-					if (not error_during_writes)
-					{
-						pr_dbg("-> Flashing completed\n");
-						pending_send_message.message_type = FlashingOk;
 					}
 					else
 					{
-						pr_dbg("-> Flashing failed\n");
+						pr_err("Cannot start flashing wifi\n");
 						pending_send_message.message_type = FlashingFailed;
 					}
 				}
 				else
 				{
-					pr_err("Cannot start flashing wifi\n");
+					pr_err("Cannot connect to wifi bootloader\n");
 					pending_send_message.message_type = FlashingFailed;
 				}
+
+				Flasher::deinit();
 			}
 			else
 			{
-				pr_err("Cannot connect to wifi bootloader\n");
+				pr_err("Invalid volume id %u for update file\n", message.vol_id);
 				pending_send_message.message_type = FlashingFailed;
 			}
-
-			Flasher::deinit();
 		}
 
 	}
