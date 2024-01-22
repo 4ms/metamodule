@@ -4,6 +4,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "src/core/lv_obj_pos.h"
 
 namespace MetaModule
 {
@@ -18,32 +19,32 @@ struct ModuleListPage : PageBase {
 		lv_obj_add_event_cb(ui_ModuleListRoller, scroll_cb, LV_EVENT_KEY, this);
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_FOCUS_KEY);
-
-		populate_slugs();
-
-		ModuleTypeSlug slug;
-		lv_roller_get_selected_str(ui_ModuleListRoller, slug._data, slug.capacity);
-		draw_module(slug);
 	}
 
 	void populate_slugs() {
+		static bool already_populated = false;
+		if (!already_populated) {
+			already_populated = true;
+			auto all_slugs = ModuleFactory::getAllSlugs();
 
-		auto all_slugs = ModuleFactory::getAllSlugs();
+			// TODO: sort by brand name
+			// std::ranges::sort(all_slugs, [](auto a, auto b) { return std::string_view{a} < std::string_view{b}; });
 
-		// TODO: sort by brand name
-		// std::ranges::sort(all_slugs, [](auto a, auto b) { return std::string_view{a} < std::string_view{b}; });
-
-		std::string slugs_str;
-		slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
-		for (auto slug : all_slugs) {
-			slugs_str += std::string_view{slug};
-			slugs_str += "\n";
+			std::string slugs_str;
+			slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
+			for (auto slug : all_slugs) {
+				slugs_str += std::string_view{slug};
+				slugs_str += "\n";
+			}
+			slugs_str.pop_back();
+			lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
 		}
-		slugs_str.pop_back();
-		lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
 	}
 
 	void prepare_focus() final {
+		populate_slugs();
+		draw_module();
+
 		show_roller();
 		lv_group_focus_obj(ui_ModuleListRoller);
 		lv_group_set_editing(group, true);
@@ -101,10 +102,16 @@ private:
 		if (!page)
 			return;
 
-		ModuleTypeSlug slug;
-		lv_roller_get_selected_str(event->target, slug._data, slug.capacity);
-		page->draw_module(slug);
+		// ModuleTypeSlug slug;
+		// lv_roller_get_selected_str(event->target, slug._data, slug.capacity);
+		page->draw_module();
 		page->show_roller();
+	}
+
+	void draw_module() {
+		ModuleTypeSlug slug;
+		lv_roller_get_selected_str(ui_ModuleListRoller, slug._data, slug.capacity);
+		draw_module(slug);
 	}
 
 	void draw_module(ModuleTypeSlug slug) {

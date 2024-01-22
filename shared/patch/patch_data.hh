@@ -22,11 +22,34 @@ struct PatchData {
 
 	static constexpr uint32_t MIDIKnobSet = 0xFFFFFFFF;
 
-	PatchData() = default;
-	PatchData(std::string_view patch_name)
-		: patch_name{patch_name}
-		, module_slugs{"HubMedium"}
-		, knob_sets{{{}, "Knob Set 1"}} {
+	// PatchData() = default;
+	// PatchData(PatchData &) = default;
+	// PatchData(PatchData &&) = default;
+	// PatchData &operator=(const PatchData &) = default;
+	// PatchData &operator=(PatchData &&) = default;
+	// PatchData(std::string_view patch_name)
+	// 	: patch_name{patch_name}
+	// 	, module_slugs{"HubMedium"}
+	// 	, knob_sets{{{}, "Knob Set 1"}} {
+	// }
+
+	void blank_patch(std::string_view patch_name) {
+		*this = PatchData{};
+		// description = "";
+		// module_slugs.clear();
+		// int_cables.clear();
+		// mapped_ins.clear();
+		// mapped_outs.clear();
+		// static_knobs.clear();
+		// knob_sets.clear();
+		// module_states.clear();
+		// midi_maps.set.clear();
+		// midi_poly_num = 1;
+
+		this->patch_name.copy(patch_name);
+		module_slugs.push_back("HubMedium");
+		knob_sets.push_back({{}, "Knob Set 1"});
+		midi_maps.name = "MIDI";
 	}
 
 	const MappedKnob *find_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) const {
