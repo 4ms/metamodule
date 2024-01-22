@@ -347,18 +347,22 @@ public:
 
 	void add_internal_cable(Jack in, Jack out) {
 		pd.add_internal_cable(in, out);
+		modules[out.module_id]->mark_output_patched(out.jack_id);
+		modules[in.module_id]->mark_input_patched(in.jack_id);
 	}
 
 	void add_injack_mapping(uint16_t panel_jack_id, Jack jack) {
 		pd.add_mapped_injack(panel_jack_id, jack);
 		if (panel_jack_id < in_conns.size())
 			update_or_add(in_conns[panel_jack_id], jack);
+		modules[jack.module_id]->mark_input_patched(jack.jack_id);
 	}
 
 	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
 		pd.add_mapped_outjack(panel_jack_id, jack);
 		if (panel_jack_id < out_conns.size())
 			out_conns[panel_jack_id] = jack;
+		modules[jack.module_id]->mark_output_patched(jack.jack_id);
 	}
 
 	void disconnect_injack(Jack jack) {
