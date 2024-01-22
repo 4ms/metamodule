@@ -193,7 +193,7 @@ public:
 		return true;
 	}
 
-	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
+	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset) {
 		FIL fil;
 		UINT bytes_read = 0;
 
@@ -205,6 +205,12 @@ public:
 
 			if (f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK)
 				return 0;
+		}
+
+		if (f_lseek(&fil, offset) != FR_OK)
+		{
+			f_close(&fil);
+			return 0;
 		}
 
 		if (f_read(&fil, buffer.data(), buffer.size_bytes(), &bytes_read) != FR_OK) {

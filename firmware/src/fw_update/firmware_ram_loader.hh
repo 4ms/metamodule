@@ -28,7 +28,7 @@ struct FirmwareRamLoader {
 			return false;
 		}
 
-		auto bytes_read = fileio->read_file(filename, buffer);
+		auto bytes_read = fileio->read_file(filename, buffer, 0);
 
 		if (bytes_read < actual_size) {
 			pr_err("Failed to read %u bytes. Only read %u\n", actual_size, bytes_read);

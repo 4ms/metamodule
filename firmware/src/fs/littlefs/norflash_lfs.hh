@@ -136,11 +136,15 @@ public:
 	}
 
 	// Reads into buffer, returns the bytes actually read
-	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
+	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset) {
 		lfs_file_t file;
 
 		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_RDONLY);
 		if (err < 0)
+			return 0;
+
+		auto seek_err = lfs_file_seek(&lfs, &file, offset, LFS_SEEK_SET);
+		if (seek_err < 0)
 			return 0;
 
 		auto bytes_read = lfs_file_read(&lfs, &file, buffer.data(), buffer.size_bytes());
