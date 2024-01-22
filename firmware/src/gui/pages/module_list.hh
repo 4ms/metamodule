@@ -112,7 +112,8 @@ struct ModuleListPage : PageBase {
 	void populate_slugs() {
 
 		auto all_slugs = ModuleFactory::getAllSlugs();
-		std::ranges::sort(all_slugs, [](auto a, auto b) { return std::string_view{a} < std::string_view{b}; });
+		// TODO: sort by
+		// std::ranges::sort(all_slugs, [](auto a, auto b) { return std::string_view{a} < std::string_view{b}; });
 		std::string slugs_str;
 		slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
 		for (auto slug : all_slugs) {
@@ -121,7 +122,6 @@ struct ModuleListPage : PageBase {
 		}
 		slugs_str.pop_back();
 		lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
-
 	}
 
 	void prepare_focus() final {
