@@ -1,6 +1,7 @@
 #include "firmware_writer.hh"
  
 #include <wifi/flasher/flasher.h>
+#include "flash_loader/flash_loader.hh"
 
 namespace MetaModule
 {
@@ -177,7 +178,52 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumQSPI(uint32_t address, ui
 
 IntercoreStorageMessage FirmwareWriter::flashQSPI(FatFileIO* fileio, std::string_view filename, uint32_t address, const uint32_t length, uint32_t& bytesWritten)
 {
-	return {.message_type = FlashingFailed};
+    FlashLoader loader;
+
+	constexpr static uint32_t FlashSectorSize = 4096;
+	std::array<uint8_t, FlashSectorSize> BatchBuffer;
+	bytesWritten = 0;
+
+	bool errorDetected = false;
+
+    if (loader.check_flash_chip())
+	{
+		while (bytesWritten < length)
+		{
+			auto to_read = std::min<std::size_t>(length - bytesWritten, BatchBuffer.size());
+
+			auto thisReadBuffer = std::span<char>((char*)BatchBuffer.data(), to_read);
+			auto bytesRead = fileio->read_file(filename, thisReadBuffer, bytesWritten);
+
+			if (bytesRead == to_read)
+			{
+				auto success = loader.write_sectors(address + bytesWritten, thisReadBuffer);
+
+				if (success)
+				{
+					bytesWritten += to_read;
+				}
+				else
+				{
+					errorDetected = true;
+					break;
+				}
+			}
+			else
+			{
+				pr_err("Cannot read from update file in range %u - %u\n", bytesWritten, bytesWritten+to_read);
+				errorDetected = true;
+				break;
+			}
+		}
+	}
+	else
+	{
+		errorDetected = true;
+	}
+
+
+	return errorDetected ? IntercoreStorageMessage{.message_type = FlashingFailed} : IntercoreStorageMessage{.message_type = FlashingOk};
 }
 
 void FirmwareWriter::send_pending_message(InterCoreComm &comm) {
