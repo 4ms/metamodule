@@ -46,9 +46,9 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_AliasTextArea);
 		lv_group_add_obj(group, ui_ListButton);
 		lv_group_add_obj(group, ui_EditButton);
-		lv_hide(ui_KnobSetButton);
-		// lv_group_add_obj(group, ui_KnobSetButton);
+		lv_group_add_obj(group, ui_KnobSetButton);
 		lv_group_add_obj(group, ui_TrashButton);
+		lv_hide(ui_EditButton);
 		lv_group_set_editing(group, false);
 	}
 
