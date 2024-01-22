@@ -860,7 +860,7 @@ ui_EditButton = lv_btn_create(ui_EditMapButtons);
 lv_obj_set_width( ui_EditButton, 32);
 lv_obj_set_height( ui_EditButton, 32);
 lv_obj_set_align( ui_EditButton, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_EditButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_add_flag( ui_EditButton, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_EditButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_EditButton, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_EditButton, lv_color_hex(0x4067D3), LV_PART_MAIN | LV_STATE_DEFAULT );

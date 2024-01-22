@@ -38,6 +38,7 @@ struct PatchViewPage : PageBase {
 		lv_group_set_editing(group, false);
 
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_AddButton, add_module_cb, LV_EVENT_CLICKED, (void *)this);
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -45,6 +46,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(ui_InfoButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SettingsButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_AddButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 
 		lv_obj_add_event_cb(ui_PatchViewPage, scroll_end_cb, LV_EVENT_SCROLL, this);
 
@@ -105,9 +107,10 @@ struct PatchViewPage : PageBase {
 		lv_group_set_editing(group, false);
 
 		lv_group_add_obj(group, ui_PlayButton);
-		lv_group_add_obj(group, ui_KnobButton);
-		lv_group_add_obj(group, ui_SaveButton);
 		lv_group_add_obj(group, ui_InfoButton);
+		lv_group_add_obj(group, ui_KnobButton);
+		lv_group_add_obj(group, ui_AddButton);
+		lv_group_add_obj(group, ui_SaveButton);
 		lv_group_add_obj(group, ui_SettingsButton);
 
 		lv_show(modules_cont);
@@ -141,19 +144,6 @@ struct PatchViewPage : PageBase {
 			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_CLICKED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 		}
-
-		// Add Module placeholder
-		auto add_module = lv_obj_create(modules_cont);
-		lv_obj_set_size(add_module, 110, Height);
-		module_canvases.push_back(add_module);
-		style_module(add_module);
-		lv_obj_set_style_border_width(add_module, 2, LV_PART_MAIN);
-		lv_obj_set_style_border_color(add_module, lv_color_hex(0x333333), LV_PART_MAIN);
-		auto add_module_label = lv_label_create(add_module);
-		lv_label_set_text(add_module_label, "Add Module");
-		lv_obj_center(add_module_label);
-		lv_obj_add_event_cb(add_module, add_module_cb, LV_EVENT_CLICKED, (void *)this);
-		lv_obj_add_event_cb(add_module, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 
 		is_ready = true;
 

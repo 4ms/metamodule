@@ -20,9 +20,9 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     images/ui_img_1x_play1_png.c
     images/ui_img_1x_add1_png.c
     images/ui_img_1x_settings1_png.c
+    images/ui_img_1x_info1_png.c
     images/ui_img_1x_knob1_png.c
     images/ui_img_1x_knob1pressed_png.c
-    images/ui_img_1x_info1_png.c
     images/ui_img_1x_infosmall2_png.c
     fonts/ui_font_MuseoSansRounded50010.c
     fonts/ui_font_MuseoSansRounded50012.c
