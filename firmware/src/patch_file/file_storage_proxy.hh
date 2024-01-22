@@ -113,7 +113,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool request_checksum_compare(StaticString<32> checksum, uint32_t address, uint32_t length, uint32_t* bytes_processed)
+	[[nodiscard]] bool request_checksum_compare(IntercoreStorageMessage::FlashTarget target, StaticString<32> checksum, uint32_t address, uint32_t length, uint32_t* bytes_processed)
 	{
 		IntercoreStorageMessage message{
 			.message_type = StartChecksumCompare,
@@ -121,13 +121,14 @@ public:
 			.length = length,
 			.checksum = checksum,
 			.bytes_processed = bytes_processed,
+			.flashTarget = target,
 		};
 		if (!comm_.send_message(message))
 			return false;
 		return true;
 	}
 
-	[[nodiscard]] bool request_file_flash(std::string_view filename, Volume vol, uint32_t address, uint32_t length, uint32_t* bytes_processed)
+	[[nodiscard]] bool request_file_flash(IntercoreStorageMessage::FlashTarget target, std::string_view filename, Volume vol, uint32_t address, uint32_t length, uint32_t* bytes_processed)
 	{
 		IntercoreStorageMessage message{
 			.message_type = StartFlashing,
@@ -136,6 +137,7 @@ public:
 			.address = address,
 			.length = length,
 			.bytes_processed = bytes_processed,
+			.flashTarget = target,
 		};
 		if (!comm_.send_message(message))
 			return false;

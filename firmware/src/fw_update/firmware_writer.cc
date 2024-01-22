@@ -18,7 +18,19 @@ void FirmwareWriter::handle_message(IntercoreStorageMessage &message)
 
 		pr_dbg("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 
-		pending_send_message = compareChecksumWifi(message.address, message.length, {message.checksum.data()});
+		if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI)
+		{
+			pending_send_message = compareChecksumWifi(message.address, message.length, {message.checksum.data()});
+		}
+		else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI)
+		{
+			pending_send_message = compareChecksumQSPI(message.address, message.length, {message.checksum.data()});
+		}
+		else
+		{
+			pr_err("Undefined flash target %u\n", message.flashTarget);
+			pending_send_message.message_type = ChecksumFailed;
+		}
 	}
 	else if (message.message_type == StartFlashing)
 	{
@@ -32,7 +44,19 @@ void FirmwareWriter::handle_message(IntercoreStorageMessage &message)
 
 		if (fileio != nullptr)
 		{
-			pending_send_message = flashWifi(fileio, message.filename, message.address, message.length, *message.bytes_processed);
+			if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI)
+			{
+				pending_send_message = flashWifi(fileio, message.filename, message.address, message.length, *message.bytes_processed);
+			}
+			else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI)
+			{
+				pending_send_message = flashQSPI(fileio, message.filename, message.address, message.length, *message.bytes_processed);
+			}
+			else
+			{
+				pr_err("Undefined flash target %u\n", message.flashTarget);
+				pending_send_message.message_type = ChecksumFailed;
+			}
 		}
 		else
 		{
@@ -143,6 +167,17 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(FatFileIO* fileio, std::string
 	Flasher::deinit();
 
 	return returnValue;
+}
+
+IntercoreStorageMessage FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum)
+{
+	// TODO: implement calculating checksum
+	return {.message_type = ChecksumMismatch};
+}
+
+IntercoreStorageMessage FirmwareWriter::flashQSPI(FatFileIO* fileio, std::string_view filename, uint32_t address, const uint32_t length, uint32_t& bytesWritten)
+{
+	return {.message_type = FlashingFailed};
 }
 
 void FirmwareWriter::send_pending_message(InterCoreComm &comm) {

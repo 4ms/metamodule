@@ -7,6 +7,16 @@
 namespace MetaModule
 {
 
+auto GetTargetForUpdateType = [](UpdateType val) -> std::optional<IntercoreStorageMessage::FlashTarget>
+{
+	switch (val)
+	{
+		case UpdateType::Wifi: return IntercoreStorageMessage::FlashTarget::WIFI;
+		case UpdateType::App: return IntercoreStorageMessage::FlashTarget::QSPI;
+		default: return std::nullopt;
+	}
+};
+
 FirmwareUpdaterProxy::FirmwareUpdaterProxy(FileStorageProxy &file_storage)
     : file_storage{file_storage}
 	, state(Idle)
@@ -86,23 +96,32 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
 				justEnteredState = false;
 				pr_dbg("Start verifying file %u of %u\n", current_file_idx, manifest.files.size());
 
-				if (auto checksumValue = manifest.files[current_file_idx].md5; checksumValue)
+				auto& thisFile = manifest.files[current_file_idx];
+
+				if (auto target = GetTargetForUpdateType(thisFile.type); target)
 				{
-					sharedMem->bytes_processed = 0;
-					current_file_size = manifest.files[current_file_idx].filesize;
-
-					auto result = file_storage.request_checksum_compare(*checksumValue, manifest.files[current_file_idx].address, manifest.files[current_file_idx].filesize, &sharedMem->bytes_processed);
-
-					if (not result)
+					if (auto checksumValue = thisFile.md5; checksumValue)
 					{
-						abortWithMessage("Cannot trigger comparing checksums");
-					}	
+						sharedMem->bytes_processed = 0;
+						current_file_size = manifest.files[current_file_idx].filesize;
+
+						auto result = file_storage.request_checksum_compare(*target, *checksumValue, thisFile.address, thisFile.filesize, &sharedMem->bytes_processed);
+
+						if (not result)
+						{
+							abortWithMessage("Cannot trigger comparing checksums");
+						}	
+					}
+					else
+					{
+						pr_dbg("Skipping verify step because no checksum is defined");
+						moveToState(Writing);
+					}				
 				}
 				else
 				{
-					pr_dbg("Skipping verify step because no checksum is defined");
-					moveToState(Writing);
-				}				
+					abortWithMessage("Invalid update file type");
+				}
 			}
 			else
 			{
@@ -133,14 +152,23 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
 				justEnteredState = false;
 				pr_dbg("Start flashing file %u of %u\n", current_file_idx, manifest.files.size());
 
+				auto& thisFile = manifest.files[current_file_idx];
+
 				sharedMem->bytes_processed = 0;
-				current_file_size = manifest.files[current_file_idx].filesize;
+				current_file_size = thisFile.filesize;
 
-				auto result = file_storage.request_file_flash(manifest.files[current_file_idx].filename, vol, manifest.files[current_file_idx].address, manifest.files[current_file_idx].filesize, &sharedMem->bytes_processed);
-
-				if (not result)
+				if (auto target = GetTargetForUpdateType(thisFile.type); target)
 				{
-					abortWithMessage("Cannot trigger flashing");
+					auto result = file_storage.request_file_flash(*target, thisFile.filename, vol, thisFile.address, thisFile.filesize, &sharedMem->bytes_processed);
+
+					if (not result)
+					{
+						abortWithMessage("Cannot trigger flashing");
+					}
+				}
+				else
+				{
+					abortWithMessage("Invalid update file type");
 				}
 			}
 			else

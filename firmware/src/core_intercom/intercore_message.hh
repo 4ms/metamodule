@@ -55,6 +55,8 @@ struct IntercoreStorageMessage {
 	uint32_t length;
 	StaticString<32> checksum;
 	uint32_t* bytes_processed;
+	enum FlashTarget : uint8_t {WIFI, QSPI};
+	FlashTarget flashTarget;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);
