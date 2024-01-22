@@ -137,7 +137,6 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
-  ${FWDIR}/src/flash_loader/flash_loader.cc
   ${FWDIR}/src/gui/elements/element_name.cc
 
   #
