@@ -56,6 +56,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Generate firmware update manifest json file")
     parser.add_argument("--app", dest="app_file", help="Input application uimg file")
     parser.add_argument("--fsbl", dest="fsbl_file", help="First stage bootloader")
+    parser.add_argument("--dfu", dest="dfu_file", help="DFU bootloader")
     parser.add_argument("--wifi_bootloader", dest="wifi_bl_file", help="Wifi bootloader binary")
     parser.add_argument("--wifi_application", dest="wifi_app_file", help="Wifi application binary")
     parser.add_argument("--wifi_filesystem", dest="wifi_fs_file", help="Wifi filesystem image")
@@ -76,9 +77,10 @@ if __name__ == "__main__":
         j["metadata"] = {'version': parse_file_version(args.version)}
 
     j["files"] = [
-        process_file(destination_dir, args.app_file, "app", name="Main App", address=0x80000),
         process_file(destination_dir, args.fsbl_file, "app", name="FSBL1", address=0x0),
         process_file(destination_dir, args.fsbl_file, "app", name="FSBL2", address=0x40000),
+        process_file(destination_dir, args.dfu_file, "app", name="DFU", address=0x50000),
+        process_file(destination_dir, args.app_file, "app", name="Main App", address=0x80000),
         process_file(destination_dir, args.wifi_bl_file, "wifi", name="Wifi Bootloader", address=0x0),
         process_file(destination_dir, args.wifi_app_file, "wifi", name="Wifi Application", address=0x10000),
         process_file(destination_dir, args.wifi_fs_file, "wifi", name="Wifi Filesystem", address=0x20000),
