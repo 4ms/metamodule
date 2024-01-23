@@ -85,7 +85,12 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 		{
 			pr_dbg("-> Checksum matches\n");
 			returnValue = {.message_type = ChecksumMatch};
-		}				
+		}
+		else
+		{
+			pr_dbg("-> Cannot get checksum\n");
+			returnValue = {.message_type = ChecksumFailed};
+		}
 	}
 	else
 	{
