@@ -77,7 +77,7 @@ if __name__ == "__main__":
         j["metadata"] = {'version': parse_file_version(args.version)}
 
     j["files"] = [
-        process_file(destination_dir, args.app_file, "app", name="Main App"),
+        process_file(destination_dir, args.app_file, "app", name="Main App", address=0x80000),
         process_file(destination_dir, args.wifi_bl_file, "wifi", name="Wifi Bootloader", address=0x0),
         process_file(destination_dir, args.wifi_app_file, "wifi", name="Wifi Application", address=0x10000),
         process_file(destination_dir, args.wifi_app_file, "wifi", name="Wifi Filesystem", address=0x20000),
