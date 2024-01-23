@@ -47,6 +47,7 @@ struct ModuleListPage : PageBase {
 
 	void prepare_focus() final {
 		populate_slugs();
+		drawn_module_idx = -1; //force redraw
 		draw_timer = lv_timer_create(draw_module_cb, 200, this);
 
 		show_roller();
@@ -58,9 +59,12 @@ struct ModuleListPage : PageBase {
 	void update() final {
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (roller_shown) {
-				hide_roller();
-			} else
+				page_list.increment_patch_revision(); //force redraw TODO: put this in args
 				load_prev_page();
+			} else {
+				show_roller();
+				lv_group_set_editing(group, true);
+			}
 		}
 	}
 
@@ -70,12 +74,15 @@ struct ModuleListPage : PageBase {
 
 	void show_roller() {
 		roller_shown = true;
-		lv_show(ui_ModuleListRollerPanel);
+		// lv_show(ui_ModuleListRollerPanel);
+		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
 	}
 
 	void hide_roller() {
 		roller_shown = false;
-		lv_hide(ui_ModuleListRollerPanel);
+		// lv_hide(ui_ModuleListRollerPanel);
+		lv_obj_set_width(ui_ModuleListRollerPanel, 2);
+		lv_group_set_editing(group, true);
 	}
 
 	void blur() final {
@@ -89,6 +96,8 @@ private:
 			return;
 
 		if (page->is_roller_shown()) {
+			page->hide_roller();
+		} else {
 			ModuleTypeSlug slug;
 			lv_roller_get_selected_str(event->target, slug._data, slug.capacity);
 			page->patch_mod_queue.put(AddModule{slug});
@@ -96,9 +105,6 @@ private:
 			page->page_list.increment_patch_revision();
 			page->load_page(PageId::PatchView, page->args);
 			page->notify_queue.put({"Adding module " + std::string{slug}});
-		} else {
-			page->show_roller();
-			lv_group_set_editing(page->group, true);
 		}
 	}
 
@@ -108,7 +114,6 @@ private:
 			return;
 
 		lv_timer_reset(page->draw_timer);
-		page->show_roller();
 	}
 
 	static void draw_module_cb(lv_timer_t *timer) {
@@ -125,7 +130,6 @@ private:
 			drawn_module_idx = cur_idx;
 			lv_roller_get_selected_str(ui_ModuleListRoller, slug._data, slug.capacity);
 			draw_module(slug);
-			pr_dbg("draw\n");
 		}
 	}
 
