@@ -30,7 +30,9 @@ struct ModuleListPage : PageBase {
 			auto all_slugs = ModuleFactory::getAllSlugs();
 
 			// TODO: sort by brand name
-			std::ranges::sort(all_slugs, [](auto a, auto b) { return std::string_view{a} < std::string_view{b}; });
+			std::sort(all_slugs.begin(), all_slugs.end(), [](auto a, auto b) {
+				return std::string_view{a} < std::string_view{b};
+			});
 
 			std::string slugs_str;
 			slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
