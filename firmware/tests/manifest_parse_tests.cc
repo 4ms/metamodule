@@ -1,9 +1,12 @@
 #include "doctest.h"
 
 #include "../src/fw_update/manifest_parse.hh"
+#include "patch_convert/ryml/ryml_serial.hh"
 #include <string_view>
 
 TEST_CASE("Parse json") {
+	RymlInit::init_once();
+
 	MetaModule::ManifestParser p;
 
 	std::string test_json = R"({
@@ -16,16 +19,21 @@ TEST_CASE("Parse json") {
 		"md5": "abaa17e7f9d854b402fc97aa26182f7c",
 	},
 	{
+		"type": "BadFile",
+		"filename": "notfound.uimg",
+		"filesize": 8888,
+		"md5": "AAAABBBBCCCCDDDDEEEEFFFF11112222",
+	},
+	{
+		"unknownKey": "invalid",
+	},
+	{
+	},
+	{
 		"type": "wifi",
 		"filename": "metamodule-wifi-v1.0.2.uimg",
 		"filesize": 7654321,
 		"md5": "1234567890ABCDEFFEDCBA9876543210",
-	},
-	{
-		"type": "BadFile",
-		"filename": "metamodule-nope-v1.0.2.uimg",
-		"filesize": 8888,
-		"md5": "AAAABBBBCCCCDDDDEEEEFFFF11112222",
 	}
 ]
 })";

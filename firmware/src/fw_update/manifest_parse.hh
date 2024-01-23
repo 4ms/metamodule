@@ -12,45 +12,48 @@
 namespace MetaModule
 {
 
-inline std::optional<UpdateFile> parseFile(ryml::ConstNodeRef const &n) {
+inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updateFile) {
 
-	if (n.is_map() && n.has_child("type") && n.has_child("filename") && n.has_child("filesize"))
-	{
-		auto parseFileType = [](const auto& typeString) -> std::optional<UpdateType>
-		{
-			if (typeString.val() == "app") return MetaModule::UpdateType::App;
-			else if (typeString.val() == "wifi") return MetaModule::UpdateType::Wifi;
-			else return std::nullopt;
+	if (n.has_child("type") && n.has_child("filename") && n.has_child("filesize")) {
+
+		auto parseFileType = [](const auto &typeString) -> std::optional<UpdateType> {
+			if (typeString.val() == "app")
+				return MetaModule::UpdateType::App;
+			else if (typeString.val() == "wifi")
+				return MetaModule::UpdateType::Wifi;
+			else
+				return std::nullopt;
 		};
 
-		if (auto updateType = parseFileType(n["type"]); updateType)
-		{
-			UpdateFile updateFile;
+		if (auto updateType = parseFileType(n["type"]); updateType) {
 
-			updateFile.type = *updateType;
-			n["filename"] >> updateFile.filename;
-			n["filesize"] >> updateFile.filesize;
+			updateFile->type = *updateType;
+			n["filename"] >> updateFile->filename;
+			n["filesize"] >> updateFile->filesize;
+			n["address"] >> updateFile->address;
 
 			if (n.has_child("md5")) {
 				auto md5 = n["md5"].val();
 				auto md5_sv = std::string_view{md5.data(), md5.size()};
-				updateFile.md5 = md5_sv;
+				updateFile->md5 = md5_sv;
 			}
-
-			if (n.has_child("address"))
-			{
-				n["address"] >> updateFile.address;
-			}
-
-			return updateFile;
-		}
-		else
-		{
+			return true;
+			
+		} else {
 			pr_err("Unknown update type\n");
 		}
-
 	}
-	return std::nullopt;
+
+	return false;
+}
+
+inline bool read(ryml::ConstNodeRef const &n, std::vector<UpdateFile> *updateFiles) {
+	for (auto const ch : n) {
+		UpdateFile updateFile;
+		if (read(ch, &updateFile))
+			updateFiles->push_back(updateFile);
+	}
+	return true;
 }
 
 struct ManifestParser {
@@ -73,16 +76,8 @@ struct ManifestParser {
 				UpdateManifest manifest{};
 				root["version"] >> manifest.version;
 
-				if (root.has_child("files"))
-				{
-					for (auto thisNode : root["files"])
-					{
-						if (auto thisFile = parseFile(thisNode); thisFile)
-						{
-							manifest.files.push_back(*thisFile);
-						}
-					}
-
+				if (root.has_child("files")) {
+					root["files"] >> manifest.files;
 					return manifest;
 				}
 				else
