@@ -222,7 +222,7 @@ void FirmwareUpdaterProxy::proceedWithNextFile()
 void FirmwareUpdaterProxy::moveToState(State newState)
 {
 	justEnteredState = true;
-    pr_dbg("Update move state %u -> %u\n", state, newState);
+    pr_trace("Updater: Move state %u -> %u\n", state, newState);
     state = newState;
 }
 

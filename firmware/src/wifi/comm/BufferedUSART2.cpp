@@ -43,7 +43,7 @@ void BufferedUSART2::initPeripheral()
                 auto result = queue.put(val);
                 if (not result)
                 {
-                    pr_err("RX Overrun\n");
+                    pr_err("USART2: RX Soft Overrun\n");
                 }
             }
             while (LL_USART_IsActiveFlag_RXNE(USART_PERIPH));
