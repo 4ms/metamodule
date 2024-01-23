@@ -85,11 +85,20 @@ if ("${TOOLCHAIN_BASE_DIR}" STREQUAL "")
 else()
 	set(BOOTLOADER_TOOLCHAIN_OPT "TOOLCHAIN_DIR=${TOOLCHAIN_BASE_DIR}/")
 endif()
+
 add_custom_target(
   bootloader
   COMMAND make BOARD_CONF=../board_conf/mmp11_conf.hh ${BOOTLOADER_TOOLCHAIN_OPT}
   COMMENT "Building MP1-Boot (FSBL)"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot
+  VERBATIM
+)
+
+add_custom_target(
+  bootloader-dfu
+  COMMAND make BOARD_CONF=../board_conf/mmp11_conf.hh ${BOOTLOADER_TOOLCHAIN_OPT}
+  COMMENT "Building DFU Bootloader"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu
   VERBATIM
 )
 
