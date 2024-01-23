@@ -52,6 +52,7 @@ add_custom_command(
   COMMAND flashing/elf_to_uimg.py --m4 $<TARGET_FILE:main_m4.elf> --a7 $<TARGET_FILE:main.elf> ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
   COMMAND flashing/manifest_generator.py
            --version "${GIT_FIRMWARE_VERSION_TAG}"
+           --fsbl "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot/build/fsbl.stm32"
            --app "${CMAKE_CURRENT_BINARY_DIR}/main.uimg"
            --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/bootloader.bin"
            --wifi_app "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
