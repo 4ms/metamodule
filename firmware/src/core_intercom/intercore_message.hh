@@ -36,6 +36,9 @@ struct IntercoreStorageMessage {
 		PatchDataWriteFail,
 		PatchDataWriteOK,
 
+		RequestFactoryResetPatches,
+		FactoryResetPatchesDone,
+
 		NumRequests,
 	};
 	MessageType message_type = MessageType::None;

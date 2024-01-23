@@ -54,6 +54,7 @@ public:
 		norflash_.reformat();
 		PatchFileIO::create_default_patches(norflash_);
 	}
+
 	bool write_patch_file(Volume vol, std::string_view filename, std::span<const char> data) {
 		if (vol == Volume::USB) {
 			auto success = PatchFileIO::write_file(data, usbdrive_, filename);
@@ -155,6 +156,13 @@ public:
 					pending_send_message.message_type = PatchDataWriteOK;
 				}
 			}
+
+			message.message_type = None; //mark as handled
+		}
+
+		if (message.message_type == RequestFactoryResetPatches) {
+			pending_send_message.message_type = FactoryResetPatchesDone;
+			reload_default_patches();
 
 			message.message_type = None; //mark as handled
 		}

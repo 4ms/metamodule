@@ -196,6 +196,11 @@ public:
 		return true;
 	}
 
+	bool request_reset_factory_patches() {
+		pr_info("Reset to factory patches: Simulator default patches are read-only\n");
+		return true;
+	}
+
 private:
 	PatchDirList patch_dir_list_;
 

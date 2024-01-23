@@ -66,15 +66,6 @@ public:
 		return view_patch_;
 	}
 
-	void new_patch() {
-		std::string name = "Untitled Patch " + std::to_string((uint8_t)HAL_GetTick());
-		view_patch_.blank_patch(name);
-
-		name += ".yml";
-		view_patch_loc_.filename.copy(name);
-		view_patch_loc_.vol = Volume::RamDisk;
-	}
-
 	StaticString<255> get_view_patch_filename() {
 		return view_patch_loc_.filename;
 	}
@@ -122,6 +113,15 @@ public:
 		return true;
 	}
 
+	void new_patch() {
+		std::string name = "Untitled Patch " + std::to_string((uint8_t)HAL_GetTick());
+		view_patch_.blank_patch(name);
+
+		name += ".yml";
+		view_patch_loc_.filename.copy(name);
+		view_patch_loc_.vol = Volume::RamDisk;
+	}
+
 	bool write_patch(std::string_view filename = "") {
 		if (filename == "")
 			filename = view_patch_loc_.filename;
@@ -143,6 +143,15 @@ public:
 		if (!comm_.send_message(message))
 			return false;
 
+		return true;
+	}
+
+	bool request_reset_factory_patches() {
+		IntercoreStorageMessage message{
+			.message_type = RequestFactoryResetPatches,
+		};
+		if (!comm_.send_message(message))
+			return false;
 		return true;
 	}
 
