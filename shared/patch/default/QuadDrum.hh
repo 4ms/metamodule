@@ -1,0 +1,383 @@
+static char QuadDrum_patch[] =
+	R"(
+PatchData:
+  patch_name: Quad Drum
+  description: 'Two Djembes, two SynthDrums. Top row of inputs = Triggers. Bottom row = 1V/oct. Top row of outs = individual. Outs 1,2 = Stereo Mix'
+  module_slugs:
+    0: HubMedium
+    1: StMix
+    2: Drum
+    3: Drum
+    4: Djembe
+    5: Djembe
+  int_cables:
+    - out:
+        module_id: 3
+        jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 6
+      color: 61865
+    - out:
+        module_id: 2
+        jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 4
+      color: 35419
+    - out:
+        module_id: 4
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+      color: 13501
+    - out:
+        module_id: 5
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 2
+      color: 35921
+  mapped_ins:
+    - panel_jack_id: 3
+      ins:
+        - module_id: 3
+          jack_id: 1
+    - panel_jack_id: 2
+      ins:
+        - module_id: 2
+          jack_id: 1
+    - panel_jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 0
+    - panel_jack_id: 1
+      ins:
+        - module_id: 5
+          jack_id: 0
+    - panel_jack_id: 6
+      ins:
+        - module_id: 4
+          jack_id: 4
+    - panel_jack_id: 7
+      ins:
+        - module_id: 5
+          jack_id: 4
+    - panel_jack_id: 4
+      ins:
+        - module_id: 2
+          jack_id: 0
+    - panel_jack_id: 5
+      ins:
+        - module_id: 3
+          jack_id: 0
+  mapped_outs:
+    - panel_jack_id: 4
+      out:
+        module_id: 4
+        jack_id: 0
+    - panel_jack_id: 5
+      out:
+        module_id: 5
+        jack_id: 0
+    - panel_jack_id: 6
+      out:
+        module_id: 2
+        jack_id: 1
+    - panel_jack_id: 7
+      out:
+        module_id: 3
+        jack_id: 1
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 1
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0
+    - module_id: 1
+      param_id: 1
+      value: 0
+    - module_id: 1
+      param_id: 2
+      value: 0.374699
+    - module_id: 1
+      param_id: 3
+      value: 0.340964
+    - module_id: 1
+      param_id: 4
+      value: 0.361446
+    - module_id: 1
+      param_id: 5
+      value: 0.631325
+    - module_id: 1
+      param_id: 6
+      value: 0.36988
+    - module_id: 1
+      param_id: 7
+      value: 0.637349
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 0.274699
+    - module_id: 2
+      param_id: 2
+      value: 0.374699
+    - module_id: 2
+      param_id: 3
+      value: 0
+    - module_id: 2
+      param_id: 4
+      value: 0.00240979
+    - module_id: 2
+      param_id: 5
+      value: 0.2
+    - module_id: 2
+      param_id: 6
+      value: 0.99759
+    - module_id: 2
+      param_id: 7
+      value: 0.00240979
+    - module_id: 2
+      param_id: 8
+      value: 0.383132
+    - module_id: 3
+      param_id: 0
+      value: 0.33494
+    - module_id: 3
+      param_id: 1
+      value: 0.00240964
+    - module_id: 3
+      param_id: 2
+      value: 0.340964
+    - module_id: 3
+      param_id: 3
+      value: 0.33494
+    - module_id: 3
+      param_id: 4
+      value: 0.122892
+    - module_id: 3
+      param_id: 5
+      value: 0.328916
+    - module_id: 3
+      param_id: 6
+      value: 0.122892
+    - module_id: 3
+      param_id: 7
+      value: 0.210843
+    - module_id: 3
+      param_id: 8
+      value: 0
+    - module_id: 4
+      param_id: 0
+      value: 0.2
+    - module_id: 4
+      param_id: 1
+      value: 0.483133
+    - module_id: 4
+      param_id: 2
+      value: 0.478313
+    - module_id: 4
+      param_id: 3
+      value: 0.572289
+    - module_id: 5
+      param_id: 0
+      value: 0.328916
+    - module_id: 5
+      param_id: 1
+      value: 0.5
+    - module_id: 5
+      param_id: 2
+      value: 0.5
+    - module_id: 5
+      param_id: 3
+      value: 0
+  mapped_knobs:
+    - name: Pitch+Strike+Vo
+      set:
+        - panel_knob_id: 0
+          module_id: 4
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 4
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 5
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 4
+          module_id: 5
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 1
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 2
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 2
+          param_id: 7
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 2
+          param_id: 6
+          curve_type: 0
+          min: 1
+          max: 0
+        - panel_knob_id: 8
+          module_id: 1
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
+          module_id: 3
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 3
+          param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 3
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 1
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: Synth Drums
+      set:
+        - panel_knob_id: 0
+          module_id: 2
+          param_id: 5
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 2
+          param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 2
+          param_id: 7
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 3
+          param_id: 5
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 4
+          module_id: 3
+          param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 3
+          param_id: 8
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 2
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 2
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 2
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
+          module_id: 3
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 3
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 3
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+
+'vcvModuleStates': []
+
+)";
