@@ -29,10 +29,18 @@ lv_obj_set_style_pad_top(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 4,  LV_P
 lv_obj_set_style_pad_bottom(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 4,  LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0x444444),  LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_bg_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_border_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 lv_obj_set_style_border_side(lv_tabview_get_tab_btns(ui_SystemMenuTabView), LV_BORDER_SIDE_FULL,  LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0xFD8B18),  LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 128,  LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 2,  LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 3,  LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0xFD8B18),  LV_PART_MAIN | LV_STATE_CHECKED|LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 128,  LV_PART_MAIN| LV_STATE_CHECKED|LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 2,  LV_PART_MAIN| LV_STATE_CHECKED|LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 3,  LV_PART_MAIN| LV_STATE_CHECKED|LV_STATE_FOCUS_KEY);
 
 lv_obj_set_style_radius(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 12,  LV_PART_ITEMS| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0x777777),  LV_PART_ITEMS | LV_STATE_DEFAULT );
@@ -89,8 +97,38 @@ lv_label_set_text(ui_SystemMenuExpanders,"Expanders connected:");
 lv_obj_set_style_text_font(ui_SystemMenuExpanders, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SystemMenuPrefs = lv_tabview_add_tab(ui_SystemMenuTabView, "Prefs");
+lv_obj_set_flex_flow(ui_SystemMenuPrefs,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_SystemMenuPrefs, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_set_style_bg_color(ui_SystemMenuPrefs, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_SystemMenuPrefs, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_ResetFactoryPatchesDescription = lv_label_create(ui_SystemMenuPrefs);
+lv_obj_set_width( ui_ResetFactoryPatchesDescription, lv_pct(100));
+lv_obj_set_height( ui_ResetFactoryPatchesDescription, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_ResetFactoryPatchesDescription, LV_ALIGN_CENTER );
+lv_label_set_text(ui_ResetFactoryPatchesDescription,"Restore all patches stored internally to factory defaults:");
+
+ui_ResetFactoryPatchesButton = lv_btn_create(ui_SystemMenuPrefs);
+lv_obj_set_width( ui_ResetFactoryPatchesButton, LV_SIZE_CONTENT);  /// 100
+lv_obj_set_height( ui_ResetFactoryPatchesButton, LV_SIZE_CONTENT);   /// 50
+lv_obj_set_align( ui_ResetFactoryPatchesButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_ResetFactoryPatchesButton, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
+lv_obj_clear_flag( ui_ResetFactoryPatchesButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_bg_color(ui_ResetFactoryPatchesButton, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ResetFactoryPatchesButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_ResetFactoryPatchesButton, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_ResetFactoryPatchesButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_ResetFactoryPatchesButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ResetFactoryPatchesButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ResetFactoryPatchesButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_ResetFactoryPatchesButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_ResetFactoryPatchesButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_ResetFactoryPatchesLabel = lv_label_create(ui_ResetFactoryPatchesButton);
+lv_obj_set_width( ui_ResetFactoryPatchesLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_ResetFactoryPatchesLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_ResetFactoryPatchesLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_ResetFactoryPatchesLabel,"Reset Factory Patches");
 
 ui_SystemMenuTest = lv_tabview_add_tab(ui_SystemMenuTabView, "Check");
 lv_obj_set_style_bg_color(ui_SystemMenuTest, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -127,6 +165,12 @@ lv_obj_clear_flag( ui_SystemMenuUpdateFWBut, LV_OBJ_FLAG_SCROLLABLE );    /// Fl
 lv_obj_set_style_radius(ui_SystemMenuUpdateFWBut, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_SystemMenuUpdateFWBut, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_SystemMenuUpdateFWBut, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_SystemMenuUpdateFWBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_SystemMenuUpdateFWBut, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_SystemMenuUpdateFWBut, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_SystemMenuUpdateFWBut, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_SystemMenuUpdateFWBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_SystemMenuUpdateFWBut, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 ui_SystemMenuUpdateFWlabel = lv_label_create(ui_SystemMenuUpdateFWBut);
 lv_obj_set_width( ui_SystemMenuUpdateFWlabel, LV_SIZE_CONTENT);  /// 1

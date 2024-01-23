@@ -18,6 +18,7 @@ struct SystemMenuPage : PageBase {
 	SystemMenuPage(PatchContext info)
 		: PageBase{info, PageId::SystemMenu}
 		, fwupdate_tab{patch_storage, patch_playloader}
+		, prefs_tab{patch_storage}
 		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
 		init_bg(ui_SystemMenu);
@@ -50,6 +51,8 @@ struct SystemMenuPage : PageBase {
 
 		} else if (active_tab == Tabs::Prefs) {
 			prefs_tab.update();
+			if (pressed_back && prefs_tab.consume_back_event())
+				pressed_back = false;
 
 		} else if (active_tab == Tabs::Status) {
 			status_tab.update();
@@ -79,10 +82,12 @@ private:
 		if (!page)
 			return;
 
+		lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
+		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
+
 		switch (lv_btnmatrix_get_selected_btn(page->tabs)) {
 			case Tabs::Status: {
 				page->active_tab = Tabs::Status;
-				lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
 				page->status_tab.prepare_focus(page->group);
 				break;
 			}
@@ -95,14 +100,12 @@ private:
 
 			case Tabs::Check: {
 				page->active_tab = Tabs::Check;
-				lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
 				page->check_tab.prepare_focus(page->group);
 				break;
 			}
 
 			case Tabs::Prefs: {
 				page->active_tab = Tabs::Prefs;
-				lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
 				page->prefs_tab.prepare_focus(page->group);
 				break;
 			}
