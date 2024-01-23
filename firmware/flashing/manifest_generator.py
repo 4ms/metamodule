@@ -18,15 +18,13 @@ def process_file(dest_dir, filename, imagetype, *, name=None, address=None):
         entry = dict()
 
         entry["filename"] = os.path.basename(filename)
-        entry["type"] = imagetype
+        entry["type"]     = imagetype
         entry["filesize"] = os.stat(filename).st_size
-        entry["md5"] = hashlib.md5(file.read()).hexdigest()
+        entry["md5"]      = hashlib.md5(file.read()).hexdigest()
+        entry["address"]  = int(address)
 
         if name is not None:
             entry["name"] = name
-
-        if address is not None:
-            entry["address"] = int(address)
 
         try:
             shutil.copyfile(filename, os.path.join(dest_dir, os.path.basename(filename)))
