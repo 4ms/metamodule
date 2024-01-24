@@ -40,4 +40,9 @@ bool FlashLoader::write_sectors(uint32_t base_addr, std::span<char> buffer) {
 	return write_sectors(base_addr, buff_u8);
 }
 
+bool FlashLoader::read_sectors(uint32_t base_addr, std::span<uint8_t> buffer)
+{
+	return flash.read(buffer.data(), base_addr, buffer.size());
+}
+
 } // namespace MetaModule

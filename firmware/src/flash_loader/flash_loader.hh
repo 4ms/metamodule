@@ -13,6 +13,8 @@ public:
 	bool write_sectors(uint32_t base_addr, std::span<uint8_t> buffer);
 	bool write_sectors(uint32_t base_addr, std::span<char> buffer);
 
+	bool read_sectors(uint32_t base_addr, std::span<uint8_t> buffer);
+
 private:
 	mdrivlib::QSpiFlash flash;
 };
