@@ -74,14 +74,17 @@ struct PatchViewPage : PageBase {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
-		if (active_knob_set == page_list.get_active_knobset() && patch_revision == page_list.get_patch_revision() &&
-			displayed_patch_loc_hash == args.patch_loc_hash)
+		// don't redraw/reload patch is nothing has changed
+		if (!gui_state.force_redraw_patch && active_knob_set == page_list.get_active_knobset() &&
+			patch_revision == page_list.get_patch_revision() && displayed_patch_loc_hash == args.patch_loc_hash)
 		{
 			is_ready = true;
 			watch_lights();
 			update_map_ring_style();
 			return;
 		}
+
+		gui_state.force_redraw_patch = false;
 
 		if (args.patch_loc_hash)
 			displayed_patch_loc_hash = args.patch_loc_hash.value();

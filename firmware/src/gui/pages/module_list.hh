@@ -61,7 +61,7 @@ struct ModuleListPage : PageBase {
 	void update() final {
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (roller_shown) {
-				page_list.increment_patch_revision(); //force redraw TODO: put this in args
+				gui_state.force_redraw_patch = true;
 				load_prev_page();
 			} else {
 				show_roller();
