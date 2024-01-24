@@ -23,6 +23,11 @@ void BufferedUSART2::init()
     initPeripheral();
 }
 
+void BufferedUSART2::deinit()
+{
+    LL_USART_DisableIT_RXNE_RXFNE(USART_PERIPH);
+}
+
 bool BufferedUSART2::setBaudrate(uint32_t baudRate)
 {
     return commMain.set_baudrate(baudRate);
