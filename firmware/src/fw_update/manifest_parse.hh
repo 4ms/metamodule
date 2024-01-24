@@ -37,6 +37,11 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updateFile) {
 				auto md5_sv = std::string_view{md5.data(), md5.size()};
 				updateFile->md5 = md5_sv;
 			}
+
+			if (n.has_child("name"))
+			{
+				n["name"] >> updateFile->name;
+			}
 			return true;
 			
 		} else {

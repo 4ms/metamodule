@@ -14,6 +14,7 @@ TEST_CASE("Parse json") {
 "files": [
 	{
 		"type": "app",
+		"name": "Main Application",
 		"filename": "metamodule-main-v1.2.3.uimg",
 		"filesize": 1234567,
 		"md5": "abaa17e7f9d854b402fc97aa26182f7c",
