@@ -13,6 +13,7 @@ public:
 
 	struct Status {
 		State state{State::Idle};
+		std::string name;
 		std::size_t file_size{0};
 		std::size_t bytes_completed{0};
 		std::string error_message{};
@@ -44,6 +45,7 @@ private:
 
 	std::size_t current_file_idx;
 	std::size_t current_file_size;
+	std::string current_file_name;
 
 	struct SharedMem
 	{

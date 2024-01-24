@@ -103,7 +103,8 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
 					if (auto checksumValue = thisFile.md5; checksumValue)
 					{
 						sharedMem->bytes_processed = 0;
-						current_file_size = manifest.files[current_file_idx].filesize;
+						current_file_size = thisFile.filesize;
+						current_file_name = thisFile.name;
 
 						auto result = file_storage.request_checksum_compare(*target, *checksumValue, thisFile.address, thisFile.filesize, &sharedMem->bytes_processed);
 
@@ -156,6 +157,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
 
 				sharedMem->bytes_processed = 0;
 				current_file_size = thisFile.filesize;
+				current_file_name = thisFile.name;
 
 				if (auto target = GetTargetForUpdateType(thisFile.type); target)
 				{
@@ -196,8 +198,8 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
 	}
 
 	return state == State::Error ?
-		Status{state, current_file_size, sharedMem->bytes_processed, error_message} :
-		Status{state, current_file_size, sharedMem->bytes_processed};    
+		Status{state, current_file_name, current_file_size, sharedMem->bytes_processed, error_message} :
+		Status{state, current_file_name, current_file_size, sharedMem->bytes_processed};    
 }
 
 void FirmwareUpdaterProxy::abortWithMessage(const char* message)

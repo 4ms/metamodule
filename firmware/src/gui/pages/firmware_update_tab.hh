@@ -88,10 +88,10 @@ struct FirmwareUpdateTab {
 					state = State::Failed;
 
 				} else if (status.state == FirmwareUpdaterProxy::Verifying) {
-					display_progress("Comparing with target area", status.file_size, status.bytes_completed);
+					display_progress("Checking target memory checksum", status.name, status.file_size, status.bytes_completed);
 
 				} else if (status.state == FirmwareUpdaterProxy::Writing) {
-					display_progress("Writing file", status.file_size, status.bytes_completed);
+					display_progress("Writing to memory", status.name, status.file_size, status.bytes_completed);
 
 				} else if (status.state == FirmwareUpdaterProxy::Success) {
 					display_success();
@@ -199,10 +199,12 @@ private:
 		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
 
-	void display_progress(std::string_view message, int file_size, int bytes_completed) {
+	void display_progress(std::string_view message, std::string file_name, int file_size, int bytes_completed) {
 		if (file_size > 0 && bytes_completed < file_size) {
 			lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
-								  "%.*s:\n%u of %u kB\nDO NOT POWER OFF",
+								  "%.*s: %.*s\n%u of %u kB\nDO NOT POWER OFF",
+								  (int)file_name.size(),
+								  file_name.data(),
 								  (int)message.size(),
 								  message.data(),
 								  unsigned((bytes_completed) / 1024),
@@ -216,7 +218,7 @@ private:
 			lv_show(ui_FWUpdateSpinner);
 			lv_hide(ui_SystemMenUpdateProgressBar);
 			lv_label_set_text_fmt(
-				ui_SystemMenuUpdateMessage, "%.*s:\nDO NOT POWER OFF", (int)message.size(), message.data());
+				ui_SystemMenuUpdateMessage, "%.*s: %.*s\nDO NOT POWER OFF", (int)file_name.size(), file_name.data(), (int)message.size(), message.data());
 		}
 	}
 
