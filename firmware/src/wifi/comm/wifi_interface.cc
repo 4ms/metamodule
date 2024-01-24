@@ -107,9 +107,19 @@ void init(PatchStorage* storage)
 {
     printf("Initializing Wifi\n");
 
-    patchStorage = storage;
+    patchStorage = storage;   
+}
 
+void start()
+{
+    pr_dbg("Wifi: Starting RX\n");
     BufferedUSART2::init();
+}
+
+void stop()
+{
+    pr_dbg("Wifi: Stopping RX\n");
+    BufferedUSART2::deinit();
 }
 
 
