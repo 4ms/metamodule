@@ -20,6 +20,8 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
+  ${FWDIR}/src/fw_update/hash/hash_processor.cc
+  ${FWDIR}/src/fw_update/hash/md5_hash.c
   ${FWDIR}/src/fw_update/firmware_writer.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
   ${FWDIR}/src/usb/usb_drive_device.cc
