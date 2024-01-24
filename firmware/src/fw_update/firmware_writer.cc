@@ -1,6 +1,7 @@
 #include "firmware_writer.hh"
  
 #include <wifi/flasher/flasher.h>
+#include <wifi/comm/wifi_interface.hh>
 #include "flash_loader/flash_loader.hh"
 
 namespace MetaModule
@@ -73,6 +74,11 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 {
 	IntercoreStorageMessage returnValue;
 
+	// Stop wifi reception before long running operation
+	#ifdef ENABLE_WIFI_BRIDGE
+	WifiInterface::stop();
+	#endif
+
 	auto result = Flasher::init(230400);
 
 	if (result == ESP_LOADER_SUCCESS)
@@ -107,6 +113,11 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 IntercoreStorageMessage FirmwareWriter::flashWifi(FatFileIO* fileio, std::string_view filename, uint32_t address, const uint32_t length, uint32_t& bytesWritten)
 {
 	IntercoreStorageMessage returnValue;
+
+	// Stop wifi reception before long running operation
+	#ifdef ENABLE_WIFI_BRIDGE
+	WifiInterface::stop();
+	#endif
 
 	auto result = Flasher::init(230400);
 
@@ -185,6 +196,11 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumQSPI(uint32_t address, ui
 IntercoreStorageMessage FirmwareWriter::flashQSPI(FatFileIO* fileio, std::string_view filename, uint32_t address, const uint32_t length, uint32_t& bytesWritten)
 {
     FlashLoader loader;
+
+	// Stop wifi reception before long running operation
+	#ifdef ENABLE_WIFI_BRIDGE
+	WifiInterface::stop();
+	#endif
 
 	constexpr static uint32_t FlashSectorSize = 4096;
 	std::array<uint8_t, FlashSectorSize> BatchBuffer;
