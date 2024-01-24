@@ -4,6 +4,8 @@
 #include <wifi/comm/wifi_interface.hh>
 #include "flash_loader/flash_loader.hh"
 
+#include "hash/hash_processor.hh"
+
 namespace MetaModule
 {
 
@@ -189,8 +191,37 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(FatFileIO* fileio, std::string
 
 IntercoreStorageMessage FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum)
 {
-	// TODO: implement calculating checksum
-	return {.message_type = ChecksumMismatch};
+	FlashLoader loader;
+	MD5Processor processor;
+	
+	const std::size_t BlockSize = 4096;
+	std::array<uint8_t, BlockSize> BlockBuffer;
+
+	std::size_t offset = 0;
+	while (offset < length)
+	{
+		auto bytesToRead = std::min<std::size_t>(length-offset, BlockBuffer.size());
+		auto thisReadArea = std::span<uint8_t>(BlockBuffer.data(), bytesToRead);
+
+		auto read_result = loader.read_sectors(address + offset, thisReadArea);
+		
+		if (read_result)
+		{
+			processor.update(thisReadArea);
+			offset += bytesToRead;
+		}
+		else
+		{
+			return {.message_type = ChecksumFailed};
+		}
+	}
+
+	auto str_digest = to_hex_string(processor.getDigest());
+	auto str_digest_sv = std::string_view(str_digest.data(), str_digest.size());
+
+	auto match = checksum.compare(str_digest_sv) == 0;
+
+	return {.message_type = match ? ChecksumMatch : ChecksumMismatch};
 }
 
 IntercoreStorageMessage FirmwareWriter::flashQSPI(FatFileIO* fileio, std::string_view filename, uint32_t address, const uint32_t length, uint32_t& bytesWritten)
