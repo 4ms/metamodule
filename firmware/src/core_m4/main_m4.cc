@@ -8,9 +8,12 @@
 #include "drivers/rcc.hh"
 #include "drivers/system_clocks.hh"
 #include "fs/fatfs/sd_host.hh"
-#include "fs/fs_manager.hh"
 #include "hsem_handler.hh"
 #include "usb/usb_manager.hh"
+
+#include "patch_file/patch_storage.hh"
+#include "fw_update/firmware_file_finder.hh"
+#include "fw_update/firmware_writer.hh"
 
 #ifdef ENABLE_WIFI_BRIDGE
 #include <wifi_interface.hh>
@@ -54,18 +57,22 @@ void main() {
 	// SD Card
 	SDCardHost sd;
 
-	FilesystemManager fs{usb.get_msc_fileio(), sd.get_fileio(), SharedMemoryS::ptrs.icc_message};
+	// ICC dependant modules
+	PatchStorage patch_storage{sd.get_fileio(), usb.get_msc_fileio()};
+	FirmwareFileFinder firmware_files{sd.get_fileio(), usb.get_msc_fileio()};
+	FirmwareWriter firmware_writer{sd.get_fileio(), usb.get_msc_fileio()};
+
+	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm(*SharedMemoryS::ptrs.icc_message);
+
 	if (reload_default_patches)
-		fs.reload_default_patches();
+		patch_storage.reload_default_patches();
 
 #ifdef ENABLE_WIFI_BRIDGE
-	WifiInterface::init(&fs.get_patch_storage());
+	WifiInterface::init(&patch_storage);
 #endif
 
 	// Controls
-	auto param_block_base = SharedMemoryS::ptrs.param_block;
-	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
-	Controls controls{*param_block_base, *auxsignal_buffer, usb.get_midi_host()};
+	Controls controls{*SharedMemoryS::ptrs.param_block, *SharedMemoryS::ptrs.auxsignal_block, usb.get_midi_host()};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
@@ -85,7 +92,16 @@ void main() {
 
 		usb.process();
 		sd.process();
-		fs.process();
+		
+		auto message = intercore_comm.get_new_message();
+		firmware_files.handle_message(message);
+		patch_storage.handle_message(message);
+		firmware_writer.handle_message(message);
+
+		firmware_files.send_pending_message(intercore_comm);
+		patch_storage.send_pending_message(intercore_comm);
+		firmware_writer.send_pending_message(intercore_comm);
+
 
 #ifdef ENABLE_WIFI_BRIDGE
 		WifiInterface::run();
