@@ -22,27 +22,20 @@ struct FirmwareFileFinder {
 		usb_changes_.reset();
 	}
 
-	void handle_message(IntercoreStorageMessage &message) {
+	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
 
 		if (message.message_type == RequestFirmwareFile) {
-			scan_all_for_manifest();
-			message.message_type = None;
+			return scan_all_for_manifest();
 		}
 
 		if (message.message_type == RequestLoadFileToRam) {
 			pr_trace("M4: got RequestLoadFileToRam\n");
-			load_file(message);
-			message.message_type = None;
+			return load_file(message);
 		}
 
 		poll_media_change();
-	}
 
-	void send_pending_message(InterCoreComm &comm) {
-		if (pending_send_message.message_type != None) {
-			if (comm.send_message(pending_send_message))
-				pending_send_message.message_type = None;
-		}
+		return std::nullopt;
 	}
 
 private:
@@ -51,7 +44,7 @@ private:
 		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
 	}
 
-	void scan_all_for_manifest() {
+	IntercoreStorageMessage scan_all_for_manifest() {
 		pr_trace("M4: scanning all volumes for firmware manifest files (metamodule*.json)\n");
 
 		std::optional<Volume> fw_file_vol{};
@@ -68,13 +61,18 @@ private:
 		}
 
 		if (fw_file_vol) {
-			pending_send_message.message_type = FirmwareFileFound;
-			pending_send_message.filename.copy(found_filename);
-			pending_send_message.bytes_read = found_filesize;
-			pending_send_message.vol_id = fw_file_vol.value();
+			IntercoreStorageMessage result {
+				.message_type = FirmwareFileFound,
+				.bytes_read = found_filesize,
+				.vol_id = fw_file_vol.value(),
+			};
+
+			result.filename.copy(found_filename);
+
+			return result;
 
 		} else {
-			pending_send_message.message_type = FirmwareFileNotFound;
+			return {.message_type = FirmwareFileNotFound};
 		}
 	}
 
@@ -98,7 +96,7 @@ private:
 		return true;
 	}
 
-	void load_file(IntercoreStorageMessage &message) {
+	IntercoreStorageMessage load_file(const IntercoreStorageMessage &message) {
 		FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
 							(message.vol_id == Volume::SDCard) ? &sdcard_ :
 																 nullptr;
@@ -106,10 +104,10 @@ private:
 
 		if (success) {
 			pr_trace("M4: Loaded OK.\n");
-			pending_send_message.message_type = LoadFileToRamSuccess;
+			return {.message_type = LoadFileToRamSuccess};
 		} else {
 			pr_err("M4: Failed Load\n");
-			pending_send_message.message_type = LoadFileToRamFailed;
+			return {.message_type = LoadFileToRamFailed};
 		}
 	}
 
@@ -117,8 +115,6 @@ private:
 	FatFileIO &usbdrive_;
 	PollChange sd_changes_{1000};
 	PollChange usb_changes_{1000};
-
-	IntercoreStorageMessage pending_send_message{.message_type = None};
 
 	StaticString<255> found_filename;
 	uint32_t found_filesize = 0;

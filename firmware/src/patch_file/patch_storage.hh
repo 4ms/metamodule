@@ -12,6 +12,7 @@
 #include "patch_file/patch_fileio.hh"
 #include "pr_dbg.hh"
 #include "util/poll_change.hh"
+#include <optional>
 
 namespace MetaModule
 {
@@ -32,7 +33,6 @@ class PatchStorage {
 
 	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
 	using enum IntercoreStorageMessage::MessageType;
-	IntercoreStorageMessage pending_send_message{.message_type = None};
 
 public:
 	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
@@ -85,17 +85,9 @@ public:
 	}
 
 
-	void send_pending_message(InterCoreComm2 &comm) {
-		if (pending_send_message.message_type != None) {
-			// Keep trying to send message until suceeds
-			if (comm.send_message(pending_send_message))
-				pending_send_message.message_type = None;
-		}
-	}
-
-	void handle_message(IntercoreStorageMessage &message) {
+	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
 		if (message.message_type == RequestRefreshPatchList) {
-			pending_send_message.message_type = PatchListUnchanged;
+			IntercoreStorageMessage result {.message_type = PatchListUnchanged};
 
 			auto *patch_dir_list_ = message.patch_dir_list;
 
@@ -108,7 +100,7 @@ public:
 					if (sdcard_.is_mounted())
 						PatchFileIO::add_directory(sdcard_, patch_dir_list_->volume_root(Volume::SDCard));
 
-					pending_send_message.message_type = PatchListChanged;
+					result.message_type = PatchListChanged;
 				}
 
 				if (usb_changes_.take_change()) {
@@ -118,7 +110,7 @@ public:
 					if (usbdrive_.is_mounted())
 						PatchFileIO::add_directory(usbdrive_, patch_dir_list_->volume_root(Volume::USB));
 
-					pending_send_message.message_type = PatchListChanged;
+					result.message_type = PatchListChanged;
 				}
 
 				if (norflash_changes_.take_change()) {
@@ -126,30 +118,35 @@ public:
 
 					PatchFileIO::add_directory(norflash_, patch_dir_list_->volume_root(Volume::NorFlash));
 
-					pending_send_message.message_type = PatchListChanged;
+					result.message_type = PatchListChanged;
 				}
 			}
-
-			message.message_type = None; //mark as handled
+			return result;
 		}
 
-		if (message.message_type == RequestPatchData) {
-			pending_send_message.message_type = PatchDataLoadFail;
-			pending_send_message.filename = message.filename;
-			pending_send_message.vol_id = message.vol_id;
-			pending_send_message.bytes_read = 0;
+		else if (message.message_type == RequestPatchData) {
+
+			IntercoreStorageMessage result {
+				.message_type = PatchDataLoadFail,
+				.bytes_read = 0,
+				.vol_id = message.vol_id,
+				.filename = message.filename,
+			};
 
 			if ((uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
 				auto bytes_read = load_patch_file(message.buffer, message.vol_id, message.filename);
 				if (bytes_read) {
-					pending_send_message.message_type = PatchDataLoaded;
-					pending_send_message.bytes_read = bytes_read;
+					result.message_type = PatchDataLoaded;
+					result.bytes_read = bytes_read;
 				}
 			}
-			message.message_type = None; //mark as handled
+			
+			return result;
 		}
 
 		poll_media_change();
+
+		return std::nullopt;
 	}
 
 	PatchDirList getPatchList()

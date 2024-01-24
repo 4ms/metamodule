@@ -94,14 +94,38 @@ void main() {
 		sd.process();
 		
 		auto message = intercore_comm.get_new_message();
-		firmware_files.handle_message(message);
-		patch_storage.handle_message(message);
-		firmware_writer.handle_message(message);
 
-		firmware_files.send_pending_message(intercore_comm);
-		patch_storage.send_pending_message(intercore_comm);
-		firmware_writer.send_pending_message(intercore_comm);
+		if (message.message_type != IntercoreStorageMessage::MessageType::None)
+		{
+			// Function to pass a message to a receiver
+			// If message is handled by the receiver, the response is sent
+			// otherwise we can continue with the next receiver
+			auto process_receiver = [&intercore_comm, &message](auto& receiver)
+			{
+				if (auto response = receiver.handle_message(message); response)
+				{
+					// mark message as handled
+					message.message_type = IntercoreStorageMessage::MessageType::None;
 
+					// try to send response infinitely
+					while (not intercore_comm.send_message(*response));
+					return true;
+				}
+				return false;
+			};
+
+			// Handle all receivers
+			if (not process_receiver(firmware_files))
+			{
+				if (not process_receiver(patch_storage))
+				{
+					if (not process_receiver(firmware_writer))
+					{
+						pr_err("ICC message of type %u not handled\n", message.message_type);
+					}
+				}
+			}
+		}
 
 #ifdef ENABLE_WIFI_BRIDGE
 		WifiInterface::run();

@@ -11,32 +11,28 @@ FirmwareWriter::FirmwareWriter(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
 	, usbdrive_{usb_fileio} {
 }
 
-void FirmwareWriter::handle_message(IntercoreStorageMessage &message)
+std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const IntercoreStorageMessage& message)
 {
 	if (message.message_type == StartChecksumCompare)
 	{
-		message.message_type = None;
-
 		pr_dbg("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 
 		if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI)
 		{
-			pending_send_message = compareChecksumWifi(message.address, message.length, {message.checksum.data()});
+			return compareChecksumWifi(message.address, message.length, {message.checksum.data()});
 		}
 		else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI)
 		{
-			pending_send_message = compareChecksumQSPI(message.address, message.length, {message.checksum.data()});
+			return compareChecksumQSPI(message.address, message.length, {message.checksum.data()});
 		}
 		else
 		{
 			pr_err("Undefined flash target %u\n", message.flashTarget);
-			pending_send_message.message_type = ChecksumFailed;
+			return IntercoreStorageMessage{.message_type = ChecksumFailed};
 		}
 	}
 	else if (message.message_type == StartFlashing)
 	{
-		message.message_type = None;
-
 		pr_dbg("-> Start flashing to 0x%08x\n", message.address);
 
 		FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
@@ -47,24 +43,29 @@ void FirmwareWriter::handle_message(IntercoreStorageMessage &message)
 		{
 			if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI)
 			{
-				pending_send_message = flashWifi(fileio, message.filename, message.address, message.length, *message.bytes_processed);
+				return flashWifi(fileio, message.filename, message.address, message.length, *message.bytes_processed);
 			}
 			else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI)
 			{
-				pending_send_message = flashQSPI(fileio, message.filename, message.address, message.length, *message.bytes_processed);
+				return flashQSPI(fileio, message.filename, message.address, message.length, *message.bytes_processed);
 			}
 			else
 			{
 				pr_err("Undefined flash target %u\n", message.flashTarget);
-				pending_send_message.message_type = ChecksumFailed;
+				return IntercoreStorageMessage{.message_type = FlashingFailed};
 			}
 		}
 		else
 		{
 			pr_err("Invalid volume id %u for update file\n", message.vol_id);
-			pending_send_message.message_type = FlashingFailed;
+			return IntercoreStorageMessage{.message_type = FlashingFailed};
 		}
 	}
+	else
+	{
+		return std::nullopt;
+	}
+
 
 }
 
@@ -229,13 +230,6 @@ IntercoreStorageMessage FirmwareWriter::flashQSPI(FatFileIO* fileio, std::string
 
 
 	return errorDetected ? IntercoreStorageMessage{.message_type = FlashingFailed} : IntercoreStorageMessage{.message_type = FlashingOk};
-}
-
-void FirmwareWriter::send_pending_message(InterCoreComm &comm) {
-	if (pending_send_message.message_type != None) {
-		if (comm.send_message(pending_send_message))
-			pending_send_message.message_type = None;
-	}
 }
 
 
