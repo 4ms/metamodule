@@ -85,19 +85,36 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 
 	if (result == ESP_LOADER_SUCCESS)
 	{
-		result = Flasher::verify(address, length, checksum);
-		if (result == ESP_LOADER_ERROR_INVALID_MD5)
+		// Write to a dummy location so the following checksum operation does not fail
+		// TODO: This should be fixed in the esp_serial_flasher library
+		if (address >= 0x200000)
 		{
-			returnValue = {.message_type = ChecksumMismatch};
+			const std::size_t DummyAddress = 0x00600000;
+			uint8_t dummyByte = 0xFF;
+			result = Flasher::flash(DummyAddress, {&dummyByte, 1});
 		}
-		else if (result == ESP_LOADER_SUCCESS)
+
+		if (result == ESP_LOADER_SUCCESS)
 		{
-			pr_dbg("-> Checksum matches\n");
-			returnValue = {.message_type = ChecksumMatch};
+			result = Flasher::verify(address, length, checksum);
+			if (result == ESP_LOADER_ERROR_INVALID_MD5)
+			{
+				returnValue = {.message_type = ChecksumMismatch};
+			}
+			else if (result == ESP_LOADER_SUCCESS)
+			{
+				pr_dbg("-> Checksum matches\n");
+				returnValue = {.message_type = ChecksumMatch};
+			}
+			else
+			{
+				pr_dbg("-> Cannot get checksum\n");
+				returnValue = {.message_type = ChecksumFailed};
+			}
 		}
 		else
 		{
-			pr_dbg("-> Cannot get checksum\n");
+			pr_err("Cannot write dummy byte to wifi flash\n");
 			returnValue = {.message_type = ChecksumFailed};
 		}
 	}
