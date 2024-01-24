@@ -26,7 +26,7 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 		}
 		else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI)
 		{
-			return compareChecksumQSPI(message.address, message.length, {message.checksum.data()});
+			return compareChecksumQSPI(message.address, message.length, {message.checksum.data()}, *message.bytes_processed);
 		}
 		else
 		{
@@ -189,7 +189,7 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(FatFileIO* fileio, std::string
 	return returnValue;
 }
 
-IntercoreStorageMessage FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum)
+IntercoreStorageMessage FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum, uint32_t& bytesChecked)
 {
 	FlashLoader loader;
 	MD5Processor processor;
@@ -209,6 +209,7 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumQSPI(uint32_t address, ui
 		{
 			processor.update(thisReadArea);
 			offset += bytesToRead;
+			bytesChecked = offset;
 		}
 		else
 		{
