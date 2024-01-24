@@ -50,7 +50,8 @@ struct ModuleListPage : PageBase {
 	void prepare_focus() final {
 		populate_slugs();
 		drawn_module_idx = -1; //force redraw
-		draw_timer = lv_timer_create(draw_module_cb, 200, this);
+		draw_module();
+		draw_timer = lv_timer_create(draw_module_cb, 100, this);
 
 		show_roller();
 		lv_group_focus_obj(ui_ModuleListRoller);
@@ -76,13 +77,11 @@ struct ModuleListPage : PageBase {
 
 	void show_roller() {
 		roller_shown = true;
-		// lv_show(ui_ModuleListRollerPanel);
 		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
 	}
 
 	void hide_roller() {
 		roller_shown = false;
-		// lv_hide(ui_ModuleListRollerPanel);
 		lv_obj_set_width(ui_ModuleListRollerPanel, 2);
 		lv_group_set_editing(group, true);
 	}
