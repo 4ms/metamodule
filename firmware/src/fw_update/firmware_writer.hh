@@ -19,9 +19,9 @@ public:
 
 private:
 	IntercoreStorageMessage compareChecksumWifi(uint32_t, uint32_t, Checksum_t);
-	IntercoreStorageMessage flashWifi(FatFileIO* fileio, std::string_view filename, uint32_t address, const uint32_t length, uint32_t& bytesWritten);
+	IntercoreStorageMessage flashWifi(std::span<uint8_t>, uint32_t address, uint32_t& bytesWritten);
 	IntercoreStorageMessage compareChecksumQSPI(uint32_t, uint32_t, Checksum_t, uint32_t& bytesWritten);
-	IntercoreStorageMessage flashQSPI(FatFileIO* fileio, std::string_view filename, uint32_t address, const uint32_t length, uint32_t& bytesWritten);
+	IntercoreStorageMessage flashQSPI(std::span<uint8_t>, uint32_t address, uint32_t& bytesWritten);
 
 private:
 	FatFileIO &sdcard_;

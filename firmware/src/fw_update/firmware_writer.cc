@@ -3,6 +3,7 @@
 #include <wifi/flasher/flasher.h>
 #include <wifi/comm/wifi_interface.hh>
 #include "flash_loader/flash_loader.hh"
+#include "ram_buffer.hh"
 
 #include "hash/hash_processor.hh"
 
@@ -44,17 +45,38 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 
 		if (fileio != nullptr)
 		{
-			if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI)
+			auto workingBuffer = get_ram_buffer_server();
+
+			if (message.length <= workingBuffer.size())
 			{
-				return flashWifi(fileio, message.filename, message.address, message.length, *message.bytes_processed);
-			}
-			else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI)
-			{
-				return flashQSPI(fileio, message.filename, message.address, message.length, *message.bytes_processed);
+				auto readBuffer = workingBuffer.first(message.length);
+				auto bytesRead = fileio->read_file(message.filename, {(char*)workingBuffer.data(), workingBuffer.size()}, *message.bytes_processed);
+
+				if (bytesRead == message.length)
+				{
+					if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI)
+					{
+						return flashWifi(readBuffer, message.address, *message.bytes_processed);
+					}
+					else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI)
+					{
+						return flashQSPI(readBuffer, message.address, *message.bytes_processed);
+					}
+					else
+					{
+						pr_err("Undefined flash target %u\n", message.flashTarget);
+						return IntercoreStorageMessage{.message_type = FlashingFailed};
+					}
+				}
+				else
+				{
+					pr_err("Failed reading file to flash\n");
+					return IntercoreStorageMessage{.message_type = FlashingFailed};
+				}
 			}
 			else
 			{
-				pr_err("Undefined flash target %u\n", message.flashTarget);
+				pr_err("File to flash to large (%u) for working buffer (%u)\n", message.length, workingBuffer.size());
 				return IntercoreStorageMessage{.message_type = FlashingFailed};
 			}
 		}
@@ -129,7 +151,7 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 	return returnValue;
 }
 
-IntercoreStorageMessage FirmwareWriter::flashWifi(FatFileIO* fileio, std::string_view filename, uint32_t address, const uint32_t length, uint32_t& bytesWritten)
+IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uint32_t address, uint32_t& bytesWritten)
 {
 	IntercoreStorageMessage returnValue;
 
@@ -142,39 +164,29 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(FatFileIO* fileio, std::string
 
 	if (result == ESP_LOADER_SUCCESS)
 	{
-		std::array<uint8_t, 1024> BatchBuffer;
+		const std::size_t BatchSize = 1024;
 
-		result = Flasher::flash_start(address, length, BatchBuffer.size());
+		result = Flasher::flash_start(address, buffer.size(), BatchSize);
 
 		if (result == ESP_LOADER_SUCCESS)
 		{
 			bool error_during_writes = false;
 
-			while (bytesWritten < length)
+			while (bytesWritten < buffer.size())
 			{
-				auto to_read = std::min<std::size_t>(length - bytesWritten, BatchBuffer.size());
+				auto to_read = std::min<std::size_t>(buffer.size() - bytesWritten, BatchSize);
+				auto thisBatch = buffer.subspan(bytesWritten, to_read);
 
-				auto thisReadBuffer = std::span<char>((char*)BatchBuffer.data(), to_read);
-				auto bytesRead = fileio->read_file(filename, thisReadBuffer, bytesWritten);
+				result = Flasher::flash_process(thisBatch);
 
-				if (bytesRead == to_read)
+				if (result != ESP_LOADER_SUCCESS)
 				{
-					result = Flasher::flash_process(std::span<uint8_t>((uint8_t*)thisReadBuffer.data(), thisReadBuffer.size()));
-					if (result != ESP_LOADER_SUCCESS)
-					{
-						error_during_writes = true;
-						break;
-					}
-					else
-					{
-						bytesWritten += to_read;
-					}
+					error_during_writes = true;
+					break;
 				}
 				else
 				{
-					pr_err("Cannot read from update file in range %u - %u\n", bytesWritten, bytesWritten+to_read);
-					error_during_writes = true;
-					break;
+					bytesWritten += to_read;
 				}
 			}
 
@@ -242,7 +254,7 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumQSPI(uint32_t address, ui
 	return {.message_type = match ? ChecksumMatch : ChecksumMismatch};
 }
 
-IntercoreStorageMessage FirmwareWriter::flashQSPI(FatFileIO* fileio, std::string_view filename, uint32_t address, const uint32_t length, uint32_t& bytesWritten)
+IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uint32_t address, uint32_t& bytesWritten)
 {
     FlashLoader loader;
 
@@ -251,41 +263,30 @@ IntercoreStorageMessage FirmwareWriter::flashQSPI(FatFileIO* fileio, std::string
 	WifiInterface::stop();
 	#endif
 
-	constexpr static uint32_t FlashSectorSize = 4096;
-	std::array<uint8_t, FlashSectorSize> BatchBuffer;
+	const uint32_t FlashSectorSize = 4096;
+	const std::size_t BatchSize = FlashSectorSize;
 	bytesWritten = 0;
 
 	bool errorDetected = false;
 
     if (loader.check_flash_chip())
 	{
-		while (bytesWritten < length)
+		while (bytesWritten < buffer.size())
 		{
-			auto to_read = std::min<std::size_t>(length - bytesWritten, BatchBuffer.size());
+			auto to_read = std::min<std::size_t>(buffer.size() - bytesWritten, BatchSize);
+			auto thisBatch = buffer.subspan(bytesWritten, to_read);
+			
+			auto success = loader.write_sectors(address + bytesWritten, thisBatch);
 
-			auto thisReadBuffer = std::span<char>((char*)BatchBuffer.data(), to_read);
-			auto bytesRead = fileio->read_file(filename, thisReadBuffer, bytesWritten);
-
-			if (bytesRead == to_read)
+			if (success)
 			{
-				auto success = loader.write_sectors(address + bytesWritten, thisReadBuffer);
-
-				if (success)
-				{
-					bytesWritten += to_read;
-				}
-				else
-				{
-					errorDetected = true;
-					break;
-				}
+				bytesWritten += to_read;
 			}
 			else
 			{
-				pr_err("Cannot read from update file in range %u - %u\n", bytesWritten, bytesWritten+to_read);
 				errorDetected = true;
 				break;
-			}
+			}			
 		}
 	}
 	else
