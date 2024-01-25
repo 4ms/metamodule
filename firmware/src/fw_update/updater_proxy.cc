@@ -22,7 +22,7 @@ FirmwareUpdaterProxy::FirmwareUpdaterProxy(FileStorageProxy &file_storage)
 	, state(Idle)
 	, sharedMem(nullptr)
 {
-	auto ram_buffer = get_ram_buffer();
+	auto ram_buffer = get_ram_buffer_client();
 	assert(ram_buffer.size() >= sizeof(SharedMem));
 
 	sharedMem = new (ram_buffer.data()) SharedMem;
