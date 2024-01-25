@@ -3,6 +3,7 @@
 #include "ram_buffer.hh"
 #include "manifest_parse.hh"
 #include <cassert>
+#include <algorithm>
 
 namespace MetaModule
 {
@@ -72,6 +73,12 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process()
                 ManifestParser parser;
 
                 auto parseResult = parser.parse(manifestBuffer);
+
+				// uncomment the following to ignore files that point to bootloader areas
+				// std::erase_if(parseResult->files, [](auto file)
+				// {
+				// 	return file.type == UpdateType::App and file.address < 0x80000;
+				// });
 
                 if (parseResult and parseResult->files.size() > 0) {
                     manifest = *parseResult;
