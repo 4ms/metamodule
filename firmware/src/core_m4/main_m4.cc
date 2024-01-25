@@ -69,6 +69,7 @@ void main() {
 
 #ifdef ENABLE_WIFI_BRIDGE
 	WifiInterface::init(&patch_storage);
+	WifiInterface::start();
 #endif
 
 	// Controls
