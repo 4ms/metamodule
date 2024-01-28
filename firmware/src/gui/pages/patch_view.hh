@@ -74,10 +74,17 @@ struct PatchViewPage : PageBase {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
-		// don't redraw/reload patch is nothing has changed
-		if (!gui_state.force_redraw_patch && active_knob_set == page_list.get_active_knobset() &&
-			patch_revision == page_list.get_patch_revision() && displayed_patch_loc_hash == args.patch_loc_hash)
-		{
+		bool needs_refresh = false;
+		if (gui_state.force_redraw_patch)
+			needs_refresh = true;
+		if (knobset_settings.active_knobset != page_list.get_active_knobset())
+			needs_refresh = true;
+		if (patch_revision != page_list.get_patch_revision())
+			needs_refresh = true;
+		if (displayed_patch_loc_hash != args.patch_loc_hash)
+			needs_refresh = true;
+
+		if (!needs_refresh) {
 			is_ready = true;
 			watch_lights();
 			update_map_ring_style();
@@ -86,10 +93,18 @@ struct PatchViewPage : PageBase {
 
 		gui_state.force_redraw_patch = false;
 
+		if (displayed_patch_loc_hash != args.patch_loc_hash) {
+			args.view_knobset_id = 0;
+		}
+
+		if (args.view_knobset_id) {
+			knobset_settings.active_knobset = args.view_knobset_id.value();
+			page_list.set_active_knobset(knobset_settings.active_knobset);
+		}
+
 		if (args.patch_loc_hash)
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
-		active_knob_set = page_list.get_active_knobset();
 		patch_revision = page_list.get_patch_revision();
 
 		clear();
@@ -131,7 +146,7 @@ struct PatchViewPage : PageBase {
 				continue;
 
 			module_drawer.draw_mapped_elements(
-				patch, module_idx, active_knob_set, canvas, drawn_elements, is_patch_playing);
+				patch, module_idx, knobset_settings.active_knobset, canvas, drawn_elements, is_patch_playing);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
@@ -322,7 +337,7 @@ private:
 
 	void update_active_knobset() {
 		blur();
-		page_list.set_active_knobset(knobset_settings.active_knobset);
+		args.view_knobset_id = knobset_settings.active_knobset;
 		patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
 		prepare_focus();
 	}
@@ -476,8 +491,6 @@ private:
 
 	PatchLocHash displayed_patch_loc_hash;
 	uint32_t patch_revision = 0xFFFFFFFF;
-
-	unsigned active_knob_set = 0;
 
 	unsigned last_audio_load = 0;
 
