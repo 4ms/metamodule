@@ -19,17 +19,12 @@ namespace MetaModule
 enum class PageChangeDirection { Back, Forward, Jump };
 
 struct GuiState {
-	// TODO; use this:
-	// struct CableBegnning {
-	// 	Jack jack;
-	// 	ElementType type;
-	// 	bool has_connections;
-	// };
-	// std::optional<CableBegnning> new_cable;
-
-	std::optional<Jack> new_cable_begin_jack;
-	ElementType new_cable_begin_type{};
-	bool new_cable_begin_has_connections{};
+	struct CableBeginning {
+		Jack jack;
+		ElementType type;
+		bool has_connections;
+	};
+	std::optional<CableBeginning> new_cable;
 
 	bool force_redraw_patch{};
 };

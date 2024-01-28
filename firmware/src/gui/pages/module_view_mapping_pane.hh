@@ -302,7 +302,7 @@ private:
 	}
 
 	void handle_cable_creating() {
-		if (!gui_state.new_cable_begin_jack) {
+		if (!gui_state.new_cable) {
 			lv_hide(ui_CableCreationPanel);
 			return;
 		}
@@ -311,8 +311,8 @@ private:
 		lv_hide(ui_CableAddButton);
 		lv_show(ui_CableCreationPanel);
 
-		auto begin_type = gui_state.new_cable_begin_type;
-		auto begin_connected = gui_state.new_cable_begin_has_connections;
+		auto begin_type = gui_state.new_cable->type;
+		auto begin_connected = gui_state.new_cable->has_connections;
 		auto begin_node_has_output = begin_connected || begin_type == ElementType::Output;
 		auto this_node_has_output = this_jack_has_connections || this_jack_type == ElementType::Output;
 		bool can_finish_cable = this_node_has_output ^ begin_node_has_output;
@@ -321,7 +321,7 @@ private:
 		lv_group_add_obj(pane_group, ui_CableFinishButton);
 		lv_group_add_obj(pane_group, ui_CableCancelButton);
 
-		auto begin_jack = gui_state.new_cable_begin_jack.value();
+		auto begin_jack = gui_state.new_cable->jack;
 		auto jackname = get_full_element_name(begin_jack.module_id, begin_jack.jack_id, begin_type, patch);
 		lv_label_set_text_fmt(ui_CableCreationLabel,
 							  "In progress: adding a cable from %s %s",
@@ -366,9 +366,9 @@ private:
 				auto name = get_full_element_name(
 					page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, page->patch);
 
-				page->gui_state.new_cable_begin_jack = page->this_jack;
-				page->gui_state.new_cable_begin_type = page->this_jack_type;
-				page->gui_state.new_cable_begin_has_connections = page->this_jack_has_connections;
+				page->gui_state.new_cable = {.jack = page->this_jack,
+											 .type = page->this_jack_type,
+											 .has_connections = page->this_jack_has_connections};
 
 				page->notify_queue.put({"Choose a jack to connect to " + std::string(name.module_name) + " " +
 											std::string(name.element_name),
@@ -428,7 +428,7 @@ private:
 
 			page->patch_mod_queue.put(jackmapping);
 			page->notify_queue.put({"Connected to panel"});
-			page->gui_state.new_cable_begin_jack = {};
+			page->gui_state.new_cable = std::nullopt;
 		};
 
 		page->panel_cable_popup.show(action, "Which panel jack do you want to connect to?", "Connect", choices.c_str());
@@ -439,13 +439,13 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		if (!page->gui_state.new_cable_begin_jack) {
+		if (!page->gui_state.new_cable) {
 			page->notify_queue.put({"Something went wrong... can't finish a cable here because no cable was started",
 									Notification::Priority::Error});
 			return;
 		}
-		auto begin_jack = *page->gui_state.new_cable_begin_jack;
-		auto begin_jack_type = page->gui_state.new_cable_begin_type;
+		auto begin_jack = page->gui_state.new_cable->jack;
+		auto begin_jack_type = page->gui_state.new_cable->type;
 
 		bool make_panel_mapping = false;
 
@@ -467,7 +467,7 @@ private:
 				jackmapping.type = ElementType::Input;
 				page->patch_mod_queue.put(jackmapping);
 				page->notify_queue.put({"Added cable from panel input"});
-				page->gui_state.new_cable_begin_jack = {};
+				page->gui_state.new_cable = std::nullopt;
 			}
 		}
 
@@ -483,7 +483,7 @@ private:
 
 			page->patch_mod_queue.put(newcable);
 			page->notify_queue.put({"Added cable"});
-			page->gui_state.new_cable_begin_jack = {};
+			page->gui_state.new_cable = std::nullopt;
 		}
 	}
 
@@ -495,7 +495,7 @@ private:
 		DisconnectJack disconnect{.jack = page->this_jack, .type = page->this_jack_type};
 		page->patch_mod_queue.put(disconnect);
 		page->notify_queue.put({"Disconnected jack"});
-		page->gui_state.new_cable_begin_jack = {};
+		page->gui_state.new_cable = std::nullopt;
 	}
 
 	static void follow_cable_button_cb(lv_event_t *event) {
@@ -518,7 +518,7 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		page->gui_state.new_cable_begin_jack = {};
+		page->gui_state.new_cable = std::nullopt;
 		page->notify_queue.put({"Cancelled making a cable", Notification::Priority::Info, 1000});
 		page->should_close = true;
 	}

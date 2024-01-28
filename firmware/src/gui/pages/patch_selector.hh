@@ -30,7 +30,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		gui_state.new_cable_begin_jack = {}; //clear cable in progress
+		gui_state.new_cable = std::nullopt;
 
 		state = State::TryingToRequestPatchList;
 		hide_spinner();
