@@ -1,13 +1,14 @@
-#include "CoreModules/CoreProcessor.hh"
-#include "CoreModules/moduleFactory.hh"
 #include "info/Tapo_info.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
+#include "CoreModules/moduleFactory.hh"
 
 namespace MetaModule
 {
 
-class TapoCore : public CoreProcessor {
+class TapoCore : public SmartCoreProcessor<TapoInfo> {
 	using Info = TapoInfo;
 	using ThisCore = TapoCore;
+	using enum Info::Elem;
 
 public:
 	TapoCore() = default;
@@ -15,21 +16,7 @@ public:
 	void update() override {
 	}
 
-	void set_param(int param_id, float val) override {
-	}
-
-	void set_input(int input_id, float val) override {
-	}
-
-	float get_output(int output_id) const override {
-		return 0.f;
-	}
-
 	void set_samplerate(float sr) override {
-	}
-
-	float get_led_brightness(int led_id) const override {
-		return 0.f;
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
