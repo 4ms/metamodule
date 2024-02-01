@@ -1,11 +1,8 @@
 #include "firmware_writer.hh"
-
-#include "flash_loader/flash_loader.hh"
-#include "ram_buffer.hh"
-#include <wifi/comm/wifi_interface.hh>
-#include <wifi/flasher/flasher.h>
-
 #include "hash/hash_processor.hh"
+#include "ram_buffer.hh"
+#include "wifi/comm/wifi_interface.hh"
+#include "wifi/flasher/flasher.h"
 
 namespace MetaModule
 {
@@ -168,7 +165,6 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 
 IntercoreStorageMessage
 FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum, uint32_t &bytesChecked) {
-	FlashLoader loader;
 	MD5Processor processor;
 
 	const std::size_t BlockSize = 4096;
@@ -199,7 +195,6 @@ FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_
 }
 
 IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uint32_t address, uint32_t &bytesWritten) {
-	FlashLoader loader;
 
 // Stop wifi reception before long running operation
 #ifdef ENABLE_WIFI_BRIDGE

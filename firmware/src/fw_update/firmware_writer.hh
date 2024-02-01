@@ -2,6 +2,7 @@
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "fat_file_io.hh"
+#include "flash_loader/flash_loader.hh"
 #include <optional>
 
 namespace MetaModule
@@ -24,6 +25,8 @@ private:
 
 	FatFileIO &sdcard_;
 	FatFileIO &usbdrive_;
+
+	FlashLoader loader;
 };
 
 } // namespace MetaModule
