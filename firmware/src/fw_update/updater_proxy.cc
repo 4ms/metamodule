@@ -72,21 +72,23 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 				ManifestParser parser;
 
 				auto parseResult = parser.parse(manifestBuffer);
+				if (!parseResult) {
+					abortWithMessage("Manifest file is invalid");
+					break;
+				}
 
 				// uncomment the following to ignore files that point to bootloader areas
-				// std::erase_if(parseResult->files, [](auto file)
-				// {
-				// 	return file.type == UpdateType::App and file.address < 0x80000;
-				// });
+				// std::erase_if(parseResult->files,
+				// 			  [](auto file) { return file.type == UpdateType::App and file.address < 0x80000; });
 
-				if (parseResult and parseResult->files.size() > 0) {
+				if (parseResult->files.size() > 0) {
 					manifest = *parseResult;
 
 					current_file_idx = 0;
 					moveToState(State::Verifying);
 
 				} else {
-					abortWithMessage("Manifest file is invalid");
+					abortWithMessage("Manifest file has no valid files");
 				}
 
 			} else if (message.message_type == FileStorageProxy::LoadFileToRamFailed) {
