@@ -1,7 +1,7 @@
 #include "updater_proxy.hh"
+#include "fw_update/ram_buffer.hh" //must be exactly this, or else simulator build picks wrong file
 #include "manifest_parse.hh"
 #include "pr_dbg.hh"
-#include "ram_buffer.hh"
 #include <algorithm>
 #include <cassert>
 
@@ -24,7 +24,6 @@ FirmwareUpdaterProxy::FirmwareUpdaterProxy(FileStorageProxy &file_storage)
 	, state(Idle)
 	, sharedMem(nullptr) {
 	auto ram_buffer = get_ram_buffer_client();
-	assert(ram_buffer.size() >= sizeof(SharedMem));
 
 	sharedMem = new (ram_buffer.data()) SharedMem;
 }
@@ -32,6 +31,14 @@ FirmwareUpdaterProxy::FirmwareUpdaterProxy(FileStorageProxy &file_storage)
 bool FirmwareUpdaterProxy::start(std::string_view manifest_filename,
 								 Volume manifest_file_vol,
 								 uint32_t manifest_filesize) {
+
+	if (get_ram_buffer_client().size() <= sizeof(SharedMem)) {
+		pr_err("Buffer (%zu) is too small for loading a manifest (%zu)\n",
+			   get_ram_buffer_client().size(),
+			   sizeof(SharedMem));
+		return false;
+	}
+
 	if (manifest_filesize <= sizeof(SharedMem::manifestBuffer)) {
 		manifestBuffer = std::span<char>((char *)sharedMem->manifestBuffer.data(), manifest_filesize);
 
