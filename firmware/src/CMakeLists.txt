@@ -129,6 +129,7 @@ add_executable(
   ${FWDIR}/system/time.cc
   ${FWDIR}/system/startup_ca7.s
   ${FWDIR}/src/core_intercom/shared_memory.cc
+  ${FWDIR}/src/core_a7/a7_shared_memory.cc
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/audio/audio.cc
@@ -143,6 +144,7 @@ add_executable(
   #
   ${SHARED}/CoreModules/hub/hub_medium.cc
   ${SHARED}/patch_convert/yaml_to_patch.cc
+  ${SHARED}/patch_convert/patch_to_yaml.cc
   ${SHARED}/patch_convert/ryml/ryml_serial.cc
   #
   ${FWDIR}/lib/fatfs/source/ff.c

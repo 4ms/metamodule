@@ -1,6 +1,7 @@
 #pragma once
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
+#include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params.hh"
 #include "params/params_dbg_print.hh"
@@ -13,9 +14,9 @@
 namespace MetaModule
 {
 
-using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
-static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1 alignas(64);
-static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2 alignas(64);
+using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 4>;
+static inline FrameBufferT framebuf1 alignas(64);
+static inline FrameBufferT framebuf2 alignas(64);
 
 class Ui {
 private:
@@ -24,7 +25,7 @@ private:
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
 
-	MessageQueue msg_queue;
+	NotificationQueue notify_queue;
 	PageManager page_manager;
 	ParamsMidiState params;
 	MetaParams metaparams;
@@ -38,13 +39,12 @@ public:
 	   PatchModQueue &patch_mod_queue)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
-		, msg_queue{1024}
-		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
+		, page_manager{patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue} {
 
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, framebuf2);
+		MMDisplay::init(metaparams);
 		Gui::init_lvgl_styles();
 		page_manager.init();
 	}
@@ -61,12 +61,6 @@ public:
 		if ((now - last_page_update_tm) > 16) {
 			last_page_update_tm = now;
 			page_update_task();
-		}
-
-		auto msg = msg_queue.get_message();
-		if (!msg.empty()) {
-			pr_info("%s", msg.data());
-			msg_queue.clear_message();
 		}
 
 		// Uncomment to enable:
@@ -87,7 +81,11 @@ private:
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		page_manager.update_current_page();
-		patch_playloader.handle_sync_patch_loading();
+
+		auto load_status = patch_playloader.handle_sync_patch_loading();
+		if (!load_status.success) {
+			notify_queue.put({load_status.error_string, Notification::Priority::Error, 5000});
+		}
 
 		new_patch_data = false;
 	}

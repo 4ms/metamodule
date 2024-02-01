@@ -1,6 +1,7 @@
 #include "element_name.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "gui/elements/context.hh"
+#include "gui/elements/panel_name.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 
@@ -40,21 +41,36 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 
 void append_connected_jack_name(std::string &opts, GuiElement const &drawn, PatchData const &patch) {
 
-	FullElementName name{"", ""};
+	auto append = [&opts, &patch](Jack jack, ElementType type) {
+		FullElementName name = get_full_element_name(jack.module_id, jack.jack_id, type, patch);
+		opts = opts + " [" + std::string(name.module_name) + " " + std::string(name.element_name) + "] ";
+	};
+
 	if (drawn.idx.input_idx != ElementCount::Indices::NoElementMarker) {
 		Jack in_jack = {.module_id = drawn.module_idx, .jack_id = drawn.idx.input_idx};
+
 		if (auto *cable = patch.find_internal_cable_with_injack(in_jack)) {
-			name = get_full_element_name(cable->out.module_id, cable->out.jack_id, ElementType::Output, patch);
+			if (auto out_map = patch.find_mapped_outjack(cable->out)) {
+				append_panel_jack_name(opts, JackOutput{}, out_map->panel_jack_id);
+			}
+
+			append(cable->out, ElementType::Output);
+
+			for (auto &in : cable->ins) {
+				if (in != in_jack)
+					append(in, ElementType::Input);
+			}
 		}
 	}
-	if (drawn.idx.output_idx != ElementCount::Indices::NoElementMarker) {
+
+	else if (drawn.idx.output_idx != ElementCount::Indices::NoElementMarker)
+	{
 		Jack out_jack = {.module_id = drawn.module_idx, .jack_id = drawn.idx.input_idx};
+
 		if (auto *cable = patch.find_internal_cable_with_outjack(out_jack)) {
-			name = get_full_element_name(cable->ins[0].module_id, cable->ins[0].jack_id, ElementType::Input, patch);
+			for (auto &in : cable->ins)
+				append(in, ElementType::Input);
 		}
-	}
-	if (name.module_name.size() || name.element_name.size()) {
-		opts = opts + " [" + std::string(name.module_name) + " " + std::string(name.element_name) + "]";
 	}
 }
 

@@ -12,6 +12,7 @@
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_knobset_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -26,28 +27,31 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
-	PatchViewPage(PatchInfo info)
+	PatchViewPage(PatchContext info)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
-		, cable_drawer{modules_cont, drawn_elements} {
+		, cable_drawer{modules_cont, drawn_elements}
+		, file_menu{patch_storage} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_AddButton, add_module_cb, LV_EVENT_CLICKED, (void *)this);
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(ui_AddButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_SaveButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_InfoButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SettingsButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_AddButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 
 		lv_obj_add_event_cb(ui_PatchViewPage, scroll_end_cb, LV_EVENT_SCROLL, this);
 
 		// Settings menu
-		settings_menu.init();
+		// settings_menu.init();
 		knobset_menu.init();
 		desc_panel.hide();
 
@@ -70,19 +74,37 @@ struct PatchViewPage : PageBase {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
 
-		if (active_knob_set == page_list.get_active_knobset() && patch_revision == page_list.get_patch_revision() &&
-			displayed_patch_loc_hash == args.patch_loc_hash)
-		{
+		bool needs_refresh = false;
+		if (gui_state.force_redraw_patch)
+			needs_refresh = true;
+		if (knobset_settings.active_knobset != page_list.get_active_knobset())
+			needs_refresh = true;
+		if (patch_revision != page_list.get_patch_revision())
+			needs_refresh = true;
+		if (displayed_patch_loc_hash != args.patch_loc_hash)
+			needs_refresh = true;
+
+		if (!needs_refresh) {
 			is_ready = true;
 			watch_lights();
 			update_map_ring_style();
 			return;
 		}
 
+		gui_state.force_redraw_patch = false;
+
+		if (displayed_patch_loc_hash != args.patch_loc_hash) {
+			args.view_knobset_id = 0;
+		}
+
+		if (args.view_knobset_id) {
+			knobset_settings.active_knobset = args.view_knobset_id.value();
+			page_list.set_active_knobset(knobset_settings.active_knobset);
+		}
+
 		if (args.patch_loc_hash)
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
-		active_knob_set = page_list.get_active_knobset();
 		patch_revision = page_list.get_patch_revision();
 
 		clear();
@@ -103,9 +125,10 @@ struct PatchViewPage : PageBase {
 		lv_group_set_editing(group, false);
 
 		lv_group_add_obj(group, ui_PlayButton);
+		lv_group_add_obj(group, ui_InfoButton);
 		lv_group_add_obj(group, ui_KnobButton);
 		lv_group_add_obj(group, ui_AddButton);
-		lv_group_add_obj(group, ui_InfoButton);
+		lv_group_add_obj(group, ui_SaveButton);
 		lv_group_add_obj(group, ui_SettingsButton);
 
 		lv_show(modules_cont);
@@ -123,7 +146,7 @@ struct PatchViewPage : PageBase {
 				continue;
 
 			module_drawer.draw_mapped_elements(
-				patch, module_idx, active_knob_set, canvas, drawn_elements, is_patch_playing);
+				patch, module_idx, knobset_settings.active_knobset, canvas, drawn_elements, is_patch_playing);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
@@ -132,14 +155,7 @@ struct PatchViewPage : PageBase {
 			bottom = std::max(bottom, this_bottom);
 
 			module_canvases.push_back(canvas);
-
-			lv_group_add_obj(group, canvas);
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SNAPPABLE);
-
-			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
-			lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-			lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+			style_module(canvas);
 
 			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
@@ -163,12 +179,14 @@ struct PatchViewPage : PageBase {
 		settings_menu.prepare_focus(group);
 		knobset_menu.prepare_focus(group, patch.knob_sets);
 		desc_panel.prepare_focus(group, patch);
+		file_menu.prepare_focus(group);
 	}
 
 	void blur() override {
 		settings_menu.hide();
 		knobset_menu.hide();
 		desc_panel.hide();
+		file_menu.hide();
 	}
 
 	void update() override {
@@ -200,13 +218,20 @@ struct PatchViewPage : PageBase {
 				knobset_menu.hide();
 
 			} else if (desc_panel.is_visible()) {
-				desc_panel.hide();
+				desc_panel.back_event();
+
+			} else if (file_menu.is_visible()) {
+				file_menu.hide();
 
 			} else {
 				page_list.request_last_page();
 				blur();
 				params.lights.stop_watching_all();
 			}
+		}
+
+		if (desc_panel.did_update_names()) {
+			lv_label_set_text(ui_PatchName, patch.patch_name.c_str());
 		}
 
 		if (is_patch_playing) {
@@ -312,7 +337,7 @@ private:
 
 	void update_active_knobset() {
 		blur();
-		page_list.set_active_knobset(knobset_settings.active_knobset);
+		args.view_knobset_id = knobset_settings.active_knobset;
 		patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
 		prepare_focus();
 	}
@@ -349,8 +374,17 @@ private:
 		drawn_elements.clear();
 		module_ids.clear();
 
-		settings_menu.blur();
 		knobset_menu.blur();
+	}
+
+	void style_module(lv_obj_t *canvas) {
+		lv_group_add_obj(group, canvas);
+		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SNAPPABLE);
+
+		lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
+		lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
+		lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
 	}
 
 	static void module_pressed_cb(lv_event_t *event) {
@@ -376,8 +410,9 @@ private:
 			return;
 
 		auto user_data = lv_obj_get_user_data(this_module_obj);
-		if (!user_data)
+		if (!user_data) {
 			return;
+		}
 
 		uint32_t module_id = *(static_cast<uint32_t *>(user_data));
 		if (module_id >= page->patch.module_slugs.size())
@@ -416,8 +451,17 @@ private:
 		page->update_map_ring_style();
 		page->settings_menu.hide();
 		page->knobset_menu.hide();
+		page->file_menu.hide();
 	}
 
+	static void add_module_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		if (!page)
+			return;
+		page->load_page(PageId::ModuleList, page->args);
+	}
+
+private:
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
 	CableDrawer cable_drawer;
@@ -429,6 +473,8 @@ private:
 	PatchViewKnobsetMenu knobset_menu{knobset_settings};
 
 	PatchDescriptionPanel desc_panel;
+
+	PatchViewFileMenu file_menu;
 
 	MapRingDisplay map_ring_display{settings};
 
@@ -445,8 +491,6 @@ private:
 
 	PatchLocHash displayed_patch_loc_hash;
 	uint32_t patch_revision = 0xFFFFFFFF;
-
-	unsigned active_knob_set = 0;
 
 	unsigned last_audio_load = 0;
 

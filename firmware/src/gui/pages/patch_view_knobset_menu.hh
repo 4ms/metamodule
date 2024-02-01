@@ -1,13 +1,10 @@
 #pragma once
+#include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "page_list.hh"
 #include "patch/patch_data.hh"
 #include <vector>
-
-extern "C" {
-#include "gui/slsexport/meta5/ui.h"
-}
 
 namespace MetaModule
 {
@@ -101,7 +98,7 @@ struct PatchViewKnobsetMenu {
 
 	void show() {
 		if (!visible) {
-			Dropdown_Animation(ui_KnobsetMenu, 0);
+			DropInFromLeft_Animation(ui_KnobsetMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
 				return;
@@ -115,7 +112,7 @@ struct PatchViewKnobsetMenu {
 
 	void hide() {
 		if (visible) {
-			Dropup_Animation(ui_KnobsetMenu, 0);
+			DropOutToRight_Animation(ui_KnobsetMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
 				return;

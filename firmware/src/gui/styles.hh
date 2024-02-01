@@ -47,11 +47,19 @@ struct Gui {
 	static inline lv_style_t mapped_circle_style;
 	static inline lv_style_t mapped_jack_circle_label_style;
 
+	static inline lv_style_t dropdown_style;
+	static inline lv_style_t dropdown_style_main_checked;
+	static inline lv_style_t dropdown_style_selected;
+
+	// General outline for focused objects (FOCUS and FOCUS_KEY)
+	static inline lv_style_t focus_style;
+
 	// COLORS
 	static inline lv_color_t orange_highlight = lv_color_hex(0xfd8b18);
 	static inline const char *orange_highlight_html = "#fd8b18 ";
 	static inline lv_color_t yellow_highlight = lv_color_hex(0x8bfd18);
 	static inline const char *yellow_highlight_html = "#d7ff6a ";
+	static inline const char *blue_highlight_html = "#188bfd ";
 	static inline const char *brown_highlight_html = "#A26E3E ";
 
 	static inline lv_theme_t *theme;
@@ -216,6 +224,33 @@ struct Gui {
 		lv_style_set_bg_opa(&subdir_panel_item_sel_style, LV_OPA_100);
 		lv_style_set_outline_width(&subdir_panel_item_sel_style, 0);
 		lv_style_set_border_width(&subdir_panel_item_sel_style, 0);
+
+		// Dropdown
+		lv_style_init(&dropdown_style);
+		lv_style_set_bg_color(&dropdown_style, lv_color_hex(0x333333));
+		lv_style_set_text_color(&dropdown_style, lv_color_white());
+		lv_style_set_text_opa(&dropdown_style, 255);
+		lv_style_set_text_font(&dropdown_style, &lv_font_montserrat_14);
+		lv_style_set_pad_ver(&dropdown_style, 4);
+
+		// Dropdown: Part Selected
+		lv_style_init(&dropdown_style_selected);
+		lv_style_set_bg_color(&dropdown_style_selected, orange_highlight);
+
+		lv_style_init(&dropdown_style_main_checked);
+		// lv_style_set_border_color(&dropdown_style_main_checked, lv_color_hex(0xFF00FF));
+		// lv_style_set_border_opa(&dropdown_style_main_checked, LV_OPA_0);
+		lv_style_set_outline_color(&dropdown_style_main_checked, orange_highlight);
+		lv_style_set_outline_opa(&dropdown_style_main_checked, LV_OPA_100);
+		lv_style_set_outline_width(&dropdown_style_main_checked, 0);
+		lv_style_set_outline_pad(&dropdown_style_main_checked, 1);
+
+		// Focus
+		lv_style_init(&focus_style);
+		lv_style_set_outline_color(&focus_style, orange_highlight);
+		lv_style_set_outline_opa(&focus_style, LV_OPA_100);
+		lv_style_set_outline_width(&focus_style, 3);
+		lv_style_set_outline_pad(&focus_style, 2);
 	}
 
 	static lv_obj_t *create_map_circle(lv_obj_t *parent) {
