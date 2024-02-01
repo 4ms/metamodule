@@ -1,14 +1,14 @@
 #pragma once
 #include "util/static_string.hh"
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
-#include <optional>
 
 namespace MetaModule
 {
 
-enum class UpdateType { App, Wifi};
+enum class UpdateType { App, Wifi };
 
 struct UpdateFile {
 	UpdateType type;

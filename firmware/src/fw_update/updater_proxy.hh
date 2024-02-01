@@ -1,8 +1,8 @@
 #pragma once
-#include <cstdint>
-#include <string>
 #include "patch_file/file_storage_proxy.hh"
 #include "update_file.hh"
+#include <cstdint>
+#include <string>
 
 namespace MetaModule
 {
@@ -19,8 +19,6 @@ public:
 		std::string error_message{};
 	};
 
-public:
-
 	FirmwareUpdaterProxy(FileStorageProxy &file_storage);
 
 	bool start(std::string_view manifest_filename, Volume manifest_file_vol, uint32_t manifest_filesize);
@@ -28,11 +26,10 @@ public:
 	Status process();
 
 private:
-	void abortWithMessage(const char* message);
+	void abortWithMessage(const char *message);
 	void moveToState(State);
 	void proceedWithNextFile();
 
-private:
 	FileStorageProxy &file_storage;
 
 	State state;
@@ -47,14 +44,13 @@ private:
 	std::size_t current_file_size;
 	std::string current_file_name;
 
-	struct SharedMem
-	{
+	struct SharedMem {
 		uint32_t bytes_processed;
 		StaticString<32> checksum;
 		std::array<uint8_t, 4 * 1024 * 1024> manifestBuffer;
 	};
 
-	SharedMem* sharedMem;
+	SharedMem *sharedMem;
 };
 
 } // namespace MetaModule

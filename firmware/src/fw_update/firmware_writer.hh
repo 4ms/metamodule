@@ -4,7 +4,6 @@
 #include "fat_file_io.hh"
 #include <optional>
 
-
 namespace MetaModule
 {
 
@@ -19,15 +18,12 @@ public:
 
 private:
 	IntercoreStorageMessage compareChecksumWifi(uint32_t, uint32_t, Checksum_t);
-	IntercoreStorageMessage flashWifi(std::span<uint8_t>, uint32_t address, uint32_t& bytesWritten);
-	IntercoreStorageMessage compareChecksumQSPI(uint32_t, uint32_t, Checksum_t, uint32_t& bytesWritten);
-	IntercoreStorageMessage flashQSPI(std::span<uint8_t>, uint32_t address, uint32_t& bytesWritten);
+	IntercoreStorageMessage flashWifi(std::span<uint8_t>, uint32_t address, uint32_t &bytesWritten);
+	IntercoreStorageMessage compareChecksumQSPI(uint32_t, uint32_t, Checksum_t, uint32_t &bytesWritten);
+	IntercoreStorageMessage flashQSPI(std::span<uint8_t>, uint32_t address, uint32_t &bytesWritten);
 
-private:
 	FatFileIO &sdcard_;
 	FatFileIO &usbdrive_;
-	
-
 };
 
 } // namespace MetaModule

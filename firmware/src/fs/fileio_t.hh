@@ -1,9 +1,9 @@
 #pragma once
 #include "fs/dir_entry_kind.hh"
+#include <cstdint>
 #include <functional>
 #include <span>
 #include <string_view>
-#include <cstdint>
 
 using FileAction = std::function<void(const std::string_view filename, uint32_t timestamp, uint32_t filesize)>;
 
@@ -19,7 +19,7 @@ concept FileIoC = requires(T t,
 						   FileAction action,
 						   DirEntryAction direntry_action,
 						   uint32_t tm,
-						   std::size_t length) {
+						   std::size_t offset) {
 	{
 		t.update_or_create_file(filename, const_data)
 	} -> std::convertible_to<bool>;
@@ -30,7 +30,7 @@ concept FileIoC = requires(T t,
 		t.foreach_dir_entry(path, direntry_action)
 	} -> std::convertible_to<bool>;
 	{
-		t.read_file(filename, read_buffer, length)
+		t.read_file(filename, read_buffer, offset)
 	} -> std::integral;
 	{
 		t.volname()

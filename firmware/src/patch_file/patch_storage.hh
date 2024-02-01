@@ -54,6 +54,7 @@ public:
 		norflash_.reformat();
 		PatchFileIO::create_default_patches(norflash_);
 	}
+
 	bool write_patch_file(Volume vol, std::string_view filename, std::span<const char> data) {
 		if (vol == Volume::USB) {
 			auto success = PatchFileIO::write_file(data, usbdrive_, filename);
@@ -84,10 +85,9 @@ public:
 		return write_patch_file(vol, filename, {(const char *)data.data(), data.size()});
 	}
 
-
 	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
 		if (message.message_type == RequestRefreshPatchList) {
-			IntercoreStorageMessage result {.message_type = PatchListUnchanged};
+			IntercoreStorageMessage result{.message_type = PatchListUnchanged};
 
 			auto *patch_dir_list_ = message.patch_dir_list;
 
@@ -124,9 +124,10 @@ public:
 			return result;
 		}
 
-		else if (message.message_type == RequestPatchData) {
+		else if (message.message_type == RequestPatchData)
+		{
 
-			IntercoreStorageMessage result {
+			IntercoreStorageMessage result{
 				.message_type = PatchDataLoadFail,
 				.bytes_read = 0,
 				.vol_id = message.vol_id,
@@ -140,7 +141,7 @@ public:
 					result.bytes_read = bytes_read;
 				}
 			}
-			
+
 			return result;
 		}
 
@@ -149,12 +150,15 @@ public:
 		return std::nullopt;
 	}
 
-	PatchDirList getPatchList()
-	{
+	PatchDirList getPatchList() {
 		PatchDirList patch_dir_list_;
 
-		if (sdcard_.is_mounted()) PatchFileIO::add_directory(sdcard_, patch_dir_list_.volume_root(Volume::SDCard));
-		if (usbdrive_.is_mounted()) PatchFileIO::add_directory(usbdrive_, patch_dir_list_.volume_root(Volume::USB));
+		if (sdcard_.is_mounted())
+			PatchFileIO::add_directory(sdcard_, patch_dir_list_.volume_root(Volume::SDCard));
+
+		if (usbdrive_.is_mounted())
+			PatchFileIO::add_directory(usbdrive_, patch_dir_list_.volume_root(Volume::USB));
+
 		PatchFileIO::add_directory(norflash_, patch_dir_list_.volume_root(Volume::NorFlash));
 
 		return patch_dir_list_;

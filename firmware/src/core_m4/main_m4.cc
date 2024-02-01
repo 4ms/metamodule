@@ -11,9 +11,9 @@
 #include "hsem_handler.hh"
 #include "usb/usb_manager.hh"
 
-#include "patch_file/patch_storage.hh"
 #include "fw_update/firmware_file_finder.hh"
 #include "fw_update/firmware_writer.hh"
+#include "patch_file/patch_storage.hh"
 
 #ifdef ENABLE_WIFI_BRIDGE
 #include <wifi_interface.hh>
@@ -62,7 +62,8 @@ void main() {
 	FirmwareFileFinder firmware_files{sd.get_fileio(), usb.get_msc_fileio()};
 	FirmwareWriter firmware_writer{sd.get_fileio(), usb.get_msc_fileio()};
 
-	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm(*SharedMemoryS::ptrs.icc_message);
+	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm(
+		*SharedMemoryS::ptrs.icc_message);
 
 	if (reload_default_patches)
 		patch_storage.reload_default_patches();
@@ -93,35 +94,30 @@ void main() {
 
 		usb.process();
 		sd.process();
-		
+
 		auto message = intercore_comm.get_new_message();
 
-		if (message.message_type != IntercoreStorageMessage::MessageType::None)
-		{
+		if (message.message_type != IntercoreStorageMessage::MessageType::None) {
 			// Function to pass a message to a receiver
 			// If message is handled by the receiver, the response is sent
 			// otherwise we can continue with the next receiver
-			auto process_receiver = [&intercore_comm, &message](auto& receiver)
-			{
-				if (auto response = receiver.handle_message(message); response)
-				{
+			auto process_receiver = [&intercore_comm, &message](auto &receiver) {
+				if (auto response = receiver.handle_message(message); response) {
 					// mark message as handled
 					message.message_type = IntercoreStorageMessage::MessageType::None;
 
 					// try to send response infinitely
-					while (not intercore_comm.send_message(*response));
+					while (not intercore_comm.send_message(*response))
+						;
 					return true;
 				}
 				return false;
 			};
 
 			// Handle all receivers
-			if (not process_receiver(firmware_files))
-			{
-				if (not process_receiver(patch_storage))
-				{
-					if (not process_receiver(firmware_writer))
-					{
+			if (not process_receiver(firmware_files)) {
+				if (not process_receiver(patch_storage)) {
+					if (not process_receiver(firmware_writer)) {
 						pr_err("ICC message of type %u not handled\n", message.message_type);
 					}
 				}

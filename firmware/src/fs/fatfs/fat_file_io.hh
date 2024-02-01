@@ -207,8 +207,7 @@ public:
 				return 0;
 		}
 
-		if (f_lseek(&fil, offset) != FR_OK)
-		{
+		if (f_lseek(&fil, offset) != FR_OK) {
 			f_close(&fil);
 			return 0;
 		}

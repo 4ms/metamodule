@@ -7,6 +7,8 @@
 #include <console/pr_dbg.hh>
 
 #include <cstring>
+#include <string_view>
+#include <span>
 #include <optional>
 
 namespace Flasher

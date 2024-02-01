@@ -6,7 +6,6 @@
 #include <span>
 #include <string_view>
 
-
 namespace Flasher
 {
 
@@ -21,4 +20,4 @@ esp_loader_error_t conditional_flash(uint32_t address, std::span<const uint8_t>,
 esp_loader_error_t flash_start(uint32_t address, uint32_t length, uint32_t batchSize);
 esp_loader_error_t flash_process(std::span<uint8_t>);
 
-}
+} // namespace Flasher

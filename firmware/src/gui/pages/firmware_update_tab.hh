@@ -88,7 +88,8 @@ struct FirmwareUpdateTab {
 					state = State::Failed;
 
 				} else if (status.state == FirmwareUpdaterProxy::Verifying) {
-					display_progress("Checking target memory checksum", status.name, status.file_size, status.bytes_completed);
+					display_progress(
+						"Checking target memory checksum", status.name, status.file_size, status.bytes_completed);
 
 				} else if (status.state == FirmwareUpdaterProxy::Writing) {
 					display_progress("Writing to memory", status.name, status.file_size, status.bytes_completed);
@@ -217,8 +218,12 @@ private:
 		} else {
 			lv_show(ui_FWUpdateSpinner);
 			lv_hide(ui_SystemMenUpdateProgressBar);
-			lv_label_set_text_fmt(
-				ui_SystemMenuUpdateMessage, "%.*s: %.*s\nDO NOT POWER OFF", (int)file_name.size(), file_name.data(), (int)message.size(), message.data());
+			lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
+								  "%.*s: %.*s\nDO NOT POWER OFF",
+								  (int)file_name.size(),
+								  file_name.data(),
+								  (int)message.size(),
+								  message.data());
 		}
 	}
 

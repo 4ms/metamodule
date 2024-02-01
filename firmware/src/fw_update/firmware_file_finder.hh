@@ -61,7 +61,7 @@ private:
 		}
 
 		if (fw_file_vol) {
-			IntercoreStorageMessage result {
+			IntercoreStorageMessage result{
 				.message_type = FirmwareFileFound,
 				.bytes_read = found_filesize,
 				.vol_id = fw_file_vol.value(),

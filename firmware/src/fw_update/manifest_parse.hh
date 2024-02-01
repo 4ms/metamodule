@@ -38,12 +38,11 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updateFile) {
 				updateFile->md5 = md5_sv;
 			}
 
-			if (n.has_child("name"))
-			{
+			if (n.has_child("name")) {
 				n["name"] >> updateFile->name;
 			}
 			return true;
-			
+
 		} else {
 			pr_err("Unknown update type\n");
 		}
@@ -72,31 +71,23 @@ struct ManifestParser {
 
 		ryml::Tree tree = ryml::parse_in_place(ryml::substr(json.data(), json.size()));
 
-		if (tree.num_children(0) > 0)
-		{
+		if (tree.num_children(0) > 0) {
 			ryml::ConstNodeRef root = tree.rootref();
 
-			if (root.has_child("version"))
-			{
+			if (root.has_child("version")) {
 				UpdateManifest manifest{};
 				root["version"] >> manifest.version;
 
 				if (root.has_child("files")) {
 					root["files"] >> manifest.files;
 					return manifest;
-				}
-				else
-				{
+				} else {
 					pr_dbg("Manifest file has no root node with key 'files'\n");
 				}
-			}
-			else
-			{
+			} else {
 				pr_dbg("Manifest has no version\n");
 			}
-		}
-		else
-		{
+		} else {
 			pr_dbg("Manifest not valid json or yaml\n");
 		}
 
