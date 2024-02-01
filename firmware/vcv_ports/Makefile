@@ -43,7 +43,7 @@ ARCH_CFLAGS := -DSTM32MP157Cxx -DSTM32MP1 -DCORE_CA7
 LFLAGS = $(MCU)  \
 		 -Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
 		 -Wl,--gc-sections \
-		 -nostdlib -nostartfiles -ffreestanding
+		 -nostartfiles -nostdlib
 
 %.diss : %.so
 	arm-none-eabi-objdump -CDz --source $^ > $@
@@ -57,7 +57,10 @@ LFLAGS = $(MCU)  \
 
 #### Shared lib (-shared), multiple files ##################
 
-EXTRACFLAGS = -fPIC -c -Wno-double-promotion
+EXTRACFLAGS = -fPIC -c -Wno-double-promotion \
+		 -nostartfiles \
+		 -nostdlib \
+		 -shared \
 
 	# @mkdir -p $(OBJDIR)
 	# $(CXX) $(DEPFLAGS) -PIC -c $(CXXFLAGS) plugin-extcall-multifile1.cc -o $(BUILDDIR)/plugin-extcall-multifile1.o
@@ -94,8 +97,6 @@ CFLAGS ?= -g2 \
 		 $(MCU) \
 		 $(INCLUDES) \
 		 -fdata-sections -ffunction-sections \
-		 -nostartfiles \
-		 -ffreestanding \
 		 $(EXTRACFLAGS)\
 
 CXXFLAGS ?= $(CFLAGS) \
@@ -106,21 +107,20 @@ CXXFLAGS ?= $(CFLAGS) \
 		-fno-threadsafe-statics \
 		-mno-unaligned-access \
 		-Werror=return-type \
-		-Wdouble-promotion \
 		-Wno-register \
 		-Wno-volatile \
 		 $(EXTRACXXFLAGS) \
 
 LINK_STDLIB ?= -nostdlib
 
-LFLAGS ?= -Wl,--gc-sections \
-		 -Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
-		 $(MCU)  \
-		 -T $(LINKSCR) \
-		 $(LINK_STDLIB) \
-		 -nostartfiles \
-		 -ffreestanding \
-		 $(EXTRALDFLAGS) \
+# LFLAGS ?= -Wl,--gc-sections \
+# 		 -Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
+# 		 $(MCU)  \
+# 		 -T $(LINKSCR) \
+# 		 $(LINK_STDLIB) \
+# 		 -nostartfiles \
+# 		 -ffreestanding \
+# 		 $(EXTRALDFLAGS) \
 
 DEPFLAGS = -MMD -MP -MF $(OBJDIR)/$(basename $<).d
 
