@@ -61,7 +61,7 @@ add_custom_command(
            "${CMAKE_CURRENT_BINARY_DIR}/release/metamodule.json"
   COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
   COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
-  DEPENDS main.elf main_m4.elf
+  DEPENDS main.elf main_m4.elf bootloader bootloader-dfu
   COMMENT "Creating combined uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
@@ -97,7 +97,7 @@ add_custom_target(
 
 add_custom_target(
   bootloader-dfu
-  COMMAND make BOARD_CONF=../board_conf/mmp11_conf.hh ${BOOTLOADER_TOOLCHAIN_OPT}
+  COMMAND make BOARD_CONF=board_conf/mmp11_conf.hh ${BOOTLOADER_TOOLCHAIN_OPT}
   COMMENT "Building DFU Bootloader"
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu
   VERBATIM
