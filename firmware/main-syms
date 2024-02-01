@@ -2445,9 +2445,9 @@ c2096970 t RymlInit::init_once()::{lambda(char const*, unsigned int, c4::yml::Lo
 c2156a98 V std::__detail::__to_chars_10_impl<unsigned int>(char*, unsigned int, unsigned int)::__digits
 c205c4b8 T operator delete(void*, unsigned int)
 c205c4b4 T operator new(unsigned int)
-c21448c0 t ____aeabi_atexit_from_arm
+c21448b0 t ____aeabi_atexit_from_arm
 c21448a8 t ___fini_from_thumb
-c21448b0 t ___getpid_from_thumb
+c21448e0 t ___getpid_from_thumb
 c20002a0 T __adddf3
 c2000618 T __addsf3
 c2134f5c T __aeabi_atexit
@@ -2493,7 +2493,7 @@ c21d1ff0 R __exidx_start
 c21c91a0 R __exp2f_data
 c21c92e8 R __exp_data
 c200055c T __extendsfdf2
-c21448c8 t __fflush_from_arm
+c21448b8 t __fflush_from_arm
 c21d2200 d __fini_array_end
 c21d2200 d __fini_array_start
 c2144838 T __fixdfdi
@@ -2508,7 +2508,7 @@ c2000518 T __floatunsidf
 c2000778 T __floatunsisf
 c2135fc0 T __fpclassifyf
 c213c698 T __fputwc
-c21448d8 t __free_from_arm
+c21448d0 t __free_from_arm
 c218edf0 r __func__.0
 c21913f8 r __func__.0
 c21912d4 r __func__.0
@@ -2661,7 +2661,7 @@ c27bca08 B __lock___tz_mutex
 c21434f8 T __lshift
 c235b9f0 D __malloc_av_
 c27bc870 B __malloc_current_mallinfo
-c21448d0 t __malloc_from_arm
+c21448c8 t __malloc_from_arm
 c213a710 T __malloc_lock
 c27bc89c B __malloc_max_sbrked_mem
 c27bc898 B __malloc_max_total_mem
@@ -2693,7 +2693,7 @@ c21c9b58 R __pow_log_data
 c21cad28 R __powf_log2_data
 c21d1ff8 d __preinit_array_end
 c21d1ff8 d __preinit_array_start
-c21448e0 t __printf_from_arm
+c21448d8 t __printf_from_arm
 c2143998 T __ratio
 c213dec4 T __register_exitproc
 c213de50 T __retarget_lock_acquire
@@ -2723,7 +2723,7 @@ c2143ccc T __sseek
 c214473c T __ssprint_r
 c213fbe0 T __ssvfiscanf_r
 c27bc9e0 B __stdio_exit_handler
-c21448b8 t __strncpy_from_arm
+c21448c0 t __strncpy_from_arm
 c200029c T __subdf3
 c2143cf8 T __submore
 c2000614 T __subsf3

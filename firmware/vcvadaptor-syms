@@ -1,0 +1,104 @@
+
+string.cpp.obj:
+00000000 T rack::string::f[abi:cxx11](char const*, ...)
+00000000 T rack::string::fV[abi:cxx11](char const*, std::__va_list)
+         U std::__throw_bad_alloc()
+         U operator delete(void*, unsigned int)
+         U operator new(unsigned int)
+         U memcpy
+         U memset
+         U vsnprintf
+
+plugin_instance.cc.obj:
+00000000 B pluginInstance
+
+pffft.c.obj:
+00000000 T cfftf1_ps
+00000000 T cffti1_ps
+         U cos
+         U free
+         U malloc
+         U memcpy
+00000000 T pffft_aligned_free
+00000000 T pffft_aligned_malloc
+00000000 T pffft_cplx_finalize
+00000000 T pffft_cplx_preprocess
+00000000 T pffft_destroy_setup
+00000000 T pffft_new_setup
+00000000 T pffft_simd_size
+00000000 T pffft_transform
+00000000 T pffft_transform_internal
+00000000 T pffft_transform_ordered
+00000000 T pffft_zconvolve_accumulate
+00000000 T pffft_zreorder
+         U printf
+         U sin
+00000000 T validate_pffft_simd
+
+Module.cpp.obj:
+00000000 W CoreProcessor::set_alt_param(int, float)
+00000000 W CoreProcessor::get_alt_param_value(unsigned int, float)
+         U VCVModuleWrapper::mark_input_patched(int)
+         U VCVModuleWrapper::mark_output_patched(int)
+         U VCVModuleWrapper::mark_input_unpatched(int)
+         U VCVModuleWrapper::mark_output_unpatched(int)
+         U VCVModuleWrapper::mark_all_inputs_unpatched()
+         U VCVModuleWrapper::mark_all_outputs_unpatched()
+         U VCVModuleWrapper::update()
+         U VCVModuleWrapper::set_input(int, float)
+         U VCVModuleWrapper::set_param(int, float)
+00000000 W rack::engine::Module::dataToJson()
+00000000 W rack::engine::Module::onUnBypass(rack::engine::Module::UnBypassEvent const&)
+00000000 W rack::engine::Module::onRandomize(rack::engine::Module::RandomizeEvent const&)
+00000000 W rack::engine::Module::onRandomize()
+00000000 W rack::engine::Module::onSetMaster(rack::engine::Module::SetMasterEvent const&)
+00000000 W rack::engine::Module::dataFromJson(json_t*)
+00000000 W rack::engine::Module::onPortChange(rack::engine::Module::PortChangeEvent const&)
+00000000 W rack::engine::Module::paramsToJson()
+00000000 W rack::engine::Module::onUnsetMaster(rack::engine::Module::UnsetMasterEvent const&)
+00000000 W rack::engine::Module::processBypass(VCVModuleWrapper::ProcessArgs const&)
+00000000 W rack::engine::Module::paramsFromJson(json_t*)
+00000000 W rack::engine::Module::set_samplerate(float)
+00000000 T rack::engine::Module::initialize_state(std::basic_string_view<char, std::char_traits<char> >)
+00000000 W rack::engine::Module::onExpanderChange(rack::engine::Module::ExpanderChangeEvent const&)
+00000000 W rack::engine::Module::onSampleRateChange(rack::engine::Module::SampleRateChangeEvent const&)
+00000000 W rack::engine::Module::onSampleRateChange()
+00000000 W rack::engine::Module::onAdd(rack::engine::Module::AddEvent const&)
+00000000 W rack::engine::Module::onSave(rack::engine::Module::SaveEvent const&)
+00000000 W rack::engine::Module::toJson()
+00000000 W rack::engine::Module::onReset(rack::engine::Module::ResetEvent const&)
+00000000 W rack::engine::Module::onReset()
+00000000 W rack::engine::Module::fromJson(json_t*)
+00000000 W rack::engine::Module::onBypass(rack::engine::Module::BypassEvent const&)
+00000000 W rack::engine::Module::onRemove(rack::engine::Module::RemoveEvent const&)
+         U VCVModuleWrapper::get_output(int) const
+         U VCVModuleWrapper::get_led_brightness(int) const
+00000000 R vtable for rack::engine::Module
+         w __cxa_pure_virtual
+         U json_delete
+         U json_loadb
+         U json_object_get
+         U printf
+
+VCV_module_wrapper.cc.obj:
+00000000 W CoreProcessor::set_alt_param(int, float)
+00000000 W CoreProcessor::initialize_state(std::basic_string_view<char, std::char_traits<char> >)
+00000000 W CoreProcessor::get_alt_param_value(unsigned int, float)
+00000000 T VCVModuleWrapper::set_samplerate(float)
+00000000 T VCVModuleWrapper::mark_input_patched(int)
+00000000 T VCVModuleWrapper::mark_output_patched(int)
+00000000 T VCVModuleWrapper::mark_input_unpatched(int)
+00000000 T VCVModuleWrapper::mark_output_unpatched(int)
+00000000 T VCVModuleWrapper::mark_all_inputs_unpatched()
+00000000 T VCVModuleWrapper::mark_all_outputs_unpatched()
+00000000 T VCVModuleWrapper::update()
+00000000 T VCVModuleWrapper::set_input(int, float)
+00000000 T VCVModuleWrapper::set_param(int, float)
+00000000 T VCVModuleWrapper::VCVModuleWrapper()
+00000000 T VCVModuleWrapper::VCVModuleWrapper()
+         U rack::random::init()
+00000000 T VCVModuleWrapper::get_output(int) const
+00000000 T VCVModuleWrapper::get_led_brightness(int) const
+00000000 R vtable for VCVModuleWrapper
+         w __cxa_pure_virtual
+         U roundf
