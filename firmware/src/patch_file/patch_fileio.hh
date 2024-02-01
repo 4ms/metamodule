@@ -19,7 +19,7 @@ public:
 
 	static bool read_file(std::span<char> &buffer, FileIoC auto &fileio, const std::string_view filename) {
 
-		auto bytes_read = fileio.read_file(filename, buffer, 0);
+		auto bytes_read = fileio.read_file(filename, buffer);
 		if (bytes_read == 0) {
 			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
 			return false;

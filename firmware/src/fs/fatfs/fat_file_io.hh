@@ -193,7 +193,7 @@ public:
 		return true;
 	}
 
-	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset) {
+	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset = 0) {
 		FIL fil;
 		UINT bytes_read = 0;
 
