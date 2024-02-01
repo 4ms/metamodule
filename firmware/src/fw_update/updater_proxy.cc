@@ -91,7 +91,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 		case Verifying: {
 			if (justEnteredState) {
 				justEnteredState = false;
-				pr_dbg("Start verifying file %u of %u\n", current_file_idx, manifest.files.size());
+				pr_dbg("Start verifying file %u of %u\n", current_file_idx + 1, manifest.files.size());
 
 				auto &thisFile = manifest.files[current_file_idx];
 
@@ -137,7 +137,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 		case Writing: {
 			if (justEnteredState) {
 				justEnteredState = false;
-				pr_dbg("Start flashing file %u of %u\n", current_file_idx, manifest.files.size());
+				pr_dbg("Start flashing file %u of %u\n", current_file_idx + 1, manifest.files.size());
 
 				auto &thisFile = manifest.files[current_file_idx];
 
