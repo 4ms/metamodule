@@ -71,20 +71,29 @@ if __name__ == "__main__":
     destination_dir = os.path.dirname(args.out_file)
     os.makedirs(destination_dir, exist_ok=True)
 
-    j = {'version': ManifestFormatVersion}
+    j = {'version': ManifestFormatVersion, 'files': []}
 
     if args.version:
         j["metadata"] = {'version': parse_file_version(args.version)}
 
-    j["files"] = [
-        process_file(destination_dir, args.fsbl_file, "app", name="FSBL1", address=0x0),
-        process_file(destination_dir, args.fsbl_file, "app", name="FSBL2", address=0x40000),
-        process_file(destination_dir, args.dfu_file, "app", name="DFU", address=0x50000),
-        process_file(destination_dir, args.app_file, "app", name="Main App", address=0x80000),
-        process_file(destination_dir, args.wifi_bl_file, "wifi", name="Wifi Bootloader", address=0x0),
-        process_file(destination_dir, args.wifi_app_file, "wifi", name="Wifi Application", address=0x10000),
-        process_file(destination_dir, args.wifi_fs_file, "wifi", name="Wifi Filesystem", address=0x200000),
-    ]
+    if args.fsbl_file:
+        j["files"].append(process_file(destination_dir, args.fsbl_file, "app", name="FSBL1", address=0x0))
+        j["files"].append(process_file(destination_dir, args.fsbl_file, "app", name="FSBL2", address=0x40000))
+
+    if args.dfu_file:
+        j["files"].append(process_file(destination_dir, args.dfu_file, "app", name="DFU", address=0x50000))
+
+    if args.app_file:
+        j["files"].append(process_file(destination_dir, args.app_file, "app", name="Main App", address=0x80000))
+
+    if args.wifi_bl_file:
+        j["files"].append(process_file(destination_dir, args.wifi_bl_file, "wifi", name="Wifi Bootloader", address=0x0))
+
+    if args.wifi_app_file:
+        j["files"].append(process_file(destination_dir, args.wifi_app_file, "wifi", name="Wifi Application", address=0x10000))
+
+    if args.wifi_fs_file:
+        j["files"].append(process_file(destination_dir, args.wifi_fs_file, "wifi", name="Wifi Filesystem", address=0x200000))
 
     with open(args.out_file, "w+") as out_file:
         data_json = json.dumps(j, indent=4)
