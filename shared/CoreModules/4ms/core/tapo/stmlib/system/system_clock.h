@@ -30,6 +30,7 @@
 #define STMLIB_SYSTEM_SYSTEM_CLOCK_H_
 
 #include "stmlib/stmlib.h"
+#include <chrono>
 
 namespace stmlib {
 
@@ -38,21 +39,19 @@ class SystemClock {
   SystemClock() { }
   ~SystemClock() { }
   
-  inline void Init() { count_ = 0; }
-  inline void Tick() { ++count_; }
-  inline volatile uint32_t milliseconds() const { return count_; }
-  inline void Delay(uint32_t ms) {
+  static inline uint32_t milliseconds()
+  {
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    return uint32_t(now);
+  }
+
+  static inline void Delay(uint32_t ms) {
     uint32_t target = milliseconds() + ms;
     while (milliseconds() <= target);
   }
-
- private:
-  volatile uint32_t count_;
-
-  DISALLOW_COPY_AND_ASSIGN(SystemClock);
 };
 
-extern SystemClock system_clock;
+static SystemClock system_clock;
 
 }  // namespace stmlib
 

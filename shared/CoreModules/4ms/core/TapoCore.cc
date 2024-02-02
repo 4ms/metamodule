@@ -19,7 +19,6 @@ public:
 		buffer = std::make_unique<Buffer_t>();
 		delay.Init((short*)buffer->data(), buffer->size()/sizeof(short) / 2);
 
-		system_clock.Init();
 		ui.Init(&delay, &parameters);
 
 		std::fill(audioBufferTX.begin(), audioBufferTX.end(), ShortFrame{0,0});
@@ -81,4 +80,3 @@ private:
 
 } // namespace MetaModule
 
-namespace stmlib {SystemClock system_clock;}
