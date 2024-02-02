@@ -23,7 +23,7 @@ private:
 inline auto to_hex_string = [](MD5Processor::Digest_t val) {
 	std::array<char, 32> result;
 	for (std::size_t i = 0; i < val.size(); i++) {
-		sprintf(result.data() + 2 * i, "%02x", val[i]);
+		snprintf(result.data() + 2 * i, 3, "%02x", val[i]);
 	}
 	return result;
 };
