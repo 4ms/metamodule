@@ -18,8 +18,6 @@ struct FirmwareFileFinder {
 	FirmwareFileFinder(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
 		: sdcard_{sdcard_fileio}
 		, usbdrive_{usb_fileio} {
-		sd_changes_.reset();
-		usb_changes_.reset();
 	}
 
 	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
@@ -33,17 +31,10 @@ struct FirmwareFileFinder {
 			return load_file(message);
 		}
 
-		poll_media_change();
-
 		return std::nullopt;
 	}
 
 private:
-	void poll_media_change() {
-		sd_changes_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
-		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
-	}
-
 	IntercoreStorageMessage scan_all_for_manifest() {
 		pr_trace("M4: scanning all volumes for firmware manifest files (metamodule*.json)\n");
 
@@ -113,8 +104,6 @@ private:
 
 	FatFileIO &sdcard_;
 	FatFileIO &usbdrive_;
-	PollChange sd_changes_{1000};
-	PollChange usb_changes_{1000};
 
 	StaticString<255> found_filename;
 	uint32_t found_filesize = 0;

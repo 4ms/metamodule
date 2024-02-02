@@ -86,15 +86,17 @@ public:
 	}
 
 	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
+
 		if (message.message_type == RequestRefreshPatchList) {
+
 			IntercoreStorageMessage result{.message_type = PatchListUnchanged};
 
 			auto *patch_dir_list_ = message.patch_dir_list;
 
 			if (patch_dir_list_) {
+				poll_media_change();
 
 				if (sd_changes_.take_change()) {
-					printf("sd update\n");
 					patch_dir_list_->clear_patches(Volume::SDCard);
 
 					if (sdcard_.is_mounted())
@@ -104,7 +106,6 @@ public:
 				}
 
 				if (usb_changes_.take_change()) {
-					printf("usb update\n");
 					patch_dir_list_->clear_patches(Volume::USB);
 
 					if (usbdrive_.is_mounted())
@@ -144,8 +145,6 @@ public:
 
 			return result;
 		}
-
-		poll_media_change();
 
 		return std::nullopt;
 	}
