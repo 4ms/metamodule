@@ -28,21 +28,28 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updateFile) {
 		if (auto updateType = parseFileType(n["type"]); updateType) {
 
 			updateFile->type = *updateType;
-			n["filename"] >> updateFile->filename;
-			n["filesize"] >> updateFile->filesize;
-			n["address"] >> updateFile->address;
 
-			if (n.has_child("md5")) {
-				auto md5 = n["md5"].val();
-				auto md5_sv = std::string_view{md5.data(), md5.size()};
-				updateFile->md5 = md5_sv;
+			if (n.has_child("filename") and n.has_child("address") and n.has_child("filesize"))
+			{
+
+				n["filename"] >> updateFile->filename;
+				n["filesize"] >> updateFile->filesize;
+				n["address"] >> updateFile->address;
+
+				if (n.has_child("md5")) {
+					auto md5 = n["md5"].val();
+					auto md5_sv = std::string_view{md5.data(), md5.size()};
+					updateFile->md5 = md5_sv;
+				}
+
+				if (n.has_child("name")) {
+					n["name"] >> updateFile->name;
+				}
+				return true;
 			}
-
-			if (n.has_child("name")) {
-				n["name"] >> updateFile->name;
+			else{
+				pr_err("Missing required fields\n");
 			}
-			return true;
-
 		} else {
 			pr_err("Unknown update type\n");
 		}

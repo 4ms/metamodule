@@ -47,9 +47,17 @@ TEST_CASE("Parse json") {
 	},
 	{
 		"type": "wifi",
+		"name": "no-address",
+		"filename": "metamodule-wifi-v1.0.2.uimg",
+		"filesize": 7654321,
+	},
+	{
+		"type": "wifi",
+		"name": "with-address",
 		"filename": "metamodule-wifi-v1.0.2.uimg",
 		"filesize": 7654321,
 		"md5": "1234567890ABCDEFFEDCBA9876543210",
+		"address": 123456
 	}
 ]
 })";
@@ -76,5 +84,5 @@ TEST_CASE("Parse json") {
 	CHECK(files[1].filename == "metamodule-wifi-v1.0.2.uimg");
 	CHECK(files[1].filesize == 7654321);
 	CHECK(files[1].md5 == "1234567890ABCDEFFEDCBA9876543210"sv);
-	CHECK(files[1].address == 0xFFFFFFFF);
+	CHECK(files[1].address == 123456);
 }
