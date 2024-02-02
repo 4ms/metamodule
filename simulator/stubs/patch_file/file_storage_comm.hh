@@ -1,5 +1,6 @@
 #pragma once
 #include "../src/core_intercom/intercore_message.hh"
+#include "fs/fileio_t.hh"
 #include "fs/volumes.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
@@ -48,7 +49,10 @@ struct SimulatorFileStorageComm {
 				break;
 
 			case RequestLoadFileToRam:
-				msg_state_ = MsgState::FirmwareFileLoadRequested;
+				if (storage.hostfs_.read_file(msg.filename, msg.buffer))
+					msg_state_ = MsgState::FirmwareFileLoadOK;
+				else
+					msg_state_ = MsgState::FirmwareFileLoadFail;
 				break;
 
 			case RequestWritePatchData: {
@@ -102,24 +106,26 @@ struct SimulatorFileStorageComm {
 
 		if (msg_state_ == MsgState::FirmwareUpdateFileRequested) {
 			msg_state_ = MsgState::Idle;
-			mock_file_found_ctr++;
 
-			if ((mock_file_found_ctr % 8) < 4)
-				return {
-					.message_type = FirmwareFileFound,
-					.bytes_read = mock_file_found_ctr + mock_firmware_file_size,
-					.vol_id = Volume::SDCard,
-					.filename = "metamodule-fw.json",
-				};
-			else
-				return {FirmwareFileNotFound};
+			if (find_manifest(storage.hostfs_)) {
+				IntercoreStorageMessage reply;
+				reply.message_type = FirmwareFileFound;
+				reply.filename.copy(found_filename);
+				reply.bytes_read = found_filesize;
+				reply.vol_id = Volume::SDCard;
+				return reply;
+			} else
+				return {FirmwareFileFound};
 		}
 
-		if (msg_state_ == MsgState::FirmwareFileLoadRequested) {
-			if (mock_file_found_ctr++ > 50) {
-				msg_state_ = MsgState::Idle;
-				return {LoadFileToRamSuccess};
-			}
+		if (msg_state_ == MsgState::FirmwareFileLoadOK) {
+			msg_state_ = MsgState::Idle;
+			return {LoadFileToRamSuccess};
+		}
+
+		if (msg_state_ == MsgState::FirmwareFileLoadFail) {
+			msg_state_ = MsgState::Idle;
+			return {LoadFileToRamFailed};
 		}
 
 		return {};
@@ -150,11 +156,31 @@ private:
 		return raw_patch_data_.size_bytes();
 	}
 
+	bool find_manifest(FileIoC auto &fileio) {
+		found_filename.copy("");
+
+		bool ok = fileio.foreach_file_with_ext(
+			".json", [this](const std::string_view filename, uint32_t tm, uint32_t filesize) {
+				pr_dbg("Checking file %.255s\n", filename.data());
+
+				if (/*filename.starts_with("metamodule") && */ filesize > 30) {
+					found_filename.copy(filename);
+					found_filesize = filesize;
+					pr_dbg("Found manifest file: %s (%u B)\n", found_filename.c_str(), found_filesize);
+				}
+			});
+
+		if (!ok || found_filename.length() == 0)
+			return false;
+
+		return true;
+	}
+
 	SimulatorPatchStorage &storage;
 	PatchLocation requested_view_patch_loc_;
 
-	unsigned mock_file_found_ctr = 0;
-	unsigned mock_firmware_file_size = 513;
+	StaticString<255> found_filename;
+	uint32_t found_filesize = 0;
 
 	bool refresh_required = true;
 
@@ -165,7 +191,8 @@ private:
 		ViewPatchRequested,
 		PatchListRequested,
 		FirmwareUpdateFileRequested,
-		FirmwareFileLoadRequested,
+		FirmwareFileLoadOK,
+		FirmwareFileLoadFail,
 		WritePatchFileRequested,
 	} msg_state_ = MsgState::Idle;
 };
