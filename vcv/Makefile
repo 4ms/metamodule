@@ -28,6 +28,17 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/dynamic_data.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/easiglib/numtypes.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/tapo/stmlib
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/tapo/
+CXXFLAGS += -DSAMPLE_RATE=48000
+CXXFLAGS += -DTEST
+SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/multitap_delay.cc
+SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/resources.cc
+SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/tap_allocator.cc
+SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/control.cc
+SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/ui.cc
+SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/stmlib/utils/random.cc
+SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/stmlib/dsp/units.cc
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard src/hub/*.cc)
@@ -47,7 +58,6 @@ CXXFLAGS += -DVCVRACK
 # Careful about linking to shared libraries, since you can't assume much about the user's environment and library search path.
 # Static libraries are fine, but they should be added to this plugin's build system.
 LDFLAGS +=
-
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
