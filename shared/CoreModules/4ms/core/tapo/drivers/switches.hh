@@ -62,6 +62,12 @@ class Switches {
     // }
   }
 
+  void set(uint8_t channel, uint8_t val)
+  {
+    previous_switch_state_[channel] = switch_state_[channel];
+    switch_state_[channel] = val;
+  }
+
   inline uint8_t state(int i) { return switch_state_[i]; }
   inline uint8_t switched(int i) {
     return switch_state_[i] != previous_switch_state_[i];

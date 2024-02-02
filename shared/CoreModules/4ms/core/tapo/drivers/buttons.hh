@@ -56,7 +56,11 @@ class Buttons {
     fill(&button_state_[0], &button_state_[kNumButtons], 0xff);
   }
 
-  void Debounce() {
+  void Debounce() {}
+
+  void set(uint8_t channel, bool val)
+  {
+    button_state_[channel] = button_state_[channel] << 1 | val;
   }
 
   inline bool released(uint8_t index) const {

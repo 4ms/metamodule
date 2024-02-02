@@ -47,6 +47,16 @@ class Control {
   void Read(Parameters* parameters, bool sequencer_mode);
   void Calibrate();
 
+  Adc& getADCDriver()
+  {
+    return adc_;
+  }
+
+  GateInput& getGateInputDriver()
+  {
+    return gate_input_;
+  }
+
  private:
 
   Adc adc_;

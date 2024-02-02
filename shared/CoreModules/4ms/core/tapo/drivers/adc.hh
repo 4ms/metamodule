@@ -54,24 +54,26 @@ enum AdcChannel {
   ADC_CHANNEL_LAST
 };
 
-class Adc {
-public:
-  void Deinit(void) {}
-
+struct Adc {
+  void Deinit() {}
   void Init() {}
-
   void Convert() {}
   void Wait() {}
 
+  inline void set(uint8_t channel, float val)
+  {
+    values_[channel] = val;
+  }
+
   inline uint16_t value(uint8_t channel) const {
-    return values_[channel];
+    return uint16_t(float_value(channel) * 65535.0f);
   }
   inline float float_value(uint8_t channel) const {
-    return static_cast<float>(values_[channel]) / 65536.0f;
+    return values_[channel];
   }
 
  private:
-  uint16_t values_[ADC_CHANNEL_LAST];
+  float values_[ADC_CHANNEL_LAST];
 };
 
 #endif

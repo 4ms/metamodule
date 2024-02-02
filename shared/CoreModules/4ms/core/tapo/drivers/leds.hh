@@ -84,9 +84,7 @@ class Leds {
   void Write() {}
 
   void Clear() {
-    for (int i=0; i<kNumLeds; i++) {
-      set(i, false);
-    }
+    // TODO: implement
   }
 
   void set(uint8_t channel, bool value) {

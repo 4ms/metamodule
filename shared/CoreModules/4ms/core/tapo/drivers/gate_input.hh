@@ -41,14 +41,13 @@ class GateInput {
   void Init() {
   }
 
-  inline void Read() {
-    for (int i=0; i<GATE_INPUT_LAST; i++) {
-      previous_values_[i] = values_[i];
-    }
-
-    // TODO: implement
-    //values_[GATE_INPUT_REPEAT] = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_4);
+  inline void set(uint8_t channel, bool newVal)
+  {
+    previous_values_[channel] = values_[channel];
+    values_[channel] = newVal;
   }
+
+  inline void Read() {}
 
 	inline bool value(int8_t channel) const { return values_[channel]; }
 

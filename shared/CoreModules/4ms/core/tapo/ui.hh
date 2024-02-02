@@ -92,6 +92,27 @@ class Ui {
 
   static Ui* instance_;
 
+  Adc& getADCDriver()
+  {
+    return control_.getADCDriver();
+  }
+  GateInput& getGateInputDriver()
+  {
+    return control_.getGateInputDriver();
+  }
+  Leds& getLEDDriver()
+  {
+    return leds_;
+  }
+  Buttons& getButtonDriver()
+  {
+    return buttons_;
+  }
+  Switches& getSwitchDriver()
+  {
+    return switches_;
+  }
+
  private:
   void OnButtonPressed(const stmlib::Event& e);
   void OnButtonReleased(const stmlib::Event& e);
