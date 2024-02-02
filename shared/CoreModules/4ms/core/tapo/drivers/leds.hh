@@ -84,35 +84,40 @@ class Leds {
   void Write() {}
 
   void Clear() {
-    // TODO: implement
+    for (int i=0; i<kNumLeds; i++) {
+      set(i, false);
+    }
+  }
+
+  bool get(uint8_t channel)
+  {
+    return values_[channel];
   }
 
   void set(uint8_t channel, bool value) {
-    // TODO: implement
+    values_[channel] = value;
   }
 
   void set_rgb(uint8_t channel, uint8_t color) {
-    // TODO: implement
+    for (int i=0; i<3; i++) {
+      set(channel * 3 + i, (color >> i) & 1);
+    }
   }
 
   void set_repeat(uint8_t color) {
-    // set(LED_REPEAT_R, (color >> 0) & 1);
-    // set(LED_REPEAT_G, (color >> 1) & 1);
-    // set(LED_REPEAT_B, (color >> 2) & 1);
-
-    // TODO: implement
+    set(LED_REPEAT_R, (color >> 0) & 1);
+    set(LED_REPEAT_G, (color >> 1) & 1);
+    set(LED_REPEAT_B, (color >> 2) & 1);
   }
 
   void set_delete(uint8_t color) {
-    // set(LED_DELETE_R, (color >> 0) & 1);
-    // set(LED_DELETE_G, (color >> 1) & 1);
-    // set(LED_DELETE_B, (color >> 2) & 1);
-
-      // TODO: implement
+    set(LED_DELETE_R, (color >> 0) & 1);
+    set(LED_DELETE_G, (color >> 1) & 1);
+    set(LED_DELETE_B, (color >> 2) & 1);
   }
 
  private:
-  bool values_[kNumLeds];
+  std::array<bool,kNumLeds> values_;
 };
 
 #endif
