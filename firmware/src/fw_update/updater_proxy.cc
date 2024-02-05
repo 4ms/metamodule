@@ -84,8 +84,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 				if (parseResult->files.size() > 0) {
 					manifest = *parseResult;
 
-					current_file_idx = 0;
-					moveToState(State::Verifying);
+					moveToState(State::LoadingUpdateFiles);
 
 				} else {
 					abortWithMessage("Manifest file has no valid files");
@@ -94,6 +93,67 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 			} else if (message.message_type == FileStorageProxy::LoadFileToRamFailed) {
 				abortWithMessage("Failed reading manifest file");
 			}
+
+		} break;
+
+		case LoadingUpdateFiles: {
+
+			bool requestLoadingCurrentFile = false;
+
+			if (justEnteredState)
+			{
+				justEnteredState = false;
+
+				current_file_idx = 0;
+				requestLoadingCurrentFile = true;
+			}
+			else
+			{
+				auto message = file_storage.get_message();
+
+				if (message.message_type != FileStorageProxy::None)
+				{
+					if (message.message_type == FileStorageProxy::LoadFileToRamSuccess)
+					{
+						current_file_idx++;
+
+						if (current_file_idx == manifest.files.size()) {
+							current_file_idx = 0;
+							moveToState(Verifying);
+						}
+						else
+						{
+							requestLoadingCurrentFile = true;
+						}
+					}
+					else{
+						abortWithMessage("Failed loading update file");
+					}
+				}
+			}
+
+			if (requestLoadingCurrentFile)
+			{
+				auto &thisFile = manifest.files[current_file_idx];
+
+				if (auto thisFileBuffer = allocator.allocate(thisFile.filesize); thisFileBuffer)
+				{
+					auto requestResult = file_storage.request_load_file(thisFile.filename, vol, {(char*)thisFileBuffer, thisFile.filesize});
+
+					if (requestResult)
+					{
+						loadedFiles.emplace_back(thisFileBuffer, thisFile.filesize);
+					}
+					else
+					{
+						abortWithMessage("Cannot request loading update file");
+					}
+				}
+				else{
+					abortWithMessage("Cannot allocate buffer for update file");
+				}
+			}
+
 
 		} break;
 

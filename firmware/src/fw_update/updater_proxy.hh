@@ -10,7 +10,7 @@ namespace MetaModule
 
 class FirmwareUpdaterProxy {
 public:
-	enum State { Idle, Error, LoadingManifest, Verifying, Writing, Success };
+	enum State { Idle, Error, LoadingManifest, LoadingUpdateFiles, Verifying, Writing, Success };
 
 	struct Status {
 		State state{State::Idle};
@@ -51,6 +51,7 @@ private:
 	};
 
 	SharedMem *sharedMem;
+	std::vector<std::span<uint8_t>> loadedFiles;
 
 	OneTimeArenaAllocator allocator;
 };
