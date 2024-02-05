@@ -1,6 +1,5 @@
 #include "firmware_writer.hh"
 #include "hash/hash_processor.hh"
-#include "ram_buffer.hh"
 #include "wifi/comm/wifi_interface.hh"
 #include "wifi/flasher/flasher.h"
 
@@ -28,39 +27,15 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 	} else if (message.message_type == StartFlashing) {
 		pr_dbg("-> Start flashing to 0x%08x\n", message.address);
 
-		FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
-							(message.vol_id == Volume::SDCard) ? &sdcard_ :
-																 nullptr;
-
-		if (fileio != nullptr) {
-			auto workingBuffer = get_ram_buffer_server();
-
-			if (message.length <= workingBuffer.size()) {
-				auto readBuffer = workingBuffer.first(message.length);
-				auto bytesRead = fileio->read_file(
-					message.filename, {(char *)workingBuffer.data(), workingBuffer.size()}, *message.bytes_processed);
-
-				if (bytesRead == message.length) {
-					if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI) {
-						return flashWifi(readBuffer, message.address, *message.bytes_processed);
-					} else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI) {
-						return flashQSPI(readBuffer, message.address, *message.bytes_processed);
-					} else {
-						pr_err("Undefined flash target %u\n", message.flashTarget);
-						return IntercoreStorageMessage{.message_type = FlashingFailed};
-					}
-				} else {
-					pr_err("Failed reading file to flash\n");
-					return IntercoreStorageMessage{.message_type = FlashingFailed};
-				}
-			} else {
-				pr_err("File to flash to large (%u) for working buffer (%u)\n", message.length, workingBuffer.size());
-				return IntercoreStorageMessage{.message_type = FlashingFailed};
-			}
+		if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI) {
+			return flashWifi({(uint8_t*)message.buffer.data(), message.buffer.size()}, message.address, *message.bytes_processed);
+		} else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI) {
+			return flashQSPI({(uint8_t*)message.buffer.data(), message.buffer.size()}, message.address, *message.bytes_processed);
 		} else {
-			pr_err("Invalid volume id %u for update file\n", message.vol_id);
+			pr_err("Undefined flash target %u\n", message.flashTarget);
 			return IntercoreStorageMessage{.message_type = FlashingFailed};
-		}
+		}	
+		
 	} else {
 		return std::nullopt;
 	}

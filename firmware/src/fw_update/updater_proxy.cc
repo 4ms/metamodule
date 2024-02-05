@@ -23,7 +23,7 @@ FirmwareUpdaterProxy::FirmwareUpdaterProxy(FileStorageProxy &file_storage)
 	: file_storage{file_storage}
 	, state(Idle)
 	, sharedMem(nullptr)
-	, allocator(get_ram_buffer_client()) {
+	, allocator(get_ram_buffer()) {
 }
 
 bool FirmwareUpdaterProxy::start(std::string_view manifest_filename,
@@ -209,6 +209,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 				pr_dbg("Start flashing file %u of %u\n", current_file_idx + 1, manifest.files.size());
 
 				auto &thisFile = manifest.files[current_file_idx];
+				auto &thisLoadedFile = loadedFiles[current_file_idx];
 
 				sharedMem->bytes_processed = 0;
 				current_file_size = thisFile.filesize;
@@ -216,10 +217,8 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 
 				if (auto target = GetTargetForUpdateType(thisFile.type); target) {
 					auto result = file_storage.request_file_flash(*target,
-																  thisFile.filename,
-																  vol,
+																  thisLoadedFile,
 																  thisFile.address,
-																  thisFile.filesize,
 																  &sharedMem->bytes_processed);
 
 					if (not result) {
