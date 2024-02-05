@@ -87,6 +87,9 @@ struct FirmwareUpdateTab {
 					display_update_failed(status.error_message);
 					state = State::Failed;
 
+				} else if (status.state == FirmwareUpdaterProxy::LoadingUpdateFiles) {
+					display_loading_files();
+				
 				} else if (status.state == FirmwareUpdaterProxy::Verifying) {
 					display_progress(
 						"Checking target memory checksum", status.name, status.file_size, status.bytes_completed);
@@ -144,13 +147,23 @@ private:
 
 	void display_reading_manifest() {
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
-							  "Reading update file %s (%u kB)... Please wait\n",
+							  "Reading manifest file %s (%u kB)... Please wait\n",
 							  manifest_filename.data(),
 							  int(manifest_filesize / 1024));
 		lv_show(ui_FWUpdateSpinner);
 		lv_hide(ui_SystemMenUpdateProgressBar);
 		lv_hide(ui_SystemMenuUpdateFWBut);
 		state = State::Updating;
+	}
+
+	void display_loading_files()
+	{
+		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
+						"Loadidng update files... Please wait\n");
+
+		lv_show(ui_FWUpdateSpinner);
+		lv_hide(ui_SystemMenUpdateProgressBar);
+		lv_hide(ui_SystemMenuUpdateFWBut);
 	}
 
 	void display_manifest_found() {
