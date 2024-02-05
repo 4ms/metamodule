@@ -3,6 +3,7 @@
 #include "update_file.hh"
 #include <cstdint>
 #include <string>
+#include "ram_buffer.hh"
 
 namespace MetaModule
 {
@@ -47,10 +48,11 @@ private:
 	struct SharedMem {
 		uint32_t bytes_processed;
 		StaticString<32> checksum;
-		std::array<uint8_t, 4 * 1024 * 1024> manifestBuffer;
 	};
 
 	SharedMem *sharedMem;
+
+	OneTimeArenaAllocator allocator;
 };
 
 } // namespace MetaModule

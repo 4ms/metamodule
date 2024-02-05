@@ -22,37 +22,37 @@ auto GetTargetForUpdateType = [](UpdateType val) -> std::optional<IntercoreStora
 FirmwareUpdaterProxy::FirmwareUpdaterProxy(FileStorageProxy &file_storage)
 	: file_storage{file_storage}
 	, state(Idle)
-	, sharedMem(nullptr) {
-	auto ram_buffer = get_ram_buffer_client();
-
-	sharedMem = new (ram_buffer.data()) SharedMem;
+	, sharedMem(nullptr)
+	, allocator(get_ram_buffer_client()) {
 }
 
 bool FirmwareUpdaterProxy::start(std::string_view manifest_filename,
 								 Volume manifest_file_vol,
 								 uint32_t manifest_filesize) {
 
-	if (get_ram_buffer_client().size() <= sizeof(SharedMem)) {
-		pr_err("Buffer (%zu) is too small for loading a manifest (%zu)\n",
-			   get_ram_buffer_client().size(),
-			   sizeof(SharedMem));
-		return false;
-	}
+	if (auto sharedMemPtr = allocator.allocate(sizeof(SharedMem)); sharedMemPtr) {
 
-	if (manifest_filesize <= sizeof(SharedMem::manifestBuffer)) {
-		manifestBuffer = std::span<char>((char *)sharedMem->manifestBuffer.data(), manifest_filesize);
+		sharedMem = new (sharedMemPtr) SharedMem;
 
-		pr_dbg("%p + %u\n", manifestBuffer.data(), manifestBuffer.size());
+		if (auto manifestPtr = allocator.allocate(manifest_filesize); manifestPtr) {
 
-		if (file_storage.request_load_file(manifest_filename, manifest_file_vol, manifestBuffer)) {
-			vol = manifest_file_vol;
-			moveToState(State::LoadingManifest);
-			return true;
+			manifestBuffer = std::span<char>((char *)manifestPtr, manifest_filesize);
+
+			if (file_storage.request_load_file(manifest_filename, manifest_file_vol, manifestBuffer)) {
+				vol = manifest_file_vol;
+				moveToState(State::LoadingManifest);
+				return true;
+			} else {
+				abortWithMessage("Cannot request manifest file");
+			}
 		} else {
-			abortWithMessage("Cannot request manifest file");
+			abortWithMessage("Manifest file is too large");
 		}
-	} else {
-		abortWithMessage("Manifest file is too large");
+
+	}
+	else
+	{
+		abortWithMessage("Cannot allocate shared memory");
 	}
 
 	return false;
