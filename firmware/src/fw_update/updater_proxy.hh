@@ -1,9 +1,9 @@
 #pragma once
 #include "patch_file/file_storage_proxy.hh"
+#include "ram_buffer.hh"
 #include "update_file.hh"
 #include <cstdint>
 #include <string>
-#include "ram_buffer.hh"
 
 namespace MetaModule
 {
@@ -35,7 +35,7 @@ private:
 
 	State state;
 	std::string error_message;
-	bool justEnteredState;
+	bool justEnteredState{};
 
 	Volume vol;
 	std::span<char> manifestBuffer;
@@ -46,7 +46,7 @@ private:
 	std::string current_file_name;
 
 	struct SharedMem {
-		uint32_t bytes_processed;
+		uint32_t bytes_processed{0};
 		StaticString<32> checksum;
 	};
 

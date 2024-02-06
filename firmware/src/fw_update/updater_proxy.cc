@@ -30,6 +30,8 @@ bool FirmwareUpdaterProxy::start(std::string_view manifest_filename,
 								 Volume manifest_file_vol,
 								 uint32_t manifest_filesize) {
 
+	allocator.reset();
+
 	if (auto sharedMemPtr = allocator.allocate(sizeof(SharedMem)); sharedMemPtr) {
 
 		sharedMem = new (sharedMemPtr) SharedMem;
@@ -49,9 +51,7 @@ bool FirmwareUpdaterProxy::start(std::string_view manifest_filename,
 			abortWithMessage("Manifest file is too large");
 		}
 
-	}
-	else
-	{
+	} else {
 		abortWithMessage("Cannot allocate shared memory");
 	}
 
@@ -100,60 +100,46 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 
 			bool requestLoadingCurrentFile = false;
 
-			if (justEnteredState)
-			{
+			if (justEnteredState) {
 				justEnteredState = false;
 
 				current_file_idx = 0;
 				requestLoadingCurrentFile = true;
-			}
-			else
-			{
+			} else {
 				auto message = file_storage.get_message();
 
-				if (message.message_type != FileStorageProxy::None)
-				{
-					if (message.message_type == FileStorageProxy::LoadFileToRamSuccess)
-					{
+				if (message.message_type != FileStorageProxy::None) {
+					if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
 						current_file_idx++;
 
 						if (current_file_idx == manifest.files.size()) {
 							current_file_idx = 0;
 							moveToState(Verifying);
-						}
-						else
-						{
+						} else {
 							requestLoadingCurrentFile = true;
 						}
-					}
-					else{
+					} else {
 						abortWithMessage("Failed loading update file");
 					}
 				}
 			}
 
-			if (requestLoadingCurrentFile)
-			{
+			if (requestLoadingCurrentFile) {
 				auto &thisFile = manifest.files[current_file_idx];
 
-				if (auto thisFileBuffer = allocator.allocate(thisFile.filesize); thisFileBuffer)
-				{
-					auto requestResult = file_storage.request_load_file(thisFile.filename, vol, {(char*)thisFileBuffer, thisFile.filesize});
+				if (auto thisFileBuffer = allocator.allocate(thisFile.filesize); thisFileBuffer) {
+					auto requestResult = file_storage.request_load_file(
+						thisFile.filename, vol, {(char *)thisFileBuffer, thisFile.filesize});
 
-					if (requestResult)
-					{
+					if (requestResult) {
 						loadedFiles.emplace_back(thisFileBuffer, thisFile.filesize);
-					}
-					else
-					{
+					} else {
 						abortWithMessage("Cannot request loading update file");
 					}
-				}
-				else{
+				} else {
 					abortWithMessage("Cannot allocate buffer for update file");
 				}
 			}
-
 
 		} break;
 
@@ -216,10 +202,8 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 				current_file_name = thisFile.name;
 
 				if (auto target = GetTargetForUpdateType(thisFile.type); target) {
-					auto result = file_storage.request_file_flash(*target,
-																  thisLoadedFile,
-																  thisFile.address,
-																  &sharedMem->bytes_processed);
+					auto result = file_storage.request_file_flash(
+						*target, thisLoadedFile, thisFile.address, &sharedMem->bytes_processed);
 
 					if (not result) {
 						abortWithMessage("Cannot trigger flashing");

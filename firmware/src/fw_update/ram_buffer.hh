@@ -11,25 +11,27 @@ inline std::span<uint8_t> get_ram_buffer() {
 	return {reinterpret_cast<uint8_t *>(_FWBUFFER), FWBUFFER_SZ};
 }
 
-class OneTimeArenaAllocator
-{
+class OneTimeArenaAllocator {
 public:
-	OneTimeArenaAllocator(std::span<uint8_t> arena_) : arena(arena_), offset(0) {}
+	OneTimeArenaAllocator(std::span<uint8_t> arena_)
+		: arena(arena_)
+		, offset(0) {
+	}
 
-	uint8_t* allocate(std::size_t size)
-	{
+	uint8_t *allocate(std::size_t size) {
 		auto bytesRemaining = arena.size() - offset;
-		if (bytesRemaining > size)
-		{
+		if (bytesRemaining > size) {
 			auto result = &arena[offset];
 			offset += size;
 
 			return result;
-		}
-		else
-		{
+		} else {
 			return nullptr;
 		}
+	}
+
+	void reset() {
+		offset = 0;
 	}
 
 private:
