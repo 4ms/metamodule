@@ -52,13 +52,6 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 	auto result = Flasher::init(230400);
 
 	if (result == ESP_LOADER_SUCCESS) {
-		// Write to a dummy location so the following checksum operation does not fail
-		// TODO: This should be fixed in the esp_serial_flasher library
-		if (address >= 0x200000) {
-			const std::size_t DummyAddress = 0x00600000;
-			uint8_t dummyByte = 0xFF;
-			result = Flasher::flash(DummyAddress, {&dummyByte, 1});
-		}
 
 		if (result == ESP_LOADER_SUCCESS) {
 			result = Flasher::verify(address, length, checksum);
