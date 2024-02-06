@@ -57,9 +57,7 @@ and you can't play them.
 ### Build with wifi bridge
 
 To simpilfy development workflow, the wifi bridge functionality is not included in the build by default.
-If you want to build with wifi code, you need to install the flatbuffer
-compiler `flatc` with the correct version as described in the [setup
-guide](../docs/Setup.md) and configure with the `full` preset.
+To enable it, configure with the `full` preset
 
 ```
 make configure PRESET=full
