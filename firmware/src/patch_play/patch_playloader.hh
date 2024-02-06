@@ -21,7 +21,7 @@ struct PatchPlayLoader {
 
 		uint32_t tries = 10000;
 		while (--tries) {
-			if (storage_.request_viewpatch({"Befaco4msPlayground.yml", Volume::NorFlash}))
+			if (storage_.request_viewpatch({"SlothDrone.yml", Volume::NorFlash}))
 				break;
 		}
 		if (tries == 0) {
