@@ -7,9 +7,9 @@ on:
         description: 'Build only a subset of modules'
         default: false
         type: boolean
-      omit_wifi:
-        description: 'Omit wifi features'
-        default: true
+      build_wifi:
+        description: 'Build wifi features'
+        default: false
         type: boolean
   push:
     branches:
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/lnnrts/metamodule@sha256:fc81416d9f424a3dcc735644cdfb0e6f8d2641f64fe5eec73d9e3e6bc23640c3
     env:
-      preset: ${{ inputs.omit_wifi && 'base' || 'full' }}
+      preset: ${{ inputs.build_wifi && 'full' || 'base' }}
     steps:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
