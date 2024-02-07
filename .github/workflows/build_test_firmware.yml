@@ -9,7 +9,7 @@ on:
         type: boolean
       omit_wifi:
         description: 'Omit wifi features'
-        default: false
+        default: true
         type: boolean
   push:
     branches:
