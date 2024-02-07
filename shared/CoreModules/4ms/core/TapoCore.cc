@@ -111,9 +111,33 @@ private:
 		buttons.set(BUTTON_REPEAT, getState<RepeatButton>()  == MomentaryButton::State_t::RELEASED);
 		buttons.set(BUTTON_DELETE, getState<DeleteButton>()  == MomentaryButton::State_t::RELEASED);
 
-		// TODO: check conversion
-		switches.set(SWITCH_EDIT, uint8_t(getState<AddOffInsSwitch>()));
-		switches.set(SWITCH_VELO, uint8_t(getState<ResAmpLpfSwitch>()));
+		auto SwitchStateMappingEdit = [](auto val) -> uint8_t
+		{
+			// map position VCV -> firmware
+			switch(val)
+			{
+				case 0:  return 2; // overdub
+				case 1:  return 0; // off
+				case 2:  return 1; // normal
+				default: return 0;
+			}
+		};
+
+		auto SwitchStateMappingVelo = [](auto val) -> uint8_t
+		{
+			// map position VCV -> firmware
+			switch(val)
+			{
+				case 0:  return 1; // lp
+				case 1:  return 0; // amp 
+				case 2:  return 2; // bp
+				default: return 0;
+			}
+		};
+
+
+		switches.set(SWITCH_EDIT, SwitchStateMappingEdit(getState<AddOffInsSwitch>()));
+		switches.set(SWITCH_VELO, SwitchStateMappingVelo(getState<ResAmpLpfSwitch>()));
 
 		setLED<Button1Button>(std::array{leds.get(LED_BUT1_R), leds.get(LED_BUT1_G), leds.get(LED_BUT1_B)});
 		setLED<Button2Button>(std::array{leds.get(LED_BUT2_R), leds.get(LED_BUT2_G), leds.get(LED_BUT2_B)});
