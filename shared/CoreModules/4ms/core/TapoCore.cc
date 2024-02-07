@@ -14,10 +14,15 @@ class TapoCore : public SmartCoreProcessor<TapoInfo> {
 	using enum Info::Elem;
 
 public:
-	TapoCore() : audioBufferFillCount(0)
+	TapoCore() : audioBufferFillCount(0), gateOutCounter(0)
 	{
 		buffer = std::make_unique<Buffer_t>();
 		delay.Init((short*)buffer->data(), buffer->size()/sizeof(short) / 2);
+
+		delay.tap_modulo_observable_.set_observer([this]
+		{
+			onTapDetected();
+		});
 
 		ui.Init(&delay, &parameters);
 
@@ -42,6 +47,8 @@ public:
 
 		packUnpackBlockBuffers();
 		audioBufferFillCount++;
+
+		updateGateOut();
 	}
 
 	void set_samplerate(float sr) override {
@@ -120,9 +127,28 @@ private:
 
 		// TODO: make this an actual red LED
 		setLED<TapLedLight>(std::array{leds.get(LED_TAP), false, false});
-
 	}
-	
+
+	void onTapDetected()
+	{
+		pingGateOut();
+		ui.PingGateLed();
+	}
+
+private:
+	void updateGateOut()
+	{
+		if (gateOutCounter != 0 and --gateOutCounter == 0)
+		{
+			setOutput<GateOut>(0);
+		}
+	}
+
+	void pingGateOut()
+	{
+		gateOutCounter = 20;
+		setOutput<GateOut>(5.0f);
+	}	
 
 private:
 	static constexpr std::size_t BufferSizeInBytes = 0x02000000;
@@ -138,6 +164,8 @@ private:
 	std::array<ShortFrame,BlockSize> audioBufferRX;
 	std::array<ShortFrame,BlockSize> audioBufferTX;
 	std::size_t audioBufferFillCount;
+
+	uint32_t gateOutCounter;
 };
 
 } // namespace MetaModule
