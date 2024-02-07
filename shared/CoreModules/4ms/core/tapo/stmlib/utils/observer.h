@@ -26,9 +26,11 @@
 //
 // Observer pattern.
 
+#include <functional>
+
 class Observable0 {
 private:
-  typedef void (*ObserverFct)();
+  using ObserverFct = std::function<void(void)>;
   ObserverFct observer_;
 
 public:
