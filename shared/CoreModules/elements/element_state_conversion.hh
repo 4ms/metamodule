@@ -99,11 +99,25 @@ constexpr std::array<float, T::NumLights> convertLED(const T &, float value) req
 	return {value};
 }
 
+// Fallback for RGB LEDs
+template<typename T>
+constexpr std::array<float, T::NumLights> convertLED(const T &, std::array<float,3> values) requires(T::NumLights == 3)
+{
+	return values;
+}
+
 // Fallback for single LED elements with explicit type conversion
 template<typename T>
 constexpr std::array<float, T::NumLights> convertLED(const T &, bool value) requires(T::NumLights == 1)
 {
 	return {value ? 1.0f : 0.0f};
+}
+
+// Fallback for RGB LED elements with explicit type conversion
+template<typename T>
+constexpr std::array<float, T::NumLights> convertLED(const T &, std::array<bool,3> values) requires(T::NumLights == 3)
+{
+	return {values[0] ? 1.0f : 0.0f, values[1] ? 1.0f : 0.0f, values[2] ? 1.0f : 0.0f};
 }
 
 template<typename T>
