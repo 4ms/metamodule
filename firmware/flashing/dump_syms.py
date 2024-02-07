@@ -37,6 +37,41 @@ def GetAddressesOfSymbols(file, needed_syms):
         logging.warning(f"** WARNING: Symbol not found: {n} **")
     return syms
 
+def GetLibcSymbols():
+    libc_syms = [
+         "abort",
+         "ceil",
+         "cos",
+         "cosf",
+         "exp",
+         "expf",
+         "fabs",
+         "floor",
+         "floorf",
+         "fmaxf",
+         "fminf",
+         "fmod",
+         "log2f",
+         "logf",
+         "memcmp",
+         "memcpy",
+         "memmove",
+         "memset",
+         "pow",
+         "powf",
+         "roundf",
+         "sin",
+         "sinf",
+         "sqrt",
+         "sqrtf",
+         "strlen",
+         "tanf",
+         "tanh",
+         "__aeabi_atexit",
+         "__cxa_pure_virtual",
+    ]
+    return libc_syms
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Dump symbols that plugins might need")
@@ -48,17 +83,22 @@ if __name__ == "__main__":
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG, format='%(message)s')
     else:
-        logging.basicConfig(level=logging.WARNING, format='%(message)s')
+        logging.basicConfig(level=logging.INFO, format='%(message)s')
 
     needed_syms = []
-    obj_files = Path(args.objdir).glob("*.obj")
+
+    obj_files = Path(args.objdir).glob("**/*.obj")
     for obj_file in obj_files:
-        print(f"Looking for symbols in {obj_file}")
+        logging.info(f"Looking for symbols in {obj_file}")
         with open(obj_file, "rb") as f:
             needed_syms += GetRequiredSymbolNames(f)
 
-    # objfile = "../build/mp1corea7/medium/main.elf"
+    needed_syms += GetLibcSymbols()
+
     logging.debug("Finding symbol addresses:")
+
     with open(args.elf, "rb") as f:
         syms = GetAddressesOfSymbols(f, needed_syms)
         
+
+# flashing/dump_syms.py --objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ --elf ./build/mp1corea7/medium/main.elf -v
