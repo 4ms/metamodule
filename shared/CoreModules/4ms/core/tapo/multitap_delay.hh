@@ -35,9 +35,9 @@
 
 #include "stmlib/dsp/filter.h"
 
-using namespace stmlib;
-
 namespace TapoDelay {
+
+using namespace stmlib;
 
 enum TapType {
   TAP_DRY,

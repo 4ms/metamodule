@@ -35,7 +35,7 @@
 #define M_PI 3.14159265358979323846
 #include <cmath>
 
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 enum FilterMode {
   FILTER_MODE_LOW_PASS,

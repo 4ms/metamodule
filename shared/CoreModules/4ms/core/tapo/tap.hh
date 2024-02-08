@@ -38,9 +38,9 @@
 #include "random_oscillator.hh"
 #include "fader.hh"
 
-using namespace stmlib;
-
 namespace TapoDelay {
+
+using namespace stmlib;
 
 const float kTimeLfoAmplitude = 0.5f;
 const float kA440 = 440.0f / SAMPLE_RATE;

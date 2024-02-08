@@ -31,7 +31,7 @@
 
 #include "../stmlib.h"
 
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 class Random {
  public:

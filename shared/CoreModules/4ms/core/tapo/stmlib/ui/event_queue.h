@@ -24,7 +24,7 @@
 #include "../utils/ring_buffer.h"
 #include "../system/system_clock.h"
 
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 enum ControlType {
   CONTROL_POT = 0,

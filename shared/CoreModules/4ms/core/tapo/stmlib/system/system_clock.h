@@ -32,7 +32,7 @@
 #include "../stmlib.h"
 #include <chrono>
 
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 class SystemClock {
  public:

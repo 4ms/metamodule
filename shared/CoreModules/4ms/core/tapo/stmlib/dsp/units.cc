@@ -28,7 +28,7 @@
 
 #include "../dsp/units.h"
 
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 /* extern */
 const float lut_pitch_ratio_high[] = {

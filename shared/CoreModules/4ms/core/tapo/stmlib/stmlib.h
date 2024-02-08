@@ -22,8 +22,7 @@
 // 
 // See http://creativecommons.org/licenses/MIT/ for more information.
 
-#ifndef STMLIB_STMLIB_H_
-#define STMLIB_STMLIB_H_
+#pragma once
 
 #include <inttypes.h>
 #include <stddef.h>
@@ -90,7 +89,7 @@ inline void StaticAssertImplementation() {
 	char static_assert_size_mismatch[b] = { 0 };
 }
  
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 typedef union {
   uint16_t value;
@@ -111,4 +110,4 @@ struct FourCC {
 
 }  // namespace stmlib
 
-#endif   // STMLIB_STMLIB_H_
+

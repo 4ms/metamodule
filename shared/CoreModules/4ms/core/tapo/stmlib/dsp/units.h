@@ -32,7 +32,7 @@
 #include "../stmlib.h"
 #include "../dsp/dsp.h"
 
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 extern const float lut_pitch_ratio_high[257];
 extern const float lut_pitch_ratio_low[257];

@@ -28,7 +28,7 @@
 
 #include "../utils/random.h"
 
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 /* static */
 uint32_t Random::rng_state_ = 0x21;

@@ -38,9 +38,9 @@
 #include "persistent.hh"
 #include "multitap_delay.hh"
 
-using namespace stmlib;
-
 namespace TapoDelay {
+
+using namespace stmlib;
 
 class Control {
  public:

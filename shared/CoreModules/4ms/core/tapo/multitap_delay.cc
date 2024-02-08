@@ -31,9 +31,9 @@
 #include "stmlib/dsp/rsqrt.h"
 #include "multitap_delay.hh"
 
-using namespace stmlib;
-
 namespace TapoDelay {
+
+using namespace stmlib;
 
 const int32_t kClockDefaultPeriod = 1 * SAMPLE_RATE;
 const int32_t kMaxQuantizeClock = 2 * SAMPLE_RATE;

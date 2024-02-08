@@ -31,7 +31,7 @@
 
 #include "../stmlib.h"
 
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 template<typename To, typename From>
 struct unsafe_bit_cast_t {

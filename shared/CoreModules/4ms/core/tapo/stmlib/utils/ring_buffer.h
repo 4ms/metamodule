@@ -32,7 +32,7 @@
 #include "../stmlib.h"
 #include <algorithm>
 
-namespace stmlib {
+namespace TapoDelay::stmlib {
 
 template<typename T, size_t size>
 class RingBuffer {
