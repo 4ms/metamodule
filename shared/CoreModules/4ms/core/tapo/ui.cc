@@ -30,6 +30,8 @@
 #include "ui.hh"
 #include "stmlib/utils/random.h"
 
+namespace TapoDelay {
+
 const int32_t kLongPressDuration = 400;
 const int32_t kVeryLongPressDuration = 1200;
 
@@ -588,4 +590,5 @@ void Ui::DoEvents() {
     queue_.Touch();
     SaveSettings();
   }
+}
 }

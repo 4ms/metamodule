@@ -41,6 +41,8 @@
 #include "control.hh"
 #include "persistent.hh"
 
+namespace TapoDelay {
+
 enum UiMode {
   UI_MODE_SPLASH,
   UI_MODE_NORMAL,
@@ -157,5 +159,6 @@ class Ui {
   bool sequencer_mode_;
   bool settings_changed_;
 };
+}
 
 #endif

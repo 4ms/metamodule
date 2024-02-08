@@ -30,6 +30,8 @@
 
 #include "stmlib/stmlib.h"
 
+namespace TapoDelay {
+
 const size_t kBlockSize = 64;
 const uint8_t kMaxTaps = 32;
 
@@ -92,5 +94,6 @@ struct Slot {
   uint8_t size;
   TapParameters taps[kMaxTaps];
 };
+}
 
 #endif  // MTD_DSP_PARAMETERS_H_

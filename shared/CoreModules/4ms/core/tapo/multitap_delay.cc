@@ -33,6 +33,8 @@
 
 using namespace stmlib;
 
+namespace TapoDelay {
+
 const int32_t kClockDefaultPeriod = 1 * SAMPLE_RATE;
 const int32_t kMaxQuantizeClock = 2 * SAMPLE_RATE;
 
@@ -322,3 +324,5 @@ void MultitapDelay::Process(Parameters *params, ShortFrame* input, ShortFrame* o
     quantize_ = false;
   }
 };
+
+}

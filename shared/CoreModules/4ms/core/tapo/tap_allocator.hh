@@ -32,6 +32,8 @@
 #include "tap.hh"
 #include "stmlib/utils/ring_buffer.h"
 
+namespace TapoDelay {
+
 class TapAllocator
 {
  public:
@@ -80,4 +82,5 @@ class TapAllocator
   stmlib::RingBuffer<TapParameters, kMaxTaps*4> queue_;
 };
 
+}
 #endif

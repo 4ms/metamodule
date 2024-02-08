@@ -32,6 +32,8 @@
 #include "parameters.hh"
 #include "resources.h"
 
+namespace TapoDelay {
+
 const int kNumSlots = 6 * 4;    // 6 buttons, 4 banks
 
 struct CalibrationData {
@@ -162,4 +164,5 @@ private:
   uint16_t token_[4];
 };
 
+}
 #endif

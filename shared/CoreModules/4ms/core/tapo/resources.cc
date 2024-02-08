@@ -31,6 +31,8 @@
 
 
 #include "resources.h"
+
+namespace TapoDelay {
 const int16_t lut_preset_types[] = {
        1,      1,      1,      1,
        1,      1,      1,      1,
@@ -853,3 +855,5 @@ const float* lookup_table_table[] = {
   lut_preset_pans,
 };
 
+
+}

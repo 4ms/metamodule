@@ -31,6 +31,8 @@
 
 #include "../stmlib/stmlib.h"
 
+namespace TapoDelay {
+
 enum AdcChannel {
   // pots
   ADC_SCALE_POT,
@@ -75,5 +77,7 @@ struct Adc {
  private:
   float values_[ADC_CHANNEL_LAST];
 };
+
+}
 
 #endif

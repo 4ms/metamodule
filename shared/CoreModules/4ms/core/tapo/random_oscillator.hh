@@ -34,6 +34,8 @@
 #ifndef RANDOM_OSCILLATOR_H_
 #define RANDOM_OSCILLATOR_H_
 
+namespace TapoDelay {
+
 using namespace stmlib;
 
 const float kOscillationMinimumGap = 0.3f;
@@ -81,4 +83,5 @@ class RandomOscillator
   }
 };
 
+}
 #endif

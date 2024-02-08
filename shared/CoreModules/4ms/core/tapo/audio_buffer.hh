@@ -34,6 +34,8 @@
 
 #include <algorithm>
 
+namespace TapoDelay {
+
 class AudioBuffer
 {
  public:
@@ -142,5 +144,7 @@ class AudioBuffer
   uint32_t cursor_;
   uint32_t buffer_size_;
 };
+
+}
 
 #endif

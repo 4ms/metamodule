@@ -38,6 +38,8 @@
 
 using namespace stmlib;
 
+namespace TapoDelay {
+
 enum TapType {
   TAP_DRY,
   TAP_ADDED,
@@ -126,4 +128,5 @@ private:
   uint32_t prev_max_time_;
 };
 
+}
 #endif

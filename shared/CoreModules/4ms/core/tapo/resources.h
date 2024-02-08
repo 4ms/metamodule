@@ -36,6 +36,8 @@
 
 #include "stmlib/stmlib.h"
 
+namespace TapoDelay {
+
 
 typedef uint8_t ResourceId;
 
@@ -65,4 +67,5 @@ extern const float lut_preset_pans[];
 #define LUT_PRESET_PANS 4
 #define LUT_PRESET_PANS_SIZE 768
 
+}
 #endif  // _RESOURCES_H_

@@ -41,6 +41,8 @@
 
 using namespace stmlib;
 
+namespace TapoDelay {
+
 class Control {
  public:
   void Init(MultitapDelay* delay, CalibrationData* calibration_data);
@@ -78,5 +80,7 @@ class Control {
   float freq_lp_;
   float amount_lp_;
 };
+
+}
 
 #endif

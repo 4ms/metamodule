@@ -31,6 +31,8 @@
 
 #include "../stmlib/stmlib.h"
 
+namespace TapoDelay {
+
 enum GateNames {
   GATE_INPUT_REPEAT,
   GATE_INPUT_LAST
@@ -63,4 +65,5 @@ class GateInput {
 	bool values_[GATE_INPUT_LAST];
 };
 
+}
 #endif

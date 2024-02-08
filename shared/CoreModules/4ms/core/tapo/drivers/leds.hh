@@ -35,6 +35,8 @@
 #include "../stmlib/stmlib.h"
 #include <array>
 
+namespace TapoDelay {
+
 const uint8_t kNumLeds = 26;
 
 enum LedColor {
@@ -121,4 +123,5 @@ class Leds {
   std::array<bool,kNumLeds> values_;
 };
 
+}
 #endif

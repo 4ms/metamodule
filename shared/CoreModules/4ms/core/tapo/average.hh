@@ -31,6 +31,8 @@
 
 #include <algorithm>
 
+namespace TapoDelay {
+
 template<int SIZE>
 class Average {
  public:
@@ -78,4 +80,5 @@ private:
   Average<SIZE> a;
 };
 
+}
 #endif

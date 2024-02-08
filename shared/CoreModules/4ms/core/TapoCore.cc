@@ -26,7 +26,7 @@ public:
 
 		ui.Init(&delay, &parameters);
 
-		std::fill(audioBufferTX.begin(), audioBufferTX.end(), ShortFrame{0,0});
+		std::fill(audioBufferTX.begin(), audioBufferTX.end(), ::TapoDelay::ShortFrame{0,0});
 	}
 
 	void update() override {
@@ -72,6 +72,8 @@ private:
 
 	void sideloadDrivers()
 	{
+		using namespace ::TapoDelay;
+
 		auto& adc      = ui.getADCDriver();
 		auto& buttons  = ui.getButtonDriver();
 		auto& leds     = ui.getLEDDriver();
@@ -180,13 +182,13 @@ private:
 
 	std::unique_ptr<Buffer_t> buffer;
 
-	MultitapDelay delay;
-	Parameters parameters;
-	Ui ui;
+	::TapoDelay::MultitapDelay delay;
+	::TapoDelay::Parameters parameters;
+	::TapoDelay::Ui ui;
 	
-	static constexpr std::size_t BlockSize = kBlockSize;
-	std::array<ShortFrame,BlockSize> audioBufferRX;
-	std::array<ShortFrame,BlockSize> audioBufferTX;
+	static constexpr std::size_t BlockSize = ::TapoDelay::kBlockSize;
+	std::array<::TapoDelay::ShortFrame,BlockSize> audioBufferRX;
+	std::array<::TapoDelay::ShortFrame,BlockSize> audioBufferTX;
 	std::size_t audioBufferFillCount;
 
 	uint32_t gateOutCounter;

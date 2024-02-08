@@ -34,6 +34,8 @@
 
 #include "parameters.hh"
 
+namespace TapoDelay {
+
 class Fader {
  public:
   void Init() {
@@ -79,4 +81,5 @@ class Fader {
   float volume_increment_;
 };
 
+}
 #endif

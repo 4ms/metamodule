@@ -36,6 +36,8 @@
 
 using namespace std;
 
+namespace TapoDelay {
+
 const uint8_t kNumButtons = 8;
 
 enum ButtonNames {
@@ -80,4 +82,5 @@ private:
   uint8_t button_state_[kNumButtons];
 };
 
+}
 #endif

@@ -36,6 +36,8 @@
 
 using namespace std;
 
+namespace TapoDelay {
+
 const uint8_t kNumSwitches = 2;
 const uint8_t kNumBitPerSwitch = 2;
 
@@ -77,5 +79,6 @@ private:
   uint8_t switch_state_[kNumSwitches];
   uint8_t previous_switch_state_[kNumSwitches];
 };
+}
 
 #endif

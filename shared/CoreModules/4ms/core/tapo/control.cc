@@ -35,6 +35,8 @@
 
 using namespace std;
 
+namespace TapoDelay {
+
 const float kPotDeadZoneSize = 0.01f;
 const float kScalePotNotchSize = 0.07f;
 const float kScaleHysteresis = 0.03f;
@@ -304,4 +306,6 @@ void Control::Read(Parameters* parameters, bool sequencer_mode) {
 
   gate_input_.Read();
   adc_.Convert();
+}
+
 }

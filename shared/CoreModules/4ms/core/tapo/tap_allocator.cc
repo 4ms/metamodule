@@ -28,6 +28,8 @@
 
 #include "tap_allocator.hh"
 
+namespace TapoDelay {
+
 void TapAllocator::Init(Tap taps[kMaxTaps])
 {
   taps_ = taps;
@@ -145,4 +147,6 @@ void TapAllocator::Clear()
   max_time_ = 0.0f;
   oldest_voice_ = next_voice_;
   count_voices_ = 0;
+}
+
 }

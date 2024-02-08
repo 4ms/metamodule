@@ -41,6 +41,8 @@
 
 using namespace stmlib;
 
+namespace TapoDelay {
+
 const float kTimeLfoAmplitude = 0.5f;
 const float kA440 = 440.0f / SAMPLE_RATE;
 // Warning: at high frequency and low Q, filter becomes unstable
@@ -195,5 +197,7 @@ class Tap
   float previous_lfo_sample_;
 
 };
+
+}
 
 #endif
