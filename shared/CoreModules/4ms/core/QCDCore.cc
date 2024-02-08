@@ -106,7 +106,7 @@ private:
 					if(factor.operation == DIV) {
 						clockInCounter++;
 
-						if(clockInCounter == factor.factor)
+						if(clockInCounter >= factor.factor)
 						{
 							processSyncPulse = true;
 							clockInCounter = 0;
