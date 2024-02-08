@@ -20,6 +20,13 @@ private:
 	{
 		operation_t operation;
 		uint32_t factor;
+
+	   inline bool operator!=(factorType_t a) {
+       if (a.operation == operation && a.factor == factor)
+          return false;
+       else
+          return true;
+    	}
 	};
 
 	enum invMode_t {DELAY, INVERTED, SHUFFLE};
@@ -36,7 +43,11 @@ public:
 	void update() override {
 		auto now = ++ticks;
 
-		factor = readFactorCV();
+		if (auto newFactor = readFactorCV(); newFactor != factor) {
+			factor = newFactor;
+			calculateClockOutPeriod(now, factor);
+		}
+
 		pulsewidth = readPulsewidthCV();
 		triggerLengthInTicks = calculateTriggerlength(pulsewidth);
 		invMode = readInvMode();
