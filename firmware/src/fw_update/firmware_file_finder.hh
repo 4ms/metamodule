@@ -68,23 +68,15 @@ private:
 	}
 
 	bool find_manifest(FatFileIO &fileio) {
-		found_filename.copy("");
+		found_filename.copy("update/metamodule.json");
 
-		bool ok = fileio.foreach_file_with_ext(
-			".json", [this](const std::string_view filename, uint32_t tm, uint32_t filesize) {
-				pr_trace("M4: Checking file %.255s\n", filename.data());
-
-				if (filename.starts_with("metamodule") && filesize > 30) {
-					found_filename.copy(filename);
-					found_filesize = filesize;
-					pr_trace("M4: Found manifest file: %s (%u B)\n", found_filename.c_str(), found_filesize);
-				}
-			});
-
-		if (!ok || found_filename.length() == 0)
-			return false;
-
-		return true;
+		FILINFO info;
+		if (fileio.get_fat_filinfo(std::string_view(found_filename), info))
+		{
+			found_filesize = info.fsize;
+			return true;
+		}
+		return false;
 	}
 
 	IntercoreStorageMessage load_file(const IntercoreStorageMessage &message) {
