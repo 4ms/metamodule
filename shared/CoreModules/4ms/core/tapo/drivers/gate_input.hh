@@ -26,8 +26,7 @@
 //
 // Driver for the gate inputs.
 
-#ifndef GATE_INPUT_H_
-#define GATE_INPUT_H_
+#pragma once
 
 #include "../stmlib/stmlib.h"
 
@@ -66,4 +65,4 @@ class GateInput {
 };
 
 }
-#endif
+

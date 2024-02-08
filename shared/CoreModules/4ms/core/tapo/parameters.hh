@@ -25,8 +25,7 @@
 // -----------------------------------------------------------------------------
 //
 
-#ifndef PARAMETERS_H_
-#define PARAMETERS_H_
+#pragma once
 
 #include "stmlib/stmlib.h"
 
@@ -96,4 +95,3 @@ struct Slot {
 };
 }
 
-#endif  // MTD_DSP_PARAMETERS_H_

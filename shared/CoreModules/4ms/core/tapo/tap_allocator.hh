@@ -26,8 +26,7 @@
 //
 // Tap allocator
 
-#ifndef TAP_ALLOCATOR_H_
-#define TAP_ALLOCATOR_H_
+#pragma once
 
 #include "tap.hh"
 #include "stmlib/utils/ring_buffer.h"
@@ -83,4 +82,3 @@ class TapAllocator
 };
 
 }
-#endif

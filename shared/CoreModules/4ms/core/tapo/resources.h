@@ -30,9 +30,7 @@
 // make resources
 
 
-#ifndef _RESOURCES_H_
-#define _RESOURCES_H_
-
+#pragma once
 
 #include "stmlib/stmlib.h"
 
@@ -68,4 +66,4 @@ extern const float lut_preset_pans[];
 #define LUT_PRESET_PANS_SIZE 768
 
 }
-#endif  // _RESOURCES_H_
+

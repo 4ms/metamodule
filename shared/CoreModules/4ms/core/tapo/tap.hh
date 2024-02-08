@@ -26,6 +26,8 @@
 //
 //  A single tap
 
+#pragma once
+
 #include "stmlib/dsp/dsp.h"
 #include "stmlib/dsp/filter.h"
 #include "stmlib/dsp/units.h"
@@ -35,9 +37,6 @@
 #include "audio_buffer.hh"
 #include "random_oscillator.hh"
 #include "fader.hh"
-
-#ifndef TAP_H_
-#define TAP_H_
 
 using namespace stmlib;
 
@@ -200,4 +199,4 @@ class Tap
 
 }
 
-#endif
+

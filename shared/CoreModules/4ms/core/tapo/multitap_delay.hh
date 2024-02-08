@@ -26,8 +26,7 @@
 //
 // Multitap delay
 
-#ifndef MULTITAP_DELAY_H_
-#define MULTITAP_DELAY_H_
+#pragma once
 
 #include "parameters.hh"
 #include "tap_allocator.hh"
@@ -129,4 +128,4 @@ private:
 };
 
 }
-#endif
+

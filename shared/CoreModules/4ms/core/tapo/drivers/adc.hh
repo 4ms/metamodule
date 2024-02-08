@@ -26,8 +26,7 @@
 //
 // Driver for ADC.
 
-#ifndef ADC_H_
-#define ADC_H_
+#pragma once
 
 #include "../stmlib/stmlib.h"
 
@@ -79,5 +78,3 @@ struct Adc {
 };
 
 }
-
-#endif

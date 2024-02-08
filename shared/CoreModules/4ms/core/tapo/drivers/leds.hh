@@ -26,8 +26,7 @@
 //
 // Driver for the status LEDs.
 
-#ifndef LEDS_H_
-#define LEDS_H_
+#pragma once
 
 // activate to enable prototype 2 compatibility mode
 // #define PROTO2
@@ -124,4 +123,4 @@ class Leds {
 };
 
 }
-#endif
+

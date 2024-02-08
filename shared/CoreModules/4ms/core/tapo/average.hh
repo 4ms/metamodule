@@ -26,8 +26,7 @@
 //
 // Moving average filter
 
-#ifndef AVERAGE_H_
-#define AVERAGE_H_
+#pragma once
 
 #include <algorithm>
 
@@ -81,4 +80,4 @@ private:
 };
 
 }
-#endif
+

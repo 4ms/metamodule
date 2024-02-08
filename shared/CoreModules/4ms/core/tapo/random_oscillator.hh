@@ -26,13 +26,12 @@
 //
 // Smoothed random oscillator
 
+#pragma once
+
 #include "stmlib/utils/random.h"
 #include "stmlib/dsp/dsp.h"
 
 #include "resources.h"
-
-#ifndef RANDOM_OSCILLATOR_H_
-#define RANDOM_OSCILLATOR_H_
 
 namespace TapoDelay {
 
@@ -84,4 +83,4 @@ class RandomOscillator
 };
 
 }
-#endif
+

@@ -27,8 +27,7 @@
 //
 // User interface
 
-#ifndef UI_H_
-#define UI_H_
+#pragma once
 
 #include "stmlib/stmlib.h"
 #include "stmlib/ui/event_queue.h"
@@ -161,4 +160,4 @@ class Ui {
 };
 }
 
-#endif
+

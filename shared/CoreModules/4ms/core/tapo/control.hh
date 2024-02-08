@@ -26,8 +26,7 @@
 //
 // Calibration settings.
 
-#ifndef CV_SCALER_H_
-#define CV_SCALER_H_
+#pragma once
 
 #include "stmlib/stmlib.h"
 #include "stmlib/dsp/filter.h"
@@ -83,4 +82,3 @@ class Control {
 
 }
 
-#endif

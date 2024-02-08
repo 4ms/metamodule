@@ -26,8 +26,7 @@
 //
 // Persistent data
 
-#ifndef PERSISTENT_H_
-#define PERSISTENT_H_
+#pragma once
 
 #include "parameters.hh"
 #include "resources.h"
@@ -165,4 +164,4 @@ private:
 };
 
 }
-#endif
+

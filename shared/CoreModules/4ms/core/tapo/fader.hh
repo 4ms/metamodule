@@ -27,8 +27,7 @@
 // Fade signal in/out
 
 
-#ifndef FADER_H_
-#define FADER_H_
+#pragma once
 
 #include "stmlib/dsp/dsp.h"
 
@@ -82,4 +81,4 @@ class Fader {
 };
 
 }
-#endif
+

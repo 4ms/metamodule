@@ -27,8 +27,7 @@
 //
 // Driver for the front panel buttons.
 
-#ifndef BUTTONS_H_
-#define BUTTONS_H_
+#pragma once
 
 #include "../stmlib/stmlib.h"
 
@@ -83,4 +82,4 @@ private:
 };
 
 }
-#endif
+

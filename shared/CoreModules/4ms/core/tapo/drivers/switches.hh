@@ -26,8 +26,7 @@
 //
 // Driver for the front panel switches.
 
-#ifndef SWITCHES_H_
-#define SWITCHES_H_
+#pragma once
 
 #include "buttons.hh"
 #include "../stmlib/stmlib.h"
@@ -81,4 +80,4 @@ private:
 };
 }
 
-#endif
+

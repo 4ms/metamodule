@@ -26,8 +26,7 @@
 //
 // Simple ring buffer with multiple taps
 
-#ifndef AUDIO_BUFFER_H_
-#define AUDIO_BUFFER_H_
+#pragma once
 
 #include "stmlib/stmlib.h"
 #include "stmlib/dsp/dsp.h"
@@ -147,4 +146,3 @@ class AudioBuffer
 
 }
 
-#endif
