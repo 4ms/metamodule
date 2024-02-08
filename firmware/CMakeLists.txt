@@ -47,29 +47,46 @@ set(A7_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corea7/medium)
 add_subdirectory(src/core_m4 ${M4_BIN_PATH})
 add_subdirectory(src ${A7_BIN_PATH})
 
+set(RELEASE_TARGET_DIR   ${CMAKE_CURRENT_BINARY_DIR}/release)
+set(RELEASE_ARCHIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}.zip)
+set(MANIFEST_FILENAME    metamodule.json)
+set(COMBINED_IMAGE_PATH  ${CMAKE_CURRENT_BINARY_DIR}/main.uimg)
+
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/metamodule-firmware.json
-  COMMAND flashing/elf_to_uimg.py --m4 $<TARGET_FILE:main_m4.elf> --a7 $<TARGET_FILE:main.elf> ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
-  COMMAND flashing/manifest_generator.py
-           --version         "${GIT_FIRMWARE_VERSION_TAG}"
-           --fsbl            "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot/build/fsbl.stm32"
-           --dfu             "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu/build/usbdfu.uimg"
-           --app             "${CMAKE_CURRENT_BINARY_DIR}/main.uimg"
-           --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/bootloader.bin"
-           --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
-           --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/filesystem.img"
-           "${CMAKE_CURRENT_BINARY_DIR}/release/metamodule.json"
-  COMMAND ls -l ${CMAKE_CURRENT_BINARY_DIR}/main.uimg
-  COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
-  DEPENDS main.elf main_m4.elf bootloader bootloader-dfu
+  OUTPUT ${COMBINED_IMAGE_PATH}
+  COMMAND flashing/elf_to_uimg.py
+          --m4 $<TARGET_FILE:main_m4.elf>
+          --a7 $<TARGET_FILE:main.elf>
+          ${COMBINED_IMAGE_PATH}
+  COMMAND cp ${COMBINED_IMAGE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
+  COMMAND ls -l ${COMBINED_IMAGE_PATH}
+  DEPENDS main.elf main_m4.elf
   COMMENT "Creating combined uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
 )
 
+add_custom_command(
+  OUTPUT ${RELEASE_ARCHIVE_PATH}
+  COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
+           --version         "${GIT_FIRMWARE_VERSION_TAG}"
+           --fsbl            "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot/build/fsbl.stm32"
+           --dfu             "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu/build/usbdfu.uimg"
+           --app             "${COMBINED_IMAGE_PATH}"
+           --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/bootloader.bin"
+           --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
+           --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/filesystem.img"
+           "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
+  COMMAND ${CMAKE_COMMAND} -E tar cvf ${RELEASE_ARCHIVE_PATH} --format=zip -- .
+  DEPENDS ${COMBINED_IMAGE_PATH} bootloader bootloader-dfu
+  COMMENT "Creating release at ${RELEASE_ARCHIVE_PATH}"
+  WORKING_DIRECTORY ${RELEASE_TARGET_DIR}
+  VERBATIM USES_TERMINAL
+)
+
 add_custom_target(
   combined-uimg ALL
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/main.uimg ${CMAKE_CURRENT_BINARY_DIR}/metamodule-firmware.json
+  DEPENDS ${COMBINED_IMAGE_PATH} ${RELEASE_ARCHIVE_PATH}
 )
 
 
