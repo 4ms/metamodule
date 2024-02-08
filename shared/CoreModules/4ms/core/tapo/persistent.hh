@@ -56,7 +56,6 @@ public:
 
   void Init(size_t buffer_size) {
 
-    // if (!settings_storage_.ParsimoniousLoad(&data_, &settings_token_)) {
       for (size_t i=0; i<4; i++) {
         data_.calibration_data.offset[i] = 0.5f;
       }
@@ -69,7 +68,6 @@ public:
       data_.repeat = 0;
       data_.sync = 0;
       SaveData();
-    // }
 
     // sanitize settings
     CONSTRAIN(data_.velocity_parameter, 0, 4);
@@ -79,14 +77,6 @@ public:
     CONSTRAIN(data_.current_slot, 0, 6 * 4);
     if (data_.repeat != 1) data_.repeat = 0;
     if (data_.sync != 1) data_.sync = 0;
-
-    // if (!bank0_.ParsimoniousLoad(&slots_[6 * 0], 6 * sizeof(Slot), &token_[0]) ||
-    //     !bank1_.ParsimoniousLoad(&slots_[6 * 1], 6 * sizeof(Slot), &token_[1]) ||
-    //     !bank2_.ParsimoniousLoad(&slots_[6 * 2], 6 * sizeof(Slot), &token_[2]) ||
-    //     !bank3_.ParsimoniousLoad(&slots_[6 * 3], 6 * sizeof(Slot), &token_[3])) {
-    //   for (int i=0; i<4; i++)
-    //     ResetBank(i);
-    // }
 
     // sanitize slots
     for (int slot=0; slot<kNumSlots; slot++) {
@@ -102,16 +92,11 @@ public:
   }
 
   void SaveData() {
-    // settings_storage_.ParsimoniousSave(data_, &settings_token_);
   }
 
   Data* mutable_data() { return &data_; }
 
   void SaveBank(int bank) {
-    // if (bank == 0) bank0_.ParsimoniousSave(&slots_[6 * 0], 6 * sizeof(Slot), &token_[0]);
-    // if (bank == 1) bank1_.ParsimoniousSave(&slots_[6 * 1], 6 * sizeof(Slot), &token_[1]);
-    // if (bank == 2) bank2_.ParsimoniousSave(&slots_[6 * 2], 6 * sizeof(Slot), &token_[2]);
-    // if (bank == 3) bank3_.ParsimoniousSave(&slots_[6 * 3], 6 * sizeof(Slot), &token_[3]);
   }
 
   void SaveSlot(int slot_nr) {
@@ -152,14 +137,8 @@ public:
 private:
   Data data_;
   uint16_t settings_token_;
-  // stmlib::Storage<7> settings_storage_;
 
   Slot slots_[kNumSlots];
-
-  // stmlib::Storage<8> bank0_;
-  // stmlib::Storage<9> bank1_;
-  // stmlib::Storage<10> bank2_;
-  // stmlib::Storage<11> bank3_;
   uint16_t token_[4];
 };
 
