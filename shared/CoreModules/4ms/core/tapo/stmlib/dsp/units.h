@@ -29,8 +29,8 @@
 #ifndef STMLIB_DSP_UNITS_H_
 #define STMLIB_DSP_UNITS_H_
 
-#include "stmlib/stmlib.h"
-#include "stmlib/dsp/dsp.h"
+#include "../stmlib.h"
+#include "../dsp/dsp.h"
 
 namespace stmlib {
 

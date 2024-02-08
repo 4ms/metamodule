@@ -29,7 +29,7 @@
 #ifndef ADC_H_
 #define ADC_H_
 
-#include "stmlib/stmlib.h"
+#include "../stmlib/stmlib.h"
 
 enum AdcChannel {
   // pots

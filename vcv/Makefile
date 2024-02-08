@@ -24,10 +24,14 @@ INCLUDES += -Isrc
 INCLUDES += -I$(SHARED)
 INCLUDES += -I$(SHARED)/CoreModules/4ms
 SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*Core.cc)
+
+# Ensemble Oscillator
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/dynamic_data.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/easiglib/numtypes.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
+
+# Tapographic Delay
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/tapo/stmlib
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/tapo/
 CXXFLAGS += -DSAMPLE_RATE=48000
@@ -39,6 +43,8 @@ SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/control.cc
 SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/ui.cc
 SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/stmlib/utils/random.cc
 SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/stmlib/dsp/units.cc
+
+# plugin
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard src/hub/*.cc)

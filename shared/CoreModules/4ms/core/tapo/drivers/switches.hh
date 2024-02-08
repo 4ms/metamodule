@@ -29,8 +29,8 @@
 #ifndef SWITCHES_H_
 #define SWITCHES_H_
 
-#include "drivers/buttons.hh"
-#include "stmlib/stmlib.h"
+#include "buttons.hh"
+#include "../stmlib/stmlib.h"
 
 #include <algorithm>
 

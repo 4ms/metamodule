@@ -29,7 +29,7 @@
 #ifndef STMLIB_SYSTEM_SYSTEM_CLOCK_H_
 #define STMLIB_SYSTEM_SYSTEM_CLOCK_H_
 
-#include "stmlib/stmlib.h"
+#include "../stmlib.h"
 #include <chrono>
 
 namespace stmlib {

@@ -26,7 +26,7 @@
 //
 // Conversion from semitones to frequency ratio.
 
-#include "stmlib/dsp/units.h"
+#include "../dsp/units.h"
 
 namespace stmlib {
 

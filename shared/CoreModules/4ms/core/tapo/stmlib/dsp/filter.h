@@ -30,7 +30,7 @@
 #ifndef STMLIB_DSP_FILTER_H_
 #define STMLIB_DSP_FILTER_H_
 
-#include "stmlib/stmlib.h"
+#include "../stmlib.h"
 
 #define M_PI 3.14159265358979323846
 #include <cmath>

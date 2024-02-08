@@ -30,7 +30,7 @@
 #ifndef BUTTONS_H_
 #define BUTTONS_H_
 
-#include "stmlib/stmlib.h"
+#include "../stmlib/stmlib.h"
 
 #include <algorithm>
 

@@ -20,9 +20,9 @@
 #ifndef STMLIB_UI_EVENT_QUEUE_H_
 #define STMLIB_UI_EVENT_QUEUE_H_
 
-#include "stmlib/stmlib.h"
-#include "stmlib/utils/ring_buffer.h"
-#include "stmlib/system/system_clock.h"
+#include "../stmlib.h"
+#include "../utils/ring_buffer.h"
+#include "../system/system_clock.h"
 
 namespace stmlib {
 

@@ -29,7 +29,7 @@
 #ifndef GATE_INPUT_H_
 #define GATE_INPUT_H_
 
-#include "stmlib/stmlib.h"
+#include "../stmlib/stmlib.h"
 
 enum GateNames {
   GATE_INPUT_REPEAT,

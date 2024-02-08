@@ -32,7 +32,8 @@
 // activate to enable prototype 2 compatibility mode
 // #define PROTO2
 
-#include "stmlib/stmlib.h"
+#include "../stmlib/stmlib.h"
+#include <array>
 
 const uint8_t kNumLeds = 26;
 

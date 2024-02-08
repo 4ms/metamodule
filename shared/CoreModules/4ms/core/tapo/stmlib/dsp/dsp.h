@@ -29,7 +29,7 @@
 #ifndef STMLIB_UTILS_DSP_DSP_H_
 #define STMLIB_UTILS_DSP_DSP_H_
 
-#include "stmlib/stmlib.h"
+#include "../stmlib.h"
 
 #include <cmath>
 #include <math.h>
