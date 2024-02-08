@@ -77,7 +77,7 @@ private:
 
 			if (auto newFactor = readFactorCV(); newFactor != factor) {
 				factor = newFactor;
-				calculateClockOutPeriod(now, factor);
+				calculateClockOutPeriod(factor);
 			}
 
 			pulsewidth = readPulsewidthCV();
@@ -183,6 +183,18 @@ private:
 			}
 
 			clockIn.lastEventInTicks = timestampInTicks;
+		}
+
+		void calculateClockOutPeriod(factorType_t factor) {
+			if(clockIn.periodInTicks) {
+				if(factor.operation == MULT) {
+					clockOut.periodInTicks = *clockIn.periodInTicks / factor.factor;
+				} else if (factor.operation == DIV){
+					clockOut.periodInTicks = *clockIn.periodInTicks * factor.factor;
+				} else {
+					clockOut.periodInTicks.reset();
+				}
+			}
 		}
 
 		void calculateClockOutPeriod(uint32_t timestampInTicks, factorType_t factor) {
