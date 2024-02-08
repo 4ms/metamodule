@@ -67,7 +67,6 @@ jobs:
           cd firmware && make limit lim
 
       - name: Build and test
-        if: ${{ ! inputs.include_wifi }}
         run: cd firmware && make configure PRESET=${{ inputs.preset }} && make all
 
       - name: Set Release Version

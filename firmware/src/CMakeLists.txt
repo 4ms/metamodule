@@ -1,7 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
-option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" OFF)
+option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" ON)
 
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(SHARED ${FWDIR}/../shared)
