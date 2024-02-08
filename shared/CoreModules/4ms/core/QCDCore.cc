@@ -72,7 +72,7 @@ private:
 				set_samplerate(48000.f);
 		}
 
-		void update() {
+		void update(auto clockInput) {
 			auto now = ++ticks;
 
 			if (auto newFactor = readFactorCV(); newFactor != factor) {
@@ -84,8 +84,8 @@ private:
 			triggerLengthInTicks = calculateTriggerlength(pulsewidth);
 			invMode = readInvMode();
 
-			if (auto clockInputValue = parent->getInput<Mapping::ClkInIn>(); clockInputValue) {
-				if (triggerEdgeDetectorClock(triggerDetectorClock(*clockInputValue))) {
+			if (clockInput) {
+				if (triggerEdgeDetectorClock(triggerDetectorClock(*clockInput))) {
 					calculateClockInPeriod(now);
 					calculateClockOutPeriod(now, factor);
 				}
@@ -462,10 +462,35 @@ public:
 	}
 
 	void update() override {
-		channelA.update();
-		channelB.update();
-		channelC.update();
-		channelD.update();
+		auto clockInA = getInput<MappingA::ClkInIn>();
+		auto clockInB = getInput<MappingB::ClkInIn>();
+		auto clockInC = getInput<MappingC::ClkInIn>();
+		auto clockInD = getInput<MappingD::ClkInIn>();
+		
+		auto clockToA = clockInA;
+		auto clockToB = clockInA;
+		auto clockToC = clockInA;
+		auto clockToD = clockInA;
+
+		if(clockInB) {
+			clockToB = clockInB;
+			clockToC = clockInB;
+			clockToD = clockInB;
+		}
+
+		if(clockInC) {
+			clockToC = clockInC;
+			clockToD = clockInC;
+		}
+
+		if(clockInD) {
+			clockToD = clockInD;
+		}
+		
+		channelA.update(clockToA);
+		channelB.update(clockToB);
+		channelC.update(clockToC);
+		channelD.update(clockToD);
 	}
 
 	void set_samplerate(float sr) override {
