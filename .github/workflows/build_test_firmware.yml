@@ -79,5 +79,5 @@ jobs:
         with:
           name: "Firmware Version: ${{ env.CI_REF_NAME }}"
           files: |
-            firmware/build/release/*
+            firmware/build/metamodule*.zip
 
