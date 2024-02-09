@@ -49,6 +49,7 @@ private:
 		{
 			operation_t operation;
 			uint32_t factor;
+			uint32_t index;
 
 		   inline bool operator!=(factorType_t a) {
 	       if (a.operation == operation && a.factor == factor)
@@ -68,7 +69,7 @@ private:
 	public:
 		Channel(QCDCore* parent_)
 			: triggerDetectorClock(1.0f, 2.0f), triggerDetectorReset(1.0f, 2.0f), ticks(0), 
-			clockInCounter(0), invMode(DELAY), clockOutState(LOW), phase(0.0f), processSyncPulse(false), clockOutRisingEdgeCounter(0), parent(parent_) {
+			clockDivCounter({0}), invMode(DELAY), clockOutState(LOW), phase(0.0f), processSyncPulse(false), clockOutRisingEdgeCounter(0), parent(parent_) {
 				set_samplerate(48000.f);
 		}
 
@@ -93,8 +94,6 @@ private:
 				resetClocks(now);
 			}		
 
-
-
 			if(clockIn.lastEventInTicks && clockIn.periodInTicks) {
 				if(auto newPhase = processResetIn(now); newPhase) {
 					phase = *newPhase;
@@ -103,13 +102,21 @@ private:
 				uint32_t phaseOffset = uint32_t(std::round(*clockIn.periodInTicks * phase));
 
 				if (now == *clockIn.lastEventInTicks + phaseOffset) {
-					if(factor.operation == DIV) {
-						clockInCounter++;
 
-						if(clockInCounter >= factor.factor)
+					for (uint32_t index = 0; index < clockDivCounter.size(); index++) {
+						
+						clockDivCounter[index]++;
+
+						if(clockDivCounter[index] >= clockFactor[index].factor) {
+							clockDivCounter[index] = 0;
+						}
+					}
+
+					if(factor.operation == DIV) {
+
+						if(clockDivCounter[factor.index] == 0)
 						{
 							processSyncPulse = true;
-							clockInCounter = 0;
 						}
 					} else {
 						processSyncPulse = true;
@@ -332,28 +339,29 @@ private:
 		static constexpr float outputHighVoltageLevel = 5.0f;
 		static constexpr float triggerLengthMinimumInS = 0.005f;
 
+		static constexpr uint32_t maxIndexDivisions = 9;
 		static constexpr std::array<factorType_t,21> clockFactor = {{
-			{DIV, 32},
-			{DIV, 32},
-			{DIV, 16},
-			{DIV, 8},
-			{DIV, 7},
-			{DIV, 6},
-			{DIV, 5},
-			{DIV, 4},
-			{DIV, 3},
-			{DIV, 2},
-			{MULT, 1},
-			{MULT, 2},
-			{MULT, 3},
-			{MULT, 4},
-			{MULT, 5},
-			{MULT, 6},
-			{MULT, 7},
-			{MULT, 8},
-			{MULT, 12},
-			{MULT, 16},
-			{MULT, 16}
+			{DIV, 32, 0},
+			{DIV, 32, 1},
+			{DIV, 16, 2},
+			{DIV, 8, 3},
+			{DIV, 7, 4},
+			{DIV, 6, 5},
+			{DIV, 5, 6},
+			{DIV, 4, 7},
+			{DIV, 3, 8},
+			{DIV, 2, 9},
+			{MULT, 1, 10},
+			{MULT, 2, 11},
+			{MULT, 3, 12},
+			{MULT, 4, 13},
+			{MULT, 5, 14},
+			{MULT, 6, 15},
+			{MULT, 7, 16},
+			{MULT, 8, 17},
+			{MULT, 12, 18},
+			{MULT, 16, 19},
+			{MULT, 16, 20}
 		}};
 
 	private:
@@ -361,7 +369,7 @@ private:
 		uint32_t triggerLengthMinimumInTicks;
 		uint32_t triggerLengthInTicks;
 		uint32_t ticks;
-		uint32_t clockInCounter;
+		std::array<uint32_t, maxIndexDivisions + 1> clockDivCounter;
 		factorType_t factor;
 		float pulsewidth;
 		invMode_t invMode;
