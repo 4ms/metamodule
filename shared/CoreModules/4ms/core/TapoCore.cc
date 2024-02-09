@@ -16,8 +16,7 @@ class TapoCore : public SmartCoreProcessor<TapoInfo> {
 public:
 	TapoCore() : audioBufferFillCount(0), gateOutCounter(0)
 	{
-		buffer = std::make_unique<Buffer_t>();
-		delay.Init((short*)buffer->data(), buffer->size()/sizeof(short) / 2);
+		delay.Init((short*)buffer.data(), buffer.size()/sizeof(short) / 2);
 
 		delay.tap_modulo_observable_.set_observer([this]
 		{
@@ -180,7 +179,7 @@ private:
 	static constexpr std::size_t BufferSizeInBytes = 0x02000000;
 	using Buffer_t = std::array<uint8_t,BufferSizeInBytes>;
 
-	std::unique_ptr<Buffer_t> buffer;
+	Buffer_t buffer;
 
 	::TapoDelay::MultitapDelay delay;
 	::TapoDelay::Parameters parameters;
