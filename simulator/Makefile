@@ -17,6 +17,9 @@ warnings:
 
 run: all
 	build/simulator
+
+debug: all
+	gdb -q -ex "set debuginfod enabled off" -ex "set pagination off"  -ex "run" --args build/simulator
 	
 # "make limit filename.txt" --> only build modules whose names are in the text file
 ifeq (limit,$(firstword $(MAKECMDGOALS)))
