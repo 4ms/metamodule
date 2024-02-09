@@ -14,10 +14,10 @@ namespace ElfFile
 
 class Relocater {
 	uintptr_t base_address;
-	std::span<HostSymbol> host_syms;
+	std::span<const HostSymbol> host_syms;
 
 public:
-	Relocater(uint8_t *elf_load_address, std::span<HostSymbol> host_symbols)
+	Relocater(uint8_t *elf_load_address, const std::span<const HostSymbol> host_symbols)
 		: base_address{reinterpret_cast<uintptr_t>(elf_load_address)}
 		, host_syms{host_symbols} {
 	}

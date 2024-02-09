@@ -1,6 +1,7 @@
 #pragma once
 #include "debug.hh"
 #include "dynload/elf_relocator.hh"
+#include "dynload/host_sym_list.hh"
 #include "dynload/host_symbol.hh"
 #include "elf_file.hh"
 #include "pr_dbg.hh"
@@ -17,19 +18,19 @@
 
 #include "rack.hpp"
 
-extern "C" void _aeabi_atexit() {
-}
+// extern "C" void _aeabi_atexit() {
+// }
 
-GCC_OPTIMIZE_OFF
-plugin::Model *testHostCall(const char *slug) {
-	printf("creating TestModule: %s\n", slug);
-	return nullptr;
-}
+// GCC_OPTIMIZE_OFF
+// plugin::Model *testHostCall(const char *slug) {
+// 	printf("creating TestModule: %s\n", slug);
+// 	return nullptr;
+// }
 
-GCC_OPTIMIZE_OFF
-void testAddModel(rack::Model *model) {
-	printf("calling addModel(%p)\n", model);
-}
+// GCC_OPTIMIZE_OFF
+// void testAddModel(rack::Model *model) {
+// 	printf("calling addModel(%p)\n", model);
+// }
 
 struct DynLoadTest {
 
@@ -49,6 +50,19 @@ struct DynLoadTest {
 		if (init_func) {
 			init_func(&plugin);
 		}
+
+		// Force these symbols from libc
+		// TODO: how to do this otherwise?
+		// We can't link the plugin to libc unless we compile a libc with it, since the arm-none-eabi libc
+		// was not compiled with -fPIC
+		// Linker KEEP()?
+		// build libc with the plugin, mabye musl libc?
+		exp(0.5f);
+		expf(0.5f);
+		fmod(0.5f, 1.f);
+		sinf(0.5f);
+		tanf(0.5f);
+		tanh(0.5f);
 
 		while (true) {
 			__NOP();
@@ -114,19 +128,20 @@ struct DynLoadTest {
 	//}
 
 	void process_relocs() {
-		auto addmodel_addr = reinterpret_cast<uint32_t>(&testAddModel);
-		auto createmodel_addr = reinterpret_cast<uint32_t>(&testHostCall);
+		// auto addmodel_addr = reinterpret_cast<uint32_t>(&testAddModel);
+		// auto createmodel_addr = reinterpret_cast<uint32_t>(&testHostCall);
 
-		auto hostsyms = std::vector<ElfFile::HostSymbol>{{
-			{"_ZN6Plugin8addModelEP5Model", 0, addmodel_addr},
-			{"_Z11createModelI10TestModule10TestWidgetEP5ModelPKc", 0, createmodel_addr},
-			{"__aeabi_atexit", 0, reinterpret_cast<uint32_t>(&_aeabi_atexit)},
-			{"strlen", 0, reinterpret_cast<uint32_t>(&strlen)},
-			{"memcpy", 0, reinterpret_cast<uint32_t>(&memcpy)},
-			{"memmove", 0, reinterpret_cast<uint32_t>(&memmove)},
-			{"roundf", 0, reinterpret_cast<uint32_t>(&roundf)},
-		}};
-		ElfFile::Relocater relocator{block.code.data(), hostsyms};
+		// static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
+		// 	{"_ZN6Plugin8addModelEP5Model", 0, addmodel_addr},
+		// 	{"_Z11createModelI10TestModule10TestWidgetEP5ModelPKc", 0, createmodel_addr},
+		// 	{"__aeabi_atexit", 0, reinterpret_cast<uint32_t>(&_aeabi_atexit)},
+		// 	{"strlen", 0, reinterpret_cast<uint32_t>(&strlen)},
+		// 	{"memcpy", 0, reinterpret_cast<uint32_t>(&memcpy)},
+		// 	{"memmove", 0, reinterpret_cast<uint32_t>(&memmove)},
+		// 	{"roundf", 0, reinterpret_cast<uint32_t>(&roundf)},
+		// });
+
+		ElfFile::Relocater relocator{block.code.data(), HostSymbols};
 
 		for (auto reloc : elf.relocs) {
 			relocator.write(reloc);

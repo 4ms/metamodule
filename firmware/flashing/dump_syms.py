@@ -23,18 +23,19 @@ def GetRequiredSymbolNames(file):
 
 
 def GetAddressesOfSymbols(file, needed_syms):
-    syms = []
+    syms = {} 
     elf = ELFFile(file)
     symtab = elf.get_section_by_name(".symtab")
     for i in range(symtab.num_symbols()):
         s = symtab.get_symbol(i)
         if s.name in needed_syms:
-            syms.append({s.name: s['st_value']})
+            syms[s.name] = s['st_value']
             logging.debug(f"{hex(s['st_value'])}\t{s.name}")
             needed_syms.remove(s.name)
 
     for n in needed_syms:
         logging.warning(f"** WARNING: Symbol not found: {n} **")
+
     return syms
 
 def GetLibcSymbols():
@@ -99,6 +100,26 @@ if __name__ == "__main__":
 
     with open(args.elf, "rb") as f:
         syms = GetAddressesOfSymbols(f, needed_syms)
+
+
+    symlist = """
+#pragma once
+#include "host_symbol.hh"
+#include <array>
+
+static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
+"""
+    for sym, addr in syms.items():
+        symlist+= f"""{{"{sym}", 0, {hex(addr)}}},
+"""
+
+    symlist += """
+});
+"""
+    with open("host_sym_list.hh", "w") as f:
+        f.write(symlist)
+
+    print(symlist)
         
 
 # flashing/dump_syms.py --objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ --elf ./build/mp1corea7/medium/main.elf -v
