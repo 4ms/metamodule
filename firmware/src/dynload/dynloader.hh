@@ -58,7 +58,6 @@ struct DynLoadTest {
 		sinf(0.5f);
 		tanf(0.5f);
 		tanh(0.5f);
-		__BKPT();
 		volatile auto keep = std::allocator<char>{};
 	}
 
@@ -140,22 +139,13 @@ struct DynLoadTest {
 	//}
 
 	void process_relocs() {
-		// auto addmodel_addr = reinterpret_cast<uint32_t>(&testAddModel);
-		// auto createmodel_addr = reinterpret_cast<uint32_t>(&testHostCall);
-
-		// static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
-		// 	{"_ZN6Plugin8addModelEP5Model", 0, addmodel_addr},
-		// 	{"_Z11createModelI10TestModule10TestWidgetEP5ModelPKc", 0, createmodel_addr},
-		// 	{"__aeabi_atexit", 0, reinterpret_cast<uint32_t>(&_aeabi_atexit)},
-		// 	{"strlen", 0, reinterpret_cast<uint32_t>(&strlen)},
-		// 	{"memcpy", 0, reinterpret_cast<uint32_t>(&memcpy)},
-		// 	{"memmove", 0, reinterpret_cast<uint32_t>(&memmove)},
-		// 	{"roundf", 0, reinterpret_cast<uint32_t>(&roundf)},
-		// });
-
 		auto hostsyms = std::vector<ElfFile::HostSymbol>{};
 		hostsyms.insert(hostsyms.end(), HostSymbols.begin(), HostSymbols.end());
+
 		hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+
+		for (auto sym : hostsyms)
+			pr_dbg("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
 
 		ElfFile::Relocater relocator{block.code.data(), hostsyms};
 

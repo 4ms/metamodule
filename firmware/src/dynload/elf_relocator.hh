@@ -37,26 +37,27 @@ public:
 
 			case R_ARM_GLOB_DAT: {
 				//"Resolves to the address of the specified symbol"
-				pr_dbg("R_ARM_GLOB_DAT: %s...", rel.symbol_name().data());
 				if (rel.symbol_value() == 0)
-					pr_warn("Warning: symbol has initial value of 0, TODO: look in host\n");
+					pr_warn("R_ARM_GLOB_DAT: %s Symbol not found (symbol has initial value of 0)\n",
+							rel.symbol_name().data());
 				else {
 					*reloc_address = rel.symbol_value() + base_address;
-					pr_dbg("write 0x%x (+%x) to address 0x%x (+%x)\n",
-						   rel.symbol_value() + base_address,
-						   rel.symbol_value(),
-						   rel.reloc_offset() + base_address,
-						   rel.reloc_offset());
+					pr_trace("R_ARM_GLOB_DAT: %s ", rel.symbol_name().data());
+					pr_trace("write 0x%x (+%x) to address 0x%x (+%x)\n",
+							 rel.symbol_value() + base_address,
+							 rel.symbol_value(),
+							 rel.reloc_offset() + base_address,
+							 rel.reloc_offset());
 				}
 			} break;
 
 			case R_ARM_ABS32: {
-				pr_dbg("R_ARM_ABS32: %s, write 0x%x (+%x) to address 0x%x (+%x)\n",
-					   rel.symbol_name().data(),
-					   rel.symbol_value() + *reloc_address + base_address,
-					   rel.symbol_value() + *reloc_address,
-					   rel.reloc_offset() + base_address,
-					   rel.reloc_offset());
+				pr_trace("R_ARM_ABS32: %s, write 0x%x (+%x) to address 0x%x (+%x)\n",
+						 rel.symbol_name().data(),
+						 rel.symbol_value() + *reloc_address + base_address,
+						 rel.symbol_value() + *reloc_address,
+						 rel.reloc_offset() + base_address,
+						 rel.reloc_offset());
 				// S + A
 				// This seems like it makes sense since we need the base_Address, but it's P +A:
 				*reloc_address = *reloc_address + rel.symbol_value() + base_address;
@@ -69,20 +70,23 @@ public:
 			case R_ARM_JUMP_SLOT: {
 				//S+A
 				// "Resolves to the address of the specified symbol"
-				pr_dbg("R_ARM_JUMP_SLOT: %s... ", rel.symbol_name().data());
 				if (rel.symbol_value() == 0) {
 					auto sym = std::ranges::find_if(host_syms, [&rel](auto &s) { return s.name == rel.symbol_name(); });
 					if (sym != host_syms.end()) {
 						*reloc_address = sym->address;
-						pr_dbg("Found symbol at 0x%x\n", sym->address);
-					} else
+						pr_trace("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
+						pr_trace("Found symbol at 0x%x\n", sym->address);
+					} else {
+						pr_err("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
 						pr_err("Symbol not found in host symbols\n");
+					}
 				} else {
-					pr_dbg("write 0x%x (+%x) to address 0x%x (+%x)\n",
-						   rel.symbol_value() + base_address,
-						   rel.symbol_value(),
-						   rel.reloc_offset() + base_address,
-						   rel.reloc_offset());
+					pr_trace("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
+					pr_trace("write 0x%x (+%x) to address 0x%x (+%x)\n",
+							 rel.symbol_value() + base_address,
+							 rel.symbol_value(),
+							 rel.reloc_offset() + base_address,
+							 rel.reloc_offset());
 					*reloc_address = rel.symbol_value() + base_address;
 				}
 
