@@ -32,6 +32,7 @@
 #include "../stmlib/stmlib.h"
 
 #include <algorithm>
+#include <array>
 
 using namespace std;
 
@@ -48,19 +49,12 @@ enum SwitchNames {
 
 class Switches {
  public:
-  void Init() {}
+  void Init() {
+    std::fill(switch_state_.begin(), switch_state_.end(), 0);
+    std::fill(previous_switch_state_.begin(), previous_switch_state_.end(), 0);
+  }
 
   void Read() {
-    // for (int i=0; i<kNumSwitches; i++) {
-    //   previous_switch_state_[i] = switch_state_[i];
-    //   switch_state_[i] = 0;
-    //   for (int j=0; j<kNumBitPerSwitch; j++) {
-    //     int idx = j + kNumBitPerSwitch * i;
-    //     switch_state_[i] = switch_state_[i] << 1
-    //       | !GPIO_ReadInputDataBit(switch_pins[idx].gpio,
-    //                               switch_pins[idx].pin);
-    //   }
-    // }
   }
 
   void set(uint8_t channel, uint8_t val)
@@ -75,8 +69,8 @@ class Switches {
   }
 
 private:
-  uint8_t switch_state_[kNumSwitches];
-  uint8_t previous_switch_state_[kNumSwitches];
+  std::array<uint8_t,kNumSwitches> switch_state_;
+  std::array<uint8_t,kNumSwitches> previous_switch_state_;
 };
 }
 

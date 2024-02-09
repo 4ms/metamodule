@@ -29,6 +29,7 @@
 #pragma once
 
 #include "../stmlib/stmlib.h"
+#include <array>
 
 namespace TapoDelay {
 
@@ -57,7 +58,9 @@ enum AdcChannel {
 
 struct Adc {
   void Deinit() {}
-  void Init() {}
+  void Init() {
+    std::fill(values_.begin(), values_.end(), 0.0f);
+  }
   void Convert() {}
   void Wait() {}
 
@@ -74,7 +77,7 @@ struct Adc {
   }
 
  private:
-  float values_[ADC_CHANNEL_LAST];
+  std::array<float,ADC_CHANNEL_LAST> values_;
 };
 
 }

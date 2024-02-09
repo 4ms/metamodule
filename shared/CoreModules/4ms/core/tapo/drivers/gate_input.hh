@@ -29,6 +29,7 @@
 #pragma once
 
 #include "../stmlib/stmlib.h"
+#include <array>
 
 namespace TapoDelay {
 

@@ -81,6 +81,7 @@ enum LedNames {
 class Leds {
  public:
   void Init() {
+    Clear();
   }
 
   void Write() {}
