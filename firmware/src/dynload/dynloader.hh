@@ -14,7 +14,8 @@
 
 // #include "build-simple-elf.hh"
 // #include "build-elf.hh"
-#include "build-vcva-2.hh"
+// #include "build-vcva-2.hh"
+#include "befaco-strip-so.h"
 
 #include "rack.hpp"
 
@@ -32,25 +33,19 @@
 // 	printf("calling addModel(%p)\n", model);
 // }
 
+GCC_OPTIMIZE_OFF
+extern "C" void _empty_func_stub() {
+}
+
 struct DynLoadTest {
 
 	DynLoadTest()
-		: elf{{testbrand_elf, testbrand_elf_len}} {
+		// : elf{{testbrand_elf, testbrand_elf_len}} {
+		: elf{{Befaco_strip_so, Befaco_strip_so_len}} {
 	}
 
 	GCC_OPTIMIZE_OFF
-	void test() {
-		// elf.print_sec_headers();
-		// elf.print_prog_headers();
-		load_executable();
-		process_relocs();
-		init_globals();
-		find_init_plugin_function();
-
-		if (init_func) {
-			init_func(&plugin);
-		}
-
+	void keep_symbols() {
 		// Force these symbols from libc
 		// TODO: how to do this otherwise?
 		// We can't link the plugin to libc unless we compile a libc with it, since the arm-none-eabi libc
@@ -63,6 +58,23 @@ struct DynLoadTest {
 		sinf(0.5f);
 		tanf(0.5f);
 		tanh(0.5f);
+		__BKPT();
+		volatile auto keep = std::allocator<char>{};
+	}
+
+	GCC_OPTIMIZE_OFF
+	void test() {
+		keep_symbols();
+		// elf.print_sec_headers();
+		// elf.print_prog_headers();
+		load_executable();
+		process_relocs();
+		init_globals();
+		find_init_plugin_function();
+
+		if (init_func) {
+			init_func(&plugin);
+		}
 
 		while (true) {
 			__NOP();
@@ -141,7 +153,11 @@ struct DynLoadTest {
 		// 	{"roundf", 0, reinterpret_cast<uint32_t>(&roundf)},
 		// });
 
-		ElfFile::Relocater relocator{block.code.data(), HostSymbols};
+		auto hostsyms = std::vector<ElfFile::HostSymbol>{};
+		hostsyms.insert(hostsyms.end(), HostSymbols.begin(), HostSymbols.end());
+		hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+
+		ElfFile::Relocater relocator{block.code.data(), hostsyms};
 
 		for (auto reloc : elf.relocs) {
 			relocator.write(reloc);
