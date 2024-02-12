@@ -143,6 +143,7 @@ struct DynLoadTest {
 		hostsyms.insert(hostsyms.end(), HostSymbols.begin(), HostSymbols.end());
 
 		hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcEC2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 
 		for (auto sym : hostsyms)
 			pr_dbg("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
