@@ -62,24 +62,24 @@ enum SequencerDirection {
 };
 
 struct Parameters {
-  float gain;
-  float scale;
-  float feedback;
-  float modulation_amount;
-  float modulation_frequency;
-  float morph;
-  float drywet;
-  float sync_ratio;
+  float gain{};
+  float scale{};
+  float feedback{};
+  float modulation_amount{};
+  float modulation_frequency{};
+  float morph{};
+  float drywet{};
+  float sync_ratio{};
 
-  float velocity;
+  float velocity{};
 
-  EditMode edit_mode;
-  VelocityType velocity_type;
-  SequencerDirection sequencer_direction;
+  EditMode edit_mode{};
+  VelocityType velocity_type{};
+  SequencerDirection sequencer_direction{};
 
   // Settings
-  float velocity_parameter;
-  PanningMode panning_mode;
+  float velocity_parameter{};
+  PanningMode panning_mode{};
 };
 
 struct TapParameters {

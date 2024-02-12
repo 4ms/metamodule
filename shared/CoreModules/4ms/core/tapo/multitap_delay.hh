@@ -101,32 +101,32 @@ private:
   void Process(Parameters *params, ShortFrame* input, ShortFrame* output);
   float ComputePanning(PanningMode panning_mode);
 
-  TapAllocator tap_allocator_;
-  Tap taps_[kMaxTaps];
-  AudioBuffer buffer_;
-  float feedback_buffer_[kBlockSize];
-  float feedback_compensation_;
-  Svf dc_blocker_;
-  Fader repeat_fader_;
-  uint32_t counter_;
+  TapAllocator tap_allocator_{};
+  Tap taps_[kMaxTaps]{};
+  AudioBuffer buffer_{};
+  float feedback_buffer_[kBlockSize]{};
+  float feedback_compensation_{};
+  Svf dc_blocker_{};
+  Fader repeat_fader_{};
+  uint32_t counter_{};
 
-  uint32_t repeat_time_;
-  uint32_t clock_counter_;
-  Average<4> clock_period_;
-  float clock_period_smoothed_;
-  float sync_scale_;
+  uint32_t repeat_time_{};
+  uint32_t clock_counter_{};
+  Average<4> clock_period_{};
+  float clock_period_smoothed_{};
+  float sync_scale_{};
 
-  bool sync_;
-  bool counter_running_;
+  bool sync_{};
+  bool counter_running_{};
 
-  bool quantize_;
+  bool quantize_{};
 
-  bool pan_state_;
+  bool pan_state_{};
 
-  Parameters prev_params_;
-  uint32_t prev_max_time_;
+  Parameters prev_params_{};
+  uint32_t prev_max_time_{};
 
-  int32_t kMaxQuantizeClock;
+  int32_t kMaxQuantizeClock{};
 };
 
 }
