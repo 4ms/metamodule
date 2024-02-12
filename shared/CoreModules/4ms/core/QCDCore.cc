@@ -68,8 +68,7 @@ private:
 
 	public:
 		Channel(QCDCore* parent_)
-			: triggerDetectorClock(1.0f, 2.0f), triggerDetectorReset(1.0f, 2.0f), ticks(0), 
-			clockDivCounter({0}), invMode(DELAY), clockOutState(LOW), phase(0.0f), processSyncPulse(false), clockOutRisingEdgeCounter(0), parent(parent_) {
+			: parent(parent_), ticks(0), clockDivCounter({0}), invMode(DELAY), clockOutState(LOW), phase(0.0f), processSyncPulse(false), clockOutRisingEdgeCounter(0), triggerDetectorClock(1.0f, 2.0f), triggerDetectorReset(1.0f, 2.0f) {
 				set_samplerate(48000.f);
 		}
 
@@ -470,27 +469,36 @@ private:
 	Channel<MappingC> channelC;
 	Channel<MappingD> channelD;
 
-friend Channel<MappingA>;
-friend Channel<MappingB>;
-friend Channel<MappingC>;
-friend Channel<MappingD>;
+	friend Channel<MappingA>;
+	friend Channel<MappingB>;
+	friend Channel<MappingC>;
+	friend Channel<MappingD>;
 
 public:
 	QCDCore()
-		: channelA(this), channelB(this), channelC(this), channelD(this){
-		
+		: channelA(this), channelB(this), channelC(this), channelD(this), ticks(0), lastTap(0), tapPeriod(0), lastTapOut(0), ticksTapPressed(0), lastTapButtonState(MomentaryButton::State_t::RELEASED), triggerDetectorTap(1.0f, 2.0f){
+		set_samplerate(48000.f);
 	}
 
 	void update() override {
+		auto tapClock = tapOut();
+
 		auto clockInA = getInput<MappingA::ClkInIn>();
 		auto clockInB = getInput<MappingB::ClkInIn>();
 		auto clockInC = getInput<MappingC::ClkInIn>();
 		auto clockInD = getInput<MappingD::ClkInIn>();
-		
-		auto clockToA = clockInA;
-		auto clockToB = clockInA;
-		auto clockToC = clockInA;
-		auto clockToD = clockInA;
+
+		std::optional<float> clockToA = tapClock;
+		std::optional<float> clockToB = tapClock;
+		std::optional<float> clockToC = tapClock;
+		std::optional<float> clockToD = tapClock;
+
+		if(clockInA) {
+			clockToA = clockInA;
+			clockToB = clockInA;
+			clockToC = clockInA;
+			clockToD = clockInA;
+		}
 
 		if(clockInB) {
 			clockToB = clockInB;
