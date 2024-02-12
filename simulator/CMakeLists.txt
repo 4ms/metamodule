@@ -173,3 +173,22 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_link_options(simulator PRIVATE "/MAP:simulator.map")
 endif()
+
+
+## Debugging
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  find_program(CMAKE_DEBUGGER_BINARY lldb)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  find_program(CMAKE_DEBUGGER_BINARY gdb)
+endif()
+
+add_custom_target(
+  debug
+  DEPENDS simulator
+  COMMAND ${CMAKE_DEBUGGER_BINARY} -q
+    -ex \"set debuginfod enabled off\"
+    -ex \"set pagination off\" 
+    -ex \"run\"
+    --args $<TARGET_FILE:simulator> -p ${CMAKE_CURRENT_LIST_DIR}/patches
+  USES_TERMINAL
+)
