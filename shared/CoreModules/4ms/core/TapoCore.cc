@@ -16,7 +16,12 @@ class TapoCore : public SmartCoreProcessor<TapoInfo> {
 public:
 	TapoCore() : audioBufferFillCount(0), gateOutCounter(0)
 	{
-		delay.Init((short*)buffer.data(), buffer.size()/sizeof(short) / 2);
+		initialize(48000);
+	}
+
+	void initialize(uint32_t sample_rate)
+	{
+		delay.Init((short*)buffer.data(), buffer.size()/sizeof(short) / 2, 48000);
 
 		delay.tap_modulo_observable_.set_observer([this]
 		{
@@ -25,6 +30,7 @@ public:
 
 		ui.Init(&delay, &parameters);
 
+		audioBufferFillCount = 0;
 		std::fill(audioBufferTX.begin(), audioBufferTX.end(), ::TapoDelay::ShortFrame{0,0});
 	}
 
@@ -51,6 +57,7 @@ public:
 	}
 
 	void set_samplerate(float sr) override {
+		initialize(std::round(sr));
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
