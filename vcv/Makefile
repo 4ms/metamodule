@@ -34,7 +34,6 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
 # Tapographic Delay
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/tapo/stmlib
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/tapo/
-CXXFLAGS += -DSAMPLE_RATE=48000
 CXXFLAGS += -DTEST
 SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/multitap_delay.cc
 SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/resources.cc

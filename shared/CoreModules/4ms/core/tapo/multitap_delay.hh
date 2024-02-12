@@ -51,7 +51,7 @@ enum TapType {
 class MultitapDelay
 {
 public:
-  void Init(short* buffer, int32_t buffer_size);
+  void Init(short* buffer, int32_t buffer_size, uint32_t sample_rate);
   void Process(Parameters *params, ShortFrame* input, ShortFrame* output);
 
   void AddTap(Parameters *params);
@@ -125,6 +125,8 @@ private:
 
   Parameters prev_params_;
   uint32_t prev_max_time_;
+
+  int32_t kMaxQuantizeClock;
 };
 
 }

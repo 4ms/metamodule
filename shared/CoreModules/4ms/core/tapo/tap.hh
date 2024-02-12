@@ -43,7 +43,6 @@ namespace TapoDelay {
 using namespace stmlib;
 
 const float kTimeLfoAmplitude = 0.5f;
-const float kA440 = 440.0f / SAMPLE_RATE;
 // Warning: at high frequency and low Q, filter becomes unstable
 const float kCutoffLowestNote = 30.0f;
 const float kCutoffNrOctaves = 7.689f;
@@ -52,13 +51,14 @@ class Tap
 {
  public:
 
-  void Init() {
+  void Init(uint32_t sample_rate) {
     lfo_.Init();
     fader_.Init();
     previous_lfo_sample_ = 0.0f;
     time_ = kBlockSize;
     velocity_ = 0.0f;
     panning_ = 0.5f;
+    kSampleRate = sample_rate;
   };
 
   /* minimum time is block size */
@@ -99,6 +99,8 @@ class Tap
 
     float velocity = velocity_;
 
+    const float kA440 = 440.0f / kSampleRate;
+
     /* set filter parameters */
     if (velocity_type == VELOCITY_LP) {
       velocity *= 1.0f - params->velocity_parameter;
@@ -123,8 +125,8 @@ class Tap
     float time_start = time_ * prev_params->scale + kBlockSize;
     float time_end = time_ * params->scale + kBlockSize;
 
-    float amplitude_start = kTimeLfoAmplitude * SAMPLE_RATE;
-    float amplitude_end = kTimeLfoAmplitude * SAMPLE_RATE;
+    float amplitude_start = kTimeLfoAmplitude * kSampleRate;
+    float amplitude_end = kTimeLfoAmplitude * kSampleRate;
 
     // limit LFO amplitude to no cross write head
     if (amplitude_start >= time_start - kBlockSize) {
@@ -194,6 +196,8 @@ class Tap
 
   RandomOscillator lfo_;
   float previous_lfo_sample_;
+
+  uint32_t kSampleRate;
 
 };
 

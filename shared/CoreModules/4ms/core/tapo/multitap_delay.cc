@@ -35,13 +35,16 @@ namespace TapoDelay {
 
 using namespace stmlib;
 
-const int32_t kClockDefaultPeriod = 1 * SAMPLE_RATE;
-const int32_t kMaxQuantizeClock = 2 * SAMPLE_RATE;
 
-void MultitapDelay::Init(short* buffer, int32_t buffer_size) {
+
+void MultitapDelay::Init(short* buffer, int32_t buffer_size, const uint32_t sample_rate) {
+
+  const int32_t kClockDefaultPeriod = 1 * sample_rate;
+  kMaxQuantizeClock = 2 * sample_rate;
+
   buffer_.Init(buffer, buffer_size);
   dc_blocker_.Init();
-  dc_blocker_.set_f_q<FREQUENCY_FAST>(10.0f / SAMPLE_RATE, 0.6f);
+  dc_blocker_.set_f_q<FREQUENCY_FAST>(10.0f / sample_rate, 0.6f);
   repeat_fader_.Init();
   clock_period_.Init(kClockDefaultPeriod);
   clock_period_smoothed_ = kClockDefaultPeriod;
@@ -49,7 +52,7 @@ void MultitapDelay::Init(short* buffer, int32_t buffer_size) {
   quantize_ = false;
 
   for (size_t i=0; i<kMaxTaps; i++) {
-    taps_[i].Init();
+    taps_[i].Init(sample_rate);
   }
   tap_allocator_.Init(taps_);
 
