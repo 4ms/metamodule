@@ -522,6 +522,10 @@ public:
 	}
 
 	void set_samplerate(float sr) override {
+		timeStepInS = 1.f /sr;
+
+		ticksToResetTap = 1.f / timeStepInS;
+
 		channelA.set_samplerate(sr);
 		channelB.set_samplerate(sr);
 		channelC.set_samplerate(sr);
@@ -533,6 +537,85 @@ public:
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
+
+private:
+	float tapOut() {
+		auto now = ++ticks;
+
+		auto tapButton = getState<TapTempoButton>();
+
+		tapOutTiming(now, tapButton);
+
+		return updateTapOut(now, tapButton);
+	}
+
+	void tapOutTiming(auto now, auto tapButtonState) {
+		if(tapButtonState == MomentaryButton::State_t::PRESSED && lastTapButtonState == MomentaryButton::State_t::RELEASED) {
+			tapPeriod = now - lastTap;
+			lastTap = now;
+			lastTapOut = now;
+		} else if (tapButtonState == MomentaryButton::State_t::PRESSED && lastTapButtonState == MomentaryButton::State_t::PRESSED) {
+			++ticksTapPressed;
+
+			if(ticksTapPressed >= ticksToResetTap) {
+				tapPeriod = 0;
+			}
+		} else {
+			ticksTapPressed = 0;
+		}
+
+		lastTapButtonState = tapButtonState;
+	}
+
+	float updateTapOut(auto now, auto tapButtonState) {
+		bool clockOut;
+
+		if(tapPeriod != 0) {
+			if(tapButtonState == MomentaryButton::State_t::PRESSED) {
+				clockOut = true;
+			}else{
+				if(now >= lastTapOut + tapPeriod) {
+					clockOut = true;
+					lastTapOut = now;
+				} else if (now >= lastTapOut + (tapPeriod >> 1)) {
+					clockOut = false;
+				} else {
+					clockOut = true;
+				}
+			}		
+		} else {
+			clockOut = false;
+		}
+
+		float tapOutVoltage;
+
+		if(clockOut == true) {
+			tapOutVoltage = 10.f;
+			setLED<TapTempoButton>(1.f);
+		} else {
+			tapOutVoltage = 0.f;
+			setLED<TapTempoButton>(0.f);
+		}
+
+		setOutput<TapOut>(tapOutVoltage);
+
+		return tapOutVoltage;
+	}
+
+private:
+	float timeStepInS; 
+	uint32_t ticks;
+	uint32_t lastTap;
+	uint32_t tapPeriod;
+	uint32_t lastTapOut;
+	uint32_t ticksTapPressed;
+	uint32_t ticksToResetTap;
+	MomentaryButton::State_t lastTapButtonState;
+
+
+private:
+	FlipFlop triggerDetectorTap;
+	EdgeDetector triggerEdgeDetectorTap;
 
 };
 
