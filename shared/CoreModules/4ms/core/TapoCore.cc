@@ -21,7 +21,7 @@ public:
 
 	void initialize(uint32_t sample_rate)
 	{
-		delay.Init((short*)buffer.data(), buffer.size()/sizeof(short) / 2, 48000);
+		delay.Init((short*)buffer.data(), buffer.size()/sizeof(short) / 2, sample_rate);
 
 		delay.tap_modulo_observable_.set_observer([this]
 		{
