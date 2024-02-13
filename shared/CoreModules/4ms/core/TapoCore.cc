@@ -196,7 +196,7 @@ private:
 	static constexpr float GateOnLengthInS             = 4.0e-3f;
 	static constexpr float GateMaxOutputVoltage        = 8.0f;
 	static constexpr uint32_t UISampleRateDivider      = 32;     // Needs to be a power of 2
-	static constexpr float TapSensorPressedIntensity   = 1.0f;
+	static constexpr float TapSensorPressedIntensity   = 0.5f;
 	static constexpr float GateInputThresholdInVolts   = 0.5f;
 	static constexpr float AudioInputFullScaleInVolts  = 22.0f;
 	static constexpr float AudioOutputFullScaleInVolts = 17.0f;
