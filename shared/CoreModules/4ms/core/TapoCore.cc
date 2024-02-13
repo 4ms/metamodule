@@ -14,7 +14,7 @@ class TapoCore : public SmartCoreProcessor<TapoInfo> {
 	using enum Info::Elem;
 
 public:
-	TapoCore() : audioBufferFillCount(0), gateOutCounter(0)
+	TapoCore() : audioBufferFillCount(0), gateOutCounter(0), uiSampleCounter(0)
 	{
 		initialize(48000);
 	}
@@ -36,15 +36,18 @@ public:
 
 	void update() override {
 
-		sideloadDrivers();
+		if (uiSampleCounter++ % 32 == 0)
+		{
+			sideloadDrivers();
 
-		ui.Poll();
-		ui.DoEvents();
-		delay.Poll();
+			ui.Poll();
+			ui.DoEvents();
+		}
 
 		if (audioBufferFillCount == BlockSize)
 		{
 			ui.ReadParameters();
+			delay.Poll();
 			delay.Process(&parameters, audioBufferRX.data(), audioBufferTX.data());
 
 			audioBufferFillCount = 0;
@@ -198,6 +201,8 @@ private:
 	std::size_t audioBufferFillCount;
 
 	uint32_t gateOutCounter;
+
+	uint32_t uiSampleCounter;
 };
 
 } // namespace MetaModule
