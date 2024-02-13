@@ -74,7 +74,12 @@ public:
 private:
 	void packUnpackBlockBuffers()
 	{
-		auto monoInput = int16_t(getInput<AudioIn>().value_or(0) * 32767.0 / AudioInputFullScaleInVolts);
+		auto clamp = [](auto val, auto max_amplitude)
+		{
+			return std::min(std::max(val, -max_amplitude), max_amplitude);
+		};
+
+		auto monoInput = int16_t(clamp(getInput<AudioIn>().value_or(0) / AudioInputFullScaleInVolts, 1.0f) * 32767.0 );
 		audioBufferRX[audioBufferFillCount] = {monoInput, monoInput};
 
 		setOutput<AudioOut1Out>(float(audioBufferTX[audioBufferFillCount].l) / 32768.0 * AudioOutputFullScaleInVolts);
@@ -193,7 +198,7 @@ private:
 	static constexpr uint32_t UISampleRateDivider      = 32;     // Needs to be a power of 2
 	static constexpr float TapSensorPressedIntensity   = 1.0f;
 	static constexpr float GateInputThresholdInVolts   = 0.5f;
-	static constexpr float AudioInputFullScaleInVolts  = 11.0f;
+	static constexpr float AudioInputFullScaleInVolts  = 22.0f;
 	static constexpr float AudioOutputFullScaleInVolts = 17.0f;
 	static constexpr uint32_t DefaultSampleRateInHz    = 48000;
 
