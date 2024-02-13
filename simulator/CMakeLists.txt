@@ -176,19 +176,26 @@ endif()
 
 
 ## Debugging
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") 
   find_program(CMAKE_DEBUGGER_BINARY lldb)
+  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- -p ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/module_tests/4ms)
+
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   find_program(CMAKE_DEBUGGER_BINARY gdb)
+  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} -q
+    -ex \"set debuginfod enabled off\"
+    -ex \"set pagination off\" 
+    -ex \"run\"
+    --args $<TARGET_FILE:simulator> -p ${CMAKE_CURRENT_LIST_DIR}/patches
+  )
+else ()
+  set(DEBUG_COMMAND echo "Compiler is ${CMAKE_CXX_COMPILER_ID}, but must be Clang, AppleClang, or GNU to debug")
 endif()
 
 add_custom_target(
   debug
   DEPENDS simulator
-  COMMAND ${CMAKE_DEBUGGER_BINARY} -q
-    -ex \"set debuginfod enabled off\"
-    -ex \"set pagination off\" 
-    -ex \"run\"
-    --args $<TARGET_FILE:simulator> -p ${CMAKE_CURRENT_LIST_DIR}/patches
+  COMMAND ${DEBUG_COMMAND}
   USES_TERMINAL
 )
+
