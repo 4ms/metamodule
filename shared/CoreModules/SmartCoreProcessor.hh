@@ -133,6 +133,18 @@ private:
 		return indices[element_idx];
 	}
 
+private:
+	void mark_all_inputs_unpatched() override {
+		std::fill(inputValues.begin(), inputValues.end(), std::nullopt);
+	}
+	void mark_input_unpatched(const int input_id) override {
+		inputValues[input_id].reset();
+	}
+	void mark_input_patched(const int input_id) override {
+		// do nothing here
+		// value will be set by next update
+	}
+
 	std::array<float, counts.num_params> paramValues{};
 	std::array<std::optional<float>, counts.num_inputs> inputValues{0};
 	std::array<float, counts.num_outputs> outputValues{};
