@@ -18,11 +18,8 @@ warnings:
 run: all
 	build/simulator
 
-debug-gdb: all
-	gdb -q -ex "set debuginfod enabled off" -ex "set pagination off"  -ex "run" --args build/simulator
-
-debug-lldb: all
-	lldb build/simulator
+debug:
+	cmake --build ${BUILDDIR} --target debug
 	
 # "make limit filename.txt" --> only build modules whose names are in the text file
 ifeq (limit,$(firstword $(MAKECMDGOALS)))
