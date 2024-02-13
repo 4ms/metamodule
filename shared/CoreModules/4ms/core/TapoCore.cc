@@ -21,6 +21,8 @@ public:
 
 	void initialize(uint32_t sample_rate)
 	{
+		currentSampleRate = sample_rate;
+
 		delay.Init((short*)buffer.data(), buffer.size()/sizeof(short) / 2, sample_rate);
 
 		delay.tap_modulo_observable_.set_observer([this]
@@ -181,19 +183,22 @@ private:
 
 	void pingGateOut()
 	{
-		gateOutCounter = GateOnLengthInSamples;
-		setOutput<GateOut>(GateOnLengthInSamples);
+		gateOutCounter = GateOnLengthInS * currentSampleRate ;
+		setOutput<GateOut>(GateMaxOutputVoltage);
 	}	
 
 private:
-	static constexpr uint32_t GateOnLengthInSamples    = 20;
-	static constexpr float GateMaxOutputVoltage        = 5.0f;
+	static constexpr float GateOnLengthInS             = 4.0e-3f;
+	static constexpr float GateMaxOutputVoltage        = 8.0f;
 	static constexpr uint32_t UISampleRateDivider      = 32;     // Needs to be a power of 2
 	static constexpr float TapSensorPressedIntensity   = 1.0f;
 	static constexpr float GateInputThresholdInVolts   = 0.5f;
 	static constexpr float AudioInputFullScaleInVolts  = 11.0f;
 	static constexpr float AudioOutputFullScaleInVolts = 17.0f;
 	static constexpr uint32_t DefaultSampleRateInHz    = 48000;
+
+private:
+	float currentSampleRate;
 
 private:
 	static constexpr std::size_t BufferSizeInBytes = 0x02000000;
