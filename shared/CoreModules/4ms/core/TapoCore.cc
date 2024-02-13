@@ -16,7 +16,7 @@ class TapoCore : public SmartCoreProcessor<TapoInfo> {
 public:
 	TapoCore() : audioBufferFillCount(0), gateOutCounter(0), uiSampleCounter(0)
 	{
-		initialize(48000);
+		initialize(DefaultSampleRateInHz);
 	}
 
 	void initialize(uint32_t sample_rate)
@@ -36,7 +36,7 @@ public:
 
 	void update() override {
 
-		if (uiSampleCounter++ % 32 == 0)
+		if (uiSampleCounter++ % UISampleRateDivider == 0)
 		{
 			sideloadDrivers();
 
@@ -72,11 +72,11 @@ public:
 private:
 	void packUnpackBlockBuffers()
 	{
-		auto monoInput = int16_t(getInput<AudioIn>().value_or(0) * 32767.0 / 11.0);
+		auto monoInput = int16_t(getInput<AudioIn>().value_or(0) * 32767.0 / AudioInputFullScaleInVolts);
 		audioBufferRX[audioBufferFillCount] = {monoInput, monoInput};
 
-		setOutput<AudioOut1Out>(float(audioBufferTX[audioBufferFillCount].l) / 32768.0 * 17.0);
-		setOutput<AudioOut2Out>(float(audioBufferTX[audioBufferFillCount].r) / 32768.0 * 17.0);
+		setOutput<AudioOut1Out>(float(audioBufferTX[audioBufferFillCount].l) / 32768.0 * AudioOutputFullScaleInVolts);
+		setOutput<AudioOut2Out>(float(audioBufferTX[audioBufferFillCount].r) / 32768.0 * AudioOutputFullScaleInVolts);
 	}
 
 	void sideloadDrivers()
@@ -108,10 +108,10 @@ private:
 		if (auto val=getInput<ExtClockIn>(); val)       adc.set(ADC_CLOCK_CV, *val);
 
 		// TODO: set threshold
-		if (auto val=getInput<RepeatJackIn>(); val)  gate.set(GATE_INPUT_REPEAT, *val > 0.5f);
+		if (auto val=getInput<RepeatJackIn>(); val)  gate.set(GATE_INPUT_REPEAT, *val > GateInputThresholdInVolts);
 
 		// not force sensitive
-		adc.set(ADC_FSR_CV, getState<TapSensorButton>() == MomentaryButton::State_t::PRESSED ? 1.0 : 0.0);
+		adc.set(ADC_FSR_CV, getState<TapSensorButton>() == MomentaryButton::State_t::PRESSED ? TapSensorPressedIntensity : 0.0);
 
 		buttons.set(BUTTON_1,      getState<Button1Button>() == MomentaryButton::State_t::RELEASED);
 		buttons.set(BUTTON_2,      getState<Button2Button>() == MomentaryButton::State_t::RELEASED);
@@ -181,9 +181,19 @@ private:
 
 	void pingGateOut()
 	{
-		gateOutCounter = 20;
-		setOutput<GateOut>(5.0f);
+		gateOutCounter = GateOnLengthInSamples;
+		setOutput<GateOut>(GateOnLengthInSamples);
 	}	
+
+private:
+	static constexpr uint32_t GateOnLengthInSamples    = 20;
+	static constexpr float GateMaxOutputVoltage        = 5.0f;
+	static constexpr uint32_t UISampleRateDivider      = 32;     // Needs to be a power of 2
+	static constexpr float TapSensorPressedIntensity   = 1.0f;
+	static constexpr float GateInputThresholdInVolts   = 0.5f;
+	static constexpr float AudioInputFullScaleInVolts  = 11.0f;
+	static constexpr float AudioOutputFullScaleInVolts = 17.0f;
+	static constexpr uint32_t DefaultSampleRateInHz    = 48000;
 
 private:
 	static constexpr std::size_t BufferSizeInBytes = 0x02000000;
