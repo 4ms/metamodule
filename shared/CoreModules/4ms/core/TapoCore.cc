@@ -134,9 +134,9 @@ private:
 			// map position VCV -> firmware
 			switch(val)
 			{
-				case 0:  return 2; // overdub
+				case 0:  return 1; // overdub
 				case 1:  return 0; // off
-				case 2:  return 1; // normal
+				case 2:  return 2; // normal
 				default: return 0;
 			}
 		};
