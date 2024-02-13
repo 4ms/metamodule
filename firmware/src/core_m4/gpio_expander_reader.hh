@@ -28,7 +28,7 @@ public:
 		switch (cur_client) {
 
 			case PrepareReadGPIOExpander: {
-				auto err = main_jacksense_reader.prepare_read();
+				auto err = main_jacksense_reader.start_read();
 				if (err != GPIOExpander::Error::None)
 					handle_error();
 				cur_client = RequestReadGPIOExpander;
@@ -36,7 +36,7 @@ public:
 			}
 
 			case RequestReadGPIOExpander: {
-				auto err = main_jacksense_reader.read_pins();
+				auto err = main_jacksense_reader.finish_read();
 				if (err != GPIOExpander::Error::None)
 					handle_error();
 				cur_client = CollectReadGPIOExpander;
@@ -55,7 +55,7 @@ public:
 			}
 
 			case PrepareReadExtGPIOExpander: {
-				auto err = ext_jacksense_reader.prepare_read();
+				auto err = ext_jacksense_reader.start_read();
 				if (err != GPIOExpander::Error::None)
 					handle_error();
 				cur_client = RequestReadExtGPIOExpander;
@@ -63,7 +63,7 @@ public:
 			}
 
 			case RequestReadExtGPIOExpander: {
-				auto err = ext_jacksense_reader.read_pins();
+				auto err = ext_jacksense_reader.finish_read();
 				if (err != GPIOExpander::Error::None)
 					handle_error();
 				cur_client = CollectReadExtGPIOExpander;
