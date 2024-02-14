@@ -32,15 +32,22 @@ public:
 		auto reloc_address = reinterpret_cast<uint32_t *>(rel.reloc_offset() + base_address);
 		switch (rel.reloc_type()) {
 			case R_ARM_RELATIVE:
-				pr_dbg("R_ARM_RELATIVE: no action\n");
+				pr_trace("R_ARM_RELATIVE: no action\n");
 				break;
 
 			case R_ARM_GLOB_DAT: {
 				//"Resolves to the address of the specified symbol"
-				if (rel.symbol_value() == 0)
-					pr_warn("R_ARM_GLOB_DAT: %s Symbol not found (symbol has initial value of 0)\n",
-							rel.symbol_name().data());
-				else {
+				if (rel.symbol_value() == 0) {
+					auto sym = std::ranges::find_if(host_syms, [&rel](auto &s) { return s.name == rel.symbol_name(); });
+					if (sym != host_syms.end()) {
+						*reloc_address = sym->address;
+						pr_dbg("R_ARM_GLOB_DAT: %s ", rel.symbol_name().data());
+						pr_dbg("Found symbol at 0x%x\n", sym->address);
+					} else {
+						pr_err("R_ARM_GLOB_DAT: %s ", rel.symbol_name().data());
+						pr_err("Symbol not found in host symbols\n");
+					}
+				} else {
 					*reloc_address = rel.symbol_value() + base_address;
 					pr_trace("R_ARM_GLOB_DAT: %s ", rel.symbol_name().data());
 					pr_trace("write 0x%x (+%x) to address 0x%x (+%x)\n",
