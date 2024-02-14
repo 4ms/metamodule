@@ -5,6 +5,7 @@
 #include "cpputil/util/seq_map.hh"
 #include "cpputil/util/static_string.hh"
 #include <memory>
+#include <vector>
 
 // Why does this not work?
 // extern "C" {
