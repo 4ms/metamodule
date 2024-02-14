@@ -144,6 +144,10 @@ struct DynLoadTest {
 
 		hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 		hostsyms.push_back({"_ZNSaIcEC2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcED1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcED2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 
 		for (auto sym : hostsyms)
 			pr_dbg("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
