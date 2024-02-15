@@ -1,6 +1,5 @@
 #pragma once
 #include "base_element.hh"
-#include <string_view>
 #include <variant>
 
 namespace MetaModule
@@ -39,8 +38,8 @@ using Element = std::variant<NullElement,
 
 							 Display, //TODO
 
-							 AltParamToggle2,
-							 AltParamToggle3>;
+							 AltParamContinuous,
+							 AltParamChoice>;
 
 namespace
 {

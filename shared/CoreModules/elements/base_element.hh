@@ -6,9 +6,9 @@
 
 // Hierarchy:
 //                                                   BaseElement
-//                     +---------------------------------'--------------+---------------------------+
-//                     |                                                |                           |
-//              ParamElement                                        JackElement                  LightElement
+//                     +---------------------------------'--------------+---------------------------+-------------------------------+
+//                     |                                                |                           |                               |
+//              ParamElement                                        JackElement                  LightElement                   AltParam
 //     +----------+---'--------+------------------+                +------'-----+         +---------+'-------+---------+
 //     |          |            |                  |                |            |         |         |        |         |
 //    Pot     Encoder       Switch              Button          JackInput  JackOutput  MonoLight DualLight RGBLight Display
@@ -160,12 +160,25 @@ struct RgbLight : LightElement {
 	static constexpr size_t NumLights = 3;
 };
 
-// // Displays
+// Displays
 struct Display : LightElement {}; //TODO: does this need its own category?
 
-// AltParams: TODO
-struct AltParam : BaseElement {};
-struct AltParamToggle2 : AltParam {};
-struct AltParamToggle3 : AltParam {};
+// AltParams:
+// Like Params but they are not drawn on the faceplate (access by menu only)
+struct AltParamElement : BaseElement {
+	static constexpr size_t NumParams = 1;
+};
+
+struct AltParamContinuous : AltParamElement {
+	using State_t = float;
+};
+
+struct AltParamChoice : AltParamElement {
+	using State_t = unsigned;
+
+	static constexpr size_t MaxChoices = 8;
+	unsigned num_pos = 2;
+	std::array<std::string_view, MaxChoices> pos_names{};
+};
 
 } // namespace MetaModule
