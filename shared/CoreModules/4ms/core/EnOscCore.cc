@@ -1,4 +1,4 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "enosc/ui.hh"
 #include "info/EnOsc_info.hh"
@@ -6,9 +6,10 @@
 namespace MetaModule
 {
 
-class EnOscCore : public CoreProcessor {
+class EnOscCore : public SmartCoreProcessor<EnOscInfo> {
 	using Info = EnOscInfo;
 	using ThisCore = EnOscCore;
+	using enum Info::Elem;
 	enum { NumKnobs = Info::KnobWarp + 1 };
 
 	enum { kBlockSize = 64 };
@@ -37,124 +38,76 @@ public:
 			enosc.Poll();
 			enosc.osc().Process(out_block_);
 		}
+
+		sideloadDrivers();
 	}
 
-	// DOWN=0 / MID=0.5 / UP=1.0
-	Switches::State switchstate(float val) {
-		return val < 0.25f ? Switches::State::DOWN : val < 0.75f ? Switches::State::MID : Switches::State::UP;
-	}
+	void sideloadDrivers()
+	{
+		enosc.set_potcv(AdcInput::POT_BALANCE, getState<BalanceKnob>());
+		enosc.set_potcv(AdcInput::POT_MOD, getState<CrossFmKnob>());
+		enosc.set_potcv(AdcInput::POT_DETUNE, getState<DetuneKnob>());
+		enosc.set_potcv(AdcInput::POT_PITCH, getState<PitchKnob>());
+		enosc.set_potcv(AdcInput::POT_ROOT, getState<RootKnob>());
+		enosc.set_potcv(AdcInput::POT_SCALE, getState<ScaleKnob>());
+		enosc.set_potcv(AdcInput::POT_SPREAD, getState<SpreadKnob>());
+		enosc.set_potcv(AdcInput::POT_TWIST, getState<TwistKnob>());
+		enosc.set_potcv(AdcInput::POT_WARP, getState<WarpKnob>());
 
-	void set_param(int param_id, float val) override {
-		switch (param_id) {
-			case Info::KnobBalance:
-				enosc.set_potcv(AdcInput::POT_BALANCE, val);
-				break;
-			case Info::KnobCross_Fm:
-				enosc.set_potcv(AdcInput::POT_MOD, val);
-				break;
-			case Info::KnobDetune:
-				enosc.set_potcv(AdcInput::POT_DETUNE, val);
-				break;
-			case Info::KnobPitch:
-				enosc.set_potcv(AdcInput::POT_PITCH, val);
-				break;
-			case Info::KnobRoot:
-				enosc.set_potcv(AdcInput::POT_ROOT, val);
-				break;
-			case Info::KnobScale:
-				enosc.set_potcv(AdcInput::POT_SCALE, val);
-				break;
-			case Info::KnobSpread:
-				enosc.set_potcv(AdcInput::POT_SPREAD, val);
-				break;
-			case Info::KnobTwist:
-				enosc.set_potcv(AdcInput::POT_TWIST, val);
-				break;
-			case Info::KnobWarp:
-				enosc.set_potcv(AdcInput::POT_WARP, val);
-				break;
-			case Info::SwitchLearn:
-				enosc.set_learn_button(val > 0.5f);
-				break;
-			case Info::SwitchFreeze:
-				enosc.set_freeze_button(val > 0.5f);
-				break;
-			case Info::SwitchScale_Switch:
-				enosc.switches().scale_.set(switchstate(val));
-				break;
-			case Info::SwitchCross_Fm_Switch:
-				enosc.switches().mod_.set(switchstate(val));
-				break;
-			case Info::SwitchTwist_Switch:
-				enosc.switches().twist_.set(switchstate(val));
-				break;
-			case Info::SwitchWarp_Switch:
-				enosc.switches().warp_.set(switchstate(val));
-				break;
-			case Info::AltStereoSplit: {
-				auto mode = static_cast<SplitMode>(val * 2.9f);
-				enosc.set_stereo_mode(mode);
-			} break;
-			case Info::AltNumOsc: {
-				int num_osc = (val * 15.9f) + 1;
-				enosc.set_num_osc(num_osc);
-			} break;
-			case Info::AltCrossfade:
-				enosc.set_crossfade(val);
-				break;
-			case Info::AltFreezeSplit: {
-				auto mode = static_cast<SplitMode>(val * 2.9f);
-				enosc.set_freeze_mode(mode);
-			} break;
-			case Info::AltFineTune:
-				enosc.set_fine_tune(val);
-				break;
-		}
-	}
+		// TODO: check mapping
+		enosc.set_learn_button(getState<LearnButton>() == MomentaryButton::State_t::PRESSED);
+		enosc.set_freeze_button(getState<FreezeButton>() == MomentaryButton::State_t::PRESSED);
 
-	void set_input(int input_id, float val) override {
-		val /= 5.f;	  //-5V to +5V => -1..1
-		val *= -0.5f; //-1..1 => 0.5..-0.5
-		val += 0.5f;  // => 1..0
-					  // Ui::set_potcv will clamp
-		switch (input_id) {
-			case Info::InputBalance_Jack:
-				enosc.set_potcv(AdcInput::CV_BALANCE, val);
-				break;
-			case Info::InputCross_Fm_Jack:
-				enosc.set_potcv(AdcInput::CV_MOD, val);
-				break;
-			case Info::InputPitch_Jack:
-				enosc.set_pitchroot_cv(SpiAdcInput::CV_PITCH, val);
-				break;
-			case Info::InputRoot_Jack:
-				enosc.set_pitchroot_cv(SpiAdcInput::CV_ROOT, val);
-				break;
-			case Info::InputScale_Jack:
-				enosc.set_potcv(AdcInput::CV_SCALE, val);
-				break;
-			case Info::InputSpread_Jack:
-				enosc.set_potcv(AdcInput::CV_SPREAD, val);
-				break;
-			case Info::InputTwist_Jack:
-				enosc.set_potcv(AdcInput::CV_TWIST, val);
-				break;
-			case Info::InputWarp_Jack:
-				enosc.set_potcv(AdcInput::CV_WARP, val);
-				break;
-			case Info::InputFreeze_Jack:
-				enosc.set_freeze_gate(val > 0.5f);
-				break;
-			case Info::InputLearn_Jack:
-				enosc.set_learn_gate(val > 0.5f);
-				break;
-		}
-	}
+		auto SwitchStateMapping = [](float val)
+		{
+			// DOWN=0 / MID=0.5 / UP=1.0
+			return val < 0.25f ? Switches::State::DOWN : val < 0.75f ? Switches::State::MID : Switches::State::UP;
+		};
 
-	float get_output(int output_id) const override {
-		s9_23 sample = output_id == 0 ? out_block_[block_ctr].l : out_block_[block_ctr].r;
-		auto s = f::inclusive(sample).repr() * 4.5f; //hardware model is about 4.5Vpp for one osc
-		return s;
+		// TODO: check mapping
+		enosc.switches().scale_.set(SwitchStateMapping(getState<ScaleSwitch>()));
+		enosc.switches().mod_.set(  SwitchStateMapping(getState<CrossFmSwitch>()));
+		enosc.switches().twist_.set(SwitchStateMapping(getState<TwistSwitch>()));
+		enosc.switches().warp_.set( SwitchStateMapping(getState<WarpSwitch>()));
+
+		enosc.set_stereo_mode(SplitMode(getState<StereoSplitAlt>()));
+		enosc.set_freeze_mode(SplitMode(getState<FreezeSplitAlt>()));
+		enosc.set_num_osc(getState<NumOscAlt>());
+		enosc.set_crossfade(getState<CrossfadeAlt>());
+		enosc.set_fine_tune(getState<FineTuneAlt>());
+
+		auto InputScalingFunc = [](float valInV)
+		{
+			return (((valInV / 5.0f) * -0.5f) + 0.5f);
+		};
+
+		if (auto val = getInput<BalanceJackIn>(); val)  enosc.set_potcv(AdcInput::CV_BALANCE,         InputScalingFunc(*val));
+		if (auto val = getInput<CrossFmJackIn>(); val) enosc.set_potcv(AdcInput::CV_MOD,             InputScalingFunc(*val));
+		if (auto val = getInput<PitchJackIn>(); val)    enosc.set_pitchroot_cv(SpiAdcInput::CV_PITCH, InputScalingFunc(*val));
+		if (auto val = getInput<RootJackIn>(); val)     enosc.set_pitchroot_cv(SpiAdcInput::CV_ROOT,  InputScalingFunc(*val));
+		if (auto val = getInput<ScaleJackIn>(); val)    enosc.set_potcv(AdcInput::CV_SCALE,           InputScalingFunc(*val));
+		if (auto val = getInput<SpreadJackIn>(); val)   enosc.set_potcv(AdcInput::CV_SPREAD,          InputScalingFunc(*val));
+		if (auto val = getInput<TwistJackIn>(); val)    enosc.set_potcv(AdcInput::CV_TWIST,           InputScalingFunc(*val));
+		if (auto val = getInput<WarpJackIn>(); val)     enosc.set_potcv(AdcInput::CV_WARP,            InputScalingFunc(*val));
+
+		if (auto val = getInput<FreezeJackIn>(); val)   enosc.set_freeze_gate(InputScalingFunc(*val) > 0.5f);
+		if (auto val = getInput<LearnJackIn>(); val)    enosc.set_learn_gate( InputScalingFunc(*val) > 0.5f);
+
+		auto OutputScalingFunc = [](auto sample)
+		{
+			return  f::inclusive(sample).repr() * 4.5f; //hardware model is about 4.5Vp
+		};
+
+		setOutput<OutAOut>(OutputScalingFunc(out_block_[block_ctr].l));
+		setOutput<OutBOut>(OutputScalingFunc(out_block_[block_ctr].r));
+
+		auto MapLEDColor = [](auto val)
+		{
+			return std::array<float,3>{f::inclusive(val.red()).repr(), f::inclusive(val.green()).repr(), f::inclusive(val.blue()).repr()};
+		};
+
+		setLED<LearnButton>(MapLEDColor(enosc.get_learn_led_color()));
+		setLED<FreezeButton>(MapLEDColor(enosc.get_freeze_led_color()));
 	}
 
 	void set_samplerate(float sr) override {
@@ -163,33 +116,6 @@ public:
 			ui_process_throttle = (unsigned)sample_rate_ / kUiProcessRate;
 			ui_update_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
 		}
-	}
-
-	float get_led_brightness(int led_id) const override {
-		if (led_id < 0 || led_id > 5)
-			return 0.f;
-
-		if (led_id < 3) {
-			auto c = enosc.get_learn_led_color();
-			auto el = led_id == 0 ? c.red() : led_id == 1 ? c.green() : c.blue();
-			return f::inclusive(el).repr();
-		} else {
-			auto c = enosc.get_freeze_led_color();
-			auto el = led_id == 3 ? c.red() : led_id == 4 ? c.green() : c.blue();
-			return f::inclusive(el).repr();
-		}
-	}
-
-	void mark_all_inputs_unpatched() override {
-		for (unsigned i = 0; i < Info::NumInJacks; i++)
-			set_input(i, 0.f);
-	}
-
-	void mark_input_unpatched(const int input_id) override {
-		set_input(input_id, 0.f);
-	}
-
-	void mark_input_patched(const int input_id) override {
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
