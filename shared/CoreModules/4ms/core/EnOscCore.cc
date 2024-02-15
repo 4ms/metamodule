@@ -1,14 +1,12 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "info/EnOsc_info.hh"
-// #include "enosc/altparam_EnOsc_info.hh"
 #include "enosc/ui.hh"
+#include "info/EnOsc_info.hh"
 
 namespace MetaModule
 {
 
 class EnOscCore : public CoreProcessor {
-	// using Info = APEnOscInfo;
 	using Info = EnOscInfo;
 	using ThisCore = EnOscCore;
 	enum { NumKnobs = Info::KnobWarp + 1 };
@@ -46,7 +44,6 @@ public:
 		return val < 0.25f ? Switches::State::DOWN : val < 0.75f ? Switches::State::MID : Switches::State::UP;
 	}
 
-	// TODO: re-arrange AdcInput enums to match
 	void set_param(int param_id, float val) override {
 		switch (param_id) {
 			case Info::KnobBalance:
@@ -76,49 +73,41 @@ public:
 			case Info::KnobWarp:
 				enosc.set_potcv(AdcInput::POT_WARP, val);
 				break;
-			case static_cast<int>(Info::SwitchLearn) + NumKnobs:
+			case Info::SwitchLearn:
 				enosc.set_learn_button(val > 0.5f);
 				break;
-			case static_cast<int>(Info::SwitchFreeze) + NumKnobs:
+			case Info::SwitchFreeze:
 				enosc.set_freeze_button(val > 0.5f);
 				break;
-			case static_cast<int>(Info::SwitchScale_Switch) + NumKnobs:
+			case Info::SwitchScale_Switch:
 				enosc.switches().scale_.set(switchstate(val));
 				break;
-			case static_cast<int>(Info::SwitchCross_Fm_Switch) + NumKnobs:
+			case Info::SwitchCross_Fm_Switch:
 				enosc.switches().mod_.set(switchstate(val));
 				break;
-			case static_cast<int>(Info::SwitchTwist_Switch) + NumKnobs:
+			case Info::SwitchTwist_Switch:
 				enosc.switches().twist_.set(switchstate(val));
 				break;
-			case static_cast<int>(Info::SwitchWarp_Switch) + NumKnobs:
+			case Info::SwitchWarp_Switch:
 				enosc.switches().warp_.set(switchstate(val));
 				break;
-		}
-	}
-
-	static constexpr int NumAltParams = 4;
-
-	enum {
-		AltCrossfade_Time = 0,
-		AltStereo_Split = 1,
-		AltNum_Oscs = 2,
-		AltFreeze_Split = 3,
-	};
-
-	void set_alt_param(const int alt_param_id, const float val) override {
-		switch (alt_param_id) {
-			case AltStereo_Split:
-				enosc.set_stereo_mode(static_cast<SplitMode>(val));
-				break;
-			case AltNum_Oscs:
-				enosc.set_num_osc(val);
-				break;
-			case AltCrossfade_Time:
+			case Info::AltStereoSplit: {
+				auto mode = static_cast<SplitMode>(val * 2.9f);
+				enosc.set_stereo_mode(mode);
+			} break;
+			case Info::AltNumOsc: {
+				int num_osc = (val * 15.9f) + 1;
+				enosc.set_num_osc(num_osc);
+			} break;
+			case Info::AltCrossfade:
 				enosc.set_crossfade(val);
 				break;
-			case AltFreeze_Split:
-				enosc.set_freeze_mode(static_cast<SplitMode>(val));
+			case Info::AltFreezeSplit: {
+				auto mode = static_cast<SplitMode>(val * 2.9f);
+				enosc.set_freeze_mode(mode);
+			} break;
+			case Info::AltFineTune:
+				enosc.set_fine_tune(val);
 				break;
 		}
 	}
@@ -191,36 +180,8 @@ public:
 		}
 	}
 
-	static constexpr std::string_view NumString[16] = {
-		"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
-
-	constexpr std::string_view get_alt_param_value(unsigned alt_id, float val) override {
-		switch (alt_id) {
-			case AltStereo_Split:
-				return val < 0.5f ? "Even/Odd" : val < 1.5f ? "Low/High" : "Root/Others";
-				break;
-
-			case AltNum_Oscs:
-				if (val < 1 || val > 16)
-					return "";
-				return NumString[((int)val) - 1];
-				break;
-
-			case AltCrossfade_Time:
-				if (val < 0 || val > 1)
-					return "";
-				return NumString[(int)(val * 10.f)];
-				break;
-
-			case AltFreeze_Split:
-				return val < 0.5f ? "Even/Odd" : val < 1.5f ? "Low/High" : "Root/Others";
-				break;
-		}
-		return "";
-	}
-
 	void mark_all_inputs_unpatched() override {
-		for (unsigned i = 0; i < 10; /*Info::NumInJacks*/ i++)
+		for (unsigned i = 0; i < Info::NumInJacks; i++)
 			set_input(i, 0.f);
 	}
 
