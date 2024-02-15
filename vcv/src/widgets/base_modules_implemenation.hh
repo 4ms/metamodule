@@ -38,4 +38,12 @@ inline void do_config_element(Encoder el, const Indices &indices, const ModuleCo
 	context.module->configParam(indices.param_idx, -INFINITY, INFINITY, 0, el.short_name.data());
 };
 
+inline void do_config_element(AltParamContinuous el, const Indices &indices, const ModuleContext_t &context) {
+	context.module->configParam(indices.param_idx, 0.f, 1.f, 0.5f, el.short_name.data());
+}
+
+inline void do_config_element(AltParamChoice el, const Indices &indices, const ModuleContext_t &context) {
+	context.module->configParam(indices.param_idx, 0, el.num_pos - 1, 0, el.short_name.data());
+}
+
 } // namespace MetaModule::VCVImplementation::Module
