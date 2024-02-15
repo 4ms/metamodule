@@ -17,7 +17,10 @@ void CommModule::process(const ProcessArgs &args) {
 
 	for (auto &alt : altParams) {
 		if (alt.is_updated)
-			core->set_alt_param(alt.id, alt.val);
+
+			// TODO: implement
+			//core->set_alt_param(alt.id, alt.val);
+			
 		alt.is_updated = false;
 	}
 
