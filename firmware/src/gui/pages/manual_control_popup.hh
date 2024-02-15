@@ -100,6 +100,14 @@ private:
 						   lv_arc_set_value(ui_ControlArc, 1);
 						   arc_change_value();
 					   },
+
+					   [this](const AltParamChoice &el) {
+						   auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
+						   if (new_value > lv_arc_get_max_value(ui_ControlArc))
+							   new_value = lv_arc_get_min_value(ui_ControlArc);
+						   lv_arc_set_value(ui_ControlArc, new_value);
+						   arc_change_value();
+					   },
 				   },
 				   drawn_el->element);
 		lv_group_focus_obj(ui_ControlArc);
@@ -132,6 +140,8 @@ private:
 					   [](const FlipSwitch &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
 					   [](const Pot &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
+					   [](const AltParamChoice &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
+					   [](const AltParamContinuous &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
 				   },
 				   drawn_el->element);
 
