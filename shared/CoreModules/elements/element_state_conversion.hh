@@ -73,6 +73,21 @@ constexpr Pot::State_t convertState(const T &, float val) requires(std::derived_
 	return val;
 }
 
+template<typename T>
+constexpr AltParamContinuous::State_t convertState(const T &, float val)
+	requires(std::derived_from<T, AltParamContinuous>)
+{
+	return val;
+}
+
+template<typename T>
+constexpr AltParamChoice::State_t convertState(const T &element, float val)
+	requires(std::derived_from<T, AltParamChoice>)
+{
+	//maps 0..1 -> 1..N
+	return AltParamChoice::State_t(1 + std::round(val * (float)(element.num_pos - 1)));
+}
+
 //
 // LEDs
 //
