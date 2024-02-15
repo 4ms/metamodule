@@ -32,6 +32,16 @@ inline std::string get_element_value_string(Element const &element, float value)
 
 				   [value = value, &s](LatchingButton const &) { s = value < 0.5f ? "Off" : "On"; },
 
+				   [value = value, &s](AltParamContinuous const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
+
+				   [value = value, &s](AltParamChoice const &el) {
+					   auto v = StateConversion::convertState(el, value);
+					   if (v > 0 && v <= el.pos_names.size() && el.pos_names[v - 1].size())
+						   s = el.pos_names[v - 1];
+					   else
+						   s = std::to_string(v) + std::string("/") + std::to_string(el.num_pos);
+				   },
+
 				   [](BaseElement const &) {},
 			   },
 			   element);
