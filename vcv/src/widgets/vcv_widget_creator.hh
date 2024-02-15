@@ -25,13 +25,19 @@ struct VCVWidgetCreator {
 		: context{module_widget, module} {
 	}
 
-	template<typename T>
-	void create(const T &element) {
-		// forward to implementation together with current context
-		if (auto indices = ElementCount::get_indices<INFO>(element)) {
-			VCVImplementation::Widget::do_create(element, indices.value(), context);
+	template<typename EL>
+	void create(const EL &element)
+	{
+		// alt parameters do not have a widget
+		if constexpr (not std::derived_from<EL,MetaModule::AltParamElement>)
+		{
+			// forward to implementation together with current context
+			if (auto indices = ElementCount::get_indices<INFO>(element)) {
+				VCVImplementation::Widget::do_create(element, indices.value(), context);
+			}
 		}
 	}
+
 
 private:
 	WidgetContext_t context;
