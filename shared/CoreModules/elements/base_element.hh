@@ -180,6 +180,7 @@ struct AltParamChoice : AltParamElement {
 	using State_t = unsigned;
 
 	unsigned num_pos = 2;
+	State_t DefaultValue = 0;
 };
 
 struct AltParamChoiceLabled : AltParamChoice 
