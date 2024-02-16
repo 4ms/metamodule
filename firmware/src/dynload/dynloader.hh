@@ -15,7 +15,8 @@
 // #include "build-simple-elf.hh"
 // #include "build-elf.hh"
 // #include "build-vcva-2.hh"
-#include "befaco-strip-so.h"
+// #include "befaco-strip-so.h"
+#include "befaco-strip-so-2modules.h"
 
 #include "rack.hpp"
 

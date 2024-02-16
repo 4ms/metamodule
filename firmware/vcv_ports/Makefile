@@ -9,22 +9,22 @@ SOURCES = plugin/libc_stub.c \
 		Befaco/src/plugin.cpp \
 		Befaco/src/EvenVCO.cpp \
 		Befaco/src/DualAtenuverter.cpp \
-		Befaco/src/SpringReverb.cpp \
-		Befaco/src/ABC.cpp \
-		Befaco/src/ADSR.cpp \
-		Befaco/src/ChoppingKinky.cpp \
-		Befaco/src/HexmixVCA.cpp \
-		Befaco/src/Kickall.cpp \
-		Befaco/src/Mixer.cpp \
-		Befaco/src/Morphader.cpp \
-		Befaco/src/MotionMTR.cpp \
-		Befaco/src/Percall.cpp \
-		Befaco/src/PonyVCO.cpp \
-		Befaco/src/Rampage.cpp \
-		Befaco/src/STMix.cpp \
-		Befaco/src/SamplingModulator.cpp \
-		Befaco/src/SlewLimiter.cpp \
-		Befaco/src/StereoStrip.cpp \
+		# Befaco/src/SpringReverb.cpp \
+		# Befaco/src/ABC.cpp \
+		# Befaco/src/ADSR.cpp \
+		# Befaco/src/ChoppingKinky.cpp \
+		# Befaco/src/HexmixVCA.cpp \
+		# Befaco/src/Kickall.cpp \
+		# Befaco/src/Mixer.cpp \
+		# Befaco/src/Morphader.cpp \
+		# Befaco/src/MotionMTR.cpp \
+		# Befaco/src/Percall.cpp \
+		# Befaco/src/PonyVCO.cpp \
+		# Befaco/src/Rampage.cpp \
+		# Befaco/src/STMix.cpp \
+		# Befaco/src/SamplingModulator.cpp \
+		# Befaco/src/SlewLimiter.cpp \
+		# Befaco/src/StereoStrip.cpp \
 
 INCLUDES := -IBefaco/src \
 			-I../src \
@@ -133,15 +133,17 @@ OBJCPY 	= $(ARCH)-objcopy
 OBJDMP 	= $(ARCH)-objdump
 GDB 	= $(ARCH)-gdb
 SZ 		= $(ARCH)-size
+STRIP	= $(ARCH)-strip
 
 SZOPTS 	= -d
 
 SO 	    = $(BUILDDIR)/$(BINARYNAME).so
+SOSTRIP = $(BUILDDIR)/$(BINARYNAME)-strip.so
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
 BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
 
-all: Makefile $(SO) 
+all: Makefile $(SOSTRIP) 
 
 $(OBJDIR)/%.o: %.s
 	@mkdir -p $(dir $@)
@@ -162,6 +164,9 @@ $(OBJDIR)/%.o: %.c[cp]* $(OBJDIR)/%.d
 $(SO): $(OBJECTS)
 	$(info Linking shared library...)
 	$(LD) -shared $(LFLAGS) -o $@ $(OBJECTS)
+
+$(SOSTRIP): $(SO)
+	$(STRIP) -g -v -o $@ $<
 
 $(ELF): $(OBJECTS) $(LINKSCR)
 	$(info Linking...)

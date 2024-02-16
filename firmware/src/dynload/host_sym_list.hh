@@ -4,7 +4,7 @@
 #include <array>
 
 static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
-{"_ZN10MetaModule13ModuleFactory14creation_funcsE", 0, 0xc28a7758},
+{"_ZN10MetaModule13ModuleFactory14creation_funcsE", 0, 0xc26214d8},
 {"_ZN16VCVModuleWrapperC1Ev", 0, 0xc2114894},
 {"memmove", 0, 0xc2190861},
 {"sinf", 0, 0xc2187ca1},
@@ -45,7 +45,7 @@ static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
 {"exp", 0, 0xc2187631},
 {"sqrtf", 0, 0xc2188135},
 {"_ZN4rack6string2fVB5cxx11EPKcSt9__va_list", 0, 0xc211447c},
-{"_ZN10MetaModule13ModuleFactory5infosE", 0, 0xc289ff54},
+{"_ZN10MetaModule13ModuleFactory5infosE", 0, 0xc2619cd4},
 {"_ZNK16VCVModuleWrapper18get_led_brightnessEi", 0, 0xc2114844},
 {"_ZNK16VCVModuleWrapper10get_outputEi", 0, 0xc211473c},
 {"_ZTV16VCVModuleWrapper", 0, 0xc2210594},
