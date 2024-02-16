@@ -39,7 +39,8 @@ using Element = std::variant<NullElement,
 							 Display, //TODO
 
 							 AltParamContinuous,
-							 AltParamChoice>;
+							 AltParamChoice,
+							 AltParamChoiceLabled>;
 
 namespace
 {

@@ -43,8 +43,8 @@ struct EnOscInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(209.12), to_mm<72>(305.91), Center, "Out B", ""}},
 		AltParamContinuous{{0, 0, {}, "Crossfade", ""}},
 		AltParamChoice{{0, 0, {}, "NumOsc", ""}, 16},
-		AltParamChoice{{0, 0, {}, "StereoSplit", ""}, 3, {"Even/Odd", "Low/High", "Root/Others"}},
-		AltParamChoice{{0, 0, {}, "FreezeSplit", ""}, 3, {"Even/Odd", "Low/High", "Root/Others"}},
+		AltParamChoiceLabled{{{0, 0, {}, "StereoSplit", ""}, 3}, {"Even/Odd", "Low/High", "Root/Others"}},
+		AltParamChoiceLabled{{{0, 0, {}, "FreezeSplit", ""}, 3}, {"Even/Odd", "Low/High", "Root/Others"}},
 		AltParamContinuous{{0, 0, {}, "FineTune", ""}},
 	}};
 
