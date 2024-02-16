@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "CoreModules/elements/dump.hh"
+
 // #include "build-simple-elf.hh"
 // #include "build-elf.hh"
 // #include "build-vcva-2.hh"
@@ -60,6 +62,7 @@ struct DynLoadTest {
 		tanf(0.5f);
 		tanh(0.5f);
 		volatile auto keep = std::allocator<char>{};
+		volatile int x = strlen("ABCD");
 	}
 
 	GCC_OPTIMIZE_OFF
@@ -122,9 +125,20 @@ struct DynLoadTest {
 			ctor = reinterpret_cast<ctor_func_t>(addr + block.code.data());
 			pr_info("Calling ctor %p\n", ctor);
 			__BKPT();
-			volatile int x = strlen("ABCD");
 			ctor();
 		}
+	}
+
+	GCC_OPTIMIZE_OFF
+	void run_module() {
+		auto evenvco_info = MetaModule::ModuleFactory::getModuleInfo("EvenVCO");
+		printf("evenvco has %d elements\n", evenvco_info.elements.size());
+
+		auto dualat_info = MetaModule::ModuleFactory::getModuleInfo("DualAtenuverter");
+		printf("dualat has %d elements\n", dualat_info.elements.size());
+
+		MetaModule::DumpModuleInfo::print("EvenVCO");
+		MetaModule::DumpModuleInfo::print("DualAtenuverter");
 	}
 
 	//GCC_OPTIMIZE_OFF
@@ -162,7 +176,8 @@ struct DynLoadTest {
 
 	GCC_OPTIMIZE_OFF
 	void find_init_plugin_function() {
-		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initP6Plugin");
+		// auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initP6Plugin");
+		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
 
 		if (init_plugin_symbol) {
 			auto load_address = init_plugin_symbol->offset() /*- block.elf_offset*/ + block.code.data();

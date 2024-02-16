@@ -4,7 +4,7 @@
 #include <array>
 
 static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
-{"_ZN10MetaModule13ModuleFactory14creation_funcsE", 0, 0xc26214d8},
+{"_ZN10MetaModule13ModuleFactory14creation_funcsE", 0, 0xc2621518},
 {"_ZN16VCVModuleWrapperC1Ev", 0, 0xc2114894},
 {"memmove", 0, 0xc2190861},
 {"sinf", 0, 0xc2187ca1},
@@ -41,14 +41,14 @@ static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
 {"json_object_set_new", 0, 0xc21867fc},
 {"_ZN4rack6string1fB5cxx11EPKcz", 0, 0xc21145e0},
 {"log2f", 0, 0xc21878c1},
-{"_ZTVN4rack6engine6ModuleE", 0, 0xc22104ec},
+{"_ZTVN4rack6engine6ModuleE", 0, 0xc221052c},
 {"exp", 0, 0xc2187631},
 {"sqrtf", 0, 0xc2188135},
 {"_ZN4rack6string2fVB5cxx11EPKcSt9__va_list", 0, 0xc211447c},
-{"_ZN10MetaModule13ModuleFactory5infosE", 0, 0xc2619cd4},
+{"_ZN10MetaModule13ModuleFactory5infosE", 0, 0xc2619d14},
 {"_ZNK16VCVModuleWrapper18get_led_brightnessEi", 0, 0xc2114844},
 {"_ZNK16VCVModuleWrapper10get_outputEi", 0, 0xc211473c},
-{"_ZTV16VCVModuleWrapper", 0, 0xc2210594},
+{"_ZTV16VCVModuleWrapper", 0, 0xc22105d4},
 {"_ZN16VCVModuleWrapper6updateEv", 0, 0xc21146e8},
 {"_ZSt28__throw_bad_array_new_lengthv", 0, 0xc20b0328},
 {"cos", 0, 0xc2188769},
