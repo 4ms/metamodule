@@ -171,6 +171,9 @@ struct AltParamElement : BaseElement {
 
 struct AltParamContinuous : AltParamElement {
 	using State_t = float;
+	State_t MinValue = 0.0f;
+	State_t MaxValue = 1.0f;
+	State_t DefaultValue = 0.5f;
 };
 
 struct AltParamChoice : AltParamElement {

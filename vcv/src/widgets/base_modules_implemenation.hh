@@ -39,7 +39,7 @@ inline void do_config_element(Encoder el, const Indices &indices, const ModuleCo
 };
 
 inline void do_config_element(AltParamContinuous el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0.f, 1.f, 0.5f, el.short_name.data());
+	context.module->configParam(indices.param_idx, el.MinValue, el.MaxValue, el.DefaultValue, el.short_name.data());
 }
 
 inline void do_config_element(AltParamChoice el, const Indices &indices, const ModuleContext_t &context) {
