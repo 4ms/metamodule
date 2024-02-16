@@ -10,7 +10,7 @@ namespace MetaModule::VCVImplementation::Widget
 inline void do_create(BaseElement element, const ElementCount::Indices &, const WidgetContext_t &) {
 	// Default: do nothing
 	// FIXME: Maybe this should be replaced with more specific fallbacks
-	printf("Widget not found\n");
+	printf("Creating of element '%.*s' not defined\n", int(element.short_name.size()), element.short_name.data());
 }
 
 } // namespace MetaModule::VCVImplementation::Widget
