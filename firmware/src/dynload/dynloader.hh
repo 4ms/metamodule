@@ -143,8 +143,15 @@ struct DynLoadTest {
 		auto evenvco = MetaModule::ModuleFactory::create("EvenVCOPlugin");
 		auto dualat = MetaModule::ModuleFactory::create("DualAtenuverterPlugin");
 
-		dualat->update();
-		evenvco->update();
+		if (dualat)
+			dualat->update();
+		else
+			pr_dbg("Dual at did not create()");
+
+		if (evenvco)
+			evenvco->update();
+		else
+			pr_dbg("EvenVCO did not create()");
 	}
 
 	//GCC_OPTIMIZE_OFF

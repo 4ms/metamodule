@@ -25,6 +25,14 @@ endif
 limit:
 	cmake --fresh --preset ${PRESET} -G ${GEN} -DLIMITED_MODULES_FILE=$(LIMITFILE)
 
+dyn:
+	cd vcv_ports && make
+	cp ./vcv_ports/build/Befaco-strip-so.h ./src/dynload/befaco-strip-so-2modules.h
+	cmake --build --preset ${PRESET} 
+	flashing/dump_syms.py --objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ --elf ./build/mp1corea7/medium/main.elf --out src/dynload/host_sym_list.hh -v
+	cmake --build --preset ${PRESET} 
+
+
 bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images flash-bootloader-sd flash-app-sd flash-dfu jprog debug start-jlinkgdb start-openocd flash_loader flash_loader_dfu:
 	cmake --build --preset ${PRESET} -- $(MAKECMDGOALS)
 

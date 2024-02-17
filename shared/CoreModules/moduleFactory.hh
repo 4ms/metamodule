@@ -86,7 +86,7 @@ public:
 	static inline ModuleInfoView nullinfo{};
 
 	//
-// private:
+	// private:
 	static SeqMap<ModuleTypeSlug, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> infos;
 	static SeqMap<ModuleTypeSlug, FaceplatePtr, MAX_MODULE_TYPES> faceplates;
