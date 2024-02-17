@@ -73,6 +73,9 @@ struct DynLoadTest {
 		load_executable();
 		process_relocs();
 		init_globals();
+
+		run_module();
+
 		find_init_plugin_function();
 
 		if (init_func) {
@@ -124,21 +127,24 @@ struct DynLoadTest {
 			auto addr = reinterpret_cast<uint32_t>(ctor);
 			ctor = reinterpret_cast<ctor_func_t>(addr + block.code.data());
 			pr_info("Calling ctor %p\n", ctor);
-			__BKPT();
 			ctor();
 		}
 	}
 
 	GCC_OPTIMIZE_OFF
 	void run_module() {
-		auto evenvco_info = MetaModule::ModuleFactory::getModuleInfo("EvenVCO");
-		printf("evenvco has %d elements\n", evenvco_info.elements.size());
+		printf("evenvco:\n");
+		MetaModule::DumpModuleInfo::print("EvenVCOPlugin");
 
-		auto dualat_info = MetaModule::ModuleFactory::getModuleInfo("DualAtenuverter");
-		printf("dualat has %d elements\n", dualat_info.elements.size());
+		printf("dualat\n");
+		MetaModule::DumpModuleInfo::print("DualAtenuverterPlugin");
 
-		MetaModule::DumpModuleInfo::print("EvenVCO");
-		MetaModule::DumpModuleInfo::print("DualAtenuverter");
+		__BKPT();
+		auto evenvco = MetaModule::ModuleFactory::create("EvenVCOPlugin");
+		auto dualat = MetaModule::ModuleFactory::create("DualAtenuverterPlugin");
+
+		dualat->update();
+		evenvco->update();
 	}
 
 	//GCC_OPTIMIZE_OFF

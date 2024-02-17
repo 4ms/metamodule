@@ -167,6 +167,7 @@ $(SO): $(OBJECTS)
 
 $(SOSTRIP): $(SO)
 	$(STRIP) -g -v -o $@ $<
+	cd build && xxd -i $(BINARYNAME)-strip.so > $(BINARYNAME)-strip-so.h
 
 $(ELF): $(OBJECTS) $(LINKSCR)
 	$(info Linking...)
