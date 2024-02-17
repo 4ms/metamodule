@@ -143,14 +143,16 @@ struct DynLoadTest {
 		auto evenvco = MetaModule::ModuleFactory::create("EvenVCOPlugin");
 		auto dualat = MetaModule::ModuleFactory::create("DualAtenuverterPlugin");
 
-		if (dualat)
-			dualat->update();
-		else
+		if (dualat) {
+			pr_dbg("Dualat ptr is at %p\n", dualat.get());
+			dualat->set_samplerate(48000);
+		} else
 			pr_dbg("Dual at did not create()");
 
-		if (evenvco)
+		if (evenvco) {
+			pr_dbg("Even is at %p\n", evenvco.get());
 			evenvco->update();
-		else
+		} else
 			pr_dbg("EvenVCO did not create()");
 	}
 

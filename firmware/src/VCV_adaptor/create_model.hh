@@ -34,9 +34,9 @@ plugin::Model *createModel(std::string_view slug)
 	// }
 
 	// Register creation function
-	volatile int x = 1;
-	while (x)
-		;
+	// volatile int x = 1;
+	// while (x)
+	// 	;
 	ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
 	// pr_dbg("Register create() for %.*s\n", slug.size(), slug.data());
 
