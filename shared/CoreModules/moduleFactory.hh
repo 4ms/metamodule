@@ -2,10 +2,14 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_info_view.hh"
 #include "CoreModules/module_type_slug.hh"
-#include "cpputil/util/seq_map.hh"
-#include "cpputil/util/static_string.hh"
 #include <memory>
 #include <vector>
+
+// #ifdef TESTPROJECT
+// #define pr_dbg(...)
+// #else
+// #include "console/pr_dbg.hh"
+// #endif
 
 // Why does this not work?
 // extern "C" {
@@ -16,91 +20,28 @@ namespace MetaModule
 {
 
 class ModuleFactory {
-
 public:
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
 	using FaceplatePtr = void *;
-	static constexpr int MAX_MODULE_TYPES = 512;
+	static inline constexpr int MAX_MODULE_TYPES = 512;
 
 	ModuleFactory() = delete;
-
 	static bool
-	registerModuleType(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate, const ModuleInfoView &info) {
-		bool already_exists = creation_funcs.key_exists(typeslug);
-		infos.insert(typeslug, info);
-		creation_funcs.insert(typeslug, funcCreate);
-		return already_exists;
-	}
+	registerModuleType(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate, const ModuleInfoView &info);
+	static bool registerModuleType(const ModuleTypeSlug &typeslug, const ModuleInfoView &info);
+	static bool registerModuleType(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate);
+	static bool registerModuleFaceplate(const ModuleTypeSlug &typeslug, FaceplatePtr faceplate);
 
-	static bool registerModuleType(const ModuleTypeSlug &typeslug, const ModuleInfoView &info) {
-		bool already_exists = creation_funcs.key_exists(typeslug);
-		infos.insert(typeslug, info);
-		return already_exists;
-	}
+	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug &typeslug);
 
-	static bool registerModuleType(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate) {
-		bool already_exists = creation_funcs.key_exists(typeslug);
-		creation_funcs.insert(typeslug, funcCreate);
-		return already_exists;
-	}
-
-	static bool registerModuleFaceplate(const ModuleTypeSlug &typeslug, FaceplatePtr faceplate) {
-		if (faceplates.key_exists(typeslug)) {
-			return false;
-		} else {
-			return faceplates.insert(typeslug, faceplate);
-		}
-	}
-
-	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug &typeslug) {
-		if (auto f_create = creation_funcs.get(typeslug))
-			return (*f_create)();
-		else
-			return nullptr;
-	}
-
-	static std::string_view getModuleTypeName(const ModuleTypeSlug &typeslug) {
-		if (auto m = infos.get(typeslug))
-			return m->description;
-		return "Not found.";
-	}
-
-	static ModuleInfoView &getModuleInfo(const ModuleTypeSlug &typeslug) {
-		if (auto m = infos.get(typeslug))
-			return *m;
-		else
-			return nullinfo;
-	}
-
-	static FaceplatePtr getModuleFaceplate(const ModuleTypeSlug &typeslug) {
-		if (auto m = faceplates.get(typeslug))
-			return *m;
-		else
-			return nullptr;
-	}
+	static std::string_view getModuleTypeName(const ModuleTypeSlug &typeslug);
+	static ModuleInfoView &getModuleInfo(const ModuleTypeSlug &typeslug);
+	static FaceplatePtr getModuleFaceplate(const ModuleTypeSlug &typeslug);
 
 	// Returns true if slug is valid and registered.
-	static bool isValidSlug(const ModuleTypeSlug &typeslug) {
-		return infos.key_exists(typeslug) && creation_funcs.key_exists(typeslug);
-	}
+	static bool isValidSlug(const ModuleTypeSlug &typeslug);
 
-	static std::vector<ModuleTypeSlug> getAllSlugs() {
-		std::vector<ModuleTypeSlug> slugs;
-		slugs.assign(infos.keys.begin(), std::next(infos.keys.begin(), infos.size()));
-		return slugs;
-	}
-
-	static inline ModuleInfoView nullinfo{};
-
-	//
-	// private:
-	static SeqMap<ModuleTypeSlug, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
-	static SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> infos;
-	static SeqMap<ModuleTypeSlug, FaceplatePtr, MAX_MODULE_TYPES> faceplates;
-
-	// static constexpr auto _sz_creation_funcs = sizeof(creation_funcs); //48k
-	// static constexpr auto _sz_infos = sizeof(infos);				   //112k
-	// static constexpr auto _sz_view = sizeof(ModuleInfoView); //136B
+	static std::vector<ModuleTypeSlug> getAllSlugs();
 };
 
 } // namespace MetaModule
