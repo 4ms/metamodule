@@ -103,11 +103,14 @@ private:
 		adc.set(ADC_MORPH_POT, 		getState<MorphKnob>());
 		adc.set(ADC_GAIN_POT, 		getState<LevelKnob>());
 
-		// TODO: make bipolar
-		if (auto val=getInput<TimeJackIn>(); val)       adc.set(ADC_SCALE_CV, *val);
-		if (auto val=getInput<FeedbackJackIn>(); val)   adc.set(ADC_FEEDBACK_CV, *val);
-		if (auto val=getInput<ModulationJackIn>(); val) adc.set(ADC_MODULATION_CV, *val);
-		if (auto val=getInput<DryWetJackIn>(); val)     adc.set(ADC_DRYWET_CV, *val);
+		auto BipolarCVInputFunc = [](float voltage)
+		{
+			return std::clamp(voltage / (2 * BiploarCVInputFullRangeInV) + 0.5f, 0.0f, 1.0f);
+		};
+		if (auto val=getInput<TimeJackIn>(); val)       adc.set(ADC_SCALE_CV,      BipolarCVInputFunc(*val));
+		if (auto val=getInput<FeedbackJackIn>(); val)   adc.set(ADC_FEEDBACK_CV,   BipolarCVInputFunc(*val));
+		if (auto val=getInput<ModulationJackIn>(); val) adc.set(ADC_MODULATION_CV, BipolarCVInputFunc(*val));
+		if (auto val=getInput<DryWetJackIn>(); val)     adc.set(ADC_DRYWET_CV,     BipolarCVInputFunc(*val));
 		
 		// TODO: make unipolar
 		if (auto val=getInput<TapIn>(); val)            adc.set(ADC_TAPTRIG_CV, *val);
@@ -201,6 +204,7 @@ private:
 	static constexpr float AudioInputFullScaleInVolts  = 22.0f;
 	static constexpr float AudioOutputFullScaleInVolts = 17.0f;
 	static constexpr uint32_t DefaultSampleRateInHz    = 48000;
+	static constexpr float BiploarCVInputFullRangeInV  = 5.0f;
 
 private:
 	float currentSampleRate;
