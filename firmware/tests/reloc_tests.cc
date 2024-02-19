@@ -3,7 +3,8 @@
 #include "dynload/elf_file.hh"
 #include "dynload/elf_relocator.hh"
 
-TEST_CASE("Relocations") {
+// This test doesn't CHECK anything, so not using it
+TEST_CASE("Relocations" * doctest::skip()) {
 	ElfFile::Elf elf{{testbrand_elf, testbrand_elf_len}};
 	elf.print_sec_headers();
 	elf.print_prog_headers();
@@ -18,8 +19,8 @@ TEST_CASE("Relocations") {
 		if (seg.is_loadable()) {
 			std::ranges::copy(seg, std::next(code.begin(), seg.address()));
 
-			pr_info(
-				"Loading segment with file offset 0x%x to %p\n", seg.offset(), std::next(code.begin(), seg.address()));
+			// pr_info(
+			// 	"Loading segment with file offset 0x%x to %p\n", seg.offset(), std::next(code.begin(), seg.address()));
 		}
 	}
 

@@ -103,10 +103,16 @@ def GetLibcSymbols():
          "json_false",
          "json_integer",
 
-         "_ZN10MetaModule13ModuleFactory5infosE",
          "_ZTV16VCVModuleWrapper",
-         "_ZN10MetaModule13ModuleFactory14creation_funcsE",
          "_ZTVN4rack6engine6ModuleE",
+
+
+         # "_ZN10MetaModule13ModuleFactory14creation_funcsE",
+         # "_ZN10MetaModule13ModuleFactory5infosE",
+         # "_ZN10MetaModule13ModuleFactory11isValidSlugERK12StaticStringILj31EE",
+         # "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EERKNS_14ModuleInfoViewE",
+         # "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EEPFSt10unique_ptrI13CoreProcessorSt14default_deleteIS6_EEvE",
+
     ]
     return libc_syms
 

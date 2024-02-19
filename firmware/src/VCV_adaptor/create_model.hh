@@ -5,12 +5,6 @@
 #include "VCV_adaptor/plugin/Model.hpp"
 #include <string_view>
 
-#ifdef TESTPROJECT
-#define pr_dbg(...)
-#else
-#include "console/pr_dbg.hh"
-#endif
-
 // #include "CoreModules/AudibleInstruments/info/Braids_info.hh"
 
 namespace rack
@@ -33,12 +27,7 @@ plugin::Model *createModel(std::string_view slug)
 	// 	return nullptr;
 	// }
 
-	// Register creation function
-	// volatile int x = 1;
-	// while (x)
-	// 	;
 	ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
-	pr_dbg("Register create() for %.*s\n", slug.size(), slug.data());
 
 	if (!ModuleFactory::isValidSlug(slug)) {
 		// Create a ModuleInfoView at runtime
@@ -63,7 +52,6 @@ plugin::Model *createModel(std::string_view slug)
 		info.indices = indices;
 
 		ModuleFactory::registerModuleType(slug, info);
-		// pr_dbg("Register info for %.*s\n", slug.size(), slug.data());
 
 		// TODO: create a Model type which refers to ModuleT and WidgetT, and return a ptr to a static instance of it
 		return nullptr;
