@@ -79,11 +79,11 @@ private:
 			return std::min(std::max(val, -max_amplitude), max_amplitude);
 		};
 
-		auto monoInput = int16_t(clamp(getInput<AudioIn>().value_or(0) / AudioInputFullScaleInVolts, 1.0f) * 32767.0 );
+		auto monoInput = int16_t(clamp(getInput<AudioIn>().value_or(0) / AudioInputFullScaleInVolt, 1.0f) * 32767.0 );
 		audioBufferRX[audioBufferFillCount] = {monoInput, monoInput};
 
-		setOutput<AudioOut1Out>(float(audioBufferTX[audioBufferFillCount].l) / 32768.0 * AudioOutputFullScaleInVolts);
-		setOutput<AudioOut2Out>(float(audioBufferTX[audioBufferFillCount].r) / 32768.0 * AudioOutputFullScaleInVolts);
+		setOutput<AudioOut1Out>(float(audioBufferTX[audioBufferFillCount].l) / 32768.0 * AudioOutputFullScaleInVolt);
+		setOutput<AudioOut2Out>(float(audioBufferTX[audioBufferFillCount].r) / 32768.0 * AudioOutputFullScaleInVolt);
 	}
 
 	void sideloadDrivers()
@@ -96,6 +96,9 @@ private:
 		auto& switches = ui.getSwitchDriver();
 		auto& gate     = ui.getGateInputDriver();
 
+		//
+		// Knobs
+		//
 		adc.set(ADC_SCALE_POT,      getState<TimeKnob>());
 		adc.set(ADC_FEEDBACK_POT,   getState<FeedbackKnob>());
 		adc.set(ADC_MODULATION_POT, getState<ModulationKnob>());
@@ -103,29 +106,42 @@ private:
 		adc.set(ADC_MORPH_POT, 		getState<MorphKnob>());
 		adc.set(ADC_GAIN_POT, 		getState<LevelKnob>());
 
+		//
+		// Biploar CVs
+		//
 		auto BipolarCVInputFunc = [](float voltage)
 		{
-			return std::clamp(voltage / (2 * BiploarCVInputFullRangeInV) + 0.5f, 0.0f, 1.0f);
+			return std::clamp(voltage / (2 * BiploarCVInputFullScaleInVolt) + 0.5f, 0.0f, 1.0f);
 		};
 		if (auto val=getInput<TimeJackIn>(); val)       adc.set(ADC_SCALE_CV,      BipolarCVInputFunc(*val));
 		if (auto val=getInput<FeedbackJackIn>(); val)   adc.set(ADC_FEEDBACK_CV,   BipolarCVInputFunc(*val));
 		if (auto val=getInput<ModulationJackIn>(); val) adc.set(ADC_MODULATION_CV, BipolarCVInputFunc(*val));
 		if (auto val=getInput<DryWetJackIn>(); val)     adc.set(ADC_DRYWET_CV,     BipolarCVInputFunc(*val));
 
-
+		//
+		// Velocity CV
+		//
 		auto VelocityCVInputFunc = [](float voltage)
 		{
-			return std::clamp(voltage / VelocityCVInputFullScaleInV, 0.0f, 1.0f);
+			return std::clamp(voltage / VelocityCVInputFullScaleInVolt, 0.0f, 1.0f);
 		};
 		if (auto val=getInput<VelocityIn>(); val)       adc.set(ADC_VEL_CV, VelocityCVInputFunc(*val));
 
-		if (auto val=getInput<RepeatJackIn>(); val)  gate.set(GATE_INPUT_REPEAT, *val > GateInputThresholdInVolts);
-		if (auto val=getInput<TapIn>(); val)         adc.set(ADC_TAPTRIG_CV,     *val > GateInputThresholdInVolts);		
-		if (auto val=getInput<ExtClockIn>(); val)    adc.set(ADC_CLOCK_CV,       *val > GateInputThresholdInVolts);		
+		//
+		// Gate and trigger inputs
+		//
+		if (auto val=getInput<RepeatJackIn>(); val)  gate.set(GATE_INPUT_REPEAT, *val > GateInputThresholdInVolt);
+		if (auto val=getInput<TapIn>(); val)         adc.set(ADC_TAPTRIG_CV,     *val > GateInputThresholdInVolt);		
+		if (auto val=getInput<ExtClockIn>(); val)    adc.set(ADC_CLOCK_CV,       *val > GateInputThresholdInVolt);		
 
-		// not force sensitive
+		//
+		// Tap Button
+		//
 		adc.set(ADC_FSR_CV, getState<TapSensorButton>() == MomentaryButton::State_t::PRESSED ? TapSensorPressedIntensity : 0.0);
 
+		//
+		// Button
+		//
 		buttons.set(BUTTON_1,      getState<Button1Button>() == MomentaryButton::State_t::RELEASED);
 		buttons.set(BUTTON_2,      getState<Button2Button>() == MomentaryButton::State_t::RELEASED);
 		buttons.set(BUTTON_3,      getState<Button3Button>() == MomentaryButton::State_t::RELEASED);
@@ -135,6 +151,9 @@ private:
 		buttons.set(BUTTON_REPEAT, getState<RepeatButton>()  == MomentaryButton::State_t::RELEASED);
 		buttons.set(BUTTON_DELETE, getState<DeleteButton>()  == MomentaryButton::State_t::RELEASED);
 
+		//
+		// Three-Way Switches
+		//
 		auto SwitchStateMappingEdit = [](auto val) -> uint8_t
 		{
 			// map position VCV -> firmware
@@ -158,11 +177,12 @@ private:
 				default: return 0;
 			}
 		};
-
-
 		switches.set(SWITCH_EDIT, SwitchStateMappingEdit(getState<AddOffInsSwitch>()));
 		switches.set(SWITCH_VELO, SwitchStateMappingVelo(getState<ResAmpLpfSwitch>()));
 
+		//
+		// LEDs
+		//
 		setLED<Button1Button>(std::array{leds.get(LED_BUT1_R), leds.get(LED_BUT1_G), leds.get(LED_BUT1_B)});
 		setLED<Button2Button>(std::array{leds.get(LED_BUT2_R), leds.get(LED_BUT2_G), leds.get(LED_BUT2_B)});
 		setLED<Button3Button>(std::array{leds.get(LED_BUT3_R), leds.get(LED_BUT3_G), leds.get(LED_BUT3_B)});
@@ -194,21 +214,24 @@ private:
 
 	void pingGateOut()
 	{
-		gateOutCounter = GateOnLengthInS * currentSampleRate ;
-		setOutput<GateOut>(GateMaxOutputVoltage);
+		gateOutCounter = GateOutLengthInS * currentSampleRate ;
+		setOutput<GateOut>(GateOutVoltageInVolt);
 	}	
 
 private:
-	static constexpr float GateOnLengthInS             = 4.0e-3f;
-	static constexpr float GateMaxOutputVoltage        = 8.0f;
-	static constexpr uint32_t UISampleRateDivider      = 32;     // Needs to be a power of 2
-	static constexpr float TapSensorPressedIntensity   = 0.5f;
-	static constexpr float GateInputThresholdInVolts   = 0.5f;
-	static constexpr float AudioInputFullScaleInVolts  = 22.0f;
-	static constexpr float AudioOutputFullScaleInVolts = 17.0f;
-	static constexpr uint32_t DefaultSampleRateInHz    = 48000;
-	static constexpr float BiploarCVInputFullRangeInV  = 5.0f;
-	static constexpr float VelocityCVInputFullScaleInV = 8.0f;
+	static constexpr uint32_t DefaultSampleRateInHz   = 48000;
+
+	static constexpr uint32_t UISampleRateDivider     = 32;     // Needs to be a power of 2
+
+	static constexpr float GateOutLengthInS           = 4.0e-3f;
+	static constexpr float GateOutVoltageInVolt       = 8.0f;	
+	static constexpr float TapSensorPressedIntensity  = 0.5f;
+	static constexpr float GateInputThresholdInVolt   = 0.5f;
+	static constexpr float AudioInputFullScaleInVolt  = 22.0f;
+	static constexpr float AudioOutputFullScaleInVolt = 17.0f;
+	
+	static constexpr float BiploarCVInputFullScaleInVolt  = 5.0f;
+	static constexpr float VelocityCVInputFullScaleInVolt = 8.0f;
 
 private:
 	float currentSampleRate;
