@@ -5,11 +5,11 @@
 #include "VCV_adaptor/plugin/Model.hpp"
 #include <string_view>
 
-// #ifdef TESTPROJECT
-// #define pr_dbg(...)
-// #else
-// #include "console/pr_dbg.hh"
-// #endif
+#ifdef TESTPROJECT
+#define pr_dbg(...)
+#else
+#include "console/pr_dbg.hh"
+#endif
 
 // #include "CoreModules/AudibleInstruments/info/Braids_info.hh"
 
@@ -38,7 +38,7 @@ plugin::Model *createModel(std::string_view slug)
 	// while (x)
 	// 	;
 	ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
-	// pr_dbg("Register create() for %.*s\n", slug.size(), slug.data());
+	pr_dbg("Register create() for %.*s\n", slug.size(), slug.data());
 
 	if (!ModuleFactory::isValidSlug(slug)) {
 		// Create a ModuleInfoView at runtime
