@@ -111,10 +111,17 @@ private:
 		if (auto val=getInput<FeedbackJackIn>(); val)   adc.set(ADC_FEEDBACK_CV,   BipolarCVInputFunc(*val));
 		if (auto val=getInput<ModulationJackIn>(); val) adc.set(ADC_MODULATION_CV, BipolarCVInputFunc(*val));
 		if (auto val=getInput<DryWetJackIn>(); val)     adc.set(ADC_DRYWET_CV,     BipolarCVInputFunc(*val));
-		
+
 		// TODO: make unipolar
+		auto VelocityCVInputFunc = [](auto voltage)
+		{
+			return std::clamp((voltage / VelocityCVInputFullScaleInV), 0.0f, 1.0f);
+		};
+		if (auto val=getInput<VelocityIn>(); val)       adc.set(ADC_VEL_CV, VelocityCVInputFunc(*val));
+
+
 		if (auto val=getInput<TapIn>(); val)            adc.set(ADC_TAPTRIG_CV, *val);
-		if (auto val=getInput<VelocityIn>(); val)       adc.set(ADC_VEL_CV, *val);
+		
 		if (auto val=getInput<ExtClockIn>(); val)       adc.set(ADC_CLOCK_CV, *val);
 
 		// TODO: set threshold
@@ -205,6 +212,7 @@ private:
 	static constexpr float AudioOutputFullScaleInVolts = 17.0f;
 	static constexpr uint32_t DefaultSampleRateInHz    = 48000;
 	static constexpr float BiploarCVInputFullRangeInV  = 5.0f;
+	static constexpr float VelocityCVInputFullScaleInV = 8.0f;
 
 private:
 	float currentSampleRate;
