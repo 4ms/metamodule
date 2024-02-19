@@ -68,6 +68,7 @@ def GetLibcSymbols():
          "strlen",
          "tanf",
          "tanh",
+         "printf",
          "__aeabi_atexit",
          "__cxa_pure_virtual",
          "_ZNSaIcEC1Ev", # std::allocator<char>::allocator()
