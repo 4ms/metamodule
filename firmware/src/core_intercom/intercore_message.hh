@@ -32,6 +32,13 @@ struct IntercoreStorageMessage {
 		LoadFileToRamFailed,
 		LoadFileToRamSuccess,
 
+		RequestWritePatchData,
+		PatchDataWriteFail,
+		PatchDataWriteOK,
+
+		RequestFactoryResetPatches,
+		FactoryResetPatchesDone,
+
 		NumRequests,
 	};
 	MessageType message_type = MessageType::None;

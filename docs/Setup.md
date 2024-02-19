@@ -30,6 +30,7 @@
   - arm-none-eabi-gcc toolchain 12.2 or later
   - xxd
   - python3
+  - optional: flatc according to version of flatbuffers submodule
 
 - Simulator:
   - cmake v3.24 or later

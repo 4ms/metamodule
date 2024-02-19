@@ -43,7 +43,8 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		*(.rodata)         /* .rodata sections (constants, strings, etc.) */
-		*(.rodata*) 
+		*(.rodata*)
+		*(.binary*)
 		. = ALIGN(8);
 	} > ROM
 

@@ -1,5 +1,6 @@
 #pragma once
-#include "gui/message_queue.hh"
+#include "gui/notify/display.hh"
+#include "gui/notify/queue.hh"
 #include "gui/slsexport/comp_init.hh"
 #include "metaparams.hh"
 #include "params_state.hh"
@@ -11,6 +12,7 @@
 #include "gui/pages/knobmap.hh"
 #include "gui/pages/knobset_view.hh"
 #include "gui/pages/main_menu.hh"
+#include "gui/pages/module_list.hh"
 #include "gui/pages/module_view.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector.hh"
@@ -23,8 +25,9 @@ namespace MetaModule
 class PageManager {
 	SlsComponentInit sls_comp_init;
 
-	PatchInfo info;
+	PatchContext info;
 	PageList page_list;
+	GuiState gui_state;
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info};
@@ -34,6 +37,7 @@ class PageManager {
 	KnobMapPage page_knobmap{info};
 	CableEditPage page_cableedit{info};
 	SystemMenuPage page_systemmenu{info};
+	ModuleListPage page_modulelist{info};
 
 public:
 	PageBase *cur_page = &page_mainmenu;
@@ -42,9 +46,16 @@ public:
 				PatchPlayLoader &patch_playloader,
 				ParamsMidiState &params,
 				MetaParams &metaparams,
-				MessageQueue &msg_queue,
+				NotificationQueue &notify_queue,
 				PatchModQueue &patch_mod_queue)
-		: info{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue, page_list} {
+		: info{patch_storage,
+			   patch_playloader,
+			   params,
+			   metaparams,
+			   notify_queue,
+			   patch_mod_queue,
+			   page_list,
+			   gui_state} {
 	}
 
 	void init() {
@@ -61,6 +72,16 @@ public:
 			}
 		} else
 			cur_page->update();
+
+		handle_notifications();
+	}
+
+	void handle_notifications() {
+		auto msg = info.notify_queue.get();
+		if (msg) {
+			pr_info("%s\n", msg->message.c_str());
+			DisplayNotification::show(*msg);
+		}
 	}
 
 	void debug_print_args(auto newpage) {

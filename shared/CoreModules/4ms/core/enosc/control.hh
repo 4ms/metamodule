@@ -320,10 +320,10 @@ class Control : public EventSource<Event> {
 
 	PotCVCombiner<PotConditioner<POT_DETUNE, Law::LINEAR, NoFilter>, NoCVInput, QuadraticOnePoleLp<1>> detune_{adc_};
 
-	ExtCVConditioner<CV_PITCH, Average<4, 4>> pitch_cv_{
+	ExtCVConditioner<CV_PITCH, Average<2, 2>> pitch_cv_{
 		calibration_data_.pitch_offset, calibration_data_.pitch_slope, spi_adc_};
 
-	ExtCVConditioner<CV_ROOT, Average<4, 2>> root_cv_{
+	ExtCVConditioner<CV_ROOT, Average<2, 2>> root_cv_{
 		calibration_data_.root_offset, calibration_data_.root_slope, spi_adc_};
 
 	Parameters &params_;

@@ -5,6 +5,7 @@
 #include "cpputil/util/seq_map.hh"
 #include "cpputil/util/static_string.hh"
 #include <memory>
+#include <vector>
 
 // Why does this not work?
 // extern "C" {
@@ -81,6 +82,12 @@ public:
 	// Returns true if slug is valid and registered.
 	static bool isValidSlug(const ModuleTypeSlug &typeslug) {
 		return infos.key_exists(typeslug) && creation_funcs.key_exists(typeslug);
+	}
+
+	static std::vector<ModuleTypeSlug> getAllSlugs() {
+		std::vector<ModuleTypeSlug> slugs;
+		slugs.assign(infos.keys.begin(), std::next(infos.keys.begin(), infos.size()));
+		return slugs;
 	}
 
 	static inline ModuleInfoView nullinfo{};

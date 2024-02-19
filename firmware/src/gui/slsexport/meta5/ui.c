@@ -7,8 +7,10 @@
 #include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-void Dropdown_Animation( lv_obj_t *TargetObject, int delay);
-void Dropup_Animation( lv_obj_t *TargetObject, int delay);
+void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay);
+void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay);
+void SlideDown_Animation( lv_obj_t *TargetObject, int delay);
+void SlideUp_Animation( lv_obj_t *TargetObject, int delay);
 
 
 // SCREEN: ui_MainMenu
@@ -62,9 +64,11 @@ lv_obj_t *ui_PatchName;
 lv_obj_t *ui_LoadMeter2;
 lv_obj_t *ui_ButtonsContainer;
 lv_obj_t *ui_PlayButton;
+lv_obj_t *ui_InfoButton;
 lv_obj_t *ui_KnobButton;
 lv_obj_t *ui_AddButton;
-lv_obj_t *ui_InfoButton;
+lv_obj_t *ui_SaveButton;
+lv_obj_t *ui_SaveButtonLabel;
 lv_obj_t *ui_SettingsButton;
 lv_obj_t *ui_ModulesPanel;
 lv_obj_t *ui_SettingsMenu;
@@ -104,8 +108,8 @@ lv_obj_t *ui_ModuleName;
 lv_obj_t *ui_DescriptionPanel;
 lv_obj_t *ui_DescPanelPatchName;
 lv_obj_t *ui_Description;
-lv_obj_t *ui_DescriptionEdit;
-lv_obj_t *ui_DescriptionEditLabel;
+lv_obj_t *ui_DescriptionEditButton;
+lv_obj_t *ui_DescriptionEditButtonLabel;
 lv_obj_t *ui_DescriptionClose;
 lv_obj_t *ui_DescriptionCloseLabel;
 lv_obj_t *ui_PatchFileMenu;
@@ -122,6 +126,13 @@ lv_obj_t *ui_PatchFileRevertBut;
 lv_obj_t *ui_PatchFileRevertLabel;
 lv_obj_t *ui_PatchFileDeleteBut;
 lv_obj_t *ui_PatchFileDeleteLabel;
+lv_obj_t *ui_DescriptionEditPanel;
+lv_obj_t *ui_PatchNameEditTextArea;
+lv_obj_t *ui_DescriptionEditTextArea;
+lv_obj_t *ui_DescriptionEditSaveButton;
+lv_obj_t *ui_DescriptionEditSaveLabel;
+lv_obj_t *ui_DescriptionEditCancelButton;
+lv_obj_t *ui_DescriptionEditCancelLabel;
 
 
 // SCREEN: ui_MappingMenu
@@ -144,8 +155,19 @@ lv_obj_t *ui_MappedItemHeader;
 lv_obj_t *ui_MappedItemHeaderMapText;
 lv_obj_t *ui_MappedItemHeaderKnobSetText;
 lv_obj_t *ui_MapList;
-lv_obj_t *ui_CableEditButton;
-lv_obj_t *ui_CableEditButtonLabel;
+lv_obj_t *ui_CableAddButton;
+lv_obj_t *ui_CableAddLabel;
+lv_obj_t *ui_CablePanelAddButton;
+lv_obj_t *ui_CablePanelAddLabel;
+lv_obj_t *ui_CableRemoveButton;
+lv_obj_t *ui_CableRemoveButtonLabel;
+lv_obj_t *ui_CableCreationPanel;
+lv_obj_t *ui_CableCreationLabel;
+lv_obj_t *ui_CableCreationBeginLabel;
+lv_obj_t *ui_CableFinishButton;
+lv_obj_t *ui_CableFinishLabel;
+lv_obj_t *ui_CableCancelButton;
+lv_obj_t *ui_CableCancelButtonLabel;
 lv_obj_t *ui_ControlAlert;
 lv_obj_t *ui_ControlArc;
 lv_obj_t *ui_ControlAlertLabel;
@@ -230,6 +252,7 @@ lv_obj_t *ui_ListButton;
 lv_obj_t *ui_ListLabel;
 lv_obj_t *ui_EditButton;
 lv_obj_t *ui_EditLabel;
+lv_obj_t *ui_KnobSetButton;
 lv_obj_t *ui_TrashButton;
 lv_obj_t *ui_TrashLabel;
 lv_obj_t *ui_Keyboard;
@@ -245,8 +268,55 @@ lv_obj_t *ui_CancelButton;
 lv_obj_t *ui_CancelLabel;
 lv_obj_t *ui_TrashButton2;
 lv_obj_t *ui_TrashLabel2;
+lv_obj_t *ui_Choice2Button;
+lv_obj_t *ui_Choice2Label;
 lv_obj_t *ui_ConfirmButton;
 lv_obj_t *ui_ConfirmLabel;
+lv_obj_t *ui_MessagePanel;
+lv_obj_t *ui_MessageLabel;
+lv_obj_t *ui_Panel2;
+lv_obj_t *ui_Panel3;
+lv_obj_t *ui_Panel4;
+lv_obj_t *ui_Panel5;
+lv_obj_t *ui_Panel6;
+lv_obj_t *ui_Panel7;
+lv_obj_t *ui_Panel8;
+lv_obj_t *ui_Panel9;
+lv_obj_t *ui_Panel10;
+lv_obj_t *ui_Panel11;
+lv_obj_t *ui_Panel12;
+lv_obj_t *ui_Container2;
+lv_obj_t *ui_Container3;
+lv_obj_t *ui_Container4;
+lv_obj_t *ui_Container5;
+lv_obj_t *ui_Container6;
+lv_obj_t *ui_Container7;
+lv_obj_t *ui_Container8;
+lv_obj_t *ui_Container9;
+lv_obj_t *ui_Container10;
+lv_obj_t *ui_Container11;
+lv_obj_t *ui_Container12;
+lv_obj_t *ui_Label9;
+lv_obj_t *ui_Label10;
+lv_obj_t *ui_Label11;
+lv_obj_t *ui_Label12;
+lv_obj_t *ui_Button6;
+lv_obj_t *ui_Button7;
+lv_obj_t *ui_Button8;
+lv_obj_t *ui_Button9;
+lv_obj_t *ui_Button10;
+lv_obj_t *ui_Button11;
+lv_obj_t *ui_Button12;
+lv_obj_t *ui_Panel1;
+
+
+// SCREEN: ui_ModuleListPage
+void ui_ModuleListPage_screen_init(void);
+lv_obj_t *ui_ModuleListPage;
+lv_obj_t *ui_ModuleListImage;
+lv_obj_t *ui_ModuleListRollerPanel;
+lv_obj_t *ui_ModuleListRollerTitle;
+lv_obj_t *ui_ModuleListRoller;
 
 
 // SCREEN: ui_CableMapPage
@@ -258,8 +328,6 @@ lv_obj_t *ui_CableFromTitle;
 lv_obj_t *ui_CableFromEditButton;
 lv_obj_t *ui_CableToTitle;
 lv_obj_t *ui_CableToPanel;
-lv_obj_t *ui_CableCancel;
-lv_obj_t *ui_CableCancelLabel;
 lv_obj_t *ui_CableDeleteButton;
 lv_obj_t *ui_CableDeleteIcon;
 
@@ -274,6 +342,9 @@ lv_obj_t *ui_SystemMenuPCBversion;
 lv_obj_t *ui_SystemMenuFWversion;
 lv_obj_t *ui_SystemMenuExpanders;
 lv_obj_t *ui_SystemMenuPrefs;
+lv_obj_t *ui_ResetFactoryPatchesDescription;
+lv_obj_t *ui_ResetFactoryPatchesButton;
+lv_obj_t *ui_ResetFactoryPatchesLabel;
 lv_obj_t *ui_SystemMenuTest;
 lv_obj_t *ui_SystemMenuUpdateTab;
 lv_obj_t *ui_SystemMenuUpdateFWversion;
@@ -299,7 +370,7 @@ const lv_img_dsc_t *ui_imgset_settings[1] = {&ui_img_1x_settings1_png};
 #endif
 
 ///////////////////// ANIMATIONS ////////////////////
-void Dropdown_Animation( lv_obj_t *TargetObject, int delay)
+void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay)
 {
 ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
 PropertyAnimation_0_user_data->target = TargetObject;
@@ -321,7 +392,7 @@ lv_anim_set_early_apply( &PropertyAnimation_0, false );
 lv_anim_start(&PropertyAnimation_0);
 
 }
-void Dropup_Animation( lv_obj_t *TargetObject, int delay)
+void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay)
 {
 ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
 PropertyAnimation_0_user_data->target = TargetObject;
@@ -343,6 +414,51 @@ lv_anim_set_early_apply( &PropertyAnimation_0, false );
 lv_anim_start(&PropertyAnimation_0);
 
 }
+void SlideDown_Animation( lv_obj_t *TargetObject, int delay)
+{
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+PropertyAnimation_0_user_data->target = TargetObject;
+PropertyAnimation_0_user_data->val = -1;
+lv_anim_t PropertyAnimation_0;
+lv_anim_init(&PropertyAnimation_0);
+lv_anim_set_time(&PropertyAnimation_0, 400);
+lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_y );
+lv_anim_set_values(&PropertyAnimation_0, -40, 0 );
+lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_overshoot);
+lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
+lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
+lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+ lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+lv_anim_set_early_apply( &PropertyAnimation_0, false );
+lv_anim_start(&PropertyAnimation_0);
+
+}
+void SlideUp_Animation( lv_obj_t *TargetObject, int delay)
+{
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+PropertyAnimation_0_user_data->target = TargetObject;
+PropertyAnimation_0_user_data->val = -1;
+lv_anim_t PropertyAnimation_0;
+lv_anim_init(&PropertyAnimation_0);
+lv_anim_set_time(&PropertyAnimation_0, 250);
+lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_y );
+lv_anim_set_values(&PropertyAnimation_0, 0, -80 );
+lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_ease_in);
+lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
+lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
+lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+ lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+lv_anim_set_early_apply( &PropertyAnimation_0, false );
+ lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_y );
+lv_anim_start(&PropertyAnimation_0);
+
+}
 
 ///////////////////// FUNCTIONS ////////////////////
 
@@ -361,6 +477,7 @@ ui_MappingMenu_screen_init();
 ui_KnobSetViewPage_screen_init();
 ui_EditMappingPage_screen_init();
 ui_DeleteMappingPopUp_screen_init();
+ui_ModuleListPage_screen_init();
 ui_CableMapPage_screen_init();
 ui_SystemMenu_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);

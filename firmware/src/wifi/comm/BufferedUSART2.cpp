@@ -12,7 +12,7 @@
 #include <console/pr_dbg.hh>
 
 static mdrivlib::Uart<WifiUartConfig> commMain;
-Queue<uint8_t,256> BufferedUSART2::queue;
+LockFreeFifoSpsc<uint8_t,256> BufferedUSART2::queue;
 
 #define USART_PERIPH        UART5
 #define USART_IRQ           UART5_IRQn
@@ -40,7 +40,7 @@ void BufferedUSART2::initPeripheral()
             {
                 auto val = USART_PERIPH->RDR;
 
-                auto result = queue.Push(val);
+                auto result = queue.put(val);
                 if (not result)
                 {
                     pr_err("RX Overrun\n");
@@ -50,7 +50,7 @@ void BufferedUSART2::initPeripheral()
         }
         else
         {
-            printf_("No flag\n");
+            printf("No flag\n");
         }
     });
 
@@ -67,7 +67,7 @@ void BufferedUSART2::transmit(uint8_t val)
 
 std::optional<uint8_t> BufferedUSART2::receive()
 {
-    return queue.PopOptional();
+    return queue.get();
 }
 
 

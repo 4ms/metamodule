@@ -2,6 +2,7 @@
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "patch/patch_data.hh"
+#include "patch_convert/patch_to_yaml.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_file.hh"
 #include "patch_file/patch_location.hh"
@@ -76,7 +77,6 @@ public:
 	//
 	// patchlist: list of all patches found on all volumes
 	//
-	// TODO: sender passes a reference to a PatchFileList which should be populated
 	[[nodiscard]] bool request_patchlist() {
 		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList, .patch_dir_list = &patch_dir_list_};
 		if (!comm_.send_message(message))
@@ -107,6 +107,48 @@ public:
 			.vol_id = vol,
 			.buffer = buffer,
 			.filename = filename,
+		};
+		if (!comm_.send_message(message))
+			return false;
+		return true;
+	}
+
+	void new_patch() {
+		std::string name = "Untitled Patch " + std::to_string((uint8_t)HAL_GetTick());
+		view_patch_.blank_patch(name);
+
+		name += ".yml";
+		view_patch_loc_.filename.copy(name);
+		view_patch_loc_.vol = Volume::RamDisk;
+	}
+
+	bool write_patch(std::string_view filename = "") {
+		if (filename == "")
+			filename = view_patch_loc_.filename;
+
+		std::span<char> file_data = raw_patch_data_;
+
+		patch_to_yaml_buffer(view_patch_, file_data);
+
+		// printf("size: %zu, %zu\n", file_data.size(), sz);
+		// printf("%.*s\n", (int)sz, file_data.data());
+
+		IntercoreStorageMessage message{
+			.message_type = RequestWritePatchData,
+			.vol_id = view_patch_loc_.vol,
+			.buffer = file_data,
+			.filename = filename,
+		};
+
+		if (!comm_.send_message(message))
+			return false;
+
+		return true;
+	}
+
+	bool request_reset_factory_patches() {
+		IntercoreStorageMessage message{
+			.message_type = RequestFactoryResetPatches,
 		};
 		if (!comm_.send_message(message))
 			return false;

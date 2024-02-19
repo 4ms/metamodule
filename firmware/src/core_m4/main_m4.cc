@@ -12,6 +12,10 @@
 #include "hsem_handler.hh"
 #include "usb/usb_manager.hh"
 
+#ifdef ENABLE_WIFI_BRIDGE
+#include <wifi_interface.hh>
+#endif
+
 namespace MetaModule
 {
 
@@ -54,6 +58,10 @@ void main() {
 	if (reload_default_patches)
 		fs.reload_default_patches();
 
+#ifdef ENABLE_WIFI_BRIDGE
+	WifiInterface::init(&fs.get_patch_storage());
+#endif
+
 	// Controls
 	auto param_block_base = SharedMemoryS::ptrs.param_block;
 	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
@@ -77,7 +85,10 @@ void main() {
 
 		usb.process();
 		sd.process();
-
 		fs.process();
+
+#ifdef ENABLE_WIFI_BRIDGE
+		WifiInterface::run();
+#endif
 	}
 }

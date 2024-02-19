@@ -9,6 +9,7 @@
 #include "patch/patch_data.hh"
 #include "patch_play/multicore_play.hh"
 #include "pr_dbg.hh"
+#include "result_t.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include "util/oscs.hh"
@@ -86,10 +87,13 @@ public:
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
-	bool load_patch(const PatchData &patchdata) {
+	Result load_patch(const PatchData &patchdata) {
 
-		if (patchdata.patch_name.length() == 0 || patchdata.module_slugs.size() == 0)
-			return false;
+		if (patchdata.patch_name.length() == 0)
+			return {false, "Cannot load: patch does not have a name"};
+
+		if (patchdata.module_slugs.size() == 0)
+			return {false, "Cannot load: patch does not have any modules"};
 
 		copy_patch_data(patchdata);
 
@@ -105,7 +109,7 @@ public:
 			if (modules[i] == nullptr) {
 				pr_err("Module %s not found\n", pd.module_slugs[i].data());
 				is_loaded = false;
-				return false;
+				return {false, "Cannot load: Module " + std::string(pd.module_slugs[i]) + " not known"};
 			}
 			pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
@@ -143,7 +147,7 @@ public:
 		set_active_knob_set(0);
 
 		is_loaded = true;
-		return true;
+		return {true};
 	}
 
 	// Runs the patch
@@ -339,6 +343,57 @@ public:
 
 	void set_active_knob_set(unsigned num) {
 		active_knob_set = std::min(num, MaxKnobSets - 1);
+	}
+
+	void add_internal_cable(Jack in, Jack out) {
+		pd.add_internal_cable(in, out);
+		modules[out.module_id]->mark_output_patched(out.jack_id);
+		modules[in.module_id]->mark_input_patched(in.jack_id);
+	}
+
+	void add_injack_mapping(uint16_t panel_jack_id, Jack jack) {
+		pd.add_mapped_injack(panel_jack_id, jack);
+		if (panel_jack_id < in_conns.size())
+			update_or_add(in_conns[panel_jack_id], jack);
+		modules[jack.module_id]->mark_input_patched(jack.jack_id);
+	}
+
+	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
+		pd.add_mapped_outjack(panel_jack_id, jack);
+		if (panel_jack_id < out_conns.size())
+			out_conns[panel_jack_id] = jack;
+		modules[jack.module_id]->mark_output_patched(jack.jack_id);
+	}
+
+	void disconnect_injack(Jack jack) {
+		pd.disconnect_injack(jack);
+	}
+
+	void disconnect_outjack(Jack jack) {
+		pd.disconnect_outjack(jack);
+	}
+
+	void add_module(ModuleTypeSlug slug) {
+		auto module_idx = pd.module_slugs.size();
+		pd.module_slugs.push_back(slug); //only needed to make sure pd.module_slugs.size() is accurate
+
+		modules[module_idx] = ModuleFactory::create(slug);
+		if (modules[module_idx] == nullptr) {
+			pr_err("Module %s not found\n", slug.c_str());
+			return;
+		}
+		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
+
+		modules[module_idx]->mark_all_inputs_unpatched();
+		modules[module_idx]->mark_all_outputs_unpatched();
+		modules[module_idx]->set_samplerate(samplerate);
+
+		calc_multiple_module_indicies();
+		smp.load_patch(pd.module_slugs.size());
+	}
+
+	void remove_module(uint16_t module_idx) {
+		// TODO: remove module and all cables, mappings
 	}
 
 	void set_samplerate(float hz) {

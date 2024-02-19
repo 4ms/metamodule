@@ -1,9 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <spsc/queue.hpp>
-using namespace lockfree::spsc;
-
+#include "util/lockfree_fifo_spsc.hh"
 
 
 class BufferedUSART2
@@ -20,5 +18,5 @@ private:
     static void initPeripheral();
 
 private:
-    static Queue<uint8_t,256> queue;
+    static LockFreeFifoSpsc<uint8_t,256> queue;
 };

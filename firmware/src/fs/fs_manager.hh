@@ -30,6 +30,10 @@ struct FilesystemManager {
 		patch_storage.reload_default_patches();
 	}
 
+	PatchStorage &get_patch_storage() {
+		return patch_storage;
+	}
+
 private:
 	FatFileIO &usb_fileio;
 	FatFileIO &sd_fileio;

@@ -8,6 +8,7 @@ set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp1)
 set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
 set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
 set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
+set(WIFI_DIR ${FWDIR}/src/wifi)
 
 add_executable(
   main_m4.elf
@@ -117,6 +118,9 @@ set(MCU_FLAGS
     -mfloat-abi=hard
 )
 
+add_library(mp15xm4_arch INTERFACE)
+target_compile_options(mp15xm4_arch INTERFACE ${MCU_FLAGS})
+
 target_compile_features(main_m4.elf PUBLIC cxx_std_23)
 
 target_compile_options(
@@ -172,6 +176,20 @@ target_link_script(
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
+
+# Fix for ff.c string overfow (false positive?)
+target_link_options(main_m4.elf PUBLIC -Wno-stringop-overflow)
+
+if (ENABLE_WIFI_BRIDGE)
+
+  target_compile_definitions(main_m4.elf PRIVATE
+    ENABLE_WIFI_BRIDGE=1
+  )
+
+  # Add comm functionality
+  add_subdirectory(${FWDIR}/src/wifi/comm ${CMAKE_BINARY_DIR}/wifi_comm)
+
+endif()
 
 set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
 

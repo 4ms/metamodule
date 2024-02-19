@@ -19,7 +19,7 @@ TEST_SOURCES += ../yaml_to_patch.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
-BUILDDIR = $(TEST_DIR)/build
+BUILDDIR = $(TEST_DIR)/build/obj
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
@@ -73,12 +73,12 @@ $(DOCTESTHEADER_DIR)/doctest.h:
 	wget https://raw.githubusercontent.com/onqtam/doctest/master/doctest/doctest.h -P $(DOCTESTHEADER_DIR)/
 
 clean:
-	rm -rf $(BUILDDIR)
+	rm -rf $(TEST_DIR)/build
 
 $(DEPDIR): ; @mkdir -p $@
 
-DEPFILES := $(addprefix $(DEPDIR)/, $(addsuffix .d, $(basename $(TEST_SOURCES))))
+DEPFILES =  $(addprefix $(DEPDIR)/, $(subst ../,,$(addsuffix .d, $(basename $(TEST_SOURCES)))))
 $(DEPFILES):
 
-include $(wildcard $(DEPFILES))
+include $(DEPFILES)
 
