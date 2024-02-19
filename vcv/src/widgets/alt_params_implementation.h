@@ -4,113 +4,18 @@
 namespace MetaModule::VCVImplementation::Widget
 {
 
-struct ContinousQuantity : rack::Quantity
-{
-	ContinousQuantity(rack::Module &module_, std::size_t param_idx_, float minVal, float maxVal, float defaultVal)
-		: module{module_}
-        , param_idx(param_idx_)
-		, _min(minVal)
-        , _max(maxVal)
-        , _default(defaultVal)
-	{
-		_val = module.getParam(param_idx).getValue();
-	}
-
-	void setValue(float value) override
-	{
-        value = std::clamp(value, _min, _max);
-		if (value != _val)
-		{
-			_val = value;
-			module.getParam(param_idx).setValue(_val);
-		}
-	}
-
-	float getValue() override {
-		return _val;
-	}
-	float getMinValue() override {
-		return _min;
-	}
-	float getMaxValue() override {
-		return _max;
-	}
-	float getDefaultValue() override {
-		return _default;
-	}
-
-private:
-	rack::Module &module;
-    std::size_t param_idx;
-	float _val;
-    float _min;
-    float _max;
-    float _default;
-};
-
-struct QuantizedQuantity : rack::Quantity
-{
-	QuantizedQuantity(rack::Module &module_, std::size_t param_idx_, float minVal, float maxVal, float defaultVal)
-		: module{module_}
-        , param_idx(param_idx_)
-		, _min(minVal)
-        , _max(maxVal)
-        , _default(defaultVal)
-	{
-		_val = module.getParam(param_idx).getValue();
-	}
-
-	void setValue(float value) override
-	{
-        value = std::clamp(value, _min, _max);
-		if (value != _val)
-		{
-            // if (std::abs(value - _val) > 0.6f)
-            // {
-                _val = std::round(value);
-                module.getParam(param_idx).setValue(_val);
-            // }
-		}
-	}
-
-	float getValue() override {
-		return _val;
-	}
-	float getMinValue() override {
-		return _min;
-	}
-	float getMaxValue() override {
-		return _max;
-	}
-	float getDefaultValue() override {
-		return _default;
-	}
-
-private:
-	rack::Module &module;
-    std::size_t param_idx;
-	float _val;
-    float _min;
-    float _max;
-    float _default;
-};
-
-
-
-struct AltParamSlider : public rack::ui::Slider
-{
-	AltParamSlider(rack::Quantity* quant)
-    {
-        quantity = quant;
-	}
-	~AltParamSlider() {
-		delete quantity;
-	}
-};
+/*
+ * Leaf item in an alt paramter context menu to select a certain choice
+ * for a single paramter on a module instance
+ */
 
 struct AltParamChoiceItem : rack::ui::MenuItem
 {
-    AltParamChoiceItem(rack::Module* module_, std::size_t param_idx_, std::size_t choiceIndex_) : module(module_), param_idx(param_idx_), choiceIndex(choiceIndex_) {};
+    AltParamChoiceItem(rack::Module* module_, std::size_t param_idx_, std::size_t choiceIndex_)
+		: module(module_)
+		, param_idx(param_idx_)
+		, choiceIndex(choiceIndex_)
+		{};
     void onAction(const ActionEvent& e) override
     {
         e.unconsume();
@@ -124,9 +29,17 @@ private:
     std::size_t choiceIndex;
 };
 
+/*
+ * Submenu that holds all options for a single alt paramter on a module instance
+ */
+
 struct AltParamChoiceLabledMenu : rack::ui::MenuItem
 {
-    AltParamChoiceLabledMenu(rack::Module* module_, std::size_t param_idx_, AltParamChoiceLabled el) : module(module_), param_idx(param_idx_), element(el) {}
+    AltParamChoiceLabledMenu(rack::Module* module_, std::size_t param_idx_, AltParamChoiceLabled el)
+		: module(module_)
+		, param_idx(param_idx_)
+		, element(el)
+		{}
 
     rack::ui::Menu* createChildMenu() override
     {
@@ -148,16 +61,54 @@ private:
     AltParamChoiceLabled element;
 };
 
+/*
+ * Slider that snaps to integer values
+*/
+
+struct QuantizedSlider : public rack::ui::Slider
+{
+	void onDragMove(const DragMoveEvent& e) override
+	{
+		if (quantity) {
+
+			// This is hardcoded in the rack source code and copied here
+			constexpr float SENSITIVITY = 0.001f;
+
+			const float QuantizationSize = 1.0f / quantity->getMaxValue();
+
+			auto quantityIncrement = SENSITIVITY * e.mouseDelta.x;
+			accumulatedDrag += quantityIncrement;
+
+			if (std::abs(accumulatedDrag) >= QuantizationSize)
+			{
+				auto thisDrag = accumulatedDrag > 0 ? QuantizationSize : -QuantizationSize;
+				accumulatedDrag -= thisDrag;
+
+				auto newValue = std::round(quantity->getValue() + thisDrag * quantity->getMaxValue());
+				quantity->setValue(newValue);
+			}
+		}
+	}
+
+	float accumulatedDrag = 0.0f;
+};
+
+/*
+ * Implementations for rendering the context menu entries for certain alt param elements types
+ */
+
 inline void do_render_to_menu(AltParamContinuous el, rack::ui::Menu* menu, Indices &indices, const WidgetContext_t &context)
 {
-	auto *item = new rack::ui::MenuItem;
-	item->text = el.short_name;
-    item->disabled = true;
-	menu->addChild(item);
+	auto slider = new rack::ui::Slider;
+	slider->quantity = context.module->getParamQuantity(indices.param_idx);
+	slider->box.size.x = 100;
+	menu->addChild(slider);
+}
 
-    auto quantity = new ContinousQuantity(*context.module, indices.param_idx, el.MinValue, el.MaxValue, el.DefaultValue);
-
-	auto slider = new AltParamSlider{quantity};
+inline void do_render_to_menu(AltParamChoice el, rack::ui::Menu* menu, Indices &indices, const WidgetContext_t &context)
+{
+	auto slider = new QuantizedSlider;
+	slider->quantity = context.module->getParamQuantity(indices.param_idx);
 	slider->box.size.x = 100;
 	menu->addChild(slider);
 }
@@ -168,20 +119,6 @@ inline void do_render_to_menu(AltParamChoiceLabled el, rack::ui::Menu* menu, Ind
 	item->text = el.short_name;
     item->rightText = RIGHT_ARROW;
     menu->addChild(item);
-}
-
-inline void do_render_to_menu(AltParamChoice el, rack::ui::Menu* menu, Indices &indices, const WidgetContext_t &context)
-{
-	auto *item = new rack::ui::MenuItem;
-	item->text = el.short_name;
-    item->disabled = true;
-	menu->addChild(item);
-
-    auto quantity = new QuantizedQuantity(*context.module, indices.param_idx, 0, el.num_pos, el.DefaultValue);
-
-	auto slider = new AltParamSlider{quantity};
-	slider->box.size.x = 100;
-	menu->addChild(slider);
 }
 
 }
