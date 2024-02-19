@@ -32,9 +32,6 @@
 
 namespace TapoDelay {
 
-const int32_t kLongPressDuration = 400;
-const int32_t kVeryLongPressDuration = 1200;
-
 using namespace stmlib;
 
 Ui* Ui::instance_;

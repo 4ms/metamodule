@@ -67,6 +67,14 @@ class Ui {
   void DoEvents();
   void Panic();
 
+  static const int32_t kLongPressDuration = 400;
+  static const int32_t kVeryLongPressDuration = 1200;
+
+  void InsertEvent(ControlType control_type, uint16_t id, int32_t data)
+  {
+    queue_.AddEvent(control_type, id, data);
+  }
+
   void ReadParameters() {
     control_.Read(parameters_, sequencer_mode_);
 
