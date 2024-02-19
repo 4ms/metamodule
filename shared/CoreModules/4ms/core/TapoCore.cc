@@ -112,20 +112,16 @@ private:
 		if (auto val=getInput<ModulationJackIn>(); val) adc.set(ADC_MODULATION_CV, BipolarCVInputFunc(*val));
 		if (auto val=getInput<DryWetJackIn>(); val)     adc.set(ADC_DRYWET_CV,     BipolarCVInputFunc(*val));
 
-		// TODO: make unipolar
-		auto VelocityCVInputFunc = [](auto voltage)
+
+		auto VelocityCVInputFunc = [](float voltage)
 		{
-			return std::clamp((voltage / VelocityCVInputFullScaleInV), 0.0f, 1.0f);
+			return std::clamp(voltage / VelocityCVInputFullScaleInV, 0.0f, 1.0f);
 		};
 		if (auto val=getInput<VelocityIn>(); val)       adc.set(ADC_VEL_CV, VelocityCVInputFunc(*val));
 
-
-		if (auto val=getInput<TapIn>(); val)            adc.set(ADC_TAPTRIG_CV, *val);
-		
-		if (auto val=getInput<ExtClockIn>(); val)       adc.set(ADC_CLOCK_CV, *val);
-
-		// TODO: set threshold
 		if (auto val=getInput<RepeatJackIn>(); val)  gate.set(GATE_INPUT_REPEAT, *val > GateInputThresholdInVolts);
+		if (auto val=getInput<TapIn>(); val)         adc.set(ADC_TAPTRIG_CV,     *val > GateInputThresholdInVolts);		
+		if (auto val=getInput<ExtClockIn>(); val)    adc.set(ADC_CLOCK_CV,       *val > GateInputThresholdInVolts);		
 
 		// not force sensitive
 		adc.set(ADC_FSR_CV, getState<TapSensorButton>() == MomentaryButton::State_t::PRESSED ? TapSensorPressedIntensity : 0.0);
