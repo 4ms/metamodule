@@ -25,7 +25,7 @@ static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
 {"_Znwj", 0, 0xc202a858},
 {"_ZN16VCVModuleWrapperC1Ev", 0, 0xc208e460},
 {"_ZN16VCVModuleWrapper14set_samplerateEf", 0, 0xc208e2e4},
-{"_ZN10MetaModule13ModuleFactory14creation_funcsE", 0, 0xc2528860},
+{"_ZN10MetaModule13ModuleFactory14creation_funcsE", 0, 0xc25062f8},
 {"fminf", 0, 0xc21023d5},
 {"_ZN16VCVModuleWrapper20mark_input_unpatchedEi", 0, 0xc208e340},
 {"fabs", 0, 0xc210195d},
@@ -53,7 +53,7 @@ static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
 {"exp", 0, 0xc2101199},
 {"memcpy", 0, 0xc2000d00},
 {"strlen", 0, 0xc2001201},
-{"_ZN10MetaModule13ModuleFactory5infosE", 0, 0xc252105c},
+{"_ZN10MetaModule13ModuleFactory5infosE", 0, 0xc24feaf4},
 {"tanf", 0, 0xc210196d},
 
 });

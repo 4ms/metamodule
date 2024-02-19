@@ -121,11 +121,17 @@ private:
 				if (auto linked_string_table_section = get_section(linked_symbol_section->linked_section_idx())) {
 					auto linked_string_table = linked_string_table_section->as_string_table();
 
-					if (&linked_symbols != &raw_dyn_symbols)
-						pr_err("Error: expecting linked symbol table to be .dynsym\n");
+					if (linked_symbols.begin() != raw_dyn_symbols.begin())
+						pr_err("Error: expecting %.*s linked symbol table to be .dynsym, but is idx %d\n",
+							   sec_name.size(),
+							   sec_name.data(),
+							   rel_section->linked_section_idx());
 
-					if (&linked_string_table != &dyn_string_table)
-						pr_err("Error: expecting linked symbol table to be .dynstr\n");
+					if (linked_string_table.begin() != dyn_string_table.begin())
+						pr_err("Error: expecting %.*s linked string table to be .dynstr, but is idx %d\n",
+							   sec_name.size(),
+							   sec_name.data(),
+							   rel_section->linked_section_idx());
 
 					for (auto &rel : raw_rels) {
 						relocs.emplace_back(rel, linked_symbols, linked_string_table);

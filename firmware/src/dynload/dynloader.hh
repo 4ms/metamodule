@@ -13,28 +13,13 @@
 #include <vector>
 
 #include "CoreModules/elements/dump.hh"
+#include "rack.hpp"
 
 // #include "build-simple-elf.hh"
 // #include "build-elf.hh"
 // #include "build-vcva-2.hh"
 // #include "befaco-strip-so.h"
 #include "befaco-strip-so-2modules.h"
-
-#include "rack.hpp"
-
-// extern "C" void _aeabi_atexit() {
-// }
-
-// GCC_OPTIMIZE_OFF
-// plugin::Model *testHostCall(const char *slug) {
-// 	printf("creating TestModule: %s\n", slug);
-// 	return nullptr;
-// }
-
-// GCC_OPTIMIZE_OFF
-// void testAddModel(rack::Model *model) {
-// 	printf("calling addModel(%p)\n", model);
-// }
 
 GCC_OPTIMIZE_OFF
 extern "C" void _empty_func_stub() {
@@ -49,20 +34,22 @@ struct DynLoadTest {
 
 	GCC_OPTIMIZE_OFF
 	void keep_symbols() {
-		// Force these symbols from libc
+		// Force these symbols from libc and other libs
 		// TODO: how to do this otherwise?
 		// We can't link the plugin to libc unless we compile a libc with it, since the arm-none-eabi libc
 		// was not compiled with -fPIC
-		// Linker KEEP()?
-		// build libc with the plugin, mabye musl libc?
+		// - Linker KEEP()?
+		// - build libc with the plugin, mabye musl libc?
+		// - build plugin with json library
 		exp(0.5f);
 		expf(0.5f);
 		fmod(0.5f, 1.f);
 		sinf(0.5f);
 		tanf(0.5f);
 		tanh(0.5f);
-		volatile auto keep = std::allocator<char>{};
+		volatile auto keep = std::allocator<char>{}; //seems to do nothing
 		volatile int x = strlen("ABCD");
+		auto savefunc = &json_object_set_new;
 	}
 
 	GCC_OPTIMIZE_OFF
@@ -74,7 +61,7 @@ struct DynLoadTest {
 		process_relocs();
 		init_globals();
 
-		run_module();
+		// test_run_module();
 
 		find_init_plugin_function();
 
@@ -82,27 +69,32 @@ struct DynLoadTest {
 			init_func(&plugin);
 		}
 
-		while (true) {
-			__NOP();
-		}
+		// while (true) {
+		// 	__NOP();
+		// }
 	}
 
 	GCC_OPTIMIZE_OFF
 	void load_executable() {
 		size_t load_size = elf.load_size();
 
-		pr_info("Allocating %zu bytes for loading\n", load_size);
-		block.code.resize(load_size);
+		// pr_info("Need %zu bytes for loading (%zu max)\n", load_size, codeblock.code.size());
+		// if (load_size > codeblock.code.size()) {
+		// 	pr_err("Too big!\n");
+		// 	return;
+		// }
+		codeblock.code.resize(load_size);
+		pr_info("Allocating %zu bytes for loading code at 0x%x\n", load_size, codeblock.code.begin());
 
 		for (auto &seg : elf.segments) {
 			if (seg.is_loadable()) {
-				std::ranges::copy(seg, std::next(block.code.begin(), seg.address()));
+				std::ranges::copy(seg, std::next(codeblock.code.begin(), seg.address()));
 
 				pr_info("Loading segment with file offset 0x%x-0x%x to %p-%p\n",
 						seg.offset(),
 						seg.offset() + seg.file_size(),
-						std::next(block.code.begin(), seg.address()),
-						std::next(block.code.begin(), seg.address() + seg.file_size()));
+						std::next(codeblock.code.begin(), seg.address()),
+						std::next(codeblock.code.begin(), seg.address() + seg.file_size()));
 			}
 		}
 	}
@@ -125,48 +117,53 @@ struct DynLoadTest {
 
 		for (auto ctor : ctors) {
 			auto addr = reinterpret_cast<uint32_t>(ctor);
-			ctor = reinterpret_cast<ctor_func_t>(addr + block.code.data());
+			ctor = reinterpret_cast<ctor_func_t>(addr + codeblock.code.data());
 			pr_info("Calling ctor %p\n", ctor);
 			ctor();
 		}
 	}
 
 	GCC_OPTIMIZE_OFF
-	void run_module() {
-		printf("evenvco:\n");
+	void test_run_module() {
+		printf("EvenVCOPlugin:\n");
 		MetaModule::DumpModuleInfo::print("EvenVCOPlugin");
 
-		printf("dualat\n");
+		printf("DualAtenuverterPlugin\n");
 		MetaModule::DumpModuleInfo::print("DualAtenuverterPlugin");
 
-		__BKPT();
 		auto evenvco = MetaModule::ModuleFactory::create("EvenVCOPlugin");
 		auto dualat = MetaModule::ModuleFactory::create("DualAtenuverterPlugin");
 
 		if (dualat) {
 			pr_dbg("Dualat ptr is at %p\n", dualat.get());
-			dualat->set_samplerate(48000);
 		} else
 			pr_dbg("Dual at did not create()");
 
 		if (evenvco) {
 			pr_dbg("Even is at %p\n", evenvco.get());
-			evenvco->update();
 		} else
 			pr_dbg("EvenVCO did not create()");
-	}
 
-	//GCC_OPTIMIZE_OFF
-	//void process_got() {
-	//	auto got_section = elf.find_section(".got");
-	//	if (!got_section) {
-	//		pr_err("No .got section\n");
-	//		return;
-	//	}
-	//	std::span<uint32_t> got{(uint32_t *)got_section->begin(), (uint32_t *)got_section->end()};
-	//	//now we can write to got like got[3] = ...
-	//	// but we don't know the index so... :(
-	//}
+		evenvco->update();
+		auto out1 = dualat->get_output(0);
+		auto out2 = dualat->get_output(1);
+		pr_dbg("Out 1 %f, Out 2 %f\n", out1, out2);
+		dualat->update();
+		dualat->mark_input_patched(0);
+		dualat->mark_input_patched(1);
+		dualat->mark_output_patched(0);
+		dualat->mark_output_patched(1);
+		dualat->set_param(0, 0.75f);
+		dualat->set_param(1, 0.25f);
+		dualat->set_param(2, 0.25f);
+		dualat->set_param(3, 0.75f);
+		dualat->set_input(0, 0.3333f);
+		dualat->set_input(1, 0.8888f);
+		dualat->update();
+		out1 = dualat->get_output(0);
+		out2 = dualat->get_output(1);
+		pr_dbg("Out 1 %f, Out 2 %f\n", out1, out2);
+	}
 
 	void process_relocs() {
 		auto hostsyms = std::vector<ElfFile::HostSymbol>{};
@@ -180,9 +177,9 @@ struct DynLoadTest {
 		hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 
 		for (auto sym : hostsyms)
-			pr_dbg("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
+			pr_trace("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
 
-		ElfFile::Relocater relocator{block.code.data(), hostsyms};
+		ElfFile::Relocater relocator{codeblock.code.data(), hostsyms};
 
 		for (auto reloc : elf.relocs) {
 			relocator.write(reloc);
@@ -195,7 +192,7 @@ struct DynLoadTest {
 		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
 
 		if (init_plugin_symbol) {
-			auto load_address = init_plugin_symbol->offset() /*- block.elf_offset*/ + block.code.data();
+			auto load_address = init_plugin_symbol->offset() /*- block.elf_offset*/ + codeblock.code.data();
 			init_func = reinterpret_cast<InitPluginFunc *>(load_address);
 
 		} else
@@ -204,13 +201,14 @@ struct DynLoadTest {
 
 	ElfFile::Elf elf;
 
-	struct CodeBlock {
-		uint32_t elf_offset{}; //offset where data starts in elf file
-		std::vector<uint8_t> code;
-	};
-	CodeBlock block;
-
 	rack::Plugin plugin;
+
+	struct CodeBlock {
+		std::vector<uint8_t> code;
+		// std::array<uint8_t, 0x10'0000> alignas(0x10'000) code;
+		uint32_t elf_offset{}; //offset where data starts in elf file
+	};
+	CodeBlock codeblock;
 
 	using InitPluginFunc = void(rack::Plugin *);
 	InitPluginFunc *init_func{};
