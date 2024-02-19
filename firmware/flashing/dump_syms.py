@@ -109,9 +109,9 @@ def GetLibcSymbols():
 
          # "_ZN10MetaModule13ModuleFactory14creation_funcsE",
          # "_ZN10MetaModule13ModuleFactory5infosE",
-         # "_ZN10MetaModule13ModuleFactory11isValidSlugERK12StaticStringILj31EE",
-         # "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EERKNS_14ModuleInfoViewE",
-         # "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EEPFSt10unique_ptrI13CoreProcessorSt14default_deleteIS6_EEvE",
+         "_ZN10MetaModule13ModuleFactory11isValidSlugERK12StaticStringILj31EE",
+         "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EERKNS_14ModuleInfoViewE",
+         "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EEPFSt10unique_ptrI13CoreProcessorSt14default_deleteIS6_EEvE",
 
     ]
     return libc_syms
@@ -163,6 +163,7 @@ static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
     with open(args.out, "w") as f:
         f.write(symlist)
 
-
+# also check
+#build/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/moduleFactory.cc.obj
 # flashing/dump_syms.py --objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ --elf ./build/mp1corea7/medium/main.elf --out src/dynload/host_sym_list.hh -v
 
