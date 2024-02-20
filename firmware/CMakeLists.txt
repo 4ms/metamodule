@@ -77,10 +77,9 @@ add_custom_command(
            --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
            --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/filesystem.img"
            "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cvf ${RELEASE_ARCHIVE_PATH} --format=zip -- .
+  COMMAND ${CMAKE_COMMAND} -E tar cvf ${RELEASE_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}
   DEPENDS ${COMBINED_IMAGE_PATH} bootloader bootloader-dfu
   COMMENT "Creating release at ${RELEASE_ARCHIVE_PATH}"
-  WORKING_DIRECTORY ${RELEASE_TARGET_DIR}
   VERBATIM USES_TERMINAL
 )
 
