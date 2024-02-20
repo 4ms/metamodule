@@ -24,6 +24,10 @@ add_subdirectory(lvgl_drv)
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 include(${LVGL_DIR}/CMakeLists.txt)
 
+# #################### RYML ##################################
+
+add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+
 # #################### SLS Export ##################################
 
 file(STRINGS ${FWDIR}/src/gui/slsexport/meta5/filelist.txt SLS_SOURCES)
@@ -110,13 +114,6 @@ foreach(brand ${brands})
   endforeach()
 
 endforeach()
-
-# #################### RYML + Patch Convert ##################################
-set(RYMLDIR ${SHARED}/patch_convert/ryml/rapidyaml)
-file(GLOB RYML_SOURCES ${RYMLDIR}/src/c4/yml/*.cpp ${RYMLDIR}/ext/c4core/src/c4/*.cpp)
-add_library(ryml OBJECT ${RYML_SOURCES})
-target_include_directories(ryml PUBLIC ${RYMLDIR}/src ${RYMLDIR}/ext/c4core/src)
-target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
