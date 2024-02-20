@@ -28,7 +28,6 @@ target_include_directories(
 #
 add_subdirectory(VCV_adaptor)
 target_link_libraries(VCV_adaptor PUBLIC mp15xa7_arch)
-target_include_directories(VCV_adaptor PRIVATE console/) # For pr_dbg, etc
 target_link_libraries(jansson PUBLIC mp15xa7_arch)
 
 #
@@ -53,13 +52,10 @@ foreach(brand ${brands})
 
   # Module Library
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_link_libraries(${brand}Library PRIVATE mp15xa7_arch)
+  target_link_libraries(${brand}Library PRIVATE mp15xa7_arch VCV_adaptor)
   target_include_directories(
     ${brand}Library
-    PUBLIC ${FWDIR}/src/VCV_adaptor
-           ${FWDIR}/src/VCV_adaptor/pffft
-           ${FWDIR}/lib/jansson
-           ${FWDIR}/lib/jansson/jansson/src
+    PUBLIC 
            ${FWDIR}/src
            ${FWDIR}
            ${SHARED}
