@@ -3,16 +3,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(mm_sim LANGUAGES C CXX)
 
-set(FWDIR ${PROJECT_SOURCE_DIR}/../firmware)
-set(SHARED ${PROJECT_SOURCE_DIR}/../shared)
-set(SIM_ROOT ${PROJECT_SOURCE_DIR})
+set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
+set(SHARED ${CMAKE_CURRENT_LIST_DIR}/../shared)
 set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
 
 set(LV_CONF_PATH
-    ${SIM_ROOT}/lv_conf.h
+    ${CMAKE_CURRENT_LIST_DIR}/lv_conf.h
     CACHE STRING "" FORCE)
-
-get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 
 # #################### cpputil #########################################
 
@@ -24,6 +21,7 @@ add_subdirectory(lvgl_drv)
 
 # #################### LVGL ############################################
 
+get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 include(${LVGL_DIR}/CMakeLists.txt)
 
 # #################### SLS Export ##################################
@@ -139,20 +137,11 @@ target_include_directories(
   simulator
   PRIVATE src
           stubs
-          lvgl_drv
           sdl_audio
-          ${SDL2_INCLUDE_DIRS}
-          ${SIM_ROOT}
-          ${FWDIR}
-          ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${FWDIR}/src/medium
-          ${SHARED}
           ${SHARED}/patch
-          ${SHARED}/patch_convert/ryml/rapidyaml/src
-          ${SHARED}/CoreModules
-          ${SHARED}/CoreModules/4ms)
+          )
 
 target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
 
