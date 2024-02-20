@@ -11,8 +11,6 @@ INCLUDES += -I$(SHARED_DIR)/processors
 INCLUDES += -I$(SHARED_DIR)/patch
 INCLUDES += -I$(SHARED_DIR)/patch_convert/ryml
 INCLUDES += -I$(SHARED_DIR)
-INCLUDES += -I$(SHARED_DIR)/axoloti-wrapper
-INCLUDES += -I$(SHARED_DIR)/etl/include
 INCLUDES += -I$(RYMLDIR)/src
 INCLUDES += -I$(RYMLDIR)/ext/c4core/src
 
