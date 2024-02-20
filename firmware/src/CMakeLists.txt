@@ -203,6 +203,11 @@ set_source_files_properties(
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 
+set_source_files_properties(
+  ${SHARED}/CoreModules/moduleFactory.cc
+  PROPERTIES COMPILE_OPTIONS "-fno-lto"
+)
+
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 

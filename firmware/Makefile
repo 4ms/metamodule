@@ -27,7 +27,10 @@ limit:
 
 dyn:
 	cmake --build --preset ${PRESET} 
-	flashing/dump_syms.py --objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ --elf ./build/mp1corea7/medium/main.elf --out src/dynload/host_sym_list.hh -v
+	flashing/dump_syms.py \
+			--objdir ./build/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/ \
+			--objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ \
+			--elf ./build/mp1corea7/medium/main.elf --out src/dynload/host_sym_list.hh -v
 	cmake --build --preset ${PRESET} 
 
 plugin:
