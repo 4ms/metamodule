@@ -119,7 +119,7 @@ def GetLibcSymbols():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Dump symbols that plugins might need")
-    parser.add_argument("--objdir", help="Object dir with .obj files with the symbols we neeed (VCV_module_wrapper.cc.obj)")
+    parser.add_argument("--objdir", action="append", help="Object dir with .obj files with the symbols we want to make available to plugins (i.e. VCV_module_wrapper.cc.obj)")
     parser.add_argument("--elf", help="Fully linked elf file with addresses of all symbols (main.elf)")
     parser.add_argument("--out", help="output header file")
     parser.add_argument("-v", dest="verbose", help="Verbose logging", action="store_true")
@@ -132,11 +132,12 @@ if __name__ == "__main__":
 
     needed_syms = []
 
-    obj_files = Path(args.objdir).glob("**/*.obj")
-    for obj_file in obj_files:
-        logging.info(f"Looking for symbols in {obj_file}")
-        with open(obj_file, "rb") as f:
-            needed_syms += GetRequiredSymbolNames(f)
+    for obj_dir in args.objdir:
+        obj_files = Path(obj_dir).glob("**/*.obj")
+        for obj_file in obj_files:
+            logging.info(f"Looking for symbols in {obj_file}")
+            with open(obj_file, "rb") as f:
+                needed_syms += GetRequiredSymbolNames(f)
 
     needed_syms += GetLibcSymbols()
 
@@ -163,7 +164,8 @@ static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
     with open(args.out, "w") as f:
         f.write(symlist)
 
-# also check
-#build/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/moduleFactory.cc.obj
-# flashing/dump_syms.py --objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ --elf ./build/mp1corea7/medium/main.elf --out src/dynload/host_sym_list.hh -v
+# flashing/dump_syms.py \
+#         --objdir ./build/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/ \
+#         --objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ \
+#         --elf ./build/mp1corea7/medium/main.elf --out src/dynload/host_sym_list.hh -v
 
