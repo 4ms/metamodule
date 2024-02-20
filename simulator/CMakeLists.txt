@@ -41,8 +41,6 @@ set_source_files_properties(${FWDIR}/src/gui/slsexport/meta5/ui.c
 
 add_subdirectory(${FWDIR}/src/VCV_adaptor
                  ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
-target_sources(VCV_adaptor PRIVATE stubs/random.cpp)
-target_include_directories(VCV_adaptor PRIVATE stubs/ ${FWDIR}/src/console)
 
 # #################### Other brands ##################################
 
@@ -76,17 +74,14 @@ foreach(brand ${brands})
   # Module Library
   target_include_directories(
     ${brand}Library
-    PUBLIC ${FWDIR}/src/VCV_adaptor
-           ${FWDIR}/src/VCV_adaptor/pffft
-           ${FWDIR}/lib/jansson
-           ${FWDIR}/lib/jansson/jansson/src
+    PUBLIC
            ${FWDIR}/src
            ${FWDIR}
            ${SHARED}
            )
   target_compile_options(${brand}Library PRIVATE -Wno-attributes -Wno-deprecated-enum-enum-conversion -g2)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
-  target_link_libraries(${brand}Library PUBLIC cpputil)
+  target_link_libraries(${brand}Library PUBLIC cpputil VCV_adaptor)
 
   # Faceplate artwork
   # Use provided module list file.
@@ -118,17 +113,18 @@ endforeach()
 # #################### Application ############################################
 
 add_executable(
-    simulator 
-    src/main.cc 
-    src/ui.cc
-    ${FWDIR}/src/gui/elements/element_name.cc
-    ${FWDIR}/src/fw_update/updater_proxy.cc
-    ${SHARED}/patch_convert/ryml/ryml_serial.cc
-    ${SHARED}/patch_convert/yaml_to_patch.cc 
-    ${SHARED}/patch_convert/patch_to_yaml.cc 
-    ${FACEPLATE_ARTWORK_SOURCES}
-    ${COMP_ARTWORK_SOURCES} 
-    ${SLS_SOURCES})
+	simulator 
+	src/main.cc 
+	src/ui.cc
+  stubs/random.cpp
+	${FWDIR}/src/gui/elements/element_name.cc
+  ${FWDIR}/src/fw_update/updater_proxy.cc
+	${SHARED}/patch_convert/ryml/ryml_serial.cc
+	${SHARED}/patch_convert/yaml_to_patch.cc 
+	${SHARED}/patch_convert/patch_to_yaml.cc
+	${FACEPLATE_ARTWORK_SOURCES}
+	${COMP_ARTWORK_SOURCES} 
+	${SLS_SOURCES})
 
 target_include_directories(
   simulator
