@@ -1,23 +1,31 @@
 # 
 # Flatbuffers
 # (Manually create a target because original cmake includes the flatc compiler)
-# 
+#
+
+set(FLATBUFFERS_SUBMODULE_PATH ${FWDIR}/lib/flatbuffers)
 
 add_library(flatbuffers INTERFACE)
-target_include_directories(flatbuffers INTERFACE ${FWDIR}/lib/flatbuffers/include/)
+target_include_directories(flatbuffers INTERFACE ${FLATBUFFERS_SUBMODULE_PATH}/include/)
 
-# Locate flatbuffer compiler
-# This falls back to the local flatabuffers repository if not found on PATH
-find_program(FLATBUFFERS_FLATC_EXECUTABLE flatc
-    PATHS ${FWDIR}/lib/flatbuffers/build
-    REQUIRED)
-message("Found flatbuffers compiler at " ${FLATBUFFERS_FLATC_EXECUTABLE})
+# Build flatbuffers compiler from submodule
+include(ExternalProject)
+ExternalProject_Add(
+    flatc
+    SOURCE_DIR ${FLATBUFFERS_SUBMODULE_PATH}/
+    INSTALL_COMMAND cmake -E echo "Skipping install step for flatc"
+)
+
+# Use flatbuffers compiler executable from external project
+ExternalProject_Get_property(flatc BINARY_DIR)
+set(FLATBUFFERS_FLATC_EXECUTABLE ${BINARY_DIR}/flatc)
 
 # Compile flat buffer definitions to cpp headers
 set(COMPILED_FLATBUFFER_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/flat)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${FWDIR}/lib/flatbuffers/CMake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${FLATBUFFERS_SUBMODULE_PATH}/CMake)
 include(BuildFlatBuffers)
 build_flatbuffers(flat/all.fbs "" flatbuffer_messages_utils "" ${COMPILED_FLATBUFFER_OUTPUT_DIR} "" "")
+add_dependencies(flatbuffer_messages_utils flatc)
 
 # Create library with generated flatbuffer headers
 add_library(flatbuffer_messages INTERFACE)

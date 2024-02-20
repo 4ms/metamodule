@@ -5,6 +5,7 @@
 #include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_location.hh"
+#include "shared/patch_convert/patch_to_yaml.hh"
 #include "shared/patch_convert/yaml_to_patch.hh"
 #include "stubs/patch_file/default_patch_io.hh"
 #include "stubs/patch_file/host_file_io.hh"
@@ -50,6 +51,15 @@ public:
 		return true;
 	}
 
+	void new_patch() {
+		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
+		view_patch_.blank_patch(name);
+
+		name += ".yml";
+		view_patch_loc_.filename.copy(name);
+		view_patch_loc_.vol = Volume::RamDisk;
+	}
+
 	PatchData &get_view_patch() {
 		return view_patch_;
 	}
@@ -84,8 +94,8 @@ public:
 			msg_state_ = MsgState::Idle;
 
 			// TODO: Refresh from all fs, see if anything changed
-			if (filesystem_changed) {
-				filesystem_changed = false;
+			if (refresh_required) {
+				refresh_required = false;
 				return {PatchListChanged};
 			} else {
 				return {PatchListUnchanged};
@@ -181,6 +191,35 @@ public:
 		return true;
 	}
 
+	bool write_patch(std::string_view filename = "") {
+		if (filename == "")
+			filename = view_patch_loc_.filename;
+
+		std::span<char> file_data = raw_patch_buffer_;
+
+		patch_to_yaml_buffer(view_patch_, file_data);
+
+		msg_state_ = MsgState::WritePatchFileRequested;
+
+		bool ok = hostfs_.update_or_create_file(filename, file_data);
+
+		if (!ok) {
+			pr_err("Error writing file!\n");
+			return false;
+		}
+
+		// printf("size: %zu, %zu\n", file_data.size(), sz);
+		// printf("%.*s\n", (int)sz, file_data.data());
+
+		refresh_required = true;
+		return true;
+	}
+
+	bool request_reset_factory_patches() {
+		pr_info("Reset to factory patches: Simulator default patches are read-only\n");
+		return true;
+	}
+
 private:
 	PatchDirList patch_dir_list_;
 
@@ -201,11 +240,12 @@ private:
 		PatchListRequested,
 		FirmwareUpdateFileRequested,
 		FirmwareFileLoadRequested,
+		WritePatchFileRequested,
 	} msg_state_ = MsgState::Idle;
 
 	unsigned mock_file_found_ctr = 0;
 	unsigned mock_firmware_file_size = 513;
 
-	bool filesystem_changed = true;
+	bool refresh_required = true;
 };
 } // namespace MetaModule

@@ -16,7 +16,7 @@ namespace MetaModule
 
 struct PatchSelectorPage : PageBase {
 
-	PatchSelectorPage(PatchInfo info)
+	PatchSelectorPage(PatchContext info)
 		: PageBase{info, PageId::PatchSel}
 		, subdir_panel{roller_item_infos} {
 
@@ -30,6 +30,8 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		gui_state.new_cable = std::nullopt;
+
 		state = State::TryingToRequestPatchList;
 		hide_spinner();
 		subdir_panel.blur();

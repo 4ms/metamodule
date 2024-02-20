@@ -1,7 +1,11 @@
 #pragma once
+#include "gui/helpers/lv_helpers.hh"
 #include "lvgl.h"
 #include "ui_local.h"
 #include <array>
+
+namespace MetaModule
+{
 
 struct SlsComponentInit {
 	SlsComponentInit() {
@@ -32,6 +36,9 @@ struct SlsComponentInit {
 		for (auto slider : {ui_MinSlider, ui_MaxSlider, ui_CablesTranspSlider, ui_MapTranspSlider}) {
 			style_slider(slider);
 		}
+
+		lv_obj_set_parent(ui_MessagePanel, lv_layer_top());
+		lv_obj_set_y(ui_MessagePanel, -80);
 	}
 
 	static void style_slider(lv_obj_t *slider) {
@@ -47,3 +54,5 @@ struct SlsComponentInit {
 		lv_obj_set_style_bg_opa(slider, 255, (uint32_t)LV_PART_KNOB | LV_STATE_EDITED);
 	}
 };
+
+} // namespace MetaModule

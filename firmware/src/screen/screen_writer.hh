@@ -88,7 +88,7 @@ public:
 
 	void init() {
 		SpiDmaDataCmdDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
-		_reset();
+		reset();
 		using InitCommands =
 			mdrivlib::ST77XX::ST7789Init<ScreenWriterConfT::width,
 										 ScreenWriterConfT::height,
@@ -147,46 +147,26 @@ public:
 
 	void transfer_buffer_to_screen() {
 		if (mode == HalfFrameDoubleBuffer) {
-			//Total setup times = 12.5+1.6+12.5+1.6 = 28.2us, every 16Hz (or 33Hz) = <0.1 %
-			// Debug::Pin5::high(); // time to setup the first mem_xfer = 12-13us
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 
 			set_pos(0, 0, _width - 1, _height - 1);
 			mem_xfer.config_transfer(dst, src, HalfFrameSize);
-
-			// Debug::Pin2::high(); // start MDMA xfer #1
 			mem_xfer.register_callback([&]() {
-				// Debug::Pin4::high(); // time to setup the SPI transfer = 1.6us, starting 180us after first mem_xfer
-				// Debug::Pin2::low(); // completed MDMA xfer#1
-				// Debug::Pin3::high(); // start BDMA transfer #1
 				config_dma_transfer(dst_addr, HalfFrameSize);
 				start_dma_transfer([&]() {
-					// Debug::Pin5::high(); //time to setup mem_xfer = 12-13us, starting 12ms after first SPI transfer
-					// Debug::Pin3::low(); // completed BDMA xfer #1
-
 					//Start transferring the second half:
 					// set_pos(0, _height / 2, _width - 1, _height - 1);
 					mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
-
-					// Debug::Pin2::high(); // start MDMA xfer #2
 					mem_xfer.register_callback([&]() {
-						// Debug::Pin4::high(); //time to setup second SPI transfer = 1.6us, starting 180us after mem_xfer
-						// Debug::Pin2::low();	 // completed MDMA xfer #2
-						// Debug::Pin3::high(); // start BDMA xfer #2
 						config_dma_transfer(dst_addr, HalfFrameSize);
 						start_dma_transfer([&]() {
-							// Debug::Pin3::low(); // completed BDMA xfer #3
 							HWSemaphore<ScreenFrameWriteLock>::unlock();
 						});
-						// Debug::Pin4::low(); //end setup measurement
 					});
 					mem_xfer.start_transfer();
-					// Debug::Pin5::low(); //end setup measurement
 				});
-				// Debug::Pin4::low(); //end setup measurement
 			});
 			mem_xfer.start_transfer();
-			// Debug::Pin5::low(); //end setup measurement
 
 		} else if (mode == FullFrameDoubleBuffer) {
 			HWSemaphore<ScreenFrameWriteLock>::lock();
@@ -222,6 +202,16 @@ public:
 		__DSB();
 
 		start_dma_transfer();
+	}
+
+	void reset() {
+		Pin reset_pin{ScreenWriterConfT::ResetPin, PinMode::Output};
+		reset_pin.high();
+		HAL_Delay(1);
+		reset_pin.low();
+		HAL_Delay(10);
+		reset_pin.high();
+		HAL_Delay(120);
 	}
 
 protected:
@@ -266,25 +256,6 @@ protected:
 			if (c.delay_ms)
 				HAL_Delay(c.delay_ms);
 		}
-	}
-
-	void _reset() {
-		Pin reset_pin{ScreenWriterConfT::ResetPin, PinMode::Output};
-		// reset_pin.high();
-		// volatile int i = 10000; //10000 = high for 123us
-		// while (i)
-		// 	i = i - 1;
-		// reset_pin.low();
-		// i = 1000; //1000 = low for 12.6us
-		// while (i)
-		// 	i = i - 1;
-		// reset_pin.high();
-		reset_pin.high();
-		HAL_Delay(1);
-		reset_pin.low();
-		HAL_Delay(10);
-		reset_pin.high();
-		HAL_Delay(120);
 	}
 };
 } // namespace MetaModule

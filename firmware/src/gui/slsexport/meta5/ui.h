@@ -16,8 +16,10 @@ extern "C" {
 #include "components/ui_comp.h"
 #include "components/ui_comp_hook.h"
 #include "ui_events.h"
-void Dropdown_Animation( lv_obj_t *TargetObject, int delay);
-void Dropup_Animation( lv_obj_t *TargetObject, int delay);
+void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay);
+void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay);
+void SlideDown_Animation( lv_obj_t *TargetObject, int delay);
+void SlideUp_Animation( lv_obj_t *TargetObject, int delay);
 // SCREEN: ui_MainMenu
 void ui_MainMenu_screen_init(void);
 extern lv_obj_t *ui_MainMenu;
@@ -65,9 +67,11 @@ extern lv_obj_t *ui_PatchName;
 extern lv_obj_t *ui_LoadMeter2;
 extern lv_obj_t *ui_ButtonsContainer;
 extern lv_obj_t *ui_PlayButton;
+extern lv_obj_t *ui_InfoButton;
 extern lv_obj_t *ui_KnobButton;
 extern lv_obj_t *ui_AddButton;
-extern lv_obj_t *ui_InfoButton;
+extern lv_obj_t *ui_SaveButton;
+extern lv_obj_t *ui_SaveButtonLabel;
 extern lv_obj_t *ui_SettingsButton;
 extern lv_obj_t *ui_ModulesPanel;
 extern lv_obj_t *ui_SettingsMenu;
@@ -107,8 +111,8 @@ extern lv_obj_t *ui_ModuleName;
 extern lv_obj_t *ui_DescriptionPanel;
 extern lv_obj_t *ui_DescPanelPatchName;
 extern lv_obj_t *ui_Description;
-extern lv_obj_t *ui_DescriptionEdit;
-extern lv_obj_t *ui_DescriptionEditLabel;
+extern lv_obj_t *ui_DescriptionEditButton;
+extern lv_obj_t *ui_DescriptionEditButtonLabel;
 extern lv_obj_t *ui_DescriptionClose;
 extern lv_obj_t *ui_DescriptionCloseLabel;
 extern lv_obj_t *ui_PatchFileMenu;
@@ -125,6 +129,13 @@ extern lv_obj_t *ui_PatchFileRevertBut;
 extern lv_obj_t *ui_PatchFileRevertLabel;
 extern lv_obj_t *ui_PatchFileDeleteBut;
 extern lv_obj_t *ui_PatchFileDeleteLabel;
+extern lv_obj_t *ui_DescriptionEditPanel;
+extern lv_obj_t *ui_PatchNameEditTextArea;
+extern lv_obj_t *ui_DescriptionEditTextArea;
+extern lv_obj_t *ui_DescriptionEditSaveButton;
+extern lv_obj_t *ui_DescriptionEditSaveLabel;
+extern lv_obj_t *ui_DescriptionEditCancelButton;
+extern lv_obj_t *ui_DescriptionEditCancelLabel;
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
 extern lv_obj_t *ui_MappingMenu;
@@ -145,8 +156,19 @@ extern lv_obj_t *ui_MappedItemHeader;
 extern lv_obj_t *ui_MappedItemHeaderMapText;
 extern lv_obj_t *ui_MappedItemHeaderKnobSetText;
 extern lv_obj_t *ui_MapList;
-extern lv_obj_t *ui_CableEditButton;
-extern lv_obj_t *ui_CableEditButtonLabel;
+extern lv_obj_t *ui_CableAddButton;
+extern lv_obj_t *ui_CableAddLabel;
+extern lv_obj_t *ui_CablePanelAddButton;
+extern lv_obj_t *ui_CablePanelAddLabel;
+extern lv_obj_t *ui_CableRemoveButton;
+extern lv_obj_t *ui_CableRemoveButtonLabel;
+extern lv_obj_t *ui_CableCreationPanel;
+extern lv_obj_t *ui_CableCreationLabel;
+extern lv_obj_t *ui_CableCreationBeginLabel;
+extern lv_obj_t *ui_CableFinishButton;
+extern lv_obj_t *ui_CableFinishLabel;
+extern lv_obj_t *ui_CableCancelButton;
+extern lv_obj_t *ui_CableCancelButtonLabel;
 extern lv_obj_t *ui_ControlAlert;
 extern lv_obj_t *ui_ControlArc;
 extern lv_obj_t *ui_ControlAlertLabel;
@@ -227,6 +249,7 @@ extern lv_obj_t *ui_ListButton;
 extern lv_obj_t *ui_ListLabel;
 extern lv_obj_t *ui_EditButton;
 extern lv_obj_t *ui_EditLabel;
+extern lv_obj_t *ui_KnobSetButton;
 extern lv_obj_t *ui_TrashButton;
 extern lv_obj_t *ui_TrashLabel;
 extern lv_obj_t *ui_Keyboard;
@@ -240,8 +263,53 @@ extern lv_obj_t *ui_CancelButton;
 extern lv_obj_t *ui_CancelLabel;
 extern lv_obj_t *ui_TrashButton2;
 extern lv_obj_t *ui_TrashLabel2;
+extern lv_obj_t *ui_Choice2Button;
+extern lv_obj_t *ui_Choice2Label;
 extern lv_obj_t *ui_ConfirmButton;
 extern lv_obj_t *ui_ConfirmLabel;
+extern lv_obj_t *ui_MessagePanel;
+extern lv_obj_t *ui_MessageLabel;
+extern lv_obj_t *ui_Panel2;
+extern lv_obj_t *ui_Panel3;
+extern lv_obj_t *ui_Panel4;
+extern lv_obj_t *ui_Panel5;
+extern lv_obj_t *ui_Panel6;
+extern lv_obj_t *ui_Panel7;
+extern lv_obj_t *ui_Panel8;
+extern lv_obj_t *ui_Panel9;
+extern lv_obj_t *ui_Panel10;
+extern lv_obj_t *ui_Panel11;
+extern lv_obj_t *ui_Panel12;
+extern lv_obj_t *ui_Container2;
+extern lv_obj_t *ui_Container3;
+extern lv_obj_t *ui_Container4;
+extern lv_obj_t *ui_Container5;
+extern lv_obj_t *ui_Container6;
+extern lv_obj_t *ui_Container7;
+extern lv_obj_t *ui_Container8;
+extern lv_obj_t *ui_Container9;
+extern lv_obj_t *ui_Container10;
+extern lv_obj_t *ui_Container11;
+extern lv_obj_t *ui_Container12;
+extern lv_obj_t *ui_Label9;
+extern lv_obj_t *ui_Label10;
+extern lv_obj_t *ui_Label11;
+extern lv_obj_t *ui_Label12;
+extern lv_obj_t *ui_Button6;
+extern lv_obj_t *ui_Button7;
+extern lv_obj_t *ui_Button8;
+extern lv_obj_t *ui_Button9;
+extern lv_obj_t *ui_Button10;
+extern lv_obj_t *ui_Button11;
+extern lv_obj_t *ui_Button12;
+extern lv_obj_t *ui_Panel1;
+// SCREEN: ui_ModuleListPage
+void ui_ModuleListPage_screen_init(void);
+extern lv_obj_t *ui_ModuleListPage;
+extern lv_obj_t *ui_ModuleListImage;
+extern lv_obj_t *ui_ModuleListRollerPanel;
+extern lv_obj_t *ui_ModuleListRollerTitle;
+extern lv_obj_t *ui_ModuleListRoller;
 // SCREEN: ui_CableMapPage
 void ui_CableMapPage_screen_init(void);
 extern lv_obj_t *ui_CableMapPage;
@@ -251,8 +319,6 @@ extern lv_obj_t *ui_CableFromTitle;
 extern lv_obj_t *ui_CableFromEditButton;
 extern lv_obj_t *ui_CableToTitle;
 extern lv_obj_t *ui_CableToPanel;
-extern lv_obj_t *ui_CableCancel;
-extern lv_obj_t *ui_CableCancelLabel;
 extern lv_obj_t *ui_CableDeleteButton;
 extern lv_obj_t *ui_CableDeleteIcon;
 // SCREEN: ui_SystemMenu
@@ -265,6 +331,9 @@ extern lv_obj_t *ui_SystemMenuPCBversion;
 extern lv_obj_t *ui_SystemMenuFWversion;
 extern lv_obj_t *ui_SystemMenuExpanders;
 extern lv_obj_t *ui_SystemMenuPrefs;
+extern lv_obj_t *ui_ResetFactoryPatchesDescription;
+extern lv_obj_t *ui_ResetFactoryPatchesButton;
+extern lv_obj_t *ui_ResetFactoryPatchesLabel;
 extern lv_obj_t *ui_SystemMenuTest;
 extern lv_obj_t *ui_SystemMenuUpdateTab;
 extern lv_obj_t *ui_SystemMenuUpdateFWversion;
@@ -278,9 +347,9 @@ extern lv_obj_t *ui____initial_actions0;
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png
 LV_IMG_DECLARE( ui_img_1x_add1_png);   // assets/1x/Add1.png
 LV_IMG_DECLARE( ui_img_1x_settings1_png);   // assets/1x/Settings1.png
+LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
 LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
 LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
-LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);

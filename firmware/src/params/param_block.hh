@@ -7,8 +7,8 @@ namespace MetaModule
 {
 
 struct ParamBlock {
-	std::array<Params, StreamConf::Audio::BlockSize> params;
-	MetaParams metaparams;
+	std::array<Params, StreamConf::Audio::BlockSize> params{};
+	MetaParams metaparams{};
 };
 
 using DoubleBufParamBlock = std::array<ParamBlock, 2>;

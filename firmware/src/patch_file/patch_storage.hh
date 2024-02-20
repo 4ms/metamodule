@@ -146,6 +146,26 @@ public:
 			return result;
 		}
 
+		if (message.message_type == RequestWritePatchData) {
+			IntercoreStorageMessage result{.message_type = PatchDataWriteFail};
+
+			if (message.filename.size() > 0 && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
+				auto wrote_ok = write_patch_file(message.buffer, message.filename, message.vol_id);
+				if (wrote_ok) {
+					result.message_type = PatchDataWriteOK;
+				}
+			}
+
+			return result;
+		}
+
+		if (message.message_type == RequestFactoryResetPatches) {
+			IntercoreStorageMessage result{.message_type = FactoryResetPatchesDone};
+			reload_default_patches();
+
+			return result;
+		}
+
 		return std::nullopt;
 	}
 
@@ -193,6 +213,31 @@ private:
 
 		pr_dbg("Read patch %.*s, %d bytes\n", (int)filename.size(), filename.data(), buffer.size_bytes());
 		return buffer.size_bytes();
+	}
+
+	bool write_patch_file(std::span<const char> patchdata, std::string_view filename, Volume vol) {
+		bool ok = false;
+		switch (vol) {
+			case Volume::NorFlash:
+				ok = PatchFileIO::write_file(patchdata, norflash_, filename);
+				break;
+			case Volume::SDCard:
+				ok = PatchFileIO::write_file(patchdata, sdcard_, filename);
+				break;
+			case Volume::USB:
+				ok = PatchFileIO::write_file(patchdata, usbdrive_, filename);
+				break;
+			default:
+				break;
+		}
+
+		if (!ok) {
+			pr_warn("Could not write patch file\n");
+			return false;
+		}
+
+		pr_dbg("Wrote patch %.*s, %d bytes\n", (int)filename.size(), filename.data(), patchdata.size());
+		return true;
 	}
 };
 

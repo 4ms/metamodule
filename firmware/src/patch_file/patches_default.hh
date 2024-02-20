@@ -10,14 +10,20 @@
 #include "patch/default/Braids-Quad.hh"
 #include "patch/default/Djembe4verb.hh"
 #include "patch/default/EnOscDual.hh"
+#include "patch/default/EnOscPoly4.hh"
 #include "patch/default/EnOsc_8_step_seq.hh"
 #include "patch/default/EnvVCA_knobsets.hh"
 #include "patch/default/KarplusStereo.hh"
+#include "patch/default/QuadDrum.hh"
+#include "patch/default/SlothDrone.hh"
 #include "patch/default/twosimpleosc.hh"
 
 struct DefaultPatches {
 
 	static inline std::array patch_raw_data = std::to_array<std::span<char>>({
+		Sloth_Drone_patch,
+		EnOscPoly4_patch,
+		QuadDrum_patch,
 		Befaco4msPlayground_patch,
 		Djembe4verb_patch,
 		EnOsc_Dual_patch,
@@ -30,6 +36,9 @@ struct DefaultPatches {
 	});
 
 	static inline std::array patch_filenames = std::to_array<ModuleTypeSlug>({
+		"SlothDrone.yml",
+		"EnOscPoly4.yml",
+		"QuadDrum.yml",
 		"Befaco4msPlayground.yml",
 		"Djembe4verb.yml",
 		"EnOsc_Dual.yml",

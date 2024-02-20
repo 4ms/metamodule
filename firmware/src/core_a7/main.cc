@@ -1,5 +1,6 @@
 #include "app_startup.hh"
 #include "audio/audio.hh"
+#include "core_a7/a7_shared_memory.hh"
 #include "core_a7/static_buffers.hh"
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
@@ -15,12 +16,12 @@
 #include "system/time.hh"
 #include "uart_log.hh"
 
-// #include "core_intercom/semaphore_action.hh" //TODO use this
+#ifdef ENABLE_WIFI_BRIDGE
+#include <wifi_update.hh>
+#endif
 
 namespace MetaModule
 {
-
-constexpr inline bool reset_to_factory_patches = false;
 
 struct SystemInit : AppStartup, UartLog, Debug, Hardware {
 } _sysinit;
@@ -34,8 +35,8 @@ void main() {
 
 	HAL_Delay(50);
 	print_time();
-	printf("Build: %s (%s)\n", GIT_HASH.data(), GIT_COMMIT_TIME.data());
-	printf("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
+	pr_info("Build: %s (%s)\n", GIT_HASH.data(), GIT_COMMIT_TIME.data());
+	pr_info("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
 
 	PatchPlayer patch_player;
 	FileStorageProxy file_storage_proxy{
@@ -53,21 +54,28 @@ void main() {
 					  StaticBuffers::param_blocks,
 					  patch_mod_queue};
 
-	StaticBuffers::raw_patch_span = {StaticBuffers::raw_patch_data.data(), StaticBuffers::raw_patch_data.size()};
-	SharedMemoryS::ptrs = {&StaticBuffers::param_blocks,
-						   &StaticBuffers::auxsignal_block,
-						   &StaticBuffers::virtdrive,
-						   &StaticBuffers::icc_shared_message,
-						   &StaticBuffers::raw_patch_span, //DEPRECATE
-						   &patch_player,
-						   &patch_playloader,
-						   &StaticBuffers::patch_dir_list,
-						   &file_storage_proxy,
-						   &sync_params,
-						   &patch_mod_queue};
+	SharedMemoryS::ptrs = {
+		&StaticBuffers::param_blocks,
+		&StaticBuffers::auxsignal_block,
+		&StaticBuffers::virtdrive,
+		&StaticBuffers::icc_shared_message,
+	};
+	A7SharedMemoryS::ptrs = {
+		&patch_player,
+		&patch_playloader,
+		&file_storage_proxy,
+		&sync_params,
+		&patch_mod_queue,
+	};
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
+	mdrivlib::SystemCache::clean_dcache_by_range(&A7SharedMemoryS::ptrs, sizeof(A7SharedMemoryS::ptrs));
+	mdrivlib::SystemCache::clean_dcache_by_range(&SharedMemoryS::ptrs, sizeof(SharedMemoryS::ptrs));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
+
+#ifdef ENABLE_WIFI_BRIDGE
+	WifiUpdate::run();
+#endif
 
 	pr_info("A7 Core 1 initialized\n");
 

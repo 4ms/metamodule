@@ -16,6 +16,7 @@ concept FileIoC = requires(T t,
 						   std::string_view path,
 						   const std::span<const char> const_data,
 						   std::span<char> read_buffer,
+						   std::span<const char> write_buffer,
 						   FileAction action,
 						   DirEntryAction direntry_action,
 						   uint32_t tm,
@@ -31,6 +32,9 @@ concept FileIoC = requires(T t,
 	} -> std::convertible_to<bool>;
 	{
 		t.read_file(filename, read_buffer, offset)
+	} -> std::integral;
+	{
+		t.update_or_create_file(filename, write_buffer)
 	} -> std::integral;
 	{
 		t.volname()

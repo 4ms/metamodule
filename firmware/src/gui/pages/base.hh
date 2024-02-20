@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/panel_conf.hh"
-#include "gui/message_queue.hh"
+#include "gui/elements/element_name.hh"
+#include "gui/notify/queue.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
 #include "lvgl.h"
@@ -17,14 +18,26 @@ namespace MetaModule
 
 enum class PageChangeDirection { Back, Forward, Jump };
 
-struct PatchInfo {
+struct GuiState {
+	struct CableBeginning {
+		Jack jack;
+		ElementType type;
+		bool has_connections;
+	};
+	std::optional<CableBeginning> new_cable;
+
+	bool force_redraw_patch{};
+};
+
+struct PatchContext {
 	FileStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
 	ParamsMidiState &params;
 	MetaParams &metaparams;
-	MessageQueue &msg_queue;
+	NotificationQueue &notify_queue;
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
+	GuiState &gui_state;
 };
 
 struct PageBase {
@@ -32,9 +45,10 @@ struct PageBase {
 	PatchPlayLoader &patch_playloader;
 	ParamsMidiState &params;
 	MetaParams &metaparams;
-	MessageQueue &msg_queue;
+	NotificationQueue &notify_queue;
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
+	GuiState &gui_state;
 
 	PageArguments args;
 
@@ -51,14 +65,15 @@ struct PageBase {
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;
 
-	PageBase(PatchInfo info, PageId id)
+	PageBase(PatchContext info, PageId id)
 		: patch_storage{info.patch_storage}
 		, patch_playloader{info.patch_playloader}
 		, params{info.params}
 		, metaparams{info.metaparams}
-		, msg_queue{info.msg_queue}
+		, notify_queue{info.notify_queue}
 		, patch_mod_queue{info.patch_mod_queue}
 		, page_list{info.page_list}
+		, gui_state{info.gui_state}
 		, id{id} {
 		page_list.register_page(this, id);
 	}
@@ -111,11 +126,11 @@ struct PageBase {
 	}
 
 	bool patch_is_playing(std::optional<PatchLocHash> patch_loc_hash) {
-		if (patch_loc_hash.has_value())
+		if (patch_loc_hash.has_value()) {
 			return (patch_loc_hash.value() == patch_playloader.cur_patch_loc_hash());
-		else
+		} else {
 			return false;
-		// return patch_loc_hash.value_or(PatchLocation{}) == patch_playloader.cur_patch_loc_hash();
+		}
 	}
 };
 } // namespace MetaModule

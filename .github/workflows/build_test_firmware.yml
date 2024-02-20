@@ -7,16 +7,14 @@ on:
         description: 'Build only a subset of modules'
         default: false
         type: boolean
-      preset:
-        description: 'Select preset'
-        type: choice
-        default: 'full'
-        options:
-        - full
-        - base
+      skip_wifi:
+        description: 'Skip building wifi features'
+        default: false
+        type: boolean
   push:
     branches:
       - main
+      - fix-ci
     tags:
       - 'firmware-v[0-9]+.[0-9]+.[0-9]+'
     paths:
@@ -36,6 +34,8 @@ jobs:
     name: "Build firmware"
     runs-on: ubuntu-latest
     container: ghcr.io/lnnrts/metamodule@sha256:fc81416d9f424a3dcc735644cdfb0e6f8d2641f64fe5eec73d9e3e6bc23640c3
+    env:
+      preset: ${{ inputs.skip_wifi && 'base' || 'full' }}
     steps:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
@@ -56,7 +56,7 @@ jobs:
           submodules: 'recursive'
           token: ${{ secrets.CHECKOUT_TOKEN }}
 
-      - name: Create limit file
+      - name: Build and test (limited modules)
         if: ${{ inputs.limited_modules }}
         run: |
           echo "4ms:EnOsc" >> firmware/lim
@@ -64,10 +64,11 @@ jobs:
           echo "Befaco:EvenVCO" >> firmware/lim
           echo "HetrickCV:PhasorGen" >> firmware/lim
           echo "AudibleInstruments:Braids" >> firmware/lim
-          cd firmware && make limit lim
+          cd firmware && PRESET=${{ env.preset }} make limit lim && make all
 
       - name: Build and test
-        run: cd firmware && make configure PRESET=${{ inputs.preset }} && make all
+        if: ${{ ! inputs.limited_modules }}
+        run: cd firmware && make configure PRESET=${{ env.preset }} && make all
 
       - name: Set Release Version
         if: startsWith(github.ref, 'refs/tags/firmware-v')

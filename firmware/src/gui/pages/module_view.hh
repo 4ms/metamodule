@@ -19,12 +19,12 @@ struct ModuleViewPage : PageBase {
 
 	ViewSettings settings;
 
-	ModuleViewPage(PatchInfo info)
-		: PageBase{info, PageId::ModuleView}
+	ModuleViewPage(PatchContext context)
+		: PageBase{context, PageId::ModuleView}
 		, map_ring_display{settings}
 		, patch{patch_storage.get_view_patch()}
 		, roller{ui_ElementRoller}
-		, mapping_pane{info.patch_storage, module_mods, params, args, page_list} {
+		, mapping_pane{context.patch_storage, module_mods, params, args, page_list, notify_queue, gui_state} {
 
 		init_bg(ui_MappingMenu);
 
@@ -37,7 +37,6 @@ struct ModuleViewPage : PageBase {
 
 		button.clear();
 		module_controls.clear();
-		mapping_pane.init();
 
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, roller);
@@ -55,13 +54,15 @@ struct ModuleViewPage : PageBase {
 		this_module_id = args.module_id.value_or(this_module_id);
 
 		if (!read_slug()) {
-			msg_queue.append_message("Module View page cannot read module slug.\n");
+			notify_queue.put(
+				{"Cannot determine module to view. Patch file may be corrupted.", Notification::Priority::Error});
 			return;
 		}
 
 		moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
-			msg_queue.append_message("Module View page got empty module info.\r\n");
+			notify_queue.put(
+				{"Cannot show module " + std::string(slug) + ". Never heard of it!", Notification::Priority::Error});
 			return;
 		}
 
@@ -102,20 +103,19 @@ struct ModuleViewPage : PageBase {
 
 		for (const auto &drawn_element : drawn_elements) {
 			auto &drawn = drawn_element.gui_element;
+			if (!drawn.obj)
+				continue;
 
 			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
 				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
 			}
-
-			if (!drawn.obj)
-				continue;
 
 			std::visit(
 				[this, drawn = drawn](auto &el) {
 					opts += el.short_name;
 
 					if (drawn.mapped_panel_id)
-						opts = opts + " [" + get_panel_name<PanelDef>(el, drawn.mapped_panel_id.value()) + ']';
+						append_panel_jack_name(opts, el, drawn.mapped_panel_id.value());
 
 					append_connected_jack_name(opts, drawn, patch);
 
@@ -160,35 +160,32 @@ struct ModuleViewPage : PageBase {
 
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 
+		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
 		if (cur_el) {
 			mode = ViewMode::Mapping;
 			mapping_pane.hide();
 			mapping_pane.show(*cur_el);
 		} else {
-			mode = ViewMode::List;
 			show_roller();
 		}
 	}
 
 	void update() override {
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (mapping_pane.manual_control_visible()) {
-				mapping_pane.hide_manual_control();
-
-			} else if (mode == ViewMode::List) {
+			if (mode == ViewMode::List) {
 				load_prev_page();
 
-			} else if (mapping_pane.addmap_visible()) {
-				mapping_pane.hide_addmap();
-
-			} else {
-				mode = ViewMode::List;
-				show_roller();
+			} else if (mode == ViewMode::Mapping) {
+				mapping_pane.back_event();
 			}
 		}
 
-		if (mode == ViewMode::Mapping)
+		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
+			if (mapping_pane.wants_to_close()) {
+				show_roller();
+			}
+		}
 
 		if (is_patch_playing) {
 			// copy light values from params, indexed by light element id
@@ -217,31 +214,32 @@ struct ModuleViewPage : PageBase {
 		if (auto patch_mod = module_mods.get(); patch_mod.has_value()) {
 			page_list.increment_patch_revision();
 
+			bool refresh = true;
 			// Apply to this thread's copy of patch
 			std::visit(overloaded{
-						   [this](AddMapping &mod) { apply_add_mapping(mod); },
-						   [this](AddMidiMap &mod) { apply_add_midi_map(mod); },
-						   [](auto &m) {},
+						   [&, this](AddMapping &mod) { refresh = patch.add_update_mapped_knob(mod.set_id, mod.map); },
+						   [&, this](AddMidiMap &mod) { refresh = patch.add_update_midi_map(mod.map); },
+						   [&, this](AddInternalCable &mod) { patch.add_internal_cable(mod.in, mod.out); },
+						   [&, this](AddJackMapping &mod) {
+							   mod.type == ElementType::Output ? patch.add_mapped_outjack(mod.panel_jack_id, mod.jack) :
+																 patch.add_mapped_injack(mod.panel_jack_id, mod.jack);
+						   },
+						   [&, this](DisconnectJack &mod) {
+							   mod.type == ElementType::Output ? patch.disconnect_outjack(mod.jack) :
+																 patch.disconnect_injack(mod.jack);
+						   },
+						   [&](auto &m) { refresh = false; },
 					   },
 					   patch_mod.value());
+
+			if (refresh) {
+				redraw_module();
+				mapping_pane.refresh();
+			}
 
 			// Forward the mod to the audio/patch_player queue
 			if (is_patch_playing)
 				patch_mod_queue.put(patch_mod.value());
-		}
-	}
-
-	void apply_add_mapping(AddMapping &mod) {
-		if (patch.add_update_mapped_knob(mod.set_id, mod.map)) {
-			redraw_module();
-			mapping_pane.refresh();
-		}
-	}
-
-	void apply_add_midi_map(AddMidiMap &mod) {
-		if (patch.add_update_midi_map(mod.map)) {
-			redraw_module();
-			mapping_pane.refresh();
 		}
 	}
 
@@ -258,6 +256,7 @@ struct ModuleViewPage : PageBase {
 
 private:
 	void show_roller() {
+		mode = ViewMode::List;
 		mapping_pane.hide();
 		lv_show(ui_ElementRollerPanel);
 		lv_obj_set_height(roller, 210);

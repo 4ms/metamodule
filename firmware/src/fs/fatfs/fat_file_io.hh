@@ -112,28 +112,7 @@ public:
 	}
 
 	bool update_or_create_file(const std::string_view filename, const std::span<const char> data) {
-		return create_file(filename.data(), data.data(), data.size_bytes());
-	}
-
-	bool create_file(const char *filename, const char *const data, unsigned sz) {
-		FIL fil;
-		if (f_chdrive(_fatvol) != FR_OK)
-			return false;
-
-		if (f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) {
-			if (!mount_disk())
-				return false;
-			if (f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
-				return false;
-		}
-
-		UINT bytes_written = 0;
-		auto res = f_write(&fil, data, sz, &bytes_written);
-		if (res != FR_OK || bytes_written != sz)
-			return false;
-
-		f_close(&fil);
-		return true;
+		return write_file(filename.data(), data);
 	}
 
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
@@ -219,6 +198,30 @@ public:
 
 		f_close(&fil);
 		return bytes_read;
+	}
+
+	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
+		FIL fil;
+		UINT bytes_written = 0;
+
+		f_chdrive(_fatvol);
+
+		if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+			if (!mount_disk())
+				return 0;
+
+			if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK)
+				return 0;
+		}
+
+		auto res = f_write(&fil, buffer.data(), buffer.size_bytes(), &bytes_written);
+
+		f_close(&fil);
+
+		if (res != FR_OK)
+			return 0;
+
+		return bytes_written;
 	}
 
 	bool delete_file(std::string_view filename) {
