@@ -47,7 +47,7 @@ set(A7_BIN_PATH ${CMAKE_CURRENT_BINARY_DIR}/mp1corea7/medium)
 add_subdirectory(src/core_m4 ${M4_BIN_PATH})
 add_subdirectory(src ${A7_BIN_PATH})
 
-set(RELEASE_TARGET_DIR   ${CMAKE_CURRENT_BINARY_DIR}/release)
+set(RELEASE_TARGET_DIR   ${CMAKE_CURRENT_BINARY_DIR}/metamodule-firmware)
 set(RELEASE_ARCHIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}.zip)
 set(MANIFEST_FILENAME    metamodule.json)
 set(COMBINED_IMAGE_PATH  ${CMAKE_CURRENT_BINARY_DIR}/main.uimg)
