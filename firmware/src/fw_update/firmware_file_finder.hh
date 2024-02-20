@@ -3,6 +3,7 @@
 #include "drivers/inter_core_comm.hh"
 #include "fat_file_io.hh"
 #include "firmware_ram_loader.hh"
+#include "fw_update/update_path.hh"
 #include "util/poll_change.hh"
 #include "util/static_string.hh"
 #include <cstring>
@@ -68,11 +69,10 @@ private:
 	}
 
 	bool find_manifest(FatFileIO &fileio) {
-		found_filename.copy("update/metamodule.json");
+		found_filename.copy(UpdateFileManifestFilename);
 
 		FILINFO info;
-		if (fileio.get_fat_filinfo(std::string_view(found_filename), info))
-		{
+		if (fileio.get_fat_filinfo(std::string_view(found_filename), info)) {
 			found_filesize = info.fsize;
 			return true;
 		}
