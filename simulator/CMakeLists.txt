@@ -3,7 +3,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(mm_sim LANGUAGES C CXX)
 
-set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
 set(FWDIR ${PROJECT_SOURCE_DIR}/../firmware)
 set(SHARED ${PROJECT_SOURCE_DIR}/../shared)
 set(SIM_ROOT ${PROJECT_SOURCE_DIR})
@@ -14,6 +13,10 @@ set(LV_CONF_PATH
     CACHE STRING "" FORCE)
 
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
+
+# #################### cpputil #########################################
+
+add_subdirectory(../shared/cpputil cpputil)
 
 # #################### LVGL Simulator Driver #################################
 
@@ -78,9 +81,10 @@ foreach(brand ${brands})
            ${FWDIR}/src
            ${FWDIR}
            ${SHARED}
-           ${SHARED}/cpputil)
+           )
   target_compile_options(${brand}Library PRIVATE -Wno-attributes -Wno-deprecated-enum-enum-conversion -g2)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
+  target_link_libraries(${brand}Library PUBLIC cpputil)
 
   # Faceplate artwork
   # Use provided module list file.
@@ -145,7 +149,6 @@ target_include_directories(
           ${FWDIR}/src/params
           ${FWDIR}/src/medium
           ${SHARED}
-          ${SHARED}/cpputil
           ${SHARED}/patch
           ${SHARED}/patch_convert/ryml/rapidyaml/src
           ${SHARED}/CoreModules
@@ -153,7 +156,7 @@ target_include_directories(
 
 target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 VCV_adaptor)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 VCV_adaptor cpputil)
 
 foreach(brand ${brands})
   target_link_libraries(simulator PRIVATE ${brand}Library)
