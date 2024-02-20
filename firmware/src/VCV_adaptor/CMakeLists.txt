@@ -5,7 +5,7 @@ add_library(VCV_adaptor STATIC)
 # These sources are used by other libraries indirectly linked to VCV_adaptor, so they need to be public
 target_sources(
   VCV_adaptor
-  PUBLIC string.cpp
+  PRIVATE string.cpp
          plugin_instance.cc
          pffft/pffft.c
          engine/Module.cpp
@@ -20,6 +20,7 @@ target_include_directories(
   PUBLIC ${MM_ROOT}/firmware/src/VCV_adaptor
          ${MM_ROOT}/firmware/src/VCV_adaptor/pffft
          ${MM_ROOT}/firmware/src
+         ${MM_ROOT}/firmware/src/console
          ${MM_ROOT}/firmware
          ${MM_ROOT}/shared
          ${MM_ROOT}/shared/cpputil
