@@ -126,6 +126,7 @@ add_executable(
     ${FWDIR}/src/fw_update/updater_proxy.cc
     ${SHARED}/patch_convert/ryml/ryml_serial.cc
     ${SHARED}/patch_convert/yaml_to_patch.cc 
+    ${SHARED}/patch_convert/patch_to_yaml.cc 
     ${FACEPLATE_ARTWORK_SOURCES}
     ${COMP_ARTWORK_SOURCES} 
     ${SLS_SOURCES})

@@ -1,5 +1,4 @@
 #include "updater_proxy.hh"
-#include "fw_update/ram_buffer.hh" //must be exactly this, or else simulator build picks wrong file
 #include "fw_update/update_path.hh"
 #include "manifest_parse.hh"
 #include "pr_dbg.hh"

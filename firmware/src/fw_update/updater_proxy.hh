@@ -1,6 +1,6 @@
 #pragma once
+#include "fw_update/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "patch_file/file_storage_proxy.hh"
-#include "ram_buffer.hh"
 #include "update_file.hh"
 #include <cstdint>
 #include <string>

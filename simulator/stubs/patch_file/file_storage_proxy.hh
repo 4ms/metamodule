@@ -182,12 +182,9 @@ public:
 	}
 
 	[[nodiscard]] bool request_file_flash(IntercoreStorageMessage::FlashTarget target,
-										  std::string_view filename,
-										  Volume vol,
+										  std::span<uint8_t> buffer,
 										  uint32_t address,
-										  uint32_t length,
 										  uint32_t *bytes_processed) {
-		//TODO
 		return true;
 	}
 
