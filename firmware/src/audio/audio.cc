@@ -186,13 +186,14 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// Gate inputs
-		for (auto [i, gatein] : countzip(params.gate_ins)) {
+		for (auto [i, gatein, sync_gatein] : countzip(params.gate_ins, param_state.gate_ins)) {
 			if (!jack_is_patched(param_state.jack_senses, i + FirstGateInput))
 				gatein.register_state(false);
 			if (gatein.just_went_high())
 				player.set_panel_input(i + FirstGateInput, 8.f);
 			if (gatein.just_went_low())
 				player.set_panel_input(i + FirstGateInput, 0.f);
+			sync_gatein.copy_state(gatein);
 		}
 
 		// Pass Knob values to modules
