@@ -28,11 +28,19 @@ protected:
 		auto idx = index(EL);
 		outputValues[idx.output_idx] = val;
 	}
+
 	template<Elem EL>
-	bool isOutputPatched() requires(count(EL).num_outputs == 1)
+	bool isPatched() requires(count(EL).num_outputs == 1)
 	{
 		auto idx = index(EL);
 		return outputPatched[idx.output_idx];
+	}
+
+	template<Elem EL>
+	bool isPatched() requires(count(EL).num_inputs == 1)
+	{
+		auto idx = index(EL);
+		return inputValues[idx.input_idx].has_value();
 	}
 
 	template<Elem EL>
