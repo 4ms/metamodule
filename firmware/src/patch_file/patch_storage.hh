@@ -12,6 +12,7 @@
 #include "patch_file/patch_fileio.hh"
 #include "pr_dbg.hh"
 #include "util/poll_change.hh"
+#include <optional>
 
 namespace MetaModule
 {
@@ -32,7 +33,6 @@ class PatchStorage {
 
 	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
 	using enum IntercoreStorageMessage::MessageType;
-	IntercoreStorageMessage pending_send_message{.message_type = None};
 
 public:
 	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
@@ -85,21 +85,16 @@ public:
 		return write_patch_file(vol, filename, {(const char *)data.data(), data.size()});
 	}
 
-	void send_pending_message(InterCoreComm2 &comm) {
-		if (pending_send_message.message_type != None) {
-			// Keep trying to send message until suceeds
-			if (comm.send_message(pending_send_message))
-				pending_send_message.message_type = None;
-		}
-	}
+	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
 
-	void handle_message(IntercoreStorageMessage &message) {
 		if (message.message_type == RequestRefreshPatchList) {
-			pending_send_message.message_type = PatchListUnchanged;
+
+			IntercoreStorageMessage result{.message_type = PatchListUnchanged};
 
 			auto *patch_dir_list_ = message.patch_dir_list;
 
 			if (patch_dir_list_) {
+				poll_media_change();
 
 				if (sd_changes_.take_change()) {
 					patch_dir_list_->clear_patches(Volume::SDCard);
@@ -107,7 +102,7 @@ public:
 					if (sdcard_.is_mounted())
 						PatchFileIO::add_directory(sdcard_, patch_dir_list_->volume_root(Volume::SDCard));
 
-					pending_send_message.message_type = PatchListChanged;
+					result.message_type = PatchListChanged;
 				}
 
 				if (usb_changes_.take_change()) {
@@ -116,7 +111,7 @@ public:
 					if (usbdrive_.is_mounted())
 						PatchFileIO::add_directory(usbdrive_, patch_dir_list_->volume_root(Volume::USB));
 
-					pending_send_message.message_type = PatchListChanged;
+					result.message_type = PatchListChanged;
 				}
 
 				if (norflash_changes_.take_change()) {
@@ -124,50 +119,54 @@ public:
 
 					PatchFileIO::add_directory(norflash_, patch_dir_list_->volume_root(Volume::NorFlash));
 
-					pending_send_message.message_type = PatchListChanged;
+					result.message_type = PatchListChanged;
 				}
 			}
-
-			message.message_type = None; //mark as handled
+			return result;
 		}
 
-		if (message.message_type == RequestPatchData) {
-			pending_send_message.message_type = PatchDataLoadFail;
-			pending_send_message.filename = message.filename;
-			pending_send_message.vol_id = message.vol_id;
-			pending_send_message.bytes_read = 0;
+		else if (message.message_type == RequestPatchData)
+		{
+
+			IntercoreStorageMessage result{
+				.message_type = PatchDataLoadFail,
+				.bytes_read = 0,
+				.vol_id = message.vol_id,
+				.filename = message.filename,
+			};
 
 			if ((uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
 				auto bytes_read = load_patch_file(message.buffer, message.vol_id, message.filename);
 				if (bytes_read) {
-					pending_send_message.message_type = PatchDataLoaded;
-					pending_send_message.bytes_read = bytes_read;
+					result.message_type = PatchDataLoaded;
+					result.bytes_read = bytes_read;
 				}
 			}
-			message.message_type = None; //mark as handled
+
+			return result;
 		}
 
 		if (message.message_type == RequestWritePatchData) {
-			pending_send_message.message_type = PatchDataWriteFail;
+			IntercoreStorageMessage result{.message_type = PatchDataWriteFail};
 
 			if (message.filename.size() > 0 && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
 				auto wrote_ok = write_patch_file(message.buffer, message.filename, message.vol_id);
 				if (wrote_ok) {
-					pending_send_message.message_type = PatchDataWriteOK;
+					result.message_type = PatchDataWriteOK;
 				}
 			}
 
-			message.message_type = None; //mark as handled
+			return result;
 		}
 
 		if (message.message_type == RequestFactoryResetPatches) {
-			pending_send_message.message_type = FactoryResetPatchesDone;
+			IntercoreStorageMessage result{.message_type = FactoryResetPatchesDone};
 			reload_default_patches();
 
-			message.message_type = None; //mark as handled
+			return result;
 		}
 
-		poll_media_change();
+		return std::nullopt;
 	}
 
 	PatchDirList getPatchList() {
@@ -175,8 +174,10 @@ public:
 
 		if (sdcard_.is_mounted())
 			PatchFileIO::add_directory(sdcard_, patch_dir_list_.volume_root(Volume::SDCard));
+
 		if (usbdrive_.is_mounted())
 			PatchFileIO::add_directory(usbdrive_, patch_dir_list_.volume_root(Volume::USB));
+
 		PatchFileIO::add_directory(norflash_, patch_dir_list_.volume_root(Volume::NorFlash));
 
 		return patch_dir_list_;

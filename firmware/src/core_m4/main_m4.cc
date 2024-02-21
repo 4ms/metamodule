@@ -4,12 +4,12 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/ipcc.hh"
-#include "drivers/pin.hh"
 #include "drivers/rcc.hh"
 #include "drivers/system_clocks.hh"
 #include "fs/fatfs/sd_host.hh"
-#include "fs/fs_manager.hh"
+#include "fs/fs_messages.hh"
 #include "hsem_handler.hh"
+#include "patch_file/patch_storage.hh"
 #include "usb/usb_manager.hh"
 
 #ifdef ENABLE_WIFI_BRIDGE
@@ -54,18 +54,18 @@ void main() {
 	// SD Card
 	SDCardHost sd;
 
-	FilesystemManager fs{usb.get_msc_fileio(), sd.get_fileio(), SharedMemoryS::ptrs.icc_message};
+	FilesystemMessages fs_messages{usb.get_msc_fileio(), sd.get_fileio(), SharedMemoryS::ptrs.icc_message};
+
 	if (reload_default_patches)
-		fs.reload_default_patches();
+		fs_messages.reload_default_patches();
 
 #ifdef ENABLE_WIFI_BRIDGE
-	WifiInterface::init(&fs.get_patch_storage());
+	WifiInterface::init(&fs_messages.get_patch_storage());
+	WifiInterface::start();
 #endif
 
 	// Controls
-	auto param_block_base = SharedMemoryS::ptrs.param_block;
-	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
-	Controls controls{*param_block_base, *auxsignal_buffer, usb.get_midi_host()};
+	Controls controls{*SharedMemoryS::ptrs.param_block, *SharedMemoryS::ptrs.auxsignal_block, usb.get_midi_host()};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 
@@ -85,7 +85,8 @@ void main() {
 
 		usb.process();
 		sd.process();
-		fs.process();
+
+		fs_messages.process();
 
 #ifdef ENABLE_WIFI_BRIDGE
 		WifiInterface::run();

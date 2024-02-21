@@ -9,6 +9,8 @@ namespace MetaModule::WifiInterface
 	void init(PatchStorage*);
 
 	void run();
+	void start();
+	void stop();
 
 	void handle_received_frame(uint8_t, std::span<uint8_t>);
 };

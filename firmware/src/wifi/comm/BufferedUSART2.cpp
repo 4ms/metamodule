@@ -23,6 +23,11 @@ void BufferedUSART2::init()
     initPeripheral();
 }
 
+void BufferedUSART2::deinit()
+{
+    LL_USART_DisableIT_RXNE_RXFNE(USART_PERIPH);
+}
+
 bool BufferedUSART2::setBaudrate(uint32_t baudRate)
 {
     return commMain.set_baudrate(baudRate);
@@ -43,7 +48,7 @@ void BufferedUSART2::initPeripheral()
                 auto result = queue.put(val);
                 if (not result)
                 {
-                    pr_err("RX Overrun\n");
+                    pr_err("USART2: RX Soft Overrun\n");
                 }
             }
             while (LL_USART_IsActiveFlag_RXNE(USART_PERIPH));

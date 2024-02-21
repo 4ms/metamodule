@@ -8,6 +8,7 @@ class BufferedUSART2
 {
 public:
     static void init();
+    static void deinit();
 
     static bool setBaudrate(uint32_t);
 
