@@ -24,20 +24,20 @@ static void serial_debug_print(const uint8_t* data, uint16_t size, bool write)
     #ifdef LOG_TRANSACTIONS
     if (write)
     {
-        printf_("WRITE ");
+        printf("WRITE ");
     }
     else
     {
-        printf_("Read ");
+        printf("Read ");
     }
-    printf_("Len %u\n", size);
+    printf("Len %u\n", size);
     
 
     for (uint32_t i=0; i<size; i++)
     {
-        printf_("0x%02x ", data[i]);
+        printf("0x%02x ", data[i]);
     }
-    printf_("\n");
+    printf("\n");
     #endif
 }
 
@@ -94,6 +94,12 @@ void loader_port_init()
 
     resetPin.init(WifiBootloaderResetConfig, mdrivlib::PinMode::Output, mdrivlib::PinPull::Up);
     bootSelectPin.init(WifiBootloaderBootSelectConfig, mdrivlib::PinMode::Output, mdrivlib::PinPull::Up);
+}
+
+void loader_port_deinit()
+{
+    BufferedUSART::deinit();
+    bootSelectPin.high();
 }
 
 // Set GPIO0 LOW, then

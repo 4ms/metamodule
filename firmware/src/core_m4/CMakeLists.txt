@@ -8,6 +8,7 @@ set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp1)
 set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
 set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
 set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
+set(WIFI_DIR ${FWDIR}/src/wifi)
 
 add_executable(
   main_m4.elf
@@ -19,6 +20,10 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
+  ${FWDIR}/src/fw_update/hash/hash_processor.cc
+  ${FWDIR}/src/fw_update/hash/md5_hash.c
+  ${FWDIR}/src/fw_update/firmware_writer.cc
+  ${FWDIR}/src/flash_loader/flash_loader.cc
   ${FWDIR}/src/usb/usb_drive_device.cc
   ${FWDIR}/src/usb/usbd_conf.cc
   ${FWDIR}/src/usb/usbd_desc.c
@@ -117,6 +122,9 @@ set(MCU_FLAGS
     -mfloat-abi=hard
 )
 
+add_library(mp15xm4_arch INTERFACE)
+target_compile_options(mp15xm4_arch INTERFACE ${MCU_FLAGS})
+
 target_compile_features(main_m4.elf PUBLIC cxx_std_23)
 
 target_compile_options(
@@ -172,6 +180,26 @@ target_link_script(
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
+
+# Fix for ff.c string overfow (false positive?)
+target_link_options(main_m4.elf PUBLIC -Wno-stringop-overflow)
+
+if (ENABLE_WIFI_BRIDGE)
+
+  target_compile_definitions(main_m4.elf PRIVATE
+    ENABLE_WIFI_BRIDGE=1
+  )
+
+  # Add comm functionality
+  add_subdirectory(${FWDIR}/src/wifi/comm ${CMAKE_BINARY_DIR}/wifi_comm)
+
+endif()
+
+# Always add wifi flashing
+add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
+
+
+
 
 set(GEN_PATH ${CMAKE_CURRENT_BINARY_DIR})
 

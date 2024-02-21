@@ -80,10 +80,11 @@ struct HostFileIO {
 		return true;
 	}
 
-	uint64_t read_file(const std::string_view filename, std::span<char> buffer) {
+	uint64_t read_file(const std::string_view filename, std::span<char> buffer, size_t offset = 0) {
 		std::filesystem::current_path(_patch_dir);
 
 		// Interpret "/" root dir as _patch_dir
+		std::filesystem::current_path(_patch_dir);
 		std::string filepath;
 		if (filename.starts_with("/"))
 			filepath = "." + std::string(filename);
@@ -94,18 +95,38 @@ struct HostFileIO {
 		std::ifstream ifs(filepath, std::ios::in);
 		uint64_t sz = 0;
 		if (ifs.is_open()) {
+			// Find file size
 			ifs.seekg(0, std::ios::end);
 			sz = ifs.tellg();
-			ifs.seekg(0, std::ios::beg);
+
+			ifs.seekg(offset, std::ios::beg);
+			sz -= offset;
+
 			ifs.read(buffer.data(), buffer.size_bytes());
 			ifs.close();
 		}
 		return sz;
 	}
 
-	bool update_or_create_file(const std::string_view filename, const std::span<const char> data) {
-		//TODO
-		return false;
+	bool update_or_create_file(const std::string_view filename, const std::span<const char> buffer) {
+		// Interpret "/" root dir as _patch_dir
+		std::filesystem::current_path(_patch_dir);
+		std::string filepath;
+		if (filename.starts_with("/"))
+			filepath = "." + std::string(filename);
+		else
+			filepath = filename;
+
+		std::cout << "HostFileIO: write " << filepath << "\n";
+
+		auto ofs = std::ofstream{filepath, std::ios::out};
+		uint64_t sz = 0;
+		if (ofs.is_open()) {
+			ofs.write(buffer.data(), buffer.size_bytes());
+			ofs.close();
+			sz = buffer.size_bytes();
+		}
+		return sz;
 	}
 
 	bool delete_file(std::string_view filename) {

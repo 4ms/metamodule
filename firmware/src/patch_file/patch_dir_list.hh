@@ -9,6 +9,11 @@ namespace MetaModule
 
 struct PatchDirList {
 
+	const PatchDir &volume_root(Volume vol) const {
+		auto vol_num = static_cast<std::underlying_type_t<Volume>>(vol);
+		return vol_root[vol_num];
+	}
+
 	PatchDir &volume_root(Volume vol) {
 		auto vol_num = static_cast<std::underlying_type_t<Volume>>(vol);
 		return vol_root[vol_num];

@@ -11,18 +11,20 @@ namespace Framing
 {
 
 template <std::size_t SIZE>
-class StaticDeframer : public Deframer
+class StaticDeframer : public Deframer<StaticDeframer<SIZE>>
 {
 public:
-	StaticDeframer(const Configuration_t& config_, const FUNC func_) : Deframer(config_, func_) {};
-	~StaticDeframer() = default;
+	StaticDeframer(const Configuration_t& config_) : Deframer<StaticDeframer<SIZE>>(config_, this) {};
 
 private:
-	virtual void doReset() override
+	template <typename FUNC>
+	void doReset(const FUNC&& func)
 	{
 		fillCount = 0;
 	}
-	virtual void doAdd(uint8_t byte) override
+
+	template <typename FUNC>
+	void doAdd(uint8_t byte, const FUNC&& func)
 	{
 		if (fillCount < SIZE)
 		{
@@ -30,11 +32,12 @@ private:
 		}
 		else
 		{
-			pr_err("StaticDeframer: Frame larger than maximum size");
-			doReset();
+			pr_err("StaticDeframer: Frame larger than maximum size\n");
+			doReset(func);
 		}
 	}
-	virtual void doComplete() override
+	template <typename FUNC>
+	void doComplete(const FUNC&& func)
 	{
 		func({receiveBuffer.data(), fillCount});
 	}
@@ -42,6 +45,9 @@ private:
 private:
 	std::array<uint8_t,SIZE> receiveBuffer;
 	std::size_t fillCount = 0;
+
+private:
+	friend Deframer<StaticDeframer<SIZE>>;
 };
 
 }

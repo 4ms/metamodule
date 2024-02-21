@@ -136,11 +136,15 @@ public:
 	}
 
 	// Reads into buffer, returns the bytes actually read
-	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
+	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset = 0) {
 		lfs_file_t file;
 
 		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_RDONLY);
 		if (err < 0)
+			return 0;
+
+		auto seek_err = lfs_file_seek(&lfs, &file, offset, LFS_SEEK_SET);
+		if (seek_err < 0)
 			return 0;
 
 		auto bytes_read = lfs_file_read(&lfs, &file, buffer.data(), buffer.size_bytes());
@@ -149,6 +153,24 @@ public:
 
 		lfs_file_close(&lfs, &file);
 		return bytes_read;
+	}
+
+	// Write
+	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
+		lfs_file_t file;
+
+		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC);
+		if (err < 0)
+			return 0;
+
+		auto bytes_written = lfs_file_write(&lfs, &file, buffer.data(), buffer.size_bytes());
+		if (bytes_written <= (int)buffer.size_bytes()) {
+			lfs_file_close(&lfs, &file);
+			return 0;
+		}
+
+		lfs_file_close(&lfs, &file);
+		return bytes_written;
 	}
 
 	// Performs an action(filename, timestamp) on each file in LittleFS root dir ending with the extension

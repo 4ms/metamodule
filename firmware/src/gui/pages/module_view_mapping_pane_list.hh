@@ -19,13 +19,17 @@ namespace MetaModule
 // Or Add/edit callbacks live here and they only use some other class (not ModuleViewMappingPane)
 struct MappingPaneList {
 
-	static lv_obj_t *create_map_list_item(MappedKnob const &map, std::string_view knobset_name, lv_obj_t *parent) {
+	static lv_obj_t *
+	create_map_list_item(MappedKnob const &map, std::string_view knobset_name, lv_obj_t *parent, bool is_active) {
 		auto obj = ui_MappedKnobsetitem_create(parent);
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
 		lv_show(circle);
-		lv_label_set_text(setname, knobset_name.data());
+		if (is_active)
+			lv_label_set_text_fmt(setname, "%s*", knobset_name.data());
+		else
+			lv_label_set_text(setname, knobset_name.data());
 
 		auto name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text(label, name.c_str());
@@ -42,10 +46,13 @@ struct MappingPaneList {
 		return obj;
 	}
 
-	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name, lv_obj_t *parent) {
+	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name, lv_obj_t *parent, bool is_active) {
 		auto obj = ui_UnmappedSetItem_create(parent);
 		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
-		lv_label_set_text(setname, knobset_name.data());
+		if (is_active)
+			lv_label_set_text_fmt(setname, "%s*", knobset_name.data());
+		else
+			lv_label_set_text(setname, knobset_name.data());
 		return obj;
 	}
 
@@ -150,9 +157,11 @@ private:
 
 	static void format_cc_map_circle(uint16_t cc_num, lv_obj_t *circle, lv_obj_t *label) {
 		//Workaround to make two lines
-		// std::string name{lv_label_get_text(label)};
-		// name.insert(name[2], "\n");
-		// lv_label_set_text(label, name.c_str());
+		std::string name{lv_label_get_text(label)};
+		if (name.size() > 2 && name[0] == 'C' && name[1] == 'C') {
+			name.insert(2, "\n");
+			lv_label_set_text(label, name.c_str());
+		}
 		format_label(label, -2, &ui_font_MuseoSansRounded50012);
 		format_circle(circle, Gui::palette_main[LV_PALETTE_GREY], 2);
 	}

@@ -20,8 +20,9 @@ struct AddMapPopUp {
 	}
 	//
 
-	void prepare_focus(lv_group_t *group) {
+	void prepare_focus(lv_group_t *group, lv_obj_t *base) {
 		base_group = group;
+		lv_obj_set_parent(ui_AddMapPopUp, base);
 	}
 
 	void show(uint32_t knobset_id, uint16_t param_id, uint16_t module_id) {

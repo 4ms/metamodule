@@ -10,13 +10,13 @@ namespace MetaModule
 {
 struct Params {
 	std::array<float, PanelDef::NumCVIn> cvjacks{};
-	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
+	std::array<bool, PanelDef::NumGateIn> gate_ins{};
 	std::array<Toggler, PanelDef::NumRgbButton> buttons{};
 	std::array<float, PanelDef::NumPot> knobs{};
 
 	Midi::Event midi_event;
 
-	uint32_t jack_senses;
+	uint32_t jack_senses{};
 
 	Params() {
 		clear();
@@ -26,7 +26,7 @@ struct Params {
 		for (float &cvjack : cvjacks)
 			cvjack = 0.f;
 		for (auto &gate_in : gate_ins)
-			gate_in.reset();
+			gate_in = false;
 		for (auto &button : buttons)
 			button.reset();
 		for (float &knob : knobs)
@@ -41,7 +41,7 @@ struct Params {
 		for (unsigned i = 0; i < PanelDef::NumCVIn; i++)
 			cvjacks[i] = that.cvjacks[i];
 		for (unsigned i = 0; i < PanelDef::NumGateIn; i++)
-			gate_ins[i].copy_state(that.gate_ins[i]);
+			gate_ins[i] = that.gate_ins[i];
 		for (unsigned i = 0; i < PanelDef::NumRgbButton; i++)
 			buttons[i].copy_state(that.buttons[i]);
 		for (unsigned i = 0; i < PanelDef::NumPot; i++)

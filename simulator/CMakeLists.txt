@@ -79,7 +79,7 @@ foreach(brand ${brands})
            ${FWDIR}
            ${SHARED}
            ${SHARED}/cpputil)
-  target_compile_options(${brand}Library PRIVATE -Wno-attributes -Wno-deprecated-enum-enum-conversion)
+  target_compile_options(${brand}Library PRIVATE -Wno-attributes -Wno-deprecated-enum-enum-conversion -g2)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
 
   # Faceplate artwork
@@ -119,15 +119,17 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 # #################### Application ############################################
 
 add_executable(
-	simulator 
-	src/main.cc 
-	src/ui.cc
-	${FWDIR}/src/gui/elements/element_name.cc
-	${SHARED}/patch_convert/ryml/ryml_serial.cc
-	${SHARED}/patch_convert/yaml_to_patch.cc 
-	${FACEPLATE_ARTWORK_SOURCES}
-	${COMP_ARTWORK_SOURCES} 
-	${SLS_SOURCES})
+    simulator 
+    src/main.cc 
+    src/ui.cc
+    ${FWDIR}/src/gui/elements/element_name.cc
+    ${FWDIR}/src/fw_update/updater_proxy.cc
+    ${SHARED}/patch_convert/ryml/ryml_serial.cc
+    ${SHARED}/patch_convert/yaml_to_patch.cc 
+    ${SHARED}/patch_convert/patch_to_yaml.cc 
+    ${FACEPLATE_ARTWORK_SOURCES}
+    ${COMP_ARTWORK_SOURCES} 
+    ${SLS_SOURCES})
 
 target_include_directories(
   simulator
@@ -172,3 +174,29 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_link_options(simulator PRIVATE "/MAP:simulator.map")
 endif()
+
+
+## Debugging
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") 
+  find_program(CMAKE_DEBUGGER_BINARY lldb)
+  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- -p ${CMAKE_CURRENT_LIST_DIR}/patches)
+
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  find_program(CMAKE_DEBUGGER_BINARY gdb)
+  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} -q
+    -ex \"set debuginfod enabled off\"
+    -ex \"set pagination off\" 
+    -ex \"run\"
+    --args $<TARGET_FILE:simulator> -p ${CMAKE_CURRENT_LIST_DIR}/patches
+  )
+else ()
+  set(DEBUG_COMMAND echo "Compiler is ${CMAKE_CXX_COMPILER_ID}, but must be Clang, AppleClang, or GNU to debug")
+endif()
+
+add_custom_target(
+  debug
+  DEPENDS simulator
+  COMMAND ${DEBUG_COMMAND}
+  USES_TERMINAL
+)
+

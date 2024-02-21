@@ -17,6 +17,9 @@ warnings:
 
 run: all
 	build/simulator
+
+debug:
+	cmake --build ${BUILDDIR} --target debug
 	
 # "make limit filename.txt" --> only build modules whose names are in the text file
 ifeq (limit,$(firstword $(MAKECMDGOALS)))

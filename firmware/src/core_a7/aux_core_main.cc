@@ -1,6 +1,6 @@
 #include "conf/hsem_conf.hh"
+#include "core_a7/a7_shared_memory.hh"
 #include "core_a7/smp_api.hh"
-#include "core_intercom/shared_memory.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/smp.hh"
@@ -22,11 +22,11 @@ extern "C" void aux_core_main() {
 
 	pr_info("A7 Core 2 starting\n");
 
-	auto patch_player = SharedMemoryS::ptrs.patch_player;
-	auto patch_playloader = SharedMemoryS::ptrs.patch_playloader;
-	auto patch_storage_proxy = SharedMemoryS::ptrs.patch_storage;
-	auto sync_params = SharedMemoryS::ptrs.sync_params;
-	auto patch_mod_queue = SharedMemoryS::ptrs.patch_mod_queue;
+	auto patch_player = A7SharedMemoryS::ptrs.patch_player;
+	auto patch_playloader = A7SharedMemoryS::ptrs.patch_playloader;
+	auto patch_storage_proxy = A7SharedMemoryS::ptrs.patch_storage;
+	auto sync_params = A7SharedMemoryS::ptrs.sync_params;
+	auto patch_mod_queue = A7SharedMemoryS::ptrs.patch_mod_queue;
 
 	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
 

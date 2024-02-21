@@ -1,5 +1,5 @@
 #pragma once
-#include "fw_update/updater.hh"
+#include "fw_update/updater_proxy.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
@@ -83,20 +83,21 @@ struct FirmwareUpdateTab {
 			case State::Updating: {
 				auto status = updater.process();
 
-				if (status.state == FirmwareUpdater::Error) {
+				if (status.state == FirmwareUpdaterProxy::Error) {
 					display_update_failed(status.error_message);
 					state = State::Failed;
 
-				} else if (status.state == FirmwareUpdater::LoadingFilesToRAM) {
-					display_progress("Loading to RAM", status.file_size, 0);
+				} else if (status.state == FirmwareUpdaterProxy::LoadingUpdateFiles) {
+					display_loading_files();
 
-				} else if (status.state == FirmwareUpdater::WritingApp) {
-					display_progress("Writing application", status.file_size, status.bytes_remaining);
+				} else if (status.state == FirmwareUpdaterProxy::Verifying) {
+					display_progress(
+						"Checking target memory checksum", status.name, status.file_size, status.bytes_completed);
 
-				} else if (status.state == FirmwareUpdater::WritingWifi) {
-					display_progress("Writing wifi firmware", status.file_size, status.bytes_remaining);
+				} else if (status.state == FirmwareUpdaterProxy::Writing) {
+					display_progress("Writing to memory", status.name, status.file_size, status.bytes_completed);
 
-				} else if (status.state == FirmwareUpdater::Success) {
+				} else if (status.state == FirmwareUpdaterProxy::Success) {
 					display_success();
 					state = State::Success;
 				}
@@ -146,13 +147,21 @@ private:
 
 	void display_reading_manifest() {
 		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
-							  "Reading update file %s (%u kB)... Please wait\n",
+							  "Reading manifest file %s (%u kB)... Please wait\n",
 							  manifest_filename.data(),
 							  int(manifest_filesize / 1024));
 		lv_show(ui_FWUpdateSpinner);
 		lv_hide(ui_SystemMenUpdateProgressBar);
 		lv_hide(ui_SystemMenuUpdateFWBut);
 		state = State::Updating;
+	}
+
+	void display_loading_files() {
+		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage, "Loading update files... Please wait\n");
+
+		lv_show(ui_FWUpdateSpinner);
+		lv_hide(ui_SystemMenUpdateProgressBar);
+		lv_hide(ui_SystemMenuUpdateFWBut);
 	}
 
 	void display_manifest_found() {
@@ -202,24 +211,30 @@ private:
 		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
 
-	void display_progress(std::string_view message, int file_size, int bytes_remaining) {
-		if (file_size > 0 && bytes_remaining > 0) {
+	void display_progress(std::string_view message, std::string file_name, int file_size, int bytes_completed) {
+		if (file_size > 0 && bytes_completed < file_size) {
 			lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
-								  "%.*s:\n%u of %u kB\nDO NOT POWER OFF",
+								  "%.*s: %.*s\n%u of %u kB\nDO NOT POWER OFF",
+								  (int)file_name.size(),
+								  file_name.data(),
 								  (int)message.size(),
 								  message.data(),
-								  unsigned((file_size - bytes_remaining) / 1024),
+								  unsigned((bytes_completed) / 1024),
 								  unsigned(file_size / 1024));
 
-			int percent = 100 * (file_size - bytes_remaining) / file_size;
+			int percent = 100 * (bytes_completed) / file_size;
 			lv_hide(ui_FWUpdateSpinner);
 			lv_show(ui_SystemMenUpdateProgressBar);
 			lv_bar_set_value(ui_SystemMenUpdateProgressBar, percent, LV_ANIM_ON);
 		} else {
 			lv_show(ui_FWUpdateSpinner);
 			lv_hide(ui_SystemMenUpdateProgressBar);
-			lv_label_set_text_fmt(
-				ui_SystemMenuUpdateMessage, "%.*s:\nDO NOT POWER OFF", (int)message.size(), message.data());
+			lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
+								  "%.*s: %.*s\nDO NOT POWER OFF",
+								  (int)file_name.size(),
+								  file_name.data(),
+								  (int)message.size(),
+								  message.data());
 		}
 	}
 
@@ -236,7 +251,7 @@ private:
 
 	uint32_t manifest_filesize = 0;
 
-	FirmwareUpdater updater;
+	FirmwareUpdaterProxy updater;
 
 	PollEvent<uint32_t> media_poll{2000};
 

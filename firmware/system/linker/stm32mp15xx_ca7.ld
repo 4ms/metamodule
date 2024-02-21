@@ -8,6 +8,7 @@ INCLUDE system/linker/memory.ld
 MEMORY
 {
     ROM (rx)			: ORIGIN = _A7_CODE,		LENGTH = _A7_CODE_SZ
+    RAM (rx)			: ORIGIN = _A7_RAM,			LENGTH = _A7_RAM_SZ
 	VIRTDRIVE (rw)		: ORIGIN = _VIRTDRIVE,		LENGTH = _VIRTDRIVE_SZ 
 	FWBUFFER (rw)		: ORIGIN = _FWBUFFER,		LENGTH = _FWBUFFER_SZ 
 	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
@@ -43,7 +44,8 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		*(.rodata)         /* .rodata sections (constants, strings, etc.) */
-		*(.rodata*) 
+		*(.rodata*)
+		*(.binary*)
 		. = ALIGN(8);
 	} > ROM
 
@@ -98,7 +100,7 @@ SECTIONS
         _bss_end = .;
 		. = ALIGN(256);
 		_ram_aligned_end = .;
-    } > ROM
+    } > RAM
 
 	.heap (NOLOAD):
 	{

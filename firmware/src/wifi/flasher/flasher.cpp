@@ -7,6 +7,9 @@
 #include <console/pr_dbg.hh>
 
 #include <cstring>
+#include <string_view>
+#include <span>
+#include <optional>
 
 namespace Flasher
 {
@@ -52,7 +55,17 @@ esp_loader_error_t init(uint32_t baudrate)
     return err;
 }
 
-esp_loader_error_t flash(uint32_t address, std::span<uint8_t> buffer)
+void deinit()
+{
+    loader_port_deinit();
+}
+
+void reboot()
+{
+    esp_loader_reset_target();
+}
+
+esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
 {
     esp_loader_error_t err;
 
@@ -67,11 +80,13 @@ esp_loader_error_t flash(uint32_t address, std::span<uint8_t> buffer)
         pr_err("Flasher: Erasing flash failed with error %d\n", err);
         return err;
     }
-    pr_dbg("Flasher: Start programming\n");
+    pr_dbg("Flasher: Start programming %08x - %08x\n", address, address + buffer.size());
 
     const uint8_t* bin_addr = buffer.data();
     const std::size_t binary_size = buffer.size();
-    size_t written = 0;    
+    size_t written = 0;
+
+    std::optional<int> lastPrintedProgress;
 
     while (written < binary_size)
     {
@@ -89,27 +104,88 @@ esp_loader_error_t flash(uint32_t address, std::span<uint8_t> buffer)
         written += to_read;
 
         int progress = (int)(((float)written / float(binary_size)) * 100);
-        pr_dbg("Flasher: Progress: %d %%\n", progress);
+
+        if (not lastPrintedProgress or lastPrintedProgress != progress)
+        {
+            pr_dbg("Flasher: Progress: %d %%\n", progress);
+            lastPrintedProgress = progress;
+        }        
     };
 
     pr_dbg("Flasher: Finished programming\n");
 
-    #ifdef MD5_ENABLED
-    err = esp_loader_flash_verify();
-    if (err == ESP_LOADER_ERROR_UNSUPPORTED_FUNC)
-    {
-        pr_err("Flasher: ESP8266 does not support flash verify command.\n");
-        return err;
-    }
-    else if (err != ESP_LOADER_SUCCESS)
-    {
-        pr_err("Flasher: MD5 does not match. err: %d\n", err);
-        return err;
-    }
-    pr_dbg("Flasher: Flash verified\n");
-    #endif
-
     return ESP_LOADER_SUCCESS;
+}
+
+esp_loader_error_t verify(uint32_t address, uint32_t length, std::string_view checksum)
+{
+    pr_dbg("Flasher: Getting checksum from %08x-%08x\n", address, address + length);
+
+    std::array<uint8_t,32> readValue;
+
+    auto result = esp_loader_get_md5_hex(address, length, readValue.data());
+
+    if (result == ESP_LOADER_SUCCESS)
+    {
+        if (std::memcmp(checksum.data(), readValue.data(), checksum.size()) == 0)
+        {
+            return ESP_LOADER_SUCCESS;
+        }
+        else
+        {
+            pr_err("Flasher: Mismatch: Expected %.*s vs Read %.*s\n", checksum.size(), checksum.data(), readValue.size(), readValue.data());
+            return ESP_LOADER_ERROR_INVALID_MD5;
+        }
+    }
+    else
+    {
+        pr_err("Flasher: Failed to get checksum: %u\n", result);
+    }
+
+    return result;
+}
+
+esp_loader_error_t conditional_flash(uint32_t address, std::span<const uint8_t> payload, std::string_view checksum)
+{
+    pr_dbg("Flasher: Conditionally flash %p-%p with checksum %.*s to %p\n", &payload.front(), &payload.back(), checksum.size(), checksum.data(), address);
+
+    auto result = verify(address, payload.size(), checksum);
+
+    if (result == ESP_LOADER_SUCCESS)
+    {
+        pr_dbg("Flasher: Checksum already matches\n");
+        return ESP_LOADER_SUCCESS;
+    }
+    else if (result == ESP_LOADER_ERROR_INVALID_MD5)
+    {
+        result = flash(address, payload);
+
+        if (result == ESP_LOADER_SUCCESS)
+        {
+            pr_dbg("Flasher: Payload flashed successfully\n");
+            return ESP_LOADER_SUCCESS;
+        }
+        else
+        {
+            pr_err("Flasher: Flashing failed with result: %u\n", result);
+        }
+    }
+    else
+    {
+        pr_err("Flasher: Failed to read checksum of destination area\n");
+    }
+
+    return result;
+}
+
+esp_loader_error_t flash_start(uint32_t address, uint32_t length, uint32_t batchSize)
+{
+    return esp_loader_flash_start(address, length, batchSize);
+}
+
+esp_loader_error_t flash_process(std::span<uint8_t> buffer)
+{
+    return esp_loader_flash_write(buffer.data(), buffer.size());
 }
 
 }
