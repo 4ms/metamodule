@@ -89,7 +89,7 @@ struct FirmwareUpdateTab {
 
 				} else if (status.state == FirmwareUpdaterProxy::LoadingUpdateFiles) {
 					display_loading_files();
-				
+
 				} else if (status.state == FirmwareUpdaterProxy::Verifying) {
 					display_progress(
 						"Checking target memory checksum", status.name, status.file_size, status.bytes_completed);
@@ -156,10 +156,8 @@ private:
 		state = State::Updating;
 	}
 
-	void display_loading_files()
-	{
-		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage,
-						"Loadidng update files... Please wait\n");
+	void display_loading_files() {
+		lv_label_set_text_fmt(ui_SystemMenuUpdateMessage, "Loading update files... Please wait\n");
 
 		lv_show(ui_FWUpdateSpinner);
 		lv_hide(ui_SystemMenUpdateProgressBar);
