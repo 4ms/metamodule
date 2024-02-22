@@ -5,6 +5,11 @@ set_arch_flags()
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(SHARED ${FWDIR}/../shared)
 
+#
+# cpputil
+#
+add_subdirectory(${SHARED}/cpputil ${CMAKE_CURRENT_BINARY_DIR}/cpputil)
+
 add_executable(
   flash_loader.elf
   ${FWDIR}/system/libc_stub.c
@@ -48,7 +53,6 @@ target_include_directories(
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
           ${SHARED}
-          ${SHARED}/cpputil
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
           ${FWDIR}/lib/cmsis/Core_A/Include
           ${FWDIR}/lib/cmsis/Include
@@ -66,6 +70,8 @@ target_link_script(
   -nostdlib
   -flto=auto
 )
+
+target_link_libraries(flash_loader.elf PRIVATE cpputil)
 
 add_bin_hex_command(flash_loader)
 

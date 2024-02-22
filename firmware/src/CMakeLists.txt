@@ -71,7 +71,6 @@ foreach(brand ${brands})
            ${FWDIR}/src
            ${FWDIR}
            ${SHARED}
-           ${SHARED}/cpputil
   )
   target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
@@ -218,7 +217,6 @@ target_include_directories(
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
           ${SHARED}
-          ${SHARED}/cpputil
           ${SHARED}/patch
           ${SHARED}/patch_convert
           ${FWDIR}/lib/fatfs/source
@@ -233,7 +231,7 @@ target_include_directories(
 
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor cpputil)
 
 foreach(brand ${brands})
   target_link_libraries(main.elf PRIVATE ${brand}Library)

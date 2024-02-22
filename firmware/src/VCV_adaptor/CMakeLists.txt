@@ -14,7 +14,7 @@ add_subdirectory(${MM_ROOT}/firmware/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jan
 add_subdirectory(pffft)
 
 # TODO: is this really meant to be propagated
-target_link_libraries(VCV_adaptor PUBLIC pffft jansson)
+target_link_libraries(VCV_adaptor PUBLIC pffft jansson cpputil)
 
 target_link_libraries(VCV_adaptor PRIVATE lvgl::lvgl jansson)
 
@@ -25,7 +25,6 @@ target_include_directories(
          ${MM_ROOT}/firmware/src/console
          ${MM_ROOT}/firmware
          ${MM_ROOT}/shared
-         ${MM_ROOT}/shared/cpputil
 )
 
 set_property(TARGET VCV_adaptor PROPERTY CXX_STANDARD 20)

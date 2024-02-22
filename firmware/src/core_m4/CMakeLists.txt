@@ -105,7 +105,6 @@ target_include_directories(
           ${SHARED}
           ${SHARED}/processors
           ${SHARED}/CoreModules
-          ${SHARED}/cpputil
           ${SHARED}/patch
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
@@ -121,6 +120,8 @@ target_link_script(
   ${FWDIR}/system/linker/stm32mp15xx_m4.ld
   -L${FWDIR}
 )
+
+target_link_libraries(main_m4.elf PRIVATE cpputil)
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
