@@ -97,11 +97,7 @@ endforeach()
 #
 # RYML
 #
-set(RYMLDIR ${SHARED}/patch_convert/ryml/rapidyaml)
-file(GLOB RYML_SOURCES ${RYMLDIR}/src/c4/yml/*.cpp ${RYMLDIR}/ext/c4core/src/c4/*.cpp)
-add_library(ryml OBJECT ${RYML_SOURCES})
-target_link_libraries(ryml PUBLIC mp15xa7_arch)
-target_include_directories(ryml PUBLIC ${RYMLDIR}/src ${RYMLDIR}/ext/c4core/src)
+add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
 
 #
 # SLS Exported GUI (meta5)
