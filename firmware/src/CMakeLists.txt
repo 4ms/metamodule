@@ -6,11 +6,12 @@ option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" ON)
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(SHARED ${FWDIR}/../shared)
 
+set_arch_flags()
+
 #
 # Driver interface
 #
 add_library(mdrivlib_interface INTERFACE)
-target_link_libraries(mdrivlib_interface INTERFACE mp15xa7_arch)
 target_include_directories(
   mdrivlib_interface
   INTERFACE ${FWDIR}/lib/cmsis-device/stm32mp157c/include
@@ -39,8 +40,6 @@ target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
 # VCV Adaptor
 #
 add_subdirectory(VCV_adaptor)
-target_link_libraries(VCV_adaptor PUBLIC mp15xa7_arch)
-target_link_libraries(jansson PUBLIC mp15xa7_arch)
 
 #
 # Brands
@@ -64,7 +63,7 @@ foreach(brand ${brands})
 
   # Module Library
   add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_link_libraries(${brand}Library PRIVATE mp15xa7_arch VCV_adaptor)
+  target_link_libraries(${brand}Library PRIVATE VCV_adaptor)
   target_include_directories(
     ${brand}Library
     PUBLIC 
@@ -115,10 +114,8 @@ add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_D
 # SLS Exported GUI (meta5)
 #
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
-target_link_libraries(ui PRIVATE lvgl::lvgl mp15xa7_arch)
 # Fix for SLS generated files (See https://forum.squareline.io/t/unused-variable-target-warning-when-compiling/1610/3 )
 target_compile_options(ui PRIVATE -Wno-unused-variable)
-
 
 #
 # Main App
@@ -235,7 +232,7 @@ target_include_directories(
 
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mp15xa7_arch mdrivlib_interface ui ryml VCV_adaptor)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor)
 
 foreach(brand ${brands})
   target_link_libraries(main.elf PRIVATE ${brand}Library)

@@ -1,15 +1,11 @@
-#
-# Interface library for compile settings
-#
-add_library(mp15xa7_arch INTERFACE)
-target_compile_definitions(
-  mp15xa7_arch
-  INTERFACE USE_HAL_DRIVER
-            USE_FULL_LL_DRIVER
-            STM32MP1
-            STM32MP157Cxx
-            CORE_CA7
-            $<$<BOOL:${USE_FEWER_MODULES}>:USE_FEWER_MODULES=1>
+macro(set_arch_flags)
+add_compile_definitions(
+      USE_HAL_DRIVER
+      USE_FULL_LL_DRIVER
+      STM32MP1
+      STM32MP157Cxx
+      CORE_CA7
+      $<$<BOOL:${USE_FEWER_MODULES}>:USE_FEWER_MODULES=1>
 )
 
 # Note: MCU_FLAGS is used with linking as well
@@ -26,38 +22,29 @@ set(MCU_FLAGS
     -funsafe-math-optimizations
 )
 
-target_compile_features(mp15xa7_arch INTERFACE cxx_std_23)
+set(CMAKE_CXX_STANDARD 23)
 
-target_compile_options(
-  mp15xa7_arch
-  INTERFACE ${MCU_FLAGS}
-            "SHELL:--param l1-cache-size=32"
-            "SHELL:--param l1-cache-line-size=64"
-            "SHELL:--param l2-cache-size=256"
-            $<$<CONFIG:Debug>:-O0
-            -g3>
-            $<$<CONFIG:Release>:-O3>
-            $<$<CONFIG:RelWithDebInfo>:-O3
-            -g3>
-            -fno-common
-            -fdata-sections
-            -ffunction-sections
-            -nostartfiles
-            -ffreestanding
-            -fno-unwind-tables
-            -Wall
-            -Werror=return-type
-            -Wsign-compare
-            $<$<COMPILE_LANGUAGE:CXX>:
-            # -flto=auto
-            -ffold-simple-inlines
-            -Wno-psabi
-            -fno-rtti
-            -fno-exceptions
-            -Wno-register
-            -Wno-volatile
-            -fno-threadsafe-statics
-            >
+add_compile_options(
+  ${MCU_FLAGS}
+  "SHELL:--param l1-cache-size=32"
+  "SHELL:--param l1-cache-line-size=64"
+  "SHELL:--param l2-cache-size=256"
+  "$<$<CONFIG:Debug>:-O0>"
+  "$<$<CONFIG:Debug>:-g3>"
+  "$<$<CONFIG:Release>:-O3>"
+  "$<$<CONFIG:RelWithDebInfo>:-O3>"
+  "$<$<CONFIG:RelWithDebInfo>:-g3>"
+  -fno-common
+  -fdata-sections
+  -ffunction-sections
+  -nostartfiles
+  -ffreestanding
+  -fno-unwind-tables
+  -Wall
+  -Werror=return-type
+  -Wsign-compare
+
 )
 
-target_link_options(mp15xa7_arch INTERFACE ${MCU_FLAGS})
+add_link_options(${MCU_FLAGS})
+endmacro()

@@ -1,4 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
+set_arch_flags()
 
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(SHARED ${FWDIR}/../shared)
@@ -52,8 +54,6 @@ target_include_directories(
           ${FWDIR}/lib/cmsis/Include
           ${FWDIR}/lib/stm32-hal/stm32mp1/include
 )
-
-target_link_libraries(flash_loader.elf PRIVATE mp15xa7_arch)
 
 target_link_script(
   flash_loader
