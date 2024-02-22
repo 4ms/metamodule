@@ -129,7 +129,7 @@ public:
 			} break;
 
 			default:
-				pr_dbg("Unknown reloc (%d) reloc %x, symbol value %x\n",
+				pr_err("Unknown reloc (%d) reloc %x, symbol value %x\n",
 					   rel.reloc_type(),
 					   rel.symbol_value(),
 					   rel.reloc_offset());

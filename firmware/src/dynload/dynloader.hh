@@ -83,18 +83,18 @@ struct DynLoader {
 	}
 
 	bool process_relocs() {
-		bool missing_sym = false;
+		bool all_syms_found = true;
 		ElfFile::Relocater relocator{codeblock.data(), hostsyms};
 
 		for (auto reloc : elf.relocs) {
 			bool ok = relocator.write(reloc);
 			if (!ok) {
-				missing_sym = true;
+				all_syms_found = false;
 				//TODO: store the missing symbol name so we can notify the user later
 			}
 		}
 
-		return missing_sym;
+		return all_syms_found;
 	}
 
 	// GCC_OPTIMIZE_OFF
