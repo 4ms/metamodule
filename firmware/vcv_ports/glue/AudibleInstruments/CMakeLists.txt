@@ -4,7 +4,7 @@ add_library(AudibleInstrumentsLibrary OBJECT ${AUDIBLEINSTRUMENTS_SOURCE_PATHS})
 
 target_include_directories(AudibleInstrumentsLibrary PRIVATE ${AUDIBLE_DIR}/src ${AUDIBLE_DIR}/eurorack)
 
-target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-double-promotion -Wno-deprecated-enum-float-conversion)
+target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-double-promotion $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-float-conversion>)
 
 # Fixes for compiler warnings in AudibleInstruments:
 set_source_files_properties(
@@ -22,7 +22,7 @@ set_source_files_properties(
 )
 
 # Fix for stmlib STATIC_ASSERT creating typedefs that aren't used
-target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs -Wno-volatile)
+target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>)
 
 set_source_files_properties(
   ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc PROPERTIES COMPILE_OPTIONS "-Wno-asm-operand-widths"

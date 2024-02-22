@@ -79,7 +79,7 @@ foreach(brand ${brands})
            ${FWDIR}
            ${SHARED}
            )
-  target_compile_options(${brand}Library PRIVATE -Wno-attributes -Wno-deprecated-enum-enum-conversion -g2)
+  target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion> -g2)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
   target_link_libraries(${brand}Library PUBLIC cpputil VCV_adaptor)
 

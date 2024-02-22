@@ -73,7 +73,7 @@ foreach(brand ${brands})
            ${SHARED}
            ${SHARED}/cpputil
   )
-  target_compile_options(${brand}Library PRIVATE -Wno-attributes -Wno-deprecated-enum-enum-conversion)
+  target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
 
   # Faceplate artwork
