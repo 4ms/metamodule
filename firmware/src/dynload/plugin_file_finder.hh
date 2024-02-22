@@ -84,7 +84,7 @@ private:
 				if (kind == DirEntryKind::File) {
 					if (entryname.ends_with(".so")) {
 						pr_trace("Found plugin file %.*s/%.*s\n", path.c_str(), entryname.size(), entryname.data());
-						plugin_files.push_back(PluginFile{fileio.vol_id(), path, std::string(entryname)});
+						plugin_files.push_back(PluginFile{fileio.vol_id(), path, std::string(entryname), filesize});
 					}
 				}
 			});

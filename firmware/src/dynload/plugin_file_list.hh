@@ -10,6 +10,7 @@ struct PluginFile {
 	Volume vol;
 	std::string dir_name;	 //"BrandX"     ==> "/{Volume}/metamodule-plugins/BrandX"
 	std::string plugin_name; //"PluginName" ==> "/{Volume}/metamodule-plugins/BrandX/PluginName.so"
+	size_t file_size;
 };
 
 using PluginFileList = std::vector<PluginFile>;

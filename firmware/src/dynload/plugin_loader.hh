@@ -9,7 +9,7 @@ namespace MetaModule
 
 class PluginFileLoader {
 public:
-	enum class State { NotInit, Error, Idle, GettingList, LoadingPlugins, Success };
+	enum class State { NotInit, Error, Idle, GettingList, ReadingPlugin, LoadingPlugin, Success };
 
 	struct Status {
 		State state{State::Idle};
@@ -51,20 +51,38 @@ public:
 				}
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
-					status.state = State::LoadingPlugins;
+					status.state = State::ReadingPlugin;
+					file_idx = 0;
 				}
 
 			} break;
 
-			case State::LoadingPlugins: {
-				//TODO: parse one at a time and report success/error
-				for (auto &file : *plugin_files) {
-					pr_dbg("Loading plugin from vol %d:metamodule-plugins/%s/%s\n",
-						   file.vol,
-						   file.dir_name.c_str(),
-						   file.plugin_name.c_str());
-					//TODO: use DynLoader
+			case State::ReadingPlugin: {
+				if (file_idx >= plugin_files->size()) {
+					status.state = State::Success;
+					break;
 				}
+				auto plugin = (*plugin_files)[file_idx];
+				std::string path = "metamodule-plugins/" + plugin.dir_name + "/" + plugin.plugin_name;
+				auto buffer = allocator.allocate(plugin.file_size);
+				if (buffer) {
+					auto ok = file_storage.request_load_file(path, plugin.vol, {(char *)buffer, plugin.file_size});
+					if (ok)
+						status.state = State::LoadingPlugin;
+				} else {
+					status.state = State::Error;
+					status.error_message =
+						"Failed to allocate " + std::to_string(plugin.file_size) + " bytes for plugin";
+				}
+			} break;
+
+			case State::LoadingPlugin: {
+				auto plugin = (*plugin_files)[file_idx];
+				pr_dbg("Loading plugin from vol %d:metamodule-plugins/%s/%s\n",
+					   plugin.vol,
+					   plugin.dir_name.c_str(),
+					   plugin.plugin_name.c_str());
+				//TODO: use DynLoader
 			} break;
 
 			case State::NotInit:
@@ -80,6 +98,7 @@ private:
 	FileStorageProxy &file_storage;
 
 	Status status;
+	unsigned file_idx = 0;
 
 	OneTimeArenaAllocator allocator;
 	PluginFileList *plugin_files{};
