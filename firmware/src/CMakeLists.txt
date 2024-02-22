@@ -23,6 +23,7 @@ target_include_directories(
             ${FWDIR}/lib/stm32-hal/stm32mp1/include
             ${FWDIR}/src/core_a7
 )
+target_compile_options(mdrivlib_interface INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
 
 #
 # LVGL
