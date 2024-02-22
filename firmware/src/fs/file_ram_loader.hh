@@ -8,7 +8,7 @@
 namespace MetaModule
 {
 
-struct FirmwareRamLoader {
+struct FileRamLoader {
 
 	bool load_to_ram(FatFileIO *fileio, std::string_view filename, std::span<char> buffer) {
 		if (!fileio || buffer.size() == 0) {
