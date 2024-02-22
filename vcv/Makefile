@@ -33,6 +33,7 @@ SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/4ms/core/*Core.cc)
 SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/data.cc
 SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/dynamic_data.cc
 SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/easiglib/numtypes.cc
+SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
 
 # plugin
 SOURCES += $(wildcard src/*.cpp)
@@ -41,9 +42,8 @@ SOURCES += $(wildcard src/hub/*.cc)
 SOURCES += $(wildcard src/comm/*.cc)
 SOURCES += $(wildcard src/mapping/*.cc)
 SOURCES += $(wildcard src/models/*.cc)
-
 SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
-SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
+
 SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
 SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
 
@@ -99,7 +99,7 @@ vcv_tests:
 
 axo_tests:
 	$(info ... Running Axoloti-wrapper tests ...)
-	@cd $(SHARED)/axoloti-wrapper && $(MAKE) --no-print-directory -f tests/Makefile
+	@cd $(SHARED)/CoreModules/4ms/core/axoloti-wrapper && $(MAKE) --no-print-directory -f tests/Makefile
 
 patch_convert_tests:
 	$(info ... Running patch convert (yaml<-->patch) tests ...)
