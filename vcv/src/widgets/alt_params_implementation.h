@@ -35,7 +35,7 @@ private:
 
 struct AltParamChoiceLabledMenu : rack::ui::MenuItem
 {
-    AltParamChoiceLabledMenu(rack::Module* module_, std::size_t param_idx_, AltParamChoiceLabled el)
+    AltParamChoiceLabledMenu(rack::Module* module_, std::size_t param_idx_, AltParamChoiceLabeled el)
 		: module(module_)
 		, param_idx(param_idx_)
 		, element(el)
@@ -58,7 +58,7 @@ struct AltParamChoiceLabledMenu : rack::ui::MenuItem
 private:
     rack::Module* module;
     std::size_t param_idx;
-    AltParamChoiceLabled element;
+    AltParamChoiceLabeled element;
 };
 
 /*
@@ -113,7 +113,7 @@ inline void do_render_to_menu(AltParamChoice el, rack::ui::Menu* menu, Indices &
 	menu->addChild(slider);
 }
 
-inline void do_render_to_menu(AltParamChoiceLabled el, rack::ui::Menu* menu, Indices &indices, const WidgetContext_t &context)
+inline void do_render_to_menu(AltParamChoiceLabeled el, rack::ui::Menu* menu, Indices &indices, const WidgetContext_t &context)
 {
 	auto *item = new AltParamChoiceLabledMenu(context.module, indices.param_idx, el);
 	item->text = el.short_name;

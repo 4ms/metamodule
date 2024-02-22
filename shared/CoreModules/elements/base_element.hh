@@ -183,8 +183,7 @@ struct AltParamChoice : AltParamElement {
 	State_t DefaultValue = 0;
 };
 
-struct AltParamChoiceLabled : AltParamChoice 
-{
+struct AltParamChoiceLabeled : AltParamChoice {
 	static constexpr size_t MaxChoices = 8;
 	std::array<std::string_view, MaxChoices> pos_names{};
 };

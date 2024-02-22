@@ -40,7 +40,7 @@ using Element = std::variant<NullElement,
 
 							 AltParamContinuous,
 							 AltParamChoice,
-							 AltParamChoiceLabled>;
+							 AltParamChoiceLabeled>;
 
 namespace
 {
