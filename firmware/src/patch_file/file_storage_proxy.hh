@@ -79,9 +79,7 @@ public:
 	//
 	[[nodiscard]] bool request_patchlist() {
 		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList, .patch_dir_list = &patch_dir_list_};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
 	}
 
 	PatchDirList &get_patch_list() {
@@ -95,9 +93,7 @@ public:
 	// Scan all mounted volumes for firmware update files
 	[[nodiscard]] bool request_find_firmware_file() {
 		IntercoreStorageMessage message{.message_type = RequestFirmwareFile};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
 	}
 
 	// Load a file from filesystem to RAM
@@ -108,9 +104,7 @@ public:
 			.buffer = buffer,
 			.filename = filename,
 		};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
 	}
 
 	[[nodiscard]] bool request_checksum_compare(IntercoreStorageMessage::FlashTarget target,
@@ -126,9 +120,7 @@ public:
 			.bytes_processed = bytes_processed,
 			.flashTarget = target,
 		};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
 	}
 
 	[[nodiscard]] bool request_file_flash(IntercoreStorageMessage::FlashTarget target,
@@ -142,9 +134,7 @@ public:
 			.bytes_processed = bytes_processed,
 			.flashTarget = target,
 		};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
 	}
 
 	void new_patch() {
@@ -164,9 +154,6 @@ public:
 
 		patch_to_yaml_buffer(view_patch_, file_data);
 
-		// printf("size: %zu, %zu\n", file_data.size(), sz);
-		// printf("%.*s\n", (int)sz, file_data.data());
-
 		IntercoreStorageMessage message{
 			.message_type = RequestWritePatchData,
 			.vol_id = view_patch_loc_.vol,
@@ -174,19 +161,16 @@ public:
 			.filename = filename,
 		};
 
-		if (!comm_.send_message(message))
-			return false;
-
-		return true;
+		return comm_.send_message(message);
 	}
 
 	bool request_reset_factory_patches() {
 		IntercoreStorageMessage message{
 			.message_type = RequestFactoryResetPatches,
 		};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
+	}
+
 	bool request_plugin_file_list(PluginFileList *plugin_file_list) {
 		IntercoreStorageMessage message{
 			.message_type = RequestPluginFileList,
