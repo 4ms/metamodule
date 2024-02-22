@@ -1,4 +1,5 @@
 #pragma once
+#include "dynload/plugin_file_list.hh"
 #include "fs/volumes.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "util/static_string.hh"
@@ -48,6 +49,10 @@ struct IntercoreStorageMessage {
 		RequestFactoryResetPatches,
 		FactoryResetPatchesDone,
 
+		RequestPluginFileList,
+		PluginFileListOK,
+		PluginFileListFail,
+
 		NumRequests,
 	};
 	MessageType message_type = MessageType::None;
@@ -64,6 +69,8 @@ struct IntercoreStorageMessage {
 	uint32_t *bytes_processed;
 	enum FlashTarget : uint8_t { WIFI, QSPI };
 	FlashTarget flashTarget;
+
+	PluginFileList *plugin_file_list;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);
