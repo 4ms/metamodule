@@ -24,6 +24,18 @@ target_include_directories(
 )
 
 #
+# LVGL
+#
+set(LV_CONF_PATH
+    ${FWDIR}/lib/lvgl/lv_conf.h
+    CACHE STRING "" FORCE
+)
+add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
+target_link_libraries(lvgl PRIVATE mdrivlib_interface)
+target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
+
+
+#
 # VCV Adaptor
 #
 add_subdirectory(VCV_adaptor)

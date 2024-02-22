@@ -11,16 +11,6 @@ project(
   LANGUAGES C CXX ASM
 )
 
-#
-# LVGL
-#
-set(LV_CONF_PATH
-    ${PROJECT_SOURCE_DIR}/lib/lvgl/lv_conf.h
-    CACHE STRING "" FORCE
-)
-add_subdirectory(${PROJECT_SOURCE_DIR}/lib/lvgl)
-target_link_libraries(lvgl PRIVATE mdrivlib_interface)
-target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
 
 #
 # Only build a limited set of modules, defined in an external file
