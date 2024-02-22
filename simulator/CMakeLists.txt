@@ -119,7 +119,7 @@ add_executable(
 	${SHARED}/patch_convert/patch_to_yaml.cc
 	${FACEPLATE_ARTWORK_SOURCES}
 	${COMP_ARTWORK_SOURCES} 
-	${SLS_SOURCES})
+	)
 
 target_include_directories(
   simulator
