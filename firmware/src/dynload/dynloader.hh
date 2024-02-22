@@ -4,6 +4,7 @@
 #include "dynload/host_sym_list.hh"
 #include "dynload/host_symbol.hh"
 #include "elf_file.hh"
+#include "keep-symbols.hh"
 #include "pr_dbg.hh"
 #include "stm32mp1xx.h"
 #include <cstring>
@@ -15,43 +16,18 @@
 #include "CoreModules/elements/dump.hh"
 #include "rack.hpp"
 
-#include "befaco-strip-so.h"
-// #include "befaco-strip-so-2modules.h"
-
-GCC_OPTIMIZE_OFF
-extern "C" void _empty_func_stub() {
+extern "C" GCC_OPTIMIZE_OFF void _empty_func_stub() {
 }
 
-struct DynLoadTest {
+struct DynLoader {
 
-	DynLoadTest()
-		// : elf{{testbrand_elf, testbrand_elf_len}} {
-		: elf{{Befaco_strip_so, Befaco_strip_so_len}} {
-	}
-
-	GCC_OPTIMIZE_OFF
-	void keep_symbols() {
-		// Force these symbols from libc and other libs
-		// TODO: how to do this otherwise?
-		// We can't link the plugin to libc unless we compile a libc with it, since the arm-none-eabi libc
-		// was not compiled with -fPIC
-		// - Linker KEEP()?
-		// - build libc with the plugin, mabye musl libc?
-		// - build plugin with json library
-		exp(0.5f);
-		expf(0.5f);
-		fmod(0.5f, 1.f);
-		sinf(0.5f);
-		tanf(0.5f);
-		tanh(0.5f);
-		volatile auto keep = std::allocator<char>{}; //seems to do nothing
-		volatile int x = strlen("ABCD");
-		auto savefunc = &json_object_set_new;
-	}
-
-	GCC_OPTIMIZE_OFF
-	void test() {
+	DynLoader(std::span<uint8_t> elf_file_data)
+		: elf{elf_file_data} {
 		keep_symbols();
+	}
+
+	GCC_OPTIMIZE_OFF
+	void load() {
 		// elf.print_sec_headers();
 		// elf.print_prog_headers();
 		load_executable();
@@ -60,11 +36,7 @@ struct DynLoadTest {
 
 		// test_run_module();
 
-		find_init_plugin_function();
-
-		if (init_func) {
-			init_func(&plugin);
-		}
+		run_init_plugin_function();
 	}
 
 	GCC_OPTIMIZE_OFF
@@ -180,16 +152,22 @@ struct DynLoadTest {
 	}
 
 	GCC_OPTIMIZE_OFF
-	void find_init_plugin_function() {
+	void run_init_plugin_function() {
 		// auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initP6Plugin");
 		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
+
+		plugin.models.clear();
 
 		if (init_plugin_symbol) {
 			auto load_address = init_plugin_symbol->offset() /*- block.elf_offset*/ + codeblock.code.data();
 			init_func = reinterpret_cast<InitPluginFunc *>(load_address);
+			if (init_func) {
+				init_func(&plugin);
+			} else
+				pr_err("Symbol init(rack::plugin::Plugin*) was null\n");
 
 		} else
-			pr_err("Did not find init(Plugin*)\n");
+			pr_err("Did not find init(rack::plugin::Plugin*)\n");
 	}
 
 	ElfFile::Elf elf;

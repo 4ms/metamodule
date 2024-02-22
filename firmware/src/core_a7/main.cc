@@ -21,6 +21,8 @@
 #include <wifi_update.hh>
 #endif
 
+#include "dynload/befaco-strip-so.h"
+
 namespace MetaModule
 {
 
@@ -75,8 +77,8 @@ void main() {
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
 	pr_info("Dyn Load Test\n");
-	DynLoadTest dynload;
-	dynload.test();
+	DynLoader dynload{{Befaco_strip_so, Befaco_strip_so_len}};
+	dynload.load();
 
 #ifdef ENABLE_WIFI_BRIDGE
 	WifiUpdate::run();

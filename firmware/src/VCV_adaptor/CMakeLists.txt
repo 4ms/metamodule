@@ -9,6 +9,7 @@ target_sources(
          plugin_instance.cc
          pffft/pffft.c
          engine/Module.cpp
+         ../dynload/keep-symbols.cc
 		 VCV_module_wrapper.cc
 )
 
