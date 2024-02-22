@@ -15,11 +15,8 @@
 #include "CoreModules/elements/dump.hh"
 #include "rack.hpp"
 
-// #include "build-simple-elf.hh"
-// #include "build-elf.hh"
-// #include "build-vcva-2.hh"
-// #include "befaco-strip-so.h"
-#include "befaco-strip-so-2modules.h"
+#include "befaco-strip-so.h"
+// #include "befaco-strip-so-2modules.h"
 
 GCC_OPTIMIZE_OFF
 extern "C" void _empty_func_stub() {
@@ -68,10 +65,6 @@ struct DynLoadTest {
 		if (init_func) {
 			init_func(&plugin);
 		}
-
-		// while (true) {
-		// 	__NOP();
-		// }
 	}
 
 	GCC_OPTIMIZE_OFF

@@ -35,7 +35,7 @@ dyn:
 
 plugin:
 	cd vcv_ports && make
-	cp ./vcv_ports/build/Befaco-strip-so.h ./src/dynload/befaco-strip-so-2modules.h
+	cp ./vcv_ports/build/Befaco-strip-so.h ./src/dynload/befaco-strip-so.h
 
 
 bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images flash-bootloader-sd flash-app-sd flash-dfu jprog debug start-jlinkgdb start-openocd flash_loader flash_loader_dfu:
