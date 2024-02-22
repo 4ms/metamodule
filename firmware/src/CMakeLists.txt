@@ -45,65 +45,7 @@ add_subdirectory(VCV_adaptor)
 #
 # Brands
 #
-include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
-
-foreach(brand ${brands})
-
-  # Component artwork
-  file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
-  list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
-  foreach(component ${BRAND_ARTWORK_SOURCES})
-    cmake_path(GET component STEM LAST_ONLY COMPIMGNAME)
-    set(COMPFILENAME "${COMPIMGNAME}.png")
-    configure_file(${FWDIR}/src/gui/images/component_register.cc.in ${brand}/${COMPIMGNAME}_register.cc)
-    list(APPEND COMP_ARTWORK_SOURCES ${brand}/${COMPIMGNAME}_register.cc)
-    # Fixup for compiler warning on files that include LVGL 8.3 headers:
-    set_source_files_properties(${brand}/${COMPIMGNAME}_register.cc
-      PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;")
-  endforeach()
-
-  # Module Library
-  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_link_libraries(${brand}Library PRIVATE VCV_adaptor)
-  target_include_directories(
-    ${brand}Library
-    PUBLIC 
-           ${FWDIR}/src
-           ${FWDIR}
-           ${SHARED}
-  )
-  target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
-  target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
-
-  # Faceplate artwork
-  # Use provided module list file.
-  include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
-  foreach(module IN LISTS ${brand}Modules)
-
-    # Workaround for 4ms
-    if(brand EQUAL "4ms")
-      set(IMGNAME "${module}_artwork")
-    else()
-      set(IMGNAME ${module})
-    endif()
-
-    # Skip files that aren't generated yet. Otherwise we can't run the faceplate-images target to generate images
-    # because CMake fails to configure the project
-    set(image_path ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
-    if(EXISTS "${image_path}")
-      cleanup_imgname(${IMGNAME})
-
-      # Generate a .cc file that will register the map from slug to lvgl image data
-      configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
-
-      list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
-      list(APPEND FACEPLATE_ARTWORK_SOURCES ${image_path})
-    endif()
-
-  endforeach()
-
-endforeach()
-
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 
 #
 # RYML
@@ -187,9 +129,6 @@ add_executable(
   #
   ${FWDIR}/src/vcv_adaptor_seed_random.cpp
   #
-  ${COMP_ARTWORK_SOURCES}
-  ${FACEPLATE_ARTWORK_SOURCES}
-  #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
@@ -229,11 +168,7 @@ target_include_directories(
 
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor cpputil)
-
-foreach(brand ${brands})
-  target_link_libraries(main.elf PRIVATE ${brand}Library)
-endforeach()
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor cpputil vcv_ports)
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
