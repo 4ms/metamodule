@@ -182,7 +182,7 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
   #
-  ${FWDIR}/src/VCV_adaptor/random.cpp
+  ${FWDIR}/src/vcv_adaptor_seed_random.cpp
   #
   ${COMP_ARTWORK_SOURCES}
   ${FACEPLATE_ARTWORK_SOURCES}
