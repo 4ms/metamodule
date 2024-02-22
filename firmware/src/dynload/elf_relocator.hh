@@ -22,7 +22,9 @@ public:
 		, host_syms{host_symbols} {
 	}
 
-	void write(ElfReloc &rel) {
+	bool write(ElfReloc &rel) {
+		bool ok = false;
+
 		// ARM ELF Docs:
 		// A: Addend. Value extracted from the storage unit being relocated.
 		// S: Value of the symbol referred to by the relocation.
@@ -33,6 +35,7 @@ public:
 		switch (rel.reloc_type()) {
 			case R_ARM_RELATIVE:
 				pr_trace("R_ARM_RELATIVE: no action\n");
+				ok = true;
 				break;
 
 			case R_ARM_GLOB_DAT: {
@@ -46,12 +49,15 @@ public:
 								 rel.reloc_offset() + base_address,
 								 rel.reloc_offset());
 						*reloc_address = sym->address;
+						ok = true;
 					} else {
 						pr_err("R_ARM_GLOB_DAT: %s ", rel.symbol_name().data());
 						pr_err("Symbol value is 0 and name not found in host symbols\n");
+						ok = false;
 					}
 				} else {
 					*reloc_address = rel.symbol_value() + base_address;
+					ok = true;
 					pr_trace("R_ARM_GLOB_DAT: %s ", rel.symbol_name().data());
 					pr_trace("write 0x%x (+%x) to address 0x%x (+%x)\n",
 							 rel.symbol_value() + base_address,
@@ -72,9 +78,11 @@ public:
 								 rel.reloc_offset() + base_address,
 								 rel.reloc_offset());
 						*reloc_address = sym->address;
+						ok = true;
 					} else {
 						pr_err("R_ARM_ABS32: %s, symval = 0 ", rel.symbol_name().data());
 						pr_err("Symbol not found in host symbols\n");
+						ok = false;
 					}
 
 				} else {
@@ -85,11 +93,8 @@ public:
 							 rel.symbol_value() + *reloc_address,
 							 rel.reloc_offset() + base_address,
 							 rel.reloc_offset());
-					// S + A
-					// This seems like it makes sense since we need the base_Address, but it's P +A:
 					*reloc_address = *reloc_address + rel.symbol_value() + base_address;
-					// This is S+A but doesn't seem to be an "absolute" address
-					// *reloc_address += symbol_value();
+					ok = true;
 				}
 
 			} break;
@@ -101,12 +106,14 @@ public:
 				if (rel.symbol_value() == 0) {
 					auto sym = std::ranges::find_if(host_syms, [&rel](auto &s) { return s.name == rel.symbol_name(); });
 					if (sym != host_syms.end()) {
-						*reloc_address = sym->address;
 						pr_trace("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
 						pr_trace("Found symbol at 0x%x\n", sym->address);
+						*reloc_address = sym->address;
+						ok = true;
 					} else {
 						pr_err("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
 						pr_err("Symbol not found in host symbols\n");
+						ok = false;
 					}
 				} else {
 					pr_trace("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
@@ -116,6 +123,7 @@ public:
 							 rel.reloc_offset() + base_address,
 							 rel.reloc_offset());
 					*reloc_address = rel.symbol_value() + base_address;
+					ok = true;
 				}
 
 			} break;
@@ -125,9 +133,10 @@ public:
 					   rel.reloc_type(),
 					   rel.symbol_value(),
 					   rel.reloc_offset());
-
+				ok = false;
 				break;
 		}
+		return ok;
 	}
 };
 

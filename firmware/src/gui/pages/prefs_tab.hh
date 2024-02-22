@@ -1,5 +1,5 @@
 #pragma once
-#include "dynload/dynloader.hh"
+#include "dynload/plugin_loader.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
@@ -14,10 +14,11 @@ struct PrefsTab {
 
 	PrefsTab(FileStorageProxy &patch_storage)
 		: file_storage{patch_storage}
+		, plugin_loader{patch_storage}
 		, plugin_button(lv_btn_create(ui_SystemMenuPrefs))
 		, plugin_button_label(lv_label_create(plugin_button)) {
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(plugin_button_label, load_plugin_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(plugin_button, load_plugin_but_cb, LV_EVENT_CLICKED, this);
 
 		////// set up UI: TODO do this in SLS
 		lv_obj_set_width(plugin_button, LV_SIZE_CONTENT);
@@ -65,6 +66,10 @@ struct PrefsTab {
 	}
 
 	void update() {
+		auto result = plugin_loader.process();
+		if (result.error_message.length()) {
+			pr_err("Error: %s\n", result.error_message.c_str());
+		}
 	}
 
 private:
@@ -89,15 +94,15 @@ private:
 			return;
 
 		auto page = static_cast<PrefsTab *>(event->user_data);
-
-		// pr_info("Dyn Load Test\n");
-		// DynLoader dynload{{Befaco_strip_so, Befaco_strip_so_len}};
-		// dynload.load();
+		pr_dbg("Start plugin loader\n");
+		page->plugin_loader.start();
 	}
 
 	lv_group_t *group = nullptr;
 	FileStorageProxy &file_storage;
 	ConfirmPopup confirm_popup;
+
+	PluginFileLoader plugin_loader;
 
 	lv_obj_t *plugin_button;
 	lv_obj_t *plugin_button_label;

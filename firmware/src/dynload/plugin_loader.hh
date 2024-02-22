@@ -14,16 +14,16 @@ public:
 	enum class State {
 		NotInit,
 		Error,
-		Idle,
-		GettingList,
-		PrepareReadPlugin,
+		RequestList,
+		WaitingForList,
+		PrepareForReadingPlugin,
 		RequestReadPlugin,
 		LoadingPlugin,
 		Success
 	};
 
 	struct Status {
-		State state{State::Idle};
+		State state{State::NotInit};
 		std::string name;
 		std::string error_message;
 	};
@@ -33,23 +33,28 @@ public:
 		, allocator{get_ram_buffer()} {
 	}
 
-	void start(PluginFileList &plugin_file_list) {
-		status = {State::Idle, "", ""};
-		plugin_files = &plugin_file_list;
+	void start() {
 		allocator.reset();
+		if (auto newmem = allocator.allocate(sizeof(PluginFileList))) {
+			plugin_files = new (newmem) PluginFileList;
+			status = {State::RequestList, "", ""};
+		} else {
+			pr_err("Could not allocate %zu bytes for plugin file list\n", sizeof(PluginFileList));
+			status = {State::Error, "", "Out of memory, could not make plugin file list"};
+		}
 	}
 
 	Status process() {
-		if (!plugin_files || plugin_files->size() == 0)
-			return {State::NotInit};
+		if (!plugin_files)
+			status.state = State::NotInit;
 
 		switch (status.state) {
-			case State::Idle:
+			case State::RequestList:
 				if (file_storage.request_plugin_file_list(plugin_files))
-					status.state = State::GettingList;
+					status.state = State::WaitingForList;
 				break;
 
-			case State::GettingList: {
+			case State::WaitingForList: {
 				auto message = file_storage.get_message();
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListFail) {
@@ -58,15 +63,15 @@ public:
 				}
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
-					status.state = State::PrepareReadPlugin;
+					status.state = State::PrepareForReadingPlugin;
 					file_idx = 0;
 				}
 
 			} break;
 
-			case State::PrepareReadPlugin: {
-				auto plugin = (*plugin_files)[file_idx];
-				buffer = {(char *)allocator.allocate(plugin.file_size), plugin.file_size};
+			case State::PrepareForReadingPlugin: {
+				auto &plugin = (*plugin_files)[file_idx];
+				buffer = {allocator.allocate(plugin.file_size), plugin.file_size};
 				if (buffer.data()) {
 					status.state = State::RequestReadPlugin;
 				} else {
@@ -77,14 +82,14 @@ public:
 			} break;
 
 			case State::RequestReadPlugin: {
-				auto plugin = (*plugin_files)[file_idx];
-				std::string path = plugin.dir_name + "/" + plugin.plugin_name;
-				if (file_storage.request_load_file(path, plugin.vol, buffer))
+				auto &plugin = (*plugin_files)[file_idx];
+				std::string path = std::string(plugin.dir_name) + "/" + std::string(plugin.plugin_name);
+				if (file_storage.request_load_file(path, plugin.vol, {(char *)buffer.data(), buffer.size()}))
 					status.state = State::LoadingPlugin;
 			} break;
 
 			case State::LoadingPlugin: {
-				auto plugin = (*plugin_files)[file_idx];
+				auto &plugin = (*plugin_files)[file_idx];
 				pr_dbg("Loading plugin data from vol %d:%s/%s, from buffer %p ++%zu\n",
 					   plugin.vol,
 					   plugin.dir_name.c_str(),
@@ -99,7 +104,7 @@ public:
 				if (file_idx >= plugin_files->size()) {
 					status.state = State::Success;
 				} else
-					status.state = State::PrepareReadPlugin;
+					status.state = State::PrepareForReadingPlugin;
 			} break;
 
 			case State::NotInit:
@@ -114,12 +119,13 @@ public:
 private:
 	FileStorageProxy &file_storage;
 
-	Status status;
+	Status status{};
 	unsigned file_idx = 0;
 
 	OneTimeArenaAllocator allocator;
-	std::span<char> buffer;
-	PluginFileList *plugin_files{};
+	std::span<uint8_t> buffer;
+
+	PluginFileList *plugin_files = nullptr;
 };
 
 } // namespace MetaModule

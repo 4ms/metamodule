@@ -32,10 +32,15 @@ struct DynLoader {
 		}
 
 		load_executable();
-		process_relocs();
+		bool ok = process_relocs();
+		if (!ok)
+			return false;
+
 		init_globals();
 
 		run_init_plugin_function();
+
+		return true;
 	}
 
 	GCC_OPTIMIZE_OFF
@@ -71,16 +76,23 @@ struct DynLoader {
 		hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 		hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 
-		for (auto sym : hostsyms)
-			pr_trace("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
+		// for (auto sym : hostsyms)
+		// 	pr_trace("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
 	}
 
-	void process_relocs() {
+	bool process_relocs() {
+		bool missing_sym = false;
 		ElfFile::Relocater relocator{codeblock.code.data(), hostsyms};
 
 		for (auto reloc : elf.relocs) {
-			relocator.write(reloc);
+			bool ok = relocator.write(reloc);
+			if (!ok) {
+				missing_sym = true;
+				//TODO: store the missing symbol name so we can notify the user later
+			}
 		}
+
+		return missing_sym;
 	}
 
 	GCC_OPTIMIZE_OFF

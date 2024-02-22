@@ -32,7 +32,7 @@ struct PluginFileFinder {
 
 private:
 	IntercoreStorageMessage find_plugin_files(const IntercoreStorageMessage &message) {
-		pr_trace("M4: scanning volumes for plugin files (plugin/**/*.so)\n");
+		pr_dbg("M4: scanning volumes for plugin files (plugin/**/*.so)\n");
 
 		message.plugin_file_list->clear();
 
@@ -53,7 +53,7 @@ private:
 	}
 
 	bool scan_volume(FileIoC auto &fileio, PluginFileList &plugin_files) {
-		pr_dbg("Scanning metamodule-plugins dir on volume %s\n", fileio.volname());
+		pr_trace("Scanning metamodule-plugins dir on volume %d\n", fileio.vol_id());
 
 		bool ok = fileio.foreach_dir_entry(
 			"metamodule-plugins",
@@ -83,8 +83,8 @@ private:
 				// Add files:
 				if (kind == DirEntryKind::File) {
 					if (entryname.ends_with(".so")) {
-						pr_trace("Found plugin file %.*s/%.*s\n", path.c_str(), entryname.size(), entryname.data());
-						plugin_files.push_back(PluginFile{fileio.vol_id(), path, std::string(entryname), filesize});
+						pr_trace("Found plugin file %s/%.*s\n", path.c_str(), entryname.size(), entryname.data());
+						plugin_files.push_back({fileio.vol_id(), path.c_str(), entryname, filesize});
 					}
 				}
 			});
