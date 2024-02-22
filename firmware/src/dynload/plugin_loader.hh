@@ -40,7 +40,7 @@ public:
 	}
 
 	Status process() {
-		if (!plugin_files)
+		if (!plugin_files || plugin_files->size() == 0)
 			return {State::NotInit};
 
 		switch (status.state) {
@@ -65,11 +65,6 @@ public:
 			} break;
 
 			case State::PrepareReadPlugin: {
-				if (file_idx >= plugin_files->size()) {
-					status.state = State::Success;
-					break;
-				}
-
 				auto plugin = (*plugin_files)[file_idx];
 				buffer = {(char *)allocator.allocate(plugin.file_size), plugin.file_size};
 				if (buffer.data()) {
@@ -99,6 +94,12 @@ public:
 
 				DynLoader dynloader{buffer};
 				dynloader.load();
+				file_idx++;
+
+				if (file_idx >= plugin_files->size()) {
+					status.state = State::Success;
+				} else
+					status.state = State::PrepareReadPlugin;
 			} break;
 
 			case State::NotInit:

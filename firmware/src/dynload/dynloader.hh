@@ -16,25 +16,24 @@
 #include "CoreModules/elements/dump.hh"
 #include "rack.hpp"
 
-extern "C" GCC_OPTIMIZE_OFF void _empty_func_stub() {
-}
-
 struct DynLoader {
 
 	DynLoader(std::span<uint8_t> elf_file_data)
 		: elf{elf_file_data} {
 		keep_symbols();
+		init_host_symbol_table();
 	}
 
 	GCC_OPTIMIZE_OFF
-	void load() {
-		// elf.print_sec_headers();
-		// elf.print_prog_headers();
+	bool load() {
+		if (elf.segments.size() == 0 || elf.sections.size() == 0 || elf.relocs.size() == 0) {
+			pr_err("Not a valid elf file\n");
+			return false;
+		}
+
 		load_executable();
 		process_relocs();
 		init_globals();
-
-		// test_run_module();
 
 		run_init_plugin_function();
 	}
@@ -43,11 +42,7 @@ struct DynLoader {
 	void load_executable() {
 		size_t load_size = elf.load_size();
 
-		// pr_info("Need %zu bytes for loading (%zu max)\n", load_size, codeblock.code.size());
-		// if (load_size > codeblock.code.size()) {
-		// 	pr_err("Too big!\n");
-		// 	return;
-		// }
+		codeblock.code.clear();
 		codeblock.code.resize(load_size);
 		pr_info("Allocating %zu bytes for loading code at 0x%x\n", load_size, codeblock.code.begin());
 
@@ -61,6 +56,30 @@ struct DynLoader {
 						std::next(codeblock.code.begin(), seg.address()),
 						std::next(codeblock.code.begin(), seg.address() + seg.file_size()));
 			}
+		}
+	}
+
+	void init_host_symbol_table() {
+		//TODO: process a symbol table loaded from binary blob at a fixed address
+		hostsyms.clear();
+		hostsyms.insert(hostsyms.end(), HostSymbols.begin(), HostSymbols.end());
+
+		hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcEC2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcED1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcED2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+		hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+
+		for (auto sym : hostsyms)
+			pr_trace("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
+	}
+
+	void process_relocs() {
+		ElfFile::Relocater relocator{codeblock.code.data(), hostsyms};
+
+		for (auto reloc : elf.relocs) {
+			relocator.write(reloc);
 		}
 	}
 
@@ -130,27 +149,6 @@ struct DynLoader {
 		pr_dbg("Out 1 %f, Out 2 %f\n", out1, out2);
 	}
 
-	void process_relocs() {
-		auto hostsyms = std::vector<ElfFile::HostSymbol>{};
-		hostsyms.insert(hostsyms.end(), HostSymbols.begin(), HostSymbols.end());
-
-		hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcEC2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcED1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcED2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-
-		for (auto sym : hostsyms)
-			pr_trace("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
-
-		ElfFile::Relocater relocator{codeblock.code.data(), hostsyms};
-
-		for (auto reloc : elf.relocs) {
-			relocator.write(reloc);
-		}
-	}
-
 	GCC_OPTIMIZE_OFF
 	void run_init_plugin_function() {
 		// auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initP6Plugin");
@@ -183,4 +181,6 @@ struct DynLoader {
 
 	using InitPluginFunc = void(rack::Plugin *);
 	InitPluginFunc *init_func{};
+
+	std::vector<ElfFile::HostSymbol> hostsyms;
 };
