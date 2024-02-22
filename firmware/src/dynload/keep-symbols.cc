@@ -3,6 +3,9 @@
 #include <cstring>
 #include <memory>
 
+extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
+}
+
 void __attribute__((optimize("-O0"))) keep_symbols() {
 	// Force these symbols from libc and other libs
 	// TODO: how to do this otherwise?
