@@ -187,6 +187,12 @@ public:
 		if (!comm_.send_message(message))
 			return false;
 		return true;
+	bool request_plugin_file_list(PluginFileList *plugin_file_list) {
+		IntercoreStorageMessage message{
+			.message_type = RequestPluginFileList,
+			.plugin_file_list = plugin_file_list,
+		};
+		return comm_.send_message(message);
 	}
 
 private:
