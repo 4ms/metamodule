@@ -145,7 +145,7 @@ target_compile_options(
           -Werror=return-type
           -Wsign-compare
           -Wdouble-promotion
-          -flto=auto
+          # -flto=auto
           $<$<COMPILE_LANGUAGE:CXX>:
           -ffold-simple-inlines
           -Wno-psabi
@@ -174,7 +174,7 @@ target_link_script(
   -Wl,--gc-sections
   -ffreestanding
   -nostartfiles
-  -flto=auto
+  # -flto=auto
   ${MCU_FLAGS}
 )
 

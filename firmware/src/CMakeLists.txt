@@ -247,6 +247,6 @@ target_link_script(
   -Wno-psabi
   -ffreestanding
   -nostartfiles
-  -flto=auto
+  # -flto=auto
 )
 
