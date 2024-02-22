@@ -69,6 +69,7 @@ def panel_to_components(tree):
     components['outputs'] = []
     components['lights'] = []
     components['switches'] = []
+    components['alt_params'] = []
 
     circles = components_group.findall(".//svg:circle", ns)
     rects = components_group.findall(".//svg:rect", ns)
@@ -96,10 +97,17 @@ def panel_to_components(tree):
             c['class'] = split[1]
 
         # If name is ElementName@pos1@pos2, then extract pos names
+        c['pos_names'] = []
         split = name.split("@")
         if len(split) > 1:
             name = split[0]
             c['pos_names'] = split[1:]
+
+        c['num_choices'] = 0
+        choices = name.split("?")
+        if len(choices) > 1:
+            name = split[0]
+            c['num_choices'] = split[1]
 
         c['display_name'] = format_for_display(name)
         c['legacy_enum_name'] = format_as_legacy_enum_item(name)
@@ -227,6 +235,29 @@ def panel_to_components(tree):
             components['switches'].append(c)
             c['category'] = "Switch"
 
+        #Medium grey: AltParamContinuous
+        elif color == '#808080':
+            set_class_if_not_set(c, "AltParamContinuous")
+            components['alt_params'].append(c)
+            c['category'] = "AltParam"
+
+        #Ligth grey: AltParamChoice or AltParamChoiceLabeled
+        elif color.startswith('#c0c0'):
+            if c['num_choices'] == 0:
+                c['num_choices'] = len(c['pos_names'])
+
+            if c['num_choices'] == 0:
+                Log(f"Warning, no number of choices or list of choice names specificed for {c['name']}, defaulting to 2 (unnamed)")
+                c['num_choices'] = 2
+
+            if len(c['pos_names']) > 0:
+                set_class_if_not_set(c, "AltParamChoiceLabeled")
+            else:
+                set_class_if_not_set(c, "AltParamChoice")
+
+            components['alt_params'].append(c)
+            c['category'] = "AltParam"
+
         elif color == '#ffff00':
             Log(f"Widgets are not supported: found at {c['cx']},{c['cy']}. Skipping.")
         else:
@@ -238,6 +269,7 @@ def panel_to_components(tree):
     components['inputs'].reverse()
     components['outputs'].reverse()
     components['lights'].reverse()
+    components['alt_params'].reverse()
 
     components['elements'] = []
     components['elements'] += components['params']
@@ -245,6 +277,7 @@ def panel_to_components(tree):
     components['elements'] += components['inputs']
     components['elements'] += components['outputs']
     components['elements'] += components['lights']
+    components['elements'] += components['alt_params']
 
     return components
 
@@ -286,6 +319,7 @@ struct {slug}Info : ModuleInfoBase {{
     {make_legacy_enum("Input", components['inputs'])}
     {make_legacy_enum("Output", components['outputs'])}
     {make_legacy_enum("Led", components['lights'])}
+    {make_legacy_enum("AltParam", components['alt_params'])}
 }};
 }} // namespace MetaModule
 """
@@ -300,14 +334,31 @@ def list_elem_definitions(elems, DPI):
     for k in elems:
         source += "\t\t"
         source += f"{k['class']}{{{{"
+        if k['class'] == "AltParamChoiceLabeled":
+            source += f"{{"
         source += f"to_mm<{DPI}>({k['cx']}), "
         source += f"to_mm<{DPI}>({k['cy']}), "
         source += f"{k['coord_ref']}, "
         source += f"\"{k['display_name']}\", "
         source += f"\"\"" #long name
         source += f"""}}"""
-        if k['class'] == "Toggle3pos" and "pos_names" in k.keys() and len(k['pos_names']) == 3:
+
+        if k['class'] == "Toggle3pos" and len(k['pos_names']) == 3:
             source += f""", {{"{k['pos_names'][0]}", "{k['pos_names'][1]}", "{k['pos_names'][2]}"}}""" 
+
+        if k['class'] == "Toggle2pos" and len(k['pos_names']) == 2:
+            source += f""", {{"{k['pos_names'][0]}", "{k['pos_names'][1]}"}}""" 
+
+        if k['class'] == "AltParamChoice":
+            source += f""", {k['num_choices']}""" 
+
+        if k['class'] == "AltParamChoiceLabeled":
+            source += f""", {k['num_choices']}}}, {{"""
+            for nm in k['pos_names']:
+                source += f""""{nm}","""
+            source.removesuffix(", ")
+            source += f"""}}"""
+
         source += f"""}},
 """
     return source
