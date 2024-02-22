@@ -30,12 +30,7 @@ add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_D
 
 # #################### SLS Export ##################################
 
-file(STRINGS ${FWDIR}/src/gui/slsexport/meta5/filelist.txt SLS_SOURCES)
-list(TRANSFORM SLS_SOURCES PREPEND "${FWDIR}/src/gui/slsexport/meta5/")
-
-# Fixup for compiler warning in LVGL 8.3.4:
-set_source_files_properties(${FWDIR}/src/gui/slsexport/meta5/ui.c
-                            PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
+add_subdirectory(${FWDIR}/src/gui/slsexport/meta5 ${CMAKE_CURRENT_BINARY_DIR}/ui)
 
 # #################### VCV Adaptor ##################################
 
@@ -81,7 +76,7 @@ foreach(brand ${brands})
            )
   target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion> -g2)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
-  target_link_libraries(${brand}Library PUBLIC cpputil VCV_adaptor)
+  target_link_libraries(${brand}Library PUBLIC cpputil VCV_adaptor ui)
 
   # Faceplate artwork
   # Use provided module list file.
