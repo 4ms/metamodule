@@ -44,7 +44,7 @@ If:
 	PathMatch: [".*/VCV-adaptor/dsp/.*", ".*/VCV-adaptor/simd/.*"]
 CompileFlags:
 	Add: [
-        "--include /opt/homebrew/opt/llvm/lib/clang/16/include/arm_neon.h"
+        "--include /opt/homebrew/opt/llvm/lib/clang/17/include/arm_neon.h"
 	]
 
 ---

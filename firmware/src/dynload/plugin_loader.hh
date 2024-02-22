@@ -4,12 +4,23 @@
 #include <cstdint>
 #include <string>
 
+#include "dynload/dynloader.hh"
+
 namespace MetaModule
 {
 
 class PluginFileLoader {
 public:
-	enum class State { NotInit, Error, Idle, GettingList, ReadingPlugin, LoadingPlugin, Success };
+	enum class State {
+		NotInit,
+		Error,
+		Idle,
+		GettingList,
+		PrepareReadPlugin,
+		RequestReadPlugin,
+		LoadingPlugin,
+		Success
+	};
 
 	struct Status {
 		State state{State::Idle};
@@ -25,6 +36,7 @@ public:
 	void start(PluginFileList &plugin_file_list) {
 		status = {State::Idle, "", ""};
 		plugin_files = &plugin_file_list;
+		allocator.reset();
 	}
 
 	Status process() {
@@ -35,11 +47,6 @@ public:
 			case State::Idle:
 				if (file_storage.request_plugin_file_list(plugin_files))
 					status.state = State::GettingList;
-				else {
-					status.state = State::Error;
-					status.error_message = "Failed to request plugin list";
-				}
-				status.state = State::GettingList;
 				break;
 
 			case State::GettingList: {
@@ -51,24 +58,22 @@ public:
 				}
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
-					status.state = State::ReadingPlugin;
+					status.state = State::PrepareReadPlugin;
 					file_idx = 0;
 				}
 
 			} break;
 
-			case State::ReadingPlugin: {
+			case State::PrepareReadPlugin: {
 				if (file_idx >= plugin_files->size()) {
 					status.state = State::Success;
 					break;
 				}
+
 				auto plugin = (*plugin_files)[file_idx];
-				std::string path = "metamodule-plugins/" + plugin.dir_name + "/" + plugin.plugin_name;
-				auto buffer = allocator.allocate(plugin.file_size);
-				if (buffer) {
-					auto ok = file_storage.request_load_file(path, plugin.vol, {(char *)buffer, plugin.file_size});
-					if (ok)
-						status.state = State::LoadingPlugin;
+				buffer = {(char *)allocator.allocate(plugin.file_size), plugin.file_size};
+				if (buffer.data()) {
+					status.state = State::RequestReadPlugin;
 				} else {
 					status.state = State::Error;
 					status.error_message =
@@ -76,13 +81,24 @@ public:
 				}
 			} break;
 
+			case State::RequestReadPlugin: {
+				auto plugin = (*plugin_files)[file_idx];
+				std::string path = plugin.dir_name + "/" + plugin.plugin_name;
+				if (file_storage.request_load_file(path, plugin.vol, buffer))
+					status.state = State::LoadingPlugin;
+			} break;
+
 			case State::LoadingPlugin: {
 				auto plugin = (*plugin_files)[file_idx];
-				pr_dbg("Loading plugin from vol %d:metamodule-plugins/%s/%s\n",
+				pr_dbg("Loading plugin data from vol %d:%s/%s, from buffer %p ++%zu\n",
 					   plugin.vol,
 					   plugin.dir_name.c_str(),
-					   plugin.plugin_name.c_str());
-				//TODO: use DynLoader
+					   plugin.plugin_name.c_str(),
+					   buffer.data(),
+					   buffer.size());
+
+				DynLoader dynloader{buffer};
+				dynloader.load();
 			} break;
 
 			case State::NotInit:
@@ -101,6 +117,7 @@ private:
 	unsigned file_idx = 0;
 
 	OneTimeArenaAllocator allocator;
+	std::span<char> buffer;
 	PluginFileList *plugin_files{};
 };
 

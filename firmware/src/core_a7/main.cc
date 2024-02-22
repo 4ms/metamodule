@@ -5,7 +5,6 @@
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
-#include "dynload/dynloader.hh"
 #include "fs/time_convert.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
