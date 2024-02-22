@@ -7,8 +7,6 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 
-#include "dynload/befaco-strip-so.h"
-
 namespace MetaModule
 {
 
@@ -48,7 +46,11 @@ struct PrefsTab {
 
 	void prepare_focus(lv_group_t *group) {
 		this->group = group;
+		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
+		lv_group_remove_obj(plugin_button);
 		lv_group_add_obj(group, ui_ResetFactoryPatchesButton);
+		lv_group_add_obj(group, plugin_button);
+
 		lv_group_focus_obj(ui_ResetFactoryPatchesButton);
 		confirm_popup.init(ui_SystemMenu, group);
 	}
@@ -88,9 +90,9 @@ private:
 
 		auto page = static_cast<PrefsTab *>(event->user_data);
 
-		pr_info("Dyn Load Test\n");
-		DynLoader dynload{{Befaco_strip_so, Befaco_strip_so_len}};
-		dynload.load();
+		// pr_info("Dyn Load Test\n");
+		// DynLoader dynload{{Befaco_strip_so, Befaco_strip_so_len}};
+		// dynload.load();
 	}
 
 	lv_group_t *group = nullptr;
