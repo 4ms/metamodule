@@ -1,4 +1,5 @@
 #include "jansson.h"
+#include "string.hpp"
 #include <cmath>
 #include <cstring>
 #include <memory>
@@ -20,7 +21,12 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	sinf(0.5f);
 	tanf(0.5f);
 	tanh(0.5f);
+	sqrt(0.5f);
+	sqrtf(0.5f);
+	powf(0.5f, 0.5f);
+	sin(0.5f);
 	volatile auto keep = std::allocator<char>{}; //seems to do nothing
 	volatile int x = strlen("ABCD");
 	volatile auto savefunc = &json_object_set_new;
+	rack::string::f("Abc%d", 1);
 }
