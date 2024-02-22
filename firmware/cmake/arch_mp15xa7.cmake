@@ -43,7 +43,7 @@ add_compile_options(
   -Wall
   -Werror=return-type
   -Wsign-compare
-
+  -Wno-psabi
 )
 
 add_link_options(${MCU_FLAGS})
