@@ -35,3 +35,4 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     fonts/ui_font_MuseoSansRounded90040.c)
 
 add_library(ui ${SOURCES})
+target_link_libraries(ui PUBLIC lvgl)
