@@ -1984,5 +1984,35 @@
          x="44.03"
          y="0"
          id="tspan1175">or</tspan></text>
+    <circle
+       id="FreezeSplit@Even/Odd@Low/High@Root/Others"
+       cx="61.77"
+       cy="208.21"
+       r="6"
+       style="fill: #808080;" />
+    <circle
+       id="StereoSplit@Even/Odd@Low/High@Root/Others"
+       cx="168.87"
+       cy="208.21"
+       r="6"
+       style="fill: #808081;" />
+    <circle
+       id="Crossfade"
+       cx="32.72"
+       cy="144.14"
+       r="6"
+       style="fill: #808080;" />
+    <circle
+       id="NumOsc@16"
+       cx="115.27"
+       cy="61.62"
+       r="6"
+       style="fill: #808080;" />
+    <circle
+       id="FineTune"
+       cx="176.96"
+       cy="78.07"
+       r="6"
+       style="fill: #808080;" />
   </g>
 </svg>

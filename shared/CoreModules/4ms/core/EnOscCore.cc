@@ -70,11 +70,11 @@ public:
 		enosc.switches().twist_.set(SwitchStateMapping(getState<TwistSwitch>()));
 		enosc.switches().warp_.set( SwitchStateMapping(getState<WarpSwitch>()));
 
-		enosc.set_stereo_mode(SplitMode(getState<StereoSplitAlt>()));
-		enosc.set_freeze_mode(SplitMode(getState<FreezeSplitAlt>()));
-		enosc.set_num_osc(getState<NumOscAlt>());
-		enosc.set_crossfade(getState<CrossfadeAlt>());
-		enosc.set_fine_tune(getState<FineTuneAlt>());
+		enosc.set_stereo_mode(SplitMode(getState<StereosplitAltParam>()));
+		enosc.set_freeze_mode(SplitMode(getState<FreezesplitAltParam>()));
+		enosc.set_num_osc(getState<NumoscAltParam>());
+		enosc.set_crossfade(getState<CrossfadeAltParam>());
+		enosc.set_fine_tune(getState<FinetuneAltParam>());
 
 		auto InputScalingFunc = [](float valInV)
 		{
@@ -82,7 +82,7 @@ public:
 		};
 
 		if (auto val = getInput<BalanceJackIn>(); val)  enosc.set_potcv(AdcInput::CV_BALANCE,         InputScalingFunc(*val));
-		if (auto val = getInput<CrossFmJackIn>(); val) enosc.set_potcv(AdcInput::CV_MOD,             InputScalingFunc(*val));
+		if (auto val = getInput<CrossFmJackIn>(); val)  enosc.set_potcv(AdcInput::CV_MOD,             InputScalingFunc(*val));
 		if (auto val = getInput<PitchJackIn>(); val)    enosc.set_pitchroot_cv(SpiAdcInput::CV_PITCH, InputScalingFunc(*val));
 		if (auto val = getInput<RootJackIn>(); val)     enosc.set_pitchroot_cv(SpiAdcInput::CV_ROOT,  InputScalingFunc(*val));
 		if (auto val = getInput<ScaleJackIn>(); val)    enosc.set_potcv(AdcInput::CV_SCALE,           InputScalingFunc(*val));
