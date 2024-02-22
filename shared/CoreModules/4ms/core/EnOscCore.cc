@@ -91,22 +91,22 @@ public:
 			case Info::SwitchWarp_Switch:
 				enosc.switches().warp_.set(switchstate(val));
 				break;
-			case Info::AltStereoSplit: {
+			case Info::AltParamStereosplit: {
 				auto mode = static_cast<SplitMode>(val * 2.9f);
 				enosc.set_stereo_mode(mode);
 			} break;
-			case Info::AltNumOsc: {
+			case Info::AltParamNumosc: {
 				int num_osc = (val * 15.9f) + 1;
 				enosc.set_num_osc(num_osc);
 			} break;
-			case Info::AltCrossfade:
+			case Info::AltParamCrossfade:
 				enosc.set_crossfade(val);
 				break;
-			case Info::AltFreezeSplit: {
+			case Info::AltParamFreezesplit: {
 				auto mode = static_cast<SplitMode>(val * 2.9f);
 				enosc.set_freeze_mode(mode);
 			} break;
-			case Info::AltFineTune:
+			case Info::AltParamFinetune:
 				enosc.set_fine_tune(val);
 				break;
 		}

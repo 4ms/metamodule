@@ -99,7 +99,7 @@ struct EnOscInfo : ModuleInfoBase {
     };
     
     enum {
-        SwitchScale_Switch, 
+        SwitchScale_Switch = NumKnobs, 
         SwitchCross_Fm_Switch, 
         SwitchTwist_Switch, 
         SwitchWarp_Switch, 
@@ -130,7 +130,7 @@ struct EnOscInfo : ModuleInfoBase {
     
     
     enum {
-        AltParamFinetune, 
+        AltParamFinetune = NumSwitches, 
         AltParamNumosc, 
         AltParamCrossfade, 
         AltParamStereosplit, 
