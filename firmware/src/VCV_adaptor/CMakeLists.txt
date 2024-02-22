@@ -7,26 +7,25 @@ target_sources(
   VCV_adaptor
   PRIVATE string.cpp
          plugin_instance.cc
-         pffft/pffft.c
          engine/Module.cpp
 )
 
 add_subdirectory(${MM_ROOT}/firmware/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
+add_subdirectory(pffft)
 
-target_link_libraries(VCV_adaptor PUBLIC lvgl::lvgl jansson)
+# TODO: is this really meant to be propagated
+target_link_libraries(VCV_adaptor PUBLIC pffft jansson)
+
+target_link_libraries(VCV_adaptor PRIVATE lvgl::lvgl jansson)
 
 target_include_directories(
   VCV_adaptor
   PUBLIC ${MM_ROOT}/firmware/src/VCV_adaptor
-         ${MM_ROOT}/firmware/src/VCV_adaptor/pffft
          ${MM_ROOT}/firmware/src
          ${MM_ROOT}/firmware/src/console
          ${MM_ROOT}/firmware
          ${MM_ROOT}/shared
          ${MM_ROOT}/shared/cpputil
 )
-
-# Fixup for pffft compiler warnings
-set_source_files_properties(pffft/pffft.c PROPERTIES COMPILE_OPTIONS "-Wno-double-promotion;-Wno-pointer-to-int-cast")
 
 set_property(TARGET VCV_adaptor PROPERTY CXX_STANDARD 20)
