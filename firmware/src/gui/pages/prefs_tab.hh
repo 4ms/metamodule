@@ -1,10 +1,13 @@
 #pragma once
+#include "dynload/dynloader.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+
+#include "dynload/befaco-strip-so.h"
 
 namespace MetaModule
 {
@@ -84,6 +87,10 @@ private:
 			return;
 
 		auto page = static_cast<PrefsTab *>(event->user_data);
+
+		pr_info("Dyn Load Test\n");
+		DynLoader dynload{{Befaco_strip_so, Befaco_strip_so_len}};
+		dynload.load();
 	}
 
 	lv_group_t *group = nullptr;
