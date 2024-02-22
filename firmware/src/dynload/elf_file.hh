@@ -23,6 +23,10 @@ struct Elf {
 		, raw_prog_headers{(Elf32_Phdr *)(elfdata.data() + raw_elf_header->e_phoff), raw_elf_header->e_phnum}
 		, string_table{find_string_table()} {
 
+		pr_trace("elf data is at %08x++%x\n", elfdata.data(), elfdata.size_bytes());
+		pr_trace("phnum: %u\n", raw_elf_header->e_phnum);
+		pr_trace("shnum: %u\n", raw_elf_header->e_shnum);
+
 		populate_segments();
 		populate_sections();
 		find_dyn_strings();
@@ -31,8 +35,6 @@ struct Elf {
 		find_raw_symbols();
 		populate_relocations(".rel.dyn");
 		populate_relocations(".rel.plt");
-
-		pr_dbg("elf data is at %08x++%x\n", elfdata.data(), elfdata.size_bytes());
 	}
 
 	void print_sec_headers() {

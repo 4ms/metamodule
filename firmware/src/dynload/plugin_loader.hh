@@ -34,6 +34,7 @@ public:
 	}
 
 	void start() {
+		plugin_code.clear();
 		allocator.reset();
 		if (auto newmem = allocator.allocate(sizeof(PluginFileList))) {
 			plugin_files = new (newmem) PluginFileList;
@@ -90,6 +91,8 @@ public:
 
 			case State::LoadingPlugin: {
 				auto &plugin = (*plugin_files)[file_idx];
+				auto code = plugin_code.emplace_back(plugin.plugin_name.c_str());
+
 				pr_dbg("Loading plugin data from vol %d:%s/%s, from buffer %p ++%zu\n",
 					   plugin.vol,
 					   plugin.dir_name.c_str(),
@@ -97,8 +100,13 @@ public:
 					   buffer.data(),
 					   buffer.size());
 
-				DynLoader dynloader{buffer};
-				dynloader.load();
+				DynLoader dynloader{buffer, code.code};
+				auto ok = dynloader.load();
+				if (ok)
+					pr_info("Plugin loaded!\n");
+				else
+					pr_err("Could not load plugin\n");
+
 				file_idx++;
 
 				if (file_idx >= plugin_files->size()) {
@@ -125,7 +133,14 @@ private:
 	OneTimeArenaAllocator allocator;
 	std::span<uint8_t> buffer;
 
+	// Dynamically generated in non-cacheable RAM
 	PluginFileList *plugin_files = nullptr;
+
+	struct LoadedPlugin {
+		std::string name;
+		std::vector<uint8_t> code;
+	};
+	std::vector<LoadedPlugin> plugin_code;
 };
 
 } // namespace MetaModule

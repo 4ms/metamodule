@@ -18,13 +18,15 @@
 
 struct DynLoader {
 
-	DynLoader(std::span<uint8_t> elf_file_data)
-		: elf{elf_file_data} {
+	DynLoader(std::span<uint8_t> elf_file_data, std::vector<uint8_t> &code_buffer)
+		: elf{elf_file_data}
+		, codeblock{code_buffer} {
+
 		keep_symbols();
 		init_host_symbol_table();
 	}
 
-	GCC_OPTIMIZE_OFF
+	// GCC_OPTIMIZE_OFF
 	bool load() {
 		if (elf.segments.size() == 0 || elf.sections.size() == 0 || elf.relocs.size() == 0) {
 			pr_err("Not a valid elf file\n");
@@ -43,23 +45,23 @@ struct DynLoader {
 		return true;
 	}
 
-	GCC_OPTIMIZE_OFF
+	// GCC_OPTIMIZE_OFF
 	void load_executable() {
 		size_t load_size = elf.load_size();
 
-		codeblock.code.clear();
-		codeblock.code.resize(load_size);
-		pr_info("Allocating %zu bytes for loading code at 0x%x\n", load_size, codeblock.code.begin());
+		codeblock.clear();
+		codeblock.resize(load_size);
+		pr_info("Allocating %zu bytes for loading code at 0x%x\n", load_size, codeblock.begin());
 
 		for (auto &seg : elf.segments) {
 			if (seg.is_loadable()) {
-				std::ranges::copy(seg, std::next(codeblock.code.begin(), seg.address()));
+				std::ranges::copy(seg, std::next(codeblock.begin(), seg.address()));
 
 				pr_info("Loading segment with file offset 0x%x-0x%x to %p-%p\n",
 						seg.offset(),
 						seg.offset() + seg.file_size(),
-						std::next(codeblock.code.begin(), seg.address()),
-						std::next(codeblock.code.begin(), seg.address() + seg.file_size()));
+						std::next(codeblock.begin(), seg.address()),
+						std::next(codeblock.begin(), seg.address() + seg.file_size()));
 			}
 		}
 	}
@@ -82,7 +84,7 @@ struct DynLoader {
 
 	bool process_relocs() {
 		bool missing_sym = false;
-		ElfFile::Relocater relocator{codeblock.code.data(), hostsyms};
+		ElfFile::Relocater relocator{codeblock.data(), hostsyms};
 
 		for (auto reloc : elf.relocs) {
 			bool ok = relocator.write(reloc);
@@ -95,7 +97,7 @@ struct DynLoader {
 		return missing_sym;
 	}
 
-	GCC_OPTIMIZE_OFF
+	// GCC_OPTIMIZE_OFF
 	void init_globals() {
 		auto initarray_section = elf.find_section(".init_array");
 		if (!initarray_section) {
@@ -113,55 +115,13 @@ struct DynLoader {
 
 		for (auto ctor : ctors) {
 			auto addr = reinterpret_cast<uint32_t>(ctor);
-			ctor = reinterpret_cast<ctor_func_t>(addr + codeblock.code.data());
+			ctor = reinterpret_cast<ctor_func_t>(addr + codeblock.data());
 			pr_info("Calling ctor %p\n", ctor);
 			ctor();
 		}
 	}
 
-	GCC_OPTIMIZE_OFF
-	void test_run_module() {
-		printf("EvenVCOPlugin:\n");
-		MetaModule::DumpModuleInfo::print("EvenVCOPlugin");
-
-		printf("DualAtenuverterPlugin\n");
-		MetaModule::DumpModuleInfo::print("DualAtenuverterPlugin");
-
-		auto evenvco = MetaModule::ModuleFactory::create("EvenVCOPlugin");
-		auto dualat = MetaModule::ModuleFactory::create("DualAtenuverterPlugin");
-
-		if (dualat) {
-			pr_dbg("Dualat ptr is at %p\n", dualat.get());
-		} else
-			pr_dbg("Dual at did not create()");
-
-		if (evenvco) {
-			pr_dbg("Even is at %p\n", evenvco.get());
-		} else
-			pr_dbg("EvenVCO did not create()");
-
-		evenvco->update();
-		auto out1 = dualat->get_output(0);
-		auto out2 = dualat->get_output(1);
-		pr_dbg("Out 1 %f, Out 2 %f\n", out1, out2);
-		dualat->update();
-		dualat->mark_input_patched(0);
-		dualat->mark_input_patched(1);
-		dualat->mark_output_patched(0);
-		dualat->mark_output_patched(1);
-		dualat->set_param(0, 0.75f);
-		dualat->set_param(1, 0.25f);
-		dualat->set_param(2, 0.25f);
-		dualat->set_param(3, 0.75f);
-		dualat->set_input(0, 0.3333f);
-		dualat->set_input(1, 0.8888f);
-		dualat->update();
-		out1 = dualat->get_output(0);
-		out2 = dualat->get_output(1);
-		pr_dbg("Out 1 %f, Out 2 %f\n", out1, out2);
-	}
-
-	GCC_OPTIMIZE_OFF
+	// GCC_OPTIMIZE_OFF
 	void run_init_plugin_function() {
 		// auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initP6Plugin");
 		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
@@ -169,7 +129,7 @@ struct DynLoader {
 		plugin.models.clear();
 
 		if (init_plugin_symbol) {
-			auto load_address = init_plugin_symbol->offset() /*- block.elf_offset*/ + codeblock.code.data();
+			auto load_address = init_plugin_symbol->offset() + codeblock.data();
 			init_func = reinterpret_cast<InitPluginFunc *>(load_address);
 			if (init_func) {
 				init_func(&plugin);
@@ -180,16 +140,10 @@ struct DynLoader {
 			pr_err("Did not find init(rack::plugin::Plugin*)\n");
 	}
 
+private:
 	ElfFile::Elf elf;
-
 	rack::Plugin plugin;
-
-	struct CodeBlock {
-		std::vector<uint8_t> code;
-		// std::array<uint8_t, 0x10'0000> alignas(0x10'000) code;
-		uint32_t elf_offset{}; //offset where data starts in elf file
-	};
-	CodeBlock codeblock;
+	std::vector<uint8_t> &codeblock;
 
 	using InitPluginFunc = void(rack::Plugin *);
 	InitPluginFunc *init_func{};

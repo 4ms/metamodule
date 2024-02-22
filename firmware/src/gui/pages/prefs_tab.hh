@@ -102,6 +102,7 @@ private:
 	FileStorageProxy &file_storage;
 	ConfirmPopup confirm_popup;
 
+	//TODO: Organizationally, maybe this should be in main, and a ref to it in PatchContext?
 	PluginFileLoader plugin_loader;
 
 	lv_obj_t *plugin_button;
