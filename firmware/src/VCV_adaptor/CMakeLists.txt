@@ -1,4 +1,4 @@
-set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
+set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../)
 
 add_library(VCV_adaptor STATIC)
 
