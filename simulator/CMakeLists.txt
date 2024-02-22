@@ -67,7 +67,7 @@ target_include_directories(
           ${SHARED}/patch
           )
 
-target_compile_options(simulator PRIVATE -Wall -Og ${SDL2_CFLAGS_OTHER})
+target_compile_options(simulator PRIVATE -Wall -Og)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 VCV_adaptor cpputil ui vcv_ports)
 
