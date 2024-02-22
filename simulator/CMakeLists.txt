@@ -11,6 +11,8 @@ set(LV_CONF_PATH
     ${CMAKE_CURRENT_LIST_DIR}/lv_conf.h
     CACHE STRING "" FORCE)
 
+add_compile_options(-g2)
+
 # #################### cpputil #########################################
 
 add_subdirectory(../shared/cpputil cpputil)
@@ -74,7 +76,7 @@ foreach(brand ${brands})
            ${FWDIR}
            ${SHARED}
            )
-  target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion> -g2)
+  target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
   target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
   target_link_libraries(${brand}Library PUBLIC cpputil VCV_adaptor ui)
 
@@ -131,7 +133,7 @@ target_include_directories(
           ${SHARED}/patch
           )
 
-target_compile_options(simulator PRIVATE -Wall -Og -g2 ${SDL2_CFLAGS_OTHER})
+target_compile_options(simulator PRIVATE -Wall -Og ${SDL2_CFLAGS_OTHER})
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 VCV_adaptor cpputil)
 
