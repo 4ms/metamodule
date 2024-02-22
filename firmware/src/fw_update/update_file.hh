@@ -1,25 +1,22 @@
 #pragma once
 #include "util/static_string.hh"
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
 namespace MetaModule
 {
 
-enum class UpdateType { App, WifiFirmware, WifiFilesystem, WifiApp, Invalid };
+enum class UpdateType { App, Wifi };
 
 struct UpdateFile {
-	UpdateType type = UpdateType::Invalid;
+	UpdateType type;
 	std::string filename;
 	uint32_t filesize = 0;
-	StaticString<32> md5{};
-
-	struct Version {
-		uint8_t major = 0;
-		uint8_t minor = 0;
-		uint8_t revision = 0;
-	} version;
+	std::optional<StaticString<32>> md5;
+	uint32_t address;
+	std::string name;
 };
 
 struct UpdateManifest {

@@ -172,6 +172,22 @@ public:
 		return true;
 	}
 
+	[[nodiscard]] bool request_checksum_compare(IntercoreStorageMessage::FlashTarget target,
+												StaticString<32> checksum,
+												uint32_t address,
+												uint32_t length,
+												uint32_t *bytes_processed) {
+		//TODO
+		return true;
+	}
+
+	[[nodiscard]] bool request_file_flash(IntercoreStorageMessage::FlashTarget target,
+										  std::span<uint8_t> buffer,
+										  uint32_t address,
+										  uint32_t *bytes_processed) {
+		return true;
+	}
+
 	bool write_patch(std::string_view filename = "") {
 		if (filename == "")
 			filename = view_patch_loc_.filename;
@@ -228,14 +244,5 @@ private:
 	unsigned mock_firmware_file_size = 513;
 
 	bool refresh_required = true;
-
-	// IntercoreStorageMessage::MessageType populate_patchlist(std::span<const PatchFile> &list, Volume vol) {
-	// 	if (list.size() == 0) {
-	// 		list = patch_list_.get_patchfile_list(vol);
-	// 		if (list.size() > 0)
-	// 			return PatchListChanged;
-	// 	}
-	// 	return PatchListUnchanged;
-	// }
 };
 } // namespace MetaModule

@@ -12,44 +12,58 @@
 namespace MetaModule
 {
 
-inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updatefile) {
-	if (!n.is_map())
-		return false;
-	if (!n.has_child("type"))
-		return false;
-	if (!n.has_child("filename"))
-		return false;
-	if (!n.has_child("filesize"))
-		return false;
+inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updateFile) {
 
-	n["filename"] >> updatefile->filename;
-	n["filesize"] >> updatefile->filesize;
+	if (n.has_child("type") && n.has_child("filename") && n.has_child("filesize")) {
 
-	updatefile->type = (n["type"].val() == "app")			  ? MetaModule::UpdateType::App :
-					   (n["type"].val() == "wifi-app")		  ? MetaModule::UpdateType::WifiApp :
-					   (n["type"].val() == "wifi-firmware")	  ? MetaModule::UpdateType::WifiFirmware :
-					   (n["type"].val() == "wifi-filesystem") ? MetaModule::UpdateType::WifiFilesystem :
-																MetaModule::UpdateType::Invalid;
+		auto parseFileType = [](const auto &typeString) -> std::optional<UpdateType> {
+			if (typeString.val() == "app")
+				return MetaModule::UpdateType::App;
+			else if (typeString.val() == "wifi")
+				return MetaModule::UpdateType::Wifi;
+			else
+				return std::nullopt;
+		};
 
-	if (n.has_child("md5")) {
-		auto md5 = n["md5"].val();
-		auto md5_sv = std::string_view{md5.data(), md5.size()};
-		updatefile->md5 = md5_sv;
+		if (auto updateType = parseFileType(n["type"]); updateType) {
+
+			updateFile->type = *updateType;
+
+			if (n.has_child("filename") and n.has_child("address") and n.has_child("filesize"))
+			{
+
+				n["filename"] >> updateFile->filename;
+				n["filesize"] >> updateFile->filesize;
+				n["address"] >> updateFile->address;
+
+				if (n.has_child("md5")) {
+					auto md5 = n["md5"].val();
+					auto md5_sv = std::string_view{md5.data(), md5.size()};
+					updateFile->md5 = md5_sv;
+				}
+
+				if (n.has_child("name")) {
+					n["name"] >> updateFile->name;
+				}
+				return true;
+			}
+			else{
+				pr_err("Missing required fields\n");
+			}
+		} else {
+			pr_err("Unknown update type\n");
+		}
 	}
 
-	if (n.has_child("version")) {
-		auto version = n["version"];
+	return false;
+}
 
-		if (version.has_child("major"))
-			version["major"] >> updatefile->version.major;
-
-		if (version.has_child("minor"))
-			version["minor"] >> updatefile->version.minor;
-
-		if (version.has_child("revision"))
-			version["revision"] >> updatefile->version.revision;
+inline bool read(ryml::ConstNodeRef const &n, std::vector<UpdateFile> *updateFiles) {
+	for (auto const ch : n) {
+		UpdateFile updateFile;
+		if (read(ch, &updateFile))
+			updateFiles->push_back(updateFile);
 	}
-
 	return true;
 }
 
@@ -57,35 +71,34 @@ struct ManifestParser {
 
 	// returns true if file data is valid manifest json file (does not check md5 or if files exist)
 	// creates the list of files we need
-	UpdateManifest parse(std::span<char> json) {
-		UpdateManifest manifest{};
+	std::optional<UpdateManifest> parse(std::span<char> json) {
 
 		// ryml has issues with tabs in json sometimes:
 		std::replace(json.begin(), json.end(), '\t', ' ');
 
 		ryml::Tree tree = ryml::parse_in_place(ryml::substr(json.data(), json.size()));
 
-		if (tree.num_children(0) == 0) {
+		if (tree.num_children(0) > 0) {
+			ryml::ConstNodeRef root = tree.rootref();
+
+			if (root.has_child("version")) {
+				UpdateManifest manifest{};
+				root["version"] >> manifest.version;
+
+				if (root.has_child("files")) {
+					root["files"] >> manifest.files;
+					return manifest;
+				} else {
+					pr_dbg("Manifest file has no root node with key 'files'\n");
+				}
+			} else {
+				pr_dbg("Manifest has no version\n");
+			}
+		} else {
 			pr_dbg("Manifest not valid json or yaml\n");
-			return manifest;
 		}
 
-		ryml::ConstNodeRef root = tree.rootref();
-
-		if (!root.has_child("version")) {
-			pr_dbg("Manifest file has no root node with key 'version'\n");
-			return manifest;
-		}
-
-		if (!root.has_child("files")) {
-			pr_dbg("Manifest file has no root node with key 'files'\n");
-			return manifest;
-		}
-
-		root["version"] >> manifest.version;
-		root["files"] >> manifest.files;
-
-		return manifest;
+		return std::nullopt;
 	}
 };
 

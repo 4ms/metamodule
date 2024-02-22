@@ -137,7 +137,7 @@ private:
 		constexpr uint32_t HEADER_SIZE = 64;
 		std::array<char, HEADER_SIZE> _buf;
 
-		auto bytes_read = fileio.read_file(filename, _buf);
+		auto bytes_read = fileio.read_file(filename, _buf, 0);
 		if (bytes_read == 0) {
 			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
 			return "";

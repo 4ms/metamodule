@@ -39,9 +39,14 @@ struct DefaultPatchFileIO {
 		return true;
 	}
 
-	uint64_t read_file(std::string_view filename, std::span<char> buffer) {
+	uint64_t read_file(std::string_view filename, std::span<char> buffer, size_t offset = 0) {
 		uint64_t sz = 0;
 		auto num_patches = DefaultPatches::num_patches();
+
+		if (offset != 0) {
+			pr_err("DefaultPatchFileIO::read_file does not support reading partial files\n");
+			return 0;
+		}
 
 		for (unsigned i = 0; i < num_patches; i++) {
 			if (filename.starts_with("/"))

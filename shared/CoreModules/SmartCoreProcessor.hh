@@ -30,6 +30,20 @@ protected:
 	}
 
 	template<Elem EL>
+	bool isPatched() requires(count(EL).num_outputs == 1)
+	{
+		auto idx = index(EL);
+		return outputPatched[idx.output_idx];
+	}
+
+	template<Elem EL>
+	bool isPatched() requires(count(EL).num_inputs == 1)
+	{
+		auto idx = index(EL);
+		return inputValues[idx.input_idx].has_value();
+	}
+
+	template<Elem EL>
 	std::optional<float> getInput() requires(count(EL).num_inputs == 1)
 	{
 		auto idx = index(EL);
@@ -98,7 +112,15 @@ private:
 			ledValues[led_idx] = val;
 	}
 
-protected:
+	constexpr static auto counts = ElementCount::count<INFO>();
+	constexpr static auto indices = ElementCount::get_indices<INFO>();
+
+	constexpr static auto index(Elem el) {
+		auto element_idx = element_index(el);
+		return indices[element_idx];
+	}
+
+public:
 	float get_output(int output_id) const override {
 		if (output_id < (int)outputValues.size())
 			return outputValues[output_id]; // Note: this undoes what CommModule does
@@ -124,31 +146,37 @@ protected:
 		}
 	}
 
-private:
-	constexpr static auto counts = ElementCount::count<INFO>();
-	constexpr static auto indices = ElementCount::get_indices<INFO>();
-
-	constexpr static auto index(Elem el) {
-		auto element_idx = element_index(el);
-		return indices[element_idx];
-	}
-
-private:
 	void mark_all_inputs_unpatched() override {
 		std::fill(inputValues.begin(), inputValues.end(), std::nullopt);
 	}
+
 	void mark_input_unpatched(const int input_id) override {
 		inputValues[input_id].reset();
 	}
+
 	void mark_input_patched(const int input_id) override {
 		// do nothing here
 		// value will be set by next update
 	}
 
+	void mark_all_outputs_unpatched() override {
+		std::fill(outputPatched.begin(), outputPatched.end(), false);
+	}
+
+	void mark_output_unpatched(int output_id) override {
+		outputPatched[output_id] = false;
+	}
+
+	void mark_output_patched(int output_id) override {
+		outputPatched[output_id] = true;
+	}
+
+private:
 	std::array<float, counts.num_params> paramValues{};
 	std::array<std::optional<float>, counts.num_inputs> inputValues{0};
 	std::array<float, counts.num_outputs> outputValues{};
 	std::array<float, counts.num_lights> ledValues{};
+	std::array<bool, counts.num_outputs> outputPatched{};
 };
 
 } // namespace MetaModule

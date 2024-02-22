@@ -1,8 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
-option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" OFF)
-option(ENABLE_WIFI_BRIDGE_UPDATE "Enable updating firmware of wifi bridge module" ON)
+option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" ON)
 
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(SHARED ${FWDIR}/../shared)
@@ -138,7 +137,7 @@ add_executable(
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
   ${FWDIR}/src/fs/time_convert.cc
-  ${FWDIR}/src/flash_loader/flash_loader.cc
+  ${FWDIR}/src/fw_update/updater_proxy.cc
   ${FWDIR}/src/gui/elements/element_name.cc
 
   #
@@ -210,19 +209,6 @@ set_source_files_properties(
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
-
-if (ENABLE_WIFI_BRIDGE)
-  target_compile_definitions(main.elf PRIVATE
-    ENABLE_WIFI_BRIDGE=1
-  )
-
-  if (ENABLE_WIFI_BRIDGE_UPDATE)
-    target_compile_definitions(main.elf PRIVATE ENABLE_WIFI_BRIDGE_UPDATE=1)
-  endif()
-
-  add_subdirectory(${FWDIR}/src/wifi/flasher ${CMAKE_BINARY_DIR}/wifi_flash)
-
-endif()
 
 target_include_directories(
   main.elf

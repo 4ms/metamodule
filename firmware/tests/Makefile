@@ -18,6 +18,8 @@ TEST_SOURCES += ../shared/patch_convert/ryml/ryml_serial.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 TEST_SOURCES += src/fs/time_convert.cc
+TEST_SOURCES += src/fw_update/hash/md5_hash.h
+TEST_SOURCES += src/fw_update/hash/hash_processor.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
