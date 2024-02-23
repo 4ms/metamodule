@@ -51,24 +51,18 @@ add_subdirectory(src ${A7_BIN_PATH})
 # Symbol table
 #
 
+set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml
+  OUTPUT ${SYMBOLS_FILE}
   #TODO: fix hard-coded dirs
-  COMMAND flashing/dump_syms.py
-  			--objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
-			--objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/
-			--elf $<TARGET_FILE:main.elf>
-			--yaml ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml \
-			-v
-
-  COMMAND flashing/dump_syms.py
-          --m4 $<TARGET_FILE:main_m4.elf>
-          --a7 $<TARGET_FILE:main.elf>
-          ${MAIN_FW_FILENAME}
-  COMMAND cp ${MAIN_FW_FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
-  COMMAND ls -l ${MAIN_FW_FILENAME}
-  DEPENDS main.elf main_m4.elf
-  COMMENT "Creating combined uimg file"
+  COMMAND flashing/dump_syms.py -v
+          --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
+          --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/
+          --elf $<TARGET_FILE:main.elf>
+          --yaml ${SYMBOLS_FILE}
+  COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
+  DEPENDS main.elf 
+  COMMENT "Exporting symbols"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
 )
@@ -90,7 +84,7 @@ add_custom_command(
           ${MAIN_FW_FILENAME}
   COMMAND cp ${MAIN_FW_FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
   COMMAND ls -l ${MAIN_FW_FILENAME}
-  DEPENDS main.elf main_m4.elf ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml #TODO: Is this the best way to be sure dump_syms is always run first?
+  DEPENDS main.elf main_m4.elf ${SYMBOLS_FILE}
   COMMENT "Creating combined uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
