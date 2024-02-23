@@ -147,6 +147,14 @@ def write_json(outfile, syms):
         f.write(data)
 
 
+def write_yaml(outfile, syms):
+    data = ""
+    for sym, addr in syms.items():
+        data += f"{sym}: {hex(addr)}\n"
+    with open(outfile, "w") as f:
+        f.write(data)
+
+
 
 def write_header(outfile, syms):
     symlist = """
@@ -172,9 +180,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Dump symbols that plugins might need")
     parser.add_argument("--objdir", action="append", help="Object dir with .obj files with the symbols we want to make available to plugins (i.e. VCV_module_wrapper.cc.obj)")
     parser.add_argument("--elf", help="Fully linked elf file with addresses of all symbols (main.elf)")
-    parser.add_argument("--out", help="output header file")
-    parser.add_argument("--bin", help="output binary symtab+strtab")
-    parser.add_argument("--json", help="output json symtab+strtab")
+    parser.add_argument("--header", help="output c++ header file")
+    parser.add_argument("--bin", help="output binary")
+    parser.add_argument("--json", help="output json")
+    parser.add_argument("--yaml", help="output yaml")
     parser.add_argument("-v", dest="verbose", help="Verbose logging", action="store_true")
     args = parser.parse_args()
 
@@ -194,14 +203,17 @@ if __name__ == "__main__":
 
     needed_syms += GetLibcSymbols()
 
+    # remove duplicates
+    needed_syms = list(set(needed_syms))
+
     logging.debug("Finding symbol addresses:")
 
     with open(args.elf, "rb") as f:
         syms = GetAddressesOfSymbols(f, needed_syms)
 
 
-    if args.out:
-        write_header(args.out, syms)
+    if args.header:
+        write_header(args.header, syms)
 
     if args.bin:
         write_binary(args.bin, syms)
@@ -209,11 +221,7 @@ if __name__ == "__main__":
     if args.json:
         write_json(args.json, syms)
 
+    if args.yaml:
+        write_yaml(args.yaml, syms)
 
-
-    
-# flashing/dump_syms.py \
-#         --objdir ./build/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/ \
-#         --objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ \
-#         --elf ./build/mp1corea7/medium/main.elf --out src/dynload/host_sym_list.hh -v
 
