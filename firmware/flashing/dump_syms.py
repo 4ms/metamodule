@@ -155,6 +155,11 @@ def write_yaml(outfile, syms):
     with open(outfile, "w") as f:
         f.write(data)
 
+        padding = len(data) % 4
+        while padding > 0:
+            f.write("\x00")
+            padding -= 1
+
 
 
 def write_header(outfile, syms):
