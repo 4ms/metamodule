@@ -36,7 +36,7 @@ def GetAddressesOfSymbols(file, needed_syms):
             needed_syms.remove(s.name)
 
     for n in needed_syms:
-        logging.warning(f"** WARNING: Symbol not found: {n} **")
+        logging.warning(f"** WARNING: Symbol not found in main.elf: {n} **")
 
     return syms
 
@@ -73,11 +73,6 @@ def GetLibcSymbols():
          "printf",
          "__aeabi_atexit",
          "__cxa_pure_virtual",
-         "_ZNSaIcEC1Ev", # std::allocator<char>::allocator()
-         "_ZNSaIcED1Ev", # std::allocator<char>::~allocator()
-         "_ZNSaIcED2Ev", # std::allocator<char>::~allocator() ? somehow different?
-         "_ZNSaIcEC1ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&)
-         "_ZNSaIcEC2ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&) ? somehow different?
 
          "_Znwj", # operator new(unsigned int)
          "_Znaj", # operator new[](unsigned int)
@@ -90,12 +85,12 @@ def GetLibcSymbols():
          "_ZSt17__throw_bad_allocv", #
          "_ZSt28__throw_bad_array_new_lengthv", #
 
-         "pffft_new_setup",
-         "pffft_aligned_free",
-         "pffft_transform",
-         "pffft_destroy_setup",
-         "pffft_aligned_malloc",
-         "pffft_zconvolve_accumulate",
+         # Not found, replaced with an empty function
+         "_ZNSaIcEC1Ev", # std::allocator<char>::allocator()
+         "_ZNSaIcED1Ev", # std::allocator<char>::~allocator()
+         "_ZNSaIcED2Ev", # std::allocator<char>::~allocator() ? somehow different?
+         "_ZNSaIcEC1ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&)
+         "_ZNSaIcEC2ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&) ? somehow different?
 
          "json_integer_value",
          "json_object",
@@ -105,13 +100,19 @@ def GetLibcSymbols():
          "json_false",
          "json_integer",
 
-         "_ZTV16VCVModuleWrapper",
-         "_ZTVN4rack6engine6ModuleE",
+         # "_ZTV16VCVModuleWrapper",
+         # "_ZTVN4rack6engine6ModuleE",
 
+         # "_ZN10MetaModule13ModuleFactory11isValidSlugERK12StaticStringILj31EE",
+         # "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EERKNS_14ModuleInfoViewE",
+         # "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EEPFSt10unique_ptrI13CoreProcessorSt14default_deleteIS6_EEvE",
 
-         "_ZN10MetaModule13ModuleFactory11isValidSlugERK12StaticStringILj31EE",
-         "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EERKNS_14ModuleInfoViewE",
-         "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EEPFSt10unique_ptrI13CoreProcessorSt14default_deleteIS6_EEvE",
+         # "pffft_new_setup",
+         # "pffft_aligned_free",
+         # "pffft_transform",
+         # "pffft_destroy_setup",
+         # "pffft_aligned_malloc",
+         # "pffft_zconvolve_accumulate",
 
     ]
     return libc_syms
@@ -201,7 +202,14 @@ if __name__ == "__main__":
             with open(obj_file, "rb") as f:
                 needed_syms += GetRequiredSymbolNames(f)
 
-    needed_syms += GetLibcSymbols()
+    libc_syms = GetLibcSymbols()
+    for s in libc_syms:
+        if s in needed_syms:
+            logging.debug(f"Manually given symbol {s} already requested")
+        else:
+            needed_syms.append(s)
+
+    # needed_syms += GetLibcSymbols()
 
     # remove duplicates
     needed_syms = list(set(needed_syms))
