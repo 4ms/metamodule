@@ -25,8 +25,16 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	sqrtf(0.5f);
 	powf(0.5f, 0.5f);
 	sin(0.5f);
+	log(0.5f);
+	logf(0.5f);
+	log2f(0.5f);
+	cos(0.5f);
+	cosf(0.5f);
 	volatile auto keep = std::allocator<char>{}; //seems to do nothing
 	volatile int x = strlen("ABCD");
 	volatile auto savefunc = &json_object_set_new;
 	rack::string::f("Abc%d", 1);
+
+	auto ar = new int[10];
+	delete[] ar;
 }
