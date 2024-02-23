@@ -14,6 +14,8 @@ MEMORY
 	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
 	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
 
+	SYMLIST (r)			: ORIGIN = _A7_SYMS,		LENGTH = _A7_SYMS_SZ
+
 	SHAREDMEMINDEX (rw) : ORIGIN = _A7_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
 	SYSRAM (rw)			: ORIGIN = 0x2FFC0000,		LENGTH = 256K
 }
@@ -101,6 +103,11 @@ SECTIONS
 		. = ALIGN(256);
 		_ram_aligned_end = .;
     } > RAM
+
+	.symlist : {
+        FILL(0x00);
+        BYTE(0x00);
+	} > SYMLIST
 
 	.heap (NOLOAD):
 	{

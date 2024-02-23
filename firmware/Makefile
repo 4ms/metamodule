@@ -30,18 +30,11 @@ dyn:
 	flashing/dump_syms.py \
 			--objdir ./build/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/ \
 			--objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ \
-			--elf ./build/mp1corea7/medium/main.elf --out src/dynload/host_sym_list.hh -v
-	cmake --build --preset ${PRESET} 
-
-dynj:
-	cmake --build --preset ${PRESET} 
-	flashing/dump_syms.py \
-			--objdir ./build/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/ \
-			--objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ \
 			--elf ./build/mp1corea7/medium/main.elf \
 			--json test.json \
-			--bin test.bin \
+			--yaml test.yml \
 			-v
+	arm-none-eabi-objcopy --update-section .symlist=test.json build/mp1corea7/medium/main.elf build/mp1corea7/medium/main.elf
 
 plugin:
 	cd vcv_ports && make
