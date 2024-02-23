@@ -112,7 +112,9 @@ inline void do_render_to_menu(AltParamContinuous el, rack::ui::Menu* menu, Indic
 {
 	auto slider = new rack::ui::Slider;
 	slider->quantity = context.module->getParamQuantity(indices.param_idx);
-	slider->box.size.x = 100;
+	
+	// hardcoded slider with according to contained text
+	slider->box.size.x = slider->quantity->getString().size() * 12;
 	menu->addChild(slider);
 }
 
@@ -120,7 +122,9 @@ inline void do_render_to_menu(AltParamChoice el, rack::ui::Menu* menu, Indices &
 {
 	auto slider = new QuantizedSlider;
 	slider->quantity = context.module->getParamQuantity(indices.param_idx);
-	slider->box.size.x = 100;
+
+	// hardcoded slider with according to contained text
+	slider->box.size.x = slider->quantity->getString().size() * 12;
 	menu->addChild(slider);
 }
 
