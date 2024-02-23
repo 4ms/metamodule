@@ -1,79 +1,16 @@
-
 #pragma once
 #include "host_symbol.hh"
-#include <array>
+#include "ld.h"
+#include "sym_list_parse.hh"
+#include <span>
+#include <vector>
 
-static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
-{"_ZSt20__throw_length_errorPKc", 0, 0xc2037460},
-{"tanh", 0, 0xc213372d},
-{"_ZSt19__throw_logic_errorPKc", 0, 0xc2037464},
-{"memcmp", 0, 0xc213c035},
-{"_ZN16VCVModuleWrapper26mark_all_outputs_unpatchedEv", 0, 0xc20b2bd4},
-{"abort", 0, 0xc2136dc1},
-{"_ZN16VCVModuleWrapper18mark_input_patchedEi", 0, 0xc20b2bc0},
-{"_ZN16VCVModuleWrapper6updateEv", 0, 0xc20b2b20},
-{"_ZSt17__throw_bad_allocv", 0, 0xc203745c},
-{"_ZN10MetaModule13ModuleFactory23registerModuleFaceplateERK12StaticStringILj31EEPv", 0, 0xc207bd08},
-{"roundf", 0, 0xc2132581},
-{"cos", 0, 0xc2133549},
-{"floorf", 0, 0xc21343ed},
-{"_ZN16VCVModuleWrapper19mark_output_patchedEi", 0, 0xc20b2c10},
-{"memset", 0, 0xc213c27d},
-{"expf", 0, 0xc21325d1},
-{"json_integer_value", 0, 0xc21287c0},
-{"json_object", 0, 0xc2128608},
-{"_ZN10MetaModule13ModuleFactory11getAllSlugsEv", 0, 0xc207c2b8},
-{"fmod", 0, 0xc21326b9},
-{"_ZN16VCVModuleWrapper9set_paramEif", 0, 0xc20b2c24},
-{"memmove", 0, 0xc213c181},
-{"_Znwj", 0, 0xc203747c},
-{"_empty_func_stub", 0, 0xc20b2a54},
-{"_Z12keep_symbolsv", 0, 0xc20b2a6c},
-{"_ZN16VCVModuleWrapperC1Ev", 0, 0xc20b2ccc},
-{"_ZN16VCVModuleWrapper14set_samplerateEf", 0, 0xc20b2b50},
-{"sqrt", 0, 0xc2133509},
-{"_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EEPFSt10unique_ptrI13CoreProcessorSt14default_deleteIS6_EEvE", 0, 0xc207bbfc},
-{"_ZN10MetaModule13ModuleFactory13getModuleInfoERK12StaticStringILj31EE", 0, 0xc207bf30},
-{"_ZN10MetaModule13ModuleFactory6createERK12StaticStringILj31EE", 0, 0xc207be44},
-{"fminf", 0, 0xc2134375},
-{"_ZN4rack6string2fVB5cxx11EPKcSt9__va_list", 0, 0xc20b27bc},
-{"pow", 0, 0xc2132f59},
-{"_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EERKNS_14ModuleInfoViewE", 0, 0xc207ba54},
-{"_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EEPFSt10unique_ptrI13CoreProcessorSt14default_deleteIS6_EEvERKNS_14ModuleInfoViewE", 0, 0xc207b860},
-{"_ZN16VCVModuleWrapper20mark_input_unpatchedEi", 0, 0xc20b2bac},
-{"fabs", 0, 0xc21335d9},
-{"_ZNK16VCVModuleWrapper10get_outputEi", 0, 0xc20b2b74},
-{"printf", 0, 0xc2137425},
-{"_ZN10MetaModule13ModuleFactory18getModuleFaceplateERK12StaticStringILj31EE", 0, 0xc207c04c},
-{"json_object_set_new", 0, 0xc2128a04},
-{"fmaxf", 0, 0xc2134339},
-{"json_object_get", 0, 0xc2128674},
-{"__aeabi_atexit", 0, 0xc2129491},
-{"_ZTVN4rack6engine6ModuleE", 0, 0xc216b7c8},
-{"floor", 0, 0xc2133e41},
-{"_ZN16VCVModuleWrapper25mark_all_inputs_unpatchedEv", 0, 0xc20b2b84},
-{"json_true", 0, 0xc2128858},
-{"_ZTV16VCVModuleWrapper", 0, 0xc216b870},
-{"_ZN4rack6engine6Module16initialize_stateESt17basic_string_viewIcSt11char_traitsIcEE", 0, 0xc20b2960},
-{"sqrtf", 0, 0xc2132f15},
-{"__cxa_pure_virtual", 0, 0xc2037478},
-{"_ZSt28__throw_bad_array_new_lengthv", 0, 0xc2037474},
-{"sin", 0, 0xc213363d},
-{"_ZNK16VCVModuleWrapper18get_led_brightnessEi", 0, 0xc20b2c7c},
-{"_ZN4rack6string1fB5cxx11EPKcz", 0, 0xc20b2920},
-{"_ZN16VCVModuleWrapper9set_inputEif", 0, 0xc20b2b64},
-{"json_integer", 0, 0xc2128788},
-{"json_false", 0, 0xc2128864},
-{"_ZN10MetaModule13ModuleFactory11isValidSlugERK12StaticStringILj31EE", 0, 0xc207c124},
-{"sinf", 0, 0xc2132ca9},
-{"_ZN16VCVModuleWrapper21mark_output_unpatchedEi", 0, 0xc20b2bfc},
-{"_ZN16VCVModuleWrapperC2Ev", 0, 0xc20b2ccc},
-{"_ZdlPvj", 0, 0xc2037480},
-{"powf", 0, 0xc2132999},
-{"exp", 0, 0xc2132709},
-{"memcpy", 0, 0xc2000ec0},
-{"strlen", 0, 0xc20013c1},
-{"ceil", 0, 0xc2133d31},
-{"tanf", 0, 0xc21335e9},
+namespace MetaModule
+{
 
-});
+std::vector<ElfFile::HostSymbol> get_host_symbols() {
+	auto symlist_yaml = std::span<char>{reinterpret_cast<char *>(A7_SYMS), A7_SYMS_SZ / sizeof(ElfFile::HostSymbol)};
+	return parse_symlist(symlist_yaml);
+}
+
+} // namespace MetaModule

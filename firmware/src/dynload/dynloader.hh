@@ -2,7 +2,7 @@
 #include "debug.hh"
 #include "dynload/elf_relocator.hh"
 #include "dynload/host_sym_list.hh"
-#include "dynload/host_symbol.hh"
+// #include "dynload/host_symbol.hh"
 #include "elf_file.hh"
 #include "keep-symbols.hh"
 #include "pr_dbg.hh"
@@ -16,6 +16,9 @@
 #include "CoreModules/elements/dump.hh"
 #include "rack.hpp"
 
+namespace MetaModule
+{
+
 struct DynLoader {
 
 	DynLoader(std::span<uint8_t> elf_file_data, std::vector<uint8_t> &code_buffer)
@@ -23,6 +26,7 @@ struct DynLoader {
 		, codeblock{code_buffer} {
 
 		keep_symbols();
+
 		init_host_symbol_table();
 	}
 
@@ -67,7 +71,8 @@ struct DynLoader {
 	}
 
 	void init_host_symbol_table() {
-		//TODO: process a symbol table loaded from binary blob at a fixed address
+		auto HostSymbols = get_host_symbols();
+
 		hostsyms.clear();
 		hostsyms.insert(hostsyms.end(), HostSymbols.begin(), HostSymbols.end());
 
@@ -78,8 +83,8 @@ struct DynLoader {
 		hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 		hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 
-		// for (auto sym : hostsyms)
-		// 	pr_trace("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
+		for (auto sym : hostsyms)
+			pr_trace("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
 	}
 
 	bool process_relocs() {
@@ -150,3 +155,5 @@ private:
 
 	std::vector<ElfFile::HostSymbol> hostsyms;
 };
+
+} // namespace MetaModule
