@@ -8,7 +8,7 @@
 namespace MetaModule
 {
 
-std::vector<ElfFile::HostSymbol> get_host_symbols() {
+inline std::vector<ElfFile::HostSymbol> get_host_symbols() {
 	auto symlist_yaml = std::span<char>{reinterpret_cast<char *>(A7_SYMS), A7_SYMS_SZ / sizeof(ElfFile::HostSymbol)};
 	return parse_symlist(symlist_yaml);
 }

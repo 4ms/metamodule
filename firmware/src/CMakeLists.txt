@@ -139,7 +139,8 @@ add_executable(
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
   ${FWDIR}/src/gui/elements/element_name.cc
-
+  #
+  ${FWDIR}/src/dynload/dynloader.cc
   #
   ${SHARED}/CoreModules/hub/hub_medium.cc
   ${SHARED}/CoreModules/moduleFactory.cc

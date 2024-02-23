@@ -2,7 +2,6 @@
 #include "debug.hh"
 #include "dynload/elf_relocator.hh"
 #include "dynload/host_sym_list.hh"
-// #include "dynload/host_symbol.hh"
 #include "elf_file.hh"
 #include "keep-symbols.hh"
 #include "pr_dbg.hh"
@@ -71,20 +70,22 @@ struct DynLoader {
 	}
 
 	void init_host_symbol_table() {
-		auto HostSymbols = get_host_symbols();
+		if (hostsyms.size() == 0) {
+			auto host_symbols = get_host_symbols();
+			pr_info("Found %zu symbols in binary to export for plugins\n", host_symbols.size());
 
-		hostsyms.clear();
-		hostsyms.insert(hostsyms.end(), HostSymbols.begin(), HostSymbols.end());
+			hostsyms.insert(hostsyms.end(), host_symbols.begin(), host_symbols.end());
 
-		hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcEC2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcED1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcED2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-		hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			hostsyms.push_back({"_ZNSaIcEC2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			hostsyms.push_back({"_ZNSaIcED1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			hostsyms.push_back({"_ZNSaIcED2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 
-		for (auto sym : hostsyms)
-			pr_trace("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
+			for (auto sym : hostsyms)
+				pr_info("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
+		}
 	}
 
 	bool process_relocs() {
@@ -153,7 +154,7 @@ private:
 	using InitPluginFunc = void(rack::Plugin *);
 	InitPluginFunc *init_func{};
 
-	std::vector<ElfFile::HostSymbol> hostsyms;
+	static std::vector<ElfFile::HostSymbol> hostsyms;
 };
 
 } // namespace MetaModule
