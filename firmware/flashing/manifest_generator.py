@@ -4,28 +4,34 @@ import argparse
 import logging
 import json
 import os
+import hashlib
+import re
+import shutil
 
 ManifestFormatVersion = 1
 
-def process_file(filename, imagetype, version):
-    entry = {}
-    entry["type"] = imagetype
-    entry["filename"] = os.path.basename(filename)
-    entry["filesize"] = os.stat(filename).st_size
 
-    #TODO md5
-    entry["md5"] = "123"
+def process_file(dest_dir, filename, imagetype, *, name=None, address=None):
 
-    entry["version"] = {}
-    v = version.split(".")
-    if len(v) > 0:
-        entry["version"]["major"] = v[0]
-    if len(v) > 1:
-        entry["version"]["minor"] = v[1]
-    if len(v) > 2:
-        entry["version"]["revision"] = v[2]
+    with open(filename, 'rb') as file:
 
-    return entry
+        entry = dict()
+
+        entry["filename"] = os.path.basename(filename)
+        entry["type"]     = imagetype
+        entry["filesize"] = os.stat(filename).st_size
+        entry["md5"]      = hashlib.md5(file.read()).hexdigest()
+        entry["address"]  = int(address)
+
+        if name is not None:
+            entry["name"] = name
+
+        try:
+            shutil.copyfile(filename, os.path.join(dest_dir, os.path.basename(filename)))
+        except shutil.SameFileError:
+            pass
+
+        return entry
 
 def parse_file_version(version):
     """ Convert a string like: firmware-v0.6.2-278-g52dfd038
@@ -33,18 +39,27 @@ def parse_file_version(version):
         Or: 2.1.5
         Into: 0.6.2
     """
-    vsplit = version.split("-")
-    if len(vsplit) > 1:
-        v = vsplit[1]
-    else:
-        v = vsplit[0]
+    
+    match = re.match(r".*(?P<major>[0-9]+)\.(?P<minor>[0-9]+)\.(?P<revision>[0-9]+).*", version)
 
-    v = v.strip("v")
-    return v
+    if match is None:
+        raise ValueError(f"'{version}' does not contain a valid version")
 
+    result = match.groupdict()
+
+    for key,value in result.items():
+        result[key] = int(value)
+
+    return result
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Generate firmware update manifest json file")
     parser.add_argument("--app", dest="app_file", help="Input application uimg file")
+    parser.add_argument("--fsbl", dest="fsbl_file", help="First stage bootloader")
+    parser.add_argument("--dfu", dest="dfu_file", help="DFU bootloader")
+    parser.add_argument("--wifi_bootloader", dest="wifi_bl_file", help="Wifi bootloader binary")
+    parser.add_argument("--wifi_application", dest="wifi_app_file", help="Wifi application binary")
+    parser.add_argument("--wifi_filesystem", dest="wifi_fs_file", help="Wifi filesystem image")
     parser.add_argument("--version", dest="version", help="Version string e.g. \"1.2.3\"")
     parser.add_argument("out_file", help="Output json file")
     parser.add_argument("-v", dest="verbose", help="Verbose logging", action="store_true")
@@ -53,13 +68,32 @@ if __name__ == "__main__":
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
 
-    
-    j = {'version': ManifestFormatVersion}
+    destination_dir = os.path.dirname(args.out_file)
+    os.makedirs(destination_dir, exist_ok=True)
 
-    version = parse_file_version(args.version)
+    j = {'version': ManifestFormatVersion, 'files': []}
 
-    j["files"] = []
-    j["files"].append(process_file(args.app_file, "app", version))
+    if args.version:
+        j["metadata"] = {'version': parse_file_version(args.version)}
+
+    if args.fsbl_file:
+        j["files"].append(process_file(destination_dir, args.fsbl_file, "app", name="FSBL1", address=0x0))
+        j["files"].append(process_file(destination_dir, args.fsbl_file, "app", name="FSBL2", address=0x40000))
+
+    if args.dfu_file:
+        j["files"].append(process_file(destination_dir, args.dfu_file, "app", name="DFU", address=0x50000))
+
+    if args.app_file:
+        j["files"].append(process_file(destination_dir, args.app_file, "app", name="Main App", address=0x80000))
+
+    if args.wifi_bl_file:
+        j["files"].append(process_file(destination_dir, args.wifi_bl_file, "wifi", name="Wifi Bootloader", address=0x0))
+
+    if args.wifi_app_file:
+        j["files"].append(process_file(destination_dir, args.wifi_app_file, "wifi", name="Wifi Application", address=0x10000))
+
+    if args.wifi_fs_file:
+        j["files"].append(process_file(destination_dir, args.wifi_fs_file, "wifi", name="Wifi Filesystem", address=0x200000))
 
     with open(args.out_file, "w+") as out_file:
         data_json = json.dumps(j, indent=4)

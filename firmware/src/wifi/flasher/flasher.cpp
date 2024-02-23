@@ -7,6 +7,8 @@
 #include <console/pr_dbg.hh>
 
 #include <cstring>
+#include <string_view>
+#include <span>
 #include <optional>
 
 namespace Flasher
@@ -112,21 +114,6 @@ esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
 
     pr_dbg("Flasher: Finished programming\n");
 
-    #ifdef MD5_ENABLED
-    err = esp_loader_flash_verify();
-    if (err == ESP_LOADER_ERROR_UNSUPPORTED_FUNC)
-    {
-        pr_err("Flasher: ESP8266 does not support flash verify command.\n");
-        return err;
-    }
-    else if (err != ESP_LOADER_SUCCESS)
-    {
-        pr_err("Flasher: MD5 does not match. err: %d\n", err);
-        return err;
-    }
-    pr_dbg("Flasher: Flash verified\n");
-    #endif
-
     return ESP_LOADER_SUCCESS;
 }
 
@@ -189,6 +176,16 @@ esp_loader_error_t conditional_flash(uint32_t address, std::span<const uint8_t> 
     }
 
     return result;
+}
+
+esp_loader_error_t flash_start(uint32_t address, uint32_t length, uint32_t batchSize)
+{
+    return esp_loader_flash_start(address, length, batchSize);
+}
+
+esp_loader_error_t flash_process(std::span<uint8_t> buffer)
+{
+    return esp_loader_flash_write(buffer.data(), buffer.size());
 }
 
 }

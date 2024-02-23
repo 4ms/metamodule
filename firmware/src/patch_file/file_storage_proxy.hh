@@ -113,6 +113,40 @@ public:
 		return true;
 	}
 
+	[[nodiscard]] bool request_checksum_compare(IntercoreStorageMessage::FlashTarget target,
+												StaticString<32> checksum,
+												uint32_t address,
+												uint32_t length,
+												uint32_t *bytes_processed) {
+		IntercoreStorageMessage message{
+			.message_type = StartChecksumCompare,
+			.address = address,
+			.length = length,
+			.checksum = checksum,
+			.bytes_processed = bytes_processed,
+			.flashTarget = target,
+		};
+		if (!comm_.send_message(message))
+			return false;
+		return true;
+	}
+
+	[[nodiscard]] bool request_file_flash(IntercoreStorageMessage::FlashTarget target,
+										  std::span<uint8_t> buffer,
+										  uint32_t address,
+										  uint32_t *bytes_processed) {
+		IntercoreStorageMessage message{
+			.message_type = StartFlashing,
+			.buffer = {(char *)buffer.data(), buffer.size()},
+			.address = address,
+			.bytes_processed = bytes_processed,
+			.flashTarget = target,
+		};
+		if (!comm_.send_message(message))
+			return false;
+		return true;
+	}
+
 	void new_patch() {
 		std::string name = "Untitled Patch " + std::to_string((uint8_t)HAL_GetTick());
 		view_patch_.blank_patch(name);

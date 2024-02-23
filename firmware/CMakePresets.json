@@ -46,6 +46,10 @@
     {
       "name": "base",
       "configurePreset": "base"
+    },
+    {
+      "name": "full",
+      "configurePreset": "full"
     }
   ]
 }
