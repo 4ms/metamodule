@@ -6,6 +6,8 @@ import logging
 from pathlib import Path
 from elftools.elf.elffile import ELFFile
 
+import json
+
 def GetRequiredSymbolNames(file):
     needed_syms = []
     elf = ELFFile(file)
@@ -115,12 +117,64 @@ def GetLibcSymbols():
     return libc_syms
 
 
+def write_binary(outfile, syms):
+    strtab = bytearray()
+    symtab = bytearray()
+    for sym, addr in syms.items():
+        offset = len(strtab)
+        symtab += bytearray(addr.to_bytes(4, "little"))
+        symtab += bytearray(offset.to_bytes(4, "little"))
+
+        strtab += bytearray(sym.encode())
+        strtab += bytearray(b'\x00')
+
+    magic = bytearray("SYMS".encode())
+    
+    bin = bytearray()
+    bin += magic
+    bin += bytearray(len(symtab).to_bytes(4, 'little'))
+    bin += bytearray(len(strtab).to_bytes(4, 'little'))
+    bin += symtab
+    bin += strtab
+
+    with open(outfile, "wb") as f:
+        f.write(bin)
+
+
+def write_json(outfile, syms):
+    data = json.dumps(syms)
+    with open(outfile, "w") as f:
+        f.write(data)
+
+
+
+def write_header(outfile, syms):
+    symlist = """
+#pragma once
+#include "host_symbol.hh"
+#include <array>
+
+static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
+"""
+    for sym, addr in syms.items():
+        symlist+= f"""{{"{sym}", 0, {hex(addr)}}},
+"""
+
+    symlist += """
+});
+    """
+    with open(outfile, "w") as f:
+        f.write(symlist)
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Dump symbols that plugins might need")
     parser.add_argument("--objdir", action="append", help="Object dir with .obj files with the symbols we want to make available to plugins (i.e. VCV_module_wrapper.cc.obj)")
     parser.add_argument("--elf", help="Fully linked elf file with addresses of all symbols (main.elf)")
     parser.add_argument("--out", help="output header file")
     parser.add_argument("--bin", help="output binary symtab+strtab")
+    parser.add_argument("--json", help="output json symtab+strtab")
     parser.add_argument("-v", dest="verbose", help="Verbose logging", action="store_true")
     args = parser.parse_args()
 
@@ -152,41 +206,8 @@ if __name__ == "__main__":
     if args.bin:
         write_binary(args.bin, syms)
 
-
-
-def write_binary(outfile, syms):
-    strtab = bytearray()
-    symtab = bytearray()
-    for sym, addr in syms.items():
-        offset = len(strtab)
-        symtab += bytearray(addr.to_bytes(4, "little"))
-        symtab += bytearray(offset.to_bytes(4, "little"))
-
-        strtab += bytearray(sym.encode())
-        strtab += bytearray(b'\x00')
-
-
-
-
-def write_header(outfile, syms):
-    symlist = """
-#pragma once
-#include "host_symbol.hh"
-#include <array>
-
-static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
-"""
-    for sym, addr in syms.items():
-        symlist+= f"""{{"{sym}", 0, {hex(addr)}}},
-"""
-
-    symlist += """
-});
-    """
-    with open(outfile, "w") as f:
-        f.write(symlist)
-
-
+    if args.json:
+        write_json(args.json, syms)
 
 
 
