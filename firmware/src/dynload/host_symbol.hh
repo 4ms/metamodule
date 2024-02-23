@@ -1,11 +1,11 @@
 #pragma once
-#include <string_view>
+#include <string>
 
 namespace ElfFile
 {
 
 struct HostSymbol {
-	std::string_view name{};
+	std::string name{};
 	uint32_t hash{};
 	uintptr_t address{};
 };
