@@ -14,6 +14,10 @@ inline bool read(ryml::ConstNodeRef const &n, ElfFile::HostSymbol *symbol) {
 	symbol->name = sv; //copy
 	symbol->hash = 0;
 	n >> symbol->address;
+
+	if (symbol->address == 0 || symbol->name.size() == 0)
+		return false;
+
 	return true;
 }
 
