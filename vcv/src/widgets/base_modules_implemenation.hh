@@ -43,7 +43,7 @@ inline void do_config_element(AltParamContinuous el, const Indices &indices, con
 }
 
 inline void do_config_element(AltParamChoice el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0, el.num_pos - 1, 0, el.short_name.data());
+	context.module->configParam(indices.param_idx, 1, el.num_pos, 0, el.short_name.data());
 }
 
 } // namespace MetaModule::VCVImplementation::Module

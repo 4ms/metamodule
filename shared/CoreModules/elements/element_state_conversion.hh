@@ -84,8 +84,8 @@ template<typename T>
 constexpr AltParamChoice::State_t convertState(const T &element, float val)
 	requires(std::derived_from<T, AltParamChoice>)
 {
-	//maps 0..1 -> 1..N
-	return AltParamChoice::State_t(1 + std::round(val * (float)(element.num_pos - 1)));
+	// round and clamp to valid range
+	return AltParamChoice::State_t(std::clamp<unsigned>(std::round(val), 1, element.num_pos));
 }
 
 //

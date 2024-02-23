@@ -47,7 +47,7 @@ struct AltParamChoiceLabledMenu : rack::ui::MenuItem
 
         for (std::size_t i=0; i<element.num_pos; i++)
         {
-            auto choiceItem = new AltParamChoiceItem(module, param_idx, i);
+            auto choiceItem = new AltParamChoiceItem(module, param_idx, i + 1);
             auto choiceText = element.pos_names[i];
             choiceItem->text = std::string(choiceText);
             childMenu->addChild(choiceItem);
