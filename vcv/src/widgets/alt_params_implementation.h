@@ -1,5 +1,6 @@
 #include "rack.hpp"
 #include <algorithm>
+#include <CoreModules/elements/element_state_conversion.hh>
 
 namespace MetaModule::VCVImplementation::Widget
 {
@@ -11,9 +12,10 @@ namespace MetaModule::VCVImplementation::Widget
 
 struct AltParamChoiceItem : rack::ui::MenuItem
 {
-    AltParamChoiceItem(rack::Module* module_, std::size_t param_idx_, std::size_t choiceIndex_)
+    AltParamChoiceItem(rack::Module* module_, std::size_t param_idx_, AltParamChoiceLabeled el_, std::size_t choiceIndex_)
 		: module(module_)
 		, param_idx(param_idx_)
+		, el(el_)
 		, choiceIndex(choiceIndex_)
 		{};
     void onAction(const ActionEvent& e) override
@@ -22,10 +24,19 @@ struct AltParamChoiceItem : rack::ui::MenuItem
 
         module->getParam(param_idx).setValue(choiceIndex);
     }
+	void draw(const DrawArgs& args) override
+	{
+		// add checkmark if this choice is selected
+		auto currentState = MetaModule::StateConversion::convertState(el, module->getParam(param_idx).getValue());
+		rightText = currentState == choiceIndex ? CHECKMARK_STRING : " ";
+
+		rack::ui::MenuItem::draw(args);
+	}
 
 private:
     rack::Module* module;
     std::size_t param_idx;
+    AltParamChoiceLabeled el;
     std::size_t choiceIndex;
 };
 
@@ -47,7 +58,7 @@ struct AltParamChoiceLabledMenu : rack::ui::MenuItem
 
         for (std::size_t i=0; i<element.num_pos; i++)
         {
-            auto choiceItem = new AltParamChoiceItem(module, param_idx, i + 1);
+            auto choiceItem = new AltParamChoiceItem(module, param_idx, element, i + 1);
             auto choiceText = element.pos_names[i];
             choiceItem->text = std::string(choiceText);
             childMenu->addChild(choiceItem);
