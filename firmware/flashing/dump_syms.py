@@ -107,8 +107,6 @@ def GetLibcSymbols():
          "_ZTVN4rack6engine6ModuleE",
 
 
-         # "_ZN10MetaModule13ModuleFactory14creation_funcsE",
-         # "_ZN10MetaModule13ModuleFactory5infosE",
          "_ZN10MetaModule13ModuleFactory11isValidSlugERK12StaticStringILj31EE",
          "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EERKNS_14ModuleInfoViewE",
          "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EEPFSt10unique_ptrI13CoreProcessorSt14default_deleteIS6_EEvE",
@@ -122,6 +120,7 @@ if __name__ == "__main__":
     parser.add_argument("--objdir", action="append", help="Object dir with .obj files with the symbols we want to make available to plugins (i.e. VCV_module_wrapper.cc.obj)")
     parser.add_argument("--elf", help="Fully linked elf file with addresses of all symbols (main.elf)")
     parser.add_argument("--out", help="output header file")
+    parser.add_argument("--bin", help="output binary symtab+strtab")
     parser.add_argument("-v", dest="verbose", help="Verbose logging", action="store_true")
     args = parser.parse_args()
 
@@ -147,6 +146,29 @@ if __name__ == "__main__":
         syms = GetAddressesOfSymbols(f, needed_syms)
 
 
+    if args.out:
+        write_header(args.out, syms)
+
+    if args.bin:
+        write_binary(args.bin, syms)
+
+
+
+def write_binary(outfile, syms):
+    strtab = bytearray()
+    symtab = bytearray()
+    for sym, addr in syms.items():
+        offset = len(strtab)
+        symtab += bytearray(addr.to_bytes(4, "little"))
+        symtab += bytearray(offset.to_bytes(4, "little"))
+
+        strtab += bytearray(sym.encode())
+        strtab += bytearray(b'\x00')
+
+
+
+
+def write_header(outfile, syms):
     symlist = """
 #pragma once
 #include "host_symbol.hh"
@@ -160,10 +182,15 @@ static constexpr inline auto HostSymbols = std::to_array<ElfFile::HostSymbol>({
 
     symlist += """
 });
-"""
-    with open(args.out, "w") as f:
+    """
+    with open(outfile, "w") as f:
         f.write(symlist)
 
+
+
+
+
+    
 # flashing/dump_syms.py \
 #         --objdir ./build/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/ \
 #         --objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ \
