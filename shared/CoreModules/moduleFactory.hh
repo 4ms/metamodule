@@ -34,7 +34,6 @@ public:
 
 	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug &typeslug);
 
-	static std::string_view getModuleTypeName(const ModuleTypeSlug &typeslug);
 	static ModuleInfoView &getModuleInfo(const ModuleTypeSlug &typeslug);
 	static FaceplatePtr getModuleFaceplate(const ModuleTypeSlug &typeslug);
 

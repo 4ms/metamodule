@@ -72,12 +72,6 @@ std::unique_ptr<CoreProcessor> ModuleFactory::create(const ModuleTypeSlug &types
 		return nullptr;
 }
 
-std::string_view ModuleFactory::getModuleTypeName(const ModuleTypeSlug &typeslug) {
-	if (auto m = infos().get(typeslug))
-		return m->description;
-	return "Not found.";
-}
-
 ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &typeslug) {
 	if (auto m = infos().get(typeslug))
 		return *m;

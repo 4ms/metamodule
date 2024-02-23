@@ -47,9 +47,6 @@ TEST_CASE("Static objects register automatically") {
 	auto cf = ModuleFactory::create(typeID);
 	CHECK(cf != nullptr);
 
-	auto nm = ModuleFactory::getModuleTypeName(typeID);
-	CHECK(nm == "abcabc module");
-
 	auto info = ModuleFactory::getModuleInfo(typeID);
 	CHECK(info.width_hp == 40);
 	CHECK(info.description == "abcabc module");
@@ -82,9 +79,6 @@ TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView")
 
 	constexpr char typeID[20] = "ABC";
 	CHECK(ModuleFactory::isValidSlug(typeID));
-
-	auto nm = ModuleFactory::getModuleTypeName(typeID);
-	CHECK(nm == "ABC module");
 
 	auto info = ModuleFactory::getModuleInfo(typeID);
 	CHECK(info.width_hp == 40);
