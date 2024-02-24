@@ -29,8 +29,7 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updateFile) {
 
 			updateFile->type = *updateType;
 
-			if (n.has_child("filename") and n.has_child("address") and n.has_child("filesize"))
-			{
+			if (n.has_child("filename") and n.has_child("address") and n.has_child("filesize")) {
 
 				n["filename"] >> updateFile->filename;
 				n["filesize"] >> updateFile->filesize;
@@ -46,12 +45,11 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updateFile) {
 					n["name"] >> updateFile->name;
 				}
 				return true;
-			}
-			else{
+			} else {
 				pr_err("Missing required fields\n");
 			}
 		} else {
-			pr_err("Unknown update type\n");
+			pr_err("Unknown update type in manifest\n");
 		}
 	}
 

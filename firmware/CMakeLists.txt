@@ -97,7 +97,7 @@ add_custom_command(
            --version         "${GIT_FIRMWARE_VERSION_TAG}"
            --app             "${MAIN_FW_FILENAME}"
            "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cvf ${RELEASE_FW_ONLY_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}/main.uimg ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} && rm -rf ${RELEASE_TARGET_DIR}
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_ONLY_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}/main.uimg ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} && rm -rf ${RELEASE_TARGET_DIR}
 
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
            --version         "${GIT_FIRMWARE_VERSION_TAG}"
@@ -108,7 +108,7 @@ add_custom_command(
            --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
            --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/filesystem.img"
            "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cvf ${RELEASE_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR} && rm -rf ${RELEASE_TARGET_DIR}
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR} && rm -rf ${RELEASE_TARGET_DIR}
 
   DEPENDS ${MAIN_FW_FILENAME} bootloader bootloader-dfu
   COMMENT "Creating release at ${RELEASE_ARCHIVE_PATH}"
