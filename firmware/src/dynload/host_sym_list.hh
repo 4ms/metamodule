@@ -11,6 +11,8 @@ namespace MetaModule
 inline std::vector<ElfFile::HostSymbol> get_host_symbols() {
 	auto symlist = std::string_view{reinterpret_cast<const char *>(A7_SYMS), A7_SYMS_SZ};
 
+	symlist = symlist.substr(0, symlist.find_first_of('\0'));
+
 	return parse_symlist(symlist);
 }
 
