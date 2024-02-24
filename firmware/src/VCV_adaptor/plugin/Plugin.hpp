@@ -1,5 +1,5 @@
 #pragma once
-#include "VCV_adaptor/plugin//Model.hpp"
+#include "VCV_adaptor/plugin/Model.hpp"
 #include <vector>
 
 namespace rack::plugin
