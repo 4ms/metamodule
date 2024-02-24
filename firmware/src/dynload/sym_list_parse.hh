@@ -10,18 +10,25 @@ namespace MetaModule
 {
 
 inline bool read(ryml::ConstNodeRef const &n, ElfFile::HostSymbol *symbol) {
-	auto sv = std::string_view{n.key().data(), n.key().size()};
-	symbol->name = sv; //copy
-	symbol->hash = 0;
-	n >> symbol->address;
-
-	if (symbol->address == 0 || symbol->name.size() == 0)
+	if (!n.is_map() || !n.has_child("Name") || !n.has_child("Addr")) {
 		return false;
+	}
+
+	n["Name"] >> symbol->name;
+	n["Addr"] >> symbol->address;
+	if (n.has_child("Hash"))
+		n["Hash"] >> symbol->hash;
+	else
+		symbol->hash = 0;
+
+	if (symbol->address == 0 || symbol->name.size() == 0) {
+		return false;
+	}
 
 	return true;
 }
 
-inline std::vector<ElfFile::HostSymbol> parse_symlist(std::span<const char> yaml) {
+inline std::vector<ElfFile::HostSymbol> parse_symlist(std::string_view yaml) {
 	std::vector<ElfFile::HostSymbol> syms;
 
 	ryml::Tree tree = ryml::parse_in_arena(ryml::csubstr(yaml.data(), yaml.size()));
@@ -33,10 +40,7 @@ inline std::vector<ElfFile::HostSymbol> parse_symlist(std::span<const char> yaml
 
 	ryml::ConstNodeRef root = tree.rootref();
 
-	//TODO: change yaml structure from key:value to - Name: symbolname\n  Address: 0x...
-	// root >> syms;
-
-	for (const auto sym : root.children()) {
+	for (const auto sym : root.child(0)) {
 		ElfFile::HostSymbol s;
 		if (read(sym, &s)) {
 			syms.push_back(s);

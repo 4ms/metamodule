@@ -90,7 +90,7 @@ def GetLibcSymbols():
          "_ZNSaIcED1Ev", # std::allocator<char>::~allocator()
          "_ZNSaIcED2Ev", # std::allocator<char>::~allocator() ? somehow different?
          "_ZNSaIcEC1ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&)
-         "_ZNSaIcEC2ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&) ? somehow different?
+         "_ZNSaIcEC2ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&) 
 
          "json_integer_value",
          "json_object",
@@ -99,21 +99,6 @@ def GetLibcSymbols():
          "json_true",
          "json_false",
          "json_integer",
-
-         # "_ZTV16VCVModuleWrapper",
-         # "_ZTVN4rack6engine6ModuleE",
-
-         # "_ZN10MetaModule13ModuleFactory11isValidSlugERK12StaticStringILj31EE",
-         # "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EERKNS_14ModuleInfoViewE",
-         # "_ZN10MetaModule13ModuleFactory18registerModuleTypeERK12StaticStringILj31EEPFSt10unique_ptrI13CoreProcessorSt14default_deleteIS6_EEvE",
-
-         # "pffft_new_setup",
-         # "pffft_aligned_free",
-         # "pffft_transform",
-         # "pffft_destroy_setup",
-         # "pffft_aligned_malloc",
-         # "pffft_zconvolve_accumulate",
-
     ]
     return libc_syms
 
@@ -149,16 +134,18 @@ def write_json(outfile, syms):
 
 
 def write_yaml(outfile, syms):
-    data = ""
+    data = "Symbols:\n"
     for sym, addr in syms.items():
-        data += f"{sym}: {hex(addr)}\n"
+        data += f"  - Name: {sym}\n"
+        # data += f"    Hash: {elfhash(sym)}\n"
+        data += f"    Addr: {hex(addr)}\n"
+
     with open(outfile, "w") as f:
         f.write(data)
 
+        # Pad so that data size is aligned to 4 bytes
         padding = len(data) % 4
-        while padding > 0:
-            f.write("\x00")
-            padding -= 1
+        f.write("\x00" * padding)
 
 
 
