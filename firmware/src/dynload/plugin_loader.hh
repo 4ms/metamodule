@@ -1,10 +1,10 @@
 #pragma once
+#include "VCV_adaptor/plugin/Plugin.hpp"
+#include "dynload/dynloader.hh"
 #include "fw_update/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "patch_file/file_storage_proxy.hh"
 #include <cstdint>
 #include <string>
-
-#include "dynload/dynloader.hh"
 
 namespace MetaModule
 {
@@ -26,6 +26,12 @@ public:
 		State state{State::NotInit};
 		std::string name;
 		std::string error_message;
+	};
+
+	struct LoadedPlugin {
+		std::string name;
+		rack::plugin::Plugin models;
+		std::vector<uint8_t> code;
 	};
 
 	PluginFileLoader(FileStorageProxy &file_storage)
@@ -100,12 +106,7 @@ public:
 					   buffer.data(),
 					   buffer.size());
 
-				DynLoader dynloader{buffer, code.code};
-				auto ok = dynloader.load();
-				if (ok)
-					pr_info("Plugin loaded!\n");
-				else
-					pr_err("Could not load plugin\n");
+				load_plugin(code);
 
 				file_idx++;
 
@@ -124,6 +125,27 @@ public:
 		return status;
 	}
 
+	void load_plugin(LoadedPlugin &plugin) {
+		using InitPluginFunc = void(rack::plugin::Plugin *);
+
+		DynLoader dynloader{buffer, plugin.code};
+
+		if (!dynloader.load()) {
+			pr_err("Could not load plugin\n");
+			return;
+		}
+
+		auto init = dynloader.find_init_func<InitPluginFunc>();
+		if (!init) {
+			pr_err("Could not init plugin\n");
+			return;
+		}
+
+		init(&plugin.models);
+
+		pr_info("Plugin loaded!\n");
+	}
+
 private:
 	FileStorageProxy &file_storage;
 
@@ -136,10 +158,6 @@ private:
 	// Dynamically generated in non-cacheable RAM
 	PluginFileList *plugin_files = nullptr;
 
-	struct LoadedPlugin {
-		std::string name;
-		std::vector<uint8_t> code;
-	};
 	std::vector<LoadedPlugin> plugin_code;
 };
 

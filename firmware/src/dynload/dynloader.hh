@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "CoreModules/elements/dump.hh"
-#include "rack.hpp"
 
 namespace MetaModule
 {
@@ -25,11 +24,9 @@ struct DynLoader {
 		, codeblock{code_buffer} {
 
 		keep_symbols();
-
 		init_host_symbol_table();
 	}
 
-	// GCC_OPTIMIZE_OFF
 	bool load() {
 		if (elf.segments.size() == 0 || elf.sections.size() == 0 || elf.relocs.size() == 0) {
 			pr_err("Not a valid elf file\n");
@@ -37,18 +34,28 @@ struct DynLoader {
 		}
 
 		load_executable();
-		bool ok = process_relocs();
-		if (!ok)
-			return false;
+		if (process_relocs()) {
+			init_globals();
+			return true;
+		}
 
-		init_globals();
-
-		run_init_plugin_function();
-
-		return true;
+		return false;
 	}
 
-	// GCC_OPTIMIZE_OFF
+	template<typename PluginInitFunc>
+	PluginInitFunc *find_init_func() {
+		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
+
+		if (init_plugin_symbol) {
+			auto load_address = init_plugin_symbol->offset() + codeblock.data();
+			return reinterpret_cast<PluginInitFunc *>(load_address);
+		} else {
+			pr_err("Did not find init(rack::plugin::Plugin*)\n");
+			return nullptr;
+		}
+	}
+
+private:
 	void load_executable() {
 		size_t load_size = elf.load_size();
 
@@ -103,7 +110,6 @@ struct DynLoader {
 		return all_syms_found;
 	}
 
-	// GCC_OPTIMIZE_OFF
 	void init_globals() {
 		auto initarray_section = elf.find_section(".init_array");
 		if (!initarray_section) {
@@ -127,32 +133,9 @@ struct DynLoader {
 		}
 	}
 
-	// GCC_OPTIMIZE_OFF
-	void run_init_plugin_function() {
-		// auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initP6Plugin");
-		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
-
-		plugin.models.clear();
-
-		if (init_plugin_symbol) {
-			auto load_address = init_plugin_symbol->offset() + codeblock.data();
-			init_func = reinterpret_cast<InitPluginFunc *>(load_address);
-			if (init_func) {
-				init_func(&plugin);
-			} else
-				pr_err("Symbol init(rack::plugin::Plugin*) was null\n");
-
-		} else
-			pr_err("Did not find init(rack::plugin::Plugin*)\n");
-	}
-
 private:
 	ElfFile::Elf elf;
-	rack::Plugin plugin;
 	std::vector<uint8_t> &codeblock;
-
-	using InitPluginFunc = void(rack::Plugin *);
-	InitPluginFunc *init_func{};
 
 	static std::vector<ElfFile::HostSymbol> hostsyms;
 };
