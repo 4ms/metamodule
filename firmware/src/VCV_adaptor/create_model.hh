@@ -15,6 +15,44 @@ std::unique_ptr<CoreProcessor> create_vcv_module() {
 	return std::make_unique<ModuleT>();
 }
 
+// Points all string_views of elements to strings in the returned strings
+inline void rebase_strings(std::span<MetaModule::Element> elements, std::vector<std::string> &strings) {
+
+	for (auto &element : elements) {
+		// Copy the string_view's data to a new string, and then point the string_view to it
+		{
+			auto el = MetaModule::base_element(element);
+			el.short_name = strings.emplace_back(el.short_name);
+			el.long_name = strings.emplace_back(el.long_name);
+		}
+		std::visit(overloaded{[](auto &el) {},
+							  [&strings](MetaModule::ImageElement &el) {
+								  el.image = strings.emplace_back(el.image);
+							  }},
+				   element);
+		std::visit(overloaded{[](auto &el) {},
+							  [&strings](MetaModule::Slider &el) {
+								  el.image_handle = strings.emplace_back(el.image_handle);
+							  }},
+				   element);
+		std::visit(overloaded{[](auto &el) {},
+							  [&strings](MetaModule::FlipSwitch &el) {
+								  for (auto &pos_name : el.pos_names)
+									  pos_name = strings.emplace_back(pos_name);
+								  for (auto &frame : el.frames)
+									  frame = strings.emplace_back(frame);
+							  }},
+				   element);
+		std::visit(overloaded{[](auto &el) {},
+							  [&strings](MetaModule::SlideSwitch &el) {
+								  el.image_handle = strings.emplace_back(el.image_handle);
+								  for (auto &pos_name : el.pos_names)
+									  pos_name = strings.emplace_back(pos_name);
+							  }},
+				   element);
+	}
+}
+
 template<typename ModuleT, typename WidgetT>
 plugin::Model *createModel(std::string_view slug)
 	requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
