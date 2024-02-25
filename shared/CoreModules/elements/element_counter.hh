@@ -105,7 +105,7 @@ consteval auto get_indices() {
 inline void get_indices(std::span<const MetaModule::Element> elements, std::span<Indices> indices) {
 	Indices running_total{};
 
-	for (unsigned i = 0; auto el : elements) {
+	for (unsigned i = 0; const auto &el : elements) {
 		Counts el_cnt = count(el);
 		Indices masked_total = {
 			.param_idx = el_cnt.num_params > 0 ? running_total.param_idx : Indices::NoElementMarker,
