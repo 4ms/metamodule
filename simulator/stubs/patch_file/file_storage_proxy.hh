@@ -188,6 +188,10 @@ public:
 		return true;
 	}
 
+	bool request_plugin_file_list(PluginFileList *plugin_file_list) {
+		return true;
+	}
+
 	bool write_patch(std::string_view filename = "") {
 		if (filename == "")
 			filename = view_patch_loc_.filename;
