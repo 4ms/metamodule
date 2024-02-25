@@ -96,17 +96,26 @@ public:
 			} break;
 
 			case State::LoadingPlugin: {
-				auto &plugin = (*plugin_files)[file_idx];
-				auto code = plugin_code.emplace_back(plugin.plugin_name.c_str());
+				auto &plugin_file = (*plugin_files)[file_idx];
+
+				// Strip .so
+				std::string pluginname = plugin_file.plugin_name;
+				if (pluginname.ends_with(".so"))
+					pluginname = pluginname.substr(0, pluginname.length() - 3);
+
+				plugin_code.push_back(LoadedPlugin{pluginname});
+				auto &plugin = plugin_code.back();
+				// Why does this fail in clang 15?
+				// auto plugin = plugin_code.emplace_back(pluginname);
 
 				pr_dbg("Loading plugin data from vol %d:%s/%s, from buffer %p ++%zu\n",
-					   plugin.vol,
-					   plugin.dir_name.c_str(),
-					   plugin.plugin_name.c_str(),
+					   plugin_file.vol,
+					   plugin_file.dir_name.c_str(),
+					   plugin_file.plugin_name.c_str(),
 					   buffer.data(),
 					   buffer.size());
 
-				load_plugin(code);
+				load_plugin(plugin);
 
 				file_idx++;
 
@@ -143,6 +152,7 @@ public:
 
 		init(&plugin.models);
 
+		// now load the /res directory to...?
 		pr_info("Plugin loaded!\n");
 	}
 
