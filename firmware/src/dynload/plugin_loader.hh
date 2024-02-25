@@ -103,10 +103,8 @@ public:
 				if (pluginname.ends_with(".so"))
 					pluginname = pluginname.substr(0, pluginname.length() - 3);
 
-				plugin_code.push_back(LoadedPlugin{pluginname});
-				auto &plugin = plugin_code.back();
-				// Why does this fail in clang 15?
-				// auto plugin = plugin_code.emplace_back(pluginname);
+				// Why does clang 15 need the `LoadedPlugin`?
+				auto plugin = plugin_code.emplace_back(LoadedPlugin{pluginname});
 
 				pr_dbg("Loading plugin data from vol %d:%s/%s, from buffer %p ++%zu\n",
 					   plugin_file.vol,
