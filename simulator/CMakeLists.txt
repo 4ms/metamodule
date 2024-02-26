@@ -65,6 +65,7 @@ target_include_directories(
           ${FWDIR}/src/console
           ${FWDIR}/src/params
           ${SHARED}/patch
+          ${FWDIR}/src/medium
           )
 
 target_compile_options(simulator PRIVATE -Wall -Og)
