@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.24)
+project(vcv_ports)
+
 #
 # Only build a limited set of modules, defined in an external file
 #
@@ -10,9 +13,14 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
 
+
 # Create library that combines all brands
 # Link against this library from outside
+add_library(_vcv_ports_internal STATIC)
+
+# Create interface wrapper that whole-links the actual library
 add_library(vcv_ports INTERFACE)
+target_link_libraries(vcv_ports INTERFACE "$<LINK_LIBRARY:WHOLE_ARCHIVE,_vcv_ports_internal>")
 
 # Common paths
 set(IMAGES_BASEDIR ${FWDIR}/src/gui/images)
@@ -80,11 +88,13 @@ foreach(brand ${brands})
   target_sources(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
   target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
 
-  target_link_libraries(vcv_ports INTERFACE ${brand}Library)
+  target_link_libraries(_vcv_ports_internal PUBLIC ${brand}Library)
 
 endforeach()
 
+target_link_libraries(_vcv_ports_internal PRIVATE lvgl)
+
 # add all image source files as public sources
 # TODO: Can we already compile them here? (lvgl dependency)
-target_sources(vcv_ports PUBLIC ${COMP_ARTWORK_SOURCES})
-target_sources(vcv_ports PUBLIC ${FACEPLATE_ARTWORK_SOURCES})
+target_sources(_vcv_ports_internal PRIVATE  ${COMP_ARTWORK_SOURCES})
+target_sources(_vcv_ports_internal PRIVATE  ${FACEPLATE_ARTWORK_SOURCES})
