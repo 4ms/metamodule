@@ -172,6 +172,8 @@ private:
 	}
 
 	void prepare_for_element(const BaseElement &) {
+		lv_hide(ui_CableAddButton);
+		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_ControlButton);
 		lv_hide(ui_CableCancelButton);
 		lv_hide(ui_CableRemoveButton);
@@ -614,6 +616,42 @@ private:
 			pr_err("Cannot display more than %d knobsets\n", mapped_item_user_data.size());
 			lv_obj_set_user_data(obj, nullptr);
 		}
+	}
+
+	//
+	// AltParams
+	//
+	void prepare_for_element(const AltParamElement &) {
+		lv_hide(ui_CableAddButton);
+		lv_hide(ui_CableCreationPanel);
+		lv_hide(ui_CableRemoveButton);
+		lv_hide(ui_CablePanelAddButton);
+
+		lv_hide(ui_MappedPanel);
+		lv_hide(ui_MappedItemHeader);
+
+		lv_show(ui_ControlButton, is_patch_playing);
+		lv_label_set_text(ui_ControlButtonLabel, "Adjust");
+
+		if (is_patch_playing) {
+			lv_group_add_obj(pane_group, ui_ControlButton);
+			lv_group_focus_obj(ui_ControlButton);
+		}
+	}
+
+	//
+	// LightElement
+	//
+	void prepare_for_element(const LightElement &) {
+		lv_hide(ui_CableAddButton);
+		lv_hide(ui_CableCreationPanel);
+		lv_hide(ui_CableRemoveButton);
+		lv_hide(ui_CablePanelAddButton);
+
+		lv_hide(ui_MappedPanel);
+		lv_hide(ui_MappedItemHeader);
+
+		lv_hide(ui_ControlButton);
 	}
 
 	static void edit_map_button_cb(lv_event_t *event) {

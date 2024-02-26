@@ -153,4 +153,5 @@ inline void do_create(RgbLight el, const Indices &indices, const WidgetContext_t
 	context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 }
 
+
 } // namespace MetaModule::VCVImplementation::Widget
