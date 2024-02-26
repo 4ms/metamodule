@@ -6,14 +6,14 @@
 namespace MetaModule
 {
 struct EnOscInfo : ModuleInfoBase {
-    static constexpr std::string_view slug{"EnOsc"};
-    static constexpr std::string_view description{"Ensemble Oscillator"};
-    static constexpr uint32_t width_hp = 16;
-    static constexpr std::string_view svg_filename{"res/modules/EnOsc_artwork.svg"};
+	static constexpr std::string_view slug{"EnOsc"};
+	static constexpr std::string_view description{"Ensemble Oscillator"};
+	static constexpr uint32_t width_hp = 16;
+	static constexpr std::string_view svg_filename{"res/modules/EnOsc_artwork.svg"};
 
-    using enum Coords;
+	using enum Coords;
 
-    static constexpr std::array<Element, 32> Elements{{
+	static constexpr std::array<Element, 32> Elements{{
 		Davies1900hBlackKnob{{to_mm<72>(54.1), to_mm<72>(78.08), Center, "Scale", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(115.27), to_mm<72>(61.62), Center, "Spread", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(176.96), to_mm<72>(78.07), Center, "Pitch", ""}},
@@ -41,47 +41,47 @@ struct EnOscInfo : ModuleInfoBase {
 		GateJackInput4ms{{to_mm<72>(171.75), to_mm<72>(319.03), Center, "Freeze Jack", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(209.12), to_mm<72>(262.78), Center, "Out A", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(209.12), to_mm<72>(305.91), Center, "Out B", ""}},
-		AltParamContinuous{{to_mm<72>(176.96), to_mm<72>(78.07), Center, "FineTune", ""}},
-		AltParamChoice{{to_mm<72>(115.27), to_mm<72>(61.62), Center, "NumOsc", ""}, 16},
-		AltParamContinuous{{to_mm<72>(32.72), to_mm<72>(144.14), Center, "Crossfade", ""}},
-		AltParamChoiceLabeled{{{to_mm<72>(168.87), to_mm<72>(208.21), Center, "StereoSplit", ""}, 3}, {"Even/Odd", "Low/High", "Root/Others"}},
-		AltParamChoiceLabeled{{{to_mm<72>(61.77), to_mm<72>(208.21), Center, "FreezeSplit", ""}, 3}, {"Even/Odd", "Low/High", "Root/Others"}},
-}};
+		AltParamContinuous{{to_mm<72>(176.96), to_mm<72>(78.07), Center, "FineTune", ""}, 0.5f},
+		AltParamChoice{{to_mm<72>(115.27), to_mm<72>(61.62), Center, "NumOsc", ""}, 16, 16},
+		AltParamContinuous{{to_mm<72>(32.72), to_mm<72>(144.14), Center, "Crossfade", ""}, 0.5f},
+		AltParamChoiceLabeled{{{to_mm<72>(168.87), to_mm<72>(208.21), Center, "StereoSplit", ""}, 3, 1}, {"Even/Odd", "Low/High", "Root/Others"}},
+		AltParamChoiceLabeled{{{to_mm<72>(61.77), to_mm<72>(208.21), Center, "FreezeSplit", ""}, 3, 1}, {"Even/Odd", "Low/High", "Root/Others"}},
+	}};
 
-    enum class Elem {
-        ScaleKnob,
-        SpreadKnob,
-        PitchKnob,
-        BalanceKnob,
-        RootKnob,
-        CrossFmKnob,
-        TwistKnob,
-        DetuneKnob,
-        WarpKnob,
-        ScaleSwitch,
-        CrossFmSwitch,
-        TwistSwitch,
-        WarpSwitch,
-        LearnButton,
-        FreezeButton,
-        PitchJackIn,
-        ScaleJackIn,
-        SpreadJackIn,
-        CrossFmJackIn,
-        LearnJackIn,
-        RootJackIn,
-        BalanceJackIn,
-        TwistJackIn,
-        WarpJackIn,
-        FreezeJackIn,
-        OutAOut,
-        OutBOut,
-        FinetuneAltParam,
-        NumoscAltParam,
-        CrossfadeAltParam,
-        StereosplitAltParam,
-        FreezesplitAltParam,
-    };
+	enum class Elem {
+		ScaleKnob,
+		SpreadKnob,
+		PitchKnob,
+		BalanceKnob,
+		RootKnob,
+		CrossFmKnob,
+		TwistKnob,
+		DetuneKnob,
+		WarpKnob,
+		ScaleSwitch,
+		CrossFmSwitch,
+		TwistSwitch,
+		WarpSwitch,
+		LearnButton,
+		FreezeButton,
+		PitchJackIn,
+		ScaleJackIn,
+		SpreadJackIn,
+		CrossFmJackIn,
+		LearnJackIn,
+		RootJackIn,
+		BalanceJackIn,
+		TwistJackIn,
+		WarpJackIn,
+		FreezeJackIn,
+		OutAOut,
+		OutBOut,
+		FinetuneAltParam,
+		NumoscAltParam,
+		CrossfadeAltParam,
+		StereosplitAltParam,
+		FreezesplitAltParam,
+	};
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     

@@ -25,8 +25,8 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.1131277"
-     inkscape:cx="180.53807"
-     inkscape:cy="244.89765"
+     inkscape:cx="180.77469"
+     inkscape:cy="245.37088"
      inkscape:window-width="1916"
      inkscape:window-height="1205"
      inkscape:window-x="50"
@@ -1995,7 +1995,7 @@
        cx="168.87"
        cy="208.21"
        r="6"
-       style="fill: #808081;" />
+       style="fill: #808080;" />
     <circle
        id="Crossfade"
        cx="32.72"
@@ -2007,7 +2007,7 @@
        cx="115.27"
        cy="61.62"
        r="6"
-       style="fill: #808080;" />
+       style="fill: #80808f;" />
     <circle
        id="FineTune"
        cx="176.96"
