@@ -239,12 +239,12 @@ def panel_to_components(tree):
             if len(c['pos_names']) > 0:
                 set_class_if_not_set(c, "AltParamChoiceLabeled")
                 c['num_choices'] = len(c['pos_names'])
-                c['default_val'] = str(max(0, min(c['num_choices'] - 1, default_val_int - 128)))
+                c['default_val'] = str(max(1, min(c['num_choices'], default_val_int - 127)))
 
             elif c['num_choices'] > 0:
                 set_class_if_not_set(c, "AltParamChoice")
                 c['pos_names'] = []
-                c['default_val'] = str(max(0, min(c['num_choices'] - 1, default_val_int - 128)))
+                c['default_val'] = str(max(1, min(c['num_choices'], default_val_int - 127)))
 
             elif c['num_choices'] == 0:
                 set_class_if_not_set(c, "AltParamContinuous")
@@ -360,11 +360,14 @@ def list_elem_definitions(elems, DPI):
         if k['class'] == "Toggle3pos" and len(k['pos_names']) == 3:
             source += f""", {{"{k['pos_names'][0]}", "{k['pos_names'][1]}", "{k['pos_names'][2]}"}}""" 
 
+        if k['class'] == "AltParamContinuous":
+            source += f""", {k["default_val"]}""" 
+
         if k['class'] == "AltParamChoice":
-            source += f""", {k['num_choices']}""" 
+            source += f""", {k['num_choices']}, {k["default_val"]}""" 
 
         if k['class'] == "AltParamChoiceLabeled":
-            source += f""", {k['num_choices']}}}, {{"""
+            source += f""", {k['num_choices']}, {k["default_val"]}}}, {{"""
             for nm in k['pos_names']:
                 source += f""""{nm}", """
             source = source.removesuffix(", ")
