@@ -16,15 +16,35 @@ std::unique_ptr<CoreProcessor> create_vcv_module() {
 }
 
 // Points all string_views of elements to strings in the returned strings
-inline void rebase_strings(std::span<MetaModule::Element> elements, std::vector<std::string> &strings) {
+inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vector<std::string> &strings) {
+	size_t num_strings = 0;
+	for (auto &element : elements) {
+		std::visit(overloaded{
+					   [&num_strings](MetaModule::BaseElement) { num_strings += 2; },
+					   [&num_strings](MetaModule::ImageElement &el) { num_strings += 3; },
+					   [&num_strings](MetaModule::Slider &el) { num_strings += 4; },
+					   [&num_strings](MetaModule::FlipSwitch &el) { num_strings += 9; },
+					   [&num_strings](MetaModule::SlideSwitch &el) { num_strings += el.num_pos + 4; },
+				   },
+				   element);
+	}
+	strings.reserve(num_strings);
+	// printf("STRINGS: %p\n", strings.data());
 
 	for (auto &element : elements) {
-		// Copy the string_view's data to a new string, and then point the string_view to it
-		{
-			auto el = MetaModule::base_element(element);
-			el.short_name = strings.emplace_back(el.short_name);
-			el.long_name = strings.emplace_back(el.long_name);
-		}
+		std::visit(
+			[&strings](MetaModule::BaseElement &el) {
+				// printf("\tshort_name: %.*s: was %p ",
+				// 	   (int)el.short_name.size(),
+				// 	   el.short_name.data(),
+				// 	   el.short_name.data());
+				el.short_name = strings.emplace_back(el.short_name);
+				// printf("-> %p (%zu)\n", el.short_name.data(), el.short_name.size());
+
+				el.long_name = strings.emplace_back(el.long_name);
+			},
+			element);
+
 		std::visit(overloaded{[](auto &el) {},
 							  [&strings](MetaModule::ImageElement &el) {
 								  el.image = strings.emplace_back(el.image);
@@ -46,11 +66,34 @@ inline void rebase_strings(std::span<MetaModule::Element> elements, std::vector<
 		std::visit(overloaded{[](auto &el) {},
 							  [&strings](MetaModule::SlideSwitch &el) {
 								  el.image_handle = strings.emplace_back(el.image_handle);
+
 								  for (auto &pos_name : el.pos_names)
 									  pos_name = strings.emplace_back(pos_name);
 							  }},
 				   element);
 	}
+	// printf("END STRINGS: %p\n", strings.data());
+}
+
+void debug_dump_strings(std::span<MetaModule::Element> elements, std::span<std::string> string_table) {
+	for (auto &s : string_table)
+		printf("strtab:\t%p\t%s\n", s.data(), s.c_str());
+
+	for (auto &element : elements) {
+		auto el = base_element(element);
+		printf("el.short_name: %.*s: %p\n", (int)el.short_name.size(), el.short_name.data(), el.short_name.data());
+		std::visit(overloaded{[](auto &el) {},
+							  [](MetaModule::SlideSwitch &el) {
+								  for (auto &pos_name : el.pos_names)
+									  printf("el.pos_names[]: %.*s: %p\n",
+											 (int)pos_name.size(),
+											 pos_name.data(),
+											 pos_name.data());
+							  }},
+				   element);
+	}
+
+	printf("\n\n");
 }
 
 template<typename ModuleT, typename WidgetT>
@@ -68,18 +111,18 @@ plugin::Model *createModel(std::string_view slug)
 	ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
 
 	if (!ModuleFactory::isValidSlug(slug)) {
-		// Create a ModuleInfoView at runtime
-		// Each call to createModel<...> has unique ModuleT/WidgetT, so each of the static vars below are unique.
-		// The static ModuleT holds the strings
-		// The static elements vector points to those strings
-		// The ModuleInfoView::Elements (that gets registered with ModuleFactory) points to the static elements vector.
-		// ModuleInfoView::indices points to the static indices vector
-		static ModuleT module;
+		// Construct the module and modulewidget, so we can intercept their calls
+		ModuleT module;
 		WidgetT mw{&module};
+
+		// Store backing data for Info struct as static data, unique to each call of createModel<ModuleT, WidgetT>
 		static std::vector<MetaModule::Element> elements;
 		static std::vector<ElementCount::Indices> indices;
+		static std::vector<std::string> string_table;
 
 		mw.populate_elements(elements);
+		rebase_strings(elements, string_table);
+
 		indices.resize(elements.size());
 		ElementCount::get_indices(elements, indices);
 
@@ -90,6 +133,8 @@ plugin::Model *createModel(std::string_view slug)
 		info.indices = indices;
 
 		ModuleFactory::registerModuleType(slug, info);
+
+		debug_dump_strings(elements, string_table);
 
 		// TODO: create a Model type which refers to ModuleT and WidgetT, and return a ptr to a static instance of it
 		return nullptr;
