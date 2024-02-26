@@ -20,6 +20,9 @@ include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
 add_library(_vcv_ports_internal STATIC)
 target_sources(_vcv_ports_internal PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
 
+# Enable LTO for top level library
+set_property(TARGET _vcv_ports_internal PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+
 set_property(TARGET _vcv_ports_internal PROPERTY CXX_STANDARD 20)
 
 # Create interface wrapper that whole-links the actual library
@@ -91,6 +94,9 @@ foreach(brand ${brands})
   target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
   target_sources(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
   target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
+
+  # Enable LTO for all brands
+  set_property(TARGET ${brand}Library PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
   target_link_libraries(_vcv_ports_internal PUBLIC ${brand}Library)
 
