@@ -12,8 +12,6 @@ target_include_directories(
   4msLibrary
   PUBLIC ${MM_ROOT}/shared
          ${MM_ROOT}/shared/CoreModules/4ms
-         ${MM_ROOT}/firmware/src
-         ${MM_ROOT}/firmware/src/medium
 )
 
 set_property(TARGET 4msLibrary PROPERTY CXX_STANDARD 20)
