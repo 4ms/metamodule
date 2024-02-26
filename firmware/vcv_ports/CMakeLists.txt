@@ -4,6 +4,7 @@ project(vcv_ports)
 #
 # Only build a limited set of modules, defined in an external file
 #
+
 include(${CMAKE_CURRENT_LIST_DIR}/glue/filter.cmake)
 
 unset(USE_LIMITED_MODULES)
@@ -17,6 +18,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
 # Create library that combines all brands
 # Link against this library from outside
 add_library(_vcv_ports_internal STATIC)
+
+set_property(TARGET _vcv_ports_internal PROPERTY CXX_STANDARD 20)
 
 # Create interface wrapper that whole-links the actual library
 add_library(vcv_ports INTERFACE)
