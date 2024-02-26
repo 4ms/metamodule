@@ -20,3 +20,10 @@ find_program(CMAKE_GDB ${TOOLCHAIN_PREFIX}gdb gdb CACHE INTERNAL "gdb client")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# Backport cmake whole linking to cross toolchain
+# TODO: needs to be added for clang
+set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE 
+"-Wl,--whole-archive" "<LINK_ITEM>" "-Wl,--no-whole-archive"
+)
+set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED True)
