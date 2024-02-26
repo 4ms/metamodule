@@ -18,6 +18,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
 # Create library that combines all brands
 # Link against this library from outside
 add_library(_vcv_ports_internal STATIC)
+target_sources(_vcv_ports_internal PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
 
 set_property(TARGET _vcv_ports_internal PROPERTY CXX_STANDARD 20)
 
