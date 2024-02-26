@@ -84,8 +84,8 @@ template<typename T>
 constexpr AltParamChoice::State_t convertState(const T &element, float val)
 	requires(std::derived_from<T, AltParamChoice>)
 {
-	// round and clamp to valid range
-	return AltParamChoice::State_t(std::clamp<unsigned>(std::round(val), 1, element.num_pos));
+	//maps 0..1 -> 0..N-1
+	return AltParamChoice::State_t(std::round(val * (float)(element.num_pos - 1)));
 }
 
 //
@@ -101,7 +101,7 @@ constexpr std::array<float, T::NumLights> convertLED(const T &, float value) req
 
 // Fallback for RGB LEDs
 template<typename T>
-constexpr std::array<float, T::NumLights> convertLED(const T &, std::array<float,3> values) requires(T::NumLights == 3)
+constexpr std::array<float, T::NumLights> convertLED(const T &, std::array<float, 3> values) requires(T::NumLights == 3)
 {
 	return values;
 }
@@ -115,7 +115,7 @@ constexpr std::array<float, T::NumLights> convertLED(const T &, bool value) requ
 
 // Fallback for RGB LED elements with explicit type conversion
 template<typename T>
-constexpr std::array<float, T::NumLights> convertLED(const T &, std::array<bool,3> values) requires(T::NumLights == 3)
+constexpr std::array<float, T::NumLights> convertLED(const T &, std::array<bool, 3> values) requires(T::NumLights == 3)
 {
 	return {values[0] ? 1.0f : 0.0f, values[1] ? 1.0f : 0.0f, values[2] ? 1.0f : 0.0f};
 }

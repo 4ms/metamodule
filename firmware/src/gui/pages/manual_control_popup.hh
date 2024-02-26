@@ -54,7 +54,7 @@ struct ManualControlPopUp {
 		auto cur_val = patch.get_static_knob_value(module_id, param_id);
 		if (cur_val) {
 			float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
-			lv_arc_set_value(ui_ControlArc, cur_val.value() * range);
+			lv_arc_set_value(ui_ControlArc, std::round(cur_val.value() * range) + lv_arc_get_min_value(ui_ControlArc));
 			update_control_arc_text();
 		}
 	}

@@ -27,7 +27,7 @@ struct AltParamChoiceItem : rack::ui::MenuItem
 	void draw(const DrawArgs& args) override
 	{
 		// add checkmark if this choice is selected
-		auto currentState = MetaModule::StateConversion::convertState(el, module->getParam(param_idx).getValue());
+		auto currentState = std::clamp<unsigned>(std::round(module->getParam(param_idx).getValue()), 1, el.num_pos);
 		rightText = currentState == choiceIndex ? CHECKMARK_STRING : " ";
 
 		rack::ui::MenuItem::draw(args);
