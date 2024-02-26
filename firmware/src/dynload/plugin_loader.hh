@@ -30,7 +30,7 @@ public:
 
 	struct LoadedPlugin {
 		std::string name;
-		rack::plugin::Plugin models;
+		rack::plugin::Plugin rack_plugin;
 		std::vector<uint8_t> code;
 	};
 
@@ -40,7 +40,7 @@ public:
 	}
 
 	void start() {
-		plugin_code.clear();
+		plugins.clear();
 		allocator.reset();
 		if (auto newmem = allocator.allocate(sizeof(PluginFileList))) {
 			plugin_files = new (newmem) PluginFileList;
@@ -103,8 +103,10 @@ public:
 				if (pluginname.ends_with(".so"))
 					pluginname = pluginname.substr(0, pluginname.length() - 3);
 
-				// Why does clang 15 need the `LoadedPlugin`?
-				auto plugin = plugin_code.emplace_back(LoadedPlugin{pluginname});
+				// TODO: get slug from a plugin.json file inside the plugin dir
+				auto plugin = plugins.emplace_back();
+				plugin.name = pluginname;
+				plugin.rack_plugin.slug = pluginname;
 
 				pr_dbg("Loading plugin data from vol %d:%s/%s, from buffer %p ++%zu\n",
 					   plugin_file.vol,
@@ -148,7 +150,7 @@ public:
 			return;
 		}
 
-		init(&plugin.models);
+		init(&plugin.rack_plugin);
 
 		// now load the /res directory to...?
 		pr_info("Plugin loaded!\n");
@@ -166,7 +168,7 @@ private:
 	// Dynamically generated in non-cacheable RAM
 	PluginFileList *plugin_files = nullptr;
 
-	std::vector<LoadedPlugin> plugin_code;
+	std::vector<LoadedPlugin> plugins;
 };
 
 } // namespace MetaModule

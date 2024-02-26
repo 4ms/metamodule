@@ -76,6 +76,7 @@ struct FramebufferWidget : Widget {
 	float oversample = 1.0;
 	bool dirtyOnSubpixelChange = true;
 	math::Vec viewportMargin = math::Vec(INFINITY, INFINITY);
+
 	void setDirty(bool dirty = true) {
 	}
 	int getImageHandle() {
@@ -99,15 +100,23 @@ struct FramebufferWidget : Widget {
 
 // Should be called SvgParamWidget
 struct SvgWidget : Widget {
-	SvgWidget *bg = this;
-	NVGcolor bgColor;
-	bool visible;
+	std::unique_ptr<SvgWidget> bg; // = std::make_unique<SvgWidget>();
+	NVGcolor bgColor{};
+	bool visible = true;
 
-	void setSvg(std::shared_ptr<window::Svg>) {
+	std::string svg_filename;
+
+	void setSvg(std::shared_ptr<window::Svg> svg) {
+		svg_filename = svg->filename;
 	}
 
-	void setSVG(std::shared_ptr<window::Svg>) {
+	void setSVG(std::shared_ptr<window::Svg> svg) {
+		return setSvg(svg);
 	}
+
+	// SvgWidget() : bg(new SvgWidget) {
+	// }
+	// ~SvgWidget() override { delete bg;}
 };
 
 } // namespace widget

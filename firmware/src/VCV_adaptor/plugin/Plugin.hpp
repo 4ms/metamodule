@@ -6,6 +6,7 @@ namespace rack::plugin
 {
 
 struct Plugin {
+	std::string slug;
 	std::vector<Model *> models;
 
 	void addModel(Model *model) {

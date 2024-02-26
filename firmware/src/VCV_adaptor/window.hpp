@@ -1,6 +1,7 @@
 #pragma once
 #include "VCV_adaptor/math.hpp"
 #include <memory>
+#include <string>
 #include <string_view>
 
 namespace rack::window
@@ -25,14 +26,17 @@ inline math::Vec mm2px(math::Vec mm) {
 }
 
 struct Svg {
-	void loadString(std::string_view str) {
-	}
+	std::string filename;
+
+	// void loadString(std::string_view str) {
+	// }
 	// math::Vec getSize() { return {0, 0}; }
 	// int getNumShapes() { return 0; }
 	// int getNumPaths() { return 0; }
 	// int getNumPoints() { return 0; }
 	static std::shared_ptr<Svg> load(std::string_view filename) {
-		return nullptr;
+		auto svg = std::make_shared<Svg>(filename);
+		return svg;
 	}
 };
 
@@ -51,8 +55,9 @@ struct Window {
 		return nullptr;
 	}
 
-	std::shared_ptr<Svg> loadSvg(std::string_view) {
-		return nullptr;
+	std::shared_ptr<Svg> loadSvg(std::string_view filename) {
+		auto svg = std::make_shared<Svg>(filename);
+		return svg;
 	}
 };
 

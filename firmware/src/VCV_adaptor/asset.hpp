@@ -15,9 +15,12 @@ inline std::string_view user(std::string_view filename = "") {
 	return "";
 }
 
-inline std::string_view plugin(plugin::Plugin *plugin, std::string_view filename = "") {
-	// printf("asset::plugin(%.*s)\n", (int)filename.size(), filename.data());
-	return "";
+inline std::string plugin(plugin::Plugin *plugin, std::string_view filename = "") {
+	std::string path = "";
+	if (plugin)
+		path = plugin->slug + std::string("/");
+	path += filename;
+	return path;
 }
 
 } // namespace rack::asset
