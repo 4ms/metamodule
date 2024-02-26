@@ -5,13 +5,12 @@
 namespace rack::asset
 {
 
-inline std::string_view system(std::string_view filename = "") {
-	// printf("asset::system(%.*s)\n", (int)filename.size(), filename.data());
-	return "";
+inline std::string system(std::string_view filename = "") {
+	return std::string("sys/") + std::string(filename);
 }
 
-inline std::string_view user(std::string_view filename = "") {
-	// printf("asset::user(%.*s)\n", (int)filename.size(), filename.data());
+inline std::string user(std::string_view filename = "") {
+	return std::string("usr/") + std::string(filename);
 	return "";
 }
 
