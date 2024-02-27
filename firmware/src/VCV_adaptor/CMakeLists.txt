@@ -10,7 +10,10 @@ target_sources(
          engine/Module.cpp
 )
 
-add_subdirectory(${MM_ROOT}/firmware/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
+# TODO: replace this with for example fetchContent later
+if (NOT TARGET jansson)
+  add_subdirectory(${MM_ROOT}/firmware/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
+endif()
 add_subdirectory(pffft)
 
 # TODO: is this really meant to be propagated
