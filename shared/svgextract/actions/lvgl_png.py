@@ -40,28 +40,28 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_{NAMECAPS
     with open(filename,  "rb") as f:
         pngdata = f.read()
 
-    numBytes = 0
+    byteIdx = 0
     width = 0
     height = 0
 
     for byte in pngdata:
 
-        if numBytes >= 16 and numBytes <= 19:
-            width = width * 16 + int(byte)
+        if byteIdx >= 16 and byteIdx <= 19:
+            width = width * 256 + int(byte)
 
-        if numBytes >= 20 and numBytes <= 23:
-            height = height * 16 + int(byte)
+        if byteIdx >= 20 and byteIdx <= 23:
+            height = height * 256 + int(byte)
 
-        if numBytes % 13 == 0:
+        if byteIdx % 13 == 0:
             res += "\n    "
 
         res += format(byte, "#04x")
 
 
-        if numBytes < len(pngdata) - 1:
+        if byteIdx < len(pngdata) - 1:
           res += ", "
 
-        numBytes += 1
+        byteIdx += 1
 
 
     res += f"""
@@ -73,7 +73,7 @@ const lv_img_dsc_t {imgname} = {{
   .header.reserved = 0,
   .header.w = {width},
   .header.h = {height},
-  .data_size = {numBytes},
+  .data_size = {byteIdx},
   .data = {imgname}_map,
 }};
 """
