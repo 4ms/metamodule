@@ -35,8 +35,8 @@ public:
 	template<Info::Elem EL>
 	auto getState()
 	{
-			return SmartCoreProcessor<Info>::getState<EL>();
-		}
+		return SmartCoreProcessor<Info>::getState<EL>();
+	}
 
 private:
 	template <class Mapping>
@@ -183,7 +183,6 @@ private:
 
 		void calculateClockInPeriod(uint32_t timestampInTicks) {
 			if(clockIn.lastEventInTicks) {
-				//clockIn.periodInTicks = *clockIn.lastEventInTicks - timestampInTicks;
 				if(clockIn.lastEventInTicks < timestampInTicks) {
 					clockIn.periodInTicks = timestampInTicks - *clockIn.lastEventInTicks;
 				} else { //overflow
