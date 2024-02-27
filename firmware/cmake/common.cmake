@@ -16,9 +16,9 @@ function(add_bin_hex_command target_base)
   add_custom_command(
     TARGET ${target_base}.elf
     POST_BUILD
-    COMMAND arm-none-eabi-objcopy -O ihex $<TARGET_FILE:${target_base}.elf> ${BASENAME}.hex
-    COMMAND arm-none-eabi-objcopy -O binary $<TARGET_FILE:${target_base}.elf> ${BASENAME}.bin
-    COMMAND arm-none-eabi-size -d $<TARGET_FILE:${target_base}.elf>
+    COMMAND ${CMAKE_OBJCOPY}   -O ihex $<TARGET_FILE:${target_base}.elf> ${BASENAME}.hex
+    COMMAND ${CMAKE_OBJCOPY}   -O binary $<TARGET_FILE:${target_base}.elf> ${BASENAME}.bin
+    COMMAND ${CMAKE_SIZE_UTIL} -d $<TARGET_FILE:${target_base}.elf>
     COMMENT "Built .elf file: $<TARGET_FILE:${target_base}.elf>"
   )
   set_target_properties(
