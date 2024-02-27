@@ -59,16 +59,14 @@ target_include_directories(
           ${FWDIR}/lib/stm32-hal/stm32mp1/include
 )
 
+target_compile_options(flash_loader.elf PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
+
 target_link_script(
   flash_loader
   ${FWDIR}/system/linker/stm32mp15xx_ca7_flashloader.ld
   -L${FWDIR}
   -Wl,--gc-sections
-  -Wno-psabi
-  -ffreestanding
-  -nostartfiles
   -nostdlib
-  -flto=auto
 )
 
 target_link_libraries(flash_loader.elf PRIVATE cpputil)
