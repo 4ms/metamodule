@@ -608,13 +608,13 @@ private:
 
 		if(clockOut == true) {
 			tapOutVoltage = 10.f;
-			setLED<TapTempoButton>(1.f);
+			setLED<Info::Elem::TapTempoButton>(1.f);
 		} else {
 			tapOutVoltage = 0.f;
-			setLED<TapTempoButton>(0.f);
+			setLED<Info::Elem::TapTempoButton>(0.f);
 		}
 
-		setOutput<TapOut>(tapOutVoltage);
+		setOutput<Info::Elem::TapOut>(tapOutVoltage);
 
 		return tapOutVoltage;
 	}
