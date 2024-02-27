@@ -39,7 +39,6 @@ add_compile_options(
   -Werror=return-type
   -Wsign-compare
   -Wdouble-promotion
-  # -flto=auto
   $<$<COMPILE_LANGUAGE:CXX>:-ffold-simple-inlines>
   $<$<COMPILE_LANGUAGE:CXX>:-Wno-psabi>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
@@ -52,7 +51,6 @@ add_link_options(
     -Wl,--gc-sections
     -ffreestanding
     -nostartfiles
-    # -flto=auto
     ${MCU_FLAGS}
 )
 endmacro()

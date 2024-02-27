@@ -2,6 +2,8 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xm4.cmake)
 set_arch_flags()
 
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
 set(M4DIR ${CMAKE_CURRENT_SOURCE_DIR}) # /firmware/src/core_m4
 set(FWDIR ${CMAKE_SOURCE_DIR}) # /firmware
 set(SHARED ${FWDIR}/../shared) # /shared
