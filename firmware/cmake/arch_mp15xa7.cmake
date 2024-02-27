@@ -45,6 +45,9 @@ add_compile_options(
   -Werror=return-type
   -Wsign-compare
   -Wno-psabi
+  "$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>"
+  "$<$<COMPILE_LANGUAGE:CXX>:-ffold-simple-inlines>"
+  "$<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>"
 )
 
 add_link_options(${MCU_FLAGS})
