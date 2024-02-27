@@ -29,7 +29,9 @@ set_source_files_properties(
 )
 
 # Silence warning for synth_string_part.cc (used by Rings.cc) which writes 8B into a 4B space.
-target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-stringop-overflow)
+# Must be PUBLIC to propagate upwards into linkage of main.elf.
+# TODO: fix this somehow, so we don't silence this useful warning in other projects.
+target_link_options(AudibleInstrumentsLibrary PUBLIC -Wno-stringop-overflow)
 
 # Define TEST so braids dsp/dsp.h works (since it contains raw Cortex-M4 assembly)
 target_compile_definitions(AudibleInstrumentsLibrary PRIVATE TEST)
