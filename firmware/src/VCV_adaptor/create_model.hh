@@ -75,7 +75,7 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vect
 	// printf("END STRINGS: %p\n", strings.data());
 }
 
-void debug_dump_strings(std::span<MetaModule::Element> elements, std::span<std::string> string_table) {
+inline void debug_dump_strings(std::span<MetaModule::Element> elements, std::span<std::string> string_table) {
 	for (auto &s : string_table)
 		printf("strtab:\t%p\t%s\n", s.data(), s.c_str());
 

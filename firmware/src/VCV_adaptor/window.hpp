@@ -35,7 +35,7 @@ struct Svg {
 	// int getNumPaths() { return 0; }
 	// int getNumPoints() { return 0; }
 	static std::shared_ptr<Svg> load(std::string_view filename) {
-		auto svg = std::make_shared<Svg>(filename);
+		auto svg = std::make_shared<Svg>(std::string(filename));
 		return svg;
 	}
 };
@@ -56,7 +56,7 @@ struct Window {
 	}
 
 	std::shared_ptr<Svg> loadSvg(std::string_view filename) {
-		auto svg = std::make_shared<Svg>(filename);
+		auto svg = std::make_shared<Svg>(std::string(filename));
 		return svg;
 	}
 };

@@ -100,7 +100,8 @@ struct FramebufferWidget : Widget {
 
 // Should be called SvgParamWidget
 struct SvgWidget : Widget {
-	std::unique_ptr<SvgWidget> bg; // = std::make_unique<SvgWidget>();
+	// TODO: if using a unique_ptr here causes vcv_ports to not compile, use a raw ptr and remember to delete it
+	std::unique_ptr<SvgWidget> bg;
 	NVGcolor bgColor{};
 	bool visible = true;
 
@@ -114,8 +115,9 @@ struct SvgWidget : Widget {
 		return setSvg(svg);
 	}
 
-	// SvgWidget() : bg(new SvgWidget) {
-	// }
+	SvgWidget()
+		: bg(new SvgWidget) {
+	}
 	// ~SvgWidget() override { delete bg;}
 };
 
