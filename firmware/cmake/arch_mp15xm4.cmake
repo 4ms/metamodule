@@ -15,6 +15,7 @@ set(MCU_FLAGS
     -mthumb
     -mlittle-endian
     -mfloat-abi=hard
+    -fno-exceptions
 )
 
 set(CMAKE_CXX_STANDARD 23)
