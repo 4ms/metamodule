@@ -7,8 +7,8 @@
 #include "patch_file/patch_location.hh"
 #include "shared/patch_convert/patch_to_yaml.hh"
 #include "shared/patch_convert/yaml_to_patch.hh"
-#include "stubs/patch_file/default_patch_io.hh"
-#include "stubs/patch_file/host_file_io.hh"
+#include "default_patch_io.hh"
+#include "host_file_io.hh"
 #include <cstdint>
 
 namespace MetaModule
