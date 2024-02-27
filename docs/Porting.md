@@ -117,7 +117,7 @@ set(brands
 
 7) **Generate faceplate artwork.**
 
-   Run `make faceplate-image-<Brand>` to generate the faceplate artwork for
+   Run `make faceplate-images-<Brand>` to generate the faceplate artwork for
    your brand only. This will (re-)generate a faceplate for **all** the images in
    the `BRAND_FACEPLATE_SVGS` cmake list you made earlier (even if nothing changed).
    If you only want to regenerate a few images, use limit file -- see [Firmware
