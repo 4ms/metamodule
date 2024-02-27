@@ -1,17 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 project(vcv_ports)
 
-#
-# Only build a limited set of modules, defined in an external file
-#
-
-include(${CMAKE_CURRENT_LIST_DIR}/glue/filter.cmake)
-
-unset(USE_LIMITED_MODULES)
-if(DEFINED LIMITED_MODULES_FILE)
-  validate_limited_modules_file(${LIMITED_MODULES_FILE})
-endif()
-
 include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
 
 

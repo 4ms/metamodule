@@ -12,6 +12,16 @@ project(
 )
 
 #
+# Only build a limited set of modules, defined in an external file
+#
+include(vcv_ports/glue/filter.cmake)
+
+unset(USE_LIMITED_MODULES)
+if(DEFINED LIMITED_MODULES_FILE)
+  validate_limited_modules_file(${LIMITED_MODULES_FILE})
+endif()
+
+#
 # Git commit hash
 #
 include(cmake/CheckGit.cmake)
