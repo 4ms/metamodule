@@ -109,6 +109,9 @@ set(brands
 )
 ```
 
+   Run `make configure` after doing this to refresh the build with the new brand.
+
+
 6) **Add the plugin to the VCV whitelist** 
 
    Add an entry for your brand in `vcv/src/mapping/module_directory.hh`. 
