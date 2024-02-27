@@ -33,6 +33,7 @@ add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_D
 # #################### SLS Export ##################################
 
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5 ${CMAKE_CURRENT_BINARY_DIR}/ui)
+target_link_libraries(ui PRIVATE lvgl)
 
 # #################### VCV Adaptor ##################################
 

@@ -64,6 +64,7 @@ endif()
 # SLS Exported GUI (meta5)
 #
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
+target_link_libraries(ui PRIVATE lvgl)
 
 #
 # Main App
