@@ -130,7 +130,7 @@ private:
 		void set_samplerate(float sr) {
 			timeStepInS = 1.f /sr;
 
-			// triggerLengthMinimumInTicks = uint32_t(std::round(triggerLengthMinimumInS / timeStepInS));
+			triggerLength5msInTicks = uint32_t(std::round(0.005f / timeStepInS));
 			triggerLengthMinimumInTicks = 2;
 		}
 
@@ -171,7 +171,11 @@ private:
 
 		uint32_t calculateTriggerlength(float pulsewidth) {
 			if(clockOut.periodInTicks) {
-				return triggerLengthMinimumInTicks + uint32_t(std::round(pulsewidth * (*clockOut.periodInTicks - 2 * triggerLengthMinimumInTicks)));
+				if (1/(timeStepInS * *clockOut.periodInTicks) < 100) {
+					return triggerLength5msInTicks + uint32_t(std::round(pulsewidth * (*clockOut.periodInTicks - 2 * triggerLength5msInTicks)));
+				} else {
+					return triggerLengthMinimumInTicks + uint32_t(std::round(pulsewidth * (*clockOut.periodInTicks - 2 * triggerLengthMinimumInTicks)));
+				}
 			} else {
 				return triggerLengthMinimumInTicks;
 			}
@@ -271,7 +275,19 @@ private:
 		void updateInvOut(uint32_t timestamp) {
 			if ((invMode == DELAY) || (invMode == SHUFFLE)) {
 				if(clockInvOut.lastEventInTicks) {
-					if(timestamp >= (*clockInvOut.lastEventInTicks + triggerLengthMinimumInTicks)) {
+					auto invOutTriggerLength = triggerLengthMinimumInTicks;
+
+					if (1/(timeStepInS * *clockOut.periodInTicks) < 100) {
+						invOutTriggerLength = triggerLength5msInTicks;
+					} else {
+						invOutTriggerLength = uint32_t(std::round(*clockOut.periodInTicks * 0.3f));
+					}
+
+					if(invOutTriggerLength < triggerLengthMinimumInTicks) {
+						invOutTriggerLength = triggerLengthMinimumInTicks;
+					}
+
+					if(timestamp >= (*clockInvOut.lastEventInTicks + invOutTriggerLength)) {
 						parent->setOutput<Mapping::InvOutOut>(0.f);
 						parent->setLED<Mapping::InvLight>(0.f);
 						clockInvOut.lastEventInTicks.reset();
@@ -366,6 +382,7 @@ private:
 	private:
 		float timeStepInS;
 		uint32_t triggerLengthMinimumInTicks;
+		uint32_t triggerLength5msInTicks;
 		uint32_t triggerLengthInTicks;
 		uint32_t ticks;
 		std::array<uint32_t, maxIndexDivisions + 1> clockDivCounter;
