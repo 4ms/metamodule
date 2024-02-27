@@ -1,7 +1,7 @@
 #pragma once
-#include "CoreModules/module_type_slug.hh"
+#include <module_type_slug.hh>
 #include "patch.hh"
-#include "util/static_string.hh"
+#include <util/static_string.hh>
 #include <algorithm>
 #include <optional>
 #include <vector>

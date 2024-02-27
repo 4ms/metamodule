@@ -1,6 +1,6 @@
 #pragma once
-#include "CoreModules/module_type_slug.hh"
-#include "patch/patch.hh"
+#include <module_type_slug.hh>
+#include <patch.hh>
 #include "ryml_std.hpp"
 
 // These must be included after ryml_std.hpp:

@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/hub/panel_medium_defs.hh"
+#include <hub/panel_medium_defs.hh>
 #include "midi_def.hh"
 #include "util/math.hh"
 #include "util/static_string.hh"

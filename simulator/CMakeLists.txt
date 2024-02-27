@@ -26,19 +26,20 @@ add_subdirectory(lvgl_drv)
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 include(${LVGL_DIR}/CMakeLists.txt)
 
-# #################### RYML ##################################
-
-add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
-
 # #################### SLS Export ##################################
 
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5 ${CMAKE_CURRENT_BINARY_DIR}/ui)
 target_link_libraries(ui PRIVATE lvgl)
 
+# #################### Patch Convert ##################################
+
+add_subdirectory(${SHARED}/patch_convert patch_convert)
+
 # #################### VCV Adaptor ##################################
 
 add_subdirectory(${FWDIR}/src/VCV_adaptor
                  ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
+
 
 # #################### Other brands ##################################
 
@@ -53,9 +54,6 @@ add_executable(
   stubs/random.cpp
 	${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
-	${SHARED}/patch_convert/ryml/ryml_serial.cc
-	${SHARED}/patch_convert/yaml_to_patch.cc 
-	${SHARED}/patch_convert/patch_to_yaml.cc
 	)
 
 target_include_directories(
@@ -65,13 +63,12 @@ target_include_directories(
           sdl_audio
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${SHARED}/patch
           ${FWDIR}/src/medium
           )
 
 target_compile_options(simulator PRIVATE -Wall -Og)
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 VCV_adaptor cpputil ui vcv_ports)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl patch_convert SDL2 VCV_adaptor cpputil ui vcv_ports)
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 

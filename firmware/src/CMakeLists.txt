@@ -48,9 +48,9 @@ add_subdirectory(VCV_adaptor)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 
 #
-# RYML
+# Patch Convert
 #
-add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+add_subdirectory(${SHARED}/patch_convert patch_convert)
 
 #
 # Jansson
@@ -92,9 +92,6 @@ add_executable(
 
   #
   ${SHARED}/CoreModules/hub/hub_medium.cc
-  ${SHARED}/patch_convert/yaml_to_patch.cc
-  ${SHARED}/patch_convert/patch_to_yaml.cc
-  ${SHARED}/patch_convert/ryml/ryml_serial.cc
   #
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
@@ -174,7 +171,7 @@ target_include_directories(
 
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor cpputil vcv_ports jansson)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui patch_convert VCV_adaptor cpputil vcv_ports jansson)
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})

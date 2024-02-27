@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/element_info.hh"
-#include "cpputil/util/base_concepts.hh"
+#include <util/base_concepts.hh>
 #include <array>
 #include <cstdint>
 #include <span>

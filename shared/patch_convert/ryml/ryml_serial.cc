@@ -1,13 +1,13 @@
 
 #include "ryml_std.hpp"
 //
-#include "patch/patch.hh"
+#include <patch.hh>
 #include "ryml.hpp"
 #include "ryml_serial_chars.hh"
 #include <cstdio>
 
-#include "CoreModules/module_type_slug.hh"
-#include "cpputil/util/countzip.hh"
+#include <module_type_slug.hh>
+#include <util/countzip.hh>
 
 void write(ryml::NodeRef *n, Jack const &jack) {
 	*n |= ryml::MAP;

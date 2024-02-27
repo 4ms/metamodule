@@ -1,3 +1,3 @@
 #pragma once
-#include "cpputil/util/static_string.hh"
+#include <util/static_string.hh>
 using ModuleTypeSlug = StaticString<31>;
