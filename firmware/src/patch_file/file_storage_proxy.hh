@@ -7,6 +7,7 @@
 #include "patch_file.hh"
 #include "patch_file/patch_location.hh"
 #include "pr_dbg.hh"
+#include "util/seq_map.hh"
 
 namespace MetaModule
 {
@@ -46,6 +47,18 @@ public:
 		return true;
 	}
 
+	bool open_patch_file(PatchLocHash patch_loc_hash) {
+		if (auto patch = open_patches_.get(patch_loc_hash)) {
+			// Expensive copy: could view_patch_ just point to the open_patches_ entry?
+			pr_dbg("Found %s in cache\n", patch->patch_name.c_str());
+			view_patch_ = *patch;
+			return true;
+		} else {
+			pr_dbg("Not in cache\n");
+			return false;
+		}
+	}
+
 	// TODO: pass the span as an arg, not as a member var
 	bool parse_view_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
@@ -56,9 +69,14 @@ public:
 		if (!yaml_raw_to_patch(file_data, patch))
 			return false;
 
+		open_patches_.insert(PatchLocHash{requested_view_patch_loc_}, patch);
+		pr_dbg("Adding %s to cache\n", patch.patch_name.c_str());
+
+		// Expensive copy: could view_patch_ just point to the open_patches_ entry?
 		view_patch_ = patch;
 		view_patch_loc_.filename = requested_view_patch_loc_.filename;
 		view_patch_loc_.vol = requested_view_patch_loc_.vol;
+
 		return true;
 	}
 
@@ -197,7 +215,11 @@ private:
 	std::span<char> raw_patch_data_;
 	PatchData view_patch_;
 
+	SeqMap<PatchLocHash, PatchData, 32> open_patches_;
+
 	PatchLocation requested_view_patch_loc_;
 	PatchLocation view_patch_loc_;
+
+	std::optional<IntercoreStorageMessage> next_response{};
 };
 } // namespace MetaModule

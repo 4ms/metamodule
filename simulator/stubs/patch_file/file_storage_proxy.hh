@@ -9,6 +9,7 @@
 #include "shared/patch_convert/yaml_to_patch.hh"
 #include "stubs/patch_file/default_patch_io.hh"
 #include "stubs/patch_file/host_file_io.hh"
+#include "util/seq_map.hh"
 #include <cstdint>
 
 namespace MetaModule
@@ -36,6 +37,18 @@ public:
 		return true;
 	}
 
+	bool open_patch_file(PatchLocHash patch_loc_hash) {
+		if (auto patch = open_patches_.get(patch_loc_hash)) {
+			// Expensive copy: could view_patch_ just point to the open_patches_ entry?
+			pr_dbg("Found %s in cache\n", patch->patch_name.c_str());
+			view_patch_ = patch;
+			return true;
+		} else {
+			pr_dbg("Not in cache\n");
+			return false;
+		}
+	}
+
 	bool parse_view_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch.subspan(0, bytes_read);
 
@@ -45,15 +58,20 @@ public:
 		if (!yaml_raw_to_patch(file_data, patch))
 			return false;
 
-		view_patch_ = patch;
-
-		view_patch_loc_ = requested_view_patch_loc_;
-		return true;
+		// Add it to the cache
+		if (auto new_patch = open_patches_.overwrite(PatchLocHash{requested_view_patch_loc_}, patch)) {
+			pr_dbg("Adding %s to cache\n", patch.patch_name.c_str());
+			view_patch_ = new_patch;
+			view_patch_loc_ = requested_view_patch_loc_;
+			return true;
+		} else
+			return false;
 	}
 
 	void new_patch() {
 		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
-		view_patch_.blank_patch(name);
+		view_patch_ = &emptypatch;
+		view_patch_->blank_patch(name);
 
 		name += ".yml";
 		view_patch_loc_.filename.copy(name);
@@ -61,7 +79,7 @@ public:
 	}
 
 	PatchData &get_view_patch() {
-		return view_patch_;
+		return *view_patch_;
 	}
 
 	StaticString<255> get_view_patch_filename() {
@@ -194,7 +212,7 @@ public:
 
 		std::span<char> file_data = raw_patch_buffer_;
 
-		patch_to_yaml_buffer(view_patch_, file_data);
+		patch_to_yaml_buffer(*view_patch_, file_data);
 
 		msg_state_ = MsgState::WritePatchFileRequested;
 
@@ -226,7 +244,10 @@ private:
 	std::array<char, 65536> raw_patch_buffer_;
 	std::span<char> raw_patch;
 
-	PatchData view_patch_;
+	PatchData emptypatch;
+	PatchData *view_patch_ = &emptypatch;
+
+	SeqMap<PatchLocHash, PatchData, 32> open_patches_;
 
 	PatchLocation requested_view_patch_loc_;
 	PatchLocation view_patch_loc_;
