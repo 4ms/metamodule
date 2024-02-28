@@ -1,5 +1,5 @@
 #pragma once
-#include "VCV_adaptor/widgets.hh"
+#include "VCV_adaptor/componentlibrary.hpp"
 #include "VCV_adaptor/window.hpp"
 #include <string_view>
 

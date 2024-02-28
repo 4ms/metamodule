@@ -18,11 +18,12 @@ namespace rack
 // Creates a Widget and makes the right Element in the Widget
 template<typename T>
 T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_view name) {
-	auto *o = new T;
+	auto *widget = new T;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element = MetaModule::make_element<T>({pos.x, pos.y, coord_ref, name, name});
-	return o;
+	widget->element = MetaModule::make_element<T>({pos.x, pos.y, coord_ref, name, name});
+	// widget->element = MetaModule::make_element(widget, {pos.x, pos.y, coord_ref, name, name});
+	return widget;
 }
 
 // Special case for slide widgets because they sometimes offset their position

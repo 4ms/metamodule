@@ -69,7 +69,9 @@ struct Widget {
 };
 
 struct OpaqueWidget : Widget {};
-struct TransparentWidget : Widget {};
+struct TransparentWidget : Widget {
+	float opacity = 0.f;
+};
 struct FramebufferWidget : Widget {
 	bool dirty = true;
 	bool bypassed = false;
@@ -101,7 +103,8 @@ struct FramebufferWidget : Widget {
 // Should be called SvgParamWidget
 struct SvgWidget : Widget {
 	// TODO: if using a unique_ptr here causes vcv_ports to not compile, use a raw ptr and remember to delete it
-	std::unique_ptr<SvgWidget> bg;
+	// SvgWidget *bg;
+	// std::unique_ptr<SvgWidget> bg;
 	NVGcolor bgColor{};
 	bool visible = true;
 
@@ -109,17 +112,25 @@ struct SvgWidget : Widget {
 
 	void setSvg(std::shared_ptr<window::Svg> svg) {
 		svg_filename = svg->filename;
+		printf("SvgWidget::svg_filename = %s\n", svg_filename.c_str());
 	}
 
 	void setSVG(std::shared_ptr<window::Svg> svg) {
 		return setSvg(svg);
 	}
 
-	SvgWidget()
-		: bg(new SvgWidget) {
-	}
-	// ~SvgWidget() override { delete bg;}
+	// SvgWidget()
+	// SvgWidget()
+	// 	: bg(new SvgWidget) {
+	// 	printf("ctor SvgWidget, new bg\n");
+	// }
+	// ~SvgWidget() override {
+	// 	printf("dtor SvgWidget, delete bg\n");
+	// 	delete bg;
+	// }
 };
+
+struct TransformWidget : Widget {};
 
 } // namespace widget
 } // namespace rack

@@ -25,13 +25,16 @@ struct PortWidget : widget::Widget {
 struct SvgPort : PortWidget {
 	widget::FramebufferWidget *fb = nullptr;
 	// CircularShadow* shadow;
-	widget::SvgWidget *sw = nullptr;
+	widget::SvgWidget *sw = &_sw;
 
 	void setSvg(std::shared_ptr<window::Svg> svg) {
 	}
 	void setSVG(std::shared_ptr<window::Svg> svg) {
 		setSvg(svg);
 	}
+
+private:
+	widget::SvgWidget _sw;
 };
 
 struct ThemedSvgPort : SvgPort {
@@ -48,6 +51,7 @@ struct ThemedSvgPort : SvgPort {
 // Lights
 
 struct ModuleLightWidget : widget::Widget {
+	engine::Module *module;
 	int firstLightId = -1;
 	NVGcolor bgColor = nvgRGBA(0, 0, 0, 0);
 	NVGcolor color = nvgRGBA(0, 0, 0, 0);
@@ -68,9 +72,6 @@ struct ParamWidget : widget::SvgWidget {
 	int paramId = -1;
 	engine::Module *module = nullptr;
 
-	widget::SvgWidget *fg = &_bg;
-	widget::SvgWidget *bg = &_bg;
-
 	engine::ParamQuantity *getParamQuantity() {
 		if (!module)
 			return nullptr;
@@ -78,18 +79,37 @@ struct ParamWidget : widget::SvgWidget {
 	}
 
 private:
-	widget::SvgWidget _bg;
 };
 
-struct SvgSlider : ParamWidget {
-	math::Vec minHandlePos;
-	math::Vec maxHandlePos;
-	bool horizontal;
-	widget::SvgWidget *background = &_background;
+struct Knob : ParamWidget {
+	bool horizontal = false;
+	bool smooth = true;
+	bool snap = false;
+	float speed = 1.f;
+	bool forceLinear = false;
+	float minAngle = -M_PI;
+	float maxAngle = M_PI;
+};
 
-	void setBackgroundSvg(auto) {
+struct SvgKnob : Knob {
+	widget::FramebufferWidget *fb;
+	// CircularShadow* shadow;
+	widget::SvgWidget *sw;
+	widget::TransformWidget *tw;
+};
+
+struct SvgSlider : Knob {
+	std::unique_ptr<widget::FramebufferWidget> fb{new widget::FramebufferWidget};
+	std::unique_ptr<widget::SvgWidget> background{new widget::SvgWidget};
+	std::unique_ptr<widget::SvgWidget> handle{new widget::SvgWidget};
+
+	math::Vec minHandlePos, maxHandlePos;
+
+	void setBackgroundSvg(std::shared_ptr<window::Svg> svg) {
+		background->svg_filename = svg->filename;
 	}
-	void setHandleSvg(auto) {
+	void setHandleSvg(std::shared_ptr<window::Svg> svg) {
+		handle->svg_filename = svg->filename;
 	}
 	void setHandlePos(math::Vec minHandlePos, math::Vec maxHandlePos) {
 	}
@@ -100,9 +120,21 @@ private:
 	widget::SvgWidget _background;
 };
 
+struct CircularShadow : widget::TransparentWidget {};
+
 struct SvgSwitch : ParamWidget {
+	widget::FramebufferWidget *fb;
+	CircularShadow *shadow;
+	widget::SvgWidget *sw;
+	bool latch = false;
+
+	// std::vector<std::shared_ptr<window::Svg>> frames;
+	std::vector<std::string> frames;
+
 	bool momentary;
-	void addFrame(std::shared_ptr<window::Svg>) {
+
+	void addFrame(std::shared_ptr<window::Svg> svg) {
+		frames.push_back(svg->filename);
 	}
 };
 

@@ -1,8 +1,8 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
 #include "VCV_adaptor/app/Menu.hpp"
+#include "VCV_adaptor/componentlibrary.hpp"
 #include "VCV_adaptor/helpers.hpp"
-#include "VCV_adaptor/widgets.hh"
 #include "VCV_adaptor/window.hpp"
 #include <vector>
 

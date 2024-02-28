@@ -2,12 +2,6 @@
 #include "CoreModules/elements/elements.hh"
 #include "VCV_adaptor/widget_convert/base.hh"
 
-// Forward declare widgets from Befaco/src/plugin.hpp
-namespace rack::componentlibrary
-{
-struct RedGreenBlueLight;
-}
-
 // Used in Frames and Warps
 template<typename Base>
 struct Rogan6PSLight;

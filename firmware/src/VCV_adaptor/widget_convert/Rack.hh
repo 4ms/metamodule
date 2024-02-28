@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
+#include "VCV_adaptor/componentlibrary.hpp"
 #include "VCV_adaptor/widget_convert/base.hh"
-#include "VCV_adaptor/widgets.hh"
 
 namespace MetaModule
 {

@@ -1,7 +1,7 @@
 #pragma once
-#include "VCV_adaptor/nanovg.h"
-#include "VCV_adaptor/widgets.hh"
 #include "VCV_adaptor/app/CableWidget.hpp"
+#include "VCV_adaptor/componentlibrary.hpp"
+#include "VCV_adaptor/nanovg.h"
 
 namespace rack::app
 {

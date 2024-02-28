@@ -50,8 +50,8 @@ struct Davies1900hLargeRedKnob : app::ParamWidget{};
 struct Davies1900hLargeBlackKnob : app::ParamWidget{};
 
 struct Rogan : app::ParamWidget {
-	widget::SvgWidget* bg;
-	widget::SvgWidget* fg;
+	std::unique_ptr<widget::SvgWidget> bg {new widget::SvgWidget};
+	std::unique_ptr<widget::SvgWidget> fg {new widget::SvgWidget};
 };
 
 struct Rogan1PRed : app::ParamWidget {};
@@ -91,8 +91,35 @@ struct Rogan6PSWhite: app::ParamWidget {};
 struct SynthTechAlco : app::ParamWidget {};
 struct Trimpot : app::ParamWidget {};
 
-struct BefacoBigKnob : app::ParamWidget {};
-struct BefacoTinyKnob : app::ParamWidget {};
+struct BefacoBigKnob : app::SvgKnob {
+	widget::SvgWidget* bg;
+
+	BefacoBigKnob() : bg(new widget::SvgWidget) {
+		printf("BefacoBigKnob()\n");
+		minAngle = -0.75f * M_PI;
+		maxAngle = 0.75f * M_PI;
+		setSvg(window::Svg::load(asset::system("res/ComponentLibrary/BefacoBigKnob.svg")));
+
+		
+		// fb->addChildBelow(bg, tw);
+		bg->setSvg(window::Svg::load(asset::system("res/ComponentLibrary/BefacoBigKnob_bg.svg")));
+	}
+};
+
+struct BefacoTinyKnob : app::SvgKnob {
+	widget::SvgWidget* bg;
+
+	BefacoTinyKnob() : bg(new widget::SvgWidget) {
+		minAngle = -0.8f * M_PI;
+		maxAngle = 0.8f * M_PI;
+
+		
+		// fb->addChildBelow(bg, tw);
+
+		setSvg(window::Svg::load(asset::system("res/ComponentLibrary/BefacoTinyPointBlack.svg")));
+		bg->setSvg(window::Svg::load(asset::system("res/ComponentLibrary/BefacoTinyKnobWhite_bg.svg")));
+	}
+};
 
 struct BefacoSlidePot : app::SvgSlider {
 	BefacoSlidePot() {

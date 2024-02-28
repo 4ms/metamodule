@@ -1,8 +1,8 @@
 #pragma once
 #include "CoreModules/elements/base_element.hh"
 #include "CoreModules/elements/elements.hh"
+#include "VCV_adaptor/componentlibrary.hpp"
 #include "VCV_adaptor/widget_convert/base.hh"
-#include "VCV_adaptor/widgets.hh"
 
 // Forward declare widgets
 struct SlothRedGreenLightWidget;

@@ -1,6 +1,6 @@
 #pragma once
 #include "VCV_adaptor/app/RackWidget.hpp"
-#include "VCV_adaptor/widgets.hh"
+#include "VCV_adaptor/componentlibrary.hpp"
 namespace rack::app
 {
 
