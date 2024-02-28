@@ -69,6 +69,9 @@ PatchData:
     - module_id: 1
       param_id: 14
       value: 0
+    - module_id: 1
+      param_id: 16
+      value: 0.5
   mapped_knobs:
     - name: ''
       set:

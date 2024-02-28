@@ -22,12 +22,11 @@ struct GenericModule {
 			configComm(cnt.num_params, cnt.num_inputs, cnt.num_outputs, cnt.num_lights);
 
 			// Configure elements with VCV
+			// this includes alt parameters
 			MetaModule::VCVModuleParamCreator<INFO> creator{this};
 			for (auto &element : INFO::Elements) {
 				std::visit([&creator](auto &el) { creator.config_element(el); }, element);
 			}
-
-			// TODO: register alt params
 		}
 	};
 
@@ -61,20 +60,39 @@ struct GenericModule {
 			}
 		}
 
-		// TODO: context menu for alt params:
-		//
-		// void appendContextMenu(rack::ui::Menu *menu) override
-		// {
-		// 	menu->addChild(new rack::ui::MenuEntry);
-		// 	for (auto &alt : Defs::AltParams) {
-		// 		auto *item = new rack::ui::MenuItem;
-		// 		item->text = std::string{alt.short_name};
-		// 		menu->addChild(item);
 
-		// 		auto slider = new AltParamSlider{*mainModule, alt};
-		// 		slider->box.size.x = 100;
-		// 		menu->addChild(slider);
-		// 	}
-		// }
+		// custom menu item that draws a child menu populated with entries
+		// defined by the alt parameter elements of the module
+		struct AltParamMenuTop : rack::ui::MenuItem
+		{
+			AltParamMenuTop(MetaModule::VCVWidgetCreator<INFO> creator_) : creator(creator_) {}
+
+			rack::ui::Menu* createChildMenu() override
+			{
+				auto childMenu = new rack::ui::Menu;
+
+				// let each element render itself to the menu
+				for (auto &element : INFO::Elements) {
+					std::visit([&childMenu, this](auto &el) { creator.renderToContextMenu(el, childMenu); }, element);
+				}
+				return childMenu;
+			}
+		private:
+			MetaModule::VCVWidgetCreator<INFO> creator;
+		};
+
+		void appendContextMenu(rack::ui::Menu *menu) override
+		{
+			MetaModule::VCVWidgetCreator<INFO> creator(this, module);
+
+			// add single entry with submenu
+			// we need to forward the creator so the entry itself is able to create further menu items
+			auto altParamItem = new AltParamMenuTop(creator);
+			altParamItem->text = "Alt Parameters";
+			altParamItem->rightText = RIGHT_ARROW;
+
+			menu->addChild(altParamItem);
+		}
+
 	};
 };

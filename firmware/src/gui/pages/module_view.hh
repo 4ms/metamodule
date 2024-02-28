@@ -103,8 +103,6 @@ struct ModuleViewPage : PageBase {
 
 		for (const auto &drawn_element : drawn_elements) {
 			auto &drawn = drawn_element.gui_element;
-			if (!drawn.obj)
-				continue;
 
 			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
 				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
@@ -265,22 +263,28 @@ private:
 	}
 
 	void add_button(lv_obj_t *obj) {
+
 		auto &b = button.emplace_back();
 		b = lv_btn_create(ui_ModuleImage);
 		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 
-		float width = lv_obj_get_width(obj);
-		float height = lv_obj_get_height(obj);
-		float c_x = (float)lv_obj_get_x(obj) + width / 2.f;
-		float c_y = (float)lv_obj_get_y(obj) + height / 2.f;
+		if (obj) {
+			float width = lv_obj_get_width(obj);
+			float height = lv_obj_get_height(obj);
+			float c_x = (float)lv_obj_get_x(obj) + width / 2.f;
+			float c_y = (float)lv_obj_get_y(obj) + height / 2.f;
 
-		auto x_padding = std::min(width * 0.75f, 12.f);
-		auto y_padding = std::min(height * 0.75f, 12.f);
-		auto x_size = x_padding + width;
-		auto y_size = y_padding + height;
-		lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
-		lv_obj_set_size(b, std::round(x_size), std::round(y_size));
-		lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+			auto x_padding = std::min(width * 0.75f, 12.f);
+			auto y_padding = std::min(height * 0.75f, 12.f);
+			auto x_size = x_padding + width;
+			auto y_size = y_padding + height;
+			lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+			lv_obj_set_pos(b, std::round(c_x - x_size / 2.f), std::round(c_y - y_size / 2.f));
+			lv_obj_set_size(b, std::round(x_size), std::round(y_size));
+		} else {
+			lv_obj_set_pos(b, 0, 0);
+			lv_obj_set_size(b, 0, 0);
+		}
 	}
 
 	void reset_module_page() {

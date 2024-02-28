@@ -1,20 +1,40 @@
 # If RACK_DIR is not defined when calling the Makefile, default to two directories above
 RACK_DIR ?= ../..
 
-SHARED_DIR = ../shared
-SHARED = $(SHARED_DIR)
-RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
+SHARED = src/shared
 
-INCLUDES = -Isrc
-INCLUDES += -I$(SHARED_DIR)/cpputil
-INCLUDES += -I$(SHARED_DIR)/processors
-INCLUDES += -I$(SHARED_DIR)/patch
-INCLUDES += -I$(SHARED_DIR)/patch_convert/ryml
-INCLUDES += -I$(SHARED_DIR)
-INCLUDES += -I$(SHARED_DIR)/axoloti-wrapper
-INCLUDES += -I$(SHARED_DIR)/etl/include
+## Cpputil
+INCLUDES += -I$(SHARED)/cpputil
+SOURCES += $(wildcard $(SHARED)/cpputil/util/*.cc)
+
+## Rapidyaml
+RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 INCLUDES += -I$(RYMLDIR)/src
 INCLUDES += -I$(RYMLDIR)/ext/c4core/src
+SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
+SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+
+## Patch serialization
+INCLUDES += -I$(SHARED)/patch_convert/ryml
+SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
+SOURCES += $(SHARED)/patch_convert/patch_to_yaml.cc
+
+# Modules
+INCLUDES += -Isrc
+INCLUDES += -I$(SHARED)
+INCLUDES += -I$(SHARED)/CoreModules/4ms
+SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*Core.cc)
+SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/dynamic_data.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/easiglib/numtypes.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
+SOURCES += $(wildcard src/*.cpp)
+SOURCES += $(wildcard src/*.cc)
+SOURCES += $(wildcard src/hub/*.cc)
+SOURCES += $(wildcard src/comm/*.cc)
+SOURCES += $(wildcard src/mapping/*.cc)
+SOURCES += $(wildcard src/models/*.cc)
+
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS += -std=c++2a 
@@ -27,28 +47,6 @@ CXXFLAGS += -DVCVRACK
 # Careful about linking to shared libraries, since you can't assume much about the user's environment and library search path.
 # Static libraries are fine, but they should be added to this plugin's build system.
 LDFLAGS +=
-
-INCLUDES += -I$(SHARED_DIR)/CoreModules/4ms
-SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/4ms/core/*Core.cc)
-SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/data.cc
-SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/dynamic_data.cc
-SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/easiglib/numtypes.cc
-
-# plugin
-SOURCES += $(wildcard src/*.cpp)
-SOURCES += $(wildcard src/*.cc)
-SOURCES += $(wildcard src/hub/*.cc)
-SOURCES += $(wildcard src/comm/*.cc)
-SOURCES += $(wildcard src/mapping/*.cc)
-SOURCES += $(wildcard src/models/*.cc)
-
-SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
-SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
-SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
-SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
-
-SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
-SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
 
 # Add files to the ZIP package when running `make dist`
@@ -99,7 +97,7 @@ vcv_tests:
 
 axo_tests:
 	$(info ... Running Axoloti-wrapper tests ...)
-	@cd $(SHARED)/axoloti-wrapper && $(MAKE) --no-print-directory -f tests/Makefile
+	@cd $(SHARED)/CoreModules/4ms/core/axoloti-wrapper && $(MAKE) --no-print-directory -f tests/Makefile
 
 patch_convert_tests:
 	$(info ... Running patch convert (yaml<-->patch) tests ...)

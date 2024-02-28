@@ -4,8 +4,6 @@ project(MinBLEP)
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/minblep_main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/minblep.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../firmware/src/VCV_adaptor/pffft/pffft.c
-    ${CMAKE_CURRENT_LIST_DIR}/../cpputil/util/math_tables.cc
 )
 
 set(CMAKE_CXX_STANDARD 20)
@@ -18,8 +16,12 @@ add_executable(gen_minblep ${SOURCES})
 target_include_directories(gen_minblep PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../../firmware/src/
     ${CMAKE_CURRENT_LIST_DIR}/..
-    ${CMAKE_CURRENT_LIST_DIR}/../cpputil
 )
+
+add_subdirectory(../cpputil ${CMAKE_CURRENT_BINARY_DIR}/cpputil)
+add_subdirectory(../../firmware/src/VCV_adaptor/pffft ${CMAKE_CURRENT_BINARY_DIR}/pffft)
+
+target_link_libraries(gen_minblep PRIVATE cpputil pffft)
 
 add_custom_command(
     OUTPUT ${FW_ROOT}/src/VCV_adaptor/dsp/minblep_4_32.h

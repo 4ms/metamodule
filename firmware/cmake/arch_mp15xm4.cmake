@@ -1,26 +1,21 @@
 macro(set_arch_flags)
 add_compile_definitions(
-      USE_HAL_DRIVER
-      USE_FULL_LL_DRIVER
-      STM32MP1
-      STM32MP157Cxx
-      CORE_CA7
-      $<$<BOOL:${USE_FEWER_MODULES}>:USE_FEWER_MODULES=1>
+    USE_HAL_DRIVER
+    USE_FULL_LL_DRIVER
+    STM32MP157Cxx
+    STM32MP1
+    CORE_CM4
+    ARM_MATH_CM4
 )
 
 # Note: MCU_FLAGS is used with linking as well
 set(MCU_FLAGS
-    -fno-exceptions
-    -fno-math-errno
-    -mcpu=cortex-a7
+    -mcpu=cortex-m4
+    -mfpu=fpv4-sp-d16
+    -mthumb
     -mlittle-endian
-    -mfpu=neon-vfpv4
     -mfloat-abi=hard
-    -mthumb-interwork
-    -mno-unaligned-access
-    -mtune=cortex-a7
-    -mvectorize-with-neon-quad
-    -funsafe-math-optimizations
+    -fno-exceptions
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -44,11 +39,19 @@ add_compile_options(
   -Wall
   -Werror=return-type
   -Wsign-compare
-  -Wno-psabi
-  "$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>"
-  "$<$<COMPILE_LANGUAGE:CXX>:-ffold-simple-inlines>"
-  "$<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>"
+  -Wdouble-promotion
+  $<$<COMPILE_LANGUAGE:CXX>:-ffold-simple-inlines>
+  $<$<COMPILE_LANGUAGE:CXX>:-Wno-psabi>
+  $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+  $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+  $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>
+  $<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>  
 )
 
-add_link_options(${MCU_FLAGS})
+add_link_options(
+    -Wl,--gc-sections
+    -ffreestanding
+    -nostartfiles
+    ${MCU_FLAGS}
+)
 endmacro()

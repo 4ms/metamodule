@@ -4,7 +4,14 @@ add_library(AudibleInstrumentsLibrary OBJECT ${AUDIBLEINSTRUMENTS_SOURCE_PATHS})
 
 target_include_directories(AudibleInstrumentsLibrary PRIVATE ${AUDIBLE_DIR}/src ${AUDIBLE_DIR}/eurorack)
 
-target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-double-promotion -Wno-deprecated-enum-float-conversion)
+target_compile_options(AudibleInstrumentsLibrary
+  PRIVATE
+    -Wno-double-promotion
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-float-conversion>
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wno-volatile>>
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-volatile>>
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:AppleClang>:-Wno-deprecated-volatile>>    
+    )
 
 # Fixes for compiler warnings in AudibleInstruments:
 set_source_files_properties(
@@ -12,17 +19,8 @@ set_source_files_properties(
   PROPERTIES COMPILE_OPTIONS "-Wno-unused-const-variable;-Wno-unused-but-set-variable"
 )
 
-# Fix warning for volatile read/write in ring_buffer.h 
-set_source_files_properties(
-    ${AUDIBLE_DIR}/src/Marbles.cpp
-    ${AUDIBLE_DIR}/eurorack/marbles/random/t_generator.cc
-    ${AUDIBLE_DIR}/eurorack/marbles/random/x_y_generator.cc
-    ${AUDIBLE_DIR}/eurorack/marbles/random/output_channel.cc
-  PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-volatile"
-)
-
 # Fix for stmlib STATIC_ASSERT creating typedefs that aren't used
-target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs -Wno-deprecated-volatile)
+target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs)
 
 set_source_files_properties(
   ${AUDIBLE_DIR}/eurorack/stmlib/dsp/units.cc PROPERTIES COMPILE_OPTIONS "-Wno-asm-operand-widths"

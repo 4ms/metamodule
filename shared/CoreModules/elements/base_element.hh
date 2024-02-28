@@ -6,9 +6,9 @@
 
 // Hierarchy:
 //                                                   BaseElement
-//                     +---------------------------------'--------------+---------------------------+
-//                     |                                                |                           |
-//              ParamElement                                        JackElement                  LightElement
+//                     +---------------------------------'--------------+---------------------------+-------------------------------+
+//                     |                                                |                           |                               |
+//              ParamElement                                        JackElement                  LightElement                   AltParam
 //     +----------+---'--------+------------------+                +------'-----+         +---------+'-------+---------+
 //     |          |            |                  |                |            |         |         |        |         |
 //    Pot     Encoder       Switch              Button          JackInput  JackOutput  MonoLight DualLight RGBLight Display
@@ -160,12 +160,32 @@ struct RgbLight : LightElement {
 	static constexpr size_t NumLights = 3;
 };
 
-// // Displays
+// Displays
 struct Display : LightElement {}; //TODO: does this need its own category?
 
-// AltParams: TODO
-struct AltParam : BaseElement {};
-struct AltParamToggle2 : AltParam {};
-struct AltParamToggle3 : AltParam {};
+// AltParams:
+// Like Params but they are not drawn on the faceplate (access by menu only)
+struct AltParamElement : BaseElement {
+	static constexpr size_t NumParams = 1;
+};
+
+struct AltParamContinuous : AltParamElement {
+	using State_t = float;
+	State_t DefaultValue = 0.5f;
+	State_t MinValue = 0.0f;
+	State_t MaxValue = 1.0f;
+};
+
+struct AltParamChoice : AltParamElement {
+	using State_t = unsigned;
+
+	unsigned num_pos = 2;
+	State_t DefaultValue = 0;
+};
+
+struct AltParamChoiceLabeled : AltParamChoice {
+	static constexpr size_t MaxChoices = 8;
+	std::array<std::string_view, MaxChoices> pos_names{};
+};
 
 } // namespace MetaModule

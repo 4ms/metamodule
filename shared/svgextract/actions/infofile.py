@@ -69,6 +69,7 @@ def panel_to_components(tree):
     components['outputs'] = []
     components['lights'] = []
     components['switches'] = []
+    components['alt_params'] = []
 
     circles = components_group.findall(".//svg:circle", ns)
     rects = components_group.findall(".//svg:rect", ns)
@@ -96,8 +97,13 @@ def panel_to_components(tree):
             c['class'] = split[1]
 
         # If name is ElementName@pos1@pos2, then extract pos names
+        c['pos_names'] = []
+        c['num_choices'] = 0
         split = name.split("@")
-        if len(split) > 1:
+        if len(split) == 2:
+            name = split[0]
+            c['num_choices'] = int(split[1])
+        elif len(split) > 2:
             name = split[0]
             c['pos_names'] = split[1:]
 
@@ -152,6 +158,7 @@ def panel_to_components(tree):
         # TODO: detect Center or TopLeft coords
         c['coord_ref'] = "Center";
         default_val_int = int(color[-2:], 16)
+
         #Red: Knob or slider
         if color.startswith("#ff00") and default_val_int <= 128:
             c['default_val'] = str(default_val_int / 128) + "f"
@@ -227,10 +234,44 @@ def panel_to_components(tree):
             components['switches'].append(c)
             c['category'] = "Switch"
 
+        #Medium grey: AltParam
+        elif color.startswith('#8080'):
+            if len(c['pos_names']) > 0:
+                set_class_if_not_set(c, "AltParamChoiceLabeled")
+                c['num_choices'] = len(c['pos_names'])
+                c['default_val'] = str(max(1, min(c['num_choices'], default_val_int - 127)))
+
+            elif c['num_choices'] > 0:
+                set_class_if_not_set(c, "AltParamChoice")
+                c['pos_names'] = []
+                c['default_val'] = str(max(1, min(c['num_choices'], default_val_int - 127)))
+
+            elif c['num_choices'] == 0:
+                set_class_if_not_set(c, "AltParamContinuous")
+                if default_val_int == 255:
+                    default_val_int = 256
+                c['default_val'] = str(default_val_int / 256) + "f"
+
+            c['linked_region'] = []
+            if shape == "rect":
+                c['linked_region'] = [c['x'], c['y'], c['x'] + c['width'], c['y'] + c['height']]
+           
+            components['alt_params'].append(c)
+            c['category'] = "AltParam"
+
         elif color == '#ffff00':
             Log(f"Widgets are not supported: found at {c['cx']},{c['cy']}. Skipping.")
         else:
             Log(f"Unknown color: {color} found at {c['cx']},{c['cy']}. Skipping.")
+
+    # Find alt param links to normal params
+    for alt in components['alt_params']:
+        if len(alt['linked_region']) == 0:
+            for p in components['params']:
+                if p['cx'] == alt['cx'] and p['cy'] == alt['cy']:
+                    alt['linked_param'] = p
+                    break
+
 
     # Sort components
     components['params'].reverse()
@@ -238,6 +279,7 @@ def panel_to_components(tree):
     components['inputs'].reverse()
     components['outputs'].reverse()
     components['lights'].reverse()
+    components['alt_params'].reverse()
 
     components['elements'] = []
     components['elements'] += components['params']
@@ -245,6 +287,7 @@ def panel_to_components(tree):
     components['elements'] += components['inputs']
     components['elements'] += components['outputs']
     components['elements'] += components['lights']
+    components['elements'] += components['alt_params']
 
     return components
 
@@ -286,6 +329,7 @@ struct {slug}Info : ModuleInfoBase {{
     {make_legacy_enum("Input", components['inputs'])}
     {make_legacy_enum("Output", components['outputs'])}
     {make_legacy_enum("Led", components['lights'])}
+    {make_legacy_enum("AltParam", components['alt_params'])}
 }};
 }} // namespace MetaModule
 """
@@ -293,13 +337,16 @@ struct {slug}Info : ModuleInfoBase {{
 
 
 def list_elem_definitions(elems, DPI):
-    #TODO: Toggle3pos/2pos can have string values for positions
+    # TODO: use AltParam linked_region and linked_param
+
     if len(elems) == 0:
         return ""
     source = ""
     for k in elems:
         source += "\t\t"
         source += f"{k['class']}{{{{"
+        if k['class'] == "AltParamChoiceLabeled":
+            source += f"{{"
         source += f"to_mm<{DPI}>({k['cx']}), "
         source += f"to_mm<{DPI}>({k['cy']}), "
         source += f"{k['coord_ref']}, "
@@ -363,7 +410,7 @@ def make_legacy_enum(item_prefix, elements):
     i = 0
     for k in elements:
         source += f"""
-        {item_prefix}{k['legacy_enum_name']} = {str(i)},"""
+        {item_prefix}{k['legacy_enum_name']}, """
         i = i + 1
     if item_prefix == "Knob":
            source += """
