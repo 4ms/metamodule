@@ -6,6 +6,8 @@
 namespace rack::app
 {
 
+struct CircularShadow : widget::TransparentWidget {};
+
 // Ports
 struct PortWidget : widget::Widget {
 	int portId = -1;
@@ -23,17 +25,25 @@ struct PortWidget : widget::Widget {
 };
 
 struct SvgPort : PortWidget {
-	widget::FramebufferWidget *fb = nullptr;
-	// CircularShadow* shadow;
+	widget::FramebufferWidget *fb = &_fb;
+	CircularShadow *shadow = &_shadow;
 	widget::SvgWidget *sw = &_sw;
+	std::string svg_filename;
 
 	void setSvg(std::shared_ptr<window::Svg> svg) {
+		if (svg->filename.size()) {
+			svg_filename = svg->filename;
+			printf("SvgPort:svg_filename %s\n", svg_filename.c_str());
+		} else
+			printf("SvgPort: svg with empty name\n");
 	}
 	void setSVG(std::shared_ptr<window::Svg> svg) {
 		setSvg(svg);
 	}
 
 private:
+	widget::FramebufferWidget _fb;
+	CircularShadow _shadow;
 	widget::SvgWidget _sw;
 };
 
@@ -42,6 +52,11 @@ struct ThemedSvgPort : SvgPort {
 	std::shared_ptr<window::Svg> darkSvg;
 
 	void setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
+		this->lightSvg = lightSvg;
+		this->darkSvg = darkSvg;
+		printf("ThemedSvgPort:light svg_filename %s, dark %s\n",
+			   this->lightSvg->filename.c_str(),
+			   this->darkSvg->filename.c_str());
 	}
 
 	void step() override {
@@ -51,7 +66,7 @@ struct ThemedSvgPort : SvgPort {
 // Lights
 
 struct ModuleLightWidget : widget::Widget {
-	engine::Module *module;
+	engine::Module *module = nullptr;
 	int firstLightId = -1;
 	NVGcolor bgColor = nvgRGBA(0, 0, 0, 0);
 	NVGcolor color = nvgRGBA(0, 0, 0, 0);
@@ -92,10 +107,16 @@ struct Knob : ParamWidget {
 };
 
 struct SvgKnob : Knob {
-	widget::FramebufferWidget *fb;
-	// CircularShadow* shadow;
-	widget::SvgWidget *sw;
-	widget::TransformWidget *tw;
+	widget::FramebufferWidget *fb = &_fb;
+	CircularShadow *shadow = &_shadow;
+	widget::SvgWidget *sw = &_sw;
+	widget::TransformWidget *tw = &_tw;
+
+private:
+	widget::FramebufferWidget _fb;
+	CircularShadow _shadow;
+	widget::SvgWidget _sw;
+	widget::TransformWidget _tw;
 };
 
 struct SvgSlider : Knob {
@@ -106,36 +127,41 @@ struct SvgSlider : Knob {
 	math::Vec minHandlePos, maxHandlePos;
 
 	void setBackgroundSvg(std::shared_ptr<window::Svg> svg) {
-		background->svg_filename = svg->filename;
+		if (svg->filename.size())
+			background->svg_filename = svg->filename;
+		else
+			printf("Svgslider: Svg bg with empty name\n");
 	}
 	void setHandleSvg(std::shared_ptr<window::Svg> svg) {
-		handle->svg_filename = svg->filename;
+		if (svg->filename.size())
+			handle->svg_filename = svg->filename;
+		else
+			printf("Svgslider: Svg with empty name\n");
 	}
 	void setHandlePos(math::Vec minHandlePos, math::Vec maxHandlePos) {
 	}
 	void setHandlePosCentered(math::Vec minHandlePosCentered, math::Vec maxHandlePosCentered) {
 	}
-
-private:
-	widget::SvgWidget _background;
 };
 
-struct CircularShadow : widget::TransparentWidget {};
-
 struct SvgSwitch : ParamWidget {
-	widget::FramebufferWidget *fb;
-	CircularShadow *shadow;
-	widget::SvgWidget *sw;
+	widget::FramebufferWidget *fb = &_fb;
+	CircularShadow *shadow = &_shadow;
+	widget::SvgWidget *sw = &_sw;
+
 	bool latch = false;
+	bool momentary = false;
 
-	// std::vector<std::shared_ptr<window::Svg>> frames;
 	std::vector<std::string> frames;
-
-	bool momentary;
 
 	void addFrame(std::shared_ptr<window::Svg> svg) {
 		frames.push_back(svg->filename);
 	}
+
+private:
+	widget::FramebufferWidget _fb;
+	CircularShadow _shadow;
+	widget::SvgWidget _sw;
 };
 
 } // namespace rack::app

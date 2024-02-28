@@ -29,18 +29,11 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vect
 				   element);
 	}
 	strings.reserve(num_strings);
-	// printf("STRINGS: %p\n", strings.data());
 
 	for (auto &element : elements) {
 		std::visit(
 			[&strings](MetaModule::BaseElement &el) {
-				// printf("\tshort_name: %.*s: was %p ",
-				// 	   (int)el.short_name.size(),
-				// 	   el.short_name.data(),
-				// 	   el.short_name.data());
 				el.short_name = strings.emplace_back(el.short_name);
-				// printf("-> %p (%zu)\n", el.short_name.data(), el.short_name.size());
-
 				el.long_name = strings.emplace_back(el.long_name);
 			},
 			element);
@@ -72,7 +65,6 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vect
 							  }},
 				   element);
 	}
-	// printf("END STRINGS: %p\n", strings.data());
 }
 
 inline void debug_dump_strings(std::span<MetaModule::Element> elements, std::span<std::string> string_table) {
@@ -134,7 +126,7 @@ plugin::Model *createModel(std::string_view slug)
 
 		ModuleFactory::registerModuleType(slug, info);
 
-		debug_dump_strings(elements, string_table);
+		// debug_dump_strings(elements, string_table);
 
 		// TODO: create a Model type which refers to ModuleT and WidgetT, and return a ptr to a static instance of it
 		return nullptr;

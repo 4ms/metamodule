@@ -677,17 +677,12 @@ struct BefacoTinyKnob : app::SvgKnob {
 
 struct BefacoSlidePot : app::SvgSlider {
 	BefacoSlidePot() {
-		printf("BefacoSlidePot()-1\n");
 		setBackgroundSvg(Svg::load(asset::system("res/ComponentLibrary/BefacoSlidePot.svg")));
-		printf("BefacoSlidePot()2\n");
 		setHandleSvg(Svg::load(asset::system("res/ComponentLibrary/BefacoSlidePotHandle.svg")));
-		printf("BefacoSlidePot()3\n");
 		math::Vec margin = math::Vec(3.5, 3.5);
 		setHandlePos(math::Vec(-1, 87).plus(margin), math::Vec(-1, -2).plus(margin));
-		printf("BefacoSlidePot()4\n");
 		background->box.pos = margin;
 		box.size = background->box.size.plus(margin.mult(2));
-		printf("BefacoSlidePot()6\n");
 	}
 };
 

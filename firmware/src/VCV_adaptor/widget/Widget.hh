@@ -18,7 +18,7 @@ struct DrawArgs {
 namespace widget
 {
 struct Widget {
-	math::Rect box;
+	math::Rect box{0, 0, 0, 0};
 	MetaModule::Element element;
 
 	virtual ~Widget() = default;
@@ -53,12 +53,16 @@ struct Widget {
 		return false;
 	}
 	void addChild(Widget *child) {
+		//TODO: take ownership of the pointer, and delete it in ~Widget()
 	}
 	void addChildBottom(Widget *child) {
+		//TODO: take ownership of the pointer, and delete it in ~Widget()
 	}
 	void addChildBelow(Widget *child, Widget *sibling) {
+		//TODO: take ownership of the pointer, and delete it in ~Widget()
 	}
 	void addChildAbove(Widget *child, Widget *sibling) {
+		//TODO: take ownership of the pointer, and delete it in ~Widget()
 	}
 	void removeChild(Widget *child) {
 	}
@@ -102,9 +106,6 @@ struct FramebufferWidget : Widget {
 
 // Should be called SvgParamWidget
 struct SvgWidget : Widget {
-	// TODO: if using a unique_ptr here causes vcv_ports to not compile, use a raw ptr and remember to delete it
-	// SvgWidget *bg;
-	// std::unique_ptr<SvgWidget> bg;
 	NVGcolor bgColor{};
 	bool visible = true;
 

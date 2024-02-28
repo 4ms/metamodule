@@ -8,16 +8,19 @@ namespace MetaModule
 
 template<typename RackWidgetT>
 Element make_element(BaseElement) {
+	printf("Unknown WidgetT\n");
 	return NullElement{};
 }
 
 template<typename RackWidgetT>
 Element make_element_output(BaseElement) {
+	printf("Unknown Output\n");
 	return NullElement{};
 }
 
 template<typename RackWidgetT>
 Element make_element_input(BaseElement) {
+	printf("Unknown Input\n");
 	return NullElement{};
 }
 
@@ -27,6 +30,16 @@ inline Element make_element(rack::app::SvgScrew *widget, BaseElement) {
 
 inline Element make_element(rack::widget::SvgWidget *widget, BaseElement el) {
 	return NullElement{};
+}
+
+inline Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
+	printf("make_element(SvgKnob)\n");
+	return Knob{b, widget->svg_filename};
+}
+
+inline Element make_element(rack::app::SvgSlider *widget, BaseElement b) {
+	printf("make_element(SvgSlider)\n");
+	return Slider{{b, widget->svg_filename}, widget->handle->svg_filename};
 }
 
 inline Element make_element(rack::app::SvgSwitch *widget, BaseElement b) {

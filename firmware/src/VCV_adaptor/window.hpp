@@ -41,8 +41,7 @@ struct Svg {
 	// int getNumPoints() { return 0; }
 	static std::shared_ptr<Svg> load(std::string const &filename) {
 		printf("Svg::load %s\n", filename.c_str());
-		// printf("Svg::load %.*s\n", (int)filename.size(), filename.data());
-		return std::make_shared<Svg>(std::string(filename));
+		return std::make_shared<Svg>(filename);
 	}
 };
 
@@ -61,9 +60,9 @@ struct Window {
 		return nullptr;
 	}
 
-	std::shared_ptr<Svg> loadSvg(std::string_view filename) {
+	std::shared_ptr<Svg> loadSvg(std::string const &filename) {
 		printf("Window::loadSvg %.*s\n", (int)filename.size(), filename.data());
-		auto svg = std::make_shared<Svg>(std::string(filename));
+		auto svg = std::make_shared<Svg>(filename);
 		return svg;
 	}
 };

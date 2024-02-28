@@ -21,8 +21,8 @@ T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_
 	auto *widget = new T;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	widget->element = MetaModule::make_element<T>({pos.x, pos.y, coord_ref, name, name});
-	// widget->element = MetaModule::make_element(widget, {pos.x, pos.y, coord_ref, name, name});
+	// widget->element = MetaModule::make_element<T>({pos.x, pos.y, coord_ref, name, name});
+	widget->element = MetaModule::make_element(widget, {pos.x, pos.y, coord_ref, name, name});
 	return widget;
 }
 
