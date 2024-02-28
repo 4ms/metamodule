@@ -160,7 +160,7 @@ private:
 		invMode_t readInvMode() {
 			auto invMode = parent->getState<Mapping::InvModeSwitch>();
 
-			if(invMode == Toggle3posHoriz::State_t::UP) {
+			if(invMode == Toggle3posHoriz::State_t::LEFT) {
 				return DELAY;
 			} else if(invMode == Toggle3posHoriz::State_t::CENTER) {
 				return INVERTED;
