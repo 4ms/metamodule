@@ -318,11 +318,25 @@ def generate_switch_position_names(elem):
     if "pos_names" not in elem.keys():
         return ""
 
-    elif elem['class'] in ThreePosSwitches and len(elem['pos_names']) >= 3:
+    elif elem['class'] in ThreePosSwitches and len(elem['pos_names']) == 3:
         return f""", {{"{elem['pos_names'][0]}", "{elem['pos_names'][1]}", "{elem['pos_names'][2]}"}}""" 
 
-    elif elem['class'] in TwoPosSwitches and len(elem['pos_names']) >= 2:
+    elif elem['class'] in TwoPosSwitches and len(elem['pos_names']) == 2:
         return f""", {{"{elem['pos_names'][0]}", "{elem['pos_names'][1]}"}}""" 
+
+    elif elem['class'] == "AltParamContinuous":
+        return f""", {elem["default_val"]}""" 
+
+    elif elem['class'] == "AltParamChoice":
+        return f""", {elem['num_choices']}, {elem["default_val"]}""" 
+
+    elif elem['class'] == "AltParamChoiceLabeled":
+        source = f""", {elem['num_choices']}, {elem["default_val"]}}}, {{"""
+        for nm in elem['pos_names']:
+            source += f""""{nm}", """
+        source = source.removesuffix(", ")
+        source += f"""}}"""
+        return source
 
     else:
         return ""
