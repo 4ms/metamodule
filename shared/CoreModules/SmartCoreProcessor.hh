@@ -59,12 +59,12 @@ protected:
 		constexpr auto elementID = element_index(EL);
 		constexpr auto &elementRef = INFO::Elements[elementID];
 
-		// construct element of same type as the element the enum points to
+		// reconstruct the element with its original type
 		constexpr auto variantIndex = elementRef.index();
-		std::variant_alternative_t<variantIndex, Element> DummyElement;
+		constexpr auto specializedElement = std::get<variantIndex>(elementRef);
 
 		// read raw value
-		std::array<float, DummyElement.NumParams> rawValues;
+		std::array<float, specializedElement.NumParams> rawValues;
 		for (std::size_t i = 0; i < rawValues.size(); i++) {
 			rawValues[i] = getParamRaw(EL, i);
 		}
@@ -73,9 +73,9 @@ protected:
 		// use shortcut for special but common case of single parameter elements
 		// in order to keep the conversion functions simple
 		if constexpr (rawValues.size() == 1) {
-			return MetaModule::StateConversion::convertState(DummyElement, rawValues[0]);
+			return MetaModule::StateConversion::convertState(specializedElement, rawValues[0]);
 		} else {
-			return MetaModule::StateConversion::convertState(DummyElement, rawValues);
+			return MetaModule::StateConversion::convertState(specializedElement, rawValues);
 		}
 	}
 
@@ -86,12 +86,12 @@ protected:
 		constexpr auto elementID = static_cast<size_t>(EL);
 		constexpr auto &elementRef = INFO::Elements[elementID];
 
-		// construct element of same type as the element the enum points to
+		// reconstruct the element with its original type
 		constexpr auto variantIndex = elementRef.index();
-		std::variant_alternative_t<variantIndex, Element> DummyElement;
+		constexpr auto specializedElement = std::get<variantIndex>(elementRef);
 
 		// call conversion function for that type of element
-		auto rawValues = StateConversion::convertLED(DummyElement, value);
+		auto rawValues = StateConversion::convertLED(specializedElement, value);
 
 		for (std::size_t i = 0; i < rawValues.size(); i++) {
 			setLEDRaw(EL, rawValues[i], i);
