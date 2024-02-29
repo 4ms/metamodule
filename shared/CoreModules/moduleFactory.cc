@@ -31,11 +31,14 @@ SeqMap<ModuleTypeSlug, ModuleFactory::FaceplatePtr, ModuleFactory::MAX_MODULE_TY
 
 ModuleInfoView nullinfo{};
 
+std::string _currentBrand;
+
 } // namespace
 
 bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug,
 									   CreateModuleFunc funcCreate,
 									   const ModuleInfoView &info) {
+	//TODO prepend currentBrand to slug
 	bool already_exists = creation_funcs().key_exists(typeslug);
 	infos().insert(typeslug, info);
 	creation_funcs().insert(typeslug, funcCreate);
@@ -94,6 +97,14 @@ std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs() {
 	std::vector<ModuleTypeSlug> slugs;
 	slugs.assign(infos().keys.begin(), std::next(infos().keys.begin(), infos().size()));
 	return slugs;
+}
+
+void ModuleFactory::setCurrentBrand(std::string brandSlug) {
+	_currentBrand = brandSlug;
+}
+
+std::string ModuleFactory::currentBrandPath() {
+	return _currentBrand + std::string("/");
 }
 
 } // namespace MetaModule

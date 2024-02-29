@@ -27,6 +27,8 @@ inline std::string plugin(plugin::Plugin *plugin, std::string_view filename = ""
 	std::string path = "";
 	if (plugin)
 		path = plugin->slug + std::string("/");
+	else
+		printf("No plugin slug\n");
 
 	path += filename;
 	svg_to_png(path);

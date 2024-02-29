@@ -40,25 +40,34 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vect
 
 		std::visit(overloaded{[](auto &el) {},
 							  [&strings](MetaModule::ImageElement &el) {
-								  el.image = strings.emplace_back(el.image);
+								  auto str = MetaModule::ModuleFactory::currentBrandPath() + std::string{el.image};
+								  el.image = strings.emplace_back(str);
+								  printf("%s: %s\n", el.short_name.data(), str.c_str());
 							  }},
 				   element);
 		std::visit(overloaded{[](auto &el) {},
 							  [&strings](MetaModule::Slider &el) {
-								  el.image_handle = strings.emplace_back(el.image_handle);
+								  auto str =
+									  MetaModule::ModuleFactory::currentBrandPath() + std::string{el.image_handle};
+								  el.image_handle = strings.emplace_back(str);
 							  }},
 				   element);
 		std::visit(overloaded{[](auto &el) {},
 							  [&strings](MetaModule::FlipSwitch &el) {
 								  for (auto &pos_name : el.pos_names)
 									  pos_name = strings.emplace_back(pos_name);
-								  for (auto &frame : el.frames)
-									  frame = strings.emplace_back(frame);
+
+								  for (auto &frame : el.frames) {
+									  auto str = MetaModule::ModuleFactory::currentBrandPath() + std::string{frame};
+									  frame = strings.emplace_back(str);
+								  }
 							  }},
 				   element);
 		std::visit(overloaded{[](auto &el) {},
 							  [&strings](MetaModule::SlideSwitch &el) {
-								  el.image_handle = strings.emplace_back(el.image_handle);
+								  auto str =
+									  MetaModule::ModuleFactory::currentBrandPath() + std::string{el.image_handle};
+								  el.image_handle = strings.emplace_back(str);
 
 								  for (auto &pos_name : el.pos_names)
 									  pos_name = strings.emplace_back(pos_name);

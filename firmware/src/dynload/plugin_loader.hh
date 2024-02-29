@@ -137,7 +137,11 @@ public:
 	void load_plugin(LoadedPlugin &plugin) {
 		using InitPluginFunc = void(rack::plugin::Plugin *);
 
+		ModuleFactory::setCurrentBrand(plugin.name);
+
 		DynLoader dynloader{buffer, plugin.code};
+
+		ModuleFactory::setCurrentBrand("");
 
 		if (!dynloader.load()) {
 			pr_err("Could not load plugin\n");
