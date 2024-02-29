@@ -79,6 +79,8 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 
 inline lv_obj_t *draw_element(const SliderLight &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = draw_element(Slider(el), canvas, module_height);
+	if (!obj)
+		return nullptr;
 	auto handle = lv_obj_get_child(obj, 0);
 	if (handle) {
 		lv_color_t color{.full = el.color};
@@ -93,6 +95,8 @@ inline lv_obj_t *draw_element(const SliderLight &el, lv_obj_t *canvas, uint32_t 
 
 inline lv_obj_t *draw_element(const Button &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = draw_element(ImageElement(el), canvas, module_height);
+	if (!obj)
+		return nullptr;
 	lv_obj_set_style_radius(obj, 20, LV_PART_MAIN);
 	lv_obj_set_style_shadow_width(obj, module_height >= 240 ? 8 : 0, LV_PART_MAIN);
 	lv_obj_set_style_shadow_spread(obj, module_height >= 240 ? 2 : 0, LV_PART_MAIN);
@@ -108,6 +112,8 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t 
 		return nullptr;
 
 	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), body_img, canvas, module_height);
+	if (!obj)
+		return nullptr;
 
 	lv_obj_t *handle;
 

@@ -225,22 +225,22 @@ struct Module : VCVModuleWrapper {
 		return lights[index];
 	}
 	ParamQuantity *getParamQuantity(int index) {
-		if (index >= (int)paramQuantities.size())
+		if (index < 0 || index >= (int)paramQuantities.size())
 			return nullptr;
 		return paramQuantities[index].get();
 	}
 	PortInfo *getInputInfo(int index) {
-		if (index >= (int)inputInfos.size())
+		if (index < 0 || index >= (int)inputInfos.size())
 			return nullptr;
 		return inputInfos[index].get();
 	}
 	PortInfo *getOutputInfo(int index) {
-		if (index >= (int)outputInfos.size())
+		if (index < 0 || index >= (int)outputInfos.size())
 			return nullptr;
 		return outputInfos[index].get();
 	}
 	LightInfo *getLightInfo(int index) {
-		if (index >= (int)lightInfos.size())
+		if (index < 0 || index >= (int)lightInfos.size())
 			return nullptr;
 		return lightInfos[index].get();
 	}
