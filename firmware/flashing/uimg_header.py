@@ -36,6 +36,13 @@ def create_uimg_header(payload, *, loadaddr, entryaddr, name, type):
     compress = UImg.compress_none
     arch = UImg.arch_arm
 
+    # Force payload alignment
+    alignment = len(payload) % 4
+    print(f"Adding {alignment} bytes for padding")
+    while alignment > 0:
+        payload += b'\x00'
+        alignment -= 1
+
     # Calculate some header entries:
     header_size = 64
     datalen = len(payload) + header_size
@@ -64,7 +71,7 @@ def create_uimg_header(payload, *, loadaddr, entryaddr, name, type):
     header = bytearray(header_no_crc)
     header[4:8] = hcrc
 
-    return header
+    return header, payload
 
 
 if __name__ == "__main__":
@@ -83,7 +90,7 @@ if __name__ == "__main__":
 
         payload = bin_file.read()
 
-        header = create_uimg_header(
+        header, payload = create_uimg_header(
                     payload,
                     loadaddr=args.load_addr,
                     entryaddr=args.load_addr + args.entry_point_offset,
