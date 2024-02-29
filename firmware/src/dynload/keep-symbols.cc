@@ -31,10 +31,13 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	cos(0.5f);
 	cosf(0.5f);
 	volatile auto keep = std::allocator<char>{}; //seems to do nothing
+	(void)keep;
 	volatile int x = strlen("ABCD");
+	(void)x;
 	volatile auto savefunc = &json_object_set_new;
+	(void)savefunc;
 	rack::string::f("Abc%d", 1);
-
+	puts("");
 	auto ar = new int[10];
 	delete[] ar;
 }

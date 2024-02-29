@@ -60,6 +60,7 @@ def GetLibcSymbols():
          "memcpy",
          "memmove",
          "memset",
+         "memchr",
          "pow",
          "powf",
          "roundf",
@@ -71,6 +72,7 @@ def GetLibcSymbols():
          "tanf",
          "tanh",
          "printf",
+         "puts",
          "__aeabi_atexit",
          "__cxa_pure_virtual",
 
@@ -84,6 +86,9 @@ def GetLibcSymbols():
          "_ZSt19__throw_logic_errorPKc", #std::__throw_logic_error(char const*)
          "_ZSt17__throw_bad_allocv", #
          "_ZSt28__throw_bad_array_new_lengthv", #
+         "_ZSt24__throw_out_of_range_fmtPKcz",
+
+         "_ZNSt19_Sp_make_shared_tag5_S_eqERKSt9type_info",
 
          # Not found, replaced with an empty function
          "_ZNSaIcEC1Ev", # std::allocator<char>::allocator()
