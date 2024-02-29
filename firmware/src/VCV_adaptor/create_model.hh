@@ -29,44 +29,48 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vect
 				   element);
 	}
 	strings.reserve(num_strings);
+	printf("Reserved %zu strings\n", num_strings);
 
 	for (auto &element : elements) {
+		using namespace MetaModule;
+
 		std::visit(
-			[&strings](MetaModule::BaseElement &el) {
+			[&strings](BaseElement &el) {
 				el.short_name = strings.emplace_back(el.short_name);
 				el.long_name = strings.emplace_back(el.long_name);
 			},
 			element);
 
 		std::visit(overloaded{[](auto &el) {},
-							  [&strings](MetaModule::ImageElement &el) {
-								  auto str = MetaModule::ModuleFactory::currentBrandPath() + std::string{el.image};
+							  [&strings](ImageElement &el) {
+								  auto str = ModuleFactory::currentBrandPath() + std::string{el.image};
+								  printf("rebase %s => %s\n", el.image.data(), str.c_str());
 								  el.image = strings.emplace_back(str);
-								  printf("%s: %s\n", el.short_name.data(), str.c_str());
 							  }},
 				   element);
 		std::visit(overloaded{[](auto &el) {},
-							  [&strings](MetaModule::Slider &el) {
-								  auto str =
-									  MetaModule::ModuleFactory::currentBrandPath() + std::string{el.image_handle};
+							  [&strings](Slider &el) {
+								  auto str = ModuleFactory::currentBrandPath() + std::string{el.image_handle};
+								  printf("rebase %s => %s\n", el.image_handle.data(), str.c_str());
 								  el.image_handle = strings.emplace_back(str);
 							  }},
 				   element);
 		std::visit(overloaded{[](auto &el) {},
-							  [&strings](MetaModule::FlipSwitch &el) {
+							  [&strings](FlipSwitch &el) {
 								  for (auto &pos_name : el.pos_names)
 									  pos_name = strings.emplace_back(pos_name);
 
 								  for (auto &frame : el.frames) {
-									  auto str = MetaModule::ModuleFactory::currentBrandPath() + std::string{frame};
+									  auto str = ModuleFactory::currentBrandPath() + std::string{frame};
+									  printf("rebase %s => %s\n", frame.data(), str.c_str());
 									  frame = strings.emplace_back(str);
 								  }
 							  }},
 				   element);
 		std::visit(overloaded{[](auto &el) {},
-							  [&strings](MetaModule::SlideSwitch &el) {
-								  auto str =
-									  MetaModule::ModuleFactory::currentBrandPath() + std::string{el.image_handle};
+							  [&strings](SlideSwitch &el) {
+								  auto str = ModuleFactory::currentBrandPath() + std::string{el.image_handle};
+								  printf("rebase %s => %s\n", el.image_handle.data(), str.c_str());
 								  el.image_handle = strings.emplace_back(str);
 
 								  for (auto &pos_name : el.pos_names)
