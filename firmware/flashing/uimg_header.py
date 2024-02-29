@@ -38,7 +38,6 @@ def create_uimg_header(payload, *, loadaddr, entryaddr, name, type):
 
     # Force payload alignment
     alignment = len(payload) % 4
-    print(f"Adding {alignment} bytes for padding")
     while alignment > 0:
         payload += b'\x00'
         alignment -= 1
