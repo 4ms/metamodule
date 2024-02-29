@@ -34,12 +34,14 @@ struct DynLoader {
 		}
 
 		load_executable();
-		if (process_relocs()) {
-			init_globals();
-			return true;
+
+		if (!process_relocs()) {
+			pr_err("Failed to process all relocations\n");
+			return false;
 		}
 
-		return false;
+		init_globals();
+		return true;
 	}
 
 	template<typename PluginInitFunc>
