@@ -12,17 +12,6 @@ project(
 )
 
 #
-# LVGL
-#
-set(LV_CONF_PATH
-    ${PROJECT_SOURCE_DIR}/lib/lvgl/lv_conf.h
-    CACHE STRING "" FORCE
-)
-add_subdirectory(${PROJECT_SOURCE_DIR}/lib/lvgl)
-target_link_libraries(lvgl PRIVATE mdrivlib_interface)
-target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
-
-#
 # Only build a limited set of modules, defined in an external file
 #
 include(vcv_ports/glue/filter.cmake)
@@ -161,7 +150,7 @@ add_custom_target(
   COMMAND cd ${PROJECT_SOURCE_DIR} && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/patch_convert && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/CoreModules && make --no-print-directory -f tests/Makefile -j8
-  COMMAND cd ${SHARED}/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${SHARED}/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
   VERBATIM USES_TERMINAL
 )
 file(

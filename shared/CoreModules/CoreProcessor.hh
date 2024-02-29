@@ -13,8 +13,6 @@ public:
 	virtual float get_led_brightness(const int led_id) const {
 		return 0;
 	}
-	virtual void set_alt_param(const int alt_param_id, const float val) {
-	}
 
 	static constexpr unsigned NameChars = 15;
 	static constexpr unsigned LongNameChars = 39;
@@ -30,9 +28,6 @@ public:
 	virtual void mark_output_unpatched(const int output_id) {
 	}
 	virtual void mark_output_patched(const int output_id) {
-	}
-	virtual constexpr std::string_view get_alt_param_value(unsigned alt_id, float val) {
-		return "-";
 	}
 
 	virtual void initialize_state(std::string_view state_string) {

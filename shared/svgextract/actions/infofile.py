@@ -98,8 +98,12 @@ def panel_to_components(tree):
 
         # If name is ElementName@pos1@pos2, then extract pos names
         c['pos_names'] = []
+        c['num_choices'] = 0
         split = name.split("@")
-        if len(split) > 1:
+        if len(split) == 2:
+            name = split[0]
+            c['num_choices'] = int(split[1])
+        elif len(split) > 2:
             name = split[0]
             c['pos_names'] = split[1:]
 
@@ -160,6 +164,7 @@ def panel_to_components(tree):
         # TODO: detect Center or TopLeft coords
         c['coord_ref'] = "Center";
         default_val_int = int(color[-2:], 16)
+
         #Red: Knob or slider
         if color.startswith("#ff00") and default_val_int <= 128:
             c['default_val'] = str(default_val_int / 128) + "f"
@@ -235,26 +240,28 @@ def panel_to_components(tree):
             components['switches'].append(c)
             c['category'] = "Switch"
 
-        #Medium grey: AltParamContinuous
-        elif color == '#808080':
-            set_class_if_not_set(c, "AltParamContinuous")
-            components['alt_params'].append(c)
-            c['category'] = "AltParam"
-
-        #Ligth grey: AltParamChoice or AltParamChoiceLabeled
-        elif color.startswith('#c0c0'):
-            if c['num_choices'] == 0:
-                c['num_choices'] = len(c['pos_names'])
-
-            if c['num_choices'] == 0:
-                Log(f"Warning, no number of choices or list of choice names specificed for {c['name']}, defaulting to 2 (unnamed)")
-                c['num_choices'] = 2
-
+        #Medium grey: AltParam
+        elif color.startswith('#8080'):
             if len(c['pos_names']) > 0:
                 set_class_if_not_set(c, "AltParamChoiceLabeled")
-            else:
-                set_class_if_not_set(c, "AltParamChoice")
+                c['num_choices'] = len(c['pos_names'])
+                c['default_val'] = str(max(1, min(c['num_choices'], default_val_int - 127)))
 
+            elif c['num_choices'] > 0:
+                set_class_if_not_set(c, "AltParamChoice")
+                c['pos_names'] = []
+                c['default_val'] = str(max(1, min(c['num_choices'], default_val_int - 127)))
+
+            elif c['num_choices'] == 0:
+                set_class_if_not_set(c, "AltParamContinuous")
+                if default_val_int == 255:
+                    default_val_int = 256
+                c['default_val'] = str(default_val_int / 256) + "f"
+
+            c['linked_region'] = []
+            if shape == "rect":
+                c['linked_region'] = [c['x'], c['y'], c['x'] + c['width'], c['y'] + c['height']]
+           
             components['alt_params'].append(c)
             c['category'] = "AltParam"
 
@@ -262,6 +269,15 @@ def panel_to_components(tree):
             Log(f"Widgets are not supported: found at {c['cx']},{c['cy']}. Skipping.")
         else:
             Log(f"Unknown color: {color} found at {c['cx']},{c['cy']}. Skipping.")
+
+    # Find alt param links to normal params
+    for alt in components['alt_params']:
+        if len(alt['linked_region']) == 0:
+            for p in components['params']:
+                if p['cx'] == alt['cx'] and p['cy'] == alt['cy']:
+                    alt['linked_param'] = p
+                    break
+
 
     # Sort components
     components['params'].reverse()
@@ -327,7 +343,8 @@ struct {slug}Info : ModuleInfoBase {{
 
 
 def list_elem_definitions(elems, DPI):
-    #TODO: Toggle3pos/2pos can have string values for positions
+    # TODO: use AltParam linked_region and linked_param
+
     if len(elems) == 0:
         return ""
     source = ""
@@ -343,20 +360,23 @@ def list_elem_definitions(elems, DPI):
         source += f"\"\"" #long name
         source += f"""}}"""
 
-        if k['class'] == "Toggle3pos" and len(k['pos_names']) == 3:
-            source += f""", {{"{k['pos_names'][0]}", "{k['pos_names'][1]}", "{k['pos_names'][2]}"}}""" 
-
         if k['class'] == "Toggle2pos" and len(k['pos_names']) == 2:
             source += f""", {{"{k['pos_names'][0]}", "{k['pos_names'][1]}"}}""" 
 
+        if k['class'] == "Toggle3pos" and len(k['pos_names']) == 3:
+            source += f""", {{"{k['pos_names'][0]}", "{k['pos_names'][1]}", "{k['pos_names'][2]}"}}""" 
+
+        if k['class'] == "AltParamContinuous":
+            source += f""", {k["default_val"]}""" 
+
         if k['class'] == "AltParamChoice":
-            source += f""", {k['num_choices']}""" 
+            source += f""", {k['num_choices']}, {k["default_val"]}""" 
 
         if k['class'] == "AltParamChoiceLabeled":
-            source += f""", {k['num_choices']}}}, {{"""
+            source += f""", {k['num_choices']}, {k["default_val"]}}}, {{"""
             for nm in k['pos_names']:
-                source += f""""{nm}","""
-            source.removesuffix(", ")
+                source += f""""{nm}", """
+            source = source.removesuffix(", ")
             source += f"""}}"""
 
         source += f"""}},
@@ -385,7 +405,7 @@ def make_legacy_enum(item_prefix, elements):
     i = 0
     for k in elements:
         source += f"""
-        {item_prefix}{k['legacy_enum_name']} = {str(i)},"""
+        {item_prefix}{k['legacy_enum_name']}, """
         i = i + 1
     if item_prefix == "Knob":
            source += """

@@ -1,7 +1,14 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
+set_arch_flags()
 
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(SHARED ${FWDIR}/../shared)
+
+#
+# cpputil
+#
+add_subdirectory(${SHARED}/cpputil ${CMAKE_CURRENT_BINARY_DIR}/cpputil)
 
 add_executable(
   flash_loader.elf
@@ -46,26 +53,23 @@ target_include_directories(
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
           ${SHARED}
-          ${SHARED}/cpputil
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
           ${FWDIR}/lib/cmsis/Core_A/Include
           ${FWDIR}/lib/cmsis/Include
           ${FWDIR}/lib/stm32-hal/stm32mp1/include
 )
 
-target_link_libraries(flash_loader.elf PRIVATE mp15xa7_arch)
+target_compile_options(flash_loader.elf PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
 
 target_link_script(
   flash_loader
   ${FWDIR}/system/linker/stm32mp15xx_ca7_flashloader.ld
   -L${FWDIR}
   -Wl,--gc-sections
-  -Wno-psabi
-  -ffreestanding
-  -nostartfiles
   -nostdlib
-  -flto=auto
 )
+
+target_link_libraries(flash_loader.elf PRIVATE cpputil)
 
 add_bin_hex_command(flash_loader)
 

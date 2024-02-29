@@ -6,11 +6,12 @@ option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" ON)
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(SHARED ${FWDIR}/../shared)
 
+set_arch_flags()
+
 #
 # Driver interface
 #
 add_library(mdrivlib_interface INTERFACE)
-target_link_libraries(mdrivlib_interface INTERFACE mp15xa7_arch)
 target_include_directories(
   mdrivlib_interface
   INTERFACE ${FWDIR}/lib/cmsis-device/stm32mp157c/include
@@ -22,99 +23,48 @@ target_include_directories(
             ${FWDIR}/lib/stm32-hal/stm32mp1/include
             ${FWDIR}/src/core_a7
 )
+target_compile_options(mdrivlib_interface INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
+
+#
+# LVGL
+#
+set(LV_CONF_PATH
+    ${FWDIR}/lib/lvgl/lv_conf.h
+    CACHE STRING "" FORCE
+)
+add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
+target_link_libraries(lvgl PRIVATE mdrivlib_interface)
+target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
+
 
 #
 # VCV Adaptor
 #
 add_subdirectory(VCV_adaptor)
-target_link_libraries(VCV_adaptor PUBLIC mp15xa7_arch)
-target_include_directories(VCV_adaptor PRIVATE console/) # For pr_dbg, etc
-target_link_libraries(jansson PUBLIC mp15xa7_arch)
 
 #
 # Brands
 #
-include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
-
-foreach(brand ${brands})
-
-  # Component artwork
-  file(GLOB BRAND_ARTWORK_SOURCES ${FWDIR}/src/gui/images/${brand}/components/*.c)
-  list(APPEND COMP_ARTWORK_SOURCES ${BRAND_ARTWORK_SOURCES})
-  foreach(component ${BRAND_ARTWORK_SOURCES})
-    cmake_path(GET component STEM LAST_ONLY COMPIMGNAME)
-    set(COMPFILENAME "${COMPIMGNAME}.png")
-    configure_file(${FWDIR}/src/gui/images/component_register.cc.in ${brand}/${COMPIMGNAME}_register.cc)
-    list(APPEND COMP_ARTWORK_SOURCES ${brand}/${COMPIMGNAME}_register.cc)
-    # Fixup for compiler warning on files that include LVGL 8.3 headers:
-    set_source_files_properties(${brand}/${COMPIMGNAME}_register.cc
-      PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;")
-  endforeach()
-
-  # Module Library
-  add_subdirectory(${FWDIR}/vcv_ports/glue/${brand} ${CMAKE_CURRENT_BINARY_DIR}/${brand})
-  target_link_libraries(${brand}Library PRIVATE mp15xa7_arch)
-  target_include_directories(
-    ${brand}Library
-    PUBLIC ${FWDIR}/src/VCV_adaptor
-           ${FWDIR}/src/VCV_adaptor/pffft
-           ${FWDIR}/lib/jansson
-           ${FWDIR}/lib/jansson/jansson/src
-           ${FWDIR}/src
-           ${FWDIR}
-           ${SHARED}
-           ${SHARED}/cpputil
-  )
-  target_compile_options(${brand}Library PRIVATE -Wno-attributes -Wno-deprecated-enum-enum-conversion)
-  target_sources(${brand}Library PRIVATE ${FWDIR}/vcv_ports/glue/empty.cc)
-
-  # Faceplate artwork
-  # Use provided module list file.
-  include(${FWDIR}/vcv_ports/glue/${brand}/modules.cmake)
-  foreach(module IN LISTS ${brand}Modules)
-
-    # Workaround for 4ms
-    if(brand EQUAL "4ms")
-      set(IMGNAME "${module}_artwork")
-    else()
-      set(IMGNAME ${module})
-    endif()
-
-    # Skip files that aren't generated yet. Otherwise we can't run the faceplate-images target to generate images
-    # because CMake fails to configure the project
-    set(image_path ${FWDIR}/src/gui/images/${brand}/modules/${IMGNAME}_240.c)
-    if(EXISTS "${image_path}")
-      cleanup_imgname(${IMGNAME})
-
-      # Generate a .cc file that will register the map from slug to lvgl image data
-      configure_file(${FWDIR}/src/gui/images/faceplate_register.cc.in ${brand}/${module}_register.cc)
-
-      list(APPEND FACEPLATE_ARTWORK_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${module}_register.cc)
-      list(APPEND FACEPLATE_ARTWORK_SOURCES ${image_path})
-    endif()
-
-  endforeach()
-
-endforeach()
-
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 
 #
 # RYML
 #
-set(RYMLDIR ${SHARED}/patch_convert/ryml/rapidyaml)
-file(GLOB RYML_SOURCES ${RYMLDIR}/src/c4/yml/*.cpp ${RYMLDIR}/ext/c4core/src/c4/*.cpp)
-add_library(ryml OBJECT ${RYML_SOURCES})
-target_link_libraries(ryml PUBLIC mp15xa7_arch)
-target_include_directories(ryml PUBLIC ${RYMLDIR}/src ${RYMLDIR}/ext/c4core/src)
+add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+
+#
+# Jansson
+#
+# TODO: replace this with for example fetchContent later
+if (NOT TARGET jansson)
+  add_subdirectory(${FWDIR}/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
+endif()
 
 #
 # SLS Exported GUI (meta5)
 #
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
-target_link_libraries(ui PRIVATE lvgl::lvgl mp15xa7_arch)
-# Fix for SLS generated files (See https://forum.squareline.io/t/unused-variable-target-warning-when-compiling/1610/3 )
-target_compile_options(ui PRIVATE -Wno-unused-variable)
-
+target_link_libraries(ui PRIVATE lvgl)
 
 #
 # Main App
@@ -188,10 +138,7 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
   #
-  ${FWDIR}/src/VCV_adaptor/random.cpp
-  #
-  ${COMP_ARTWORK_SOURCES}
-  ${FACEPLATE_ARTWORK_SOURCES}
+  ${FWDIR}/src/vcv_adaptor_seed_random.cpp
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
@@ -223,26 +170,18 @@ target_include_directories(
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
           ${SHARED}
-          ${SHARED}/cpputil
           ${SHARED}/patch
           ${SHARED}/patch_convert
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
           #
-          ${FWDIR}/lib/jansson
-          ${FWDIR}/lib/jansson/jansson/src
-          #
           ${CMAKE_BINARY_DIR}/checkgit
 )
 
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mp15xa7_arch mdrivlib_interface ui ryml VCV_adaptor)
-
-foreach(brand ${brands})
-  target_link_libraries(main.elf PRIVATE ${brand}Library)
-endforeach()
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor cpputil vcv_ports jansson)
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})

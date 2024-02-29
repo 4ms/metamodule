@@ -12,7 +12,7 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
-TEST_SOURCES += ../axoloti-wrapper/axoloti_math.cpp
+TEST_SOURCES += ../4ms/core/axoloti-wrapper/axoloti_math.cpp
 
 BUILDDIR = $(TEST_DIR)/build
 

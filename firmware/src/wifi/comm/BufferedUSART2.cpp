@@ -48,15 +48,21 @@ void BufferedUSART2::initPeripheral()
                 auto result = queue.put(val);
                 if (not result)
                 {
-                    pr_err("USART2: RX Soft Overrun\n");
+                    pr_warn("USART2: RX Soft Overrun\n");
                 }
             }
             while (LL_USART_IsActiveFlag_RXNE(USART_PERIPH));
         }
-        else
-        {
-            printf("No flag\n");
-        }
+        else if (LL_USART_IsActiveFlag_ORE(USART_PERIPH))
+		{
+            pr_warn("USART2: FIFO Overrun\n");
+			LL_USART_ClearFlag_ORE(USART_PERIPH);
+		}
+		else
+		{
+			pr_warn("USART2: ISR called with no flag\n");
+			(void)USART_PERIPH->RDR;
+		}
     });
 
     // read RX from hardware to clear RXNE flag

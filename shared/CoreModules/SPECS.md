@@ -60,27 +60,29 @@ If height > width then it's vertical. Otherwise it's horizontal
 color is ‘#FFC080’
 If height > width then it's vertical. Otherwise it's horizontal
 
-**Medium Grey: AltParamContinuous**
-color is ‘#808080’
-A continuous range parameter (any value 0.0 to 1.0) that's hidden from the faceplate
-
-**Light Grey: AltParamChoice**
-color is ‘#c0c0c0’ (default), ranging up to `#c0c0ff`
-A discrete-valued parameter that's hidden from the faceplate
-
-Number of choices is specified with `?number`. 
-2 choices is `Name?2`, 3 choices is `Name?3`, etc.
-Default is 2 choices if no `?` is provided
-
-To provide names for the choices, append them to the object name using the `@` separator, instead of the `?`.
-Example: `Speed@Low@Medium@High`
-The number of choices will be deduced from the number of names given (3 in this case)
-
-The default choice can be specified by adding it to the blue color (zero-based, so `c0` means the first choice).
-Example: A 3-choice AltParam (`Name?3` or `Name@low@med@high`) with the default choice of 2 (the last choice) would have a color of `#c0c0c2` 
-
 **Yellow: Misc widget/undefined custom element:**
 color is ‘#FFFF00’ or ‘#ff0’ or ‘yellow’
+
+**Grey: AltParam**
+color is ‘#808080’
+
+By default this is a continuous range parameter (any value 0.0 to 1.0).
+
+If the object name contains a single `@` followed by a number, then this is a discrete-valued choice without labels (AltParamChoice). 
+Example: 2 choices is `Name@2`, 3 choices is `Name@3`, etc.
+
+To provide names for the choices (AltParamChoiceLabeled), append them to the object name using the `@` separator. 
+There must be at least two `@` symbols in the name.
+Examples: `Speed@Low@Medium@High` or `Channels@1@2@3@4@5`
+The number of choices will be deduced from the number of labels given.
+
+The default choice can be specified by adding it to the blue color (zero-based, so `80` means the first choice).
+Example: A 3-choice AltParam (`Name@3` or `Name@low@med@high`) with the default choice of 2 (the last choice) would have a color of `#808082` 
+For continuous values, the default value is interpreted as a fixed-point number between 00 and FF. So 0x808080 is a default of 0.5. (0xFF is interpreted as 1.0, not 255/256)
+
+If the shape is a rectangle then it will be linked to the region of the faceplate that it covers (position and size).
+Otherwise, if the center X,Y position matches a knob, switch, button, or slider object exactly, then the AltParam is linked to that object.
+Otherwise, it will be not linked to any other parameter.
 
 -------------
 
@@ -150,18 +152,6 @@ There are two text elements required. They both must *not* be converted to outli
  
  - Text object with the name “slug”. Text content should be a short identifier (e.g. “SMR” or “EnOsc”)
  - Text object with the name “modulename”. Content is full module name (“Spectral Multiband Resonator”)
-
---------------
-
-AltParam Linking:
-
-AltParams can link to another element so they appear in that element's context menu.
-Or they can be unlinked so they appear in the module's context menu only.
-Or they can link to a region on the faceplate.
-
-If the center X,Y coordinates match the X,Y of another object, then it's linked to that object's element.
-Otherwise, if center X,Y is 0,0, then it's not linked to any other element or region on the faceplate.
-Otherwise it's linked to an invisible region on the faceplate given by the object's position and size.
 
 --------------
 
