@@ -41,6 +41,7 @@ public:
 		if (uiSampleCounter++ % UISampleRateDivider == 0)
 		{
 			sideloadDrivers();
+			pollAltParameters();
 
 			ui.Poll();
 			ui.DoEvents();
@@ -197,6 +198,39 @@ private:
 		setLED<TapLedLight>(std::array{leds.get(LED_TAP), false, false});
 	}
 
+	void pollAltParameters()
+	{
+		auto ProcessAltParam = [this](std::size_t index, unsigned newVal)
+		{
+			static std::array<TapoDelay::ButtonNames,6> Buttons {{TapoDelay::BUTTON_1, TapoDelay::BUTTON_2, TapoDelay::BUTTON_3, TapoDelay::BUTTON_4, TapoDelay::BUTTON_5, TapoDelay::BUTTON_6}};
+
+			auto& thisOldValue = altParamsOldValues[index];
+
+			// check if the alt parameter has been changed since the last time
+			if (newVal != thisOldValue)
+			{
+				thisOldValue = newVal;
+
+				// Insert key combo for required settings change
+				if (index + newVal + 1 < Buttons.size())
+				{
+					auto buttonLong = Buttons[index];
+					auto buttonShort = Buttons[index + 1 + newVal];
+
+					ui.InsertEvent(TapoDelay::stmlib::CONTROL_SWITCH, buttonLong, 0);
+					ui.InsertEvent(TapoDelay::stmlib::CONTROL_SWITCH, buttonLong, TapoDelay::Ui::kLongPressDuration);
+					ui.InsertEvent(TapoDelay::stmlib::CONTROL_SWITCH, buttonShort, 0);
+					ui.InsertEvent(TapoDelay::stmlib::CONTROL_SWITCH, buttonShort, TapoDelay::Ui::kLongPressDuration/2);
+				}
+			}
+		};
+
+		ProcessAltParam(0, getState<VelocityAltParam>());
+		ProcessAltParam(1, getState<BankAltParam>());
+		ProcessAltParam(2, getState<PanAltParam>());
+		ProcessAltParam(3, getState<ModeAltParam>());
+	}
+
 	void onTapDetected()
 	{
 		pingGateOut();
@@ -254,6 +288,8 @@ private:
 	uint32_t gateOutCounter;
 
 	uint32_t uiSampleCounter;
+
+	std::array<std::optional<unsigned>,4> altParamsOldValues;
 };
 
 } // namespace MetaModule
