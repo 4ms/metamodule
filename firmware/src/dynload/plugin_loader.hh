@@ -99,16 +99,21 @@ public:
 				auto &plugin_file = (*plugin_files)[file_idx];
 
 				// Strip .so
-				std::string pluginname = plugin_file.plugin_name;
-				if (pluginname.ends_with(".so"))
+				auto pluginname = std::string{std::string_view{plugin_file.plugin_name}};
+				pr_trace("Plugin file name: %s\n", pluginname.c_str());
+
+				if (pluginname.ends_with(".so")) {
 					pluginname = pluginname.substr(0, pluginname.length() - 3);
+					pr_trace("Stripping .so => %s\n", pluginname.c_str());
+				}
 
 				// TODO: get slug from a plugin.json file inside the plugin dir
 				auto plugin = plugins.emplace_back();
 				plugin.name = pluginname;
 				plugin.rack_plugin.slug = pluginname;
 
-				pr_dbg("Loading plugin data from vol %d:%s/%s, from buffer %p ++%zu\n",
+				pr_dbg("Loading plugin %s from vol %d:%s / %s, from buffer %p ++%zu\n",
+					   plugin.name,
 					   plugin_file.vol,
 					   plugin_file.dir_name.c_str(),
 					   plugin_file.plugin_name.c_str(),
@@ -126,8 +131,11 @@ public:
 			} break;
 
 			case State::NotInit:
-			case State::Error:
+				break;
 			case State::Success:
+				break;
+			case State::Error:
+				status.error_message.clear();
 				break;
 		}
 

@@ -81,7 +81,7 @@ private:
 	void init_host_symbol_table() {
 		if (hostsyms.size() == 0) {
 			auto host_symbols = get_host_symbols();
-			pr_info("Found %zu symbols in binary to export for plugins\n", host_symbols.size());
+			pr_info("Found %zu host symbols in binary to export for plugins\n", host_symbols.size());
 
 			hostsyms.insert(hostsyms.end(), host_symbols.begin(), host_symbols.end());
 
@@ -92,8 +92,8 @@ private:
 			hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 			hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 
-			for (auto sym : hostsyms)
-				pr_info("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
+			// for (auto sym : hostsyms)
+			// 	pr_info("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);
 		}
 	}
 
