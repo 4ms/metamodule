@@ -25,20 +25,10 @@ endif
 limit:
 	cmake --fresh --preset ${PRESET} -G ${GEN} -DLIMITED_MODULES_FILE=$(LIMITFILE)
 
-dyn:
-	cmake --build --preset ${PRESET} 
-	flashing/dump_syms.py \
-			--objdir ./build/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/ \
-			--objdir ./build/mp1corea7/medium/VCV_adaptor/CMakeFiles/VCV_adaptor.dir/ \
-			--elf ./build/mp1corea7/medium/main.elf \
-			--json test.json \
-			--yaml test.yml \
-			-v
-	arm-none-eabi-objcopy --update-section .symlist=test.json build/mp1corea7/medium/main.elf build/mp1corea7/medium/main.elf
-
 plugin:
-	cd vcv_ports && make
-	cp ./vcv_ports/build/Befaco-strip-so.h ./src/dynload/befaco-strip-so.h
+	make -C vcv_ports -j16
+	cp vcv_ports/build/Befaco-strip.so /Volumes/METAMOD/metamodule-plugins/Befaco/
+	diskutil unmountDisk /Volumes/METAMOD
 
 
 bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images flash-bootloader-sd flash-app-sd flash-dfu jprog debug start-jlinkgdb start-openocd flash_loader flash_loader_dfu:
