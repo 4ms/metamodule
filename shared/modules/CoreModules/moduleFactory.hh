@@ -1,7 +1,7 @@
 #pragma once
-#include "CoreModules/CoreProcessor.hh"
-#include "CoreModules/elements/element_info_view.hh"
-#include "CoreModules/module_type_slug.hh"
+#include "CoreProcessor.hh"
+#include "elements/element_info_view.hh"
+#include "module_type_slug.hh"
 #include <util/seq_map.hh>
 #include <util/static_string.hh>
 #include <memory>

@@ -36,6 +36,9 @@ CXXFLAGS = 	-Wall \
 			-I../shared \
 			-I../shared/cpputil \
 			-I../shared/patch \
+			-I../shared/modules \
+			-I../shared/modules/CoreModules \
+			-I../shared/modules/CoreModules/elements \
 			-I../shared/CoreModules \
 			-I../shared/patch_convert \
 			-I../shared/patch_convert/ryml \

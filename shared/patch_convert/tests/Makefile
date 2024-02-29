@@ -30,6 +30,8 @@ CXXFLAGS = 	-Wall \
 			-I.. \
 			-I../patch \
 			-I../CoreModules \
+			-I../modules/CoreModules \
+			-I../modules \
 			-I../cpputil \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \

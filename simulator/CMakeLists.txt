@@ -68,7 +68,7 @@ target_include_directories(
 
 target_compile_options(simulator PRIVATE -Wall -Og)
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl patch_convert SDL2 VCV_adaptor cpputil ui vcv_ports)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl patch_convert SDL2 VCV_adaptor cpputil ui vcv_ports modules)
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 

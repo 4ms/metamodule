@@ -20,6 +20,9 @@ CXXFLAGS = 	-Wall \
 			-I. \
 			-I.. \
 			-I../../shared/cpputil \
+			-I../../shared/modules/CoreModules/elements \
+			-I../../shared/modules/CoreModules/ \
+			-I../../shared/modules/ \
 			-I../../shared/etl/include \
 			-I$(TEST_DIR) \
 			-Wno-unused-const-variable \

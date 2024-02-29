@@ -5,6 +5,7 @@ add_library(patch_convert)
 set_property(TARGET patch_convert PROPERTY CXX_STANDARD 20)
 
 add_subdirectory(ryml/rapidyaml)
+add_subdirectory(../modules modules)
 
 target_sources(patch_convert PRIVATE
     ryml/ryml_serial.cc
@@ -13,7 +14,6 @@ target_sources(patch_convert PRIVATE
 )
 
 target_include_directories(patch_convert PUBLIC
-    ../patch
-    ../CoreModules)
+    ../patch)
 
-target_link_libraries(patch_convert PUBLIC ryml cpputil)
+target_link_libraries(patch_convert PUBLIC ryml cpputil modules)
