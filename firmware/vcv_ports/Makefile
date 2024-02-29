@@ -3,8 +3,6 @@ BUILDDIR := build
 OBJDIR := $(BUILDDIR)/obj/obj
 
 SOURCES = plugin/libc_stub.c \
-		Befaco/src/plugin.cpp \
-		Befaco/src/EvenVCO.cpp \
 		Befaco/src/DualAtenuverter.cpp \
 		Befaco/src/ABC.cpp \
 		Befaco/src/ADSR.cpp \
@@ -15,14 +13,18 @@ SOURCES = plugin/libc_stub.c \
 		Befaco/src/Morphader.cpp \
 		Befaco/src/MotionMTR.cpp \
 		Befaco/src/Percall.cpp \
-		Befaco/src/PonyVCO.cpp \
 		Befaco/src/Rampage.cpp \
 		Befaco/src/STMix.cpp \
 		Befaco/src/SamplingModulator.cpp \
 		Befaco/src/SlewLimiter.cpp \
 		Befaco/src/StereoStrip.cpp \
+		glue/Befaco/plugin.cpp
 		
+		# Befaco/src/EvenVCO.cpp \
+		# Befaco/src/PonyVCO.cpp \
 		# Befaco/src/SpringReverb.cpp \
+		
+		# Befaco/src/plugin.cpp \
 
 INCLUDES := -IBefaco/src \
 			-I../src \
@@ -91,7 +93,7 @@ SO 	    = $(BUILDDIR)/$(BINARYNAME).so
 SOSTRIP = $(BUILDDIR)/$(BINARYNAME)-strip.so
 SOSTRIP_H = $(BUILDDIR)/$(BINARYNAME)-strip-so.h
 
-all: Makefile $(SOSTRIP_H) 
+all: Makefile $(SOSTRIP) 
 
 $(OBJDIR)/%.o: %.s
 	@mkdir -p $(dir $@)
@@ -115,8 +117,8 @@ $(SO): $(OBJECTS)
 $(SOSTRIP): $(SO)
 	$(STRIP) -g -v -o $@ $<
 
-$(SOSTRIP_H): $(SOSTRIP)
-	cd build && xxd -i $(BINARYNAME)-strip.so > $(BINARYNAME)-strip-so.h
+# $(SOSTRIP_H): $(SOSTRIP)
+# 	cd build && xxd -i $(BINARYNAME)-strip.so > $(BINARYNAME)-strip-so.h
 
 %.diss : %.so
 	arm-none-eabi-objdump -CDz --source $^ > $@
