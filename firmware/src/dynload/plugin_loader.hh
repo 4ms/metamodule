@@ -113,7 +113,7 @@ public:
 				plugin.rack_plugin.slug = pluginname;
 
 				pr_dbg("Loading plugin %s from vol %d:%s / %s, from buffer %p ++%zu\n",
-					   plugin.name,
+					   plugin.name.c_str(),
 					   plugin_file.vol,
 					   plugin_file.dir_name.c_str(),
 					   plugin_file.plugin_name.c_str(),
@@ -149,8 +149,6 @@ public:
 
 		DynLoader dynloader{buffer, plugin.code};
 
-		ModuleFactory::setCurrentBrand("");
-
 		if (!dynloader.load()) {
 			pr_err("Could not load plugin\n");
 			return;
@@ -163,6 +161,8 @@ public:
 		}
 
 		init(&plugin.rack_plugin);
+
+		ModuleFactory::setCurrentBrand("");
 
 		// now load the /res directory to...?
 		pr_info("Plugin loaded!\n");
