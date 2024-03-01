@@ -7,6 +7,8 @@ namespace rack::plugin
 
 struct Plugin {
 	std::string slug;
+
+	// Owning pointers
 	std::vector<Model *> models;
 
 	void addModel(Model *model);

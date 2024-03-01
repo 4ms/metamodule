@@ -1,7 +1,10 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/elements/element_counter.hh"
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace rack
 {
@@ -22,7 +25,13 @@ struct Plugin;
 
 struct Model {
 	std::string slug{};
-	Plugin *plugin;
+	Plugin *plugin = nullptr; //weak reference
+
+	std::vector<MetaModule::Element> elements;
+	std::vector<ElementCount::Indices> indices;
+	std::vector<std::string> string_table;
+
+	// Model() = default;
 
 	virtual ~Model() = default;
 
