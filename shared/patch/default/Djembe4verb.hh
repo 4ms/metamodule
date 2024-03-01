@@ -1,4 +1,4 @@
-static char Djembe4verb_patch[] =
+static const char Djembe4verb_patch[] =
 	R"(
 PatchData:
   patch_name: 'Djembe-4-verb'

@@ -1,4 +1,4 @@
-static char KarplusStereo_patch[] =
+static const char KarplusStereo_patch[] =
 	R"(
 PatchData:
   patch_name: Karplus Stereo

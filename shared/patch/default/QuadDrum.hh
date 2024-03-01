@@ -1,4 +1,4 @@
-static char QuadDrum_patch[] =
+static const char QuadDrum_patch[] =
 	R"(
 PatchData:
   patch_name: Quad Drum

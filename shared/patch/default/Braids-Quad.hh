@@ -1,4 +1,4 @@
-static char BraidsQuad_patch[] =
+static const char BraidsQuad_patch[] =
 	R"(
 PatchData:
   patch_name: Braids Quad
