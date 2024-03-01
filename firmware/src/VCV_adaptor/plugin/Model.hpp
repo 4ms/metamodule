@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_counter.hh"
+#include <deque>
 #include <memory>
 #include <string>
 #include <utility>
@@ -29,7 +30,7 @@ struct Model {
 
 	std::vector<MetaModule::Element> elements;
 	std::vector<ElementCount::Indices> indices;
-	std::vector<std::string> string_table;
+	std::deque<std::string> string_table;
 
 	// Model() = default;
 

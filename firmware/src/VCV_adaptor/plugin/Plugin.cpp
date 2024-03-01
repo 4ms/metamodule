@@ -3,6 +3,7 @@
 #include "app/ModuleWidget.hpp"
 #include "console/pr_dbg.hh"
 #include "util/overloaded.hh"
+#include <deque>
 
 namespace MetaModule
 {
@@ -13,21 +14,7 @@ namespace MetaModule
 // }
 
 // Points all string_views of elements to strings in the returned strings
-inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vector<std::string> &strings) {
-	size_t num_strings = 0;
-	for (auto &element : elements) {
-		std::visit(overloaded{
-					   [&num_strings](MetaModule::BaseElement) { num_strings += 2; },
-					   [&num_strings](MetaModule::ImageElement &el) { num_strings += 3; },
-					   [&num_strings](MetaModule::Slider &el) { num_strings += 4; },
-					   [&num_strings](MetaModule::FlipSwitch &el) { num_strings += 9; },
-					   [&num_strings](MetaModule::SlideSwitch &el) { num_strings += el.num_pos + 4; },
-				   },
-				   element);
-	}
-	strings.reserve(num_strings);
-	printf("Reserved %zu strings\n", num_strings);
-
+inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::deque<std::string> &strings) {
 	for (auto &element : elements) {
 		std::visit(
 			[&strings](BaseElement &el) {
@@ -66,7 +53,7 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vect
 	}
 }
 
-inline void debug_dump_strings(std::span<MetaModule::Element> elements, std::span<std::string> string_table) {
+inline void debug_dump_strings(std::span<MetaModule::Element> elements, std::deque<std::string> const &string_table) {
 	for (auto &s : string_table)
 		printf("strtab:\t%p\t%s\n", s.data(), s.c_str());
 
