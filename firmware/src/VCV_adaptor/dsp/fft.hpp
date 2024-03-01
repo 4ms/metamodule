@@ -1,5 +1,5 @@
 #pragma once
-#include "VCV_adaptor/pffft/pffft.h"
+#include <pffft.h>
 
 namespace rack::dsp
 {

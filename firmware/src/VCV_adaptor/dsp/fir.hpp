@@ -1,6 +1,6 @@
 #pragma once
 #include "VCV_adaptor/dsp/common.hpp"
-#include "VCV_adaptor/pffft/pffft.h"
+#include <pffft.h>
 
 namespace rack::dsp
 {
