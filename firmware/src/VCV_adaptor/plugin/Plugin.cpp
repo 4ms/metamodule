@@ -13,9 +13,16 @@ namespace MetaModule
 // 	return std::make_unique<ModuleT>();
 // }
 
+inline void inspect_sv(std::string_view const &sv) {
+	printf("%.*s %p(+%u)\n", sv.size(), sv.data(), sv.data(), sv.size());
+}
+
 // Points all string_views of elements to strings in the returned strings
 inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::deque<std::string> &strings) {
+	unsigned i = 0;
 	for (auto &element : elements) {
+		printf("%d\n", i);
+		i++;
 		std::visit(
 			[&strings](BaseElement &el) {
 				el.short_name = strings.emplace_back(el.short_name);
@@ -23,26 +30,27 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::dequ
 			},
 			element);
 
-		std::visit(overloaded{[](auto &el) {},
+		std::visit(overloaded{[](BaseElement &el) {},
 							  [&strings](ImageElement &el) {
 								  el.image = strings.emplace_back(el.image);
 							  }},
 				   element);
-		std::visit(overloaded{[](auto &el) {},
+		std::visit(overloaded{[](BaseElement &el) {},
 							  [&strings](Slider &el) {
 								  el.image_handle = strings.emplace_back(el.image_handle);
 							  }},
 				   element);
-		std::visit(overloaded{[](auto &el) {},
+		std::visit(overloaded{[](BaseElement &el) {},
 							  [&strings](FlipSwitch &el) {
 								  for (auto &pos_name : el.pos_names)
 									  pos_name = strings.emplace_back(pos_name);
 
-								  for (auto &frame : el.frames)
+								  for (auto &frame : el.frames) {
 									  frame = strings.emplace_back(frame);
+								  }
 							  }},
 				   element);
-		std::visit(overloaded{[](auto &el) {},
+		std::visit(overloaded{[](BaseElement &el) {},
 							  [&strings](SlideSwitch &el) {
 								  el.image_handle = strings.emplace_back(el.image_handle);
 
@@ -54,66 +62,41 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::dequ
 }
 
 inline void debug_dump_strings(std::span<MetaModule::Element> elements, std::deque<std::string> const &string_table) {
-	for (auto &s : string_table)
-		printf("strtab:\t%p\t%s\n", s.data(), s.c_str());
+	for (auto const &s : string_table)
+		printf("strtab: %p %s\n", s.data(), s.c_str());
 
+	printf("Dumping element strings: (%zu)\n", elements.size());
 	for (auto &element : elements) {
+		printf("Type %zu\n", element.index());
 		auto el = base_element(element);
 		printf("el.short_name: %.*s: %p\n", (int)el.short_name.size(), el.short_name.data(), el.short_name.data());
-		std::visit(overloaded{[](auto &el) {},
-							  [](SlideSwitch &el) {
-								  for (auto &pos_name : el.pos_names)
-									  printf("el.pos_names[]: %.*s: %p\n",
-											 (int)pos_name.size(),
-											 pos_name.data(),
-											 pos_name.data());
+
+		std::visit(overloaded{[](BaseElement const &el) {},
+							  [](ImageElement const &el) {
+								  printf("image: ");
+								  inspect_sv(el.image);
+							  }},
+				   element);
+
+		std::visit(overloaded{[](BaseElement const &el) {},
+							  [](SlideSwitch const &el) {
+								  for (auto &pos_name : el.pos_names) {
+									  printf("slide switch el.pos_names[]: ");
+									  inspect_sv(pos_name);
+								  }
+								  inspect_sv(el.image_handle);
+							  },
+							  [](FlipSwitch const &el) {
+								  for (auto &pos_name : el.pos_names) {
+									  printf("flip switch el.pos_names[]: ");
+									  inspect_sv(pos_name);
+								  }
 							  }},
 				   element);
 	}
 
 	printf("\n\n");
 }
-
-// template<typename ModuleT, typename WidgetT>
-// rack::plugin::Model *createModel2(std::string_view slug)
-// 	requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
-// {
-// 	using namespace MetaModule;
-
-// 	// ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
-
-// 	if (!ModuleFactory::isValidSlug(slug)) {
-// 		// Construct the module and modulewidget, so we can intercept their calls
-// 		ModuleT module;
-// 		WidgetT mw{&module};
-
-// 		// Store backing data for Info struct as static data, unique to each call of createModel<ModuleT, WidgetT>
-// 		static std::vector<MetaModule::Element> elements;
-// 		static std::vector<ElementCount::Indices> indices;
-// 		static std::vector<std::string> string_table;
-
-// 		mw.populate_elements(elements);
-// 		rebase_strings(elements, string_table);
-
-// 		indices.resize(elements.size());
-// 		ElementCount::get_indices(elements, indices);
-
-// 		MetaModule::ModuleInfoView info;
-// 		info.elements = elements;
-// 		info.description = slug;
-// 		info.width_hp = 1; //TODO: deprecate width_hp
-// 		info.indices = indices;
-
-// 		ModuleFactory::registerModuleType(slug, info);
-
-// 		// debug_dump_strings(elements, string_table);
-
-// 		// TODO: create a Model type which refers to ModuleT and WidgetT, and return a ptr to a static instance of it
-// 		return nullptr;
-// 	}
-
-// 	return nullptr;
-// }
 
 } // namespace MetaModule
 
@@ -124,17 +107,24 @@ void Plugin::addModel(Model *model) {
 	using namespace MetaModule;
 
 	std::string_view slug = model->slug;
+	pr_dbg("Adding VCV_adaptor model %s\n", model->slug.c_str());
 
 	if (ModuleFactory::isValidSlug(slug)) {
 		pr_err("Duplicate module slug: %s, skipping\n", model->slug.c_str());
 		return;
 	}
 
+	pr_dbg("Creating module\n");
 	auto module = model->createModule();
+	pr_dbg("Creating module widget\n");
 	auto modulewidget = model->createModuleWidget(module);
 
+	pr_dbg("Populating Elements\n");
 	modulewidget->populate_elements(model->elements);
+	pr_dbg("Rebasing Strings\n");
 	rebase_strings(model->elements, model->string_table);
+
+	debug_dump_strings(model->elements, model->string_table);
 
 	model->indices.resize(model->elements.size());
 	ElementCount::get_indices(model->elements, model->indices);
@@ -145,6 +135,7 @@ void Plugin::addModel(Model *model) {
 	info.width_hp = 1; //TODO: deprecate width_hp
 	info.indices = model->indices;
 
+	pr_dbg("Registering info\n");
 	ModuleFactory::registerModuleType(slug, info);
 
 	model->plugin = this;

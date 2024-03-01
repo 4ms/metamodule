@@ -248,26 +248,26 @@ make_element<rack::componentlibrary::LargeLight<rack::componentlibrary::RedGreen
 
 // Inputs
 
-template<>
-inline Element make_element_input<rack::componentlibrary::PJ301MPort>(BaseElement b) {
-	return JackInput{b, "jack_x.png"};
-};
+// template<>
+// inline Element make_element_input<rack::componentlibrary::PJ301MPort>(BaseElement b) {
+// 	return JackInput{b, "jack_x.png"};
+// };
 
-template<>
-inline Element make_element_input<rack::componentlibrary::ThemedPJ301MPort>(BaseElement b) {
-	return JackInput{b, "jack_x.png"};
-};
+// template<>
+// inline Element make_element_input<rack::componentlibrary::ThemedPJ301MPort>(BaseElement b) {
+// 	return JackInput{b, "jack_x.png"};
+// };
 
 // Outputs
 
-template<>
-inline Element make_element_output<rack::componentlibrary::PJ301MPort>(BaseElement b) {
-	return JackOutput{b, "jack_x.png"};
-};
+// template<>
+// inline Element make_element_output<rack::componentlibrary::PJ301MPort>(BaseElement b) {
+// 	return JackOutput{b, "jack_x.png"};
+// };
 
-template<>
-inline Element make_element_output<rack::componentlibrary::ThemedPJ301MPort>(BaseElement b) {
-	return JackOutput{b, "jack_x.png"};
-};
+// template<>
+// inline Element make_element_output<rack::componentlibrary::ThemedPJ301MPort>(BaseElement b) {
+// 	return JackOutput{b, "jack_x.png"};
+// };
 
 } // namespace MetaModule

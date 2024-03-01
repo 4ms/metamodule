@@ -113,11 +113,11 @@ struct SvgWidget : Widget {
 
 	void setSvg(std::shared_ptr<window::Svg> svg) {
 		svg_filename = svg->filename;
-		printf("SvgWidget::svg_filename = %s\n", svg_filename.c_str());
+		printf("SvgWidget::setSvg(): svg_filename = %s\n", svg_filename.c_str());
 	}
 
 	void setSVG(std::shared_ptr<window::Svg> svg) {
-		return setSvg(svg);
+		setSvg(svg);
 	}
 
 	// SvgWidget()
@@ -125,10 +125,10 @@ struct SvgWidget : Widget {
 	// 	: bg(new SvgWidget) {
 	// 	printf("ctor SvgWidget, new bg\n");
 	// }
-	// ~SvgWidget() override {
-	// 	printf("dtor SvgWidget, delete bg\n");
-	// 	delete bg;
-	// }
+	~SvgWidget() override {
+		printf("dtor SvgWidget, delete bg\n");
+		// delete bg;
+	}
 };
 
 struct TransformWidget : Widget {};

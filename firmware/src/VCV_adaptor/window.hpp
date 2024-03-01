@@ -29,8 +29,8 @@ inline math::Vec mm2px(math::Vec mm) {
 struct Svg {
 	std::string filename;
 
-	Svg(std::string fname)
-		: filename{std::move(fname)} {
+	Svg(std::string_view fname)
+		: filename{fname} {
 	}
 
 	// void loadString(std::string_view str) {
@@ -39,8 +39,8 @@ struct Svg {
 	// int getNumShapes() { return 0; }
 	// int getNumPaths() { return 0; }
 	// int getNumPoints() { return 0; }
-	static std::shared_ptr<Svg> load(std::string const &filename) {
-		printf("Svg::load %s\n", filename.c_str());
+	static std::shared_ptr<Svg> load(std::string_view filename) {
+		printf("Svg::load %.*s\n", filename.size(), filename.data());
 		return std::make_shared<Svg>(filename);
 	}
 };

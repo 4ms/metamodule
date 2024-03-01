@@ -47,4 +47,4 @@ plugin::Model *createModel(std::string_view slug) {
 
 } // namespace rack
 
-using namespace rack;
+// using namespace rack;
