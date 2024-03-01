@@ -9,6 +9,7 @@ target_sources(
          plugin_instance.cc
          engine/Module.cpp
          ../dynload/keep-symbols.cc
+         plugin/Plugin.cpp
 		 VCV_module_wrapper.cc
 )
 

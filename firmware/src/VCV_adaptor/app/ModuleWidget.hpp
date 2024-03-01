@@ -12,9 +12,14 @@ namespace rack
 struct ModuleWidget : widget::Widget {
 	engine::Module *module;
 	widget::Widget panel;
+	plugin::Model *model;
 
 	void setModule(engine::Module *m) {
 		module = m;
+	}
+
+	void setModel(plugin::Model *m) {
+		model = m;
 	}
 
 	void setPanel(Widget *panel) {

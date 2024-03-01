@@ -10,11 +10,6 @@
 namespace rack
 {
 
-template<typename ModuleT>
-std::unique_ptr<CoreProcessor> create_vcv_module() {
-	return std::make_unique<ModuleT>();
-}
-
 // Points all string_views of elements to strings in the returned strings
 inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vector<std::string> &strings) {
 	size_t num_strings = 0;
@@ -43,40 +38,42 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::vect
 
 		std::visit(overloaded{[](auto &el) {},
 							  [&strings](ImageElement &el) {
-								  auto str = ModuleFactory::currentBrandPath() + std::string{el.image};
-								  printf("rebase %s => %s\n", el.image.data(), str.c_str());
+								  auto str = std::string{el.image};
+								  printf("rebase %.*s => %s\n", el.image.size(), el.image.data(), str.c_str());
 								  el.image = strings.emplace_back(str);
 							  }},
 				   element);
-		std::visit(overloaded{[](auto &el) {},
-							  [&strings](Slider &el) {
-								  auto str = ModuleFactory::currentBrandPath() + std::string{el.image_handle};
-								  printf("rebase %s => %s\n", el.image_handle.data(), str.c_str());
-								  el.image_handle = strings.emplace_back(str);
-							  }},
-				   element);
+		std::visit(
+			overloaded{[](auto &el) {},
+					   [&strings](Slider &el) {
+						   auto str = std::string{el.image_handle};
+						   printf("rebase %.*s => %s\n", el.image_handle.size(), el.image_handle.data(), str.c_str());
+						   el.image_handle = strings.emplace_back(str);
+					   }},
+			element);
 		std::visit(overloaded{[](auto &el) {},
 							  [&strings](FlipSwitch &el) {
 								  for (auto &pos_name : el.pos_names)
 									  pos_name = strings.emplace_back(pos_name);
 
 								  for (auto &frame : el.frames) {
-									  auto str = ModuleFactory::currentBrandPath() + std::string{frame};
-									  printf("rebase %s => %s\n", frame.data(), str.c_str());
+									  auto str = std::string{frame};
+									  printf("rebase %.*s => %s\n", frame.size(), frame.data(), str.c_str());
 									  frame = strings.emplace_back(str);
 								  }
 							  }},
 				   element);
-		std::visit(overloaded{[](auto &el) {},
-							  [&strings](SlideSwitch &el) {
-								  auto str = ModuleFactory::currentBrandPath() + std::string{el.image_handle};
-								  printf("rebase %s => %s\n", el.image_handle.data(), str.c_str());
-								  el.image_handle = strings.emplace_back(str);
+		std::visit(
+			overloaded{[](auto &el) {},
+					   [&strings](SlideSwitch &el) {
+						   auto str = std::string{el.image_handle};
+						   printf("rebase %.*s => %s\n", el.image_handle.size(), el.image_handle.data(), str.c_str());
+						   el.image_handle = strings.emplace_back(str);
 
-								  for (auto &pos_name : el.pos_names)
-									  pos_name = strings.emplace_back(pos_name);
-							  }},
-				   element);
+						   for (auto &pos_name : el.pos_names)
+							   pos_name = strings.emplace_back(pos_name);
+					   }},
+			element);
 	}
 }
 
@@ -101,17 +98,51 @@ inline void debug_dump_strings(std::span<MetaModule::Element> elements, std::spa
 	printf("\n\n");
 }
 
+template<typename ModuleT>
+std::unique_ptr<CoreProcessor> create_vcv_module() {
+	return std::make_unique<ModuleT>();
+}
+
+/** Returns a Model that constructs a Module and ModuleWidget subclass. */
+template<class ModuleT, class ModuleWidgetT>
+plugin::Model *createModel(std::string slug) {
+
+	MetaModule::ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
+
+	struct TModel : plugin::Model {
+
+		rack::engine::Module *createModule() override {
+			engine::Module *m = new ModuleT;
+			m->model = this;
+			return m;
+		}
+
+		/*app::*/ ModuleWidget *createModuleWidget(engine::Module *m) override {
+			ModuleT *tm = nullptr;
+			if (m) {
+				// assert(m->model == this);
+				// Make sure we don't chop off TModule-specific data before passing it
+				// to the constructor of TModuleWidget
+				tm = static_cast<ModuleT *>(m);
+			}
+			/*app::*/ ModuleWidget *mw = new ModuleWidgetT(tm);
+			// assert(mw->module == m);
+			mw->setModule(m);
+			mw->setModel(this);
+			return mw;
+		}
+	};
+
+	plugin::Model *o = new TModel;
+	o->slug = slug;
+	return o;
+}
+
 template<typename ModuleT, typename WidgetT>
-plugin::Model *createModel(std::string_view slug)
+plugin::Model *createModel2(std::string_view slug)
 	requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
 {
 	using namespace MetaModule;
-
-	// if (slug == "Braids") {
-	// 	ModuleFactory::registerModuleType(
-	// 		slug, create_vcv_module<ModuleT>, MetaModule::ModuleInfoView::makeView<MetaModule::BraidsInfo>());
-	// 	return nullptr;
-	// }
 
 	ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
 

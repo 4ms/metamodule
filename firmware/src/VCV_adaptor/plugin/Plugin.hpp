@@ -9,9 +9,8 @@ struct Plugin {
 	std::string slug;
 	std::vector<Model *> models;
 
-	void addModel(Model *model) {
-		models.push_back(model);
-	}
+	void addModel(Model *model);
+	~Plugin();
 };
 
 } // namespace rack::plugin

@@ -145,7 +145,7 @@ public:
 	void load_plugin(LoadedPlugin &plugin) {
 		using InitPluginFunc = void(rack::plugin::Plugin *);
 
-		ModuleFactory::setCurrentBrand(plugin.name);
+		// ModuleFactory::setCurrentBrand(plugin.name);
 
 		DynLoader dynloader{buffer, plugin.code};
 
@@ -162,7 +162,7 @@ public:
 
 		init(&plugin.rack_plugin);
 
-		ModuleFactory::setCurrentBrand("");
+		// ModuleFactory::setCurrentBrand("");
 
 		// now load the /res directory to...?
 		pr_info("Plugin loaded!\n");
@@ -180,6 +180,7 @@ private:
 	// Dynamically generated in non-cacheable RAM
 	PluginFileList *plugin_files = nullptr;
 
+	// TODO: plugins should live somewhere all UI can access, perhaps in main and passed by ref to PageContext
 	std::vector<LoadedPlugin> plugins;
 };
 
