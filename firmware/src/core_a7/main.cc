@@ -78,6 +78,8 @@ void main() {
 	WifiUpdate::run();
 #endif
 
+	PluginManager plugin_manager{file_storage_proxy};
+
 	pr_info("A7 Core 1 initialized\n");
 
 	// Tell other cores we're done with init
@@ -88,7 +90,6 @@ void main() {
 		;
 
 	sync_params.clear();
-	PluginManager plugin_manager{file_storage_proxy};
 
 	patch_playloader.load_initial_patch();
 

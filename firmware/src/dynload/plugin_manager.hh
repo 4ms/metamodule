@@ -3,6 +3,8 @@
 #include "patch_file/file_storage_proxy.hh"
 #include <list>
 
+extern rack::plugin::Plugin *pluginInstance;
+
 extern rack::plugin::Model *modelEvenVCO;
 extern rack::plugin::Model *modelRampage;
 extern rack::plugin::Model *modelABC;
@@ -38,27 +40,32 @@ struct PluginManager {
 
 		//Load internal plugins
 		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
+		pluginInstance = &befaco_plugin;
 		befaco_plugin.addModel(modelEvenVCO);
-		befaco_plugin.addModel(modelRampage);
-		befaco_plugin.addModel(modelABC);
+		befaco_plugin.addModel(modelPonyVCO);
+		// befaco_plugin.addModel(modelRampage);
+		// befaco_plugin.addModel(modelABC);
+		// befaco_plugin.addModel(modelMixer);
+		// befaco_plugin.addModel(modelSlewLimiter);
+		// befaco_plugin.addModel(modelDualAtenuverter);
+		// befaco_plugin.addModel(modelPercall);
+		// befaco_plugin.addModel(modelHexmixVCA);
+		// befaco_plugin.addModel(modelChoppingKinky);
+		// befaco_plugin.addModel(modelKickall);
+		// befaco_plugin.addModel(modelSamplingModulator);
+		// befaco_plugin.addModel(modelMorphader);
+		// befaco_plugin.addModel(modelADSR);
+		// befaco_plugin.addModel(modelSTMix);
+		// befaco_plugin.addModel(modelChannelStrip);
+		// befaco_plugin.addModel(modelMotionMTR);
+
+		// Sometimes:
 		// befaco_plugin.addModel(modelSpringReverb);
-		befaco_plugin.addModel(modelMixer);
-		befaco_plugin.addModel(modelSlewLimiter);
-		befaco_plugin.addModel(modelDualAtenuverter);
-		befaco_plugin.addModel(modelPercall);
-		befaco_plugin.addModel(modelHexmixVCA);
-		befaco_plugin.addModel(modelChoppingKinky);
-		befaco_plugin.addModel(modelKickall);
-		befaco_plugin.addModel(modelSamplingModulator);
-		befaco_plugin.addModel(modelMorphader);
-		befaco_plugin.addModel(modelADSR);
-		befaco_plugin.addModel(modelSTMix);
+
+		// Never:
 		// befaco_plugin.addModel(modelMuxlicer);
 		// befaco_plugin.addModel(modelMex);
 		// befaco_plugin.addModel(modelNoisePlethora);
-		befaco_plugin.addModel(modelChannelStrip);
-		befaco_plugin.addModel(modelPonyVCO);
-		befaco_plugin.addModel(modelMotionMTR);
 
 		internal_plugins.emplace_back("AudibleInstruments");
 		internal_plugins.emplace_back("hetrickcv");
