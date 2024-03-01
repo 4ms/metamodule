@@ -23,6 +23,7 @@ CXXFLAGS = 	-Wall \
 			-I../../shared/modules/CoreModules/elements \
 			-I../../shared/modules/CoreModules/ \
 			-I../../shared/modules/ \
+			-I../../shared/gcem/include/ \
 			-I../../shared/etl/include \
 			-I$(TEST_DIR) \
 			-Wno-unused-const-variable \

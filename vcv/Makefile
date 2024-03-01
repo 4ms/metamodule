@@ -22,6 +22,7 @@ SOURCES += $(SHARED)/patch_convert/patch_to_yaml.cc
 # Modules
 INCLUDES += -Isrc
 INCLUDES += -I$(SHARED)
+INCLUDES += -I$(SHARED)/gcem/include
 INCLUDES += -I$(SHARED)/CoreModules/4ms
 INCLUDES += -I$(SHARED)/patch/
 INCLUDES += -I$(SHARED)/modules/

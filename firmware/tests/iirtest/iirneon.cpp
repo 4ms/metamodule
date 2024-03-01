@@ -1,5 +1,5 @@
 #include "iirneon.hh"
-#include "gcem/include/gcem.hpp"
+#include <gcem.hpp>
 
 static constexpr float SAMPLERATE = 48000.f;
 static constexpr float fConst3 = gcem::pow(0.00100000005f, (1.66666663f / SAMPLERATE));

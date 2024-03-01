@@ -1,5 +1,5 @@
 #pragma once
-#include "gcem/include/gcem.hpp"
+#include <gcem.hpp>
 #include "CoreModules/4ms/core/helpers/mapping.h"
 #include <algorithm>
 #include <cmath>

@@ -3,7 +3,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 
-#include "gcem/include/gcem.hpp"
+#include <gcem.hpp>
 #include "iirneon.hh"
 #include "util/math.hh"
 #include "util/math_tables.hh"

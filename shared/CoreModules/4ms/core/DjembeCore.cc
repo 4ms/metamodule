@@ -3,7 +3,7 @@
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/moduleFactory.hh"
 
-#include "gcem/include/gcem.hpp"
+#include <gcem.hpp>
 #include "util/math.hh"
 #include "util/math_tables.hh"
 

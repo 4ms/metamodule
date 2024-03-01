@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../helpers/mapping.h"
-#include "gcem/include/gcem.hpp"
+#include <gcem.hpp>
 
 namespace MetaModule
 {

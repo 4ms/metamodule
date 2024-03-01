@@ -1,5 +1,5 @@
 #pragma once
-#include "gcem/include/gcem.hpp"
+#include <gcem.hpp>
 #include "util/interp_array.hh"
 #include <array>
 
