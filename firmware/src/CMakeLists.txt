@@ -151,6 +151,7 @@ set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIO
 target_include_directories(
   main.elf
   PRIVATE 
+          ${FWDIR}
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
