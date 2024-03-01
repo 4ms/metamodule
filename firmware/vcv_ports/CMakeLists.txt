@@ -37,12 +37,6 @@ foreach(brand ${brands})
     cmake_path(GET component STEM LAST_ONLY COMPIMGNAME)
     set(_this_component_image_file ${CMAKE_CURRENT_BINARY_DIR}/${brand}/${COMPIMGNAME}_register.cc)
 
-    # generate image file for component
-    # if(${brand} STREQUAL "Rack")
-    #   set(COMPFILENAME "sys/res/ComponentLibrary/${COMPIMGNAME}.png")
-    # else()
-    #   set(COMPFILENAME "res/components/${COMPIMGNAME}.png")
-    # endif()
     set(COMPFILENAME "${COMPIMGNAME}.png")
     configure_file(${IMAGES_BASEDIR}/component_register.cc.in ${_this_component_image_file})
     list(APPEND COMP_ARTWORK_SOURCES ${_this_component_image_file})
