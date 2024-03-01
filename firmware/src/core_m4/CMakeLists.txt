@@ -14,6 +14,11 @@ set(USBHOST_LIBDIR ${FWDIR}/lib/stm32-usb-host-lib)
 set(USBDEV_LIBDIR ${FWDIR}/lib/stm32-usb-device-lib)
 set(WIFI_DIR ${FWDIR}/src/wifi)
 
+# TODO: replace with fetchcontent
+if (NOT TARGET cpputil)
+  add_subdirectory(../../../shared/cpputil cpputil)
+endif()
+
 add_executable(
   main_m4.elf
   ${M4DIR}/controls.cc
