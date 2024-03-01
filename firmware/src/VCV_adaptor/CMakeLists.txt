@@ -2,7 +2,7 @@ set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../)
 
 # TODO: replace this with for example fetchContent later
 if (NOT TARGET jansson)
-  add_subdirectory(${MM_ROOT}/firmware/lib/jansson jansson)
+  add_subdirectory(${MM_ROOT}/shared/jansson jansson)
 endif()
 if (NOT TARGET pffft)
   add_subdirectory(pffft)

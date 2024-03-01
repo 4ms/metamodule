@@ -57,7 +57,7 @@ add_subdirectory(${SHARED}/patch_convert patch_convert)
 #
 # TODO: replace this with for example fetchContent later
 if (NOT TARGET jansson)
-  add_subdirectory(${FWDIR}/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
+  add_subdirectory(${SHARED}/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
 endif()
 
 #
