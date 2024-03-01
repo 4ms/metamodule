@@ -133,6 +133,12 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 
 IntercoreStorageMessage
 FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum, uint32_t &bytesChecked) {
+
+	// Stop wifi reception before long running operation
+#ifdef ENABLE_WIFI_BRIDGE
+	WifiInterface::stop();
+#endif
+
 	MD5Processor processor;
 
 	const std::size_t BlockSize = 4096;
