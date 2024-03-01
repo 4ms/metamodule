@@ -2,7 +2,7 @@
 	path = firmware/lib/mdrivlib
 	url = https://github.com/4ms/mdrivlib.git
 [submodule "firmware/lib/lvgl/lvgl"]
-	path = firmware/lib/lvgl/lvgl
+	path = shared/lvgl/lvgl
 	url = https://github.com/lvgl/lvgl.git
 [submodule "shared/patch_convert/ryml/rapidyaml"]
 	path = shared/patch_convert/ryml/rapidyaml

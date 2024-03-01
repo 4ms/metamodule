@@ -5,7 +5,7 @@ project(mm_sim LANGUAGES C CXX)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(SHARED ${CMAKE_CURRENT_LIST_DIR}/../shared)
-set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
+set(LVGL_DIR ${SHARED}/lvgl/lvgl)
 
 set(LV_CONF_PATH
     ${CMAKE_CURRENT_LIST_DIR}/lv_conf.h
@@ -17,14 +17,14 @@ add_compile_options(-g2)
 
 add_subdirectory(../shared/cpputil cpputil)
 
-# #################### LVGL Simulator Driver #################################
-
-add_subdirectory(lvgl_drv)
-
 # #################### LVGL ############################################
 
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
-include(${LVGL_DIR}/CMakeLists.txt)
+add_subdirectory(${SHARED}/lvgl lvgl)
+
+# #################### LVGL Simulator Driver #################################
+
+add_subdirectory(lvgl_drv)
 
 # #################### SLS Export ##################################
 

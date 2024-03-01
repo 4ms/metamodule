@@ -29,10 +29,13 @@ target_compile_options(mdrivlib_interface INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-W
 # LVGL
 #
 set(LV_CONF_PATH
-    ${FWDIR}/lib/lvgl/lv_conf.h
+    ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_conf.h
     CACHE STRING "" FORCE
 )
-add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
+if (NOT TARGET lvgl)
+  add_subdirectory(${FWDIR}/../shared/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
+endif()
+
 target_link_libraries(lvgl PRIVATE mdrivlib_interface)
 target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
 
