@@ -61,7 +61,6 @@ target_include_directories(
   PRIVATE src
           stubs
           sdl_audio
-          ${FWDIR}/src/console
           ${FWDIR}/src/params
           ${FWDIR}/src/medium
           )
