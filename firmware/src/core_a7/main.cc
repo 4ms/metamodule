@@ -5,6 +5,7 @@
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
+#include "dynload/plugin_manager.hh"
 #include "fs/time_convert.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
@@ -87,6 +88,8 @@ void main() {
 		;
 
 	sync_params.clear();
+	PluginManager plugin_manager{file_storage_proxy};
+
 	patch_playloader.load_initial_patch();
 
 	audio.start();

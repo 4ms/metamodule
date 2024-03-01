@@ -2,6 +2,8 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xm4.cmake)
 set_arch_flags()
 
+# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
 set(M4DIR ${CMAKE_CURRENT_SOURCE_DIR}) # /firmware/src/core_m4
 set(FWDIR ${CMAKE_SOURCE_DIR}) # /firmware
 set(SHARED ${FWDIR}/../shared) # /shared
@@ -114,6 +116,8 @@ target_include_directories(
           ${USBDEV_LIBDIR}/Core/Inc
           ${USBDEV_LIBDIR}/Class/MSC/Inc
 )
+
+set_property(TARGET main_m4.elf PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 target_link_script(
   main_m4
