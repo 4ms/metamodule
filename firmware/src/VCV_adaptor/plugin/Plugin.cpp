@@ -140,12 +140,12 @@ void Plugin::addModel(Model *model) {
 
 	if (ModuleFactory::isValidSlug(slug)) {
 		pr_err("Duplicate module slug: %s, skipping\n", model->slug.c_str());
+		return;
 	}
 
 	auto module = model->createModule();
 	auto modulewidget = model->createModuleWidget(module);
 
-	// ModuleFactory::registerModuleType(slug, model->create_vcv_module);
 	modulewidget->populate_elements(model->elements);
 	rebase_strings(model->elements, model->string_table);
 

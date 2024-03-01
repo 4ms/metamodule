@@ -17,6 +17,8 @@ std::unique_ptr<CoreProcessor> create_vcv_module() {
 // create the given Module and ModuleWidget subclasses
 // To match VCV Rack API, ownership of the Model is passed to the caller.
 template<class ModuleT, class ModuleWidgetT>
+requires(std::derived_from<ModuleWidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
+
 plugin::Model *createModel(std::string_view slug) {
 
 	MetaModule::ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);

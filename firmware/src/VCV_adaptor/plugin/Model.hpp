@@ -42,10 +42,6 @@ struct Model {
 	virtual /*app::*/ ModuleWidget *createModuleWidget(engine::Module *m) {
 		return nullptr;
 	}
-
-	virtual std::unique_ptr<CoreProcessor> create_vcv_module() {
-		return nullptr;
-	}
 };
 
 } // namespace plugin
