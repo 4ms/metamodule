@@ -89,6 +89,7 @@ def GetLibcSymbols():
          "_ZSt24__throw_out_of_range_fmtPKcz",
 
          "_ZNSt19_Sp_make_shared_tag5_S_eqERKSt9type_info",
+         "_ZNSt8__detail15_List_node_base7_M_hookEPS0_",
 
          # Not found, replaced with an empty function
          "_ZNSaIcEC1Ev", # std::allocator<char>::allocator()
