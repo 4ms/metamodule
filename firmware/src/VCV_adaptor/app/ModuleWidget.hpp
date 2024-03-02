@@ -6,7 +6,7 @@
 #include "VCV_adaptor/window.hpp"
 #include <vector>
 
-namespace rack
+namespace rack::app
 {
 
 struct ModuleWidget : widget::Widget {
@@ -63,15 +63,6 @@ struct ModuleWidget : widget::Widget {
 			printf("Error: can't add a null ParamWidget\n");
 			return;
 		}
-		std::visit(
-			overloaded{[](MetaModule::BaseElement &el) { printf("MW Not imgel\n"); },
-					   [](MetaModule::ImageElement &el) {
-						   printf("MW pre-placed image element: ");
-						   printf("%.*s %p(+%u)\n", el.image.size(), el.image.data(), el.image.data(), el.image.size());
-					   }},
-			paramWidget->element);
-
-		printf("Adding Param to ModuleWidget\n");
 		place_at(paramElements, paramWidget->paramId, paramWidget->element);
 
 		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
@@ -83,7 +74,6 @@ struct ModuleWidget : widget::Widget {
 			printf("Error: can't add a null input PortWidget\n");
 			return;
 		}
-		printf("Adding Input to ModuleWidget\n");
 		place_at(inputElements, input->portId, input->element);
 
 		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
@@ -95,7 +85,6 @@ struct ModuleWidget : widget::Widget {
 			printf("Error: can't add a null output PortWidget\n");
 			return;
 		}
-		printf("Adding Output to ModuleWidget\n");
 		place_at(outputElements, output->portId, output->element);
 
 		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
@@ -125,31 +114,15 @@ struct ModuleWidget : widget::Widget {
 
 	void populate_elements(std::vector<MetaModule::Element> &elements) {
 		elements.clear();
-		printf("Populate %zu paramElements, %zu inEl, %zu outEl, %zu lightEl\n",
-			   paramElements.size(),
-			   inputElements.size(),
-			   outputElements.size(),
-			   lightElements.size());
 		elements.reserve(paramElements.size() + inputElements.size() + outputElements.size() + lightElements.size());
 		elements.insert(elements.end(), paramElements.begin(), paramElements.end());
 		elements.insert(elements.end(), inputElements.begin(), inputElements.end());
 		elements.insert(elements.end(), outputElements.begin(), outputElements.end());
 		elements.insert(elements.end(), lightElements.begin(), lightElements.end());
-		printf("Resulting elements: %zu\n", elements.size());
-		for (auto &element : elements) {
-			std::visit(
-				overloaded{
-					[](MetaModule::BaseElement &el) { printf("MW Not imgel\n"); },
-					[](MetaModule::ImageElement &el) {
-						printf("MW post-pop image element: ");
-						printf("%.*s %p(+%u)\n", el.image.size(), el.image.data(), el.image.data(), el.image.size());
-					}},
-				element);
-		}
 	}
 
 	~ModuleWidget() override {
-		printf("~MW()");
+		printf("~MW()\n");
 		for (auto &w : owned_widgets) {
 			delete w;
 		}
@@ -164,4 +137,4 @@ private:
 	std::list<Widget *> owned_widgets;
 };
 
-} // namespace rack
+} // namespace rack::app
