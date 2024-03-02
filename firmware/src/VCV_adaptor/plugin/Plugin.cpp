@@ -13,16 +13,9 @@ namespace MetaModule
 // 	return std::make_unique<ModuleT>();
 // }
 
-inline void inspect_sv(std::string_view const &sv) {
-	printf("%.*s %p(+%u)\n", sv.size(), sv.data(), sv.data(), sv.size());
-}
-
 // Points all string_views of elements to strings in the returned strings
 inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::deque<std::string> &strings) {
-	unsigned i = 0;
 	for (auto &element : elements) {
-		printf("%d\n", i);
-		i++;
 		std::visit(
 			[&strings](BaseElement &el) {
 				el.short_name = strings.emplace_back(el.short_name);
@@ -61,7 +54,12 @@ inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::dequ
 	}
 }
 
+inline void inspect_sv(std::string_view const &sv) {
+	printf("%.*s %p(+%u)\n", sv.size(), sv.data(), sv.data(), sv.size());
+}
+
 inline void debug_dump_strings(std::span<MetaModule::Element> elements, std::deque<std::string> const &string_table) {
+
 	for (auto const &s : string_table)
 		printf("strtab: %p %s\n", s.data(), s.c_str());
 
@@ -95,7 +93,7 @@ inline void debug_dump_strings(std::span<MetaModule::Element> elements, std::deq
 				   element);
 	}
 
-	printf("\n\n");
+	printf("\n");
 }
 
 } // namespace MetaModule
@@ -114,14 +112,10 @@ void Plugin::addModel(Model *model) {
 		return;
 	}
 
-	pr_dbg("Creating module\n");
 	auto module = model->createModule();
-	pr_dbg("Creating module widget\n");
 	auto modulewidget = model->createModuleWidget(module);
 
-	pr_dbg("Populating Elements\n");
 	modulewidget->populate_elements(model->elements);
-	pr_dbg("Rebasing Strings\n");
 	rebase_strings(model->elements, model->string_table);
 
 	debug_dump_strings(model->elements, model->string_table);
@@ -135,7 +129,6 @@ void Plugin::addModel(Model *model) {
 	info.width_hp = 1; //TODO: deprecate width_hp
 	info.indices = model->indices;
 
-	pr_dbg("Registering info\n");
 	ModuleFactory::registerModuleType(slug, info);
 
 	model->plugin = this;
