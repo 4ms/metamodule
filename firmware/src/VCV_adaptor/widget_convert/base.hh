@@ -36,9 +36,10 @@ inline Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
 	return Knob{b, widget->svg_filename};
 }
 
-inline Element make_element_switch(rack::app::SvgSlider *widget, BaseElement b) {
+inline Element make_element_slideswitch(rack::app::SvgSlider *widget, BaseElement b) {
 	printf("make_element_switch(SvgSlider)\n");
-	return SlideSwitch{{b, widget->svg_filename}, 2, widget->handle->svg_filename}; //labels filled in later
+	return SlideSwitch{
+		{b, widget->svg_filename}, 2, widget->handle->svg_filename}; //num_pos and labels are filled in later
 }
 
 inline Element make_element(rack::app::SvgSlider *widget, BaseElement b) {

@@ -59,7 +59,12 @@ T *createElementParamWidget(
 	widget->module = module;
 	widget->paramId = paramId;
 
-	widget->element = MetaModule::make_element(widget, {pos.x, pos.y, coord_ref, name, name});
+	// Slide switch is SvgSlider type in VCV, so we need to disambiguiate
+	engine::ParamQuantity *pq = widget->getParamQuantity();
+	if (pq->snapEnabled)
+		widget->element = MetaModule::make_element_slideswitch(widget, {pos.x, pos.y, coord_ref, name, name});
+	else
+		widget->element = MetaModule::make_element(widget, {pos.x, pos.y, coord_ref, name, name});
 	return widget;
 }
 
