@@ -108,7 +108,8 @@ public:
 				}
 
 				// TODO: get slug from a plugin.json file inside the plugin dir
-				auto plugin = plugins.emplace_back();
+
+				auto &plugin = plugins.emplace_back();
 				plugin.name = pluginname;
 				plugin.rack_plugin.slug = pluginname;
 
@@ -145,8 +146,6 @@ public:
 	void load_plugin(LoadedPlugin &plugin) {
 		using InitPluginFunc = void(rack::plugin::Plugin *);
 
-		// ModuleFactory::setCurrentBrand(plugin.name);
-
 		DynLoader dynloader{buffer, plugin.code};
 
 		if (!dynloader.load()) {
@@ -162,9 +161,8 @@ public:
 
 		init(&plugin.rack_plugin);
 
-		// ModuleFactory::setCurrentBrand("");
+		// TODO: now load the /res directory to...?
 
-		// now load the /res directory to...?
 		pr_info("Plugin loaded!\n");
 	}
 
@@ -181,7 +179,7 @@ private:
 	PluginFileList *plugin_files = nullptr;
 
 	// TODO: plugins should live somewhere all UI can access, perhaps in main and passed by ref to PageContext
-	std::vector<LoadedPlugin> plugins;
+	std::deque<LoadedPlugin> plugins;
 };
 
 } // namespace MetaModule
