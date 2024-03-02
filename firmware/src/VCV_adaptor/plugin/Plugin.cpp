@@ -8,13 +8,10 @@
 namespace MetaModule
 {
 
-// template<typename ModuleT>
-// std::unique_ptr<CoreProcessor> create_vcv_module() {
-// 	return std::make_unique<ModuleT>();
-// }
-
-// Points all string_views of elements to strings in the returned strings
-inline void rebase_strings(std::vector<MetaModule::Element> &elements, std::deque<std::string> &strings) {
+// Transfer ownership of a model's strings from the Module and ModuleWidget (as VCV does) to the Model/Pluin (which is what MetaModule wants)
+// This is done by copying the strings that elements[] string_views point to, and putting the copy in strings[] (which is a member of Model)
+// Then point the elements[] string_views to strings[].
+inline void move_strings(std::vector<MetaModule::Element> &elements, std::deque<std::string> &strings) {
 	for (auto &element : elements) {
 		std::visit(
 			[&strings](BaseElement &el) {
@@ -116,9 +113,9 @@ void Plugin::addModel(Model *model) {
 	auto modulewidget = model->createModuleWidget(module);
 
 	modulewidget->populate_elements(model->elements);
-	rebase_strings(model->elements, model->string_table);
+	move_strings(model->elements, model->string_table);
 
-	debug_dump_strings(model->elements, model->string_table);
+	// debug_dump_strings(model->elements, model->string_table);
 
 	model->indices.resize(model->elements.size());
 	ElementCount::get_indices(model->elements, model->indices);

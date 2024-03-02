@@ -10,9 +10,10 @@
 namespace rack
 {
 
-//namespace app {
+namespace app
+{
 struct ModuleWidget;
-//}
+}
 
 namespace engine
 {
@@ -40,7 +41,7 @@ struct Model {
 		return nullptr;
 	}
 
-	virtual /*app::*/ ModuleWidget *createModuleWidget(engine::Module *m) {
+	virtual app::ModuleWidget *createModuleWidget(engine::Module *m) {
 		return nullptr;
 	}
 };
