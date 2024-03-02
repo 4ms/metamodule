@@ -31,7 +31,7 @@ struct Model {
 
 	std::vector<MetaModule::Element> elements;
 	std::vector<ElementCount::Indices> indices;
-	std::deque<std::string> string_table;
+	std::deque<std::string> strings;
 
 	// Model() = default;
 
@@ -44,6 +44,9 @@ struct Model {
 	virtual app::ModuleWidget *createModuleWidget(engine::Module *m) {
 		return nullptr;
 	}
+
+	void move_strings();
+	void debug_dump_strings();
 };
 
 } // namespace plugin

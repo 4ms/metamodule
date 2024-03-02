@@ -2,7 +2,6 @@ set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../)
 
 add_library(VCV_adaptor STATIC)
 
-# These sources are used by other libraries indirectly linked to VCV_adaptor, so they need to be public
 target_sources(
   VCV_adaptor
   PRIVATE string.cpp
@@ -11,6 +10,7 @@ target_sources(
          ../dynload/keep-symbols.cc
          plugin/Plugin.cpp
 		 VCV_module_wrapper.cc
+         plugin/Model.cpp
 )
 
 # TODO: replace this with for example fetchContent later

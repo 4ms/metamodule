@@ -6,94 +6,7 @@
 #include <deque>
 
 namespace MetaModule
-{
-
-// Transfer ownership of a model's strings from the Module and ModuleWidget (as VCV does) to the Model/Pluin (which is what MetaModule wants)
-// This is done by copying the strings that elements[] string_views point to, and putting the copy in strings[] (which is a member of Model)
-// Then point the elements[] string_views to strings[].
-inline void move_strings(std::vector<MetaModule::Element> &elements, std::deque<std::string> &strings) {
-	for (auto &element : elements) {
-		std::visit(
-			[&strings](BaseElement &el) {
-				el.short_name = strings.emplace_back(el.short_name);
-				el.long_name = strings.emplace_back(el.long_name);
-			},
-			element);
-
-		std::visit(overloaded{[](BaseElement &el) {},
-							  [&strings](ImageElement &el) {
-								  el.image = strings.emplace_back(el.image);
-							  }},
-				   element);
-		std::visit(overloaded{[](BaseElement &el) {},
-							  [&strings](Slider &el) {
-								  el.image_handle = strings.emplace_back(el.image_handle);
-							  }},
-				   element);
-		std::visit(overloaded{[](BaseElement &el) {},
-							  [&strings](FlipSwitch &el) {
-								  for (auto &pos_name : el.pos_names)
-									  pos_name = strings.emplace_back(pos_name);
-
-								  for (auto &frame : el.frames) {
-									  frame = strings.emplace_back(frame);
-								  }
-							  }},
-				   element);
-		std::visit(overloaded{[](BaseElement &el) {},
-							  [&strings](SlideSwitch &el) {
-								  el.image_handle = strings.emplace_back(el.image_handle);
-
-								  for (auto &pos_name : el.pos_names)
-									  pos_name = strings.emplace_back(pos_name);
-							  }},
-				   element);
-	}
-}
-
-inline void inspect_sv(std::string_view const &sv) {
-	printf("%.*s %p(+%u)\n", sv.size(), sv.data(), sv.data(), sv.size());
-}
-
-inline void debug_dump_strings(std::span<MetaModule::Element> elements, std::deque<std::string> const &string_table) {
-
-	for (auto const &s : string_table)
-		printf("strtab: %p %s\n", s.data(), s.c_str());
-
-	printf("Dumping element strings: (%zu)\n", elements.size());
-	for (auto &element : elements) {
-		printf("Type %zu\n", element.index());
-		auto el = base_element(element);
-		printf("el.short_name: %.*s: %p\n", (int)el.short_name.size(), el.short_name.data(), el.short_name.data());
-
-		std::visit(overloaded{[](BaseElement const &el) {},
-							  [](ImageElement const &el) {
-								  printf("image: ");
-								  inspect_sv(el.image);
-							  }},
-				   element);
-
-		std::visit(overloaded{[](BaseElement const &el) {},
-							  [](SlideSwitch const &el) {
-								  for (auto &pos_name : el.pos_names) {
-									  printf("slide switch el.pos_names[]: ");
-									  inspect_sv(pos_name);
-								  }
-								  inspect_sv(el.image_handle);
-							  },
-							  [](FlipSwitch const &el) {
-								  for (auto &pos_name : el.pos_names) {
-									  printf("flip switch el.pos_names[]: ");
-									  inspect_sv(pos_name);
-								  }
-							  }},
-				   element);
-	}
-
-	printf("\n");
-}
-
-} // namespace MetaModule
+{} // namespace MetaModule
 
 namespace rack::plugin
 {
@@ -113,9 +26,9 @@ void Plugin::addModel(Model *model) {
 	auto modulewidget = model->createModuleWidget(module);
 
 	modulewidget->populate_elements(model->elements);
-	move_strings(model->elements, model->string_table);
+	model->move_strings();
 
-	// debug_dump_strings(model->elements, model->string_table);
+	// model->debug_dump_strings();
 
 	model->indices.resize(model->elements.size());
 	ElementCount::get_indices(model->elements, model->indices);
@@ -130,6 +43,9 @@ void Plugin::addModel(Model *model) {
 
 	model->plugin = this;
 	models.push_back(model);
+
+	delete modulewidget;
+	delete module;
 }
 
 Plugin::~Plugin() {
