@@ -1,11 +1,14 @@
 #pragma once
 #include "CoreModules/module_type_slug.hh"
-#include "patch_dir.hh"
+#include "fs/dir_tree.hh"
+#include "patch_file.hh"
 #include <array>
 #include <utility>
 
 namespace MetaModule
 {
+
+using PatchDir = DirTree<PatchFile>;
 
 struct PatchDirList {
 

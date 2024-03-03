@@ -1,30 +1,31 @@
 #pragma once
 #include "fs/volumes.hh"
-#include "patch_file.hh"
+#include <string>
 #include <utility>
 #include <vector>
 
 namespace MetaModule
 {
 
-struct PatchDir {
+template<typename EntryT>
+struct DirTree {
 	std::string name;
-	std::vector<PatchDir> dirs;
-	std::vector<PatchFile> files;
+	std::vector<DirTree> dirs;
+	std::vector<EntryT> files;
 
-	PatchDir()
+	DirTree()
 		: name("") {
 	}
 
-	PatchDir(std::string &&name)
+	DirTree(std::string &&name)
 		: name{std::move(name)} {
 	}
 
-	PatchDir(std::string_view name)
+	DirTree(std::string_view name)
 		: name{name} {
 	}
 
-	PatchDir(const char *name)
+	DirTree(const char *name)
 		: name{name} {
 	}
 
