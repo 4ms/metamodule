@@ -4,12 +4,11 @@
 #include <array>
 #include <cstring>
 
-
-constexpr size_t MaxNumDisks = 3;
+constexpr size_t MaxNumDisks = 4;
 
 namespace
 {
-std::array<DiskOps *, MaxNumDisks> _diskops{nullptr, nullptr, nullptr};
+std::array<DiskOps *, MaxNumDisks> _diskops{nullptr, nullptr, nullptr, nullptr};
 }
 
 // Register a set of disk operations with the FatFS filesystem.

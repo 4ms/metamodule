@@ -15,6 +15,7 @@ bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 inline PARTITION VolToPart[FF_VOLUMES] = {
 	{0, 0}, /* "0:" ==> Auto detect partition on USB */
 	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
+	{3, 1}, /* "1:" ==> partition 1 on Ramdisk */
 };
 
 class FatFileIO {
