@@ -106,7 +106,7 @@ public:
 	}
 
 	bool update_or_create_file(const std::string_view filename, const std::span<const char> data) {
-		return write_file(filename.data(), data);
+		return write_file(filename, data);
 	}
 
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
