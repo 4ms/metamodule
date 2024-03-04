@@ -291,4 +291,26 @@ public:
 		}
 		return true;
 	}
+
+	void print_dir(std::string_view path, unsigned max_depth, unsigned cur_depth = 0) {
+		pr_dbg("%s/\n", path.data());
+		cur_depth++;
+
+		if (cur_depth == max_depth)
+			return;
+
+		foreach_dir_entry(path,
+						  [=, this](std::string_view filename, uint32_t filesize, uint32_t tmstmp, DirEntryKind kind) {
+							  for (auto i = 0u; i < cur_depth; i++)
+								  pr_dbg("  ");
+
+							  if (kind == DirEntryKind::File)
+								  pr_dbg("%.*s\t%u\t%x\n", filename.size(), filename.data(), filesize, tmstmp);
+
+							  else if (kind == DirEntryKind::Dir) {
+								  std::string dirpath = std::string(path) + std::string("/") + std::string(filename);
+								  print_dir(dirpath, max_depth, cur_depth);
+							  }
+						  });
+	}
 };
