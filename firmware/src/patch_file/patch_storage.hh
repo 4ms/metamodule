@@ -33,7 +33,7 @@ class PatchStorage {
 	PollChange sd_changes_{1000};
 
 	RamDiskOps ramdisk_ops{*SharedMemoryS::ptrs.ramdrive};
-	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
+	FatFileIO ramdisk_{&ramdisk_ops, Volume::RamDisk};
 
 	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
 	using enum IntercoreStorageMessage::MessageType;
@@ -139,7 +139,7 @@ public:
 			};
 
 			if ((uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
-				auto bytes_read = load_patch_file(message.buffer, message.vol_id, message.filename);
+				auto bytes_read = load_file(message.buffer, message.vol_id, message.filename);
 				if (bytes_read) {
 					result.message_type = PatchDataLoaded;
 					result.bytes_read = bytes_read;
@@ -153,7 +153,7 @@ public:
 			IntercoreStorageMessage result{.message_type = PatchDataWriteFail};
 
 			if (message.filename.size() > 0 && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
-				auto wrote_ok = write_patch_file(message.buffer, message.filename, message.vol_id);
+				auto wrote_ok = write_file(message.buffer, message.filename, message.vol_id);
 				if (wrote_ok) {
 					result.message_type = PatchDataWriteOK;
 				}
@@ -171,7 +171,7 @@ public:
 
 		if (message.message_type == RequestCopyPluginAssets) {
 			IntercoreStorageMessage result{};
-			if (copy_plugin_assets())
+			if (PatchFileIO::deep_copy_dirs(norflash_, ramdisk_, "res"))
 				result.message_type = CopyPluginAssetsOK;
 			else
 				result.message_type = CopyPluginAssetsFail;
@@ -202,7 +202,7 @@ private:
 		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
 	}
 
-	uint32_t load_patch_file(std::span<char> buffer, Volume vol, std::string_view filename) {
+	uint32_t load_file(std::span<char> buffer, Volume vol, std::string_view filename) {
 
 		bool ok = false;
 		switch (vol) {
@@ -228,7 +228,7 @@ private:
 		return buffer.size_bytes();
 	}
 
-	bool write_patch_file(std::span<const char> patchdata, std::string_view filename, Volume vol) {
+	bool write_file(std::span<const char> patchdata, std::string_view filename, Volume vol) {
 		bool ok = false;
 		switch (vol) {
 			case Volume::NorFlash:
