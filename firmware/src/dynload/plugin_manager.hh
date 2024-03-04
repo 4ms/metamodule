@@ -36,7 +36,6 @@ namespace MetaModule
 struct PluginManager {
 	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
-	// TODO: will be used to copy from LittleFS to RamDisk
 	FileStorageProxy &file_storage_proxy;
 
 	std::list<rack::plugin::Plugin> internal_plugins;
@@ -87,7 +86,8 @@ struct PluginManager {
 			return;
 		}
 
-		// Request FSProxy copy LittleFS->RamDisk /res dir
+		file_storage_proxy.request_install_plugin_assets();
+
 	}
 };
 
