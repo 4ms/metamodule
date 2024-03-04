@@ -86,8 +86,19 @@ struct PluginManager {
 			return;
 		}
 
-		file_storage_proxy.request_install_plugin_assets();
+		file_storage_proxy.request_copy_system_plugin_assets();
 
+		while (true) {
+			auto msg = file_storage_proxy.get_message();
+			if (msg.message_type == FileStorageProxy::CopyPluginAssetsOK) {
+				ramdisk.print_dir("res", 3);
+				break;
+			}
+			if (msg.message_type == FileStorageProxy::CopyPluginAssetsFail) {
+				pr_err("Failed to copy system plugin assets to ramdisk\n");
+				break;
+			}
+		}
 	}
 };
 

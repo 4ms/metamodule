@@ -179,7 +179,7 @@ public:
 		return comm_.send_message(message);
 	}
 
-	bool request_install_plugin_assets() {
+	bool request_copy_system_plugin_assets() {
 		IntercoreStorageMessage message{.message_type = RequestCopyPluginAssets};
 		return comm_.send_message(message);
 	}
