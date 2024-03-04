@@ -6,6 +6,13 @@
 
 constexpr size_t MaxNumDisks = 4;
 
+// required by fatfs:
+PARTITION VolToPart[FF_VOLUMES] = {
+	{0, 0}, /* "0:" ==> Auto detect partition on USB */
+	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
+	{3, 1}, /* "3:" ==> partition 1 on Ramdisk */
+};
+
 namespace
 {
 std::array<DiskOps *, MaxNumDisks> _diskops{nullptr, nullptr, nullptr, nullptr};

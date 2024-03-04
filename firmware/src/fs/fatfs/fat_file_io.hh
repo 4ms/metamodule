@@ -11,13 +11,6 @@
 // defined in fatfs/diskio.cc:
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
-// required by fatfs:
-inline PARTITION VolToPart[FF_VOLUMES] = {
-	{0, 0}, /* "0:" ==> Auto detect partition on USB */
-	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
-	{3, 1}, /* "3:" ==> partition 1 on Ramdisk */
-};
-
 class FatFileIO {
 	using Volume = MetaModule::Volume;
 
