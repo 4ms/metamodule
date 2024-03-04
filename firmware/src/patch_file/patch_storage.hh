@@ -2,6 +2,7 @@
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdcard_conf.hh"
 #include "core_intercom/intercore_message.hh"
+#include "core_intercom/shared_memory.hh"
 #include "drivers/inter_core_comm.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "fs/fatfs/fat_file_io.hh"
@@ -21,15 +22,18 @@ namespace MetaModule
 class PatchStorage {
 
 	FatFileIO &sdcard_;
-	PollChange sd_changes_{1000};
+
+	FatFileIO &usbdrive_;
 
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
 	LfsFileIO norflash_{flash_};
 
-	FatFileIO &usbdrive_;
 	PollChange usb_changes_{1000};
-
 	PollChange norflash_changes_{1000};
+	PollChange sd_changes_{1000};
+
+	RamDiskOps ramdisk_ops{*SharedMemoryS::ptrs.ramdrive};
+	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
 	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
 	using enum IntercoreStorageMessage::MessageType;
@@ -125,8 +129,7 @@ public:
 			return result;
 		}
 
-		else if (message.message_type == RequestPatchData)
-		{
+		if (message.message_type == RequestPatchData) {
 
 			IntercoreStorageMessage result{
 				.message_type = PatchDataLoadFail,
@@ -162,6 +165,16 @@ public:
 		if (message.message_type == RequestFactoryResetPatches) {
 			IntercoreStorageMessage result{.message_type = FactoryResetPatchesDone};
 			reload_default_patches();
+
+			return result;
+		}
+
+		if (message.message_type == RequestCopyPluginAssets) {
+			IntercoreStorageMessage result{};
+			if (copy_plugin_assets())
+				result.message_type = CopyPluginAssetsOK;
+			else
+				result.message_type = CopyPluginAssetsFail;
 
 			return result;
 		}

@@ -132,6 +132,55 @@ public:
 		return true;
 	}
 
+	static bool copy_directories_deep(FileIoC auto &fileio_from,
+									  FileIoC auto &fileio_to,
+									  std::string dir,
+									  unsigned recursion_depth = 0) {
+		pr_dbg("Deep copy of %s\n on vol:%d to vol:%d", dir.c_str(), fileio_from, fileio_to);
+
+		bool ok = fileio_from.foreach_dir_entry(
+			dir, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
+				std::string full_path = dir + "/" + std::string(entryname);
+
+				// Copy files:
+				if (kind == DirEntryKind::File) {
+					pr_trace("Copy file: %s\n", full_path.c_str());
+					auto filedata = fileio_to.update_or_create_file(full_path, filedata);
+					patch_dir.files.push_back(PatchFile{std::string(entryname), filesize, timestamp, *patchname});
+				}
+
+				// Add dirs:
+				if (kind == DirEntryKind::Dir) {
+					if (entryname.starts_with("."))
+						return;
+					if (recursion_depth < MaxDirRecursion) {
+						pr_trace("Add dir: %s\n", full_path.c_str());
+						patch_dir.dirs.emplace_back(full_path);
+					}
+				}
+			});
+
+		if (!ok) {
+			pr_err("Failed to read dir on %.32s\n", fileio.volname().data());
+			return false;
+		}
+
+		for (auto &dir : patch_dir.dirs) {
+			pr_trace("[%d] Entering subdir: %.*s\n", recursion_depth, dir.name.size(), dir.name.data());
+			ok = add_directory(fileio, dir, recursion_depth + 1);
+			if (!ok) {
+				pr_err("Failed to add subdir\n");
+			}
+		}
+
+		std::sort(patch_dir.files.begin(), patch_dir.files.end(), [](auto a, auto b) {
+			return std::string_view{a.patchname} < std::string_view{b.patchname};
+		});
+		std::sort(patch_dir.dirs.begin(), patch_dir.dirs.end(), [](auto a, auto b) { return a.name < b.name; });
+
+		return ok;
+	}
+
 private:
 	static ModuleTypeSlug _read_patch_name(FileIoC auto &fileio, const std::string_view filename) {
 		constexpr uint32_t HEADER_SIZE = 64;

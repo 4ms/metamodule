@@ -53,6 +53,10 @@ struct IntercoreStorageMessage {
 		PluginFileListOK,
 		PluginFileListFail,
 
+		RequestCopyPluginAssets,
+		CopyPluginAssetsOK,
+		CopyPluginAssetsFail,
+
 		NumRequests,
 	};
 	MessageType message_type = MessageType::None;

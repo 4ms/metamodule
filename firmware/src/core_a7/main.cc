@@ -78,6 +78,9 @@ void main() {
 	WifiUpdate::run();
 #endif
 
+	// prevents M4 from using it as a USBD device: TODO remove this or remove usb_device in M4, or make it a config option to enable USB MSC Device mode
+	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
+
 	PluginManager plugin_manager{file_storage_proxy};
 
 	pr_info("A7 Core 1 initialized\n");
