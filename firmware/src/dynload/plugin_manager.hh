@@ -1,6 +1,9 @@
 #pragma once
 #include "VCV_adaptor/plugin/Plugin.hpp"
+#include "fs/fatfs/fat_file_io.hh"
+#include "fs/fatfs/ramdisk_ops.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "static_buffers.hh"
 #include <list>
 
 extern rack::plugin::Plugin *pluginInstance;
@@ -31,6 +34,9 @@ namespace MetaModule
 {
 
 struct PluginManager {
+	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
+	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
+	// TODO: will be used to copy from LittleFS to RamDisk
 	FileStorageProxy &file_storage_proxy;
 
 	std::list<rack::plugin::Plugin> internal_plugins;
@@ -70,6 +76,18 @@ struct PluginManager {
 		internal_plugins.emplace_back("AudibleInstruments");
 		internal_plugins.emplace_back("hetrickcv");
 		internal_plugins.emplace_back("nonlinearcircuits");
+
+		load_assets();
+	}
+
+	void load_assets() {
+		// TODO: load internal plugin assets
+		if (!ramdisk.format_disk()) {
+			pr_err("Could not format RamDisk, no assets can be loaded!\n");
+			return;
+		}
+
+		// Request FSProxy copy LittleFS->RamDisk /res dir
 	}
 };
 
