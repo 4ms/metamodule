@@ -55,9 +55,14 @@ VERSION ?= $(shell git describe --always)
 LITTLEFS_VERSION := $(shell git -C $(LITTLEFS_DIR) describe --tags || echo "unknown")
 BUILD_CONFIG_NAME ?= -generic
 
-OBJ		:= build/main.o \
-		   build/lfs.o \
-		   build/lfs_util.o
+BUILDDIR := build
+OBJDIR := $(BUILDDIR)/obj/obj
+
+SOURCES := main.cpp \
+		   $(LITTLEFS_DIR)/lfs.c \
+		   $(LITTLEFS_DIR)/lfs_util.c \
+
+OBJ  = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 
 INCLUDES := -Itclap -Iinclude -I$(LITTLEFS_DIR) -I$(LITTLEFS_PARENTDIR) -I.
 
@@ -94,15 +99,13 @@ $(DIST_ARCHIVE): $(TARGET) $(DIST_DIR)
 	cp $(TARGET) $(DIST_DIR)/
 	$(ARCHIVE_CMD) $(DIST_ARCHIVE) $(DIST_DIR)
 
-build/%.o: %.cpp
+$(OBJDIR)/%.o: %.c[cp]* $(OBJDIR)/%.d
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ 
 
-build/lfs.o: %.
-# $(OBJDIR)/%.o: %.c[cp]* $(OBJDIR)/%.d
-# 	@mkdir -p $(dir $@)
-# 	$(info Building $< at $(OPTFLAG))
-# 	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
+$(OBJDIR)/%.o: %.c $(OBJDIR)/%.d
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@ 
 
 $(TARGET): $(OBJ)
 	$(CXX) $^ -o $@ $(LDFLAGS)
