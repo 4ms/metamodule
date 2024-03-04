@@ -33,10 +33,10 @@ add_executable(
   ${FWDIR}/src/usb/usbd_desc.c
   ${FWDIR}/src/usb/usbh_conf.cc
   ${FWDIR}/src/usb/usbh_midi.cc
-  ${FWDIR}/lib//fatfs/source/ff.c
-  ${FWDIR}/lib//fatfs/source/ffunicode.c
-  ${FWDIR}/lib//littlefs/lfs.c
-  ${FWDIR}/lib//littlefs/lfs_util.c
+  ${FWDIR}/lib/fatfs/source/ff.c
+  ${FWDIR}/lib/fatfs/source/ffunicode.c
+  ${FWDIR}/lib/littlefs/lfs.c
+  ${FWDIR}/lib/littlefs/lfs_util.c
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
