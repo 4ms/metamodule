@@ -101,9 +101,6 @@ add_executable(
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
   #
-  ${FWDIR}/lib/littlefs/lfs.c
-  ${FWDIR}/lib/littlefs/lfs_util.c
-  #
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc_ex.c
@@ -154,9 +151,6 @@ set_source_files_properties(
   ${SHARED}/CoreModules/moduleFactory.cc
   PROPERTIES COMPILE_OPTIONS "-fno-lto"
 )
-
-# Fixup for compiler warning for LittleFS
-set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 
 target_include_directories(
   main.elf
