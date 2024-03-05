@@ -1,11 +1,9 @@
 #pragma once
 #include "VCV_adaptor/plugin/Plugin.hpp"
-#include "a7_shared_memory.hh"
 #include "conf/ramdisk_conf.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "patch_file/file_storage_proxy.hh"
-// #include "static_buffers.hh"
 #include <list>
 
 extern rack::plugin::Plugin *pluginInstance;
