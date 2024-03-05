@@ -125,10 +125,10 @@ struct SvgWidget : Widget {
 	// 	: bg(new SvgWidget) {
 	// 	printf("ctor SvgWidget, new bg\n");
 	// }
-	~SvgWidget() override {
-		printf("dtor SvgWidget, delete bg\n");
-		// delete bg;
-	}
+	// ~SvgWidget() override {
+	// printf("dtor SvgWidget, delete bg\n");
+	// delete bg;
+	// }
 };
 
 struct TransformWidget : Widget {};

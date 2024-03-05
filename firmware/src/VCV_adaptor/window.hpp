@@ -40,7 +40,7 @@ struct Svg {
 	// int getNumPaths() { return 0; }
 	// int getNumPoints() { return 0; }
 	static std::shared_ptr<Svg> load(std::string_view filename) {
-		printf("Svg::load %.*s\n", (int)filename.size(), filename.data());
+		// printf("Svg::load %.*s\n", (int)filename.size(), filename.data());
 		return std::make_shared<Svg>(filename);
 	}
 };

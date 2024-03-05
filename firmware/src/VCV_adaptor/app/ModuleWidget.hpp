@@ -122,7 +122,7 @@ struct ModuleWidget : widget::Widget {
 	}
 
 	~ModuleWidget() override {
-		printf("~MW()\n");
+		// printf("~MW()\n");
 		for (auto &w : owned_widgets) {
 			delete w;
 		}
