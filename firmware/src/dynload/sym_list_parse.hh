@@ -1,5 +1,5 @@
 #include "console/pr_dbg.hh"
-#include "host_symbol.hh"
+#include "elf_process/host_symbol.hh"
 #include <span>
 #include <vector>
 

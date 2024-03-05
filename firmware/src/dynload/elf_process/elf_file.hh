@@ -1,6 +1,6 @@
 #pragma once
-#include "dynload/elf_reloc.hh"
 #include "elf_helpers.hh"
+#include "elf_reloc.hh"
 #include "elf_section.hh"
 #include "elf_symbol.hh"
 #include "pr_dbg.hh"

@@ -13,7 +13,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	// We can't link the plugin to libc unless we compile a libc with it, since the arm-none-eabi libc
 	// was not compiled with -fPIC
 	// - Linker KEEP()?
-	// - build libc with the plugin, mabye musl libc?
+	// - build libc with the plugin, maybe musl libc?
 	// - build plugin with json library
 	exp(0.5f);
 	expf(0.5f);

@@ -1,5 +1,5 @@
 #pragma once
-#include "host_symbol.hh"
+#include "elf_process/host_symbol.hh"
 #include "ld.h"
 #include "sym_list_parse.hh"
 #include <span>

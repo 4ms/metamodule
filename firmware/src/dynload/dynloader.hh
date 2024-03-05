@@ -1,8 +1,8 @@
 #pragma once
 #include "debug.hh"
-#include "dynload/elf_relocator.hh"
-#include "dynload/host_sym_list.hh"
-#include "elf_file.hh"
+#include "elf_process/elf_file.hh"
+#include "elf_process/elf_relocator.hh"
+#include "host_sym_list.hh"
 #include "keep-symbols.hh"
 #include "pr_dbg.hh"
 #include "stm32mp1xx.h"
