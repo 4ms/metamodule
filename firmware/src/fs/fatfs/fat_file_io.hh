@@ -92,16 +92,19 @@ public:
 
 	bool format_disk() {
 		BYTE work[FF_MAX_SS * 2];
-		auto res = f_mkfs(_fatvol, nullptr, work, sizeof(work));
-		if (res != FR_OK)
+		MKFS_PARM opts{.fmt = FM_SFD | FM_ANY, .align = 512, .au_size = 512};
+		auto res = f_mkfs(_fatvol, &opts, work, sizeof(work));
+		if (res != FR_OK) {
+			pr_err("Formatting failed with error code %d\n", res);
 			return false;
+		}
 
 		res = f_mount(&fs, _fatvol, 1);
 		if (res != FR_OK) {
-			pr_err("Disk not formatted, err %d\n", res);
+			pr_err("Disk not mounted, err %d\n", res);
 			return false;
 		}
-		pr_trace("Disk formatted\n");
+
 		return true;
 	}
 
