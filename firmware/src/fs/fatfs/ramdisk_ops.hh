@@ -2,6 +2,7 @@
 #include "conf/ramdisk_conf.hh"
 #include "disk_ops.hh"
 #include "fs/ramdisk.hh"
+#include "pr_dbg.hh"
 #include <cstring>
 
 class RamDiskOps : public DiskOps {
@@ -15,7 +16,8 @@ public:
 	}
 
 	DSTATUS status() override {
-		return (_status == Status::NotInit) ? (STA_NOINIT | STA_NODISK) : 0;
+		return 0;
+		// return (_status == Status::NotInit) ? (STA_NOINIT | STA_NODISK) : 0;
 	}
 
 	Status get_status() {
@@ -31,18 +33,17 @@ public:
 	// - and when it mouts the disk in f_mount(_,_,1)
 	// - and the first time FatFS attempts a read/write/stat if the disk is not yet mounted
 	DSTATUS initialize() override {
-		if (_status == Status::NotInit) {
-			// do something?
-		}
-		_status = Status::NotInUse;
+		_status = Status::Mounted;
 		return 0;
 	}
 
 	DRESULT read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) override {
 		const uint32_t address = sector_start * RamDiskBlockSize;
 		const uint32_t bytes = num_sectors * RamDiskBlockSize;
-		if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
+		if (address >= RamDiskSizeBytes || (address + bytes) > RamDiskSizeBytes) {
+			pr_err("Attempt to read out of RamDisk bounds: 0x%x + 0x%x\n", address, bytes);
 			return RES_ERROR;
+		}
 
 		std::memcpy(dst, &ramdisk.virtdrive[address], bytes);
 		return RES_OK;
@@ -51,8 +52,10 @@ public:
 	DRESULT write(const uint8_t *src, uint32_t sector_start, uint32_t num_sectors) override {
 		const uint32_t address = sector_start * RamDiskBlockSize;
 		const uint32_t bytes = num_sectors * RamDiskBlockSize;
-		if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
+		if (address >= RamDiskSizeBytes || (address + bytes) > RamDiskSizeBytes) {
+			pr_err("Attempt to write out of RamDisk bounds: 0x%x + 0x%x\n", address, bytes);
 			return RES_ERROR;
+		}
 
 		std::memcpy(&ramdisk.virtdrive[address], src, bytes);
 		return RES_OK;
