@@ -121,6 +121,7 @@ public:
 					   plugin.fileinfo.plugin_name.c_str(),
 					   buffer.data(),
 					   buffer.size());
+				HAL_Delay(10);
 
 				if (load_plugin(plugin))
 					load_plugin_assets(plugin);
@@ -170,7 +171,8 @@ public:
 
 	bool load_plugin_assets(LoadedPlugin &plugin) {
 		std::string path = std::string(plugin.fileinfo.dir_name) + std::string("/res");
-		pr_trace("Loading Assets from vol %d: %s\n", plugin.fileinfo.vol, path.c_str());
+		pr_trace("Loading assets from vol %d: %s\n", plugin.fileinfo.vol, path.c_str());
+
 		file_storage.request_copy_dir_to_ramdisk(plugin.fileinfo.vol, path);
 
 		IntercoreStorageMessage msg{.message_type = FileStorageProxy::None};

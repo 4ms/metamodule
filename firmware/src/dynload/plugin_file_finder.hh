@@ -82,11 +82,8 @@ private:
 				// Add files:
 				if (kind == DirEntryKind::File) {
 					if (entryname.ends_with(".so")) {
-						//Strip "metamodule-plugins" from path
-						std::string pluginname = path; //.substr(PluginDirName.length() + 1);
-						plugin_files.push_back({fileio.vol_id(), pluginname.c_str(), entryname, filesize});
-
-						pr_trace("Found plugin file %s/%.*s\n", pluginname.c_str(), entryname.size(), entryname.data());
+						plugin_files.push_back({fileio.vol_id(), path.c_str(), entryname, filesize});
+						pr_trace("Found plugin file %s/%.*s\n", path.c_str(), entryname.size(), entryname.data());
 					}
 				}
 			});

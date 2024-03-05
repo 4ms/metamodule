@@ -91,11 +91,22 @@ struct PluginManager {
 	}
 
 	void start_loading_plugins() {
+		state = State::IsLoading;
+
+		ramdisk.unmount_drive();
 		plugin_file_loader.start();
 	}
 
 	auto process_loading() {
-		return plugin_file_loader.process();
+		auto result = plugin_file_loader.process();
+		if (result.state == PluginFileLoader::State::Success) {
+			if (state == State::IsLoading) {
+				state = State::Done;
+				pr_dbg("All plugins loaded\n");
+				// ramdisk.print_dir("/", 4);
+			}
+		}
+		return result;
 	}
 
 	void test_write() {
@@ -112,6 +123,8 @@ struct PluginManager {
 		auto bytes_read = ramdisk.read_file("checkfile", r);
 		pr_trace("%.*s\n", bytes_read, &r[0]);
 	}
+
+	enum class State { Ready, IsLoading, Done } state = State::Ready;
 };
 
 } // namespace MetaModule
