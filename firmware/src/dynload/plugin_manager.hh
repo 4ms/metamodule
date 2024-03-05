@@ -85,24 +85,9 @@ struct PluginManager {
 			pr_dbg("RamDisk formatted and mounted\n");
 	}
 
-	void load_assets() {
+	void load_internal_assets() {
 		// TODO: Save internal assets on LittleFS NOR Flash Driver,
 		// Load internal plugin assets to RamDisk
-		if (false) {
-			file_storage_proxy.request_copy_system_plugin_assets();
-
-			while (true) {
-				auto msg = file_storage_proxy.get_message();
-				if (msg.message_type == FileStorageProxy::CopyPluginAssetsOK) {
-					ramdisk.print_dir("res", 3);
-					break;
-				}
-				if (msg.message_type == FileStorageProxy::CopyPluginAssetsFail) {
-					pr_err("Failed to copy system plugin assets to ramdisk\n");
-					break;
-				}
-			}
-		}
 	}
 
 	void start_loading_plugins() {

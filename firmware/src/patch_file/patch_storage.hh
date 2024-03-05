@@ -171,10 +171,23 @@ public:
 
 		if (message.message_type == RequestCopyPluginAssets) {
 			IntercoreStorageMessage result{};
-			if (PatchFileIO::deep_copy_dirs(norflash_, ramdisk_, "res"))
-				result.message_type = CopyPluginAssetsOK;
-			else
-				result.message_type = CopyPluginAssetsFail;
+			bool ok = false;
+			std::string path = message.filename;
+			switch (message.vol_id) {
+				case Volume::NorFlash:
+					ok = PatchFileIO::deep_copy_dirs(norflash_, ramdisk_, path);
+					break;
+				case Volume::SDCard:
+					ok = PatchFileIO::deep_copy_dirs(sdcard_, ramdisk_, path);
+					break;
+				case Volume::USB:
+					ok = PatchFileIO::deep_copy_dirs(usbdrive_, ramdisk_, path);
+					break;
+				default:
+					break;
+			}
+
+			result.message_type = ok ? CopyPluginAssetsOK : CopyPluginAssetsFail;
 
 			return result;
 		}

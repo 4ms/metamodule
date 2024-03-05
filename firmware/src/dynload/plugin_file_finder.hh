@@ -56,9 +56,8 @@ private:
 		pr_trace("Scanning metamodule-plugins dir on volume %d\n", fileio.vol_id());
 
 		bool ok = fileio.foreach_dir_entry(
-			"metamodule-plugins",
-			[&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
-				std::string full_path = "metamodule-plugins/" + std::string(entryname);
+			PluginDirName, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
+				std::string full_path = std::string(PluginDirName) + std::string("/") + std::string(entryname);
 
 				// Scan each dir in metamodule-plugins/
 				if (kind == DirEntryKind::Dir) {
@@ -83,8 +82,11 @@ private:
 				// Add files:
 				if (kind == DirEntryKind::File) {
 					if (entryname.ends_with(".so")) {
-						pr_trace("Found plugin file %s/%.*s\n", path.c_str(), entryname.size(), entryname.data());
-						plugin_files.push_back({fileio.vol_id(), path.c_str(), entryname, filesize});
+						//Strip "metamodule-plugins" from path
+						std::string pluginname = path; //.substr(PluginDirName.length() + 1);
+						plugin_files.push_back({fileio.vol_id(), pluginname.c_str(), entryname, filesize});
+
+						pr_trace("Found plugin file %s/%.*s\n", pluginname.c_str(), entryname.size(), entryname.data());
 					}
 				}
 			});

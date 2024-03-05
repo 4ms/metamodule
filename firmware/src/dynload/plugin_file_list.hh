@@ -7,7 +7,7 @@
 namespace MetaModule
 {
 
-static constexpr std::string_view PluginDirName{"metamodule-plugins/"};
+static constexpr std::string_view PluginDirName{"metamodule-plugins"};
 
 struct PluginFile {
 	Volume vol{Volume::MaxVolumes};

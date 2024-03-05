@@ -179,8 +179,8 @@ public:
 		return comm_.send_message(message);
 	}
 
-	bool request_copy_system_plugin_assets() {
-		IntercoreStorageMessage message{.message_type = RequestCopyPluginAssets};
+	bool request_copy_dir_to_ramdisk(Volume vol, std::string_view path) {
+		IntercoreStorageMessage message{.message_type = RequestCopyPluginAssets, .vol_id = vol, .filename = path};
 		return comm_.send_message(message);
 	}
 
