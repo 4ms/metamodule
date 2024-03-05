@@ -40,7 +40,7 @@ add_subdirectory(src ${A7_BIN_PATH})
 # Symbol table
 #
 
-set(SYMBOLS_FILE ${CMAKE_CURRENT_SOURCE_DIR}/a7_symbols.yaml) #TESTING: put this back into BIN dir
+set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
 add_custom_command(
   OUTPUT ${SYMBOLS_FILE}
   #TODO: fix hard-coded dirs
