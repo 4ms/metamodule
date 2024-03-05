@@ -44,7 +44,7 @@ set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
 add_custom_command(
   OUTPUT ${SYMBOLS_FILE}
   #TODO: fix hard-coded dirs
-  COMMAND flashing/dump_syms.py -v
+  COMMAND flashing/dump_syms.py # -v
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/VCV_adaptor/
           --elf $<TARGET_FILE:main.elf>
