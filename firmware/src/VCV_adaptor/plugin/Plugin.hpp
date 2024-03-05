@@ -6,6 +6,14 @@ namespace rack::plugin
 {
 
 struct Plugin {
+	Plugin()
+		: slug{""} {
+	}
+
+	Plugin(std::string slug)
+		: slug{slug} {
+	}
+
 	std::string slug;
 
 	// Owning pointers: TODO unique_ptr (or will that break the VCV API?)
