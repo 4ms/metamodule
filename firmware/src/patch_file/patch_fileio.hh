@@ -1,4 +1,5 @@
 #pragma once
+#include "dynload/plugin_file_list.hh"
 #include "fs/fileio_t.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_file/patch_dir_list.hh"
@@ -135,7 +136,7 @@ public:
 
 	static bool
 	deep_copy_dirs(FileIoC auto &fileio_from, FileIoC auto &fileio_to, std::string dir, unsigned recursion_depth = 0) {
-		pr_dbg("Deep copy of %s\n", dir.c_str());
+		pr_dbg("[%d] Deep copy of %s\n", recursion_depth, dir.c_str());
 
 		bool ok = fileio_from.foreach_dir_entry(
 			dir, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
@@ -151,10 +152,11 @@ public:
 					auto bytes_read = fileio_from.read_file(full_path, filedata);
 
 					if (bytes_read == filesize) {
-						if (fileio_to.update_or_create_file(full_path, filedata))
-							pr_trace("Copied %s (%zu bytes)\n", full_path.c_str(), filesize);
-						else
-							pr_err("Failed to copy file %s (%zu bytes)\n", full_path.c_str(), filesize);
+						std::string write_path = full_path.substr(PluginDirName.length() + 1);
+						if (fileio_to.write_file(write_path, filedata)) {
+							pr_trace("Wrote %s (%zu bytes)\n", write_path.c_str(), filesize);
+						} else
+							pr_err("Failed to copy file %s (%zu bytes)\n", write_path.c_str(), filesize);
 					} else
 						pr_err("Failed to read file %s (%zu bytes)\n", full_path.c_str(), filesize);
 				}
@@ -163,11 +165,11 @@ public:
 				if (kind == DirEntryKind::Dir) {
 					if (entryname.starts_with("."))
 						return;
-					if (recursion_depth < MaxPatchDirRecursion) {
+					if (recursion_depth < MaxAssetDirRecursion) {
 						pr_trace("Entering dir: %s\n", full_path.c_str());
 						ok = deep_copy_dirs(fileio_from, fileio_to, full_path, recursion_depth + 1);
 					} else
-						pr_trace("Found dir: %s, but recursion level is at max, ignroing\n", full_path.c_str());
+						pr_trace("Found dir: %s, but recursion level is at max, ignoring\n", full_path.c_str());
 				}
 			});
 

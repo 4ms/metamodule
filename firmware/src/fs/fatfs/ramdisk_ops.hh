@@ -77,8 +77,6 @@ public:
 			case CTRL_TRIM:
 				break;
 			case CTRL_EJECT:
-				// Set a flag that norflashramdisk can see, so it can xfer patches
-				// return unmount() ? RES_OK : RES_ERROR;
 				break;
 
 			case MMC_GET_SDSTAT:
