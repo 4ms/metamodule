@@ -16,6 +16,7 @@ endif()
 
 set_property(TARGET _vcv_ports_internal PROPERTY CXX_STANDARD 20)
 
+
 # Create interface wrapper that whole-links the actual library
 add_library(vcv_ports INTERFACE)
 target_link_libraries(vcv_ports INTERFACE "$<LINK_LIBRARY:WHOLE_ARCHIVE,_vcv_ports_internal>")
@@ -83,6 +84,7 @@ foreach(brand ${brands})
 
   target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
   target_sources(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
+  target_compile_definitions(${brand}Library PRIVATE METAMODULE_INTERNAL_PLUGIN=1)
   target_link_libraries(${brand}Library PUBLIC VCV_adaptor)
 
   if (CMAKE_CROSSCOMPILING)
