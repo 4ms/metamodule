@@ -1,6 +1,10 @@
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/QPLFO_info.hh"
+#include "qplfo/LFO.h"
+#include "helpers/EdgeDetector.h"
+
+#include <chrono>
 
 namespace MetaModule
 {
@@ -39,6 +43,31 @@ private:
 	template <class Mapping>
 	class Channel
 	{
+	private:
+		template<Info::Elem EL>
+		void setOutput(auto val)
+		{
+			return parent->setOutput<EL>(val);
+		}
+
+		template<Info::Elem EL>
+		auto getInput()
+		{
+			return parent->getInput<EL>();
+		}
+
+		template<Info::Elem EL, typename VAL>
+		void setLED(const VAL &value)
+		{
+			return parent->setLED<EL>(value);
+		}
+
+		template<Info::Elem EL>
+		auto getState()
+		{
+			return parent->getState<EL>();
+		}
+
 	public:
 		Channel(QPLFOCore* parent_) : parent(parent_)
 		{
@@ -46,7 +75,39 @@ private:
 
 		void update()
 		{
+			auto now = get_timestamp();
 
+			if (tapEdge(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
+			{
+				if (lastTapTime)
+				{
+					lfo.setPeriodLength(now - *lastTapTime);
+				}
+				lastTapTime = now;
+			}
+
+			lfo.update(now);
+
+			setLED<Mapping::PingButton>(lfo.getPhase() > 0.5f);
+
+			if (getState<Mapping::OnButton>() == LatchingButton::State_t::DOWN)
+			{
+				setLED<Mapping::OnButton>(true);
+
+				auto outValue = lfo.getValue();
+
+				setOutput<Mapping::Out>(outValue * 10.0f);
+			}
+			else
+			{
+				setLED<Mapping::OnButton>(false);
+				setOutput<Mapping::Out>(0.0f);
+			}
+		}
+
+		uint32_t get_timestamp()
+		{
+			return uint32_t(std::chrono::system_clock::now().time_since_epoch().count());
 		}
 
 		void set_samplerate(float sr) {
@@ -55,6 +116,10 @@ private:
 
 	private:
 		QPLFOCore* parent;
+		LFO lfo;
+		EdgeDetector tapEdge;
+
+		std::optional<uint32_t> lastTapTime;
 
 	};
 
