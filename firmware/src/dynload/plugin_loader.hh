@@ -1,8 +1,9 @@
 #pragma once
 #include "VCV_adaptor/plugin/Plugin.hpp"
 #include "dynload/dynloader.hh"
-#include "fw_update/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
+#include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "patch_file/file_storage_proxy.hh"
+#include "util/monotonic_allocator.hh"
 #include <cstdint>
 #include <string>
 
@@ -172,7 +173,7 @@ private:
 	Status status{};
 	unsigned file_idx = 0;
 
-	OneTimeArenaAllocator allocator;
+	MonotonicAllocator allocator;
 	std::span<uint8_t> buffer;
 
 	// Dynamically generated in non-cacheable RAM
