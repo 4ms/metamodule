@@ -12,9 +12,9 @@ namespace MetaModule
 
 struct PrefsTab {
 
-	PrefsTab(FileStorageProxy &patch_storage)
-		: file_storage{patch_storage}
-		, plugin_loader{patch_storage}
+	PrefsTab(PluginManager &plugin_manager, FileStorageProxy &patch_storage)
+		: plugin_manager{plugin_manager}
+		, file_storage{patch_storage}
 		, plugin_button(lv_btn_create(ui_SystemMenuPrefs))
 		, plugin_button_label(lv_label_create(plugin_button)) {
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
@@ -66,7 +66,7 @@ struct PrefsTab {
 	}
 
 	void update() {
-		auto result = plugin_loader.process();
+		auto result = plugin_manager.process_loading();
 		if (result.error_message.length()) {
 			pr_err("Error: %s\n", result.error_message.c_str());
 		}
@@ -94,16 +94,15 @@ private:
 			return;
 
 		auto page = static_cast<PrefsTab *>(event->user_data);
-		pr_dbg("Start plugin loader\n");
-		page->plugin_loader.start();
+		page->plugin_manager.start_loading_plugins();
 	}
 
 	lv_group_t *group = nullptr;
-	FileStorageProxy &file_storage;
-	ConfirmPopup confirm_popup;
 
-	//TODO: Organizationally, maybe this should be in main, and a ref to it in PatchContext?
-	PluginFileLoader plugin_loader;
+	PluginManager &plugin_manager;
+	FileStorageProxy &file_storage;
+
+	ConfirmPopup confirm_popup;
 
 	lv_obj_t *plugin_button;
 	lv_obj_t *plugin_button_label;

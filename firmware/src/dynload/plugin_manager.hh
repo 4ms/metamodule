@@ -4,6 +4,7 @@
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "plugin_loader.hh"
 #include <list>
 
 extern rack::plugin::Plugin *pluginInstance;
@@ -23,9 +24,6 @@ extern rack::plugin::Model *modelSamplingModulator;
 extern rack::plugin::Model *modelMorphader;
 extern rack::plugin::Model *modelADSR;
 extern rack::plugin::Model *modelSTMix;
-extern rack::plugin::Model *modelMuxlicer;
-extern rack::plugin::Model *modelMex;
-extern rack::plugin::Model *modelNoisePlethora;
 extern rack::plugin::Model *modelChannelStrip;
 extern rack::plugin::Model *modelPonyVCO;
 extern rack::plugin::Model *modelMotionMTR;
@@ -40,12 +38,16 @@ struct PluginManager {
 
 	std::list<rack::plugin::Plugin> internal_plugins;
 
+	PluginFileLoader plugin_file_loader;
+
 	PluginManager(FileStorageProxy &file_storage_proxy, RamDrive &ramdisk_storage)
 		: file_storage_proxy{file_storage_proxy}
 		, ramdisk_ops{ramdisk_storage}
-		, ramdisk{&ramdisk_ops, Volume::RamDisk} {
+		, ramdisk{&ramdisk_ops, Volume::RamDisk}
+		, plugin_file_loader{file_storage_proxy} {
 
 		//Load internal plugins
+		//TODO: how to do this from build system?
 		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
 		pluginInstance = &befaco_plugin;
 		befaco_plugin.addModel(modelEvenVCO);
@@ -65,18 +67,16 @@ struct PluginManager {
 		// befaco_plugin.addModel(modelSTMix);
 		// befaco_plugin.addModel(modelChannelStrip);
 		// befaco_plugin.addModel(modelMotionMTR);
-
-		// Sometimes:
 		// befaco_plugin.addModel(modelSpringReverb);
 
-		// Never:
-		// befaco_plugin.addModel(modelMuxlicer);
-		// befaco_plugin.addModel(modelMex);
-		// befaco_plugin.addModel(modelNoisePlethora);
-
 		internal_plugins.emplace_back("AudibleInstruments");
+		//TODO
+
 		internal_plugins.emplace_back("hetrickcv");
+		//TODO
+
 		internal_plugins.emplace_back("nonlinearcircuits");
+		//TODO
 
 		if (!ramdisk.format_disk()) {
 			pr_err("Could not format RamDisk, no assets can be loaded!\n");
@@ -85,23 +85,7 @@ struct PluginManager {
 			pr_dbg("RamDisk formatted and mounted\n");
 	}
 
-	void test_write() {
-		const char w[25] = "*Testing some file\ndata\n";
-		auto bytes_written = ramdisk.write_file("checkfile", w);
-		pr_trace("Wrote %zu bytes\n", bytes_written);
-	}
-
-	void test_read() {
-		auto filinfo = ramdisk.get_file_info("checkfile");
-		pr_trace("Checkfile = %zu bytes\n", filinfo.size);
-
-		std::array<char, 128> r{0};
-		auto bytes_read = ramdisk.read_file("checkfile", r);
-		pr_trace("%.*s\n", bytes_read, &r[0]);
-	}
-
 	void load_assets() {
-
 		// TODO: Save internal assets on LittleFS NOR Flash Driver,
 		// Load internal plugin assets to RamDisk
 		if (false) {
@@ -119,6 +103,29 @@ struct PluginManager {
 				}
 			}
 		}
+	}
+
+	void start_loading_plugins() {
+		plugin_file_loader.start();
+	}
+
+	auto process_loading() {
+		return plugin_file_loader.process();
+	}
+
+	void test_write() {
+		const char w[24] = "Testing some file\ndata\n";
+		auto bytes_written = ramdisk.write_file("checkfile", w);
+		pr_trace("Wrote %zu bytes\n", bytes_written);
+	}
+
+	void test_read() {
+		auto filinfo = ramdisk.get_file_info("checkfile");
+		pr_trace("Checkfile = %zu bytes\n", filinfo.size);
+
+		std::array<char, 128> r{0};
+		auto bytes_read = ramdisk.read_file("checkfile", r);
+		pr_trace("%.*s\n", bytes_read, &r[0]);
 	}
 };
 
