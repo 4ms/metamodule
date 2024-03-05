@@ -2,6 +2,7 @@
 #include "disk_ops.hh"
 #include "ff.h"
 #include <array>
+#include <cstdio>
 #include <cstring>
 
 constexpr size_t MaxNumDisks = 4;
@@ -10,7 +11,7 @@ constexpr size_t MaxNumDisks = 4;
 PARTITION VolToPart[FF_VOLUMES] = {
 	{0, 0}, /* "0:" ==> Auto detect partition on USB */
 	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
-	{3, 1}, /* "3:" ==> partition 1 on Ramdisk */
+	{2, 0}, /* "2:" ==> auto detect partition on Ramdisk */
 };
 
 namespace
