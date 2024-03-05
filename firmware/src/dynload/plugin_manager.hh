@@ -1,9 +1,11 @@
 #pragma once
 #include "VCV_adaptor/plugin/Plugin.hpp"
+#include "a7_shared_memory.hh"
+#include "conf/ramdisk_conf.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "patch_file/file_storage_proxy.hh"
-#include "static_buffers.hh"
+// #include "static_buffers.hh"
 #include <list>
 
 extern rack::plugin::Plugin *pluginInstance;
@@ -34,14 +36,16 @@ namespace MetaModule
 {
 
 struct PluginManager {
-	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
-	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 	FileStorageProxy &file_storage_proxy;
+	RamDiskOps ramdisk_ops;
+	FatFileIO ramdisk;
 
 	std::list<rack::plugin::Plugin> internal_plugins;
 
-	PluginManager(FileStorageProxy &file_storage_proxy)
-		: file_storage_proxy{file_storage_proxy} {
+	PluginManager(FileStorageProxy &file_storage_proxy, RamDrive &ramdisk_storage)
+		: file_storage_proxy{file_storage_proxy}
+		, ramdisk_ops{ramdisk_storage}
+		, ramdisk{&ramdisk_ops, Volume::RamDisk} {
 
 		//Load internal plugins
 		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
@@ -76,27 +80,45 @@ struct PluginManager {
 		internal_plugins.emplace_back("hetrickcv");
 		internal_plugins.emplace_back("nonlinearcircuits");
 
-		load_assets();
-	}
-
-	void load_assets() {
-		// TODO: load internal plugin assets
 		if (!ramdisk.format_disk()) {
 			pr_err("Could not format RamDisk, no assets can be loaded!\n");
 			return;
-		}
+		} else
+			pr_dbg("RamDisk formatted and mounted\n");
+	}
 
-		file_storage_proxy.request_copy_system_plugin_assets();
+	void test_write() {
+		const char w[25] = "*Testing some file\ndata\n";
+		auto bytes_written = ramdisk.write_file("checkfile", w);
+		pr_trace("Wrote %zu bytes\n", bytes_written);
+	}
 
-		while (true) {
-			auto msg = file_storage_proxy.get_message();
-			if (msg.message_type == FileStorageProxy::CopyPluginAssetsOK) {
-				ramdisk.print_dir("res", 3);
-				break;
-			}
-			if (msg.message_type == FileStorageProxy::CopyPluginAssetsFail) {
-				pr_err("Failed to copy system plugin assets to ramdisk\n");
-				break;
+	void test_read() {
+		auto filinfo = ramdisk.get_file_info("checkfile");
+		pr_trace("Checkfile = %zu bytes\n", filinfo.size);
+
+		std::array<char, 128> r{0};
+		auto bytes_read = ramdisk.read_file("checkfile", r);
+		pr_trace("%.*s\n", bytes_read, &r[0]);
+	}
+
+	void load_assets() {
+
+		// TODO: Save internal assets on LittleFS NOR Flash Driver,
+		// Load internal plugin assets to RamDisk
+		if (false) {
+			file_storage_proxy.request_copy_system_plugin_assets();
+
+			while (true) {
+				auto msg = file_storage_proxy.get_message();
+				if (msg.message_type == FileStorageProxy::CopyPluginAssetsOK) {
+					ramdisk.print_dir("res", 3);
+					break;
+				}
+				if (msg.message_type == FileStorageProxy::CopyPluginAssetsFail) {
+					pr_err("Failed to copy system plugin assets to ramdisk\n");
+					break;
+				}
 			}
 		}
 	}

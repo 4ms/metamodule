@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "dynload/plugin_manager.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_args.hh"
@@ -38,6 +39,7 @@ struct PatchContext {
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
 	GuiState &gui_state;
+	PluginManager &plugin_manager;
 };
 
 struct PageBase {

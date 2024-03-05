@@ -1,6 +1,7 @@
 #pragma once
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
+#include "dynload/plugin_manager.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
 #include "params/params.hh"
@@ -36,10 +37,12 @@ public:
 	Ui(PatchPlayLoader &patch_playloader,
 	   FileStorageProxy &patch_storage,
 	   SyncParams &sync_params,
-	   PatchModQueue &patch_mod_queue)
+	   PatchModQueue &patch_mod_queue,
+	   PluginManager &plugin_manager)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
-		, page_manager{patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue} {
+		, page_manager{
+			  patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue, plugin_manager} {
 
 		params.clear();
 		metaparams.clear();
