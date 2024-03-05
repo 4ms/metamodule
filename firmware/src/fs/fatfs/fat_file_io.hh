@@ -70,6 +70,10 @@ public:
 		return false;
 	}
 
+	bool unmount_drive() {
+		return f_unmount(_fatvol) == FR_OK;
+	}
+
 	bool unmount_disk() {
 		auto disk_id = static_cast<uint8_t>(_vol);
 		return (disk_ioctl(disk_id, CTRL_EJECT, nullptr) == RES_OK);
@@ -197,26 +201,54 @@ public:
 		return bytes_read;
 	}
 
+	bool make_dir(const std::string &path) {
+		auto res = f_mkdir(path.c_str());
+
+		if (res == FR_OK || res == FR_EXIST)
+			return true;
+
+		if (res == FR_NO_PATH) {
+			auto pos = path.find_last_of('/');
+			if (pos == std::string::npos)
+				return false;
+			if (!make_dir(path.substr(0, pos)))
+				return false;
+		}
+		return f_mkdir(path.c_str()) == FR_OK;
+	}
+
 	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
 		FIL fil;
 		UINT bytes_written = 0;
 
 		f_chdrive(_fatvol);
 
-		if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
-			if (!mount_disk())
-				return 0;
+		// Create dirs
+		auto path = std::string(filename);
+		if (auto slashpos = path.find_last_of('/'); slashpos != path.npos) {
+			make_dir(path.substr(0, slashpos));
+		}
 
-			if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK)
+		if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+			if (!mount_disk()) {
+				pr_err("Failed to mount %.3s\n", _fatvol);
 				return 0;
+			}
+
+			if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+				pr_err("Failed to open for writing %.*s on %.3s\n", (int)filename.size(), filename.data(), _fatvol);
+				return 0;
+			}
 		}
 
 		auto res = f_write(&fil, buffer.data(), buffer.size_bytes(), &bytes_written);
 
 		f_close(&fil);
 
-		if (res != FR_OK)
+		if (res != FR_OK) {
+			pr_err("Failed to write %.*s on %.3s\n", (int)filename.size(), filename.data(), _fatvol);
 			return 0;
+		}
 
 		return bytes_written;
 	}
@@ -281,6 +313,7 @@ public:
 				return false;
 		}
 
+		f_rewinddir(&dj);
 		while (f_readdir(&dj, &fno) == FR_OK) {
 			if (fno.fname[0] == '\0')
 				break;
@@ -289,14 +322,13 @@ public:
 
 			pr_trace("Found dir entry %s type %d\n", fno.fname, entry_type);
 
-			// std::string file_path = full_path + std::string(fno.fname);
 			action(fno.fname, timestamp, fno.fsize, entry_type);
 		}
 		return true;
 	}
 
 	void print_dir(std::string_view path, unsigned max_depth, unsigned cur_depth = 0) {
-		pr_dbg("%s/\n", path.data());
+		pr_dbg("%s\n", path.data());
 		cur_depth++;
 
 		if (cur_depth == max_depth)
@@ -311,7 +343,7 @@ public:
 								  pr_dbg("%.*s\t%u\t%x\n", filename.size(), filename.data(), filesize, tmstmp);
 
 							  else if (kind == DirEntryKind::Dir) {
-								  std::string dirpath = std::string(path) + std::string("/") + std::string(filename);
+								  std::string dirpath = std::string(path) + std::string(filename) + std::string("/");
 								  print_dir(dirpath, max_depth, cur_depth);
 							  }
 						  });
