@@ -11,7 +11,7 @@ set(LV_CONF_PATH
     ${CMAKE_CURRENT_LIST_DIR}/lv_conf.h
     CACHE STRING "" FORCE)
 
-add_compile_options(-g2)
+add_compile_options(-O0 -g2)
 
 # #################### cpputil #########################################
 
@@ -42,6 +42,13 @@ add_subdirectory(${FWDIR}/src/VCV_adaptor
 
 # #################### Other brands ##################################
 
+# Only build a limited set of modules, defined in an external file 
+include(${FWDIR}/vcv_ports/glue/filter.cmake) 
+unset(USE_LIMITED_MODULES) 
+if(DEFINED LIMITED_MODULES_FILE) 
+  validate_limited_modules_file(${LIMITED_MODULES_FILE}) 
+endif() 
+
 add_subdirectory(${FWDIR}/vcv_ports/ ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
 
 # #################### Application ############################################
@@ -57,6 +64,11 @@ add_executable(
 	${SHARED}/patch_convert/yaml_to_patch.cc 
 	${SHARED}/patch_convert/patch_to_yaml.cc
 	${SHARED}/CoreModules/moduleFactory.cc
+	stubs/fattime.cc
+	${FWDIR}/lib/fatfs/source/ff.c
+	${FWDIR}/lib/fatfs/source/ffunicode.c
+	${FWDIR}/src/fs/fatfs/diskio.cc
+	${FWDIR}/src/fs/time_convert.cc
 	)
 
 target_include_directories(
@@ -68,6 +80,8 @@ target_include_directories(
           ${FWDIR}/src/params
           ${SHARED}/patch
           ${FWDIR}/src/medium
+          ${FWDIR}/lib/fatfs/source
+          ${FWDIR}/src/fs/fatfs
           )
 
 target_compile_options(simulator PRIVATE -Wall -Og)

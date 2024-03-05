@@ -1,14 +1,14 @@
 #pragma once
 #include "../src/core_intercom/intercore_message.hh"
+#include "default_patch_io.hh"
 #include "fs/volumes.hh"
+#include "host_file_io.hh"
 #include "patch/patch_data.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_location.hh"
 #include "shared/patch_convert/patch_to_yaml.hh"
 #include "shared/patch_convert/yaml_to_patch.hh"
-#include "default_patch_io.hh"
-#include "host_file_io.hh"
 #include <cstdint>
 
 namespace MetaModule
@@ -218,6 +218,10 @@ public:
 
 	bool request_reset_factory_patches() {
 		pr_info("Reset to factory patches: Simulator default patches are read-only\n");
+		return true;
+	}
+
+	bool request_copy_system_plugin_assets() {
 		return true;
 	}
 

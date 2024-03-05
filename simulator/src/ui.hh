@@ -33,6 +33,9 @@ private:
 	PatchPlayLoader patch_playloader{patch_storage, patch_player};
 	PatchModQueue patch_mod_queue;
 
+	std::unique_ptr<RamDrive> ramdrive;
+	PluginManager plugin_manager;
+
 	NotificationQueue notify_queue;
 	PageManager page_manager;
 	ParamsMidiState params;

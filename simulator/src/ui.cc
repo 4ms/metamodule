@@ -6,7 +6,9 @@ namespace MetaModule
 
 Ui::Ui(std::string_view patch_path, size_t block_size)
 	: patch_storage(patch_path)
-	, page_manager{patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue}
+	, ramdrive{new RamDrive}
+	, plugin_manager{patch_storage, *ramdrive}
+	, page_manager{patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue, plugin_manager}
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
 	params.clear();
