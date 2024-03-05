@@ -11,12 +11,131 @@ class QPLFOCore : public SmartCoreProcessor<QPLFOInfo> {
 	using enum Info::Elem;
 
 public:
-	QPLFOCore() = default;
+	template<Info::Elem EL>
+	void setOutput(auto val)
+	{
+		return SmartCoreProcessor<Info>::setOutput<EL>(val);
+	}
+
+	template<Info::Elem EL>
+	auto getInput()
+	{
+		return SmartCoreProcessor<Info>::getInput<EL>();
+	}
+
+	template<Info::Elem EL, typename VAL>
+	void setLED(const VAL &value)
+	{
+		return SmartCoreProcessor<Info>::setLED<EL>(value);
+	}
+
+	template<Info::Elem EL>
+	auto getState()
+	{
+		return SmartCoreProcessor<Info>::getState<EL>();
+	}
+
+private:
+	template <class Mapping>
+	class Channel
+	{
+	public:
+		Channel(QPLFOCore* parent_) : parent(parent_)
+		{
+		}
+
+		void update()
+		{
+
+		}
+
+		void set_samplerate(float sr) {
+		}
+
+
+	private:
+		QPLFOCore* parent;
+
+	};
+
+private:
+	struct MappingA
+	{
+		const static auto SkewKnob   = Skew1Knob;
+		const static auto PingButton = Ping1Button;
+		const static auto OnButton   = On1Button;
+		const static auto PingJackIn = Ping1JackIn;
+		const static auto SkewCVIn   = Skew1CvIn;
+		const static auto ResetIn    = Reset1In;
+		const static auto Out        = Out1Out;
+		const static auto LED        = Led1Light;
+	};
+
+	struct MappingB
+	{
+		const static auto SkewKnob   = Skew2Knob;
+		const static auto PingButton = Ping2Button;
+		const static auto OnButton   = On2Button;
+		const static auto PingJackIn = Ping2JackIn;
+		const static auto SkewCVIn   = Skew2JackIn;
+		const static auto ResetIn    = Reset2In;
+		const static auto Out        = Out2Out;
+		const static auto LED        = Led2Light;
+	};
+
+	struct MappingC
+	{
+		const static auto SkewKnob   = Skew3Knob;
+		const static auto PingButton = Ping3Button;
+		const static auto OnButton   = On3Button;
+		const static auto PingJackIn = Ping3JackIn;
+		const static auto SkewCVIn   = Skew3JackIn;
+		const static auto ResetIn    = Reset3In;
+		const static auto Out        = Out3Out;
+		const static auto LED        = Led3Light;
+	};
+
+	struct MappingD
+	{
+		const static auto SkewKnob   = Skew4Knob;
+		const static auto PingButton = Ping4Button;
+		const static auto OnButton   = On4Button;
+		const static auto PingJackIn = Ping4JackIn;
+		const static auto SkewCVIn   = Skew4JackIn;
+		const static auto ResetIn    = Reset4In;
+		const static auto Out        = Out4Out;
+		const static auto LED        = Led4Light;
+	};	
+
+	Channel<MappingA> channelA;
+	Channel<MappingB> channelB;
+	Channel<MappingC> channelC;
+	Channel<MappingD> channelD;
+
+	friend Channel<MappingA>;
+	friend Channel<MappingB>;
+	friend Channel<MappingC>;
+	friend Channel<MappingD>;
+
+public:
+	QPLFOCore()
+		: channelA(this), channelB(this), channelC(this), channelD(this)
+	{
+
+	}
 
 	void update() override {
+		channelA.update();
+		channelB.update();
+		channelC.update();
+		channelD.update();
 	}
 
 	void set_samplerate(float sr) override {
+		channelA.set_samplerate(sr);
+		channelB.set_samplerate(sr);
+		channelC.set_samplerate(sr);
+		channelD.set_samplerate(sr);
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
