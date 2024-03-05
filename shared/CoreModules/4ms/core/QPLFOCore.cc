@@ -69,7 +69,9 @@ private:
 		}
 
 	public:
-		Channel(QPLFOCore* parent_) : parent(parent_)
+		Channel(QPLFOCore* parent_)
+			: parent(parent_)
+			, lfo(PulseWidthInS * get_timestamp_frequency())
 		{
 		}
 
@@ -86,6 +88,7 @@ private:
 				lastTapTime = now;
 			}
 
+			lfo.setSkew(getState<Mapping::SkewKnob>());
 			lfo.update(now);
 
 			setLED<Mapping::PingButton>(lfo.getPhase() > 0.5f);
@@ -105,18 +108,13 @@ private:
 			}
 		}
 
-		uint32_t get_timestamp()
-		{
-			return uint32_t(std::chrono::system_clock::now().time_since_epoch().count());
-		}
-
 		void set_samplerate(float sr) {
 		}
 
 
 	private:
 		QPLFOCore* parent;
-		LFO lfo;
+		QPLFO::LFO lfo;
 		EdgeDetector tapEdge;
 
 		std::optional<uint32_t> lastTapTime;
@@ -186,7 +184,6 @@ public:
 	QPLFOCore()
 		: channelA(this), channelB(this), channelC(this), channelD(this)
 	{
-
 	}
 
 	void update() override {
@@ -202,6 +199,19 @@ public:
 		channelC.set_samplerate(sr);
 		channelD.set_samplerate(sr);
 	}
+
+	static uint32_t get_timestamp()
+	{
+		return uint32_t(std::chrono::steady_clock::now().time_since_epoch().count());
+	}
+
+	static float get_timestamp_frequency()
+	{
+		return float(std::chrono::steady_clock::period::den) / float(std::chrono::steady_clock::period::num);
+	}
+
+private:
+	static constexpr float PulseWidthInS = 10e-3f;
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
