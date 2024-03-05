@@ -81,11 +81,22 @@ private:
 
 			if (tapEdge(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
 			{
+				lastExtClockTime.reset();
 				if (lastTapTime)
 				{
 					lfo.setPeriodLength(now - *lastTapTime);
 				}
 				lastTapTime = now;
+			}
+
+			if (extClockEdge(getInput<Mapping::PingJackIn>() > PingJackThresholdInV))
+			{
+				lastTapTime.reset();
+				if (lastExtClockTime)
+				{
+					lfo.setPeriodLength(now - *lastExtClockTime);
+				}
+				lastExtClockTime = now;
 			}
 
 			lfo.setSkew(getState<Mapping::SkewKnob>());
@@ -116,8 +127,10 @@ private:
 		QPLFOCore* parent;
 		QPLFO::LFO lfo;
 		EdgeDetector tapEdge;
+		EdgeDetector extClockEdge;
 
 		std::optional<uint32_t> lastTapTime;
+		std::optional<uint32_t> lastExtClockTime;
 
 	};
 
@@ -211,7 +224,8 @@ public:
 	}
 
 private:
-	static constexpr float PulseWidthInS = 10e-3f;
+	static constexpr float PulseWidthInS        = 10e-3f;
+	static constexpr float PingJackThresholdInV = 0.1f;
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
