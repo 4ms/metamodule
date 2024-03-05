@@ -33,14 +33,10 @@ struct PatchDirList {
 
 private:
 	static unsigned vol_idx(Volume vol) {
-		// for (unsigned i = 0; auto v : vols) {
-		// 	if (vol == v)
-		// 		return i;
-		// 	i++;
-		// }
 		auto v = std::ranges::find(vols, vol);
-		auto vol_num = std::distance(v, vols.begin());
-		return std::clamp((int)vol_num, 0, (int)vols.size() - 1);
+		auto dist = std::distance(vols.begin(), v);
+		int vol_num = std::clamp((int)dist, 0, (int)vols.size() - 1);
+		return vol_num;
 	}
 };
 

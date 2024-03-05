@@ -121,7 +121,7 @@ struct PluginManager {
 
 	void test_read() {
 		auto filinfo = ramdisk.get_file_info("checkfile");
-		pr_trace("Checkfile = %zu bytes\n", filinfo.size);
+		pr_trace("Checkfile = %d bytes\n", filinfo.size);
 
 		std::array<char, 128> r{0};
 		auto bytes_read = ramdisk.read_file("checkfile", r);
