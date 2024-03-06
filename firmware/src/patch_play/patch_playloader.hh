@@ -117,15 +117,15 @@ private:
 	ModuleTypeSlug loaded_patch_name_ = "";
 
 	Result _load_patch() {
-		auto &patch = storage_.get_view_patch();
+		auto patch = storage_.get_view_patch();
 		auto vol = storage_.get_view_patch_vol();
 
-		pr_trace("Attempting play patch from vol %d: %.31s\n", (uint32_t)vol, patch.patch_name.data());
+		pr_trace("Attempting play patch from vol %d: %.31s\n", (uint32_t)vol, patch->patch_name.data());
 
-		auto result = player_.load_patch(patch);
+		auto result = player_.load_patch(*patch);
 		if (result.success) {
 			loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
-			loaded_patch_name_ = patch.patch_name;
+			loaded_patch_name_ = patch->patch_name;
 		}
 
 		return result;

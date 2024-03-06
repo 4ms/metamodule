@@ -235,7 +235,7 @@ struct PatchSelectorPage : PageBase {
 
 	void view_loaded_patch() {
 		auto patch = patch_storage.get_view_patch();
-		pr_trace("Parsed patch: %.31s\n", patch.patch_name.data());
+		pr_trace("Parsed patch: %.31s\n", patch->patch_name.data());
 
 		args.patch_loc = selected_patch;
 		args.patch_loc_hash = PatchLocHash{selected_patch};

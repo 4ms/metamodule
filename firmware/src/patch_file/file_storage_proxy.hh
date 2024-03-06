@@ -76,8 +76,8 @@ public:
 		}
 	}
 
-	PatchData &get_view_patch() {
-		return *view_patch_;
+	PatchData *get_view_patch() {
+		return view_patch_;
 	}
 
 	StaticString<255> get_view_patch_filename() {
