@@ -2,11 +2,12 @@
 #include "../src/core_intercom/intercore_message.hh"
 #include "fs/fileio_t.hh"
 #include "fs/volumes.hh"
+#include "fw_update/update_path.hh"
+#include "patch_file/default_patch_io.hh"
+#include "patch_file/host_file_io.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_location.hh"
-#include "stubs/patch_file/default_patch_io.hh"
-#include "stubs/patch_file/host_file_io.hh"
 #include <cstdint>
 
 namespace MetaModule
@@ -157,23 +158,16 @@ private:
 	}
 
 	bool find_manifest(FileIoC auto &fileio) {
-		found_filename.copy("");
+		found_filename.copy(UpdateFileManifestFilename);
 
-		bool ok = fileio.foreach_file_with_ext(
-			".json", [this](const std::string_view filename, uint32_t tm, uint32_t filesize) {
-				pr_dbg("Checking file %.255s\n", filename.data());
-
-				if (/*filename.starts_with("metamodule") && */ filesize > 30) {
-					found_filename.copy(filename);
-					found_filesize = filesize;
-					pr_dbg("Found manifest file: %s (%u B)\n", found_filename.c_str(), found_filesize);
-				}
-			});
-
-		if (!ok || found_filename.length() == 0)
-			return false;
-
-		return true;
+		std::vector<char> buffer(16 * 1024);
+		auto bytes_read = fileio.read_file(std::string_view(found_filename), buffer);
+		if (bytes_read > 0) {
+			found_filesize = bytes_read;
+			pr_dbg("Found manifest file: %s (%u B)\n", found_filename.c_str(), found_filesize);
+			return true;
+		}
+		return false;
 	}
 
 	SimulatorPatchStorage &storage;
