@@ -30,66 +30,6 @@ public:
 		PatchFileIO::add_directory(defaultpatchfs_, patch_dir_list_.volume_root(Volume::NorFlash));
 	}
 
-	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
-		requested_view_patch_loc_.filename = patch_loc.filename;
-		requested_view_patch_loc_.vol = patch_loc.vol;
-		msg_state_ = MsgState::ViewPatchRequested;
-		return true;
-	}
-
-	bool open_patch_file(PatchLocHash patch_loc_hash) {
-		if (auto patch = open_patches_.get(patch_loc_hash)) {
-			// Expensive copy: could view_patch_ just point to the open_patches_ entry?
-			pr_dbg("Found %s in cache\n", patch->patch_name.c_str());
-			view_patch_ = patch;
-			return true;
-		} else {
-			pr_dbg("Not in cache\n");
-			return false;
-		}
-	}
-
-	bool parse_view_patch(uint32_t bytes_read) {
-		std::span<char> file_data = raw_patch.subspan(0, bytes_read);
-
-		// Load into a temporary patch file, so if it fails, view_patch_ is not effected
-		// And if ryml fails to deserialize, we aren't left with data from the last patch
-		PatchData patch;
-		if (!yaml_raw_to_patch(file_data, patch))
-			return false;
-
-		// Add it to the cache
-		if (auto new_patch = open_patches_.overwrite(PatchLocHash{requested_view_patch_loc_}, patch)) {
-			pr_dbg("Adding %s to cache\n", patch.patch_name.c_str());
-			view_patch_ = new_patch;
-			view_patch_loc_ = requested_view_patch_loc_;
-			return true;
-		} else
-			return false;
-	}
-
-	void new_patch() {
-		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
-		view_patch_ = &emptypatch;
-		view_patch_->blank_patch(name);
-
-		name += ".yml";
-		view_patch_loc_.filename.copy(name);
-		view_patch_loc_.vol = Volume::RamDisk;
-	}
-
-	PatchData &get_view_patch() {
-		return *view_patch_;
-	}
-
-	StaticString<255> get_view_patch_filename() {
-		return view_patch_loc_.filename;
-	}
-
-	Volume get_view_patch_vol() {
-		return view_patch_loc_.vol;
-	}
-
 	IntercoreStorageMessage get_message() {
 
 		if (msg_state_ == MsgState::ViewPatchRequested) {
@@ -144,6 +84,54 @@ public:
 
 		return {};
 	}
+	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
+		requested_view_patch_loc_ = patch_loc;
+		msg_state_ = MsgState::ViewPatchRequested;
+		return true;
+	}
+
+	bool open_patch_file(PatchLocHash patch_loc_hash) {
+		if (auto patch = open_patches_.get(patch_loc_hash)) {
+			// Expensive copy: could view_patch_ just point to the open_patches_ entry?
+			pr_dbg("Found %s in cache\n", patch->patch_name.c_str());
+			view_patch_ = patch;
+			return true;
+		} else {
+			pr_dbg("Not in cache\n");
+			return false;
+		}
+	}
+
+	bool parse_view_patch(uint32_t bytes_read) {
+		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
+
+		// Load into a temporary patch file, so if it fails, view_patch_ is not effected
+		// And if ryml fails to deserialize, we aren't left with data from the last patch
+		PatchData patch;
+		if (!yaml_raw_to_patch(file_data, patch))
+			return false;
+
+		// Add it to the cache
+		if (auto new_patch = open_patches_.overwrite(PatchLocHash{requested_view_patch_loc_}, patch)) {
+			pr_dbg("Adding %s to cache\n", patch.patch_name.c_str());
+			view_patch_ = new_patch;
+			view_patch_loc_ = requested_view_patch_loc_;
+			return true;
+		} else
+			return false;
+	}
+
+	PatchData &get_view_patch() {
+		return *view_patch_;
+	}
+
+	StaticString<255> get_view_patch_filename() {
+		return view_patch_loc_.filename;
+	}
+
+	Volume get_view_patch_vol() {
+		return view_patch_loc_.vol;
+	}
 
 	[[nodiscard]] bool request_patchlist() {
 		msg_state_ = MsgState::PatchListRequested;
@@ -152,32 +140,6 @@ public:
 
 	PatchDirList &get_patch_list() {
 		return patch_dir_list_;
-	}
-
-	uint32_t load_patch_file(PatchLocation const &loc) {
-
-		raw_patch = raw_patch_buffer_;
-
-		bool ok = false;
-
-		if (loc.vol == Volume::SDCard)
-			ok = PatchFileIO::read_file(raw_patch, hostfs_, loc.filename);
-
-		if (loc.vol == Volume::NorFlash)
-			ok = PatchFileIO::read_file(raw_patch, defaultpatchfs_, loc.filename);
-
-		//TODO: add USB when we have a usb fileio
-		// if (vol == Volume::USB)
-		// ok = PatchFileIO::read_file(raw_patch, usbpatchfs_, filename);
-
-		if (!ok) {
-			std::cout << "Could not load patch " << loc.filename << " on vol " << (int)loc.vol << "\n";
-			return 0;
-		}
-
-		view_patch_loc_ = loc;
-		std::cout << "Read patch id " << loc.filename << " " << raw_patch.size_bytes() << " bytes\n";
-		return raw_patch.size_bytes();
 	}
 
 	[[nodiscard]] bool request_find_firmware_file() {
@@ -206,6 +168,16 @@ public:
 		return true;
 	}
 
+	void new_patch() {
+		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
+		view_patch_ = &unsaved_patch_;
+		view_patch_->blank_patch(name);
+
+		name += ".yml";
+		view_patch_loc_.filename.copy(name);
+		view_patch_loc_.vol = Volume::RamDisk;
+	}
+
 	bool write_patch(std::string_view filename = "") {
 		if (filename == "")
 			filename = view_patch_loc_.filename;
@@ -223,9 +195,6 @@ public:
 			return false;
 		}
 
-		// printf("size: %zu, %zu\n", file_data.size(), sz);
-		// printf("%.*s\n", (int)sz, file_data.data());
-
 		refresh_required = true;
 		return true;
 	}
@@ -236,16 +205,41 @@ public:
 	}
 
 private:
+	uint32_t load_patch_file(PatchLocation const &loc) {
+
+		raw_patch_data_ = raw_patch_buffer_;
+
+		bool ok = false;
+
+		if (loc.vol == Volume::SDCard)
+			ok = PatchFileIO::read_file(raw_patch_data_, hostfs_, loc.filename);
+
+		if (loc.vol == Volume::NorFlash)
+			ok = PatchFileIO::read_file(raw_patch_data_, defaultpatchfs_, loc.filename);
+
+		//TODO: add USB when we have a usb fileio
+		// if (vol == Volume::USB)
+		// ok = PatchFileIO::read_file(raw_patch, usbpatchfs_, filename);
+
+		if (!ok) {
+			std::cout << "Could not load patch " << loc.filename << " on vol " << (int)loc.vol << "\n";
+			return 0;
+		}
+
+		view_patch_loc_ = loc;
+		std::cout << "Read patch id " << loc.filename << " " << raw_patch_data_.size_bytes() << " bytes\n";
+		return raw_patch_data_.size_bytes();
+	}
 	PatchDirList patch_dir_list_;
 
 	HostFileIO hostfs_;
 	DefaultPatchFileIO defaultpatchfs_;
 
 	std::array<char, 65536> raw_patch_buffer_;
-	std::span<char> raw_patch;
+	std::span<char> raw_patch_data_;
 
-	PatchData emptypatch;
-	PatchData *view_patch_ = &emptypatch;
+	PatchData unsaved_patch_;
+	PatchData *view_patch_ = &unsaved_patch_;
 
 	SeqMap<PatchLocHash, PatchData, 32> open_patches_;
 

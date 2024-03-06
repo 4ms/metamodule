@@ -42,8 +42,7 @@ public:
 		if (!comm_.send_message(message))
 			return false;
 
-		requested_view_patch_loc_.filename = patch_loc.filename;
-		requested_view_patch_loc_.vol = patch_loc.vol;
+		requested_view_patch_loc_ = patch_loc;
 		return true;
 	}
 
@@ -51,7 +50,7 @@ public:
 		if (auto patch = open_patches_.get(patch_loc_hash)) {
 			// Expensive copy: could view_patch_ just point to the open_patches_ entry?
 			pr_dbg("Found %s in cache\n", patch->patch_name.c_str());
-			view_patch_ = *patch;
+			view_patch_ = patch;
 			return true;
 		} else {
 			pr_dbg("Not in cache\n");
@@ -69,19 +68,17 @@ public:
 		if (!yaml_raw_to_patch(file_data, patch))
 			return false;
 
-		open_patches_.insert(PatchLocHash{requested_view_patch_loc_}, patch);
-		pr_dbg("Adding %s to cache\n", patch.patch_name.c_str());
-
-		// Expensive copy: could view_patch_ just point to the open_patches_ entry?
-		view_patch_ = patch;
-		view_patch_loc_.filename = requested_view_patch_loc_.filename;
-		view_patch_loc_.vol = requested_view_patch_loc_.vol;
-
-		return true;
+		if (auto new_patch = open_patches_.overwrite(PatchLocHash{requested_view_patch_loc_}, patch)) {
+			pr_dbg("Adding %s to cache\n", patch.patch_name.c_str());
+			view_patch_ = new_patch;
+			view_patch_loc_ = requested_view_patch_loc_;
+			return true;
+		} else
+			return false;
 	}
 
 	PatchData &get_view_patch() {
-		return view_patch_;
+		return *view_patch_;
 	}
 
 	StaticString<255> get_view_patch_filename() {
@@ -166,8 +163,9 @@ public:
 	}
 
 	void new_patch() {
-		std::string name = "Untitled Patch " + std::to_string((uint8_t)HAL_GetTick());
-		view_patch_.blank_patch(name);
+		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
+		view_patch_ = &unsaved_patch_;
+		view_patch_->blank_patch(name);
 
 		name += ".yml";
 		view_patch_loc_.filename.copy(name);
@@ -180,7 +178,7 @@ public:
 
 		std::span<char> file_data = raw_patch_data_;
 
-		patch_to_yaml_buffer(view_patch_, file_data);
+		patch_to_yaml_buffer(*view_patch_, file_data);
 
 		// printf("size: %zu, %zu\n", file_data.size(), sz);
 		// printf("%.*s\n", (int)sz, file_data.data());
@@ -213,7 +211,9 @@ private:
 	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, IntercoreStorageMessage> comm_;
 
 	std::span<char> raw_patch_data_;
-	PatchData view_patch_;
+
+	PatchData unsaved_patch_;
+	PatchData *view_patch_ = &unsaved_patch_;
 
 	SeqMap<PatchLocHash, PatchData, 32> open_patches_;
 
