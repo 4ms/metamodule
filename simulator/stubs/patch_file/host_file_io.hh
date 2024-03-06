@@ -20,12 +20,16 @@ struct HostFileIO {
 	bool foreach_file_with_ext(const std::string_view extension, auto action) {
 		namespace fs = std::filesystem;
 
-		std::cout << "Scanning " << _patch_dir << " for patches...\n";
+		std::cout << "Scanning " << _patch_dir << " for " << extension << " files...\n";
+
+		fs::current_path(_patch_dir);
+
+		fs::path full_path{"."};
 
 		try {
 			for (const auto &entry : fs::directory_iterator(_patch_dir)) {
 				auto fn = entry.path();
-				if (fn.extension() == fs::path(".yml")) {
+				if (fn.extension() == fs::path(extension)) {
 					auto last_modif = fs::last_write_time(fn);
 					auto timestamp = last_modif.time_since_epoch().count();
 					auto sz = (uint32_t)fs::file_size(fn);
