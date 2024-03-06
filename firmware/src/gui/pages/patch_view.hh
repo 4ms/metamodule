@@ -62,7 +62,7 @@ struct PatchViewPage : PageBase {
 	void prepare_focus() override {
 		is_ready = false;
 
-		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
+		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playing) {
 			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
