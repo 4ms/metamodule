@@ -39,8 +39,8 @@ void main() {
 	pr_info("Version: %s\n", GIT_FIRMWARE_VERSION_TAG.data());
 
 	PatchPlayer patch_player;
-	FileStorageProxy file_storage_proxy{
-		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::patch_dir_list};
+	FileStorageComm patch_comm{StaticBuffers::icc_shared_message};
+	FileStorageProxy file_storage_proxy{StaticBuffers::raw_patch_data, patch_comm, StaticBuffers::patch_dir_list};
 	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
 
 	SyncParams sync_params;

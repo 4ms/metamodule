@@ -28,9 +28,12 @@ public:
 	void play_patch(std::span<Frame> buffer);
 
 private:
+	PatchDirList patch_dir_list;
 	PatchPlayer patch_player;
-	FileStorageProxy patch_storage;
-	PatchPlayLoader patch_playloader{patch_storage, patch_player};
+	SimulatorPatchStorage patch_storage;
+	FileStorageComm patch_comm;
+	FileStorageProxy file_storage_proxy;
+	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
 	PatchModQueue patch_mod_queue;
 
 	std::unique_ptr<RamDrive> ramdrive;
@@ -45,6 +48,8 @@ private:
 
 	std::vector<StreamConfSim::Audio::AudioInFrame> in_buffer;
 	std::vector<StreamConfSim::Audio::AudioOutFrame> out_buffer;
+
+	std::array<char, 65536> raw_patch_data;
 
 	uint32_t last_lvgl_task_tm = 0;
 	uint32_t last_page_task_tm = 0;
