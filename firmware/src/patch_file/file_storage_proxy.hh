@@ -40,15 +40,12 @@ public:
 		if (!comm_.send_message(message))
 			return false;
 
-		pr_dbg("request loading patch from filesystem\n");
-
 		requested_view_patch_loc_ = patch_loc;
 		return true;
 	}
 
 	bool load_if_open(PatchLocation patch_loc) {
 		if (auto patch = open_patches_.get(PatchLocHash{patch_loc})) {
-			pr_dbg("Patch is open, loading from cache\n");
 			view_patch_ = patch;
 			view_patch_loc_ = patch_loc;
 			return true;
