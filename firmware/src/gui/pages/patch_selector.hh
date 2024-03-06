@@ -197,9 +197,9 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::TryingToRequestPatchData:
-				if (patch_storage.open_patch_file(selected_patch)) {
+				if (patch_storage.load_if_open(selected_patch)) {
 					view_loaded_patch();
-				} else if (patch_storage.request_viewpatch(selected_patch)) {
+				} else if (patch_storage.request_load_patch(selected_patch)) {
 					state = State::RequestedPatchData;
 					show_spinner();
 				}
@@ -210,7 +210,7 @@ struct PatchSelectorPage : PageBase {
 
 				if (message.message_type == FileStorageProxy::PatchDataLoaded) {
 					// Try to parse the patch and open the PatchView page
-					if (patch_storage.parse_view_patch(message.bytes_read)) {
+					if (patch_storage.parse_loaded_patch(message.bytes_read)) {
 						view_loaded_patch();
 						hide_spinner();
 
@@ -235,7 +235,6 @@ struct PatchSelectorPage : PageBase {
 
 	void view_loaded_patch() {
 		auto patch = patch_storage.get_view_patch();
-		pr_dbg("Parsed patch: %.31s\n", patch.patch_name.data());
 		pr_trace("Parsed patch: %.31s\n", patch.patch_name.data());
 
 		args.patch_loc = selected_patch;

@@ -21,7 +21,7 @@ struct PatchPlayLoader {
 
 		uint32_t tries = 10000;
 		while (--tries) {
-			if (storage_.request_viewpatch({"SlothDrone.yml", Volume::NorFlash}))
+			if (storage_.request_load_patch({"SlothDrone.yml", Volume::NorFlash}))
 				break;
 		}
 		if (tries == 0) {
@@ -34,7 +34,7 @@ struct PatchPlayLoader {
 			auto message = storage_.get_message();
 
 			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
-				if (!storage_.parse_view_patch(message.bytes_read))
+				if (!storage_.parse_loaded_patch(message.bytes_read))
 					pr_err("ERROR: could not parse initial patch\n");
 				else
 					_load_patch();
