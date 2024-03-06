@@ -1,31 +1,35 @@
 #include "moduleFactory.hh"
 #include "util/seq_map.hh"
 
-// #ifdef TESTPROJECT
-// #define pr_dbg(...)
-// #else
-// #include "console/pr_dbg.hh"
-// #endif
+#ifdef TESTPROJECT
+#define pr_dbg(...)
+#else
+#include "console/pr_dbg.hh"
+#endif
 
 namespace MetaModule
 {
 
 namespace
 {
+//Lazily loaded maps, needed to avoid static-initialization ordering issues with CoreModules self-registering
 
-SeqMap<ModuleTypeSlug, ModuleFactory::CreateModuleFunc, ModuleFactory::MAX_MODULE_TYPES> &creation_funcs() {
-	static SeqMap<ModuleTypeSlug, ModuleFactory::CreateModuleFunc, ModuleFactory::MAX_MODULE_TYPES> _creation_funcs{};
+static constexpr int MAX_MODULE_TYPES = 512;
+
+// SeqMap<ModuleTypeSlug, ModuleFactory::CreateModuleFunc, MAX_MODULE_TYPES>
+auto &creation_funcs() {
+	static SeqMap<ModuleTypeSlug, ModuleFactory::CreateModuleFunc, MAX_MODULE_TYPES> _creation_funcs{};
 	return _creation_funcs;
 }
 
-SeqMap<ModuleTypeSlug, ModuleInfoView, ModuleFactory::MAX_MODULE_TYPES> &infos() {
-	static SeqMap<ModuleTypeSlug, ModuleInfoView, ModuleFactory::MAX_MODULE_TYPES> _infos{};
+// SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES>
+auto &infos() {
+	static SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> _infos{};
 	return _infos;
 }
 
-// FIXME: why does auto not work for return type?
-SeqMap<ModuleTypeSlug, ModuleFactory::FaceplatePtr, ModuleFactory::MAX_MODULE_TYPES> &faceplates() {
-	static SeqMap<ModuleTypeSlug, ModuleFactory::FaceplatePtr, ModuleFactory::MAX_MODULE_TYPES> _faceplates{};
+auto &faceplates() {
+	static SeqMap<ModuleTypeSlug, std::string_view, MAX_MODULE_TYPES> _faceplates{};
 	return _faceplates;
 }
 
@@ -60,10 +64,14 @@ bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug, CreateMod
 	return already_exists;
 }
 
-bool ModuleFactory::registerModuleFaceplate(const ModuleTypeSlug &typeslug, FaceplatePtr faceplate) {
+bool ModuleFactory::registerModuleFaceplate(const ModuleTypeSlug &typeslug, std::string_view faceplate) {
 	if (faceplates().key_exists(typeslug)) {
 		return false;
 	} else {
+		pr_dbg("ModuleFactory::register %s to faceplate %.*s\n",
+			   typeslug.c_str(),
+			   (int)faceplate.size(),
+			   faceplate.data());
 		return faceplates().insert(typeslug, faceplate);
 	}
 }
@@ -82,11 +90,11 @@ ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &typeslug) {
 		return nullinfo;
 }
 
-ModuleFactory::FaceplatePtr ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &typeslug) {
+std::string_view ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &typeslug) {
 	if (auto m = faceplates().get(typeslug))
 		return *m;
 	else
-		return nullptr;
+		return "";
 }
 
 bool ModuleFactory::isValidSlug(const ModuleTypeSlug &typeslug) {

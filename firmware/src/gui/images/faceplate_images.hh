@@ -7,8 +7,8 @@ namespace MetaModule
 {
 
 struct ModuleImages {
-	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
-		return static_cast<lv_img_dsc_t *>(ModuleFactory::getModuleFaceplate(slug));
+	static const auto get_image_by_slug(const std::string_view slug) {
+		return ModuleFactory::getModuleFaceplate(slug);
 	}
 };
 

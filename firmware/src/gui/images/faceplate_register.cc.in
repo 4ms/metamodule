@@ -1,4 +1,4 @@
 #include "CoreModules/moduleFactory.hh"
 struct lv_img_dsc_t;
 extern const lv_img_dsc_t @IMGNAME@_240;
-static const bool faceplate_register_@brand@_@module@ = MetaModule::ModuleFactory::registerModuleFaceplate("@module@", (void *)(&@IMGNAME@_240));
+static const bool faceplate_register_@brand@_@module@ = MetaModule::ModuleFactory::registerModuleFaceplate("@module@", "@IMGNAME@_240");
