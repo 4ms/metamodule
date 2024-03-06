@@ -30,7 +30,7 @@ public:
 	//
 	// viewpatch: Patch we are currently viewing in the GUI:
 	//
-	[[nodiscard]] bool request_viewpatch(PatchLocation patch_loc) {
+	[[nodiscard]] bool request_load_patch(PatchLocation patch_loc) {
 		IntercoreStorageMessage message{
 			.message_type = RequestPatchData,
 			.vol_id = patch_loc.vol,
@@ -44,9 +44,10 @@ public:
 		return true;
 	}
 
-	bool open_patch_file(PatchLocHash patch_loc_hash) {
-		if (auto patch = open_patches_.get(patch_loc_hash)) {
+	bool load_if_open(PatchLocation patch_loc) {
+		if (auto patch = open_patches_.get(PatchLocHash{patch_loc})) {
 			view_patch_ = patch;
+			view_patch_loc_ = patch_loc;
 			return true;
 		} else {
 			return false;
@@ -54,25 +55,27 @@ public:
 	}
 
 	// TODO: pass the span as an arg, not as a member var
-	bool parse_view_patch(uint32_t bytes_read) {
+	bool parse_loaded_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
 
-		// Load into a temporary patch file, so if it fails, view_patch_ is not effected
-		// And if ryml fails to deserialize, we aren't left with data from the last patch
-		PatchData patch;
-		if (!yaml_raw_to_patch(file_data, patch))
-			return false;
-
-		if (auto new_patch = open_patches_.overwrite(PatchLocHash{requested_view_patch_loc_}, patch)) {
+		if (auto new_patch = open_patches_.overwrite(PatchLocHash{requested_view_patch_loc_}, {})) {
+			if (!yaml_raw_to_patch(file_data, *new_patch)) {
+				pr_err("Failed to parse\n");
+				open_patches_.remove_last();
+				return false;
+			}
 			view_patch_ = new_patch;
 			view_patch_loc_ = requested_view_patch_loc_;
 			return true;
-		} else
+
+		} else {
+			pr_err("Failed to add to cache\n");
 			return false;
+		}
 	}
 
-	PatchData &get_view_patch() {
-		return *view_patch_;
+	PatchData *get_view_patch() {
+		return view_patch_;
 	}
 
 	StaticString<255> get_view_patch_filename() {

@@ -93,7 +93,7 @@ struct ModuleViewPage : PageBase {
 		active_knob_set = page_list.get_active_knobset();
 
 		module_drawer.draw_mapped_elements(
-			patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
+			*patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
 
 		lv_obj_update_layout(canvas);
 
@@ -115,7 +115,7 @@ struct ModuleViewPage : PageBase {
 					if (drawn.mapped_panel_id)
 						append_panel_jack_name(opts, el, drawn.mapped_panel_id.value());
 
-					append_connected_jack_name(opts, drawn, patch);
+					append_connected_jack_name(opts, drawn, *patch);
 
 					opts += "\n";
 					add_button(drawn.obj);
@@ -199,7 +199,7 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
 
-				auto did_move = std::visit(UpdateElement{params, patch, gui_el}, drawn_el.element);
+				auto did_move = std::visit(UpdateElement{params, *patch, gui_el}, drawn_el.element);
 
 				if (did_move && settings.map_ring_flash_active) {
 					map_ring_display.flash_once(gui_el.map_ring, true);
@@ -215,16 +215,17 @@ struct ModuleViewPage : PageBase {
 			bool refresh = true;
 			// Apply to this thread's copy of patch
 			std::visit(overloaded{
-						   [&, this](AddMapping &mod) { refresh = patch.add_update_mapped_knob(mod.set_id, mod.map); },
-						   [&, this](AddMidiMap &mod) { refresh = patch.add_update_midi_map(mod.map); },
-						   [&, this](AddInternalCable &mod) { patch.add_internal_cable(mod.in, mod.out); },
+						   [&, this](AddMapping &mod) { refresh = patch->add_update_mapped_knob(mod.set_id, mod.map); },
+						   [&, this](AddMidiMap &mod) { refresh = patch->add_update_midi_map(mod.map); },
+						   [&, this](AddInternalCable &mod) { patch->add_internal_cable(mod.in, mod.out); },
 						   [&, this](AddJackMapping &mod) {
-							   mod.type == ElementType::Output ? patch.add_mapped_outjack(mod.panel_jack_id, mod.jack) :
-																 patch.add_mapped_injack(mod.panel_jack_id, mod.jack);
+							   mod.type == ElementType::Output ?
+								   patch->add_mapped_outjack(mod.panel_jack_id, mod.jack) :
+								   patch->add_mapped_injack(mod.panel_jack_id, mod.jack);
 						   },
 						   [&, this](DisconnectJack &mod) {
-							   mod.type == ElementType::Output ? patch.disconnect_outjack(mod.jack) :
-																 patch.disconnect_injack(mod.jack);
+							   mod.type == ElementType::Output ? patch->disconnect_outjack(mod.jack) :
+																 patch->disconnect_injack(mod.jack);
 						   },
 						   [&](auto &m) { refresh = false; },
 					   },
@@ -306,10 +307,10 @@ private:
 			return false;
 		auto module_id = args.module_id.value();
 
-		if (module_id >= patch.module_slugs.size())
+		if (module_id >= patch->module_slugs.size())
 			return false;
 
-		slug = patch.module_slugs[module_id];
+		slug = patch->module_slugs[module_id];
 		return true;
 	}
 
@@ -355,7 +356,7 @@ private:
 	uint32_t cur_selected = 0;
 	std::string_view slug = "";
 	bool is_patch_playing = false;
-	PatchData &patch;
+	PatchData *patch;
 
 	unsigned active_knob_set = 0;
 

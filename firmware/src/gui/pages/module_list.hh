@@ -102,7 +102,7 @@ private:
 			ModuleTypeSlug slug;
 			lv_roller_get_selected_str(event->target, slug._data, slug.capacity);
 			page->patch_mod_queue.put(AddModule{slug});
-			page->patch_storage.get_view_patch().module_slugs.push_back(slug);
+			page->patch_storage.get_view_patch()->module_slugs.push_back(slug);
 			page->page_list.increment_patch_revision();
 			page->load_page(PageId::PatchView, page->args);
 			page->notify_queue.put({"Adding module " + std::string{slug}});
