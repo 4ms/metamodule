@@ -121,7 +121,6 @@ public:
 					   plugin.fileinfo.plugin_name.c_str(),
 					   buffer.data(),
 					   buffer.size());
-				HAL_Delay(10);
 
 				if (load_plugin(plugin))
 					load_plugin_assets(plugin);

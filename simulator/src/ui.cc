@@ -9,8 +9,14 @@ Ui::Ui(std::string_view patch_path, size_t block_size)
 	, patch_comm{patch_storage}
 	, file_storage_proxy{raw_patch_data, patch_comm, patch_dir_list}
 	, ramdrive{new RamDrive}
-	, plugin_manager{patch_storage, *ramdrive}
-	, page_manager{patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue, plugin_manager}
+	, plugin_manager{file_storage_proxy, *ramdrive}
+	, page_manager{file_storage_proxy,
+				   patch_playloader,
+				   params,
+				   metaparams,
+				   notify_queue,
+				   patch_mod_queue,
+				   plugin_manager}
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
 
