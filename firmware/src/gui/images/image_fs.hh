@@ -4,6 +4,10 @@
 #include <string_view>
 
 // Mock read-only filesystem: given a file name, return the file contents
+// The filesystem is populated automatically by cmake from the contents of
+// src/gui/images/*/components/*.c
+// src/gui/images/*/modules/*.c
+//
 // TODO: replace with real filesystem (LittleFS for NORFlash)
 // TODO: use /plugin/BRAND/res/components/ directories
 // TODO: integrate this with module faceplates (/plugin/BRAND/res/modules/)

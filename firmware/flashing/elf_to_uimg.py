@@ -82,7 +82,7 @@ def get_images_for_elf(filename, *, destination, loader):
                 if type == UImg.image_type_kernel:
                     print("Contains entry point at 0x{:08x}".format(entry_point))
 
-                header = create_uimg_header(payload, loadaddr=lma, entryaddr=entry_point, name=name, type=type)
+                header, payload = create_uimg_header(payload, loadaddr=lma, entryaddr=entry_point, name=name, type=type)
 
                 # Just concatenate generated images
                 output = output + header + payload

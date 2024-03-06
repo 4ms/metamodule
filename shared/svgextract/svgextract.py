@@ -48,6 +48,10 @@ convertSvgToLvgl [input SVG file name] [path for generated files]
     will be the same as the .svg base filename, with .png and .c extensions.
     Requires the same inkscape and convert programs/paths as createLvglFaceplate
 
+convertPngToLvgl [input PNG file name]
+    Converts the PNG to a LVGL format .c file and saves it in the same dir as the PNG. 
+    The filename will be the same as the .png base filename, with a .c extension.
+
 """)
 
     extended_help = f"""
@@ -77,12 +81,17 @@ createCoreModule [slug] {{optional output path for CoreModule file}}
 
 def parse_args(args):
     script = args.pop(0)
+
     if len(args) < 2:
         usage(script)
         return
 
     cmd = args.pop(0).lower()
     inputfile = args.pop(0)
+
+    if cmd == 'convertpngtolvgl':
+        lvgl.pngToLvgl(inputfile)
+        return
 
     if cmd == 'processsvg':
         processSvg(inputfile)
@@ -98,6 +107,7 @@ def parse_args(args):
         slug = inputfile
         coreModule.createCoreModule(slug, output) 
         return
+
 
     # Two args required for all other cmds:
 

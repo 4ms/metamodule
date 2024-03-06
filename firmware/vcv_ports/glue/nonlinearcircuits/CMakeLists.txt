@@ -15,7 +15,7 @@ set_property(TARGET nonlinearcircuitsLibrary PROPERTY CXX_STANDARD 20)
 target_compile_options(
     nonlinearcircuitsLibrary
   PRIVATE -fvisibility=hidden
-          -fvisibility-inlines-hidden
+          $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>
           # Fixes for warnings with Gamma:
           -Wno-misleading-indentation
           -Wno-unused-but-set-variable

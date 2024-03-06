@@ -109,24 +109,24 @@ struct Toggle2posHoriz : FlipSwitch {
 
 	constexpr Toggle2posHoriz() = default;
 	constexpr Toggle2posHoriz(BaseElement b)
-		: FlipSwitch{{b}, 2, {"switch_horiz_down.png", "switch_horiz_up.png"}} {
+		: FlipSwitch{{b}, 2, {"switch_horiz_left.png", "switch_horiz_right.png"}} {
 	}
 	constexpr Toggle2posHoriz(BaseElement b, std::array<std::string_view, 2> names)
-		: FlipSwitch{{b}, 2, {"switch_horiz_down.png", "switch_horiz_up.png"}, {names[0], names[1]}} {
+		: FlipSwitch{{b}, 2, {"switch_horiz_left.png", "switch_horiz_right.png"}, {names[0], names[1]}} {
 	}
 };
 
 struct Toggle3posHoriz : FlipSwitch {
-	enum State_t : FlipSwitch::State_t { DOWN = 0, CENTER = 1, UP = 2 };
+	enum State_t : FlipSwitch::State_t { LEFT = 0, CENTER = 1, RIGHT = 2 };
 
 	constexpr Toggle3posHoriz() = default;
 	constexpr Toggle3posHoriz(BaseElement b)
-		: FlipSwitch{{b}, 3, {"switch_horiz_down.png", "switch_horiz_center.png", "switch_horiz_up.png"}} {
+		: FlipSwitch{{b}, 3, {"switch_horiz_left.png", "switch_horiz_center.png", "switch_horiz_right.png"}} {
 	}
 	constexpr Toggle3posHoriz(BaseElement b, std::array<std::string_view, 3> names)
 		: FlipSwitch{{b},
 					 3,
-					 {"switch_horiz_down.png", "switch_horiz_center.png", "switch_horiz_up.png"},
+					 {"switch_horiz_left.png", "switch_horiz_center.png", "switch_horiz_right.png"},
 					 {names[0], names[1], names[2]}} {
 	}
 };
@@ -180,6 +180,18 @@ struct RedLight : MonoLight {
 struct BlueLight : MonoLight {
 	constexpr BlueLight(BaseElement b)
 		: MonoLight{{b, "led_x.png"}, Colors565::Blue} {
+	}
+};
+
+struct WhiteLight : MonoLight {
+	constexpr WhiteLight(BaseElement b)
+		: MonoLight{{b, "led_x.png"}, Colors565::White} {
+	}
+};
+
+struct GreenLight : MonoLight {
+	constexpr GreenLight(BaseElement b)
+		: MonoLight{{b, "led_x.png"}, Colors565::Green} {
 	}
 };
 

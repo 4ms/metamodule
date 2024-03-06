@@ -1,4 +1,8 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xm4.cmake)
+set_arch_flags()
+
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 set(M4DIR ${CMAKE_CURRENT_SOURCE_DIR}) # /firmware/src/core_m4
 set(FWDIR ${CMAKE_SOURCE_DIR}) # /firmware
@@ -103,7 +107,6 @@ target_include_directories(
           ${SHARED}
           ${SHARED}/processors
           ${SHARED}/CoreModules
-          ${SHARED}/cpputil
           ${SHARED}/patch
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
@@ -114,69 +117,13 @@ target_include_directories(
           ${USBDEV_LIBDIR}/Class/MSC/Inc
 )
 
-set(MCU_FLAGS
-    -mcpu=cortex-m4
-    -mfpu=fpv4-sp-d16
-    -mthumb
-    -mlittle-endian
-    -mfloat-abi=hard
-)
-
-add_library(mp15xm4_arch INTERFACE)
-target_compile_options(mp15xm4_arch INTERFACE ${MCU_FLAGS})
-
-target_compile_features(main_m4.elf PUBLIC cxx_std_23)
-
-target_compile_options(
-  main_m4.elf
-  PRIVATE ${MCU_FLAGS}
-          $<$<CONFIG:Debug>:-O0
-          -g3>
-          $<$<CONFIG:Release>:-O3>
-          $<$<CONFIG:RelWithDebInfo>:-O3
-          -g3>
-          -fno-common
-          -fdata-sections
-          -ffunction-sections
-          -nostartfiles
-          -ffreestanding
-          -fno-unwind-tables
-          -Wall
-          -Werror=return-type
-          -Wsign-compare
-          -Wdouble-promotion
-          -flto=auto
-          $<$<COMPILE_LANGUAGE:CXX>:
-          -ffold-simple-inlines
-          -Wno-psabi
-          -fno-rtti
-          -fno-exceptions
-          -Wno-register
-          -Wno-volatile
-          -fno-threadsafe-statics
-          >
-)
-
-target_compile_definitions(
-  main_m4.elf
-  PRIVATE USE_HAL_DRIVER
-          USE_FULL_LL_DRIVER
-          STM32MP157Cxx
-          STM32MP1
-          CORE_CM4
-          ARM_MATH_CM4
-)
-
 target_link_script(
   main_m4
   ${FWDIR}/system/linker/stm32mp15xx_m4.ld
   -L${FWDIR}
-  -Wl,--gc-sections
-  -ffreestanding
-  -nostartfiles
-  -flto=auto
-  ${MCU_FLAGS}
 )
+
+target_link_libraries(main_m4.elf PRIVATE cpputil)
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
