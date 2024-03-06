@@ -29,15 +29,16 @@ public:
 
 private:
 	PatchDirList patch_dir_list;
-	PatchPlayer patch_player;
-	SimulatorPatchStorage patch_storage;
-	FileStorageComm patch_comm;
-	FileStorageProxy file_storage_proxy;
-	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
-	PatchModQueue patch_mod_queue;
 
 	std::unique_ptr<RamDrive> ramdrive;
+	FileStorageComm patch_comm;
+	FileStorageProxy file_storage_proxy;
 	PluginManager plugin_manager;
+	SimulatorPatchStorage patch_storage;
+
+	PatchPlayer patch_player;
+	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
+	PatchModQueue patch_mod_queue;
 
 	NotificationQueue notify_queue;
 	PageManager page_manager;

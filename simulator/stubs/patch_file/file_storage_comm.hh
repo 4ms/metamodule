@@ -1,7 +1,7 @@
 #pragma once
 #include "../src/core_intercom/intercore_message.hh"
 #include "dynload/plugin_file_scan.hh"
-#include "fs/fileio_t.hh"
+#include "fat_file_io.hh"
 #include "fs/volumes.hh"
 #include "fw_update/update_path.hh"
 #include "patch_file/default_patch_io.hh"
@@ -15,15 +15,18 @@ namespace MetaModule
 {
 
 struct SimulatorPatchStorage {
-	SimulatorPatchStorage(std::string_view path, PatchDirList &patch_dir_list_)
-		: hostfs_{MetaModule::Volume::SDCard, path}
-		, defaultpatchfs_{MetaModule::Volume::NorFlash} {
-		PatchFileIO::add_directory(hostfs_, patch_dir_list_.volume_root(Volume::SDCard));
-		PatchFileIO::add_directory(defaultpatchfs_, patch_dir_list_.volume_root(Volume::NorFlash));
+
+	SimulatorPatchStorage(std::string_view path, PatchDirList &patch_dir_list_, FatFileIO &ramdisk)
+		: hostfs{MetaModule::Volume::SDCard, path}
+		, defaultpatchfs{MetaModule::Volume::NorFlash}
+		, ramdisk{ramdisk} {
+		PatchFileIO::add_directory(hostfs, patch_dir_list_.volume_root(Volume::SDCard));
+		PatchFileIO::add_directory(defaultpatchfs, patch_dir_list_.volume_root(Volume::NorFlash));
 	}
 
-	HostFileIO hostfs_;
-	DefaultPatchFileIO defaultpatchfs_;
+	HostFileIO hostfs;
+	DefaultPatchFileIO defaultpatchfs;
+	FatFileIO &ramdisk;
 };
 
 struct SimulatorFileStorageComm {
@@ -57,7 +60,7 @@ struct SimulatorFileStorageComm {
 			} break;
 
 			case RequestFirmwareFile: {
-				if (find_manifest(storage.hostfs_)) {
+				if (find_manifest(storage.hostfs)) {
 					reply.message_type = FirmwareFileFound;
 					reply.filename.copy(found_filename);
 					reply.bytes_read = found_filesize;
@@ -83,7 +86,7 @@ struct SimulatorFileStorageComm {
 			} break;
 
 			case RequestLoadFileToRam: {
-				if (storage.hostfs_.read_file(msg.filename, msg.buffer))
+				if (storage.hostfs.read_file(msg.filename, msg.buffer))
 					reply = {LoadFileToRamSuccess};
 				else
 					reply = {LoadFileToRamFailed};
@@ -91,7 +94,7 @@ struct SimulatorFileStorageComm {
 
 			case RequestWritePatchData: {
 				msg_state_ = RequestWritePatchData;
-				if (!storage.hostfs_.update_or_create_file(msg.filename, msg.buffer)) {
+				if (!storage.hostfs.update_or_create_file(msg.filename, msg.buffer)) {
 					pr_err("Error writing file!\n");
 					return false;
 				}
@@ -121,10 +124,10 @@ private:
 		bool ok = false;
 
 		if (loc.vol == Volume::SDCard)
-			ok = PatchFileIO::read_file(raw_patch_data_, storage.hostfs_, loc.filename);
+			ok = PatchFileIO::read_file(raw_patch_data_, storage.hostfs, loc.filename);
 
 		if (loc.vol == Volume::NorFlash)
-			ok = PatchFileIO::read_file(raw_patch_data_, storage.defaultpatchfs_, loc.filename);
+			ok = PatchFileIO::read_file(raw_patch_data_, storage.defaultpatchfs, loc.filename);
 
 		//TODO: add USB when we have a usb fileio
 		// if (vol == Volume::USB)
@@ -157,10 +160,10 @@ private:
 		message.plugin_file_list->clear();
 
 		bool hostfs_ok = false;
-		hostfs_ok = scan_volume(storage.hostfs_, *message.plugin_file_list);
+		hostfs_ok = scan_volume(storage.hostfs, *message.plugin_file_list);
 
 		bool defaultpatchfs_ok = false;
-		defaultpatchfs_ok = scan_volume(storage.defaultpatchfs_, *message.plugin_file_list);
+		defaultpatchfs_ok = scan_volume(storage.defaultpatchfs, *message.plugin_file_list);
 
 		return (hostfs_ok || defaultpatchfs_ok);
 	}
