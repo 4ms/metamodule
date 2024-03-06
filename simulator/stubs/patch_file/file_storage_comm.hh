@@ -35,39 +35,61 @@ struct SimulatorFileStorageComm {
 
 	[[nodiscard]] bool send_message(const MessageT &msg) {
 		switch (msg.message_type) {
-			case RequestPatchData:
+			case RequestPatchData: {
 				requested_view_patch_loc_ = PatchLocation{msg.filename, msg.vol_id};
 				raw_patch_data_ = msg.buffer;
-				msg_state_ = MsgState::ViewPatchRequested;
-				break;
+				auto bytes_read = load_patch_file(requested_view_patch_loc_);
+				reply = {.message_type = bytes_read ? PatchDataLoaded : PatchDataLoadFail,
+						 .bytes_read = bytes_read,
+						 .vol_id = requested_view_patch_loc_.vol,
+						 .filename = requested_view_patch_loc_.filename};
+			} break;
 
-			case RequestRefreshPatchList:
-				msg_state_ = MsgState::PatchListRequested;
-				break;
+			case RequestRefreshPatchList: {
+				// TODO: Refresh from all fs, see if anything changed
+				if (refresh_required) {
+					refresh_required = false;
+					reply = {PatchListChanged};
+				} else {
+					reply = {PatchListUnchanged};
+				}
+			} break;
 
-			case RequestFirmwareFile:
-				msg_state_ = MsgState::FirmwareUpdateFileRequested;
-				break;
+			case RequestFirmwareFile: {
+				if (find_manifest(storage.hostfs_)) {
+					reply.message_type = FirmwareFileFound;
+					reply.filename.copy(found_filename);
+					reply.bytes_read = found_filesize;
+					reply.vol_id = Volume::SDCard;
+				} else {
+					reply = {FirmwareFileFound};
+				}
+			} break;
 
-			case RequestLoadFileToRam:
+			case StartChecksumCompare: {
+				reply = {ChecksumMatch}; //TODO: make it fail sometimes?
+			} break;
+
+			case RequestLoadFileToRam: {
 				if (storage.hostfs_.read_file(msg.filename, msg.buffer))
-					msg_state_ = MsgState::FirmwareFileLoadOK;
+					reply = {LoadFileToRamSuccess};
 				else
-					msg_state_ = MsgState::FirmwareFileLoadFail;
-				break;
+					reply = {LoadFileToRamFailed};
+			} break;
 
 			case RequestWritePatchData: {
-				msg_state_ = MsgState::WritePatchFileRequested;
 				if (!storage.hostfs_.update_or_create_file(msg.filename, msg.buffer)) {
 					pr_err("Error writing file!\n");
+					reply = {PatchDataWriteFail};
 					return false;
 				}
+				reply = {PatchDataWriteOK};
 				refresh_required = true;
 			} break;
 
-			case RequestFactoryResetPatches:
+			case RequestFactoryResetPatches: {
 				pr_info("Reset to factory patches = no action. (simulator default patches are read-only)\n");
-				break;
+			} break;
 
 			default:
 				break;
@@ -77,59 +99,9 @@ struct SimulatorFileStorageComm {
 	}
 
 	IntercoreStorageMessage get_new_message() {
-		if (msg_state_ == MsgState::ViewPatchRequested) {
-			msg_state_ = MsgState::Idle;
-
-			auto bytes_read = load_patch_file(requested_view_patch_loc_);
-			if (bytes_read)
-				return {.message_type = PatchDataLoaded,
-						.bytes_read = bytes_read,
-						.vol_id = requested_view_patch_loc_.vol,
-						.filename = requested_view_patch_loc_.filename};
-			else
-				return {.message_type = PatchDataLoadFail,
-						.bytes_read = 0,
-						.vol_id = requested_view_patch_loc_.vol,
-						.filename = requested_view_patch_loc_.filename};
-		}
-
-		if (msg_state_ == MsgState::PatchListRequested) {
-			msg_state_ = MsgState::Idle;
-
-			// TODO: Refresh from all fs, see if anything changed
-			if (refresh_required) {
-				refresh_required = false;
-				return {PatchListChanged};
-			} else {
-				return {PatchListUnchanged};
-			}
-		}
-
-		if (msg_state_ == MsgState::FirmwareUpdateFileRequested) {
-			msg_state_ = MsgState::Idle;
-
-			if (find_manifest(storage.hostfs_)) {
-				IntercoreStorageMessage reply;
-				reply.message_type = FirmwareFileFound;
-				reply.filename.copy(found_filename);
-				reply.bytes_read = found_filesize;
-				reply.vol_id = Volume::SDCard;
-				return reply;
-			} else
-				return {FirmwareFileFound};
-		}
-
-		if (msg_state_ == MsgState::FirmwareFileLoadOK) {
-			msg_state_ = MsgState::Idle;
-			return {LoadFileToRamSuccess};
-		}
-
-		if (msg_state_ == MsgState::FirmwareFileLoadFail) {
-			msg_state_ = MsgState::Idle;
-			return {LoadFileToRamFailed};
-		}
-
-		return {};
+		auto r = reply;
+		reply = {.message_type = IntercoreStorageMessage::None};
+		return r;
 	}
 
 private:
@@ -180,15 +152,7 @@ private:
 
 	std::span<char> raw_patch_data_;
 
-	enum class MsgState {
-		Idle,
-		ViewPatchRequested,
-		PatchListRequested,
-		FirmwareUpdateFileRequested,
-		FirmwareFileLoadOK,
-		FirmwareFileLoadFail,
-		WritePatchFileRequested,
-	} msg_state_ = MsgState::Idle;
+	IntercoreStorageMessage reply{.message_type = IntercoreStorageMessage::None};
 };
 
 using FileStorageComm = SimulatorFileStorageComm;

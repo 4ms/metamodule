@@ -31,7 +31,6 @@ class PatchStorage {
 
 	PollChange norflash_changes_{1000};
 
-	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
 	using enum IntercoreStorageMessage::MessageType;
 
 public:
