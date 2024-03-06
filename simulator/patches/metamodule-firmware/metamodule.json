@@ -1,0 +1,20 @@
+{
+    "version": 1,
+    "files": [
+        {
+            "filename": "main.uimg",
+            "type": "app",
+            "filesize": 5796620,
+            "md5": "32b2e2e9715fd2e462547eebfad0ca6a",
+            "address": 524288,
+            "name": "Main App"
+        }
+    ],
+    "metadata": {
+        "version": {
+            "major": 0,
+            "minor": 9,
+            "revision": 0
+        }
+    }
+}
