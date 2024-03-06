@@ -36,31 +36,58 @@ struct SimulatorFileStorageComm {
 		using enum IntercoreStorageMessage::MessageType;
 
 		switch (msg.message_type) {
-			case RequestPatchData:
+			case RequestPatchData: {
 				requested_view_patch_loc_ = PatchLocation{msg.filename, msg.vol_id};
 				raw_patch_data_ = msg.buffer;
-				msg_state_ = RequestPatchData;
-				break;
+				auto bytes_read = load_patch_file(requested_view_patch_loc_);
+				reply = {.message_type = bytes_read ? PatchDataLoaded : PatchDataLoadFail,
+						 .bytes_read = bytes_read,
+						 .vol_id = requested_view_patch_loc_.vol,
+						 .filename = requested_view_patch_loc_.filename};
+			} break;
 
-			case RequestRefreshPatchList:
-			case RequestFirmwareFile:
-			case StartChecksumCompare:
-				msg_state_ = msg.message_type;
-				break;
+			case RequestRefreshPatchList: {
+				// TODO: Refresh from all fs, see if anything changed
+				if (refresh_required) {
+					refresh_required = false;
+					reply = {PatchListChanged};
+				} else {
+					reply = {PatchListUnchanged};
+				}
+			} break;
 
-			case RequestPluginFileList:
+			case RequestFirmwareFile: {
+				if (find_manifest(storage.hostfs_)) {
+					reply.message_type = FirmwareFileFound;
+					reply.filename.copy(found_filename);
+					reply.bytes_read = found_filesize;
+					reply.vol_id = Volume::SDCard;
+				} else {
+					reply = {FirmwareFileFound};
+				}
+			} break;
+
+			case StartChecksumCompare: {
+				reply = {ChecksumMatch}; //TODO: make it fail sometimes?
+			} break;
+
+			case RequestPluginFileList: {
 				if (find_plugin_files(msg))
-					msg_state_ = PluginFileListOK;
+					reply = {PluginFileListOK};
 				else
-					msg_state_ = PluginFileListFail;
-				break;
+					reply = {PluginFileListFail};
+			} break;
 
-			case RequestLoadFileToRam:
+			case RequestCopyPluginAssets: {
+				msg_state_ = RequestCopyPluginAssets;
+			} break;
+
+			case RequestLoadFileToRam: {
 				if (storage.hostfs_.read_file(msg.filename, msg.buffer))
-					msg_state_ = FirmwareFileFound;
+					reply = {LoadFileToRamSuccess};
 				else
-					msg_state_ = FirmwareFileNotFound;
-				break;
+					reply = {LoadFileToRamFailed};
+			} break;
 
 			case RequestWritePatchData: {
 				msg_state_ = RequestWritePatchData;
@@ -71,9 +98,9 @@ struct SimulatorFileStorageComm {
 				refresh_required = true;
 			} break;
 
-			case RequestFactoryResetPatches:
+			case RequestFactoryResetPatches: {
 				pr_info("Reset to factory patches = no action. (simulator default patches are read-only)\n");
-				break;
+			} break;
 
 			default:
 				break;
@@ -83,65 +110,9 @@ struct SimulatorFileStorageComm {
 	}
 
 	IntercoreStorageMessage get_new_message() {
-		using enum IntercoreStorageMessage::MessageType;
-
-		IntercoreStorageMessage reply{.message_type = None};
-
-		if (msg_state_ == RequestPatchData) {
-			msg_state_ = None;
-
-			auto bytes_read = load_patch_file(requested_view_patch_loc_);
-			reply = {.message_type = bytes_read ? PatchDataLoaded : PatchDataLoadFail,
-					 .bytes_read = bytes_read,
-					 .vol_id = requested_view_patch_loc_.vol,
-					 .filename = requested_view_patch_loc_.filename};
-		}
-
-		else if (msg_state_ == RequestRefreshPatchList)
-		{
-			// TODO: Refresh from all fs, see if anything changed
-			if (refresh_required) {
-				refresh_required = false;
-				reply = {PatchListChanged};
-			} else {
-				reply = {PatchListUnchanged};
-			}
-		}
-
-		else if (msg_state_ == RequestFirmwareFile)
-		{
-			if (find_manifest(storage.hostfs_)) {
-				reply.message_type = FirmwareFileFound;
-				reply.filename.copy(found_filename);
-				reply.bytes_read = found_filesize;
-				reply.vol_id = Volume::SDCard;
-			} else {
-				reply = {FirmwareFileFound};
-			}
-		}
-
-		else if (msg_state_ == FirmwareFileFound)
-		{
-			reply = {LoadFileToRamSuccess};
-		}
-
-		else if (msg_state_ == FirmwareFileNotFound)
-		{
-			reply = {LoadFileToRamFailed};
-		}
-
-		else if (msg_state_ == StartChecksumCompare)
-		{
-			reply = {ChecksumMatch}; //TODO: make it fail sometimes?
-		}
-
-		else if (msg_state_ == PluginFileListOK || msg_state_ == PluginFileListFail)
-		{
-			reply = {msg_state_};
-		}
-
-		msg_state_ = None;
-		return reply;
+		auto r = reply;
+		reply = {.message_type = IntercoreStorageMessage::None};
+		return r;
 	}
 
 private:
@@ -194,6 +165,7 @@ private:
 		return (hostfs_ok || defaultpatchfs_ok);
 	}
 
+private:
 	SimulatorPatchStorage &storage;
 	PatchLocation requested_view_patch_loc_;
 
@@ -205,6 +177,8 @@ private:
 	std::span<char> raw_patch_data_;
 
 	IntercoreStorageMessage::MessageType msg_state_{IntercoreStorageMessage::None};
+
+	IntercoreStorageMessage reply{.message_type = IntercoreStorageMessage::None};
 };
 
 using FileStorageComm = SimulatorFileStorageComm;

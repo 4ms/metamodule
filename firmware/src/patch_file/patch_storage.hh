@@ -35,7 +35,6 @@ class PatchStorage {
 	RamDiskOps ramdisk_ops{*SharedMemoryS::ptrs.ramdrive};
 	FatFileIO ramdisk_{&ramdisk_ops, Volume::RamDisk};
 
-	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
 	using enum IntercoreStorageMessage::MessageType;
 
 public:
