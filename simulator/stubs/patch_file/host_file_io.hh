@@ -22,6 +22,10 @@ struct HostFileIO {
 
 		std::cout << "Scanning " << _patch_dir << " for " << extension << " files...\n";
 
+		fs::current_path(_patch_dir);
+
+		fs::path full_path{"."};
+
 		try {
 			for (const auto &entry : fs::directory_iterator(_patch_dir)) {
 				auto fn = entry.path();
