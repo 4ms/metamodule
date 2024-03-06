@@ -14,6 +14,8 @@ struct ModuleWidget : widget::Widget {
 	widget::Widget panel;
 	plugin::Model *model;
 
+	std::string svg_filename;
+
 	void setModule(engine::Module *m) {
 		module = m;
 	}
@@ -22,10 +24,13 @@ struct ModuleWidget : widget::Widget {
 		model = m;
 	}
 
-	void setPanel(Widget *panel) {
+	void setPanel(Widget *newpanel) {
+		panel = *newpanel;
+		printf("Using a widget for a panel is not supported\n");
 	}
 
 	void setPanel(std::shared_ptr<window::Svg> svg) {
+		svg_filename = svg->filename;
 	}
 
 	widget::Widget *getPanel() {

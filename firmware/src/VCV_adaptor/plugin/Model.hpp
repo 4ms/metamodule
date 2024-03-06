@@ -46,6 +46,7 @@ struct Model {
 	}
 
 	void move_strings();
+	std::string_view add_string(std::string_view str);
 	void debug_dump_strings();
 };
 
