@@ -1,6 +1,7 @@
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/VCAM_info.hh"
+#include "vcam/vcam_channel.h"
 
 namespace MetaModule
 {
@@ -14,8 +15,11 @@ public:
 	VCAMCore() = default;
 
 	void update() override {
+		channelA1.pot(getState<A1LevelKnob>());
+
 		if (auto input = getInput<InAIn>(); input) {
-			setOutput<Out1Out>(*input);
+			channelA1.input(*input);
+			setOutput<Out1Out>(channelA1.output());
 		}
 	}
 
@@ -31,6 +35,9 @@ public:
 
 private:
 	float timeStepInS = 1.f / 48000.f;
+
+private:
+	Channel channelA1;
 };
 
 } // namespace MetaModule
