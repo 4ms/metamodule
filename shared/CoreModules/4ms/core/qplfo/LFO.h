@@ -1,6 +1,7 @@
 #include <cmath>
 #include <optional>
 #include <numeric>
+#include <variant>
 #include "../helpers/mapping.h"
 
 namespace QPLFO
@@ -22,7 +23,7 @@ public:
     using Timestamp_t = uint32_t;
 
 public:
-    LFO(Timestamp_t pulseWidth) : phase(0), PulseWidth(pulseWidth), resetLockPoint(0), phaseOffset(0)
+    LFO(Timestamp_t pulseWidth) : phase(0), mode(TriggerMode{}), PulseWidth(pulseWidth), resetLockPoint(0), phaseOffset(0)
     {
     }
 
@@ -57,23 +58,23 @@ public:
 
         if (val < PulseThres)
         {
-            mode = Mode_t::Pulse;
-            quarticToLinearAmount = 0.0f;
-            relativeRiseTime = 0.01f;
+            mode = TriggerMode{};
         }
         else if (val < PlugRampThres)
         {
-            mode = Mode_t::Fade;
-            quarticToLinearAmount = (val - PulseThres) / (PlugRampThres - PulseThres);
-            relativeRiseTime = 0.01f;
+            mode = ExpMode
+            {
+                .quarticToLinearAmount = (val - PulseThres) / (PlugRampThres - PulseThres)
+            };
         }
         else
         {
             auto fadePos = (val - PlugRampThres - PulseThres) / (1.0f - PlugRampThres - PulseThres);
 
-            mode = Mode_t::Fade;
-            quarticToLinearAmount = 1.0f;
-            relativeRiseTime = fadePos;
+            mode = LinearMode
+            {
+                .relativeRiseTime = fadePos
+            };
         }
     }
 
@@ -105,25 +106,9 @@ public:
         // work off of a new phase that includes the reset lock point
         float shiftedPhase = wrapPhase(phase - phaseOffset);
 
-        if (mode == Mode_t::Fade)
+        if (periodLength)
         {
-            if (shiftedPhase <= relativeRiseTime)
-            {
-                return shiftedPhase / relativeRiseTime;
-            }
-            else
-            {
-                auto relativeFallPhase = (shiftedPhase - relativeRiseTime) / (1.0f - relativeRiseTime);
-
-                auto EnvQuad = QuarticFadeTable.lookup(relativeFallPhase);
-                auto EnvLin = 1.0f - relativeFallPhase;
-
-                return std::lerp(EnvQuad, EnvLin, quarticToLinearAmount);
-            }
-        }
-        else
-        {
-            if (periodLength)
+            if (std::holds_alternative<TriggerMode>(mode))
             {
                 if (shiftedPhase * periodLength.value() < PulseWidth)
                 {
@@ -134,11 +119,29 @@ public:
                     return 0.0f;
                 }
             }
-            else
+            else if (auto expParams = std::get_if<ExpMode>(&mode))
             {
-                return 0.0f;
+                auto EnvQuad = QuarticFadeTable.lookup(shiftedPhase);
+                auto EnvLin = 1.0f - shiftedPhase;
+
+                return std::lerp(EnvQuad, EnvLin, expParams->quarticToLinearAmount);
+            }
+            else if (auto linParams = std::get_if<LinearMode>(&mode))
+            {
+                if (shiftedPhase <= linParams->relativeRiseTime)
+                {
+                    return shiftedPhase / linParams->relativeRiseTime;
+                }
+                else
+                {
+                    auto relativeFallPhase = (shiftedPhase - linParams->relativeRiseTime) / (1.0f - linParams->relativeRiseTime);
+
+                    return 1.0f - relativeFallPhase;
+                }
             }
         }
+
+        return 0.0f;
     }
 
 private:
@@ -159,8 +162,16 @@ private:
     std::optional<Timestamp_t> periodLength;
     float relativeRiseTime;
 
-    float quarticToLinearAmount;
-    enum Mode_t {Fade, Pulse};
+    struct TriggerMode {};
+    struct ExpMode
+    {
+        float quarticToLinearAmount;    
+    };
+    struct LinearMode {
+        float relativeRiseTime;
+    };
+
+    using Mode_t = std::variant<TriggerMode, ExpMode, LinearMode>;
     Mode_t mode;
 
     const Timestamp_t PulseWidth;
