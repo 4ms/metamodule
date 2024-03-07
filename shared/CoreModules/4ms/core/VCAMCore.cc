@@ -1,35 +1,26 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/VCAM_info.hh"
 
 namespace MetaModule
 {
 
-class VCAMCore : public CoreProcessor {
+class VCAMCore : public SmartCoreProcessor<VCAMInfo> {
 	using Info = VCAMInfo;
 	using ThisCore = VCAMCore;
+	using enum Info::Elem;
 
 public:
 	VCAMCore() = default;
 
 	void update() override {
-	}
-
-	void set_param(int param_id, float val) override {
-	}
-
-	void set_input(int input_id, float val) override {
-	}
-
-	float get_output(int output_id) const override {
-		return 0.f;
+		if (auto input = getInput<InAIn>(); input) {
+			setOutput<Out1Out>(*input);
+		}
 	}
 
 	void set_samplerate(float sr) override {
-	}
-
-	float get_led_brightness(int led_id) const override {
-		return 0.f;
+		timeStepInS = 1.0f / sr;
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -39,6 +30,7 @@ public:
 	// clang-format on
 
 private:
+	float timeStepInS = 1.f / 48000.f;
 };
 
 } // namespace MetaModule
