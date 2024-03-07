@@ -3,6 +3,7 @@
 #include "info/QPLFO_info.hh"
 #include "qplfo/LFO.h"
 #include "helpers/EdgeDetector.h"
+#include "helpers/Gestures.h"
 
 #include <chrono>
 
@@ -72,6 +73,7 @@ private:
 		Channel(QPLFOCore* parent_)
 			: parent(parent_)
 			, lfo(PulseWidthInS * get_timestamp_frequency())
+			, tapLongPress(2.0f * get_timestamp_frequency())
 		{
 		}
 
@@ -99,6 +101,11 @@ private:
 			}
 			else
 			{
+				if (tapLongPress(now, getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
+				{
+					printf("Long press\n");
+				}
+
 				if (tapEdge(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
 				{
 					// reset counter on ping input
@@ -157,12 +164,12 @@ private:
 		QPLFOCore* parent;
 		QPLFO::LFO lfo;
 		EdgeDetector tapEdge;
+		LongPressDetector tapLongPress;
 		EdgeDetector extClockEdge;
 		EdgeDetector resetEdge;
 
 		std::optional<uint32_t> lastTapTime;
 		std::optional<uint32_t> lastExtClockTime;
-
 	};
 
 private:
