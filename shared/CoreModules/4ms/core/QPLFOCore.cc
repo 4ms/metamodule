@@ -111,12 +111,21 @@ private:
 				auto outValue = lfo.getValue();
 
 				setOutput<Mapping::Out>(outValue * 10.0f);
+
+				// TODO: change to single color
+				// TODO: does this need to be changed for bipolar output
+				setLED<Mapping::LED>(std::array<float,3>{outValue,outValue,outValue});
 			}
 			else
 			{
 				setLED<Mapping::OnButton>(false);
 				setOutput<Mapping::Out>(0.0f);
+
+				// TODO: change to single color
+				// TODO: does this need to be changed for bipolar output
+				setLED<Mapping::LED>(std::array<float,3>{0,0,0});
 			}
+
 		}
 
 		void set_samplerate(float sr) {
