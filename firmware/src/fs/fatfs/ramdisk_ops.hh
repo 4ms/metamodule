@@ -67,7 +67,7 @@ public:
 				*(WORD *)buff = RamDiskBlockSize;
 				break;
 			case GET_BLOCK_SIZE: // Get erase block size in unit of sector (DWORD)
-				*(DWORD *)buff = 8;
+				*(DWORD *)buff = 1;
 				break;
 			case GET_SECTOR_COUNT:
 				*(DWORD *)buff = RamDiskSizeBytes / RamDiskBlockSize;
