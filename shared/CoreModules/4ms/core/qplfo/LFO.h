@@ -23,7 +23,7 @@ public:
     using Timestamp_t = uint32_t;
 
 public:
-    LFO(Timestamp_t pulseWidth) : phase(0), mode(TriggerMode{}), PulseWidth(pulseWidth), resetLockPoint(0), phaseOffset(0)
+    LFO(Timestamp_t pulseWidth) : phase(0), mode(TriggerMode{}), PulseWidth(pulseWidth), resetLockPoint(0), phaseOffset(0), skewTouchedZero(true)
     {
     }
 
@@ -36,7 +36,19 @@ public:
         {
             auto phaseIncrement = float(timeIncrement) / float(*periodLength);
 
-            phase = wrapPhase(phase + phaseIncrement);
+            phase += phaseIncrement;
+
+            if (phase > 1.0f)
+            {
+                phase = std::fmod(phase, 1.0f);
+
+                // track skew touching zero
+                skewTouchedZeroLastPeriod = skewTouchedZero;
+                skewTouchedZero = false;
+
+                // always set new mode on a new period
+                nextMode = mode;
+            }
         }
     }
 
@@ -58,23 +70,24 @@ public:
 
         if (val < PulseThres)
         {
-            mode = TriggerMode{};
+            skewTouchedZero = true;
+            updateMode(TriggerMode{});
         }
         else if (val < PlugRampThres)
         {
-            mode = ExpMode
+            updateMode(ExpMode
             {
                 .quarticToLinearAmount = (val - PulseThres) / (PlugRampThres - PulseThres)
-            };
+            });
         }
         else
         {
             auto fadePos = (val - PlugRampThres - PulseThres) / (1.0f - PlugRampThres - PulseThres);
 
-            mode = LinearMode
+            updateMode(LinearMode
             {
                 .relativeRiseTime = fadePos
-            };
+            });
         }
     }
 
@@ -155,29 +168,60 @@ private:
 
 private:
 
+    struct TriggerMode
+    {
+    };
+    struct ExpMode
+    {
+        float quarticToLinearAmount;    
+    };
+    struct LinearMode
+     {
+        float relativeRiseTime;
+    };
+
+    using Mode_t = std::variant<TriggerMode, ExpMode, LinearMode>;
+
+    void updateMode(Mode_t newMode)
+    {
+        nextMode = newMode;
+
+        // only switch to a non-linear mode
+        // if skew touched zero in last period
+        if (    std::holds_alternative<LinearMode>(mode) and
+                not std::holds_alternative<LinearMode>(nextMode) and
+                not skewTouchedZeroLastPeriod
+            )
+        {
+            // do set new mode now
+            // will be done on next period start
+        }
+        else
+        {
+            mode = nextMode;
+        }       
+    }
+
+private:
+
     float phase;
 
     Timestamp_t lastUpdateTime;
 
     std::optional<Timestamp_t> periodLength;
-    float relativeRiseTime;
 
-    struct TriggerMode {};
-    struct ExpMode
-    {
-        float quarticToLinearAmount;    
-    };
-    struct LinearMode {
-        float relativeRiseTime;
-    };
-
-    using Mode_t = std::variant<TriggerMode, ExpMode, LinearMode>;
     Mode_t mode;
+    Mode_t nextMode;
 
     const Timestamp_t PulseWidth;
 
     Timestamp_t resetLockPoint;
     float phaseOffset;
+
+    bool skewTouchedZero;
+    bool skewTouchedZeroLastPeriod;
+
+
 
 };
 }
