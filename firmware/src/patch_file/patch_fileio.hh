@@ -13,7 +13,7 @@ namespace MetaModule
 class PatchFileIO {
 
 	static constexpr unsigned MaxPatchDirRecursion = 1; // /dir/patch.yml
-	static constexpr unsigned MaxAssetDirRecursion = 2; // /res/components/name.png
+	static constexpr unsigned MaxAssetDirRecursion = 2; // /Brand/components/name.png
 
 public:
 	enum class FileFilter { All, NewerTimestamp };
@@ -136,7 +136,7 @@ public:
 
 	static bool
 	deep_copy_dirs(FileIoC auto &fileio_from, FileIoC auto &fileio_to, std::string dir, unsigned recursion_depth = 0) {
-		pr_dbg("[%d] Deep copy of %s\n", recursion_depth, dir.c_str());
+		// pr_dbg("[%d] Deep copy of %s\n", recursion_depth, dir.c_str());
 
 		bool ok = fileio_from.foreach_dir_entry(
 			dir, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
@@ -169,7 +169,7 @@ public:
 						pr_trace("Entering dir: %s\n", full_path.c_str());
 						ok = deep_copy_dirs(fileio_from, fileio_to, full_path, recursion_depth + 1);
 					} else
-						pr_trace("Found dir: %s, but recursion level is at max, ignoring\n", full_path.c_str());
+						pr_warn("Found dir: %s, but recursion level is at max, ignoring\n", full_path.c_str());
 				}
 			});
 

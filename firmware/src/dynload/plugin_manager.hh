@@ -102,8 +102,9 @@ struct PluginManager {
 		if (result.state == PluginFileLoader::State::Success) {
 			if (state == State::IsLoading) {
 				state = State::Done;
-				pr_dbg("All plugins loaded\n");
-				// ramdisk.print_dir("/", 4);
+				pr_info("All plugins loaded\n");
+
+				ramdisk.print_dir("/", 4);
 			}
 		}
 		return result;
@@ -112,16 +113,16 @@ struct PluginManager {
 	void test_write() {
 		const char w[24] = "Testing some file\ndata\n";
 		auto bytes_written = ramdisk.write_file("checkfile", w);
-		pr_trace("Wrote %zu bytes\n", bytes_written);
+		pr_dbg("Wrote %zu bytes\n", bytes_written);
 	}
 
 	void test_read() {
 		auto filinfo = ramdisk.get_file_info("checkfile");
-		pr_trace("Checkfile = %d bytes\n", filinfo.size);
+		pr_dbg("Checkfile = %d bytes\n", filinfo.size);
 
 		std::array<char, 128> r{0};
 		auto bytes_read = ramdisk.read_file("checkfile", r);
-		pr_trace("%.*s\n", bytes_read, &r[0]);
+		pr_dbg("%.*s\n", bytes_read, &r[0]);
 	}
 
 	enum class State { Ready, IsLoading, Done } state = State::Ready;

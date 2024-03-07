@@ -304,7 +304,7 @@ public:
 		f_chdrive(_fatvol);
 
 		auto full_path = std::string(path);
-		pr_trace("FatFS: scanning dir %s\n", full_path.c_str());
+		// pr_trace("FatFS: scanning dir %s\n", full_path.c_str());
 
 		if (f_opendir(&dj, full_path.c_str()) != FR_OK) {
 			if (!mount_disk())
@@ -320,7 +320,7 @@ public:
 			auto entry_type = (fno.fattrib & AM_DIR) ? DirEntryKind::Dir : DirEntryKind::File;
 			uint32_t timestamp = rawtimestamp(fno);
 
-			pr_trace("Found dir entry %s type %d\n", fno.fname, entry_type);
+			// pr_trace("Found dir entry %s type %d\n", fno.fname, entry_type);
 
 			action(fno.fname, timestamp, fno.fsize, entry_type);
 		}
@@ -328,7 +328,6 @@ public:
 	}
 
 	void print_dir(std::string_view path, unsigned max_depth, unsigned cur_depth = 0) {
-		pr_dbg("%s\n", path.data());
 		cur_depth++;
 
 		if (cur_depth == max_depth)
@@ -336,13 +335,14 @@ public:
 
 		foreach_dir_entry(path,
 						  [=, this](std::string_view filename, uint32_t filesize, uint32_t tmstmp, DirEntryKind kind) {
-							  for (auto i = 0u; i < cur_depth; i++)
+							  for (auto i = 0u; i < cur_depth - 1; i++)
 								  pr_dbg("  ");
 
 							  if (kind == DirEntryKind::File)
 								  pr_dbg("%.*s\t%u\t%x\n", filename.size(), filename.data(), filesize, tmstmp);
 
 							  else if (kind == DirEntryKind::Dir) {
+								  pr_dbg("%.*s/\n", filename.size(), filename.data());
 								  std::string dirpath = std::string(path) + std::string(filename) + std::string("/");
 								  print_dir(dirpath, max_depth, cur_depth);
 							  }
