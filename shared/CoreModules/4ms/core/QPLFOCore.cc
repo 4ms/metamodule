@@ -104,7 +104,10 @@ private:
 				lfo.reset();
 			}
 
-			lfo.setSkew(getState<Mapping::SkewKnob>());
+			auto skewCV = getInput<Mapping::SkewCVIn>().value_or(0) / CVInputRangeInV;
+			auto skew = std::clamp(getState<Mapping::SkewKnob>() + skewCV, 0.0f, 1.0f);
+			lfo.setSkew(skew);
+
 			lfo.update(now);
 
 			setLED<Mapping::PingButton>(lfo.getPhase() > 0.5f);
@@ -239,8 +242,9 @@ public:
 	}
 
 private:
-	static constexpr float PulseWidthInS        = 10e-3f;
+	static constexpr float PulseWidthInS       = 10e-3f;
 	static constexpr float TriggerThresholdInV = 0.1f;
+	static constexpr float CVInputRangeInV     = 10.0f;
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
