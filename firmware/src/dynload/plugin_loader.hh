@@ -169,7 +169,7 @@ public:
 	}
 
 	bool load_plugin_assets(LoadedPlugin &plugin) {
-		std::string path = std::string(plugin.fileinfo.dir_name) + std::string("/res");
+		std::string path = std::string(plugin.fileinfo.dir_name) + std::string("");
 		pr_trace("Loading assets from vol %d: %s\n", plugin.fileinfo.vol, path.c_str());
 
 		file_storage.request_copy_dir_to_ramdisk(plugin.fileinfo.vol, path);
