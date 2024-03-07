@@ -256,7 +256,7 @@ public:
 
 private:
 	static constexpr float PulseWidthInS       = 10e-3f;
-	static constexpr float TriggerThresholdInV = 0.1f;
+	static constexpr float TriggerThresholdInV = 2.5f;
 	static constexpr float CVInputRangeInV     = 10.0f;
 
 	// Boilerplate to auto-register in ModuleFactory
