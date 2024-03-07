@@ -1,10 +1,46 @@
 ## MetaModule Users Guide:
 
-### How to upgrade firmware
+
+### How to upgrade firmware:
+
+This method works if you are running firmware v0.7.x or later. For earlier
+versions, use the USB-DFU method described in the next section. You can check
+your current firmware version by clicking Settings from the Main Menu. 
+
 
 1) Download the latest firmware release from the [MetaModule Github
 releases](https://github.com/4ms/metamodule/releases). You only need the
-main.uimg file, the other files are just for doing debugging.
+`metamodule-firmware-vX.X.X-main.zip` file.
+
+2) Unzip this file. It will create a folder called `metamodule-firmware`
+
+3a) Copy the unzipped files to the SD Card or USB Drive:
+
+    - If you are upgrading from v0.8.x or v0.7.x, then copy the *contents* of
+      the `metamodule-firmware` folder to the SD card or USB drive (not the
+      folder itself).
+
+    - If you are upgrading from v0.9.x or later, then copy the entire
+      `metamodule-firmware` folder to an SD card or USB drive (the folder *and*
+      the contents).
+
+4) Insert the SD card or USB drive into the MetaModule.
+
+5) Go to the Main Menu > Settings > Update
+
+6) It will detect the `metamodule-firmware/metamodule.json` file and display an
+"Update Firmware" button. Click this button. A pop-up will display making sure
+you want to update. Click OK.
+
+7) Wait for it to perform the update, and do not power off until it's done. If
+it fails, it's best to reboot before trying again.
+
+
+### USB-DFU update method (when upgrading from v0.7.x and earlier):
+
+1) Download the latest firmware release from the [MetaModule Github
+releases](https://github.com/4ms/metamodule/releases). Unzip the files. You
+only need the main.uimg file, the other files are just for doing debugging.
 
 2) Connect a USB cable from a computer to the module.
 
@@ -33,10 +69,10 @@ This is normal, and is not a problem. It's safe to ignore this.
 the module
 
 
-### How to upgrade your bootloader
+### How to upgrade your bootloader for old units (pre-December 12, 2023)
 
 **You only need to do this if you received your beta MetaModule prior to Dec 12,
-2023.**
+2023 (firmware version 0.5.1 and earlier).**
 
 1) Download the `flash_loader.uimg` file from the [MetaModule Github
 releases](https://github.com/4ms/metamodule/releases) for Firmware version
