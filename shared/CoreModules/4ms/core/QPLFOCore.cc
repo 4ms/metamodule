@@ -79,24 +79,39 @@ private:
 		{
 			auto now = get_timestamp();
 
-			if (tapEdge(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
+			if (auto pingInput = getInput<Mapping::PingJackIn>(); pingInput)
 			{
-				lastExtClockTime.reset();
-				if (lastTapTime)
-				{
-					lfo.setPeriodLength(now - *lastTapTime);
-				}
-				lastTapTime = now;
-			}
-
-			if (extClockEdge(getInput<Mapping::PingJackIn>() > TriggerThresholdInV))
-			{
+				// always disable tap tempo if jack is inserted
 				lastTapTime.reset();
-				if (lastExtClockTime)
+
+				auto isPingHigh = *pingInput > TriggerThresholdInV;
+
+				if (extClockEdge(isPingHigh))
 				{
-					lfo.setPeriodLength(now - *lastExtClockTime);
+					if (lastExtClockTime)
+					{
+						lfo.setPeriodLength(now - *lastExtClockTime);
+					}
+					lastExtClockTime = now;
 				}
-				lastExtClockTime = now;
+
+				setLED<Mapping::PingButton>(isPingHigh);
+			}
+			else
+			{
+				if (tapEdge(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
+				{
+					// reset counter on ping input
+					lastExtClockTime.reset();
+
+					if (lastTapTime)
+					{
+						lfo.setPeriodLength(now - *lastTapTime);
+					}
+					lastTapTime = now;
+				}
+
+				setLED<Mapping::PingButton>(lfo.getPhase() > 0.5f);
 			}
 
 			if (resetEdge(getInput<Mapping::ResetIn>() > TriggerThresholdInV))
@@ -109,8 +124,6 @@ private:
 			lfo.setSkew(skew);
 
 			lfo.update(now);
-
-			setLED<Mapping::PingButton>(lfo.getPhase() > 0.5f);
 
 			if (getState<Mapping::OnButton>() == LatchingButton::State_t::DOWN)
 			{
