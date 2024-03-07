@@ -60,7 +60,7 @@ struct SimulatorFileStorageComm {
 			} break;
 
 			case RequestFirmwareFile: {
-				if (find_manifest(storage.hostfs_)) {
+				if (find_manifest(storage.hostfs)) {
 					reply.message_type = FirmwareFileFound;
 					reply.filename.copy(found_filename);
 					reply.bytes_read = found_filesize;
@@ -75,7 +75,7 @@ struct SimulatorFileStorageComm {
 			} break;
 
 			case RequestLoadFileToRam: {
-				if (storage.hostfs_.read_file(msg.filename, msg.buffer))
+				if (storage.hostfs.read_file(msg.filename, msg.buffer))
 					reply = {LoadFileToRamSuccess};
 				else
 					reply = {LoadFileToRamFailed};
@@ -84,23 +84,18 @@ struct SimulatorFileStorageComm {
 			case RequestPluginFileList: {
 				if (find_plugin_files(msg))
 					reply = {PluginFileListOK};
-                else
-                    reply = {PluginFileListFail};
-            } break;
-            
-			case RequestCopyPluginAssets: {
-				msg_state_ = RequestCopyPluginAssets;
+				else
+					reply = {PluginFileListFail};
 			} break;
 
-			case RequestLoadFileToRam: {
-				if (storage.hostfs.read_file(msg.filename, msg.buffer))
-					reply = {LoadFileToRamSuccess};
-				else
-					reply = {LoadFileToRamFailed};
+			case RequestCopyPluginAssets: {
+				storage.ramdisk.mount_disk();
+				bool ok = PatchFileIO::deep_copy_dirs(storage.hostfs, storage.ramdisk, msg.filename);
+				reply.message_type = ok ? CopyPluginAssetsOK : CopyPluginAssetsFail;
 			} break;
 
 			case RequestWritePatchData: {
-				if (!storage.hostfs_.update_or_create_file(msg.filename, msg.buffer)) {
+				if (!storage.hostfs.update_or_create_file(msg.filename, msg.buffer)) {
 					pr_err("Error writing file!\n");
 					reply = {PatchDataWriteFail};
 					return false;
