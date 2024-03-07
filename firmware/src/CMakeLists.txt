@@ -34,7 +34,17 @@ set(LV_CONF_PATH
 )
 add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
 target_link_libraries(lvgl PRIVATE mdrivlib_interface)
-target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
+
+target_include_directories(lvgl 
+    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source 
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs
+)
+
+target_sources(lvgl
+    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
+            ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
+)
 
 
 #

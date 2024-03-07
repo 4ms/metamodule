@@ -10,9 +10,9 @@ namespace rack::app
 {
 
 struct ModuleWidget : widget::Widget {
-	engine::Module *module;
-	widget::Widget panel;
-	plugin::Model *model;
+	engine::Module *module = nullptr;
+	widget::Widget *panel = nullptr;
+	plugin::Model *model = nullptr;
 
 	std::string svg_filename;
 
@@ -24,17 +24,31 @@ struct ModuleWidget : widget::Widget {
 		model = m;
 	}
 
-	void setPanel(Widget *newpanel) {
-		panel = *newpanel;
-		printf("Using a widget for a panel is not supported\n");
+	// void setPanel(widget::Widget *newpanel) {
+	// 	if (panel)
+	// 		delete panel;
+	// 	panel = newpanel;
+	// }
+
+	void setPanel(app::SvgPanel *newpanel) {
+		if (!newpanel)
+			return;
+		if (panel)
+			delete panel;
+		panel = newpanel;
+
+		if (newpanel->svg)
+			svg_filename = newpanel->svg->filename;
 	}
 
 	void setPanel(std::shared_ptr<window::Svg> svg) {
-		svg_filename = svg->filename;
+		auto *panel = new SvgPanel;
+		panel->setBackground(svg);
+		setPanel(panel);
 	}
 
 	widget::Widget *getPanel() {
-		return &panel;
+		return panel;
 	}
 
 	void place_at(std::vector<MetaModule::Element> &elements, int id, const MetaModule::Element &el) {
@@ -131,6 +145,8 @@ struct ModuleWidget : widget::Widget {
 		for (auto &w : owned_widgets) {
 			delete w;
 		}
+		if (panel)
+			delete panel;
 	}
 
 private:

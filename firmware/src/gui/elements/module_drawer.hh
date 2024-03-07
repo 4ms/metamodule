@@ -20,8 +20,8 @@ struct ModuleDrawer {
 
 	// Draws the module from patch, into container, using the provided buffer.
 	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
-		const std::string_view img_filename = ModuleImages::get_image_by_slug(slug);
-		if (img_filename.length() == 0) {
+		const auto img_filename = ModuleImages::get_image_by_slug(slug);
+		if (img_filename.length() <= 2) {
 			if (!slug.is_equal("HubMedium"))
 				pr_warn("Image not found for %s\n", slug.c_str());
 			return nullptr;
@@ -32,7 +32,7 @@ struct ModuleDrawer {
 		// we need the image size to set the canvas buffer
 		// but we need the canvas w/buffer to draw the image
 		lv_img_header_t img_header;
-		auto res = lv_img_decoder_get_info(img_filename.data(), &img_header);
+		auto res = lv_img_decoder_get_info(img_filename.c_str(), &img_header);
 		if (res != LV_RES_OK) {
 			pr_warn("Could not read image %s for module %s\n", img_filename.data(), slug.c_str());
 			return nullptr;
@@ -63,7 +63,7 @@ struct ModuleDrawer {
 
 		pr_trace("Drawing faceplate %s (%d x %d)\n", slug.data(), widthpx, height);
 
-		lv_canvas_draw_img(canvas, 0, 0, img_filename.data(), &draw_img_dsc);
+		lv_canvas_draw_img(canvas, 0, 0, img_filename.c_str(), &draw_img_dsc);
 		// Overflow visible: requires too much processing when zoomed-out to view lots of modules
 		if (height == 240)
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
