@@ -22,7 +22,7 @@ public:
     using Timestamp_t = uint32_t;
 
 public:
-    LFO(Timestamp_t pulseWidth) : phase(0), PulseWidth(pulseWidth)
+    LFO(Timestamp_t pulseWidth) : phase(0), PulseWidth(pulseWidth), resetLockPoint(0), phaseOffset(0)
     {
     }
 
@@ -35,7 +35,16 @@ public:
         {
             auto phaseIncrement = float(timeIncrement) / float(*periodLength);
 
-            phase = std::fmod(phase + phaseIncrement, 1.0f);
+            phase = wrapPhase(phase + phaseIncrement);
+        }
+    }
+
+    void reset()
+    {
+        if (periodLength)
+        {
+            resetLockPoint = phase * periodLength.value();
+            phaseOffset = phase;
         }
     }
 
@@ -71,6 +80,19 @@ public:
     void setPeriodLength(Timestamp_t val)
     {
         periodLength = val;
+
+        if (periodLength and periodLength > resetLockPoint)
+        {
+            // keep lock point and calculate new phase offset for new tempo
+            phaseOffset = float(resetLockPoint) / float(*periodLength);
+        }
+        else
+        {
+            // lock point is larger than period
+            // reset lock point
+            resetLockPoint = 0;
+            phaseOffset = 0;
+        }
     }
 
     float getPhase()
@@ -80,15 +102,18 @@ public:
 
     float getValue()
     {
+        // work off of a new phase that includes the reset lock point
+        float shiftedPhase = wrapPhase(phase - phaseOffset);
+
         if (mode == Mode_t::Fade)
         {
-            if (phase <= relativeRiseTime)
+            if (shiftedPhase <= relativeRiseTime)
             {
-                return phase / relativeRiseTime;
+                return shiftedPhase / relativeRiseTime;
             }
             else
             {
-                auto relativeFallPhase = (phase - relativeRiseTime) / (1.0f - relativeRiseTime);
+                auto relativeFallPhase = (shiftedPhase - relativeRiseTime) / (1.0f - relativeRiseTime);
 
                 auto EnvQuad = QuarticFadeTable.lookup(relativeFallPhase);
                 auto EnvLin = 1.0f - relativeFallPhase;
@@ -100,7 +125,7 @@ public:
         {
             if (periodLength)
             {
-                if (phase * periodLength.value() < PulseWidth)
+                if (shiftedPhase * periodLength.value() < PulseWidth)
                 {
                     return 1.0f;
                 }
@@ -117,6 +142,16 @@ public:
     }
 
 private:
+
+    static float wrapPhase(float val)
+    {
+        while (val < 0.0f) val += 1.0f;
+        while (val >= 1.0f) val -= 1.0f;
+        return val;
+    }
+
+private:
+
     float phase;
 
     Timestamp_t lastUpdateTime;
@@ -129,6 +164,9 @@ private:
     Mode_t mode;
 
     const Timestamp_t PulseWidth;
+
+    Timestamp_t resetLockPoint;
+    float phaseOffset;
 
 };
 }
