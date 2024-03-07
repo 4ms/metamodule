@@ -17,6 +17,7 @@ inline void strip_paths(std::string &path) {
 	auto lastslash = path.find_last_of('/');
 	if (lastslash != std::string::npos)
 		path = path.substr(lastslash + 1);
+#else
 #endif
 }
 
@@ -35,14 +36,23 @@ inline std::string user(std::string_view filename = "") {
 }
 
 inline std::string plugin(plugin::Plugin *plugin, std::string_view filename = "") {
-	std::string path = "";
+	std::string path{filename};
+
+	// Strip the res/
+	if (path.substr(0, 4) == "res/") {
+		path = path.substr(4);
+	}
+
+	// Add plugin/ if it exists
 	if (plugin)
-		path = plugin->slug + std::string("/");
+		path = plugin->slug + std::string("/") + path;
 	else
 		printf("No plugin slug\n");
 
-	path += filename;
+	// .svg => .png
 	svg_to_png(path);
+
+	// handle internal plugins (temporary fix)
 	strip_paths(path);
 
 	return path;
