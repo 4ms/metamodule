@@ -1,24 +1,27 @@
 #pragma once
 #include "lvgl.h"
 #include <map>
+#include <string>
 #include <string_view>
 
-// Mock read-only filesystem: given a file name, return the file contents
-// The filesystem is populated automatically by cmake from the contents of
-// src/gui/images/*/components/*.c
-// src/gui/images/*/modules/*.c
-//
-// TODO: replace with real filesystem (LittleFS for NORFlash)
-// TODO: use /plugin/BRAND/res/components/ directories
-// TODO: integrate this with module faceplates (/plugin/BRAND/res/modules/)
-struct PNGFileSystem {
-	static lv_img_dsc_t const *read(std::string_view filename) {
-		if (mock_fs.contains(filename))
-			return mock_fs[filename];
-		else
-			return nullptr;
-	}
+namespace MetaModule
+{
 
+struct ComponentImages {
+
+	static const std::string get_comp_path(const std::string_view filename) {
+		if (filename.length() > 0)
+			return LV_FS_FATFS_LETTER + std::string(":2:/") + std::string(filename);
+		else
+			return "";
+	}
+};
+} // namespace MetaModule
+
+//////////////////////////////
+//remove this
+
+struct PNGFileSystem {
 	static bool register_file(std::string_view filename, lv_img_dsc_t const *filedata) {
 		if (filename.size() == 0)
 			return false;

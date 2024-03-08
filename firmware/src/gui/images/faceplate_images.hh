@@ -7,8 +7,9 @@ namespace MetaModule
 {
 
 struct ModuleImages {
-	static const std::string get_image_by_slug(const std::string_view slug) {
-		auto path = LV_FS_FATFS_LETTER + std::string(":2:") + std::string(ModuleFactory::getModuleFaceplate(slug));
+	static const std::string get_faceplate(const std::string_view slug) {
+		std::string filename = std::string(ModuleFactory::getModuleFaceplate(slug));
+		auto path = LV_FS_FATFS_LETTER + std::string(":2:/") + filename;
 		return path;
 	}
 };

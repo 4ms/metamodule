@@ -47,7 +47,7 @@ public:
 
 	// Adds all files/dirs to patch_dir
 	static bool add_directory(FileIoC auto &fileio, PatchDir &patch_dir, unsigned recursion_depth = 0) {
-		pr_dbg("Scanning dir: '%s'\n", patch_dir.name.data());
+		pr_trace("Scanning dir: '%s'\n", patch_dir.name.data());
 
 		bool ok = fileio.foreach_dir_entry(
 			patch_dir.name, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
@@ -136,7 +136,7 @@ public:
 
 	static bool
 	deep_copy_dirs(FileIoC auto &fileio_from, FileIoC auto &fileio_to, std::string dir, unsigned recursion_depth = 0) {
-		// pr_dbg("[%d] Deep copy of %s\n", recursion_depth, dir.c_str());
+		pr_trace("[%d] Deep copy of %s\n", recursion_depth, dir.c_str());
 
 		bool ok = fileio_from.foreach_dir_entry(
 			dir, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
@@ -144,10 +144,15 @@ public:
 
 				// Copy files:
 				if (kind == DirEntryKind::File) {
+					if (entryname.ends_with(".so") || entryname.starts_with('.')) {
+						pr_trace("Skipping file %s\n", full_path.c_str());
+						return;
+					}
 					if (filesize > 1024 * 1024) {
 						pr_warn("Skipping large file %s (%zu bytes)", full_path.c_str(), filesize);
 						return;
 					}
+
 					std::vector<char> filedata(filesize);
 					auto bytes_read = fileio_from.read_file(full_path, filedata);
 
@@ -207,9 +212,9 @@ private:
 
 		auto endpos = header.find_first_of("'\"\n\r");
 		if (endpos == header.npos) {
-			pr_dbg("File does not contain a quote or newline after '%s' in the first %d chars, ignoring\n",
-				   name_tag.data(),
-				   HEADER_SIZE);
+			pr_trace("File does not contain a quote or newline after '%s' in the first %d chars, ignoring\n",
+					 name_tag.data(),
+					 HEADER_SIZE);
 			return "";
 		}
 		header.remove_suffix(header.size() - endpos);
