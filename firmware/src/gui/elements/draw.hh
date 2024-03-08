@@ -48,8 +48,8 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 	if (!body_sz)
 		return nullptr;
 
-	float w = body_sz->x;
-	float h = body_sz->y;
+	float w = body_sz->w;
+	float h = body_sz->h;
 
 	lv_obj_t *handle;
 
@@ -113,7 +113,7 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t 
 	auto body_sz = ElementDrawer::get_image_size(el.image);
 	if (!body_sz)
 		return nullptr;
-	bool vert = (body_sz->y > body_sz->x);
+	bool vert = (body_sz->w > body_sz->h);
 
 	lv_obj_t *handle;
 
@@ -127,9 +127,9 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t 
 		handle = lv_obj_create(obj);
 		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 		if (vert)
-			lv_obj_set_size(handle, body_sz->x - 2, body_sz->y / el.num_pos);
+			lv_obj_set_size(handle, body_sz->w - 2, body_sz->h / el.num_pos);
 		else
-			lv_obj_set_size(handle, body_sz->x / el.num_pos, body_sz->y - 2);
+			lv_obj_set_size(handle, body_sz->w / el.num_pos, body_sz->h - 2);
 
 		lv_obj_set_style_pad_all(handle, 0, LV_STATE_DEFAULT);
 	}

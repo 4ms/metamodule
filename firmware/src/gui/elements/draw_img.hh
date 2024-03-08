@@ -14,10 +14,15 @@
 namespace MetaModule::ElementDrawer
 {
 
-std::optional<lv_point_t> get_image_size(std::string_view img_path) {
+struct ImageSize {
+	uint32_t w;
+	uint32_t h;
+};
+
+inline std::optional<ImageSize> get_image_size(std::string_view img_path) {
 	lv_img_header_t img_header;
 	if (lv_img_decoder_get_info(img_path.data(), &img_header) == LV_RES_OK)
-		return lv_point_t((int16_t)img_header.w, (int16_t)img_header.h);
+		return ImageSize{img_header.w, img_header.h};
 	else
 		return {};
 }
@@ -64,7 +69,7 @@ draw_image(float x, float y, Coords coord_ref, std::string_view img_filename, lv
 	auto img_path = ComponentImages::get_comp_path(img_filename);
 
 	if (auto sz = get_image_size(img_path)) {
-		Impl::draw_image(x, y, sz->x, sz->y, coord_ref, img_path, obj, module_height);
+		Impl::draw_image(x, y, sz->w, sz->h, coord_ref, img_path, obj, module_height);
 	} else
 		pr_warn("Could not read image %s\n", img_path.c_str());
 }
@@ -80,10 +85,10 @@ draw_image(const BaseElement &el, std::string_view img_filename, lv_obj_t *canva
 		lv_obj_t *obj = lv_img_create(canvas);
 		float x = ModuleInfoBase::mm_to_px(el.x_mm, module_height);
 		float y = ModuleInfoBase::mm_to_px(el.y_mm, module_height);
-		Impl::draw_image(x, y, sz->x, sz->y, el.coords, img_path, obj, module_height);
+		Impl::draw_image(x, y, sz->w, sz->h, el.coords, img_path, obj, module_height);
 		lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
-		lv_obj_set_size(obj, sz->x, sz->y);
+		lv_obj_set_size(obj, sz->w, sz->h);
 		lv_obj_set_style_pad_all(obj, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(obj, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 		return obj;
