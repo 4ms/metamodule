@@ -7,7 +7,6 @@
 #include "gui/elements/redraw_light.hh"
 #include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"

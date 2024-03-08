@@ -2,7 +2,7 @@
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/helpers/units_conversion.hh"
-#include "gui/images/image_fs.hh"
+#include "gui/images/paths.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"

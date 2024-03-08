@@ -2,7 +2,7 @@
 #include "CoreModules/elements/element_state_conversion.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
-#include "gui/images/image_fs.hh"
+#include "gui/images/paths.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include <cmath>

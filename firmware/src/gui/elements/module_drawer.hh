@@ -5,7 +5,7 @@
 #include "gui/elements/draw.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
-#include "gui/images/faceplate_images.hh"
+#include "gui/images/paths.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "patch/patch_data.hh"
@@ -20,7 +20,7 @@ struct ModuleDrawer {
 
 	// Draws the module from patch, into container, using the provided buffer.
 	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
-		const auto img_filename = ModuleImages::get_faceplate(slug);
+		const auto img_filename = ModuleImages::get_faceplate_path(slug);
 		if (img_filename.length() <= 2) {
 			if (!slug.is_equal("HubMedium"))
 				pr_warn("Image not found for %s\n", slug.c_str());
