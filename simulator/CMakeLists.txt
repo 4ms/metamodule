@@ -25,6 +25,10 @@ add_subdirectory(lvgl_drv)
 
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 include(${LVGL_DIR}/CMakeLists.txt)
+target_include_directories(lvgl PRIVATE 
+          ${FWDIR}/lib/fatfs/source
+          ${FWDIR}/src/fs/fatfs
+)
 
 # #################### RYML ##################################
 
@@ -83,6 +87,7 @@ target_include_directories(
           ${FWDIR}/src/medium
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
+			.
           )
 
 target_compile_options(simulator PRIVATE -Wall -Og)
