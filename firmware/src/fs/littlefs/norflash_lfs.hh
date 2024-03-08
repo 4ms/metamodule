@@ -13,13 +13,13 @@
 namespace MetaModule
 {
 
+template<size_t VolumeFlashAddr>
 class LfsFileIO {
 	lfs_t lfs{};
 	mdrivlib::QSpiFlash &_flash;
 
 public:
 	static constexpr uint32_t BlockSize = 4096;
-	static constexpr uint32_t MaxFileSize = 32768;
 	enum class Status { AlreadyFormatted, NewlyFormatted, FlashError, LFSError };
 
 	const std::string_view _volname{"LFS Flash"};
@@ -38,15 +38,15 @@ public:
 
 		const static lfs_config cfg = {
 			.context = &_flash,
-			.read = NorFlashOps::read,
-			.prog = NorFlashOps::prog,
-			.erase = NorFlashOps::erase,
-			.sync = NorFlashOps::sync,
+			.read = NorFlashOps<VolumeFlashAddr>::read,
+			.prog = NorFlashOps<VolumeFlashAddr>::prog,
+			.erase = NorFlashOps<VolumeFlashAddr>::erase,
+			.sync = NorFlashOps<VolumeFlashAddr>::sync,
 
 			.read_size = 16,
 			.prog_size = 16,
 			.block_size = BlockSize,
-			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps::FlashOffset) / BlockSize,
+			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps<VolumeFlashAddr>::FlashOffset) / BlockSize,
 			.block_cycles = 500,
 			.cache_size = 1024,
 			.lookahead_size = 64,
@@ -86,15 +86,15 @@ public:
 	Status reformat() {
 		const static lfs_config cfg = {
 			.context = &_flash,
-			.read = NorFlashOps::read,
-			.prog = NorFlashOps::prog,
-			.erase = NorFlashOps::erase,
-			.sync = NorFlashOps::sync,
+			.read = NorFlashOps<VolumeFlashAddr>::read,
+			.prog = NorFlashOps<VolumeFlashAddr>::prog,
+			.erase = NorFlashOps<VolumeFlashAddr>::erase,
+			.sync = NorFlashOps<VolumeFlashAddr>::sync,
 
 			.read_size = 16,
 			.prog_size = 16,
 			.block_size = BlockSize,
-			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps::FlashOffset) / BlockSize,
+			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps<VolumeFlashAddr>::FlashOffset) / BlockSize,
 			.block_cycles = 500,
 			.cache_size = 1024,
 			.lookahead_size = 64,

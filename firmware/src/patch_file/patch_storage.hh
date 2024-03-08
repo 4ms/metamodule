@@ -21,12 +21,14 @@ namespace MetaModule
 // PatchStorage manages all patch filesystems <--> PatchList
 class PatchStorage {
 
+	using PatchVolFileIO = LfsFileIO<PatchVolFlashOffset>;
+
 	FatFileIO &sdcard_;
 
 	FatFileIO &usbdrive_;
 
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
-	LfsFileIO norflash_{flash_};
+	PatchVolFileIO norflash_{flash_};
 
 	PollChange usb_changes_{1000};
 	PollChange norflash_changes_{1000};
@@ -44,7 +46,7 @@ public:
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
-		if (status == LfsFileIO::Status::NewlyFormatted) {
+		if (status == PatchVolFileIO::Status::NewlyFormatted) {
 			reload_default_patches();
 		}
 
