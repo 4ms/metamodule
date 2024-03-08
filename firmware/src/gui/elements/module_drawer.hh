@@ -20,7 +20,7 @@ struct ModuleDrawer {
 
 	// Draws the module from patch, into container, using the provided buffer.
 	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
-		const auto img_filename = ModuleImages::get_image_by_slug(slug);
+		const auto img_filename = ModuleImages::get_faceplate(slug);
 		if (img_filename.length() <= 2) {
 			if (!slug.is_equal("HubMedium"))
 				pr_warn("Image not found for %s\n", slug.c_str());
