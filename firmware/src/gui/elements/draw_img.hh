@@ -17,7 +17,7 @@ namespace MetaModule::ElementDrawer
 std::optional<lv_point_t> get_image_size(std::string_view img_path) {
 	lv_img_header_t img_header;
 	if (lv_img_decoder_get_info(img_path.data(), &img_header) == LV_RES_OK)
-		return lv_point_t(img_header.w, img_header.h);
+		return lv_point_t((int16_t)img_header.w, (int16_t)img_header.h);
 	else
 		return {};
 }
