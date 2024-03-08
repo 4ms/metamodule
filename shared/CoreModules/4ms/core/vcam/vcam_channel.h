@@ -6,7 +6,7 @@ class Channel
 {
 public:
     Channel()
-        : controlPatched(false), potValue(0.f), inputValue(0.f), outputValue(0.f) {
+        : potValue(0.f), inputValue(0.f), outputValue(0.f), controlValue(0.f) {
 
     }
 
@@ -18,23 +18,23 @@ public:
         potValue = pot;
     }
 
-    void setControlPatched(bool isPatched) {
-        controlPatched = isPatched;
+    void control(float control) {
+        controlValue = control;
     }
 
     float output(void) {
-        if(controlPatched) {
-            outputValue = inputValue;
-        } else {
-            outputValue = inputValue * VoltageToGainTable.lookup(potValue * 5.f);
-        }
+        outputValue = inputValue * VoltageToGainTable.lookup(potValue * controlValue);
 
         return outputValue;
     }
 
+    float getLEDbrightness(void) {
+        return VoltageToGainTable.lookup(potValue * controlValue);
+    }
+
 private:
-bool controlPatched;
 float potValue;
 float inputValue;
 float outputValue;
+float controlValue;
 };

@@ -17,10 +17,20 @@ public:
 	void update() override {
 		channelA1.pot(getState<A1LevelKnob>());
 
+		if (auto control = getInput<A1JackIn>(); control) {
+			channelA1.control(*control);
+		} else {
+			channelA1.control(5.f);
+		}
+
 		if (auto input = getInput<InAIn>(); input) {
 			channelA1.input(*input);
 			setOutput<Out1Out>(channelA1.output());
+		} else {
+			setOutput<Out1Out>(0.f);
 		}
+
+		setLED<A1Button>(channelA1.getLEDbrightness());
 	}
 
 	void set_samplerate(float sr) override {
