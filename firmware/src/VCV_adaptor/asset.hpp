@@ -12,13 +12,11 @@ inline void svg_to_png(std::string &path) {
 }
 
 inline void strip_paths(std::string &path) {
-	//Hack: remove strip_paths after we are loading internal plugin assets to RamDisk
-	// #ifdef METAMODULE_INTERNAL_PLUGIN
-	// 	auto lastslash = path.find_last_of('/');
-	// 	if (lastslash != std::string::npos)
-	// 		path = path.substr(lastslash + 1);
-	// #else
-	// #endif
+#ifdef METAMODULE_INTERNAL_PLUGIN
+	path = "M:/" + path;
+#else
+	//path = "P:/" + path;
+#endif
 }
 
 inline std::string system(std::string_view filename = "") {
