@@ -23,6 +23,9 @@ public:
 			channelA1.control(5.f);
 		}
 
+		bool isMuted = (getState<A1Button>() == LatchingButton::State_t::DOWN);
+		channelA1.mute(isMuted);
+
 		if (auto input = getInput<InAIn>(); input) {
 			channelA1.input(*input);
 			setOutput<Out1Out>(channelA1.output());
