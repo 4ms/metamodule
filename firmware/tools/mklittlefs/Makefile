@@ -99,11 +99,11 @@ $(DIST_ARCHIVE): $(TARGET) $(DIST_DIR)
 	cp $(TARGET) $(DIST_DIR)/
 	$(ARCHIVE_CMD) $(DIST_ARCHIVE) $(DIST_DIR)
 
-$(OBJDIR)/%.o: %.c[cp]* $(OBJDIR)/%.d
+$(OBJDIR)/%.o: %.cpp 
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ 
 
-$(OBJDIR)/%.o: %.c $(OBJDIR)/%.d
+$(OBJDIR)/%.o: %.c 
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@ 
 
