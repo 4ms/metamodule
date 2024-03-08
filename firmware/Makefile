@@ -27,6 +27,7 @@ limit:
 
 plugin:
 	make -C vcv_ports -j16
+	ls -l vcv_ports/build/Befaco-strip.so
 	cp vcv_ports/build/Befaco-strip.so /Volumes/METAMOD/metamodule-plugins/Befaco/Befaco.so
 	diskutil unmountDisk /Volumes/METAMOD
 
