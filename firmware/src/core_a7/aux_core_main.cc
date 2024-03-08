@@ -7,7 +7,6 @@
 #include "drivers/timekeeper.hh"
 #include "dynload/plugin_manager.hh"
 #include "gui/ui.hh"
-#include "lvgl.h"
 #include "patch_play/patch_player.hh"
 
 extern "C" void aux_core_main() {

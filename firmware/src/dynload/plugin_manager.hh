@@ -1,6 +1,7 @@
 #pragma once
 #include "VCV_adaptor/plugin/Plugin.hpp"
 #include "conf/ramdisk_conf.hh"
+#include "fs/asset_fs.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -35,6 +36,7 @@ struct PluginManager {
 	FileStorageProxy &file_storage_proxy;
 	RamDiskOps ramdisk_ops;
 	FatFileIO ramdisk;
+	AssetFS asset_fs;
 
 	std::list<rack::plugin::Plugin> internal_plugins;
 
