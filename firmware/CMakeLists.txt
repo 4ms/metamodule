@@ -84,14 +84,16 @@ add_custom_command(
 
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
            --version         "${GIT_FIRMWARE_VERSION_TAG}"
+           --assets          "${CMAKE_BINARY_DIR}/intdrive.img"
            --app             "${MAIN_FW_FILENAME}"
            "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_ONLY_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}/main.uimg ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} && rm -rf ${RELEASE_TARGET_DIR}
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_ONLY_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}/main.uimg ${RELEASE_TARGET_DIR}/intdrive.img ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} && rm -rf ${RELEASE_TARGET_DIR}
 
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
            --version         "${GIT_FIRMWARE_VERSION_TAG}"
            --fsbl            "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot/build/fsbl.stm32"
            --dfu             "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu/build/usbdfu.uimg"
+           --assets          "${CMAKE_BINARY_DIR}/intdrive.img"
            --app             "${MAIN_FW_FILENAME}"
            --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/bootloader.bin"
            --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
