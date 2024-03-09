@@ -22,7 +22,7 @@ add_library(vcv_ports INTERFACE)
 target_link_libraries(vcv_ports INTERFACE "$<LINK_LIBRARY:WHOLE_ARCHIVE,_vcv_ports_internal>")
 
 # Common paths
-set(IMAGES_BASEDIR ${FWDIR}/src/gui/images)
+# set(IMAGES_BASEDIR ${FWDIR}/src/gui/images)
 
 foreach(brand ${brands})
 
@@ -96,7 +96,7 @@ foreach(brand ${brands})
 
 endforeach()
 
-target_link_libraries(_vcv_ports_internal PRIVATE lvgl)
+# target_link_libraries(_vcv_ports_internal PRIVATE lvgl)
 
 # add all image source files as public sources
 # TODO: Can we already compile them here? (lvgl dependency)
