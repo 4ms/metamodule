@@ -37,16 +37,17 @@ struct PluginManager {
 	FileStorageProxy &file_storage_proxy;
 	RamDiskOps ramdisk_ops;
 	FatFileIO ramdisk;
-	AssetFS asset_fs;
+	AssetFS &asset_fs;
 
 	std::list<rack::plugin::Plugin> internal_plugins;
 
 	PluginFileLoader plugin_file_loader;
 
-	PluginManager(FileStorageProxy &file_storage_proxy, RamDrive &ramdisk_storage)
+	PluginManager(FileStorageProxy &file_storage_proxy, RamDrive &ramdisk_storage, AssetFS &asset_fs)
 		: file_storage_proxy{file_storage_proxy}
 		, ramdisk_ops{ramdisk_storage}
 		, ramdisk{&ramdisk_ops, Volume::RamDisk}
+		, asset_fs{asset_fs}
 		, plugin_file_loader{file_storage_proxy} {
 
 		//Load internal plugins
@@ -88,14 +89,14 @@ struct PluginManager {
 			pr_dbg("RamDisk formatted and mounted\n");
 
 		DirTree<FileEntry> dir_tree;
-		add_directory(asset_fs.lfs_io, dir_tree);
+		// add_directory(asset_fs.lfs_io, dir_tree);
 	}
 
 	static constexpr unsigned MaxAssetDirRecursion = 4;
 	bool add_directory(FileIoC auto &fileio, DirTree<FileEntry> &dir_tree, unsigned recursion_depth = 0) {
 		pr_trace("Scanning dir: '%s'\n", dir_tree.name.data());
 
-		bool ok = asset_fs.lfs_io.foreach_dir_entry(
+		bool ok = fileio.lfs_io.foreach_dir_entry(
 			dir_tree.name, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
 				// std::string full_path = dir + "/" + std::string(entryname);
 				// std::string full_path = std::string(entryname);
@@ -109,7 +110,7 @@ struct PluginManager {
 
 				if (kind == DirEntryKind::File) {
 					pr_dbg("%s\n", entryname.data());
-					dir_tree.files.emplace_back(std::string(entryname), filesize, timestamp);
+					dir_tree.files.push_back(FileEntry{std::string(entryname), filesize, timestamp});
 				}
 			});
 
