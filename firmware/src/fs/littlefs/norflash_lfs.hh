@@ -18,7 +18,7 @@ class LfsFileIO {
 	lfs_t lfs{};
 	mdrivlib::QSpiFlash &_flash;
 
-	using NorFlashOps = NorFlashOps<VolumeFlashAddr, VolumeFlashSize>;
+	using ThisNorFlashOps = NorFlashOps<VolumeFlashAddr, VolumeFlashSize>;
 
 public:
 	static constexpr uint32_t BlockSize = 4096;
@@ -40,20 +40,21 @@ public:
 
 		const static lfs_config cfg = {
 			.context = &_flash,
-			.read = NorFlashOps::read,
-			.prog = NorFlashOps::prog,
-			.erase = NorFlashOps::erase,
-			.sync = NorFlashOps::sync,
+			.read = ThisNorFlashOps::read,
+			.prog = ThisNorFlashOps::prog,
+			.erase = ThisNorFlashOps::erase,
+			.sync = ThisNorFlashOps::sync,
 
 			.read_size = 16,
 			.prog_size = 16,
 			.block_size = BlockSize,
-			.block_count = NorFlashOps::Size / BlockSize,
+			.block_count = ThisNorFlashOps::Size / BlockSize,
 			.block_cycles = 500,
 			.cache_size = 1024,
 			.lookahead_size = 64,
 		};
 
+		pr_dbg("Configure lfs with %u blocks (%u/%u)\n", cfg.block_count, ThisNorFlashOps::Size, BlockSize);
 		auto err = lfs_mount(&lfs, &cfg);
 		if (err >= 0) {
 			pr_dbg("LittleFS mounted OK\n");
@@ -82,15 +83,15 @@ public:
 	Status reformat() {
 		const static lfs_config cfg = {
 			.context = &_flash,
-			.read = NorFlashOps::read,
-			.prog = NorFlashOps::prog,
-			.erase = NorFlashOps::erase,
-			.sync = NorFlashOps::sync,
+			.read = ThisNorFlashOps::read,
+			.prog = ThisNorFlashOps::prog,
+			.erase = ThisNorFlashOps::erase,
+			.sync = ThisNorFlashOps::sync,
 
 			.read_size = 16,
 			.prog_size = 16,
 			.block_size = BlockSize,
-			.block_count = NorFlashOps::Size / BlockSize,
+			.block_count = ThisNorFlashOps::Size / BlockSize,
 			.block_cycles = 500,
 			.cache_size = 1024,
 			.lookahead_size = 64,
