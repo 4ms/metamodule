@@ -68,11 +68,14 @@ add_executable(
 	${SHARED}/patch_convert/yaml_to_patch.cc 
 	${SHARED}/patch_convert/patch_to_yaml.cc
 	${SHARED}/CoreModules/moduleFactory.cc
+	#Fatfs:
 	stubs/fattime.cc
 	${FWDIR}/lib/fatfs/source/ff.c
 	${FWDIR}/lib/fatfs/source/ffunicode.c
 	${FWDIR}/src/fs/fatfs/diskio.cc
 	${FWDIR}/src/fs/time_convert.cc
+	#Tar:
+	${FWDIR}/src/fs/untar.cc
 	)
 
 target_include_directories(

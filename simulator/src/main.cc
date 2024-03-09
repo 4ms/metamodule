@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 	SDLAudio<Frame> audio_out{settings.audioout_dev};
 
 	auto patch_path = std::filesystem::absolute(settings.patch_path);
-	auto asset_path = std::filesystem::absolute("../firmware/build/intdrive.img");
+	auto asset_path = std::filesystem::absolute("../../firmware/build/intdrive.img");
 
 	MetaModule::Ui ui{patch_path.string(), asset_path.string(), audio_out.get_block_size()};
 

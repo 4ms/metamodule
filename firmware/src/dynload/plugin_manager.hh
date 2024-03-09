@@ -5,6 +5,7 @@
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "fs/fileio_t.hh"
+#include "fs/untar.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
 #include <list>
@@ -88,7 +89,8 @@ struct PluginManager {
 		} else
 			pr_dbg("RamDisk formatted and mounted\n");
 
-		DirTree<FileEntry> dir_tree;
+		Tar::print_info(asset_fs.raw_image);
+		// DirTree<FileEntry> dir_tree;
 		// add_directory(asset_fs.lfs_io, dir_tree);
 	}
 
