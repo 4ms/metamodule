@@ -13,10 +13,12 @@
 namespace MetaModule
 {
 
-template<size_t VolumeFlashAddr>
+template<size_t VolumeFlashAddr, size_t VolumeFlashSize>
 class LfsFileIO {
 	lfs_t lfs{};
 	mdrivlib::QSpiFlash &_flash;
+
+	using NorFlashOps = NorFlashOps<VolumeFlashAddr, VolumeFlashSize>;
 
 public:
 	static constexpr uint32_t BlockSize = 4096;
@@ -38,15 +40,15 @@ public:
 
 		const static lfs_config cfg = {
 			.context = &_flash,
-			.read = NorFlashOps<VolumeFlashAddr>::read,
-			.prog = NorFlashOps<VolumeFlashAddr>::prog,
-			.erase = NorFlashOps<VolumeFlashAddr>::erase,
-			.sync = NorFlashOps<VolumeFlashAddr>::sync,
+			.read = NorFlashOps::read,
+			.prog = NorFlashOps::prog,
+			.erase = NorFlashOps::erase,
+			.sync = NorFlashOps::sync,
 
 			.read_size = 16,
 			.prog_size = 16,
 			.block_size = BlockSize,
-			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps<VolumeFlashAddr>::FlashOffset) / BlockSize,
+			.block_count = NorFlashOps::Size / BlockSize,
 			.block_cycles = 500,
 			.cache_size = 1024,
 			.lookahead_size = 64,
@@ -60,13 +62,7 @@ public:
 
 		pr_dbg("LittleFS not formatted\n");
 
-		// No FS on disk, format and re-mount
-		if (lfs_format(&lfs, &cfg) < 0)
-			return Status::LFSError;
-		if (lfs_mount(&lfs, &cfg) < 0)
-			return Status::LFSError;
-
-		return Status::NewlyFormatted;
+		return Status::LFSError;
 	}
 
 	std::string_view volname() const {
@@ -86,15 +82,15 @@ public:
 	Status reformat() {
 		const static lfs_config cfg = {
 			.context = &_flash,
-			.read = NorFlashOps<VolumeFlashAddr>::read,
-			.prog = NorFlashOps<VolumeFlashAddr>::prog,
-			.erase = NorFlashOps<VolumeFlashAddr>::erase,
-			.sync = NorFlashOps<VolumeFlashAddr>::sync,
+			.read = NorFlashOps::read,
+			.prog = NorFlashOps::prog,
+			.erase = NorFlashOps::erase,
+			.sync = NorFlashOps::sync,
 
 			.read_size = 16,
 			.prog_size = 16,
 			.block_size = BlockSize,
-			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps<VolumeFlashAddr>::FlashOffset) / BlockSize,
+			.block_count = NorFlashOps::Size / BlockSize,
 			.block_cycles = 500,
 			.cache_size = 1024,
 			.lookahead_size = 64,

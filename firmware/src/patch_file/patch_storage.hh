@@ -21,7 +21,7 @@ namespace MetaModule
 // PatchStorage manages all patch filesystems <--> PatchList
 class PatchStorage {
 
-	using PatchVolFileIO = LfsFileIO<PatchVolFlashOffset>;
+	using PatchVolFileIO = LfsFileIO<PatchVolFlashOffset, PatchVolFlashSize>;
 
 	FatFileIO &sdcard_;
 
@@ -46,6 +46,9 @@ public:
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
+		if (status == PatchVolFileIO::Status::LFSError) {
+			status = norflash_.reformat();
+		}
 		if (status == PatchVolFileIO::Status::NewlyFormatted) {
 			reload_default_patches();
 		}

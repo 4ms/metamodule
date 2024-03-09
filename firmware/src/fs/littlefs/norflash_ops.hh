@@ -6,13 +6,17 @@
 //next 4MB is Assets
 //last 2MB is pathches
 static constexpr uint32_t AssetVolFlashOffset = 10 * 1024 * 1024; //0xA00000;
+static constexpr uint32_t AssetVolFlashSize = 4 * 1024 * 1024;
+
 static constexpr uint32_t PatchVolFlashOffset = 14 * 1024 * 1024; //0xE00000;
+static constexpr uint32_t PatchVolFlashSize = 2 * 1024 * 1024;
 
 // NorFlashOps is the bridge between QSPI driver and LittleFS
-template<size_t FlashAddr>
+template<size_t FlashAddr, size_t FlashSize>
 struct NorFlashOps {
 	static constexpr uint32_t BlockSize = 4096;
 	static constexpr size_t FlashOffset = FlashAddr;
+	static constexpr size_t Size = FlashSize;
 
 	static int read(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size) {
 		uint32_t addr = block * BlockSize + off + FlashOffset;
