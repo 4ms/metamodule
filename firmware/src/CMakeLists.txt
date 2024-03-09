@@ -46,6 +46,16 @@ target_sources(lvgl
             ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
 )
 
+#
+# LittleFS
+#
+add_library(littlefs STATIC
+    ${FWDIR}/lib/littlefs/lfs.c
+    ${FWDIR}/lib/littlefs/lfs_util.c
+)
+target_include_directories(littlefs PUBLIC
+    ${FWDIR}/lib/littlefs
+)
 
 #
 # VCV Adaptor
@@ -185,7 +195,7 @@ target_include_directories(
 
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor cpputil vcv_ports jansson)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor cpputil vcv_ports jansson littlefs)
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})

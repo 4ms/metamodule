@@ -5,7 +5,7 @@
 //first 10MB is for bootloaders (512kB) and application (9.5MB)
 //next 4MB is Assets
 //last 2MB is pathches
-static constexpr uint32_t AssetVolFlashOffset = 10 * 1024 * 1024; //0xB00000;
+static constexpr uint32_t AssetVolFlashOffset = 10 * 1024 * 1024; //0xA00000;
 static constexpr uint32_t PatchVolFlashOffset = 14 * 1024 * 1024; //0xE00000;
 
 // NorFlashOps is the bridge between QSPI driver and LittleFS

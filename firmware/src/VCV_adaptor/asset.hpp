@@ -11,12 +11,12 @@ inline void svg_to_png(std::string &path) {
 	}
 }
 
-inline void strip_paths(std::string &path) {
-#ifdef METAMODULE_INTERNAL_PLUGIN
-	path = "M:/" + path;
-#else
-	//path = "P:/" + path;
-#endif
+inline void set_drive(std::string &path) {
+	// #ifdef METAMODULE_INTERNAL_PLUGIN
+	// 	path = "M:/" + path;
+	// #else
+	// path = "P:/" + path;
+	// #endif
 }
 
 inline std::string system(std::string_view filename = "") {
@@ -29,14 +29,14 @@ inline std::string system(std::string_view filename = "") {
 		path = std::string("racklib/") + path;
 	}
 
-	strip_paths(path);
+	set_drive(path);
 	return path;
 }
 
 inline std::string user(std::string_view filename = "") {
 	auto path = std::string("usr/") + std::string(filename);
 	svg_to_png(path);
-	strip_paths(path);
+	set_drive(path);
 	return path;
 }
 
@@ -57,8 +57,7 @@ inline std::string plugin(plugin::Plugin *plugin, std::string_view filename = ""
 	// .svg => .png
 	svg_to_png(path);
 
-	// handle internal plugins (temporary fix)
-	strip_paths(path);
+	set_drive(path);
 
 	return path;
 }
