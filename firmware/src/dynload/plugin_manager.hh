@@ -89,55 +89,7 @@ struct PluginManager {
 		} else
 			pr_dbg("RamDisk formatted and mounted\n");
 
-		auto asset_tar = Tar::Archive(asset_fs.raw_image);
-		asset_tar.print_info();
-
-		// Tar::print_info(asset_fs.raw_image);
-		// DirTree<FileEntry> dir_tree;
-		// add_directory(asset_fs.lfs_io, dir_tree);
-	}
-
-	static constexpr unsigned MaxAssetDirRecursion = 4;
-	bool add_directory(FileIoC auto &fileio, DirTree<FileEntry> &dir_tree, unsigned recursion_depth = 0) {
-		pr_trace("Scanning dir: '%s'\n", dir_tree.name.data());
-
-		bool ok = fileio.lfs_io.foreach_dir_entry(
-			dir_tree.name, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
-				// std::string full_path = dir + "/" + std::string(entryname);
-				// std::string full_path = std::string(entryname);
-
-				if (kind == DirEntryKind::Dir) {
-					if (!entryname.starts_with(".") && recursion_depth < MaxAssetDirRecursion) {
-						pr_dbg("%s/\n", entryname.data());
-						dir_tree.dirs.emplace_back(entryname);
-					}
-				}
-
-				if (kind == DirEntryKind::File) {
-					pr_dbg("%s\n", entryname.data());
-					dir_tree.files.push_back(FileEntry{std::string(entryname), filesize, timestamp});
-				}
-			});
-
-		if (!ok) {
-			pr_err("Failed to read dir on %.32s\n", fileio.volname().data());
-			return false;
-		}
-
-		for (auto &dir : dir_tree.dirs) {
-			pr_trace("[%d] Entering subdir: %.*s\n", recursion_depth, dir.name.size(), dir.name.data());
-			ok = add_directory(fileio, dir, recursion_depth + 1);
-			if (!ok) {
-				pr_err("Failed to add subdir\n");
-			}
-		}
-
-		return ok;
-	}
-
-	void load_internal_assets() {
-		// TODO: Save internal assets on LittleFS NOR Flash Driver,
-		// Load internal plugin assets to RamDisk
+		load_internal_assets();
 	}
 
 	void start_loading_plugins() {
@@ -160,6 +112,17 @@ struct PluginManager {
 		return result;
 	}
 
+private:
+	void load_internal_assets() {
+		auto asset_tar = Tar::Archive(asset_fs.raw_image);
+		asset_tar.print_info();
+
+		auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
+			return ramdisk.write_file(filename, buffer);
+		};
+		asset_tar.extract_files(ramdisk_writer);
+	}
+
 	void test_write() {
 		const char w[24] = "Testing some file\ndata\n";
 		auto bytes_written = ramdisk.write_file("checkfile", w);
@@ -173,56 +136,6 @@ struct PluginManager {
 		std::array<char, 128> r{0};
 		auto bytes_read = ramdisk.read_file("checkfile", r);
 		pr_dbg("%.*s\n", bytes_read, &r[0]);
-	}
-
-	static bool
-	deep_copy_dirs(FileIoC auto &fileio_from, FileIoC auto &fileio_to, std::string dir, unsigned recursion_depth = 0) {
-		pr_trace("[%d] Deep copy of %s\n", recursion_depth, dir.c_str());
-
-		bool ok = fileio_from.foreach_dir_entry(
-			dir, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
-				std::string full_path = dir + "/" + std::string(entryname);
-
-				// Copy files:
-				if (kind == DirEntryKind::File) {
-					if (entryname.ends_with(".so") || entryname.starts_with('.')) {
-						pr_trace("Skipping file %s\n", full_path.c_str());
-						return;
-					}
-					if (filesize > 1024 * 1024) {
-						pr_warn("Skipping large file %s (%zu bytes)", full_path.c_str(), filesize);
-						return;
-					}
-
-					std::vector<char> filedata(filesize);
-					auto bytes_read = fileio_from.read_file(full_path, filedata);
-
-					if (bytes_read == filesize) {
-						std::string write_path = full_path.substr(PluginDirName.length() + 1);
-						if (fileio_to.write_file(write_path, filedata)) {
-							pr_trace("Wrote %s (%zu bytes)\n", write_path.c_str(), filesize);
-						} else
-							pr_err("Failed to copy file %s (%zu bytes)\n", write_path.c_str(), filesize);
-					} else
-						pr_err("Failed to read file %s (%zu bytes)\n", full_path.c_str(), filesize);
-				}
-
-				// Follow dirs:
-				if (kind == DirEntryKind::Dir) {
-					if (entryname.starts_with("."))
-						return;
-					if (recursion_depth < 4) {
-						pr_trace("Entering dir: %s\n", full_path.c_str());
-						ok = deep_copy_dirs(fileio_from, fileio_to, full_path, recursion_depth + 1);
-					} else
-						pr_warn("Found dir: %s, but recursion level is at max, ignoring\n", full_path.c_str());
-				}
-			});
-
-		if (!ok)
-			pr_err("Failed to read dir on %.32s\n", fileio_from.volname().data());
-
-		return ok;
 	}
 
 	enum class State { Ready, IsLoading, Done } state = State::Ready;

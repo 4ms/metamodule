@@ -9,7 +9,8 @@ namespace Tar
 
 static int iszeroed(char *buf, size_t size);
 static unsigned oct2uint(char *oct, unsigned size);
-constexpr inline unsigned RECORDSIZE = 10240;
+static bool is_file(char entry_type);
+static bool is_dir(char entry_type);
 
 struct tar_t {
 	char original_name[100]; // original filenme; only availible when writing into a tar
@@ -48,6 +49,17 @@ struct tar_t {
 	};
 
 	tar_t *next;
+
+	static constexpr unsigned RECORDSIZE = 10240;
+	static constexpr char REGULAR = 0;
+	static constexpr char NORMAL = '0';
+	static constexpr char HARDLINK = '1';
+	static constexpr char SYMLINK = '2';
+	static constexpr char CHAR = '3';
+	static constexpr char BLOCK = '4';
+	static constexpr char DIRECTORY = '5';
+	static constexpr char FIFO = '6';
+	static constexpr char CONTIGUOUS = '7';
 };
 
 Archive::Archive(std::span<const char> filedata)
@@ -91,7 +103,7 @@ Archive::Archive(std::span<const char> filedata)
 				*tar = nullptr;
 
 				// skip to end of record
-				read_pos += (RECORDSIZE - (offset % RECORDSIZE));
+				read_pos += (tar_t::RECORDSIZE - (offset % tar_t::RECORDSIZE));
 
 				break;
 			}
@@ -119,6 +131,39 @@ Archive::Archive(std::span<const char> filedata)
 	num_entries = count;
 }
 
+bool Archive::extract_files(std::function<uint32_t(std::string_view, std::span<const char>)> write) {
+	tar_t *entry = archive;
+
+	bool all_entries_ok = true;
+	while (entry) {
+		if (auto filedata = extract_entry(entry); filedata.size() > 0) {
+			pr_info("Extracted %zu bytes for %s\n", filedata.size(), entry->name);
+			write(entry->name, filedata);
+		} else {
+			all_entries_ok = false;
+			pr_err("Failed to extract %s\n", entry->name);
+		}
+		entry = entry->next;
+	}
+
+	return all_entries_ok;
+}
+
+std::vector<char> Archive::extract_entry(tar_t *entry) {
+	if (is_file(entry->type)) {
+		const unsigned int size = oct2uint(entry->size, 11);
+		// std::string_view filename = entry->name;
+
+		read_pos = 512 + entry->begin;
+		std::vector<char> filedata(size);
+		image_read(filedata.data(), size);
+		return filedata;
+	} else if (is_dir(entry->type)) {
+		return {};
+	} else
+		return {};
+}
+
 Archive::~Archive() {
 	while (archive) {
 		tar_t *next = archive->next;
@@ -142,6 +187,14 @@ bool Archive::image_read(char *buf, int size) {
 	std::memcpy(buf, filedata.data() + read_pos, size);
 	read_pos += size;
 	return true;
+}
+
+bool is_file(char entry_type) {
+	return (entry_type == tar_t::REGULAR) || (entry_type == tar_t::NORMAL) || (entry_type == tar_t::CONTIGUOUS);
+}
+
+bool is_dir(char entry_type) {
+	return (entry_type == tar_t::DIRECTORY);
 }
 
 int iszeroed(char *buf, size_t size) {
