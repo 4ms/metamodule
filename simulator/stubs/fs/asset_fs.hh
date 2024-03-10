@@ -1,5 +1,7 @@
 #pragma once
-#include "patch_file/host_file_io.hh"
+#include <fstream>
+#include <string_view>
+#include <vector>
 
 namespace MetaModule
 {

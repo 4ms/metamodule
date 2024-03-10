@@ -2,46 +2,66 @@
 #include "pr_dbg.hh"
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 
 namespace Tar
 {
 
-static unsigned image_read(std::span<const char> data, char *buf, int size, unsigned read_pos);
 static int iszeroed(char *buf, size_t size);
 static unsigned oct2uint(char *oct, unsigned size);
-
 constexpr inline unsigned RECORDSIZE = 10240;
 
-void print_info(std::span<char> data) {
-	tar_t *archive = nullptr;
-	pr_dbg("Reading %p\n", data.data());
-	read(data, &archive);
+struct tar_t {
+	char original_name[100]; // original filenme; only availible when writing into a tar
+	unsigned int begin;		 // location of data in file (including metadata)
+	union {
+		union {
+			// Pre-POSIX.1-1988 format
+			struct {
+				char name[100]; // file name
+				char mode[8];	// permissions
+				char uid[8];	// user id (octal)
+				char gid[8];	// group id (octal)
+				char size[12];	// size (octal)
+				char mtime[12]; // modification time (octal)
+				char check
+					[8]; // sum of unsigned characters in block, with spaces in the check field while calculation is done (octal)
+				char link;			 // link indicator
+				char link_name[100]; // name of linked file
+			};
 
-	tar_t *entry = archive;
-	pr_dbg("Read.\n");
-	while (entry) {
-		pr_info("- %s\n", entry->name);
-		entry = entry->next;
-	}
+			// UStar format (POSIX IEEE P1003.1)
+			struct {
+				char old[156];			  // first 156 octets of Pre-POSIX.1-1988 format
+				char type;				  // file type
+				char also_link_name[100]; // name of linked file
+				char ustar[8];			  // ustar\000
+				char owner[32];			  // user name (string)
+				char group[32];			  // group name (string)
+				char major[8];			  // device major number
+				char minor[8];			  // device minor number
+				char prefix[155];
+			};
+		};
 
-	pr_dbg("freeing\n");
-	tar_free(archive);
-}
+		char block[512]; // raw memory (500 octets of actual data, padded to 1 block)
+	};
 
-bool read(std::span<char> data, tar_t **archive) {
-	unsigned read_pos = 0;
+	tar_t *next;
+};
 
-	if (data.size() == 0)
+Archive::Archive(std::span<const char> filedata)
+	: filedata{filedata} {
+
+	if (filedata.size() == 0) {
 		pr_err("No data");
-
-	if (!archive || *archive) {
-		pr_err("Archive must be a pointer to a null pointer");
+		return;
 	}
 
 	unsigned offset = 0;
 	int count = 0;
 
-	tar_t **tar = archive;
+	tar_t **tar = &archive;
 	char update = 1;
 
 	for (count = 0;; count++) {
@@ -49,17 +69,25 @@ bool read(std::span<char> data, tar_t **archive) {
 		// std::memset(tar[0], 0, sizeof(tar_t));
 		*tar = (tar_t *)std::calloc(1, sizeof(tar_t));
 
-		if (update)
-			read_pos = image_read(data, (*tar)->block, 512, read_pos);
+		if (update) {
+			if (!image_read((*tar)->block, 512)) {
+				pr_err("Failed to read byte %zu + 512\n", read_pos);
+				return;
+			}
+		}
 
 		update = 1;
 		// if current block is all zeros
 		if (iszeroed((*tar)->block, 512)) {
-			read_pos = image_read(data, (*tar)->block, 512, read_pos);
+			if (!image_read((*tar)->block, 512)) {
+				pr_err("Failed to read byte %zu + 512\n", read_pos);
+				return;
+			}
 
 			// check if next block is all zeros as well
 			if (iszeroed((*tar)->block, 512)) {
-				tar_free(*tar);
+				// tar_free(*tar);
+				free(*tar);
 				*tar = nullptr;
 
 				// skip to end of record
@@ -88,7 +116,32 @@ bool read(std::span<char> data, tar_t **archive) {
 		tar = &((*tar)->next);
 	}
 
-	return count;
+	num_entries = count;
+}
+
+Archive::~Archive() {
+	while (archive) {
+		tar_t *next = archive->next;
+		free(archive);
+		// delete archive;
+		archive = next;
+	}
+}
+
+void Archive::print_info() {
+	tar_t *entry = archive;
+	while (entry) {
+		pr_info("- %s\n", entry->name);
+		entry = entry->next;
+	}
+}
+
+bool Archive::image_read(char *buf, int size) {
+	if (read_pos + size > filedata.size())
+		return false;
+	std::memcpy(buf, filedata.data() + read_pos, size);
+	read_pos += size;
+	return true;
 }
 
 int iszeroed(char *buf, size_t size) {
@@ -100,11 +153,6 @@ int iszeroed(char *buf, size_t size) {
 	return 1;
 }
 
-unsigned image_read(std::span<const char> data, char *buf, int size, unsigned read_pos) {
-	std::memcpy(buf, data.data() + read_pos, size);
-	return read_pos + size;
-}
-
 unsigned oct2uint(char *oct, unsigned size) {
 	unsigned int out = 0;
 	unsigned i = 0;
@@ -112,15 +160,6 @@ unsigned oct2uint(char *oct, unsigned size) {
 		out = (out << 3) | (unsigned int)(oct[i++] - '0');
 	}
 	return out;
-}
-
-void tar_free(tar_t *archive) {
-	while (archive) {
-		tar_t *next = archive->next;
-		free(archive);
-		// delete archive;
-		archive = next;
-	}
 }
 
 } // namespace Tar

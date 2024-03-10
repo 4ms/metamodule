@@ -89,7 +89,10 @@ struct PluginManager {
 		} else
 			pr_dbg("RamDisk formatted and mounted\n");
 
-		Tar::print_info(asset_fs.raw_image);
+		auto asset_tar = Tar::Archive(asset_fs.raw_image);
+		asset_tar.print_info();
+
+		// Tar::print_info(asset_fs.raw_image);
 		// DirTree<FileEntry> dir_tree;
 		// add_directory(asset_fs.lfs_io, dir_tree);
 	}
