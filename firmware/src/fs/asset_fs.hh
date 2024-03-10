@@ -8,19 +8,18 @@ namespace MetaModule
 {
 
 struct AssetFS {
+	uint32_t flash_addr;
 
-	std::vector<char> raw_image;
-
-	AssetFS(uint32_t flash_address) {
-		// Read uimg header from flash_address
-		// If valid, extract the size
-		// Read that many bytes past the header into raw_image.data()
-		printf("hardware\n");
+	AssetFS(uint32_t flash_address)
+		: flash_addr{flash_address} {
 	}
 
-	void release() {
-		raw_image.clear();
-		raw_image.shrink_to_fit();
+	std::vector<char> read_image() {
+		std::vector<char> raw_image;
+		// TODO: read uimg, determine payload size
+		// resize raw_image
+		// read payload into raw_image
+		return raw_image;
 	}
 };
 

@@ -7,9 +7,14 @@ namespace MetaModule
 {
 
 struct AssetFS {
-	std::vector<char> raw_image;
+	std::string image_path;
 
-	AssetFS(std::string_view image_path) {
+	AssetFS(std::string_view image_path)
+		: image_path{image_path} {
+	}
+
+	std::vector<char> read_image() {
+		std::vector<char> raw_image;
 
 		std::ifstream ifs(image_path, std::ios::in);
 
@@ -26,11 +31,8 @@ struct AssetFS {
 			printf("Raw image is %zu, first byte is %x\n", raw_image.size(), raw_image[0]);
 		} else
 			printf("Error %s not opened\n", image_path.data());
-	}
 
-	void release() {
-		raw_image.clear();
-		raw_image.shrink_to_fit();
+		return raw_image;
 	}
 };
 

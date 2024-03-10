@@ -114,7 +114,8 @@ struct PluginManager {
 
 private:
 	void load_internal_assets() {
-		auto asset_tar = Tar::Archive(asset_fs.raw_image);
+		auto raw_image = asset_fs.read_image();
+		auto asset_tar = Tar::Archive(raw_image);
 		asset_tar.print_info();
 
 		auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
