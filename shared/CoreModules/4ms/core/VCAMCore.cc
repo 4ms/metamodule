@@ -55,7 +55,7 @@ public:
 		} else {
 			channelA4.control(5.f);
 		}
-		
+
 		if (auto control = getInput<B1JackIn>(); control) {
 			channelB1.control(*control);
 		} else {
@@ -119,25 +119,25 @@ public:
 			channelD4.control(5.f);
 		}
 
-		channelA1.mute(getState<A1Button>() == LatchingButton::State_t::DOWN);
-		channelA2.mute(getState<A2Button>() == LatchingButton::State_t::DOWN);
-		channelA3.mute(getState<A3Button>() == LatchingButton::State_t::DOWN);
-		channelA4.mute(getState<A4Button>() == LatchingButton::State_t::DOWN);
+		channelA1.mute(getState<A1Button>() == LatchingButton::State_t::UP);
+		channelA2.mute(getState<A2Button>() == LatchingButton::State_t::UP);
+		channelA3.mute(getState<A3Button>() == LatchingButton::State_t::UP);
+		channelA4.mute(getState<A4Button>() == LatchingButton::State_t::UP);
 
-		channelB1.mute(getState<B1Button>() == LatchingButton::State_t::DOWN);
-		channelB2.mute(getState<B2Button>() == LatchingButton::State_t::DOWN);
-		channelB3.mute(getState<B3Button>() == LatchingButton::State_t::DOWN);
-		channelB4.mute(getState<B4Button>() == LatchingButton::State_t::DOWN);
+		channelB1.mute(getState<B1Button>() == LatchingButton::State_t::UP);
+		channelB2.mute(getState<B2Button>() == LatchingButton::State_t::UP);
+		channelB3.mute(getState<B3Button>() == LatchingButton::State_t::UP);
+		channelB4.mute(getState<B4Button>() == LatchingButton::State_t::UP);
 
-		channelC1.mute(getState<C1Button>() == LatchingButton::State_t::DOWN);
-		channelC2.mute(getState<C2Button>() == LatchingButton::State_t::DOWN);
-		channelC3.mute(getState<C3Button>() == LatchingButton::State_t::DOWN);
-		channelC4.mute(getState<C4Button>() == LatchingButton::State_t::DOWN);
+		channelC1.mute(getState<C1Button>() == LatchingButton::State_t::UP);
+		channelC2.mute(getState<C2Button>() == LatchingButton::State_t::UP);
+		channelC3.mute(getState<C3Button>() == LatchingButton::State_t::UP);
+		channelC4.mute(getState<C4Button>() == LatchingButton::State_t::UP);
 
-		channelD1.mute(getState<D1Button>() == LatchingButton::State_t::DOWN);
-		channelD2.mute(getState<D2Button>() == LatchingButton::State_t::DOWN);
-		channelD3.mute(getState<D3Button>() == LatchingButton::State_t::DOWN);
-		channelD4.mute(getState<D4Button>() == LatchingButton::State_t::DOWN);
+		channelD1.mute(getState<D1Button>() == LatchingButton::State_t::UP);
+		channelD2.mute(getState<D2Button>() == LatchingButton::State_t::UP);
+		channelD3.mute(getState<D3Button>() == LatchingButton::State_t::UP);
+		channelD4.mute(getState<D4Button>() == LatchingButton::State_t::UP);
 
 		setLED<A1Button>(channelA1.getLEDbrightness());
 		setLED<A2Button>(channelA2.getLEDbrightness());
@@ -163,7 +163,7 @@ public:
 		float output2 = 0.f;
 		float output3 = 0.f;
 		float output4 = 0.f;
-		
+
 		if (auto input = getInput<InAIn>(); input) {
 			channelA1.input(*input);
 			output1 += channelA1.output();
