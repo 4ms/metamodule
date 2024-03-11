@@ -20,6 +20,7 @@ public:
 
 	void update() override {
 		readSwitches();
+		readRotate();
 
 		if (auto resetInputValue = getInput<ResetIn>(); resetInputValue) {
 			if (resetTriggerEdgeDetector(resetTriggerDetector(*resetInputValue))) {
@@ -122,6 +123,14 @@ private:
 			autoresetMode = AutoReset_t::AUTORESET_16;
 		} else {
 			autoresetMode = AutoReset_t::AUTORESET_OFF;
+		}
+	}
+
+	void readRotate() {
+		if(auto rotateValue = getInput<RotateIn>(); rotateValue) {
+			adc = uint32_t(std::clamp(*rotateValue, 0.f, 5.f) / 5.f * 255.f);
+		} else {
+			adc = 0;
 		}
 	}
 
