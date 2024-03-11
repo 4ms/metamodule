@@ -220,10 +220,10 @@ public:
 			output4 += channelD4.output();
 		}
 
-		setOutput<Out1Out>(output1);
-		setOutput<Out2Out>(output2);
-		setOutput<Out3Out>(output3);
-		setOutput<Out4Out>(output4);
+		setOutput<Out1Out>(std::clamp(output1, -10.f, 10.f));
+		setOutput<Out2Out>(std::clamp(output2, -10.f, 10.f));
+		setOutput<Out3Out>(std::clamp(output3, -10.f, 10.f));
+		setOutput<Out4Out>(std::clamp(output4, -10.f, 10.f));
 	}
 
 	void set_samplerate(float sr) override {
