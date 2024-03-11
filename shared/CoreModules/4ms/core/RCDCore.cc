@@ -252,23 +252,23 @@ private:
 
 		if (outputMode == Output_t::GATE){
 			if (countingMode == Counting_t::DOWN){
-				if (counters[0]==((divisions[0]>>1)+1)) {setOutput<D1Out>(0.f); setLED<LedD1Light>(ledOff);}
-				if (counters[1]==((divisions[1]>>1)+1)) {setOutput<D2Out>(0.f); setLED<LedD2Light>(ledOff);}
-				if (counters[2]==((divisions[2]>>1)+1)) {setOutput<D3Out>(0.f); setLED<LedD3Light>(ledOff);}
-				if (counters[3]==((divisions[3]>>1)+1)) {setOutput<D4Out>(0.f); setLED<LedD4Light>(ledOff);}
-				if (counters[4]==((divisions[4]>>1)+1)) {setOutput<D5Out>(0.f); setLED<LedD5Light>(ledOff);}
-				if (counters[5]==((divisions[5]>>1)+1)) {setOutput<D6Out>(0.f); setLED<LedD6Light>(ledOff);}
-				if (counters[6]==((divisions[6]>>1)+1)) {setOutput<D7Out>(0.f); setLED<LedD7Light>(ledOff);}
-				if (counters[7]==((divisions[7]>>1)+1)) {setOutput<D8Out>(0.f); setLED<LedD8Light>(ledOff);}
+				if (counters[0]==((divisions[0]+1)>>1)) {setOutput<D1Out>(0.f); setLED<LedD1Light>(ledOff);}
+				if (counters[1]==((divisions[1]+1)>>1)) {setOutput<D2Out>(0.f); setLED<LedD2Light>(ledOff);}
+				if (counters[2]==((divisions[2]+1)>>1)) {setOutput<D3Out>(0.f); setLED<LedD3Light>(ledOff);}
+				if (counters[3]==((divisions[3]+1)>>1)) {setOutput<D4Out>(0.f); setLED<LedD4Light>(ledOff);}
+				if (counters[4]==((divisions[4]+1)>>1)) {setOutput<D5Out>(0.f); setLED<LedD5Light>(ledOff);}
+				if (counters[5]==((divisions[5]+1)>>1)) {setOutput<D6Out>(0.f); setLED<LedD6Light>(ledOff);}
+				if (counters[6]==((divisions[6]+1)>>1)) {setOutput<D7Out>(0.f); setLED<LedD7Light>(ledOff);}
+				if (counters[7]==((divisions[7]+1)>>1)) {setOutput<D8Out>(0.f); setLED<LedD8Light>(ledOff);}
 			} else {
-				if (counters[0]==((divisions[0]>>1)+1)) {setOutput<D1Out>(10.f); setLED<LedD1Light>(ledBlue);}
-				if (counters[1]==((divisions[1]>>1)+1)) {setOutput<D2Out>(10.f); setLED<LedD2Light>(ledRed);}
-				if (counters[2]==((divisions[2]>>1)+1)) {setOutput<D3Out>(10.f); setLED<LedD3Light>(ledGreen);}
-				if (counters[3]==((divisions[3]>>1)+1)) {setOutput<D4Out>(10.f); setLED<LedD4Light>(ledRed);}
-				if (counters[4]==((divisions[4]>>1)+1)) {setOutput<D5Out>(10.f); setLED<LedD5Light>(ledBlue);}
-				if (counters[5]==((divisions[5]>>1)+1)) {setOutput<D6Out>(10.f); setLED<LedD6Light>(ledGreen);}
-				if (counters[6]==((divisions[6]>>1)+1)) {setOutput<D7Out>(10.f); setLED<LedD7Light>(ledBlue);}
-				if (counters[7]==((divisions[7]>>1)+1)) {setOutput<D8Out>(10.f); setLED<LedD8Light>(ledRed);}
+				if (counters[0]==((divisions[0]+1)>>1)) {setOutput<D1Out>(10.f); setLED<LedD1Light>(ledBlue);}
+				if (counters[1]==((divisions[1]+1)>>1)) {setOutput<D2Out>(10.f); setLED<LedD2Light>(ledRed);}
+				if (counters[2]==((divisions[2]+1)>>1)) {setOutput<D3Out>(10.f); setLED<LedD3Light>(ledGreen);}
+				if (counters[3]==((divisions[3]+1)>>1)) {setOutput<D4Out>(10.f); setLED<LedD4Light>(ledRed);}
+				if (counters[4]==((divisions[4]+1)>>1)) {setOutput<D5Out>(10.f); setLED<LedD5Light>(ledBlue);}
+				if (counters[5]==((divisions[5]+1)>>1)) {setOutput<D6Out>(10.f); setLED<LedD6Light>(ledGreen);}
+				if (counters[6]==((divisions[6]+1)>>1)) {setOutput<D7Out>(10.f); setLED<LedD7Light>(ledBlue);}
+				if (counters[7]==((divisions[7]+1)>>1)) {setOutput<D8Out>(10.f); setLED<LedD8Light>(ledRed);}
 			}
 
 			if (++counters[0]>divisions[0]) counters[0]=0;
