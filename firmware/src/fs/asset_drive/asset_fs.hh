@@ -33,7 +33,7 @@ struct AssetFS {
 		}
 
 		auto tar_image_size = Uimg::be2le(header.ih_size);
-		if (tar_image_size <= 4 * 1024 * 1024) {
+		if (tar_image_size > (4 * 1024 * 1024 - 64)) {
 			pr_err("Tar is invalid size: %zu\n", tar_image_size);
 			return {};
 		}
