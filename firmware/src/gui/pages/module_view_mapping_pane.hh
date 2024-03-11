@@ -44,7 +44,8 @@ struct ModuleViewMappingPane {
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
 		, control_popup{patch, patch_mod_queue}
-		, patch_mod_queue{patch_mod_queue} {
+		, patch_mod_queue{patch_mod_queue}
+		, patch_storage{patch_storage} {
 
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
@@ -67,6 +68,7 @@ struct ModuleViewMappingPane {
 	}
 
 	void show(const DrawnElement &drawn_el) {
+		patch = patch_storage.get_view_patch();
 		add_map_popup.hide();
 
 		lv_group_remove_all_objs(pane_group);
@@ -745,6 +747,7 @@ private:
 	ConfirmPopup add_cable_popup;
 	ChoicePopup panel_cable_popup;
 	PatchModQueue &patch_mod_queue;
+	FileStorageProxy &patch_storage;
 };
 
 } // namespace MetaModule
