@@ -1,0 +1,20 @@
+{
+    "version": 1,
+    "files": [
+        {
+            "filename": "assets.uimg",
+            "type": "app",
+            "filesize": 1423936,
+            "md5": "e2c843d44e1171d256d4deb6c14a9948",
+            "address": 10485760,
+            "name": "Assets"
+        }
+    ],
+    "metadata": {
+        "version": {
+            "major": 0,
+            "minor": 9,
+            "revision": 0
+        }
+    }
+}
