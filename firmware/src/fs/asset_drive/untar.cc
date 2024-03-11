@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
+#include <string>
 
 namespace Tar
 {
@@ -11,13 +12,15 @@ static int iszeroed(char *buf, size_t size);
 static unsigned oct2uint(char *oct, unsigned size);
 static bool is_file(char entry_type);
 static bool is_dir(char entry_type);
+static std::string entry_name(tar_t *entry);
+static bool is_ustar(tar_t *entry);
 
 struct tar_t {
 	char original_name[100]; // original filenme; only availible when writing into a tar
 	unsigned int begin;		 // location of data in file (including metadata)
 	union {
 		union {
-			// Pre-POSIX.1-1988 format
+			// UStar format (POSIX IEEE P1003.1)
 			struct {
 				char name[100]; // file name
 				char mode[8];	// permissions
@@ -25,22 +28,15 @@ struct tar_t {
 				char gid[8];	// group id (octal)
 				char size[12];	// size (octal)
 				char mtime[12]; // modification time (octal)
-				char check
-					[8]; // sum of unsigned characters in block, with spaces in the check field while calculation is done (octal)
-				char link;			 // link indicator
+				char check[8];
+				// sum of unsigned characters in block, with spaces in the check field while calculation is done (octal)
+				char type;			 // file type
 				char link_name[100]; // name of linked file
-			};
-
-			// UStar format (POSIX IEEE P1003.1)
-			struct {
-				char old[156];			  // first 156 octets of Pre-POSIX.1-1988 format
-				char type;				  // file type
-				char also_link_name[100]; // name of linked file
-				char ustar[8];			  // ustar\000
-				char owner[32];			  // user name (string)
-				char group[32];			  // group name (string)
-				char major[8];			  // device major number
-				char minor[8];			  // device minor number
+				char ustar[8];		 // ustar\000
+				char owner[32];		 // user name (string)
+				char group[32];		 // group name (string)
+				char major[8];		 // device major number
+				char minor[8];		 // device minor number
 				char prefix[155];
 			};
 		};
@@ -136,12 +132,13 @@ bool Archive::extract_files(std::function<uint32_t(std::string_view, std::span<c
 
 	bool all_entries_ok = true;
 	while (entry) {
+		auto name = entry_name(entry);
 		if (auto filedata = extract_entry(entry); filedata.size() > 0) {
-			pr_info("Extracted %zu bytes for %s\n", filedata.size(), entry->name);
-			write(entry->name, filedata);
+			pr_info("Extracted %zu bytes for %s\n", filedata.size(), name);
+			write(name, filedata);
 		} else {
 			all_entries_ok = false;
-			pr_err("Failed to extract %s\n", entry->name);
+			pr_err("Failed to extract %s\n", name);
 		}
 		entry = entry->next;
 	}
@@ -176,7 +173,7 @@ Archive::~Archive() {
 void Archive::print_info() {
 	tar_t *entry = archive;
 	while (entry) {
-		pr_info("- %s\n", entry->name);
+		pr_info("- %s\n", entry_name(entry));
 		entry = entry->next;
 	}
 }
@@ -187,6 +184,24 @@ bool Archive::image_read(char *buf, int size) {
 	std::memcpy(buf, filedata.data() + read_pos, size);
 	read_pos += size;
 	return true;
+}
+
+std::string entry_name(tar_t *entry) {
+	auto name = std::string_view{entry->name, 100};
+	if (auto nullpos = name.find_first_of('\0'); nullpos != std::string::npos)
+		name = name.substr(0, nullpos);
+
+	if (is_ustar(entry) && entry->prefix[0] != '\0') {
+		auto prefix = std::string_view{entry->prefix, 100};
+		if (auto nullpos = prefix.find_first_of('\0'); nullpos != std::string::npos)
+			prefix = prefix.substr(0, nullpos);
+		return std::string{prefix} + "/" + std::string{name};
+	} else
+		return std::string{name};
+}
+
+bool is_ustar(tar_t *entry) {
+	return std::string_view{entry->ustar} == std::string_view{"ustar"};
 }
 
 bool is_file(char entry_type) {
