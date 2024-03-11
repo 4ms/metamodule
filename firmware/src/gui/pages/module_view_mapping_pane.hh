@@ -43,7 +43,7 @@ struct ModuleViewMappingPane {
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
-		, control_popup{patch, patch_mod_queue}
+		, control_popup{patch_storage, patch_mod_queue}
 		, patch_mod_queue{patch_mod_queue}
 		, patch_storage{patch_storage} {
 

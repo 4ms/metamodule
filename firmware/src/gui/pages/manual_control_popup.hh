@@ -8,6 +8,7 @@
 #include "lvgl.h"
 #include "patch.hh"
 #include "patch_data.hh"
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "util/overloaded.hh"
 
@@ -16,9 +17,9 @@ namespace MetaModule
 
 struct ManualControlPopUp {
 
-	ManualControlPopUp(PatchData *patch, PatchModQueue &patch_mod_queue)
-		: patch{patch}
-		, patch_mod_queue{patch_mod_queue}
+	ManualControlPopUp(FileStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
+		: patch_mod_queue{patch_mod_queue}
+		, patch_storage{patch_storage}
 		, controlarc_group(lv_group_create()) {
 
 		lv_group_add_obj(controlarc_group, ui_ControlArc);
@@ -40,6 +41,7 @@ struct ManualControlPopUp {
 			return;
 		drawn_el = el;
 
+		patch = patch_storage.get_view_patch();
 		prepare_control_arc();
 
 		lv_show(ui_ControlAlert);
@@ -199,6 +201,7 @@ private:
 	const DrawnElement *drawn_el;
 	PatchData *patch;
 	PatchModQueue &patch_mod_queue;
+	FileStorageProxy &patch_storage;
 	lv_group_t *controlarc_group = nullptr;
 	lv_group_t *prev_group = nullptr;
 
