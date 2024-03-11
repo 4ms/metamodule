@@ -105,7 +105,7 @@ struct Toggle3pos : FlipSwitch {
 };
 
 struct Toggle2posHoriz : FlipSwitch {
-	enum State_t : FlipSwitch::State_t { DOWN = 0, UP = 1 };
+	enum State_t : FlipSwitch::State_t { LEFT = 0, RIGHT = 1 };
 
 	constexpr Toggle2posHoriz() = default;
 	constexpr Toggle2posHoriz(BaseElement b)
