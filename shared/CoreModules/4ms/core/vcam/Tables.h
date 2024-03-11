@@ -112,4 +112,4 @@ constexpr std::array<float, 101> GainValues = {
     1.258036
 };
 
-LookupTable_t<GainValues.size()> VoltageToGainTable(VoltageToGainTableRange::min, VoltageToGainTableRange::max, GainValues);
+constexpr inline LookupTable_t<GainValues.size()> VoltageToGainTable(VoltageToGainTableRange::min, VoltageToGainTableRange::max, GainValues);
