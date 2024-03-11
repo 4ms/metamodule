@@ -1,6 +1,7 @@
 #pragma once
 #include "VCV_adaptor/plugin/Plugin.hpp"
 #include "conf/ramdisk_conf.hh"
+#include "dynload/plugins.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
 #include "fs/fatfs/fat_file_io.hh"
@@ -9,27 +10,6 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
 #include <list>
-
-extern rack::plugin::Plugin *pluginInstance;
-
-extern rack::plugin::Model *modelEvenVCO;
-extern rack::plugin::Model *modelRampage;
-extern rack::plugin::Model *modelABC;
-extern rack::plugin::Model *modelSpringReverb;
-extern rack::plugin::Model *modelMixer;
-extern rack::plugin::Model *modelSlewLimiter;
-extern rack::plugin::Model *modelDualAtenuverter;
-extern rack::plugin::Model *modelPercall;
-extern rack::plugin::Model *modelHexmixVCA;
-extern rack::plugin::Model *modelChoppingKinky;
-extern rack::plugin::Model *modelKickall;
-extern rack::plugin::Model *modelSamplingModulator;
-extern rack::plugin::Model *modelMorphader;
-extern rack::plugin::Model *modelADSR;
-extern rack::plugin::Model *modelSTMix;
-extern rack::plugin::Model *modelChannelStrip;
-extern rack::plugin::Model *modelPonyVCO;
-extern rack::plugin::Model *modelMotionMTR;
 
 namespace MetaModule
 {
@@ -55,33 +35,138 @@ struct PluginManager {
 		//TODO: how to do this from build system?
 		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
 		pluginInstance = &befaco_plugin;
-		befaco_plugin.addModel(modelEvenVCO);
-		befaco_plugin.addModel(modelPonyVCO);
-		// befaco_plugin.addModel(modelRampage);
-		// befaco_plugin.addModel(modelABC);
-		// befaco_plugin.addModel(modelMixer);
-		// befaco_plugin.addModel(modelSlewLimiter);
-		// befaco_plugin.addModel(modelDualAtenuverter);
-		// befaco_plugin.addModel(modelPercall);
-		// befaco_plugin.addModel(modelHexmixVCA);
-		// befaco_plugin.addModel(modelChoppingKinky);
-		// befaco_plugin.addModel(modelKickall);
-		// befaco_plugin.addModel(modelSamplingModulator);
-		// befaco_plugin.addModel(modelMorphader);
-		// befaco_plugin.addModel(modelADSR);
-		// befaco_plugin.addModel(modelSTMix);
-		// befaco_plugin.addModel(modelChannelStrip);
-		// befaco_plugin.addModel(modelMotionMTR);
+		pluginInstance->addModel(modelEvenVCO);
+		pluginInstance->addModel(modelPonyVCO);
+		pluginInstance->addModel(modelRampage);
+		pluginInstance->addModel(modelABC);
+		pluginInstance->addModel(modelMixer);
+		pluginInstance->addModel(modelSlewLimiter);
+		pluginInstance->addModel(modelDualAtenuverter);
+		pluginInstance->addModel(modelPercall);
+		pluginInstance->addModel(modelHexmixVCA);
+		pluginInstance->addModel(modelChoppingKinky);
+		pluginInstance->addModel(modelKickall);
+		pluginInstance->addModel(modelSamplingModulator);
+		pluginInstance->addModel(modelMorphader);
+		pluginInstance->addModel(modelADSR);
+		pluginInstance->addModel(modelSTMix);
+		pluginInstance->addModel(modelChannelStrip);
+		pluginInstance->addModel(modelMotionMTR);
 		// befaco_plugin.addModel(modelSpringReverb);
 
-		internal_plugins.emplace_back("AudibleInstruments");
-		//TODO
+		auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
+		pluginInstance = &audins_plugin;
+		pluginInstance->addModel(modelBlinds);
+		pluginInstance->addModel(modelBraids);
+		pluginInstance->addModel(modelBranches);
+		// pluginInstance->addModel(modelClouds);
+		pluginInstance->addModel(modelElements);
+		// pluginInstance->addModel(modelFrames);
+		pluginInstance->addModel(modelKinks);
+		pluginInstance->addModel(modelLinks);
+		pluginInstance->addModel(modelMarbles);
+		// pluginInstance->addModel(modelPlaits);
+		pluginInstance->addModel(modelRings);
+		pluginInstance->addModel(modelRipples);
+		pluginInstance->addModel(modelShades);
+		pluginInstance->addModel(modelShelves);
+		// pluginInstance->addModel(modelStages);
+		// pluginInstance->addModel(modelStreams);
+		// pluginInstance->addModel(modelTides);
+		pluginInstance->addModel(modelTides2);
+		pluginInstance->addModel(modelVeils);
+		// pluginInstance->addModel(modelWarps);
 
-		internal_plugins.emplace_back("hetrickcv");
-		//TODO
+		auto &hcv_plugin = internal_plugins.emplace_back("hetrickcv");
+		pluginInstance = &hcv_plugin;
+		pluginInstance->addModel(modelTwoToFour);
+		pluginInstance->addModel(modelAnalogToDigital);
+		pluginInstance->addModel(modelASR);
+		pluginInstance->addModel(modelBinaryGate);
+		pluginInstance->addModel(modelBinaryNoise);
+		pluginInstance->addModel(modelBitshift);
+		// pluginInstance->addModel(modelBlankPanel);
+		pluginInstance->addModel(modelBoolean3);
+		pluginInstance->addModel(modelChaos1Op);
+		pluginInstance->addModel(modelChaos2Op);
+		pluginInstance->addModel(modelChaos3Op);
+		pluginInstance->addModel(modelChaoticAttractors);
+		pluginInstance->addModel(modelClockedNoise);
+		// pluginInstance->addModel(modelComparator);
+		pluginInstance->addModel(modelContrast);
+		pluginInstance->addModel(modelCrackle);
+		// pluginInstance->addModel(modelDataCompander);
+		// pluginInstance->addModel(modelDelta);
+		pluginInstance->addModel(modelDigitalToAnalog);
+		pluginInstance->addModel(modelDust);
+		pluginInstance->addModel(modelExponent);
+		pluginInstance->addModel(modelFBSineChaos);
+		pluginInstance->addModel(modelFlipFlop);
+		pluginInstance->addModel(modelFlipPan);
+		pluginInstance->addModel(modelGateDelay);
+		pluginInstance->addModel(modelGateJunction);
+		pluginInstance->addModel(modelGateJunctionExp);
+		pluginInstance->addModel(modelGingerbread);
+		pluginInstance->addModel(modelLogicCombine);
+		pluginInstance->addModel(modelMidSide);
+		pluginInstance->addModel(modelMinMax);
+		pluginInstance->addModel(modelPhaseDrivenSequencer);
+		pluginInstance->addModel(modelPhaseDrivenSequencer32);
+		pluginInstance->addModel(modelPhasorAnalyzer);
+		pluginInstance->addModel(modelPhasorBurstGen);
+		pluginInstance->addModel(modelPhasorDivMult);
+		pluginInstance->addModel(modelPhasorEuclidean);
+		pluginInstance->addModel(modelPhasorGates);
+		pluginInstance->addModel(modelPhasorGates32);
+		pluginInstance->addModel(modelPhasorGates64);
+		pluginInstance->addModel(modelPhasorGen);
+		pluginInstance->addModel(modelPhasorGeometry);
+		pluginInstance->addModel(modelPhasorHumanizer);
+		// pluginInstance->addModel(modelPhasorMixer);
+		pluginInstance->addModel(modelPhasorOctature);
+		pluginInstance->addModel(modelPhasorQuadrature);
+		pluginInstance->addModel(modelPhasorRandom);
+		pluginInstance->addModel(modelPhasorRanger);
+		pluginInstance->addModel(modelPhasorReset);
+		pluginInstance->addModel(modelPhasorRhythmGroup);
+		pluginInstance->addModel(modelPhasorShape);
+		pluginInstance->addModel(modelPhasorShift);
+		pluginInstance->addModel(modelPhasorStutter);
+		pluginInstance->addModel(modelPhasorSubstepShape);
+		pluginInstance->addModel(modelPhasorSwing);
+		pluginInstance->addModel(modelPhasorTimetable);
+		pluginInstance->addModel(modelPhasorToClock);
+		pluginInstance->addModel(modelPhasorToLFO);
+		pluginInstance->addModel(modelPhasorToWaveforms);
+		pluginInstance->addModel(modelProbability);
+		// pluginInstance->addModel(modelRandomGates);
+		// pluginInstance->addModel(modelRotator);
+		// pluginInstance->addModel(modelRungler);
+		pluginInstance->addModel(modelScanner);
+		pluginInstance->addModel(modelVectorMix);
+		pluginInstance->addModel(modelWaveshape);
+		pluginInstance->addModel(modelXYToPolar);
 
-		internal_plugins.emplace_back("nonlinearcircuits");
-		//TODO
+		auto &nlc_plugin = internal_plugins.emplace_back("nonlinearcircuits");
+		pluginInstance = &nlc_plugin;
+		pluginInstance->addModel(model4Seq);
+		pluginInstance->addModel(modelCipher);
+		pluginInstance->addModel(modelBOOLs);
+		pluginInstance->addModel(modelDivideConquer);
+		pluginInstance->addModel(modelDivineCMOS);
+		pluginInstance->addModel(modelDoubleNeuron);
+		pluginInstance->addModel(modelGenie);
+		pluginInstance->addModel(modelLetsSplosh);
+		pluginInstance->addModel(modelNeuron);
+		pluginInstance->addModel(modelNumberwang);
+		pluginInstance->addModel(modelRouter);
+		pluginInstance->addModel(modelSegue);
+		pluginInstance->addModel(modelSlothApathy);
+		pluginInstance->addModel(modelSlothInertia);
+		pluginInstance->addModel(modelSlothTorpor);
+		pluginInstance->addModel(modelSquidAxon);
+		pluginInstance->addModel(modelStatues);
+		pluginInstance->addModel(modelTripleSloth);
 
 		if (!ramdisk.format_disk()) {
 			pr_err("Could not format RamDisk, no assets can be loaded!\n");
@@ -116,7 +201,7 @@ private:
 	void load_internal_assets() {
 		auto raw_image = asset_fs.read_image();
 		auto asset_tar = Tar::Archive(raw_image);
-		asset_tar.print_info();
+		// asset_tar.print_info();
 
 		auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
 			return ramdisk.write_file(filename, buffer);
