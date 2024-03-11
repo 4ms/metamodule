@@ -1,15 +1,7 @@
 #pragma once
 #include "drivers/qspi_flash_driver.hh"
+#include "fs/norflash_layout.hh"
 #include "lib/littlefs/lfs.h"
-
-//first 10MB is for bootloaders (512kB) and application (9.5MB)
-//next 4MB is Assets (4MB is reserved for this but for now we keep the image to 2MB for faster flashing)
-//last 2MB is pathches
-static constexpr uint32_t AssetVolFlashOffset = 10 * 1024 * 1024; //0xA00000;
-static constexpr uint32_t AssetVolFlashSize = 2 * 1024 * 1024;
-
-static constexpr uint32_t PatchVolFlashOffset = 14 * 1024 * 1024; //0xE00000;
-static constexpr uint32_t PatchVolFlashSize = 2 * 1024 * 1024;
 
 // NorFlashOps is the bridge between QSPI driver and LittleFS
 template<size_t FlashAddr, size_t FlashSize>

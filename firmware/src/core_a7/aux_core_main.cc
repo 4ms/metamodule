@@ -6,6 +6,7 @@
 #include "drivers/smp.hh"
 #include "drivers/timekeeper.hh"
 #include "dynload/plugin_manager.hh"
+#include "fs/norflash_layout.hh"
 #include "gui/ui.hh"
 #include "patch_play/patch_player.hh"
 
@@ -29,7 +30,8 @@ extern "C" void aux_core_main() {
 	auto patch_mod_queue = A7SharedMemoryS::ptrs.patch_mod_queue;
 	auto ramdisk_storage = A7SharedMemoryS::ptrs.ramdrive;
 
-	PluginManager plugin_manager{*file_storage_proxy, *ramdisk_storage};
+	AssetFS asset_fs{AssetVolFlashOffset};
+	PluginManager plugin_manager{*file_storage_proxy, *ramdisk_storage, asset_fs};
 
 	Ui ui{*patch_playloader, *file_storage_proxy, *sync_params, *patch_mod_queue, plugin_manager};
 

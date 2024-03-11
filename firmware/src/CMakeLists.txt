@@ -107,6 +107,8 @@ add_executable(
   ${SHARED}/patch_convert/patch_to_yaml.cc
   ${SHARED}/patch_convert/ryml/ryml_serial.cc
   #
+  ${FWDIR}/src/fs/untar.cc
+  #
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
   #
