@@ -1,35 +1,28 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/RCD_info.hh"
+
+#include "CoreModules/4ms/core/helpers/EdgeDetector.h"
+#include "CoreModules/4ms/core/helpers/FlipFlop.h"
 
 namespace MetaModule
 {
 
-class RCDCore : public CoreProcessor {
+class RCDCore : public SmartCoreProcessor<RCDInfo> {
 	using Info = RCDInfo;
 	using ThisCore = RCDCore;
+	using enum Info::Elem;
 
 public:
-	RCDCore() = default;
+	RCDCore()
+		: triggerDetector(1.0f, 2.0f) {
+	}
 
 	void update() override {
-	}
-
-	void set_param(int param_id, float val) override {
-	}
-
-	void set_input(int input_id, float val) override {
-	}
-
-	float get_output(int output_id) const override {
-		return 0.f;
+		setLED<LedInLight>(std::array{1.f,1.f,1.f});
 	}
 
 	void set_samplerate(float sr) override {
-	}
-
-	float get_led_brightness(int led_id) const override {
-		return 0.f;
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -39,6 +32,9 @@ public:
 	// clang-format on
 
 private:
+	FlipFlop triggerDetector;
+	EdgeDetector triggerEdgeDetector;
+
 };
 
 } // namespace MetaModule
