@@ -99,15 +99,15 @@ private:
 		}
 
 		if (getState<MaxDiv1Switch>() == Toggle2posHoriz::State_t::LEFT) {
-			maxDiv16Mode = MaxDiv_t::MAXDIV_64;
-		} else {
-			maxDiv16Mode = MaxDiv_t::MAXDIV_8;
-		}
-
-		if (getState<MaxDiv2Switch>() == Toggle2posHoriz::State_t::LEFT) {
 			maxDiv32Mode = MaxDiv_t::MAXDIV_64;
 		} else {
 			maxDiv32Mode = MaxDiv_t::MAXDIV_8;
+		}
+
+		if (getState<MaxDiv2Switch>() == Toggle2posHoriz::State_t::LEFT) {
+			maxDiv16Mode = MaxDiv_t::MAXDIV_64;
+		} else {
+			maxDiv16Mode = MaxDiv_t::MAXDIV_8;
 		}
 
 		if (getState<SpreadSwitch>() == Toggle2posHoriz::State_t::LEFT) {
