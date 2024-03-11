@@ -16,3 +16,19 @@ public:
 private:
 	bool val;
 };
+
+class FallingEdgeDetector
+{
+public:
+	FallingEdgeDetector() : val(false) {}
+
+	bool operator()(bool in)
+	{
+		auto result = val and not in;
+		val = in;
+		return result;
+	}
+
+private:
+	bool val;
+};
