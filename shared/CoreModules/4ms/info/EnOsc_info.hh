@@ -9,7 +9,8 @@ struct EnOscInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"EnOsc"};
 	static constexpr std::string_view description{"Ensemble Oscillator"};
 	static constexpr uint32_t width_hp = 16;
-	static constexpr std::string_view svg_filename{"4ms/fp/EnOsc.png"};
+	static constexpr std::string_view svg_filename{"res/modules/EnOsc_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/EnOsc.png"};
 
 	using enum Coords;
 
