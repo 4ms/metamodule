@@ -33,7 +33,7 @@ struct SvgPort : PortWidget {
 	void setSvg(std::shared_ptr<window::Svg> svg) {
 		if (svg->filename.size()) {
 			svg_filename = svg->filename;
-			printf("SvgPort:svg_filename %s\n", svg_filename.c_str());
+			// printf("SvgPort:svg_filename %s\n", svg_filename.c_str());
 		} else
 			printf("SvgPort: svg with empty name\n");
 	}
@@ -54,9 +54,9 @@ struct ThemedSvgPort : SvgPort {
 	void setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
 		this->lightSvg = lightSvg;
 		this->darkSvg = darkSvg;
-		printf("ThemedSvgPort:light svg_filename %s, dark %s\n",
-			   this->lightSvg->filename.c_str(),
-			   this->darkSvg->filename.c_str());
+		// printf("ThemedSvgPort:light svg_filename %s, dark %s\n",
+		// 	   this->lightSvg->filename.c_str(),
+		// 	   this->darkSvg->filename.c_str());
 	}
 
 	void step() override {
