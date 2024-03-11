@@ -1,0 +1,361 @@
+PatchData:
+  patch_name: VCAM
+  description: Patch Description
+  module_slugs:
+    0: HubMedium
+    1: VCAM
+  int_cables: []
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+    - panel_jack_id: 1
+      ins:
+        - module_id: 1
+          jack_id: 5
+    - panel_jack_id: 2
+      ins:
+        - module_id: 1
+          jack_id: 10
+    - panel_jack_id: 3
+      ins:
+        - module_id: 1
+          jack_id: 15
+    - panel_jack_id: 4
+      ins:
+        - module_id: 1
+          jack_id: 1
+    - panel_jack_id: 5
+      ins:
+        - module_id: 1
+          jack_id: 2
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 1
+    - panel_jack_id: 2
+      out:
+        module_id: 1
+        jack_id: 2
+    - panel_jack_id: 3
+      out:
+        module_id: 1
+        jack_id: 3
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.333735
+    - module_id: 1
+      param_id: 1
+      value: 0.448193
+    - module_id: 1
+      param_id: 2
+      value: 0.384337
+    - module_id: 1
+      param_id: 3
+      value: 0.438554
+    - module_id: 1
+      param_id: 4
+      value: 0.410843
+    - module_id: 1
+      param_id: 5
+      value: 0.40241
+    - module_id: 1
+      param_id: 6
+      value: 0.420482
+    - module_id: 1
+      param_id: 7
+      value: 0.422892
+    - module_id: 1
+      param_id: 8
+      value: 0.43012
+    - module_id: 1
+      param_id: 9
+      value: 0.433735
+    - module_id: 1
+      param_id: 10
+      value: 0.396386
+    - module_id: 1
+      param_id: 11
+      value: 0.416867
+    - module_id: 1
+      param_id: 12
+      value: 0.5
+    - module_id: 1
+      param_id: 13
+      value: 0.5
+    - module_id: 1
+      param_id: 14
+      value: 0.5
+    - module_id: 1
+      param_id: 15
+      value: 0.5
+    - module_id: 1
+      param_id: 16
+      value: 1
+    - module_id: 1
+      param_id: 17
+      value: 0
+    - module_id: 1
+      param_id: 18
+      value: 0
+    - module_id: 1
+      param_id: 19
+      value: 0
+    - module_id: 1
+      param_id: 20
+      value: 0
+    - module_id: 1
+      param_id: 21
+      value: 0
+    - module_id: 1
+      param_id: 22
+      value: 0
+    - module_id: 1
+      param_id: 23
+      value: 0
+    - module_id: 1
+      param_id: 24
+      value: 0
+    - module_id: 1
+      param_id: 25
+      value: 0
+    - module_id: 1
+      param_id: 26
+      value: 0
+    - module_id: 1
+      param_id: 27
+      value: 0
+    - module_id: 1
+      param_id: 28
+      value: 0
+    - module_id: 1
+      param_id: 29
+      value: 0
+    - module_id: 1
+      param_id: 30
+      value: 0
+    - module_id: 1
+      param_id: 31
+      value: 0
+  mapped_knobs:
+    - name: Levels In A/B/C
+      set:
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 1
+          param_id: 5
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 1
+          param_id: 6
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 4
+          module_id: 1
+          param_id: 7
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 1
+          param_id: 11
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 1
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 1
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
+          module_id: 1
+          param_id: 8
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 1
+          param_id: 9
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 1
+          param_id: 10
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: Levels In D
+      set:
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 15
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 1
+          param_id: 12
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 1
+          param_id: 13
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 1
+          param_id: 14
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: Buttons In A/B/
+      set:
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 19
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 20
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 1
+          param_id: 21
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 1
+          param_id: 22
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 4
+          module_id: 1
+          param_id: 23
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 1
+          param_id: 27
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 1
+          param_id: 16
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 1
+          param_id: 17
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 1
+          param_id: 18
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
+          module_id: 1
+          param_id: 24
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 1
+          param_id: 25
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 1
+          param_id: 26
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set:
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 31
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 1
+          param_id: 28
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 1
+          param_id: 29
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 1
+          param_id: 30
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+
+'vcvModuleStates': []
