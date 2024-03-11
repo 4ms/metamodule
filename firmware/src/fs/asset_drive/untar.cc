@@ -134,7 +134,7 @@ bool Archive::extract_files(std::function<uint32_t(std::string_view, std::span<c
 	while (entry) {
 		auto name = entry_name(entry);
 		if (auto filedata = extract_entry(entry); filedata.size() > 0) {
-			pr_info("Extracted %zu bytes for %s\n", filedata.size(), name);
+			pr_info("Extracted %zu bytes for %s\n", filedata.size(), name.c_str());
 			write(name, filedata);
 		} else {
 			all_entries_ok = false;
@@ -173,7 +173,7 @@ Archive::~Archive() {
 void Archive::print_info() {
 	tar_t *entry = archive;
 	while (entry) {
-		pr_info("- %s\n", entry_name(entry));
+		pr_info("- %s\n", entry_name(entry).c_str());
 		entry = entry->next;
 	}
 }
