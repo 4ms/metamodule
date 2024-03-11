@@ -1,11 +1,11 @@
 #pragma once
 #include "VCV_adaptor/plugin/Plugin.hpp"
 #include "conf/ramdisk_conf.hh"
-#include "fs/asset_fs.hh"
+#include "fs/asset_drive/asset_fs.hh"
+#include "fs/asset_drive/untar.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "fs/fileio_t.hh"
-#include "fs/untar.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin_loader.hh"
 #include <list>
@@ -121,21 +121,27 @@ private:
 		auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
 			return ramdisk.write_file(filename, buffer);
 		};
+
 		asset_tar.extract_files(ramdisk_writer);
 	}
 
-	void test_write() {
+	void test_internal_asset() {
+		test_read("4ms/fp/Pan.png");
+		test_read("README.txt");
+	}
+
+	void test_write(std::string_view filename) {
 		const char w[24] = "Testing some file\ndata\n";
-		auto bytes_written = ramdisk.write_file("checkfile", w);
+		auto bytes_written = ramdisk.write_file(filename, w);
 		pr_dbg("Wrote %zu bytes\n", bytes_written);
 	}
 
-	void test_read() {
-		auto filinfo = ramdisk.get_file_info("checkfile");
-		pr_dbg("Checkfile = %d bytes\n", filinfo.size);
+	void test_read(std::string_view filename) {
+		auto filinfo = ramdisk.get_file_info(filename);
+		pr_dbg("Check reading %s = %d bytes\n", filename.data(), filinfo.size);
 
 		std::array<char, 128> r{0};
-		auto bytes_read = ramdisk.read_file("checkfile", r);
+		auto bytes_read = ramdisk.read_file(filename, r);
 		pr_dbg("%.*s\n", bytes_read, &r[0]);
 	}
 

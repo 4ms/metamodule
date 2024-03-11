@@ -75,7 +75,7 @@ add_executable(
 	${FWDIR}/src/fs/fatfs/diskio.cc
 	${FWDIR}/src/fs/time_convert.cc
 	#Tar:
-	${FWDIR}/src/fs/untar.cc
+	${FWDIR}/src/fs/asset_drive/untar.cc
 	)
 
 target_include_directories(
