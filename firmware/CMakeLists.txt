@@ -57,11 +57,31 @@ add_custom_command(
 )
 
 #
+# Asset Dir
+#
+#TODO
+# 
+
+set(ASSET_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/internal-drive)
+set(ASSET_IMG_FILENAME  ${CMAKE_CURRENT_BINARY_DIR}/intdrive.uimg)
+
+add_custom_command(
+  OUTPUT ${ASSET_IMG_FILENAME}
+  COMMAND tar -cf ${CMAKE_CURRENT_BINARY_DIR}/intdrive.tar -C ${ASSET_DIR} --strip-component=1 .
+  COMMAND flashing/uimg_header.py --name Assets build/intdrive.tar ${ASSET_IMG_FILENAME}
+  COMMENT "Creating assets uimg file"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  VERBATIM USES_TERMINAL
+)
+
+
+#
 # Package Release
 #
 set(RELEASE_TARGET_DIR   ${CMAKE_CURRENT_BINARY_DIR}/metamodule-firmware)
 set(RELEASE_ARCHIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-all.zip)
 set(RELEASE_FW_ONLY_ARCHIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-main.zip)
+set(RELEASE_ASSETS_ARCHIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-assets.zip)
 set(MANIFEST_FILENAME    metamodule.json)
 set(MAIN_FW_FILENAME  ${CMAKE_CURRENT_BINARY_DIR}/main.uimg)
 
@@ -84,16 +104,22 @@ add_custom_command(
 
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
            --version         "${GIT_FIRMWARE_VERSION_TAG}"
-           --assets          "${CMAKE_BINARY_DIR}/intdrive.img"
+           --assets          "${ASSET_IMG_FILENAME}"
+           "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_ASSETS_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}/intdrive.uimg ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} && rm -rf ${RELEASE_TARGET_DIR}
+
+  COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
+           --version         "${GIT_FIRMWARE_VERSION_TAG}"
+           --assets          "${ASSET_IMG_FILENAME}"
            --app             "${MAIN_FW_FILENAME}"
            "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_ONLY_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}/main.uimg ${RELEASE_TARGET_DIR}/intdrive.img ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} && rm -rf ${RELEASE_TARGET_DIR}
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_ONLY_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}/main.uimg ${RELEASE_TARGET_DIR}/intdrive.uimg ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} && rm -rf ${RELEASE_TARGET_DIR}
 
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
            --version         "${GIT_FIRMWARE_VERSION_TAG}"
            --fsbl            "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot/build/fsbl.stm32"
            --dfu             "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu/build/usbdfu.uimg"
-           --assets          "${CMAKE_BINARY_DIR}/intdrive.img"
+           --assets          "${ASSET_IMG_FILENAME}"
            --app             "${MAIN_FW_FILENAME}"
            --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/bootloader.bin"
            --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
@@ -101,7 +127,7 @@ add_custom_command(
            "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
   COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR} && rm -rf ${RELEASE_TARGET_DIR}
 
-  DEPENDS ${MAIN_FW_FILENAME} bootloader bootloader-dfu
+  DEPENDS ${MAIN_FW_FILENAME} ${ASSET_IMG_FILENAME} bootloader bootloader-dfu
   COMMENT "Creating release at ${RELEASE_ARCHIVE_PATH}"
   VERBATIM USES_TERMINAL
 )
