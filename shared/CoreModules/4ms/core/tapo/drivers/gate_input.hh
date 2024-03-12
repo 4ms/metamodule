@@ -61,8 +61,8 @@ class GateInput {
   }
 
  private:
-	bool previous_values_[GATE_INPUT_LAST];
-	bool values_[GATE_INPUT_LAST];
+	bool previous_values_[GATE_INPUT_LAST]{};
+	bool values_[GATE_INPUT_LAST]{};
 };
 
 }

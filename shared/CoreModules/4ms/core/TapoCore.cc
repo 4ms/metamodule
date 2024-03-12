@@ -34,6 +34,14 @@ public:
 
 		audioBufferFillCount = 0;
 		std::fill(audioBufferTX.begin(), audioBufferTX.end(), ::TapoDelay::ShortFrame{0,0});
+
+		ui.getADCDriver().set(TapoDelay::ADC_SCALE_CV,      0.5f);
+		ui.getADCDriver().set(TapoDelay::ADC_FEEDBACK_CV,   0.5f);
+		ui.getADCDriver().set(TapoDelay::ADC_MODULATION_CV, 0.5f);
+		ui.getADCDriver().set(TapoDelay::ADC_DRYWET_CV,     0.5f);
+		ui.getADCDriver().set(TapoDelay::ADC_VEL_CV,     	0.0f);
+		ui.getADCDriver().set(TapoDelay::ADC_TAPTRIG_CV,   	0.0f);
+		ui.getADCDriver().set(TapoDelay::ADC_CLOCK_CV,   	0.0f);
 	}
 
 	void update() override {
