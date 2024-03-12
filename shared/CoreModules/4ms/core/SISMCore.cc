@@ -75,6 +75,13 @@ public:
 
 		setLED<LedPSliceLight>(slicePositive / 8.0f);
 		setLED<LedNSliceLight>(sliceNegative / -8.0f);
+
+		auto mixOut = std::clamp(outputValue[0] + outputValue[1] + outputValue[2] + outputValue[3], -10.f, 10.f);
+
+		setOutput<MixOut>(mixOut);
+
+		setLED<LedNMixLight>(mixOut / -8.0f);
+		setLED<LedPMixLight>(mixOut / 8.0f);
 	}
 
 	void set_samplerate(float sr) override {
