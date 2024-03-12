@@ -14,10 +14,15 @@ public:
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
 
 	ModuleFactory() = delete;
-	static bool
-	registerModuleType(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate, const ModuleInfoView &info);
-	static bool registerModuleType(const ModuleTypeSlug &typeslug, const ModuleInfoView &info);
-	static bool registerModuleType(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate);
+
+	// register* functions return true if registration succeeds
+	static bool registerModuleType(const ModuleTypeSlug &typeslug,
+								   CreateModuleFunc funcCreate,
+								   const ModuleInfoView &info,
+								   std::string_view faceplate_filename);
+
+	static bool registerModuleInfo(const ModuleTypeSlug &typeslug, const ModuleInfoView &info);
+	static bool registerModuleCreationFunc(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate);
 	static bool registerModuleFaceplate(const ModuleTypeSlug &typeslug, std::string_view filename);
 
 	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug &typeslug);

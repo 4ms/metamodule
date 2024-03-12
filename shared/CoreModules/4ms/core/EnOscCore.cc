@@ -195,8 +195,7 @@ public:
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
-	static inline bool f_registered = ModuleFactory::registerModuleFaceplate(Info::slug, Info::png_filename);
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>(), Info::png_filename);
 	// clang-format on
 
 private:

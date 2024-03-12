@@ -42,7 +42,7 @@ void Plugin::addModel(Model *model) {
 	info.width_hp = 1; //TODO: deprecate width_hp
 	info.indices = model->indices;
 
-	ModuleFactory::registerModuleType(slug, info);
+	ModuleFactory::registerModuleInfo(slug, info);
 
 	model->plugin = this;
 	models.push_back(model);

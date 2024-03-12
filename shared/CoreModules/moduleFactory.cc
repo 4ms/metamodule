@@ -3,6 +3,7 @@
 
 #ifdef TESTPROJECT
 #define pr_dbg(...)
+#define pr_err(...)
 #else
 #include "console/pr_dbg.hh"
 #endif
@@ -41,38 +42,44 @@ std::string _currentBrand;
 
 bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug,
 									   CreateModuleFunc funcCreate,
-									   const ModuleInfoView &info) {
-	//TODO prepend currentBrand to slug
-	bool already_exists = creation_funcs().key_exists(typeslug);
-	infos().insert(typeslug, info);
-	creation_funcs().insert(typeslug, funcCreate);
-	// pr_dbg("ModuleFactory::register %s to infos() %p, funcs %p\n", typeslug.c_str(), &infos(), &creation_funcs());
+									   const ModuleInfoView &info,
+									   std::string_view faceplate_filename) {
+	bool already_exists = registerModuleCreationFunc(typeslug, funcCreate);
+	registerModuleInfo(typeslug, info);
+	registerModuleFaceplate(typeslug, faceplate_filename);
 	return already_exists;
 }
 
-bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug, const ModuleInfoView &info) {
-	bool already_exists = creation_funcs().key_exists(typeslug);
-	infos().insert(typeslug, info);
-	// pr_dbg("ModuleFactory::register %s to infos() %p\n", typeslug.c_str(), &infos());
-	return already_exists;
+bool ModuleFactory::registerModuleInfo(const ModuleTypeSlug &typeslug, const ModuleInfoView &info) {
+	if (!infos().key_exists(typeslug)) {
+		pr_dbg("ModuleFactory::register %s to infos() %p\n", typeslug.c_str(), &infos());
+		return infos().insert(typeslug, info);
+	} else {
+		pr_err("ModuleFactory: info for %s already exists\n", typeslug.c_str());
+		return false;
+	}
 }
 
-bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate) {
-	bool already_exists = creation_funcs().key_exists(typeslug);
-	creation_funcs().insert(typeslug, funcCreate);
-	// pr_dbg("ModuleFactory::register %s to funcs %p\n", typeslug.c_str(), &creation_funcs());
-	return already_exists;
+bool ModuleFactory::registerModuleCreationFunc(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate) {
+	if (!creation_funcs().key_exists(typeslug)) {
+		pr_dbg("ModuleFactory::register %s to funcs %p\n", typeslug.c_str(), &creation_funcs());
+		return creation_funcs().insert(typeslug, funcCreate);
+	} else {
+		pr_err("ModuleFactory: creation func for %s already exists\n", typeslug.c_str());
+		return false;
+	}
 }
 
 bool ModuleFactory::registerModuleFaceplate(const ModuleTypeSlug &typeslug, std::string_view faceplate) {
-	if (faceplates().key_exists(typeslug)) {
-		return false;
-	} else {
+	if (!faceplates().key_exists(typeslug)) {
 		pr_dbg("ModuleFactory::register %s to faceplate %.*s\n",
 			   typeslug.c_str(),
 			   (int)faceplate.size(),
 			   faceplate.data());
 		return faceplates().insert(typeslug, faceplate);
+	} else {
+		pr_err("ModuleFactory: faceplate for %s already exists\n", typeslug.c_str());
+		return false;
 	}
 }
 

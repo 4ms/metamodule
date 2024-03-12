@@ -33,8 +33,8 @@ using namespace MetaModule;
 class AutoInit {
 
 public:
-	static inline bool g_abcabc_already_exists =
-		ModuleFactory::registerModuleType(abcabc_slug, TestCoreMod::create, abcabcInfo);
+	static inline bool g_abcabc_registered_ok =
+		ModuleFactory::registerModuleType(abcabc_slug, TestCoreMod::create, abcabcInfo, "faceplate.png");
 };
 
 TEST_CASE("Static objects register automatically") {
@@ -51,7 +51,7 @@ TEST_CASE("Static objects register automatically") {
 	CHECK(info.width_hp == 40);
 	CHECK(info.description == "abcabc module");
 
-	CHECK_FALSE(AutoInit::g_abcabc_already_exists);
+	CHECK(AutoInit::g_abcabc_registered_ok);
 }
 
 constexpr MetaModule::ModuleInfoView ABCInfo{
@@ -71,8 +71,8 @@ struct TestInfo : MetaModule::ModuleInfoBase {
 
 TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView") {
 
-	bool already_exists = ModuleFactory::registerModuleType("ABC", TestCoreMod::create, ABCInfo);
-	CHECK_FALSE(already_exists);
+	bool registered_ok = ModuleFactory::registerModuleType("ABC", TestCoreMod::create, ABCInfo, "abc.png");
+	CHECK(registered_ok);
 
 	CHECK(ModuleFactory::isValidSlug("ABC"));
 	CHECK_FALSE(ModuleFactory::isValidSlug("DEF"));
@@ -94,8 +94,8 @@ TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView")
 			.elements = TestInfo::Elements,
 		};
 
-		already_exists = ModuleFactory::registerModuleType("DEF", TestCoreMod::create, testinfo);
-		CHECK_FALSE(already_exists);
+		registered_ok = ModuleFactory::registerModuleType("DEF", TestCoreMod::create, testinfo, "def.png");
+		CHECK(registered_ok);
 
 		CHECK(ModuleFactory::getModuleInfo("DEF").width_hp == 4);
 		auto elements = ModuleFactory::getModuleInfo("DEF").elements;
