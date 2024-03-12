@@ -10,6 +10,7 @@ struct FadeInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Crossfader"};
     static constexpr uint32_t width_hp = 4;
     static constexpr std::string_view svg_filename{"res/modules/Fade_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Fade.png"};
 
     using enum Coords;
 

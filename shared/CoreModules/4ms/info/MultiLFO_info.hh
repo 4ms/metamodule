@@ -10,6 +10,7 @@ struct MultiLFOInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Multi LFO"};
     static constexpr uint32_t width_hp = 8;
     static constexpr std::string_view svg_filename{"res/modules/MultiLFO_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/MultiLFO.png"};
 
     using enum Coords;
 

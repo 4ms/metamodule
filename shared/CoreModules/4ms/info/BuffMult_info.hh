@@ -10,6 +10,7 @@ struct BuffMultInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Buffered Multiple"};
     static constexpr uint32_t width_hp = 3;
     static constexpr std::string_view svg_filename{"res/modules/BuffMult_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/BuffMult.png"};
 
     using enum Coords;
 

@@ -10,6 +10,7 @@ struct SlewInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Slew Limiter"};
     static constexpr uint32_t width_hp = 4;
     static constexpr std::string_view svg_filename{"res/modules/Slew_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Slew.png"};
 
     using enum Coords;
 

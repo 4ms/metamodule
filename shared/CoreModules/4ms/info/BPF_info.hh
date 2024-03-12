@@ -10,6 +10,7 @@ struct BPFInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Band-Pass Filter"};
     static constexpr uint32_t width_hp = 4;
     static constexpr std::string_view svg_filename{"res/modules/BPF_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/BPF.png"};
 
     using enum Coords;
 

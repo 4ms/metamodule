@@ -12,6 +12,8 @@ struct ModuleInfoBase {
 	static constexpr std::string_view description{""};
 	static constexpr uint32_t width_hp = 0;
 	static constexpr std::array<Element, 0> Elements{};
+	static constexpr std::string_view svg_filename{""};
+	static constexpr std::string_view png_filename{""};
 
 	template<size_t DPI = 75>
 	static constexpr float to_mm(float px) {

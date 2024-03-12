@@ -10,6 +10,7 @@ struct GateInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Gate Delay"};
     static constexpr uint32_t width_hp = 4;
     static constexpr std::string_view svg_filename{"res/modules/Gate_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Gate.png"};
 
     using enum Coords;
 

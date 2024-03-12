@@ -10,6 +10,7 @@ struct ENVVCAInfo : ModuleInfoBase {
     static constexpr std::string_view description{"EnvelopeVCA"};
     static constexpr uint32_t width_hp = 8;
     static constexpr std::string_view svg_filename{"res/modules/ENVVCA_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/ENVVCA.png"};
 
     using enum Coords;
 

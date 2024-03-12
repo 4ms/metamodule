@@ -10,6 +10,7 @@ struct SourceInfo : ModuleInfoBase {
     static constexpr std::string_view description{"DC Source"};
     static constexpr uint32_t width_hp = 4;
     static constexpr std::string_view svg_filename{"res/modules/Source_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Source.png"};
 
     using enum Coords;
 

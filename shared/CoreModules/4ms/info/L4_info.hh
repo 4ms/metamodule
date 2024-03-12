@@ -10,6 +10,7 @@ struct L4Info : ModuleInfoBase {
     static constexpr std::string_view description{"Listen Four"};
     static constexpr uint32_t width_hp = 10;
     static constexpr std::string_view svg_filename{"res/modules/L4_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/L4.png"};
 
     using enum Coords;
 

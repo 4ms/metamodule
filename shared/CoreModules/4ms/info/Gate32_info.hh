@@ -10,6 +10,7 @@ struct Gate32Info : ModuleInfoBase {
     static constexpr std::string_view description{"32 Step Gate Sequencer"};
     static constexpr uint32_t width_hp = 17;
     static constexpr std::string_view svg_filename{"res/modules/Gate32_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Gate32.png"};
 
     using enum Coords;
 

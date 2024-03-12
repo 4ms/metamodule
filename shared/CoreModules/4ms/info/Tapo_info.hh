@@ -10,6 +10,7 @@ struct TapoInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Tapographic Delay"};
     static constexpr uint32_t width_hp = 18;
     static constexpr std::string_view svg_filename{"res/modules/Tapo_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Tapo.png"};
 
     using enum Coords;
 

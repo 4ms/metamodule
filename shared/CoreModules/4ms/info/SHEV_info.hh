@@ -10,6 +10,7 @@ struct SHEVInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Shaped Dual EnvVCA"};
     static constexpr uint32_t width_hp = 20;
     static constexpr std::string_view svg_filename{"res/modules/SHEV_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/SHEV.png"};
 
     using enum Coords;
 
