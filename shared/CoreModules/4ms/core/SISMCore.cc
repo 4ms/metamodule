@@ -49,6 +49,18 @@ public:
 		setOutput<Out2Out>(outputValue[1]);
 		setOutput<Out3Out>(outputValue[2]);
 		setOutput<Out4Out>(outputValue[3]);
+
+		setLED<LedN1Light>(outputValue[0] / -8.0f);
+		setLED<LedP1Light>(outputValue[0] / 8.0f);
+
+		setLED<LedN2Light>(outputValue[1] / -8.0f);
+		setLED<LedP2Light>(outputValue[1] / 8.0f);
+
+		setLED<LedN3Light>(outputValue[2] / -8.0f);
+		setLED<LedP3Light>(outputValue[2] / 8.0f);
+
+		setLED<LedN4Light>(outputValue[3] / -8.0f);
+		setLED<LedP4Light>(outputValue[3] / 8.0f);
 	}
 
 	void set_samplerate(float sr) override {
