@@ -45,10 +45,10 @@ public:
 		outputValue[2] = process(inputValue[2], getState<Scale3Knob>(), getState<Shift3Knob>());
 		outputValue[3] = process(inputValue[3], getState<Scale4Knob>(), getState<Shift4Knob>());
 
-		setOutput<Out1Out>(outputValue[0]);
-		setOutput<Out2Out>(outputValue[1]);
-		setOutput<Out3Out>(outputValue[2]);
-		setOutput<Out4Out>(outputValue[3]);
+		setOutput<Out1Out>(std::clamp(outputValue[0], -10.f, 10.f));
+		setOutput<Out2Out>(std::clamp(outputValue[1], -10.f, 10.f));
+		setOutput<Out3Out>(std::clamp(outputValue[2], -10.f, 10.f));
+		setOutput<Out4Out>(std::clamp(outputValue[3], -10.f, 10.f));
 
 		setLED<LedN1Light>(outputValue[0] / -8.0f);
 		setLED<LedP1Light>(outputValue[0] / 8.0f);
@@ -61,6 +61,20 @@ public:
 
 		setLED<LedN4Light>(outputValue[3] / -8.0f);
 		setLED<LedP4Light>(outputValue[3] / 8.0f);
+
+		auto slicePositive = 0.f;
+		auto sliceNegative = 0.f;
+
+		for (auto output : outputValue) {
+			slicePositive += std::clamp(output, 0.f, 10.f);
+			sliceNegative += std::clamp(output, -10.f, 0.f);
+		}
+
+		setOutput<PSliceOut>(std::clamp(slicePositive, 0.f, 10.f));
+		setOutput<NSliceOut>(std::clamp(sliceNegative, -10.f, 0.f));
+
+		setLED<LedPSliceLight>(slicePositive / 8.0f);
+		setLED<LedNSliceLight>(sliceNegative / -8.0f);
 	}
 
 	void set_samplerate(float sr) override {
