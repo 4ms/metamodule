@@ -23,11 +23,11 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.7368508"
-     inkscape:cx="188.84754"
+     inkscape:cx="189.13542"
      inkscape:cy="211.87773"
      inkscape:window-width="2512"
      inkscape:window-height="1387"
-     inkscape:window-x="58"
+     inkscape:window-x="50"
      inkscape:window-y="25"
      inkscape:window-maximized="0"
      inkscape:current-layer="components" />
@@ -2528,7 +2528,7 @@
        style="fill: #ffc000;" />
     <circle
        id="Tap_LED"
-       data-name="Tap LED"
+       data-name="Tap LED#RedLight"
        cx="129.3"
        cy="268.61"
        r="4.25"

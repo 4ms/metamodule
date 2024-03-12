@@ -43,7 +43,7 @@ struct TapoInfo : ModuleInfoBase {
 		GateJackOutput4ms{{to_mm<72>(193.9), to_mm<72>(214.43), Center, "Gate Out", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(237.33), to_mm<72>(222.97), Center, "Audio Out 1", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(237.33), to_mm<72>(264.89), Center, "Audio Out 2", ""}},
-		RedGreenBlueLight{{to_mm<72>(129.3), to_mm<72>(268.61), Center, "Tap LED", ""}},
+		RedLight{{to_mm<72>(129.3), to_mm<72>(268.61), Center, "Tap LED", ""}},
 		AltParamChoiceLabeled{{{to_mm<72>(130.256), to_mm<72>(48.37), Center, "Velocity", ""}, 5, 1}, {"Min", "Low", "Med", "High", "Max"}},
 		AltParamChoiceLabeled{{{to_mm<72>(148.011), to_mm<72>(40.89), Center, "Bank", ""}, 4, 1}, {"A", "B", "C", "D"}},
 		AltParamChoiceLabeled{{{to_mm<72>(166.263), to_mm<72>(33.409), Center, "Pan", ""}, 3, 1}, {"SUM/R", "RND", "ALT"}},

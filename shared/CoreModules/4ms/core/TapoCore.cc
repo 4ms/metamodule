@@ -191,11 +191,10 @@ private:
 		setLED<Button5Button>(std::array{leds.get(LED_BUT5_R), leds.get(LED_BUT5_G), leds.get(LED_BUT5_B)});
 		setLED<Button6Button>(std::array{leds.get(LED_BUT6_R), leds.get(LED_BUT6_G), leds.get(LED_BUT6_B)});
 
-		setLED<RepeatButton>(std::array{!leds.get(LED_REPEAT_R), !leds.get(LED_REPEAT_G), !leds.get(LED_REPEAT_B)});
-		setLED<DeleteButton>(std::array{!leds.get(LED_DELETE_G), !leds.get(LED_DELETE_G), !leds.get(LED_DELETE_B)});
+		setLED<RepeatButton>(std::array{leds.get(LED_REPEAT_R), leds.get(LED_REPEAT_G), leds.get(LED_REPEAT_B)});
+		setLED<DeleteButton>(std::array{leds.get(LED_DELETE_G), leds.get(LED_DELETE_G), leds.get(LED_DELETE_B)});
 
-		// TODO: make this an actual red LED
-		setLED<TapLedLight>(std::array{leds.get(LED_TAP), false, false});
+		setLED<TapLedLight>(leds.get(LED_TAP));
 	}
 
 	void pollAltParameters()
