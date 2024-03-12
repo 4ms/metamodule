@@ -138,7 +138,7 @@ bool Archive::extract_files(std::function<uint32_t(std::string_view, std::span<c
 			write(name, filedata);
 		} else {
 			all_entries_ok = false;
-			pr_err("Failed to extract %s\n", name);
+			pr_err("Failed to extract %s\n", name.c_str());
 		}
 		entry = entry->next;
 	}

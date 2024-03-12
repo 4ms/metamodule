@@ -18,8 +18,7 @@ int main(int argc, char *argv[]) {
 
 	auto patch_path = std::filesystem::absolute(settings.patch_path);
 
-	//FIXME: put intdrive.img in sim/build so no relative path needed
-	auto asset_tar_path = std::filesystem::absolute("../firmware/build/intdrive.img");
+	auto asset_tar_path = std::filesystem::absolute("../firmware/build/assets.uimg");
 
 	MetaModule::Ui ui{patch_path.string(), asset_tar_path.string(), audio_out.get_block_size()};
 
