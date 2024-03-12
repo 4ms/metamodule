@@ -20,10 +20,10 @@ inline void set_drive(std::string &path) {
 }
 
 inline std::string system(std::string_view filename = "") {
-	auto path = std::string("sys/") + std::string(filename);
+	auto path = std::string(filename);
 	svg_to_png(path);
 
-	const std::string_view prefix{"sys/res/ComponentLibrary/"};
+	const std::string_view prefix{"res/ComponentLibrary/"};
 	if (path.starts_with(prefix)) {
 		path = path.substr(prefix.length());
 		path = std::string("rack-lib/") + path;
