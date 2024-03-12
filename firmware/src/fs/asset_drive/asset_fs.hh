@@ -20,19 +20,18 @@ struct AssetFS {
 	std::vector<char> read_image() {
 		Uimg::image_header header;
 
-		if (!flash_.read(reinterpret_cast<uint8_t *>(&header), flash_addr, 64)) {
+		if (!flash_.read(reinterpret_cast<uint8_t *>(&header), flash_addr, sizeof header)) {
 			pr_err("Unable to read header from flash at 0x%x\n", flash_addr);
 			return {};
 		}
 
-		if (Uimg::be2le(header.ih_magic) != Uimg::IH_MAGIC) {
-			pr_err("No valid uimg header found in flash at 0x%x. Magic found = %x\n",
-				   flash_addr,
-				   Uimg::be2le(header.ih_magic));
+		auto magic = Uimg::be32_to_cpu(header.ih_magic);
+		if (magic != Uimg::IH_MAGIC) {
+			pr_err("No valid uimg header found in flash at 0x%x. Magic found = %x\n", flash_addr, magic);
 			return {};
 		}
 
-		auto tar_image_size = Uimg::be2le(header.ih_size);
+		auto tar_image_size = Uimg::be32_to_cpu(header.ih_size);
 		if (tar_image_size > (4 * 1024 * 1024 - 64)) {
 			pr_err("Tar is invalid size: %zu\n", tar_image_size);
 			return {};

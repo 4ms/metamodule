@@ -5,9 +5,15 @@
 namespace Uimg
 {
 
-uint32_t be2le(uint32_t x) {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+inline uint32_t be32_to_cpu(uint32_t x) {
 	return ((x & 0xff000000) >> 24) | ((x & 0x00ff0000) >> 8) | ((x & 0x0000ff00) << 8) | ((x & 0x000000ff) << 24);
 }
+#else
+inline uint32_t be32_to_cpu(uint32_t x) {
+	return x;
+}
+#endif
 
 constexpr uint32_t IH_MAGIC = 0x27051956; /* Image Magic Number */
 constexpr uint32_t IH_NMLEN = 32;		  /* Image Name Length */
