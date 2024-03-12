@@ -72,7 +72,7 @@ struct LightWidget : widget::Widget {
 struct MultiLightWidget : LightWidget {
 	std::vector<NVGcolor> baseColors;
 
-	int getNumColors() {
+	int getNumColors() const {
 		return baseColors.size();
 	}
 
