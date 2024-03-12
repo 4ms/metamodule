@@ -192,7 +192,7 @@ private:
 		setLED<Button6Button>(std::array{leds.get(LED_BUT6_R), leds.get(LED_BUT6_G), leds.get(LED_BUT6_B)});
 
 		setLED<RepeatButton>(std::array{leds.get(LED_REPEAT_R), leds.get(LED_REPEAT_G), leds.get(LED_REPEAT_B)});
-		setLED<DeleteButton>(std::array{leds.get(LED_DELETE_G), leds.get(LED_DELETE_G), leds.get(LED_DELETE_B)});
+		setLED<DeleteButton>(std::array{leds.get(LED_DELETE_R), leds.get(LED_DELETE_G), leds.get(LED_DELETE_B)});
 
 		setLED<TapLedLight>(leds.get(LED_TAP));
 	}
