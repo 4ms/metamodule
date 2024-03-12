@@ -45,43 +45,67 @@ public:
 		outputValue[2] = process(inputValue[2], getState<Scale3Knob>(), getState<Shift3Knob>());
 		outputValue[3] = process(inputValue[3], getState<Scale4Knob>(), getState<Shift4Knob>());
 
-		setOutput<Out1Out>(std::clamp(outputValue[0], -10.f, 10.f));
-		setOutput<Out2Out>(std::clamp(outputValue[1], -10.f, 10.f));
-		setOutput<Out3Out>(std::clamp(outputValue[2], -10.f, 10.f));
-		setOutput<Out4Out>(std::clamp(outputValue[3], -10.f, 10.f));
+		setOutput<Out1Out>(std::clamp(outputValue[0], minimumOutputInV, maximumOutputInV));
+		setOutput<Out2Out>(std::clamp(outputValue[1], minimumOutputInV, maximumOutputInV));
+		setOutput<Out3Out>(std::clamp(outputValue[2], minimumOutputInV, maximumOutputInV));
+		setOutput<Out4Out>(std::clamp(outputValue[3], minimumOutputInV, maximumOutputInV));
 
-		setLED<LedN1Light>(outputValue[0] / -8.0f);
-		setLED<LedP1Light>(outputValue[0] / 8.0f);
+		setLED<LedN1Light>(outputValue[0] / negativeLEDScaling);
+		setLED<LedP1Light>(outputValue[0] / positiveLEDScaling);
 
-		setLED<LedN2Light>(outputValue[1] / -8.0f);
-		setLED<LedP2Light>(outputValue[1] / 8.0f);
+		setLED<LedN2Light>(outputValue[1] / negativeLEDScaling);
+		setLED<LedP2Light>(outputValue[1] / positiveLEDScaling);
 
-		setLED<LedN3Light>(outputValue[2] / -8.0f);
-		setLED<LedP3Light>(outputValue[2] / 8.0f);
+		setLED<LedN3Light>(outputValue[2] / negativeLEDScaling);
+		setLED<LedP3Light>(outputValue[2] / positiveLEDScaling);
 
-		setLED<LedN4Light>(outputValue[3] / -8.0f);
-		setLED<LedP4Light>(outputValue[3] / 8.0f);
+		setLED<LedN4Light>(outputValue[3] / negativeLEDScaling);
+		setLED<LedP4Light>(outputValue[3] / positiveLEDScaling);
 
 		auto slicePositive = 0.f;
 		auto sliceNegative = 0.f;
+		auto mixOut = 0.f;
+		auto mixOutSW = 0.f;
 
-		for (auto output : outputValue) {
-			slicePositive += std::clamp(output, 0.f, 10.f);
-			sliceNegative += std::clamp(output, -10.f, 0.f);
+		for (auto index = 0; index < outputValue.size(); index++) {
+			slicePositive += std::clamp(outputValue[index], 0.f, maximumOutputInV);
+			sliceNegative += std::clamp(outputValue[index], minimumOutputInV, 0.f);
+			mixOut += outputValue[index];
+
+			auto outputPatched = [this](auto index) -> bool {
+				if (index == 0) {
+					return isPatched<Out1Out>();
+				} else if (index == 1) {
+					return isPatched<Out2Out>();
+				} else if (index == 2) {
+					return isPatched<Out3Out>();
+				} else if (index == 3) {
+					return isPatched<Out4Out>();
+				}
+
+				return false;
+			};
+
+			if(!outputPatched(index)) {
+				mixOutSW += outputValue[index];
+			}
 		}
 
-		setOutput<PSliceOut>(std::clamp(slicePositive, 0.f, 10.f));
-		setOutput<NSliceOut>(std::clamp(sliceNegative, -10.f, 0.f));
+		setOutput<PSliceOut>(std::clamp(slicePositive, 0.f, maximumOutputInV));
+		setOutput<NSliceOut>(std::clamp(sliceNegative, minimumOutputInV, 0.f));
 
-		setLED<LedPSliceLight>(slicePositive / 8.0f);
-		setLED<LedNSliceLight>(sliceNegative / -8.0f);
+		setLED<LedPSliceLight>(slicePositive / positiveLEDScaling);
+		setLED<LedNSliceLight>(sliceNegative / negativeLEDScaling);
 
-		auto mixOut = std::clamp(outputValue[0] + outputValue[1] + outputValue[2] + outputValue[3], -10.f, 10.f);
+		setOutput<MixOut>(std::clamp(mixOut, minimumOutputInV, maximumOutputInV));
 
-		setOutput<MixOut>(mixOut);
+		setLED<LedNMixLight>(mixOut / negativeLEDScaling);
+		setLED<LedPMixLight>(mixOut / positiveLEDScaling);
 
-		setLED<LedNMixLight>(mixOut / -8.0f);
-		setLED<LedPMixLight>(mixOut / 8.0f);
+		setOutput<Mix_Sw_Out>(std::clamp(mixOutSW, minimumOutputInV, maximumOutputInV));
+
+		setLED<LedNMix_Sw_Light>(mixOutSW / negativeLEDScaling);
+		setLED<LedPMix_Sw_Light>(mixOutSW / positiveLEDScaling);
 	}
 
 	void set_samplerate(float sr) override {
@@ -95,6 +119,10 @@ public:
 
 private:
 	static constexpr float maximumShiftInV = 9.5f;
+	static constexpr float maximumOutputInV = 10.f;
+	static constexpr float minimumOutputInV = -10.f;
+	static constexpr float negativeLEDScaling = -8.f;
+	static constexpr float positiveLEDScaling = 8.f;
 	std::array<float, 4> outputValue;
 	std::array<float, 4> inputValue;
 
