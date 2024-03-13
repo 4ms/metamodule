@@ -32,11 +32,19 @@ Boot from SD Card instructions below.
 You have several choices for how to load the firmware applcation. Each one is covered 
 in a section below:
 
-1) Load in RAM over SWD/JTAG
+1) Load via the in-app updater
 
-2) Load into NOR Flash over DFU-USB
+2) Load in RAM over SWD/JTAG
 
-3) Boot from SD Card
+3) Load into NOR Flash over DFU-USB
+
+4) Boot from SD Card
+
+
+### Load via in-app updater
+
+This method is primarily used for users or those porting modules from VCV Rack to MetaModule.
+The instructions are here: [MetaModule Users Guide](./user-firmware-update.md)
 
 
 ### Load in RAM over SWD/JTAG

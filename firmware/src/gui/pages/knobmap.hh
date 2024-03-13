@@ -67,14 +67,14 @@ struct KnobMapPage : PageBase {
 
 		view_set_idx = args.view_knobset_id.value_or(view_set_idx);
 		auto map_idx = args.mappedknob_id.value_or(-1); //fail
-		auto findmap = patch.find_mapped_knob(view_set_idx, map_idx);
+		auto findmap = patch->find_mapped_knob(view_set_idx, map_idx);
 		if (!findmap) {
 			pr_err("Mapping not found for set %d, panel_knob_id %d\n", view_set_idx, map_idx);
 			return;
 		}
 		map = *findmap;
 
-		auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, patch);
+		auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
 		lv_label_set_text(ui_ModuleMapName, fullname.module_name.data());
 		lv_label_set_text(ui_KnobMapName, fullname.element_name.data());
 
@@ -89,7 +89,7 @@ struct KnobMapPage : PageBase {
 
 		auto panel_name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text_fmt(
-			ui_MappedName, "Knob %s in '%s'", panel_name.c_str(), patch.valid_knob_set_name(view_set_idx));
+			ui_MappedName, "Knob %s in '%s'", panel_name.c_str(), patch->valid_knob_set_name(view_set_idx));
 
 		float val = params.knobs[map.panel_knob_id];
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, val);
@@ -110,7 +110,7 @@ struct KnobMapPage : PageBase {
 		bool is_patch_playing =
 			args.patch_loc_hash ? (*args.patch_loc_hash == patch_playloader.cur_patch_loc_hash()) : false;
 
-		auto s_param = patch.find_static_knob(map.module_id, map.param_id);
+		auto s_param = patch->find_static_knob(map.module_id, map.param_id);
 		float knob_val = s_param && is_patch_playing ? s_param->value : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
 		lv_obj_set_style_opa(ui_EditMappingArc, is_patch_playing ? LV_OPA_100 : LV_OPA_0, LV_PART_KNOB);
@@ -168,7 +168,7 @@ struct KnobMapPage : PageBase {
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});
 		page->patch_mod_queue.put(
 			EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx, .cur_val = val / 100.f});
-		page->patch.add_update_mapped_knob(page->view_set_idx, page->map);
+		page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
@@ -187,7 +187,7 @@ struct KnobMapPage : PageBase {
 		} else {
 			page->hide_keyboard();
 			page->map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
-			page->patch.add_update_mapped_knob(page->view_set_idx, page->map);
+			page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
 		}
 	}
 
@@ -199,7 +199,7 @@ struct KnobMapPage : PageBase {
 		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
 			page->hide_keyboard();
 			page->map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
-			page->patch.add_update_mapped_knob(page->view_set_idx, page->map);
+			page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
 		}
 	}
 
@@ -254,7 +254,7 @@ struct KnobMapPage : PageBase {
 
 				page->patch_mod_queue.put(RemoveMapping{.map = page->map, .set_id = page->view_set_idx});
 
-				if (!page->patch.remove_mapping(page->view_set_idx, page->map))
+				if (!page->patch->remove_mapping(page->view_set_idx, page->map))
 					pr_err("Could not delete mapping\n");
 				else
 					page->page_list.request_last_page();
@@ -273,7 +273,7 @@ struct KnobMapPage : PageBase {
 
 private:
 	lv_obj_t *base = nullptr;
-	PatchData &patch;
+	PatchData *patch;
 	MappedKnob map{};
 
 	ConfirmPopup del_popup;

@@ -197,7 +197,9 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::TryingToRequestPatchData:
-				if (patch_storage.request_viewpatch(selected_patch)) {
+				if (patch_storage.load_if_open(selected_patch)) {
+					view_loaded_patch();
+				} else if (patch_storage.request_load_patch(selected_patch)) {
 					state = State::RequestedPatchData;
 					show_spinner();
 				}
@@ -208,15 +210,8 @@ struct PatchSelectorPage : PageBase {
 
 				if (message.message_type == FileStorageProxy::PatchDataLoaded) {
 					// Try to parse the patch and open the PatchView page
-					if (patch_storage.parse_view_patch(message.bytes_read)) {
-						auto view_patch = patch_storage.get_view_patch();
-						pr_trace("Parsed patch: %.31s\n", view_patch.patch_name.data());
-
-						args.patch_loc = selected_patch;
-						args.patch_loc_hash = PatchLocHash{selected_patch};
-						page_list.request_new_page(PageId::PatchView, args);
-
-						state = State::Closing;
+					if (patch_storage.parse_loaded_patch(message.bytes_read)) {
+						view_loaded_patch();
 						hide_spinner();
 
 					} else {
@@ -238,7 +233,18 @@ struct PatchSelectorPage : PageBase {
 		}
 	}
 
-	void blur() override {
+	void view_loaded_patch() {
+		auto patch = patch_storage.get_view_patch();
+		pr_trace("Parsed patch: %.31s\n", patch->patch_name.data());
+
+		args.patch_loc = selected_patch;
+		args.patch_loc_hash = PatchLocHash{selected_patch};
+		page_list.request_new_page(PageId::PatchView, args);
+
+		state = State::Closing;
+	}
+
+	void blur() final {
 		hide_spinner();
 	}
 

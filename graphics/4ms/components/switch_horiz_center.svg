@@ -6,17 +6,19 @@
    id="SubMiniToggle_1"
    x="0px"
    y="0px"
-   viewBox="0 0 21.6 16.6"
+   viewBox="0 0 28.800001 22.080001"
    xml:space="preserve"
    sodipodi:docname="switch_horiz_center.svg"
-   width="21.6"
-   height="16.6"
+   width="0.30000001in"
+   height="0.23in"
    inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg"><defs
-   id="defs13" /><sodipodi:namedview
+   id="defs13">
+	
+</defs><sodipodi:namedview
    id="namedview11"
    pagecolor="#ffffff"
    bordercolor="#000000"
@@ -26,40 +28,41 @@
    inkscape:pagecheckerboard="0"
    inkscape:deskcolor="#d1d1d1"
    showgrid="false"
-   inkscape:zoom="17.240495"
-   inkscape:cx="7.1053642"
-   inkscape:cy="20.272039"
+   inkscape:zoom="13.108101"
+   inkscape:cx="3.2041255"
+   inkscape:cy="16.363926"
    inkscape:window-width="1390"
    inkscape:window-height="1205"
-   inkscape:window-x="50"
-   inkscape:window-y="86"
+   inkscape:window-x="675"
+   inkscape:window-y="39"
    inkscape:window-maximized="0"
-   inkscape:current-layer="SubMiniToggle_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-units="in" />
 <style
    type="text/css"
    id="style2">
 	.st0{fill:#E6E6E6;stroke:#666666;stroke-width:0.6851;stroke-miterlimit:11.0973;}
 	.st1{fill:#FFFFFF;stroke:#666666;stroke-width:0.6851;stroke-miterlimit:9.7872;}
 </style>
-<path
-   id="path7255"
-   class="st0"
-   d="m 10.8,16.2 c -4.3999998,0 -7.8999998,-3.6 -7.8999998,-7.8999998 0,-4.3 3.6,-7.90000001 7.8999998,-7.90000001 4.3,0 7.9,3.60000001 7.9,7.90000001 v 0 C 18.7,12.7 15.2,16.2 10.8,16.2" />
-<path
-   id="path7261"
-   class="st0"
-   d="M 10.8,14 C 7.6000002,14 5.1000002,11.4 5.1000002,8.3000002 c 0,-3.1 2.6,-5.7 5.6999998,-5.7 3.1,0 5.7,2.5 5.7,5.7 v 0 C 16.5,11.4 13.9,14 10.8,14" />
-<path
-   id="path7265"
-   d="M 15.2,8.3000002 C 15.2,10.7 13.2,12.7 10.8,12.7 c -2.3999998,0 -4.3999998,-2 -4.3999998,-4.3999998 0,-2.4 2,-4.4 4.3999998,-4.4 v 0 c 2.4,0 4.4,1.9 4.4,4.4" />
+
+
+
+
 <g
-   id="middle"
-   transform="translate(2.5000002,-2.4999998)">
-	<circle
-   class="st1"
-   cx="8.3000002"
-   cy="10.8"
-   r="3.4000001"
-   id="circle7" />
-</g>
-</svg>
+   id="Layer_1"
+   data-name="Layer 1"
+   transform="matrix(0,1.3049645,-1.3049645,0,28.602289,0.00877531)"><path
+     id="path7255"
+     d="M 8.46,19 A 8.11,8.11 0 1 1 16.57,10.89 8.12,8.12 0 0 1 8.46,19"
+     style="fill:#e6e6e6;stroke:#666666;stroke-width:0.7px;stroke-miterlimit:11.3386" /><path
+     id="path7261"
+     d="M 8.46,16.71 A 5.84,5.84 0 1 1 14.3,10.87 5.84,5.84 0 0 1 8.46,16.71"
+     style="fill:#e6e6e6;stroke:#666666;stroke-width:0.7px;stroke-miterlimit:11.3386" /><path
+     id="path7265"
+     d="M 13,10.87 A 4.5,4.5 0 1 1 8.5,6.37 4.51,4.51 0 0 1 13,10.87" /><circle
+     class="st1"
+     cx="14.400001"
+     cy="11.04"
+     r="4.5364785"
+     id="circle7"
+     transform="matrix(0,-0.76630437,0.76630437,0,-0.00672456,21.918059)" /></g></svg>

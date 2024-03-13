@@ -29,7 +29,6 @@ def svgToLVGL(svgFilename, pngFilename, resize=0, alpha=True, exportLayer=None):
     # SVG ==> PNG
     exportLayer = f"--export-id=\"{exportLayer}\" --export-id-only" if exportLayer else ""
 
-
     if resize == 0:
         dpi = determine_dpi(svgFilename)
         export_size = f"--export-dpi={dpi}"
@@ -46,16 +45,21 @@ def svgToLVGL(svgFilename, pngFilename, resize=0, alpha=True, exportLayer=None):
         Log(f"Failed running {inkscape_cmd}. Aborting")
         return
 
+    pngToLvgl(pngFilename)
+
+
+def pngToLvgl(pngFilename):
     # PNG ==> LVGL image (C file with array)
     cfiledata = lvgl_png.generate_lvgl_png_img(pngFilename)
     cFilename = os.path.realpath(os.path.splitext(pngFilename)[0]+".c")
     try:
         with open(cFilename, "w") as f:
             f.write(cfiledata)
-        Log(f"Converted {pngFilename} to {os.path.basename(cFilename)} at {dpi} dpi.")
+        Log(f"Converted {pngFilename} to {os.path.basename(cFilename)}")
     except:
         Log(f"Failed to write {cFilename}. Aborting")
         return
+
 
 def determine_dpi(filename):
     # Workaround for different SVGs;

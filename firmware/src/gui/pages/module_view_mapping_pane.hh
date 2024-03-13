@@ -43,8 +43,9 @@ struct ModuleViewMappingPane {
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
-		, control_popup{patch, patch_mod_queue}
-		, patch_mod_queue{patch_mod_queue} {
+		, control_popup{patch_storage, patch_mod_queue}
+		, patch_mod_queue{patch_mod_queue}
+		, patch_storage{patch_storage} {
 
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
@@ -67,18 +68,19 @@ struct ModuleViewMappingPane {
 	}
 
 	void show(const DrawnElement &drawn_el) {
+		patch = patch_storage.get_view_patch();
 		add_map_popup.hide();
 
 		lv_group_remove_all_objs(pane_group);
 		lv_group_set_editing(pane_group, false);
 
-		if (patch.patch_name.length() == 0) {
+		if (patch->patch_name.length() == 0) {
 			pr_warn("Patch name empty\n");
 			return;
 		}
 
 		auto module_id = args.module_id;
-		if (!module_id.has_value() || *module_id >= patch.module_slugs.size()) {
+		if (!module_id.has_value() || *module_id >= patch->module_slugs.size()) {
 			pr_warn("Module has missing or invalid ID\n");
 			return;
 		}
@@ -87,7 +89,7 @@ struct ModuleViewMappingPane {
 		args.element_counts = drawn_el.gui_element.count;
 		args.element_indices = drawn_el.gui_element.idx;
 
-		auto slug = patch.module_slugs[this_module_id];
+		auto slug = patch->module_slugs[this_module_id];
 
 		// Knob name label
 		lv_label_set_text(ui_Module_Name, slug.c_str());
@@ -227,20 +229,20 @@ private:
 
 	const InternalCable *find_internal_cable(ElementType dir, Jack jack) {
 		if (dir == ElementType::Output)
-			return patch.find_internal_cable_with_outjack(jack);
+			return patch->find_internal_cable_with_outjack(jack);
 		else
-			return patch.find_internal_cable_with_injack(jack);
+			return patch->find_internal_cable_with_injack(jack);
 	}
 
 	void list_cable_nodes(InternalCable const *cable) {
 		// Each cable has an output:
 		if (!(cable->out == this_jack && this_jack_type == ElementType::Output)) {
-			auto obj = list.create_cable_item(cable->out, ElementType::Output, patch, ui_MapList);
+			auto obj = list.create_cable_item(cable->out, ElementType::Output, *patch, ui_MapList);
 			make_selectable_outjack_item(obj, cable->out);
 		}
 
 		// Output might be connected to the panel
-		if (auto panel_jack = patch.find_mapped_outjack(cable->out)) {
+		if (auto panel_jack = patch->find_mapped_outjack(cable->out)) {
 			list_panel_out_cable(panel_jack->panel_jack_id);
 		}
 
@@ -248,14 +250,14 @@ private:
 		for (auto &injack : cable->ins) {
 			//draw it if NOT (it's this jack and this jack is an input)
 			if (!(injack == this_jack && this_jack_type == ElementType::Input)) {
-				auto obj = list.create_cable_item(injack, ElementType::Input, patch, ui_MapList);
+				auto obj = list.create_cable_item(injack, ElementType::Input, *patch, ui_MapList);
 				make_selectable_injack_item(obj, injack);
 			}
 		}
 	}
 
 	void list_panel_in_cable(Jack injack) {
-		if (auto panel_jack = patch.find_mapped_injack(injack)) {
+		if (auto panel_jack = patch->find_mapped_injack(injack)) {
 			lv_hide(ui_CablePanelAddButton);
 
 			auto obj = list.create_panel_incable_item(panel_jack->panel_jack_id, ui_MapList);
@@ -263,7 +265,7 @@ private:
 
 			for (auto &mappedin : panel_jack->ins) {
 				if (mappedin != injack) {
-					auto obj = list.create_cable_item(mappedin, ElementType::Input, patch, ui_MapList);
+					auto obj = list.create_cable_item(mappedin, ElementType::Input, *patch, ui_MapList);
 					make_selectable_injack_item(obj, mappedin);
 				}
 			}
@@ -324,7 +326,7 @@ private:
 		lv_group_add_obj(pane_group, ui_CableCancelButton);
 
 		auto begin_jack = gui_state.new_cable->jack;
-		auto jackname = get_full_element_name(begin_jack.module_id, begin_jack.jack_id, begin_type, patch);
+		auto jackname = get_full_element_name(begin_jack.module_id, begin_jack.jack_id, begin_type, *patch);
 		lv_label_set_text_fmt(ui_CableCreationLabel,
 							  "In progress: adding a cable from %s %s",
 							  jackname.module_name.data(),
@@ -366,7 +368,7 @@ private:
 				if (choice == 0) //Cancel
 					return;
 				auto name = get_full_element_name(
-					page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, page->patch);
+					page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, *page->patch);
 
 				page->gui_state.new_cable = {.jack = page->this_jack,
 											 .type = page->this_jack_type,
@@ -392,14 +394,14 @@ private:
 		if (page->this_jack_type == ElementType::Input && !page->this_jack_has_connections) {
 			for (auto i = 0u; i < PanelDef::NumUserFacingInJacks; i++) {
 				choices += get_panel_name<PanelDef>(JackInput{}, i);
-				if (page->patch.find_mapped_injack(i))
+				if (page->patch->find_mapped_injack(i))
 					choices += " (patched)";
 				choices += "\n";
 			}
 		} else {
 			for (auto i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
 				choices += get_panel_name<PanelDef>(JackOutput{}, i);
-				if (page->patch.find_mapped_outjack(i))
+				if (page->patch->find_mapped_outjack(i))
 					choices += " (patched)";
 				choices += "\n";
 			}
@@ -414,7 +416,7 @@ private:
 			jackmapping.panel_jack_id = (uint16_t)(choice - 1);
 
 			if (page->this_jack_type == ElementType::Input) {
-				if (auto *cable = page->patch.find_internal_cable_with_injack(page->this_jack)) {
+				if (auto *cable = page->patch->find_internal_cable_with_injack(page->this_jack)) {
 					// Input jack that's connected to an output -> Panel Out jack
 					jackmapping.jack = cable->out;
 					jackmapping.type = ElementType::Output;
@@ -454,12 +456,12 @@ private:
 		// Handle case of starting with a PanelIn->In and finishing on an input
 		if (begin_jack_type == ElementType::Input && page->this_jack_type == ElementType::Input) {
 			AddJackMapping jackmapping{};
-			if (auto panel_jack = page->patch.find_mapped_injack(begin_jack)) {
+			if (auto panel_jack = page->patch->find_mapped_injack(begin_jack)) {
 				jackmapping.jack = page->this_jack;
 				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
 				make_panel_mapping = true;
 
-			} else if (auto panel_jack = page->patch.find_mapped_injack(page->this_jack)) {
+			} else if (auto panel_jack = page->patch->find_mapped_injack(page->this_jack)) {
 				jackmapping.jack = begin_jack;
 				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
 				make_panel_mapping = true;
@@ -546,20 +548,20 @@ private:
 		}
 
 		// Show MIDI set first (always show, even if set is empty)
-		auto [_, added_list_item] = show_knobset(patch.midi_maps, PatchData::MIDIKnobSet);
+		auto [_, added_list_item] = show_knobset(patch->midi_maps, PatchData::MIDIKnobSet);
 		if (!added_list_item)
-			show_unmapped_knobset(PatchData::MIDIKnobSet, patch.valid_knob_set_name(PatchData::MIDIKnobSet));
+			show_unmapped_knobset(PatchData::MIDIKnobSet, patch->valid_knob_set_name(PatchData::MIDIKnobSet));
 
 		// Show all non-empty knobsets
 		std::optional<unsigned> first_empty_set = std::nullopt;
-		for (uint32_t set_i = 0; set_i < patch.knob_sets.size(); set_i++) {
-			auto &set = patch.knob_sets[set_i];
+		for (uint32_t set_i = 0; set_i < patch->knob_sets.size(); set_i++) {
+			auto &set = patch->knob_sets[set_i];
 
 			// Show non-empty knobset if it has a mapping
 			// If it's not mapped, only show it if the knobset is not empty
 			auto [set_is_empty, added_list_item] = show_knobset(set, set_i);
 			if (!set_is_empty && !added_list_item)
-				show_unmapped_knobset(set_i, patch.valid_knob_set_name(set_i));
+				show_unmapped_knobset(set_i, patch->valid_knob_set_name(set_i));
 
 			else if (set_is_empty && !first_empty_set.has_value())
 				first_empty_set = set_i;
@@ -580,10 +582,10 @@ private:
 	KnobSetStatus show_knobset(MappedKnobSet const &set, unsigned set_i) {
 		bool set_is_empty = true;
 		bool added_list_item = false;
-		auto setname = patch.valid_knob_set_name(set_i);
+		auto setname = patch->valid_knob_set_name(set_i);
 
 		for (auto &map : set.set) {
-			if (map.module_id > 0 && map.module_id < patch.module_slugs.size()) {
+			if (map.module_id > 0 && map.module_id < patch->module_slugs.size()) {
 				set_is_empty = false;
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					auto obj =
@@ -720,7 +722,7 @@ private:
 	const DrawnElement *drawn_element = nullptr;
 	bool is_patch_playing = false;
 	bool should_close = false;
-	PatchData &patch;
+	PatchData *patch;
 	ParamsMidiState &params;
 
 	PageArguments &args;
@@ -745,6 +747,7 @@ private:
 	ConfirmPopup add_cable_popup;
 	ChoicePopup panel_cable_popup;
 	PatchModQueue &patch_mod_queue;
+	FileStorageProxy &patch_storage;
 };
 
 } // namespace MetaModule

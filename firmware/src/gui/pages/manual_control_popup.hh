@@ -8,6 +8,7 @@
 #include "lvgl.h"
 #include "patch.hh"
 #include "patch_data.hh"
+#include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "util/overloaded.hh"
 
@@ -16,9 +17,9 @@ namespace MetaModule
 
 struct ManualControlPopUp {
 
-	ManualControlPopUp(PatchData &patch, PatchModQueue &patch_mod_queue)
-		: patch{patch}
-		, patch_mod_queue{patch_mod_queue}
+	ManualControlPopUp(FileStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
+		: patch_mod_queue{patch_mod_queue}
+		, patch_storage{patch_storage}
 		, controlarc_group(lv_group_create()) {
 
 		lv_group_add_obj(controlarc_group, ui_ControlArc);
@@ -40,6 +41,7 @@ struct ManualControlPopUp {
 			return;
 		drawn_el = el;
 
+		patch = patch_storage.get_view_patch();
 		prepare_control_arc();
 
 		lv_show(ui_ControlAlert);
@@ -51,7 +53,7 @@ struct ManualControlPopUp {
 
 		auto param_id = drawn_el->gui_element.idx.param_idx;
 		auto module_id = drawn_el->gui_element.module_idx;
-		auto cur_val = patch.get_static_knob_value(module_id, param_id);
+		auto cur_val = patch->get_static_knob_value(module_id, param_id);
 		if (cur_val) {
 			float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
 			lv_arc_set_value(ui_ControlArc, std::round(cur_val.value() * range) + lv_arc_get_min_value(ui_ControlArc));
@@ -162,7 +164,7 @@ private:
 			.value = (float)value / range, //0/6 1/6 ... 6/6 => 1 2 ... 7
 		};
 		patch_mod_queue.put(SetStaticParam{.param = sp});
-		patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
+		patch->set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 
 		update_control_arc_text();
 	}
@@ -197,8 +199,9 @@ private:
 	}
 
 	const DrawnElement *drawn_el;
-	PatchData &patch;
+	PatchData *patch;
 	PatchModQueue &patch_mod_queue;
+	FileStorageProxy &patch_storage;
 	lv_group_t *controlarc_group = nullptr;
 	lv_group_t *prev_group = nullptr;
 

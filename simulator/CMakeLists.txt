@@ -41,7 +41,14 @@ add_subdirectory(${FWDIR}/src/VCV_adaptor
                  ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
 
 # #################### Other brands ##################################
-
+ 
+# Only build a limited set of modules, defined in an external file  
+include(${FWDIR}/vcv_ports/glue/filter.cmake)  
+unset(USE_LIMITED_MODULES)  
+if(DEFINED LIMITED_MODULES_FILE)  
+  validate_limited_modules_file(${LIMITED_MODULES_FILE})  
+endif()  
+ 
 add_subdirectory(${FWDIR}/vcv_ports/ ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
 
 # #################### Application ############################################
@@ -72,7 +79,7 @@ target_include_directories(
 
 target_compile_options(simulator PRIVATE -Wall -Og)
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 VCV_adaptor cpputil ui vcv_ports)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports)
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 

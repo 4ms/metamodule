@@ -21,7 +21,7 @@ struct PatchPlayLoader {
 
 		uint32_t tries = 10000;
 		while (--tries) {
-			if (storage_.request_viewpatch({"SlothDrone.yml", Volume::NorFlash}))
+			if (storage_.request_load_patch({"SlothDrone.yml", Volume::NorFlash}))
 				break;
 		}
 		if (tries == 0) {
@@ -34,7 +34,7 @@ struct PatchPlayLoader {
 			auto message = storage_.get_message();
 
 			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
-				if (!storage_.parse_view_patch(message.bytes_read))
+				if (!storage_.parse_loaded_patch(message.bytes_read))
 					pr_err("ERROR: could not parse initial patch\n");
 				else
 					_load_patch();
@@ -117,15 +117,15 @@ private:
 	ModuleTypeSlug loaded_patch_name_ = "";
 
 	Result _load_patch() {
-		auto &patch = storage_.get_view_patch();
+		auto patch = storage_.get_view_patch();
 		auto vol = storage_.get_view_patch_vol();
 
-		pr_trace("Attempting play patch from vol %d: %.31s\n", (uint32_t)vol, patch.patch_name.data());
+		pr_trace("Attempting play patch from vol %d: %.31s\n", (uint32_t)vol, patch->patch_name.data());
 
-		auto result = player_.load_patch(patch);
+		auto result = player_.load_patch(*patch);
 		if (result.success) {
 			loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
-			loaded_patch_name_ = patch.patch_name;
+			loaded_patch_name_ = patch->patch_name;
 		}
 
 		return result;

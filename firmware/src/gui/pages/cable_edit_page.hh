@@ -88,7 +88,7 @@ struct CableEditPage : PageBase {
 	}
 
 private:
-	PatchData &patch;
+	PatchData *patch;
 
 	std::vector<lv_obj_t *> in_jack_objs;
 	Jack out_jack{};
@@ -148,7 +148,7 @@ private:
 	}
 
 	lv_obj_t *add_input_jack(Jack const &in) {
-		auto obj = MappingPaneList::create_cable_item(in, ElementType::Input, patch, ui_CableToPanel);
+		auto obj = MappingPaneList::create_cable_item(in, ElementType::Input, *patch, ui_CableToPanel);
 		// // auto label = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
 		// // lv_obj_set_style_pad_left(label, 0, LV_STATE_DEFAULT);
 		// lv_obj_add_flag(obj, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
