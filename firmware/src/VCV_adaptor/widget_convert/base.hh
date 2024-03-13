@@ -5,6 +5,10 @@
 namespace MetaModule
 {
 
+//
+// Jacks
+//
+
 inline Element make_element_output(rack::app::SvgPort const *widget, BaseElement b) {
 	return JackOutput{b, widget->svg_filename};
 }
@@ -13,16 +17,13 @@ inline Element make_element_input(rack::app::SvgPort const *widget, BaseElement 
 	return JackInput{b, widget->svg_filename};
 }
 
-inline Element make_element(rack::app::SvgScrew const *widget, BaseElement) {
-	return NullElement{};
-}
-
-inline Element make_element(rack::widget::SvgWidget const *widget, BaseElement el) {
-	printf("Unknown SvgWidget\n");
-	return NullElement{};
-}
+//
+// Pots/Sliders
+//
 
 inline Element make_element(rack::app::SvgKnob const *widget, BaseElement b) {
+	// SvgKnobs have a base SVG, and sometimes have a bg svg.
+	// If there is a bg svg, then use its name.
 	if (widget->fb->_bg && widget->fb->_bg->svg_filename.length())
 		return Knob{b, widget->fb->_bg->svg_filename};
 	else
@@ -39,13 +40,23 @@ inline Element make_element_slideswitch(rack::app::SvgSlider const *widget, Base
 }
 
 inline Element make_element(rack::app::SvgSlider const *widget, BaseElement b) {
-
 	if (widget->background->svg_filename.length()) {
 		return Slider{{b, widget->background->svg_filename}, widget->handle->svg_filename};
 	} else {
 		return Slider{{b, widget->svg_filename}, widget->handle->svg_filename};
 	}
 }
+
+inline Element make_element(rack::componentlibrary::Rogan const *widget, BaseElement b) {
+	// Rogan knobs have a bg svg, base svg, and fg svg. The main svg rotates, the others do not.
+	// The fg and base svgs are always the same color and thus are combined into one PNG for the MetaModule.
+	// The bg svg is lighting effect gradient and can be ignored for MetaModule's low-res screen.
+	return Knob{b, widget->svg_filename};
+}
+
+//
+// Switch/Button
+//
 
 inline Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
 	if (widget->momentary) {
@@ -65,6 +76,10 @@ inline Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
 		return NullElement{};
 	}
 }
+
+//
+// Lights
+//
 
 template<typename LightBaseT>
 Element make_element(rack::componentlibrary::TSvgLight<LightBaseT> const *widget, BaseElement el) {
@@ -101,6 +116,19 @@ Element make_element(rack::componentlibrary::TGrayModuleLightWidget<LightBaseT> 
 	}
 
 	printf("Light widget not handled (%d colors)\n", widget->getNumColors());
+	return NullElement{};
+}
+
+//
+// Not supported
+//
+
+inline Element make_element(rack::app::SvgScrew const *widget, BaseElement) {
+	return NullElement{};
+}
+
+inline Element make_element(rack::widget::SvgWidget const *widget, BaseElement el) {
+	printf("Unknown SvgWidget\n");
 	return NullElement{};
 }
 
