@@ -44,12 +44,9 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 	if (!obj)
 		return nullptr;
 
-	auto body_sz = ElementDrawer::get_image_size(el.image);
-	if (!body_sz)
-		return nullptr;
-
-	float w = body_sz->w;
-	float h = body_sz->h;
+	lv_obj_refr_size(obj);
+	float w = lv_obj_get_width(obj);
+	float h = lv_obj_get_height(obj);
 
 	lv_obj_t *handle;
 
