@@ -31,7 +31,8 @@ void Plugin::addModel(Model *model) {
 	auto panel_filename = model->add_string(modulewidget->svg_filename);
 	ModuleFactory::registerModuleFaceplate(slug, panel_filename);
 
-	// model->debug_dump_strings();
+	// if (slug == "MotionMTR")
+	// 	model->debug_dump_strings();
 
 	model->indices.resize(model->elements.size());
 	ElementCount::get_indices(model->elements, model->indices);
@@ -57,7 +58,7 @@ Plugin::~Plugin() {
 		// In VCV Rack: don't delete model because it's allocated once and referenced by a global.
 
 		// In MetaModule: we need to delete the models when the Plugin is removed
-		pr_dbg("Deleting Model %s\n", model->slug.c_str());
+		// pr_dbg("Deleting Model %s\n", model->slug.c_str());
 		delete model;
 	}
 }

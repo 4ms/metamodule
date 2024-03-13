@@ -126,6 +126,8 @@ struct Knob : ParamWidget {
 	float maxAngle = M_PI;
 };
 
+// construct fb with SvgKnob *(this)
+// call to fb->addChildBelow uses b
 struct SvgKnob : Knob {
 	widget::FramebufferWidget *fb = &_fb;
 	CircularShadow *shadow = &_shadow;
@@ -143,7 +145,6 @@ struct SvgSlider : Knob {
 	std::unique_ptr<widget::FramebufferWidget> fb{new widget::FramebufferWidget};
 	std::unique_ptr<widget::SvgWidget> background{new widget::SvgWidget};
 	std::unique_ptr<widget::SvgWidget> handle{new widget::SvgWidget};
-
 	math::Vec minHandlePos, maxHandlePos;
 
 	void setBackgroundSvg(std::shared_ptr<window::Svg> svg) {
@@ -152,14 +153,17 @@ struct SvgSlider : Knob {
 		else
 			printf("Svgslider: Svg bg with empty name\n");
 	}
+
 	void setHandleSvg(std::shared_ptr<window::Svg> svg) {
 		if (svg->filename.size())
 			handle->svg_filename = svg->filename;
 		else
 			printf("Svgslider: Svg with empty name\n");
 	}
+
 	void setHandlePos(math::Vec minHandlePos, math::Vec maxHandlePos) {
 	}
+
 	void setHandlePosCentered(math::Vec minHandlePosCentered, math::Vec maxHandlePosCentered) {
 	}
 };

@@ -52,7 +52,7 @@ bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug,
 
 bool ModuleFactory::registerModuleInfo(const ModuleTypeSlug &typeslug, const ModuleInfoView &info) {
 	if (!infos().key_exists(typeslug)) {
-		pr_dbg("ModuleFactory::register %s to infos() %p\n", typeslug.c_str(), &infos());
+		// pr_dbg("ModuleFactory::register %s to infos() %p\n", typeslug.c_str(), &infos());
 		return infos().insert(typeslug, info);
 	} else {
 		pr_err("ModuleFactory: info for %s already exists\n", typeslug.c_str());
@@ -62,7 +62,7 @@ bool ModuleFactory::registerModuleInfo(const ModuleTypeSlug &typeslug, const Mod
 
 bool ModuleFactory::registerModuleCreationFunc(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate) {
 	if (!creation_funcs().key_exists(typeslug)) {
-		pr_dbg("ModuleFactory::register %s to funcs %p\n", typeslug.c_str(), &creation_funcs());
+		// pr_dbg("ModuleFactory::register %s to funcs %p\n", typeslug.c_str(), &creation_funcs());
 		return creation_funcs().insert(typeslug, funcCreate);
 	} else {
 		pr_err("ModuleFactory: creation func for %s already exists\n", typeslug.c_str());
@@ -72,10 +72,10 @@ bool ModuleFactory::registerModuleCreationFunc(const ModuleTypeSlug &typeslug, C
 
 bool ModuleFactory::registerModuleFaceplate(const ModuleTypeSlug &typeslug, std::string_view faceplate) {
 	if (!faceplates().key_exists(typeslug)) {
-		pr_dbg("ModuleFactory::register %s to faceplate %.*s\n",
-			   typeslug.c_str(),
-			   (int)faceplate.size(),
-			   faceplate.data());
+		// pr_dbg("ModuleFactory::register %s to faceplate %.*s\n",
+		// 	   typeslug.c_str(),
+		// 	   (int)faceplate.size(),
+		// 	   faceplate.data());
 		return faceplates().insert(typeslug, faceplate);
 	} else {
 		pr_err("ModuleFactory: faceplate for %s already exists\n", typeslug.c_str());
