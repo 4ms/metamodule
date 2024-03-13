@@ -52,7 +52,7 @@ struct PluginManager {
 		pluginInstance->addModel(modelSTMix);
 		pluginInstance->addModel(modelChannelStrip);
 		pluginInstance->addModel(modelMotionMTR);
-		// befaco_plugin.addModel(modelSpringReverb);
+		pluginInstance->addModel(modelSpringReverb);
 
 		auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
 		pluginInstance = &audins_plugin;
