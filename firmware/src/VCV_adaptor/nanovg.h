@@ -119,10 +119,19 @@ inline void nvgEndFrame(NVGcontext* ctx) {}
 inline void nvgGlobalCompositeOperation(NVGcontext* ctx, int op) {}
 inline void nvgGlobalCompositeBlendFunc(NVGcontext* ctx, int sfactor, int dfactor) {}
 inline void nvgGlobalCompositeBlendFuncSeparate(NVGcontext* ctx, int srcRGB, int dstRGB, int srcAlpha, int dstAlpha) {}
-inline NVGcolor nvgRGB(unsigned char r, unsigned char g, unsigned char b) { return {}; }
-inline NVGcolor nvgRGBf(float r, float g, float b) { return {}; }
-inline NVGcolor nvgRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a) { return {}; }
-inline NVGcolor nvgRGBAf(float r, float g, float b, float a) { return {}; }
+inline NVGcolor nvgRGB(unsigned char r, unsigned char g, unsigned char b) { 
+	return {.r = r / 255.0f, .g = g / 255.0f, .b = b / 255.0f, .a = 1.f};
+}
+inline NVGcolor nvgRGBf(float r, float g, float b) { 
+	return {{{r, g, b, 1.f}}};
+}
+inline NVGcolor nvgRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+	return {.r = r / 255.0f, .g = g / 255.0f, .b = b / 255.0f, .a = a / 255.f};
+}
+inline NVGcolor nvgRGBAf(float r, float g, float b, float a) {
+	return {{{r, g, b, a}}};
+}
+
 inline NVGcolor nvgLerpRGBA(NVGcolor c0, NVGcolor c1, float u) { return {}; }
 inline NVGcolor nvgTransRGBA(NVGcolor c0, unsigned char a) { return {}; }
 inline NVGcolor nvgTransRGBAf(NVGcolor c0, float a) { return {}; }
