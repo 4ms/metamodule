@@ -71,7 +71,7 @@ draw_image(float x, float y, Coords coord_ref, std::string_view img_filename, lv
 	if (auto sz = get_image_size(img_path)) {
 		Impl::draw_image(x, y, sz->w, sz->h, coord_ref, img_path, obj, module_height);
 	} else
-		pr_warn("Could not read image %s\n", img_path.c_str());
+		pr_warn("Could not read image '%s'\n", img_path.c_str());
 }
 
 // Create an object as a sub-object of the canvas, and draw img in it
@@ -95,7 +95,7 @@ draw_image(const BaseElement &el, std::string_view img_filename, lv_obj_t *canva
 		}
 	}
 
-	pr_warn("Could not read image %s\n", img_path.c_str());
+	pr_warn("Could not read image `%s` for %s\n", img_path.c_str(), el.short_name.data());
 	return nullptr;
 }
 

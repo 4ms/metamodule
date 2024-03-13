@@ -41,8 +41,9 @@ inline lv_obj_t *draw_element(const FlipSwitch &el, lv_obj_t *canvas, uint32_t m
 // Draw slider with its handle as a sub-object
 inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
-	if (!obj)
+	if (!obj) {
 		return nullptr;
+	}
 
 	lv_obj_refr_size(obj);
 	float w = lv_obj_get_width(obj);
@@ -107,10 +108,10 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t 
 	if (!obj)
 		return nullptr;
 
-	auto body_sz = ElementDrawer::get_image_size(el.image);
-	if (!body_sz)
-		return nullptr;
-	bool vert = (body_sz->w > body_sz->h);
+	lv_obj_refr_size(obj);
+	float w = lv_obj_get_width(obj);
+	float h = lv_obj_get_height(obj);
+	auto vert = h > w;
 
 	lv_obj_t *handle;
 
@@ -124,9 +125,9 @@ inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t 
 		handle = lv_obj_create(obj);
 		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 		if (vert)
-			lv_obj_set_size(handle, body_sz->w - 2, body_sz->h / el.num_pos);
+			lv_obj_set_size(handle, w - 2, h / el.num_pos);
 		else
-			lv_obj_set_size(handle, body_sz->w / el.num_pos, body_sz->h - 2);
+			lv_obj_set_size(handle, w / el.num_pos, h - 2);
 
 		lv_obj_set_style_pad_all(handle, 0, LV_STATE_DEFAULT);
 	}
