@@ -173,7 +173,10 @@ struct SvgSwitch : ParamWidget {
 	CircularShadow *shadow = &_shadow;
 	widget::SvgWidget *sw = &_sw;
 
+	// VCV: Use frames 0 and 1 when the mouse is pressed and released, instead of using the param value as the frame index.
 	bool latch = false;
+
+	// VCV: Instead of incrementing values on each click, sets maxValue on press and minValue on release.
 	bool momentary = false;
 
 	std::vector<std::string> frames;

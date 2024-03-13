@@ -102,6 +102,8 @@ Element make_element(rack::componentlibrary::TSvgLight<LightBaseT> const *widget
 
 template<typename LightBaseT>
 Element make_element(rack::componentlibrary::TGrayModuleLightWidget<LightBaseT> const *widget, BaseElement el) {
+	//TODO: make a new TSvgLight and set baseColors the same
+
 	if (widget->getNumColors() == 1) {
 		auto c = widget->baseColors[0];
 		return MonoLight{{el, "rack-lib/SmallLight.png"}, RGB565{c.r, c.g, c.b}};
