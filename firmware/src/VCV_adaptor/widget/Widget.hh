@@ -76,6 +76,24 @@ struct OpaqueWidget : Widget {};
 struct TransparentWidget : Widget {
 	float opacity = 0.f;
 };
+
+// Should be called SvgParamWidget
+struct SvgWidget : Widget {
+	NVGcolor bgColor{};
+	bool visible = true;
+
+	std::string svg_filename;
+
+	void setSvg(std::shared_ptr<window::Svg> svg) {
+		svg_filename = svg->filename;
+		// printf("SvgWidget::setSvg(): svg_filename = %s\n", svg_filename.c_str());
+	}
+
+	void setSVG(std::shared_ptr<window::Svg> svg) {
+		setSvg(svg);
+	}
+};
+
 struct FramebufferWidget : Widget {
 	bool dirty = true;
 	bool bypassed = false;
@@ -102,23 +120,12 @@ struct FramebufferWidget : Widget {
 	}
 	virtual void drawFramebuffer() {
 	}
-};
-
-// Should be called SvgParamWidget
-struct SvgWidget : Widget {
-	NVGcolor bgColor{};
-	bool visible = true;
-
-	std::string svg_filename;
-
-	void setSvg(std::shared_ptr<window::Svg> svg) {
-		svg_filename = svg->filename;
-		// printf("SvgWidget::setSvg(): svg_filename = %s\n", svg_filename.c_str());
+	void addChildBelow(SvgWidget *child, Widget *sibling) {
+		_bg = child;
+		//TODO: take ownership of the pointer, and delete it in ~Widget()
 	}
 
-	void setSVG(std::shared_ptr<window::Svg> svg) {
-		setSvg(svg);
-	}
+	widget::SvgWidget *_bg = nullptr;
 };
 
 struct TransformWidget : Widget {};

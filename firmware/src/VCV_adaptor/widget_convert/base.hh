@@ -23,20 +23,35 @@ inline Element make_element(rack::widget::SvgWidget const *widget, BaseElement e
 }
 
 inline Element make_element(rack::app::SvgKnob const *widget, BaseElement b) {
-	return Knob{b, widget->svg_filename};
+	if (widget->fb->_bg && widget->fb->_bg->svg_filename.length())
+		return Knob{b, widget->fb->_bg->svg_filename};
+	else
+		return Knob{b, widget->svg_filename};
 }
 
 inline Element make_element_slideswitch(rack::app::SvgSlider const *widget, BaseElement b) {
-	//num_pos and labels are filled in later
-	return SlideSwitch{{b, widget->svg_filename}, 2, widget->handle->svg_filename};
+	//Note: num_pos and labels are filled in later
+	if (widget->background->svg_filename.length()) {
+		return SlideSwitch{{b, widget->background->svg_filename}, 2, widget->handle->svg_filename};
+	} else {
+		return SlideSwitch{{b, widget->svg_filename}, 2, widget->handle->svg_filename};
+	}
 }
 
 inline Element make_element(rack::app::SvgSlider const *widget, BaseElement b) {
-	return Slider{{b, widget->svg_filename}, widget->handle->svg_filename};
+
+	if (widget->background->svg_filename.length()) {
+		return Slider{{b, widget->background->svg_filename}, widget->handle->svg_filename};
+	} else {
+		return Slider{{b, widget->svg_filename}, widget->handle->svg_filename};
+	}
 }
 
 inline Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
-	if (widget->frames.size() == 3) {
+	if (widget->momentary) {
+		return MomentaryButton{b, widget->frames[0]};
+
+	} else if (widget->frames.size() == 3) {
 		return FlipSwitch{{b}, 3, {widget->frames[0], widget->frames[1], widget->frames[2]}};
 
 	} else if (widget->frames.size() == 2) {
@@ -66,7 +81,7 @@ Element make_element(rack::componentlibrary::TSvgLight<LightBaseT> const *widget
 		return RgbLight{el, widget->sw->svg_filename};
 	}
 
-	printf("Light widget not handled (%zu colors)\n", widget->getNumColors());
+	printf("Light widget not handled (%d colors)\n", widget->getNumColors());
 	return NullElement{};
 }
 
@@ -85,7 +100,7 @@ Element make_element(rack::componentlibrary::TGrayModuleLightWidget<LightBaseT> 
 		return RgbLight{el, "rack-lib/SmallLight.png"};
 	}
 
-	printf("Light widget not handled (%zu colors)\n", widget->getNumColors());
+	printf("Light widget not handled (%d colors)\n", widget->getNumColors());
 	return NullElement{};
 }
 
