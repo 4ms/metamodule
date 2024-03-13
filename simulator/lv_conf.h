@@ -610,7 +610,7 @@ LV_FONT_DECLARE( ui_font_MuseoSansRounded70016)\
 #define LV_USE_FS_FATFS  1
 #if LV_USE_FS_FATFS
     #define LV_FS_FATFS_LETTER 'P'     /*Set an upper cased letter on which the drive will accessible (e.g. 'A')*/
-    #define LV_FS_FATFS_CACHE_SIZE UINT16_MAX    /*>0 to cache this number of bytes in lv_fs_read()*/
+    #define LV_FS_FATFS_CACHE_SIZE 0    /*>0 to cache this number of bytes in lv_fs_read()*/
 #endif
 
 /*PNG decoder library*/
