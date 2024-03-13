@@ -11,7 +11,7 @@ set(LV_CONF_PATH
     ${CMAKE_CURRENT_LIST_DIR}/lv_conf.h
     CACHE STRING "" FORCE)
 
-add_compile_options(-g2)
+add_compile_options(-O0 -g2)
 
 # #################### cpputil #########################################
 
@@ -25,6 +25,10 @@ add_subdirectory(lvgl_drv)
 
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 include(${LVGL_DIR}/CMakeLists.txt)
+target_include_directories(lvgl PRIVATE 
+          ${FWDIR}/lib/fatfs/source
+          ${FWDIR}/src/fs/fatfs
+)
 
 # #################### RYML ##################################
 
@@ -64,6 +68,14 @@ add_executable(
 	${SHARED}/patch_convert/yaml_to_patch.cc 
 	${SHARED}/patch_convert/patch_to_yaml.cc
 	${SHARED}/CoreModules/moduleFactory.cc
+	#Fatfs:
+	stubs/fattime.cc
+	${FWDIR}/lib/fatfs/source/ff.c
+	${FWDIR}/lib/fatfs/source/ffunicode.c
+	${FWDIR}/src/fs/fatfs/diskio.cc
+	${FWDIR}/src/fs/time_convert.cc
+	#Tar:
+	${FWDIR}/src/fs/asset_drive/untar.cc
 	)
 
 target_include_directories(
@@ -71,10 +83,14 @@ target_include_directories(
   PRIVATE src
           stubs
           sdl_audio
+          ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
           ${SHARED}/patch
           ${FWDIR}/src/medium
+          ${FWDIR}/lib/fatfs/source
+          ${FWDIR}/src/fs/fatfs
+			.
           )
 
 target_compile_options(simulator PRIVATE -Wall -Og)

@@ -10,6 +10,7 @@ struct NoiseInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Noise Source"};
     static constexpr uint32_t width_hp = 4;
     static constexpr std::string_view svg_filename{"res/modules/Noise_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Noise.png"};
 
     using enum Coords;
 

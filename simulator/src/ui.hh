@@ -22,17 +22,22 @@ class Ui {
 	};
 
 public:
-	Ui(std::string_view patch_path, size_t block_size);
+	Ui(std::string_view patch_path, std::string_view asset_path, size_t block_size);
 
 	bool update();
 	void play_patch(std::span<Frame> buffer);
 
 private:
 	PatchDirList patch_dir_list;
-	PatchPlayer patch_player;
-	SimulatorPatchStorage patch_storage;
+
+	std::unique_ptr<RamDrive> ramdrive;
 	FileStorageComm patch_comm;
 	FileStorageProxy file_storage_proxy;
+	AssetFS asset_fs;
+	PluginManager plugin_manager;
+	SimulatorPatchStorage patch_storage;
+
+	PatchPlayer patch_player;
 	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
 	PatchModQueue patch_mod_queue;
 

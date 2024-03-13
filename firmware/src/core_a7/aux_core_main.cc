@@ -5,8 +5,9 @@
 #include "drivers/hsem.hh"
 #include "drivers/smp.hh"
 #include "drivers/timekeeper.hh"
+#include "dynload/plugin_manager.hh"
+#include "fs/norflash_layout.hh"
 #include "gui/ui.hh"
-#include "lvgl.h"
 #include "patch_play/patch_player.hh"
 
 extern "C" void aux_core_main() {
@@ -24,11 +25,15 @@ extern "C" void aux_core_main() {
 
 	auto patch_player = A7SharedMemoryS::ptrs.patch_player;
 	auto patch_playloader = A7SharedMemoryS::ptrs.patch_playloader;
-	auto patch_storage_proxy = A7SharedMemoryS::ptrs.patch_storage;
+	auto file_storage_proxy = A7SharedMemoryS::ptrs.patch_storage;
 	auto sync_params = A7SharedMemoryS::ptrs.sync_params;
 	auto patch_mod_queue = A7SharedMemoryS::ptrs.patch_mod_queue;
+	auto ramdisk_storage = A7SharedMemoryS::ptrs.ramdrive;
 
-	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
+	AssetFS asset_fs{AssetVolFlashOffset};
+	PluginManager plugin_manager{*file_storage_proxy, *ramdisk_storage, asset_fs};
+
+	Ui ui{*patch_playloader, *file_storage_proxy, *sync_params, *patch_mod_queue, plugin_manager};
 
 	struct AuxCorePlayerContext {
 		uint32_t starting_idx = 1;

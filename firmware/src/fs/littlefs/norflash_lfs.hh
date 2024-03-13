@@ -13,13 +13,15 @@
 namespace MetaModule
 {
 
+template<size_t VolumeFlashAddr, size_t VolumeFlashSize>
 class LfsFileIO {
 	lfs_t lfs{};
 	mdrivlib::QSpiFlash &_flash;
 
+	using ThisNorFlashOps = NorFlashOps<VolumeFlashAddr, VolumeFlashSize>;
+
 public:
 	static constexpr uint32_t BlockSize = 4096;
-	static constexpr uint32_t MaxFileSize = 32768;
 	enum class Status { AlreadyFormatted, NewlyFormatted, FlashError, LFSError };
 
 	const std::string_view _volname{"LFS Flash"};
@@ -38,20 +40,21 @@ public:
 
 		const static lfs_config cfg = {
 			.context = &_flash,
-			.read = NorFlashOps::read,
-			.prog = NorFlashOps::prog,
-			.erase = NorFlashOps::erase,
-			.sync = NorFlashOps::sync,
+			.read = ThisNorFlashOps::read,
+			.prog = ThisNorFlashOps::prog,
+			.erase = ThisNorFlashOps::erase,
+			.sync = ThisNorFlashOps::sync,
 
 			.read_size = 16,
 			.prog_size = 16,
 			.block_size = BlockSize,
-			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps::FlashOffset) / BlockSize,
+			.block_count = ThisNorFlashOps::Size / BlockSize,
 			.block_cycles = 500,
 			.cache_size = 1024,
 			.lookahead_size = 64,
 		};
 
+		pr_dbg("Configure lfs with %u blocks (%u/%u)\n", cfg.block_count, ThisNorFlashOps::Size, BlockSize);
 		auto err = lfs_mount(&lfs, &cfg);
 		if (err >= 0) {
 			pr_dbg("LittleFS mounted OK\n");
@@ -60,13 +63,7 @@ public:
 
 		pr_dbg("LittleFS not formatted\n");
 
-		// No FS on disk, format and re-mount
-		if (lfs_format(&lfs, &cfg) < 0)
-			return Status::LFSError;
-		if (lfs_mount(&lfs, &cfg) < 0)
-			return Status::LFSError;
-
-		return Status::NewlyFormatted;
+		return Status::LFSError;
 	}
 
 	std::string_view volname() const {
@@ -86,15 +83,15 @@ public:
 	Status reformat() {
 		const static lfs_config cfg = {
 			.context = &_flash,
-			.read = NorFlashOps::read,
-			.prog = NorFlashOps::prog,
-			.erase = NorFlashOps::erase,
-			.sync = NorFlashOps::sync,
+			.read = ThisNorFlashOps::read,
+			.prog = ThisNorFlashOps::prog,
+			.erase = ThisNorFlashOps::erase,
+			.sync = ThisNorFlashOps::sync,
 
 			.read_size = 16,
 			.prog_size = 16,
 			.block_size = BlockSize,
-			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps::FlashOffset) / BlockSize,
+			.block_count = ThisNorFlashOps::Size / BlockSize,
 			.block_cycles = 500,
 			.cache_size = 1024,
 			.lookahead_size = 64,

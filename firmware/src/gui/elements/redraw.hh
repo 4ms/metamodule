@@ -2,7 +2,7 @@
 #include "CoreModules/elements/element_state_conversion.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
-#include "gui/images/image_fs.hh"
+#include "gui/images/paths.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include <cmath>
@@ -70,10 +70,15 @@ inline bool redraw_element(const FlipSwitch &element, const GuiElement &gui_el, 
 	unsigned frame_num = StateConversion::convertState(element, val);
 
 	if (frame_num < element.frames.size()) {
-		auto img = PNGFileSystem::read(element.frames[frame_num]);
-		auto cur_img = lv_img_get_src(gui_el.obj);
-		if (img && img != cur_img) {
-			lv_img_set_src(gui_el.obj, img);
+
+		auto img = ComponentImages::get_comp_path(element.frames[frame_num]);
+		if (!img.length())
+			return false;
+
+		auto cur_img = std::string_view{static_cast<const char *>(lv_img_get_src(gui_el.obj))};
+
+		if (img != cur_img) {
+			lv_img_set_src(gui_el.obj, img.c_str());
 			did_change_frame = true;
 		}
 	}

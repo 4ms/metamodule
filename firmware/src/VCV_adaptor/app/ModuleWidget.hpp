@@ -10,9 +10,11 @@ namespace rack::app
 {
 
 struct ModuleWidget : widget::Widget {
-	engine::Module *module;
-	widget::Widget panel;
-	plugin::Model *model;
+	engine::Module *module = nullptr;
+	widget::Widget *panel = nullptr;
+	plugin::Model *model = nullptr;
+
+	std::string svg_filename;
 
 	void setModule(engine::Module *m) {
 		module = m;
@@ -22,14 +24,31 @@ struct ModuleWidget : widget::Widget {
 		model = m;
 	}
 
-	void setPanel(Widget *panel) {
+	// void setPanel(widget::Widget *newpanel) {
+	// 	if (panel)
+	// 		delete panel;
+	// 	panel = newpanel;
+	// }
+
+	void setPanel(app::SvgPanel *newpanel) {
+		if (!newpanel)
+			return;
+		if (panel)
+			delete panel;
+		panel = newpanel;
+
+		if (newpanel->svg)
+			svg_filename = newpanel->svg->filename;
 	}
 
 	void setPanel(std::shared_ptr<window::Svg> svg) {
+		auto *panel = new SvgPanel;
+		panel->setBackground(svg);
+		setPanel(panel);
 	}
 
 	widget::Widget *getPanel() {
-		return &panel;
+		return panel;
 	}
 
 	void place_at(std::vector<MetaModule::Element> &elements, int id, const MetaModule::Element &el) {
@@ -122,10 +141,12 @@ struct ModuleWidget : widget::Widget {
 	}
 
 	~ModuleWidget() override {
-		printf("~MW()\n");
+		// printf("~MW()\n");
 		for (auto &w : owned_widgets) {
 			delete w;
 		}
+		if (panel)
+			delete panel;
 	}
 
 private:

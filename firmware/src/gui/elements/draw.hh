@@ -3,7 +3,7 @@
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/draw_img.hh"
 #include "gui/helpers/units_conversion.hh"
-#include "gui/images/image_fs.hh"
+#include "gui/images/paths.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include <cmath>
@@ -17,8 +17,7 @@ inline lv_obj_t *draw_element(const BaseElement &, lv_obj_t *, uint32_t) {
 }
 
 inline lv_obj_t *draw_element(const ImageElement &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto img = PNGFileSystem::read(el.image);
-	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), img, canvas, module_height);
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	return obj;
 }
 
@@ -35,29 +34,28 @@ inline lv_obj_t *draw_element(const LightElement &el, lv_obj_t *canvas, uint32_t
 }
 
 inline lv_obj_t *draw_element(const FlipSwitch &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto img = PNGFileSystem::read(el.frames[0]);
-	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), img, canvas, module_height);
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.frames[0], canvas, module_height);
 	return obj;
 }
 
 // Draw slider with its handle as a sub-object
 inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto body_img = PNGFileSystem::read(el.image);
-	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), body_img, canvas, module_height);
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	if (!obj)
 		return nullptr;
 
-	float w = body_img->header.w;
-	float h = body_img->header.h;
+	auto body_sz = ElementDrawer::get_image_size(el.image);
+	if (!body_sz)
+		return nullptr;
+
+	float w = body_sz->w;
+	float h = body_sz->h;
 
 	lv_obj_t *handle;
+
 	if (el.image_handle.size()) {
 		handle = lv_img_create(obj);
-		auto handle_img = PNGFileSystem::read(el.image_handle);
-		if (handle_img) {
-			ElementDrawerImpl::draw_image(0, 0, Coords::Center, handle_img, handle, module_height);
-		} else
-			pr_err("No handle image found for %.*s!\n", (int)el.image_handle.size(), el.image_handle.data());
+		ElementDrawer::draw_image(0, 0, Coords::Center, el.image_handle, handle, module_height);
 	} else {
 		handle = lv_obj_create(obj);
 		if (w <= h) {
@@ -81,6 +79,7 @@ inline lv_obj_t *draw_element(const SliderLight &el, lv_obj_t *canvas, uint32_t 
 	auto obj = draw_element(Slider(el), canvas, module_height);
 	if (!obj)
 		return nullptr;
+
 	auto handle = lv_obj_get_child(obj, 0);
 	if (handle) {
 		lv_color_t color{.full = el.color};
@@ -107,38 +106,34 @@ inline lv_obj_t *draw_element(const Button &el, lv_obj_t *canvas, uint32_t modul
 
 //Draw slide switch with handle as a sub-object
 inline lv_obj_t *draw_element(const SlideSwitch &el, lv_obj_t *canvas, uint32_t module_height) {
-	auto body_img = PNGFileSystem::read(el.image);
-	if (body_img == nullptr)
-		return nullptr;
-
-	auto obj = ElementDrawerImpl::draw_image(BaseElement(el), body_img, canvas, module_height);
+	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	if (!obj)
 		return nullptr;
+
+	auto body_sz = ElementDrawer::get_image_size(el.image);
+	if (!body_sz)
+		return nullptr;
+	bool vert = (body_sz->w > body_sz->h);
 
 	lv_obj_t *handle;
 
 	// Use image for handle, if image exists
-	if (el.image_handle.size()) {
+	if (el.image_handle.length()) {
 		handle = lv_img_create(obj);
-		auto handle_img = PNGFileSystem::read(el.image_handle);
-		if (handle_img)
-			ElementDrawerImpl::draw_image(0, 0, Coords::TopLeft, handle_img, handle, module_height);
-		else
-			pr_err("No handle image found for %.*s!\n", (int)el.image_handle.size(), el.image_handle.data());
+		ElementDrawer::draw_image(0, 0, Coords::TopLeft, el.image_handle, handle, module_height);
 
 	} else {
 		// If there's no handle img, draw a handle with LVGL styles:
 		handle = lv_obj_create(obj);
 		lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
-		if (body_img->header.h > body_img->header.w) //vertical
-			lv_obj_set_size(handle, body_img->header.w - 2, body_img->header.h / el.num_pos);
+		if (vert)
+			lv_obj_set_size(handle, body_sz->w - 2, body_sz->h / el.num_pos);
 		else
-			lv_obj_set_size(handle, body_img->header.w / el.num_pos, body_img->header.h - 2);
+			lv_obj_set_size(handle, body_sz->w / el.num_pos, body_sz->h - 2);
 
 		lv_obj_set_style_pad_all(handle, 0, LV_STATE_DEFAULT);
 	}
 
-	bool vert = body_img->header.w < body_img->header.h;
 	lv_obj_set_align(handle, vert ? LV_ALIGN_TOP_MID : LV_ALIGN_LEFT_MID);
 	lv_obj_set_pos(handle, 0, 0);
 	return obj;

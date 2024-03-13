@@ -47,7 +47,8 @@ public:
 				ParamsMidiState &params,
 				MetaParams &metaparams,
 				NotificationQueue &notify_queue,
-				PatchModQueue &patch_mod_queue)
+				PatchModQueue &patch_mod_queue,
+				PluginManager &plugin_manager)
 		: info{patch_storage,
 			   patch_playloader,
 			   params,
@@ -55,7 +56,8 @@ public:
 			   notify_queue,
 			   patch_mod_queue,
 			   page_list,
-			   gui_state} {
+			   gui_state,
+			   plugin_manager} {
 	}
 
 	void init() {

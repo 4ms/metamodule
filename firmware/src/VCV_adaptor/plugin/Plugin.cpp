@@ -28,6 +28,9 @@ void Plugin::addModel(Model *model) {
 	modulewidget->populate_elements(model->elements);
 	model->move_strings();
 
+	auto panel_filename = model->add_string(modulewidget->svg_filename);
+	ModuleFactory::registerModuleFaceplate(slug, panel_filename);
+
 	// model->debug_dump_strings();
 
 	model->indices.resize(model->elements.size());
@@ -39,7 +42,7 @@ void Plugin::addModel(Model *model) {
 	info.width_hp = 1; //TODO: deprecate width_hp
 	info.indices = model->indices;
 
-	ModuleFactory::registerModuleType(slug, info);
+	ModuleFactory::registerModuleInfo(slug, info);
 
 	model->plugin = this;
 	models.push_back(model);

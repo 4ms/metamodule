@@ -10,6 +10,7 @@ struct Mixer4Info : ModuleInfoBase {
     static constexpr std::string_view description{"4 Ch. Mixer4"};
     static constexpr uint32_t width_hp = 10;
     static constexpr std::string_view svg_filename{"res/modules/Mixer4_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Mixer4.png"};
 
     using enum Coords;
 

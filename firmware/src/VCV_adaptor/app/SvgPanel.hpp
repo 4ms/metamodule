@@ -12,9 +12,10 @@ struct SvgPanel : widget::Widget {
 	widget::FramebufferWidget *fb;
 	widget::SvgWidget *sw;
 	PanelBorder *panelBorder;
-	window::Svg *svg;
+	std::shared_ptr<window::Svg> svg;
 
 	void setBackground(std::shared_ptr<window::Svg> svg) {
+		this->svg = svg;
 	}
 };
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "dynload/plugin_file_list.hh"
 #include "fs/fileio_t.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_file/patch_dir_list.hh"
@@ -11,7 +12,8 @@ namespace MetaModule
 // PatchFileIO are helpers to transfer patches between filesystems and PatchList
 class PatchFileIO {
 
-	static constexpr unsigned MaxDirRecursion = 1;
+	static constexpr unsigned MaxPatchDirRecursion = 1; // /dir/patch.yml
+	static constexpr unsigned MaxAssetDirRecursion = 2; // /Brand/components/name.png
 
 public:
 	enum class FileFilter { All, NewerTimestamp };
@@ -45,7 +47,7 @@ public:
 
 	// Adds all files/dirs to patch_dir
 	static bool add_directory(FileIoC auto &fileio, PatchDir &patch_dir, unsigned recursion_depth = 0) {
-		pr_dbg("Scanning dir: '%s'\n", patch_dir.name.data());
+		pr_trace("Scanning dir: '%s'\n", patch_dir.name.data());
 
 		bool ok = fileio.foreach_dir_entry(
 			patch_dir.name, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
@@ -55,7 +57,7 @@ public:
 				if (kind == DirEntryKind::Dir) {
 					if (entryname.starts_with("."))
 						return;
-					if (recursion_depth < MaxDirRecursion) {
+					if (recursion_depth < MaxPatchDirRecursion) {
 						pr_trace("Add dir: %s\n", full_path.c_str());
 						patch_dir.dirs.emplace_back(full_path);
 					}
@@ -132,6 +134,56 @@ public:
 		return true;
 	}
 
+	static bool
+	deep_copy_dirs(FileIoC auto &fileio_from, FileIoC auto &fileio_to, std::string dir, unsigned recursion_depth = 0) {
+		pr_trace("[%d] Deep copy of %s\n", recursion_depth, dir.c_str());
+
+		bool ok = fileio_from.foreach_dir_entry(
+			dir, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
+				std::string full_path = dir + "/" + std::string(entryname);
+
+				// Copy files:
+				if (kind == DirEntryKind::File) {
+					if (entryname.ends_with(".so") || entryname.starts_with('.')) {
+						pr_trace("Skipping file %s\n", full_path.c_str());
+						return;
+					}
+					if (filesize > 1024 * 1024) {
+						pr_warn("Skipping large file %s (%zu bytes)", full_path.c_str(), filesize);
+						return;
+					}
+
+					std::vector<char> filedata(filesize);
+					auto bytes_read = fileio_from.read_file(full_path, filedata);
+
+					if (bytes_read == filesize) {
+						std::string write_path = full_path.substr(PluginDirName.length() + 1);
+						if (fileio_to.write_file(write_path, filedata)) {
+							pr_trace("Wrote %s (%zu bytes)\n", write_path.c_str(), filesize);
+						} else
+							pr_err("Failed to copy file %s (%zu bytes)\n", write_path.c_str(), filesize);
+					} else
+						pr_err("Failed to read file %s (%zu bytes)\n", full_path.c_str(), filesize);
+				}
+
+				// Follow dirs:
+				if (kind == DirEntryKind::Dir) {
+					if (entryname.starts_with("."))
+						return;
+					if (recursion_depth < MaxAssetDirRecursion) {
+						pr_trace("Entering dir: %s\n", full_path.c_str());
+						ok = deep_copy_dirs(fileio_from, fileio_to, full_path, recursion_depth + 1);
+					} else
+						pr_warn("Found dir: %s, but recursion level is at max, ignoring\n", full_path.c_str());
+				}
+			});
+
+		if (!ok)
+			pr_err("Failed to read dir on %.32s\n", fileio_from.volname().data());
+
+		return ok;
+	}
+
 private:
 	static ModuleTypeSlug _read_patch_name(FileIoC auto &fileio, const std::string_view filename) {
 		constexpr uint32_t HEADER_SIZE = 64;
@@ -160,9 +212,9 @@ private:
 
 		auto endpos = header.find_first_of("'\"\n\r");
 		if (endpos == header.npos) {
-			pr_dbg("File does not contain a quote or newline after '%s' in the first %d chars, ignoring\n",
-				   name_tag.data(),
-				   HEADER_SIZE);
+			pr_trace("File does not contain a quote or newline after '%s' in the first %d chars, ignoring\n",
+					 name_tag.data(),
+					 HEADER_SIZE);
 			return "";
 		}
 		header.remove_suffix(header.size() - endpos);

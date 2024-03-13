@@ -10,6 +10,7 @@ struct DetuneInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Detuner"};
     static constexpr uint32_t width_hp = 8;
     static constexpr std::string_view svg_filename{"res/modules/Detune_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Detune.png"};
 
     using enum Coords;
 

@@ -10,6 +10,7 @@ struct DrumInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Drum Voice"};
     static constexpr uint32_t width_hp = 15;
     static constexpr std::string_view svg_filename{"res/modules/Drum_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Drum.png"};
 
     using enum Coords;
 

@@ -10,6 +10,7 @@ struct Prob8Info : ModuleInfoBase {
     static constexpr std::string_view description{"Probability Module"};
     static constexpr uint32_t width_hp = 8;
     static constexpr std::string_view svg_filename{"res/modules/Prob8_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Prob8.png"};
 
     using enum Coords;
 

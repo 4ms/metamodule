@@ -34,8 +34,17 @@ set(LV_CONF_PATH
 )
 add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
 target_link_libraries(lvgl PRIVATE mdrivlib_interface)
-target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
 
+target_include_directories(lvgl 
+    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source 
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs
+)
+
+target_sources(lvgl
+    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
+            ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
+)
 
 #
 # VCV Adaptor
@@ -98,11 +107,10 @@ add_executable(
   ${SHARED}/patch_convert/patch_to_yaml.cc
   ${SHARED}/patch_convert/ryml/ryml_serial.cc
   #
+  ${FWDIR}/src/fs/asset_drive/untar.cc
+  #
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
-  #
-  ${FWDIR}/lib/littlefs/lfs.c
-  ${FWDIR}/lib/littlefs/lfs_util.c
   #
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
@@ -154,9 +162,6 @@ set_source_files_properties(
   ${SHARED}/CoreModules/moduleFactory.cc
   PROPERTIES COMPILE_OPTIONS "-fno-lto"
 )
-
-# Fixup for compiler warning for LittleFS
-set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 
 target_include_directories(
   main.elf

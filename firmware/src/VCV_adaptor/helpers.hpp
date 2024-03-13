@@ -118,8 +118,11 @@ TWidget *createWidgetCentered(math::Vec pos) {
 	return createElementWidget<TWidget>(pos, MetaModule::Coords::Center, "Unknown");
 }
 
-inline app::SvgPanel *createPanel(std::string_view svgPath) {
-	return nullptr;
+template<class TPanel = app::SvgPanel>
+TPanel *createPanel(std::string svgPath) {
+	auto *panel = new TPanel;
+	panel->setBackground(window::Svg::load(svgPath));
+	return panel;
 }
 
 inline void set_labels(std::span<std::string_view> pos_names, std::vector<std::string> &labels) {

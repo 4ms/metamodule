@@ -4,11 +4,20 @@
 namespace MetaModule
 {
 
-Ui::Ui(std::string_view patch_path, size_t block_size)
-	: patch_storage(patch_path, patch_dir_list)
+Ui::Ui(std::string_view patch_path, std::string_view asset_path, size_t block_size)
+	: ramdrive{new RamDrive}
 	, patch_comm{patch_storage}
 	, file_storage_proxy{raw_patch_data, patch_comm, patch_dir_list}
-	, page_manager{file_storage_proxy, patch_playloader, params, metaparams, notify_queue, patch_mod_queue}
+	, asset_fs{asset_path}
+	, plugin_manager{file_storage_proxy, *ramdrive, asset_fs}
+	, patch_storage(patch_path, patch_dir_list, plugin_manager.ramdisk)
+	, page_manager{file_storage_proxy,
+				   patch_playloader,
+				   params,
+				   metaparams,
+				   notify_queue,
+				   patch_mod_queue,
+				   plugin_manager}
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
 

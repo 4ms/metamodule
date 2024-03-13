@@ -5,7 +5,6 @@
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
-#include "dynload/plugin_manager.hh"
 #include "fs/time_convert.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
@@ -67,6 +66,7 @@ void main() {
 		&file_storage_proxy,
 		&sync_params,
 		&patch_mod_queue,
+		&StaticBuffers::virtdrive,
 	};
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
@@ -78,7 +78,8 @@ void main() {
 	WifiUpdate::run();
 #endif
 
-	PluginManager plugin_manager{file_storage_proxy};
+	// prevents M4 from using it as a USBD device: TODO remove this or remove usb_device in M4, or make it a config option to enable USB MSC Device mode
+	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
 
 	pr_info("A7 Core 1 initialized\n");
 
@@ -90,7 +91,6 @@ void main() {
 		;
 
 	sync_params.clear();
-
 	patch_playloader.load_initial_patch();
 
 	audio.start();

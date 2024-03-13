@@ -10,6 +10,7 @@ struct Seq8Info : ModuleInfoBase {
     static constexpr std::string_view description{"8 Step Sequencer"};
     static constexpr uint32_t width_hp = 8;
     static constexpr std::string_view svg_filename{"res/modules/Seq8_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Seq8.png"};
 
     using enum Coords;
 

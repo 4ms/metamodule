@@ -33,7 +33,7 @@ struct SvgPort : PortWidget {
 	void setSvg(std::shared_ptr<window::Svg> svg) {
 		if (svg->filename.size()) {
 			svg_filename = svg->filename;
-			printf("SvgPort:svg_filename %s\n", svg_filename.c_str());
+			// printf("SvgPort:svg_filename %s\n", svg_filename.c_str());
 		} else
 			printf("SvgPort: svg with empty name\n");
 	}
@@ -52,11 +52,9 @@ struct ThemedSvgPort : SvgPort {
 	std::shared_ptr<window::Svg> darkSvg;
 
 	void setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
+		svg_filename = lightSvg->filename;
 		this->lightSvg = lightSvg;
 		this->darkSvg = darkSvg;
-		printf("ThemedSvgPort:light svg_filename %s, dark %s\n",
-			   this->lightSvg->filename.c_str(),
-			   this->darkSvg->filename.c_str());
 	}
 
 	void step() override {
@@ -65,20 +63,42 @@ struct ThemedSvgPort : SvgPort {
 
 // Lights
 
-struct ModuleLightWidget : widget::Widget {
-	engine::Module *module = nullptr;
-	int firstLightId = -1;
+struct LightWidget : widget::Widget {
 	NVGcolor bgColor = nvgRGBA(0, 0, 0, 0);
 	NVGcolor color = nvgRGBA(0, 0, 0, 0);
 	NVGcolor borderColor = nvgRGBA(0, 0, 0, 0);
+};
 
+struct MultiLightWidget : LightWidget {
 	std::vector<NVGcolor> baseColors;
-	int getNumColors() {
-		return 0;
+
+	int getNumColors() const {
+		return baseColors.size();
 	}
+
 	void addBaseColor(NVGcolor baseColor) {
+		baseColors.push_back(baseColor);
 	}
+
 	void setBrightnesses(const std::vector<float> &brightnesses) {
+		//TODO
+	}
+};
+
+struct ModuleLightWidget : MultiLightWidget {
+	engine::Module *module = nullptr;
+	int firstLightId = -1;
+
+	engine::Light *getLight(int colorId) {
+		if (!module || firstLightId < 0)
+			return nullptr;
+		return &module->lights[firstLightId + colorId];
+	}
+
+	engine::LightInfo *getLightInfo() {
+		if (!module || firstLightId < 0)
+			return nullptr;
+		return module->lightInfos[firstLightId].get();
 	}
 };
 

@@ -10,6 +10,7 @@ struct OctaveInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Octave Shifter"};
     static constexpr uint32_t width_hp = 4;
     static constexpr std::string_view svg_filename{"res/modules/Octave_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Octave.png"};
 
     using enum Coords;
 

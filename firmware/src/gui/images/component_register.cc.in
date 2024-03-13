@@ -1,3 +1,0 @@
-#include "gui/images/image_fs.hh"
-extern const lv_img_dsc_t @COMPIMGNAME@;
-static const bool component_register_@COMPIMGNAME@ = PNGFileSystem::register_file("@COMPFILENAME@", &@COMPIMGNAME@);

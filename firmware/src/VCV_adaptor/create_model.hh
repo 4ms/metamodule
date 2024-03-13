@@ -21,7 +21,7 @@ requires(std::derived_from<ModuleWidgetT, app::ModuleWidget>) && (std::derived_f
 
 plugin::Model *createModel(std::string_view slug) {
 
-	MetaModule::ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
+	MetaModule::ModuleFactory::registerModuleCreationFunc(slug, create_vcv_module<ModuleT>);
 
 	struct ModelT : plugin::Model {
 

@@ -192,6 +192,11 @@ public:
 		return comm_.send_message(message);
 	}
 
+	bool request_copy_dir_to_ramdisk(Volume vol, std::string_view path) {
+		IntercoreStorageMessage message{.message_type = RequestCopyPluginAssets, .vol_id = vol, .filename = path};
+		return comm_.send_message(message);
+	}
+
 private:
 	PatchDirList &patch_dir_list_;
 

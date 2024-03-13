@@ -1,4 +1,5 @@
 #pragma once
+#include "../firmware/src/VCV_adaptor/plugin//Plugin.hpp"
 #include <cstdint>
 #include <span>
 #include <vector>
@@ -9,11 +10,18 @@ struct DynLoader {
 	}
 
 	bool load() {
-		return false;
+		printf("Plugin was loaded and symbols resolved\n");
+		return true;
 	}
 
 	template<typename PluginInitFunc>
 	PluginInitFunc *find_init_func() {
-		return nullptr;
+		return init_plugin;
+	}
+
+	static void init_plugin(rack::plugin::Plugin *) {
+		printf("Plugin init_plugin was called\n");
+		//TODO: push a rack::Model to the Plugin
+		return;
 	}
 };

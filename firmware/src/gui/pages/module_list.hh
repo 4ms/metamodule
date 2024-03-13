@@ -137,11 +137,14 @@ private:
 	void draw_module(ModuleTypeSlug slug) {
 		ModuleDrawer drawer{ui_ModuleListImage, 240};
 		auto module_canvas = drawer.draw_faceplate(slug, page_pixel_buffer);
-		lv_obj_refr_size(module_canvas);
-		auto width_px = lv_obj_get_width(module_canvas);
-		lv_obj_set_width(ui_ModuleListImage, width_px);
-		lv_obj_refr_size(ui_ModuleListImage);
-		drawer.draw_elements(slug, module_canvas);
+		if (module_canvas) {
+			lv_obj_refr_size(module_canvas);
+			auto width_px = lv_obj_get_width(module_canvas);
+			lv_obj_set_width(ui_ModuleListImage, width_px);
+			lv_obj_refr_size(ui_ModuleListImage);
+			drawer.draw_elements(slug, module_canvas);
+		} else
+			notify_queue.put(Notification{"Could not load faceplate image", Notification::Priority::Error});
 	}
 
 	bool roller_shown = true;

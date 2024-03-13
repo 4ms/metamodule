@@ -53,6 +53,10 @@ void Model::move_strings() {
 	}
 }
 
+std::string_view Model::add_string(std::string_view str) {
+	return strings.emplace_back(str);
+}
+
 inline void inspect_sv(std::string_view const &sv) {
 	printf("%.*s %p(+%u)\n", sv.size(), sv.data(), sv.data(), sv.size());
 }

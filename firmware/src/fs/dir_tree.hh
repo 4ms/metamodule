@@ -7,7 +7,13 @@
 namespace MetaModule
 {
 
-template<typename EntryT>
+struct FileEntry {
+	std::string filename;
+	uint32_t filesize;
+	uint32_t timestamp;
+};
+
+template<typename EntryT = FileEntry>
 struct DirTree {
 	std::string name;
 	std::vector<DirTree> dirs;

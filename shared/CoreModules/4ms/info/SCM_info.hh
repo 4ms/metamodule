@@ -10,6 +10,7 @@ struct SCMInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Shuffling Clock Multiplier"};
     static constexpr uint32_t width_hp = 12;
     static constexpr std::string_view svg_filename{"res/modules/SCM_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/SCM.png"};
 
     using enum Coords;
 
