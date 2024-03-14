@@ -20,6 +20,7 @@ public:
 		PrepareForReadingPlugin,
 		RequestReadPlugin,
 		LoadingPlugin,
+		ProcessingPlugin,
 		Success
 	};
 
@@ -97,6 +98,24 @@ public:
 			} break;
 
 			case State::LoadingPlugin: {
+				IntercoreStorageMessage msg{FileStorageProxy::None};
+				while (msg.message_type == FileStorageProxy::None) {
+					msg = file_storage.get_message();
+				}
+				if (msg.message_type == FileStorageProxy::LoadFileToRamFailed) {
+					status.state = State::Error;
+					status.error_message = "Failed to read from disk";
+				} else if (msg.message_type == FileStorageProxy::LoadFileToRamSuccess) {
+					status.state = State::ProcessingPlugin;
+				} else {
+					pr_warn("Unknown response %d, trying again\n", msg.message_type);
+					//try again
+					status.state = State::RequestReadPlugin;
+				}
+
+			} break;
+
+			case State::ProcessingPlugin: {
 				auto &plugin_file = (*plugin_files)[file_idx];
 
 				// Strip .so
@@ -122,8 +141,8 @@ public:
 					   buffer.data(),
 					   buffer.size());
 
-				if (load_plugin(plugin))
-					load_plugin_assets(plugin);
+				load_plugin_assets(plugin);
+				load_plugin(plugin);
 
 				file_idx++;
 
