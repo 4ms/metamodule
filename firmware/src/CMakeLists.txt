@@ -146,7 +146,7 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
   #
-  ${FWDIR}/src/vcv_adaptor_seed_random.cpp
+  ${FWDIR}/src/vcv_hardware/random.cpp
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
