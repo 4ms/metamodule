@@ -80,13 +80,22 @@ inline Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
 
 template<typename LightBaseT>
 Element make_element(rack::componentlibrary::VCVLightBezel<LightBaseT> const *widget, BaseElement el) {
-	printf("make_element(): VCVLightBezel. numColors = %d\n", widget->light->getNumColors());
 	if (widget->light->getNumColors() == 3) {
+		if (!widget->momentary)
+			printf("make_element(): Latching RGB button not yet supported\n");
+
 		return MomentaryButtonRGB{el, widget->frames[0]};
-	}
-	if (widget->light->getNumColors() == 1) {
+
+	} else if (widget->light->getNumColors() == 1) {
 		auto c = widget->light->baseColors[0];
-		return LatchingButton{{el, widget->frames[0]}, RGB565{c.r, c.g, c.b}};
+		if (widget->momentary)
+			return MomentaryButtonLight{{el, widget->frames[0]}, RGB565{c.r, c.g, c.b}};
+		else
+			return LatchingButton{{el, widget->frames[0]}, RGB565{c.r, c.g, c.b}};
+
+	} else {
+		printf("make_element(): Unknown VCVLightBezel\n");
+		return NullElement{};
 	}
 }
 

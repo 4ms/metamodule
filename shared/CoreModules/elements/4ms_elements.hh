@@ -55,10 +55,10 @@ struct OrangeButton : LatchingButton {
 	}
 };
 
-struct WhiteMomentary7mm : MomentaryButtonWhiteLight {
+struct WhiteMomentary7mm : MomentaryButtonLight {
 	constexpr WhiteMomentary7mm() = default;
 	constexpr WhiteMomentary7mm(BaseElement b)
-		: MomentaryButtonWhiteLight{b, "4ms/comp/button_x.png"} {
+		: MomentaryButtonLight{{b, "4ms/comp/button_x.png"}, Colors565::White} {
 	}
 };
 

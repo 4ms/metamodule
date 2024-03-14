@@ -89,8 +89,9 @@ struct MomentaryButton : Button {
 struct MomentaryButtonRGB : MomentaryButton {
 	static constexpr size_t NumLights = 3;
 };
-struct MomentaryButtonWhiteLight : MomentaryButton {
+struct MomentaryButtonLight : MomentaryButton {
 	static constexpr size_t NumLights = 1;
+	RGB565 color = Colors565::White;
 };
 
 // LatchingButton always has a single color LED

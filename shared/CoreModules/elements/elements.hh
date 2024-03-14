@@ -21,7 +21,7 @@ using Element = std::variant<NullElement,
 							 SlideSwitch,
 
 							 MomentaryButton,
-							 MomentaryButtonWhiteLight,
+							 MomentaryButtonLight,
 							 MomentaryButtonRGB,
 
 							 LatchingButton,
