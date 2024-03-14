@@ -58,7 +58,7 @@ std::string_view Model::add_string(std::string_view str) {
 }
 
 inline void inspect_sv(std::string_view const &sv) {
-	printf("%.*s %p(+%u)\n", sv.size(), sv.data(), sv.data(), sv.size());
+	printf("%.*s %p(+%u)\n", (int)sv.size(), sv.data(), sv.data(), sv.size());
 }
 
 void Model::debug_dump_strings() {
