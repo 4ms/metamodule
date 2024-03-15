@@ -47,6 +47,7 @@ add_custom_command(
   COMMAND flashing/dump_syms.py # -v
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/VCV_adaptor/
+          --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/
           --elf $<TARGET_FILE:main.elf>
           --yaml ${SYMBOLS_FILE}
   COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 

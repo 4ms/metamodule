@@ -73,6 +73,7 @@ def GetLibcSymbols():
          "tanh",
          "printf",
          "puts",
+         "free",
          "__aeabi_atexit",
          "__cxa_pure_virtual",
 
@@ -105,6 +106,10 @@ def GetLibcSymbols():
          "json_true",
          "json_false",
          "json_integer",
+         "json_array_insert_new",
+         "json_array_get",
+         "json_number_value",
+         "json_dumps",
     ]
     return libc_syms
 

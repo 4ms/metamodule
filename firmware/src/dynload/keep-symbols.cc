@@ -1,3 +1,8 @@
+#include "VCV_adaptor/app/Widget.hh"
+#include "VCV_adaptor/random.hpp"
+#include "VCV_adaptor/widget/Widget.hh"
+
+#include "history.hpp"
 #include "jansson.h"
 #include "string.hpp"
 #include <cmath>
@@ -15,29 +20,58 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	// - Linker KEEP()?
 	// - build libc with the plugin, maybe musl libc?
 	// - build plugin with json library
-	exp(0.5f);
-	expf(0.5f);
-	fmod(0.5f, 1.f);
-	sinf(0.5f);
-	tanf(0.5f);
-	tanh(0.5f);
-	sqrt(0.5f);
-	sqrtf(0.5f);
-	powf(0.5f, 0.5f);
-	sin(0.5f);
-	log(0.5f);
-	logf(0.5f);
-	log2f(0.5f);
-	cos(0.5f);
-	cosf(0.5f);
-	volatile auto keep = std::allocator<char>{}; //seems to do nothing
-	(void)keep;
-	volatile int x = strlen("ABCD");
-	(void)x;
-	volatile auto savefunc = &json_object_set_new;
-	(void)savefunc;
-	rack::string::f("Abc%d", 1);
-	puts("");
+
+	auto keep = [&](auto *func) {
+		return func;
+	};
+
+	// Can't use keep() with clang because these are template functions:
+	(void)exp(1.f);
+	(void)expf(1.f);
+	(void)fmod(1.f, 1.f);
+	(void)sinf(1.f);
+	(void)tanf(1.f);
+	(void)tanh(1.f);
+	(void)sqrt(1.f);
+	(void)sqrtf(1.f);
+	(void)powf(1.f, 1.f);
+	(void)sin(1.f);
+	(void)log(1.f);
+	(void)logf(1.f);
+	(void)log2f(1.f);
+	(void)cos(1.f);
+	(void)cosf(1.f);
+
+	(void)keep(json_object_set_new);
+	(void)keep(json_array_get);
+	(void)keep(json_array_insert_new);
+	(void)keep(json_number_value);
+	(void)keep(json_dumps);
+
+	(void)keep(strlen);
+	(void)keep(malloc);
+	(void)keep(free);
+	(void)keep(puts);
+
+	(void)keep(rack::random::local);
+	(void)keep(rack::string::f);
+
+	rack::history::ModuleAdd{}.setModule({});
+	rack::history::State{}.push({});
+	rack::widget::TransformWidget{}.translate({});
+	rack::widget::TransformWidget{}.rotate({});
+	rack::widget::TransformWidget{}.rotate({}, {});
+	rack::widget::TransformWidget{}.scale({});
+	rack::widget::Widget{}.removeChild({});
+	rack::widget::Widget{}.addChildBottom({});
+	rack::widget::Widget{}.addChildBelow({}, {});
+	rack::app::SvgSwitch{}.addFrame(std::make_shared<rack::window::Svg>(""));
+
 	auto ar = new int[10];
 	delete[] ar;
+
+	volatile auto alloc = std::allocator<char>{}; //seems to do nothing
+	(void)alloc;
+
+	//stdlib
 }
