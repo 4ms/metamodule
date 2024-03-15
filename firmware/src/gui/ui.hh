@@ -15,14 +15,8 @@
 namespace MetaModule
 {
 
-using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 4>;
-static inline FrameBufferT framebuf1 alignas(64);
-static inline FrameBufferT framebuf2 alignas(64);
-
 class Ui {
 private:
-	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
-
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
 

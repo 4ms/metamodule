@@ -10,6 +10,11 @@
 #include "gui/ui.hh"
 #include "patch_play/patch_player.hh"
 
+using FrameBufferT =
+	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
+static inline FrameBufferT framebuf1 alignas(64);
+static inline FrameBufferT framebuf2 alignas(64);
+
 extern "C" void aux_core_main() {
 	using namespace MetaModule;
 	using namespace mdrivlib;
@@ -29,6 +34,8 @@ extern "C" void aux_core_main() {
 	auto sync_params = A7SharedMemoryS::ptrs.sync_params;
 	auto patch_mod_queue = A7SharedMemoryS::ptrs.patch_mod_queue;
 	auto ramdisk_storage = A7SharedMemoryS::ptrs.ramdrive;
+
+	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 
 	AssetFS asset_fs{AssetVolFlashOffset};
 	PluginManager plugin_manager{*file_storage_proxy, *ramdisk_storage, asset_fs};
