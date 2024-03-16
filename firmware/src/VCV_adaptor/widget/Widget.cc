@@ -4,31 +4,51 @@
 namespace rack::widget
 {
 void Widget::addChild(Widget *child) {
-	//TODO: take ownership of the pointer, and delete it in ~Widget()
+	if (!child)
+		return;
+	// children.push_back(child);
+	// child->parent = this;
+	// if (box.size == math::Vec{}) {
+	// 	box.size = child->box.size;
+	// 	printf("Updating widget parent box size to child size %f %f\n", box.size.x, box.size.y);
+	// }
 }
 void Widget::addChildBottom(Widget *child) {
-	//TODO: take ownership of the pointer, and delete it in ~Widget()
+	addChild(child);
 }
 void Widget::addChildBelow(Widget *child, Widget *sibling) {
-	//TODO: take ownership of the pointer, and delete it in ~Widget()
+	addChild(child);
 }
 void Widget::addChildAbove(Widget *child, Widget *sibling) {
-	//TODO: take ownership of the pointer, and delete it in ~Widget()
+	addChild(child);
 }
 void Widget::removeChild(Widget *child) {
+	if (child) {
+		std::erase(children, child);
+		// child->parent = nullptr;
+	}
 }
 void Widget::clearChildren() {
+	// for (Widget *child : children) {
+	// 	if (child)
+	// 		delete child;
+	// }
+	// children.clear();
+}
+
+Widget::~Widget() {
+	// clearChildren();
 }
 
 void SvgWidget::setSvg(std::shared_ptr<window::Svg> svg) {
 	svg_filename = svg->filename;
 	box.size = get_svg_size(svg_filename);
-	// printf("SvgWidget::setSvg(): svg_filename = %s\n", svg_filename.c_str());
 }
 
 void FramebufferWidget::addChildBelow(SvgWidget *child, Widget *sibling) {
+	//we take ownership
 	_bg = child;
-	//TODO: take ownership of the pointer, and delete it in ~Widget()
+	//TODO: set parent's size equal to _bg's size
 }
 
 FramebufferWidget::~FramebufferWidget() {

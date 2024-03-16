@@ -25,7 +25,7 @@ struct Widget {
 	Widget *parent = nullptr;
 	std::list<Widget *> children;
 
-	virtual ~Widget() = default;
+	virtual ~Widget();
 
 	virtual void onDragStart(const event::DragStart &e) {
 	}
