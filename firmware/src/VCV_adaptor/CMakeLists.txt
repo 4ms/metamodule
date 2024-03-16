@@ -4,18 +4,18 @@ add_library(VCV_adaptor STATIC)
 
 target_sources(
   VCV_adaptor
-  PRIVATE string.cpp
-         plugin_instance.cc
-         engine/Module.cpp
+  PRIVATE src/string.cpp
+         src/plugin_instance.cc
+         src/engine/Module.cpp
          ../dynload/keep-symbols.cc
-         plugin/Plugin.cpp
-		 VCV_module_wrapper.cc
-         plugin/Model.cpp
-         widget/Widget.cc
-         app/ModuleWidget.cpp
-         app/Widget.cc
-         history.cpp
-         svg.cc
+         src/plugin/Plugin.cpp
+		 src/VCV_module_wrapper.cc
+         src/plugin/Model.cpp
+         src/widget/Widget.cc
+         src/app/ModuleWidget.cpp
+         src/app/Widget.cc
+         src/history.cpp
+         src/svg.cc
 )
 
 # TODO: replace this with for example fetchContent later
@@ -31,7 +31,8 @@ target_link_libraries(VCV_adaptor PRIVATE lvgl::lvgl jansson)
 
 target_include_directories(
   VCV_adaptor
-  PUBLIC ${MM_ROOT}/firmware/src/VCV_adaptor
+  PUBLIC include
+         include/VCV_adaptor
          ${MM_ROOT}/firmware/src
          ${MM_ROOT}/firmware/src/console
          ${MM_ROOT}/firmware

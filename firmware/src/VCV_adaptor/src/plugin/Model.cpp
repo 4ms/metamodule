@@ -1,4 +1,4 @@
-#include "Model.hpp"
+#include "plugin/Model.hpp"
 #include "util/overloaded.hh"
 
 namespace rack::plugin

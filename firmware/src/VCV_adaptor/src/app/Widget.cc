@@ -1,4 +1,4 @@
-#include "Widget.hh"
+#include "app/Widget.hh"
 #include "svg.hh"
 
 namespace rack::app

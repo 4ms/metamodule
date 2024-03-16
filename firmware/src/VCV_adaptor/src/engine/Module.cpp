@@ -1,4 +1,4 @@
-#include "Module.hpp"
+#include "engine/Module.hpp"
 #include "jansson.h"
 #include "pr_dbg.hh"
 
@@ -14,9 +14,9 @@ void Module::initialize_state(std::string_view state_string) {
 	}
 
 	json_t *data = json_object_get(root, "data");
-	if (data) 
+	if (data)
 		this->dataFromJson(data);
-	
+
 	json_decref(root);
 }
 
