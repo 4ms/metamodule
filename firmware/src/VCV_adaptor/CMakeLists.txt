@@ -19,15 +19,15 @@ target_sources(
 )
 
 # TODO: replace this with for example fetchContent later
-if (NOT TARGET jansson)
-  add_subdirectory(${MM_ROOT}/firmware/lib/jansson ${CMAKE_CURRENT_BINARY_DIR}/jansson)
-endif()
+# if (NOT TARGET jansson)
+add_subdirectory(jansson)
+# endif()
 add_subdirectory(pffft)
 
-# TODO: is this really meant to be propagated
+# propagate these libraries (e.g. to vcv_ports/Befaco, etc)
 target_link_libraries(VCV_adaptor PUBLIC pffft jansson cpputil)
 
-target_link_libraries(VCV_adaptor PRIVATE lvgl::lvgl jansson)
+target_link_libraries(VCV_adaptor PRIVATE lvgl::lvgl)
 
 target_include_directories(
   VCV_adaptor

@@ -26,7 +26,7 @@
 	path = firmware/vcv_ports/hetrickcv
 	url = https://github.com/mhetrick/hetrickcv.git
 [submodule "firmware/lib/jansson/jansson"]
-	path = firmware/lib/jansson/jansson
+	path = firmware/src/VCV_adaptor/jansson/jansson
 	url = https://github.com/4ms/jansson.git
 [submodule "firmware/lib/esp-serial-flasher"]
 	path = firmware/lib/esp-serial-flasher
