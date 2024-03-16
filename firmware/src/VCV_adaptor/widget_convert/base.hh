@@ -22,12 +22,17 @@ inline Element make_element_input(rack::app::SvgPort const *widget, BaseElement 
 // Pots/Sliders
 //
 
-inline Element make_element(rack::app::SvgKnob const *widget, BaseElement b) {
+//TODO: don't set box size here
+// either have dedicated function refresh_widget_size()
+// or in SvgWidget::setSvg, set its parents size recursively (if not set)
+inline Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
 	// SvgKnobs have a base SVG, and sometimes have a bg svg.
 	// If there is a bg svg, then use its name.
-	if (widget->fb->_bg && widget->fb->_bg->svg_filename.length())
+	if (widget->fb->_bg && widget->fb->_bg->svg_filename.length()) {
+		if (widget->box.size == rack::math::Vec{})
+			widget->box.size = widget->fb->_bg->box.size;
 		return Knob{b, widget->fb->_bg->svg_filename};
-	else
+	} else
 		return Knob{b, widget->svg_filename};
 }
 
@@ -125,7 +130,7 @@ Element make_element(rack::componentlibrary::TSvgLight<LightBaseT> const *widget
 template<typename LightBaseT>
 Element make_element(rack::componentlibrary::TGrayModuleLightWidget<LightBaseT> const *widget, BaseElement el) {
 
-	auto size = ModuleInfoBase::to_mm(widget->box.size.x);
+	auto size = to_mm(widget->box.size.x);
 
 	std::string_view image = size <= 2.6f ? "rack-lib/SmallLight.png" : //4px => 2.14mm
 							 size <= 3.7f ? "rack-lib/MediumLight.png" : //6px => 3.21mm

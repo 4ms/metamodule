@@ -143,24 +143,7 @@ private:
 
 	std::list<Widget *> owned_widgets;
 
-	void update_coords(math::Rect const &box, MetaModule::Element &element) {
-		std::visit(
-			[box](MetaModule::BaseElement &el) {
-				el.x_mm = MetaModule::ModuleInfoBase::to_mm(box.pos.x);
-				el.y_mm = MetaModule::ModuleInfoBase::to_mm(box.pos.y);
-				el.coords = MetaModule::Coords::TopLeft;
-
-				// el.x_mm = MetaModule::ModuleInfoBase::to_mm(box.pos.x + box.size.x / 2.f);
-				// el.y_mm = MetaModule::ModuleInfoBase::to_mm(box.pos.y + box.size.y / 2.f);
-				// el.coords = MetaModule::Coords::Center;
-			},
-			element);
-		printf("update_coord %f %f => %f %f\n",
-			   box.pos.x,
-			   box.pos.y,
-			   MetaModule::base_element(element).x_mm,
-			   MetaModule::base_element(element).y_mm);
-	}
+	static void update_coords(math::Rect const &box, MetaModule::Element &element);
 };
 
 } // namespace rack::app

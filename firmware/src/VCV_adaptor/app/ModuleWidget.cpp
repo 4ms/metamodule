@@ -24,12 +24,21 @@ void ModuleWidget::setPanel(std::shared_ptr<window::Svg> svg) {
 }
 
 ModuleWidget::~ModuleWidget() {
-	// printf("~MW()\n");
 	for (auto &w : owned_widgets) {
 		delete w;
 	}
 	if (panel)
 		delete panel;
+}
+
+void ModuleWidget::update_coords(math::Rect const &box, MetaModule::Element &element) {
+	std::visit(
+		[box](MetaModule::BaseElement &el) {
+			el.x_mm = MetaModule::to_mm(box.pos.x);
+			el.y_mm = MetaModule::to_mm(box.pos.y);
+			el.coords = MetaModule::Coords::TopLeft;
+		},
+		element);
 }
 
 } // namespace rack::app
