@@ -37,6 +37,9 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 #include "settings.hpp"
 // #include "componentlibrary.hpp"
 
+#include "Quantity.hpp" //in VCV, this is included where needed, but some 3rd party plugins assume its already included
+#include "glfw.hh"
+
 // #include "widget/TransparentWidget.hpp"
 // #include "widget/OpenGlWidget.hpp"
 // #include "widget/OpaqueWidget.hpp"
@@ -151,5 +154,4 @@ using namespace componentlibrary;
 
 using namespace color;
 
-#define DEBUG printf
 } // namespace rack

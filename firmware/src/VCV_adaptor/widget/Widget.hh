@@ -5,6 +5,7 @@
 #include "VCV_adaptor/math.hpp"
 #include "VCV_adaptor/nanovg.h"
 #include "VCV_adaptor/window.hpp"
+#include <list>
 
 namespace rack
 {
@@ -20,6 +21,9 @@ namespace widget
 struct Widget {
 	math::Rect box{0, 0, 0, 0};
 	MetaModule::Element element;
+
+	Widget *parent = nullptr;
+	std::list<Widget *> children;
 
 	virtual ~Widget() = default;
 
@@ -128,7 +132,23 @@ struct FramebufferWidget : Widget {
 	widget::SvgWidget *_bg = nullptr;
 };
 
-struct TransformWidget : Widget {};
+struct TransformWidget : Widget {
+	void translate(math::Vec delta) {
+		printf("transformation not supported\n");
+	}
+
+	void rotate(float angle) {
+		printf("transformation not supported\n");
+	}
+
+	void rotate(float angle, math::Vec origin) {
+		printf("transformation not supported\n");
+	}
+
+	void scale(math::Vec s) {
+		printf("transformation not supported\n");
+	}
+};
 
 } // namespace widget
 } // namespace rack

@@ -31,7 +31,8 @@ struct Engine {
 	// size_t getNumModules();
 	// size_t getModuleIds(int64_t *moduleIds, size_t len);
 	// std::vector<int64_t> getModuleIds();
-	// void addModule(Module *module);
+	void addModule(Module *module) {
+	}
 	// void removeModule(Module *module);
 	// bool hasModule(Module *module);
 	// Module *getModule(int64_t moduleId);

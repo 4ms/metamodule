@@ -25,5 +25,8 @@ struct MenuItem : MenuEntry {
 	std::string text;
 	std::string rightText;
 	bool disabled = false;
+	virtual Menu *createChildMenu() {
+		return nullptr;
+	}
 };
 } // namespace rack::ui

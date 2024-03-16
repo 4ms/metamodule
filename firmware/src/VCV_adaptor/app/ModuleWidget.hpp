@@ -24,6 +24,14 @@ struct ModuleWidget : widget::Widget {
 		model = m;
 	}
 
+	engine::Module *getModule() {
+		return module;
+	}
+
+	plugin::Model *getModel() {
+		return model;
+	}
+
 	// void setPanel(widget::Widget *newpanel) {
 	// 	if (panel)
 	// 		delete panel;

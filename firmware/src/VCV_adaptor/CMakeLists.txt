@@ -11,6 +11,7 @@ target_sources(
          plugin/Plugin.cpp
 		 VCV_module_wrapper.cc
          plugin/Model.cpp
+         history.cpp
 )
 
 # TODO: replace this with for example fetchContent later

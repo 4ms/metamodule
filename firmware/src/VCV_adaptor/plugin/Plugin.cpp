@@ -5,13 +5,13 @@
 #include "util/overloaded.hh"
 #include <deque>
 
-namespace MetaModule
-{} // namespace MetaModule
-
 namespace rack::plugin
 {
 
 void Plugin::addModel(Model *model) {
+	if (!model)
+		return;
+
 	using namespace MetaModule;
 
 	std::string_view slug = model->slug;

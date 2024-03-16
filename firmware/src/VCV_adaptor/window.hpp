@@ -1,4 +1,5 @@
 #pragma once
+#include "VCV_adaptor/glfw.hh"
 #include "VCV_adaptor/math.hpp"
 #include <memory>
 #include <string>
@@ -53,6 +54,9 @@ struct Font {
 struct Image {};
 
 struct Window {
+	GLFWwindow *win;
+	// std::unique_ptr<GLFWwindow> win{new GLFWwindow};
+
 	std::shared_ptr<Font> loadFont(std::string_view) {
 		return nullptr;
 	}

@@ -294,4 +294,4 @@ extern const std::string API_URL;
 #define RIGHT_ARROW "▸"
 
 // Logger depends on common.hpp, but it is handy to include it along with common.hpp.
-// #include <logger.hpp>
+#include <logger.hpp>

@@ -1,6 +1,7 @@
 #pragma once
 #include "VCV_adaptor/app/CableWidget.hpp"
 #include "VCV_adaptor/componentlibrary.hpp"
+#include "VCV_adaptor/history.hpp"
 #include "VCV_adaptor/nanovg.h"
 
 namespace rack::app
@@ -65,6 +66,34 @@ struct RackWidget : widget::OpaqueWidget {
 	}
 	NVGcolor getNextCableColor() {
 		return {};
+	}
+
+	void addModule(ModuleWidget *mw) {
+	}
+	void addModuleAtMouse(ModuleWidget *mw) {
+	}
+	void removeModule(ModuleWidget *mw) {
+	}
+	ModuleWidget *getModule(int64_t moduleId) {
+		return nullptr;
+	}
+	std::vector<ModuleWidget *> getModules() {
+		return {};
+	}
+	bool hasModules() {
+		return false;
+	}
+
+	bool requestModulePos(ModuleWidget *mw, math::Vec pos) {
+		return false;
+	}
+	void setModulePosNearest(ModuleWidget *mw, math::Vec pos) {
+	}
+	void setModulePosForce(ModuleWidget *mw, math::Vec pos) {
+	}
+	void setModulePosSqueeze(ModuleWidget *mw, math::Vec pos) {
+	}
+	void updateModuleOldPositions() {
 	}
 };
 

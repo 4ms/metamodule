@@ -1,7 +1,6 @@
 #pragma once
-#include "VCV_adaptor/nanovg.h"
-#include "VCV_adaptor/widgets.hh"
 #include "VCV_adaptor/app/CableWidget.hpp"
+#include "VCV_adaptor/widgets.hh"
 
 namespace rack::app
 {
@@ -9,8 +8,14 @@ namespace rack::app
 struct RackWidget : widget::OpaqueWidget {
 	ParamWidget *touchedParam = nullptr;
 
+	std::unique_ptr<widget::Widget> modulecontainer;
+
+	RackWidget()
+		: modulecontainer{new widget::Widget} {
+	}
+
 	widget::Widget *getModuleContainer() {
-		return {};
+		return modulecontainer.get();
 	}
 	widget::Widget *getCableContainer() {
 		return {};
