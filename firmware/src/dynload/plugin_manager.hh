@@ -30,7 +30,12 @@ struct PluginManager {
 		, ramdisk{&ramdisk_ops, Volume::RamDisk}
 		, asset_fs{asset_fs}
 		, plugin_file_loader{file_storage_proxy} {
+		prepare_ramdisk();
+		load_internal_assets();
+		load_internal_plugins();
+	}
 
+	void load_internal_plugins() {
 		//Load internal plugins
 		//TODO: how to do this from build system?
 		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
@@ -59,22 +64,23 @@ struct PluginManager {
 		pluginInstance->addModel(modelBlinds);
 		pluginInstance->addModel(modelBraids);
 		pluginInstance->addModel(modelBranches);
-		// pluginInstance->addModel(modelClouds);
 		pluginInstance->addModel(modelElements);
-		// pluginInstance->addModel(modelFrames);
 		pluginInstance->addModel(modelKinks);
 		pluginInstance->addModel(modelLinks);
 		pluginInstance->addModel(modelMarbles);
-		// pluginInstance->addModel(modelPlaits);
 		pluginInstance->addModel(modelRings);
 		pluginInstance->addModel(modelRipples);
 		pluginInstance->addModel(modelShades);
 		pluginInstance->addModel(modelShelves);
+		pluginInstance->addModel(modelTides2);
+		pluginInstance->addModel(modelVeils);
+		//TODO:
+		// pluginInstance->addModel(modelClouds);
+		// pluginInstance->addModel(modelFrames);
+		// pluginInstance->addModel(modelPlaits);
 		// pluginInstance->addModel(modelStages);
 		// pluginInstance->addModel(modelStreams);
 		// pluginInstance->addModel(modelTides);
-		pluginInstance->addModel(modelTides2);
-		pluginInstance->addModel(modelVeils);
 		// pluginInstance->addModel(modelWarps);
 
 		auto &hcv_plugin = internal_plugins.emplace_back("hetrickcv");
@@ -85,18 +91,14 @@ struct PluginManager {
 		pluginInstance->addModel(modelBinaryGate);
 		pluginInstance->addModel(modelBinaryNoise);
 		pluginInstance->addModel(modelBitshift);
-		// pluginInstance->addModel(modelBlankPanel);
 		pluginInstance->addModel(modelBoolean3);
 		pluginInstance->addModel(modelChaos1Op);
 		pluginInstance->addModel(modelChaos2Op);
 		pluginInstance->addModel(modelChaos3Op);
 		pluginInstance->addModel(modelChaoticAttractors);
 		pluginInstance->addModel(modelClockedNoise);
-		// pluginInstance->addModel(modelComparator);
 		pluginInstance->addModel(modelContrast);
 		pluginInstance->addModel(modelCrackle);
-		// pluginInstance->addModel(modelDataCompander);
-		// pluginInstance->addModel(modelDelta);
 		pluginInstance->addModel(modelDigitalToAnalog);
 		pluginInstance->addModel(modelDust);
 		pluginInstance->addModel(modelExponent);
@@ -122,7 +124,6 @@ struct PluginManager {
 		pluginInstance->addModel(modelPhasorGen);
 		pluginInstance->addModel(modelPhasorGeometry);
 		pluginInstance->addModel(modelPhasorHumanizer);
-		// pluginInstance->addModel(modelPhasorMixer);
 		pluginInstance->addModel(modelPhasorOctature);
 		pluginInstance->addModel(modelPhasorQuadrature);
 		pluginInstance->addModel(modelPhasorRandom);
@@ -139,13 +140,19 @@ struct PluginManager {
 		pluginInstance->addModel(modelPhasorToLFO);
 		pluginInstance->addModel(modelPhasorToWaveforms);
 		pluginInstance->addModel(modelProbability);
-		// pluginInstance->addModel(modelRandomGates);
-		// pluginInstance->addModel(modelRotator);
-		// pluginInstance->addModel(modelRungler);
 		pluginInstance->addModel(modelScanner);
 		pluginInstance->addModel(modelVectorMix);
 		pluginInstance->addModel(modelWaveshape);
 		pluginInstance->addModel(modelXYToPolar);
+		// TODO:??
+		// pluginInstance->addModel(modelBlankPanel);
+		// pluginInstance->addModel(modelComparator);
+		// pluginInstance->addModel(modelDataCompander);
+		// pluginInstance->addModel(modelDelta);
+		// pluginInstance->addModel(modelPhasorMixer);
+		// pluginInstance->addModel(modelRandomGates);
+		// pluginInstance->addModel(modelRotator);
+		// pluginInstance->addModel(modelRungler);
 
 		auto &nlc_plugin = internal_plugins.emplace_back("nonlinearcircuits");
 		pluginInstance = &nlc_plugin;
@@ -167,20 +174,20 @@ struct PluginManager {
 		pluginInstance->addModel(modelSquidAxon);
 		pluginInstance->addModel(modelStatues);
 		pluginInstance->addModel(modelTripleSloth);
+	}
 
+	void prepare_ramdisk() {
 		if (!ramdisk.format_disk()) {
 			pr_err("Could not format RamDisk, no assets can be loaded!\n");
 			return;
 		} else
 			pr_dbg("RamDisk formatted and mounted\n");
-
-		load_internal_assets();
 	}
 
 	void start_loading_plugins() {
 		state = State::IsLoading;
 
-		ramdisk.unmount_drive();
+		ramdisk.mount_disk();
 		plugin_file_loader.start();
 	}
 
