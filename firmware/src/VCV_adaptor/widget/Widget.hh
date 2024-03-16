@@ -56,22 +56,12 @@ struct Widget {
 	bool hasChild(Widget *child) {
 		return false;
 	}
-	void addChild(Widget *child) {
-		//TODO: take ownership of the pointer, and delete it in ~Widget()
-	}
-	void addChildBottom(Widget *child) {
-		//TODO: take ownership of the pointer, and delete it in ~Widget()
-	}
-	void addChildBelow(Widget *child, Widget *sibling) {
-		//TODO: take ownership of the pointer, and delete it in ~Widget()
-	}
-	void addChildAbove(Widget *child, Widget *sibling) {
-		//TODO: take ownership of the pointer, and delete it in ~Widget()
-	}
-	void removeChild(Widget *child) {
-	}
-	void clearChildren() {
-	}
+	void addChild(Widget *child);
+	void addChildBottom(Widget *child);
+	void addChildBelow(Widget *child, Widget *sibling);
+	void addChildAbove(Widget *child, Widget *sibling);
+	void removeChild(Widget *child);
+	void clearChildren();
 	void hide() {
 	}
 };
@@ -88,10 +78,7 @@ struct SvgWidget : Widget {
 
 	std::string svg_filename;
 
-	void setSvg(std::shared_ptr<window::Svg> svg) {
-		svg_filename = svg->filename;
-		// printf("SvgWidget::setSvg(): svg_filename = %s\n", svg_filename.c_str());
-	}
+	void setSvg(std::shared_ptr<window::Svg> svg);
 
 	void setSVG(std::shared_ptr<window::Svg> svg) {
 		setSvg(svg);
@@ -124,30 +111,18 @@ struct FramebufferWidget : Widget {
 	}
 	virtual void drawFramebuffer() {
 	}
-	void addChildBelow(SvgWidget *child, Widget *sibling) {
-		_bg = child;
-		//TODO: take ownership of the pointer, and delete it in ~Widget()
-	}
 
+	void addChildBelow(SvgWidget *child, Widget *sibling);
+
+	~FramebufferWidget() override;
 	widget::SvgWidget *_bg = nullptr;
 };
 
 struct TransformWidget : Widget {
-	void translate(math::Vec delta) {
-		printf("transformation not supported\n");
-	}
-
-	void rotate(float angle) {
-		printf("transformation not supported\n");
-	}
-
-	void rotate(float angle, math::Vec origin) {
-		printf("transformation not supported\n");
-	}
-
-	void scale(math::Vec s) {
-		printf("transformation not supported\n");
-	}
+	void translate(math::Vec delta);
+	void rotate(float angle);
+	void rotate(float angle, math::Vec origin);
+	void scale(math::Vec s);
 };
 
 } // namespace widget

@@ -18,8 +18,8 @@ namespace rack
 template<typename T>
 T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_view name) {
 	auto *widget = new T;
-	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
-	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	// pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	// pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
 
 	widget->element = MetaModule::make_element(widget, {pos.x, pos.y, coord_ref, name, name});
 	return widget;
@@ -30,8 +30,8 @@ template<typename T>
 T *createElementParamWidget(
 	math::Vec pos, MetaModule::Coords coord_ref, std::string_view name, engine::Module *module, int paramId) {
 	auto *widget = new T;
-	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
-	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	// pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	// pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
 
 	widget->module = module;
 	widget->paramId = paramId;
@@ -53,8 +53,8 @@ T *createElementParamWidget(
 		pos.x += widget->background->box.pos.x;
 		pos.y += widget->background->box.pos.y;
 	}
-	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
-	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	// pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	// pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
 
 	widget->module = module;
 	widget->paramId = paramId;
@@ -163,33 +163,40 @@ TParamWidget *createParamImpl(MetaModule::Coords coords, math::Vec pos, engine::
 
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
-	return createParamImpl<TParamWidget>(MetaModule::Coords::TopLeft, pos, module, paramId);
+	auto widget = createParamImpl<TParamWidget>(MetaModule::Coords::TopLeft, pos, module, paramId);
+	widget->box.pos = pos;
+	return widget;
 }
 
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
-	return createParamImpl<TParamWidget>(MetaModule::Coords::Center, pos, module, paramId);
+	auto widget = createParamImpl<TParamWidget>(MetaModule::Coords::Center, pos, module, paramId);
+	widget->box.pos = widget->box.pos.minus(widget->box.size.div(2));
+	return widget;
 }
 
 template<class TPortWidget>
 TPortWidget *createInput(math::Vec pos, engine::Module *module, int inputId) {
 	auto name = getInputName(module, inputId);
-	auto *o = new TPortWidget;
-	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
-	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element = MetaModule::make_element_input(o, {pos.x, pos.y, MetaModule::Coords::TopLeft, name, name});
-	o->portId = inputId;
-	if (o->getPortInfo())
-		o->getPortInfo()->name = name;
-	return o;
+	auto *widget = new TPortWidget;
+	widget->box.pos = pos;
+	// pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	// pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	widget->element = MetaModule::make_element_input(widget, {pos.x, pos.y, MetaModule::Coords::TopLeft, name, name});
+	widget->portId = inputId;
+	if (widget->getPortInfo())
+		widget->getPortInfo()->name = name;
+	return widget;
 }
 
 template<class TPortWidget>
 TPortWidget *createInputCentered(math::Vec pos, engine::Module *module, int inputId) {
 	auto name = getInputName(module, inputId);
 	auto *widget = new TPortWidget;
-	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
-	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	widget->box.pos = widget->box.pos.minus(widget->box.size.div(2));
+
+	// pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	// pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
 	widget->element = MetaModule::make_element_input(widget, {pos.x, pos.y, MetaModule::Coords::Center, name, name});
 	widget->portId = inputId;
 	if (widget->getPortInfo())
@@ -200,67 +207,73 @@ TPortWidget *createInputCentered(math::Vec pos, engine::Module *module, int inpu
 template<class TPortWidget>
 TPortWidget *createOutput(math::Vec pos, engine::Module *module, int outputId) {
 	auto name = getOutputName(module, outputId);
-	auto *o = new TPortWidget;
-	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
-	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element = MetaModule::make_element_output(o, {pos.x, pos.y, MetaModule::Coords::TopLeft, name, name});
-	o->portId = outputId;
-	if (o->getPortInfo())
-		o->getPortInfo()->name = name;
-	return o;
+	auto *widget = new TPortWidget;
+	widget->box.pos = pos;
+	// pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	// pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	widget->element = MetaModule::make_element_output(widget, {pos.x, pos.y, MetaModule::Coords::TopLeft, name, name});
+	widget->portId = outputId;
+	if (widget->getPortInfo())
+		widget->getPortInfo()->name = name;
+	return widget;
 }
 
 template<class TPortWidget>
 TPortWidget *createOutputCentered(math::Vec pos, engine::Module *module, int outputId) {
 	auto name = getOutputName(module, outputId);
-	auto *o = new TPortWidget;
-	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
-	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element = MetaModule::make_element_output(o, {pos.x, pos.y, MetaModule::Coords::Center, name, name});
-	o->portId = outputId;
-	if (o->getPortInfo())
-		o->getPortInfo()->name = name;
-	return o;
+	auto *widget = new TPortWidget;
+	widget->box.pos = widget->box.pos.minus(widget->box.size.div(2));
+	// pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	// pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	widget->element = MetaModule::make_element_output(widget, {pos.x, pos.y, MetaModule::Coords::Center, name, name});
+	widget->portId = outputId;
+	if (widget->getPortInfo())
+		widget->getPortInfo()->name = name;
+	return widget;
 }
 
 template<class TModuleLightWidget>
 TModuleLightWidget *createLight(math::Vec pos, engine::Module *module, int firstLightId) {
 	auto name = getLightName(module, firstLightId);
-	auto o = createElementWidget<TModuleLightWidget>(pos, MetaModule::Coords::TopLeft, name);
-	o->firstLightId = firstLightId;
-	return o;
+	auto widget = createElementWidget<TModuleLightWidget>(pos, MetaModule::Coords::TopLeft, name);
+	widget->box.pos = pos;
+	widget->firstLightId = firstLightId;
+	return widget;
 }
 
 template<class TModuleLightWidget>
 TModuleLightWidget *createLightCentered(math::Vec pos, engine::Module *module, int firstLightId) {
 	auto name = getLightName(module, firstLightId);
-	auto o = createElementWidget<TModuleLightWidget>(pos, MetaModule::Coords::Center, name);
-	o->firstLightId = firstLightId;
-	return o;
+	auto widget = createElementWidget<TModuleLightWidget>(pos, MetaModule::Coords::Center, name);
+	widget->box.pos = widget->box.pos.minus(widget->box.size.div(2));
+	widget->firstLightId = firstLightId;
+	return widget;
 }
 
 template<class TParamWidget>
 TParamWidget *createLightParam(math::Vec pos, engine::Module *module, int paramId, int firstLightId) {
 	auto name = getParamName(module, paramId);
-	auto param = createElementWidget<TParamWidget>(pos, MetaModule::Coords::TopLeft, name);
-	param->paramId = paramId;
+	auto widget = createElementWidget<TParamWidget>(pos, MetaModule::Coords::TopLeft, name);
+	widget->box.pos = pos;
+	widget->paramId = paramId;
 
 	// TODO: how to do this?
 	// param->getLight()->firstLightId = firstLightId;
 
-	return param;
+	return widget;
 }
 
 template<class TParamWidget>
 TParamWidget *createLightParamCentered(math::Vec pos, engine::Module *module, int paramId, int firstLightId) {
 	auto name = getParamName(module, paramId);
-	auto param = createElementWidget<TParamWidget>(pos, MetaModule::Coords::Center, name);
-	param->paramId = paramId;
+	auto widget = createElementWidget<TParamWidget>(pos, MetaModule::Coords::Center, name);
+	widget->box.pos = widget->box.pos.minus(widget->box.size.div(2));
+	widget->paramId = paramId;
 
 	// TODO: how to do this?
 	// param->getLight()->firstLightId = firstLightId;
 
-	return param;
+	return widget;
 }
 
 template<class TMenu = ui::Menu>

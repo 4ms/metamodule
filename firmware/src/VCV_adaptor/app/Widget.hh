@@ -30,13 +30,7 @@ struct SvgPort : PortWidget {
 	widget::SvgWidget *sw = &_sw;
 	std::string svg_filename;
 
-	void setSvg(std::shared_ptr<window::Svg> svg) {
-		if (svg->filename.size()) {
-			svg_filename = svg->filename;
-			// printf("SvgPort:svg_filename %s\n", svg_filename.c_str());
-		} else
-			printf("SvgPort: svg with empty name\n");
-	}
+	void setSvg(std::shared_ptr<window::Svg> svg);
 	void setSVG(std::shared_ptr<window::Svg> svg) {
 		setSvg(svg);
 	}
@@ -51,11 +45,7 @@ struct ThemedSvgPort : SvgPort {
 	std::shared_ptr<window::Svg> lightSvg;
 	std::shared_ptr<window::Svg> darkSvg;
 
-	void setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
-		svg_filename = lightSvg->filename;
-		this->lightSvg = lightSvg;
-		this->darkSvg = darkSvg;
-	}
+	void setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg);
 
 	void step() override {
 	}
@@ -147,25 +137,10 @@ struct SvgSlider : Knob {
 	std::unique_ptr<widget::SvgWidget> handle{new widget::SvgWidget};
 	math::Vec minHandlePos, maxHandlePos;
 
-	void setBackgroundSvg(std::shared_ptr<window::Svg> svg) {
-		if (svg->filename.size())
-			background->svg_filename = svg->filename;
-		else
-			printf("Svgslider: Svg bg with empty name\n");
-	}
-
-	void setHandleSvg(std::shared_ptr<window::Svg> svg) {
-		if (svg->filename.size())
-			handle->svg_filename = svg->filename;
-		else
-			printf("Svgslider: Svg with empty name\n");
-	}
-
-	void setHandlePos(math::Vec minHandlePos, math::Vec maxHandlePos) {
-	}
-
-	void setHandlePosCentered(math::Vec minHandlePosCentered, math::Vec maxHandlePosCentered) {
-	}
+	void setBackgroundSvg(std::shared_ptr<window::Svg> svg);
+	void setHandleSvg(std::shared_ptr<window::Svg> svg);
+	void setHandlePos(math::Vec minHandlePos, math::Vec maxHandlePos);
+	void setHandlePosCentered(math::Vec minHandlePosCentered, math::Vec maxHandlePosCentered);
 };
 
 struct SvgSwitch : ParamWidget {
@@ -181,9 +156,7 @@ struct SvgSwitch : ParamWidget {
 
 	std::vector<std::string> frames;
 
-	void addFrame(std::shared_ptr<window::Svg> svg) {
-		frames.push_back(svg->filename);
-	}
+	void addFrame(std::shared_ptr<window::Svg> svg);
 
 private:
 	widget::FramebufferWidget _fb;

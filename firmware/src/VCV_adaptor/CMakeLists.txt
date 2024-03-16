@@ -11,7 +11,11 @@ target_sources(
          plugin/Plugin.cpp
 		 VCV_module_wrapper.cc
          plugin/Model.cpp
+         widget/Widget.cc
+         app/ModuleWidget.cpp
+         app/Widget.cc
          history.cpp
+         svg.cc
 )
 
 # TODO: replace this with for example fetchContent later

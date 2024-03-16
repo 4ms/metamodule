@@ -32,28 +32,9 @@ struct ModuleWidget : widget::Widget {
 		return model;
 	}
 
-	// void setPanel(widget::Widget *newpanel) {
-	// 	if (panel)
-	// 		delete panel;
-	// 	panel = newpanel;
-	// }
+	void setPanel(app::SvgPanel *newpanel);
 
-	void setPanel(app::SvgPanel *newpanel) {
-		if (!newpanel)
-			return;
-		if (panel)
-			delete panel;
-		panel = newpanel;
-
-		if (newpanel->svg)
-			svg_filename = newpanel->svg->filename;
-	}
-
-	void setPanel(std::shared_ptr<window::Svg> svg) {
-		auto *panel = new SvgPanel;
-		panel->setBackground(svg);
-		setPanel(panel);
-	}
+	void setPanel(std::shared_ptr<window::Svg> svg);
 
 	widget::Widget *getPanel() {
 		return panel;
@@ -79,6 +60,7 @@ struct ModuleWidget : widget::Widget {
 	void addChild(app::ModuleLightWidget *lightWidget) {
 		if (!lightWidget)
 			return;
+		update_coords(lightWidget->box, lightWidget->element);
 		place_at(lightElements, lightWidget->firstLightId, lightWidget->element);
 
 		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
@@ -90,6 +72,7 @@ struct ModuleWidget : widget::Widget {
 			printf("Error: can't add a null ParamWidget\n");
 			return;
 		}
+		update_coords(paramWidget->box, paramWidget->element);
 		place_at(paramElements, paramWidget->paramId, paramWidget->element);
 
 		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
@@ -101,6 +84,7 @@ struct ModuleWidget : widget::Widget {
 			printf("Error: can't add a null input PortWidget\n");
 			return;
 		}
+		update_coords(input->box, input->element);
 		place_at(inputElements, input->portId, input->element);
 
 		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
@@ -112,6 +96,7 @@ struct ModuleWidget : widget::Widget {
 			printf("Error: can't add a null output PortWidget\n");
 			return;
 		}
+		update_coords(output->box, output->element);
 		place_at(outputElements, output->portId, output->element);
 
 		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
@@ -148,14 +133,7 @@ struct ModuleWidget : widget::Widget {
 		elements.insert(elements.end(), lightElements.begin(), lightElements.end());
 	}
 
-	~ModuleWidget() override {
-		// printf("~MW()\n");
-		for (auto &w : owned_widgets) {
-			delete w;
-		}
-		if (panel)
-			delete panel;
-	}
+	~ModuleWidget() override;
 
 private:
 	std::vector<MetaModule::Element> paramElements;
@@ -164,6 +142,25 @@ private:
 	std::vector<MetaModule::Element> lightElements;
 
 	std::list<Widget *> owned_widgets;
+
+	void update_coords(math::Rect const &box, MetaModule::Element &element) {
+		std::visit(
+			[box](MetaModule::BaseElement &el) {
+				el.x_mm = MetaModule::ModuleInfoBase::to_mm(box.pos.x);
+				el.y_mm = MetaModule::ModuleInfoBase::to_mm(box.pos.y);
+				el.coords = MetaModule::Coords::TopLeft;
+
+				// el.x_mm = MetaModule::ModuleInfoBase::to_mm(box.pos.x + box.size.x / 2.f);
+				// el.y_mm = MetaModule::ModuleInfoBase::to_mm(box.pos.y + box.size.y / 2.f);
+				// el.coords = MetaModule::Coords::Center;
+			},
+			element);
+		printf("update_coord %f %f => %f %f\n",
+			   box.pos.x,
+			   box.pos.y,
+			   MetaModule::base_element(element).x_mm,
+			   MetaModule::base_element(element).y_mm);
+	}
 };
 
 } // namespace rack::app
