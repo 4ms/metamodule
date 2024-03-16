@@ -83,8 +83,8 @@ draw_image(const BaseElement &el, std::string_view img_filename, lv_obj_t *canva
 	if (img_path.length() > 0) {
 		if (auto sz = get_image_size(img_path)) {
 			lv_obj_t *obj = lv_img_create(canvas);
-			float x = ModuleInfoBase::mm_to_px(el.x_mm, module_height);
-			float y = ModuleInfoBase::mm_to_px(el.y_mm, module_height);
+			float x = mm_to_px(el.x_mm, module_height);
+			float y = mm_to_px(el.y_mm, module_height);
 			Impl::draw_image(x, y, sz->w, sz->h, el.coords, img_path, obj, module_height);
 			lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
 			lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
