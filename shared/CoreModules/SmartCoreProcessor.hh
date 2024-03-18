@@ -123,13 +123,13 @@ private:
 public:
 	float get_output(int output_id) const override {
 		if (output_id < (int)outputValues.size())
-			return outputValues[output_id]; // Note: this undoes what CommModule does
+			return outputValues[output_id];
 		return 0.f;
 	}
 
 	void set_input(int input_id, float val) override {
 		if (input_id < (int)inputValues.size())
-			inputValues[input_id] = val; // Note: this undoes what CommModule does
+			inputValues[input_id] = val;
 	}
 
 	void set_param(int param_id, float val) override {
