@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <string_view>
 
 class CoreProcessor {
@@ -31,6 +32,9 @@ public:
 	}
 
 	virtual void initialize_state(std::string_view state_string) {
+	}
+	virtual std::string save_state() {
+		return "";
 	}
 
 	virtual ~CoreProcessor() = default;
