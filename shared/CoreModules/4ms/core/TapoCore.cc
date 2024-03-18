@@ -30,6 +30,11 @@ public:
 			onTapDetected();
 		});
 
+		for (std::size_t i=0; i<TapoDelay::kNumbBanks; i++)
+		{
+			ui.getPersistentStorage().ResetBank(i);
+		}
+
 		ui.Init(&delay, &parameters);
 
 		audioBufferFillCount = 0;
