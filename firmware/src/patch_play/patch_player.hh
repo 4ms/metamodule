@@ -139,7 +139,7 @@ public:
 			if (ms.module_id >= modules.size())
 				continue;
 
-			modules[ms.module_id]->initialize_state(ms.data_json);
+			modules[ms.module_id]->initialize_state(ms.state_data);
 		}
 
 		calc_multiple_module_indicies();
@@ -175,6 +175,18 @@ public:
 	void update_lights() {
 		smp.read_patch_state();
 		smp.join();
+	}
+
+	std::vector<ModuleInitState> get_module_states() {
+		std::vector<ModuleInitState> states;
+
+		for (auto [i, module] : enumerate(modules)) {
+			if (i >= pd.module_slugs.size())
+				break;
+			states.push_back({(uint32_t)i, module->save_state()});
+		}
+
+		return states;
 	}
 
 	void unload_patch() {
