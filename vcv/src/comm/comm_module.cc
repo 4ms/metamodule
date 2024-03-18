@@ -17,17 +17,19 @@ void CommModule::process(const ProcessArgs &args) {
 
 	for (auto &injack : inJacks) {
 		auto id = injack.getId();
-		
-		if (injack.isConnected())
-		{
+		injack.updateInput();
+
+		if (injack.isJustPatched())
 			core->mark_input_patched(id);
 
+		if (injack.isJustUnpatched()) {
+			core->set_input(id, 0); // 0 = unpatched value. TODO: allow for normalizations
+			core->mark_input_unpatched(id);
+		}
+
+		if (injack.isConnected()) {
 			auto scaledIn = injack.getValue();
 			core->set_input(id, scaledIn);
-		}
-		else
-		{
-			core->mark_input_unpatched(id);
 		}
 	}
 
