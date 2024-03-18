@@ -15,15 +15,6 @@ void CommModule::process(const ProcessArgs &args) {
 		i++;
 	}
 
-	for (auto &alt : altParams) {
-		if (alt.is_updated)
-
-			// TODO: implement
-			//core->set_alt_param(alt.id, alt.val);
-			
-		alt.is_updated = false;
-	}
-
 	for (auto &injack : inJacks) {
 		auto id = injack.getId();
 		
