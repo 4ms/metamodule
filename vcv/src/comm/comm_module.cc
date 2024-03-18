@@ -45,9 +45,23 @@ void CommModule::process(const ProcessArgs &args) {
 		core->set_samplerate(args.sampleRate);
 	}
 
+	// Patched state needs to be set before update
+	// otherwise the first sample after patching can be undefined
+	for (auto &out : outJacks) {
+
+		auto id = out.getId();
+
+		if (out.isConnected()) core->mark_output_patched(id);
+		else                   core->mark_output_unpatched(id);
+	}
+
 	core->update();
 
+
+	// Always set output independent of patch state
+	// since when unpatched the value will not be used anyway
 	for (auto &out : outJacks) {
+
 		auto raw_value = core->get_output(out.getId());
 		out.setValue(raw_value);
 	}
