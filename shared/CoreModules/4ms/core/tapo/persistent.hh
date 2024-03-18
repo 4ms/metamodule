@@ -33,7 +33,8 @@
 
 namespace TapoDelay {
 
-const int kNumSlots = 6 * 4;    // 6 buttons, 4 banks
+const int kNumbBanks = 4;
+const int kNumSlots = 6 * kNumbBanks;    // 6 buttons, 4 banks
 
 struct CalibrationData {
   float offset[4];

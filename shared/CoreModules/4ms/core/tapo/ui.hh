@@ -121,6 +121,10 @@ class Ui {
   {
     return switches_;
   }
+  Persistent& getPersistentStorage()
+  {
+    return persistent_;
+  }
 
  private:
   void OnButtonPressed(const stmlib::Event& e);
