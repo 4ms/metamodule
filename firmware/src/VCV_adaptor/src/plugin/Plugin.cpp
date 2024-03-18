@@ -15,7 +15,7 @@ void Plugin::addModel(Model *model) {
 	using namespace MetaModule;
 
 	std::string_view slug = model->slug;
-	pr_dbg("Adding VCV_adaptor model %s\n", model->slug.c_str());
+	pr_trace("Adding VCV_adaptor model %s\n", model->slug.c_str());
 
 	if (ModuleFactory::isValidSlug(slug)) {
 		pr_err("Duplicate module slug: %s, skipping\n", model->slug.c_str());

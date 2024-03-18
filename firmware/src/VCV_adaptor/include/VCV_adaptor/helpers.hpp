@@ -166,13 +166,6 @@ TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
 	auto widget = createParamImpl<TParamWidget>(MetaModule::Coords::Center, pos, module, paramId);
-	printf("createParamCentered: given %fVpx %fVpx, size = %fmm %fmm, pos %f %f\n",
-		   pos.x,
-		   pos.y,
-		   widget->box.size.x,
-		   widget->box.size.y,
-		   widget->box.pos.x,
-		   widget->box.pos.y);
 	return widget;
 }
 
