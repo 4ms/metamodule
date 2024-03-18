@@ -1,5 +1,6 @@
 #include "Module.hpp"
 #include "jansson.h"
+#include "patch_convert/patch_to_yaml.hh"
 #include "patch_convert/ryml/ryml_serial.hh"
 #include "pr_dbg.hh"
 
@@ -32,8 +33,21 @@ void Module::initialize_state(std::string_view state_yml) {
 }
 
 std::string Module::save_state() {
-	//TODO: serialize result of this->dataToJson() as json, then convert to yml
-	return "";
+	json_t *dataJ = this->dataToJson();
+
+	if (!dataJ)
+		return ""; // Do nothing if module has no state to store
+
+	std::string moduleStateStr;
+	auto sz = json_dumpb(dataJ, nullptr, 0, JSON_INDENT(0));
+	if (sz > 0) {
+		moduleStateStr.resize(sz + 1);
+		json_dumpb(dataJ, moduleStateStr.data(), sz, JSON_INDENT(0));
+	}
+
+	auto data_yml = json_to_yml(moduleStateStr);
+
+	return data_yml;
 }
 
 } // namespace rack::engine

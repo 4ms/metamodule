@@ -183,7 +183,8 @@ public:
 		for (auto [i, module] : enumerate(modules)) {
 			if (i >= pd.module_slugs.size())
 				break;
-			states.push_back({(uint32_t)i, module->save_state()});
+			if (auto state_data = module->save_state(); state_data.length())
+				states.push_back({(uint32_t)i, state_data});
 		}
 
 		return states;
