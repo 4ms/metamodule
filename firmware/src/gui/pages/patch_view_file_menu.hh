@@ -3,15 +3,15 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
-#include "patch_file/file_storage_proxy.hh"
+#include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
 {
 
 struct PatchViewFileMenu {
 
-	PatchViewFileMenu(FileStorageProxy &patch_storage)
-		: patch_storage{patch_storage}
+	PatchViewFileMenu(PatchPlayLoader &play_loader)
+		: play_loader{play_loader}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
@@ -72,10 +72,10 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		page->patch_storage.write_patch();
+		page->play_loader.request_save_patch();
 	}
 
-	FileStorageProxy &patch_storage;
+	PatchPlayLoader &play_loader;
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
