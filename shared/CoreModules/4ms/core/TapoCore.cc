@@ -96,8 +96,15 @@ private:
 		auto monoInput = int16_t(clamp(getInput<AudioIn>().value_or(0) / AudioInputFullScaleInVolt, 1.0f) * 32767.0 );
 		audioBufferRX[audioBufferFillCount] = {monoInput, monoInput};
 
-		setOutput<AudioOut1Out>(float(audioBufferTX[audioBufferFillCount].l) / 32768.0 * AudioOutputFullScaleInVolt);
-		setOutput<AudioOut2Out>(float(audioBufferTX[audioBufferFillCount].r) / 32768.0 * AudioOutputFullScaleInVolt);
+		if (isPatched<AudioOut2Out>())
+		{
+			setOutput<AudioOut1Out>(float(audioBufferTX[audioBufferFillCount].l) / 32768.0 * AudioOutputFullScaleInVolt);
+			setOutput<AudioOut2Out>(float(audioBufferTX[audioBufferFillCount].r) / 32768.0 * AudioOutputFullScaleInVolt);
+		}
+		else
+		{
+			setOutput<AudioOut1Out>((float(audioBufferTX[audioBufferFillCount].l) + float(audioBufferTX[audioBufferFillCount].r)) / 2 / 32768.0 * AudioOutputFullScaleInVolt);
+		}
 	}
 
 	void sideloadDrivers()
