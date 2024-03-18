@@ -1,21 +1,15 @@
 #pragma once
-#include "util/edge_detector.hh"
 #include <rack.hpp>
 
 struct CommJack {
 protected:
 	rack::Port &port;
 	unsigned idx;
-	EdgeStateDetector plugDetect;
 
 public:
 	CommJack(rack::Port &port, unsigned idx)
 		: port{port}
 		, idx{idx} {
-	}
-
-	void updateInput() {
-		plugDetect.update(port.isConnected());
 	}
 
 	float getId() {
@@ -24,14 +18,6 @@ public:
 
 	bool isConnected() {
 		return port.isConnected();
-	}
-
-	bool isJustPatched() {
-		return plugDetect.went_high();
-	}
-
-	bool isJustUnpatched() {
-		return plugDetect.went_low();
 	}
 };
 
