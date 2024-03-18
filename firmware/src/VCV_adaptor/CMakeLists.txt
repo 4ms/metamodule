@@ -19,7 +19,7 @@ add_subdirectory(pffft)
 # TODO: is this really meant to be propagated
 target_link_libraries(VCV_adaptor PUBLIC pffft jansson cpputil)
 
-target_link_libraries(VCV_adaptor PRIVATE lvgl::lvgl jansson)
+target_link_libraries(VCV_adaptor PRIVATE lvgl::lvgl jansson ryml)
 
 target_include_directories(
   VCV_adaptor

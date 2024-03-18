@@ -134,9 +134,5 @@ static_assert(sizeof(MappedOutputJack) == 24, "MappedOutputJack should be 24B");
 
 struct ModuleInitState {
 	uint32_t module_id;
-	// StaticString<31> plugin_slug;
-	// StaticString<31> module_slug;
-	// StaticString<15> version;
-	std::string data_json;
-	// json_t *data_json;
+	std::string state_data;
 };

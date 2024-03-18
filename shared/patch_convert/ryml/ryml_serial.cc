@@ -253,11 +253,10 @@ bool read(ryml::ConstNodeRef const &n, ModuleInitState *m) {
 
 	n["id"] >> m->module_id;
 
-	// The "data" field is stored as raw json string
-	// because vcv-native modules need to be passed a jansson object
+	// Keep the data field as a yaml string
+	// Modules will decide how to deserialize
 	ryml::ConstNodeRef data_node = n["data"];
-	m->data_json = ryml::emitrs_json<std::string>(data_node);
-	m->data_json = "{" + m->data_json + "}";
+	m->state_data = ryml::emitrs_yaml<std::string>(data_node);
 
 	return true;
 }
