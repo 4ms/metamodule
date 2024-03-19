@@ -1,0 +1,42 @@
+name: linux
+
+on: [push]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Create Build Environment
+      run: |
+        sudo apt update
+        sudo apt install mm-common g++-11
+        cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure
+      working-directory: ${{runner.workspace}}/build
+      env:
+        CXX: g++-11
+      run: |
+        cmake -DCMAKE_BUILD_TYPE=${{matrix.build_type}} $GITHUB_WORKSPACE
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      run: |
+        threads=`nproc`
+        cmake --build . --config ${{matrix.build_type}} --parallel $threads
+
+    - name: Run Tests
+      working-directory: ${{runner.workspace}}/build
+      run: |
+        pwd
+        ctest -C ${{matrix.build_type}} -V --output-on-failure
