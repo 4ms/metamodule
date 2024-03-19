@@ -189,6 +189,7 @@ R"(PatchData:
     name: ''
     set: []
   midi_poly_num: 4
+  vcvModuleStates: []
 )");
 	// clang-format on
 }
