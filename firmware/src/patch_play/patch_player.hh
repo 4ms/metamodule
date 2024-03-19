@@ -139,7 +139,7 @@ public:
 			if (ms.module_id >= modules.size())
 				continue;
 
-			modules[ms.module_id]->initialize_state(ms.state_data);
+			modules[ms.module_id]->load_state(ms.state_data);
 		}
 
 		calc_multiple_module_indicies();
@@ -185,7 +185,7 @@ public:
 				break;
 			if (!module)
 				continue;
-			if (auto state_data = module->save_state(); state_data.length() > 0)
+			if (auto state_data = module->save_state(); state_data.size() > 0)
 				states.push_back({(uint32_t)i, state_data});
 		}
 
