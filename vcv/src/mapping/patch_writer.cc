@@ -11,14 +11,9 @@ PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModul
 	pd.knob_sets.clear();
 	pd.mapped_ins.clear();
 	pd.mapped_outs.clear();
-
-	moduleStateDataJ = json_object();
-	moduleArrayJ = json_array();
 }
 
-PatchFileWriter::~PatchFileWriter() {
-	json_decref(moduleStateDataJ);
-}
+PatchFileWriter::~PatchFileWriter() = default;
 
 void PatchFileWriter::setPatchName(std::string patchName) {
 	pd.patch_name = patchName.c_str();
@@ -177,33 +172,21 @@ void PatchFileWriter::setParamList(std::vector<ParamMap> &params) {
 
 void PatchFileWriter::addModuleStateJson(rack::Module *module) {
 	if (!module)
-		return; //invalid moduel
+		return; //invalid module
 
 	if (!idMap.contains(module->id))
 		return; //module not recognized
 
-	json_t *dataJ = module->dataToJson();
+	if (json_t *dataJ = module->dataToJson()) {
 
-	if (!dataJ)
-		return; // Do nothing if module has no state to store
+		std::string json_string;
+		if (auto sz = json_dumpb(dataJ, nullptr, 0, JSON_COMPACT); sz > 0) {
+			json_string.resize(sz);
+			json_dumpb(dataJ, json_string.data(), sz, JSON_COMPACT);
 
-	json_t *moduleJ = json_object();
-
-	auto id = idMap[module->id];
-	json_object_set_new(moduleJ, "id", json_integer(id));
-
-	if (module->model && module->model->plugin)
-		json_object_set_new(moduleJ, "plugin", json_string(module->model->plugin->slug.c_str()));
-
-	if (module->model)
-		json_object_set_new(moduleJ, "model", json_string(module->model->slug.c_str()));
-
-	if (module->model && module->model->plugin)
-		json_object_set_new(moduleJ, "version", json_string(module->model->plugin->version.c_str()));
-
-	json_object_set_new(moduleJ, "data", dataJ);
-
-	json_array_append_new(moduleArrayJ, moduleJ);
+			pd.module_states.push_back({idMap[module->id], json_string});
+		}
+	}
 }
 
 void PatchFileWriter::addKnobMapSet(unsigned knobSetId, std::string_view knobSetName) {
@@ -366,21 +349,7 @@ void PatchFileWriter::mapMidiCCJack(CableMap &cable) {
 }
 
 std::string PatchFileWriter::printPatchYAML() {
-	auto patch_yml = patch_to_yaml_string(pd);
-	json_object_set_new(moduleStateDataJ, "vcvModuleStates", moduleArrayJ);
-
-	std::string moduleStateStr;
-	auto sz = json_dumpb(moduleStateDataJ, nullptr, 0, JSON_INDENT(0));
-	if (sz > 0) {
-		moduleStateStr.resize(sz + 1);
-		json_dumpb(moduleStateDataJ, moduleStateStr.data(), sz, JSON_INDENT(0));
-	}
-	auto data_yml = json_to_yml(moduleStateStr);
-
-	patch_yml.append("\n");
-	patch_yml.append(data_yml);
-
-	return patch_yml;
+	return patch_to_yaml_string(pd);
 }
 
 std::map<int64_t, uint16_t> PatchFileWriter::squash_ids(std::vector<int64_t> ids) {

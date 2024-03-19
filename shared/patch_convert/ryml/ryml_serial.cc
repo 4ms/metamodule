@@ -75,6 +75,15 @@ void write(ryml::NodeRef *n, std::vector<ModuleTypeSlug> const &slugs) {
 	}
 }
 
+void write(ryml::NodeRef *n, ModuleInitState const &state) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("module_id") << state.module_id;
+
+	auto data_node = n->append_child();
+	data_node |= ryml::_WIP_VAL_LITERAL;
+	data_node << ryml::key("data") << state.state_data;
+}
+
 bool read(ryml::ConstNodeRef const &n, Jack *jack) {
 	if (n.num_children() < 2)
 		return false;
@@ -246,17 +255,17 @@ bool read(ryml::ConstNodeRef const &n, ModuleInitState *m) {
 
 	if (!n.is_map())
 		return false;
-	if (!n.has_child("id"))
+	if (!n.has_child("module_id"))
 		return false;
 	if (!n.has_child("data"))
 		return false;
 
-	n["id"] >> m->module_id;
+	n["module_id"] >> m->module_id;
 
-	// Keep the data field as a yaml string
+	// copy the data field as a string
 	// Modules will decide how to deserialize
 	ryml::ConstNodeRef data_node = n["data"];
-	m->state_data = ryml::emitrs_yaml<std::string>(data_node);
+	m->state_data = std::string{data_node.val().data(), data_node.val().size()};
 
 	return true;
 }

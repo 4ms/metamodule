@@ -39,8 +39,8 @@ bool yaml_raw_to_patch(char *yaml, size_t size, PatchData &pd) {
 		patchdata["midi_poly_num"] >> pd.midi_poly_num;
 
 	// Check for VCV Module State data
-	if (root.has_child("vcvModuleStates"))
-		root["vcvModuleStates"] >> pd.module_states;
+	if (patchdata.has_child("vcvModuleStates"))
+		patchdata["vcvModuleStates"] >> pd.module_states;
 
 	return true;
 }
