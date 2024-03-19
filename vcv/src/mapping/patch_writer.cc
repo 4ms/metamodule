@@ -179,13 +179,14 @@ void PatchFileWriter::addModuleStateJson(rack::Module *module) {
 
 	if (json_t *dataJ = module->dataToJson()) {
 
-		std::string json_string;
-		if (auto sz = json_dumpb(dataJ, nullptr, 0, JSON_COMPACT); sz > 0) {
-			json_string.resize(sz);
-			json_dumpb(dataJ, json_string.data(), sz, JSON_COMPACT);
-
-			pd.module_states.push_back({idMap[module->id], json_string});
+		auto sz = json_dumpb(dataJ, nullptr, 0, JSON_COMPACT);
+		if (sz > 0) {
+			std::vector<uint8_t> state_data(sz);
+			json_dumpb(dataJ, (char *)state_data.data(), sz, JSON_COMPACT);
+			pd.module_states.push_back({idMap[module->id], state_data});
 		}
+
+		json_decref(dataJ);
 	}
 }
 

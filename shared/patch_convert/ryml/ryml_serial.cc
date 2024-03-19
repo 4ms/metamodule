@@ -1,13 +1,13 @@
 
 #include "ryml_std.hpp"
 //
+#include "CoreModules/module_type_slug.hh"
+#include "base64/base64.h"
+#include "cpputil/util/countzip.hh"
 #include "patch/patch.hh"
 #include "ryml.hpp"
 #include "ryml_serial_chars.hh"
 #include <cstdio>
-
-#include "CoreModules/module_type_slug.hh"
-#include "cpputil/util/countzip.hh"
 
 void write(ryml::NodeRef *n, Jack const &jack) {
 	*n |= ryml::MAP;
@@ -79,9 +79,15 @@ void write(ryml::NodeRef *n, ModuleInitState const &state) {
 	*n |= ryml::MAP;
 	n->append_child() << ryml::key("module_id") << state.module_id;
 
-	auto data_node = n->append_child();
-	data_node |= ryml::_WIP_VAL_LITERAL;
-	data_node << ryml::key("data") << state.state_data;
+	std::string encoded_data(base64::calc_encoded_size(state.state_data.size()), '\0');
+	auto err = base64::encode(state.state_data, encoded_data);
+
+	if (!err.has_error()) {
+		auto data_node = n->append_child();
+		data_node |= ryml::_WIP_VAL_LITERAL;
+		data_node << ryml::key("data") << encoded_data;
+		data_node.set_val_tag(ryml::from_tag(c4::yml::TAG_BINARY));
+	}
 }
 
 bool read(ryml::ConstNodeRef const &n, Jack *jack) {
@@ -252,22 +258,24 @@ bool read(ryml::ConstNodeRef const &n, StaticParam *k) {
 bool read(ryml::ConstNodeRef const &n, ModuleInitState *m) {
 	if (n.num_children() < 2)
 		return false;
-
 	if (!n.is_map())
 		return false;
 	if (!n.has_child("module_id"))
 		return false;
-	if (!n.has_child("data"))
+	if (!n.has_child("data") || !n["data"].has_val())
 		return false;
 
 	n["module_id"] >> m->module_id;
 
-	// copy the data field as a string
+	// Copy the data field as a vector of bytes
 	// Modules will decide how to deserialize
-	ryml::ConstNodeRef data_node = n["data"];
-	m->state_data = std::string{data_node.val().data(), data_node.val().size()};
 
-	return true;
+	auto raw_data = std::string_view{n["data"].val().begin(), n["data"].val().end()};
+	auto sz = base64::calc_decoded_size(raw_data);
+	m->state_data.resize(sz);
+	auto err = base64::decode(raw_data, m->state_data);
+
+	return !err.has_error();
 }
 
 namespace RymlInit
