@@ -1,4 +1,5 @@
 #include "comm/comm_module.hh"
+#include "base64/base64.h"
 
 void CommModule::onSampleRateChange() {
 	sampleRateChanged = true;
@@ -50,7 +51,6 @@ void CommModule::process(const ProcessArgs &args) {
 
 	core->update();
 
-
 	// Always set output independent of patch state
 	// since when unpatched the value will not be used anyway
 	for (auto &out : outJacks) {
@@ -76,4 +76,39 @@ void CommModule::configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned N
 	}
 	core->mark_all_inputs_unpatched();
 	core->mark_all_outputs_unpatched();
+}
+
+json_t *CommModule::dataToJson() {
+	// Get state blob from module
+	auto state_data = core->save_state();
+
+	// base64 encode it
+	std::string encoded_data(base64::calc_encoded_size(state_data.size()), '\0');
+	auto err = base64::encode(state_data, encoded_data);
+
+	// json encode the base64 string to be stored in vcv patch file
+	if (!err.has_error()) {
+		json_t *rootJ = json_object();
+		json_object_set_new(rootJ, "base64", json_string(encoded_data.c_str()));
+		return rootJ;
+	} else
+		return nullptr;
+}
+
+void CommModule::dataFromJson(json_t *rootJ) {
+	// Decode vcv patch json into a base64 string
+	if (auto base64J = json_object_get(rootJ, "base64"); base64J) {
+		if (auto base64_str = json_string_value(base64J); base64_str) {
+
+			// base64 decode it
+			auto base64_data = std::string_view(base64_str);
+			auto sz = base64::calc_decoded_size(base64_data);
+			std::vector<uint8_t> decoded_data(sz);
+			auto err = base64::decode(base64_data, decoded_data);
+
+			// Send it to the module
+			if (!err)
+				core->load_state(decoded_data);
+		}
+	}
 }

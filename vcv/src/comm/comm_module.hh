@@ -20,4 +20,7 @@ protected:
 	void configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned NUM_OUTPUTS, unsigned NUM_LIGHTS);
 	void process(const ProcessArgs &args) override;
 	void onSampleRateChange() override;
+
+	json_t *dataToJson() override;
+	void dataFromJson(json_t *rootJ) override;
 };
