@@ -2,7 +2,6 @@
 #include "ryml_std.hpp"
 //
 #include "CoreModules/module_type_slug.hh"
-#include "base64/base64.h"
 #include "cpputil/util/countzip.hh"
 #include "patch/patch.hh"
 #include "ryml.hpp"
@@ -79,15 +78,13 @@ void write(ryml::NodeRef *n, ModuleInitState const &state) {
 	*n |= ryml::MAP;
 	n->append_child() << ryml::key("module_id") << state.module_id;
 
-	std::string encoded_data(base64::calc_encoded_size(state.state_data.size()), '\0');
-	auto err = base64::encode(state.state_data, encoded_data);
+	auto data_node = n->append_child();
+	data_node |= ryml::_WIP_VAL_LITERAL;
 
-	if (!err.has_error()) {
-		auto data_node = n->append_child();
-		data_node |= ryml::_WIP_VAL_LITERAL;
-		data_node << ryml::key("data") << encoded_data;
-		data_node.set_val_tag(ryml::from_tag(c4::yml::TAG_BINARY));
-	}
+	auto state_as_string = ryml::csubstr{(const char *)state.state_data.data(), state.state_data.size()};
+	data_node << ryml::key("data") << ryml::fmt::base64(state_as_string);
+
+	data_node.set_val_tag(ryml::from_tag(c4::yml::TAG_BINARY));
 }
 
 bool read(ryml::ConstNodeRef const &n, Jack *jack) {
@@ -270,12 +267,16 @@ bool read(ryml::ConstNodeRef const &n, ModuleInitState *m) {
 	// Copy the data field as a vector of bytes
 	// Modules will decide how to deserialize
 
-	auto raw_data = std::string_view{n["data"].val().begin(), n["data"].val().end()};
-	auto sz = base64::calc_decoded_size(raw_data);
-	m->state_data.resize(sz);
-	auto err = base64::decode(raw_data, m->state_data);
+	ryml::blob state_blob(m->state_data.data(), m->state_data.size());
+	auto needed_size = n["data"].deserialize_val(ryml::fmt::base64(state_blob));
+	if (needed_size > m->state_data.size()) {
+		m->state_data.resize(needed_size);
+		state_blob = {m->state_data.data(), m->state_data.size()};
+		needed_size = n["data"].deserialize_val(ryml::fmt::base64(state_blob));
+	}
+	m->state_data.resize(needed_size);
 
-	return !err.has_error();
+	return true;
 }
 
 namespace RymlInit

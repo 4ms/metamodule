@@ -1,5 +1,5 @@
 #include "comm/comm_module.hh"
-#include "base64/base64.h"
+#include "c4/base64.hpp"
 
 void CommModule::onSampleRateChange() {
 	sampleRateChanged = true;
@@ -80,19 +80,17 @@ void CommModule::configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned N
 
 json_t *CommModule::dataToJson() {
 	// Get state blob from module
-	auto state_data = core->save_state();
+	auto const state_data = core->save_state();
 
 	// base64 encode it
-	std::string encoded_data(base64::calc_encoded_size(state_data.size()), '\0');
-	auto err = base64::encode(state_data, encoded_data);
+	auto needed_size = c4::base64_encode({}, {state_data.data(), state_data.size()});
+	std::string encoded_data(needed_size, '\0');
+	c4::base64_encode({encoded_data.data(), encoded_data.size()}, {state_data.data(), state_data.size()});
 
-	// json encode the base64 string to be stored in vcv patch file
-	if (!err.has_error()) {
-		json_t *rootJ = json_object();
-		json_object_set_new(rootJ, "base64", json_string(encoded_data.c_str()));
-		return rootJ;
-	} else
-		return nullptr;
+	// serialize the base64 string
+	json_t *rootJ = json_object();
+	json_object_set_new(rootJ, "base64", json_string(encoded_data.c_str()));
+	return rootJ;
 }
 
 void CommModule::dataFromJson(json_t *rootJ) {
@@ -100,15 +98,11 @@ void CommModule::dataFromJson(json_t *rootJ) {
 	if (auto base64J = json_object_get(rootJ, "base64"); base64J) {
 		if (auto base64_str = json_string_value(base64J); base64_str) {
 
-			// base64 decode it
-			auto base64_data = std::string_view(base64_str);
-			auto sz = base64::calc_decoded_size(base64_data);
-			std::vector<uint8_t> decoded_data(sz);
-			auto err = base64::decode(base64_data, decoded_data);
+			auto needed_size = c4::base64_decode(base64_str, {});
+			std::vector<uint8_t> decoded_data(needed_size);
+			c4::base64_decode(base64_str, {decoded_data.data(), decoded_data.size()});
 
-			// Send it to the module
-			if (!err)
-				core->load_state(decoded_data);
+			core->load_state(decoded_data);
 		}
 	}
 }
