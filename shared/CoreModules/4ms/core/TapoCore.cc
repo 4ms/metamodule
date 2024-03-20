@@ -17,6 +17,11 @@ public:
 	TapoCore() : audioBufferFillCount(0), gateOutCounter(0), uiSampleCounter(0)
 	{
 		initialize(DefaultSampleRateInHz);
+
+		for (std::size_t i=0; i<TapoDelay::kNumSlots; i++)
+		{
+			ui.getPersistentStorage().ResetSlot(i);
+		}
 	}
 
 	void initialize(uint32_t sample_rate)
@@ -29,11 +34,6 @@ public:
 		{
 			onTapDetected();
 		});
-
-		for (std::size_t i=0; i<TapoDelay::kNumbBanks; i++)
-		{
-			ui.getPersistentStorage().ResetBank(i);
-		}
 
 		ui.Init(&delay, &parameters);
 
