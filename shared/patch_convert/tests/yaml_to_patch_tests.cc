@@ -112,6 +112,13 @@ PatchData:
         curve_type: 4
         min: 0.4
         max: 0.65
+  vcvModuleStates:
+    - module_id: 2
+      data: !!binary |-
+        AQJ/gP7/
+    - module_id: 3
+      data: !!binary |-
+        AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8AAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w==
 )";
 	// clang-format on
 
@@ -210,4 +217,20 @@ PatchData:
 	CHECK(pd.knob_sets[1].set[0].curve_type == 4);
 	CHECK(pd.knob_sets[1].set[0].min == 0.4f);
 	CHECK(pd.knob_sets[1].set[0].max == 0.65f);
+
+	CHECK(pd.module_states.size() == 2);
+
+	CHECK(pd.module_states[0].module_id == 2);
+	CHECK(pd.module_states[0].state_data.size() == 6);
+	CHECK(pd.module_states[0].state_data[0] == 0x01);
+	CHECK(pd.module_states[0].state_data[1] == 0x02);
+	CHECK(pd.module_states[0].state_data[2] == 0x7F);
+	CHECK(pd.module_states[0].state_data[3] == 0x80);
+	CHECK(pd.module_states[0].state_data[4] == 0xFE);
+	CHECK(pd.module_states[0].state_data[5] == 0xFF);
+
+	CHECK(pd.module_states[1].module_id == 3);
+	CHECK(pd.module_states[1].state_data.size() == 1024);
+	for (unsigned i = 0; auto c : pd.module_states[1].state_data)
+		CHECK(c == (i++ & 0xFF));
 }
