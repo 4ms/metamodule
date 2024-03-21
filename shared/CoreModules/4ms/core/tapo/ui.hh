@@ -151,30 +151,33 @@ class Ui {
 
   Buttons buttons_;
   Switches switches_;
-  uint32_t press_time_[kNumButtons];
-  uint32_t long_press_time_[kNumButtons];
-  UiMode mode_;
-  int settings_page_;           // 0..4
-  int settings_item_[4];
-  uint16_t animation_counter_;
-  uint16_t ignore_releases_;
-  uint8_t bank_;
-  int8_t current_slot_;
-  int8_t next_slot_;
-  float sample_counter_to_next_slot_;
-  int8_t save_candidate_slot_;
+  uint32_t press_time_[kNumButtons]{};
+  uint32_t long_press_time_[kNumButtons]{};
+  UiMode mode_{UI_MODE_NORMAL};
+  int settings_page_{};           // 0..4
+  int settings_item_[4]{};
+  uint16_t animation_counter_{};
+  uint16_t ignore_releases_{};
+  uint8_t bank_{};
+  int8_t current_slot_{};
+  int8_t next_slot_{};
+  float sample_counter_to_next_slot_{};
+  int8_t save_candidate_slot_{};
 
-  uint16_t ping_gate_led_counter_;
-  uint16_t ping_save_led_counter_;
-  uint16_t ping_reset_counter_;
+  uint16_t ping_gate_led_counter_{};
+  uint16_t ping_save_led_counter_{};
+  uint16_t ping_reset_counter_{};
 
-  float velocity_meter_;
-  LedColor velocity_meter_color_;
+  float velocity_meter_{};
+  LedColor velocity_meter_color_{};
 
-  bool sequencer_mode_;
-  bool settings_changed_;
+  bool sequencer_mode_{};
+  bool settings_changed_{};
 
   SystemClock system_clock_{};
+
+  static constexpr bool HandleMultiButtonPresses = false;
+
 };
 }
 
