@@ -125,6 +125,10 @@ class Ui {
   {
     return persistent_;
   }
+  void Tick()
+  {
+    system_clock_.Tick();
+  }
 
  private:
   void OnButtonPressed(const stmlib::Event& e);
@@ -136,7 +140,7 @@ class Ui {
   void PaintLeds();
   void LoadSlot(uint8_t slot);
 
-  stmlib::EventQueue<16> queue_;
+  stmlib::EventQueue<16> queue_{system_clock_};
 
   Persistent persistent_;
   Control control_;
@@ -169,6 +173,8 @@ class Ui {
 
   bool sequencer_mode_;
   bool settings_changed_;
+
+  SystemClock system_clock_{};
 };
 }
 

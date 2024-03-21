@@ -182,18 +182,18 @@ void Ui::Poll() {
   for (uint8_t i=0; i<kNumButtons; i++) {
     if (buttons_.just_pressed(i)) {
       queue_.AddEvent(CONTROL_SWITCH, i, 0);
-      press_time_[i] = system_clock.milliseconds();
-      long_press_time_[i] = system_clock.milliseconds();
+      press_time_[i] = system_clock_.milliseconds();
+      long_press_time_[i] = system_clock_.milliseconds();
     }
     if (buttons_.pressed(i) && press_time_[i] != 0) {
-      int32_t pressed_time = system_clock.milliseconds() - press_time_[i];
+      int32_t pressed_time = system_clock_.milliseconds() - press_time_[i];
       if (pressed_time > kLongPressDuration) {
         queue_.AddEvent(CONTROL_SWITCH, i, pressed_time);
         press_time_[i] = 0;
       }
     }
     if (buttons_.pressed(i) && long_press_time_[i] != 0) {
-      int32_t pressed_time = system_clock.milliseconds() - long_press_time_[i];
+      int32_t pressed_time = system_clock_.milliseconds() - long_press_time_[i];
       if (pressed_time > kVeryLongPressDuration) {
         queue_.AddEvent(CONTROL_SWITCH, i, pressed_time);
         long_press_time_[i] = 0;
@@ -204,7 +204,7 @@ void Ui::Poll() {
       queue_.AddEvent(
           CONTROL_SWITCH,
           i,
-          system_clock.milliseconds() - press_time_[i] + 1);
+          system_clock_.milliseconds() - press_time_[i] + 1);
       press_time_[i] = 0;
     }
   }
@@ -360,7 +360,7 @@ inline void Ui::PaintLeds() {
   leds_.Write();
 
   // Update state variables
-  if ((system_clock.milliseconds() & 15) == 0)
+  if ((system_clock_.milliseconds() & 15) == 0)
     animation_counter_++;
 
   if (ping_reset_counter_ > 0)

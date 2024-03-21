@@ -50,12 +50,13 @@ public:
 	}
 
 	void update() override {
+		if (uiSampleCounter++ >= (currentSampleRate/TickFreqHz)) {
+			uiSampleCounter = 0;
 
-		if (uiSampleCounter++ % UISampleRateDivider == 0)
-		{
 			sideloadDrivers();
 			pollAltParameters();
 
+			ui.Tick();
 			ui.Poll();
 			ui.DoEvents();
 		}
@@ -274,7 +275,7 @@ private:
 private:
 	static constexpr uint32_t DefaultSampleRateInHz   = 48000;
 
-	static constexpr uint32_t UISampleRateDivider     = 32;     // Needs to be a power of 2
+	static constexpr uint32_t TickFreqHz = 1000;
 
 	static constexpr float GateOutLengthInS           = 4.0e-3f;
 	static constexpr float GateOutVoltageInVolt       = 8.0f;	

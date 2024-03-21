@@ -30,28 +30,24 @@
 #define STMLIB_SYSTEM_SYSTEM_CLOCK_H_
 
 #include "../stmlib.h"
-#include <chrono>
 
 namespace TapoDelay::stmlib {
 
 class SystemClock {
  public:
-  SystemClock() { }
-  ~SystemClock() { }
-  
-  static inline uint32_t milliseconds()
-  {
-    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    return uint32_t(now);
-  }
+  SystemClock() = default;
 
-  static inline void Delay(uint32_t ms) {
+  inline void Init() { count_ = 0; }
+  inline void Tick() { ++count_; }
+  inline uint32_t milliseconds() const { return count_; }
+  inline void Delay(uint32_t ms) {
     uint32_t target = milliseconds() + ms;
     while (milliseconds() <= target);
   }
-};
 
-static SystemClock system_clock;
+ private:
+  uint32_t count_ = 0;
+};
 
 }  // namespace stmlib
 

@@ -45,7 +45,7 @@ struct Event {
 template<uint16_t size = 32>
 class EventQueue {
  public:
-  EventQueue() { }
+  EventQueue(SystemClock &system_clock) :system_clock{system_clock} { }
   
   void Init() {
     events_.Init();
@@ -84,6 +84,7 @@ class EventQueue {
  private:
   uint32_t last_event_time_;
   RingBuffer<Event, size> events_;
+  SystemClock &system_clock;
 };
 
 }  // namespace stmlib
