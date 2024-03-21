@@ -199,7 +199,7 @@ void Ui::Poll() {
         long_press_time_[i] = 0;
       }
     }
-    
+
     if (buttons_.released(i) && press_time_[i] != 0) {
       queue_.AddEvent(
           CONTROL_SWITCH,
@@ -420,42 +420,47 @@ void Ui::SaveSettings()
 }
 
 void Ui::OnButtonPressed(const Event& e) {
+  if (HandleMultiButtonPresses) {
 
-  if (e.control_id <= BUTTON_6) {
-    // scan other pressed buttons on the left
-    int pressed = -1;
-    for (int i=0; i<e.control_id; i++) {
-      if (buttons_.pressed(i) && i<=BUTTON_4) pressed = i;
+    if (e.control_id <= BUTTON_6) {
+      // scan other pressed buttons on the left
+      int pressed = -1;
+      for (int i=0; i<e.control_id; i++) {
+        if (buttons_.pressed(i) && i<=BUTTON_4) pressed = i;
+      }
+      if (pressed != -1) {
+        // double press
+        mode_ = UI_MODE_SETTINGS;
+        settings_changed_ = true;
+        ignore_releases_ = 2;
+        settings_page_ = pressed;
+        settings_item_[pressed] = e.control_id - pressed - 1;
+        ParseSettingsCurrentPage();
+      }
     }
-    if (pressed != -1) {
-      // double press
-      mode_ = UI_MODE_SETTINGS;
-      settings_changed_ = true;
+
+    if (mode_ == UI_MODE_SETTINGS &&
+        settings_page_ == 1 &&
+        ((e.control_id == BUTTON_REPEAT && buttons_.pressed(BUTTON_DELETE)) ||
+         (e.control_id == BUTTON_DELETE && buttons_.pressed(BUTTON_REPEAT)))) {
+      SaveSettings();             // must save before resetting
+      current_slot_ = -1;         // clear currently selected slot (might change)
+      next_slot_ = -1;
+      persistent_.ResetCurrentBank();
+      mode_ = UI_MODE_CONFIRM_RESET_TO_FACTORY_DEFAULT;
       ignore_releases_ = 2;
-      settings_page_ = pressed;
-      settings_item_[pressed] = e.control_id - pressed - 1;
-      ParseSettingsCurrentPage();
     }
-  }
 
-  if (mode_ == UI_MODE_SETTINGS &&
-      settings_page_ == 1 &&
-      ((e.control_id == BUTTON_REPEAT && buttons_.pressed(BUTTON_DELETE)) ||
-       (e.control_id == BUTTON_DELETE && buttons_.pressed(BUTTON_REPEAT)))) {
-    SaveSettings();             // must save before resetting
-    current_slot_ = -1;         // clear currently selected slot (might change)
-    next_slot_ = -1;
-    persistent_.ResetCurrentBank();
-    mode_ = UI_MODE_CONFIRM_RESET_TO_FACTORY_DEFAULT;
-    ignore_releases_ = 2;
   }
 }
 
 void Ui::OnButtonReleased(const Event& e) {
-  // hack for double presses
-  if (ignore_releases_ > 0) {
-    ignore_releases_--;
-    return;
+  if (HandleMultiButtonPresses) {
+    // hack for double presses
+    if (ignore_releases_ > 0) {
+      ignore_releases_--;
+      return;
+    }
   }
 
   if (mode_ == UI_MODE_CONFIRM_SAVE) {
