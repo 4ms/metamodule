@@ -126,7 +126,7 @@ private:
   Parameters prev_params_{};
   uint32_t prev_max_time_{};
 
-  int32_t kMaxQuantizeClock{};
+  uint32_t kMaxQuantizeClock{};
 };
 
 }

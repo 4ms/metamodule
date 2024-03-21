@@ -74,13 +74,13 @@ struct MappedKnobSet {
 struct InternalCable {
 	Jack out;
 	std::vector<Jack> ins;
-	std::optional<uint16_t> color;
+	std::optional<uint16_t> color{};
 };
 
 struct MappedInputJack {
 	uint32_t panel_jack_id;
 	std::vector<Jack> ins;
-	AliasNameString alias_name;
+	AliasNameString alias_name{};
 
 	std::optional<uint32_t> midi_note_pitch() const {
 		return MathTools::between<uint32_t>(panel_jack_id, MidiMonoNoteJack, MidiNote8Jack);
@@ -127,7 +127,7 @@ struct MappedInputJack {
 struct MappedOutputJack {
 	uint32_t panel_jack_id;
 	Jack out;
-	AliasNameString alias_name;
+	AliasNameString alias_name{};
 };
 
 static_assert(sizeof(MappedOutputJack) == 24, "MappedOutputJack should be 24B");

@@ -40,7 +40,7 @@ class RingBuffer {
   RingBuffer() { }
   
   inline void Init() {
-    read_ptr_ = write_ptr_ = 0;
+    read_ptr_ = 0; write_ptr_ = 0;
   }
   
   inline size_t capacity() const { return size; }
