@@ -2,6 +2,7 @@ include(modules.cmake)
 
 add_library(
   4msLibrary OBJECT
+  ${4MS_SOURCE_PATHS}
 )
 
 set_property(TARGET 4msLibrary PROPERTY CXX_STANDARD 20)
@@ -47,4 +48,11 @@ target_sources(
     ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/ui.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/stmlib/utils/random.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/stmlib/dsp/units.cc
+)
+
+# Axoloti ports
+target_sources(
+	4msLibrary
+	PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
 )
