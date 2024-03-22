@@ -90,54 +90,55 @@ struct SISMInfo : ModuleInfoBase {
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobScale_1 = 0,
-        KnobShift_1 = 1,
-        KnobScale_2 = 2,
-        KnobShift_2 = 3,
-        KnobScale_3 = 4,
-        KnobShift_3 = 5,
-        KnobScale_4 = 6,
-        KnobShift_4 = 7,
+        KnobScale_1, 
+        KnobShift_1, 
+        KnobScale_2, 
+        KnobShift_2, 
+        KnobScale_3, 
+        KnobShift_3, 
+        KnobScale_4, 
+        KnobShift_4, 
         NumKnobs,
     };
     
     
     enum {
-        InputIn_1 = 0,
-        InputIn_2 = 1,
-        InputIn_3 = 2,
-        InputIn_4 = 3,
+        InputIn_1, 
+        InputIn_2, 
+        InputIn_3, 
+        InputIn_4, 
         NumInJacks,
     };
     
     enum {
-        OutputOut_1 = 0,
-        OutputOut_2 = 1,
-        OutputOut_3 = 2,
-        OutputOut_4 = 3,
-        OutputP_Slice = 4,
-        OutputN_Slice = 5,
-        OutputMix__Sw_ = 6,
-        OutputMix = 7,
+        OutputOut_1, 
+        OutputOut_2, 
+        OutputOut_3, 
+        OutputOut_4, 
+        OutputP_Slice, 
+        OutputN_Slice, 
+        OutputMix__Sw_, 
+        OutputMix, 
         NumOutJacks,
     };
     
     enum {
-        LedLed_N_1 = 0,
-        LedLed_P_1 = 1,
-        LedLed_N_2 = 2,
-        LedLed_P_2 = 3,
-        LedLed_N_3 = 4,
-        LedLed_P_3 = 5,
-        LedLed_N_4 = 6,
-        LedLed_P_4 = 7,
-        LedLed_P_Slice = 8,
-        LedLed_N_Slice = 9,
-        LedLed_N_Mix__Sw_ = 10,
-        LedLed_P_Mix__Sw_ = 11,
-        LedLed_N_Mix = 12,
-        LedLed_P_Mix = 13,
+        LedLed_N_1, 
+        LedLed_P_1, 
+        LedLed_N_2, 
+        LedLed_P_2, 
+        LedLed_N_3, 
+        LedLed_P_3, 
+        LedLed_N_4, 
+        LedLed_P_4, 
+        LedLed_P_Slice, 
+        LedLed_N_Slice, 
+        LedLed_N_Mix__Sw_, 
+        LedLed_P_Mix__Sw_, 
+        LedLed_N_Mix, 
+        LedLed_P_Mix, 
         NumDiscreteLeds,
     };
+    
 };
 } // namespace MetaModule
