@@ -72,23 +72,10 @@ public:
 			sliceNegative += std::clamp(outputValue[index], minimumOutputInV, 0.f);
 			mixOut += outputValue[index];
 
-			auto outputPatched = [this](auto index) -> bool {
-				if (index == 0) {
-					return isPatched<Out1Out>();
-				} else if (index == 1) {
-					return isPatched<Out2Out>();
-				} else if (index == 2) {
-					return isPatched<Out3Out>();
-				} else if (index == 3) {
-					return isPatched<Out4Out>();
-				}
-
-				return false;
-			};
-
-			if(!outputPatched(index)) {
-				mixOutSW += outputValue[index];
-			}
+			mixOutSW += isPatched<Out1Out>() ? 0 : outputValue[0];
+			mixOutSW += isPatched<Out2Out>() ? 0 : outputValue[1];
+			mixOutSW += isPatched<Out3Out>() ? 0 : outputValue[2];
+			mixOutSW += isPatched<Out4Out>() ? 0 : outputValue[3];
 		}
 
 		setOutput<PSliceOut>(std::clamp(slicePositive, 0.f, maximumOutputInV));
