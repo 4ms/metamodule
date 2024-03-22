@@ -212,7 +212,7 @@ struct KnobSetViewPage : PageBase {
 			else
 				page->args.view_knobset_id = cur_id.value() + 1;
 
-			page->load_page(
+			page->page_list.request_new_page_no_history(
 				PageId::KnobSetView,
 				{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->args.view_knobset_id});
 		}
@@ -230,7 +230,7 @@ struct KnobSetViewPage : PageBase {
 			else
 				page->args.view_knobset_id = cur_id.value() - 1;
 
-			page->load_page(
+			page->page_list.request_new_page_no_history(
 				PageId::KnobSetView,
 				{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->args.view_knobset_id});
 		}
