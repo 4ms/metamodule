@@ -366,10 +366,20 @@ public:
 	}
 
 	void disconnect_injack(Jack jack) {
+		for (auto &ins : in_conns) {
+			std::erase(ins, jack);
+		}
+		modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
 		pd.disconnect_injack(jack);
 	}
 
 	void disconnect_outjack(Jack jack) {
+		for (auto &out : out_conns) {
+			if (out == jack) {
+				out = {0xFFFF, 0xFFFF}; //disconnected
+			}
+		}
+		modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 		pd.disconnect_outjack(jack);
 	}
 

@@ -35,8 +35,6 @@ struct MapRingDisplay {
 					   },
 				   },
 				   drawn_el.element);
-
-		// update(drawn_el.gui_element.map_ring, on_highlighted_module, is_patch_playing);
 	}
 
 	void update(lv_obj_t *map_ring, bool on_highlighted_module, bool is_patch_playing) {

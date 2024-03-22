@@ -27,11 +27,12 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
-	PatchViewPage(PatchContext info)
+	PatchViewPage(PatchContext info, ViewSettings &settings)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
+		, settings{settings}
 		, file_menu{patch_storage} {
 
 		init_bg(base);
@@ -172,7 +173,7 @@ struct PatchViewPage : PageBase {
 		update_map_ring_style();
 
 		cable_drawer.set_height(bottom + 30);
-		cable_drawer.draw(*patch);
+		update_cable_style(true);
 
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
@@ -323,16 +324,18 @@ private:
 		}
 	}
 
-	void update_cable_style() {
+	void update_cable_style(bool force = false) {
 		static MapRingStyle last_cable_style;
-		if (settings.cable_style.mode != last_cable_style.mode) {
+
+		cable_drawer.set_opacity(settings.cable_style.opa);
+
+		if (force || settings.cable_style.mode != last_cable_style.mode) {
 			if (settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
 				cable_drawer.draw(*patch);
 			else
 				cable_drawer.clear();
 		}
 		last_cable_style = settings.cable_style;
-		cable_drawer.set_opacity(settings.cable_style.opa);
 	}
 
 	void update_active_knobset() {
@@ -464,9 +467,9 @@ private:
 private:
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
-	CableDrawer cable_drawer;
+	CableDrawer<4 * 240 + 8> cable_drawer; //TODO: relate this number to the module container size
 
-	ViewSettings settings;
+	ViewSettings &settings;
 	PatchViewSettingsMenu settings_menu{settings};
 
 	PatchViewKnobsetMenu::Settings knobset_settings;
