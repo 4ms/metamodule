@@ -67,7 +67,7 @@ public:
 		auto mixOut = 0.f;
 		auto mixOutSW = 0.f;
 
-		for (auto index = 0; index < outputValue.size(); index++) {
+		for (auto index = 0u; index < outputValue.size(); index++) {
 			slicePositive += std::clamp(outputValue[index], 0.f, maximumOutputInV);
 			sliceNegative += std::clamp(outputValue[index], minimumOutputInV, 0.f);
 			mixOut += outputValue[index];
