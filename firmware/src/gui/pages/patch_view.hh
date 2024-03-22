@@ -27,11 +27,12 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
-	PatchViewPage(PatchContext info)
+	PatchViewPage(PatchContext info, ViewSettings &settings)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
+		, settings{settings}
 		, file_menu{patch_storage} {
 
 		init_bg(base);
@@ -466,7 +467,7 @@ private:
 	lv_obj_t *modules_cont;
 	CableDrawer cable_drawer;
 
-	ViewSettings settings;
+	ViewSettings &settings;
 	PatchViewSettingsMenu settings_menu{settings};
 
 	PatchViewKnobsetMenu::Settings knobset_settings;

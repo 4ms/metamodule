@@ -17,10 +17,9 @@ namespace MetaModule
 {
 struct ModuleViewPage : PageBase {
 
-	ViewSettings settings;
-
-	ModuleViewPage(PatchContext context)
+	ModuleViewPage(PatchContext context, ViewSettings &settings)
 		: PageBase{context, PageId::ModuleView}
+		, settings{settings}
 		, map_ring_display{settings}
 		, patch{patch_storage.get_view_patch()}
 		, roller{ui_ElementRoller}
@@ -345,6 +344,8 @@ private:
 			page->mapping_pane.show(page->drawn_elements[cur_sel]);
 		}
 	}
+
+	ViewSettings &settings;
 
 	ModuleInfoView moduleinfo;
 	PatchModQueue module_mods;
