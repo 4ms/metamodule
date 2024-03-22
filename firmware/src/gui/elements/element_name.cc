@@ -65,7 +65,7 @@ void append_connected_jack_name(std::string &opts, GuiElement const &drawn, Patc
 
 	else if (drawn.idx.output_idx != ElementCount::Indices::NoElementMarker)
 	{
-		Jack out_jack = {.module_id = drawn.module_idx, .jack_id = drawn.idx.input_idx};
+		Jack out_jack = {.module_id = drawn.module_idx, .jack_id = drawn.idx.output_idx};
 
 		if (auto *cable = patch.find_internal_cable_with_outjack(out_jack)) {
 			for (auto &in : cable->ins)
