@@ -58,13 +58,13 @@ public:
 		outer_outline_dsc.color = lv_color_black();
 
 		lv_draw_rect_dsc_init(&injack_dsc);
-		injack_dsc.bg_opa = LV_OPA_50;
+		injack_dsc.bg_opa = LV_OPA_100;
 		injack_dsc.bg_img_opa = LV_OPA_0;
 		injack_dsc.outline_opa = LV_OPA_0;
 		injack_dsc.shadow_opa = LV_OPA_0;
 		injack_dsc.border_opa = LV_OPA_100;
 		injack_dsc.border_color = lv_color_black();
-		injack_dsc.border_width = 2;
+		injack_dsc.border_width = 4;
 		injack_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 		injack_dsc.radius = 2;
 
