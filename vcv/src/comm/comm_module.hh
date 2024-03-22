@@ -6,14 +6,7 @@
 
 class CommModule : public rack::Module {
 public:
-	struct AltParam {
-		bool is_updated = false;
-		unsigned id;
-		float val;
-	};
-
 	std::unique_ptr<CoreProcessor> core;
-	std::vector<AltParam> altParams;
 	std::vector<CommInputJack> inJacks;
 	std::vector<CommOutputJack> outJacks;
 

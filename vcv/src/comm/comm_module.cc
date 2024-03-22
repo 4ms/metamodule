@@ -15,15 +15,6 @@ void CommModule::process(const ProcessArgs &args) {
 		i++;
 	}
 
-	for (auto &alt : altParams) {
-		if (alt.is_updated)
-
-			// TODO: implement
-			//core->set_alt_param(alt.id, alt.val);
-			
-		alt.is_updated = false;
-	}
-
 	for (auto &injack : inJacks) {
 		auto id = injack.getId();
 		injack.updateInput();
@@ -32,8 +23,8 @@ void CommModule::process(const ProcessArgs &args) {
 			core->mark_input_patched(id);
 
 		if (injack.isJustUnpatched()) {
-			core->set_input(id, 0); // 0 = unpatched value. TODO: allow for normalizations
 			core->mark_input_unpatched(id);
+			core->set_input(id, 0); // 0 = unpatched value
 		}
 
 		if (injack.isConnected()) {
@@ -47,9 +38,23 @@ void CommModule::process(const ProcessArgs &args) {
 		core->set_samplerate(args.sampleRate);
 	}
 
+	// Patched state needs to be set before update
+	// otherwise the first sample after patching can be undefined
+	for (auto &out : outJacks) {
+
+		auto id = out.getId();
+
+		if (out.isConnected()) core->mark_output_patched(id);
+		else                   core->mark_output_unpatched(id);
+	}
+
 	core->update();
 
+
+	// Always set output independent of patch state
+	// since when unpatched the value will not be used anyway
 	for (auto &out : outJacks) {
+
 		auto raw_value = core->get_output(out.getId());
 		out.setValue(raw_value);
 	}
