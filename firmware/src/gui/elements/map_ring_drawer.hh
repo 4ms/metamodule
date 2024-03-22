@@ -115,12 +115,12 @@ inline lv_obj_t *draw_mapped_ring(const JackInput &el,
 
 	if (auto label = lv_obj_get_child(circle, 0)) {
 
-		auto panel_id = panel_el_id.value();
-
-		if (panel_id < 6)
-			lv_label_set_text_fmt(label, "%d", int(panel_id + 1));
-		else
-			lv_label_set_text_fmt(label, "G%d", int(panel_id - 5));
+		if (panel_el_id.has_value()) {
+			if (*panel_el_id < 6)
+				lv_label_set_text_fmt(label, "%d", int(*panel_el_id + 1));
+			else
+				lv_label_set_text_fmt(label, "G%d", int(*panel_el_id - 5));
+		}
 	}
 
 	return circle;
@@ -139,8 +139,9 @@ inline lv_obj_t *draw_mapped_ring(const JackOutput &el,
 
 	if (auto label = lv_obj_get_child(circle, 0)) {
 
-		auto panel_id = panel_el_id.value();
-		lv_label_set_text_fmt(label, "%d", int(panel_id + 1));
+		if (panel_el_id.has_value()) {
+			lv_label_set_text_fmt(label, "%d", int(*panel_el_id + 1));
+		}
 	}
 
 	return circle;
