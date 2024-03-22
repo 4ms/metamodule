@@ -26,6 +26,8 @@ struct KnobSetViewPage : PageBase {
 		, patch{patch_storage.get_view_patch()} {
 		init_bg(base);
 		lv_group_set_editing(group, false);
+		lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_NextKnobSet, next_knobset_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() override {
@@ -48,10 +50,25 @@ struct KnobSetViewPage : PageBase {
 			i++;
 		}
 
+		patch = patch_storage.get_view_patch();
+
 		lv_group_remove_all_objs(group);
 
+		if (patch->knob_sets.size() > 2) {
+			lv_show(ui_PreviousKnobSet);
+			lv_show(ui_NextKnobSet);
+			lv_group_add_obj(group, ui_PreviousKnobSet);
+			lv_group_add_obj(group, ui_NextKnobSet);
+		} else if (patch->knob_sets.size() > 1) {
+			lv_hide(ui_PreviousKnobSet);
+			lv_show(ui_NextKnobSet);
+			lv_group_add_obj(group, ui_NextKnobSet);
+		} else {
+			lv_hide(ui_PreviousKnobSet);
+			lv_hide(ui_NextKnobSet);
+		}
+
 		knobset = nullptr;
-		patch = patch_storage.get_view_patch();
 
 		if (!args.view_knobset_id)
 			return;
@@ -181,6 +198,42 @@ struct KnobSetViewPage : PageBase {
 
 		page->args.mappedknob_id = mk.panel_knob_id;
 		page->page_list.request_new_page(PageId::KnobMap, page->args);
+	}
+
+	static void next_knobset_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+
+		if (auto cur_id = page->args.view_knobset_id) {
+			if (page->args.view_knobset_id >= page->patch->knob_sets.size() - 1)
+				page->args.view_knobset_id = 0;
+			else
+				page->args.view_knobset_id = cur_id.value() + 1;
+
+			page->load_page(
+				PageId::KnobSetView,
+				{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->args.view_knobset_id});
+		}
+	}
+
+	static void prev_knobset_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+
+		if (auto cur_id = page->args.view_knobset_id) {
+			if (page->args.view_knobset_id == 0)
+				page->args.view_knobset_id = page->patch->knob_sets.size() - 1;
+			else
+				page->args.view_knobset_id = cur_id.value() - 1;
+
+			page->load_page(
+				PageId::KnobSetView,
+				{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->args.view_knobset_id});
+		}
 	}
 
 private:

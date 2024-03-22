@@ -374,7 +374,7 @@ lv_obj_clear_flag( ui_SettingsMenu, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_F
 lv_obj_set_scroll_dir(ui_SettingsMenu, LV_DIR_VER);
 lv_obj_set_style_radius(ui_SettingsMenu, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_SettingsMenu, lv_color_hex(0x555555), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_SettingsMenu, 208, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_SettingsMenu, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_color(ui_SettingsMenu, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_SettingsMenu, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_SettingsMenu, 5, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -1125,7 +1125,7 @@ lv_obj_clear_flag( ui_KnobsetMenu, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOC
 lv_obj_set_scroll_dir(ui_KnobsetMenu, LV_DIR_VER);
 lv_obj_set_style_radius(ui_KnobsetMenu, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_KnobsetMenu, lv_color_hex(0x555555), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_KnobsetMenu, 208, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_KnobsetMenu, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_color(ui_KnobsetMenu, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_KnobsetMenu, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_KnobsetMenu, 5, LV_PART_MAIN| LV_STATE_DEFAULT);

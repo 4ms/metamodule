@@ -44,8 +44,8 @@ lv_obj_set_style_bg_color(cui_KnobSetButton, lv_color_hex(0xFFFFFF), LV_PART_MAI
 lv_obj_set_style_bg_opa(cui_KnobSetButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(cui_KnobSetButton, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(cui_KnobSetButton, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(cui_KnobSetButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(cui_KnobSetButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(cui_KnobSetButton, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(cui_KnobSetButton, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(cui_KnobSetButton, 0, LV_PART_MAIN| LV_STATE_CHECKED);
 lv_obj_set_style_outline_color(cui_KnobSetButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(cui_KnobSetButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);

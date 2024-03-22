@@ -114,6 +114,8 @@ struct PatchViewPage : PageBase {
 
 		patch = patch_storage.get_view_patch();
 
+		patch->trim_empty_knobsets();
+
 		if (patch->patch_name.length() == 0)
 			return;
 

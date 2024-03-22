@@ -270,6 +270,10 @@ struct PatchData {
 		return nullptr;
 	}
 
+	void trim_empty_knobsets() {
+		std::erase_if(knob_sets, [](auto &knobset) { return knobset.set.size() == 0; });
+	}
+
 	const char *valid_knob_set_name(unsigned set_i) const {
 		if (set_i == MIDIKnobSet)
 			return "MIDI";
