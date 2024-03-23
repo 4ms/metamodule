@@ -64,6 +64,7 @@ public:
 				open_patches_.remove_last();
 				return false;
 			}
+			new_patch->trim_empty_knobsets(); //Handle patches saved by early firmware with empty knob sets
 			view_patch_ = new_patch;
 			view_patch_loc_ = requested_view_patch_loc_;
 			return true;
