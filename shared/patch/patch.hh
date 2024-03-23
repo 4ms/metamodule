@@ -134,5 +134,5 @@ static_assert(sizeof(MappedOutputJack) == 24, "MappedOutputJack should be 24B");
 
 struct ModuleInitState {
 	uint32_t module_id;
-	std::vector<uint8_t> state_data;
+	std::string state_data;
 };

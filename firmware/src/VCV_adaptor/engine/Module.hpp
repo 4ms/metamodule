@@ -357,8 +357,8 @@ struct Module : VCVModuleWrapper {
 	// PRIVATE void doProcess(const ProcessArgs &args);
 	// PRIVATE static void jsonStripIds(json_t *rootJ);
 
-	void load_state(std::span<const uint8_t> state_data) override;
-	std::vector<uint8_t> save_state() override;
+	void load_state(std::string_view state_data) override;
+	std::string save_state() override;
 };
 
 } // namespace rack::engine

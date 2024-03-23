@@ -181,9 +181,10 @@ void PatchFileWriter::addModuleStateJson(rack::Module *module) {
 
 		auto sz = json_dumpb(dataJ, nullptr, 0, JSON_COMPACT);
 		if (sz > 0) {
-			std::vector<uint8_t> state_data(sz);
-			json_dumpb(dataJ, (char *)state_data.data(), sz, JSON_COMPACT);
-			pd.module_states.push_back({idMap[module->id], state_data});
+			std::string state_string;
+			state_string.resize(sz, '\0');
+			json_dumpb(dataJ, (char *)state_string.data(), sz, JSON_COMPACT);
+			pd.module_states.push_back({idMap[module->id], state_string});
 		}
 
 		json_decref(dataJ);

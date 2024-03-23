@@ -81,10 +81,7 @@ void write(ryml::NodeRef *n, ModuleInitState const &state) {
 	auto data_node = n->append_child();
 	data_node |= ryml::_WIP_VAL_LITERAL;
 
-	auto state_as_string = ryml::csubstr{(const char *)state.state_data.data(), state.state_data.size()};
-	data_node << ryml::key("data") << ryml::fmt::base64(state_as_string);
-
-	data_node.set_val_tag(ryml::from_tag(c4::yml::TAG_BINARY));
+	data_node << ryml::key("data") << state.state_data;
 }
 
 bool read(ryml::ConstNodeRef const &n, Jack *jack) {
@@ -264,18 +261,10 @@ bool read(ryml::ConstNodeRef const &n, ModuleInitState *m) {
 
 	n["module_id"] >> m->module_id;
 
-	// Copy the data field as a vector of bytes
+	// Copy the data field as a string
 	// Modules will decide how to deserialize
 
-	ryml::blob state_blob(m->state_data.data(), m->state_data.size());
-	auto needed_size = n["data"].deserialize_val(ryml::fmt::base64(state_blob));
-	if (needed_size > m->state_data.size()) {
-		m->state_data.resize(needed_size);
-		state_blob = {m->state_data.data(), m->state_data.size()};
-		needed_size = n["data"].deserialize_val(ryml::fmt::base64(state_blob));
-	}
-	m->state_data.resize(needed_size);
-
+	n["data"] >> m->state_data;
 	return true;
 }
 

@@ -1,5 +1,4 @@
 #include "comm/comm_module.hh"
-#include "c4/base64.hpp"
 
 void CommModule::onSampleRateChange() {
 	sampleRateChanged = true;
@@ -45,8 +44,10 @@ void CommModule::process(const ProcessArgs &args) {
 
 		auto id = out.getId();
 
-		if (out.isConnected()) core->mark_output_patched(id);
-		else                   core->mark_output_unpatched(id);
+		if (out.isConnected())
+			core->mark_output_patched(id);
+		else
+			core->mark_output_unpatched(id);
 	}
 
 	core->update();
@@ -80,29 +81,19 @@ void CommModule::configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned N
 
 json_t *CommModule::dataToJson() {
 	// Get state blob from module
-	auto const state_data = core->save_state();
+	const auto state_string = core->save_state();
 
-	// base64 encode it
-	auto needed_size = c4::base64_encode({}, {state_data.data(), state_data.size()});
-	std::string encoded_data(needed_size, '\0');
-	c4::base64_encode({encoded_data.data(), encoded_data.size()}, {state_data.data(), state_data.size()});
-
-	// serialize the base64 string
+	// serialize the string as json
 	json_t *rootJ = json_object();
-	json_object_set_new(rootJ, "base64", json_string(encoded_data.c_str()));
+	json_object_set_new(rootJ, "state", json_string(state_string.c_str()));
 	return rootJ;
 }
 
 void CommModule::dataFromJson(json_t *rootJ) {
-	// Decode vcv patch json into a base64 string
-	if (auto base64J = json_object_get(rootJ, "base64"); base64J) {
-		if (auto base64_str = json_string_value(base64J); base64_str) {
-
-			auto needed_size = c4::base64_decode(base64_str, {});
-			std::vector<uint8_t> decoded_data(needed_size);
-			c4::base64_decode(base64_str, {decoded_data.data(), decoded_data.size()});
-
-			core->load_state(decoded_data);
+	// Decode vcv patch json into a string
+	if (auto stateJ = json_object_get(rootJ, "state"); stateJ) {
+		if (auto state_str = json_string_value(stateJ); state_str) {
+			core->load_state(state_str);
 		}
 	}
 }

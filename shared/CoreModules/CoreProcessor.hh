@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
-#include <span>
-#include <vector>
+#include <string>
+#include <string_view>
 
 class CoreProcessor {
 public:
@@ -32,10 +32,10 @@ public:
 	virtual void mark_output_patched(const int output_id) {
 	}
 
-	virtual void load_state(std::span<const uint8_t> state_data) {
+	virtual void load_state(std::string_view state_data) {
 	}
-	virtual std::vector<uint8_t> save_state() {
-		return {};
+	virtual std::string save_state() {
+		return "";
 	}
 
 	virtual ~CoreProcessor() = default;

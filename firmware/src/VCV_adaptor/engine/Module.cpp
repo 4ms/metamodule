@@ -5,7 +5,7 @@
 namespace rack::engine
 {
 
-void Module::load_state(std::span<const uint8_t> state_data) {
+void Module::load_state(std::string_view state_data) {
 	if (state_data.size() == 0)
 		return;
 
@@ -22,13 +22,13 @@ void Module::load_state(std::span<const uint8_t> state_data) {
 	json_decref(root);
 }
 
-std::vector<uint8_t> Module::save_state() {
+std::string Module::save_state() {
 	json_t *dataJ = this->dataToJson();
 
 	if (!dataJ)
 		return {};
 
-	std::vector<uint8_t> state_data;
+	std::string state_data;
 	auto sz = json_dumpb(dataJ, nullptr, 0, JSON_COMPACT);
 	if (sz > 0) {
 		state_data.resize(sz);
