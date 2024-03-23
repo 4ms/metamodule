@@ -212,23 +212,38 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (settings_menu.visible) {
-				settings_menu.hide();
-
-			} else if (knobset_menu.visible) {
-				knobset_menu.hide();
-
-			} else if (desc_panel.is_visible()) {
-				desc_panel.back_event();
-
-			} else if (file_menu.is_visible()) {
-				file_menu.hide();
-
+			if (metaparams.ignore_metabutton_release) {
+				metaparams.ignore_metabutton_release = false;
 			} else {
-				page_list.request_last_page();
-				blur();
-				params.lights.stop_watching_all();
+				if (settings_menu.visible) {
+					settings_menu.hide();
+
+				} else if (knobset_menu.visible) {
+					knobset_menu.hide();
+
+				} else if (desc_panel.is_visible()) {
+					desc_panel.back_event();
+
+				} else if (file_menu.is_visible()) {
+					file_menu.hide();
+
+				} else {
+					page_list.request_last_page();
+					blur();
+					params.lights.stop_watching_all();
+				}
 			}
+		}
+
+		if (auto knobset_change = metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
+			auto next = knobset_settings.active_knobset + knobset_change;
+			if (next >= patch->knob_sets.size())
+				next = 0;
+			else if (next < 0)
+				next = patch->knob_sets.size() - 1;
+
+			knobset_settings.active_knobset = next;
+			knobset_settings.changed = true;
 		}
 
 		if (desc_panel.did_update_names()) {

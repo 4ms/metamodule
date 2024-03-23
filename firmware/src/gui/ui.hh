@@ -24,6 +24,7 @@ private:
 
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
+	PatchModQueue &patch_mod_queue;
 
 	NotificationQueue notify_queue;
 	PageManager page_manager;
@@ -39,6 +40,7 @@ public:
 	   PatchModQueue &patch_mod_queue)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
+		, patch_mod_queue{patch_mod_queue}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue} {
 
 		params.clear();
@@ -86,6 +88,11 @@ private:
 		if (!load_status.success) {
 			notify_queue.put({load_status.error_string, Notification::Priority::Error, 5000});
 		}
+
+		// auto knobset_change = metaparams.rotary_with_metabutton.use_motion();
+		// if (knobset_change != 0) {
+		// 	printf("Change knobset: %d\n", knobset_change);
+		// }
 
 		new_patch_data = false;
 	}

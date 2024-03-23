@@ -149,7 +149,13 @@ public:
 			data->continue_reading = true;
 		}
 #else
-		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+		if (m->meta_buttons[0].is_pressed()) {
+			if (m->rotary.motion != 0) {
+				m->ignore_metabutton_release = true;
+				m->rotary_with_metabutton.transfer_motion(m->rotary);
+			}
+		} else
+			data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
 #endif
 
 #ifdef MONKEYROTARY
