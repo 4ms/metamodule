@@ -1,0 +1,170 @@
+PatchData:
+  patch_name: Tapo Save Test
+  description: Patch Description
+  module_slugs:
+    0: HubMedium
+    1: Tapo
+    2: Braids
+    3: ENVVCA
+  int_cables:
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 4
+      color: 1453
+    - out:
+        module_id: 3
+        jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 0
+      color: 13501
+  mapped_ins: []
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 1
+        jack_id: 1
+    - panel_jack_id: 1
+      out:
+        module_id: 1
+        jack_id: 2
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0
+    - module_id: 1
+      param_id: 2
+      value: 0.5
+    - module_id: 1
+      param_id: 3
+      value: 0
+    - module_id: 1
+      param_id: 4
+      value: 0
+    - module_id: 1
+      param_id: 5
+      value: 0.631325
+    - module_id: 1
+      param_id: 6
+      value: 1
+    - module_id: 1
+      param_id: 7
+      value: 0
+    - module_id: 1
+      param_id: 8
+      value: 0
+    - module_id: 1
+      param_id: 9
+      value: 0
+    - module_id: 1
+      param_id: 10
+      value: 0
+    - module_id: 1
+      param_id: 11
+      value: 0
+    - module_id: 1
+      param_id: 12
+      value: 0
+    - module_id: 1
+      param_id: 13
+      value: 0
+    - module_id: 1
+      param_id: 14
+      value: 0
+    - module_id: 1
+      param_id: 15
+      value: 0
+    - module_id: 1
+      param_id: 16
+      value: 0
+    - module_id: 1
+      param_id: 17
+      value: 0
+    - module_id: 1
+      param_id: 18
+      value: 0.666667
+    - module_id: 1
+      param_id: 19
+      value: 0
+    - module_id: 1
+      param_id: 20
+      value: 0
+    - module_id: 2
+      param_id: 0
+      value: 0.5
+    - module_id: 2
+      param_id: 1
+      value: 0.5
+    - module_id: 2
+      param_id: 2
+      value: 0.5
+    - module_id: 2
+      param_id: 3
+      value: 0.5
+    - module_id: 2
+      param_id: 4
+      value: 0.5
+    - module_id: 2
+      param_id: 5
+      value: 0.5
+    - module_id: 2
+      param_id: 6
+      value: 0.606024
+    - module_id: 3
+      param_id: 0
+      value: 0.642
+    - module_id: 3
+      param_id: 1
+      value: 0
+    - module_id: 3
+      param_id: 2
+      value: 0.5
+    - module_id: 3
+      param_id: 3
+      value: 0.5
+    - module_id: 3
+      param_id: 4
+      value: 0.5
+    - module_id: 3
+      param_id: 5
+      value: 0.5
+    - module_id: 3
+      param_id: 6
+      value: 0
+    - module_id: 3
+      param_id: 7
+      value: 1
+  mapped_knobs:
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  vcvModuleStates:
+    - module_id: 1
+      data: |-
+        AQAAAAIAAABBACZGAAAAPwEAAADvpTw/M4CDRgAAAD8BAAAAWkVcPvYbu0fe3V0/AgAAAAAAAAA6ce1HzcxMPwIAAAAAAIA/+14NSLy7Oz8CAAAAAAAAAITBIUirqio/AgAAAAAAgD8yGjRImpkZPwIAAAAAAAAANZ1ESImICD8CAAAAAACAP4R5U0jv7u4+AgAAAAAAAABl2WBIzczMPgIAAAAAAIA/4+JsSKuqqj4CAAAAAAAAADu4d0iJiIg+AgAAAAAAgD8evIBIzcxMPgIAAAAAAAAAUh+FSImICD4CAAAAAACAPzUSiUiJiIg9AgAAAAAAAAAAoIxIAAAAAAIAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAADAAAANACERgAAAD8BAAAASO/9PlgA4EYAAAA/AQAAADd2Lz5CAChHAAAAPwEAAAAXTys/02uPR7y7Oz8CAAAAaoRlP0VSo0erqio/AgAAAI2wXD/TPbNHmpkZPwIAAACx3FM/Rfq/R4mICD8CAAAA1AhLP6Aqykfv7u4+AgAAAPc0Qj9PUdJHzczMPgIAAAAaYTk/qNbYR6uqqj4CAAAAPo0wPyMO3keJiIg+AgAAAGG5Jz+EOuJHzcxMPgIAAACE5R4/OZHlR4mICD4CAAAAqBEWP/086EeJiIg9AgAAAMs9DT8AYOpHAAAAAAIAAADuaQQ/A4PsRwAAAAACAAAAIyz3Pscu70eJiIg9AgAAAGqE5T58hfJHiYgIPgIAAACx3NM+3bH2R83MTD4CAAAA9zTCPljp+0eJiIg+AgAAAD6NsD5YNwFIq6qqPgIAAACE5Z4+sEoFSM3MzD4CAAAAyz2NPt5iCkjv7u4+AgAAACMsdz4XwRBIiYgIPwIAAACx3FM+3rYYSJqZGT8CAAAAPo0wPheqIkirqio/AgAAAMs9DT4eGi9IvLs7PwIAAACx3NM9J6Y+SM3MTD8CAAAAyz2NPTIVUkje3V0/AgAAAMs9DT0AYGpI7+5uPwIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+    - module_id: 2
+      data: |-
+        {"settings":[28,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"lowCpu":false}
