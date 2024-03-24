@@ -16,4 +16,4 @@ target_include_directories(
 
 set_property(TARGET 4msLibrary PROPERTY CXX_STANDARD 20)
 
-target_link_libraries(4msLibrary PRIVATE cpputil)
+target_link_libraries(4msLibrary PRIVATE cpputil ryml)
