@@ -1,4 +1,5 @@
 #include "yaml_to_patch.hh"
+#include "ryml/ryml_init.hh"
 #include "ryml/ryml_serial.hh"
 
 bool yaml_raw_to_patch(char *yaml, size_t size, PatchData &pd) {

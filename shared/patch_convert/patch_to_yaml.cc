@@ -1,4 +1,5 @@
 #include "patch_to_yaml.hh"
+#include "ryml/ryml_init.hh"
 #include "ryml/ryml_serial.hh"
 #include <span>
 

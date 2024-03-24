@@ -12,6 +12,7 @@ target_include_directories(
   4msLibrary
   PUBLIC ${MM_ROOT}/shared
          ${MM_ROOT}/shared/CoreModules/4ms
+		 ${MM_ROOT}/shared/patch_convert/ryml #For ryml_serial
 )
 
 set_property(TARGET 4msLibrary PROPERTY CXX_STANDARD 20)

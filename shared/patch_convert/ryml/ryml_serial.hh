@@ -25,8 +25,3 @@ bool read(ryml::ConstNodeRef const &n, MappedKnob *k);
 bool read(ryml::ConstNodeRef const &n, MappedKnobSet *ks);
 bool read(ryml::ConstNodeRef const &n, StaticParam *k);
 bool read(ryml::ConstNodeRef const &n, ModuleInitState *m);
-
-namespace RymlInit
-{
-void init_once();
-}

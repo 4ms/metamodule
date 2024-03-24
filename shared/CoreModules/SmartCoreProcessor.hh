@@ -5,7 +5,8 @@
 #include <array>
 #include <optional>
 
-#include "ryml_serial.hh"
+#include "ryml.hpp"
+#include "ryml_init.hh"
 
 namespace MetaModule
 {

@@ -6,7 +6,6 @@
 #include "patch/patch.hh"
 #include "ryml.hpp"
 #include "ryml_serial_chars.hh"
-#include <cstdio>
 
 void write(ryml::NodeRef *n, Jack const &jack) {
 	*n |= ryml::MAP;
@@ -267,21 +266,3 @@ bool read(ryml::ConstNodeRef const &n, ModuleInitState *m) {
 	n["data"] >> m->state_data;
 	return true;
 }
-
-namespace RymlInit
-{
-void init_once() {
-	static bool already_init = false;
-	static c4::yml::Callbacks callbacks;
-	if (!already_init) {
-		already_init = true;
-		callbacks.m_error = [](const char *msg, size_t /*msg_len*/, c4::yml::Location loc, void * /*user_data*/) {
-			if (loc.name.empty())
-				printf("[ryml] %s\n", msg);
-			else
-				printf("[ryml] %s in %s %zu:%zu)\n", msg, loc.name.data(), loc.line, loc.col);
-		};
-		c4::yml::set_callbacks(callbacks);
-	}
-}
-} // namespace RymlInit
