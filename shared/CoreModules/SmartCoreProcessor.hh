@@ -5,8 +5,7 @@
 #include <array>
 #include <optional>
 
-#include "ryml.hpp"
-#include "ryml_std.hpp"
+#include "ryml_serial.hh"
 
 namespace MetaModule
 {
@@ -102,22 +101,10 @@ protected:
 	}
 
 public:
-	// Convert the module state string provided by load_state into raw bytes that our module can use
-	static std::vector<uint8_t> decode(std::string_view state_string) {
-		// Unwrap json
-		auto json_string = std::string{state_string};
+	// Patch file yaml -> decode -> raw bytes for module
+	static std::vector<uint8_t> decode(std::string_view base64_string) {
+		RymlInit::init_once();
 
-		ryml::Tree tree = ryml::parse_in_place({json_string.data(), json_string.size()});
-		if (tree.num_children(0) == 0)
-			return {};
-
-		ryml::ConstNodeRef root = tree.rootref();
-		if (!root.has_child("state"))
-			return {};
-
-		auto base64_string = std::string_view{root["state"].val().data(), root["state"].val().size()};
-
-		// Then, decode the base64 into bytes
 		auto needed_size = c4::base64_decode({base64_string.data(), base64_string.size()}, {});
 		std::vector<uint8_t> decoded_data(needed_size);
 		c4::base64_decode({base64_string.data(), base64_string.size()}, {decoded_data.data(), decoded_data.size()});
@@ -125,22 +112,15 @@ public:
 		return decoded_data;
 	}
 
-	// Convert raw bytes to a module state string suitable for storing with save_state()
+	// Raw bytes from module -> encode -> patch file yaml
 	static std::string encode(std::span<const uint8_t> raw_data) {
+		RymlInit::init_once();
+
 		// Encode bytes into base64
 		auto needed_size = c4::base64_encode({}, {raw_data.data(), raw_data.size()});
 		std::string encoded_data(needed_size, '\0');
 		c4::base64_encode({encoded_data.data(), encoded_data.size()}, {raw_data.data(), raw_data.size()});
-
-		// Then add json tags
-		ryml::Tree tree;
-		ryml::NodeRef root = tree.rootref();
-		root |= ryml::MAP;
-		root["state"] << encoded_data;
-		return ryml::emitrs_json<std::string>(tree);
-
-		// TODO: better to do this the naive way?
-		// return "{\"state\": \"" + encoded_data + "\"}";
+		return encoded_data;
 	}
 
 private:

@@ -177,17 +177,21 @@ void PatchFileWriter::addModuleStateJson(rack::Module *module) {
 	if (!idMap.contains(module->id))
 		return; //module not recognized
 
-	if (json_t *dataJ = module->dataToJson()) {
-
+	if (json_t *dataJ = module->dataToJson(); dataJ) {
+		std::string state_string;
 		auto sz = json_dumpb(dataJ, nullptr, 0, JSON_COMPACT);
 		if (sz > 0) {
-			std::string state_string;
 			state_string.resize(sz, '\0');
 			json_dumpb(dataJ, (char *)state_string.data(), sz, JSON_COMPACT);
-			pd.module_states.push_back({idMap[module->id], state_string});
+		} else {
+			if (auto state_cstr = json_string_value(dataJ); state_cstr) {
+				state_string = state_cstr;
+			}
 		}
-
 		json_decref(dataJ);
+
+		if (state_string.size() > 0)
+			pd.module_states.push_back({idMap[module->id], state_string});
 	}
 }
 

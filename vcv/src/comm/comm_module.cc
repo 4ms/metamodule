@@ -80,20 +80,16 @@ void CommModule::configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned N
 }
 
 json_t *CommModule::dataToJson() {
-	// Get state blob from module
 	const auto state_string = core->save_state();
 
-	// serialize the string as json
-	json_t *rootJ = json_object();
-	json_object_set_new(rootJ, "state", json_string(state_string.c_str()));
-	return rootJ;
+	if (state_string.size())
+		return json_string(state_string.c_str());
+	else
+		return nullptr;
 }
 
 void CommModule::dataFromJson(json_t *rootJ) {
-	// Decode vcv patch json into a string
-	if (auto stateJ = json_object_get(rootJ, "state"); stateJ) {
-		if (auto state_str = json_string_value(stateJ); state_str) {
-			core->load_state(state_str);
-		}
+	if (auto state_str = json_string_value(rootJ); state_str) {
+		core->load_state(state_str);
 	}
 }
