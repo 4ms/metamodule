@@ -195,6 +195,10 @@ public:
 		clear_cache();
 	}
 
+	PatchData const &patch() {
+		return pd;
+	}
+
 	// K-rate setters/getters:
 
 	void set_panel_param(unsigned param_id, float val) {

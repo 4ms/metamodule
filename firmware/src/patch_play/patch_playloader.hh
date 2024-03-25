@@ -95,6 +95,10 @@ struct PatchPlayLoader {
 		return !stopping_audio_ && !audio_is_muted_ && player_.is_loaded;
 	}
 
+	const PatchData &playing_patch() {
+		return player_.patch();
+	}
+
 	// Concurrency: Called from UI thread
 	Result handle_sync_patch_loading() {
 		if (loading_new_patch_ && audio_is_muted_) {

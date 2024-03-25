@@ -62,9 +62,19 @@ public:
 	}
 
 	void update_current_page() {
+
 		auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion();
 		if (knobset_change != 0) {
-			printf("Change knobset: %d\n", knobset_change);
+
+			if (int num_knobsets = info.patch_playloader.playing_patch().knob_sets.size(); num_knobsets > 0) {
+				int cur_knobset = info.page_list.get_active_knobset();
+				int next_knobset = MathTools::wrap(knobset_change + cur_knobset, 0, num_knobsets - 1);
+
+				info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
+				info.page_list.set_active_knobset(next_knobset);
+
+				pr_trace("Change knobset via button: %d -> %d\n", cur_knobset, next_knobset);
+			}
 		}
 
 		// Interpret and pass on back button events
