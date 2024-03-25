@@ -148,7 +148,7 @@ struct PatchSelectorPage : PageBase {
 
 	void update() override {
 
-		if (metaparams.meta_buttons[0].is_just_released()) {
+		if (metaparams.back_button.is_just_released()) {
 			if (lv_group_get_focused(group) == ui_PatchListRoller) {
 				subdir_panel.focus();
 			} else {

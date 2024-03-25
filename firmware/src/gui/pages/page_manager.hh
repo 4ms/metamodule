@@ -62,6 +62,19 @@ public:
 	}
 
 	void update_current_page() {
+		auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion();
+		if (knobset_change != 0) {
+			printf("Change knobset: %d\n", knobset_change);
+		}
+
+		// Interpret and pass on back button events
+		if (info.metaparams.meta_buttons[0].is_just_released()) {
+			if (!info.metaparams.ignore_metabutton_release)
+				info.metaparams.back_button.register_falling_edge();
+			else
+				info.metaparams.ignore_metabutton_release = false;
+		}
+
 		if (auto newpage = page_list.get_requested_page()) {
 			if (newpage->page) {
 				cur_page->blur();

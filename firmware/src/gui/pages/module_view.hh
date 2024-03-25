@@ -173,7 +173,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
-		if (metaparams.meta_buttons[0].is_just_released()) {
+		if (metaparams.back_button.is_just_released()) {
 			if (mode == ViewMode::List) {
 				load_prev_page();
 

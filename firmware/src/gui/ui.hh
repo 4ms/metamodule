@@ -89,11 +89,6 @@ private:
 			notify_queue.put({load_status.error_string, Notification::Priority::Error, 5000});
 		}
 
-		// auto knobset_change = metaparams.rotary_with_metabutton.use_motion();
-		// if (knobset_change != 0) {
-		// 	printf("Change knobset: %d\n", knobset_change);
-		// }
-
 		new_patch_data = false;
 	}
 

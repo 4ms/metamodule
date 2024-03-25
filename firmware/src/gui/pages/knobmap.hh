@@ -125,7 +125,7 @@ struct KnobMapPage : PageBase {
 	}
 
 	void update() override {
-		if (metaparams.meta_buttons[0].is_just_released()) {
+		if (metaparams.back_button.is_just_released()) {
 			if (kb_visible) {
 				hide_keyboard();
 			} else if (del_popup.is_visible()) {

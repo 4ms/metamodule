@@ -133,7 +133,7 @@ struct KnobSetViewPage : PageBase {
 
 	void update() override {
 		lv_group_set_editing(group, false);
-		if (metaparams.meta_buttons[0].is_just_released()) {
+		if (metaparams.back_button.is_just_released()) {
 			if (page_list.request_last_page()) {
 				blur();
 			}
