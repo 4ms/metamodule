@@ -108,6 +108,18 @@ struct ModuleDrawer {
 			std::visit([this, canvas](auto &el) { ElementDrawer::draw_element(el, canvas, height); }, element);
 		}
 	}
+
+	void draw_mapped_ring(
+		PatchData const &patch, uint32_t module_idx, uint32_t active_knob_set, lv_obj_t *canvas, DrawnElement &drawn) {
+
+		auto &gui_el = drawn.gui_element;
+		gui_el.map_ring = std::visit(
+			[&](auto &el) {
+				auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, gui_el.idx);
+				return MapRingDrawer::draw_mapped_ring(el, gui_el.obj, canvas, mapping_id, height);
+			},
+			drawn.element);
+	}
 };
 
 } // namespace MetaModule

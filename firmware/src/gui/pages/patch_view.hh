@@ -183,6 +183,26 @@ struct PatchViewPage : PageBase {
 		file_menu.prepare_focus(group);
 	}
 
+	void redraw_map_rings() {
+		for (auto &drawn_el : drawn_elements) {
+			auto &gui_el = drawn_el.gui_element;
+
+			if (gui_el.count.num_params > 0 && gui_el.map_ring) {
+				lv_obj_del_async(gui_el.map_ring);
+				gui_el.map_ring = nullptr;
+			}
+		}
+
+		for (auto &drawn_el : drawn_elements) {
+			auto knobset = knobset_settings.active_knobset;
+			auto module_id = drawn_el.gui_element.module_idx;
+			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
+
+			ModuleDrawer{modules_cont, Height}.draw_mapped_ring(*patch, module_id, knobset, canvas, drawn_el);
+		}
+		update_map_ring_style();
+	}
+
 	void blur() override {
 		settings_menu.hide();
 		knobset_menu.hide();
@@ -204,6 +224,12 @@ struct PatchViewPage : PageBase {
 		if (is_patch_playing != last_is_patch_playing || knobset_settings.changed) {
 			knobset_settings.changed = false;
 			update_active_knobset();
+		}
+
+		if (is_patch_playing && knobset_settings.active_knobset != page_list.get_active_knobset()) {
+			args.view_knobset_id = page_list.get_active_knobset();
+			knobset_settings.active_knobset = page_list.get_active_knobset();
+			redraw_map_rings();
 		}
 
 		if (auto &knobset = knobset_menu.requested_knobset_view) {
