@@ -116,6 +116,7 @@ struct ModuleDrawer {
 		gui_el.map_ring = std::visit(
 			[&](auto &el) {
 				auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, active_knob_set, gui_el.idx);
+				gui_el.mapped_panel_id = mapping_id;
 				return MapRingDrawer::draw_mapped_ring(el, gui_el.obj, canvas, mapping_id, height);
 			},
 			drawn.element);
