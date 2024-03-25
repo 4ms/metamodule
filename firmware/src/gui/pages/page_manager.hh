@@ -68,7 +68,7 @@ public:
 
 			if (int num_knobsets = info.patch_playloader.playing_patch().knob_sets.size(); num_knobsets > 0) {
 				int cur_knobset = info.page_list.get_active_knobset();
-				int next_knobset = MathTools::wrap(knobset_change + cur_knobset, 0, num_knobsets - 1);
+				int next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
 
 				info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
 				info.page_list.set_active_knobset(next_knobset);
