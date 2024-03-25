@@ -16,7 +16,7 @@ public:
 
 	void update() override {
 		if(auto input = getInput<In1In>(); input) {
-			setOutput<OutLeftOut>(*input * PanningTable.lookup(1.f - getState<Pan1Knob>()));
+			setOutput<OutLeftOut>(*input * PanningTable.lookup(1.f - getState<Pan1Knob>()) * LevelTable.lookup(getState<Level1Knob>()));
 		}
 		
 	}
