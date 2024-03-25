@@ -2,9 +2,9 @@
 #include "CoreModules/moduleFactory.hh"
 #include "info/L4_info.hh"
 #include "l4/Tables.h"
+#include "l4/DCBlock.h"
 
 #include "processors/tools/expDecay.h"
-#include "processors/tools/dcBlock.h"
 
 namespace MetaModule
 {
@@ -15,7 +15,10 @@ class L4Core : public SmartCoreProcessor<L4Info> {
 	using enum Info::Elem;
 
 public:
-	L4Core() {
+	L4Core() :
+		channel1DCBlocker(DCBlockerFactor), channel2DCBlocker(DCBlockerFactor), 
+		channel3LeftDCBlocker(DCBlockerFactor), channel3RightDCBlocker(DCBlockerFactor),
+		channel4LeftDCBlocker(DCBlockerFactor), channel4RightDCBlocker(DCBlockerFactor) {
 		channel1EnvelopeLeft.attackTime = envelopeTimeConstant;
 		channel1EnvelopeLeft.decayTime = envelopeTimeConstant;
 
@@ -49,8 +52,9 @@ public:
 		auto channelRight = channelLeft;
 
 		if(auto input = getInput<In1In>(); input) {
-			channelLeft = *input * PanningTable.lookup(1.f - getState<Pan1Knob>()) * LevelTable.lookup(getState<Level1Knob>());
-			channelRight = *input * PanningTable.lookup(getState<Pan1Knob>()) * LevelTable.lookup(getState<Level1Knob>());
+			auto filteredInput = channel1DCBlocker(*input);
+			channelLeft = filteredInput * PanningTable.lookup(1.f - getState<Pan1Knob>()) * LevelTable.lookup(getState<Level1Knob>());
+			channelRight = filteredInput * PanningTable.lookup(getState<Pan1Knob>()) * LevelTable.lookup(getState<Level1Knob>());
 
 			outputLeft += channelLeft;
 			outputRight += channelRight;
@@ -62,8 +66,9 @@ public:
 		channelRight = channelLeft;
 
 		if(auto input = getInput<In2In>(); input) {
-			channelLeft = *input * PanningTable.lookup(1.f - getState<Pan2Knob>()) * LevelTable.lookup(getState<Level2Knob>());
-			channelRight = *input * PanningTable.lookup(getState<Pan2Knob>()) * LevelTable.lookup(getState<Level2Knob>());
+			auto filteredInput = channel2DCBlocker(*input);
+			channelLeft = filteredInput * PanningTable.lookup(1.f - getState<Pan2Knob>()) * LevelTable.lookup(getState<Level2Knob>());
+			channelRight = filteredInput * PanningTable.lookup(getState<Pan2Knob>()) * LevelTable.lookup(getState<Level2Knob>());
 
 			outputLeft += channelLeft;
 			outputRight += channelRight;
@@ -75,12 +80,14 @@ public:
 		channelRight = channelLeft;
 
 		if(auto inputL = getInput<In3LIn>(); inputL) {
-			channelLeft = *inputL * LevelTable.lookup(getState<Level3Knob>());
+			auto filteredInput = channel3LeftDCBlocker(*inputL);
+			channelLeft = filteredInput * LevelTable.lookup(getState<Level3Knob>());
 			channelRight =  channelLeft;
 		}
 
 		if(auto inputR = getInput<In3RIn>(); inputR) {
-			channelRight = *inputR * LevelTable.lookup(getState<Level3Knob>());
+			auto filteredInput = channel3RightDCBlocker(*inputR);
+			channelRight = filteredInput * LevelTable.lookup(getState<Level3Knob>());
 		}
 
 		outputLeft += channelLeft;
@@ -92,12 +99,14 @@ public:
 		channelRight = channelLeft;
 
 		if(auto inputL = getInput<In4LIn>(); inputL) {
-			channelLeft = *inputL * LevelTable.lookup(getState<Level4Knob>());
+			auto filteredInput = channel4LeftDCBlocker(*inputL);
+			channelLeft = filteredInput * LevelTable.lookup(getState<Level4Knob>());
 			channelRight = channelLeft;
 		}
 
 		if(auto inputR = getInput<In4RIn>(); inputR) {
-				channelRight = *inputR * LevelTable.lookup(getState<Level4Knob>());
+			auto filteredInput = channel4RightDCBlocker(*inputR);
+			channelRight = filteredInput * LevelTable.lookup(getState<Level4Knob>());
 		}
 
 		outputLeft += channelLeft;
@@ -124,6 +133,14 @@ public:
 private:
 	static constexpr float LEDScaling = 5.f;
 	static constexpr float envelopeTimeConstant = 200.f;
+	static constexpr float DCBlockerFactor = 0.995f;
+
+	DCBlock channel1DCBlocker;
+	DCBlock channel2DCBlocker;
+	DCBlock channel3LeftDCBlocker;
+	DCBlock channel3RightDCBlocker;
+	DCBlock channel4LeftDCBlocker;
+	DCBlock channel4RightDCBlocker;	
 
 	ExpDecay channel1EnvelopeLeft;
 	ExpDecay channel1EnvelopeRight;
