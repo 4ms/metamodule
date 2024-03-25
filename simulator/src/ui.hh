@@ -19,6 +19,8 @@ class Ui {
 		.quit = SDLK_ESCAPE,
 		.param_inc = ']',
 		.param_dec = '[',
+		.prev_knobset = ',',
+		.next_knobset = '.',
 	};
 
 public:

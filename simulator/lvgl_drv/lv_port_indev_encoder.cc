@@ -102,6 +102,14 @@ void LvglEncoderSimulatorDriver::handle_key_up(SDL_Keycode key, lv_indev_data_t 
 		_instance->param_dec_pressed = true;
 	}
 
+	if (key == keys.next_knobset) {
+		_instance->knobset_change++;
+	}
+
+	if (key == keys.prev_knobset) {
+		_instance->knobset_change--;
+	}
+
 	// 1-8 select which patch output to route to the soundcard left output.
 	// Patch output (L + 1) % 8 will be routed to the soundcard right output.
 	if (key >= '1' && key <= '8') {
@@ -175,6 +183,12 @@ bool LvglEncoderSimulatorDriver::param_dec() {
 	bool pressed = param_dec_pressed;
 	param_dec_pressed = false;
 	return pressed;
+}
+
+int LvglEncoderSimulatorDriver::knobset_changed() {
+	auto change = knobset_change;
+	knobset_change = 0;
+	return change;
 }
 
 unsigned LvglEncoderSimulatorDriver::selected_param() {
