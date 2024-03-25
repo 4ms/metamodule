@@ -4,6 +4,7 @@
 #include "lvgl.h"
 #include "page_list.hh"
 #include "patch/patch_data.hh"
+#include "util/countzip.hh"
 #include <vector>
 
 namespace MetaModule
@@ -58,11 +59,12 @@ struct PatchViewKnobsetMenu {
 					lv_label_set_text(label, text);
 				}
 
-				// Activate knobset button (knobset name)
-				if (settings.active_knobset == knobset_list.size())
+				if (knobset_list.size() == settings.active_knobset) {
 					lv_obj_add_state(check, LV_STATE_CHECKED);
-				else
+					checked_knobset = settings.active_knobset;
+				} else
 					lv_obj_clear_state(check, LV_STATE_CHECKED);
+
 				lv_obj_add_event_cb(check, knobset_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 				lv_group_add_obj(knobset_menu_group, check);
 
@@ -94,6 +96,23 @@ struct PatchViewKnobsetMenu {
 			lv_obj_del(c);
 		}
 		knobset_list.clear();
+	}
+
+	void update() {
+		if (checked_knobset != settings.active_knobset) {
+			if (checked_knobset < knobset_list.size()) {
+				auto oldcheck = ui_comp_get_child(knobset_list[checked_knobset], UI_COMP_KNOBSETGROUP_KNOBSETBUTTON);
+				lv_obj_clear_state(oldcheck, LV_STATE_CHECKED);
+			}
+
+			if (settings.active_knobset < knobset_list.size()) {
+				auto newcheck =
+					ui_comp_get_child(knobset_list[settings.active_knobset], UI_COMP_KNOBSETGROUP_KNOBSETBUTTON);
+				lv_obj_add_state(newcheck, LV_STATE_CHECKED);
+			}
+
+			checked_knobset = settings.active_knobset;
+		}
 	}
 
 	void show() {
@@ -197,6 +216,7 @@ struct PatchViewKnobsetMenu {
 	bool visible = false;
 	Settings &settings;
 	std::vector<lv_obj_t *> knobset_list;
+	uint32_t checked_knobset = 0;
 
 	std::optional<unsigned> requested_knobset_view = std::nullopt;
 };

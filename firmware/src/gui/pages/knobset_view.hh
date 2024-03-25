@@ -79,10 +79,7 @@ struct KnobSetViewPage : PageBase {
 		knobset = &patch->knob_sets[ks_idx];
 		lv_label_set_text(ui_KnobSetNameText, patch->valid_knob_set_name(ks_idx));
 
-		if (patch->patch_name.length())
-			lv_label_set_text(ui_KnobSetDescript, patch->patch_name.c_str());
-		else
-			lv_label_set_text(ui_KnobSetDescript, "");
+		update_active_status(true);
 
 		unsigned num_maps[PanelDef::NumKnobs]{};
 
@@ -131,6 +128,27 @@ struct KnobSetViewPage : PageBase {
 		lv_group_set_editing(group, false);
 	}
 
+	void update_active_status(bool force = false) {
+		bool prev_value = is_actively_playing;
+
+		is_patch_playing = patch_is_playing(args.patch_loc_hash);
+
+		if (is_patch_playing && args.view_knobset_id.value_or(999) == page_list.get_active_knobset())
+			is_actively_playing = true;
+		else
+			is_actively_playing = false;
+
+		if (force || prev_value != is_actively_playing) {
+			if (is_actively_playing) {
+				lv_label_set_text(ui_KnobSetDescript, "(Active)");
+				lv_obj_set_style_bg_color(ui_KnobSetContainer, lv_color_hex(0x333333), LV_PART_MAIN);
+			} else {
+				lv_label_set_text(ui_KnobSetDescript, "(Inactive)");
+				lv_obj_set_style_bg_color(ui_KnobSetContainer, lv_color_hex(0x888888), LV_PART_MAIN);
+			}
+		}
+	}
+
 	void update() override {
 		lv_group_set_editing(group, false);
 		if (metaparams.back_button.is_just_released()) {
@@ -139,9 +157,9 @@ struct KnobSetViewPage : PageBase {
 			}
 		}
 
-		is_patch_playing = patch_is_playing(args.patch_loc_hash);
+		update_active_status();
 
-		if (is_patch_playing) {
+		if (is_actively_playing) {
 			// Iterate all knobs
 			for (auto knob_i = 0u; knob_i < params.knobs.size(); knob_i++) {
 				// Find the knobs that have moved
@@ -251,6 +269,7 @@ private:
 	lv_obj_t *base = nullptr;
 	MappedKnobSet *knobset = nullptr;
 	PatchData *patch;
+	bool is_actively_playing = false;
 
 	std::array<lv_obj_t *, 12> panes{ui_KnobPanelA,
 									 ui_KnobPanelB,

@@ -78,8 +78,6 @@ struct PatchViewPage : PageBase {
 		bool needs_refresh = false;
 		if (gui_state.force_redraw_patch)
 			needs_refresh = true;
-		if (knobset_settings.active_knobset != page_list.get_active_knobset())
-			needs_refresh = true;
 		if (patch_revision != page_list.get_patch_revision())
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
@@ -94,13 +92,16 @@ struct PatchViewPage : PageBase {
 
 		gui_state.force_redraw_patch = false;
 
-		if (displayed_patch_loc_hash != args.patch_loc_hash) {
-			args.view_knobset_id = 0;
-		}
+		// Prepare the knobset menu with the actively playing patch's knobset
+		if (is_patch_playing)
+			knobset_settings.active_knobset = page_list.get_active_knobset();
 
-		if (args.view_knobset_id) {
-			knobset_settings.active_knobset = args.view_knobset_id.value();
-			page_list.set_active_knobset(knobset_settings.active_knobset);
+		else {
+			// Reset to first knobset when we view a different patch than previously viewed
+			if (displayed_patch_loc_hash != args.patch_loc_hash) {
+				args.view_knobset_id = 0;
+			}
+			knobset_settings.active_knobset = args.view_knobset_id.value_or(0);
 		}
 
 		if (args.patch_loc_hash)
@@ -223,7 +224,10 @@ struct PatchViewPage : PageBase {
 
 		if (is_patch_playing != last_is_patch_playing || knobset_settings.changed) {
 			knobset_settings.changed = false;
-			update_active_knobset();
+			args.view_knobset_id = knobset_settings.active_knobset;
+			page_list.set_active_knobset(knobset_settings.active_knobset);
+			patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
+			redraw_map_rings();
 		}
 
 		if (is_patch_playing && knobset_settings.active_knobset != page_list.get_active_knobset()) {
@@ -255,6 +259,10 @@ struct PatchViewPage : PageBase {
 				blur();
 				params.lights.stop_watching_all();
 			}
+		}
+
+		if (knobset_menu.visible) {
+			knobset_menu.update();
 		}
 
 		if (desc_panel.did_update_names()) {
@@ -364,12 +372,12 @@ private:
 		last_cable_style = settings.cable_style;
 	}
 
-	void update_active_knobset() {
-		blur();
-		args.view_knobset_id = knobset_settings.active_knobset;
-		patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
-		prepare_focus();
-	}
+	// void update_active_knobset() {
+	// 	blur();
+	// 	args.view_knobset_id = knobset_settings.active_knobset;
+	// 	patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
+	// 	prepare_focus();
+	// }
 
 	void redraw_modulename() {
 		auto module_id = highlighted_module_id.value_or(0xFFFFFFFF);
