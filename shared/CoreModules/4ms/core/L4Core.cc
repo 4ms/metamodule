@@ -96,6 +96,8 @@ public:
 		outputLeft *= 2.f;
 		outputRight *= 2.f;
 
+		auto headphoneOut = (outputLeft + outputRight) * LevelTable.lookup(getState<HeadphoneLevelKnob>());
+
 		//-16.2dB attenuation in line mode
 		if(getState<Mod__OR_LineSwitch>() == Toggle2posHoriz::State_t::RIGHT) {
 			outputLeft *= 0.155f;
@@ -115,6 +117,7 @@ public:
 
 		setOutput<OutLeftOut>(std::clamp(outputLeft, -11.f, 11.f));
 		setOutput<OutRightOut>(std::clamp(outputRight, -11.f, 11.f));
+		setOutput<HeadphoneOut>(std::clamp(headphoneOut, -11.f, 11.f));
 	}
 
 	void set_samplerate(float sr) override {
