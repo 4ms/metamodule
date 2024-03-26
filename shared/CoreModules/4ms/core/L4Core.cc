@@ -3,6 +3,7 @@
 #include "info/L4_info.hh"
 #include "l4/Tables.h"
 #include "l4/DCBlock.h"
+#include "l4/PeakDetector.h"
 
 #include "processors/tools/expDecay.h"
 
@@ -19,29 +20,6 @@ public:
 		channel1DCBlocker(DCBlockerFactor), channel2DCBlocker(DCBlockerFactor), 
 		channel3LeftDCBlocker(DCBlockerFactor), channel3RightDCBlocker(DCBlockerFactor),
 		channel4LeftDCBlocker(DCBlockerFactor), channel4RightDCBlocker(DCBlockerFactor) {
-		channel1EnvelopeLeft.attackTime = envelopeTimeConstant;
-		channel1EnvelopeLeft.decayTime = envelopeTimeConstant;
-
-		channel1EnvelopeRight.attackTime = envelopeTimeConstant;
-		channel1EnvelopeRight.decayTime = envelopeTimeConstant;
-
-		channel2EnvelopeLeft.attackTime = envelopeTimeConstant;
-		channel2EnvelopeLeft.decayTime = envelopeTimeConstant;
-
-		channel2EnvelopeRight.attackTime = envelopeTimeConstant;
-		channel2EnvelopeRight.decayTime = envelopeTimeConstant;
-
-		channel3EnvelopeLeft.attackTime = envelopeTimeConstant;
-		channel3EnvelopeLeft.decayTime = envelopeTimeConstant;
-
-		channel3EnvelopeRight.attackTime = envelopeTimeConstant;
-		channel3EnvelopeRight.decayTime = envelopeTimeConstant;
-
-		channel4EnvelopeLeft.attackTime = envelopeTimeConstant;
-		channel4EnvelopeLeft.decayTime = envelopeTimeConstant;
-
-		channel4EnvelopeRight.attackTime = envelopeTimeConstant;
-		channel4EnvelopeRight.decayTime = envelopeTimeConstant;
 	};
 
 	void update() override {
@@ -60,7 +38,7 @@ public:
 			outputRight += channelRight;
 		}
 
-		setLED<Level1LedLight>(std::array<float,3>{0.f, channel1EnvelopeRight.update(gcem::abs(channelRight)) / LEDScaling , channel1EnvelopeLeft.update(gcem::abs(channelLeft)) / LEDScaling});
+		setLED<Level1LedLight>(std::array<float,3>{0.f, channel1EnvelopeRight(gcem::abs(channelRight)) / LEDScaling , channel1EnvelopeLeft(gcem::abs(channelLeft)) / LEDScaling});
 
 		channelLeft = 0.f;
 		channelRight = channelLeft;
@@ -74,7 +52,7 @@ public:
 			outputRight += channelRight;
 		}
 
-		setLED<Level2LedLight>(std::array<float,3>{0.f, channel2EnvelopeRight.update(gcem::abs(channelRight)) / LEDScaling , channel2EnvelopeLeft.update(gcem::abs(channelLeft)) / LEDScaling});
+		setLED<Level2LedLight>(std::array<float,3>{0.f, channel2EnvelopeRight(gcem::abs(channelRight)) / LEDScaling , channel2EnvelopeLeft(gcem::abs(channelLeft)) / LEDScaling});
 
 		channelLeft = 0.f;
 		channelRight = channelLeft;
@@ -93,7 +71,7 @@ public:
 		outputLeft += channelLeft;
 		outputRight += channelRight;
 
-		setLED<Level3LedLight>(std::array<float,3>{0.f, channel3EnvelopeRight.update(gcem::abs(channelRight)) / LEDScaling , channel3EnvelopeLeft.update(gcem::abs(channelLeft)) / LEDScaling});
+		setLED<Level3LedLight>(std::array<float,3>{0.f, channel3EnvelopeRight(gcem::abs(channelRight)) / LEDScaling , channel3EnvelopeLeft(gcem::abs(channelLeft)) / LEDScaling});
 
 		channelLeft = 0.f;
 		channelRight = channelLeft;
@@ -112,7 +90,7 @@ public:
 		outputLeft += channelLeft;
 		outputRight += channelRight;
 
-		setLED<Level4LedLight>(std::array<float,3>{0.f, channel4EnvelopeRight.update(gcem::abs(channelRight)) / LEDScaling , channel4EnvelopeLeft.update(gcem::abs(channelLeft)) / LEDScaling});
+		setLED<Level4LedLight>(std::array<float,3>{0.f, channel4EnvelopeRight(gcem::abs(channelRight)) / LEDScaling , channel4EnvelopeLeft(gcem::abs(channelLeft)) / LEDScaling});
 
 		//+6dB output boost
 		outputLeft *= 2.f;
@@ -127,13 +105,21 @@ public:
 		outputLeft *= LevelTable.lookup(getState<MainLevelKnob>());
 		outputRight *= LevelTable.lookup(getState<MainLevelKnob>());
 
+		auto outputLeftEnvelope = mainEnvelopeLeft(gcem::abs(outputLeft));
+		auto outputRightEnvelope = mainEnvelopeRight(gcem::abs(outputRight));
+		auto clippingLeft = outputLeftEnvelope >= 10.f ? 1.f : 0.f;
+		auto clippingRight = outputRightEnvelope >= 10.f ? 1.f : 0.f;
+
+		setLED<OutLLedLight>(std::array<float,3>{clippingLeft, 0.0f, outputLeftEnvelope / LEDScaling});
+		setLED<OutRLedLight>(std::array<float,3>{clippingRight, outputRightEnvelope / LEDScaling, 0.f});
+
 		setOutput<OutLeftOut>(std::clamp(outputLeft, -11.f, 11.f));
 		setOutput<OutRightOut>(std::clamp(outputRight, -11.f, 11.f));
 	}
 
 	void set_samplerate(float sr) override {
-		channel1EnvelopeLeft.set_samplerate(sr);
-		channel1EnvelopeRight.set_samplerate(sr);
+		mainEnvelopeLeft.setSamplerate(sr);
+		mainEnvelopeRight.setSamplerate(sr);
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -144,7 +130,7 @@ public:
 
 private:
 	static constexpr float LEDScaling = 5.f;
-	static constexpr float envelopeTimeConstant = 200.f;
+	static constexpr float envelopeTimeConstant = 2000.f;
 	static constexpr float DCBlockerFactor = 0.995f;
 
 	DCBlock channel1DCBlocker;
@@ -154,17 +140,20 @@ private:
 	DCBlock channel4LeftDCBlocker;
 	DCBlock channel4RightDCBlocker;	
 
-	ExpDecay channel1EnvelopeLeft;
-	ExpDecay channel1EnvelopeRight;
+	PeakDetector channel1EnvelopeLeft;
+	PeakDetector channel1EnvelopeRight;
 
-	ExpDecay channel2EnvelopeLeft;
-	ExpDecay channel2EnvelopeRight;
+	PeakDetector channel2EnvelopeLeft;
+	PeakDetector channel2EnvelopeRight;
 
-	ExpDecay channel3EnvelopeLeft;
-	ExpDecay channel3EnvelopeRight;
+	PeakDetector channel3EnvelopeLeft;
+	PeakDetector channel3EnvelopeRight;
 
-	ExpDecay channel4EnvelopeLeft;
-	ExpDecay channel4EnvelopeRight;
+	PeakDetector channel4EnvelopeLeft;
+	PeakDetector channel4EnvelopeRight;
+
+	PeakDetector mainEnvelopeLeft;
+	PeakDetector mainEnvelopeRight;
 };
 
 } // namespace MetaModule
