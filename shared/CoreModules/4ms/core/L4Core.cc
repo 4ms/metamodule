@@ -114,9 +114,21 @@ public:
 
 		setLED<Level4LedLight>(std::array<float,3>{0.f, channel4EnvelopeRight.update(gcem::abs(channelRight)) / LEDScaling , channel4EnvelopeLeft.update(gcem::abs(channelLeft)) / LEDScaling});
 
-		setOutput<OutLeftOut>(outputLeft);
-		setOutput<OutRightOut>(outputRight);
-		
+		//+6dB output boost
+		outputLeft *= 2.f;
+		outputRight *= 2.f;
+
+		//-16.2dB attenuation in line mode
+		if(getState<Mod__OR_LineSwitch>() == Toggle2posHoriz::State_t::RIGHT) {
+			outputLeft *= 0.155f;
+			outputRight *= 0.155f;
+		}
+
+		outputLeft *= LevelTable.lookup(getState<MainLevelKnob>());
+		outputRight *= LevelTable.lookup(getState<MainLevelKnob>());
+
+		setOutput<OutLeftOut>(std::clamp(outputLeft, -11.f, 11.f));
+		setOutput<OutRightOut>(std::clamp(outputRight, -11.f, 11.f));
 	}
 
 	void set_samplerate(float sr) override {
