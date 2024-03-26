@@ -20,7 +20,7 @@ lv_obj_set_flex_align(cui_MappedKnobsetitem, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_
 lv_obj_add_flag( cui_MappedKnobsetitem, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( cui_MappedKnobsetitem, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(cui_MappedKnobsetitem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(cui_MappedKnobsetitem, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_color(cui_MappedKnobsetitem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(cui_MappedKnobsetitem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(cui_MappedKnobsetitem, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(cui_MappedKnobsetitem, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -34,11 +34,15 @@ lv_obj_set_style_text_opa(cui_MappedKnobsetitem, 255, LV_PART_MAIN| LV_STATE_DEF
 lv_obj_set_style_text_align(cui_MappedKnobsetitem, LV_TEXT_ALIGN_AUTO, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_decor(cui_MappedKnobsetitem, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(cui_MappedKnobsetitem, &ui_font_MuseoSansRounded90018, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(cui_MappedKnobsetitem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUSED );
-lv_obj_set_style_bg_opa(cui_MappedKnobsetitem, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(cui_MappedKnobsetitem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(cui_MappedKnobsetitem, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(cui_MappedKnobsetitem, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(cui_MappedKnobsetitem, -1, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_border_width(cui_MappedKnobsetitem, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-lv_obj_set_style_outline_width(cui_MappedKnobsetitem, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-lv_obj_set_style_outline_pad(cui_MappedKnobsetitem, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_color(cui_MappedKnobsetitem, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(cui_MappedKnobsetitem, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(cui_MappedKnobsetitem, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(cui_MappedKnobsetitem, -1, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 lv_obj_t *cui_Circle;
 cui_Circle = lv_btn_create(cui_MappedKnobsetitem);
