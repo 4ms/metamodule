@@ -107,13 +107,13 @@ struct KnobMapPage : PageBase {
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
 		// Set initial positions of arcs and sliders
-		bool is_patch_playing =
-			args.patch_loc_hash ? (*args.patch_loc_hash == patch_playloader.cur_patch_loc_hash()) : false;
+		update_active_status();
 
 		auto s_param = patch->find_static_knob(map.module_id, map.param_id);
-		float knob_val = s_param && is_patch_playing ? s_param->value : 0;
+		// float knob_val = s_param && is_actively_playing ? s_param->value : 0;
+		float knob_val = s_param ? s_param->value : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
-		lv_obj_set_style_opa(ui_EditMappingArc, is_patch_playing ? LV_OPA_100 : LV_OPA_0, LV_PART_KNOB);
+		lv_obj_set_style_opa(ui_EditMappingArc, is_actively_playing ? LV_OPA_100 : LV_OPA_50, LV_PART_KNOB);
 
 		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
 		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
@@ -135,10 +135,26 @@ struct KnobMapPage : PageBase {
 			}
 		}
 
-		auto knob_val = params.knobs[map.panel_knob_id].val;
-		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
+		update_active_status();
+		if (is_actively_playing) {
+			auto &knob = params.knobs[map.panel_knob_id];
+			if (knob.did_change()) {
+				set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob);
+			}
+			lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_100, LV_PART_KNOB);
+		} else
+			lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_50, LV_PART_KNOB);
 
 		add_map_popup.update(params);
+	}
+
+	void update_active_status() {
+		is_patch_playing = patch_is_playing(args.patch_loc_hash);
+
+		if (is_patch_playing && args.view_knobset_id.value_or(999) == page_list.get_active_knobset())
+			is_actively_playing = true;
+		else
+			is_actively_playing = false;
 	}
 
 	void blur() final {
@@ -283,6 +299,9 @@ private:
 	bool kb_visible = false;
 
 	uint32_t view_set_idx = 0;
+
+	bool is_actively_playing = false;
+	bool is_patch_playing = false;
 };
 
 } // namespace MetaModule

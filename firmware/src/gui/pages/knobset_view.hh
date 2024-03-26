@@ -68,6 +68,8 @@ struct KnobSetViewPage : PageBase {
 			lv_hide(ui_NextKnobSet);
 		}
 
+		update_active_status(true);
+
 		knobset = nullptr;
 
 		if (!args.view_knobset_id)
@@ -78,8 +80,6 @@ struct KnobSetViewPage : PageBase {
 
 		knobset = &patch->knob_sets[ks_idx];
 		lv_label_set_text(ui_KnobSetNameText, patch->valid_knob_set_name(ks_idx));
-
-		update_active_status(true);
 
 		unsigned num_maps[PanelDef::NumKnobs]{};
 
@@ -106,9 +106,19 @@ struct KnobSetViewPage : PageBase {
 				}
 			}
 
-			auto s_param = patch->find_static_knob(map.module_id, map.param_id);
-			float val = s_param && is_patch_playing ? s_param->value : 0;
+			float val = 0.f;
+			// if (is_actively_playing) {
+			// 	auto knobset_id = page_list.get_active_knobset();
+			// 	if (auto m_param = patch->find_mapped_knob(knobset_id, map.param_id)) {
+			// 		// val = m_param->get_mapped_val();
+			// 	}
+
+			// } else
+			if (auto s_param = patch->find_static_knob(map.module_id, map.param_id))
+				val = s_param->value;
+
 			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), val);
+
 			lv_obj_set_style_opa(get_knob(cont), is_patch_playing ? LV_OPA_100 : LV_OPA_0, LV_PART_KNOB);
 
 			set_for_knob(cont, map.panel_knob_id);
