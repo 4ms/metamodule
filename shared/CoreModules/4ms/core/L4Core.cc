@@ -134,7 +134,7 @@ public:
 private:
 	static constexpr float LEDScaling = 5.f;
 	static constexpr float envelopeTimeConstant = 2000.f;
-	static constexpr float DCBlockerFactor = 0.995f;
+	static constexpr float DCBlockerFactor = 0.9995f;
 
 	DCBlock channel1DCBlocker;
 	DCBlock channel2DCBlocker;
