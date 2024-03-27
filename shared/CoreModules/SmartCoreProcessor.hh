@@ -4,6 +4,7 @@
 #include "CoreModules/elements/element_state_conversion.hh"
 #include <array>
 #include <optional>
+#include <vector>
 
 #include "ryml.hpp"
 #include "ryml_init.hh"
