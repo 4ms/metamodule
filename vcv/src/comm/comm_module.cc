@@ -44,12 +44,13 @@ void CommModule::process(const ProcessArgs &args) {
 
 		auto id = out.getId();
 
-		if (out.isConnected()) core->mark_output_patched(id);
-		else                   core->mark_output_unpatched(id);
+		if (out.isConnected())
+			core->mark_output_patched(id);
+		else
+			core->mark_output_unpatched(id);
 	}
 
 	core->update();
-
 
 	// Always set output independent of patch state
 	// since when unpatched the value will not be used anyway
@@ -76,4 +77,19 @@ void CommModule::configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned N
 	}
 	core->mark_all_inputs_unpatched();
 	core->mark_all_outputs_unpatched();
+}
+
+json_t *CommModule::dataToJson() {
+	const auto state_string = core->save_state();
+
+	if (state_string.size())
+		return json_string(state_string.c_str());
+	else
+		return nullptr;
+}
+
+void CommModule::dataFromJson(json_t *rootJ) {
+	if (auto state_str = json_string_value(rootJ); state_str) {
+		core->load_state(state_str);
+	}
 }

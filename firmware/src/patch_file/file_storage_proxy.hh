@@ -172,6 +172,10 @@ public:
 		view_patch_loc_.vol = Volume::RamDisk;
 	}
 
+	void update_patch_module_states(std::vector<ModuleInitState> const &states) {
+		view_patch_->module_states = states; //copy
+	}
+
 	bool write_patch(std::string_view filename = "") {
 		if (filename == "")
 			filename = view_patch_loc_.filename;

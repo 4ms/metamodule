@@ -54,16 +54,18 @@ add_subdirectory(${FWDIR}/vcv_ports/ ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
 # #################### Application ############################################
 
 add_executable(
-	simulator 
-	src/main.cc 
-	src/ui.cc
-  stubs/random.cpp
-	${FWDIR}/src/gui/elements/element_name.cc
-  ${FWDIR}/src/fw_update/updater_proxy.cc
-	${SHARED}/patch_convert/ryml/ryml_serial.cc
-	${SHARED}/patch_convert/yaml_to_patch.cc 
-	${SHARED}/patch_convert/patch_to_yaml.cc
-	)
+    simulator 
+    src/main.cc 
+    src/ui.cc
+    stubs/random.cpp
+    ${FWDIR}/src/gui/elements/element_name.cc
+    ${FWDIR}/src/fw_update/updater_proxy.cc
+    ${SHARED}/patch_convert/ryml/ryml_serial.cc
+    ${SHARED}/patch_convert/ryml/ryml_init.cc
+    ${SHARED}/patch_convert/yaml_to_patch.cc 
+    ${SHARED}/patch_convert/patch_to_yaml.cc
+    ${SHARED}/CoreModules/hub/hub_medium.cc
+    )
 
 target_include_directories(
   simulator

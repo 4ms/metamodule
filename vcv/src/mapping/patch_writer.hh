@@ -43,9 +43,6 @@ private:
 
 	void setModuleList(std::vector<ModuleID> &modules);
 
-	json_t *moduleStateDataJ;
-	json_t *moduleArrayJ;
-
 	PatchData pd;
 	int64_t hubModuleId = -1;
 

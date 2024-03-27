@@ -84,7 +84,7 @@ void Ui::lvgl_update_task() {
 
 void Ui::page_update_task() { //60Hz
 	page_manager.update_current_page();
-	auto load_status = patch_playloader.handle_sync_patch_loading();
+	auto load_status = patch_playloader.handle_file_events();
 	if (!load_status.success) {
 		notify_queue.put({load_status.error_string, Notification::Priority::Error, 5000});
 	}
