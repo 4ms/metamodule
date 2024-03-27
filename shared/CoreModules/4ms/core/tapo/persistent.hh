@@ -27,14 +27,17 @@
 // Persistent data
 
 #pragma once
-
+#include <array>
+#include <span>
+#include <vector>
 #include "parameters.hh"
 #include "resources.h"
 
 namespace TapoDelay {
 
 const int kNumbBanks = 4;
-const int kNumSlots = 6 * kNumbBanks;    // 6 buttons, 4 banks
+const int kSlotsPerBank = 6;
+const int kNumSlots = kSlotsPerBank * kNumbBanks;    // 6 buttons, 4 banks
 
 struct CalibrationData {
   float offset[4];
@@ -57,18 +60,18 @@ public:
 
   void Init(size_t buffer_size) {
 
-      for (size_t i=0; i<4; i++) {
-        data_.calibration_data.offset[i] = 0.5f;
-      }
-      // default settings:
-      data_.velocity_parameter = 2;
-      data_.current_bank = 0;
-      data_.panning_mode = 1;
-      data_.sequencer_mode = 0;
-      data_.current_slot = 0;
-      data_.repeat = 0;
-      data_.sync = 0;
-      SaveData();
+    for (size_t i=0; i<4; i++) {
+      data_.calibration_data.offset[i] = 0.5f;
+    }
+    // default settings:
+    data_.velocity_parameter = 2;
+    data_.current_bank = 0;
+    data_.panning_mode = 1;
+    data_.sequencer_mode = 0;
+    data_.current_slot = 0;
+    data_.repeat = 0;
+    data_.sync = 0;
+    SaveData();
 
     // sanitize settings
     CONSTRAIN(data_.velocity_parameter, 0, 4);
@@ -97,13 +100,12 @@ public:
 
   Data* mutable_data() { return &data_; }
 
-  void SaveBank(int bank) {
-  }
-
+  // Mark the slot to be saved
   void SaveSlot(int slot_nr) {
-    SaveBank(slot_nr / 6);
+    slot_is_customized_[slot_nr] = true;
   }
 
+  // Restore slot to factory default
   void ResetSlot(int slot) {
     slots_[slot].size = lut_preset_sizes[slot];
 
@@ -115,12 +117,13 @@ public:
       t->velocity_type = static_cast<VelocityType>(lut_preset_types[index]);
       t->panning = lut_preset_pans[index];
     }
+    slot_is_customized_[slot] = false;
   }
 
+  // Restore all slots in a bank to factory default
   void ResetBank(int bank) {
     for(int slot=bank*6; slot<(bank+1)*6; slot++)
       ResetSlot(slot);
-    SaveBank(bank);
   }
 
   uint8_t current_bank() { return data_.current_bank; }
@@ -135,12 +138,36 @@ public:
 
   Slot* mutable_slot(int nr) { return &slots_[nr]; }
 
+  struct SavedSlot{
+    uint32_t index;
+    Slot contents;
+  };
+
+  void load_custom_slots(std::span<const SavedSlot> saved_slots) {
+    for (auto const &slot : saved_slots) {
+      if (slot.index < kNumSlots) {
+        slots_[slot.index] = slot.contents;
+        slot_is_customized_[slot.index] = true;
+      }
+    }
+  }
+
+  std::vector<SavedSlot> get_custom_slots() {
+    std::vector<SavedSlot> saved_slots;
+
+    for (auto slot_i = 0u; auto custom : slot_is_customized_) {
+      if (custom) {
+        saved_slots.push_back({slot_i, slots_[slot_i]});
+      }
+      slot_i++;
+    }
+    return saved_slots;
+  }
+
 private:
   Data data_;
-  uint16_t settings_token_;
-
-  Slot slots_[kNumSlots];
-  uint16_t token_[4];
+  std::array<Slot, kNumSlots> slots_;
+  std::array<bool, kNumSlots> slot_is_customized_{};
 };
 
 }

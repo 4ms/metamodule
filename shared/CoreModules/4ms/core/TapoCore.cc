@@ -80,6 +80,35 @@ public:
 		initialize(std::round(sr));
 	}
 
+	void load_state(std::string_view state_data) override 
+	{
+		using SavedSlot = TapoDelay::Persistent::SavedSlot;
+
+		auto slot_data = decode(state_data);
+
+		unsigned num_saved_slots = slot_data.size() / sizeof(SavedSlot);
+		if (num_saved_slots * sizeof(SavedSlot) != slot_data.size()) {
+			// Ignore data that's not an integer number of slots
+			return;
+		}
+
+		auto saved_slots =
+			std::span<const SavedSlot>{reinterpret_cast<const SavedSlot *>(slot_data.data()), num_saved_slots};
+
+		ui.getPersistentStorage().load_custom_slots(saved_slots);
+	}
+
+	std::string save_state() override 
+	{
+		using SavedSlot = TapoDelay::Persistent::SavedSlot;
+
+		auto slot_data = ui.getPersistentStorage().get_custom_slots();
+
+		unsigned data_bytes = slot_data.size() * sizeof(SavedSlot);
+
+		return encode({(uint8_t *)slot_data.data(), data_bytes});
+	}
+
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
