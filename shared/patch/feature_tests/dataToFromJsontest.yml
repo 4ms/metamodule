@@ -241,11 +241,11 @@ PatchData:
   midi_poly_num: 0
   vcvModuleStates:
     - module_id: 1
-      data: !!binary |-
-        eyJibG9ja1RaRk1EQyI6ZmFsc2UsInJlbW92ZVB1bHNlREMiOmZhbHNlLCJvdmVyc2FtcGxpbmdJbmRleCI6MH0=
+      data: |-
+        {"blockTZFMDC":false,"removePulseDC":false,"oversamplingIndex":0}
     - module_id: 2
-      data: !!binary |-
-        eyJibG9ja1RaRk1EQyI6dHJ1ZSwicmVtb3ZlUHVsc2VEQyI6dHJ1ZSwib3ZlcnNhbXBsaW5nSW5kZXgiOjN9
+      data: |-
+        {"blockTZFMDC":true,"removePulseDC":true,"oversamplingIndex":3}
     - module_id: 4
-      data: !!binary |-
-        eyJnYXRlU3RhdGVzIjpbdHJ1ZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSx0cnVlLGZhbHNlLGZhbHNlLGZhbHNlLGZhbHNlLHRydWUsZmFsc2UsZmFsc2UsZmFsc2UsZmFsc2UsdHJ1ZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZSxmYWxzZV19
+      data: |-
+        {"gateStates":[true,false,false,false,false,true,false,false,false,false,true,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]}
