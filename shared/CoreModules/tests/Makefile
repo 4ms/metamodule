@@ -3,7 +3,7 @@
 
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR = $(TEST_DIR)
-RYMLDIR = ../../shared/patch_convert/ryml/rapidyaml
+RYMLDIR = ../../shared/patch_convert/ryml
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard ../cpputil/util/*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
@@ -13,8 +13,10 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 TEST_SOURCES += 4ms/core/axoloti-wrapper/axoloti_math.cpp
-TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
-TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+TEST_SOURCES += $(RYMLDIR)/ryml_serial.cc
+TEST_SOURCES += $(RYMLDIR)/ryml_init.cc
+TEST_SOURCES += $(wildcard $(RYMLDIR)/rapidyaml/src/c4/yml/*.cpp)
+TEST_SOURCES += $(wildcard $(RYMLDIR)/rapidyaml/ext/c4core/src/c4/*.cpp)
 
 BUILDDIR = $(TEST_DIR)/build/obj/obj
 
@@ -23,8 +25,9 @@ CXXFLAGS = 	-Wall \
 			-I. \
 			-I.. \
 			-I../../shared/cpputil \
-			-I$(RYMLDIR)/src \
-			-I$(RYMLDIR)/ext/c4core/src \
+			-I$(RYMLDIR) \
+			-I$(RYMLDIR)/rapidyaml/src \
+			-I$(RYMLDIR)/rapidyaml/ext/c4core/src \
 			-I$(TEST_DIR) \
 			-Wno-unused-const-variable \
 			-Wno-missing-braces \

@@ -41,11 +41,13 @@ struct TestModuleCore : SmartCoreProcessor<TestInfo> {
 TEST_CASE("Fail") {
 	TestModuleCore core;
 
-	// auto e = core.encode("ABCD");
 	std::vector<uint8_t> raw{1, 2, 3, 4};
-	std::string encoded = "{\"state\": \"AQIDBA==\"}";
+	std::string encoded = "AQIDBA==";
+
+	// Check base64 encoding works:
 	CHECK(encoded == core.encode(raw));
 
+	// Check base64 decoding works:
 	auto roundtrip_raw = core.decode(encoded);
 	for (unsigned i = 0; auto c : roundtrip_raw) {
 		CHECK(c == raw[i++]);
