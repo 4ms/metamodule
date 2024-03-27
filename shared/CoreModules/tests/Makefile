@@ -3,6 +3,7 @@
 
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR = $(TEST_DIR)
+RYMLDIR = ../../shared/patch_convert/ryml
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard ../cpputil/util/*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
@@ -11,16 +12,22 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
-TEST_SOURCES += ../4ms/core/axoloti-wrapper/axoloti_math.cpp
+TEST_SOURCES += 4ms/core/axoloti-wrapper/axoloti_math.cpp
+TEST_SOURCES += $(RYMLDIR)/ryml_serial.cc
+TEST_SOURCES += $(RYMLDIR)/ryml_init.cc
+TEST_SOURCES += $(wildcard $(RYMLDIR)/rapidyaml/src/c4/yml/*.cpp)
+TEST_SOURCES += $(wildcard $(RYMLDIR)/rapidyaml/ext/c4core/src/c4/*.cpp)
 
-BUILDDIR = $(TEST_DIR)/build
+BUILDDIR = $(TEST_DIR)/build/obj/obj
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++20 \
 			-I. \
 			-I.. \
 			-I../../shared/cpputil \
-			-I../../shared/etl/include \
+			-I$(RYMLDIR) \
+			-I$(RYMLDIR)/rapidyaml/src \
+			-I$(RYMLDIR)/rapidyaml/ext/c4core/src \
 			-I$(TEST_DIR) \
 			-Wno-unused-const-variable \
 			-Wno-missing-braces \
@@ -28,11 +35,9 @@ CXXFLAGS = 	-Wall \
 
 ### Boilerplate below here:
 
-#CXX = clang++
-LDFLAGS = -lstdc++
-OBJECTS = $(addprefix $(BUILDDIR)/, $(subst ../,,$(addsuffix .o, $(basename $(TEST_SOURCES)))))
+OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
 DEPDIR := $(BUILDDIR)
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(subst ../,,$(basename $<).d)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
 
 TMPFILE = $(BUILDDIR)/runtests.out
 

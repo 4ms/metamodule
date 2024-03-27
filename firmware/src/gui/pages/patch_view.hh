@@ -27,12 +27,13 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
-	PatchViewPage(PatchContext info)
+	PatchViewPage(PatchContext info, ViewSettings &settings)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
-		, file_menu{patch_storage} {
+		, settings{settings}
+		, file_menu{patch_playloader} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -62,7 +63,7 @@ struct PatchViewPage : PageBase {
 	void prepare_focus() override {
 		is_ready = false;
 
-		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
+		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playing) {
 			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
@@ -113,13 +114,15 @@ struct PatchViewPage : PageBase {
 
 		patch = patch_storage.get_view_patch();
 
-		if (patch.patch_name.length() == 0)
+		patch->trim_empty_knobsets();
+
+		if (patch->patch_name.length() == 0)
 			return;
 
-		lv_label_set_text(ui_PatchName, patch.patch_name.c_str());
+		lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
 
-		module_canvases.reserve(patch.module_slugs.size());
-		module_ids.reserve(patch.module_slugs.size());
+		module_canvases.reserve(patch->module_slugs.size());
+		module_ids.reserve(patch->module_slugs.size());
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -138,7 +141,7 @@ struct PatchViewPage : PageBase {
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
 		int bottom = 0;
 
-		for (auto [module_idx, slug] : enumerate(patch.module_slugs)) {
+		for (auto [module_idx, slug] : enumerate(patch->module_slugs)) {
 			module_ids.push_back(module_idx);
 
 			auto canvas = module_drawer.draw_faceplate(slug, canvas_buf);
@@ -146,7 +149,7 @@ struct PatchViewPage : PageBase {
 				continue;
 
 			module_drawer.draw_mapped_elements(
-				patch, module_idx, knobset_settings.active_knobset, canvas, drawn_elements, is_patch_playing);
+				*patch, module_idx, knobset_settings.active_knobset, canvas, drawn_elements, is_patch_playing);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
@@ -172,13 +175,13 @@ struct PatchViewPage : PageBase {
 		update_map_ring_style();
 
 		cable_drawer.set_height(bottom + 30);
-		cable_drawer.draw(patch);
+		update_cable_style(true);
 
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
 		settings_menu.prepare_focus(group);
-		knobset_menu.prepare_focus(group, patch.knob_sets);
-		desc_panel.prepare_focus(group, patch);
+		knobset_menu.prepare_focus(group, patch->knob_sets);
+		desc_panel.prepare_focus(group, *patch);
 		file_menu.prepare_focus(group);
 	}
 
@@ -231,7 +234,7 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (desc_panel.did_update_names()) {
-			lv_label_set_text(ui_PatchName, patch.patch_name.c_str());
+			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
 		}
 
 		if (is_patch_playing) {
@@ -299,7 +302,7 @@ private:
 
 			auto &gui_el = drawn_el.gui_element;
 
-			auto was_redrawn = std::visit(UpdateElement{params, patch, drawn_el.gui_element}, drawn_el.element);
+			auto was_redrawn = std::visit(UpdateElement{params, *patch, drawn_el.gui_element}, drawn_el.element);
 			if (was_redrawn) {
 				if (settings.map_ring_flash_active)
 					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
@@ -323,16 +326,18 @@ private:
 		}
 	}
 
-	void update_cable_style() {
+	void update_cable_style(bool force = false) {
 		static MapRingStyle last_cable_style;
-		if (settings.cable_style.mode != last_cable_style.mode) {
+
+		cable_drawer.set_opacity(settings.cable_style.opa);
+
+		if (force || settings.cable_style.mode != last_cable_style.mode) {
 			if (settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
-				cable_drawer.draw(patch);
+				cable_drawer.draw(*patch);
 			else
 				cable_drawer.clear();
 		}
 		last_cable_style = settings.cable_style;
-		cable_drawer.set_opacity(settings.cable_style.opa);
 	}
 
 	void update_active_knobset() {
@@ -344,7 +349,7 @@ private:
 
 	void redraw_modulename() {
 		auto module_id = highlighted_module_id.value_or(0xFFFFFFFF);
-		if (module_id >= patch.module_slugs.size())
+		if (module_id >= patch->module_slugs.size())
 			return;
 
 		if (highlighted_module_obj == nullptr)
@@ -415,13 +420,13 @@ private:
 		}
 
 		uint32_t module_id = *(static_cast<uint32_t *>(user_data));
-		if (module_id >= page->patch.module_slugs.size())
+		if (module_id >= page->patch->module_slugs.size())
 			return;
 
 		page->highlighted_module_id = module_id;
 		page->highlighted_module_obj = this_module_obj;
 
-		const auto this_slug = page->patch.module_slugs[module_id];
+		const auto this_slug = page->patch->module_slugs[module_id];
 		lv_label_set_text(ui_ModuleName, this_slug.c_str());
 
 		auto module_x = lv_obj_get_x(page->highlighted_module_obj);
@@ -464,9 +469,9 @@ private:
 private:
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
-	CableDrawer cable_drawer;
+	CableDrawer<4 * 240 + 8> cable_drawer; //TODO: relate this number to the module container size
 
-	ViewSettings settings;
+	ViewSettings &settings;
 	PatchViewSettingsMenu settings_menu{settings};
 
 	PatchViewKnobsetMenu::Settings knobset_settings;
@@ -481,7 +486,7 @@ private:
 	std::optional<uint32_t> highlighted_module_id{};
 	lv_obj_t *highlighted_module_obj = nullptr;
 
-	PatchData &patch = patch_storage.get_view_patch();
+	PatchData *patch = patch_storage.get_view_patch();
 
 	std::vector<lv_obj_t *> module_canvases;
 	std::vector<uint32_t> module_ids;

@@ -21,7 +21,7 @@ struct PatchPlayLoader {
 
 		uint32_t tries = 10000;
 		while (--tries) {
-			if (storage_.request_viewpatch({"SlothDrone.yml", Volume::NorFlash}))
+			if (storage_.request_load_patch({"SlothDrone.yml", Volume::NorFlash}))
 				break;
 		}
 		if (tries == 0) {
@@ -34,7 +34,7 @@ struct PatchPlayLoader {
 			auto message = storage_.get_message();
 
 			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
-				if (!storage_.parse_view_patch(message.bytes_read))
+				if (!storage_.parse_loaded_patch(message.bytes_read))
 					pr_err("ERROR: could not parse initial patch\n");
 				else
 					_load_patch();
@@ -96,13 +96,28 @@ struct PatchPlayLoader {
 	}
 
 	// Concurrency: Called from UI thread
-	Result handle_sync_patch_loading() {
+	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {
 			auto result = _load_patch();
 			loading_new_patch_ = false;
 			return result;
 		}
+
+		if (saving_patch_) {
+			save_patch();
+		}
+
 		return {true, ""};
+	}
+
+	void request_save_patch() {
+		saving_patch_ = true;
+	}
+
+	void save_patch() {
+		saving_patch_ = false;
+		storage_.update_patch_module_states(player_.get_module_states());
+		storage_.write_patch();
 	}
 
 private:
@@ -112,20 +127,21 @@ private:
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
 	std::atomic<bool> stopping_audio_ = false;
+	std::atomic<bool> saving_patch_ = false;
 
 	PatchLocHash loaded_patch_loc_hash;
 	ModuleTypeSlug loaded_patch_name_ = "";
 
 	Result _load_patch() {
-		auto &patch = storage_.get_view_patch();
+		auto patch = storage_.get_view_patch();
 		auto vol = storage_.get_view_patch_vol();
 
-		pr_trace("Attempting play patch from vol %d: %.31s\n", (uint32_t)vol, patch.patch_name.data());
+		pr_trace("Attempting play patch from vol %d: %.31s\n", (uint32_t)vol, patch->patch_name.data());
 
-		auto result = player_.load_patch(patch);
+		auto result = player_.load_patch(*patch);
 		if (result.success) {
 			loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
-			loaded_patch_name_ = patch.patch_name;
+			loaded_patch_name_ = patch->patch_name;
 		}
 
 		return result;

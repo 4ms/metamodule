@@ -26,6 +26,8 @@ struct KnobSetViewPage : PageBase {
 		, patch{patch_storage.get_view_patch()} {
 		init_bg(base);
 		lv_group_set_editing(group, false);
+		lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_NextKnobSet, next_knobset_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() override {
@@ -48,22 +50,37 @@ struct KnobSetViewPage : PageBase {
 			i++;
 		}
 
+		patch = patch_storage.get_view_patch();
+
 		lv_group_remove_all_objs(group);
 
+		if (patch->knob_sets.size() > 2) {
+			lv_show(ui_PreviousKnobSet);
+			lv_show(ui_NextKnobSet);
+			lv_group_add_obj(group, ui_PreviousKnobSet);
+			lv_group_add_obj(group, ui_NextKnobSet);
+		} else if (patch->knob_sets.size() > 1) {
+			lv_hide(ui_PreviousKnobSet);
+			lv_show(ui_NextKnobSet);
+			lv_group_add_obj(group, ui_NextKnobSet);
+		} else {
+			lv_hide(ui_PreviousKnobSet);
+			lv_hide(ui_NextKnobSet);
+		}
+
 		knobset = nullptr;
-		patch = patch_storage.get_view_patch();
 
 		if (!args.view_knobset_id)
 			return;
 		auto ks_idx = args.view_knobset_id.value();
-		if (ks_idx >= patch.knob_sets.size())
+		if (ks_idx >= patch->knob_sets.size())
 			return;
 
-		knobset = &patch.knob_sets[ks_idx];
-		lv_label_set_text(ui_KnobSetNameText, patch.valid_knob_set_name(ks_idx));
+		knobset = &patch->knob_sets[ks_idx];
+		lv_label_set_text(ui_KnobSetNameText, patch->valid_knob_set_name(ks_idx));
 
-		if (patch.patch_name.length())
-			lv_label_set_text(ui_KnobSetDescript, patch.patch_name.c_str());
+		if (patch->patch_name.length())
+			lv_label_set_text(ui_KnobSetDescript, patch->patch_name.c_str());
 		else
 			lv_label_set_text(ui_KnobSetDescript, "");
 
@@ -87,12 +104,12 @@ struct KnobSetViewPage : PageBase {
 				if (name.length()) {
 					lv_label_set_text(label, name.data());
 				} else {
-					auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, patch);
+					auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
 					lv_label_set_text_fmt(label, "%s\n%s", fullname.module_name.data(), fullname.element_name.data());
 				}
 			}
 
-			auto s_param = patch.find_static_knob(map.module_id, map.param_id);
+			auto s_param = patch->find_static_knob(map.module_id, map.param_id);
 			float val = s_param && is_patch_playing ? s_param->value : 0;
 			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), val);
 			lv_obj_set_style_opa(get_knob(cont), is_patch_playing ? LV_OPA_100 : LV_OPA_0, LV_PART_KNOB);
@@ -170,17 +187,53 @@ struct KnobSetViewPage : PageBase {
 			return;
 
 		auto view_set_idx = page->args.view_knobset_id.value_or(0xFFFF);
-		if (view_set_idx >= page->patch.knob_sets.size())
+		if (view_set_idx >= page->patch->knob_sets.size())
 			return;
 
 		auto map_idx = reinterpret_cast<uintptr_t>(obj->user_data);
-		if (map_idx >= page->patch.knob_sets[view_set_idx].set.size())
+		if (map_idx >= page->patch->knob_sets[view_set_idx].set.size())
 			return;
 
-		auto &mk = page->patch.knob_sets[view_set_idx].set[map_idx];
+		auto &mk = page->patch->knob_sets[view_set_idx].set[map_idx];
 
 		page->args.mappedknob_id = mk.panel_knob_id;
 		page->page_list.request_new_page(PageId::KnobMap, page->args);
+	}
+
+	static void next_knobset_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+
+		if (auto cur_id = page->args.view_knobset_id) {
+			if (page->args.view_knobset_id >= page->patch->knob_sets.size() - 1)
+				page->args.view_knobset_id = 0;
+			else
+				page->args.view_knobset_id = cur_id.value() + 1;
+
+			page->page_list.request_new_page_no_history(
+				PageId::KnobSetView,
+				{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->args.view_knobset_id});
+		}
+	}
+
+	static void prev_knobset_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+
+		if (auto cur_id = page->args.view_knobset_id) {
+			if (page->args.view_knobset_id == 0)
+				page->args.view_knobset_id = page->patch->knob_sets.size() - 1;
+			else
+				page->args.view_knobset_id = cur_id.value() - 1;
+
+			page->page_list.request_new_page_no_history(
+				PageId::KnobSetView,
+				{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->args.view_knobset_id});
+		}
 	}
 
 private:
@@ -197,7 +250,7 @@ private:
 
 	lv_obj_t *base = nullptr;
 	MappedKnobSet *knobset = nullptr;
-	PatchData &patch;
+	PatchData *patch;
 
 	std::array<lv_obj_t *, 12> panes{ui_KnobPanelA,
 									 ui_KnobPanelB,

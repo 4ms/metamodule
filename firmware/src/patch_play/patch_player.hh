@@ -139,7 +139,7 @@ public:
 			if (ms.module_id >= modules.size())
 				continue;
 
-			modules[ms.module_id]->initialize_state(ms.data_json);
+			modules[ms.module_id]->load_state(ms.state_data);
 		}
 
 		calc_multiple_module_indicies();
@@ -175,6 +175,21 @@ public:
 	void update_lights() {
 		smp.read_patch_state();
 		smp.join();
+	}
+
+	std::vector<ModuleInitState> get_module_states() {
+		std::vector<ModuleInitState> states;
+
+		for (auto [i, module] : enumerate(modules)) {
+			if (i >= pd.module_slugs.size())
+				break;
+			if (!module)
+				continue;
+			if (auto state_data = module->save_state(); state_data.size() > 0)
+				states.push_back({(uint32_t)i, state_data});
+		}
+
+		return states;
 	}
 
 	void unload_patch() {
@@ -366,10 +381,20 @@ public:
 	}
 
 	void disconnect_injack(Jack jack) {
+		for (auto &ins : in_conns) {
+			std::erase(ins, jack);
+		}
+		modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
 		pd.disconnect_injack(jack);
 	}
 
 	void disconnect_outjack(Jack jack) {
+		for (auto &out : out_conns) {
+			if (out == jack) {
+				out = {0xFFFF, 0xFFFF}; //disconnected
+			}
+		}
+		modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 		pd.disconnect_outjack(jack);
 	}
 

@@ -8,6 +8,7 @@
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -17,10 +18,10 @@ namespace MetaModule
 {
 struct ModuleViewPage : PageBase {
 
-	ViewSettings settings;
-
-	ModuleViewPage(PatchContext context)
+	ModuleViewPage(PatchContext context, ViewSettings &settings)
 		: PageBase{context, PageId::ModuleView}
+		, settings{settings}
+		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings}
 		, patch{patch_storage.get_view_patch()}
 		, roller{ui_ElementRoller}
@@ -93,7 +94,7 @@ struct ModuleViewPage : PageBase {
 		active_knob_set = page_list.get_active_knobset();
 
 		module_drawer.draw_mapped_elements(
-			patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
+			*patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
 
 		lv_obj_update_layout(canvas);
 
@@ -115,7 +116,7 @@ struct ModuleViewPage : PageBase {
 					if (drawn.mapped_panel_id)
 						append_panel_jack_name(opts, el, drawn.mapped_panel_id.value());
 
-					append_connected_jack_name(opts, drawn, patch);
+					append_connected_jack_name(opts, drawn, *patch);
 
 					opts += "\n";
 					add_button(drawn.obj);
@@ -155,6 +156,9 @@ struct ModuleViewPage : PageBase {
 		}
 
 		update_map_ring_style();
+
+		cable_drawer.set_height(240);
+		update_cable_style(true);
 
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 
@@ -199,7 +203,7 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
 
-				auto did_move = std::visit(UpdateElement{params, patch, gui_el}, drawn_el.element);
+				auto did_move = std::visit(UpdateElement{params, *patch, gui_el}, drawn_el.element);
 
 				if (did_move && settings.map_ring_flash_active) {
 					map_ring_display.flash_once(gui_el.map_ring, true);
@@ -215,16 +219,17 @@ struct ModuleViewPage : PageBase {
 			bool refresh = true;
 			// Apply to this thread's copy of patch
 			std::visit(overloaded{
-						   [&, this](AddMapping &mod) { refresh = patch.add_update_mapped_knob(mod.set_id, mod.map); },
-						   [&, this](AddMidiMap &mod) { refresh = patch.add_update_midi_map(mod.map); },
-						   [&, this](AddInternalCable &mod) { patch.add_internal_cable(mod.in, mod.out); },
+						   [&, this](AddMapping &mod) { refresh = patch->add_update_mapped_knob(mod.set_id, mod.map); },
+						   [&, this](AddMidiMap &mod) { refresh = patch->add_update_midi_map(mod.map); },
+						   [&, this](AddInternalCable &mod) { patch->add_internal_cable(mod.in, mod.out); },
 						   [&, this](AddJackMapping &mod) {
-							   mod.type == ElementType::Output ? patch.add_mapped_outjack(mod.panel_jack_id, mod.jack) :
-																 patch.add_mapped_injack(mod.panel_jack_id, mod.jack);
+							   mod.type == ElementType::Output ?
+								   patch->add_mapped_outjack(mod.panel_jack_id, mod.jack) :
+								   patch->add_mapped_injack(mod.panel_jack_id, mod.jack);
 						   },
 						   [&, this](DisconnectJack &mod) {
-							   mod.type == ElementType::Output ? patch.disconnect_outjack(mod.jack) :
-																 patch.disconnect_injack(mod.jack);
+							   mod.type == ElementType::Output ? patch->disconnect_outjack(mod.jack) :
+																 patch->disconnect_injack(mod.jack);
 						   },
 						   [&](auto &m) { refresh = false; },
 					   },
@@ -246,6 +251,20 @@ struct ModuleViewPage : PageBase {
 		for (auto &drawn_el : drawn_elements) {
 			map_ring_display.update(drawn_el, true, is_patch_playing);
 		}
+	}
+
+	void update_cable_style(bool force = false) {
+		static MapRingStyle last_cable_style;
+
+		cable_drawer.set_opacity(settings.cable_style.opa);
+
+		if (force || settings.cable_style.mode != last_cable_style.mode) {
+			if (settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
+				cable_drawer.draw_single_module(*patch, this_module_id);
+			else
+				cable_drawer.clear();
+		}
+		last_cable_style = settings.cable_style;
 	}
 
 	void blur() final {
@@ -306,10 +325,10 @@ private:
 			return false;
 		auto module_id = args.module_id.value();
 
-		if (module_id >= patch.module_slugs.size())
+		if (module_id >= patch->module_slugs.size())
 			return false;
 
-		slug = patch.module_slugs[module_id];
+		slug = patch->module_slugs[module_id];
 		return true;
 	}
 
@@ -345,6 +364,9 @@ private:
 		}
 	}
 
+	ViewSettings &settings;
+	CableDrawer<240> cable_drawer;
+
 	ModuleInfoView moduleinfo;
 	PatchModQueue module_mods;
 
@@ -355,7 +377,7 @@ private:
 	uint32_t cur_selected = 0;
 	std::string_view slug = "";
 	bool is_patch_playing = false;
-	PatchData &patch;
+	PatchData *patch;
 
 	unsigned active_knob_set = 0;
 

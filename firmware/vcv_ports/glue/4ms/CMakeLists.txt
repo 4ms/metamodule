@@ -7,12 +7,13 @@ add_library(
 
 set_property(TARGET 4msLibrary PROPERTY CXX_STANDARD 20)
 
-target_link_libraries(4msLibrary PRIVATE cpputil)
+target_link_libraries(4msLibrary PRIVATE cpputil ryml)
 
 target_include_directories(
   4msLibrary
   PUBLIC ${MM_ROOT}/shared
          ${MM_ROOT}/shared/CoreModules/4ms
+		 ${MM_ROOT}/shared/patch_convert/ryml #For ryml_serial
 )
 
 # Ensemble Oscillator

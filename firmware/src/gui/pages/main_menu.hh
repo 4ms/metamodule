@@ -25,10 +25,10 @@ struct MainMenuPage : PageBase {
 
 	void prepare_focus() final {
 		auto patch = patch_storage.get_view_patch();
-		if (patch.patch_name.length() == 0)
+		if (patch->patch_name.length() == 0)
 			lv_label_set_text(patchname_label, "No patch playing");
 		else
-			lv_label_set_text(patchname_label, patch.patch_name.c_str());
+			lv_label_set_text(patchname_label, patch->patch_name.c_str());
 
 		lv_group_set_editing(group, false);
 		lv_group_focus_obj(ui_MenuPanelPatches);

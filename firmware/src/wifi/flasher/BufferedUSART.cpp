@@ -52,10 +52,16 @@ void BufferedUSART::initPeripheral()
             }
             while (LL_USART_IsActiveFlag_RXNE(USART_PERIPH));
         }
-        else
-        {
-            printf("No flag\n");
-        }
+        else if (LL_USART_IsActiveFlag_ORE(USART_PERIPH))
+		{
+            pr_warn("USART1: FIFO Overrun\n");
+			LL_USART_ClearFlag_ORE(USART_PERIPH);
+		}
+		else
+		{
+			pr_warn("USART1: ISR called with no flag\n");
+			(void)USART_PERIPH->RDR;
+		}
     });
 
     // read RX from hardware to clear RXNE flag

@@ -1,10 +1,4 @@
 #
-# Embedded images
-#
-
-add_subdirectory(images ${CMAKE_BINARY_DIR}/wifi_images)
-
-#
 # ESP Serial Flasher
 #
 
@@ -25,5 +19,5 @@ target_sources(main_m4.elf PRIVATE
 
 target_include_directories(main_m4.elf PRIVATE .)
 
-target_link_libraries(main_m4.elf PUBLIC flasher wifi_images)
+target_link_libraries(main_m4.elf PUBLIC flasher)
 

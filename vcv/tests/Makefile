@@ -17,6 +17,7 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 TEST_SOURCES += ../shared/patch_convert/patch_to_yaml.cc
 TEST_SOURCES += ../shared/patch_convert/ryml/ryml_serial.cc
+TEST_SOURCES += ../shared/patch_convert/ryml/ryml_init.cc
 TEST_SOURCES += src/mapping/patch_writer.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
@@ -47,7 +48,6 @@ CXXFLAGS = 	-Wall \
 
 ### Boilerplate below here:
 
-LDFLAGS = -lstdc++
 OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
 DEPDIR := $(BUILDDIR)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
