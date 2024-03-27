@@ -22,30 +22,8 @@ struct PatchData {
 
 	static constexpr uint32_t MIDIKnobSet = 0xFFFFFFFF;
 
-	// PatchData() = default;
-	// PatchData(PatchData &) = default;
-	// PatchData(PatchData &&) = default;
-	// PatchData &operator=(const PatchData &) = default;
-	// PatchData &operator=(PatchData &&) = default;
-	// PatchData(std::string_view patch_name)
-	// 	: patch_name{patch_name}
-	// 	, module_slugs{"HubMedium"}
-	// 	, knob_sets{{{}, "Knob Set 1"}} {
-	// }
-
 	void blank_patch(std::string_view patch_name) {
 		*this = PatchData{};
-		// description = "";
-		// module_slugs.clear();
-		// int_cables.clear();
-		// mapped_ins.clear();
-		// mapped_outs.clear();
-		// static_knobs.clear();
-		// knob_sets.clear();
-		// module_states.clear();
-		// midi_maps.set.clear();
-		// midi_poly_num = 1;
-
 		this->patch_name.copy(patch_name);
 		module_slugs.push_back("HubMedium");
 		knob_sets.push_back({{}, "Knob Set 1"});
@@ -187,14 +165,14 @@ struct PatchData {
 	void disconnect_injack(Jack jack) {
 		// Remove from inputs on all internal cables
 		for (auto &cable : int_cables) {
-			std::erase_if(cable.ins, [jack](auto in) { return (in == jack); });
+			std::erase(cable.ins, jack);
 		}
 		// Remove any cables that now have no inputs
 		std::erase_if(int_cables, [](auto cable) { return (cable.ins.size() == 0); });
 
 		// Remove from inputs on all panel mappings
 		for (auto &map : mapped_ins) {
-			std::erase_if(map.ins, [jack](auto in) { return (in == jack); });
+			std::erase(map.ins, jack);
 		}
 		// Remove any panel mappings that now have no inputs
 		std::erase_if(mapped_ins, [](auto map) { return (map.ins.size() == 0); });
@@ -290,6 +268,10 @@ struct PatchData {
 			}
 		}
 		return nullptr;
+	}
+
+	void trim_empty_knobsets() {
+		std::erase_if(knob_sets, [](auto &knobset) { return knobset.set.size() == 0; });
 	}
 
 	const char *valid_knob_set_name(unsigned set_i) const {

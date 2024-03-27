@@ -8,7 +8,6 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 
-#include "gui/pages/cable_edit_page.hh"
 #include "gui/pages/knobmap.hh"
 #include "gui/pages/knobset_view.hh"
 #include "gui/pages/main_menu.hh"
@@ -28,14 +27,14 @@ class PageManager {
 	PatchContext info;
 	PageList page_list;
 	GuiState gui_state;
+	ViewSettings settings;
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info};
-	PatchViewPage page_patchview{info};
-	ModuleViewPage page_module{info};
+	PatchViewPage page_patchview{info, settings};
+	ModuleViewPage page_module{info, settings};
 	KnobSetViewPage page_knobsetview{info};
 	KnobMapPage page_knobmap{info};
-	CableEditPage page_cableedit{info};
 	SystemMenuPage page_systemmenu{info};
 	ModuleListPage page_modulelist{info};
 

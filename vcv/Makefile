@@ -1,7 +1,7 @@
 # If RACK_DIR is not defined when calling the Makefile, default to two directories above
 RACK_DIR ?= ../..
 
-SHARED = src/shared
+SHARED = ../shared
 
 ## Cpputil
 INCLUDES += -I$(SHARED)/cpputil

@@ -8,6 +8,7 @@
 #include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -17,10 +18,10 @@ namespace MetaModule
 {
 struct ModuleViewPage : PageBase {
 
-	ViewSettings settings;
-
-	ModuleViewPage(PatchContext context)
+	ModuleViewPage(PatchContext context, ViewSettings &settings)
 		: PageBase{context, PageId::ModuleView}
+		, settings{settings}
+		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings}
 		, patch{patch_storage.get_view_patch()}
 		, roller{ui_ElementRoller}
@@ -156,6 +157,9 @@ struct ModuleViewPage : PageBase {
 
 		update_map_ring_style();
 
+		cable_drawer.set_height(240);
+		update_cable_style(true);
+
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 
 		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
@@ -247,6 +251,20 @@ struct ModuleViewPage : PageBase {
 		for (auto &drawn_el : drawn_elements) {
 			map_ring_display.update(drawn_el, true, is_patch_playing);
 		}
+	}
+
+	void update_cable_style(bool force = false) {
+		static MapRingStyle last_cable_style;
+
+		cable_drawer.set_opacity(settings.cable_style.opa);
+
+		if (force || settings.cable_style.mode != last_cable_style.mode) {
+			if (settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
+				cable_drawer.draw_single_module(*patch, this_module_id);
+			else
+				cable_drawer.clear();
+		}
+		last_cable_style = settings.cable_style;
 	}
 
 	void blur() final {
@@ -345,6 +363,9 @@ private:
 			page->mapping_pane.show(page->drawn_elements[cur_sel]);
 		}
 	}
+
+	ViewSettings &settings;
+	CableDrawer<240> cable_drawer;
 
 	ModuleInfoView moduleinfo;
 	PatchModQueue module_mods;
