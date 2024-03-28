@@ -43,7 +43,7 @@ public:
 template <typename Data>
 class Observable1 {
 private:
-  typedef void (*ObserverFct)(Data);
+  using ObserverFct = std::function<void(Data)>;
   ObserverFct observer_;
 
 public:
@@ -56,7 +56,7 @@ public:
 template <typename Data1, typename Data2>
 class Observable2 {
 private:
-  typedef void (*ObserverFct)(Data1, Data2);
+  using ObserverFct = std::function<void(Data1, Data2)>;
   ObserverFct observer_;
 
 public:

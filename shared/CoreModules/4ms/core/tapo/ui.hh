@@ -99,8 +99,6 @@ class Ui {
 
   void SequencerStep(float morph_time);
 
-  static Ui* instance_;
-
   Adc& getADCDriver()
   {
     return control_.getADCDriver();

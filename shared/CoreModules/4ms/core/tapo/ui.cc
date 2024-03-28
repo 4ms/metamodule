@@ -34,33 +34,14 @@ namespace TapoDelay {
 
 using namespace stmlib;
 
-Ui* Ui::instance_;
-
-void reset_observer() {
-    Ui::instance_->PingResetLed();
-}
-
-void tap_observer(TapType type, float velocity) {
-  Ui::instance_->PingMeter(type, velocity);
-}
-
-void slot_modified_observer() {
-  Ui::instance_->SlotModified();
-}
-
-void step_observer(float morph_time) {
-  Ui::instance_->SequencerStep(morph_time);
-}
-
 void Ui::Init(MultitapDelay* delay, Parameters* parameters) {
   delay_ = delay;
   parameters_ = parameters;
-  instance_ = this;
 
-  delay_->reset_observable_.set_observer(&reset_observer);
-  delay_->tap_observable_.set_observer(&tap_observer);
-  delay_->slot_modified_observable_.set_observer(&slot_modified_observer);
-  delay_->step_observable_.set_observer(&step_observer);
+  delay_->reset_observable_.set_observer([this]{ PingResetLed(); });
+  delay_->tap_observable_.set_observer([this](TapType type, float velocity) { PingMeter(type, velocity); });
+  delay_->slot_modified_observable_.set_observer([this]{ SlotModified(); });
+  delay_->step_observable_.set_observer([this](float morph_time) { SequencerStep(morph_time); });
 
   leds_.Init();
   buttons_.Init();
