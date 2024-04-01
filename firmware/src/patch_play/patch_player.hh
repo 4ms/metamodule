@@ -132,7 +132,7 @@ public:
 		}
 
 		// Set static (non-mapped) knobs
-		for (auto &k : pd.static_knobs)
+		for (auto const &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
 
 		for (auto const &ms : pd.module_states) {
@@ -193,10 +193,6 @@ public:
 		pd.midi_maps.name = "";
 
 		clear_cache();
-	}
-
-	PatchData const &patch() {
-		return pd;
 	}
 
 	// K-rate setters/getters:
