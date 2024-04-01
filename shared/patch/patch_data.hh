@@ -134,24 +134,28 @@ struct PatchData {
 
 	const StaticParam *find_static_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : static_knobs) {
-			if (m.module_id == module_id && m.param_id == param_id)
+			if (m.module_id == module_id && m.param_id == param_id) {
 				return &m;
+			}
 		}
 		return nullptr;
 	}
 
 	std::optional<float> get_static_knob_value(uint16_t module_id, uint16_t param_id) const {
-		for (auto &m : static_knobs) {
-			if (m.module_id == module_id && m.param_id == param_id)
+		for (auto const &m : static_knobs) {
+			if (m.module_id == module_id && m.param_id == param_id) {
 				return m.value;
+			}
 		}
 		return std::nullopt;
 	}
 
 	void set_static_knob_value(uint32_t module_id, uint32_t param_id, float val) {
 		for (auto &m : static_knobs) {
-			if (m.module_id == module_id && m.param_id == param_id)
+			if (m.module_id == module_id && m.param_id == param_id) {
 				m.value = val;
+				return;
+			}
 		}
 	}
 
