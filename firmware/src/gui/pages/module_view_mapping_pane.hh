@@ -571,8 +571,7 @@ private:
 		}
 
 		// Show MIDI set first (always show, even if set is empty)
-		auto added_list_item = show_knobset(patch->midi_maps, PatchData::MIDIKnobSet);
-		if (!added_list_item)
+		if (!show_knobset(patch->midi_maps, PatchData::MIDIKnobSet))
 			show_unmapped_knobset(PatchData::MIDIKnobSet, patch->valid_knob_set_name(PatchData::MIDIKnobSet));
 
 		// Show all non-empty knobsets
@@ -581,8 +580,7 @@ private:
 
 			// Show non-empty knobset if it has a mapping
 			// If it's not mapped, only show it if the knobset is not empty
-			auto added_list_item = show_knobset(set, set_i);
-			if (!added_list_item)
+			if (!show_knobset(set, set_i))
 				show_unmapped_knobset(set_i, patch->valid_knob_set_name(set_i));
 		}
 
@@ -692,10 +690,13 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		uint32_t knobset_id = 0; //FIXME
+		uint32_t knobset_id = 0; 
 		auto obj = event->target;
 		if (auto knobset_ptr = lv_obj_get_user_data(obj)) {
 			knobset_id = *static_cast<uint32_t *>(knobset_ptr);
+		} else {
+			pr_err("Knob set id not set\n");
+			return;
 		}
 
 		// Clear all CC events
