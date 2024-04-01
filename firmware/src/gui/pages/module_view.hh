@@ -189,6 +189,12 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
+			args.view_knobset_id = page_list.get_active_knobset();
+			active_knobset = page_list.get_active_knobset();
+			redraw_map_rings();
+		}
+
 		if (is_patch_playing) {
 			// copy light values from params, indexed by light element id
 			for (auto &wl : params.lights.watch_lights) {
@@ -245,6 +251,25 @@ struct ModuleViewPage : PageBase {
 			if (is_patch_playing)
 				patch_mod_queue.put(patch_mod.value());
 		}
+	}
+
+	void redraw_map_rings() {
+		for (auto &drawn_el : drawn_elements) {
+			auto &gui_el = drawn_el.gui_element;
+
+			if (gui_el.count.num_params > 0 && gui_el.map_ring) {
+				lv_obj_del_async(gui_el.map_ring);
+				gui_el.map_ring = nullptr;
+			}
+		}
+
+		for (auto &drawn_el : drawn_elements) {
+			auto module_id = drawn_el.gui_element.module_idx;
+			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
+
+			ModuleDrawer{ui_ModuleImage, 240}.draw_mapped_ring(*patch, module_id, active_knobset, canvas, drawn_el);
+		}
+		update_map_ring_style();
 	}
 
 	// This gets called after map_ring_style changes
