@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/knobset_button.hh"
 #include "gui/notify/display.hh"
 #include "gui/notify/queue.hh"
 #include "gui/slsexport/comp_init.hh"
@@ -28,6 +29,7 @@ class PageManager {
 	PageList page_list;
 	GuiState gui_state;
 	ViewSettings settings;
+	ButtonLight button_light;
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info};
@@ -59,6 +61,7 @@ public:
 
 	void init() {
 		page_list.request_initial_page(PageId::MainMenu, {});
+		button_light.display_knobset(0);
 	}
 
 	void update_current_page() {
@@ -95,6 +98,8 @@ public:
 				info.page_list.set_active_knobset(next_knobset);
 				std::string ks_name = patch->valid_knob_set_name(next_knobset);
 				info.notify_queue.put({"Using Knob Set \"" + ks_name + "\""});
+
+				button_light.display_knobset(next_knobset);
 			}
 		}
 	}
@@ -146,11 +151,12 @@ public:
 	}
 
 	void debug_print_args(auto newpage) {
+		PatchLocation nullloc{"", Volume::MaxVolumes};
 		pr_trace("Args: mod: %d, panel: %d, set: %d, patchnamehash: %u\n",
 				 newpage->args->module_id.value_or(88),
 				 newpage->args->mappedknob_id.value_or(88),
 				 newpage->args->view_knobset_id.value_or(88),
-				 (unsigned)newpage->args->patch_loc_hash.value_or(8888).index);
+				 (unsigned)newpage->args->patch_loc_hash.value_or(nullloc).filehash);
 
 		if (newpage->args->element_indices) {
 			auto i = newpage->args->element_indices.value();
