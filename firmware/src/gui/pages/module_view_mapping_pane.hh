@@ -571,45 +571,32 @@ private:
 		}
 
 		// Show MIDI set first (always show, even if set is empty)
-		auto [_, added_list_item] = show_knobset(patch->midi_maps, PatchData::MIDIKnobSet);
+		auto added_list_item = show_knobset(patch->midi_maps, PatchData::MIDIKnobSet);
 		if (!added_list_item)
 			show_unmapped_knobset(PatchData::MIDIKnobSet, patch->valid_knob_set_name(PatchData::MIDIKnobSet));
 
 		// Show all non-empty knobsets
-		std::optional<unsigned> first_empty_set = std::nullopt;
 		for (uint32_t set_i = 0; set_i < patch->knob_sets.size(); set_i++) {
 			auto &set = patch->knob_sets[set_i];
 
 			// Show non-empty knobset if it has a mapping
 			// If it's not mapped, only show it if the knobset is not empty
-			auto [set_is_empty, added_list_item] = show_knobset(set, set_i);
-			if (!set_is_empty && !added_list_item)
+			auto added_list_item = show_knobset(set, set_i);
+			if (!added_list_item)
 				show_unmapped_knobset(set_i, patch->valid_knob_set_name(set_i));
-
-			else if (set_is_empty && !first_empty_set.has_value())
-				first_empty_set = set_i;
 		}
 
-		// Show the first empty knobset (if there is one)
-		if (first_empty_set.has_value()) {
-			unsigned set_i = first_empty_set.value();
-			show_unmapped_knobset(set_i, "(new knobset)");
+		if (patch->knob_sets.size() < 8) {
+			show_unmapped_knobset(patch->knob_sets.size(), "(new knobset)");
 		}
 	}
 
-	struct KnobSetStatus {
-		bool set_is_empty;
-		bool added_list_item;
-	};
-
-	KnobSetStatus show_knobset(MappedKnobSet const &set, unsigned set_i) {
-		bool set_is_empty = true;
+	bool show_knobset(MappedKnobSet const &set, unsigned set_i) {
 		bool added_list_item = false;
 		auto setname = patch->valid_knob_set_name(set_i);
 
 		for (auto &map : set.set) {
 			if (map.module_id > 0 && map.module_id < patch->module_slugs.size()) {
-				set_is_empty = false;
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
 					bool is_active = is_patch_playing && set_i == page_list.get_active_knobset();
 					auto obj = list.create_map_list_item(map, setname, ui_MapList, is_active);
@@ -619,7 +606,7 @@ private:
 				}
 			}
 		}
-		return {set_is_empty, added_list_item};
+		return added_list_item;
 	}
 
 	void show_unmapped_knobset(unsigned set_i, const char *setname) {
