@@ -43,6 +43,7 @@ bool Ui::update() {
 	if (tm - last_page_task_tm >= 16) {
 		transfer_aux_button_events();
 		transfer_params();
+		change_knobset();
 		update_channel_selections();
 		page_update_task();
 		last_page_task_tm = tm;
@@ -116,6 +117,12 @@ void Ui::transfer_params() {
 
 			std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
 		}
+	}
+}
+
+void Ui::change_knobset() {
+	if (auto change = input_driver.knobset_changed(); change != 0) {
+		metaparams.rotary_with_metabutton.motion += change;
 	}
 }
 

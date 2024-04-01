@@ -84,18 +84,26 @@ struct PatchData {
 
 	// Updates an existing mapped knob, or adds it if it doesn't exist yet
 	bool add_update_mapped_knob(uint32_t set_id, MappedKnob const &map) {
-		if (set_id >= knob_sets.size())
+		if (set_id >= MaxKnobSets)
 			return false;
 
 		if (map.module_id >= module_slugs.size())
 			return false;
 
-		// if (map.param_id >= PanelDef::NumKnobs)
-		// 	return false;
+		if (set_id > knob_sets.size())
+			return false;
 
-		if (auto *m = _get_mapped_knob(set_id, map.module_id, map.param_id)) {
+		if (set_id == knob_sets.size()) {
+			// Append a new knob set and add a mapping to it
+			knob_sets.push_back({});
+			knob_sets[set_id].set.push_back(map);
+
+		} else if (auto *m = _get_mapped_knob(set_id, map.module_id, map.param_id)) {
+			// Update a mapping in an existing knob set
 			*m = map;
+
 		} else {
+			// Add a new mapping in an existing knob set
 			knob_sets[set_id].set.push_back(map);
 		}
 
@@ -134,24 +142,28 @@ struct PatchData {
 
 	const StaticParam *find_static_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : static_knobs) {
-			if (m.module_id == module_id && m.param_id == param_id)
+			if (m.module_id == module_id && m.param_id == param_id) {
 				return &m;
+			}
 		}
 		return nullptr;
 	}
 
 	std::optional<float> get_static_knob_value(uint16_t module_id, uint16_t param_id) const {
-		for (auto &m : static_knobs) {
-			if (m.module_id == module_id && m.param_id == param_id)
+		for (auto const &m : static_knobs) {
+			if (m.module_id == module_id && m.param_id == param_id) {
 				return m.value;
+			}
 		}
 		return std::nullopt;
 	}
 
 	void set_static_knob_value(uint32_t module_id, uint32_t param_id, float val) {
 		for (auto &m : static_knobs) {
-			if (m.module_id == module_id && m.param_id == param_id)
+			if (m.module_id == module_id && m.param_id == param_id) {
 				m.value = val;
+				return;
+			}
 		}
 	}
 

@@ -2,6 +2,7 @@
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
 #include "midi_params.hh"
+#include "patch.hh"
 #include "patch/midi_def.hh"
 #include "patch_play/lights.hh"
 #include "util/debouncer.hh"
@@ -82,6 +83,25 @@ struct ParamsMidiState : ParamsState {
 
 		for (auto &cc : midi_ccs)
 			cc = 0;
+	}
+
+	std::optional<float> panel_knob_new_value(uint16_t mapped_panel_id) const {
+
+		auto mk = MappedKnob{.panel_knob_id = mapped_panel_id};
+
+		if (mk.is_panel_knob()) {
+			auto latched = knobs[mapped_panel_id];
+			return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
+		}
+
+		else if (mk.is_midi_cc())
+		{
+			auto latched = midi_ccs[mk.cc_num()];
+			return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
+		}
+
+		else
+			return std::nullopt;
 	}
 };
 

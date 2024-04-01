@@ -132,7 +132,7 @@ public:
 		}
 
 		// Set static (non-mapped) knobs
-		for (auto &k : pd.static_knobs)
+		for (auto const &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
 
 		for (auto const &ms : pd.module_states) {

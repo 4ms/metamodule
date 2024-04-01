@@ -19,6 +19,8 @@ class Ui {
 		.quit = SDLK_ESCAPE,
 		.param_inc = ']',
 		.param_dec = '[',
+		.prev_knobset = ',',
+		.next_knobset = '.',
 	};
 
 public:
@@ -60,6 +62,7 @@ private:
 	void page_update_task();
 	void transfer_aux_button_events();
 	void transfer_params();
+	void change_knobset();
 	void update_channel_selections();
 };
 

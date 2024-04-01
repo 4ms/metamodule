@@ -27,6 +27,7 @@ struct MapCableUserData {
 	ElementCount::Indices idx;
 };
 
+//TODO: Separate this into CableMappingPane, ParamMappingPane
 struct ModuleViewMappingPane {
 	ModuleViewMappingPane(FileStorageProxy &patch_storage,
 						  PatchModQueue &patch_mod_queue,
@@ -139,6 +140,26 @@ struct ModuleViewMappingPane {
 
 	void update() {
 		add_map_popup.update(params);
+		if (is_patch_playing) {
+
+			if (last_active_knobset != page_list.get_active_knobset()) {
+				if (last_active_knobset <= map_list_items.size()) {
+					//Remove active mark
+					if (auto set_i = last_active_knobset + 1; set_i < map_list_items.size()) {
+						if (auto obj = map_list_items[set_i])
+							lv_obj_set_style_bg_opa(obj, LV_OPA_0, LV_STATE_DEFAULT);
+					}
+				}
+				if (page_list.get_active_knobset() <= map_list_items.size()) {
+					//Add active mark
+					if (auto set_i = page_list.get_active_knobset() + 1; set_i < map_list_items.size()) {
+						if (auto obj = map_list_items[set_i])
+							lv_obj_set_style_bg_opa(obj, LV_OPA_100, LV_STATE_DEFAULT);
+					}
+				}
+				last_active_knobset = page_list.get_active_knobset();
+			}
+		}
 	}
 
 	bool wants_to_close() {
@@ -165,6 +186,7 @@ struct ModuleViewMappingPane {
 private:
 	static inline std::array<MapKnobUserData, MaxKnobSets + 1> mapped_item_user_data{};
 	static inline std::array<MapCableUserData, 12> mapped_cable_user_data{};
+	uint32_t last_active_knobset = 0;
 
 	void remove_all_items() {
 		for (auto &obj : map_list_items) {
@@ -549,59 +571,45 @@ private:
 		}
 
 		// Show MIDI set first (always show, even if set is empty)
-		auto [_, added_list_item] = show_knobset(patch->midi_maps, PatchData::MIDIKnobSet);
-		if (!added_list_item)
+		if (!show_knobset(patch->midi_maps, PatchData::MIDIKnobSet))
 			show_unmapped_knobset(PatchData::MIDIKnobSet, patch->valid_knob_set_name(PatchData::MIDIKnobSet));
 
 		// Show all non-empty knobsets
-		std::optional<unsigned> first_empty_set = std::nullopt;
 		for (uint32_t set_i = 0; set_i < patch->knob_sets.size(); set_i++) {
 			auto &set = patch->knob_sets[set_i];
 
 			// Show non-empty knobset if it has a mapping
 			// If it's not mapped, only show it if the knobset is not empty
-			auto [set_is_empty, added_list_item] = show_knobset(set, set_i);
-			if (!set_is_empty && !added_list_item)
+			if (!show_knobset(set, set_i))
 				show_unmapped_knobset(set_i, patch->valid_knob_set_name(set_i));
-
-			else if (set_is_empty && !first_empty_set.has_value())
-				first_empty_set = set_i;
 		}
 
-		// Show the first empty knobset (if there is one)
-		if (first_empty_set.has_value()) {
-			unsigned set_i = first_empty_set.value();
-			show_unmapped_knobset(set_i, "(new knobset)");
+		if (patch->knob_sets.size() < 8) {
+			show_unmapped_knobset(patch->knob_sets.size(), "(new knobset)");
 		}
 	}
 
-	struct KnobSetStatus {
-		bool set_is_empty;
-		bool added_list_item;
-	};
-
-	KnobSetStatus show_knobset(MappedKnobSet const &set, unsigned set_i) {
-		bool set_is_empty = true;
+	bool show_knobset(MappedKnobSet const &set, unsigned set_i) {
 		bool added_list_item = false;
 		auto setname = patch->valid_knob_set_name(set_i);
 
 		for (auto &map : set.set) {
 			if (map.module_id > 0 && map.module_id < patch->module_slugs.size()) {
-				set_is_empty = false;
 				if (map.param_id == drawn_element->gui_element.idx.param_idx && map.module_id == this_module_id) {
-					auto obj =
-						list.create_map_list_item(map, setname, ui_MapList, set_i == page_list.get_active_knobset());
+					bool is_active = is_patch_playing && set_i == page_list.get_active_knobset();
+					auto obj = list.create_map_list_item(map, setname, ui_MapList, is_active);
 					make_selectable_knobset_item(obj, set_i, map.panel_knob_id);
 					lv_obj_add_event_cb(obj, edit_map_button_cb, LV_EVENT_CLICKED, this);
 					added_list_item = true;
 				}
 			}
 		}
-		return {set_is_empty, added_list_item};
+		return added_list_item;
 	}
 
 	void show_unmapped_knobset(unsigned set_i, const char *setname) {
-		auto obj = list.create_unmapped_list_item(setname, ui_MapList, set_i == page_list.get_active_knobset());
+		bool is_active = is_patch_playing && set_i == page_list.get_active_knobset();
+		auto obj = list.create_unmapped_list_item(setname, ui_MapList, is_active);
 		make_selectable_knobset_item(obj, set_i, std::nullopt);
 		lv_obj_add_event_cb(obj, add_map_button_cb, LV_EVENT_CLICKED, this);
 	}
@@ -682,10 +690,13 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		uint32_t knobset_id = 0; //FIXME
+		uint32_t knobset_id = 0; 
 		auto obj = event->target;
 		if (auto knobset_ptr = lv_obj_get_user_data(obj)) {
 			knobset_id = *static_cast<uint32_t *>(knobset_ptr);
+		} else {
+			pr_err("Knob set id not set\n");
+			return;
 		}
 
 		// Clear all CC events

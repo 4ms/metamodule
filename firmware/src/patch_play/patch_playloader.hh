@@ -140,6 +140,7 @@ private:
 
 		auto result = player_.load_patch(*patch);
 		if (result.success) {
+			storage_.play_view_patch();
 			loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
 			loaded_patch_name_ = patch->patch_name;
 		}

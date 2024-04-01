@@ -81,12 +81,6 @@ PatchData:
           curve_type: 0
           min: 0
           max: 1
-        - panel_knob_id: 0
-          module_id: 1
-          param_id: 8
-          curve_type: 0
-          min: 0
-          max: 1
         - panel_knob_id: 1
           module_id: 1
           param_id: 4

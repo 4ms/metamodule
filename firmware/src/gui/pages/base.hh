@@ -88,9 +88,7 @@ struct PageBase {
 	}
 
 	void focus(PageArguments const *args) {
-		for (auto &b : metaparams.meta_buttons)
-			b.clear_events();
-
+		metaparams.back_button.clear_events();
 		metaparams.rotary_button.clear_events();
 
 		if (group) {
