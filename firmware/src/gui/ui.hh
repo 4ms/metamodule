@@ -24,7 +24,6 @@ private:
 
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
-	PatchModQueue &patch_mod_queue;
 
 	NotificationQueue notify_queue;
 	PageManager page_manager;
@@ -40,7 +39,6 @@ public:
 	   PatchModQueue &patch_mod_queue)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
-		, patch_mod_queue{patch_mod_queue}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue} {
 
 		params.clear();
