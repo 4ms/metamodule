@@ -4,8 +4,8 @@
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
+#include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_light.hh"
-#include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
@@ -214,6 +214,8 @@ struct PatchViewPage : PageBase {
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
 
+		patch = patch_storage.get_view_patch();
+
 		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
 
 		if (is_patch_playing != last_is_patch_playing || settings.changed) {
@@ -334,7 +336,8 @@ private:
 
 			auto &gui_el = drawn_el.gui_element;
 
-			auto was_redrawn = std::visit(UpdateElement{params, *patch, drawn_el.gui_element}, drawn_el.element);
+			auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
+
 			if (was_redrawn) {
 				if (settings.map_ring_flash_active)
 					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
@@ -371,13 +374,6 @@ private:
 		}
 		last_cable_style = settings.cable_style;
 	}
-
-	// void update_active_knobset() {
-	// 	blur();
-	// 	args.view_knobset_id = knobset_settings.active_knobset;
-	// 	patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
-	// 	prepare_focus();
-	// }
 
 	void redraw_modulename() {
 		auto module_id = highlighted_module_id.value_or(0xFFFFFFFF);

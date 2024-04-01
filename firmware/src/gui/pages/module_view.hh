@@ -4,8 +4,8 @@
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/module_param.hh"
+#include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_light.hh"
-#include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
@@ -91,10 +91,10 @@ struct ModuleViewPage : PageBase {
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
 
-		active_knob_set = page_list.get_active_knobset();
+		active_knobset = page_list.get_active_knobset();
 
 		module_drawer.draw_mapped_elements(
-			*patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
+			*patch, this_module_id, active_knobset, canvas, drawn_elements, is_patch_playing);
 
 		lv_obj_update_layout(canvas);
 
@@ -203,9 +203,10 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
 
-				auto did_move = std::visit(UpdateElement{params, *patch, gui_el}, drawn_el.element);
+				//TODO: cache s_param
+				auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
 
-				if (did_move && settings.map_ring_flash_active) {
+				if (was_redrawn && settings.map_ring_flash_active) {
 					map_ring_display.flash_once(gui_el.map_ring, true);
 				}
 
@@ -379,7 +380,7 @@ private:
 	bool is_patch_playing = false;
 	PatchData *patch;
 
-	unsigned active_knob_set = 0;
+	unsigned active_knobset = 0;
 
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_controls;

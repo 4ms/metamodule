@@ -4,7 +4,6 @@
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/module_param.hh"
-#include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/knob_arc.hh"
@@ -31,8 +30,7 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		is_patch_playing = patch_is_playing(args.patch_loc_hash);
-
+		// Clear
 		for (unsigned i = 0; auto cont : containers) {
 			set_for_knob(cont, i);
 
@@ -49,10 +47,15 @@ struct KnobSetViewPage : PageBase {
 
 			i++;
 		}
-
-		patch = patch_storage.get_view_patch();
-
 		lv_group_remove_all_objs(group);
+
+		knobset = nullptr;
+		arcs.clear();
+		static_params.clear();
+
+		// Setup
+		update_active_status(true);
+		patch = patch_storage.get_view_patch();
 
 		if (patch->knob_sets.size() > 2) {
 			lv_show(ui_PreviousKnobSet);
@@ -68,20 +71,20 @@ struct KnobSetViewPage : PageBase {
 			lv_hide(ui_NextKnobSet);
 		}
 
-		update_active_status(true);
-
-		knobset = nullptr;
-
+		// Set Knobset
 		if (!args.view_knobset_id)
 			return;
 		auto ks_idx = args.view_knobset_id.value();
 		if (ks_idx >= patch->knob_sets.size())
 			return;
-
 		knobset = &patch->knob_sets[ks_idx];
+
 		lv_label_set_text(ui_KnobSetNameText, patch->valid_knob_set_name(ks_idx));
 
+		// Set mappings in knobset
 		unsigned num_maps[PanelDef::NumKnobs]{};
+		arcs.resize(knobset->set.size());
+		static_params.resize(knobset->set.size());
 
 		for (auto [idx, map] : enumerate(knobset->set)) {
 			if (!map.is_panel_knob())
@@ -106,17 +109,8 @@ struct KnobSetViewPage : PageBase {
 				}
 			}
 
-			float val = 0.f;
-			// if (is_actively_playing) {
-			// 	auto knobset_id = page_list.get_active_knobset();
-			// 	if (auto m_param = patch->find_mapped_knob(knobset_id, map.param_id)) {
-			// 		// val = m_param->get_mapped_val();
-			// 	}
-
-			// } else
-			if (auto s_param = patch->find_static_knob(map.module_id, map.param_id))
-				val = s_param->value;
-
+			static_params[idx] = patch->find_static_knob(map.module_id, map.param_id);
+			float val = static_params[idx] ? map.unmap_val(static_params[idx]->value) : 0;
 			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), val);
 
 			lv_obj_set_style_opa(get_knob(cont), is_patch_playing ? LV_OPA_100 : LV_OPA_0, LV_PART_KNOB);
@@ -129,7 +123,9 @@ struct KnobSetViewPage : PageBase {
 			lv_obj_remove_event_cb(cont, mapping_cb);
 			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
 
-			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx)); //Dangerous? "ptr" is actually an integer
+			arcs[idx] = get_knob(cont);
+
+			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx));
 
 			if (map.panel_knob_id == args.mappedknob_id)
 				lv_group_focus_obj(cont);
@@ -169,25 +165,10 @@ struct KnobSetViewPage : PageBase {
 
 		update_active_status();
 
-		if (is_actively_playing) {
-			// Iterate all knobs
-			for (auto knob_i = 0u; knob_i < params.knobs.size(); knob_i++) {
-				// Find the knobs that have moved
-				if (auto knobpos = ElementUpdate::get_mapped_param_value(params, knob_i); knobpos.has_value()) {
-					// Iterate all containers in the pane for this knob
-					auto pane = panes[knob_i];
-					auto num_children = lv_obj_get_child_cnt(pane);
-					for (unsigned i = 0; i < num_children; i++) {
-						auto cont = lv_obj_get_child(pane, i);
-						if (!cont)
-							continue;
-						auto map_idx = reinterpret_cast<uintptr_t>(lv_obj_get_user_data(cont));
-						if (map_idx < knobset->set.size()) {
-							unsigned lv_pos = knobpos.value() * 120.f;
-							lv_arc_set_value(get_knob(cont), lv_pos);
-						}
-					}
-				}
+		if (knobset) {
+			for (auto [arc, s_param, map] : zip(arcs, static_params, knobset->set)) {
+				float s_val = s_param ? map.unmap_val(s_param->value) : 0;
+				lv_arc_set_value(arc, s_val * 120.f);
 			}
 		}
 	}
@@ -222,9 +203,7 @@ struct KnobSetViewPage : PageBase {
 		if (map_idx >= page->patch->knob_sets[view_set_idx].set.size())
 			return;
 
-		auto &mk = page->patch->knob_sets[view_set_idx].set[map_idx];
-
-		page->args.mappedknob_id = mk.panel_knob_id;
+		page->args.mappedknob_id = map_idx;
 		page->page_list.request_new_page(PageId::KnobMap, page->args);
 	}
 
@@ -280,6 +259,9 @@ private:
 	MappedKnobSet *knobset = nullptr;
 	PatchData *patch;
 	bool is_actively_playing = false;
+
+	std::vector<lv_obj_t *> arcs;
+	std::vector<const StaticParam *> static_params;
 
 	std::array<lv_obj_t *, 12> panes{ui_KnobPanelA,
 									 ui_KnobPanelB,
