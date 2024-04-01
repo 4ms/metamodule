@@ -63,27 +63,11 @@ public:
 
 	void update_current_page() {
 
-		auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion();
-		if (knobset_change != 0) {
+		handle_knobset_change();
 
-			if (int num_knobsets = info.patch_playloader.playing_patch().knob_sets.size(); num_knobsets > 0) {
-				int cur_knobset = info.page_list.get_active_knobset();
-				int next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
+		update_patch_params();
 
-				info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
-				info.page_list.set_active_knobset(next_knobset);
-
-				pr_trace("Change knobset via button: %d -> %d\n", cur_knobset, next_knobset);
-			}
-		}
-
-		// Interpret and pass on back button events
-		if (info.metaparams.meta_buttons[0].is_just_released()) {
-			if (!info.metaparams.ignore_metabutton_release)
-				info.metaparams.back_button.register_falling_edge();
-			else
-				info.metaparams.ignore_metabutton_release = false;
-		}
+		handle_back_event();
 
 		if (auto newpage = page_list.get_requested_page()) {
 			if (newpage->page) {
@@ -96,6 +80,61 @@ public:
 			cur_page->update();
 
 		handle_notifications();
+	}
+
+	void handle_knobset_change() {
+		auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion();
+		if (knobset_change != 0) {
+
+			auto patch = info.patch_storage.playing_patch();
+			if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
+				int cur_knobset = info.page_list.get_active_knobset();
+				int next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
+
+				info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
+				info.page_list.set_active_knobset(next_knobset);
+				std::string ks_name = patch->valid_knob_set_name(next_knobset);
+				info.notify_queue.put({"Using Knob Set \"" + ks_name + "\""});
+			}
+		}
+	}
+
+	// Update internal copy of patch with knob changes
+	// This is used to keep GUI in sync with patch player's copy of the patch without concurrancy issues
+	void update_patch_params() {
+		auto patch = info.patch_storage.playing_patch();
+		auto active_knobset = info.page_list.get_active_knobset();
+		if (active_knobset >= patch->knob_sets.size())
+			return;
+
+		// Iterate all panel knobs
+		for (auto panel_knob_i = 0u; panel_knob_i < info.params.knobs.size(); panel_knob_i++) {
+
+			// Find knobs that have moved
+			auto knobpos = info.params.panel_knob_new_value(panel_knob_i);
+			if (!knobpos.has_value())
+				continue;
+
+			// Iterate all knob maps in the active knob set
+			for (auto &map : patch->knob_sets[active_knobset].set) {
+
+				// update the patch for knobs that moved
+				if (map.panel_knob_id == panel_knob_i) {
+					auto scaled_val = map.get_mapped_val(knobpos.value());
+					patch->set_static_knob_value(map.module_id, map.param_id, scaled_val);
+				}
+			}
+		}
+	}
+
+	void handle_back_event() {
+		// Interpret and pass on back button events
+		if (info.metaparams.meta_buttons[0].is_just_released()) {
+			if (!info.metaparams.ignore_metabutton_release)
+				info.metaparams.back_button.register_falling_edge();
+			else
+				info.metaparams.ignore_metabutton_release = false;
+		}
 	}
 
 	void handle_notifications() {
