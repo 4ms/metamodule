@@ -43,9 +43,6 @@ public:
 			pr_err("Can't communicate with FUSB302\n");
 
 		// tm = HAL_GetTick();
-		Debug::red_LED1::low();
-		Debug::blue_LED1::low();
-		Debug::green_LED1::low();
 		pr_dbg("Starting DRP polling\n");
 		usbctl.start_drp_polling();
 	}
@@ -57,20 +54,14 @@ public:
 			using enum FUSB302::Device::ConnectedState;
 
 			if (newstate == AsDevice) {
-				Debug::red_LED1::high();
-				Debug::blue_LED1::low();
 				pr_info("Connected as a device\n");
 				usb_drive.start();
 
 			} else if (newstate == AsHost) {
-				Debug::red_LED1::low();
-				Debug::blue_LED1::high();
 				pr_info("Starting host\n");
 				usb_host.start();
 
 			} else if (newstate == None) {
-				Debug::red_LED1::low();
-				Debug::blue_LED1::low();
 				if (state == AsHost) {
 					state = None; //so that we don't do Host::Process()
 					usb_host.stop();
