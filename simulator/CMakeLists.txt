@@ -76,7 +76,7 @@ target_include_directories(
           ${FWDIR}/src/medium
           )
 
-target_compile_options(simulator PRIVATE -Wall -Og)
+target_compile_options(simulator PRIVATE -Wall -Og -Wno-double-promotion)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports)
 
