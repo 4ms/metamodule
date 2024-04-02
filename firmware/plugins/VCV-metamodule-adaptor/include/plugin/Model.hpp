@@ -1,90 +1,66 @@
 #pragma once
+#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/elements/element_counter.hh"
 #include <common.hpp>
-#include <plugin/Plugin.hpp>
-
+#include <deque>
 #include <jansson.h>
-
 #include <list>
+#include <plugin/Plugin.hpp>
+#include <vector>
 
-
-namespace rack {
-
-
-namespace ui {
+namespace rack::ui
+{
 struct Menu;
-} // namespace app
+} // namespace rack::ui
 
-
-namespace app {
+namespace rack::app
+{
 struct ModuleWidget;
-} // namespace app
+} // namespace rack::app
 
-
-namespace engine {
+namespace rack::engine
+{
 struct Module;
-} // namespace engine
+} // namespace rack::engine
 
+namespace rack::plugin
+{
 
-namespace plugin {
-
-
-/** Type information for a module.
-Factory for Module and ModuleWidget.
-*/
 struct Model {
-	Plugin* plugin = NULL;
+	Plugin *plugin = nullptr;
 
-	/** Must be unique. Used for saving patches. Never change this after releasing your module.
-	The model slug must be unique within your plugin, but it doesn't need to be unique among different plugins.
-	*/
-	std::string slug;
-	/** Human readable name for your model, e.g. "Voltage Controlled Oscillator" */
+	std::string slug{};
+
 	std::string name;
-	/** List of tag IDs representing the function(s) of the module.
-	Tag IDs are not part of the ABI and may change at any time.
-	*/
 	std::list<int> tagIds;
-	/** A one-line summary of the module's purpose */
 	std::string description;
-	/** The manual of the module. HTML, PDF, or GitHub readme/wiki are fine.
-	*/
 	std::string manualUrl;
 	std::string modularGridUrl;
 
-	/** Hides model from the Module Browser but able to be loaded from a patch file.
-	Useful for deprecating modules without breaking old patches.
-	*/
 	bool hidden = false;
 
-	virtual ~Model() {}
-	/** Creates a Module. */
-	virtual engine::Module* createModule() {
-		return NULL;
-	}
-	/** Creates a ModuleWidget with a Module attached.
-	Module may be NULL.
-	*/
-	virtual app::ModuleWidget* createModuleWidget(engine::Module* m) {
-		return NULL;
+	std::vector<MetaModule::Element> elements;
+	std::vector<ElementCount::Indices> indices;
+	std::deque<std::string> strings;
+
+	virtual ~Model() = default;
+
+	virtual engine::Module *createModule() {
+		return nullptr;
 	}
 
-	void fromJson(json_t* rootJ);
-	/** Returns the branded name of the model, e.g. VCV VCO-1. */
+	virtual app::ModuleWidget *createModuleWidget(engine::Module *m) {
+		return nullptr;
+	}
+
+	void move_strings();
+	std::string_view add_string(std::string_view str);
+	void debug_dump_strings();
+
 	std::string getFullName();
-	std::string getFactoryPresetDirectory();
-	std::string getUserPresetDirectory();
-	/** Returns the module or plugin manual URL, whichever exists. */
-	std::string getManualUrl();
 
-	/** Appends items to menu with useful Model information.
-
-	Enable `inBrowser` to show Module Browser key commands.
-	*/
-	void appendContextMenu(ui::Menu* menu, bool inBrowser = false);
-	bool isFavorite();
-	void setFavorite(bool favorite);
+	void fromJson(json_t *rootJ) {
+	}
 };
 
-
-} // namespace plugin
-} // namespace rack
+} // namespace rack::plugin

@@ -1,34 +1,30 @@
 #pragma once
 #include <app/common.hpp>
-#include <widget/TransparentWidget.hpp>
+#include <settings.hpp>
 #include <widget/FramebufferWidget.hpp>
 #include <widget/SvgWidget.hpp>
-#include <settings.hpp>
+#include <widget/TransparentWidget.hpp>
 
-
-namespace rack {
-namespace app {
-
+namespace rack::app
+{
 
 struct PanelBorder : widget::TransparentWidget {
-	void draw(const DrawArgs& args) override;
+	void draw(const DrawArgs &args) override {
+	}
 };
-
 
 struct SvgPanel : widget::Widget {
-	widget::FramebufferWidget* fb;
-	widget::SvgWidget* sw;
-	PanelBorder* panelBorder;
+	widget::FramebufferWidget *fb;
+	widget::SvgWidget *sw;
+	PanelBorder *panelBorder;
 	std::shared_ptr<window::Svg> svg;
 
-	SvgPanel();
-	void step() override;
-	void setBackground(std::shared_ptr<window::Svg> svg);
+	void setBackground(std::shared_ptr<window::Svg> svg) {
+		this->svg = svg;
+	}
 };
 
-
 DEPRECATED typedef SvgPanel SVGPanel;
-
 
 struct ThemedSvgPanel : SvgPanel {
 	std::shared_ptr<window::Svg> lightSvg;
@@ -46,6 +42,4 @@ struct ThemedSvgPanel : SvgPanel {
 	}
 };
 
-
-} // namespace app
-} // namespace rack
+} // namespace rack::app

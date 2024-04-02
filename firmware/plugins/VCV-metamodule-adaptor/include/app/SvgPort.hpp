@@ -29,16 +29,7 @@ struct ThemedSvgPort : SvgPort {
 	std::shared_ptr<window::Svg> lightSvg;
 	std::shared_ptr<window::Svg> darkSvg;
 
-	void setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
-		this->lightSvg = lightSvg;
-		this->darkSvg = darkSvg;
-		SvgPort::setSvg(settings::preferDarkPanels ? darkSvg : lightSvg);
-	}
-
-	void step() override {
-		SvgPort::setSvg(settings::preferDarkPanels ? darkSvg : lightSvg);
-		SvgPort::step();
-	}
+	void setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg);
 };
 
 } // namespace rack::app

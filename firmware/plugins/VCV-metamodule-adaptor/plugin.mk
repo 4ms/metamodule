@@ -34,9 +34,9 @@ CXXFLAGS ?= $(CFLAGS) \
 		-Werror=return-type \
 		-Wno-register \
 		-Wno-volatile \
+		-fno-rtti \
 		$(EXTRA_CPPFLAGS) \
 		
-		# -fno-rtti \
 
 OBJECTS   = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(OBJDIR)/, $(addsuffix .d, $(basename $(SOURCES))))

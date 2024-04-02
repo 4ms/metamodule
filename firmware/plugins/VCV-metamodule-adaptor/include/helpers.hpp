@@ -1,7 +1,8 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/element_strings.hh"
-#include "make_element.hh"
+#include "metamodule/create_model.hh"
+#include "metamodule/make_element.hh"
 #include "util/overloaded.hh"
 #include <app/SvgPanel.hpp>
 #include <engine/Module.hpp>
@@ -13,8 +14,6 @@
 #include <ui/Menu.hpp>
 #include <ui/MenuItem.hpp>
 #include <ui/MenuLabel.hpp>
-
-#include "create_model.hh"
 
 namespace rack
 {
@@ -131,7 +130,7 @@ inline void set_labels(std::span<std::string_view> pos_names, std::vector<std::s
 	}
 }
 
-inline void set_labels(engine::SwitchQuantity *pq, MetaModule::Element &element) {
+inline void set_labels(engine::ParamQuantity *pq, MetaModule::Element &element) {
 	// Switches with strings for each position
 	if (pq->labels.size() > 0) {
 		using namespace MetaModule;

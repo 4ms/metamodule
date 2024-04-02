@@ -5,6 +5,7 @@
 #include <color.hpp>
 #include <common.hpp>
 #include <math.hpp>
+#include <ranges>
 #include <weakptr.hpp>
 #include <widget/event.hpp>
 #include <window/Window.hpp>
@@ -20,13 +21,12 @@ The bounding box of a Widget is a rectangle specified by `box` relative to their
 The appearance is defined by overriding `draw()`, and the behavior is defined by overriding `step()` and `on*()` event handlers.
 */
 struct Widget : WeakBase {
-	//MM
 	MetaModule::Element element;
 
 	/** Position relative to parent and size of widget. */
 	math::Rect box = math::Rect(math::Vec(), math::Vec(INFINITY, INFINITY));
 	/** Automatically set when Widget is added as a child to another Widget */
-	Widget *parent = NULL;
+	Widget *parent = nullptr;
 	std::list<Widget *> children;
 	/** Disables rendering but allow stepping.
 	Use isVisible(), setVisible(), show(), or hide() instead of using this variable directly.
@@ -39,19 +39,33 @@ struct Widget : WeakBase {
 
 	virtual ~Widget();
 
-	math::Rect getBox();
-	/** Calls setPosition() and then setSize(). */
-	void setBox(math::Rect box);
-	math::Vec getPosition();
-	/** Sets position and triggers RepositionEvent if position changed. */
-	void setPosition(math::Vec pos);
-	math::Vec getSize();
+	math::Rect getBox() {
+		return box;
+	}
+	void setBox(math::Rect box) {
+		setPosition(box.pos);
+		setSize(box.size);
+	}
+	math::Vec getPosition() {
+		return box.pos;
+	}
+	void setPosition(math::Vec pos) {
+		box.pos = pos;
+	}
+	math::Vec getSize() {
+		return {box.size};
+	}
 	/** Sets size and triggers ResizeEvent if size changed. */
 	void setSize(math::Vec size);
-	widget::Widget *getParent();
-	bool isVisible();
-	/** Sets `visible` and triggers ShowEvent or HideEvent if changed. */
-	void setVisible(bool visible);
+	widget::Widget *getParent() {
+		return parent;
+	}
+	bool isVisible() {
+		return visible;
+	}
+	void setVisible(bool visible) {
+		this->visible = visible;
+	}
 	/** Makes Widget visible and triggers ShowEvent if changed. */
 	void show() {
 		setVisible(true);
@@ -78,14 +92,14 @@ struct Widget : WeakBase {
 	/** Returns `v` transformed into world/root/global/absolute coordinates.
 	*/
 	math::Vec getAbsoluteOffset(math::Vec v) {
-		return getRelativeOffset(v, NULL);
+		return getRelativeOffset(v, nullptr);
 	}
 	/** Returns the zoom level in the coordinate system of `ancestor`.
 	Only `ZoomWidget` should override this to return value other than 1.
 	*/
 	virtual float getRelativeZoom(Widget *ancestor);
 	float getAbsoluteZoom() {
-		return getRelativeZoom(NULL);
+		return getRelativeZoom(nullptr);
 	}
 	/** Returns a subset of the given Rect bounded by the box of this widget and all ancestors.
 	*/
@@ -93,25 +107,14 @@ struct Widget : WeakBase {
 
 	template<class T>
 	T *getAncestorOfType() {
-		if (!parent)
-			return NULL;
-		T *p = dynamic_cast<T *>(parent);
-		if (p)
-			return p;
-		return parent->getAncestorOfType<T>();
+		//Not supported
+		return nullptr;
 	}
 
 	template<class T>
 	T *getFirstDescendantOfType() {
-		for (Widget *child : children) {
-			T *c = dynamic_cast<T *>(child);
-			if (c)
-				return c;
-			c = child->getFirstDescendantOfType<T>();
-			if (c)
-				return c;
-		}
-		return NULL;
+		//Not supported
+		return nullptr;
 	}
 
 	/** Checks if the given widget is a child of `this` widget.
@@ -140,22 +143,17 @@ struct Widget : WeakBase {
 	void clearChildren();
 
 	/** Advances the module by one frame */
-	virtual void step();
+	virtual void step() {
+	}
 
 	struct DrawArgs {
-		NVGcontext *vg = NULL;
+		NVGcontext *vg = nullptr;
 		/** Local box representing the visible viewport. */
 		math::Rect clipBox;
-		NVGLUframebuffer *fb = NULL;
+		NVGLUframebuffer *fb = nullptr;
 	};
 
-	/** Draws the widget to the NanoVG context.
-
-	When overriding, call the superclass's `draw(args)` to recurse to children.
-	*/
-	virtual void draw(const DrawArgs &args);
-	/** Override draw(const DrawArgs &args) instead */
-	DEPRECATED virtual void draw(NVGcontext *vg) {
+	virtual void draw(const DrawArgs &args) {
 	}
 
 	/** Draw additional layers.
@@ -165,54 +163,24 @@ struct Widget : WeakBase {
 	When overriding, always wrap draw commands in `if (layer == ...) {}` to avoid drawing on all layers.
 	When overriding, call the superclass's `drawLayer(args, layer)` to recurse to children.
 	*/
-	virtual void drawLayer(const DrawArgs &args, int layer);
+	virtual void drawLayer(const DrawArgs &args, int layer) {
+	}
 
-	/** Draws a particular child.
-	Saves and restores NanoVG context to prevent changing the given context.
-	*/
-	void drawChild(Widget *child, const DrawArgs &args, int layer = 0);
+	void drawChild(Widget *child, const DrawArgs &args, int layer = 0) {
+	}
 
 	// Events
 
 	/** Recurses an event to all visible Widgets */
 	template<typename TMethod, class TEvent>
 	void recurseEvent(TMethod f, const TEvent &e) {
-		for (auto it = children.rbegin(); it != children.rend(); it++) {
-			// Stop propagation if requested
-			if (!e.isPropagating())
-				break;
-			Widget *child = *it;
-			// Don't filter child by visibility. Typically only position events need to be filtered by visibility.
-			// if (!child->visible)
-			// 	continue;
-
-			// Clone event for (currently) no reason
-			TEvent e2 = e;
-			// Call child event handler
-			(child->*f)(e2);
-		}
+		//not supported
 	}
 
 	/** Recurses an event to all visible Widgets until it is consumed. */
 	template<typename TMethod, class TEvent>
 	void recursePositionEvent(TMethod f, const TEvent &e) {
-		for (auto it = children.rbegin(); it != children.rend(); it++) {
-			// Stop propagation if requested
-			if (!e.isPropagating())
-				break;
-			Widget *child = *it;
-			// Filter child by visibility and position
-			if (!child->visible)
-				continue;
-			if (!child->box.contains(e.pos))
-				continue;
-
-			// Clone event and adjust its position
-			TEvent e2 = e;
-			e2.pos = e.pos.minus(child->box.pos);
-			// Call child event handler
-			(child->*f)(e2);
-		}
+		//not supported
 	}
 
 	using BaseEvent = widget::BaseEvent;
@@ -235,91 +203,42 @@ struct Widget : WeakBase {
 		recursePositionEvent(&Widget::onHover, e);
 	}
 
-	/** Occurs each mouse button press or release.
-	Recurses.
-	Consume this event to allow DoubleClick, Select, Deselect, SelectKey, SelectText, DragStart, DragEnd, DragMove, and DragDrop to occur.
-	*/
 	struct ButtonEvent : BaseEvent, PositionBaseEvent {
-		/** GLFW_MOUSE_BUTTON_LEFT, GLFW_MOUSE_BUTTON_RIGHT, GLFW_MOUSE_BUTTON_MIDDLE, etc. */
-		int button;
-		/** GLFW_PRESS or GLFW_RELEASE */
-		int action;
-		/** GLFW_MOD_* */
-		int mods;
+		int button{};
+		int action{};
+		int mods{};
 	};
 	virtual void onButton(const ButtonEvent &e) {
 		recursePositionEvent(&Widget::onButton, e);
 	}
 
-	/** Occurs when the left mouse button is pressed a second time on the same Widget within a time duration.
-	Must consume the Button event (on left button press) to receive this event.
-	*/
 	struct DoubleClickEvent : BaseEvent {};
 	virtual void onDoubleClick(const DoubleClickEvent &e) {
 	}
 
 	/** An event prototype with a GLFW key. */
 	struct KeyBaseEvent {
-		/** The key corresponding to what it would be called in its position on a QWERTY US keyboard.
-		For example, the WASD directional keys used for first-person shooters will always be reported as "WASD", regardless if they say "ZQSD" on an AZERTY keyboard.
-		You should usually not use these for printable characters such as "Ctrl+V" key commands. Instead, use `keyName`.
-		You *should* use these for non-printable keys, such as Escape, arrow keys, Home, F1-12, etc.
-		You should also use this for Enter, Tab, and Space. Although they are printable keys, they do not appear in `keyName`.
-		See GLFW_KEY_* for the list of possible values.
-		*/
 		int key;
-		/** Platform-dependent "software" key code.
-		This variable is only included for completion. There should be no reason for you to use this.
-		You should instead use `key` (for non-printable characters) or `keyName` (for printable characters).
-		Values are platform independent and can change between different keyboards or keyboard layouts on the same OS.
-		*/
 		int scancode;
-		/** String containing the lowercase key name, if it produces a printable character.
-		This is the only variable that correctly represents the label printed on any keyboard layout, whether it's QWERTY, AZERTY, QWERTZ, Dvorak, etc.
-		For example, if the user presses the key labeled "q" regardless of the key position, `keyName` will be "q".
-		For non-printable characters this is an empty string.
-		Enter, Tab, and Space do not give a `keyName`. Use `key` instead.
-		Shift has no effect on the key name. Shift+1 results in "1", Shift+q results in "q", etc.
-		*/
 		std::string keyName;
-		/** The type of event occurring with the key.
-		Possible values are GLFW_RELEASE, GLFW_PRESS, GLFW_REPEAT, or RACK_HELD.
-		RACK_HELD is sent every frame while the key is held.
-		*/
 		int action;
-		/** Bitwise OR of key modifiers, such as Ctrl or Shift.
-		Use (mods & RACK_MOD_MASK) == RACK_MOD_CTRL to check for Ctrl on Linux and Windows but Cmd on Mac.
-		See GLFW_MOD_* for the list of possible values.
-		*/
 		int mods;
 	};
 
-	/** Occurs when a key is pressed, released, or repeated while the mouse is hovering a Widget.
-	Recurses.
-	*/
 	struct HoverKeyEvent : BaseEvent, PositionBaseEvent, KeyBaseEvent {};
 	virtual void onHoverKey(const HoverKeyEvent &e) {
 		recursePositionEvent(&Widget::onHoverKey, e);
 	}
 
-	/** An event prototype with a Unicode character. */
 	struct TextBaseEvent {
-		/** Unicode code point of the character */
-		int codepoint;
+		int codepoint{};
 	};
-	/** Occurs when a character is typed while the mouse is hovering a Widget.
-	Recurses.
-	*/
 	struct HoverTextEvent : BaseEvent, PositionBaseEvent, TextBaseEvent {};
 	virtual void onHoverText(const HoverTextEvent &e) {
 		recursePositionEvent(&Widget::onHoverText, e);
 	}
 
-	/** Occurs when the mouse scroll wheel is moved while the mouse is hovering a Widget.
-	Recurses.
-	*/
 	struct HoverScrollEvent : BaseEvent, PositionBaseEvent {
-		/** Change of scroll wheel position. */
 		math::Vec scrollDelta;
 	};
 	virtual void onHoverScroll(const HoverScrollEvent &e) {
@@ -371,8 +290,7 @@ struct Widget : WeakBase {
 	}
 
 	struct DragBaseEvent : BaseEvent {
-		/** The mouse button held while dragging. */
-		int button;
+		int button{};
 	};
 	/** Occurs when a Widget begins being dragged.
 	Must consume the Button event (on press) to receive this event.
@@ -405,7 +323,7 @@ struct Widget : WeakBase {
 	*/
 	struct DragHoverEvent : DragBaseEvent, PositionBaseEvent {
 		/** The dragged widget */
-		Widget *origin = NULL;
+		Widget *origin = nullptr;
 		/** Change in mouse position since the last frame. Can be zero. */
 		math::Vec mouseDelta;
 	};
@@ -419,7 +337,7 @@ struct Widget : WeakBase {
 	*/
 	struct DragEnterEvent : DragBaseEvent {
 		/** The dragged widget */
-		Widget *origin = NULL;
+		Widget *origin = nullptr;
 	};
 	virtual void onDragEnter(const DragEnterEvent &e) {
 	}
@@ -429,7 +347,7 @@ struct Widget : WeakBase {
 	*/
 	struct DragLeaveEvent : DragBaseEvent {
 		/** The dragged widget */
-		Widget *origin = NULL;
+		Widget *origin = nullptr;
 	};
 	virtual void onDragLeave(const DragLeaveEvent &e) {
 	}
@@ -439,7 +357,7 @@ struct Widget : WeakBase {
 	*/
 	struct DragDropEvent : DragBaseEvent {
 		/** The dragged widget */
-		Widget *origin = NULL;
+		Widget *origin = nullptr;
 	};
 	virtual void onDragDrop(const DragDropEvent &e) {
 	}
@@ -525,7 +443,7 @@ struct Widget : WeakBase {
 	Recurses.
 	*/
 	struct ContextCreateEvent : BaseEvent {
-		NVGcontext *vg;
+		NVGcontext *vg{};
 	};
 	virtual void onContextCreate(const ContextCreateEvent &e) {
 		recurseEvent(&Widget::onContextCreate, e);
@@ -535,7 +453,7 @@ struct Widget : WeakBase {
 	Recurses.
 	*/
 	struct ContextDestroyEvent : BaseEvent {
-		NVGcontext *vg;
+		NVGcontext *vg{};
 	};
 	virtual void onContextDestroy(const ContextDestroyEvent &e) {
 		recurseEvent(&Widget::onContextDestroy, e);
