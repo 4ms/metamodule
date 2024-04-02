@@ -1,7 +1,8 @@
 #pragma once
 #include "audio_stream_conf.hh"
-#include "conf/board_conf.hh"
 #include <cstdint>
+
+#include "../mocks/mocks.hh"
 
 namespace LDKit
 {
