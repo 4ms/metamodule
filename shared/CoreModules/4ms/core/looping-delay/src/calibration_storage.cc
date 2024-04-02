@@ -1,8 +1,8 @@
 #include "calibration_storage.hh"
-#include "conf/flash_layout.hh"
-#include "flash.hh"
 #include "ping_methods.hh"
 #include <span>
+
+#include "../mocks/conf.hh"
 
 namespace LDKit
 {
@@ -46,36 +46,17 @@ void PersistentStorage::factory_reset() {
 }
 
 PersistentStorage::PersistentStorage() {
-	if (!flash.read(data) || !data.validate()) {
-		set_default_cal();
-		if (!flash.write(data)) {
-			storage_is_ok = false;
-			// __BKPT(2); // ERROR!
-		}
-	}
-	handle_updated_firmware();
+	set_default_cal();
 }
 
-bool PersistentStorage::save_flash_params() { //
-	if (!storage_is_ok)
-		return false;
-	return flash.write(data);
+bool PersistentStorage::save_flash_params() {
+	return true;
 }
 
 void PersistentStorage::handle_updated_firmware() {
-	if (data.major_firmware_version == FirmwareMajorVersion && data.minor_firmware_version == FirmwareMinorVersion)
-		return;
-
-	apply_firmware_specific_adjustments();
-	data.major_firmware_version = FirmwareMajorVersion;
-	data.minor_firmware_version = FirmwareMinorVersion;
-	save_flash_params();
 }
 
 void PersistentStorage::apply_firmware_specific_adjustments() {
-	if (data.major_firmware_version == 0 && data.minor_firmware_version == 0) {
-		// v0.0 => newer
-	}
 }
 
 } // namespace LDKit

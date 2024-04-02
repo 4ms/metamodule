@@ -1,11 +1,8 @@
 #pragma once
-#include "brain_conf.hh"
-#include "conf/flash_layout.hh"
 #include "elements.hh"
-#include "flash_block.hh"
 #include "modes.hh"
 #include "settings.hh"
-#include "util/wear_level.hh"
+
 #include <cstdint>
 
 namespace LDKit
@@ -43,7 +40,6 @@ struct PersistentData {
 };
 
 struct PersistentStorage {
-	WearLevel<FlashBlock<SettingsFlashAddr, PersistentData, 8>> flash;
 	PersistentData data;
 	bool storage_is_ok = true;
 
