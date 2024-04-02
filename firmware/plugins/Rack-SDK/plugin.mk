@@ -1,97 +1,109 @@
-ifndef RACK_DIR
-$(error RACK_DIR is not defined)
-endif
+ARCH_CFLAGS := -DSTM32MP157Cxx -DSTM32MP1 -DCORE_CA7
 
-SLUG := $(shell jq -r .slug plugin.json)
-VERSION := $(shell jq -r .version plugin.json)
+MCU :=  -mcpu=cortex-a7 -march=armv7ve -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard
 
-ifndef SLUG
-$(error SLUG could not be found in manifest)
-endif
-ifndef VERSION
-$(error VERSION could not be found in manifest)
-endif
+LFLAGS := $(MCU)  \
+		 -Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
+		 -Wl,--gc-sections \
+		 -nostartfiles -nostdlib
 
-DISTRIBUTABLES += plugin.json
+OPTFLAG ?= -O2
 
-FLAGS += -fPIC
-FLAGS += -I$(RACK_DIR)/include -I$(RACK_DIR)/dep/include
+AFLAGS = $(MCU)
 
-LDFLAGS += -shared
-# Plugins must link to libRack because when Rack is used as a plugin of another application, its symbols are not available to subsequently loaded shared libraries.
-LDFLAGS += -L$(RACK_DIR) -lRack
+CFLAGS ?= -g2 \
+		 -fno-common \
+		 $(ARCH_CFLAGS) \
+		 $(MCU) \
+		 $(INCLUDES) \
+		 -fdata-sections -ffunction-sections \
+		 -fPIC \
+		 -nostartfiles \
+		 -nostdlib \
+		 -shared \
+		 -c \
+		 -Wno-double-promotion \
+		 -Wno-attributes \
 
-include $(RACK_DIR)/arch.mk
+CXXFLAGS ?= $(CFLAGS) \
+		-std=c++2a \
+		-fno-exceptions \
+		-fno-unwind-tables \
+		-fno-threadsafe-statics \
+		-mno-unaligned-access \
+		-Werror=return-type \
+		-Wno-register \
+		-Wno-volatile \
+		$(EXTRA_CPPFLAGS) \
+		
+		# -fno-rtti \
 
-TARGET := plugin
+OBJECTS   = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
+DEPS   	  = $(addprefix $(OBJDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
+DEPFLAGS = -MMD -MP -MF $(OBJDIR)/$(basename $<).d
 
-ifdef ARCH_LIN
-	TARGET := $(TARGET).so
-	# This prevents static variables in the DSO (dynamic shared object) from being preserved after dlclose().
-	FLAGS += -fno-gnu-unique
-	# When Rack loads a plugin, it symlinks /tmp/Rack2 to its system dir, so the plugin can link to libRack.
-	LDFLAGS += -Wl,-rpath=/tmp/Rack2
-	# Since the plugin's compiler could be a different version than Rack's compiler, link libstdc++ and libgcc statically to avoid ABI issues.
-	LDFLAGS += -static-libstdc++ -static-libgcc
-	RACK_USER_DIR ?= $(HOME)/.Rack2
-endif
+ARCH 	= arm-none-eabi
+CC 		= $(ARCH)-gcc
+CXX 	= $(ARCH)-g++
+LD 		= $(ARCH)-g++
+AS 		= $(ARCH)-as
+OBJCPY 	= $(ARCH)-objcopy
+OBJDMP 	= $(ARCH)-objdump
+GDB 	= $(ARCH)-gdb
+SZ 		= $(ARCH)-size
+STRIP	= $(ARCH)-strip
 
-ifdef ARCH_MAC
-	TARGET := $(TARGET).dylib
-	LDFLAGS += -undefined dynamic_lookup
-	RACK_USER_DIR ?= $(HOME)/Documents/Rack2
-	CODESIGN ?= codesign -f -s -
-endif
+SO 	    = $(BUILDDIR)/$(BINARYNAME).so
+SOSTRIP = $(BUILDDIR)/$(BINARYNAME)-strip.so
+SOSTRIP_H = $(BUILDDIR)/$(BINARYNAME)-strip-so.h
 
-ifdef ARCH_WIN
-	TARGET := $(TARGET).dll
-	LDFLAGS += -static-libstdc++
-	RACK_USER_DIR ?= $(USERPROFILE)/Documents/Rack2
-endif
+all: Makefile $(SOSTRIP) 
 
-PLUGINS_DIR := $(RACK_USER_DIR)/plugins-$(ARCH_OS)-$(ARCH_CPU)
+$(OBJDIR)/%.o: %.s
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	$(AS) $(AFLAGS) $< -o $@ 
 
-DEP_FLAGS += -fPIC
-include $(RACK_DIR)/dep.mk
+$(OBJDIR)/%.o: %.c $(OBJDIR)/%.d
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	@$(CC) $(DEPFLAGS) $(OPTFLAG) $(CFLAGS) $< -o $@
 
+$(OBJDIR)/%.o: %.c[cp]* $(OBJDIR)/%.d
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	@$(CXX) $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
-all: $(TARGET)
+$(SO): $(OBJECTS)
+	$(info Linking shared library...)
+	@$(LD) -shared $(LFLAGS) -o $@ $(OBJECTS)
 
-include $(RACK_DIR)/compile.mk
+$(SOSTRIP): $(SO)
+	$(STRIP) -g -v -o $@ $<
+
+# $(SOSTRIP_H): $(SOSTRIP)
+# 	cd build && xxd -i $(BINARYNAME)-strip.so > $(BINARYNAME)-strip-so.h
+
+%.diss : %.so
+	arm-none-eabi-objdump -CDz --source $^ > $@
+
+%.nm : %.so
+	arm-none-eabi-nm -CA $^ > $@
+
+%.readelf : %.so
+	arm-none-eabi-readelf --demangle=auto -a -W $^ > $@
+
+%.d: ;
 
 clean:
-	rm -rfv build $(TARGET) dist
+	rm -rf build
 
-ZSTD_COMPRESSION_LEVEL ?= 19
-
-dist: all
-	rm -rf dist
-	mkdir -p dist/$(SLUG)
-	@# Strip symbols from binary
-	cp $(TARGET) dist/$(SLUG)/
-ifdef ARCH_MAC
-	$(STRIP) -S dist/$(SLUG)/$(TARGET)
-	$(INSTALL_NAME_TOOL) -change libRack.dylib /tmp/Rack2/libRack.dylib dist/$(SLUG)/$(TARGET)
-	$(OTOOL) -L dist/$(SLUG)/$(TARGET)
-else
-	$(STRIP) -s dist/$(SLUG)/$(TARGET)
+ifneq "$(MAKECMDGOALS)" "clean"
+-include $(DEPS)
 endif
-	@# Sign binary if CODESIGN is defined
-ifdef CODESIGN
-	$(CODESIGN) dist/$(SLUG)/$(TARGET)
-endif
-	@# Copy distributables
-ifdef ARCH_MAC
-	rsync -rR $(DISTRIBUTABLES) dist/$(SLUG)/
-else
-	cp -r --parents $(DISTRIBUTABLES) dist/$(SLUG)/
-endif
-	@# Create ZIP package
-	cd dist && tar -c $(SLUG) | zstd -$(ZSTD_COMPRESSION_LEVEL) -o "$(SLUG)"-"$(VERSION)"-$(ARCH_NAME).vcvplugin
 
-install: dist
-	mkdir -p "$(PLUGINS_DIR)"
-	cp dist/*.vcvplugin "$(PLUGINS_DIR)"/
+.PRECIOUS: $(DEPS) $(OBJECTS) $(SO) $(SOSTRIP) $(SOSTRIP_H)
+.PHONY: all clean 
 
-.PHONY: clean dist
-.DEFAULT_GOAL := all
+
+
