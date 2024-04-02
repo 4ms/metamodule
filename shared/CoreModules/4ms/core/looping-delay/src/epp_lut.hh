@@ -1,5 +1,4 @@
 #pragma once
-#include "cmsis_gcc.h"
 #include <concepts>
 #include <cstdint>
 
@@ -516,6 +515,24 @@ inline constexpr float epp_lut[4096] = {
 	0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,
 	0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,
 	0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0,			0.0,		  0.0};
+
+
+uint32_t __USAT(int32_t val, uint32_t sat)
+{
+  if (sat <= 31U)
+  {
+    const uint32_t max = ((1U << sat) - 1U);
+    if (val > (int32_t)max)
+    {
+      return max;
+    }
+    else if (val < 0)
+    {
+      return 0U;
+    }
+  }
+  return (uint32_t)val;
+}
 
 template<std::integral T>
 constexpr T epp_crossfade(T a, T b, float phase) {
