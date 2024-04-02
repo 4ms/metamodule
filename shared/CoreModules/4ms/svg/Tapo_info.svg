@@ -23,8 +23,8 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.7368508"
-     inkscape:cx="189.13542"
-     inkscape:cy="211.87773"
+     inkscape:cx="188.27178"
+     inkscape:cy="262.54414"
      inkscape:window-width="2512"
      inkscape:window-height="1387"
      inkscape:window-x="50"
@@ -2505,27 +2505,83 @@
   </g>
   <g
      id="components">
+    <text
+       id="slug"
+       transform="translate(159.7,372.66)"
+       style="font-family:MyriadPro-Regular, 'Myriad Pro';font-size:6px"><tspan
+         x="0"
+         y="0"
+         style="letter-spacing: -.06em;"
+         id="tspan2892">T</tspan><tspan
+         x="2.6"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan2894">apo</tspan></text>
+    <text
+       id="modulename"
+       transform="translate(184.23,372.66)"
+       style="font-family:MyriadPro-Regular, 'Myriad Pro';font-size:6px"><tspan
+         x="0"
+         y="0"
+         style="letter-spacing: -.06em;"
+         id="tspan2897">T</tspan><tspan
+         x="2.6"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan2899">apo</tspan><tspan
+         x="12.2"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan2901">g</tspan><tspan
+         x="15.52"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan2903">r</tspan><tspan
+         x="17.45"
+         y="0"
+         id="tspan2905">aphic </tspan><tspan
+         x="32.45"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan2907">D</tspan><tspan
+         x="36.47"
+         y="0"
+         id="tspan2909">el</tspan><tspan
+         x="40.89"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan2911">a</tspan><tspan
+         x="43.73"
+         y="0"
+         id="tspan2913">y</tspan></text>
     <rect
-       id="RES_AMP_LPF"
-       data-name="RES AMP LPF@LPF@AMP@RES"
-       x="220.18"
-       y="308.5"
-       width="11.34"
-       height="17.01"
-       style="fill: #ffc080;" />
-    <circle
-       id="Delete#MomentaryRGB5mm"
-       cx="194.13"
-       cy="297.17"
-       r="8.5"
-       style="fill: #ffc000;" />
-    <circle
-       id="Tap_Sensor"
-       data-name="Tap Sensor"
-       cx="129.13"
-       cy="315.91"
-       r="21.26"
-       style="fill: #ffc000;" />
+       style="fill:#808080;fill-opacity:0.5;stroke-width:0.692446"
+       id="Mode@Edit@Seq"
+       width="99.738678"
+       height="7.2180891"
+       x="134.53238"
+       y="22.320103" />
+    <rect
+       style="fill:#808080;fill-opacity:0.5;stroke-width:0.808629"
+       id="Pan@SUM/R@RND@ALT"
+       width="136.01607"
+       height="7.2180891"
+       x="98.25499"
+       y="29.800322" />
+    <rect
+       style="fill:#808080;fill-opacity:0.5;stroke-width:0.910695"
+       id="Bank@A@B@C@D"
+       width="172.51917"
+       height="7.2180891"
+       x="61.751888"
+       y="37.28054" />
+    <rect
+       style="fill:#808080;fill-opacity:0.5;stroke-width:1.00004"
+       id="Velocity@Min@Low@Med@High@Max"
+       width="208.02959"
+       height="7.2180891"
+       x="26.241468"
+       y="44.760761" />
     <circle
        id="Tap_LED"
        data-name="Tap LED#RedLight"
@@ -2533,20 +2589,6 @@
        cy="268.61"
        r="4.25"
        style="fill: #f0f;" />
-    <circle
-       id="Repeat#MomentaryRGB5mm"
-       cx="64.53"
-       cy="296.79"
-       r="8.5"
-       style="fill: #ffc000;" />
-    <rect
-       id="ADD_OFF_INS"
-       data-name="ADD OFF INS@INS@OFF@ADD"
-       x="26.46"
-       y="308.5"
-       width="11.34"
-       height="17.01"
-       style="fill: #ffc080;" />
     <circle
        id="Audio_Out_2"
        data-name="Audio Out 2"
@@ -2629,6 +2671,90 @@
        cy="222.74"
        r="11.34"
        style="fill: lime;" />
+    <rect
+       id="RES_AMP_LPF"
+       data-name="RES AMP LPF@LPF@AMP@RES"
+       x="220.18"
+       y="308.5"
+       width="11.34"
+       height="17.01"
+       style="fill:#ffc080" />
+    <circle
+       id="Delete#MomentaryRGB5mm"
+       cx="194.13"
+       cy="297.17"
+       r="8.5"
+       style="fill:#ffc000" />
+    <circle
+       id="Tap_Sensor"
+       data-name="Tap Sensor"
+       cx="129.13"
+       cy="315.91"
+       r="21.26"
+       style="fill:#ffc000" />
+    <circle
+       id="Repeat#MomentaryRGB5mm"
+       cx="64.53"
+       cy="296.79"
+       r="8.5"
+       style="fill:#ffc000" />
+    <rect
+       id="ADD_OFF_INS"
+       data-name="ADD OFF INS@INS@OFF@ADD"
+       x="26.46"
+       y="308.5"
+       width="11.34"
+       height="17.01"
+       style="fill:#ffc080" />
+    <circle
+       id="Button_6"
+       data-name="Button 6#MomentaryRGB5mm"
+       cx="218.95"
+       cy="61.81"
+       r="8.5"
+       style="fill:#ffc000" />
+    <circle
+       id="Button_5"
+       data-name="Button 5#MomentaryRGB5mm"
+       cx="183.25"
+       cy="61.81"
+       r="8.5"
+       style="fill:#ffc000" />
+    <circle
+       id="Button_4"
+       data-name="Button 4#MomentaryRGB5mm"
+       cx="147.25"
+       cy="61.81"
+       r="8.5"
+       style="fill:#ffc000" />
+    <circle
+       id="Button_3"
+       data-name="Button 3#MomentaryRGB5mm"
+       cx="111.25"
+       cy="61.81"
+       r="8.5"
+       style="fill:#ffc000" />
+    <circle
+       id="Button_2"
+       data-name="Button 2#MomentaryRGB5mm"
+       cx="75.19"
+       cy="61.81"
+       r="8.5"
+       style="fill:#ffc000" />
+    <circle
+       id="Button_1"
+       data-name="Button 1#MomentaryRGB5mm"
+       cx="39.25"
+       cy="61.81"
+       r="8.5"
+       style="fill: #ffc000;"
+       inkscape:label="Button_1" />
+    <circle
+       id="Morph"
+       cx="223.88"
+       cy="97.51"
+       r="8.5"
+       style="fill:red" />
     <circle
        id="Dry_Wet"
        data-name="Dry Wet"
@@ -2655,135 +2781,10 @@
        r="17.01"
        style="fill: #ff0040;" />
     <circle
-       id="Morph"
-       cx="223.88"
-       cy="97.51"
-       r="8.5"
-       style="fill: red;" />
-    <circle
        id="Level"
        cx="34.7"
        cy="97.51"
        r="8.5"
        style="fill: #ff0070;" />
-    <circle
-       id="Button_6"
-       data-name="Button 6#MomentaryRGB5mm"
-       cx="218.95"
-       cy="61.81"
-       r="8.5"
-       style="fill: #ffc000;" />
-    <circle
-       id="Button_5"
-       data-name="Button 5#MomentaryRGB5mm"
-       cx="183.25"
-       cy="61.81"
-       r="8.5"
-       style="fill: #ffc000;" />
-    <circle
-       id="Button_4"
-       data-name="Button 4#MomentaryRGB5mm"
-       cx="147.25"
-       cy="61.81"
-       r="8.5"
-       style="fill: #ffc000;" />
-    <circle
-       id="Button_3"
-       data-name="Button 3#MomentaryRGB5mm"
-       cx="111.25"
-       cy="61.81"
-       r="8.5"
-       style="fill: #ffc000;" />
-    <circle
-       id="Button_2"
-       data-name="Button 2#MomentaryRGB5mm"
-       cx="75.19"
-       cy="61.81"
-       r="8.5"
-       style="fill: #ffc000;" />
-    <circle
-       id="Button_1"
-       data-name="Button 1#MomentaryRGB5mm"
-       cx="39.25"
-       cy="61.81"
-       r="8.5"
-       style="fill: #ffc000;" />
-    <text
-       id="slug"
-       transform="translate(159.7 372.66)"
-       style="font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 6px;"><tspan
-         x="0"
-         y="0"
-         style="letter-spacing: -.06em;"
-         id="tspan2892">T</tspan><tspan
-         x="2.6"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan2894">apo</tspan></text>
-    <text
-       id="modulename"
-       transform="translate(184.23 372.66)"
-       style="font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 6px;"><tspan
-         x="0"
-         y="0"
-         style="letter-spacing: -.06em;"
-         id="tspan2897">T</tspan><tspan
-         x="2.6"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan2899">apo</tspan><tspan
-         x="12.2"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan2901">g</tspan><tspan
-         x="15.52"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan2903">r</tspan><tspan
-         x="17.45"
-         y="0"
-         id="tspan2905">aphic </tspan><tspan
-         x="32.45"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan2907">D</tspan><tspan
-         x="36.47"
-         y="0"
-         id="tspan2909">el</tspan><tspan
-         x="40.89"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan2911">a</tspan><tspan
-         x="43.73"
-         y="0"
-         id="tspan2913">y</tspan></text>
-    <rect
-       style="fill:#808080;fill-opacity:0.5;stroke-width:0.692446"
-       id="Mode@Edit@Seq"
-       width="99.738678"
-       height="7.2180891"
-       x="134.53238"
-       y="22.320103" />
-    <rect
-       style="fill:#808080;fill-opacity:0.5;stroke-width:0.808629"
-       id="Pan@SUM/R@RND@ALT"
-       width="136.01607"
-       height="7.2180891"
-       x="98.25499"
-       y="29.800322" />
-    <rect
-       style="fill:#808080;fill-opacity:0.5;stroke-width:0.910695"
-       id="Bank@A@B@C@D"
-       width="172.51917"
-       height="7.2180891"
-       x="61.751888"
-       y="37.28054" />
-    <rect
-       style="fill:#808080;fill-opacity:0.5;stroke-width:1.00004"
-       id="Velocity@Min@Low@Med@High@Max"
-       width="208.02959"
-       height="7.2180891"
-       x="26.241468"
-       y="44.760761" />
   </g>
 </svg>
