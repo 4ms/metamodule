@@ -2,12 +2,9 @@
 #include "audio_memory.hh"
 #include "audio_stream_conf.hh"
 #include "auto_mute.hh"
-#include "brain_conf.hh"
 #include "compress.hh"
 #include "controls.hh"
 #include "dcblock.hh"
-#include "debug.hh"
-#include "delay_buffer.hh"
 #include "epp_lut.hh"
 #include "flags.hh"
 #include "loop_util.hh"
@@ -17,12 +14,16 @@
 #include "util/zip.hh"
 #include <algorithm>
 
+#include "../mocks/delay_buffer.hh"
+
 namespace LDKit
 {
 
 class LoopingDelay {
 	Params &params;
 	Flags &flags;
+
+	DelayBuffer delay_buffer;
 
 	CircularBufferAccess<DelayBuffer::span> buf;
 	CircularBufferAccess<DelayBuffer::span> fade_buf;
@@ -52,8 +53,8 @@ public:
 	LoopingDelay(Params &params, Flags &flags)
 		: params{params}
 		, flags{flags}
-		, buf{DelayBuffer::get(), static_cast<size_t>(params.divmult_time)}
-		, fade_buf{DelayBuffer::get(), static_cast<size_t>(params.divmult_time)} {
+		, buf{delay_buffer.get(), static_cast<size_t>(params.divmult_time)}
+		, fade_buf{delay_buffer.get(), static_cast<size_t>(params.divmult_time)} {
 		Memory::clear();
 	}
 
@@ -286,6 +287,24 @@ public:
 	}
 
 	//// util:
+
+	int32_t __SSAT(int32_t val, uint32_t sat)
+	{
+		if ((sat >= 1U) && (sat <= 32U))
+		{
+			const int32_t max = (int32_t)((1U << (sat - 1U)) - 1U);
+			const int32_t min = -1 - max ;
+			if (val > max)
+			{
+			return max;
+			}
+			else if (val < min)
+			{
+			return min;
+			}
+		}
+		return val;
+	}
 
 	int32_t clip(int32_t val) {
 		constexpr size_t Max24bit = (1U << 23);
