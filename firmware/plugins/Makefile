@@ -24,7 +24,8 @@ SOURCES = $(ADAPTORDIR)/libc_stub.c \
 		Befaco/src/SpringReverb.cpp \
 		Befaco-plugin.cpp \
 		
-INCLUDES := -IBefaco/src \
+INCLUDES := -I. \
+			-IBefaco/src \
 			-I$(ADAPTORDIR)/include \
 			-I$(ADAPTORDIR)/dep/include \
 			-I$(ADAPTORDIR)/dep/include/cpputil
