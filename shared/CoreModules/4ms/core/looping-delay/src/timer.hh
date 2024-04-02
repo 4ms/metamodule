@@ -1,21 +1,17 @@
 #pragma once
-#include "conf/board_conf.hh"
-#include "drivers/pin_change.hh"
-#include "pcb_detect.hh"
 #include "ping_methods.hh"
+#include "../mocks/mocks.hh"
 
 namespace LDKit
 {
 
 class Timer {
-	Board::PingJack ping_jack;
-	mdrivlib::PinChangeInt<Brain::LRClkPinChangeConf> pin_change;
-	Board::ClkOut clk_out;
-	Board::BusClkOut bus_clk_out;
-	Board::LoopLED loop_led;
+	Mocks::InputPin ping_jack;
+	Mocks::OutputPin clk_out;
+	Mocks::OutputPin bus_clk_out;
+	Mocks::MockedLED loop_led;
 
-	Board::LoopClkBuilt loop_out_built;
-	Board::LoopClkKit loop_out_kit;
+	Mocks::OutputPin loop_out;
 
 	uint32_t _ping_tmr = 0;
 	uint32_t _ping_time = 12000;
@@ -28,19 +24,16 @@ class Timer {
 	bool _ping_tmr_needs_reset = false;
 	PingMethod &_ping_method;
 
-	bool is_kit = false;
-
 public:
 	Timer(PingMethod &ping_method)
 		: _ping_method{ping_method} {
-		pin_change.init([this] { inc(); });
-		is_kit = PCBDetect::is_kit();
 	}
 
 	void start() {
-		pin_change.start();
+		// do nothing
 	}
 
+	// TODO: call this with every sample/block
 	void inc() {
 		if (_ping_tmr_needs_reset) {
 			_ping_tmr_needs_reset = false;
@@ -84,7 +77,7 @@ public:
 			reset_loop_tmr(_loop_tmr - _loop_time);
 		} else if (_loop_tmr >= (_loop_time / 2)) {
 			loop_led.low();
-			is_kit ? loop_out_kit.low() : loop_out_built.low();
+			loop_out.low();
 		}
 	}
 
@@ -112,7 +105,7 @@ public:
 
 	void reset_loop_tmr(float reset_to = 0.f) {
 		loop_led.high();
-		is_kit ? loop_out_kit.high() : loop_out_built.high();
+		loop_out.high();
 		_loop_tmr = reset_to;
 	}
 
