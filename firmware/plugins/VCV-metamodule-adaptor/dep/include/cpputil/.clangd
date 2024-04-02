@@ -1,0 +1,6 @@
+---
+CompileFlags:
+	Add: [
+		"-I..",
+		"-std=gnu++2b",
+	]
