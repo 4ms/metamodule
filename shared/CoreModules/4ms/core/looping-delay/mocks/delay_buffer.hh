@@ -22,6 +22,11 @@ struct DelayBuffer {
 		return sp_;
 	}
 
+	void clear()
+	{
+		std::fill(buf_.begin(), buf_.end(), 0);
+	}
+
 private:
     array buf_;
     span sp_;

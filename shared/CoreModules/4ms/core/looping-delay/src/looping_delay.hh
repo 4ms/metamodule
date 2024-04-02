@@ -1,5 +1,4 @@
 #pragma once
-#include "audio_memory.hh"
 #include "audio_stream_conf.hh"
 #include "auto_mute.hh"
 #include "compress.hh"
@@ -55,7 +54,7 @@ public:
 		, flags{flags}
 		, buf{delay_buffer.get(), static_cast<size_t>(params.divmult_time)}
 		, fade_buf{delay_buffer.get(), static_cast<size_t>(params.divmult_time)} {
-		Memory::clear();
+		delay_buffer.clear();
 	}
 
 	// TODO: when global_mode[CALIBRATE] is set, we should change the audio callback
@@ -79,7 +78,7 @@ public:
 				toggle_rev();
 		}
 		if (flags.take_clear_memory())
-			Memory::clear();
+			delay_buffer.clear();
 
 		// Buffers for R/W this block (backing data)
 		std::array<int16_t, AudioStreamConf::BlockSize * 2> full_rd_buff;
