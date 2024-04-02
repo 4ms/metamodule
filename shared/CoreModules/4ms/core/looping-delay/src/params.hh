@@ -12,6 +12,8 @@
 #include "util/countzip.hh"
 #include "util/math.hh"
 
+#include "../mocks/conf.hh"
+
 namespace LDKit
 {
 // Params holds all the modes, settings and parameters for the looping delay
