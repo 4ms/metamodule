@@ -29,12 +29,17 @@ public:
 	using SwitchPos = Mocks::SwitchPos;
 
 	uint16_t read_pot(PotAdcElement adcnum) {
-		// TODO
-		return 0;
+		return pot_adc_buffer[adcnum];
 	}
 	uint16_t read_cv(CVAdcElement adcnum) {
-		// TODO
-		return 0;
+		return cv_adc_buffer[adcnum];
+	}
+
+	void sideload_pot(PotAdcElement adcnum, uint16_t val) {
+		pot_adc_buffer[adcnum] = val;
+	}
+	void sideload_cv(CVAdcElement adcnum, uint16_t val)	{
+		cv_adc_buffer[adcnum] = val;
 	}
 
 	SwitchPos read_time_switch() {
@@ -53,5 +58,9 @@ public:
 		rev_jack.update();
 		inf_jack.update();
 	}
+
+private:
+	std::array<uint16_t, NumCVs> cv_adc_buffer;
+	std::array<uint16_t, NumPots> pot_adc_buffer;
 };
 } // namespace LDKit
