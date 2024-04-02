@@ -6,6 +6,8 @@
 namespace MetaModule
 {
 
+//TODO: All of these functions: put in a .cc. For template functions, put as much as possible in a .cc
+
 //
 // Jacks
 //
@@ -66,16 +68,17 @@ inline Element make_element(rack::componentlibrary::Rogan const *widget, BaseEle
 
 inline Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
 	if (widget->momentary) {
-		return MomentaryButton{b, widget->frames[0]};
+		return MomentaryButton{b, widget->frames[0]->filename};
 
 	} else if (widget->frames.size() == 3) {
-		return FlipSwitch{{b}, 3, {widget->frames[0], widget->frames[1], widget->frames[2]}};
+		return FlipSwitch{
+			{b}, 3, {widget->frames[0]->filename, widget->frames[1]->filename, widget->frames[2]->filename}};
 
 	} else if (widget->frames.size() == 2) {
-		return FlipSwitch{{b}, 2, {widget->frames[0], widget->frames[1]}};
+		return FlipSwitch{{b}, 2, {widget->frames[0]->filename, widget->frames[1]->filename}};
 
 	} else if (widget->frames.size() == 1) {
-		return MomentaryButton{b, widget->frames[0]};
+		return MomentaryButton{b, widget->frames[0]->filename};
 
 	} else {
 		printf("make_element(): Unknown SvgSwitch, frames size is not 1, 2 or 3\n");

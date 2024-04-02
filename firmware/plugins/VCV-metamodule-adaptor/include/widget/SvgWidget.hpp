@@ -1,14 +1,15 @@
 #pragma once
 #include <widget/Widget.hpp>
 
-
-namespace rack {
-namespace widget {
-
+namespace rack::widget
+{
 
 /** Owns and draws a window::Svg */
 struct SvgWidget : Widget {
 	std::shared_ptr<window::Svg> svg;
+
+	//MM:
+	std::string svg_filename; //TODO: use svg->filename
 
 	SvgWidget();
 
@@ -21,12 +22,9 @@ struct SvgWidget : Widget {
 		setSvg(svg);
 	}
 
-	void draw(const DrawArgs& args) override;
+	void draw(const DrawArgs &args) override;
 };
-
 
 DEPRECATED typedef SvgWidget SVGWidget;
 
-
-} // namespace widget
-} // namespace rack
+} // namespace rack::widget

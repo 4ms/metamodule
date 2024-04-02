@@ -11,6 +11,10 @@
 #include <span>
 #include <string_view>
 #include <ui/Menu.hpp>
+#include <ui/MenuItem.hpp>
+#include <ui/MenuLabel.hpp>
+
+#include "create_model.hh"
 
 namespace rack
 {
@@ -127,9 +131,10 @@ inline void set_labels(std::span<std::string_view> pos_names, std::vector<std::s
 	}
 }
 
-inline void set_labels(engine::ParamQuantity *pq, Element &element) {
+inline void set_labels(engine::SwitchQuantity *pq, MetaModule::Element &element) {
 	// Switches with strings for each position
 	if (pq->labels.size() > 0) {
+		using namespace MetaModule;
 		std::visit(overloaded{
 					   [](BaseElement &) {},
 					   [&pq](FlipSwitch &el) {
@@ -141,7 +146,7 @@ inline void set_labels(engine::ParamQuantity *pq, Element &element) {
 						   set_labels(el.pos_names, pq->labels);
 					   },
 				   },
-				   widget->element);
+				   element);
 	}
 }
 

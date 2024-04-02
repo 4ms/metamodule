@@ -6,20 +6,19 @@
 #include <Quantity.hpp>
 #include <engine/Param.hpp>
 
-
-namespace rack {
-namespace engine {
-
+namespace rack
+{
+namespace engine
+{
 
 struct Module;
-
 
 /** A Quantity that wraps an engine::Param.
 
 If `smoothEnabled` is true, all methods access/modify the Param's target value of the Engine's per-sample smoothing algorithm instead of the immediate value.
 */
 struct ParamQuantity : Quantity {
-	Module* module = NULL;
+	Module *module = NULL;
 	int paramId = -1;
 
 	/** The minimum allowed value. */
@@ -66,7 +65,7 @@ struct ParamQuantity : Quantity {
 	/** Rounds values to the nearest integer. */
 	bool snapEnabled = false;
 
-	Param* getParam();
+	Param *getParam();
 
 	/** Sets the target value of the Engine's smoothing algorithm, or immediate value if smoothing is disabled.
 
@@ -108,23 +107,24 @@ struct ParamQuantity : Quantity {
 
 	virtual std::string getDescription();
 
-	virtual json_t* toJson();
-	virtual void fromJson(json_t* rootJ);
+	virtual json_t *toJson();
+	virtual void fromJson(json_t *rootJ);
 
 	/** Deprecated. Use setValue() instead, which is identical since Rack 2.3.0. */
 	DEPRECATED void setSmoothValue(float value);
 	/** Deprecated. Use getValue() instead, which is identical since Rack 2.3.0. */
 	DEPRECATED float getSmoothValue();
+
+	//MM:
+	std::vector<std::string> labels;
 };
 
-
 struct SwitchQuantity : ParamQuantity {
-	std::vector<std::string> labels;
+	// std::vector<std::string> labels;
 
 	std::string getDisplayValueString() override;
 	void setDisplayValueString(std::string s) override;
 };
-
 
 } // namespace engine
 } // namespace rack
