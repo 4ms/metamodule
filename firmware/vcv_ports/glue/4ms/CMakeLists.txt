@@ -6,6 +6,7 @@ add_library(
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
+  ${MM_ROOT}/shared/CoreModules/4ms/core/looping-delay/src/calibration_storage.cc
 )
 
 target_include_directories(
