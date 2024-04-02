@@ -1,6 +1,11 @@
 #pragma once
-#include "brain_conf.hh"
+
 #include <cstdint>
+
+namespace Brain
+{
+constexpr inline uint32_t MemorySizeBytes = 0x00800000;
+}
 
 namespace LDKit
 {
