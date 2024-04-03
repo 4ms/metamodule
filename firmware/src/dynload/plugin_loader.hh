@@ -1,10 +1,11 @@
 #pragma once
-#include "VCV_adaptor/plugin/Plugin.hpp"
 #include "dynload/dynloader.hh"
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "patch_file/file_storage_proxy.hh"
+#include "plugin/Plugin.hpp"
 #include "util/monotonic_allocator.hh"
 #include <cstdint>
+#include <deque>
 #include <string>
 
 namespace MetaModule

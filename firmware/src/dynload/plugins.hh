@@ -1,4 +1,4 @@
-#include "VCV_adaptor/plugin/Plugin.hpp"
+#include "plugin/Plugin.hpp"
 
 extern rack::plugin::Plugin *pluginInstance;
 

@@ -49,7 +49,7 @@ target_sources(lvgl
 #
 # VCV Adaptor
 #
-add_subdirectory(VCV_adaptor)
+add_subdirectory(../plugins/VCV-metamodule-adaptor ${CMAKE_BINARY_DIR}/VCV_mm_adaptor)
 
 #
 # Brands
@@ -166,6 +166,7 @@ set_source_files_properties(
 target_include_directories(
   main.elf
   PRIVATE 
+          ${FWDIR}
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
@@ -186,7 +187,7 @@ target_include_directories(
 
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor cpputil vcv_ports jansson)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_mm_adaptor cpputil vcv_ports jansson)
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})

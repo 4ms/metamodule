@@ -1,5 +1,4 @@
 #pragma once
-#include "VCV_adaptor/plugin/Plugin.hpp"
 #include "conf/ramdisk_conf.hh"
 #include "dynload/plugins.hh"
 #include "fs/asset_drive/asset_fs.hh"
@@ -8,6 +7,7 @@
 #include "fs/fatfs/ramdisk_ops.hh"
 #include "fs/fileio_t.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "plugin/Plugin.hpp"
 #include "plugin_loader.hh"
 #include <list>
 
