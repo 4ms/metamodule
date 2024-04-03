@@ -2,6 +2,7 @@
 #include "app/ModuleWidget.hpp"
 #include "app/SvgSlider.hpp"
 #include "app/SvgSwitch.hpp"
+#include "metamodule/make_element.hh"
 #include "random.hpp"
 #include "widget/TransformWidget.hpp"
 
@@ -80,6 +81,24 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	rack::app::SvgSlider{}.setBackgroundSvg({});
 	rack::app::SvgSlider{}.setHandlePos({}, {});
 	rack::app::ModuleWidget{}.addChild(new rack::app::ModuleLightWidget);
+
+	rack::app::SvgSwitch sw;
+	rack::app::SvgPort port;
+	rack::app::SvgKnob knob;
+	rack::app::SvgSlider slider;
+	rack::app::SvgScrew screw;
+	rack::widget::SvgWidget wid;
+	rack::componentlibrary::Rogan rogan;
+
+	MetaModule::make_element_output(&port, MetaModule::BaseElement{});
+	MetaModule::make_element_input(&port, MetaModule::BaseElement{});
+	MetaModule::make_element(&knob, MetaModule::BaseElement{});
+	MetaModule::make_element(&slider, MetaModule::BaseElement{});
+	MetaModule::make_element_slideswitch(&slider, MetaModule::BaseElement{});
+	MetaModule::make_element(&rogan, MetaModule::BaseElement{});
+	MetaModule::make_element(&sw, MetaModule::BaseElement{});
+	MetaModule::make_element(&screw, MetaModule::BaseElement{});
+	MetaModule::make_element(&wid, MetaModule::BaseElement{});
 
 	auto ar = new int[10];
 	delete[] ar;
