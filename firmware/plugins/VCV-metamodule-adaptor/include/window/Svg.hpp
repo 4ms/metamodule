@@ -57,7 +57,9 @@ struct Svg {
 	void draw(NVGcontext *vg);
 
 	/** Loads Svg from a cache. */
-	static std::shared_ptr<Svg> load(const std::string &filename);
+	static std::shared_ptr<Svg> load(const std::string &filename) {
+		return make_shared<Svg>(filename);
+	}
 };
 
 DEPRECATED typedef Svg SVG;

@@ -16,14 +16,11 @@ struct SvgPort : PortWidget {
 
 	std::string svg_filename; //TODO: instead use sw->svg->filename;
 
-	SvgPort();
 	void setSvg(std::shared_ptr<window::Svg> svg);
-	DEPRECATED void setSVG(std::shared_ptr<window::Svg> svg) {
+	void setSVG(std::shared_ptr<window::Svg> svg) {
 		setSvg(svg);
 	}
 };
-
-DEPRECATED typedef SvgPort SVGPort;
 
 struct ThemedSvgPort : SvgPort {
 	std::shared_ptr<window::Svg> lightSvg;

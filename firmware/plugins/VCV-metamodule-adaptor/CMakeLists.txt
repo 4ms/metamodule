@@ -20,7 +20,9 @@ target_sources(
          src/widget/FramebufferWidget.cc
 
          src/Quantity.cpp
-		 src/VCV_module_wrapper.cc
+         src/VCV_module_wrapper.cc
+         src/asset.cc
+         src/context.cpp
          src/history.cpp
          src/keep-symbols.cc
          src/plugin_instance.cc
