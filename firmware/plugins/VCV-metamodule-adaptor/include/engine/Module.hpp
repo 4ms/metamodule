@@ -33,11 +33,6 @@ struct Module : VCVModuleWrapper {
 
 	int64_t id = -1;
 
-	std::vector<Param> params;
-	std::vector<Input> inputs;
-	std::vector<Output> outputs;
-	std::vector<Light> lights;
-
 	std::vector<std::unique_ptr<PortInfo>> inputInfos;
 	std::vector<std::unique_ptr<PortInfo>> outputInfos;
 	std::vector<std::unique_ptr<LightInfo>> lightInfos;
