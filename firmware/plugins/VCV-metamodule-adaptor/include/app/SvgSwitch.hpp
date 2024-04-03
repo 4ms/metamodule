@@ -15,7 +15,7 @@ struct SvgSwitch : Switch {
 
 	// std::vector<std::shared_ptr<window::Svg>> frames;
 	// MM simplifies:
-	std::vector<std::string_view> frames;
+	std::vector<std::string> frames;
 
 	// Use frames 0 and 1 when the mouse is pressed and released, instead of using the param value as the frame index.
 	bool latch = false;
