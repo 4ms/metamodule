@@ -1,34 +1,28 @@
 #pragma once
 #include <common.hpp>
 
-
-namespace rack {
-namespace engine {
-
+namespace rack::engine
+{
 
 struct Module;
 
-
 struct LightInfo {
-	Module* module = NULL;
+	Module *module = nullptr;
 	int lightId = -1;
 
-	/** The name of the light, using sentence capitalization.
-	e.g. "Level", "Oscillator phase", "Mode CV".
-
-	Don't use the word "light" or "LED" in the name.
-	Since this text is often prepended or appended to the name, the name will appear as e.g. "Level light light".
-	*/
 	std::string name;
 
-	/** An optional one-sentence description of the light. */
 	std::string description;
 
-	virtual ~LightInfo() {}
-	virtual std::string getName();
-	virtual std::string getDescription();
+	virtual ~LightInfo() = default;
+
+	virtual std::string getName() {
+		return name;
+	}
+
+	virtual std::string getDescription() {
+		return description;
+	}
 };
 
-
-} // namespace engine
-} // namespace rack
+} // namespace rack::engine

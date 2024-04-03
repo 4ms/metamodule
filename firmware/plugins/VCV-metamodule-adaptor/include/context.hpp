@@ -49,8 +49,6 @@ struct Context {
 	history::State *history = nullptr;
 	patch::Manager *patch = nullptr;
 	midiloopback::Context *midiLoopbackContext = nullptr;
-
-	~Context();
 };
 
 /** Returns the global Context pointer */

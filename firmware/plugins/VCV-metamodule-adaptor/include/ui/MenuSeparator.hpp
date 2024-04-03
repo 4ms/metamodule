@@ -1,17 +1,10 @@
 #pragma once
-#include <ui/common.hpp>
 #include <ui/MenuEntry.hpp>
+#include <ui/common.hpp>
 
+namespace rack::ui
+{
 
-namespace rack {
-namespace ui {
+struct MenuSeparator : MenuEntry {};
 
-
-struct MenuSeparator : MenuEntry {
-	MenuSeparator();
-	void draw(const DrawArgs& args) override;
-};
-
-
-} // namespace ui
-} // namespace rack
+} // namespace rack::ui
