@@ -2,6 +2,10 @@ ARCH_CFLAGS := -DSTM32MP157Cxx -DSTM32MP1 -DCORE_CA7
 
 MCU :=  -mcpu=cortex-a7 -march=armv7ve -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard
 
+BINARYNAME := $(PLUGINNAME)
+BUILDDIR := build
+OBJDIR := $(BUILDDIR)/obj/obj
+
 LFLAGS := $(MCU)  \
 		 -Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
 		 -Wl,--gc-sections \
@@ -37,6 +41,12 @@ CXXFLAGS ?= $(CFLAGS) \
 		-Wno-volatile \
 		$(EXTRA_CPPFLAGS) \
 		
+SOURCES += $(ADAPTORDIR)/libc_stub.c 
+INCLUDES += \
+			-I$(ADAPTORDIR)/include \
+			-I$(ADAPTORDIR)/dep/include \
+			-I$(ADAPTORDIR)/dep/include/cpputil
+
 
 OBJECTS   = $(addprefix $(OBJDIR)/, $(addsuffix .obj, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(OBJDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
