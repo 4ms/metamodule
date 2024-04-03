@@ -1,47 +1,51 @@
 #pragma once
 #include <app/common.hpp>
-#include <widget/OpaqueWidget.hpp>
-#include <ui/Tooltip.hpp>
 #include <engine/Module.hpp>
 #include <engine/PortInfo.hpp>
+#include <ui/Tooltip.hpp>
+#include <widget/OpaqueWidget.hpp>
 
-
-namespace rack {
-namespace app {
-
+namespace rack
+{
+namespace app
+{
 
 /** Manages an engine::Port on a ModuleWidget. */
 struct PortWidget : widget::OpaqueWidget {
-	struct Internal;
-	Internal* internal;
 
-	engine::Module* module = NULL;
+	engine::Module *module = nullptr;
 	engine::Port::Type type = engine::Port::INPUT;
 	int portId = -1;
 
-	PortWidget();
-	~PortWidget();
-	engine::Port* getPort();
-	engine::PortInfo* getPortInfo();
-	void createTooltip();
-	void destroyTooltip();
-	void createContextMenu();
-	virtual void appendContextMenu(ui::Menu* menu) {}
-	void deleteTopCableAction();
+	engine::Port *getPort() {
+		if (!module)
+			return nullptr;
+		if (type == engine::Port::INPUT)
+			return (size_t)portId < module->inputs.size() ? &module->inputs[portId] : nullptr;
+		else
+			return (size_t)portId < module->outputs.size() ? &module->outputs[portId] : nullptr;
+	}
 
-	void step() override;
-	void draw(const DrawArgs& args) override;
+	engine::PortInfo *getPortInfo() {
+		if (!module)
+			return nullptr;
+		if (type == engine::Port::INPUT)
+			return (size_t)portId < module->inputInfos.size() ? module->inputInfos[portId].get() : nullptr;
+		else
+			return (size_t)portId < module->outputInfos.size() ? module->outputInfos[portId].get() : nullptr;
+	}
 
-	void onButton(const ButtonEvent& e) override;
-	void onEnter(const EnterEvent& e) override;
-	void onLeave(const LeaveEvent& e) override;
-	void onDragStart(const DragStartEvent& e) override;
-	void onDragEnd(const DragEndEvent& e) override;
-	void onDragDrop(const DragDropEvent& e) override;
-	void onDragEnter(const DragEnterEvent& e) override;
-	void onDragLeave(const DragLeaveEvent& e) override;
+	void createTooltip() {
+	}
+	void destroyTooltip() {
+	}
+	void createContextMenu() {
+	}
+	virtual void appendContextMenu(ui::Menu *menu) {
+	}
+	void deleteTopCableAction() {
+	}
 };
-
 
 } // namespace app
 } // namespace rack

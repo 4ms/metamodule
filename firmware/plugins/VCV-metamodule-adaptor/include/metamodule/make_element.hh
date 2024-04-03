@@ -68,17 +68,16 @@ inline Element make_element(rack::componentlibrary::Rogan const *widget, BaseEle
 
 inline Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
 	if (widget->momentary) {
-		return MomentaryButton{b, widget->frames[0]->filename};
+		return MomentaryButton{b, widget->frames[0]};
 
 	} else if (widget->frames.size() == 3) {
-		return FlipSwitch{
-			{b}, 3, {widget->frames[0]->filename, widget->frames[1]->filename, widget->frames[2]->filename}};
+		return FlipSwitch{{b}, 3, {widget->frames[0], widget->frames[1], widget->frames[2]}};
 
 	} else if (widget->frames.size() == 2) {
-		return FlipSwitch{{b}, 2, {widget->frames[0]->filename, widget->frames[1]->filename}};
+		return FlipSwitch{{b}, 2, {widget->frames[0], widget->frames[1]}};
 
 	} else if (widget->frames.size() == 1) {
-		return MomentaryButton{b, widget->frames[0]->filename};
+		return MomentaryButton{b, widget->frames[0]};
 
 	} else {
 		printf("make_element(): Unknown SvgSwitch, frames size is not 1, 2 or 3\n");

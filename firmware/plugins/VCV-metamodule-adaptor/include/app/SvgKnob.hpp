@@ -15,13 +15,13 @@ struct SvgKnob : Knob {
 	widget::SvgWidget *sw = &_sw;
 	widget::TransformWidget *tw = &_tw;
 
+	void setSvg(std::shared_ptr<window::Svg> svg);
+
 private:
 	widget::FramebufferWidget _fb;
 	CircularShadow _shadow;
 	widget::SvgWidget _sw;
 	widget::TransformWidget _tw;
-
-	void setSvg(std::shared_ptr<window::Svg> svg);
 };
 
 } // namespace rack::app

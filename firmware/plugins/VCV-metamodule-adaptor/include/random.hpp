@@ -1,6 +1,5 @@
 #pragma once
 #include <common.hpp>
-#include <random>
 #include <vector>
 
 #ifndef M_PI
@@ -13,14 +12,14 @@
 #define M_E 2.7182818284590452354f
 #endif
 #ifndef M_SQRT1_2
-#define M_SQRT1_2	0.70710678118654752440f
+#define M_SQRT1_2 0.70710678118654752440f
 #endif
 
-
-namespace rack {
+namespace rack
+{
 /** Random number generation */
-namespace random {
-
+namespace random
+{
 
 /** xoroshiro128+. Very fast, not-cryptographic random number generator.
 From https://prng.di.unimi.it/
@@ -73,7 +72,6 @@ struct Xoroshiro128Plus {
 	}
 };
 
-
 // Simple global API
 
 void init();
@@ -81,53 +79,58 @@ void init();
 /** Returns the generator.
 Named "local" because the generator was thread-local in previous versions.
 */
-Xoroshiro128Plus& local();
+Xoroshiro128Plus &local();
 
-template <typename T>
+template<typename T>
 T get() {
 	// Call operator()() and cast by default
 	return local()();
 }
 
-template <>
+template<>
 inline uint32_t get() {
 	// Take top 32 bits which has better randomness properties.
 	return get<uint64_t>() >> 32;
 }
 
-template <>
+template<>
 inline uint16_t get() {
 	return get<uint64_t>() >> 48;
 }
 
-template <>
+template<>
 inline uint8_t get() {
 	return get<uint64_t>() >> 56;
 }
 
-template <>
+template<>
 inline bool get() {
 	return get<uint64_t>() >> 63;
 }
 
-template <>
+template<>
 inline float get() {
 	// The multiplier is 2f7fffff in hex. This gives maximum precision of uint32_t -> float conversion and its image is [0, 1).
 	return get<uint32_t>() * 2.32830629e-10f;
 }
 
-template <>
+template<>
 inline double get() {
 	return get<uint64_t>() * 5.421010862427522e-20;
 }
 
-
 /** Returns a uniform random uint64_t from 0 to UINT64_MAX */
-inline uint64_t u64() {return get<uint64_t>();}
+inline uint64_t u64() {
+	return get<uint64_t>();
+}
 /** Returns a uniform random uint32_t from 0 to UINT32_MAX */
-inline uint32_t u32() {return get<uint32_t>();}
+inline uint32_t u32() {
+	return get<uint32_t>();
+}
 /** Returns a uniform random float in the interval [0.0, 1.0) */
-inline float uniform() {return get<float>();}
+inline float uniform() {
+	return get<float>();
+}
 
 /** Returns a normal random number with mean 0 and standard deviation 1 */
 inline float normal() {
@@ -146,8 +149,8 @@ inline float normal() {
 }
 
 /** Fills an array with random bytes. */
-inline void buffer(uint8_t* out, size_t len) {
-	Xoroshiro128Plus& rng = local();
+inline void buffer(uint8_t *out, size_t len) {
+	Xoroshiro128Plus &rng = local();
 	for (size_t i = 0; i < len; i += 4) {
 		uint64_t r = rng();
 		out[i] = r;
@@ -166,7 +169,6 @@ inline std::vector<uint8_t> vector(size_t len) {
 	buffer(v.data(), len);
 	return v;
 }
-
 
 } // namespace random
 } // namespace rack
