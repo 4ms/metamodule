@@ -1,4 +1,5 @@
 #include "metamodule/VCV_module_wrapper.hh"
+#include "console/pr_dbg.hh"
 #include <random.hpp>
 
 VCVModuleWrapper::VCVModuleWrapper() {
@@ -22,15 +23,20 @@ void VCVModuleWrapper::set_param(int id, float val) {
 		if (paramQuantities[id]->snapEnabled)
 			val = std::round(val);
 	}
-	params[id].setValue(val);
+	if (id < (int)params.size())
+		params[id].setValue(val);
 }
 
 void VCVModuleWrapper::set_input(const int input_id, const float val) {
-	inputs[input_id].setVoltage(val);
+	if (input_id < (int)inputs.size())
+		inputs[input_id].setVoltage(val);
 }
 
 float VCVModuleWrapper::get_output(const int output_id) const {
-	return outputs[output_id].getVoltage();
+	if (output_id < (int)outputs.size())
+		return outputs[output_id].getVoltage();
+	else
+		return 0.f;
 }
 
 float VCVModuleWrapper::get_led_brightness(const int led_id) const {
@@ -47,11 +53,13 @@ void VCVModuleWrapper::mark_all_inputs_unpatched() {
 }
 
 void VCVModuleWrapper::mark_input_unpatched(const int input_id) {
-	inputs[input_id].connected = false;
+	if (input_id < (int)inputs.size())
+		inputs[input_id].connected = false;
 }
 
 void VCVModuleWrapper::mark_input_patched(const int input_id) {
-	inputs[input_id].connected = true;
+	if (input_id < (int)inputs.size())
+		inputs[input_id].connected = true;
 }
 
 void VCVModuleWrapper::mark_all_outputs_unpatched() {
@@ -60,9 +68,11 @@ void VCVModuleWrapper::mark_all_outputs_unpatched() {
 }
 
 void VCVModuleWrapper::mark_output_unpatched(const int output_id) {
-	outputs[output_id].connected = false;
+	if (output_id < (int)outputs.size())
+		outputs[output_id].connected = false;
 }
 
 void VCVModuleWrapper::mark_output_patched(const int output_id) {
-	outputs[output_id].connected = true;
+	if (output_id < (int)outputs.size())
+		outputs[output_id].connected = true;
 }
