@@ -25,8 +25,9 @@ void ModuleWidget::setPanel(std::shared_ptr<window::Svg> svg) {
 }
 
 ModuleWidget::~ModuleWidget() {
-	for (auto &w : owned_widgets) {
-		delete w;
+	for (auto w : owned_widgets) {
+		if (w)
+			delete w;
 	}
 	if (panel)
 		delete panel;

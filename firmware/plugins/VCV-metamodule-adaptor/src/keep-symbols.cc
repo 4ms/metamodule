@@ -1,3 +1,6 @@
+#include "app/ModuleLightWidget.hpp"
+#include "app/ModuleWidget.hpp"
+#include "app/SvgSlider.hpp"
 #include "app/SvgSwitch.hpp"
 #include "random.hpp"
 #include "widget/TransformWidget.hpp"
@@ -35,12 +38,19 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	(void)sqrt(1.f);
 	(void)sqrtf(1.f);
 	(void)powf(1.f, 1.f);
+	(void)pow(1., 1.);
 	(void)sin(1.f);
 	(void)log(1.f);
+	(void)log10(1.f);
+	(void)log10f(1.f);
 	(void)logf(1.f);
 	(void)log2f(1.f);
 	(void)cos(1.f);
 	(void)cosf(1.f);
+	(void)ceil(1.f);
+	(void)ceilf(1.f);
+	(void)floor(1.f);
+	(void)floorf(1.f);
 
 	(void)keep(json_object_set_new);
 	(void)keep(json_array_get);
@@ -66,6 +76,10 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	rack::widget::Widget{}.addChildBottom({});
 	rack::widget::Widget{}.addChildBelow({}, {});
 	rack::app::SvgSwitch{}.addFrame(std::make_shared<rack::window::Svg>(""));
+	rack::app::SvgSlider{}.setHandleSvg({});
+	rack::app::SvgSlider{}.setBackgroundSvg({});
+	rack::app::SvgSlider{}.setHandlePos({}, {});
+	rack::app::ModuleWidget{}.addChild(new rack::app::ModuleLightWidget);
 
 	auto ar = new int[10];
 	delete[] ar;

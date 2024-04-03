@@ -17,13 +17,11 @@ namespace
 
 static constexpr int MAX_MODULE_TYPES = 512;
 
-// SeqMap<ModuleTypeSlug, ModuleFactory::CreateModuleFunc, MAX_MODULE_TYPES>
 auto &creation_funcs() {
 	static SeqMap<ModuleTypeSlug, ModuleFactory::CreateModuleFunc, MAX_MODULE_TYPES> _creation_funcs{};
 	return _creation_funcs;
 }
 
-// SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES>
 auto &infos() {
 	static SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> _infos{};
 	return _infos;

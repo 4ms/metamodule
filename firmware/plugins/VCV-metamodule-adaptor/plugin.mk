@@ -30,15 +30,15 @@ CXXFLAGS ?= $(CFLAGS) \
 		-fno-exceptions \
 		-fno-unwind-tables \
 		-fno-threadsafe-statics \
+		-fno-rtti \
 		-mno-unaligned-access \
 		-Werror=return-type \
 		-Wno-register \
 		-Wno-volatile \
-		-fno-rtti \
 		$(EXTRA_CPPFLAGS) \
 		
 
-OBJECTS   = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
+OBJECTS   = $(addprefix $(OBJDIR)/, $(addsuffix .obj, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(OBJDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 DEPFLAGS = -MMD -MP -MF $(OBJDIR)/$(basename $<).d
 
@@ -59,17 +59,17 @@ SOSTRIP_H = $(BUILDDIR)/$(BINARYNAME)-strip-so.h
 
 all: Makefile $(SOSTRIP) 
 
-$(OBJDIR)/%.o: %.s
+$(OBJDIR)/%.obj: %.s
 	@mkdir -p $(dir $@)
 	$(info Building $<)
 	$(AS) $(AFLAGS) $< -o $@ 
 
-$(OBJDIR)/%.o: %.c $(OBJDIR)/%.d
+$(OBJDIR)/%.obj: %.c $(OBJDIR)/%.d
 	@mkdir -p $(dir $@)
 	$(info Building $<)
 	@$(CC) $(DEPFLAGS) $(OPTFLAG) $(CFLAGS) $< -o $@
 
-$(OBJDIR)/%.o: %.c[cp]* $(OBJDIR)/%.d
+$(OBJDIR)/%.obj: %.c[cp]* $(OBJDIR)/%.d
 	@mkdir -p $(dir $@)
 	$(info Building $<)
 	@$(CXX) $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@

@@ -48,8 +48,10 @@ add_custom_command(
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/VCV_mm_adaptor/
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware
+          --plugin ./plugins/build/Befaco.so
           --elf $<TARGET_FILE:main.elf>
           --yaml ${SYMBOLS_FILE}
+          -v
   COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
   DEPENDS main.elf 
   COMMENT "Exporting symbols"
