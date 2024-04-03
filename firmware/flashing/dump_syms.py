@@ -5,6 +5,7 @@ import logging
 
 from pathlib import Path
 from elftools.elf.elffile import ELFFile
+from elftools.elf.sections import SymbolTableSection
 
 import json
 
@@ -12,7 +13,7 @@ def GetRequiredSymbolNames(file):
     needed_syms = []
     elf = ELFFile(file)
     mmsyms = elf.get_section_by_name(".symtab")
-    if mmsyms is not None:
+    if isinstance(mmsyms, SymbolTableSection):
         for i in range(mmsyms.num_symbols()):
             n = mmsyms.get_symbol(i).name
             l = mmsyms.get_symbol(i)['st_info']['bind']
@@ -23,17 +24,33 @@ def GetRequiredSymbolNames(file):
                 needed_syms.append(n)
     return needed_syms
 
+def GetPluginRequiredSymbolNames(file):
+    needed_syms = []
+    elf = ELFFile(file)
+    mmsyms = elf.get_section_by_name(".symtab")
+    if isinstance(mmsyms, SymbolTableSection):
+        for i in range(mmsyms.num_symbols()):
+            n = mmsyms.get_symbol(i).name
+            l = mmsyms.get_symbol(i)['st_info']['bind']
+            t = mmsyms.get_symbol(i)['st_info']['type']
+            ndx = mmsyms.get_symbol(i)['st_shndx']
+            if n != "" and l == "STB_GLOBAL" and ndx == 'SHN_UNDEF':
+                logging.debug(f"{i}: bind:{l} type:{t} {n}")
+                needed_syms.append(n)
+    return needed_syms
+
 
 def GetAddressesOfSymbols(file, needed_syms):
     syms = {} 
     elf = ELFFile(file)
     symtab = elf.get_section_by_name(".symtab")
-    for i in range(symtab.num_symbols()):
-        s = symtab.get_symbol(i)
-        if s.name in needed_syms:
-            syms[s.name] = s['st_value']
-            logging.debug(f"{hex(s['st_value'])}\t{s.name}")
-            needed_syms.remove(s.name)
+    if isinstance(symtab, SymbolTableSection):
+        for i in range(symtab.num_symbols()):
+            s = symtab.get_symbol(i)
+            if s.name in needed_syms:
+                syms[s.name] = s['st_value']
+                logging.debug(f"{hex(s['st_value'])}\t{s.name}")
+                needed_syms.remove(s.name)
 
     for n in needed_syms:
         logging.warning(f"** WARNING: Symbol not found in main.elf: {n} **")
@@ -184,6 +201,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Dump symbols that plugins might need")
     parser.add_argument("--objdir", action="append", help="Object dir with .obj files with the symbols we want to make available to plugins (i.e. VCV_module_wrapper.cc.obj)")
     parser.add_argument("--elf", help="Fully linked elf file with addresses of all symbols (main.elf)")
+    parser.add_argument("--plugin", help="Path to sample plugin .so file to test if all symbols will be resolved")
     parser.add_argument("--header", help="output c++ header file")
     parser.add_argument("--bin", help="output binary")
     parser.add_argument("--json", help="output json")
@@ -204,6 +222,12 @@ if __name__ == "__main__":
             logging.info(f"Looking for symbols in {obj_file}")
             with open(obj_file, "rb") as f:
                 needed_syms += GetRequiredSymbolNames(f)
+
+    if args.plugin:
+        logging.info(f"Checking if symbols in {args.plugin} would be resolved")
+        with open(args.plugin, "rb") as f:
+            needed_syms += GetPluginRequiredSymbolNames(f)
+
 
     libc_syms = GetLibcSymbols()
     for s in libc_syms:
