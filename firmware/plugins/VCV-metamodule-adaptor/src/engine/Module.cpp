@@ -1,6 +1,6 @@
 #include "engine/Module.hpp"
+#include "console/pr_dbg.hh"
 #include "jansson.h"
-#include "pr_dbg.hh"
 
 namespace rack::engine
 {

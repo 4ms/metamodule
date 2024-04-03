@@ -66,39 +66,4 @@ math::Rect Widget::getViewport(math::Rect r) {
 	return {};
 }
 
-/////////////////////////////////////
-#include "svg.hh"
-
-void SvgWidget::setSvg(std::shared_ptr<window::Svg> svg) {
-	svg_filename = svg->filename;
-	box.size = get_svg_size(svg_filename);
-}
-
-void FramebufferWidget::addChildBelow(SvgWidget *child, Widget *sibling) {
-	//we take ownership
-	_bg = child;
-	//TODO: set parent's size equal to _bg's size
-}
-
-FramebufferWidget::~FramebufferWidget() {
-	if (_bg)
-		delete _bg;
-}
-
-void TransformWidget::translate(math::Vec delta) {
-	printf("translate transformation not supported\n");
-}
-
-void TransformWidget::rotate(float angle) {
-	printf("rotate transformation not supported\n");
-}
-
-void TransformWidget::rotate(float angle, math::Vec origin) {
-	printf("rotate transformation not supported\n");
-}
-
-void TransformWidget::scale(math::Vec s) {
-	printf("scale transformation not supported\n");
-}
-
 } // namespace rack::widget

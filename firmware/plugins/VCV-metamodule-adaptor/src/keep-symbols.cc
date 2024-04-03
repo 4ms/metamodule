@@ -1,6 +1,6 @@
-#include "VCV_adaptor/app/Widget.hh"
-#include "VCV_adaptor/random.hpp"
-#include "VCV_adaptor/widget/Widget.hh"
+#include "app/SvgSwitch.hpp"
+#include "random.hpp"
+#include "widget/TransformWidget.hpp"
 
 #include "history.hpp"
 #include "jansson.h"
