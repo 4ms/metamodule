@@ -1,21 +1,18 @@
 #pragma once
-#include <vector>
-#include <set>
-#include <map>
 #include <list>
+#include <map>
+#include <set>
 #include <tuple>
+#include <vector>
 
 #include <jansson.h>
 
+#include <color.hpp>
 #include <common.hpp>
 #include <math.hpp>
-#include <color.hpp>
 
-
-namespace rack {
-/** Process-scope globals, most of which are persisted across launches */
-namespace settings {
-
+namespace rack::settings
+{
 
 // Runtime state, not serialized.
 
@@ -90,7 +87,7 @@ enum BrowserSort {
 };
 extern BrowserSort browserSort;
 extern float browserZoom;
-extern json_t* pluginSettingsJ;
+extern json_t *pluginSettingsJ;
 
 struct ModuleInfo {
 	bool enabled = true;
@@ -102,7 +99,7 @@ struct ModuleInfo {
 extern std::map<std::string, std::map<std::string, ModuleInfo>> moduleInfos;
 /** Returns a ModuleInfo if exists for the given slugs.
 */
-ModuleInfo* getModuleInfo(const std::string& pluginSlug, const std::string& moduleSlug);
+ModuleInfo *getModuleInfo(const std::string &pluginSlug, const std::string &moduleSlug);
 
 /** The VCV JSON API returns the data structure
 {pluginSlug: [moduleSlugs] or true}
@@ -115,15 +112,13 @@ struct PluginWhitelist {
 };
 extern std::map<std::string, PluginWhitelist> moduleWhitelist;
 
-bool isModuleWhitelisted(const std::string& pluginSlug, const std::string& moduleSlug);
+bool isModuleWhitelisted(const std::string &pluginSlug, const std::string &moduleSlug);
 
 PRIVATE void init();
 PRIVATE void destroy();
-PRIVATE json_t* toJson();
-PRIVATE void fromJson(json_t* rootJ);
+PRIVATE json_t *toJson();
+PRIVATE void fromJson(json_t *rootJ);
 PRIVATE void save(std::string path = "");
 PRIVATE void load(std::string path = "");
 
-
-} // namespace settings
-} // namespace rack
+} // namespace rack::settings

@@ -22,6 +22,7 @@ target_sources(
          src/history.cpp
          src/keep-symbols.cc
          src/plugin_instance.cc
+         src/settings.cpp
          src/string.cpp
          src/svg.cc
 )

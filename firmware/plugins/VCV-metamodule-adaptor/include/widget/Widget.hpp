@@ -97,7 +97,9 @@ struct Widget : WeakBase {
 	/** Returns the zoom level in the coordinate system of `ancestor`.
 	Only `ZoomWidget` should override this to return value other than 1.
 	*/
-	virtual float getRelativeZoom(Widget *ancestor);
+	virtual float getRelativeZoom(Widget *ancestor) {
+		return 1.f;
+	}
 	float getAbsoluteZoom() {
 		return getRelativeZoom(nullptr);
 	}
