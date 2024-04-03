@@ -21,8 +21,9 @@ SOURCES = $(ADAPTORDIR)/libc_stub.c \
 		Befaco/src/StereoStrip.cpp \
 		Befaco/src/EvenVCO.cpp \
 		Befaco/src/PonyVCO.cpp \
-		Befaco/src/SpringReverb.cpp \
 		Befaco-plugin.cpp \
+		
+		# Befaco/src/SpringReverb.cpp \
 		
 INCLUDES := -I. \
 			-IBefaco/src \
