@@ -20,7 +20,7 @@ namespace widget
 The bounding box of a Widget is a rectangle specified by `box` relative to their parent.
 The appearance is defined by overriding `draw()`, and the behavior is defined by overriding `step()` and `on*()` event handlers.
 */
-struct Widget : WeakBase {
+struct Widget {
 	MetaModule::Element element;
 
 	/** Position relative to parent and size of widget. */
