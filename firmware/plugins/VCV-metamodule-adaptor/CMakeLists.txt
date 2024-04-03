@@ -12,12 +12,14 @@ target_sources(
          src/app/SvgSlider.cc
          src/app/SvgSwitch.cc
          src/engine/Module.cpp
+         src/engine/ParamQuantity.cpp
          src/plugin/Model.cpp
          src/plugin/Plugin.cpp
          src/widget/Widget.cc
          src/widget/SvgWidget.cc
          src/widget/FramebufferWidget.cc
 
+         src/Quantity.cpp
 		 src/VCV_module_wrapper.cc
          src/history.cpp
          src/keep-symbols.cc

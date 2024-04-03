@@ -12,8 +12,6 @@ struct SvgWidget : Widget {
 	std::string svg_filename; //TODO: use svg->filename
 	NVGcolor bgColor{};
 
-	SvgWidget();
-
 	void wrap() {
 	}
 
@@ -22,7 +20,5 @@ struct SvgWidget : Widget {
 		setSvg(svg);
 	}
 };
-
-DEPRECATED typedef SvgWidget SVGWidget;
 
 } // namespace rack::widget

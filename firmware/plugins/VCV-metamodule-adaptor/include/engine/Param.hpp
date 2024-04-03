@@ -1,14 +1,9 @@
 #pragma once
-#include <common.hpp>
-#include <math.hpp>
 
-
-namespace rack {
-namespace engine {
-
+namespace rack::engine
+{
 
 struct Param {
-	/** Unstable API. Use setValue() and getValue() instead. */
 	float value = 0.f;
 
 	float getValue() {
@@ -20,6 +15,4 @@ struct Param {
 	}
 };
 
-
-} // namespace engine
-} // namespace rack
+} // namespace rack::engine

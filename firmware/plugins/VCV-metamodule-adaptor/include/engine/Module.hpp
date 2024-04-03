@@ -25,66 +25,26 @@ struct Model;
 namespace engine
 {
 
-/** DSP processor instance for your module. */
 struct Module : VCVModuleWrapper {
 	// struct Internal;
 	// Internal *internal;
 
-	/** Not owned. */
 	plugin::Model *model = nullptr;
 
-	/** Unique ID for referring to the module in the engine.
-	Between 0 and 2^53-1 since the number is serialized with JSON.
-	Assigned when added to the engine.
-	*/
 	int64_t id = -1;
 
-	/** Arrays of components.
-	Initialized using config().
-
-	It is recommended to call getParam(), getInput(), etc. instead of accessing these directly.
-	*/
 	std::vector<Param> params;
 	std::vector<Input> inputs;
 	std::vector<Output> outputs;
 	std::vector<Light> lights;
 
-	/** Arrays of component metadata.
-	Initialized using configParam(), configInput(), configOutput(), and configLight().
-	LightInfos are initialized to null unless configLight() is called.
-
-	It is recommended to call getParamQuantity(), getInputInfo(), etc. instead of accessing these directly.
-	*/
 	std::vector<std::unique_ptr<PortInfo>> inputInfos;
 	std::vector<std::unique_ptr<PortInfo>> outputInfos;
 	std::vector<std::unique_ptr<LightInfo>> lightInfos;
 
-	/** Represents a message-passing channel for an adjacent module. */
 	struct Expander {
-		/** ID of the expander module, or -1 if nonexistent. */
 		int64_t moduleId = -1;
-		/** Pointer to the expander Module, or NULL if nonexistent. */
 		Module *module = nullptr;
-		/** Double buffer for receiving messages from the expander module.
-		If you intend to receive messages from an expander, allocate both message buffers with identical blocks of memory (arrays, structs, etc).
-		Remember to free the buffer in the Module destructor.
-		Example:
-
-			rightExpander.producerMessage = new MyExpanderMessage;
-			rightExpander.consumerMessage = new MyExpanderMessage;
-
-		You must check the expander module's `model` before attempting to write its message buffer.
-		Once the module is checked, you can reinterpret_cast its producerMessage at no performance cost.
-
-		Producer messages are intended to be write-only.
-		Consumer messages are intended to be read-only.
-
-		Once you write a message, set messageFlipRequested to true to request that the messages are flipped at the end of the timestep.
-		This means that message-passing has 1-sample latency.
-
-		You may choose for your Module to instead write to its own message buffer for consumption by other modules, i.e. the expander "pulls" rather than this module "pushing".
-		As long as this convention is followed by the other module, this is fine.
-		*/
 		void *producerMessage = nullptr;
 		void *consumerMessage = nullptr;
 		bool messageFlipRequested = false;
@@ -103,18 +63,13 @@ struct Module : VCVModuleWrapper {
 	};
 	std::vector<BypassRoute> bypassRoutes;
 
-	/** Constructs a Module with no params, inputs, outputs, and lights. */
 	Module();
-	/** Use config() instead. */
 	// DEPRECATED Module(int numParams, int numInputs, int numOutputs, int numLights = 0)
 	// 	: Module() {
 	// 	config(numParams, numInputs, numOutputs, numLights);
 	// }
 	~Module() override;
 
-	/** Configures the number of Params, Outputs, Inputs, and Lights.
-	Should only be called from a Module subclass's constructor.
-	*/
 	void config(int numParams, int numInputs, int numOutputs, int numLights = 0);
 
 	template<class TParamQuantity = ParamQuantity>
@@ -229,9 +184,6 @@ struct Module : VCVModuleWrapper {
 		return static_cast<TLightInfo *>(lightInfos[lightId].get());
 	}
 
-	/** Adds a direct route from an input to an output when the module is bypassed.
-	Should only be called from a Module subclass's constructor.
-	*/
 	void configBypass(int inputId, int outputId) {
 		if (inputId >= (int)inputs.size())
 			return;
@@ -258,7 +210,6 @@ struct Module : VCVModuleWrapper {
 		return "";
 	}
 
-	/** Getters for members */
 	plugin::Model *getModel() {
 		return model;
 	}
@@ -315,47 +266,30 @@ struct Module : VCVModuleWrapper {
 	Expander &getRightExpander() {
 		return rightExpander;
 	}
-	/** Returns the left Expander for `side = 0` and the right Expander for `side = 1`. */
 	Expander &getExpander(uint8_t side) {
 		return side ? rightExpander : leftExpander;
 	}
 
 	// Virtual methods
 
-	/** Called instead of process() when Module is bypassed.
-	Typically you do not need to override this. Use configBypass() instead.
-	If you do override it, avoid reading param values, since the state of the module should have no effect on routing.
-	*/
 	virtual void processBypass(const ProcessArgs &args) {
 	}
 
-	/** Usually you should override dataToJson() instead.
-	There are very few reasons you should override this (perhaps to lock a mutex while serialization is occurring).
-	*/
 	virtual json_t *toJson() {
 		return nullptr;
 	}
-	/** This is virtual only for the purpose of unserializing legacy data when you could set properties of the `.modules[]` object itself.
-	Normally you should override dataFromJson().
-	Remember to call `Module::fromJson(rootJ)` within your overridden method.
-	*/
 	virtual void fromJson(json_t *rootJ) {
 	}
 
-	/** Serializes the "params" object. */
 	virtual json_t *paramsToJson() {
 		return nullptr;
 	}
 	virtual void paramsFromJson(json_t *rootJ) {
 	}
 
-	/** Override to store extra internal data in the "data" property of the module's JSON object. */
 	virtual json_t *dataToJson() {
 		return nullptr;
 	}
-	/** Override to load internal data from the "data" property of the module's JSON object.
-	Not called if "data" property is not present.
-	*/
 	virtual void dataFromJson(json_t *rootJ) {
 	}
 
@@ -366,43 +300,30 @@ struct Module : VCVModuleWrapper {
 	// All of these events are thread-safe with process().
 
 	struct AddEvent {};
-	/** Called after adding the module to the Engine.
-	*/
 	virtual void onAdd(const AddEvent &e) {
 		// Call deprecated event method by default
 		onAdd();
 	}
 
 	struct RemoveEvent {};
-	/** Called before removing the module from the Engine.
-	*/
 	virtual void onRemove(const RemoveEvent &e) {
 		// Call deprecated event method by default
 		onRemove();
 	}
 
 	struct BypassEvent {};
-	/** Called after bypassing the module.
-	*/
 	virtual void onBypass(const BypassEvent &e) {
 	}
 
 	struct UnBypassEvent {};
-	/** Called after enabling the module.
-	*/
 	virtual void onUnBypass(const UnBypassEvent &e) {
 	}
 
 	struct PortChangeEvent {
-		/** True if connecting, false if disconnecting. */
 		bool connecting;
-		/** Port::INPUT or Port::OUTPUT */
 		Port::Type type;
 		int portId;
 	};
-	/** Called after a cable connects to or disconnects from a port.
-	This event is not called for output ports if a stackable cable was added/removed and did not change the port's connected state.
-	*/
 	virtual void onPortChange(const PortChangeEvent &e) {
 	}
 
@@ -410,40 +331,26 @@ struct Module : VCVModuleWrapper {
 		float sampleRate;
 		float sampleTime;
 	};
-	/** Called when the Engine sample rate changes, and when the Module is added to the Engine.
-	*/
 	virtual void onSampleRateChange(const SampleRateChangeEvent &e) {
 		// Call deprecated event method by default
 		onSampleRateChange();
 	}
 
 	struct ExpanderChangeEvent {
-		/** 0 for left, 1 for right. */
 		uint8_t side;
 	};
-	/** Called after an expander is added, removed, or changed on either the left or right side of the Module.
-	*/
 	virtual void onExpanderChange(const ExpanderChangeEvent &e) {
 	}
 
 	struct ResetEvent {};
-	/** Called when the user resets (initializes) the module.
-	The default implementation resets all parameters to their default value, so you must call `Module::onReset(e)` in your overridden method if you want to keep this behavior.
-	*/
 	virtual void onReset(const ResetEvent &e) {
 	}
 
 	struct RandomizeEvent {};
-	/** Called when the user randomizes the module.
-	The default implementation randomizes all parameters by default, so you must call `Module::onRandomize(e)` in your overridden method if you want to keep this behavior.
-	*/
 	virtual void onRandomize(const RandomizeEvent &e) {
 	}
 
 	struct SaveEvent {};
-	/** Called when the user saves the patch to a file.
-	If your module uses patch asset storage, make sure all files are saved in this event.
-	*/
 	virtual void onSave(const SaveEvent &e) {
 	}
 
@@ -455,19 +362,14 @@ struct Module : VCVModuleWrapper {
 	virtual void onUnsetMaster(const UnsetMasterEvent &e) {
 	}
 
-	/** DEPRECATED. Override `onAdd(e)` instead. */
 	virtual void onAdd() {
 	}
-	/** DEPRECATED. Override `onRemove(e)` instead. */
 	virtual void onRemove() {
 	}
-	/** DEPRECATED. Override `onReset(e)` instead. */
 	virtual void onReset() {
 	}
-	/** DEPRECATED. Override `onRandomize(e)` instead. */
 	virtual void onRandomize() {
 	}
-	/** DEPRECATED. Override `onSampleRateChange(e)` instead. */
 	virtual void onSampleRateChange() {
 	}
 
