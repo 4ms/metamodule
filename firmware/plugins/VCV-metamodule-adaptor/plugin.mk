@@ -53,9 +53,8 @@ GDB 	= $(ARCH)-gdb
 SZ 		= $(ARCH)-size
 STRIP	= $(ARCH)-strip
 
-SO 	    = $(BUILDDIR)/$(BINARYNAME).so
-SOSTRIP = $(BUILDDIR)/$(BINARYNAME)-strip.so
-SOSTRIP_H = $(BUILDDIR)/$(BINARYNAME)-strip-so.h
+SO 	    = $(BUILDDIR)/$(BINARYNAME)-debug.so
+SOSTRIP = $(BUILDDIR)/$(BINARYNAME).so
 
 all: Makefile $(SOSTRIP) 
 
