@@ -94,6 +94,10 @@ void Model::debug_dump_strings() {
 									  printf("flip switch el.pos_names[]: ");
 									  inspect_sv(pos_name);
 								  }
+								  for (auto &frame : el.frames) {
+									  printf("flip switch el.frames[]: ");
+									  inspect_sv(frame);
+								  }
 							  }},
 				   element);
 	}
