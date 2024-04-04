@@ -59,10 +59,10 @@ struct PluginManager {
 		// pluginInstance->addModel(modelMotionMTR);
 		// pluginInstance->addModel(modelSpringReverb);
 
-		auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
-		pluginInstance = &audins_plugin;
+		// auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
+		// pluginInstance = &audins_plugin;
 		// pluginInstance->addModel(modelBlinds);
-		pluginInstance->addModel(modelBraids);
+		// pluginInstance->addModel(modelBraids);
 		// pluginInstance->addModel(modelBranches);
 		// pluginInstance->addModel(modelElements);
 		// pluginInstance->addModel(modelKinks);
