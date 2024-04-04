@@ -128,6 +128,15 @@ class Ui {
     system_clock_.Tick();
   }
 
+  int8_t current_slot()
+  {
+    return current_slot_;
+  }
+  void set_current_slot(int8_t val)
+  {
+    current_slot_ = val;
+  }
+
  private:
   void OnButtonPressed(const stmlib::Event& e);
   void OnButtonReleased(const stmlib::Event& e);
