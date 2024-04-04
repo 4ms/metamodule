@@ -34,9 +34,6 @@ public:
 	static bool isValidSlug(const ModuleTypeSlug &typeslug);
 
 	static std::vector<ModuleTypeSlug> getAllSlugs();
-
-	static void setCurrentBrand(std::string slug);
-	static std::string currentBrandPath();
 };
 
 } // namespace MetaModule

@@ -112,12 +112,4 @@ std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs() {
 	return slugs;
 }
 
-void ModuleFactory::setCurrentBrand(std::string brandSlug) {
-	_currentBrand = brandSlug;
-}
-
-std::string ModuleFactory::currentBrandPath() {
-	return _currentBrand + std::string("/");
-}
-
 } // namespace MetaModule
