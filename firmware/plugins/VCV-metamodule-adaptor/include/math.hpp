@@ -1,27 +1,79 @@
 #pragma once
 #include <complex>
-#include <algorithm> // for std::min, max
+#include <algorithm>
+#include <cmath>
 
-#include <common.hpp>
+namespace rack::math
+{
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846f
+#endif
 
-namespace rack {
-/** Extends `<cmath>` with extra functions and types */
-namespace math {
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923f
+#endif
 
+#ifndef M_PI_4
+#define M_PI_4 0.78539816339744830962f
+#endif
+
+#ifndef M_SQRT2
+#define M_SQRT2 1.41421356237309504880f
+#endif
+
+#ifndef M_E
+#define M_E 2.7182818284590452354f
+#endif
+
+#ifndef M_SQRT1_2
+#define M_SQRT1_2 0.70710678118654752440f
+#endif
+
+#ifndef M_LOG2E
+#define M_LOG2E 1.4426950408889634074f
+#endif
+
+#ifndef M_LOG10E
+#define M_LOG10E 0.43429448190325182765f
+#endif
+
+#ifndef M_LN2
+#define M_LN2 _M_LN2
+#endif
+
+#ifndef M_LN10
+#define M_LN10 2.30258509299404568402f
+#endif
+
+#ifndef M_1_PI
+#define M_1_PI 0.31830988618379067154f
+#endif
+
+#ifndef M_2_PI
+#define M_2_PI 0.63661977236758134308f
+#endif
+
+#ifndef M_2_SQRTPI
+#define M_2_SQRTPI 1.12837916709551257390f
+#endif
+
+#ifndef M_SQRT2
+#define M_SQRT2 1.41421356237309504880f
+#endif
 
 ////////////////////
 // basic integer functions
 ////////////////////
 
 /** Returns true if `x` is odd. */
-template <typename T>
+template<typename T>
 bool isEven(T x) {
 	return x % 2 == 0;
 }
 
 /** Returns true if `x` is odd. */
-template <typename T>
+template<typename T>
 bool isOdd(T x) {
 	return x % 2 != 0;
 }
@@ -64,7 +116,7 @@ inline int eucDiv(int a, int b) {
 	return div;
 }
 
-inline void eucDivMod(int a, int b, int* div, int* mod) {
+inline void eucDivMod(int a, int b, int *div, int *mod) {
 	*div = a / b;
 	*mod = a % b;
 	if (*mod < 0) {
@@ -83,7 +135,7 @@ inline int log2(int n) {
 }
 
 /** Returns whether `n` is a power of 2. */
-template <typename T>
+template<typename T>
 bool isPow2(T n) {
 	return n > 0 && (n & (n - 1)) == 0;
 }
@@ -91,7 +143,7 @@ bool isPow2(T n) {
 /** Returns 1 for positive numbers, -1 for negative numbers, and 0 for zero.
 See https://en.wikipedia.org/wiki/Sign_function.
 */
-template <typename T>
+template<typename T>
 T sgn(T x) {
 	return x > 0 ? 1 : (x < 0 ? -1 : 0);
 }
@@ -121,7 +173,8 @@ __attribute__((optnone))
 #else
 __attribute__((optimize("signed-zeros")))
 #endif
-inline float normalizeZero(float x) {
+inline float
+normalizeZero(float x) {
 	return x + 0.f;
 }
 
@@ -161,7 +214,7 @@ inline float crossfade(float a, float b, float p) {
 /** Linearly interpolates an array `p` with index `x`.
 The array at `p` must be at least length `floor(x) + 2`.
 */
-inline float interpolateLinear(const float* p, float x) {
+inline float interpolateLinear(const float *p, float x) {
 	int xi = x;
 	float xf = x - xi;
 	return crossfade(p[xi], p[xi + 1], xf);
@@ -173,7 +226,7 @@ Example:
 
 	cmultf(ar, ai, br, bi, &ar, &ai);
 */
-inline void complexMult(float ar, float ai, float br, float bi, float* cr, float* ci) {
+inline void complexMult(float ar, float ai, float br, float bi, float *cr, float *ci) {
 	*cr = ar * br - ai * bi;
 	*ci = ar * bi + ai * br;
 }
@@ -190,39 +243,45 @@ struct Vec {
 	float x = 0.f;
 	float y = 0.f;
 
-	Vec() {}
-	Vec(float xy) : x(xy), y(xy) {}
-	Vec(float x, float y) : x(x), y(y) {}
+	Vec() = default;
+	Vec(float xy)
+		: x(xy)
+		, y(xy) {
+	}
+	Vec(float x, float y)
+		: x(x)
+		, y(y) {
+	}
 
-	float& operator[](int i) {
+	float &operator[](int i) {
 		return (i == 0) ? x : y;
 	}
-	const float& operator[](int i) const {
+	const float &operator[](int i) const {
 		return (i == 0) ? x : y;
 	}
 	/** Negates the vector.
 	Equivalent to a reflection across the `y = -x` line.
 	*/
 	Vec neg() const {
-		return Vec(-x, -y);
+		return {-x, -y};
 	}
 	Vec plus(Vec b) const {
-		return Vec(x + b.x, y + b.y);
+		return {x + b.x, y + b.y};
 	}
 	Vec minus(Vec b) const {
-		return Vec(x - b.x, y - b.y);
+		return {x - b.x, y - b.y};
 	}
 	Vec mult(float s) const {
-		return Vec(x * s, y * s);
+		return {x * s, y * s};
 	}
 	Vec mult(Vec b) const {
-		return Vec(x * b.x, y * b.y);
+		return {x * b.x, y * b.y};
 	}
 	Vec div(float s) const {
-		return Vec(x / s, y / s);
+		return {x / s, y / s};
 	}
 	Vec div(Vec b) const {
-		return Vec(x / b.x, y / b.y);
+		return {x / b.x, y / b.y};
 	}
 	float dot(Vec b) const {
 		return x * b.x + y * b.y;
@@ -246,31 +305,31 @@ struct Vec {
 	Vec rotate(float angle) {
 		float sin = std::sin(angle);
 		float cos = std::cos(angle);
-		return Vec(x * cos - y * sin, x * sin + y * cos);
+		return {x * cos - y * sin, x * sin + y * cos};
 	}
 	/** Swaps the coordinates.
 	Equivalent to a reflection across the `y = x` line.
 	*/
 	Vec flip() const {
-		return Vec(y, x);
+		return {y, x};
 	}
 	Vec min(Vec b) const {
-		return Vec(std::fmin(x, b.x), std::fmin(y, b.y));
+		return {std::fmin(x, b.x), std::fmin(y, b.y)};
 	}
 	Vec max(Vec b) const {
-		return Vec(std::fmax(x, b.x), std::fmax(y, b.y));
+		return {std::fmax(x, b.x), std::fmax(y, b.y)};
 	}
 	Vec abs() const {
-		return Vec(std::fabs(x), std::fabs(y));
+		return {std::fabs(x), std::fabs(y)};
 	}
 	Vec round() const {
-		return Vec(std::round(x), std::round(y));
+		return {std::round(x), std::round(y)};
 	}
 	Vec floor() const {
-		return Vec(std::floor(x), std::floor(y));
+		return {std::floor(x), std::floor(y)};
 	}
 	Vec ceil() const {
-		return Vec(std::ceil(x), std::ceil(y));
+		return {std::ceil(x), std::ceil(y)};
 	}
 	bool equals(Vec b) const {
 		return x == b.x && y == b.y;
@@ -293,7 +352,6 @@ struct Vec {
 	}
 };
 
-
 /** 2-dimensional rectangle for graphics.
 Mathematically, Rects include points on its left/top edge but *not* its right/bottom edge.
 The infinite Rect (equal to the entire plane) is defined using pos=-inf and size=inf.
@@ -302,13 +360,19 @@ struct Rect {
 	Vec pos;
 	Vec size;
 
-	Rect() {}
-	Rect(Vec pos, Vec size) : pos(pos), size(size) {}
-	Rect(float posX, float posY, float sizeX, float sizeY) : pos(Vec(posX, posY)), size(Vec(sizeX, sizeY)) {}
+	Rect() = default;
+	Rect(Vec pos, Vec size)
+		: pos(pos)
+		, size(size) {
+	}
+	Rect(float posX, float posY, float sizeX, float sizeY)
+		: pos(Vec(posX, posY))
+		, size(Vec(sizeX, sizeY)) {
+	}
 	/** Constructs a Rect from a top-left and bottom-right vector.
 	*/
 	static Rect fromMinMax(Vec a, Vec b) {
-		return Rect(a, b.minus(a));
+		return {a, b.minus(a)};
 	}
 	/** Constructs a Rect from any two opposite corners.
 	*/
@@ -317,29 +381,30 @@ struct Rect {
 	}
 	/** Returns the infinite Rect. */
 	static Rect inf() {
-		return Rect(Vec(-INFINITY, -INFINITY), Vec(INFINITY, INFINITY));
+		return {Vec(-INFINITY, -INFINITY), Vec(INFINITY, INFINITY)};
 	}
 
 	/** Returns whether this Rect contains a point, inclusive on the left/top, exclusive on the right/bottom.
 	Correctly handles infinite Rects.
 	*/
 	bool contains(Vec v) const {
-		return (pos.x <= v.x) && (size.x == INFINITY || v.x < pos.x + size.x)
-		    && (pos.y <= v.y) && (size.y == INFINITY || v.y < pos.y + size.y);
+		return (pos.x <= v.x) && (size.x == INFINITY || v.x < pos.x + size.x) && (pos.y <= v.y) &&
+			   (size.y == INFINITY || v.y < pos.y + size.y);
 	}
 	/** Returns whether this Rect contains (is a superset of) a Rect.
 	Correctly handles infinite Rects.
 	*/
 	bool contains(Rect r) const {
-		return (pos.x <= r.pos.x) && (r.pos.x - size.x <= pos.x - r.size.x)
-		    && (pos.y <= r.pos.y) && (r.pos.y - size.y <= pos.y - r.size.y);
+		return (pos.x <= r.pos.x) && (r.pos.x - size.x <= pos.x - r.size.x) && (pos.y <= r.pos.y) &&
+			   (r.pos.y - size.y <= pos.y - r.size.y);
 	}
 	/** Returns whether this Rect overlaps with another Rect.
 	Correctly handles infinite Rects.
 	*/
 	bool intersects(Rect r) const {
-		return (r.size.x == INFINITY || pos.x < r.pos.x + r.size.x) && (size.x == INFINITY || r.pos.x < pos.x + size.x)
-		    && (r.size.y == INFINITY || pos.y < r.pos.y + r.size.y) && (size.y == INFINITY || r.pos.y < pos.y + size.y);
+		return (r.size.x == INFINITY || pos.x < r.pos.x + r.size.x) &&
+			   (size.x == INFINITY || r.pos.x < pos.x + size.x) &&
+			   (r.size.y == INFINITY || pos.y < r.pos.y + r.size.y) && (size.y == INFINITY || r.pos.y < pos.y + size.y);
 	}
 	bool equals(Rect r) const {
 		return pos.equals(r.pos) && size.equals(r.size);
@@ -372,13 +437,13 @@ struct Rect {
 		return pos;
 	}
 	Vec getTopRight() const {
-		return Vec(getRight(), getTop());
+		return {getRight(), getTop()};
 	}
 	Vec getBottomLeft() const {
-		return Vec(getLeft(), getBottom());
+		return {getLeft(), getBottom()};
 	}
 	Vec getBottomRight() const {
-		return Vec(getRight(), getBottom());
+		return {getRight(), getBottom()};
 	}
 	/** Clamps the edges of the rectangle to fit within a bound. */
 	Rect clamp(Rect bound) const {
@@ -417,7 +482,7 @@ struct Rect {
 	}
 	/** Returns a Rect with its position set to zero. */
 	Rect zeroPos() const {
-		return Rect(Vec(), size);
+		return {Vec(), size};
 	}
 	/** Expands each corner. */
 	Rect grow(Vec delta) const {
@@ -450,84 +515,76 @@ struct Rect {
 	}
 };
 
-
 inline Vec Vec::clamp(Rect bound) const {
-	return Vec(
-		math::clamp(x, bound.pos.x, bound.pos.x + bound.size.x),
-		math::clamp(y, bound.pos.y, bound.pos.y + bound.size.y)
-	);
+	return {math::clamp(x, bound.pos.x, bound.pos.x + bound.size.x),
+			math::clamp(y, bound.pos.y, bound.pos.y + bound.size.y)};
 }
 
 inline Vec Vec::clampSafe(Rect bound) const {
-	return Vec(
-		math::clampSafe(x, bound.pos.x, bound.pos.x + bound.size.x),
-		math::clampSafe(y, bound.pos.y, bound.pos.y + bound.size.y)
-	);
+	return {math::clampSafe(x, bound.pos.x, bound.pos.x + bound.size.x),
+			math::clampSafe(y, bound.pos.y, bound.pos.y + bound.size.y)};
 }
-
 
 // Operator overloads for Vec
-inline Vec operator+(const Vec& a) {
+inline Vec operator+(const Vec &a) {
 	return a;
 }
-inline Vec operator-(const Vec& a) {
+inline Vec operator-(const Vec &a) {
 	return a.neg();
 }
-inline Vec operator+(const Vec& a, const Vec& b) {
+inline Vec operator+(const Vec &a, const Vec &b) {
 	return a.plus(b);
 }
-inline Vec operator-(const Vec& a, const Vec& b) {
+inline Vec operator-(const Vec &a, const Vec &b) {
 	return a.minus(b);
 }
-inline Vec operator*(const Vec& a, const Vec& b) {
+inline Vec operator*(const Vec &a, const Vec &b) {
 	return a.mult(b);
 }
-inline Vec operator*(const Vec& a, const float& b) {
+inline Vec operator*(const Vec &a, const float &b) {
 	return a.mult(b);
 }
-inline Vec operator*(const float& a, const Vec& b) {
+inline Vec operator*(const float &a, const Vec &b) {
 	return b.mult(a);
 }
-inline Vec operator/(const Vec& a, const Vec& b) {
+inline Vec operator/(const Vec &a, const Vec &b) {
 	return a.div(b);
 }
-inline Vec operator/(const Vec& a, const float& b) {
+inline Vec operator/(const Vec &a, const float &b) {
 	return a.div(b);
 }
-inline Vec operator+=(Vec& a, const Vec& b) {
+inline Vec operator+=(Vec &a, const Vec &b) {
 	return a = a.plus(b);
 }
-inline Vec operator-=(Vec& a, const Vec& b) {
+inline Vec operator-=(Vec &a, const Vec &b) {
 	return a = a.minus(b);
 }
-inline Vec operator*=(Vec& a, const Vec& b) {
+inline Vec operator*=(Vec &a, const Vec &b) {
 	return a = a.mult(b);
 }
-inline Vec operator*=(Vec& a, const float& b) {
+inline Vec operator*=(Vec &a, const float &b) {
 	return a = a.mult(b);
 }
-inline Vec operator/=(Vec& a, const Vec& b) {
+inline Vec operator/=(Vec &a, const Vec &b) {
 	return a = a.div(b);
 }
-inline Vec operator/=(Vec& a, const float& b) {
+inline Vec operator/=(Vec &a, const float &b) {
 	return a = a.div(b);
 }
-inline bool operator==(const Vec& a, const Vec& b) {
+inline bool operator==(const Vec &a, const Vec &b) {
 	return a.equals(b);
 }
-inline bool operator!=(const Vec& a, const Vec& b) {
+inline bool operator!=(const Vec &a, const Vec &b) {
 	return !a.equals(b);
 }
-
 
 // Operator overloads for Rect
-inline bool operator==(const Rect& a, const Rect& b) {
+inline bool operator==(const Rect &a, const Rect &b) {
 	return a.equals(b);
 }
-inline bool operator!=(const Rect& a, const Rect& b) {
+inline bool operator!=(const Rect &a, const Rect &b) {
 	return !a.equals(b);
 }
-
 
 /** Expands a Vec and Rect into a comma-separated list.
 Useful for print debugging.
@@ -541,6 +598,4 @@ Or passing the values to a C function.
 #define VEC_ARGS(v) (v).x, (v).y
 #define RECT_ARGS(r) (r).pos.x, (r).pos.y, (r).size.x, (r).size.y
 
-
-} // namespace math
-} // namespace rack
+} // namespace rack::math

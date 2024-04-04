@@ -8,12 +8,17 @@
 
 #include "history.hpp"
 #include "jansson.h"
+#include "pffft.h"
 #include "string.hpp"
 #include <cmath>
 #include <cstring>
 #include <memory>
 
 extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
+}
+
+float roundevenf(float x) {
+	return roundf(x);
 }
 
 void __attribute__((optimize("-O0"))) keep_symbols() {
@@ -52,6 +57,17 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	(void)ceilf(1.f);
 	(void)floor(1.f);
 	(void)floorf(1.f);
+	(void)exp2(1.f);
+	(void)fmax(1.f, 2.f);
+	(void)fmin(1.f, 2.f);
+	(void)trunc(2.f);
+	(void)truncf(2.f);
+	(void)nextafterf(1.f, 2.f);
+	(void)atan2(1.f, 2.f);
+	(void)erf(2.f);
+	(void)fmodf(2.f, 2.f);
+	(void)roundevenf(1.f);
+	(void)tolower('a');
 
 	(void)keep(json_object_set_new);
 	(void)keep(json_array_get);
@@ -99,6 +115,18 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	MetaModule::make_element(&sw, MetaModule::BaseElement{});
 	MetaModule::make_element(&screw, MetaModule::BaseElement{});
 	MetaModule::make_element(&wid, MetaModule::BaseElement{});
+
+	(void)keep(pffft_new_setup);
+	(void)keep(pffft_destroy_setup);
+	(void)keep(pffft_transform);
+	(void)keep(pffft_transform_ordered);
+	(void)keep(pffft_zreorder);
+	(void)keep(pffft_zconvolve_accumulate);
+	(void)keep(pffft_aligned_free);
+	(void)keep(pffft_aligned_malloc);
+	(void)keep(pffft_simd_size);
+
+	rack::settings::preferDarkPanels = false;
 
 	auto ar = new int[10];
 	delete[] ar;
