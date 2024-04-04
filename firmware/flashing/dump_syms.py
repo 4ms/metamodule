@@ -223,7 +223,7 @@ if __name__ == "__main__":
             with open(obj_file, "rb") as f:
                 needed_syms += GetRequiredSymbolNames(f)
 
-    if args.plugin:
+    for plugin in args.plugin:
         logging.info(f"Checking if symbols in {args.plugin} would be resolved")
         with open(args.plugin, "rb") as f:
             needed_syms += GetPluginRequiredSymbolNames(f)
