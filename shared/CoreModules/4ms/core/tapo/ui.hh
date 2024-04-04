@@ -138,7 +138,7 @@ class Ui {
   void PaintLeds();
   void LoadSlot(uint8_t slot);
 
-  stmlib::EventQueue<16> queue_{system_clock_};
+  stmlib::EventQueue<64> queue_{system_clock_};
 
   Persistent persistent_;
   Control control_;
