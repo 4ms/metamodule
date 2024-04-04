@@ -28,3 +28,6 @@ int *__errno() {
 	static int errno = 0;
 	return &errno;
 }
+int _open(const char *filename, int flags, int mode) {
+	return 0;
+}
