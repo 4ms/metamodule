@@ -28,7 +28,8 @@ foreach(brand ${brands})
   target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
   target_sources(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
   target_compile_definitions(${brand}Library PRIVATE METAMODULE_INTERNAL_PLUGIN=1)
-  target_link_libraries(${brand}Library PUBLIC VCV_mm_adaptor)
+  # target_link_libraries(${brand}Library PUBLIC VCV_mm_adaptor)
+  target_link_libraries(${brand}Library PUBLIC VCV_mm_adaptor_interface cpputil)# jansson pffft)
 
   if (CMAKE_CROSSCOMPILING)
     # Enable LTO for all brands

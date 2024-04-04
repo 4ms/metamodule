@@ -187,7 +187,9 @@ target_include_directories(
 
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_mm_adaptor cpputil vcv_ports jansson)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml  cpputil vcv_ports)
+# target_link_libraries(main.elf PRIVATE VCV_mm_adaptor)
+target_link_libraries(main.elf PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,VCV_mm_adaptor>")
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
@@ -199,7 +201,7 @@ target_link_script(
   main
   ${FWDIR}/system/linker/stm32mp15xx_ca7.ld
   -L${FWDIR}
-  -Wl,--gc-sections
+  # -Wl,--gc-sections
   -Wno-psabi
   -ffreestanding
   -nostartfiles

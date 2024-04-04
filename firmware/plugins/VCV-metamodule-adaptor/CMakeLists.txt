@@ -35,8 +35,10 @@ target_sources(
 add_subdirectory(jansson)
 add_subdirectory(pffft)
 
-target_link_libraries(VCV_mm_adaptor PUBLIC pffft jansson cpputil)
+target_link_libraries(VCV_mm_adaptor PUBLIC cpputil) 
 target_link_libraries(VCV_mm_adaptor PRIVATE lvgl::lvgl)
+target_link_libraries(VCV_mm_adaptor PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,jansson>")
+target_link_libraries(VCV_mm_adaptor PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,pffft>")
 
 target_include_directories(
   VCV_mm_adaptor
@@ -48,3 +50,15 @@ target_include_directories(
 )
 
 set_property(TARGET VCV_mm_adaptor PROPERTY CXX_STANDARD 20)
+target_compile_options(VCV_mm_adaptor PRIVATE -fno-function-sections -fno-data-sections)
+
+add_library(VCV_mm_adaptor_interface INTERFACE)
+set_property(TARGET VCV_mm_adaptor_interface PROPERTY CXX_STANDARD 20)
+target_include_directories(
+  VCV_mm_adaptor_interface
+  INTERFACE include
+         src
+         dep/include
+         ${MM_ROOT}/firmware/src #for svg.cc: gui/elements/..., and for console/pr_dbg.hh
+         ${MM_ROOT}/shared
+)
