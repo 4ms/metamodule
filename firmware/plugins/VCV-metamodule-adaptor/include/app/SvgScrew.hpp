@@ -5,12 +5,9 @@
 #include <widget/SvgWidget.hpp>
 #include <widget/Widget.hpp>
 
-namespace rack
-{
-namespace app
+namespace rack::app
 {
 
-/** If you don't add these to your ModuleWidget, they will fall out of the rack... */
 struct SvgScrew : widget::Widget {
 	widget::FramebufferWidget *fb;
 	widget::SvgWidget *sw;
@@ -18,8 +15,6 @@ struct SvgScrew : widget::Widget {
 	void setSvg(std::shared_ptr<window::Svg> svg) {
 	}
 };
-
-DEPRECATED typedef SvgScrew SVGScrew;
 
 struct ThemedSvgScrew : SvgScrew {
 	std::shared_ptr<window::Svg> lightSvg;
@@ -32,5 +27,4 @@ struct ThemedSvgScrew : SvgScrew {
 	}
 };
 
-} // namespace app
-} // namespace rack
+} // namespace rack::app

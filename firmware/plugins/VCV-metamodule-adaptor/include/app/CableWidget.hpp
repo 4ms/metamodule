@@ -1,54 +1,57 @@
 #pragma once
-#include <map>
-#include <app/common.hpp>
-#include <widget/Widget.hpp>
 #include <app/PortWidget.hpp>
+#include <app/common.hpp>
 #include <engine/Cable.hpp>
+#include <map>
+#include <widget/Widget.hpp>
 
-
-namespace rack {
-namespace app {
-
+namespace rack::app
+{
 
 struct PlugWidget;
 
-
 struct CableWidget : widget::Widget {
-	struct Internal;
-	Internal* internal;
-
 	/** Owned. */
-	engine::Cable* cable = NULL;
+	engine::Cable *cable = nullptr;
 	NVGcolor color;
-	PlugWidget* inputPlug;
-	PlugWidget* outputPlug;
+	PlugWidget *inputPlug;
+	PlugWidget *outputPlug;
 
-	PortWidget* inputPort = NULL;
-	PortWidget* outputPort = NULL;
-	PortWidget* hoveredInputPort = NULL;
-	PortWidget* hoveredOutputPort = NULL;
+	PortWidget *inputPort = nullptr;
+	PortWidget *outputPort = nullptr;
+	PortWidget *hoveredInputPort = nullptr;
+	PortWidget *hoveredOutputPort = nullptr;
 
-	CableWidget();
-	~CableWidget();
-	bool isComplete();
-	/** Based on the input/output ports, re-creates the cable and removes/adds it to the Engine. */
-	void updateCable();
-	/** From a cable, sets the input/output ports.
-	Cable must already be added to the Engine.
-	Adopts ownership.
-	*/
-	void setCable(engine::Cable* cable);
-	engine::Cable* getCable();
-	math::Vec getInputPos();
-	math::Vec getOutputPos();
-	void mergeJson(json_t* rootJ);
-	void fromJson(json_t* rootJ);
-	void step() override;
-	void draw(const DrawArgs& args) override;
-	void drawLayer(const DrawArgs& args, int layer) override;
-	engine::Cable* releaseCable();
+	~CableWidget() override {
+		if (cable)
+			delete cable;
+	}
+	bool isComplete() {
+		return false;
+	}
+	void updateCable() {
+	}
+	void setCable(engine::Cable *cable) {
+		this->cable = cable;
+	}
+	engine::Cable *getCable() {
+		return cable;
+	}
+	math::Vec getInputPos() {
+		return {};
+	}
+	math::Vec getOutputPos() {
+		return {};
+	}
+	void mergeJson(json_t *rootJ) {
+	}
+	void fromJson(json_t *rootJ) {
+	}
+	engine::Cable *releaseCable() {
+		auto t = cable;
+		cable = nullptr;
+		return t;
+	}
 };
 
-
-} // namespace app
-} // namespace rack
+} // namespace rack::app
