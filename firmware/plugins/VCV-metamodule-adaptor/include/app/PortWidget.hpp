@@ -5,9 +5,7 @@
 #include <ui/Tooltip.hpp>
 #include <widget/OpaqueWidget.hpp>
 
-namespace rack
-{
-namespace app
+namespace rack::app
 {
 
 /** Manages an engine::Port on a ModuleWidget. */
@@ -47,5 +45,4 @@ struct PortWidget : widget::OpaqueWidget {
 	}
 };
 
-} // namespace app
-} // namespace rack
+} // namespace rack::app

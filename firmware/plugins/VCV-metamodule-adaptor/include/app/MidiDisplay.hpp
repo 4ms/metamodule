@@ -36,7 +36,7 @@ struct MidiButton : SvgButton {
 	}
 };
 
-void appendMidiMenu(ui::Menu *menu, midi::Port *port) {
+inline void appendMidiMenu(ui::Menu *menu, midi::Port *port) {
 }
 
 } // namespace rack::app
