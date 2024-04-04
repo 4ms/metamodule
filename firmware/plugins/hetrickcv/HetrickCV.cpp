@@ -68,7 +68,7 @@ void init(rack::Plugin *p) {
 	p->addModel(modelProbability);
 	// p->addModel(modelRandomGates);
 	// p->addModel(modelRotator);
-	p->addModel(modelRungler);
+	// p->addModel(modelRungler);
 	p->addModel(modelScanner);
 	p->addModel(modelVectorMix);
 	p->addModel(modelWaveshape);
