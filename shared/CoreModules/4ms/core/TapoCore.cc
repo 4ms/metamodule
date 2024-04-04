@@ -5,6 +5,8 @@
 #include "tapo/multitap_delay.hh"
 #include "tapo/ui.hh"
 
+#include <alpaca/alpaca.h>
+
 namespace MetaModule
 {
 
@@ -47,6 +49,8 @@ public:
 		ui.getADCDriver().set(TapoDelay::ADC_VEL_CV,     	0.0f);
 		ui.getADCDriver().set(TapoDelay::ADC_TAPTRIG_CV,   	0.0f);
 		ui.getADCDriver().set(TapoDelay::ADC_CLOCK_CV,   	0.0f);
+
+		applySaveState();
 	}
 
 	void update() override {
@@ -80,33 +84,60 @@ public:
 		initialize(std::round(sr));
 	}
 
+	//////////////////////////////////
+
+	struct SaveState_t
+	{
+		bool repeat;
+		int8_t current_slot;
+		bool sync;
+		std::vector<TapoDelay::Persistent::SavedSlot> slots;
+	};
+
+	SaveState_t saveState;
+
 	void load_state(std::string_view state_data) override 
 	{
-		using SavedSlot = TapoDelay::Persistent::SavedSlot;
+		auto raw_data = decode(state_data);
 
-		auto slot_data = decode(state_data);
-
-		unsigned num_saved_slots = slot_data.size() / sizeof(SavedSlot);
-		if (num_saved_slots * sizeof(SavedSlot) != slot_data.size()) {
-			// Ignore data that's not an integer number of slots
-			return;
+		std::error_code ec;
+		auto newSaveState = alpaca::deserialize<SaveState_t>(raw_data, ec);
+		if (!ec)
+		{
+			// only keep current save state but don't apply here
+			saveState = newSaveState;
 		}
-
-		auto saved_slots =
-			std::span<const SavedSlot>{reinterpret_cast<const SavedSlot *>(slot_data.data()), num_saved_slots};
-
-		ui.getPersistentStorage().load_custom_slots(saved_slots);
+		else
+		{
+			// Deserialization error
+			// just ignore
+		}
 	}
 
 	std::string save_state() override 
 	{
-		using SavedSlot = TapoDelay::Persistent::SavedSlot;
+		// set current state so it will be applied correctly on sample rate change
+		saveState = SaveState_t
+		{
+			.repeat = delay.repeat() > 0.0f,
+			.current_slot = ui.current_slot(),
+			.sync = delay.sync(),
+			.slots = ui.getPersistentStorage().get_custom_slots()
+		};
 
-		auto slot_data = ui.getPersistentStorage().get_custom_slots();
+		std::vector<uint8_t> bytes;
+		alpaca::serialize(saveState, bytes);
 
-		unsigned data_bytes = slot_data.size() * sizeof(SavedSlot);
+		return encode({bytes.data(), bytes.size()});
+	}
 
-		return encode({(uint8_t *)slot_data.data(), data_bytes});
+	void applySaveState()
+	{
+		// at this point we assume all called elements are initialized
+		ui.getPersistentStorage().load_custom_slots(std::span{saveState.slots.data(), saveState.slots.size()});
+		ui.set_current_slot(saveState.current_slot);
+		delay.set_sync(saveState.sync);
+		delay.set_repeat(saveState.repeat);
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
