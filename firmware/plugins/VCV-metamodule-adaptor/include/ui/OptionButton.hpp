@@ -1,18 +1,10 @@
 #pragma once
-#include <ui/common.hpp>
 #include <ui/RadioButton.hpp>
+#include <ui/common.hpp>
 
+namespace rack::ui
+{
 
-namespace rack {
-namespace ui {
+struct OptionButton : RadioButton {};
 
-
-/** Behaves like a RadioButton and appears with a checkmark beside text.
-*/
-struct OptionButton : RadioButton {
-	void draw(const DrawArgs& args) override;
-};
-
-
-} // namespace ui
-} // namespace rack
+} // namespace rack::ui

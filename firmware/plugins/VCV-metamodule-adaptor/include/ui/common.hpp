@@ -1,9 +1,9 @@
 #pragma once
-#include <nanovg.h>
 #include <blendish.h>
+#include <nanovg.h>
 
-#include <common.hpp>
 #include <color.hpp>
+#include <common.hpp>
 
 /** Useful for menu items with a "true" boolean state */
 #define CHECKMARK_STRING "✔"
@@ -12,21 +12,12 @@
 /** Useful for menu items that open a sub-menu */
 #define RIGHT_ARROW "▸"
 
+namespace rack::ui
+{
 
-namespace rack {
+inline void setTheme(NVGcolor bg, NVGcolor fg) {
+}
+inline void refreshTheme() {
+}
 
-
-/** Common graphical user interface widgets
-*/
-namespace ui {
-
-
-PRIVATE void init();
-PRIVATE void destroy();
-void setTheme(NVGcolor bg, NVGcolor fg);
-/** Sets theme from settings. */
-void refreshTheme();
-
-
-} // namespace ui
-} // namespace rack
+} // namespace rack::ui
