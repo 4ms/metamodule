@@ -35,6 +35,7 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
 # Tapographic Delay
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/tapo/stmlib
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/tapo/
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/alpaca/include
 CXXFLAGS += -DTEST
 SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/multitap_delay.cc
 SOURCES  += $(SHARED)/CoreModules/4ms/core/tapo/resources.cc
