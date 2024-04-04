@@ -27,6 +27,8 @@
 
 #pragma once
 
+#include <array>
+
 #include "stmlib/stmlib.h"
 
 namespace TapoDelay {
@@ -91,7 +93,7 @@ struct TapParameters {
 
 struct Slot {
   uint8_t size;
-  TapParameters taps[kMaxTaps];
+  std::array<TapParameters,kMaxTaps> taps;
 };
 }
 
