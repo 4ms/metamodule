@@ -9,7 +9,7 @@ set_property(TARGET 4msLibrary PROPERTY CXX_STANDARD 20)
 
 if (NOT DEFINED alpaca)
   add_subdirectory(${MM_ROOT}/shared/CoreModules/4ms/core/alpaca alpaca)
-  target_compile_definitions(alpaca INTERFACE __ALPACA_BYTE_ORDER=1234)
+  target_compile_definitions(alpaca INTERFACE ALPACA_NO_PREFETCH)
 endif()
 
 target_link_libraries(4msLibrary PRIVATE cpputil ryml alpaca::alpaca)
