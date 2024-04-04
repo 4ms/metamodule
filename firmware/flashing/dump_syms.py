@@ -201,7 +201,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Dump symbols that plugins might need")
     parser.add_argument("--objdir", action="append", help="Object dir with .obj files with the symbols we want to make available to plugins (i.e. VCV_module_wrapper.cc.obj)")
     parser.add_argument("--elf", help="Fully linked elf file with addresses of all symbols (main.elf)")
-    parser.add_argument("--plugin", help="Path to sample plugin .so file to test if all symbols will be resolved")
+    parser.add_argument("--plugin", action="append", help="Path to sample plugin .so file to test if all symbols will be resolved")
     parser.add_argument("--header", help="output c++ header file")
     parser.add_argument("--bin", help="output binary")
     parser.add_argument("--json", help="output json")
@@ -219,14 +219,17 @@ if __name__ == "__main__":
     for obj_dir in args.objdir:
         obj_files = Path(obj_dir).glob("**/*.obj")
         for obj_file in obj_files:
+            logging.info("------")
             logging.info(f"Looking for symbols in {obj_file}")
             with open(obj_file, "rb") as f:
                 needed_syms += GetRequiredSymbolNames(f)
 
-    for plugin in args.plugin:
-        logging.info(f"Checking if symbols in {args.plugin} would be resolved")
-        with open(args.plugin, "rb") as f:
-            needed_syms += GetPluginRequiredSymbolNames(f)
+    if args.plugin:
+        for plugin in args.plugin:
+            logging.info("------")
+            logging.info(f"Checking if symbols in {plugin} would be resolved")
+            with open(plugin, "rb") as f:
+                needed_syms += GetPluginRequiredSymbolNames(f)
 
 
     libc_syms = GetLibcSymbols()
@@ -241,6 +244,7 @@ if __name__ == "__main__":
     # remove duplicates
     needed_syms = list(set(needed_syms))
 
+    logging.debug("------")
     logging.debug("Finding symbol addresses:")
 
     with open(args.elf, "rb") as f:
