@@ -3,8 +3,8 @@ set(brands
     4ms
     Rack
     # other
-    Befaco
-    AudibleInstruments
-    hetrickcv
-    nonlinearcircuits
+    # Befaco
+    # AudibleInstruments
+    # hetrickcv
+    # nonlinearcircuits
 )
