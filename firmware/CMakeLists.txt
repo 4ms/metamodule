@@ -48,8 +48,8 @@ add_custom_command(
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
           --objdir ${CMAKE_BINARY_DIR}/VCV_mm_adaptor/
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware
-          # --plugin ./plugins/Befaco/build/Befaco.so
-          # --plugin ./plugins/hetrickcv/build/HetrickCV.so
+          --checkplugin ./plugins/Befaco/build/Befaco.so
+          --checkplugin ./plugins/hetrickcv/build/HetrickCV.so
           --elf $<TARGET_FILE:main.elf>
           --yaml ${SYMBOLS_FILE}
           -v

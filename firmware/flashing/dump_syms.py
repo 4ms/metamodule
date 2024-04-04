@@ -255,6 +255,7 @@ if __name__ == "__main__":
     parser.add_argument("--objdir", action="append", help="Object dir with .obj files with the symbols we want to make available to plugins (i.e. VCV_module_wrapper.cc.obj)")
     parser.add_argument("--elf", help="Fully linked elf file with addresses of all symbols (main.elf)")
     parser.add_argument("--plugin", action="append", help="Path to sample plugin .so file to test if all symbols will be resolved")
+    parser.add_argument("--checkplugin", action="append", help="Path to a plugin .so file. Reports which symbols cannot be resolved")
     parser.add_argument("--header", help="output c++ header file")
     parser.add_argument("--bin", help="output binary")
     parser.add_argument("--json", help="output json")
@@ -280,9 +281,20 @@ if __name__ == "__main__":
     if args.plugin:
         for plugin in args.plugin:
             logging.info("------")
-            logging.info(f"Checking if symbols in {plugin} would be resolved")
+            logging.info(f"Reading plugin {plugin} symbols, to later find them in main.elf")
             with open(plugin, "rb") as f:
                 needed_syms += GetPluginRequiredSymbolNames(f)
+
+    check_symbols = []
+    if args.checkplugin:
+        for plugin in args.checkplugin:
+            logging.info("------")
+            logging.info(f"Checking if symbols in {plugin} would be resolved")
+            with open(plugin, "rb") as f:
+                check_symbols += GetPluginRequiredSymbolNames(f)
+    # remove duplicates
+    check_symbols = list(set(check_symbols))
+
 
 
     libc_syms = GetLibcSymbols()
@@ -303,6 +315,11 @@ if __name__ == "__main__":
     with open(args.elf, "rb") as f:
         syms = GetAddressesOfSymbols(f, needed_syms)
 
+    logging.debug("------")
+    logging.debug("Verifying if plugins would have all symbols resolved:")
+    for check in check_symbols:
+        if check not in syms.keys():
+            logging.info(f"Symbol in plugin not found {check}")
 
     if args.header:
         write_header(args.header, syms)
