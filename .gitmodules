@@ -45,4 +45,4 @@
 	url = https://github.com/4ms/metamodule-bridge-protocol.git
 [submodule "shared/CoreModules/4ms/core/alpaca"]
 	path = shared/CoreModules/4ms/core/alpaca
-	url = https://github.com/LnnrtS/alpaca
+	url = https://github.com/4ms/alpaca
