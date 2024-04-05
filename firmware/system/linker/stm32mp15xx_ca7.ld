@@ -32,6 +32,7 @@ SECTIONS
 		*(.irqhandler)
         *(.text)
         *(.text*)
+		KEEP(*make_element*(.text))
 					/* Todo: check if we need the next 5 lines */
 		*(.glue_7)         /* glue arm to thumb code */
 		*(.glue_7t)        /* glue thumb to arm code */
@@ -168,12 +169,12 @@ SECTIONS
 	
 
   /* Remove information from the compiler libraries */
-  /DISCARD/ :
-  {
-    libc.a ( * )
-    libm.a ( * )
-    libgcc.a ( * )
-  }
+  /* /DISCARD/ : */
+  /* { */
+  /*   libc.a ( * ) */
+  /*   libm.a ( * ) */
+  /*   libgcc.a ( * ) */
+  /* } */
 
 	.ARM.attributes 0 : { *(.ARM.attributes) }
 }
