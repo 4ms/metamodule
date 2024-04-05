@@ -32,7 +32,9 @@ SECTIONS
 		*(.irqhandler)
         *(.text)
         *(.text*)
-		KEEP(*VCV_mm_adaptor*:(.text))
+		KEEP(*VCV_mm_adaptor*:(.text*))
+		KEEP(*jansson*:(.text*))
+		KEEP(*pffft*:(.text*))
 					/* Todo: check if we need the next 5 lines */
 		*(.glue_7)         /* glue arm to thumb code */
 		*(.glue_7t)        /* glue thumb to arm code */
