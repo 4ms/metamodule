@@ -285,16 +285,6 @@ if __name__ == "__main__":
             with open(plugin, "rb") as f:
                 needed_syms += GetPluginRequiredSymbolNames(f)
 
-    check_symbols = []
-    if args.checkplugin:
-        for plugin in args.checkplugin:
-            logging.info("------")
-            logging.info(f"Checking if symbols in {plugin} would be resolved")
-            with open(plugin, "rb") as f:
-                check_symbols += GetPluginRequiredSymbolNames(f)
-    # remove duplicates
-    check_symbols = list(set(check_symbols))
-
 
 
     libc_syms = GetLibcSymbols()
@@ -315,8 +305,17 @@ if __name__ == "__main__":
     with open(args.elf, "rb") as f:
         syms = GetAddressesOfSymbols(f, needed_syms)
 
-    logging.debug("------")
-    logging.debug("Verifying if plugins would have all symbols resolved:")
+    check_symbols = []
+    if args.checkplugin:
+        for plugin in args.checkplugin:
+            logging.info("------")
+            logging.info(f"Checking if symbols in {plugin} would be resolved")
+            with open(plugin, "rb") as f:
+                check_symbols += GetPluginRequiredSymbolNames(f)
+
+    # remove duplicates
+    check_symbols = list(set(check_symbols))
+
     for check in check_symbols:
         if check not in syms.keys():
             logging.info(f"Symbol in plugin not found {check}")
