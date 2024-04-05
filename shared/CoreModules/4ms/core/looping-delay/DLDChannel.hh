@@ -55,6 +55,8 @@ public:
 
     void update()
     {
+		sideloadDrivers();
+
 		if (audioBufferFillCount == inBlock.size())
 		{
 			audioBufferFillCount = 0;
@@ -70,6 +72,50 @@ public:
     void set_samplerate(float sr) {
 		// TODO: implement
     }
+
+private:
+	void sideloadDrivers()
+	{
+		auto ConvertKnobFunc = [](float val) -> int16_t
+		{
+			return int16_t(std::clamp(val, 0.0f, 1.0f) * 32767.0f);
+		};
+
+		// Knobs
+		controls.sideload_pot(LDKit::TimePot,      ConvertKnobFunc(getState<Mapping::TimeKnob>()));
+		controls.sideload_pot(LDKit::FeedbackPot,  ConvertKnobFunc(getState<Mapping::FeedbackKnob>()));
+		controls.sideload_pot(LDKit::DelayFeedPot, ConvertKnobFunc(getState<Mapping::DelayFeedKnob>()));
+		controls.sideload_pot(LDKit::MixPot,       ConvertKnobFunc(getState<Mapping::MixKnob>()));
+
+		// CVs
+		controls.sideload_cv(LDKit::TimeCV,      ConvertKnobFunc(getInput<Mapping::TimeInput>().value_or(0)));
+		controls.sideload_cv(LDKit::FeedbackCV,  ConvertKnobFunc(getInput<Mapping::FeedbackInput>().value_or(0)));
+		controls.sideload_cv(LDKit::DelayFeedCV, ConvertKnobFunc(getInput<Mapping::DelayFeedInput>().value_or(0)));
+		// controls.sideload_cv(LDKit::MixCV,       ConvertKnobFunc(getInput<Mapping::MixInput>().value_or(0)));
+
+		// LEDs
+		setLED<Mapping::ReverseButton>(controls.rev_led.sideload_get());
+		setLED<Mapping::HoldButton>(controls.inf_led.sideload_get());
+
+		// Buttons
+		controls.rev_button.sideload_set(getState<Mapping::ReverseButton>() == MomentaryButton::State_t::PRESSED);
+		controls.inf_button.sideload_set(getState<Mapping::HoldButton>() == MomentaryButton::State_t::PRESSED);
+
+		// Trigger Inputs
+		controls.rev_jack.sideload_set(getInput<Mapping::ReverseInput>().value_or(0) > 0.1f);
+		controls.inf_jack.sideload_set(getInput<Mapping::HoldInput>().value_or(0) > 0.1f);
+
+		// Switch
+		// ...
+
+		// Clock outputs
+		setOutput<Mapping::LoopOutput>(params.timer.loop_out.sideload_get());
+
+		// Forward to/from module level
+		// send clock output
+		// receive ping input
+		// send ping output
+	}
 
 private:
 	void packUnpackBlockBuffers()
