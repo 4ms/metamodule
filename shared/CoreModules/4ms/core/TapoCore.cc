@@ -155,9 +155,14 @@ public:
 
 		// at this point we assume all called elements are initialized
 		ui.getPersistentStorage().load_custom_slots(std::span{saveState.slots.data(), saveState.slots.size()});
-		ui.set_current_slot(saveState.current_slot);
+
+		// only restore if current slot is valid
+		if (saveState.current_slot > 0)
+		{
+			ui.set_current_slot(saveState.current_slot);
+		}
 		delay.set_sync(saveState.sync);
-		delay.set_repeat(saveState.repeat);
+		delay.set_repeat(saveState.repeat ? 1.0f : 0.0f);
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
