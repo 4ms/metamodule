@@ -86,6 +86,26 @@ inline bool redraw_element(const FlipSwitch &element, const GuiElement &gui_el, 
 	return did_change_frame;
 }
 
+inline bool redraw_element(const MomentaryButton &element, const GuiElement &gui_el, float val) {
+	bool did_change_image = false;
+
+	auto state = StateConversion::convertState(element, val);
+	auto image_name = state == MomentaryButton::State_t::PRESSED ? element.pressed_image : element.image;
+
+	auto img = ComponentImages::get_comp_path(image_name);
+	if (!img.length())
+		return false;
+
+	auto cur_img = std::string_view{static_cast<const char *>(lv_img_get_src(gui_el.obj))};
+
+	if (img != cur_img) {
+		lv_img_set_src(gui_el.obj, img.c_str());
+		did_change_image = true;
+	}
+
+	return did_change_image;
+}
+
 inline bool redraw_element(const SlideSwitch &element, const GuiElement &gui_el, float val) {
 	auto handle = lv_obj_get_child(gui_el.obj, 0);
 	if (!handle) {

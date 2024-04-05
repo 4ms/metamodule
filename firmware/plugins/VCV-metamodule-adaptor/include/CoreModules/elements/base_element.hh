@@ -84,6 +84,7 @@ struct Button : ParamElement {};
 
 struct MomentaryButton : Button {
 	enum class State_t { PRESSED, RELEASED };
+	std::string_view pressed_image = "";
 };
 
 struct MomentaryButtonRGB : MomentaryButton {

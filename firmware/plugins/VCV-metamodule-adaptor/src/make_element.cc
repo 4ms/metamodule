@@ -52,10 +52,15 @@ Element make_element(rack::app::SvgSlider const *widget, BaseElement b) {
 }
 
 Element make_element(rack::componentlibrary::Rogan const *widget, BaseElement b) {
-	// Rogan knobs have a bg svg, base svg, and fg svg. The main svg rotates, the others do not.
+	// Rogan knobs have a Rogan::bg svg, Rogan::fg svg, SvgKnob::sw svg, and SvgWidget::svg.
 	// The fg and base svgs are always the same color and thus are combined into one PNG for the MetaModule.
 	// The bg svg is lighting effect gradient and can be ignored for MetaModule's low-res screen.
-	return Knob{b, widget->svg_filename};
+	// The SvgKnob::sw rotates
+	// The SvgWidget::svg is apparently not used?
+	if (widget->sw)
+		return Knob{b, widget->sw->svg_filename};
+	else
+		return Knob{b, widget->svg_filename};
 }
 
 //
@@ -67,13 +72,13 @@ Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
 		return FlipSwitch{{b}, 3, {widget->frames[0], widget->frames[1], widget->frames[2]}};
 
 	} else if (widget->frames.size() == 2) {
-		return FlipSwitch{{b}, 2, {widget->frames[0], widget->frames[1]}};
+		if (widget->momentary)
+			return MomentaryButton{{b, widget->frames[0]}, widget->frames[1]};
+		else
+			return FlipSwitch{{b}, 2, {widget->frames[0], widget->frames[1]}};
 
 	} else if (widget->frames.size() == 1) {
-		return MomentaryButton{b, widget->frames[0]};
-
-	} else if (widget->momentary) {
-		return MomentaryButton{b, widget->frames[0]};
+		return MomentaryButton{{b, widget->frames[0]}};
 
 	} else {
 		pr_warn("make_element(): Unknown SvgSwitch, frames size is not 1, 2 or 3\n");
