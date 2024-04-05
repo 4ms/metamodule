@@ -201,7 +201,7 @@ target_link_script(
   main
   ${FWDIR}/system/linker/stm32mp15xx_ca7.ld
   -L${FWDIR}
-  # -Wl,--gc-sections
+  -Wl,--gc-sections
   -Wno-psabi
   -ffreestanding
   -nostartfiles

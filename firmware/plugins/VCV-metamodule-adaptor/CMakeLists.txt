@@ -50,7 +50,6 @@ target_include_directories(
 )
 
 set_property(TARGET VCV_mm_adaptor PROPERTY CXX_STANDARD 20)
-target_compile_options(VCV_mm_adaptor PRIVATE -fno-function-sections -fno-data-sections)
 
 add_library(VCV_mm_adaptor_interface INTERFACE)
 set_property(TARGET VCV_mm_adaptor_interface PROPERTY CXX_STANDARD 20)
