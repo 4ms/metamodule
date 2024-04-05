@@ -6,6 +6,7 @@ namespace LDKit
 {
 
 class Timer {
+public:
 	Mocks::InputPin ping_jack;
 	Mocks::OutputPin clk_out;
 	Mocks::OutputPin bus_clk_out;
@@ -13,6 +14,7 @@ class Timer {
 
 	Mocks::OutputPin loop_out;
 
+private:
 	uint32_t _ping_tmr = 0;
 	uint32_t _ping_time = 12000;
 	bool _ping_changed = true;
