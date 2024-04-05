@@ -47,8 +47,10 @@ struct DynLoader {
 	template<typename PluginInitFunc>
 	PluginInitFunc *find_init_func() {
 		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
-		if (!init_plugin_symbol)
+		if (!init_plugin_symbol) {
+			pr_warn("No c++ init(rack::plugin::Plugin*) symbol found, trying init()\n");
 			init_plugin_symbol = elf.find_dyn_symbol("init");
+		}
 
 		if (init_plugin_symbol) {
 			auto load_address = init_plugin_symbol->offset() + codeblock.data();
@@ -87,12 +89,17 @@ private:
 
 			hostsyms.insert(hostsyms.end(), host_symbols.begin(), host_symbols.end());
 
-			hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-			hostsyms.push_back({"_ZNSaIcEC2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-			hostsyms.push_back({"_ZNSaIcED1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-			hostsyms.push_back({"_ZNSaIcED2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-			hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
-			hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			//// force stubs for std::allocator<char>::allocator()
+			//hostsyms.push_back({"_ZNSaIcEC1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			//hostsyms.push_back({"_ZNSaIcEC2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+
+			////std::allocator<char>::~allocator()
+			//hostsyms.push_back({"_ZNSaIcED1Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			//hostsyms.push_back({"_ZNSaIcED2Ev", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+
+			////std::allocator<char>::allocator(std::allocator<char> const&)
+			//hostsyms.push_back({"_ZNSaIcEC1ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
+			//hostsyms.push_back({"_ZNSaIcEC2ERKS_", 0, reinterpret_cast<uint32_t>(&_empty_func_stub)});
 
 			// for (auto sym : hostsyms)
 			// 	pr_info("%.*s %08x\n", sym.name.size(), sym.name.data(), sym.address);

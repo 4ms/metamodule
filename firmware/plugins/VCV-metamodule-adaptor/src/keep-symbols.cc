@@ -105,65 +105,19 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	// aka: _ZNSt19_Sp_make_shared_tag5_S_eqERKSt9type_info
 	auto f = std::make_shared<float>(1.f);
 
-	// (void)keep(json_object_set_new);
-	// (void)keep(json_array_get);
-	// (void)keep(json_array_insert_new);
-	// (void)keep(json_number_value);
-	// (void)keep(json_dumps);
+	// provides _Znaj: operator new[](unsigned int)
+	auto ar = new int[10];
 
-	// (void)keep(rack::random::local);
-	// (void)keep(rack::string::f);
+	// provides _ZdaPv: operator delete[](void*)
+	delete[] ar;
 
-	// rack::history::ModuleAdd{}.setModule({});
-	// rack::history::State{}.push({});
-	// rack::widget::TransformWidget{}.translate({});
-	// rack::widget::TransformWidget{}.rotate({});
-	// rack::widget::TransformWidget{}.rotate({}, {});
-	// rack::widget::TransformWidget{}.scale({});
-	// rack::widget::Widget{}.removeChild({});
-	// rack::widget::Widget{}.addChildBottom({});
-	// rack::widget::Widget{}.addChildBelow({}, {});
-	// rack::app::SvgSwitch{}.addFrame(std::make_shared<rack::window::Svg>(""));
-	// rack::app::SvgSlider{}.setHandleSvg({});
-	// rack::app::SvgSlider{}.setBackgroundSvg({});
-	// rack::app::SvgSlider{}.setHandlePos({}, {});
-	// rack::app::ModuleWidget{}.addChild(new rack::app::ModuleLightWidget);
-
-	// rack::app::SvgSwitch sw;
-	// rack::app::SvgPort port;
-	// rack::app::SvgKnob knob;
-	// rack::app::SvgSlider slider;
-	// rack::app::SvgScrew screw;
-	// rack::widget::SvgWidget wid;
-	// rack::componentlibrary::Rogan rogan;
-
-	// MetaModule::make_element_output(&port, MetaModule::BaseElement{});
-	// MetaModule::make_element_input(&port, MetaModule::BaseElement{});
-	// MetaModule::make_element(&knob, MetaModule::BaseElement{});
-	// MetaModule::make_element(&slider, MetaModule::BaseElement{});
-	// MetaModule::make_element_slideswitch(&slider, MetaModule::BaseElement{});
-	// MetaModule::make_element(&rogan, MetaModule::BaseElement{});
-	// MetaModule::make_element(&sw, MetaModule::BaseElement{});
-	// MetaModule::make_element(&screw, MetaModule::BaseElement{});
-	// MetaModule::make_element(&wid, MetaModule::BaseElement{});
-
-	// (void)keep(pffft_new_setup);
-	// (void)keep(pffft_destroy_setup);
-	// (void)keep(pffft_transform);
-	// (void)keep(pffft_transform_ordered);
-	// (void)keep(pffft_zreorder);
-	// (void)keep(pffft_zconvolve_accumulate);
-	// (void)keep(pffft_aligned_free);
-	// (void)keep(pffft_aligned_malloc);
-	// (void)keep(pffft_simd_size);
-
-	// rack::settings::preferDarkPanels = false;
-
-	// auto ar = new int[10];
-	// delete[] ar;
+	auto a = new int;
+	// provides: _ZdlPv: operator delete(void*)
+	delete a;
 
 	// volatile auto alloc = std::allocator<char>{}; //seems to do nothing
 	// (void)alloc;
 
+	std::string x = "A very long String, longer than SSO could optimize without dynamic memory allocation";
 	//stdlib
 }

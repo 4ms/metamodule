@@ -139,7 +139,6 @@ def GetLibcSymbols():
          "puts",
          "time", 
 
-         
          "realloc",
          "free",
 
@@ -163,11 +162,11 @@ def GetLibcSymbols():
          "_ZNSt8__detail15_List_node_base7_M_hookEPS0_",
 
          # Not found, replaced with an empty function
-         "_ZNSaIcEC1Ev", # std::allocator<char>::allocator()
-         "_ZNSaIcED1Ev", # std::allocator<char>::~allocator()
-         "_ZNSaIcED2Ev", # std::allocator<char>::~allocator() ? somehow different?
-         "_ZNSaIcEC1ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&)
-         "_ZNSaIcEC2ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&) 
+         # "_ZNSaIcEC1Ev", # std::allocator<char>::allocator()
+         # "_ZNSaIcED1Ev", # std::allocator<char>::~allocator()
+         # "_ZNSaIcED2Ev", # std::allocator<char>::~allocator() ? somehow different?
+         # "_ZNSaIcEC1ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&)
+         # "_ZNSaIcEC2ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&) 
 
          "json_integer_value",
          "json_object",
