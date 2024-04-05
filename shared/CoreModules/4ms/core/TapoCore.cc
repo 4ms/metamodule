@@ -7,6 +7,12 @@
 
 #include <alpaca/alpaca.h>
 
+// #define PRINTS
+
+#ifdef PRINTS
+#include <cstdio>
+#endif
+
 namespace MetaModule
 {
 
@@ -114,6 +120,9 @@ public:
 		{
 			// Deserialization error
 			// just ignore
+			#ifdef PRINTS
+			printf("Deserialization Error: %s\n", ec.message().c_str());
+			#endif
 		}
 	}
 
@@ -128,6 +137,10 @@ public:
 			.slots = ui.getPersistentStorage().get_custom_slots()
 		};
 
+		#ifdef PRINTS
+		printf("Save: Repeat %u, Current Slot %d, Sync %u, NumbSlots %u\n", saveState.repeat, saveState.current_slot, saveState.sync, saveState.slots.size());
+		#endif
+
 		std::vector<uint8_t> bytes;
 		alpaca::serialize<alpaca::options::with_version>(saveState, bytes);
 
@@ -136,6 +149,10 @@ public:
 
 	void applySaveState()
 	{
+		#ifdef PRINTS
+		printf("Apply: Repeat %u, Current Slot %d, Sync %u, NumbSlots %u\n", saveState.repeat, saveState.current_slot, saveState.sync, saveState.slots.size());
+		#endif
+
 		// at this point we assume all called elements are initialized
 		ui.getPersistentStorage().load_custom_slots(std::span{saveState.slots.data(), saveState.slots.size()});
 		ui.set_current_slot(saveState.current_slot);
