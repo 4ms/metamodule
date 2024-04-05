@@ -86,6 +86,9 @@ public:
 
 	//////////////////////////////////
 
+	// This struct is serialized and deserialized on save/load
+	// To preserve backwards compatibility, only add fields
+	// (do not reorder or remove)
 	struct SaveState_t
 	{
 		bool repeat;
@@ -101,7 +104,7 @@ public:
 		auto raw_data = decode(state_data);
 
 		std::error_code ec;
-		auto newSaveState = alpaca::deserialize<SaveState_t>(raw_data, ec);
+		auto newSaveState = alpaca::deserialize<alpaca::options::with_version, SaveState_t>(raw_data, ec);
 		if (!ec)
 		{
 			// only keep current save state but don't apply here
@@ -126,7 +129,7 @@ public:
 		};
 
 		std::vector<uint8_t> bytes;
-		alpaca::serialize(saveState, bytes);
+		alpaca::serialize<alpaca::options::with_version>(saveState, bytes);
 
 		return encode({bytes.data(), bytes.size()});
 	}
