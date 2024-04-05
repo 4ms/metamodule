@@ -94,13 +94,12 @@ INCLUDES := -I. \
 			-I$(SOURCEREPO) \
 
 # Any extra flags needed can go here:
-EXTRA_CLAGS := -fvisibility=hidden \
+EXTRA_CLAGS := \
 			   -Wno-misleading-indentation \
 			   -Wno-unused-but-set-variable \
 			   -Wno-unused-function \
 			   -Wno-unused-variable \
 
 EXTRA_CPPFLAGS := -Wno-deprecated-enum-float-conversion \
-				  -fvisibility-inlines-hidden \
 
 include $(ADAPTORDIR)/plugin.mk
