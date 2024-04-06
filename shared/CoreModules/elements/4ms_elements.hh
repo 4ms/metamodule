@@ -58,21 +58,21 @@ struct OrangeButton : LatchingButton {
 struct WhiteMomentary7mm : MomentaryButtonLight {
 	constexpr WhiteMomentary7mm() = default;
 	constexpr WhiteMomentary7mm(BaseElement b)
-		: MomentaryButtonLight{{b, "4ms/comp/button_x.png"}, Colors565::White} {
+		: MomentaryButtonLight{{{b, "4ms/comp/button_x.png"}, ""}, Colors565::White} {
 	}
 };
 
 struct MomentaryRGB7mm : MomentaryButtonRGB {
 	constexpr MomentaryRGB7mm() = default;
 	constexpr MomentaryRGB7mm(BaseElement b)
-		: MomentaryButtonRGB{b, "4ms/comp/button_x.png"} {
+		: MomentaryButtonRGB{{{b, "4ms/comp/button_x.png"}, ""}} {
 	}
 };
 
 struct MomentaryRGB5mm : MomentaryButtonRGB {
 	constexpr MomentaryRGB5mm() = default;
 	constexpr MomentaryRGB5mm(BaseElement b)
-		: MomentaryButtonRGB{b, "4ms/comp/button_x.png"} {
+		: MomentaryButtonRGB{{{b, "4ms/comp/button_x.png"}, ""}} {
 	}
 };
 
