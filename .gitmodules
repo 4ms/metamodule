@@ -19,9 +19,6 @@
 [submodule "firmware/vcv_ports/Befaco"]
 	path = firmware/vcv_ports/Befaco
 	url = https://github.com/hemmer/Befaco.git
-[submodule "firmware/src/VCV_adaptor/simde"]
-	path = firmware/src/VCV_adaptor/simde
-	url = https://github.com/simd-everywhere/simde.git
 [submodule "firmware/vcv_ports/hetrickcv"]
 	path = firmware/vcv_ports/hetrickcv
 	url = https://github.com/mhetrick/hetrickcv.git
