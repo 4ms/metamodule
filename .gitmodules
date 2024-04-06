@@ -15,7 +15,7 @@
 	url = https://github.com/4ms/mp1-boot.git
 [submodule "firmware/vcv_ports/AudibleInstruments"]
 	path = firmware/vcv_ports/AudibleInstruments
-	url = https://github.com/VCVRack/AudibleInstruments.git
+	url = https://github.com:4ms/AudibleInstruments.git
 [submodule "firmware/vcv_ports/Befaco"]
 	path = firmware/vcv_ports/Befaco
 	url = https://github.com/hemmer/Befaco.git
