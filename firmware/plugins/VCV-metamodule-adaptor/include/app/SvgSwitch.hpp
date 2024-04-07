@@ -28,4 +28,6 @@ private:
 	widget::SvgWidget _sw;
 };
 
+using SVGSwitch = SvgSwitch;
+
 } // namespace rack::app
