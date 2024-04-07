@@ -32,11 +32,11 @@ void Module::config(int num_params, int num_inputs, int num_outputs, int num_lig
 
 	inputs.resize(num_inputs);
 	for (auto &x : inputs)
-		x.voltage = 0;
+		x.setVoltage(0.f);
 
 	outputs.resize(num_outputs);
 	for (auto &x : outputs)
-		x.voltage = 0;
+		x.setVoltage(0.f);
 
 	lights.resize(num_lights);
 	for (auto &x : lights)

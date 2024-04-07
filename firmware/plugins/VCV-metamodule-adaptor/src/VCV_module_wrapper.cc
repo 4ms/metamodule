@@ -49,30 +49,30 @@ float VCVModuleWrapper::get_led_brightness(const int led_id) const {
 
 void VCVModuleWrapper::mark_all_inputs_unpatched() {
 	for (auto &in : inputs)
-		in.connected = false;
+		in.channels = 0;
 }
 
 void VCVModuleWrapper::mark_input_unpatched(const int input_id) {
 	if (input_id < (int)inputs.size())
-		inputs[input_id].connected = false;
+		inputs[input_id].channels = 0;
 }
 
 void VCVModuleWrapper::mark_input_patched(const int input_id) {
 	if (input_id < (int)inputs.size())
-		inputs[input_id].connected = true;
+		inputs[input_id].channels = 1;
 }
 
 void VCVModuleWrapper::mark_all_outputs_unpatched() {
 	for (auto &out : outputs)
-		out.connected = false;
+		out.channels = 0;
 }
 
 void VCVModuleWrapper::mark_output_unpatched(const int output_id) {
 	if (output_id < (int)outputs.size())
-		outputs[output_id].connected = false;
+		outputs[output_id].channels = 0;
 }
 
 void VCVModuleWrapper::mark_output_patched(const int output_id) {
 	if (output_id < (int)outputs.size())
-		outputs[output_id].connected = true;
+		outputs[output_id].channels = 1;
 }
