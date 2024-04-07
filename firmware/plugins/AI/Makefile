@@ -21,14 +21,13 @@ SOURCES :=\
   $(SOURCEREPO)/src/Shelves.cpp \
   $(SOURCEREPO)/src/Tides2.cpp \
   $(SOURCEREPO)/src/Veils.cpp \
-  
-  # $(SOURCEREPO)/src/Clouds.cpp \
-  # $(SOURCEREPO)/src/Frames.cpp \
-  # $(SOURCEREPO)/src/Plaits.cpp \
-  # $(SOURCEREPO)/src/Stages.cpp \
-  # $(SOURCEREPO)/src/Streams.cpp \
-  # $(SOURCEREPO)/src/Tides.cpp \
-  # $(SOURCEREPO)/src/Warps.cpp \
+  $(SOURCEREPO)/src/Clouds.cpp \
+  $(SOURCEREPO)/src/Frames.cpp \
+  $(SOURCEREPO)/src/Plaits.cpp \
+  $(SOURCEREPO)/src/Stages.cpp \
+  $(SOURCEREPO)/src/Streams.cpp \
+  $(SOURCEREPO)/src/Tides.cpp \
+  $(SOURCEREPO)/src/Warps.cpp \
 
 
 #Helpers
