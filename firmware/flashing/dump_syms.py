@@ -139,6 +139,7 @@ def GetLibcSymbols():
          "puts",
          "time", 
 
+         "calloc",
          "realloc",
          "free",
 

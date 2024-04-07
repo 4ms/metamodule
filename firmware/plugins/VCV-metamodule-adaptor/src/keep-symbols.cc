@@ -98,6 +98,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 
 	(void)keep(strlen);
 	(void)keep(malloc);
+	(void)keep(calloc);
 	(void)keep(free);
 	(void)keep(puts);
 

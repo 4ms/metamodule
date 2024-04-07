@@ -1,6 +1,21 @@
-ARCH_CFLAGS := -DSTM32MP157Cxx -DSTM32MP1 -DCORE_CA7
+ARCH_CFLAGS :=  -DSTM32MP157Cxx -DSTM32MP1 -DCORE_CA7 \
+				-DUSE_HAL_DRIVER -DUSE_FULL_LL_DRIVER \
+				--param l1-cache-size=32 \
+				--param l1-cache-line-size=64 \
+				--param l2-cache-size=256 \
 
-MCU :=  -mcpu=cortex-a7 -march=armv7ve -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard
+MCU := \
+    -fno-exceptions \
+    -fno-math-errno \
+    -mcpu=cortex-a7 \
+    -mlittle-endian \
+    -mfpu=neon-vfpv4 \
+    -mfloat-abi=hard \
+    -mthumb-interwork \
+    -mno-unaligned-access \
+    -mtune=cortex-a7 \
+    -mvectorize-with-neon-quad \
+    -funsafe-math-optimizations \
 
 BINARYNAME := $(PLUGINNAME)
 BUILDDIR := build
@@ -11,35 +26,39 @@ LFLAGS := $(MCU)  \
 		 -Wl,--gc-sections \
 		 -nostartfiles -nostdlib
 
-OPTFLAG ?= -O2
+OPTFLAG ?= -O3
 
 AFLAGS = $(MCU)
 
-CFLAGS ?= -g2 \
-		 -fno-common \
-		 $(ARCH_CFLAGS) \
-		 $(MCU) \
-		 $(INCLUDES) \
-		 -fdata-sections -ffunction-sections \
-		 -fPIC \
-		 -nostartfiles \
-		 -nostdlib \
-		 -shared \
-		 -c \
-		 -Wno-double-promotion \
-		 -Wno-attributes \
+CFLAGS ?= \
+		-g2 \
+		$(ARCH_CFLAGS) \
+		$(MCU) \
+		$(INCLUDES) \
+		-fno-common \
+		-fdata-sections -ffunction-sections \
+		-fno-unwind-tables \
+		-fPIC \
+		-nostartfiles \
+		-nostdlib \
+		-shared \
+		-c \
+		-Wno-double-promotion \
+		-Wno-attributes \
+		-Wno-psabi
 
 CXXFLAGS ?= $(CFLAGS) \
 		-std=c++2a \
 		-fno-exceptions \
-		-fno-unwind-tables \
 		-fno-threadsafe-statics \
 		-fno-rtti \
+		-ffold-simple-inlines \
 		-mno-unaligned-access \
 		-Werror=return-type \
 		-Wno-register \
 		-Wno-volatile \
 		$(EXTRA_CPPFLAGS) \
+
 		
 SOURCES += $(ADAPTORDIR)/libc_stub.c 
 INCLUDES += \
@@ -89,9 +108,6 @@ $(SO): $(OBJECTS)
 
 $(SOSTRIP): $(SO)
 	$(STRIP) -g -v -o $@ $<
-
-# $(SOSTRIP_H): $(SOSTRIP)
-# 	cd build && xxd -i $(BINARYNAME)-strip.so > $(BINARYNAME)-strip-so.h
 
 %.diss : %.so
 	arm-none-eabi-objdump -CDz --source $^ > $@
