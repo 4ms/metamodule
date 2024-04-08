@@ -32,6 +32,12 @@ void Model::move_strings() {
 				   element);
 
 		std::visit(overloaded{[](BaseElement &el) {},
+							  [this](MomentaryButton &el) {
+								  el.pressed_image = strings.emplace_back(el.pressed_image);
+							  }},
+				   element);
+
+		std::visit(overloaded{[](BaseElement &el) {},
 							  [this](FlipSwitch &el) {
 								  for (auto &pos_name : el.pos_names)
 									  pos_name = strings.emplace_back(pos_name);
