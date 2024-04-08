@@ -32,6 +32,7 @@ set(4msModules
     LPF
     LPG
     MNMX
+    MPEG
     Mixer4
     MultiLFO
     Noise
