@@ -48,12 +48,12 @@ add_custom_command(
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
           --objdir ${CMAKE_BINARY_DIR}/VCV_mm_adaptor/
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware
-          --checkplugin ./plugins/Befaco/build/Befaco.so
-		  --checkplugin ./plugins/AI/build/AudibleInstruments.so
-          --checkplugin ./plugins/hetrickcv/build/HetrickCV.so
+          # --checkplugin ./plugins/Befaco/build/Befaco.so
+		  # --checkplugin ./plugins/AI/build/AudibleInstruments.so
+          # --checkplugin ./plugins/hetrickcv/build/HetrickCV.so
           --elf $<TARGET_FILE:main.elf>
           --yaml ${SYMBOLS_FILE}
-          -v
+          # -v
   COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
   DEPENDS main.elf 
   COMMENT "Exporting symbols"
@@ -305,18 +305,13 @@ foreach(brand ${brands})
   include(${PROJECT_SOURCE_DIR}/vcv_ports/glue/${brand}/modules.cmake)
 
   if(NOT DEFINED ${BRAND}_FACEPLATE_SVGS)
-    message(
-      FATAL_ERROR
-        "No faceplate svgs for ${BRAND}, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_FACEPLATE_SVGS!"
-    )
+    message(FATAL_ERROR "No faceplate svgs for ${BRAND}, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_FACEPLATE_SVGS!")
   endif()
 
-  # generation script will fail if this folder doesn't exist
-  file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/modules)
-
+  # TODO: SVG -> PNG, not LVGL, and place it in assets/, keeping original directory structure
   foreach(svg ${${BRAND}_FACEPLATE_SVGS})
     get_filename_component(svg_name ${svg} NAME_WE)
-    set(c240_name ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/modules/${svg_name}_240.c)
+    set(c240_name ${PROJECT_SOURCE_DIR}/assetss/${brand}/modules/${svg_name}.c)
 
     # for each module svg, convert to .c version
     add_custom_command(
