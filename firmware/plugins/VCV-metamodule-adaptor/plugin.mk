@@ -53,7 +53,6 @@ CXXFLAGS ?= $(CFLAGS) \
 		-fno-threadsafe-statics \
 		-fno-rtti \
 		-ffold-simple-inlines \
-		-mno-unaligned-access \
 		-Werror=return-type \
 		-Wno-register \
 		-Wno-volatile \
