@@ -13,7 +13,7 @@ struct MPEGInfo : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 17> Elements{{
+    static constexpr std::array<Element, 23> Elements{{
 		Davies1900hBlackKnob{{to_mm<72>(36.45), to_mm<72>(87.77), Center, "Div/Mult", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(37.35), to_mm<72>(154.72), Center, "Shape", ""}},
 		Knob9mm{{to_mm<72>(91.14), to_mm<72>(133.33), Center, "Scale", ""}},
@@ -31,6 +31,12 @@ struct MPEGInfo : ModuleInfoBase {
 		RedLight{{to_mm<72>(14.57), to_mm<72>(220.0), Center, "EOF Light", ""}},
 		RedBlueLight{{to_mm<72>(57.4), to_mm<72>(200.1), Center, "ENV OUT Light", ""}},
 		BlueLight{{to_mm<72>(99.67), to_mm<72>(220.0), Center, "5V ENV Light", ""}},
+		AltParamChoiceLabeled{{{to_mm<72>(57.12), to_mm<72>(224.36), Center, "Skew Limit", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(80.21), to_mm<72>(41.57), Center, "Free-running Ping", ""}, 2, 1}, {"On", "Off"}},
+		AltParamChoiceLabeled{{{to_mm<72>(23.07), to_mm<72>(244.84), Center, "EOF Jack Type", ""}, 2, 1}, {"Gate", "Trigger"}},
+		AltParamChoiceLabeled{{{to_mm<72>(23.07), to_mm<72>(244.84), Center, "EOF Jack Mode", ""}, 4, 1}, {"EOF", "EOR", "Half-Rise", "Tap Clock"}},
+		AltParamChoiceLabeled{{{to_mm<72>(91.59), to_mm<72>(287.64), Center, "Cycle Jack Mode", ""}, 3, 1}, {"Gate", "Gate+Sync", "Trig"}},
+		AltParamChoiceLabeled{{{to_mm<72>(23.01), to_mm<72>(287.64), Center, "Trig Jack Mode", ""}, 3, 1}, {"Async  Trig", "Async Gate", "Quantized Trig"}},
 }};
 
     enum class Elem {
@@ -51,6 +57,12 @@ struct MPEGInfo : ModuleInfoBase {
         EofLight,
         EnvOutLight,
         _5VEnvLight,
+        SkewLimitAltParam,
+        FreeNRunningPingAltParam,
+        EofJackTypeAltParam,
+        EofJackModeAltParam,
+        CycleJackModeAltParam,
+        TrigJackModeAltParam,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
@@ -92,5 +104,13 @@ struct MPEGInfo : ModuleInfoBase {
         NumDiscreteLeds,
     };
     
+    enum {
+        AltParamSkew_Limit, 
+        AltParamFreeNRunning_Ping, 
+        AltParamEof_Jack_Type, 
+        AltParamEof_Jack_Mode, 
+        AltParamCycle_Jack_Mode, 
+        AltParamTrig_Jack_Mode, 
+    };
 };
 } // namespace MetaModule

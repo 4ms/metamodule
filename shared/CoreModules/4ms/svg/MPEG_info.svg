@@ -29,9 +29,9 @@
      inkscape:cy="249.63781"
      inkscape:window-width="2512"
      inkscape:window-height="1387"
-     inkscape:window-x="50"
-     inkscape:window-y="25"
-     inkscape:window-maximized="1"
+     inkscape:window-x="40"
+     inkscape:window-y="59"
+     inkscape:window-maximized="0"
      inkscape:current-layer="components" />
   <g
      id="faceplate"
@@ -802,5 +802,47 @@
          x="90.202774"
          y="361.24786"
          id="tspan114">ini PEG</tspan></text>
+    <circle
+       id="TrigJackModeAltFunc"
+       cx="23.01"
+       cy="287.64001"
+       r="4"
+       style="fill:#808080;stroke-width:0px"
+       data-name="Trig Jack Mode@Async  Trig@Async Gate@Quantized Trig" />
+    <circle
+       id="CycleJackModeAltFunc"
+       data-name="Cycle Jack Mode@Gate@Gate+Sync@Trig"
+       cx="91.589996"
+       cy="287.64001"
+       r="4"
+       style="fill:#808080;stroke-width:0px" />
+    <circle
+       id="EOFJackModeAltParam"
+       cx="23.07"
+       cy="244.84"
+       r="4"
+       style="fill:#808080;stroke-width:0px"
+       data-name="EOF Jack Mode@EOF@EOR@Half-Rise@Tap Clock" />
+    <circle
+       id="EOFJackTypeAltParam"
+       cx="23.07"
+       cy="244.84"
+       r="4"
+       style="fill:#808080;stroke-width:0px"
+       data-name="EOF Jack Type@Gate@Trigger" />
+    <circle
+       id="FreerunningPingAltParam"
+       data-name="Free-running Ping@On@Off"
+       cx="80.209999"
+       cy="41.57"
+       r="4"
+       style="fill:#808080;stroke-width:0px" />
+    <circle
+       id="SkewLimitAltParam"
+       data-name="Skew Limit@Off@On"
+       cx="57.119999"
+       cy="224.36"
+       r="4"
+       style="fill:#808080;stroke-width:0px" />
   </g>
 </svg>
