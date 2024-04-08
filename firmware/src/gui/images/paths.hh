@@ -18,7 +18,7 @@ struct ComponentImages {
 
 struct ModuleImages {
 	static const std::string get_faceplate_path(const std::string_view slug) {
-		std::string filename = std::string(ModuleFactory::getModuleFaceplate(slug));
+		auto filename = std::string(ModuleFactory::getModuleFaceplate(slug));
 		if (filename.length())
 			return LV_FS_FATFS_LETTER + std::string(":2:/") + filename;
 		else
