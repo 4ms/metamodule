@@ -49,6 +49,7 @@ add_custom_command(
           --objdir ${CMAKE_BINARY_DIR}/VCV_mm_adaptor/
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware
           --checkplugin ./plugins/Befaco/build/Befaco.so
+		  --checkplugin ./plugins/AI/build/AudibleInstruments.so
           --checkplugin ./plugins/hetrickcv/build/HetrickCV.so
           --elf $<TARGET_FILE:main.elf>
           --yaml ${SYMBOLS_FILE}
