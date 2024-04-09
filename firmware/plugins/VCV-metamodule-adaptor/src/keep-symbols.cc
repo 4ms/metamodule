@@ -53,7 +53,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	(void)coshf(1.f);
 	(void)erf(2.f);
 	(void)erfc(2.f);
-	(void)gamma(2.f);
+	// (void)gamma(2.f);
 	(void)lgamma(2.f);
 	(void)remainder(1.f, 2.f);
 	(void)exp(1.f);
