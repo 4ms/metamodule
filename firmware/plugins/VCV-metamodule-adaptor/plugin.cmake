@@ -4,14 +4,6 @@ set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 add_library(arch_mp15x_a7 INTERFACE)
 
-target_compile_definitions(arch_mp15x_a7 INTERFACE
-	USE_HAL_DRIVER
-	USE_FULL_LL_DRIVER
-	STM32MP1
-	STM32MP157Cxx
-	CORE_CA7
-)
-
 set(MCU_FLAGS
 	-fno-exceptions
 	-fno-math-errno
