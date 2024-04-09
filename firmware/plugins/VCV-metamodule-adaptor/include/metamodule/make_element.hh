@@ -70,7 +70,8 @@ Element make_element(rack::componentlibrary::TGrayModuleLightWidget<LightBaseT> 
 							 size <= 4.5f ? "4ms/comp/led_x.png" : //8px => 4.28mm
 							 size <= 5.3f ? "rack-lib/LargeLight.png" : //9px => 4.82mm
 							 size <= 6.5f ? "rack-lib/VCVBezelLight.png" : //11px => 5.89mm
-											"rack-lib/VCVBezel.png"; //14px => 7.5mm
+							 size <= 18.f ? "rack-lib/VCVBezel.png" : //14px => 7.5mm
+											"rack-lib/Rogan6PSLight.png"; //44px
 
 	if (widget->getNumColors() == 1) {
 		auto c = widget->baseColors[0];
