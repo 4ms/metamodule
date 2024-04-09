@@ -81,45 +81,47 @@ private:
 		{
 			auto now = get_timestamp();
 
-			if (auto pingInput = getInput<Mapping::PingJackIn>(); pingInput)
-			{
-				// always disable tap tempo if jack is inserted
-				lastTapTime.reset();
+			// if (auto pingInput = getInput<Mapping::PingJackIn>(); pingInput)
+			// {
+			// 	// always disable tap tempo if jack is inserted
+			// 	lastTapTime.reset();
 
-				auto isPingHigh = *pingInput > TriggerThresholdInV;
+			// 	auto isPingHigh = *pingInput > TriggerThresholdInV;
 
-				if (extClockEdge(isPingHigh))
-				{
-					if (lastExtClockTime)
-					{
-						lfo.setPeriodLength(now - *lastExtClockTime);
-					}
-					lastExtClockTime = now;
-				}
+			// 	if (extClockEdge(isPingHigh))
+			// 	{
+			// 		if (lastExtClockTime)
+			// 		{
+			// 			lfo.setPeriodLength(now - *lastExtClockTime);
+			// 		}
+			// 		lastExtClockTime = now;
+			// 	}
 
-				setLED<Mapping::PingButton>(isPingHigh);
-			}
-			else
-			{
-				if (tapLongPress(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
-				{
-					printf("Long press\n");
-				}
+			// 	setLED<Mapping::PingButton>(isPingHigh);
+			// }
+			// else
+			// {
+			// 	if (tapLongPress(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
+			// 	{
+			// 		printf("Long press\n");
+			// 	}
 
-				if (tapEdge(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
-				{
-					// reset counter on ping input
-					lastExtClockTime.reset();
+			// 	if (tapEdge(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
+			// 	{
+			// 		// reset counter on ping input
+			// 		lastExtClockTime.reset();
 
-					if (lastTapTime)
-					{
-						lfo.setPeriodLength(now - *lastTapTime);
-					}
-					lastTapTime = now;
-				}
+			// 		if (lastTapTime)
+			// 		{
+			// 			lfo.setPeriodLength(now - *lastTapTime);
+			// 		}
+			// 		lastTapTime = now;
+			// 	}
 
-				setLED<Mapping::PingButton>(lfo.getPhase() > 0.5f);
-			}
+			// 	setLED<Mapping::PingButton>(lfo.getPhase() > 0.5f);
+			// }
+
+			lfo.setPeriodLength(0.14f);
 
 			if (resetEdge(getInput<Mapping::ResetIn>() > TriggerThresholdInV))
 			{
@@ -130,7 +132,7 @@ private:
 			auto skew = std::clamp(getState<Mapping::SkewKnob>() + skewCV, 0.0f, 1.0f);
 			lfo.setSkew(skew);
 
-			lfo.update(now);
+			lfo.update(timeStepInS);
 
 			if (getState<Mapping::OnButton>() == LatchingButton::State_t::DOWN)
 			{

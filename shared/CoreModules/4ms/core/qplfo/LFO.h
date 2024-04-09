@@ -20,21 +20,15 @@ Mapping::LookupTable_t<50>::generate<FadeTableRange>([](auto val) {
 class LFO
 {
 public:
-    using Timestamp_t = uint32_t;
-
-public:
-    LFO(Timestamp_t pulseWidth) : phase(0), mode(TriggerMode{}), PulseWidth(pulseWidth), resetLockPoint(0), phaseOffset(0), skewTouchedZero(true)
+    LFO(float pulseWidthInS) : phase(0), mode(TriggerMode{}), PulseWidthInS(pulseWidthInS), resetLockPointInS(0.f), phaseOffset(0), skewTouchedZero(true)
     {
     }
 
-    void update(Timestamp_t now)
+    void update(float timeStepInS)
     {
-        auto timeIncrement = now - lastUpdateTime;
-        lastUpdateTime = now;
-
-        if (periodLength)
+        if (periodLengthInS)
         {
-            auto phaseIncrement = float(timeIncrement) / float(*periodLength);
+            auto phaseIncrement = float(timeStepInS) / float(*periodLengthInS);
 
             phase += phaseIncrement;
 
@@ -54,9 +48,9 @@ public:
 
     void reset()
     {
-        if (periodLength)
+        if (periodLengthInS)
         {
-            resetLockPoint = phase * periodLength.value();
+            resetLockPointInS = phase * periodLengthInS.value();
             phaseOffset = phase;
         }
     }
@@ -91,21 +85,21 @@ public:
         }
     }
 
-    void setPeriodLength(Timestamp_t val)
+    void setPeriodLength(float valInS)
     {
-        periodLength = val;
+        periodLengthInS = valInS;
 
-        if (periodLength and periodLength > resetLockPoint)
+        if (periodLengthInS and periodLengthInS > resetLockPointInS)
         {
             // keep lock point and calculate new phase offset for new tempo
-            phaseOffset = float(resetLockPoint) / float(*periodLength);
+            phaseOffset = float(resetLockPointInS) / float(*periodLengthInS);
         }
         else
         {
             // lock point is larger than period
             // reset lock point
-            resetLockPoint = 0;
-            phaseOffset = 0;
+            resetLockPointInS = 0.f;
+            phaseOffset = 0.f;
         }
     }
 
@@ -119,11 +113,11 @@ public:
         // work off of a new phase that includes the reset lock point
         float shiftedPhase = wrapPhase(phase - phaseOffset);
 
-        if (periodLength)
+        if (periodLengthInS)
         {
             if (std::holds_alternative<TriggerMode>(mode))
             {
-                if (shiftedPhase * periodLength.value() < PulseWidth)
+                if (shiftedPhase * periodLengthInS.value() < PulseWidthInS)
                 {
                     return 1.0f;
                 }
@@ -206,16 +200,14 @@ private:
 
     float phase;
 
-    Timestamp_t lastUpdateTime;
-
-    std::optional<Timestamp_t> periodLength;
+    std::optional<float> periodLengthInS;
 
     Mode_t mode;
     Mode_t nextMode;
 
-    const Timestamp_t PulseWidth;
+    const float PulseWidthInS;
 
-    Timestamp_t resetLockPoint;
+    float resetLockPointInS;
     float phaseOffset;
 
     bool skewTouchedZero;
