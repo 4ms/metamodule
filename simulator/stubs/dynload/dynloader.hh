@@ -1,5 +1,5 @@
 #pragma once
-#include "VCV_adaptor/plugin/Plugin.hpp"
+#include "plugin/Plugin.hpp"
 #include <cstdint>
 #include <span>
 #include <vector>

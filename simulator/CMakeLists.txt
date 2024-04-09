@@ -41,8 +41,7 @@ target_link_libraries(ui PRIVATE lvgl)
 
 # #################### VCV Adaptor ##################################
 
-add_subdirectory(${FWDIR}/src/VCV_adaptor
-                 ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
+add_subdirectory(${FWDIR}/plugins/VCV-metamodule-adaptor ${CMAKE_CURRENT_BINARY_DIR}/VCV-mm-adaptor)
 
 # #################### Other brands ##################################
  
@@ -95,7 +94,7 @@ target_include_directories(
 
 target_compile_options(simulator PRIVATE -Wall -Og)
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports VCV_mm_adaptor)
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 
