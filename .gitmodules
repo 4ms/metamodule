@@ -40,3 +40,6 @@
 [submodule "firmware/src/wifi/comm/flat"]
 	path = firmware/src/wifi/comm/flat
 	url = https://github.com/4ms/metamodule-bridge-protocol.git
+[submodule "firmware/metamodule-rack-interface"]
+	path = firmware/metamodule-rack-interface
+	url = git@github.com:4ms/metamodule-rack-interface.git
