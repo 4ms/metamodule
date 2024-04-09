@@ -15,6 +15,11 @@ Element make_element(rack::componentlibrary::Rogan const *widget, BaseElement b)
 Element make_element(rack::app::SvgSwitch const *widget, BaseElement b);
 Element make_element(rack::app::SvgScrew const *widget, BaseElement);
 Element make_element(rack::widget::SvgWidget const *widget, BaseElement el);
+Element make_element(rack::app::MultiLightWidget const *widget, BaseElement const &el);
+
+Element make_mono_led_element(std::string_view image, rack::app::MultiLightWidget const *widget, BaseElement const &el);
+Element make_dual_led_element(std::string_view image, rack::app::MultiLightWidget const *widget, BaseElement const &el);
+Element make_rgb_led_element(std::string_view image, rack::app::MultiLightWidget const *widget, BaseElement const &el);
 
 //
 // Lights (and buttons with lights)
@@ -44,46 +49,15 @@ Element make_element(rack::componentlibrary::VCVLightBezel<LightBaseT> const *wi
 template<typename LightBaseT>
 Element make_element(rack::componentlibrary::TSvgLight<LightBaseT> const *widget, BaseElement el) {
 	if (widget->getNumColors() == 1) {
-		auto c = widget->baseColors[0];
-		return MonoLight{{el, widget->sw->svg_filename}, RGB565{c.r, c.g, c.b}};
+		return make_mono_led_element(widget->sw->svg_filename, widget, el);
 	}
+
 	if (widget->getNumColors() == 2) {
-		auto c1 = widget->baseColors[0];
-		auto c2 = widget->baseColors[1];
-		return DualLight{{el, widget->sw->svg_filename}, {RGB565{c1.r, c1.g, c1.b}, RGB565{c2.r, c2.g, c2.b}}};
+		return make_dual_led_element(widget->sw->svg_filename, widget, el);
 	}
+
 	if (widget->getNumColors() == 3) {
-		return RgbLight{el, widget->sw->svg_filename};
-	}
-
-	printf("Light widget not handled (%d colors)\n", widget->getNumColors());
-	return NullElement{};
-}
-
-template<typename LightBaseT>
-Element make_element(rack::componentlibrary::TGrayModuleLightWidget<LightBaseT> const *widget, BaseElement el) {
-
-	auto size = to_mm(widget->box.size.x);
-
-	std::string_view image = size <= 2.6f ? "rack-lib/SmallLight.png" : //4px => 2.14mm
-							 size <= 3.7f ? "rack-lib/MediumLight.png" : //6px => 3.21mm
-							 size <= 4.5f ? "4ms/comp/led_x.png" : //8px => 4.28mm
-							 size <= 5.3f ? "rack-lib/LargeLight.png" : //9px => 4.82mm
-							 size <= 6.5f ? "rack-lib/VCVBezelLight.png" : //11px => 5.89mm
-							 size <= 18.f ? "rack-lib/VCVBezel.png" : //14px => 7.5mm
-											"rack-lib/Rogan6PSLight.png"; //44px
-
-	if (widget->getNumColors() == 1) {
-		auto c = widget->baseColors[0];
-		return MonoLight{{el, image}, RGB565{c.r, c.g, c.b}};
-	}
-	if (widget->getNumColors() == 2) {
-		auto c1 = widget->baseColors[0];
-		auto c2 = widget->baseColors[1];
-		return DualLight{{el, image}, {RGB565{c1.r, c1.g, c1.b}, RGB565{c2.r, c2.g, c2.b}}};
-	}
-	if (widget->getNumColors() == 3) {
-		return RgbLight{el, image};
+		return make_rgb_led_element(widget->sw->svg_filename, widget, el);
 	}
 
 	printf("Light widget not handled (%d colors)\n", widget->getNumColors());

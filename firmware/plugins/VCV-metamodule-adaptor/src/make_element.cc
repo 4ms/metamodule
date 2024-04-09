@@ -87,6 +87,59 @@ Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
 }
 
 //
+// LEDS
+//
+
+std::string_view get_led_image_by_size(rack::widget::Widget const *widget) {
+	auto size = to_mm(widget->box.size.x);
+
+	std::string_view image = size <= 2.6f ? "rack-lib/SmallLight.png" : //4px => 2.14mm
+							 size <= 3.7f ? "rack-lib/MediumLight.png" : //6px => 3.21mm
+							 size <= 4.5f ? "4ms/comp/led_x.png" : //8px => 4.28mm
+							 size <= 5.3f ? "rack-lib/LargeLight.png" : //9px => 4.82mm
+							 size <= 6.5f ? "rack-lib/VCVBezelLight.png" : //11px => 5.89mm
+							 size <= 18.f ? "rack-lib/VCVBezel.png" : //14px => 7.5mm
+											"rack-lib/Rogan6PSLight.png"; //44px
+
+	return image;
+}
+
+Element
+make_mono_led_element(std::string_view image, rack::app::MultiLightWidget const *widget, BaseElement const &el) {
+	auto c = widget->baseColors[0];
+	return MonoLight{{el, image}, RGB565{c.r, c.g, c.b}};
+}
+
+Element
+make_dual_led_element(std::string_view image, rack::app::MultiLightWidget const *widget, BaseElement const &el) {
+	auto c1 = widget->baseColors[0];
+	auto c2 = widget->baseColors[1];
+	return DualLight{{el, image}, {RGB565{c1.r, c1.g, c1.b}, RGB565{c2.r, c2.g, c2.b}}};
+}
+
+Element make_rgb_led_element(std::string_view image, rack::app::MultiLightWidget const *widget, BaseElement const &el) {
+	return RgbLight{el, image};
+}
+
+Element make_element(rack::app::MultiLightWidget const *widget, BaseElement const &el) {
+	auto image = get_led_image_by_size(widget);
+
+	if (widget->getNumColors() == 1) {
+		return make_mono_led_element(image, widget, el);
+
+	} else if (widget->getNumColors() == 2) {
+		return make_dual_led_element(image, widget, el);
+
+	} else if (widget->getNumColors() == 3) {
+		return make_rgb_led_element(image, widget, el);
+
+	} else {
+		printf("Light widget not handled (%d colors)\n", widget->getNumColors());
+		return NullElement{};
+	}
+}
+
+//
 // Not supported
 //
 
