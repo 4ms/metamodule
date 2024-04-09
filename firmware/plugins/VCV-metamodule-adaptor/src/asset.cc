@@ -12,11 +12,6 @@ static void svg_to_png(std::string &path) {
 }
 
 static void set_drive(std::string &path) {
-	// #ifdef METAMODULE_INTERNAL_PLUGIN
-	// 	path = "M:/" + path;
-	// #else
-	// path = "P:/" + path;
-	// #endif
 }
 
 std::string system(std::string_view filename) {
