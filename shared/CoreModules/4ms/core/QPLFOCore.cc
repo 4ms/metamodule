@@ -72,8 +72,8 @@ private:
 	public:
 		Channel(QPLFOCore* parent_)
 			: parent(parent_)
-			, lfo(PulseWidthInS * get_timestamp_frequency())
-			, tapLongPress(2.0f * get_timestamp_frequency())
+			, lfo(PulseWidthInS)
+			, tapLongPress(2.0f)
 		{
 		}
 
@@ -101,7 +101,7 @@ private:
 			}
 			else
 			{
-				if (tapLongPress(now, getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
+				if (tapLongPress(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
 				{
 					printf("Long press\n");
 				}
@@ -157,6 +157,9 @@ private:
 		}
 
 		void set_samplerate(float sr) {
+			timeStepInS = 1.f / sr;
+
+			tapLongPress.set_samplerate(sr);
 		}
 
 
@@ -170,6 +173,9 @@ private:
 
 		std::optional<uint32_t> lastTapTime;
 		std::optional<uint32_t> lastExtClockTime;
+
+		float timeStepInS = 1.f / 48000.f;
+
 	};
 
 private:
@@ -273,6 +279,7 @@ private:
 	// clang-format on
 
 private:
+	float timeStepInS = 1.f / 48000.f;
 };
 
 } // namespace MetaModule

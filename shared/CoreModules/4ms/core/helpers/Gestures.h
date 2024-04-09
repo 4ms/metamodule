@@ -4,36 +4,39 @@
 class LongPressDetector
 {
 public:
-    using Timestamp_t = uint32_t;
-    LongPressDetector(Timestamp_t thres)
-        : threshold(thres)
-        , pressDuration(0)
+    LongPressDetector(float thresInS)
+        : thresholdInS(thresInS)
+        , pressDurationInS(0.f)
     {
     }
 
-    bool operator()(Timestamp_t now, bool val)
+    bool operator()(bool val)
     {
-        if (lastCall)
-        {
-            if (val)
-            {   
-                pressDuration += (now - *lastCall);
-                if (pressDuration >= threshold)
-                {
-                    pressDuration = 0;
-                    return true;
-                }
-            }
-            else
+        if (val)
+        {   
+            pressDurationInS += timeStepInS;
+            if (pressDurationInS >= thresholdInS)
             {
-                pressDuration = 0;
+                pressDurationInS = 0.f;
+                return true;
             }
         }
-        lastCall = now;
+        else
+        {
+            pressDurationInS = 0.f;
+        }
+
         return false;
     }
+
+    void set_samplerate(float sr) {
+        timeStepInS = 1.f / sr;
+    }
+    
 private:
-    const Timestamp_t threshold;
-    std::optional<Timestamp_t> lastCall;
-    Timestamp_t pressDuration;
+    const float thresholdInS;
+    float pressDurationInS;
+
+private:
+    float timeStepInS = 1.f / 48000.f;
 };
