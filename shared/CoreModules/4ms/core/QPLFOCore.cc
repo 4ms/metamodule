@@ -2,6 +2,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "info/QPLFO_info.hh"
 #include "qplfo/LFO.h"
+#include "qplfo/TapPing.h"
 #include "helpers/EdgeDetector.h"
 #include "helpers/Gestures.h"
 
@@ -84,7 +85,7 @@ private:
 			if (auto pingInput = getInput<Mapping::PingJackIn>(); pingInput)
 			{
 				// always disable tap tempo if jack is inserted
-				lastTapTime.reset();
+				// lastTapTime.reset();
 
 				auto isPingHigh = *pingInput > TriggerThresholdInV;
 
@@ -93,7 +94,7 @@ private:
 					if (lastExtClockTime)
 					{
 						lfo.setPeriodLength((ticks - *lastExtClockTime) * timeStepInS);
-						lfo.resetPhase();
+						lfo.start();
 					}
 					lastExtClockTime = ticks;
 				}
@@ -107,20 +108,19 @@ private:
 					printf("Long press\n");
 				}
 
-				if (tapEdge(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
-				{
-					// reset counter on ping input
-					lastExtClockTime.reset();
+				tapPing.inputButton(ticks, getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED);
 
-					if (lastTapTime)
-					{
-						lfo.setPeriodLength((ticks - *lastTapTime) * timeStepInS);
-						lfo.resetPhase();
-					}
-					lastTapTime = ticks;
+				if(auto tapPeriod = tapPing.getPeriod()) 
+				{
+					lfo.setPeriodLength(*tapPeriod * timeStepInS);
 				}
 
-				setLED<Mapping::PingButton>(lfo.getPhase() > 0.5f);
+				if(tapPing.updateTapOut(ticks) == true)
+				{
+					lfo.start();
+				} 
+
+				setLED<Mapping::PingButton>(lfo.getPhase() < 0.5f);
 			}
 
 			if (resetEdge(getInput<Mapping::ResetIn>() > TriggerThresholdInV))
@@ -172,6 +172,7 @@ private:
 		LongPressDetector tapLongPress;
 		EdgeDetector extClockEdge;
 		EdgeDetector resetEdge;
+		TapPing tapPing;
 
 		std::optional<uint32_t> lastTapTime;
 		std::optional<uint32_t> lastExtClockTime;

@@ -20,13 +20,13 @@ Mapping::LookupTable_t<50>::generate<FadeTableRange>([](auto val) {
 class LFO
 {
 public:
-    LFO(float pulseWidthInS) : phase(0), mode(TriggerMode{}), PulseWidthInS(pulseWidthInS), resetLockPointInS(0.f), phaseOffset(0), skewTouchedZero(true)
+    LFO(float pulseWidthInS) : phase(0), mode(TriggerMode{}), PulseWidthInS(pulseWidthInS), resetLockPointInS(0.f), phaseOffset(0), skewTouchedZero(true), running(false)
     {
     }
 
     void update(float timeStepInS)
     {
-        if (periodLengthInS)
+        if (periodLengthInS && running == true)
         {
             auto phaseIncrement = float(timeStepInS) / float(*periodLengthInS);
 
@@ -34,7 +34,7 @@ public:
 
             if (phase > 1.0f)
             {
-                phase = std::fmod(phase, 1.0f);
+                // phase = std::fmod(phase, 1.0f);
 
                 // track skew touching zero
                 skewTouchedZeroLastPeriod = skewTouchedZero;
@@ -42,6 +42,8 @@ public:
 
                 // always set new mode on a new period
                 nextMode = mode;
+
+                running = false;
             }
         }
     }
@@ -108,9 +110,10 @@ public:
         return phase;
     }
 
-    void resetPhase()
+    void start()
     {
         phase = 0.f;
+        running = true;
     }
 
     float getValue()
@@ -218,6 +221,7 @@ private:
     bool skewTouchedZero;
     bool skewTouchedZeroLastPeriod;
 
+    bool running;
 
 
 };
