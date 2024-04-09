@@ -98,7 +98,7 @@ macro(create_plugin)
 
     set(PLUGIN ${arg1})
 
-    # target_link_libraries(${PLUGIN} PRIVATE mm_vcv_plugin)
+    target_link_libraries(${PLUGIN} PRIVATE mm_vcv_plugin)
 
     target_link_options(${PLUGIN} PRIVATE 
         -shared
@@ -114,21 +114,21 @@ macro(create_plugin)
             COMMAND ${CMAKE_CXX_COMPILER} ${LFLAGS} -o ${PLUGIN}-debug.so $<TARGET_OBJECTS:${PLUGIN}> $<TARGET_OBJECTS:mm_vcv_plugin>
             COMMAND_EXPAND_LISTS
             VERBATIM USES_TERMINAL
-        )
+    )
 
-        add_custom_command(
-            OUTPUT ${PLUGIN}.so
-            DEPENDS ${PLUGIN}-debug.so
-            COMMAND ${CMAKE_STRIP} -g -v -o ${PLUGIN}.so ${PLUGIN}-debug.so
-            VERBATIM USES_TERMINAL
-        )
+    add_custom_command(
+        OUTPUT ${PLUGIN}.so
+        DEPENDS ${PLUGIN}-debug.so
+        COMMAND ${CMAKE_STRIP} -g -v -o ${PLUGIN}.so ${PLUGIN}-debug.so
+        VERBATIM USES_TERMINAL
+    )
 
-        add_custom_target(
-            plugin
-            ALL
-            DEPENDS ${PLUGIN}.so
-        )
+    add_custom_target(
+        plugin
+        ALL
+        DEPENDS ${PLUGIN}.so
+    )
 
-    endmacro()
+endmacro()
 
 
