@@ -46,10 +46,10 @@ struct QPLFOInfo : ModuleInfoBase {
 		WhiteLight{{to_mm<72>(45.23), to_mm<72>(152.55), Center, "LED 2", ""}},
 		BlueLight{{to_mm<72>(45.23), to_mm<72>(228.15), Center, "LED 3", ""}},
 		GreenLight{{to_mm<72>(45.23), to_mm<72>(303.75), Center, "LED 4", ""}},
-		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(43.18), Center, "One Shot Mode ch1", ""}, 2, 1}, {"off", "on"}},
-		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(118.78), Center, "One Shot Mode ch2", ""}, 2, 1}, {"off", "on"}},
-		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(194.38), Center, "One Shot Mode ch3", ""}, 2, 1}, {"off", "on"}},
-		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(269.98), Center, "One Shot Mode ch4", ""}, 2, 1}, {"off", "on"}},
+		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(43.18), Center, "Fire On Unmute ch1", ""}, 2, 1}, {"off", "on"}},
+		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(118.78), Center, "Fire On Unmute ch2", ""}, 2, 1}, {"off", "on"}},
+		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(194.38), Center, "Fire On Unmute ch3", ""}, 2, 1}, {"off", "on"}},
+		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(269.98), Center, "Fire On Unmute ch4", ""}, 2, 1}, {"off", "on"}},
 		AltParamChoiceLabeled{{{to_mm<72>(151.258), to_mm<72>(17.009), Center, "Output Range", ""}, 2, 1}, {"0V to +10V", "-5V to +5V"}},
 }};
 
@@ -86,10 +86,10 @@ struct QPLFOInfo : ModuleInfoBase {
         Led2Light,
         Led3Light,
         Led4Light,
-        OneShotModeCh1AltParam,
-        OneShotModeCh2AltParam,
-        OneShotModeCh3AltParam,
-        OneShotModeCh4AltParam,
+        FireOnUnmuteCh1AltParam,
+        FireOnUnmuteCh2AltParam,
+        FireOnUnmuteCh3AltParam,
+        FireOnUnmuteCh4AltParam,
         OutputRangeAltParam,
     };
 
@@ -148,10 +148,10 @@ struct QPLFOInfo : ModuleInfoBase {
     };
     
     enum {
-        AltParamOne_Shot_Mode_Ch1, 
-        AltParamOne_Shot_Mode_Ch2, 
-        AltParamOne_Shot_Mode_Ch3, 
-        AltParamOne_Shot_Mode_Ch4, 
+        AltParamFire_On_Unmute_Ch1, 
+        AltParamFire_On_Unmute_Ch2, 
+        AltParamFire_On_Unmute_Ch3, 
+        AltParamFire_On_Unmute_Ch4, 
         AltParamOutput_Range, 
     };
 };
