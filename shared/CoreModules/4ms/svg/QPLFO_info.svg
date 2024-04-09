@@ -32,7 +32,7 @@
      inkscape:window-x="50"
      inkscape:window-y="25"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg155" />
+     inkscape:current-layer="components" />
   <g
      id="faceplate">
     <rect
@@ -1067,46 +1067,39 @@
          y="0"
          id="tspan155">ingable LFO</tspan></text>
     <circle
-       id="OneShot1AltParam"
-       data-name="One Shot Mode ch1@off@on"
+       style="fill:#808080"
+       id="OutputPolarityAltParam"
+       cx="151.2581"
+       cy="17.009293"
+       r="4"
+       data-name="Output Range@0V to +10V@-5V to +5V" />
+    <circle
+       id="FireOnUnmute4AltParam"
+       data-name="Fire On Unmute ch4@off@on"
        cx="154.79"
-       cy="43.18"
+       cy="269.98"
        r="4"
        style="fill:#808080" />
     <circle
-       id="OneShot2AltParam"
-       data-name="One Shot Mode ch2@off@on"
-       cx="154.79"
-       cy="118.78"
-       r="4"
-       style="fill:#808080" />
-    <circle
-       id="OneShot3AltParam"
-       data-name="One Shot Mode ch3@off@on"
+       id="FireOnUnmute3AltParam"
+       data-name="Fire On Unmute ch3@off@on"
        cx="154.79"
        cy="194.38"
        r="4"
        style="fill:#808080" />
     <circle
-       id="OneShot4AltParam"
-       data-name="One Shot Mode ch4@off@on"
+       id="FireOnUnmute2AltParam"
+       data-name="Fire On Unmute ch2@off@on"
        cx="154.79"
-       cy="269.98"
+       cy="118.78"
+       r="4"
+       style="fill:#808080" />
+    <circle
+       id="FireOnUnmute1AltParam"
+       data-name="Fire On Unmute ch1@off@on"
+       cx="154.79"
+       cy="43.18"
        r="4"
        style="fill:#808080" />
   </g>
-  <circle
-     style="fill:#808080"
-     id="ThresholdAltParam"
-     cx="136.67871"
-     cy="16.705555"
-     r="4"
-     data-name="Trigger Threshold" />
-  <circle
-     style="fill:#808080"
-     id="circle155"
-     cx="151.2581"
-     cy="17.009293"
-     r="4"
-     data-name="Output Range@0V to +10V@-5V to +5V" />
 </svg>
