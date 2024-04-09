@@ -12,7 +12,6 @@ target_compile_definitions(arch_mp15x_a7 INTERFACE
 	CORE_CA7
 )
 
-# Note: MCU_FLAGS is used with linking as well
 set(MCU_FLAGS
 	-fno-exceptions
 	-fno-math-errno
@@ -55,17 +54,6 @@ target_compile_options(arch_mp15x_a7 INTERFACE
 	"$<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>"
 )
 
-target_link_options(arch_mp15x_a7 
-	INTERFACE 
-	${MCU_FLAGS}
-	-Wl,--gc-sections 
-	-nostartfiles 
-	-nostdlib
-)
-
-# -Wl,-Map,$(PLUGINNAME).map,--cref
-
-
 add_library(mm_vcv_plugin STATIC ${CMAKE_CURRENT_LIST_DIR}/libc_stub.c)
 
 target_compile_options(mm_vcv_plugin PUBLIC
@@ -82,25 +70,19 @@ target_include_directories(mm_vcv_plugin PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/dep/include/cpputil
 )
 
-set_property(TARGET mm_vcv_plugin PROPERTY CXX_STANDARD 23)
+set_property(TARGET mm_vcv_plugin PROPERTY CXX_STANDARD 20)
+
 target_link_libraries(mm_vcv_plugin PUBLIC arch_mp15x_a7)
 
-set(LFLAGS
-    -shared
-    ${MCU_FLAGS}
-    -Wl,-Map,plugin.map,--cref
-    -Wl,--gc-sections
-    -nostartfiles -nostdlib
-)
-
-
+# Usage: create_plugin(PluginTarget)
+# PluginTarget is the name of the cmake target
 macro(create_plugin)
 
-    set(PLUGIN ${arg1})
+	set(PLUGIN ${ARGV0})
 
     target_link_libraries(${PLUGIN} PRIVATE mm_vcv_plugin)
 
-    target_link_options(${PLUGIN} PRIVATE 
+	set(LFLAGS
         -shared
         ${MCU_FLAGS}
         -Wl,-Map,plugin.map,--cref
@@ -109,17 +91,18 @@ macro(create_plugin)
     )
 
     add_custom_command(
-            OUTPUT ${PLUGIN}-debug.so
-            DEPENDS ${PLUGIN}
-            COMMAND ${CMAKE_CXX_COMPILER} ${LFLAGS} -o ${PLUGIN}-debug.so $<TARGET_OBJECTS:${PLUGIN}> $<TARGET_OBJECTS:mm_vcv_plugin>
-            COMMAND_EXPAND_LISTS
-            VERBATIM USES_TERMINAL
+		OUTPUT ${PLUGIN}-debug.so
+		DEPENDS ${PLUGIN}
+		COMMAND ${CMAKE_CXX_COMPILER} ${LFLAGS} -o ${PLUGIN}-debug.so $<TARGET_OBJECTS:${PLUGIN}> $<TARGET_OBJECTS:mm_vcv_plugin>
+		COMMAND_EXPAND_LISTS
+		VERBATIM USES_TERMINAL
     )
 
     add_custom_command(
         OUTPUT ${PLUGIN}.so
         DEPENDS ${PLUGIN}-debug.so
         COMMAND ${CMAKE_STRIP} -g -v -o ${PLUGIN}.so ${PLUGIN}-debug.so
+		COMMAND ls -l ${PLUGIN}.so
         VERBATIM USES_TERMINAL
     )
 

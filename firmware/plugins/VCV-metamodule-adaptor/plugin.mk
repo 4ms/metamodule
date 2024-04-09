@@ -107,6 +107,7 @@ $(SO): $(OBJECTS)
 
 $(SOSTRIP): $(SO)
 	$(STRIP) -g -v -o $@ $<
+	@ls -l $@
 
 %.diss : %.so
 	arm-none-eabi-objdump -CDz --source $^ > $@

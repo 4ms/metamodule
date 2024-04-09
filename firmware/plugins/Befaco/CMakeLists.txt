@@ -1,16 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
 include(../VCV-metamodule-adaptor/plugin.cmake)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 project(
     Befaco
     VERSION 0.1
     DESCRIPTION "Befaco Plugin for MetaModule"
     LANGUAGES C CXX 
 )
-
 
 add_library(Befaco STATIC)
 
@@ -47,34 +43,6 @@ target_include_directories(Befaco PRIVATE
 
 set_property(TARGET Befaco PROPERTY CXX_STANDARD 20)
 
-target_compile_options(Befaco PRIVATE
-    -Wno-deprecated-enum-float-conversion
-)
+target_compile_options(Befaco PRIVATE -Wno-deprecated-enum-float-conversion)
 
-
-# create_plugin(Befaco)
-
-target_link_options(Befaco PRIVATE -shared ${LFLAGS})
-
-set(PLUGIN ${CMAKE_PROJECT_NAME})
-
-add_custom_command(
-    OUTPUT ${PLUGIN}-debug.so
-    DEPENDS ${PLUGIN}
-    COMMAND ${CMAKE_CXX_COMPILER} ${LFLAGS} -o ${PLUGIN}-debug.so $<TARGET_OBJECTS:${PLUGIN}> $<TARGET_OBJECTS:mm_vcv_plugin>
-    COMMAND_EXPAND_LISTS
-    VERBATIM USES_TERMINAL
-)
-
-add_custom_command(
-    OUTPUT ${PLUGIN}.so
-    DEPENDS ${PLUGIN}-debug.so
-    COMMAND ${CMAKE_STRIP} -g -v -o ${PLUGIN}.so ${PLUGIN}-debug.so
-    VERBATIM USES_TERMINAL
-)
-
-add_custom_target(
-    plugin
-    ALL
-    DEPENDS ${PLUGIN}.so
-)
+create_plugin("Befaco")
