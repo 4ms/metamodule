@@ -108,6 +108,11 @@ public:
         return phase;
     }
 
+    void resetPhase()
+    {
+        phase = 0.f;
+    }
+
     float getValue()
     {
         // work off of a new phase that includes the reset lock point

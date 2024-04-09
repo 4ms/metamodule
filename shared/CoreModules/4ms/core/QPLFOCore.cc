@@ -93,6 +93,7 @@ private:
 					if (lastExtClockTime)
 					{
 						lfo.setPeriodLength((ticks - *lastExtClockTime) * timeStepInS);
+						lfo.resetPhase();
 					}
 					lastExtClockTime = ticks;
 				}
@@ -114,6 +115,7 @@ private:
 					if (lastTapTime)
 					{
 						lfo.setPeriodLength((ticks - *lastTapTime) * timeStepInS);
+						lfo.resetPhase();
 					}
 					lastTapTime = ticks;
 				}
