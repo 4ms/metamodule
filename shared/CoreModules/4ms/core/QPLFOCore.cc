@@ -105,7 +105,7 @@ private:
 			{
 				if (tapLongPress(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
 				{
-					printf("Long press\n");
+					tapPing.deactivateOuput();
 				}
 
 				tapPing.inputButton(ticks, getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED);

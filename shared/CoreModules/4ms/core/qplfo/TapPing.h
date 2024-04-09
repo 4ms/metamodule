@@ -6,7 +6,7 @@ class TapPing
 {
 public:
     TapPing() :
-        lastTap(0), tapPeriod(0), lastTapOut(0), lastTapButtonState(false)
+        lastTap(0), tapPeriod(0), lastTapOut(0), lastTapButtonState(false), outputActive(true)
     {
 
     }
@@ -16,6 +16,7 @@ public:
 			tapPeriod = now - lastTap;
 			lastTap = now;
 			lastTapOut = now;
+			outputActive = true;
 		}
 
 		lastTapButtonState = tapButtonState;
@@ -24,7 +25,7 @@ public:
     bool updateTapOut(auto now) {
 		bool pingOut = false;
 
-		if(tapPeriod != 0) {
+		if(tapPeriod != 0 && outputActive) {
 			if(now == lastTapOut + tapPeriod) {
 				pingOut = true;
 				lastTapOut = now;
@@ -42,9 +43,14 @@ public:
         return std::nullopt;
     }
 
+	void deactivateOuput() {
+		outputActive = false;
+	}
+
 private:
     uint32_t lastTap;
 	uint32_t tapPeriod;
 	uint32_t lastTapOut;
     bool lastTapButtonState;
+	bool outputActive;
 };
