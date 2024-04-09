@@ -120,7 +120,22 @@ private:
 					lfo.start();
 				} 
 
-				setLED<Mapping::PingButton>(lfo.getPhase() < 0.5f);
+				if (getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED) 
+				{
+					setLED<Mapping::PingButton>(true);
+				} 
+				else 
+				{
+					if (lfo.hasPeriodLength())
+					{
+						setLED<Mapping::PingButton>(lfo.getPhase() < 0.5f);
+					}
+					else
+					{
+						setLED<Mapping::PingButton>(false);
+					}
+				}
+				
 			}
 
 			if (resetEdge(getInput<Mapping::ResetIn>() > TriggerThresholdInV))

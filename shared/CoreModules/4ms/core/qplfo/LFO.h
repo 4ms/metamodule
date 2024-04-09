@@ -105,6 +105,11 @@ public:
         }
     }
 
+    bool hasPeriodLength()
+    {
+        return periodLengthInS.has_value();
+    }
+
     float getPhase()
     {
         return phase;
