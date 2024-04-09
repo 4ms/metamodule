@@ -10,7 +10,7 @@
 #include <asset.hpp>
 #include <widget/FramebufferWidget.hpp>
 #include <widget/SvgWidget.hpp>
-#include <window/svg.hpp>
+#include <window/Svg.hpp>
 
 namespace rack
 {
