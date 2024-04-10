@@ -5,4 +5,5 @@ set(brands
 	hetrickcv
 	AudibleInstruments
 	nonlinearcircuits
+    eightfold
 )

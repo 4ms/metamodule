@@ -33,6 +33,9 @@ struct ModuleDirectory {
 		if (module->model->plugin->slug == "NonlinearCircuits")
 			return true;
 
+		if (module->model->plugin->slug == "eightfold")
+			return true;
+
 		return false;
 	}
 
