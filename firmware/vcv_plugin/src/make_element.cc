@@ -30,8 +30,13 @@ Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
 		if (widget->box.size == rack::math::Vec{})
 			widget->box.size = widget->fb->_bg->box.size;
 		return Knob{b, widget->fb->_bg->svg_filename};
-	} else
+
+	} else if (widget->sw->svg_filename.size()) {
+		return Knob{b, widget->sw->svg_filename};
+
+	} else {
 		return Knob{b, widget->svg_filename};
+	}
 }
 
 Element make_element_slideswitch(rack::app::SvgSlider const *widget, BaseElement b) {
