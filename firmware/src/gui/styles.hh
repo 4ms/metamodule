@@ -133,8 +133,8 @@ struct Gui {
 		lv_style_init(&panel_highlight_style);
 		lv_style_set_radius(&panel_highlight_style, 120);
 		lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
-		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_20);
-		lv_style_set_border_opa(&panel_highlight_style, LV_OPA_50);
+		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_40);
+		lv_style_set_border_opa(&panel_highlight_style, LV_OPA_70);
 		lv_style_set_border_width(&panel_highlight_style, 1);
 		lv_style_set_border_color(&panel_highlight_style, orange_highlight);
 

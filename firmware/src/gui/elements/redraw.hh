@@ -4,6 +4,7 @@
 #include "gui/elements/context.hh"
 #include "gui/images/paths.hh"
 #include "lvgl.h"
+#include "patch_data.hh"
 #include "pr_dbg.hh"
 #include <cmath>
 
@@ -153,5 +154,18 @@ inline bool redraw_element(const SlideSwitch &element, const GuiElement &gui_el,
 inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }
+
+struct RedrawElement {
+	PatchData const *patch;
+	GuiElement &gui_el;
+
+	bool operator()(auto &el) {
+		auto s_param = patch->find_static_knob(gui_el.module_idx, gui_el.idx.param_idx);
+		if (!s_param)
+			return false;
+		else
+			return redraw_element(el, gui_el, s_param->value);
+	}
+};
 
 } // namespace MetaModule

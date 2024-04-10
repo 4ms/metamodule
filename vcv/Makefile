@@ -1,7 +1,7 @@
 # If RACK_DIR is not defined when calling the Makefile, default to two directories above
 RACK_DIR ?= ../..
 
-SHARED = src/shared
+SHARED = ../shared
 
 ## Cpputil
 INCLUDES += -I$(SHARED)/cpputil
@@ -17,6 +17,7 @@ SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 ## Patch serialization
 INCLUDES += -I$(SHARED)/patch_convert/ryml
 SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
+SOURCES += $(SHARED)/patch_convert/ryml/ryml_init.cc
 SOURCES += $(SHARED)/patch_convert/patch_to_yaml.cc
 
 # Modules

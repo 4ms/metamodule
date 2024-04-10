@@ -1,4 +1,5 @@
 #include "patch_to_yaml.hh"
+#include "ryml/ryml_init.hh"
 #include "ryml/ryml_serial.hh"
 #include <span>
 
@@ -19,6 +20,7 @@ static ryml::Tree create_tree(PatchData const &pd, ryml::Tree &tree) {
 	data["mapped_knobs"] << pd.knob_sets;
 	data["midi_maps"] << pd.midi_maps;
 	data["midi_poly_num"] << pd.midi_poly_num;
+	data["vcvModuleStates"] << pd.module_states;
 
 	return tree;
 }

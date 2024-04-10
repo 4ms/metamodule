@@ -60,7 +60,7 @@ struct ModuleListPage : PageBase {
 	}
 
 	void update() final {
-		if (metaparams.meta_buttons[0].is_just_released()) {
+		if (metaparams.back_button.is_just_released()) {
 			if (roller_shown) {
 				gui_state.force_redraw_patch = true;
 				load_prev_page();

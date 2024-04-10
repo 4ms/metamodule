@@ -27,9 +27,6 @@ public:
 		return comm_.get_new_message();
 	}
 
-	//
-	// viewpatch: Patch we are currently viewing in the GUI:
-	//
 	[[nodiscard]] bool request_load_patch(PatchLocation patch_loc) {
 		IntercoreStorageMessage message{
 			.message_type = RequestPatchData,
@@ -45,10 +42,16 @@ public:
 	}
 
 	bool load_if_open(PatchLocation patch_loc) {
-		if (auto patch = open_patches_.get(PatchLocHash{patch_loc})) {
+		if (PatchLocHash{patch_loc} == PatchLocHash{playing_patch_loc_}) {
+			view_patch_ = &playing_patch_;
+			view_patch_loc_ = patch_loc;
+			return true;
+
+		} else if (auto patch = open_patches_.get(PatchLocHash{patch_loc})) {
 			view_patch_ = patch;
 			view_patch_loc_ = patch_loc;
 			return true;
+
 		} else {
 			return false;
 		}
@@ -64,6 +67,7 @@ public:
 				open_patches_.remove_last();
 				return false;
 			}
+			new_patch->trim_empty_knobsets(); //Handle patches saved by early firmware with empty knob sets
 			view_patch_ = new_patch;
 			view_patch_loc_ = requested_view_patch_loc_;
 			return true;
@@ -74,8 +78,34 @@ public:
 		}
 	}
 
+	//
+	// playing_patch: (copy of) patch currently playing in the audio thread
+	//
+	PatchData *playing_patch() {
+		return &playing_patch_;
+	}
+
+	//
+	// viewpatch: (pointer to) patch we are currently viewing in the GUI
+	//
 	PatchData *get_view_patch() {
 		return view_patch_;
+	}
+
+	//
+	// Tells FileStorageProxy that the view_patch is now being played
+	//
+	void play_view_patch() {
+		playing_patch_ = *view_patch_; //copy
+		playing_patch_loc_ = view_patch_loc_;
+
+		// Remove it from open_patches_
+		view_patch_->blank_patch("");
+		if (!open_patches_.remove(PatchLocHash{view_patch_loc_}))
+			pr_warn("Warning: patch not found in open patches\n");
+
+		//re-point view_patch to playing_patch
+		view_patch_ = &playing_patch_;
 	}
 
 	StaticString<255> get_view_patch_filename() {
@@ -159,6 +189,10 @@ public:
 		view_patch_loc_.vol = Volume::RamDisk;
 	}
 
+	void update_patch_module_states(std::vector<ModuleInitState> const &states) {
+		view_patch_->module_states = states; //copy
+	}
+
 	bool write_patch(std::string_view filename = "") {
 		if (filename == "")
 			filename = view_patch_loc_.filename;
@@ -206,10 +240,12 @@ private:
 
 	PatchData unsaved_patch_;
 	PatchData *view_patch_ = &unsaved_patch_;
+	PatchData playing_patch_;
 
 	SeqMap<PatchLocHash, PatchData, 32> open_patches_;
 
 	PatchLocation requested_view_patch_loc_;
 	PatchLocation view_patch_loc_;
+	PatchLocation playing_patch_loc_;
 };
 } // namespace MetaModule

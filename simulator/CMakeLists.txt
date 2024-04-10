@@ -57,25 +57,18 @@ add_subdirectory(${FWDIR}/vcv_ports/ ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
 # #################### Application ############################################
 
 add_executable(
-	simulator 
-	src/main.cc 
-	src/ui.cc
+    simulator 
+    src/main.cc 
+    src/ui.cc
     stubs/random.cpp
-	${FWDIR}/src/gui/elements/element_name.cc
+    ${FWDIR}/src/gui/elements/element_name.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
-	${SHARED}/patch_convert/ryml/ryml_serial.cc
-	${SHARED}/patch_convert/yaml_to_patch.cc 
-	${SHARED}/patch_convert/patch_to_yaml.cc
-	${SHARED}/CoreModules/moduleFactory.cc
-	#Fatfs:
-	stubs/fattime.cc
-	${FWDIR}/lib/fatfs/source/ff.c
-	${FWDIR}/lib/fatfs/source/ffunicode.c
-	${FWDIR}/src/fs/fatfs/diskio.cc
-	${FWDIR}/src/fs/time_convert.cc
-	#Tar:
-	${FWDIR}/src/fs/asset_drive/untar.cc
-	)
+    ${SHARED}/patch_convert/ryml/ryml_serial.cc
+    ${SHARED}/patch_convert/ryml/ryml_init.cc
+    ${SHARED}/patch_convert/yaml_to_patch.cc 
+    ${SHARED}/patch_convert/patch_to_yaml.cc
+    ${SHARED}/CoreModules/hub/hub_medium.cc
+    )
 
 target_include_directories(
   simulator
@@ -92,7 +85,7 @@ target_include_directories(
 			.
           )
 
-target_compile_options(simulator PRIVATE -Wall -Og)
+target_compile_options(simulator PRIVATE -Wall -Og -Wno-double-promotion)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports VCV_mm_adaptor)
 

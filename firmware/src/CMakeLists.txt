@@ -106,6 +106,7 @@ add_executable(
   ${SHARED}/patch_convert/yaml_to_patch.cc
   ${SHARED}/patch_convert/patch_to_yaml.cc
   ${SHARED}/patch_convert/ryml/ryml_serial.cc
+  ${SHARED}/patch_convert/ryml/ryml_init.cc
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc
   #

@@ -1,13 +1,11 @@
 
 #include "ryml_std.hpp"
 //
+#include "CoreModules/module_type_slug.hh"
+#include "cpputil/util/countzip.hh"
 #include "patch/patch.hh"
 #include "ryml.hpp"
 #include "ryml_serial_chars.hh"
-#include <cstdio>
-
-#include "CoreModules/module_type_slug.hh"
-#include "cpputil/util/countzip.hh"
 
 void write(ryml::NodeRef *n, Jack const &jack) {
 	*n |= ryml::MAP;
@@ -73,6 +71,16 @@ void write(ryml::NodeRef *n, std::vector<ModuleTypeSlug> const &slugs) {
 		ryml::csubstr slug(x.c_str(), x.length());
 		n->append_child() << ryml::key(idx) << slug;
 	}
+}
+
+void write(ryml::NodeRef *n, ModuleInitState const &state) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("module_id") << state.module_id;
+
+	auto data_node = n->append_child();
+	data_node |= ryml::_WIP_VAL_LITERAL;
+
+	data_node << ryml::key("data") << state.state_data;
 }
 
 bool read(ryml::ConstNodeRef const &n, Jack *jack) {
@@ -243,39 +251,18 @@ bool read(ryml::ConstNodeRef const &n, StaticParam *k) {
 bool read(ryml::ConstNodeRef const &n, ModuleInitState *m) {
 	if (n.num_children() < 2)
 		return false;
-
 	if (!n.is_map())
 		return false;
-	if (!n.has_child("id"))
+	if (!n.has_child("module_id"))
 		return false;
-	if (!n.has_child("data"))
+	if (!n.has_child("data") || !n["data"].has_val())
 		return false;
 
-	n["id"] >> m->module_id;
+	n["module_id"] >> m->module_id;
 
-	// The "data" field is stored as raw json string
-	// because vcv-native modules need to be passed a jansson object
-	ryml::ConstNodeRef data_node = n["data"];
-	m->data_json = ryml::emitrs_json<std::string>(data_node);
-	m->data_json = "{" + m->data_json + "}";
+	// Copy the data field as a string
+	// Modules will decide how to deserialize
 
+	n["data"] >> m->state_data;
 	return true;
 }
-
-namespace RymlInit
-{
-void init_once() {
-	static bool already_init = false;
-	static c4::yml::Callbacks callbacks;
-	if (!already_init) {
-		already_init = true;
-		callbacks.m_error = [](const char *msg, size_t /*msg_len*/, c4::yml::Location loc, void * /*user_data*/) {
-			if (loc.name.empty())
-				printf("[ryml] %s\n", msg);
-			else
-				printf("[ryml] %s in %s %zu:%zu)\n", msg, loc.name.data(), loc.line, loc.col);
-		};
-		c4::yml::set_callbacks(callbacks);
-	}
-}
-} // namespace RymlInit

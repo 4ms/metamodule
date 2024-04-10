@@ -48,6 +48,12 @@ struct MappedKnob {
 		return (max - min) * panel_val + min;
 	}
 
+	float unmap_val(float mapped_val) const {
+		if (min == max)
+			return 0;
+		return (mapped_val - min) / (max - min);
+	}
+
 	bool is_panel_knob() const {
 		return panel_knob_id < PanelDef::NumKnobs;
 	}
@@ -134,9 +140,5 @@ static_assert(sizeof(MappedOutputJack) == 24, "MappedOutputJack should be 24B");
 
 struct ModuleInitState {
 	uint32_t module_id;
-	// StaticString<31> plugin_slug;
-	// StaticString<31> module_slug;
-	// StaticString<15> version;
-	std::string data_json;
-	// json_t *data_json;
+	std::string state_data;
 };

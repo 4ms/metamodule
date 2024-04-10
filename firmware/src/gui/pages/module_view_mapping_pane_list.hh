@@ -25,11 +25,9 @@ struct MappingPaneList {
 		auto setname = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_KNOBSETNAMETEXT);
 		auto circle = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE);
 		auto label = ui_comp_get_child(obj, UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER);
+		lv_label_set_text(setname, knobset_name.data());
 		lv_show(circle);
-		if (is_active)
-			lv_label_set_text_fmt(setname, "%s*", knobset_name.data());
-		else
-			lv_label_set_text(setname, knobset_name.data());
+		lv_obj_set_style_bg_opa(obj, is_active ? LV_OPA_100 : LV_OPA_0, LV_STATE_DEFAULT);
 
 		auto name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text(label, name.c_str());
@@ -49,10 +47,8 @@ struct MappingPaneList {
 	static lv_obj_t *create_unmapped_list_item(std::string_view knobset_name, lv_obj_t *parent, bool is_active) {
 		auto obj = ui_UnmappedSetItem_create(parent);
 		auto setname = ui_comp_get_child(obj, UI_COMP_UNMAPPEDSETITEM_KNOBSETNAMETEXT);
-		if (is_active)
-			lv_label_set_text_fmt(setname, "%s*", knobset_name.data());
-		else
-			lv_label_set_text(setname, knobset_name.data());
+		lv_label_set_text(setname, knobset_name.data());
+		lv_obj_set_style_bg_opa(obj, is_active ? LV_OPA_100 : LV_OPA_0, LV_STATE_DEFAULT);
 		return obj;
 	}
 

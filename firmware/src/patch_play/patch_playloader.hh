@@ -96,13 +96,28 @@ struct PatchPlayLoader {
 	}
 
 	// Concurrency: Called from UI thread
-	Result handle_sync_patch_loading() {
+	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {
 			auto result = _load_patch();
 			loading_new_patch_ = false;
 			return result;
 		}
+
+		if (saving_patch_) {
+			save_patch();
+		}
+
 		return {true, ""};
+	}
+
+	void request_save_patch() {
+		saving_patch_ = true;
+	}
+
+	void save_patch() {
+		saving_patch_ = false;
+		storage_.update_patch_module_states(player_.get_module_states());
+		storage_.write_patch();
 	}
 
 private:
@@ -112,6 +127,7 @@ private:
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
 	std::atomic<bool> stopping_audio_ = false;
+	std::atomic<bool> saving_patch_ = false;
 
 	PatchLocHash loaded_patch_loc_hash;
 	ModuleTypeSlug loaded_patch_name_ = "";
@@ -124,6 +140,7 @@ private:
 
 		auto result = player_.load_patch(*patch);
 		if (result.success) {
+			storage_.play_view_patch();
 			loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
 			loaded_patch_name_ = patch->patch_name;
 		}

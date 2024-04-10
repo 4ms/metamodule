@@ -10,19 +10,39 @@ Module::Module() = default;
 Module::~Module() {
 }
 
-void Module::initialize_state(std::string_view state_string) {
+void Module::load_state(std::string_view state_data) {
+	if (state_data.size() == 0)
+		return;
+
 	json_error_t err;
-	json_t *root = json_loadb(state_string.data(), state_string.size(), 0, &err);
+
+	json_t *root = json_loadb((char *)state_data.data(), state_data.size(), 0, &err);
 	if (!root) {
 		pr_err("JSON decode error: %d:%d %s\n", err.line, err.column, err.text);
 		return;
 	}
 
-	json_t *data = json_object_get(root, "data");
-	if (data)
-		this->dataFromJson(data);
+	this->dataFromJson(root);
 
 	json_decref(root);
+}
+
+std::string Module::save_state() {
+	json_t *dataJ = this->dataToJson();
+
+	if (!dataJ)
+		return {};
+
+	std::string state_data;
+	auto sz = json_dumpb(dataJ, nullptr, 0, JSON_COMPACT);
+	if (sz > 0) {
+		state_data.resize(sz);
+		json_dumpb(dataJ, (char *)state_data.data(), sz, JSON_COMPACT);
+	}
+
+	json_decref(dataJ);
+
+	return state_data;
 }
 
 void Module::config(int num_params, int num_inputs, int num_outputs, int num_lights) {

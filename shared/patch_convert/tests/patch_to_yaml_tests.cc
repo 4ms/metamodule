@@ -82,6 +82,13 @@ TEST_CASE("Correct yaml output produced") {
 
 	pd.midi_poly_num = 4;
 
+	pd.module_states.push_back({2, "some string\nCan span lines\n\nNo problem"});
+
+	std::string str;
+	for (unsigned i = 0; i < 1000; i++)
+		str.push_back(char((i++ % 0x5F) + 0x20));
+	pd.module_states.push_back({3, str});
+
 	auto yaml = patch_to_yaml_string(pd);
 	CHECK(yaml ==
 		  // clang-format off
@@ -189,6 +196,16 @@ R"(PatchData:
     name: ''
     set: []
   midi_poly_num: 4
+  vcvModuleStates:
+    - module_id: 2
+      data: |-
+        some string
+        Can span lines
+        
+        No problem
+    - module_id: 3
+      data: |-
+         "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdfhjlnprtvxz|~!#%')+-/13579;=?ACEGIKMOQSUWY[]_acegikmoqsuwy{} "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdfhjlnprtvxz|~!#%')+-/13579;=?ACEGIKMOQSUWY[]_acegikmoqsuwy{} "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdfhjlnprtvxz|~!#%')+-/13579;=?ACEGIKMOQSUWY[]_acegikmoqsuwy{} "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdfhjlnprtvxz|~!#%')+-/13579;=?ACEGIKMOQSUWY[]_acegikmoqsuwy{} "$&(*,.02468:<>@BDFHJLNPRTVXZ\^`bdfhjlnprtvxz|~!#%')+-/13579;=?ACEGIKMOQSUWY[]_acegikmoqsuwy{} "$&(*,.02468:<>@BDFHJLNP
 )");
 	// clang-format on
 }

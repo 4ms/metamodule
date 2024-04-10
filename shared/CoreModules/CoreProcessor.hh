@@ -1,4 +1,6 @@
 #pragma once
+#include <cstdint>
+#include <string>
 #include <string_view>
 
 class CoreProcessor {
@@ -30,7 +32,10 @@ public:
 	virtual void mark_output_patched(const int output_id) {
 	}
 
-	virtual void initialize_state(std::string_view state_string) {
+	virtual void load_state(std::string_view state_data) {
+	}
+	virtual std::string save_state() {
+		return "";
 	}
 
 	virtual ~CoreProcessor() = default;

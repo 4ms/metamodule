@@ -52,6 +52,7 @@ bool Ui::update() {
 	if (tm - last_page_task_tm >= 16) {
 		transfer_aux_button_events();
 		transfer_params();
+		change_knobset();
 		update_channel_selections();
 		page_update_task();
 		last_page_task_tm = tm;
@@ -93,7 +94,7 @@ void Ui::lvgl_update_task() {
 
 void Ui::page_update_task() { //60Hz
 	page_manager.update_current_page();
-	auto load_status = patch_playloader.handle_sync_patch_loading();
+	auto load_status = patch_playloader.handle_file_events();
 	if (!load_status.success) {
 		notify_queue.put({load_status.error_string, Notification::Priority::Error, 5000});
 	}
@@ -125,6 +126,12 @@ void Ui::transfer_params() {
 
 			std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
 		}
+	}
+}
+
+void Ui::change_knobset() {
+	if (auto change = input_driver.knobset_changed(); change != 0) {
+		metaparams.rotary_with_metabutton.motion += change;
 	}
 }
 

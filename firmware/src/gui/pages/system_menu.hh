@@ -42,7 +42,7 @@ struct SystemMenuPage : PageBase {
 	}
 
 	void update() final {
-		bool pressed_back = metaparams.meta_buttons[0].is_just_released();
+		bool pressed_back = metaparams.back_button.is_just_released();
 
 		if (active_tab == Tabs::Update) {
 			fwupdate_tab.update();
