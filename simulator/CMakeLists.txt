@@ -41,7 +41,7 @@ target_link_libraries(ui PRIVATE lvgl)
 
 # #################### VCV Adaptor ##################################
 
-add_subdirectory(${FWDIR}/plugins/VCV-metamodule-adaptor ${CMAKE_CURRENT_BINARY_DIR}/VCV-mm-adaptor)
+add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin) 
 
 # #################### Other brands ##################################
  
