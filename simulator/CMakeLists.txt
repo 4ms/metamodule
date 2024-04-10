@@ -41,7 +41,8 @@ target_link_libraries(ui PRIVATE lvgl)
 
 # #################### VCV Adaptor ##################################
 
-add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin) 
+add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
+target_compile_options(vcv_plugin PRIVATE -Wno-double-promotion)
 
 # #################### Other brands ##################################
  
@@ -53,6 +54,7 @@ if(DEFINED LIMITED_MODULES_FILE)
 endif()  
  
 add_subdirectory(${FWDIR}/vcv_ports/ ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
+target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 
 # #################### Application ############################################
 

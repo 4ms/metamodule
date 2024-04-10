@@ -16,11 +16,12 @@ target_compile_options(
     nonlinearcircuitsLibrary
   PRIVATE -fvisibility=hidden
           $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>
-          # Fixes for warnings with Gamma:
-          -Wno-misleading-indentation
-          -Wno-unused-but-set-variable
-          -Wno-unused-function
-          # Fixes for warnings with DSP and main source:
-          -Wno-unused-variable
+          -Wno-double-promotion
+          # # Fixes for warnings with Gamma:
+          # -Wno-misleading-indentation
+          # -Wno-unused-but-set-variable
+          # -Wno-unused-function
+          # # Fixes for warnings with DSP and main source:
+          # -Wno-unused-variable
 )
 
