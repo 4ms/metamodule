@@ -29,6 +29,7 @@ foreach(brand ${brands})
   target_sources(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
   target_link_libraries(${brand}Library PUBLIC vcv_ports_interface)
   target_link_libraries(${brand}Library PRIVATE cpputil)
+  target_include_directories(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/..) #For Befaco
 
   if (CMAKE_CROSSCOMPILING)
     # Enable LTO for all brands
