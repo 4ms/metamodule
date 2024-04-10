@@ -48,6 +48,7 @@ target_include_directories(
   PUBLIC src
          ${MM_ROOT}/firmware/src #for svg.cc: gui/elements/..., and for console/pr_dbg.hh
          ${MM_ROOT}/shared
+         ${MM_ROOT}/shared/CoreModules/metamodule-core-interface
 )
 
 set_property(TARGET vcv_plugin PROPERTY CXX_STANDARD 20)
@@ -56,5 +57,11 @@ target_compile_options(vcv_plugin PRIVATE -fno-function-sections -fno-data-secti
 
 # Create interface library for use by vcv_ports (built-in vcv modules)
 add_library(vcv_ports_interface INTERFACE)
-target_include_directories(vcv_ports_interface INTERFACE ${MM_ROOT}/shared)
+
+target_include_directories(
+    vcv_ports_interface 
+    INTERFACE ${MM_ROOT}/shared
+              ${MM_ROOT}/shared/CoreModules/metamodule-core-interface
+)
+
 target_link_libraries(vcv_ports_interface INTERFACE metamodule-rack-interface)

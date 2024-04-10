@@ -106,7 +106,7 @@ target_include_directories(
           ${FWDIR}/system
           ${SHARED}
           ${SHARED}/processors
-          ${SHARED}/CoreModules
+          ${SHARED}/CoreModules/metamodule-core-interface
           ${SHARED}/patch
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs

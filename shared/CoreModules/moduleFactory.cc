@@ -1,4 +1,4 @@
-#include "moduleFactory.hh"
+#include "CoreModules/moduleFactory.hh"
 #include "util/seq_map.hh"
 
 #ifdef TESTPROJECT

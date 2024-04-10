@@ -179,6 +179,7 @@ target_include_directories(
           ${SHARED}
           ${SHARED}/patch
           ${SHARED}/patch_convert
+          ${SHARED}/CoreModules/metamodule-core-interface
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
