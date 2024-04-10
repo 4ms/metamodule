@@ -32,7 +32,7 @@ SECTIONS
 		*(.irqhandler)
         *(.text)
         *(.text*)
-		KEEP(*VCV_mm_adaptor*:(.text*))
+		KEEP(*vcv_plugin*:(.text*))
 		KEEP(*jansson*:(.text*))
 		KEEP(*pffft*:(.text*))
 		KEEP(*(.text._ZdlPv))
