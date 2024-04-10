@@ -174,6 +174,10 @@ struct PluginManager {
 		pluginInstance->addModel(modelSquidAxon);
 		pluginInstance->addModel(modelStatues);
 		pluginInstance->addModel(modelTripleSloth);
+
+		auto &eightfold_plugin = internal_plugins.emplace_back("eightfold");
+		pluginInstance = &eightfold_plugin;
+		pluginInstance->addModel(modelSDOrcasHeartV2);
 	}
 
 	void prepare_ramdisk() {

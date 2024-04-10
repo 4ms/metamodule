@@ -128,3 +128,5 @@ extern rack::plugin::Model *modelSlothTorpor;
 extern rack::plugin::Model *modelSquidAxon;
 extern rack::plugin::Model *modelStatues;
 extern rack::plugin::Model *modelTripleSloth;
+
+extern rack::plugin::Model *modelSDOrcasHeartV2;
