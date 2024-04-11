@@ -137,7 +137,15 @@ private:
 
 			if (resetEdge(getInput<Mapping::ResetIn>() > TriggerThresholdInV))
 			{
-				lfo.reset();
+				//TODO: this is not correct
+				if(lfo.isRunning() == true)
+				{
+					lfo.reset();
+				}
+				else
+				{
+					lfo.start();
+				}
 			}
 
 			auto onButtonState = getState<Mapping::OnButton>();

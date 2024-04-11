@@ -115,6 +115,11 @@ public:
         return phase;
     }
 
+    bool isRunning()
+    {
+        return running;
+    }
+
     void start()
     {
         phase = 0.f;
