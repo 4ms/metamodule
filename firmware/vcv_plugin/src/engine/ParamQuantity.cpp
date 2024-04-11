@@ -119,7 +119,7 @@ void ParamQuantity::setDisplayValueString(std::string s) {
 
 std::string ParamQuantity::getLabel() {
 	if (name == "")
-		return "#" + std::to_string(paramId + 1);
+		return std::string("#") + std::to_string(paramId + 1);
 	return name;
 }
 
