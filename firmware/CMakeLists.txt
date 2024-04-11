@@ -53,7 +53,7 @@ add_custom_command(
           # --checkplugin ./plugins/hetrickcv/build/HetrickCV.so
           --elf $<TARGET_FILE:main.elf>
           --yaml ${SYMBOLS_FILE}
-          -v
+          # -v
   COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
   DEPENDS main.elf 
   COMMENT "Exporting symbols"

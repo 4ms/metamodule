@@ -169,17 +169,17 @@ def GetLibcSymbols():
          # "_ZNSaIcEC1ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&)
          # "_ZNSaIcEC2ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&) 
 
-         "json_integer_value",
-         "json_object",
-         "json_object_set_new",
-         "json_object_get",
-         "json_true",
-         "json_false",
-         "json_integer",
-         "json_array_insert_new",
-         "json_array_get",
-         "json_number_value",
-         "json_dumps",
+         # "json_integer_value",
+         # "json_object",
+         # "json_object_set_new",
+         # "json_object_get",
+         # "json_true",
+         # "json_false",
+         # "json_integer",
+         # "json_array_insert_new",
+         # "json_array_get",
+         # "json_number_value",
+         # "json_dumps",
     ]
     return libc_syms
 
@@ -273,14 +273,14 @@ if __name__ == "__main__":
     for obj_dir in args.objdir:
         obj_files = Path(obj_dir).glob("**/*.obj")
         for obj_file in obj_files:
-            logging.info("------")
+            logging.debug("------")
             logging.info(f"Looking for symbols in {obj_file}")
             with open(obj_file, "rb") as f:
                 needed_syms += GetRequiredSymbolNames(f)
 
     if args.plugin:
         for plugin in args.plugin:
-            logging.info("------")
+            logging.debug("------")
             logging.info(f"Reading plugin {plugin} symbols, to later find them in main.elf")
             with open(plugin, "rb") as f:
                 needed_syms += GetPluginRequiredSymbolNames(f)
@@ -308,7 +308,7 @@ if __name__ == "__main__":
     check_symbols = []
     if args.checkplugin:
         for plugin in args.checkplugin:
-            logging.info("------")
+            logging.debug("------")
             logging.info(f"Checking if symbols in {plugin} would be resolved")
             with open(plugin, "rb") as f:
                 check_symbols += GetPluginRequiredSymbolNames(f)

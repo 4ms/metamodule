@@ -25,13 +25,6 @@ endif
 limit:
 	cmake --fresh --preset ${PRESET} -G ${GEN} -DLIMITED_MODULES_FILE=$(LIMITFILE)
 
-plugin:
-	make -C vcv_ports -j16
-	ls -l vcv_ports/build/Befaco-strip.so
-	cp vcv_ports/build/Befaco-strip.so /Volumes/METAMOD/metamodule-plugins/Befaco/Befaco.so
-	diskutil unmountDisk /Volumes/METAMOD
-
-
 bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images flash-bootloader-sd flash-app-sd flash-dfu jprog debug start-jlinkgdb start-openocd flash_loader flash_loader_dfu:
 	cmake --build --preset ${PRESET} -- $(MAKECMDGOALS)
 
