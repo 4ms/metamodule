@@ -43,3 +43,6 @@
 [submodule "firmware/vcv_ports/eightfold"]
 	path = firmware/vcv_ports/eightfold
 	url = https://github.com/scanner-darkly/eightfold.git
+[submodule "shared/CoreModules/metamodule-core-interface"]
+	path = shared/CoreModules/metamodule-core-interface
+	url = https://github.com/4ms/metamodule-core-interface.git
