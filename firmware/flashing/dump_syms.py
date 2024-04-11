@@ -168,18 +168,6 @@ def GetLibcSymbols():
          # "_ZNSaIcED2Ev", # std::allocator<char>::~allocator() ? somehow different?
          # "_ZNSaIcEC1ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&)
          # "_ZNSaIcEC2ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&) 
-
-         # "json_integer_value",
-         # "json_object",
-         # "json_object_set_new",
-         # "json_object_get",
-         # "json_true",
-         # "json_false",
-         # "json_integer",
-         # "json_array_insert_new",
-         # "json_array_get",
-         # "json_number_value",
-         # "json_dumps",
     ]
     return libc_syms
 
