@@ -70,6 +70,7 @@ def GetLibcSymbols():
          "asinf",
          "asinh",
          "asinhf",
+         "atanf",
          "atan2",
          "atan2f",
          "ceil",
@@ -143,6 +144,16 @@ def GetLibcSymbols():
          "realloc",
          "free",
 
+         "__aeabi_f2ulz", #not found in main
+         "__aeabi_f2lz", #not found in main
+         "__aeabi_l2f",
+         "__aeabi_ul2f",
+         "__aeabi_ldivmod",
+         "__aeabi_uldivmod",
+         "__divsc3", #not found in main
+         "__mulsc3", #not found in main
+         "csqrtf", #not found in main
+
          "__assert_func",
          "__aeabi_atexit",
          "__cxa_pure_virtual",
@@ -158,6 +169,7 @@ def GetLibcSymbols():
          "_ZSt17__throw_bad_allocv", #
          "_ZSt28__throw_bad_array_new_lengthv", #
          "_ZSt24__throw_out_of_range_fmtPKcz",
+         "_ZSt25__throw_bad_function_callv",
 
          "_ZNSt19_Sp_make_shared_tag5_S_eqERKSt9type_info",
          "_ZNSt8__detail15_List_node_base7_M_hookEPS0_",

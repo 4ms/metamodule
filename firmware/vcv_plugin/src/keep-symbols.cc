@@ -13,12 +13,27 @@
 #include <cmath>
 #include <cstring>
 #include <memory>
+#include <random>
 
 extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 }
 
 extern "C" __attribute__((optimize("-O0"))) float roundevenf(float x) {
 	return roundf(x);
+}
+
+namespace std
+{
+random_device::result_type random_device::_M_getval() {
+	return rack::random::get<random_device::result_type>();
+}
+
+void random_device::_M_init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const &) {
+}
+} // namespace std
+
+extern "C" _Complex float csqrtf(_Complex float x) {
+	return __builtin_csqrtf(x);
 }
 
 void __attribute__((optimize("-O0"))) keep_symbols() {
@@ -43,6 +58,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	(void)asinh(1.f);
 	(void)asinhf(1.f);
 	(void)asinf(1.f);
+	(void)atanf(2.f);
 	(void)atan2(1.f, 2.f);
 	(void)atan2f(1.f, 2.f);
 	(void)ceil(1.f);
@@ -101,6 +117,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	(void)keep(calloc);
 	(void)keep(free);
 	(void)keep(puts);
+	(void)keep(std::__throw_bad_function_call);
 
 	// provides std::_Sp_make_shared_tag::_S_eq(std::type_info const&)
 	// aka: _ZNSt19_Sp_make_shared_tag5_S_eqERKSt9type_info
@@ -116,9 +133,19 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	// provides: _ZdlPv: operator delete(void*)
 	delete a;
 
-	// volatile auto alloc = std::allocator<char>{}; //seems to do nothing
-	// (void)alloc;
-
 	std::string x = "A very long String, longer than SSO could optimize without dynamic memory allocation";
-	//stdlib
+
+	float xx = 1.1f;
+	auto yy = static_cast<unsigned long long>(xx);
+	(void)yy;
+	auto zz = static_cast<long long>(xx);
+	(void)zz;
+
+	// provides: __mulsc3 and __divsc3
+	volatile float _Complex xfa{1};
+	volatile float _Complex xfb{2};
+	xfa = xfa * xfb;
+	xfb = xfb / xfa;
+	(void)xfa;
+	(void)xfb;
 }
