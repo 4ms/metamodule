@@ -15,7 +15,6 @@ public:
 		if(tapButtonState == true && lastTapButtonState == false) {
 			tapPeriod = now - lastTap;
 			lastTap = now;
-			lastTapOut = now;
 			outputActive = true;
 		}
 
@@ -26,7 +25,7 @@ public:
 		bool pingOut = false;
 
 		if(tapPeriod != 0 && outputActive) {
-			if(now == lastTapOut + tapPeriod) {
+			if(now >= lastTapOut + tapPeriod) {
 				pingOut = true;
 				lastTapOut = now;
 			}		

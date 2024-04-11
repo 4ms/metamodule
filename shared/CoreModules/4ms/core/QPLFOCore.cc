@@ -84,9 +84,6 @@ private:
 
 			if (auto pingInput = getInput<Mapping::PingJackIn>(); pingInput)
 			{
-				// always disable tap tempo if jack is inserted
-				// lastTapTime.reset();
-
 				auto isPingHigh = *pingInput > TriggerThresholdInV;
 
 				if (extClockEdge(isPingHigh))
@@ -115,7 +112,7 @@ private:
 					lfo.setPeriodLength(*tapPeriod * timeStepInS);
 				}
 
-				if(tapPing.updateTapOut(ticks) == true)
+				if(tapEdge(tapPing.updateTapOut(ticks)))
 				{
 					lfo.start();
 				} 
@@ -157,7 +154,6 @@ private:
 
 				setOutput<Mapping::Out>(outValue * 10.0f);
 
-				// TODO: change to single color
 				// TODO: does this need to be changed for bipolar output
 				setLED<Mapping::LED>(outValue);
 			}
@@ -166,7 +162,6 @@ private:
 				setLED<Mapping::OnButton>(0.f);
 				setOutput<Mapping::Out>(0.0f);
 
-				// TODO: change to single color
 				// TODO: does this need to be changed for bipolar output
 				setLED<Mapping::LED>(0.f);
 			}
@@ -183,10 +178,10 @@ private:
 	private:
 		QPLFOCore* parent;
 		QPLFO::LFO lfo;
-		EdgeDetector tapEdge;
 		LongPressDetector tapLongPress;
 		EdgeDetector extClockEdge;
 		EdgeDetector resetEdge;
+		EdgeDetector tapEdge;
 		TapPing tapPing;
 
 		std::optional<uint32_t> lastTapTime;
