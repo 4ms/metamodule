@@ -56,12 +56,12 @@ target_compile_options(vcv_plugin PRIVATE -fno-function-sections -fno-data-secti
 
 
 # Create interface library for use by vcv_ports (built-in vcv modules)
-add_library(vcv_ports_interface INTERFACE)
+add_library(vcv_plugin_interface INTERFACE)
 
 target_include_directories(
-    vcv_ports_interface 
+    vcv_plugin_interface 
     INTERFACE ${MM_ROOT}/shared
               ${MM_ROOT}/shared/CoreModules/metamodule-core-interface
 )
 
-target_link_libraries(vcv_ports_interface INTERFACE metamodule-rack-interface)
+target_link_libraries(vcv_plugin_interface INTERFACE metamodule-rack-interface)

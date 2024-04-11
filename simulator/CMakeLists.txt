@@ -98,7 +98,8 @@ target_include_directories(
 target_compile_options(simulator PRIVATE -Wall -Og)
 target_compile_options(simulator PRIVATE -Wno-double-promotion)
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports vcv_plugin)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports)
+target_link_libraries(simulator PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 
