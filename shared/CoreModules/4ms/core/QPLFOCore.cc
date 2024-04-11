@@ -164,7 +164,14 @@ private:
 
 				auto outValue = lfo.getValue();
 
-				setOutput<Mapping::Out>(outValue * 10.0f);
+				if(getState<OutputRangeAltParam>() == 0)
+				{
+					setOutput<Mapping::Out>(outValue * 10.0f);
+				}
+				else
+				{
+					setOutput<Mapping::Out>(outValue * 10.0f - 5.f);
+				}
 
 				// TODO: does this need to be changed for bipolar output
 				setLED<Mapping::LED>(outValue);
