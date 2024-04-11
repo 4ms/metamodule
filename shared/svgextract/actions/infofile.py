@@ -309,7 +309,7 @@ def components_to_infofile(components):
 
     #TODO: embed knob long name vs short name in svg
     source = f"""#pragma once
-#include "CoreModules/elements/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
