@@ -140,6 +140,18 @@ private:
 				lfo.reset();
 			}
 
+			auto onButtonState = getState<Mapping::OnButton>();
+
+			if(getState<Mapping::FireOnUnmute>() == 1)
+			{
+				if(onButtonState == LatchingButton::State_t::DOWN && previousOnButtonState == LatchingButton::State_t::UP)
+				{
+					lfo.start();
+				}
+			}
+
+			previousOnButtonState = onButtonState;
+
 			auto skewCV = getInput<Mapping::SkewCVIn>().value_or(0) / CVInputRangeInV;
 			auto skew = std::clamp(getState<Mapping::SkewKnob>() + skewCV, 0.0f, 1.0f);
 			lfo.setSkew(skew);
@@ -187,9 +199,10 @@ private:
 		std::optional<uint32_t> lastTapTime;
 		std::optional<uint32_t> lastExtClockTime;
 
+		LatchingButton::State_t previousOnButtonState = LatchingButton::State_t::DOWN;
+
 		float timeStepInS = 1.f / 48000.f;
 		uint32_t ticks = 0;
-
 	};
 
 private:
@@ -203,6 +216,7 @@ private:
 		const static auto ResetIn    = Reset1In;
 		const static auto Out        = Out1Out;
 		const static auto LED        = Led1Light;
+		const static auto FireOnUnmute = FireOnUnmuteCh1AltParam;
 	};
 
 	struct MappingB
@@ -215,6 +229,7 @@ private:
 		const static auto ResetIn    = Reset2In;
 		const static auto Out        = Out2Out;
 		const static auto LED        = Led2Light;
+		const static auto FireOnUnmute = FireOnUnmuteCh2AltParam;
 	};
 
 	struct MappingC
@@ -227,6 +242,7 @@ private:
 		const static auto ResetIn    = Reset3In;
 		const static auto Out        = Out3Out;
 		const static auto LED        = Led3Light;
+		const static auto FireOnUnmute = FireOnUnmuteCh3AltParam;
 	};
 
 	struct MappingD
@@ -239,6 +255,7 @@ private:
 		const static auto ResetIn    = Reset4In;
 		const static auto Out        = Out4Out;
 		const static auto LED        = Led4Light;
+		const static auto FireOnUnmute = FireOnUnmuteCh4AltParam;
 	};	
 
 	Channel<MappingA> channelA;
