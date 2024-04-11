@@ -99,7 +99,7 @@ private:
 					lastExtClockTime = ticks;
 				}
 
-				setLED<Mapping::PingButton>(isPingHigh);
+				setLED<Mapping::PingButton>(isPingHigh);				
 			}
 			else
 			{
@@ -122,17 +122,17 @@ private:
 
 				if (getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED) 
 				{
-					setLED<Mapping::PingButton>(true);
+					setLED<Mapping::PingButton>(1.f);
 				} 
 				else 
 				{
 					if (lfo.hasPeriodLength())
 					{
-						setLED<Mapping::PingButton>(lfo.getPhase() < 0.5f);
+						setLED<Mapping::PingButton>(lfo.getPhase() < 0.5f);					
 					}
 					else
 					{
-						setLED<Mapping::PingButton>(false);
+						setLED<Mapping::PingButton>(0.f);
 					}
 				}
 				
@@ -151,7 +151,7 @@ private:
 
 			if (getState<Mapping::OnButton>() == LatchingButton::State_t::DOWN)
 			{
-				setLED<Mapping::OnButton>(true);
+				setLED<Mapping::OnButton>(1.f);
 
 				auto outValue = lfo.getValue();
 
@@ -159,16 +159,16 @@ private:
 
 				// TODO: change to single color
 				// TODO: does this need to be changed for bipolar output
-				setLED<Mapping::LED>(std::array<float,3>{outValue,outValue,outValue});
+				setLED<Mapping::LED>(outValue);
 			}
 			else
 			{
-				setLED<Mapping::OnButton>(false);
+				setLED<Mapping::OnButton>(0.f);
 				setOutput<Mapping::Out>(0.0f);
 
 				// TODO: change to single color
 				// TODO: does this need to be changed for bipolar output
-				setLED<Mapping::LED>(std::array<float,3>{0,0,0});
+				setLED<Mapping::LED>(0.f);
 			}
 
 		}
