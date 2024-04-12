@@ -4,11 +4,27 @@
 namespace rack::app
 {
 
+SvgPort::SvgPort() {
+	addChild(fb);
+	fb->addChild(shadow);
+	// Avoid breakage if plugins fail to call setSvg()
+	// In that case, just disable the shadow.
+	shadow->box.size = math::Vec();
+	fb->addChild(sw);
+}
+
 void SvgPort::setSvg(std::shared_ptr<window::Svg> svg) {
 	if (svg->filename.size()) {
 		svg_filename = svg->filename;
+		// sw->setSvg(svg);
 		box.size = get_svg_size(svg_filename);
-		// printf("SvgPort:svg_filename %s\n", svg_filename.c_str());
+		fb->box.size = box.size;
+		sw->box.size = box.size;
+
+		// Move shadow downward by 10%
+		shadow->box.size = box.size;
+		shadow->box.pos = math::Vec(0, box.size.y * 0.10);
+
 	} else
 		printf("SvgPort: svg with empty name\n");
 }
