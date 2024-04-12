@@ -25,6 +25,7 @@ INCLUDES += -Isrc
 INCLUDES += -I$(SHARED)
 INCLUDES += -I$(SHARED)/CoreModules/metamodule-core-interface
 INCLUDES += -I$(SHARED)/CoreModules/4ms
+SOURCES += $(SHARED)/CoreModules/moduleFactory.cc
 SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*Core.cc)
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/dynamic_data.cc
