@@ -81,7 +81,7 @@ inline void do_create(MomentaryButtonRGB el, const Indices &indices, const Widge
 	create_4ms_param<WidgetT, LightT>(el.x_mm, el.y_mm, indices, context);
 }
 
-inline void do_create(MomentaryButtonWhiteLight el, const Indices &indices, const WidgetContext_t &context) {
+inline void do_create(MomentaryButtonLight el, const Indices &indices, const WidgetContext_t &context) {
 	using WidgetT = rack::MomentarySwitch<rack::LEDBezel>;
 	using LightT = rack::LEDBezelLight<rack::WhiteLight>;
 	create_4ms_param<WidgetT, LightT>(el.x_mm, el.y_mm, indices, context);
@@ -152,6 +152,5 @@ inline void do_create(RgbLight el, const Indices &indices, const WidgetContext_t
 	using LightT = rack::MediumLight<rack::RedGreenBlueLight>;
 	context.module_widget->addChild(rack::createLightCentered<LightT>(ctr_pos, context.module, indices.light_idx));
 }
-
 
 } // namespace MetaModule::VCVImplementation::Widget

@@ -23,6 +23,7 @@ SOURCES += $(SHARED)/patch_convert/patch_to_yaml.cc
 # Modules
 INCLUDES += -Isrc
 INCLUDES += -I$(SHARED)
+INCLUDES += -I$(SHARED)/CoreModules/metamodule-core-interface
 INCLUDES += -I$(SHARED)/CoreModules/4ms
 SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*Core.cc)
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc

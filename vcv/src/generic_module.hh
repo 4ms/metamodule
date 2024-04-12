@@ -15,7 +15,7 @@ struct GenericModule {
 	struct Module : CommModule {
 		Module() {
 			// Create processing core
-			core = ModuleFactory::create(INFO::slug);
+			core = MetaModule::ModuleFactory::create(INFO::slug);
 
 			// Register with VCV the number of elements of each type
 			auto cnt = ElementCount::count<INFO>();
@@ -60,15 +60,14 @@ struct GenericModule {
 			}
 		}
 
-
 		// custom menu item that draws a child menu populated with entries
 		// defined by the alt parameter elements of the module
-		struct AltParamMenuTop : rack::ui::MenuItem
-		{
-			AltParamMenuTop(MetaModule::VCVWidgetCreator<INFO> creator_) : creator(creator_) {}
+		struct AltParamMenuTop : rack::ui::MenuItem {
+			AltParamMenuTop(MetaModule::VCVWidgetCreator<INFO> creator_)
+				: creator(creator_) {
+			}
 
-			rack::ui::Menu* createChildMenu() override
-			{
+			rack::ui::Menu *createChildMenu() override {
 				auto childMenu = new rack::ui::Menu;
 
 				// let each element render itself to the menu
@@ -77,12 +76,12 @@ struct GenericModule {
 				}
 				return childMenu;
 			}
+
 		private:
 			MetaModule::VCVWidgetCreator<INFO> creator;
 		};
 
-		void appendContextMenu(rack::ui::Menu *menu) override
-		{
+		void appendContextMenu(rack::ui::Menu *menu) override {
 			MetaModule::VCVWidgetCreator<INFO> creator(this, module);
 
 			// add single entry with submenu
@@ -93,6 +92,5 @@ struct GenericModule {
 
 			menu->addChild(altParamItem);
 		}
-
 	};
 };
