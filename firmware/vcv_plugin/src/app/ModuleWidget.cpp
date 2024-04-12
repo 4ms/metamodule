@@ -96,6 +96,14 @@ void ModuleWidget::addOutput(app::PortWidget *output) {
 	owned_widgets.push_back(output);
 }
 
+void ModuleWidget::addChild(SvgPanel *child) {
+	setPanel(child);
+}
+
+void ModuleWidget::addChildBottom(SvgPanel *child) {
+	addChild(child);
+}
+
 app::ParamWidget *ModuleWidget::getParam(int paramId) {
 	return nullptr;
 }

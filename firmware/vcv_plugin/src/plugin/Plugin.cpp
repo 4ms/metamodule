@@ -29,8 +29,19 @@ void Plugin::addModel(Model *model) {
 	modulewidget->populate_elements(model->elements);
 	model->move_strings();
 
-	auto panel_filename = model->add_string(modulewidget->svg_filename);
-	ModuleFactory::registerModuleFaceplate(slug, panel_filename);
+	std::string panelsvg;
+	if (modulewidget->svg_filename.size()) {
+		panelsvg = modulewidget->svg_filename;
+	} else if (modulewidget->panel && modulewidget->panel->svg) {
+		panelsvg = modulewidget->panel->svg->filename;
+	}
+
+	if (panelsvg.size()) {
+		auto panel_filename = model->add_string(panelsvg);
+		ModuleFactory::registerModuleFaceplate(slug, panel_filename);
+		pr_trace("-> faceplate is %s\n", panel_filename.data());
+	} else
+		pr_err("No faceplate for %s\n", model->slug.c_str());
 
 	// if (slug == "MotionMTR")
 	// 	model->debug_dump_strings();
