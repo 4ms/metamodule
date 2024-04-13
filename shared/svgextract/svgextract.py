@@ -36,21 +36,16 @@ createInfo [input svg file name] {{optional output path for ModuleInfo file}}
 createVcvSvg [input SVG file name] [output artwork SVG file name]
     Saves a new VCV artwork SVG file with the components layer removed.
 
-createLvglFaceplate [input faceplate SVG file name] [output C file name] {{optional layer to extract, default=all}}
-    Converts the SVG to a 47 dpi LVGL format .c file (240px/5.059in = 47.44dpi):
+createPngFaceplate [input faceplate SVG file name] [output PNG file name] {{optional layer to extract, default=all}}
+    Converts the SVG to a 47 dpi PNG file (240px/5.059in = 47.44dpi):
     If you want just one layer of the SVG to be extracted, pass that layer name as the optional 3rd argument.
     (e.g. for 4ms SVG info files, the layer to extract is called `faceplate`).
     Requires inkscape v1.2.2 and for the command to be present on PATH, or found at the env var INKSCAPE_BIN_PATH
 
-convertSvgToLvgl [input SVG file name] [path for generated files]
-    Converts the SVG to a 47dpi LVGL format .c files. An intermediate PNG file is also created.
-    The generated PNG and .c files will be put into the specified dir. The filenames
-    will be the same as the .svg base filename, with .png and .c extensions.
-    Requires the same inkscape and convert programs/paths as createLvglFaceplate
-
-convertPngToLvgl [input PNG file name]
-    Converts the PNG to a LVGL format .c file and saves it in the same dir as the PNG. 
-    The filename will be the same as the .png base filename, with a .c extension.
+convertSvgToPng [input SVG file name] [path for generated file]
+    Converts the SVG to a 47dpi PNG format into the specified dir. The filename
+    will be the same as the .svg base filename, with the .png extensions.
+    Requires inkscape v1.2.2 to be on PATH or at INKSCAPE_BIN_PATH.
 
 """)
 
@@ -89,10 +84,6 @@ def parse_args(args):
     cmd = args.pop(0).lower()
     inputfile = args.pop(0)
 
-    if cmd == 'convertpngtolvgl':
-        lvgl.pngToLvgl(inputfile)
-        return
-
     if cmd == 'processsvg':
         processSvg(inputfile)
         return
@@ -127,13 +118,13 @@ def parse_args(args):
         vcv.appendPluginFiles(slug, brand)
         return
 
-    elif cmd == 'createlvglfaceplate':
+    elif cmd == 'createpngfaceplate':
         layer = args.pop(0) if len(args) > 0 else "all"
-        lvgl.faceplateSvgToLVGL(inputfile, output, layer)
+        lvgl.faceplateSvgToPng(inputfile, output, layer)
         return
 
-    elif cmd == 'convertsvgtolvgl':
-        lvgl.componentSvgToLVGL(inputfile, output)
+    elif cmd == 'convertsvgtopng':
+        lvgl.componentSvgToPng(inputfile, output)
         return
 
     else:

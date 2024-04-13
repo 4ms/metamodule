@@ -6,20 +6,21 @@ from . import lvgl_png
 
 from helpers.util import *
 
-def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="all"):
+def faceplateSvgToPng(artworkSvgFilename, outputBaseName, exportLayer="all"):
     if exportLayer=="all":
         exportLayer = None
     png240Filename = outputBaseName.rstrip(".c") + ".png"
-    svgToLVGL(artworkSvgFilename, png240Filename, 240, False, exportLayer)
+    svgToPng(artworkSvgFilename, png240Filename, 240, False, exportLayer)
 
 
-def componentSvgToLVGL(svgFilename, outputDir):
+def componentSvgToPng(svgFilename, outputDir):
     outputDir = outputDir.rstrip("/") + "/"
     png240Filename = outputDir + os.path.splitext(os.path.basename(svgFilename))[0] + ".png"
-    svgToLVGL(svgFilename, png240Filename)
+    svgToPng(svgFilename, png240Filename)
 
 
-def svgToLVGL(svgFilename, pngFilename, resize=0, alpha=True, exportLayer=None):
+
+def svgToPng(svgFilename, pngFilename, resize=0, alpha=True, exportLayer=None):
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
     if inkscapeBin is None:
         Log("inkscape is not found. Please put it in your shell PATH, or set INKSCAPE_BIN_PATH to the path to the binary")
@@ -43,21 +44,6 @@ def svgToLVGL(svgFilename, pngFilename, resize=0, alpha=True, exportLayer=None):
         Log(f"Converted {svgFilename} to {os.path.basename(pngFilename)} at {dpi} dpi.")
     except:
         Log(f"Failed running {inkscape_cmd}. Aborting")
-        return
-
-    pngToLvgl(pngFilename)
-
-
-def pngToLvgl(pngFilename):
-    # PNG ==> LVGL image (C file with array)
-    cfiledata = lvgl_png.generate_lvgl_png_img(pngFilename)
-    cFilename = os.path.realpath(os.path.splitext(pngFilename)[0]+".c")
-    try:
-        with open(cFilename, "w") as f:
-            f.write(cfiledata)
-        Log(f"Converted {pngFilename} to {os.path.basename(cFilename)}")
-    except:
-        Log(f"Failed to write {cFilename}. Aborting")
         return
 
 
