@@ -50,6 +50,7 @@ target_sources(lvgl
 # VCV Adaptor
 #
 add_subdirectory(../vcv_plugin ${CMAKE_BINARY_DIR}/vcv_plugin)
+target_sources(vcv_plugin PRIVATE ../vcv_plugin/src/keep-symbols.cc)
 
 #
 # Brands
