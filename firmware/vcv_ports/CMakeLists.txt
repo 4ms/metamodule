@@ -5,20 +5,20 @@ include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
 
 # Create library that combines all brands
 # Link against this library from outside
-add_library(vcv_ports STATIC)
-target_sources(vcv_ports PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
+add_library(_vcv_ports_internal STATIC)
+target_sources(_vcv_ports_internal PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
 
 if (CMAKE_CROSSCOMPILING)
   # Enable LTO for top level library
-  set_property(TARGET vcv_ports PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+  set_property(TARGET _vcv_ports_internal PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-set_property(TARGET vcv_ports PROPERTY CXX_STANDARD 20)
+set_property(TARGET _vcv_ports_internal PROPERTY CXX_STANDARD 20)
 
 
 # Create interface wrapper that whole-links the actual library
-# add_library(vcv_ports INTERFACE)
-# target_link_libraries(vcv_ports INTERFACE "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_ports>")
+add_library(vcv_ports INTERFACE)
+target_link_libraries(vcv_ports INTERFACE "$<LINK_LIBRARY:WHOLE_ARCHIVE,_vcv_ports_internal>")
 
 foreach(brand ${brands})
 
@@ -38,7 +38,7 @@ foreach(brand ${brands})
     set_property(TARGET ${brand}Library PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
   endif()
 
-  target_link_libraries(vcv_ports PUBLIC ${brand}Library)
+  target_link_libraries(_vcv_ports_internal PUBLIC ${brand}Library)
 
 endforeach()
 
