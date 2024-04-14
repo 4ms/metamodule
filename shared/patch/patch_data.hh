@@ -56,6 +56,22 @@ struct PatchData {
 		return nullptr;
 	}
 
+	const std::optional<uint32_t> find_mapped_knob_idx(uint32_t set_id, uint32_t module_id, uint32_t param_id) const {
+		if (set_id != MIDIKnobSet && set_id >= knob_sets.size())
+			return std::nullopt;
+
+		auto &knobset = (set_id == MIDIKnobSet) ? midi_maps.set : knob_sets[set_id].set;
+
+		auto mk = std::find_if(knobset.cbegin(), knobset.cend(), [=](auto m) {
+			return (m.module_id == module_id && m.param_id == param_id);
+		});
+
+		if (mk != knobset.end())
+			return std::distance(knobset.begin(), mk);
+		else
+			return std::nullopt;
+	}
+
 	const MappedKnob *find_midi_map(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : midi_maps.set) {
 			if (m.module_id == module_id && m.param_id == param_id)

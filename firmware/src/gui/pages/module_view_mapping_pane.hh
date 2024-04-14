@@ -20,7 +20,7 @@ namespace MetaModule
 
 struct MapKnobUserData {
 	uint32_t set_i{};
-	std::optional<uint16_t> mapped_panel_id{};
+	std::optional<uint16_t> mappedknob_idx{};
 };
 struct MapCableUserData {
 	uint16_t module_id;
@@ -619,9 +619,16 @@ private:
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
 		if (displayed_knobsets < mapped_item_user_data.size()) {
-			mapped_item_user_data[displayed_knobsets].set_i = set_i;
-			mapped_item_user_data[displayed_knobsets].mapped_panel_id = mapped_panel_id;
-			lv_obj_set_user_data(obj, &(mapped_item_user_data[displayed_knobsets]));
+			if (auto mapped_knob =
+					patch->find_mapped_knob_idx(set_i, this_module_id, drawn_element->gui_element.idx.param_idx))
+			{
+				mapped_item_user_data[displayed_knobsets].set_i = set_i;
+				mapped_item_user_data[displayed_knobsets].mappedknob_idx = mapped_knob.value();
+				lv_obj_set_user_data(obj, &(mapped_item_user_data[displayed_knobsets]));
+			} else {
+				lv_obj_set_user_data(obj, nullptr);
+			}
+
 			displayed_knobsets++;
 		} else {
 			pr_err("Cannot display more than %d knobsets\n", mapped_item_user_data.size());
@@ -676,12 +683,12 @@ private:
 		if (auto objdata = lv_obj_get_user_data(event->target)) {
 
 			auto data = *static_cast<MapKnobUserData *>(objdata);
-			if (!data.mapped_panel_id.has_value())
+			if (!data.mappedknob_idx.has_value())
 				return;
 
 			page->page_list.update_state(PageId::ModuleView, page->args);
 			page->page_list.request_new_page(PageId::KnobMap,
-											 {.mappedknob_id = data.mapped_panel_id, .view_knobset_id = data.set_i});
+											 {.mappedknob_id = data.mappedknob_idx, .view_knobset_id = data.set_i});
 		}
 	}
 
@@ -690,7 +697,7 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		uint32_t knobset_id = 0; 
+		uint32_t knobset_id = 0;
 		auto obj = event->target;
 		if (auto knobset_ptr = lv_obj_get_user_data(obj)) {
 			knobset_id = *static_cast<uint32_t *>(knobset_ptr);

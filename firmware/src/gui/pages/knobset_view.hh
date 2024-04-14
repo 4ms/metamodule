@@ -127,10 +127,11 @@ struct KnobSetViewPage : PageBase {
 
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx));
 
-			if (map.panel_knob_id == args.mappedknob_id)
+			if (idx == args.mappedknob_id)
 				lv_group_focus_obj(cont);
 		}
 
+		printf("KnobSetView: args.mappedknob_id = %d\n", args.mappedknob_id.value_or(-1));
 		lv_group_set_editing(group, false);
 	}
 
