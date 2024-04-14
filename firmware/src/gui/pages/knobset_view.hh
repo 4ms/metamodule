@@ -131,7 +131,6 @@ struct KnobSetViewPage : PageBase {
 				lv_group_focus_obj(cont);
 		}
 
-		printf("KnobSetView: args.mappedknob_id = %d\n", args.mappedknob_id.value_or(-1));
 		lv_group_set_editing(group, false);
 	}
 

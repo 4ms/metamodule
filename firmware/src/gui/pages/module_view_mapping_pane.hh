@@ -619,15 +619,15 @@ private:
 		lv_group_add_obj(pane_group, obj);
 		lv_group_focus_obj(obj);
 		if (displayed_knobsets < mapped_item_user_data.size()) {
+			mapped_item_user_data[displayed_knobsets].set_i = set_i;
 			if (auto mapped_knob =
 					patch->find_mapped_knob_idx(set_i, this_module_id, drawn_element->gui_element.idx.param_idx))
-			{
-				mapped_item_user_data[displayed_knobsets].set_i = set_i;
+
 				mapped_item_user_data[displayed_knobsets].mappedknob_idx = mapped_knob.value();
-				lv_obj_set_user_data(obj, &(mapped_item_user_data[displayed_knobsets]));
-			} else {
-				lv_obj_set_user_data(obj, nullptr);
-			}
+			else
+				mapped_item_user_data[displayed_knobsets].mappedknob_idx = std::nullopt;
+
+			lv_obj_set_user_data(obj, &(mapped_item_user_data[displayed_knobsets]));
 
 			displayed_knobsets++;
 		} else {
@@ -688,7 +688,9 @@ private:
 
 			page->page_list.update_state(PageId::ModuleView, page->args);
 			page->page_list.request_new_page(PageId::KnobMap,
-											 {.mappedknob_id = data.mappedknob_idx, .view_knobset_id = data.set_i});
+											 {.patch_loc_hash = page->args.patch_loc_hash,
+											  .mappedknob_id = data.mappedknob_idx,
+											  .view_knobset_id = data.set_i});
 		}
 	}
 
