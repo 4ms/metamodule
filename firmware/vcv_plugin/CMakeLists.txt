@@ -52,8 +52,7 @@ target_sources(
 
 add_subdirectory(jansson)
 add_subdirectory(pffft)
-
-include(metamodule-rack-interface/interface.cmake)
+add_subdirectory(metamodule-rack-interface)
 
 target_link_libraries(vcv_plugin PUBLIC cpputil) 
 target_link_libraries(vcv_plugin PRIVATE lvgl::lvgl)
