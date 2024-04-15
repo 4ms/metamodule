@@ -95,7 +95,7 @@ def GetLibcSymbols():
          "fminf",
          "fmod",
          "fmodf",
-         "gamma",
+         # "gamma",
          "ldexp",
          "ldexpf",
          "lgamma",
@@ -137,6 +137,9 @@ def GetLibcSymbols():
          "fputs",
          "printf",
          "fprintf",
+         "snprintf",
+         "sprintf",
+         "vsnprintf",
          "puts",
          "time", 
 
