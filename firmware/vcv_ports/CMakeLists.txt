@@ -1,6 +1,20 @@
 cmake_minimum_required(VERSION 3.24)
 project(vcv_ports)
 
+#############################
+
+# TODO: remove hardcoded paths
+
+if (NOT TARGET metamodule::vcv-plugin-interface)
+  add_subdirectory(../vcv_plugin/interface vcv-plugin)
+endif()
+
+if (NOT TARGET cpputil::cpputil)
+  add_subdirectory(../../shared/cpputil cpputil)
+endif()
+
+#############################
+
 include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
 
 # Create library that combines all brands
@@ -28,10 +42,10 @@ foreach(brand ${brands})
   target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
   target_sources(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
 
-  # Link against the interface to vcv_plugin because it's linked to the main.elf with WHOLE_ARCHIVE
-  target_link_libraries(${brand}Library PRIVATE vcv_plugin_interface)
+  # Link against the mocked vcv interface
+  target_link_libraries(${brand}Library PRIVATE metamodule::vcv-plugin-interface)
 
-  target_link_libraries(${brand}Library PRIVATE cpputil)
+  target_link_libraries(${brand}Library PRIVATE cpputil::cpputil)
 
   if (CMAKE_CROSSCOMPILING)
     # Enable LTO for all brands

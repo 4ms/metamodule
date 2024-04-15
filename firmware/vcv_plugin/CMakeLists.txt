@@ -1,17 +1,12 @@
-set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../)
+cmake_minimum_required(VERSION 3.24)
+project(VCV-Plugin)
 
 #################################
 
-# Create interface library for use by vcv_ports (built-in vcv modules)
-add_library(vcv_plugin_interface INTERFACE)
+add_subdirectory(interface)
 
-target_include_directories(
-    vcv_plugin_interface 
-    INTERFACE ${MM_ROOT}/shared
-)
-
-target_link_libraries(vcv_plugin_interface INTERFACE metamodule::rack-interface metamodule::core-interface)
-
+# TODO: This needs to be removed eventually
+set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../)
 
 #################################
 
@@ -51,7 +46,6 @@ target_sources(
 
 add_subdirectory(jansson)
 add_subdirectory(pffft)
-add_subdirectory(metamodule-rack-interface)
 
 target_link_libraries(vcv_plugin PUBLIC cpputil) 
 target_link_libraries(vcv_plugin PRIVATE lvgl::lvgl)
