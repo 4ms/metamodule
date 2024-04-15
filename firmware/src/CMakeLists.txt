@@ -60,7 +60,9 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_
 #
 # RYML
 #
-add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+if (NOT TARGET ryml)
+  add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+endif()
 
 #
 # Jansson
@@ -80,7 +82,9 @@ target_link_libraries(ui PRIVATE lvgl)
 # Core Interface
 #
 
-add_subdirectory(${SHARED}/CoreModules/metamodule-core-interface metamodule-core-interface)
+if (NOT TARGET metamodule::core-interface)
+  add_subdirectory(${SHARED}/CoreModules/metamodule-core-interface metamodule-core-interface)
+endif()
 
 #
 # Main App
@@ -193,7 +197,9 @@ target_include_directories(
           ${CMAKE_BINARY_DIR}/checkgit
 )
 
-add_subdirectory(${SHARED}/cpputil cpputil)
+if (NOT TARGET cpputil::cpputil)
+  add_subdirectory(${SHARED}/cpputil cpputil)
+endif()
 
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml cpputil vcv_ports)
