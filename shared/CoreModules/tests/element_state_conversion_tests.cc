@@ -1,5 +1,6 @@
-#include "CoreModules/4ms/4ms_elements.hh"
 #include "CoreModules/elements/element_state_conversion.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+
 #include "doctest.h"
 
 TEST_CASE("Convert State SlideSwitch 7 pos") {

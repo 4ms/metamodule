@@ -3,6 +3,9 @@
 #include "util/overloaded.hh"
 #include <string>
 
+// TODO: there should be no dependency on a specific brand here
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+
 namespace MetaModule
 {
 

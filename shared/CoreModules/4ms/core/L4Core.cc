@@ -1,11 +1,12 @@
+#include "info/L4_info.hh"
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "info/L4_info.hh"
 #include "l4/Tables.h"
 #include "l4/DCBlock.h"
 #include "l4/PeakDetector.h"
 
 #include "processors/tools/expDecay.h"
+
 
 namespace MetaModule
 {
