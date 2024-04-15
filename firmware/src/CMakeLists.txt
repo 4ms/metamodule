@@ -77,6 +77,12 @@ add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
 target_link_libraries(ui PRIVATE lvgl)
 
 #
+# Core Interface
+#
+
+add_subdirectory(${SHARED}/CoreModules/metamodule-core-interface metamodule-core-interface)
+
+#
 # Main App
 #
 add_executable(
@@ -180,7 +186,6 @@ target_include_directories(
           ${SHARED}
           ${SHARED}/patch
           ${SHARED}/patch_convert
-          ${SHARED}/CoreModules/metamodule-core-interface
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include

@@ -8,10 +8,9 @@ add_library(vcv_plugin_interface INTERFACE)
 target_include_directories(
     vcv_plugin_interface 
     INTERFACE ${MM_ROOT}/shared
-              ${MM_ROOT}/shared/CoreModules/metamodule-core-interface
 )
 
-target_link_libraries(vcv_plugin_interface INTERFACE metamodule-rack-interface)
+target_link_libraries(vcv_plugin_interface INTERFACE metamodule-rack-interface metamodule::core-interface)
 
 
 #################################
