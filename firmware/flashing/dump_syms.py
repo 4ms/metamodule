@@ -174,6 +174,9 @@ def GetLibcSymbols():
          "_ZNSt19_Sp_make_shared_tag5_S_eqERKSt9type_info",
          "_ZNSt8__detail15_List_node_base7_M_hookEPS0_",
 
+         "_ZNKSt8__detail20_Prime_rehash_policy14_M_need_rehashEjjj",
+         "_ZSt11_Hash_bytesPKvjj",
+
          # Not found, replaced with an empty function
          # "_ZNSaIcEC1Ev", # std::allocator<char>::allocator()
          # "_ZNSaIcED1Ev", # std::allocator<char>::~allocator()

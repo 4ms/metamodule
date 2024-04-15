@@ -14,6 +14,7 @@
 #include <cstring>
 #include <memory>
 #include <random>
+#include <unordered_map>
 
 extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 }
@@ -122,6 +123,9 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	// provides std::_Sp_make_shared_tag::_S_eq(std::type_info const&)
 	// aka: _ZNSt19_Sp_make_shared_tag5_S_eqERKSt9type_info
 	auto f = std::make_shared<float>(1.f);
+	auto f2 = std::make_shared<float>(1.5f);
+	if (f != f2)
+		f = f2;
 
 	// provides _Znaj: operator new[](unsigned int)
 	auto ar = new int[10];
@@ -134,6 +138,10 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	delete a;
 
 	std::string x = "A very long String, longer than SSO could optimize without dynamic memory allocation";
+
+	std::unordered_map<std::string, std::string> umap;
+	umap[x] = "This string resolves Symbol in plugin not found "
+			  "_ZNKSt8__detail20_Prime_rehash_policy14_M_need_rehashEjjj, by being very long";
 
 	float xx = 1.1f;
 	auto yy = static_cast<unsigned long long>(xx);
