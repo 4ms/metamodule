@@ -36,7 +36,7 @@ struct ModuleDirectory {
 		if (module->model->plugin->slug == "eightfold")
 			return true;
 
-		return false;
+		return true;
 	}
 
 	static bool isHub(std::string_view slug) {
