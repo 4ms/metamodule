@@ -1,5 +1,19 @@
+cmake_minimum_required(VERSION 3.24)
+project(VCV-Plugin)
 
+#################################
+
+add_subdirectory(interface)
+
+# TODO: This needs to be removed eventually
+set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../)
+
+#################################
+
+# Create library that holds the implementation of the interface defined by vcv_plugin_interface
 add_library(vcv_plugin STATIC)
+
+target_link_libraries(vcv_plugin PUBLIC vcv_plugin_interface)
 
 target_sources(
   vcv_plugin
@@ -33,34 +47,18 @@ target_sources(
 add_subdirectory(jansson)
 add_subdirectory(pffft)
 
-include(metamodule-rack-interface/interface.cmake)
-
-target_link_libraries(vcv_plugin PUBLIC metamodule-rack-interface)
 target_link_libraries(vcv_plugin PUBLIC cpputil) 
 target_link_libraries(vcv_plugin PRIVATE lvgl::lvgl)
 target_link_libraries(vcv_plugin PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,jansson>")
 target_link_libraries(vcv_plugin PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,pffft>")
 
-set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../)
 target_include_directories(
   vcv_plugin
   PUBLIC src
          ${MM_ROOT}/firmware/src #for svg.cc: gui/elements/..., and for console/pr_dbg.hh
-         ${MM_ROOT}/shared
-         ${MM_ROOT}/shared/CoreModules/metamodule-core-interface
 )
 
 set_property(TARGET vcv_plugin PROPERTY CXX_STANDARD 20)
 target_compile_options(vcv_plugin PRIVATE -fno-function-sections -fno-data-sections)
 
 
-# Create interface library for use by vcv_ports (built-in vcv modules)
-add_library(vcv_plugin_interface INTERFACE)
-
-target_include_directories(
-    vcv_plugin_interface 
-    INTERFACE ${MM_ROOT}/shared
-              ${MM_ROOT}/shared/CoreModules/metamodule-core-interface
-)
-
-target_link_libraries(vcv_plugin_interface INTERFACE metamodule-rack-interface)

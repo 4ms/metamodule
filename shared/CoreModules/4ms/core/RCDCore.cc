@@ -1,6 +1,6 @@
+#include "info/RCD_info.hh"
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "info/RCD_info.hh"
 
 #include "CoreModules/4ms/core/helpers/EdgeDetector.h"
 #include "CoreModules/4ms/core/helpers/FlipFlop.h"

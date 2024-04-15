@@ -18,7 +18,9 @@ target_include_directories(gen_minblep PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/..
 )
 
-add_subdirectory(../cpputil ${CMAKE_CURRENT_BINARY_DIR}/cpputil)
+if (NOT cpputil::cpputil)
+    add_subdirectory(../cpputil ${CMAKE_CURRENT_BINARY_DIR}/cpputil)
+endif()
 add_subdirectory(../../firmware/src/VCV_adaptor/pffft ${CMAKE_CURRENT_BINARY_DIR}/pffft)
 
 target_link_libraries(gen_minblep PRIVATE cpputil pffft)

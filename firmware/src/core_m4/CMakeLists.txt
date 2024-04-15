@@ -106,7 +106,6 @@ target_include_directories(
           ${FWDIR}/system
           ${SHARED}
           ${SHARED}/processors
-          ${SHARED}/CoreModules/metamodule-core-interface
           ${SHARED}/patch
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
@@ -116,6 +115,8 @@ target_include_directories(
           ${USBDEV_LIBDIR}/Core/Inc
           ${USBDEV_LIBDIR}/Class/MSC/Inc
 )
+
+target_link_libraries(main_m4.elf PUBLIC metamodule::core-interface)
 
 set_property(TARGET main_m4.elf PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
