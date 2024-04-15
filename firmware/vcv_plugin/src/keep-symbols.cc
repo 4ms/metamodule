@@ -156,4 +156,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	xfb = xfb / xfa;
 	(void)xfa;
 	(void)xfb;
+
+	// provides vtable for Quantity
+	rack::Quantity q;
 }
