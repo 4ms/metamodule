@@ -188,6 +188,7 @@ target_include_directories(
           ${CMAKE_BINARY_DIR}/checkgit
 )
 
+add_subdirectory(${SHARED}/cpputil cpputil)
 
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml cpputil vcv_ports)
