@@ -3,6 +3,7 @@
 #include "frame.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_manager.hh"
+#include "internal_plugin_manager.hh"
 #include "lv_port_indev.h"
 #include "patch_file/file_storage_proxy.hh"
 
@@ -33,11 +34,15 @@ private:
 	PatchDirList patch_dir_list;
 
 	std::unique_ptr<RamDrive> ramdrive;
+	RamDiskOps ramdisk_ops;
+	FatFileIO ramdisk;
+	SimulatorPatchStorage patch_storage;
+
 	FileStorageComm patch_comm;
 	FileStorageProxy file_storage_proxy;
 	AssetFS asset_fs;
+	InternalPluginManager internal_plugin_manager;
 	PluginManager plugin_manager;
-	SimulatorPatchStorage patch_storage;
 
 	PatchPlayer patch_player;
 	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};

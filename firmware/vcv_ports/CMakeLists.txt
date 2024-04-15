@@ -33,6 +33,7 @@ set_property(TARGET _vcv_ports_internal PROPERTY CXX_STANDARD 20)
 # Create interface wrapper that whole-links the actual library
 add_library(vcv_ports INTERFACE)
 target_link_libraries(vcv_ports INTERFACE "$<LINK_LIBRARY:WHOLE_ARCHIVE,_vcv_ports_internal>")
+target_include_directories(vcv_ports INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 foreach(brand ${brands})
 

@@ -8,6 +8,7 @@
 #include "dynload/plugin_manager.hh"
 #include "fs/norflash_layout.hh"
 #include "gui/ui.hh"
+#include "internal_plugin_manager.hh"
 #include "patch_play/patch_player.hh"
 
 using FrameBufferT =
@@ -37,8 +38,11 @@ extern "C" void aux_core_main() {
 
 	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 
+	RamDiskOps ramdisk_ops{*ramdisk_storage};
+	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 	AssetFS asset_fs{AssetVolFlashOffset};
-	PluginManager plugin_manager{*file_storage_proxy, *ramdisk_storage, asset_fs};
+	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
+	PluginManager plugin_manager{*file_storage_proxy, ramdisk};
 
 	Ui ui{*patch_playloader, *file_storage_proxy, *sync_params, *patch_mod_queue, plugin_manager};
 
