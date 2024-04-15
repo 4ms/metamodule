@@ -10,7 +10,7 @@ target_include_directories(
     INTERFACE ${MM_ROOT}/shared
 )
 
-target_link_libraries(vcv_plugin_interface INTERFACE metamodule-rack-interface metamodule::core-interface)
+target_link_libraries(vcv_plugin_interface INTERFACE metamodule::rack-interface metamodule::core-interface)
 
 
 #################################
