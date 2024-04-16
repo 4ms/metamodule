@@ -25,14 +25,14 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.4355285"
-     inkscape:cx="75.958873"
+     inkscape:cx="76.164167"
      inkscape:cy="249.63781"
      inkscape:window-width="2512"
      inkscape:window-height="1387"
      inkscape:window-x="40"
-     inkscape:window-y="31"
+     inkscape:window-y="25"
      inkscape:window-maximized="0"
-     inkscape:current-layer="faceplate" />
+     inkscape:current-layer="components" />
   <g
      id="faceplate"
      transform="translate(0,-0.00940739)">
@@ -818,5 +818,12 @@
        cy="224.36"
        r="4"
        style="fill:#808080;stroke-width:0px" />
+    <circle
+       id="ShiftAltParam"
+       cx="91.139999"
+       cy="188.53999"
+       r="4"
+       style="fill:#808080;stroke-width:0px"
+       data-name="Shift" />
   </g>
 </svg>
