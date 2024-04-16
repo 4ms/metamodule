@@ -471,7 +471,8 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		page->patch_playloader.request_load_view_patch();
+		if (!page->is_patch_playing)
+			page->patch_playloader.request_load_view_patch();
 	}
 
 	static void button_focussed_cb(lv_event_t *event) {

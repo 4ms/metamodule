@@ -68,8 +68,10 @@ struct KnobMapPage : PageBase {
 		if (view_set_idx >= patch->knob_sets.size()) {
 			return;
 		}
+
+		//mappedknob_id is the index of the MappedKnob in the MappedKnobSet::set vector
 		auto map_idx = args.mappedknob_id;
-		if (!map_idx.has_value() || map_idx >= patch->knob_sets[view_set_idx].set.size()) {
+		if (!map_idx.has_value() || map_idx.value() >= patch->knob_sets[view_set_idx].set.size()) {
 			pr_err("Mapping not found for set %d, panel_knob_id %d\n", view_set_idx, map_idx);
 			return;
 		}
@@ -239,7 +241,7 @@ struct KnobMapPage : PageBase {
 		if (!page)
 			return;
 
-		page->args.mappedknob_id = page->map.panel_knob_id;
+		// Note: we keep args.mappedknob_id the same as it was when this page was loaded
 		page->args.view_knobset_id = page->view_set_idx;
 		page->page_list.request_new_page(PageId::KnobSetView, page->args);
 	}

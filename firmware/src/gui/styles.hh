@@ -43,6 +43,7 @@ struct Gui {
 	// Volume or subdir name in Drives panel on PatchSelector
 	static inline lv_style_t subdir_panel_item_style;
 	static inline lv_style_t subdir_panel_item_sel_style;
+	static inline lv_style_t subdir_panel_item_sel_blurred_style;
 
 	static inline lv_style_t mapped_circle_style;
 	static inline lv_style_t mapped_jack_circle_label_style;
@@ -224,6 +225,12 @@ struct Gui {
 		lv_style_set_bg_opa(&subdir_panel_item_sel_style, LV_OPA_100);
 		lv_style_set_outline_width(&subdir_panel_item_sel_style, 0);
 		lv_style_set_border_width(&subdir_panel_item_sel_style, 0);
+
+		lv_style_init(&subdir_panel_item_sel_blurred_style);
+		lv_style_set_bg_color(&subdir_panel_item_sel_blurred_style, lv_color_hex(0x555555));
+		lv_style_set_bg_opa(&subdir_panel_item_sel_blurred_style, LV_OPA_100);
+		lv_style_set_outline_width(&subdir_panel_item_sel_blurred_style, 0);
+		lv_style_set_border_width(&subdir_panel_item_sel_blurred_style, 0);
 
 		// Dropdown
 		lv_style_init(&dropdown_style);

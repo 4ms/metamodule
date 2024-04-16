@@ -89,6 +89,13 @@ struct ModuleViewPage : PageBase {
 		auto display_widthpx = std::min<lv_coord_t>(width_px + 4, 190);
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
+		if (lv_obj_get_width(ui_ModuleImage) > width_px) {
+			lv_obj_clear_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
+		} else {
+			lv_obj_add_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
+		}
+
+		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
 
 		active_knobset = page_list.get_active_knobset();
 
