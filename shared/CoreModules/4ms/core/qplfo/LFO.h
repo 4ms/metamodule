@@ -57,6 +57,12 @@ public:
         }
     }
 
+    void clearResetLockPoint()
+    {
+        resetLockPointInS = 0.f;
+        phaseOffset = 0.f;
+    }
+
     void setSkew(float val)
     {
         val = std::clamp(val, 0.0f, 1.0f);

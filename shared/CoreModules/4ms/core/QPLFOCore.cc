@@ -111,6 +111,8 @@ private:
 				if (tapLongPress(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
 				{
 					tapPing.deactivateOuput();
+
+					lfo.clearResetLockPoint();
 				}
 
 				tapPing.inputButton(ticks, getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED);
