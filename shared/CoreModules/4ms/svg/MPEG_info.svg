@@ -25,12 +25,12 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.4355285"
-     inkscape:cx="76.369461"
+     inkscape:cx="75.958873"
      inkscape:cy="249.63781"
      inkscape:window-width="2512"
      inkscape:window-height="1387"
      inkscape:window-x="40"
-     inkscape:window-y="59"
+     inkscape:window-y="31"
      inkscape:window-maximized="0"
      inkscape:current-layer="components" />
   <g
@@ -777,7 +777,7 @@
        cx="30.52"
        cy="41.57"
        r="11.34"
-       style="fill:#ff8000;stroke-width:0px" />
+       style="fill:#ffc000;stroke-width:0px" />
     <text
        id="slug"
        transform="scale(0.96953597,1.0314212)"
