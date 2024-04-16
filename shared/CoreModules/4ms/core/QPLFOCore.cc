@@ -82,8 +82,11 @@ private:
 		{
 			ticks++;
 
+			auto resetIn = getInput<Mapping::ResetIn>().value_or(0);
+
 			if (auto pingInput = getInput<Mapping::PingJackIn>(); pingInput)
 			{
+				//ping input based triggering
 				auto isPingHigh = *pingInput > TriggerThresholdInV;
 
 				if (extClockEdge(isPingHigh))
@@ -91,7 +94,11 @@ private:
 					if (lastExtClockTime)
 					{
 						lfo.setPeriodLength((ticks - *lastExtClockTime) * timeStepInS);
-						lfo.start();
+						//don't start in "floating reset mode"
+						if(resetIn < TriggerThresholdInV)
+						{
+							lfo.start();
+						}
 					}
 					lastExtClockTime = ticks;
 				}
@@ -100,6 +107,7 @@ private:
 			}
 			else
 			{
+				//tap based triggering
 				if (tapLongPress(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED))
 				{
 					tapPing.deactivateOuput();
@@ -112,7 +120,8 @@ private:
 					lfo.setPeriodLength(*tapPeriod * timeStepInS);
 				}
 
-				if(tapEdge(tapPing.updateTapOut(ticks)))
+				//don't start in "floating reset mode"
+				if(tapEdge(tapPing.updateTapOut(ticks)) && (resetIn < TriggerThresholdInV))
 				{
 					lfo.start();
 				} 
@@ -135,14 +144,23 @@ private:
 				
 			}
 
-			if (resetEdge(getInput<Mapping::ResetIn>() > TriggerThresholdInV))
+			//reset based triggering
+			if (resetEdge(resetIn > TriggerThresholdInV))
 			{
-				//TODO: this is not correct
 				if(lfo.isRunning() == true)
 				{
 					lfo.reset();
 				}
 				else
+				{
+					lfo.start();
+				}
+			}
+
+			//cycle in "floating reset mode"
+			if(resetIn > TriggerThresholdInV)
+			{
+				if(lfo.isRunning() != true)
 				{
 					lfo.start();
 				}
