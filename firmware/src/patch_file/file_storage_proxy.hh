@@ -116,6 +116,10 @@ public:
 		return view_patch_loc_.vol;
 	}
 
+	PatchLocHash get_view_patch_loc_hash() {
+		return PatchLocHash{view_patch_loc_};
+	}
+
 	//
 	// patchlist: list of all patches found on all volumes
 	//

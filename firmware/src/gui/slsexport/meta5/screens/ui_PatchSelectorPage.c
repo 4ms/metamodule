@@ -154,6 +154,8 @@ lv_obj_set_style_pad_column(ui_DrivesPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_DrivesPanel, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_color(ui_DrivesPanel, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_DrivesPanel, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_DrivesPanel, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_DrivesPanel, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
 
 lv_obj_set_style_bg_color(ui_DrivesPanel, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_DrivesPanel, 100, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
@@ -379,6 +381,7 @@ lv_obj_set_flex_grow( ui_PatchListRoller, 2);
 lv_obj_set_x( ui_PatchListRoller, -4 );
 lv_obj_set_y( ui_PatchListRoller, -3 );
 lv_obj_set_align( ui_PatchListRoller, LV_ALIGN_BOTTOM_RIGHT );
+lv_obj_add_state( ui_PatchListRoller, LV_STATE_FOCUSED );     /// States
 lv_obj_clear_flag( ui_PatchListRoller, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE );    /// Flags
 lv_obj_set_style_text_color(ui_PatchListRoller, lv_color_hex(0x999999), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -389,7 +392,6 @@ lv_obj_set_style_text_font(ui_PatchListRoller, &ui_font_MuseoSansRounded70016, L
 lv_obj_set_style_radius(ui_PatchListRoller, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_PatchListRoller, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_width(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(ui_PatchListRoller, LV_BORDER_SIDE_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_color(ui_PatchListRoller, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_outline_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -411,17 +413,21 @@ lv_obj_set_style_outline_color(ui_PatchListRoller, lv_color_hex(0x000000), LV_PA
 lv_obj_set_style_outline_opa(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_SCROLLED);
 lv_obj_set_style_outline_color(ui_PatchListRoller, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_PatchListRoller, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_color(ui_PatchListRoller, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
 lv_obj_set_style_outline_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 lv_obj_set_style_text_color(ui_PatchListRoller, lv_color_hex(0xFFFFFF), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_PatchListRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_PatchListRoller, lv_color_hex(0xFD8B18), LV_PART_SELECTED | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_color(ui_PatchListRoller, lv_color_hex(0x444444), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_PatchListRoller, 255, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_border_color(ui_PatchListRoller, lv_color_hex(0x000000), LV_PART_SELECTED | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_PatchListRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_PatchListRoller, 0, LV_PART_SELECTED| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(ui_PatchListRoller, LV_BORDER_SIDE_FULL, LV_PART_SELECTED| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_PatchListRoller, lv_color_hex(0xFD8B18), LV_PART_SELECTED | LV_STATE_FOCUSED );
+lv_obj_set_style_bg_opa(ui_PatchListRoller, 255, LV_PART_SELECTED| LV_STATE_FOCUSED);
 
 ui_waitspinner = lv_spinner_create(ui_PatchSelectorPage,1000,90);
 lv_obj_set_width( ui_waitspinner, 65);

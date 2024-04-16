@@ -127,7 +127,7 @@ struct KnobSetViewPage : PageBase {
 
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx));
 
-			if (map.panel_knob_id == args.mappedknob_id)
+			if (idx == args.mappedknob_id)
 				lv_group_focus_obj(cont);
 		}
 

@@ -37,6 +37,9 @@ struct PatchSelectorSubdirPanel {
 				}
 			}
 
+			auto vol_item = lv_obj_get_child(vol_cont, 0);
+			lv_obj_add_style(vol_item, &Gui::subdir_panel_item_sel_blurred_style, LV_STATE_USER_2);
+
 			// No need to scan if no files or dirs: disable it
 			if (root.files.size() == 0 && root.dirs.size() == 0) {
 				lv_disable(vol_cont);
@@ -80,10 +83,15 @@ struct PatchSelectorSubdirPanel {
 				if (strcmp(txt, roller_path) == 0) {
 					if (last_subdir_sel) {
 						lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
+						lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
 						label_clips(last_subdir_sel);
 					}
 					last_subdir_sel = obj;
-					lv_obj_add_state(obj, LV_STATE_FOCUSED);
+					if (lv_obj_has_state(ui_DrivesPanel, LV_STATE_FOCUSED)) {
+						lv_obj_add_state(obj, LV_STATE_FOCUSED);
+					} else {
+						lv_obj_add_state(obj, LV_STATE_USER_2);
+					}
 					label_scrolls(obj);
 					lv_obj_scroll_to_view_recursive(obj, LV_ANIM_ON);
 					return (i == 0) ? true : false;
@@ -98,7 +106,7 @@ struct PatchSelectorSubdirPanel {
 		lv_obj_add_state(ui_DrivesPanel, LV_STATE_FOCUSED);
 
 		if (last_subdir_sel) {
-			lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
+			lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
 			lv_group_focus_obj(last_subdir_sel);
 		} else {
 			if (group)
@@ -113,8 +121,9 @@ struct PatchSelectorSubdirPanel {
 		if (group)
 			lv_group_set_editing(group, true);
 
-		if (last_subdir_sel)
-			lv_obj_add_state(last_subdir_sel, LV_STATE_FOCUSED);
+		if (last_subdir_sel) {
+			lv_obj_add_state(last_subdir_sel, LV_STATE_USER_2);
+		}
 	}
 
 	static void subdir_focus_cb(lv_event_t *event) {
@@ -170,6 +179,7 @@ private:
 		lv_obj_add_style(btn, &Gui::subdir_panel_item_style, LV_STATE_DEFAULT);
 		lv_obj_add_style(btn, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUSED);
 		lv_obj_add_style(btn, &Gui::subdir_panel_item_sel_style, LV_STATE_FOCUS_KEY);
+		lv_obj_add_style(btn, &Gui::subdir_panel_item_sel_blurred_style, LV_STATE_USER_2);
 
 		lv_label_set_text_fmt(name_label, "%s", dir.name.c_str());
 		lv_label_set_long_mode(name_label, LV_LABEL_LONG_CLIP);
