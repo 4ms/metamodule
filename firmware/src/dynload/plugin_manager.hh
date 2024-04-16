@@ -36,9 +36,8 @@ public:
 		if (result.state == PluginFileLoader::State::Success) {
 			if (state == State::IsLoading) {
 				state = State::Done;
-				pr_info("All plugins loaded\n");
-
-				ramdisk.print_dir("/", 4);
+				pr_info("No more plugins found\n");
+				// ramdisk.print_dir("/", 4);
 			}
 		}
 		return result;

@@ -39,7 +39,6 @@ void Plugin::addModel(Model *model) {
 	if (panelsvg.size()) {
 		auto panel_filename = model->add_string(panelsvg);
 		ModuleFactory::registerModuleFaceplate(slug, panel_filename);
-		pr_trace("-> faceplate is %s\n", panel_filename.data());
 	} else
 		pr_err("No faceplate for %s\n", model->slug.c_str());
 
