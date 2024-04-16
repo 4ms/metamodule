@@ -142,6 +142,7 @@ def GetLibcSymbols():
          "vsnprintf",
          "puts",
          "time", 
+         "strcmp", 
 
          "calloc",
          "realloc",
