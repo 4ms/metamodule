@@ -201,7 +201,6 @@ private:
 					setOutput<Mapping::Out>(outValue * 10.0f - 5.f);
 				}
 
-				// TODO: does this need to be changed for bipolar output
 				setLED<Mapping::LED>(outValue);
 			}
 			else
@@ -209,7 +208,6 @@ private:
 				setLED<Mapping::OnButton>(0.f);
 				setOutput<Mapping::Out>(0.0f);
 
-				// TODO: does this need to be changed for bipolar output
 				setLED<Mapping::LED>(0.f);
 			}
 
