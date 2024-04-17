@@ -38,80 +38,9 @@ extern "C" _Complex float csqrtf(_Complex float x) {
 }
 
 void __attribute__((optimize("-O0"))) keep_symbols() {
-	// Force these symbols from libc and other libs
-	// TODO: how to do this otherwise?
-	// We can't link the plugin to libc unless we compile a libc with it, since the arm-none-eabi libc
-	// was not compiled with -fPIC
-	// - Linker KEEP()?
-	// - build libc with the plugin, maybe musl libc?
-	// - build plugin with json library
-
 	auto keep = [&](auto *func) {
 		return func;
 	};
-
-	// Can't use keep() with clang because these are template functions:
-	(void)acos(1.f);
-	(void)acosh(1.f);
-	(void)acoshf(1.f);
-	(void)acosf(1.f);
-	(void)asin(1.f);
-	(void)asinh(1.f);
-	(void)asinhf(1.f);
-	(void)asinf(1.f);
-	(void)atanf(2.f);
-	(void)atan2(1.f, 2.f);
-	(void)atan2f(1.f, 2.f);
-	(void)ceil(1.f);
-	(void)ceilf(1.f);
-	(void)cos(1.f);
-	(void)cosf(1.f);
-	(void)cosh(1.f);
-	(void)coshf(1.f);
-	(void)erf(2.f);
-	(void)erfc(2.f);
-	// (void)gamma(2.f);
-	(void)lgamma(2.f);
-	(void)remainder(1.f, 2.f);
-	(void)exp(1.f);
-	(void)exp2(1.f);
-	(void)exp2f(1.f);
-	(void)expf(1.f);
-	(void)floor(1.f);
-	(void)floorf(1.f);
-	(void)fmax(1.f, 2.f);
-	(void)fmaxf(2.f, 2.f);
-	(void)fmin(1.f, 2.f);
-	(void)fminf(2.f, 2.f);
-	(void)fmod(1.f, 1.f);
-	(void)fmodf(2.f, 2.f);
-	(void)ldexp(1.f, 1.f);
-	(void)ldexpf(1.f, 1.f);
-	(void)log(1.f);
-	(void)log10(1.f);
-	(void)log10f(1.f);
-	(void)log2(1.f);
-	(void)log2f(1.f);
-	(void)logf(1.f);
-	(void)nextafterf(1.f, 2.f);
-	(void)pow(1., 1.);
-	(void)powf(1.f, 1.f);
-	(void)round(1.f);
-	(void)roundf(1.f);
-	(void)roundevenf(1.f);
-	(void)sin(1.f);
-	(void)sinf(1.f);
-	(void)sinh(1.f);
-	(void)sinhf(1.f);
-	(void)sqrt(1.f);
-	(void)sqrtf(1.f);
-	(void)tan(1.f);
-	(void)tanf(1.f);
-	(void)tanh(1.f);
-	(void)tanhf(1.f);
-	(void)tolower('a');
-	(void)trunc(2.f);
-	(void)truncf(2.f);
 
 	(void)keep(strlen);
 	(void)keep(malloc);
@@ -143,6 +72,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	umap[x] = "This string resolves Symbol in plugin not found "
 			  "_ZNKSt8__detail20_Prime_rehash_policy14_M_need_rehashEjjj, by being very long";
 
+	// provide __aeabi_f2uzl and __aeabi_f2lz
 	float xx = 1.1f;
 	auto yy = static_cast<unsigned long long>(xx);
 	(void)yy;
@@ -156,6 +86,14 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 	xfb = xfb / xfa;
 	(void)xfa;
 	(void)xfb;
+
+	// provides: __muldc3 and __divdc3
+	volatile double _Complex xfc{1};
+	volatile double _Complex xfd{2};
+	xfc = xfc * xfd;
+	xfd = xfd / xfc;
+	(void)xfd;
+	(void)xfc;
 
 	// provides vtable for Quantity
 	rack::Quantity q;
