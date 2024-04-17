@@ -24,27 +24,25 @@ struct ModuleListPage : PageBase {
 	}
 
 	void populate_slugs() {
-		static bool already_populated = false;
-		if (!already_populated) {
-			already_populated = true;
-			auto all_slugs = ModuleFactory::getAllSlugs();
+		//TODO: only repopulate if plugins changed
 
-			// TODO: sort by brand name
-			std::sort(all_slugs.begin(), all_slugs.end(), [](auto a, auto b) {
-				return std::string_view{a} < std::string_view{b};
-			});
+		auto all_slugs = ModuleFactory::getAllSlugs();
 
-			std::string slugs_str;
-			slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
-			for (auto slug : all_slugs) {
-				if (!slug.is_equal("HubMedium")) {
-					slugs_str += std::string_view{slug};
-					slugs_str += "\n";
-				}
+		// TODO: sort by brand name
+		std::sort(all_slugs.begin(), all_slugs.end(), [](auto a, auto b) {
+			return std::string_view{a} < std::string_view{b};
+		});
+
+		std::string slugs_str;
+		slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
+		for (auto slug : all_slugs) {
+			if (!slug.is_equal("HubMedium")) {
+				slugs_str += std::string_view{slug};
+				slugs_str += "\n";
 			}
-			slugs_str.pop_back();
-			lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
 		}
+		slugs_str.pop_back();
+		lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
 	}
 
 	void prepare_focus() final {
