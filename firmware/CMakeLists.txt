@@ -41,6 +41,7 @@ add_subdirectory(src ${A7_BIN_PATH})
 #
 
 set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
+set(SYMBOLS_JSON_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.json)
 add_custom_command(
   OUTPUT ${SYMBOLS_FILE}
   #TODO: fix hard-coded dirs
@@ -48,11 +49,9 @@ add_custom_command(
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
           --objdir ${CMAKE_BINARY_DIR}/vcv_plugin/
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
-          # --checkplugin ./plugins/Befaco/build/Befaco.so
-		  # --checkplugin ./plugins/AI/build/AudibleInstruments.so
-          # --checkplugin ./plugins/hetrickcv/build/HetrickCV.so
           --elf $<TARGET_FILE:main.elf>
           --yaml ${SYMBOLS_FILE}
+          --json ${SYMBOLS_JSON_FILE}
           # -v
   COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
   DEPENDS main.elf 
