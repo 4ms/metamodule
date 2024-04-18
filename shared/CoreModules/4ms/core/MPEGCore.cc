@@ -1,35 +1,59 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/MPEG_info.hh"
+
+#include "mpeg/PingGenerator.h"
+
+#include "helpers/EdgeDetector.h"
+#include "helpers/FlipFlop.h"
+#include "helpers/Gestures.h"
 
 namespace MetaModule
 {
 
-class MPEGCore : public CoreProcessor {
+class MPEGCore : public SmartCoreProcessor<MPEGInfo> {
 	using Info = MPEGInfo;
 	using ThisCore = MPEGCore;
+	using enum Info::Elem;
 
 public:
-	MPEGCore() = default;
+	MPEGCore() 
+		: mode(SYNC), ticks(0), triggerPing(1.0f, 2.0f), tapLongPress(2.f)
+	{
+
+	};
 
 	void update() override {
-	}
+		ticks++;
 
-	void set_param(int param_id, float val) override {
-	}
+		if (tapEdge(getState<PingButton>() == MomentaryButton::State_t::PRESSED))
+		{
+			ping.tap(ticks);
+		}
 
-	void set_input(int input_id, float val) override {
-	}
+		if(tapLongPress(getState<PingButton>() == MomentaryButton::State_t::PRESSED))
+		{
+			ping.reset();
+		}
 
-	float get_output(int output_id) const override {
-		return 0.f;
+		if (auto pingIn = getInput<PingTrigIn>(); pingIn.has_value())
+		{
+			if (pingEdge(triggerPing(*pingIn)))
+			{
+				ping.ping(ticks);
+			}
+		}
+
+		ping.setFreeRunning(getState<FreeNRunningPingAltParam>() == 0);
+
+		ping.update(ticks);
+
+		setLED<CycleButton>(ping.getPhase() < 0.5f);
+		setOutput<EofOut>(ping.getPhase() < 0.5f);
 	}
 
 	void set_samplerate(float sr) override {
-	}
-
-	float get_led_brightness(int led_id) const override {
-		return 0.f;
+		tapLongPress.set_samplerate(sr);
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -39,6 +63,18 @@ public:
 	// clang-format on
 
 private:
+	enum mode_t {ASYNC, SYNC};
+
+	mode_t mode;
+
+	uint32_t ticks;
+
+private:
+	PingGenerator ping;
+	EdgeDetector tapEdge;
+	FlipFlop triggerPing;
+	EdgeDetector pingEdge;
+	LongPressDetector tapLongPress;
 };
 
 } // namespace MetaModule
