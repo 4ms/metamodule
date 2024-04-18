@@ -3,6 +3,7 @@
 #include "info/MPEG_info.hh"
 
 #include "mpeg/PingGenerator.h"
+#include "mpeg/ClockDivMult.h"
 
 #include "helpers/EdgeDetector.h"
 #include "helpers/FlipFlop.h"
@@ -48,12 +49,17 @@ public:
 
 		ping.update(ticks);
 
-		setLED<CycleButton>(ping.getPhase() < 0.5f);
-		setOutput<EofOut>(ping.getPhase() < 0.5f);
+		clockDivMult.setFactor(getState<Div_MultKnob>(), getInput<DivIn>());
+
+		clockDivMult.update((ping.getPhase() > 0.f && ping.getPhase() < 0.5f), ticks);
+
+		setLED<PingButton>(clockDivMult.getPhase() < 0.5f);
+		setOutput<EofOut>(clockDivMult.getPhase() < 0.5f);
 	}
 
 	void set_samplerate(float sr) override {
 		tapLongPress.set_samplerate(sr);
+		clockDivMult.set_samplerate(sr);
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -75,6 +81,7 @@ private:
 	FlipFlop triggerPing;
 	EdgeDetector pingEdge;
 	LongPressDetector tapLongPress;
+	ClockDivMult clockDivMult;
 };
 
 } // namespace MetaModule
