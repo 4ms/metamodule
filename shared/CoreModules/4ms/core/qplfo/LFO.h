@@ -32,17 +32,8 @@ public:
 
             phase += phaseIncrement;
 
-            if (phase > 1.0f)
+            if (phase >= 1.0f)
             {
-                // phase = std::fmod(phase, 1.0f);
-
-                // track skew touching zero
-                skewTouchedZeroLastPeriod = skewTouchedZero;
-                skewTouchedZero = false;
-
-                // always set new mode on a new period
-                nextMode = mode;
-
                 running = false;
             }
         }
@@ -128,6 +119,12 @@ public:
 
     void start()
     {
+        // track skew touching zero
+        skewTouchedZeroLastPeriod = skewTouchedZero;
+        skewTouchedZero = false;
+        // always set new mode on a new period
+        nextMode = mode;
+
         phase = 0.f;
         running = true;
     }
