@@ -95,7 +95,11 @@ private:
 					{
 						lfo.setPeriodLength((ticks - *lastExtClockTime) * timeStepInS);
 						//don't start in "floating reset mode"
-						if(resetIn < TriggerThresholdInV)
+						if(resetIn > TriggerThresholdInV)
+						{
+							armLFO = true;
+						}
+						else
 						{
 							lfo.start();
 						}
@@ -123,9 +127,17 @@ private:
 				}
 
 				//don't start in "floating reset mode"
-				if(tapEdge(tapPing.updateTapOut(ticks)) && (resetIn < TriggerThresholdInV))
+				if(tapEdge(tapPing.updateTapOut(ticks)))
 				{
-					lfo.start();
+					//don't start in "floating reset mode"
+					if(resetIn > TriggerThresholdInV)
+					{
+						armLFO = true;
+					}
+					else
+					{
+						lfo.start();
+					}
 				} 
 
 				if (getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED) 
@@ -162,10 +174,11 @@ private:
 			//cycle in "floating reset mode"
 			if(resetIn > TriggerThresholdInV)
 			{
-				if(lfo.isRunning() != true)
+				if (armLFO == true && lfo.isRunning() != true)
 				{
 					lfo.start();
-				}
+					armLFO = false;
+				}		
 			}
 
 			auto onButtonState = getState<Mapping::OnButton>();
@@ -236,6 +249,7 @@ private:
 
 		float timeStepInS = 1.f / 48000.f;
 		uint32_t ticks = 0;
+		bool armLFO = false;
 	};
 
 private:
