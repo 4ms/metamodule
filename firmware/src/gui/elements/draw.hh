@@ -42,7 +42,23 @@ inline lv_obj_t *draw_element(const FlipSwitch &el, lv_obj_t *canvas, uint32_t m
 inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
 	if (!obj) {
-		return nullptr;
+		obj = lv_obj_create(canvas);
+		float x = mm_to_px(el.x_mm, module_height);
+		float y = mm_to_px(el.y_mm, module_height);
+		float width = mm_to_px(el.width_mm, module_height);
+		float height = mm_to_px(el.width_mm, module_height);
+		float zoom = module_height / 240.f;
+		x = fix_zoomed_coord(el.coords, x, width, zoom);
+		y = fix_zoomed_coord(el.coords, y, height, zoom);
+		lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
+		int16_t pos_x = std::round(x);
+		int16_t pos_y = std::round(y);
+		lv_obj_set_pos(obj, pos_x, pos_y);
+		lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
+		lv_obj_set_size(obj, el.width_mm, el.height_mm);
+		lv_obj_set_style_pad_all(obj, 0, LV_STATE_DEFAULT);
+		lv_obj_add_flag(obj, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 	}
 
 	lv_obj_refr_size(obj);
