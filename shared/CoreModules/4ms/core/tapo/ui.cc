@@ -30,6 +30,12 @@
 #include "ui.hh"
 #include "stmlib/utils/random.h"
 
+// #define PRINTS
+
+#ifdef PRINTS
+#include <cstdio>
+#endif
+
 namespace TapoDelay {
 
 using namespace stmlib;
@@ -85,14 +91,32 @@ void Ui::Init(MultitapDelay* delay, Parameters* parameters) {
   }
 }
 
-void Ui::LoadSlot(uint8_t slot) {
-  if ((current_slot_ == slot && next_slot_ == -1) || next_slot_ == slot)
+void Ui::ReloadCurrentSlot()
+{
+  // TODO: this is taken from below
+  // Not sure if it is always the right thing to do
+  int current = next_slot_ < 0 ? current_slot_ : next_slot_;
+
+  LoadSlot(current, true);
+}
+
+void Ui::LoadSlot(uint8_t slot, bool force) {
+
+  #ifdef PRINTS
+  printf("Request loading slot %d (current %d next %d forced %u)\n", slot, current_slot_, next_slot_, force);
+  #endif
+
+  if (not force and ((current_slot_ == slot && next_slot_ == -1) || next_slot_ == slot))
     return;
 
   next_slot_ = slot;
   // if morph=0, we add 1 to correctly switch to next slot
   sample_counter_to_next_slot_ = parameters_->morph + 1;
   delay_->Load(persistent_.mutable_slot(next_slot_));
+
+  #ifdef PRINTS
+  printf("Loaded slot %d\n", next_slot_);
+  #endif
 }
 
 void Ui::SequencerStep(float morph_time) {

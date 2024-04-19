@@ -75,6 +75,8 @@ class Ui {
     queue_.AddEvent(control_type, id, data);
   }
 
+  void ReloadCurrentSlot();
+
   void ReadParameters() {
     control_.Read(parameters_, sequencer_mode_);
 
@@ -134,7 +136,7 @@ class Ui {
   }
   void set_current_slot(int8_t val)
   {
-    current_slot_ = val;
+    LoadSlot(val, true);
   }
 
  private:
@@ -145,7 +147,7 @@ class Ui {
   void ParseSettingsCurrentPage();
   void SaveSettings();
   void PaintLeds();
-  void LoadSlot(uint8_t slot);
+  void LoadSlot(uint8_t slot, bool force=false);
 
   stmlib::EventQueue<64> queue_{system_clock_};
 
