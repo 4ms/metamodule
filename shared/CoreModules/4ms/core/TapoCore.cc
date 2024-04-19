@@ -169,6 +169,8 @@ public:
 		}
 		delay.set_sync(saveState.sync);
 		delay.set_repeat(saveState.repeat ? 1.0f : 0.0f);
+
+		ui.ReloadCurrentSlot();
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
