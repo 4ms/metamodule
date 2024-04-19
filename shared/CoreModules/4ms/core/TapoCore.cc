@@ -113,8 +113,14 @@ public:
 		auto newSaveState = alpaca::deserialize<alpaca::options::with_version, SaveState_t>(raw_data, ec);
 		if (!ec)
 		{
-			// only keep current save state but don't apply here
+			// store current state so it can be applied later
 			saveState = newSaveState;
+
+			#ifdef PRINTS
+			printf("Loaded: Repeat %u, Current Slot %d, Sync %u, NumbSlots %u\n", saveState.repeat, saveState.current_slot, saveState.sync, saveState.slots.size());
+			#endif
+
+			applySaveState();
 		}
 		else
 		{
