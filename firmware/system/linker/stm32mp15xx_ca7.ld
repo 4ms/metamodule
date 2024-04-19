@@ -32,18 +32,13 @@ SECTIONS
 		*(.irqhandler)
         *(.text)
         *(.text*)
+
+		/* Keep symbols that we want to export to plugin API */
 		KEEP(*vcv_plugin*:(.text*))
 		KEEP(*jansson*:(.text*))
 		KEEP(*pffft*:(.text*))
-		KEEP(*(.text._ZdlPv))
-		/* FIXME: these aren't in main.elf*/
-		KEEP(*(.text._ZNSaIcEC1Ev))
-		KEEP(*(.text._ZNSaIcEC2Ev))
-		KEEP(*(.text._ZNSaIcED1Ev))
-		KEEP(*(.text._ZNSaIcED2Ev))
-		KEEP(*(.text._ZNSaIcEC1ERKS_))
-		KEEP(*(.text._ZNSaIcEC2ERKS_))
-					/* Todo: check if we need the next 5 lines */
+		KEEP(libcpp_stub*(.text*))
+
 		*(.glue_7)         /* glue arm to thumb code */
 		*(.glue_7t)        /* glue thumb to arm code */
 		*(.eh_frame)

@@ -49,6 +49,7 @@ add_custom_command(
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
           --objdir ${CMAKE_BINARY_DIR}/vcv_plugin/
           --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
+          --checkplugin ../../mm-plugins/BogAudio/metamodule-plugins/BogaudioModules/BogaudioModules.so
           --elf $<TARGET_FILE:main.elf>
           --yaml ${SYMBOLS_FILE}
           --json ${SYMBOLS_JSON_FILE}

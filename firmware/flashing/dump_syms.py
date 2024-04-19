@@ -60,72 +60,41 @@ def GetAddressesOfSymbols(file, needed_syms):
 # These are symbols that are already in main.elf, but I don't know an easy way to find them
 def GetLibcSymbols():
     libc_syms = [
-         "abort",
 
-        #string;
-         "fputs",
-         "printf",
-         "fprintf",
-         "snprintf",
-         "sprintf",
-         "vsnprintf",
-         "puts",
-         "time", 
-         "strcmp", 
-         "strlen",
-         "memchr",
-         "memcmp",
-         "memcpy",
-         "memmove",
-         "memset",
-
+         # These needed if plugin compiled with libc sources
+         "malloc",
          "calloc",
          "realloc",
          "free",
-
-         "__aeabi_f2ulz", #not found in main
-         "__aeabi_f2lz", #not found in main
-         "__aeabi_l2f",
-         "__aeabi_ul2f",
+         "_malloc_r",
+         "_calloc_r",
+         "_realloc_r",
+         "_free_r",
+         "abort",
+         "__atexit",
+         "__atexit_recursive_mutex",
+         # FIXME: why is __aeabi_l2d not found in the plugin's libgcc?
          "__aeabi_l2d",
-         "__aeabi_d2lz",
-         "__aeabi_ldivmod",
-         "__aeabi_uldivmod",
-         "__divsc3", #not found in main
-         "__mulsc3", #not found in main
-         "__muldc3", #not found in main
-         "csqrtf", #not found in main
 
+        # These symbols needed if plugin compiled with static libc:
+         # "_exit",
+         # "_getpid",
+         # "_close",
+         # "_fstat",
+         # "_isatty",
+         # "_write",
+         # "_kill",
+         # "_read",
+         # "_lseek",
+         # "_sbrk",
+         # "_fini",
+
+         # These are always defined by firmware
+         # TODO: how can we call the atexit functions of the plugin on unload?
          "__assert_func",
+         "_impure_ptr",
          "__aeabi_atexit",
          "__cxa_pure_virtual",
-         "_impure_ptr",
-
-         "_Znwj", # operator new(unsigned int)
-         "_Znaj", # operator new[](unsigned int)
-         "_ZdlPv", # operator delete(void*)
-         "_ZdaPv", # operator delete[](void*)
-         "_ZdlPvj", # operator delete(void*, unsigned int)
-
-         "_ZSt20__throw_length_errorPKc", #std::__throw_length_error(char const*)
-         "_ZSt19__throw_logic_errorPKc", #std::__throw_logic_error(char const*)
-         "_ZSt17__throw_bad_allocv", #
-         "_ZSt28__throw_bad_array_new_lengthv", #
-         "_ZSt24__throw_out_of_range_fmtPKcz",
-         "_ZSt25__throw_bad_function_callv",
-
-         "_ZNSt19_Sp_make_shared_tag5_S_eqERKSt9type_info",
-         "_ZNSt8__detail15_List_node_base7_M_hookEPS0_",
-
-         "_ZNKSt8__detail20_Prime_rehash_policy14_M_need_rehashEjjj",
-         "_ZSt11_Hash_bytesPKvjj",
-
-         # Not found, replaced with an empty function
-         # "_ZNSaIcEC1Ev", # std::allocator<char>::allocator()
-         # "_ZNSaIcED1Ev", # std::allocator<char>::~allocator()
-         # "_ZNSaIcED2Ev", # std::allocator<char>::~allocator() ? somehow different?
-         # "_ZNSaIcEC1ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&)
-         # "_ZNSaIcEC2ERKS_", # std::allocator<char>::allocator(std::allocator<char> const&) 
     ]
     return libc_syms
 
