@@ -54,6 +54,8 @@ public:
   void Init(short* buffer, int32_t buffer_size, uint32_t sample_rate);
   void Process(Parameters *params, ShortFrame* input, ShortFrame* output);
 
+  void changeSampleRate(uint32_t);
+
   void AddTap(Parameters *params);
   void Clear();
   void RemoveLastTap();

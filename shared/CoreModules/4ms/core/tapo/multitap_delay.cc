@@ -59,6 +59,21 @@ void MultitapDelay::Init(short* buffer, int32_t buffer_size, const uint32_t samp
   buffer_.Clear();
 };
 
+void MultitapDelay::changeSampleRate(uint32_t sample_rate)
+{
+  const int32_t kClockDefaultPeriod = 1 * sample_rate;
+  clock_period_.Init(kClockDefaultPeriod);
+  clock_period_smoothed_ = kClockDefaultPeriod;
+  sync_scale_ = kClockDefaultPeriod;
+
+  kMaxQuantizeClock = 2 * sample_rate;
+
+  for (size_t i=0; i<kMaxTaps; i++) {
+    taps_[i].Init(sample_rate);
+  }
+  tap_allocator_.Init(taps_);
+}
+
 void MultitapDelay::set_repeat(bool state) {
   if (state) {
     repeat_fader_.fade_in(prev_params_.morph + 1.0f);
