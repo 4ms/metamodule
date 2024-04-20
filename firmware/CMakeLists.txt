@@ -42,10 +42,11 @@ add_subdirectory(src ${A7_BIN_PATH})
 
 set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
 set(API_SYMBOL_NAMES_FILE ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugin-sdk/api-symbols.txt)
+get_target_property(CoreModulesBinDir CoreModules BINARY_DIR)
+get_target_property(VcvPluginBinDir vcv_plugin BINARY_DIR)
 set(SYMBOLS_BINFILE_DIRS
-  #TODO: replace hard-coded dirs with target properties
-  --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
-  --objdir ${CMAKE_BINARY_DIR}/vcv_plugin/
+  --objdir ${CoreModulesBinDir} #${CMAKE_BINARY_DIR}/mp1corea7/medium/CoreModules/
+  --objdir ${VcvPluginBinDir} #${CMAKE_BINARY_DIR}/vcv_plugin/
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
 )
 

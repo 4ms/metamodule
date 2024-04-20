@@ -112,8 +112,6 @@ add_executable(
   #
   ${FWDIR}/src/dynload/dynloader.cc
   #
-  ${SHARED}/CoreModules/hub/hub_medium.cc
-  ${SHARED}/CoreModules/moduleFactory.cc
   ${SHARED}/patch_convert/yaml_to_patch.cc
   ${SHARED}/patch_convert/patch_to_yaml.cc
   ${SHARED}/patch_convert/ryml/ryml_serial.cc
@@ -163,6 +161,9 @@ add_executable(
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
+# CoreModules sources
+add_subdirectory(${SHARED}/CoreModules CoreModules)
+
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
   ${FWDIR}/src/core_a7/aux_core_main.cc
@@ -170,10 +171,6 @@ set_source_files_properties(
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 
-set_source_files_properties(
-  ${SHARED}/CoreModules/moduleFactory.cc
-  PROPERTIES COMPILE_OPTIONS "-fno-lto"
-)
 
 target_include_directories(
   main.elf
@@ -202,7 +199,7 @@ if (NOT TARGET cpputil::cpputil)
 endif()
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml cpputil vcv_ports)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui ryml cpputil vcv_ports)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
 
 if (METAMODULE_PCB_VERSION)
