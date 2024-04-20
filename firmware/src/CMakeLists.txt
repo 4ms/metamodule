@@ -83,7 +83,7 @@ target_link_libraries(ui PRIVATE lvgl)
 #
 
 if (NOT TARGET metamodule::core-interface)
-  add_subdirectory(${SHARED}/CoreModules/metamodule-core-interface metamodule-core-interface)
+  add_subdirectory(${FWDIR}/metamodule-plugin-sdk/metamodule-core-interface metamodule-core-interface)
 endif()
 
 #

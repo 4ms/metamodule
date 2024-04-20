@@ -7,11 +7,11 @@ project(VCV-Plugin-Interface)
 set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../)
 
 if (NOT TARGET metamodule::rack-interface)
-  add_subdirectory(metamodule-rack-interface)
+  add_subdirectory(${MM_ROOT}/firmware/metamodule-plugin-sdk/metamodule-rack-interface metamodule-rack-interface)
 endif()
 
 if (NOT TARGET metamodule::core-interface)
-  add_subdirectory(${MM_ROOT}/shared/CoreModules/metamodule-core-interface metamodule-core-interface)
+  add_subdirectory(${MM_ROOT}/firmware/metamodule-plugin-sdk/metamodule-core-interface metamodule-core-interface)
 endif()
 
 #######################

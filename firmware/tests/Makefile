@@ -39,7 +39,7 @@ CXXFLAGS = 	-Wall \
 			-I../shared/patch_convert \
 			-I../shared/patch_convert/ryml \
 			-I../shared/CoreModules \
-			-I../shared/CoreModules/metamodule-core-interface \
+			-Imetamodule-plugin-sdk/metamodule-core-interface \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
 			-isystem $(TEST_DIR) \

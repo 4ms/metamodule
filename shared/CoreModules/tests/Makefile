@@ -25,7 +25,7 @@ CXXFLAGS = 	-Wall \
 		 	-std=gnu++20 \
 			-I. \
 			-I.. \
-			-Imetamodule-core-interface \
+			-I../../firmware/metamodule-plugin-sdk/metamodule-core-interface \
 			-I../../shared/cpputil \
 			-I$(RYMLDIR) \
 			-I$(RYMLDIR)/rapidyaml/src \
