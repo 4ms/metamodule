@@ -139,6 +139,9 @@ class Ui {
     LoadSlot(val, true);
   }
 
+  void setSettingsItem(int page, int item);
+  int getSettingsItem(int page);
+
  private:
   void OnButtonPressed(const stmlib::Event& e);
   void OnButtonReleased(const stmlib::Event& e);

@@ -119,6 +119,16 @@ void Ui::LoadSlot(uint8_t slot, bool force) {
   #endif
 }
 
+void Ui::setSettingsItem(int page, int item)
+{
+    settings_item_[page] = item;
+    ParseSettings();
+}
+int Ui::getSettingsItem(int page)
+{
+    return settings_item_[page];
+}
+
 void Ui::SequencerStep(float morph_time) {
   int current = next_slot_ < 0 ? current_slot_ : next_slot_;
 
@@ -395,6 +405,11 @@ void Ui::ParseSettings() {
 
 void Ui::ParseSettingsCurrentPage() {
   int p = settings_item_[settings_page_];
+
+  #ifdef PRINTS
+  printf("Set Setting page %d %d\n", settings_page_, p);
+  #endif
+
   switch (settings_page_) {
   case PAGE_VELOCITY_PARAMETER: {
     parameters_->velocity_parameter = static_cast<float>(p) / 4.0f;
