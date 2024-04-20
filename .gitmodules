@@ -37,9 +37,6 @@
 [submodule "firmware/src/wifi/comm/flat"]
 	path = firmware/src/wifi/comm/flat
 	url = https://github.com/4ms/metamodule-bridge-protocol.git
-[submodule "firmware/metamodule-rack-interface"]
-	path = firmware/vcv_plugin/interface/metamodule-rack-interface
-	url = git@github.com:4ms/metamodule-rack-interface.git
 [submodule "firmware/vcv_ports/eightfold"]
 	path = firmware/vcv_ports/eightfold
 	url = https://github.com/scanner-darkly/eightfold.git
