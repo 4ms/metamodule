@@ -335,7 +335,7 @@ private:
 
 	void pollAltParameters()
 	{
-		auto ProcessAltParam = [this](std::size_t index, unsigned newVal)
+		auto ProcessAltParam = [this](std::size_t index, unsigned newVal) -> std::optional<unsigned>
 		{
 			auto& thisOldValue = altParamsOldValues[index];
 
@@ -346,12 +346,37 @@ private:
 
 				ui.setSettingsItem(int(index), int(newVal));
 			}
+			else
+			{
+				// check the setting has been changed internally
+				// and alt param needs to be updated
+				auto internalValue = unsigned(ui.getSettingsItem(int(index)));
+				if (thisOldValue and internalValue != thisOldValue)
+				{
+					return internalValue;
+				}
+			}
+
+			return std::nullopt;
 		};
 
-		ProcessAltParam(TapoDelay::SettingsPages::PAGE_VELOCITY_PARAMETER, getState<VelocityAltParam>());
-		ProcessAltParam(TapoDelay::SettingsPages::PAGE_BANK, getState<BankAltParam>());
-		ProcessAltParam(TapoDelay::SettingsPages::PAGE_PANNING_MODE, getState<PanAltParam>());
-		ProcessAltParam(TapoDelay::SettingsPages::PAGE_SEQUENCER, getState<ModeAltParam>());
+		if (auto newVal = ProcessAltParam(TapoDelay::SettingsPages::PAGE_VELOCITY_PARAMETER, getState<VelocityAltParam>()); newVal)
+		{
+			// set alt param if this is supported
+		}
+		if (auto newVal = ProcessAltParam(TapoDelay::SettingsPages::PAGE_BANK, getState<BankAltParam>()); newVal)
+		{
+			// set alt param if this is supported
+		}
+		if (auto newVal = ProcessAltParam(TapoDelay::SettingsPages::PAGE_PANNING_MODE, getState<PanAltParam>()); newVal)
+		{
+			// set alt param if this is supported
+		}
+		if (auto newVal = ProcessAltParam(TapoDelay::SettingsPages::PAGE_SEQUENCER, getState<ModeAltParam>()); newVal)
+		{
+			// set alt param if this is supported
+		}
+
 	}
 
 	void onTapDetected()
