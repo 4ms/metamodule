@@ -24,19 +24,13 @@ class TapoCore : public SmartCoreProcessor<TapoInfo> {
 public:
 	TapoCore() : audioBufferFillCount(0), gateOutCounter(0), uiSampleCounter(0)
 	{
-		initialize(DefaultSampleRateInHz);
+		#ifdef PRINTS
+		printf("Constructor TapoCore\n");
+		#endif
 
-		for (std::size_t i=0; i<TapoDelay::kNumSlots; i++)
-		{
-			ui.getPersistentStorage().ResetSlot(i);
-		}
-	}
+		delay.Init((short*)buffer.data(), buffer.size()/sizeof(short) / 2, DefaultSampleRateInHz);
 
-	void initialize(uint32_t sample_rate)
-	{
-		currentSampleRate = sample_rate;
-
-		delay.Init((short*)buffer.data(), buffer.size()/sizeof(short) / 2, sample_rate);
+		currentSampleRateInHz = DefaultSampleRateInHz;
 
 		delay.tap_modulo_observable_.set_observer([this]
 		{
@@ -56,11 +50,34 @@ public:
 		ui.getADCDriver().set(TapoDelay::ADC_TAPTRIG_CV,   	0.0f);
 		ui.getADCDriver().set(TapoDelay::ADC_CLOCK_CV,   	0.0f);
 
-		applySaveState();
+		for (std::size_t i=0; i<TapoDelay::kNumSlots; i++)
+		{
+			ui.getPersistentStorage().ResetSlot(i);
+		}
+	}
+
+	void set_samplerate(float sr) override {
+
+		auto new_samplerate = uint32_t(std::round(sr));
+
+		if (new_samplerate != currentSampleRateInHz)
+		{
+			populateSaveState();
+
+			#ifdef PRINTS
+			printf("Change sample rate %uHz -> %uHz\n", currentSampleRateInHz, new_samplerate);
+			#endif
+
+			currentSampleRateInHz = new_samplerate;
+			
+			delay.changeSampleRate(currentSampleRateInHz);
+
+			applySaveState();	
+		}
 	}
 
 	void update() override {
-		if (uiSampleCounter++ >= (currentSampleRate/TickFreqHz)) {
+		if (uiSampleCounter++ >= (float(currentSampleRateInHz)/TickFreqHz)) {
 			uiSampleCounter = 0;
 
 			sideloadDrivers();
@@ -84,10 +101,6 @@ public:
 		audioBufferFillCount++;
 
 		updateGateOut();
-	}
-
-	void set_samplerate(float sr) override {
-		initialize(std::round(sr));
 	}
 
 	//////////////////////////////////
@@ -370,7 +383,7 @@ private:
 
 	void pingGateOut()
 	{
-		gateOutCounter = GateOutLengthInS * currentSampleRate ;
+		gateOutCounter = GateOutLengthInS * float(currentSampleRateInHz);
 		setOutput<GateOut>(GateOutVoltageInVolt);
 	}	
 
@@ -390,7 +403,7 @@ private:
 	static constexpr float VelocityCVInputFullScaleInVolt = 8.0f;
 
 private:
-	float currentSampleRate;
+	uint32_t currentSampleRateInHz;
 
 private:
 	static constexpr std::size_t BufferSizeInBytes = 0x02000000;
