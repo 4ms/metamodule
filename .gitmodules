@@ -40,3 +40,6 @@
 [submodule "firmware/vcv_ports/eightfold"]
 	path = firmware/vcv_ports/eightfold
 	url = https://github.com/scanner-darkly/eightfold.git
+[submodule "firmware/metamodule-plugin-sdk"]
+	path = firmware/metamodule-plugin-sdk
+	url = https://github.com/4ms/metamodule-plugin-sdk.git
