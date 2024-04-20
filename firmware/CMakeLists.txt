@@ -41,31 +41,45 @@ add_subdirectory(src ${A7_BIN_PATH})
 #
 
 set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
-set(SYMBOLS_JSON_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.json)
+set(API_SYMBOL_NAMES_FILE ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugin-sdk/api-symbols.txt)
+set(SYMBOLS_BINFILE_DIRS
+  #TODO: replace hard-coded dirs with target properties
+  --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
+  --objdir ${CMAKE_BINARY_DIR}/vcv_plugin/
+  --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
+)
+
+add_custom_command(
+  OUTPUT ${API_SYMBOL_NAMES_FILE}
+  COMMAND scripts/dump_syms.py
+          ${SYMBOLS_BINFILE_DIRS}
+          --text-out ${API_SYMBOL_NAMES_FILE}
+		  #-v
+  DEPENDS main.elf
+  COMMENT "Creating new API symbol list file in the SDK directory ${API_SYMBOL_NAMES_FILE}"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk
+  VERBATIM USES_TERMINAL
+)
+
+add_custom_target(new-api-sym-list DEPENDS ${API_SYMBOL_NAMES_FILE})
+
 add_custom_command(
   OUTPUT ${SYMBOLS_FILE}
-  #TODO: fix hard-coded dirs
-  COMMAND flashing/dump_syms.py # -v
-          --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/Users/dann/4ms/stm32/meta-module/shared/CoreModules/
-          --objdir ${CMAKE_BINARY_DIR}/vcv_plugin/
-          --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
-          --checkplugin ../../mm-plugins/BogAudio/metamodule-plugins/BogaudioModules/BogaudioModules.so
+  COMMAND scripts/find_syms.py
+          --symbols ${API_SYMBOL_NAMES_FILE}
           --elf $<TARGET_FILE:main.elf>
-          --yaml ${SYMBOLS_FILE}
-          --json ${SYMBOLS_JSON_FILE}
+          --out ${SYMBOLS_FILE}
           # -v
   COMMAND ${CMAKE_OBJCOPY} --update-section .symlist=${SYMBOLS_FILE} $<TARGET_FILE:main.elf> $<TARGET_FILE:main.elf> 
   DEPENDS main.elf 
-  COMMENT "Exporting symbols"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMENT "Generating table of API symbol addresses and installing in firmware binary"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk
   VERBATIM USES_TERMINAL
 )
 
 #
 # Asset Dir
 #
-#TODO
-# 
 
 set(ASSET_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/assets)
 set(ASSET_IMG_FILENAME  assets.uimg)
