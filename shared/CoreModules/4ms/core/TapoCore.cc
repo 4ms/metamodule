@@ -134,14 +134,7 @@ public:
 
 	std::string save_state() override 
 	{
-		// set current state so it will be applied correctly on sample rate change
-		saveState = SaveState_t
-		{
-			.repeat = delay.repeat() > 0.0f,
-			.current_slot = ui.current_slot(),
-			.sync = delay.sync(),
-			.slots = ui.getPersistentStorage().get_custom_slots()
-		};
+		populateSaveState();
 
 		#ifdef PRINTS
 		printf("Save: Repeat %u, Current Slot %d, Sync %u, NumbSlots %u\n", saveState.repeat, saveState.current_slot, saveState.sync, saveState.slots.size());
@@ -171,6 +164,22 @@ public:
 		delay.set_repeat(saveState.repeat ? 1.0f : 0.0f);
 
 		ui.ReloadCurrentSlot();
+	}
+
+	void populateSaveState()
+	{
+		// set current state so it will be applied correctly on sample rate change
+		saveState = SaveState_t
+		{
+			.repeat = delay.repeat() > 0.0f,
+			.current_slot = ui.current_slot(),
+			.sync = delay.sync(),
+			.slots = ui.getPersistentStorage().get_custom_slots()
+		};
+
+		#ifdef PRINTS
+		printf("Populate: Repeat %u, Current Slot %d, Sync %u, NumbSlots %u\n", saveState.repeat, saveState.current_slot, saveState.sync, saveState.slots.size());
+		#endif
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
