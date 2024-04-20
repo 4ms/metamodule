@@ -550,10 +550,12 @@ void Ui::OnButtonReleased(const Event& e) {
         mode_ = UI_MODE_CONFIRM_SAVE;
       }
       else if (e.data >= kLongPressDuration) {
-        if (e.control_id <= BUTTON_4) {
-          mode_ = UI_MODE_SETTINGS;
-          settings_page_ = e.control_id;
-        }
+        // Setting settings via UI disabled
+        // since they are controlled by alt parameters
+        // if (e.control_id <= BUTTON_4) {
+        //   mode_ = UI_MODE_SETTINGS;
+        //   settings_page_ = e.control_id;
+        // }
       } else {
         LoadSlot(bank_ * 6 + e.control_id);
       }
