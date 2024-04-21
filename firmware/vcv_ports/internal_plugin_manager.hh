@@ -49,6 +49,8 @@ struct InternalPluginManager {
 	void load_internal_plugins() {
 		//Load internal plugins
 		//TODO: how to do this from build system?
+
+#ifndef BUILD_DYN_PLUGIN_Befaco
 		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
 		pluginInstance = &befaco_plugin;
 		pluginInstance->addModel(modelEvenVCO);
@@ -69,7 +71,9 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelChannelStrip);
 		pluginInstance->addModel(modelMotionMTR);
 		pluginInstance->addModel(modelSpringReverb);
+#endif
 
+#ifndef BUILD_DYN_PLUGIN_AudibleInstruments
 		auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
 		pluginInstance = &audins_plugin;
 		pluginInstance->addModel(modelBlinds);
@@ -93,7 +97,9 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelStreams);
 		pluginInstance->addModel(modelTides);
 		pluginInstance->addModel(modelWarps);
+#endif
 
+#ifndef BUILD_DYN_PLUGIN_hetrickcv
 		auto &hcv_plugin = internal_plugins.emplace_back("hetrickcv");
 		pluginInstance = &hcv_plugin;
 		pluginInstance->addModel(modelTwoToFour);
@@ -163,7 +169,9 @@ struct InternalPluginManager {
 		// 	pluginInstance->addModel(modelRandomGates);
 		// 	pluginInstance->addModel(modelRotator);
 		// 	pluginInstance->addModel(modelRungler);
+#endif
 
+#ifndef BUILD_DYN_PLUGIN_nonlinearcircuits
 		auto &nlc_plugin = internal_plugins.emplace_back("nonlinearcircuits");
 		pluginInstance = &nlc_plugin;
 		pluginInstance->addModel(model4Seq);
@@ -184,10 +192,13 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelSquidAxon);
 		pluginInstance->addModel(modelStatues);
 		pluginInstance->addModel(modelTripleSloth);
+#endif
 
+#ifndef BUILD_DYN_PLUGIN_eightfold
 		auto &eightfold_plugin = internal_plugins.emplace_back("eightfold");
 		pluginInstance = &eightfold_plugin;
 		pluginInstance->addModel(modelSDOrcasHeartV2);
+#endif
 	}
 };
 } // namespace MetaModule

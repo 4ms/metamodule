@@ -206,6 +206,12 @@ if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
 endif()
 
+include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
+foreach(brand ${brands})
+	if (DEFINED BUILD_DYN_PLUGIN_${brand})
+	target_compile_definitions(main.elf PRIVATE -DBUILD_DYN_PLUGIN_${brand})
+	endif()
+endforeach()
 
 
 target_link_script(
