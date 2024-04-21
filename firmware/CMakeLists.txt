@@ -45,8 +45,8 @@ set(API_SYMBOL_NAMES_FILE ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugin-sdk/api-sy
 get_target_property(CoreModulesBinDir CoreModules BINARY_DIR)
 get_target_property(VcvPluginBinDir vcv_plugin BINARY_DIR)
 set(SYMBOLS_BINFILE_DIRS
-  --objdir ${CoreModulesBinDir} #${CMAKE_BINARY_DIR}/mp1corea7/medium/CoreModules/
-  --objdir ${VcvPluginBinDir} #${CMAKE_BINARY_DIR}/vcv_plugin/
+  --objdir ${CoreModulesBinDir} 
+  --objdir ${VcvPluginBinDir} 
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
 )
 
@@ -163,7 +163,7 @@ add_custom_target(
 
 
 #
-# Bootloader (MP1-Boot)
+# Bootloaders: MP1-Boot and MP1-DFU-USB
 #
 if ("${TOOLCHAIN_BASE_DIR}" STREQUAL "")
 	set(BOOTLOADER_TOOLCHAIN_OPT "")
@@ -286,18 +286,11 @@ include(vcv_ports/brands.cmake)
 foreach(brand ${brands})
   string(TOUPPER ${brand} BRAND)
 
-  add_custom_command(
-    OUTPUT faceplate-cmd-${brand}
-    COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for ${brand} faceplates"
-    VERBATIM USES_TERMINAL
-  )
-  add_custom_target(faceplate-images-${brand} DEPENDS faceplate-cmd-${brand})
-  add_dependencies(faceplate-images faceplate-images-${brand})
-
-  # for components, we just want _all_ components so use a glob
+  # Components
   file(GLOB ${brand}_comp_svgs ${PROJECT_SOURCE_DIR}/../graphics/${brand}/components/*.svg)
 
   # for each component svg, add_custom_command (...) to convert to lvgl
+  # TODO: SVG -> PNG, not LVGL, and place it in assets/ dir
   foreach(svg ${${brand}_comp_svgs})
     get_filename_component(svg_name ${svg} NAME_WE)
     set(outpath ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/components/)
@@ -309,6 +302,15 @@ foreach(brand ${brands})
       COMMENT "Converting component: ${svg_name} to ${svg_name}.c"
     )
   endforeach()
+
+  # Faceplates
+  add_custom_command(
+    OUTPUT faceplate-cmd-${brand}
+    COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for ${brand} faceplates"
+    VERBATIM USES_TERMINAL
+  )
+  add_custom_target(faceplate-images-${brand} DEPENDS faceplate-cmd-${brand})
+  add_dependencies(faceplate-images faceplate-images-${brand})
 
   # For faceplates, we get branded lists from glue/BRAND/modules.cmake. In this file, each brand should set
   # ${BRAND}_FACEPLATE_SVGS to be the paths to all the faceplate SVGs
