@@ -15,8 +15,6 @@ endif()
 
 #############################
 
-include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
-
 # Create library that combines all brands
 # Link against this library from outside
 add_library(_vcv_ports_internal STATIC)
@@ -35,25 +33,42 @@ add_library(vcv_ports INTERFACE)
 target_link_libraries(vcv_ports INTERFACE "$<LINK_LIBRARY:WHOLE_ARCHIVE,_vcv_ports_internal>")
 target_include_directories(vcv_ports INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
+# Get list of brands
+include(${CMAKE_CURRENT_LIST_DIR}/brands.cmake)
+
 foreach(brand ${brands})
 
-  include(${CMAKE_CURRENT_LIST_DIR}/glue/${brand}/modules.cmake)
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glue/${brand})
+  if (BUILD_DYN_PLUGIN_${brand})
+	message("Building ${brand} as external plugin")
+	include(ExternalProject)
+	# TODO: pass installation dir to plugin project. Create a cmake target `install` for the plugin in `plugin.cmake`
+	ExternalProject_Add(
+		${brand}
+		SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/glue/${brand}
+		CMAKE_ARGS -DBUILD_DYN_PLUGIN=1
+		INSTALL_COMMAND ""
+	)
 
-  target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
-  target_sources(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
+  else()
 
-  # Link against the mocked vcv interface
-  target_link_libraries(${brand}Library PRIVATE metamodule::vcv-plugin-interface)
+	message("Building ${brand} as built-in plugin")
+	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glue/${brand})
+	target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
+	target_sources(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
 
-  target_link_libraries(${brand}Library PRIVATE cpputil::cpputil)
+	# Link against the mocked vcv interface
+	target_link_libraries(${brand}Library PRIVATE metamodule::vcv-plugin-interface)
 
-  if (CMAKE_CROSSCOMPILING)
-    # Enable LTO for all brands
-    set_property(TARGET ${brand}Library PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-  endif()
+	target_link_libraries(${brand}Library PRIVATE cpputil::cpputil)
 
-  target_link_libraries(_vcv_ports_internal PUBLIC ${brand}Library)
+	if (CMAKE_CROSSCOMPILING)
+		# Enable LTO for all brands
+		set_property(TARGET ${brand}Library PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+	endif()
+
+	target_link_libraries(_vcv_ports_internal PUBLIC ${brand}Library)
+
+	endif()
 
 endforeach()
 
