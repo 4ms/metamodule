@@ -65,7 +65,7 @@ struct ParamElement : ImageElement {
 // Pots (Knobs, Sliders)
 struct Pot : ParamElement {
 	using State_t = float;
-	static constexpr State_t DefaultValue = 0.5f;
+	State_t DefaultValue = 0.5f;
 };
 
 struct Knob : Pot {};
