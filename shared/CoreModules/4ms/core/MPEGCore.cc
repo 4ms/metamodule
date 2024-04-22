@@ -4,6 +4,7 @@
 
 #include "mpeg/PingGenerator.h"
 #include "mpeg/ClockDivMult.h"
+#include "mpeg/PingableEnvelope.h"
 
 #include "helpers/EdgeDetector.h"
 #include "helpers/FlipFlop.h"
@@ -53,7 +54,21 @@ public:
 
 		clockDivMult.update((ping.getPhase() > 0.f && ping.getPhase() < 0.5f), ticks);
 
+		auto period = clockDivMult.getOutPeriod();
+		if(period.has_value())
+		{
+			env.setPeriod(*period);
+		}
+
+		if(clockEdge(clockDivMult.getPhase() < 0.1f))
+		{
+			env.start();
+		}
+
+		env.update(ticks);
+
 		setLED<PingButton>(clockDivMult.getPhase() < 0.5f);
+		setOutput<EnvOut>(env.getPhase());
 		setOutput<EofOut>(clockDivMult.getPhase() < 0.5f);
 	}
 
@@ -82,6 +97,8 @@ private:
 	EdgeDetector pingEdge;
 	LongPressDetector tapLongPress;
 	ClockDivMult clockDivMult;
+	EdgeDetector clockEdge;
+	PingableEnvelope env;
 };
 
 } // namespace MetaModule

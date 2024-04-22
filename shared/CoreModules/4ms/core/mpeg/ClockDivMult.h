@@ -106,6 +106,11 @@ public:
         return phase;
     }
 
+    std::optional<uint32_t> getOutPeriod()
+    {
+        return clockOut.periodInTicks;
+    }
+
 private:
         void calculateClockInPeriod(uint32_t timestampInTicks) {
 			if(clockIn.lastEventInTicks) {
