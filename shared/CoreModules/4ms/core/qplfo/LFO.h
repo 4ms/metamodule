@@ -20,7 +20,7 @@ Mapping::LookupTable_t<50>::generate<FadeTableRange>([](auto val) {
 class LFO
 {
 public:
-    LFO(float pulseWidthInS) : phase(0), mode(TriggerMode{}), PulseWidthInS(pulseWidthInS), resetLockPointInS(0.f), phaseOffset(0), skewTouchedZero(true), running(false)
+    LFO(float pulseWidthInS) : phase(0), mode(TriggerMode{}), PulseWidthInS(pulseWidthInS), resetLockPointInS(0.f), phaseOffset(0), skewTouchedZero(true), running(false), skew(0)
     {
     }
 
@@ -54,34 +54,49 @@ public:
         phaseOffset = 0.f;
     }
 
-    void setSkew(float val)
+    void setSkew(float val, uint32_t now)
     {
         val = std::clamp(val, 0.0f, 1.0f);
+
+        constexpr float skewChangeThresh = 0.005f;
+
+        if (val <= skew - skewChangeThresh || val >= skew + skewChangeThresh)
+        {
+            skew = val;
+            lastSkewUpdate = now;
+        }
 
         constexpr float PulseThres    = 0.02f;
         constexpr float PlugRampThres = 0.06f;
 
-        if (val < PulseThres)
+        if (skew < PulseThres)
         {
             skewTouchedZero = true;
             updateMode(TriggerMode{});
         }
-        else if (val < PlugRampThres)
+        else if (skew < PlugRampThres)
         {
             updateMode(ExpMode
             {
-                .quarticToLinearAmount = (val - PulseThres) / (PlugRampThres - PulseThres)
+                .quarticToLinearAmount = (skew - PulseThres) / (PlugRampThres - PulseThres)
             });
         }
         else
         {
-            auto fadePos = (val - PlugRampThres - PulseThres) / (1.0f - PlugRampThres - PulseThres);
+            auto fadePos = (skew - PlugRampThres - PulseThres) / (1.0f - PlugRampThres - PulseThres);
 
             updateMode(LinearMode
             {
                 .relativeRiseTime = fadePos
             });
         }
+    }
+
+    bool skewIsModulated(uint32_t now, float timeStepInS)
+    {
+        constexpr float modulationTimeoutInS = 0.05f;
+
+        return ((now - lastSkewUpdate) * timeStepInS) < modulationTimeoutInS;
     }
 
     void setPeriodLength(float valInS)
@@ -236,6 +251,7 @@ private:
 
     bool running;
 
-
+    float skew;
+    uint32_t lastSkewUpdate;
 };
 }

@@ -94,8 +94,8 @@ private:
 					if (lastExtClockTime)
 					{
 						lfo.setPeriodLength((ticks - *lastExtClockTime) * timeStepInS);
-						//don't start in "floating reset mode"
-						if(resetIn > TriggerThresholdInV)
+						//don't start in "floating reset mode" or when skew is being modulated
+						if(resetIn > TriggerThresholdInV || lfo.skewIsModulated(ticks, timeStepInS))
 						{
 							armLFO = true;
 						}
@@ -126,11 +126,10 @@ private:
 					lfo.setPeriodLength(*tapPeriod * timeStepInS);
 				}
 
-				//don't start in "floating reset mode"
 				if(tapEdge(tapPing.updateTapOut(ticks)))
 				{
-					//don't start in "floating reset mode"
-					if(resetIn > TriggerThresholdInV)
+					//don't start in "floating reset mode" of if skew is being moduluated
+					if(resetIn > TriggerThresholdInV || lfo.skewIsModulated(ticks, timeStepInS))
 					{
 						armLFO = true;
 					}
@@ -171,8 +170,8 @@ private:
 				}
 			}
 
-			//cycle in "floating reset mode"
-			if(resetIn > TriggerThresholdInV)
+			//cycle in "floating reset mode" or if skew is being modulated
+			if (resetIn > TriggerThresholdInV || lfo.skewIsModulated(ticks, timeStepInS))
 			{
 				if (armLFO == true && lfo.isRunning() != true)
 				{
@@ -180,6 +179,8 @@ private:
 					armLFO = false;
 				}		
 			}
+
+
 
 			auto onButtonState = getState<Mapping::OnButton>();
 
@@ -195,7 +196,7 @@ private:
 
 			auto skewCV = getInput<Mapping::SkewCVIn>().value_or(0) / CVInputRangeInV;
 			auto skew = std::clamp(getState<Mapping::SkewKnob>() + skewCV, 0.0f, 1.0f);
-			lfo.setSkew(skew);
+			lfo.setSkew(skew, ticks);
 
 			lfo.update(timeStepInS);
 
