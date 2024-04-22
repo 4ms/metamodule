@@ -18,7 +18,7 @@ struct MPEGInfo : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(37.35), to_mm<72>(154.72), Center, "Shape", ""}},
 		Knob9mm{{to_mm<72>(91.14), to_mm<72>(133.33), Center, "Scale", ""}},
 		Knob9mm{{to_mm<72>(91.14), to_mm<72>(188.54), Center, "Offset", ""}},
-		WhiteMomentary7mm{{to_mm<72>(30.52), to_mm<72>(41.57), Center, "Ping", ""}},
+		MomentaryRGB7mm{{to_mm<72>(30.52), to_mm<72>(41.57), Center, "Ping", ""}},
 		OrangeButton{{to_mm<72>(92.15), to_mm<72>(81.15), Center, "Cycle", ""}},
 		GateJackInput4ms{{to_mm<72>(80.21), to_mm<72>(41.57), Center, "Ping Trig", ""}},
 		GateJackInput4ms{{to_mm<72>(23.01), to_mm<72>(287.64), Center, "Trigger", ""}},

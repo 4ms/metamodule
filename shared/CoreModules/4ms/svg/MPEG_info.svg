@@ -25,7 +25,7 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.4355285"
-     inkscape:cx="76.164167"
+     inkscape:cx="75.753579"
      inkscape:cy="249.63781"
      inkscape:window-width="2512"
      inkscape:window-height="1387"
@@ -751,7 +751,8 @@
        cx="30.52"
        cy="41.57"
        r="11.34"
-       style="fill:#ffc000;stroke-width:0px" />
+       style="fill:#ffc000;stroke-width:0px"
+       data-name="Ping#MomentaryRGB7mm" />
     <text
        id="slug"
        transform="scale(0.96953597,1.0314212)"
