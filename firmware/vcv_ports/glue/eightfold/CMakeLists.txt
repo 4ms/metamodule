@@ -27,6 +27,6 @@ if (BUILD_DYN_PLUGIN)
 	create_plugin(
 		SOURCE_LIB      eightfoldLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/eightfold
-		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugins/eightfold
+		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/eightfold
 	)
 endif()

@@ -61,6 +61,6 @@ if (BUILD_DYN_PLUGIN)
 	create_plugin(
 		SOURCE_LIB      hetrickcvLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/hetrickcv
-		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugins/hetrickcv
+		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/hetrickcv
 	)
 endif()

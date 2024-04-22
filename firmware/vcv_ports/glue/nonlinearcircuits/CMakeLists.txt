@@ -37,6 +37,6 @@ if (BUILD_DYN_PLUGIN)
 	create_plugin(
 		SOURCE_LIB      nonlinearcircuitsLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/nonlinearcircuits
-		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugins/nonlinearcircuits
+		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/nonlinearcircuits
 	)
 endif()

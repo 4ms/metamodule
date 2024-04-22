@@ -54,6 +54,6 @@ if (BUILD_DYN_PLUGIN)
 	create_plugin(
 		SOURCE_LIB      AudibleInstrumentsLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/AudibleInstruments
-		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugins/AudibleInstruments
+		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/AudibleInstruments
 	)
 endif()

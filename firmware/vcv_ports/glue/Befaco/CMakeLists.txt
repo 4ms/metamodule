@@ -29,6 +29,6 @@ if (BUILD_DYN_PLUGIN)
 	create_plugin(
 		SOURCE_LIB      BefacoLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/Befaco
-		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugins/Befaco
+		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/Befaco
 	)
 endif()
