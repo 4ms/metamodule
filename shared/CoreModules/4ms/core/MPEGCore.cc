@@ -20,13 +20,39 @@ class MPEGCore : public SmartCoreProcessor<MPEGInfo> {
 
 public:
 	MPEGCore() 
-		: mode(SYNC), ticks(0), triggerPing(1.0f, 2.0f), tapLongPress(2.f)
+		: mode(SYNC), ticks(0), triggerPing(1.0f, 2.0f), tapLongPress(2.f), isCycling(false)
 	{
 
 	};
 
 	void update() override {
 		ticks++;
+
+		if (cycleButtonRisingEdge(getState<CycleButton>() == LatchingButton::State_t::DOWN))
+		{
+			isCycling = true;
+		}
+		else if (cycleButtonFallingEdge(getState<CycleButton>() == LatchingButton::State_t::DOWN))
+		{
+			isCycling = false;
+		}
+
+		auto cycleInput = getInput<CycleTrigIn>();
+		if (cycleInput.has_value())
+		{
+			if (cycleJackRisingEdge(*cycleInput > risingEdgeThresholdInV))
+			{
+				isCycling = !isCycling;
+			}
+			else if (cycleJackFallingEdge(*cycleInput > risingEdgeThresholdInV))
+			{
+				if (getState<CycleJackModeAltParam>() != 2)
+				{
+					isCycling = !isCycling;
+				}
+			}
+		}
+
 
 		if (tapEdge(getState<PingButton>() == MomentaryButton::State_t::PRESSED))
 		{
@@ -68,8 +94,10 @@ public:
 		env.update(ticks);
 
 		setLED<PingButton>(clockDivMult.getPhase() < 0.5f);
+		setLED<CycleButton>(isCycling);
 		setOutput<EnvOut>(env.getPhase());
 		setOutput<EofOut>(ping.getPhaseTap() < 0.5f);
+		setOutput<_5VEnvOut>(clockDivMult.getPhase() < 0.5f);
 	}
 
 	void set_samplerate(float sr) override {
@@ -90,6 +118,8 @@ private:
 
 	uint32_t ticks;
 
+	bool isCycling;
+
 private:
 	PingGenerator ping;
 	EdgeDetector tapEdge;
@@ -99,6 +129,13 @@ private:
 	ClockDivMult clockDivMult;
 	EdgeDetector clockEdge;
 	PingableEnvelope env;
+	EdgeDetector cycleJackRisingEdge;
+	FallingEdgeDetector cycleJackFallingEdge;
+	EdgeDetector cycleButtonRisingEdge;
+	FallingEdgeDetector cycleButtonFallingEdge;
+
+private:
+	static constexpr float risingEdgeThresholdInV = 2.5f;
 };
 
 } // namespace MetaModule
