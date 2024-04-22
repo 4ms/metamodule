@@ -31,6 +31,8 @@ void random_device::_M_init(std::__cxx11::basic_string<char, std::char_traits<ch
 } // namespace std
 
 void __attribute__((optimize("-O0"))) keep_symbols() {
+	auto x = &calloc;
+	(void)x;
 	// provides vtable for Quantity
 	rack::Quantity q;
 }
