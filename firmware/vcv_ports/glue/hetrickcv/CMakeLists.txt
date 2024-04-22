@@ -56,6 +56,8 @@ target_compile_options(
 )
 
 if (BUILD_DYN_PLUGIN)
+    target_sources(hetrickcvLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/HetrickCV.cpp)
+
 	create_plugin(
 		SOURCE_LIB      hetrickcvLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/hetrickcv

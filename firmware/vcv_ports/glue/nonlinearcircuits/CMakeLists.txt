@@ -32,6 +32,8 @@ target_compile_options(
 )
 
 if (BUILD_DYN_PLUGIN)
+    target_sources(nonlinearcircuitsLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/NLC.cpp)
+
 	create_plugin(
 		SOURCE_LIB      nonlinearcircuitsLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/nonlinearcircuits

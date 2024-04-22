@@ -22,6 +22,8 @@ target_compile_options(eightfoldLibrary PRIVATE -Wno-double-promotion)
 set_property(TARGET eightfoldLibrary PROPERTY CXX_STANDARD 20)
 
 if (BUILD_DYN_PLUGIN)
+    target_sources(eightfoldLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/plugin.cpp)
+
 	create_plugin(
 		SOURCE_LIB      eightfoldLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/eightfold

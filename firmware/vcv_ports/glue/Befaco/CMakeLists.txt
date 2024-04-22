@@ -24,6 +24,8 @@ target_compile_options(BefacoLibrary PRIVATE -Wno-double-promotion $<$<COMPILE_L
 set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 20)
 
 if (BUILD_DYN_PLUGIN)
+    target_sources(BefacoLibary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/plugin.cpp)
+
 	create_plugin(
 		SOURCE_LIB      BefacoLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/Befaco

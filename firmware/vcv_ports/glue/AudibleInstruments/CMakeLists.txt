@@ -49,6 +49,8 @@ target_compile_definitions(AudibleInstrumentsLibrary PRIVATE TEST)
 set_property(TARGET AudibleInstrumentsLibrary PROPERTY CXX_STANDARD 20)
 
 if (BUILD_DYN_PLUGIN)
+    target_sources(AudibleInstrumentsLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/plugin.cpp)
+
 	create_plugin(
 		SOURCE_LIB      AudibleInstrumentsLibrary
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/AudibleInstruments
