@@ -1,3 +1,15 @@
+cmake_minimum_required(VERSION 3.22)
+
+if (BUILD_DYN_PLUGIN)
+	include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
+endif()
+
+project(nonlinearcircuitsMetaModulePlugin 
+    VERSION 	0.1 
+    DESCRIPTION "nonlinearcircuits Plugin for MetaModule" 
+    LANGUAGES 	C CXX ASM
+)
+
 include(modules.cmake)
 
 set(EXTRA_SOURCES ${NONLINEARCIRCUITS_DIR}/src/NLCShared.cpp)
@@ -17,11 +29,12 @@ target_compile_options(
   PRIVATE -fvisibility=hidden
           $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>
           -Wno-double-promotion
-          # # Fixes for warnings with Gamma:
-          # -Wno-misleading-indentation
-          # -Wno-unused-but-set-variable
-          # -Wno-unused-function
-          # # Fixes for warnings with DSP and main source:
-          # -Wno-unused-variable
 )
 
+if (BUILD_DYN_PLUGIN)
+	create_plugin(
+		SOURCE_LIB      nonlinearcircuitsLibrary
+		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/nonlinearcircuits
+		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugins/nonlinearcircuits
+	)
+endif()
