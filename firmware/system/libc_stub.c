@@ -13,9 +13,9 @@ void _kill(int x) {
 int _getpid() {
 	return -1;
 }
-void _close() {
+void _close(int x) {
 }
-void _fstat() {
+void _fstat(int x, void *p) {
 }
 void _isatty() {
 }
