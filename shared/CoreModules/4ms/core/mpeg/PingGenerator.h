@@ -7,25 +7,25 @@
 class PingGenerator
 {
 public:
-    PingGenerator() : taps{0}, phase(0.f), lastUpdate(0), periodOrigin(NONE), isFreeRunning(true)
+    PingGenerator() : taps{0}, phase(0.f), phaseTap(0.f), lastUpdate(0), periodOrigin(NONE), isFreeRunning(true)
     {
     }
 
 
     void tap(uint32_t now)
     {
-        auto newPeriod = now - taps[1];
-        auto previousPeriod = taps[1] - taps[0];
+        auto newTapPeriod = now - taps[1];
+        auto previousTapPeriod = taps[1] - taps[0];
 
-        auto periodRatio = float(newPeriod) / float(previousPeriod);
+        auto periodRatio = float(newTapPeriod) / float(previousTapPeriod);
 
         if (periodRatio <= 1.f + maxTapOffset && periodRatio >= 1.f - maxTapOffset)
         {
-            period = (newPeriod + previousPeriod) / 2.f;
+            periodTap = (newTapPeriod + previousTapPeriod) / 2.f;
         }
         else
         {
-            period = float(newPeriod);
+            periodTap = float(newTapPeriod);
         }
 
         periodOrigin = TAP;
@@ -34,13 +34,14 @@ public:
         taps[1] = now;
 
         phase = 0.f;
+        phaseTap = 0.f;
     }
 
     void ping(uint32_t now)
     {
         if (previousPing.has_value())
         {
-            period = now - *previousPing;
+            periodPing = now - *previousPing;
             periodOrigin = PING;
         }
             
@@ -51,29 +52,44 @@ public:
 
     void update(uint32_t now)
     {
-        if(period.has_value())
+        if (periodOrigin == TAP)
         {
-            auto phaseIncrement = (now - lastUpdate) / *period;
-
-            phase += phaseIncrement;
-
-            if (periodOrigin == TAP)
+            if (periodTap.has_value())
             {
+                auto phaseIncrement = (now - lastUpdate) / *periodTap;
+                phase += phaseIncrement;
                 phase = std::fmod(phase, 1.0f);
             }
-            else if (periodOrigin == PING && isFreeRunning)
-            {
-                phase = std::fmod(phase, 1.0f);
-            }
-
-
-            lastUpdate = now;
         }
+        else if (periodOrigin == PING)
+        {
+            if (periodPing.has_value())
+            {
+                auto phaseIncrement = (now - lastUpdate) / *periodPing;
+                phase += phaseIncrement;
+            }
+
+            if (isFreeRunning)
+            {
+                phase = std::fmod(phase, 1.0f);
+            }
+        }
+
+        if (periodTap.has_value())
+        {
+            auto phaseIncrement = (now - lastUpdate) / *periodTap;
+            phaseTap += phaseIncrement;
+            phaseTap = std::fmod(phaseTap, 1.0f);
+        }
+
+
+        lastUpdate = now;
     }
 
     void reset()
     {
-        period.reset();
+        periodTap.reset();
+        periodPing.reset();
     }
 
     void setFreeRunning(bool val)
@@ -86,13 +102,20 @@ public:
         return phase;
     }
 
+    float getPhaseTap()
+    {
+        return phaseTap;
+    }
+
 private:
     std::array<uint32_t, 2> taps;
     std::optional<uint32_t> previousPing;
     float phase;
+    float phaseTap;
     uint32_t lastUpdate;
     bool isFreeRunning;
-    std::optional<float> period;
+    std::optional<float> periodTap;
+    std::optional<float> periodPing;
 
 private:
     enum PeriodOrigin_t {TAP, PING, NONE};

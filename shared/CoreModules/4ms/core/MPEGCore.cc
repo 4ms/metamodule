@@ -69,7 +69,7 @@ public:
 
 		setLED<PingButton>(clockDivMult.getPhase() < 0.5f);
 		setOutput<EnvOut>(env.getPhase());
-		setOutput<EofOut>(clockDivMult.getPhase() < 0.5f);
+		setOutput<EofOut>(ping.getPhaseTap() < 0.5f);
 	}
 
 	void set_samplerate(float sr) override {
