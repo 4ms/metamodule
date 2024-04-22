@@ -26,8 +26,7 @@ set_property(TARGET nonlinearcircuitsLibrary PROPERTY CXX_STANDARD 20)
 
 target_compile_options(
     nonlinearcircuitsLibrary
-  PRIVATE -fvisibility=hidden
-          $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>
+    PRIVATE
           -Wno-double-promotion
 )
 

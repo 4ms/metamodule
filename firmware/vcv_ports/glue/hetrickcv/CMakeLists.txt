@@ -45,8 +45,7 @@ set_property(TARGET hetrickcvLibrary PROPERTY CXX_STANDARD 20)
 
 target_compile_options(
   hetrickcvLibrary
-  PRIVATE -fvisibility=hidden
-          $<$<COMPILE_LANGUAGE:CXX>:-fvisibility-inlines-hidden>
+  PRIVATE 
           # Fixes for warnings with Gamma:
           -Wno-misleading-indentation
           -Wno-unused-but-set-variable

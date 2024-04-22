@@ -3,7 +3,7 @@
 // The pluginInstance-wide instance of the Plugin class
 Plugin *pluginInstance;
 
-__attribute__((visibility("default"))) void init(rack::Plugin *p) {
+void init(rack::Plugin *p) {
 	pluginInstance = p;
 
 	p->addModel(modelTwoToFour);
