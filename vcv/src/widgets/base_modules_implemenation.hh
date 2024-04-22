@@ -15,7 +15,7 @@ inline void do_config_element(JackOutput el, const Indices &indices, const Modul
 };
 
 inline void do_config_element(Pot el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0.f, 1.f, 0.5f, el.short_name.data());
+	context.module->configParam(indices.param_idx, 0.f, 1.f, el.DefaultValue, el.short_name.data());
 };
 
 inline void do_config_element(LightElement el, const Indices &indices, const ModuleContext_t &context) {
@@ -23,15 +23,15 @@ inline void do_config_element(LightElement el, const Indices &indices, const Mod
 };
 
 inline void do_config_element(Button el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0, 1, 0, el.short_name.data());
+	context.module->configParam(indices.param_idx, 0, 1, el.DefaultValue, el.short_name.data());
 }
 
 inline void do_config_element(SlideSwitch el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0, el.num_pos - 1, 0, el.short_name.data());
+	context.module->configParam(indices.param_idx, 0, el.num_pos - 1, el.DefaultValue, el.short_name.data());
 };
 
 inline void do_config_element(FlipSwitch el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0, el.num_pos - 1, 0, el.short_name.data());
+	context.module->configParam(indices.param_idx, 0, el.num_pos - 1, el.DefaultValue, el.short_name.data());
 };
 
 inline void do_config_element(Encoder el, const Indices &indices, const ModuleContext_t &context) {
