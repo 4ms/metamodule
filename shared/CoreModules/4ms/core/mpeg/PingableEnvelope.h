@@ -46,6 +46,11 @@ public:
         periodInTicks = valueInTicks;
     }
 
+    bool isRunning()
+    {
+        return running;
+    }
+
 private:
     timestamp_t periodInTicks;
     float phase;

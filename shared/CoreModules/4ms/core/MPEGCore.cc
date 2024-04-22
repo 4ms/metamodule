@@ -20,7 +20,7 @@ class MPEGCore : public SmartCoreProcessor<MPEGInfo> {
 
 public:
 	MPEGCore() 
-		: mode(SYNC), ticks(0), triggerPing(1.0f, 2.0f), tapLongPress(2.f), isCycling(false)
+		: mode(SYNC), ticks(0), triggerPing(1.0f, 2.0f), tapLongPress(2.f), isCycling(false), phaseOffset(0.f), startedWhileCycling(false)
 	{
 
 	};
@@ -43,6 +43,11 @@ public:
 			if (cycleJackRisingEdge(*cycleInput > risingEdgeThresholdInV))
 			{
 				isCycling = !isCycling;
+
+				if (getState<CycleJackModeAltParam>() == 1)
+				{
+					mode = SYNC;
+				}
 			}
 			else if (cycleJackFallingEdge(*cycleInput > risingEdgeThresholdInV))
 			{
@@ -51,6 +56,18 @@ public:
 					isCycling = !isCycling;
 				}
 			}
+		}
+
+		if (cycleEdge(isCycling) && mode == ASYNC)
+		{
+			env.start();
+			startedWhileCycling = isCycling;
+		}
+
+		if (isCycling && mode == ASYNC && !env.isRunning())
+		{
+			env.start();
+			startedWhileCycling = isCycling;
 		}
 
 
@@ -88,14 +105,35 @@ public:
 
 		if(clockEdge(clockDivMult.getPhase() < 0.1f))
 		{
-			env.start();
+			if (mode == SYNC)
+			{
+				env.start();
+				startedWhileCycling = isCycling;
+			}
 		}
 
 		env.update(ticks);
 
-		setLED<PingButton>(clockDivMult.getPhase() < 0.5f);
+		setLED<PingButton>(clockDivMult.getPhase() < 0.5f && clockDivMult.getPhase() > 0.f);
 		setLED<CycleButton>(isCycling);
-		setOutput<EnvOut>(env.getPhase());
+
+		if (getState<ShiftAltParam>() < 0.5f)
+		{
+			mode = SYNC;
+		}
+		else
+		{
+			mode = ASYNC;
+		}
+		setLED<_5VEnvLight>(mode == SYNC);
+
+		float envOutput = 0.f;
+		if (isCycling || startedWhileCycling)
+		{
+			envOutput = env.getPhase();
+		}
+		setOutput<EnvOut>(envOutput);
+
 		setOutput<EofOut>(ping.getPhaseTap() < 0.5f);
 		setOutput<_5VEnvOut>(clockDivMult.getPhase() < 0.5f);
 	}
@@ -119,6 +157,8 @@ private:
 	uint32_t ticks;
 
 	bool isCycling;
+	float phaseOffset;
+	bool startedWhileCycling;
 
 private:
 	PingGenerator ping;
@@ -133,6 +173,7 @@ private:
 	FallingEdgeDetector cycleJackFallingEdge;
 	EdgeDetector cycleButtonRisingEdge;
 	FallingEdgeDetector cycleButtonFallingEdge;
+	EdgeDetector cycleEdge;
 
 private:
 	static constexpr float risingEdgeThresholdInV = 2.5f;
