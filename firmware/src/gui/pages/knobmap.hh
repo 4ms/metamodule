@@ -1,7 +1,6 @@
 #pragma once
 #include "gui/elements/element_name.hh"
 #include "gui/elements/panel_name.hh"
-#include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/add_map_popup.hh"
 #include "gui/pages/base.hh"
@@ -66,14 +65,19 @@ struct KnobMapPage : PageBase {
 		patch = patch_storage.get_view_patch();
 
 		view_set_idx = args.view_knobset_id.value_or(view_set_idx);
-		auto map_idx = args.mappedknob_id.value_or(-1); //fail
-		auto findmap = patch->find_mapped_knob(view_set_idx, map_idx);
-		if (!findmap) {
+		if (view_set_idx >= patch->knob_sets.size()) {
+			return;
+		}
+
+		//mappedknob_id is the index of the MappedKnob in the MappedKnobSet::set vector
+		auto map_idx = args.mappedknob_id;
+		if (!map_idx.has_value() || map_idx.value() >= patch->knob_sets[view_set_idx].set.size()) {
 			pr_err("Mapping not found for set %d, panel_knob_id %d\n", view_set_idx, map_idx);
 			return;
 		}
-		map = *findmap;
+		map = patch->knob_sets[view_set_idx].set[map_idx.value()];
 
+		// Title
 		auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
 		lv_label_set_text(ui_ModuleMapName, fullname.module_name.data());
 		lv_label_set_text(ui_KnobMapName, fullname.element_name.data());
@@ -91,11 +95,18 @@ struct KnobMapPage : PageBase {
 		lv_label_set_text_fmt(
 			ui_MappedName, "Knob %s in '%s'", panel_name.c_str(), patch->valid_knob_set_name(view_set_idx));
 
-		float val = params.knobs[map.panel_knob_id];
-		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, val);
-
+		// Min/Max sliders
 		lv_label_set_text_fmt(ui_MinValue, "%d%%", unsigned(map.min * 100));
 		lv_label_set_text_fmt(ui_MaxValue, "%d%%", unsigned(map.max * 100));
+		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
+		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
+
+		// Knob arc
+
+		static_param = patch->find_static_knob(map.module_id, map.param_id);
+		float knob_val = static_param ? map.unmap_val(static_param->value) : 0;
+		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
+		lv_obj_set_style_opa(ui_EditMappingArc, is_actively_playing ? LV_OPA_100 : LV_OPA_50, LV_PART_KNOB);
 
 		auto color = Gui::knob_palette[map.panel_knob_id % 6];
 		lv_obj_set_style_arc_color(ui_EditMappingArc, color, LV_PART_INDICATOR);
@@ -106,17 +117,7 @@ struct KnobMapPage : PageBase {
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
-		// Set initial positions of arcs and sliders
-		bool is_patch_playing =
-			args.patch_loc_hash ? (*args.patch_loc_hash == patch_playloader.cur_patch_loc_hash()) : false;
-
-		auto s_param = patch->find_static_knob(map.module_id, map.param_id);
-		float knob_val = s_param && is_patch_playing ? s_param->value : 0;
-		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
-		lv_obj_set_style_opa(ui_EditMappingArc, is_patch_playing ? LV_OPA_100 : LV_OPA_0, LV_PART_KNOB);
-
-		lv_slider_set_value(ui_MinSlider, map.min * 100.f, LV_ANIM_OFF);
-		lv_slider_set_value(ui_MaxSlider, map.max * 100.f, LV_ANIM_OFF);
+		update_active_status();
 
 		lv_group_set_editing(group, false);
 
@@ -125,7 +126,7 @@ struct KnobMapPage : PageBase {
 	}
 
 	void update() override {
-		if (metaparams.meta_buttons[0].is_just_released()) {
+		if (metaparams.back_button.is_just_released()) {
 			if (kb_visible) {
 				hide_keyboard();
 			} else if (del_popup.is_visible()) {
@@ -135,10 +136,28 @@ struct KnobMapPage : PageBase {
 			}
 		}
 
-		auto knob_val = params.knobs[map.panel_knob_id].val;
-		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
+		update_active_status();
+
+		if (is_actively_playing && static_param) {
+			float s_val = map.unmap_val(static_param->value);
+			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, s_val);
+		}
 
 		add_map_popup.update(params);
+	}
+
+	void update_active_status() {
+		is_patch_playing = patch_is_playing(args.patch_loc_hash);
+
+		if (is_patch_playing && args.view_knobset_id.value_or(999) == page_list.get_active_knobset()) {
+			if (!is_actively_playing)
+				lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_100, LV_PART_KNOB);
+			is_actively_playing = true;
+		} else {
+			if (is_actively_playing)
+				lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_50, LV_PART_KNOB);
+			is_actively_playing = false;
+		}
 	}
 
 	void blur() final {
@@ -222,7 +241,7 @@ struct KnobMapPage : PageBase {
 		if (!page)
 			return;
 
-		page->args.mappedknob_id = page->map.panel_knob_id;
+		// Note: we keep args.mappedknob_id the same as it was when this page was loaded
 		page->args.view_knobset_id = page->view_set_idx;
 		page->page_list.request_new_page(PageId::KnobSetView, page->args);
 	}
@@ -275,6 +294,7 @@ private:
 	lv_obj_t *base = nullptr;
 	PatchData *patch;
 	MappedKnob map{};
+	const StaticParam *static_param = nullptr;
 
 	ConfirmPopup del_popup;
 
@@ -283,6 +303,9 @@ private:
 	bool kb_visible = false;
 
 	uint32_t view_set_idx = 0;
+
+	bool is_actively_playing = false;
+	bool is_patch_playing = false;
 };
 
 } // namespace MetaModule

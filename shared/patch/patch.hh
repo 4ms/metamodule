@@ -48,6 +48,12 @@ struct MappedKnob {
 		return (max - min) * panel_val + min;
 	}
 
+	float unmap_val(float mapped_val) const {
+		if (min == max)
+			return 0;
+		return (mapped_val - min) / (max - min);
+	}
+
 	bool is_panel_knob() const {
 		return panel_knob_id < PanelDef::NumKnobs;
 	}

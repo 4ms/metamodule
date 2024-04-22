@@ -4,8 +4,8 @@
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/module_param.hh"
+#include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_light.hh"
-#include "gui/elements/update.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
@@ -90,11 +90,18 @@ struct ModuleViewPage : PageBase {
 		auto display_widthpx = std::min<lv_coord_t>(width_px + 4, 190);
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
+		if (lv_obj_get_width(ui_ModuleImage) > width_px) {
+			lv_obj_clear_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
+		} else {
+			lv_obj_add_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
+		}
 
-		active_knob_set = page_list.get_active_knobset();
+		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+
+		active_knobset = page_list.get_active_knobset();
 
 		module_drawer.draw_mapped_elements(
-			*patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
+			*patch, this_module_id, active_knobset, canvas, drawn_elements, is_patch_playing);
 
 		lv_obj_update_layout(canvas);
 
@@ -173,7 +180,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
-		if (metaparams.meta_buttons[0].is_just_released()) {
+		if (metaparams.back_button.is_just_released()) {
 			if (mode == ViewMode::List) {
 				load_prev_page();
 
@@ -187,6 +194,12 @@ struct ModuleViewPage : PageBase {
 			if (mapping_pane.wants_to_close()) {
 				show_roller();
 			}
+		}
+
+		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
+			args.view_knobset_id = page_list.get_active_knobset();
+			active_knobset = page_list.get_active_knobset();
+			redraw_map_rings();
 		}
 
 		if (is_patch_playing) {
@@ -203,9 +216,10 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
 
-				auto did_move = std::visit(UpdateElement{params, *patch, gui_el}, drawn_el.element);
+				//TODO: cache s_param
+				auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
 
-				if (did_move && settings.map_ring_flash_active) {
+				if (was_redrawn && settings.map_ring_flash_active) {
 					map_ring_display.flash_once(gui_el.map_ring, true);
 				}
 
@@ -244,6 +258,25 @@ struct ModuleViewPage : PageBase {
 			if (is_patch_playing)
 				patch_mod_queue.put(patch_mod.value());
 		}
+	}
+
+	void redraw_map_rings() {
+		for (auto &drawn_el : drawn_elements) {
+			auto &gui_el = drawn_el.gui_element;
+
+			if (gui_el.count.num_params > 0 && gui_el.map_ring) {
+				lv_obj_del_async(gui_el.map_ring);
+				gui_el.map_ring = nullptr;
+			}
+		}
+
+		for (auto &drawn_el : drawn_elements) {
+			auto module_id = drawn_el.gui_element.module_idx;
+			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
+
+			ModuleDrawer{ui_ModuleImage, 240}.draw_mapped_ring(*patch, module_id, active_knobset, canvas, drawn_el);
+		}
+		update_map_ring_style();
 	}
 
 	// This gets called after map_ring_style changes
@@ -379,7 +412,7 @@ private:
 	bool is_patch_playing = false;
 	PatchData *patch;
 
-	unsigned active_knob_set = 0;
+	unsigned active_knobset = 0;
 
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_controls;

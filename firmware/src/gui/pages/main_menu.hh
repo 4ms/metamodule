@@ -60,7 +60,7 @@ private:
 			return;
 		page->patch_storage.new_patch();
 		page->patch_playloader.request_load_view_patch();
-		page->load_page(PageId::PatchView, {});
+		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patch_storage.get_view_patch_loc_hash()});
 	}
 
 	static void settings_cb(lv_event_t *event) {

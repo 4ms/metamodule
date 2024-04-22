@@ -23,6 +23,9 @@ struct MetaParams {
 	uint32_t midi_poly_chans = 1;
 
 	uint8_t audio_load = 0;
+	RotaryMotion rotary_with_metabutton{};
+	Toggler back_button{};
+	bool ignore_metabutton_release = false;
 
 	MetaParams() {
 		clear();

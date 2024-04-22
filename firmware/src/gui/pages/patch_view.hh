@@ -4,8 +4,8 @@
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
+#include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_light.hh"
-#include "gui/elements/update.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
@@ -78,8 +78,6 @@ struct PatchViewPage : PageBase {
 		bool needs_refresh = false;
 		if (gui_state.force_redraw_patch)
 			needs_refresh = true;
-		if (knobset_settings.active_knobset != page_list.get_active_knobset())
-			needs_refresh = true;
 		if (patch_revision != page_list.get_patch_revision())
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
@@ -94,13 +92,16 @@ struct PatchViewPage : PageBase {
 
 		gui_state.force_redraw_patch = false;
 
-		if (displayed_patch_loc_hash != args.patch_loc_hash) {
-			args.view_knobset_id = 0;
-		}
+		// Prepare the knobset menu with the actively playing patch's knobset
+		if (is_patch_playing)
+			knobset_settings.active_knobset = page_list.get_active_knobset();
 
-		if (args.view_knobset_id) {
-			knobset_settings.active_knobset = args.view_knobset_id.value();
-			page_list.set_active_knobset(knobset_settings.active_knobset);
+		else {
+			// Reset to first knobset when we view a different patch than previously viewed
+			if (displayed_patch_loc_hash != args.patch_loc_hash) {
+				args.view_knobset_id = 0;
+			}
+			knobset_settings.active_knobset = args.view_knobset_id.value_or(0);
 		}
 
 		if (args.patch_loc_hash)
@@ -113,8 +114,6 @@ struct PatchViewPage : PageBase {
 		lv_hide(modules_cont);
 
 		patch = patch_storage.get_view_patch();
-
-		patch->trim_empty_knobsets();
 
 		if (patch->patch_name.length() == 0)
 			return;
@@ -185,6 +184,26 @@ struct PatchViewPage : PageBase {
 		file_menu.prepare_focus(group);
 	}
 
+	void redraw_map_rings() {
+		for (auto &drawn_el : drawn_elements) {
+			auto &gui_el = drawn_el.gui_element;
+
+			if (gui_el.count.num_params > 0 && gui_el.map_ring) {
+				lv_obj_del_async(gui_el.map_ring);
+				gui_el.map_ring = nullptr;
+			}
+		}
+
+		for (auto &drawn_el : drawn_elements) {
+			auto knobset = knobset_settings.active_knobset;
+			auto module_id = drawn_el.gui_element.module_idx;
+			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
+
+			ModuleDrawer{modules_cont, Height}.draw_mapped_ring(*patch, module_id, knobset, canvas, drawn_el);
+		}
+		update_map_ring_style();
+	}
+
 	void blur() override {
 		settings_menu.hide();
 		knobset_menu.hide();
@@ -194,6 +213,8 @@ struct PatchViewPage : PageBase {
 
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
+
+		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
 
@@ -205,7 +226,16 @@ struct PatchViewPage : PageBase {
 
 		if (is_patch_playing != last_is_patch_playing || knobset_settings.changed) {
 			knobset_settings.changed = false;
-			update_active_knobset();
+			args.view_knobset_id = knobset_settings.active_knobset;
+			page_list.set_active_knobset(knobset_settings.active_knobset);
+			patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
+			redraw_map_rings();
+		}
+
+		if (is_patch_playing && knobset_settings.active_knobset != page_list.get_active_knobset()) {
+			args.view_knobset_id = page_list.get_active_knobset();
+			knobset_settings.active_knobset = page_list.get_active_knobset();
+			redraw_map_rings();
 		}
 
 		if (auto &knobset = knobset_menu.requested_knobset_view) {
@@ -213,7 +243,7 @@ struct PatchViewPage : PageBase {
 			knobset = std::nullopt;
 		}
 
-		if (metaparams.meta_buttons[0].is_just_released()) {
+		if (metaparams.back_button.is_just_released()) {
 			if (settings_menu.visible) {
 				settings_menu.hide();
 
@@ -231,6 +261,10 @@ struct PatchViewPage : PageBase {
 				blur();
 				params.lights.stop_watching_all();
 			}
+		}
+
+		if (knobset_menu.visible) {
+			knobset_menu.update();
 		}
 
 		if (desc_panel.did_update_names()) {
@@ -302,7 +336,8 @@ private:
 
 			auto &gui_el = drawn_el.gui_element;
 
-			auto was_redrawn = std::visit(UpdateElement{params, *patch, drawn_el.gui_element}, drawn_el.element);
+			auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
+
 			if (was_redrawn) {
 				if (settings.map_ring_flash_active)
 					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
@@ -338,13 +373,6 @@ private:
 				cable_drawer.clear();
 		}
 		last_cable_style = settings.cable_style;
-	}
-
-	void update_active_knobset() {
-		blur();
-		args.view_knobset_id = knobset_settings.active_knobset;
-		patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
-		prepare_focus();
 	}
 
 	void redraw_modulename() {
@@ -444,7 +472,8 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		page->patch_playloader.request_load_view_patch();
+		if (!page->is_patch_playing)
+			page->patch_playloader.request_load_view_patch();
 	}
 
 	static void button_focussed_cb(lv_event_t *event) {
