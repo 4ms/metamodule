@@ -383,7 +383,11 @@ def generate_switch_position_names(elem):
             source += f""""{nm}", """
         source = source.removesuffix(", ")
         source += f"""}}"""
+
         return source
+
+    elif "default_val" in elem:
+        return f""", {elem["default_val"]}""" 
 
     else:
         return ""
