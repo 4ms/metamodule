@@ -30,9 +30,19 @@ void random_device::_M_init(std::__cxx11::basic_string<char, std::char_traits<ch
 }
 } // namespace std
 
+extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp);
+
 void __attribute__((optimize("-O0"))) keep_symbols() {
-	auto x = &calloc;
-	(void)x;
+	{
+		auto x = &calloc;
+		(void)x;
+	}
+
+	{
+		auto x = &gettimeofday;
+		(void)x;
+	}
+
 	// provides vtable for Quantity
 	rack::Quantity q;
 }
