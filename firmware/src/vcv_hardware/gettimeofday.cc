@@ -16,3 +16,7 @@ extern "C" int _gettimeofday(struct timeval *tp, struct timezone *tzp) {
 
 	return 0;
 }
+
+extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp) {
+	return _gettimeofday(tp, tzp);
+}
