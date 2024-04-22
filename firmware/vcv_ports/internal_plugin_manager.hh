@@ -48,7 +48,8 @@ struct InternalPluginManager {
 
 	void load_internal_plugins() {
 		//Load internal plugins
-		//TODO: how to do this from build system?
+		// TODO: use the glue/BRAND/plugin.cpp::init() function for each brand...
+		// 		 But, somehow get around the issue of multiple definitions of global symbol pluginInstance
 
 #ifndef BUILD_DYN_PLUGIN_Befaco
 		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");

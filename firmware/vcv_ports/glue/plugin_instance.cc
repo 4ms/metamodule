@@ -1,4 +1,7 @@
-#include <plugin/Plugin.hpp>
+namespace rack::plugin
+{
+struct Plugin;
+}
 
 // This is used for internal plugins. It's set to the current plugin instance while loading the internal plugin
 // It's a workaround for the fact that internal plugins can't all have their own global symbol of this name.

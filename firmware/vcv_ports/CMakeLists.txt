@@ -18,7 +18,9 @@ endif()
 # Create library that combines all brands
 # Link against this library from outside
 add_library(_vcv_ports_internal STATIC)
-target_sources(_vcv_ports_internal PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
+
+# All built-ins use a common pluginInstance symbol
+target_sources(_vcv_ports_internal PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/plugin_instance.cc)
 
 if (CMAKE_CROSSCOMPILING)
   # Enable LTO for top level library
@@ -54,7 +56,6 @@ foreach(brand ${brands})
 	message("Building ${brand} as built-in plugin")
 	add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glue/${brand})
 	target_compile_options(${brand}Library PRIVATE -Wno-attributes $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>)
-	target_sources(${brand}Library PRIVATE ${CMAKE_CURRENT_LIST_DIR}/glue/empty.cc)
 
 	# Link against the mocked vcv interface
 	target_link_libraries(${brand}Library PRIVATE metamodule::vcv-plugin-interface)

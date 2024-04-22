@@ -38,7 +38,6 @@ target_sources(
          src/context.cpp
          src/history.cpp
          src/make_element.cc
-         src/plugin_instance.cc
          src/settings.cpp
          src/string.cpp
          src/svg.cc
