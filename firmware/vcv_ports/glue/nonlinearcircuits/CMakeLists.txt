@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.22)
 
 if (BUILD_DYN_PLUGIN)
-	include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
 endif()
 
 project(nonlinearcircuitsMetaModulePlugin 
-    VERSION 	0.1 
+    VERSION     0.1 
     DESCRIPTION "nonlinearcircuits Plugin for MetaModule" 
-    LANGUAGES 	C CXX ASM
+    LANGUAGES   C CXX ASM
 )
 
 include(modules.cmake)
@@ -34,9 +34,10 @@ target_compile_options(
 if (BUILD_DYN_PLUGIN)
     target_sources(nonlinearcircuitsLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/NLC.cpp)
 
-	create_plugin(
-		SOURCE_LIB      nonlinearcircuitsLibrary
-		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/nonlinearcircuits
-		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/nonlinearcircuits
-	)
+    create_plugin(
+        SOURCE_LIB      nonlinearcircuitsLibrary
+        PLUGIN_NAME     nonlinearcircuits
+        SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/nonlinearcircuits
+        DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/nonlinearcircuits
+    )
 endif()

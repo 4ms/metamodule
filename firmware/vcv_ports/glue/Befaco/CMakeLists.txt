@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.22)
 
 if (BUILD_DYN_PLUGIN)
-	#FIXME: Improve setting this path?
-	include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
+    #FIXME: Improve setting this path?
+    include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
 endif()
 
 project(BefacoMetaModulePlugin 
-    VERSION 	0.1 
+    VERSION     0.1 
     DESCRIPTION "Befaco Plugin for MetaModule" 
-    LANGUAGES 	C CXX ASM
+    LANGUAGES   C CXX ASM
 )
 
 include(modules.cmake)
@@ -26,9 +26,10 @@ set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 20)
 if (BUILD_DYN_PLUGIN)
     target_sources(BefacoLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/plugin.cpp)
 
-	create_plugin(
-		SOURCE_LIB      BefacoLibrary
-		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/Befaco
-		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/Befaco
-	)
+    create_plugin(
+        SOURCE_LIB      BefacoLibrary
+        PLUGIN_NAME     Befaco
+        SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/Befaco
+        DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/Befaco
+    )
 endif()

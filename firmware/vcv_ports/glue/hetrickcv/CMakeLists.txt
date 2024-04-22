@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.22)
 
 if (BUILD_DYN_PLUGIN)
-	include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
 endif()
 
 project(hetrickcvMetaModulePlugin 
-    VERSION 	0.1 
+    VERSION     0.1 
     DESCRIPTION "hetrickcv Plugin for MetaModule" 
-    LANGUAGES 	C CXX ASM
+    LANGUAGES   C CXX ASM
 )
 
 include(modules.cmake)
@@ -58,9 +58,10 @@ target_compile_options(
 if (BUILD_DYN_PLUGIN)
     target_sources(hetrickcvLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/HetrickCV.cpp)
 
-	create_plugin(
-		SOURCE_LIB      hetrickcvLibrary
-		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/hetrickcv
-		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/hetrickcv
-	)
+    create_plugin(
+        SOURCE_LIB      hetrickcvLibrary
+        PLUGIN_NAME     hetrickcv
+        SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/hetrickcv
+        DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/hetrickcv
+    )
 endif()

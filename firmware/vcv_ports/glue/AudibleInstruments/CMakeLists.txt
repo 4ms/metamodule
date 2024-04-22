@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.22)
 
 if (BUILD_DYN_PLUGIN)
-	include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
 endif()
 
 project(AudibleInstrumentsMetaModulePlugin 
-    VERSION 	0.1 
-	DESCRIPTION "AudibleInstruments Plugin for MetaModule" 
-    LANGUAGES 	C CXX ASM
+    VERSION     0.1 
+    DESCRIPTION "AudibleInstruments Plugin for MetaModule" 
+    LANGUAGES   C CXX ASM
 )
 
 include(modules.cmake)
@@ -51,9 +51,10 @@ set_property(TARGET AudibleInstrumentsLibrary PROPERTY CXX_STANDARD 20)
 if (BUILD_DYN_PLUGIN)
     target_sources(AudibleInstrumentsLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/plugin.cpp)
 
-	create_plugin(
-		SOURCE_LIB      AudibleInstrumentsLibrary
-		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/AudibleInstruments
-		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/AudibleInstruments
-	)
+    create_plugin(
+        SOURCE_LIB      AudibleInstrumentsLibrary
+        PLUGIN_NAME     AudibleInstruments
+        SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/AudibleInstruments
+        DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/AudibleInstruments
+    )
 endif()
