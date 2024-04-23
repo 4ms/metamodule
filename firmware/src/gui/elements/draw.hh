@@ -41,23 +41,31 @@ inline lv_obj_t *draw_element(const FlipSwitch &el, lv_obj_t *canvas, uint32_t m
 // Draw slider with its handle as a sub-object
 inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = ElementDrawer::draw_image(BaseElement(el), el.image, canvas, module_height);
+
 	if (!obj) {
 		obj = lv_obj_create(canvas);
-		float x = mm_to_px(el.x_mm, module_height);
-		float y = mm_to_px(el.y_mm, module_height);
 		float width = mm_to_px(el.width_mm, module_height);
-		float height = mm_to_px(el.width_mm, module_height);
+		float height = mm_to_px(el.height_mm, module_height);
+		float channel_width_px = 5.f;
+		if (height > width)
+			width = channel_width_px;
+		else
+			height = channel_width_px;
 		float zoom = module_height / 240.f;
-		x = fix_zoomed_coord(el.coords, x, width, zoom);
-		y = fix_zoomed_coord(el.coords, y, height, zoom);
-		lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
+		float x = fix_zoomed_coord(el.coords, mm_to_px(el.x_mm, module_height), width, zoom);
+		float y = fix_zoomed_coord(el.coords, mm_to_px(el.y_mm, module_height), height, zoom);
 		int16_t pos_x = std::round(x);
 		int16_t pos_y = std::round(y);
+
+		lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
 		lv_obj_set_pos(obj, pos_x, pos_y);
+		lv_obj_set_size(obj, width, height);
 		lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
-		lv_obj_set_size(obj, el.width_mm, el.height_mm);
 		lv_obj_set_style_pad_all(obj, 0, LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(obj, LV_OPA_100, LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_color(obj, lv_color_hex(0x666666), LV_STATE_DEFAULT);
+		lv_obj_set_style_border_width(obj, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(obj, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 	}
 
@@ -74,13 +82,13 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 		handle = lv_obj_create(obj);
 		if (w <= h) {
 			// Vertical
-			lv_obj_set_width(handle, w);
+			lv_obj_set_width(handle, w * module_height / 60);
 			lv_obj_set_height(handle, module_height / 24);
 			lv_obj_add_style(handle, &Gui::slider_handle_style, LV_PART_MAIN);
 		} else {
 			// Horizontal
 			lv_obj_set_width(handle, module_height / 24); //10px at full scale
-			lv_obj_set_height(handle, std::round(h));
+			lv_obj_set_height(handle, std::round(h * module_height / 60));
 			lv_obj_add_style(handle, &Gui::slider_handle_style, LV_PART_MAIN);
 		}
 	}

@@ -95,7 +95,11 @@ draw_image(const BaseElement &el, std::string_view img_filename, lv_obj_t *canva
 		}
 	}
 
-	pr_warn("Could not read image `%s` for %s\n", img_path.c_str(), el.short_name.data());
+	if (img_path.size())
+		pr_warn("Could not read image `%s` for %s\n", img_path.c_str(), el.short_name.data());
+	else
+		pr_trace("No image given for %.*s\n", (int)el.short_name.size(), el.short_name.data());
+
 	return nullptr;
 }
 
