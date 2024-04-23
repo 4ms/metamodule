@@ -20,6 +20,12 @@ Element make_element_input(rack::app::SvgPort const *widget, BaseElement b) {
 //
 // Pots/Sliders
 //
+Element make_element(rack::app::Knob const *widget, BaseElement b) {
+	b.width_mm = to_mm(widget->box.size.x);
+	b.height_mm = to_mm(widget->box.size.y);
+	pr_dbg("Create image-less knob\n");
+	return Knob{{b, ""}};
+}
 
 //TODO: don't set box size here
 // either have dedicated function refresh_widget_size()
@@ -163,7 +169,7 @@ Element make_element(rack::app::MultiLightWidget const *widget, BaseElement el) 
 		return make_rgb_led_element(image, widget, el);
 
 	} else {
-		printf("Light widget not handled (%d colors)\n", widget->getNumColors());
+		pr_warn("Light widget not handled (%d colors)\n", widget->getNumColors());
 		return NullElement{};
 	}
 }
@@ -178,22 +184,22 @@ Element make_element(rack::app::SvgScrew const *widget, BaseElement) {
 
 Element make_element(rack::app::ParamWidget const *widget, BaseElement el) {
 	if (widget->svg_filename.size()) {
-		printf("Unknown ParamWidget, using image as a ParamElement\n");
+		pr_dbg("Unknown ParamWidget, using image as a ParamElement\n");
 		return ParamElement{el, widget->svg_filename};
 
 	} else {
-		printf("ParamWidget without an SVG: ignoring\n");
-		return NullElement{};
+		pr_dbg("ParamWidget without an SVG, using a blank ParamElement\n");
+		return ParamElement{el, ""};
 	}
 }
 
 Element make_element(rack::widget::SvgWidget const *widget, BaseElement el) {
 	if (widget->svg_filename.size()) {
-		printf("Unknown SvgWidget, using image as a ImageElement\n");
+		pr_dbg("Unknown SvgWidget, using image as a ImageElement\n");
 		return ImageElement{el, widget->svg_filename};
 
 	} else {
-		printf("Unknown SvgWidget\n");
+		pr_warn("Unknown SvgWidget\n");
 		return NullElement{};
 	}
 }
