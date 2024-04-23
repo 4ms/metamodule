@@ -20,11 +20,11 @@ void __throw_logic_error(char const *) {
 		;
 }
 
-void __throw_out_of_range_fmt(char const *, ...) {
-}
+ void __throw_out_of_range_fmt(char const *, ...) {
+ }
 
-void __throw_bad_array_new_length() {
-}
+ void __throw_bad_array_new_length() {
+ }
 
 //Needed to compile at -O0 when using std::string
 template<typename T>
@@ -39,15 +39,6 @@ template<>
 allocator<char>::~allocator() = default;
 template<>
 allocator<char>::allocator(const std::allocator<char> &) = default;
-
-void __throw_bad_cast() {
-	while (true)
-		;
-}
-
-void __throw_runtime_error(char const *) {
-}
-
 
 } // namespace std
 
