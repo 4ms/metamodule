@@ -20,7 +20,7 @@ class MPEGCore : public SmartCoreProcessor<MPEGInfo> {
 
 public:
 	MPEGCore() 
-		: mode(SYNC), ticks(0), triggerPing(1.0f, 2.0f), tapLongPress(2.f), isCycling(false), phaseOffset(0.f), startedWhileCycling(false)
+		: mode(SYNC), ticks(0), triggerPing(1.0f, 2.0f), tapLongPress(2.f), isCycling(false), phaseOffset(0.f), startedWhileCycling(false), startedByTrigger(false), armQuantizedTrigger(false), triggerIn(lowerThresholdTrigInInV, risingEdgeThresholdInV)
 	{
 
 	};
@@ -55,6 +55,40 @@ public:
 				{
 					isCycling = !isCycling;
 				}
+			}
+		}
+
+		if (auto triggerSignal = getInput<TriggerIn>(); triggerSignal.has_value())
+		{
+			auto triggerJackMode = getState<TrigJackModeAltParam>();
+			auto triggerFlipFlop = triggerIn(*triggerSignal);
+
+			if (triggerInRisingEdge(triggerFlipFlop))
+			{
+				if (triggerJackMode != 2)
+				{
+					//async gate and trigger
+					env.start();
+					startedByTrigger = true;
+
+					mode = ASYNC;
+				}
+				else
+				{
+					//re-phasing trigger
+				}
+			}
+
+			if (triggerJackMode == 1)
+			{
+				env.setHold(triggerFlipFlop);
+			}
+
+			if (triggerJackMode == 2 && triggerFlipFlop == true)
+			{
+				//arm quantized trigger
+				armQuantizedTrigger = true;
+				mode = SYNC;
 			}
 		}
 
@@ -108,27 +142,44 @@ public:
 			if (mode == SYNC)
 			{
 				env.start();
+
 				startedWhileCycling = isCycling;
+
+				if (armQuantizedTrigger)
+				{
+					startedByTrigger = true;
+				}
 			}
 		}
 
 		env.update(ticks);
-
-		setLED<PingButton>(clockDivMult.getPhase() < 0.5f && clockDivMult.getPhase() > 0.f);
-		setLED<CycleButton>(isCycling);
-
-		if (getState<ShiftAltParam>() < 0.5f)
+		if (env.stoppedAfterLastUpdate())
 		{
-			mode = SYNC;
+			startedWhileCycling = false;
+			startedByTrigger = false;
+			armQuantizedTrigger = false;
+		}
+
+		if (clockDivMult.getPhase() < 0.5f && clockDivMult.getPhase() > 0.f)
+		{
+			if (mode == SYNC)
+			{
+				setLED<PingButton>(cyan);
+			}
+			else
+			{
+				setLED<PingButton>(white);
+			}
 		}
 		else
 		{
-			mode = ASYNC;
+			setLED<PingButton>(off);
 		}
-		setLED<_5VEnvLight>(mode == SYNC);
+		
+		setLED<CycleButton>(isCycling);
 
 		float envOutput = 0.f;
-		if (isCycling || startedWhileCycling)
+		if (isCycling || startedWhileCycling || startedByTrigger)
 		{
 			envOutput = env.getPhase();
 		}
@@ -159,6 +210,8 @@ private:
 	bool isCycling;
 	float phaseOffset;
 	bool startedWhileCycling;
+	bool startedByTrigger;
+	bool armQuantizedTrigger;
 
 private:
 	PingGenerator ping;
@@ -174,9 +227,17 @@ private:
 	EdgeDetector cycleButtonRisingEdge;
 	FallingEdgeDetector cycleButtonFallingEdge;
 	EdgeDetector cycleEdge;
+	FlipFlop triggerIn;
+	EdgeDetector triggerInRisingEdge;
+
 
 private:
+	static constexpr float lowerThresholdTrigInInV = 1.f;
 	static constexpr float risingEdgeThresholdInV = 2.5f;
+
+	static constexpr std::array<float,3> cyan = {0.f, 0.87f, 0.87f};
+	static constexpr std::array<float,3> white = {1.0f, 1.0f, 1.0f};
+	static constexpr std::array<float,3> off = {0.0f, 0.0f, 0.0f};
 };
 
 } // namespace MetaModule
