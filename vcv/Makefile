@@ -23,7 +23,8 @@ SOURCES += $(SHARED)/patch_convert/patch_to_yaml.cc
 # Modules
 INCLUDES += -Isrc
 INCLUDES += -I$(SHARED)
-INCLUDES += -I$(SHARED)/CoreModules/metamodule-core-interface
+#FIXME: path to firmware dir
+INCLUDES += -I../firmware/metamodule-plugin-sdk/metamodule-core-interface
 INCLUDES += -I$(SHARED)/CoreModules/4ms
 SOURCES += $(SHARED)/CoreModules/moduleFactory.cc
 SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*Core.cc)
