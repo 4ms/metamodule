@@ -40,10 +40,9 @@ Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
 	}
 }
 
-Element make_element(rack::app::SliderKnob *const widget, BaseElement b) {
+Element make_element(rack::app::SliderKnob const *widget, BaseElement b) {
 	b.width_mm = widget->box.size.x;
 	b.height_mm = widget->box.size.y;
-	printf("SliderKnob; w=%f, h=%fmm\n", b.width_mm, b.height_mm);
 	return Slider{{b, ""}, ""};
 }
 
