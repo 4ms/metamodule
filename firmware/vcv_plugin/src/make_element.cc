@@ -100,7 +100,9 @@ Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
 
 	} else {
 		pr_warn("make_element(): Unknown SvgSwitch, frames size is not 1, 2 or 3\n");
-		return NullElement{};
+		b.width_mm = to_mm(widget->box.size.x);
+		b.height_mm = to_mm(widget->box.size.y);
+		return ParamElement{b};
 	}
 }
 
@@ -182,21 +184,25 @@ Element make_element(rack::app::SvgScrew const *widget, BaseElement) {
 	return NullElement{};
 }
 
-Element make_element(rack::app::ParamWidget const *widget, BaseElement el) {
+Element make_element(rack::app::ParamWidget const *widget, BaseElement b) {
 	if (widget->svg_filename.size()) {
 		pr_dbg("Unknown ParamWidget, using image as a ParamElement\n");
-		return ParamElement{el, widget->svg_filename};
+		return ParamElement{b, widget->svg_filename};
 
 	} else {
 		pr_dbg("ParamWidget without an SVG, using a blank ParamElement\n");
-		return ParamElement{el, ""};
+		b.width_mm = to_mm(widget->box.size.x);
+		b.height_mm = to_mm(widget->box.size.y);
+		return ParamElement{b, ""};
 	}
 }
 
-Element make_element(rack::widget::SvgWidget const *widget, BaseElement el) {
+Element make_element(rack::widget::SvgWidget const *widget, BaseElement b) {
 	if (widget->svg_filename.size()) {
 		pr_dbg("Unknown SvgWidget, using image as a ImageElement\n");
-		return ImageElement{el, widget->svg_filename};
+		b.width_mm = to_mm(widget->box.size.x);
+		b.height_mm = to_mm(widget->box.size.y);
+		return ImageElement{b, widget->svg_filename};
 
 	} else {
 		pr_warn("Unknown SvgWidget\n");
