@@ -61,4 +61,9 @@ target_include_directories(
 set_property(TARGET vcv_plugin PROPERTY CXX_STANDARD 20)
 target_compile_options(vcv_plugin PRIVATE -fno-function-sections -fno-data-sections)
 
+set_source_files_properties(
+  src/svg.cc
+  PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
+)
+
 
