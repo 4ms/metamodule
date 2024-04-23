@@ -82,6 +82,12 @@ private:
 					   // default: do nothing
 					   [](const BaseElement &) {},
 
+					   [this](const ParamElement &) {
+						   // Generic Param: clicking toggles value 0/100
+						   lv_arc_set_value(ui_ControlArc, lv_arc_get_value(ui_ControlArc) > 50 ? 0 : 100);
+						   arc_change_value();
+					   },
+
 					   // switches: increment value, wrapping
 					   [this](const Switch &) {
 						   auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
@@ -138,6 +144,7 @@ private:
 
 		std::visit(overloaded{
 					   [](const BaseElement &) {},
+					   [](const ParamElement &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
 					   [](const Button &el) { lv_arc_set_range(ui_ControlArc, 0, 1); },
 					   [](const FlipSwitch &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
