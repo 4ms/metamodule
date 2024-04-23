@@ -76,6 +76,10 @@ public:
 				else
 				{
 					//re-phasing trigger
+					if (clockDivMult.isDividing())
+					{
+						clockDivMult.rePhase();
+					}
 				}
 			}
 

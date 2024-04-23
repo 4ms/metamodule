@@ -106,6 +106,19 @@ public:
         return phase;
     }
 
+    bool isDividing()
+    {
+        return factor.operation == DIV;
+    }
+
+    void rePhase()
+    {
+        for (uint32_t index = 0; index < clockDivCounter.size(); index++) 
+        {
+            clockDivCounter[index] = clockFactor[index].factor;
+        }
+    }
+
     std::optional<uint32_t> getOutPeriod()
     {
         return clockOut.periodInTicks;
