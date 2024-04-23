@@ -176,8 +176,25 @@ Element make_element(rack::app::SvgScrew const *widget, BaseElement) {
 	return NullElement{};
 }
 
+Element make_element(rack::app::ParamWidget const *widget, BaseElement el) {
+	if (widget->svg_filename.size()) {
+		printf("Unknown ParamWidget, using image as a ParamElement\n");
+		return ParamElement{el, widget->svg_filename};
+
+	} else {
+		printf("ParamWidget without an SVG: ignoring\n");
+		return NullElement{};
+	}
+}
+
 Element make_element(rack::widget::SvgWidget const *widget, BaseElement el) {
-	printf("Unknown SvgWidget\n");
-	return NullElement{};
+	if (widget->svg_filename.size()) {
+		printf("Unknown SvgWidget, using image as a ImageElement\n");
+		return ImageElement{el, widget->svg_filename};
+
+	} else {
+		printf("Unknown SvgWidget\n");
+		return NullElement{};
+	}
 }
 } // namespace MetaModule
