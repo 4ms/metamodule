@@ -5,8 +5,8 @@ namespace rack::widget
 {
 
 void SvgWidget::setSvg(std::shared_ptr<window::Svg> svg) {
-	svg_filename = svg->filename;
-	box.size = get_svg_size(svg_filename);
+	this->svg = svg;
+	box.size = get_svg_size(svg->filename);
 }
 
 } // namespace rack::widget
