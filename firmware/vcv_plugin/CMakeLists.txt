@@ -31,6 +31,7 @@ target_sources(
          src/widget/Widget.cc
          src/widget/SvgWidget.cc
          src/widget/FramebufferWidget.cc
+         src/window/Svg.cpp
 
          src/Quantity.cpp
          src/VCV_module_wrapper.cc
