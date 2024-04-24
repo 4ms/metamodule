@@ -45,7 +45,10 @@ inline lv_obj_t *draw_element(const Knob &el, lv_obj_t *canvas, uint32_t module_
 
 	// Create image-less knob
 	obj = lv_obj_create(canvas);
-	float diameter = mm_to_px((el.width_mm + el.height_mm) / 2, module_height);
+	int16_t diameter = std::round(mm_to_px((el.width_mm + el.height_mm) / 2, module_height));
+	diameter = std::max<int16_t>(diameter, 10);
+	if (diameter & 0b1) //odd
+		diameter += 1;	//make even
 	float zoom = module_height / 240.f;
 	float x = fix_zoomed_coord(el.coords, mm_to_px(el.x_mm, module_height), diameter, zoom);
 	float y = fix_zoomed_coord(el.coords, mm_to_px(el.y_mm, module_height), diameter, zoom);
@@ -69,7 +72,7 @@ inline lv_obj_t *draw_element(const Knob &el, lv_obj_t *canvas, uint32_t module_
 	lv_obj_refr_size(obj);
 
 	auto dot = lv_obj_create(obj);
-	int16_t dot_dia = std::round(std::max(3.f, diameter / 6));
+	int16_t dot_dia = std::round(std::max(3.f, (float)diameter / 6));
 	lv_obj_set_align(dot, LV_ALIGN_CENTER);
 	// lv_obj_set_pos(dot, -diameter * 0.20f, diameter * 0.5f - dot_dia * 1.5f);
 	lv_obj_set_pos(dot, 0, -diameter * 0.5f + dot_dia * 1.f);
