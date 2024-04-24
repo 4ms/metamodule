@@ -92,16 +92,23 @@ inline lv_obj_t *draw_element(const Slider &el, lv_obj_t *canvas, uint32_t modul
 	if (!obj) {
 		// Create image-less slider
 		obj = lv_obj_create(canvas);
+		float x = mm_to_px(el.x_mm, module_height);
+		float y = mm_to_px(el.y_mm, module_height);
 		float width = mm_to_px(el.width_mm, module_height);
 		float height = mm_to_px(el.height_mm, module_height);
-		float channel_width_px = 5.f;
-		if (height > width)
+		const float channel_width_px = module_height / 60;
+		if (height > width) {
+			x += (width - channel_width_px) / 2;
 			width = channel_width_px;
-		else
+			height -= module_height / 30; //padding
+		} else {
+			y += (width - channel_width_px) / 2;
+			width -= module_height / 30; //padding
 			height = channel_width_px;
+		}
 		float zoom = module_height / 240.f;
-		float x = fix_zoomed_coord(el.coords, mm_to_px(el.x_mm, module_height), width, zoom);
-		float y = fix_zoomed_coord(el.coords, mm_to_px(el.y_mm, module_height), height, zoom);
+		x = fix_zoomed_coord(el.coords, x, width, zoom);
+		y = fix_zoomed_coord(el.coords, y, height, zoom);
 		int16_t pos_x = std::round(x);
 		int16_t pos_y = std::round(y);
 
