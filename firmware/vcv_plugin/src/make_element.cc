@@ -23,7 +23,6 @@ Element make_element_input(rack::app::SvgPort const *widget, BaseElement b) {
 Element make_element(rack::app::Knob const *widget, BaseElement b) {
 	b.width_mm = to_mm(widget->box.size.x);
 	b.height_mm = to_mm(widget->box.size.y);
-	pr_dbg("Create image-less knob\n");
 	return Knob{{b, ""}};
 }
 
@@ -112,7 +111,7 @@ Element make_momentary_rgb(std::string_view image, BaseElement const &el) {
 }
 
 Element make_latching_rgb(std::string_view image, BaseElement const &el) {
-	printf("Latching RGB button not supported yet. Using momentary\n");
+	pr_warn("Latching RGB button not supported yet. Using momentary\n");
 	return MomentaryButtonRGB{{{el, image}}};
 }
 
@@ -141,7 +140,7 @@ make_button_light(rack::app::MultiLightWidget const *light, rack::app::SvgSwitch
 			return make_latching_rgb(widget->frames[0]->filename, el);
 	}
 
-	// printf("make_element(): Unknown VCVLightBezel\n");
+	pr_warn("make_element(): Unknown VCVLightBezel\n");
 	return NullElement{};
 }
 
