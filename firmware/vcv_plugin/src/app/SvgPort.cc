@@ -23,7 +23,7 @@ void SvgPort::setSvg(std::shared_ptr<window::Svg> svg) {
 }
 
 void ThemedSvgPort::setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
-	// svg_filename = lightSvg->filename;
+	sw->setSvg(lightSvg);
 	this->lightSvg = lightSvg;
 	this->darkSvg = darkSvg;
 }

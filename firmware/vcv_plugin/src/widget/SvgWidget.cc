@@ -10,8 +10,10 @@ void SvgWidget::setSvg(std::shared_ptr<window::Svg> svg) {
 		if (this->svg->filename != svg->filename) {
 			// We can't re-assign our svg shared_ptr after ModuleWidget::addParam() has been called,
 			// because the old shared_ptr would be deleted, leaving our Elements string_view dangling.
-			// TODO: if some plugin relies on calling setSvg after addParam, then we will need to fix this.
-			pr_warn("Cannot change svg filename (%s)\n", this->svg->filename.c_str());
+			// We can, however, change it before addParam is called (i.e. in the Widget constructor)
+			pr_warn("Changing svg filename from %s to %s\n", this->svg->filename.c_str(), svg->filename.c_str());
+
+			this->svg->filename = svg->filename;
 		}
 	}
 
