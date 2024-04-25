@@ -17,15 +17,23 @@ namespace MetaModule
 inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
 	bool did_update_position = false;
 
-	constexpr int32_t threshold_centidegrees = 30; // = 3.0 degrees
+	constexpr int32_t threshold_centidegrees = 30; // 30 centidegrees = 3.0 degrees
 
 	int32_t angle = val * 3000.f - 1500.f;
 	while (angle < 0)
 		angle += 3600;
-	int32_t cur_angle = lv_img_get_angle(gui_el.obj);
+
+	bool is_img = lv_obj_has_class(gui_el.obj, &lv_img_class);
+
+	int32_t cur_angle =
+		is_img ? lv_img_get_angle(gui_el.obj) : lv_obj_get_style_transform_angle(gui_el.obj, LV_PART_MAIN);
 
 	if (std::abs(angle - cur_angle) > threshold_centidegrees) {
-		lv_img_set_angle(gui_el.obj, angle);
+		if (is_img)
+			lv_img_set_angle(gui_el.obj, angle);
+		else
+			lv_obj_set_style_transform_angle(gui_el.obj, angle, LV_PART_MAIN);
+
 		did_update_position = true;
 	}
 

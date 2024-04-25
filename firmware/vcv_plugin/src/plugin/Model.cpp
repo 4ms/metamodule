@@ -88,6 +88,7 @@ void Model::debug_dump_strings() {
 
 		std::visit(overloaded{[](BaseElement const &el) {},
 							  [](Slider const &el) { inspect_sv(el.image_handle); },
+							  [](MomentaryButton const &el) { inspect_sv(el.pressed_image); },
 							  [](SlideSwitch const &el) {
 								  for (auto &pos_name : el.pos_names) {
 									  printf("slide switch el.pos_names[]: ");
