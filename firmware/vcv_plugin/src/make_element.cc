@@ -33,14 +33,15 @@ Element make_element(rack::app::Knob const *widget, BaseElement b) {
 }
 
 //TODO: don't set box size here
-// either have dedicated function refresh_widget_size()
+// either have dedicated function refresh_widget_size() which scans all children,
 // or in SvgWidget::setSvg, set its parents size recursively (if not set)
 Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
 	// SvgKnobs have a base SVG, and sometimes have a bg svg.
 	// If there is a bg svg, then use its name.
 	if (widget->fb->_bg && widget->fb->_bg->svg && widget->fb->_bg->svg->filename.length()) {
-		if (widget->box.size == rack::math::Vec{})
-			widget->box.size = widget->fb->_bg->box.size;
+		// TODO: are there some cases when a widget sets its box differently than the bg box?
+		// if (widget->box.size.isFinite() && !widget->box.size.isZero())
+		widget->box.size = widget->fb->_bg->box.size;
 		return Knob{b, widget->fb->_bg->svg->filename};
 
 	} else if (widget->sw->svg->filename.size()) {
@@ -79,7 +80,7 @@ Element make_element(rack::componentlibrary::Rogan const *widget, BaseElement b)
 	// The fg and base svgs are always the same color and thus are combined into one PNG for the MetaModule.
 	// The bg svg is lighting effect gradient and can be ignored for MetaModule's low-res screen.
 	// The SvgKnob::sw rotates
-	// The SvgWidget::svg is apparently not used?
+	// The SvgWidget::svg is not used (it's in MM only, not in Rack)
 	if (widget->sw)
 		return Knob{b, widget->sw->svg->filename};
 	else
