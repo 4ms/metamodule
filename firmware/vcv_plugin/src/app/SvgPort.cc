@@ -14,23 +14,16 @@ SvgPort::SvgPort() {
 }
 
 void SvgPort::setSvg(std::shared_ptr<window::Svg> svg) {
-	if (svg->filename.size()) {
-		svg_filename = svg->filename;
-		// sw->setSvg(svg);
-		box.size = get_svg_size(svg_filename);
-		fb->box.size = box.size;
-		sw->box.size = box.size;
-
-		// Move shadow downward by 10%
-		shadow->box.size = box.size;
-		shadow->box.pos = math::Vec(0, box.size.y * 0.10);
-
+	sw->setSvg(svg);
+	if (sw->svg) {
+		box.size = sw->box.size;
+		fb->box.size = sw->box.size;
 	} else
 		printf("SvgPort: svg with empty name\n");
 }
 
 void ThemedSvgPort::setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
-	svg_filename = lightSvg->filename;
+	// svg_filename = lightSvg->filename;
 	this->lightSvg = lightSvg;
 	this->darkSvg = darkSvg;
 }

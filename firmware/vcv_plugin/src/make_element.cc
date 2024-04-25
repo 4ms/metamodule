@@ -10,11 +10,17 @@ namespace MetaModule
 //
 
 Element make_element_output(rack::app::SvgPort const *widget, BaseElement b) {
-	return JackOutput{b, widget->svg_filename};
+	if (widget->sw->svg)
+		return JackOutput{b, widget->sw->svg->filename};
+	else
+		return JackOutput{b, ""};
 }
 
 Element make_element_input(rack::app::SvgPort const *widget, BaseElement b) {
-	return JackInput{b, widget->svg_filename};
+	if (widget->sw->svg)
+		return JackInput{b, widget->sw->svg->filename};
+	else
+		return JackInput{b, ""};
 }
 
 //
