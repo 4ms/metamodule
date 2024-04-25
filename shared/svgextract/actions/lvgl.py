@@ -6,29 +6,20 @@ from . import lvgl_png
 
 from helpers.util import *
 
-def faceplateSvgToPng(artworkSvgFilename, outputBaseName, exportLayer="all"):
-    if exportLayer=="all":
-        exportLayer = None
-    png240Filename = outputBaseName.rstrip(".c") + ".png"
-    svgToPng(artworkSvgFilename, png240Filename, 240, False, exportLayer)
-
-
-def componentSvgToPng(svgFilename, outputDir):
+def convertSvgToPng(svgFilename, outputDir, resize=0, exportLayer="all"):
     outputDir = outputDir.rstrip("/") + "/"
     png240Filename = outputDir + os.path.splitext(os.path.basename(svgFilename))[0] + ".png"
-    svgToPng(svgFilename, png240Filename)
+    svgToPng(svgFilename, png240Filename, resize, exportLayer)
 
 
-
-def svgToPng(svgFilename, pngFilename, resize=0, alpha=True, exportLayer=None):
+def svgToPng(svgFilename, pngFilename, resize=0, exportLayer="all"):
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
     if inkscapeBin is None:
         Log("inkscape is not found. Please put it in your shell PATH, or set INKSCAPE_BIN_PATH to the path to the binary")
         Log("Aborting")
         return
 
-    # SVG ==> PNG
-    exportLayer = f"--export-id=\"{exportLayer}\" --export-id-only" if exportLayer else ""
+    exportLayer = f"--export-id=\"{exportLayer}\" --export-id-only" if exportLayer != "all" else ""
 
     if resize == 0:
         dpi = determine_dpi(svgFilename)
@@ -37,7 +28,7 @@ def svgToPng(svgFilename, pngFilename, resize=0, alpha=True, exportLayer=None):
         dpi = f"x{resize}"
         export_size = f"--export-height={resize}"
 
-    inkscape_cmd = f'{inkscapeBin} --export-type="png" {exportLayer} --export-png-use-dithering=false {export_size} --export-filename={pngFilename} {svgFilename}'
+    inkscape_cmd = f'{inkscapeBin} --export-type="png" {exportLayer} --export-png-use-dithering=false {export_size} --export-filename=\"{pngFilename}\" {svgFilename}'
 
     try:
         subprocess.run(f'{inkscape_cmd}', shell=True, check=True)
