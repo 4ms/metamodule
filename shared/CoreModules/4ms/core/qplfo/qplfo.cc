@@ -50,11 +50,12 @@ Module::Module()
 	running[2]=0;
 	running[3]=0;
 
-	clk_time[0]=0;
-	clk_time[1]=0;
-	clk_time[2]=0;
-	clk_time[3]=0;
-
+    // set to something reasonably large
+    // to avoid div by 0 during initial processing
+	clk_time[0]=100;
+	clk_time[1]=100;
+	clk_time[2]=100;
+	clk_time[3]=100;
 }
 
 void Module::doTick() {
