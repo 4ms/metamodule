@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <array>
 
 /************************
  * Mnuemonics			*
@@ -93,6 +94,16 @@ private:
 
     void setDACChannel(uint8_t, int16_t);
 
+public:
+    // To be modified externally
+    std::array<bool,4> tapLEDs;
+    std::array<bool,4> tapButtons;
+    std::array<bool,4> pingInputs;
+    std::array<bool,4> resetInputs;
+
+    std::array<float,4> outputs;
+
+    void setADCChannel(uint8_t, float);
 };
 
 }
