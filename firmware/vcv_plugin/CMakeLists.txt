@@ -37,7 +37,9 @@ target_sources(
          src/VCV_module_wrapper.cc
          src/asset.cc
          src/context.cpp
+         src/glfw3.c
          src/history.cpp
+         src/logger.cpp
          src/make_element.cc
          src/settings.cpp
          src/string.cpp
@@ -52,6 +54,7 @@ target_link_libraries(vcv_plugin PUBLIC cpputil)
 target_link_libraries(vcv_plugin PRIVATE lvgl::lvgl)
 target_link_libraries(vcv_plugin PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,jansson>")
 target_link_libraries(vcv_plugin PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,pffft>")
+target_link_libraries(vcv_plugin INTERFACE metamodule::rack-interface)
 
 target_include_directories(
   vcv_plugin
