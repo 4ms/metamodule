@@ -13,7 +13,7 @@ struct QPLFOInfo : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 32> Elements{{
+    static constexpr std::array<Element, 37> Elements{{
 		Davies1900hBlackKnob{{to_mm<72>(114.03), to_mm<72>(59.68), Center, "Skew 1", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(114.03), to_mm<72>(135.28), Center, "Skew 2", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(114.03), to_mm<72>(210.88), Center, "Skew 3", ""}},
@@ -42,10 +42,15 @@ struct QPLFOInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(22.57), to_mm<72>(152.34), Center, "Out 2", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(22.57), to_mm<72>(227.94), Center, "Out 3", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(22.57), to_mm<72>(303.54), Center, "Out 4", ""}},
-		RedGreenBlueLight{{to_mm<72>(45.23), to_mm<72>(76.95), Center, "LED 1", ""}},
-		RedGreenBlueLight{{to_mm<72>(45.23), to_mm<72>(152.55), Center, "LED 2", ""}},
-		RedGreenBlueLight{{to_mm<72>(45.23), to_mm<72>(228.15), Center, "LED 3", ""}},
-		RedGreenBlueLight{{to_mm<72>(45.23), to_mm<72>(303.75), Center, "LED 4", ""}},
+		RedLight{{to_mm<72>(45.23), to_mm<72>(76.95), Center, "LED 1", ""}},
+		WhiteLight{{to_mm<72>(45.23), to_mm<72>(152.55), Center, "LED 2", ""}},
+		BlueLight{{to_mm<72>(45.23), to_mm<72>(228.15), Center, "LED 3", ""}},
+		GreenLight{{to_mm<72>(45.23), to_mm<72>(303.75), Center, "LED 4", ""}},
+		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(43.18), Center, "Fire On Unmute ch1", ""}, 2, 1}, {"off", "on"}},
+		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(118.78), Center, "Fire On Unmute ch2", ""}, 2, 1}, {"off", "on"}},
+		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(194.38), Center, "Fire On Unmute ch3", ""}, 2, 1}, {"off", "on"}},
+		AltParamChoiceLabeled{{{to_mm<72>(154.79), to_mm<72>(269.98), Center, "Fire On Unmute ch4", ""}, 2, 1}, {"off", "on"}},
+		AltParamChoiceLabeled{{{to_mm<72>(151.258), to_mm<72>(17.009), Center, "Output Range", ""}, 2, 1}, {"0V to +10V", "-5V to +5V"}},
 }};
 
     enum class Elem {
@@ -81,60 +86,73 @@ struct QPLFOInfo : ModuleInfoBase {
         Led2Light,
         Led3Light,
         Led4Light,
+        FireOnUnmuteCh1AltParam,
+        FireOnUnmuteCh2AltParam,
+        FireOnUnmuteCh3AltParam,
+        FireOnUnmuteCh4AltParam,
+        OutputRangeAltParam,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobSkew_1 = 0,
-        KnobSkew_2 = 1,
-        KnobSkew_3 = 2,
-        KnobSkew_4 = 3,
+        KnobSkew_1, 
+        KnobSkew_2, 
+        KnobSkew_3, 
+        KnobSkew_4, 
         NumKnobs,
     };
     
     enum {
-        SwitchPing_1 = 0,
-        SwitchOn_1 = 1,
-        SwitchPing_2 = 2,
-        SwitchOn_2 = 3,
-        SwitchPing_3 = 4,
-        SwitchOn_3 = 5,
-        SwitchPing_4 = 6,
-        SwitchOn_4 = 7,
+        SwitchPing_1, 
+        SwitchOn_1, 
+        SwitchPing_2, 
+        SwitchOn_2, 
+        SwitchPing_3, 
+        SwitchOn_3, 
+        SwitchPing_4, 
+        SwitchOn_4, 
         NumSwitches,
     };
     
     enum {
-        InputPing_1_Jack = 0,
-        InputSkew_1_Cv = 1,
-        InputReset_1 = 2,
-        InputPing_2_Jack = 3,
-        InputSkew_2_Jack = 4,
-        InputReset_2 = 5,
-        InputPing_3_Jack = 6,
-        InputSkew_3_Jack = 7,
-        InputReset_3 = 8,
-        InputPing_4_Jack = 9,
-        InputSkew_4_Jack = 10,
-        InputReset_4 = 11,
+        InputPing_1_Jack, 
+        InputSkew_1_Cv, 
+        InputReset_1, 
+        InputPing_2_Jack, 
+        InputSkew_2_Jack, 
+        InputReset_2, 
+        InputPing_3_Jack, 
+        InputSkew_3_Jack, 
+        InputReset_3, 
+        InputPing_4_Jack, 
+        InputSkew_4_Jack, 
+        InputReset_4, 
         NumInJacks,
     };
     
     enum {
-        OutputOut_1 = 0,
-        OutputOut_2 = 1,
-        OutputOut_3 = 2,
-        OutputOut_4 = 3,
+        OutputOut_1, 
+        OutputOut_2, 
+        OutputOut_3, 
+        OutputOut_4, 
         NumOutJacks,
     };
     
     enum {
-        LedLed_1 = 0,
-        LedLed_2 = 1,
-        LedLed_3 = 2,
-        LedLed_4 = 3,
+        LedLed_1, 
+        LedLed_2, 
+        LedLed_3, 
+        LedLed_4, 
         NumDiscreteLeds,
+    };
+    
+    enum {
+        AltParamFire_On_Unmute_Ch1, 
+        AltParamFire_On_Unmute_Ch2, 
+        AltParamFire_On_Unmute_Ch3, 
+        AltParamFire_On_Unmute_Ch4, 
+        AltParamOutput_Range, 
     };
 };
 } // namespace MetaModule
