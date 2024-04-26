@@ -1,7 +1,6 @@
-#include "stm32f0xx_conf.h"
 #include "dig_inouts.h"
-#include "pwm.h"
-#include "adc.h"
+
+#include <cstdint>
 
 
 //#define FREERUN
@@ -10,11 +9,11 @@
 /************************
  * Time keeping			*
  ************************/
-volatile uint32_t tmr_ping[4]={0,0,0,0};
-volatile uint32_t tmr_reset[4]={0,0,0,0};
-volatile uint32_t tmr_tapin[4]={0,0,0,0};
-volatile uint32_t tmr_tapout[4]={0,0,0,0};
-volatile uint32_t ping_irq_timestamp[4]={0,0,0,0};
+uint32_t tmr_ping[4]={0,0,0,0};
+uint32_t tmr_reset[4]={0,0,0,0};
+uint32_t tmr_tapin[4]={0,0,0,0};
+uint32_t tmr_tapout[4]={0,0,0,0};
+uint32_t ping_irq_timestamp[4]={0,0,0,0};
 
 /************************
  * Mnuemonics			*
@@ -43,10 +42,10 @@ volatile uint32_t ping_irq_timestamp[4]={0,0,0,0};
 /********************
  * Global variables	*
  ********************/
-volatile uint8_t timer_overflowed=0;
+uint8_t timer_overflowed=0;
 uint8_t ping_state[4]={0,0,0,0};
-volatile uint8_t clk_time_changed[4]={0,0,0,0};
-volatile uint16_t adc_buffer[4];
+uint8_t clk_time_changed[4]={0,0,0,0};
+uint16_t adc_buffer[4];
 int16_t t_dacout[4]={0,0,0,0};
 
 
@@ -174,12 +173,7 @@ int main(void)
 
 	init_tmrs();
 	init_dig_inouts();
-	init_adc((uint16_t *)adc_buffer);
 
-	//delay();
-
-	init_pwm();
-	SysTick_Config(SystemCoreClock/10000); //1000 is 1ms ticks, 10000 is 100us ticks, 100000 is 10us ticks
 
 	TAPLED_OFF(1);
 	TAPLED_OFF(2);
@@ -560,10 +554,6 @@ int main(void)
 
 				timer_overflowed-=t_of;
 
-				TIM_SetCompare1(TIM1, t_dacout[0]);
-				TIM_SetCompare2(TIM1, t_dacout[1]);
-				TIM_SetCompare3(TIM1, t_dacout[2]);
-				TIM_SetCompare4(TIM1, t_dacout[3]);
 
 			} //if (t_of)
 		} //chan==3
