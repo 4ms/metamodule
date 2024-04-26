@@ -75,6 +75,14 @@ Element make_element(rack::app::SvgSlider const *widget, BaseElement b) {
 	}
 }
 
+Element make_element_lightslider(rack::app::SvgSlider const *widget, BaseElement b) {
+	if (widget->background->svg->filename.length()) {
+		return SliderLight{{{b, widget->background->svg->filename}, widget->handle->svg->filename}, Colors565::Red};
+	} else {
+		return SliderLight{{{b, widget->svg->filename}, widget->handle->svg->filename}, Colors565::Red};
+	}
+}
+
 Element make_element(rack::componentlibrary::Rogan const *widget, BaseElement b) {
 	// Rogan knobs have a Rogan::bg svg, Rogan::fg svg, SvgKnob::sw svg, and SvgWidget::svg.
 	// The fg and base svgs are always the same color and thus are combined into one PNG for the MetaModule.
