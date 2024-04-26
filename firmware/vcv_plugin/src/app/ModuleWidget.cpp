@@ -125,16 +125,16 @@ void ModuleWidget::populate_elements(std::vector<MetaModule::Element> &elements)
 	elements.insert(elements.end(), lightElements.begin(), lightElements.end());
 }
 
-std::vector<ParamWidget *> getParams() {
+std::vector<ParamWidget *> ModuleWidget::getParams() {
 	return {};
 }
-std::vector<PortWidget *> getPorts() {
+std::vector<PortWidget *> ModuleWidget::getPorts() {
 	return {};
 }
-std::vector<PortWidget *> getInputs() {
+std::vector<PortWidget *> ModuleWidget::getInputs() {
 	return {};
 }
-std::vector<PortWidget *> getOutputs() {
+std::vector<PortWidget *> ModuleWidget::getOutputs() {
 	return {};
 }
 
