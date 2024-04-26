@@ -5,6 +5,7 @@
 #include "mpeg/PingGenerator.h"
 #include "mpeg/ClockDivMult.h"
 #include "mpeg/PingableEnvelope.h"
+#include "mpeg/Waveshaping.h"
 
 #include "helpers/EdgeDetector.h"
 #include "helpers/FlipFlop.h"
@@ -182,15 +183,25 @@ public:
 		
 		setLED<CycleButton>(isCycling);
 
+		auto shapeControl = getState<ShapeKnob>();
+
+		if (auto shapeCV = getInput<ShapeCvIn>(); shapeCV.has_value())
+		{
+			shapeControl += *shapeCV / 5.f;
+			shapeControl = std::clamp(shapeControl, 0.f, 1.f);
+		}
+
+		waveshaper.setShape(shapeControl);
+
 		float envOutput = 0.f;
 		if (isCycling || startedWhileCycling || startedByTrigger)
 		{
-			envOutput = env.getPhase();
+			envOutput = waveshaper.shape(env.getPhase());
 		}
-		setOutput<EnvOut>(envOutput);
+
+		setOutput<_5VEnvOut>(envOutput * 5.f);
 
 		setOutput<EofOut>(ping.getPhaseTap() < 0.5f);
-		setOutput<_5VEnvOut>(clockDivMult.getPhase() < 0.5f);
 	}
 
 	void set_samplerate(float sr) override {
@@ -233,6 +244,7 @@ private:
 	EdgeDetector cycleEdge;
 	FlipFlop triggerIn;
 	EdgeDetector triggerInRisingEdge;
+	Waveshaping waveshaper;
 
 
 private:
