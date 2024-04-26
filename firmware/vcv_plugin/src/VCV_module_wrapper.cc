@@ -17,7 +17,7 @@ void VCVModuleWrapper::set_samplerate(float rate) {
 }
 
 void VCVModuleWrapper::set_param(int id, float val) {
-	if (id < (int)paramQuantities.size()) {
+	if (id < (int)paramQuantities.size() && paramQuantities[id]) {
 		val *= (paramQuantities[id]->maxValue - paramQuantities[id]->minValue);
 		val += paramQuantities[id]->minValue;
 		if (paramQuantities[id]->snapEnabled)
