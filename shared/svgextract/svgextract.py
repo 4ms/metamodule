@@ -5,7 +5,7 @@ from helpers.util import *
 import actions.vcv as vcv
 import actions.infofile as infofile
 import actions.coreModule as coreModule
-import actions.lvgl as lvgl
+import actions.png as png
 
 # Version check
 f"Python 3.6+ is required"
@@ -120,24 +120,24 @@ def parse_args(args):
     elif cmd == 'convertfaceplatetopng':
         layer = args.pop(0) if len(args) > 0 else "all"
         if Path(inputfile).is_file():
-            lvgl.convertSvgToPng(inputfile, output, 240, layer)
+            png.convertSvgToPng(inputfile, output, 240, layer)
 
         elif Path(inputfile).is_dir():
             svg_files = Path(inputfile).glob("*.svg")
             for svg_file in svg_files:
-                lvgl.convertSvgToPng(str(svg_file), output)
+                png.convertSvgToPng(str(svg_file), output)
 
         
         return
 
     elif cmd == 'convertsvgtopng':
         if Path(inputfile).is_file():
-            lvgl.convertSvgToPng(inputfile, output)
+            png.convertSvgToPng(inputfile, output)
 
         elif Path(inputfile).is_dir():
             svg_files = Path(inputfile).glob("*.svg")
             for svg_file in svg_files:
-                lvgl.convertSvgToPng(str(svg_file), output)
+                png.convertSvgToPng(str(svg_file), output)
 
         return
 

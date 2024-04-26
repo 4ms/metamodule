@@ -2,7 +2,6 @@ import os
 from shutil import which
 import subprocess
 import re
-from . import lvgl_png
 
 from helpers.util import *
 
