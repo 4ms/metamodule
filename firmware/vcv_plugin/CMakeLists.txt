@@ -24,6 +24,7 @@ target_sources(
          src/app/SvgPort.cc
          src/app/SvgSlider.cc
          src/app/SvgSwitch.cc
+         src/engine/Engine.cpp
          src/engine/Module.cpp
          src/engine/ParamQuantity.cpp
          src/plugin/Model.cpp
