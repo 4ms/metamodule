@@ -40,11 +40,16 @@ public:
 
 			// Touch parameter
 			// This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
-			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
-				if (this->getParamQuantity()) {
-					APP->scene->rack->setTouchedParam(this);
+			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+				if ((e.mods & RACK_MOD_MASK) == 0) {
+					if (this->getParamQuantity()) {
+						APP->scene->rack->setTouchedParam(this);
+					}
+					e.consume(this);
 				}
-				e.consume(this);
+				else if ((e.mods & RACK_MOD_MASK) == GLFW_MOD_SHIFT) {
+					mapBut.start_mapping();
+				}
 			}
 
 			// Right click to open context menu
@@ -53,6 +58,10 @@ public:
 				e.consume(this);
 			}
 		}
+	}
+
+	void onDeselect(const rack::event::Deselect &e) override {
+		mapBut.end_mapping();
 	}
 
 	void onHover(const rack::event::Hover &e) override {

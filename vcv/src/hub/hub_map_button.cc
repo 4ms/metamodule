@@ -33,7 +33,15 @@ void HubMapButton::onDragStart(const rack::event::DragStart &e) {
 	if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
 		return;
 	}
+	
+	start_mapping();
 
+	// ???What is this?
+	if (quantity)
+		quantity->setMax();
+}
+
+void HubMapButton::start_mapping() {
 	// Start a mapping unless one is in progress from this object (in which case, abort it)
 	bool currentSourceIsThisButton = false;
 
@@ -45,10 +53,6 @@ void HubMapButton::onDragStart(const rack::event::DragStart &e) {
 		APP->scene->rack->setTouchedParam(nullptr);
 		hub->startMappingFrom(hubParamObj.objID);
 	}
-
-	// ???What is this?
-	if (quantity)
-		quantity->setMax();
 }
 
 void HubMapButton::onHover(const rack::event::Hover &e) {
