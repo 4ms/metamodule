@@ -21,7 +21,7 @@ inline void do_create(BaseElement element, const ElementCount::Indices &, const 
 
 inline void do_create(Knob el, const ElementCount::Indices &idx, const HubWidgetContext &ctx) {
 	auto ctr_pos = rack::mm2px({el.x_mm, el.y_mm});
-	if (el.image == "knob_x.png")
+	if (el.image.ends_with("knob_x.png"))
 		ctx.module_widget->addLabeledKnobPx<Davies1900hBlackKnob4ms>(el.short_name, idx.param_idx, ctr_pos, 19.f);
 	else
 		ctx.module_widget->addLabeledKnobPx<Small9mmKnob>(el.short_name, idx.param_idx, ctr_pos, 14.f);
