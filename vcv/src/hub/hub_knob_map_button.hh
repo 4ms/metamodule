@@ -21,6 +21,10 @@ public:
 	}
 
 	void onDeselect(const rack::event::Deselect &e) override {
+		end_mapping();
+	}
+
+	void end_mapping() {
 		if (!hub)
 			return;
 
