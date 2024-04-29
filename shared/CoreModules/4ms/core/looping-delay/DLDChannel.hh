@@ -83,6 +83,17 @@ private:
 			return int16_t(std::clamp(val, 0.0f, 1.0f) * 32767.0f);
 		};
 
+		auto Convert3WaySwitchStateFunc = [](auto inState) -> LDKit::Mocks::SwitchPos
+		{
+			switch (inState)
+			{
+				case Toggle3pos::State_t::DOWN: return LDKit::Mocks::SwitchPos::Down;
+				case Toggle3pos::State_t::UP: return LDKit::Mocks::SwitchPos::Up;
+				case Toggle3pos::State_t::CENTER: return LDKit::Mocks::SwitchPos::Center;
+				default: return LDKit::Mocks::SwitchPos::Invalid;
+			}
+		};
+
 		// Knobs
 		controls.sideload_pot(LDKit::TimePot,      ConvertKnobFunc(getState<Mapping::TimeKnob>()));
 		controls.sideload_pot(LDKit::FeedbackPot,  ConvertKnobFunc(getState<Mapping::FeedbackKnob>()));
@@ -108,7 +119,7 @@ private:
 		controls.inf_jack.sideload_set(getInput<Mapping::HoldInput>().value_or(0) > 0.1f);
 
 		// Switch
-		// ...
+		controls.time_switch.sideload_set(Convert3WaySwitchStateFunc(getState<Mapping::TimeModSwitch>()));
 
 		// Clock outputs
 		setOutput<Mapping::LoopOutput>(params.timer.loop_out.sideload_get());
