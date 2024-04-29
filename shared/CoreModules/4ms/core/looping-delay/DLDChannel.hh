@@ -120,8 +120,7 @@ private:
 		setLED<Mapping::ReverseButton>(controls.rev_led.sideload_get());
 		setLED<Mapping::HoldButton>(controls.inf_led.sideload_get());
 
-		 // TODO: this should be a mono color light
-		setLED<Mapping::TimeLight>(std::array<float,3>{params.timer.loop_led.sideload_get() ? 1.0f: 0.0f, 0.0f, 0.0f});
+		setLED<Mapping::TimeLight>(params.timer.loop_led.sideload_get() ? 1.0f: 0.0f);
 
 		// Buttons
 		controls.rev_button.sideload_set(getState<Mapping::ReverseButton>() == MomentaryButton::State_t::PRESSED);
