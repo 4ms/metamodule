@@ -115,8 +115,8 @@ private:
 		controls.inf_button.sideload_set(getState<Mapping::HoldButton>() == MomentaryButton::State_t::PRESSED);
 
 		// Trigger Inputs
-		controls.rev_jack.sideload_set(getInput<Mapping::ReverseInput>().value_or(0) > 0.1f);
-		controls.inf_jack.sideload_set(getInput<Mapping::HoldInput>().value_or(0) > 0.1f);
+		controls.rev_jack.sideload_set(getInput<Mapping::ReverseInput>().value_or(0) > TriggerThresholdInVolt);
+		controls.inf_jack.sideload_set(getInput<Mapping::HoldInput>().value_or(0) > TriggerThresholdInVolt);
 
 		// Switch
 		controls.time_switch.sideload_set(Convert3WaySwitchStateFunc(getState<Mapping::TimeModSwitch>()));
@@ -151,6 +151,7 @@ private:
 private:
 	static constexpr float AudioInputFullScaleInVolt  = 22.0f;
 	static constexpr float AudioOutputFullScaleInVolt = 17.0f;
+	static constexpr float TriggerThresholdInVolt     = 0.1f;
 
 private:
 	LDKit::Controls controls;
