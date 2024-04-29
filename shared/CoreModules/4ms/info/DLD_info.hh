@@ -51,8 +51,8 @@ struct DLDInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(71.16), to_mm<72>(281.49), Center, "Send A", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(217.15), to_mm<72>(281.49), Center, "Send B", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(260.18), to_mm<72>(281.49), Center, "Out B", ""}},
-		RedGreenBlueLight{{to_mm<72>(66.03), to_mm<72>(34.94), Center, "Time A LED", ""}},
-		RedGreenBlueLight{{to_mm<72>(222.2), to_mm<72>(34.94), Center, "Time B LED", ""}},
+		RedLight{{to_mm<72>(66.03), to_mm<72>(34.94), Center, "Time A LED", ""}},
+		RedLight{{to_mm<72>(222.2), to_mm<72>(34.94), Center, "Time B LED", ""}},
 }};
 
     enum class Elem {
@@ -100,62 +100,63 @@ struct DLDInfo : ModuleInfoBase {
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobTime_A = 0,
-        KnobTime_B = 1,
-        KnobFeedback_A = 2,
-        KnobFeedback_B = 3,
-        KnobDelay_Feed_A = 4,
-        KnobMix_A = 5,
-        KnobMix_B = 6,
-        KnobDelay_Feed_B = 7,
+        KnobTime_A, 
+        KnobTime_B, 
+        KnobFeedback_A, 
+        KnobFeedback_B, 
+        KnobDelay_Feed_A, 
+        KnobMix_A, 
+        KnobMix_B, 
+        KnobDelay_Feed_B, 
         NumKnobs,
     };
     
     enum {
-        SwitchP16__OR__1_8Th_A = 0,
-        SwitchP16__OR__1_8Th_B = 1,
-        SwitchPing_Button = 2,
-        SwitchReverse_A = 3,
-        SwitchHold_A = 4,
-        SwitchHold_B = 5,
-        SwitchReverse_B = 6,
+        SwitchP16__OR__1_8Th_A, 
+        SwitchP16__OR__1_8Th_B, 
+        SwitchPing_Button, 
+        SwitchReverse_A, 
+        SwitchHold_A, 
+        SwitchHold_B, 
+        SwitchReverse_B, 
         NumSwitches,
     };
     
     enum {
-        InputPing_Jack = 0,
-        InputIn_A = 1,
-        InputReturn_A = 2,
-        InputReverse_A_Jack = 3,
-        InputReverse_B_Jack = 4,
-        InputReturn_B = 5,
-        InputIn_B = 6,
-        InputHold_A_Jack = 7,
-        InputHold_B_Jack = 8,
-        InputTime_A_Jack = 9,
-        InputFeedback_A_Jack = 10,
-        InputDelay_Feed_A_Jack = 11,
-        InputDelay_Feed_B_Jack = 12,
-        InputFeedback_B_Jack = 13,
-        InputTime_B_Jack = 14,
+        InputPing_Jack, 
+        InputIn_A, 
+        InputReturn_A, 
+        InputReverse_A_Jack, 
+        InputReverse_B_Jack, 
+        InputReturn_B, 
+        InputIn_B, 
+        InputHold_A_Jack, 
+        InputHold_B_Jack, 
+        InputTime_A_Jack, 
+        InputFeedback_A_Jack, 
+        InputDelay_Feed_A_Jack, 
+        InputDelay_Feed_B_Jack, 
+        InputFeedback_B_Jack, 
+        InputTime_B_Jack, 
         NumInJacks,
     };
     
     enum {
-        OutputLoop_A = 0,
-        OutputClock_Out = 1,
-        OutputLoop_B = 2,
-        OutputOut_A = 3,
-        OutputSend_A = 4,
-        OutputSend_B = 5,
-        OutputOut_B = 6,
+        OutputLoop_A, 
+        OutputClock_Out, 
+        OutputLoop_B, 
+        OutputOut_A, 
+        OutputSend_A, 
+        OutputSend_B, 
+        OutputOut_B, 
         NumOutJacks,
     };
     
     enum {
-        LedTime_A_Led = 0,
-        LedTime_B_Led = 1,
+        LedTime_A_Led, 
+        LedTime_B_Led, 
         NumDiscreteLeds,
     };
+    
 };
 } // namespace MetaModule
