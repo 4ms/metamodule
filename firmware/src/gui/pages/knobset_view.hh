@@ -27,6 +27,7 @@ struct KnobSetViewPage : PageBase {
 		lv_group_set_editing(group, false);
 		lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_NextKnobSet, next_knobset_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ActivateKnobSet, activate_knobset_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() override {
@@ -112,7 +113,6 @@ struct KnobSetViewPage : PageBase {
 			static_params[idx] = patch->find_static_knob(map.module_id, map.param_id);
 			float val = static_params[idx] ? map.unmap_val(static_params[idx]->value) : 0;
 			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), val);
-
 
 			set_for_knob(cont, map.panel_knob_id);
 
@@ -265,7 +265,24 @@ struct KnobSetViewPage : PageBase {
 		}
 	}
 
+	static void activate_knobset_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+
+		if (page->args.view_knobset_id.has_value())
+			page->change_knobset(page->args.view_knobset_id.value());
+	}
+
 private:
+	void change_knobset(unsigned knobset_idx) {
+		args.view_knobset_id = knobset_idx;
+		page_list.set_active_knobset(knobset_idx);
+		patch_mod_queue.put(ChangeKnobSet{knobset_idx});
+		update_active_status();
+	}
+
 	void set_for_knob(lv_obj_t *cont, unsigned knob_i) {
 		auto knob = get_knob(cont);
 		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
