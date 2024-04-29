@@ -59,10 +59,19 @@ enum class SwitchPos { Invalid = 0b00, Up = 0b01, Down = 0b10, Center = 0b11 };
 
 struct MockedSwitch3Pos
 {
+	MockedSwitch3Pos() : state(SwitchPos::Down) {}
 	SwitchPos read()
 	{
-		return SwitchPos::Down;
+		return state;
 	}
+
+	void sideload_set(SwitchPos val)
+	{
+		state = val;
+	}
+
+private:
+	SwitchPos state;
 };
 
 struct OutputPin
