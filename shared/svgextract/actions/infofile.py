@@ -65,28 +65,27 @@ def panel_to_components(tree):
 
     # Scan all circles and rects for components
     components['params'] = []
-    components['inputs'] = []
-    components['outputs'] = []
+    components['jacks'] = []
     components['lights'] = []
-    components['switches'] = []
     components['alt_params'] = []
 
-    circles = components_group.findall(".//svg:circle", ns)
-    rects = components_group.findall(".//svg:rect", ns)
+    components['legacy_knobs'] = [] #legacy only
+    components['legacy_switches'] = [] #legacy only
+    components['legacy_inputs'] = [] #legacy only
+    components['legacy_outputs'] = [] #legacy only
 
-    for el in circles + rects:
+    all = components_group.findall(".//svg:*",ns)
+
+    for el in all:
         c = {}
         # Get name
-        # name = el.get('{http://www.inkscape.org/namespaces/inkscape}label')
-        # if name is None:
         name = el.get('data-name')
         if name is None:
             name = el.get('id')
             if name is not None:
                 name = remove_trailing_dash_number(name)
         if name is None:
-            name = ''.join(random.choices(string.ascii_uppercase, k=6))
-            Log("Unnamed component found: generating random name: " + name)
+            continue
 
         c['raw_name'] = name
 
@@ -145,7 +144,7 @@ def panel_to_components(tree):
             # c['orientation'] = "Round"
 
         else:
-            shape = "unknown"
+            continue
 
         # Get color --> component type
         style = el.get('style')
@@ -178,6 +177,7 @@ def panel_to_components(tree):
                 set_class_if_not_set(c, get_slider_class(c))
                 c['category'] = "Slider"
 
+            components['legacy_knobs'].append(c)
             components['params'].append(c)
 
         #Magenta: LED
@@ -189,55 +189,64 @@ def panel_to_components(tree):
         #Green: Input jack, analog (CV or audio): 
         elif color == '#00ff00':
             set_class_if_not_set(c, "AnalogJackInput4ms")
-            components['inputs'].append(c)
+            components['legacy_inputs'].append(c)
+            components['jacks'].append(c)
             c['category'] = "In"
 
         #Light Green: Input jack, digital (gate or trig):
         elif color == '#80ff80':
             set_class_if_not_set(c, "GateJackInput4ms")
-            components['inputs'].append(c)
+            components['legacy_inputs'].append(c)
+            components['jacks'].append(c)
             c['category'] = "In"
 
         #Blue: Output jack, analog (CV or audio)
         elif color == '#0000ff':
             set_class_if_not_set(c, "AnalogJackOutput4ms")
-            components['outputs'].append(c)
+            components['legacy_outputs'].append(c)
+            components['jacks'].append(c)
             c['category'] = "Out"
 
         #Light Blue: Output jack, digital (gate or trig):
         elif color == '#8080ff':
             set_class_if_not_set(c, "GateJackOutput4ms")
-            components['outputs'].append(c)
+            components['legacy_outputs'].append(c)
+            components['jacks'].append(c)
             c['category'] = "Out"
 
         #Deep Purple: Encodeer
         elif color == '#c000c0':
             set_class_if_not_set(c, get_encoder_class_from_radius(el.get('r')))
+            components['legacy_knobs'].append(c)
             components['params'].append(c)
             c['category'] = "Encoder"
 
         #Orange: Button - Latching
         elif color == '#ff8000':
             set_class_if_not_set(c, "OrangeButton")
-            components['switches'].append(c)
+            components['legacy_switches'].append(c)
+            components['params'].append(c)
             c['category'] = "Button"
 
         #Light Orange: Button - Momentary
         elif color == '#ffc000':
             set_class_if_not_set(c, "WhiteMomentary7mm")
-            components['switches'].append(c)
+            components['legacy_switches'].append(c)
+            components['params'].append(c)
             c['category'] = "Button"
 
         #Deep Pink rectangle: Switch - 2pos
         elif color == '#ff8080':
             set_class_if_not_set(c, get_toggle2pos_class(c))
-            components['switches'].append(c)
+            components['legacy_switches'].append(c)
+            components['params'].append(c)
             c['category'] = "Switch"
 
         #Hot Pink rectangle: Switch - 3pos
         elif color == '#ffc080':
             set_class_if_not_set(c, get_toggle3pos_class(c))
-            components['switches'].append(c)
+            components['legacy_switches'].append(c)
+            components['params'].append(c)
             c['category'] = "Switch"
 
         #Medium grey: AltParam
@@ -280,18 +289,19 @@ def panel_to_components(tree):
 
 
     # Sort components
+    components['legacy_knobs'].reverse()
+    components['legacy_switches'].reverse()
+    components['legacy_inputs'].reverse()
+    components['legacy_outputs'].reverse()
+
     components['params'].reverse()
-    components['switches'].reverse()
-    components['inputs'].reverse()
-    components['outputs'].reverse()
+    components['jacks'].reverse()
     components['lights'].reverse()
     components['alt_params'].reverse()
 
     components['elements'] = []
     components['elements'] += components['params']
-    components['elements'] += components['switches']
-    components['elements'] += components['inputs']
-    components['elements'] += components['outputs']
+    components['elements'] += components['jacks']
     components['elements'] += components['lights']
     components['elements'] += components['alt_params']
 
@@ -331,10 +341,10 @@ struct {slug}Info : ModuleInfoBase {{
     }};
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
-    {make_legacy_enum("Knob", components['params'])}
-    {make_legacy_enum("Switch", components['switches'])}
-    {make_legacy_enum("Input", components['inputs'])}
-    {make_legacy_enum("Output", components['outputs'])}
+    {make_legacy_enum("Knob", components['legacy_knobs'])}
+    {make_legacy_enum("Switch", components['legacy_switches'])}
+    {make_legacy_enum("Input", components['legacy_inputs'])}
+    {make_legacy_enum("Output", components['legacy_outputs'])}
     {make_legacy_enum("Led", components['lights'])}
     {make_legacy_enum("AltParam", components['alt_params'])}
 }};

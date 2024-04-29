@@ -109,6 +109,17 @@ struct Gui {
 		palette_main[LV_PALETTE_BLUE_GREY], //?
 	};
 
+	static inline std::array<lv_color_t, 8> knob_disabled_palette{
+		palette_main[LV_PALETTE_RED],
+		palette_main[LV_PALETTE_YELLOW],
+		palette_main[LV_PALETTE_CYAN],
+		palette_main[LV_PALETTE_PINK],
+		palette_main[LV_PALETTE_ORANGE],
+		palette_main[LV_PALETTE_GREEN],
+		palette_main[LV_PALETTE_GREY],		//?
+		palette_main[LV_PALETTE_BLUE_GREY], //?
+	};
+
 	// Slider Handle Style
 	static constexpr lv_style_const_prop_t slider_handle_style_props[9] = {
 		LV_STYLE_CONST_BG_OPA(LV_OPA_100),
@@ -124,6 +135,12 @@ struct Gui {
 	static inline auto slider_handle_style = LV_STYLE_CONST_CPP(slider_handle_style_props);
 
 	static void init_lvgl_styles() {
+
+		for (auto &color : knob_disabled_palette) {
+			auto hsv = lv_color_to_hsv(color);
+			color = lv_color_hsv_to_rgb(hsv.h, hsv.s / 2, hsv.v / 2);
+		}
+
 		// invisible_style
 		lv_style_init(&invisible_style);
 		lv_style_set_bg_opa(&invisible_style, 0);

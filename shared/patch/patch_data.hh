@@ -174,13 +174,15 @@ struct PatchData {
 		return std::nullopt;
 	}
 
-	void set_static_knob_value(uint32_t module_id, uint32_t param_id, float val) {
+	void set_or_add_static_knob_value(uint32_t module_id, uint32_t param_id, float val) {
 		for (auto &m : static_knobs) {
 			if (m.module_id == module_id && m.param_id == param_id) {
 				m.value = val;
 				return;
 			}
 		}
+		// Not found, add it
+		static_knobs.push_back({(uint16_t)module_id, (uint16_t)param_id, val});
 	}
 
 	void add_internal_cable(Jack in, Jack out) {

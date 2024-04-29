@@ -48,6 +48,15 @@ void __throw_runtime_error(char const *) {
 // template<>
 // allocator<char>::allocator(const std::allocator<char> &) = default;
 
+void __throw_bad_cast() {
+	while (true)
+		;
+}
+
+void __throw_runtime_error(char const *) {
+}
+
+
 } // namespace std
 
 extern "C" void __cxa_pure_virtual() {

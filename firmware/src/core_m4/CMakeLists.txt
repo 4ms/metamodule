@@ -38,7 +38,7 @@ add_executable(
   ${FWDIR}/lib/littlefs/lfs.c
   ${FWDIR}/lib/littlefs/lfs_util.c
   ${FWDIR}/system/libc_stub.c
-  ${FWDIR}/system/libcpp_stub.cc
+  ${M4DIR}/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/startup_stm32mp157cxx_cm4.s
   ${DRIVERLIB}/drivers/hal_handlers.cc

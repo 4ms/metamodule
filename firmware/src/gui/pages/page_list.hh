@@ -136,7 +136,6 @@ public:
 		_new_page_requested = false;
 	}
 
-private:
 	PageBase *page(PageId id) {
 		return _pages[static_cast<std::underlying_type_t<PageId>>(id)];
 	}

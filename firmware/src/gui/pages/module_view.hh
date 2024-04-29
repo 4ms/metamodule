@@ -215,7 +215,6 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
 
-				//TODO: cache s_param
 				auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
 
 				if (was_redrawn && settings.map_ring_flash_active) {
