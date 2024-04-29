@@ -3066,10 +3066,10 @@
     <circle id="Hold_A_AltParam" data-name="Hold A@Trig@Gate" cx="122.51" cy="281.49" r="4" style="fill: #808080;" />
     <circle id="PingMethodAltParam" data-name="Ping Method@IgnoreJitter@Ignore%Change@1:1@Avg 2@Avg 4" cx="167.59" cy="42.51" r="11.34" style="fill:#808080;" />
 
-    <rect style="fill:#808080;" id="AutoMuteBAltParam" width="12" height="12" x="206" y="7" data-name="AutoMute@On@Off" />
-    <rect style="fill:#808080;" id="AutoMuteAAltParam" width="12" height="12" x="6" y="7" data-name="AutoMute@On@Off" />
-    <rect style="fill:#808080;" id="SoftClipBAltParam" width="12" height="12" x="223" y="7" data-name="Soft Clip@On@Off" />
-    <rect style="fill:#808080;" id="SoftClipAAltParam" width="12" height="12" x="23" y="7" data-name="Soft Clip@On@Off" />
+    <rect style="fill:#808080;" id="AutoMuteBAltParam" width="12" height="12" x="206" y="7" data-name="AutoMute B@On@Off" />
+    <rect style="fill:#808080;" id="AutoMuteAAltParam" width="12" height="12" x="6" y="7" data-name="AutoMute A@On@Off" />
+    <rect style="fill:#808080;" id="SoftClipBAltParam" width="12" height="12" x="223" y="7" data-name="Soft Clip B@On@Off" />
+    <rect style="fill:#808080;" id="SoftClipAAltParam" width="12" height="12" x="23" y="7" data-name="Soft Clip A@On@Off" />
 
     <text id="slug" transform="translate(185.53 372.54)" style="font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 6px;"><tspan x="0" y="0" id="tspan673">DLD</tspan></text>
     <text
