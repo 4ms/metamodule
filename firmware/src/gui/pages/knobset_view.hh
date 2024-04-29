@@ -60,16 +60,16 @@ struct KnobSetViewPage : PageBase {
 		if (patch->knob_sets.size() > 2) {
 			lv_show(ui_PreviousKnobSet);
 			lv_show(ui_NextKnobSet);
-			lv_group_add_obj(group, ui_PreviousKnobSet);
-			lv_group_add_obj(group, ui_NextKnobSet);
 		} else if (patch->knob_sets.size() > 1) {
 			lv_hide(ui_PreviousKnobSet);
 			lv_show(ui_NextKnobSet);
-			lv_group_add_obj(group, ui_NextKnobSet);
 		} else {
 			lv_hide(ui_PreviousKnobSet);
 			lv_hide(ui_NextKnobSet);
 		}
+		lv_group_add_obj(group, ui_PreviousKnobSet);
+		lv_group_add_obj(group, ui_ActivateKnobSet);
+		lv_group_add_obj(group, ui_NextKnobSet);
 
 		// Set Knobset
 		if (!args.view_knobset_id)
@@ -146,11 +146,14 @@ struct KnobSetViewPage : PageBase {
 
 		if (force || prev_value != is_actively_playing) {
 			if (is_actively_playing) {
+				lv_show(ui_KnobSetDescript);
+				lv_hide(ui_ActivateKnobSet);
 				lv_label_set_text(ui_KnobSetDescript, "(Active)");
 				lv_obj_set_style_bg_color(ui_KnobSetContainer, lv_color_hex(0x333333), LV_PART_MAIN);
 			} else {
-				lv_label_set_text(ui_KnobSetDescript, "(Inactive)");
-				lv_obj_set_style_bg_color(ui_KnobSetContainer, lv_color_hex(0x888888), LV_PART_MAIN);
+				lv_hide(ui_KnobSetDescript);
+				lv_show(ui_ActivateKnobSet);
+				lv_obj_set_style_bg_color(ui_KnobSetContainer, lv_color_hex(0x666666), LV_PART_MAIN);
 			}
 		}
 	}
