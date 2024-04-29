@@ -1,4 +1,5 @@
 #include "info/Tapo_info.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 
