@@ -45,12 +45,30 @@ struct MockedTrigger : public InputPin
 	bool is_pressed() { return value; }
 	bool is_just_released()  { return just_went_low(); }
     bool is_just_pressed()  { return just_went_high(); }
+
+
 };
 
 struct MockedButton : public MockedTrigger
 {
-	unsigned how_long_held() { return 0;}
-	unsigned how_long_held_pressed() { return 0;}
+	void sideload_set(bool newVal)
+	{
+		if (newVal != value)
+		{
+			steady_state_ctr = 0;
+		}
+		else
+		{
+			if (steady_state_ctr < std::numeric_limits<uint32_t>::max() - 1) steady_state_ctr++;
+		}
+
+		value = newVal;
+	}
+	unsigned how_long_held() { return steady_state_ctr; }
+	unsigned how_long_held_pressed() { return is_pressed() ? steady_state_ctr : 0; }
+
+private:
+	uint32_t steady_state_ctr;
 };
 
 
