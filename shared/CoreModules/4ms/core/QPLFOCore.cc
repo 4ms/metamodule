@@ -74,10 +74,22 @@ public:
 		setLED<Ping3Button>(mod.tapLEDs[2]);
 		setLED<Ping4Button>(mod.tapLEDs[3]);
 
-		setOutput<Out1Out>(channelOn[0] ? mod.outputs[0] * OutputFullScaleInV : 0.0f);
-		setOutput<Out2Out>(channelOn[1] ? mod.outputs[1] * OutputFullScaleInV : 0.0f);
-		setOutput<Out3Out>(channelOn[2] ? mod.outputs[2] * OutputFullScaleInV : 0.0f);
-		setOutput<Out4Out>(channelOn[3] ? mod.outputs[3] * OutputFullScaleInV : 0.0f);
+		auto OutputFunc = [this](auto val)
+		{
+			auto result = val * OutputFullScaleInV;
+
+			if (getState<OutputRangeAltParam>() == 1)
+			{
+				result -= OutputFullScaleInV / 2.0f;
+			}
+
+			return result;
+		};
+
+		setOutput<Out1Out>(channelOn[0] ? OutputFunc(mod.outputs[0]) : 0.0f);
+		setOutput<Out2Out>(channelOn[1] ? OutputFunc(mod.outputs[1]) : 0.0f);
+		setOutput<Out3Out>(channelOn[2] ? OutputFunc(mod.outputs[2]) : 0.0f);
+		setOutput<Out4Out>(channelOn[3] ? OutputFunc(mod.outputs[3]) : 0.0f);
 
 		mod.setADCChannel(0, std::clamp(getState<Skew1Knob>() + getInput<Skew1CvIn>().value_or(0) / CVInputFullScaleInV, 0.0f, 1.0f));
 		mod.setADCChannel(1, std::clamp(getState<Skew2Knob>() + getInput<Skew2JackIn>().value_or(0) / CVInputFullScaleInV, 0.0f, 1.0f));
