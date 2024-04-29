@@ -165,10 +165,10 @@ private:
 			return float(output) / AudioFullScale * AudioOutputFullScaleInVolt;
 		};
 		
-		inBlock[audioBufferFillCount] = {InputConversionFunc(getInput<Mapping::AudioInput>().value_or(0)), InputConversionFunc(getInput<Mapping::ReturnInput>().value_or(0))};
+		inBlock[audioBufferFillCount] = {InputConversionFunc(getInput<Mapping::ReturnInput>().value_or(0)), InputConversionFunc(getInput<Mapping::AudioInput>().value_or(0))};
 
-		setOutput<Mapping::AudioOutput>(OutputConversionFunc(outBlock[audioBufferFillCount].chan[0]));
-		setOutput<Mapping::SendOutput>(OutputConversionFunc(outBlock[audioBufferFillCount].chan[1]));
+		setOutput<Mapping::AudioOutput>(OutputConversionFunc(outBlock[audioBufferFillCount].chan[1]));
+		setOutput<Mapping::SendOutput>(OutputConversionFunc(outBlock[audioBufferFillCount].chan[0]));
 	}
 
 private:
