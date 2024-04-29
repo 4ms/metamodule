@@ -278,11 +278,11 @@ struct KnobSetViewPage : PageBase {
 		auto page = static_cast<KnobSetViewPage *>(event->user_data);
 
 		if (page->args.view_knobset_id.has_value())
-			page->change_knobset(page->args.view_knobset_id.value());
+			page->activate_knobset(page->args.view_knobset_id.value());
 	}
 
 private:
-	void change_knobset(unsigned knobset_idx) {
+	void activate_knobset(unsigned knobset_idx) {
 		args.view_knobset_id = knobset_idx;
 		page_list.set_active_knobset(knobset_idx);
 		patch_mod_queue.put(ChangeKnobSet{knobset_idx});
