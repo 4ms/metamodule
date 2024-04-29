@@ -1,12 +1,12 @@
-# Creating Meta Module Patches With VCV
+# Creating MetaModule Patches With VCV
 
 ### Adding Modules to Your Library
-To get started, you will need to add the free 4msCompany Meta Module to your VCV Library. If you aren't familiar with adding modules to your VCV Library, it is an easy process.
+To get started, you will need to add the free 4msCompany MetaModule to your VCV Library. If you aren't familiar with adding modules to your VCV Library, it is an easy process.
 
 #### Via VCV Library (NOT YET AVAILABLE)
 1) Go to [the VCV Library](https://library.vcvrack.com/) and make sure that you are signed into your account (top-right corner).
-2) On the top of the Library are a number of filters. You can search for "Meta Module" or "4ms". Alternatively, you can use [the 4msCompany Brand Filter](https://library.vcvrack.com/?query=&brand=4msCompany&tag=&license=) to list all modules by 4ms.
-3) Aside from the Meta Module, you will want to add modules from other supported brands for creating your patches. Currently, the Meta Module supports modules from 4msCompany, Befaco, HetrickCV, and Nonlinear Circuits, along with the Macro Oscillator by Audible Instruments. (TODO: Add a link to a supported list of modules)
+2) On the top of the Library are a number of filters. You can search for "MetaModule" or "4ms". Alternatively, you can use [the 4msCompany Brand Filter](https://library.vcvrack.com/?query=&brand=4msCompany&tag=&license=) to list all modules by 4ms.
+3) Aside from the MetaModule, you will want to add modules from other supported brands for creating your patches. Currently, the MetaModule supports modules from 4msCompany, Befaco, HetrickCV, and Nonlinear Circuits, along with the Macro Oscillator by Audible Instruments. (TODO: Add a link to a supported list of modules)
 4) To add a module to your account, simply click the "+ Add" text on each module that you wish to have available in your VCV environment.
 5) After adding modules to your account, open VCV Rack (or restart it if it's currently open). If you are not signed in to your VCV account on VCV Rack itself, click the "Library" menu on the top file bar and sign in there.
 
@@ -21,7 +21,7 @@ To get started, you will need to add the free 4msCompany Meta Module to your VCV
 
 ### Saving the Basic Patch
 
-The 4ms Meta Module acts as the patch creation hub inside of VCV. To add it to your VCV Patch, right click on an empty space in VCV to bring up your module library.
+The 4ms MetaModule acts as the patch creation hub inside of VCV. To add it to your VCV Patch, right click on an empty space in VCV to bring up your module library.
 
 ![VCV Library](./images/Library.png)
 
@@ -33,23 +33,24 @@ Additionally, you can add modules to your Favorites by control-clicking the mdou
 
 ![Favorites](./images/FavoritesLibrary.png)
 
-For the most basic patch, you will need at least two modules: the 4ms Meta Module and a VCV Audio module. The Audio module is used to send signals to your speakers while patching. Additionally, it is needed by most modules in VCV as it establishes a sample rate clock source for audio callbacks. Adding the two modules to your rack will look like this:
+For the most basic patch, you will need at least two modules: the 4ms MetaModule and a VCV Audio module. The Audio module is used to send signals to your speakers while patching. Additionally, it is needed by most modules in VCV as it establishes a sample rate clock source for audio callbacks. Adding the two modules to your rack will look like this:
 
 ![BasicPatch](./images/MetaModule.png)
 
 It is worth saving this patch so that you can come back to it quickly. Go to File->Save at the top of VCV and save this as something like "MetamoduleTemplate.vcv".
 
-### First Patch: Turning your Meta Module into an Ensemble Oscillator
+### First Patch: Turning your MetaModule into an Ensemble Oscillator
 
-Finally, let's make some sound! As a fun first patch, let's turn the Meta Module into the excellent 4ms Ensemble Oscillator. Open the Library again, and add the 4ms Ensemble Oscillator to your patch.
+Finally, let's make some sound! As a fun first patch, let's turn the MetaModule into the excellent 4ms Ensemble Oscillator. Open the Library again, and add the 4ms Ensemble Oscillator to your patch.
 
 ![Ensemble Oscillator](./images/Ensemble.png)
 
-We want the oscillator outputs to come out of the hardware Meta Module's outputs. To do this, we will connect the oscillator outputs to Meta Module's 1 and 2 outputs. To hear the oscillator on our computer speakers, we will additionally connect the oscillator to the Audio module. Before doing this, make sure your speakers or headphones are set to a comfortable level, as the signal will be quite loud!
+We want the oscillator outputs to come out of the hardware MetaModule's outputs. To do this, we will connect the oscillator outputs to MetaModule's 1 and 2 outputs. To hear the oscillator on our computer speakers, we will additionally connect the oscillator to the Audio module. Before doing this, make sure your speakers or headphones are set to a comfortable level, as the signal will be quite loud!
 
 ![Basic Connections](./images/EnsembleConnected.png)
 
-Now that we have an oscillator drone, let's map some controls! To map a control, click the dashed line on the Meta Module knob that you wish to attach to a control. A solid line will appear around the knob to let you know that you are in mapping mode.
+Now that we have an oscillator drone, let's map some controls! To map a control, click the dashed line on the MetaModule knob that you wish to attach to a control. A solid line will appear around the knob to let you know that you are in mapping mode.
+If you find it hard to click exactly on the dashed line, you also can Shift + Click on a knob on the MetaModule.
 
 ![Mapping Mode](./images/MappingMode.png)
 
@@ -61,30 +62,30 @@ If you make a mistake and wish to unmap a knob, right-click on the knob and sele
 
 ![Unmap](./images/Unmap.png)
 
-By default, the Meta Module knob controls the entire range of the knob. For instance, turning the Meta Module knob to 3 o'clock will set the corresponding knob to 3 o'clock. To change the range and direction of the mapped knob, right-click the knob on the Meta Module to bring up the Min/Max range.
+By default, the MetaModule knob controls the entire range of the knob. For instance, turning the MetaModule knob to 3 o'clock will set the corresponding knob to 3 o'clock. To change the range and direction of the mapped knob, right-click the knob on the MetaModule to bring up the Min/Max range.
 
 ![Range](./images/Range.png)
 
 There are two important (and fun!) notes here:
-1) You can set Max to less than Min to make a knob move in the opposite direction compared to the Meta Module knob.
-2) You can map a Meta Module knob to multiple knobs and ranges.
+1) You can set Max to less than Min to make a knob move in the opposite direction compared to the MetaModule knob.
+2) You can map a MetaModule knob to multiple knobs and ranges.
 
 ![Multimap](./images/Multimap.png)
 
-Aside from knob mappings, we will also want to add CV control of the Ensemble Oscillator. This can be done by dragging a cable from the software Meta Module's "Audio/CV Ins" section to the Ensemble Oscillator's jacks that you wish to send CV to. After you've created a few connections that you like, fill out the Name and Description fields on the Meta Module.
+Aside from knob mappings, we will also want to add CV control of the Ensemble Oscillator. This can be done by dragging a cable from the software MetaModule's "Audio/CV Ins" section to the Ensemble Oscillator's jacks that you wish to send CV to. After you've created a few connections that you like, fill out the Name and Description fields on the MetaModule.
 
 ![Description](./images/Description.png)
 
 ### Saving and Exporting Your Patch
 
-We can now send this patch to the hardware Meta Module. To export your patch, click the big red SAVE button on the top-right of the software Meta Module's interface. This will bring up a dialogue to save the current patch as a Meta Module-compatible .yml file. Make sure your put the file in a place that you'll remember.
+We can now send this patch to the hardware MetaModule. To export your patch, click the big red SAVE button on the top-right of the software MetaModule's interface. This will bring up a dialogue to save the current patch as a MetaModule-compatible .yml file. Make sure your put the file in a place that you'll remember.
 
-You can now upload the patch to the hardware Meta Module via USB drive or microSD (WiFi is coming later with an expander module).
+You can now upload the patch to the hardware MetaModule via USB drive or microSD (WiFi is coming later with an expander module).
 
 Copy the .yml patch file to a microSD card or a USB drive. The card or
 drive must be formatted as FAT32 or ExFAT. The drive may have multiple partitions,
 but only the first FAT partition found will be used. Insert the card
-or drive into the Meta Module and in a moment it will appear in the Patch
+or drive into the MetaModule and in a moment it will appear in the Patch
 Selector page (press the Back button repeatedly to get back to the Patch
 Selector page). You can open a patch just by selecting it and clicking on it.
 Play it by clicking the Play button. Once you have a patch opened or playing,
@@ -111,7 +112,7 @@ normally (monophonically). Use the MIDI "learn" features of these modules to
 set CC or note numbers, just like you would if making a VCV Rack patch.
 
 For example, create a patch in VCV Rack with an Ensemble Oscillator OUT A going
-to an ENVVCA Audio In. Then patch the ENVVCA Audio Out to the Meta Module's Out
+to an ENVVCA Audio In. Then patch the ENVVCA Audio Out to the MetaModule's Out
 1 jack. Adjust the ENVVCA sliders and switches so that it plays "notes" at a
 reasonable tempo when you have the ENVVCA Cycle button on. Now, turn Cycle off
 and add a MIDI-CV module to the patch. Patch the Voct output to the Ensemble's
@@ -124,7 +125,7 @@ setting.
 ![MIDI Basic patch](./images/MIDI-monophonic.png)
 ![MIDI monophonic setting](./images/MIDI-poly-setting.png)
 
-Now, transfer the patch to the Meta Module and attach a USB-MIDI keyboard to
+Now, transfer the patch to the MetaModule and attach a USB-MIDI keyboard to
 the USB-C jack. Playing notes on the MIDI keyboard should play them in your
 patch.
 

@@ -192,6 +192,8 @@ extern lv_obj_t *ui_PreviousKnobSetLabel;
 extern lv_obj_t *ui_KnobSetTitle;
 extern lv_obj_t *ui_KnobSetNameText;
 extern lv_obj_t *ui_KnobSetDescript;
+extern lv_obj_t *ui_ActivateKnobSet;
+extern lv_obj_t *ui_ActivateKnobSetLabel;
 extern lv_obj_t *ui_NextKnobSet;
 extern lv_obj_t *ui_NextKnobSetLabel;
 extern lv_obj_t *ui_KnobSetPanelLeft;

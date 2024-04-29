@@ -164,7 +164,7 @@ private:
 			.value = (float)value / range, //0/6 1/6 ... 6/6 => 1 2 ... 7
 		};
 		patch_mod_queue.put(SetStaticParam{.param = sp});
-		patch->set_static_knob_value(sp.module_id, sp.param_id, sp.value);
+		patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
 
 		update_control_arc_text();
 	}
