@@ -148,19 +148,28 @@ private:
 private:
 	void packUnpackBlockBuffers()
 	{
+		constexpr float AudioFullScale = ((1<<(AudioStreamConf::SampleBits-1)) -1);
+
 		auto clamp = [](auto val, auto max_amplitude)
 		{
 			return std::min(std::max(val, -max_amplitude), max_amplitude);
 		};
 
-		constexpr float AudioFullScale = ((1<<(AudioStreamConf::SampleBits-1)) -1);
+		auto InputConversionFunc = [clamp](auto inputInV) -> int32_t
+		{
+			float normalized = clamp(inputInV / AudioInputFullScaleInVolt, 1.0f);
+			return int32_t(normalized * AudioFullScale);
+		};
 
-		// TODO: this is mono to stereo
-		auto monoInput = int32_t(clamp(getInput<Mapping::AudioInput>().value_or(0) / AudioInputFullScaleInVolt, 1.0f) * AudioFullScale );
-		inBlock[audioBufferFillCount] = {monoInput, monoInput};
+		auto OutputConversionFunc = [](auto output) -> float
+		{
+			return float(output) / AudioFullScale * AudioOutputFullScaleInVolt;
+		};
+		
+		inBlock[audioBufferFillCount] = {InputConversionFunc(getInput<Mapping::AudioInput>().value_or(0)), InputConversionFunc(getInput<Mapping::ReturnInput>().value_or(0))};
 
-		// TODO: this is stereo to mono
-		setOutput<Mapping::AudioOutput>((float(outBlock[audioBufferFillCount].chan[0]) + float(outBlock[audioBufferFillCount].chan[1])) / 2 / AudioFullScale * AudioOutputFullScaleInVolt);		
+		setOutput<Mapping::AudioOutput>(OutputConversionFunc(outBlock[audioBufferFillCount].chan[0]));
+		setOutput<Mapping::SendOutput>(OutputConversionFunc(outBlock[audioBufferFillCount].chan[1]));
 	}
 
 private:
