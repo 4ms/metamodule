@@ -128,7 +128,7 @@ public:
 				// update the patch for knobs that moved
 				if (map.panel_knob_id == panel_knob_i) {
 					auto scaled_val = map.get_mapped_val(knobpos.value());
-					patch->set_static_knob_value(map.module_id, map.param_id, scaled_val);
+					patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
 				}
 			}
 		}

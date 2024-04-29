@@ -121,7 +121,6 @@ struct KnobSetViewPage : PageBase {
 			else
 				disable(cont, map.panel_knob_id);
 
-			printf("Adding %p %d to group\n", cont, idx);
 			lv_group_add_obj(group, cont);
 
 			lv_obj_remove_event_cb(cont, mapping_cb);
