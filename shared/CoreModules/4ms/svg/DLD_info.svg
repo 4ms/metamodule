@@ -24,14 +24,14 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="2.4382974"
-     inkscape:cx="192.14227"
-     inkscape:cy="249.35432"
-     inkscape:window-width="2512"
+     inkscape:zoom="2.3104056"
+     inkscape:cx="178.32367"
+     inkscape:cy="218.14352"
+     inkscape:window-width="2088"
      inkscape:window-height="1387"
-     inkscape:window-x="50"
+     inkscape:window-x="475"
      inkscape:window-y="25"
-     inkscape:window-maximized="1"
+     inkscape:window-maximized="0"
      inkscape:current-layer="components" />
   <g
      id="faceplate">
@@ -3011,288 +3011,57 @@
   </g>
   <g
      id="components">
-    <circle
-       id="Time_B_Jack"
-       data-name="Time B Jack"
-       cx="262.73"
-       cy="322.03"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Feedback_B_Jack"
-       data-name="Feedback B Jack"
-       cx="215.27"
-       cy="322.03"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Delay_Feed_B_Jack"
-       data-name="Delay Feed B Jack"
-       cx="167.84"
-       cy="322.03"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Delay_Feed_A_Jack"
-       data-name="Delay Feed A Jack"
-       cx="120.17"
-       cy="322.03"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Feedback_A_Jack"
-       data-name="Feedback A Jack"
-       cx="72.88"
-       cy="322.03"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Time_A_Jack"
-       data-name="Time A Jack"
-       cx="25.58"
-       cy="322.03"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Out_B"
-       data-name="Out B"
-       cx="260.18"
-       cy="281.49"
-       r="11.34"
-       style="fill: blue;" />
-    <circle
-       id="Send_B"
-       data-name="Send B"
-       cx="217.15"
-       cy="281.49"
-       r="11.34"
-       style="fill: blue;" />
-    <circle
-       id="Hold_B_Jack"
-       data-name="Hold B Jack"
-       cx="165.98"
-       cy="281.49"
-       r="11.34"
-       style="fill: #80ff80;" />
-    <circle
-       id="Hold_A_Jack"
-       data-name="Hold A Jack"
-       cx="122.51"
-       cy="281.49"
-       r="11.34"
-       style="fill: #80ff80;" />
-    <circle
-       id="Send_A"
-       data-name="Send A"
-       cx="71.16"
-       cy="281.49"
-       r="11.34"
-       style="fill: blue;" />
-    <circle
-       id="Out_A"
-       data-name="Out A"
-       cx="28.08"
-       cy="281.49"
-       r="11.34"
-       style="fill: blue;" />
-    <circle
-       id="In_B"
-       data-name="In B"
-       cx="260.18"
-       cy="242.1"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Return_B"
-       data-name="Return B"
-       cx="217.15"
-       cy="242.1"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Reverse_B_Jack"
-       data-name="Reverse B Jack"
-       cx="165.98"
-       cy="242.1"
-       r="11.34"
-       style="fill: #80ff80;" />
-    <circle
-       id="Reverse_A_Jack"
-       data-name="Reverse A Jack"
-       cx="122.51"
-       cy="242.1"
-       r="11.34"
-       style="fill: #80ff80;" />
-    <circle
-       id="Return_A"
-       data-name="Return A"
-       cx="71.16"
-       cy="242.1"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="In_A"
-       data-name="In A"
-       cx="28.08"
-       cy="242.1"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Delay_Feed_B"
-       data-name="Delay Feed B"
-       cx="245.19"
-       cy="183.78"
-       r="17.01"
-       style="fill: #ff0080;" />
-    <circle
-       id="Mix_B"
-       data-name="Mix B"
-       cx="177.02"
-       cy="178.91"
-       r="17.01"
-       style="fill: #ff0070;" />
-    <circle
-       id="Mix_A"
-       data-name="Mix A"
-       cx="111.56"
-       cy="178.84"
-       r="17.01"
-       style="fill: #ff0070;" />
-    <circle
-       id="Delay_Feed_A"
-       data-name="Delay Feed A"
-       cx="43.46"
-       cy="184.04"
-       r="17.01"
-       style="fill: #ff0080;" />
-    <circle
-       id="Feedback_B"
-       data-name="Feedback B"
-       cx="254.59"
-       cy="119.05"
-       r="17.01"
-       style="fill: #ff0040;" />
-    <circle
-       id="Reverse_B"
-       data-name="Reverse B"
-       cx="206.08"
-       cy="123.11"
-       r="10.63"
-       style="fill: #ffc000;" />
-    <circle
-       id="Hold_B"
-       data-name="Hold B"
-       cx="169.66"
-       cy="135.74"
-       r="10.63"
-       style="fill: #ffc000;" />
-    <circle
-       id="Hold_A"
-       data-name="Hold A"
-       cx="118.44"
-       cy="135.74"
-       r="10.63"
-       style="fill: #ffc000;" />
-    <circle
-       id="Reverse_A"
-       data-name="Reverse A"
-       cx="81.85"
-       cy="123.11"
-       r="10.63"
-       style="fill: #ffc000;" />
-    <circle
-       id="Feedback_A"
-       data-name="Feedback A"
-       cx="34.17"
-       cy="119.05"
-       r="17.01"
-       style="fill: #ff0040;" />
-    <circle
-       id="Loop_B"
-       data-name="Loop B"
-       cx="180.38"
-       cy="81.44"
-       r="11.34"
-       style="fill: blue;" />
-    <circle
-       id="Clock_Out"
-       data-name="Clock Out"
-       cx="144.16"
-       cy="93.48"
-       r="11.34"
-       style="fill: blue;" />
-    <circle
-       id="Loop_A"
-       data-name="Loop A"
-       cx="108.25"
-       cy="81.44"
-       r="11.34"
-       style="fill: blue;" />
-    <circle
-       id="Time_B"
-       data-name="Time B"
-       cx="254.17"
-       cy="53.39"
-       r="17.01"
-       style="fill: #ff0040;" />
-    <circle
-       id="Time_B_LED"
-       data-name="Time B LED#RedLight"
-       cx="222.2"
-       cy="34.94"
-       r="4.25"
-       style="fill: #f0f;" />
-    <rect
-       id="_16_1_8th_B"
-       data-name="+16 | 1/8th B"
-       x="199.68"
-       y="42.95"
-       width="11.34"
-       height="17.01"
-       style="fill: #ffc080;" />
-    <circle
-       id="Ping_Jack"
-       data-name="Ping Jack"
-       cx="167.59"
-       cy="42.51"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
-       id="Ping_Button"
-       data-name="Ping Button"
-       cx="124.03"
-       cy="42.51"
-       r="10.63"
-       style="fill: #ffc000;" />
-    <rect
-       id="_16_1_8th_A"
-       data-name="+16 | 1/8th A"
-       x="78.44"
-       y="42.95"
-       width="11.34"
-       height="17.01"
-       style="fill: #ffc080;" />
-    <circle
-       id="Time_A_LED"
-       data-name="Time A LED#RedLight"
-       cx="66.03"
-       cy="34.94"
-       r="4.25"
-       style="fill: #f0f;" />
-    <circle
-       id="Time_A"
-       data-name="Time A"
-       cx="34.32"
-       cy="53.53"
-       r="17.01"
-       style="fill: #ff0040;" />
-    <text
-       id="slug"
-       transform="translate(185.53 372.54)"
-       style="font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 6px;"><tspan
-         x="0"
-         y="0"
-         id="tspan673">DLD</tspan></text>
+    <circle id="Time_B_Jack" data-name="Time B Jack" cx="262.73" cy="322.03" r="11.34" style="fill: lime;" />
+    <circle id="Feedback_B_Jack" data-name="Feedback B Jack" cx="215.27" cy="322.03" r="11.34" style="fill: lime;" />
+    <circle id="Delay_Feed_B_Jack" data-name="Delay Feed B Jack" cx="167.84" cy="322.03" r="11.34" style="fill: lime;" />
+    <circle id="Delay_Feed_A_Jack" data-name="Delay Feed A Jack" cx="120.17" cy="322.03" r="11.34" style="fill: lime;" />
+    <circle id="Feedback_A_Jack" data-name="Feedback A Jack" cx="72.88" cy="322.03" r="11.34" style="fill: lime;" />
+    <circle id="Time_A_Jack" data-name="Time A Jack" cx="25.58" cy="322.03" r="11.34" style="fill: lime;" />
+    <circle id="Out_B" data-name="Out B" cx="260.18" cy="281.49" r="11.34" style="fill: blue;" />
+    <circle id="Send_B" data-name="Send B" cx="217.15" cy="281.49" r="11.34" style="fill: blue;" />
+    <circle id="Hold_B_Jack" data-name="Hold B Jack" cx="165.98" cy="281.49" r="11.34" style="fill: #80ff80;" />
+    <circle id="Hold_A_Jack" data-name="Hold A Jack" cx="122.51" cy="281.49" r="11.34" style="fill: #80ff80;" />
+    <circle id="Send_A" data-name="Send A" cx="71.16" cy="281.49" r="11.34" style="fill: blue;" />
+    <circle id="Out_A" data-name="Out A" cx="28.08" cy="281.49" r="11.34" style="fill: blue;" />
+    <circle id="In_B" data-name="In B" cx="260.18" cy="242.1" r="11.34" style="fill: lime;" />
+    <circle id="Return_B" data-name="Return B" cx="217.15" cy="242.1" r="11.34" style="fill: lime;" />
+    <circle id="Reverse_B_Jack" data-name="Reverse B Jack" cx="165.98" cy="242.1" r="11.34" style="fill: #80ff80;" />
+    <circle id="Reverse_A_Jack" data-name="Reverse A Jack" cx="122.51" cy="242.1" r="11.34" style="fill: #80ff80;" />
+    <circle id="Return_A" data-name="Return A" cx="71.16" cy="242.1" r="11.34" style="fill: lime;" />
+    <circle id="In_A" data-name="In A" cx="28.08" cy="242.1" r="11.34" style="fill: lime;" />
+    <circle id="Delay_Feed_B" data-name="Delay Feed B" cx="245.19" cy="183.78" r="17.01" style="fill: #ff0080;" />
+    <circle id="Mix_B" data-name="Mix B" cx="177.02" cy="178.91" r="17.01" style="fill: #ff0070;" />
+    <circle id="Mix_A" data-name="Mix A" cx="111.56" cy="178.84" r="17.01" style="fill: #ff0070;" />
+    <circle id="Delay_Feed_A" data-name="Delay Feed A" cx="43.46" cy="184.04" r="17.01" style="fill: #ff0080;" />
+    <circle id="Feedback_B" data-name="Feedback B" cx="254.59" cy="119.05" r="17.01" style="fill: #ff0040;" />
+    <circle id="Reverse_B" data-name="Reverse B" cx="206.08" cy="123.11" r="10.63" style="fill: #ffc000;" />
+    <circle id="Hold_B" data-name="Hold B" cx="169.66" cy="135.74" r="10.63" style="fill: #ffc000;" />
+    <circle id="Hold_A" data-name="Hold A" cx="118.44" cy="135.74" r="10.63" style="fill: #ffc000;" />
+    <circle id="Reverse_A" data-name="Reverse A" cx="81.85" cy="123.11" r="10.63" style="fill: #ffc000;" />
+    <circle id="Feedback_A" data-name="Feedback A" cx="34.17" cy="119.05" r="17.01" style="fill: #ff0040;" />
+    <circle id="Loop_B" data-name="Loop B" cx="180.38" cy="81.44" r="11.34" style="fill: blue;" />
+    <circle id="Clock_Out" data-name="Clock Out" cx="144.16" cy="93.48" r="11.34" style="fill: blue;" />
+    <circle id="Loop_A" data-name="Loop A" cx="108.25" cy="81.44" r="11.34" style="fill: blue;" />
+    <circle id="Time_B" data-name="Time B" cx="254.17" cy="53.39" r="17.01" style="fill: #ff0040;" />
+    <circle id="Time_B_LED" data-name="Time B LED" cx="222.2" cy="34.94" r="4.25" style="fill: #f0f;" />
+    <rect id="_16_1_8th_B" data-name="+16 | 1/8th B" x="199.68" y="42.95" width="11.34" height="17.01" style="fill: #ffc080;" />
+    <circle id="Ping_Jack" data-name="Ping Jack" cx="167.59" cy="42.51" r="11.34" style="fill: lime;" />
+    <circle id="Ping_Button" data-name="Ping Button" cx="124.03" cy="42.51" r="10.63" style="fill: #ffc000;" />
+    <rect id="_16_1_8th_A" data-name="+16 | 1/8th A" x="78.44" y="42.95" width="11.34" height="17.01" style="fill: #ffc080;" />
+    <circle id="Time_A_LED" data-name="Time A LED" cx="66.03" cy="34.94" r="4.25" style="fill: #f0f;" />
+    <circle id="Time_A" data-name="Time A" cx="34.32" cy="53.53" r="17.01" style="fill: #ff0040;" />
+
+    <circle id="DelayFeedBAltParam" data-name="DelayFeed B Taper@Log@Lin" cx="245.19" cy="183.78" r="4" style="fill: #808080;" />
+    <circle id="DelayFeedAAltParam" data-name="DelayFeed A Taper@Log@Lin" cx="43.46" cy="184.04" r="4" style="fill: #808080;" />
+    <circle id="RevBJackAltParam" data-name="Rev. B@Trig@Gate" cx="165.98" cy="242.1" r="4" style="fill:#808080" />
+    <circle id="RevAJackAltParam" data-name="Rev. A@Trig@Gate" cx="122.51" cy="242.1" r="4" style="fill:#808080" />
+    <circle id="Hold_B_AltParam" data-name="Hold B@Trig@Gate" cx="165.98" cy="281.49" r="4" style="fill: #808080;" />
+    <circle id="Hold_A_AltParam" data-name="Hold A@Trig@Gate" cx="122.51" cy="281.49" r="4" style="fill: #808080;" />
+
+    <rect style="fill:#808080;stroke-width:0.702728" id="AutoMuteAltParam" width="12.303946" height="12.303947" x="6.7613235" y="7.6899676" data-name="AutoMute@On@Off" />
+    <rect style="fill:#808080;stroke-width:0.702728" id="SoftClipAltParam" width="12.303946" height="12.303947" x="23.064054" y="7.9975662" data-name="Soft Clip@On@Off" />
+
+    <text id="slug" transform="translate(185.53 372.54)" style="font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 6px;"><tspan x="0" y="0" id="tspan673">DLD</tspan></text>
     <text
        id="modulename"
        transform="translate(210.05 372.54)"
