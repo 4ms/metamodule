@@ -125,7 +125,7 @@ private:
 		controls.time_switch.sideload_set(Convert3WaySwitchStateFunc(getState<Mapping::TimeModSwitch>()));
 
 		// Clock outputs
-		setOutput<Mapping::LoopOutput>(params.timer.loop_out.sideload_get());
+		setOutput<Mapping::LoopOutput>(params.timer.loop_out.sideload_get() * TriggerOutputFullScaleInVolt);
 
 		// Forward to/from module level
 		// send clock output
@@ -152,9 +152,10 @@ private:
 	}
 
 private:
-	static constexpr float AudioInputFullScaleInVolt  = 22.0f;
-	static constexpr float AudioOutputFullScaleInVolt = 17.0f;
-	static constexpr float TriggerThresholdInVolt     = 0.1f;
+	static constexpr float AudioInputFullScaleInVolt    = 22.0f;
+	static constexpr float AudioOutputFullScaleInVolt   = 17.0f;
+	static constexpr float TriggerThresholdInVolt       = 0.1f;
+	static constexpr float TriggerOutputFullScaleInVolt = 5.0f;
 
 private:
 	LDKit::Controls controls;
