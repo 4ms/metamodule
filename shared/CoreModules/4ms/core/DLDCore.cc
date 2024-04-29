@@ -94,8 +94,19 @@ public:
 	}
 
 	void update() override {
+
+		channelA.io.pingButtonIn = getState<PingButton>() == MomentaryButton::State_t::PRESSED;
+		channelA.io.pingJackIn = getInput<PingJackIn>().value_or(0) > TriggerThresholdInVolt;
+
+		channelB.io.pingButtonIn = getState<PingButton>() == MomentaryButton::State_t::PRESSED;
+		channelB.io.pingJackIn = getInput<PingJackIn>().value_or(0) > TriggerThresholdInVolt;
+
 		channelA.update();
 		channelB.update();
+
+		// only map channel B to common controls
+		setLED<PingButton>(channelB.io.pingOut);
+		setOutput<ClockOut>(channelB.io.clockOut ? ClockOuputFullScaleInVolt : 0.0f);
 	}
 
 	void set_samplerate(float sr) override {
@@ -110,6 +121,8 @@ public:
 	// clang-format on
 
 private:
+	static constexpr float TriggerThresholdInVolt    = 0.1f;
+	static constexpr float ClockOuputFullScaleInVolt = 5.0f;
 };
 
 } // namespace MetaModule

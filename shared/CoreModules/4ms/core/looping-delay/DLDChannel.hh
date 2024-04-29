@@ -69,11 +69,21 @@ public:
 
 		packUnpackBlockBuffers();
 		audioBufferFillCount++;
-
     }
+
     void set_samplerate(float sr) {
 		// TODO: implement
     }
+
+public:
+	struct ModuleIO_t
+	{
+		bool pingButtonIn;
+		bool pingJackIn;
+		bool pingOut;
+		bool clockOut;
+	};
+	ModuleIO_t io;
 
 private:
 	void sideloadDrivers()
@@ -128,9 +138,11 @@ private:
 		setOutput<Mapping::LoopOutput>(params.timer.loop_out.sideload_get() * TriggerOutputFullScaleInVolt);
 
 		// Forward to/from module level
-		// send clock output
-		// receive ping input
-		// send ping output
+		io.pingOut = controls.ping_led.sideload_get();
+		io.clockOut = params.timer.clk_out.sideload_get();
+		params.timer.ping_jack.sideload_set(io.pingJackIn);
+		controls.ping_button.sideload_set(io.pingButtonIn);
+
 	}
 
 private:
