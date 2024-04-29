@@ -410,11 +410,12 @@ private:
 //////////////////////////////////////////////////////////////
 
 class QCDCore : public SmartCoreProcessor<QCDInfo> {
-	using Info = QCDInfo;
 	using ThisCore = QCDCore;
-	using enum Info::Elem;
 
 public:
+	using Info = QCDInfo;
+	using enum Info::Elem;
+
 	template<Info::Elem EL>
 	void setOutput(auto val)
 	{

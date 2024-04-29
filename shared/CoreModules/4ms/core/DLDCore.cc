@@ -7,11 +7,11 @@ namespace MetaModule
 {
 
 class DLDCore : public SmartCoreProcessor<DLDInfo> {
+public:
 	using Info = DLDInfo;
 	using ThisCore = DLDCore;
 	using enum Info::Elem;
 
-public:
 	template<Info::Elem EL>
 	void setOutput(auto val)
 	{
