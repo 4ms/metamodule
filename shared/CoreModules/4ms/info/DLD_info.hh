@@ -13,7 +13,7 @@ struct DLDInfo : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 39> Elements{{
+    static constexpr std::array<Element, 56> Elements{{
 		Davies1900hBlackKnob{{to_mm<72>(34.32), to_mm<72>(53.53), Center, "Time A", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(254.17), to_mm<72>(53.39), Center, "Time B", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(34.17), to_mm<72>(119.05), Center, "Feedback A", ""}},
@@ -53,6 +53,23 @@ struct DLDInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(260.18), to_mm<72>(281.49), Center, "Out B", ""}},
 		RedLight{{to_mm<72>(66.03), to_mm<72>(34.94), Center, "Time A LED", ""}},
 		RedLight{{to_mm<72>(222.2), to_mm<72>(34.94), Center, "Time B LED", ""}},
+		AltParamChoiceLabeled{{{to_mm<72>(29.0), to_mm<72>(13.0), Center, "Soft Clip", ""}, 2, 1}, {"On", "Off"}},
+		AltParamChoiceLabeled{{{to_mm<72>(229.0), to_mm<72>(13.0), Center, "Soft Clip", ""}, 2, 1}, {"On", "Off"}},
+		AltParamChoiceLabeled{{{to_mm<72>(12.0), to_mm<72>(13.0), Center, "AutoMute", ""}, 2, 1}, {"On", "Off"}},
+		AltParamChoiceLabeled{{{to_mm<72>(212.0), to_mm<72>(13.0), Center, "AutoMute", ""}, 2, 1}, {"On", "Off"}},
+		AltParamChoiceLabeled{{{to_mm<72>(167.59), to_mm<72>(42.51), Center, "Ping Method", ""}, 5, 1}, {"IgnoreJitter", "Ignore%Change", "1:1", "Avg 2", "Avg 4"}},
+		AltParamChoiceLabeled{{{to_mm<72>(122.51), to_mm<72>(281.49), Center, "Hold A", ""}, 2, 1}, {"Trig", "Gate"}},
+		AltParamChoiceLabeled{{{to_mm<72>(165.98), to_mm<72>(281.49), Center, "Hold B", ""}, 2, 1}, {"Trig", "Gate"}},
+		AltParamChoiceLabeled{{{to_mm<72>(122.51), to_mm<72>(242.1), Center, "Rev. A", ""}, 2, 1}, {"Trig", "Gate"}},
+		AltParamChoiceLabeled{{{to_mm<72>(165.98), to_mm<72>(242.1), Center, "Rev. B", ""}, 2, 1}, {"Trig", "Gate"}},
+		AltParamChoiceLabeled{{{to_mm<72>(43.46), to_mm<72>(184.04), Center, "DelayFeed A Taper", ""}, 2, 1}, {"Log", "Lin"}},
+		AltParamChoiceLabeled{{{to_mm<72>(245.19), to_mm<72>(183.78), Center, "DelayFeed B Taper", ""}, 2, 1}, {"Log", "Lin"}},
+		AltParamChoiceLabeled{{{to_mm<72>(25.58), to_mm<72>(322.03), Center, "Time A Auto-UnQ", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(262.73), to_mm<72>(322.03), Center, "Time B Auto-UnQ", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(71.16), to_mm<72>(242.1), Center, "Stereo Mode A", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(217.15), to_mm<72>(242.1), Center, "Stereo Mode B", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(34.32), to_mm<72>(53.53), Center, "Crossfade A", ""}, 7, 4}, {"1ms", "2ms", "4ms", "8ms", "25ms", "100ms", "250ms"}},
+		AltParamChoiceLabeled{{{to_mm<72>(254.17), to_mm<72>(53.39), Center, "Crossfade B", ""}, 7, 4}, {"1ms", "2ms", "4ms", "8ms", "25ms", "100ms", "250ms"}},
 }};
 
     enum class Elem {
@@ -95,6 +112,23 @@ struct DLDInfo : ModuleInfoBase {
         OutBOut,
         TimeALedLight,
         TimeBLedLight,
+        SoftClipAltParam,
+        SoftClipAltParam,
+        AutomuteAltParam,
+        AutomuteAltParam,
+        PingMethodAltParam,
+        HoldAAltParam,
+        HoldBAltParam,
+        Rev_AAltParam,
+        Rev_BAltParam,
+        DelayfeedATaperAltParam,
+        DelayfeedBTaperAltParam,
+        TimeAAutoNUnqAltParam,
+        TimeBAutoNUnqAltParam,
+        StereoModeAAltParam,
+        StereoModeBAltParam,
+        CrossfadeAAltParam,
+        CrossfadeBAltParam,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
@@ -158,5 +192,24 @@ struct DLDInfo : ModuleInfoBase {
         NumDiscreteLeds,
     };
     
+    enum {
+        AltParamSoft_Clip, 
+        AltParamSoft_Clip, 
+        AltParamAutomute, 
+        AltParamAutomute, 
+        AltParamPing_Method, 
+        AltParamHold_A, 
+        AltParamHold_B, 
+        AltParamRev__A, 
+        AltParamRev__B, 
+        AltParamDelayfeed_A_Taper, 
+        AltParamDelayfeed_B_Taper, 
+        AltParamTime_A_AutoNUnq, 
+        AltParamTime_B_AutoNUnq, 
+        AltParamStereo_Mode_A, 
+        AltParamStereo_Mode_B, 
+        AltParamCrossfade_A, 
+        AltParamCrossfade_B, 
+    };
 };
 } // namespace MetaModule

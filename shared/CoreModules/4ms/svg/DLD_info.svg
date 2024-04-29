@@ -3043,23 +3043,33 @@
     <circle id="Clock_Out" data-name="Clock Out" cx="144.16" cy="93.48" r="11.34" style="fill: blue;" />
     <circle id="Loop_A" data-name="Loop A" cx="108.25" cy="81.44" r="11.34" style="fill: blue;" />
     <circle id="Time_B" data-name="Time B" cx="254.17" cy="53.39" r="17.01" style="fill: #ff0040;" />
-    <circle id="Time_B_LED" data-name="Time B LED" cx="222.2" cy="34.94" r="4.25" style="fill: #f0f;" />
+    <circle id="Time_B_LED" data-name="Time B LED#RedLight" cx="222.2" cy="34.94" r="4.25" style="fill: #f0f;" />
     <rect id="_16_1_8th_B" data-name="+16 | 1/8th B" x="199.68" y="42.95" width="11.34" height="17.01" style="fill: #ffc080;" />
     <circle id="Ping_Jack" data-name="Ping Jack" cx="167.59" cy="42.51" r="11.34" style="fill: lime;" />
     <circle id="Ping_Button" data-name="Ping Button" cx="124.03" cy="42.51" r="10.63" style="fill: #ffc000;" />
     <rect id="_16_1_8th_A" data-name="+16 | 1/8th A" x="78.44" y="42.95" width="11.34" height="17.01" style="fill: #ffc080;" />
-    <circle id="Time_A_LED" data-name="Time A LED" cx="66.03" cy="34.94" r="4.25" style="fill: #f0f;" />
+    <circle id="Time_A_LED" data-name="Time A LED#RedLight" cx="66.03" cy="34.94" r="4.25" style="fill: #f0f;" />
     <circle id="Time_A" data-name="Time A" cx="34.32" cy="53.53" r="17.01" style="fill: #ff0040;" />
 
+    <circle id="CrossfadeBAltParam" data-name="Crossfade B@1ms@2ms@4ms@8ms@25ms@100ms@250ms" cx="254.17" cy="53.39" r="4" style="fill: #808083;" />
+    <circle id="CrossfadeAAltParam" data-name="Crossfade A@1ms@2ms@4ms@8ms@25ms@100ms@250ms" cx="34.32" cy="53.53" r="4" style="fill:  #808083;" />
+
+    <circle id="StereoModeBAltParam" data-name="Stereo Mode B@Off@On" cx="217.15" cy="242.1" r="4" style="fill: #808080;" />
+    <circle id="StereoModeAAltParam" data-name="Stereo Mode A@Off@On" cx="71.16" cy="242.1" r="4" style="fill: #808080;" />
+    <circle id="TimeBAltParam" data-name="Time B Auto-UnQ@Off@On" cx="262.73" cy="322.03" r="4" style="fill: #808080;" />
+    <circle id="TimeAAltParam" data-name="Time A Auto-UnQ@Off@On" cx="25.58" cy="322.03" r="4" style="fill: #808080;" />
     <circle id="DelayFeedBAltParam" data-name="DelayFeed B Taper@Log@Lin" cx="245.19" cy="183.78" r="4" style="fill: #808080;" />
     <circle id="DelayFeedAAltParam" data-name="DelayFeed A Taper@Log@Lin" cx="43.46" cy="184.04" r="4" style="fill: #808080;" />
     <circle id="RevBJackAltParam" data-name="Rev. B@Trig@Gate" cx="165.98" cy="242.1" r="4" style="fill:#808080" />
     <circle id="RevAJackAltParam" data-name="Rev. A@Trig@Gate" cx="122.51" cy="242.1" r="4" style="fill:#808080" />
     <circle id="Hold_B_AltParam" data-name="Hold B@Trig@Gate" cx="165.98" cy="281.49" r="4" style="fill: #808080;" />
     <circle id="Hold_A_AltParam" data-name="Hold A@Trig@Gate" cx="122.51" cy="281.49" r="4" style="fill: #808080;" />
+    <circle id="PingMethodAltParam" data-name="Ping Method@IgnoreJitter@Ignore%Change@1:1@Avg 2@Avg 4" cx="167.59" cy="42.51" r="11.34" style="fill:#808080;" />
 
-    <rect style="fill:#808080;stroke-width:0.702728" id="AutoMuteAltParam" width="12.303946" height="12.303947" x="6.7613235" y="7.6899676" data-name="AutoMute@On@Off" />
-    <rect style="fill:#808080;stroke-width:0.702728" id="SoftClipAltParam" width="12.303946" height="12.303947" x="23.064054" y="7.9975662" data-name="Soft Clip@On@Off" />
+    <rect style="fill:#808080;" id="AutoMuteBAltParam" width="12" height="12" x="206" y="7" data-name="AutoMute@On@Off" />
+    <rect style="fill:#808080;" id="AutoMuteAAltParam" width="12" height="12" x="6" y="7" data-name="AutoMute@On@Off" />
+    <rect style="fill:#808080;" id="SoftClipBAltParam" width="12" height="12" x="223" y="7" data-name="Soft Clip@On@Off" />
+    <rect style="fill:#808080;" id="SoftClipAAltParam" width="12" height="12" x="23" y="7" data-name="Soft Clip@On@Off" />
 
     <text id="slug" transform="translate(185.53 372.54)" style="font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 6px;"><tspan x="0" y="0" id="tspan673">DLD</tspan></text>
     <text
