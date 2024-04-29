@@ -55,6 +55,8 @@ public:
 
     void update()
     {
+		params.timer.inc();
+
 		sideloadDrivers();
 
 		if (audioBufferFillCount == inBlock.size())
