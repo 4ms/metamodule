@@ -114,7 +114,7 @@ bool Archive::extract_files(std::function<uint32_t(std::string_view, std::span<c
 
 		if (entry.type == TarEntry::File) {
 			if (auto filedata = extract_file_entry(entry); filedata.size() > 0) {
-				pr_trace("Extracted %zu bytes for %s\n", filedata.size(), name.c_str());
+				pr_dump("Extracted %zu bytes for %s\n", filedata.size(), name.c_str());
 				write(name, filedata);
 			} else {
 				all_entries_ok = false;

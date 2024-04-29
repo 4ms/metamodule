@@ -73,6 +73,7 @@ public:
 				}
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
+					pr_trace("Found %d plugins\n", plugin_files->size());
 					status.state = State::PrepareForReadingPlugin;
 					file_idx = 0;
 				}

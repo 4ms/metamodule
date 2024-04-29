@@ -159,7 +159,7 @@ public:
 					if (bytes_read == filesize) {
 						std::string write_path = full_path.substr(PluginDirName.length() + 1);
 						if (fileio_to.write_file(write_path, filedata)) {
-							pr_trace("Wrote %s (%zu bytes)\n", write_path.c_str(), filesize);
+							pr_dump("Wrote %s (%zu bytes)\n", write_path.c_str(), filesize);
 						} else
 							pr_err("Failed to copy file %s (%zu bytes)\n", write_path.c_str(), filesize);
 					} else
