@@ -121,6 +121,7 @@ struct KnobSetViewPage : PageBase {
 			else
 				disable(cont, map.panel_knob_id);
 
+			printf("Adding %p %d to group\n", cont, idx);
 			lv_group_add_obj(group, cont);
 
 			lv_obj_remove_event_cb(cont, mapping_cb);
@@ -132,6 +133,12 @@ struct KnobSetViewPage : PageBase {
 
 			if (idx == args.mappedknob_id)
 				lv_group_focus_obj(cont);
+			else if (idx == 0 && !args.mappedknob_id) {
+				if (lv_obj_has_flag(ui_NextKnobSet, LV_OBJ_FLAG_HIDDEN))
+					lv_group_focus_obj(cont);
+				else
+					lv_group_focus_obj(ui_NextKnobSet);
+			}
 		}
 
 		lv_group_set_editing(group, false);
