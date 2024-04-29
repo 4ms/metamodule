@@ -97,7 +97,9 @@ public:
 				info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
 				info.page_list.set_active_knobset(next_knobset);
 				std::string ks_name = patch->valid_knob_set_name(next_knobset);
-				info.notify_queue.put({"Using Knob Set \"" + ks_name + "\""});
+
+				if (cur_page != page_list.page(PageId::KnobSetView))
+					info.notify_queue.put({"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 1000});
 
 				button_light.display_knobset(next_knobset);
 			}
