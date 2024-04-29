@@ -166,12 +166,9 @@ struct KnobSetViewPage : PageBase {
 						enable(child, knob_i);
 					}
 				}
-
-				// lv_obj_set_style_bg_color(ui_KnobSetContainer, lv_color_hex(0x333333), LV_PART_MAIN);
 			} else {
 				lv_hide(ui_KnobSetDescript);
 				lv_show(ui_ActivateKnobSet, is_patch_playing);
-				// lv_obj_set_style_bg_color(ui_KnobSetContainer, lv_color_hex(0x555555), LV_PART_MAIN);
 				for (auto [knob_i, pane] : enumerate(panes)) {
 					auto num_children = lv_obj_get_child_cnt(pane);
 					for (auto i = 0u; i < num_children; i++) {
