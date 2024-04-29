@@ -20,15 +20,15 @@ extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 }
 
 // Define std::random so plugins can use it
-namespace std
-{
-random_device::result_type random_device::_M_getval() {
-	return rack::random::get<random_device::result_type>();
-}
+// namespace std
+// {
+// random_device::result_type random_device::_M_getval() {
+// 	return rack::random::get<random_device::result_type>();
+// }
 
-void random_device::_M_init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const &) {
-}
-} // namespace std
+// void random_device::_M_init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const &) {
+// }
+// } // namespace std
 
 extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp);
 
