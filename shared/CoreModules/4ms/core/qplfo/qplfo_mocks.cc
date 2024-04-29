@@ -30,8 +30,8 @@ uint32_t Module::RESETJACK(uint8_t x)
 
 void Module::setDACChannel(uint8_t channel, int16_t value)
 {
-    // input is 12 bit
-    outputs[channel] = float(value) / ((1<<12) - 1);
+    // input is 10 bit
+    outputs[channel] = float(value) / ((1<<10) - 1);
 }
 
 void Module::setADCChannel(uint8_t channel, float value)
