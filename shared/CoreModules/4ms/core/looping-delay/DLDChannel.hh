@@ -127,12 +127,14 @@ private:
 			return std::min(std::max(val, -max_amplitude), max_amplitude);
 		};
 
+		constexpr float AudioFullScale = ((1<<(AudioStreamConf::SampleBits-1)) -1);
+
 		// TODO: this is mono to stereo
-		auto monoInput = int16_t(clamp(getInput<Mapping::AudioInput>().value_or(0) / AudioInputFullScaleInVolt, 1.0f) * 32767.0 );
+		auto monoInput = int32_t(clamp(getInput<Mapping::AudioInput>().value_or(0) / AudioInputFullScaleInVolt, 1.0f) * AudioFullScale );
 		inBlock[audioBufferFillCount] = {monoInput, monoInput};
 
 		// TODO: this is stereo to mono
-		setOutput<Mapping::AudioOutput>((float(outBlock[audioBufferFillCount].chan[0]) + float(outBlock[audioBufferFillCount].chan[1])) / 2 / 32768.0 * AudioOutputFullScaleInVolt);		
+		setOutput<Mapping::AudioOutput>((float(outBlock[audioBufferFillCount].chan[0]) + float(outBlock[audioBufferFillCount].chan[1])) / 2 / AudioFullScale * AudioOutputFullScaleInVolt);		
 	}
 
 private:
