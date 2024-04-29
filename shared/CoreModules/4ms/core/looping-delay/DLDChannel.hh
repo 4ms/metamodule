@@ -90,7 +90,7 @@ private:
 	{
 		auto ConvertKnobFunc = [](float val) -> int16_t
 		{
-			return int16_t(std::clamp(val, 0.0f, 1.0f) * 32767.0f);
+			return int16_t(std::clamp(val, 0.0f, 1.0f) * 4095.0f);
 		};
 
 		auto Convert3WaySwitchStateFunc = [](auto inState) -> LDKit::Mocks::SwitchPos
