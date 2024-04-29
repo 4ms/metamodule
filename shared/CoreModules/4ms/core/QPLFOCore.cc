@@ -3,6 +3,7 @@
 #include "info/QPLFO_info.hh"
 
 #include "qplfo/qplfo.hh"
+#include "helpers/EdgeDetector.h"
 
 #include <algorithm>
 
@@ -58,6 +59,11 @@ public:
 		mod.resetInputs[1] = getInput<Reset2In>().value_or(0);
 		mod.resetInputs[2] = getInput<Reset3In>().value_or(0);
 		mod.resetInputs[3] = getInput<Reset4In>().value_or(0);
+
+		if (onEdgeDetectors[0](channelOn[0]) and getState<FireOnUnmuteCh1AltParam>() == 1) mod.resetInputs[0] = true;
+		if (onEdgeDetectors[1](channelOn[1]) and getState<FireOnUnmuteCh2AltParam>() == 1) mod.resetInputs[1] = true;
+		if (onEdgeDetectors[2](channelOn[2]) and getState<FireOnUnmuteCh3AltParam>() == 1) mod.resetInputs[2] = true;
+		if (onEdgeDetectors[3](channelOn[3]) and getState<FireOnUnmuteCh4AltParam>() == 1) mod.resetInputs[3] = true;
 
 		setLED<Led1Light>(mod.outputs[0]);
 		setLED<Led2Light>(mod.outputs[1]);
@@ -118,6 +124,7 @@ private:
 	float tickCounter;
 
 	std::array<bool,4> channelOn;
+	std::array<EdgeDetector,4> onEdgeDetectors;
 
 	QPLFO::Module mod;
 };
