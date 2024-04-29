@@ -84,7 +84,7 @@ public:
 		{
 			auto result = val * OutputFullScaleInV;
 
-			if (getState<OutputRangeAltParam>() == 1)
+			if (getState<Info::Elem::OutputRangeAltParam>() == 1)
 			{
 				result -= OutputFullScaleInV / 2.0f;
 			}
