@@ -59,6 +59,8 @@ public:
 
 		sideloadDrivers();
 
+		handleAltParameters();
+
 		if (audioBufferFillCount == inBlock.size())
 		{
 			audioBufferFillCount = 0;
@@ -141,7 +143,33 @@ private:
 		io.clockOut = params.timer.clk_out.sideload_get();
 		params.timer.ping_jack.sideload_set(io.pingJackIn);
 		controls.ping_button.sideload_set(io.pingButtonIn);
+	}
 
+	void handleAltParameters()
+	{
+		params.settings.soft_clip                = getState<Mapping::SoftClipEnabledAlt>() == 0;
+		params.settings.auto_mute                = getState<Mapping::AutoMuteEnabledAlt>() == 0;
+		params.settings.auto_unquantize_timejack = getState<Mapping::TimeUnquantizedAlt>() == 1;
+		params.settings.stereo_mode              = getState<Mapping::StereoModeAlt>() == 1;
+		params.settings.log_delay_feed           = getState<Mapping::DelayFeedTaperModeAlt>() == 0;
+		params.settings.rev_jack                 = getState<Mapping::ReverseInputModeAlt>() == 0 ? LDKit::GateType::Trig : LDKit::GateType::Gate;
+		params.settings.inf_jack                 = getState<Mapping::HoldInputModeAlt>()    == 0 ? LDKit::GateType::Trig : LDKit::GateType::Gate;
+
+		static constexpr std::array<uint32_t, 7> CrossfadeSamples      = {1, 96, 192, 384, 1200, 4800, 12000};
+		static constexpr std::array<uint32_t, 7> WriteCrossfadeSamples = {1, 96, 192, 192, 192,  4800,  4800};
+
+		params.settings.crossfade_samples       = CrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()];
+		params.settings.write_crossfade_samples = WriteCrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()];
+
+		static constexpr std::array<PingMethod,5> PingMethods = {
+			PingMethod::IGNORE_FLAT_DEVIATION_5,
+			PingMethod::IGNORE_PERCENT_DEVIATION,
+			PingMethod::ONE_TO_ONE,
+			PingMethod::MOVING_AVERAGE_2,
+			PingMethod::MOVING_AVERAGE_4
+		};
+
+		params.settings.ping_method = PingMethods[getState<Mapping::PingMethodAlt>()];
 	}
 
 private:
