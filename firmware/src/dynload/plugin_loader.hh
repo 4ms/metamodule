@@ -46,7 +46,6 @@ public:
 	void start() {
 		ramdisk.mount_disk();
 
-		plugins.clear();
 		allocator.reset();
 		if (auto newmem = allocator.allocate(sizeof(PluginFileList))) {
 			plugin_files = new (newmem) PluginFileList;
@@ -139,13 +138,12 @@ public:
 				auto &plugin_file = (*plugin_files)[file_idx];
 
 				// Strip .so
-				auto pluginname = std::string{std::string_view{plugin_file.plugin_name}};
-				pr_trace("Plugin file name: %s\n", pluginname.c_str());
-
+				auto pluginname = std::string_view{plugin_file.plugin_name};
 				if (pluginname.ends_with(".so")) {
 					pluginname = pluginname.substr(0, pluginname.length() - 3);
-					pr_trace("Stripping .so => %s\n", pluginname.c_str());
+					plugin_file.plugin_name.copy(pluginname);
 				}
+				pr_trace("Plugin file name: %s\n", plugin_file.plugin_name.c_str());
 
 				// TODO: get slug from a plugin.json file inside the plugin dir
 
@@ -164,12 +162,7 @@ public:
 				load_plugin_assets(plugin);
 				load_plugin(plugin);
 
-				file_idx++;
-
-				if (file_idx >= plugin_files->size()) {
-					status.state = State::Success;
-				} else
-					status.state = State::PrepareForReadingPlugin;
+				status.state = State::Success;
 			} break;
 
 			case State::NotInit:
