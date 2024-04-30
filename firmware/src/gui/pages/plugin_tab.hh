@@ -15,19 +15,41 @@ struct PluginTab {
 		: plugin_manager{plugin_manager}
 		, notify_queue{notify_queue} {
 
-		lv_foreach_child(ui_PluginsFoundCont, [](auto *obj, unsigned) {
-			lv_obj_del_async(obj);
-			return true;
-		});
+		clear_loaded_list();
+		clear_found_list();
+		lv_show(ui_PluginScanButton);
+		lv_obj_add_event_cb(ui_PluginScanButton, scan_plugins_cb, LV_EVENT_CLICKED, this);
+		lv_hide(ui_PluginsFoundCont);
+	}
 
+	void clear_loaded_list() {
 		lv_foreach_child(ui_PluginsLoadedCont, [](auto *obj, unsigned) {
 			lv_obj_del_async(obj);
 			return true;
 		});
+	}
 
-		lv_show(ui_PluginScanButton);
-		lv_obj_add_event_cb(ui_PluginScanButton, scan_plugins_cb, LV_EVENT_CLICKED, this);
-		lv_hide(ui_PluginsFoundCont);
+	void clear_found_list() {
+		lv_foreach_child(ui_PluginsFoundCont, [](auto *obj, unsigned) {
+			lv_obj_del_async(obj);
+			return true;
+		});
+	}
+	void populate_loaded_list() {
+		auto loaded_plugin_list = plugin_manager.loaded_plugins();
+		for (auto &plugin : loaded_plugin_list) {
+			lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
+			lv_group_add_obj(group, plugin_obj);
+		}
+	}
+
+	bool plugin_already_loaded(StaticString<255> &name) {
+		auto loaded_plugin_list = plugin_manager.loaded_plugins();
+		for (auto &plugin : loaded_plugin_list) {
+			if (plugin.fileinfo.plugin_name == name)
+				return true;
+		}
+		return false;
 	}
 
 	void prepare_focus(lv_group_t *group) {
@@ -38,11 +60,8 @@ struct PluginTab {
 		lv_group_add_obj(group, ui_PluginScanButton);
 		lv_group_focus_obj(ui_PluginScanButton);
 
-		auto loaded_plugin_list = plugin_manager.loaded_plugins();
-		for (auto &plugin : loaded_plugin_list) {
-			lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
-			lv_group_add_obj(group, plugin_obj);
-		}
+		clear_loaded_list();
+		populate_loaded_list();
 	}
 
 	void update() {
@@ -52,21 +71,24 @@ struct PluginTab {
 			lv_hide(ui_PluginScanButton);
 			lv_show(ui_PluginsFoundCont);
 
-			lv_foreach_child(ui_PluginsFoundCont, [](auto *obj, unsigned) {
-				lv_obj_del_async(obj);
-				return true;
-			});
+			clear_found_list();
 
+			bool first_item = true;
 			auto *found_plugins = plugin_manager.found_plugin_list();
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
-				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, plugin.plugin_name.c_str());
-				lv_group_add_obj(group, plugin_obj);
 
-				if (idx == 0)
-					lv_group_focus_obj(plugin_obj);
+				if (!plugin_already_loaded(plugin.plugin_name)) {
+					lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, plugin.plugin_name.c_str());
+					lv_group_add_obj(group, plugin_obj);
 
-				lv_obj_set_user_data(plugin_obj, (void *)(idx + 1));
-				lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
+					if (first_item) {
+						lv_group_focus_obj(plugin_obj);
+						first_item = false;
+					}
+
+					lv_obj_set_user_data(plugin_obj, (void *)(idx + 1));
+					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
+				}
 
 				idx++;
 			}
