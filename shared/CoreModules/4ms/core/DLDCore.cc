@@ -45,8 +45,6 @@ private:
 		const static Info::Elem MixKnob               = MixAKnob;
 		const static Info::Elem ReverseButton         = ReverseAButton;
 		const static Info::Elem HoldButton            = HoldAButton;
-		const static Info::Elem AudioInput            = InAIn;
-		const static Info::Elem AudioOutput           = OutAOut;
 		const static Info::Elem ReturnInput           = ReturnAIn;
 		const static Info::Elem SendOutput            = SendAOut;
 		const static Info::Elem ReverseInput          = ReverseAJackIn;
@@ -76,8 +74,7 @@ private:
 		const static Info::Elem MixKnob               = MixBKnob;
 		const static Info::Elem ReverseButton         = ReverseBButton;
 		const static Info::Elem HoldButton            = HoldBButton;
-		const static Info::Elem AudioInput            = InBIn;
-		const static Info::Elem AudioOutput           = OutBOut;
+
 		const static Info::Elem ReturnInput           = ReturnBIn;
 		const static Info::Elem SendOutput            = SendBOut;
 		const static Info::Elem ReverseInput          = ReverseBJackIn;
@@ -122,8 +119,16 @@ public:
 		channelB.io.pingButtonIn = pingButton;
 		channelB.io.pingJackIn = pingJack;
 
+		// Input normalization
+		channelA.io.audioIn = getInput<InAIn>().value_or(0);
+		channelB.io.audioIn = isPatched<InBIn>() ? getInput<InBIn>().value_or(0) : channelA.io.audioIn; 
+
 		channelA.update();
 		channelB.update();
+
+		// Output normalization
+		setOutput<OutBOut>(channelB.io.audioOut);
+		setOutput<OutAOut>(isPatched<OutBOut>() ? channelA.io.audioOut : channelA.io.audioOut + channelB.io.audioOut);
 
 		// only map channel B to common controls
 		setLED<PingButton>(channelB.io.pingOut);

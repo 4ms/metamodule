@@ -80,6 +80,8 @@ public:
 public:
 	struct ModuleIO_t
 	{
+		float audioIn;
+		float audioOut;
 		bool pingButtonIn;
 		bool pingJackIn;
 		bool pingOut;
@@ -193,9 +195,9 @@ private:
 			return float(output) / AudioFullScale * AudioOutputFullScaleInVolt;
 		};
 		
-		inBlock[audioBufferFillCount] = {InputConversionFunc(getInput<Mapping::ReturnInput>().value_or(0)), InputConversionFunc(getInput<Mapping::AudioInput>().value_or(0))};
+		inBlock[audioBufferFillCount] = {InputConversionFunc(getInput<Mapping::ReturnInput>().value_or(0)), InputConversionFunc(io.audioIn)};
 
-		setOutput<Mapping::AudioOutput>(OutputConversionFunc(outBlock[audioBufferFillCount].chan[1]));
+		io.audioOut = OutputConversionFunc(outBlock[audioBufferFillCount].chan[1]);
 		setOutput<Mapping::SendOutput>(OutputConversionFunc(outBlock[audioBufferFillCount].chan[0]));
 	}
 
