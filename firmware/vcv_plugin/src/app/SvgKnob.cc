@@ -7,6 +7,7 @@ namespace rack::app
 
 void SvgKnob::setSvg(std::shared_ptr<window::Svg> svg) {
 	sw->setSvg(svg);
+	box.size = sw->box.size;
 }
 
 } // namespace rack::app

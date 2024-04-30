@@ -14,6 +14,7 @@ void SvgWidget::setSvg(std::shared_ptr<window::Svg> svg) {
 			pr_warn("Changing svg filename from %s to %s\n", this->svg->filename.c_str(), svg->filename.c_str());
 
 			this->svg->filename = svg->filename;
+			box.size = get_svg_size(svg->filename);
 		}
 	}
 
