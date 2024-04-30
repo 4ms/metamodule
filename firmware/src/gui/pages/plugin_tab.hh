@@ -58,10 +58,9 @@ struct PluginTab {
 		this->group = group;
 		lv_show(ui_PluginScanButton);
 		lv_hide(ui_PluginsFoundCont);
-		lv_group_remove_obj(ui_PluginScanButton);
-		lv_group_remove_obj(ui_PluginsBuiltinListText);
+		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_PluginScanButton);
-		lv_group_add_obj(group, ui_PluginsBuiltinListText);
+		// lv_group_add_obj(group, ui_PluginsBuiltinListText);
 		lv_group_focus_obj(ui_PluginScanButton);
 
 		clear_found_list();
