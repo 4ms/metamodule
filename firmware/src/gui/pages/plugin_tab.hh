@@ -25,7 +25,10 @@ struct PluginTab {
 		auto result = plugin_manager.process_loading();
 
 		if (result.state == PluginFileLoader::State::GotList) {
-			lv_foreach_child(ui_PluginsFoundCont, [](auto *obj) { lv_obj_delete_async(obj); });
+			lv_foreach_child(ui_PluginsFoundCont, [](auto *obj, unsigned) {
+				lv_obj_del_async(obj);
+				return true;
+			});
 
 			auto *found_plugins = plugin_manager.found_plugin_list();
 			for (auto &plugin : *found_plugins) {
