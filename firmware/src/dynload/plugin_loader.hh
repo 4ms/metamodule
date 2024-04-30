@@ -168,6 +168,7 @@ public:
 			case State::NotInit:
 				break;
 			case State::GotList:
+				status.state = State::Idle;
 				break;
 			case State::Idle:
 				break;

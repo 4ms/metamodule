@@ -27,9 +27,8 @@ struct PluginTab {
 		lv_show(ui_PluginScanButton);
 		lv_hide(ui_PluginsFoundCont);
 		lv_hide(ui_PluginTabSpinner);
-		lv_group_remove_all_objs(group);
+		lv_group_remove_obj(ui_PluginScanButton);
 		lv_group_add_obj(group, ui_PluginScanButton);
-		// lv_group_add_obj(group, ui_PluginsBuiltinListText);
 		lv_group_focus_obj(ui_PluginScanButton);
 
 		clear_found_list();
@@ -78,13 +77,12 @@ struct PluginTab {
 		else if (result.state == PluginFileLoader::State::Success)
 		{
 			lv_hide(ui_PluginTabSpinner);
-			if (load_in_progress_idx.has_value()) {
-				auto plugin_obj = lv_obj_get_child(ui_PluginsFoundCont, *load_in_progress_idx);
-				lv_obj_set_user_data(plugin_obj, nullptr);
-				lv_obj_remove_event_cb(plugin_obj, load_plugin_cb);
-				lv_obj_set_parent(plugin_obj, ui_PluginsLoadedCont);
-				lv_group_remove_obj(plugin_obj);
-				load_in_progress_idx = std::nullopt;
+			if (load_in_progress_obj) {
+				lv_obj_set_user_data(load_in_progress_obj, nullptr);
+				lv_obj_remove_event_cb(load_in_progress_obj, load_plugin_cb);
+				lv_obj_set_parent(load_in_progress_obj, ui_PluginsLoadedCont);
+				lv_group_remove_obj(load_in_progress_obj);
+				load_in_progress_obj = nullptr;
 			}
 		}
 
@@ -113,8 +111,7 @@ private:
 	void populate_loaded_list() {
 		auto loaded_plugin_list = plugin_manager.loaded_plugins();
 		for (auto &plugin : loaded_plugin_list) {
-			lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
-			lv_group_add_obj(group, plugin_obj);
+			create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
 		}
 	}
 
@@ -146,14 +143,14 @@ private:
 		if (idx > 0) {
 			lv_show(ui_PluginTabSpinner);
 			page->plugin_manager.load_plugin(idx - 1);
-			page->load_in_progress_idx = idx - 1;
+			page->load_in_progress_obj = event->target;
 		}
 	}
 
 	PluginManager &plugin_manager;
 	NotificationQueue &notify_queue;
 
-	std::optional<unsigned> load_in_progress_idx{};
+	lv_obj_t *load_in_progress_obj = nullptr;
 
 	lv_group_t *group = nullptr;
 };

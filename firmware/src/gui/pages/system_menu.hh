@@ -40,6 +40,8 @@ struct SystemMenuPage : PageBase {
 		lv_group_add_obj(group, tabs);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
+
+		status_tab.prepare_focus(group);
 	}
 
 	void update() final {
