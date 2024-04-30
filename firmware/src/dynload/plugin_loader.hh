@@ -54,6 +54,11 @@ public:
 		}
 	}
 
+	void load_plugin(unsigned idx) {
+		status.state = State::PrepareForReadingPlugin;
+		file_idx = 0;
+	}
+
 	Status process() {
 		if (!plugin_files)
 			status.state = State::NotInit;
@@ -74,11 +79,13 @@ public:
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
 					pr_trace("Found %d plugins\n", plugin_files->size());
-					status.state = State::PrepareForReadingPlugin;
+					status.state = State::Success;
 					file_idx = 0;
 				}
 
 			} break;
+
+				//////////////////
 
 			case State::PrepareForReadingPlugin: {
 				auto &plugin = (*plugin_files)[file_idx];

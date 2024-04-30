@@ -16,7 +16,7 @@ namespace MetaModule
 class PluginManager {
 	FatFileIO &ramdisk;
 	PluginFileLoader plugin_file_loader;
-	enum class State { Ready, IsLoading, Done } state = State::Ready;
+	enum class State { Ready, IsLoadingList, IsLoadingPlugin, Done } state = State::Ready;
 
 public:
 	PluginManager(FileStorageProxy &file_storage_proxy, FatFileIO &ramdisk)
@@ -25,7 +25,7 @@ public:
 	}
 
 	void start_loading_plugins() {
-		state = State::IsLoading;
+		state = State::IsLoadingList;
 
 		ramdisk.mount_disk();
 		plugin_file_loader.start();
@@ -33,10 +33,14 @@ public:
 
 	auto process_loading() {
 		auto result = plugin_file_loader.process();
+
 		if (result.state == PluginFileLoader::State::Success) {
-			if (state == State::IsLoading) {
+			if (state == State::IsLoadingList) {
+				//report back
+			}
+
+			if (state == State::IsLoadingPlugin) {
 				state = State::Done;
-				pr_info("No more plugins found\n");
 				// ramdisk.print_dir("/", 4);
 			}
 		}
