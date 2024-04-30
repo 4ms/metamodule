@@ -83,8 +83,10 @@ private:
 		if (!page)
 			return;
 
-		lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
-		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
+		lv_group_remove_all_objs(page->group);
+		lv_group_add_obj(page->group, page->tabs);
+		// lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
+		// lv_group_remove_obj(ui_ResetFactoryPatchesButton);
 
 		switch (lv_btnmatrix_get_selected_btn(page->tabs)) {
 			case Tabs::Info: {

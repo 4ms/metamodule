@@ -1,5 +1,8 @@
 #pragma once
 #include "dynload/dynloader.hh"
+#include "dynload/loaded_plugin.hh"
+#include "fs/fatfs/fat_file_io.hh"
+#include "fs/fatfs/ramdisk_ops.hh"
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
@@ -16,6 +19,7 @@ public:
 	enum class State {
 		NotInit,
 		Error,
+		Idle,
 		RequestList,
 		WaitingForList,
 		GotList,
@@ -32,18 +36,16 @@ public:
 		std::string error_message;
 	};
 
-	struct LoadedPlugin {
-		PluginFile fileinfo;
-		rack::plugin::Plugin rack_plugin;
-		std::vector<uint8_t> code;
-	};
-
-	PluginFileLoader(FileStorageProxy &file_storage)
+	PluginFileLoader(FileStorageProxy &file_storage, FatFileIO &ramdisk, LoadedPluginList &loaded_plugin_list)
 		: file_storage{file_storage}
+		, ramdisk{ramdisk}
+		, plugins{loaded_plugin_list}
 		, allocator{get_ram_buffer()} {
 	}
 
 	void start() {
+		ramdisk.mount_disk();
+
 		plugins.clear();
 		allocator.reset();
 		if (auto newmem = allocator.allocate(sizeof(PluginFileList))) {
@@ -63,6 +65,7 @@ public:
 	}
 
 	PluginFileList const *found_plugin_list() {
+		status.state = State::Idle;
 		return plugin_files;
 	}
 
@@ -71,6 +74,7 @@ public:
 			status.state = State::NotInit;
 
 		switch (status.state) {
+
 			case State::RequestList:
 				if (file_storage.request_plugin_file_list(plugin_files))
 					status.state = State::WaitingForList;
@@ -172,6 +176,8 @@ public:
 				break;
 			case State::GotList:
 				break;
+			case State::Idle:
+				break;
 			case State::Success:
 				break;
 			case State::Error:
@@ -229,6 +235,8 @@ public:
 
 private:
 	FileStorageProxy &file_storage;
+	FatFileIO &ramdisk;
+	std::deque<LoadedPlugin> &plugins;
 
 	Status status{};
 	unsigned file_idx = 0;
@@ -236,11 +244,8 @@ private:
 	MonotonicAllocator allocator;
 	std::span<uint8_t> buffer;
 
-	// Dynamically generated in non-cacheable RAM
+	// Dynamically allocated in non-cacheable RAM
 	PluginFileList *plugin_files = nullptr;
-
-	// TODO: plugins should live somewhere all UI can access, perhaps in main and passed by ref to PageContext
-	std::deque<LoadedPlugin> plugins;
 };
 
 } // namespace MetaModule
