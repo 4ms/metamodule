@@ -3,8 +3,8 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/firmware_update_tab.hh"
-#include "gui/pages/hardware_test_tab.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/plugin_tab.hh"
 #include "gui/pages/prefs_tab.hh"
 #include "gui/pages/system_status_tab.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -18,7 +18,8 @@ struct SystemMenuPage : PageBase {
 	SystemMenuPage(PatchContext info)
 		: PageBase{info, PageId::SystemMenu}
 		, fwupdate_tab{patch_storage, patch_playloader}
-		, prefs_tab{info.plugin_manager, patch_storage, info.notify_queue}
+		, plugin_tab{info.plugin_manager, info.notify_queue}
+		, prefs_tab{patch_storage}
 		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
 		init_bg(ui_SystemMenu);
@@ -54,11 +55,11 @@ struct SystemMenuPage : PageBase {
 			if (pressed_back && prefs_tab.consume_back_event())
 				pressed_back = false;
 
-		} else if (active_tab == Tabs::Status) {
+		} else if (active_tab == Tabs::Info) {
 			status_tab.update();
 
-		} else if (active_tab == Tabs::Check) {
-			check_tab.update();
+		} else if (active_tab == Tabs::Plugins) {
+			plugin_tab.update();
 		}
 
 		if (pressed_back) {
@@ -86,8 +87,8 @@ private:
 		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
 
 		switch (lv_btnmatrix_get_selected_btn(page->tabs)) {
-			case Tabs::Status: {
-				page->active_tab = Tabs::Status;
+			case Tabs::Info: {
+				page->active_tab = Tabs::Info;
 				page->status_tab.prepare_focus(page->group);
 				break;
 			}
@@ -98,9 +99,9 @@ private:
 				break;
 			}
 
-			case Tabs::Check: {
-				page->active_tab = Tabs::Check;
-				page->check_tab.prepare_focus(page->group);
+			case Tabs::Plugins: {
+				page->active_tab = Tabs::Plugins;
+				page->plugin_tab.prepare_focus(page->group);
 				break;
 			}
 
@@ -113,12 +114,12 @@ private:
 	}
 
 	FirmwareUpdateTab fwupdate_tab;
-	HardwareTestTab check_tab;
+	PluginTab plugin_tab;
 	SystemStatusTab status_tab;
 	PrefsTab prefs_tab;
 
-	enum Tabs { Status = 0, Prefs = 1, Check = 2, Update = 3, NumTabs };
-	Tabs active_tab = Status;
+	enum Tabs { Plugins = 0, Info = 1, Prefs = 2, Update = 3, NumTabs };
+	Tabs active_tab = Plugins;
 	lv_obj_t *tabs = nullptr;
 };
 
