@@ -18,6 +18,7 @@ public:
 		Error,
 		RequestList,
 		WaitingForList,
+		GotList,
 		PrepareForReadingPlugin,
 		RequestReadPlugin,
 		LoadingPlugin,
@@ -55,8 +56,14 @@ public:
 	}
 
 	void load_plugin(unsigned idx) {
-		status.state = State::PrepareForReadingPlugin;
-		file_idx = 0;
+		if (idx < plugin_files->size()) {
+			status.state = State::PrepareForReadingPlugin;
+			file_idx = idx;
+		}
+	}
+
+	PluginFileList const *found_plugin_list() {
+		return plugin_files;
 	}
 
 	Status process() {
@@ -79,7 +86,7 @@ public:
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
 					pr_trace("Found %d plugins\n", plugin_files->size());
-					status.state = State::Success;
+					status.state = State::GotList;
 					file_idx = 0;
 				}
 
@@ -162,6 +169,8 @@ public:
 			} break;
 
 			case State::NotInit:
+				break;
+			case State::GotList:
 				break;
 			case State::Success:
 				break;
