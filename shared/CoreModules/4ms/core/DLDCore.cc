@@ -95,11 +95,14 @@ public:
 
 	void update() override {
 
-		channelA.io.pingButtonIn = getState<PingButton>() == MomentaryButton::State_t::PRESSED;
-		channelA.io.pingJackIn = getInput<PingJackIn>().value_or(0) > TriggerThresholdInVolt;
+		auto pingButton = getState<PingButton>() == MomentaryButton::State_t::PRESSED;
+		auto pingJack = getInput<PingJackIn>().value_or(0) > TriggerThresholdInVolt;
 
-		channelB.io.pingButtonIn = getState<PingButton>() == MomentaryButton::State_t::PRESSED;
-		channelB.io.pingJackIn = getInput<PingJackIn>().value_or(0) > TriggerThresholdInVolt;
+		channelA.io.pingButtonIn = pingButton;
+		channelA.io.pingJackIn = pingJack;
+
+		channelB.io.pingButtonIn = pingButton;
+		channelB.io.pingJackIn = pingJack;
 
 		channelA.update();
 		channelB.update();
