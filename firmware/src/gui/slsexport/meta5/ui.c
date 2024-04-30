@@ -19,7 +19,9 @@ lv_obj_t *ui_MainMenu;
 lv_obj_t *ui_MainMenuNowPlayingPanel;
 lv_obj_t *ui_MainMenuNowPlaying;
 lv_obj_t *ui_MainMenuNowPlayingName;
-lv_obj_t *ui_MainMenuLoadMeter;
+lv_obj_t *ui_MainMenuLastViewedPanel;
+lv_obj_t *ui_MainMenuLastViewed;
+lv_obj_t *ui_MainMenuLastViewedName;
 lv_obj_t *ui_MainMenuPanel;
 lv_obj_t *ui_MenuPanelPatches;
 lv_obj_t *ui_MenuImagePatches;
@@ -30,7 +32,7 @@ lv_obj_t *ui_MenuLabelSave;
 lv_obj_t *ui_MenuPanelSettings;
 lv_obj_t *ui_MenuImageSettings;
 lv_obj_t *ui_MenuLabelSettings;
-
+lv_obj_t *ui_MainMenuLoadMeter;
 
 // SCREEN: ui_PatchSelectorPage
 void ui_PatchSelectorPage_screen_init(void);

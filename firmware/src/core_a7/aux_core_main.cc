@@ -90,6 +90,8 @@ extern "C" void aux_core_main() {
 	while (HWSemaphore<M4CoreReady>::is_locked())
 		;
 
+	HAL_Delay(300); //allow time to load initial patch: TODO use semaphor
+
 	while (true) {
 		ui.update();
 		__NOP();

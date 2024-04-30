@@ -43,8 +43,7 @@ public:
 
 	bool load_if_open(PatchLocation patch_loc) {
 		if (PatchLocHash{patch_loc} == PatchLocHash{playing_patch_loc_}) {
-			view_patch_ = &playing_patch_;
-			view_patch_loc_ = patch_loc;
+			view_playing_patch();
 			return true;
 
 		} else if (auto patch = open_patches_.get(PatchLocHash{patch_loc})) {
@@ -80,6 +79,7 @@ public:
 
 	//
 	// playing_patch: (copy of) patch currently playing in the audio thread
+	// Keep it outside of open_patches because we should never overwrite it
 	//
 	PatchData *playing_patch() {
 		return &playing_patch_;
@@ -106,6 +106,11 @@ public:
 
 		//re-point view_patch to playing_patch
 		view_patch_ = &playing_patch_;
+	}
+
+	void view_playing_patch() {
+		view_patch_ = &playing_patch_;
+		view_patch_loc_ = playing_patch_loc_;
 	}
 
 	StaticString<255> get_view_patch_filename() {
