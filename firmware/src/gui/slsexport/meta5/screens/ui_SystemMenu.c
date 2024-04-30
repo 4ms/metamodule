@@ -218,7 +218,7 @@ lv_obj_add_flag( ui_PluginsLoadedCont, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Fla
 lv_obj_clear_flag( ui_PluginsLoadedCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_PluginsLoadedCont, LV_SCROLLBAR_MODE_ON);
 lv_obj_set_scroll_dir(ui_PluginsLoadedCont, LV_DIR_VER);
-lv_obj_set_style_pad_left(ui_PluginsLoadedCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_PluginsLoadedCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_PluginsLoadedCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PluginsLoadedCont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_PluginsLoadedCont, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -269,7 +269,7 @@ lv_obj_set_style_pad_bottom(ui_PluginsBuiltinTitle, 8, LV_PART_MAIN| LV_STATE_DE
 
 ui_PluginsBuiltinListText = lv_label_create(ui_PluginsRightColumn);
 lv_obj_set_height( ui_PluginsBuiltinListText, 130);
-lv_obj_set_width( ui_PluginsBuiltinListText, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_width( ui_PluginsBuiltinListText, lv_pct(97));
 lv_obj_set_align( ui_PluginsBuiltinListText, LV_ALIGN_CENTER );
 lv_label_set_text(ui_PluginsBuiltinListText,"4ms\nBefaco\nMorphable Instr.\nHetrickCV\nNonlinearCircuits\nEightfold");
 lv_obj_add_flag( ui_PluginsBuiltinListText, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
@@ -278,6 +278,12 @@ lv_obj_set_scroll_dir(ui_PluginsBuiltinListText, LV_DIR_VER);
 lv_obj_set_style_text_letter_space(ui_PluginsBuiltinListText, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_PluginsBuiltinListText, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_PluginsBuiltinListText, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_PluginsBuiltinListText, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_PluginsBuiltinListText, 64, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_PluginsBuiltinListText, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_PluginsBuiltinListText, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_PluginsBuiltinListText, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_PluginsBuiltinListText, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SystemMenuInfoTab = lv_tabview_add_tab(ui_SystemMenuTabView, "Info");
 lv_obj_set_flex_flow(ui_SystemMenuInfoTab,LV_FLEX_FLOW_COLUMN);
