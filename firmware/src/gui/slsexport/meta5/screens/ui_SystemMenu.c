@@ -293,6 +293,20 @@ lv_obj_set_style_outline_opa(ui_PluginsBuiltinListText, 255, LV_PART_MAIN| LV_ST
 lv_obj_set_style_outline_width(ui_PluginsBuiltinListText, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 lv_obj_set_style_outline_pad(ui_PluginsBuiltinListText, 1, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
+ui_PluginTabSpinner = lv_spinner_create(ui_SystemMenuTabView,1000,90);
+lv_obj_set_width( ui_PluginTabSpinner, 50);
+lv_obj_set_height( ui_PluginTabSpinner, 50);
+lv_obj_set_align( ui_PluginTabSpinner, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_PluginTabSpinner, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_clear_flag( ui_PluginTabSpinner, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_arc_color(ui_PluginTabSpinner, lv_color_hex(0xFF8918), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_arc_opa(ui_PluginTabSpinner, 64, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_arc_width(ui_PluginTabSpinner, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+lv_obj_set_style_arc_color(ui_PluginTabSpinner, lv_color_hex(0xFF8918), LV_PART_INDICATOR | LV_STATE_DEFAULT );
+lv_obj_set_style_arc_opa(ui_PluginTabSpinner, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+lv_obj_set_style_arc_width(ui_PluginTabSpinner, 10, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+
 ui_SystemMenuInfoTab = lv_tabview_add_tab(ui_SystemMenuTabView, "Info");
 lv_obj_set_flex_flow(ui_SystemMenuInfoTab,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_SystemMenuInfoTab, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);

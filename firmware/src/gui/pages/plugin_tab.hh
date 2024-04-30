@@ -22,42 +22,11 @@ struct PluginTab {
 		lv_hide(ui_PluginsFoundCont);
 	}
 
-	void clear_loaded_list() {
-		lv_foreach_child(ui_PluginsLoadedCont, [](auto *obj, unsigned) {
-			lv_obj_del_async(obj);
-			return true;
-		});
-	}
-
-	void clear_found_list() {
-		lv_foreach_child(ui_PluginsFoundCont, [](auto *obj, unsigned) {
-			lv_obj_del_async(obj);
-			return true;
-		});
-	}
-	void populate_loaded_list() {
-		auto loaded_plugin_list = plugin_manager.loaded_plugins();
-		for (auto &plugin : loaded_plugin_list) {
-			lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
-			lv_group_add_obj(group, plugin_obj);
-		}
-	}
-
-	bool plugin_already_loaded(StaticString<255> const &name) {
-		// This next line makes it crash? Why?
-		// auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
-		// for (auto &plugin : loaded_plugin_list) {
-		// if (plugin.fileinfo.plugin_name == name) {
-		// 	return true;
-		// }
-		// }
-		return false;
-	}
-
 	void prepare_focus(lv_group_t *group) {
 		this->group = group;
 		lv_show(ui_PluginScanButton);
 		lv_hide(ui_PluginsFoundCont);
+		lv_hide(ui_PluginTabSpinner);
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_PluginScanButton);
 		// lv_group_add_obj(group, ui_PluginsBuiltinListText);
@@ -72,6 +41,7 @@ struct PluginTab {
 		auto result = plugin_manager.process_loading();
 
 		if (result.state == PluginFileLoader::State::GotList) {
+			lv_hide(ui_PluginTabSpinner);
 			lv_hide(ui_PluginScanButton);
 			lv_show(ui_PluginsFoundCont);
 
@@ -107,6 +77,7 @@ struct PluginTab {
 
 		else if (result.state == PluginFileLoader::State::Success)
 		{
+			lv_hide(ui_PluginTabSpinner);
 			if (load_in_progress_idx.has_value()) {
 				auto plugin_obj = lv_obj_get_child(ui_PluginsFoundCont, *load_in_progress_idx);
 				lv_obj_set_user_data(plugin_obj, nullptr);
@@ -125,10 +96,44 @@ struct PluginTab {
 	}
 
 private:
+	void clear_loaded_list() {
+		lv_foreach_child(ui_PluginsLoadedCont, [](auto *obj, unsigned) {
+			lv_obj_del_async(obj);
+			return true;
+		});
+	}
+
+	void clear_found_list() {
+		lv_foreach_child(ui_PluginsFoundCont, [](auto *obj, unsigned) {
+			lv_obj_del_async(obj);
+			return true;
+		});
+	}
+
+	void populate_loaded_list() {
+		auto loaded_plugin_list = plugin_manager.loaded_plugins();
+		for (auto &plugin : loaded_plugin_list) {
+			lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
+			lv_group_add_obj(group, plugin_obj);
+		}
+	}
+
+	bool plugin_already_loaded(StaticString<255> const &name) {
+		// This next line makes it crash? Why?
+		// auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
+		// for (auto &plugin : loaded_plugin_list) {
+		// if (plugin.fileinfo.plugin_name == name) {
+		// 	return true;
+		// }
+		// }
+		return false;
+	}
+
 	static void scan_plugins_cb(lv_event_t *event) {
 		auto page = static_cast<PluginTab *>(event->user_data);
 		if (!page)
 			return;
+		lv_show(ui_PluginTabSpinner);
 		page->plugin_manager.start_loading_plugin_list();
 	}
 
@@ -139,6 +144,7 @@ private:
 
 		auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
 		if (idx > 0) {
+			lv_show(ui_PluginTabSpinner);
 			page->plugin_manager.load_plugin(idx - 1);
 			page->load_in_progress_idx = idx - 1;
 		}
