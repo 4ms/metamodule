@@ -12,9 +12,10 @@ namespace MetaModule
 
 struct PrefsTab {
 
-	PrefsTab(PluginManager &plugin_manager, FileStorageProxy &patch_storage)
+	PrefsTab(PluginManager &plugin_manager, FileStorageProxy &patch_storage, NotificationQueue &notify_queue)
 		: plugin_manager{plugin_manager}
 		, file_storage{patch_storage}
+		, notify_queue{notify_queue}
 		, plugin_button(lv_btn_create(ui_SystemMenuPrefs))
 		, plugin_button_label(lv_label_create(plugin_button)) {
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
@@ -69,6 +70,7 @@ struct PrefsTab {
 		auto result = plugin_manager.process_loading();
 		if (result.error_message.length()) {
 			pr_err("Error: %s\n", result.error_message.c_str());
+			notify_queue.put({"Could not load plugin", Notification::Priority::Error});
 		}
 	}
 
@@ -101,6 +103,7 @@ private:
 
 	PluginManager &plugin_manager;
 	FileStorageProxy &file_storage;
+	NotificationQueue &notify_queue;
 
 	ConfirmPopup confirm_popup;
 

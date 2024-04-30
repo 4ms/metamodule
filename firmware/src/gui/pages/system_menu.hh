@@ -18,7 +18,7 @@ struct SystemMenuPage : PageBase {
 	SystemMenuPage(PatchContext info)
 		: PageBase{info, PageId::SystemMenu}
 		, fwupdate_tab{patch_storage, patch_playloader}
-		, prefs_tab{info.plugin_manager, patch_storage}
+		, prefs_tab{info.plugin_manager, patch_storage, info.notify_queue}
 		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
 		init_bg(ui_SystemMenu);
