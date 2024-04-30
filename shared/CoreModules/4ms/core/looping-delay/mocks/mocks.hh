@@ -11,22 +11,16 @@ struct InputPin
 	
     bool just_went_high()
     {
-        if (value and not compareValue)
-		{
-			compareValue = true;
-			return true;
-		}
-		return false;
+		auto result = value and not compareValue;
+		compareValue = value;
+		return result;
     }
 
 	bool just_went_low()
     {
-        if (not value and compareValue)
-		{
-			compareValue = false;
-			return true;
-		}
-		return false;
+		auto result = not value and compareValue;
+		compareValue = value;
+		return result;
     }
 
 	void sideload_set(bool val)
