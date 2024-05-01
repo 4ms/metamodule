@@ -49,7 +49,7 @@ struct ModuleListPage : PageBase {
 		populate_slugs();
 		drawn_module_idx = -1; //force redraw
 		draw_module();
-		draw_timer = lv_timer_create(draw_module_cb, 100, this);
+		draw_timer = lv_timer_create(draw_module_cb, 200, this);
 
 		show_roller();
 		lv_group_focus_obj(ui_ModuleListRoller);
@@ -66,6 +66,10 @@ struct ModuleListPage : PageBase {
 				show_roller();
 				lv_group_set_editing(group, true);
 			}
+		}
+		if (do_redraw) {
+			do_redraw = false;
+			draw_module();
 		}
 	}
 
@@ -119,7 +123,7 @@ private:
 		auto page = static_cast<ModuleListPage *>(timer->user_data);
 		if (!page)
 			return;
-		page->draw_module();
+		page->do_redraw = true;
 	}
 
 	void draw_module() {
@@ -133,6 +137,8 @@ private:
 	}
 
 	void draw_module(ModuleTypeSlug slug) {
+		clear_module_canvas();
+
 		ModuleDrawer drawer{ui_ModuleListImage, 240};
 		auto module_canvas = drawer.draw_faceplate(slug, page_pixel_buffer);
 		if (module_canvas) {
@@ -145,9 +151,17 @@ private:
 			notify_queue.put(Notification{"Could not load faceplate image", Notification::Priority::Error});
 	}
 
+	void clear_module_canvas() {
+		lv_foreach_child(ui_ModuleListImage, [](auto *obj, int i) {
+			lv_obj_del_async(obj);
+			return true;
+		});
+	}
+
 	bool roller_shown = true;
 	lv_timer_t *draw_timer{};
 	unsigned drawn_module_idx = -1;
+	bool do_redraw = false;
 };
 
 } // namespace MetaModule
