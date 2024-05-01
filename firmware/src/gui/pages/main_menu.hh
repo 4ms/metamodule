@@ -51,6 +51,11 @@ struct MainMenuPage : PageBase {
 	}
 
 	void update() final {
+		if (metaparams.back_button.is_just_released()) {
+			if (patch_storage.get_view_patch())
+				load_page(PageId::PatchView, {.patch_loc_hash = patch_storage.get_view_patch_loc_hash()});
+		}
+
 		if (last_audio_load != metaparams.audio_load) {
 			last_audio_load = metaparams.audio_load;
 			lv_label_set_text_fmt(ui_MainMenuLoadMeter, "%d%%", metaparams.audio_load);
