@@ -26,6 +26,8 @@ public:
 		PrepareForReadingPlugin,
 		RequestReadPlugin,
 		LoadingPlugin,
+		PrepareLoadPluginAssets,
+		LoadingPluginAssets,
 		ProcessingPlugin,
 		Success
 	};
@@ -117,16 +119,16 @@ public:
 			} break;
 
 			case State::LoadingPlugin: {
-				IntercoreStorageMessage msg{FileStorageProxy::None};
-				while (msg.message_type == FileStorageProxy::None) {
-					msg = file_storage.get_message();
-				}
+				auto msg = file_storage.get_message();
+
 				if (msg.message_type == FileStorageProxy::LoadFileToRamFailed) {
 					status.state = State::Error;
 					status.error_message = "Failed to read from disk";
+
 				} else if (msg.message_type == FileStorageProxy::LoadFileToRamSuccess) {
-					status.state = State::ProcessingPlugin;
-				} else {
+					status.state = State::PrepareLoadPluginAssets;
+
+				} else if (msg.message_type != FileStorageProxy::None) {
 					pr_warn("Unknown response %d, trying again\n", msg.message_type);
 					//try again
 					status.state = State::RequestReadPlugin;
@@ -134,7 +136,7 @@ public:
 
 			} break;
 
-			case State::ProcessingPlugin: {
+			case State::PrepareLoadPluginAssets: {
 				auto &plugin_file = (*plugin_files)[file_idx];
 
 				// Strip .so
@@ -159,11 +161,41 @@ public:
 					   buffer.data(),
 					   buffer.size());
 
-				load_plugin_assets(plugin);
+				pr_trace("Loading assets from vol %d: %s\n", plugin.fileinfo.vol, plugin.fileinfo.dir_name.c_str());
+
+				file_storage.request_copy_dir_to_ramdisk(plugin.fileinfo.vol, plugin.fileinfo.dir_name);
+
+				status.state = State::LoadingPluginAssets;
+			} break;
+
+			case State::LoadingPluginAssets: {
+				auto msg = file_storage.get_message();
+
+				if (msg.message_type == FileStorageProxy::CopyPluginAssetsOK) {
+					pr_info("Plugin assets loaded!\n");
+					status.state = State::ProcessingPlugin;
+
+				} else if (msg.message_type == FileStorageProxy::CopyPluginAssetsFail) {
+					pr_err("Failed to copy plugin assets to ramdisk\n");
+					status.error_message = "Failed to load images";
+					status.state = State::Error;
+
+				} else if (msg.message_type != FileStorageProxy::None) {
+					pr_err("Unknown response to request to copy assets to ramdisk: %u\n", msg.message_type);
+					status.error_message = "Failed to load images, unknown error";
+					status.state = State::Error;
+				}
+			} break;
+
+			case State::ProcessingPlugin: {
+				auto &plugin = plugins.back();
+
 				if (load_plugin(plugin))
 					status.state = State::Success;
-				else
+				else {
 					status.state = State::Error;
+				}
+
 			} break;
 
 			case State::NotInit:
@@ -207,28 +239,6 @@ public:
 		pr_info("Plugin loaded!\n");
 		status.error_message = "";
 		return true;
-	}
-
-	bool load_plugin_assets(LoadedPlugin &plugin) {
-		pr_trace("Loading assets from vol %d: %s\n", plugin.fileinfo.vol, plugin.fileinfo.dir_name.c_str());
-
-		file_storage.request_copy_dir_to_ramdisk(plugin.fileinfo.vol, plugin.fileinfo.dir_name);
-
-		IntercoreStorageMessage msg{.message_type = FileStorageProxy::None};
-		while (msg.message_type == FileStorageProxy::None) {
-			msg = file_storage.get_message();
-		}
-
-		if (msg.message_type == FileStorageProxy::CopyPluginAssetsOK) {
-			pr_info("Plugin assets loaded!\n");
-			return true;
-		} else if (msg.message_type == FileStorageProxy::CopyPluginAssetsFail) {
-			pr_err("Failed to copy system plugin assets to ramdisk\n");
-		} else {
-			pr_err("Unknown response to request to copy assets to ramdisk: %u\n", msg.message_type);
-		}
-
-		return false;
 	}
 
 private:
