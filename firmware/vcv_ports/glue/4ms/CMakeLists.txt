@@ -29,7 +29,6 @@ target_sources(
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
 )
 
-
 # Tapographic Delay
 target_compile_definitions(
   4msLibrary
@@ -55,6 +54,15 @@ target_sources(
     ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/stmlib/utils/random.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/stmlib/dsp/units.cc
 )
+
+# QPLFO
+target_sources(
+  4msLibrary
+  PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/qplfo/qplfo.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/qplfo/qplfo_mocks.cc
+)
+
 
 # Axoloti ports
 target_sources(

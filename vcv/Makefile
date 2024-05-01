@@ -53,6 +53,10 @@ SOURCES += $(wildcard src/comm/*.cc)
 SOURCES += $(wildcard src/mapping/*.cc)
 SOURCES += $(wildcard src/models/*.cc)
 
+# QPLFO
+SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo_mocks.cc
+
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS += -std=c++2a 
