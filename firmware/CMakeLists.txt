@@ -242,23 +242,10 @@ add_custom_target(
   VERBATIM USES_TERMINAL
 )
 
-add_custom_command(
-  OUTPUT comp-cmd
-  COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for components"
-  VERBATIM USES_TERMINAL
-)
 
-add_custom_command(
-  OUTPUT faceplate-cmd
-  COMMAND ${CMAKE_COMMAND} -E echo "Generated LVGL image files for faceplates (all brands)"
-  VERBATIM USES_TERMINAL
-)
-
-add_custom_command(
-  OUTPUT vcvimages-cmd
-  COMMAND ${CMAKE_COMMAND} -E echo "Updating/creating 4ms VCV artwork SVGs files from *_info.svg files"
-  VERBATIM USES_TERMINAL
-)
+#
+# Process 4ms info files
+#
 
 add_custom_command(
   OUTPUT moduleinfos-cmd
@@ -266,96 +253,11 @@ add_custom_command(
   VERBATIM USES_TERMINAL
 )
 
-add_custom_target(comp-images DEPENDS comp-cmd)
-add_custom_target(faceplate-images DEPENDS faceplate-cmd)
-add_custom_target(vcv-images DEPENDS vcvimages-cmd)
-add_custom_target(module-infos DEPENDS moduleinfos-cmd)
 
-# meta command to do all processing
-add_custom_target(
-  regenerate-all
-  DEPENDS comp-images
-          faceplate-images
-          vcv-images
-          module-infos
-)
-
-# List of brands
-include(vcv_ports/brands.cmake)
-
-foreach(brand ${brands})
-  string(TOUPPER ${brand} BRAND)
-
-  # Components
-  file(GLOB ${brand}_comp_svgs ${PROJECT_SOURCE_DIR}/../graphics/${brand}/components/*.svg)
-
-  # for each component svg, add_custom_command (...) to convert to lvgl
-  # TODO: SVG -> PNG, not LVGL, and place it in assets/ dir
-  foreach(svg ${${brand}_comp_svgs})
-    get_filename_component(svg_name ${svg} NAME_WE)
-    set(outpath ${PROJECT_SOURCE_DIR}/src/gui/images/${brand}/components/)
-    add_custom_command(
-      OUTPUT comp-cmd
-      APPEND
-      COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py convertSvgToLvgl ${svg} ${outpath}
-      DEPENDS ${svg}
-      COMMENT "Converting component: ${svg_name} to ${svg_name}.c"
-    )
-  endforeach()
-
-  # Faceplates
-  add_custom_command(
-    OUTPUT faceplate-cmd-${brand}
-    COMMAND ${CMAKE_COMMAND} -E echo "Generating LVGL image files for ${brand} faceplates"
-    VERBATIM USES_TERMINAL
-  )
-  add_custom_target(faceplate-images-${brand} DEPENDS faceplate-cmd-${brand})
-  add_dependencies(faceplate-images faceplate-images-${brand})
-
-  # For faceplates, we get branded lists from glue/BRAND/modules.cmake. In this file, each brand should set
-  # ${BRAND}_FACEPLATE_SVGS to be the paths to all the faceplate SVGs
-  include(${PROJECT_SOURCE_DIR}/vcv_ports/glue/${brand}/modules.cmake)
-
-  if(NOT DEFINED ${BRAND}_FACEPLATE_SVGS)
-    message(FATAL_ERROR "No faceplate svgs for ${BRAND}, make sure vcv_ports/glue/${brand}/modules.cmake defines ${BRAND}_FACEPLATE_SVGS!")
-  endif()
-
-  # TODO: SVG -> PNG, not LVGL, and place it in assets/, keeping original directory structure
-  foreach(svg ${${BRAND}_FACEPLATE_SVGS})
-    get_filename_component(svg_name ${svg} NAME_WE)
-    set(c240_name ${PROJECT_SOURCE_DIR}/assetss/${brand}/modules/${svg_name}.c)
-
-    # for each module svg, convert to .c version
-    add_custom_command(
-      OUTPUT faceplate-cmd-${brand}
-      APPEND
-      COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createLvglFaceplate ${svg} ${c240_name}
-      DEPENDS ${svg}
-      COMMENT "Creating 240px-height lvgl img from full-sized svg artwork: ${svg_name}_240.c"
-    )
-  endforeach() # loop over faceplates
-
-endforeach() # loop over brands
-
-# 4ms Info SVGs for each info svg, add_custom_command (...) to convert get the VCV svg and generate the _info.hh
+# 4ms Info SVGs for each info svg, add_custom_command (...) to to generate the _info.hh
+include(vcv_ports/glue/4ms/modules.cmake)
 foreach(info_svg ${4MS_INFO_SVGS})
   get_filename_component(slug ${info_svg} NAME_WE) # e.g. Verb_info
-
-  string(
-    REPLACE "_info"
-            "_artwork"
-            svg_name_artwork
-            ${slug}
-  )
-  set(vcv_svg ${PROJECT_SOURCE_DIR}/../vcv/res/modules/${svg_name_artwork}.svg)
-
-  add_custom_command(
-    OUTPUT vcvimages-cmd
-    APPEND
-    COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createVcvSvg ${info_svg} ${vcv_svg}
-    DEPENDS ${info_svg}
-    COMMENT "Creating VCV SVG: ${slug}"
-  )
 
   add_custom_command(
     OUTPUT moduleinfos-cmd
@@ -367,10 +269,13 @@ foreach(info_svg ${4MS_INFO_SVGS})
   )
 endforeach()
 
-set_source_files_properties(comp-cmd PROPERTIES SYMBOLIC "true")
-set_source_files_properties(faceplate-cmd PROPERTIES SYMBOLIC "true")
-set_source_files_properties(vcvimages-cmd PROPERTIES SYMBOLIC "true")
 set_source_files_properties(moduleinfos-cmd PROPERTIES SYMBOLIC "true")
+
+add_custom_target(module-infos DEPENDS moduleinfos-cmd)
+
+#
+# minBlep tables for vcv modules
+#
 
 add_custom_target(
   gen_minblep
