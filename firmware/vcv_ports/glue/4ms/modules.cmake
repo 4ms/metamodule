@@ -53,9 +53,6 @@ set(4msModules
     Verb
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
-limit_modules_built("4ms" 4msModules)
-
 # Info svgs (used to generate info.hh files and VCV svgs)
 list(TRANSFORM 4msModules PREPEND ${MM_ROOT}/shared/CoreModules/4ms/svg/ OUTPUT_VARIABLE 4MS_INFO_SVGS)
 list(TRANSFORM 4MS_INFO_SVGS APPEND _info.svg)

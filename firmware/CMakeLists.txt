@@ -6,20 +6,10 @@ set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 
 project(
   MetaModule
-  VERSION 0.1
+  VERSION 0.10
   DESCRIPTION "MetaModule"
   LANGUAGES C CXX ASM
 )
-
-#
-# Only build a limited set of modules, defined in an external file
-#
-include(vcv_ports/glue/filter.cmake)
-
-unset(USE_LIMITED_MODULES)
-if(DEFINED LIMITED_MODULES_FILE)
-  validate_limited_modules_file(${LIMITED_MODULES_FILE})
-endif()
 
 #
 # Git commit hash

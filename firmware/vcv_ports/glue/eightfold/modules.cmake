@@ -2,9 +2,6 @@ set(eightfoldModules
     SDOrcasHeartV2
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
-limit_modules_built("eightfold" eightfoldModules)
-
 set(EIGHTFOLD_DIR ${CMAKE_CURRENT_LIST_DIR}/../../eightfold)
 
 list(TRANSFORM eightfoldModules PREPEND ${EIGHTFOLD_DIR}/res/ OUTPUT_VARIABLE EIGHTFOLD_FACEPLATE_SVGS)
