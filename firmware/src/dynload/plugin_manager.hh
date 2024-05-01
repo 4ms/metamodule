@@ -26,9 +26,7 @@ public:
 	}
 
 	auto process_loading() {
-		auto result = plugin_file_loader.process();
-
-		return result;
+		return plugin_file_loader.process();
 	}
 
 	LoadedPluginList const &loaded_plugins() {

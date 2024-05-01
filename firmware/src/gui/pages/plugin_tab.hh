@@ -87,9 +87,10 @@ struct PluginTab {
 		}
 
 		if (result.error_message.length()) {
+			lv_hide(ui_PluginTabSpinner);
 			pr_err("Error: %s\n", result.error_message.c_str());
 			std::string err = "Error loading plugin: " + result.error_message;
-			notify_queue.put({err, Notification::Priority::Error});
+			notify_queue.put({err, Notification::Priority::Error, 1500});
 		}
 	}
 

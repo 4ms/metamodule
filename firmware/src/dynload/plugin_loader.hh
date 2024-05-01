@@ -160,9 +160,10 @@ public:
 					   buffer.size());
 
 				load_plugin_assets(plugin);
-				load_plugin(plugin);
-
-				status.state = State::Success;
+				if (load_plugin(plugin))
+					status.state = State::Success;
+				else
+					status.state = State::Error;
 			} break;
 
 			case State::NotInit:
@@ -187,13 +188,15 @@ public:
 
 		DynLoader dynloader{buffer, plugin.code};
 
-		if (!dynloader.load()) {
+		if (auto err_msg = dynloader.load(); err_msg != "") {
+			status.error_message = err_msg;
 			pr_err("Could not load plugin\n");
 			return false;
 		}
 
 		auto init = dynloader.find_init_func<InitPluginFunc>();
 		if (!init) {
+			status.error_message = "No init function found";
 			pr_err("Could not init plugin\n");
 			return false;
 		}
@@ -202,6 +205,7 @@ public:
 		init(&plugin.rack_plugin);
 
 		pr_info("Plugin loaded!\n");
+		status.error_message = "";
 		return true;
 	}
 

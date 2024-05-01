@@ -27,21 +27,21 @@ struct DynLoader {
 		init_host_symbol_table();
 	}
 
-	bool load() {
+	std::string load() {
 		if (elf.segments.size() == 0 || elf.sections.size() == 0 || elf.relocs.size() == 0) {
 			pr_err("Not a valid elf file\n");
-			return false;
+			return "Not a valid plugin file";
 		}
 
 		load_executable();
 
-		if (!process_relocs()) {
-			pr_err("Failed to process all relocations\n");
-			return false;
+		if (auto err_msg = process_relocs(); err_msg != "") {
+			pr_err("Failed: %s\n", err_msg.c_str());
+			return err_msg;
 		}
 
 		init_globals();
-		return true;
+		return "";
 	}
 
 	template<typename PluginInitFunc>
@@ -94,19 +94,21 @@ private:
 		}
 	}
 
-	bool process_relocs() {
-		bool all_syms_found = true;
+	std::string process_relocs() {
 		ElfFile::Relocater relocator{codeblock.data(), hostsyms};
 
 		for (auto reloc : elf.relocs) {
-			bool ok = relocator.write(reloc);
-			if (!ok) {
-				all_syms_found = false;
-				//TODO: store the missing symbol name so we can notify the user later
+			if (!relocator.write(reloc)) {
+				std::string err_msg;
+				if (reloc.symbol_name().data() && reloc.symbol_name().size() > 0)
+					err_msg = "Missing symbol: " + std::string(reloc.symbol_name());
+				else
+					err_msg = "Unknown relocation entry";
+				return err_msg;
 			}
 		}
 
-		return all_syms_found;
+		return "";
 	}
 
 	void init_globals() {
