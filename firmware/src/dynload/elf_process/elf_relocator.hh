@@ -32,10 +32,18 @@ public:
 		// r_offset field of the relocation directive and the base address of the section being relocated.
 
 		auto reloc_address = reinterpret_cast<uint32_t *>(rel.reloc_offset() + base_address);
+
 		switch (rel.reloc_type()) {
+
 			case R_ARM_RELATIVE:
-				pr_dump("R_ARM_RELATIVE: no action\n");
+				*reloc_address = rel.symbol_value() + base_address;
 				ok = true;
+				pr_dump("R_ARM_RELATIVE: %s ", rel.symbol_name().data());
+				pr_dump("write 0x%x (+%x) to address 0x%x (+%x)\n",
+						rel.symbol_value() + base_address,
+						rel.symbol_value(),
+						rel.reloc_offset() + base_address,
+						rel.reloc_offset());
 				break;
 
 			case R_ARM_GLOB_DAT: {
