@@ -24,6 +24,7 @@ void SlideUp_Animation( lv_obj_t *TargetObject, int delay);
 // SCREEN: ui_MainMenu
 void ui_MainMenu_screen_init(void);
 extern lv_obj_t *ui_MainMenu;
+extern lv_obj_t *ui_MainMenuStatusBar;
 extern lv_obj_t *ui_MainMenuNowPlayingPanel;
 extern lv_obj_t *ui_MainMenuNowPlaying;
 extern lv_obj_t *ui_MainMenuNowPlayingName;

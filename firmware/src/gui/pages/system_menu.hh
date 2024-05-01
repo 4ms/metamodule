@@ -40,8 +40,6 @@ struct SystemMenuPage : PageBase {
 		lv_group_add_obj(group, tabs);
 		lv_group_focus_obj(tabs);
 		lv_group_set_editing(group, true);
-
-		status_tab.prepare_focus(group);
 	}
 
 	void update() final {
@@ -122,8 +120,8 @@ private:
 	SystemStatusTab status_tab;
 	PrefsTab prefs_tab;
 
-	enum Tabs { Plugins = 0, Info = 1, Prefs = 2, Update = 3, NumTabs };
-	Tabs active_tab = Plugins;
+	enum Tabs { Info = 0, Plugins = 1, Prefs = 2, Update = 3, NumTabs };
+	Tabs active_tab = Info;
 	lv_obj_t *tabs = nullptr;
 };
 
