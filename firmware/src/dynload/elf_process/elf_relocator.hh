@@ -25,29 +25,30 @@ public:
 	bool write(ElfReloc &rel) {
 		bool ok = false;
 
-		// ARM ELF Docs:
-		// A: Addend. Value extracted from the storage unit being relocated.
-		// S: Value of the symbol referred to by the relocation.
-		// P: Place (address of the storage unit) being relocated. It is calculated using the
-		// r_offset field of the relocation directive and the base address of the section being relocated.
-
 		auto reloc_address = reinterpret_cast<uint32_t *>(rel.reloc_offset() + base_address);
 
 		switch (rel.reloc_type()) {
 
-			case R_ARM_RELATIVE:
-				*reloc_address = rel.symbol_value() + base_address;
-				ok = true;
-				pr_dump("R_ARM_RELATIVE: %s ", rel.symbol_name().data());
-				pr_dump("write 0x%x (+%x) to address 0x%x (+%x)\n",
-						rel.symbol_value() + base_address,
-						rel.symbol_value(),
-						rel.reloc_offset() + base_address,
-						rel.reloc_offset());
-				break;
+			case R_ARM_RELATIVE: {
+				if (rel.symbol_value() == 0) {
+					*reloc_address = *reloc_address + base_address;
+					ok = true;
+					pr_dump("R_ARM_RELATIVE: %s ", rel.symbol_name().data());
+					pr_dump("write 0x%x (+%x) to address 0x%x (+%x)\n",
+							*reloc_address + base_address,
+							*reloc_address,
+							rel.reloc_offset() + base_address,
+							rel.reloc_offset());
+				} else {
+					// Docs are not clear how to handle this case.
+					pr_warn("(?) R_ARM_RELATIVE: %s ", rel.symbol_name().data());
+					*reloc_address = rel.symbol_value() + base_address;
+					ok = true;
+				}
+			} break;
 
 			case R_ARM_GLOB_DAT: {
-				//"Resolves to the address of the specified symbol"
+				// This is handled the same as R_ARM_JUMP_SLOT
 				if (rel.symbol_value() == 0) {
 					auto sym = std::ranges::find_if(host_syms, [&rel](auto &s) { return s.name == rel.symbol_name(); });
 					if (sym != host_syms.end()) {
@@ -73,6 +74,33 @@ public:
 							rel.reloc_offset() + base_address,
 							rel.reloc_offset());
 				}
+			} break;
+
+			// This is identical to R_ARM_GLOB_DAT.
+			case R_ARM_JUMP_SLOT: {
+				if (rel.symbol_value() == 0) {
+					auto sym = std::ranges::find_if(host_syms, [&rel](auto &s) { return s.name == rel.symbol_name(); });
+					if (sym != host_syms.end()) {
+						pr_dump("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
+						pr_dump("Found symbol at 0x%x\n", sym->address);
+						*reloc_address = sym->address; // Should we do *reloc_address += sym->address since it's S+A
+						ok = true;
+					} else {
+						pr_err("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
+						pr_err("\nSymbol not found in host symbols\n");
+						ok = false;
+					}
+				} else {
+					pr_dump("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
+					pr_dump("write 0x%x (+%x) to address 0x%x (+%x)\n",
+							rel.symbol_value() + base_address,
+							rel.symbol_value(),
+							rel.reloc_offset() + base_address,
+							rel.reloc_offset());
+					*reloc_address = rel.symbol_value() + base_address;
+					ok = true;
+				}
+
 			} break;
 
 			case R_ARM_ABS32: {
@@ -102,35 +130,6 @@ public:
 							rel.reloc_offset() + base_address,
 							rel.reloc_offset());
 					*reloc_address = *reloc_address + rel.symbol_value() + base_address;
-					ok = true;
-				}
-
-			} break;
-
-			// Provide the address of the symbol found in the host
-			case R_ARM_JUMP_SLOT: {
-				//S+A
-				// "Resolves to the address of the specified symbol"
-				if (rel.symbol_value() == 0) {
-					auto sym = std::ranges::find_if(host_syms, [&rel](auto &s) { return s.name == rel.symbol_name(); });
-					if (sym != host_syms.end()) {
-						pr_dump("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
-						pr_dump("Found symbol at 0x%x\n", sym->address);
-						*reloc_address = sym->address;
-						ok = true;
-					} else {
-						pr_err("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
-						pr_err("\nSymbol not found in host symbols\n");
-						ok = false;
-					}
-				} else {
-					pr_dump("R_ARM_JUMP_SLOT: %s ", rel.symbol_name().data());
-					pr_dump("write 0x%x (+%x) to address 0x%x (+%x)\n",
-							rel.symbol_value() + base_address,
-							rel.symbol_value(),
-							rel.reloc_offset() + base_address,
-							rel.reloc_offset());
-					*reloc_address = rel.symbol_value() + base_address;
 					ok = true;
 				}
 
