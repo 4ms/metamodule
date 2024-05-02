@@ -46,13 +46,6 @@ target_compile_options(vcv_plugin PRIVATE -Wno-double-promotion)
 
 # #################### Other brands ##################################
  
-# Only build a limited set of modules, defined in an external file  
-include(${FWDIR}/vcv_ports/glue/filter.cmake)  
-unset(USE_LIMITED_MODULES)  
-if(DEFINED LIMITED_MODULES_FILE)  
-  validate_limited_modules_file(${LIMITED_MODULES_FILE})  
-endif()  
- 
 add_subdirectory(${FWDIR}/vcv_ports/ ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
 target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 
