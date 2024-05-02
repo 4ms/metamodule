@@ -50,13 +50,13 @@ struct PluginTab {
 			auto *found_plugins = plugin_manager.found_plugin_list();
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
+				// Strip .so
+				auto pluginname = std::string{std::string_view{plugin.plugin_name}};
+				if (pluginname.ends_with(".so")) {
+					pluginname = pluginname.substr(0, pluginname.length() - 3);
+				}
 
-				if (!plugin_already_loaded(plugin.plugin_name)) {
-					// Strip .so
-					auto pluginname = std::string{std::string_view{plugin.plugin_name}};
-					if (pluginname.ends_with(".so")) {
-						pluginname = pluginname.substr(0, pluginname.length() - 3);
-					}
+				if (!plugin_already_loaded(pluginname)) {
 
 					lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, pluginname.c_str());
 					lv_group_add_obj(group, plugin_obj);
@@ -127,14 +127,15 @@ private:
 		}
 	}
 
-	bool plugin_already_loaded(StaticString<255> const &name) {
+	bool plugin_already_loaded(std::string_view name) {
 		// TODO: get this working
-		// auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
-		// for (auto &plugin : loaded_plugin_list) {
-		// if (plugin.fileinfo.plugin_name == name) {
-		// 	return true;
-		// }
-		// }
+		auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
+		for (auto &plugin : loaded_plugin_list) {
+			pr_dbg("Comparing %s (new) and %s (loaded)\n", name.data(), plugin.fileinfo.plugin_name.c_str());
+			if (plugin.fileinfo.plugin_name == name) {
+				return true;
+			}
+		}
 		return false;
 	}
 
