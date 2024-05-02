@@ -27,15 +27,12 @@ struct PluginTab {
 		lv_show(ui_PluginScanButton);
 		lv_hide(ui_PluginsFoundCont);
 		lv_hide(ui_PluginTabSpinner);
-		lv_group_remove_obj(ui_PluginScanButton);
-		lv_group_add_obj(group, ui_PluginScanButton);
+		lv_group_add_obj(this->group, ui_PluginScanButton);
 
-		clear_found_list();
-		clear_loaded_list();
-		populate_loaded_list();
-
-		// lv_group_remove_obj(ui_PluginsBuiltinListText);
-		// lv_group_add_obj(group, ui_PluginsBuiltinListText);
+		lv_foreach_child(ui_PluginsLoadedCont, [this](auto *obj, unsigned) {
+			lv_group_add_obj(this->group, obj);
+			return true;
+		});
 		lv_group_focus_obj(ui_PluginScanButton);
 	}
 
@@ -93,10 +90,6 @@ struct PluginTab {
 
 				lv_obj_del_async(load_in_progress_obj);
 
-				// Remove add builtin list to force it to be at the end
-				// lv_group_remove_obj(ui_PluginsBuiltinListText);
-				// lv_group_add_obj(group, ui_PluginsBuiltinListText);
-
 				load_in_progress_obj = nullptr;
 			}
 		}
@@ -135,7 +128,7 @@ private:
 	}
 
 	bool plugin_already_loaded(StaticString<255> const &name) {
-		// This next line makes it crash? Why?
+		// TODO: get this working
 		// auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
 		// for (auto &plugin : loaded_plugin_list) {
 		// if (plugin.fileinfo.plugin_name == name) {
