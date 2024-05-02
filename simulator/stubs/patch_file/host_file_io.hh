@@ -85,7 +85,6 @@ struct HostFileIO {
 	}
 
 	uint64_t read_file(const std::string_view filename, std::span<char> buffer, size_t offset = 0) {
-		std::cout << "HostFileIO for path " << _root_dir.c_str() << "\n";
 		// Interpret "/" root dir as _patch_dir
 		std::filesystem::current_path(_root_dir);
 
