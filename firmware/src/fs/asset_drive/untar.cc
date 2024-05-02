@@ -4,7 +4,9 @@
 #include <cstring>
 #include <functional>
 #include <list>
+#include <span>
 #include <string>
+#include <string_view>
 
 namespace Tar
 {
