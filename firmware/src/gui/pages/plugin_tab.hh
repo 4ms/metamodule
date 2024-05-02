@@ -66,7 +66,7 @@ struct PluginTab {
 						first_item = false;
 					}
 
-					lv_obj_set_user_data(plugin_obj, (void *)(idx + 1));
+					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx + 1));
 					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
 					lv_obj_add_event_cb(plugin_obj, scroll_on_focus_cb, LV_EVENT_FOCUSED, this);
 					lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
