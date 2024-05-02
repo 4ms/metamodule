@@ -7,7 +7,7 @@
 class PingGenerator
 {
 public:
-    PingGenerator() : taps{0}, phase(0.f), phaseTap(0.f), lastUpdate(0), periodOrigin(NONE), isFreeRunning(true)
+    PingGenerator() : taps{0}, phase(0.f), phaseTap(0.f), lastUpdate(0), periodOrigin(NONE), isFreeRunning(false)
     {
     }
 
@@ -105,6 +105,20 @@ public:
     float getPhaseTap()
     {
         return phaseTap;
+    }
+
+    std::optional<float> getPeriod()
+    {
+        if (periodOrigin  == TAP)
+        {
+            return periodTap;
+        }
+        else if (periodOrigin == PING)
+        {
+            return periodPing;
+        }
+
+        return std::nullopt;
     }
 
 private:
