@@ -38,7 +38,7 @@ public:
         resetClocks();
     };
 
-    void update(auto clockInput, auto now)
+    void update(auto clockInput, auto now, auto inPeriod)
     {
         if(factorUpdated) 
         {
@@ -47,7 +47,7 @@ public:
         }
 
         if (triggerEdgeDetectorClock(clockInput)) {
-            calculateClockInPeriod(now);
+            setClockInPeriod(now, inPeriod);
             calculateClockOutPeriod(now, factor);
 
             if(clockIn.lastEventInTicks && clockIn.periodInTicks) {
@@ -125,15 +125,8 @@ public:
     }
 
 private:
-        void calculateClockInPeriod(uint32_t timestampInTicks) {
-			if(clockIn.lastEventInTicks) {
-				if(clockIn.lastEventInTicks < timestampInTicks) {
-					clockIn.periodInTicks = timestampInTicks - *clockIn.lastEventInTicks;
-				} else { //overflow
-					clockIn.periodInTicks = std::numeric_limits<decltype(ticks)>::max() - *clockIn.lastEventInTicks;
-					clockIn.periodInTicks = *clockIn.periodInTicks + timestampInTicks;
-				}
-			}
+        void setClockInPeriod(auto timestampInTicks, auto inPeriod) {
+            clockIn.periodInTicks = inPeriod;
 
 			clockIn.lastEventInTicks = timestampInTicks;
 		}

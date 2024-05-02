@@ -134,7 +134,14 @@ public:
 
 		clockDivMult.setFactor(getState<Div_MultKnob>(), getInput<DivIn>());
 
-		clockDivMult.update((ping.getPhase() > 0.f && ping.getPhase() < 0.5f), ticks);
+		std::optional<uint32_t> pingPeriod = std::nullopt;
+		if (ping.getPeriod().has_value())
+		{
+			pingPeriod = uint32_t(*ping.getPeriod());
+		}
+
+		//TODO: this is a non-ideal way of generating a trigger. by re-triggering due to tempo changes it's possible to wrap the phase without reaching the upper boundary.		
+		clockDivMult.update((ping.getPhase() > 0.f && ping.getPhase() < 0.1f), ticks, pingPeriod);
 
 		auto period = clockDivMult.getOutPeriod();
 		if(period.has_value())
@@ -142,6 +149,7 @@ public:
 			env.setPeriod(*period);
 		}
 
+		//TODO: this is a non-ideal way of generating a trigger. by re-triggering due to tempo changes it's possible to wrap the phase without reaching the upper boundary.
 		if(clockEdge(clockDivMult.getPhase() < 0.1f))
 		{
 			if (mode == SYNC)
