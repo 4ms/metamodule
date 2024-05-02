@@ -9,9 +9,9 @@ struct DynLoader {
 	DynLoader(std::span<uint8_t> elf_file_data, std::vector<uint8_t> &code_buffer) {
 	}
 
-	bool load() {
+	std::string load() {
 		printf("Plugin was loaded and symbols resolved\n");
-		return true;
+		return "";
 	}
 
 	template<typename PluginInitFunc>

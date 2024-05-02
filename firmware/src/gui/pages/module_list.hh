@@ -107,7 +107,6 @@ private:
 			page->patch_storage.get_view_patch()->module_slugs.push_back(slug);
 			page->page_list.increment_patch_revision();
 			page->load_page(PageId::PatchView, page->args);
-			page->notify_queue.put({"Adding module " + std::string{slug}});
 		}
 	}
 
