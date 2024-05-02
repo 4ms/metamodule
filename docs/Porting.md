@@ -109,6 +109,9 @@ set(brands
 )
 ```
 
+   Run `make configure` after doing this to refresh the build with the new brand.
+
+
 6) **Add the plugin to the VCV whitelist** 
 
    Add an entry for your brand in `vcv/src/mapping/module_directory.hh`. 
@@ -117,7 +120,7 @@ set(brands
 
 7) **Generate faceplate artwork.**
 
-   Run `make faceplate-image-<Brand>` to generate the faceplate artwork for
+   Run `make faceplate-images-<Brand>` to generate the faceplate artwork for
    your brand only. This will (re-)generate a faceplate for **all** the images in
    the `BRAND_FACEPLATE_SVGS` cmake list you made earlier (even if nothing changed).
    If you only want to regenerate a few images, use limit file -- see [Firmware
@@ -194,7 +197,7 @@ shared/svgextract/svgextract.py convertSvgToLvgl graphics/<Brand>/components/New
    as a template parameter and returns a MetaModule Element constructed with 
    the image you converted.
 
-   Create a new file in `firmware/VCV_adaptor/widget_convert/<Brand>.hh`
+   Create a new file in `firmware/src/VCV_adaptor/widget_convert/<Brand>.hh`
    (or just append to the file if it already exists).
 
    To convert the `MyBrandNewWidget` which uses the image `NewWidget.svg`, 
@@ -205,13 +208,13 @@ shared/svgextract/svgextract.py convertSvgToLvgl graphics/<Brand>/components/New
 #include "CoreModules/elements/elements.hh"
 #include "VCV_adaptor/widget_convert/base.hh"
 
-struct MyBrandNewWidget; //foward declare
+struct MyBrandNewWidget; //forward declare
 
 namespace MetaModule {
 
 template<>
 inline Element make_element<::MyBrandNewWidget>(BaseElement b) {
-	return Knob{{b}, "NewWidget.png"};
+	return Knob{b, "NewWidget.png"};
 };
 
 }
@@ -221,7 +224,7 @@ inline Element make_element<::MyBrandNewWidget>(BaseElement b) {
    plugin files here, but you can do it how you like.
    The `make_element` function takes a BaseElement type (which contains the 
    XY position of the element, and other things) and the image filename to
-   constuct an Element. Note that we chose the `Knob` element. If we were doing
+   construct an Element. Note that we chose the `Knob` element. If we were doing
    a slider, we would choose the Slider element. See
    `shared/CoreModules/elements/elements.hh` for all the possible elements.
    Also see `shared/CoreModules/elements/base_element.hh` for the fields each Element requires.
@@ -261,5 +264,5 @@ inline Element make_element<::Cool3PosSwitch>(BaseElement b) {
 
   - There are lots of other elements (lights, etc).. TODO: summarize them here.
 
-   Take a look at the other brand files in `firmware/VCV_adaptor/widget_convert/` for more examples.
+   Take a look at the other brand files in `firmware/src/VCV_adaptor/widget_convert/` for more examples.
 

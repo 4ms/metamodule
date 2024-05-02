@@ -5,9 +5,16 @@
 #include "drivers/hsem.hh"
 #include "drivers/smp.hh"
 #include "drivers/timekeeper.hh"
+#include "dynload/plugin_manager.hh"
+#include "fs/norflash_layout.hh"
 #include "gui/ui.hh"
-#include "lvgl.h"
+#include "internal_plugin_manager.hh"
 #include "patch_play/patch_player.hh"
+
+using FrameBufferT =
+	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
+static inline FrameBufferT framebuf1 alignas(64);
+static inline FrameBufferT framebuf2 alignas(64);
 
 extern "C" void aux_core_main() {
 	using namespace MetaModule;
@@ -24,11 +31,20 @@ extern "C" void aux_core_main() {
 
 	auto patch_player = A7SharedMemoryS::ptrs.patch_player;
 	auto patch_playloader = A7SharedMemoryS::ptrs.patch_playloader;
-	auto patch_storage_proxy = A7SharedMemoryS::ptrs.patch_storage;
+	auto file_storage_proxy = A7SharedMemoryS::ptrs.patch_storage;
 	auto sync_params = A7SharedMemoryS::ptrs.sync_params;
 	auto patch_mod_queue = A7SharedMemoryS::ptrs.patch_mod_queue;
+	auto ramdisk_storage = A7SharedMemoryS::ptrs.ramdrive;
 
-	Ui ui{*patch_playloader, *patch_storage_proxy, *sync_params, *patch_mod_queue};
+	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
+
+	RamDiskOps ramdisk_ops{*ramdisk_storage};
+	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
+	AssetFS asset_fs{AssetVolFlashOffset};
+	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
+	PluginManager plugin_manager{*file_storage_proxy, ramdisk};
+
+	Ui ui{*patch_playloader, *file_storage_proxy, *sync_params, *patch_mod_queue, plugin_manager};
 
 	struct AuxCorePlayerContext {
 		uint32_t starting_idx = 1;
@@ -73,6 +89,8 @@ extern "C" void aux_core_main() {
 
 	while (HWSemaphore<M4CoreReady>::is_locked())
 		;
+
+	HAL_Delay(300); //allow time to load initial patch: TODO use semaphor
 
 	while (true) {
 		ui.update();

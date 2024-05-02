@@ -34,13 +34,23 @@ set(LV_CONF_PATH
 )
 add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
 target_link_libraries(lvgl PRIVATE mdrivlib_interface)
-target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR}/lib/printf)
 
+target_include_directories(lvgl 
+    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source 
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs
+)
+
+target_sources(lvgl
+    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
+            ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
+)
 
 #
 # VCV Adaptor
 #
-add_subdirectory(VCV_adaptor)
+add_subdirectory(../vcv_plugin ${CMAKE_BINARY_DIR}/vcv_plugin)
+target_sources(vcv_plugin PRIVATE ../vcv_plugin/src/keep-symbols.cc)
 
 #
 # Brands
@@ -50,7 +60,9 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_
 #
 # RYML
 #
-add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+if (NOT TARGET ryml)
+  add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+endif()
 
 #
 # Jansson
@@ -65,6 +77,14 @@ endif()
 #
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
 target_link_libraries(ui PRIVATE lvgl)
+
+#
+# Core Interface
+#
+
+if (NOT TARGET metamodule::core-interface)
+  add_subdirectory(${FWDIR}/metamodule-plugin-sdk/metamodule-core-interface metamodule-core-interface)
+endif()
 
 #
 # Main App
@@ -89,19 +109,18 @@ add_executable(
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
   ${FWDIR}/src/gui/elements/element_name.cc
-
   #
-  ${SHARED}/CoreModules/hub/hub_medium.cc
+  ${FWDIR}/src/dynload/dynloader.cc
+  #
   ${SHARED}/patch_convert/yaml_to_patch.cc
   ${SHARED}/patch_convert/patch_to_yaml.cc
   ${SHARED}/patch_convert/ryml/ryml_serial.cc
   ${SHARED}/patch_convert/ryml/ryml_init.cc
   #
+  ${FWDIR}/src/fs/asset_drive/untar.cc
+  #
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
-  #
-  ${FWDIR}/lib/littlefs/lfs.c
-  ${FWDIR}/lib/littlefs/lfs_util.c
   #
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal.c
   ${FWDIR}/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_rcc.c
@@ -137,10 +156,14 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/hal_handlers.cc
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
   #
-  ${FWDIR}/src/vcv_adaptor_seed_random.cpp
+  ${FWDIR}/src/vcv_hardware/random.cpp
+  ${FWDIR}/src/vcv_hardware/gettimeofday.cc
   #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
+
+# CoreModules sources
+add_subdirectory(${SHARED}/CoreModules CoreModules)
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
@@ -149,12 +172,11 @@ set_source_files_properties(
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 
-# Fixup for compiler warning for LittleFS
-set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
 
 target_include_directories(
   main.elf
   PRIVATE 
+          ${FWDIR}
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
@@ -173,14 +195,24 @@ target_include_directories(
           ${CMAKE_BINARY_DIR}/checkgit
 )
 
+if (NOT TARGET cpputil::cpputil)
+  add_subdirectory(${SHARED}/cpputil cpputil)
+endif()
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface ui ryml VCV_adaptor cpputil vcv_ports jansson)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui ryml cpputil vcv_ports)
+target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
 endif()
 
+include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
+foreach(brand ${brands})
+	if (DEFINED BUILD_DYN_PLUGIN_${brand})
+	target_compile_definitions(main.elf PRIVATE -DBUILD_DYN_PLUGIN_${brand})
+	endif()
+endforeach()
 
 
 target_link_script(

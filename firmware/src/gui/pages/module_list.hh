@@ -24,34 +24,32 @@ struct ModuleListPage : PageBase {
 	}
 
 	void populate_slugs() {
-		static bool already_populated = false;
-		if (!already_populated) {
-			already_populated = true;
-			auto all_slugs = ModuleFactory::getAllSlugs();
+		//TODO: only repopulate if plugins changed
 
-			// TODO: sort by brand name
-			std::sort(all_slugs.begin(), all_slugs.end(), [](auto a, auto b) {
-				return std::string_view{a} < std::string_view{b};
-			});
+		auto all_slugs = ModuleFactory::getAllSlugs();
 
-			std::string slugs_str;
-			slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
-			for (auto slug : all_slugs) {
-				if (!slug.is_equal("HubMedium")) {
-					slugs_str += std::string_view{slug};
-					slugs_str += "\n";
-				}
+		// TODO: sort by brand name
+		std::sort(all_slugs.begin(), all_slugs.end(), [](auto a, auto b) {
+			return std::string_view{a} < std::string_view{b};
+		});
+
+		std::string slugs_str;
+		slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
+		for (auto slug : all_slugs) {
+			if (!slug.is_equal("HubMedium")) {
+				slugs_str += std::string_view{slug};
+				slugs_str += "\n";
 			}
-			slugs_str.pop_back();
-			lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
 		}
+		slugs_str.pop_back();
+		lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
 	}
 
 	void prepare_focus() final {
 		populate_slugs();
 		drawn_module_idx = -1; //force redraw
 		draw_module();
-		draw_timer = lv_timer_create(draw_module_cb, 100, this);
+		draw_timer = lv_timer_create(draw_module_cb, 200, this);
 
 		show_roller();
 		lv_group_focus_obj(ui_ModuleListRoller);
@@ -68,6 +66,10 @@ struct ModuleListPage : PageBase {
 				show_roller();
 				lv_group_set_editing(group, true);
 			}
+		}
+		if (do_redraw) {
+			do_redraw = false;
+			draw_module();
 		}
 	}
 
@@ -121,7 +123,7 @@ private:
 		auto page = static_cast<ModuleListPage *>(timer->user_data);
 		if (!page)
 			return;
-		page->draw_module();
+		page->do_redraw = true;
 	}
 
 	void draw_module() {
@@ -135,18 +137,31 @@ private:
 	}
 
 	void draw_module(ModuleTypeSlug slug) {
+		clear_module_canvas();
+
 		ModuleDrawer drawer{ui_ModuleListImage, 240};
 		auto module_canvas = drawer.draw_faceplate(slug, page_pixel_buffer);
-		lv_obj_refr_size(module_canvas);
-		auto width_px = lv_obj_get_width(module_canvas);
-		lv_obj_set_width(ui_ModuleListImage, width_px);
-		lv_obj_refr_size(ui_ModuleListImage);
-		drawer.draw_elements(slug, module_canvas);
+		if (module_canvas) {
+			lv_obj_refr_size(module_canvas);
+			auto width_px = lv_obj_get_width(module_canvas);
+			lv_obj_set_width(ui_ModuleListImage, width_px);
+			lv_obj_refr_size(ui_ModuleListImage);
+			drawer.draw_elements(slug, module_canvas);
+		} else
+			notify_queue.put(Notification{"Could not load faceplate image", Notification::Priority::Error});
+	}
+
+	void clear_module_canvas() {
+		lv_foreach_child(ui_ModuleListImage, [](auto *obj, int i) {
+			lv_obj_del_async(obj);
+			return true;
+		});
 	}
 
 	bool roller_shown = true;
 	lv_timer_t *draw_timer{};
 	unsigned drawn_module_idx = -1;
+	bool do_redraw = false;
 };
 
 } // namespace MetaModule

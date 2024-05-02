@@ -1,5 +1,5 @@
-static char EnvVCA_knobsets_patch[] = 
-R"(
+static const char EnvVCA_knobsets_patch[] =
+	R"(
 PatchData:
   patch_name: EnvVCA_knobsets
   description: Patch Description

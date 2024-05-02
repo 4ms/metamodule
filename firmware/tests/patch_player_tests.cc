@@ -1,8 +1,6 @@
 #include "doctest.h"
 #include "patch_convert/yaml_to_patch.hh"
 
-#define printf_ printf
-
 #include "patch_play/patch_player.hh"
 #include <string>
 

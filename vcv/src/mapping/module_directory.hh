@@ -33,7 +33,10 @@ struct ModuleDirectory {
 		if (module->model->plugin->slug == "NonlinearCircuits")
 			return true;
 
-		return false;
+		if (module->model->plugin->slug == "eightfold")
+			return true;
+
+		return true;
 	}
 
 	static bool isHub(std::string_view slug) {

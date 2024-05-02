@@ -20,7 +20,7 @@
 
 struct DefaultPatches {
 
-	static inline std::array patch_raw_data = std::to_array<std::span<char>>({
+	static inline std::array patch_raw_data = std::to_array<std::span<const char>>({
 		Sloth_Drone_patch,
 		EnOscPoly4_patch,
 		QuadDrum_patch,
@@ -54,7 +54,7 @@ struct DefaultPatches {
 		return patch_raw_data.size();
 	}
 
-	static std::span<char> get_patch(uint32_t id) {
+	static std::span<const char> get_patch(uint32_t id) {
 		if (id >= patch_raw_data.size())
 			return {};
 		return {patch_raw_data[id].data(), patch_raw_data[id].size_bytes()};

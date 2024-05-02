@@ -1,7 +1,8 @@
 #pragma once
-#include "fw_update/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
+#include "memory/ram_buffer.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "update_file.hh"
+#include "util/monotonic_allocator.hh"
 #include <cstdint>
 #include <string>
 
@@ -53,7 +54,7 @@ private:
 	SharedMem *sharedMem;
 	std::vector<std::span<uint8_t>> loadedFiles;
 
-	OneTimeArenaAllocator allocator;
+	MonotonicAllocator allocator;
 };
 
 } // namespace MetaModule

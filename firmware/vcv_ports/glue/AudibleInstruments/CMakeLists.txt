@@ -1,3 +1,15 @@
+cmake_minimum_required(VERSION 3.22)
+
+if (BUILD_DYN_PLUGIN)
+    include(${CMAKE_CURRENT_LIST_DIR}/../../../metamodule-plugin-sdk/plugin.cmake)
+endif()
+
+project(AudibleInstrumentsMetaModulePlugin 
+    VERSION     0.1 
+    DESCRIPTION "AudibleInstruments Plugin for MetaModule" 
+    LANGUAGES   C CXX ASM
+)
+
 include(modules.cmake)
 
 add_library(AudibleInstrumentsLibrary OBJECT ${AUDIBLEINSTRUMENTS_SOURCE_PATHS})
@@ -35,3 +47,14 @@ target_link_options(AudibleInstrumentsLibrary PUBLIC -Wno-stringop-overflow)
 target_compile_definitions(AudibleInstrumentsLibrary PRIVATE TEST)
 
 set_property(TARGET AudibleInstrumentsLibrary PROPERTY CXX_STANDARD 20)
+
+if (BUILD_DYN_PLUGIN)
+    target_sources(AudibleInstrumentsLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/plugin.cpp)
+
+    create_plugin(
+        SOURCE_LIB      AudibleInstrumentsLibrary
+        PLUGIN_NAME     AudibleInstruments
+        SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/AudibleInstruments
+        DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/AudibleInstruments
+    )
+endif()

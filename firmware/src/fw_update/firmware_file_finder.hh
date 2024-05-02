@@ -2,7 +2,7 @@
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "fat_file_io.hh"
-#include "firmware_ram_loader.hh"
+#include "fs/file_ram_loader.hh"
 #include "fw_update/update_path.hh"
 #include "util/poll_change.hh"
 #include "util/static_string.hh"
@@ -100,7 +100,7 @@ private:
 	StaticString<255> found_filename;
 	uint32_t found_filesize = 0;
 
-	FirmwareRamLoader ram_loader;
+	FileRamLoader ram_loader;
 };
 
 } // namespace MetaModule

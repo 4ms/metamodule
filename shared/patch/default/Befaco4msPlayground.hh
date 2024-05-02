@@ -1,4 +1,4 @@
-static char Befaco4msPlayground_patch[] =
+static const char Befaco4msPlayground_patch[] =
 	R"(
 PatchData:
   patch_name: Befaco4msPlayground

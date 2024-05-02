@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/elements/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,6 +10,7 @@ struct KPLSInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Karplus–Strong Voice"};
     static constexpr uint32_t width_hp = 4;
     static constexpr std::string_view svg_filename{"res/modules/KPLS_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/KPLS.png"};
 
     using enum Coords;
 
