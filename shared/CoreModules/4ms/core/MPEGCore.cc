@@ -70,6 +70,7 @@ public:
 				{
 					//async gate and trigger
 					env.start();
+					waveshaper.updateShape();
 					startedByTrigger = true;
 
 					mode = ASYNC;
@@ -100,12 +101,14 @@ public:
 		if (cycleEdge(isCycling) && mode == ASYNC)
 		{
 			env.start();
+			waveshaper.updateShape();
 			startedWhileCycling = isCycling;
 		}
 
 		if (isCycling && mode == ASYNC && !env.isRunning())
 		{
 			env.start();
+			waveshaper.updateShape();
 			startedWhileCycling = isCycling;
 		}
 
@@ -155,6 +158,7 @@ public:
 			if (mode == SYNC)
 			{
 				env.start();
+				waveshaper.updateShape();
 
 				startedWhileCycling = isCycling;
 
@@ -199,7 +203,7 @@ public:
 			shapeControl = std::clamp(shapeControl, 0.f, 1.f);
 		}
 
-		waveshaper.setShape(shapeControl);
+		waveshaper.setNextShape(shapeControl);
 
 		float envOutput = 0.f;
 		if (isCycling || startedWhileCycling || startedByTrigger)

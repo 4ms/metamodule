@@ -8,7 +8,7 @@
 class Waveshaping
 {
 public:
-    Waveshaping() : shapeType(0), skew(0), next_curve_rise(0), next_curve_fall(0), relativeFallTime(0.5), limit_skew(false)
+    Waveshaping() : shapeType(0), skew(0), next_curve_rise(0), next_curve_fall(0), relativeFallTime(0.5), limit_skew(false), state(NONE)
     {
         relativeRiseTime = 1.f - relativeFallTime;
     };
@@ -17,16 +17,28 @@ public:
     {
         float segmentPhase = 0.f;
         uint8_t segmentShape = 0;
+		auto previousState = state;
 
         if (phase <= relativeRiseTime)
         {
+			state = RISE;
+			if (state != previousState)
+			{
+				updateShape();
+			}
+
             segmentPhase = phase / relativeRiseTime;
-            segmentShape = next_curve_rise;
+            segmentShape = curve_rise;
         }
         else
         {
+			state = FALL;
+			if (state != previousState)
+			{
+				updateShape();
+			}
             segmentPhase = 1- ((phase - relativeRiseTime) / relativeFallTime);
-            segmentShape = next_curve_fall;
+            segmentShape = curve_fall;
         }
 
         auto curve = calc_curve(int16_t(segmentPhase*4095), segmentShape);
@@ -35,7 +47,7 @@ public:
     }
 
 
-    void setShape(float val)
+    void setNextShape(float val)
     {
         shapeType = uint16_t(std::clamp(val, 0.f, 1.f) * 4095.f);
 
@@ -47,15 +59,27 @@ public:
         // printf("Absolute fall time: %u Relative fall time: %.8f\n", absoluteFallTime, float(absoluteFallTime) / float(std::numeric_limits<uint32_t>::max()));
     }
 
+	void updateShape()
+	{
+		curve_rise = next_curve_rise;
+		curve_fall = next_curve_fall;
+	}
+
 private:
     uint16_t shapeType;
     float relativeFallTime;
     float relativeRiseTime;
 
 private:
+	enum State_t {RISE, FALL, NONE};
+	State_t state;
+
+private:
     uint8_t skew;
     uint8_t next_curve_rise;
     uint8_t next_curve_fall;
+    uint8_t curve_rise;
+    uint8_t curve_fall;
     bool limit_skew;
 
 private:
