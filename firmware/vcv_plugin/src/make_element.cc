@@ -236,6 +236,10 @@ Element make_element(rack::app::SvgScrew const *widget, BaseElement) {
 	return NullElement{};
 }
 
+Element make_element(rack::widget::Widget const *widget, BaseElement) {
+	return NullElement{};
+}
+
 Element make_element(rack::app::ParamWidget const *widget, BaseElement b) {
 	if (widget->svg && widget->svg->filename.size()) {
 		pr_dbg("Unknown ParamWidget, using image as a ParamElement\n");

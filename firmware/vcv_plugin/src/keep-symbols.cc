@@ -32,10 +32,16 @@ extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 
 extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp);
 extern "C" void __cxa_pure_virtual();
+extern "C" void *memalign(size_t align, size_t nbytes);
 
 void __attribute__((optimize("-O0"))) keep_symbols() {
 	{
 		auto x = &calloc;
+		(void)x;
+	}
+
+	{
+		auto x = &memalign;
 		(void)x;
 	}
 
