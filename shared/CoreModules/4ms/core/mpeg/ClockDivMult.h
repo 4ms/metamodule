@@ -181,7 +181,7 @@ private:
 						}
 					}
 				} else {
-					if (timestampInTicks >= (*clockOut.lastEventInTicks + (*clockOut.periodInTicks / 2))) {
+                    if (timestampInTicks >= (*clockOut.lastEventInTicks + triggerLengthMinimumInTicks)) {
 						setClockOutFallingEdge();
 					}
 				}
