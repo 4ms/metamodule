@@ -39,6 +39,36 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 		auto x = &calloc;
 		(void)x;
 	}
+	{
+		int x = 123;
+		x = __builtin_popcount(x);
+		(void)x;
+	}
+	{
+		long x = 123;
+		x = __builtin_popcount(x);
+		(void)x;
+	}
+	{
+		long long x = 123;
+		x = __builtin_popcount(x);
+		(void)x;
+	}
+	{
+		unsigned x = 123;
+		x = __builtin_popcount(x);
+		(void)x;
+	}
+	{
+		unsigned long x = 123;
+		x = __builtin_popcount(x);
+		(void)x;
+	}
+	{
+		unsigned long long x = 123;
+		x = __builtin_popcount(x);
+		(void)x;
+	}
 
 	{
 		auto x = &memalign;
