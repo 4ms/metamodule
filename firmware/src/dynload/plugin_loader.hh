@@ -1,8 +1,6 @@
 #pragma once
 #include "dynload/dynloader.hh"
 #include "dynload/loaded_plugin.hh"
-#include "fs/fatfs/fat_file_io.hh"
-#include "fs/fatfs/ramdisk_ops.hh"
 #include "memory/ram_buffer.hh" //path must be exactly this, or else simulator build picks wrong file
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
@@ -38,22 +36,18 @@ public:
 		std::string error_message;
 	};
 
-	PluginFileLoader(FileStorageProxy &file_storage, FatFileIO &ramdisk, LoadedPluginList &loaded_plugin_list)
+	PluginFileLoader(FileStorageProxy &file_storage)
 		: file_storage{file_storage}
-		, ramdisk{ramdisk}
-		, plugins{loaded_plugin_list}
 		, allocator{get_ram_buffer()} {
 	}
 
 	void start() {
-		ramdisk.mount_disk();
-
 		allocator.reset();
 		if (auto newmem = allocator.allocate(sizeof(PluginFileList))) {
 			plugin_files = new (newmem) PluginFileList;
 			status = {State::RequestList, "", ""};
 		} else {
-			pr_err("Could not allocate %zu bytes for plugin file list\n", sizeof(PluginFileList));
+			pr_err("Could not allocate %zu bytes for plugin file list\n", sizeof(PluginFileList)); //4164B
 			status = {State::Error, "", "Out of memory, could not make plugin file list"};
 		}
 	}
@@ -70,7 +64,7 @@ public:
 		return plugin_files;
 	}
 
-	Status process() {
+	Status process(LoadedPluginList &loaded_plugins) {
 		if (!plugin_files)
 			status.state = State::NotInit;
 
@@ -149,7 +143,7 @@ public:
 
 				// TODO: get slug from a plugin.json file inside the plugin dir
 
-				auto &plugin = plugins.emplace_back();
+				auto &plugin = loaded_plugins.emplace_back();
 				plugin.fileinfo = plugin_file;
 				plugin.rack_plugin.slug = pluginname;
 
@@ -160,7 +154,6 @@ public:
 					   plugin.fileinfo.plugin_name.c_str(),
 					   buffer.data(),
 					   buffer.size());
-
 				pr_trace("Loading assets from vol %d: %s\n", plugin.fileinfo.vol, plugin.fileinfo.dir_name.c_str());
 
 				file_storage.request_copy_dir_to_ramdisk(plugin.fileinfo.vol, plugin.fileinfo.dir_name);
@@ -188,7 +181,7 @@ public:
 			} break;
 
 			case State::ProcessingPlugin: {
-				auto &plugin = plugins.back();
+				auto &plugin = loaded_plugins.back();
 
 				if (load_plugin(plugin))
 					status.state = State::Success;
@@ -243,8 +236,6 @@ public:
 
 private:
 	FileStorageProxy &file_storage;
-	FatFileIO &ramdisk;
-	std::deque<LoadedPlugin> &plugins;
 
 	Status status{};
 	unsigned file_idx = 0;
