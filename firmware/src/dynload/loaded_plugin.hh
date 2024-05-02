@@ -3,7 +3,7 @@
 #include "dynload/plugin_file_list.hh"
 #include "plugin/Plugin.hpp"
 #include <cstdint>
-#include <deque>
+#include <list>
 #include <vector>
 
 namespace MetaModule
@@ -15,6 +15,6 @@ struct LoadedPlugin {
 	std::vector<uint8_t> code;
 };
 
-using LoadedPluginList = std::deque<LoadedPlugin>;
+using LoadedPluginList = std::list<LoadedPlugin>;
 
 } // namespace MetaModule
