@@ -121,7 +121,20 @@ private:
 	{
 		auto ConvertKnobFunc = [](float val) -> int16_t
 		{
-			return int16_t(std::clamp(val, 0.0f, 1.0f) * 4095.0f);
+			// 0..1 -> 0..4095
+			return std::clamp<int16_t>(val * 4096.f, 0, 4095);
+		};
+
+		auto ConvertCVFunc = [](float val) -> int16_t
+		{
+			// 0..+5V -> 0..4095
+			return std::clamp<int16_t>(val / 5.f * 4096.f, 0, 4095);
+		};
+
+		auto ConvertTimeCVFunc = [](float val) -> int16_t
+		{
+			// -5V..+5V -> 4095..0
+			return std::clamp<int16_t>((5.f - val)/10.f * 4096.f, 0, 4095);
 		};
 
 		auto Convert3WaySwitchStateFunc = [](auto inState) -> LDKit::Mocks::SwitchPos
@@ -142,10 +155,10 @@ private:
 		controls.sideload_pot(LDKit::MixPot,       ConvertKnobFunc(getState<Mapping::MixKnob>()));
 
 		// CVs
-		controls.sideload_cv(LDKit::TimeCV,      ConvertKnobFunc(getInput<Mapping::TimeInput>().value_or(0)));
-		controls.sideload_cv(LDKit::FeedbackCV,  ConvertKnobFunc(getInput<Mapping::FeedbackInput>().value_or(0)));
-		controls.sideload_cv(LDKit::DelayFeedCV, ConvertKnobFunc(getInput<Mapping::DelayFeedInput>().value_or(0)));
-		// controls.sideload_cv(LDKit::MixCV,       ConvertKnobFunc(getInput<Mapping::MixInput>().value_or(0)));
+		controls.sideload_cv(LDKit::TimeCV,      ConvertTimeCVFunc(getInput<Mapping::TimeInput>().value_or(0)));
+		controls.sideload_cv(LDKit::FeedbackCV,  ConvertCVFunc(getInput<Mapping::FeedbackInput>().value_or(0)));
+		controls.sideload_cv(LDKit::DelayFeedCV, ConvertCVFunc(getInput<Mapping::DelayFeedInput>().value_or(0)));
+		// controls.sideload_cv(LDKit::MixCV,       ConvertCVFunc(getInput<Mapping::MixInput>().value_or(0)));
 
 		// LEDs
 		setLED<Mapping::ReverseButton>(controls.rev_led.sideload_get());
@@ -190,7 +203,7 @@ private:
 		auto AdaptLengthToSampleRateFunc = [this](auto lengthInSamples)
 		{
 			// make sure this never becomes zero
-			return std::max(1, uint32_t(lengthInSamples * sampleRate / looping_delay.DefaultSampleRate));
+			return std::max(1u, uint32_t(lengthInSamples * sampleRate / looping_delay.DefaultSampleRate));
 		};
 
 		params.settings.crossfade_samples       = AdaptLengthToSampleRateFunc(CrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()]);
