@@ -199,10 +199,10 @@ public:
 
 		if (auto shapeCV = getInput<ShapeCvIn>(); shapeCV.has_value())
 		{
-			shapeControl += *shapeCV / 5.f;
+			shapeControl += std::clamp(*shapeCV / 10.f, -0.5f, 0.5f);
 			shapeControl = std::clamp(shapeControl, 0.f, 1.f);
 		}
-
+		
 		waveshaper.setNextShape(shapeControl);
 
 		float envOutput = 0.f;
