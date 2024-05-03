@@ -187,8 +187,14 @@ private:
 		static constexpr std::array<uint32_t, 7> CrossfadeSamples      = {1, 96, 192, 384, 1200, 4800, 12000};
 		static constexpr std::array<uint32_t, 7> WriteCrossfadeSamples = {1, 96, 192, 192, 192,  4800,  4800};
 
-		params.settings.crossfade_samples       = CrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()];
-		params.settings.write_crossfade_samples = WriteCrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()];
+		auto AdaptLengthToSampleRateFunc = [this](auto lengthInSamples)
+		{
+			// make sure this never becomes zero
+			return std::max(1, uint32_t(lengthInSamples * sampleRate / looping_delay.DefaultSampleRate));
+		};
+
+		params.settings.crossfade_samples       = AdaptLengthToSampleRateFunc(CrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()]);
+		params.settings.write_crossfade_samples = AdaptLengthToSampleRateFunc(WriteCrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()]);
 
 		static constexpr std::array<PingMethod,5> PingMethods = {
 			PingMethod::IGNORE_FLAT_DEVIATION_5,
