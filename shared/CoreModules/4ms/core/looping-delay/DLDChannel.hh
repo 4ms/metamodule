@@ -3,6 +3,12 @@
 #include "src/params.hh"
 #include "src/looping_delay.hh"
 
+#define DEBUG_LOGGING
+
+#ifdef DEBUG_LOGGING
+#include <cstdio>
+#endif
+
 namespace MetaModule
 {
 
@@ -43,6 +49,8 @@ public:
 		, params(controls, flags)
 		, looping_delay(params, flags)
 		, audioBufferFillCount(0)
+		, sampleRate(looping_delay.DefaultSampleRate)
+		, timerIncrement(1)
 		{
 			for (auto& sample : outBlock)
 			{
@@ -55,7 +63,12 @@ public:
 
     void update()
     {
-		params.timer.inc();
+		timerPhase += timerIncrement;
+		while (timerPhase >= 1.0f)
+		{
+			timerPhase -= 1.0f;
+			params.timer.inc();
+		}		
 
 		sideloadDrivers();
 
@@ -74,7 +87,21 @@ public:
     }
 
     void set_samplerate(float sr) {
-		// TODO: implement
+
+		auto newSampleRate = uint32_t(std::round(sr));
+
+		if (newSampleRate != sampleRate)
+		{
+			#ifdef DEBUG_LOGGING
+			printf("Switch sample rate %u -> %u\n", sampleRate, newSampleRate);
+			#endif
+
+			sampleRate = newSampleRate;
+
+			timerIncrement = TimerFrequency / float(sampleRate);
+
+			looping_delay.set_samplerate(sampleRate);
+		}
     }
 
 public:
@@ -218,6 +245,13 @@ private:
 	AudioStreamConf::AudioOutBlock outBlock;
 	std::size_t audioBufferFillCount;
 
+private:
+	uint32_t sampleRate;
+
+private:
+	static constexpr float TimerFrequency = 48000.0f;
+	float timerPhase;
+	float timerIncrement;
 }; 
 
 }
