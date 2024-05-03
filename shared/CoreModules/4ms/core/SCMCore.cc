@@ -39,14 +39,6 @@ public:
 		auto clockInValue = getInput<ClkIn>().value_or(0);
 
 		setLED<LedInLight>(std::array<float,3>{clockInValue, 0, 0});
-		setLED<LedX1Light>(std::array<float,3>{outs[Info::OutputX1] ? 1.0f : 0, 0, 0});
-		setLED<LedX2Light>(std::array<float,3>{outs[Info::OutputX2] ? 1.0f : 0, 0, 0});
-		setLED<LedS3Light>(std::array<float,3>{outs[Info::OutputS3] ? 1.0f : 0, 0, 0});
-		setLED<LedS4Light>(std::array<float,3>{outs[Info::OutputS4] ? 1.0f : 0, 0, 0});
-		setLED<LedS5Light>(std::array<float,3>{outs[Info::OutputS5] ? 1.0f : 0, 0, 0});
-		setLED<LedS6Light>(std::array<float,3>{outs[Info::OutputS6] ? 1.0f : 0, 0, 0});
-		setLED<LedS8Light>(std::array<float,3>{outs[Info::OutputS8] ? 1.0f : 0, 0, 0});
-		setLED<LedX8Light>(std::array<float,3>{outs[Info::OutputX8] ? 1.0f : 0, 0, 0});
 
 		if (clockInValue > 0.5f) {
 			if (!clkin) {
@@ -156,6 +148,24 @@ public:
 			update_pulse_params = false;
 			update_slip_params = false;
 		}
+
+		setOutput<X1Out>(outs[Info::OutputX1] ? 1.0f : 0.0f);
+		setOutput<X2Out>(outs[Info::OutputX2] ? 1.0f : 0.0f);
+		setOutput<S3Out>(outs[Info::OutputS3] ? 1.0f : 0.0f);
+		setOutput<S4Out>(outs[Info::OutputS4] ? 1.0f : 0.0f);
+		setOutput<S5Out>(outs[Info::OutputS5] ? 1.0f : 0.0f);
+		setOutput<S6Out>(outs[Info::OutputS6] ? 1.0f : 0.0f);
+		setOutput<S8Out>(outs[Info::OutputS8] ? 1.0f : 0.0f);
+		setOutput<X8Out>(outs[Info::OutputX8] ? 1.0f : 0.0f);
+
+		setLED<LedX1Light>(std::array<float,3>{outs[Info::OutputX1] ? 1.0f : 0, 0, 0});
+		setLED<LedX2Light>(std::array<float,3>{outs[Info::OutputX2] ? 1.0f : 0, 0, 0});
+		setLED<LedS3Light>(std::array<float,3>{outs[Info::OutputS3] ? 1.0f : 0, 0, 0});
+		setLED<LedS4Light>(std::array<float,3>{outs[Info::OutputS4] ? 1.0f : 0, 0, 0});
+		setLED<LedS5Light>(std::array<float,3>{outs[Info::OutputS5] ? 1.0f : 0, 0, 0});
+		setLED<LedS6Light>(std::array<float,3>{outs[Info::OutputS6] ? 1.0f : 0, 0, 0});
+		setLED<LedS8Light>(std::array<float,3>{outs[Info::OutputS8] ? 1.0f : 0, 0, 0});
+		setLED<LedX8Light>(std::array<float,3>{outs[Info::OutputX8] ? 1.0f : 0, 0, 0});
 	}
 
 	void reset_all_phases() {
@@ -245,14 +255,7 @@ public:
 		return static_cast<uint32_t>(pw);
 	}
 
-	float get_output(int output_id) const override {
-		if (output_id < Info::NumOutJacks)
-			return outs[output_id] ? 1.f : 0.f;
-		else
-			return 0.f;
-	}
-
-	void set_samplerate(float sr) override {
+    void set_samplerate(float sr) override {
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
