@@ -15,6 +15,7 @@
 #include <memory>
 #include <random>
 #include <unordered_map>
+// #include <sys/unistd.h>
 
 extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 }
@@ -34,7 +35,28 @@ extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp);
 extern "C" void __cxa_pure_virtual();
 extern "C" void *memalign(size_t align, size_t nbytes);
 
+extern "C" int getentropy(void *, size_t) {
+	return 0;
+}
+
+extern "C" int read(int file, char *ptr, int len) {
+	return 0;
+}
+extern "C" void lseek() {
+}
+extern "C" void fstat() {
+}
+extern "C" wint_t _uc2jp_l(wint_t c, struct __locale_t *l);
+extern "C" int _write(int file, char *ptr, int len);
+extern "C" int write(int file, char *ptr, int len) {
+	return _write(file, ptr, len);
+}
+
 void __attribute__((optimize("-O0"))) keep_symbols() {
+	{
+		auto x = &_uc2jp_l;
+		(void)x;
+	}
 	{
 		auto x = &calloc;
 		(void)x;
