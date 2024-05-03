@@ -24,14 +24,27 @@ public:
 	}
 
 	void update() override {
-		uint32_t rotate_adc = convert_param(pots[Info::KnobRotate] + ins[Info::InputRotate_Jack], 8);
-		uint32_t slippage_adc = convert_param(pots[Info::KnobSlip] + ins[Info::InputSlip_Jack], 255);
-		uint32_t shuffle_adc = convert_param(pots[Info::KnobShuffle] + ins[Info::InputShuffle_Jack], 255);
-		uint32_t skip_adc = convert_param(pots[Info::KnobSkip] + ins[Info::InputSkip_Jack], 255);
-		uint32_t pw_adc = convert_param(pots[Info::KnobPw] + ins[Info::InputPw_Jack], 255);
+		uint32_t rotate_adc = convert_param(getState<RotateKnob>() + ins[Info::InputRotate_Jack], 8);
+		uint32_t slippage_adc = convert_param(getState<SkipKnob>() + ins[Info::InputSlip_Jack], 255);
+		uint32_t shuffle_adc = convert_param(getState<ShuffleKnob>() + ins[Info::InputShuffle_Jack], 255);
+		uint32_t skip_adc = convert_param(getState<SkipKnob>() + ins[Info::InputSkip_Jack], 255);
+		uint32_t pw_adc = convert_param(getState<PwKnob>() + ins[Info::InputPw_Jack], 255);
 
-		bool faster_switch_state = switches[Info::Switch_4X_Fast] > 0;
-		mute = switches[Info::Switch_4X_Fast] > 0;
+		bool faster_switch_state = getState<_4XFastButton>() == LatchingButton::State_t::DOWN;
+		mute = getState<MuteButton>() == LatchingButton::State_t::DOWN;
+
+		setLED<_4XFastButton>(faster_switch_state);
+		setLED<MuteButton>(mute);
+
+		setLED<LedInLight>(std::array<float,3>{ins[Info::InputClk_In], 0, 0});
+		setLED<LedX1Light>(std::array<float,3>{outs[Info::OutputX1] ? 1.0f : 0, 0, 0});
+		setLED<LedX2Light>(std::array<float,3>{outs[Info::OutputX2] ? 1.0f : 0, 0, 0});
+		setLED<LedS3Light>(std::array<float,3>{outs[Info::OutputS3] ? 1.0f : 0, 0, 0});
+		setLED<LedS4Light>(std::array<float,3>{outs[Info::OutputS4] ? 1.0f : 0, 0, 0});
+		setLED<LedS5Light>(std::array<float,3>{outs[Info::OutputS5] ? 1.0f : 0, 0, 0});
+		setLED<LedS6Light>(std::array<float,3>{outs[Info::OutputS6] ? 1.0f : 0, 0, 0});
+		setLED<LedS8Light>(std::array<float,3>{outs[Info::OutputS8] ? 1.0f : 0, 0, 0});
+		setLED<LedX8Light>(std::array<float,3>{outs[Info::OutputX8] ? 1.0f : 0, 0, 0});
 
 		if (ins[Info::InputClk_In] > 0.5f) {
 			if (!clkin) {
@@ -228,11 +241,6 @@ public:
 		return static_cast<uint32_t>(pw);
 	}
 
-	void set_param(int param_id, float val) override {
-		if (param_id < Info::NumKnobs)
-			pots[param_id] = val;
-	}
-
 	void set_input(int input_id, float val) override {
 		if (input_id < Info::NumInJacks)
 			ins[input_id] = val;
@@ -248,27 +256,6 @@ public:
 	void set_samplerate(float sr) override {
 	}
 
-	float get_led_brightness(int led_id) const override {
-		if (led_id == Info::Switch_4X_Fast)
-			return switches[Info::Switch_4X_Fast] > 0;
-
-		if (led_id == Info::SwitchMute)
-			return switches[Info::Switch_4X_Fast] > 0;
-
-		//first two LEDs are Switches
-		led_id -= 2;
-		if (led_id == Info::LedLed_In)
-			return ins[Info::InputClk_In];
-
-		static_assert(Info::LedLed_In == 0,
-					  "SCM Led_In must be 0 and the other LEDs must be 1-8 in order."
-					  "Fix this or modify the code below this assert.");
-		if (led_id < Info::NumDiscreteLeds)
-			return outs[led_id - 1];
-
-		return 0.f;
-	}
-
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
@@ -277,8 +264,6 @@ public:
 
 private:
 	// Controls/Outs
-	float pots[Info::NumKnobs];
-	float switches[Info::NumSwitches];
 	float ins[Info::NumInJacks];
 	std::array<bool, Info::NumOutJacks> outs;
 
