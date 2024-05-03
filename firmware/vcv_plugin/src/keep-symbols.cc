@@ -52,6 +52,38 @@ extern "C" int write(int file, char *ptr, int len) {
 	return _write(file, ptr, len);
 }
 
+using _Unwind_Ptr = void *;
+extern "C" _Unwind_Ptr __gnu_Unwind_Find_exidx(_Unwind_Ptr pc, int *pcount) {
+	return nullptr;
+}
+
+extern "C" void *_ZGTtnaj(size_t sz) {
+	return nullptr;
+}
+extern "C" void *_ZGTtnaX(size_t sz) {
+	return nullptr;
+}
+extern "C" void _ZGTtdlPv(void *ptr) {
+}
+extern "C" uint8_t _ITM_RU1(const uint8_t *p) {
+	return {};
+}
+extern "C" uint16_t _ITM_RU2(const uint16_t *p) {
+	return {};
+}
+extern "C" uint32_t _ITM_RU4(const uint32_t *p) {
+	return {};
+}
+extern "C" uint64_t _ITM_RU8(const uint64_t *p) {
+	return {};
+}
+extern "C" void _ITM_memcpyRtWn(void *, const void *, size_t) {
+}
+extern "C" void _ITM_memcpyRnWt(void *, const void *, size_t) {
+}
+extern "C" void _ITM_addUserCommitAction(void (*)(void *), uint64_t, void *) {
+}
+
 void __attribute__((optimize("-O0"))) keep_symbols() {
 	{
 		auto x = &_uc2jp_l;
