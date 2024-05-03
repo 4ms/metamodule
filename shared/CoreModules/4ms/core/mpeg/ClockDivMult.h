@@ -80,7 +80,7 @@ public:
         auto selector = potValue;
 
         if(cvValue.has_value()) {
-            selector += std::clamp(*cvValue, cvMinInV, cvMaxInV) / cvMaxInV;
+            selector += std::clamp(*cvValue / 10.f, -0.5f, 0.5f);
             selector = std::clamp(selector, 0.0f, 1.0f);
         }
 
