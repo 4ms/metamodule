@@ -2,6 +2,7 @@
 
 #include "elements.hh"
 #include "../mocks/mocks.hh"
+#include <array>
 
 namespace LDKit
 {

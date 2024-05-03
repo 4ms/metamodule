@@ -1,4 +1,6 @@
 #pragma once
+#include <limits>
+#include <cstdint>
 
 namespace LDKit::Mocks
 {
