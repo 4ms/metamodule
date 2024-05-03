@@ -31,8 +31,8 @@ struct PersistentData {
 			   (uint8_t)settings.inf_jack <= 1 &&										//
 			   (uint8_t)settings.loop_clock <= 1 &&										//
 			   (uint8_t)settings.main_clock <= 1 &&										//
-			   settings.crossfade_samples < 48000 &&									//
-			   settings.write_crossfade_samples < 48000 &&								//
+			   settings.crossfade_samples < 192000 &&									//
+			   settings.write_crossfade_samples < 192000 &&								//
 			   std::abs(settings.crossfade_rate - settings.calc_fade_increment(settings.crossfade_samples)) < 0.01f &&
 			   std::abs(settings.write_crossfade_rate -
 						settings.calc_fade_increment(settings.write_crossfade_samples)) < 0.01f; // &&

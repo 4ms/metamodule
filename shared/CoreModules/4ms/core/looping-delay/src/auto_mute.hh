@@ -7,11 +7,22 @@ struct AutoMute {
 	float fade_amt = 1.f;
 	float lpf = MinLevel;
 
+	float AttackRate = 1.f / AttackPeriod;
+	float DecayRate = 1.f / DecayPeriod;
+
 	static constexpr float LPFCoef = 1.f / LPFCoefRecip;
-	static constexpr float AttackRate = 1.f / AttackPeriod;
-	static constexpr float DecayRate = 1.f / DecayPeriod;
 
 	AutoMute() = default;
+
+	void setAttackPeriod(uint32_t val)
+	{
+		AttackRate = 1.f / val;
+	}
+
+	void setDecayPeriod(uint32_t val)
+	{
+		DecayRate = 1.f / val;
+	}
 
 	int32_t update(int32_t cur) {
 		lpf += LPFCoef * (std::abs(cur) - lpf);

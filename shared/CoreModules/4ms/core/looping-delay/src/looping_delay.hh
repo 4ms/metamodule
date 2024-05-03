@@ -19,6 +19,10 @@ namespace LDKit
 {
 
 class LoopingDelay {
+public:
+	static constexpr uint32_t DefaultSampleRate = 48000;
+
+private:
 	Params &params;
 	Flags &flags;
 
@@ -40,9 +44,13 @@ class LoopingDelay {
 	uint32_t loop_start = 0;
 	uint32_t loop_end = 0;
 
+	static constexpr float AttackTimeInS = 0.020f; 			// 20ms
+	static constexpr float DecayTimeInS  = 0.020f;			// 20ms
 	static constexpr int32_t AutoMuteThreshold = 0.020 / 20. * 0x7F'FFFF; // 20mV of 20Vpp
-	static constexpr int32_t AutoMuteAttack = 0.020 * 48000;			  // 20ms
-	static constexpr int32_t AutoMuteDecay = 0.020 * 48000;				  // 20ms
+
+	static constexpr int32_t AutoMuteAttack = AttackTimeInS * float(DefaultSampleRate);
+	static constexpr int32_t AutoMuteDecay = DecayTimeInS * float(DefaultSampleRate);
+
 	AutoMute<500, AutoMuteThreshold, AutoMuteAttack, AutoMuteDecay> main_automute;
 	AutoMute<500, AutoMuteThreshold, AutoMuteAttack, AutoMuteDecay> aux_automute;
 
@@ -55,6 +63,23 @@ public:
 		, buf{delay_buffer.get(), static_cast<size_t>(params.divmult_time)}
 		, fade_buf{delay_buffer.get(), static_cast<size_t>(params.divmult_time)} {
 		delay_buffer.clear();
+	}
+
+	void set_samplerate(uint32_t newSampleRate)
+	{
+		if (newSampleRate != params.currentSampleRate)
+		{
+			main_automute.setAttackPeriod(AttackTimeInS * float(newSampleRate));
+			main_automute.setDecayPeriod(DecayTimeInS * float(newSampleRate));
+			aux_automute.setAttackPeriod(AttackTimeInS * float(newSampleRate));
+			aux_automute.setDecayPeriod(DecayTimeInS * float(newSampleRate));
+
+			delay_buffer.clear();
+
+			// TODO: set read/write head positions to match new sample rate
+
+			params.currentSampleRate = newSampleRate;
+		}
 	}
 
 	// TODO: when global_mode[CALIBRATE] is set, we should change the audio callback

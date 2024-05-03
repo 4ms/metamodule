@@ -34,6 +34,8 @@ struct Params {
 	uint32_t ping_time = 12000;
 	uint32_t locked_ping_time = 12000;
 
+	uint32_t currentSampleRate = 48000;
+
 	ChannelMode modes;
 	OperationMode op_mode = OperationMode::Normal;
 
@@ -372,8 +374,8 @@ private:
 		}
 
 		if (settings.auto_unquantize_timejack) {
-			// Auto Unquantize mode: set jack to Quant when time is > 23Hz (48000 / 2048 = 23Hz)
-			modes.time_cv_quantized = (divmult_time >= 2048);
+			// Auto Unquantize mode: set jack to Quant when time is > 23Hz
+			modes.time_cv_quantized = (divmult_time >= currentSampleRate / 23);
 		}
 	}
 

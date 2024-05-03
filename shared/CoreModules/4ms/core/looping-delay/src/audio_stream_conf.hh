@@ -8,7 +8,6 @@ struct AudioStreamConf {
 
 	using SampleT = int32_t;
 
-	static constexpr int SampleRate = 48000;
 	static constexpr int SampleBits = 24;
 	static constexpr int NumInChans = 2;
 	static constexpr int NumOutChans = 2;

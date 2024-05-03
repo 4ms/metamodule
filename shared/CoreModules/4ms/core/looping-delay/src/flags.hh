@@ -16,6 +16,7 @@ private:
 	bool _clear_memory = false;
 
 public:
+	// TODO: This has hardcoded sample rate
 	uint32_t mute_on_boot_ctr = 375; // 0.250s * 48000 / 32 block-size
 
 	bool take_time_changed() {
