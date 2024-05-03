@@ -28,7 +28,8 @@ public:
 		auto reloc_address = reinterpret_cast<uint32_t *>(rel.reloc_offset() + base_address);
 
 		switch (rel.reloc_type()) {
-
+			case R_ARM_REL32: //FIXME: this more like an ABS32, right?
+				pr_dump("R_ARM_REL32: %s\n", rel.symbol_name().data());
 			case R_ARM_RELATIVE: {
 				if (rel.symbol_value() == 0) {
 					*reloc_address = *reloc_address + base_address;
@@ -41,7 +42,7 @@ public:
 							rel.reloc_offset());
 				} else {
 					// Docs are not clear how to handle this case.
-					pr_warn("(?) R_ARM_RELATIVE: %s ", rel.symbol_name().data());
+					pr_warn("(?) R_ARM_RELATIVE/REL32: %s\n", rel.symbol_name().data());
 					*reloc_address = rel.symbol_value() + base_address;
 					ok = true;
 				}
