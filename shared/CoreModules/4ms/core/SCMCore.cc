@@ -1,4 +1,4 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "SCMPlus/cv_skip.h"
 #include "info/SCM_info.hh"
@@ -6,12 +6,15 @@
 #include "util/math.hh"
 #include "util/zip.hh"
 
+#include <cstdio>
+
 namespace MetaModule
 {
 
-class SCMCore : public CoreProcessor {
+class SCMCore : public SmartCoreProcessor<SCMInfo> {
 	using Info = SCMInfo;
 	using ThisCore = SCMCore;
+	using enum Info::Elem;
 
 public:
 	SCMCore() = default;
