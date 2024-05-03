@@ -24,7 +24,7 @@ struct Params {
 
 	// TODO: double-buffer Params:
 	// put just these into its own struct
-	float time = 0.f;		 // TIME: fractional value for time multiplication, integer value for time division
+	float time = 1.f;		 // TIME: fractional value for time multiplication, integer value for time division
 	float delay_feed = 0.7f; // DELAY FEED: amount of main input mixed into delay loop
 	float feedback = 0.5f;	 // FEEDBACK: amount of regeneration
 	float mix_dry = 0.7f;	 // MIX: mix of delayed and clean on the main output
