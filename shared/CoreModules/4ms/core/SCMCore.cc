@@ -24,11 +24,11 @@ public:
 	}
 
 	void update() override {
-		uint32_t rotate_adc = convert_param(getState<RotateKnob>() + ins[Info::InputRotate_Jack], 8);
-		uint32_t slippage_adc = convert_param(getState<SkipKnob>() + ins[Info::InputSlip_Jack], 255);
-		uint32_t shuffle_adc = convert_param(getState<ShuffleKnob>() + ins[Info::InputShuffle_Jack], 255);
-		uint32_t skip_adc = convert_param(getState<SkipKnob>() + ins[Info::InputSkip_Jack], 255);
-		uint32_t pw_adc = convert_param(getState<PwKnob>() + ins[Info::InputPw_Jack], 255);
+		uint32_t rotate_adc   = convert_param(getState<RotateKnob>()  + getInput<RotateJackIn>().value_or(0), 8);
+		uint32_t slippage_adc = convert_param(getState<SlipKnob>()    + getInput<SlipJackIn>().value_or(0), 255);
+		uint32_t shuffle_adc  = convert_param(getState<ShuffleKnob>() + getInput<ShuffleJackIn>().value_or(0), 255);
+		uint32_t skip_adc     = convert_param(getState<SkipKnob>()    + getInput<SkipJackIn>().value_or(0), 255);
+		uint32_t pw_adc       = convert_param(getState<PwKnob>()      + getInput<PwJackIn>().value_or(0), 255);
 
 		bool faster_switch_state = getState<_4XFastButton>() == LatchingButton::State_t::DOWN;
 		mute = getState<MuteButton>() == LatchingButton::State_t::DOWN;
@@ -36,7 +36,9 @@ public:
 		setLED<_4XFastButton>(faster_switch_state);
 		setLED<MuteButton>(mute);
 
-		setLED<LedInLight>(std::array<float,3>{ins[Info::InputClk_In], 0, 0});
+		auto clockInValue = getInput<ClkIn>().value_or(0);
+
+		setLED<LedInLight>(std::array<float,3>{clockInValue, 0, 0});
 		setLED<LedX1Light>(std::array<float,3>{outs[Info::OutputX1] ? 1.0f : 0, 0, 0});
 		setLED<LedX2Light>(std::array<float,3>{outs[Info::OutputX2] ? 1.0f : 0, 0, 0});
 		setLED<LedS3Light>(std::array<float,3>{outs[Info::OutputS3] ? 1.0f : 0, 0, 0});
@@ -46,7 +48,7 @@ public:
 		setLED<LedS8Light>(std::array<float,3>{outs[Info::OutputS8] ? 1.0f : 0, 0, 0});
 		setLED<LedX8Light>(std::array<float,3>{outs[Info::OutputX8] ? 1.0f : 0, 0, 0});
 
-		if (ins[Info::InputClk_In] > 0.5f) {
+		if (clockInValue > 0.5f) {
 			if (!clkin) {
 				clkin = true;
 				handle_clock_in();
@@ -99,14 +101,16 @@ public:
 				slip_howmany = slip_every - 1; // 1..(slip_every-1)
 		}
 
-		if (ins[Info::InputResync] > 0.5f && !resync) {
+		auto resyncInValue = getInput<ResyncIn>().value_or(0);
+
+		if (resyncInValue > 0.5f && !resync) {
 			resync = true;
 			for (auto [_p, _s, _slip, _slipamt] : zip(p, s, slip, slipamt)) {
 				_p = 0;
 				_s = 0;
 				_slip = _slipamt;
 			}
-		} else if (!ins[Info::InputResync])
+		} else if (!resyncInValue)
 			resync = false;
 
 		if (DoFreeRun) {
@@ -241,11 +245,6 @@ public:
 		return static_cast<uint32_t>(pw);
 	}
 
-	void set_input(int input_id, float val) override {
-		if (input_id < Info::NumInJacks)
-			ins[input_id] = val;
-	}
-
 	float get_output(int output_id) const override {
 		if (output_id < Info::NumOutJacks)
 			return outs[output_id] ? 1.f : 0.f;
@@ -264,7 +263,6 @@ public:
 
 private:
 	// Controls/Outs
-	float ins[Info::NumInJacks];
 	std::array<bool, Info::NumOutJacks> outs;
 
 	static constexpr bool DoFreeRun = true; //TODO: make this a switch?
