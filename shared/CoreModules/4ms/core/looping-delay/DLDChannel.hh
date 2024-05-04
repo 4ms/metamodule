@@ -51,7 +51,6 @@ public:
 		, looping_delay(params, flags)
 		, audioBufferFillCount(0)
 		, sampleRate(looping_delay.DefaultSampleRate)
-		, timerIncrement(1)
 		{
 			for (auto& sample : outBlock)
 			{
@@ -64,12 +63,7 @@ public:
 
     void update()
     {
-		timerPhase += timerIncrement;
-		while (timerPhase >= 1.0f)
-		{
-			timerPhase -= 1.0f;
-			params.timer.inc();
-		}		
+		params.timer.inc();
 
 		sideloadDrivers();
 
@@ -98,8 +92,6 @@ public:
 			#endif
 
 			sampleRate = newSampleRate;
-
-			timerIncrement = TimerFrequency / float(sampleRate);
 
 			looping_delay.set_samplerate(sampleRate);
 		}
@@ -271,7 +263,6 @@ private:
 private:
 	static constexpr float TimerFrequency = 48000.0f;
 	float timerPhase;
-	float timerIncrement;
 }; 
 
 }
