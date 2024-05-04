@@ -130,7 +130,7 @@ public:
 
 		// Output normalization
 		setOutput<OutBOut>(channelB.io.audioOut);
-		setOutput<OutAOut>(isPatched<OutBOut>() ? channelA.io.audioOut : channelA.io.audioOut + channelB.io.audioOut);
+		setOutput<OutAOut>(isPatched<OutBOut>() ? channelA.io.audioOut : (channelA.io.audioOut + channelB.io.audioOut) / 2);
 
 		// only map channel B to common controls
 		setLED<PingButton>(channelB.io.pingOut);
