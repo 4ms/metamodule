@@ -76,6 +76,11 @@ public:
 
 			delay_buffer.clear();
 
+			float factor = (float)newSampleRate/params.currentSampleRate;
+			params.timer.scale_periods(factor);
+			params.ping_time = std::round((float)params.ping_time * factor);
+			set_divmult_time();
+
 			params.currentSampleRate = newSampleRate;
 		}
 	}
