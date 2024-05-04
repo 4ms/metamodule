@@ -44,8 +44,8 @@ private:
 	uint32_t loop_start = 0;
 	uint32_t loop_end = 0;
 
-	static constexpr float AttackTimeInS = 0.020f; 			// 20ms
-	static constexpr float DecayTimeInS  = 0.020f;			// 20ms
+	static constexpr float AttackTimeInS = 0.020f;						  // 20ms
+	static constexpr float DecayTimeInS = 0.020f;						  // 20ms
 	static constexpr int32_t AutoMuteThreshold = 0.020 / 20. * 0x7F'FFFF; // 20mV of 20Vpp
 
 	static constexpr int32_t AutoMuteAttack = AttackTimeInS * float(DefaultSampleRate);
@@ -65,10 +65,8 @@ public:
 		delay_buffer.clear();
 	}
 
-	void set_samplerate(uint32_t newSampleRate)
-	{
-		if (newSampleRate != params.currentSampleRate)
-		{
+	void set_samplerate(uint32_t newSampleRate) {
+		if (newSampleRate != params.currentSampleRate) {
 			main_automute.setAttackPeriod(AttackTimeInS * float(newSampleRate));
 			main_automute.setDecayPeriod(DecayTimeInS * float(newSampleRate));
 			aux_automute.setAttackPeriod(AttackTimeInS * float(newSampleRate));
@@ -76,13 +74,21 @@ public:
 
 			delay_buffer.clear();
 
-			float factor = (float)newSampleRate/params.currentSampleRate;
-			params.timer.scale_periods(factor);
-			params.ping_time = std::round((float)params.ping_time * factor);
-			set_divmult_time();
+			params.timer.scale_periods((float)newSampleRate / params.currentSampleRate);
+			flags.set_time_changed();
 
 			params.currentSampleRate = newSampleRate;
 		}
+	}
+
+	void set_ping_time(uint32_t ping_time) {
+		params.timer.set_ping_time(ping_time);
+		flags.set_time_changed();
+	}
+
+	float get_ping_time_at_default_samplerate() {
+		uint32_t scaled_ping_time = std::round(params.ping_time * DefaultSampleRate / params.currentSampleRate );
+		return scaled_ping_time;
 	}
 
 	// TODO: when global_mode[CALIBRATE] is set, we should change the audio callback
@@ -315,19 +321,14 @@ public:
 
 	//// util:
 
-	int32_t __SSAT(int32_t val, uint32_t sat)
-	{
-		if ((sat >= 1U) && (sat <= 32U))
-		{
+	int32_t __SSAT(int32_t val, uint32_t sat) {
+		if ((sat >= 1U) && (sat <= 32U)) {
 			const int32_t max = (int32_t)((1U << (sat - 1U)) - 1U);
-			const int32_t min = -1 - max ;
-			if (val > max)
-			{
-			return max;
-			}
-			else if (val < min)
-			{
-			return min;
+			const int32_t min = -1 - max;
+			if (val > max) {
+				return max;
+			} else if (val < min) {
+				return min;
 			}
 		}
 		return val;
@@ -525,7 +526,6 @@ public:
 		loop_start = Util::offset_samples(loop_start, loop_shift);
 		loop_end = Util::offset_samples(loop_end, loop_shift);
 	}
-
 };
 
 } // namespace LDKit

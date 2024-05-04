@@ -97,6 +97,14 @@ public:
 		}
     }
 
+	void set_ping_time(uint32_t ping_time) {
+		looping_delay.set_ping_time(ping_time);
+	}
+
+	uint32_t get_ping_time() {
+		return looping_delay.get_ping_time_at_default_samplerate();
+	}
+
 public:
 	struct ModuleIO_t
 	{
@@ -259,10 +267,6 @@ private:
 
 private:
 	uint32_t sampleRate;
-
-private:
-	static constexpr float TimerFrequency = 48000.0f;
-	float timerPhase;
 }; 
 
 }

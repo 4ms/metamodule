@@ -1,6 +1,7 @@
 #pragma once
 #include "../mocks/mocks.hh"
 #include "ping_methods.hh"
+#include <cstdint>
 
 namespace LDKit
 {
@@ -127,6 +128,15 @@ public:
 		_pingled_tmr = (float)_pingled_tmr * factor;
 		_loop_time = (float)_loop_time * factor;
 		_loop_tmr = (float)_loop_tmr * factor;
+		_ping_changed = true;
+	}
+
+	void set_ping_time(uint32_t time) {
+		_ping_tmr = time;
+		_pingled_tmr = 0;
+		reset_ping_tmr();
+		reset_loop_tmr();
+		_ping_changed = true;
 	}
 };
 

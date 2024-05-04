@@ -1,8 +1,9 @@
-#include "info/DLD_info.hh"
+#include "CoreModules/4ms/info/DLD_info.hh"
 //
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "looping-delay/DLDChannel.hh"
+#include <alpaca/alpaca.h>
 
 namespace MetaModule
 {
@@ -139,6 +140,47 @@ public:
 	void set_samplerate(float sr) override {
 		channelA.set_samplerate(sr);
 		channelB.set_samplerate(sr);
+	}
+
+	struct SaveState_t
+	{
+		uint32_t ping_time;
+	};
+	SaveState_t saveState;
+
+	void load_state(std::string_view state_data) override 
+	{
+		auto raw_data = decode(state_data);
+
+		std::error_code ec;
+		auto newSaveState = alpaca::deserialize<alpaca::options::with_version, SaveState_t>(raw_data, ec);
+		if (!ec)
+		{
+			// store current state so it can be applied later
+			saveState = newSaveState;
+			applySaveState();
+		}
+	}
+
+	std::string save_state() override 
+	{
+		populateSaveState();
+
+		std::vector<uint8_t> bytes;
+		alpaca::serialize<alpaca::options::with_version>(saveState, bytes);
+
+		return encode({bytes.data(), bytes.size()});
+	}
+
+	void applySaveState() 
+	{
+		channelA.set_ping_time(saveState.ping_time);
+		channelB.set_ping_time(saveState.ping_time);
+	}
+
+	void populateSaveState()
+	{
+		saveState.ping_time = channelA.get_ping_time();
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
