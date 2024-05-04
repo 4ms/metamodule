@@ -1,6 +1,7 @@
+#include "info/DLD_info.hh"
+//
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "info/DLD_info.hh"
 #include "looping-delay/DLDChannel.hh"
 
 namespace MetaModule
