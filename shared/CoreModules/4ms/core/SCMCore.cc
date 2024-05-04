@@ -149,14 +149,14 @@ public:
 			update_slip_params = false;
 		}
 
-		setOutput<X1Out>(outs[Info::OutputX1] ? 1.0f : 0.0f);
-		setOutput<X2Out>(outs[Info::OutputX2] ? 1.0f : 0.0f);
-		setOutput<S3Out>(outs[Info::OutputS3] ? 1.0f : 0.0f);
-		setOutput<S4Out>(outs[Info::OutputS4] ? 1.0f : 0.0f);
-		setOutput<S5Out>(outs[Info::OutputS5] ? 1.0f : 0.0f);
-		setOutput<S6Out>(outs[Info::OutputS6] ? 1.0f : 0.0f);
-		setOutput<S8Out>(outs[Info::OutputS8] ? 1.0f : 0.0f);
-		setOutput<X8Out>(outs[Info::OutputX8] ? 1.0f : 0.0f);
+		setOutput<X1Out>(outs[Info::OutputX1] ? 8.0f : 0.0f);
+		setOutput<X2Out>(outs[Info::OutputX2] ? 8.0f : 0.0f);
+		setOutput<S3Out>(outs[Info::OutputS3] ? 8.0f : 0.0f);
+		setOutput<S4Out>(outs[Info::OutputS4] ? 8.0f : 0.0f);
+		setOutput<S5Out>(outs[Info::OutputS5] ? 8.0f : 0.0f);
+		setOutput<S6Out>(outs[Info::OutputS6] ? 8.0f : 0.0f);
+		setOutput<S8Out>(outs[Info::OutputS8] ? 8.0f : 0.0f);
+		setOutput<X8Out>(outs[Info::OutputX8] ? 8.0f : 0.0f);
 
 		setLED<LedX1Light>(outs[Info::OutputX1] ? 1.0f : 0);
 		setLED<LedX2Light>(outs[Info::OutputX2] ? 1.0f : 0);
@@ -255,7 +255,7 @@ public:
 		return static_cast<uint32_t>(pw);
 	}
 
-    void set_samplerate(float sr) override {
+	void set_samplerate(float sr) override {
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
