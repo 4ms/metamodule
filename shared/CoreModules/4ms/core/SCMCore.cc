@@ -246,13 +246,8 @@ public:
 	}
 
 	uint32_t calc_pw(uint8_t pw_adc, uint32_t period) {
-		if (pw_adc < MIN_PW)
-			return MIN_PW;
-		if (pw_adc > 254)
-			return period - MIN_PW;
-
 		float pw = (float)pw_adc / 255.f * (float)period;
-		return static_cast<uint32_t>(pw);
+		return std::clamp<uint32_t>(pw, MIN_PW, period - MIN_PW);	
 	}
 
 	void set_samplerate(float sr) override {
