@@ -196,7 +196,7 @@ private:
 		auto AdaptLengthToSampleRateFunc = [this](auto lengthInSamples)
 		{
 			// make sure this never becomes zero
-			return std::max(1u, uint32_t(lengthInSamples * sampleRate / looping_delay.DefaultSampleRate));
+			return std::max<uint32_t>(1, uint32_t(lengthInSamples * sampleRate / looping_delay.DefaultSampleRate));
 		};
 
 		params.settings.crossfade_samples       = AdaptLengthToSampleRateFunc(CrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()]);

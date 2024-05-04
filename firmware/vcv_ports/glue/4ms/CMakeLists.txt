@@ -9,6 +9,19 @@ add_library(
   ${MM_ROOT}/shared/CoreModules/4ms/core/looping-delay/src/calibration_storage.cc
 )
 
+# DLD
+target_sources(
+  4msLibrary
+  PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/looping-delay/src/calibration_storage.cc
+)
+
+target_include_directories(
+  4msLibrary
+  PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/looping-delay/src
+)
+
 target_include_directories(
   4msLibrary
   PUBLIC ${MM_ROOT}/shared
