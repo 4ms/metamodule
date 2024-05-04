@@ -211,11 +211,11 @@ private:
 		params.settings.write_crossfade_samples = AdaptLengthToSampleRateFunc(WriteCrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()]);
 
 		static constexpr std::array<PingMethod,5> PingMethods = {
-			PingMethod::IGNORE_FLAT_DEVIATION_5,
+			PingMethod::IGNORE_FLAT_DEVIATION_10,
 			PingMethod::IGNORE_PERCENT_DEVIATION,
 			PingMethod::ONE_TO_ONE,
 			PingMethod::MOVING_AVERAGE_2,
-			PingMethod::MOVING_AVERAGE_4
+			PingMethod::LINEAR_AVERAGE_4
 		};
 
 		params.settings.ping_method = PingMethods[getState<Mapping::PingMethodAlt>()];
