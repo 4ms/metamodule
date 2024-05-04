@@ -38,7 +38,7 @@ public:
 
 		auto clockInValue = getInput<ClkIn>().value_or(0);
 
-		setLED<LedInLight>(std::array<float,3>{clockInValue, 0, 0});
+		setLED<LedInLight>(clockInValue);
 
 		if (clockInValue > 0.5f) {
 			if (!clkin) {
@@ -158,14 +158,14 @@ public:
 		setOutput<S8Out>(outs[Info::OutputS8] ? 1.0f : 0.0f);
 		setOutput<X8Out>(outs[Info::OutputX8] ? 1.0f : 0.0f);
 
-		setLED<LedX1Light>(std::array<float,3>{outs[Info::OutputX1] ? 1.0f : 0, 0, 0});
-		setLED<LedX2Light>(std::array<float,3>{outs[Info::OutputX2] ? 1.0f : 0, 0, 0});
-		setLED<LedS3Light>(std::array<float,3>{outs[Info::OutputS3] ? 1.0f : 0, 0, 0});
-		setLED<LedS4Light>(std::array<float,3>{outs[Info::OutputS4] ? 1.0f : 0, 0, 0});
-		setLED<LedS5Light>(std::array<float,3>{outs[Info::OutputS5] ? 1.0f : 0, 0, 0});
-		setLED<LedS6Light>(std::array<float,3>{outs[Info::OutputS6] ? 1.0f : 0, 0, 0});
-		setLED<LedS8Light>(std::array<float,3>{outs[Info::OutputS8] ? 1.0f : 0, 0, 0});
-		setLED<LedX8Light>(std::array<float,3>{outs[Info::OutputX8] ? 1.0f : 0, 0, 0});
+		setLED<LedX1Light>(outs[Info::OutputX1] ? 1.0f : 0);
+		setLED<LedX2Light>(outs[Info::OutputX2] ? 1.0f : 0);
+		setLED<LedS3Light>(outs[Info::OutputS3] ? 1.0f : 0);
+		setLED<LedS4Light>(outs[Info::OutputS4] ? 1.0f : 0);
+		setLED<LedS5Light>(outs[Info::OutputS5] ? 1.0f : 0);
+		setLED<LedS6Light>(outs[Info::OutputS6] ? 1.0f : 0);
+		setLED<LedS8Light>(outs[Info::OutputS8] ? 1.0f : 0);
+		setLED<LedX8Light>(outs[Info::OutputX8] ? 1.0f : 0);
 	}
 
 	void reset_all_phases() {
