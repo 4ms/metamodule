@@ -31,7 +31,12 @@ public:
 		uint32_t pw_adc       = convert_param(getState<PwKnob>()      + getInput<PwJackIn>().value_or(0)/5.f, 255);
 
 		bool faster_switch_state = getState<_4XFastButton>() == LatchingButton::State_t::DOWN;
+		if (getInput<_4XFastJackIn>().value_or(0) > 2.5f)
+			faster_switch_state = !faster_switch_state;
+
 		mute = getState<MuteButton>() == LatchingButton::State_t::DOWN;
+		if (getInput<MuteJackIn>().value_or(0) > 2.5f)
+			mute = !mute;
 
 		setLED<_4XFastButton>(faster_switch_state);
 		setLED<MuteButton>(mute);
