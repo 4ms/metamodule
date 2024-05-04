@@ -16,29 +16,50 @@ struct MainMenuPage : PageBase {
 		lv_group_add_obj(group, ui_MenuPanelSave); //new patch
 		lv_group_add_obj(group, ui_MenuPanelSettings);
 
+		lv_group_add_obj(group, ui_MainMenuNowPlayingPanel);
+		lv_group_add_obj(group, ui_MainMenuLastViewedPanel);
+
 		lv_group_focus_obj(ui_MenuPanelPatches);
 
 		lv_obj_add_event_cb(ui_MenuPanelPatches, patchsel_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MenuPanelSettings, settings_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MenuPanelSave, new_patch_cb, LV_EVENT_CLICKED, this);
+
+		lv_obj_add_event_cb(ui_MainMenuLastViewedPanel, last_viewed_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_MainMenuNowPlayingPanel, now_playing_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() final {
-		auto patch = patch_storage.get_view_patch();
-		if (patch->patch_name.length() == 0)
-			lv_label_set_text(patchname_label, "No patch playing");
-		else
-			lv_label_set_text(patchname_label, patch->patch_name.c_str());
+		auto patch = patch_storage.playing_patch();
+		if (!patch || patch->patch_name.length() == 0) {
+			lv_hide(ui_MainMenuNowPlayingPanel);
+		} else {
+			lv_show(ui_MainMenuNowPlayingPanel);
+			lv_label_set_text(ui_MainMenuNowPlayingName, patch->patch_name.c_str());
+		}
+
+		auto viewpatch = patch_storage.get_view_patch();
+		if (viewpatch == patch || !viewpatch || viewpatch->patch_name.length() == 0) {
+			lv_hide(ui_MainMenuLastViewedPanel);
+		} else {
+			lv_show(ui_MainMenuLastViewedPanel);
+			lv_label_set_text(ui_MainMenuLastViewedName, viewpatch->patch_name.c_str());
+		}
 
 		lv_group_set_editing(group, false);
 		lv_group_focus_obj(ui_MenuPanelPatches);
 	}
 
 	void update() final {
+		if (metaparams.back_button.is_just_released()) {
+			if (patch_storage.get_view_patch())
+				load_page(PageId::PatchView, {.patch_loc_hash = patch_storage.get_view_patch_loc_hash()});
+		}
+
 		if (last_audio_load != metaparams.audio_load) {
 			last_audio_load = metaparams.audio_load;
-			lv_label_set_text_fmt(load_label, "%d%%", metaparams.audio_load);
-			lv_show(load_label);
+			lv_label_set_text_fmt(ui_MainMenuLoadMeter, "%d%%", metaparams.audio_load);
+			lv_show(ui_MainMenuLoadMeter);
 		};
 	}
 
@@ -47,6 +68,21 @@ struct MainMenuPage : PageBase {
 	}
 
 private:
+	static void last_viewed_cb(lv_event_t *event) {
+		auto page = static_cast<MainMenuPage *>(event->user_data);
+		if (!page)
+			return;
+		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patch_storage.get_view_patch_loc_hash()});
+	}
+
+	static void now_playing_cb(lv_event_t *event) {
+		auto page = static_cast<MainMenuPage *>(event->user_data);
+		if (!page)
+			return;
+		page->patch_storage.view_playing_patch();
+		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patch_playloader.cur_patch_loc_hash()});
+	}
+
 	static void patchsel_cb(lv_event_t *event) {
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
@@ -60,7 +96,7 @@ private:
 			return;
 		page->patch_storage.new_patch();
 		page->patch_playloader.request_load_view_patch();
-		page->load_page(PageId::PatchView, {});
+		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patch_storage.get_view_patch_loc_hash()});
 	}
 
 	static void settings_cb(lv_event_t *event) {
@@ -71,9 +107,6 @@ private:
 	}
 
 	unsigned last_audio_load = 0;
-
-	lv_obj_t *patchname_label = ui_MainMenuNowPlayingName;
-	lv_obj_t *load_label = ui_MainMenuLoadMeter;
 };
 
 } // namespace MetaModule

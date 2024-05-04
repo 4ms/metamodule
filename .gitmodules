@@ -15,19 +15,13 @@
 	url = https://github.com/4ms/mp1-boot.git
 [submodule "firmware/vcv_ports/AudibleInstruments"]
 	path = firmware/vcv_ports/AudibleInstruments
-	url = https://github.com/VCVRack/AudibleInstruments.git
+	url = https://github.com/4ms/AudibleInstruments.git
 [submodule "firmware/vcv_ports/Befaco"]
 	path = firmware/vcv_ports/Befaco
 	url = https://github.com/hemmer/Befaco.git
-[submodule "firmware/src/VCV_adaptor/simde"]
-	path = firmware/src/VCV_adaptor/simde
-	url = https://github.com/simd-everywhere/simde.git
 [submodule "firmware/vcv_ports/hetrickcv"]
 	path = firmware/vcv_ports/hetrickcv
 	url = https://github.com/mhetrick/hetrickcv.git
-[submodule "firmware/lib/jansson/jansson"]
-	path = firmware/lib/jansson/jansson
-	url = https://github.com/4ms/jansson.git
 [submodule "firmware/lib/esp-serial-flasher"]
 	path = firmware/lib/esp-serial-flasher
 	url = https://github.com/4ms/esp-serial-flasher.git
@@ -43,3 +37,12 @@
 [submodule "firmware/src/wifi/comm/flat"]
 	path = firmware/src/wifi/comm/flat
 	url = https://github.com/4ms/metamodule-bridge-protocol.git
+[submodule "firmware/vcv_ports/eightfold"]
+	path = firmware/vcv_ports/eightfold
+	url = https://github.com/scanner-darkly/eightfold.git
+[submodule "firmware/metamodule-plugin-sdk"]
+	path = firmware/metamodule-plugin-sdk
+	url = https://github.com/4ms/metamodule-plugin-sdk.git
+[submodule "shared/CoreModules/4ms/core/alpaca"]
+	path = shared/CoreModules/4ms/core/alpaca
+	url = https://github.com/4ms/alpaca

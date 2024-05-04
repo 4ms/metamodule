@@ -1,4 +1,4 @@
-#include "VCV_adaptor/random.hpp"
+#include "random.hpp"
 #include <time.h>
 
 namespace rack::random

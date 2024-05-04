@@ -3,6 +3,9 @@
 #include "util/overloaded.hh"
 #include <string>
 
+// TODO: there should be no dependency on a specific brand here
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+
 namespace MetaModule
 {
 
@@ -11,6 +14,8 @@ inline std::string get_element_value_string(Element const &element, float value)
 
 	std::visit(overloaded{
 				   [value = value, &s](Pot const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
+
+				   [value = value, &s](ParamElement const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
 
 				   [value = value, &s](SlideSwitch const &el) {
 					   auto v = StateConversion::convertState(el, value);

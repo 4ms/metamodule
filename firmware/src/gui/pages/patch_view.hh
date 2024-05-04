@@ -7,13 +7,11 @@
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
-#include "gui/pages/patch_view_knobset_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -39,7 +37,8 @@ struct PatchViewPage : PageBase {
 		lv_group_set_editing(group, false);
 
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_AddButton, add_module_cb, LV_EVENT_CLICKED, (void *)this);
+		lv_obj_add_event_cb(ui_AddButton, add_module_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_KnobButton, knob_button_cb, LV_EVENT_CLICKED, this);
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -51,9 +50,6 @@ struct PatchViewPage : PageBase {
 
 		lv_obj_add_event_cb(ui_PatchViewPage, scroll_end_cb, LV_EVENT_SCROLL, this);
 
-		// Settings menu
-		// settings_menu.init();
-		knobset_menu.init();
 		desc_panel.hide();
 
 		lv_label_set_text(ui_ModuleName, "");
@@ -94,14 +90,14 @@ struct PatchViewPage : PageBase {
 
 		// Prepare the knobset menu with the actively playing patch's knobset
 		if (is_patch_playing)
-			knobset_settings.active_knobset = page_list.get_active_knobset();
+			active_knobset = page_list.get_active_knobset();
 
 		else {
 			// Reset to first knobset when we view a different patch than previously viewed
 			if (displayed_patch_loc_hash != args.patch_loc_hash) {
 				args.view_knobset_id = 0;
 			}
-			knobset_settings.active_knobset = args.view_knobset_id.value_or(0);
+			active_knobset = args.view_knobset_id.value_or(0);
 		}
 
 		if (args.patch_loc_hash)
@@ -148,7 +144,7 @@ struct PatchViewPage : PageBase {
 				continue;
 
 			module_drawer.draw_mapped_elements(
-				*patch, module_idx, knobset_settings.active_knobset, canvas, drawn_elements, is_patch_playing);
+				*patch, module_idx, active_knobset, canvas, drawn_elements, is_patch_playing);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
@@ -179,7 +175,6 @@ struct PatchViewPage : PageBase {
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
 		settings_menu.prepare_focus(group);
-		knobset_menu.prepare_focus(group, patch->knob_sets);
 		desc_panel.prepare_focus(group, *patch);
 		file_menu.prepare_focus(group);
 	}
@@ -195,7 +190,7 @@ struct PatchViewPage : PageBase {
 		}
 
 		for (auto &drawn_el : drawn_elements) {
-			auto knobset = knobset_settings.active_knobset;
+			auto knobset = active_knobset;
 			auto module_id = drawn_el.gui_element.module_idx;
 			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
 
@@ -206,7 +201,6 @@ struct PatchViewPage : PageBase {
 
 	void blur() override {
 		settings_menu.hide();
-		knobset_menu.hide();
 		desc_panel.hide();
 		file_menu.hide();
 	}
@@ -224,31 +218,22 @@ struct PatchViewPage : PageBase {
 			update_cable_style();
 		}
 
-		if (is_patch_playing != last_is_patch_playing || knobset_settings.changed) {
-			knobset_settings.changed = false;
-			args.view_knobset_id = knobset_settings.active_knobset;
-			page_list.set_active_knobset(knobset_settings.active_knobset);
-			patch_mod_queue.put(ChangeKnobSet{knobset_settings.active_knobset});
+		if (is_patch_playing != last_is_patch_playing) {
+			args.view_knobset_id = active_knobset;
+			page_list.set_active_knobset(active_knobset);
+			patch_mod_queue.put(ChangeKnobSet{active_knobset});
 			redraw_map_rings();
 		}
 
-		if (is_patch_playing && knobset_settings.active_knobset != page_list.get_active_knobset()) {
+		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
-			knobset_settings.active_knobset = page_list.get_active_knobset();
+			active_knobset = page_list.get_active_knobset();
 			redraw_map_rings();
-		}
-
-		if (auto &knobset = knobset_menu.requested_knobset_view) {
-			load_page(PageId::KnobSetView, {.patch_loc_hash = args.patch_loc_hash, .view_knobset_id = knobset});
-			knobset = std::nullopt;
 		}
 
 		if (metaparams.back_button.is_just_released()) {
 			if (settings_menu.visible) {
 				settings_menu.hide();
-
-			} else if (knobset_menu.visible) {
-				knobset_menu.hide();
 
 			} else if (desc_panel.is_visible()) {
 				desc_panel.back_event();
@@ -261,10 +246,6 @@ struct PatchViewPage : PageBase {
 				blur();
 				params.lights.stop_watching_all();
 			}
-		}
-
-		if (knobset_menu.visible) {
-			knobset_menu.update();
 		}
 
 		if (desc_panel.did_update_names()) {
@@ -406,8 +387,6 @@ private:
 		module_canvases.clear();
 		drawn_elements.clear();
 		module_ids.clear();
-
-		knobset_menu.blur();
 	}
 
 	void style_module(lv_obj_t *canvas) {
@@ -472,7 +451,8 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		page->patch_playloader.request_load_view_patch();
+		if (!page->is_patch_playing)
+			page->patch_playloader.request_load_view_patch();
 	}
 
 	static void button_focussed_cb(lv_event_t *event) {
@@ -483,7 +463,6 @@ private:
 		page->highlighted_module_id = std::nullopt;
 		page->update_map_ring_style();
 		page->settings_menu.hide();
-		page->knobset_menu.hide();
 		page->file_menu.hide();
 	}
 
@@ -494,6 +473,15 @@ private:
 		page->load_page(PageId::ModuleList, page->args);
 	}
 
+	static void knob_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+
+		page->load_page(PageId::KnobSetView,
+						{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->active_knobset});
+	}
+
 private:
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
@@ -502,8 +490,7 @@ private:
 	ViewSettings &settings;
 	PatchViewSettingsMenu settings_menu{settings};
 
-	PatchViewKnobsetMenu::Settings knobset_settings;
-	PatchViewKnobsetMenu knobset_menu{knobset_settings};
+	unsigned active_knobset = 0;
 
 	PatchDescriptionPanel desc_panel;
 

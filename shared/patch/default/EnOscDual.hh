@@ -1,4 +1,4 @@
-static char EnOsc_Dual_patch[] =
+static const char EnOsc_Dual_patch[] =
 	R"(
 PatchData:
   patch_name: EnOsc Dual

@@ -1,4 +1,4 @@
-static char EnOsc8StepSeq_patch[] =
+static const char EnOsc8StepSeq_patch[] =
 	R"(
 PatchData:
   patch_name: 'EnOsc-8-step-seq'

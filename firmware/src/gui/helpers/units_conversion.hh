@@ -2,7 +2,7 @@
 #include "CoreModules/elements/elements.hh"
 #include <cmath>
 
-namespace MetaModule::ElementDrawerImpl
+namespace MetaModule::ElementDrawer
 {
 
 constexpr float fix_zoomed_coord(Coords coord_ref, float x, float width, float zoom) {
@@ -17,4 +17,4 @@ constexpr float fix_zoomed_coord(Coords coord_ref, float x, float width, float z
 	return x;
 }
 
-} // namespace MetaModule::ElementDrawerImpl
+} // namespace MetaModule::ElementDrawer

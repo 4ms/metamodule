@@ -11,12 +11,6 @@
 // defined in fatfs/diskio.cc:
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
-// required by fatfs:
-inline PARTITION VolToPart[FF_VOLUMES] = {
-	{0, 0}, /* "0:" ==> Auto detect partition on USB */
-	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
-};
-
 class FatFileIO {
 	using Volume = MetaModule::Volume;
 
@@ -76,6 +70,10 @@ public:
 		return false;
 	}
 
+	bool unmount_drive() {
+		return f_unmount(_fatvol) == FR_OK;
+	}
+
 	bool unmount_disk() {
 		auto disk_id = static_cast<uint8_t>(_vol);
 		return (disk_ioctl(disk_id, CTRL_EJECT, nullptr) == RES_OK);
@@ -98,21 +96,24 @@ public:
 
 	bool format_disk() {
 		BYTE work[FF_MAX_SS * 2];
-		auto res = f_mkfs(_fatvol, nullptr, work, sizeof(work));
-		if (res != FR_OK)
+		MKFS_PARM opts{.fmt = FM_SFD | FM_ANY, .align = 512, .au_size = 512};
+		auto res = f_mkfs(_fatvol, &opts, work, sizeof(work));
+		if (res != FR_OK) {
+			pr_err("Formatting failed with error code %d\n", res);
 			return false;
+		}
 
 		res = f_mount(&fs, _fatvol, 1);
 		if (res != FR_OK) {
-			pr_err("Disk not formatted, err %d\n", res);
+			pr_err("Disk not mounted, err %d\n", res);
 			return false;
 		}
-		pr_trace("Disk formatted\n");
+
 		return true;
 	}
 
 	bool update_or_create_file(const std::string_view filename, const std::span<const char> data) {
-		return write_file(filename.data(), data);
+		return write_file(filename, data);
 	}
 
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
@@ -200,26 +201,54 @@ public:
 		return bytes_read;
 	}
 
+	bool make_dir(const std::string &path) {
+		auto res = f_mkdir(path.c_str());
+
+		if (res == FR_OK || res == FR_EXIST)
+			return true;
+
+		if (res == FR_NO_PATH) {
+			auto pos = path.find_last_of('/');
+			if (pos == std::string::npos)
+				return false;
+			if (!make_dir(path.substr(0, pos)))
+				return false;
+		}
+		return f_mkdir(path.c_str()) == FR_OK;
+	}
+
 	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
 		FIL fil;
 		UINT bytes_written = 0;
 
 		f_chdrive(_fatvol);
 
-		if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
-			if (!mount_disk())
-				return 0;
+		// Create dirs
+		auto path = std::string(filename);
+		if (auto slashpos = path.find_last_of('/'); slashpos != path.npos) {
+			make_dir(path.substr(0, slashpos));
+		}
 
-			if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK)
+		if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+			if (!mount_disk()) {
+				pr_err("Failed to mount %.3s\n", _fatvol);
 				return 0;
+			}
+
+			if (f_open(&fil, filename.data(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+				pr_err("Failed to open for writing %.*s on %.3s\n", (int)filename.size(), filename.data(), _fatvol);
+				return 0;
+			}
 		}
 
 		auto res = f_write(&fil, buffer.data(), buffer.size_bytes(), &bytes_written);
 
 		f_close(&fil);
 
-		if (res != FR_OK)
+		if (res != FR_OK) {
+			pr_err("Failed to write %.*s on %.3s\n", (int)filename.size(), filename.data(), _fatvol);
 			return 0;
+		}
 
 		return bytes_written;
 	}
@@ -275,7 +304,7 @@ public:
 		f_chdrive(_fatvol);
 
 		auto full_path = std::string(path);
-		pr_trace("FatFS: scanning dir %s\n", full_path.c_str());
+		// pr_trace("FatFS: scanning dir %s\n", full_path.c_str());
 
 		if (f_opendir(&dj, full_path.c_str()) != FR_OK) {
 			if (!mount_disk())
@@ -284,17 +313,39 @@ public:
 				return false;
 		}
 
+		f_rewinddir(&dj);
 		while (f_readdir(&dj, &fno) == FR_OK) {
 			if (fno.fname[0] == '\0')
 				break;
 			auto entry_type = (fno.fattrib & AM_DIR) ? DirEntryKind::Dir : DirEntryKind::File;
 			uint32_t timestamp = rawtimestamp(fno);
 
-			pr_trace("Found dir entry %s type %d\n", fno.fname, entry_type);
+			// pr_trace("Found dir entry %s type %d\n", fno.fname, entry_type);
 
-			// std::string file_path = full_path + std::string(fno.fname);
 			action(fno.fname, timestamp, fno.fsize, entry_type);
 		}
 		return true;
+	}
+
+	void print_dir(std::string_view path, unsigned max_depth, unsigned cur_depth = 0) {
+		cur_depth++;
+
+		if (cur_depth == max_depth)
+			return;
+
+		foreach_dir_entry(path,
+						  [=, this](std::string_view filename, uint32_t filesize, uint32_t tmstmp, DirEntryKind kind) {
+							  for (auto i = 0u; i < cur_depth - 1; i++)
+								  pr_dbg("  ");
+
+							  if (kind == DirEntryKind::File)
+								  pr_dbg("%.*s\t%u\t%x\n", filename.size(), filename.data(), filesize, tmstmp);
+
+							  else if (kind == DirEntryKind::Dir) {
+								  pr_dbg("%.*s/\n", filename.size(), filename.data());
+								  std::string dirpath = std::string(path) + std::string(filename) + std::string("/");
+								  print_dir(dirpath, max_depth, cur_depth);
+							  }
+						  });
 	}
 };

@@ -59,4 +59,8 @@ struct DebugN<3> {
 	using Pin = Debug::Pin3;
 };
 
+#ifndef __clang__
 #define GCC_OPTIMIZE_OFF __attribute__((optimize("-O0")))
+#else
+#define GCC_OPTIMIZE_OFF
+#endif

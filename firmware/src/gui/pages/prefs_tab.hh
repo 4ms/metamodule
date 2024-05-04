@@ -1,4 +1,5 @@
 #pragma once
+#include "dynload/plugin_loader.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
@@ -18,6 +19,7 @@ struct PrefsTab {
 
 	void prepare_focus(lv_group_t *group) {
 		this->group = group;
+		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
 		lv_group_add_obj(group, ui_ResetFactoryPatchesButton);
 		lv_group_focus_obj(ui_ResetFactoryPatchesButton);
 		confirm_popup.init(ui_SystemMenu, group);

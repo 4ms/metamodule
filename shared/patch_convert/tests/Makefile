@@ -29,6 +29,7 @@ CXXFLAGS = 	-Wall \
 			-Iryml \
 			-I../../firmware/src/medium \
 			-I.. \
+			-I../../firmware/metamodule-plugin-sdk/metamodule-core-interface \
 			-I../cpputil \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \

@@ -1,4 +1,3 @@
-#include "audio_stream.hh"
 #include "frame.hh"
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
@@ -6,7 +5,6 @@
 #include "sdl_audio.hh"
 #include "settings.hh"
 #include "ui.hh"
-#include <iostream>
 
 int main(int argc, char *argv[]) {
 	MetaModuleSim::Settings settings;
@@ -18,7 +16,11 @@ int main(int argc, char *argv[]) {
 
 	SDLAudio<Frame> audio_out{settings.audioout_dev};
 
-	MetaModule::Ui ui{settings.patch_path, audio_out.get_block_size()};
+	auto patch_path = std::filesystem::absolute(settings.patch_path);
+
+	auto asset_tar_path = std::filesystem::absolute("../firmware/build/assets.uimg");
+
+	MetaModule::Ui ui{patch_path.string(), asset_tar_path.string(), audio_out.get_block_size()};
 
 	audio_out.set_callback([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
 	audio_out.unpause();

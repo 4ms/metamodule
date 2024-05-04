@@ -1,6 +1,7 @@
 #pragma once
 #include "../src/core_intercom/intercore_message.hh"
-#include "fs/fileio_t.hh"
+#include "dynload/plugin_file_scan.hh"
+#include "fat_file_io.hh"
 #include "fs/volumes.hh"
 #include "fw_update/update_path.hh"
 #include "patch_file/default_patch_io.hh"
@@ -14,26 +15,29 @@ namespace MetaModule
 {
 
 struct SimulatorPatchStorage {
-	SimulatorPatchStorage(std::string_view path, PatchDirList &patch_dir_list_)
-		: hostfs_{MetaModule::Volume::SDCard, path}
-		, defaultpatchfs_{MetaModule::Volume::NorFlash} {
-		PatchFileIO::add_directory(hostfs_, patch_dir_list_.volume_root(Volume::SDCard));
-		PatchFileIO::add_directory(defaultpatchfs_, patch_dir_list_.volume_root(Volume::NorFlash));
+
+	SimulatorPatchStorage(std::string_view path, PatchDirList &patch_dir_list_, FatFileIO &ramdisk)
+		: hostfs{MetaModule::Volume::SDCard, path}
+		, defaultpatchfs{MetaModule::Volume::NorFlash}
+		, ramdisk{ramdisk} {
+		PatchFileIO::add_directory(hostfs, patch_dir_list_.volume_root(Volume::SDCard));
+		PatchFileIO::add_directory(defaultpatchfs, patch_dir_list_.volume_root(Volume::NorFlash));
 	}
 
-	HostFileIO hostfs_;
-	DefaultPatchFileIO defaultpatchfs_;
+	HostFileIO hostfs;
+	DefaultPatchFileIO defaultpatchfs;
+	FatFileIO &ramdisk;
 };
 
 struct SimulatorFileStorageComm {
-	using enum IntercoreStorageMessage::MessageType;
-	using MessageT = IntercoreStorageMessage;
 
 	SimulatorFileStorageComm(SimulatorPatchStorage &patch_storage)
 		: storage{patch_storage} {
 	}
 
-	[[nodiscard]] bool send_message(const MessageT &msg) {
+	[[nodiscard]] bool send_message(const IntercoreStorageMessage &msg) {
+		using enum IntercoreStorageMessage::MessageType;
+
 		switch (msg.message_type) {
 			case RequestPatchData: {
 				requested_view_patch_loc_ = PatchLocation{msg.filename, msg.vol_id};
@@ -56,7 +60,7 @@ struct SimulatorFileStorageComm {
 			} break;
 
 			case RequestFirmwareFile: {
-				if (find_manifest(storage.hostfs_)) {
+				if (find_manifest(storage.hostfs)) {
 					reply.message_type = FirmwareFileFound;
 					reply.filename.copy(found_filename);
 					reply.bytes_read = found_filesize;
@@ -71,14 +75,27 @@ struct SimulatorFileStorageComm {
 			} break;
 
 			case RequestLoadFileToRam: {
-				if (storage.hostfs_.read_file(msg.filename, msg.buffer))
+				if (storage.hostfs.read_file(msg.filename, msg.buffer))
 					reply = {LoadFileToRamSuccess};
 				else
 					reply = {LoadFileToRamFailed};
 			} break;
 
+			case RequestPluginFileList: {
+				if (find_plugin_files(msg))
+					reply = {PluginFileListOK};
+				else
+					reply = {PluginFileListFail};
+			} break;
+
+			case RequestCopyPluginAssets: {
+				storage.ramdisk.mount_disk();
+				bool ok = PatchFileIO::deep_copy_dirs(storage.hostfs, storage.ramdisk, msg.filename);
+				reply.message_type = ok ? CopyPluginAssetsOK : CopyPluginAssetsFail;
+			} break;
+
 			case RequestWritePatchData: {
-				if (!storage.hostfs_.update_or_create_file(msg.filename, msg.buffer)) {
+				if (!storage.hostfs.update_or_create_file(msg.filename, msg.buffer)) {
 					pr_err("Error writing file!\n");
 					reply = {PatchDataWriteFail};
 					return false;
@@ -110,10 +127,10 @@ private:
 		bool ok = false;
 
 		if (loc.vol == Volume::SDCard)
-			ok = PatchFileIO::read_file(raw_patch_data_, storage.hostfs_, loc.filename);
+			ok = PatchFileIO::read_file(raw_patch_data_, storage.hostfs, loc.filename);
 
 		if (loc.vol == Volume::NorFlash)
-			ok = PatchFileIO::read_file(raw_patch_data_, storage.defaultpatchfs_, loc.filename);
+			ok = PatchFileIO::read_file(raw_patch_data_, storage.defaultpatchfs, loc.filename);
 
 		//TODO: add USB when we have a usb fileio
 		// if (vol == Volume::USB)
@@ -142,6 +159,19 @@ private:
 		return false;
 	}
 
+	bool find_plugin_files(const IntercoreStorageMessage &message) {
+		message.plugin_file_list->clear();
+
+		bool hostfs_ok = false;
+		hostfs_ok = scan_volume(storage.hostfs, *message.plugin_file_list);
+
+		bool defaultpatchfs_ok = false;
+		defaultpatchfs_ok = scan_volume(storage.defaultpatchfs, *message.plugin_file_list);
+
+		return (hostfs_ok || defaultpatchfs_ok);
+	}
+
+private:
 	SimulatorPatchStorage &storage;
 	PatchLocation requested_view_patch_loc_;
 

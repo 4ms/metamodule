@@ -5,10 +5,8 @@ set(4msModules
     ADEnv
     Atvert2
     BPF
-    BuffMult
     CLKD
     CLKM
-    Comp
     ComplexEG
     DEV
     DLD
@@ -18,21 +16,15 @@ set(4msModules
     ENVVCA
     EnOsc
     FM
-    Fade
     Follow
     Freeverb
-    GRev
-    Gate32
-    Gate8
     Gate
     HPF
-    InfOsc
     KPLS
     L4
     LPF
     LPG
     MNMX
-    Mixer4
     MultiLFO
     Noise
     Octave
@@ -50,9 +42,7 @@ set(4msModules
     SHEV
     SISM
     STS
-    Seq4
     Seq8
-    Sequant
     Slew
     Source
     StMix
@@ -62,9 +52,6 @@ set(4msModules
     VCAM
     Verb
 )
-
-include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
-limit_modules_built("4ms" 4msModules)
 
 # Info svgs (used to generate info.hh files and VCV svgs)
 list(TRANSFORM 4msModules PREPEND ${MM_ROOT}/shared/CoreModules/4ms/svg/ OUTPUT_VARIABLE 4MS_INFO_SVGS)

@@ -6,7 +6,6 @@
 #include "gui/elements/module_param.hh"
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_light.hh"
-#include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
@@ -90,6 +89,13 @@ struct ModuleViewPage : PageBase {
 		auto display_widthpx = std::min<lv_coord_t>(width_px + 4, 190);
 		lv_obj_set_width(ui_ModuleImage, display_widthpx);
 		lv_obj_refr_size(ui_ModuleImage);
+		if (lv_obj_get_width(ui_ModuleImage) > width_px) {
+			lv_obj_clear_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
+		} else {
+			lv_obj_add_flag(ui_ModuleImage, LV_OBJ_FLAG_SCROLLABLE);
+		}
+
+		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
 
 		active_knobset = page_list.get_active_knobset();
 
@@ -209,7 +215,6 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
 
-				//TODO: cache s_param
 				auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
 
 				if (was_redrawn && settings.map_ring_flash_active) {

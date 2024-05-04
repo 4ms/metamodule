@@ -46,3 +46,5 @@ shared/gen_minblep/gen_minblep
 simulator/firmware
 simulator/shared
 *.o
+
+metamodule-plugins/

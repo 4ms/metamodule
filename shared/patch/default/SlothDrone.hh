@@ -1,4 +1,4 @@
-static char Sloth_Drone_patch[] =
+static const char Sloth_Drone_patch[] =
 	R"(
 PatchData:
   patch_name: Sloth Drone

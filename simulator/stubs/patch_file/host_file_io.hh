@@ -10,24 +10,24 @@
 struct HostFileIO {
 	using Volume = MetaModule::Volume;
 	const Volume _vol;
-	std::filesystem::path _patch_dir;
+	std::filesystem::path _root_dir;
 
-	HostFileIO(Volume vol_id, std::string_view patch_dir)
-		: _vol{vol_id}
-		, _patch_dir{std::filesystem::absolute(patch_dir)} {
+	HostFileIO(Volume vol_id, std::string_view root_dir)
+		: _vol{vol_id} {
+		_root_dir = std::filesystem::absolute(root_dir);
 	}
 
 	bool foreach_file_with_ext(const std::string_view extension, auto action) {
 		namespace fs = std::filesystem;
 
-		std::cout << "Scanning " << _patch_dir << " for " << extension << " files...\n";
+		std::cout << "Scanning " << _root_dir << " for " << extension << " files...\n";
 
-		fs::current_path(_patch_dir);
+		fs::current_path(_root_dir);
 
 		fs::path full_path{"."};
 
 		try {
-			for (const auto &entry : fs::directory_iterator(_patch_dir)) {
+			for (const auto &entry : fs::directory_iterator(_root_dir)) {
 				auto fn = entry.path();
 				if (fn.extension() == fs::path(extension)) {
 					auto last_modif = fs::last_write_time(fn);
@@ -48,7 +48,7 @@ struct HostFileIO {
 	bool foreach_dir_entry(const std::string_view path, auto action) {
 		namespace fs = std::filesystem;
 
-		fs::current_path(_patch_dir);
+		fs::current_path(_root_dir);
 
 		std::string f_path;
 
@@ -85,10 +85,9 @@ struct HostFileIO {
 	}
 
 	uint64_t read_file(const std::string_view filename, std::span<char> buffer, size_t offset = 0) {
-		std::filesystem::current_path(_patch_dir);
-
 		// Interpret "/" root dir as _patch_dir
-		std::filesystem::current_path(_patch_dir);
+		std::filesystem::current_path(_root_dir);
+
 		std::string filepath;
 		if (filename.starts_with("/"))
 			filepath = "." + std::string(filename);
@@ -114,7 +113,7 @@ struct HostFileIO {
 
 	bool update_or_create_file(const std::string_view filename, const std::span<const char> buffer) {
 		// Interpret "/" root dir as _patch_dir
-		std::filesystem::current_path(_patch_dir);
+		std::filesystem::current_path(_root_dir);
 		std::string filepath;
 		if (filename.starts_with("/"))
 			filepath = "." + std::string(filename);

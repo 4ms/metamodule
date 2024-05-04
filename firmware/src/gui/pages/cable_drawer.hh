@@ -138,7 +138,10 @@ public:
 			if (d.gui_element.module_idx == jack.module_id && d.gui_element.count.num_outputs > 0 &&
 				d.gui_element.idx.output_idx == jack.jack_id)
 			{
-				return get_obj_xy(d.gui_element.obj);
+				if (d.gui_element.obj)
+					return get_obj_xy(d.gui_element.obj);
+				else
+					return std::nullopt;
 			}
 		}
 		return std::nullopt;
@@ -149,7 +152,10 @@ public:
 			if (d.gui_element.module_idx == jack.module_id && d.gui_element.count.num_inputs > 0 &&
 				d.gui_element.idx.input_idx == jack.jack_id)
 			{
-				return get_obj_xy(d.gui_element.obj);
+				if (d.gui_element.obj)
+					return get_obj_xy(d.gui_element.obj);
+				else
+					return std::nullopt;
 			}
 		}
 		return std::nullopt;

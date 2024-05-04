@@ -26,19 +26,27 @@ void __throw_out_of_range_fmt(char const *, ...) {
 void __throw_bad_array_new_length() {
 }
 
+void __throw_bad_cast() {
+	while (true)
+		;
+}
+
+void __throw_runtime_error(char const *) {
+}
+
 //Needed to compile at -O0 when using std::string
-template<typename T>
-struct allocator {
-	allocator();
-	allocator(const std::allocator<char> &);
-	~allocator();
-};
-template<>
-allocator<char>::allocator() = default;
-template<>
-allocator<char>::~allocator() = default;
-template<>
-allocator<char>::allocator(const std::allocator<char> &) = default;
+// template<typename T>
+// struct allocator {
+// 	allocator();
+// 	allocator(const std::allocator<char> &);
+// 	~allocator();
+// };
+// template<>
+// allocator<char>::allocator() = default;
+// template<>
+// allocator<char>::~allocator() = default;
+// template<>
+// allocator<char>::allocator(const std::allocator<char> &) = default;
 
 } // namespace std
 

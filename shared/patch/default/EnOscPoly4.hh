@@ -1,4 +1,4 @@
-static char EnOscPoly4_patch[] =
+static const char EnOscPoly4_patch[] =
 	R"(
 PatchData:
   patch_name: EnOscPoly4

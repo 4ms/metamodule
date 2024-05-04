@@ -2,7 +2,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xm4.cmake)
 set_arch_flags()
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 set(M4DIR ${CMAKE_CURRENT_SOURCE_DIR}) # /firmware/src/core_m4
 set(FWDIR ${CMAKE_SOURCE_DIR}) # /firmware
@@ -33,12 +33,12 @@ add_executable(
   ${FWDIR}/src/usb/usbd_desc.c
   ${FWDIR}/src/usb/usbh_conf.cc
   ${FWDIR}/src/usb/usbh_midi.cc
-  ${FWDIR}/lib//fatfs/source/ff.c
-  ${FWDIR}/lib//fatfs/source/ffunicode.c
-  ${FWDIR}/lib//littlefs/lfs.c
-  ${FWDIR}/lib//littlefs/lfs_util.c
+  ${FWDIR}/lib/fatfs/source/ff.c
+  ${FWDIR}/lib/fatfs/source/ffunicode.c
+  ${FWDIR}/lib/littlefs/lfs.c
+  ${FWDIR}/lib/littlefs/lfs_util.c
   ${FWDIR}/system/libc_stub.c
-  ${FWDIR}/system/libcpp_stub.cc
+  ${M4DIR}/libcpp_stub.cc
   ${FWDIR}/system/new.cc
   ${FWDIR}/system/startup_stm32mp157cxx_cm4.s
   ${DRIVERLIB}/drivers/hal_handlers.cc
@@ -106,7 +106,6 @@ target_include_directories(
           ${FWDIR}/system
           ${SHARED}
           ${SHARED}/processors
-          ${SHARED}/CoreModules
           ${SHARED}/patch
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
@@ -116,6 +115,10 @@ target_include_directories(
           ${USBDEV_LIBDIR}/Core/Inc
           ${USBDEV_LIBDIR}/Class/MSC/Inc
 )
+
+target_link_libraries(main_m4.elf PUBLIC metamodule::core-interface)
+
+set_property(TARGET main_m4.elf PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 target_link_script(
   main_m4

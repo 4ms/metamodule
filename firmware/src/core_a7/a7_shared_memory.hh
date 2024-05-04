@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/ramdisk_conf.hh"
 #include "patch_play/patch_mod_queue.hh"
 
 namespace MetaModule
@@ -16,6 +17,7 @@ struct A7SharedMemoryS {
 		FileStorageProxy *patch_storage{};
 		SyncParams *sync_params{};
 		PatchModQueue *patch_mod_queue{};
+		RamDrive *ramdrive{};
 	};
 
 	static Ptrs ptrs;

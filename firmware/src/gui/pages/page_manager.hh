@@ -48,7 +48,8 @@ public:
 				ParamsMidiState &params,
 				MetaParams &metaparams,
 				NotificationQueue &notify_queue,
-				PatchModQueue &patch_mod_queue)
+				PatchModQueue &patch_mod_queue,
+				PluginManager &plugin_manager)
 		: info{patch_storage,
 			   patch_playloader,
 			   params,
@@ -56,7 +57,8 @@ public:
 			   notify_queue,
 			   patch_mod_queue,
 			   page_list,
-			   gui_state} {
+			   gui_state,
+			   plugin_manager} {
 	}
 
 	void init() {
@@ -97,7 +99,9 @@ public:
 				info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
 				info.page_list.set_active_knobset(next_knobset);
 				std::string ks_name = patch->valid_knob_set_name(next_knobset);
-				info.notify_queue.put({"Using Knob Set \"" + ks_name + "\""});
+
+				if (cur_page != page_list.page(PageId::KnobSetView))
+					info.notify_queue.put({"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 1000});
 
 				button_light.display_knobset(next_knobset);
 			}
@@ -126,7 +130,7 @@ public:
 				// update the patch for knobs that moved
 				if (map.panel_knob_id == panel_knob_i) {
 					auto scaled_val = map.get_mapped_val(knobpos.value());
-					patch->set_static_knob_value(map.module_id, map.param_id, scaled_val);
+					patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
 				}
 			}
 		}

@@ -43,6 +43,7 @@ struct Gui {
 	// Volume or subdir name in Drives panel on PatchSelector
 	static inline lv_style_t subdir_panel_item_style;
 	static inline lv_style_t subdir_panel_item_sel_style;
+	static inline lv_style_t subdir_panel_item_sel_blurred_style;
 
 	static inline lv_style_t mapped_circle_style;
 	static inline lv_style_t mapped_jack_circle_label_style;
@@ -108,20 +109,38 @@ struct Gui {
 		palette_main[LV_PALETTE_BLUE_GREY], //?
 	};
 
+	static inline std::array<lv_color_t, 8> knob_disabled_palette{
+		palette_main[LV_PALETTE_RED],
+		palette_main[LV_PALETTE_YELLOW],
+		palette_main[LV_PALETTE_CYAN],
+		palette_main[LV_PALETTE_PINK],
+		palette_main[LV_PALETTE_ORANGE],
+		palette_main[LV_PALETTE_GREEN],
+		palette_main[LV_PALETTE_GREY],		//?
+		palette_main[LV_PALETTE_BLUE_GREY], //?
+	};
+
 	// Slider Handle Style
-	static constexpr lv_style_const_prop_t slider_handle_style_props[8] = {
+	static constexpr lv_style_const_prop_t slider_handle_style_props[9] = {
 		LV_STYLE_CONST_BG_OPA(LV_OPA_100),
-		LV_STYLE_CONST_BG_COLOR(lv_color_make_rgb565(0xFF, 0xFF, 0xFF)),
+		LV_STYLE_CONST_BG_COLOR(lv_color_make_rgb565(0x90, 0x90, 0x90)),
 		LV_STYLE_CONST_OUTLINE_OPA(LV_OPA_100),
 		LV_STYLE_CONST_OUTLINE_COLOR(lv_color_make_rgb565(0xC0, 0xC0, 0xC0)),
-		LV_STYLE_CONST_OUTLINE_WIDTH(1),
-		LV_STYLE_CONST_BORDER_COLOR(lv_color_make_rgb565(0, 0, 0)),
-		LV_STYLE_CONST_BORDER_WIDTH(1),
+		LV_STYLE_CONST_OUTLINE_WIDTH(2),
+		LV_STYLE_CONST_BORDER_COLOR(lv_color_make_rgb565(0x20, 0x20, 0x20)),
+		LV_STYLE_CONST_BORDER_WIDTH(2),
+		LV_STYLE_CONST_BORDER_OPA(LV_OPA_80),
 		LV_STYLE_CONST_RADIUS(2),
 	};
 	static inline auto slider_handle_style = LV_STYLE_CONST_CPP(slider_handle_style_props);
 
 	static void init_lvgl_styles() {
+
+		for (auto &color : knob_disabled_palette) {
+			auto hsv = lv_color_to_hsv(color);
+			color = lv_color_hsv_to_rgb(hsv.h, hsv.s / 2, hsv.v / 2);
+		}
+
 		// invisible_style
 		lv_style_init(&invisible_style);
 		lv_style_set_bg_opa(&invisible_style, 0);
@@ -224,6 +243,12 @@ struct Gui {
 		lv_style_set_bg_opa(&subdir_panel_item_sel_style, LV_OPA_100);
 		lv_style_set_outline_width(&subdir_panel_item_sel_style, 0);
 		lv_style_set_border_width(&subdir_panel_item_sel_style, 0);
+
+		lv_style_init(&subdir_panel_item_sel_blurred_style);
+		lv_style_set_bg_color(&subdir_panel_item_sel_blurred_style, lv_color_hex(0x555555));
+		lv_style_set_bg_opa(&subdir_panel_item_sel_blurred_style, LV_OPA_100);
+		lv_style_set_outline_width(&subdir_panel_item_sel_blurred_style, 0);
+		lv_style_set_border_width(&subdir_panel_item_sel_blurred_style, 0);
 
 		// Dropdown
 		lv_style_init(&dropdown_style);

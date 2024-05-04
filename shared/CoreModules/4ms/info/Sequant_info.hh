@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/elements/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,6 +10,7 @@ struct SequantInfo : ModuleInfoBase {
     static constexpr std::string_view description{"2 Ch. 8 Step Sequencer w/ Quantizer"};
     static constexpr uint32_t width_hp = 17;
     static constexpr std::string_view svg_filename{"res/modules/Sequant_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Sequant.png"};
 
     using enum Coords;
 

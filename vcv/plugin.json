@@ -15,9 +15,9 @@
   "modules": [
 	{
       "slug": "HubMedium",
-      "name": "Meta Module",
-      "description": "Meta Module",
-      "tags": ["Hardware clone", "Utility", "External"]
+      "name": "MetaModule",
+      "description": "MetaModule Hub is used to create patches that run on MetaModule hardware. Use the hub to create mappings between physical and virtual controls and jacks.",
+      "tags": ["Utility", "External"]
 	},
 	{
       "slug": "EnOsc",
@@ -98,12 +98,6 @@
       "tags": ["Oscillator"]
     },
     {
-      "slug": "InfOsc",
-      "name": "InfOsc",
-      "description": "Infinite Oscillator (partially functional)",
-      "tags": ["Oscillator"]
-    },
-    {
       "slug": "Drum",
       "name": "Drum",
       "description": "Drum",
@@ -130,37 +124,37 @@
     {
       "slug": "VCAM",
       "name": "VCA Matrix [VCAM]",
-      "description": "VCAM (not implemented)",
+      "description": "VCAM",
       "tags": ["Voltage-controlled amplifier", "Hardware clone", "Mixer"]
     },
     {
       "slug": "Tapo",
       "name": "Tapographic Delay [TAPO]",
-      "description": "Tapo (not implemented)",
+      "description": "Tapo",
       "tags": ["Effect", "Delay", "Digital", "Hardware clone"]
     },
     {
       "slug": "SISM",
       "name": "Shifting Inverting Signal Mingler [SISM]",
-      "description": "SISM (not implemented)",
+      "description": "SISM",
       "tags": ["Utility", "Mixer", "Hardware clone"]
     },
     {
       "slug": "SH",
       "name": "Sample and Hold",
-      "description": "SH (not implemented)",
+      "description": "SH",
       "tags": ["Random", "Sample and hold"]
     },
     {
       "slug": "SCM",
       "name": "Shuffling Clock Multiplier [SCM]",
-      "description": "SCM (not implemented)",
+      "description": "SCM (partially implemented)",
       "tags": ["Clock modulator", "Hardware clone"]
     },
     {
       "slug": "RCD",
       "name": "Rotating Clock Divider [RCD]",
-      "description": "RCD (not implemented)",
+      "description": "RCD",
       "tags": ["Clock modulator", "Hardware clone"]
     },
     {
@@ -172,7 +166,7 @@
     {
       "slug": "QCD",
       "name": "Quad Clock Distributor [QCD]",
-      "description": "QCD (not implemented)",
+      "description": "QCD",
       "tags": ["Clock generator", "Clock modulator", "Quad", "Hardware clone"]
     },
     {
@@ -196,32 +190,8 @@
     {
       "slug": "L4",
       "name": "Listen Four [L4]",
-      "description": "L4 (not implemented)",
+      "description": "L4",
       "tags": ["Mixer"]
-    },
-    {
-      "slug": "Gate8",
-      "name": "Gate8",
-      "description": "Gate8 (not implemented)",
-      "tags": ["Sequencer"]
-    },
-    {
-      "slug": "Gate32",
-      "name": "Gate32",
-      "description": "Gate32 (not implemented)",
-      "tags": ["Sequencer"]
-    },
-    {
-      "slug": "GRev",
-      "name": "GRev",
-      "description": "GRev (not implemented)",
-      "tags": ["Effect", "Granular"]
-    },
-    {
-      "slug": "Fade",
-      "name": "Fade",
-      "description": "Fade (not implemented)",
-      "tags": ["Utility"]
     },
     {
       "slug": "DLD",
@@ -230,22 +200,10 @@
       "tags": ["Dual", "Digital", "Delay", "Effect", "Hardware clone"]
     },
     {
-      "slug": "Comp",
-      "name": "Comp",
-      "description": "Comp (not implemented)",
-      "tags": []
-    },
-    {
       "slug": "ADEnv",
       "name": "ADEnv",
       "description": "ADEnv (not implemented)",
       "tags": ["Envelope Generator"]
-    },
-    {
-      "slug": "Sequant",
-      "name": "Sequant",
-      "description": "Sequant (not implemented)",
-      "tags": ["Sequencer", "Quantizer"]
     },
     {
       "slug": "Switch41",
@@ -258,12 +216,6 @@
       "name": "Switch14",
       "description": "Switch 1:4",
       "tags": ["Switch", "Quad"]
-    },
-    {
-      "slug": "Seq4",
-      "name": "Seq4",
-      "description": "Seq4",
-      "tags": ["Sequencer"]
     },
     {
       "slug": "Quant",
@@ -292,7 +244,7 @@
     {
       "slug": "LPF",
       "name": "LPF",
-      "description": "LPF (not implemented)",
+      "description": "LPF",
       "tags": ["Filter"]
     },
     {
@@ -304,7 +256,7 @@
     {
       "slug": "Slew",
       "name": "Slew",
-      "description": "Slew (not implemented)",
+      "description": "Slew",
       "tags": ["Slew limiter"]
     },
     {
@@ -360,18 +312,6 @@
       "name": "Atvert2",
       "description": "Two-channel attenuverter",
       "tags": ["Attenuator", "Dual", "Utility"]
-    },
-	{
-      "slug": "BuffMult",
-      "name": "Buffered Multiple [BuffMult]",
-      "description": "Takes one signal and outputs four identical copies. Useful for cleaning up cables and repatching.",
-      "tags": ["Multiple", "Dual", "Utility"]
-	},
-    {
-      "slug": "Mixer4",
-      "name": "Mixer4",
-      "description": "Mixer4 (not implemented)",
-      "tags": ["Mixer"]
     }
   ]
 }

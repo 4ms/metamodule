@@ -11,7 +11,7 @@ set(LV_CONF_PATH
     ${CMAKE_CURRENT_LIST_DIR}/lv_conf.h
     CACHE STRING "" FORCE)
 
-add_compile_options(-g2)
+add_compile_options(-O0 -g2)
 
 # #################### cpputil #########################################
 
@@ -25,6 +25,10 @@ add_subdirectory(lvgl_drv)
 
 get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 include(${LVGL_DIR}/CMakeLists.txt)
+target_include_directories(lvgl PRIVATE 
+          ${FWDIR}/lib/fatfs/source
+          ${FWDIR}/src/fs/fatfs
+)
 
 # #################### RYML ##################################
 
@@ -37,50 +41,58 @@ target_link_libraries(ui PRIVATE lvgl)
 
 # #################### VCV Adaptor ##################################
 
-add_subdirectory(${FWDIR}/src/VCV_adaptor
-                 ${CMAKE_CURRENT_BINARY_DIR}/VCV_adaptor)
+add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
+target_compile_options(vcv_plugin PRIVATE -Wno-double-promotion)
 
 # #################### Other brands ##################################
  
-# Only build a limited set of modules, defined in an external file  
-include(${FWDIR}/vcv_ports/glue/filter.cmake)  
-unset(USE_LIMITED_MODULES)  
-if(DEFINED LIMITED_MODULES_FILE)  
-  validate_limited_modules_file(${LIMITED_MODULES_FILE})  
-endif()  
- 
 add_subdirectory(${FWDIR}/vcv_ports/ ${CMAKE_CURRENT_BINARY_DIR}/vcv_ports)
+target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 
 # #################### Application ############################################
 
 add_executable(
-    simulator 
-    src/main.cc 
-    src/ui.cc
+	simulator 
+	src/main.cc 
+	src/ui.cc
     stubs/random.cpp
-    ${FWDIR}/src/gui/elements/element_name.cc
+	${FWDIR}/src/gui/elements/element_name.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
-    ${SHARED}/patch_convert/ryml/ryml_serial.cc
-    ${SHARED}/patch_convert/ryml/ryml_init.cc
-    ${SHARED}/patch_convert/yaml_to_patch.cc 
-    ${SHARED}/patch_convert/patch_to_yaml.cc
-    ${SHARED}/CoreModules/hub/hub_medium.cc
-    )
+	${SHARED}/patch_convert/ryml/ryml_serial.cc
+	${SHARED}/patch_convert/ryml/ryml_init.cc
+	${SHARED}/patch_convert/yaml_to_patch.cc 
+	${SHARED}/patch_convert/patch_to_yaml.cc
+	${SHARED}/CoreModules/moduleFactory.cc
+	#Fatfs:
+	stubs/fattime.cc
+	${FWDIR}/lib/fatfs/source/ff.c
+	${FWDIR}/lib/fatfs/source/ffunicode.c
+	${FWDIR}/src/fs/fatfs/diskio.cc
+	${FWDIR}/src/fs/time_convert.cc
+	#Tar:
+	${FWDIR}/src/fs/asset_drive/untar.cc
+	)
 
 target_include_directories(
   simulator
   PRIVATE src
           stubs
           sdl_audio
+          ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
           ${SHARED}/patch
           ${FWDIR}/src/medium
+          ${FWDIR}/lib/fatfs/source
+          ${FWDIR}/src/fs/fatfs
+			.
           )
 
-target_compile_options(simulator PRIVATE -Wall -Og -Wno-double-promotion)
+target_compile_options(simulator PRIVATE -Wall -Og)
+target_compile_options(simulator PRIVATE -Wno-double-promotion)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports)
+target_link_libraries(simulator PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 
