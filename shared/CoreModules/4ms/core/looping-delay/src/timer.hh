@@ -1,6 +1,6 @@
 #pragma once
-#include "ping_methods.hh"
 #include "../mocks/mocks.hh"
+#include "ping_methods.hh"
 
 namespace LDKit
 {
@@ -119,6 +119,14 @@ public:
 		auto t = _ping_cycled;
 		_ping_cycled = false;
 		return t;
+	}
+
+	void scale_periods(float factor) {
+		_ping_time = (float)_ping_time * factor;
+		_ping_tmr = (float)_ping_tmr * factor;
+		_pingled_tmr = (float)_pingled_tmr * factor;
+		_loop_time = (float)_loop_time * factor;
+		_loop_tmr = (float)_loop_tmr * factor;
 	}
 };
 
