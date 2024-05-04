@@ -19,16 +19,16 @@ class SCMCore : public SmartCoreProcessor<SCMInfo> {
 public:
 	SCMCore() = default;
 
-	uint32_t convert_param(float rawval, uint32_t max) {
+	uint32_t convert_param(float rawval, float max) {
 		return MathTools::constrain<float>(rawval * max, 0.f, 255.f);
 	}
 
 	void update() override {
-		uint32_t rotate_adc   = convert_param(getState<RotateKnob>()  + getInput<RotateJackIn>().value_or(0), 8);
-		uint32_t slippage_adc = convert_param(getState<SlipKnob>()    + getInput<SlipJackIn>().value_or(0), 255);
-		uint32_t shuffle_adc  = convert_param(getState<ShuffleKnob>() + getInput<ShuffleJackIn>().value_or(0), 255);
-		uint32_t skip_adc     = convert_param(getState<SkipKnob>()    + getInput<SkipJackIn>().value_or(0), 255);
-		uint32_t pw_adc       = convert_param(getState<PwKnob>()      + getInput<PwJackIn>().value_or(0), 255);
+		uint32_t rotate_adc   = convert_param(getState<RotateKnob>()  + getInput<RotateJackIn>().value_or(0)/5.f, 7.99f);
+		uint32_t slippage_adc = convert_param(getState<SlipKnob>()    + getInput<SlipJackIn>().value_or(0)/5.f, 255);
+		uint32_t shuffle_adc  = convert_param(getState<ShuffleKnob>() + getInput<ShuffleJackIn>().value_or(0)/5.f, 255);
+		uint32_t skip_adc     = convert_param(getState<SkipKnob>()    + getInput<SkipJackIn>().value_or(0)/5.f, 255);
+		uint32_t pw_adc       = convert_param(getState<PwKnob>()      + getInput<PwJackIn>().value_or(0)/5.f, 255);
 
 		bool faster_switch_state = getState<_4XFastButton>() == LatchingButton::State_t::DOWN;
 		mute = getState<MuteButton>() == LatchingButton::State_t::DOWN;
