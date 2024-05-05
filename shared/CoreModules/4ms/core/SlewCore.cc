@@ -33,7 +33,7 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
-		if (input_id == Info::InputIn)
+		if (input_id == Info::InputInput)
 			signalInput = val;
 	}
 

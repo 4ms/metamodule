@@ -27,7 +27,7 @@ public:
 
 	void set_input(int input_id, float val) override {
 		switch (input_id) {
-			case Info::InputIn:
+			case Info::InputInput:
 				signalInput = val;
 				break;
 			case Info::InputCv:

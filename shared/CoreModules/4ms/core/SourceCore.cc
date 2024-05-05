@@ -35,10 +35,10 @@ public:
 
 	float get_output(const int output_id) const override {
 		switch (output_id) {
-			case Info::Output_1:
+			case Info::Output_1_Out:
 				return output1 * OutputVoltageRange;
 				break;
-			case Info::Output_2:
+			case Info::Output_2_Out:
 				return output2 * OutputVoltageRange;
 				break;
 		}
