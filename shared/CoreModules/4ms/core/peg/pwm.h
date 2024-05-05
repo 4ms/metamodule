@@ -3,8 +3,8 @@
  */
 
 #pragma once
-#include "drivers/stm32xx.h"
 #include <stddef.h>
+
 
 enum PwmOutputs {
 	PWM_ENVA_R,
@@ -28,14 +28,14 @@ enum PwmOutputs {
 	NUM_PWMS
 };
 
-struct PWMOutput {
-	GPIO_TypeDef *gpio;
-	uint32_t pinnum;
-	uint8_t af;
-	TIM_HandleTypeDef tim;
-	uint8_t timchan;
-	uint32_t period;
-};
+// struct PWMOutput {
+// 	GPIO_TypeDef *gpio;
+// 	uint32_t pinnum;
+// 	uint8_t af;
+// 	TIM_HandleTypeDef tim;
+// 	uint8_t timchan;
+// 	uint32_t period;
+// };
 
 void init_pwm();
-void update_pwm(uint32_t pwmval, enum PwmOutputs channel);
+// void update_pwm(uint32_t pwmval, enum PwmOutputs channel);

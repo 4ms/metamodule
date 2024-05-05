@@ -1,5 +1,5 @@
 #pragma once
-#include "dig_inout_pins.hh"
+// #include "dig_inout_pins.hh"
 
 #ifdef TRIGDEBUGMODE
 #define DEBUGON DigIO::TrigJack::high();

@@ -1,28 +1,30 @@
-#include "adc.h"
+// #include "adc.h"
 #include "analog_conditioning.h"
 #include "calibration.hh"
 #include "dac.h"
 #include "debounced_digins.h"
 #include "dig_inouts.hh"
-#include "drivers/system.hh"
+// #include "drivers/system.hh"
 #include "env_transition.h"
 #include "env_update.h"
-#include "flash_layout.hh"
+// #include "flash_layout.hh"
 #include "flash_user.hh"
-#include "hardware_tests.h"
+// #include "hardware_tests.h"
 #include "leds.h"
 #include "math_util.h"
 #include "params.h"
 #include "pingable_env.h"
 #include "pwm.h"
 #include "settings.h"
-#include "stm32xx.h"
-#include "system.hh"
+// #include "stm32xx.h"
+// #include "system.hh"
 #include "system_mode.h"
 #include "timers.h"
 #include "trigout.h"
 #include "util/math.hh"
-#include "version.hh"
+
+namespace MetaModule::PEG
+{
 
 extern analog_t analog[NUM_ADCS];
 extern struct SystemSettings settings;
@@ -75,9 +77,6 @@ static const uint32_t kDacSampleRate = 40000;
 
 void main() {
 
-	mdrivlib::System::SetVectorTable(AppFlashAddr);
-	system_init();
-
 	init_pingable_env(&m);
 	init_dig_inouts();
 
@@ -91,24 +90,12 @@ void main() {
 	init_pwm();
 	all_lights_off();
 
-	if (!read_settings()) {
-		test_hardware();
-		write_settings();
-	}
-	HAL_Delay(10);
-	if (DigIO::PingBut::read()) {
-		test_hardware();
-	}
-
 	init_debouncer();
 
-	HAL_Delay(50);
 	read_settings();
 	adjust_palette();
 	check_calibration();
 	adjust_palette();
-
-	Version::show_version();
 
 	init_dac(kDacSampleRate, &update_all_envelopes);
 
@@ -467,6 +454,4 @@ void read_ping_clock() {
 	}
 }
 
-extern "C" void SysTick_Handler() {
-	HAL_IncTick();
 }
