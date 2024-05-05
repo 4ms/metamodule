@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,18 +11,18 @@ struct LPGInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Low Pass Gate"};
     static constexpr uint32_t width_hp = 8;
     static constexpr std::string_view svg_filename{"res/modules/LPG_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/LPG.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/LPG.png"};
 
     using enum Coords;
 
     static constexpr std::array<Element, 7> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(57.94), to_mm<72>(57.97), Center, "Level", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(119.21), Center, "CV", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(119.21), Center, "Decay", ""}},
-		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(272.09), Center, "Input", ""}},
-		GateJackInput4ms{{to_mm<72>(83.32), to_mm<72>(272.09), Center, "Ping", ""}},
-		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(313.7), Center, "CV Jack", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(83.32), to_mm<72>(313.7), Center, "Out", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(57.81), to_mm<72>(57.85), Center, "Level", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(31.83), to_mm<72>(119.09), Center, "CV", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(83.37), to_mm<72>(119.09), Center, "Decay", ""}},
+		AnalogJackInput4ms{{to_mm<72>(32.0), to_mm<72>(271.97), Center, "Input", ""}},
+		GateJackInput4ms{{to_mm<72>(83.2), to_mm<72>(271.97), Center, "Ping", ""}},
+		AnalogJackInput4ms{{to_mm<72>(32.0), to_mm<72>(313.57), Center, "CV Jack", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(83.2), to_mm<72>(313.57), Center, "Out", ""}},
 }};
 
     enum class Elem {
@@ -37,24 +38,25 @@ struct LPGInfo : ModuleInfoBase {
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobLevel = 0,
-        KnobCv = 1,
-        KnobDecay = 2,
+        KnobLevel, 
+        KnobCv, 
+        KnobDecay, 
         NumKnobs,
     };
     
     
     enum {
-        InputInput = 0,
-        InputPing = 1,
-        InputCv_Jack = 2,
+        InputInput, 
+        InputPing, 
+        InputCv_Jack, 
         NumInJacks,
     };
     
     enum {
-        OutputOut = 0,
+        OutputOut, 
         NumOutJacks,
     };
+    
     
 };
 } // namespace MetaModule

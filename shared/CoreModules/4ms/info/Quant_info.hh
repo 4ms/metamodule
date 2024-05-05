@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,20 +11,20 @@ struct QuantInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Quantizer"};
     static constexpr uint32_t width_hp = 10;
     static constexpr std::string_view svg_filename{"res/modules/Quant_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/Quant.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/Quant.png"};
 
     using enum Coords;
 
     static constexpr std::array<Element, 9> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(37.85), to_mm<72>(151.34), Center, "Scale", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(106.4), to_mm<72>(151.34), Center, "Root", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(72.13), to_mm<72>(201.33), Center, "Transpose", ""}},
-		AnalogJackInput4ms{{to_mm<72>(29.94), to_mm<72>(272.23), Center, "Input", ""}},
-		AnalogJackInput4ms{{to_mm<72>(72.13), to_mm<72>(272.23), Center, "Scale CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(115.17), to_mm<72>(272.23), Center, "Root CV", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(29.94), to_mm<72>(313.84), Center, "Thru", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(72.13), to_mm<72>(313.84), Center, "Pre", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(115.17), to_mm<72>(313.84), Center, "Out", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(72.0), to_mm<72>(57.56), Center, "Scale", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(37.73), to_mm<72>(119.29), Center, "Root", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(106.27), to_mm<72>(119.29), Center, "Transpose", ""}},
+		AnalogJackInput4ms{{to_mm<72>(29.82), to_mm<72>(272.11), Center, "Input", ""}},
+		AnalogJackInput4ms{{to_mm<72>(72.0), to_mm<72>(272.11), Center, "Scale CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(115.04), to_mm<72>(272.11), Center, "Root CV", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(29.82), to_mm<72>(313.71), Center, "Thru", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(72.0), to_mm<72>(313.71), Center, "Pre", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(115.04), to_mm<72>(313.71), Center, "Out", ""}},
 }};
 
     enum class Elem {
@@ -41,26 +42,27 @@ struct QuantInfo : ModuleInfoBase {
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobScale = 0,
-        KnobRoot = 1,
-        KnobTranspose = 2,
+        KnobScale, 
+        KnobRoot, 
+        KnobTranspose, 
         NumKnobs,
     };
     
     
     enum {
-        InputInput = 0,
-        InputScale_Cv = 1,
-        InputRoot_Cv = 2,
+        InputInput, 
+        InputScale_Cv, 
+        InputRoot_Cv, 
         NumInJacks,
     };
     
     enum {
-        OutputThru = 0,
-        OutputPre = 1,
-        OutputOut = 2,
+        OutputThru, 
+        OutputPre, 
+        OutputOut, 
         NumOutJacks,
     };
+    
     
 };
 } // namespace MetaModule
