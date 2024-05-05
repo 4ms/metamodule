@@ -38,4 +38,4 @@ enum PwmOutputs {
 // };
 
 void init_pwm();
-// void update_pwm(uint32_t pwmval, enum PwmOutputs channel);
+void update_pwm(uint32_t pwmval, enum PwmOutputs channel);

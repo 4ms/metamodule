@@ -26,13 +26,14 @@
 namespace MetaModule::PEG
 {
 
-extern analog_t analog[NUM_ADCS];
-extern struct SystemSettings settings;
-extern volatile uint32_t systmr;
-extern volatile uint32_t tapouttmr;
-extern volatile uint32_t tapintmr;
-extern volatile uint32_t pingtmr;
-extern volatile uint32_t trigouttmr;
+struct SystemSettings settings;
+
+/* extern */ analog_t analog[NUM_ADCS];
+/* extern */ uint32_t systmr;
+/* extern */ uint32_t tapouttmr;
+/* extern */ uint32_t tapintmr;
+/* extern */ uint32_t pingtmr;
+/* extern */ uint32_t trigouttmr;
 
 static const uint32_t kDacSampleRate = 40000;
 
@@ -58,7 +59,7 @@ MiniPEG::MiniPEG()
 	check_calibration();
 	adjust_palette();
 
-	init_dac(kDacSampleRate, &update_all_envelopes);
+	// init_dac(kDacSampleRate, &update_all_envelopes);
 
 	init_params();
 
