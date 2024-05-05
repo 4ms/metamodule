@@ -1,3 +1,5 @@
+#include "main.hh"
+
 // #include "adc.h"
 #include "analog_conditioning.h"
 #include "calibration.hh"
@@ -9,14 +11,12 @@
 #include "env_update.h"
 // #include "flash_layout.hh"
 #include "flash_user.hh"
-// #include "hardware_tests.h"
 #include "leds.h"
 #include "math_util.h"
 #include "params.h"
-#include "pingable_env.h"
+
 #include "pwm.h"
 #include "settings.h"
-// #include "stm32xx.h"
 // #include "system.hh"
 #include "system_mode.h"
 #include "timers.h"
@@ -34,49 +34,10 @@ extern volatile uint32_t tapintmr;
 extern volatile uint32_t pingtmr;
 extern volatile uint32_t trigouttmr;
 
-volatile uint32_t ping_irq_timestamp = 0;
-volatile uint32_t trig_irq_timestamp = 0;
-
-uint32_t last_tapin_time = 0;
-uint32_t tapout_clk_time = 0;
-
-uint32_t clk_time = 0;
-
-uint8_t cycle_but_on = 0;
-
-volatile uint8_t using_tap_clock = 0;
-uint8_t do_toggle_cycle = 0;
-
-uint8_t force_params_update = 0;
-
-char div_ping_led = 0;
-char got_tap_clock = 0;
-
-uint32_t entering_system_mode = 0;
-uint8_t system_mode_cur = 0;
-uint8_t initial_cycle_button_state = 0;
-char update_cycle_button_now = 0;
-
-bool adjusting_shift_mode = false;
-bool toggled_sync_mode = false;
-int16_t cycle_latched_offset;
-
-PingableEnvelope m;
-
-// main.h
-static void read_ping_button();
-static void read_trigjacks();
-static void read_cycle_button();
-static void check_reset_envelopes();
-static void update_tap_clock();
-static void read_ping_clock();
-static void ping_led_off();
-static void ping_led_on();
-
 static const uint32_t kDacSampleRate = 40000;
 
-void main() {
-
+MiniPEG::MiniPEG()
+{
 	init_pingable_env(&m);
 	init_dig_inouts();
 
@@ -128,33 +89,34 @@ void main() {
 	}
 
 	last_tapin_time = 0;
-
-	while (1) {
-		// G0: loops every ~11uS, maybe 13us if you include envelope updates every
-		// 4th loop G4: loops every ~2uS, with ~10us gaps
-		// p4 unit no-lock: 1.2uS fastest loop. Max 10us loop... average 530kHz
-		// p5-f746: 1.5us fastest, 10us slowest, Mean: 3.9us
-		// p5-f423: 2.5us fastest, 15us slowest, Mean: 6us
-
-		// DEBUGON;
-		read_ping_button();
-		read_trigjacks();
-		read_cycle_button();
-		check_reset_envelopes();
-
-		// DEBUGOFF;
-		update_tap_clock();
-		read_ping_clock();
-		update_adc_params(force_params_update);
-		force_params_update = 0;
-
-		handle_trigout_trigfall();
-
-		handle_system_mode(m.sync_to_ping_mode);
-	}
 }
 
-static void read_ping_button() {
+void MiniPEG::update()
+{
+	// G0: loops every ~11uS, maybe 13us if you include envelope updates every
+	// 4th loop G4: loops every ~2uS, with ~10us gaps
+	// p4 unit no-lock: 1.2uS fastest loop. Max 10us loop... average 530kHz
+	// p5-f746: 1.5us fastest, 10us slowest, Mean: 3.9us
+	// p5-f423: 2.5us fastest, 15us slowest, Mean: 6us
+
+	// DEBUGON;
+	read_ping_button();
+	read_trigjacks();
+	read_cycle_button();
+	check_reset_envelopes();
+
+	// DEBUGOFF;
+	update_tap_clock();
+	read_ping_clock();
+	update_adc_params(force_params_update);
+	force_params_update = 0;
+
+	handle_trigout_trigfall();
+
+	handle_system_mode(m.sync_to_ping_mode);	
+}
+
+void MiniPEG::read_ping_button() {
 	if (toggled_sync_mode)
 		return;
 
@@ -207,7 +169,7 @@ static void read_ping_button() {
 	}
 }
 
-void handle_qnt_trig(struct PingableEnvelope *e) {
+void MiniPEG::handle_qnt_trig(struct PingableEnvelope *e) {
 	e->triga_down = 0;
 	e->trigq_down = 1;
 	e->sync_to_ping_mode = 1;
@@ -247,7 +209,7 @@ void handle_async_trig(struct PingableEnvelope *e) {
 	e->async_phase_diff = e->divpingtmr;
 }
 
-void read_trigjacks() {
+void MiniPEG::read_trigjacks() {
 	if (just_pressed(TRIGGER_JACK)) {
 		if (settings.trigin_function == TRIGIN_IS_QNT)
 			handle_qnt_trig(&m);
@@ -274,7 +236,7 @@ void read_trigjacks() {
 	}
 }
 
-void update_trigout() {
+void MiniPEG::update_trigout() {
 	if (m.env_state == RISE) {
 		if ((m.accum >> 19) >= 2048)
 			hr_on();
@@ -292,7 +254,7 @@ void update_trigout() {
 	}
 }
 
-static void read_cycle_button() {
+void MiniPEG::read_cycle_button() {
 	if (just_pressed(CYCLE_BUTTON)) {
 		cycle_latched_offset = analog[POT_OFFSET].lpf_val;
 	}
@@ -330,19 +292,19 @@ static void read_cycle_button() {
 	}
 }
 
-static void ping_led_off() {
+void MiniPEG::ping_led_off() {
 	set_rgb_led(LED_PING, c_OFF);
 	div_ping_led = 0;
 }
 
-static void ping_led_on() {
+void MiniPEG::ping_led_on() {
 	set_rgb_led(LED_PING, m.sync_to_ping_mode ? c_CYAN : c_WHITE);
 	div_ping_led = 1;
 }
 
 // Todo: this should be done when divpingtmr is updated, or when div_clk_time is
 // updated void resync_on_divpingtmr()
-void check_reset_envelopes() {
+void MiniPEG::check_reset_envelopes() {
 	check_restart_async_env(&m);
 
 	if (div_ping_led && (m.divpingtmr >= (m.div_clk_time >> 1))) {
@@ -362,7 +324,7 @@ void check_reset_envelopes() {
 }
 
 // Todo: this only needs to be done when tapouttmr updates
-void update_tap_clock() {
+void MiniPEG::update_tap_clock() {
 	if (tapout_clk_time) {
 		if (tapouttmr >= tapout_clk_time) {
 			tapouttmr = 0;
@@ -381,7 +343,7 @@ void update_tap_clock() {
 	}
 }
 
-void read_ping_clock() {
+void MiniPEG::read_ping_clock() {
 	if (got_tap_clock || ping_irq_timestamp) {
 		if (ping_irq_timestamp) {
 			uint32_t prev_clk_time = clk_time;
