@@ -4,6 +4,7 @@
 #include "conf/panel_conf.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/smp.hh"
+#include "null_module.hh"
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
@@ -108,8 +109,7 @@ public:
 
 			if (modules[i] == nullptr) {
 				pr_err("Module %s not found\n", pd.module_slugs[i].data());
-				is_loaded = false;
-				return {false, "Cannot load: Module " + std::string(pd.module_slugs[i]) + " not known"};
+				modules[i] = std::make_unique<NullModule>();
 			}
 			pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
