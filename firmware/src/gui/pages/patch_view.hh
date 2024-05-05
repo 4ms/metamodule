@@ -216,6 +216,7 @@ struct PatchViewPage : PageBase {
 			settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
+			watch_lights();
 		}
 
 		if (is_patch_playing != last_is_patch_playing) {
