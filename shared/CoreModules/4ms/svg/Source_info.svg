@@ -76,7 +76,7 @@
     <circle id="_1_Out" data-name=" 1 Out" cx="28.8" cy="265.11" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="_2" data-name="2" cx="28.8" cy="94.96" r="8.5" style="fill: #ff0020; stroke-width: 0px;"/>
     <circle id="_1" data-name="1" cx="28.8" cy="46.72" r="8.5" style="fill: #ff0020; stroke-width: 0px;"/>
-    <text id="slug" transform="translate(38.07 369.44)" style="fill: #000; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0">S</tspan><tspan x="1.48" y="0" style="letter-spacing: 0em;">R</tspan><tspan x="3.1" y="0">C</tspan></text>
+    <text id="slug" transform="translate(38.07 369.44)" style="fill: #000; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0">Source</tspan></text>
     <text id="modulename" transform="translate(47.68 369.44)" style="fill: #000; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">S</tspan><tspan x="1.5" y="0" style="letter-spacing: 0em;">ou</tspan><tspan x="4.8" y="0" style="letter-spacing: -.01em;">r</tspan><tspan x="5.75" y="0" style="letter-spacing: 0em;">c</tspan><tspan x="7.07" y="0">e</tspan></text>
   </g>
 </svg>
