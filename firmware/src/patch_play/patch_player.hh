@@ -104,18 +104,24 @@ public:
 		// First module is the hub
 		modules[0] = ModuleFactory::create(PanelDef::typeID);
 
+		unsigned num_not_found = 0;
+		std::string not_found;
 		for (size_t i = 1; i < pd.module_slugs.size(); i++) {
 			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
 				pr_err("Module %s not found\n", pd.module_slugs[i].data());
 				modules[i] = std::make_unique<NullModule>();
-			}
-			pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
+				num_not_found++;
+				if (num_not_found == 1)
+					not_found = std::string_view{pd.module_slugs[i]};
+			} else {
+				pr_trace("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
-			modules[i]->mark_all_inputs_unpatched();
-			modules[i]->mark_all_outputs_unpatched();
-			modules[i]->set_samplerate(samplerate);
+				modules[i]->mark_all_inputs_unpatched();
+				modules[i]->mark_all_outputs_unpatched();
+				modules[i]->set_samplerate(samplerate);
+			}
 		}
 
 		mark_patched_jacks();
@@ -147,7 +153,15 @@ public:
 		set_active_knob_set(0);
 
 		is_loaded = true;
-		return {true};
+		if (num_not_found == 1)
+			return {true, std::string{"Module "} + not_found + std::string{" not known, ignoring."}};
+		else if (num_not_found > 1)
+			return {true,
+					std::string{"Module "} + not_found + std::string{" and "} + std::to_string(num_not_found - 1) +
+						std::string{" others not known, ignoring."}};
+
+		else
+			return {true};
 	}
 
 	// Runs the patch
