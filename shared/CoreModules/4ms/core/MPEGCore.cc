@@ -2,7 +2,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "info/MPEG_info.hh"
 
-#include "peg/main.hh"
+#include "mpeg/main.hh"
 
 #include "helpers/FlipFlop.h"
 #include "helpers/EdgeDetector.h"
