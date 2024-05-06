@@ -56,7 +56,7 @@ private:
 		const static Info::Elem DelayFeedInput        = DelayFeedAJackIn;
 		const static Info::Elem LoopOutput            = LoopAOut;
 		const static Info::Elem TimeLight             = TimeALedLight;
-		const static Info::Elem TimeModSwitch         = P16_OR_1_8ThASwitch;
+		const static Info::Elem TimeModSwitch         = TimeMultASwitch;
 		const static Info::Elem SoftClipEnabledAlt    = SoftClipAAltParam;
 		const static Info::Elem AutoMuteEnabledAlt    = AutomuteAAltParam;
 		const static Info::Elem CrossFadeTimeAlt      = CrossfadeAAltParam;
@@ -86,7 +86,7 @@ private:
 		const static Info::Elem DelayFeedInput        = DelayFeedBJackIn;
 		const static Info::Elem LoopOutput            = LoopBOut;
 		const static Info::Elem TimeLight             = TimeBLedLight;
-		const static Info::Elem TimeModSwitch         = P16_OR_1_8ThBSwitch;
+		const static Info::Elem TimeModSwitch         = TimeMultBSwitch;
 		const static Info::Elem SoftClipEnabledAlt    = SoftClipBAltParam;
 		const static Info::Elem AutoMuteEnabledAlt    = AutomuteBAltParam;
 		const static Info::Elem CrossFadeTimeAlt      = CrossfadeBAltParam;
