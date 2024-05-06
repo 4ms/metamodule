@@ -25,6 +25,7 @@ public:
 
 	void update() override {
 		sideloadDrivers();
+		sideloadSystemSettings();
 		peg.update();
 	}
 
@@ -60,6 +61,19 @@ private:
 		setLED<CycleButton>(std::array<float,3>{pwmToFloat(peg.pwm_vals[6]),pwmToFloat(peg.pwm_vals[7]),pwmToFloat(peg.pwm_vals[8])});
 		setLED<PingButton>(std::array<float,3>{pwmToFloat(peg.pwm_vals[9]),pwmToFloat(peg.pwm_vals[10]),pwmToFloat(peg.pwm_vals[11])});
 		setLED<EofLight>(pwmToFloat(peg.pwm_vals[12]));
+	}
+
+	void sideloadSystemSettings()
+	{
+		peg.settings.limit_skew = getState<SkewLimitAltParam>();
+		//TODO: this might need scaling
+		peg.settings.free_running_ping = getState<FreeNRunningPingAltParam>();
+		peg.settings.trigout_is_trig = getState<EofJackTypeAltParam>();
+		peg.settings.trigin_function = TrigInFunctions(getState<TrigJackModeAltParam>());
+		peg.settings.trigout_function = TrigOutFunctions(getState<EofJackModeAltParam>());
+
+		peg.settings.cycle_jack_behavior = CycleJackBehaviors(getState<CycleJackModeAltParam>());
+		peg.settings.shift_value = int32_t(getState<ShiftAltParam>() * 4095.f - 2048.f);
 	}
 
 private:
