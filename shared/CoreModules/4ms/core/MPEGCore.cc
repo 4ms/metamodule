@@ -48,6 +48,7 @@ private:
 		peg.digio.CycleJack.sideload_set(cycleIn(getInput<CycleTrigIn>().value_or(0.f)));
 		peg.digio.TrigJack.sideload_set(triggerIn(getInput<TriggerIn>().value_or(0.f)));
 
+		setOutput<EofOut>(peg.digio.EOJack.sideload_get() ? 5.0f : 0.f);
 	}
 
 private:
