@@ -42,7 +42,7 @@ private:
 		peg.adc_dma_buffer[5] = uint16_t(getState<Div_MultKnob>() * 4095.f);
 
 		peg.digio.PingBut.sideload_set(getState<PingButton>() == MomentaryButton::State_t::PRESSED);
-		peg.digio.CycleBut.sideload_set(getState<CycleButton>() == LatchingButton::State_t::DOWN);
+		peg.digio.CycleBut.sideload_set(getState<CycleButton>() == MomentaryButton::State_t::PRESSED);
 
 		peg.digio.PingJack.sideload_set(pingIn(getInput<PingTrigIn>().value_or(0.f)));
 		peg.digio.CycleJack.sideload_set(cycleIn(getInput<CycleTrigIn>().value_or(0.f)));
