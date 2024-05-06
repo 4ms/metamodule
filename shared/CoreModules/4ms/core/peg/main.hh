@@ -192,6 +192,17 @@ private:
     bool is_pressed(DebouncedDiginList pin);
     void init_debouncer(void);
 
+private:
+    void reset_transition_counter();
+    void force_transition();
+    bool check_to_start_transition();
+
+    void do_start_transition(struct PingableEnvelope *e);
+    void start_transition(struct PingableEnvelope *e, uint32_t elapsed_time);
+    int8_t calc_divided_ping_div_ctr(PingableEnvelope *e, envelopeStates envstate);
+
+    uint32_t didnt_change_divmult = 0;
+
 };
 
 }

@@ -1,31 +1,26 @@
-#include "env_transition.h"
+#include "main.hh"
 #include "dig_inout_pins.hh"
 #include "envelope_calcs.h"
 #include "util/math.hh"
 
-extern volatile uint8_t using_tap_clock;
-extern uint32_t clk_time;
-extern volatile uint32_t tapouttmr;
-extern volatile uint32_t pingtmr;
+namespace MetaModule::PEG
+{
 
 const uint32_t NUM_ADC_CYCLES_BEFORE_TRANSITION = 200; //200 is about 100ms
-static uint32_t didnt_change_divmult = 0;
 
 constexpr uint32_t TransitionPeriod = 512;
 constexpr uint32_t TransitionPeriodBitShift = MathTools::Log2<TransitionPeriod>::val;
 
-static int8_t calc_divided_ping_div_ctr(PingableEnvelope *e, envelopeStates envstate);
-
-void reset_transition_counter() {
+void MiniPEG::reset_transition_counter() {
 	didnt_change_divmult = 1;
 	// DigIO::DebugOut::high();
 }
 
-void force_transition() {
+void MiniPEG::force_transition() {
 	didnt_change_divmult = NUM_ADC_CYCLES_BEFORE_TRANSITION;
 }
 
-bool check_to_start_transition() {
+bool MiniPEG::check_to_start_transition() {
 	if (didnt_change_divmult > 0) {
 		didnt_change_divmult++;
 		if (didnt_change_divmult >= NUM_ADC_CYCLES_BEFORE_TRANSITION) {
@@ -36,7 +31,7 @@ bool check_to_start_transition() {
 	return false;
 }
 
-void do_start_transition(PingableEnvelope *e) {
+void MiniPEG::do_start_transition(PingableEnvelope *e) {
 	uint32_t elapsed_time;
 	if (!e->div_clk_time)
 		return;
@@ -88,7 +83,7 @@ void do_start_transition(PingableEnvelope *e) {
 }
 
 // FIXME: if elapsed_time is not at least TransisionPeriod, then does the TransitionPeriodBitShift math work?
-void start_transition(PingableEnvelope *e, uint32_t elapsed_time) {
+void MiniPEG::start_transition(PingableEnvelope *e, uint32_t elapsed_time) {
 	if (elapsed_time > e->div_clk_time)
 		elapsed_time -= e->div_clk_time;
 
@@ -133,7 +128,7 @@ void start_transition(PingableEnvelope *e, uint32_t elapsed_time) {
 	e->transition_ctr = TransitionPeriod;
 }
 
-static int8_t calc_divided_ping_div_ctr(struct PingableEnvelope *e, enum envelopeStates envstate) {
+int8_t MiniPEG::calc_divided_ping_div_ctr(struct PingableEnvelope *e, enum envelopeStates envstate) {
 	int8_t pdc;
 	uint32_t rise_per_clk;
 	uint32_t temp_u32;
@@ -175,4 +170,6 @@ static int8_t calc_divided_ping_div_ctr(struct PingableEnvelope *e, enum envelop
 		pdc = e->ping_div_ctr;
 
 	return pdc;
+}
+
 }
