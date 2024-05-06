@@ -173,6 +173,11 @@ private:
 
     uint16_t shape;
 
+private:
+    void init_pingable_env(struct PingableEnvelope *e);
+    void copy_rise_fall_incs(struct PingableEnvelope *dst, struct PingableEnvelope *src);
+    void copy_skew_and_curves(struct PingableEnvelope *dst, struct PingableEnvelope *src);
+
 };
 
 }
