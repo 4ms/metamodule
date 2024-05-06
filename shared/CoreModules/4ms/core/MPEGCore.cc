@@ -2,6 +2,8 @@
 #include "CoreModules/moduleFactory.hh"
 #include "info/MPEG_info.hh"
 
+#include "peg/main.hh"
+
 namespace MetaModule
 {
 
@@ -17,10 +19,14 @@ public:
 	};
 
 	void update() override {
+		peg.update();
 	}
 
 	void set_samplerate(float sr) override {
 	}
+
+private:
+	PEG::MiniPEG peg;
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
