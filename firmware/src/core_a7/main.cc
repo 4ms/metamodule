@@ -66,6 +66,7 @@ void main() {
 		&file_storage_proxy,
 		&sync_params,
 		&patch_mod_queue,
+		&StaticBuffers::virtdrive,
 	};
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
@@ -76,6 +77,9 @@ void main() {
 #ifdef ENABLE_WIFI_BRIDGE
 	WifiUpdate::run();
 #endif
+
+	// prevents M4 from using it as a USBD device: TODO remove this or remove usb_device in M4, or make it a config option to enable USB MSC Device mode
+	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
 
 	pr_info("A7 Core 1 initialized\n");
 

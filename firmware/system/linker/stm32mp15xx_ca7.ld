@@ -14,6 +14,8 @@ MEMORY
 	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
 	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
 
+	SYMLIST (r)			: ORIGIN = _A7_SYMS,		LENGTH = _A7_SYMS_SZ
+
 	SHAREDMEMINDEX (rw) : ORIGIN = _A7_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
 	SYSRAM (rw)			: ORIGIN = 0x2FFC0000,		LENGTH = 256K
 }
@@ -30,7 +32,13 @@ SECTIONS
 		*(.irqhandler)
         *(.text)
         *(.text*)
-					/* Todo: check if we need the next 5 lines */
+
+		/* Keep symbols that we want to export to plugin API */
+		KEEP(*vcv_plugin*:(.text*))
+		KEEP(*jansson*:(.text*))
+		KEEP(*pffft*:(.text*))
+		KEEP(libcpp_stub*(.text*))
+
 		*(.glue_7)         /* glue arm to thumb code */
 		*(.glue_7t)        /* glue thumb to arm code */
 		*(.eh_frame)
@@ -102,6 +110,11 @@ SECTIONS
 		_ram_aligned_end = .;
     } > RAM
 
+	.symlist : {
+        FILL(0x00);
+        BYTE(0x00);
+	} > SYMLIST
+
 	.heap (NOLOAD):
 	{
 		. = ALIGN(8);
@@ -161,12 +174,12 @@ SECTIONS
 	
 
   /* Remove information from the compiler libraries */
-  /DISCARD/ :
-  {
-    libc.a ( * )
-    libm.a ( * )
-    libgcc.a ( * )
-  }
+  /* /DISCARD/ : */
+  /* { */
+  /*   libc.a ( * ) */
+  /*   libm.a ( * ) */
+  /*   libgcc.a ( * ) */
+  /* } */
 
 	.ARM.attributes 0 : { *(.ARM.attributes) }
 }

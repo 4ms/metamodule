@@ -6,7 +6,6 @@
 #include "gui/elements/module_param.hh"
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_light.hh"
-#include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_mapping_pane.hh"

@@ -61,6 +61,12 @@ inline void label_clips(lv_obj_t *obj) {
 	}
 }
 
+inline void label_overflow_dot(lv_obj_t *obj) {
+	if (lv_obj_get_child_cnt(obj) > 0) {
+		lv_label_set_long_mode(lv_obj_get_child(obj, 0), LV_LABEL_LONG_DOT);
+	}
+}
+
 inline void remove_all_event_cb(lv_obj_t *obj) {
 	while (lv_obj_remove_event_cb(obj, nullptr))
 		;

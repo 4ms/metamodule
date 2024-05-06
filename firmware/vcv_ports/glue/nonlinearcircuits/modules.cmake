@@ -21,9 +21,6 @@ set(nonlinearcircuitsModules
     TripleSloth
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/../filter.cmake)
-limit_modules_built("nonlinearcircuits" nonlinearcircuitsModules)
-
 # cpp paths
 list(TRANSFORM nonlinearcircuitsModules REPLACE "GENiE" "Genie" OUTPUT_VARIABLE NONLINEARCIRCUITS_SOURCE_PATHS)
 list(TRANSFORM NONLINEARCIRCUITS_SOURCE_PATHS PREPEND ${NONLINEARCIRCUITS_DIR}/src/)

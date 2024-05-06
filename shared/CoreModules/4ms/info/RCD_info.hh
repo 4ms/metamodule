@@ -1,15 +1,17 @@
 #pragma once
-#include "CoreModules/elements/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
 namespace MetaModule
 {
 struct RCDInfo : ModuleInfoBase {
-	static constexpr std::string_view slug{"RCD"};
-	static constexpr std::string_view description{"Rotating Clock Divider"};
-	static constexpr uint32_t width_hp = 10;
-	static constexpr std::string_view svg_filename{"res/modules/RCD_artwork.svg"};
+    static constexpr std::string_view slug{"RCD"};
+    static constexpr std::string_view description{"Rotating Clock Divider"};
+    static constexpr uint32_t width_hp = 10;
+    static constexpr std::string_view svg_filename{"res/modules/RCD_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/RCD.png"};
 
 	using enum Coords;
 

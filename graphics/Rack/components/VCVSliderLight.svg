@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 25.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   version="1.0"
+   id="svg164153"
+   x="0px"
+   y="0px"
+   width="4.3202701"
+   height="6.00001"
+   viewBox="0 0 4.3202698 6.0000101"
+   enable-background="new 0 0 4.3204 11.74218"
+   xml:space="preserve"
+   sodipodi:docname="VCVSliderLight.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   inkscape:export-filename="../../../firmware/assets/rack-lib/VCVSliderLight.png"
+   inkscape:export-xdpi="133.325"
+   inkscape:export-ydpi="133.325"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs19" />
+<sodipodi:namedview
+   bordercolor="#666666"
+   borderopacity="1.0"
+   fit-margin-bottom="0"
+   fit-margin-left="0"
+   fit-margin-right="0"
+   fit-margin-top="0"
+   id="base"
+   inkscape:current-layer="svg164153"
+   inkscape:cx="0.58802238"
+   inkscape:cy="1.4952569"
+   inkscape:document-units="mm"
+   inkscape:pageopacity="0.0"
+   inkscape:pageshadow="2"
+   inkscape:window-height="882"
+   inkscape:window-maximized="0"
+   inkscape:window-width="1600"
+   inkscape:window-x="116"
+   inkscape:window-y="25"
+   inkscape:zoom="29.760772"
+   pagecolor="#ffffff"
+   showgrid="false"
+   inkscape:pagecheckerboard="0"
+   inkscape:showpageshadow="2"
+   inkscape:deskcolor="#d1d1d1">
+	</sodipodi:namedview>
+
+
+<rect
+   x="3.8"
+   y="0"
+   opacity=".25"
+   enable-background="new    "
+   width=".5"
+   height="5.99999"
+   id="rect7" />
+<rect
+   x="0"
+   y="0"
+   opacity=".25"
+   enable-background="new    "
+   width=".5"
+   height="5.99999"
+   id="rect9" />
+<linearGradient
+   id="SVGID_1_"
+   gradientUnits="userSpaceOnUse"
+   x1="-983.01074"
+   y1="1002.4846"
+   x2="-983.01074"
+   y2="999.99487"
+   gradientTransform="matrix(-1,0,0,1,-980.8506,-998.20348)">
+	<stop
+   offset="0"
+   style="stop-color:#FDFDFF"
+   id="stop11" />
+	<stop
+   offset="1"
+   style="stop-color:#FCFEFF;stop-opacity:0"
+   id="stop13" />
+</linearGradient>
+
+<rect
+   style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none"
+   id="rect1"
+   width="3.3"
+   height="6"
+   x="0.5"
+   y="0" /></svg>

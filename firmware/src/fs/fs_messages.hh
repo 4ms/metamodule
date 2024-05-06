@@ -2,6 +2,7 @@
 
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
+#include "dynload/plugin_file_finder.hh"
 #include "fs/fatfs/fat_file_io.hh"
 #include "fw_update/firmware_file_finder.hh"
 #include "fw_update/firmware_writer.hh"
@@ -36,6 +37,7 @@ struct FilesystemMessages {
 			process_receiver(patch_storage);
 			process_receiver(firmware_files);
 			process_receiver(firmware_writer);
+			process_receiver(plugin_files);
 
 			if (message.message_type != IntercoreStorageMessage::MessageType::None) {
 				pr_err("ICC message of type %u not handled\n", message.message_type);
@@ -60,6 +62,7 @@ private:
 	PatchStorage patch_storage{sd_fileio, usb_fileio};
 	FirmwareFileFinder firmware_files{sd_fileio, usb_fileio};
 	FirmwareWriter firmware_writer{sd_fileio, usb_fileio};
+	PluginFileFinder plugin_files{sd_fileio, usb_fileio};
 };
 
 } // namespace MetaModule

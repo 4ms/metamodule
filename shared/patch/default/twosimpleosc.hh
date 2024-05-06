@@ -1,4 +1,4 @@
-static char twosimpleosc_patch[] =
+static const char twosimpleosc_patch[] =
 	R"(
 PatchData:
   patch_name: twosimpleosc

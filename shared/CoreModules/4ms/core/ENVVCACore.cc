@@ -186,7 +186,7 @@ public:
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>(), Info::png_filename);
 	// clang-format on
 
 private:
@@ -207,13 +207,6 @@ private:
 
 private:
 	float timeStepInS = 1.f / 48000.f;
-
-private:
-	static constexpr float followInputHysteresisInV = 0.025f;
-	float previousFollowInputValue;
-
-	static constexpr float followInputFilterCoeff = 0.01f;
-	float previousFollowInputFilterOutput;
 };
 
 } // namespace MetaModule

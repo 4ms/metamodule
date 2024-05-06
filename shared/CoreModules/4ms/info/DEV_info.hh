@@ -1,5 +1,6 @@
 #pragma once
-#include "CoreModules/elements/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,6 +11,7 @@ struct DEVInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Dual EnvVCA"};
     static constexpr uint32_t width_hp = 16;
     static constexpr std::string_view svg_filename{"res/modules/DEV_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/DEV.png"};
 
     using enum Coords;
 

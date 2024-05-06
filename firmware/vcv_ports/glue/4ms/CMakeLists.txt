@@ -1,5 +1,15 @@
 include(modules.cmake)
 
+####################
+
+# TODO: This is actually not 4ms specific but relevant for all modules that use SmartCoreProcessor
+
+if (NOT TARGET ryml)
+  add_subdirectory(${MM_ROOT}/shared/patch_convert/ryml/rapidyaml rapidyaml)
+endif()
+
+####################
+
 add_library(
   4msLibrary OBJECT
   ${4MS_SOURCE_PATHS}

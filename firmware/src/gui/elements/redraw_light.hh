@@ -100,8 +100,8 @@ inline void redraw_light_element(const LatchingButton &element, const GuiElement
 }
 
 inline void
-redraw_light_element(const MomentaryButtonWhiteLight &element, const GuiElement &gui_el, std::span<const float> vals) {
-	style_mono(gui_el.obj, Colors565::White, vals);
+redraw_light_element(const MomentaryButtonLight &element, const GuiElement &gui_el, std::span<const float> vals) {
+	style_mono(gui_el.obj, element.color, vals);
 }
 
 inline void

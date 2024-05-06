@@ -121,14 +121,15 @@ struct Gui {
 	};
 
 	// Slider Handle Style
-	static constexpr lv_style_const_prop_t slider_handle_style_props[8] = {
+	static constexpr lv_style_const_prop_t slider_handle_style_props[9] = {
 		LV_STYLE_CONST_BG_OPA(LV_OPA_100),
-		LV_STYLE_CONST_BG_COLOR(lv_color_make_rgb565(0xFF, 0xFF, 0xFF)),
+		LV_STYLE_CONST_BG_COLOR(lv_color_make_rgb565(0x90, 0x90, 0x90)),
 		LV_STYLE_CONST_OUTLINE_OPA(LV_OPA_100),
 		LV_STYLE_CONST_OUTLINE_COLOR(lv_color_make_rgb565(0xC0, 0xC0, 0xC0)),
-		LV_STYLE_CONST_OUTLINE_WIDTH(1),
-		LV_STYLE_CONST_BORDER_COLOR(lv_color_make_rgb565(0, 0, 0)),
-		LV_STYLE_CONST_BORDER_WIDTH(1),
+		LV_STYLE_CONST_OUTLINE_WIDTH(2),
+		LV_STYLE_CONST_BORDER_COLOR(lv_color_make_rgb565(0x20, 0x20, 0x20)),
+		LV_STYLE_CONST_BORDER_WIDTH(2),
+		LV_STYLE_CONST_BORDER_OPA(LV_OPA_80),
 		LV_STYLE_CONST_RADIUS(2),
 	};
 	static inline auto slider_handle_style = LV_STYLE_CONST_CPP(slider_handle_style_props);

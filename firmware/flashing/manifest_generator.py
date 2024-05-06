@@ -57,6 +57,7 @@ if __name__ == "__main__":
     parser.add_argument("--app", dest="app_file", help="Input application uimg file")
     parser.add_argument("--fsbl", dest="fsbl_file", help="First stage bootloader")
     parser.add_argument("--dfu", dest="dfu_file", help="DFU bootloader")
+    parser.add_argument("--assets", dest="assets_file", help="Assets filesystem image")
     parser.add_argument("--wifi_bootloader", dest="wifi_bl_file", help="Wifi bootloader binary")
     parser.add_argument("--wifi_application", dest="wifi_app_file", help="Wifi application binary")
     parser.add_argument("--wifi_filesystem", dest="wifi_fs_file", help="Wifi filesystem image")
@@ -78,13 +79,16 @@ if __name__ == "__main__":
 
     if args.fsbl_file:
         j["files"].append(process_file(destination_dir, args.fsbl_file, "app", name="FSBL1", address=0x0))
-        j["files"].append(process_file(destination_dir, args.fsbl_file, "app", name="FSBL2", address=0x40000))
+        j["files"].append(process_file(destination_dir, args.fsbl_file, "app", name="FSBL2", address=0x040000))
 
     if args.dfu_file:
-        j["files"].append(process_file(destination_dir, args.dfu_file, "app", name="DFU", address=0x50000))
+        j["files"].append(process_file(destination_dir, args.dfu_file, "app", name="DFU", address=0x050000))
 
     if args.app_file:
-        j["files"].append(process_file(destination_dir, args.app_file, "app", name="Main App", address=0x80000))
+        j["files"].append(process_file(destination_dir, args.app_file, "app", name="Main App", address=0x080000))
+
+    if args.assets_file:
+        j["files"].append(process_file(destination_dir, args.assets_file, "app", name="Assets", address=0xa00000))
 
     if args.wifi_bl_file:
         j["files"].append(process_file(destination_dir, args.wifi_bl_file, "wifi", name="Wifi Bootloader", address=0x0))

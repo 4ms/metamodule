@@ -2,14 +2,21 @@
 #include "disk_ops.hh"
 #include "ff.h"
 #include <array>
+#include <cstdio>
 #include <cstring>
 
+constexpr size_t MaxNumDisks = 4;
 
-constexpr size_t MaxNumDisks = 3;
+// required by fatfs:
+PARTITION VolToPart[FF_VOLUMES] = {
+	{0, 0}, /* "0:" ==> Auto detect partition on USB */
+	{1, 0}, /* "1:" ==> Auto detect partition on SdCard */
+	{2, 0}, /* "2:" ==> auto detect partition on Ramdisk */
+};
 
 namespace
 {
-std::array<DiskOps *, MaxNumDisks> _diskops{nullptr, nullptr, nullptr};
+std::array<DiskOps *, MaxNumDisks> _diskops{nullptr, nullptr, nullptr, nullptr};
 }
 
 // Register a set of disk operations with the FatFS filesystem.

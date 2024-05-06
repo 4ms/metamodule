@@ -34,6 +34,17 @@
       }
     },
     {
+      "name": "dyn-plugins",
+      "inherits": "full",
+      "cacheVariables": {
+        "BUILD_DYN_PLUGIN_AudibleInstruments": { "type": "BOOL", "value": "ON" },
+        "BUILD_DYN_PLUGIN_Befaco":             { "type": "BOOL", "value": "ON" }, 
+        "BUILD_DYN_PLUGIN_hetrickcv":          { "type": "BOOL", "value": "ON" },
+        "BUILD_DYN_PLUGIN_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
+        "BUILD_DYN_PLUGIN_eightfold":          { "type": "BOOL", "value": "ON" }
+      }
+    },
+    {
       "name": "pcb-p12",
       "description": "PCB p11 with mods (aka p12)",
       "inherits": "base",
@@ -50,6 +61,10 @@
     {
       "name": "full",
       "configurePreset": "full"
+    },
+    {
+      "name": "dyn-plugins",
+      "configurePreset": "dyn-plugins"
     }
   ]
 }

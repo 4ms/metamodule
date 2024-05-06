@@ -4,11 +4,23 @@
 namespace MetaModule
 {
 
-Ui::Ui(std::string_view patch_path, size_t block_size)
-	: patch_storage(patch_path, patch_dir_list)
+Ui::Ui(std::string_view patch_path, std::string_view asset_path, size_t block_size)
+	: ramdrive{new RamDrive}
+	, ramdisk_ops{*ramdrive}
+	, ramdisk{&ramdisk_ops, Volume::RamDisk}
+	, patch_storage(patch_path, patch_dir_list, ramdisk)
 	, patch_comm{patch_storage}
 	, file_storage_proxy{raw_patch_data, patch_comm, patch_dir_list}
-	, page_manager{file_storage_proxy, patch_playloader, params, metaparams, notify_queue, patch_mod_queue}
+	, asset_fs{asset_path}
+	, internal_plugin_manager{ramdisk, asset_fs}
+	, plugin_manager{file_storage_proxy, ramdisk}
+	, page_manager{file_storage_proxy,
+				   patch_playloader,
+				   params,
+				   metaparams,
+				   notify_queue,
+				   patch_mod_queue,
+				   plugin_manager}
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
 
@@ -88,6 +100,8 @@ void Ui::page_update_task() { //60Hz
 	auto load_status = patch_playloader.handle_file_events();
 	if (!load_status.success) {
 		notify_queue.put({load_status.error_string, Notification::Priority::Error, 5000});
+	} else if (load_status.error_string.size()) {
+		notify_queue.put({load_status.error_string, Notification::Priority::Info, 3000});
 	}
 }
 

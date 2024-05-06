@@ -7,7 +7,6 @@
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
@@ -217,6 +216,7 @@ struct PatchViewPage : PageBase {
 			settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
+			watch_lights();
 		}
 
 		if (is_patch_playing != last_is_patch_playing) {

@@ -168,7 +168,7 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 			bool filesUpdated = false;
 
 			if (auto thisVolume = LocationToVolume(destination); thisVolume) {
-				auto success = patchStorage->write_patch_file(*thisVolume, filename, receivedPatchData);
+				auto success = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
 
 				if (success) {
 					auto result = CreateResult(fbb, true);

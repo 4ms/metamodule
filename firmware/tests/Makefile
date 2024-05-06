@@ -39,14 +39,14 @@ CXXFLAGS = 	-Wall \
 			-I../shared/patch_convert \
 			-I../shared/patch_convert/ryml \
 			-I../shared/CoreModules \
+			-Imetamodule-plugin-sdk/metamodule-core-interface \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
+			-isystem $(TEST_DIR) \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:
 
-#CXX = clang++
-#LDFLAGS = -lstdc++
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
 DEPDIR := $(BUILDDIR)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d

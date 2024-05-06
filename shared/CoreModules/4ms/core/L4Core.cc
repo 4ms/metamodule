@@ -1,11 +1,12 @@
+#include "info/L4_info.hh"
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "info/L4_info.hh"
 #include "l4/Tables.h"
 #include "l4/DCBlock.h"
 #include "l4/PeakDetector.h"
 
 #include "processors/tools/expDecay.h"
+
 
 namespace MetaModule
 {
@@ -128,7 +129,7 @@ public:
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>(), Info::png_filename);
 	// clang-format on
 
 private:

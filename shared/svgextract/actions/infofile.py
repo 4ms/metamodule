@@ -106,6 +106,12 @@ def panel_to_components(tree):
             name = split[0]
             c['pos_names'] = split[1:]
 
+        c['num_choices'] = 0
+        choices = name.split("?")
+        if len(choices) > 1:
+            name = split[0]
+            c['num_choices'] = split[1]
+
         c['display_name'] = format_for_display(name)
         c['legacy_enum_name'] = format_as_legacy_enum_item(name)
         c['enum_name'] = format_as_enum_item(name)
@@ -313,7 +319,8 @@ def components_to_infofile(components):
 
     #TODO: embed knob long name vs short name in svg
     source = f"""#pragma once
-#include "CoreModules/elements/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 

@@ -1,4 +1,4 @@
-static char BefacoVCOs_patch[] =
+static const char BefacoVCOs_patch[] =
 	R"(
 PatchData:
   patch_name: BefacoVCOs

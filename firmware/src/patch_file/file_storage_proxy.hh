@@ -43,8 +43,7 @@ public:
 
 	bool load_if_open(PatchLocation patch_loc) {
 		if (PatchLocHash{patch_loc} == PatchLocHash{playing_patch_loc_}) {
-			view_patch_ = &playing_patch_;
-			view_patch_loc_ = patch_loc;
+			view_playing_patch();
 			return true;
 
 		} else if (auto patch = open_patches_.get(PatchLocHash{patch_loc})) {
@@ -80,6 +79,7 @@ public:
 
 	//
 	// playing_patch: (copy of) patch currently playing in the audio thread
+	// Keep it outside of open_patches because we should never overwrite it
 	//
 	PatchData *playing_patch() {
 		return &playing_patch_;
@@ -108,6 +108,11 @@ public:
 		view_patch_ = &playing_patch_;
 	}
 
+	void view_playing_patch() {
+		view_patch_ = &playing_patch_;
+		view_patch_loc_ = playing_patch_loc_;
+	}
+
 	StaticString<255> get_view_patch_filename() {
 		return view_patch_loc_.filename;
 	}
@@ -124,13 +129,8 @@ public:
 	// patchlist: list of all patches found on all volumes
 	//
 	[[nodiscard]] bool request_patchlist() {
-		IntercoreStorageMessage message{
-			.message_type = RequestRefreshPatchList,
-			.patch_dir_list = &patch_dir_list_,
-		};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList, .patch_dir_list = &patch_dir_list_};
+		return comm_.send_message(message);
 	}
 
 	PatchDirList &get_patch_list() {
@@ -144,9 +144,7 @@ public:
 	// Scan all mounted volumes for firmware update files
 	[[nodiscard]] bool request_find_firmware_file() {
 		IntercoreStorageMessage message{.message_type = RequestFirmwareFile};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
 	}
 
 	// Load a file from filesystem to RAM
@@ -157,9 +155,7 @@ public:
 			.buffer = buffer,
 			.filename = filename,
 		};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
 	}
 
 	[[nodiscard]] bool request_checksum_compare(IntercoreStorageMessage::FlashTarget target,
@@ -175,9 +171,7 @@ public:
 			.bytes_processed = bytes_processed,
 			.flashTarget = target,
 		};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
 	}
 
 	[[nodiscard]] bool request_file_flash(IntercoreStorageMessage::FlashTarget target,
@@ -191,9 +185,7 @@ public:
 			.bytes_processed = bytes_processed,
 			.flashTarget = target,
 		};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
 	}
 
 	void new_patch() {
@@ -218,9 +210,6 @@ public:
 
 		patch_to_yaml_buffer(*view_patch_, file_data);
 
-		// printf("size: %zu, %zu\n", file_data.size(), sz);
-		// printf("%.*s\n", (int)sz, file_data.data());
-
 		IntercoreStorageMessage message{
 			.message_type = RequestWritePatchData,
 			.vol_id = view_patch_loc_.vol,
@@ -228,19 +217,27 @@ public:
 			.filename = filename,
 		};
 
-		if (!comm_.send_message(message))
-			return false;
-
-		return true;
+		return comm_.send_message(message);
 	}
 
 	bool request_reset_factory_patches() {
 		IntercoreStorageMessage message{
 			.message_type = RequestFactoryResetPatches,
 		};
-		if (!comm_.send_message(message))
-			return false;
-		return true;
+		return comm_.send_message(message);
+	}
+
+	bool request_plugin_file_list(PluginFileList *plugin_file_list) {
+		IntercoreStorageMessage message{
+			.message_type = RequestPluginFileList,
+			.plugin_file_list = plugin_file_list,
+		};
+		return comm_.send_message(message);
+	}
+
+	bool request_copy_dir_to_ramdisk(Volume vol, std::string_view path) {
+		IntercoreStorageMessage message{.message_type = RequestCopyPluginAssets, .vol_id = vol, .filename = path};
+		return comm_.send_message(message);
 	}
 
 private:

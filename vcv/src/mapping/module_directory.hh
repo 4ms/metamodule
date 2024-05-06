@@ -4,7 +4,12 @@
 
 struct ModuleDirectory {
 
-	// True if module is in the 4ms or MetaModule compatible plugin, including the Hub
+	// Return false if the module should not be included in the patch
+	// Including a module that can't be loaded will give an warning
+	// message the user when they try to load the patch on hardware.
+	// This can be good feedback. Only exclude modules which users
+	// would not expect to have running on hardware (because returning false
+	// here will surpress the warning message).
 	static bool isInPlugin(rack::Module *module) {
 		if (!module)
 			return false;
@@ -13,27 +18,24 @@ struct ModuleDirectory {
 		if (!module->model->plugin)
 			return false;
 
-		if (module->model->plugin->slug == "4msCompany")
-			return true;
+		std::array blacklist = {
+			"Scope",
+			"Oscilloscope",
+			"AudioInterface2",
+			"AudioInterface",
+			"AudioInterface16",
+			"Bogaudio-Analyzer",
+			"Bogaudio-AnalyzerXL",
+			"Bogaudio-Ranalyzer",
+			"Notes",
+			"Blank",
+		};
 
-		if (module->model->plugin->slug == "Befaco") {
-			if (module->model->slug == "NoisePlethora")
+		for (auto slug : blacklist) {
+			if (module->model->slug == slug)
 				return false;
-			if (module->model->slug == "Muxlicer")
-				return false;
-			return true;
 		}
-
-		if (module->model->plugin->slug == "AudibleInstruments")
-			return true;
-
-		if (module->model->plugin->slug == "HetrickCV")
-			return true;
-
-		if (module->model->plugin->slug == "NonlinearCircuits")
-			return true;
-
-		return false;
+		return true;
 	}
 
 	static bool isHub(std::string_view slug) {
