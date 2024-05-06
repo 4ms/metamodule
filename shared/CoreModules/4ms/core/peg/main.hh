@@ -1,7 +1,10 @@
 #pragma once
 
 #include <cstdint>
+
 #include "pingable_env.h"
+#include "flash_user.hh"
+#include "analog_conditioning.h"
 
 namespace MetaModule::PEG
 {
@@ -24,6 +27,7 @@ private:
     void ping_led_off();
     void ping_led_on();
     void handle_qnt_trig(PingableEnvelope*);
+    void handle_async_trig(PingableEnvelope*);
 
 private:
     PingableEnvelope m;
@@ -54,6 +58,16 @@ private:
     bool adjusting_shift_mode = false;
     bool toggled_sync_mode = false;
     int16_t cycle_latched_offset;
+
+private:
+    struct SystemSettings settings;
+
+    analog_t analog[NUM_ADCS];
+    uint32_t systmr;
+    uint32_t tapouttmr;
+    uint32_t tapintmr;
+    uint32_t pingtmr;
+    uint32_t trigouttmr;
 };
 
     void main();

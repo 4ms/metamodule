@@ -1,7 +1,6 @@
 #include "main.hh"
 
 // #include "adc.h"
-#include "analog_conditioning.h"
 #include "calibration.hh"
 #include "dac.h"
 #include "debounced_digins.h"
@@ -25,15 +24,6 @@
 
 namespace MetaModule::PEG
 {
-
-struct SystemSettings settings;
-
-/* extern */ analog_t analog[NUM_ADCS];
-/* extern */ uint32_t systmr;
-/* extern */ uint32_t tapouttmr;
-/* extern */ uint32_t tapintmr;
-/* extern */ uint32_t pingtmr;
-/* extern */ uint32_t trigouttmr;
 
 static const uint32_t kDacSampleRate = 40000;
 
@@ -190,7 +180,7 @@ void MiniPEG::handle_qnt_trig(struct PingableEnvelope *e) {
 	e->curve_fall = e->next_curve_fall;
 }
 
-void handle_async_trig(struct PingableEnvelope *e) {
+void MiniPEG::handle_async_trig(struct PingableEnvelope *e) {
 	e->triga_down = 1;
 	e->trigq_down = 0;
 	e->sync_to_ping_mode = 0;
