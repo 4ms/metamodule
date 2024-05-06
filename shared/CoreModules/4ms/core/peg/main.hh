@@ -6,6 +6,7 @@
 #include "flash_user.hh"
 #include "analog_conditioning.h"
 #include "dig_inout_pins.hh"
+#include "pwm.h"
 
 namespace MetaModule::PEG
 {
@@ -102,7 +103,14 @@ public:
     // for sideloading
     uint16_t adc_dma_buffer[NUM_ADCS];
 
+private:
+    void init_pwm();
+    void update_pwm(uint32_t pwmval, enum PwmOutputs channel);
+
+public:
+    // for sideloading
+    uint32_t pwm_vals[NUM_PWMS];
+
 };
 
-    void main();
 }
