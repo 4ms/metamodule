@@ -50,6 +50,7 @@ public:
 		, params(controls, flags)
 		, looping_delay(params, flags)
 		, audioBufferFillCount(0)
+		, uiUpdateCounter(0)
 		, sampleRate(looping_delay.DefaultSampleRate)
 		{
 			for (auto& sample : outBlock)
@@ -65,13 +66,17 @@ public:
     {
 		params.timer.inc();
 
-		sideloadDrivers();
+		if (uiUpdateCounter >= params.currentSampleRate/uiUpdateRateHz)
+		{
+			uiUpdateCounter = 0;
 
-		if (audioBufferFillCount == inBlock.size())
+			sideloadDrivers();
+			handleAltParameters();
+		}
+
+		if (audioBufferFillCount >= inBlock.size())
 		{
 			audioBufferFillCount = 0;
-
-			handleAltParameters();
 
 			params.update();
 			looping_delay.update(inBlock, outBlock);		
@@ -79,6 +84,7 @@ public:
 
 		packUnpackBlockBuffers();
 		audioBufferFillCount++;
+		uiUpdateCounter++;
     }
 
     void set_samplerate(float sr) {
@@ -255,6 +261,7 @@ private:
 	static constexpr float AudioOutputFullScaleInVolt   = 10.0f;
 	static constexpr float TriggerThresholdInVolt       = 0.1f;
 	static constexpr float TriggerOutputFullScaleInVolt = 5.0f;
+	static constexpr std::size_t uiUpdateRateHz = 3000;
 
 private:
 	LDKit::Controls controls;
@@ -266,6 +273,7 @@ private:
 	AudioStreamConf::AudioInBlock inBlock;
 	AudioStreamConf::AudioOutBlock outBlock;
 	std::size_t audioBufferFillCount;
+	std::size_t uiUpdateCounter;
 
 private:
 	uint32_t sampleRate;
