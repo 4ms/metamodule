@@ -5,7 +5,7 @@ namespace MetaModule::PEG
 {
 
 
-static constexpr uint32_t FIRST_CD_POT = ADC_POT_SCALE;
+// static constexpr uint32_t FIRST_CD_POT = ADC_POT_SCALE;
 
 
 

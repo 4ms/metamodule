@@ -29,7 +29,6 @@ void MiniPEG::update_all_envelopes() {
 void MiniPEG::update_envelope(PingableEnvelope *e) {
 	envelopeStates end_segment_flag = WAIT;
 	uint8_t end_env_flag = 0;
-	uint16_t cur_val = 0;
 
 	if ((clk_time == 0) || (e->div_clk_time == 0)) {
 		e->envelope_running = 0;
