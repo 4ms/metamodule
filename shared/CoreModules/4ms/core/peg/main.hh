@@ -89,7 +89,8 @@ private:
 
     uint8_t trigout_high = 0;
 
-private:
+public:
+    // for sideloading
     DigIO digio;
 
 private:
@@ -97,6 +98,8 @@ private:
     void init_analog_conditioning(void);
     void setup_fir_lpf(void);
 
+public:
+    // for sideloading
     uint16_t adc_dma_buffer[NUM_ADCS];
 
 };
