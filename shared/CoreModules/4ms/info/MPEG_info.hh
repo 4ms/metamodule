@@ -35,8 +35,8 @@ struct MPEGInfo : ModuleInfoBase {
 		AltParamChoiceLabeled{{{to_mm<72>(57.12), to_mm<72>(224.36), Center, "Skew Limit", ""}, 2, 1}, {"Off", "On"}},
 		AltParamChoiceLabeled{{{to_mm<72>(80.21), to_mm<72>(41.57), Center, "Free-running Ping", ""}, 2, 1}, {"On", "Off"}},
 		AltParamChoiceLabeled{{{to_mm<72>(23.07), to_mm<72>(244.84), Center, "EOF Jack Type", ""}, 2, 1}, {"Gate", "Trigger"}},
-		AltParamChoiceLabeled{{{to_mm<72>(23.07), to_mm<72>(244.84), Center, "EOF Jack Mode", ""}, 4, 1}, {"EOF", "EOR", "Half-Rise", "Tap Clock"}},
-		AltParamChoiceLabeled{{{to_mm<72>(91.59), to_mm<72>(287.64), Center, "Cycle Jack Mode", ""}, 3, 1}, {"Gate", "Gate+Sync", "Trig"}},
+		AltParamChoiceLabeled{{{to_mm<72>(23.07), to_mm<72>(244.84), Center, "EOF Jack Mode", ""}, 4, 1}, {"EOR", "EOF", "Half-Rise", "Tap Clock"}},
+		AltParamChoiceLabeled{{{to_mm<72>(91.59), to_mm<72>(287.64), Center, "Cycle Jack Mode", ""}, 3, 1}, {"Trig", "Gate+Sync", "Gate"}},
 		AltParamChoiceLabeled{{{to_mm<72>(23.01), to_mm<72>(287.64), Center, "Trig Jack Mode", ""}, 3, 1}, {"Async  Trig", "Async Gate", "Quantized Trig"}},
 }};
 
