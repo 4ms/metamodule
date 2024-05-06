@@ -18,19 +18,32 @@ public:
 	MPEGCore() :
 		pingIn(1.f,2.f),
 		cycleIn(1.f,2.f),
-		triggerIn(1.f,2.f)
+		triggerIn(1.f,2.f),
+		timerPhase(0),
+		timerPhaseIncrement(1.0f)
 	{
-
+		// TODO: maybe calling these is not required
+		sideloadDrivers();
+		sideloadSystemSettings();
+		peg.update_all_envelopes();
 	};
 
 	void update() override {
 		sideloadDrivers();
 		sideloadSystemSettings();
-		peg.update_all_envelopes();
+
+		timerPhase += timerPhaseIncrement;
+		while (timerPhase > 1.0f)
+		{
+			peg.update_all_envelopes();
+			timerPhase -= 1.0f;
+		}
+
 		peg.update();
 	}
 
 	void set_samplerate(float sr) override {
+		timerPhaseIncrement = float(PEG::MiniPEG::kDacSampleRate) / sr;
 	}
 
 private:
@@ -80,16 +93,21 @@ private:
 private:
 	PEG::MiniPEG peg;
 
+private:
+	FlipFlop pingIn;
+	FlipFlop cycleIn;
+	FlipFlop triggerIn;
+
+private:
+	float timerPhase;
+	float timerPhaseIncrement;
+
+public:
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
-
-private:
-	FlipFlop pingIn;
-	FlipFlop cycleIn;
-	FlipFlop triggerIn;
 };
 
 } // namespace MetaModule
