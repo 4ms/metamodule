@@ -63,8 +63,6 @@ private:
     int16_t cycle_latched_offset;
 
 private:
-    struct SystemSettings settings;
-
     analog_t analog[NUM_ADCS];
     uint32_t systmr;
     uint32_t tapouttmr;
@@ -153,6 +151,16 @@ private:
     void calc_skew_and_curves(uint16_t shape, uint8_t *skew, uint8_t *next_curve_rise, uint8_t *next_curve_fall);
     void calc_rise_fall_incs(struct PingableEnvelope *e);
     void calc_div_clk_time(struct PingableEnvelope *e, uint32_t new_clk_time);
+
+private:
+    int write_settings(void);
+    uint8_t read_settings(void);
+    uint8_t check_settings_valid(void);
+    void default_settings(void);
+
+public:
+    // for sideloading
+    struct SystemSettings settings;
 
 };
 
