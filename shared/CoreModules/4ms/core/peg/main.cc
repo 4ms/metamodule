@@ -96,6 +96,14 @@ void MiniPEG::update()
 	// handle_system_mode(m.sync_to_ping_mode);
 }
 
+void MiniPEG::pingEdgeIn()
+{
+	ping_irq_timestamp = pingtmr;
+	clockbus_on();
+	pingtmr = 0;
+	using_tap_clock = 0;
+}
+
 void MiniPEG::read_ping_button() {
 	if (toggled_sync_mode)
 		return;

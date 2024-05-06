@@ -5,6 +5,7 @@
 #include "peg/main.hh"
 
 #include "helpers/FlipFlop.h"
+#include "helpers/EdgeDetector.h"
 
 #include <array>
 #include <algorithm>
@@ -74,9 +75,15 @@ private:
 		peg.digio.PingBut.sideload_set(getState<PingButton>() == MomentaryButton::State_t::PRESSED);
 		peg.digio.CycleBut.sideload_set(getState<CycleButton>() == MomentaryButton::State_t::PRESSED);
 
-		peg.digio.PingJack.sideload_set(pingIn(getInput<PingTrigIn>().value_or(0.f)));
 		peg.digio.CycleJack.sideload_set(cycleIn(getInput<CycleTrigIn>().value_or(0.f)));
 		peg.digio.TrigJack.sideload_set(triggerIn(getInput<TriggerIn>().value_or(0.f)));
+
+		// TODO: ping input originall has internal lowpass filtering
+		// peg.digio.PingJack.sideload_set(pingIn(getInput<PingTrigIn>().value_or(0.f)));
+		if (pingEdge(pingIn(getInput<PingTrigIn>().value_or(0.f))))
+		{
+			peg.pingEdgeIn();
+		}
 
 		setOutput<EofOut>(peg.digio.EOJack.sideload_get() ? TriggerOutputInV : 0.f);
 
@@ -151,6 +158,7 @@ private:
 	FlipFlop pingIn;
 	FlipFlop cycleIn;
 	FlipFlop triggerIn;
+	EdgeDetector pingEdge;
 
 private:
 	float timerPhase;

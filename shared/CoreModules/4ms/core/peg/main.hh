@@ -21,6 +21,8 @@ public:
 
     void update();
 
+    void pingEdgeIn();
+
 private:
     void read_ping_button();
     void read_trigjacks();
