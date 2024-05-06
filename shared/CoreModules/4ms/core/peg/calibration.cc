@@ -45,7 +45,7 @@ CalRequests MiniPEG::should_enter_calibration_mode(void) {
 
 void MiniPEG::check_calibration(void) {
 	// if (!sanity_check_calibration()) {
-	// 	default_settings();
+		default_settings();
 	// 	if (write_settings() != HAL_OK)
 	// 		error_writing_settings();
 	// }

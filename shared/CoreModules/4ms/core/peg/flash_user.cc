@@ -12,6 +12,10 @@ int MiniPEG::write_settings(void) {
 
 uint8_t MiniPEG::read_settings(void) {
 	// TODO: check return code
+
+	// Always load default settings for now
+	default_settings();
+
 	return 0;
 }
 
