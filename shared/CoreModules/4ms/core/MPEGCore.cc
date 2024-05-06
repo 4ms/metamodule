@@ -6,6 +6,9 @@
 
 #include "helpers/FlipFlop.h"
 
+#include <array>
+#include <algorithm>
+
 namespace MetaModule
 {
 
@@ -99,14 +102,40 @@ private:
 
 	void sideloadSystemSettings()
 	{
-		peg.settings.limit_skew          = getState<SkewLimitAltParam>();
-		//TODO: this might need scaling
-		peg.settings.free_running_ping   = getState<FreeNRunningPingAltParam>();
-		peg.settings.trigout_is_trig     = getState<EofJackTypeAltParam>();
-		peg.settings.trigin_function     = TrigInFunctions(getState<TrigJackModeAltParam>());
-		peg.settings.trigout_function    = TrigOutFunctions(getState<EofJackModeAltParam>());
-		peg.settings.cycle_jack_behavior = CycleJackBehaviors(getState<CycleJackModeAltParam>());
-		peg.settings.shift_value         = int32_t(getState<ShiftAltParam>() * 4095.f - 2048.f);
+		peg.settings.limit_skew          = getState<SkewLimitAltParam>() == 1 ? 1 : 0;
+		peg.settings.free_running_ping   = getState<FreeNRunningPingAltParam>() == 0 ? 1 : 0;
+		peg.settings.trigout_is_trig     = getState<EofJackTypeAltParam>() == 1 ? 1 : 0;
+
+		static constexpr std::array<TrigOutFunctions,4> TrigOutOptions
+		{
+			TRIGOUT_IS_ENDOFRISE,
+			TRIGOUT_IS_ENDOFFALL,
+			TRIGOUT_IS_HALFRISE,
+			TRIGOUT_IS_TAPCLKOUT
+		};
+
+		peg.settings.trigout_function    = TrigOutOptions[getState<EofJackModeAltParam>()];
+
+		// TODO: check if this mapping is correct
+		static constexpr std::array<CycleJackBehaviors,3> CycleJackOptions
+		{
+			CYCLE_JACK_RISING_EDGE_TOGGLES,
+			CYCLE_JACK_BOTH_EDGES_TOGGLES_QNT,
+			CYCLE_JACK_BOTH_EDGES_TOGGLES
+		};
+
+		peg.settings.cycle_jack_behavior = CycleJackOptions[getState<CycleJackModeAltParam>()];
+
+		static constexpr std::array<TrigInFunctions,3> TriggerInOptions
+		{
+			TRIGIN_IS_ASYNC,
+			TRIGIN_IS_ASYNC_SUSTAIN,
+			TRIGIN_IS_QNT
+		};
+
+		peg.settings.trigin_function     = TriggerInOptions[getState<TrigJackModeAltParam>()];
+
+		peg.settings.shift_value         = std::lerp(-2048.f, 2048.f, getState<ShiftAltParam>());
 	}
 
 private:
