@@ -1,13 +1,16 @@
-#include "globals.h"
+#include "main.hh"
+#include "envelope_calcs.h"
 #include "log4096.h"
 #include "util/math.hh"
+#include "settings.h"
 #include <array>
 
-extern struct SystemSettings settings;
+namespace MetaModule::PEG
+{
 
 constexpr int8_t P_array[NUM_DIVMULTS] = {32, 16, 8, 7, 6, 5, 4, 3, 2, 1, -2, -3, -4, -5, -6, -7, -8, -12, -16};
 
-int8_t get_clk_div_nominal(uint16_t adc_val) {
+int8_t MiniPEG::get_clk_div_nominal(uint16_t adc_val) {
 	uint8_t i;
 
 	for (i = 0; i < NUM_DIVMULTS; i++) {
@@ -17,12 +20,12 @@ int8_t get_clk_div_nominal(uint16_t adc_val) {
 	return (P_array[NUM_DIVMULTS - 1]);
 }
 
-void calc_div_clk_time(struct PingableEnvelope *e, uint32_t new_clk_time) {
+void MiniPEG::calc_div_clk_time(struct PingableEnvelope *e, uint32_t new_clk_time) {
 	e->div_clk_time = get_clk_div_time(e->clock_divider_amount, new_clk_time);
 	calc_rise_fall_incs(e);
 }
 
-uint32_t get_clk_div_time(int8_t clock_divide_amount, uint32_t clk_time) {
+uint32_t MiniPEG::get_clk_div_time(int8_t clock_divide_amount, uint32_t clk_time) {
 	if (clock_divide_amount > 1)
 		return clk_time * clock_divide_amount;
 	else if (clock_divide_amount < -1)
@@ -31,7 +34,7 @@ uint32_t get_clk_div_time(int8_t clock_divide_amount, uint32_t clk_time) {
 		return clk_time;
 }
 
-void calc_rise_fall_incs(struct PingableEnvelope *e) {
+void MiniPEG::calc_rise_fall_incs(struct PingableEnvelope *e) {
 	e->fall_time = get_fall_time(e->skew, e->div_clk_time);
 	e->rise_time = e->div_clk_time - e->fall_time;
 	e->rise_inc = (1UL << 31) / e->rise_time;
@@ -40,7 +43,7 @@ void calc_rise_fall_incs(struct PingableEnvelope *e) {
 
 //skew: 0..255, 0 means fall=min
 // TODO: use division, check it uses SDIV
-uint32_t get_fall_time(uint8_t skew, uint32_t div_clk_time) {
+uint32_t MiniPEG::get_fall_time(uint8_t skew, uint32_t div_clk_time) {
 	// return div_clk_time/2;
 
 	uint32_t skew_portion, u;
@@ -137,7 +140,7 @@ constexpr std::array region_sizes = MathTools::array_adj_diff(region_starts);
 // shape: 0..4095 (adc value)
 // returns skew: 0..255
 // returns next_curve_rise and _fall: 0..255: expo/linear/log
-void calc_skew_and_curves(uint16_t shape, uint8_t *skew, uint8_t *next_curve_rise, uint8_t *next_curve_fall) {
+void MiniPEG::calc_skew_and_curves(uint16_t shape, uint8_t *skew, uint8_t *next_curve_rise, uint8_t *next_curve_fall) {
 	if (shape > region_starts.back())
 		shape = region_starts.back();
 	int i = 1;
@@ -185,7 +188,7 @@ void calc_skew_and_curves(uint16_t shape, uint8_t *skew, uint8_t *next_curve_ris
 //phase: 0..4095
 //cur_curve: 0..255, curve to use: 0=expo, 127/128=linear, 255=log (interpolates)
 //returns: 0..4095 dac value
-int16_t calc_curve(int16_t phase, uint8_t cur_curve) {
+int16_t MiniPEG::calc_curve(int16_t phase, uint8_t cur_curve) {
 	if (phase > 4095)
 		phase = 4095;
 
@@ -202,4 +205,6 @@ int16_t calc_curve(int16_t phase, uint8_t cur_curve) {
 		uint16_t t_loga = log4096[phase];
 		return MathTools::interpolate<139>(phase, t_loga, cur_curve - 139);
 	}
+}
+
 }

@@ -62,6 +62,7 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/peg/main.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/trigout.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/analog_conditioning.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/env_update.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg/envelope_calcs.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/shareddrv/dac.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/mocks/pwm.cc
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg/
