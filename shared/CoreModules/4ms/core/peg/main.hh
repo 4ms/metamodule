@@ -178,6 +178,9 @@ private:
     void copy_rise_fall_incs(struct PingableEnvelope *dst, struct PingableEnvelope *src);
     void copy_skew_and_curves(struct PingableEnvelope *dst, struct PingableEnvelope *src);
 
+private:
+    void init_dig_inouts(void);
+
 };
 
 }
