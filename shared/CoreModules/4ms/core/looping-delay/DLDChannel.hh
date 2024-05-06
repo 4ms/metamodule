@@ -249,8 +249,8 @@ private:
 	}
 
 private:
-	static constexpr float AudioInputFullScaleInVolt    = 22.0f;
-	static constexpr float AudioOutputFullScaleInVolt   = 17.0f;
+	static constexpr float AudioInputFullScaleInVolt    = 10.0f;
+	static constexpr float AudioOutputFullScaleInVolt   = 10.0f;
 	static constexpr float TriggerThresholdInVolt       = 0.1f;
 	static constexpr float TriggerOutputFullScaleInVolt = 5.0f;
 

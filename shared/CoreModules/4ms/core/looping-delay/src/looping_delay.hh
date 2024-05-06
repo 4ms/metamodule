@@ -319,27 +319,12 @@ public:
 			params.set_inf_state(InfState::Off);
 	}
 
-	//// util:
-
-	int32_t __SSAT(int32_t val, uint32_t sat) {
-		if ((sat >= 1U) && (sat <= 32U)) {
-			const int32_t max = (int32_t)((1U << (sat - 1U)) - 1U);
-			const int32_t min = -1 - max;
-			if (val > max) {
-				return max;
-			} else if (val < min) {
-				return min;
-			}
-		}
-		return val;
-	}
-
 	int32_t clip(int32_t val) {
-		constexpr size_t Max24bit = (1U << 23);
+		constexpr size_t Max24bit = (1U << 23) - 1;
 		if (params.settings.soft_clip)
 			val = compress<Max24bit, 75>(val);
 		else
-			val = __SSAT(val, 24);
+			val = MathTools::signed_saturate(val, 24);
 		return val;
 	}
 
