@@ -6,6 +6,7 @@
 #include "flash_user.hh"
 #include "analog_conditioning.h"
 #include "dig_inout_pins.hh"
+#include "debounced_digins.h"
 #include "pwm.h"
 #include "dac.h"
 
@@ -184,6 +185,12 @@ private:
     uint32_t tapintmr;
     uint32_t pingtmr;
     uint32_t trigouttmr;
+
+private:
+    bool just_released(DebouncedDiginList pin);
+    bool just_pressed(DebouncedDiginList pin);
+    bool is_pressed(DebouncedDiginList pin);
+    void init_debouncer(void);
 
 };
 

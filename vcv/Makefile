@@ -68,6 +68,7 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/peg/params.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/pingable_env.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/dig_inouts.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/timers.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg/shareddrv/debounced_digins.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/shareddrv/dac.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/mocks/pwm.cc
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg/

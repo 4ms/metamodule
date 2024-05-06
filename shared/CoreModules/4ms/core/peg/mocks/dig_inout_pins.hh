@@ -8,12 +8,12 @@ namespace MetaModule::PEG
 
 struct DigIO
 {
-	InputPin PingBut;
-	InputPin CycleBut;
+	MockedTrigger PingBut;
+	MockedTrigger CycleBut;
 
-	InputPin PingJack;
-	InputPin CycleJack;
-	InputPin TrigJack;
+	MockedTrigger PingJack;
+	MockedTrigger CycleJack;
+	MockedTrigger TrigJack;
 
 	OutputPin EOJack;
     OutputPin ClockBusOut;
