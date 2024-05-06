@@ -94,7 +94,7 @@ void MiniPEG::update()
 
 	handle_trigout_trigfall();
 
-	handle_system_mode(m.sync_to_ping_mode);	
+	// handle_system_mode(m.sync_to_ping_mode);
 }
 
 void MiniPEG::read_ping_button() {
