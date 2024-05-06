@@ -60,7 +60,7 @@ private:
 		};
 
 		peg.adc_dma_buffer[CV_SHAPE]   = MapOutputFunc(getInput<ShapeCvIn>().value_or(0.f));
-		peg.adc_dma_buffer[CV_DIVMULT] = MapOutputFunc(getInput<DivIn>().value_or(0.f));
+		peg.adc_dma_buffer[CV_DIVMULT] = MapOutputFunc(getInput<Div_MultCvIn>().value_or(0.f));
 
 		auto MapKnobFunc = [](auto val) -> uint16_t
 		{
@@ -79,8 +79,8 @@ private:
 		peg.digio.TrigJack.sideload_set(triggerIn(getInput<TriggerIn>().value_or(0.f)));
 
 		// TODO: ping input originall has internal lowpass filtering
-		// peg.digio.PingJack.sideload_set(pingIn(getInput<PingTrigIn>().value_or(0.f)));
-		if (pingEdge(pingIn(getInput<PingTrigIn>().value_or(0.f))))
+		// peg.digio.PingJack.sideload_set(pingIn(getInput<PingJackIn>().value_or(0.f)));
+		if (pingEdge(pingIn(getInput<PingJackIn>().value_or(0.f))))
 		{
 			peg.pingEdgeIn();
 		}

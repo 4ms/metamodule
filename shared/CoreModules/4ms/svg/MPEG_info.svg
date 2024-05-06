@@ -25,12 +25,12 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.4355285"
-     inkscape:cx="75.753579"
-     inkscape:cy="249.63781"
-     inkscape:window-width="2512"
-     inkscape:window-height="1387"
-     inkscape:window-x="40"
-     inkscape:window-y="25"
+     inkscape:cx="60.151216"
+     inkscape:cy="208.57896"
+     inkscape:window-width="1920"
+     inkscape:window-height="1027"
+     inkscape:window-x="2444"
+     inkscape:window-y="299"
      inkscape:window-maximized="0"
      inkscape:current-layer="components" />
   <g
@@ -642,11 +642,53 @@
      transform="translate(0,-0.00940739)"
      style="display:inline">
     <circle
+       id="5V_ENV_Light"
+       data-name="5V ENV Light"
+       cx="99.669998"
+       cy="220"
+       r="4.96"
+       style="fill:#ff00ff;stroke-width:0px" />
+    <circle
+       id="ENV_OUT_Light"
+       data-name="ENV OUT Light"
+       cx="57.400002"
+       cy="200.10001"
+       r="4.96"
+       style="fill:#ff00ff;stroke-width:0px" />
+    <circle
+       id="EOF_Light"
+       data-name="EOF Light#RedLight"
+       cx="14.57"
+       cy="220"
+       r="4.96"
+       style="fill:#ff00ff;stroke-width:0px" />
+    <circle
+       id="5V_ENV_Out"
+       data-name="5V ENV Out"
+       cx="91.699997"
+       cy="244.94"
+       r="11.34"
+       style="fill:#0000ff;stroke-width:0px" />
+    <circle
+       id="EOF"
+       cx="23.07"
+       cy="244.84"
+       r="11.34"
+       style="fill:#8080ff;stroke-width:0px" />
+    <circle
+       id="ENV_Out"
+       data-name="ENV Out"
+       cx="57.119999"
+       cy="224.36"
+       r="11.34"
+       style="fill:#0000ff;stroke-width:0px" />
+    <circle
        id="Div"
        cx="57.380001"
        cy="311.04001"
        r="11.34"
-       style="fill:#00ff00;stroke-width:0px" />
+       style="fill:#00ff00;stroke-width:0px"
+       data-name="Div/Mult CV" />
     <circle
        id="Cycle_Trig"
        data-name="Cycle Trig"
@@ -668,53 +710,26 @@
        r="11.34"
        style="fill:#80ff80;stroke-width:0px" />
     <circle
-       id="5V_ENV_Out"
-       data-name="5V ENV Out"
-       cx="91.699997"
-       cy="244.94"
-       r="11.34"
-       style="fill:#0000ff;stroke-width:0px" />
-    <circle
-       id="ENV_Out"
-       data-name="ENV Out"
-       cx="57.119999"
-       cy="224.36"
-       r="11.34"
-       style="fill:#0000ff;stroke-width:0px" />
-    <circle
-       id="EOF"
-       cx="23.07"
-       cy="244.84"
-       r="11.34"
-       style="fill:#8080ff;stroke-width:0px" />
-    <circle
-       id="5V_ENV_Light"
-       data-name="5V ENV Light#BlueLight"
-       cx="99.669998"
-       cy="220"
-       r="4.96"
-       style="fill:#ff00ff;stroke-width:0px" />
-    <circle
-       id="ENV_OUT_Light"
-       data-name="ENV OUT Light#RedBlueLight"
-       cx="57.400002"
-       cy="200.10001"
-       r="4.96"
-       style="fill:#ff00ff;stroke-width:0px" />
-    <circle
-       id="EOF_Light"
-       data-name="EOF Light#RedLight"
-       cx="14.57"
-       cy="220"
-       r="4.96"
-       style="fill:#ff00ff;stroke-width:0px" />
-    <circle
        id="Ping_Trig"
-       data-name="Ping Trig"
+       data-name="Ping Jack"
        cx="80.209999"
        cy="41.57"
        r="11.34"
        style="fill:#80ff80;stroke-width:0px" />
+    <circle
+       id="Cycle"
+       cx="92.150002"
+       cy="81.150002"
+       r="11.34"
+       style="fill:#ffc000;stroke-width:0px"
+       data-name="Cycle#MomentaryRGB7mm" />
+    <circle
+       id="Ping"
+       cx="30.52"
+       cy="41.57"
+       r="11.34"
+       style="fill:#ffc000;stroke-width:0px"
+       data-name="Ping#MomentaryRGB7mm" />
     <circle
        id="Offset"
        cx="91.139999"
@@ -740,19 +755,6 @@
        cy="87.769997"
        r="17.01"
        style="fill:#ff0040;stroke-width:0px" />
-    <circle
-       id="Cycle"
-       cx="92.150002"
-       cy="81.150002"
-       r="11.34"
-       style="fill:#ff8000;stroke-width:0px" />
-    <circle
-       id="Ping"
-       cx="30.52"
-       cy="41.57"
-       r="11.34"
-       style="fill:#ffc000;stroke-width:0px"
-       data-name="Ping#MomentaryRGB7mm" />
     <text
        id="slug"
        transform="scale(0.96953597,1.0314212)"
@@ -786,7 +788,7 @@
        data-name="Trig Jack Mode@Async  Trig@Async Gate@Quantized Trig" />
     <circle
        id="CycleJackModeAltFunc"
-       data-name="Cycle Jack Mode@Gate@Gate+Sync@Trig"
+       data-name="Cycle Jack Mode@Trig@Gate+Sync@Gate"
        cx="91.589996"
        cy="287.64001"
        r="4"
@@ -797,7 +799,7 @@
        cy="244.84"
        r="4"
        style="fill:#808080;stroke-width:0px"
-       data-name="EOF Jack Mode@EOF@EOR@Half-Rise@Tap Clock" />
+       data-name="EOF Jack Mode@EOR@EOF@Half-Rise@Tap Clock" />
     <circle
        id="EOFJackTypeAltParam"
        cx="23.07"
