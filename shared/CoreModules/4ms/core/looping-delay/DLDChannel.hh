@@ -67,11 +67,11 @@ public:
 
 		sideloadDrivers();
 
-		handleAltParameters();
-
 		if (audioBufferFillCount == inBlock.size())
 		{
 			audioBufferFillCount = 0;
+
+			handleAltParameters();
 
 			params.update();
 			looping_delay.update(inBlock, outBlock);		
@@ -208,7 +208,9 @@ private:
 		};
 
 		params.settings.crossfade_samples       = AdaptLengthToSampleRateFunc(CrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()]);
+		params.settings.crossfade_rate          = params.settings.calc_fade_increment(params.settings.crossfade_samples);
 		params.settings.write_crossfade_samples = AdaptLengthToSampleRateFunc(WriteCrossfadeSamples[getState<Mapping::CrossFadeTimeAlt>()]);
+		params.settings.write_crossfade_rate    = params.settings.calc_fade_increment(params.settings.write_crossfade_samples);
 
 		static constexpr std::array<PingMethod,5> PingMethods = {
 			PingMethod::LINEAR_AVERAGE_4,
