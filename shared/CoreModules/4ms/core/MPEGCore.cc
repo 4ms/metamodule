@@ -34,12 +34,12 @@ public:
 private:
 	void sideloadDrivers()
 	{
-		peg.adc_cv_dma_buffer[0] = uint16_t(std::clamp(getInput<ShapeCvIn>().value_or(0.f) / 10.f + 0.5f, 0.f, 1.f) * 4095.f);
-		peg.adc_cv_dma_buffer[1] = uint16_t(std::clamp(getInput<DivIn>().value_or(0.f) / 10.f + 0.5f, 0.f, 1.f) * 4095.f);
-		peg.adc_pot_dma_buffer[0] = uint16_t(getState<ScaleKnob>() * 4095.f);
-		peg.adc_pot_dma_buffer[1] = uint16_t(getState<OffsetKnob>() * 4095.f);
-		peg.adc_pot_dma_buffer[2] = uint16_t(getState<ShapeKnob>() * 4095.f);
-		peg.adc_pot_dma_buffer[3] = uint16_t(getState<Div_MultKnob>() * 4095.f);
+		peg.adc_dma_buffer[0] = uint16_t(std::clamp(getInput<ShapeCvIn>().value_or(0.f) / -10.f + 0.5f, 0.f, 1.f) * 4095.f);
+		peg.adc_dma_buffer[1] = uint16_t(std::clamp(getInput<DivIn>().value_or(0.f) / -10.f + 0.5f, 0.f, 1.f) * 4095.f);
+		peg.adc_dma_buffer[2] = uint16_t(getState<ScaleKnob>() * 4095.f);
+		peg.adc_dma_buffer[3] = uint16_t(getState<OffsetKnob>() * 4095.f);
+		peg.adc_dma_buffer[4] = uint16_t(getState<ShapeKnob>() * 4095.f);
+		peg.adc_dma_buffer[5] = uint16_t(getState<Div_MultKnob>() * 4095.f);
 
 		peg.digio.PingBut.sideload_set(getState<PingButton>() == MomentaryButton::State_t::PRESSED);
 		peg.digio.CycleBut.sideload_set(getState<CycleButton>() == LatchingButton::State_t::DOWN);
