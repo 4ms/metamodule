@@ -208,7 +208,7 @@ void MiniPEG::handle_env_end(struct PingableEnvelope *e, uint8_t end_env_flag) {
 int32_t MiniPEG::scale_shift_offset_env(uint16_t raw_env_val) {
 	int32_t env = (int32_t)raw_env_val;
 	constexpr auto kScaleRange = 4096; // - SCALE_PLATEAU_WIDTH;
-	env = (((env + offset) * scale) / kScaleRange) + shift;
+	env = (((env + offset) * scale) / kScaleRange) + settings.shift_value;
 
 	if (env > 4095)
 		env = 4095;

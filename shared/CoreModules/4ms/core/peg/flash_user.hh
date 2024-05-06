@@ -72,7 +72,7 @@ struct SystemSettings {
 	uint16_t enva_cal_r, enva_cal_g, enva_cal_b;
 	uint16_t envb_cal_r, envb_cal_g, envb_cal_b;
 
-	int32_t shift_value; // not used
+	int32_t shift_value;
 };
 
 #define QNT_REPHASES_WHEN_CYCLE_OFF 0

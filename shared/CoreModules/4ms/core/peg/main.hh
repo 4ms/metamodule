@@ -140,7 +140,7 @@ private:
     bool system_mode_active;
     int32_t scale;
     int32_t offset;
-    int32_t shift;
+    int32_t shift; // not used anymore
 
 private:
     int8_t get_clk_div_nominal(uint16_t adc_val);

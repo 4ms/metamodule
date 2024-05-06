@@ -84,7 +84,9 @@ uint8_t MiniPEG::read_shape_scale_offset(void) {
 			adjusting_shift_mode = true;
 
 		if (adjusting_shift_mode)
-			shift = 2048 + tmp;
+			// This variable is not used anymore
+			// instead the settings value is used directly
+			shift = 2048 + tmp; 
 		else
 			//offset must go to zero at max
 			offset = tmp - (2048 - OFFSET_PLATEAU_WIDTH / 2 - 4 /*wiggle room*/);
