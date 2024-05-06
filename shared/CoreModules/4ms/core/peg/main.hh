@@ -7,7 +7,7 @@
 #include "analog_conditioning.h"
 #include "dig_inout_pins.hh"
 #include "debounced_digins.h"
-#include "pwm.h"
+#include "leds.h"
 #include "dac.h"
 #include "calibration.hh"
 
@@ -218,6 +218,20 @@ private:
     // void wait_for_pingbut_downup(void);
     // void wait_for_cyclebut_downup(void);
     // void error_writing_settings(void);
+
+private:
+    void set_led_brightness(uint16_t brightness, PwmOutputs pwm_led_num);
+    void set_rgb_led(RgbLeds rgb_led_id, Palette color_id);
+    void adjust_palette(void);
+    uint16_t adjust_hue(uint16_t base, uint16_t adj);
+    void all_lights_off(void);
+
+    void create_color(AdjustedColor *col, uint16_t red, uint16_t green, uint16_t blue);
+
+    AdjustedColor palette[NUM_COLORS];
+
+    static constexpr uint32_t kMaxBrightness = 4095;
+    static constexpr uint32_t kMaxBrightnessBits = 12;
 
 };
 

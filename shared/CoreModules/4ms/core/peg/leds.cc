@@ -1,11 +1,13 @@
-#include "globals.h"
+#include "main.hh"
+#include "log4096.h"
+
+namespace MetaModule::PEG
+{
 
 extern const uint16_t log4096[4096];
-extern struct SystemSettings settings;
 
-AdjustedColor palette[NUM_COLORS];
 
-uint16_t adjust_hue(uint16_t base, uint16_t adj) {
+uint16_t MiniPEG::adjust_hue(uint16_t base, uint16_t adj) {
 	uint32_t a = (base * adj) >> (kMaxBrightnessBits - 1);
 	if (a > kMaxBrightness)
 		return kMaxBrightness;
@@ -13,7 +15,7 @@ uint16_t adjust_hue(uint16_t base, uint16_t adj) {
 		return a;
 }
 
-void create_color(AdjustedColor *col, uint16_t red, uint16_t green, uint16_t blue) {
+void MiniPEG::create_color(AdjustedColor *col, uint16_t red, uint16_t green, uint16_t blue) {
 	col->ping.r = adjust_hue(red, settings.ping_cal_r);
 	col->ping.g = adjust_hue(green, settings.ping_cal_g);
 	col->ping.b = adjust_hue(blue, settings.ping_cal_b);
@@ -31,7 +33,7 @@ void create_color(AdjustedColor *col, uint16_t red, uint16_t green, uint16_t blu
 	col->envB.b = adjust_hue(blue, settings.envb_cal_b);
 }
 
-void adjust_palette(void) {
+void MiniPEG::adjust_palette(void) {
 	create_color(&palette[c_OFF], 0, 0, 0);
 	create_color(&palette[c_GREY50], 1024, 1024, 1024);
 	create_color(&palette[c_WHITE], 2048, 2048, 2048);
@@ -46,7 +48,7 @@ void adjust_palette(void) {
 	create_color(&palette[c_PURPLE], 3600, 0, 4095);
 }
 
-void set_rgb_led(RgbLeds rgb_led_id, Palette color_id) {
+void MiniPEG::set_rgb_led(RgbLeds rgb_led_id, Palette color_id) {
 	if (rgb_led_id == LED_PING) {
 		update_pwm(palette[color_id].ping.r, PWM_PINGBUT_R);
 		update_pwm(palette[color_id].ping.b, PWM_PINGBUT_B);
@@ -67,11 +69,11 @@ void set_rgb_led(RgbLeds rgb_led_id, Palette color_id) {
 		return;
 }
 
-void set_led_brightness(uint16_t brightness, PwmOutputs pwm_led_num) {
+void MiniPEG::set_led_brightness(uint16_t brightness, PwmOutputs pwm_led_num) {
 	update_pwm(brightness, pwm_led_num);
 }
 
-void all_lights_off() {
+void MiniPEG::all_lights_off() {
 	update_pwm(0, PWM_CYCLEBUT_R);
 	update_pwm(0, PWM_CYCLEBUT_G);
 	update_pwm(0, PWM_CYCLEBUT_B);
@@ -89,4 +91,6 @@ void all_lights_off() {
 	update_pwm(0, PWM_ENVB_B);
 
 	update_pwm(0, PWM_EOF_LED);
+}
+
 }

@@ -7,7 +7,6 @@
 #include "env_update.h"
 // #include "flash_layout.hh"
 #include "flash_user.hh"
-#include "leds.h"
 #include "math_util.h"
 #include "params.h"
 
