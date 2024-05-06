@@ -3044,10 +3044,10 @@
     <circle id="Loop_A" data-name="Loop A" cx="108.25" cy="81.44" r="11.34" style="fill: blue;" />
     <circle id="Time_B" data-name="Time B" cx="254.17" cy="53.39" r="17.01" style="fill: #ff0040;" />
     <circle id="Time_B_LED" data-name="Time B LED#RedLight" cx="222.2" cy="34.94" r="4.25" style="fill: #f0f;" />
-    <rect id="_16_1_8th_B" data-name="+16 | 1/8th B" x="199.68" y="42.95" width="11.34" height="17.01" style="fill: #ffc080;" />
+    <rect id="TimeMultB" data-name="Time Mult B@1/8th@=@+16" x="199.68" y="42.95" width="11.34" height="17.01" style="fill: #ffc080;" />
     <circle id="Ping_Jack" data-name="Ping Jack" cx="167.59" cy="42.51" r="11.34" style="fill: lime;" />
     <circle id="Ping_Button" data-name="Ping Button" cx="124.03" cy="42.51" r="10.63" style="fill: #ffc000;" />
-    <rect id="_16_1_8th_A" data-name="+16 | 1/8th A" x="78.44" y="42.95" width="11.34" height="17.01" style="fill: #ffc080;" />
+    <rect id="TimeMultA" data-name="+Time Mult A@1/8th@=@+16" x="78.44" y="42.95" width="11.34" height="17.01" style="fill: #ffc080;" />
     <circle id="Time_A_LED" data-name="Time A LED#RedLight" cx="66.03" cy="34.94" r="4.25" style="fill: #f0f;" />
     <circle id="Time_A" data-name="Time A" cx="34.32" cy="53.53" r="17.01" style="fill: #ff0040;" />
 
@@ -3064,7 +3064,7 @@
     <circle id="RevAJackAltParam" data-name="Rev. A@Trig@Gate" cx="122.51" cy="242.1" r="4" style="fill:#808080" />
     <circle id="Hold_B_AltParam" data-name="Hold B@Trig@Gate" cx="165.98" cy="281.49" r="4" style="fill: #808080;" />
     <circle id="Hold_A_AltParam" data-name="Hold A@Trig@Gate" cx="122.51" cy="281.49" r="4" style="fill: #808080;" />
-    <circle id="PingMethodAltParam" data-name="Ping Method@IgnoreJitter@Ignore%Change@1:1@Avg 2@Avg 4" cx="167.59" cy="42.51" r="11.34" style="fill:#808080;" />
+    <circle id="PingMethodAltParam" data-name="Ping Method@Avg 4@Avg 2@1:1@IgnoreJitter@Ignore%Change" cx="167.59" cy="42.51" r="11.34" style="fill:#808080;" />
 
     <rect style="fill:#808080;" id="AutoMuteBAltParam" width="12" height="12" x="206" y="7" data-name="AutoMute B@On@Off" />
     <rect style="fill:#808080;" id="AutoMuteAAltParam" width="12" height="12" x="6" y="7" data-name="AutoMute A@On@Off" />
@@ -3079,30 +3079,7 @@
          x="0"
          y="0"
          style="letter-spacing: 0em;"
-         id="tspan674">D</tspan><tspan
-         x="4.01"
-         y="0"
-         id="tspan675">ual </tspan><tspan
-         x="12.9"
-         y="0"
-         style="letter-spacing: -.01em;"
-         id="tspan676">L</tspan><tspan
-         x="15.65"
-         y="0"
-         id="tspan677">ooping </tspan><tspan
-         x="35.01"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan678">D</tspan><tspan
-         x="39.03"
-         y="0"
-         id="tspan679">el</tspan><tspan
-         x="43.45"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan680">a</tspan><tspan
-         x="46.29"
-         y="0"
-         id="tspan681">y</tspan></text>
+         id="tspan674">Dual Looping Delay</tspan>
+         </text>
   </g>
 </svg>

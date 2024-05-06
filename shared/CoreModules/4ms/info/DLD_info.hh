@@ -59,7 +59,7 @@ struct DLDInfo : ModuleInfoBase {
 		AltParamChoiceLabeled{{{to_mm<72>(229.0), to_mm<72>(13.0), Center, "Soft Clip B", ""}, 2, 1}, {"On", "Off"}},
 		AltParamChoiceLabeled{{{to_mm<72>(12.0), to_mm<72>(13.0), Center, "AutoMute A", ""}, 2, 1}, {"On", "Off"}},
 		AltParamChoiceLabeled{{{to_mm<72>(212.0), to_mm<72>(13.0), Center, "AutoMute B", ""}, 2, 1}, {"On", "Off"}},
-		AltParamChoiceLabeled{{{to_mm<72>(167.59), to_mm<72>(42.51), Center, "Ping Method", ""}, 5, 1}, {"IgnoreJitter", "Ignore%Change", "1:1", "Avg 2", "Avg 4"}},
+		AltParamChoiceLabeled{{{to_mm<72>(167.59), to_mm<72>(42.51), Center, "Ping Method", ""}, 5, 1}, {"Avg 4", "Avg 2", "1:1", "IgnoreJitter", "Ignore%Change"}},
 		AltParamChoiceLabeled{{{to_mm<72>(122.51), to_mm<72>(281.49), Center, "Hold A", ""}, 2, 1}, {"Trig", "Gate"}},
 		AltParamChoiceLabeled{{{to_mm<72>(165.98), to_mm<72>(281.49), Center, "Hold B", ""}, 2, 1}, {"Trig", "Gate"}},
 		AltParamChoiceLabeled{{{to_mm<72>(122.51), to_mm<72>(242.1), Center, "Rev. A", ""}, 2, 1}, {"Trig", "Gate"}},
