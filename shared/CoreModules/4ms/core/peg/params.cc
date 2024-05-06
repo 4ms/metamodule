@@ -1,29 +1,13 @@
-#include "params.h"
-#include "analog_conditioning.h"
+#include "main.hh"
 #include "calibration.hh"
 #include "debounced_digins.h"
-#include "dig_inout_pins.hh"
 #include "env_transition.h"
 #include "envelope_calcs.h"
-#include "flash_user.hh"
-#include "pingable_env.h"
 #include "settings.h"
 #include "util/math.hh"
 
-extern struct PingableEnvelope m;
-extern uint32_t clk_time;
-extern struct SystemSettings settings;
-extern analog_t analog[NUM_ADCS];
-extern int16_t cycle_latched_offset;
-extern bool adjusting_shift_mode;
-
-int32_t scale, offset, shift;
-
-static uint16_t shape;
-static int8_t read_divmult();
-static uint8_t read_shape_scale_offset();
-static void update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_clock_divider_amount);
-static void update_env_tracking(struct PingableEnvelope *e);
+namespace MetaModule::PEG
+{
 
 //Settings:
 #define USER_INPUT_POLL_TIME 80
@@ -31,14 +15,14 @@ static void update_env_tracking(struct PingableEnvelope *e);
 #define ADC_DRIFT 16
 #define DIV_ADC_HYSTERESIS 16
 
-void init_params(void) {
+void MiniPEG::init_params(void) {
 	//Todo: store shift value in flash
 	shift = 2048; //=settings.shift_value
 	offset = 0;
 	scale = 0;
 }
 
-void update_adc_params(uint8_t force_params_update) {
+void MiniPEG::update_adc_params(uint8_t force_params_update) {
 	static uint16_t oversample_wait_ctr = 0;
 	static uint16_t poll_user_input = 0;
 
@@ -85,7 +69,7 @@ void update_adc_params(uint8_t force_params_update) {
 // Reads Scale, Offset, and Shape CV and pots
 // Updates global vars: shift, shape, offset
 // Returns 1 if shape changed, 0 if not
-static uint8_t read_shape_scale_offset(void) {
+uint8_t MiniPEG::read_shape_scale_offset(void) {
 	uint8_t update_risefallincs = 0;
 
 	{
@@ -122,7 +106,7 @@ static uint8_t read_shape_scale_offset(void) {
 // Reads Divmult pot and cv
 // returns updated clock divider
 // amount or 0 if no change
-static int8_t read_divmult(void) {
+int8_t MiniPEG::read_divmult(void) {
 	static int16_t last_total_adc = 0;
 	static int8_t last_clock_divider_amount = 0;
 
@@ -169,14 +153,14 @@ static int8_t read_divmult(void) {
 	return new_clock_divider_amount;
 }
 
-static void update_env_tracking(struct PingableEnvelope *e) {
+void MiniPEG::update_env_tracking(struct PingableEnvelope *e) {
 	if (e->envelope_running && e->sync_to_ping_mode)
 		e->tracking_changedrisefalls = 1;
 
 	e->async_env_changed_shape = 1;
 }
 
-static void update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_clock_divider_amount) {
+void MiniPEG::update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_clock_divider_amount) {
 	e->clock_divider_amount = new_clock_divider_amount;
 
 	if (clk_time) {
@@ -187,4 +171,6 @@ static void update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_
 
 		e->div_clk_time = get_clk_div_time(new_clock_divider_amount, clk_time);
 	}
+}
+
 }

@@ -162,6 +162,17 @@ public:
     // for sideloading
     struct SystemSettings settings;
 
+private:
+    void update_adc_params(uint8_t force_params_update);
+    void init_params(void);
+
+    int8_t read_divmult();
+    uint8_t read_shape_scale_offset();
+    void update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_clock_divider_amount);
+    void update_env_tracking(struct PingableEnvelope *e);
+
+    uint16_t shape;
+
 };
 
 }
