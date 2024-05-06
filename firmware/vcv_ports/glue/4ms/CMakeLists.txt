@@ -63,6 +63,36 @@ target_sources(
     ${MM_ROOT}/shared/CoreModules/4ms/core/qplfo/qplfo_mocks.cc
 )
 
+#MPEG
+# MiniPEG
+target_sources(
+  4msLibrary
+  PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/main.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/trigout.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/analog_conditioning.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/env_update.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/envelope_calcs.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/flash_user.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/params.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/pingable_env.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/dig_inouts.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/timers.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/calibration.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/env_transition.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/leds.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/shareddrv/debounced_digins.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/shareddrv/dac.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/mocks/pwm.cc
+)
+
+target_include_directories(
+  4msLibrary
+  PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/mocks
+)
+
 
 # Axoloti ports
 target_sources(
