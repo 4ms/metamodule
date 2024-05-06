@@ -34,8 +34,6 @@ enum AdcPotChannels {
 
 enum AnalogPolarity { AP_UNIPOLAR, AP_BIPOLAR };
 
-#define MAX_LPF_SIZE 16
-
 typedef struct AnalogConditioned {
 	// uint8_t lpf_size;
 	// uint8_t lpf_size_shift;
