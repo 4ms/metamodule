@@ -49,6 +49,9 @@ private:
 		peg.digio.TrigJack.sideload_set(triggerIn(getInput<TriggerIn>().value_or(0.f)));
 
 		setOutput<EofOut>(peg.digio.EOJack.sideload_get() ? 5.0f : 0.f);
+
+		setOutput<EnvOut>(-20.f/4095.f * float(peg.dac_vals[0]) + 10.f);
+		setOutput<_5VEnvOut>( float(peg.dac_vals[1]) / 4095.f * 5.f);
 	}
 
 private:
