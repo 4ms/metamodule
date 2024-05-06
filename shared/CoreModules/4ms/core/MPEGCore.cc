@@ -52,6 +52,14 @@ private:
 
 		setOutput<EnvOut>(-20.f/4095.f * float(peg.dac_vals[0]) + 10.f);
 		setOutput<_5VEnvOut>( float(peg.dac_vals[1]) / 4095.f * 5.f);
+
+		auto pwmToFloat = [](uint16_t pwm_val){return float(pwm_val)/float(std::numeric_limits<uint16_t>::max());};
+
+		setLED<EnvOutLight>(std::array<float,3>{pwmToFloat(peg.pwm_vals[0]),pwmToFloat(peg.pwm_vals[1]),pwmToFloat(peg.pwm_vals[2])});
+		setLED<_5VEnvLight>(std::array<float,3>{pwmToFloat(peg.pwm_vals[3]),pwmToFloat(peg.pwm_vals[4]),pwmToFloat(peg.pwm_vals[5])});
+		setLED<CycleButton>(std::array<float,3>{pwmToFloat(peg.pwm_vals[6]),pwmToFloat(peg.pwm_vals[7]),pwmToFloat(peg.pwm_vals[8])});
+		setLED<PingButton>(std::array<float,3>{pwmToFloat(peg.pwm_vals[9]),pwmToFloat(peg.pwm_vals[10]),pwmToFloat(peg.pwm_vals[11])});
+		setLED<EofLight>(pwmToFloat(peg.pwm_vals[12]));
 	}
 
 private:
