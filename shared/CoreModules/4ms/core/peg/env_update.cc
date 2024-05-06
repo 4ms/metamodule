@@ -1,33 +1,20 @@
-#include "env_update.h"
-#include "dac.h"
+#include "main.hh"
+
 #include "dig_inouts.hh"
 #include "env_transition.h"
 #include "envelope_calcs.h"
-#include "flash_user.hh"
 #include "leds.h"
-#include "pingable_env.h"
 #include "settings.h"
 #include "timers.h"
 #include "trigout.h"
 
-extern int32_t scale, offset, shift;
-extern uint32_t clk_time;
-extern uint8_t cycle_but_on;
-extern struct PingableEnvelope m;
-extern struct SystemSettings settings;
-extern volatile uint8_t using_tap_clock;
-extern volatile uint32_t tapouttmr;
-extern volatile uint32_t pingtmr;
-extern bool system_mode_active;
+namespace MetaModule::PEG
+{
 
-static void do_reset_envelope(PingableEnvelope *e);
-static void output_env_val(uint16_t rawA);
-static void handle_env_segment_end(PingableEnvelope *e, envelopeStates end_segment_flag);
-static void handle_env_end(PingableEnvelope *e, uint8_t end_env_flag);
-static void start_envelope_in_sync(PingableEnvelope *e);
-static void start_envelope_immediate(PingableEnvelope *e);
+const uint32_t k_accum_max = (0xFFF << 19);
+const uint32_t k_accum_min = (0x001 << 19);
 
-void update_all_envelopes() {
+void MiniPEG::update_all_envelopes() {
 	//@22kHz: 6.5us, every 45.5us, = 14.2%
 	//@40kHz: 6.5us, every 25.0us = 26.0%
 	// DEBUGON;
@@ -39,10 +26,7 @@ void update_all_envelopes() {
 	// DEBUGOFF;
 }
 
-const uint32_t k_accum_max = (0xFFF << 19);
-const uint32_t k_accum_min = (0x001 << 19);
-
-void update_envelope(PingableEnvelope *e) {
+void MiniPEG::update_envelope(PingableEnvelope *e) {
 	envelopeStates end_segment_flag = WAIT;
 	uint8_t end_env_flag = 0;
 	uint16_t cur_val = 0;
@@ -176,7 +160,7 @@ void update_envelope(PingableEnvelope *e) {
 	handle_env_end(e, end_env_flag);
 }
 
-static void handle_env_segment_end(struct PingableEnvelope *e, envelopeStates end_segment_flag) {
+void MiniPEG::handle_env_segment_end(struct PingableEnvelope *e, envelopeStates end_segment_flag) {
 	if (end_segment_flag) {
 		if (end_segment_flag == FALL)
 			e->curve_fall = e->next_curve_fall;
@@ -191,7 +175,7 @@ static void handle_env_segment_end(struct PingableEnvelope *e, envelopeStates en
 	}
 }
 
-static void handle_env_end(struct PingableEnvelope *e, uint8_t end_env_flag) {
+void MiniPEG::handle_env_end(struct PingableEnvelope *e, uint8_t end_env_flag) {
 	if (end_env_flag) {
 		eof_on();
 		eor_off(); //should already be OFF, but make sure
@@ -221,7 +205,7 @@ static void handle_env_end(struct PingableEnvelope *e, uint8_t end_env_flag) {
 	}
 }
 
-static int32_t scale_shift_offset_env(uint16_t raw_env_val) {
+int32_t MiniPEG::scale_shift_offset_env(uint16_t raw_env_val) {
 	int32_t env = (int32_t)raw_env_val;
 	constexpr auto kScaleRange = 4096; // - SCALE_PLATEAU_WIDTH;
 	env = (((env + offset) * scale) / kScaleRange) + shift;
@@ -234,7 +218,7 @@ static int32_t scale_shift_offset_env(uint16_t raw_env_val) {
 	return env;
 }
 
-static void output_env_val(uint16_t rawA) {
+void MiniPEG::output_env_val(uint16_t rawA) {
 	int32_t envA = scale_shift_offset_env(rawA);
 	int32_t envB = rawA;
 
@@ -254,7 +238,7 @@ static void output_env_val(uint16_t rawA) {
 	}
 }
 
-static void do_reset_envelope(struct PingableEnvelope *e) {
+void MiniPEG::do_reset_envelope(struct PingableEnvelope *e) {
 	e->reset_now_flag = 0;
 
 	if (e->cur_val < 0x0010)
@@ -293,7 +277,7 @@ static void do_reset_envelope(struct PingableEnvelope *e) {
 	e->reset_nextping_flag = 0;
 }
 
-void check_restart_async_env(struct PingableEnvelope *e) {
+void MiniPEG::check_restart_async_env(struct PingableEnvelope *e) {
 	if (e->async_phase_diff > e->div_clk_time)
 		e->async_phase_diff = 0; //fail-safe measure
 
@@ -308,7 +292,7 @@ void check_restart_async_env(struct PingableEnvelope *e) {
 	}
 }
 
-void sync_env_to_clk(struct PingableEnvelope *e) {
+void MiniPEG::sync_env_to_clk(struct PingableEnvelope *e) {
 	if (!e->sync_to_ping_mode)
 		e->ready_to_start_async = 1;
 	else {
@@ -323,7 +307,7 @@ void sync_env_to_clk(struct PingableEnvelope *e) {
 	}
 }
 
-uint8_t resync_on_ping(struct PingableEnvelope *e) {
+uint8_t MiniPEG::resync_on_ping(struct PingableEnvelope *e) {
 	if (cycle_but_on || e->trigq_down || e->reset_nextping_flag || e->envelope_running) {
 		if (e->clock_divider_amount > 1) //we're dividing the clock, so resync on every N pings
 		{
@@ -358,7 +342,7 @@ uint8_t resync_on_ping(struct PingableEnvelope *e) {
 	return 0;
 }
 
-void start_envelope(struct PingableEnvelope *e) {
+void MiniPEG::start_envelope(struct PingableEnvelope *e) {
 	if (!e->envelope_running) {
 		if (e->sync_to_ping_mode)
 			start_envelope_in_sync(e);
@@ -368,14 +352,14 @@ void start_envelope(struct PingableEnvelope *e) {
 		e->ping_div_ctr = e->clock_divider_amount;
 }
 
-static void start_envelope_immediate(struct PingableEnvelope *e) {
+void MiniPEG::start_envelope_immediate(struct PingableEnvelope *e) {
 	e->envelope_running = 1;
 	e->reset_now_flag = 1;
 	e->ready_to_start_async = 0;
 	e->async_phase_diff = e->divpingtmr;
 }
 
-static void start_envelope_in_sync(struct PingableEnvelope *e) {
+void MiniPEG::start_envelope_in_sync(struct PingableEnvelope *e) {
 	//Todo: use floats
 	uint64_t time_tmp = 0;
 	uint32_t elapsed_time;
@@ -413,7 +397,7 @@ static void start_envelope_in_sync(struct PingableEnvelope *e) {
 	e->ping_div_ctr = e->clock_divider_amount;
 }
 
-void stop_envelope(struct PingableEnvelope *e) {
+void MiniPEG::stop_envelope(struct PingableEnvelope *e) {
 	e->env_state = WAIT;
 	e->envelope_running = 0;
 	e->divpingtmr = 0;
@@ -426,4 +410,6 @@ void stop_envelope(struct PingableEnvelope *e) {
 	e->fall_time = 0;
 	e->rise_inc = 0;
 	e->fall_inc = 0;
+}
+
 }

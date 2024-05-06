@@ -21,8 +21,6 @@
 namespace MetaModule::PEG
 {
 
-static const uint32_t kDacSampleRate = 40000;
-
 MiniPEG::MiniPEG()
 {
 	init_pingable_env(&m);
@@ -43,9 +41,6 @@ MiniPEG::MiniPEG()
 	read_settings();
 	adjust_palette();
 	adjust_palette();
-
-	// TODO: call this with dac sample rate
-	// update_all_envelopes()
 
 	init_params();
 

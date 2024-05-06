@@ -119,6 +119,32 @@ public:
     // for sideloading
     uint16_t dac_vals[2];
 
+public:
+    // call this with dac sample rate
+    static const uint32_t kDacSampleRate = 40000;
+    void update_all_envelopes();
+
+private:
+    void update_envelope(PingableEnvelope *e);
+    void stop_envelope(struct PingableEnvelope *e);
+    void start_envelope(struct PingableEnvelope *e);
+    void check_restart_async_env(struct PingableEnvelope *e);
+    void sync_env_to_clk(struct PingableEnvelope *e);
+    uint8_t resync_on_ping(struct PingableEnvelope *e);
+
+    void do_reset_envelope(PingableEnvelope *e);
+    void output_env_val(uint16_t rawA);
+    void handle_env_segment_end(PingableEnvelope *e, envelopeStates end_segment_flag);
+    void handle_env_end(PingableEnvelope *e, uint8_t end_env_flag);
+    void start_envelope_in_sync(PingableEnvelope *e);
+    void start_envelope_immediate(PingableEnvelope *e);
+    int32_t scale_shift_offset_env(uint16_t raw_env_val);
+
+    bool system_mode_active;
+    int32_t scale;
+    int32_t offset;
+    int32_t shift;
+
 };
 
 }
