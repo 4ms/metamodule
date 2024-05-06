@@ -15,14 +15,20 @@ struct InputPin
     bool just_went_high()
     {
 		auto result = value and not compareValue;
-		compareValue = value;
+		if (result)
+		{
+			compareValue = value;
+		}
 		return result;
     }
 
 	bool just_went_low()
     {
 		auto result = not value and compareValue;
-		compareValue = value;
+		if (result)
+		{
+			compareValue = value;
+		}
 		return result;
     }
 
