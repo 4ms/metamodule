@@ -98,8 +98,6 @@ private:
     void setup_fir_lpf(void);
 
     uint16_t adc_dma_buffer[NUM_ADCS];
-    uint16_t *adc_cv_dma_buffer = &(adc_dma_buffer[0]);
-    uint16_t *adc_pot_dma_buffer = &(adc_dma_buffer[NUM_CV_ADCS]);
 
 };
 

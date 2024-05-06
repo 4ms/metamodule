@@ -40,6 +40,10 @@ const int16_t adc_cal_offset[NUM_ADCS] = {0, 48, 48, 0, 0, 0};
 //where COEF might be 0.1
 
 void MiniPEG::condition_analog(void) {
+
+	uint16_t *adc_cv_dma_buffer = &(adc_dma_buffer[0]);
+    uint16_t *adc_pot_dma_buffer = &(adc_dma_buffer[NUM_CV_ADCS]);
+
 	uint8_t i, pot_i;
 	int32_t t;
 	static uint8_t oversample_ctr = 0;
