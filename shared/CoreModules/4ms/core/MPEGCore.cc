@@ -142,7 +142,7 @@ private:
 
 		peg.settings.trigin_function     = TriggerInOptions[getState<TrigJackModeAltParam>()];
 
-		peg.settings.shift_value         = std::lerp(-2048.f, 2048.f, getState<ShiftAltParam>());
+		peg.settings.shift_value         = getState<ShiftAltParam>() * 4095.f;
 	}
 
 private:
