@@ -1,15 +1,13 @@
 #include "main.hh"
-#include "dig_inout_pins.hh"
 #include "leds.h"
 #include "settings.h"
 
 namespace MetaModule::PEG
 {
 
-
 void MiniPEG::trigout_on() {
 	if (!trigout_high) {
-		DigIO::EOJack.high();
+		digio.EOJack.high();
 		set_led_brightness(kMaxBrightness, PWM_EOF_LED);
 		trigout_high = 1;
 		trigouttmr = 0;
@@ -17,7 +15,7 @@ void MiniPEG::trigout_on() {
 }
 void MiniPEG::trigout_off() {
 	if (!settings.trigout_is_trig && (trigouttmr > TRIGOUT_MIN_GATE_TIME)) {
-		DigIO::EOJack.low();
+		digio.EOJack.low();
 		set_led_brightness(0, PWM_EOF_LED);
 		trigouttmr = 0;
 	}
@@ -26,7 +24,7 @@ void MiniPEG::trigout_off() {
 
 void MiniPEG::handle_trigout_trigfall() {
 	if (settings.trigout_is_trig && trigouttmr > TRIGOUT_TRIG_TIME) {
-		DigIO::EOJack.low();
+		digio.EOJack.low();
 		set_led_brightness(0, PWM_EOF_LED);
 		trigouttmr = 0;
 	}
@@ -69,9 +67,9 @@ void MiniPEG::tapclkout_off() {
 		trigout_off();
 }
 void MiniPEG::clockbus_on() {
-	DigIO::ClockBusOut.high();
+	digio.ClockBusOut.high();
 }
 void MiniPEG::clockbus_off() {
-	DigIO::ClockBusOut.low();
+	digio.ClockBusOut.low();
 }
 }

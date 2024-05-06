@@ -5,6 +5,7 @@
 #include "pingable_env.h"
 #include "flash_user.hh"
 #include "analog_conditioning.h"
+#include "dig_inout_pins.hh"
 
 namespace MetaModule::PEG
 {
@@ -87,6 +88,9 @@ private:
     void trigout_off();
 
     uint8_t trigout_high = 0;
+
+private:
+    DigIO digio;
 
 };
 

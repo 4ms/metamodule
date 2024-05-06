@@ -3,12 +3,11 @@
 #include "pins.hh"
 using namespace MetaModule::PEG::Mocks;
 
-// TODO: this needs to become a member object
-
-// struct DigIO {
-namespace DigIO
+namespace MetaModule::PEG
 {
 
+struct DigIO
+{
 	InputPin PingBut;
 	InputPin CycleBut;
 
@@ -22,3 +21,5 @@ namespace DigIO
 	// //SWO pin can be debug out
 	// using DebugOut = mdrivlib::FPin<GPIO::B, PinNum::_3, PinMode::Output, PinPolarity::Normal>;
 };
+
+}
