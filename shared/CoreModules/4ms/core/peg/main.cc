@@ -1,7 +1,6 @@
 #include "main.hh"
 
 // #include "adc.h"
-#include "dac.h"
 #include "debounced_digins.h"
 #include "dig_inouts.hh"
 // #include "drivers/system.hh"
@@ -45,7 +44,8 @@ MiniPEG::MiniPEG()
 	adjust_palette();
 	adjust_palette();
 
-	// init_dac(kDacSampleRate, &update_all_envelopes);
+	// TODO: call this with dac sample rate
+	// update_all_envelopes()
 
 	init_params();
 

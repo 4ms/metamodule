@@ -7,6 +7,7 @@
 #include "analog_conditioning.h"
 #include "dig_inout_pins.hh"
 #include "pwm.h"
+#include "dac.h"
 
 namespace MetaModule::PEG
 {
@@ -110,6 +111,13 @@ private:
 public:
     // for sideloading
     uint32_t pwm_vals[NUM_PWMS];
+
+private:
+    void dac_out(enum DACs dac, uint16_t val);
+
+public:
+    // for sideloading
+    uint16_t dac_vals[2];
 
 };
 
