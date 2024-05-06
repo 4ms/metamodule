@@ -26,6 +26,7 @@ public:
 	void update() override {
 		sideloadDrivers();
 		sideloadSystemSettings();
+		peg.update_all_envelopes();
 		peg.update();
 	}
 
