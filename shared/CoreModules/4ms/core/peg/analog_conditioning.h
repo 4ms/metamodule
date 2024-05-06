@@ -51,5 +51,4 @@ typedef struct AnalogConditioned {
 
 } analog_t;
 
-void condition_analog(void);
-void init_analog_conditioning(void);
+
