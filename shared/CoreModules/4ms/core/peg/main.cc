@@ -1,7 +1,6 @@
 #include "main.hh"
 
 // #include "adc.h"
-#include "calibration.hh"
 #include "dac.h"
 #include "debounced_digins.h"
 #include "dig_inouts.hh"
@@ -45,7 +44,6 @@ MiniPEG::MiniPEG()
 
 	read_settings();
 	adjust_palette();
-	check_calibration();
 	adjust_palette();
 
 	// init_dac(kDacSampleRate, &update_all_envelopes);
