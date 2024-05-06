@@ -1,37 +1,22 @@
-#include "analog_conditioning.h"
-#include "dig_inouts.hh"
-#include "flash_user.hh"
+#include "main.hh"
 #include "leds.h"
 
-extern SystemSettings settings;
-extern analog_t analog[NUM_ADCS];
-extern uint16_t *adc_cv_dma_buffer;
-extern uint16_t *adc_pot_dma_buffer;
+namespace MetaModule::PEG
+{
+
 
 static constexpr uint32_t FIRST_CD_POT = ADC_POT_SCALE;
 
-enum CalRequests {
-	CAL_REQUEST_NONE,
-	CAL_REQUEST_ALL,
-	CAL_REQUEST_CENTER_DET,
-	CAL_REQUEST_LEDS,
-};
 
-static uint8_t sanity_check_calibration(void);
-static void calibrate_divmult_pot(void);
-static CalRequests should_enter_calibration_mode(void);
-static void calibrate_center_detents(void);
-static void calibrate_led_colors(void);
-static void wait_for_pingbut_downup(void);
-static void wait_for_cyclebut_downup(void);
-static void error_writing_settings(void);
 
-bool pot_centered(uint8_t pot_num) {
+/*
+
+bool MiniPEG::pot_centered(uint8_t pot_num) {
 	uint16_t adc = adc_pot_dma_buffer[pot_num];
 	return ((adc_pot_dma_buffer[pot_num] > 1800) && (adc_pot_dma_buffer[pot_num] < 2200));
 }
 
-CalRequests should_enter_calibration_mode(void) {
+CalRequests MiniPEG::should_enter_calibration_mode(void) {
 	if (!DigIO::CycleBut::read())
 		return CAL_REQUEST_NONE;
 
@@ -56,30 +41,32 @@ CalRequests should_enter_calibration_mode(void) {
 	return CAL_REQUEST_NONE;
 }
 
-void check_calibration(void) {
-	if (!sanity_check_calibration()) {
-		default_settings();
-		if (write_settings() != HAL_OK)
-			error_writing_settings();
-	}
+*/
 
-	CalRequests c = should_enter_calibration_mode();
-	if (c != CAL_REQUEST_NONE) {
-		if (c == CAL_REQUEST_ALL)
-			calibrate_divmult_pot();
+void MiniPEG::check_calibration(void) {
+	// if (!sanity_check_calibration()) {
+	// 	default_settings();
+	// 	if (write_settings() != HAL_OK)
+	// 		error_writing_settings();
+	// }
 
-		if (c == CAL_REQUEST_ALL || c == CAL_REQUEST_CENTER_DET)
-			calibrate_center_detents();
+	// CalRequests c = should_enter_calibration_mode();
+	// if (c != CAL_REQUEST_NONE) {
+	// 	if (c == CAL_REQUEST_ALL)
+	// 		calibrate_divmult_pot();
 
-		if (c == CAL_REQUEST_ALL || c == CAL_REQUEST_LEDS)
-			calibrate_led_colors();
+	// 	if (c == CAL_REQUEST_ALL || c == CAL_REQUEST_CENTER_DET)
+	// 		calibrate_center_detents();
 
-		if (write_settings() != HAL_OK)
-			error_writing_settings();
-	}
+	// 	if (c == CAL_REQUEST_ALL || c == CAL_REQUEST_LEDS)
+	// 		calibrate_led_colors();
+
+	// 	if (write_settings() != HAL_OK)
+	// 		error_writing_settings();
+	// }
 }
 
-void default_calibration(void) {
+void MiniPEG::default_calibration(void) {
 	settings.midpt_array[0] = 68;
 	settings.midpt_array[1] = 262;
 	settings.midpt_array[2] = 509;
@@ -121,7 +108,9 @@ void default_calibration(void) {
 	settings.envb_cal_b = 2048;
 }
 
-uint8_t sanity_check_calibration(void) {
+/* 
+
+uint8_t MiniPEG::sanity_check_calibration(void) {
 	uint8_t j;
 
 	for (j = 0; j < (NUM_DIVMULTS - 1); j++) {
@@ -162,7 +151,7 @@ uint8_t sanity_check_calibration(void) {
 	return 1; //pass
 }
 
-void calibrate_center_detents(void) {
+void MiniPEG::calibrate_center_detents(void) {
 	const uint16_t stab_delay = 15;
 	CenterDetentPots cur = DET_SCALE;
 	uint16_t read_tot;
@@ -236,7 +225,7 @@ void calibrate_center_detents(void) {
 // First, Cycle is red, press it to start
 // When Cycle but is green, turn Div/Mult knob up a click
 // Then Cycle will turn white, press it.
-void calibrate_divmult_pot(void) {
+void MiniPEG::calibrate_divmult_pot(void) {
 	const uint16_t stab_delay = 15;
 	uint16_t calib_array[NUM_DIVMULTS];
 	uint16_t read_tot;
@@ -308,7 +297,7 @@ void calibrate_divmult_pot(void) {
 	settings.midpt_array[NUM_DIVMULTS - 1] = 4095;
 }
 
-void calibrate_led_colors(void) {
+void MiniPEG::calibrate_led_colors(void) {
 
 	set_rgb_led(LED_CYCLE, c_OFF);
 
@@ -383,4 +372,7 @@ void error_writing_settings(void) {
 		set_rgb_led(LED_CYCLE, c_RED);
 		HAL_Delay(100);
 	}
+}
+*/
+
 }

@@ -9,6 +9,7 @@
 #include "debounced_digins.h"
 #include "pwm.h"
 #include "dac.h"
+#include "calibration.hh"
 
 namespace MetaModule::PEG
 {
@@ -97,6 +98,8 @@ private:
 public:
     // for sideloading
     uint16_t adc_dma_buffer[NUM_ADCS];
+    uint16_t *adc_cv_dma_buffer = &(adc_dma_buffer[0]);
+    uint16_t *adc_pot_dma_buffer = &(adc_dma_buffer[NUM_CV_ADCS]);
 
 private:
     void init_pwm();
@@ -202,6 +205,19 @@ private:
     int8_t calc_divided_ping_div_ctr(PingableEnvelope *e, envelopeStates envstate);
 
     uint32_t didnt_change_divmult = 0;
+
+private:
+    void check_calibration(void);
+    void default_calibration(void);
+
+    // uint8_t sanity_check_calibration(void);
+    // void calibrate_divmult_pot(void);
+    // CalRequests should_enter_calibration_mode(void);
+    // void calibrate_center_detents(void);
+    // void calibrate_led_colors(void);
+    // void wait_for_pingbut_downup(void);
+    // void wait_for_cyclebut_downup(void);
+    // void error_writing_settings(void);
 
 };
 

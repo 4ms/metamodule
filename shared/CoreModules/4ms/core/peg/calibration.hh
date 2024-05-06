@@ -1,6 +1,8 @@
 #pragma once
 
-#include <stdint.h>
-
-void check_calibration(void);
-void default_calibration(void);
+enum CalRequests {
+	CAL_REQUEST_NONE,
+	CAL_REQUEST_ALL,
+	CAL_REQUEST_CENTER_DET,
+	CAL_REQUEST_LEDS,
+};
