@@ -64,11 +64,6 @@ private:
 
 private:
     analog_t analog[NUM_ADCS];
-    uint32_t systmr;
-    uint32_t tapouttmr;
-    uint32_t tapintmr;
-    uint32_t pingtmr;
-    uint32_t trigouttmr;
 
 private:
     // from trigout.hh
@@ -180,6 +175,15 @@ private:
 
 private:
     void init_dig_inouts(void);
+
+private:
+    void inc_tmrs(void);
+
+    uint32_t systmr;
+    uint32_t tapouttmr;
+    uint32_t tapintmr;
+    uint32_t pingtmr;
+    uint32_t trigouttmr;
 
 };
 
