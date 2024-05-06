@@ -3,6 +3,8 @@
 #include "pins.hh"
 using namespace MetaModule::PEG::Mocks;
 
+// TODO: this needs to become a member object
+
 // struct DigIO {
 namespace DigIO
 {

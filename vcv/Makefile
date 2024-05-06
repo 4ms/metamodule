@@ -59,8 +59,9 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo_mocks.cc
 
 # MiniPEG
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/main.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/peg/mocks/trigout_mock.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg/trigout.cc
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg/
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg/mocks
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS += -std=c++2a 

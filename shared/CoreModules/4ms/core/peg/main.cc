@@ -19,7 +19,6 @@
 // #include "system.hh"
 #include "system_mode.h"
 #include "timers.h"
-#include "trigout.h"
 #include "util/math.hh"
 
 namespace MetaModule::PEG
