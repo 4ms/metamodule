@@ -1,0 +1,41 @@
+#include "main.hh"
+#include "calibration.hh"
+
+
+namespace MetaModule::PEG
+{
+
+int MiniPEG::write_settings(void) {
+	// TODO: check return code
+	return 0;
+}
+
+uint8_t MiniPEG::read_settings(void) {
+	// TODO: check return code
+
+	// Always load default settings for now
+	default_settings();
+
+	return 0;
+}
+
+uint8_t MiniPEG::check_settings_valid(void) {
+	return settings.is_valid == VALID_SETTINGS;
+}
+
+void MiniPEG::default_settings(void) {
+	default_calibration();
+	settings.limit_skew = 1;
+	settings.free_running_ping = 1;
+	settings.trigout_is_trig = 0;
+	settings.trigin_function = TRIGIN_IS_ASYNC;
+	settings.trigout_function = TRIGOUT_IS_ENDOFFALL;
+
+	settings.cycle_jack_behavior = CYCLE_JACK_BOTH_EDGES_TOGGLES;
+
+	settings.start_clk_time = 25000;
+	settings.start_cycle_on = 1;
+	settings.start_sync_on = 0;
+}
+
+}
