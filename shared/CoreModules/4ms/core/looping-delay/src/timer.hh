@@ -8,7 +8,7 @@ namespace LDKit
 
 class Timer {
 public:
-	Mocks::InputPin ping_jack;
+	Mocks::MockedTrigger ping_jack;
 	Mocks::OutputPin clk_out;
 	Mocks::OutputPin bus_clk_out;
 	Mocks::MockedLED loop_led;

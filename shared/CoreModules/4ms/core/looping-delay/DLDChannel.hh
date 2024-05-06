@@ -168,12 +168,12 @@ private:
 		setLED<Mapping::TimeLight>(params.timer.loop_led.sideload_get() ? 1.0f: 0.0f);
 
 		// Buttons
-		controls.rev_button.sideload_set(getState<Mapping::ReverseButton>() == MomentaryButton::State_t::PRESSED);
-		controls.inf_button.sideload_set(getState<Mapping::HoldButton>() == MomentaryButton::State_t::PRESSED);
+		controls.rev_button.register_state(getState<Mapping::ReverseButton>() == MomentaryButton::State_t::PRESSED);
+		controls.inf_button.register_state(getState<Mapping::HoldButton>() == MomentaryButton::State_t::PRESSED);
 
 		// Trigger Inputs
-		controls.rev_jack.sideload_set(getInput<Mapping::ReverseInput>().value_or(0) > TriggerThresholdInVolt);
-		controls.inf_jack.sideload_set(getInput<Mapping::HoldInput>().value_or(0) > TriggerThresholdInVolt);
+		controls.rev_jack.register_state(getInput<Mapping::ReverseInput>().value_or(0) > TriggerThresholdInVolt);
+		controls.inf_jack.register_state(getInput<Mapping::HoldInput>().value_or(0) > TriggerThresholdInVolt);
 
 		// Switch
 		controls.time_switch.sideload_set(Convert3WaySwitchStateFunc(getState<Mapping::TimeModSwitch>()));
@@ -184,8 +184,8 @@ private:
 		// Forward to/from module level
 		io.pingOut = controls.ping_led.sideload_get();
 		io.clockOut = params.timer.clk_out.sideload_get();
-		params.timer.ping_jack.sideload_set(io.pingJackIn);
-		controls.ping_button.sideload_set(io.pingButtonIn);
+		params.timer.ping_jack.register_state(io.pingJackIn);
+		controls.ping_button.register_state(io.pingButtonIn);
 	}
 
 	void handleAltParameters()

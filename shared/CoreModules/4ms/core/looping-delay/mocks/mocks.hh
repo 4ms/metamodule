@@ -1,70 +1,37 @@
 #pragma once
 #include <limits>
 #include <cstdint>
+#include "util/debouncer.hh"
 
 namespace LDKit::Mocks
 {
 
-struct InputPin
+
+struct MockedTrigger : public Debouncer<0b0001, 0b1110, 0b1111>
 {
-    void update()
-    {
-    }
-	
-    bool just_went_high()
-    {
-		auto result = value and not compareValue;
-		compareValue = value;
-		return result;
-    }
-
-	bool just_went_low()
-    {
-		auto result = not value and compareValue;
-		compareValue = value;
-		return result;
-    }
-
-	void sideload_set(bool val)
-	{
-		value = val;
-	}
-
-protected:
-	bool value;
-	bool compareValue;
+	void update() {}
 };
 
 
-struct MockedTrigger : public InputPin
+struct MockedButton : public DebouncerCounter<0b01, 0b10, 0b11>
 {
-	bool is_pressed() { return value; }
-	bool is_just_released()  { return just_went_low(); }
-    bool is_just_pressed()  { return just_went_high(); }
+	void update() {}
 
-
-};
-
-struct MockedButton : public MockedTrigger
-{
-	void sideload_set(bool newVal)
-	{
-		if (newVal != value)
-		{
-			steady_state_ctr = 0;
-		}
-		else
-		{
-			if (steady_state_ctr < std::numeric_limits<uint32_t>::max() - 1) steady_state_ctr++;
-		}
-
-		value = newVal;
+	void sideload_set(bool newVal) {
+		register_state(newVal);
 	}
-	unsigned how_long_held() { return steady_state_ctr; }
-	unsigned how_long_held_pressed() { return is_pressed() ? steady_state_ctr : 0; }
 
-private:
-	uint32_t steady_state_ctr;
+	unsigned how_long_held() {
+		return steady_state_ctr;
+	}
+
+	unsigned how_long_held_pressed() {
+		return is_pressed() ? steady_state_ctr : 0;
+	}
+
+	void reset_hold_ctr() {
+		steady_state_ctr = 0;
+	}
 };
 
 
