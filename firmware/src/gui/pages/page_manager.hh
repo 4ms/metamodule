@@ -128,14 +128,39 @@ public:
 			if (!knobpos.has_value())
 				continue;
 
-			// Iterate all knob maps in the active knob set
-			for (auto &map : patch->knob_sets[active_knobset].set) {
-
-				// update the patch for knobs that moved
+			auto UpdateMapping = [=, &patch](auto const &map) {
 				if (map.panel_knob_id == panel_knob_i) {
 					auto scaled_val = map.get_mapped_val(knobpos.value());
 					patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
 				}
+			};
+
+			// Update patch for any map that's mapped to the knob that moved
+			for (auto &map : patch->knob_sets[active_knobset].set) {
+				UpdateMapping(map);
+				// if (map.panel_knob_id == panel_knob_i) {
+				// 	auto scaled_val = map.get_mapped_val(knobpos.value());
+				// 	patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
+				// }
+			}
+
+			// // Same for the MIDI Map
+			// for (auto &map : patch->midi_maps.set) {
+			// 	UpdateMapping(map);
+			// 	pr_dbg("midi %d %f\n", map.param_id, knobpos.value());
+			// 	// if (map.panel_knob_id == panel_knob_i) {
+			// 	// 	auto scaled_val = map.get_mapped_val(knobpos.value());
+			// 	// 	patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
+			// 	// }
+			// }
+		}
+
+		for (auto &map : patch->midi_maps.set) {
+			auto knobpos = info.params.panel_knob_new_value(map.panel_knob_id);
+			if (knobpos.has_value()) {
+				auto scaled_val = map.get_mapped_val(knobpos.value());
+				pr_dbg("midi %d %f -> %f\n", map.param_id, knobpos.value(), scaled_val);
+				patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
 			}
 		}
 	}
