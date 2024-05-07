@@ -83,6 +83,7 @@ void MiniPEG::update()
 	force_params_update = 0;
 
 	handle_trigout_trigfall();
+	handle_trigout_secondary_trigfall();
 
 	// handle_system_mode(m.sync_to_ping_mode);
 }

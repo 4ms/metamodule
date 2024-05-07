@@ -28,8 +28,10 @@ void MiniPEG::default_settings(void) {
 	settings.limit_skew = 1;
 	settings.free_running_ping = 1;
 	settings.trigout_is_trig = 0;
+	settings.trigout_secondary_is_trig = 0;
 	settings.trigin_function = TRIGIN_IS_ASYNC;
 	settings.trigout_function = TRIGOUT_IS_ENDOFFALL;
+	settings.trigout_secondary_function = TRIGOUT_IS_ENDOFFALL;
 
 	settings.cycle_jack_behavior = CYCLE_JACK_BOTH_EDGES_TOGGLES;
 

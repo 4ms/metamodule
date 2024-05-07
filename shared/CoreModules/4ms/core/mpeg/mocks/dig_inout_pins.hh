@@ -18,6 +18,8 @@ struct DigIO
 	OutputPin EOJack;
     OutputPin ClockBusOut;
 
+	OutputPin EOJackSecondary;
+	
 	// //SWO pin can be debug out
 	// using DebugOut = mdrivlib::FPin<GPIO::B, PinNum::_3, PinMode::Output, PinPolarity::Normal>;
 };

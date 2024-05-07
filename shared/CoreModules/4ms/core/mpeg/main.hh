@@ -79,13 +79,18 @@ private:
     void tapclkout_off();
     void tapclkout_on();
     void handle_trigout_trigfall();
+    void handle_trigout_secondary_trigfall();
     void clockbus_on();
     void clockbus_off();
 
     void trigout_on();
     void trigout_off();
 
+    void trigout_secondary_on();
+    void trigout_secondary_off();
+
     uint8_t trigout_high = 0;
+    uint8_t trigout_secondary_high = 0;
 
 public:
     // for sideloading
@@ -190,11 +195,12 @@ private:
 private:
     void inc_tmrs(void);
 
-    uint32_t systmr     = 0;
-    uint32_t tapouttmr  = 0;
-    uint32_t tapintmr   = 0;
-    uint32_t pingtmr    = 0;
-    uint32_t trigouttmr = 0;
+    uint32_t systmr               = 0;
+    uint32_t tapouttmr            = 0;
+    uint32_t tapintmr             = 0;
+    uint32_t pingtmr              = 0;
+    uint32_t trigouttmr           = 0;
+    uint32_t trigouttmr_secondary = 0;
 
 private:
     bool just_released(DebouncedDiginList pin);

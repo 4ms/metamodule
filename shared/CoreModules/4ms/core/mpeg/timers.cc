@@ -11,6 +11,7 @@ void MiniPEG::inc_tmrs(void) {
 	tapintmr++;
 	pingtmr++;
 	trigouttmr++;
+	trigouttmr_secondary++;
 }
 
 }

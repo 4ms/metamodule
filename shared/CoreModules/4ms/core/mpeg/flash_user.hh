@@ -57,8 +57,10 @@ struct SystemSettings {
 	uint8_t limit_skew = 0;
 	uint8_t free_running_ping = 0;
 	uint8_t trigout_is_trig = 0;
+	uint8_t trigout_secondary_is_trig = 0;
 	TrigInFunctions trigin_function = TrigInFunctions(0);
 	TrigOutFunctions trigout_function = TrigOutFunctions(0);
+	TrigOutFunctions trigout_secondary_function = TrigOutFunctions(0);
 
 	CycleJackBehaviors cycle_jack_behavior = CycleJackBehaviors(0);
 
