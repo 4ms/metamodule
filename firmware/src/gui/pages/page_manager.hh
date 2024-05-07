@@ -106,6 +106,10 @@ public:
 				button_light.display_knobset(next_knobset);
 			}
 		}
+
+		if (button_light.display_knobset() != info.page_list.get_active_knobset()) {
+			button_light.display_knobset(info.page_list.get_active_knobset());
+		}
 	}
 
 	// Update internal copy of patch with knob changes
