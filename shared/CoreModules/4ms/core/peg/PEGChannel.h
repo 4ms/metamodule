@@ -203,12 +203,9 @@ private:
         };
 
         //TODO: LED mapping has to be adjusted to match hardware
-        setLED<Mapping::EnvOutLight>(std::array<float, 3>{PWMToFloatFunc(peg.pwm_vals[PWM_ENVA_R]),
-                                                    PWMToFloatFunc(peg.pwm_vals[PWM_ENVA_G]),
-                                                    PWMToFloatFunc(peg.pwm_vals[PWM_ENVA_B])});
-        // setLED<Mapping::_5VEnvLight>(std::array<float, 3>{PWMToFloatFunc(peg.pwm_vals[PWM_ENVB_R]),
-        //                                             PWMToFloatFunc(peg.pwm_vals[PWM_ENVB_G]),
-        //                                             PWMToFloatFunc(peg.pwm_vals[PWM_ENVB_B])});
+        setLED<Mapping::EnvOutLight>(std::array<float, 3>{MapDACFunc(peg.dac_vals[1]),
+                                                    MapDACFunc(peg.dac_vals[1]),
+                                                    MapDACFunc(peg.dac_vals[1])});
         setLED<Mapping::CycleButton>(std::array<float, 3>{PWMToFloatFunc(peg.pwm_vals[PWM_CYCLEBUT_R]),
                                                     PWMToFloatFunc(peg.pwm_vals[PWM_CYCLEBUT_G]),
                                                     PWMToFloatFunc(peg.pwm_vals[PWM_CYCLEBUT_B])});
