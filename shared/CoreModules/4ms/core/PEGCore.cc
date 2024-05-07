@@ -67,7 +67,7 @@ private:
 		const static Info::Elem AsyncModeAltParam = AsyncRedModeAltParam;
 		const static Info::Elem FreeNRunningPingAltParam = FreeNRunningPingRedAltParam;
 		const static Info::Elem SkewLimitAltParam = SkewLimitRedAltParam;
-		const static Info::Elem EofModeAltParam = EofBlueModeAltParam;
+		const static Info::Elem EofModeAltParam = EofRedModeAltParam;
 		const static Info::Elem EorModeAltParam = EorRedModeAltParam; //not identical for each channel
 	};
 
