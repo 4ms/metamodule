@@ -10,8 +10,6 @@
 namespace MetaModule::PEG
 {
 
-#define NUM_DIVMULTS 15
-
 enum ShapeRegions {
 	RAMPUP_EXP2LIN,
 	RAMPUP2SYM_LIN2EXP,
@@ -24,5 +22,4 @@ enum ShapeRegions {
 enum PureSkews { RAMPUP = 0, SYM = 127, RAMPDOWN = 255 };
 enum PureCurves { EXPO = 0, LIN = 127, LOG = 255 };
 
-}
-
+} // namespace MetaModule::PEG

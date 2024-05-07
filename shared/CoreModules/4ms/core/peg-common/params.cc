@@ -98,6 +98,16 @@ uint8_t MiniPEG::read_shape_scale_offset(void) {
 			update_risefallincs = 1;
 		}
 	}
+	
+	{
+		int16_t skew_cv = MathTools::plateau(2048 - analog[CV_SKEW].lpf_val, SKEWCV_PLATEAU_WIDTH, 0);
+		int16_t skew_total = skew_cv + analog[POT_SKEW].lpf_val + settings.center_detent_offset[DET_SKEW];
+		skew_total = MathTools::constrain(skew_total, (int16_t)0, (int16_t)4095);
+		if (MathTools::diff((uint16_t)skew_total, skew) > ADC_DRIFT) {
+			skew = skew_total;
+			update_risefallincs = 1;
+		}
+	}
 
 	return update_risefallincs;
 }

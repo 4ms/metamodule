@@ -178,6 +178,7 @@ private:
     void update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_clock_divider_amount);
     void update_env_tracking(struct PingableEnvelope *e);
 
+	uint16_t skew = 0;  //ignored by MiniPEG
     uint16_t shape = 0;
     uint16_t oversample_wait_ctr = 0;
 	uint16_t poll_user_input = 0;

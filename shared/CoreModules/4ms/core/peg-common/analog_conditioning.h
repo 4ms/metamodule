@@ -17,6 +17,9 @@ enum AdcChannels {
 	POT_SHAPE,
 	POT_DIVMULT,
 
+	POT_SKEW,
+	CV_SKEW,
+
 	NUM_ADCS
 };
 

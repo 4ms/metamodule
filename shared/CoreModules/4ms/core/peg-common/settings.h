@@ -17,4 +17,5 @@
 constexpr inline int32_t SCALE_PLATEAU_WIDTH = 100;
 constexpr inline int32_t OFFSET_PLATEAU_WIDTH = 100;
 constexpr inline int32_t SHAPECV_PLATEAU_WIDTH = 100;
+constexpr inline int32_t SKEWCV_PLATEAU_WIDTH = 100;
 constexpr inline int32_t DIVMULTCV_PLATEAU_WIDTH = 100;
