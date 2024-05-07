@@ -50,6 +50,8 @@ public:
         sideloadDrivers();
         sideloadSystemSettings();
         peg.update_all_envelopes();
+
+        peg.settings.shift_value = 0.5f * 4095.f;
     };
 
     void update() {
@@ -86,9 +88,9 @@ private:
             return uint16_t(val * 4095.f);
         };
 
-        //TODO: this scaling needs adjustment and bipolar button has to be mapped onto offset.
         peg.adc_dma_buffer[POT_SCALE] = MapKnobFunc(getState<Mapping::ScaleKnob>());
-        // peg.adc_dma_buffer[POT_OFFSET] = MapKnobFunc(getState<Mapping::OffsetKnob>());
+        peg.adc_dma_buffer[POT_OFFSET] = MapKnobFunc(getState<Mapping::BiNPolarButton>() == LatchingButton::State_t::DOWN ? 0.5f : 1.f);
+        //TODO: shape is split into skew and curve
         // peg.adc_dma_buffer[POT_SHAPE] = MapKnobFunc(getState<Mapping::ShapeKnob>());
 
         //TODO: this scaling needs adjustment
@@ -136,6 +138,8 @@ private:
                                                 PWMToFloatFunc(peg.pwm_vals[PWM_PINGBUT_G]),
                                                 PWMToFloatFunc(peg.pwm_vals[PWM_PINGBUT_B])});
         setLED<Mapping::EofLight>(PWMToFloatFunc(peg.pwm_vals[PWM_EOF_LED]));
+
+        setLED<Mapping::BiNPolarButton>(getState<Mapping::BiNPolarButton>() == LatchingButton::State_t::DOWN);
     }
 
     void sideloadSystemSettings() {
@@ -158,8 +162,6 @@ private:
         // 	TRIGIN_IS_ASYNC, TRIGIN_IS_ASYNC_SUSTAIN, TRIGIN_IS_QNT};
 
         // peg.settings.trigin_function = TriggerInOptions[getState<Mapping::TrigJackModeAltParam>()];
-
-        // peg.settings.shift_value = getState<Mapping::ShiftAltParam>() * 4095.f;
     }
 
 private:
