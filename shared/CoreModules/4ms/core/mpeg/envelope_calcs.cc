@@ -8,7 +8,7 @@
 namespace MetaModule::PEG
 {
 
-constexpr int8_t P_array[NUM_DIVMULTS] = {32, 16, 8, 7, 6, 5, 4, 3, 2, 1, -2, -3, -4, -5, -6, -7, -8, -12, -16};
+constexpr int8_t P_array[NUM_DIVMULTS] = {8, 7, 6, 5, 4, 3, 2, 1, -2, -3, -4, -5, -6, -7, -8};
 
 int8_t MiniPEG::get_clk_div_nominal(uint16_t adc_val) {
 	uint8_t i;

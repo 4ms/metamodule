@@ -7,7 +7,7 @@
 #include "pingable_env.h"
 #include <stdint.h>
 
-#define NUM_DIVMULTS 19
+#define NUM_DIVMULTS 15
 
 enum ShapeRegions {
 	RAMPUP_EXP2LIN,

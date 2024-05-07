@@ -93,7 +93,6 @@ private:
         //TODO: shape is split into skew and curve
         // peg.adc_dma_buffer[POT_SHAPE] = MapKnobFunc(getState<Mapping::ShapeKnob>());
 
-        //TODO: this scaling needs adjustment
         peg.adc_dma_buffer[POT_DIVMULT] = MapKnobFunc(getState<Mapping::PingDivMultKnob>());
 
         peg.digio.PingBut.sideload_set(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED);

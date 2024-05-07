@@ -67,25 +67,21 @@ void MiniPEG::check_calibration(void) {
 }
 
 void MiniPEG::default_calibration(void) {
-	settings.midpt_array[0] = 68;
-	settings.midpt_array[1] = 262;
-	settings.midpt_array[2] = 509;
-	settings.midpt_array[3] = 743;
-	settings.midpt_array[4] = 973;
-	settings.midpt_array[5] = 1202;
-	settings.midpt_array[6] = 1427;
-	settings.midpt_array[7] = 1657;
-	settings.midpt_array[8] = 1882;
-	settings.midpt_array[9] = 2107;
-	settings.midpt_array[10] = 2341;
-	settings.midpt_array[11] = 2574;
-	settings.midpt_array[12] = 2802;
-	settings.midpt_array[13] = 3026;
-	settings.midpt_array[14] = 3262;
-	settings.midpt_array[15] = 3500;
-	settings.midpt_array[16] = 3734;
-	settings.midpt_array[17] = 3942;
-	settings.midpt_array[18] = 4095;
+	settings.midpt_array[0] = 273;
+	settings.midpt_array[1] = 546;
+	settings.midpt_array[2] = 819;
+	settings.midpt_array[3] = 1092;
+	settings.midpt_array[4] = 1365;
+	settings.midpt_array[5] = 1638;
+	settings.midpt_array[6] = 1911;
+	settings.midpt_array[7] = 2184;
+	settings.midpt_array[8] = 2457;
+	settings.midpt_array[9] = 2730;
+	settings.midpt_array[10] = 3003;
+	settings.midpt_array[11] = 3276;
+	settings.midpt_array[12] = 3549;
+	settings.midpt_array[13] = 3822;
+	settings.midpt_array[14] = 4095;
 
 	settings.center_detent_offset[DET_SCALE] = 0;
 	settings.center_detent_offset[DET_OFFSET] = 0;
