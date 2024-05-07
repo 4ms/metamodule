@@ -2,7 +2,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "info/MPEG_info.hh"
 
-#include "mpeg/main.hh"
+#include "peg-common/main.hh"
 using namespace MetaModule::PEG;
 
 #include "helpers/FlipFlop.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../mpeg/main.hh"
+#include "../peg-common/main.hh"
 
 #include "../helpers/FlipFlop.h"
 #include "../helpers/EdgeDetector.h"

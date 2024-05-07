@@ -80,8 +80,8 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/pwm.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/envelope_calcs.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg/envelope_calcs.cc
 
-INCLUDES += -I$(SHARED)/CoreModules/4ms/core/mpeg/
-INCLUDES += -I$(SHARED)/CoreModules/4ms/core/mpeg/mocks
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg-common/
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg-common/mocks
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS += -std=c++2a 

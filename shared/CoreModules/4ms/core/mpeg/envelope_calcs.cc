@@ -11,9 +11,9 @@ namespace MetaModule::PEG
 struct MiniPEGEnvelopeCalcs
 {
 
-constexpr unsigned NUM_DIVMULTS = 19;
-constexpr int8_t P_array[NUM_DIVMULTS] = {32, 16, 8, 7, 6, 5, 4, 3, 2, 1, -2, -3, -4, -5, -6, -7, -8, -12, -16};
-constexpr int16_t midpt_array[NUM_DIVMULTS] = {68, 262, 509, 743, 973, 1202, 1427, 1657, 1882, 
+static constexpr unsigned NUM_DIVMULTS = 19;
+static constexpr int8_t P_array[NUM_DIVMULTS] = {32, 16, 8, 7, 6, 5, 4, 3, 2, 1, -2, -3, -4, -5, -6, -7, -8, -12, -16};
+static constexpr int16_t midpt_array[NUM_DIVMULTS] = {68, 262, 509, 743, 973, 1202, 1427, 1657, 1882, 
 												2107, 2341, 2574, 2802, 3026, 3262, 3500, 3734, 3942, 4095};
 // shape: 0..4095 (adc value)
 // returns skew: 0..255
