@@ -66,7 +66,6 @@ private:
 		const static Info::Elem AsyncModeAltParam = AsyncRedModeAltParam;
 		const static Info::Elem FreeNRunningPingAltParam = FreeNRunningPingRedAltParam;
 		const static Info::Elem SkewLimitAltParam = SkewLimitRedAltParam;
-		const static Info::Elem EofModeAltParam = EofRedModeAltParam;
 	};
 
 	struct MappingB
@@ -94,7 +93,6 @@ private:
 		const static Info::Elem AsyncModeAltParam = AsyncBlueModeAltParam;
 		const static Info::Elem FreeNRunningPingAltParam = FreeNRunningPingBlueAltParam;
 		const static Info::Elem SkewLimitAltParam = SkewLimitBlueAltParam;
-		const static Info::Elem EofModeAltParam = EofBlueModeAltParam;
 	};
 
 	PEGChannel<PEGCore,MappingA> channelA;
@@ -120,6 +118,23 @@ private:
 			channelB.toggleInput(toggleIn);
 		};
 		
+		switch (getState<EofRedModeAltParam>())
+		{
+			case 0: channelA.setMainMode(channelA.MainMode::EOF_GATE); break;
+			case 1: channelA.setMainMode(channelA.MainMode::EOF_TRIG); break;
+			case 2: channelA.setMainMode(channelA.MainMode::TAP_GATE); break;
+			case 3: channelA.setMainMode(channelA.MainMode::TAP_TRIG); break;
+		}
+
+		switch (getState<EofBlueModeAltParam>())
+		{
+			case 0: channelB.setMainMode(channelB.MainMode::EOF_GATE); break;
+			case 1: channelB.setMainMode(channelB.MainMode::EOF_TRIG); break;
+			case 2: channelB.setMainMode(channelB.MainMode::TAP_GATE); break;
+			case 3: channelB.setMainMode(channelB.MainMode::TAP_TRIG); break;
+			default: return;
+		}
+
 		switch (getState<EorRedModeAltParam>())
 		{
 			case 0: channelA.setSecondaryMode(channelA.SecondaryMode::EOR_GATE); break;

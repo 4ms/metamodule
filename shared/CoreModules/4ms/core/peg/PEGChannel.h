@@ -80,7 +80,29 @@ public:
         timerPhaseIncrement = float(PEG::MiniPEG::kDacSampleRate) / sr;
     }
 
+    enum MainMode {EOF_GATE, EOF_TRIG, TAP_GATE, TAP_TRIG};
     enum SecondaryMode {EOR_GATE, EOR_TRIG, HR_GATE, HR_TRIG};
+
+    void setMainMode(MainMode mode)
+    {
+        if (mode == EOF_GATE or mode == TAP_GATE)
+        {
+            peg.settings.trigout_is_trig = 0;
+        }
+        else
+        {
+            peg.settings.trigout_is_trig = 1;
+        }
+
+        if (mode == EOF_GATE or mode == EOF_TRIG)
+        {
+            peg.settings.trigout_function = TRIGOUT_IS_ENDOFFALL;
+        }
+        else
+        {
+            peg.settings.trigout_function = TRIGOUT_IS_TAPCLKOUT;
+        }
+    }
 
     void setSecondaryMode(SecondaryMode mode)
     {
