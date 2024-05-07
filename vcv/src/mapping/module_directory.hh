@@ -29,6 +29,12 @@ struct ModuleDirectory {
 			"Bogaudio-Ranalyzer",
 			"Notes",
 			"Blank",
+			"MIDIToCVInterface",
+			"MIDI-Map",
+			"MIDITriggerToCVInterface",
+			"MIDICCToCVInterface",
+			"Split"
+
 		};
 
 		for (auto slug : blacklist) {
