@@ -25,6 +25,7 @@ set(4msModules
     LPF
     LPG
     MNMX
+    MPEG
     MultiLFO
     Noise
     Octave

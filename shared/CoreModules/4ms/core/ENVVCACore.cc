@@ -207,13 +207,6 @@ private:
 
 private:
 	float timeStepInS = 1.f / 48000.f;
-
-private:
-	static constexpr float followInputHysteresisInV = 0.025f;
-	float previousFollowInputValue;
-
-	static constexpr float followInputFilterCoeff = 0.01f;
-	float previousFollowInputFilterOutput;
 };
 
 } // namespace MetaModule
