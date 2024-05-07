@@ -5,6 +5,8 @@
 #include "../helpers/FlipFlop.h"
 #include "../helpers/EdgeDetector.h"
 
+using namespace MetaModule::PEG;
+
 namespace MetaModule
 {
 

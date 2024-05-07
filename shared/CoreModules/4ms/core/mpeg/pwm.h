@@ -5,6 +5,8 @@
 #pragma once
 #include <stddef.h>
 
+namespace MetaModule::PEG
+{
 
 enum PwmOutputs {
 	PWM_ENVA_R,
@@ -28,13 +30,4 @@ enum PwmOutputs {
 	NUM_PWMS
 };
 
-// struct PWMOutput {
-// 	GPIO_TypeDef *gpio;
-// 	uint32_t pinnum;
-// 	uint8_t af;
-// 	TIM_HandleTypeDef tim;
-// 	uint8_t timchan;
-// 	uint32_t period;
-// };
-
-
+}

@@ -7,6 +7,9 @@
 #include "pwm.h"
 #include <stdint.h>
 
+namespace MetaModule::PEG
+{
+
 enum RgbLeds {
 	LED_PING,
 	LED_CYCLE,
@@ -52,6 +55,4 @@ enum Palette {
 	NUM_COLORS
 };
 
-
-
-
+}

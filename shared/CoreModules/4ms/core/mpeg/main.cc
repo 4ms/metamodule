@@ -2,7 +2,6 @@
 
 #include "flash_user.hh"
 #include "math_util.h"
-#include "params.h"
 
 #include "settings.h"
 #include "util/math.hh"

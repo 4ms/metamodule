@@ -1,6 +1,9 @@
 #pragma once
 #include <stdint.h>
 
+namespace MetaModule::PEG
+{
+
 enum envelopeStates {
 	WAIT = 0,
 	RISE = 1,
@@ -56,4 +59,4 @@ struct PingableEnvelope {
 	uint8_t triga_down = 0;
 };
 
-
+}

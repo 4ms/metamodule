@@ -6,6 +6,9 @@
 
 #include <stdint.h>
 
+namespace MetaModule::PEG
+{
+
 enum AdcChannels {
 	CV_SHAPE,
 	CV_DIVMULT,
@@ -52,3 +55,4 @@ typedef struct AnalogConditioned {
 } analog_t;
 
 
+}

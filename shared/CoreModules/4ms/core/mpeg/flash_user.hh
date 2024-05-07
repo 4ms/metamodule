@@ -7,6 +7,9 @@
 #include "envelope_calcs.h"
 #include <stdint.h>
 
+namespace MetaModule::PEG
+{
+
 enum CycleJackBehaviors {
 	CYCLE_JACK_RISING_EDGE_TOGGLES,
 	CYCLE_JACK_BOTH_EDGES_TOGGLES_QNT,
@@ -89,4 +92,4 @@ struct SystemSettings {
 #define QNT_REPHASES_WHEN_CYCLE_OFF 0
 #define CYCLE_REPHASES_DIV_PING 1
 
-
+}

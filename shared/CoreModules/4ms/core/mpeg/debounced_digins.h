@@ -6,6 +6,9 @@
 
 #include <stdint.h>
 
+namespace MetaModule::PEG
+{
+
 enum DebouncedDiginList {
 	PING_BUTTON,
 	CYCLE_BUTTON,
@@ -21,4 +24,6 @@ typedef struct DebouncedDigin {
 	uint8_t state;
 	int8_t edge;
 } debounced_digin_t;
+
+}
 

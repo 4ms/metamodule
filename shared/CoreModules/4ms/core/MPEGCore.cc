@@ -3,6 +3,7 @@
 #include "info/MPEG_info.hh"
 
 #include "mpeg/main.hh"
+using namespace MetaModule::PEG;
 
 #include "helpers/FlipFlop.h"
 #include "helpers/EdgeDetector.h"
