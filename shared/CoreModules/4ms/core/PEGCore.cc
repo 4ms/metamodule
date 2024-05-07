@@ -62,7 +62,6 @@ private:
 		const static Info::Elem EnvOutLight  	= EnvredlightLight;
 		const static Info::Elem EofLight     	= EofredlightLight;
 		const static Info::Elem EorLight		= EorredlightLight; //not identical for each channel
-		const static Info::Elem ToggleCycleIn	= ToggleIn;
 
 		const static Info::Elem AsyncModeAltParam = AsyncRedModeAltParam;
 		const static Info::Elem FreeNRunningPingAltParam = FreeNRunningPingRedAltParam;
@@ -92,7 +91,6 @@ private:
 		const static Info::Elem EnvOutLight  	= EnvbluelightLight;
 		const static Info::Elem EofLight     	= EofblueLight;
 		const static Info::Elem EorLight		= HalfriseblueLight; //not identical for each channel
-		const static Info::Elem ToggleCycleIn	= ToggleIn;
 
 		const static Info::Elem AsyncModeAltParam = AsyncBlueModeAltParam;
 		const static Info::Elem FreeNRunningPingAltParam = FreeNRunningPingBlueAltParam;
@@ -116,6 +114,13 @@ private:
 	void update() override {
 		channelA.update();
 		channelB.update();
+
+		if(isPatched<ToggleIn>())
+		{
+			auto toggleIn = getInput<ToggleIn>();
+			channelA.toggleInput(toggleIn);
+			channelB.toggleInput(toggleIn);
+		};
 	}
 
 	void set_samplerate(float sr) override {

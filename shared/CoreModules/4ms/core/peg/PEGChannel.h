@@ -52,6 +52,8 @@ public:
         peg.update_all_envelopes();
 
         peg.settings.shift_value = 0.5f * 4095.f;
+        
+        peg.settings.cycle_jack_behavior = CYCLE_JACK_BOTH_EDGES_TOGGLES;
     };
 
     void update() {
@@ -65,6 +67,11 @@ public:
         }
 
         peg.update();
+    }
+
+    void toggleInput(auto input)
+    {
+        peg.digio.CycleJack.sideload_set(cycleIn(input.value_or(0.f)));
     }
 
     void set_samplerate(float sr) {
@@ -97,9 +104,6 @@ private:
 
         peg.digio.PingBut.sideload_set(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED);
         peg.digio.CycleBut.sideload_set(getState<Mapping::CycleButton>() == MomentaryButton::State_t::PRESSED);
-
-        //TODO: this has to be mapped onto a certain mode of the CycleJack of MPEG
-        peg.digio.CycleJack.sideload_set(cycleIn(getInput<Mapping::ToggleCycleIn>().value_or(0.f)));
         
         //TODO: QNT and ASYNC input have to be mapped onto TrigJack of MPEG
         // peg.digio.TrigJack.sideload_set(triggerIn(getInput<Mapping::TriggerIn>().value_or(0.f)));
