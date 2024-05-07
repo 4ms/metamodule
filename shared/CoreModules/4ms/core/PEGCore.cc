@@ -43,44 +43,62 @@ private:
 	private:
 	struct MappingA
 	{
-		const static Info::Elem ShapeCvIn    = SkewRedJackIn;
-		const static Info::Elem DivIn        = DivRedJackIn;
-		const static Info::Elem ScaleKnob    = ScaleRedKnob;
-		const static Info::Elem OffsetKnob   = SkewRedKnob;
-		const static Info::Elem ShapeKnob    = CurveRedKnob;
-		const static Info::Elem Div_MultKnob = PingDivMultRedKnob;
-		const static Info::Elem PingButton   = PingRedButton;
-		const static Info::Elem CycleButton  = CycleRedButton;
-		const static Info::Elem CycleTrigIn  = QntRedIn;
-		const static Info::Elem TriggerIn    = AsyncRedIn;
-		const static Info::Elem PingTrigIn   = PingRedJackIn;
-		const static Info::Elem EofOut       = EofRedOut;
-		const static Info::Elem EnvOut       = EnvRedOut;
-		const static Info::Elem _5VEnvOut    = P5VEnvRedOut;
-		const static Info::Elem EnvOutLight  = EnvredlightLight;
-		const static Info::Elem _5VEnvLight  = EorredlightLight;
-		const static Info::Elem EofLight     = EofredlightLight;
+		const static Info::Elem PingDivMultKnob = PingDivMultRedKnob;
+		const static Info::Elem ScaleKnob    	= ScaleRedKnob;
+		const static Info::Elem SkewKnob		= SkewRedKnob;
+		const static Info::Elem CurveKnob		= CurveRedKnob;
+		const static Info::Elem PingButton   	= PingRedButton;
+		const static Info::Elem CycleButton  	= CycleRedButton;
+		const static Info::Elem BiNPolarButton	= BiNPolarRedButton;
+		const static Info::Elem PingJackIn		= PingRedJackIn;
+		const static Info::Elem QntIn 			= QntRedIn;
+		const static Info::Elem AsyncIn			= AsyncRedIn;
+		const static Info::Elem DivJackIn		= DivRedJackIn;
+		const static Info::Elem SkewJackIn		= SkewRedJackIn;
+		const static Info::Elem EnvOut       	= EnvRedOut;
+		const static Info::Elem _5VEnvOut    	= P5VEnvRedOut;
+		const static Info::Elem EoFOut       	= EofRedOut;
+		const static Info::Elem EoROut			= EorOut; //not identical for each channel	
+		const static Info::Elem EnvOutLight  	= EnvredlightLight;
+		const static Info::Elem EofLight     	= EofredlightLight;
+		const static Info::Elem EorLight		= EorredlightLight; //not identical for each channel
+		const static Info::Elem ToggleCycleIn	= ToggleIn;
+
+		const static Info::Elem AsyncModeAltParam = AsyncRedModeAltParam;
+		const static Info::Elem FreeNRunningPingAltParam = FreeNRunningPingRedAltParam;
+		const static Info::Elem SkewLimitAltParam = SkewLimitRedAltParam;
+		const static Info::Elem EofModeAltParam = EofBlueModeAltParam;
+		const static Info::Elem EorModeAltParam = EorRedModeAltParam; //not identical for each channel
 	};
 
 	struct MappingB
 	{		
-		const static Info::Elem ShapeCvIn    = SkewBlueJackIn;
-		const static Info::Elem DivIn        = DivBlueJackIn;
-		const static Info::Elem ScaleKnob    = ScaleBlueKnob;
-		const static Info::Elem OffsetKnob   = SkewBlueKnob;
-		const static Info::Elem ShapeKnob    = CurveBlueKnob;
-		const static Info::Elem Div_MultKnob = PingDivMultBlueKnob;
-		const static Info::Elem PingButton   = PingBlueButton;
-		const static Info::Elem CycleButton  = CycleBlueButton;
-		const static Info::Elem CycleTrigIn  = QntBlueIn;
-		const static Info::Elem TriggerIn    = AsyncBlueIn;
-		const static Info::Elem PingTrigIn   = PingBlueJackIn;
-		const static Info::Elem EofOut       = EofBlueOut;
-		const static Info::Elem EnvOut       = EnvBlueOut;
-		const static Info::Elem _5VEnvOut    = P5VEnvBlueOut;
-		const static Info::Elem EnvOutLight  = EnvbluelightLight;
-		const static Info::Elem _5VEnvLight  = HalfriseblueLight;
-		const static Info::Elem EofLight     = EofblueLight;
+		const static Info::Elem PingDivMultKnob = PingDivMultBlueKnob;
+		const static Info::Elem ScaleKnob    	= ScaleBlueKnob;
+		const static Info::Elem SkewKnob		= SkewBlueKnob;
+		const static Info::Elem CurveKnob		= CurveBlueKnob;
+		const static Info::Elem PingButton   	= PingBlueButton;
+		const static Info::Elem CycleButton  	= CycleBlueButton;
+		const static Info::Elem BiNPolarButton	= BiNPolarBlueButton;
+		const static Info::Elem PingJackIn		= PingBlueJackIn;
+		const static Info::Elem QntIn 			= QntBlueIn;
+		const static Info::Elem AsyncIn			= AsyncBlueIn;
+		const static Info::Elem DivJackIn		= DivBlueJackIn;
+		const static Info::Elem SkewJackIn		= SkewBlueJackIn;
+		const static Info::Elem EnvOut       	= EnvBlueOut;
+		const static Info::Elem _5VEnvOut    	= P5VEnvBlueOut;
+		const static Info::Elem EoFOut       	= EofBlueOut;
+		const static Info::Elem EoROut			= HalfROut; //not identical for each channel	
+		const static Info::Elem EnvOutLight  	= EnvbluelightLight;
+		const static Info::Elem EofLight     	= EofblueLight;
+		const static Info::Elem EorLight		= HalfriseblueLight; //not identical for each channel
+		const static Info::Elem ToggleCycleIn	= ToggleIn;
+
+		const static Info::Elem AsyncModeAltParam = AsyncBlueModeAltParam;
+		const static Info::Elem FreeNRunningPingAltParam = FreeNRunningPingBlueAltParam;
+		const static Info::Elem SkewLimitAltParam = SkewLimitBlueAltParam;
+		const static Info::Elem EofModeAltParam = EofBlueModeAltParam;
+		const static Info::Elem EorModeAltParam = HalfNRBlueModeAltParam; //not identical for each channel
 	};
 
 	PEGChannel<PEGCore,MappingA> channelA;

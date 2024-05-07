@@ -76,31 +76,40 @@ private:
             return uint16_t(std::clamp(result, 0.f, 1.f) * 4095.f);
         };
 
-        peg.adc_dma_buffer[CV_SHAPE] = MapOutputFunc(getInput<Mapping::ShapeCvIn>().value_or(0.f));
-        peg.adc_dma_buffer[CV_DIVMULT] = MapOutputFunc(getInput<Mapping::DivIn>().value_or(0.f));
+        //TODO: shape is split into skew and curve
+        // peg.adc_dma_buffer[CV_SHAPE] = MapOutputFunc(getInput<Mapping::ShapeCvIn>().value_or(0.f));
+
+        //TODO: this scaling needs adjustment
+        peg.adc_dma_buffer[CV_DIVMULT] = MapOutputFunc(getInput<Mapping::DivJackIn>().value_or(0.f));
 
         auto MapKnobFunc = [](auto val) -> uint16_t {
             return uint16_t(val * 4095.f);
         };
 
+        //TODO: this scaling needs adjustment and bipolar button has to be mapped onto offset.
         peg.adc_dma_buffer[POT_SCALE] = MapKnobFunc(getState<Mapping::ScaleKnob>());
-        peg.adc_dma_buffer[POT_OFFSET] = MapKnobFunc(getState<Mapping::OffsetKnob>());
-        peg.adc_dma_buffer[POT_SHAPE] = MapKnobFunc(getState<Mapping::ShapeKnob>());
-        peg.adc_dma_buffer[POT_DIVMULT] = MapKnobFunc(getState<Mapping::Div_MultKnob>());
+        // peg.adc_dma_buffer[POT_OFFSET] = MapKnobFunc(getState<Mapping::OffsetKnob>());
+        // peg.adc_dma_buffer[POT_SHAPE] = MapKnobFunc(getState<Mapping::ShapeKnob>());
+
+        //TODO: this scaling needs adjustment
+        peg.adc_dma_buffer[POT_DIVMULT] = MapKnobFunc(getState<Mapping::PingDivMultKnob>());
 
         peg.digio.PingBut.sideload_set(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED);
         peg.digio.CycleBut.sideload_set(getState<Mapping::CycleButton>() == MomentaryButton::State_t::PRESSED);
 
-        peg.digio.CycleJack.sideload_set(cycleIn(getInput<Mapping::CycleTrigIn>().value_or(0.f)));
-        peg.digio.TrigJack.sideload_set(triggerIn(getInput<Mapping::TriggerIn>().value_or(0.f)));
+        //TODO: this has to be mapped onto a certain mode of the CycleJack of MPEG
+        peg.digio.CycleJack.sideload_set(cycleIn(getInput<Mapping::ToggleCycleIn>().value_or(0.f)));
+        
+        //TODO: QNT and ASYNC input have to be mapped onto TrigJack of MPEG
+        // peg.digio.TrigJack.sideload_set(triggerIn(getInput<Mapping::TriggerIn>().value_or(0.f)));
 
         // TODO: ping input originall has internal lowpass filtering
         // peg.digio.PingJack.sideload_set(pingIn(getInput<PingTrigIn>().value_or(0.f)));
-        if (pingEdge(pingIn(getInput<Mapping::PingTrigIn>().value_or(0.f)))) {
+        if (pingEdge(pingIn(getInput<Mapping::PingJackIn>().value_or(0.f)))) {
             peg.pingEdgeIn();
         }
 
-        setOutput<Mapping::EofOut>(peg.digio.EOJack.sideload_get() ? TriggerOutputInV : 0.f);
+        setOutput<Mapping::EoFOut>(peg.digio.EOJack.sideload_get() ? TriggerOutputInV : 0.f);
 
         auto MapDACFunc = [](auto val) -> float {
             return float(val) / 4095.f;
@@ -113,12 +122,13 @@ private:
             return float(pwm_val) / float(4095);
         };
 
+        //TODO: LED mapping has to be adjusted to match hardware
         setLED<Mapping::EnvOutLight>(std::array<float, 3>{PWMToFloatFunc(peg.pwm_vals[PWM_ENVA_R]),
                                                     PWMToFloatFunc(peg.pwm_vals[PWM_ENVA_G]),
                                                     PWMToFloatFunc(peg.pwm_vals[PWM_ENVA_B])});
-        setLED<Mapping::_5VEnvLight>(std::array<float, 3>{PWMToFloatFunc(peg.pwm_vals[PWM_ENVB_R]),
-                                                    PWMToFloatFunc(peg.pwm_vals[PWM_ENVB_G]),
-                                                    PWMToFloatFunc(peg.pwm_vals[PWM_ENVB_B])});
+        // setLED<Mapping::_5VEnvLight>(std::array<float, 3>{PWMToFloatFunc(peg.pwm_vals[PWM_ENVB_R]),
+        //                                             PWMToFloatFunc(peg.pwm_vals[PWM_ENVB_G]),
+        //                                             PWMToFloatFunc(peg.pwm_vals[PWM_ENVB_B])});
         setLED<Mapping::CycleButton>(std::array<float, 3>{PWMToFloatFunc(peg.pwm_vals[PWM_CYCLEBUT_R]),
                                                     PWMToFloatFunc(peg.pwm_vals[PWM_CYCLEBUT_G]),
                                                     PWMToFloatFunc(peg.pwm_vals[PWM_CYCLEBUT_B])});
