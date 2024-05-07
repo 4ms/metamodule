@@ -58,16 +58,15 @@ private:
 		const static Info::Elem EnvOut       	= EnvRedOut;
 		const static Info::Elem _5VEnvOut    	= P5VEnvRedOut;
 		const static Info::Elem EoFOut       	= EofRedOut;
-		const static Info::Elem EoROut			= EorOut; //not identical for each channel	
+		const static Info::Elem SecondaryOut    = EorOut;
 		const static Info::Elem EnvOutLight  	= EnvredlightLight;
 		const static Info::Elem EofLight     	= EofredlightLight;
-		const static Info::Elem EorLight		= EorredlightLight; //not identical for each channel
+		const static Info::Elem SecondaryLight  = EorredlightLight;
 
 		const static Info::Elem AsyncModeAltParam = AsyncRedModeAltParam;
 		const static Info::Elem FreeNRunningPingAltParam = FreeNRunningPingRedAltParam;
 		const static Info::Elem SkewLimitAltParam = SkewLimitRedAltParam;
 		const static Info::Elem EofModeAltParam = EofRedModeAltParam;
-		const static Info::Elem EorModeAltParam = EorRedModeAltParam; //not identical for each channel
 	};
 
 	struct MappingB
@@ -87,16 +86,15 @@ private:
 		const static Info::Elem EnvOut       	= EnvBlueOut;
 		const static Info::Elem _5VEnvOut    	= P5VEnvBlueOut;
 		const static Info::Elem EoFOut       	= EofBlueOut;
-		const static Info::Elem EoROut			= HalfROut; //not identical for each channel	
+		const static Info::Elem SecondaryOut    = HalfROut;
 		const static Info::Elem EnvOutLight  	= EnvbluelightLight;
 		const static Info::Elem EofLight     	= EofblueLight;
-		const static Info::Elem EorLight		= HalfriseblueLight; //not identical for each channel
+		const static Info::Elem SecondaryLight	= HalfriseblueLight;
 
 		const static Info::Elem AsyncModeAltParam = AsyncBlueModeAltParam;
 		const static Info::Elem FreeNRunningPingAltParam = FreeNRunningPingBlueAltParam;
 		const static Info::Elem SkewLimitAltParam = SkewLimitBlueAltParam;
 		const static Info::Elem EofModeAltParam = EofBlueModeAltParam;
-		const static Info::Elem EorModeAltParam = HalfNRBlueModeAltParam; //not identical for each channel
 	};
 
 	PEGChannel<PEGCore,MappingA> channelA;
@@ -121,6 +119,24 @@ private:
 			channelA.toggleInput(toggleIn);
 			channelB.toggleInput(toggleIn);
 		};
+		
+		switch (getState<EorRedModeAltParam>())
+		{
+			case 0: channelA.setSecondaryMode(channelA.SecondaryMode::EOR_GATE); break;
+			case 1: channelA.setSecondaryMode(channelA.SecondaryMode::EOR_TRIG); break;
+			case 2: channelA.setSecondaryMode(channelA.SecondaryMode::HR_GATE); break;
+			case 3: channelA.setSecondaryMode(channelA.SecondaryMode::HR_TRIG); break;
+			default: return;
+		}
+
+		switch (getState<HalfNRBlueModeAltParam>())
+		{
+			case 0: channelB.setSecondaryMode(channelB.SecondaryMode::HR_GATE); break;
+			case 1: channelB.setSecondaryMode(channelB.SecondaryMode::HR_TRIG); break;
+			case 2: channelB.setSecondaryMode(channelB.SecondaryMode::EOR_GATE); break;
+			case 3: channelB.setSecondaryMode(channelB.SecondaryMode::EOR_TRIG); break;
+			default: return;
+		}
 	}
 
 	void set_samplerate(float sr) override {

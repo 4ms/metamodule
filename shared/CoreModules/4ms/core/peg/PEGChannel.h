@@ -80,6 +80,29 @@ public:
         timerPhaseIncrement = float(PEG::MiniPEG::kDacSampleRate) / sr;
     }
 
+    enum SecondaryMode {EOR_GATE, EOR_TRIG, HR_GATE, HR_TRIG};
+
+    void setSecondaryMode(SecondaryMode mode)
+    {
+        if (mode == EOR_GATE or mode == HR_GATE)
+        {
+            peg.settings.trigout_secondary_is_trig = 0;
+        }
+        else
+        {
+            peg.settings.trigout_secondary_is_trig = 1;
+        }
+
+        if (mode == EOR_GATE or mode == EOR_TRIG)
+        {
+            peg.settings.trigout_secondary_function = TRIGOUT_IS_ENDOFRISE;
+        }
+        else
+        {
+            peg.settings.trigout_secondary_function = TRIGOUT_IS_HALFRISE;
+        }
+    }
+
 private:
     void sideloadDrivers() {
         auto MapOutputFunc = [](auto val) -> uint16_t {
@@ -138,6 +161,11 @@ private:
         }
 
         setOutput<Mapping::EoFOut>(peg.digio.EOJack.sideload_get() ? TriggerOutputInV : 0.f);
+
+        // Secondary out with directly coupled LED
+        // TODO: convert LED to unicolor
+        setOutput<Mapping::SecondaryOut>(peg.digio.EOJackSecondary.sideload_get() ? TriggerOutputInV : 0.f);
+        setLED<Mapping::SecondaryLight>(std::array<float,3>{peg.digio.EOJackSecondary.sideload_get() ? 1.0f : 0., 0., 0.});
 
         auto MapDACFunc = [](auto val) -> float {
             return float(val) / 4095.f;
