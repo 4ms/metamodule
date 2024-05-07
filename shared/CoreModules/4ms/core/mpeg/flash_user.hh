@@ -50,29 +50,38 @@ enum CenterDetentPots {
 #define VALID_SETTINGS 0xC002
 
 struct SystemSettings {
-	uint16_t is_valid;
-	uint16_t midpt_array[NUM_DIVMULTS];
-	int16_t center_detent_offset[NUM_CENTER_DETENT_POTS];
+	uint16_t is_valid = 0;
+	uint16_t midpt_array[NUM_DIVMULTS] = {0};
+	int16_t center_detent_offset[NUM_CENTER_DETENT_POTS] = {0};
 
-	uint8_t limit_skew;
-	uint8_t free_running_ping;
-	uint8_t trigout_is_trig;
-	TrigInFunctions trigin_function;
-	TrigOutFunctions trigout_function;
+	uint8_t limit_skew = 0;
+	uint8_t free_running_ping = 0;
+	uint8_t trigout_is_trig = 0;
+	TrigInFunctions trigin_function = TrigInFunctions(0);
+	TrigOutFunctions trigout_function = TrigOutFunctions(0);
 
-	CycleJackBehaviors cycle_jack_behavior;
+	CycleJackBehaviors cycle_jack_behavior = CycleJackBehaviors(0);
 
-	uint32_t start_clk_time;
-	uint8_t start_cycle_on;
+	uint32_t start_clk_time = 0;
+	uint8_t start_cycle_on = 0;
 
-	uint16_t ping_cal_r, ping_cal_g, ping_cal_b;
-	uint16_t cycle_cal_r, cycle_cal_g, cycle_cal_b;
-	uint16_t start_sync_on;
-	uint16_t unused2, unused3;
-	uint16_t enva_cal_r, enva_cal_g, enva_cal_b;
-	uint16_t envb_cal_r, envb_cal_g, envb_cal_b;
+	uint16_t ping_cal_r = 0;
+	uint16_t ping_cal_g = 0;
+	uint16_t ping_cal_b = 0;
+	uint16_t cycle_cal_r = 0;
+	uint16_t cycle_cal_g = 0;
+	uint16_t cycle_cal_b = 0;
+	uint16_t start_sync_on = 0;
+	uint16_t unused2 = 0;
+	uint16_t unused3 = 0;
+	uint16_t enva_cal_r = 0;
+	uint16_t enva_cal_g = 0;
+	uint16_t enva_cal_b = 0;
+	uint16_t envb_cal_r = 0;
+	uint16_t envb_cal_g = 0;
+	uint16_t envb_cal_b = 0;
 
-	int32_t shift_value;
+	int32_t shift_value = 0;
 };
 
 #define QNT_REPHASES_WHEN_CYCLE_OFF 0

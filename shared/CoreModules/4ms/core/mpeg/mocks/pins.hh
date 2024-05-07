@@ -38,8 +38,8 @@ struct InputPin
 	}
 
 protected:
-	bool value;
-	bool compareValue;
+	bool value = false;
+	bool compareValue = false;
 };
 
 
@@ -71,7 +71,7 @@ struct MockedButton : public MockedTrigger
 	unsigned how_long_held_pressed() { return is_pressed() ? steady_state_ctr : 0; }
 
 private:
-	uint32_t steady_state_ctr;
+	uint32_t steady_state_ctr = 0;
 };
 
 
@@ -92,7 +92,7 @@ struct MockedSwitch3Pos
 	}
 
 private:
-	SwitchPos state;
+	SwitchPos state = SwitchPos(0);
 };
 
 struct OutputPin
@@ -119,7 +119,7 @@ struct OutputPin
 	}
 
 private:
-	bool value;
+	bool value = false;
 };
 
 struct MockedLED : OutputPin
