@@ -76,7 +76,7 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/env_transition.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/leds.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/shareddrv/debounced_digins.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/shareddrv/dac.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/mocks/pwm.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/pwm.cc
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/mpeg/
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/mpeg/mocks
 

@@ -1,7 +1,6 @@
 #include "main.hh"
 #include "calibration.hh"
 #include "debounced_digins.h"
-#include "env_transition.h"
 #include "envelope_calcs.h"
 #include "settings.h"
 #include "util/math.hh"

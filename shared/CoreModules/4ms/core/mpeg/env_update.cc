@@ -1,12 +1,8 @@
 #include "main.hh"
 
-#include "dig_inouts.hh"
-#include "env_transition.h"
 #include "envelope_calcs.h"
 #include "leds.h"
 #include "settings.h"
-#include "timers.h"
-#include "trigout.h"
 
 namespace MetaModule::PEG
 {

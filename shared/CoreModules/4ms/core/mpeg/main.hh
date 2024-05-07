@@ -70,7 +70,6 @@ private:
     analog_t analog[NUM_ADCS];
 
 private:
-    // from trigout.hh
     void eor_on();
     void eor_off();
     void eof_on();

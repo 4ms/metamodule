@@ -1,18 +1,13 @@
 #include "main.hh"
 
-// #include "adc.h"
 #include "dig_inouts.hh"
-// #include "drivers/system.hh"
 #include "env_transition.h"
 #include "env_update.h"
-// #include "flash_layout.hh"
 #include "flash_user.hh"
 #include "math_util.h"
 #include "params.h"
 
 #include "settings.h"
-// #include "system.hh"
-#include "system_mode.h"
 #include "timers.h"
 #include "util/math.hh"
 
