@@ -4,7 +4,7 @@
 struct AudioStreamConf {
 
 	// BlockSize: Number of Frames processed each time AudioStream::process() is called
-	static constexpr int BlockSize = 1;
+	static constexpr int BlockSize = 32;
 
 	using SampleT = int32_t;
 

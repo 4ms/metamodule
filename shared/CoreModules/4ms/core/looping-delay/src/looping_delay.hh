@@ -87,7 +87,7 @@ public:
 	}
 
 	float get_ping_time_at_default_samplerate() {
-		uint32_t scaled_ping_time = std::round(params.ping_time * DefaultSampleRate / params.currentSampleRate );
+		uint32_t scaled_ping_time = std::round(params.ping_time * DefaultSampleRate / params.currentSampleRate);
 		return scaled_ping_time;
 	}
 
@@ -230,7 +230,7 @@ public:
 		write_block_to_memory(wr_buff);
 
 		handle_read_crossfade_end();
-		increment_write_crossfading();
+		// increment_write_crossfading();
 	}
 
 	void write_block_to_memory(std::span<int16_t> wr_buff) {
@@ -239,29 +239,37 @@ public:
 
 		bool rev = params.modes.reverse;
 
-		if (params.modes.inf == InfState::TransitioningOn) {
-			if (write_fade_state == FadeState::FadingDown) {
-				float phase = 1.f - write_fade_phase;
-				rev ? fade_buf.write_reverse(wr_buff, phase) : fade_buf.write(wr_buff, phase);
-				buf.wr_pos(fade_buf.wr_pos());
-			}
-		}
+		for (auto sample : wr_buff) {
 
-		if (params.modes.inf == InfState::TransitioningOff || params.modes.inf == InfState::Off) {
-			if (write_fade_state == FadeState::Crossfading) {
-				// Memory::fade_write(write_fade_ending_addr, wr_buff, rev, write_fade_phase);
-				rev ? fade_buf.write_reverse(wr_buff, write_fade_phase) : fade_buf.write(wr_buff, write_fade_phase);
-
-				// write in the opposite direction of rev
-				rev ? fade_buf.write(wr_buff, 1.f - write_fade_phase) :
-					  fade_buf.write_reverse(wr_buff, 1.f - write_fade_phase);
-			} else if (write_fade_state == FadeState::FadingUp) {
-				rev ? fade_buf.write_reverse(wr_buff, write_fade_phase) : fade_buf.write(wr_buff, write_fade_phase);
-				buf.wr_pos(fade_buf.wr_pos());
-			} else {
-				rev ? buf.write_reverse(wr_buff) : buf.write(wr_buff);
-				fade_buf.wr_pos(buf.wr_pos());
+			if (params.modes.inf == InfState::TransitioningOn) {
+				if (write_fade_state == FadeState::FadingDown) {
+					float phase = 1.f - write_fade_phase;
+					rev ? fade_buf.write_one_reverse(sample, phase) : fade_buf.write_one(sample, phase);
+					buf.wr_pos(fade_buf.wr_pos());
+				}
 			}
+
+			if (params.modes.inf == InfState::TransitioningOff || params.modes.inf == InfState::Off) {
+				if (write_fade_state == FadeState::Crossfading) {
+					rev ? fade_buf.write_one_reverse(sample, write_fade_phase) :
+						  fade_buf.write_one(sample, write_fade_phase);
+
+					// write in the opposite direction of rev
+					float phase = 1.f - write_fade_phase;
+					rev ? fade_buf.write_one(sample, phase) : fade_buf.write_one_reverse(sample, phase);
+
+				} else if (write_fade_state == FadeState::FadingUp) {
+					rev ? fade_buf.write_one_reverse(sample, write_fade_phase) :
+						  fade_buf.write_one(sample, write_fade_phase);
+					buf.wr_pos(fade_buf.wr_pos());
+
+				} else {
+					rev ? buf.write_one_reverse(sample) : buf.write_one(sample);
+					fade_buf.wr_pos(buf.wr_pos());
+				}
+			}
+
+			increment_write_crossfading();
 		}
 	}
 
