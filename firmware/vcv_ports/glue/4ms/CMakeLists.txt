@@ -95,6 +95,13 @@ target_sources(
     ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/shareddrv/dac.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/mocks/pwm.cc
 )
+target_include_directories(
+  4msLibrary
+  PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/mocks
+)
+
 # DLD
 target_sources(
   4msLibrary
