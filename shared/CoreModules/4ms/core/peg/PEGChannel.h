@@ -44,6 +44,8 @@ public:
         : parent(parent_), pingIn(1.f, 2.f)
         , cycleIn(1.f, 2.f)
         , triggerIn(1.f, 2.f)
+        , qntIn(1.f, 2.f)
+        , asyncIn(1.f, 2.f)
         , timerPhase(0)
         , timerPhaseIncrement(1.0f) {
         // TODO: maybe calling these is not required
@@ -105,8 +107,29 @@ private:
         peg.digio.PingBut.sideload_set(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED);
         peg.digio.CycleBut.sideload_set(getState<Mapping::CycleButton>() == MomentaryButton::State_t::PRESSED);
         
-        //TODO: QNT and ASYNC input have to be mapped onto TrigJack of MPEG
-        // peg.digio.TrigJack.sideload_set(triggerIn(getInput<Mapping::TriggerIn>().value_or(0.f)));
+        auto qntJackIn = getInput<Mapping::QntIn>().value_or(0.f);
+        auto asyncJackIn = getInput<Mapping::AsyncIn>().value_or(0.f);
+
+        auto qntRisingEdge = qntEdge(qntIn(qntJackIn));
+        auto asyncRisingEdge = asyncEdge(asyncIn(asyncJackIn));
+
+        if (qntRisingEdge) 
+        {
+            peg.settings.trigin_function = TRIGIN_IS_QNT;
+        }
+        else if(asyncRisingEdge)
+        {
+            peg.settings.trigin_function = TRIGIN_IS_ASYNC_SUSTAIN;
+        }
+
+        if (peg.settings.trigin_function == TRIGIN_IS_QNT)
+        {
+            peg.digio.TrigJack.sideload_set(qntIn(qntJackIn));
+        }
+        else
+        {
+            peg.digio.TrigJack.sideload_set(asyncIn(asyncJackIn));
+        }
 
         // TODO: ping input originall has internal lowpass filtering
         // peg.digio.PingJack.sideload_set(pingIn(getInput<PingTrigIn>().value_or(0.f)));
@@ -181,6 +204,11 @@ private:
     FlipFlop cycleIn;
     FlipFlop triggerIn;
     EdgeDetector pingEdge;
+
+    FlipFlop qntIn;
+    FlipFlop asyncIn;
+    EdgeDetector qntEdge;
+    EdgeDetector asyncEdge;
 
 private:
     float timerPhase;
