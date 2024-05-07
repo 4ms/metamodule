@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <list>
 #include <span>
@@ -28,7 +29,8 @@ public:
 	Archive(std::span<const char> filedata);
 
 	void print_info();
-	bool extract_files(std::function<uint32_t(std::string_view, std::span<const char>)>);
+	using extract_func_t = std::function<uint32_t(std::string_view, std::span<const char>)>;
+	bool extract_files(extract_func_t func);
 
 private:
 	bool image_read(char *buf, int size);

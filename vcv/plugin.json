@@ -116,6 +116,12 @@
       "tags": ["Effect"]
     },
     {
+      "slug": "MPEG",
+      "name": "Mini Pingable Envelope Generator [MPEG]",
+      "description": "MiniPEG",
+      "tags": ["Clock generator", "Clock modulator", "Envelope Generator", "Hardware clone"]
+    },
+    {
       "slug": "STS",
       "name": "Stereo Triggered Sampler [STS]",
       "description": "STS (not implemented)",

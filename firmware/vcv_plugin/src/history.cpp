@@ -16,7 +16,8 @@ ComplexAction::~ComplexAction() {
 }
 
 void ComplexAction::undo() {
-	for (auto action : std::ranges::reverse_view(actions)) {
+	for (auto it = actions.rbegin(); it != actions.rend(); it++) {
+		Action *action = *it;
 		action->undo();
 	}
 }
