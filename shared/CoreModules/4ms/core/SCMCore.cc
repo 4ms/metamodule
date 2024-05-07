@@ -24,11 +24,11 @@ public:
 	}
 
 	void update() override {
-		uint32_t rotate_adc   = convert_param(getState<RotateKnob>()  + getInput<RotateJackIn>().value_or(0)/5.f, 7.99f);
-		uint32_t slippage_adc = convert_param(getState<SlipKnob>()    + getInput<SlipJackIn>().value_or(0)/5.f, 255);
-		uint32_t shuffle_adc  = convert_param(getState<ShuffleKnob>() + getInput<ShuffleJackIn>().value_or(0)/5.f, 255);
-		uint32_t skip_adc     = convert_param(getState<SkipKnob>()    + getInput<SkipJackIn>().value_or(0)/5.f, 255);
-		uint32_t pw_adc       = convert_param(getState<PwKnob>()      + getInput<PwJackIn>().value_or(0)/5.f, 255);
+		uint32_t rotate_adc = convert_param(getState<RotateKnob>() + getInput<RotateJackIn>().value_or(0) / 5.f, 7.99f);
+		uint32_t slippage_adc = convert_param(getState<SlipKnob>() + getInput<SlipJackIn>().value_or(0) / 5.f, 255);
+		uint32_t shuffle_adc = convert_param(getState<ShuffleKnob>() + getInput<ShuffleJackIn>().value_or(0) / 5.f, 255);
+		uint32_t skip_adc = convert_param(getState<SkipKnob>() + getInput<SkipJackIn>().value_or(0) / 5.f, 255);
+		uint32_t pw_adc = convert_param(getState<PwKnob>() + getInput<PwJackIn>().value_or(0) / 5.f, 255);
 
 		bool faster_switch_state = getState<_4XFastButton>() == LatchingButton::State_t::DOWN;
 		if (getInput<_4XFastJackIn>().value_or(0) > 2.5f)
@@ -78,10 +78,7 @@ public:
 			update_pulse_params = true;
 		}
 
-		if (MathTools::diff(skip_adc, old_skip_adc) > 4) {
-			old_skip_adc = skip_adc;
-			skip_pattern = (skip_adc > 128) ? ~skip[0xFF - skip_adc] : skip[skip_adc];
-		}
+		skip_pattern = (skip_adc > 128) ? ~skip[0xFF - skip_adc] : skip[skip_adc];
 
 		if (shuffle_adc != old_shuffle_adc) {
 			old_shuffle_adc = shuffle_adc;
@@ -252,7 +249,7 @@ public:
 
 	uint32_t calc_pw(uint8_t pw_adc, uint32_t period) {
 		float pw = (float)pw_adc / 255.f * (float)period;
-		return std::clamp<uint32_t>(pw, MIN_PW, period - MIN_PW);	
+		return std::clamp<uint32_t>(pw, MIN_PW, period - MIN_PW);
 	}
 
 	void set_samplerate(float sr) override {
@@ -274,7 +271,6 @@ private:
 	uint32_t old_shuffle_adc = 127;
 	uint32_t old_slippage_adc = 127;
 	uint32_t old_pw_adc = 127;
-	uint32_t old_skip_adc = 127;
 	uint32_t old_rotation = 255;
 	uint32_t old_faster_switch_state = 127;
 
@@ -316,7 +312,6 @@ private:
 	std::array<uint32_t, 8> dd;
 	std::array<int32_t, 8> slipamt;
 	std::array<int32_t, 8> slip;
-
 };
 
 } // namespace MetaModule
