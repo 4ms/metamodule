@@ -189,7 +189,7 @@ private:
         // Secondary out with directly coupled LED
         // TODO: convert LED to unicolor
         setOutput<Mapping::SecondaryOut>(peg.digio.EOJackSecondary.sideload_get() ? TriggerOutputInV : 0.f);
-        setLED<Mapping::SecondaryLight>(std::array<float,3>{peg.digio.EOJackSecondary.sideload_get() ? 1.0f : 0., 0., 0.});
+        setLED<Mapping::SecondaryLight>(peg.digio.EOJackSecondary.sideload_get() ? 1.0f : 0.f);
 
         auto MapDACFunc = [](auto val) -> float {
             return float(val) / 4095.f;
@@ -202,10 +202,7 @@ private:
             return float(pwm_val) / float(4095);
         };
 
-        //TODO: LED mapping has to be adjusted to match hardware
-        setLED<Mapping::EnvOutLight>(std::array<float, 3>{MapDACFunc(peg.dac_vals[1]),
-                                                    MapDACFunc(peg.dac_vals[1]),
-                                                    MapDACFunc(peg.dac_vals[1])});
+        setLED<Mapping::EnvOutLight>(MapDACFunc(peg.dac_vals[1]));
         setLED<Mapping::CycleButton>(std::array<float, 3>{PWMToFloatFunc(peg.pwm_vals[PWM_CYCLEBUT_R]),
                                                     PWMToFloatFunc(peg.pwm_vals[PWM_CYCLEBUT_G]),
                                                     PWMToFloatFunc(peg.pwm_vals[PWM_CYCLEBUT_B])});
