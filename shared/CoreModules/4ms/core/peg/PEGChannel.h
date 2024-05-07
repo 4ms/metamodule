@@ -219,16 +219,9 @@ private:
     }
 
     void sideloadSystemSettings() {
-        // peg.settings.limit_skew = getState<Mapping::SkewLimitAltParam>() == 1 ? 1 : 0;
-        // peg.settings.free_running_ping = getState<Mapping::FreeNRunningPingAltParam>() == 0 ? 1 : 0;
-        // peg.settings.trigout_is_trig = getState<Mapping::EofJackTypeAltParam>() == 1 ? 1 : 0;
-
-        // static constexpr std::array<TrigOutFunctions, 4> TrigOutOptions{
-        // 	TRIGOUT_IS_ENDOFRISE, TRIGOUT_IS_ENDOFFALL, TRIGOUT_IS_HALFRISE, TRIGOUT_IS_TAPCLKOUT};
-
-        // peg.settings.trigout_function = TrigOutOptions[getState<Mapping::EofJackModeAltParam>()];
-
-        // // TODO: check if this mapping is correct
+        peg.settings.limit_skew = getState<Mapping::SkewLimitAltParam>() == 1 ? 1 : 0;
+        peg.settings.free_running_ping = getState<Mapping::FreeNRunningPingAltParam>() == 0 ? 1 : 0;
+        
         // static constexpr std::array<CycleJackBehaviors, 3> CycleJackOptions{
         // 	CYCLE_JACK_RISING_EDGE_TOGGLES, CYCLE_JACK_BOTH_EDGES_TOGGLES_QNT, CYCLE_JACK_BOTH_EDGES_TOGGLES};
 
