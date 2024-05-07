@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/4ms/4ms_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
@@ -14,7 +15,7 @@ struct DLDInfo : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 39> Elements{{
+    static constexpr std::array<Element, 56> Elements{{
 		Davies1900hBlackKnob{{to_mm<72>(34.32), to_mm<72>(53.53), Center, "Time A", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(254.17), to_mm<72>(53.39), Center, "Time B", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(34.17), to_mm<72>(119.05), Center, "Feedback A", ""}},
@@ -23,8 +24,8 @@ struct DLDInfo : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(111.56), to_mm<72>(178.84), Center, "Mix A", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(177.02), to_mm<72>(178.91), Center, "Mix B", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(245.19), to_mm<72>(183.78), Center, "Delay Feed B", ""}},
-		Toggle3pos{{to_mm<72>(84.11), to_mm<72>(51.455), Center, "+16 | 1/8th A", ""}},
-		Toggle3pos{{to_mm<72>(205.35), to_mm<72>(51.455), Center, "+16 | 1/8th B", ""}},
+		Toggle3pos{{to_mm<72>(84.11), to_mm<72>(51.455), Center, "Time Mult A", ""}, {"1/8th", "=", "+16"}},
+		Toggle3pos{{to_mm<72>(205.35), to_mm<72>(51.455), Center, "Time Mult B", ""}, {"1/8th", "=", "+16"}},
 		WhiteMomentary7mm{{to_mm<72>(124.03), to_mm<72>(42.51), Center, "Ping Button", ""}},
 		WhiteMomentary7mm{{to_mm<72>(81.85), to_mm<72>(123.11), Center, "Reverse A", ""}},
 		WhiteMomentary7mm{{to_mm<72>(118.44), to_mm<72>(135.74), Center, "Hold A", ""}},
@@ -52,8 +53,25 @@ struct DLDInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(71.16), to_mm<72>(281.49), Center, "Send A", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(217.15), to_mm<72>(281.49), Center, "Send B", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(260.18), to_mm<72>(281.49), Center, "Out B", ""}},
-		RedGreenBlueLight{{to_mm<72>(66.03), to_mm<72>(34.94), Center, "Time A LED", ""}},
-		RedGreenBlueLight{{to_mm<72>(222.2), to_mm<72>(34.94), Center, "Time B LED", ""}},
+		RedLight{{to_mm<72>(66.03), to_mm<72>(34.94), Center, "Time A LED", ""}},
+		RedLight{{to_mm<72>(222.2), to_mm<72>(34.94), Center, "Time B LED", ""}},
+		AltParamChoiceLabeled{{{to_mm<72>(29.0), to_mm<72>(13.0), Center, "Soft Clip A", ""}, 2, 1}, {"On", "Off"}},
+		AltParamChoiceLabeled{{{to_mm<72>(229.0), to_mm<72>(13.0), Center, "Soft Clip B", ""}, 2, 1}, {"On", "Off"}},
+		AltParamChoiceLabeled{{{to_mm<72>(12.0), to_mm<72>(13.0), Center, "AutoMute A", ""}, 2, 1}, {"On", "Off"}},
+		AltParamChoiceLabeled{{{to_mm<72>(212.0), to_mm<72>(13.0), Center, "AutoMute B", ""}, 2, 1}, {"On", "Off"}},
+		AltParamChoiceLabeled{{{to_mm<72>(167.59), to_mm<72>(42.51), Center, "Ping Method", ""}, 5, 1}, {"Avg 4", "Avg 2", "1:1", "IgnoreJitter", "Ignore%Change"}},
+		AltParamChoiceLabeled{{{to_mm<72>(122.51), to_mm<72>(281.49), Center, "Hold A", ""}, 2, 1}, {"Trig", "Gate"}},
+		AltParamChoiceLabeled{{{to_mm<72>(165.98), to_mm<72>(281.49), Center, "Hold B", ""}, 2, 1}, {"Trig", "Gate"}},
+		AltParamChoiceLabeled{{{to_mm<72>(122.51), to_mm<72>(242.1), Center, "Rev. A", ""}, 2, 1}, {"Trig", "Gate"}},
+		AltParamChoiceLabeled{{{to_mm<72>(165.98), to_mm<72>(242.1), Center, "Rev. B", ""}, 2, 1}, {"Trig", "Gate"}},
+		AltParamChoiceLabeled{{{to_mm<72>(43.46), to_mm<72>(184.04), Center, "DelayFeed A Taper", ""}, 2, 1}, {"Log", "Lin"}},
+		AltParamChoiceLabeled{{{to_mm<72>(245.19), to_mm<72>(183.78), Center, "DelayFeed B Taper", ""}, 2, 1}, {"Log", "Lin"}},
+		AltParamChoiceLabeled{{{to_mm<72>(25.58), to_mm<72>(322.03), Center, "Time A Auto-UnQ", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(262.73), to_mm<72>(322.03), Center, "Time B Auto-UnQ", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(71.16), to_mm<72>(242.1), Center, "Stereo Mode A", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(217.15), to_mm<72>(242.1), Center, "Stereo Mode B", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(34.32), to_mm<72>(53.53), Center, "Crossfade A", ""}, 7, 4}, {"1ms", "2ms", "4ms", "8ms", "25ms", "100ms", "250ms"}},
+		AltParamChoiceLabeled{{{to_mm<72>(254.17), to_mm<72>(53.39), Center, "Crossfade B", ""}, 7, 4}, {"1ms", "2ms", "4ms", "8ms", "25ms", "100ms", "250ms"}},
 }};
 
     enum class Elem {
@@ -65,8 +83,8 @@ struct DLDInfo : ModuleInfoBase {
         MixAKnob,
         MixBKnob,
         DelayFeedBKnob,
-        P16_OR_1_8ThASwitch,
-        P16_OR_1_8ThBSwitch,
+        TimeMultASwitch,
+        TimeMultBSwitch,
         PingButton,
         ReverseAButton,
         HoldAButton,
@@ -96,67 +114,104 @@ struct DLDInfo : ModuleInfoBase {
         OutBOut,
         TimeALedLight,
         TimeBLedLight,
+        SoftClipAAltParam,
+        SoftClipBAltParam,
+        AutomuteAAltParam,
+        AutomuteBAltParam,
+        PingMethodAltParam,
+        HoldAAltParam,
+        HoldBAltParam,
+        Rev_AAltParam,
+        Rev_BAltParam,
+        DelayfeedATaperAltParam,
+        DelayfeedBTaperAltParam,
+        TimeAAutoNUnqAltParam,
+        TimeBAutoNUnqAltParam,
+        StereoModeAAltParam,
+        StereoModeBAltParam,
+        CrossfadeAAltParam,
+        CrossfadeBAltParam,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobTime_A = 0,
-        KnobTime_B = 1,
-        KnobFeedback_A = 2,
-        KnobFeedback_B = 3,
-        KnobDelay_Feed_A = 4,
-        KnobMix_A = 5,
-        KnobMix_B = 6,
-        KnobDelay_Feed_B = 7,
+        KnobTime_A, 
+        KnobTime_B, 
+        KnobFeedback_A, 
+        KnobFeedback_B, 
+        KnobDelay_Feed_A, 
+        KnobMix_A, 
+        KnobMix_B, 
+        KnobDelay_Feed_B, 
         NumKnobs,
     };
     
     enum {
-        SwitchP16__OR__1_8Th_A = 0,
-        SwitchP16__OR__1_8Th_B = 1,
-        SwitchPing_Button = 2,
-        SwitchReverse_A = 3,
-        SwitchHold_A = 4,
-        SwitchHold_B = 5,
-        SwitchReverse_B = 6,
+        SwitchP16__OR__1_8Th_A, 
+        SwitchP16__OR__1_8Th_B, 
+        SwitchPing_Button, 
+        SwitchReverse_A, 
+        SwitchHold_A, 
+        SwitchHold_B, 
+        SwitchReverse_B, 
         NumSwitches,
     };
     
     enum {
-        InputPing_Jack = 0,
-        InputIn_A = 1,
-        InputReturn_A = 2,
-        InputReverse_A_Jack = 3,
-        InputReverse_B_Jack = 4,
-        InputReturn_B = 5,
-        InputIn_B = 6,
-        InputHold_A_Jack = 7,
-        InputHold_B_Jack = 8,
-        InputTime_A_Jack = 9,
-        InputFeedback_A_Jack = 10,
-        InputDelay_Feed_A_Jack = 11,
-        InputDelay_Feed_B_Jack = 12,
-        InputFeedback_B_Jack = 13,
-        InputTime_B_Jack = 14,
+        InputPing_Jack, 
+        InputIn_A, 
+        InputReturn_A, 
+        InputReverse_A_Jack, 
+        InputReverse_B_Jack, 
+        InputReturn_B, 
+        InputIn_B, 
+        InputHold_A_Jack, 
+        InputHold_B_Jack, 
+        InputTime_A_Jack, 
+        InputFeedback_A_Jack, 
+        InputDelay_Feed_A_Jack, 
+        InputDelay_Feed_B_Jack, 
+        InputFeedback_B_Jack, 
+        InputTime_B_Jack, 
         NumInJacks,
     };
     
     enum {
-        OutputLoop_A = 0,
-        OutputClock_Out = 1,
-        OutputLoop_B = 2,
-        OutputOut_A = 3,
-        OutputSend_A = 4,
-        OutputSend_B = 5,
-        OutputOut_B = 6,
+        OutputLoop_A, 
+        OutputClock_Out, 
+        OutputLoop_B, 
+        OutputOut_A, 
+        OutputSend_A, 
+        OutputSend_B, 
+        OutputOut_B, 
         NumOutJacks,
     };
     
     enum {
-        LedTime_A_Led = 0,
-        LedTime_B_Led = 1,
+        LedTime_A_Led, 
+        LedTime_B_Led, 
         NumDiscreteLeds,
+    };
+    
+    enum {
+        AltParamSoft_Clip_A, 
+        AltParamSoft_Clip_B, 
+        AltParamAutomute_A, 
+        AltParamAutomute_B, 
+        AltParamPing_Method, 
+        AltParamHold_A, 
+        AltParamHold_B, 
+        AltParamRev__A, 
+        AltParamRev__B, 
+        AltParamDelayfeed_A_Taper, 
+        AltParamDelayfeed_B_Taper, 
+        AltParamTime_A_AutoNUnq, 
+        AltParamTime_B_AutoNUnq, 
+        AltParamStereo_Mode_A, 
+        AltParamStereo_Mode_B, 
+        AltParamCrossfade_A, 
+        AltParamCrossfade_B, 
     };
 };
 } // namespace MetaModule

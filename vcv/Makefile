@@ -56,6 +56,10 @@ SOURCES += $(wildcard src/comm/*.cc)
 SOURCES += $(wildcard src/mapping/*.cc)
 SOURCES += $(wildcard src/models/*.cc)
 
+# DLD
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/looping-delay/src
+SOURCES  += $(SHARED)/CoreModules/4ms/core/looping-delay/src/calibration_storage.cc
+
 # QPLFO
 SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo_mocks.cc
