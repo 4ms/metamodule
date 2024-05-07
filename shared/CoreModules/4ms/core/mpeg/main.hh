@@ -97,6 +97,8 @@ private:
     void init_analog_conditioning(void);
     void setup_fir_lpf(void);
 
+    uint8_t oversample_ctr = 0;
+
 public:
     // for sideloading
     uint16_t adc_dma_buffer[NUM_ADCS] = {0};
@@ -173,6 +175,10 @@ private:
     void update_env_tracking(struct PingableEnvelope *e);
 
     uint16_t shape = 0;
+    uint16_t oversample_wait_ctr = 0;
+	uint16_t poll_user_input = 0;
+    int16_t last_total_adc = 0;
+	int8_t last_clock_divider_amount = 0;
 
 private:
     void init_pingable_env(struct PingableEnvelope *e);
