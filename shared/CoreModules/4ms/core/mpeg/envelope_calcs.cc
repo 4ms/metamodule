@@ -1,6 +1,6 @@
 #include "main.hh"
-#include "envelope_calcs.h"
 #include "log4096.h"
+#include "mpeg/envelope_calcs.hh"
 #include "util/math.hh"
 #include "settings.h"
 #include <array>
@@ -8,17 +8,36 @@
 namespace MetaModule::PEG
 {
 
-struct MiniPEGEnvelopeCalcs
-{
+int8_t MiniPEGEnvelopeCalcs::get_clk_div_nominal(uint16_t adc_val) {
+	for (uint8_t i = 0; i < NUM_DIVMULTS; i++) {
+		if (adc_val <= midpt_array[i])
+			return (P_array[i]);
+	}
+	return (P_array[NUM_DIVMULTS - 1]);
+}
 
-static constexpr unsigned NUM_DIVMULTS = 19;
-static constexpr int8_t P_array[NUM_DIVMULTS] = {32, 16, 8, 7, 6, 5, 4, 3, 2, 1, -2, -3, -4, -5, -6, -7, -8, -12, -16};
-static constexpr int16_t midpt_array[NUM_DIVMULTS] = {68, 262, 509, 743, 973, 1202, 1427, 1657, 1882, 
-												2107, 2341, 2574, 2802, 3026, 3262, 3500, 3734, 3942, 4095};
-// shape: 0..4095 (adc value)
-// returns skew: 0..255
-// returns next_curve_rise and _fall: 0..255: expo/linear/log
-void calc_skew_and_curves(uint16_t shape, uint8_t *skew, uint8_t *next_curve_rise, uint8_t *next_curve_fall) {
+constexpr uint32_t morph_exp2lin(uint32_t x) {
+	//0..127 => 0..127
+	return x;
+}
+constexpr uint32_t morph_lin2exp(uint32_t x) {
+	//0..127 => 127..0
+	return 127 - x;
+}
+constexpr uint32_t morph_exp2log(uint32_t x) {
+	//0..127 => 0..255
+	return x * 2;
+}
+constexpr uint32_t morph_log2exp(uint32_t x) {
+	//0..127 => 255..0
+	return 255 - x * 2;
+}
+constexpr uint32_t morph_log2lin(uint32_t x) {
+	//0..127 => 255..128
+	return 255 - x;
+}
+
+void MiniPEGEnvelopeCalcs::calc_skew_and_curves(uint16_t /*skewadc is ignored*/, uint16_t shape, uint8_t *skew, uint8_t *next_curve_rise, uint8_t *next_curve_fall) {
 	if (shape > region_starts.back())
 		shape = region_starts.back();
 	int i = 1;
@@ -63,31 +82,5 @@ void calc_skew_and_curves(uint16_t shape, uint8_t *skew, uint8_t *next_curve_ris
 	}
 }
 
-constexpr uint32_t morph_exp2lin(uint32_t x) {
-	//0..127 => 0..127
-	return x;
-}
-constexpr uint32_t morph_lin2exp(uint32_t x) {
-	//0..127 => 127..0
-	return 127 - x;
-}
-constexpr uint32_t morph_exp2log(uint32_t x) {
-	//0..127 => 0..255
-	return x * 2;
-}
-constexpr uint32_t morph_log2exp(uint32_t x) {
-	//0..127 => 255..0
-	return 255 - x * 2;
-}
-constexpr uint32_t morph_log2lin(uint32_t x) {
-	//0..127 => 255..128
-	return 255 - x;
-}
 
-static constexpr std::array region_starts = {0, 900, 1450, 2645, 3195, 4096};
-static constexpr std::array region_sizes = MathTools::array_adj_diff(region_starts);
-//{900, 550,...}
-
-
-};
 }

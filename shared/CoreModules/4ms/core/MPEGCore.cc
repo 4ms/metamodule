@@ -1,6 +1,7 @@
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/MPEG_info.hh"
+#include "mpeg/envelope_calcs.hh"
 
 #include "peg-common/main.hh"
 using namespace MetaModule::PEG;
@@ -153,7 +154,8 @@ private:
 	static constexpr float EnvelopeOutOffsetInV    = 10.0f;
 
 private:
-	PEG::MiniPEG peg;
+	PEG::MiniPEGEnvelopeCalcs env_calcs;
+	PEG::MiniPEG peg{&env_calcs};
 
 private:
 	FlipFlop pingIn;
