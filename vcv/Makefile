@@ -65,6 +65,7 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/main.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/trigout.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/analog_conditioning.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/env_update.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/envelope_calcs.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/flash_user.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/params.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/pingable_env.cc
@@ -78,8 +79,8 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/shareddrv/dac.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/pwm.cc
 
 SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/envelope_calcs.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/peg/envelope_calcs.cc
 
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg-common/
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg-common/mocks
 
