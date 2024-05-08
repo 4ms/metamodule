@@ -23,9 +23,9 @@ enum MonoLeds {
 };
 
 struct Color {
-	uint16_t r;
-	uint16_t g;
-	uint16_t b;
+	uint16_t r = 0;
+	uint16_t g = 0;
+	uint16_t b = 0;
 };
 
 struct AdjustedColor {

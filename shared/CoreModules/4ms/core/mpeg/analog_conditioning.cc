@@ -46,7 +46,6 @@ void MiniPEG::condition_analog(void) {
 
 	uint8_t i, pot_i;
 	int32_t t;
-	static uint8_t oversample_ctr = 0;
 
 	for (i = 0; i < NUM_CV_ADCS; i++) {
 		analog[i].lpf_sum += adc_cv_dma_buffer[i];

@@ -64,13 +64,12 @@ private:
 
     bool adjusting_shift_mode = false;
     bool toggled_sync_mode = false;
-    int16_t cycle_latched_offset;
+    int16_t cycle_latched_offset = 0;
 
 private:
     analog_t analog[NUM_ADCS];
 
 private:
-    // from trigout.hh
     void eor_on();
     void eor_off();
     void eof_on();
@@ -97,9 +96,11 @@ private:
     void init_analog_conditioning(void);
     void setup_fir_lpf(void);
 
+    uint8_t oversample_ctr = 0;
+
 public:
     // for sideloading
-    uint16_t adc_dma_buffer[NUM_ADCS];
+    uint16_t adc_dma_buffer[NUM_ADCS] = {0};
     uint16_t *adc_cv_dma_buffer = &(adc_dma_buffer[0]);
     uint16_t *adc_pot_dma_buffer = &(adc_dma_buffer[NUM_CV_ADCS]);
 
@@ -109,14 +110,14 @@ private:
 
 public:
     // for sideloading
-    uint32_t pwm_vals[NUM_PWMS];
+    uint32_t pwm_vals[NUM_PWMS] = {0};
 
 private:
     void dac_out(enum DACs dac, uint16_t val);
 
 public:
     // for sideloading
-    uint16_t dac_vals[2];
+    uint16_t dac_vals[2] = {0};
 
 public:
     // call this with dac sample rate
@@ -139,10 +140,10 @@ private:
     void start_envelope_immediate(PingableEnvelope *e);
     int32_t scale_shift_offset_env(uint16_t raw_env_val);
 
-    bool system_mode_active;
-    int32_t scale;
-    int32_t offset;
-    int32_t shift; // not used anymore
+    bool system_mode_active = false;
+    int32_t scale = 0;
+    int32_t offset = 0;
+    int32_t shift = 0; // not used anymore
 
 private:
     int8_t get_clk_div_nominal(uint16_t adc_val);
@@ -172,7 +173,11 @@ private:
     void update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_clock_divider_amount);
     void update_env_tracking(struct PingableEnvelope *e);
 
-    uint16_t shape;
+    uint16_t shape = 0;
+    uint16_t oversample_wait_ctr = 0;
+	uint16_t poll_user_input = 0;
+    int16_t last_total_adc = 0;
+	int8_t last_clock_divider_amount = 0;
 
 private:
     void init_pingable_env(struct PingableEnvelope *e);
@@ -185,11 +190,11 @@ private:
 private:
     void inc_tmrs(void);
 
-    uint32_t systmr;
-    uint32_t tapouttmr;
-    uint32_t tapintmr;
-    uint32_t pingtmr;
-    uint32_t trigouttmr;
+    uint32_t systmr     = 0;
+    uint32_t tapouttmr  = 0;
+    uint32_t tapintmr   = 0;
+    uint32_t pingtmr    = 0;
+    uint32_t trigouttmr = 0;
 
 private:
     bool just_released(DebouncedDiginList pin);

@@ -38,15 +38,15 @@ typedef struct AnalogConditioned {
 	// uint8_t lpf_size;
 	// uint8_t lpf_size_shift;
 	// uint8_t lpf_i;
-	uint32_t lpf_sum;
+	uint32_t lpf_sum = 0;
 	//uint16_t lpf[MAX_LPF_SIZE];
 
 	// uint8_t bracket_size;
 
-	enum AnalogPolarity polarity;
+	enum AnalogPolarity polarity = AnalogPolarity(0);
 
-	uint16_t raw_val;
-	int16_t lpf_val;
+	uint16_t raw_val = 0;
+	int16_t lpf_val = 0;
 	// uint16_t bracketed_val;
 
 } analog_t;

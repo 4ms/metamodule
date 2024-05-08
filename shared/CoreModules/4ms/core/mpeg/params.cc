@@ -1,7 +1,6 @@
 #include "main.hh"
 #include "calibration.hh"
 #include "debounced_digins.h"
-#include "env_transition.h"
 #include "envelope_calcs.h"
 #include "settings.h"
 #include "util/math.hh"
@@ -23,8 +22,6 @@ void MiniPEG::init_params(void) {
 }
 
 void MiniPEG::update_adc_params(uint8_t force_params_update) {
-	static uint16_t oversample_wait_ctr = 0;
-	static uint16_t poll_user_input = 0;
 
 	// every 60us or so
 	if (force_params_update || ++poll_user_input > USER_INPUT_POLL_TIME) {
@@ -109,8 +106,6 @@ uint8_t MiniPEG::read_shape_scale_offset(void) {
 // returns updated clock divider
 // amount or 0 if no change
 int8_t MiniPEG::read_divmult(void) {
-	static int16_t last_total_adc = 0;
-	static int8_t last_clock_divider_amount = 0;
 
 	int16_t total_adc;
 	int8_t t_clock_divider_amount = 1;
