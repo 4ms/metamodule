@@ -5,6 +5,7 @@
 #include <plugin/Plugin.hpp>
 
 #include "console/pr_dbg.hh"
+#include "shared/CoreModules/AudibleInstruments/info/Rings_info.hh"
 
 namespace rack::plugin
 {
@@ -20,6 +21,12 @@ void Plugin::addModel(Model *model) {
 
 	if (ModuleFactory::isValidSlug(slug)) {
 		pr_err("Duplicate module slug: %s, skipping\n", model->slug.c_str());
+		return;
+	}
+
+	if (slug == "Rings") {
+		ModuleFactory::registerModuleFaceplate(slug, "AudibleInstruments/Rings.png");
+		ModuleFactory::registerModuleInfo(slug, ModuleInfoView::makeView<RingsInfo>());
 		return;
 	}
 
