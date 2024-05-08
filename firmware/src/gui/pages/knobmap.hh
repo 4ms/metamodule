@@ -72,6 +72,12 @@ struct KnobMapPage : PageBase {
 		auto &knobset =
 			(view_set_idx == PatchData::MIDIKnobSet) ? patch->midi_maps.set : patch->knob_sets[view_set_idx].set;
 
+		if (view_set_idx == PatchData::MIDIKnobSet) {
+			lv_hide(ui_KnobSetButton);
+		} else {
+			lv_show(ui_KnobSetButton);
+		}
+
 		//mappedknob_id is the index of the MappedKnob in the MappedKnobSet::set vector
 		auto map_idx = args.mappedknob_id;
 		if (!map_idx.has_value() || map_idx.value() >= knobset.size()) {
