@@ -9,7 +9,8 @@
 namespace MetaModule::PEG
 {
 
-MiniPEG::MiniPEG()
+MiniPEG::MiniPEG(EnvelopeCalcsBase *env_calcs)
+	:envelope_calcs{env_calcs}
 {
 	init_pingable_env(&m);
 	init_dig_inouts();

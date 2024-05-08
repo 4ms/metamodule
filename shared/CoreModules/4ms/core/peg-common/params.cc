@@ -30,7 +30,7 @@ void MiniPEG::update_adc_params(uint8_t force_params_update) {
 
 		if (read_shape_scale_offset()) {
 			auto old_skew = m.skew;
-			calc_skew_and_curves(shape, &m.skew, &m.next_curve_rise, &m.next_curve_fall);
+			calc_skew_and_curves(skew, shape, &m.skew, &m.next_curve_rise, &m.next_curve_fall);
 			calc_rise_fall_incs(&m);
 			if (old_skew != m.skew) {
 				update_env_tracking(&m);

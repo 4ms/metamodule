@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../peg-common/main.hh"
+#include "peg/envelope_calcs.hh"
 
 #include "../helpers/FlipFlop.h"
 #include "../helpers/EdgeDetector.h"
@@ -237,7 +238,8 @@ private:
     static constexpr float EnvelopeOutOffsetInV = 10.0f;
 
 private:
-    PEG::MiniPEG peg;
+	PEG::PEGEnvelopeCalcs env_calcs;
+    PEG::MiniPEG peg{&env_calcs};
 
 private:
     FlipFlop pingIn;

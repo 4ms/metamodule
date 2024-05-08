@@ -8,6 +8,7 @@
 #include "dig_inout_pins.hh"
 #include "debounced_digins.h"
 #include "leds.h"
+#include "envelope_calcs.h"
 #include "dac.h"
 #include "calibration.hh"
 
@@ -17,7 +18,7 @@ namespace MetaModule::PEG
 struct MiniPEG
 {
 public:
-    MiniPEG();
+    MiniPEG(EnvelopeCalcsBase *env_calcs);
 
     void update();
 
@@ -155,7 +156,7 @@ private:
     uint32_t get_clk_div_time(int8_t clock_divide_amount, uint32_t clk_time);
     uint32_t get_fall_time(uint8_t skew, uint32_t div_clk_time);
     int16_t calc_curve(int16_t t_dacout, uint8_t cur_curve);
-    void calc_skew_and_curves(uint16_t shape, uint8_t *skew, uint8_t *next_curve_rise, uint8_t *next_curve_fall);
+	void calc_skew_and_curves(uint16_t skewadc, uint16_t shapeadc, uint8_t *skew, uint8_t *next_curve_rise, uint8_t *next_curve_fall);
     void calc_rise_fall_incs(struct PingableEnvelope *e);
     void calc_div_clk_time(struct PingableEnvelope *e, uint32_t new_clk_time);
 
@@ -178,6 +179,7 @@ private:
     void update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_clock_divider_amount);
     void update_env_tracking(struct PingableEnvelope *e);
 
+	EnvelopeCalcsBase *envelope_calcs;
 	uint16_t skew = 0;  //ignored by MiniPEG
     uint16_t shape = 0;
     uint16_t oversample_wait_ctr = 0;
