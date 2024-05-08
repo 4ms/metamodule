@@ -93,7 +93,7 @@ target_sources(
     ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/leds.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/shareddrv/debounced_digins.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/shareddrv/dac.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/mocks/pwm.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/pwm.cc
 )
 
 target_include_directories(
