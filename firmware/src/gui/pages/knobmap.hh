@@ -65,17 +65,20 @@ struct KnobMapPage : PageBase {
 		patch = patch_storage.get_view_patch();
 
 		view_set_idx = args.view_knobset_id.value_or(view_set_idx);
-		if (view_set_idx >= patch->knob_sets.size()) {
+		if (view_set_idx != PatchData::MIDIKnobSet && view_set_idx >= patch->knob_sets.size()) {
 			return;
 		}
 
+		auto &knobset =
+			(view_set_idx == PatchData::MIDIKnobSet) ? patch->midi_maps.set : patch->knob_sets[view_set_idx].set;
+
 		//mappedknob_id is the index of the MappedKnob in the MappedKnobSet::set vector
 		auto map_idx = args.mappedknob_id;
-		if (!map_idx.has_value() || map_idx.value() >= patch->knob_sets[view_set_idx].set.size()) {
+		if (!map_idx.has_value() || map_idx.value() >= knobset.size()) {
 			pr_err("Mapping not found for set %d, panel_knob_id %d\n", view_set_idx, map_idx);
 			return;
 		}
-		map = patch->knob_sets[view_set_idx].set[map_idx.value()];
+		map = knobset[map_idx.value()];
 
 		// Title
 		auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
