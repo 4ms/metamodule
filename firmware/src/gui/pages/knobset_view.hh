@@ -182,7 +182,8 @@ struct KnobSetViewPage : PageBase {
 		if (is_actively_playing) {
 			lv_show(ui_KnobSetDescript);
 			lv_hide(ui_ActivateKnobSet);
-			lv_label_set_text(ui_KnobSetDescript, "(Active)");
+			// lv_label_set_text(ui_KnobSetDescript, "(Active)");
+			lv_hide(ui_KnobSetDescript);
 
 			for (auto [knob_i, pane] : enumerate(panes)) {
 				auto num_children = lv_obj_get_child_cnt(pane);
@@ -394,7 +395,6 @@ private:
 		if (!knob || !circle || !label)
 			return;
 		lv_obj_add_state(circle, LV_STATE_DISABLED);
-		lv_obj_add_state(label, LV_STATE_DISABLED);
 
 		lv_obj_set_style_arc_color(knob, Gui::knob_disabled_palette[knob_i % 6], LV_PART_INDICATOR);
 		lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
@@ -407,7 +407,6 @@ private:
 		if (!knob || !circle || !label)
 			return;
 		lv_obj_clear_state(circle, LV_STATE_DISABLED);
-		lv_obj_clear_state(label, LV_STATE_DISABLED);
 
 		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
 		lv_obj_set_style_opa(knob, LV_OPA_100, LV_PART_KNOB);
