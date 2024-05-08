@@ -38,15 +38,23 @@ struct ButtonLight {
 	};
 
 	void display_knobset(unsigned knobset_id) {
-		if (knobset_id < KnobSetColors.size())
+		if (knobset_id < KnobSetColors.size()) {
 			led.set_color(KnobSetColors[knobset_id]);
+			displayed_knobset = knobset_id;
+		}
+	}
+
+	unsigned display_knobset() {
+		return displayed_knobset;
 	}
 
 	void debug(float r, float g, float b) {
 		led.set_color(Color(255.f * r, 255.f * g, 255.f * b));
 	}
 
+private:
 	ButtonLED led;
+	unsigned displayed_knobset = 0;
 };
 
 } // namespace MetaModule
