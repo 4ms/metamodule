@@ -68,6 +68,11 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		UartLog::log("No ext Audio codec detected\n\r");
 	}
 
+	// Set default calibration values
+	for (auto &inc : incal)
+		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
+			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
+
 	auto audio_callback = [this]<unsigned block>() {
 		Debug::Pin4::high();
 
@@ -82,10 +87,10 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.start_measurement();
 
-		if (skip_audio || check_patch_loading()) {
+		if (do_calibrate) {
+			calibrate_callback(audio_blocks[1 - block]);
+		} else if (skip_audio || check_patch_loading()) {
 			skip_audio = false;
-			// skip_count--;
-			Debug::Pin0::low();
 			process_nopatch(audio_blocks[1 - block], local_p);
 		} else {
 			process(audio_blocks[1 - block], local_p);
@@ -103,18 +108,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
 		load_measure.end_measurement();
-		if (load_measure.get_last_measurement_raw() > load_measure.get_last_period_raw()) {
-			skip_audio = true;
-			// skip_count += 2;
-			// if (skip_count >= 3) {
-			// 	mute_ctr = 0.f;
-			// 	patch_loader.stop_audio();
-			// 	patch_loader.notify_audio_is_muted();
-			// 	Debug::Pin0::high();
-			// }
-			// } else {
-			// 	if (!skip_audio)
-			// 		skip_count = 0;
+		if (load_measure.get_last_measurement_load_percent() >= 98) {
+			skip_audio = true; //skip next block
 		}
 		Debug::Pin4::low();
 	};
@@ -122,11 +117,29 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
 						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
+}
 
-	//TODO: User/factory routine to calibrate jacks
-	for (auto &inc : incal)
-		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
-			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
+void AudioStream::stop_calibration() {
+	do_calibrate = false;
+}
+
+void AudioStream::start_calibration(std::span<AnalyzedSignal<1000>> cal_readings) {
+	this->cal_readings = cal_readings;
+	do_calibrate = true;
+}
+
+void AudioStream::step_calibration() {
+	for (auto &cal : cal_readings) {
+		cal.reset_to(cal.iir);
+	}
+}
+
+void AudioStream::calibrate_callback(CombinedAudioBlock &audio_block) {
+	for (auto frame : audio_block.in_codec) {
+		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, frame.chan)) {
+			cal_readings[panel_jack_i].update(AudioInFrame::sign_extend(inchan));
+		}
+	}
 }
 
 void AudioStream::start() {
