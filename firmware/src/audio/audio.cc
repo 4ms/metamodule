@@ -70,13 +70,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	auto audio_callback = [this]<unsigned block>() {
 		Debug::Pin4::high();
-		if (HWSemaphore<AudioLock>::is_locked()) {
-			mute_ctr = 0.f;
-			patch_loader.stop_audio();
-			patch_loader.notify_audio_is_muted();
-			Debug::Pin0::high();
-		} else
-			HWSemaphore<AudioLock>::lock();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -89,12 +82,14 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.start_measurement();
 
-		if (check_patch_loading())
+		if (skip_audio || check_patch_loading()) {
+			skip_audio = false;
+			// skip_count--;
+			Debug::Pin0::low();
 			process_nopatch(audio_blocks[1 - block], local_p);
-		else
+		} else {
 			process(audio_blocks[1 - block], local_p);
-
-		load_measure.end_measurement();
+		}
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
@@ -107,7 +102,20 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		param_blocks[block].metaparams.midi_poly_chans = local_p.metaparams.midi_poly_chans;
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
-		HWSemaphore<AudioLock>::unlock();
+		load_measure.end_measurement();
+		if (load_measure.get_last_measurement_raw() > load_measure.get_last_period_raw()) {
+			skip_audio = true;
+			// skip_count += 2;
+			// if (skip_count >= 3) {
+			// 	mute_ctr = 0.f;
+			// 	patch_loader.stop_audio();
+			// 	patch_loader.notify_audio_is_muted();
+			// 	Debug::Pin0::high();
+			// }
+			// } else {
+			// 	if (!skip_audio)
+			// 		skip_count = 0;
+		}
 		Debug::Pin4::low();
 	};
 
