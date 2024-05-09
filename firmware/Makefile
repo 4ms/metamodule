@@ -13,18 +13,6 @@ all:
 configure:
 	cmake --fresh --preset ${PRESET} -G ${GEN}
 
-# "make limit filename.txt" --> only build modules whose names are in the text file
-ifeq (limit,$(firstword $(MAKECMDGOALS)))
-LIMITFILE := $(filter-out limit,$(MAKECMDGOALS))
-# silence messages about filename.txt target
-.PHONY: $(LIMITFILE)
-$(LIMITFILE): 
-	@echo ""
-endif
-
-limit:
-	cmake --fresh --preset ${PRESET} -G ${GEN} -DLIMITED_MODULES_FILE=$(LIMITFILE)
-
 bootloader tests dep_tests simulate gen_minblep module-infos vcv-images comp-images faceplate-images flash-bootloader-sd flash-app-sd flash-dfu jprog debug start-jlinkgdb start-openocd flash_loader flash_loader_dfu:
 	cmake --build --preset ${PRESET} -- $(MAKECMDGOALS)
 
