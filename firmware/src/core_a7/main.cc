@@ -1,5 +1,6 @@
 #include "app_startup.hh"
 #include "audio/audio.hh"
+#include "audio/calibrator.hh"
 #include "core_a7/a7_shared_memory.hh"
 #include "core_a7/static_buffers.hh"
 #include "core_intercom/shared_memory.hh"
@@ -15,6 +16,11 @@
 #include "patch_play/patch_playloader.hh"
 #include "system/time.hh"
 #include "uart_log.hh"
+
+#include "conf/qspi_flash_conf.hh"
+#include "drivers/pin.hh"
+#include "drivers/qspi_flash_driver.hh"
+#include "fs/norflash_layout.hh"
 
 #ifdef ENABLE_WIFI_BRIDGE
 #include <wifi_update.hh>
@@ -93,7 +99,93 @@ void main() {
 	sync_params.clear();
 	patch_playloader.load_initial_patch();
 
-	audio.start();
+	//TODO:
+	AudioInCalibrator cal;
+	if (!cal.read_calibration(audio)) {
+		cal.calibrate(audio);
+	} else
+		audio.start();
+
+	//std::array<std::pair<float, float>, PanelDef::NumAudioIn> caldata;
+	//mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
+	//bool do_calibrate = true;
+
+	//if (flash_.read(reinterpret_cast<uint8_t *>(caldata.data()), CalDataFlashOffset, sizeof caldata)) {
+	//	bool valid_data_found = true;
+	//	//validate
+	//	for (auto chan : caldata) {
+	//		pr_info("Read: %f %f\n", chan.first, chan.second);
+	//		if (isnanf(chan.first) || isnanf(chan.second) || chan.first < -100'000.f || chan.first > 100'000.f ||
+	//			chan.second < 3'000'000.f || chan.second > 3'500'000.f)
+	//		{
+	//			valid_data_found = false;
+	//		}
+	//	}
+	//	if (valid_data_found) {
+	//		pr_info("Cal data validated\n");
+	//		audio.set_calibration<0, 4000>(caldata);
+	//		do_calibrate = false;
+	//	} else {
+	//		pr_info("Cal data invalid\n");
+	//		do_calibrate = true;
+	//	}
+	//}
+
+	//if (do_calibrate) {
+	//	std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> cal_readings;
+	//	audio.start();
+	//	audio.start_calibration_mode(cal_readings);
+
+	//	HAL_Delay(1000);
+
+	//	pr_dbg("Ready to calibrate: patch 0V and press the back button\n");
+
+	//	mdrivlib::
+	//		FPin<mdrivlib::GPIO::D, mdrivlib::PinNum::_8, mdrivlib::PinMode::Input, mdrivlib::PinPolarity::Inverted>
+	//			button0{mdrivlib::PinPull::Up};
+
+	//	while (!button0.read())
+	//		;
+	//	while (button0.read())
+	//		;
+
+	//	audio.step_calibration();
+	//	HAL_Delay(1000);
+	//	for (auto [i, ain] : enumerate(cal_readings)) {
+	//		pr_dbg("AIN %zu: iir=%d min=%d max=%d range=%d\r\n",
+	//			   i,
+	//			   (int)(ain.iir),				// * 32768.f),
+	//			   (int)(ain.min),				// * 32768.f),
+	//			   (int)(ain.max),				// * 32768.f),
+	//			   (int)((ain.max - ain.min))); // * 32768.f));
+	//		caldata[i].first = ain.iir;
+	//	}
+
+	//	pr_dbg("Ready: patch 4V and press the back button\n");
+	//	while (!button0.read())
+	//		;
+	//	while (button0.read())
+	//		;
+
+	//	audio.step_calibration();
+	//	HAL_Delay(1000);
+	//	for (auto [i, ain] : enumerate(cal_readings)) {
+	//		pr_dbg("AIN %zu: iir=%d min=%d max=%d range=%d\r\n",
+	//			   i,
+	//			   (int)(ain.iir),				// * 32768.f),
+	//			   (int)(ain.min),				// * 32768.f),
+	//			   (int)(ain.max),				// * 32768.f),
+	//			   (int)((ain.max - ain.min))); // * 32768.f));
+	//		caldata[i].second = ain.iir;
+	//	}
+
+	//	if (!flash_.write(reinterpret_cast<uint8_t *>(caldata.data()), CalDataFlashOffset, sizeof caldata))
+	//		pr_err("Could not write cal data to flash\n");
+	//	audio.set_calibration<0, 4000>(caldata);
+	//	audio.end_calibration_mode();
+	//} else
+	//	audio.start();
+
 	print_time();
 
 	while (true) {

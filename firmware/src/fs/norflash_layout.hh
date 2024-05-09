@@ -8,4 +8,7 @@ static constexpr uint32_t AssetVolFlashOffset = 10 * 1024 * 1024; //0xA00000;
 static constexpr uint32_t AssetVolFlashSize = 2 * 1024 * 1024;
 
 static constexpr uint32_t PatchVolFlashOffset = 14 * 1024 * 1024; //0xE00000;
-static constexpr uint32_t PatchVolFlashSize = 2 * 1024 * 1024;
+static constexpr uint32_t PatchVolFlashSize = (2 * 1024 * 1024) - (2 * 1024);
+
+static constexpr uint32_t CalDataFlashOffset = PatchVolFlashOffset + PatchVolFlashSize;
+static constexpr uint32_t CalDataFlashSize = 2 * 1024;

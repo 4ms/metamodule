@@ -119,11 +119,11 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	load_measure.init();
 }
 
-void AudioStream::stop_calibration() {
+void AudioStream::end_calibration_mode() {
 	do_calibrate = false;
 }
 
-void AudioStream::start_calibration(std::span<AnalyzedSignal<1000>> cal_readings) {
+void AudioStream::start_calibration_mode(std::span<AnalyzedSignal<1000>> cal_readings) {
 	this->cal_readings = cal_readings;
 	do_calibrate = true;
 }
