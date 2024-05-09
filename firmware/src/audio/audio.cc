@@ -69,7 +69,14 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	}
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin4::high();
+		Debug::Pin4::high();
+		if (HWSemaphore<AudioLock>::is_locked()) {
+			mute_ctr = 0.f;
+			patch_loader.stop_audio();
+			patch_loader.notify_audio_is_muted();
+			Debug::Pin0::high();
+		} else
+			HWSemaphore<AudioLock>::lock();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -100,7 +107,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		param_blocks[block].metaparams.midi_poly_chans = local_p.metaparams.midi_poly_chans;
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
-		// Debug::Pin4::low();
+		HWSemaphore<AudioLock>::unlock();
+		Debug::Pin4::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },

@@ -143,6 +143,7 @@ private:
 			storage_.play_view_patch();
 			loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
 			loaded_patch_name_ = patch->patch_name;
+			stopping_audio_ = false;
 		}
 
 		return result;
