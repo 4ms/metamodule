@@ -267,6 +267,22 @@ lv_obj_t *ui_TrashButton;
 lv_obj_t *ui_TrashLabel;
 lv_obj_t *ui_Keyboard;
 
+// SCREEN: ui_JackMapViewPage
+void ui_JackMapViewPage_screen_init(void);
+lv_obj_t *ui_JackMapViewPage;
+lv_obj_t *ui_JackMapViewCont;
+lv_obj_t *ui_JackMapLeftColumn;
+lv_obj_t *ui_JackMapInputsTitle;
+lv_obj_t *ui_JackMapInCont1;
+lv_obj_t *ui_JackMapInCircle1;
+lv_obj_t *ui_JackMapInCircleLetter1;
+lv_obj_t *ui_JackMapInLabel1;
+lv_obj_t *ui_JackMapRightColumn;
+lv_obj_t *ui_JackMapOutputsTitle;
+lv_obj_t *ui_JackMapOutCont2;
+lv_obj_t *ui_JakMapOutCircle1;
+lv_obj_t *ui_JackMapOutCircleLetter1;
+lv_obj_t *ui_JackMapOutLabel1;
 
 // SCREEN: ui_DeleteMappingPopUp
 void ui_DeleteMappingPopUp_screen_init(void);

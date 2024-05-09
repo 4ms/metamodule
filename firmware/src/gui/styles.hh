@@ -76,6 +76,13 @@ struct Gui {
 		lv_palette_lighten(LV_PALETTE_PINK, 1),
 		lv_palette_lighten(LV_PALETTE_PURPLE, 1),
 	};
+
+	//0xEA1C25
+	//0xFFF200
+	//0x00AEEE
+	//0xF66194
+	//0xFFA529
+	//0x00A552
 	static constexpr std::array<lv_color_t, 19> palette_main = {
 		lv_color_make_rgb565(0xF4, 0x00, 0x00), // RED
 		lv_color_make_rgb565(0xF0, 0x63, 0x92), // PINK, F06392
