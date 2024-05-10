@@ -165,8 +165,8 @@ public:
   }
 
 private:
-  Data data_;
-  std::array<Slot, kNumSlots> slots_;
+  Data data_{};
+  std::array<Slot, kNumSlots> slots_{};
   std::array<bool, kNumSlots> slot_is_customized_{};
 };
 

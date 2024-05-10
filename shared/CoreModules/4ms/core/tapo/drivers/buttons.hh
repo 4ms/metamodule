@@ -78,7 +78,7 @@ class Buttons {
 
 
 private:
-  uint8_t button_state_[kNumButtons];
+  uint8_t button_state_[kNumButtons]{};
 };
 
 }

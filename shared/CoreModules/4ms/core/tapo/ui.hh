@@ -161,8 +161,8 @@ class Ui {
   
   Leds leds_;
 
-  Buttons buttons_;
-  Switches switches_;
+  Buttons buttons_{};
+  Switches switches_{};
   uint32_t press_time_[kNumButtons]{};
   uint32_t long_press_time_[kNumButtons]{};
   UiMode mode_{UI_MODE_NORMAL};

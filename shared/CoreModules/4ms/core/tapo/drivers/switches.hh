@@ -69,8 +69,8 @@ class Switches {
   }
 
 private:
-  std::array<uint8_t,kNumSwitches> switch_state_;
-  std::array<uint8_t,kNumSwitches> previous_switch_state_;
+  std::array<uint8_t,kNumSwitches> switch_state_{};
+  std::array<uint8_t,kNumSwitches> previous_switch_state_{};
 };
 }
 
