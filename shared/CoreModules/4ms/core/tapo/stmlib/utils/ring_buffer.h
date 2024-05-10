@@ -118,9 +118,9 @@ class RingBuffer {
   }
   
  private:
-  T buffer_[size];
-  volatile size_t read_ptr_;
-  volatile size_t write_ptr_;
+  T buffer_[size]{};
+  volatile size_t read_ptr_{};
+  volatile size_t write_ptr_{};
 
   DISALLOW_COPY_AND_ASSIGN(RingBuffer);
 };
