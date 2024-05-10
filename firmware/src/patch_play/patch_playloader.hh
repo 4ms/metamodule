@@ -103,21 +103,38 @@ struct PatchPlayLoader {
 			return result;
 		}
 
+		if (should_save_patch_) {
+			return save_patch();
+		}
 		if (saving_patch_) {
-			save_patch();
+			return check_save_patch_status();
 		}
 
 		return {true, ""};
 	}
 
 	void request_save_patch() {
-		saving_patch_ = true;
+		should_save_patch_ = true;
 	}
 
-	void save_patch() {
-		saving_patch_ = false;
-		storage_.update_patch_module_states(player_.get_module_states());
-		storage_.write_patch();
+	Result save_patch() {
+		storage_.update_view_patch_module_states(player_.get_module_states());
+		if (storage_.write_patch()) {
+			should_save_patch_ = false;
+			saving_patch_ = true;
+			return {true, "Saving..."};
+		}
+		return {true, ""};
+	}
+
+	Result check_save_patch_status() {
+		auto msg = storage_.get_message();
+		if (msg.message_type == FileStorageProxy::PatchDataWriteFail)
+			return {false, "Failed to write patch."};
+		else if (msg.message_type == FileStorageProxy::PatchDataWriteOK)
+			return {true, "Saved"};
+		else
+			return {true, ""};
 	}
 
 private:
@@ -128,6 +145,7 @@ private:
 	std::atomic<bool> audio_is_muted_ = false;
 	std::atomic<bool> stopping_audio_ = false;
 	std::atomic<bool> saving_patch_ = false;
+	std::atomic<bool> should_save_patch_ = false;
 
 	PatchLocHash loaded_patch_loc_hash;
 	ModuleTypeSlug loaded_patch_name_ = "";
