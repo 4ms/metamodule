@@ -109,6 +109,7 @@ add_executable(
   ${FWDIR}/src/fs/time_convert.cc
   ${FWDIR}/src/fw_update/updater_proxy.cc
   ${FWDIR}/src/gui/elements/element_name.cc
+  ${FWDIR}/src/gui/slsexport/ui_local.cc
   #
   ${FWDIR}/src/dynload/dynloader.cc
   #

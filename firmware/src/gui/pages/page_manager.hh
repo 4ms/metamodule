@@ -9,6 +9,7 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 
+#include "gui/pages/jackmaps.hh"
 #include "gui/pages/knobmap.hh"
 #include "gui/pages/knobset_view.hh"
 #include "gui/pages/main_menu.hh"
@@ -39,6 +40,7 @@ class PageManager {
 	KnobMapPage page_knobmap{info};
 	SystemMenuPage page_systemmenu{info};
 	ModuleListPage page_modulelist{info};
+	JackMapViewPage page_jackmap{info};
 
 public:
 	PageBase *cur_page = &page_mainmenu;

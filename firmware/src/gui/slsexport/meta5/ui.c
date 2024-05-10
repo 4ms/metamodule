@@ -273,16 +273,8 @@ lv_obj_t *ui_JackMapViewPage;
 lv_obj_t *ui_JackMapViewCont;
 lv_obj_t *ui_JackMapLeftColumn;
 lv_obj_t *ui_JackMapInputsTitle;
-lv_obj_t *ui_JackMapInCont1;
-lv_obj_t *ui_JackMapInCircle1;
-lv_obj_t *ui_JackMapInCircleLetter1;
-lv_obj_t *ui_JackMapInLabel1;
 lv_obj_t *ui_JackMapRightColumn;
 lv_obj_t *ui_JackMapOutputsTitle;
-lv_obj_t *ui_JackMapOutCont2;
-lv_obj_t *ui_JakMapOutCircle1;
-lv_obj_t *ui_JackMapOutCircleLetter1;
-lv_obj_t *ui_JackMapOutLabel1;
 
 // SCREEN: ui_DeleteMappingPopUp
 void ui_DeleteMappingPopUp_screen_init(void);
@@ -521,6 +513,7 @@ ui_DeleteMappingPopUp_screen_init();
 ui_ModuleListPage_screen_init();
 ui_CableMapPage_screen_init();
 ui_SystemMenu_screen_init();
+	ui_JackMapViewPage_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_MainMenu);
 }
