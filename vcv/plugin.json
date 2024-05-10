@@ -34,13 +34,13 @@
     {
       "slug": "DEV",
       "name": "Dual EnvVCA [DEV]",
-      "description": "DEV (not implemented)",
+      "description": "DEV",
       "tags": ["Envelope Generator", "Voltage-controlled amplifier", "LFO", "Hardware clone", "Dual", "Slew limiter"]
     },
     {
       "slug": "SHEV",
       "name": "Shaped Dual EnvVCA [ShEV]",
-      "description": "SHEV (not implemented)",
+      "description": "SHEV",
       "tags": ["Envelope Generator", "Voltage-controlled amplifier", "LFO", "Hardware clone", "Dual", "Slew limiter"]
     },
     {
@@ -166,7 +166,7 @@
     {
       "slug": "QPLFO",
       "name": "Quad Pingable LFO [QPLFO]",
-      "description": "QPLFO (not implemented)",
+      "description": "QPLFO",
       "tags": ["LFO", "Hardware clone", "Quad"]
     },
     {
@@ -188,12 +188,6 @@
       "tags": ["Clock generator", "Clock modulator", "Envelope Generator", "Dual", "Hardware clone"]
     },
     {
-      "slug": "LPG",
-      "name": "LPG",
-      "description": "LPG (not implemented)",
-      "tags": ["Low-pass gate"]
-    },
-    {
       "slug": "L4",
       "name": "Listen Four [L4]",
       "description": "L4",
@@ -202,14 +196,8 @@
     {
       "slug": "DLD",
       "name": "Dual Looping Delay [DLD]",
-      "description": "DLD (not implemented)",
+      "description": "DLD",
       "tags": ["Dual", "Digital", "Delay", "Effect", "Hardware clone"]
-    },
-    {
-      "slug": "ADEnv",
-      "name": "ADEnv",
-      "description": "ADEnv (not implemented)",
-      "tags": ["Envelope Generator"]
     },
     {
       "slug": "Switch41",
@@ -224,12 +212,6 @@
       "tags": ["Switch", "Quad"]
     },
     {
-      "slug": "Quant",
-      "name": "Quant",
-      "description": "Quant (not implemented)",
-      "tags": ["Quantizer"]
-    },
-    {
       "slug": "Prob8",
       "name": "Prob8",
       "description": "Prob8",
@@ -238,7 +220,7 @@
     {
       "slug": "Octave",
       "name": "Octave",
-      "description": "Octave (not implemented)",
+      "description": "Octave",
       "tags": []
     },
     {
@@ -246,12 +228,6 @@
       "name": "Min-Max [MNMX]",
       "description": "Takes in two signals and outputs the minimum and maximum voltages.",
       "tags": ["Utility"]
-    },
-    {
-      "slug": "LPF",
-      "name": "LPF",
-      "description": "LPF",
-      "tags": ["Filter"]
     },
     {
       "slug": "Source",
@@ -304,7 +280,7 @@
     {
       "slug": "ComplexEG",
       "name": "ComplexEG",
-      "description": "ComplexEG (not implemented)",
+      "description": "ComplexEG",
       "tags": ["Envelope Generator"]
     },
     {
