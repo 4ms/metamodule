@@ -26,15 +26,16 @@ struct Elf {
 		// pr_trace("elf data is at %08x++%x\n", elfdata.data(), elfdata.size_bytes());
 		// pr_trace("phnum: %u\n", raw_elf_header->e_phnum);
 		// pr_trace("shnum: %u\n", raw_elf_header->e_shnum);
-
-		populate_segments();
-		populate_sections();
-		find_dyn_strings();
-		symbol_table = find_section(".symtab");
-		dyn_symbol_table = find_section(".dynsym");
-		find_raw_symbols();
-		populate_relocations(".rel.dyn");
-		populate_relocations(".rel.plt");
+		if (string_table != "") {
+			populate_segments();
+			populate_sections();
+			find_dyn_strings();
+			symbol_table = find_section(".symtab");
+			dyn_symbol_table = find_section(".dynsym");
+			find_raw_symbols();
+			populate_relocations(".rel.dyn");
+			populate_relocations(".rel.plt");
+		}
 	}
 
 	void print_sec_headers() {
@@ -147,8 +148,11 @@ private:
 	}
 
 	std::string_view find_string_table() {
-		auto string_header = &raw_section_headers[raw_elf_header->e_shstrndx];
-		return {(char *)rawdata.subspan(string_header->sh_offset).data(), string_header->sh_size};
+		if (raw_elf_header->e_shstrndx < raw_section_headers.size()) {
+			auto string_header = &raw_section_headers[raw_elf_header->e_shstrndx];
+			return {(char *)rawdata.subspan(string_header->sh_offset).data(), string_header->sh_size};
+		} else
+			return "";
 	}
 
 	void find_dyn_strings() {
