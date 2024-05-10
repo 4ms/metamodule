@@ -270,16 +270,8 @@ extern lv_obj_t *ui_JackMapViewPage;
 extern lv_obj_t *ui_JackMapViewCont;
 extern lv_obj_t *ui_JackMapLeftColumn;
 extern lv_obj_t *ui_JackMapInputsTitle;
-extern lv_obj_t *ui_JackMapInCont1;
-extern lv_obj_t *ui_JackMapInCircle1;
-extern lv_obj_t *ui_JackMapInCircleLetter1;
-extern lv_obj_t *ui_JackMapInLabel1;
 extern lv_obj_t *ui_JackMapRightColumn;
 extern lv_obj_t *ui_JackMapOutputsTitle;
-extern lv_obj_t *ui_JackMapOutCont2;
-extern lv_obj_t *ui_JakMapOutCircle1;
-extern lv_obj_t *ui_JackMapOutCircleLetter1;
-extern lv_obj_t *ui_JackMapOutLabel1;
 // SCREEN: ui_DeleteMappingPopUp
 void ui_DeleteMappingPopUp_screen_init(void);
 extern lv_obj_t *ui_DeleteMappingPopUp;
