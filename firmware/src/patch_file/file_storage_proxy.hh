@@ -198,7 +198,7 @@ public:
 		view_patch_loc_.vol = Volume::RamDisk;
 	}
 
-	void update_patch_module_states(std::vector<ModuleInitState> const &states) {
+	void update_view_patch_module_states(std::vector<ModuleInitState> const &states) {
 		view_patch_->module_states = states; //copy
 	}
 
@@ -206,13 +206,17 @@ public:
 		if (filename == "")
 			filename = view_patch_loc_.filename;
 
+		Volume vol = view_patch_loc_.vol;
+		if (vol == Volume::RamDisk || vol == Volume::MaxVolumes)
+			vol = Volume::NorFlash;
+
 		std::span<char> file_data = raw_patch_data_;
 
 		patch_to_yaml_buffer(*view_patch_, file_data);
 
 		IntercoreStorageMessage message{
 			.message_type = RequestWritePatchData,
-			.vol_id = view_patch_loc_.vol,
+			.vol_id = vol,
 			.buffer = file_data,
 			.filename = filename,
 		};
