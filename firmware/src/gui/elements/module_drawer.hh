@@ -20,6 +20,8 @@ struct ModuleDrawer {
 
 	// Draws the module from patch, into container, using the provided buffer.
 	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
+		lv_obj_scroll_to_x(container, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(container, 0, LV_ANIM_OFF);
 		const auto img_filename = ModuleImages::get_faceplate_path(slug);
 		if (img_filename.length() <= 2) {
 			if (!slug.is_equal("HubMedium"))
