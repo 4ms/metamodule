@@ -11,9 +11,14 @@
 #include <cmath>
 #include <optional>
 
-//TODO: move calibration from main to here
 namespace MetaModule
 {
+
+// TODO: remove dependency on AudioStream so we can use this from CA7 core 2
+// GUI will request via PatchLoader to start/end calibration mode
+// audio.step_calibration() => AudioInCalibrator::step_calibration()
+// QSpiFlash -> use M4
+
 struct AudioInCalibrator {
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
 
@@ -61,6 +66,7 @@ struct AudioInCalibrator {
 				;
 
 			audio.step_calibration();
+			// TODO: step_calibration(cal_readings);
 			HAL_Delay(1000);
 			for (auto [i, ain] : enumerate(cal_readings)) {
 				print_reading(i, ain);
@@ -76,6 +82,7 @@ struct AudioInCalibrator {
 				;
 
 			audio.step_calibration();
+			// TODO: step_calibration(cal_readings);
 			HAL_Delay(1000);
 			for (auto [i, ain] : enumerate(cal_readings)) {
 				print_reading(i, ain);
@@ -89,6 +96,12 @@ struct AudioInCalibrator {
 
 		audio.set_calibration<0, 4000>(caldata);
 		audio.end_calibration_mode();
+	}
+
+	void step_calibration(std::span<AnalyzedSignal<1000>, PanelDef::NumAudioIn> cal_readings) {
+		for (auto &cal : cal_readings) {
+			cal.reset_to(cal.iir);
+		}
 	}
 
 	void print_reading(unsigned idx, AnalyzedSignal<1000> ain) {
