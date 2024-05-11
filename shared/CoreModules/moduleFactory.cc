@@ -112,4 +112,16 @@ std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs() {
 	return slugs;
 }
 
+std::vector<std::string_view> getAllFaceplates() {
+	std::vector<std::string_view> fp;
+	fp.assign(faceplates().vals.begin(), std::next(faceplates().vals.begin(), faceplates().size()));
+	return fp;
+}
+
+std::vector<ModuleTypeSlug> getAllFaceplateSlugs() {
+	std::vector<ModuleTypeSlug> slugs;
+	slugs.assign(faceplates().keys.begin(), std::next(faceplates().keys.begin(), infos().size()));
+	return slugs;
+}
+
 } // namespace MetaModule

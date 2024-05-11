@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/elements/module_drawer.hh"
+#include "CoreModules/ModuleFactory_internal.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
@@ -9,6 +10,25 @@
 
 namespace MetaModule
 {
+
+template<typename T>
+void apply_permutation_in_place(std::vector<T> &vec, const std::vector<std::size_t> &p) {
+	std::vector<bool> done(vec.size());
+	for (std::size_t i = 0; i < vec.size(); ++i) {
+		if (done[i]) {
+			continue;
+		}
+		done[i] = true;
+		std::size_t prev_j = i;
+		std::size_t j = p[i];
+		while (i != j) {
+			std::swap(vec[prev_j], vec[j]);
+			done[j] = true;
+			prev_j = j;
+			j = p[j];
+		}
+	}
+}
 
 struct ModuleListPage : PageBase {
 	ModuleListPage(PatchContext info)
@@ -26,12 +46,14 @@ struct ModuleListPage : PageBase {
 	void populate_slugs() {
 		//TODO: only repopulate if plugins changed
 
-		auto all_slugs = ModuleFactory::getAllSlugs();
+		// Sort by faceplate image name (essentially sorts by brand)
+		auto all_slugs = getAllFaceplateSlugs();
+		auto all_fps = getAllFaceplates();
 
-		// TODO: sort by brand name
-		std::sort(all_slugs.begin(), all_slugs.end(), [](auto a, auto b) {
-			return std::string_view{a} < std::string_view{b};
-		});
+		std::vector<std::size_t> p(all_fps.size());
+		std::iota(p.begin(), p.end(), 0);
+		std::sort(p.begin(), p.end(), [&](std::size_t i, std::size_t j) { return all_fps[i] < all_fps[j]; });
+		apply_permutation_in_place(all_slugs, p);
 
 		std::string slugs_str;
 		slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
