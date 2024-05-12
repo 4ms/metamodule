@@ -1,3 +1,5 @@
+static const char Orcas_Heart_Octo_Djembe_patch[] =
+	R"(
 PatchData:
   patch_name: Orcas_Heart_Octo_Djembe
   description: Patch Description
@@ -658,3 +660,4 @@ PatchData:
     'version': '2.0.0'
     'data':
       'selected_scale': 0
+)";
