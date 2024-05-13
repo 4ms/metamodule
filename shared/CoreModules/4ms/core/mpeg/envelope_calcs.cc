@@ -1,9 +1,4 @@
-#include "main.hh"
-#include "log4096.h"
-#include "mpeg/envelope_calcs.hh"
-#include "util/math.hh"
-#include "settings.h"
-#include <array>
+#include "envelope_calcs.hh"
 
 namespace MetaModule::PEG
 {

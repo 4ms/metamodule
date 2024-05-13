@@ -1,9 +1,5 @@
-#include "main.hh"
-#include "log4096.h"
+#pragma once
 #include "peg-common/envelope_calcs.h"
-#include "util/math.hh"
-#include "settings.h"
-#include <array>
 
 namespace MetaModule::PEG
 {
@@ -19,26 +15,12 @@ class PEGEnvelopeCalcs : public EnvelopeCalcsBase
 
 public:
 
-	int8_t get_clk_div_nominal(uint16_t adc_val) override {
-		for (uint8_t i = 0; i < NUM_DIVMULTS; i++) {
-			if (adc_val <= midpt_array[i])
-				return (P_array[i]);
-		}
-		return (P_array[NUM_DIVMULTS - 1]);
-	}
+	int8_t get_clk_div_nominal(uint16_t adc_val) override;
 
 	// shape: 0..4095 (adc value)
 	// returns skew: 0..255
 	// returns next_curve_rise and _fall: 0..255: expo/linear/log
-	void calc_skew_and_curves(uint16_t skewadc, uint16_t shapeadc, uint8_t *skew, uint8_t *next_curve_rise, uint8_t *next_curve_fall) override {
-		//TODO
-		*skew = std::clamp(skewadc / 16, 0, 255); //0..4095 => 0..255
-
-		//TODO: select curve from shapeadc
-		*next_curve_rise = PureCurves::LIN;
-		*next_curve_fall = PureCurves::LIN;
-	}
-
+	void calc_skew_and_curves(uint16_t skewadc, uint16_t shapeadc, uint8_t *skew, uint8_t *next_curve_rise, uint8_t *next_curve_fall) override;
 };
 
 }

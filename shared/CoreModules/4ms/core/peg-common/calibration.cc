@@ -64,26 +64,6 @@ void MiniPEG::check_calibration(void) {
 }
 
 void MiniPEG::default_calibration(void) {
-	// settings.midpt_array[0] = 68;
-	// settings.midpt_array[1] = 262;
-	// settings.midpt_array[2] = 509;
-	// settings.midpt_array[3] = 743;
-	// settings.midpt_array[4] = 973;
-	// settings.midpt_array[5] = 1202;
-	// settings.midpt_array[6] = 1427;
-	// settings.midpt_array[7] = 1657;
-	// settings.midpt_array[8] = 1882;
-	// settings.midpt_array[9] = 2107;
-	// settings.midpt_array[10] = 2341;
-	// settings.midpt_array[11] = 2574;
-	// settings.midpt_array[12] = 2802;
-	// settings.midpt_array[13] = 3026;
-	// settings.midpt_array[14] = 3262;
-	// settings.midpt_array[15] = 3500;
-	// settings.midpt_array[16] = 3734;
-	// settings.midpt_array[17] = 3942;
-	// settings.midpt_array[18] = 4095;
-
 	settings.center_detent_offset[DET_SCALE] = 0;
 	settings.center_detent_offset[DET_OFFSET] = 0;
 	settings.center_detent_offset[DET_SHAPE] = 0;
@@ -110,10 +90,6 @@ void MiniPEG::default_calibration(void) {
 uint8_t MiniPEG::sanity_check_calibration(void) {
 	uint8_t j;
 
-	for (j = 0; j < (NUM_DIVMULTS - 1); j++) {
-		if (settings.midpt_array[j + 1] <= settings.midpt_array[j])
-			return 0; //fail
-	}
 	for (j = 0; j < NUM_CENTER_DETENT_POTS; j++) {
 		if ((settings.center_detent_offset[j] < -1000) || (settings.center_detent_offset[j] > 1000))
 			return 0;
@@ -286,12 +262,6 @@ void MiniPEG::calibrate_divmult_pot(void) {
 			set_rgb_led(LED_CYCLE, c_OFF);
 		}
 	}
-
-	//convert the calib_array values to mid-points
-	for (j = 0; j < (NUM_DIVMULTS - 1); j++) {
-		settings.midpt_array[j] = (calib_array[j] + calib_array[j + 1]) >> 1;
-	}
-	settings.midpt_array[NUM_DIVMULTS - 1] = 4095;
 }
 
 void MiniPEG::calibrate_led_colors(void) {

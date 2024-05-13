@@ -79,6 +79,7 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/shareddrv/dac.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/pwm.cc
 
 SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/envelope_calcs.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg/envelope_calcs.cc
 
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/
 INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg-common/

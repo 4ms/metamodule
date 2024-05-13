@@ -96,6 +96,7 @@ target_sources(
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/pwm.cc
 
     ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/envelope_calcs.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg/envelope_calcs.cc
 )
 
 target_include_directories(

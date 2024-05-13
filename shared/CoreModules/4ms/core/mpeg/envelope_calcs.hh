@@ -1,7 +1,6 @@
 #pragma once
 #include "peg-common/envelope_calcs.h"
 #include "util/math.hh"
-#include <array>
 
 namespace MetaModule::PEG {
 
