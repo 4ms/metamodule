@@ -151,16 +151,17 @@ private:
         auto qntJackIn = getInput<Mapping::QntIn>().value_or(0.f);
         auto asyncJackIn = getInput<Mapping::AsyncIn>().value_or(0.f);
 
-        auto qntRisingEdge = qntEdge(qntIn(qntJackIn));
-        auto asyncRisingEdge = asyncEdge(asyncIn(asyncJackIn));
-
-        if (qntRisingEdge) 
+        if (qntEdge(qntIn(qntJackIn))) 
         {
             peg.settings.trigin_function = TRIGIN_IS_QNT;
         }
-        else if(asyncRisingEdge)
+        else if(not asyncEdgeEnabled and asyncIn(asyncJackIn))
         {
             peg.settings.trigin_function = TRIGIN_IS_ASYNC_SUSTAIN;
+        }
+        else if (asyncEdgeEnabled and asyncEdge(asyncIn(asyncJackIn)))
+        {
+            peg.settings.trigin_function = TRIGIN_IS_ASYNC;
         }
 
         if (peg.settings.trigin_function == TRIGIN_IS_QNT)
@@ -210,11 +211,13 @@ private:
     void sideloadSystemSettings() {
         peg.settings.limit_skew = getState<Mapping::SkewLimitAltParam>() == 1 ? 1 : 0;
         peg.settings.free_running_ping = getState<Mapping::FreeNRunningPingAltParam>() == 0 ? 1 : 0;
-        
-        // static constexpr std::array<TrigInFunctions, 3> TriggerInOptions{
-        // 	TRIGIN_IS_ASYNC, TRIGIN_IS_ASYNC_SUSTAIN, TRIGIN_IS_QNT};
 
-        // peg.settings.trigin_function = TriggerInOptions[getState<Mapping::TrigJackModeAltParam>()];
+        /*
+        ON: AR mode (Attack-Release). A gate on the Async jack will be ignored, and the envelope will attack and
+        immediate release (no sustain/hold). The is identical to converting a gate to a trigger before running it into the
+        Async jack
+        */
+        asyncEdgeEnabled = getState<Mapping::AsyncModeAltParam>() == 1;
     }
 
 private:
@@ -237,6 +240,8 @@ private:
     FlipFlop asyncIn;
     EdgeDetector qntEdge;
     EdgeDetector asyncEdge;
+
+    bool asyncEdgeEnabled;
 };
 
 
