@@ -1,4 +1,4 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/LPF_info.hh"
 #include "processors/lpf.h"
@@ -9,9 +9,10 @@
 namespace MetaModule
 {
 
-class LPFCore : public CoreProcessor {
+class LPFCore : public SmartCoreProcessor<LPFInfo> {
 	using Info = LPFInfo;
 	using ThisCore = LPFCore;
+	using enum Info::Elem;
 
 public:
 	LPFCore() = default;
