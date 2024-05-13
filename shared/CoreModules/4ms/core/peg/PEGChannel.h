@@ -129,8 +129,8 @@ private:
             return uint16_t(std::clamp(result, 0.f, 1.f) * 4095.f);
         };
 
-        //TODO: shape is split into skew and curve
-        // peg.adc_dma_buffer[CV_SHAPE] = MapOutputFunc(getInput<Mapping::ShapeCvIn>().value_or(0.f));
+        peg.adc_dma_buffer[CV_SHAPE] = MapOutputFunc(getInput<Mapping::CurveJackIn>().value_or(0.f));
+        peg.adc_dma_buffer[CV_SKEW] = MapOutputFunc(getInput<Mapping::SkewJackIn>().value_or(0.f));
 
         peg.adc_dma_buffer[CV_DIVMULT] = MapOutputFunc(getInput<Mapping::DivJackIn>().value_or(0.f));
 
@@ -140,8 +140,9 @@ private:
 
         peg.adc_dma_buffer[POT_SCALE] = MapKnobFunc(getState<Mapping::ScaleKnob>());
         peg.adc_dma_buffer[POT_OFFSET] = MapKnobFunc(getState<Mapping::BiNPolarButton>() == LatchingButton::State_t::DOWN ? 0.5f : 1.f);
-        //TODO: shape is split into skew and curve
-        // peg.adc_dma_buffer[POT_SHAPE] = MapKnobFunc(getState<Mapping::ShapeKnob>());
+        
+        peg.adc_dma_buffer[POT_SHAPE] = MapKnobFunc(getState<Mapping::CurveKnob>());
+        peg.adc_dma_buffer[POT_SKEW] = MapKnobFunc(getState<Mapping::SkewKnob>());
 
         peg.adc_dma_buffer[POT_DIVMULT] = MapKnobFunc(getState<Mapping::PingDivMultKnob>());
 

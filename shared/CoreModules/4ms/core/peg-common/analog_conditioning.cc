@@ -13,6 +13,7 @@ void MiniPEG::init_analog_conditioning(void) {
 	analog[POT_SCALE].polarity = AP_UNIPOLAR;
 
 	analog[CV_SHAPE].polarity = AP_BIPOLAR;
+	analog[CV_SKEW].polarity = AP_BIPOLAR;
 	analog[CV_DIVMULT].polarity = AP_BIPOLAR;
 
 	setup_fir_lpf();
@@ -34,7 +35,7 @@ void MiniPEG::setup_fir_lpf(void) {
 }
 
 //todo: make this a system calibration
-const int16_t adc_cal_offset[NUM_ADCS] = {0, 48, 48, 0, 0, 0};
+const int16_t adc_cal_offset[NUM_ADCS] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 //todo: try: new_value += (new_value - old_value) * abs(new_value - old_value) * COEF
 //where COEF might be 0.1

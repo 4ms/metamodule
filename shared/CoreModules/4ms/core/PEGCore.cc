@@ -55,6 +55,7 @@ private:
 		const static Info::Elem AsyncIn			= AsyncRedIn;
 		const static Info::Elem DivJackIn		= DivRedJackIn;
 		const static Info::Elem SkewJackIn		= SkewRedJackIn;
+		const static Info::Elem CurveJackIn 	= CurveRedJackIn;
 		const static Info::Elem EnvOut       	= EnvRedOut;
 		const static Info::Elem _5VEnvOut    	= P5VEnvRedOut;
 		const static Info::Elem EoFOut       	= EofRedOut;
@@ -82,6 +83,7 @@ private:
 		const static Info::Elem AsyncIn			= AsyncBlueIn;
 		const static Info::Elem DivJackIn		= DivBlueJackIn;
 		const static Info::Elem SkewJackIn		= SkewBlueJackIn;
+		const static Info::Elem CurveJackIn 	= CurveBlueJackIn;
 		const static Info::Elem EnvOut       	= EnvBlueOut;
 		const static Info::Elem _5VEnvOut    	= P5VEnvBlueOut;
 		const static Info::Elem EoFOut       	= EofBlueOut;

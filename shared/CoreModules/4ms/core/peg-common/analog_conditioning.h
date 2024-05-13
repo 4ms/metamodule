@@ -12,13 +12,12 @@ namespace MetaModule::PEG
 enum AdcChannels {
 	CV_SHAPE,
 	CV_DIVMULT,
+	CV_SKEW,
 	POT_SCALE,
 	POT_OFFSET,
 	POT_SHAPE,
 	POT_DIVMULT,
-
 	POT_SKEW,
-	CV_SKEW,
 
 	NUM_ADCS
 };
@@ -26,7 +25,9 @@ enum AdcChannels {
 enum AdcCVChannels {
 	ADC_CV_SHAPE,
 	ADC_CV_DIVMULT,
-	NUM_CV_ADCS,
+	ADC_CV_SKEW,
+
+	NUM_CV_ADCS
 };
 
 enum AdcPotChannels {
@@ -34,6 +35,7 @@ enum AdcPotChannels {
 	ADC_POT_OFFSET,
 	ADC_POT_SHAPE,
 	ADC_POT_DIVMULT,
+	ADC_POT_SKEW,
 
 	NUM_POT_ADCS
 };
