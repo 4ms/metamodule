@@ -8,5 +8,6 @@ namespace MetaModule
 
 std::vector<std::string_view> getAllFaceplates();
 std::vector<ModuleTypeSlug> getAllFaceplateSlugs();
+std::vector<ModuleTypeSlug> getAllBrands();
 
 } // namespace MetaModule

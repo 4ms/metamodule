@@ -124,4 +124,9 @@ std::vector<ModuleTypeSlug> getAllFaceplateSlugs() {
 	return slugs;
 }
 
+std::vector<ModuleTypeSlug> getAllBrands() {
+	std::vector<ModuleTypeSlug> brands{"4ms", "Befaco", "MIClones", "HetrickCV", "Nonlinearcircuits", "Scanner Darkly"};
+	return brands;
+}
+
 } // namespace MetaModule
