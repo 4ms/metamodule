@@ -132,7 +132,6 @@ private:
         //TODO: shape is split into skew and curve
         // peg.adc_dma_buffer[CV_SHAPE] = MapOutputFunc(getInput<Mapping::ShapeCvIn>().value_or(0.f));
 
-        //TODO: this scaling needs adjustment
         peg.adc_dma_buffer[CV_DIVMULT] = MapOutputFunc(getInput<Mapping::DivJackIn>().value_or(0.f));
 
         auto MapKnobFunc = [](auto val) -> uint16_t {
@@ -173,8 +172,7 @@ private:
             peg.digio.TrigJack.sideload_set(asyncIn(asyncJackIn));
         }
 
-        // TODO: ping input originall has internal lowpass filtering
-        // peg.digio.PingJack.sideload_set(pingIn(getInput<PingTrigIn>().value_or(0.f)));
+        // TODO: ping input originally has internal lowpass filtering
         if (pingEdge(pingIn(getInput<Mapping::PingJackIn>().value_or(0.f)))) {
             peg.pingEdgeIn();
         }
@@ -184,7 +182,7 @@ private:
         // Secondary out with directly coupled LED
         // TODO: convert LED to unicolor
         setOutput<Mapping::SecondaryOut>(peg.digio.EOJackSecondary.sideload_get() ? TriggerOutputInV : 0.f);
-        setLED<Mapping::SecondaryLight>(peg.digio.EOJackSecondary.sideload_get() ? 1.0f : 0.f);
+        setLED<Mapping::SecondaryLight>(peg.digio.EOJackSecondary.sideload_get());
 
         auto MapDACFunc = [](auto val) -> float {
             return float(val) / 4095.f;
@@ -213,11 +211,6 @@ private:
         peg.settings.limit_skew = getState<Mapping::SkewLimitAltParam>() == 1 ? 1 : 0;
         peg.settings.free_running_ping = getState<Mapping::FreeNRunningPingAltParam>() == 0 ? 1 : 0;
         
-        // static constexpr std::array<CycleJackBehaviors, 3> CycleJackOptions{
-        // 	CYCLE_JACK_RISING_EDGE_TOGGLES, CYCLE_JACK_BOTH_EDGES_TOGGLES_QNT, CYCLE_JACK_BOTH_EDGES_TOGGLES};
-
-        // peg.settings.cycle_jack_behavior = CycleJackOptions[getState<Mapping::CycleJackModeAltParam>()];
-
         // static constexpr std::array<TrigInFunctions, 3> TriggerInOptions{
         // 	TRIGIN_IS_ASYNC, TRIGIN_IS_ASYNC_SUSTAIN, TRIGIN_IS_QNT};
 
@@ -244,8 +237,6 @@ private:
     FlipFlop asyncIn;
     EdgeDetector qntEdge;
     EdgeDetector asyncEdge;
-
-
 };
 
 
