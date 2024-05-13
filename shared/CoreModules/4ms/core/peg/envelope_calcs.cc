@@ -1,6 +1,5 @@
 #include "envelope_calcs.hh"
 #include <algorithm>
-#include <cstdio>
 
 namespace MetaModule::PEG
 {
