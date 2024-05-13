@@ -103,11 +103,22 @@ private:
 
 	public : 
 	PEGCore()
-		: channelA(this), channelB(this)
+		: channelA(this)
+		, channelB(this)
+		, timerPhase(0)
+        , timerPhaseIncrement(1.0f)
 		{
 		}
 
 	void update() override {
+
+		timerPhase += timerPhaseIncrement;
+        while (timerPhase > 1.0f) {
+            channelA.doDACUpdate();
+			channelB.doDACUpdate();
+            timerPhase -= 1.0f;
+        }
+
 		channelA.update();
 		channelB.update();
 
@@ -157,18 +168,20 @@ private:
 	}
 
 	void set_samplerate(float sr) override {
-		channelA.set_samplerate(sr);
-		channelB.set_samplerate(sr);
+		// DAC update needs to happen at fixed rate, independent of sample rate
+		timerPhaseIncrement = float(PEG::MiniPEG::kDacSampleRate) / sr;
 	}
 
+private:
+    float timerPhase;
+    float timerPhaseIncrement;
 
+public:
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>(), Info::png_filename);
 	// clang-format on
-
-private:
 };
 
 } // namespace MetaModule

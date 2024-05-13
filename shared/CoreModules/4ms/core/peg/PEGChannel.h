@@ -50,8 +50,7 @@ public:
         , triggerIn(1.f, 2.f)
         , qntIn(1.f, 2.f)
         , asyncIn(1.f, 2.f)
-        , timerPhase(0)
-        , timerPhaseIncrement(1.0f) {
+    {
         // TODO: maybe calling these is not required
         sideloadDrivers();
         sideloadSystemSettings();
@@ -65,23 +64,17 @@ public:
     void update() {
         sideloadDrivers();
         sideloadSystemSettings();
-
-        timerPhase += timerPhaseIncrement;
-        while (timerPhase > 1.0f) {
-            peg.update_all_envelopes();
-            timerPhase -= 1.0f;
-        }
-
         peg.update();
+    }
+
+    void doDACUpdate()
+    {
+        peg.update_all_envelopes();
     }
 
     void toggleInput(auto input)
     {
         peg.digio.CycleJack.sideload_set(cycleIn(input.value_or(0.f)));
-    }
-
-    void set_samplerate(float sr) {
-        timerPhaseIncrement = float(PEG::MiniPEG::kDacSampleRate) / sr;
     }
 
     enum MainMode {EOF_GATE, EOF_TRIG, TAP_GATE, TAP_TRIG};
@@ -252,9 +245,7 @@ private:
     EdgeDetector qntEdge;
     EdgeDetector asyncEdge;
 
-private:
-    float timerPhase;
-    float timerPhaseIncrement;
+
 };
 
 
