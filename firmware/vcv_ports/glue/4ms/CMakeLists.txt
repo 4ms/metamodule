@@ -78,29 +78,33 @@ target_sources(
 target_sources(
   4msLibrary
   PRIVATE
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/main.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/trigout.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/analog_conditioning.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/env_update.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/main.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/trigout.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/analog_conditioning.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/env_update.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/envelope_calcs.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/flash_user.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/params.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/pingable_env.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/dig_inouts.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/timers.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/calibration.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/env_transition.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/leds.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/shareddrv/debounced_digins.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/shareddrv/dac.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/pwm.cc
+
     ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/envelope_calcs.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/flash_user.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/params.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/pingable_env.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/dig_inouts.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/timers.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/calibration.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/env_transition.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/leds.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/shareddrv/debounced_digins.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/shareddrv/dac.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/mocks/pwm.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg/envelope_calcs.cc
 )
 
 target_include_directories(
   4msLibrary
   PRIVATE
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/
-    ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/mocks
+    ${MM_ROOT}/shared/CoreModules/4ms/core
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/mocks
 )
 
 

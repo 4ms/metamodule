@@ -46,6 +46,7 @@ enum CenterDetentPots {
 	DET_SCALE,
 	DET_OFFSET,
 	DET_SHAPE,
+	DET_SKEW,
 
 	NUM_CENTER_DETENT_POTS
 };
@@ -54,7 +55,6 @@ enum CenterDetentPots {
 
 struct SystemSettings {
 	uint16_t is_valid = 0;
-	uint16_t midpt_array[NUM_DIVMULTS] = {0};
 	int16_t center_detent_offset[NUM_CENTER_DETENT_POTS] = {0};
 
 	uint8_t limit_skew = 0;

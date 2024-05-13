@@ -13,11 +13,11 @@ namespace MetaModule
 {
 
 class PEGCore : public SmartCoreProcessor<PEGInfo> {
+public:
 	using Info = PEGInfo;
 	using ThisCore = PEGCore;
 	using enum Info::Elem;
 
-public:
 	template<Info::Elem EL>
 	void setOutput(auto val) {
 		return SmartCoreProcessor<Info>::setOutput<EL>(val);

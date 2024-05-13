@@ -1,13 +1,10 @@
-#include "main.hh"
 #include "leds.h"
+#include "main.hh"
 
 namespace MetaModule::PEG
 {
 
-
 // static constexpr uint32_t FIRST_CD_POT = ADC_POT_SCALE;
-
-
 
 /*
 
@@ -45,7 +42,7 @@ CalRequests MiniPEG::should_enter_calibration_mode(void) {
 
 void MiniPEG::check_calibration(void) {
 	// if (!sanity_check_calibration()) {
-		default_settings();
+	default_settings();
 	// 	if (write_settings() != HAL_OK)
 	// 		error_writing_settings();
 	// }
@@ -67,22 +64,6 @@ void MiniPEG::check_calibration(void) {
 }
 
 void MiniPEG::default_calibration(void) {
-	settings.midpt_array[0] = 273;
-	settings.midpt_array[1] = 546;
-	settings.midpt_array[2] = 819;
-	settings.midpt_array[3] = 1092;
-	settings.midpt_array[4] = 1365;
-	settings.midpt_array[5] = 1638;
-	settings.midpt_array[6] = 1911;
-	settings.midpt_array[7] = 2184;
-	settings.midpt_array[8] = 2457;
-	settings.midpt_array[9] = 2730;
-	settings.midpt_array[10] = 3003;
-	settings.midpt_array[11] = 3276;
-	settings.midpt_array[12] = 3549;
-	settings.midpt_array[13] = 3822;
-	settings.midpt_array[14] = 4095;
-
 	settings.center_detent_offset[DET_SCALE] = 0;
 	settings.center_detent_offset[DET_OFFSET] = 0;
 	settings.center_detent_offset[DET_SHAPE] = 0;
@@ -109,10 +90,6 @@ void MiniPEG::default_calibration(void) {
 uint8_t MiniPEG::sanity_check_calibration(void) {
 	uint8_t j;
 
-	for (j = 0; j < (NUM_DIVMULTS - 1); j++) {
-		if (settings.midpt_array[j + 1] <= settings.midpt_array[j])
-			return 0; //fail
-	}
 	for (j = 0; j < NUM_CENTER_DETENT_POTS; j++) {
 		if ((settings.center_detent_offset[j] < -1000) || (settings.center_detent_offset[j] > 1000))
 			return 0;
@@ -285,12 +262,6 @@ void MiniPEG::calibrate_divmult_pot(void) {
 			set_rgb_led(LED_CYCLE, c_OFF);
 		}
 	}
-
-	//convert the calib_array values to mid-points
-	for (j = 0; j < (NUM_DIVMULTS - 1); j++) {
-		settings.midpt_array[j] = (calib_array[j] + calib_array[j + 1]) >> 1;
-	}
-	settings.midpt_array[NUM_DIVMULTS - 1] = 4095;
 }
 
 void MiniPEG::calibrate_led_colors(void) {
@@ -371,4 +342,4 @@ void error_writing_settings(void) {
 }
 */
 
-}
+} // namespace MetaModule::PEG
