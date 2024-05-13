@@ -1,6 +1,6 @@
 #pragma once
-#include "gui/elements/module_drawer.hh"
 #include "CoreModules/ModuleFactory_internal.hh"
+#include "gui/elements/module_drawer.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
@@ -65,49 +65,86 @@ struct ModuleListPage : PageBase {
 		}
 		slugs_str.pop_back();
 		lv_roller_set_options(ui_ModuleListRoller, slugs_str.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_selected(ui_ModuleListRoller, 0, LV_ANIM_OFF);
+	}
+
+	void populate_brands() {
+		auto all_brands = getAllBrands();
+
+		std::string roller_str{"All\n"};
+		roller_str.reserve(all_brands.size() * (sizeof(ModuleTypeSlug) + 1) + 5);
+		for (auto item : all_brands) {
+			roller_str += std::string_view{item};
+			roller_str += "\n";
+		}
+		roller_str.pop_back();
+		lv_roller_set_options(ui_ModuleListRoller, roller_str.c_str(), LV_ROLLER_MODE_NORMAL);
 	}
 
 	void prepare_focus() final {
+		view = View::BrandRoller;
+		roller_brand_list();
+	}
+
+	void roller_module_list() {
+		lv_label_set_text(ui_ModuleListRollerTitle, "Add Module");
 		populate_slugs();
 		drawn_module_idx = -1; //force redraw
 		draw_module();
 		draw_timer = lv_timer_create(draw_module_cb, 200, this);
 
 		show_roller();
-		lv_group_focus_obj(ui_ModuleListRoller);
-		lv_group_set_editing(group, true);
-		lv_group_set_wrap(group, false);
+	}
+
+	void roller_brand_list() {
+		lv_label_set_text(ui_ModuleListRollerTitle, "Brands:");
+		hide_module();
+		populate_brands();
+		show_roller();
 	}
 
 	void update() final {
 		if (metaparams.back_button.is_just_released()) {
-			if (roller_shown) {
+
+			if (view == View::BrandRoller) {
 				gui_state.force_redraw_patch = true;
 				load_prev_page();
-			} else {
+
+			} else if (view == View::ModuleRoller) {
+				view = View::BrandRoller;
+				hide_module();
+				roller_brand_list();
+
+			} else if (view == View::ModuleOnly) {
+				view = View::ModuleRoller;
 				show_roller();
-				lv_group_set_editing(group, true);
 			}
 		}
+
 		if (do_redraw) {
 			do_redraw = false;
 			draw_module();
 		}
 	}
 
-	bool is_roller_shown() const {
-		return roller_shown;
-	}
-
 	void show_roller() {
-		roller_shown = true;
 		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
+		lv_group_focus_obj(ui_ModuleListRoller);
+		lv_group_set_editing(group, true);
+		lv_group_set_wrap(group, false);
 	}
 
 	void hide_roller() {
-		roller_shown = false;
 		lv_obj_set_width(ui_ModuleListRollerPanel, 2);
 		lv_group_set_editing(group, true);
+	}
+
+	void show_module() {
+		lv_show(ui_ModuleListImage);
+	}
+
+	void hide_module() {
+		lv_hide(ui_ModuleListImage);
 	}
 
 	void blur() final {
@@ -120,8 +157,15 @@ private:
 		if (!page)
 			return;
 
-		if (page->is_roller_shown()) {
+		if (page->view == View::BrandRoller) {
+			page->view = View::ModuleRoller;
+			page->roller_module_list();
+			page->show_module();
+
+		} else if (page->view == View::ModuleRoller) {
+			page->view = View::ModuleOnly;
 			page->hide_roller();
+
 		} else {
 			ModuleTypeSlug slug;
 			lv_roller_get_selected_str(event->target, slug._data, slug.capacity);
@@ -137,14 +181,19 @@ private:
 		if (!page)
 			return;
 
-		lv_timer_reset(page->draw_timer);
+		if (page->view == View::ModuleOnly || page->view == View::ModuleRoller) {
+			lv_timer_reset(page->draw_timer);
+		}
 	}
 
 	static void draw_module_cb(lv_timer_t *timer) {
 		auto page = static_cast<ModuleListPage *>(timer->user_data);
 		if (!page)
 			return;
-		page->do_redraw = true;
+
+		if (page->view == View::ModuleOnly || page->view == View::ModuleRoller) {
+			page->do_redraw = true;
+		}
 	}
 
 	void draw_module() {
@@ -179,7 +228,7 @@ private:
 		});
 	}
 
-	bool roller_shown = true;
+	enum class View { BrandRoller, ModuleRoller, ModuleOnly } view{View::BrandRoller};
 	lv_timer_t *draw_timer{};
 	unsigned drawn_module_idx = -1;
 	bool do_redraw = false;
