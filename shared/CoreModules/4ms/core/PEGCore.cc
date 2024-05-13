@@ -152,6 +152,8 @@ private:
 			case 3: channelB.setSecondaryMode(channelB.SecondaryMode::EOR_TRIG); break;
 			default: return;
 		}
+
+		setOutput<OrOut>(std::max(getOutput<EnvBlueOut>(), getOutput<EnvRedOut>()));
 	}
 
 	void set_samplerate(float sr) override {
