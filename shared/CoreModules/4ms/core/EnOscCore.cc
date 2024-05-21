@@ -1,7 +1,10 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "enosc/ui.hh"
 #include "info/EnOsc_info.hh"
+
+#include "enosc/easiglib/dsp.hh"
+using namespace easiglib;
+#include "enosc/ui.hh"
 
 namespace MetaModule
 {
