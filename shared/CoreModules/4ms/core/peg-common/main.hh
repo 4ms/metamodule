@@ -5,7 +5,7 @@
 #include "pingable_env.h"
 #include "flash_user.hh"
 #include "analog_conditioning.h"
-#include "dig_inout_pins.hh"
+#include "mocks/dig_inout_pins.hh"
 #include "debounced_digins.h"
 #include "leds.h"
 #include "envelope_calcs.h"
