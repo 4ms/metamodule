@@ -5,4 +5,5 @@ set(brands
 	AudibleInstruments
 	nonlinearcircuits
     eightfold
+	Valley
 )
