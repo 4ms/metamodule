@@ -56,8 +56,11 @@ public:
         sideloadSystemSettings();
         peg.update_all_envelopes();
 
+        //PEG always starts in Sync mode
+        peg.set_sync_mode(true); 
+
         peg.settings.shift_value = 0.5f * 4095.f;
-        
+
         peg.settings.cycle_jack_behavior = CYCLE_JACK_BOTH_EDGES_TOGGLES;
     };
 
