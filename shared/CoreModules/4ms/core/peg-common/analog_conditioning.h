@@ -12,7 +12,6 @@ namespace MetaModule::PEG
 enum AdcChannels {
 	CV_SHAPE,
 	CV_DIVMULT,
-	CV_SKEW,
 	POT_SCALE,
 	POT_OFFSET,
 	POT_SHAPE,
@@ -25,7 +24,6 @@ enum AdcChannels {
 enum AdcCVChannels {
 	ADC_CV_SHAPE,
 	ADC_CV_DIVMULT,
-	ADC_CV_SKEW,
 
 	NUM_CV_ADCS
 };
@@ -59,5 +57,4 @@ typedef struct AnalogConditioned {
 
 } analog_t;
 
-
-}
+} // namespace MetaModule::PEG

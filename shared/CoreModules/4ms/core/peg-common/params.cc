@@ -1,7 +1,7 @@
-#include "main.hh"
 #include "calibration.hh"
 #include "debounced_digins.h"
 #include "envelope_calcs.h"
+#include "main.hh"
 #include "settings.h"
 #include "util/math.hh"
 
@@ -83,7 +83,7 @@ uint8_t MiniPEG::read_shape_scale_offset(void) {
 		if (adjusting_shift_mode)
 			// This variable is not used anymore
 			// instead the settings value is used directly
-			shift = 2048 + tmp; 
+			shift = 2048 + tmp;
 		else
 			//offset must go to zero at max
 			offset = tmp - (2048 - OFFSET_PLATEAU_WIDTH / 2 - 4 /*wiggle room*/);
@@ -98,13 +98,12 @@ uint8_t MiniPEG::read_shape_scale_offset(void) {
 			update_risefallincs = 1;
 		}
 	}
-	
+
 	{
-		int16_t skew_cv = MathTools::plateau(2048 - analog[CV_SKEW].lpf_val, SKEWCV_PLATEAU_WIDTH, 0);
-		int16_t skew_total = skew_cv + analog[POT_SKEW].lpf_val + settings.center_detent_offset[DET_SKEW];
-		skew_total = MathTools::constrain(skew_total, (int16_t)0, (int16_t)4095);
-		if (MathTools::diff((uint16_t)skew_total, skew) > ADC_DRIFT) {
-			skew = skew_total;
+		int16_t t_skew = analog[POT_SKEW].lpf_val + settings.center_detent_offset[DET_SKEW];
+		t_skew = MathTools::constrain(t_skew, (int16_t)0, (int16_t)4095);
+		if (MathTools::diff((uint16_t)t_skew, skew) > ADC_DRIFT) {
+			skew = t_skew;
 			update_risefallincs = 1;
 		}
 	}
@@ -180,4 +179,4 @@ void MiniPEG::update_clock_divider_amount(struct PingableEnvelope *e, int16_t ne
 	}
 }
 
-}
+} // namespace MetaModule::PEG

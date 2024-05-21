@@ -139,7 +139,6 @@ private:
         peg.adc_dma_buffer[POT_SHAPE] = MapKnobCvFunc(getState<Mapping::CurveKnob>(), getInput<Mapping::CurveJackIn>().value_or(0.f));
         peg.adc_dma_buffer[POT_SKEW] = MapKnobCvFunc(getState<Mapping::SkewKnob>(), getInput<Mapping::SkewJackIn>().value_or(0.f));
         peg.adc_dma_buffer[POT_DIVMULT] = MapKnobCvFunc(getState<Mapping::PingDivMultKnob>(), getInput<Mapping::DivJackIn>().value_or(0.f));
-        peg.adc_dma_buffer[CV_SKEW] = CVZeroVoltsAdcValue;
         peg.adc_dma_buffer[CV_SHAPE] = CVZeroVoltsAdcValue; 
         peg.adc_dma_buffer[CV_DIVMULT] = CVZeroVoltsAdcValue;
 
