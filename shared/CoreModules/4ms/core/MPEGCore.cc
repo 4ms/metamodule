@@ -9,6 +9,7 @@ using namespace MetaModule::PEG;
 #include "helpers/FlipFlop.h"
 #include "helpers/EdgeDetector.h"
 
+#include <alpaca/alpaca.h>
 #include <array>
 #include <algorithm>
 
@@ -51,6 +52,38 @@ public:
 
 	void set_samplerate(float sr) override {
 		timerPhaseIncrement = float(PEG::MiniPEG::kDacSampleRate) / sr;
+	}
+
+	struct SaveState_t {
+		bool cycling;
+		uint32_t clk_time;
+	};
+	SaveState_t saveState;
+
+	void load_state(std::string_view state_data) override 
+	{
+		auto raw_data = decode(state_data);
+
+		std::error_code ec;
+		auto newSaveState = alpaca::deserialize<alpaca::options::with_version, SaveState_t>(raw_data, ec);
+		if (!ec)
+		{
+			saveState = newSaveState;
+
+			peg.settings.start_clk_time = saveState.clk_time;
+			peg.settings.start_cycle_on = saveState.cycling;
+			peg.apply_settings();
+		}
+	}
+
+	std::string save_state() override 
+	{
+		saveState.cycling = peg.settings.start_cycle_on;
+		saveState.clk_time = peg.settings.start_clk_time;
+
+		std::vector<uint8_t> bytes;
+		alpaca::serialize<alpaca::options::with_version>(saveState, bytes);
+		return encode({bytes.data(), bytes.size()});
 	}
 
 private:
@@ -144,7 +177,6 @@ private:
 		};
 
 		peg.settings.trigin_function     = TriggerInOptions[getState<TrigJackModeAltParam>()];
-
 		peg.settings.shift_value         = getState<ShiftAltParam>() * 4095.f;
 
 		peg.set_sync_mode(getState<SyncModeAltParam>() == 0);
