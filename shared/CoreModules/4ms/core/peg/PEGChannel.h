@@ -124,20 +124,6 @@ public:
 
 private:
     void sideloadDrivers() {
-        auto MapOutputFunc = [](auto val) -> uint16_t {
-            auto result = val / CVInputFullScaleInV + 0.5f;
-            return uint16_t(std::clamp(result, -1.f, 1.f) * 4095.f);
-        };
-
-        auto MapKnobCvFunc = [](auto knobval, auto cvval) -> uint16_t {
-			return std::clamp(knobval - cvval / CVInputFullScaleInV / 2, 0.f, 1.f) * 4095;
-        };
-
-        peg.adc_dma_buffer[CV_SHAPE] = MapOutputFunc(getInput<Mapping::CurveJackIn>().value_or(0.f));
-        peg.adc_dma_buffer[CV_SKEW] = 2048;
-
-        peg.adc_dma_buffer[CV_DIVMULT] = MapOutputFunc(getInput<Mapping::DivJackIn>().value_or(0.f));
-
         auto MapKnobFunc = [](auto val) -> uint16_t {
             return uint16_t(val * 4095.f);
         };
@@ -145,11 +131,17 @@ private:
         peg.adc_dma_buffer[POT_SCALE] = MapKnobFunc(getState<Mapping::ScaleKnob>());
         peg.adc_dma_buffer[POT_OFFSET] = MapKnobFunc(getState<Mapping::BiNPolarButton>() == LatchingButton::State_t::DOWN ? 0.5f : 1.f);
         
-        peg.adc_dma_buffer[POT_SHAPE] = MapKnobFunc(getState<Mapping::CurveKnob>());
 
+        auto MapKnobCvFunc = [](auto knobval, auto cvval) -> uint16_t {
+			return std::clamp(knobval + cvval / CVInputFullScaleInV, 0.f, 1.f) * 4095;
+        };
+		// Combine CV and knob voltage to simulate analog circuitry on PEG hardware
+        peg.adc_dma_buffer[POT_SHAPE] = MapKnobCvFunc(getState<Mapping::CurveKnob>(), getInput<Mapping::CurveJackIn>().value_or(0.f));
         peg.adc_dma_buffer[POT_SKEW] = MapKnobCvFunc(getState<Mapping::SkewKnob>(), getInput<Mapping::SkewJackIn>().value_or(0.f));
-
-        peg.adc_dma_buffer[POT_DIVMULT] = MapKnobFunc(getState<Mapping::PingDivMultKnob>());
+        peg.adc_dma_buffer[POT_DIVMULT] = MapKnobCvFunc(getState<Mapping::PingDivMultKnob>(), getInput<Mapping::DivJackIn>().value_or(0.f));
+        peg.adc_dma_buffer[CV_SKEW] = CVZeroVoltsAdcValue;
+        peg.adc_dma_buffer[CV_SHAPE] = CVZeroVoltsAdcValue; 
+        peg.adc_dma_buffer[CV_DIVMULT] = CVZeroVoltsAdcValue;
 
         peg.digio.PingBut.sideload_set(getState<Mapping::PingButton>() == MomentaryButton::State_t::PRESSED);
         peg.digio.CycleBut.sideload_set(getState<Mapping::CycleButton>() == MomentaryButton::State_t::PRESSED);
@@ -227,7 +219,8 @@ private:
     }
 
 private:
-    static constexpr float CVInputFullScaleInV = -10.0f;
+    static constexpr float CVInputFullScaleInV = 10.0f;
+    static constexpr uint16_t CVZeroVoltsAdcValue = 2048;
     static constexpr float TriggerOutputInV = 5.0f;
     static constexpr float EnvelopeOutFullScaleInV = -20.0f;
     static constexpr float EnvelopeOutOffsetInV = 10.0f;
