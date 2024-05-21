@@ -37,7 +37,6 @@ private:
     void handle_qnt_trig(PingableEnvelope*);
     void handle_async_trig(PingableEnvelope*);
 
-private:
     PingableEnvelope m;
 
     uint32_t ping_irq_timestamp = 0;
@@ -67,10 +66,8 @@ private:
     bool toggled_sync_mode = false;
     int16_t cycle_latched_offset = 0;
 
-private:
     analog_t analog[NUM_ADCS];
 
-private:
     void eor_on();
     void eor_off();
     void eof_on();
@@ -125,7 +122,6 @@ public:
     // for sideloading
     uint16_t dac_vals[2] = {0};
 
-public:
     // call this with dac sample rate
     static const uint32_t kDacSampleRate = 40000;
     void update_all_envelopes();
@@ -151,7 +147,6 @@ private:
     int32_t offset = 0;
     int32_t shift = 0; // not used anymore
 
-private:
     int8_t get_clk_div_nominal(uint16_t adc_val);
     uint32_t get_clk_div_time(int8_t clock_divide_amount, uint32_t clk_time);
     uint32_t get_fall_time(uint8_t skew, uint32_t div_clk_time);
@@ -160,7 +155,6 @@ private:
     void calc_rise_fall_incs(struct PingableEnvelope *e);
     void calc_div_clk_time(struct PingableEnvelope *e, uint32_t new_clk_time);
 
-private:
     int write_settings(void);
     uint8_t read_settings(void);
     uint8_t check_settings_valid(void);
@@ -190,15 +184,12 @@ private:
     int16_t last_total_adc = 0;
 	int8_t last_clock_divider_amount = 0;
 
-private:
     void init_pingable_env(struct PingableEnvelope *e);
     void copy_rise_fall_incs(struct PingableEnvelope *dst, struct PingableEnvelope *src);
     void copy_skew_and_curves(struct PingableEnvelope *dst, struct PingableEnvelope *src);
 
-private:
     void init_dig_inouts(void);
 
-private:
     void inc_tmrs(void);
 
     uint32_t systmr               = 0;
@@ -208,13 +199,11 @@ private:
     uint32_t trigouttmr           = 0;
     uint32_t trigouttmr_secondary = 0;
 
-private:
     bool just_released(DebouncedDiginList pin);
     bool just_pressed(DebouncedDiginList pin);
     bool is_pressed(DebouncedDiginList pin);
     void init_debouncer(void);
 
-private:
     void reset_transition_counter();
     void force_transition();
     bool check_to_start_transition();
@@ -225,7 +214,6 @@ private:
 
     uint32_t didnt_change_divmult = 0;
 
-private:
     void check_calibration(void);
     void default_calibration(void);
 
@@ -238,7 +226,6 @@ private:
     // void wait_for_cyclebut_downup(void);
     // void error_writing_settings(void);
 
-private:
     void set_led_brightness(uint16_t brightness, PwmOutputs pwm_led_num);
     void set_rgb_led(RgbLeds rgb_led_id, Palette color_id);
     void adjust_palette(void);
