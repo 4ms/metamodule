@@ -37,7 +37,6 @@ void MiniPEG::default_settings(void) {
 
 	settings.start_clk_time = 25000;
 	settings.start_cycle_on = 1;
-	settings.start_sync_on = 0;
 }
 
 }

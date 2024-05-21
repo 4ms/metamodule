@@ -33,18 +33,25 @@ MiniPEG::MiniPEG(EnvelopeCalcsBase *env_calcs)
 
 	init_params();
 
-	if (settings.start_sync_on) {
-		m.sync_to_ping_mode = true;
-	} else {
-		m.sync_to_ping_mode = false;
-		m.async_env_changed_shape = 0;
-		m.ready_to_start_async = true;
-	}
+	apply_settings();
+
+	last_tapin_time = 0;
+
+}
+
+void MiniPEG::apply_settings() {
+	m.sync_to_ping_mode = false;
+	m.async_env_changed_shape = 0;
+	m.ready_to_start_async = true;
 
 	if (settings.start_clk_time) {
 		clk_time = settings.start_clk_time;
 		m.div_clk_time = settings.start_clk_time;
+		tapout_clk_time = clk_time;
 		using_tap_clock = 1;
+		tapintmr = 0;
+		tapouttmr = 0;
+		calc_div_clk_time(&m, clk_time);
 	}
 
 	if (settings.start_cycle_on) {
@@ -58,25 +65,15 @@ MiniPEG::MiniPEG(EnvelopeCalcsBase *env_calcs)
 		set_rgb_led(LED_CYCLE, c_OFF);
 		m.envelope_running = 0;
 	}
-
-	last_tapin_time = 0;
 }
 
 void MiniPEG::update()
 {
-	// G0: loops every ~11uS, maybe 13us if you include envelope updates every
-	// 4th loop G4: loops every ~2uS, with ~10us gaps
-	// p4 unit no-lock: 1.2uS fastest loop. Max 10us loop... average 530kHz
-	// p5-f746: 1.5us fastest, 10us slowest, Mean: 3.9us
-	// p5-f423: 2.5us fastest, 15us slowest, Mean: 6us
-
-	// DEBUGON;
 	read_ping_button();
 	read_trigjacks();
 	read_cycle_button();
 	check_reset_envelopes();
 
-	// DEBUGOFF;
 	update_tap_clock();
 	read_ping_clock();
 	update_adc_params(force_params_update);
@@ -86,6 +83,9 @@ void MiniPEG::update()
 	handle_trigout_secondary_trigfall();
 
 	// handle_system_mode(m.sync_to_ping_mode);
+
+	settings.start_clk_time = clk_time;
+	settings.start_cycle_on = cycle_but_on;
 }
 
 void MiniPEG::pingEdgeIn()
@@ -94,6 +94,10 @@ void MiniPEG::pingEdgeIn()
 	clockbus_on();
 	pingtmr = 0;
 	using_tap_clock = 0;
+}
+
+void MiniPEG::set_sync_mode(bool mode) {
+	m.sync_to_ping_mode = mode;
 }
 
 void MiniPEG::read_ping_button() {

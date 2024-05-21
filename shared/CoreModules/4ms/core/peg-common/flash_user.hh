@@ -76,7 +76,7 @@ struct SystemSettings {
 	uint16_t cycle_cal_r = 0;
 	uint16_t cycle_cal_g = 0;
 	uint16_t cycle_cal_b = 0;
-	uint16_t start_sync_on = 0;
+	uint16_t unused1 = 0;
 	uint16_t unused2 = 0;
 	uint16_t unused3 = 0;
 	uint16_t enva_cal_r = 0;

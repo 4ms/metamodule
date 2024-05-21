@@ -167,6 +167,9 @@ private:
     void default_settings(void);
 
 public:
+	void apply_settings();
+	void set_sync_mode(bool);
+
     // for sideloading
     struct SystemSettings settings;
 

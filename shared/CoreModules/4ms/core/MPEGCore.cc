@@ -31,6 +31,7 @@ public:
 		// TODO: maybe calling these is not required
 		sideloadDrivers();
 		sideloadSystemSettings();
+		peg.apply_settings();
 		peg.update_all_envelopes();
 	};
 
@@ -145,6 +146,8 @@ private:
 		peg.settings.trigin_function     = TriggerInOptions[getState<TrigJackModeAltParam>()];
 
 		peg.settings.shift_value         = getState<ShiftAltParam>() * 4095.f;
+
+		peg.set_sync_mode(getState<SyncModeAltParam>() == 0);
 	}
 
 private:
