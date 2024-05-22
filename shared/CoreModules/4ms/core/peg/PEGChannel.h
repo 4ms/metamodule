@@ -15,6 +15,8 @@ namespace MetaModule
 template<class Parent, class Mapping>
 class PEGChannel 
 {
+	friend Parent;
+
 private:
     template<Parent::Info::Elem EL>
 	void setOutput(auto val)

@@ -4,8 +4,7 @@
 
 #include "peg/PEGChannel.h"
 
-
-
+#include <alpaca/alpaca.h>
 #include <array>
 #include <algorithm>
 
@@ -172,6 +171,47 @@ private:
 	void set_samplerate(float sr) override {
 		// DAC update needs to happen at fixed rate, independent of sample rate
 		timerPhaseIncrement = float(PEG::MiniPEG::kDacSampleRate) / sr;
+	}
+
+	struct SaveState_t {
+		bool cyclingA;
+		bool cyclingB;
+		uint32_t clk_timeA;
+		uint32_t clk_timeB;
+	};
+	SaveState_t saveState;
+
+	void load_state(std::string_view state_data) override 
+	{
+		auto raw_data = decode(state_data);
+
+		std::error_code ec;
+		auto newSaveState = alpaca::deserialize<alpaca::options::with_version, SaveState_t>(raw_data, ec);
+		if (!ec)
+		{
+			saveState = newSaveState;
+
+			channelA.peg.settings.start_clk_time = saveState.clk_timeA;
+			channelA.peg.settings.start_cycle_on = saveState.cyclingA;
+			channelA.peg.apply_settings();
+
+			channelB.peg.settings.start_clk_time = saveState.clk_timeB;
+			channelB.peg.settings.start_cycle_on = saveState.cyclingB;
+			channelB.peg.apply_settings();
+		}
+	}
+
+	std::string save_state() override 
+	{
+		saveState.cyclingA = channelA.peg.settings.start_cycle_on;
+		saveState.clk_timeA = channelA.peg.settings.start_clk_time;
+
+		saveState.cyclingB = channelB.peg.settings.start_cycle_on;
+		saveState.clk_timeB = channelB.peg.settings.start_clk_time;
+
+		std::vector<uint8_t> bytes;
+		alpaca::serialize<alpaca::options::with_version>(saveState, bytes);
+		return encode({bytes.data(), bytes.size()});
 	}
 
 private:
