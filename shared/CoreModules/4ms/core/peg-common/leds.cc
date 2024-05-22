@@ -39,7 +39,7 @@ void MiniPEG::adjust_palette(void) {
 	create_color(&palette[c_WHITE], 2048, 2048, 2048);
 	create_color(&palette[c_FULLWHITE], 4095, 4095, 4095);
 	create_color(&palette[c_RED], 4095, 0, 0);
-	create_color(&palette[c_ORANGE], 4095, 600, 0);
+	create_color(&palette[c_ORANGE], 4095, 2720, 0);
 	create_color(&palette[c_YELLOW], 3600, 2400, 0);
 	create_color(&palette[c_GREEN], 0, 4095, 0);
 	create_color(&palette[c_CYAN], 0, 3600, 3600);

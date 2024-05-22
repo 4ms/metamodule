@@ -29,7 +29,6 @@ MiniPEG::MiniPEG(EnvelopeCalcsBase *env_calcs)
 
 	read_settings();
 	adjust_palette();
-	adjust_palette();
 
 	init_params();
 
