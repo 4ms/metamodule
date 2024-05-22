@@ -1,16 +1,16 @@
-#include "main.hh"
+#include "peg_base.hh"
 #include "calibration.hh"
 
 
 namespace MetaModule::PEG
 {
 
-int MiniPEG::write_settings(void) {
+int PEGBase::write_settings(void) {
 	// TODO: check return code
 	return 0;
 }
 
-uint8_t MiniPEG::read_settings(void) {
+uint8_t PEGBase::read_settings(void) {
 	// TODO: check return code
 
 	// Always load default settings for now
@@ -19,11 +19,11 @@ uint8_t MiniPEG::read_settings(void) {
 	return 0;
 }
 
-uint8_t MiniPEG::check_settings_valid(void) {
+uint8_t PEGBase::check_settings_valid(void) {
 	return settings.is_valid == VALID_SETTINGS;
 }
 
-void MiniPEG::default_settings(void) {
+void PEGBase::default_settings(void) {
 	default_calibration();
 	settings.limit_skew = 1;
 	settings.free_running_ping = 1;

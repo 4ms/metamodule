@@ -1,4 +1,4 @@
-#include "main.hh"
+#include "peg_base.hh"
 
 #include "flash_user.hh"
 #include "math_util.h"
@@ -9,7 +9,7 @@
 namespace MetaModule::PEG
 {
 
-MiniPEG::MiniPEG(EnvelopeCalcsBase *env_calcs)
+PEGBase::PEGBase(EnvelopeCalcsBase *env_calcs)
 	:envelope_calcs{env_calcs}
 {
 	init_pingable_env(&m);
@@ -38,7 +38,7 @@ MiniPEG::MiniPEG(EnvelopeCalcsBase *env_calcs)
 
 }
 
-void MiniPEG::apply_settings() {
+void PEGBase::apply_settings() {
 	m.sync_to_ping_mode = false;
 	m.async_env_changed_shape = 0;
 	m.ready_to_start_async = true;
@@ -66,7 +66,7 @@ void MiniPEG::apply_settings() {
 	}
 }
 
-void MiniPEG::update()
+void PEGBase::update()
 {
 	read_ping_button();
 	read_trigjacks();
@@ -87,7 +87,7 @@ void MiniPEG::update()
 	settings.start_cycle_on = cycle_but_on;
 }
 
-void MiniPEG::pingEdgeIn()
+void PEGBase::pingEdgeIn()
 {
 	ping_irq_timestamp = pingtmr;
 	clockbus_on();
@@ -95,11 +95,11 @@ void MiniPEG::pingEdgeIn()
 	using_tap_clock = 0;
 }
 
-void MiniPEG::set_sync_mode(bool mode) {
+void PEGBase::set_sync_mode(bool mode) {
 	m.sync_to_ping_mode = mode;
 }
 
-void MiniPEG::read_ping_button() {
+void PEGBase::read_ping_button() {
 	if (toggled_sync_mode)
 		return;
 
@@ -152,7 +152,7 @@ void MiniPEG::read_ping_button() {
 	}
 }
 
-void MiniPEG::handle_qnt_trig(struct PingableEnvelope *e) {
+void PEGBase::handle_qnt_trig(struct PingableEnvelope *e) {
 	e->triga_down = 0;
 	e->trigq_down = 1;
 	e->sync_to_ping_mode = 1;
@@ -172,7 +172,7 @@ void MiniPEG::handle_qnt_trig(struct PingableEnvelope *e) {
 	e->curve_fall = e->next_curve_fall;
 }
 
-void MiniPEG::handle_async_trig(struct PingableEnvelope *e) {
+void PEGBase::handle_async_trig(struct PingableEnvelope *e) {
 	e->triga_down = 1;
 	e->trigq_down = 0;
 	e->sync_to_ping_mode = 0;
@@ -192,7 +192,7 @@ void MiniPEG::handle_async_trig(struct PingableEnvelope *e) {
 	e->async_phase_diff = e->divpingtmr;
 }
 
-void MiniPEG::read_trigjacks() {
+void PEGBase::read_trigjacks() {
 	if (just_pressed(TRIGGER_JACK)) {
 		if (settings.trigin_function == TRIGIN_IS_QNT)
 			handle_qnt_trig(&m);
@@ -219,7 +219,7 @@ void MiniPEG::read_trigjacks() {
 	}
 }
 
-void MiniPEG::update_trigout() {
+void PEGBase::update_trigout() {
 	if (m.env_state == RISE) {
 		if ((m.accum >> 19) >= 2048)
 			hr_on();
@@ -237,7 +237,7 @@ void MiniPEG::update_trigout() {
 	}
 }
 
-void MiniPEG::read_cycle_button() {
+void PEGBase::read_cycle_button() {
 	if (just_pressed(CYCLE_BUTTON)) {
 		cycle_latched_offset = analog[POT_OFFSET].lpf_val;
 	}
@@ -275,19 +275,19 @@ void MiniPEG::read_cycle_button() {
 	}
 }
 
-void MiniPEG::ping_led_off() {
+void PEGBase::ping_led_off() {
 	set_rgb_led(LED_PING, c_OFF);
 	div_ping_led = 0;
 }
 
-void MiniPEG::ping_led_on() {
+void PEGBase::ping_led_on() {
 	set_rgb_led(LED_PING, m.sync_to_ping_mode ? c_CYAN : c_WHITE);
 	div_ping_led = 1;
 }
 
 // Todo: this should be done when divpingtmr is updated, or when div_clk_time is
 // updated void resync_on_divpingtmr()
-void MiniPEG::check_reset_envelopes() {
+void PEGBase::check_reset_envelopes() {
 	check_restart_async_env(&m);
 
 	if (div_ping_led && (m.divpingtmr >= (m.div_clk_time >> 1))) {
@@ -307,7 +307,7 @@ void MiniPEG::check_reset_envelopes() {
 }
 
 // Todo: this only needs to be done when tapouttmr updates
-void MiniPEG::update_tap_clock() {
+void PEGBase::update_tap_clock() {
 	if (tapout_clk_time) {
 		if (tapouttmr >= tapout_clk_time) {
 			tapouttmr = 0;
@@ -326,7 +326,7 @@ void MiniPEG::update_tap_clock() {
 	}
 }
 
-void MiniPEG::read_ping_clock() {
+void PEGBase::read_ping_clock() {
 	if (got_tap_clock || ping_irq_timestamp) {
 		if (ping_irq_timestamp) {
 			uint32_t prev_clk_time = clk_time;

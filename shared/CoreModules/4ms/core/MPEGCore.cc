@@ -2,10 +2,9 @@
 #include "CoreModules/moduleFactory.hh"
 #include "info/MPEG_info.hh"
 #include "mpeg/envelope_calcs.hh"
+#include "peg-common/peg_base.hh"
 
-#include "peg-common/main.hh"
 using namespace MetaModule::PEG;
-
 #include "helpers/FlipFlop.h"
 #include "helpers/EdgeDetector.h"
 
@@ -51,7 +50,7 @@ public:
 	}
 
 	void set_samplerate(float sr) override {
-		timerPhaseIncrement = float(PEG::MiniPEG::kDacSampleRate) / sr;
+		timerPhaseIncrement = float(PEG::PEGBase::kDacSampleRate) / sr;
 	}
 
 	struct SaveState_t {
@@ -190,7 +189,7 @@ private:
 
 private:
 	PEG::MiniPEGEnvelopeCalcs env_calcs;
-	PEG::MiniPEG peg{&env_calcs};
+	PEG::PEGBase peg{&env_calcs};
 
 private:
 	FlipFlop pingIn;

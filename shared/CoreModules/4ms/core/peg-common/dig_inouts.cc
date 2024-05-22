@@ -1,9 +1,9 @@
-#include "main.hh"
+#include "peg_base.hh"
 
 namespace MetaModule::PEG
 {
 
-void MiniPEG::init_dig_inouts(void) {
+void PEGBase::init_dig_inouts(void) {
 	// DigIO::PingBut{mdrivlib::PinPull::Up};
 	// DigIO::CycleBut{mdrivlib::PinPull::Up};
 	// DigIO::PingJack{mdrivlib::PinPull::Down};

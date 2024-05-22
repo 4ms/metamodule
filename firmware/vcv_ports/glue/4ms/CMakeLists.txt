@@ -78,7 +78,7 @@ target_sources(
 target_sources(
   4msLibrary
   PRIVATE
-    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/main.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/peg_base.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/trigout.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/analog_conditioning.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/env_update.cc

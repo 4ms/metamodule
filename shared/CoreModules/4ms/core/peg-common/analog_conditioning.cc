@@ -1,11 +1,11 @@
-#include "main.hh"
+#include "peg_base.hh"
 
 namespace MetaModule::PEG
 {
 
 #define MAX_LPF_SIZE 16
 
-void MiniPEG::init_analog_conditioning(void) {
+void PEGBase::init_analog_conditioning(void) {
 
 	analog[POT_DIVMULT].polarity = AP_UNIPOLAR;
 	analog[POT_SHAPE].polarity = AP_UNIPOLAR;
@@ -18,7 +18,7 @@ void MiniPEG::init_analog_conditioning(void) {
 	setup_fir_lpf();
 }
 
-void MiniPEG::setup_fir_lpf(void) {
+void PEGBase::setup_fir_lpf(void) {
 	uint8_t analog_id;
 	uint16_t initial_value;
 
@@ -39,7 +39,7 @@ const int16_t adc_cal_offset[NUM_ADCS] = {0, 0, 0, 0, 0, 0, 0};
 //todo: try: new_value += (new_value - old_value) * abs(new_value - old_value) * COEF
 //where COEF might be 0.1
 
-void MiniPEG::condition_analog(void) {
+void PEGBase::condition_analog(void) {
 
 	uint16_t *adc_cv_dma_buffer = &(adc_dma_buffer[0]);
     uint16_t *adc_pot_dma_buffer = &(adc_dma_buffer[NUM_CV_ADCS]);

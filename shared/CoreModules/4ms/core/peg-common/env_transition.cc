@@ -1,4 +1,4 @@
-#include "main.hh"
+#include "peg_base.hh"
 #include "dig_inout_pins.hh"
 #include "envelope_calcs.h"
 #include "util/math.hh"
@@ -11,16 +11,16 @@ const uint32_t NUM_ADC_CYCLES_BEFORE_TRANSITION = 200; //200 is about 100ms
 constexpr uint32_t TransitionPeriod = 512;
 constexpr uint32_t TransitionPeriodBitShift = MathTools::Log2<TransitionPeriod>::val;
 
-void MiniPEG::reset_transition_counter() {
+void PEGBase::reset_transition_counter() {
 	didnt_change_divmult = 1;
 	// DigIO::DebugOut::high();
 }
 
-void MiniPEG::force_transition() {
+void PEGBase::force_transition() {
 	didnt_change_divmult = NUM_ADC_CYCLES_BEFORE_TRANSITION;
 }
 
-bool MiniPEG::check_to_start_transition() {
+bool PEGBase::check_to_start_transition() {
 	if (didnt_change_divmult > 0) {
 		didnt_change_divmult++;
 		if (didnt_change_divmult >= NUM_ADC_CYCLES_BEFORE_TRANSITION) {
@@ -31,7 +31,7 @@ bool MiniPEG::check_to_start_transition() {
 	return false;
 }
 
-void MiniPEG::do_start_transition(PingableEnvelope *e) {
+void PEGBase::do_start_transition(PingableEnvelope *e) {
 	uint32_t elapsed_time;
 	if (!e->div_clk_time)
 		return;
@@ -83,7 +83,7 @@ void MiniPEG::do_start_transition(PingableEnvelope *e) {
 }
 
 // FIXME: if elapsed_time is not at least TransisionPeriod, then does the TransitionPeriodBitShift math work?
-void MiniPEG::start_transition(PingableEnvelope *e, uint32_t elapsed_time) {
+void PEGBase::start_transition(PingableEnvelope *e, uint32_t elapsed_time) {
 	if (elapsed_time > e->div_clk_time)
 		elapsed_time -= e->div_clk_time;
 
@@ -128,7 +128,7 @@ void MiniPEG::start_transition(PingableEnvelope *e, uint32_t elapsed_time) {
 	e->transition_ctr = TransitionPeriod;
 }
 
-int8_t MiniPEG::calc_divided_ping_div_ctr(struct PingableEnvelope *e, enum envelopeStates envstate) {
+int8_t PEGBase::calc_divided_ping_div_ctr(struct PingableEnvelope *e, enum envelopeStates envstate) {
 	int8_t pdc;
 	uint32_t rise_per_clk;
 	uint32_t temp_u32;

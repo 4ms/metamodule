@@ -1,14 +1,14 @@
-#include "main.hh"
+#include "peg_base.hh"
 
 
 namespace MetaModule::PEG
 {
 
-void MiniPEG::init_debouncer() {
+void PEGBase::init_debouncer() {
 	// debouncing not required
 }
 
-bool MiniPEG::is_pressed(DebouncedDiginList pin) {
+bool PEGBase::is_pressed(DebouncedDiginList pin) {
 	switch (pin)
 	{
 		case DebouncedDiginList::PING_BUTTON: return digio.PingBut.is_pressed();
@@ -20,7 +20,7 @@ bool MiniPEG::is_pressed(DebouncedDiginList pin) {
 	}
 }
 
-bool MiniPEG::just_pressed(DebouncedDiginList pin) {
+bool PEGBase::just_pressed(DebouncedDiginList pin) {
 	switch (pin)
 	{
 		case DebouncedDiginList::PING_BUTTON: return digio.PingBut.is_just_pressed();
@@ -32,7 +32,7 @@ bool MiniPEG::just_pressed(DebouncedDiginList pin) {
 	}
 }
 
-bool MiniPEG::just_released(DebouncedDiginList pin) {
+bool PEGBase::just_released(DebouncedDiginList pin) {
 	switch (pin)
 	{
 		case DebouncedDiginList::PING_BUTTON: return digio.PingBut.is_just_released();

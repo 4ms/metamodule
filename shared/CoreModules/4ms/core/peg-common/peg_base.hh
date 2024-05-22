@@ -15,10 +15,10 @@
 namespace MetaModule::PEG
 {
 
-struct MiniPEG
+struct PEGBase
 {
 public:
-    MiniPEG(EnvelopeCalcsBase *env_calcs);
+    PEGBase(EnvelopeCalcsBase *env_calcs);
 
     void update();
 

@@ -1,7 +1,7 @@
 #include "calibration.hh"
 #include "debounced_digins.h"
 #include "envelope_calcs.h"
-#include "main.hh"
+#include "peg_base.hh"
 #include "settings.h"
 #include "util/math.hh"
 
@@ -14,14 +14,14 @@ namespace MetaModule::PEG
 #define ADC_DRIFT 16
 #define DIV_ADC_HYSTERESIS 16
 
-void MiniPEG::init_params(void) {
+void PEGBase::init_params(void) {
 	//Todo: store shift value in flash
 	shift = 2048; //=settings.shift_value
 	offset = 0;
 	scale = 0;
 }
 
-void MiniPEG::update_adc_params(uint8_t force_params_update) {
+void PEGBase::update_adc_params(uint8_t force_params_update) {
 
 	// every 60us or so
 	if (force_params_update || ++poll_user_input > USER_INPUT_POLL_TIME) {
@@ -66,7 +66,7 @@ void MiniPEG::update_adc_params(uint8_t force_params_update) {
 // Reads Scale, Offset, and Shape CV and pots
 // Updates global vars: shift, shape, offset
 // Returns 1 if shape changed, 0 if not
-uint8_t MiniPEG::read_shape_scale_offset(void) {
+uint8_t PEGBase::read_shape_scale_offset(void) {
 	uint8_t update_risefallincs = 0;
 
 	{
@@ -114,7 +114,7 @@ uint8_t MiniPEG::read_shape_scale_offset(void) {
 // Reads Divmult pot and cv
 // returns updated clock divider
 // amount or 0 if no change
-int8_t MiniPEG::read_divmult(void) {
+int8_t PEGBase::read_divmult(void) {
 
 	int16_t total_adc;
 	int8_t t_clock_divider_amount = 1;
@@ -159,14 +159,14 @@ int8_t MiniPEG::read_divmult(void) {
 	return new_clock_divider_amount;
 }
 
-void MiniPEG::update_env_tracking(struct PingableEnvelope *e) {
+void PEGBase::update_env_tracking(struct PingableEnvelope *e) {
 	if (e->envelope_running && e->sync_to_ping_mode)
 		e->tracking_changedrisefalls = 1;
 
 	e->async_env_changed_shape = 1;
 }
 
-void MiniPEG::update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_clock_divider_amount) {
+void PEGBase::update_clock_divider_amount(struct PingableEnvelope *e, int16_t new_clock_divider_amount) {
 	e->clock_divider_amount = new_clock_divider_amount;
 
 	if (clk_time) {

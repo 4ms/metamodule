@@ -1,5 +1,5 @@
 #include "leds.h"
-#include "main.hh"
+#include "peg_base.hh"
 
 namespace MetaModule::PEG
 {
@@ -40,7 +40,7 @@ CalRequests MiniPEG::should_enter_calibration_mode(void) {
 
 */
 
-void MiniPEG::check_calibration(void) {
+void PEGBase::check_calibration(void) {
 	// if (!sanity_check_calibration()) {
 	default_settings();
 	// 	if (write_settings() != HAL_OK)
@@ -63,7 +63,7 @@ void MiniPEG::check_calibration(void) {
 	// }
 }
 
-void MiniPEG::default_calibration(void) {
+void PEGBase::default_calibration(void) {
 	settings.center_detent_offset[DET_SCALE] = 0;
 	settings.center_detent_offset[DET_OFFSET] = 0;
 	settings.center_detent_offset[DET_SHAPE] = 0;

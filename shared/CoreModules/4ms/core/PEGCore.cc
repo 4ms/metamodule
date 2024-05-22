@@ -170,7 +170,7 @@ private:
 
 	void set_samplerate(float sr) override {
 		// DAC update needs to happen at fixed rate, independent of sample rate
-		timerPhaseIncrement = float(PEG::MiniPEG::kDacSampleRate) / sr;
+		timerPhaseIncrement = float(PEG::PEGBase::kDacSampleRate) / sr;
 	}
 
 	struct SaveState_t {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../peg-common/main.hh"
+#include "peg-common/peg_base.hh"
 #include "peg/envelope_calcs.hh"
 
-#include "../helpers/FlipFlop.h"
-#include "../helpers/EdgeDetector.h"
+#include "helpers/FlipFlop.h"
+#include "helpers/EdgeDetector.h"
 #include <algorithm>
 
 using namespace MetaModule::PEG;
@@ -231,7 +231,7 @@ private:
 
 private:
 	PEG::PEGEnvelopeCalcs env_calcs;
-    PEG::MiniPEG peg{&env_calcs};
+    PEG::PEGBase peg{&env_calcs};
 
 private:
     FlipFlop pingIn;
