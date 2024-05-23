@@ -65,19 +65,19 @@ class Control {
   MultitapDelay* delay_;
   CalibrationData* calibration_data_;
 
-  FAverage<32> average_[ADC_CHANNEL_LAST];
-  FAverage<8> average_taptrig_;
-  FAverage<256> average_scale_;
-  FAverage<64> average_sync_ratio_;
-  float scale_hy_, scale_lp_;
-  OnePole fsr_filter_;
-  float previous_taptrig_;
-  bool taptrig_armed_;
-  uint32_t taptrig_counter_;
-  bool tapfsr_armed_;
-  bool clock_armed_;
-  float freq_lp_;
-  float amount_lp_;
+  FAverage<32> average_[ADC_CHANNEL_LAST]{};
+  FAverage<8> average_taptrig_{};
+  FAverage<256> average_scale_{};
+  FAverage<64> average_sync_ratio_{};
+  float scale_hy_{}, scale_lp_{};
+  OnePole fsr_filter_{};
+  float previous_taptrig_{};
+  bool taptrig_armed_{};
+  uint32_t taptrig_counter_{};
+  bool tapfsr_armed_{};
+  bool clock_armed_{};
+  float freq_lp_{};
+  float amount_lp_{};
 };
 
 }

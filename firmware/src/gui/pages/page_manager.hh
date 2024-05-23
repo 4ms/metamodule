@@ -106,6 +106,10 @@ public:
 				button_light.display_knobset(next_knobset);
 			}
 		}
+
+		if (button_light.display_knobset() != info.page_list.get_active_knobset()) {
+			button_light.display_knobset(info.page_list.get_active_knobset());
+		}
 	}
 
 	// Update internal copy of patch with knob changes
@@ -124,14 +128,20 @@ public:
 			if (!knobpos.has_value())
 				continue;
 
-			// Iterate all knob maps in the active knob set
+			// Update patch for any map that's mapped to the knob that moved
 			for (auto &map : patch->knob_sets[active_knobset].set) {
-
-				// update the patch for knobs that moved
 				if (map.panel_knob_id == panel_knob_i) {
 					auto scaled_val = map.get_mapped_val(knobpos.value());
 					patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
 				}
+			}
+		}
+
+		for (auto &map : patch->midi_maps.set) {
+			auto knobpos = info.params.panel_knob_new_value(map.panel_knob_id);
+			if (knobpos.has_value()) {
+				auto scaled_val = map.get_mapped_val(knobpos.value());
+				patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
 			}
 		}
 	}

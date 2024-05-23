@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,7 +11,7 @@ struct FreeverbInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Reverb Effect"};
     static constexpr uint32_t width_hp = 10;
     static constexpr std::string_view svg_filename{"res/modules/Freeverb_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/Freeverb.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/Freeverb.png"};
 
     using enum Coords;
 
@@ -43,27 +44,28 @@ struct FreeverbInfo : ModuleInfoBase {
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobSize = 0,
-        KnobTime = 1,
-        KnobDamp = 2,
-        KnobMix = 3,
+        KnobSize, 
+        KnobTime, 
+        KnobDamp, 
+        KnobMix, 
         NumKnobs,
     };
     
     
     enum {
-        InputInput = 0,
-        InputSize_Cv = 1,
-        InputTime_Cv = 2,
-        InputDamp_Cv = 3,
-        InputRatio_Cv = 4,
+        InputInput, 
+        InputSize_Cv, 
+        InputTime_Cv, 
+        InputDamp_Cv, 
+        InputRatio_Cv, 
         NumInJacks,
     };
     
     enum {
-        OutputOut = 0,
+        OutputOut, 
         NumOutJacks,
     };
+    
     
 };
 } // namespace MetaModule

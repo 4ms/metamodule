@@ -98,7 +98,6 @@ target_sources(
     ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/envelope_calcs.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg/envelope_calcs.cc
 )
-
 target_include_directories(
   4msLibrary
   PRIVATE
@@ -107,6 +106,18 @@ target_include_directories(
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/mocks
 )
 
+# DLD
+target_sources(
+  4msLibrary
+  PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/looping-delay/src/calibration_storage.cc
+)
+
+target_include_directories(
+  4msLibrary
+  PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/looping-delay/src
+)
 
 # Axoloti ports
 target_sources(

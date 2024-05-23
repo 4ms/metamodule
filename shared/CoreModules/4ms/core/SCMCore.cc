@@ -1,4 +1,4 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "SCMPlus/cv_skip.h"
 #include "info/SCM_info.hh"
@@ -6,31 +6,46 @@
 #include "util/math.hh"
 #include "util/zip.hh"
 
+#include <cstdio>
+
 namespace MetaModule
 {
 
-class SCMCore : public CoreProcessor {
+class SCMCore : public SmartCoreProcessor<SCMInfo> {
 	using Info = SCMInfo;
 	using ThisCore = SCMCore;
+	using enum Info::Elem;
 
 public:
 	SCMCore() = default;
 
-	uint32_t convert_param(float rawval, uint32_t max) {
+	uint32_t convert_param(float rawval, float max) {
 		return MathTools::constrain<float>(rawval * max, 0.f, 255.f);
 	}
 
 	void update() override {
-		uint32_t rotate_adc = convert_param(pots[Info::KnobRotate] + ins[Info::InputRotate_Jack], 8);
-		uint32_t slippage_adc = convert_param(pots[Info::KnobSlip] + ins[Info::InputSlip_Jack], 255);
-		uint32_t shuffle_adc = convert_param(pots[Info::KnobShuffle] + ins[Info::InputShuffle_Jack], 255);
-		uint32_t skip_adc = convert_param(pots[Info::KnobSkip] + ins[Info::InputSkip_Jack], 255);
-		uint32_t pw_adc = convert_param(pots[Info::KnobPw] + ins[Info::InputPw_Jack], 255);
+		uint32_t rotate_adc = convert_param(getState<RotateKnob>() + getInput<RotateJackIn>().value_or(0) / 5.f, 7.99f);
+		uint32_t slippage_adc = convert_param(getState<SlipKnob>() + getInput<SlipJackIn>().value_or(0) / 5.f, 255);
+		uint32_t shuffle_adc = convert_param(getState<ShuffleKnob>() + getInput<ShuffleJackIn>().value_or(0) / 5.f, 255);
+		uint32_t skip_adc = convert_param(getState<SkipKnob>() + getInput<SkipJackIn>().value_or(0) / 5.f, 255);
+		uint32_t pw_adc = convert_param(getState<PwKnob>() + getInput<PwJackIn>().value_or(0) / 5.f, 255);
 
-		bool faster_switch_state = switches[Info::Switch_4X_Fast] > 0;
-		mute = switches[Info::Switch_4X_Fast] > 0;
+		bool faster_switch_state = getState<_4XFastButton>() == LatchingButton::State_t::DOWN;
+		if (getInput<_4XFastJackIn>().value_or(0) > 2.5f)
+			faster_switch_state = !faster_switch_state;
 
-		if (ins[Info::InputClk_In] > 0.5f) {
+		mute = getState<MuteButton>() == LatchingButton::State_t::DOWN;
+		if (getInput<MuteJackIn>().value_or(0) > 2.5f)
+			mute = !mute;
+
+		setLED<_4XFastButton>(faster_switch_state);
+		setLED<MuteButton>(mute);
+
+		auto clockInValue = getInput<ClkIn>().value_or(0);
+
+		setLED<LedInLight>(clockInValue);
+
+		if (clockInValue > 0.5f) {
 			if (!clkin) {
 				clkin = true;
 				handle_clock_in();
@@ -63,10 +78,7 @@ public:
 			update_pulse_params = true;
 		}
 
-		if (MathTools::diff(skip_adc, old_skip_adc) > 4) {
-			old_skip_adc = skip_adc;
-			skip_pattern = (skip_adc > 128) ? ~skip[0xFF - skip_adc] : skip[skip_adc];
-		}
+		skip_pattern = (skip_adc > 128) ? ~skip[0xFF - skip_adc] : skip[skip_adc];
 
 		if (shuffle_adc != old_shuffle_adc) {
 			old_shuffle_adc = shuffle_adc;
@@ -83,14 +95,16 @@ public:
 				slip_howmany = slip_every - 1; // 1..(slip_every-1)
 		}
 
-		if (ins[Info::InputResync] > 0.5f && !resync) {
+		auto resyncInValue = getInput<ResyncIn>().value_or(0);
+
+		if (resyncInValue > 0.5f && !resync) {
 			resync = true;
 			for (auto [_p, _s, _slip, _slipamt] : zip(p, s, slip, slipamt)) {
 				_p = 0;
 				_s = 0;
 				_slip = _slipamt;
 			}
-		} else if (!ins[Info::InputResync])
+		} else if (!resyncInValue)
 			resync = false;
 
 		if (DoFreeRun) {
@@ -136,6 +150,24 @@ public:
 			update_pulse_params = false;
 			update_slip_params = false;
 		}
+
+		setOutput<X1Out>(outs[Info::OutputX1] ? 8.0f : 0.0f);
+		setOutput<X2Out>(outs[Info::OutputX2] ? 8.0f : 0.0f);
+		setOutput<S3Out>(outs[Info::OutputS3] ? 8.0f : 0.0f);
+		setOutput<S4Out>(outs[Info::OutputS4] ? 8.0f : 0.0f);
+		setOutput<S5Out>(outs[Info::OutputS5] ? 8.0f : 0.0f);
+		setOutput<S6Out>(outs[Info::OutputS6] ? 8.0f : 0.0f);
+		setOutput<S8Out>(outs[Info::OutputS8] ? 8.0f : 0.0f);
+		setOutput<X8Out>(outs[Info::OutputX8] ? 8.0f : 0.0f);
+
+		setLED<LedX1Light>(outs[Info::OutputX1] ? 1.0f : 0);
+		setLED<LedX2Light>(outs[Info::OutputX2] ? 1.0f : 0);
+		setLED<LedS3Light>(outs[Info::OutputS3] ? 1.0f : 0);
+		setLED<LedS4Light>(outs[Info::OutputS4] ? 1.0f : 0);
+		setLED<LedS5Light>(outs[Info::OutputS5] ? 1.0f : 0);
+		setLED<LedS6Light>(outs[Info::OutputS6] ? 1.0f : 0);
+		setLED<LedS8Light>(outs[Info::OutputS8] ? 1.0f : 0);
+		setLED<LedX8Light>(outs[Info::OutputX8] ? 1.0f : 0);
 	}
 
 	void reset_all_phases() {
@@ -216,54 +248,11 @@ public:
 	}
 
 	uint32_t calc_pw(uint8_t pw_adc, uint32_t period) {
-		if (pw_adc < MIN_PW)
-			return MIN_PW;
-		if (pw_adc > 254)
-			return period - MIN_PW;
-
 		float pw = (float)pw_adc / 255.f * (float)period;
-		return static_cast<uint32_t>(pw);
-	}
-
-	void set_param(int param_id, float val) override {
-		if (param_id < Info::NumKnobs)
-			pots[param_id] = val;
-	}
-
-	void set_input(int input_id, float val) override {
-		if (input_id < Info::NumInJacks)
-			ins[input_id] = val;
-	}
-
-	float get_output(int output_id) const override {
-		if (output_id < Info::NumOutJacks)
-			return outs[output_id] ? 1.f : 0.f;
-		else
-			return 0.f;
+		return std::clamp<uint32_t>(pw, MIN_PW, period - MIN_PW);
 	}
 
 	void set_samplerate(float sr) override {
-	}
-
-	float get_led_brightness(int led_id) const override {
-		if (led_id == Info::Switch_4X_Fast)
-			return switches[Info::Switch_4X_Fast] > 0;
-
-		if (led_id == Info::SwitchMute)
-			return switches[Info::Switch_4X_Fast] > 0;
-
-		//first two LEDs are Switches
-		led_id -= 2;
-		if (led_id == Info::LedLed_In)
-			return ins[Info::InputClk_In];
-
-		static_assert(Info::LedLed_In == 0,
-					  "SCM Led_In must be 0 and the other LEDs must be 1-8 in order."
-					  "Fix this or modify the code below this assert.");
-		if (led_id < Info::NumDiscreteLeds)
-			return outs[led_id - 1];
-
-		return 0.f;
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -274,9 +263,6 @@ public:
 
 private:
 	// Controls/Outs
-	float pots[Info::NumKnobs];
-	float switches[Info::NumSwitches];
-	float ins[Info::NumInJacks];
 	std::array<bool, Info::NumOutJacks> outs;
 
 	static constexpr bool DoFreeRun = true; //TODO: make this a switch?
@@ -285,7 +271,6 @@ private:
 	uint32_t old_shuffle_adc = 127;
 	uint32_t old_slippage_adc = 127;
 	uint32_t old_pw_adc = 127;
-	uint32_t old_skip_adc = 127;
 	uint32_t old_rotation = 255;
 	uint32_t old_faster_switch_state = 127;
 
@@ -327,32 +312,6 @@ private:
 	std::array<uint32_t, 8> dd;
 	std::array<int32_t, 8> slipamt;
 	std::array<int32_t, 8> slip;
-
-	// Alt structure: TODO
-	// struct ClockOut {
-	// 	bool is_shuffling;
-	// 	uint32_t base_mult;
-	// 	uint32_t d;		  //mult
-	// 	uint32_t tmr;	  //phase
-	// 	uint32_t per;	  //maxphase
-	// 	uint32_t pw;	  //pw
-	// 	uint32_t p;		  //pulse_ctr
-	// 	uint32_t s;		  //?
-	// 	uint32_t dd;	  //mult_prefast
-	// 	uint32_t slip;	  //?
-	// 	uint32_t slipamt; //?
-	// };
-
-	// std::array<ClockOut, 8> jacks{{
-	// 	{.is_shuffling = false, .base_mult = 1},
-	// 	{.is_shuffling = false, .base_mult = 2},
-	// 	{.is_shuffling = true, .base_mult = 3},
-	// 	{.is_shuffling = true, .base_mult = 4},
-	// 	{.is_shuffling = true, .base_mult = 5},
-	// 	{.is_shuffling = true, .base_mult = 6},
-	// 	{.is_shuffling = true, .base_mult = 8},
-	// 	{.is_shuffling = false, .base_mult = 8},
-	// }};
 };
 
 } // namespace MetaModule

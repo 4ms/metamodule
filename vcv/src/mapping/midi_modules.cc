@@ -37,12 +37,6 @@ void Modules::addMidiModule(rack::Module *module) {
 			settings.CCCV = read_settings.value();
 			moduleIds.midiCC = module->id;
 		}
-	} else if (module->model->slug == "MIDICCToCVInterface") {
-		auto read_settings = readMidiCCCVModule(module->id);
-		if (read_settings) {
-			settings.CCCV = read_settings.value();
-			moduleIds.midiCC = module->id;
-		}
 	}
 }
 

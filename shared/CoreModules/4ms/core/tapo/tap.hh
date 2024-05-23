@@ -184,20 +184,20 @@ class Tap
 
  private:
 
-  Svf filter_;
-  float lp_filter1_, lp_filter2_, lp_filter3_;
+  Svf filter_{};
+  float lp_filter1_{}, lp_filter2_{}, lp_filter3_{};
 
-  VelocityType velocity_type_;
-  float time_;
-  float velocity_;
-  float panning_;
+  VelocityType velocity_type_{};
+  float time_{};
+  float velocity_{};
+  float panning_{};
 
-  Fader fader_;
+  Fader fader_{};
 
-  RandomOscillator lfo_;
-  float previous_lfo_sample_;
+  RandomOscillator lfo_{};
+  float previous_lfo_sample_{};
 
-  uint32_t kSampleRate;
+  uint32_t kSampleRate{};
 
 };
 

@@ -72,13 +72,13 @@ class TapAllocator
 
   Tap* taps_;
 
-  int8_t next_voice_;
-  int8_t oldest_voice_;
-  int8_t count_voices_;
-  float fade_time_;
-  float max_time_;
+  int8_t next_voice_{};
+  int8_t oldest_voice_{};
+  int8_t count_voices_{};
+  float fade_time_{};
+  float max_time_{};
 
-  stmlib::RingBuffer<TapParameters, kMaxTaps*4> queue_;
+  stmlib::RingBuffer<TapParameters, kMaxTaps*4> queue_{};
 };
 
 }

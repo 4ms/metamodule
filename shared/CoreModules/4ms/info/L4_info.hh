@@ -11,7 +11,7 @@ struct L4Info : ModuleInfoBase {
     static constexpr std::string_view description{"Listen Four"};
     static constexpr uint32_t width_hp = 10;
     static constexpr std::string_view svg_filename{"res/modules/L4_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/L4.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/L4.png"};
 
     using enum Coords;
 
@@ -22,9 +22,9 @@ struct L4Info : ModuleInfoBase {
 		Davies1900hBlackKnob{{to_mm<72>(111.89), to_mm<72>(116.69), Center, "Level 2", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(111.89), to_mm<72>(174.29), Center, "Level 3", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(111.89), to_mm<72>(232.15), Center, "Level 4", ""}},
+		Toggle2posHoriz{{to_mm<72>(67.265), to_mm<72>(258.19), Center, "Mod. | Line", ""}},
 		Knob9mm{{to_mm<72>(23.27), to_mm<72>(318.85), Center, "Headphone Level", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(71.7), to_mm<72>(302.94), Center, "Main Level", ""}},
-		Toggle2posHoriz{{to_mm<72>(67.265), to_mm<72>(258.19), Center, "Mod. | Line", ""}},
 		AnalogJackInput4ms{{to_mm<72>(23.31), to_mm<72>(46.17), Center, "In 1", ""}},
 		AnalogJackInput4ms{{to_mm<72>(23.31), to_mm<72>(103.92), Center, "In 2", ""}},
 		AnalogJackInput4ms{{to_mm<72>(23.31), to_mm<72>(161.52), Center, "In 3 L", ""}},
@@ -49,9 +49,9 @@ struct L4Info : ModuleInfoBase {
         Level2Knob,
         Level3Knob,
         Level4Knob,
+        Mod__OR_LineSwitch,
         HeadphoneLevelKnob,
         MainLevelKnob,
-        Mod__OR_LineSwitch,
         In1In,
         In2In,
         In3LIn,
@@ -72,47 +72,48 @@ struct L4Info : ModuleInfoBase {
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobPan_1 = 0,
-        KnobLevel_1 = 1,
-        KnobPan_2 = 2,
-        KnobLevel_2 = 3,
-        KnobLevel_3 = 4,
-        KnobLevel_4 = 5,
-        KnobHeadphone_Level = 6,
-        KnobMain_Level = 7,
+        KnobPan_1, 
+        KnobLevel_1, 
+        KnobPan_2, 
+        KnobLevel_2, 
+        KnobLevel_3, 
+        KnobLevel_4, 
+        KnobHeadphone_Level, 
+        KnobMain_Level, 
         NumKnobs,
     };
     
     enum {
-        SwitchMod___OR__Line = 0,
+        SwitchMod___OR__Line, 
         NumSwitches,
     };
     
     enum {
-        InputIn_1 = 0,
-        InputIn_2 = 1,
-        InputIn_3_L = 2,
-        InputIn_3_R = 3,
-        InputIn_4_L = 4,
-        InputIn_4_R = 5,
+        InputIn_1, 
+        InputIn_2, 
+        InputIn_3_L, 
+        InputIn_3_R, 
+        InputIn_4_L, 
+        InputIn_4_R, 
         NumInJacks,
     };
     
     enum {
-        OutputHeadphone_Out = 0,
-        OutputOut_Left = 1,
-        OutputOut_Right = 2,
+        OutputHeadphone_Out, 
+        OutputOut_Left, 
+        OutputOut_Right, 
         NumOutJacks,
     };
     
     enum {
-        LedLevel_1_Led = 0,
-        LedLevel_2_Led = 1,
-        LedLevel_3_Led = 2,
-        LedLevel_4_Led = 3,
-        LedOut_L_Led = 4,
-        LedOut_R_Led = 5,
+        LedLevel_1_Led, 
+        LedLevel_2_Led, 
+        LedLevel_3_Led, 
+        LedLevel_4_Led, 
+        LedOut_L_Led, 
+        LedOut_R_Led, 
         NumDiscreteLeds,
     };
+    
 };
 } // namespace MetaModule

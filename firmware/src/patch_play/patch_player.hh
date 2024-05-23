@@ -346,11 +346,17 @@ public:
 	}
 
 	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map, float cur_val) {
-		auto found =
-			std::find_if(knob_conns[knobset_id][map.panel_knob_id].begin(),
-						 knob_conns[knobset_id][map.panel_knob_id].end(),
-						 [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
-		if (found != knob_conns[knobset_id][map.panel_knob_id].end()) {
+		if (knobset_id != PatchData::MIDIKnobSet && knobset_id >= knob_conns.size())
+			return;
+
+		auto &knobconn = knobset_id == PatchData::MIDIKnobSet ? midi_knob_conns[map.cc_num()] :
+																knob_conns[knobset_id][map.panel_knob_id];
+
+		auto found = std::find_if(knobconn.begin(), knobconn.end(), [&map](auto m) {
+			return map.param_id == m.param_id && map.module_id == m.module_id;
+		});
+
+		if (found != knobconn.end()) {
 			found->min = map.min;
 			found->max = map.max;
 			found->curve_type = map.curve_type;

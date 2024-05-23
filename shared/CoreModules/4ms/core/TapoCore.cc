@@ -111,13 +111,13 @@ public:
 	// (do not reorder or remove)
 	struct SaveState_t
 	{
-		bool repeat;
-		int8_t current_slot;
-		bool sync;
+		bool repeat = false;
+		int8_t current_slot = -1;
+		bool sync = false;
 		std::vector<TapoDelay::Persistent::SavedSlot> slots;
 	};
 
-	SaveState_t saveState;
+	SaveState_t saveState{};
 
 	void load_state(std::string_view state_data) override 
 	{
@@ -417,28 +417,28 @@ private:
 	static constexpr float VelocityCVInputFullScaleInVolt = 8.0f;
 
 private:
-	uint32_t currentSampleRateInHz;
+	uint32_t currentSampleRateInHz = DefaultSampleRateInHz;
 
 private:
 	static constexpr std::size_t BufferSizeInBytes = 0x02000000;
 	using Buffer_t = std::array<uint8_t,BufferSizeInBytes>;
 
-	Buffer_t buffer;
+	Buffer_t buffer{};
 
-	::TapoDelay::MultitapDelay delay;
-	::TapoDelay::Parameters parameters;
-	::TapoDelay::Ui ui;
+	::TapoDelay::MultitapDelay delay{};
+	::TapoDelay::Parameters parameters{};
+	::TapoDelay::Ui ui{};
 	
 	static constexpr std::size_t BlockSize = ::TapoDelay::kBlockSize;
 	std::array<::TapoDelay::ShortFrame,BlockSize> audioBufferRX;
 	std::array<::TapoDelay::ShortFrame,BlockSize> audioBufferTX;
 	std::size_t audioBufferFillCount;
 
-	uint32_t gateOutCounter;
+	uint32_t gateOutCounter{};
 
-	uint32_t uiSampleCounter;
+	uint32_t uiSampleCounter{};
 
-	std::array<std::optional<unsigned>,4> altParamsOldValues;
+	std::array<std::optional<unsigned>,4> altParamsOldValues{};
 };
 
 } // namespace MetaModule
