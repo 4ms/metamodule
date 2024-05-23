@@ -1,10 +1,10 @@
-#include "CoreModules//moduleFactory.hh"
+#include "console/pr_dbg.hh"
+#include "shared/CoreModules/AudibleInstruments/info/Rings_info.hh"
+#include "shared/CoreModules/moduleFactory.hh"
 #include <app/ModuleWidget.hpp>
 #include <deque>
 #include <plugin/Model.hpp>
 #include <plugin/Plugin.hpp>
-
-#include "console/pr_dbg.hh"
 
 extern rack::plugin::Plugin *pluginInstance;
 
@@ -61,7 +61,7 @@ void Plugin::addModel(Model *model) {
 	info.width_hp = 1; //TODO: deprecate width_hp
 	info.indices = model->indices;
 
-	ModuleFactory::registerModuleInfo(brand, slug, info, panel_filename);
+	ModuleFactory::registerModuleType(brand, slug, model->creation_func, info, panel_filename);
 
 	model->plugin = this;
 	models.push_back(model);

@@ -47,7 +47,7 @@ struct ModuleListPage : PageBase {
 		//TODO: only repopulate if plugins changed
 
 		// Sort by faceplate image name (essentially sorts by brand)
-		auto all_slugs = getAllFaceplateSlugs();
+		auto all_slugs = ModuleFactory::getAllSlugs();
 		// auto all_fps = getAllFaceplates();
 
 		// std::vector<std::size_t> p(all_fps.size());

@@ -1,8 +1,11 @@
 #include "CoreModules/4ms/info/EnOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "doctest.h"
+#include <cstdint>
 #include <span>
-#include <stdint.h>
+#include <string_view>
+
+/////////// Sample module class:
 
 struct TestCoreMod : public CoreProcessor {
 	void update() override {
@@ -22,6 +25,7 @@ struct TestCoreMod : public CoreProcessor {
 	}
 };
 
+////////////// Sample module construction
 static constexpr std::string_view abcabc_slug{"abcabc"};
 constexpr MetaModule::ModuleInfoView abcabcInfo{
 	.description = "abcabc module",
@@ -35,14 +39,23 @@ class AutoInit {
 public:
 	static inline bool g_abcabc_registered_ok =
 		ModuleFactory::registerModuleType(abcabc_slug, TestCoreMod::create, abcabcInfo, "faceplate.png");
+
+	static inline bool g_brandedmod_registered_ok =
+		ModuleFactory::registerModuleType("BrandX", "moduleY", TestCoreMod::create, abcabcInfo, "faceplate.png");
 };
 
+////////////// Tests
+
 TEST_CASE("Static objects register automatically") {
-	constexpr char typeID[20] = "abcabc";
-	CHECK(ModuleFactory::isValidSlug(abcabc_slug));
-	auto cf1 = ModuleFactory::create(abcabc_slug);
+	// defaults to 4ms for brand:
+	CHECK(ModuleFactory::isValidSlug("4ms:abcabc"));
+	auto cf1 = ModuleFactory::create("4ms:abcabc");
 	CHECK(cf1 != nullptr);
 
+	// check explicit brand
+	CHECK(ModuleFactory::isValidSlug("BrandX:moduleY"));
+
+	constexpr char typeID[20] = "abcabc";
 	CHECK(ModuleFactory::isValidSlug(typeID));
 	auto cf = ModuleFactory::create(typeID);
 	CHECK(cf != nullptr);
@@ -107,48 +120,6 @@ TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView")
 		CHECK(name1 == "Scale");
 
 		CHECK(elements.size() == 2);
-
-		// FIXME: update once we convert EnOsc to new format
-		// SUBCASE("Test actual EnOscInfo data") {
-		// 	already_exists =
-		// 		ModuleFactory::registerModuleType("EnOsc2", TestCoreMod::create, ModuleInfoView::makeView<EnOscInfo>());
-		// 	CHECK_FALSE(already_exists);
-
-		// 	auto info = ModuleFactory::getModuleInfo("EnOsc2");
-		// 	CHECK(info.width_hp == 16);
-		// 	CHECK(info.Knobs[0].short_name == "Scale");
-		// 	CHECK(info.Knobs[1].short_name == "Spread");
-		// 	CHECK(info.Knobs[2].short_name == "Pitch");
-		// 	CHECK(info.Knobs[2].knob_style == KnobDef::Medium);
-		// 	CHECK(info.Knobs[4].default_val == 0.5f);
-		// 	CHECK(info.Knobs[7].id == 7);
-		// 	CHECK(info.Knobs.size() == 9);
-
-		// 	CHECK(info.InJacks.size() == 10);
-		// 	CHECK(info.InJacks[2].short_name == "Spread Jack");
-		// 	CHECK(info.InJacks[2].x_mm == EnOscInfo::px_to_mm<72>(96.88f));
-
-		// 	CHECK(info.OutJacks.size() == 2);
-		// 	CHECK(info.OutJacks[0].short_name == "Out A");
-		// 	CHECK(info.OutJacks[0].signal_type == OutJackDef::Analog);
-		// 	CHECK(info.OutJacks[0].id == EnOscInfo::OutputOut_A);
-		// 	CHECK(info.OutJacks[0].y_mm == EnOscInfo::px_to_mm<72>(262.78f));
-
-		// 	// Switches
-		// 	// Leds
-
-		// 	SUBCASE("Test unregistered slug") {
-		// 		CHECK_FALSE(ModuleFactory::isValidSlug("NotFound"));
-
-		// 		auto info = ModuleFactory::getModuleInfo("NotFound");
-		// 		CHECK(info.width_hp == 0);
-		// 		CHECK(info.Knobs.size() == 0);
-		// 		CHECK(info.InJacks.size() == 0);
-		// 		CHECK(info.OutJacks.size() == 0);
-		// 		CHECK(info.Switches.size() == 0);
-		// 		CHECK(info.Leds.size() == 0);
-		// 	}
-		// }
 	}
 }
 

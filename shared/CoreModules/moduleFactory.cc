@@ -3,8 +3,8 @@
 #include <list>
 
 #ifdef TESTPROJECT
-#define pr_dbg(...)
-#define pr_err(...)
+// #define pr_dbg(...)
+// #define pr_err(...)
 #else
 #include "console/pr_dbg.hh"
 #endif
@@ -48,18 +48,15 @@ bool ModuleFactory::registerModuleType(std::string_view brand_name,
 									   std::string_view faceplate_filename) {
 
 	if (auto brand_reg = brand_registry(brand_name); brand_reg != registry().end()) {
-		if (auto module = brand_reg->modules.get(typeslug); module) {
-			// pr_warn("Module %s already registered\n", typeslug.c_str());
-			return false;
-		} else {
-			return brand_reg->modules.insert(typeslug, {funcCreate, info, std::string{faceplate_filename}});
-		}
+		// Brand exists: insert or overwrite existing entry
+		return brand_reg->modules.overwrite(typeslug, {funcCreate, info, std::string{faceplate_filename}});
 	} else {
-		// Brand does not exist:
-		auto brand = registry().emplace_back(BrandRegistry{std::string{brand_name}, {}});
+		// Brand does not exist, create it and insert entry
+		auto &brand = registry().emplace_back(BrandRegistry{std::string{brand_name}, {}});
 		return brand.modules.insert(typeslug, {funcCreate, info, std::string{faceplate_filename}});
 	}
 }
+
 bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug,
 									   CreateModuleFunc funcCreate,
 									   const ModuleInfoView &info,
@@ -67,58 +64,19 @@ bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug,
 	return registerModuleType("4ms", typeslug, funcCreate, info, faceplate_filename);
 }
 
-bool ModuleFactory::registerModuleInfo(std::string_view brand_name,
-									   const ModuleTypeSlug &typeslug,
-									   const ModuleInfoView &info,
-									   std::string_view faceplate) {
-
-	if (auto brand_reg = brand_registry(brand_name); brand_reg != registry().end()) {
-		if (auto module = brand_reg->modules.get(typeslug)) {
-			module->info = info;
-			module->faceplate = std::string{faceplate};
-			return true;
-
-		} else {
-
-			// Module does not exist
-			return brand_reg->modules.insert(typeslug, {{}, info, std::string{faceplate}});
-		}
-
-	} else {
-		// Brand does not exist:
-		auto brand = registry().emplace_back(BrandRegistry{std::string{brand_name}, {}});
-		return brand.modules.insert(typeslug, {{}, info, std::string{faceplate}});
-	}
-}
-
-bool ModuleFactory::registerModuleCreationFunc(std::string_view brand_name,
-											   const ModuleTypeSlug &typeslug,
-											   CreateModuleFunc funcCreate) {
-
-	if (auto brand_reg = brand_registry(brand_name); brand_reg != registry().end()) {
-		if (auto module = brand_reg->modules.get(typeslug)) {
-			module->creation_func = funcCreate;
-			return true;
-		} else {
-			return brand_reg->modules.insert(typeslug, {funcCreate, {}, {}});
-		}
-	} else {
-		// Brand does not exist:
-		auto brand = registry().emplace_back(BrandRegistry{std::string{brand_name}, {}});
-		return brand.modules.insert(typeslug, {funcCreate, {}, {}});
-	}
-}
-
-static std::string_view brand(std::string_view combined_slug) {
+static std::pair<std::string_view, std::string_view> brand_module(std::string_view combined_slug) {
 	auto colon = combined_slug.find_first_of(':');
-	if (colon == std::string_view::npos)
-		return "";
-	return combined_slug.substr(0, colon);
+	if (colon == std::string_view::npos) {
+		return {"4ms", combined_slug};
+	} else {
+		return {combined_slug.substr(0, colon), combined_slug.substr(colon + 1)};
+	}
 }
 
 std::unique_ptr<CoreProcessor> ModuleFactory::create(const ModuleTypeSlug &typeslug) {
-	if (auto brand_reg = brand_registry(brand(typeslug)); brand_reg != registry().end()) {
-		if (auto module = brand_reg->modules.get(typeslug)) {
+	auto [brand, module_name] = brand_module(typeslug);
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
 			if (auto f_create = module->creation_func)
 				return (*f_create)();
 		}
@@ -128,8 +86,9 @@ std::unique_ptr<CoreProcessor> ModuleFactory::create(const ModuleTypeSlug &types
 }
 
 ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &typeslug) {
-	if (auto brand_reg = brand_registry(brand(typeslug)); brand_reg != registry().end()) {
-		if (auto module = brand_reg->modules.get(typeslug)) {
+	auto [brand, module_name] = brand_module(typeslug);
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
 			return module->info;
 		}
 	}
@@ -137,8 +96,9 @@ ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &typeslug) {
 }
 
 std::string_view ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &typeslug) {
-	if (auto brand_reg = brand_registry(brand(typeslug)); brand_reg != registry().end()) {
-		if (auto module = brand_reg->modules.get(typeslug)) {
+	auto [brand, module_name] = brand_module(typeslug);
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
 			return module->faceplate;
 		}
 	}
@@ -147,9 +107,10 @@ std::string_view ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &typeslu
 }
 
 bool ModuleFactory::isValidSlug(const ModuleTypeSlug &typeslug) {
-	if (auto brand_reg = brand_registry(brand(typeslug)); brand_reg != registry().end()) {
-		if (auto module = brand_reg->modules.get(typeslug)) {
-			return bool(module->creation_func) && module->info.elements.size() > 0;
+	auto [brand, module_name] = brand_module(typeslug);
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
+			return bool(module->creation_func);
 		}
 	}
 
@@ -176,7 +137,6 @@ std::vector<ModuleTypeSlug> getAllBrands() {
 	for (auto &brand : registry()) {
 		brands.push_back(brand.brand_name.c_str());
 	}
-	// {"4ms", "Befaco", "MIClones", "HetrickCV", "Nonlinearcircuits", "Scanner Darkly"};
 	return brands;
 }
 
