@@ -59,6 +59,7 @@ struct ModuleListPage : PageBase {
 
 	void prepare_focus() final {
 		view = View::BrandRoller;
+		draw_timer = nullptr;
 		roller_brand_list();
 	}
 
@@ -88,6 +89,8 @@ struct ModuleListPage : PageBase {
 
 			} else if (view == View::ModuleRoller) {
 				view = View::BrandRoller;
+				if (draw_timer)
+					lv_timer_del(draw_timer);
 				hide_module();
 				roller_brand_list();
 
@@ -124,7 +127,6 @@ struct ModuleListPage : PageBase {
 	}
 
 	void blur() final {
-		lv_timer_del(draw_timer);
 	}
 
 private:
