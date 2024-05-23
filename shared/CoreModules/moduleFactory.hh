@@ -36,6 +36,8 @@ public:
 	static bool isValidSlug(const ModuleTypeSlug &typeslug);
 
 	static std::vector<ModuleTypeSlug> getAllSlugs();
+	static std::vector<ModuleTypeSlug> getAllSlugs(std::string_view brand);
+	static std::vector<ModuleTypeSlug> getAllBrands();
 };
 
 } // namespace MetaModule

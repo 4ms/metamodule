@@ -121,18 +121,19 @@ std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs() {
 	std::vector<ModuleTypeSlug> slugs;
 	for (auto &brand : registry()) {
 		slugs.insert(
-			slugs.end(), brand.modules.keys.begin(), std::next(brand.modules.keys.begin(), brand.modules.keys.size()));
+			slugs.end(), brand.modules.keys.begin(), std::next(brand.modules.keys.begin(), brand.modules.size()));
 	}
 	return slugs;
 }
 
-// std::vector<ModuleTypeSlug> getAllFaceplateSlugs() {
-// 	std::vector<ModuleTypeSlug> slugs;
-// 	slugs.assign(faceplates().keys.begin(), std::next(faceplates().keys.begin(), infos().size()));
-// 	return slugs;
-// }
+std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs(std::string_view brand) {
+	std::vector<ModuleTypeSlug> slugs;
+	auto modules = brand_registry(brand)->modules;
+	slugs.assign(modules.keys.begin(), std::next(modules.keys.begin(), modules.size()));
+	return slugs;
+}
 
-std::vector<ModuleTypeSlug> getAllBrands() {
+std::vector<ModuleTypeSlug> ModuleFactory::getAllBrands() {
 	std::vector<ModuleTypeSlug> brands;
 	for (auto &brand : registry()) {
 		brands.push_back(brand.brand_name.c_str());
