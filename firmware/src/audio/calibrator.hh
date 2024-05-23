@@ -22,6 +22,18 @@ namespace MetaModule
 struct AudioInCalibrator {
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
 
+	void use_defaults(AudioStream &audio) {
+		std::array<std::pair<float, float>, PanelDef::NumAudioIn> caldata{{
+			{-7603.204102, 3258431.500000},
+			{-7982.296387, 3268419.500000},
+			{-12926.662109, 3255171.250000},
+			{-7208.814453, 3256771.000000},
+			{-16831.820312, 3262270.250000},
+			{-14835.051758, 3257434.250000},
+		}};
+		audio.set_calibration<0, 4000>(caldata);
+	}
+
 	bool read_calibration(AudioStream &audio) {
 		std::array<std::pair<float, float>, PanelDef::NumAudioIn> caldata;
 

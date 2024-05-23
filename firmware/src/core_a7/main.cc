@@ -88,23 +88,27 @@ void main() {
 	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
 
 	pr_info("A7 Core 1 initialized\n");
+	// Note: from after the HAL_Delay(50) until here, it takes 20ms
 
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
-	// wait for other cores to be ready
+	// wait for other cores to be ready: ~2400ms
 	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() && mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
+
+	// ~290ms until while loop
 
 	sync_params.clear();
 	patch_playloader.load_initial_patch();
 
 	AudioInCalibrator cal;
 	if (!cal.read_calibration(audio)) {
-		cal.calibrate(audio);
-	} else {
-		audio.start();
+		pr_info("No CV calibration data found, using defaults\n");
+		cal.use_defaults(audio);
 	}
+
+	audio.start();
 
 	print_time();
 
