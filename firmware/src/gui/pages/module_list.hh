@@ -48,12 +48,12 @@ struct ModuleListPage : PageBase {
 
 		// Sort by faceplate image name (essentially sorts by brand)
 		auto all_slugs = getAllFaceplateSlugs();
-		auto all_fps = getAllFaceplates();
+		// auto all_fps = getAllFaceplates();
 
-		std::vector<std::size_t> p(all_fps.size());
-		std::iota(p.begin(), p.end(), 0);
-		std::sort(p.begin(), p.end(), [&](std::size_t i, std::size_t j) { return all_fps[i] < all_fps[j]; });
-		apply_permutation_in_place(all_slugs, p);
+		// std::vector<std::size_t> p(all_fps.size());
+		// std::iota(p.begin(), p.end(), 0);
+		// std::sort(p.begin(), p.end(), [&](std::size_t i, std::size_t j) { return all_fps[i] < all_fps[j]; });
+		// apply_permutation_in_place(all_slugs, p);
 
 		std::string slugs_str;
 		slugs_str.reserve(all_slugs.size() * sizeof(ModuleTypeSlug));
