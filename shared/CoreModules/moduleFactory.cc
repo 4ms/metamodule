@@ -66,15 +66,23 @@ bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug,
 
 static std::pair<std::string_view, std::string_view> brand_module(std::string_view combined_slug) {
 	auto colon = combined_slug.find_first_of(':');
-	if (colon == std::string_view::npos) {
-		return {"4ms", combined_slug};
-	} else {
+	if (colon != std::string_view::npos) {
 		return {combined_slug.substr(0, colon), combined_slug.substr(colon + 1)};
+
+	} else {
+		auto module_slug = combined_slug;
+		//search all brands for module slug
+		for (auto &brand : registry()) {
+			if (brand.modules.get(module_slug)) {
+				return {brand.brand_name.c_str(), module_slug};
+			}
+		}
+		return {"", ""};
 	}
 }
 
-std::unique_ptr<CoreProcessor> ModuleFactory::create(const ModuleTypeSlug &typeslug) {
-	auto [brand, module_name] = brand_module(typeslug);
+std::unique_ptr<CoreProcessor> ModuleFactory::create(const ModuleTypeSlug &combined_slug) {
+	auto [brand, module_name] = brand_module(combined_slug);
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
 			if (auto f_create = module->creation_func)
@@ -85,8 +93,8 @@ std::unique_ptr<CoreProcessor> ModuleFactory::create(const ModuleTypeSlug &types
 	return nullptr;
 }
 
-ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &typeslug) {
-	auto [brand, module_name] = brand_module(typeslug);
+ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &combined_slug) {
+	auto [brand, module_name] = brand_module(combined_slug);
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
 			return module->info;
@@ -95,8 +103,8 @@ ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &typeslug) {
 	return nullinfo;
 }
 
-std::string_view ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &typeslug) {
-	auto [brand, module_name] = brand_module(typeslug);
+std::string_view ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &combined_slug) {
+	auto [brand, module_name] = brand_module(combined_slug);
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
 			return module->faceplate;
@@ -106,8 +114,8 @@ std::string_view ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &typeslu
 	return "";
 }
 
-bool ModuleFactory::isValidSlug(const ModuleTypeSlug &typeslug) {
-	auto [brand, module_name] = brand_module(typeslug);
+bool ModuleFactory::isValidSlug(const ModuleTypeSlug &combined_slug) {
+	auto [brand, module_name] = brand_module(combined_slug);
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
 			return bool(module->creation_func);
