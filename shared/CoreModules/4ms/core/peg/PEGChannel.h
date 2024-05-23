@@ -18,25 +18,25 @@ class PEGChannel
 	friend Parent;
 
 private:
-    template<Parent::Info::Elem EL>
+    template<typename Parent::Info::Elem EL>
 	void setOutput(auto val)
 	{
 		return parent->template setOutput<EL>(val);
 	}
 
-	template<Parent::Info::Elem EL>
+	template<typename Parent::Info::Elem EL>
 	auto getInput()
 	{
 		return parent->template getInput<EL>();
 	}
 
-	template<Parent::Info::Elem EL, typename VAL>
+	template<typename Parent::Info::Elem EL, typename VAL>
 	void setLED(const VAL &value)
 	{
 		return parent->template setLED<EL>(value);
 	}
 
-	template<Parent::Info::Elem EL>
+	template<typename Parent::Info::Elem EL>
 	auto getState()
 	{
 		return parent->template getState<EL>();
