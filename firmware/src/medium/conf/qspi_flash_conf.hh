@@ -23,7 +23,7 @@ constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
 
 	.chip_id = mdrivlib::QSPIFlashConfig::W25Q128JV,
 
-	.io_mode = mdrivlib::QSPIFlashConfig::IOMode::SingleSPI,
+	.io_mode = mdrivlib::QSPIFlashConfig::IOMode::QuadSPI,
 
 	.bank = mdrivlib::QSPIFlashConfig::Bank1,
 };
