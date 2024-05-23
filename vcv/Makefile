@@ -65,24 +65,29 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo_mocks.cc
 
 # MiniPEG
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/main.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/trigout.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/analog_conditioning.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/env_update.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/main.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/trigout.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/analog_conditioning.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/env_update.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/envelope_calcs.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/flash_user.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/params.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/pingable_env.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/dig_inouts.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/timers.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/calibration.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/env_transition.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/leds.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/shareddrv/debounced_digins.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/shareddrv/dac.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/pwm.cc
+
 SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/envelope_calcs.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/flash_user.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/params.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/pingable_env.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/dig_inouts.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/timers.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/calibration.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/env_transition.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/leds.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/shareddrv/debounced_digins.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/shareddrv/dac.cc
-SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/pwm.cc
-INCLUDES += -I$(SHARED)/CoreModules/4ms/core/mpeg/
-INCLUDES += -I$(SHARED)/CoreModules/4ms/core/mpeg/mocks
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg/envelope_calcs.cc
+
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg-common/
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg-common/mocks
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS += -std=c++2a 

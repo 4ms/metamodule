@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -14,7 +15,7 @@ struct MPEGInfo : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 24> Elements{{
+    static constexpr std::array<Element, 25> Elements{{
 		Davies1900hBlackKnob{{to_mm<72>(36.45), to_mm<72>(87.77), Center, "Div/Mult", ""}},
 		Davies1900hBlackKnob{{to_mm<72>(37.35), to_mm<72>(154.72), Center, "Shape", ""}},
 		Knob9mm{{to_mm<72>(91.14), to_mm<72>(133.33), Center, "Scale", ""}},
@@ -32,6 +33,7 @@ struct MPEGInfo : ModuleInfoBase {
 		RedLight{{to_mm<72>(14.57), to_mm<72>(220.0), Center, "EOF Light", ""}},
 		RedGreenBlueLight{{to_mm<72>(57.4), to_mm<72>(200.1), Center, "ENV OUT Light", ""}},
 		RedGreenBlueLight{{to_mm<72>(99.67), to_mm<72>(220.0), Center, "5V ENV Light", ""}},
+		AltParamChoiceLabeled{{{to_mm<72>(30.52), to_mm<72>(41.57), Center, "Sync Mode", ""}, 2, 1}, {"Sync", "Async"}},
 		AltParamContinuous{{to_mm<72>(91.14), to_mm<72>(188.54), Center, "Shift", ""}, 0.5f},
 		AltParamChoiceLabeled{{{to_mm<72>(57.12), to_mm<72>(224.36), Center, "Skew Limit", ""}, 2, 1}, {"Off", "On"}},
 		AltParamChoiceLabeled{{{to_mm<72>(80.21), to_mm<72>(41.57), Center, "Free-running Ping", ""}, 2, 1}, {"On", "Off"}},
@@ -59,6 +61,7 @@ struct MPEGInfo : ModuleInfoBase {
         EofLight,
         EnvOutLight,
         _5VEnvLight,
+        SyncModeAltParam,
         ShiftAltParam,
         SkewLimitAltParam,
         FreeNRunningPingAltParam,
@@ -108,6 +111,7 @@ struct MPEGInfo : ModuleInfoBase {
     };
     
     enum {
+        AltParamSync_Mode, 
         AltParamShift, 
         AltParamSkew_Limit, 
         AltParamFreeNRunning_Ping, 

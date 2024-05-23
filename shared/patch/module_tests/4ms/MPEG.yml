@@ -60,24 +60,27 @@ PatchData:
       value: 0
     - module_id: 1
       param_id: 6
-      value: 0.5
+      value: 0
     - module_id: 1
       param_id: 7
-      value: 0
+      value: 0.5
     - module_id: 1
       param_id: 8
-      value: 0
+      value: 1
     - module_id: 1
       param_id: 9
-      value: 0
+      value: 1
     - module_id: 1
       param_id: 10
       value: 0
     - module_id: 1
       param_id: 11
-      value: 0
+      value: 0.333333
     - module_id: 1
       param_id: 12
+      value: 0.5
+    - module_id: 1
+      param_id: 13
       value: 0
   mapped_knobs:
     - name: ''
@@ -136,4 +139,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
-  vcvModuleStates: []
+  vcvModuleStates:
+    - module_id: 1
+      data: |-
+        XuzTPgGowwE=
