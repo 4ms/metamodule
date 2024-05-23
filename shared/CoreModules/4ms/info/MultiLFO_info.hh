@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,7 +11,7 @@ struct MultiLFOInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Multi LFO"};
     static constexpr uint32_t width_hp = 8;
     static constexpr std::string_view svg_filename{"res/modules/MultiLFO_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/MultiLFO.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/MultiLFO.png"};
 
     using enum Coords;
 
@@ -45,28 +46,29 @@ struct MultiLFOInfo : ModuleInfoBase {
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobRate = 0,
-        KnobPhase = 1,
-        KnobPw = 2,
+        KnobRate, 
+        KnobPhase, 
+        KnobPw, 
         NumKnobs,
     };
     
     
     enum {
-        InputReset = 0,
-        InputPw_Cv = 1,
-        InputRate_Cv = 2,
-        InputPhase_Cv = 3,
+        InputReset, 
+        InputPw_Cv, 
+        InputRate_Cv, 
+        InputPhase_Cv, 
         NumInJacks,
     };
     
     enum {
-        OutputInv_Saw = 0,
-        OutputPulse = 1,
-        OutputSaw = 2,
-        OutputSine = 3,
+        OutputInv_Saw, 
+        OutputPulse, 
+        OutputSaw, 
+        OutputSine, 
         NumOutJacks,
     };
+    
     
 };
 } // namespace MetaModule

@@ -2,7 +2,7 @@ set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../..)
 set(4MS_DIR ${MM_ROOT}/shared/CoreModules/4ms/core)
 
 set(4msModules
-    ADEnv
+    # ADEnv
     Atvert2
     BPF
     CLKD
@@ -22,8 +22,8 @@ set(4msModules
     HPF
     KPLS
     L4
-    LPF
-    LPG
+    # LPF
+    # LPG
     MNMX
     MPEG
     MultiLFO
@@ -36,7 +36,7 @@ set(4msModules
     Prob8
     QCD
     QPLFO
-    Quant
+    # Quant
     RCD
     SCM
     SH
@@ -45,7 +45,7 @@ set(4msModules
     STS
     Seq8
     Slew
-    Source
+    # Source
     StMix
     Switch14
     Switch41

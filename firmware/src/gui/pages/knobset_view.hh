@@ -54,7 +54,9 @@ struct KnobSetViewPage : PageBase {
 		static_params.clear();
 
 		// Setup
-		update_active_status(true);
+		update_active_status();
+		display_active_status();
+
 		patch = patch_storage.get_view_patch();
 
 		if (patch->knob_sets.size() > 2) {
@@ -142,38 +144,61 @@ struct KnobSetViewPage : PageBase {
 		lv_group_set_editing(group, false);
 	}
 
-	void update_active_status(bool force = false) {
-		bool prev_value = is_actively_playing;
+	void jump_to_active_knobset() {
+		// When changing knobsets with button+knob, then
+		// jump to the new active knobset
+		if (last_known_active_knobset != page_list.get_active_knobset()) {
 
+			page_list.request_new_page_no_history(
+				PageId::KnobSetView,
+				{.patch_loc_hash = args.patch_loc_hash, .view_knobset_id = page_list.get_active_knobset()});
+
+			last_known_active_knobset = page_list.get_active_knobset();
+		}
+	}
+
+	void update_active_status() {
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playing && args.view_knobset_id.value_or(999) == page_list.get_active_knobset())
 			is_actively_playing = true;
 		else
 			is_actively_playing = false;
+	}
 
-		if (force || prev_value != is_actively_playing) {
-			if (is_actively_playing) {
-				lv_show(ui_KnobSetDescript);
-				lv_hide(ui_ActivateKnobSet);
-				lv_label_set_text(ui_KnobSetDescript, "(Active)");
+	void handle_changed_active_status() {
+		jump_to_active_knobset();
 
-				for (auto [knob_i, pane] : enumerate(panes)) {
-					auto num_children = lv_obj_get_child_cnt(pane);
-					for (auto i = 0u; i < num_children; i++) {
-						auto child = lv_obj_get_child(pane, i);
-						enable(child, knob_i);
-					}
+		auto was_actively_playing = is_actively_playing;
+
+		update_active_status();
+
+		if (was_actively_playing != is_actively_playing) {
+			display_active_status();
+		}
+	}
+
+	void display_active_status() {
+		if (is_actively_playing) {
+			lv_show(ui_KnobSetDescript);
+			lv_hide(ui_ActivateKnobSet);
+			lv_label_set_text(ui_KnobSetDescript, "(Active)");
+
+			for (auto [knob_i, pane] : enumerate(panes)) {
+				auto num_children = lv_obj_get_child_cnt(pane);
+				for (auto i = 0u; i < num_children; i++) {
+					auto child = lv_obj_get_child(pane, i);
+					enable(child, knob_i);
 				}
-			} else {
-				lv_hide(ui_KnobSetDescript);
-				lv_show(ui_ActivateKnobSet, is_patch_playing);
-				for (auto [knob_i, pane] : enumerate(panes)) {
-					auto num_children = lv_obj_get_child_cnt(pane);
-					for (auto i = 0u; i < num_children; i++) {
-						auto child = lv_obj_get_child(pane, i);
-						disable(child, knob_i);
-					}
+			}
+		} else {
+			lv_hide(ui_KnobSetDescript);
+			lv_show(ui_ActivateKnobSet, is_patch_playing);
+			for (auto [knob_i, pane] : enumerate(panes)) {
+				auto num_children = lv_obj_get_child_cnt(pane);
+				for (auto i = 0u; i < num_children; i++) {
+					auto child = lv_obj_get_child(pane, i);
+					disable(child, knob_i);
 				}
 			}
 		}
@@ -187,7 +212,7 @@ struct KnobSetViewPage : PageBase {
 			}
 		}
 
-		update_active_status();
+		handle_changed_active_status();
 
 		if (knobset) {
 			for (auto [arc, s_param, map] : zip(arcs, static_params, knobset->set)) {
@@ -282,7 +307,7 @@ private:
 		args.view_knobset_id = knobset_idx;
 		page_list.set_active_knobset(knobset_idx);
 		patch_mod_queue.put(ChangeKnobSet{knobset_idx});
-		update_active_status();
+		handle_changed_active_status();
 	}
 
 	void set_for_knob(lv_obj_t *cont, unsigned knob_i) {
@@ -300,6 +325,9 @@ private:
 	MappedKnobSet *knobset = nullptr;
 	PatchData *patch;
 	bool is_actively_playing = false;
+
+	bool is_patch_playing = false;
+	unsigned last_known_active_knobset = 0;
 
 	std::vector<lv_obj_t *> arcs;
 	std::vector<const StaticParam *> static_params;
@@ -384,8 +412,6 @@ private:
 		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
 		lv_obj_set_style_opa(knob, LV_OPA_100, LV_PART_KNOB);
 	}
-
-	bool is_patch_playing = false;
 };
 
 } // namespace MetaModule

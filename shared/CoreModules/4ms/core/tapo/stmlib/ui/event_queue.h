@@ -82,8 +82,8 @@ class EventQueue {
   }
   
  private:
-  uint32_t last_event_time_;
-  RingBuffer<Event, size> events_;
+  uint32_t last_event_time_{};
+  RingBuffer<Event, size> events_{};
   SystemClock &system_clock;
 };
 

@@ -88,18 +88,11 @@ struct PatchData {
 		return nullptr;
 	}
 
-	// Adds the knob mapping if and only if it does not exist
-	bool add_unique_mapped_knob(uint32_t set_id, MappedKnob const &map) {
-		if (!find_mapped_knob(set_id, map.module_id, map.param_id)) {
-			knob_sets[set_id].set.push_back(map);
-			return true;
-		}
-
-		return false;
-	}
-
 	// Updates an existing mapped knob, or adds it if it doesn't exist yet
 	bool add_update_mapped_knob(uint32_t set_id, MappedKnob const &map) {
+		if (set_id == MIDIKnobSet)
+			return add_update_midi_map(map);
+
 		if (set_id >= MaxKnobSets)
 			return false;
 
@@ -143,15 +136,16 @@ struct PatchData {
 	}
 
 	bool remove_mapping(uint32_t set_id, MappedKnob const &map) {
-		if (set_id >= knob_sets.size())
+		if (set_id != MIDIKnobSet && set_id >= knob_sets.size())
 			return false;
 
 		if (map.module_id >= module_slugs.size())
 			return false;
 
-		auto num_erased = std::erase_if(knob_sets[set_id].set, [&map](auto m) {
-			return (m.module_id == map.module_id && m.param_id == map.param_id);
-		});
+		MappedKnobSet &set = (set_id == MIDIKnobSet) ? midi_maps : knob_sets[set_id];
+
+		auto num_erased = std::erase_if(
+			set.set, [&map](auto m) { return (m.module_id == map.module_id && m.param_id == map.param_id); });
 
 		return num_erased > 0;
 	}

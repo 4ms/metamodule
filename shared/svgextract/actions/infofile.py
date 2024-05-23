@@ -331,6 +331,7 @@ struct {slug}Info : ModuleInfoBase {{
     static constexpr std::string_view description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
     static constexpr std::string_view svg_filename{{"res/modules/{slug}_artwork.svg"}};
+    static constexpr std::string_view png_filename{{"4ms/fp/{slug}.png"}};
 
     using enum Coords;
 
