@@ -9,6 +9,8 @@
 #include <deque>
 #include <string>
 
+extern rack::plugin::Plugin *pluginInstance;
+
 namespace MetaModule
 {
 
@@ -226,6 +228,7 @@ public:
 			return false;
 		}
 
+		pluginInstance = &plugin.rack_plugin;
 		//TODO: trap exceptions, restore state, and return
 		init(&plugin.rack_plugin);
 
