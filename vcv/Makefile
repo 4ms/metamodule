@@ -65,7 +65,7 @@ SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo_mocks.cc
 
 # MiniPEG
-SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/main.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/peg_base.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/trigout.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/analog_conditioning.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/env_update.cc
