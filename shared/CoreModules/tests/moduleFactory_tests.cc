@@ -48,8 +48,8 @@ public:
 
 TEST_CASE("Static objects register automatically") {
 	// defaults to 4ms for brand:
-	CHECK(ModuleFactory::isValidSlug("4ms:abcabc"));
-	auto cf1 = ModuleFactory::create("4ms:abcabc");
+	CHECK(ModuleFactory::isValidSlug("4msCompany:abcabc"));
+	auto cf1 = ModuleFactory::create("4msCompany:abcabc");
 	CHECK(cf1 != nullptr);
 
 	// check explicit brand

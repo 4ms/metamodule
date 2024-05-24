@@ -3,8 +3,8 @@
 #include <list>
 
 #ifdef TESTPROJECT
-// #define pr_dbg(...)
-// #define pr_err(...)
+#define pr_dbg(...)
+#define pr_err(...)
 #else
 #include "console/pr_dbg.hh"
 #endif
@@ -61,7 +61,7 @@ bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug,
 									   CreateModuleFunc funcCreate,
 									   const ModuleInfoView &info,
 									   std::string_view faceplate_filename) {
-	return registerModuleType("4ms", typeslug, funcCreate, info, faceplate_filename);
+	return registerModuleType("4msCompany", typeslug, funcCreate, info, faceplate_filename);
 }
 
 static std::pair<std::string_view, std::string_view> brand_module(std::string_view combined_slug) {
@@ -74,6 +74,7 @@ static std::pair<std::string_view, std::string_view> brand_module(std::string_vi
 		//search all brands for module slug
 		for (auto &brand : registry()) {
 			if (brand.modules.get(module_slug)) {
+				pr_dbg("Brand not specified, found %s in %s\n", module_slug.data(), brand.brand_name.c_str());
 				return {brand.brand_name.c_str(), module_slug};
 			}
 		}
