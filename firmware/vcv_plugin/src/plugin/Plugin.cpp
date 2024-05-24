@@ -1,10 +1,11 @@
-#include "CoreModules//moduleFactory.hh"
+#include "console/pr_dbg.hh"
+#include "shared/CoreModules/moduleFactory.hh"
 #include <app/ModuleWidget.hpp>
 #include <deque>
 #include <plugin/Model.hpp>
 #include <plugin/Plugin.hpp>
 
-#include "console/pr_dbg.hh"
+extern rack::plugin::Plugin *pluginInstance;
 
 namespace rack::plugin
 {
@@ -15,8 +16,11 @@ void Plugin::addModel(Model *model) {
 
 	using namespace MetaModule;
 
+	model->plugin = pluginInstance;
 	std::string_view slug = model->slug;
-	pr_trace("Adding VCV_adaptor model %s\n", model->slug.c_str());
+	std::string_view brand = model->plugin->slug;
+
+	pr_trace("Adding VCV_adaptor model %s:%s\n", brand.data(), slug.data());
 
 	if (ModuleFactory::isValidSlug(slug)) {
 		pr_err("Duplicate module slug: %s, skipping\n", model->slug.c_str());
@@ -36,11 +40,13 @@ void Plugin::addModel(Model *model) {
 		panelsvg = modulewidget->panel->svg->filename;
 	}
 
+	std::string_view panel_filename = "";
+
 	if (panelsvg.size()) {
-		auto panel_filename = model->add_string(panelsvg);
-		ModuleFactory::registerModuleFaceplate(slug, panel_filename);
-	} else
+		panel_filename = model->add_string(panelsvg);
+	} else {
 		pr_err("No faceplate for %s\n", model->slug.c_str());
+	}
 
 	// if (slug == "MotionMTR")
 	// 	model->debug_dump_strings();
@@ -54,7 +60,7 @@ void Plugin::addModel(Model *model) {
 	info.width_hp = 1; //TODO: deprecate width_hp
 	info.indices = model->indices;
 
-	ModuleFactory::registerModuleInfo(slug, info);
+	ModuleFactory::registerModuleType(brand, slug, model->creation_func, info, panel_filename);
 
 	model->plugin = this;
 	models.push_back(model);

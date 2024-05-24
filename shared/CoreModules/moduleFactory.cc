@@ -1,5 +1,6 @@
 #include "CoreModules/moduleFactory.hh"
 #include "util/seq_map.hh"
+#include <list>
 
 #ifdef TESTPROJECT
 #define pr_dbg(...)
@@ -15,101 +16,129 @@ namespace
 {
 //Lazily loaded maps, needed to avoid static-initialization ordering issues with CoreModules self-registering
 
+struct ModuleRegistry {
+	ModuleFactory::CreateModuleFunc creation_func;
+	ModuleInfoView info;
+	std::string faceplate;
+};
+
 static constexpr int MAX_MODULE_TYPES = 512;
+struct BrandRegistry {
+	ModuleTypeSlug brand_name;
+	SeqMap<ModuleTypeSlug, ModuleRegistry, MAX_MODULE_TYPES> modules;
+};
 
-auto &creation_funcs() {
-	static SeqMap<ModuleTypeSlug, ModuleFactory::CreateModuleFunc, MAX_MODULE_TYPES> _creation_funcs{};
-	return _creation_funcs;
-}
-
-auto &infos() {
-	static SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> _infos{};
-	return _infos;
-}
-
-auto &faceplates() {
-	static SeqMap<ModuleTypeSlug, std::string_view, MAX_MODULE_TYPES> _faceplates{};
-	return _faceplates;
+auto &registry() {
+	static std::list<BrandRegistry> _registry{};
+	return _registry;
 }
 
 ModuleInfoView nullinfo{};
 
-std::string _currentBrand;
-
 } // namespace
+
+static auto brand_registry(std::string_view brand) {
+	return std::find_if(registry().begin(), registry().end(), [=](auto b) { return b.brand_name == brand; });
+}
+
+bool ModuleFactory::registerModuleType(std::string_view brand_name,
+									   const ModuleTypeSlug &typeslug,
+									   CreateModuleFunc funcCreate,
+									   const ModuleInfoView &info,
+									   std::string_view faceplate_filename) {
+
+	if (auto brand_reg = brand_registry(brand_name); brand_reg != registry().end()) {
+		// Brand exists: insert or overwrite existing entry
+		return brand_reg->modules.overwrite(typeslug, {funcCreate, info, std::string{faceplate_filename}});
+	} else {
+		// Brand does not exist, create it and insert entry
+		auto &brand = registry().emplace_back(BrandRegistry{brand_name, {}});
+		return brand.modules.insert(typeslug, {funcCreate, info, std::string{faceplate_filename}});
+	}
+}
 
 bool ModuleFactory::registerModuleType(const ModuleTypeSlug &typeslug,
 									   CreateModuleFunc funcCreate,
 									   const ModuleInfoView &info,
 									   std::string_view faceplate_filename) {
-	bool already_exists = registerModuleCreationFunc(typeslug, funcCreate);
-	registerModuleInfo(typeslug, info);
-	registerModuleFaceplate(typeslug, faceplate_filename);
-	return already_exists;
+	return registerModuleType("4msCompany", typeslug, funcCreate, info, faceplate_filename);
 }
 
-bool ModuleFactory::registerModuleInfo(const ModuleTypeSlug &typeslug, const ModuleInfoView &info) {
-	if (!infos().key_exists(typeslug)) {
-		// pr_dbg("ModuleFactory::register %s to infos() %p\n", typeslug.c_str(), &infos());
-		return infos().insert(typeslug, info);
+static std::pair<std::string_view, std::string_view> brand_module(std::string_view combined_slug) {
+	auto colon = combined_slug.find_first_of(':');
+	if (colon != std::string_view::npos) {
+		return {combined_slug.substr(0, colon), combined_slug.substr(colon + 1)};
+
 	} else {
-		pr_err("ModuleFactory: info for %s already exists\n", typeslug.c_str());
-		return false;
+		auto module_slug = combined_slug;
+		//search all brands for module slug
+		for (auto &brand : registry()) {
+			if (brand.modules.get(module_slug)) {
+				pr_dbg("Brand not specified, found %s in %s\n", module_slug.data(), brand.brand_name.c_str());
+				return {brand.brand_name.c_str(), module_slug};
+			}
+		}
+		return {"", ""};
 	}
 }
 
-bool ModuleFactory::registerModuleCreationFunc(const ModuleTypeSlug &typeslug, CreateModuleFunc funcCreate) {
-	if (!creation_funcs().key_exists(typeslug)) {
-		// pr_dbg("ModuleFactory::register %s to funcs %p\n", typeslug.c_str(), &creation_funcs());
-		return creation_funcs().insert(typeslug, funcCreate);
-	} else {
-		pr_err("ModuleFactory: creation func for %s already exists\n", typeslug.c_str());
-		return false;
+std::unique_ptr<CoreProcessor> ModuleFactory::create(std::string_view combined_slug) {
+	auto [brand, module_name] = brand_module(combined_slug);
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
+			if (auto f_create = module->creation_func)
+				return (*f_create)();
+		}
 	}
+
+	return nullptr;
 }
 
-bool ModuleFactory::registerModuleFaceplate(const ModuleTypeSlug &typeslug, std::string_view faceplate) {
-	if (!faceplates().key_exists(typeslug)) {
-		// pr_dbg("ModuleFactory::register %s to faceplate %.*s\n",
-		// 	   typeslug.c_str(),
-		// 	   (int)faceplate.size(),
-		// 	   faceplate.data());
-		return faceplates().insert(typeslug, faceplate);
-	} else {
-		pr_err("ModuleFactory: faceplate for %s already exists\n", typeslug.c_str());
-		return false;
+ModuleInfoView &ModuleFactory::getModuleInfo(std::string_view combined_slug) {
+	auto [brand, module_name] = brand_module(combined_slug);
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
+			return module->info;
+		}
 	}
+	return nullinfo;
 }
 
-std::unique_ptr<CoreProcessor> ModuleFactory::create(const ModuleTypeSlug &typeslug) {
-	if (auto f_create = creation_funcs().get(typeslug))
-		return (*f_create)();
-	else
-		return nullptr;
+std::string_view ModuleFactory::getModuleFaceplate(std::string_view combined_slug) {
+	auto [brand, module_name] = brand_module(combined_slug);
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
+			return module->faceplate;
+		}
+	}
+
+	return "";
 }
 
-ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &typeslug) {
-	if (auto m = infos().get(typeslug))
-		return *m;
-	else
-		return nullinfo;
+bool ModuleFactory::isValidSlug(std::string_view combined_slug) {
+	auto [brand, module_name] = brand_module(combined_slug);
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
+			return bool(module->creation_func);
+		}
+	}
+
+	return false;
 }
 
-std::string_view ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &typeslug) {
-	if (auto m = faceplates().get(typeslug))
-		return *m;
-	else
-		return "";
-}
-
-bool ModuleFactory::isValidSlug(const ModuleTypeSlug &typeslug) {
-	return infos().key_exists(typeslug) && creation_funcs().key_exists(typeslug);
-}
-
-std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs() {
+std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs(std::string_view brand) {
 	std::vector<ModuleTypeSlug> slugs;
-	slugs.assign(infos().keys.begin(), std::next(infos().keys.begin(), infos().size()));
+	auto modules = brand_registry(brand)->modules;
+	slugs.assign(modules.keys.begin(), std::next(modules.keys.begin(), modules.size()));
 	return slugs;
+}
+
+std::vector<ModuleTypeSlug> ModuleFactory::getAllBrands() {
+	std::vector<ModuleTypeSlug> brands;
+	for (auto &brand : registry()) {
+		brands.push_back(brand.brand_name.c_str());
+	}
+	return brands;
 }
 
 } // namespace MetaModule

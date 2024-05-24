@@ -63,7 +63,7 @@ void write(ryml::NodeRef *n, StaticParam const &k) {
 	n->append_child() << ryml::key("value") << k.value;
 }
 
-void write(ryml::NodeRef *n, std::vector<ModuleTypeSlug> const &slugs) {
+void write(ryml::NodeRef *n, std::vector<BrandModuleSlug> const &slugs) {
 	*n |= ryml::MAP;
 	for (auto [i, x] : enumerate(slugs)) {
 		auto idx_s = std::to_string(i);

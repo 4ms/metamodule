@@ -14,7 +14,7 @@
 
 class PatchFileWriter {
 public:
-	PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId);
+	PatchFileWriter(std::vector<BrandModule> modules, int64_t hubModuleId);
 	~PatchFileWriter();
 
 	void setPatchName(std::string patchName);
@@ -41,7 +41,7 @@ private:
 
 	void mapMidiCVPolySplitJack(CableMap &cable, unsigned monoJackId);
 
-	void setModuleList(std::vector<ModuleID> &modules);
+	void setModuleList(std::vector<BrandModule> &modules);
 
 	PatchData pd;
 	int64_t hubModuleId = -1;

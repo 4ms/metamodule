@@ -12,3 +12,8 @@ struct ModuleID {
 		return (this->id == rhs.id) && (this->slug == rhs.slug);
 	}
 };
+
+struct BrandModule {
+	int64_t id;
+	BrandModuleSlug slug;
+};

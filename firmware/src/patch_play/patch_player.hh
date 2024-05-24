@@ -418,7 +418,7 @@ public:
 		pd.disconnect_outjack(jack);
 	}
 
-	void add_module(ModuleTypeSlug slug) {
+	void add_module(BrandModuleSlug slug) {
 		auto module_idx = pd.module_slugs.size();
 		pd.module_slugs.push_back(slug); //only needed to make sure pd.module_slugs.size() is accurate
 

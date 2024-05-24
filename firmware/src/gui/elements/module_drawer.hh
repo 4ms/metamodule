@@ -19,13 +19,13 @@ struct ModuleDrawer {
 	uint32_t height;
 
 	// Draws the module from patch, into container, using the provided buffer.
-	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
+	lv_obj_t *draw_faceplate(std::string_view slug, std::span<lv_color_t> canvas_buffer) {
 		lv_obj_scroll_to_x(container, 0, LV_ANIM_OFF);
 		lv_obj_scroll_to_y(container, 0, LV_ANIM_OFF);
 		const auto img_filename = ModuleImages::get_faceplate_path(slug);
 		if (img_filename.length() <= 2) {
-			if (!slug.is_equal("HubMedium"))
-				pr_warn("Image not found for %s\n", slug.c_str());
+			if (!slug.ends_with("HubMedium"))
+				pr_warn("Image not found for %.*s\n", (int)slug.size(), slug.data());
 			return nullptr;
 		}
 
@@ -36,7 +36,7 @@ struct ModuleDrawer {
 		lv_img_header_t img_header;
 		auto res = lv_img_decoder_get_info(img_filename.c_str(), &img_header);
 		if (res != LV_RES_OK) {
-			pr_warn("Could not read image %s for module %s\n", img_filename.data(), slug.c_str());
+			pr_warn("Could not read image %s for module %.*s\n", img_filename.data(), slug.size(), slug.data());
 			return nullptr;
 		}
 
