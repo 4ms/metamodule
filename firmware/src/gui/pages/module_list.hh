@@ -64,11 +64,11 @@ struct ModuleListPage : PageBase {
 	}
 
 	void roller_module_list() {
-		lv_label_set_text(ui_ModuleListRollerTitle, "Add Module");
+		lv_label_set_text(ui_ModuleListRollerTitle, selected_brand);
 		populate_slugs();
 		drawn_module_idx = -1; //force redraw
 		draw_module();
-		draw_timer = lv_timer_create(draw_module_cb, 200, this);
+		draw_timer = lv_timer_create(draw_module_cb, 100, this);
 
 		show_roller();
 	}
