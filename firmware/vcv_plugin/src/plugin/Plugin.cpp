@@ -1,5 +1,4 @@
 #include "console/pr_dbg.hh"
-#include "shared/CoreModules/AudibleInstruments/info/Rings_info.hh"
 #include "shared/CoreModules/moduleFactory.hh"
 #include <app/ModuleWidget.hpp>
 #include <deque>
