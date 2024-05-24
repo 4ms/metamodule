@@ -23,4 +23,6 @@ void append_panel_jack_name(std::string &opts, auto const &el, uint16_t panel_ja
 	opts = opts + " [" + get_panel_name<PanelDef>(el, panel_jack_id) + ']';
 }
 
+std::string_view module_name(std::string_view combined_slug);
+
 } // namespace MetaModule
