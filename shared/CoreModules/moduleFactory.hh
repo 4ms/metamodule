@@ -27,15 +27,14 @@ public:
 								   const ModuleInfoView &info,
 								   std::string_view faceplate_filename);
 
-	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug &typeslug);
+	static std::unique_ptr<CoreProcessor> create(std::string_view combined_slug);
 
-	static ModuleInfoView &getModuleInfo(const ModuleTypeSlug &typeslug);
-	static std::string_view getModuleFaceplate(const ModuleTypeSlug &typeslug);
+	static ModuleInfoView &getModuleInfo(std::string_view combined_slug);
+	static std::string_view getModuleFaceplate(std::string_view combined_slug);
 
 	// Returns true if slug is valid and registered.
-	static bool isValidSlug(const ModuleTypeSlug &typeslug);
+	static bool isValidSlug(std::string_view combined_slug);
 
-	static std::vector<ModuleTypeSlug> getAllSlugs();
 	static std::vector<ModuleTypeSlug> getAllSlugs(std::string_view brand);
 	static std::vector<ModuleTypeSlug> getAllBrands();
 };

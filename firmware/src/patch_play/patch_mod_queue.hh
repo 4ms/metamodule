@@ -57,7 +57,7 @@ struct AddJackMapping {
 };
 
 struct AddModule {
-	ModuleTypeSlug slug{};
+	BrandModuleSlug slug{};
 };
 
 struct RemoveModule {

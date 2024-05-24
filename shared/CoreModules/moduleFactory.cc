@@ -81,7 +81,7 @@ static std::pair<std::string_view, std::string_view> brand_module(std::string_vi
 	}
 }
 
-std::unique_ptr<CoreProcessor> ModuleFactory::create(const ModuleTypeSlug &combined_slug) {
+std::unique_ptr<CoreProcessor> ModuleFactory::create(std::string_view combined_slug) {
 	auto [brand, module_name] = brand_module(combined_slug);
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
@@ -93,7 +93,7 @@ std::unique_ptr<CoreProcessor> ModuleFactory::create(const ModuleTypeSlug &combi
 	return nullptr;
 }
 
-ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &combined_slug) {
+ModuleInfoView &ModuleFactory::getModuleInfo(std::string_view combined_slug) {
 	auto [brand, module_name] = brand_module(combined_slug);
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
@@ -103,7 +103,7 @@ ModuleInfoView &ModuleFactory::getModuleInfo(const ModuleTypeSlug &combined_slug
 	return nullinfo;
 }
 
-std::string_view ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &combined_slug) {
+std::string_view ModuleFactory::getModuleFaceplate(std::string_view combined_slug) {
 	auto [brand, module_name] = brand_module(combined_slug);
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
@@ -114,7 +114,7 @@ std::string_view ModuleFactory::getModuleFaceplate(const ModuleTypeSlug &combine
 	return "";
 }
 
-bool ModuleFactory::isValidSlug(const ModuleTypeSlug &combined_slug) {
+bool ModuleFactory::isValidSlug(std::string_view combined_slug) {
 	auto [brand, module_name] = brand_module(combined_slug);
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
@@ -123,15 +123,6 @@ bool ModuleFactory::isValidSlug(const ModuleTypeSlug &combined_slug) {
 	}
 
 	return false;
-}
-
-std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs() {
-	std::vector<ModuleTypeSlug> slugs;
-	for (auto &brand : registry()) {
-		slugs.insert(
-			slugs.end(), brand.modules.keys.begin(), std::next(brand.modules.keys.begin(), brand.modules.size()));
-	}
-	return slugs;
 }
 
 std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs(std::string_view brand) {
