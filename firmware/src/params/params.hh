@@ -14,7 +14,7 @@ struct Params {
 	std::array<Toggler, PanelDef::NumRgbButton> buttons{};
 	std::array<float, PanelDef::NumPot> knobs{};
 
-	Midi::Event midi_event;
+	Midi::Event midi_event{};
 
 	uint32_t jack_senses{};
 

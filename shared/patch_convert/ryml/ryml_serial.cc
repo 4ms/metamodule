@@ -73,6 +73,16 @@ void write(ryml::NodeRef *n, std::vector<BrandModuleSlug> const &slugs) {
 	}
 }
 
+void write(ryml::NodeRef *n, std::vector<ModuleTypeSlug> const &slugs) {
+	*n |= ryml::MAP;
+	for (auto [i, x] : enumerate(slugs)) {
+		auto idx_s = std::to_string(i);
+		ryml::csubstr idx(idx_s.c_str(), idx_s.length());
+		ryml::csubstr slug(x.c_str(), x.length());
+		n->append_child() << ryml::key(idx) << slug;
+	}
+}
+
 void write(ryml::NodeRef *n, ModuleInitState const &state) {
 	*n |= ryml::MAP;
 	n->append_child() << ryml::key("module_id") << state.module_id;

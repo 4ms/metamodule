@@ -146,15 +146,19 @@ struct ModuleViewMappingPane {
 				if (last_active_knobset <= map_list_items.size()) {
 					//Remove active mark
 					if (auto set_i = last_active_knobset + 1; set_i < map_list_items.size()) {
-						if (auto obj = map_list_items[set_i])
-							lv_obj_set_style_bg_opa(obj, LV_OPA_0, LV_STATE_DEFAULT);
+						if (auto obj = map_list_items[set_i]) {
+							lv_obj_set_style_text_color(obj, lv_color_white(), LV_STATE_DEFAULT);
+							lv_obj_set_style_text_color(obj, lv_color_white(), LV_STATE_FOCUSED);
+						}
 					}
 				}
 				if (page_list.get_active_knobset() <= map_list_items.size()) {
 					//Add active mark
 					if (auto set_i = page_list.get_active_knobset() + 1; set_i < map_list_items.size()) {
-						if (auto obj = map_list_items[set_i])
-							lv_obj_set_style_bg_opa(obj, LV_OPA_100, LV_STATE_DEFAULT);
+						if (auto obj = map_list_items[set_i]) {
+							lv_obj_set_style_text_color(obj, lv_color_hex(0xFDB818), LV_STATE_DEFAULT);
+							lv_obj_set_style_text_color(obj, lv_color_hex(0xFDB818), LV_STATE_FOCUSED);
+						}
 					}
 				}
 				last_active_knobset = page_list.get_active_knobset();

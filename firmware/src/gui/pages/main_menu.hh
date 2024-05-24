@@ -27,6 +27,11 @@ struct MainMenuPage : PageBase {
 
 		lv_obj_add_event_cb(ui_MainMenuLastViewedPanel, last_viewed_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MainMenuNowPlayingPanel, now_playing_cb, LV_EVENT_CLICKED, this);
+
+		lv_label_set_text(ui_MainMenuNowPlaying, "Loading Modules...");
+		lv_label_set_text(ui_MainMenuNowPlayingName, "");
+
+		lv_hide(ui_MainMenuLastViewedPanel);
 	}
 
 	void prepare_focus() final {
@@ -35,6 +40,7 @@ struct MainMenuPage : PageBase {
 			lv_hide(ui_MainMenuNowPlayingPanel);
 		} else {
 			lv_show(ui_MainMenuNowPlayingPanel);
+			lv_label_set_text(ui_MainMenuNowPlaying, "Playing:");
 			lv_label_set_text(ui_MainMenuNowPlayingName, patch->patch_name.c_str());
 		}
 

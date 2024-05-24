@@ -24,7 +24,12 @@ struct KnobSetViewPage : PageBase {
 		, patch{patch_storage.get_view_patch()} {
 		init_bg(base);
 		lv_group_set_editing(group, false);
-		lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
+		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
+		// Use Prev button for Jack Map
+		lv_show(ui_PreviousKnobSet);
+		lv_obj_add_event_cb(ui_PreviousKnobSet, goto_jackmap_cb, LV_EVENT_CLICKED, this);
+		lv_label_set_text(ui_PreviousKnobSetLabel, "Jacks");
+
 		lv_obj_add_event_cb(ui_NextKnobSet, next_knobset_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ActivateKnobSet, activate_knobset_cb, LV_EVENT_CLICKED, this);
 	}
@@ -60,13 +65,13 @@ struct KnobSetViewPage : PageBase {
 		patch = patch_storage.get_view_patch();
 
 		if (patch->knob_sets.size() > 2) {
-			lv_show(ui_PreviousKnobSet);
+			// lv_show(ui_PreviousKnobSet);
 			lv_show(ui_NextKnobSet);
 		} else if (patch->knob_sets.size() > 1) {
-			lv_hide(ui_PreviousKnobSet);
+			// lv_hide(ui_PreviousKnobSet);
 			lv_show(ui_NextKnobSet);
 		} else {
-			lv_hide(ui_PreviousKnobSet);
+			// lv_hide(ui_PreviousKnobSet);
 			lv_hide(ui_NextKnobSet);
 		}
 		lv_group_add_obj(group, ui_PreviousKnobSet);
@@ -182,7 +187,8 @@ struct KnobSetViewPage : PageBase {
 		if (is_actively_playing) {
 			lv_show(ui_KnobSetDescript);
 			lv_hide(ui_ActivateKnobSet);
-			lv_label_set_text(ui_KnobSetDescript, "(Active)");
+			// lv_label_set_text(ui_KnobSetDescript, "(Active)");
+			lv_hide(ui_KnobSetDescript);
 
 			for (auto [knob_i, pane] : enumerate(panes)) {
 				auto num_children = lv_obj_get_child_cnt(pane);
@@ -292,6 +298,13 @@ struct KnobSetViewPage : PageBase {
 		}
 	}
 
+	static void goto_jackmap_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		page->page_list.request_new_page_no_history(PageId::JackMapView, page->args);
+	}
+
 	static void activate_knobset_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -394,7 +407,6 @@ private:
 		if (!knob || !circle || !label)
 			return;
 		lv_obj_add_state(circle, LV_STATE_DISABLED);
-		lv_obj_add_state(label, LV_STATE_DISABLED);
 
 		lv_obj_set_style_arc_color(knob, Gui::knob_disabled_palette[knob_i % 6], LV_PART_INDICATOR);
 		lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
@@ -407,7 +419,6 @@ private:
 		if (!knob || !circle || !label)
 			return;
 		lv_obj_clear_state(circle, LV_STATE_DISABLED);
-		lv_obj_clear_state(label, LV_STATE_DISABLED);
 
 		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
 		lv_obj_set_style_opa(knob, LV_OPA_100, LV_PART_KNOB);

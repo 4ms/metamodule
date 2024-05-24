@@ -57,6 +57,7 @@ add_executable(
 	src/ui.cc
     stubs/random.cpp
 	${FWDIR}/src/gui/elements/element_name.cc
+	${FWDIR}/src/gui/slsexport/ui_local.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
 	${SHARED}/patch_convert/ryml/ryml_serial.cc
 	${SHARED}/patch_convert/ryml/ryml_init.cc

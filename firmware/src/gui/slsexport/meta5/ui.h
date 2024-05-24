@@ -264,6 +264,14 @@ extern lv_obj_t *ui_KnobSetButton;
 extern lv_obj_t *ui_TrashButton;
 extern lv_obj_t *ui_TrashLabel;
 extern lv_obj_t *ui_Keyboard;
+// SCREEN: ui_JackMapViewPage
+void ui_JackMapViewPage_screen_init(void);
+extern lv_obj_t *ui_JackMapViewPage;
+extern lv_obj_t *ui_JackMapViewCont;
+extern lv_obj_t *ui_JackMapLeftColumn;
+extern lv_obj_t *ui_JackMapInputsTitle;
+extern lv_obj_t *ui_JackMapRightColumn;
+extern lv_obj_t *ui_JackMapOutputsTitle;
 // SCREEN: ui_DeleteMappingPopUp
 void ui_DeleteMappingPopUp_screen_init(void);
 extern lv_obj_t *ui_DeleteMappingPopUp;

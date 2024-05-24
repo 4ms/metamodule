@@ -23,7 +23,8 @@ enum class PageId {
 	KnobMap,
 	CableEdit,
 	SystemMenu,
-	ModuleList
+	ModuleList,
+	JackMapView
 };
 
 struct PageWithArgs {
@@ -34,7 +35,7 @@ struct PageWithArgs {
 class PageList {
 	bool _new_page_requested = false;
 
-	static constexpr uint32_t MaxPages = 10;
+	static constexpr uint32_t MaxPages = 11;
 	std::array<PageBase *, MaxPages> _pages{};
 
 	uint32_t _active_knobset_id = 0;

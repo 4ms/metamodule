@@ -76,6 +76,7 @@ struct Gui {
 		lv_palette_lighten(LV_PALETTE_PINK, 1),
 		lv_palette_lighten(LV_PALETTE_PURPLE, 1),
 	};
+
 	static constexpr std::array<lv_color_t, 19> palette_main = {
 		lv_color_make_rgb565(0xF4, 0x00, 0x00), // RED
 		lv_color_make_rgb565(0xF0, 0x63, 0x92), // PINK, F06392
@@ -118,6 +119,17 @@ struct Gui {
 		palette_main[LV_PALETTE_GREEN],
 		palette_main[LV_PALETTE_GREY],		//?
 		palette_main[LV_PALETTE_BLUE_GREY], //?
+	};
+
+	static inline std::array<lv_color_t, 8> jack_palette{
+		lv_color_make_rgb565(0xEA, 0x1C, 0x25),
+		lv_color_make_rgb565(0xFF, 0xF2, 0x00),
+		lv_color_make_rgb565(0x00, 0xAE, 0xEE),
+		lv_color_make_rgb565(0xF6, 0x61, 0x94),
+		lv_color_make_rgb565(0xFF, 0xA5, 0x29),
+		lv_color_make_rgb565(0x00, 0xA5, 0x52),
+		lv_color_make_rgb565(0x00, 0x00, 0x00),
+		lv_color_make_rgb565(0xFF, 0xFF, 0xFF),
 	};
 
 	// Slider Handle Style

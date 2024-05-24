@@ -267,6 +267,14 @@ lv_obj_t *ui_TrashButton;
 lv_obj_t *ui_TrashLabel;
 lv_obj_t *ui_Keyboard;
 
+// SCREEN: ui_JackMapViewPage
+void ui_JackMapViewPage_screen_init(void);
+lv_obj_t *ui_JackMapViewPage;
+lv_obj_t *ui_JackMapViewCont;
+lv_obj_t *ui_JackMapLeftColumn;
+lv_obj_t *ui_JackMapInputsTitle;
+lv_obj_t *ui_JackMapRightColumn;
+lv_obj_t *ui_JackMapOutputsTitle;
 
 // SCREEN: ui_DeleteMappingPopUp
 void ui_DeleteMappingPopUp_screen_init(void);
@@ -505,6 +513,7 @@ ui_DeleteMappingPopUp_screen_init();
 ui_ModuleListPage_screen_init();
 ui_CableMapPage_screen_init();
 ui_SystemMenu_screen_init();
+	ui_JackMapViewPage_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_MainMenu);
 }

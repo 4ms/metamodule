@@ -74,17 +74,17 @@ static_assert(sizeof(MappedKnob) == 32, "MappedKnob should be 32B");
 
 struct MappedKnobSet {
 	std::vector<MappedKnob> set;
-	AliasNameString name;
+	AliasNameString name{};
 };
 
 struct InternalCable {
-	Jack out;
+	Jack out{};
 	std::vector<Jack> ins;
 	std::optional<uint16_t> color{};
 };
 
 struct MappedInputJack {
-	uint32_t panel_jack_id;
+	uint32_t panel_jack_id{};
 	std::vector<Jack> ins;
 	AliasNameString alias_name{};
 
@@ -131,14 +131,14 @@ struct MappedInputJack {
 
 // 24 Bytes
 struct MappedOutputJack {
-	uint32_t panel_jack_id;
-	Jack out;
+	uint32_t panel_jack_id{};
+	Jack out{};
 	AliasNameString alias_name{};
 };
 
 static_assert(sizeof(MappedOutputJack) == 24, "MappedOutputJack should be 24B");
 
 struct ModuleInitState {
-	uint32_t module_id;
+	uint32_t module_id{};
 	std::string state_data;
 };

@@ -14,10 +14,10 @@ namespace MetaModule
 struct MetaParams {
 	float patchcv = 0.f;
 	Toggler rotary_button;
-	RotaryMotion rotary;
-	RotaryMotion rotary_pushed;
+	RotaryMotion rotary{};
+	RotaryMotion rotary_pushed{};
 	std::array<Toggler, PanelDef::NumMetaRgbButton> meta_buttons{};
-	std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> ins;
+	std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> ins{};
 
 	bool midi_connected = false;
 	uint32_t midi_poly_chans = 1;
