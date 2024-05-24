@@ -1,4 +1,5 @@
 #include "console/pr_dbg.hh"
+#include "shared/CoreModules/AudibleInstruments/info/Rings_info.hh"
 #include "shared/CoreModules/moduleFactory.hh"
 #include <app/ModuleWidget.hpp>
 #include <deque>
@@ -24,6 +25,15 @@ void Plugin::addModel(Model *model) {
 
 	if (ModuleFactory::isValidSlug(slug)) {
 		pr_err("Duplicate module slug: %s, skipping\n", model->slug.c_str());
+		return;
+	}
+
+	if (slug == "Rings") {
+		ModuleFactory::registerModuleType("AudibleInstruments",
+										  slug,
+										  model->creation_func,
+										  ModuleInfoView::makeView<RingsInfo>(),
+										  "AudibleInstruments/Rings.png");
 		return;
 	}
 
