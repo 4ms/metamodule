@@ -5,7 +5,7 @@
 #include "patch_convert/ryml/ryml_serial.hh"
 #include <algorithm>
 
-PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId)
+PatchFileWriter::PatchFileWriter(std::vector<BrandModule> modules, int64_t hubModuleId)
 	: hubModuleId{hubModuleId} {
 	setModuleList(modules);
 	pd.knob_sets.clear();
@@ -48,7 +48,7 @@ void PatchFileWriter::setMidiSettings(MetaModule::MIDI::ModuleIds &ids, MetaModu
 	pd.midi_poly_num = std::min<uint32_t>(midiSettings.CV.channels, 8U);
 }
 
-void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
+void PatchFileWriter::setModuleList(std::vector<BrandModule> &modules) {
 	std::vector<int64_t> vcv_mod_ids;
 
 	// Reserved for PANEL

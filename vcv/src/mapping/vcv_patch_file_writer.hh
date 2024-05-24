@@ -29,7 +29,7 @@ struct VCVPatchFileWriter {
 		// Find all compatible modules in this patch
 		// TODO: only add modules that are mapped to this hub
 		// Find all knobs on those modules (static knobs)
-		std::vector<ModuleID> moduleData;
+		std::vector<BrandModule> moduleData;
 		std::vector<ParamMap> paramData;
 		std::vector<int64_t> splitModuleIds;
 		MetaModule::MIDI::Modules midimodules;
@@ -40,7 +40,8 @@ struct VCVPatchFileWriter {
 			auto *module = engine->getModule(moduleID);
 
 			if (ModuleDirectory::isInPlugin(module)) {
-				moduleData.push_back({moduleID, module->model->slug.c_str()});
+				auto brand_module = module->getModel()->plugin->slug + ":" + module->getModel()->slug;
+				moduleData.push_back({moduleID, brand_module.c_str()});
 				if (module->model->slug.size() > 31)
 					printf("Warning: module slug truncated to 31 chars\n");
 
