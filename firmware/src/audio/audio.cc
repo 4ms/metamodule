@@ -87,7 +87,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.start_measurement();
 
-		if (check_patch_loading())
+		if (do_calibrate) {
+			calibrate_callback(audio_blocks[1 - block]);
+		} else if (check_patch_loading())
 			process_nopatch(audio_blocks[1 - block], local_p);
 		else
 			process(audio_blocks[1 - block], local_p);
