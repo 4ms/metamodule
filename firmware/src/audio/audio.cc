@@ -68,6 +68,11 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		UartLog::log("No ext Audio codec detected\n\r");
 	}
 
+	// Set default calibration values
+	for (auto &inc : incal)
+		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
+			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
+
 	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin4::high();
 
@@ -106,11 +111,29 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
 						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
+}
 
-	//TODO: User/factory routine to calibrate jacks
-	for (auto &inc : incal)
-		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
-			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
+void AudioStream::end_calibration_mode() {
+	do_calibrate = false;
+}
+
+void AudioStream::start_calibration_mode(std::span<AnalyzedSignal<1000>> cal_readings) {
+	this->cal_readings = cal_readings;
+	do_calibrate = true;
+}
+
+void AudioStream::step_calibration() {
+	for (auto &cal : cal_readings) {
+		cal.reset_to(cal.iir);
+	}
+}
+
+void AudioStream::calibrate_callback(CombinedAudioBlock &audio_block) {
+	for (auto frame : audio_block.in_codec) {
+		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, frame.chan)) {
+			cal_readings[panel_jack_i].update(AudioInFrame::sign_extend(inchan));
+		}
+	}
 }
 
 void AudioStream::start() {
