@@ -7,7 +7,7 @@
 #include "patch/default/Befaco4msPlayground.hh"
 #include "patch/default/Braids-Quad.hh"
 #include "patch/default/Djembe4verb.hh"
-#include "patch/default/DualEnvEnOsc.hh"
+#include "patch/default/DualEnvEnosc.hh"
 #include "patch/default/EnOscPoly4.hh"
 #include "patch/default/EnOsc_8_step_seq.hh"
 #include "patch/default/KarplusStereo.hh"
