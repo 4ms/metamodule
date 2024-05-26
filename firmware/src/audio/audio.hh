@@ -44,7 +44,10 @@ public:
 				PatchModQueue &patch_mod_queue);
 
 	void start();
-
+	void start_playing();
+	void start_calibration_mode(std::span<AnalyzedSignal<1000>> cal_readings);
+	void step_calibration();
+	void end_calibration_mode();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 
 private:
@@ -59,7 +62,7 @@ private:
 	CodecT &codec_ext_;
 	uint32_t sample_rate_;
 
-	Calibrator incal[PanelDef::NumAudioIn];
+	std::array<Calibrator, PanelDef::NumAudioIn> incal;
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
@@ -75,6 +78,10 @@ private:
 	bool ext_audio_connected = false;
 	ParamBlock local_p;
 
+	bool skip_audio = false;
+	unsigned skip_count = 0;
+	bool do_calibrate = false;
+
 	AudioConf::SampleT get_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
@@ -84,7 +91,18 @@ private:
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool check_patch_loading();
 	void handle_patch_just_loaded();
+	void calibrate_callback(CombinedAudioBlock &audio_block);
 
+	std::span<AnalyzedSignal<1000>> cal_readings{};
+
+public:
+	template<unsigned LowMilliVolts, unsigned HighMilliVolts>
+	void set_calibration(std::array<std::pair<float, float>, PanelDef::NumAudioIn> const &values) {
+		for (auto [inc, val] : zip(incal, values))
+			inc.template calibrate_chan<LowMilliVolts, HighMilliVolts, 1000>(val.first, val.second);
+	}
+
+private:
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;
 	static constexpr unsigned NumCVInputs = PanelDef::NumCVIn;
