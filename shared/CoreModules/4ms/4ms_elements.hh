@@ -10,24 +10,24 @@ namespace MetaModule
 //
 struct Knob9mm : Knob {
 	constexpr Knob9mm() = default;
-	constexpr Knob9mm(BaseElement b, float defaultValue)
-		: Knob{b, "4ms/comp/knob9mm_x.png"} {
+	constexpr Knob9mm(BaseElement b, float defaultValue = 0.5f)
+		: Knob{{{b, "4ms/comp/knob9mm_x.png"}}} {
 		DefaultValue = defaultValue;
 	}
 };
 
 struct DaviesLargeKnob : Knob {
 	constexpr DaviesLargeKnob() = default;
-	constexpr DaviesLargeKnob(BaseElement b, float defaultValue)
-		: Knob{b, "4ms/comp/knob_large_x.png"} {
+	constexpr DaviesLargeKnob(BaseElement b, float defaultValue = 0.5f)
+		: Knob{{{b, "4ms/comp/knob_large_x.png"}}} {
 		DefaultValue = defaultValue;
 	}
 };
 
 struct Davies1900hBlackKnob : Knob {
 	constexpr Davies1900hBlackKnob() = default;
-	constexpr Davies1900hBlackKnob(BaseElement b, float defaultValue)
-		: Knob{b, "4ms/comp/knob_x.png"} {
+	constexpr Davies1900hBlackKnob(BaseElement b, float defaultValue = 0.5f)
+		: Knob{{{b, "4ms/comp/knob_x.png"}}} {
 		DefaultValue = defaultValue;
 	}
 };
@@ -37,16 +37,16 @@ struct Davies1900hBlackKnob : Knob {
 //
 struct Slider25mmHorizLED : SliderLight {
 	constexpr Slider25mmHorizLED() = default;
-	constexpr Slider25mmHorizLED(BaseElement b, float defaultValue)
-		: SliderLight{{{b, "4ms/comp/slider_horiz_x.png"}, "4ms/comp/slider_horiz_handle_x.png"}, Colors565::White} {
+	constexpr Slider25mmHorizLED(BaseElement b, float defaultValue = 0.5f)
+		: SliderLight{{{{b, "4ms/comp/slider_horiz_x.png"}}, "4ms/comp/slider_horiz_handle_x.png"}, Colors565::White} {
 		DefaultValue = defaultValue;
 	}
 };
 
 struct Slider25mmVertLED : SliderLight {
 	constexpr Slider25mmVertLED() = default;
-	constexpr Slider25mmVertLED(BaseElement b, float defaultValue)
-		: SliderLight{{{b, "4ms/comp/slider_x.png"}, "4ms/comp/slider_handle_x.png"}, Colors565::White} {
+	constexpr Slider25mmVertLED(BaseElement b, float defaultValue = 0.5f)
+		: SliderLight{{{{b, "4ms/comp/slider_x.png"}}, "4ms/comp/slider_handle_x.png"}, Colors565::White} {
 		DefaultValue = defaultValue;
 	}
 };
