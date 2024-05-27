@@ -5,6 +5,12 @@
 namespace MetaModule
 {
 
+static Element make_latching_rgb(std::string_view image, BaseElement const &el, LatchingButton::State_t defaultValue);
+static Element
+make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &el, LatchingButton::State_t defaultValue);
+static Element make_momentary_rgb(std::string_view image, BaseElement const &el);
+static Element make_momentary_mono(std::string_view image, NVGcolor c, BaseElement const &el);
+
 //
 // Jacks
 //
@@ -29,7 +35,7 @@ Element make_element_input(rack::app::SvgPort const *widget, BaseElement b) {
 Element make_element(rack::app::Knob const *widget, BaseElement b) {
 	b.width_mm = to_mm(widget->box.size.x);
 	b.height_mm = to_mm(widget->box.size.y);
-	return Knob{{b, ""}};
+	return Knob{{{b, ""}}};
 }
 
 //TODO: don't set box size here
@@ -132,7 +138,7 @@ Element make_momentary_rgb(std::string_view image, BaseElement const &el) {
 	return MomentaryButtonRGB{{{el, image}}};
 }
 
-Element make_latching_rgb(std::string_view image, BaseElement const &el) {
+Element make_latching_rgb(std::string_view image, BaseElement const &el, LatchingButton::State_t defaultValue) {
 	pr_warn("Latching RGB button not supported yet. Using momentary\n");
 	return MomentaryButtonRGB{{{el, image}}};
 }
@@ -141,8 +147,9 @@ Element make_momentary_mono(std::string_view image, NVGcolor c, BaseElement cons
 	return MomentaryButtonLight{{{el, image}}, RGB565{c.r, c.g, c.b}};
 }
 
-Element make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &el) {
-	return LatchingButton{{{el, image}}, RGB565{c.r, c.g, c.b}};
+Element
+make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &el, LatchingButton::State_t defaultValue) {
+	return LatchingButton{{{el, image}}, defaultValue, RGB565{c.r, c.g, c.b}};
 }
 
 Element
@@ -157,14 +164,14 @@ make_button_light(rack::app::MultiLightWidget const *light, rack::app::SvgSwitch
 		if (widget->momentary)
 			return make_momentary_mono(widget->frames[0]->filename, c, el);
 		else
-			return make_latching_mono(widget->frames[0]->filename, c, el);
+			return make_latching_mono(widget->frames[0]->filename, c, el, defaultValue);
 	}
 
 	if (light->getNumColors() == 3) {
 		if (widget->momentary)
 			return make_momentary_rgb(widget->frames[0]->filename, el);
 		else
-			return make_latching_rgb(widget->frames[0]->filename, el);
+			return make_latching_rgb(widget->frames[0]->filename, el, defaultValue);
 	}
 
 	pr_warn("make_element(): Unknown VCVLightBezel\n");
