@@ -42,44 +42,46 @@ Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
 		// TODO: are there some cases when a widget sets its box differently than the bg box?
 		// if (widget->box.size.isFinite() && !widget->box.size.isZero())
 		widget->box.size = widget->fb->_bg->box.size;
-		return Knob{b, widget->fb->_bg->svg->filename};
+		return Knob{{{b, widget->fb->_bg->svg->filename}}};
 
 	} else if (widget->sw->svg->filename.size()) {
-		return Knob{b, widget->sw->svg->filename};
+		return Knob{{{b, widget->sw->svg->filename}}};
 
 	} else {
-		return Knob{b, widget->svg->filename};
+		return Knob{{{b, widget->svg->filename}}};
 	}
 }
 
 Element make_element(rack::app::SliderKnob const *widget, BaseElement b) {
 	b.width_mm = to_mm(widget->box.size.x);
 	b.height_mm = to_mm(widget->box.size.y);
-	return Slider{{b, ""}, ""};
+	return Slider{{{b, ""}}, ""};
 }
 
-Element make_element_slideswitch(rack::app::SvgSlider const *widget, BaseElement b) {
+Element make_element_slideswitch(rack::app::SvgSlider *widget, BaseElement b) {
 	//Note: num_pos and labels are filled in later
 	if (widget->background->svg->filename.length()) {
-		return SlideSwitch{{b, widget->background->svg->filename}, 2, widget->handle->svg->filename};
+		SlideSwitch::State_t defaultValue =
+			widget->getParamQuantity() ? widget->getParamQuantity()->getDefaultValue() : 0;
+		return SlideSwitch{{b, widget->background->svg->filename}, 2, defaultValue, widget->handle->svg->filename};
 	} else {
-		return SlideSwitch{{b, widget->svg->filename}, 2, widget->handle->svg->filename};
+		return SlideSwitch{{b, widget->svg->filename}, 2, 0, widget->handle->svg->filename};
 	}
 }
 
 Element make_element(rack::app::SvgSlider const *widget, BaseElement b) {
 	if (widget->background->svg->filename.length()) {
-		return Slider{{b, widget->background->svg->filename}, widget->handle->svg->filename};
+		return Slider{{{b, widget->background->svg->filename}}, widget->handle->svg->filename};
 	} else {
-		return Slider{{b, widget->svg->filename}, widget->handle->svg->filename};
+		return Slider{{{b, widget->svg->filename}}, widget->handle->svg->filename};
 	}
 }
 
 Element make_element_lightslider(rack::app::SvgSlider const *widget, BaseElement b) {
 	if (widget->background->svg->filename.length()) {
-		return SliderLight{{{b, widget->background->svg->filename}, widget->handle->svg->filename}, Colors565::Red};
+		return SliderLight{{{{b, widget->background->svg->filename}}, widget->handle->svg->filename}, Colors565::Red};
 	} else {
-		return SliderLight{{{b, widget->svg->filename}, widget->handle->svg->filename}, Colors565::Red};
+		return SliderLight{{{{b, widget->svg->filename}}, widget->handle->svg->filename}, Colors565::Red};
 	}
 }
 
@@ -90,25 +92,30 @@ Element make_element(rack::componentlibrary::Rogan const *widget, BaseElement b)
 	// The SvgKnob::sw rotates
 	// The SvgWidget::svg is not used (it's in MM only, not in Rack)
 	if (widget->sw)
-		return Knob{b, widget->sw->svg->filename};
+		return Knob{{{b, widget->sw->svg->filename}}};
 	else
-		return Knob{b, widget->svg->filename};
+		return Knob{{{b, widget->svg->filename}}};
 }
 
 //
 // Switch/Button
 //
 
-Element make_element(rack::app::SvgSwitch const *widget, BaseElement b) {
+Element make_element(rack::app::SvgSwitch *widget, BaseElement b) {
+	FlipSwitch::State_t defaultValue = widget->getParamQuantity() ? widget->getParamQuantity()->getDefaultValue() : 0;
+
 	if (widget->frames.size() == 3) {
-		return FlipSwitch{
-			{b}, 3, {widget->frames[0]->filename, widget->frames[1]->filename, widget->frames[2]->filename}};
+		return FlipSwitch{{b},
+						  3,
+						  defaultValue,
+						  {widget->frames[0]->filename, widget->frames[1]->filename, widget->frames[2]->filename}};
 
 	} else if (widget->frames.size() == 2) {
-		if (widget->momentary)
+		if (widget->momentary) {
 			return MomentaryButton{{b, widget->frames[0]->filename}, widget->frames[1]->filename};
-		else
-			return FlipSwitch{{b}, 2, {widget->frames[0]->filename, widget->frames[1]->filename}};
+		} else {
+			return FlipSwitch{{b}, 2, defaultValue, {widget->frames[0]->filename, widget->frames[1]->filename}};
+		}
 
 	} else if (widget->frames.size() == 1) {
 		return MomentaryButton{{b, widget->frames[0]->filename}};
@@ -139,7 +146,12 @@ Element make_latching_mono(std::string_view image, NVGcolor c, BaseElement const
 }
 
 Element
-make_button_light(rack::app::MultiLightWidget const *light, rack::app::SvgSwitch const *widget, BaseElement const &el) {
+make_button_light(rack::app::MultiLightWidget const *light, rack::app::SvgSwitch *widget, BaseElement const &el) {
+	LatchingButton::State_t defaultValue =
+		(widget->getParamQuantity() && widget->getParamQuantity()->getDefaultValue() > 0.5f) ?
+			LatchingButton::State_t::UP :
+			LatchingButton::State_t::DOWN;
+
 	if (light->getNumColors() == 1) {
 		auto c = light->baseColors[0];
 		if (widget->momentary)

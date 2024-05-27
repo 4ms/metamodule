@@ -55,8 +55,8 @@ struct Slider25mmVertLED : SliderLight {
 // Buttons
 //
 struct OrangeButton : LatchingButton {
-	constexpr OrangeButton(BaseElement b)
-		: LatchingButton{{b, "4ms/comp/button_x.png"}, Colors565::Orange} {
+	constexpr OrangeButton(BaseElement b, State_t defaultValue = State_t::UP)
+		: LatchingButton{{b, "4ms/comp/button_x.png"}, defaultValue, Colors565::Orange} {
 	}
 };
 
@@ -88,11 +88,11 @@ struct Toggle2pos : FlipSwitch {
 	enum State_t : FlipSwitch::State_t { DOWN = 0, UP = 1 };
 
 	constexpr Toggle2pos() = default;
-	constexpr Toggle2pos(BaseElement b)
-		: FlipSwitch{{b}, 2, {"4ms/comp/switch_down.png", "4ms/comp/switch_up.png"}} {
-	}
-	constexpr Toggle2pos(BaseElement b, std::array<std::string_view, 2> names)
-		: FlipSwitch{{b}, 2, {"4ms/comp/switch_down.png", "4ms/comp/switch_up.png"}, {names[0], names[1]}} {
+	constexpr Toggle2pos(BaseElement b,
+						 std::array<std::string_view, 2> names = {"Down", "Up"},
+						 State_t defaultValue = State_t::DOWN)
+		: FlipSwitch{
+			  {b}, 2, defaultValue, {"4ms/comp/switch_down.png", "4ms/comp/switch_up.png"}, {names[0], names[1]}} {
 	}
 };
 
@@ -100,12 +100,12 @@ struct Toggle3pos : FlipSwitch {
 	enum State_t : FlipSwitch::State_t { DOWN = 0, CENTER = 1, UP = 2 };
 
 	constexpr Toggle3pos() = default;
-	constexpr Toggle3pos(BaseElement b)
-		: FlipSwitch{{b}, 3, {"4ms/comp/switch_down.png", "4ms/comp/switch_center.png", "4ms/comp/switch_up.png"}} {
-	}
-	constexpr Toggle3pos(BaseElement b, std::array<std::string_view, 3> names)
+	constexpr Toggle3pos(BaseElement b,
+						 std::array<std::string_view, 3> names = {"Down", "Center", "Up"},
+						 State_t defaultValue = State_t::DOWN)
 		: FlipSwitch{{b},
 					 3,
+					 defaultValue,
 					 {"4ms/comp/switch_down.png", "4ms/comp/switch_center.png", "4ms/comp/switch_up.png"},
 					 {names[0], names[1], names[2]}} {
 	}
@@ -115,12 +115,14 @@ struct Toggle2posHoriz : FlipSwitch {
 	enum State_t : FlipSwitch::State_t { LEFT = 0, RIGHT = 1 };
 
 	constexpr Toggle2posHoriz() = default;
-	constexpr Toggle2posHoriz(BaseElement b)
-		: FlipSwitch{{b}, 2, {"4ms/comp/switch_horiz_left.png", "4ms/comp/switch_horiz_right.png"}} {
-	}
-	constexpr Toggle2posHoriz(BaseElement b, std::array<std::string_view, 2> names)
-		: FlipSwitch{
-			  {b}, 2, {"4ms/comp/switch_horiz_left.png", "4ms/comp/switch_horiz_right.png"}, {names[0], names[1]}} {
+	constexpr Toggle2posHoriz(BaseElement b,
+							  std::array<std::string_view, 2> names = {"Left", "Right"},
+							  State_t defaultValue = State_t::LEFT)
+		: FlipSwitch{{b},
+					 2,
+					 defaultValue,
+					 {"4ms/comp/switch_horiz_left.png", "4ms/comp/switch_horiz_right.png"},
+					 {names[0], names[1]}} {
 	}
 };
 
@@ -128,17 +130,13 @@ struct Toggle3posHoriz : FlipSwitch {
 	enum State_t : FlipSwitch::State_t { LEFT = 0, CENTER = 1, RIGHT = 2 };
 
 	constexpr Toggle3posHoriz() = default;
-	constexpr Toggle3posHoriz(BaseElement b)
-		: FlipSwitch{{b},
-					 3,
-					 {"4ms/comp/switch_horiz_left.png",
-					  "4ms/comp/switch_horiz_center.png",
-					  "4ms/comp/switch_horiz_right.png"}} {
-	}
-	constexpr Toggle3posHoriz(BaseElement b, std::array<std::string_view, 3> names)
+	constexpr Toggle3posHoriz(BaseElement b,
+							  std::array<std::string_view, 3> names = {"Left", "Center", "Right"},
+							  State_t defaultValue = State_t::LEFT)
 		: FlipSwitch{
 			  {b},
 			  3,
+			  defaultValue,
 			  {"4ms/comp/switch_horiz_left.png", "4ms/comp/switch_horiz_center.png", "4ms/comp/switch_horiz_right.png"},
 			  {names[0], names[1], names[2]}} {
 	}
