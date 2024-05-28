@@ -36,7 +36,10 @@ inline void do_config_element(SlideSwitch el, const Indices &indices, const Modu
 };
 
 inline void do_config_element(FlipSwitch el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0, el.num_pos - 1, el.DefaultValue, el.short_name.data());
+	std::vector<std::string> labels;
+	for (auto p : el.pos_names)
+		labels.push_back(std::string{p});
+	context.module->configSwitch(indices.param_idx, 0, el.num_pos - 1, el.DefaultValue, el.short_name.data(), labels);
 };
 
 inline void do_config_element(Encoder el, const Indices &indices, const ModuleContext_t &context) {
