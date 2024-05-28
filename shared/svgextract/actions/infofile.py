@@ -106,12 +106,6 @@ def panel_to_components(tree):
             name = split[0]
             c['pos_names'] = split[1:]
 
-        c['num_choices'] = 0
-        choices = name.split("?")
-        if len(choices) > 1:
-            name = split[0]
-            c['num_choices'] = split[1]
-
         c['display_name'] = format_for_display(name)
         c['legacy_enum_name'] = format_as_legacy_enum_item(name)
         c['enum_name'] = format_as_enum_item(name)
