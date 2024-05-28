@@ -1,35 +1,25 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/PI_info.hh"
 
 namespace MetaModule
 {
 
-class PICore : public CoreProcessor {
+class PICore : public SmartCoreProcessor<PIInfo> {
 	using Info = PIInfo;
 	using ThisCore = PICore;
+	using enum Info::Elem;
 
 public:
-	PICore() = default;
+	PICore() :
+		sampleRate(48000.f) {
+
+	};
 
 	void update() override {
 	}
 
-	void set_param(int param_id, float val) override {
-	}
-
-	void set_input(int input_id, float val) override {
-	}
-
-	float get_output(int output_id) const override {
-		return 0.f;
-	}
-
 	void set_samplerate(float sr) override {
-	}
-
-	float get_led_brightness(int led_id) const override {
-		return 0.f;
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -39,6 +29,7 @@ public:
 	// clang-format on
 
 private:
+	float sampleRate;
 };
 
 } // namespace MetaModule
