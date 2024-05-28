@@ -16,15 +16,15 @@ struct ComplexEGInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 21> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(43.5), to_mm<72>(46.07), Center, "Attack", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(108.0), to_mm<72>(45.4), Center, "Decay", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(172.5), to_mm<72>(45.4), Center, "Release", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(43.5), to_mm<72>(104.39), Center, "A Curve", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(108.0), to_mm<72>(104.39), Center, "D Curve", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(172.5), to_mm<72>(104.39), Center, "R Curve", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(43.5), to_mm<72>(163.16), Center, "Sustain", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(43.5), to_mm<72>(46.07), Center, "Attack", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(108.0), to_mm<72>(45.4), Center, "Decay", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(172.5), to_mm<72>(45.4), Center, "Release", ""}, 0.25f},
+		Davies1900hBlackKnob{{to_mm<72>(43.5), to_mm<72>(104.39), Center, "A Curve", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(108.0), to_mm<72>(104.39), Center, "D Curve", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(172.5), to_mm<72>(104.39), Center, "R Curve", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(43.5), to_mm<72>(163.16), Center, "Sustain", ""}, 0.5f},
 		OrangeButton{{to_mm<72>(108.0), to_mm<72>(159.65), Center, "Loop", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(172.39), to_mm<72>(163.1), Center, "Hold", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(172.39), to_mm<72>(163.1), Center, "Hold", ""}, 0.0f},
 		AnalogJackInput4ms{{to_mm<72>(36.32), to_mm<72>(214.01), Center, "Input", ""}},
 		AnalogJackInput4ms{{to_mm<72>(83.84), to_mm<72>(214.01), Center, "Attack CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(131.84), to_mm<72>(214.01), Center, "Decay CV", ""}},

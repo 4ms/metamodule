@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,17 +11,17 @@ struct TapoInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Tapographic Delay"};
     static constexpr uint32_t width_hp = 18;
     static constexpr std::string_view svg_filename{"res/modules/Tapo_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/Tapo.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/Tapo.png"};
 
     using enum Coords;
 
     static constexpr std::array<Element, 34> Elements{{
-		Knob9mm{{to_mm<72>(34.7), to_mm<72>(97.51), Center, "Level", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(35.19), to_mm<72>(155.83), Center, "Time", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(93.97), to_mm<72>(123.98), Center, "Feedback", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(164.73), to_mm<72>(123.98), Center, "Modulation", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(223.88), to_mm<72>(155.83), Center, "Dry Wet", ""}},
-		Knob9mm{{to_mm<72>(223.88), to_mm<72>(97.51), Center, "Morph", ""}},
+		Knob9mm{{to_mm<72>(34.7), to_mm<72>(97.51), Center, "Level", ""}, 0.875f},
+		Davies1900hBlackKnob{{to_mm<72>(35.19), to_mm<72>(155.83), Center, "Time", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(93.97), to_mm<72>(123.98), Center, "Feedback", ""}, 0.25f},
+		Davies1900hBlackKnob{{to_mm<72>(164.73), to_mm<72>(123.98), Center, "Modulation", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(223.88), to_mm<72>(155.83), Center, "Dry Wet", ""}, 1.0f},
+		Knob9mm{{to_mm<72>(223.88), to_mm<72>(97.51), Center, "Morph", ""}, 0.0f},
 		MomentaryRGB5mm{{to_mm<72>(39.25), to_mm<72>(61.81), Center, "Button 1", ""}},
 		MomentaryRGB5mm{{to_mm<72>(75.19), to_mm<72>(61.81), Center, "Button 2", ""}},
 		MomentaryRGB5mm{{to_mm<72>(111.25), to_mm<72>(61.81), Center, "Button 3", ""}},

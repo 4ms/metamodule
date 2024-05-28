@@ -16,8 +16,8 @@ struct HPFInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Cutoff", ""}},
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(94.96), Center, "Q", ""}},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Cutoff", ""}, 0.0f},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(94.96), Center, "Q", ""}, 0.0f},
 		OrangeButton{{to_mm<72>(28.8), to_mm<72>(168.66), Center, "Mode", ""}},
 		AnalogJackInput4ms{{to_mm<72>(28.8), to_mm<72>(216.85), Center, "CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(28.8), to_mm<72>(265.04), Center, "Input", ""}},

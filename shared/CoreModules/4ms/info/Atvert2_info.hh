@@ -16,8 +16,8 @@ struct Atvert2Info : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{{to_mm<72>(28.9), to_mm<72>(46.86), Center, "1", ""}},
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(94.96), Center, "2", ""}},
+		Knob9mm{{to_mm<72>(28.9), to_mm<72>(46.86), Center, "1", ""}, 0.0f},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(94.96), Center, "2", ""}, 0.0f},
 		AnalogJackInput4ms{{to_mm<72>(28.88), to_mm<72>(168.72), Center, "In 1", ""}},
 		AnalogJackInput4ms{{to_mm<72>(28.88), to_mm<72>(216.87), Center, "In 2", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(28.88), to_mm<72>(265.02), Center, "Out 1", ""}},

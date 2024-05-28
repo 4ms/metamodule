@@ -16,7 +16,7 @@ struct PanInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 5> Elements{{
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Pan", ""}},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Pan", ""}, 0.5f},
 		AnalogJackInput4ms{{to_mm<72>(28.8), to_mm<72>(168.66), Center, "CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(28.8), to_mm<72>(216.85), Center, "Input", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(28.8), to_mm<72>(265.04), Center, "Out 1", ""}},

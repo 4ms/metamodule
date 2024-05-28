@@ -11,11 +11,11 @@ struct RCDInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Rotating Clock Divider"};
     static constexpr uint32_t width_hp = 10;
     static constexpr std::string_view svg_filename{"res/modules/RCD_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/RCD.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/RCD.png"};
 
-	using enum Coords;
+    using enum Coords;
 
-	static constexpr std::array<Element, 26> Elements{{
+    static constexpr std::array<Element, 26> Elements{{
 		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(93.345), Center, "Counting", ""}, {"Down", "Up"}},
 		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(133.445), Center, "Gate Trig", ""}, {"Gate", "Trig"}},
 		Toggle2posHoriz{{to_mm<72>(108.61), to_mm<72>(181.245), Center, "Max Div 1", ""}, {"32 or 64", "8 or 16"}},
@@ -42,79 +42,81 @@ struct RCDInfo : ModuleInfoBase {
 		GreenLight{{to_mm<72>(19.98), to_mm<72>(246.01), Center, "LED d6", ""}},
 		BlueLight{{to_mm<72>(19.98), to_mm<72>(277.62), Center, "LED d7", ""}},
 		RedLight{{to_mm<72>(19.98), to_mm<72>(309.24), Center, "LED d8", ""}},
-	}};
+}};
 
-	enum class Elem {
-		CountingSwitch,
-		GateTrigSwitch,
-		MaxDiv1Switch,
-		MaxDiv2Switch,
-		SpreadSwitch,
-		AutoNResetSwitch,
-		ClkIn,
-		RotateIn,
-		ResetIn,
-		D1Out,
-		D2Out,
-		D3Out,
-		D4Out,
-		D5Out,
-		D6Out,
-		D7Out,
-		D8Out,
-		LedInLight,
-		LedD1Light,
-		LedD2Light,
-		LedD3Light,
-		LedD4Light,
-		LedD5Light,
-		LedD6Light,
-		LedD7Light,
-		LedD8Light,
-	};
+    enum class Elem {
+        CountingSwitch,
+        GateTrigSwitch,
+        MaxDiv1Switch,
+        MaxDiv2Switch,
+        SpreadSwitch,
+        AutoNResetSwitch,
+        ClkIn,
+        RotateIn,
+        ResetIn,
+        D1Out,
+        D2Out,
+        D3Out,
+        D4Out,
+        D5Out,
+        D6Out,
+        D7Out,
+        D8Out,
+        LedInLight,
+        LedD1Light,
+        LedD2Light,
+        LedD3Light,
+        LedD4Light,
+        LedD5Light,
+        LedD6Light,
+        LedD7Light,
+        LedD8Light,
+    };
 
-	// Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
-
-	enum {
-		SwitchCounting,
-		SwitchGate_Trig,
-		SwitchMax_Div_1,
-		SwitchMax_Div_2,
-		SwitchSpread,
-		SwitchAutoNReset,
-		NumSwitches,
-	};
-
-	enum {
-		InputClk_In,
-		InputRotate,
-		InputReset,
-		NumInJacks,
-	};
-
-	enum {
-		OutputD1,
-		OutputD2,
-		OutputD3,
-		OutputD4,
-		OutputD5,
-		OutputD6,
-		OutputD7,
-		OutputD8,
-		NumOutJacks,
-	};
-
-	enum {
-		LedLed_In,
-		LedLed_D1,
-		LedLed_D2,
-		LedLed_D3,
-		LedLed_D4,
-		LedLed_D5,
-		LedLed_D6,
-		LedLed_D7,
-		LedLed_D8,
-		NumDiscreteLeds,
-	};
+    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
+    
+    
+    enum {
+        SwitchCounting, 
+        SwitchGate_Trig, 
+        SwitchMax_Div_1, 
+        SwitchMax_Div_2, 
+        SwitchSpread, 
+        SwitchAutoNReset, 
+        NumSwitches,
+    };
+    
+    enum {
+        InputClk_In, 
+        InputRotate, 
+        InputReset, 
+        NumInJacks,
+    };
+    
+    enum {
+        OutputD1, 
+        OutputD2, 
+        OutputD3, 
+        OutputD4, 
+        OutputD5, 
+        OutputD6, 
+        OutputD7, 
+        OutputD8, 
+        NumOutJacks,
+    };
+    
+    enum {
+        LedLed_In, 
+        LedLed_D1, 
+        LedLed_D2, 
+        LedLed_D3, 
+        LedLed_D4, 
+        LedLed_D5, 
+        LedLed_D6, 
+        LedLed_D7, 
+        LedLed_D8, 
+        NumDiscreteLeds,
+    };
+    
 };
 } // namespace MetaModule

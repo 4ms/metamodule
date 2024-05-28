@@ -16,9 +16,9 @@ struct MultiLFOInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 11> Elements{{
-		DaviesLargeKnob{{to_mm<72>(57.67), to_mm<72>(55.73), Center, "Rate", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(119.41), Center, "Phase", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(119.75), Center, "PW", ""}},
+		DaviesLargeKnob{{to_mm<72>(57.67), to_mm<72>(55.73), Center, "Rate", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(119.41), Center, "Phase", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(119.75), Center, "PW", ""}, 0.0f},
 		AnalogJackInput4ms{{to_mm<72>(32.1), to_mm<72>(167.36), Center, "Reset", ""}},
 		AnalogJackInput4ms{{to_mm<72>(83.63), to_mm<72>(167.36), Center, "PW CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(32.1), to_mm<72>(214.57), Center, "Rate CV", ""}},
