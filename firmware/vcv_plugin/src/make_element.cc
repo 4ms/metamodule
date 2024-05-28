@@ -15,14 +15,14 @@ static Element make_momentary_mono(std::string_view image, NVGcolor c, BaseEleme
 // Jacks
 //
 
-Element make_element_output(rack::app::SvgPort const *widget, BaseElement b) {
+Element make_element_output(rack::app::SvgPort *widget, BaseElement b) {
 	if (widget->sw->svg)
 		return JackOutput{b, widget->sw->svg->filename};
 	else
 		return JackOutput{b, ""};
 }
 
-Element make_element_input(rack::app::SvgPort const *widget, BaseElement b) {
+Element make_element_input(rack::app::SvgPort *widget, BaseElement b) {
 	if (widget->sw->svg)
 		return JackInput{b, widget->sw->svg->filename};
 	else
@@ -32,7 +32,7 @@ Element make_element_input(rack::app::SvgPort const *widget, BaseElement b) {
 //
 // Pots/Sliders
 //
-Element make_element(rack::app::Knob const *widget, BaseElement b) {
+Element make_element(rack::app::Knob *widget, BaseElement b) {
 	b.width_mm = to_mm(widget->box.size.x);
 	b.height_mm = to_mm(widget->box.size.y);
 	return Knob{{{b, ""}}};
@@ -58,7 +58,7 @@ Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
 	}
 }
 
-Element make_element(rack::app::SliderKnob const *widget, BaseElement b) {
+Element make_element(rack::app::SliderKnob *widget, BaseElement b) {
 	b.width_mm = to_mm(widget->box.size.x);
 	b.height_mm = to_mm(widget->box.size.y);
 	return Slider{{{b, ""}}, ""};
@@ -75,7 +75,7 @@ Element make_element_slideswitch(rack::app::SvgSlider *widget, BaseElement b) {
 	}
 }
 
-Element make_element(rack::app::SvgSlider const *widget, BaseElement b) {
+Element make_element(rack::app::SvgSlider *widget, BaseElement b) {
 	if (widget->background->svg->filename.length()) {
 		return Slider{{{b, widget->background->svg->filename}}, widget->handle->svg->filename};
 	} else {
@@ -83,7 +83,7 @@ Element make_element(rack::app::SvgSlider const *widget, BaseElement b) {
 	}
 }
 
-Element make_element_lightslider(rack::app::SvgSlider const *widget, BaseElement b) {
+Element make_element_lightslider(rack::app::SvgSlider *widget, BaseElement b) {
 	if (widget->background->svg->filename.length()) {
 		return SliderLight{{{{b, widget->background->svg->filename}}, widget->handle->svg->filename}, Colors565::Red};
 	} else {
@@ -91,7 +91,7 @@ Element make_element_lightslider(rack::app::SvgSlider const *widget, BaseElement
 	}
 }
 
-Element make_element(rack::componentlibrary::Rogan const *widget, BaseElement b) {
+Element make_element(rack::componentlibrary::Rogan *widget, BaseElement b) {
 	// Rogan knobs have a Rogan::bg svg, Rogan::fg svg, SvgKnob::sw svg, and SvgWidget::svg.
 	// The fg and base svgs are always the same color and thus are combined into one PNG for the MetaModule.
 	// The bg svg is lighting effect gradient and can be ignored for MetaModule's low-res screen.
@@ -152,8 +152,7 @@ make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &el, La
 	return LatchingButton{{{el, image}}, defaultValue, RGB565{c.r, c.g, c.b}};
 }
 
-Element
-make_button_light(rack::app::MultiLightWidget const *light, rack::app::SvgSwitch *widget, BaseElement const &el) {
+Element make_button_light(rack::app::MultiLightWidget *light, rack::app::SvgSwitch *widget, BaseElement const &el) {
 	LatchingButton::State_t defaultValue =
 		(widget->getParamQuantity() && widget->getParamQuantity()->getDefaultValue() > 0.5f) ?
 			LatchingButton::State_t::UP :
@@ -213,7 +212,7 @@ Element make_rgb_led_element(std::string_view image, rack::app::MultiLightWidget
 	return RgbLight{el, image};
 }
 
-Element make_element(rack::app::MultiLightWidget const *widget, BaseElement el) {
+Element make_element(rack::app::MultiLightWidget *widget, BaseElement el) {
 	auto image = get_led_image_by_size(widget);
 
 	if (widget->getNumColors() == 1) {
@@ -231,8 +230,7 @@ Element make_element(rack::app::MultiLightWidget const *widget, BaseElement el) 
 	}
 }
 
-Element
-make_multi_led_element(std::string_view image, rack::app::MultiLightWidget const *widget, BaseElement const &el) {
+Element make_multi_led_element(std::string_view image, rack::app::MultiLightWidget *widget, BaseElement const &el) {
 	if (widget->getNumColors() == 1) {
 		return make_mono_led_element(image, widget, el);
 	}
@@ -251,15 +249,15 @@ make_multi_led_element(std::string_view image, rack::app::MultiLightWidget const
 // Not supported
 //
 
-Element make_element(rack::app::SvgScrew const *widget, BaseElement) {
+Element make_element(rack::app::SvgScrew *widget, BaseElement) {
 	return NullElement{};
 }
 
-Element make_element(rack::widget::Widget const *widget, BaseElement) {
+Element make_element(rack::widget::Widget *widget, BaseElement) {
 	return NullElement{};
 }
 
-Element make_element(rack::app::ParamWidget const *widget, BaseElement b) {
+Element make_element(rack::app::ParamWidget *widget, BaseElement b) {
 	if (widget->svg && widget->svg->filename.size()) {
 		pr_dbg("Unknown ParamWidget, using image as a ParamElement\n");
 		return ParamElement{b, widget->svg->filename};
@@ -272,7 +270,7 @@ Element make_element(rack::app::ParamWidget const *widget, BaseElement b) {
 	}
 }
 
-Element make_element(rack::widget::SvgWidget const *widget, BaseElement b) {
+Element make_element(rack::widget::SvgWidget *widget, BaseElement b) {
 	if (widget->svg->filename.size()) {
 		pr_dbg("Unknown SvgWidget, using image as a ImageElement\n");
 		return ImageElement{b, widget->svg->filename};
