@@ -216,8 +216,10 @@ def panel_to_components(tree):
             c['category'] = "Encoder"
 
         #Orange: Button - Latching
-        elif color == '#ff8000':
+        elif color == '#ff8000' or color == '#ff8001':
             set_class_if_not_set(c, "OrangeButton")
+            if default_val_int == 1:
+                c['default_val'] = "LatchingButton::State_t::DOWN"
             components['legacy_switches'].append(c)
             components['params'].append(c)
             c['category'] = "Button"
@@ -230,15 +232,21 @@ def panel_to_components(tree):
             c['category'] = "Button"
 
         #Deep Pink rectangle: Switch - 2pos
-        elif color == '#ff8080':
+        elif color == '#ff8080' or color == '#ff8081':
             set_class_if_not_set(c, get_toggle2pos_class(c))
+            if default_val_int == 0x81:
+                c['default_val'] = f"{c['class']}::State_t::" + ("RIGHT" if "Horiz" in c['class'] else "UP")
             components['legacy_switches'].append(c)
             components['params'].append(c)
             c['category'] = "Switch"
 
         #Hot Pink rectangle: Switch - 3pos
-        elif color == '#ffc080':
+        elif color == '#ffc080' or color == '#ffc081' or color == '#ffc082':
             set_class_if_not_set(c, get_toggle3pos_class(c))
+            if default_val_int == 0x81:
+                c['default_val'] = f"{c['class']}::State_t::CENTER"
+            elif default_val_int == 0x82:
+                c['default_val'] = f"{c['class']}::State_t::" + ("RIGHT" if "Horiz" in c['class'] else "UP")
             components['legacy_switches'].append(c)
             components['params'].append(c)
             c['category'] = "Switch"
@@ -365,16 +373,17 @@ def list_elem_definitions(elems, DPI):
         source += f"\"{k['display_name']}\", "
         source += f"\"\"" #long name
         source += f"""}}"""
-        source += generate_switch_position_names(k)
+        source += print_position_names(k)
+        source += print_default_value(k)
         source += f"""}},
 """
     return source
 
-def generate_switch_position_names(elem):
+def print_position_names(elem):
     TwoPosSwitches = ["Toggle2pos", "Toggle2posHoriz"]
     ThreePosSwitches = ["Toggle3pos", "Toggle3posHoriz"]
 
-    if "pos_names" not in elem.keys():
+    if "pos_names" not in elem.keys() and "num_choices" not in elem.keys():
         return ""
 
     elif elem['class'] in ThreePosSwitches and len(elem['pos_names']) == 3:
@@ -383,14 +392,16 @@ def generate_switch_position_names(elem):
     elif elem['class'] in TwoPosSwitches and len(elem['pos_names']) == 2:
         return f""", {{"{elem['pos_names'][0]}", "{elem['pos_names'][1]}"}}""" 
 
-    elif elem['class'] == "AltParamContinuous":
-        return f""", {elem["default_val"]}""" 
-
     elif elem['class'] == "AltParamChoice":
-        return f""", {elem['num_choices']}, {elem["default_val"]}""" 
+        return f""", {elem['num_choices']}""" 
 
     elif elem['class'] == "AltParamChoiceLabeled":
-        source = f""", {elem['num_choices']}, {elem["default_val"]}}}, {{"""
+        if "default_val" in elem:
+            defaultval = f", {elem['default_val']}"
+            del elem['default_val'] #prevent it from being added again
+        else:
+            defaultval = ""
+        source = f""", {elem['num_choices']}{defaultval}}}, {{"""
         for nm in elem['pos_names']:
             source += f""""{nm}", """
         source = source.removesuffix(", ")
@@ -398,12 +409,15 @@ def generate_switch_position_names(elem):
 
         return source
 
-    elif "default_val" in elem:
-        return f""", {elem["default_val"]}""" 
-
     else:
         return ""
 
+
+def print_default_value(elem):
+    if "default_val" in elem:
+        return f""", {elem["default_val"]}""" 
+    else:
+        return ""
 
 def list_elem_names(elems):
     if len(elems) == 0:
