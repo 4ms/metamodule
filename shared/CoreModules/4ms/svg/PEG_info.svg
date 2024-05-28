@@ -26,15 +26,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.4977047"
-     inkscape:cx="170.92823"
-     inkscape:cy="-241.36935"
+     inkscape:zoom="1.9299604"
+     inkscape:cx="196.11801"
+     inkscape:cy="-282.13014"
      inkscape:window-width="1960"
      inkscape:window-height="1208"
-     inkscape:window-x="63"
-     inkscape:window-y="25"
+     inkscape:window-x="195"
+     inkscape:window-y="81"
      inkscape:window-maximized="0"
-     inkscape:current-layer="faceplate"
+     inkscape:current-layer="components"
      showgrid="false" />
   <g
      id="faceplate"
@@ -2109,10 +2109,9 @@
        id="EOF_LED_Blue"
        data-name="EOFBlue#BlueLight"
        cx="177.5"
-       cy="-258.35999"
+       cy="258.35999"
        r="4.25"
-       style="fill:#ff00ff"
-       transform="scale(1,-1)" />
+       style="fill:#ff00ff" />
     <circle
        id="EOF_LED_Red"
        data-name="EOFRedLight#RedLight"
@@ -2330,14 +2329,14 @@
        style="fill:#ff0040" />
     <circle
        id="Cycle_Blue"
-       data-name="Cycle Blue"
+       data-name="Cycle Blue#MomentaryRGB7mm"
        cx="167.48"
        cy="41.900002"
        r="10.63"
-       style="fill:#ff8000" />
+       style="fill:#ffc000" />
     <circle
        id="Ping_Blue"
-       data-name="Ping Blue"
+       data-name="Ping Blue#MomentaryRGB7mm"
        cx="220.56"
        cy="45.560001"
        r="10.63"
@@ -2379,14 +2378,14 @@
        style="fill:#ff0040" />
     <circle
        id="Cycle_Red"
-       data-name="Cycle Red"
+       data-name="Cycle Red#MomentaryRGB7mm"
        cx="120.9"
        cy="41.959999"
        r="10.63"
-       style="fill:#ff8000" />
+       style="fill:#ffc000" />
     <circle
        id="Ping_Red"
-       data-name="Ping Red"
+       data-name="Ping Red#MomentaryRGB7mm"
        cx="68.059998"
        cy="45.560001"
        r="10.63"
