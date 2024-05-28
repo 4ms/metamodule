@@ -31,7 +31,7 @@ struct VCAMInfo : ModuleInfoBase {
 		Knob9mm{{to_mm<72>(84.56), to_mm<72>(313.03), Center, "D2 Level", ""}},
 		Knob9mm{{to_mm<72>(137.48), to_mm<72>(313.03), Center, "D3 Level", ""}},
 		Knob9mm{{to_mm<72>(190.4), to_mm<72>(313.03), Center, "D4 Level", ""}},
-		OrangeButton{{to_mm<72>(235.61), to_mm<72>(195.69), Center, "A1 Button", ""}, State_t::DOWN},
+		OrangeButton{{to_mm<72>(235.61), to_mm<72>(195.69), Center, "A1 Button", ""}},
 		OrangeButton{{to_mm<72>(274.49), to_mm<72>(195.69), Center, "A2 Button", ""}},
 		OrangeButton{{to_mm<72>(313.37), to_mm<72>(195.69), Center, "A3 Button", ""}},
 		OrangeButton{{to_mm<72>(352.25), to_mm<72>(195.69), Center, "A4 Button", ""}},
