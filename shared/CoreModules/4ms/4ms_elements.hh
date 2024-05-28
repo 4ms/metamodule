@@ -92,7 +92,10 @@ struct Toggle2pos : FlipSwitch {
 						 std::array<std::string_view, 2> names = {"Down", "Up"},
 						 State_t defaultValue = State_t::DOWN)
 		: FlipSwitch{
-			  {b}, 2, defaultValue, {"4ms/comp/switch_down.png", "4ms/comp/switch_up.png"}, {names[0], names[1]}} {
+			  {{b}, 2, defaultValue},
+			  {"4ms/comp/switch_down.png", "4ms/comp/switch_up.png"},
+			  {names[0], names[1]},
+		  } {
 	}
 };
 
@@ -103,11 +106,11 @@ struct Toggle3pos : FlipSwitch {
 	constexpr Toggle3pos(BaseElement b,
 						 std::array<std::string_view, 3> names = {"Down", "Center", "Up"},
 						 State_t defaultValue = State_t::DOWN)
-		: FlipSwitch{{b},
-					 3,
-					 defaultValue,
-					 {"4ms/comp/switch_down.png", "4ms/comp/switch_center.png", "4ms/comp/switch_up.png"},
-					 {names[0], names[1], names[2]}} {
+		: FlipSwitch{
+			  {{b}, 3, defaultValue},
+			  {"4ms/comp/switch_down.png", "4ms/comp/switch_center.png", "4ms/comp/switch_up.png"},
+			  {names[0], names[1], names[2]},
+		  } {
 	}
 };
 
@@ -118,11 +121,11 @@ struct Toggle2posHoriz : FlipSwitch {
 	constexpr Toggle2posHoriz(BaseElement b,
 							  std::array<std::string_view, 2> names = {"Left", "Right"},
 							  State_t defaultValue = State_t::LEFT)
-		: FlipSwitch{{b},
-					 2,
-					 defaultValue,
-					 {"4ms/comp/switch_horiz_left.png", "4ms/comp/switch_horiz_right.png"},
-					 {names[0], names[1]}} {
+		: FlipSwitch{
+			  {{b}, 2, defaultValue},
+			  {"4ms/comp/switch_horiz_left.png", "4ms/comp/switch_horiz_right.png"},
+			  {names[0], names[1]},
+		  } {
 	}
 };
 
@@ -134,11 +137,10 @@ struct Toggle3posHoriz : FlipSwitch {
 							  std::array<std::string_view, 3> names = {"Left", "Center", "Right"},
 							  State_t defaultValue = State_t::LEFT)
 		: FlipSwitch{
-			  {b},
-			  3,
-			  defaultValue,
+			  {{b}, 3, defaultValue},
 			  {"4ms/comp/switch_horiz_left.png", "4ms/comp/switch_horiz_center.png", "4ms/comp/switch_horiz_right.png"},
-			  {names[0], names[1], names[2]}} {
+			  {names[0], names[1], names[2]},
+		  } {
 	}
 };
 
