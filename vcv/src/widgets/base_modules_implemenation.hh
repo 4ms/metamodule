@@ -22,8 +22,13 @@ inline void do_config_element(LightElement el, const Indices &indices, const Mod
 	context.module->configLight(indices.light_idx, el.short_name.data());
 };
 
-inline void do_config_element(Button el, const Indices &indices, const ModuleContext_t &context) {
-	context.module->configParam(indices.param_idx, 0, 1, el.DefaultValue, el.short_name.data());
+inline void do_config_element(MomentaryButton el, const Indices &indices, const ModuleContext_t &context) {
+	context.module->configParam(indices.param_idx, 0, 1, 0, el.short_name.data());
+}
+
+inline void do_config_element(LatchingButton el, const Indices &indices, const ModuleContext_t &context) {
+	float defaultValue = (el.DefaultValue == LatchingButton::State_t::UP) ? 0 : 1;
+	context.module->configParam(indices.param_idx, 0, 1, defaultValue, el.short_name.data());
 }
 
 inline void do_config_element(SlideSwitch el, const Indices &indices, const ModuleContext_t &context) {
