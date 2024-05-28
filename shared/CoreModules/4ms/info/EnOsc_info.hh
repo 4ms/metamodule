@@ -16,7 +16,7 @@ struct EnOscInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 32> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(54.1), to_mm<72>(78.08), Center, "Scale", ""}, 0.25f},
+		Davies1900hBlackKnob{{to_mm<72>(54.1), to_mm<72>(78.08), Center, "Scale", ""}, 0.453125f},
 		Davies1900hBlackKnob{{to_mm<72>(115.27), to_mm<72>(61.62), Center, "Spread", ""}, 0.375f},
 		Davies1900hBlackKnob{{to_mm<72>(176.96), to_mm<72>(78.07), Center, "Pitch", ""}, 0.5f},
 		Davies1900hBlackKnob{{to_mm<72>(32.72), to_mm<72>(144.14), Center, "Balance", ""}, 0.5f},
