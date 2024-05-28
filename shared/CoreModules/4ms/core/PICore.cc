@@ -42,7 +42,7 @@ public:
 
 		updateGate(ticks);
 
-		setLED<GateLedLight>(gateState == TRIGGERED ? 1.f : 0.f);
+		setLED<GateLight>(gateState == TRIGGERED ? 1.f : 0.f);
 		setOutput<GateOut>(gateState == TRIGGERED ? gateOutHighVoltage : gateOutLowVoltage);
 		setOutput<AudioOut>(scaledInput);
 	}
