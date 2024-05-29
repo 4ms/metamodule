@@ -1,5 +1,4 @@
 #pragma once
-#include "gui/elements/module_param.hh"
 #include "page_args.hh"
 #include "patch_file/patch_location.hh"
 #include "util/circular_stack.hh"
