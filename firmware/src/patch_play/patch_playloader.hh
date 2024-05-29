@@ -92,9 +92,12 @@ struct PatchPlayLoader {
 	void audio_not_muted() {
 		audio_is_muted_ = false;
 	}
+	bool is_audio_muted() {
+		return audio_is_muted_;
+	}
 
 	bool ready_to_play() {
-		return !stopping_audio_ && !audio_is_muted_ && player_.is_loaded;
+		return !audio_is_muted_ && player_.is_loaded;
 	}
 
 	// Concurrency: Called from UI thread
@@ -187,6 +190,7 @@ private:
 			storage_.play_view_patch();
 			loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
 			loaded_patch_name_ = patch->patch_name;
+			start_audio();
 		}
 
 		return result;
