@@ -120,30 +120,28 @@ void AudioStream::start() {
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
-	auto raw_out = player.get_panel_output(output_id) * mute_ctr;
-	raw_out = -raw_out / OutputMaxVolts;
+	float raw_out = player.get_panel_output(output_id);
+	raw_out = -output_fade_amt * raw_out / OutputMaxVolts;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
 	return scaled_out;
 }
 
 bool AudioStream::check_patch_loading() {
 	if (patch_loader.should_fade_down_audio()) {
-		if (mute_ctr > 0.f) {
-			// Fade down
-			mute_ctr -= 0.1f;
-		} else {
-			// We only process half an audio buffer at a time, so make sure both halves are muted
-			mute_ctr = 0.f;
-			if (++halves_muted == 2) {
-				patch_loader.notify_audio_is_muted();
-			}
+		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
+		if (output_fade_amt <= 0.f) {
+			patch_loader.notify_audio_is_muted();
+			output_fade_amt = 0.f;
+			output_fade_delta = 0.f;
 		}
-	} else {
-		// Patch was just loaded --> unmute audio
-		if (mute_ctr == 0.f) {
-			patch_loader.audio_not_muted();
-			mute_ctr = 1.f;
-			halves_muted = 0;
+
+	} else if (patch_loader.should_fade_up_audio()) {
+		output_fade_delta = 1.f / (sample_rate_ * 0.02f);
+		if (output_fade_amt >= 1.f) {
+			patch_loader.notify_audio_is_muted();
+			output_fade_amt = 1.f;
+			output_fade_delta = 0.f;
+			patch_loader.notify_audio_not_muted();
 			handle_patch_just_loaded();
 		}
 	}
@@ -208,6 +206,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		player.update_patch();
 
 		// Get outputs from modules
+		output_fade_amt += output_fade_delta;
+
 		for (auto [i, outchan] : countzip(out.chan))
 			outchan = get_audio_output(i);
 	}

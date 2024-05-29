@@ -55,10 +55,13 @@ struct PatchPlayLoader {
 	}
 
 	void stop_audio() {
+		starting_audio_ = false;
 		stopping_audio_ = true;
 	}
 
 	void start_audio() {
+		audio_is_muted_ = false;
+		starting_audio_ = true;
 		stopping_audio_ = false;
 	}
 
@@ -71,6 +74,9 @@ struct PatchPlayLoader {
 
 	bool should_fade_down_audio() {
 		return loading_new_patch_ || stopping_audio_;
+	}
+	bool should_fade_up_audio() {
+		return starting_audio_;
 	}
 
 	// UI thread READ (KnobEditPage, ModuleViewPage)
@@ -87,9 +93,11 @@ struct PatchPlayLoader {
 	// Audio thread READ
 	// UI thread READ (via handle_sync_patch_loading())
 	void notify_audio_is_muted() {
+		stopping_audio_ = false;
 		audio_is_muted_ = true;
 	}
-	void audio_not_muted() {
+	void notify_audio_not_muted() {
+		starting_audio_ = false;
 		audio_is_muted_ = false;
 	}
 	bool is_audio_muted() {
@@ -173,6 +181,7 @@ private:
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
 	std::atomic<bool> stopping_audio_ = false;
+	std::atomic<bool> starting_audio_ = false;
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
 
