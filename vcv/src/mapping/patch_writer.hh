@@ -29,7 +29,7 @@ public:
 
 	std::string printPatchYAML();
 
-	PatchData &get_data();
+	MetaModule::PatchData &get_data();
 	static std::map<int64_t, uint16_t> squash_ids(std::vector<int64_t> ids);
 
 private:
@@ -43,7 +43,7 @@ private:
 
 	void setModuleList(std::vector<BrandModule> &modules);
 
-	PatchData pd;
+	MetaModule::PatchData pd;
 	int64_t hubModuleId = -1;
 
 	MetaModule::MIDI::ModuleIds midiModuleIds;

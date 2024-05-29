@@ -6,6 +6,9 @@
 #include <optional>
 #include <vector>
 
+namespace MetaModule
+{
+
 struct PatchData {
 	static constexpr size_t DescSize = 255;
 	ModuleTypeSlug patch_name{""};
@@ -351,3 +354,5 @@ private:
 		return nullptr;
 	}
 };
+
+} // namespace MetaModule

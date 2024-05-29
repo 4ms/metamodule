@@ -2,6 +2,9 @@
 #include "ryml/ryml_init.hh"
 #include "ryml/ryml_serial.hh"
 
+namespace MetaModule
+{
+
 bool yaml_raw_to_patch(char *yaml, size_t size, PatchData &pd) {
 	RymlInit::init_once();
 
@@ -53,3 +56,5 @@ bool yaml_raw_to_patch(std::span<char> yaml, PatchData &pd) {
 bool yaml_string_to_patch(std::string yaml, PatchData &pd) {
 	return yaml_raw_to_patch(yaml.data(), yaml.size(), pd);
 }
+
+} // namespace MetaModule
