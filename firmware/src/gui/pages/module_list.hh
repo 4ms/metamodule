@@ -49,12 +49,17 @@ struct ModuleListPage : PageBase {
 
 		std::string roller_str;
 		roller_str.reserve(all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
-		for (auto item : all_brands) {
+		unsigned sel_idx = 0;
+		for (unsigned i = 0; auto item : all_brands) {
 			roller_str += std::string_view{item};
 			roller_str += "\n";
+			if (selected_brand.is_equal(item.c_str()))
+				sel_idx = i;
+			i++;
 		}
 		roller_str.pop_back();
 		lv_roller_set_options(ui_ModuleListRoller, roller_str.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_selected(ui_ModuleListRoller, sel_idx, LV_ANIM_OFF);
 	}
 
 	void prepare_focus() final {
