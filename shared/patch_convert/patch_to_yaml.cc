@@ -3,6 +3,9 @@
 #include "ryml/ryml_serial.hh"
 #include <span>
 
+namespace MetaModule
+{
+
 static ryml::Tree create_tree(PatchData const &pd, ryml::Tree &tree) {
 	ryml::NodeRef root = tree.rootref();
 	root |= ryml::MAP;
@@ -56,3 +59,5 @@ std::string json_to_yml(std::string json) {
 
 	return ryml::emitrs_yaml<std::string>(tree);
 }
+
+} // namespace MetaModule
