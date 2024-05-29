@@ -77,6 +77,6 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 AddModule,
 									 RemoveModule>;
 
-using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
+using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 128>;
 
 } // namespace MetaModule
