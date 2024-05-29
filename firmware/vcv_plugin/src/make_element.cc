@@ -11,6 +11,14 @@ make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &el, La
 static Element make_momentary_rgb(std::string_view image, BaseElement const &el);
 static Element make_momentary_mono(std::string_view image, NVGcolor c, BaseElement const &el);
 
+static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
+	if (!widget)
+		return 0;
+	auto pq = widget->getParamQuantity();
+	float defaultValue = pq ? pq->toScaled(pq->getDefaultValue()) : 0.f;
+	return defaultValue;
+}
+
 //
 // Jacks
 //
@@ -35,72 +43,82 @@ Element make_element_input(rack::app::SvgPort *widget, BaseElement b) {
 Element make_element(rack::app::Knob *widget, BaseElement b) {
 	b.width_mm = to_mm(widget->box.size.x);
 	b.height_mm = to_mm(widget->box.size.y);
-	return Knob{{{b, ""}}};
+	Knob::State_t defaultValue = getScaledDefaultValue(widget);
+	return Knob{{{b, ""}, defaultValue}};
 }
 
 //TODO: don't set box size here
 // either have dedicated function refresh_widget_size() which scans all children,
 // or in SvgWidget::setSvg, set its parents size recursively (if not set)
 Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
+	Knob::State_t defaultValue = getScaledDefaultValue(widget);
+
 	// SvgKnobs have a base SVG, and sometimes have a bg svg.
 	// If there is a bg svg, then use its name.
 	if (widget->fb->_bg && widget->fb->_bg->svg && widget->fb->_bg->svg->filename.length()) {
 		// TODO: are there some cases when a widget sets its box differently than the bg box?
 		// if (widget->box.size.isFinite() && !widget->box.size.isZero())
 		widget->box.size = widget->fb->_bg->box.size;
-		return Knob{{{b, widget->fb->_bg->svg->filename}}};
+		return Knob{{{b, widget->fb->_bg->svg->filename}, defaultValue}};
 
 	} else if (widget->sw->svg->filename.size()) {
-		return Knob{{{b, widget->sw->svg->filename}}};
+		return Knob{{{b, widget->sw->svg->filename}, defaultValue}};
 
 	} else {
-		return Knob{{{b, widget->svg->filename}}};
+		return Knob{{{b, widget->svg->filename}, defaultValue}};
 	}
 }
 
 Element make_element(rack::app::SliderKnob *widget, BaseElement b) {
 	b.width_mm = to_mm(widget->box.size.x);
 	b.height_mm = to_mm(widget->box.size.y);
-	return Slider{{{b, ""}}, ""};
+	Slider::State_t defaultValue = getScaledDefaultValue(widget);
+	return Slider{{{b, ""}, defaultValue}, ""};
 }
 
 Element make_element_slideswitch(rack::app::SvgSlider *widget, BaseElement b) {
 	//Note: num_pos and labels are filled in later
 	if (widget->background->svg->filename.length()) {
-		SlideSwitch::State_t defaultValue =
-			widget->getParamQuantity() ? widget->getParamQuantity()->getDefaultValue() : 0;
+		SlideSwitch::State_t defaultValue = getScaledDefaultValue(widget);
 		return SlideSwitch{{{b, widget->background->svg->filename}, 2, defaultValue}, widget->handle->svg->filename};
 	} else {
-		return SlideSwitch{{{b, widget->svg->filename}, 2, 0}, widget->handle->svg->filename};
+		SlideSwitch::State_t defaultValue = 0;
+		return SlideSwitch{{{b, widget->svg->filename}, 2, defaultValue}, widget->handle->svg->filename};
 	}
 }
 
 Element make_element(rack::app::SvgSlider *widget, BaseElement b) {
+	Slider::State_t defaultValue = getScaledDefaultValue(widget);
 	if (widget->background->svg->filename.length()) {
-		return Slider{{{b, widget->background->svg->filename}}, widget->handle->svg->filename};
+		return Slider{{{b, widget->background->svg->filename}, defaultValue}, widget->handle->svg->filename};
 	} else {
-		return Slider{{{b, widget->svg->filename}}, widget->handle->svg->filename};
+		return Slider{{{b, widget->svg->filename}, defaultValue}, widget->handle->svg->filename};
 	}
 }
 
 Element make_element_lightslider(rack::app::SvgSlider *widget, BaseElement b) {
+	SliderLight::State_t defaultValue = getScaledDefaultValue(widget);
+
 	if (widget->background->svg->filename.length()) {
-		return SliderLight{{{{b, widget->background->svg->filename}}, widget->handle->svg->filename}, Colors565::Red};
+		return SliderLight{{{{b, widget->background->svg->filename}, defaultValue}, widget->handle->svg->filename},
+						   Colors565::Red};
 	} else {
-		return SliderLight{{{{b, widget->svg->filename}}, widget->handle->svg->filename}, Colors565::Red};
+		return SliderLight{{{{b, widget->svg->filename}, defaultValue}, widget->handle->svg->filename}, Colors565::Red};
 	}
 }
 
 Element make_element(rack::componentlibrary::Rogan *widget, BaseElement b) {
+	Knob::State_t defaultValue = getScaledDefaultValue(widget);
+
 	// Rogan knobs have a Rogan::bg svg, Rogan::fg svg, SvgKnob::sw svg, and SvgWidget::svg.
 	// The fg and base svgs are always the same color and thus are combined into one PNG for the MetaModule.
 	// The bg svg is lighting effect gradient and can be ignored for MetaModule's low-res screen.
 	// The SvgKnob::sw rotates
 	// The SvgWidget::svg is not used (it's in MM only, not in Rack)
 	if (widget->sw)
-		return Knob{{{b, widget->sw->svg->filename}}};
+		return Knob{{{b, widget->sw->svg->filename}, defaultValue}};
 	else
-		return Knob{{{b, widget->svg->filename}}};
+		return Knob{{{b, widget->svg->filename}, defaultValue}};
 }
 
 //
@@ -108,7 +126,7 @@ Element make_element(rack::componentlibrary::Rogan *widget, BaseElement b) {
 //
 
 Element make_element(rack::app::SvgSwitch *widget, BaseElement b) {
-	FlipSwitch::State_t defaultValue = widget->getParamQuantity() ? widget->getParamQuantity()->getDefaultValue() : 0;
+	FlipSwitch::State_t defaultValue = getScaledDefaultValue(widget);
 
 	if (widget->frames.size() == 3) {
 		return FlipSwitch{
@@ -157,9 +175,7 @@ make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &el, La
 
 Element make_button_light(rack::app::MultiLightWidget *light, rack::app::SvgSwitch *widget, BaseElement const &el) {
 	LatchingButton::State_t defaultValue =
-		(widget->getParamQuantity() && widget->getParamQuantity()->getDefaultValue() > 0.5f) ?
-			LatchingButton::State_t::UP :
-			LatchingButton::State_t::DOWN;
+		getScaledDefaultValue(widget) > 0.5f ? LatchingButton::State_t::UP : LatchingButton::State_t::DOWN;
 
 	if (light->getNumColors() == 1) {
 		auto c = light->baseColors[0];
