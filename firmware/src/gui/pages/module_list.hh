@@ -59,9 +59,6 @@ struct ModuleListPage : PageBase {
 
 	void prepare_focus() final {
 		view = View::BrandRoller;
-		if (draw_timer)
-			lv_timer_del(draw_timer);
-		draw_timer = nullptr;
 		roller_brand_list();
 	}
 
@@ -70,9 +67,11 @@ struct ModuleListPage : PageBase {
 		populate_slugs();
 		drawn_module_idx = -1; //force redraw
 		draw_module();
+
 		draw_timer = lv_timer_create(draw_module_cb, 100, this);
 
 		show_roller();
+		show_module();
 	}
 
 	void roller_brand_list() {
@@ -93,6 +92,7 @@ struct ModuleListPage : PageBase {
 				view = View::BrandRoller;
 				if (draw_timer)
 					lv_timer_del(draw_timer);
+				draw_timer = nullptr;
 				roller_brand_list();
 
 			} else if (view == View::ModuleOnly) {
@@ -146,7 +146,6 @@ private:
 			page->view = View::ModuleRoller;
 			page->selected_brand = selected_str;
 			page->roller_module_list();
-			page->show_module();
 
 		} else if (page->view == View::ModuleRoller) {
 			page->view = View::ModuleOnly;
@@ -182,13 +181,15 @@ private:
 	}
 
 	void draw_module() {
-		auto cur_idx = lv_roller_get_selected(ui_ModuleListRoller);
-		if (cur_idx != drawn_module_idx) {
-			drawn_module_idx = cur_idx;
-			ModuleTypeSlug module_slug;
-			lv_roller_get_selected_str(ui_ModuleListRoller, module_slug._data, module_slug.capacity);
-			std::string slug = std::string{selected_brand} + ":" + std::string{module_slug};
-			draw_module(slug.c_str());
+		if (view == View::ModuleOnly || view == View::ModuleRoller) {
+			auto cur_idx = lv_roller_get_selected(ui_ModuleListRoller);
+			if (cur_idx != drawn_module_idx) {
+				drawn_module_idx = cur_idx;
+				ModuleTypeSlug module_slug;
+				lv_roller_get_selected_str(ui_ModuleListRoller, module_slug._data, module_slug.capacity);
+				std::string slug = std::string{selected_brand} + ":" + std::string{module_slug};
+				draw_module(slug.c_str());
+			}
 		}
 	}
 
