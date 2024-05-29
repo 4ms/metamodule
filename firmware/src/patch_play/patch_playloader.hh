@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/modules_helpers.hh"
 #include "delay.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/patch_location.hh"
@@ -58,6 +59,7 @@ struct PatchPlayLoader {
 	}
 
 	void start_audio() {
+		stopping_audio_ = false;
 	}
 
 	// loading_new_patch_:
@@ -135,6 +137,30 @@ struct PatchPlayLoader {
 			return {true, "Saved"};
 		else
 			return {true, ""};
+	}
+
+	void load_module(std::string_view slug) {
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		player_.add_module(slug);
+
+		auto *patch = storage_.get_view_patch();
+		uint16_t module_id = patch->add_module(slug);
+		auto info = ModuleFactory::getModuleInfo(slug);
+
+		// Set params to default values
+		for (unsigned i = 0; auto const &element : info.elements) {
+			if (auto def_val = get_normalized_default_value(element); def_val.has_value()) {
+				auto param_id = info.indices[i].param_idx;
+				patch->set_or_add_static_knob_value(module_id, param_id, def_val.value());
+				player_.apply_static_param({.module_id = module_id, .param_id = param_id, .value = def_val.value()});
+			}
+			i++;
+		}
+
+		start_audio();
 	}
 
 private:

@@ -185,26 +185,7 @@ private:
 	}
 
 	void add_module(std::string_view slug) {
-		patch_mod_queue.put(AddModule{slug});
-
-		auto *patch = patch_storage.get_view_patch();
-		uint16_t module_id = patch->add_module(slug);
-		auto info = ModuleFactory::getModuleInfo(slug);
-
-		// Set params to default values
-		for (unsigned i = 0; auto const &element : info.elements) {
-			if (auto def_val = get_normalized_default_value(element); def_val.has_value()) {
-				auto param_id = info.indices[i].param_idx;
-				patch->set_or_add_static_knob_value(module_id, param_id, def_val.value());
-
-				// Tell patch player the default value for each param -- and keep trying until msg is sent
-				while (!patch_mod_queue.put(
-					SetStaticParam{{.module_id = module_id, .param_id = param_id, .value = def_val.value()}}))
-					;
-			}
-			i++;
-		}
-
+		patch_playloader.load_module(slug);
 		page_list.increment_patch_revision();
 	}
 
