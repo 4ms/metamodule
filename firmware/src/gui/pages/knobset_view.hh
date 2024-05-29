@@ -3,7 +3,6 @@
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
-#include "gui/elements/module_param.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/knob_arc.hh"
 #include "gui/pages/module_view_mapping_pane.hh"

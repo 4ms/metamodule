@@ -3,7 +3,6 @@
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
-#include "gui/elements/module_param.hh"
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/pages/base.hh"
@@ -36,7 +35,6 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
 
 		button.clear();
-		module_controls.clear();
 
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, roller);
@@ -79,7 +77,6 @@ struct ModuleViewPage : PageBase {
 		opts.reserve(num_elements * 32); // 32 chars per roller item
 		button.reserve(num_elements);
 		drawn_elements.reserve(num_elements);
-		module_controls.reserve(num_elements);
 
 		auto module_drawer = ModuleDrawer{ui_ModuleImage, 240};
 		canvas = module_drawer.draw_faceplate(slug, buffer);
@@ -129,8 +126,6 @@ struct ModuleViewPage : PageBase {
 					add_button(drawn.obj);
 				},
 				drawn_element.element);
-
-			module_controls.emplace_back(drawn_element.element, drawn_element.gui_element.idx);
 
 			if (args.element_indices.has_value()) {
 				if (ElementCount::matched(*args.element_indices, drawn.idx)) {
@@ -347,7 +342,6 @@ private:
 
 		button.clear();
 		drawn_elements.clear();
-		module_controls.clear();
 		opts.clear();
 		cur_selected = 0;
 	}
@@ -387,9 +381,8 @@ private:
 	static void roller_click_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		auto cur_sel = page->cur_selected;
-		auto &module_controls = page->module_controls;
 
-		if (cur_sel < module_controls.size()) {
+		if (cur_sel < page->drawn_elements.size()) {
 			page->mode = ViewMode::Mapping;
 			lv_hide(ui_ElementRollerPanel);
 			page->mapping_pane.show(page->drawn_elements[cur_sel]);
@@ -415,7 +408,6 @@ private:
 	unsigned active_knobset = 0;
 
 	std::vector<lv_obj_t *> button;
-	std::vector<ModuleParam> module_controls;
 	std::vector<DrawnElement> drawn_elements;
 	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals{};
 
