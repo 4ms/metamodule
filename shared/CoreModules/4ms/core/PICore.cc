@@ -50,13 +50,18 @@ public:
 
 		envelopePOut = generateEnvelope(mode == FOLLOW ? scaledInput : gateState == TRIGGERED ? gateOutHighVoltage : gateOutLowVoltage);
 
+		auto envelopeNOut = envelopeHighVoltage - envelopePOut;
+
 		setLED<GateLight>(gateState == TRIGGERED ? 1.f : 0.f);
 		setOutput<GateOut>(gateState == TRIGGERED ? gateOutHighVoltage : gateOutLowVoltage);
 
 		setOutput<Env_OutPOut>(envelopePOut);
 		setLED<EnvPLight>(envelopePOut / envelopeHighVoltage);
-		setOutput<Env_OutNOut>(envelopeHighVoltage - envelopePOut);
-		setLED<EnvNLight>((envelopeHighVoltage - envelopePOut) / envelopeHighVoltage);
+		setOutput<Env_OutNOut>(envelopeNOut);
+		setLED<EnvNLight>(envelopeNOut/ envelopeHighVoltage);
+
+		setOutput<Env_Out>(envelopePOut * getState<Env_LevelKnob>());
+		setOutput<Inv_Out>(envelopeNOut * getState<Inv_LevelKnob>());
 
 		setOutput<AudioOut>(scaledInput);
 	}
