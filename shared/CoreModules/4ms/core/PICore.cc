@@ -16,6 +16,7 @@ class PICore : public SmartCoreProcessor<PIInfo> {
 private:
 	enum GainRange_t { LOW = 0, MEDIUM = 1, HIGH = 2 };
 	enum GateState_t { IDLE, TRIGGERED };
+	enum Mode_t { FOLLOW, GEN };
 
 public:
 	PICore()
@@ -42,12 +43,26 @@ public:
 
 		updateGate(ticks);
 
+		setDecayTime();
+		readEnvelopeMode();
+
+		auto envelopePOut = 0.f;
+
+		envelopePOut = generateEnvelope(mode == FOLLOW ? scaledInput : gateState == TRIGGERED ? gateOutHighVoltage : gateOutLowVoltage);
+
 		setLED<GateLight>(gateState == TRIGGERED ? 1.f : 0.f);
 		setOutput<GateOut>(gateState == TRIGGERED ? gateOutHighVoltage : gateOutLowVoltage);
+
+		setOutput<Env_OutPOut>(envelopePOut);
+		setLED<EnvPLight>(envelopePOut / envelopeHighVoltage);
+		setOutput<Env_OutNOut>(envelopeHighVoltage - envelopePOut);
+		setLED<EnvNLight>((envelopeHighVoltage - envelopePOut) / envelopeHighVoltage);
+
 		setOutput<AudioOut>(scaledInput);
 	}
 
 	float readMaximumGain() {
+		// auto gainMode = getState<GainSwitch>();
 		auto gainMode = Toggle3posHoriz::State_t::LEFT;
 
 		if (gainMode == Toggle3posHoriz::State_t::LEFT) {
@@ -80,7 +95,38 @@ public:
 		}
 	}
 
+	void readEnvelopeMode()
+	{
+		// auto envMode = getState<EnvModeSwitch>();
+		auto envMode = Toggle2posHoriz::State_t::LEFT;
+
+		if(envMode == Toggle2posHoriz::State_t::LEFT) {
+			mode = FOLLOW;
+		} else {
+			mode = GEN;
+		}
+	}
+
+	void setDecayTime()
+	{
+		envelope.setDecay(getState<Env_DecayKnob>() * (maximumDecayTimeInS - minimumDecayTimeInS) + minimumDecayTimeInS);
+	}
+
+	float generateEnvelope(float input)
+	{
+		static constexpr float envelopeInputGain = 3.2f;
+		static constexpr float envelopeInputOffset = -0.29f;
+
+		input *= envelopeInputGain;
+		input += envelopeInputOffset;
+
+		auto envelopeOutput = envelope(std::clamp(input, 0.f, envelopeHighVoltage));
+
+		return envelopeOutput;
+	}
+
 	void set_samplerate(float sr) override {
+		envelope.setSamplerate(sr);
 		sampleRate = sr;
 		minimumGateLengthInTicks = minimumGateLengthInS * sampleRate;
 		maximumGateLengthInTicks = maximumGateLengthInS * sampleRate;
@@ -99,11 +145,14 @@ private:
 	static constexpr float gateOutLowVoltage = 0.f;
 	static constexpr float gateOutHighVoltage = 8.f;
 
-	static constexpr float gateThresholdInV = 8.f;
+	static constexpr float gateThresholdInV = 3.5f;
+
+	static constexpr float envelopeHighVoltage = 9.f;
+
+	static constexpr float minimumDecayTimeInS = 0.022f;
+	static constexpr float maximumDecayTimeInS = 2.2f;
 
 	static constexpr std::array<float, 3> maximumGains{2.f, 20.f, 500.f};
-
-	enum Mode_t { FOLLOW, GEN };
 
 private:
 	uint32_t ticks;
@@ -118,6 +167,8 @@ private:
 private:
 	static constexpr float DCBlockerFactor = 0.9995f;
 	DCBlock dcBlocker;
+
+	PeakDetector envelope;
 };
 
 } // namespace MetaModule
