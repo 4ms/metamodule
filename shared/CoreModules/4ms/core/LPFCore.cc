@@ -18,39 +18,16 @@ public:
 	LPFCore() = default;
 
 	void update() override {
+		auto input = std::clamp(getInput<InputIn>().value_or(std::rand() / (RAND_MAX * 10)), -10.f, 10.f) / 10.f;
+
+		moog.cutoff.setValue(getState<CutoffKnob>());
+		moog.q.setValue(getState<QKnob>() * 25.f);
+
+		setOutput<Out>(moog.update(input) * 10.f);
 	}
 
-	void set_param(int param_id, float val) override {
-		if (param_id == Info::KnobCutoff) {
-			baseFrequency = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
-		} else if (param_id == Info::KnobQ) {
-			filterQ = map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
-			// } else if (param_id == Info::KnobCVAmount) {
-			// 	cvAmount = val;
-		} else if (param_id == static_cast<unsigned>(Info::SwitchMode) + static_cast<unsigned>(Info::NumKnobs)) {
-			mode = val;
-		}
-	}
-
-	void set_input(int input_id, float val) override {
-		if (input_id == Info::InputInput)
-			signalIn = val;
-		if (input_id == Info::InputCv)
-			cvInput = val / CvRangeVolts;
-	}
-
-	float get_output(int output_id) const override {
-		if (output_id == Info::OutputOut)
-			return signalOut;
-		return 0.f;
-	}
-
-	void set_samplerate(float sr) override {
-		lpf.sampleRate.setValue(sr);
-	}
-
-	float get_led_brightness(int led_id) const override {
-		return mode;
+	void set_samplerate(float sr) {
+		moog.sampleRate.setValue(sr);
 	}
 
 	// Boilerplate to auto-register in ModuleFactory

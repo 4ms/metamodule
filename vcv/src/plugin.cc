@@ -36,7 +36,7 @@ void init(rack::Plugin *p) {
 	p->addModel(modelProb8);
 	p->addModel(modelOctave);
 	p->addModel(modelMNMX);
-	// p->addModel(modelLPF);
+	p->addModel(modelLPF);
 	p->addModel(modelAtvert2);
 	p->addModel(modelBPF);
 	p->addModel(modelComplexEG);

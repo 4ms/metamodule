@@ -260,6 +260,12 @@
       "tags": ["Filter"]
     },
     {
+      "slug": "LPF",
+      "name": "LPF",
+      "description": "LPF",
+      "tags": ["Filter"]
+    },
+    {
       "slug": "Gate",
       "name": "Gate",
       "description": "Gate/trigger delay with pulse width control",

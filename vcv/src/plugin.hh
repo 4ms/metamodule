@@ -35,7 +35,7 @@ extern rack::Model *modelSeq8;
 // extern rack::Model *modelQuant;
 extern rack::Model *modelProb8;
 extern rack::Model *modelMNMX;
-// extern rack::Model *modelLPF;
+extern rack::Model *modelLPF;
 extern rack::Model *modelAtvert2;
 extern rack::Model *modelBPF;
 extern rack::Model *modelComplexEG;
