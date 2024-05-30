@@ -23,11 +23,19 @@ public:
 		moog.cutoff.setValue(getState<CutoffKnob>());
 		moog.q.setValue(getState<QKnob>() * 25.f);
 
-		setOutput<Out>(moog.update(input) * 10.f);
+		lpf.cutoff.setValue(getState<CutoffKnob>() * 12000.f + 1.f);
+		lpf.q.setValue(getState<QKnob>() * 25.f + 0.1f);
+
+		auto moogOut = moog.update(input) * 10.f;
+		auto lpfOut = lpf.update(input) * 10.f;
+
+		setOutput<Out>(getState<ModeButton>() == LatchingButton::State_t::DOWN ? lpfOut : moogOut);
+		setLED<ModeButton>(getState<ModeButton>() == LatchingButton::State_t::DOWN ? 1.f : 0.f);
 	}
 
 	void set_samplerate(float sr) {
 		moog.sampleRate.setValue(sr);
+		lpf.sampleRate.setValue(sr);
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
