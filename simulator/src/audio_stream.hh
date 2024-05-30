@@ -85,7 +85,7 @@ public:
 			patch_loader.notify_audio_is_muted();
 			return true;
 		} else {
-			patch_loader.audio_not_muted();
+			patch_loader.notify_audio_not_muted();
 		}
 
 		if (!player.is_loaded) {
