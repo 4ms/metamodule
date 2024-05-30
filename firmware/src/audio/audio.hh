@@ -69,7 +69,8 @@ private:
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	mdrivlib::CycleCounter load_measure;
 	float load_lpf = 0.f;
-	float mute_ctr = 1.f;
+	float output_fade_amt = 1.f;
+	float output_fade_delta = 0.f;
 	uint32_t halves_muted = 0;
 	bool ext_audio_connected = false;
 	ParamBlock local_p;

@@ -16,14 +16,14 @@ struct FMInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 14> Elements{{
-		Knob9mm{{to_mm<72>(31.83), to_mm<72>(40.21), Center, "Pitch", ""}},
-		Knob9mm{{to_mm<72>(83.37), to_mm<72>(40.21), Center, "Mix", ""}},
-		Knob9mm{{to_mm<72>(31.83), to_mm<72>(83.35), Center, "Index", ""}},
-		Knob9mm{{to_mm<72>(83.37), to_mm<72>(83.35), Center, "Index CV", ""}},
-		Knob9mm{{to_mm<72>(31.83), to_mm<72>(126.49), Center, "Ratio C", ""}},
-		Knob9mm{{to_mm<72>(83.37), to_mm<72>(126.49), Center, "Ratio F", ""}},
-		Knob9mm{{to_mm<72>(31.83), to_mm<72>(169.63), Center, "Shape", ""}},
-		Knob9mm{{to_mm<72>(83.37), to_mm<72>(169.63), Center, "Shape CV", ""}},
+		Knob9mm{{to_mm<72>(31.83), to_mm<72>(40.21), Center, "Pitch", ""}, 0.5f},
+		Knob9mm{{to_mm<72>(83.37), to_mm<72>(40.21), Center, "Mix", ""}, 0.5f},
+		Knob9mm{{to_mm<72>(31.83), to_mm<72>(83.35), Center, "Index", ""}, 0.625f},
+		Knob9mm{{to_mm<72>(83.37), to_mm<72>(83.35), Center, "Index CV", ""}, 0.5f},
+		Knob9mm{{to_mm<72>(31.83), to_mm<72>(126.49), Center, "Ratio C", ""}, 0.375f},
+		Knob9mm{{to_mm<72>(83.37), to_mm<72>(126.49), Center, "Ratio F", ""}, 0.0f},
+		Knob9mm{{to_mm<72>(31.83), to_mm<72>(169.63), Center, "Shape", ""}, 0.0f},
+		Knob9mm{{to_mm<72>(83.37), to_mm<72>(169.63), Center, "Shape CV", ""}, 0.5f},
 		AnalogJackInput4ms{{to_mm<72>(31.83), to_mm<72>(214.43), Center, "V/Oct P", ""}},
 		AnalogJackInput4ms{{to_mm<72>(83.37), to_mm<72>(214.43), Center, "V/Oct S", ""}},
 		AnalogJackInput4ms{{to_mm<72>(31.83), to_mm<72>(263.15), Center, "Mix CV", ""}},

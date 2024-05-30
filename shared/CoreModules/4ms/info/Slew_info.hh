@@ -16,8 +16,8 @@ struct SlewInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Rise", ""}},
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(94.96), Center, "Fall", ""}},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Rise", ""}, 0.5f},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(94.96), Center, "Fall", ""}, 0.5f},
 		AnalogJackInput4ms{{to_mm<72>(28.8), to_mm<72>(265.04), Center, "Input", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(28.8), to_mm<72>(313.23), Center, "Out", ""}},
 }};

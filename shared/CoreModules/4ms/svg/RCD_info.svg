@@ -23,13 +23,13 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.2269929"
-     inkscape:cx="96.170078"
-     inkscape:cy="248.9827"
+     inkscape:zoom="1.5075077"
+     inkscape:cx="62.686246"
+     inkscape:cy="187.72706"
      inkscape:window-width="1584"
-     inkscape:window-height="1212"
-     inkscape:window-x="49"
-     inkscape:window-y="25"
+     inkscape:window-height="1051"
+     inkscape:window-x="52"
+     inkscape:window-y="38"
      inkscape:window-maximized="0"
      inkscape:current-layer="components" />
   <g
@@ -882,7 +882,7 @@
        width="11.34"
        height="17.01"
        transform="translate(415.13 197.54) rotate(90)"
-       style="fill: #ff8080;" />
+       style="fill:#ff8081" />
     <circle
        id="d7"
        cx="48.19"
@@ -903,7 +903,7 @@
        width="11.34"
        height="17.01"
        transform="translate(375.41 157.81) rotate(90)"
-       style="fill: #ff8080;" />
+       style="fill:#ff8081" />
     <circle
        id="d6"
        cx="48.19"
@@ -925,7 +925,7 @@
        width="11.34"
        height="17.01"
        transform="translate(329.58 112.35) rotate(90)"
-       style="fill: #ff8080;" />
+       style="fill:#ff8081" />
     <circle
        id="d5"
        cx="48.19"
@@ -947,7 +947,7 @@
        width="11.34"
        height="17.01"
        transform="translate(289.86 72.63) rotate(90)"
-       style="fill: #ff8080;" />
+       style="fill:#ff8081" />
     <circle
        id="d4"
        cx="48.19"
@@ -982,7 +982,7 @@
        width="11.34"
        height="17.01"
        transform="translate(242.24 24.65) rotate(90)"
-       style="fill: #ff8080;" />
+       style="fill:#ff8081" />
     <circle
        id="d2"
        cx="48.19"
@@ -1003,7 +1003,7 @@
        width="11.34"
        height="17.01"
        transform="translate(202.14 -15.45) rotate(90)"
-       style="fill: #ff8080;" />
+       style="fill:#ff8081" />
     <circle
        id="d1"
        cx="48.19"
@@ -1045,32 +1045,34 @@
        style="fill: #f0f;" />
     <text
        id="slug"
-       transform="translate(72.55 371.47)"
-       style="font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 6px;"><tspan
-         x="0"
-         y="0"
-         style="letter-spacing: 0em;"
+       style="font-size:6px;font-family:MyriadPro-Regular, 'Myriad Pro'"
+       x="58.299828"
+       y="362.04651"><tspan
+         x="58.299828"
+         y="362.04651"
+         style="letter-spacing:0em"
          id="tspan141">R</tspan><tspan
-         x="3.25"
-         y="0"
+         x="61.549828"
+         y="362.04651"
          id="tspan142">CD</tspan></text>
     <text
        id="modulename"
-       transform="translate(87.86 371.47)"
-       style="font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 6px;"><tspan
-         x="0"
-         y="0"
-         style="letter-spacing: 0em;"
+       style="font-size:6px;font-family:MyriadPro-Regular, 'Myriad Pro'"
+       x="77.057449"
+       y="361.81665"><tspan
+         x="77.057449"
+         y="361.81665"
+         style="letter-spacing:0em"
          id="tspan143">R</tspan><tspan
-         x="3.25"
-         y="0"
+         x="80.307449"
+         y="361.81665"
          id="tspan144">ot</tspan><tspan
-         x="8.53"
-         y="0"
-         style="letter-spacing: 0em;"
+         x="85.587448"
+         y="361.81665"
+         style="letter-spacing:0em"
          id="tspan145">a</tspan><tspan
-         x="11.4"
-         y="0"
+         x="88.457451"
+         y="361.81665"
          id="tspan146">ting Clock Divider</tspan></text>
   </g>
 </svg>

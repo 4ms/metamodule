@@ -6,7 +6,7 @@ In general, all elements are specified with a circle. But some objects that requ
 **Red: Knob or Slider**
 Circle = Knob
 Default position specified by amount of blue:
-0% (fully CCW): color is ‘#FF0000’ or ‘#f00’ or ‘red’
+0% (fully CCW): color is '#FF0000' or '#f00' or 'red'
 25%: #FF0020
 50%: #FF0040
 75%: #FF0060
@@ -20,19 +20,19 @@ Same colors and default position as knob
 If height > width then it's vertical. Otherwise it's horizontal
 
 **Deep Magenta: Rotary Encoder**
-color is ‘#C000C0’
+color is '#C000C0'
 
 **Green: Input jack, analog:**
-color is ‘#00FF00’ or ‘#0f0’ or ‘lime’
+color is '#00FF00' or '#0f0' or 'lime'
 
 **Light Green: Input jack, gate**
-color is ‘#80FF80’
+color is '#80FF80'
 
 **Blue: Output jack, analog**
-color is ‘#0000FF’ or ‘#00f’ or ‘blue’
+color is '#0000FF' or '#00f' or 'blue'
 
 **Light Blue: Output jack, gate**
-color is ‘#8080FF’
+color is '#8080FF'
 
 **Magenta: LED**
 color is #FF00FF
@@ -47,24 +47,25 @@ Append object name with `#classname`:
   - `#BlueLight`
 
 **Orange: Button - Latching**
-color is ‘#FF8000’
+color is '#FF8000' if default UP (not pressed/engaged)
+color is '#FF8001' if default DOWN (pressed/engaged)
 
 **Light Orange: Button - Momentary**
-color is ‘#FFC000’
+color is '#FFC000'
 
 **Light Coral: Switch - 2pos**
-color is ‘#FF8080’
+color is '#FF8080' (default = 0), '#FF8081' (default = 1)
 If height > width then it's vertical. Otherwise it's horizontal
 
 **Faded Orange: Switch - 3pos**
-color is ‘#FFC080’
+color is '#FFC080' (default = 0), '#FFC081' (default = 1), or '#FFC082' (default = 2)
 If height > width then it's vertical. Otherwise it's horizontal
 
 **Yellow: Misc widget/undefined custom element:**
-color is ‘#FFFF00’ or ‘#ff0’ or ‘yellow’
+color is '#FFFF00' or '#ff0' or 'yellow'
 
 **Grey: AltParam**
-color is ‘#808080’
+color is '#808080'
 
 By default this is a continuous range parameter (any value 0.0 to 1.0).
 
@@ -174,7 +175,7 @@ Styling: Inline Style
 
 Font: SVG
 
-Images: Link (doesn’t matter)
+Images: Link (doesn't matter)
 
 Object IDs: Layer Names
 

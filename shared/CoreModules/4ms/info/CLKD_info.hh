@@ -16,7 +16,7 @@ struct CLKDInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Divide", ""}},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Divide", ""}, 0.0f},
 		AnalogJackInput4ms{{to_mm<72>(28.8), to_mm<72>(216.85), Center, "CV", ""}},
 		GateJackInput4ms{{to_mm<72>(28.8), to_mm<72>(265.04), Center, "Clk In", ""}},
 		GateJackOutput4ms{{to_mm<72>(28.8), to_mm<72>(313.23), Center, "Clk Out", ""}},

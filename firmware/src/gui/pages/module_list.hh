@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/modules_helpers.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
@@ -158,9 +159,7 @@ private:
 
 		} else {
 			std::string slug = std::string{page->selected_brand} + ":" + std::string{selected_str};
-			page->patch_mod_queue.put(AddModule{slug.c_str()});
-			page->patch_storage.get_view_patch()->module_slugs.push_back({slug.c_str()});
-			page->page_list.increment_patch_revision();
+			page->add_module(slug);
 			page->load_page(PageId::PatchView, page->args);
 		}
 	}
@@ -183,6 +182,11 @@ private:
 		if (page->view == View::ModuleOnly || page->view == View::ModuleRoller) {
 			page->do_redraw = true;
 		}
+	}
+
+	void add_module(std::string_view slug) {
+		patch_playloader.load_module(slug);
+		page_list.increment_patch_revision();
 	}
 
 	void draw_module() {

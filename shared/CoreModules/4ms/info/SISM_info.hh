@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,26 +11,26 @@ struct SISMInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Shifting Inverting Signal Mingler"};
     static constexpr uint32_t width_hp = 12;
     static constexpr std::string_view svg_filename{"res/modules/SISM_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/SISM.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/SISM.png"};
 
     using enum Coords;
 
     static constexpr std::array<Element, 34> Elements{{
-		Knob9mm{{to_mm<72>(64.25), to_mm<72>(46.64), Center, "Scale 1", ""}},
-		Knob9mm{{to_mm<72>(107.45), to_mm<72>(46.64), Center, "Shift 1", ""}},
-		Knob9mm{{to_mm<72>(64.25), to_mm<72>(111.44), Center, "Scale 2", ""}},
-		Knob9mm{{to_mm<72>(107.45), to_mm<72>(111.44), Center, "Shift 2", ""}},
-		Knob9mm{{to_mm<72>(64.25), to_mm<72>(176.24), Center, "Scale 3", ""}},
-		Knob9mm{{to_mm<72>(107.45), to_mm<72>(176.24), Center, "Shift 3", ""}},
-		Knob9mm{{to_mm<72>(64.25), to_mm<72>(241.04), Center, "Scale 4", ""}},
-		Knob9mm{{to_mm<72>(107.45), to_mm<72>(241.04), Center, "Shift 4", ""}},
+		Knob9mm{{to_mm<72>(64.25), to_mm<72>(46.64), Center, "Scale 1", ""}, 1.0f},
+		Knob9mm{{to_mm<72>(107.45), to_mm<72>(46.64), Center, "Shift 1", ""}, 0.5f},
+		Knob9mm{{to_mm<72>(64.25), to_mm<72>(111.44), Center, "Scale 2", ""}, 1.0f},
+		Knob9mm{{to_mm<72>(107.45), to_mm<72>(111.44), Center, "Shift 2", ""}, 0.5f},
+		Knob9mm{{to_mm<72>(64.25), to_mm<72>(176.24), Center, "Scale 3", ""}, 1.0f},
+		Knob9mm{{to_mm<72>(107.45), to_mm<72>(176.24), Center, "Shift 3", ""}, 0.5f},
+		Knob9mm{{to_mm<72>(64.25), to_mm<72>(241.04), Center, "Scale 4", ""}, 1.0f},
+		Knob9mm{{to_mm<72>(107.45), to_mm<72>(241.04), Center, "Shift 4", ""}, 0.5f},
 		AnalogJackInput4ms{{to_mm<72>(21.77), to_mm<72>(52.84), Center, "In 1", ""}},
-		AnalogJackInput4ms{{to_mm<72>(21.77), to_mm<72>(117.64), Center, "In 2", ""}},
-		AnalogJackInput4ms{{to_mm<72>(21.77), to_mm<72>(182.44), Center, "In 3", ""}},
-		AnalogJackInput4ms{{to_mm<72>(21.77), to_mm<72>(247.24), Center, "In 4", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(150.52), to_mm<72>(52.9), Center, "Out 1", ""}},
+		AnalogJackInput4ms{{to_mm<72>(21.77), to_mm<72>(117.64), Center, "In 2", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(150.52), to_mm<72>(117.7), Center, "Out 2", ""}},
+		AnalogJackInput4ms{{to_mm<72>(21.77), to_mm<72>(182.44), Center, "In 3", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(150.52), to_mm<72>(182.5), Center, "Out 3", ""}},
+		AnalogJackInput4ms{{to_mm<72>(21.77), to_mm<72>(247.24), Center, "In 4", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(150.52), to_mm<72>(247.3), Center, "Out 4", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(21.1), to_mm<72>(312.16), Center, "+ Slice", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(64.25), to_mm<72>(312.16), Center, "- Slice", ""}},
@@ -61,12 +62,12 @@ struct SISMInfo : ModuleInfoBase {
         Scale4Knob,
         Shift4Knob,
         In1In,
-        In2In,
-        In3In,
-        In4In,
         Out1Out,
+        In2In,
         Out2Out,
+        In3In,
         Out3Out,
+        In4In,
         Out4Out,
         PSliceOut,
         NSliceOut,

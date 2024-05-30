@@ -16,9 +16,9 @@ struct FollowInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Rise", ""}},
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(94.96), Center, "Fall", ""}},
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(143.15), Center, "Thresh", ""}},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.77), Center, "Rise", ""}, 0.0f},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(94.96), Center, "Fall", ""}, 0.0f},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(143.15), Center, "Thresh", ""}, 0.0f},
 		AnalogJackInput4ms{{to_mm<72>(28.8), to_mm<72>(216.85), Center, "Input", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(28.8), to_mm<72>(265.04), Center, "Gate", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(28.8), to_mm<72>(313.23), Center, "Env", ""}},

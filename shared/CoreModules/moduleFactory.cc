@@ -26,6 +26,10 @@ static constexpr int MAX_MODULE_TYPES = 512;
 struct BrandRegistry {
 	ModuleTypeSlug brand_name;
 	SeqMap<ModuleTypeSlug, ModuleRegistry, MAX_MODULE_TYPES> modules;
+
+	BrandRegistry(std::string_view brand)
+		: brand_name{brand} {
+	}
 };
 
 auto &registry() {
@@ -38,7 +42,7 @@ ModuleInfoView nullinfo{};
 } // namespace
 
 static auto brand_registry(std::string_view brand) {
-	return std::find_if(registry().begin(), registry().end(), [=](auto b) { return b.brand_name == brand; });
+	return std::find_if(registry().begin(), registry().end(), [=](auto const &b) { return b.brand_name == brand; });
 }
 
 bool ModuleFactory::registerModuleType(std::string_view brand_name,
@@ -52,7 +56,7 @@ bool ModuleFactory::registerModuleType(std::string_view brand_name,
 		return brand_reg->modules.overwrite(typeslug, {funcCreate, info, std::string{faceplate_filename}});
 	} else {
 		// Brand does not exist, create it and insert entry
-		auto &brand = registry().emplace_back(BrandRegistry{brand_name, {}});
+		auto &brand = registry().emplace_back(brand_name);
 		return brand.modules.insert(typeslug, {funcCreate, info, std::string{faceplate_filename}});
 	}
 }

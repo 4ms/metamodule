@@ -16,14 +16,14 @@ struct Seq8Info : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 12> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(32.75), to_mm<72>(47.1), Center, "1", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(84.28), to_mm<72>(47.1), Center, "2", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(32.75), to_mm<72>(104.19), Center, "3", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(84.28), to_mm<72>(104.19), Center, "4", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(32.75), to_mm<72>(163.5), Center, "5", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(84.28), to_mm<72>(163.5), Center, "6", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(32.75), to_mm<72>(222.27), Center, "7", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(84.28), to_mm<72>(222.27), Center, "8", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(32.75), to_mm<72>(47.1), Center, "1", ""}, 0.25f},
+		Davies1900hBlackKnob{{to_mm<72>(84.28), to_mm<72>(47.1), Center, "2", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(32.75), to_mm<72>(104.19), Center, "3", ""}, 0.875f},
+		Davies1900hBlackKnob{{to_mm<72>(84.28), to_mm<72>(104.19), Center, "4", ""}, 0.25f},
+		Davies1900hBlackKnob{{to_mm<72>(32.75), to_mm<72>(163.5), Center, "5", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(84.28), to_mm<72>(163.5), Center, "6", ""}, 0.875f},
+		Davies1900hBlackKnob{{to_mm<72>(32.75), to_mm<72>(222.27), Center, "7", ""}, 1.0f},
+		Davies1900hBlackKnob{{to_mm<72>(84.28), to_mm<72>(222.27), Center, "8", ""}, 0.25f},
 		AnalogJackInput4ms{{to_mm<72>(30.9), to_mm<72>(272.37), Center, "Clock", ""}},
 		AnalogJackInput4ms{{to_mm<72>(84.57), to_mm<72>(272.37), Center, "Reset", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(31.0), to_mm<72>(314.05), Center, "Gate", ""}},

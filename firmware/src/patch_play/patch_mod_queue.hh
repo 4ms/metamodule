@@ -56,10 +56,6 @@ struct AddJackMapping {
 	ElementType type;
 };
 
-struct AddModule {
-	BrandModuleSlug slug{};
-};
-
 struct RemoveModule {
 	uint16_t module_idx{};
 };
@@ -74,9 +70,8 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 AddInternalCable,
 									 AddJackMapping,
 									 DisconnectJack,
-									 AddModule,
 									 RemoveModule>;
 
-using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 32>;
+using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 128>;
 
 } // namespace MetaModule

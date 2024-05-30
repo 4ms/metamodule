@@ -25,7 +25,6 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue, PatchPlayer &playe
 						   mod.type == ElementType::Input ? player.disconnect_injack(mod.jack) :
 															player.disconnect_outjack(mod.jack);
 					   },
-					   [&player](AddModule &mod) { player.add_module(mod.slug); },
 					   [&player](RemoveModule &mod) { player.remove_module(mod.module_idx); },
 
 				   },
