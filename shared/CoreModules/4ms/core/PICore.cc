@@ -64,11 +64,13 @@ public:
 		setOutput<Inv_Out>(envelopeNOut * getState<Inv_LevelKnob>());
 
 		setOutput<AudioOut>(scaledInput);
+		auto sensLight = senseEnvelope(scaledInput);
+		setLED<Sens_Light>(std::array<float,3>{(sensLight - 6.f) / 3.f,0.f,sensLight / 3.5f});
 	}
 
 	float readMaximumGain() {
 		// auto gainMode = getState<GainSwitch>();
-		auto gainMode = Toggle3posHoriz::State_t::LEFT;
+		auto gainMode = Toggle3posHoriz::State_t::CENTER;
 
 		if (gainMode == Toggle3posHoriz::State_t::LEFT) {
 			return maximumGains[LOW];
@@ -132,6 +134,7 @@ public:
 
 	void set_samplerate(float sr) override {
 		envelope.setSamplerate(sr);
+		senseEnvelope.setSamplerate(sr);
 		sampleRate = sr;
 		minimumGateLengthInTicks = minimumGateLengthInS * sampleRate;
 		maximumGateLengthInTicks = maximumGateLengthInS * sampleRate;
@@ -174,6 +177,7 @@ private:
 	DCBlock dcBlocker;
 
 	PeakDetector envelope;
+	PeakDetector senseEnvelope;
 };
 
 } // namespace MetaModule
