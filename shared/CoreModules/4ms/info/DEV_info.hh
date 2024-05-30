@@ -16,12 +16,12 @@ struct DEVInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 44> Elements{{
-		Toggle3pos{{to_mm<72>(17.6), to_mm<72>(41.905), Center, "Rise A Switch", ""}, {"Fast", "Med", "Slow"}},
-		Toggle3pos{{to_mm<72>(50.49), to_mm<72>(41.905), Center, "Fall A Switch", ""}, {"Fast", "Med", "Slow"}},
+		Toggle3pos{{to_mm<72>(17.6), to_mm<72>(41.905), Center, "Rise A Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
+		Toggle3pos{{to_mm<72>(50.49), to_mm<72>(41.905), Center, "Fall A Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
 		OrangeButton{{to_mm<72>(82.8), to_mm<72>(41.64), Center, "Cycle A", ""}},
 		OrangeButton{{to_mm<72>(147.61), to_mm<72>(41.68), Center, "Cycle B", ""}},
-		Toggle3pos{{to_mm<72>(179.89), to_mm<72>(41.905), Center, "Rise B Switch", ""}, {"Fast", "Med", "Slow"}},
-		Toggle3pos{{to_mm<72>(212.77), to_mm<72>(41.905), Center, "Fall B Switch", ""}, {"Fast", "Med", "Slow"}},
+		Toggle3pos{{to_mm<72>(179.89), to_mm<72>(41.905), Center, "Rise B Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
+		Toggle3pos{{to_mm<72>(212.77), to_mm<72>(41.905), Center, "Fall B Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
 		Slider25mmVertLED{{to_mm<72>(22.415), to_mm<72>(108.25), Center, "Rise A Slider", ""}, 0.5f},
 		Slider25mmVertLED{{to_mm<72>(56.265), to_mm<72>(108.25), Center, "Fall A Slider", ""}, 0.5f},
 		Knob9mm{{to_mm<72>(93.13), to_mm<72>(95.86), Center, "Level A", ""}, 1.0f},

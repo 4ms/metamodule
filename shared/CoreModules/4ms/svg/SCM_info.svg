@@ -27,11 +27,11 @@
      inkscape:zoom="2.4427402"
      inkscape:cx="115.23943"
      inkscape:cy="248.9008"
-     inkscape:window-width="2512"
-     inkscape:window-height="1387"
-     inkscape:window-x="49"
-     inkscape:window-y="25"
-     inkscape:window-maximized="1"
+     inkscape:window-width="1312"
+     inkscape:window-height="449"
+     inkscape:window-x="52"
+     inkscape:window-y="38"
+     inkscape:window-maximized="0"
      inkscape:current-layer="components" />
   <g
      id="faceplate">
@@ -659,7 +659,7 @@
        cx="147.99"
        cy="204.04"
        r="17.01"
-       style="fill: #ff0020;" />
+       style="fill:#ff0000" />
     <circle
        id="Skip_Jack"
        data-name="Skip Jack"
@@ -685,7 +685,7 @@
        cx="147.99"
        cy="154.07"
        r="17.01"
-       style="fill: #ff0020;" />
+       style="fill:#ff0000" />
     <circle
        id="Shuffle_Jack"
        data-name="Shuffle Jack"

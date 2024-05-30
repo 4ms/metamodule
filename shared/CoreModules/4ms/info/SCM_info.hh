@@ -18,8 +18,8 @@ struct SCMInfo : ModuleInfoBase {
     static constexpr std::array<Element, 33> Elements{{
 		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(54.12), Center, "Rotate", ""}, 0.0f},
 		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(104.09), Center, "Slip", ""}, 0.5f},
-		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(154.07), Center, "Shuffle", ""}, 0.25f},
-		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(204.04), Center, "Skip", ""}, 0.25f},
+		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(154.07), Center, "Shuffle", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(204.04), Center, "Skip", ""}, 0.0f},
 		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(254.01), Center, "PW", ""}, 0.5f},
 		OrangeButton{{to_mm<72>(148.84), to_mm<72>(291.85), Center, "4x Fast", ""}},
 		OrangeButton{{to_mm<72>(148.84), to_mm<72>(325.47), Center, "Mute", ""}},

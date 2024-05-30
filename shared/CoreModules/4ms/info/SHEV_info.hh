@@ -17,10 +17,10 @@ struct SHEVInfo : ModuleInfoBase {
 
     static constexpr std::array<Element, 55> Elements{{
 		OrangeButton{{to_mm<72>(21.16), to_mm<72>(41.89), Center, "Cycle A", ""}},
-		Toggle3pos{{to_mm<72>(94.18), to_mm<72>(41.285), Center, "Rise A Switch", ""}, {"Fast", "Med", "Slow"}},
-		Toggle3pos{{to_mm<72>(127.06), to_mm<72>(41.275), Center, "Fall A Switch", ""}, {"Fast", "Med", "Slow"}},
-		Toggle3pos{{to_mm<72>(159.95), to_mm<72>(41.275), Center, "Rise B Switch", ""}, {"Fast", "Med", "Slow"}},
-		Toggle3pos{{to_mm<72>(192.83), to_mm<72>(41.285), Center, "Fall B Switch", ""}, {"Fast", "Med", "Slow"}},
+		Toggle3pos{{to_mm<72>(94.18), to_mm<72>(41.285), Center, "Rise A Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
+		Toggle3pos{{to_mm<72>(127.06), to_mm<72>(41.275), Center, "Fall A Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
+		Toggle3pos{{to_mm<72>(159.95), to_mm<72>(41.275), Center, "Rise B Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
+		Toggle3pos{{to_mm<72>(192.83), to_mm<72>(41.285), Center, "Fall B Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
 		OrangeButton{{to_mm<72>(267.89), to_mm<72>(41.55), Center, "Cycle B", ""}},
 		Knob9mm{{to_mm<72>(23.59), to_mm<72>(86.1), Center, "Level A", ""}, 1.0f},
 		Toggle3pos{{to_mm<72>(61.58), to_mm<72>(96.635), Center, "Trig Mode A", ""}, {"ASR", "AR", "Cycle"}},

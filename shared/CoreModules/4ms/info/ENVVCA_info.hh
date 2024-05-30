@@ -16,8 +16,8 @@ struct ENVVCAInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 19> Elements{{
-		Toggle3pos{{to_mm<72>(23.19), to_mm<72>(43.305), Center, "Rise Switch", ""}, {"Fast", "Med", "Slow"}},
-		Toggle3pos{{to_mm<72>(57.33), to_mm<72>(43.305), Center, "Fall Switch", ""}, {"Fast", "Med", "Slow"}},
+		Toggle3pos{{to_mm<72>(23.19), to_mm<72>(43.305), Center, "Rise Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
+		Toggle3pos{{to_mm<72>(57.33), to_mm<72>(43.305), Center, "Fall Switch", ""}, {"Fast", "Med", "Slow"}, Toggle3pos::State_t::CENTER},
 		OrangeButton{{to_mm<72>(92.17), to_mm<72>(41.65), Center, "Cycle", ""}},
 		Slider25mmVertLED{{to_mm<72>(23.185), to_mm<72>(108.81), Center, "Rise Slider", ""}, 0.5f},
 		Slider25mmVertLED{{to_mm<72>(57.325), to_mm<72>(109.02), Center, "Fall Slider", ""}, 0.5f},

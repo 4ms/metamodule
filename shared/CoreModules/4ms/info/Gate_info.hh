@@ -16,7 +16,7 @@ struct GateInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.85), Center, "Length", ""}, 0.0f},
+		Knob9mm{{to_mm<72>(28.8), to_mm<72>(46.85), Center, "Length", ""}, 0.25f},
 		Knob9mm{{to_mm<72>(28.8), to_mm<72>(94.99), Center, "Delay", ""}, 0.0f},
 		AnalogJackInput4ms{{to_mm<72>(28.8), to_mm<72>(168.72), Center, "Length CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(28.8), to_mm<72>(216.89), Center, "Delay CV", ""}},

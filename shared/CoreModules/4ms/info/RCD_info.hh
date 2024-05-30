@@ -16,12 +16,12 @@ struct RCDInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 26> Elements{{
-		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(93.345), Center, "Counting", ""}, {"Down", "Up"}},
-		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(133.445), Center, "Gate Trig", ""}, {"Gate", "Trig"}},
-		Toggle2posHoriz{{to_mm<72>(108.61), to_mm<72>(181.245), Center, "Max Div 1", ""}, {"32 or 64", "8 or 16"}},
-		Toggle2posHoriz{{to_mm<72>(108.61), to_mm<72>(220.965), Center, "Max Div 2", ""}, {"16 or 64", "8 or 32"}},
-		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(266.615), Center, "Spread", ""}, {"on", "off"}},
-		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(306.335), Center, "Auto-Reset", ""}, {"16", "off"}},
+		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(93.345), Center, "Counting", ""}, {"Down", "Up"}, Toggle2posHoriz::State_t::RIGHT},
+		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(133.445), Center, "Gate Trig", ""}, {"Gate", "Trig"}, Toggle2posHoriz::State_t::RIGHT},
+		Toggle2posHoriz{{to_mm<72>(108.61), to_mm<72>(181.245), Center, "Max Div 1", ""}, {"32 or 64", "8 or 16"}, Toggle2posHoriz::State_t::RIGHT},
+		Toggle2posHoriz{{to_mm<72>(108.61), to_mm<72>(220.965), Center, "Max Div 2", ""}, {"16 or 64", "8 or 32"}, Toggle2posHoriz::State_t::RIGHT},
+		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(266.615), Center, "Spread", ""}, {"on", "off"}, Toggle2posHoriz::State_t::RIGHT},
+		Toggle2posHoriz{{to_mm<72>(108.8), to_mm<72>(306.335), Center, "Auto-Reset", ""}, {"16", "off"}, Toggle2posHoriz::State_t::RIGHT},
 		GateJackInput4ms{{to_mm<72>(48.19), to_mm<72>(56.31), Center, "Clk In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(92.61), to_mm<72>(56.31), Center, "Rotate", ""}},
 		GateJackInput4ms{{to_mm<72>(123.98), to_mm<72>(56.31), Center, "Reset", ""}},
