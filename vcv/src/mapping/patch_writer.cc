@@ -368,6 +368,6 @@ std::map<int64_t, uint16_t> PatchFileWriter::squash_ids(std::vector<int64_t> ids
 	return s;
 }
 
-PatchData &PatchFileWriter::get_data() {
+MetaModule::PatchData &PatchFileWriter::get_data() {
 	return pd;
 }

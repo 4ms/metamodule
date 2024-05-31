@@ -125,7 +125,7 @@ PatchData:
 )";
 	// clang-format on
 
-	PatchData pd;
+	MetaModule::PatchData pd;
 	CHECK(yaml_string_to_patch(yamlhdr, pd));
 
 	CHECK(pd.patch_name.is_equal("Test Patch 99"));

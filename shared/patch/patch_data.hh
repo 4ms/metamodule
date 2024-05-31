@@ -6,6 +6,9 @@
 #include <optional>
 #include <vector>
 
+namespace MetaModule
+{
+
 struct PatchData {
 	static constexpr size_t DescSize = 255;
 	ModuleTypeSlug patch_name{""};
@@ -322,6 +325,12 @@ struct PatchData {
 		"Knob Set 8",
 	};
 
+	size_t add_module(std::string_view slug) {
+		auto module_id = module_slugs.size();
+		module_slugs.push_back({slug});
+		return module_id;
+	}
+
 private:
 	//non-const version for private use only
 	MappedKnob *_get_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) {
@@ -351,3 +360,5 @@ private:
 		return nullptr;
 	}
 };
+
+} // namespace MetaModule

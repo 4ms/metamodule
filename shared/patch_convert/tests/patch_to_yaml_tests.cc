@@ -5,7 +5,7 @@
 #include <vector>
 
 TEST_CASE("Correct yaml output produced") {
-	PatchData pd{
+	MetaModule::PatchData pd{
 		.module_slugs{"PanelMedium", "Module1", "Module2", "Module3"},
 	};
 	pd.patch_name = "test123";

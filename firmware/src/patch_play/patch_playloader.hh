@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/modules_helpers.hh"
 #include "delay.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/patch_location.hh"
@@ -54,10 +55,14 @@ struct PatchPlayLoader {
 	}
 
 	void stop_audio() {
+		starting_audio_ = false;
 		stopping_audio_ = true;
 	}
 
 	void start_audio() {
+		audio_is_muted_ = false;
+		starting_audio_ = true;
+		stopping_audio_ = false;
 	}
 
 	// loading_new_patch_:
@@ -69,6 +74,9 @@ struct PatchPlayLoader {
 
 	bool should_fade_down_audio() {
 		return loading_new_patch_ || stopping_audio_;
+	}
+	bool should_fade_up_audio() {
+		return starting_audio_;
 	}
 
 	// UI thread READ (KnobEditPage, ModuleViewPage)
@@ -85,14 +93,19 @@ struct PatchPlayLoader {
 	// Audio thread READ
 	// UI thread READ (via handle_sync_patch_loading())
 	void notify_audio_is_muted() {
+		stopping_audio_ = false;
 		audio_is_muted_ = true;
 	}
-	void audio_not_muted() {
+	void notify_audio_not_muted() {
+		starting_audio_ = false;
 		audio_is_muted_ = false;
+	}
+	bool is_audio_muted() {
+		return audio_is_muted_;
 	}
 
 	bool ready_to_play() {
-		return !stopping_audio_ && !audio_is_muted_ && player_.is_loaded;
+		return !audio_is_muted_ && player_.is_loaded;
 	}
 
 	// Concurrency: Called from UI thread
@@ -137,6 +150,30 @@ struct PatchPlayLoader {
 			return {true, ""};
 	}
 
+	void load_module(std::string_view slug) {
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		player_.add_module(slug);
+
+		auto *patch = storage_.get_view_patch();
+		uint16_t module_id = patch->add_module(slug);
+		auto info = ModuleFactory::getModuleInfo(slug);
+
+		// Set params to default values
+		for (unsigned i = 0; auto const &element : info.elements) {
+			if (auto def_val = get_normalized_default_value(element); def_val.has_value()) {
+				auto param_id = info.indices[i].param_idx;
+				patch->set_or_add_static_knob_value(module_id, param_id, def_val.value());
+				player_.apply_static_param({.module_id = module_id, .param_id = param_id, .value = def_val.value()});
+			}
+			i++;
+		}
+
+		start_audio();
+	}
+
 private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;
@@ -144,6 +181,7 @@ private:
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
 	std::atomic<bool> stopping_audio_ = false;
+	std::atomic<bool> starting_audio_ = false;
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
 
@@ -161,6 +199,7 @@ private:
 			storage_.play_view_patch();
 			loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
 			loaded_patch_name_ = patch->patch_name;
+			start_audio();
 		}
 
 		return result;

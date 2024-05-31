@@ -33,7 +33,7 @@ R"(PatchData:
   midi_poly_num: 1
 )"};
 						 // clang-format on
-	PatchData pd;
+	MetaModule::PatchData pd;
 	CHECK(yaml_string_to_patch(patchyml, pd));
 
 	MetaModule::PatchPlayer player;
@@ -101,7 +101,7 @@ PatchData:
 	)"};
 	// clang-format on
 
-	PatchData pd;
+	MetaModule::PatchData pd;
 	CHECK(yaml_string_to_patch(patchyml, pd));
 
 	// In VCV Rack, if two cables are stacked, they appear as two separate cables.
@@ -226,7 +226,7 @@ PatchData:
 	)"};
 	// clang-format on
 
-	PatchData pd;
+	MetaModule::PatchData pd;
 
 	MetaModule::PatchPlayer player;
 	yaml_string_to_patch(patchyml, pd);
@@ -293,7 +293,7 @@ PatchData:
 	)"};
 	// clang-format on
 
-	PatchData pd;
+	MetaModule::PatchData pd;
 
 	MetaModule::PatchPlayer player;
 	yaml_string_to_patch(patchyml, pd);
@@ -350,7 +350,7 @@ PatchData:
 	)"};
 		// clang-format on
 
-		PatchData pd;
+		MetaModule::PatchData pd;
 
 		MetaModule::PatchPlayer player;
 		yaml_string_to_patch(patchyml, pd);
@@ -443,7 +443,7 @@ PatchData:
 	)"};
 	// clang-format on
 
-	PatchData pd;
+	MetaModule::PatchData pd;
 	yaml_string_to_patch(patchyml, pd);
 
 	CHECK(pd.knob_sets.size() == 3);

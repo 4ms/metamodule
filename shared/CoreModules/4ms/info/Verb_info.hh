@@ -16,12 +16,12 @@ struct VerbInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 15> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(37.73), to_mm<72>(46.3), Center, "Size", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(106.27), to_mm<72>(46.3), Center, "Time", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(37.73), to_mm<72>(104.5), Center, "Damp", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(106.27), to_mm<72>(104.5), Center, "AP Ratio", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(37.73), to_mm<72>(162.7), Center, "Comb", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(106.27), to_mm<72>(162.7), Center, "Mix", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(37.73), to_mm<72>(46.3), Center, "Size", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(106.27), to_mm<72>(46.3), Center, "Time", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(37.73), to_mm<72>(104.5), Center, "Damp", ""}, 0.25f},
+		Davies1900hBlackKnob{{to_mm<72>(106.27), to_mm<72>(104.5), Center, "AP Ratio", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(37.73), to_mm<72>(162.7), Center, "Comb", ""}, 0.25f},
+		Davies1900hBlackKnob{{to_mm<72>(106.27), to_mm<72>(162.7), Center, "Mix", ""}, 0.875f},
 		AnalogJackInput4ms{{to_mm<72>(29.82), to_mm<72>(231.98), Center, "Input", ""}},
 		AnalogJackInput4ms{{to_mm<72>(72.0), to_mm<72>(231.98), Center, "Size CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(115.04), to_mm<72>(231.98), Center, "Time CV", ""}},

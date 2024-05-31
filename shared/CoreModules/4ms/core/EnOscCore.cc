@@ -12,7 +12,6 @@ namespace MetaModule
 class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
 	using ThisCore = EnOscCore;
-	enum { NumKnobs = Info::KnobWarp + 1 };
 
 	enum { kBlockSize = 64 };
 	enum { kUiUpdateRate = 60 };
@@ -48,70 +47,80 @@ public:
 	}
 
 	void set_param(int param_id, float val) override {
-		switch (param_id) {
-			case Info::KnobBalance:
-				enosc.set_potcv(AdcInput::POT_BALANCE, val);
-				break;
-			case Info::KnobCross_Fm:
-				enosc.set_potcv(AdcInput::POT_MOD, val);
-				break;
-			case Info::KnobDetune:
-				enosc.set_potcv(AdcInput::POT_DETUNE, val);
-				break;
-			case Info::KnobPitch:
-				enosc.set_potcv(AdcInput::POT_PITCH, val);
-				break;
-			case Info::KnobRoot:
-				enosc.set_potcv(AdcInput::POT_ROOT, val);
-				break;
-			case Info::KnobScale:
-				enosc.set_potcv(AdcInput::POT_SCALE, val);
-				break;
-			case Info::KnobSpread:
-				enosc.set_potcv(AdcInput::POT_SPREAD, val);
-				break;
-			case Info::KnobTwist:
-				enosc.set_potcv(AdcInput::POT_TWIST, val);
-				break;
-			case Info::KnobWarp:
-				enosc.set_potcv(AdcInput::POT_WARP, val);
-				break;
-			case Info::SwitchLearn:
-				enosc.set_learn_button(val > 0.5f);
-				break;
-			case Info::SwitchFreeze:
-				enosc.set_freeze_button(val > 0.5f);
-				break;
-			case Info::SwitchScale_Switch:
-				enosc.switches().scale_.set(switchstate(val));
-				break;
-			case Info::SwitchCross_Fm_Switch:
-				enosc.switches().mod_.set(switchstate(val));
-				break;
-			case Info::SwitchTwist_Switch:
-				enosc.switches().twist_.set(switchstate(val));
-				break;
-			case Info::SwitchWarp_Switch:
-				enosc.switches().warp_.set(switchstate(val));
-				break;
-			case Info::AltParamStereosplit: {
-				auto mode = static_cast<SplitMode>(val * 2.9f);
-				enosc.set_stereo_mode(mode);
-			} break;
-			case Info::AltParamNumosc: {
-				int num_osc = (val * 15.9f) + 1;
-				enosc.set_num_osc(num_osc);
-			} break;
-			case Info::AltParamCrossfade:
-				enosc.set_crossfade(val);
-				break;
-			case Info::AltParamFreezesplit: {
-				auto mode = static_cast<SplitMode>(val * 2.9f);
-				enosc.set_freeze_mode(mode);
-			} break;
-			case Info::AltParamFinetune:
-				enosc.set_fine_tune(val);
-				break;
+		if (param_id < Info::NumKnobs) {
+			switch (param_id) {
+				case Info::KnobBalance:
+					enosc.set_potcv(AdcInput::POT_BALANCE, val);
+					break;
+				case Info::KnobCross_Fm:
+					enosc.set_potcv(AdcInput::POT_MOD, val);
+					break;
+				case Info::KnobDetune:
+					enosc.set_potcv(AdcInput::POT_DETUNE, val);
+					break;
+				case Info::KnobPitch:
+					enosc.set_potcv(AdcInput::POT_PITCH, val);
+					break;
+				case Info::KnobRoot:
+					enosc.set_potcv(AdcInput::POT_ROOT, val);
+					break;
+				case Info::KnobScale:
+					enosc.set_potcv(AdcInput::POT_SCALE, val);
+					break;
+				case Info::KnobSpread:
+					enosc.set_potcv(AdcInput::POT_SPREAD, val);
+					break;
+				case Info::KnobTwist:
+					enosc.set_potcv(AdcInput::POT_TWIST, val);
+					break;
+				case Info::KnobWarp:
+					enosc.set_potcv(AdcInput::POT_WARP, val);
+					break;
+			}
+
+		} else if (param_id < ((int)Info::NumKnobs + (int)Info::NumSwitches)) {
+			switch (param_id - Info::NumKnobs) {
+				case Info::SwitchScale_Switch:
+					enosc.switches().scale_.set(switchstate(val));
+					break;
+				case Info::SwitchCross_Fm_Switch:
+					enosc.switches().mod_.set(switchstate(val));
+					break;
+				case Info::SwitchTwist_Switch:
+					enosc.switches().twist_.set(switchstate(val));
+					break;
+				case Info::SwitchWarp_Switch:
+					enosc.switches().warp_.set(switchstate(val));
+					break;
+				case Info::SwitchLearn:
+					enosc.set_learn_button(val > 0.5f);
+					break;
+				case Info::SwitchFreeze:
+					enosc.set_freeze_button(val > 0.5f);
+					break;
+			}
+
+		} else {
+			switch (param_id - (int)Info::NumKnobs - (int)Info::NumSwitches) {
+				case Info::AltParamStereosplit: {
+					auto mode = static_cast<SplitMode>(val * 2.9f);
+					enosc.set_stereo_mode(mode);
+				} break;
+				case Info::AltParamNumosc: {
+					int num_osc = (val * 15.9f) + 1;
+					enosc.set_num_osc(num_osc);
+				} break;
+				case Info::AltParamCrossfade:
+					enosc.set_crossfade(val);
+					break;
+				case Info::AltParamFreezesplit: {
+					auto mode = static_cast<SplitMode>(val * 2.9f);
+					enosc.set_freeze_mode(mode);
+				} break;
+				case Info::AltParamFinetune:
+					enosc.set_fine_tune(val);
+					break;
+			}
 		}
 	}
 

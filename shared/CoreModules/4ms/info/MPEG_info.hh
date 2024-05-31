@@ -16,10 +16,10 @@ struct MPEGInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 25> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(36.45), to_mm<72>(87.77), Center, "Div/Mult", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(37.35), to_mm<72>(154.72), Center, "Shape", ""}},
-		Knob9mm{{to_mm<72>(91.14), to_mm<72>(133.33), Center, "Scale", ""}},
-		Knob9mm{{to_mm<72>(91.14), to_mm<72>(188.54), Center, "Offset", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(36.45), to_mm<72>(87.77), Center, "Div/Mult", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(37.35), to_mm<72>(154.72), Center, "Shape", ""}, 0.5f},
+		Knob9mm{{to_mm<72>(91.14), to_mm<72>(133.33), Center, "Scale", ""}, 1.0f},
+		Knob9mm{{to_mm<72>(91.14), to_mm<72>(188.54), Center, "Offset", ""}, 1.0f},
 		MomentaryRGB7mm{{to_mm<72>(30.52), to_mm<72>(41.57), Center, "Ping", ""}},
 		MomentaryRGB7mm{{to_mm<72>(92.15), to_mm<72>(81.15), Center, "Cycle", ""}},
 		GateJackInput4ms{{to_mm<72>(80.21), to_mm<72>(41.57), Center, "Ping Jack", ""}},
@@ -35,10 +35,10 @@ struct MPEGInfo : ModuleInfoBase {
 		RedGreenBlueLight{{to_mm<72>(99.67), to_mm<72>(220.0), Center, "5V ENV Light", ""}},
 		AltParamChoiceLabeled{{{to_mm<72>(30.52), to_mm<72>(41.57), Center, "Sync Mode", ""}, 2, 1}, {"Sync", "Async"}},
 		AltParamContinuous{{to_mm<72>(91.14), to_mm<72>(188.54), Center, "Shift", ""}, 0.5f},
-		AltParamChoiceLabeled{{{to_mm<72>(57.12), to_mm<72>(224.36), Center, "Skew Limit", ""}, 2, 1}, {"Off", "On"}},
+		AltParamChoiceLabeled{{{to_mm<72>(57.12), to_mm<72>(224.36), Center, "Skew Limit", ""}, 2, 2}, {"Off", "On"}},
 		AltParamChoiceLabeled{{{to_mm<72>(80.21), to_mm<72>(41.57), Center, "Free-running Ping", ""}, 2, 1}, {"On", "Off"}},
 		AltParamChoiceLabeled{{{to_mm<72>(23.07), to_mm<72>(244.84), Center, "EOF Jack Type", ""}, 2, 1}, {"Gate", "Trigger"}},
-		AltParamChoiceLabeled{{{to_mm<72>(23.07), to_mm<72>(244.84), Center, "EOF Jack Mode", ""}, 4, 1}, {"EOR", "EOF", "Half-Rise", "Tap Clock"}},
+		AltParamChoiceLabeled{{{to_mm<72>(23.07), to_mm<72>(244.84), Center, "EOF Jack Mode", ""}, 4, 2}, {"EOR", "EOF", "Half-Rise", "Tap Clock"}},
 		AltParamChoiceLabeled{{{to_mm<72>(91.59), to_mm<72>(287.64), Center, "Cycle Jack Mode", ""}, 3, 1}, {"Trig", "Gate+Sync", "Gate"}},
 		AltParamChoiceLabeled{{{to_mm<72>(23.01), to_mm<72>(287.64), Center, "Trig Jack Mode", ""}, 3, 1}, {"Async  Trig", "Async Gate", "Quantized Trig"}},
 }};

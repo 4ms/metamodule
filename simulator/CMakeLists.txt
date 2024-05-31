@@ -51,6 +51,8 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 
 # #################### Application ############################################
 
+add_subdirectory(${SHARED}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
+
 add_executable(
 	simulator 
 	src/main.cc 
@@ -63,7 +65,7 @@ add_executable(
 	${SHARED}/patch_convert/ryml/ryml_init.cc
 	${SHARED}/patch_convert/yaml_to_patch.cc 
 	${SHARED}/patch_convert/patch_to_yaml.cc
-	${SHARED}/CoreModules/moduleFactory.cc
+
 	#Fatfs:
 	stubs/fattime.cc
 	${FWDIR}/lib/fatfs/source/ff.c
@@ -92,7 +94,8 @@ target_include_directories(
 target_compile_options(simulator PRIVATE -Wall -Og)
 target_compile_options(simulator PRIVATE -Wno-double-promotion)
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports)
+
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports CoreModules)
 target_link_libraries(simulator PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)

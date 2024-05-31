@@ -142,7 +142,6 @@ def find_slug_and_modulename(components_group):
                 slug = ""
                 for m in t.itertext():
                     slug += m
-                slug = re.sub(r'\W+', '', slug).strip()
 
     if moduleName == "Unnamed":
         for t in subgroups:
@@ -157,8 +156,9 @@ def find_slug_and_modulename(components_group):
                 moduleName = ""
                 for m in t.itertext():
                     moduleName += m
-                moduleName = re.sub(r'[\W]+', ' ', moduleName).strip()
 
+    slug = re.sub(r'\W+', '', slug).strip().rstrip()
+    moduleName = re.sub(r'[^a-zA-Z0-9_.-]+', ' ', moduleName).strip().rstrip()
     return slug, moduleName
 
 

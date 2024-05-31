@@ -6,7 +6,7 @@
    version="1.1"
    id="svg114"
    sodipodi:docname="MPEG_info.svg"
-   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,9 +25,9 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.7111054"
-     inkscape:cx="76.266486"
-     inkscape:cy="242.82548"
-     inkscape:window-width="1676"
+     inkscape:cx="76.266488"
+     inkscape:cy="242.53328"
+     inkscape:window-width="1680"
      inkscape:window-height="1051"
      inkscape:window-x="52"
      inkscape:window-y="38"
@@ -798,7 +798,7 @@
        cx="23.07"
        cy="244.84"
        r="4"
-       style="fill:#808080;stroke-width:0px"
+       style="fill:#808081;stroke-width:0px"
        data-name="EOF Jack Mode@EOR@EOF@Half-Rise@Tap Clock" />
     <circle
        id="EOFJackTypeAltParam"
@@ -820,7 +820,7 @@
        cx="57.119999"
        cy="224.36"
        r="4"
-       style="fill:#808080;stroke-width:0px" />
+       style="fill:#808081;stroke-width:0px" />
     <circle
        id="ShiftAltParam"
        cx="91.139999"

@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,16 +11,16 @@ struct SCMInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Shuffling Clock Multiplier"};
     static constexpr uint32_t width_hp = 12;
     static constexpr std::string_view svg_filename{"res/modules/SCM_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/SCM.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/SCM.png"};
 
     using enum Coords;
 
     static constexpr std::array<Element, 33> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(54.12), Center, "Rotate", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(104.09), Center, "Slip", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(154.07), Center, "Shuffle", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(204.04), Center, "Skip", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(254.01), Center, "PW", ""}},
+		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(54.12), Center, "Rotate", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(104.09), Center, "Slip", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(154.07), Center, "Shuffle", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(204.04), Center, "Skip", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(147.99), to_mm<72>(254.01), Center, "PW", ""}, 0.5f},
 		OrangeButton{{to_mm<72>(148.84), to_mm<72>(291.85), Center, "4x Fast", ""}},
 		OrangeButton{{to_mm<72>(148.84), to_mm<72>(325.47), Center, "Mute", ""}},
 		GateJackInput4ms{{to_mm<72>(46.48), to_mm<72>(56.3), Center, "Clk In", ""}},
