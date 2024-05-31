@@ -52,6 +52,7 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 # #################### Application ############################################
 
 add_subdirectory(${SHARED}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
+target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
 add_executable(
 	simulator 
