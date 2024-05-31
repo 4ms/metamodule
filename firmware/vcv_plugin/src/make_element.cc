@@ -128,7 +128,10 @@ Element make_element(rack::componentlibrary::Rogan *widget, BaseElement b) {
 Element make_element(rack::app::SvgSwitch *widget, BaseElement b) {
 	FlipSwitch::State_t defaultValue = getScaledDefaultValue(widget);
 
-	if (widget->frames.size() == 3) {
+	if (widget->frames.size() >= 3) {
+		if (widget->frames.size() > 3)
+			pr_warn("make_element(): SvgSwitch with > 3 frames, only using 3");
+
 		return FlipSwitch{
 			{{b}, 3, defaultValue},
 			{widget->frames[0]->filename, widget->frames[1]->filename, widget->frames[2]->filename},
@@ -148,7 +151,7 @@ Element make_element(rack::app::SvgSwitch *widget, BaseElement b) {
 		return MomentaryButton{{b, widget->frames[0]->filename}};
 
 	} else {
-		pr_warn("make_element(): Unknown SvgSwitch, frames size is not 1, 2 or 3\n");
+		pr_warn("make_element(): SvgSwitch with no frames\n");
 		b.width_mm = to_mm(widget->box.size.x);
 		b.height_mm = to_mm(widget->box.size.y);
 		return ParamElement{b};
