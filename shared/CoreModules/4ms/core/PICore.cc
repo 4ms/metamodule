@@ -1,5 +1,6 @@
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "helpers/envelope_follower.hh"
 #include "info/PI_info.hh"
 
 #include "l4/DCBlock.h"
@@ -23,10 +24,10 @@ public:
 		: ticks(0)
 		, sampleRate(48000.f)
 		, mode(FOLLOW)
-		, dcBlocker(DCBlockerFactor)
-		, gateState(IDLE){
-
-		  };
+		, gateState(IDLE)
+		, dcBlocker(DCBlockerFactor) {
+			envelope.setAttack(0.005f);
+		}
 
 	void update() override {
 		ticks++;
@@ -174,7 +175,7 @@ private:
 	static constexpr float DCBlockerFactor = 0.9995f;
 	DCBlock dcBlocker;
 
-	PeakDetector envelope;
+	EnvelopeFollower envelope;
 	PeakDetector senseEnvelope;
 };
 
