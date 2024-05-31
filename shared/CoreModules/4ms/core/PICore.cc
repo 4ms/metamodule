@@ -69,8 +69,7 @@ public:
 	}
 
 	float readMaximumGain() {
-		// auto gainMode = getState<GainSwitch>();
-		auto gainMode = Toggle3posHoriz::State_t::CENTER;
+		auto gainMode = getState<GainSwitch>();
 
 		if (gainMode == Toggle3posHoriz::State_t::LEFT) {
 			return maximumGains[LOW];
@@ -104,8 +103,7 @@ public:
 
 	void readEnvelopeMode()
 	{
-		// auto envMode = getState<EnvModeSwitch>();
-		auto envMode = Toggle2posHoriz::State_t::LEFT;
+		auto envMode = getState<EnvModeSwitch>();
 
 		if(envMode == Toggle2posHoriz::State_t::LEFT) {
 			mode = FOLLOW;
