@@ -30,7 +30,7 @@ struct PIInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(86.52), to_mm<72>(298.075), Center, "Audio Out", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(19.95), to_mm<72>(286.08), Center, "Env. Out +", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(41.83), to_mm<72>(318.61), Center, "Env. Out -", ""}},
-		RedBlueLight{{to_mm<72>(11.39), to_mm<72>(32.64), Center, "Sens. Light", ""}},
+		RedGreenBlueLight{{to_mm<72>(11.39), to_mm<72>(32.64), Center, "Sens. Light", ""}},
 		WhiteLight{{to_mm<72>(50.37), to_mm<72>(230.46), Center, "Gate Light", ""}},
 		BlueLight{{to_mm<72>(10.77), to_mm<72>(261.2), Center, "Env + Light", ""}},
 		GreenLight{{to_mm<72>(50.37), to_mm<72>(292.62), Center, "Env - Light", ""}},

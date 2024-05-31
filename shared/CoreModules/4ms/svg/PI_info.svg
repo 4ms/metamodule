@@ -25,12 +25,12 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.2519928"
-     inkscape:cx="133.88142"
+     inkscape:cx="134.10345"
      inkscape:cy="223.80178"
-     inkscape:window-width="2512"
-     inkscape:window-height="1387"
-     inkscape:window-x="50"
-     inkscape:window-y="25"
+     inkscape:window-width="1680"
+     inkscape:window-height="1051"
+     inkscape:window-x="52"
+     inkscape:window-y="38"
      inkscape:window-maximized="1"
      inkscape:current-layer="components" />
   <g
@@ -1085,7 +1085,7 @@
        style="fill:#ff0070" />
     <circle
        id="Sens_Light"
-       data-name="Sens. Light#RedBlueLight"
+       data-name="Sens. Light"
        cx="11.39"
        cy="32.639999"
        r="4.25"
