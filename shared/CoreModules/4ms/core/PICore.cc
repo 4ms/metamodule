@@ -36,7 +36,7 @@ public:
 		if (auto input = getInput<In>(); input) {
 			auto filteredInput = dcBlocker(*input);
 			auto maximumGain = readMaximumGain();
-			scaledInput = filteredInput * (getState<SensitivityKnob>() * maximumGain);
+			scaledInput = std::clamp(filteredInput * (getState<SensitivityKnob>() * maximumGain), -12.f, 12.f);
 
 			checkGateTrigger(scaledInput);
 		}
