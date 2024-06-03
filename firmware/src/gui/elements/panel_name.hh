@@ -82,7 +82,7 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 template<typename PanelDef>
 std::string get_panel_name(const JackOutput &, uint16_t panel_id) {
 	std::string name{8};
-	name += PanelDef::get_map_outjack_name(panel_id);
+	name = PanelDef::get_map_outjack_name(panel_id);
 	return name;
 }
 
