@@ -540,7 +540,9 @@ private:
 		if (auto objdata = lv_obj_get_user_data(event->target)) {
 			auto endpoint = *static_cast<MapCableUserData *>(objdata);
 			page->page_list.request_new_page(PageId::ModuleView,
-											 {.module_id = endpoint.module_id, .element_indices = endpoint.idx});
+											 {.patch_loc_hash = page->args.patch_loc_hash,
+											  .module_id = endpoint.module_id,
+											  .element_indices = endpoint.idx});
 		}
 	}
 

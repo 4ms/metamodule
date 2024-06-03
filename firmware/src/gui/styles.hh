@@ -66,6 +66,26 @@ struct Gui {
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
 
+	static inline std::array<const char *, 6> knob_html{
+		"#F40000 ", // RED
+		"#FFF100 ", // YELLOW
+		"#00ADEE ", // CYAN
+		"#F06392 ", // PINK
+		"#FAA629 ", // ORANGE
+		"#00A551 ", // GREEN
+	};
+
+	static inline std::array<const char *, 8> jack_html{
+		"#EA1C25 ", // RED
+		"#FFF200 ", // YELLOW
+		"#00AEEE ", // CYAN
+		"#F66194 ", // PINK
+		"#FAB500 ", // ORANGE
+		"#00A552 ", // GREEN
+		"#000000 ", // dark grey/black
+		"#FFFFFF ", // light gray/white
+	};
+
 	static inline std::array<lv_color_t, 8> cable_palette{
 		lv_palette_lighten(LV_PALETTE_RED, 1),
 		lv_palette_lighten(LV_PALETTE_BLUE, 1),

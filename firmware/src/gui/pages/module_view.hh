@@ -113,26 +113,24 @@ struct ModuleViewPage : PageBase {
 				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
 			}
 
-			std::visit(
-				[this, &roller_idx, drawn_el_idx = drawn_el_idx, drawn = drawn](auto &el) {
-					if (el.short_name.size() == 0) {
-						pr_dbg("Skipping element with no name\n");
-						return;
-					}
+			auto base = base_element(drawn_element.element);
 
-					opts += el.short_name;
+			if (base.short_name.size() == 0) {
+				pr_info("Skipping element with no name\n");
+				continue;
+			}
 
-					if (drawn.mapped_panel_id)
-						append_panel_jack_name(opts, el, drawn.mapped_panel_id.value());
+			opts += base.short_name;
 
-					append_connected_jack_name(opts, drawn, *patch);
+			if (drawn.mapped_panel_id) {
+				append_panel_name(opts, drawn_element.element, drawn.mapped_panel_id.value());
+			}
 
-					opts += "\n";
-					add_button(drawn.obj);
-					roller_drawn_el_idx.push_back(drawn_el_idx);
-					roller_idx++;
-				},
-				drawn_element.element);
+			append_connected_jack_name(opts, drawn, *patch);
+
+			opts += "\n";
+			add_button(drawn.obj);
+			roller_drawn_el_idx.push_back(drawn_el_idx);
 
 			if (args.element_indices.has_value()) {
 				if (ElementCount::matched(*args.element_indices, drawn.idx)) {
@@ -140,6 +138,8 @@ struct ModuleViewPage : PageBase {
 					cur_el = &drawn_element;
 				}
 			}
+
+			roller_idx++;
 		}
 
 		// remove final \n
@@ -152,14 +152,19 @@ struct ModuleViewPage : PageBase {
 		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
 		lv_obj_clear_flag(ui_ElementRollerPanel, LV_OBJ_FLAG_HIDDEN);
 
+		auto roller_label = lv_obj_get_child(roller, 0);
+		lv_label_set_recolor(roller_label, true);
+
 		// Add text list to roller options
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_visible_row_count(roller, 10);
 
 		lv_roller_set_selected(roller, cur_selected, LV_ANIM_OFF);
 
-		if (button.size() > 0) {
+		if (cur_selected < button.size() && button.size() > 0) {
 			lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
+		} else {
+			pr_err("Current selected is not in range (%d/%zu)\n", cur_selected, button.size());
 		}
 
 		update_map_ring_style();
@@ -348,6 +353,7 @@ private:
 		button.clear();
 		drawn_elements.clear();
 		opts.clear();
+		roller_drawn_el_idx.clear();
 		cur_selected = 0;
 	}
 
@@ -369,18 +375,21 @@ private:
 		auto &but = page->button;
 
 		// Turn off old button
-		if (cur_sel >= 0) {
+		if (cur_sel >= 0 && cur_sel < but.size()) {
 			lv_obj_remove_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
 			lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
 		}
 
 		// Get the new button
 		cur_sel = lv_roller_get_selected(page->roller);
-
-		// Turn on new button
-		lv_obj_add_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
-		lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
-		lv_obj_scroll_to_view(but[cur_sel], LV_ANIM_ON);
+		if (cur_sel < but.size()) {
+			// Turn on new button
+			lv_obj_add_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
+			lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
+			lv_obj_scroll_to_view(but[cur_sel], LV_ANIM_ON);
+		} else {
+			pr_err("%u is selected but only %zu buttons\n", cur_sel, but.size());
+		}
 	}
 
 	static void roller_click_cb(lv_event_t *event) {
