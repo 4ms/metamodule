@@ -1,5 +1,6 @@
 #include "CoreModules/elements/units.hh"
 #include "metamodule/svg.hh"
+#include "util/countzip.hh"
 #include <app/ModuleWidget.hpp>
 
 namespace rack::app
@@ -116,13 +117,33 @@ app::PortWidget *ModuleWidget::getOutput(int portId) {
 	return nullptr;
 }
 
-void ModuleWidget::populate_elements(std::vector<MetaModule::Element> &elements) {
+void ModuleWidget::populate_elements(std::vector<MetaModule::Element> &elements,
+									 std::vector<ElementCount::Indices> &indices) {
 	elements.clear();
-	elements.reserve(paramElements.size() + inputElements.size() + outputElements.size() + lightElements.size());
+	indices.clear();
+
+	auto num_elems = paramElements.size() + inputElements.size() + outputElements.size() + lightElements.size();
+	elements.reserve(num_elems);
+	indices.reserve(num_elems);
+
 	elements.insert(elements.end(), paramElements.begin(), paramElements.end());
 	elements.insert(elements.end(), inputElements.begin(), inputElements.end());
 	elements.insert(elements.end(), outputElements.begin(), outputElements.end());
 	elements.insert(elements.end(), lightElements.begin(), lightElements.end());
+
+	auto None = ElementCount::Indices::NoElementMarker;
+
+	for (auto [i, el] : enumerate(paramElements))
+		indices.push_back({.param_idx = (uint8_t)i, .light_idx = None, .input_idx = None, .output_idx = None});
+
+	for (auto [i, el] : enumerate(inputElements))
+		indices.push_back({.param_idx = None, .light_idx = None, .input_idx = (uint8_t)i, .output_idx = None});
+
+	for (auto [i, el] : enumerate(outputElements))
+		indices.push_back({.param_idx = None, .light_idx = None, .input_idx = None, .output_idx = (uint8_t)i});
+
+	for (auto [i, el] : enumerate(lightElements))
+		indices.push_back({.param_idx = None, .light_idx = (uint8_t)i, .input_idx = None, .output_idx = None});
 }
 
 std::vector<ParamWidget *> ModuleWidget::getParams() {

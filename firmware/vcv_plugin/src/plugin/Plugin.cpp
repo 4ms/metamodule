@@ -40,7 +40,7 @@ void Plugin::addModel(Model *model) {
 	auto module = model->createModule();
 	auto modulewidget = model->createModuleWidget(module);
 
-	modulewidget->populate_elements(model->elements);
+	modulewidget->populate_elements(model->elements, model->indices);
 	model->move_strings();
 
 	std::string panelsvg;
@@ -61,8 +61,13 @@ void Plugin::addModel(Model *model) {
 	// if (slug == "MotionMTR")
 	// 	model->debug_dump_strings();
 
-	model->indices.resize(model->elements.size());
-	ElementCount::get_indices(model->elements, model->indices);
+	// if (slug.ends_with("ABC")) {
+	// 	for (auto [el, ind] : zip(model->elements, model->indices)) {
+	// 		auto base = base_element(el);
+	// 		pr_dbg("%.*s - ", base.short_name.size(), base.short_name.data());
+	// 		pr_dbg("p:%d i:%d o:%d l:%d\n", ind.param_idx, ind.input_idx, ind.output_idx, ind.light_idx);
+	// 	}
+	// }
 
 	MetaModule::ModuleInfoView info;
 	info.elements = model->elements;
