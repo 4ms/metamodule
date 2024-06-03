@@ -106,7 +106,7 @@ struct ModuleViewPage : PageBase {
 		unsigned roller_idx = 0;
 		DrawnElement const *cur_el = nullptr;
 
-		for (const auto &drawn_element : drawn_elements) {
+		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &drawn = drawn_element.gui_element;
 
 			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
@@ -114,7 +114,12 @@ struct ModuleViewPage : PageBase {
 			}
 
 			std::visit(
-				[this, drawn = drawn](auto &el) {
+				[this, &roller_idx, drawn_el_idx = drawn_el_idx, drawn = drawn](auto &el) {
+					if (el.short_name.size() == 0) {
+						pr_dbg("Skipping element with no name\n");
+						return;
+					}
+
 					opts += el.short_name;
 
 					if (drawn.mapped_panel_id)
@@ -124,6 +129,8 @@ struct ModuleViewPage : PageBase {
 
 					opts += "\n";
 					add_button(drawn.obj);
+					roller_drawn_el_idx.push_back(drawn_el_idx);
+					roller_idx++;
 				},
 				drawn_element.element);
 
@@ -133,8 +140,6 @@ struct ModuleViewPage : PageBase {
 					cur_el = &drawn_element;
 				}
 			}
-
-			roller_idx++;
 		}
 
 		// remove final \n
@@ -385,7 +390,9 @@ private:
 		if (cur_sel < page->drawn_elements.size()) {
 			page->mode = ViewMode::Mapping;
 			lv_hide(ui_ElementRollerPanel);
-			page->mapping_pane.show(page->drawn_elements[cur_sel]);
+
+			auto drawn_idx = page->roller_drawn_el_idx[cur_sel];
+			page->mapping_pane.show(page->drawn_elements[drawn_idx]);
 		}
 	}
 
@@ -409,6 +416,8 @@ private:
 
 	std::vector<lv_obj_t *> button;
 	std::vector<DrawnElement> drawn_elements;
+	std::vector<unsigned> roller_drawn_el_idx;
+
 	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals{};
 
 	lv_obj_t *canvas = nullptr;
