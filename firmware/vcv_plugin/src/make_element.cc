@@ -24,6 +24,8 @@ static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
 //
 
 Element make_element_output(rack::app::SvgPort *widget, BaseElement b) {
+	pr_trace("Output Jack %d at %f, %f\n", widget->portId, widget->box.pos.x, widget->box.pos.y);
+
 	if (widget->sw->svg)
 		return JackOutput{b, widget->sw->svg->filename};
 	else
@@ -31,6 +33,8 @@ Element make_element_output(rack::app::SvgPort *widget, BaseElement b) {
 }
 
 Element make_element_input(rack::app::SvgPort *widget, BaseElement b) {
+	pr_trace("Input Jack %d at %f, %f\n", widget->portId, widget->box.pos.x, widget->box.pos.y);
+
 	if (widget->sw->svg)
 		return JackInput{b, widget->sw->svg->filename};
 	else
@@ -41,6 +45,8 @@ Element make_element_input(rack::app::SvgPort *widget, BaseElement b) {
 // Pots/Sliders
 //
 Element make_element(rack::app::Knob *widget, BaseElement b) {
+	pr_trace("Knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
 	b.width_mm = to_mm(widget->box.size.x);
 	b.height_mm = to_mm(widget->box.size.y);
 	Knob::State_t defaultValue = getScaledDefaultValue(widget);
@@ -51,6 +57,8 @@ Element make_element(rack::app::Knob *widget, BaseElement b) {
 // either have dedicated function refresh_widget_size() which scans all children,
 // or in SvgWidget::setSvg, set its parents size recursively (if not set)
 Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
+	pr_trace("SVG Knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
 	Knob::State_t defaultValue = getScaledDefaultValue(widget);
 
 	// SvgKnobs have a base SVG, and sometimes have a bg svg.
@@ -70,6 +78,8 @@ Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
 }
 
 Element make_element(rack::app::SliderKnob *widget, BaseElement b) {
+	pr_trace("Slider Knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
 	b.width_mm = to_mm(widget->box.size.x);
 	b.height_mm = to_mm(widget->box.size.y);
 	Slider::State_t defaultValue = getScaledDefaultValue(widget);
@@ -77,6 +87,8 @@ Element make_element(rack::app::SliderKnob *widget, BaseElement b) {
 }
 
 Element make_element_slideswitch(rack::app::SvgSlider *widget, BaseElement b) {
+	pr_trace("Svg Slider (switch) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
 	//Note: num_pos and labels are filled in later
 	if (widget->background->svg->filename.length()) {
 		SlideSwitch::State_t defaultValue = getScaledDefaultValue(widget);
@@ -88,6 +100,8 @@ Element make_element_slideswitch(rack::app::SvgSlider *widget, BaseElement b) {
 }
 
 Element make_element(rack::app::SvgSlider *widget, BaseElement b) {
+	pr_trace("Svg Slider %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
 	Slider::State_t defaultValue = getScaledDefaultValue(widget);
 	if (widget->background->svg->filename.length()) {
 		return Slider{{{b, widget->background->svg->filename}, defaultValue}, widget->handle->svg->filename};
@@ -97,6 +111,8 @@ Element make_element(rack::app::SvgSlider *widget, BaseElement b) {
 }
 
 Element make_element_lightslider(rack::app::SvgSlider *widget, BaseElement b) {
+	pr_trace("Svg Light Slider %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
 	SliderLight::State_t defaultValue = getScaledDefaultValue(widget);
 
 	if (widget->background->svg->filename.length()) {
@@ -108,6 +124,8 @@ Element make_element_lightslider(rack::app::SvgSlider *widget, BaseElement b) {
 }
 
 Element make_element(rack::componentlibrary::Rogan *widget, BaseElement b) {
+	pr_trace("Rogan knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
 	Knob::State_t defaultValue = getScaledDefaultValue(widget);
 
 	// Rogan knobs have a Rogan::bg svg, Rogan::fg svg, SvgKnob::sw svg, and SvgWidget::svg.
@@ -126,6 +144,8 @@ Element make_element(rack::componentlibrary::Rogan *widget, BaseElement b) {
 //
 
 Element make_element(rack::app::SvgSwitch *widget, BaseElement b) {
+	pr_trace("Svg Switch %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
 	FlipSwitch::State_t defaultValue = getScaledDefaultValue(widget);
 
 	if (widget->frames.size() >= 3) {
@@ -177,6 +197,8 @@ make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &el, La
 }
 
 Element make_button_light(rack::app::MultiLightWidget *light, rack::app::SvgSwitch *widget, BaseElement const &el) {
+	pr_trace("Button light %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
 	LatchingButton::State_t defaultValue =
 		getScaledDefaultValue(widget) > 0.5f ? LatchingButton::State_t::UP : LatchingButton::State_t::DOWN;
 
@@ -235,6 +257,8 @@ Element make_rgb_led_element(std::string_view image, rack::app::MultiLightWidget
 }
 
 Element make_element(rack::app::MultiLightWidget *widget, BaseElement el) {
+	pr_trace("Light with %d elem at %f %f\n", widget->getNumColors(), widget->box.pos.x, widget->box.pos.y);
+
 	auto image = get_led_image_by_size(widget);
 
 	if (widget->getNumColors() == 1) {
@@ -253,6 +277,8 @@ Element make_element(rack::app::MultiLightWidget *widget, BaseElement el) {
 }
 
 Element make_multi_led_element(std::string_view image, rack::app::MultiLightWidget *widget, BaseElement const &el) {
+	pr_trace("SVG Light with %d elem at %f %f\n", widget->getNumColors(), widget->box.pos.x, widget->box.pos.y);
+
 	if (widget->getNumColors() == 1) {
 		return make_mono_led_element(image, widget, el);
 	}
@@ -272,20 +298,26 @@ Element make_multi_led_element(std::string_view image, rack::app::MultiLightWidg
 //
 
 Element make_element(rack::app::SvgScrew *widget, BaseElement) {
+	pr_trace("make Screw\n");
 	return NullElement{};
 }
 
 Element make_element(rack::widget::Widget *widget, BaseElement) {
+	pr_trace("Unknown Widget at pos: %f, %f; size: %f, %f\n",
+			 widget->box.pos.x,
+			 widget->box.pos.y,
+			 widget->box.size.x,
+			 widget->box.size.y);
 	return NullElement{};
 }
 
 Element make_element(rack::app::ParamWidget *widget, BaseElement b) {
 	if (widget->svg && widget->svg->filename.size()) {
-		pr_dbg("Unknown ParamWidget, using image as a ParamElement\n");
+		pr_warn("Unknown ParamWidget (param id %d)\n", widget->paramId);
 		return ParamElement{b, widget->svg->filename};
 
 	} else {
-		pr_dbg("ParamWidget without an SVG, using a blank ParamElement\n");
+		pr_warn("ParamWidget (param id %d) without an SVG, using a blank ParamElement\n", widget->paramId);
 		b.width_mm = to_mm(widget->box.size.x);
 		b.height_mm = to_mm(widget->box.size.y);
 		return ParamElement{b, ""};
