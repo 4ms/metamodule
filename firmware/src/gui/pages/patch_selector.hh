@@ -17,8 +17,7 @@ namespace MetaModule
 struct PatchSelectorPage : PageBase {
 
 	PatchSelectorPage(PatchContext info)
-		: PageBase{info, PageId::PatchSel}
-		, subdir_panel{roller_item_infos} {
+		: PageBase{info, PageId::PatchSel} {
 
 		init_bg(ui_PatchSelectorPage);
 
@@ -27,6 +26,7 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_add_event_cb(ui_PatchListRoller, patchlist_scroll_cb, LV_EVENT_KEY, this);
 		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_FOCUS_KEY);
+		lv_obj_clear_state(ui_Flashbut, LV_STATE_FOCUSED);
 	}
 
 	void prepare_focus() override {
@@ -34,7 +34,7 @@ struct PatchSelectorPage : PageBase {
 
 		state = State::TryingToRequestPatchList;
 		hide_spinner();
-		subdir_panel.blur();
+		blur_subdir_panel();
 
 		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
@@ -48,12 +48,55 @@ struct PatchSelectorPage : PageBase {
 			lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
 		}
 
-		subdir_panel.refresh();
+		setup_subdir_panel();
+	}
+
+	void setup_subdir_panel() {
+		subdir_panel.set_parent(ui_PatchSelectorPage, 1);
+		subdir_panel.focus_cb = [this](PatchDir *dir, lv_obj_t *target) {
+			auto parent = lv_obj_get_parent(target);
+
+			Volume this_vol{};
+
+			for (auto [vol, vol_cont] : zip(PatchDirList::vols, subdir_panel.vol_conts)) {
+				if (parent == vol_cont)
+					this_vol = vol;
+			}
+
+			for (auto [i, entry] : enumerate(roller_item_infos)) {
+				if (entry.path == dir->name && entry.vol == this_vol) {
+					lv_roller_set_selected(ui_PatchListRoller, i + 1, LV_ANIM_ON);
+					break;
+				}
+			}
+		};
+		subdir_panel.click_cb = [this]() {
+			blur_subdir_panel();
+		};
+
+		refresh_subdir_panel();
+	}
+
+	void refresh_subdir_panel() {
+		auto idx = lv_roller_get_selected(ui_PatchListRoller);
+		if (idx < roller_item_infos.size())
+			subdir_panel.refresh(roller_item_infos[idx]);
 	}
 
 	void refresh_patchlist(PatchDirList &patchfiles) {
 		subdir_panel.populate(group, patchfiles);
 		populate_roller(patchfiles);
+	}
+
+	void blur_subdir_panel() {
+		lv_obj_clear_state(ui_DrivesPanel, LV_STATE_FOCUSED);
+		lv_obj_clear_state(ui_PatchListRoller, LV_STATE_DISABLED);
+		lv_group_focus_obj(ui_PatchListRoller);
+
+		if (group)
+			lv_group_set_editing(group, true);
+
+		subdir_panel.blur();
 	}
 
 	void populate_roller(PatchDirList &patchfiles) {
@@ -150,6 +193,7 @@ struct PatchSelectorPage : PageBase {
 
 		if (metaparams.back_button.is_just_released()) {
 			if (lv_group_get_focused(group) == ui_PatchListRoller) {
+				lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
 				subdir_panel.focus();
 			} else {
 				page_list.request_last_page();
@@ -191,7 +235,7 @@ struct PatchSelectorPage : PageBase {
 			case State::ReloadingPatchList:
 				//TODO: use our member var patch_list, not patch_storage
 				refresh_patchlist(patch_storage.get_patch_list());
-				subdir_panel.refresh();
+				refresh_subdir_panel();
 				hide_spinner();
 				state = State::Idle;
 				break;
@@ -280,8 +324,7 @@ struct PatchSelectorPage : PageBase {
 				prev_idx = new_idx;
 			}
 		}
-
-		page->subdir_panel.refresh();
+		page->refresh_subdir_panel();
 	}
 
 	static void patchlist_click_cb(lv_event_t *event) {

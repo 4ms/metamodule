@@ -8,20 +8,17 @@
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 #include "util/zip.hh"
+#include <functional>
 
 namespace MetaModule
 {
 
 struct PatchSelectorSubdirPanel {
-	PatchSelectorSubdirPanel(std::vector<EntryInfo> &roller_items)
-		: roller_item_infos{roller_items} {
-		for (auto vol_cont : vol_conts) {
-			auto vol_item = lv_obj_get_child(vol_cont, 0);
-			lv_obj_add_event_cb(vol_item, subdir_focus_cb, LV_EVENT_FOCUSED, this);
-			lv_obj_add_event_cb(vol_item, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
-			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
-			lv_obj_set_user_data(vol_item, nullptr);
-		}
+	PatchSelectorSubdirPanel() = default;
+
+	void set_parent(lv_obj_t *parent, unsigned zindex) {
+		lv_obj_set_parent(ui_DrivesPanel, parent);
+		lv_obj_move_to_index(ui_DrivesPanel, zindex);
 	}
 
 	void populate(lv_group_t *parent_group, PatchDirList &patchfiles) {
@@ -50,6 +47,10 @@ struct PatchSelectorSubdirPanel {
 
 			// Add root-level dir on volume
 			auto vol_button = lv_obj_get_child(vol_cont, 0);
+			lv_obj_remove_event_cb(vol_item, nullptr); //remove all callbacks
+			lv_obj_add_event_cb(vol_item, subdir_focus_cb, LV_EVENT_FOCUSED, this);
+			lv_obj_add_event_cb(vol_item, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
+			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
 			lv_obj_set_user_data(vol_button, &root);
 			lv_group_add_obj(group, vol_button);
 
@@ -62,21 +63,16 @@ struct PatchSelectorSubdirPanel {
 		}
 	}
 
-	void refresh() {
-		auto idx = lv_roller_get_selected(ui_PatchListRoller);
-		if (idx >= roller_item_infos.size())
-			return;
-
-		auto &entry = roller_item_infos[idx];
+	void refresh(EntryInfo const &selected_patch) {
 
 		for (auto [vol, vol_name, vol_cont] : zip(PatchDirList::vols, PatchDirList::vol_name, vol_conts)) {
-			if (vol != entry.vol)
+			if (vol != selected_patch.vol)
 				continue;
 
-			lv_foreach_child(vol_cont, [this, entry, vol_name = vol_name](lv_obj_t *obj, unsigned i) {
+			lv_foreach_child(vol_cont, [this, selected_patch, vol_name = vol_name](lv_obj_t *obj, unsigned i) {
 				auto label_child = (i == 0) ? 1 : 0;
 				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
-				const char *roller_path = (i == 0) ? vol_name : entry.path.c_str();
+				const char *roller_path = (i == 0) ? vol_name : selected_patch.path.c_str();
 				if (txt == nullptr)
 					return true;
 
@@ -102,7 +98,6 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	void focus() {
-		lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
 		lv_obj_add_state(ui_DrivesPanel, LV_STATE_FOCUSED);
 
 		if (last_subdir_sel) {
@@ -115,12 +110,6 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	void blur() {
-		lv_obj_clear_state(ui_DrivesPanel, LV_STATE_FOCUSED);
-		lv_obj_clear_state(ui_PatchListRoller, LV_STATE_DISABLED);
-		lv_group_focus_obj(ui_PatchListRoller);
-		if (group)
-			lv_group_set_editing(group, true);
-
 		if (last_subdir_sel) {
 			lv_obj_add_state(last_subdir_sel, LV_STATE_USER_2);
 		}
@@ -137,21 +126,9 @@ struct PatchSelectorSubdirPanel {
 
 		auto *dir = static_cast<PatchDir *>(event->target->user_data);
 
-		auto parent = lv_obj_get_parent(event->target);
-		Volume this_vol{};
-		for (auto [vol, vol_cont] : zip(PatchDirList::vols, page->vol_conts)) {
-			if (parent == vol_cont)
-				this_vol = vol;
+		if (page->focus_cb) {
+			page->focus_cb(dir, event->target);
 		}
-
-		uint32_t first_roller_entry = 0;
-		for (auto [i, entry] : enumerate(page->roller_item_infos)) {
-			if (entry.path == dir->name && entry.vol == this_vol) {
-				first_roller_entry = i;
-				break;
-			}
-		}
-		lv_roller_set_selected(ui_PatchListRoller, first_roller_entry + 1, LV_ANIM_ON);
 	}
 
 	static void subdir_defocus_cb(lv_event_t *event) {
@@ -162,11 +139,17 @@ struct PatchSelectorSubdirPanel {
 
 	static void subdir_click_cb(lv_event_t *event) {
 		auto panel = static_cast<PatchSelectorSubdirPanel *>(event->user_data);
-		if (panel)
-			panel->blur();
+		if (panel) {
+			if (panel->click_cb) {
+				panel->click_cb();
+			}
+		}
 	}
 
-	lv_obj_t *last_subdir_sel = nullptr;
+	const std::array<lv_obj_t *, 3> vol_conts = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
+
+	std::function<void(PatchDir *, lv_obj_t *)> focus_cb;
+	std::function<void()> click_cb;
 
 private:
 	void add_subdir_to_panel(PatchDir &dir, lv_obj_t *vol_label) {
@@ -194,11 +177,8 @@ private:
 		lv_group_add_obj(group, btn);
 	}
 
+	lv_obj_t *last_subdir_sel = nullptr;
 	lv_group_t *group{};
-
-	const std::array<lv_obj_t *, 3> vol_conts = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
-
-	std::vector<EntryInfo> &roller_item_infos;
 };
 
 } // namespace MetaModule
