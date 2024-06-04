@@ -1754,4 +1754,37 @@ lv_obj_set_align( ui_DescriptionEditCancelLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_DescriptionEditCancelLabel,"Cancel");
 lv_obj_set_style_text_font(ui_DescriptionEditCancelLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_SaveDialogCont = lv_obj_create(ui_PatchViewPage);
+lv_obj_remove_style_all(ui_SaveDialogCont);
+lv_obj_set_width( ui_SaveDialogCont, lv_pct(103));
+lv_obj_set_height( ui_SaveDialogCont, lv_pct(100));
+lv_obj_set_flex_flow(ui_SaveDialogCont,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_SaveDialogCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+lv_obj_add_flag( ui_SaveDialogCont, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_clear_flag( ui_SaveDialogCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_bg_color(ui_SaveDialogCont, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_SaveDialogCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SaveDialogFileNameLabel = lv_label_create(ui_SaveDialogCont);
+lv_obj_set_width( ui_SaveDialogFileNameLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_SaveDialogFileNameLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SaveDialogFileNameLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_SaveDialogFileNameLabel,"File Name:");
+
+ui_SaveDialogFilename = lv_textarea_create(ui_SaveDialogCont);
+lv_obj_set_height( ui_SaveDialogFilename, 30);
+lv_obj_set_flex_grow( ui_SaveDialogFilename, 1);
+lv_obj_set_align( ui_SaveDialogFilename, LV_ALIGN_CENTER );
+lv_textarea_set_placeholder_text(ui_SaveDialogFilename,"Placeholder...");
+
+
+
+ui_SaveAsKeyboard = lv_keyboard_create(ui_SaveDialogCont);
+lv_obj_set_height( ui_SaveAsKeyboard, 97);
+lv_obj_set_width( ui_SaveAsKeyboard, lv_pct(100));
+lv_obj_set_align( ui_SaveAsKeyboard, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_SaveAsKeyboard, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
+
+lv_keyboard_set_textarea(ui_SaveAsKeyboard,ui_SaveDialogFilename);
+
 }

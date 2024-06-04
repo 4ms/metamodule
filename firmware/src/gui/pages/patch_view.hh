@@ -31,7 +31,7 @@ struct PatchViewPage : PageBase {
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
 		, settings{settings}
-		, file_menu{patch_playloader} {
+		, file_menu{patch_playloader, patch_storage} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
