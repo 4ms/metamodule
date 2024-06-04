@@ -142,8 +142,12 @@ extern lv_obj_t *ui_DescriptionEditSaveLabel;
 extern lv_obj_t *ui_DescriptionEditCancelButton;
 extern lv_obj_t *ui_DescriptionEditCancelLabel;
 extern lv_obj_t *ui_SaveDialogCont;
+extern lv_obj_t *ui_SaveDialogLeftCont;
+extern lv_obj_t *ui_SaveDialogRightCont;
 extern lv_obj_t *ui_SaveDialogFileNameLabel;
 extern lv_obj_t *ui_SaveDialogFilename;
+extern lv_obj_t *ui_SaveDialogDirLabel;
+extern lv_obj_t *ui_SaveDialogDir;
 extern lv_obj_t *ui_SaveAsKeyboard;
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);

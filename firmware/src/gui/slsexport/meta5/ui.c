@@ -138,10 +138,13 @@ lv_obj_t *ui_DescriptionEditSaveLabel;
 lv_obj_t *ui_DescriptionEditCancelButton;
 lv_obj_t *ui_DescriptionEditCancelLabel;
 lv_obj_t *ui_SaveDialogCont;
+lv_obj_t *ui_SaveDialogLeftCont;
+lv_obj_t *ui_SaveDialogRightCont;
 lv_obj_t *ui_SaveDialogFileNameLabel;
 lv_obj_t *ui_SaveDialogFilename;
+lv_obj_t *ui_SaveDialogDirLabel;
+lv_obj_t *ui_SaveDialogDir;
 lv_obj_t *ui_SaveAsKeyboard;
-
 
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
