@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
+#include "gui/pages/save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
@@ -14,6 +15,7 @@ struct PatchViewFileMenu {
 	PatchViewFileMenu(PatchPlayLoader &play_loader, FileStorageProxy &patch_storage)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
+		, save_dialog{patch_storage}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
@@ -36,7 +38,10 @@ struct PatchViewFileMenu {
 	}
 
 	void hide() {
-		if (visible) {
+		if (save_dialog.is_visible()) {
+			save_dialog.hide();
+
+		} else if (visible) {
 			DropOutToRight_Animation(ui_PatchFileMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (indev && base_group)
@@ -60,39 +65,13 @@ struct PatchViewFileMenu {
 	}
 
 private:
-	void show_file_save_dialog() {
-		lv_show(ui_SaveDialogCont);
-		lv_hide(ui_SaveAsKeyboard);
-		subdir_panel.focus();
-		subdir_panel.set_parent(ui_SaveDialogCont, 2);
-		subdir_panel.focus_cb = [this](PatchDir *dir, lv_obj_t *target) {
-			auto parent = lv_obj_get_parent(target);
+	void show_save_dialog() {
+		save_dialog.prepare_focus(base_group);
 
-			Volume this_vol{};
+		lv_obj_set_x(ui_PatchFileMenu, 220);
+		visible = false;
 
-			for (auto [vol, vol_cont] : zip(PatchDirList::vols, subdir_panel.vol_conts)) {
-				if (parent == vol_cont) {
-					this_vol = vol;
-					break;
-				}
-			}
-			pr_dbg("focus %d\n", this_vol);
-
-			// for (auto [i, entry] : enumerate(roller_item_infos)) {
-			// 	if (entry.path == dir->name && entry.vol == this_vol) {
-			// 		lv_roller_set_selected(ui_PatchListRoller, i + 1, LV_ANIM_ON);
-			// 		break;
-			// 	}
-			// }
-		};
-
-		subdir_panel.click_cb = [this]() {
-			pr_dbg("click\n");
-			// blur_subdir_panel();
-		};
-
-		EntryInfo no_patch{.kind = {}, .vol = Volume::RamDisk, .name = patch_storage.get_view_patch_filename()};
-		subdir_panel.refresh(no_patch);
+		save_dialog.show();
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -124,19 +103,16 @@ private:
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
-		page->show_file_save_dialog();
+		page->show_save_dialog();
 	}
 
 	PatchPlayLoader &play_loader;
 	FileStorageProxy &patch_storage;
+	SaveDialog save_dialog;
 
 	lv_group_t *group;
-	lv_group_t *saveas_group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
-
-	PatchSelectorSubdirPanel subdir_panel;
-	std::vector<EntryInfo> subdir_panel_patches;
 };
 
 } // namespace MetaModule
