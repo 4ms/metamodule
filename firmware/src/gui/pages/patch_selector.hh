@@ -194,8 +194,9 @@ struct PatchSelectorPage : PageBase {
 	void update() override {
 
 		if (metaparams.back_button.is_just_released()) {
-			if (lv_group_get_focused(group) == ui_PatchListRoller) {
+			if (!lv_obj_has_state(ui_PatchListRoller, LV_STATE_DISABLED)) {
 				lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
+				lv_obj_clear_state(ui_PatchListRoller, LV_STATE_FOCUSED);
 				subdir_panel.focus();
 			} else {
 				page_list.request_last_page();
