@@ -9,4 +9,8 @@ Svg::Svg(std::string_view fname)
 
 Svg::~Svg() = default;
 
+std::shared_ptr<Svg> Svg::load(const std::string &filename) {
+	return make_shared<Svg>(filename);
+}
+
 } // namespace rack::window

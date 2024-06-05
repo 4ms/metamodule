@@ -303,11 +303,7 @@ Element make_element(rack::app::SvgScrew *widget, BaseElement) {
 }
 
 Element make_element(rack::widget::Widget *widget, BaseElement) {
-	pr_trace("Unknown Widget at pos: %f, %f; size: %f, %f\n",
-			 widget->box.pos.x,
-			 widget->box.pos.y,
-			 widget->box.size.x,
-			 widget->box.size.y);
+	pr_dbg("Unknown widget at %f, %f\n", widget->getBox().pos.x, widget->getBox().pos.y);
 	return NullElement{};
 }
 
@@ -336,4 +332,9 @@ Element make_element(rack::widget::SvgWidget *widget, BaseElement b) {
 		return NullElement{b};
 	}
 }
+
+Element make_element(rack::app::SvgButton *widget, BaseElement b) {
+	return make_element(widget->sw, b);
+}
+
 } // namespace MetaModule
