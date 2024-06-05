@@ -37,11 +37,22 @@ struct PatchViewFileMenu {
 		base_group = parent_group;
 	}
 
-	void hide() {
+	void back() {
 		if (save_dialog.is_visible()) {
 			save_dialog.hide();
 
 		} else if (visible) {
+			hide();
+		}
+	}
+
+	void hide() {
+		save_dialog.hide();
+		hide_menu();
+	}
+
+	void hide_menu() {
+		if (visible) {
 			DropOutToRight_Animation(ui_PatchFileMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (indev && base_group)
@@ -61,7 +72,7 @@ struct PatchViewFileMenu {
 	}
 
 	bool is_visible() {
-		return visible;
+		return save_dialog.is_visible() || visible;
 	}
 
 private:
