@@ -30,12 +30,22 @@ struct SaveDialog {
 
 	void show() {
 		if (state == State::Hidden) {
-			auto patchname = patch_storage.get_view_patch_filename();
-			lv_textarea_set_text(ui_SaveDialogFilename, patchname.c_str());
+			auto path = std::string{PatchDirList::get_vol_name(patch_storage.get_view_patch_vol())};
+			auto filename = std::string_view{patch_storage.get_view_patch_filename()};
+
+			auto slashpos = filename.find_last_of('/');
+			if (slashpos != std::string_view::npos) {
+				path.append(filename.substr(0, slashpos));
+				filename = filename.substr(slashpos + 1);
+			}
+			lv_textarea_set_text(ui_SaveDialogFilename, filename.data());
+			lv_label_set_text(ui_SaveDialogDir, path.c_str());
 
 			lv_show(ui_SaveDialogCont);
 			lv_show(ui_SaveDialogRightCont);
+
 			subdir_panel.set_parent(ui_SaveDialogLeftCont, 0);
+
 			lv_hide(ui_SaveDialogLeftCont);
 			lv_hide(ui_SaveAsKeyboard);
 
@@ -45,11 +55,8 @@ struct SaveDialog {
 			lv_group_focus_obj(ui_SaveDialogFilename);
 			lv_group_set_editing(group, false);
 
-			pr_dbg("Show\n");
-
 			state = State::Idle;
-		} else
-			pr_dbg("Show, state %d\n", state);
+		}
 	}
 
 	void show_keyboard() {
@@ -65,9 +72,11 @@ struct SaveDialog {
 		state = State::EditDir;
 		lv_show(ui_SaveDialogLeftCont);
 
+		// subdir_panel.populate(group, patch_storage.get_patch_list());
 		subdir_panel.focus();
-		subdir_panel.set_parent(ui_SaveDialogCont, 2);
+
 		subdir_panel.focus_cb = [this](PatchDir *dir, lv_obj_t *target) {
+			pr_dbg("SaveDialog: show_subdir_panel\n");
 			auto parent = lv_obj_get_parent(target);
 
 			Volume this_vol{};
@@ -78,7 +87,7 @@ struct SaveDialog {
 					break;
 				}
 			}
-			pr_dbg("focus %d\n", this_vol);
+			pr_dbg("SaveDialog focus %d\n", this_vol);
 
 			// for (auto [i, entry] : enumerate(roller_item_infos)) {
 			// 	if (entry.path == dir->name && entry.vol == this_vol) {
@@ -89,7 +98,7 @@ struct SaveDialog {
 		};
 
 		subdir_panel.click_cb = [this]() {
-			pr_dbg("click\n");
+			pr_dbg("SaveDialog click\n");
 			hide_subdir_panel();
 		};
 
@@ -113,10 +122,12 @@ struct SaveDialog {
 			if (indev && base_group)
 				lv_indev_set_group(indev, base_group);
 			state = State::Hidden;
+
 		} else if (state == State::EditDir) {
-			pr_dbg("hide(); edirdir->idle\n");
+			pr_dbg("hide(); editdir->idle\n");
 			hide_subdir_panel();
 			state = State::Idle;
+
 		} else if (state == State::EditName) {
 			pr_dbg("hide(); editname->idle\n");
 			hide_keyboard();
