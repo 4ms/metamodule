@@ -16,8 +16,9 @@ namespace MetaModule
 
 struct PatchSelectorPage : PageBase {
 
-	PatchSelectorPage(PatchContext info)
-		: PageBase{info, PageId::PatchSel} {
+	PatchSelectorPage(PatchContext info, PatchSelectorSubdirPanel &subdir_panel)
+		: PageBase{info, PageId::PatchSel}
+		, subdir_panel{subdir_panel} {
 
 		init_bg(ui_PatchSelectorPage);
 
@@ -53,24 +54,16 @@ struct PatchSelectorPage : PageBase {
 
 	void setup_subdir_panel() {
 		subdir_panel.set_parent(ui_PatchSelectorPage, 1);
-		subdir_panel.focus_cb = [this](PatchDir *dir, lv_obj_t *target) {
-			auto parent = lv_obj_get_parent(target);
-
-			Volume this_vol{};
-
-			for (auto [vol, vol_cont] : zip(PatchDirList::vols, subdir_panel.vol_conts)) {
-				if (parent == vol_cont)
-					this_vol = vol;
-			}
-
+		subdir_panel.focus_cb = [this](Volume vol, std::string_view dir) {
 			for (auto [i, entry] : enumerate(roller_item_infos)) {
-				if (entry.path == dir->name && entry.vol == this_vol) {
+				if (entry.path == dir && entry.vol == vol) {
 					lv_roller_set_selected(ui_PatchListRoller, i + 1, LV_ANIM_ON);
 					break;
 				}
 			}
 		};
-		subdir_panel.click_cb = [this]() {
+		subdir_panel.click_cb = [this](Volume vol, std::string_view dir) {
+			pr_dbg("PatchSelectorPage click %d: %s\n", vol, dir.data());
 			blur_subdir_panel();
 		};
 
@@ -364,7 +357,7 @@ private:
 
 	std::vector<EntryInfo> roller_item_infos;
 
-	PatchSelectorSubdirPanel subdir_panel;
+	PatchSelectorSubdirPanel &subdir_panel;
 
 	static constexpr uint32_t spinner_lag_ms = 200;
 	uint32_t spinner_show_tm = 0;

@@ -25,13 +25,13 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
-	PatchViewPage(PatchContext info, ViewSettings &settings)
+	PatchViewPage(PatchContext info, ViewSettings &settings, PatchSelectorSubdirPanel &subdir_panel)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
 		, settings{settings}
-		, file_menu{patch_playloader, patch_storage} {
+		, file_menu{patch_playloader, patch_storage, subdir_panel} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);

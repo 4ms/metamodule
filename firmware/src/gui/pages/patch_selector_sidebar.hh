@@ -77,7 +77,7 @@ struct PatchSelectorSubdirPanel {
 			if (vol != selected_patch.vol)
 				continue;
 
-			lv_foreach_child(vol_cont, [selected_patch, vol_name = vol_name](lv_obj_t *obj, unsigned i) {
+			lv_foreach_child(vol_cont, [selected_patch, vol_name = vol_name, this](lv_obj_t *obj, unsigned i) {
 				auto label_child = (i == 0) ? 1 : 0;
 				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
 				const char *roller_path = (i == 0) ? vol_name : selected_patch.path.c_str();
@@ -135,13 +135,25 @@ struct PatchSelectorSubdirPanel {
 			return;
 
 		label_scrolls(event->target);
-
 		page->last_subdir_sel = event->target;
 
-		auto *dir = static_cast<PatchDir *>(event->target->user_data);
-
 		if (page->focus_cb) {
-			page->focus_cb(dir, event->target);
+			auto parent = lv_obj_get_parent(event->target);
+
+			Volume this_vol{};
+			for (auto [vol, vol_cont] : zip(PatchDirList::vols, page->vol_conts)) {
+				if (parent == vol_cont) {
+					this_vol = vol;
+					break;
+				}
+			}
+
+			std::string_view dirname = "";
+			if (auto dir = static_cast<PatchDir *>(event->target->user_data); dir) {
+				dirname = std::string_view{dir->name};
+			}
+
+			page->focus_cb(this_vol, dirname);
 		}
 	}
 
@@ -152,18 +164,34 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	static void subdir_click_cb(lv_event_t *event) {
+		pr_dbg("Sidebar click\n");
 		auto page = static_cast<PatchSelectorSubdirPanel *>(event->user_data);
-		if (page) {
-			if (page->click_cb) {
-				page->click_cb();
+
+		if (page && event->target && page->click_cb) {
+			auto parent = lv_obj_get_parent(event->target);
+
+			Volume this_vol{};
+			for (auto [vol, vol_cont] : zip(PatchDirList::vols, page->vol_conts)) {
+				if (parent == vol_cont) {
+					this_vol = vol;
+					break;
+				}
 			}
+
+			std::string_view dirname = "";
+			if (auto dir = static_cast<PatchDir *>(event->target->user_data); dir) {
+				dirname = std::string_view{dir->name};
+			}
+
+			pr_dbg("Sidebar click callback: %s\n", dirname.data());
+			page->click_cb(this_vol, dirname);
 		}
 	}
 
 	const std::array<lv_obj_t *, 3> vol_conts = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
 
-	std::function<void(PatchDir *, lv_obj_t *)> focus_cb;
-	std::function<void()> click_cb;
+	std::function<void(Volume vol, std::string_view dirname)> focus_cb;
+	std::function<void(Volume vol, std::string_view dirname)> click_cb;
 
 private:
 	void add_subdir_to_panel(PatchDir &dir, lv_obj_t *vol_label) {
@@ -186,7 +214,9 @@ private:
 		lv_obj_set_user_data(btn, &dir);
 
 		while (lv_obj_remove_event_cb(btn, nullptr)) {
+			pr_dbg("Rm cb for btn %s\n", dir.name.c_str());
 		}
+		pr_dbg("Add cb for btn %s\n", dir.name.c_str());
 		lv_obj_add_event_cb(btn, subdir_focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(btn, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
 		lv_obj_add_event_cb(btn, subdir_click_cb, LV_EVENT_CLICKED, this);
@@ -194,8 +224,8 @@ private:
 		lv_group_add_obj(group, btn);
 	}
 
-	static inline lv_obj_t *last_subdir_sel = nullptr;
-	static inline lv_group_t *group = nullptr;
+	lv_obj_t *last_subdir_sel = nullptr;
+	lv_group_t *group = nullptr;
 };
 
 } // namespace MetaModule

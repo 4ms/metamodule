@@ -113,7 +113,7 @@ public:
 		view_patch_loc_ = playing_patch_loc_;
 	}
 
-	StaticString<255> get_view_patch_filename() {
+	StaticString<255> &get_view_patch_filename() {
 		return view_patch_loc_.filename;
 	}
 

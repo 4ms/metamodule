@@ -11,15 +11,20 @@ namespace MetaModule
 
 struct SaveDialog {
 
-	SaveDialog(FileStorageProxy &patch_storage)
+	SaveDialog(FileStorageProxy &patch_storage, PatchSelectorSubdirPanel &subdir_panel)
 		: patch_storage{patch_storage}
+		, subdir_panel{subdir_panel}
 		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
 		lv_group_add_obj(group, ui_SaveDialogDir);
+		lv_group_add_obj(group, ui_SaveDialogSaveBut);
+		lv_group_add_obj(group, ui_SaveDialogCancelBut);
 
 		lv_obj_add_event_cb(ui_SaveDialogFilename, click_filename_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SaveDialogDir, click_location_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_SaveDialogCancelBut, cancel_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_SaveDialogSaveBut, save_cb, LV_EVENT_CLICKED, this);
 
 		lv_hide(ui_SaveDialogCont);
 	}
@@ -73,16 +78,19 @@ struct SaveDialog {
 
 	void show() {
 		if (mode == Mode::Hidden) {
-			path = std::string{PatchDirList::get_vol_name(patch_storage.get_view_patch_vol())};
-			auto filename = std::string_view{patch_storage.get_view_patch_filename()};
+			file_vol = patch_storage.get_view_patch_vol();
 
-			auto slashpos = filename.find_last_of('/');
+			auto fullpath = std::string_view{patch_storage.get_view_patch_filename()};
+			auto slashpos = fullpath.find_last_of('/');
 			if (slashpos != std::string_view::npos) {
-				path.append(filename.substr(0, slashpos));
-				filename = filename.substr(slashpos + 1);
+				file_path = fullpath.substr(0, slashpos);
+				file_name = fullpath.substr(slashpos + 1);
+			} else {
+				file_path = "";
+				file_name = std::string{fullpath};
 			}
-			lv_textarea_set_text(ui_SaveDialogFilename, filename.data());
-			lv_label_set_text(ui_SaveDialogDir, path.c_str());
+
+			update_dir_label();
 
 			lv_show(ui_SaveDialogCont);
 			lv_show(ui_SaveDialogRightCont);
@@ -116,34 +124,18 @@ struct SaveDialog {
 
 		subdir_panel.focus();
 
-		subdir_panel.focus_cb = [this](PatchDir *dir, lv_obj_t *target) {
-			pr_dbg("SaveDialog: show_subdir_panel\n");
-			auto parent = lv_obj_get_parent(target);
+		subdir_panel.focus_cb = nullptr;
 
-			Volume this_vol{};
-
-			for (auto [vol, vol_cont] : zip(PatchDirList::vols, subdir_panel.vol_conts)) {
-				if (parent == vol_cont) {
-					this_vol = vol;
-					break;
-				}
-			}
-			pr_dbg("SaveDialog focus %d\n", this_vol);
-
-			// for (auto [i, entry] : enumerate(roller_item_infos)) {
-			// 	if (entry.path == dir->name && entry.vol == this_vol) {
-			// 		lv_roller_set_selected(ui_PatchListRoller, i + 1, LV_ANIM_ON);
-			// 		break;
-			// 	}
-			// }
-		};
-
-		subdir_panel.click_cb = [this]() {
-			pr_dbg("SaveDialog click\n");
+		subdir_panel.click_cb = [this](Volume vol, std::string_view dir) {
+			pr_dbg("SaveDialog click %d: %s\n", vol, dir.data());
+			file_path = dir;
+			file_vol = vol;
+			update_dir_label();
 			hide_subdir_panel();
 		};
 
-		EntryInfo selected_patch{.kind = DirEntryKind::Dir, .vol = patch_storage.get_view_patch_vol(), .path = path};
+		EntryInfo selected_patch{
+			.kind = DirEntryKind::Dir, .vol = patch_storage.get_view_patch_vol(), .path = file_path};
 		subdir_panel.refresh(selected_patch);
 	}
 
@@ -174,6 +166,14 @@ struct SaveDialog {
 		}
 	}
 
+	void update_dir_label() {
+		lv_textarea_set_text(ui_SaveDialogFilename, file_name.c_str());
+
+		auto displayed_path = std::string{PatchDirList::get_vol_name(file_vol)};
+		displayed_path.append(file_path);
+		lv_label_set_text(ui_SaveDialogDir, displayed_path.c_str());
+	}
+
 private:
 	static void click_filename_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
@@ -189,13 +189,29 @@ private:
 		page->show_subdir_panel();
 	}
 
-	FileStorageProxy &patch_storage;
+	static void save_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<SaveDialog *>(event->user_data);
 
-	PatchSelectorSubdirPanel subdir_panel;
+		pr_dbg("SAVE %d:%s/%s\n", page->file_vol, page->file_path.c_str(), page->file_name.c_str());
+	}
+
+	static void cancel_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<SaveDialog *>(event->user_data);
+		page->hide();
+	}
+
+	FileStorageProxy &patch_storage;
+	PatchSelectorSubdirPanel &subdir_panel;
+
 	std::vector<EntryInfo> subdir_panel_patches;
 
-	std::string path;
-	std::string filename;
+	Volume file_vol{};
+	std::string file_path;
+	std::string file_name;
 
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
