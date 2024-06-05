@@ -137,8 +137,8 @@ std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs(std::string_view brand) {
 	return slugs;
 }
 
-std::vector<ModuleTypeSlug> ModuleFactory::getAllBrands() {
-	std::vector<ModuleTypeSlug> brands;
+std::vector<BrandTypeSlug> ModuleFactory::getAllBrands() {
+	std::vector<BrandTypeSlug> brands;
 	for (auto &brand : registry()) {
 		brands.push_back(brand.brand_name.c_str());
 	}

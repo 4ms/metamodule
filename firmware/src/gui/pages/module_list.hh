@@ -69,7 +69,7 @@ struct ModuleListPage : PageBase {
 	}
 
 	void roller_module_list() {
-		lv_label_set_text(ui_ModuleListRollerTitle, selected_brand);
+		lv_label_set_text(ui_ModuleListRollerTitle, selected_brand.c_str());
 		populate_slugs();
 		drawn_module_idx = -1; //force redraw
 		draw_module();
@@ -150,7 +150,7 @@ private:
 
 		if (page->view == View::BrandRoller) {
 			page->view = View::ModuleRoller;
-			page->selected_brand = selected_str;
+			page->selected_brand.copy(selected_str);
 			page->roller_module_list();
 
 		} else if (page->view == View::ModuleRoller) {
@@ -202,7 +202,7 @@ private:
 		}
 	}
 
-	void draw_module(ModuleTypeSlug slug) {
+	void draw_module(BrandModuleSlug slug) {
 		clear_module_canvas();
 
 		ModuleDrawer drawer{ui_ModuleListImage, 240};
@@ -228,7 +228,7 @@ private:
 	lv_timer_t *draw_timer{};
 	unsigned drawn_module_idx = -1;
 	bool do_redraw = false;
-	ModuleTypeSlug selected_brand{"4ms"};
+	BrandTypeSlug selected_brand{"4ms"};
 };
 
 } // namespace MetaModule

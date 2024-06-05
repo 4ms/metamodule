@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/dump.hh"
 #include "debug.hh"
 #include "elf_process/elf_file.hh"
 #include "elf_process/elf_relocator.hh"
@@ -11,8 +12,6 @@
 #include <span>
 #include <string>
 #include <vector>
-
-#include "CoreModules/elements/dump.hh"
 
 namespace MetaModule
 {

@@ -114,7 +114,7 @@ struct ModuleDrawer {
 		}
 	}
 
-	void draw_elements(ModuleTypeSlug slug, lv_obj_t *canvas) {
+	void draw_elements(BrandModuleSlug slug, lv_obj_t *canvas) {
 		const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 		for (const auto &element : moduleinfo.elements) {
 			std::visit([this, canvas](auto &el) { ElementDrawer::draw_element(el, canvas, height); }, element);

@@ -11,7 +11,7 @@ namespace MetaModule
 
 struct PatchData {
 	static constexpr size_t DescSize = 255;
-	ModuleTypeSlug patch_name{""};
+	PatchName patch_name{""};
 	StaticString<DescSize> description;
 	std::vector<BrandModuleSlug> module_slugs;
 	std::vector<InternalCable> int_cables;

@@ -61,7 +61,8 @@ target_link_libraries(vcv_plugin INTERFACE metamodule::rack-interface)
 target_include_directories(
   vcv_plugin
   PUBLIC src
-         ${MM_ROOT}/firmware/src #for svg.cc: gui/elements/..., and for console/pr_dbg.hh
+         ${MM_ROOT}/firmware/src #for svg.cc to access gui/elements/..., and for console/pr_dbg.hh
+         ${SHARED}
 )
 
 set_property(TARGET vcv_plugin PROPERTY CXX_STANDARD 20)
