@@ -28,9 +28,52 @@ struct SaveDialog {
 		base_group = parent_group;
 	}
 
+	void update() {
+		if (mode == Mode::EditDir) {
+
+			//TODO: this state logic should be in PatchSelectorSubdirPanel
+			// and let the caller decide what to do on success (besides populate)
+			switch (refresh_state) {
+				case RefreshState::Idle: {
+					//periodically check if patchlist needs updating:
+					uint32_t now = lv_tick_get();
+					if (now - last_refresh_check_tm > 1000) {
+						last_refresh_check_tm = now;
+						refresh_state = RefreshState::TryingToRequestPatchList;
+					}
+				} break;
+
+				case RefreshState::TryingToRequestPatchList:
+					if (patch_storage.request_patchlist()) {
+						refresh_state = RefreshState::RequestedPatchList;
+						// show_spinner();
+					}
+					break;
+
+				case RefreshState::RequestedPatchList: {
+					auto message = patch_storage.get_message().message_type;
+					if (message == FileStorageProxy::PatchListChanged) {
+						refresh_state = RefreshState::ReloadingPatchList;
+
+					} else if (message == FileStorageProxy::PatchListUnchanged) {
+						// hide_spinner();
+						refresh_state = RefreshState::Idle;
+					}
+				} break;
+
+				case RefreshState::ReloadingPatchList:
+					subdir_panel.populate(patch_storage.get_patch_list());
+					// subdir_panel.refresh({});
+					// hide_spinner();
+					refresh_state = RefreshState::Idle;
+					break;
+			}
+		}
+	}
+
 	void show() {
-		if (state == State::Hidden) {
-			auto path = std::string{PatchDirList::get_vol_name(patch_storage.get_view_patch_vol())};
+		if (mode == Mode::Hidden) {
+			path = std::string{PatchDirList::get_vol_name(patch_storage.get_view_patch_vol())};
 			auto filename = std::string_view{patch_storage.get_view_patch_filename()};
 
 			auto slashpos = filename.find_last_of('/');
@@ -49,30 +92,28 @@ struct SaveDialog {
 			lv_hide(ui_SaveDialogLeftCont);
 			lv_hide(ui_SaveAsKeyboard);
 
-			auto indev = lv_indev_get_next(nullptr);
-			if (indev && group)
-				lv_indev_set_group(indev, group);
+			lv_group_activate(group);
 			lv_group_focus_obj(ui_SaveDialogFilename);
 			lv_group_set_editing(group, false);
 
-			state = State::Idle;
+			mode = Mode::Idle;
 		}
 	}
 
 	void show_keyboard() {
-		state = State::EditDir;
+		mode = Mode::EditDir;
 		lv_show(ui_SaveAsKeyboard);
 	}
 
 	void hide_keyboard() {
 		lv_hide(ui_SaveAsKeyboard);
+		mode = Mode::Idle;
 	}
 
 	void show_subdir_panel() {
-		state = State::EditDir;
+		mode = Mode::EditDir;
 		lv_show(ui_SaveDialogLeftCont);
 
-		// subdir_panel.populate(group, patch_storage.get_patch_list());
 		subdir_panel.focus();
 
 		subdir_panel.focus_cb = [this](PatchDir *dir, lv_obj_t *target) {
@@ -102,36 +143,34 @@ struct SaveDialog {
 			hide_subdir_panel();
 		};
 
-		EntryInfo no_patch{.kind = {}, .vol = Volume::RamDisk, .name = patch_storage.get_view_patch_filename()};
-		subdir_panel.refresh(no_patch);
+		EntryInfo selected_patch{.kind = DirEntryKind::Dir, .vol = patch_storage.get_view_patch_vol(), .path = path};
+		subdir_panel.refresh(selected_patch);
 	}
 
 	void hide_subdir_panel() {
 		lv_hide(ui_SaveDialogLeftCont);
+		lv_group_activate(group);
+		mode = Mode::Idle;
 	}
 
 	bool is_visible() {
-		return state != State::Hidden;
+		return mode != Mode::Hidden;
 	}
 
 	void hide() {
-		if (state == State::Idle) {
+		if (mode == Mode::Idle) {
 			pr_dbg("hide(); idle->hidden\n");
 			lv_hide(ui_SaveDialogCont);
-			auto indev = lv_indev_get_next(nullptr);
-			if (indev && base_group)
-				lv_indev_set_group(indev, base_group);
-			state = State::Hidden;
+			lv_group_activate(base_group);
+			mode = Mode::Hidden;
 
-		} else if (state == State::EditDir) {
+		} else if (mode == Mode::EditDir) {
 			pr_dbg("hide(); editdir->idle\n");
 			hide_subdir_panel();
-			state = State::Idle;
 
-		} else if (state == State::EditName) {
+		} else if (mode == Mode::EditName) {
 			pr_dbg("hide(); editname->idle\n");
 			hide_keyboard();
-			state = State::Idle;
 		}
 	}
 
@@ -155,9 +194,21 @@ private:
 	PatchSelectorSubdirPanel subdir_panel;
 	std::vector<EntryInfo> subdir_panel_patches;
 
+	std::string path;
+	std::string filename;
+
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
-	enum class State { Hidden, Idle, EditDir, EditName } state = State::Hidden;
+	enum class Mode { Hidden, Idle, EditDir, EditName } mode = Mode::Hidden;
+
+	enum class RefreshState {
+		Idle,
+		TryingToRequestPatchList,
+		RequestedPatchList,
+		ReloadingPatchList
+	} refresh_state{RefreshState::TryingToRequestPatchList};
+
+	uint32_t last_refresh_check_tm = 0;
 };
 
 } // namespace MetaModule

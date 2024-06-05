@@ -267,6 +267,9 @@ struct PatchViewPage : PageBase {
 		} else {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
+
+		if (file_menu.is_visible())
+			file_menu.update();
 	}
 
 private:

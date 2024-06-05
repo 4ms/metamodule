@@ -75,6 +75,10 @@ struct PatchViewFileMenu {
 		return save_dialog.is_visible() || visible;
 	}
 
+	void update() {
+		save_dialog.update();
+	}
+
 private:
 	void show_save_dialog() {
 		save_dialog.prepare_focus(base_group);
