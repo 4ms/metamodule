@@ -93,8 +93,12 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_clear_state(ui_PatchListRoller, LV_STATE_DISABLED);
 		lv_group_focus_obj(ui_PatchListRoller);
 
-		if (group)
+		if (group) {
+			auto indev = lv_indev_get_next(nullptr);
+			if (indev && group)
+				lv_indev_set_group(indev, group);
 			lv_group_set_editing(group, true);
+		}
 
 		subdir_panel.blur();
 	}

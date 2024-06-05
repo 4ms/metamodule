@@ -14,15 +14,26 @@ namespace MetaModule
 {
 
 struct PatchSelectorSubdirPanel {
-	PatchSelectorSubdirPanel() = default;
+	PatchSelectorSubdirPanel()
+		: group{lv_group_create()} {
+	}
 
 	void set_parent(lv_obj_t *parent, unsigned zindex) {
 		lv_obj_set_parent(ui_DrivesPanel, parent);
 		lv_obj_move_to_index(ui_DrivesPanel, zindex);
+
+		for (auto vol_cont : vol_conts) {
+			auto vol_item = lv_obj_get_child(vol_cont, 0);
+			while (lv_obj_remove_event_cb(vol_item, nullptr)) {
+			}
+			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
+			lv_obj_add_event_cb(vol_item, subdir_focus_cb, LV_EVENT_FOCUSED, this);
+			lv_obj_add_event_cb(vol_item, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
+		}
 	}
 
 	void populate(lv_group_t *parent_group, PatchDirList &patchfiles) {
-		group = parent_group;
+		// group = parent_group;
 
 		// populate side bar with volumes and dirs
 		for (auto [vol_cont, root] : zip(vol_conts, patchfiles.vol_root)) {
@@ -30,6 +41,9 @@ struct PatchSelectorSubdirPanel {
 			// Delete existing dir labels (except first one, which is the volume root)
 			if (auto num_children = lv_obj_get_child_cnt(vol_cont); num_children > 1) {
 				for (unsigned i = 1; i < num_children; i++) {
+					if (last_subdir_sel == lv_obj_get_child(vol_cont, i)) {
+						last_subdir_sel = nullptr; //prevent dangling pointer
+					}
 					lv_obj_del_async(lv_obj_get_child(vol_cont, i));
 				}
 			}
@@ -47,10 +61,6 @@ struct PatchSelectorSubdirPanel {
 
 			// Add root-level dir on volume
 			auto vol_button = lv_obj_get_child(vol_cont, 0);
-			lv_obj_remove_event_cb(vol_item, nullptr); //remove all callbacks
-			lv_obj_add_event_cb(vol_item, subdir_focus_cb, LV_EVENT_FOCUSED, this);
-			lv_obj_add_event_cb(vol_item, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
-			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
 			lv_obj_set_user_data(vol_button, &root);
 			lv_group_add_obj(group, vol_button);
 
@@ -79,9 +89,11 @@ struct PatchSelectorSubdirPanel {
 				if (strcmp(txt, roller_path) == 0) {
 					if (last_subdir_sel) {
 						lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
+						lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUS_KEY);
 						lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
 						label_clips(last_subdir_sel);
 					}
+
 					last_subdir_sel = obj;
 					if (lv_obj_has_state(ui_DrivesPanel, LV_STATE_FOCUSED)) {
 						lv_obj_add_state(obj, LV_STATE_FOCUSED);
@@ -100,6 +112,10 @@ struct PatchSelectorSubdirPanel {
 	void focus() {
 		lv_obj_add_state(ui_DrivesPanel, LV_STATE_FOCUSED);
 
+		auto indev = lv_indev_get_next(nullptr);
+		if (indev && group)
+			lv_indev_set_group(indev, group);
+
 		if (last_subdir_sel) {
 			lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
 			lv_group_focus_obj(last_subdir_sel);
@@ -110,7 +126,9 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	void blur() {
+		lv_obj_clear_state(ui_DrivesPanel, LV_STATE_FOCUSED);
 		if (last_subdir_sel) {
+			lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
 			lv_obj_add_state(last_subdir_sel, LV_STATE_USER_2);
 		}
 	}
@@ -138,10 +156,10 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	static void subdir_click_cb(lv_event_t *event) {
-		auto panel = static_cast<PatchSelectorSubdirPanel *>(event->user_data);
-		if (panel) {
-			if (panel->click_cb) {
-				panel->click_cb();
+		auto page = static_cast<PatchSelectorSubdirPanel *>(event->user_data);
+		if (page) {
+			if (page->click_cb) {
+				page->click_cb();
 			}
 		}
 	}
@@ -170,6 +188,9 @@ private:
 
 		lv_obj_add_flag(btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_set_user_data(btn, &dir);
+
+		while (lv_obj_remove_event_cb(btn, nullptr)) {
+		}
 		lv_obj_add_event_cb(btn, subdir_focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(btn, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
 		lv_obj_add_event_cb(btn, subdir_click_cb, LV_EVENT_CLICKED, this);
