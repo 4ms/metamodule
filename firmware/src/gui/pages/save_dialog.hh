@@ -98,7 +98,7 @@ struct SaveDialog {
 			subdir_panel.set_parent(ui_SaveDialogLeftCont, 0);
 
 			lv_hide(ui_SaveDialogLeftCont);
-			lv_hide(ui_SaveAsKeyboard);
+			lv_hide(ui_Keyboard);
 
 			lv_group_activate(group);
 			lv_group_focus_obj(ui_SaveDialogFilename);
@@ -108,13 +108,49 @@ struct SaveDialog {
 		}
 	}
 
+	void hide() {
+		if (mode == Mode::Idle) {
+			pr_dbg("hide(); idle->hidden\n");
+			lv_hide(ui_SaveDialogCont);
+			lv_group_activate(base_group);
+			mode = Mode::Hidden;
+
+		} else if (mode == Mode::EditDir) {
+			pr_dbg("hide(); editdir->idle\n");
+			hide_subdir_panel();
+
+		} else if (mode == Mode::EditName) {
+			pr_dbg("hide(); editname->idle\n");
+			hide_keyboard();
+		}
+	}
+
 	void show_keyboard() {
 		mode = Mode::EditDir;
-		lv_show(ui_SaveAsKeyboard);
+
+		lv_obj_add_state(ui_SaveDialogFilename, LV_STATE_USER_1);
+
+		while (lv_obj_remove_event_cb(ui_Keyboard, nullptr))
+			;
+		lv_obj_add_event_cb(ui_Keyboard, lv_keyboard_def_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
+
+		lv_show(ui_Keyboard);
+		lv_group_add_obj(group, ui_Keyboard);
+		lv_group_focus_obj(ui_Keyboard);
+		lv_group_set_editing(group, true);
+		lv_obj_add_flag(ui_SaveAsKeyboard, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+
+		lv_obj_set_parent(ui_Keyboard, ui_SaveDialogCont);
+		lv_obj_set_y(ui_Keyboard, 128);
 	}
 
 	void hide_keyboard() {
-		lv_hide(ui_SaveAsKeyboard);
+		lv_obj_clear_state(ui_SaveDialogFilename, LV_STATE_USER_1);
+		lv_group_focus_obj(ui_SaveDialogFilename);
+		lv_group_remove_obj(ui_Keyboard);
+		lv_hide(ui_Keyboard);
 		mode = Mode::Idle;
 	}
 
@@ -149,23 +185,6 @@ struct SaveDialog {
 		return mode != Mode::Hidden;
 	}
 
-	void hide() {
-		if (mode == Mode::Idle) {
-			pr_dbg("hide(); idle->hidden\n");
-			lv_hide(ui_SaveDialogCont);
-			lv_group_activate(base_group);
-			mode = Mode::Hidden;
-
-		} else if (mode == Mode::EditDir) {
-			pr_dbg("hide(); editdir->idle\n");
-			hide_subdir_panel();
-
-		} else if (mode == Mode::EditName) {
-			pr_dbg("hide(); editname->idle\n");
-			hide_keyboard();
-		}
-	}
-
 	void update_dir_label() {
 		lv_textarea_set_text(ui_SaveDialogFilename, file_name.c_str());
 
@@ -179,7 +198,13 @@ private:
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<SaveDialog *>(event->user_data);
-		page->show_keyboard();
+
+		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
+		if (kb_hidden) {
+			page->show_keyboard();
+			lv_keyboard_set_textarea(ui_Keyboard, event->target);
+			lv_obj_scroll_to_view_recursive(event->target, LV_ANIM_ON);
+		}
 	}
 
 	static void click_location_cb(lv_event_t *event) {
@@ -202,6 +227,17 @@ private:
 			return;
 		auto page = static_cast<SaveDialog *>(event->user_data);
 		page->hide();
+	}
+
+	static void keyboard_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<SaveDialog *>(event->user_data);
+
+		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
+			page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+			page->hide_keyboard();
+		}
 	}
 
 	FileStorageProxy &patch_storage;
