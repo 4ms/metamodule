@@ -2,6 +2,7 @@
 #include "CoreModules/module_type_slug.hh"
 #include "fs/dir_tree.hh"
 #include "patch_file.hh"
+#include "util/zip.hh"
 #include <algorithm>
 #include <array>
 #include <utility>
@@ -30,6 +31,14 @@ struct PatchDirList {
 	std::array<PatchDir, 3> vol_root{};
 	static constexpr std::array<const char *, 3> vol_name = {"USB", "Card", "Internal"};
 	static constexpr std::array<Volume, 3> vols{Volume::USB, Volume::SDCard, Volume::NorFlash};
+
+	static std::string_view get_vol_name(Volume vol) {
+		for (auto [name, v] : zip(vol_name, vols)) {
+			if (vol == v)
+				return name;
+		}
+		return "";
+	}
 
 private:
 	static unsigned vol_idx(Volume vol) {
