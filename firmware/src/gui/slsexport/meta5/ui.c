@@ -145,6 +145,11 @@ lv_obj_t *ui_SaveDialogFilename;
 lv_obj_t *ui_SaveDialogDirLabel;
 lv_obj_t *ui_SaveDialogDir;
 lv_obj_t *ui_SaveAsKeyboard;
+lv_obj_t *ui_SaveDialogButtonCont;
+lv_obj_t *ui_SaveDialogCancelBut;
+lv_obj_t *ui_SaveDialogCancelButLabel;
+lv_obj_t *ui_SaveDialogSaveBut;
+lv_obj_t *ui_SaveDialogSaveButLabel;
 
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
