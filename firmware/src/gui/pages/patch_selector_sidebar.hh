@@ -14,9 +14,6 @@ namespace MetaModule
 {
 
 struct PatchSelectorSubdirPanel {
-	PatchSelectorSubdirPanel()
-		: group{lv_group_create()} {
-	}
 
 	void set_parent(lv_obj_t *parent, unsigned zindex) {
 		lv_obj_set_parent(ui_DrivesPanel, parent);
@@ -32,8 +29,9 @@ struct PatchSelectorSubdirPanel {
 		}
 	}
 
-	void populate(lv_group_t *parent_group, PatchDirList &patchfiles) {
-		// group = parent_group;
+	void populate(PatchDirList &patchfiles) {
+		if (group == nullptr)
+			group = lv_group_create();
 
 		// populate side bar with volumes and dirs
 		for (auto [vol_cont, root] : zip(vol_conts, patchfiles.vol_root)) {
@@ -79,7 +77,7 @@ struct PatchSelectorSubdirPanel {
 			if (vol != selected_patch.vol)
 				continue;
 
-			lv_foreach_child(vol_cont, [this, selected_patch, vol_name = vol_name](lv_obj_t *obj, unsigned i) {
+			lv_foreach_child(vol_cont, [selected_patch, vol_name = vol_name](lv_obj_t *obj, unsigned i) {
 				auto label_child = (i == 0) ? 1 : 0;
 				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
 				const char *roller_path = (i == 0) ? vol_name : selected_patch.path.c_str();
@@ -112,9 +110,7 @@ struct PatchSelectorSubdirPanel {
 	void focus() {
 		lv_obj_add_state(ui_DrivesPanel, LV_STATE_FOCUSED);
 
-		auto indev = lv_indev_get_next(nullptr);
-		if (indev && group)
-			lv_indev_set_group(indev, group);
+		lv_group_activate(group);
 
 		if (last_subdir_sel) {
 			lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
@@ -198,8 +194,8 @@ private:
 		lv_group_add_obj(group, btn);
 	}
 
-	lv_obj_t *last_subdir_sel = nullptr;
-	lv_group_t *group{};
+	static inline lv_obj_t *last_subdir_sel = nullptr;
+	static inline lv_group_t *group = nullptr;
 };
 
 } // namespace MetaModule

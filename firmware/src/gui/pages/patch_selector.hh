@@ -84,7 +84,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void refresh_patchlist(PatchDirList &patchfiles) {
-		subdir_panel.populate(group, patchfiles);
+		subdir_panel.populate(patchfiles);
 		populate_roller(patchfiles);
 	}
 
@@ -94,9 +94,7 @@ struct PatchSelectorPage : PageBase {
 		lv_group_focus_obj(ui_PatchListRoller);
 
 		if (group) {
-			auto indev = lv_indev_get_next(nullptr);
-			if (indev && group)
-				lv_indev_set_group(indev, group);
+			lv_group_activate(group);
 			lv_group_set_editing(group, true);
 		}
 
