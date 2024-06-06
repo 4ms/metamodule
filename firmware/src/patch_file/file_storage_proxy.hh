@@ -210,9 +210,14 @@ public:
 		view_patch_loc_.filename.copy(filepath);
 		view_patch_loc_.vol = vol;
 
+		if (open_patches_.remove(view_patch_loc_)) {
+			pr_err("Renamed patch to same name as an already open patch: %.*s\n", filepath.size(), filepath.data());
+			pr_err("Older patch is discarded without saving changes\n");
+		}
+
 		auto patch = open_patches_.overwrite(view_patch_loc_, {});
 		*patch = *view_patch_; //copy
-		view_patch_ = patch;
+		view_patch_ = patch;   //re-point
 	}
 
 	void update_view_patch_module_states(std::vector<ModuleInitState> const &states) {

@@ -164,7 +164,6 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	static void subdir_click_cb(lv_event_t *event) {
-		pr_dbg("Sidebar click\n");
 		auto page = static_cast<PatchSelectorSubdirPanel *>(event->user_data);
 
 		if (page && event->target && page->click_cb) {
@@ -183,7 +182,6 @@ struct PatchSelectorSubdirPanel {
 				dirname = std::string_view{dir->name};
 			}
 
-			pr_dbg("Sidebar click callback: %s\n", dirname.data());
 			page->click_cb(this_vol, dirname);
 		}
 	}
@@ -214,9 +212,7 @@ private:
 		lv_obj_set_user_data(btn, &dir);
 
 		while (lv_obj_remove_event_cb(btn, nullptr)) {
-			pr_dbg("Rm cb for btn %s\n", dir.name.c_str());
 		}
-		pr_dbg("Add cb for btn %s\n", dir.name.c_str());
 		lv_obj_add_event_cb(btn, subdir_focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(btn, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
 		lv_obj_add_event_cb(btn, subdir_click_cb, LV_EVENT_CLICKED, this);

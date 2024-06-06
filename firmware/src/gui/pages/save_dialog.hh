@@ -90,6 +90,7 @@ struct SaveDialog {
 				file_path = "";
 				file_name = std::string{fullpath};
 			}
+			strip_yml(file_name);
 
 			update_dir_label();
 
@@ -146,6 +147,9 @@ struct SaveDialog {
 
 	void hide_keyboard() {
 		mode = Mode::Idle;
+		file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+		strip_yml(file_name);
+		lv_textarea_set_text(ui_SaveDialogFilename, file_name.c_str());
 
 		lv_obj_clear_state(ui_SaveDialogFilename, LV_STATE_USER_1);
 		lv_group_focus_obj(ui_SaveDialogFilename);
@@ -186,9 +190,7 @@ struct SaveDialog {
 	}
 
 	void update_dir_label() {
-		if (!file_name.ends_with(".yml")) {
-			file_name.append(".yml");
-		}
+		strip_yml(file_name);
 		lv_textarea_set_text(ui_SaveDialogFilename, file_name.c_str());
 
 		auto displayed_path = std::string{PatchDirList::get_vol_name(file_vol)};
@@ -203,6 +205,12 @@ struct SaveDialog {
 	}
 
 private:
+	static void strip_yml(std::string &fname) {
+		if (fname.ends_with(".yml")) {
+			fname = fname.substr(0, fname.length() - 4);
+		}
+	}
+
 	static void click_filename_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -229,11 +237,11 @@ private:
 		auto page = static_cast<SaveDialog *>(event->user_data);
 
 		page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
-		if (!page->file_name.ends_with(".yml")) {
-			page->file_name.append(".yml");
-		}
 
 		std::string fullpath = page->file_path + "/" + page->file_name;
+		if (!fullpath.ends_with(".yml")) {
+			fullpath.append(".yml");
+		}
 		page->patch_storage.duplicate_view_patch(fullpath, page->file_vol);
 		page->patch_playloader.request_save_patch();
 		page->saved = true;
@@ -253,11 +261,6 @@ private:
 		auto page = static_cast<SaveDialog *>(event->user_data);
 
 		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
-			page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
-			if (!page->file_name.ends_with(".yml")) {
-				page->file_name.append(".yml");
-				lv_textarea_set_text(ui_SaveDialogFilename, page->file_name.c_str());
-			}
 			page->hide_keyboard();
 		}
 	}
