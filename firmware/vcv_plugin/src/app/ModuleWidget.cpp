@@ -1,4 +1,7 @@
+#include "CoreModules/elements/element_strings.hh"
 #include "CoreModules/elements/units.hh"
+#include "console/pr_dbg.hh"
+#include "metamodule/make_element.hh"
 #include "metamodule/svg.hh"
 #include "util/countzip.hh"
 #include <app/ModuleWidget.hpp>
@@ -34,7 +37,7 @@ ModuleWidget::~ModuleWidget() {
 		delete panel;
 }
 
-void ModuleWidget::place_at(std::vector<MetaModule::Element> &elements, int id, const MetaModule::Element &el) {
+static void place_at(std::vector<MetaModule::Element> &elements, int id, const MetaModule::Element &el) {
 	if (id < 0)
 		return;
 
@@ -43,6 +46,53 @@ void ModuleWidget::place_at(std::vector<MetaModule::Element> &elements, int id, 
 		elements.resize(id + 1);
 
 	elements[id] = el;
+}
+
+static std::string_view getParamName(engine::Module *module, int id) {
+	if (auto pq = module->getParamQuantity(id)) {
+		if (pq->name.size()) {
+			remove_extended_chars(pq->name);
+			return pq->name;
+		}
+	}
+	return "(Param)";
+}
+
+template<typename ParamT>
+void create_element(ParamT *widget) {
+	MetaModule::BaseElement b;
+	b.x_mm = widget->box.pos.x;
+	b.y_mm = widget->box.pos.y;
+	b.coords = MetaModule::Coords::TopLeft;
+	b.width_mm = widget->box.size.x;
+	b.height_mm = widget->box.size.y;
+	b.short_name = getParamName(widget->module, widget->paramId);
+	widget->element = MetaModule::make_element(widget, {b});
+}
+
+template<typename ParamT>
+void addParamImpl(ModuleWidget *mw, ParamT *paramWidget) {
+	if (!paramWidget) {
+		pr_err("Error: can't add a null ParamWidget\n");
+		return;
+	}
+	create_element(paramWidget);
+	place_at(mw->paramElements, paramWidget->paramId, paramWidget->element);
+	mw->owned_widgets.push_back(paramWidget);
+}
+
+void ModuleWidget::addParam(app::Knob *paramWidget) {
+	pr_dbg("Adding knob\n");
+	addParamImpl(this, paramWidget);
+}
+
+void ModuleWidget::addParam(app::SvgKnob *paramWidget) {
+	pr_dbg("Adding Svgknob\n");
+	addParamImpl(this, paramWidget);
+}
+
+void ModuleWidget::addParam(app::ParamWidget *paramWidget) {
+	pr_warn("ParamWidget skipped\n");
 }
 
 void ModuleWidget::addChild(Widget *w) {
@@ -57,37 +107,23 @@ void ModuleWidget::addChild(app::ModuleLightWidget *lightWidget) {
 	update_coords(lightWidget->box, lightWidget->element);
 	place_at(lightElements, lightWidget->firstLightId, lightWidget->element);
 
-	// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
 	owned_widgets.push_back(lightWidget);
-}
-
-void ModuleWidget::addParam(app::ParamWidget *paramWidget) {
-	if (!paramWidget) {
-		printf("Error: can't add a null ParamWidget\n");
-		return;
-	}
-	update_coords(paramWidget->box, paramWidget->element);
-	place_at(paramElements, paramWidget->paramId, paramWidget->element);
-
-	// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
-	owned_widgets.push_back(paramWidget);
 }
 
 void ModuleWidget::addInput(app::PortWidget *input) {
 	if (!input) {
-		printf("Error: can't add a null input PortWidget\n");
+		pr_err("Error: can't add a null input PortWidget\n");
 		return;
 	}
 	update_coords(input->box, input->element);
 	place_at(inputElements, input->portId, input->element);
 
-	// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
 	owned_widgets.push_back(input);
 }
 
 void ModuleWidget::addOutput(app::PortWidget *output) {
 	if (!output) {
-		printf("Error: can't add a null output PortWidget\n");
+		pr_err("Error: can't add a null output PortWidget\n");
 		return;
 	}
 	update_coords(output->box, output->element);
