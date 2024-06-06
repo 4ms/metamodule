@@ -17,7 +17,7 @@ struct PatchViewFileMenu {
 					  PatchSelectorSubdirPanel &subdir_panel)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
-		, save_dialog{patch_storage, subdir_panel}
+		, save_dialog{patch_storage, play_loader, subdir_panel}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);

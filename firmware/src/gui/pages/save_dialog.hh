@@ -11,8 +11,9 @@ namespace MetaModule
 
 struct SaveDialog {
 
-	SaveDialog(FileStorageProxy &patch_storage, PatchSelectorSubdirPanel &subdir_panel)
+	SaveDialog(FileStorageProxy &patch_storage, PatchPlayLoader &play_loader, PatchSelectorSubdirPanel &subdir_panel)
 		: patch_storage{patch_storage}
+		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
 		, group(lv_group_create()) {
 
@@ -225,6 +226,7 @@ private:
 		pr_dbg("SAVE %d:%s/%s\n", page->file_vol, page->file_path.c_str(), page->file_name.c_str());
 		std::string fullpath = page->file_path + "/" + page->file_name;
 		page->patch_storage.duplicate_view_patch(fullpath, page->file_vol);
+		page->patch_playloader.request_save_patch();
 		page->hide();
 	}
 
@@ -247,6 +249,7 @@ private:
 	}
 
 	FileStorageProxy &patch_storage;
+	PatchPlayLoader &patch_playloader;
 	PatchSelectorSubdirPanel &subdir_panel;
 
 	std::vector<EntryInfo> subdir_panel_patches;
