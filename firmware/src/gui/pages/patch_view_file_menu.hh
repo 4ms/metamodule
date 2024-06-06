@@ -81,6 +81,13 @@ struct PatchViewFileMenu {
 		save_dialog.update();
 	}
 
+	bool did_save() {
+		bool result = save_dialog.did_save();
+		result |= saved;
+		saved = false;
+		return result;
+	}
+
 private:
 	void show_save_dialog() {
 		save_dialog.prepare_focus(base_group);
@@ -113,6 +120,7 @@ private:
 			saveas_but_cb(event);
 		} else {
 			page->play_loader.request_save_patch();
+			page->saved = true;
 		}
 	}
 
@@ -130,6 +138,8 @@ private:
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
+
+	bool saved = false;
 };
 
 } // namespace MetaModule

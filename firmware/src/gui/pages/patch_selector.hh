@@ -210,7 +210,7 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::TryingToRequestPatchList:
-				if (patch_storage.request_patchlist()) {
+				if (patch_storage.request_patchlist(gui_state.force_refresh_vol)) {
 					state = State::RequestedPatchList;
 					show_spinner();
 				}
@@ -219,8 +219,10 @@ struct PatchSelectorPage : PageBase {
 			case State::RequestedPatchList: {
 				auto message = patch_storage.get_message().message_type;
 				if (message == FileStorageProxy::PatchListChanged) {
+					gui_state.force_refresh_vol = std::nullopt;
 					state = State::ReloadingPatchList;
 				} else if (message == FileStorageProxy::PatchListUnchanged) {
+					gui_state.force_refresh_vol = std::nullopt;
 					hide_spinner();
 					state = State::Idle;
 				}

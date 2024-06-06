@@ -197,6 +197,12 @@ struct SaveDialog {
 		lv_label_set_text(ui_SaveDialogDir, displayed_path.c_str());
 	}
 
+	bool did_save() {
+		bool t = saved;
+		saved = false;
+		return t;
+	}
+
 private:
 	static void click_filename_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
@@ -227,6 +233,7 @@ private:
 		std::string fullpath = page->file_path + "/" + page->file_name;
 		page->patch_storage.duplicate_view_patch(fullpath, page->file_vol);
 		page->patch_playloader.request_save_patch();
+		page->saved = true;
 		page->hide();
 	}
 
@@ -270,6 +277,8 @@ private:
 	} refresh_state{RefreshState::TryingToRequestPatchList};
 
 	uint32_t last_refresh_check_tm = 0;
+
+	bool saved = false;
 };
 
 } // namespace MetaModule

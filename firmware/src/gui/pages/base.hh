@@ -25,9 +25,11 @@ struct GuiState {
 		ElementType type;
 		bool has_connections;
 	};
-	std::optional<CableBeginning> new_cable;
+	std::optional<CableBeginning> new_cable{};
 
 	bool force_redraw_patch{};
+
+	std::optional<Volume> force_refresh_vol{};
 };
 
 struct PatchContext {

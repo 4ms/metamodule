@@ -256,7 +256,12 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (desc_panel.did_update_names()) {
+			gui_state.force_refresh_vol = patch_storage.get_view_patch_vol();
 			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
+		}
+
+		if (file_menu.did_save()) {
+			gui_state.force_refresh_vol = patch_storage.get_view_patch_vol();
 		}
 
 		if (is_patch_playing) {
