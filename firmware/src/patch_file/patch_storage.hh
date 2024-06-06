@@ -102,9 +102,18 @@ public:
 			auto *patch_dir_list_ = message.patch_dir_list;
 
 			if (patch_dir_list_) {
+				bool force_sd_refresh =
+					message.force_refresh && (message.vol_id == Volume::SDCard || message.vol_id == Volume::MaxVolumes);
+
+				bool force_usb_refresh =
+					message.force_refresh && (message.vol_id == Volume::USB || message.vol_id == Volume::MaxVolumes);
+
+				bool force_nor_refresh = message.force_refresh &&
+										 (message.vol_id == Volume::NorFlash || message.vol_id == Volume::MaxVolumes);
+
 				poll_media_change();
 
-				if (sd_changes_.take_change()) {
+				if (sd_changes_.take_change() || force_sd_refresh) {
 					patch_dir_list_->clear_patches(Volume::SDCard);
 
 					if (sdcard_.is_mounted())
@@ -113,7 +122,7 @@ public:
 					result.message_type = PatchListChanged;
 				}
 
-				if (usb_changes_.take_change()) {
+				if (usb_changes_.take_change() || force_usb_refresh) {
 					patch_dir_list_->clear_patches(Volume::USB);
 
 					if (usbdrive_.is_mounted())
@@ -122,7 +131,7 @@ public:
 					result.message_type = PatchListChanged;
 				}
 
-				if (norflash_changes_.take_change()) {
+				if (norflash_changes_.take_change() || force_nor_refresh) {
 					patch_dir_list_->clear_patches(Volume::NorFlash);
 
 					PatchFileIO::add_directory(norflash_, patch_dir_list_->volume_root(Volume::NorFlash));

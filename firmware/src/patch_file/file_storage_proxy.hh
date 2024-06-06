@@ -128,8 +128,12 @@ public:
 	//
 	// patchlist: list of all patches found on all volumes
 	//
-	[[nodiscard]] bool request_patchlist() {
+	[[nodiscard]] bool request_patchlist(std::optional<Volume> force_refresh_vol = std::nullopt) {
 		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList, .patch_dir_list = &patch_dir_list_};
+		if (force_refresh_vol.has_value()) {
+			message.force_refresh = true;
+			message.vol_id = force_refresh_vol.value();
+		}
 		return comm_.send_message(message);
 	}
 
