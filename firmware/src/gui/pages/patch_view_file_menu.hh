@@ -77,6 +77,10 @@ struct PatchViewFileMenu {
 			lv_obj_clear_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
 		}
 
+		// Not implemented yet!
+		lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
+		lv_obj_add_state(ui_PatchFileDeleteBut, LV_STATE_DISABLED);
+
 		if (!visible) {
 			DropInFromLeft_Animation(ui_PatchFileMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
