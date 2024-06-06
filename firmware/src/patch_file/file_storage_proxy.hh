@@ -125,6 +125,10 @@ public:
 		return PatchLocHash{view_patch_loc_};
 	}
 
+	void set_patch_filename(std::string_view filename) {
+		view_patch_loc_.filename.copy(filename);
+	}
+
 	//
 	// patchlist: list of all patches found on all volumes
 	//

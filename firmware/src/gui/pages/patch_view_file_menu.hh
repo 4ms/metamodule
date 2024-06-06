@@ -98,6 +98,12 @@ private:
 		save_dialog.show();
 	}
 
+	void copy_patchname_to_filename() {
+		std::string patchname = patch_storage.get_view_patch()->patch_name;
+		patchname.append(".yml");
+		patch_storage.set_patch_filename(patchname);
+	}
+
 	static void menu_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -128,6 +134,11 @@ private:
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+
+		// If the filename has not been set yet, set it to the patchname + .yml
+		if (std::string_view{page->patch_storage.get_view_patch_filename()}.starts_with("Untitled Patch ")) {
+			page->copy_patchname_to_filename();
+		}
 		page->show_save_dialog();
 	}
 
