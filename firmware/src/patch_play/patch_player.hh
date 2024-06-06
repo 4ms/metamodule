@@ -193,6 +193,7 @@ public:
 
 	std::vector<ModuleInitState> get_module_states() {
 		std::vector<ModuleInitState> states;
+		states.reserve(pd.module_slugs.size());
 
 		for (auto [i, module] : enumerate(modules)) {
 			if (i >= pd.module_slugs.size())

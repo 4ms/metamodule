@@ -19,8 +19,8 @@ struct PatchPlayLoader {
 	}
 
 	void load_initial_patch() {
-
 		uint32_t tries = 10000;
+
 		while (--tries) {
 			if (storage_.request_load_patch({"SlothDrone.yml", Volume::NorFlash}))
 				break;
@@ -65,9 +65,6 @@ struct PatchPlayLoader {
 		stopping_audio_ = false;
 	}
 
-	// loading_new_patch_:
-	// UI thread WRITE
-	// Audio thread READ
 	void request_load_view_patch() {
 		loading_new_patch_ = true;
 	}
@@ -79,8 +76,6 @@ struct PatchPlayLoader {
 		return starting_audio_;
 	}
 
-	// UI thread READ (KnobEditPage, ModuleViewPage)
-	// UI thread WRITE (via handle_sync_patch_loading() => _load_patch())
 	PatchLocHash cur_patch_loc_hash() {
 		return loaded_patch_loc_hash;
 	}
@@ -89,9 +84,6 @@ struct PatchPlayLoader {
 		return loaded_patch_name_;
 	}
 
-	// Audio thread WRITE
-	// Audio thread READ
-	// UI thread READ (via handle_sync_patch_loading())
 	void notify_audio_is_muted() {
 		stopping_audio_ = false;
 		audio_is_muted_ = true;
@@ -100,6 +92,7 @@ struct PatchPlayLoader {
 		starting_audio_ = false;
 		audio_is_muted_ = false;
 	}
+
 	bool is_audio_muted() {
 		return audio_is_muted_;
 	}
@@ -128,26 +121,6 @@ struct PatchPlayLoader {
 
 	void request_save_patch() {
 		should_save_patch_ = true;
-	}
-
-	Result save_patch() {
-		storage_.update_view_patch_module_states(player_.get_module_states());
-		if (storage_.write_patch()) {
-			should_save_patch_ = false;
-			saving_patch_ = true;
-			return {true, "Saving..."};
-		}
-		return {true, ""};
-	}
-
-	Result check_save_patch_status() {
-		auto msg = storage_.get_message();
-		if (msg.message_type == FileStorageProxy::PatchDataWriteFail)
-			return {false, "Failed to write patch."};
-		else if (msg.message_type == FileStorageProxy::PatchDataWriteOK)
-			return {true, "Saved"};
-		else
-			return {true, ""};
 	}
 
 	void load_module(std::string_view slug) {
@@ -187,6 +160,35 @@ private:
 
 	PatchLocHash loaded_patch_loc_hash;
 	ModuleTypeSlug loaded_patch_name_ = "";
+
+	Result save_patch() {
+		storage_.update_view_patch_module_states(player_.get_module_states());
+
+		if (storage_.write_patch()) {
+			should_save_patch_ = false;
+			saving_patch_ = true;
+			return {true, "Saving..."};
+		} else {
+			// message system is busy, try again next time
+			return {true, ""};
+		}
+	}
+
+	Result check_save_patch_status() {
+		auto msg = storage_.get_message();
+
+		if (msg.message_type == FileStorageProxy::PatchDataWriteFail) {
+			saving_patch_ = false;
+			return {false, "Failed to write patch."};
+
+		} else if (msg.message_type == FileStorageProxy::PatchDataWriteOK) {
+			saving_patch_ = false;
+			return {true, "Saved"};
+
+		} else {
+			return {true, ""};
+		}
+	}
 
 	Result _load_patch() {
 		auto patch = storage_.get_view_patch();
