@@ -64,6 +64,19 @@ struct PatchViewFileMenu {
 	}
 
 	void show() {
+		if (patch_storage.get_view_patch_vol() == Volume::RamDisk ||
+			patch_storage.get_view_patch_vol() == Volume::MaxVolumes)
+		{
+			// patch has not been saved yet:
+			lv_group_focus_obj(ui_PatchFileSaveBut);
+			lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
+			lv_obj_add_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
+		} else {
+			lv_group_focus_obj(ui_PatchFileSaveBut);
+			lv_obj_clear_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
+			lv_obj_clear_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
+		}
+
 		if (!visible) {
 			DropInFromLeft_Animation(ui_PatchFileMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
