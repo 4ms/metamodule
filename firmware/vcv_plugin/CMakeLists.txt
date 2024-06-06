@@ -18,6 +18,7 @@ target_link_libraries(vcv_plugin PUBLIC vcv_plugin_interface)
 target_sources(
   vcv_plugin
   PRIVATE 
+         src/app/Knob.cpp
          src/app/ModuleWidget.cpp
          src/app/ParamWidget.cc
          src/app/SvgKnob.cc
