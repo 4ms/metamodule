@@ -198,6 +198,17 @@ public:
 		view_patch_loc_.vol = Volume::RamDisk;
 	}
 
+	void duplicate_view_patch(std::string_view filepath, Volume vol) {
+		view_patch_loc_.filename.copy(filepath);
+		view_patch_loc_.vol = vol;
+
+		auto patch = open_patches_.overwrite(view_patch_loc_, {});
+		*patch = *view_patch_; //copy
+		view_patch_ = patch;
+
+		write_patch();
+	}
+
 	void update_view_patch_module_states(std::vector<ModuleInitState> const &states) {
 		view_patch_->module_states = states; //copy
 	}
