@@ -111,17 +111,14 @@ struct SaveDialog {
 
 	void hide() {
 		if (mode == Mode::Idle) {
-			pr_dbg("hide(); idle->hidden\n");
 			lv_hide(ui_SaveDialogCont);
 			lv_group_activate(base_group);
 			mode = Mode::Hidden;
 
 		} else if (mode == Mode::EditDir) {
-			pr_dbg("hide(); editdir->idle\n");
 			hide_subdir_panel();
 
 		} else if (mode == Mode::EditName) {
-			pr_dbg("hide(); editname->idle\n");
 			hide_keyboard();
 		}
 	}
@@ -166,7 +163,6 @@ struct SaveDialog {
 		subdir_panel.focus_cb = nullptr;
 
 		subdir_panel.click_cb = [this](Volume vol, std::string_view dir) {
-			pr_dbg("SaveDialog click %d: %s\n", vol, dir.data());
 			file_path = dir;
 			file_vol = vol;
 			update_dir_label();
@@ -190,6 +186,9 @@ struct SaveDialog {
 	}
 
 	void update_dir_label() {
+		if (!file_name.ends_with(".yml")) {
+			file_name.append(".yml");
+		}
 		lv_textarea_set_text(ui_SaveDialogFilename, file_name.c_str());
 
 		auto displayed_path = std::string{PatchDirList::get_vol_name(file_vol)};
@@ -229,7 +228,11 @@ private:
 			return;
 		auto page = static_cast<SaveDialog *>(event->user_data);
 
-		pr_dbg("SAVE %d:%s/%s\n", page->file_vol, page->file_path.c_str(), page->file_name.c_str());
+		page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+		if (!page->file_name.ends_with(".yml")) {
+			page->file_name.append(".yml");
+		}
+
 		std::string fullpath = page->file_path + "/" + page->file_name;
 		page->patch_storage.duplicate_view_patch(fullpath, page->file_vol);
 		page->patch_playloader.request_save_patch();
@@ -251,6 +254,10 @@ private:
 
 		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
 			page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
+			if (!page->file_name.ends_with(".yml")) {
+				page->file_name.append(".yml");
+				lv_textarea_set_text(ui_SaveDialogFilename, page->file_name.c_str());
+			}
 			page->hide_keyboard();
 		}
 	}
