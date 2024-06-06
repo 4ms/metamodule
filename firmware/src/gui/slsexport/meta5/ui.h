@@ -145,6 +145,8 @@ extern lv_obj_t *ui_SaveDialogCont;
 extern lv_obj_t *ui_SaveDialogLeftCont;
 extern lv_obj_t *ui_SaveDialogRightCont;
 extern lv_obj_t *ui_SaveDialogFileNameLabel;
+extern lv_obj_t *ui_SaveDialogFilenameCont;
+extern lv_obj_t *ui_SaveDialogFilenameDotyml;
 extern lv_obj_t *ui_SaveDialogFilename;
 extern lv_obj_t *ui_SaveDialogDirLabel;
 extern lv_obj_t *ui_SaveDialogDir;

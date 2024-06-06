@@ -1776,6 +1776,7 @@ ui_SaveDialogLeftCont = lv_obj_create(ui_SaveDialogCont);
 lv_obj_remove_style_all(ui_SaveDialogLeftCont);
 lv_obj_set_height( ui_SaveDialogLeftCont, lv_pct(100));
 lv_obj_set_flex_grow( ui_SaveDialogLeftCont, 1);
+lv_obj_add_flag( ui_SaveDialogLeftCont, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_SaveDialogLeftCont, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_SaveDialogLeftCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_SaveDialogLeftCont, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -1816,16 +1817,47 @@ lv_obj_set_style_pad_right(ui_SaveDialogFileNameLabel, 4, LV_PART_MAIN| LV_STATE
 lv_obj_set_style_pad_top(ui_SaveDialogFileNameLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_SaveDialogFileNameLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SaveDialogFilename = lv_textarea_create(ui_SaveDialogRightCont);
-lv_obj_set_width( ui_SaveDialogFilename, lv_pct(100));
+ui_SaveDialogFilenameCont = lv_obj_create(ui_SaveDialogRightCont);
+lv_obj_remove_style_all(ui_SaveDialogFilenameCont);
+lv_obj_set_width( ui_SaveDialogFilenameCont, lv_pct(100));
+lv_obj_set_height( ui_SaveDialogFilenameCont, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SaveDialogFilenameCont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_SaveDialogFilenameCont,LV_FLEX_FLOW_ROW_REVERSE);
+lv_obj_set_flex_align(ui_SaveDialogFilenameCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+lv_obj_add_flag( ui_SaveDialogFilenameCont, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
+lv_obj_clear_flag( ui_SaveDialogFilenameCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_pad_left(ui_SaveDialogFilenameCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SaveDialogFilenameCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SaveDialogFilenameCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SaveDialogFilenameCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_SaveDialogFilenameCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_SaveDialogFilenameCont, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SaveDialogFilenameDotyml = lv_label_create(ui_SaveDialogFilenameCont);
+lv_obj_set_width( ui_SaveDialogFilenameDotyml, 30);
+lv_obj_set_height( ui_SaveDialogFilenameDotyml, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SaveDialogFilenameDotyml, LV_ALIGN_CENTER );
+lv_label_set_text(ui_SaveDialogFilenameDotyml,".yml");
+lv_obj_set_style_radius(ui_SaveDialogFilenameDotyml, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_SaveDialogFilenameDotyml, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_SaveDialogFilenameDotyml, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_SaveDialogFilenameDotyml, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SaveDialogFilenameDotyml, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SaveDialogFilenameDotyml, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SaveDialogFilenameDotyml, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SaveDialogFilename = lv_textarea_create(ui_SaveDialogFilenameCont);
 lv_obj_set_height( ui_SaveDialogFilename, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_SaveDialogFilename, LV_ALIGN_CENTER );
+lv_obj_set_flex_grow( ui_SaveDialogFilename, 1);
+lv_obj_set_align( ui_SaveDialogFilename, LV_ALIGN_LEFT_MID );
 lv_textarea_set_max_length(ui_SaveDialogFilename,255);
-lv_textarea_set_text(ui_SaveDialogFilename,"EnOsc Example.yml");
+lv_textarea_set_text(ui_SaveDialogFilename,"EnOsc Example");
 lv_textarea_set_placeholder_text(ui_SaveDialogFilename,"Placeholder...");
 lv_textarea_set_one_line(ui_SaveDialogFilename,true);
+lv_obj_add_state( ui_SaveDialogFilename, LV_STATE_FOCUSED );     /// States
 lv_obj_add_flag( ui_SaveDialogFilename, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_SaveDialogFilename, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_text_align(ui_SaveDialogFilename, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_SaveDialogFilename, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_SaveDialogFilename, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_SaveDialogFilename, 255, LV_PART_MAIN| LV_STATE_DEFAULT);

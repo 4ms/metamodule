@@ -141,6 +141,8 @@ lv_obj_t *ui_SaveDialogCont;
 lv_obj_t *ui_SaveDialogLeftCont;
 lv_obj_t *ui_SaveDialogRightCont;
 lv_obj_t *ui_SaveDialogFileNameLabel;
+lv_obj_t *ui_SaveDialogFilenameCont;
+lv_obj_t *ui_SaveDialogFilenameDotyml;
 lv_obj_t *ui_SaveDialogFilename;
 lv_obj_t *ui_SaveDialogDirLabel;
 lv_obj_t *ui_SaveDialogDir;
