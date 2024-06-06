@@ -1824,7 +1824,7 @@ lv_textarea_set_max_length(ui_SaveDialogFilename,255);
 lv_textarea_set_text(ui_SaveDialogFilename,"EnOsc Example.yml");
 lv_textarea_set_placeholder_text(ui_SaveDialogFilename,"Placeholder...");
 lv_textarea_set_one_line(ui_SaveDialogFilename,true);
-lv_obj_clear_flag( ui_SaveDialogFilename, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_clear_flag( ui_SaveDialogFilename, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_SaveDialogFilename, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_SaveDialogFilename, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_SaveDialogFilename, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
