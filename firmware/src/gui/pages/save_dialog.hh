@@ -141,7 +141,7 @@ struct SaveDialog {
 		lv_obj_add_flag(ui_Keyboard, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 		lv_obj_set_parent(ui_Keyboard, ui_SaveDialogCont);
-		lv_obj_set_y(ui_Keyboard, 128);
+		lv_obj_set_y(ui_Keyboard, 108);
 	}
 
 	void hide_keyboard() {
