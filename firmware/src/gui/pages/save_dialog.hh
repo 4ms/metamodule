@@ -18,8 +18,8 @@ struct SaveDialog {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
 		lv_group_add_obj(group, ui_SaveDialogDir);
-		lv_group_add_obj(group, ui_SaveDialogSaveBut);
 		lv_group_add_obj(group, ui_SaveDialogCancelBut);
+		lv_group_add_obj(group, ui_SaveDialogSaveBut);
 
 		lv_obj_add_event_cb(ui_SaveDialogFilename, click_filename_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SaveDialogDir, click_location_cb, LV_EVENT_CLICKED, this);
@@ -68,8 +68,8 @@ struct SaveDialog {
 
 				case RefreshState::ReloadingPatchList:
 					subdir_panel.populate(patch_storage.get_patch_list());
-					// subdir_panel.refresh({});
 					// hide_spinner();
+					subdir_panel.focus();
 					refresh_state = RefreshState::Idle;
 					break;
 			}
@@ -126,7 +126,7 @@ struct SaveDialog {
 	}
 
 	void show_keyboard() {
-		mode = Mode::EditDir;
+		mode = Mode::EditName;
 
 		lv_obj_add_state(ui_SaveDialogFilename, LV_STATE_USER_1);
 
@@ -140,22 +140,24 @@ struct SaveDialog {
 		lv_group_add_obj(group, ui_Keyboard);
 		lv_group_focus_obj(ui_Keyboard);
 		lv_group_set_editing(group, true);
-		lv_obj_add_flag(ui_SaveAsKeyboard, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
+		lv_obj_add_flag(ui_Keyboard, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 
 		lv_obj_set_parent(ui_Keyboard, ui_SaveDialogCont);
 		lv_obj_set_y(ui_Keyboard, 128);
 	}
 
 	void hide_keyboard() {
+		mode = Mode::Idle;
+
 		lv_obj_clear_state(ui_SaveDialogFilename, LV_STATE_USER_1);
 		lv_group_focus_obj(ui_SaveDialogFilename);
 		lv_group_remove_obj(ui_Keyboard);
 		lv_hide(ui_Keyboard);
-		mode = Mode::Idle;
 	}
 
 	void show_subdir_panel() {
 		mode = Mode::EditDir;
+
 		lv_show(ui_SaveDialogLeftCont);
 
 		subdir_panel.focus();
@@ -176,9 +178,10 @@ struct SaveDialog {
 	}
 
 	void hide_subdir_panel() {
+		mode = Mode::Idle;
+
 		lv_hide(ui_SaveDialogLeftCont);
 		lv_group_activate(group);
-		mode = Mode::Idle;
 	}
 
 	bool is_visible() {
@@ -220,6 +223,9 @@ private:
 		auto page = static_cast<SaveDialog *>(event->user_data);
 
 		pr_dbg("SAVE %d:%s/%s\n", page->file_vol, page->file_path.c_str(), page->file_name.c_str());
+		std::string fullpath = page->file_path + "/" + page->file_name;
+		page->patch_storage.duplicate_view_patch(fullpath, page->file_vol);
+		page->hide();
 	}
 
 	static void cancel_cb(lv_event_t *event) {
