@@ -63,7 +63,6 @@ struct PatchSelectorPage : PageBase {
 			}
 		};
 		subdir_panel.click_cb = [this](Volume vol, std::string_view dir) {
-			pr_dbg("PatchSelectorPage click %d: %s\n", vol, dir.data());
 			blur_subdir_panel();
 		};
 
@@ -225,7 +224,6 @@ struct PatchSelectorPage : PageBase {
 					hide_spinner();
 					state = State::Idle;
 				}
-				//else other messages ==> error? repeat request? idle?
 			} break;
 
 			case State::ReloadingPatchList:

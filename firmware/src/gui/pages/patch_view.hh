@@ -175,8 +175,11 @@ struct PatchViewPage : PageBase {
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
 		settings_menu.prepare_focus(group);
-		desc_panel.prepare_focus(group, *patch);
 		file_menu.prepare_focus(group);
+
+		patch = patch_storage.get_view_patch();
+		desc_panel.set_patch(patch);
+		desc_panel.prepare_focus(group);
 	}
 
 	void redraw_map_rings() {
@@ -208,7 +211,10 @@ struct PatchViewPage : PageBase {
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
 
-		patch = patch_storage.get_view_patch();
+		if (patch != patch_storage.get_view_patch()) {
+			patch = patch_storage.get_view_patch();
+			desc_panel.set_patch(patch);
+		}
 
 		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
 
