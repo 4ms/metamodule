@@ -144,7 +144,6 @@ lv_obj_t *ui_SaveDialogFileNameLabel;
 lv_obj_t *ui_SaveDialogFilename;
 lv_obj_t *ui_SaveDialogDirLabel;
 lv_obj_t *ui_SaveDialogDir;
-lv_obj_t *ui_SaveAsKeyboard;
 lv_obj_t *ui_SaveDialogButtonCont;
 lv_obj_t *ui_SaveDialogCancelBut;
 lv_obj_t *ui_SaveDialogCancelButLabel;
