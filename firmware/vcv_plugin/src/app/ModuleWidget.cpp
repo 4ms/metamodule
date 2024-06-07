@@ -99,6 +99,13 @@ void ModuleWidget::addLightSwitch(app::SvgSwitch *widget, app::ModuleLightWidget
 	addChild(light);
 }
 
+void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget *light) {
+	addParam(widget);
+	light->box = widget->box;
+	// light->parent = nullptr;
+	addChild(light);
+}
+
 void ModuleWidget::addChild(SvgPanel *child) {
 	setPanel(child);
 }
