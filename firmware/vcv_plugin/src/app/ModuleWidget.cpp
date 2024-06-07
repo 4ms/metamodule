@@ -93,6 +93,12 @@ void ModuleWidget::addOutput(app::SvgPort *widget) {
 	MetaModule::addOutputImpl(this, widget);
 }
 
+void ModuleWidget::addLightSwitch(app::SvgSwitch *widget, app::ModuleLightWidget *light) {
+	addParam(widget);
+	light->box = widget->box;
+	addChild(light);
+}
+
 void ModuleWidget::addChild(SvgPanel *child) {
 	setPanel(child);
 }
