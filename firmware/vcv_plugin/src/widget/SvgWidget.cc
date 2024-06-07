@@ -22,8 +22,8 @@ void SvgWidget::setSvg(std::shared_ptr<window::Svg> svg) {
 	{
 		this->svg = svg;
 		this->box.size = get_svg_size(svg->filename);
-		pr_dbg(
-			"SvgWidget(%p)::setSvg(%s) set box.size to %f x %f\n", this, svg->filename.c_str(), box.size.x, box.size.y);
+		// pr_dbg(
+		// 	"SvgWidget(%p)::setSvg(%s) set box.size to %f x %f\n", this, svg->filename.c_str(), box.size.x, box.size.y);
 	}
 }
 

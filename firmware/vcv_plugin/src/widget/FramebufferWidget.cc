@@ -3,9 +3,9 @@
 namespace rack::widget
 {
 
-void FramebufferWidget::addChildBelow(SvgWidget *child, Widget *sibling) {
-	Widget::addChildBelow(child, sibling);
-}
+// void FramebufferWidget::addChildBelow(SvgWidget *child, Widget *sibling) {
+// 	Widget::addChildBelow(child, sibling);
+// }
 
 FramebufferWidget::~FramebufferWidget() = default;
 

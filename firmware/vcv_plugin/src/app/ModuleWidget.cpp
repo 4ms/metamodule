@@ -36,10 +36,10 @@ void ModuleWidget::setPanel(std::shared_ptr<window::Svg> svg) {
 }
 
 ModuleWidget::~ModuleWidget() {
-	printf("~MW() this=%p\n", this);
+	// printf("~MW() this=%p\n", this);
 	for (auto w : owned_widgets) {
 		if (!w->parent) {
-			printf("~MW(): delete child %p\n", w);
+			// printf("~MW(): delete child %p\n", w);
 			delete w;
 		} else
 			pr_err("~MW(): Cannot delete owned widget with a parent\n");
@@ -73,7 +73,7 @@ void addParamImpl(ModuleWidget *mw, ParamT *widget) {
 	}
 	create_element<ParamT>(widget);
 	place_at(mw->paramElements, widget->paramId, widget->element);
-	pr_dbg("MW widget %p = %s\n", widget, MetaModule::base_element(widget->element).short_name.data());
+	pr_dbg("MW widget %s\n\n", MetaModule::base_element(widget->element).short_name.data());
 	mw->owned_widgets.push_back(widget);
 }
 
