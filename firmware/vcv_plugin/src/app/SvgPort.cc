@@ -4,12 +4,17 @@
 namespace rack::app
 {
 
-SvgPort::SvgPort() {
+SvgPort::SvgPort()
+	: fb(new widget::FramebufferWidget)
+	, shadow(new CircularShadow)
+	, sw(new widget::SvgWidget) {
 	addChild(fb);
 	fb->addChild(shadow);
+
 	// Avoid breakage if plugins fail to call setSvg()
 	// In that case, just disable the shadow.
 	shadow->box.size = math::Vec();
+
 	fb->addChild(sw);
 }
 
