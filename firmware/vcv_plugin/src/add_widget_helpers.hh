@@ -1,7 +1,7 @@
 #include "assign_element_fields.hh"
 #include "console/pr_dbg.hh"
+#include "make_element.hh"
 #include "make_element_names.hh"
-#include "metamodule/make_element.hh"
 #include <app/ModuleWidget.hpp>
 
 namespace MetaModule
