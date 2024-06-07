@@ -57,6 +57,18 @@ Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
 	pr_trace("make_element: SVG Knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
 	Knob::State_t defaultValue = getScaledDefaultValue(widget);
 
+	if (widget->fb->children.size() > 2) {
+		for (auto child : widget->fb->children) {
+			if (auto svgw = dynamic_cast<rack::widget::SvgWidget *>(child)) {
+				if (svgw->svg->filename.size() > 0) {
+					pr_trace("make_element(SvgKnob): found SvgWidget child of fb with an SVG %s\n",
+							 svgw->svg->filename.data());
+					return Knob{{{b, svgw->svg->filename}, defaultValue}};
+				}
+			}
+		}
+	}
+
 	if (widget->sw->svg->filename.size()) {
 		pr_trace("make_element(SvgKnob): use sw->svg %s\n", widget->sw->svg->filename.data());
 		return Knob{{{b, widget->sw->svg->filename}, defaultValue}};

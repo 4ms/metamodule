@@ -13,4 +13,16 @@ void SvgKnob::setSvg(std::shared_ptr<window::Svg> svg) {
 	pr_dbg("SvgKnob::setSvg(%s) set box.size to %f x %f\n", svg->filename.c_str(), box.size.x, box.size.y);
 }
 
+SvgKnob::SvgKnob()
+	: fb(new widget::FramebufferWidget)
+	, shadow(new CircularShadow)
+	, sw(new widget::SvgWidget)
+	, tw(new widget::TransformWidget) {
+	addChild(fb);
+	fb->addChild(shadow);
+	shadow->box.size = math::Vec();
+	fb->addChild(tw);
+	tw->addChild(sw);
+}
+
 } // namespace rack::app

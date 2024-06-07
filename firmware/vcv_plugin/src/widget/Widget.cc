@@ -28,7 +28,7 @@ void Widget::addChildBottom(Widget *child) {
 }
 
 void Widget::addChildBelow(Widget *child, Widget *sibling) {
-	if (!child || child->parent != this)
+	if (!child || child->parent != nullptr)
 		return;
 
 	auto it = std::find(children.begin(), children.end(), sibling);
@@ -43,7 +43,7 @@ void Widget::addChildBelow(Widget *child, Widget *sibling) {
 }
 
 void Widget::addChildAbove(Widget *child, Widget *sibling) {
-	if (!child || child->parent != this)
+	if (!child || child->parent != nullptr)
 		return;
 
 	auto it = std::find(children.begin(), children.end(), sibling);
