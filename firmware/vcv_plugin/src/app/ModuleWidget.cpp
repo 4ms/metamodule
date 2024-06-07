@@ -36,9 +36,13 @@ void ModuleWidget::setPanel(std::shared_ptr<window::Svg> svg) {
 }
 
 ModuleWidget::~ModuleWidget() {
+	printf("~MW() this=%p\n", this);
 	for (auto w : owned_widgets) {
-		if (w)
+		if (!w->parent) {
+			printf("~MW(): delete child %p\n", w);
 			delete w;
+		} else
+			pr_err("~MW(): Cannot delete owned widget with a parent\n");
 	}
 	if (panel)
 		delete panel;
@@ -57,79 +61,74 @@ static void place_at(std::vector<MetaModule::Element> &elements, int id, const M
 
 template<typename ParamT>
 void create_element(ParamT *widget) {
-	// MetaModule::BaseElement b;
-	// b.x_mm = widget->box.pos.x;
-	// b.y_mm = widget->box.pos.y;
-	// b.coords = MetaModule::Coords::TopLeft;
-	// b.width_mm = widget->box.size.x;
-	// b.height_mm = widget->box.size.y;
-	// b.short_name = getParamName(widget->module, widget->paramId);
 	widget->element = MetaModule::make_element(widget, {});
 	MetaModule::update_element(widget, getParamName(widget->module, widget->paramId));
 }
 
 template<typename ParamT>
-void addParamImpl(ModuleWidget *mw, ParamT *paramWidget) {
-	if (!paramWidget) {
+void addParamImpl(ModuleWidget *mw, ParamT *widget) {
+	if (!widget) {
 		pr_err("Error: can't add a null ParamWidget\n");
 		return;
 	}
-	create_element(paramWidget);
-	place_at(mw->paramElements, paramWidget->paramId, paramWidget->element);
-	mw->owned_widgets.push_back(paramWidget);
+	create_element<ParamT>(widget);
+	place_at(mw->paramElements, widget->paramId, widget->element);
+	pr_dbg("MW widget %p = %s\n", widget, MetaModule::base_element(widget->element).short_name.data());
+	mw->owned_widgets.push_back(widget);
 }
 
-void ModuleWidget::addParam(app::Knob *paramWidget) {
-	pr_dbg("Adding knob\n");
-	addParamImpl(this, paramWidget);
+void ModuleWidget::addParam(app::Knob *widget) {
+	pr_dbg("addParam(Knob)\n");
+	addParamImpl(this, widget);
 }
 
-void ModuleWidget::addParam(app::SvgKnob *paramWidget) {
-	auto box = paramWidget->box;
+void ModuleWidget::addParam(app::SvgKnob *widget) {
+	auto box = widget->box;
 	pr_dbg("addParam(Svgknob) at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
-	addParamImpl(this, paramWidget);
+	addParamImpl(this, widget);
 }
 
-void ModuleWidget::addParam(app::ParamWidget *paramWidget) {
-	pr_warn("ParamWidget skipped\n");
+void ModuleWidget::addParam(app::ParamWidget *widget) {
+	pr_warn("addParam(ParamWidget) unknown: skipped\n");
+	if (widget)
+		owned_widgets.push_back(widget);
 }
 
-void ModuleWidget::addChild(Widget *w) {
-	if (!w)
+void ModuleWidget::addChild(Widget *widget) {
+	if (widget)
+		owned_widgets.push_back(widget);
+}
+
+void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
+	if (!widget)
 		return;
-	delete w;
+	update_coords(widget->box, widget->element);
+	place_at(lightElements, widget->firstLightId, widget->element);
+
+	pr_dbg("MW light widget %p\n", widget);
+	owned_widgets.push_back(widget);
 }
 
-void ModuleWidget::addChild(app::ModuleLightWidget *lightWidget) {
-	if (!lightWidget)
-		return;
-	update_coords(lightWidget->box, lightWidget->element);
-	place_at(lightElements, lightWidget->firstLightId, lightWidget->element);
-
-	owned_widgets.push_back(lightWidget);
-}
-
-void ModuleWidget::addInput(app::PortWidget *input) {
-	if (!input) {
+void ModuleWidget::addInput(app::PortWidget *widget) {
+	if (!widget) {
 		pr_err("Error: can't add a null input PortWidget\n");
 		return;
 	}
-	update_coords(input->box, input->element);
-	place_at(inputElements, input->portId, input->element);
+	update_coords(widget->box, widget->element);
+	place_at(inputElements, widget->portId, widget->element);
 
-	owned_widgets.push_back(input);
+	owned_widgets.push_back(widget);
 }
 
-void ModuleWidget::addOutput(app::PortWidget *output) {
-	if (!output) {
+void ModuleWidget::addOutput(app::PortWidget *widget) {
+	if (!widget) {
 		pr_err("Error: can't add a null output PortWidget\n");
 		return;
 	}
-	update_coords(output->box, output->element);
-	place_at(outputElements, output->portId, output->element);
+	update_coords(widget->box, widget->element);
+	place_at(outputElements, widget->portId, widget->element);
 
-	// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
-	owned_widgets.push_back(output);
+	owned_widgets.push_back(widget);
 }
 
 void ModuleWidget::addChild(SvgPanel *child) {
