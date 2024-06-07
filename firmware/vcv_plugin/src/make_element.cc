@@ -57,16 +57,19 @@ Element make_element(rack::app::Knob *widget, BaseElement b) {
 // either have dedicated function refresh_widget_size() which scans all children,
 // or in SvgWidget::setSvg, set its parents size recursively (if not set)
 Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
-	pr_trace("SVG Knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+	pr_trace("make_element: SVG Knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
 
 	Knob::State_t defaultValue = getScaledDefaultValue(widget);
 
 	// SvgKnobs have a base SVG, and sometimes have a bg svg.
 	// If there is a bg svg, then use its name.
+
+	// If the framebuffer's SvgWidget was given an SVG, then use it:
 	if (widget->fb->_bg && widget->fb->_bg->svg && widget->fb->_bg->svg->filename.length()) {
-		// TODO: are there some cases when a widget sets its box differently than the bg box?
 		// if (widget->box.size.isFinite() && !widget->box.size.isZero())
 		widget->box.size = widget->fb->_bg->box.size;
+		pr_trace("make_element: SvgKnob::fb::_bg = %p\n", widget->fb->_bg);
+		pr_trace("make_element: Change widget box to match fb bg %f,%f\n", widget->box.size.x, widget->box.size.y);
 		return Knob{{{b, widget->fb->_bg->svg->filename}, defaultValue}};
 
 	} else if (widget->sw->svg->filename.size()) {

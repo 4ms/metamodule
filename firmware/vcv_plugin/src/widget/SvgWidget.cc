@@ -14,14 +14,16 @@ void SvgWidget::setSvg(std::shared_ptr<window::Svg> svg) {
 			pr_warn("Changing svg filename from %s to %s\n", this->svg->filename.c_str(), svg->filename.c_str());
 
 			this->svg->filename = svg->filename;
-			box.size = get_svg_size(svg->filename);
+			this->box.size = get_svg_size(svg->filename);
 		}
 	}
 
 	else if (svg->filename.size())
 	{
 		this->svg = svg;
-		box.size = get_svg_size(svg->filename);
+		this->box.size = get_svg_size(svg->filename);
+		pr_dbg(
+			"SvgWidget(%p)::setSvg(%s) set box.size to %f x %f\n", this, svg->filename.c_str(), box.size.x, box.size.y);
 	}
 }
 

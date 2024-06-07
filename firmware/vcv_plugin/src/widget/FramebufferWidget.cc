@@ -6,7 +6,7 @@ namespace rack::widget
 void FramebufferWidget::addChildBelow(SvgWidget *child, Widget *sibling) {
 	//we take ownership
 	_bg = child;
-	//TODO: set parent's size equal to _bg's size
+	printf("FramebufferWidget::_bg = %p\n", _bg);
 }
 
 FramebufferWidget::~FramebufferWidget() {
