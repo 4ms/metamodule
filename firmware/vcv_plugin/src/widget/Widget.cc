@@ -6,41 +6,93 @@ void Widget::requestDelete() {
 }
 
 void Widget::addChild(Widget *child) {
-	if (!child)
+	if (!child || child->parent != nullptr)
 		return;
-	// children.push_back(child);
-	// child->parent = this;
-	// if (box.size == math::Vec{}) {
-	// 	box.size = child->box.size;
-	// 	printf("Updating widget parent box size to child size %f %f\n", box.size.x, box.size.y);
-	// }
+
+	child->parent = this;
+	children.push_back(child);
+
+	AddEvent eAdd;
+	child->onAdd(eAdd);
 }
+
 void Widget::addChildBottom(Widget *child) {
-	addChild(child);
+	if (!child || child->parent != nullptr)
+		return;
+
+	child->parent = this;
+	children.push_front(child);
+
+	AddEvent eAdd;
+	child->onAdd(eAdd);
 }
+
 void Widget::addChildBelow(Widget *child, Widget *sibling) {
-	addChild(child);
+	if (!child || child->parent != this)
+		return;
+
+	auto it = std::find(children.begin(), children.end(), sibling);
+	if (it == children.end())
+		return;
+
+	child->parent = this;
+	children.insert(it, child);
+
+	AddEvent eAdd;
+	child->onAdd(eAdd);
 }
+
 void Widget::addChildAbove(Widget *child, Widget *sibling) {
-	addChild(child);
+	if (!child || child->parent != this)
+		return;
+
+	auto it = std::find(children.begin(), children.end(), sibling);
+	if (it == children.end())
+		return;
+
+	child->parent = this;
+	it++;
+	children.insert(it, child);
+
+	AddEvent eAdd;
+	child->onAdd(eAdd);
 }
+
 void Widget::removeChild(Widget *child) {
-	if (child) {
-		std::erase(children, child);
-		// child->parent = nullptr;
-	}
+	if (!child || child->parent != this)
+		return;
+
+	RemoveEvent eRemove;
+	child->onRemove(eRemove);
+
+	auto it = std::find(children.begin(), children.end(), child);
+	assert(it != children.end());
+	children.erase(it);
+
+	child->parent = nullptr;
 }
+
 void Widget::clearChildren() {
-	// for (Widget *child : children) {
-	// 	if (child)
-	// 		delete child;
-	// }
-	// children.clear();
+	// printf("clearChildren() %d children\n", children.size());
+	for (Widget *child : children) {
+		RemoveEvent eRemove;
+		child->onRemove(eRemove);
+
+		child->parent = nullptr;
+		// printf("Widget(%p)::clearChildren(): delete %p\n", this, child);
+		delete child;
+	}
+	children.clear();
 }
 
 Widget::~Widget() {
-	// clearChildren();
+	// printf("~Widget() this=%p, parent=%p\n", this, parent);
+	if (!parent) {
+		clearChildren();
+	} else
+		printf("Error: Deleting a widget with a parent\n");
 }
+
 math::Rect Widget::getChildrenBoundingBox() {
 	//TODO:
 	return {};
