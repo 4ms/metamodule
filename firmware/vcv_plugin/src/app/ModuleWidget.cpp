@@ -1,10 +1,17 @@
 #include "CoreModules/elements/element_strings.hh"
 #include "CoreModules/elements/units.hh"
 #include "console/pr_dbg.hh"
+#include "make_element_names.hh"
 #include "metamodule/make_element.hh"
 #include "metamodule/svg.hh"
 #include "util/countzip.hh"
 #include <app/ModuleWidget.hpp>
+
+namespace MetaModule
+{
+static void update_element(rack::widget::Widget *widget, std::string_view name);
+static void update_coords(rack::math::Rect const &box, MetaModule::Element &element);
+} // namespace MetaModule
 
 namespace rack::app
 {
@@ -48,26 +55,17 @@ static void place_at(std::vector<MetaModule::Element> &elements, int id, const M
 	elements[id] = el;
 }
 
-static std::string_view getParamName(engine::Module *module, int id) {
-	if (auto pq = module->getParamQuantity(id)) {
-		if (pq->name.size()) {
-			remove_extended_chars(pq->name);
-			return pq->name;
-		}
-	}
-	return "(Param)";
-}
-
 template<typename ParamT>
 void create_element(ParamT *widget) {
-	MetaModule::BaseElement b;
-	b.x_mm = widget->box.pos.x;
-	b.y_mm = widget->box.pos.y;
-	b.coords = MetaModule::Coords::TopLeft;
-	b.width_mm = widget->box.size.x;
-	b.height_mm = widget->box.size.y;
-	b.short_name = getParamName(widget->module, widget->paramId);
-	widget->element = MetaModule::make_element(widget, {b});
+	// MetaModule::BaseElement b;
+	// b.x_mm = widget->box.pos.x;
+	// b.y_mm = widget->box.pos.y;
+	// b.coords = MetaModule::Coords::TopLeft;
+	// b.width_mm = widget->box.size.x;
+	// b.height_mm = widget->box.size.y;
+	// b.short_name = getParamName(widget->module, widget->paramId);
+	widget->element = MetaModule::make_element(widget, {});
+	MetaModule::update_element(widget, getParamName(widget->module, widget->paramId));
 }
 
 template<typename ParamT>
@@ -87,7 +85,8 @@ void ModuleWidget::addParam(app::Knob *paramWidget) {
 }
 
 void ModuleWidget::addParam(app::SvgKnob *paramWidget) {
-	pr_dbg("Adding Svgknob\n");
+	auto box = paramWidget->box;
+	pr_dbg("addParam(Svgknob) at (%f, %f) size (%f, %f)\n", box.pos.x, box.pos.y, box.size.x, box.size.y);
 	addParamImpl(this, paramWidget);
 }
 
@@ -194,15 +193,34 @@ std::vector<PortWidget *> ModuleWidget::getInputs() {
 std::vector<PortWidget *> ModuleWidget::getOutputs() {
 	return {};
 }
+} // namespace rack::app
 
-void ModuleWidget::update_coords(math::Rect const &box, MetaModule::Element &element) {
+namespace MetaModule
+{
+
+void update_element(rack::widget::Widget *widget, std::string_view name) {
+	std::visit(
+		[&name, &widget](MetaModule::BaseElement &el) {
+			el.x_mm = MetaModule::to_mm(widget->box.pos.x);
+			el.y_mm = MetaModule::to_mm(widget->box.pos.y);
+			el.width_mm = MetaModule::to_mm(widget->box.size.x);
+			el.height_mm = MetaModule::to_mm(widget->box.size.y);
+			el.coords = MetaModule::Coords::TopLeft;
+			el.short_name = name;
+		},
+		widget->element);
+}
+
+void update_coords(rack::math::Rect const &box, MetaModule::Element &element) {
 	std::visit(
 		[box](MetaModule::BaseElement &el) {
 			el.x_mm = MetaModule::to_mm(box.pos.x);
 			el.y_mm = MetaModule::to_mm(box.pos.y);
+			el.width_mm = MetaModule::to_mm(box.size.x);
+			el.height_mm = MetaModule::to_mm(box.size.y);
 			el.coords = MetaModule::Coords::TopLeft;
 		},
 		element);
 }
 
-} // namespace rack::app
+} // namespace MetaModule
