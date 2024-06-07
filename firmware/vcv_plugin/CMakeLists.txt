@@ -22,6 +22,7 @@ target_sources(
          src/app/ModuleWidget.cpp
          src/app/ParamWidget.cc
          src/app/SvgKnob.cc
+         src/app/SvgPanel.cpp
          src/app/SvgPort.cc
          src/app/SvgSlider.cc
          src/app/SvgSwitch.cc
