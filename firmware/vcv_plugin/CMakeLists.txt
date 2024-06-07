@@ -50,6 +50,7 @@ target_sources(
          src/string.cpp
          src/svg.cc
          src/roundevenf.c
+         src/assign_element_fields.cc
 )
 
 add_subdirectory(jansson)

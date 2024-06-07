@@ -5,11 +5,10 @@
 namespace MetaModule
 {
 
-static Element make_latching_rgb(std::string_view image, BaseElement const &el, LatchingButton::State_t defaultValue);
-static Element
-make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &el, LatchingButton::State_t defaultValue);
-static Element make_momentary_rgb(std::string_view image, BaseElement const &el);
-static Element make_momentary_mono(std::string_view image, NVGcolor c, BaseElement const &el);
+static Element make_latching_rgb(std::string_view image, BaseElement const &, LatchingButton::State_t);
+static Element make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &, LatchingButton::State_t);
+static Element make_momentary_rgb(std::string_view image, BaseElement const &);
+static Element make_momentary_mono(std::string_view image, NVGcolor c, BaseElement const &);
 
 static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
 	if (!widget)
@@ -23,92 +22,148 @@ static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
 // Jacks
 //
 
-Element make_element_output(rack::app::SvgPort *widget, BaseElement b) {
-	pr_trace("Output Jack %d at %f, %f\n", widget->portId, widget->box.pos.x, widget->box.pos.y);
+Element make_element(rack::app::SvgPort *widget, BaseElement) {
+	pr_trace("make_element(Port %d) %d at %f %f\n", widget->type, widget->portId, widget->box.pos.x, widget->box.pos.y);
 
-	if (widget->sw->svg)
-		return JackOutput{b, widget->sw->svg->filename};
-	else
-		return JackOutput{b, ""};
+	if (widget->type == rack::engine::Port::Type::INPUT) {
+		JackInput element{};
+		if (widget->sw->svg)
+			element.image = widget->sw->svg->filename;
+		return element;
+
+	} else {
+		JackOutput element{};
+		if (widget->sw->svg)
+			element.image = widget->sw->svg->filename;
+		return element;
+	}
 }
 
-Element make_element_input(rack::app::SvgPort *widget, BaseElement b) {
-	pr_trace("Input Jack %d at %f, %f\n", widget->portId, widget->box.pos.x, widget->box.pos.y);
+Element make_element(rack::app::PortWidget *widget, BaseElement) {
+	pr_trace("make_element(Port %d) %d at %f %f\n", widget->type, widget->portId, widget->box.pos.x, widget->box.pos.y);
 
-	if (widget->sw->svg)
-		return JackInput{b, widget->sw->svg->filename};
-	else
-		return JackInput{b, ""};
+	if (widget->type == rack::engine::Port::Type::INPUT) {
+		return JackInput{};
+	} else {
+		return JackOutput{};
+	}
 }
 
 //
 // Pots/Sliders
 //
-Element make_element(rack::app::Knob *widget, BaseElement b) {
-	pr_trace("Knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+Element make_element(rack::app::Knob *widget, BaseElement) {
+	pr_trace("make_element(Knob) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
 
-	b.width_mm = to_mm(widget->box.size.x);
-	b.height_mm = to_mm(widget->box.size.y);
-	Knob::State_t defaultValue = getScaledDefaultValue(widget);
-	return Knob{{{b, ""}, defaultValue}};
+	Knob element{};
+	element.DefaultValue = getScaledDefaultValue(widget);
+	return element;
 }
 
 Element make_element(rack::app::SvgKnob *widget, BaseElement b) {
-	pr_trace("make_element: SVG Knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
-	Knob::State_t defaultValue = getScaledDefaultValue(widget);
+	pr_trace("make_element(SvgKnob) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
 
-	if (widget->fb->children.size() > 2) {
-		for (auto child : widget->fb->children) {
+	Knob element{};
+	element.DefaultValue = getScaledDefaultValue(widget);
+
+	// Hack to support BefacoTinyKnobs:
+	// The main SVG is just the dot, either BefacoTinyPointWhite or BefacoTinyPointBlack.
+	// The bg SVG has the knob color: red, white, lightGray, darkGray, or black.
+	// Therefore we can't ignore the bg SVG since it determines the knob color.
+	// The bg SVG is a child of the FramebufferWidget (fb), but it's not part of the SvgKnob class.
+	// In MM, we merged the Point (dot) and bg images and saved that in the bg PNG.
+	// The Point PNG is not drawn, but it must have the right size because that's used to center the jack.
+	// TODO: consider using a concept make_element like:
+	// requires derived_form<T, SvgKnob> && !same_as<T, SvgKnob> && requires(...){w->bg->svg->filename;}
+	auto find_inner_svg_widget = [](rack::widget::FramebufferWidget *fb) {
+		for (auto child : fb->children) {
 			if (auto svgw = dynamic_cast<rack::widget::SvgWidget *>(child)) {
-				if (svgw->svg->filename.size() > 0) {
-					pr_trace("make_element(SvgKnob): found SvgWidget child of fb with an SVG %s\n",
-							 svgw->svg->filename.data());
-					return Knob{{{b, svgw->svg->filename}, defaultValue}};
+				if (svgw->svg->filename.size() > 0 && !svgw->box.size.isZero() && svgw->box.size.isFinite()) {
+					return std::string_view{svgw->svg->filename};
 				}
 			}
 		}
-	}
+		return std::string_view{""};
+	};
 
-	if (widget->sw->svg->filename.size()) {
+	if (auto inner_img = find_inner_svg_widget(widget->fb); inner_img.size() > 0) {
+		pr_trace("make_element(SvgKnob): found SvgWidget child of fb with an SVG %s\n", inner_img.data());
+		element.image = inner_img;
+
+	} else if (widget->sw->svg->filename.size()) {
 		pr_trace("make_element(SvgKnob): use sw->svg %s\n", widget->sw->svg->filename.data());
-		return Knob{{{b, widget->sw->svg->filename}, defaultValue}};
+		element.image = widget->sw->svg->filename;
 
 	} else {
 		pr_trace("make_element(SvgKnob): use svg %s\n", widget->svg->filename.data());
-		return Knob{{{b, widget->svg->filename}, defaultValue}};
+		element.image = widget->svg->filename;
 	}
+
+	return element;
 }
 
 Element make_element(rack::app::SliderKnob *widget, BaseElement b) {
-	pr_trace("Slider Knob %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+	pr_trace("make_element(SliderKnob) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
 
-	b.width_mm = to_mm(widget->box.size.x);
-	b.height_mm = to_mm(widget->box.size.y);
-	Slider::State_t defaultValue = getScaledDefaultValue(widget);
-	return Slider{{{b, ""}, defaultValue}, ""};
+	Slider element{};
+	element.DefaultValue = getScaledDefaultValue(widget);
+	return element;
 }
 
-Element make_element_slideswitch(rack::app::SvgSlider *widget, BaseElement b) {
-	pr_trace("Svg Slider (switch) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+static Element make_slideswitch(rack::app::SvgSlider *widget) {
+	SlideSwitch element{};
 
-	//Note: num_pos and labels are filled in later
 	if (widget->background->svg->filename.length()) {
-		SlideSwitch::State_t defaultValue = getScaledDefaultValue(widget);
-		return SlideSwitch{{{b, widget->background->svg->filename}, 2, defaultValue}, widget->handle->svg->filename};
-	} else {
-		SlideSwitch::State_t defaultValue = 0;
-		return SlideSwitch{{{b, widget->svg->filename}, 2, defaultValue}, widget->handle->svg->filename};
+		element.image = widget->background->svg->filename;
+	} else if (widget->svg->filename.length()) {
+		element.image = widget->svg->filename;
 	}
+
+	element.DefaultValue = getScaledDefaultValue(widget);
+
+	if (widget->handle->svg->filename.length())
+		element.image_handle = widget->handle->svg->filename;
+
+	auto pq = widget->getParamQuantity();
+
+	element.num_pos = pq->maxValue - pq->minValue + 1;
+
+	if (element.num_pos < 2 || element.num_pos > element.pos_names.size()) {
+		pr_warn("Warning: SvgSlider (max - min + 1) is %d, but must be 2..8\n", element.num_pos);
+		element.num_pos = std::clamp<size_t>(element.num_pos, 2, element.pos_names.size());
+	}
+
+	for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
+		element.pos_names[i] = pq->labels[i];
+	}
+
+	// This seems to be the default for VCV?
+	if (widget->box.size.x < widget->box.size.y) //vertical
+		element.direction = SlideSwitch::Ascend::UpLeft;
+	else
+		element.direction = SlideSwitch::Ascend::DownRight;
+	return element;
 }
 
 Element make_element(rack::app::SvgSlider *widget, BaseElement b) {
-	pr_trace("Svg Slider %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
 
-	Slider::State_t defaultValue = getScaledDefaultValue(widget);
-	if (widget->background->svg->filename.length()) {
-		return Slider{{{b, widget->background->svg->filename}, defaultValue}, widget->handle->svg->filename};
-	} else {
-		return Slider{{{b, widget->svg->filename}, defaultValue}, widget->handle->svg->filename};
+	if (auto pq = widget->getParamQuantity(); pq && pq->snapEnabled) {
+		pr_trace(
+			"make_element(SvgSlider) switch %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+		return make_slideswitch(widget);
+	}
+
+	else
+	{
+		pr_trace(
+			"make_element(SvgSlider) slider %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
+		Slider::State_t defaultValue = getScaledDefaultValue(widget);
+		if (widget->background->svg->filename.length()) {
+			return Slider{{{b, widget->background->svg->filename}, defaultValue}, widget->handle->svg->filename};
+		} else {
+			return Slider{{{b, widget->svg->filename}, defaultValue}, widget->handle->svg->filename};
+		}
 	}
 }
 
@@ -145,40 +200,72 @@ Element make_element(rack::componentlibrary::Rogan *widget, BaseElement b) {
 // Switch/Button
 //
 
-Element make_element(rack::app::SvgSwitch *widget, BaseElement b) {
-	pr_trace("Svg Switch %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+MomentaryButton make_momentary(rack::app::SvgSwitch *widget) {
+	MomentaryButton element{};
 
-	FlipSwitch::State_t defaultValue = getScaledDefaultValue(widget);
+	if (widget->frames.size() > 0) {
+		element.image = widget->frames[0]->filename;
 
-	if (widget->frames.size() >= 3) {
-		if (widget->frames.size() > 3)
-			pr_warn("make_element(): SvgSwitch with > 3 frames, only using 3");
+		if (widget->frames.size() > 1)
+			element.pressed_image = widget->frames[1]->filename;
 
-		return FlipSwitch{
-			{{b}, 3, defaultValue},
-			{widget->frames[0]->filename, widget->frames[1]->filename, widget->frames[2]->filename},
-		};
-
-	} else if (widget->frames.size() == 2) {
-		if (widget->momentary) {
-			return MomentaryButton{{b, widget->frames[0]->filename}, widget->frames[1]->filename};
-		} else {
-			return FlipSwitch{
-				{{b}, 2, defaultValue},
-				{widget->frames[0]->filename, widget->frames[1]->filename},
-			};
-		}
-
-	} else if (widget->frames.size() == 1) {
-		return MomentaryButton{{b, widget->frames[0]->filename}};
+		if (widget->frames.size() > 2)
+			pr_info("Excess momentary button frames ignored\n");
 
 	} else {
-		pr_warn("make_element(): SvgSwitch with no frames\n");
-		b.width_mm = to_mm(widget->box.size.x);
-		b.height_mm = to_mm(widget->box.size.y);
-		return ParamElement{b};
+		pr_warn("Warning: SvgSwitch has no image frames\n");
+	}
+
+	return element;
+}
+
+FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
+	FlipSwitch element{};
+
+	if (auto pq = widget->getParamQuantity(); pq) {
+		// Set the number of positions based on the max/min values set in configSwitch or configParam
+		element.num_pos = pq->maxValue - pq->minValue + 1;
+
+		if (element.num_pos < 2 || element.num_pos > 3) {
+			pr_warn("Warning: SvgSwitch (max - min + 1) is %d, but must be 2 or 3\n", element.num_pos);
+			element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, 3);
+		}
+
+		for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
+			element.pos_names[i] = pq->labels[i];
+		}
+	} else {
+		// Gracefully handle an unconfigured param:
+		element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, 3);
+		pr_warn("Warning: SvgSwitch not configured with configParam or configSwitch\n");
+	}
+
+	for (unsigned i = 0; i < std::min<size_t>(element.num_pos, widget->frames.size()); i++) {
+		element.frames[i] = widget->frames[i]->filename;
+	}
+
+	element.DefaultValue = getScaledDefaultValue(widget);
+	return element;
+}
+
+Element make_element(rack::app::SvgSwitch *widget, BaseElement) {
+	pr_trace("make_element(SvgSwitch) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+
+	bool momentary = widget->momentary;
+	if (widget->frames.size() >= 3) {
+		// Handle custom widgets that are not really momentary, like Befaco StereoStrip Mute switch
+		momentary = false;
+	}
+
+	if (momentary) {
+		return make_momentary(widget);
+	} else {
+		return make_flipswitch(widget);
 	}
 }
+
+/////////////////////
+////////////////////
 
 Element make_momentary_rgb(std::string_view image, BaseElement const &el) {
 	return MomentaryButtonRGB{{{el, image}}};
@@ -300,12 +387,12 @@ Element make_multi_led_element(std::string_view image, rack::app::MultiLightWidg
 //
 
 Element make_element(rack::app::SvgScrew *widget, BaseElement) {
-	pr_trace("make Screw\n");
+	pr_trace("make_element(SvgScrew): skip\n");
 	return NullElement{};
 }
 
 Element make_element(rack::widget::Widget *widget, BaseElement) {
-	pr_dbg("Unknown widget at %f, %f\n", widget->getBox().pos.x, widget->getBox().pos.y);
+	pr_trace("Unknown widget at %f, %f: skip\n", widget->getBox().pos.x, widget->getBox().pos.y);
 	return NullElement{};
 }
 
@@ -316,15 +403,15 @@ Element make_element(rack::app::ParamWidget *widget, BaseElement b) {
 
 	} else {
 		pr_warn("ParamWidget (param id %d) without an SVG, using a blank ParamElement\n", widget->paramId);
-		b.width_mm = to_mm(widget->box.size.x);
-		b.height_mm = to_mm(widget->box.size.y);
+		// b.width_mm = to_mm(widget->box.size.x);
+		// b.height_mm = to_mm(widget->box.size.y);
 		return ParamElement{b, ""};
 	}
 }
 
 Element make_element(rack::widget::SvgWidget *widget, BaseElement b) {
 	if (widget->svg->filename.size()) {
-		pr_dbg("Unknown SvgWidget, using image as a ImageElement\n");
+		pr_trace("Unknown SvgWidget, using image as a ImageElement\n");
 		return ImageElement{b, widget->svg->filename};
 
 	} else {

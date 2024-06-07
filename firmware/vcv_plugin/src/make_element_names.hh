@@ -3,6 +3,17 @@
 #include "util/overloaded.hh"
 #include <engine/Module.hpp>
 
+namespace MetaModule
+{
+
+inline ImageElement image_element(MetaModule::Element const &el) {
+	return std::visit(overloaded{
+						  [](BaseElement const &) { return ImageElement{}; },
+						  [](ImageElement const &e) { return e; },
+					  },
+					  el);
+}
+
 inline std::string_view getParamName(rack::engine::Module *module, int id) {
 	if (auto pq = module->getParamQuantity(id)) {
 		if (pq->name.size()) {
@@ -69,3 +80,4 @@ inline void set_labels(rack::engine::ParamQuantity *pq, MetaModule::Element &ele
 				   element);
 	}
 }
+} // namespace MetaModule
