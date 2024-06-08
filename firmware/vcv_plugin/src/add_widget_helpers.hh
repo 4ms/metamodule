@@ -65,6 +65,18 @@ void addLightImpl(rack::app::ModuleWidget *mw, LightWidgetT *widget)
 		pr_err("Error: can't add a null Light\n");
 }
 
+inline void
+addLightSwitchImpl(rack::app::ModuleWidget *mw, rack::app::SvgSwitch *widget, rack::app::ModuleLightWidget *light) {
+	if (widget) {
+		widget->element = make_button_light(widget, light);
+		assign_element_fields(widget, getParamName(widget->module, widget->paramId));
+		place_at(mw->paramElements, widget->paramId, widget->element);
+		mw->Widget::addChild(widget);
+		pr_dbg("Add light button widget '%s' to MW\n\n", base_element(widget->element).short_name.data());
+	} else
+		pr_err("Error: can't add a null Light Button widget\n");
+}
+
 // Helpers
 
 inline void place_at(std::vector<Element> &elements, int id, const Element &el) {

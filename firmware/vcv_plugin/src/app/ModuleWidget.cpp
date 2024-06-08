@@ -94,9 +94,8 @@ void ModuleWidget::addOutput(app::SvgPort *widget) {
 }
 
 void ModuleWidget::addLightSwitch(app::SvgSwitch *widget, app::ModuleLightWidget *light) {
-	addParam(widget);
-	light->box = widget->box;
-	addChild(light);
+	log_widget("addLightSwitch()", widget);
+	MetaModule::addLightSwitchImpl(this, widget, light);
 }
 
 void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget *light) {

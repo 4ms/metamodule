@@ -34,12 +34,12 @@ Element make_element(rack::widget::Widget *widget, BaseElement);
 // Button with lights
 //
 
-Element make_button_light(rack::app::MultiLightWidget *, rack::app::SvgSwitch *, BaseElement const &);
+Element make_button_light(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *light);
 
-template<typename LightBaseT>
-Element make_element(rack::componentlibrary::VCVLightBezel<LightBaseT> *widget, BaseElement el) {
-	return make_button_light(widget->light, widget, el);
-}
+// template<typename LightBaseT>
+// Element make_element(rack::componentlibrary::VCVLightBezel<LightBaseT> *widget, BaseElement) {
+// 	return make_button_light(widget->light, widget);
+// }
 
 //
 // SVG Light

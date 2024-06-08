@@ -5,18 +5,7 @@
 namespace MetaModule
 {
 
-static Element make_latching_rgb(std::string_view image, BaseElement const &, LatchingButton::State_t);
-static Element make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &, LatchingButton::State_t);
-static Element make_momentary_rgb(std::string_view image, BaseElement const &);
-static Element make_momentary_mono(std::string_view image, NVGcolor c, BaseElement const &);
-
-static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
-	if (!widget)
-		return 0;
-	auto pq = widget->getParamQuantity();
-	float defaultValue = pq ? pq->toScaled(pq->getDefaultValue()) : 0.f;
-	return defaultValue;
-}
+static float getScaledDefaultValue(rack::app::ParamWidget *widget);
 
 //
 // Jacks
@@ -251,25 +240,39 @@ Element make_element(rack::app::SvgSwitch *widget, BaseElement) {
 /////////////////////
 ////////////////////
 
-Element make_momentary_rgb(std::string_view image, BaseElement const &el) {
-	return MomentaryButtonRGB{{{el, image}}};
+static Element make_momentary_rgb(std::string_view image) {
+	MomentaryButtonRGB element;
+	element.image = image;
+	pr_dbg("make_momentary_rgb()\n");
+	return element;
 }
 
-Element make_latching_rgb(std::string_view image, BaseElement const &el, LatchingButton::State_t defaultValue) {
+static Element make_latching_rgb(std::string_view image, LatchingButton::State_t defaultValue) {
 	pr_warn("Latching RGB button not supported yet. Using momentary\n");
-	return MomentaryButtonRGB{{{el, image}}};
+	MomentaryButtonRGB element;
+	element.image = image;
+	pr_dbg("make_latching_rgb()\n");
+	return element;
 }
 
-Element make_momentary_mono(std::string_view image, NVGcolor c, BaseElement const &el) {
-	return MomentaryButtonLight{{{el, image}}, RGB565{c.r, c.g, c.b}};
+static Element make_momentary_mono(std::string_view image, NVGcolor c) {
+	MomentaryButtonLight element;
+	element.image = image;
+	element.color = RGB565{c.r, c.g, c.b};
+	pr_dbg("make_momentary_mono()\n");
+	return element;
 }
 
-Element
-make_latching_mono(std::string_view image, NVGcolor c, BaseElement const &el, LatchingButton::State_t defaultValue) {
-	return LatchingButton{{{el, image}}, defaultValue, RGB565{c.r, c.g, c.b}};
+static Element make_latching_mono(std::string_view image, NVGcolor c, LatchingButton::State_t defaultValue) {
+	LatchingButton element;
+	element.image = image;
+	element.color = RGB565{c.r, c.g, c.b};
+	element.DefaultValue = defaultValue;
+	pr_dbg("make_latching_mono()\n");
+	return element;
 }
 
-Element make_button_light(rack::app::MultiLightWidget *light, rack::app::SvgSwitch *widget, BaseElement const &el) {
+Element make_button_light(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *light) {
 	pr_trace("make_button_light() %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
 
 	LatchingButton::State_t defaultValue =
@@ -278,19 +281,20 @@ Element make_button_light(rack::app::MultiLightWidget *light, rack::app::SvgSwit
 	if (light->getNumColors() == 1) {
 		auto c = light->baseColors[0];
 		if (widget->momentary)
-			return make_momentary_mono(widget->frames[0]->filename, c, el);
+			return make_momentary_mono(widget->frames[0]->filename, c);
 		else
-			return make_latching_mono(widget->frames[0]->filename, c, el, defaultValue);
+			return make_latching_mono(widget->frames[0]->filename, c, defaultValue);
 	}
 
 	if (light->getNumColors() == 3) {
 		if (widget->momentary)
-			return make_momentary_rgb(widget->frames[0]->filename, el);
+			return make_momentary_rgb(widget->frames[0]->filename);
 		else
-			return make_latching_rgb(widget->frames[0]->filename, el, defaultValue);
+			return make_latching_rgb(widget->frames[0]->filename, defaultValue);
 	}
 
-	pr_warn("make_element(): Unknown VCVLightBezel\n");
+	pr_warn("SvgSwitch with MultiLightWidget with %d colors: only 1 and 3 colors are supported.\n",
+			light->getNumColors());
 	return NullElement{};
 }
 
@@ -427,6 +431,14 @@ Element make_element(rack::app::ParamWidget *widget, BaseElement b) {
 		// b.height_mm = to_mm(widget->box.size.y);
 		return ParamElement{b, ""};
 	}
+}
+
+static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
+	if (!widget)
+		return 0;
+	auto pq = widget->getParamQuantity();
+	float defaultValue = pq ? pq->toScaled(pq->getDefaultValue()) : 0.f;
+	return defaultValue;
 }
 
 } // namespace MetaModule
