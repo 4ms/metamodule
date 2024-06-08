@@ -1,7 +1,9 @@
+#include "CoreModules/elements/element_counter.hh"
 #include "add_widget_helpers.hh"
 #include "console/pr_dbg.hh"
 #include "metamodule/svg.hh"
 #include "util/countzip.hh"
+#include "util/zip.hh"
 #include <app/ModuleWidget.hpp>
 
 static void log_widget(std::string_view preface, rack::widget::Widget const *widget);
@@ -134,24 +136,33 @@ void ModuleWidget::populate_elements(std::vector<MetaModule::Element> &elements,
 	elements.reserve(num_elems);
 	indices.reserve(num_elems);
 
-	elements.insert(elements.end(), paramElements.begin(), paramElements.end());
-	elements.insert(elements.end(), inputElements.begin(), inputElements.end());
-	elements.insert(elements.end(), outputElements.begin(), outputElements.end());
-	elements.insert(elements.end(), lightElements.begin(), lightElements.end());
+	// concat all elements that are not NullElement
+	// We might get a NullElement if there are elements that are both param and light. Example:
+	//    RGBButton1 - p:0 i:255 o:255 l:0   --> lives at paramElements[0]
+	//    RGBButton2 - p:1 i:255 o:255 l:3   --> lives at paramElements[1]
+	//    MonoLight1 - p:255 i:255 o:255 l:4 --> lives at lightElements[4]
+	// the call to place_at for the MonoLight will add lightElements[0..3] as NullElements
+	for (auto &el : paramElements) {
+		if (el.index() != 0)
+			elements.push_back(el);
+	}
+	for (auto &el : inputElements) {
+		if (el.index() != 0)
+			elements.push_back(el);
+	}
+	for (auto &el : outputElements) {
+		if (el.index() != 0)
+			elements.push_back(el);
+	}
+	for (auto &el : lightElements) {
+		if (el.index() != 0)
+			elements.push_back(el);
+	}
 
 	auto None = ElementCount::Indices::NoElementMarker;
+	indices.resize(elements.size(), {None, None, None, None});
 
-	for (auto [i, el] : enumerate(paramElements))
-		indices.push_back({.param_idx = (uint8_t)i, .light_idx = None, .input_idx = None, .output_idx = None});
-
-	for (auto [i, el] : enumerate(inputElements))
-		indices.push_back({.param_idx = None, .light_idx = None, .input_idx = (uint8_t)i, .output_idx = None});
-
-	for (auto [i, el] : enumerate(outputElements))
-		indices.push_back({.param_idx = None, .light_idx = None, .input_idx = None, .output_idx = (uint8_t)i});
-
-	for (auto [i, el] : enumerate(lightElements))
-		indices.push_back({.param_idx = None, .light_idx = (uint8_t)i, .input_idx = None, .output_idx = None});
+	ElementCount::get_indices(elements, indices);
 }
 
 std::vector<ParamWidget *> ModuleWidget::getParams() {
