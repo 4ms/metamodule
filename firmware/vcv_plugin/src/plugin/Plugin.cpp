@@ -1,4 +1,5 @@
 #include "console/pr_dbg.hh"
+#include "module_widget_adaptor.hh"
 #include "shared/CoreModules/AudibleInstruments/info/Rings_info.hh"
 #include "shared/CoreModules/moduleFactory.hh"
 #include <app/ModuleWidget.hpp>
@@ -40,7 +41,7 @@ void Plugin::addModel(Model *model) {
 	auto module = model->createModule();
 	auto modulewidget = model->createModuleWidget(module);
 
-	modulewidget->populate_elements(model->elements, model->indices);
+	modulewidget->adaptor->populate_elements_indices(model->elements, model->indices);
 	model->move_strings();
 
 	std::string panelsvg;
