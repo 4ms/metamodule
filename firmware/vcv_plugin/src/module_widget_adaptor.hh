@@ -96,7 +96,7 @@ struct ModuleWidgetAdaptor {
 	}
 
 	template<typename ParamWidgetT>
-	inline void addLightSwitch(ParamWidgetT *widget, rack::app::ModuleLightWidget *light) {
+	inline void addLightParam(ParamWidgetT *widget, rack::app::ModuleLightWidget *light) {
 		if (widget) {
 			widget->element = make_element(widget, light);
 			assign_element_fields(widget, getParamName(widget->module, widget->paramId));

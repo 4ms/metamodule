@@ -167,7 +167,8 @@ Element make_element(rack::app::SvgSlider *widget, rack::app::MultiLightWidget *
 	SliderLight element;
 	element.DefaultValue = getScaledDefaultValue(widget);
 	element.image_handle = widget->handle->svg->filename;
-	element.color = RGB565{light->color.r, light->color.g, light->color.b};
+	auto color = light->baseColors.size() ? light->baseColors[0] : light->color;
+	element.color = RGB565{color.r, color.g, color.b};
 
 	if (widget->background->svg->filename.length()) {
 		element.image = widget->background->svg->filename;

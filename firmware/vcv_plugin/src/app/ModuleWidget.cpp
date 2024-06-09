@@ -111,14 +111,14 @@ void ModuleWidget::addOutput(app::SvgPort *widget) {
 
 void ModuleWidget::addLightSwitch(app::SvgSwitch *widget, app::ModuleLightWidget *light) {
 	log_widget("addLightSwitch()", widget);
-	adaptor->addLightSwitch(widget, light);
+	adaptor->addLightParam(widget, light);
 	Widget::addChild(widget);
 }
 
 void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget *light) {
-	addParam(widget);
-	light->box = widget->box;
-	addChild(light);
+	log_widget("addLightSwitch()", widget);
+	adaptor->addLightParam(widget, light);
+	Widget::addChild(light);
 }
 
 void ModuleWidget::addChild(SvgPanel *child) {
