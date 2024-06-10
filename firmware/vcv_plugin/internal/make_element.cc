@@ -1,4 +1,5 @@
 #include "make_element.hh"
+#include "CoreModules/elements/base_element.hh"
 #include "CoreModules/elements/units.hh"
 #include "console/pr_dbg.hh"
 
@@ -9,7 +10,13 @@ static inline constexpr bool LogWidgetTypeIds = false;
 
 static void log_make_element(std::string_view type, unsigned id) {
 	if constexpr (LogWidgetTypeIds) {
-		pr_trace("make_element(%s) idx=%d\n", type.data(), id);
+		pr_dbg("make_element(%s) idx=%d\n", type.data(), id);
+	}
+}
+
+static void log_make_element_notes(std::string_view note1, std::string_view note2) {
+	if constexpr (LogWidgetTypeIds) {
+		pr_dbg("%s %s\n", note1.data(), note2.data());
 	}
 }
 
@@ -63,7 +70,6 @@ Element make_element(rack::componentlibrary::Rogan *widget) {
 	element.DefaultValue = getScaledDefaultValue(widget);
 
 	if (widget->sw->svg->filename.size()) {
-		pr_trace("make_element(Rogan): %s\n", widget->sw->svg->filename.data());
 		element.image = widget->sw->svg->filename;
 
 	} else {
@@ -105,15 +111,15 @@ Element make_element(rack::app::SvgKnob *widget) {
 	};
 
 	if (auto inner_img = find_inner_svg_widget(widget->fb); inner_img.size() > 0) {
-		pr_trace("...found SvgWidget child of fb with an SVG %s\n", inner_img.data());
+		log_make_element_notes("...found SvgWidget child of fb with an SVG %s\n", inner_img.data());
 		element.image = inner_img;
 
 	} else if (widget->sw->svg->filename.size()) {
-		pr_trace("...use sw->svg %s\n", widget->sw->svg->filename.data());
+		log_make_element_notes("...use sw->svg %s\n", widget->sw->svg->filename.data());
 		element.image = widget->sw->svg->filename;
 
 	} else {
-		pr_trace("...use svg %s\n", widget->svg->filename.data());
+		log_make_element_notes("...use svg %s\n", widget->svg->filename.data());
 		element.image = widget->svg->filename;
 	}
 
@@ -233,6 +239,34 @@ static MomentaryButton make_momentary(rack::app::SvgSwitch *widget) {
 	return element;
 }
 
+static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
+	SlideSwitch element{};
+
+	if (auto pq = widget->getParamQuantity(); pq) {
+		// Set the number of positions based on the max/min values set in configSwitch or configParam
+		element.num_pos = pq->maxValue - pq->minValue + 1;
+
+		if (element.num_pos < 2 || element.num_pos > 8) {
+			pr_warn("Warning: SvgSwitch as SlideSwitch (max - min + 1) is %d, but must be 2 - 8\n", element.num_pos);
+			element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, 8);
+		}
+
+		for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
+			element.pos_names[i] = pq->labels[i];
+		}
+
+	} else {
+		// Gracefully handle an unconfigured param:
+		element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, 8);
+		pr_warn("Warning: SvgSwitch as SlideSwitch not configured with configParam or configSwitch\n");
+	}
+
+	element.image_handle = "no-image";
+	element.image = widget->frames[0]->filename;
+	element.DefaultValue = getScaledDefaultValue(widget);
+	return element;
+}
+
 static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 	FlipSwitch element{};
 
@@ -274,6 +308,11 @@ Element make_element(rack::app::SvgSwitch *widget) {
 	if (momentary) {
 		return make_momentary(widget);
 	} else {
+		if (auto pq = widget->getParamQuantity(); pq) {
+			auto num_pos = pq->maxValue - pq->minValue + 1;
+			if (num_pos > 3)
+				return make_slideswitch(widget);
+		}
 		return make_flipswitch(widget);
 	}
 }

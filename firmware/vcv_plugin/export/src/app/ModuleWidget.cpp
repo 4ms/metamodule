@@ -6,7 +6,7 @@
 #include "util/zip.hh"
 #include <app/ModuleWidget.hpp>
 
-static constexpr inline bool LogWidgetPlacements = true;
+static constexpr inline bool LogWidgetPlacements = false;
 
 static void log_widget(std::string_view preface, rack::widget::Widget const *widget);
 
