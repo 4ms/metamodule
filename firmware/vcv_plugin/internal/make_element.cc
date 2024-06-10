@@ -6,7 +6,7 @@
 namespace MetaModule
 {
 
-static inline constexpr bool LogWidgetTypeIds = true;
+static inline constexpr bool LogWidgetTypeIds = false;
 
 static void log_make_element(std::string_view type, unsigned id) {
 	if constexpr (LogWidgetTypeIds) {
@@ -324,7 +324,7 @@ Element make_element(rack::app::SvgSwitch *widget) {
 static Element make_momentary_rgb(std::string_view image) {
 	MomentaryButtonRGB element;
 	element.image = image;
-	pr_dbg("make_momentary_rgb()\n");
+	log_make_element_notes("make_momentary_rgb()", "");
 	return element;
 }
 
@@ -332,7 +332,7 @@ static Element make_latching_rgb(std::string_view image, LatchingButton::State_t
 	pr_warn("Latching RGB button not supported yet. Using momentary\n");
 	MomentaryButtonRGB element;
 	element.image = image;
-	pr_dbg("make_latching_rgb()\n");
+	log_make_element_notes("make_latching_rgb()", "");
 	return element;
 }
 
@@ -340,7 +340,7 @@ static Element make_momentary_mono(std::string_view image, NVGcolor c) {
 	MomentaryButtonLight element;
 	element.image = image;
 	element.color = RGB565{c.r, c.g, c.b};
-	pr_dbg("make_momentary_mono()\n");
+	log_make_element_notes("make_momentary_mono()", "");
 	return element;
 }
 
@@ -349,7 +349,7 @@ static Element make_latching_mono(std::string_view image, NVGcolor c, LatchingBu
 	element.image = image;
 	element.color = RGB565{c.r, c.g, c.b};
 	element.DefaultValue = defaultValue;
-	pr_dbg("make_latching_mono()\n");
+	log_make_element_notes("make_latching_mono()", "");
 	return element;
 }
 

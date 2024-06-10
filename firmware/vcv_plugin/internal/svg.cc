@@ -13,7 +13,8 @@ rack::math::Vec get_svg_size(std::string const &svg_filename) {
 		// 	   MetaModule::PNGpx_to_SVGpx(sz->h));
 		return {MetaModule::PNGpx_to_SVGpx(sz->w), MetaModule::PNGpx_to_SVGpx(sz->h)};
 	} else {
-		pr_err("%s: can't get svg size\n", svg_filename.c_str());
+		// Note, missing SVG is not an error:
+		// pr_trace("%s: can't get svg size\n", svg_filename.c_str());
 		return {};
 	}
 }
