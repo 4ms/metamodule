@@ -32,7 +32,7 @@ add_subdirectory(src ${A7_BIN_PATH})
 
 set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
 set(API_SYMBOL_NAMES_FILE ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugin-sdk/api-symbols.txt)
-get_target_property(VcvPluginBinDir vcv_plugin BINARY_DIR)
+get_target_property(VcvPluginBinDir vcv_plugin_export BINARY_DIR)
 set(SYMBOLS_BINFILE_DIRS
   --objdir ${VcvPluginBinDir} 
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
@@ -40,10 +40,11 @@ set(SYMBOLS_BINFILE_DIRS
 
 add_custom_command(
   OUTPUT ${API_SYMBOL_NAMES_FILE}
+  COMMAND echo "vcv export dir is ${VcvPluginBinDir}"
   COMMAND scripts/dump_syms.py
           ${SYMBOLS_BINFILE_DIRS}
           --text-out ${API_SYMBOL_NAMES_FILE}
-		  #-v
+		  -v
   DEPENDS main.elf
   COMMENT "Creating new API symbol list file in the SDK directory ${API_SYMBOL_NAMES_FILE}"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk

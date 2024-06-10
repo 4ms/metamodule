@@ -50,7 +50,7 @@ target_sources(lvgl
 # VCV Adaptor
 #
 add_subdirectory(../vcv_plugin ${CMAKE_BINARY_DIR}/vcv_plugin)
-target_sources(vcv_plugin PRIVATE ../vcv_plugin/src/keep-symbols.cc)
+target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.cc)
 
 #
 # Brands
@@ -170,6 +170,7 @@ add_subdirectory(${SHARED}/CoreModules CoreModules)
 set_source_files_properties(
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/gui/elements/element_name.cc
+  ${FWDIR}/src/gui/slsexport/ui_local.cc
   PROPERTIES COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )
 
@@ -202,7 +203,7 @@ endif()
 
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui ryml cpputil vcv_ports)
-target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
+target_link_libraries(main.elf PUBLIC vcv_plugin) #"$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
