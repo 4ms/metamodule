@@ -70,6 +70,8 @@ void ModuleWidget::addParam(app::SliderKnob *widget) {
 
 void ModuleWidget::addParam(app::SvgSlider *widget) {
 	log_widget("addParam(SvgSlider)", widget);
+	// Modify the widget's box to match the background
+	// widget->box.pos = widget->box.pos + widget->background->box.pos;
 	adaptor->addParam(widget);
 	Widget::addChild(widget);
 }

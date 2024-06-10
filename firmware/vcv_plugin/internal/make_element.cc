@@ -190,6 +190,8 @@ Element make_element(rack::app::SvgSlider *widget) {
 
 		if (widget->background->svg->filename.length()) {
 			element.image = widget->background->svg->filename;
+			// Modify the widget's box to match the background
+			widget->box.pos = widget->box.pos + widget->background->box.pos;
 		} else {
 			element.image = widget->svg->filename;
 		}
