@@ -115,7 +115,7 @@ struct ModuleWidgetAdaptor {
 	void addSvgLight(rack::app::ModuleLightWidget *widget, std::string_view image) {
 		if (widget) {
 			widget->element = make_element(widget, image);
-			assign_element_fields(widget, getParamName(widget->module, widget->firstLightId));
+			assign_element_fields(widget, getLightName(widget->module, widget->firstLightId));
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = widget->firstLightId;
