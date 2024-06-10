@@ -185,12 +185,15 @@ void ModuleWidget::addChild(Widget *widget) {
 }
 
 void ModuleWidget::addChild(widget::SvgWidget *widget) {
-	log_widget("Skipped: addChild(SvgWidget)", widget);
+	log_widget("addChild(SvgWidget)", widget);
+	adaptor->addImage(widget);
 	Widget::addChild(widget);
 }
 
 void ModuleWidget::addChild(app::SvgButton *widget) {
-	log_widget("Skipped: addChild(SvgButton)", widget);
+	log_widget("addChild(SvgButton)", widget);
+	widget->sw->box.pos = widget->box.pos;
+	adaptor->addImage(widget->sw);
 	Widget::addChild(widget);
 }
 

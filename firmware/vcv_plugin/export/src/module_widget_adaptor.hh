@@ -126,6 +126,19 @@ struct ModuleWidgetAdaptor {
 			pr_err("Error: can't add a null Light Param widget\n");
 	}
 
+	void addImage(rack::widget::SvgWidget *widget) {
+		if (widget) {
+			widget->element = make_element(widget);
+			assign_element_fields(widget, "");
+
+			ElementCount::Indices indices = clear();
+			elem_idx.emplace_back(widget->element, indices);
+
+			log_widget("SvgWidget (image):", 0, widget);
+		} else
+			pr_err("Error: can't add a null SvgWidget\n");
+	}
+
 	void populate_elements_indices(std::vector<MetaModule::Element> &elements,
 								   std::vector<ElementCount::Indices> &indices) {
 

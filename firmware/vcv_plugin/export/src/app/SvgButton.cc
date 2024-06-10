@@ -21,7 +21,7 @@ void SvgButton::addFrame(std::shared_ptr<window::Svg> svg) {
 		frames.push_back(svg);
 		if (frames.size() == 1) {
 			sw->setSvg(svg);
-			box.size = get_svg_size(svg->filename);
+			box = sw->box;
 		}
 	}
 }

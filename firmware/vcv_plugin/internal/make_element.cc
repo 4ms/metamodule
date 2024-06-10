@@ -474,7 +474,7 @@ Element make_element(rack::app::MultiLightWidget *widget, std::string_view image
 
 Element make_element(rack::widget::SvgWidget *widget) {
 	if (widget->svg->filename.size()) {
-		pr_trace("Unknown SvgWidget, using image as a ImageElement\n");
+		pr_trace("SvgWidget: using image as a ImageElement\n");
 		ImageElement element{};
 		element.image = widget->svg->filename;
 		return element;
