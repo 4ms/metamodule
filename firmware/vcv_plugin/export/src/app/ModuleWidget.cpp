@@ -56,6 +56,12 @@ void ModuleWidget::addParam(app::SvgKnob *widget) {
 	Widget::addChild(widget);
 }
 
+void ModuleWidget::addParam(rack::componentlibrary::Rogan *widget) {
+	log_widget("addParam(Rogan)", widget);
+	adaptor->addParam(widget);
+	Widget::addChild(widget);
+}
+
 void ModuleWidget::addParam(app::SliderKnob *widget) {
 	log_widget("addParam(SliderKnob)", widget);
 	adaptor->addParam(widget);

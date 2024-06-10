@@ -39,13 +39,29 @@ Element make_element(rack::app::PortWidget *widget) {
 }
 
 //
-// Pots/Sliders
+// Pots
 //
+
 Element make_element(rack::app::Knob *widget) {
 	pr_trace("make_element(Knob) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
 
 	Knob element{};
 	element.DefaultValue = getScaledDefaultValue(widget);
+	return element;
+}
+
+Element make_element(rack::componentlibrary::Rogan *widget) {
+	Knob element{};
+	element.DefaultValue = getScaledDefaultValue(widget);
+
+	if (widget->sw->svg->filename.size()) {
+		pr_trace("make_element(Rogan): %s\n", widget->sw->svg->filename.data());
+		element.image = widget->sw->svg->filename;
+
+	} else {
+		pr_err("make_element(Rogan): No svg was set\n");
+	}
+
 	return element;
 }
 
@@ -62,8 +78,11 @@ Element make_element(rack::app::SvgKnob *widget) {
 	// The bg SVG is a child of the FramebufferWidget (fb), but it's not part of the SvgKnob class.
 	// In MM, we merged the Point (dot) and bg images and saved that in the bg PNG.
 	// The Point PNG is not drawn, but it must have the right size because that's used to center the jack.
+	//
 	// TODO: consider using a concept make_element like:
 	// requires derived_form<T, SvgKnob> && !same_as<T, SvgKnob> && requires(...){w->bg->svg->filename;}
+	//
+	// This does not work for Rogan knobs
 	auto find_inner_svg_widget = [](rack::widget::FramebufferWidget *fb) {
 		for (auto child : fb->children) {
 			if (auto svgw = dynamic_cast<rack::widget::SvgWidget *>(child)) {
@@ -90,6 +109,10 @@ Element make_element(rack::app::SvgKnob *widget) {
 
 	return element;
 }
+
+//
+// Sliders
+//
 
 Element make_element(rack::app::SliderKnob *widget) {
 	pr_trace("make_element(SliderKnob) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
@@ -246,9 +269,6 @@ Element make_element(rack::app::SvgSwitch *widget) {
 		return make_flipswitch(widget);
 	}
 }
-
-/////////////////////
-////////////////////
 
 static Element make_momentary_rgb(std::string_view image) {
 	MomentaryButtonRGB element;

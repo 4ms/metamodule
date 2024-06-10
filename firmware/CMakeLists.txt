@@ -44,7 +44,7 @@ add_custom_command(
   COMMAND scripts/dump_syms.py
           ${SYMBOLS_BINFILE_DIRS}
           --text-out ${API_SYMBOL_NAMES_FILE}
-		  -v
+		  #-v
   DEPENDS main.elf
   COMMENT "Creating new API symbol list file in the SDK directory ${API_SYMBOL_NAMES_FILE}"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk

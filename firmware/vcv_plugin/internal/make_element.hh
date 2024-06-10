@@ -11,6 +11,7 @@ Element make_element(rack::app::PortWidget *widget);
 // Params:
 Element make_element(rack::app::Knob *widget);
 Element make_element(rack::app::SvgKnob *widget);
+Element make_element(rack::componentlibrary::Rogan *widget);
 Element make_element(rack::app::SliderKnob *widget);
 Element make_element(rack::app::SvgSlider *widget);
 
