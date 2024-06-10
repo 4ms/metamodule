@@ -6,7 +6,7 @@
 #include "util/zip.hh"
 #include <app/ModuleWidget.hpp>
 
-static constexpr inline bool LogWidgetPlacements = false;
+static constexpr inline bool LogWidgetPlacements = true;
 
 static void log_widget(std::string_view preface, rack::widget::Widget const *widget);
 
@@ -39,6 +39,10 @@ void ModuleWidget::setPanel(std::shared_ptr<window::Svg> svg) {
 widget::Widget *ModuleWidget::getPanel() {
 	return panel.get();
 }
+
+//
+// Params
+//
 
 void ModuleWidget::addParam(app::Knob *widget) {
 	log_widget("addParam(Knob)", widget);
@@ -76,16 +80,41 @@ void ModuleWidget::addParam(app::ParamWidget *widget) {
 	Widget::addChild(widget);
 }
 
-void ModuleWidget::addChild(Widget *widget) {
-	log_widget("Skipped: addChild(unknown Widget)", widget);
+//
+// Param + Light
+//
+
+void ModuleWidget::addLightSwitch(app::SvgSwitch *widget, app::ModuleLightWidget *light) {
+	log_widget("addLightSwitch()", widget);
+	adaptor->addLightParam(widget, light);
 	Widget::addChild(widget);
 }
+
+void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget *light) {
+	log_widget("addLightSwitch()", widget);
+	adaptor->addLightParam(widget, light);
+	Widget::addChild(light);
+}
+
+//
+// Lights
+//
 
 void ModuleWidget::addChild(app::ModuleLightWidget *widget) {
 	log_widget("addChild(ModuleLightWidget)", widget);
 	adaptor->addLight(widget);
 	Widget::addChild(widget);
 }
+
+void ModuleWidget::addSvgLight(std::string_view image, app::ModuleLightWidget *widget) {
+	log_widget("addSvgLight()", widget);
+	adaptor->addSvgLight(widget, image);
+	Widget::addChild(widget);
+}
+
+//
+// Ports
+//
 
 void ModuleWidget::addInput(app::PortWidget *widget) {
 	log_widget("addInput(PortWidget)", widget);
@@ -111,23 +140,33 @@ void ModuleWidget::addOutput(app::SvgPort *widget) {
 	Widget::addChild(widget);
 }
 
-void ModuleWidget::addLightSwitch(app::SvgSwitch *widget, app::ModuleLightWidget *light) {
-	log_widget("addLightSwitch()", widget);
-	adaptor->addLightParam(widget, light);
+//
+// Image-only
+//
+
+void ModuleWidget::addChild(app::SvgScrew *widget) {
+	log_widget("Skipped: addChild(SvgScrew)", widget);
 	Widget::addChild(widget);
 }
 
-void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget *light) {
-	log_widget("addLightSwitch()", widget);
-	adaptor->addLightParam(widget, light);
-	Widget::addChild(light);
-}
-
-void ModuleWidget::addSvgLight(std::string_view image, app::ModuleLightWidget *widget) {
-	log_widget("addSvgLight()", widget);
-	adaptor->addSvgLight(widget, image);
+void ModuleWidget::addChild(Widget *widget) {
+	log_widget("Skipped: addChild(unknown Widget)", widget);
 	Widget::addChild(widget);
 }
+
+void ModuleWidget::addChild(widget::SvgWidget *widget) {
+	log_widget("Skipped: addChild(SvgWidget)", widget);
+	Widget::addChild(widget);
+}
+
+void ModuleWidget::addChild(app::SvgButton *widget) {
+	log_widget("Skipped: addChild(SvgButton)", widget);
+	Widget::addChild(widget);
+}
+
+//
+// Panel
+//
 
 void ModuleWidget::addChild(SvgPanel *child) {
 	setPanel(child);
