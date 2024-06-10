@@ -114,13 +114,13 @@ Element make_element(rack::app::SvgKnob *widget) {
 		log_make_element_notes("...found SvgWidget child of fb with an SVG %s\n", inner_img.data());
 		element.image = inner_img;
 
-	} else if (widget->sw->svg->filename.size()) {
+	} else if (widget->sw->svg->filename.size() && widget->sw->box.size.isFinite() && !widget->sw->box.size.isZero()) {
 		log_make_element_notes("...use sw->svg %s\n", widget->sw->svg->filename.data());
 		element.image = widget->sw->svg->filename;
 
 	} else {
+		pr_err("SvgKnob with no sw->svg or inner child of fb\n");
 		log_make_element_notes("...use svg %s\n", widget->svg->filename.data());
-		element.image = widget->svg->filename;
 	}
 
 	return element;
