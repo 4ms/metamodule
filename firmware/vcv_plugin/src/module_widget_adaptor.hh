@@ -27,9 +27,17 @@ struct ModuleWidgetAdaptor {
 		return {None, None, None, None};
 	}
 
-	template<typename ParamT>
-	void addParam(ParamT *widget)
-	//TODO: requires derives from ParamWidget
+	void log_widget(std::string_view type, unsigned index, rack::widget::Widget const *widget) {
+		pr_trace("Add %.*s #%d '%.*s' to ModuleWidget\n\n",
+				 type.size(),
+				 type.data(),
+				 index,
+				 base_element(widget->element).short_name.size(),
+				 base_element(widget->element).short_name.data());
+	}
+
+	template<typename ParamWidgetT>
+	void addParam(ParamWidgetT *widget) requires(std::derived_from<ParamWidgetT, rack::app::ParamWidget>)
 	{
 		if (widget) {
 			widget->element = make_element(widget);
@@ -108,8 +116,20 @@ struct ModuleWidgetAdaptor {
 
 			pr_dbg("Added light param widget '%s' (p:%d l:%d) to MW\n\n",
 				   base_element(widget->element).short_name.data(),
-				   indices.param_idx,
-				   indices.light_idx);
+		} else
+			pr_err("Error: can't add a null Light Param widget\n");
+	}
+
+	void addSvgLight(rack::app::ModuleLightWidget *widget, std::string_view image) {
+		if (widget) {
+			widget->element = make_element(widget, image);
+			assign_element_fields(widget, getParamName(widget->module, widget->firstLightId));
+
+			ElementCount::Indices indices = clear();
+			indices.light_idx = widget->firstLightId;
+			elem_idx.emplace_back(widget->element, indices);
+
+			log_widget("SvgLight:", indices.light_idx, widget);
 		} else
 			pr_err("Error: can't add a null Light Param widget\n");
 	}

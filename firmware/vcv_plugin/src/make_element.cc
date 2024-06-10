@@ -379,24 +379,28 @@ Element make_element(rack::app::MultiLightWidget *widget) {
 	}
 }
 
-Element make_multi_led_element(std::string_view image, rack::app::MultiLightWidget *widget) {
-	pr_trace("make_multi_led_element() with %d elem at %f %f\n",
+Element make_element(rack::app::MultiLightWidget *widget, std::string_view image) {
+	pr_trace("make_element(MultiLightWidget, image) with %d elem at %f %f\n",
 			 widget->getNumColors(),
 			 widget->box.pos.x,
 			 widget->box.pos.y);
 
-	if (widget->getNumColors() == 1) {
+	if (widget->getNumColors() <= 0) {
+		pr_warn("SVGLight widget has no colors, skipping\n");
+		return NullElement{};
+
+	} else if (widget->getNumColors() == 1) {
 		return make_mono_led_element(image, widget);
-	}
-	if (widget->getNumColors() == 2) {
+
+	} else if (widget->getNumColors() == 2) {
 		return make_dual_led_element(image, widget);
-	}
-	if (widget->getNumColors() == 3) {
+
+	} else {
+		if (widget->getNumColors() > 3)
+			pr_warn("SVGLight widget has %d colors, limiting to 3\n", widget->getNumColors());
+
 		return make_rgb_led_element(image, widget);
 	}
-
-	pr_warn("SVG Light widget not handled (%d colors)\n", widget->getNumColors());
-	return NullElement{};
 }
 
 //

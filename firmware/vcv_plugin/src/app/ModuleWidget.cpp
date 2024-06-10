@@ -121,6 +121,12 @@ void ModuleWidget::addLightSlider(app::SvgSlider *widget, app::ModuleLightWidget
 	Widget::addChild(light);
 }
 
+void ModuleWidget::addSvgLight(std::string_view image, app::ModuleLightWidget *widget) {
+	log_widget("addSvgLight()", widget);
+	adaptor->addSvgLight(widget, image);
+	Widget::addChild(widget);
+}
+
 void ModuleWidget::addChild(SvgPanel *child) {
 	setPanel(child);
 }

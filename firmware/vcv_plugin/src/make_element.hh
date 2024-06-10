@@ -39,12 +39,6 @@ Element make_element(rack::app::SvgSlider *widget, rack::app::MultiLightWidget *
 //
 // SVG Light
 //
-
-Element make_multi_led_element(std::string_view image, rack::app::MultiLightWidget *);
-
-template<typename LightBaseT>
-Element make_element(rack::componentlibrary::TSvgLight<LightBaseT> *widget) {
-	return make_multi_led_element(widget->sw->svg->filename, widget);
-}
+Element make_element(rack::app::MultiLightWidget *, std::string_view image);
 
 } // namespace MetaModule
