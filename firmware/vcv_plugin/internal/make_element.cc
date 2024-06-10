@@ -6,7 +6,7 @@
 namespace MetaModule
 {
 
-static inline constexpr bool LogWidgetTypeIds = false;
+static inline constexpr bool LogWidgetTypeIds = true;
 
 static void log_make_element(std::string_view type, unsigned id) {
 	if constexpr (LogWidgetTypeIds) {
@@ -246,9 +246,9 @@ static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
 		// Set the number of positions based on the max/min values set in configSwitch or configParam
 		element.num_pos = pq->maxValue - pq->minValue + 1;
 
-		if (element.num_pos < 2 || element.num_pos > 8) {
+		if (element.num_pos < 2 || element.num_pos > element.pos_names.size()) {
 			pr_warn("Warning: SvgSwitch as SlideSwitch (max - min + 1) is %d, but must be 2 - 8\n", element.num_pos);
-			element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, 8);
+			element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, element.pos_names.size());
 		}
 
 		for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
@@ -257,7 +257,7 @@ static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
 
 	} else {
 		// Gracefully handle an unconfigured param:
-		element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, 8);
+		element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, element.pos_names.size());
 		pr_warn("Warning: SvgSwitch as SlideSwitch not configured with configParam or configSwitch\n");
 	}
 
@@ -274,9 +274,9 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 		// Set the number of positions based on the max/min values set in configSwitch or configParam
 		element.num_pos = pq->maxValue - pq->minValue + 1;
 
-		if (element.num_pos < 2 || element.num_pos > 3) {
-			pr_warn("Warning: SvgSwitch (max - min + 1) is %d, but must be 2 or 3\n", element.num_pos);
-			element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, 3);
+		if (element.num_pos < 2 || element.num_pos > FlipSwitch::MaxPositions) {
+			pr_warn("Warning: SvgSwitch (max - min + 1) is %d, but must be 2 - 4\n", element.num_pos);
+			element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, FlipSwitch::MaxPositions);
 		}
 
 		for (auto i = 0u; i < std::min<size_t>(element.num_pos, pq->labels.size()); i++) {
@@ -284,11 +284,11 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 		}
 	} else {
 		// Gracefully handle an unconfigured param:
-		element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, 3);
+		element.num_pos = std::clamp<size_t>(widget->frames.size(), 2, element.pos_names.size());
 		pr_warn("Warning: SvgSwitch not configured with configParam or configSwitch\n");
 	}
 
-	for (unsigned i = 0; i < std::min<size_t>(element.num_pos, widget->frames.size()); i++) {
+	for (unsigned i = 0; i < std::min<size_t>(FlipSwitch::MaxPositions, widget->frames.size()); i++) {
 		element.frames[i] = widget->frames[i]->filename;
 	}
 
@@ -297,7 +297,6 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 }
 
 Element make_element(rack::app::SvgSwitch *widget) {
-	log_make_element("SvgSwitch", widget->paramId);
 
 	bool momentary = widget->momentary;
 	if (widget->frames.size() >= 3) {
@@ -306,13 +305,16 @@ Element make_element(rack::app::SvgSwitch *widget) {
 	}
 
 	if (momentary) {
+		log_make_element("SvgSwitch mom", widget->paramId);
 		return make_momentary(widget);
 	} else {
 		if (auto pq = widget->getParamQuantity(); pq) {
-			auto num_pos = pq->maxValue - pq->minValue + 1;
-			if (num_pos > 3)
+			if ((pq->maxValue - pq->minValue + 1) > FlipSwitch::MaxPositions) {
+				log_make_element("SvgSwitch slide", widget->paramId);
 				return make_slideswitch(widget);
+			}
 		}
+		log_make_element("SvgSwitch flip", widget->paramId);
 		return make_flipswitch(widget);
 	}
 }
