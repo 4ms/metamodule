@@ -9,6 +9,8 @@ namespace MetaModule
 
 struct ModuleWidgetAdaptor {
 
+	static constexpr inline bool LogWidgetNames = false;
+
 	std::vector<std::pair<MetaModule::Element, ElementCount::Indices>> elem_idx;
 
 	ElementCount::Indices clear() {
@@ -17,12 +19,14 @@ struct ModuleWidgetAdaptor {
 	}
 
 	void log_widget(std::string_view type, unsigned index, rack::widget::Widget const *widget) {
-		pr_trace("Add %.*s #%d '%.*s' to ModuleWidget\n\n",
-				 type.size(),
-				 type.data(),
-				 index,
-				 base_element(widget->element).short_name.size(),
-				 base_element(widget->element).short_name.data());
+		if constexpr (LogWidgetNames) {
+			pr_trace("Add %.*s #%d '%.*s' to ModuleWidget\n\n",
+					 type.size(),
+					 type.data(),
+					 index,
+					 base_element(widget->element).short_name.size(),
+					 base_element(widget->element).short_name.data());
+		}
 	}
 
 	template<typename ParamWidgetT>

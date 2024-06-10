@@ -5,22 +5,30 @@
 namespace MetaModule
 {
 
-static float getScaledDefaultValue(rack::app::ParamWidget *widget);
+static inline constexpr bool LogWidgetTypeIds = false;
 
+static void log_make_element(std::string_view type, unsigned id) {
+	if constexpr (LogWidgetTypeIds) {
+		pr_trace("make_element(%s) idx=%d\n", type.data(), id);
+	}
+}
+
+static float getScaledDefaultValue(rack::app::ParamWidget *widget);
 //
 // Jacks
 //
 
 Element make_element(rack::app::SvgPort *widget) {
-	pr_trace("make_element(Port %d) %d at %f %f\n", widget->type, widget->portId, widget->box.pos.x, widget->box.pos.y);
 
 	if (widget->type == rack::engine::Port::Type::INPUT) {
+		log_make_element("SvgPort In", widget->portId);
 		JackInput element{};
 		if (widget->sw->svg)
 			element.image = widget->sw->svg->filename;
 		return element;
 
 	} else {
+		log_make_element("SvgPort Out", widget->portId);
 		JackOutput element{};
 		if (widget->sw->svg)
 			element.image = widget->sw->svg->filename;
@@ -29,11 +37,11 @@ Element make_element(rack::app::SvgPort *widget) {
 }
 
 Element make_element(rack::app::PortWidget *widget) {
-	pr_trace("make_element(Port %d) %d at %f %f\n", widget->type, widget->portId, widget->box.pos.x, widget->box.pos.y);
-
 	if (widget->type == rack::engine::Port::Type::INPUT) {
+		log_make_element("Port In", widget->portId);
 		return JackInput{};
 	} else {
+		log_make_element("Port Out", widget->portId);
 		return JackOutput{};
 	}
 }
@@ -43,7 +51,7 @@ Element make_element(rack::app::PortWidget *widget) {
 //
 
 Element make_element(rack::app::Knob *widget) {
-	pr_trace("make_element(Knob) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+	log_make_element("Knob", widget->paramId);
 
 	Knob element{};
 	element.DefaultValue = getScaledDefaultValue(widget);
@@ -66,7 +74,7 @@ Element make_element(rack::componentlibrary::Rogan *widget) {
 }
 
 Element make_element(rack::app::SvgKnob *widget) {
-	pr_trace("make_element(SvgKnob) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+	log_make_element("SvgKnob", widget->paramId);
 
 	Knob element{};
 	element.DefaultValue = getScaledDefaultValue(widget);
@@ -86,8 +94,10 @@ Element make_element(rack::app::SvgKnob *widget) {
 	auto find_inner_svg_widget = [](rack::widget::FramebufferWidget *fb) {
 		for (auto child : fb->children) {
 			if (auto svgw = dynamic_cast<rack::widget::SvgWidget *>(child)) {
-				if (svgw->svg->filename.size() > 0 && !svgw->box.size.isZero() && svgw->box.size.isFinite()) {
-					return std::string_view{svgw->svg->filename};
+				if (!svgw->box.size.isZero() && svgw->box.size.isFinite()) {
+					if (svgw->svg && svgw->svg->filename.size() > 0) {
+						return std::string_view{svgw->svg->filename};
+					}
 				}
 			}
 		}
@@ -95,15 +105,15 @@ Element make_element(rack::app::SvgKnob *widget) {
 	};
 
 	if (auto inner_img = find_inner_svg_widget(widget->fb); inner_img.size() > 0) {
-		pr_trace("make_element(SvgKnob): found SvgWidget child of fb with an SVG %s\n", inner_img.data());
+		pr_trace("...found SvgWidget child of fb with an SVG %s\n", inner_img.data());
 		element.image = inner_img;
 
 	} else if (widget->sw->svg->filename.size()) {
-		pr_trace("make_element(SvgKnob): use sw->svg %s\n", widget->sw->svg->filename.data());
+		pr_trace("...use sw->svg %s\n", widget->sw->svg->filename.data());
 		element.image = widget->sw->svg->filename;
 
 	} else {
-		pr_trace("make_element(SvgKnob): use svg %s\n", widget->svg->filename.data());
+		pr_trace("...use svg %s\n", widget->svg->filename.data());
 		element.image = widget->svg->filename;
 	}
 
@@ -115,7 +125,7 @@ Element make_element(rack::app::SvgKnob *widget) {
 //
 
 Element make_element(rack::app::SliderKnob *widget) {
-	pr_trace("make_element(SliderKnob) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+	log_make_element("SliderKnob", widget->paramId);
 
 	Slider element{};
 	element.DefaultValue = getScaledDefaultValue(widget);
@@ -160,15 +170,13 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 Element make_element(rack::app::SvgSlider *widget) {
 
 	if (auto pq = widget->getParamQuantity(); pq && pq->snapEnabled) {
-		pr_trace(
-			"make_element(SvgSlider) switch %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+		log_make_element("SvgSlider switch", widget->paramId);
 		return make_slideswitch(widget);
 	}
 
 	else
 	{
-		pr_trace(
-			"make_element(SvgSlider) slider %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+		log_make_element("SvgSlider slider", widget->paramId);
 
 		Slider element{};
 		element.DefaultValue = getScaledDefaultValue(widget);
@@ -185,7 +193,7 @@ Element make_element(rack::app::SvgSlider *widget) {
 }
 
 Element make_element(rack::app::SvgSlider *widget, rack::app::MultiLightWidget *light) {
-	pr_trace("make_element(SvgSlider, Light) w:%d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+	log_make_element("SvgSlider, Light", widget->paramId);
 
 	SliderLight element;
 	element.DefaultValue = getScaledDefaultValue(widget);
@@ -255,7 +263,7 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 }
 
 Element make_element(rack::app::SvgSwitch *widget) {
-	pr_trace("make_element(SvgSwitch) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+	log_make_element("SvgSwitch", widget->paramId);
 
 	bool momentary = widget->momentary;
 	if (widget->frames.size() >= 3) {
@@ -303,7 +311,7 @@ static Element make_latching_mono(std::string_view image, NVGcolor c, LatchingBu
 }
 
 Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *light) {
-	pr_trace("make_element(SvgSwitch, Light) %d at %f, %f\n", widget->paramId, widget->box.pos.x, widget->box.pos.y);
+	log_make_element("SvgSwitch, Light", widget->paramId);
 
 	LatchingButton::State_t defaultValue =
 		getScaledDefaultValue(widget) > 0.5f ? LatchingButton::State_t::UP : LatchingButton::State_t::DOWN;
@@ -377,10 +385,7 @@ static Element make_rgb_led_element(std::string_view image, rack::app::MultiLigh
 }
 
 Element make_element(rack::app::MultiLightWidget *widget) {
-	pr_trace("make_element(MultiLightWidget) with %d elem at %f %f\n",
-			 widget->getNumColors(),
-			 widget->box.pos.x,
-			 widget->box.pos.y);
+	log_make_element("MultiLightWidget has #colors:", widget->getNumColors());
 
 	auto image = get_led_image_by_size(widget);
 
@@ -400,10 +405,7 @@ Element make_element(rack::app::MultiLightWidget *widget) {
 }
 
 Element make_element(rack::app::MultiLightWidget *widget, std::string_view image) {
-	pr_trace("make_element(MultiLightWidget, image) with %d elem at %f %f\n",
-			 widget->getNumColors(),
-			 widget->box.pos.x,
-			 widget->box.pos.y);
+	log_make_element("MultiLightWidget + image has #colors:", widget->getNumColors());
 
 	if (widget->getNumColors() <= 0) {
 		pr_warn("SVGLight widget has no colors, skipping\n");
@@ -452,7 +454,7 @@ Element make_element(rack::app::SvgButton *widget) {
 //
 
 Element make_element(rack::app::SvgScrew *widget) {
-	pr_trace("make_element(SvgScrew): skip\n");
+	// pr_trace("make_element(SvgScrew): skip\n");
 	return NullElement{};
 }
 

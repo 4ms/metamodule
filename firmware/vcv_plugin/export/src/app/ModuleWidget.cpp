@@ -151,7 +151,7 @@ void ModuleWidget::addOutput(app::SvgPort *widget) {
 //
 
 void ModuleWidget::addChild(app::SvgScrew *widget) {
-	log_widget("Skipped: addChild(SvgScrew)", widget);
+	log_widget("addChild(SvgScrew)", widget);
 	Widget::addChild(widget);
 }
 
@@ -211,6 +211,7 @@ std::vector<PortWidget *> ModuleWidget::getOutputs() {
 static void log_widget(std::string_view preface, rack::widget::Widget const *widget) {
 	if (!widget)
 		pr_err("%s: Null widget\n", preface.data());
+
 	if constexpr (LogWidgetPlacements) {
 		auto box = widget->box;
 		pr_trace("%s at (%f, %f) size (%f, %f)\n", preface.data(), box.pos.x, box.pos.y, box.size.x, box.size.y);
