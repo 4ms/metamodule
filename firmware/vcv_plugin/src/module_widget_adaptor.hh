@@ -9,18 +9,7 @@ namespace MetaModule
 
 struct ModuleWidgetAdaptor {
 
-	ModuleWidgetAdaptor() {
-		printf("ModuleWidgetAdaptor()\n");
-	}
-	~ModuleWidgetAdaptor() {
-		printf("~ModuleWidgetAdaptor()\n");
-	}
-
 	std::vector<std::pair<MetaModule::Element, ElementCount::Indices>> elem_idx;
-
-	void add_element(MetaModule::Element const &el, ElementCount::Indices &indices) {
-		elem_idx.emplace_back(el, indices);
-	}
 
 	ElementCount::Indices clear() {
 		auto None = ElementCount::Indices::NoElementMarker;
@@ -47,14 +36,13 @@ struct ModuleWidgetAdaptor {
 			indices.param_idx = widget->paramId;
 			elem_idx.emplace_back(widget->element, indices);
 
-			pr_dbg("Add param %d '%s' to MW\n\n", indices.param_idx, base_element(widget->element).short_name.data());
+			log_widget("param", indices.param_idx, widget);
 		} else
 			pr_err("Error: can't add a null ParamWidget\n");
 	}
 
 	template<typename PortWidgetT>
-	void addInput(PortWidgetT *widget)
-	//TODO: requires derives from PortWidget
+	void addInput(PortWidgetT *widget) requires(std::derived_from<PortWidgetT, rack::app::PortWidget>)
 	{
 		if (widget) {
 			widget->element = make_element(widget);
@@ -64,14 +52,13 @@ struct ModuleWidgetAdaptor {
 			indices.input_idx = widget->portId;
 			elem_idx.emplace_back(widget->element, indices);
 
-			pr_dbg("Added input '%s' to MW\n\n", base_element(widget->element).short_name.data());
+			log_widget("input", indices.input_idx, widget);
 		} else
 			pr_err("Error: can't add a null input PortWidget\n");
 	}
 
 	template<typename PortWidgetT>
-	void addOutput(PortWidgetT *widget)
-	//TODO: requires derives from PortWidget
+	void addOutput(PortWidgetT *widget) requires(std::derived_from<PortWidgetT, rack::app::PortWidget>)
 	{
 		if (widget) {
 			widget->element = make_element(widget);
@@ -81,14 +68,13 @@ struct ModuleWidgetAdaptor {
 			indices.output_idx = widget->portId;
 			elem_idx.emplace_back(widget->element, indices);
 
-			pr_dbg("Added output '%s' to MW\n\n", base_element(widget->element).short_name.data());
+			log_widget("output", indices.output_idx, widget);
 		} else
 			pr_err("Error: can't add a null output PortWidget\n");
 	}
 
 	template<typename LightWidgetT>
-	void addLight(LightWidgetT *widget)
-	//TODO: requires derives from ModuleLightWidget
+	void addLight(LightWidgetT *widget) requires(std::derived_from<LightWidgetT, rack::app::ModuleLightWidget>)
 	{
 		if (widget) {
 			widget->element = make_element(widget);
@@ -98,13 +84,15 @@ struct ModuleWidgetAdaptor {
 			indices.light_idx = widget->firstLightId;
 			elem_idx.emplace_back(widget->element, indices);
 
-			pr_dbg("Added light %d '%s' to MW\n\n", indices.light_idx, base_element(widget->element).short_name.data());
+			log_widget("light", indices.light_idx, widget);
 		} else
 			pr_err("Error: can't add a null Light\n");
 	}
 
 	template<typename ParamWidgetT>
-	inline void addLightParam(ParamWidgetT *widget, rack::app::ModuleLightWidget *light) {
+	void addLightParam(ParamWidgetT *widget, rack::app::ModuleLightWidget *light)
+		requires(std::derived_from<ParamWidgetT, rack::app::ParamWidget>)
+	{
 		if (widget) {
 			widget->element = make_element(widget, light);
 			assign_element_fields(widget, getParamName(widget->module, widget->paramId));
@@ -114,8 +102,8 @@ struct ModuleWidgetAdaptor {
 			indices.param_idx = widget->paramId;
 			elem_idx.emplace_back(widget->element, indices);
 
-			pr_dbg("Added light param widget '%s' (p:%d l:%d) to MW\n\n",
-				   base_element(widget->element).short_name.data(),
+			log_widget("light param: param", indices.param_idx, widget);
+			log_widget("light param: light", indices.light_idx, widget);
 		} else
 			pr_err("Error: can't add a null Light Param widget\n");
 	}
@@ -136,6 +124,30 @@ struct ModuleWidgetAdaptor {
 
 	void populate_elements_indices(std::vector<MetaModule::Element> &elements,
 								   std::vector<ElementCount::Indices> &indices) {
+
+		std::sort(elem_idx.begin(), elem_idx.end(), [](auto const &a, auto const &b) {
+			if (a.second.param_idx < b.second.param_idx)
+				return true;
+			else if (a.second.param_idx > b.second.param_idx)
+				return false;
+
+			else if (a.second.input_idx < b.second.input_idx)
+				return true;
+			else if (a.second.input_idx > b.second.input_idx)
+				return false;
+
+			else if (a.second.output_idx < b.second.output_idx)
+				return true;
+			else if (a.second.output_idx > b.second.output_idx)
+				return false;
+
+			else if (a.second.light_idx < b.second.light_idx)
+				return true;
+
+			else
+				return false;
+		});
+
 		elements.clear();
 		indices.clear();
 
