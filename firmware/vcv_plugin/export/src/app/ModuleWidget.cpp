@@ -6,6 +6,8 @@
 #include "util/zip.hh"
 #include <app/ModuleWidget.hpp>
 
+static constexpr inline bool LogWidgetPlacements = false;
+
 static void log_widget(std::string_view preface, rack::widget::Widget const *widget);
 
 namespace rack::app
@@ -164,6 +166,8 @@ std::vector<PortWidget *> ModuleWidget::getOutputs() {
 static void log_widget(std::string_view preface, rack::widget::Widget const *widget) {
 	if (!widget)
 		pr_err("%s: Null widget\n", preface.data());
-	auto box = widget->box;
-	pr_dbg("%s at (%f, %f) size (%f, %f)\n", preface.data(), box.pos.x, box.pos.y, box.size.x, box.size.y);
+	if constexpr (LogWidgetPlacements) {
+		auto box = widget->box;
+		pr_trace("%s at (%f, %f) size (%f, %f)\n", preface.data(), box.pos.x, box.pos.y, box.size.x, box.size.y);
+	}
 }
