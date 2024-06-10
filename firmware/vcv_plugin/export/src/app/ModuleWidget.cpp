@@ -72,7 +72,6 @@ void ModuleWidget::addParam(app::SvgSlider *widget) {
 	log_widget("addParam(SvgSlider)", widget);
 	adaptor->addParam(widget);
 	Widget::addChild(widget);
-	// TODO: handle switches
 }
 
 void ModuleWidget::addParam(app::SvgSwitch *widget) {
@@ -82,8 +81,23 @@ void ModuleWidget::addParam(app::SvgSwitch *widget) {
 }
 
 void ModuleWidget::addParam(app::ParamWidget *widget) {
-	log_widget("Skipped: addParam(unknown ParamWidget)", widget);
-	Widget::addChild(widget);
+	// Most-specialized to least:
+	if (auto w = dynamic_cast<rack::componentlibrary::Rogan *>(widget))
+		addParam(w);
+	else if (auto w = dynamic_cast<app::SvgKnob *>(widget))
+		addParam(w);
+	else if (auto w = dynamic_cast<app::SvgSlider *>(widget))
+		addParam(w);
+	else if (auto w = dynamic_cast<app::SliderKnob *>(widget))
+		addParam(w);
+	else if (auto w = dynamic_cast<app::Knob *>(widget))
+		addParam(w);
+	else if (auto w = dynamic_cast<app::SvgSwitch *>(widget))
+		addParam(w);
+	else {
+		log_widget("addParam(unknown ParamWidget)", widget);
+		Widget::addChild(widget);
+	}
 }
 
 //
@@ -123,9 +137,13 @@ void ModuleWidget::addSvgLight(std::string_view image, app::ModuleLightWidget *w
 //
 
 void ModuleWidget::addInput(app::PortWidget *widget) {
-	log_widget("addInput(PortWidget)", widget);
-	adaptor->addInput(widget);
-	Widget::addChild(widget);
+	if (auto w = dynamic_cast<app::SvgPort *>(widget)) {
+		addInput(w);
+	} else {
+		log_widget("addInput(PortWidget)", widget);
+		adaptor->addInput(widget);
+		Widget::addChild(widget);
+	}
 }
 
 void ModuleWidget::addInput(app::SvgPort *widget) {
@@ -135,9 +153,13 @@ void ModuleWidget::addInput(app::SvgPort *widget) {
 }
 
 void ModuleWidget::addOutput(app::PortWidget *widget) {
-	log_widget("addOutput(PortWidget)", widget);
-	adaptor->addOutput(widget);
-	Widget::addChild(widget);
+	if (auto w = dynamic_cast<app::SvgPort *>(widget)) {
+		addOutput(w);
+	} else {
+		log_widget("addOutput(PortWidget)", widget);
+		adaptor->addOutput(widget);
+		Widget::addChild(widget);
+	}
 }
 
 void ModuleWidget::addOutput(app::SvgPort *widget) {
