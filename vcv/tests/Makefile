@@ -62,17 +62,17 @@ all: $(DOCTESTHEADER_DIR)/doctest.h tests
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CC) -c $(DEPFLAGS) $(INCLUDES) $(CFLAGS) $< -o $@
+	$(CC) -c $(DEPFLAGS) $(INCLUDES) $(CFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cc
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CXX) -c $(DEPFLAGS) $(INCLUDES) $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(DEPFLAGS) $(INCLUDES) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CXX) -c $(DEPFLAGS) $(INCLUDES) $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(DEPFLAGS) $(INCLUDES) $(CXXFLAGS) $< -o $@
 
 tests: $(BUILDDIR)/runtests
 	@$(BUILDDIR)/runtests --out=$(TMPFILE) && echo "[√] Unit tests passed: $(notdir $(PWD))" || cat $(TMPFILE)
