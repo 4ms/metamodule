@@ -5,9 +5,9 @@
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_file.hh"
 #include "patch_file/file_storage_comm.hh"
+#include "patch_file/open_patches.hh"
 #include "patch_file/patch_location.hh"
 #include "pr_dbg.hh"
-#include "util/seq_map.hh"
 
 namespace MetaModule
 {
@@ -46,7 +46,7 @@ public:
 			view_playing_patch();
 			return true;
 
-		} else if (auto patch = open_patches_.get(PatchLocHash{patch_loc})) {
+		} else if (auto patch = open_patches_.find(PatchLocHash{patch_loc})) {
 			view_patch_ = patch;
 			view_patch_loc_ = patch_loc;
 			return true;
@@ -60,21 +60,19 @@ public:
 	bool parse_loaded_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
 
-		if (auto new_patch = open_patches_.overwrite(PatchLocHash{requested_view_patch_loc_}, {})) {
-			if (!yaml_raw_to_patch(file_data, *new_patch)) {
-				pr_err("Failed to parse\n");
-				open_patches_.remove_last();
-				return false;
-			}
-			new_patch->trim_empty_knobsets(); //Handle patches saved by early firmware with empty knob sets
-			view_patch_ = new_patch;
-			view_patch_loc_ = requested_view_patch_loc_;
-			return true;
-
-		} else {
-			pr_err("Failed to add to cache\n");
+		auto new_patch = open_patches_.emplace_back(requested_view_patch_loc_);
+		if (!yaml_raw_to_patch(file_data, new_patch)) {
+			pr_err("Failed to parse\n");
+			open_patches_.remove_last();
 			return false;
 		}
+
+		//Handle patches saved by legacy firmware with empty knob sets
+		new_patch.trim_empty_knobsets();
+
+		view_patch_ = &new_patch;
+		view_patch_loc_ = requested_view_patch_loc_;
+		return true;
 	}
 
 	//
@@ -101,8 +99,7 @@ public:
 
 		// Remove it from open_patches_
 		view_patch_->blank_patch("");
-		if (!open_patches_.remove(PatchLocHash{view_patch_loc_}))
-			pr_warn("Warning: patch not found in open patches\n");
+		open_patches_.remove(view_patch_loc_);
 
 		//re-point view_patch to playing_patch
 		view_patch_ = &playing_patch_;
@@ -210,14 +207,15 @@ public:
 		view_patch_loc_.filename.copy(filepath);
 		view_patch_loc_.vol = vol;
 
-		if (open_patches_.remove(view_patch_loc_)) {
+		if (open_patches_.find(view_patch_loc_)) {
+			open_patches_.remove(view_patch_loc_);
 			pr_err("Renamed patch to same name as an already open patch: %.*s\n", filepath.size(), filepath.data());
 			pr_err("Older patch is discarded without saving changes\n");
 		}
 
-		auto patch = open_patches_.overwrite(view_patch_loc_, {});
-		*patch = *view_patch_; //copy
-		view_patch_ = patch;   //re-point
+		PatchData &patch = open_patches_.emplace_back(view_patch_loc_);
+		patch = *view_patch_; //copy
+		view_patch_ = &patch; //re-point
 	}
 
 	void update_view_patch_module_states(std::vector<ModuleInitState> const &states) {
@@ -277,7 +275,7 @@ private:
 	PatchData *view_patch_ = &unsaved_patch_;
 	PatchData playing_patch_;
 
-	SeqMap<PatchLocHash, PatchData, 32> open_patches_;
+	OpenPatchList open_patches_;
 
 	PatchLocation requested_view_patch_loc_;
 	PatchLocation view_patch_loc_;

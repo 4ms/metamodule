@@ -7,7 +7,7 @@ namespace MetaModule
 
 struct PatchLocation {
 	StaticString<255> filename;
-	Volume vol{};
+	Volume vol{Volume::RamDisk};
 
 	bool operator==(PatchLocation const &that) const = default;
 };
