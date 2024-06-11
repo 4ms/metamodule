@@ -21,6 +21,7 @@ static void log_make_element_notes(std::string_view note1, std::string_view note
 }
 
 static float getScaledDefaultValue(rack::app::ParamWidget *widget);
+
 //
 // Jacks
 //
@@ -120,7 +121,6 @@ Element make_element(rack::app::SvgKnob *widget) {
 
 	} else {
 		pr_err("SvgKnob with no sw->svg or inner child of fb\n");
-		log_make_element_notes("...use svg %s\n", widget->svg->filename.data());
 	}
 
 	return element;
@@ -143,8 +143,6 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 
 	if (widget->background->svg->filename.length()) {
 		element.image = widget->background->svg->filename;
-	} else if (widget->svg->filename.length()) {
-		element.image = widget->svg->filename;
 	}
 
 	element.DefaultValue = getScaledDefaultValue(widget);
@@ -192,8 +190,6 @@ Element make_element(rack::app::SvgSlider *widget) {
 			element.image = widget->background->svg->filename;
 			// Modify the widget's box to match the background
 			widget->box.pos = widget->box.pos + widget->background->box.pos;
-		} else {
-			element.image = widget->svg->filename;
 		}
 
 		return element;
@@ -211,8 +207,6 @@ Element make_element(rack::app::SvgSlider *widget, rack::app::MultiLightWidget *
 
 	if (widget->background->svg->filename.length()) {
 		element.image = widget->background->svg->filename;
-	} else {
-		element.image = widget->svg->filename;
 	}
 
 	return element;
@@ -507,19 +501,11 @@ Element make_element(rack::widget::Widget *widget) {
 }
 
 Element make_element(rack::app::ParamWidget *widget) {
-	if (widget->svg && widget->svg->filename.size()) {
-		pr_warn("Unknown ParamWidget (param id %d)\n", widget->paramId);
-		ParamElement element{};
-		element.image = widget->svg->filename;
-		return element;
-
-	} else {
-		pr_warn("ParamWidget (param id %d) without an SVG, using a blank ParamElement\n", widget->paramId);
-		ParamElement element{};
-		element.width_mm = to_mm(widget->box.size.x);
-		element.height_mm = to_mm(widget->box.size.y);
-		return element;
-	}
+	pr_warn("ParamWidget (param id %d) without an SVG, using a blank ParamElement\n", widget->paramId);
+	ParamElement element{};
+	element.width_mm = to_mm(widget->box.size.x);
+	element.height_mm = to_mm(widget->box.size.y);
+	return element;
 }
 
 static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
