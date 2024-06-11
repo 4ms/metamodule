@@ -96,7 +96,8 @@ target_compile_options(simulator PRIVATE -Wno-double-promotion)
 
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports CoreModules)
-target_link_libraries(simulator PUBLIC vcv_plugin)
+target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
+target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 
