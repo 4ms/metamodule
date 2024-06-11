@@ -4,7 +4,7 @@ project(VCV-Plugin-Interface)
 #######################
 
 # TODO: This needs to be removed eventually
-set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../)
+set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../..)
 
 if (NOT TARGET metamodule::rack-interface)
   add_subdirectory(${MM_ROOT}/firmware/metamodule-plugin-sdk/metamodule-rack-interface metamodule-rack-interface)

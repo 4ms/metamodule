@@ -4,6 +4,18 @@
 namespace rack::app
 {
 
+SvgSwitch::SvgSwitch()
+	: fb(new widget::FramebufferWidget)
+	, shadow(new CircularShadow)
+	, sw(new widget::SvgWidget) {
+	addChild(fb);
+	fb->addChild(shadow);
+	shadow->box.size = math::Vec();
+	fb->addChild(sw);
+}
+
+SvgSwitch::~SvgSwitch() = default;
+
 void SvgSwitch::addFrame(std::shared_ptr<window::Svg> svg) {
 	if (svg->filename.length()) {
 		frames.push_back(svg);

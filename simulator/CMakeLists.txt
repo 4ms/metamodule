@@ -42,7 +42,6 @@ target_link_libraries(ui PRIVATE lvgl)
 # #################### VCV Adaptor ##################################
 
 add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
-target_compile_options(vcv_plugin PRIVATE -Wno-double-promotion)
 
 # #################### Other brands ##################################
  
@@ -97,7 +96,8 @@ target_compile_options(simulator PRIVATE -Wno-double-promotion)
 
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports CoreModules)
-target_link_libraries(simulator PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
+target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
+target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 

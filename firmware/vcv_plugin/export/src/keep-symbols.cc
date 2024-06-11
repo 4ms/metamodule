@@ -2,7 +2,6 @@
 #include "app/ModuleWidget.hpp"
 #include "app/SvgSlider.hpp"
 #include "app/SvgSwitch.hpp"
-#include "metamodule/make_element.hh"
 #include "random.hpp"
 #include "widget/TransformWidget.hpp"
 
