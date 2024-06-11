@@ -203,7 +203,7 @@ endif()
 
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui ryml cpputil vcv_ports)
-target_link_libraries(main.elf PUBLIC vcv_plugin) #"$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
+target_link_libraries(main.elf PUBLIC vcv_plugin)
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})

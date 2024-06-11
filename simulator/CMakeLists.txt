@@ -42,7 +42,6 @@ target_link_libraries(ui PRIVATE lvgl)
 # #################### VCV Adaptor ##################################
 
 add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
-# target_compile_options(vcv_plugin INTERFACE -Wno-double-promotion)
 
 # #################### Other brands ##################################
  
