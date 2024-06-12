@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
+#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/pages/save_dialog.hh"
@@ -44,7 +45,7 @@ struct PatchViewFileMenu {
 
 	void prepare_focus(lv_group_t *parent_group) {
 		base_group = parent_group;
-		confirm_popup.init(ui_SaveDialogCont, base_group);
+		confirm_popup.init(lv_layer_top(), base_group);
 	}
 
 	void back() {
@@ -136,6 +137,7 @@ struct PatchViewFileMenu {
 
 				page_list.request_new_page_no_history(PageId::PatchSel, {});
 				patch_storage.close_view_patch();
+				hide_menu();
 			}
 		}
 	}
@@ -206,8 +208,18 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
+		std::string confirm_msg =
+			"Delete " + std::string(page->patch_storage.get_view_patch_filename()) + " on disk? This cannot be undone";
+
 		page->patch_loc = {page->patch_storage.get_view_patch_filename(), page->patch_storage.get_view_patch_vol()};
-		page->delete_state = DeleteState::TryRequest;
+		page->confirm_popup.show(
+			[page](unsigned choice) {
+				if (choice == 1) {
+					page->delete_state = DeleteState::TryRequest;
+				}
+			},
+			confirm_msg.c_str(),
+			"Delete");
 	}
 
 	PatchPlayLoader &play_loader;

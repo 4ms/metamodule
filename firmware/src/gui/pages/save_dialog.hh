@@ -1,7 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
-#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
