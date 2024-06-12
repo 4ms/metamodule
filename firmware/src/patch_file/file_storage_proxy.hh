@@ -130,7 +130,6 @@ public:
 		if (playing_patch_)
 			return playing_patch_->loc_hash;
 		else {
-			pr_err("Tried to get_playing_patch_loc_hash() for null playing_patch\n");
 			return PatchLocHash{};
 		}
 	}
@@ -139,7 +138,6 @@ public:
 		if (view_patch_)
 			return view_patch_->loc_hash;
 		else {
-			pr_err("Tried to get_view_patch_loc_hash() for null view_patch\n");
 			return PatchLocHash{};
 		}
 	}
