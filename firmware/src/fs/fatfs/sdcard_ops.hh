@@ -95,6 +95,10 @@ public:
 				return RES_OK;
 			} break;
 
+			case CTRL_SYNC: {
+				return RES_OK;
+			} break;
+
 			default:
 				return RES_PARERR;
 		}

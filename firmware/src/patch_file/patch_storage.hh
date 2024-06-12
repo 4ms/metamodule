@@ -212,6 +212,18 @@ public:
 			return result;
 		}
 
+		if (message.message_type == RequestDeleteFile) {
+			IntercoreStorageMessage result{.message_type = DeleteFileFailed};
+
+			if (message.filename.size() > 0 && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
+				if (delete_file(message.vol_id, message.filename)) {
+					result.message_type = DeleteFileSuccess;
+				}
+			}
+
+			return result;
+		}
+
 		return std::nullopt;
 	}
 
@@ -259,6 +271,34 @@ private:
 
 		pr_dbg("Read patch %.*s, %d bytes\n", (int)filename.size(), filename.data(), buffer.size_bytes());
 		return buffer.size_bytes();
+	}
+
+	bool delete_file(Volume vol, std::string_view filename) {
+		if (vol == Volume::USB) {
+			auto success = usbdrive_.delete_file(filename);
+			if (success) {
+				usb_changes_.reset();
+			}
+			return success;
+
+		} else if (vol == Volume::SDCard) {
+			auto success = sdcard_.delete_file(filename);
+			if (success) {
+				sd_changes_.reset();
+			}
+			return success;
+
+		} else if (vol == Volume::NorFlash) {
+			auto success = norflash_.delete_file(filename);
+			if (success) {
+				norflash_changes_.reset();
+			}
+			return success;
+
+		} else {
+			pr_err("No volume given\n");
+			return false;
+		}
 	}
 };
 
