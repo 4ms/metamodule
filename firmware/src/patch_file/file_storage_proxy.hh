@@ -57,7 +57,7 @@ public:
 		}
 	}
 
-	// TODO: pass the span as an arg, not as a member var
+	// Parses and opens the loaded patch, and sets the view patch to point to it
 	bool parse_loaded_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
 
@@ -277,7 +277,6 @@ public:
 	void close_view_patch() {
 		if (open_patches_.remove(view_patch_->loc_hash)) {
 			if (playing_patch_ == view_patch_) {
-				pr_dbg("Invalidating playpatch");
 				playing_patch_ = nullptr;
 			}
 			view_patch_ = nullptr;

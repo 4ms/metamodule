@@ -111,6 +111,7 @@ struct PatchViewFileMenu {
 	void update() {
 		save_dialog.update();
 		process_delete_file();
+		process_revert_patch();
 	}
 
 	void process_delete_file() {
@@ -141,6 +142,41 @@ struct PatchViewFileMenu {
 
 				page_list.request_new_page_no_history(PageId::PatchSel, {});
 				patch_storage.close_view_patch();
+				hide_menu();
+			}
+		}
+	}
+
+	void process_revert_patch() {
+		if (revert_state == RevertState::TryRequest) {
+			if (patch_storage.request_load_patch(patch_loc)) {
+				revert_state = RevertState::Requested;
+
+				if (patch_storage.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
+					was_playing = true;
+					play_loader.stop_audio();
+				} else
+					was_playing = false;
+			}
+
+		} else if (revert_state == RevertState::Requested) {
+			auto message = patch_storage.get_message();
+
+			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
+				patch_storage.close_view_patch();
+				patch_storage.parse_loaded_patch(message.bytes_read);
+
+				if (was_playing) {
+					play_loader.request_load_view_patch();
+				}
+
+				revert_state = RevertState::Idle;
+				hide_menu();
+			}
+
+			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
+				notify_queue.put({"Error opening file, not reverted.", Notification::Priority::Error});
+				revert_state = RevertState::Idle;
 				hide_menu();
 			}
 		}
@@ -258,6 +294,7 @@ private:
 	bool visible = false;
 
 	bool filesystem_changed = false;
+	bool was_playing = false;
 	PatchLocation patch_loc;
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
