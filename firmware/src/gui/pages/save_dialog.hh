@@ -89,7 +89,7 @@ struct SaveDialog {
 			if (file_vol == Volume::RamDisk)
 				file_vol = Volume::SDCard;
 
-			auto fullpath = std::string_view{patch_storage.get_view_patch_filename()};
+			auto fullpath = patch_storage.get_view_patch_filename();
 			auto slashpos = fullpath.find_last_of('/');
 			if (slashpos != std::string_view::npos) {
 				file_path = fullpath.substr(0, slashpos);
@@ -253,7 +253,7 @@ private:
 
 		// if view patch vol is RamDisk, then don't duplicate, just save
 		if (page->patch_storage.get_view_patch_vol() == Volume::RamDisk) {
-			page->patch_storage.rename_patch_file(fullpath, page->file_vol);
+			page->patch_storage.rename_view_patch_file(fullpath, page->file_vol);
 			page->patch_playloader.request_save_patch();
 			page->saved = true;
 			page->hide();

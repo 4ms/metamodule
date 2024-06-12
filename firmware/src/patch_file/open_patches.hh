@@ -22,38 +22,29 @@ struct OpenPatch {
 
 struct OpenPatchList {
 
-	PatchData *find(PatchLocHash hash) {
+	//TODO: return an optional iterator?
+
+	OpenPatch *find(PatchLocHash hash) {
 		dump();
+		if (list.empty())
+			return nullptr;
+
 		if (auto it = std::ranges::find(list, hash, &OpenPatch::loc_hash); it != list.end()) {
-			return &(it->patch);
+			return &(*it);
 		}
 		return nullptr;
 	}
 
-	bool rename_file(PatchLocHash old_loc, std::string_view new_name, Volume new_vol) {
-		pr_dbg("rename\n");
-		if (auto it = std::ranges::find(list, old_loc, &OpenPatch::loc_hash); it != list.end()) {
-			it->loc_hash = PatchLocHash{new_name, new_vol};
-			it->loc.filename.copy(new_name);
-			it->loc.vol = new_vol;
-			dump();
-			return true;
-		}
-		dump();
-		return false;
-	}
-
-	PatchData *emplace_back(PatchLocation const &loc) {
+	OpenPatch *emplace_back(PatchLocation const &loc) {
 		auto &openpatch = list.emplace_back(loc);
-		pr_dbg("emplace_back\n");
 		dump();
-		return &openpatch.patch;
+		return &openpatch;
 	}
 
-	void remove(PatchLocHash hash) {
-		list.remove_if([=](auto &e) { return e.loc_hash == hash; });
-		pr_dbg("removed\n");
+	bool remove(PatchLocHash hash) {
+		auto num_erased = std::erase_if(list, [=](auto &e) { return e.loc_hash == hash; });
 		dump();
+		return num_erased > 0;
 	}
 
 	void remove_last() {
@@ -63,7 +54,7 @@ struct OpenPatchList {
 	void dump() {
 		unsigned i = 0;
 		for (auto &p : list) {
-			pr_dbg("[%d] %d/%s: %s\n", i++, p.loc.vol, p.loc.filename.c_str(), p.patch.patch_name);
+			pr_dbg("[%d] %d:%s: %s\n", i++, p.loc.vol, p.loc.filename.c_str(), p.patch.patch_name.c_str());
 		}
 	}
 

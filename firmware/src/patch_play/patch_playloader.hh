@@ -38,7 +38,7 @@ struct PatchPlayLoader {
 				if (!storage_.parse_loaded_patch(message.bytes_read))
 					pr_err("ERROR: could not parse initial patch\n");
 				else
-					_load_patch();
+					load_patch();
 				break;
 			}
 			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
@@ -104,7 +104,7 @@ struct PatchPlayLoader {
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {
-			auto result = _load_patch();
+			auto result = load_patch();
 			loading_new_patch_ = false;
 			return result;
 		}
@@ -164,13 +164,18 @@ private:
 	Result save_patch() {
 		storage_.update_view_patch_module_states(player_.get_module_states());
 
-		if (storage_.write_patch()) {
+		if (auto res = storage_.write_patch(); res == FileStorageProxy::WriteResult::Success) {
 			should_save_patch_ = false;
 			saving_patch_ = true;
 			return {true, "Saving..."};
-		} else {
+		} else if (res == FileStorageProxy::WriteResult::Busy) {
 			// message system is busy, try again next time
 			return {true, ""};
+		} else {
+			// error with filename or volume, do not retry
+			should_save_patch_ = false;
+			saving_patch_ = false;
+			return {false, "File name or volume invalid"};
 		}
 	}
 
@@ -190,7 +195,7 @@ private:
 		}
 	}
 
-	Result _load_patch() {
+	Result load_patch() {
 		auto patch = storage_.get_view_patch();
 		auto vol = storage_.get_view_patch_vol();
 
