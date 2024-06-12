@@ -45,6 +45,7 @@ class PageList {
 		PageArguments args;
 	};
 	CircularStack<PageHistory, 64> _page_history;
+
 	PageHistory _current_state{};
 
 public:
@@ -83,6 +84,12 @@ public:
 
 	void update_state(PageId pageid, PageArguments args) {
 		_current_state = {pageid, args};
+	}
+
+	void remove_history_matching_args(PageArguments args) {
+		//TODO: could we remove the matching items?
+		_page_history.clear();
+		_page_history.push_back({.page = PageId::MainMenu});
 	}
 
 	void request_new_page_no_history(PageId pageid, PageArguments args) {

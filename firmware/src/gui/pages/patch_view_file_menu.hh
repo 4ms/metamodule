@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
+#include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/pages/save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -16,10 +17,12 @@ struct PatchViewFileMenu {
 	PatchViewFileMenu(PatchPlayLoader &play_loader,
 					  FileStorageProxy &patch_storage,
 					  PatchSelectorSubdirPanel &subdir_panel,
-					  NotificationQueue &notify_queue)
+					  NotificationQueue &notify_queue,
+					  PageList &page_list)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
 		, notify_queue{notify_queue}
+		, page_list{page_list}
 		, save_dialog{patch_storage, play_loader, subdir_panel, notify_queue}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
@@ -76,15 +79,16 @@ struct PatchViewFileMenu {
 			lv_group_focus_obj(ui_PatchFileSaveBut);
 			lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
 			lv_obj_add_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
+			lv_obj_add_state(ui_PatchFileDeleteBut, LV_STATE_DISABLED);
 		} else {
 			lv_group_focus_obj(ui_PatchFileSaveBut);
 			lv_obj_clear_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
 			lv_obj_clear_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
+			lv_obj_clear_state(ui_PatchFileDeleteBut, LV_STATE_DISABLED);
 		}
 
 		// Not implemented yet!
 		lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
-		lv_obj_add_state(ui_PatchFileDeleteBut, LV_STATE_DISABLED);
 
 		if (!visible) {
 			DropInFromLeft_Animation(ui_PatchFileMenu, 0);
@@ -106,15 +110,32 @@ struct PatchViewFileMenu {
 
 	void process_delete_file() {
 		if (delete_state == DeleteState::TryRequest) {
-			if (patch_storage.delete_view_patch() == FileStorageProxy::WriteResult::Success) {
+			if (patch_storage.request_delete_file(patch_loc.filename, patch_loc.vol)) {
 				delete_state = DeleteState::Requested;
+
+				if (patch_storage.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
+					play_loader.stop_audio();
+				}
 			}
+
 		} else if (delete_state == DeleteState::Requested) {
 			auto msg = patch_storage.get_message().message_type;
-			if (msg == FileStorageProxy::DeleteFileSuccess) {
+
+			if (msg == FileStorageProxy::DeleteFileSuccess || msg == FileStorageProxy::DeleteFileFailed) {
+				// If we made an attempt to delete a file and it failed, then we must assume
+				// the file was deleted, or the file is corrupted, or the drive was unmounted.
+				// In all these cases the file is not accessible anymore, so act as if it was deleted.
+				if (msg == FileStorageProxy::DeleteFileFailed)
+					notify_queue.put({"Error deleting file", Notification::Priority::Error});
+
 				filesystem_changed = true;
-			} else if (msg == FileStorageProxy::DeleteFileFailed) {
-				notify_queue.put({"Error deleting file", Notification::Priority::Error});
+				delete_state = DeleteState::Idle;
+
+				page_list.remove_history_matching_args(
+					{.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
+
+				page_list.request_new_page_no_history(PageId::PatchSel, {});
+				patch_storage.close_view_patch();
 			}
 		}
 	}
@@ -185,12 +206,14 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
+		page->patch_loc = {page->patch_storage.get_view_patch_filename(), page->patch_storage.get_view_patch_vol()};
 		page->delete_state = DeleteState::TryRequest;
 	}
 
 	PatchPlayLoader &play_loader;
 	FileStorageProxy &patch_storage;
 	NotificationQueue &notify_queue;
+	PageList &page_list;
 
 	SaveDialog save_dialog;
 	ConfirmPopup confirm_popup;
@@ -200,6 +223,7 @@ private:
 	bool visible = false;
 
 	bool filesystem_changed = false;
+	PatchLocation patch_loc;
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 };

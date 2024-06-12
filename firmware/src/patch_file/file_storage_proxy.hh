@@ -126,6 +126,15 @@ public:
 		}
 	}
 
+	PatchLocHash get_playing_patch_loc_hash() {
+		if (playing_patch_)
+			return playing_patch_->loc_hash;
+		else {
+			pr_err("Tried to get_playing_patch_loc_hash() for null playing_patch\n");
+			return PatchLocHash{};
+		}
+	}
+
 	PatchLocHash get_view_patch_loc_hash() {
 		if (view_patch_)
 			return view_patch_->loc_hash;
@@ -260,19 +269,16 @@ public:
 
 	enum class WriteResult { Busy, Success, InvalidVol, InvalidName };
 
-	WriteResult delete_view_patch() {
-		auto loc = view_patch_->loc;
-
+	void close_view_patch() {
 		if (open_patches_.remove(view_patch_->loc_hash)) {
+			if (playing_patch_ == view_patch_) {
+				pr_dbg("Invalidating playpatch");
+				playing_patch_ = nullptr;
+			}
 			view_patch_ = nullptr;
-			if (request_delete_file(loc.filename, loc.vol))
-				return WriteResult::Success;
-			else
-				return WriteResult::Busy;
 		} else {
 			pr_err("Tried to delete view patch, but it's not found\n");
 		}
-		return WriteResult::InvalidName;
 	}
 
 	void update_view_patch_module_states(std::vector<ModuleInitState> const &states) {
