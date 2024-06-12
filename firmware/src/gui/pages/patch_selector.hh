@@ -40,12 +40,12 @@ struct PatchSelectorPage : PageBase {
 		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
 
-		auto patchname = patch_playloader.cur_patch_name();
-		if (patchname.length() == 0) {
+		auto playing_patch = patch_storage.playing_patch();
+		if (!playing_patch || playing_patch->patch_name.length() == 0) {
 			lv_label_set_text(ui_NowPlayingName, "none");
 			lv_label_set_text(ui_LoadMeter, "");
 		} else {
-			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", patchname.c_str());
+			lv_label_set_text_fmt(ui_NowPlayingName, "%.31s", playing_patch->patch_name.c_str());
 			lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
 		}
 

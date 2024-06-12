@@ -82,8 +82,7 @@ public:
 		if (playing_patch_)
 			return &playing_patch_->patch;
 		else {
-			pr_err("Tried to get playing_patch when it's null.\n");
-			return &empty_patch;
+			return nullptr;
 		}
 	}
 
@@ -95,7 +94,7 @@ public:
 			return &view_patch_->patch;
 		else {
 			pr_err("Tried to get_view_patch when viewpatch is null.\n");
-			return &empty_patch;
+			return nullptr;
 		}
 	}
 

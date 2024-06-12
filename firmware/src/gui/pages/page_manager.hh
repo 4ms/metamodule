@@ -92,22 +92,24 @@ public:
 	}
 
 	void handle_knobset_change() {
-		auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion();
-		if (knobset_change != 0) {
+		if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
 
-			auto patch = info.patch_storage.playing_patch();
-			if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
-				int cur_knobset = info.page_list.get_active_knobset();
-				int next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
+			if (auto patch = info.patch_storage.playing_patch(); patch != nullptr) {
 
-				info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
-				info.page_list.set_active_knobset(next_knobset);
-				std::string ks_name = patch->valid_knob_set_name(next_knobset);
+				if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
+					int cur_knobset = info.page_list.get_active_knobset();
+					int next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
 
-				if (cur_page != page_list.page(PageId::KnobSetView))
-					info.notify_queue.put({"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 1000});
+					info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
+					info.page_list.set_active_knobset(next_knobset);
+					std::string ks_name = patch->valid_knob_set_name(next_knobset);
 
-				button_light.display_knobset(next_knobset);
+					if (cur_page != page_list.page(PageId::KnobSetView))
+						info.notify_queue.put(
+							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 1000});
+
+					button_light.display_knobset(next_knobset);
+				}
 			}
 		}
 
@@ -120,6 +122,9 @@ public:
 	// This is used to keep GUI in sync with patch player's copy of the patch without concurrancy issues
 	void update_patch_params() {
 		auto patch = info.patch_storage.playing_patch();
+		if (!patch)
+			return;
+
 		auto active_knobset = info.page_list.get_active_knobset();
 		if (active_knobset >= patch->knob_sets.size())
 			return;
