@@ -35,7 +35,7 @@ inline bool scan_directory(FileIoC auto &fileio, PluginFileList &plugin_files, s
 		path, [&](std::string_view entryname, uint32_t timestamp, uint32_t filesize, DirEntryKind kind) {
 			// Add files:
 			if (kind == DirEntryKind::File) {
-				if (entryname.ends_with(".so")) {
+				if (entryname.ends_with(".so") && !entryname.starts_with(".")) {
 					plugin_files.push_back({fileio.vol_id(), path.c_str(), entryname, filesize});
 					pr_trace("Found plugin file %s/%.*s\n", path.c_str(), entryname.size(), entryname.data());
 				}
