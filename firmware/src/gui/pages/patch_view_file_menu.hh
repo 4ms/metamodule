@@ -170,6 +170,8 @@ struct PatchViewFileMenu {
 					play_loader.request_load_view_patch();
 				}
 
+				page_list.request_new_page_no_history(
+					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
 				revert_state = RevertState::Idle;
 				hide_menu();
 			}
