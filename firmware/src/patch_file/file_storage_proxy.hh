@@ -60,27 +60,28 @@ public:
 	bool parse_loaded_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
 
-		auto new_patch = open_patches_.emplace_back(requested_view_patch_loc_);
-		if (!yaml_raw_to_patch(file_data, new_patch)) {
+		auto *new_patch = open_patches_.emplace_back(requested_view_patch_loc_);
+
+		if (!yaml_raw_to_patch(file_data, *new_patch)) {
 			pr_err("Failed to parse\n");
 			open_patches_.remove_last();
 			return false;
 		}
 
 		//Handle patches saved by legacy firmware with empty knob sets
-		new_patch.trim_empty_knobsets();
+		new_patch->trim_empty_knobsets();
 
-		view_patch_ = &new_patch;
+		view_patch_ = new_patch;
 		view_patch_loc_ = requested_view_patch_loc_;
+
 		return true;
 	}
 
 	//
 	// playing_patch: (copy of) patch currently playing in the audio thread
-	// Keep it outside of open_patches because we should never overwrite it
 	//
 	PatchData *playing_patch() {
-		return &playing_patch_;
+		return playing_patch_;
 	}
 
 	//
@@ -94,19 +95,12 @@ public:
 	// Tells FileStorageProxy that the view_patch is now being played
 	//
 	void play_view_patch() {
-		playing_patch_ = *view_patch_; //copy
+		playing_patch_ = view_patch_;
 		playing_patch_loc_ = view_patch_loc_;
-
-		// Remove it from open_patches_
-		view_patch_->blank_patch("");
-		open_patches_.remove(view_patch_loc_);
-
-		//re-point view_patch to playing_patch
-		view_patch_ = &playing_patch_;
 	}
 
 	void view_playing_patch() {
-		view_patch_ = &playing_patch_;
+		view_patch_ = playing_patch_;
 		view_patch_loc_ = playing_patch_loc_;
 	}
 
@@ -195,27 +189,43 @@ public:
 
 	void new_patch() {
 		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
-		view_patch_ = &unsaved_patch_;
-		view_patch_->blank_patch(name);
-
-		name += ".yml";
-		view_patch_loc_.filename.copy(name);
+		std::string filename = name + ".yml";
+		view_patch_loc_.filename.copy(filename);
 		view_patch_loc_.vol = Volume::RamDisk;
+		view_patch_ = open_patches_.emplace_back(view_patch_loc_);
+		view_patch_->blank_patch(name);
 	}
 
-	void duplicate_view_patch(std::string_view filepath, Volume vol) {
+	void rename_patch_file(std::string_view filepath, Volume vol) {
+		if (open_patches_.rename_file(view_patch_loc_, filepath, vol)) {
+			view_patch_loc_.filename.copy(filepath);
+			view_patch_loc_.vol = vol;
+		} else {
+			pr_err("Attempted to rename patch that's not open\n");
+		}
+	}
+
+	bool duplicate_view_patch(std::string_view filepath, Volume vol) {
+		// Check if filename is already open
+		if (open_patches_.find(PatchLocHash{filepath, vol})) {
+			pr_err(
+				"Can't rename patch to same name as an already open patch: %.*s\n", filepath.size(), filepath.data());
+			return false;
+		}
+
 		view_patch_loc_.filename.copy(filepath);
 		view_patch_loc_.vol = vol;
 
-		if (open_patches_.find(view_patch_loc_)) {
-			open_patches_.remove(view_patch_loc_);
-			pr_err("Renamed patch to same name as an already open patch: %.*s\n", filepath.size(), filepath.data());
-			pr_err("Older patch is discarded without saving changes\n");
-		}
+		// Create a new patch
+		PatchData *patch = open_patches_.emplace_back(view_patch_loc_);
 
-		PatchData &patch = open_patches_.emplace_back(view_patch_loc_);
-		patch = *view_patch_; //copy
-		view_patch_ = &patch; //re-point
+		// Copy the currently viewed patch into it
+		*patch = *view_patch_;
+
+		// View the new patch
+		view_patch_ = patch;
+
+		return true;
 	}
 
 	void update_view_patch_module_states(std::vector<ModuleInitState> const &states) {
@@ -273,12 +283,16 @@ private:
 
 	PatchData unsaved_patch_;
 	PatchData *view_patch_ = &unsaved_patch_;
-	PatchData playing_patch_;
+	PatchData *playing_patch_ = &unsaved_patch_;
 
 	OpenPatchList open_patches_;
 
-	PatchLocation requested_view_patch_loc_;
+	// TODO: view_patch_ => current_open_patch->patch
+	// view_patch_loc_ => current_open_patch->loc
+	// view_patch_loc_hash_ => current_open_patch->loc_hash
+	// no need for open_patches.rename_file()
 	PatchLocation view_patch_loc_;
 	PatchLocation playing_patch_loc_;
+	PatchLocation requested_view_patch_loc_;
 };
 } // namespace MetaModule
