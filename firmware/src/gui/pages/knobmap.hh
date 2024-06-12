@@ -197,6 +197,7 @@ struct KnobMapPage : PageBase {
 		page->patch_mod_queue.put(
 			EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx, .cur_val = val / 100.f});
 		page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
+		page->patch_storage.view_patch_modified();
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
@@ -281,6 +282,7 @@ struct KnobMapPage : PageBase {
 					return;
 
 				page->patch_mod_queue.put(RemoveMapping{.map = page->map, .set_id = page->view_set_idx});
+				page->patch_storage.view_patch_modified();
 
 				if (!page->patch->remove_mapping(page->view_set_idx, page->map))
 					pr_err("Could not delete mapping\n");
