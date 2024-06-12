@@ -151,7 +151,7 @@ public:
 			pr_err("Tried to set_patch_filename() for null view_patch\n");
 	}
 
-	void view_patch_modified() {
+	void mark_view_patch_modified() {
 		view_patch_->modification_count++;
 	}
 

@@ -232,7 +232,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		if (auto patch_mod = module_mods.get(); patch_mod.has_value()) {
-			patch_storage.view_patch_modified();
+			patch_storage.mark_view_patch_modified();
 
 			bool refresh = true;
 			// Apply to this thread's copy of patch
