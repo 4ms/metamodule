@@ -86,7 +86,7 @@ private:
 		if (!page)
 			return;
 		page->patch_storage.view_playing_patch();
-		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patch_playloader.cur_patch_loc_hash()});
+		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patch_storage.get_playing_patch_loc_hash()});
 	}
 
 	static void patchsel_cb(lv_event_t *event) {

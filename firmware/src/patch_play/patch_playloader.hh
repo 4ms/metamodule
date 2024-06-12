@@ -76,14 +76,6 @@ struct PatchPlayLoader {
 		return starting_audio_;
 	}
 
-	PatchLocHash cur_patch_loc_hash() {
-		return loaded_patch_loc_hash;
-	}
-
-	auto cur_patch_name() {
-		return loaded_patch_name_;
-	}
-
 	void notify_audio_is_muted() {
 		stopping_audio_ = false;
 		audio_is_muted_ = true;
@@ -158,9 +150,6 @@ private:
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
 
-	PatchLocHash loaded_patch_loc_hash;
-	ModuleTypeSlug loaded_patch_name_ = "";
-
 	Result save_patch() {
 		storage_.update_view_patch_module_states(player_.get_module_states());
 
@@ -204,8 +193,6 @@ private:
 		auto result = player_.load_patch(*patch);
 		if (result.success) {
 			storage_.play_view_patch();
-			loaded_patch_loc_hash = PatchLocHash(storage_.get_view_patch_filename(), vol);
-			loaded_patch_name_ = patch->patch_name;
 			start_audio();
 		}
 
