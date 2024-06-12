@@ -251,7 +251,7 @@ private:
 			fullpath.append(".yml");
 		}
 
-		// if view patch vol is RamDisk, then don't duplicate, just save
+		// if view patch vol is RamDisk, then don't duplicate, just rename
 		if (page->patch_storage.get_view_patch_vol() == Volume::RamDisk) {
 			page->patch_storage.rename_view_patch_file(fullpath, page->file_vol);
 			page->patch_playloader.request_save_patch();

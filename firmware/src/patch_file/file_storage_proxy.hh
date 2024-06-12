@@ -252,11 +252,8 @@ public:
 			return false;
 		}
 
-		view_patch_->loc.filename.copy(filepath);
-		view_patch_->loc.vol = vol;
-
 		// Create a new patch
-		OpenPatch *new_patch = open_patches_.emplace_back(view_patch_->loc);
+		OpenPatch *new_patch = open_patches_.emplace_back({filepath, vol});
 
 		// Copy the currently viewed patch into it
 		new_patch->patch = view_patch_->patch;
