@@ -39,6 +39,7 @@ struct PatchViewFileMenu {
 
 	void prepare_focus(lv_group_t *parent_group) {
 		base_group = parent_group;
+		confirm_popup.init(ui_SaveDialogCont, base_group);
 	}
 
 	void back() {
@@ -164,6 +165,7 @@ private:
 	PatchPlayLoader &play_loader;
 	FileStorageProxy &patch_storage;
 	SaveDialog save_dialog;
+	ConfirmPopup confirm_popup;
 
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;

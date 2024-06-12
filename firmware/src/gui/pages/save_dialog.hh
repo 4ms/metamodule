@@ -38,7 +38,6 @@ struct SaveDialog {
 
 	void prepare_focus(lv_group_t *parent_group) {
 		base_group = parent_group;
-		confirm_popup.init(ui_SaveDialogCont, base_group);
 	}
 
 	void update() {
@@ -120,10 +119,7 @@ struct SaveDialog {
 	}
 
 	void hide() {
-		if (confirm_popup.is_visible()) {
-			confirm_popup.hide();
-
-		} else if (mode == Mode::Idle) {
+		if (mode == Mode::Idle) {
 			lv_hide(ui_SaveDialogCont);
 			lv_group_activate(base_group);
 			mode = Mode::Hidden;
@@ -295,8 +291,6 @@ private:
 	PatchPlayLoader &patch_playloader;
 	PatchSelectorSubdirPanel &subdir_panel;
 	NotificationQueue &notify_queue;
-
-	ConfirmPopup confirm_popup;
 
 	std::vector<EntryInfo> subdir_panel_patches;
 
