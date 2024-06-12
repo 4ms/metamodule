@@ -35,6 +35,7 @@ struct PatchViewFileMenu {
 		lv_obj_add_event_cb(ui_PatchFileSaveBut, savebut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileDuplicateBut, saveas_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_PatchFileRevertBut, revert_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_PatchFileMenuCloseButton);
 		lv_group_add_obj(group, ui_PatchFileSaveBut);
@@ -212,7 +213,7 @@ private:
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
 		std::string confirm_msg =
-			"Delete " + std::string(page->patch_storage.get_view_patch_filename()) + " on disk? This cannot be undone";
+			"Delete " + std::string(page->patch_storage.get_view_patch_filename()) + " on disk? This cannot be undone.";
 
 		page->patch_loc = {page->patch_storage.get_view_patch_filename(), page->patch_storage.get_view_patch_vol()};
 		page->confirm_popup.show(
@@ -223,6 +224,25 @@ private:
 			},
 			confirm_msg.c_str(),
 			"Delete");
+	}
+
+	static void revert_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+
+		std::string confirm_msg = "Revert " + std::string(page->patch_storage.get_view_patch_filename()) +
+								  " to last saved version on disk? This cannot be undone.";
+
+		page->patch_loc = {page->patch_storage.get_view_patch_filename(), page->patch_storage.get_view_patch_vol()};
+		page->confirm_popup.show(
+			[page](unsigned choice) {
+				if (choice == 1) {
+					page->revert_state = RevertState::TryRequest;
+				}
+			},
+			confirm_msg.c_str(),
+			"Revert");
 	}
 
 	PatchPlayLoader &play_loader;
@@ -241,6 +261,7 @@ private:
 	PatchLocation patch_loc;
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
+	enum class RevertState { Idle, TryRequest, Requested } revert_state = RevertState::Idle;
 };
 
 } // namespace MetaModule

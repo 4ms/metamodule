@@ -257,6 +257,7 @@ struct PatchViewPage : PageBase {
 
 		if (desc_panel.did_update_names()) {
 			gui_state.force_refresh_vol = patch_storage.get_view_patch_vol();
+			patch_storage.view_patch_modified();
 			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
 		}
 
