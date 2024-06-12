@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/notify/queue.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/pages/save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -14,10 +15,11 @@ struct PatchViewFileMenu {
 
 	PatchViewFileMenu(PatchPlayLoader &play_loader,
 					  FileStorageProxy &patch_storage,
-					  PatchSelectorSubdirPanel &subdir_panel)
+					  PatchSelectorSubdirPanel &subdir_panel,
+					  NotificationQueue &notify_queue)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
-		, save_dialog{patch_storage, play_loader, subdir_panel}
+		, save_dialog{patch_storage, play_loader, subdir_panel, notify_queue}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);

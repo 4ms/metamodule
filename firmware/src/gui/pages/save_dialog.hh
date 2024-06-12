@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/notify/queue.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -11,10 +12,14 @@ namespace MetaModule
 
 struct SaveDialog {
 
-	SaveDialog(FileStorageProxy &patch_storage, PatchPlayLoader &play_loader, PatchSelectorSubdirPanel &subdir_panel)
+	SaveDialog(FileStorageProxy &patch_storage,
+			   PatchPlayLoader &play_loader,
+			   PatchSelectorSubdirPanel &subdir_panel,
+			   NotificationQueue &notify_queue)
 		: patch_storage{patch_storage}
 		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
+		, notify_queue{notify_queue}
 		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
@@ -268,6 +273,8 @@ private:
 	FileStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
 	PatchSelectorSubdirPanel &subdir_panel;
+	NotificationQueue &notify_queue;
+
 
 	std::vector<EntryInfo> subdir_panel_patches;
 
