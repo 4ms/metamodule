@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
+#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -37,6 +38,7 @@ struct SaveDialog {
 
 	void prepare_focus(lv_group_t *parent_group) {
 		base_group = parent_group;
+		confirm_popup.init(ui_SaveDialogCont, base_group);
 	}
 
 	void update() {
@@ -116,7 +118,10 @@ struct SaveDialog {
 	}
 
 	void hide() {
-		if (mode == Mode::Idle) {
+		if (confirm_popup.is_visible()) {
+			confirm_popup.hide();
+
+		} else if (mode == Mode::Idle) {
 			lv_hide(ui_SaveDialogCont);
 			lv_group_activate(base_group);
 			mode = Mode::Hidden;
@@ -247,10 +252,24 @@ private:
 		if (!fullpath.ends_with(".yml")) {
 			fullpath.append(".yml");
 		}
-		page->patch_storage.duplicate_view_patch(fullpath, page->file_vol);
-		page->patch_playloader.request_save_patch();
-		page->saved = true;
-		page->hide();
+
+		// if view patch vol is RamDisk, then don't duplicate, just save
+		if (page->patch_storage.get_view_patch_vol() == Volume::RamDisk) {
+			page->patch_storage.rename_patch_file(fullpath, page->file_vol);
+			page->patch_playloader.request_save_patch();
+			page->saved = true;
+			page->hide();
+		} else {
+			if (page->patch_storage.duplicate_view_patch(fullpath, page->file_vol)) {
+				page->patch_playloader.request_save_patch();
+				page->saved = true;
+				page->hide();
+			} else {
+				//send notification of failure
+				std::string err_str = "File " + fullpath + " already exists and is open, cannot save over it.";
+				page->notify_queue.put({err_str, Notification::Priority::Error});
+			}
+		}
 	}
 
 	static void cancel_cb(lv_event_t *event) {
@@ -275,6 +294,7 @@ private:
 	PatchSelectorSubdirPanel &subdir_panel;
 	NotificationQueue &notify_queue;
 
+	ConfirmPopup confirm_popup;
 
 	std::vector<EntryInfo> subdir_panel_patches;
 
