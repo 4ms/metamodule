@@ -87,6 +87,8 @@ struct SaveDialog {
 	void show() {
 		if (mode == Mode::Hidden) {
 			file_vol = patch_storage.get_view_patch_vol();
+			if (file_vol == Volume::RamDisk)
+				file_vol = Volume::SDCard;
 
 			auto fullpath = std::string_view{patch_storage.get_view_patch_filename()};
 			auto slashpos = fullpath.find_last_of('/');
