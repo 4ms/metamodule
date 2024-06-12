@@ -81,15 +81,18 @@ struct PatchViewFileMenu {
 			lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
 			lv_obj_add_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
 			lv_obj_add_state(ui_PatchFileDeleteBut, LV_STATE_DISABLED);
+			lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
 		} else {
 			lv_group_focus_obj(ui_PatchFileSaveBut);
 			lv_obj_clear_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
 			lv_obj_clear_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
 			lv_obj_clear_state(ui_PatchFileDeleteBut, LV_STATE_DISABLED);
-		}
 
-		// Not implemented yet!
-		lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
+			if (patch_storage.get_view_patch_modification_count() > 0)
+				lv_obj_clear_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
+			else
+				lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
+		}
 
 		if (!visible) {
 			DropInFromLeft_Animation(ui_PatchFileMenu, 0);
