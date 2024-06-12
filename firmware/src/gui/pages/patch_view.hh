@@ -260,7 +260,7 @@ struct PatchViewPage : PageBase {
 			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
 		}
 
-		if (file_menu.did_save()) {
+		if (file_menu.did_filesystem_change()) {
 			gui_state.force_refresh_vol = patch_storage.get_view_patch_vol();
 		}
 

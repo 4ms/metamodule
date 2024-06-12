@@ -210,6 +210,15 @@ public:
 		return comm_.send_message(message);
 	}
 
+	[[nodiscard]] bool request_delete_file(std::string_view filename, Volume vol) {
+		IntercoreStorageMessage message{
+			.message_type = RequestDeleteFile,
+			.vol_id = vol,
+			.filename = filename,
+		};
+		return comm_.send_message(message);
+	}
+
 	void new_patch() {
 		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
 		std::string filename = name + ".yml";
@@ -291,8 +300,8 @@ public:
 
 			IntercoreStorageMessage message{
 				.message_type = RequestWritePatchData,
-			.vol_id = vol,
-			.buffer = file_data,
+				.vol_id = vol,
+				.buffer = file_data,
 				.filename = filename,
 			};
 

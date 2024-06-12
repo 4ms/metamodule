@@ -19,6 +19,7 @@ struct PatchViewFileMenu {
 					  NotificationQueue &notify_queue)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
+		, notify_queue{notify_queue}
 		, save_dialog{patch_storage, play_loader, subdir_panel, notify_queue}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
@@ -29,6 +30,7 @@ struct PatchViewFileMenu {
 		lv_obj_add_event_cb(ui_PatchFileMenuCloseButton, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileSaveBut, savebut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileDuplicateBut, saveas_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_PatchFileDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_PatchFileMenuCloseButton);
 		lv_group_add_obj(group, ui_PatchFileSaveBut);
@@ -99,12 +101,28 @@ struct PatchViewFileMenu {
 
 	void update() {
 		save_dialog.update();
+		process_delete_file();
 	}
 
-	bool did_save() {
+	void process_delete_file() {
+		if (delete_state == DeleteState::TryRequest) {
+			if (patch_storage.delete_view_patch() == FileStorageProxy::WriteResult::Success) {
+				delete_state = DeleteState::Requested;
+			}
+		} else if (delete_state == DeleteState::Requested) {
+			auto msg = patch_storage.get_message().message_type;
+			if (msg == FileStorageProxy::DeleteFileSuccess) {
+				filesystem_changed = true;
+			} else if (msg == FileStorageProxy::DeleteFileFailed) {
+				notify_queue.put({"Error deleting file", Notification::Priority::Error});
+			}
+		}
+	}
+
+	bool did_filesystem_change() {
 		bool result = save_dialog.did_save();
-		result |= saved;
-		saved = false;
+		result |= filesystem_changed;
+		filesystem_changed = false;
 		return result;
 	}
 
@@ -146,7 +164,7 @@ private:
 			saveas_but_cb(event);
 		} else {
 			page->play_loader.request_save_patch();
-			page->saved = true;
+			page->filesystem_changed = true;
 		}
 	}
 
@@ -156,14 +174,24 @@ private:
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
 		// If the filename has not been set yet, set it to the patchname + .yml
-		if (std::string_view{page->patch_storage.get_view_patch_filename()}.starts_with("Untitled Patch ")) {
+		if (page->patch_storage.get_view_patch_filename().starts_with("Untitled Patch ")) {
 			page->copy_patchname_to_filename();
 		}
 		page->show_save_dialog();
 	}
 
+	static void delete_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+
+		page->delete_state = DeleteState::TryRequest;
+	}
+
 	PatchPlayLoader &play_loader;
 	FileStorageProxy &patch_storage;
+	NotificationQueue &notify_queue;
+
 	SaveDialog save_dialog;
 	ConfirmPopup confirm_popup;
 
@@ -171,7 +199,9 @@ private:
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
 
-	bool saved = false;
+	bool filesystem_changed = false;
+
+	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 };
 
 } // namespace MetaModule
