@@ -74,7 +74,7 @@ struct PatchViewPage : PageBase {
 		bool needs_refresh = false;
 		if (gui_state.force_redraw_patch)
 			needs_refresh = true;
-		if (patch_revision != page_list.get_patch_revision())
+		if (patch_revision != patch_storage.get_view_patch_modification_count())
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
@@ -103,7 +103,7 @@ struct PatchViewPage : PageBase {
 		if (args.patch_loc_hash)
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
-		patch_revision = page_list.get_patch_revision();
+		patch_revision = patch_storage.get_view_patch_modification_count();
 
 		clear();
 

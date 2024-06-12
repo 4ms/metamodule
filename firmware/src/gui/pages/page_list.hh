@@ -38,7 +38,6 @@ class PageList {
 	std::array<PageBase *, MaxPages> _pages{};
 
 	uint32_t _active_knobset_id = 0;
-	uint32_t _patch_revision = 0;
 
 	struct PageHistory {
 		PageId page;
@@ -55,14 +54,6 @@ public:
 
 	uint32_t get_active_knobset() {
 		return _active_knobset_id;
-	}
-
-	void increment_patch_revision() {
-		_patch_revision++;
-	}
-
-	uint32_t get_patch_revision() {
-		return _patch_revision;
 	}
 
 	// Associates a pointer to a Page with an id

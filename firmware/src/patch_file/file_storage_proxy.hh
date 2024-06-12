@@ -12,6 +12,8 @@
 namespace MetaModule
 {
 
+// TODO: separate this into the Proxy (wrappers for calls to comm_.send_message)
+// and the open patch managment (view_patch, playing_patch)
 class FileStorageProxy {
 
 public:
@@ -147,6 +149,14 @@ public:
 			view_patch_->loc.filename.copy(filename);
 		else
 			pr_err("Tried to set_patch_filename() for null view_patch\n");
+	}
+
+	void view_patch_modified() {
+		view_patch_->modification_count++;
+	}
+
+	unsigned get_view_patch_modification_count() {
+		return view_patch_->modification_count;
 	}
 
 	//
