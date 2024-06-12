@@ -115,6 +115,22 @@ struct SimulatorFileStorageComm {
 				// refresh_required = true;
 			} break;
 
+			case RequestDeleteFile: {
+				bool ok = false;
+
+				if (msg.vol_id == Volume::SDCard)
+					ok = storage.hostfs.delete_file(msg.filename);
+
+				if (msg.vol_id == Volume::NorFlash)
+					ok = storage.defaultpatchfs.delete_file(msg.filename);
+
+				if (!ok) {
+					reply = {DeleteFileFailed};
+				} else {
+					reply = {DeleteFileSuccess};
+				}
+			} break;
+
 			case RequestFactoryResetPatches: {
 				pr_info("Reset to factory patches = no action. (simulator default patches are read-only)\n");
 			} break;
