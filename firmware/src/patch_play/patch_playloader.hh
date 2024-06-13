@@ -151,7 +151,8 @@ private:
 	std::atomic<bool> should_save_patch_ = false;
 
 	Result save_patch() {
-		storage_.update_view_patch_module_states(player_.get_module_states());
+		if (storage_.get_view_patch() == storage_.get_playing_patch())
+			storage_.update_view_patch_module_states(player_.get_module_states());
 
 		if (auto res = storage_.write_patch(); res == FileStorageProxy::WriteResult::Success) {
 			should_save_patch_ = false;
