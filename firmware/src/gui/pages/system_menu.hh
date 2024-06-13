@@ -19,7 +19,7 @@ struct SystemMenuPage : PageBase {
 		: PageBase{info, PageId::SystemMenu}
 		, fwupdate_tab{patch_storage, patch_playloader}
 		, plugin_tab{info.plugin_manager, info.notify_queue}
-		, prefs_tab{patch_storage}
+		, status_tab{patch_storage}
 		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
 		init_bg(ui_SystemMenu);
@@ -57,6 +57,8 @@ struct SystemMenuPage : PageBase {
 
 		} else if (active_tab == Tabs::Info) {
 			status_tab.update();
+			if (pressed_back && status_tab.consume_back_event())
+				pressed_back = false;
 
 		} else if (active_tab == Tabs::Plugins) {
 			plugin_tab.update();
