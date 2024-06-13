@@ -25,11 +25,11 @@ lv_obj_set_style_border_side(ui_SystemMenuTabView, LV_BORDER_SIDE_FULL, LV_PART_
 
 lv_obj_set_style_bg_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0x333333),  LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 4,  LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 4,  LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 6,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 6,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 12,  LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 8,  LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0x444444),  LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_bg_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_MAIN| LV_STATE_FOCUSED);
@@ -45,7 +45,7 @@ lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 2,
 lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 3,  LV_PART_MAIN| LV_STATE_CHECKED|LV_STATE_FOCUS_KEY);
 
 lv_obj_set_style_text_font(lv_tabview_get_tab_btns(ui_SystemMenuTabView), &ui_font_MuseoSansRounded70016,  LV_PART_ITEMS| LV_STATE_DEFAULT);
-lv_obj_set_style_radius(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 12,  LV_PART_ITEMS| LV_STATE_DEFAULT);
+lv_obj_set_style_radius(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 22,  LV_PART_ITEMS| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(lv_tabview_get_tab_btns(ui_SystemMenuTabView), lv_color_hex(0x777777),  LV_PART_ITEMS | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,  LV_PART_ITEMS| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 0,  LV_PART_ITEMS| LV_STATE_DEFAULT);
@@ -64,16 +64,16 @@ lv_obj_set_style_outline_opa(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 255,
 lv_obj_set_style_outline_width(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 2,  LV_PART_ITEMS| LV_STATE_FOCUS_KEY);
 lv_obj_set_style_outline_pad(lv_tabview_get_tab_btns(ui_SystemMenuTabView), 1,  LV_PART_ITEMS| LV_STATE_FOCUS_KEY);
 
-ui_SystemMenuInfoTab = lv_tabview_add_tab(ui_SystemMenuTabView, "System");
+ui_SystemMenuInfoTab = lv_tabview_add_tab(ui_SystemMenuTabView, "Info");
 lv_obj_set_flex_flow(ui_SystemMenuInfoTab,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_SystemMenuInfoTab, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_clear_flag( ui_SystemMenuInfoTab, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_bg_color(ui_SystemMenuInfoTab, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_SystemMenuInfoTab, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_SystemMenuInfoTab, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_SystemMenuInfoTab, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_SystemMenuInfoTab, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_SystemMenuInfoTab, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_SystemMenuInfoTab, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemMenuInfoTab, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemMenuInfoTab, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemMenuInfoTab, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_SystemMenuInfoTab, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_SystemMenuInfoTab, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -127,106 +127,6 @@ lv_obj_set_height( ui_SystemMenuFWversion, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuFWversion, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemMenuFWversion,"Firmware version 0.5.1");
 lv_obj_set_style_text_font(ui_SystemMenuFWversion, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_SystemCalibrationCont = lv_obj_create(ui_SystemMenuInfoTab);
-lv_obj_remove_style_all(ui_SystemCalibrationCont);
-lv_obj_set_width( ui_SystemCalibrationCont, lv_pct(100));
-lv_obj_set_height( ui_SystemCalibrationCont, LV_SIZE_CONTENT);   /// 50
-lv_obj_set_align( ui_SystemCalibrationCont, LV_ALIGN_CENTER );
-lv_obj_set_flex_flow(ui_SystemCalibrationCont,LV_FLEX_FLOW_ROW);
-lv_obj_set_flex_align(ui_SystemCalibrationCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_clear_flag( ui_SystemCalibrationCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_set_style_border_color(ui_SystemCalibrationCont, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_border_opa(ui_SystemCalibrationCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_width(ui_SystemCalibrationCont, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_side(ui_SystemCalibrationCont, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_SystemCalibrationCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_SystemCalibrationCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_SystemCalibrationCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_SystemCalibrationCont, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_SystemCalibrationCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_SystemCalibrationCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_SystemCalibrationTitle = lv_label_create(ui_SystemCalibrationCont);
-lv_obj_set_width( ui_SystemCalibrationTitle, lv_pct(100));
-lv_obj_set_height( ui_SystemCalibrationTitle, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_SystemCalibrationTitle, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SystemCalibrationTitle,"CV jack calibration:");
-lv_obj_set_style_text_font(ui_SystemCalibrationTitle, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_SystemCalibrationButton = lv_btn_create(ui_SystemCalibrationCont);
-lv_obj_set_height( ui_SystemCalibrationButton, 28);
-lv_obj_set_width( ui_SystemCalibrationButton, LV_SIZE_CONTENT);  /// 100
-lv_obj_set_align( ui_SystemCalibrationButton, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_SystemCalibrationButton, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
-lv_obj_clear_flag( ui_SystemCalibrationButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_style_radius(ui_SystemCalibrationButton, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_SystemCalibrationButton, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_SystemCalibrationButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_SystemCalibrationButton, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(ui_SystemCalibrationButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
-lv_obj_set_style_outline_opa(ui_SystemCalibrationButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_width(ui_SystemCalibrationButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_pad(ui_SystemCalibrationButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_color(ui_SystemCalibrationButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
-lv_obj_set_style_outline_opa(ui_SystemCalibrationButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-
-ui_SystemCalibrationButtonLabel = lv_label_create(ui_SystemCalibrationButton);
-lv_obj_set_width( ui_SystemCalibrationButtonLabel, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_SystemCalibrationButtonLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_SystemCalibrationButtonLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SystemCalibrationButtonLabel,"Re-calibrate jacks");
-lv_obj_set_style_text_font(ui_SystemCalibrationButtonLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_SystemResetInternalPatchesCont = lv_obj_create(ui_SystemMenuInfoTab);
-lv_obj_remove_style_all(ui_SystemResetInternalPatchesCont);
-lv_obj_set_width( ui_SystemResetInternalPatchesCont, lv_pct(100));
-lv_obj_set_height( ui_SystemResetInternalPatchesCont, LV_SIZE_CONTENT);   /// 50
-lv_obj_set_align( ui_SystemResetInternalPatchesCont, LV_ALIGN_CENTER );
-lv_obj_set_flex_flow(ui_SystemResetInternalPatchesCont,LV_FLEX_FLOW_ROW);
-lv_obj_set_flex_align(ui_SystemResetInternalPatchesCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_clear_flag( ui_SystemResetInternalPatchesCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_set_style_border_color(ui_SystemResetInternalPatchesCont, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_border_opa(ui_SystemResetInternalPatchesCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_width(ui_SystemResetInternalPatchesCont, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_border_side(ui_SystemResetInternalPatchesCont, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_SystemResetInternalPatchesCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_SystemResetInternalPatchesCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_SystemResetInternalPatchesCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_SystemResetInternalPatchesCont, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_SystemResetInternalPatchesCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_SystemResetInternalPatchesCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_ResetFactoryPatchesDescription = lv_label_create(ui_SystemResetInternalPatchesCont);
-lv_obj_set_width( ui_ResetFactoryPatchesDescription, lv_pct(100));
-lv_obj_set_height( ui_ResetFactoryPatchesDescription, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_ResetFactoryPatchesDescription, LV_ALIGN_CENTER );
-lv_label_set_text(ui_ResetFactoryPatchesDescription,"Factory Reset patches on Internal drive:");
-lv_obj_set_style_text_font(ui_ResetFactoryPatchesDescription, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_ResetFactoryPatchesButton = lv_btn_create(ui_SystemResetInternalPatchesCont);
-lv_obj_set_height( ui_ResetFactoryPatchesButton, 28);
-lv_obj_set_width( ui_ResetFactoryPatchesButton, LV_SIZE_CONTENT);  /// 100
-lv_obj_set_align( ui_ResetFactoryPatchesButton, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_ResetFactoryPatchesButton, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
-lv_obj_clear_flag( ui_ResetFactoryPatchesButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_style_radius(ui_ResetFactoryPatchesButton, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_ResetFactoryPatchesButton, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_ResetFactoryPatchesButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_ResetFactoryPatchesButton, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(ui_ResetFactoryPatchesButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
-lv_obj_set_style_outline_opa(ui_ResetFactoryPatchesButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_width(ui_ResetFactoryPatchesButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_pad(ui_ResetFactoryPatchesButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_color(ui_ResetFactoryPatchesButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
-lv_obj_set_style_outline_opa(ui_ResetFactoryPatchesButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-
-ui_ResetFactoryPatchesLabel = lv_label_create(ui_ResetFactoryPatchesButton);
-lv_obj_set_width( ui_ResetFactoryPatchesLabel, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_ResetFactoryPatchesLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_ResetFactoryPatchesLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_ResetFactoryPatchesLabel,"Reset Factory Patches");
-lv_obj_set_style_text_font(ui_ResetFactoryPatchesLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SystemMenuTest = lv_tabview_add_tab(ui_SystemMenuTabView, "Plugins");
 lv_obj_set_flex_flow(ui_SystemMenuTest,LV_FLEX_FLOW_ROW);
@@ -486,6 +386,120 @@ lv_obj_set_flex_flow(ui_SystemMenuPrefs,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_SystemMenuPrefs, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 lv_obj_set_style_bg_color(ui_SystemMenuPrefs, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_SystemMenuPrefs, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemMenuCalibrateTab = lv_tabview_add_tab(ui_SystemMenuTabView, "System");
+lv_obj_set_flex_flow(ui_SystemMenuCalibrateTab,LV_FLEX_FLOW_COLUMN);
+lv_obj_set_flex_align(ui_SystemMenuCalibrateTab, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_clear_flag( ui_SystemMenuCalibrateTab, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_bg_color(ui_SystemMenuCalibrateTab, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_SystemMenuCalibrateTab, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_SystemMenuCalibrateTab, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemMenuCalibrateTab, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemMenuCalibrateTab, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemMenuCalibrateTab, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+lv_obj_set_style_bg_color(ui_SystemMenuCalibrateTab, lv_color_hex(0xFD8B18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_SystemMenuCalibrateTab, 128, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+
+ui_SystemCalibrationCont = lv_obj_create(ui_SystemMenuCalibrateTab);
+lv_obj_remove_style_all(ui_SystemCalibrationCont);
+lv_obj_set_width( ui_SystemCalibrationCont, lv_pct(100));
+lv_obj_set_height( ui_SystemCalibrationCont, LV_SIZE_CONTENT);   /// 50
+lv_obj_set_align( ui_SystemCalibrationCont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_SystemCalibrationCont,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_SystemCalibrationCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_clear_flag( ui_SystemCalibrationCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_border_color(ui_SystemCalibrationCont, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_border_opa(ui_SystemCalibrationCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_SystemCalibrationCont, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_side(ui_SystemCalibrationCont, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_SystemCalibrationCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemCalibrationCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemCalibrationCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemCalibrationCont, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_SystemCalibrationCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_SystemCalibrationCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemCalibrationTitle = lv_label_create(ui_SystemCalibrationCont);
+lv_obj_set_width( ui_SystemCalibrationTitle, lv_pct(100));
+lv_obj_set_height( ui_SystemCalibrationTitle, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemCalibrationTitle, LV_ALIGN_CENTER );
+lv_label_set_text(ui_SystemCalibrationTitle,"CV jack calibration:");
+lv_obj_set_style_text_font(ui_SystemCalibrationTitle, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemCalibrationButton = lv_btn_create(ui_SystemCalibrationCont);
+lv_obj_set_height( ui_SystemCalibrationButton, 28);
+lv_obj_set_width( ui_SystemCalibrationButton, LV_SIZE_CONTENT);  /// 100
+lv_obj_set_align( ui_SystemCalibrationButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_SystemCalibrationButton, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
+lv_obj_clear_flag( ui_SystemCalibrationButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_SystemCalibrationButton, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_SystemCalibrationButton, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_SystemCalibrationButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_SystemCalibrationButton, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_SystemCalibrationButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_SystemCalibrationButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_SystemCalibrationButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_SystemCalibrationButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_SystemCalibrationButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_SystemCalibrationButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_SystemCalibrationButtonLabel = lv_label_create(ui_SystemCalibrationButton);
+lv_obj_set_width( ui_SystemCalibrationButtonLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_SystemCalibrationButtonLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemCalibrationButtonLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_SystemCalibrationButtonLabel,"Re-calibrate jacks");
+lv_obj_set_style_text_font(ui_SystemCalibrationButtonLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemResetInternalPatchesCont = lv_obj_create(ui_SystemMenuCalibrateTab);
+lv_obj_remove_style_all(ui_SystemResetInternalPatchesCont);
+lv_obj_set_width( ui_SystemResetInternalPatchesCont, lv_pct(100));
+lv_obj_set_height( ui_SystemResetInternalPatchesCont, LV_SIZE_CONTENT);   /// 50
+lv_obj_set_align( ui_SystemResetInternalPatchesCont, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_SystemResetInternalPatchesCont,LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_SystemResetInternalPatchesCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_clear_flag( ui_SystemResetInternalPatchesCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_border_color(ui_SystemResetInternalPatchesCont, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_border_opa(ui_SystemResetInternalPatchesCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_SystemResetInternalPatchesCont, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_side(ui_SystemResetInternalPatchesCont, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_SystemResetInternalPatchesCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemResetInternalPatchesCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemResetInternalPatchesCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemResetInternalPatchesCont, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_SystemResetInternalPatchesCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_SystemResetInternalPatchesCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_ResetFactoryPatchesDescription = lv_label_create(ui_SystemResetInternalPatchesCont);
+lv_obj_set_width( ui_ResetFactoryPatchesDescription, lv_pct(100));
+lv_obj_set_height( ui_ResetFactoryPatchesDescription, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_ResetFactoryPatchesDescription, LV_ALIGN_CENTER );
+lv_label_set_text(ui_ResetFactoryPatchesDescription,"Factory Reset patches on Internal drive:");
+lv_obj_set_style_text_font(ui_ResetFactoryPatchesDescription, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_ResetFactoryPatchesButton = lv_btn_create(ui_SystemResetInternalPatchesCont);
+lv_obj_set_height( ui_ResetFactoryPatchesButton, 28);
+lv_obj_set_width( ui_ResetFactoryPatchesButton, LV_SIZE_CONTENT);  /// 100
+lv_obj_set_align( ui_ResetFactoryPatchesButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_ResetFactoryPatchesButton, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
+lv_obj_clear_flag( ui_ResetFactoryPatchesButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_ResetFactoryPatchesButton, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ResetFactoryPatchesButton, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ResetFactoryPatchesButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_ResetFactoryPatchesButton, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_ResetFactoryPatchesButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_ResetFactoryPatchesButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ResetFactoryPatchesButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ResetFactoryPatchesButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_ResetFactoryPatchesButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_ResetFactoryPatchesButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_ResetFactoryPatchesLabel = lv_label_create(ui_ResetFactoryPatchesButton);
+lv_obj_set_width( ui_ResetFactoryPatchesLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_ResetFactoryPatchesLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_ResetFactoryPatchesLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_ResetFactoryPatchesLabel,"Reset Factory Patches");
+lv_obj_set_style_text_font(ui_ResetFactoryPatchesLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SystemMenuUpdateTab = lv_tabview_add_tab(ui_SystemMenuTabView, "Update");
 lv_obj_set_flex_flow(ui_SystemMenuUpdateTab,LV_FLEX_FLOW_COLUMN);
