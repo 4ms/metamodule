@@ -331,6 +331,18 @@ struct PatchData {
 		return module_id;
 	}
 
+	size_t patch_size() {
+		auto sz = sizeof(PatchData);
+		sz += module_slugs.size() * sizeof(BrandModuleSlug);
+		sz += int_cables.size() * sizeof(InternalCable);
+		for (auto &in : int_cables)
+			sz += in.ins.size() * sizeof(Jack);
+
+		////TODO rest of data
+
+		return sz;
+	}
+
 private:
 	//non-const version for private use only
 	MappedKnob *_get_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) {

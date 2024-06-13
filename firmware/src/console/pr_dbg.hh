@@ -20,7 +20,7 @@ inline constexpr bool PRINT_INFO = true;
 inline constexpr bool PRINT_DEBUG = true;
 
 // Trace: detailed log of execution
-inline constexpr bool PRINT_TRACE = false;
+inline constexpr bool PRINT_TRACE = true;
 
 // Dump: large amounts of verbose data
 inline constexpr bool PRINT_DUMP = false;
