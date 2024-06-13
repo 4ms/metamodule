@@ -78,7 +78,7 @@ static std::pair<std::string_view, std::string_view> brand_module(std::string_vi
 		//search all brands for module slug
 		for (auto &brand : registry()) {
 			if (brand.modules.get(module_slug)) {
-				pr_dbg("Brand not specified, found %s in %s\n", module_slug.data(), brand.brand_name.c_str());
+				// pr_dbg("Brand not specified, found %s in %s\n", module_slug.data(), brand.brand_name.c_str());
 				return {brand.brand_name.c_str(), module_slug};
 			}
 		}

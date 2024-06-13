@@ -25,9 +25,11 @@ struct GuiState {
 		ElementType type;
 		bool has_connections;
 	};
-	std::optional<CableBeginning> new_cable;
+	std::optional<CableBeginning> new_cable{};
 
 	bool force_redraw_patch{};
+
+	std::optional<Volume> force_refresh_vol{};
 };
 
 struct PatchContext {
@@ -127,7 +129,7 @@ struct PageBase {
 
 	bool patch_is_playing(std::optional<PatchLocHash> patch_loc_hash) {
 		if (patch_loc_hash.has_value()) {
-			return (patch_loc_hash.value() == patch_playloader.cur_patch_loc_hash());
+			return (patch_loc_hash.value() == patch_storage.get_playing_patch_loc_hash());
 		} else {
 			return false;
 		}

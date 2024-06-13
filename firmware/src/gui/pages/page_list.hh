@@ -38,13 +38,13 @@ class PageList {
 	std::array<PageBase *, MaxPages> _pages{};
 
 	uint32_t _active_knobset_id = 0;
-	uint32_t _patch_revision = 0;
 
 	struct PageHistory {
 		PageId page;
 		PageArguments args;
 	};
 	CircularStack<PageHistory, 64> _page_history;
+
 	PageHistory _current_state{};
 
 public:
@@ -54,14 +54,6 @@ public:
 
 	uint32_t get_active_knobset() {
 		return _active_knobset_id;
-	}
-
-	void increment_patch_revision() {
-		_patch_revision++;
-	}
-
-	uint32_t get_patch_revision() {
-		return _patch_revision;
 	}
 
 	// Associates a pointer to a Page with an id
@@ -83,6 +75,12 @@ public:
 
 	void update_state(PageId pageid, PageArguments args) {
 		_current_state = {pageid, args};
+	}
+
+	void remove_history_matching_args(PageArguments args) {
+		//TODO: could we remove the matching items?
+		_page_history.clear();
+		_page_history.push_back({.page = PageId::MainMenu});
 	}
 
 	void request_new_page_no_history(PageId pageid, PageArguments args) {

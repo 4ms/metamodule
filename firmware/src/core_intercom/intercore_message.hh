@@ -57,12 +57,17 @@ struct IntercoreStorageMessage {
 		CopyPluginAssetsOK,
 		CopyPluginAssetsFail,
 
+		RequestDeleteFile,
+		DeleteFileFailed,
+		DeleteFileSuccess,
+
 		NumRequests,
 	};
 	MessageType message_type = MessageType::None;
 
 	uint32_t bytes_read{};
 	Volume vol_id;
+	bool force_refresh;
 	std::span<char> buffer;
 	PatchDirList *patch_dir_list;
 	StaticString<255> filename;

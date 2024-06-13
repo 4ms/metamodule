@@ -37,6 +37,8 @@ private:
 	// in_conns[]: In1-In6, GateIn1, GateIn2
 	std::array<std::vector<Jack>, PanelDef::NumUserFacingInJacks> in_conns;
 
+	unsigned num_modules = 0;
+
 	// MIDI
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_gate_conns;
@@ -98,15 +100,17 @@ public:
 
 		copy_patch_data(patchdata);
 
+		num_modules = pd.module_slugs.size();
+
 		// Tell the other core about the patch
-		smp.load_patch(pd.module_slugs.size());
+		smp.load_patch(num_modules);
 
 		// First module is the hub
 		modules[0] = ModuleFactory::create(PanelDef::typeID);
 
 		unsigned num_not_found = 0;
 		std::string not_found;
-		for (size_t i = 1; i < pd.module_slugs.size(); i++) {
+		for (size_t i = 1; i < num_modules; i++) {
 			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
@@ -142,7 +146,7 @@ public:
 			modules[k.module_id]->set_param(k.param_id, k.value);
 
 		for (auto const &ms : pd.module_states) {
-			if (ms.module_id >= modules.size())
+			if (ms.module_id >= num_modules)
 				continue;
 
 			modules[ms.module_id]->load_state(ms.state_data);
@@ -166,11 +170,11 @@ public:
 
 	// Runs the patch
 	void update_patch() {
-		if (pd.module_slugs.size() == 2)
+		if (num_modules == 2)
 			modules[1]->update();
 		else {
 			smp.update_modules();
-			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += smp.ModuleStride) {
+			for (size_t module_i = 1; module_i < num_modules; module_i += smp.ModuleStride) {
 				modules[module_i]->update();
 			}
 			smp.join();
@@ -193,9 +197,10 @@ public:
 
 	std::vector<ModuleInitState> get_module_states() {
 		std::vector<ModuleInitState> states;
+		states.reserve(num_modules);
 
 		for (auto [i, module] : enumerate(modules)) {
-			if (i >= pd.module_slugs.size())
+			if (i >= num_modules)
 				break;
 			if (!module)
 				continue;
@@ -209,7 +214,7 @@ public:
 	void unload_patch() {
 		smp.join();
 		is_loaded = false;
-		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
+		for (size_t i = 0; i < num_modules; i++) {
 			modules[i].reset(nullptr);
 		}
 		pd.int_cables.clear();
@@ -220,6 +225,8 @@ public:
 		pd.module_slugs.clear();
 		pd.midi_maps.set.clear();
 		pd.midi_maps.name = "";
+
+		num_modules = 0;
 
 		clear_cache();
 	}
@@ -316,14 +323,14 @@ private:
 public:
 	float get_panel_output(uint32_t jack_id) {
 		auto const &jack = out_conns[jack_id];
-		if (jack.module_id < pd.module_slugs.size())
+		if (jack.module_id < num_modules)
 			return modules[jack.module_id]->get_output(jack.jack_id);
 		else
 			return 0.f;
 	}
 
 	float get_module_light(uint16_t module_id, uint16_t light_id) const {
-		if (is_loaded && module_id < pd.module_slugs.size())
+		if (is_loaded && module_id < num_modules)
 			return modules[module_id]->get_led_brightness(light_id);
 		else
 			return 0;
@@ -334,7 +341,7 @@ public:
 	}
 
 	void apply_static_param(const StaticParam &sparam) {
-		if (sparam.module_id < pd.module_slugs.size() && modules[sparam.module_id])
+		if (sparam.module_id < num_modules && modules[sparam.module_id])
 			modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
 		//Also set it in the patch?
 	}
@@ -419,8 +426,9 @@ public:
 	}
 
 	void add_module(BrandModuleSlug slug) {
-		auto module_idx = pd.module_slugs.size();
-		pd.module_slugs.push_back(slug); //only needed to make sure pd.module_slugs.size() is accurate
+		auto module_idx = num_modules;
+		pd.module_slugs.push_back(slug);
+		calc_multiple_module_indicies();
 
 		modules[module_idx] = ModuleFactory::create(slug);
 		if (modules[module_idx] == nullptr) {
@@ -433,8 +441,7 @@ public:
 		modules[module_idx]->mark_all_outputs_unpatched();
 		modules[module_idx]->set_samplerate(samplerate);
 
-		calc_multiple_module_indicies();
-		smp.load_patch(pd.module_slugs.size());
+		smp.load_patch(num_modules);
 	}
 
 	void remove_module(uint16_t module_idx) {
@@ -482,7 +489,7 @@ public:
 		if (panel_out_jack_id >= out_conns.size())
 			return;
 		auto const &jack = out_conns[panel_out_jack_id];
-		if (jack.module_id < pd.module_slugs.size()) {
+		if (jack.module_id < num_modules) {
 			if (is_patched)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
 			else
@@ -634,17 +641,21 @@ public:
 	// Check for multiple instances of same module type, and cache the results
 	// This is used to create unique names for modules (e.g. LFO#1, LFO#2,...)
 	void calc_multiple_module_indicies() {
+
+		num_modules = pd.module_slugs.size(); //refresh this anytime we are refreshing dup_module_index
+
 		// Todo: this is a naive implementation, perhaps can be made more efficient
-		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
-			auto &this_slug = pd.module_slugs[i];
+		for (size_t i = 0; i < num_modules; i++) {
 
 			unsigned found = 1;
 			unsigned this_index = 0;
-			for (size_t j = 0; j < pd.module_slugs.size(); j++) {
+			for (size_t j = 0; j < num_modules; j++) {
 				if (i == j) {
 					this_index = found;
 					continue;
 				}
+
+				auto &this_slug = pd.module_slugs[i];
 				auto &that_slug = pd.module_slugs[j];
 				if (that_slug == this_slug) {
 					found++;

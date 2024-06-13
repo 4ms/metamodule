@@ -25,13 +25,13 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
-	PatchViewPage(PatchContext info, ViewSettings &settings)
+	PatchViewPage(PatchContext info, ViewSettings &settings, PatchSelectorSubdirPanel &subdir_panel)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
 		, settings{settings}
-		, file_menu{patch_playloader} {
+		, file_menu{patch_playloader, patch_storage, subdir_panel, notify_queue, page_list} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -74,7 +74,7 @@ struct PatchViewPage : PageBase {
 		bool needs_refresh = false;
 		if (gui_state.force_redraw_patch)
 			needs_refresh = true;
-		if (patch_revision != page_list.get_patch_revision())
+		if (patch_revision != patch_storage.get_view_patch_modification_count())
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
@@ -103,7 +103,7 @@ struct PatchViewPage : PageBase {
 		if (args.patch_loc_hash)
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
-		patch_revision = page_list.get_patch_revision();
+		patch_revision = patch_storage.get_view_patch_modification_count();
 
 		clear();
 
@@ -175,8 +175,11 @@ struct PatchViewPage : PageBase {
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
 		settings_menu.prepare_focus(group);
-		desc_panel.prepare_focus(group, *patch);
 		file_menu.prepare_focus(group);
+
+		patch = patch_storage.get_view_patch();
+		desc_panel.set_patch(patch);
+		desc_panel.prepare_focus(group);
 	}
 
 	void redraw_map_rings() {
@@ -208,7 +211,10 @@ struct PatchViewPage : PageBase {
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
 
-		patch = patch_storage.get_view_patch();
+		if (patch != patch_storage.get_view_patch()) {
+			patch = patch_storage.get_view_patch();
+			desc_panel.set_patch(patch);
+		}
 
 		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
 
@@ -250,7 +256,13 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (desc_panel.did_update_names()) {
+			gui_state.force_refresh_vol = patch_storage.get_view_patch_vol();
+			patch_storage.mark_view_patch_modified();
 			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
+		}
+
+		if (file_menu.did_filesystem_change()) {
+			gui_state.force_refresh_vol = patch_storage.get_view_patch_vol();
 		}
 
 		if (is_patch_playing) {
@@ -267,6 +279,9 @@ struct PatchViewPage : PageBase {
 		} else {
 			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
 		}
+
+		if (file_menu.is_visible())
+			file_menu.update();
 	}
 
 private:
@@ -465,6 +480,12 @@ private:
 		page->update_map_ring_style();
 		page->settings_menu.hide();
 		page->file_menu.hide();
+
+		if (event->target == ui_SaveButton) {
+			lv_label_set_text(ui_PatchName, page->patch_storage.get_view_patch_filename().data());
+		} else {
+			lv_label_set_text(ui_PatchName, page->patch->patch_name.c_str());
+		}
 	}
 
 	static void add_module_cb(lv_event_t *event) {
