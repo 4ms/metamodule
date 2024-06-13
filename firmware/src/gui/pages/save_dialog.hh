@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
+#include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -15,11 +16,13 @@ struct SaveDialog {
 	SaveDialog(FileStorageProxy &patch_storage,
 			   PatchPlayLoader &play_loader,
 			   PatchSelectorSubdirPanel &subdir_panel,
-			   NotificationQueue &notify_queue)
+			   NotificationQueue &notify_queue,
+			   PageList &page_list)
 		: patch_storage{patch_storage}
 		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
 		, notify_queue{notify_queue}
+		, page_list{page_list}
 		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
@@ -260,6 +263,10 @@ private:
 			if (page->patch_storage.duplicate_view_patch(fullpath, page->file_vol)) {
 				page->patch_playloader.request_save_patch();
 				page->saved = true;
+				auto patch_loc = PatchLocation{std::string_view{fullpath}, page->file_vol};
+				page->page_list.request_new_page_no_history(
+					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
+
 				page->hide();
 			} else {
 				//send notification of failure
@@ -290,6 +297,7 @@ private:
 	PatchPlayLoader &patch_playloader;
 	PatchSelectorSubdirPanel &subdir_panel;
 	NotificationQueue &notify_queue;
+	PageList &page_list;
 
 	std::vector<EntryInfo> subdir_panel_patches;
 

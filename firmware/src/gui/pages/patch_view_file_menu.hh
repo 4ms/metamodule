@@ -24,7 +24,7 @@ struct PatchViewFileMenu {
 		, patch_storage{patch_storage}
 		, notify_queue{notify_queue}
 		, page_list{page_list}
-		, save_dialog{patch_storage, play_loader, subdir_panel, notify_queue}
+		, save_dialog{patch_storage, play_loader, subdir_panel, notify_queue, page_list}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
