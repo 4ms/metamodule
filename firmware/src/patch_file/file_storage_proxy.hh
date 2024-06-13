@@ -63,7 +63,6 @@ public:
 
 		auto *new_patch = open_patches_.emplace_back(requested_view_patch_loc_);
 
-		pr_trace("\n\n%.*s\n\n", file_data.size(), file_data.data());
 		if (!yaml_raw_to_patch(file_data, new_patch->patch)) {
 			pr_err("Failed to parse\n");
 			open_patches_.remove_last();
