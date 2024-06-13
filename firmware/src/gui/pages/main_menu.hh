@@ -35,7 +35,7 @@ struct MainMenuPage : PageBase {
 	}
 
 	void prepare_focus() final {
-		auto patch = patch_storage.playing_patch();
+		auto patch = patch_storage.get_playing_patch();
 		if (!patch || patch->patch_name.length() == 0) {
 			lv_hide(ui_MainMenuNowPlayingPanel);
 		} else {

@@ -40,7 +40,7 @@ struct PatchSelectorPage : PageBase {
 		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
 
-		auto playing_patch = patch_storage.playing_patch();
+		auto playing_patch = patch_storage.get_playing_patch();
 		if (!playing_patch || playing_patch->patch_name.length() == 0) {
 			lv_label_set_text(ui_NowPlayingName, "none");
 			lv_label_set_text(ui_LoadMeter, "");
