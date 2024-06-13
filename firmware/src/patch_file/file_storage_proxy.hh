@@ -155,6 +155,10 @@ public:
 		view_patch_->modification_count++;
 	}
 
+	void reset_view_patch_modification_count() {
+		view_patch_->modification_count = 0;
+	}
+
 	unsigned get_view_patch_modification_count() {
 		return view_patch_->modification_count;
 	}

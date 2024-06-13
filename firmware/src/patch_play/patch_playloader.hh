@@ -158,9 +158,11 @@ private:
 			should_save_patch_ = false;
 			saving_patch_ = true;
 			return {true, "Saving..."};
+
 		} else if (res == FileStorageProxy::WriteResult::Busy) {
 			// message system is busy, try again next time
 			return {true, ""};
+
 		} else {
 			// error with filename or volume, do not retry
 			should_save_patch_ = false;
@@ -178,6 +180,7 @@ private:
 
 		} else if (msg.message_type == FileStorageProxy::PatchDataWriteOK) {
 			saving_patch_ = false;
+			storage_.reset_view_patch_modification_count();
 			return {true, "Saved"};
 
 		} else {
