@@ -480,6 +480,12 @@ private:
 		page->update_map_ring_style();
 		page->settings_menu.hide();
 		page->file_menu.hide();
+
+		if (event->target == ui_SaveButton) {
+			lv_label_set_text(ui_PatchName, page->patch_storage.get_view_patch_filename().data());
+		} else {
+			lv_label_set_text(ui_PatchName, page->patch->patch_name.c_str());
+		}
 	}
 
 	static void add_module_cb(lv_event_t *event) {
