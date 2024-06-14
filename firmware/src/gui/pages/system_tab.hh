@@ -1,5 +1,6 @@
 #pragma once
 #include "audio/calibrator.hh"
+#include "fs/norflash_layout.hh"
 #include "git_version.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
@@ -17,7 +18,9 @@ struct SystemTab : SystemMenuTab {
 	SystemTab(FileStorageProxy &patch_storage, ParamsMidiState &params, MetaParams &metaparams)
 		: storage{patch_storage}
 		, params{params}
-		, metaparams{metaparams} {
+		, metaparams{metaparams}
+		, cal{{Calibration::DefaultLowV, Calibration::DefaultHighV, Calibration::from_volts(0.1f)}} {
+
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
 
@@ -59,16 +62,11 @@ struct SystemTab : SystemMenuTab {
 	}
 
 	void update() override {
-		if (state == State::Calibrating) {
-			cal.update(cur_cal_chan, metaparams.ins[cur_cal_chan]);
+		if (state == State::TryingReadCal || state == State::ReadingCal) {
+			update_read_cal();
 
-			for (unsigned i = 0; i < PanelDef::NumAudioIn; i++) {
-				if (params.is_input_plugged(i)) {
-					set_input_plugged(i, true);
-				} else {
-					set_input_plugged(i, false);
-				}
-			}
+		} else if (state == State::Calibrating) {
+			update_cal();
 		}
 	}
 
@@ -76,6 +74,8 @@ private:
 	enum class JackCalStatus { NotCal, Error, Done };
 
 	void start_calibration() {
+		// send message via PatchPlayLoader to tell audio to disable calibration?
+
 		lv_show(ui_CalibrationProcedureCont);
 		lv_hide(ui_SystemCalibrationButton);
 		lv_hide(ui_SystemResetInternalPatchesCont);
@@ -86,19 +86,57 @@ private:
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
 		lv_obj_scroll_to_view_recursive(ui_SystemCalibrationTitle, LV_ANIM_OFF);
 
-		cal.start();
-		cur_cal_chan = 0;
-		state = State::Calibrating;
+		state = State::TryingReadCal;
 
 		for (auto i = 0u; i < input_status.size(); i++) {
 			set_input_status(i, JackCalStatus::NotCal);
+			input_plugged[i] = false;
+		}
+	}
+
+	void update_read_cal() {
+		if (state == State::TryingReadCal) {
+
+			auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&caldata), sizeof(caldata)};
+			auto ok = storage.request_read_flash(caldata_span, CalDataFlashOffset, &caldata_bytes_read);
+			if (ok)
+				state = State::ReadingCal;
+
+		} else if (state == State::ReadingCal) {
+
+			auto msg = storage.get_message();
+			if (msg.message_type == IntercoreStorageMessage::MessageType::ReadFlashOk) {
+				if (caldata_bytes_read == sizeof(caldata)) {
+					pr_trace("Read calibration data\n");
+					state = State::Calibrating;
+				} else {
+					pr_err("Wrong size calibration data read (%d read, expected %d)\n",
+						   caldata_bytes_read,
+						   sizeof(caldata));
+					state = State::Calibrating;
+				}
+
+			} else if (msg.message_type == IntercoreStorageMessage::MessageType::ReadFlashFailed) {
+				pr_err("Failed to read calibration data\n");
+				state = State::Calibrating;
+			}
+		}
+	}
+
+	void update_cal() {
+		for (unsigned i = 0; i < PanelDef::NumAudioIn; i++) {
+			if (params.is_input_plugged(i)) {
+				set_input_plugged(i, true);
+				in_signals[i].update(metaparams.ins[i].iir);
+				cal.update(i, in_signals[i]);
+
+			} else {
+				set_input_plugged(i, false);
+			}
 		}
 	}
 
 	void set_input_status(unsigned idx, JackCalStatus status) {
-		if (idx >= input_status.size())
-			return;
-
 		input_status[idx] = status;
 		auto *label = input_status_labels[idx];
 		switch (status) {
@@ -113,26 +151,33 @@ private:
 			} break;
 
 			case JackCalStatus::Error: {
-				lv_label_set_text_fmt(label, "In %d: BAD", idx);
+				lv_label_set_text_fmt(label, "In %d: X", idx);
 				lv_obj_set_style_text_color(label, Gui::palette_main[LV_PALETTE_RED], LV_PART_MAIN);
 			} break;
 		}
 	}
 
 	void set_input_plugged(unsigned idx, bool plugged) {
-		if (idx >= input_plugged.size())
-			return;
-
 		auto *label = input_status_labels[idx];
+
 		if (plugged && !input_plugged[idx]) {
 			input_plugged[idx] = true;
+			cal.start_chan(idx);
 			lv_obj_set_style_outline_opa(label, LV_OPA_100, LV_PART_MAIN);
 			set_input_status(idx, JackCalStatus::NotCal);
 
 		} else if (!plugged && input_plugged[idx]) {
 			input_plugged[idx] = false;
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
-			// TODO: Check if cal is completed, and set status to Done or Error
+
+			if (auto reading = cal.stop_chan(idx)) {
+				pr_trace("Calibrated input %d: %f %f\n", idx, reading->first, reading->second);
+				caldata.ins_data[idx] = reading.value();
+				set_input_status(idx, JackCalStatus::Done);
+			} else {
+				pr_trace("Failed to calibrated input %d", idx);
+				set_input_status(idx, JackCalStatus::Error);
+			}
 		}
 	}
 
@@ -166,10 +211,12 @@ private:
 	MetaParams &metaparams;
 
 	ConfirmPopup confirm_popup;
-	Calibrator cal;
+	CalibrationRoutine cal;
+	CalData caldata;
+	uint32_t caldata_bytes_read = 0;
+	std::array<AnalyzedSignal<16>, PanelDef::NumAudioIn> in_signals;
 
-	enum class State { Idle, Calibrating } state = State::Idle;
-	unsigned cur_cal_chan = 0;
+	enum class State { Idle, TryingReadCal, ReadingCal, Calibrating, WritingCal } state = State::Idle;
 
 	std::array<bool, PanelDef::NumAudioIn> input_plugged{};
 	std::array<JackCalStatus, PanelDef::NumAudioIn> input_status{};
