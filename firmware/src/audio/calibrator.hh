@@ -77,14 +77,18 @@ public:
 					reading.reset_to(reading.iir);
 
 				if (++delay_ctr == 16) { //@16ms update rate = 256ms between attempts
+					delay_ctr = 0;
 
-					if (validate_reading(reading, Calibration::from_volts(config.low_measurement_volts))) {
+					if (!got_low[chan_num] &&
+						validate_reading(reading, Calibration::from_volts(config.low_measurement_volts)))
+					{
 						pr_dbg("Low: ");
 						caldata.ins_data[chan_num].first = reading.iir;
 						got_low[chan_num] = true;
 					}
 
-					else if (validate_reading(reading, Calibration::from_volts(config.high_measurement_volts)))
+					else if (!got_high[chan_num] &&
+							 validate_reading(reading, Calibration::from_volts(config.high_measurement_volts)))
 					{
 						pr_dbg("High: ");
 						caldata.ins_data[chan_num].second = reading.iir;
@@ -94,13 +98,14 @@ public:
 					else
 					{
 						pr_dbg("Rejected: ");
-						delay_ctr = 0;
 					}
 
 					debug_print_reading(chan_num, reading);
 
-					if (got_low[chan_num] && got_high[chan_num])
+					if (got_low[chan_num] && got_high[chan_num]) {
+						pr_dbg("Got low and high\n");
 						states[chan_num] = State::Done;
+					}
 				}
 			} break;
 
@@ -114,7 +119,7 @@ private:
 		if (std::abs(reading.iir - target) < Calibration::DefaultTolerance) {
 			if (std::abs(reading.min - target) < Calibration::DefaultTolerance) {
 				if (std::abs(reading.max - target) < Calibration::DefaultTolerance) {
-					if ((reading.max - reading.min) < 200)
+					if ((reading.max - reading.min) < Calibration::from_volts(0.001f))
 						return true;
 				}
 			}

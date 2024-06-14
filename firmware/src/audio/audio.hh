@@ -92,7 +92,8 @@ private:
 public:
 	void set_calibration(CalData const &caldata) {
 		for (auto [chan, val] : zip(incal, caldata.ins_data))
-			chan.calibrate_chan(caldata.ins_measured_mv.first, caldata.ins_measured_mv.second, val.first, val.second);
+			chan.calibrate_chan(
+				caldata.ins_measured_volts.first, caldata.ins_measured_volts.second, val.first, val.second);
 	}
 
 private:
