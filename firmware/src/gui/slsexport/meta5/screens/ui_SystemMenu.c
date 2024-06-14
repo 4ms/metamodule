@@ -504,7 +504,7 @@ lv_obj_set_height( ui_SystemCalibrationCont, LV_SIZE_CONTENT);   /// 50
 lv_obj_set_align( ui_SystemCalibrationCont, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_SystemCalibrationCont,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_SystemCalibrationCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_clear_flag( ui_SystemCalibrationCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_clear_flag( ui_SystemCalibrationCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_pad_left(ui_SystemCalibrationCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_SystemCalibrationCont, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_SystemCalibrationCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -556,7 +556,8 @@ lv_obj_set_height( ui_CalibrationProcedureCont, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_CalibrationProcedureCont, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_CalibrationProcedureCont,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_CalibrationProcedureCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_clear_flag( ui_CalibrationProcedureCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_add_flag( ui_CalibrationProcedureCont, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
+lv_obj_clear_flag( ui_CalibrationProcedureCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_pad_left(ui_CalibrationProcedureCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_CalibrationProcedureCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_CalibrationProcedureCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -596,10 +597,6 @@ lv_obj_set_align( ui_CalibrationIn1Label, LV_ALIGN_CENTER );
 lv_label_set_text(ui_CalibrationIn1Label,"In 1: -");
 lv_obj_clear_flag( ui_CalibrationIn1Label, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_CalibrationIn1Label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(ui_CalibrationIn1Label, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_outline_opa(ui_CalibrationIn1Label, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_width(ui_CalibrationIn1Label, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_pad(ui_CalibrationIn1Label, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_CalibrationIn1Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_CalibrationIn1Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_CalibrationIn1Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -612,6 +609,10 @@ lv_obj_set_align( ui_CalibrationIn2Label, LV_ALIGN_CENTER );
 lv_label_set_text(ui_CalibrationIn2Label,"In 2: -");
 lv_obj_clear_flag( ui_CalibrationIn2Label, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_CalibrationIn2Label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CalibrationIn2Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CalibrationIn2Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CalibrationIn2Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CalibrationIn2Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CalibrationIn3Label = lv_label_create(ui_CalibrationInputStatusCont);
 lv_obj_set_width( ui_CalibrationIn3Label, LV_SIZE_CONTENT);  /// 1
@@ -620,6 +621,10 @@ lv_obj_set_align( ui_CalibrationIn3Label, LV_ALIGN_CENTER );
 lv_label_set_text(ui_CalibrationIn3Label,"In 3: -");
 lv_obj_clear_flag( ui_CalibrationIn3Label, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_CalibrationIn3Label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CalibrationIn3Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CalibrationIn3Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CalibrationIn3Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CalibrationIn3Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CalibrationIn4Label = lv_label_create(ui_CalibrationInputStatusCont);
 lv_obj_set_width( ui_CalibrationIn4Label, LV_SIZE_CONTENT);  /// 1
@@ -629,6 +634,10 @@ lv_label_set_text(ui_CalibrationIn4Label,"In 4: -");
 lv_obj_add_flag( ui_CalibrationIn4Label, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
 lv_obj_clear_flag( ui_CalibrationIn4Label, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_CalibrationIn4Label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CalibrationIn4Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CalibrationIn4Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CalibrationIn4Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CalibrationIn4Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CalibrationIn5Label = lv_label_create(ui_CalibrationInputStatusCont);
 lv_obj_set_width( ui_CalibrationIn5Label, LV_SIZE_CONTENT);  /// 1
@@ -637,6 +646,10 @@ lv_obj_set_align( ui_CalibrationIn5Label, LV_ALIGN_CENTER );
 lv_label_set_text(ui_CalibrationIn5Label,"In 5: -");
 lv_obj_clear_flag( ui_CalibrationIn5Label, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_CalibrationIn5Label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CalibrationIn5Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CalibrationIn5Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CalibrationIn5Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CalibrationIn5Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CalibrationIn6Label = lv_label_create(ui_CalibrationInputStatusCont);
 lv_obj_set_width( ui_CalibrationIn6Label, LV_SIZE_CONTENT);  /// 1
@@ -645,6 +658,10 @@ lv_obj_set_align( ui_CalibrationIn6Label, LV_ALIGN_CENTER );
 lv_label_set_text(ui_CalibrationIn6Label,"In 6: -");
 lv_obj_clear_flag( ui_CalibrationIn6Label, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_font(ui_CalibrationIn6Label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_CalibrationIn6Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_CalibrationIn6Label, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_CalibrationIn6Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_CalibrationIn6Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CalibrationCancelButton = lv_btn_create(ui_CalibrationProcedureCont);
 lv_obj_set_height( ui_CalibrationCancelButton, 28);

@@ -1,6 +1,5 @@
 #pragma once
 #include "conf/panel_conf.hh"
-#include "drivers/stm32xx.h"
 #include "pr_dbg.hh"
 #include "util/analyzed_signal.hh"
 #include "util/countzip.hh"
