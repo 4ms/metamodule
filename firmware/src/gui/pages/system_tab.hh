@@ -32,6 +32,9 @@ struct SystemTab : SystemMenuTab {
 
 		lv_group_focus_obj(ui_SystemCalibrationButton);
 		confirm_popup.init(ui_SystemMenu, group);
+
+		lv_show(ui_SystemCalibrationButton);
+		lv_hide(ui_SystemCalibrationCont);
 	}
 
 	// Returns true if this pages uses the back event
