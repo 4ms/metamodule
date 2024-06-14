@@ -25,12 +25,12 @@ struct SlsComponentInit {
 		// Keyboard itself (not outlined when active)
 		lv_obj_set_style_outline_opa(ui_Keyboard, LV_OPA_0, LV_STATE_EDITED);
 
-		auto settings_btns = lv_tabview_get_tab_btns(ui_SystemMenuTabView);
-		lv_obj_set_style_outline_color(
-			settings_btns, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
-		lv_obj_set_style_outline_opa(settings_btns, LV_OPA_100, (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
-		lv_obj_set_style_outline_width(settings_btns, 2, (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
-		lv_obj_set_style_outline_pad(settings_btns, 3, (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
+		// auto settings_btns = lv_tabview_get_tab_btns(ui_SystemMenuTabView);
+		// lv_obj_set_style_outline_color(
+		// 	settings_btns, lv_color_hex(0xFD8B18), (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
+		// lv_obj_set_style_outline_opa(settings_btns, LV_OPA_100, (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
+		// lv_obj_set_style_outline_width(settings_btns, 2, (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
+		// lv_obj_set_style_outline_pad(settings_btns, 3, (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
 
 		// Sliders
 		for (auto slider : {ui_MinSlider, ui_MaxSlider, ui_CablesTranspSlider, ui_MapTranspSlider}) {
