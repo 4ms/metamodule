@@ -150,7 +150,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 		case Verifying: {
 			if (justEnteredState) {
 				justEnteredState = false;
-				pr_dbg("Start verifying file %u of %u\n", current_file_idx + 1, manifest.files.size());
+				pr_trace("Start verifying file %u of %u\n", current_file_idx + 1, manifest.files.size());
 
 				auto &thisFile = manifest.files[current_file_idx];
 
@@ -167,7 +167,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 							abortWithMessage("Cannot trigger comparing checksums");
 						}
 					} else {
-						pr_dbg("Skipping verify step because no checksum is defined");
+						pr_trace("Skipping verify step because no checksum is defined");
 						moveToState(Writing);
 					}
 				} else {
@@ -196,7 +196,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 		case Writing: {
 			if (justEnteredState) {
 				justEnteredState = false;
-				pr_dbg("Start flashing file %u of %u\n", current_file_idx + 1, manifest.files.size());
+				pr_trace("Start flashing file %u of %u\n", current_file_idx + 1, manifest.files.size());
 
 				auto &thisFile = manifest.files[current_file_idx];
 				auto &thisLoadedFile = loadedFiles[current_file_idx];

@@ -26,7 +26,7 @@ bool FlashLoader::write_sectors(uint32_t base_addr, std::span<uint8_t> buffer) {
 		bytes_to_erase -= 4096;
 	}
 
-	pr_dbg("Writing 0x%x B to %x\n", buffer.size(), base_addr);
+	pr_dump("Writing 0x%x B to %x\n", buffer.size(), base_addr);
 	if (!flash.write(buffer.data(), base_addr, buffer.size())) {
 		pr_err("ERROR: Flash failed to write\n");
 		return false;

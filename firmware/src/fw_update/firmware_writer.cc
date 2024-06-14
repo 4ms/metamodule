@@ -13,24 +13,31 @@ FirmwareWriter::FirmwareWriter(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
 
 std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const IntercoreStorageMessage &message) {
 	if (message.message_type == StartChecksumCompare) {
-		pr_dbg("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
+		pr_trace("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 
 		if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI) {
 			return compareChecksumWifi(message.address, message.length, {message.checksum.data()});
+
 		} else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI) {
 			return compareChecksumQSPI(
 				message.address, message.length, {message.checksum.data()}, *message.bytes_processed);
+
 		} else {
 			pr_err("Undefined flash target %u\n", message.flashTarget);
 			return IntercoreStorageMessage{.message_type = ChecksumFailed};
 		}
+
 	} else if (message.message_type == StartFlashing) {
-		pr_dbg("-> Start flashing to 0x%08x\n", message.address);
+		pr_trace("-> Start flashing to 0x%08x\n", message.address);
 
 		if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI) {
-			return flashWifi({(uint8_t*)message.buffer.data(), message.buffer.size()}, message.address, *message.bytes_processed);
+			return flashWifi(
+				{(uint8_t *)message.buffer.data(), message.buffer.size()}, message.address, *message.bytes_processed);
+
 		} else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI) {
-			return flashQSPI({(uint8_t*)message.buffer.data(), message.buffer.size()}, message.address, *message.bytes_processed);
+			return flashQSPI(
+				{(uint8_t *)message.buffer.data(), message.buffer.size()}, message.address, *message.bytes_processed);
+
 		} else {
 			pr_err("Undefined flash target %u\n", message.flashTarget);
 			return IntercoreStorageMessage{.message_type = FlashingFailed};
@@ -53,21 +60,19 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 
 	if (result == ESP_LOADER_SUCCESS) {
 
-		if (result == ESP_LOADER_SUCCESS) {
 			result = Flasher::verify(address, length, checksum);
+
 			if (result == ESP_LOADER_ERROR_INVALID_MD5) {
 				returnValue = {.message_type = ChecksumMismatch};
 			} else if (result == ESP_LOADER_SUCCESS) {
-				pr_dbg("-> Checksum matches\n");
+			pr_trace("-> Checksum matches\n");
 				returnValue = {.message_type = ChecksumMatch};
-			} else {
-				pr_dbg("-> Cannot get checksum\n");
-				returnValue = {.message_type = ChecksumFailed};
-			}
+
 		} else {
-			pr_err("Cannot write dummy byte to wifi flash\n");
+			pr_trace("-> Cannot get checksum\n");
 			returnValue = {.message_type = ChecksumFailed};
 		}
+
 	} else {
 		pr_err("Cannot connect to wifi bootloader\n");
 		returnValue = {.message_type = ChecksumFailed};
@@ -111,10 +116,10 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 			}
 
 			if (not error_during_writes) {
-				pr_dbg("-> Flashing completed\n");
+				pr_trace("-> Flashing completed\n");
 				returnValue = {.message_type = FlashingOk};
 			} else {
-				pr_dbg("-> Flashing failed\n");
+				pr_trace("-> Flashing failed\n");
 				returnValue = {.message_type = FlashingFailed};
 			}
 		} else {

@@ -87,13 +87,13 @@ struct ManifestParser {
 					root["files"] >> manifest.files;
 					return manifest;
 				} else {
-					pr_dbg("Manifest file has no root node with key 'files'\n");
+					pr_warn("Manifest file has no root node with key 'files'\n");
 				}
 			} else {
-				pr_dbg("Manifest has no version\n");
+				pr_warn("Manifest has no version\n");
 			}
 		} else {
-			pr_dbg("Manifest not valid json or yaml\n");
+			pr_warn("Manifest not valid json or yaml\n");
 		}
 
 		return std::nullopt;

@@ -27,7 +27,7 @@ esp_loader_error_t init(uint32_t baudrate)
     }
     else
     {
-        pr_dbg("Flasher: Connected to target\n");
+        pr_trace("Flasher: Connected to target\n");
 
         err = esp_loader_change_transmission_rate(baudrate);
         if (err == ESP_LOADER_ERROR_UNSUPPORTED_FUNC)
@@ -47,7 +47,7 @@ esp_loader_error_t init(uint32_t baudrate)
             }
             else
             {
-                pr_dbg("Flasher: Transmission rate changed changed\n");
+                pr_trace("Flasher: Transmission rate changed changed\n");
             }
         }
     }
@@ -67,20 +67,18 @@ void reboot()
 
 esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
 {
-    esp_loader_error_t err;
+    pr_trace("Flasher: Erasing flash (this may take a while)...\n");
 
     const std::size_t BatchSize = 1024;
     std::array<uint8_t, BatchSize> BatchBuffer;
-
-    pr_dbg("Flasher: Erasing flash (this may take a while)...\n");
-    err = esp_loader_flash_start(address, buffer.size(), BatchBuffer.size());
+    auto err = esp_loader_flash_start(address, buffer.size(), BatchBuffer.size());
 
     if (err != ESP_LOADER_SUCCESS)
     {
         pr_err("Flasher: Erasing flash failed with error %d\n", err);
         return err;
     }
-    pr_dbg("Flasher: Start programming %08x - %08x\n", address, address + buffer.size());
+    pr_trace("Flasher: Start programming %08x - %08x\n", address, address + buffer.size());
 
     const uint8_t* bin_addr = buffer.data();
     const std::size_t binary_size = buffer.size();
@@ -107,19 +105,19 @@ esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
 
         if (not lastPrintedProgress or lastPrintedProgress != progress)
         {
-            pr_dbg("Flasher: Progress: %d %%\n", progress);
+            pr_trace("Flasher: Progress: %d %%\n", progress);
             lastPrintedProgress = progress;
         }        
     };
 
-    pr_dbg("Flasher: Finished programming\n");
+    pr_trace("Flasher: Finished programming\n");
 
     return ESP_LOADER_SUCCESS;
 }
 
 esp_loader_error_t verify(uint32_t address, uint32_t length, std::string_view checksum)
 {
-    pr_dbg("Flasher: Getting checksum from %08x-%08x\n", address, address + length);
+    pr_trace("Flasher: Getting checksum from %08x-%08x\n", address, address + length);
 
     std::array<uint8_t,32> readValue;
 
@@ -147,13 +145,13 @@ esp_loader_error_t verify(uint32_t address, uint32_t length, std::string_view ch
 
 esp_loader_error_t conditional_flash(uint32_t address, std::span<const uint8_t> payload, std::string_view checksum)
 {
-    pr_dbg("Flasher: Conditionally flash %p-%p with checksum %.*s to %p\n", &payload.front(), &payload.back(), checksum.size(), checksum.data(), address);
+    pr_trace("Flasher: Conditionally flash %p-%p with checksum %.*s to %p\n", &payload.front(), &payload.back(), checksum.size(), checksum.data(), address);
 
     auto result = verify(address, payload.size(), checksum);
 
     if (result == ESP_LOADER_SUCCESS)
     {
-        pr_dbg("Flasher: Checksum already matches\n");
+        pr_trace("Flasher: Checksum already matches\n");
         return ESP_LOADER_SUCCESS;
     }
     else if (result == ESP_LOADER_ERROR_INVALID_MD5)
@@ -162,7 +160,7 @@ esp_loader_error_t conditional_flash(uint32_t address, std::span<const uint8_t> 
 
         if (result == ESP_LOADER_SUCCESS)
         {
-            pr_dbg("Flasher: Payload flashed successfully\n");
+            pr_trace("Flasher: Payload flashed successfully\n");
             return ESP_LOADER_SUCCESS;
         }
         else
