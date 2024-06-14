@@ -391,7 +391,7 @@ extern lv_obj_t *ui_SystemMenuUpdateFWBut;
 extern lv_obj_t *ui_SystemMenuUpdateFWlabel;
 extern lv_obj_t *ui_SystemMenUpdateProgressBar;
 extern lv_obj_t *ui_FWUpdateSpinner;
-// SCREEN: ui_JackMapViewPage
+extern lv_obj_t *ui_SystemMenuUpdateLog;
 void ui_JackMapViewPage_screen_init(void);
 extern lv_obj_t *ui_JackMapViewPage;
 extern lv_obj_t *ui_JackMapViewCont;
