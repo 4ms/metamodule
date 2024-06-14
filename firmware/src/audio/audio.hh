@@ -46,9 +46,6 @@ public:
 
 	void start();
 	void start_playing();
-	void start_calibration_mode(std::span<AnalyzedSignal<1000>> cal_readings);
-	void step_calibration();
-	void end_calibration_mode();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
 
 private:
@@ -81,7 +78,6 @@ private:
 
 	bool skip_audio = false;
 	unsigned skip_count = 0;
-	bool do_calibrate = false;
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
@@ -92,9 +88,6 @@ private:
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool check_patch_loading();
 	void handle_patch_just_loaded();
-	void calibrate_callback(CombinedAudioBlock &audio_block);
-
-	std::span<AnalyzedSignal<1000>> cal_readings{};
 
 public:
 	void set_calibration(CalData const &caldata) {

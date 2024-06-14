@@ -87,9 +87,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.start_measurement();
 
-		if (do_calibrate) {
-			calibrate_callback(audio_blocks[1 - block]);
-		} else if (check_patch_loading())
+		if (check_patch_loading())
 			process_nopatch(audio_blocks[1 - block], local_p);
 		else
 			process(audio_blocks[1 - block], local_p);
@@ -113,29 +111,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
 						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
-}
-
-void AudioStream::end_calibration_mode() {
-	do_calibrate = false;
-}
-
-void AudioStream::start_calibration_mode(std::span<AnalyzedSignal<1000>> cal_readings) {
-	this->cal_readings = cal_readings;
-	do_calibrate = true;
-}
-
-void AudioStream::step_calibration() {
-	for (auto &cal : cal_readings) {
-		cal.reset_to(cal.iir);
-	}
-}
-
-void AudioStream::calibrate_callback(CombinedAudioBlock &audio_block) {
-	for (auto frame : audio_block.in_codec) {
-		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, frame.chan)) {
-			cal_readings[panel_jack_i].update(AudioInFrame::sign_extend(inchan));
-		}
-	}
 }
 
 void AudioStream::start() {
