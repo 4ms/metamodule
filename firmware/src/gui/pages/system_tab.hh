@@ -15,10 +15,12 @@ struct SystemTab : SystemMenuTab {
 
 	SystemTab(FileStorageProxy &patch_storage)
 		: storage{patch_storage} {
+		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
+
 		this->group = group;
 
 		lv_group_remove_obj(ui_SystemCalibrationButton);
@@ -43,6 +45,13 @@ struct SystemTab : SystemMenuTab {
 	}
 
 private:
+	static void calibrate_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<SystemTab *>(event->user_data);
+	}
+
 	static void resetbut_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -54,7 +63,7 @@ private:
 					page->storage.request_reset_factory_patches();
 				}
 			},
-			"Do you really want to PERMENENTLY DELETE all patches stored internally? This will replace them with "
+			"Do you really want to PERMANENTLY DELETE all patches stored internally? This will replace them with "
 			"factory default patches.\n",
 			"Delete");
 	}
