@@ -59,6 +59,8 @@ bool FirmwareUpdaterProxy::start(std::string_view manifest_filename,
 }
 
 FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
+	error_message = "";
+
 	switch (state) {
 		case Idle:
 		case Success:
@@ -194,8 +196,8 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 						break;
 
 					case FileStorageProxy::WifiExpanderNotConnected:
+						error_message = "No Wifi Expander: skipping " + manifest.files[current_file_idx].filename;
 						proceedWithNextFile();
-						// abortWithMessage("No Wifi expander found.");
 						break;
 
 					default:
@@ -252,9 +254,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 			abortWithMessage("Internal Error");
 	}
 
-	return state == State::Error ?
-			   Status{state, current_file_name, current_file_size, sharedMem->bytes_processed, error_message} :
-			   Status{state, current_file_name, current_file_size, sharedMem->bytes_processed};
+	return Status{state, current_file_name, current_file_size, sharedMem->bytes_processed, error_message};
 }
 
 void FirmwareUpdaterProxy::abortWithMessage(const char *message) {
