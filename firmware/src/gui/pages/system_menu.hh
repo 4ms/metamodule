@@ -6,7 +6,8 @@
 #include "gui/pages/page_list.hh"
 #include "gui/pages/plugin_tab.hh"
 #include "gui/pages/prefs_tab.hh"
-#include "gui/pages/system_status_tab.hh"
+#include "gui/pages/system_info_tab.hh"
+#include "gui/pages/system_tab.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "util/poll_event.hh"
@@ -15,63 +16,49 @@ namespace MetaModule
 {
 
 struct SystemMenuPage : PageBase {
+
 	SystemMenuPage(PatchContext info)
 		: PageBase{info, PageId::SystemMenu}
-		, fwupdate_tab{patch_storage, patch_playloader}
 		, plugin_tab{info.plugin_manager, info.notify_queue}
-		, status_tab{patch_storage}
-		, tabs(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
+		, fwupdate_tab{patch_storage, patch_playloader}
+		, system_tab{patch_storage}
+		, tab_bar(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
 		init_bg(ui_SystemMenu);
 
 		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, tabs);
+		lv_group_add_obj(group, tab_bar);
 		lv_group_set_editing(group, true);
 
-		lv_obj_add_event_cb(tabs, tab_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(tab_bar, tab_cb, LV_EVENT_VALUE_CHANGED, this);
 	}
 
 	void prepare_focus() final {
 		lv_hide(ui_FWUpdateSpinner);
 		lv_tabview_set_act(ui_SystemMenuTabView, 0, LV_ANIM_OFF);
-		status_tab.prepare_focus(group);
+		info_tab.prepare_focus(group);
 
 		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, tabs);
-		lv_group_focus_obj(tabs);
+		lv_group_add_obj(group, tab_bar);
+		lv_group_focus_obj(tab_bar);
 		lv_group_set_editing(group, true);
 	}
 
 	void update() final {
-		bool pressed_back = metaparams.back_button.is_just_released();
 
-		if (active_tab == Tabs::Update) {
-			fwupdate_tab.update();
-			if (pressed_back && fwupdate_tab.consume_back_event())
-				pressed_back = false;
+		active_tab->update();
 
-		} else if (active_tab == Tabs::Prefs) {
-			prefs_tab.update();
-			if (pressed_back && prefs_tab.consume_back_event())
-				pressed_back = false;
+		if (metaparams.back_button.is_just_released()) {
+			if (!active_tab->consume_back_event()) {
 
-		} else if (active_tab == Tabs::Info) {
-			status_tab.update();
-			if (pressed_back && status_tab.consume_back_event())
-				pressed_back = false;
-
-		} else if (active_tab == Tabs::Plugins) {
-			plugin_tab.update();
-		}
-
-		if (pressed_back) {
-			if (lv_group_get_focused(group) == tabs)
-				page_list.request_last_page();
-			else {
-				lv_group_remove_all_objs(group);
-				lv_group_add_obj(group, tabs);
-				lv_group_focus_obj(tabs);
-				lv_group_set_editing(group, true);
+				if (lv_group_get_focused(group) == tab_bar) {
+					page_list.request_last_page();
+				} else {
+					lv_group_remove_all_objs(group);
+					lv_group_add_obj(group, tab_bar);
+					lv_group_focus_obj(tab_bar);
+					lv_group_set_editing(group, true);
+				}
 			}
 		}
 	}
@@ -85,46 +72,27 @@ private:
 		if (!page)
 			return;
 
-		lv_group_remove_all_objs(page->group);
-		lv_group_add_obj(page->group, page->tabs);
-		// lv_group_remove_obj(ui_SystemMenuUpdateFWBut);
-		// lv_group_remove_obj(ui_ResetFactoryPatchesButton);
-
-		switch (lv_btnmatrix_get_selected_btn(page->tabs)) {
-			case Tabs::Info: {
-				page->active_tab = Tabs::Info;
-				page->status_tab.prepare_focus(page->group);
-				break;
-			}
-
-			case Tabs::Update: {
-				page->active_tab = Tabs::Update;
-				page->fwupdate_tab.prepare_focus(page->group);
-				break;
-			}
-
-			case Tabs::Plugins: {
-				page->active_tab = Tabs::Plugins;
-				page->plugin_tab.prepare_focus(page->group);
-				break;
-			}
-
-			case Tabs::Prefs: {
-				page->active_tab = Tabs::Prefs;
-				page->prefs_tab.prepare_focus(page->group);
-				break;
-			}
-		}
+		page->tab_click();
 	}
 
-	FirmwareUpdateTab fwupdate_tab;
-	PluginTab plugin_tab;
-	SystemStatusTab status_tab;
-	PrefsTab prefs_tab;
+	void tab_click() {
+		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, tab_bar);
 
-	enum Tabs { Info = 0, Plugins = 1, Prefs = 2, Update = 3, NumTabs };
-	Tabs active_tab = Info;
-	lv_obj_t *tabs = nullptr;
+		auto active_tab_index = lv_btnmatrix_get_selected_btn(tab_bar);
+		active_tab = tabs[active_tab_index];
+		active_tab->prepare_focus(group);
+	}
+
+	InfoTab info_tab;
+	PluginTab plugin_tab;
+	PrefsTab prefs_tab;
+	SystemTab system_tab;
+	FirmwareUpdateTab fwupdate_tab;
+	std::array<SystemMenuTab *, 5> tabs{&info_tab, &plugin_tab, &prefs_tab, &system_tab, &fwupdate_tab};
+	SystemMenuTab *active_tab = &info_tab;
+
+	lv_obj_t *tab_bar;
 };
 
 } // namespace MetaModule

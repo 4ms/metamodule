@@ -1,28 +1,14 @@
 #pragma once
-#include "dynload/plugin_loader.hh"
-#include "gui/helpers/lv_helpers.hh"
-#include "gui/pages/base.hh"
-#include "gui/pages/page_list.hh"
+#include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
 
 namespace MetaModule
 {
 
-struct PrefsTab {
+struct PrefsTab : SystemMenuTab {
 
-	PrefsTab() = default;
-
-	void prepare_focus(lv_group_t *group) {
+	void prepare_focus(lv_group_t *group) override {
 		this->group = group;
-	}
-
-	// Returns true if this pages uses the back event
-	bool consume_back_event() {
-		return false;
-	}
-
-	void update() {
 	}
 
 private:

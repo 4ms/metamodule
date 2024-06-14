@@ -4,27 +4,22 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 
 namespace MetaModule
 {
 
-struct SystemStatusTab {
+struct SystemTab : SystemMenuTab {
 
-	SystemStatusTab(FileStorageProxy &patch_storage)
+	SystemTab(FileStorageProxy &patch_storage)
 		: storage{patch_storage} {
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
 	}
 
-	void prepare_focus(lv_group_t *group) {
+	void prepare_focus(lv_group_t *group) override {
 		this->group = group;
-
-		std::string_view fw_version = GIT_FIRMWARE_VERSION_TAG;
-		if (fw_version.starts_with("firmware-"))
-			fw_version.remove_prefix(9);
-
-		lv_label_set_text_fmt(ui_SystemMenuFWversion, "Firmware version: %s", fw_version.data());
 
 		lv_group_remove_obj(ui_SystemCalibrationButton);
 		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
@@ -36,7 +31,7 @@ struct SystemStatusTab {
 	}
 
 	// Returns true if this pages uses the back event
-	bool consume_back_event() {
+	bool consume_back_event() override {
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
 			return true;
@@ -44,7 +39,7 @@ struct SystemStatusTab {
 		return false;
 	}
 
-	void update() {
+	void update() override {
 	}
 
 private:
@@ -52,7 +47,7 @@ private:
 		if (!event || !event->user_data)
 			return;
 
-		auto page = static_cast<SystemStatusTab *>(event->user_data);
+		auto page = static_cast<SystemTab *>(event->user_data);
 		page->confirm_popup.show(
 			[page](bool ok) {
 				if (ok) {
