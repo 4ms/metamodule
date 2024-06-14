@@ -2,6 +2,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
@@ -9,7 +10,7 @@
 namespace MetaModule
 {
 
-struct PluginTab {
+struct PluginTab : SystemMenuTab {
 
 	PluginTab(PluginManager &plugin_manager, NotificationQueue &notify_queue)
 		: plugin_manager{plugin_manager}
@@ -22,7 +23,7 @@ struct PluginTab {
 		lv_hide(ui_PluginsFoundCont);
 	}
 
-	void prepare_focus(lv_group_t *group) {
+	void prepare_focus(lv_group_t *group) override {
 		this->group = group;
 		lv_show(ui_PluginScanButton);
 		lv_hide(ui_PluginsFoundCont);
@@ -36,7 +37,7 @@ struct PluginTab {
 		lv_group_focus_obj(ui_PluginScanButton);
 	}
 
-	void update() {
+	void update() override {
 		auto result = plugin_manager.process_loading();
 
 		if (result.state == PluginFileLoader::State::GotList) {
