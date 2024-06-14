@@ -1,15 +1,13 @@
 #pragma once
-#include "audio/audio.hh"
 #include "conf/panel_conf.hh"
-#include "conf/qspi_flash_conf.hh"
-#include "drivers/pin.hh"
-#include "drivers/qspi_flash_driver.hh"
-#include "fs/norflash_layout.hh"
+#include "drivers/stm32xx.h"
 #include "pr_dbg.hh"
 #include "util/analyzed_signal.hh"
+#include "util/countzip.hh"
 #include <array>
 #include <cmath>
 #include <optional>
+#include <span>
 
 namespace MetaModule
 {
@@ -19,104 +17,48 @@ namespace MetaModule
 // audio.step_calibration() => AudioInCalibrator::step_calibration()
 // QSpiFlash -> use M4
 
-struct AudioInCalibrator {
-	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
+class Calibrator {
+	using CalData = std::array<std::pair<float, float>, PanelDef::NumAudioIn /* + PanelDef::NumAudioOut*/>;
 
-	void use_defaults(AudioStream &audio) {
-		std::array<std::pair<float, float>, PanelDef::NumAudioIn> caldata{{
-			{-7603.204102, 3258431.500000},
-			{-7982.296387, 3268419.500000},
-			{-12926.662109, 3255171.250000},
-			{-7208.814453, 3256771.000000},
-			{-16831.820312, 3262270.250000},
-			{-14835.051758, 3257434.250000},
-		}};
-		audio.set_calibration<0, 4000>(caldata);
-	}
+	CalData caldata;
 
-	bool read_calibration(AudioStream &audio) {
-		std::array<std::pair<float, float>, PanelDef::NumAudioIn> caldata;
+public:
+	// caller needs to send message via PatchPlayLoader to tell audio to disable calibration
+	// cal.reset_readings(analyzed_signal);
+	// ...wait for a few blocks
+	// cal.record_low_measurements(metaparams.cal_readings);
+	//
+	// cal.reset_readings(analyzed_signal);
+	// ...wait for a few blocks
+	// cal.record_high_measurements(metaparams.cal_readings);
+	//
+	// write()
 
-		if (flash_.read(reinterpret_cast<uint8_t *>(caldata.data()), CalDataFlashOffset, sizeof caldata)) {
-
-			for (auto chan : caldata) {
-				pr_dbg("Read: %f %f\n", chan.first, chan.second);
-				if (isnanf(chan.first) || isnanf(chan.second) || chan.first < -100'000.f || chan.first > 100'000.f ||
-					chan.second < 3'000'000.f || chan.second > 3'500'000.f)
-				{
-					pr_info("Cal data invalid\n");
-					return false;
-				}
-			}
-			pr_dbg("Cal data validated: setting audio cal\n");
-			audio.set_calibration<0, 4000>(caldata);
-			return true;
-
-		} else {
-			pr_dbg("Error reading calibration data in flash\n");
-			return false;
+	void record_low_measurements(std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> &cal_readings) {
+		for (auto [i, ain] : enumerate(cal_readings)) {
+			debug_print_reading(i, ain);
+			caldata[i].first = ain.iir;
 		}
 	}
 
-	void calibrate(AudioStream &audio) {
-		std::array<std::pair<float, float>, PanelDef::NumAudioIn> caldata;
-		std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> cal_readings;
-		mdrivlib::
-			FPin<mdrivlib::GPIO::D, mdrivlib::PinNum::_8, mdrivlib::PinMode::Input, mdrivlib::PinPolarity::Inverted>
-				button0{mdrivlib::PinPull::Up};
-
-		audio.start();
-		audio.start_calibration_mode(cal_readings);
-		HAL_Delay(1000);
-
-		{
-			pr_dbg("Ready to calibrate: patch 0V and press the back button\n");
-
-			while (!button0.read())
-				;
-			while (button0.read())
-				;
-
-			audio.step_calibration();
-			// TODO: step_calibration(cal_readings);
-			HAL_Delay(1000);
-			for (auto [i, ain] : enumerate(cal_readings)) {
-				print_reading(i, ain);
-				caldata[i].first = ain.iir;
-			}
-		}
-
-		{
-			pr_dbg("Ready: patch 4V and press the back button\n");
-			while (!button0.read())
-				;
-			while (button0.read())
-				;
-
-			audio.step_calibration();
-			// TODO: step_calibration(cal_readings);
-			HAL_Delay(1000);
-			for (auto [i, ain] : enumerate(cal_readings)) {
-				print_reading(i, ain);
-				caldata[i].second = ain.iir;
-			}
-		}
-
-		if (!flash_.write(reinterpret_cast<uint8_t *>(caldata.data()), CalDataFlashOffset, sizeof caldata)) {
-			pr_err("Could not write cal data to flash\n");
-		}
-
-		audio.set_calibration<0, 4000>(caldata);
-		audio.end_calibration_mode();
-	}
-
-	void step_calibration(std::span<AnalyzedSignal<1000>, PanelDef::NumAudioIn> cal_readings) {
-		for (auto &cal : cal_readings) {
-			cal.reset_to(cal.iir);
+	void record_high_measurements(std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> &cal_readings) {
+		for (auto [i, ain] : enumerate(cal_readings)) {
+			debug_print_reading(i, ain);
+			caldata[i].second = ain.iir;
 		}
 	}
 
-	void print_reading(unsigned idx, AnalyzedSignal<1000> ain) {
+	void reset_readings(std::span<AnalyzedSignal<1000>, PanelDef::NumAudioIn> cal_readings) {
+		for (auto &chan : cal_readings) {
+			chan.reset_to(chan.iir);
+		}
+	}
+
+	CalData &get_cal_data() {
+		return caldata;
+	}
+
+	void debug_print_reading(unsigned idx, AnalyzedSignal<1000> ain) {
 		pr_dbg("AIN %zu: iir=%d min=%d max=%d range=%d\r\n",
 			   idx,
 			   (int)(ain.iir),

@@ -1,6 +1,6 @@
 #include "app_startup.hh"
 #include "audio/audio.hh"
-#include "audio/calibrator.hh"
+#include "audio/calibration_data_reader.hh"
 #include "core_a7/a7_shared_memory.hh"
 #include "core_a7/static_buffers.hh"
 #include "core_intercom/shared_memory.hh"
@@ -66,6 +66,7 @@ void main() {
 		&StaticBuffers::virtdrive,
 		&StaticBuffers::icc_shared_message,
 	};
+
 	A7SharedMemoryS::ptrs = {
 		&patch_player,
 		&patch_playloader,
@@ -74,6 +75,13 @@ void main() {
 		&patch_mod_queue,
 		&StaticBuffers::virtdrive,
 	};
+
+	{
+		CalibrationDataReader cal;
+		cal.read_calibration_or_defaults();
+		//TODO: voltages for which these values used, should be stored in the CalData header
+		audio.set_calibration<0, 4000>(cal.get_cal_data());
+	}
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	mdrivlib::SystemCache::clean_dcache_by_range(&A7SharedMemoryS::ptrs, sizeof(A7SharedMemoryS::ptrs));
@@ -84,7 +92,7 @@ void main() {
 	WifiUpdate::run();
 #endif
 
-	// prevents M4 from using it as a USBD device: TODO remove this or remove usb_device in M4, or make it a config option to enable USB MSC Device mode
+	// prevents M4 from using it as a USBD device:
 	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
 
 	pr_info("A7 Core 1 initialized\n");
@@ -101,12 +109,6 @@ void main() {
 
 	sync_params.clear();
 	patch_playloader.load_initial_patch();
-
-	AudioInCalibrator cal;
-	if (!cal.read_calibration(audio)) {
-		pr_info("No CV calibration data found, using defaults\n");
-		cal.use_defaults(audio);
-	}
 
 	audio.start();
 
