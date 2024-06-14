@@ -79,10 +79,9 @@ void main() {
 	};
 
 	{
-		CalibrationDataReader cal;
-		cal.read_calibration_or_defaults();
-		//TODO: voltages for which these values used, should be stored in the CalData header
-		audio.set_calibration<0, 4000>(cal.get_cal_data());
+		FlashLoader loader;
+		CalibrationDataReader cal{loader};
+		audio.set_calibration(cal.read_calibration_or_defaults());
 	}
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));

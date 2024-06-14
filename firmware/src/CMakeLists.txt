@@ -119,6 +119,7 @@ add_executable(
   ${SHARED}/patch_convert/ryml/ryml_init.cc
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc
+  ${FWDIR}/src/flash_loader/flash_loader.cc
   #
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c

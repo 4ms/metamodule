@@ -1,4 +1,5 @@
 #pragma once
+#include "audio/calibration_data.hh"
 #include "conf/board_codec_conf.hh"
 #include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
@@ -96,10 +97,9 @@ private:
 	std::span<AnalyzedSignal<1000>> cal_readings{};
 
 public:
-	template<unsigned LowMilliVolts, unsigned HighMilliVolts>
-	void set_calibration(std::array<std::pair<float, float>, PanelDef::NumAudioIn> const &values) {
-		for (auto [chan, val] : zip(incal, values))
-			chan.template calibrate_chan<LowMilliVolts, HighMilliVolts, 1000>(val.first, val.second);
+	void set_calibration(CalData const &caldata) {
+		for (auto [chan, val] : zip(incal, caldata.ins_data))
+			chan.calibrate_chan(caldata.ins_measured_mv.first, caldata.ins_measured_mv.second, val.first, val.second);
 	}
 
 private:
