@@ -17,8 +17,8 @@ lv_obj_t *create_plugin_list_item(lv_obj_t *parent, const char *name) {
 						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
 	lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_set_style_radius(obj, 0, LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(obj, lv_color_hex(0x888888), LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_opa(obj, 64, LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(obj, lv_color_hex(0x555555), LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(obj, LV_OPA_100, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(obj, 6, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(obj, 4, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(obj, 2, LV_STATE_DEFAULT);

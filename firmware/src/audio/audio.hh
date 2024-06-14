@@ -98,8 +98,8 @@ private:
 public:
 	template<unsigned LowMilliVolts, unsigned HighMilliVolts>
 	void set_calibration(std::array<std::pair<float, float>, PanelDef::NumAudioIn> const &values) {
-		for (auto [inc, val] : zip(incal, values))
-			inc.template calibrate_chan<LowMilliVolts, HighMilliVolts, 1000>(val.first, val.second);
+		for (auto [chan, val] : zip(incal, values))
+			chan.template calibrate_chan<LowMilliVolts, HighMilliVolts, 1000>(val.first, val.second);
 	}
 
 private:

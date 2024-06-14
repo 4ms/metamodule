@@ -1,4 +1,5 @@
 #pragma once
+#include "audio/calibrator.hh"
 #include "git_version.h"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
@@ -13,8 +14,9 @@ namespace MetaModule
 
 struct SystemTab : SystemMenuTab {
 
-	SystemTab(FileStorageProxy &patch_storage)
-		: storage{patch_storage} {
+	SystemTab(FileStorageProxy &patch_storage, MetaParams &metaparams)
+		: storage{patch_storage}
+		, metaparams{metaparams} {
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
 	}
@@ -42,6 +44,9 @@ struct SystemTab : SystemMenuTab {
 	}
 
 	void update() override {
+		if (state == State::Calibrating) {
+			cal.update(cur_cal_chan, metaparams.ins[cur_cal_chan]);
+		}
 	}
 
 private:
@@ -50,6 +55,10 @@ private:
 			return;
 
 		auto page = static_cast<SystemTab *>(event->user_data);
+
+		page->cal.start();
+		page->cur_cal_chan = 0;
+		page->state = State::Calibrating;
 	}
 
 	static void resetbut_cb(lv_event_t *event) {
@@ -68,8 +77,15 @@ private:
 			"Delete");
 	}
 
-	lv_group_t *group = nullptr;
 	FileStorageProxy &storage;
+	MetaParams &metaparams;
+
 	ConfirmPopup confirm_popup;
+	Calibrator cal;
+
+	enum class State { Idle, Calibrating } state = State::Idle;
+	unsigned cur_cal_chan = 0;
+
+	lv_group_t *group = nullptr;
 };
 } // namespace MetaModule

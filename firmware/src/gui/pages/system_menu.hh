@@ -20,7 +20,7 @@ struct SystemMenuPage : PageBase {
 	SystemMenuPage(PatchContext info)
 		: PageBase{info, PageId::SystemMenu}
 		, plugin_tab{info.plugin_manager, info.notify_queue}
-		, system_tab{patch_storage}
+		, system_tab{patch_storage, metaparams}
 		, fwupdate_tab{patch_storage, patch_playloader}
 		, tab_bar(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
 
