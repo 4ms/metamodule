@@ -41,8 +41,8 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 		} else {
 			pr_err("Undefined flash target %u\n", message.flashTarget);
 			return IntercoreStorageMessage{.message_type = FlashingFailed};
-		}	
-		
+		}
+
 	} else {
 		return std::nullopt;
 	}
@@ -60,22 +60,22 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 
 	if (result == ESP_LOADER_SUCCESS) {
 
-			result = Flasher::verify(address, length, checksum);
+		result = Flasher::verify(address, length, checksum);
 
-			if (result == ESP_LOADER_ERROR_INVALID_MD5) {
-				returnValue = {.message_type = ChecksumMismatch};
-			} else if (result == ESP_LOADER_SUCCESS) {
+		if (result == ESP_LOADER_ERROR_INVALID_MD5) {
+			returnValue = {.message_type = ChecksumMismatch};
+		} else if (result == ESP_LOADER_SUCCESS) {
 			pr_trace("-> Checksum matches\n");
-				returnValue = {.message_type = ChecksumMatch};
+			returnValue = {.message_type = ChecksumMatch};
 
 		} else {
 			pr_trace("-> Cannot get checksum\n");
-			returnValue = {.message_type = ChecksumFailed};
+			returnValue = {.message_type = WifiExpanderCommError};
 		}
 
 	} else {
 		pr_err("Cannot connect to wifi bootloader\n");
-		returnValue = {.message_type = ChecksumFailed};
+		returnValue = {.message_type = WifiExpanderNotConnected};
 	}
 
 	Flasher::deinit();
@@ -161,7 +161,7 @@ FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_
 			offset += bytesToRead;
 			bytesChecked = offset;
 		} else {
-			return {.message_type = ChecksumFailed};
+			return {.message_type = ReadFlashFailed};
 		}
 	}
 
