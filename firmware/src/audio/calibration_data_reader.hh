@@ -16,6 +16,11 @@ namespace MetaModule
 
 class CalibrationDataReader {
 
+	// struct CalData2 {
+	// 	std::pair<float, float> ins_measured_millivolts;
+	// 	std::array<std::pair<float, float>, PanelDef::NumAudioIn> ins_data;
+	// };
+
 	using CalData = std::array<std::pair<float, float>, PanelDef::NumAudioIn /* + PanelDef::NumAudioOut*/>;
 	CalData caldata;
 

@@ -18,9 +18,10 @@ namespace MetaModule
 // QSpiFlash -> use M4
 
 class Calibrator {
-	using CalData = std::array<std::pair<float, float>, PanelDef::NumAudioIn /* + PanelDef::NumAudioOut*/>;
+	using CalData = std::array<std::pair<float, float>, PanelDef::NumAudioIn>;
 
 	CalData caldata;
+	unsigned delay_ctr = 0;
 
 public:
 	// caller needs to send message via PatchPlayLoader to tell audio to disable calibration
@@ -34,25 +35,47 @@ public:
 	//
 	// write()
 
-	void record_low_measurements(std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> &cal_readings) {
-		for (auto [i, ain] : enumerate(cal_readings)) {
-			debug_print_reading(i, ain);
-			caldata[i].first = ain.iir;
+	void start() {
+		state = State::WaitingForLow;
+		delay_ctr = 0;
+	}
+
+	void update(unsigned chan_num, AnalyzedSignal<1000> reading) {
+
+		switch (state) {
+			case State::Idle: {
+			} break;
+
+			case State::WaitingForLow: {
+				if (delay_ctr == 0)
+					reading.reset_to(reading.iir);
+
+				if (++delay_ctr > 16) { //256ms
+					caldata[chan_num].first = reading.iir;
+					state = State::WaitingforHigh;
+					delay_ctr = 0;
+				}
+			} break;
+
+			case State::WaitingforHigh: {
+				if (delay_ctr == 0)
+					reading.reset_to(reading.iir);
+
+				if (++delay_ctr > 16) { //256ms
+					caldata[chan_num].second = reading.iir;
+					state = State::WaitingforHigh;
+					delay_ctr = 0;
+
+					debug_print_reading(chan_num, reading);
+				}
+			} break;
+
+			case State::Done: {
+			} break;
 		}
 	}
 
-	void record_high_measurements(std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> &cal_readings) {
-		for (auto [i, ain] : enumerate(cal_readings)) {
-			debug_print_reading(i, ain);
-			caldata[i].second = ain.iir;
-		}
-	}
-
-	void reset_readings(std::span<AnalyzedSignal<1000>, PanelDef::NumAudioIn> cal_readings) {
-		for (auto &chan : cal_readings) {
-			chan.reset_to(chan.iir);
-		}
-	}
+	enum class State { Idle, WaitingForLow, WaitingforHigh, Done } state = State::Idle;
 
 	CalData &get_cal_data() {
 		return caldata;
