@@ -31,6 +31,8 @@ struct FirmwareUpdateTab : SystemMenuTab {
 		display_file_not_found();
 
 		confirm_popup.init(ui_SystemMenu, group);
+		lv_label_set_text(ui_SystemMenuUpdateLog, "");
+		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
 
 	// Returns true if this pages uses the back event
@@ -84,8 +86,11 @@ struct FirmwareUpdateTab : SystemMenuTab {
 			case State::Updating: {
 				auto status = updater.process();
 
+				if (status.state != FirmwareUpdaterProxy::Error && status.message.length())
+					append_log_message(status.message);
+
 				if (status.state == FirmwareUpdaterProxy::Error) {
-					display_update_failed(status.error_message);
+					display_update_failed(status.message);
 					state = State::Failed;
 
 				} else if (status.state == FirmwareUpdaterProxy::LoadingUpdateFiles) {
@@ -200,6 +205,13 @@ private:
 		lv_obj_set_style_text_color(ui_SystemMenuUpdateMessage, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
 		lv_label_set_text_fmt(
 			ui_SystemMenuUpdateMessage, "Updating firmware failed!\n%.*s", (int)message.length(), message.data());
+		lv_hide(ui_FWUpdateSpinner);
+		lv_hide(ui_SystemMenUpdateProgressBar);
+	}
+
+	void append_log_message(std::string_view message) {
+		std::string log = lv_label_get_text(ui_SystemMenuUpdateLog);
+		lv_label_set_text_fmt(ui_SystemMenuUpdateLog, "%s\n%.*s", log.c_str(), (int)message.length(), message.data());
 		lv_hide(ui_FWUpdateSpinner);
 		lv_hide(ui_SystemMenUpdateProgressBar);
 	}
