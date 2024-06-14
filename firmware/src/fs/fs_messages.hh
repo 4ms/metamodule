@@ -1,5 +1,6 @@
 #pragma once
 
+#include "audio/calibration_message_handler.hh"
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "dynload/plugin_file_finder.hh"
@@ -38,6 +39,7 @@ struct FilesystemMessages {
 			process_receiver(firmware_files);
 			process_receiver(firmware_writer);
 			process_receiver(plugin_files);
+			process_receiver(calibration_handler);
 
 			if (message.message_type != IntercoreStorageMessage::MessageType::None) {
 				pr_err("ICC message of type %u not handled\n", message.message_type);
@@ -59,10 +61,13 @@ private:
 
 	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm;
 
+	FlashLoader flash_loader;
+
 	PatchStorage patch_storage{sd_fileio, usb_fileio};
 	FirmwareFileFinder firmware_files{sd_fileio, usb_fileio};
-	FirmwareWriter firmware_writer{sd_fileio, usb_fileio};
+	FirmwareWriter firmware_writer{sd_fileio, usb_fileio, flash_loader};
 	PluginFileFinder plugin_files{sd_fileio, usb_fileio};
+	CalibrationMessageHandler calibration_handler{flash_loader};
 };
 
 } // namespace MetaModule
