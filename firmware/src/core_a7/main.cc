@@ -41,7 +41,8 @@ void main() {
 	PatchPlayer patch_player;
 	FileStorageComm patch_comm{StaticBuffers::icc_shared_message};
 	FileStorageProxy file_storage_proxy{StaticBuffers::raw_patch_data, patch_comm, StaticBuffers::patch_dir_list};
-	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
+	OpenPatchManager open_patches_manager;
+	PatchPlayLoader patch_playloader{file_storage_proxy, open_patches_manager, patch_player};
 
 	SyncParams sync_params;
 	PatchModQueue patch_mod_queue;
@@ -64,6 +65,7 @@ void main() {
 		&patch_player,
 		&patch_playloader,
 		&file_storage_proxy,
+		&open_patches_manager,
 		&sync_params,
 		&patch_mod_queue,
 		&StaticBuffers::virtdrive,

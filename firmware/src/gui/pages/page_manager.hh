@@ -48,6 +48,7 @@ public:
 	PageBase *cur_page = &page_mainmenu;
 
 	PageManager(FileStorageProxy &patch_storage,
+				OpenPatchManager &open_patch_manager,
 				PatchPlayLoader &patch_playloader,
 				ParamsMidiState &params,
 				MetaParams &metaparams,
@@ -55,6 +56,7 @@ public:
 				PatchModQueue &patch_mod_queue,
 				PluginManager &plugin_manager)
 		: info{patch_storage,
+			   open_patch_manager,
 			   patch_playloader,
 			   params,
 			   metaparams,

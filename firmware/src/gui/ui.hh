@@ -30,13 +30,20 @@ private:
 public:
 	Ui(PatchPlayLoader &patch_playloader,
 	   FileStorageProxy &patch_storage,
+	   OpenPatchManager &open_patch_manager,
 	   SyncParams &sync_params,
 	   PatchModQueue &patch_mod_queue,
 	   PluginManager &plugin_manager)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
-		, page_manager{
-			  patch_storage, patch_playloader, params, metaparams, notify_queue, patch_mod_queue, plugin_manager} {
+		, page_manager{patch_storage,
+					   open_patch_manager,
+					   patch_playloader,
+					   params,
+					   metaparams,
+					   notify_queue,
+					   patch_mod_queue,
+					   plugin_manager} {
 
 		params.clear();
 		metaparams.clear();
