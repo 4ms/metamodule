@@ -50,6 +50,14 @@ public:
 		delay_ctr = 0;
 	}
 
+	bool has_low_reading(unsigned chan_num) {
+		return chan_num < got_low.size() ? got_low[chan_num] : false;
+	}
+
+	bool has_high_reading(unsigned chan_num) {
+		return chan_num < got_high.size() ? got_high[chan_num] : false;
+	}
+
 	// return channel's validated readings if we got them both
 	[[nodiscard]] std::optional<std::pair<float, float>> stop_chan(unsigned chan_num) {
 		if (chan_num >= states.size())

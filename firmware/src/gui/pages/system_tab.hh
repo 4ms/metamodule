@@ -71,7 +71,7 @@ struct SystemTab : SystemMenuTab {
 	}
 
 private:
-	enum class JackCalStatus { NotCal, Error, Done };
+	enum class JackCalStatus { NotCal, LowOnly, HighOnly, Error, Done };
 
 	void start_calibration() {
 		// send message via PatchPlayLoader to tell audio to disable calibration?
@@ -141,18 +141,18 @@ private:
 		auto *label = input_status_labels[idx];
 		switch (status) {
 			case JackCalStatus::NotCal: {
-				lv_label_set_text_fmt(label, "In %d: --", idx);
-				lv_obj_set_style_text_color(label, lv_color_white(), LV_PART_MAIN);
+				lv_label_set_text_fmt(label, "In %d:\n #aaaaaa C2 C4#", idx);
+				// lv_obj_set_style_text_color(label, lv_color_white(), LV_PART_MAIN);
 			} break;
 
 			case JackCalStatus::Done: {
-				lv_label_set_text_fmt(label, "In %d: OK", idx);
-				lv_obj_set_style_text_color(label, Gui::palette_main[LV_PALETTE_GREEN], LV_PART_MAIN);
+				lv_label_set_text_fmt(label, "In %d:\n#00a551 OK#", idx);
+				// lv_obj_set_style_text_color(label, Gui::palette_main[LV_PALETTE_GREEN], LV_PART_MAIN);
 			} break;
 
 			case JackCalStatus::Error: {
-				lv_label_set_text_fmt(label, "In %d: X", idx);
-				lv_obj_set_style_text_color(label, Gui::palette_main[LV_PALETTE_RED], LV_PART_MAIN);
+				lv_label_set_text_fmt(label, "In %d:\n#f40000 FAIL#", idx);
+				// lv_obj_set_style_text_color(label, Gui::palette_main[LV_PALETTE_RED], LV_PART_MAIN);
 			} break;
 		}
 	}
