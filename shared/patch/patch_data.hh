@@ -334,11 +334,28 @@ struct PatchData {
 	size_t patch_size() {
 		auto sz = sizeof(PatchData);
 		sz += module_slugs.size() * sizeof(BrandModuleSlug);
+
 		sz += int_cables.size() * sizeof(InternalCable);
-		for (auto &in : int_cables)
+		for (auto const &cable : int_cables)
+			sz += cable.ins.size() * sizeof(Jack);
+
+		sz += mapped_ins.size() * sizeof(MappedInputJack);
+		for (auto const &in : mapped_ins)
 			sz += in.ins.size() * sizeof(Jack);
 
-		////TODO rest of data
+		sz += mapped_outs.size() * sizeof(MappedOutputJack);
+
+		sz += static_knobs.size() * sizeof(StaticParam);
+
+		sz += knob_sets.size() * sizeof(MappedKnobSet);
+		for (auto const &knob_set : knob_sets)
+			sz += knob_set.set.size() * sizeof(MappedKnob);
+
+		sz += module_states.size() * sizeof(ModuleInitState);
+		for (auto const &state : module_states)
+			sz += state.state_data.size() * sizeof(char);
+
+		sz += midi_maps.set.size() * sizeof(MappedKnob);
 
 		return sz;
 	}

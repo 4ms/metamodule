@@ -25,7 +25,6 @@ struct OpenPatchList {
 	//TODO: return an optional iterator?
 
 	OpenPatch *find(PatchLocHash hash) {
-		dump("find");
 		if (list.empty())
 			return nullptr;
 
@@ -37,13 +36,13 @@ struct OpenPatchList {
 
 	OpenPatch *emplace_back(PatchLocation const &loc) {
 		auto &openpatch = list.emplace_back(loc);
-		dump("emplace_back");
+		dump();
 		return &openpatch;
 	}
 
 	bool remove(PatchLocHash hash) {
 		auto num_erased = std::erase_if(list, [=](auto &e) { return e.loc_hash == hash; });
-		dump("Remove");
+		dump();
 		return num_erased > 0;
 	}
 
@@ -51,17 +50,25 @@ struct OpenPatchList {
 		list.pop_back();
 	}
 
-	void dump(std::string_view header) {
+private:
+	void dump() {
 		unsigned i = 0;
-		pr_dbg("%s: \n", header.data());
+		size_t total_size = 0;
+
+		pr_dbg("________\n");
 		for (auto &p : list) {
-			pr_dbg("[%d] %d:%s: %s #%d\n",
+			auto sz = p.patch.patch_size();
+			total_size += sz;
+			pr_dbg("[%d] %d:%s: %s #%d [%zu B]\n",
 				   i++,
 				   p.loc.vol,
 				   p.loc.filename.c_str(),
 				   p.patch.patch_name.c_str(),
-				   p.modification_count);
+				   p.modification_count,
+				   sz);
 		}
+		pr_dbg("TOTAL: %zu\n", total_size);
+		pr_dbg("________\n");
 	}
 
 private:
