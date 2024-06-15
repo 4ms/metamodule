@@ -39,7 +39,7 @@ struct CalData {
 
 		if (version == 1) {
 			for (auto chan : ins_data) {
-				if (isnanf(chan.first) || isnanf(chan.second) ||
+				if (std::isnan(chan.first) || std::isnan(chan.second) ||
 					!within_tol(chan.first, Calibration::from_volts(Calibration::DefaultLowV)) ||
 					!within_tol(chan.second, Calibration::from_volts(Calibration::DefaultHighV)))
 				{
