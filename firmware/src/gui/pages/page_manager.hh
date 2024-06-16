@@ -96,7 +96,7 @@ public:
 	void handle_knobset_change() {
 		if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
 
-			if (auto patch = info.patch_storage.get_playing_patch(); patch != nullptr) {
+			if (auto patch = info.open_patch_manager.get_playing_patch(); patch != nullptr) {
 
 				if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
 					int cur_knobset = info.page_list.get_active_knobset();
@@ -123,7 +123,7 @@ public:
 	// Update internal copy of patch with knob changes
 	// This is used to keep GUI in sync with patch player's copy of the patch without concurrancy issues
 	void update_patch_params() {
-		auto patch = info.patch_storage.get_playing_patch();
+		auto patch = info.open_patch_manager.get_playing_patch();
 		if (!patch)
 			return;
 

@@ -20,7 +20,7 @@ struct KnobSetViewPage : PageBase {
 	KnobSetViewPage(PatchContext info)
 		: PageBase{info, PageId::KnobSetView}
 		, base{ui_KnobSetViewPage}
-		, patch{patch_storage.get_view_patch()} {
+		, patch{patches.get_view_patch()} {
 		init_bg(base);
 		lv_group_set_editing(group, false);
 		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
@@ -61,7 +61,7 @@ struct KnobSetViewPage : PageBase {
 		update_active_status();
 		display_active_status();
 
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 
 		if (patch->knob_sets.size() > 2) {
 			// lv_show(ui_PreviousKnobSet);

@@ -2,6 +2,7 @@
 #include "CoreModules/modules_helpers.hh"
 #include "delay.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
 #include "patch_play/patch_player.hh"
 #include "pr_dbg.hh"
@@ -13,16 +14,18 @@ namespace MetaModule
 
 // PatchLoader handles loading of patches from storage into PatchPlayer
 struct PatchPlayLoader {
-	PatchPlayLoader(FileStorageProxy &patch_storage, PatchPlayer &patchplayer)
+	PatchPlayLoader(FileStorageProxy &patch_storage, OpenPatchManager &patches, PatchPlayer &patchplayer)
 		: player_{patchplayer}
-		, storage_{patch_storage} {
+		, storage_{patch_storage}
+		, patches_{patches} {
 	}
 
 	void load_initial_patch() {
 		uint32_t tries = 10000;
 
+		PatchLocation initial_patch_loc{"SlothDrone.yml", Volume::NorFlash};
 		while (--tries) {
-			if (storage_.request_load_patch({"SlothDrone.yml", Volume::NorFlash}))
+			if (storage_.request_load_patch(initial_patch_loc))
 				break;
 		}
 		if (tries == 0) {
@@ -35,10 +38,12 @@ struct PatchPlayLoader {
 			auto message = storage_.get_message();
 
 			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
-				if (!storage_.parse_loaded_patch(message.bytes_read))
+				auto patch_data = storage_.get_patch_data(message.bytes_read);
+				if (!patches_.open_patch(patch_data, initial_patch_loc))
 					pr_err("ERROR: could not parse initial patch\n");
 				else
 					load_patch();
+
 				break;
 			}
 			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
@@ -122,7 +127,7 @@ struct PatchPlayLoader {
 
 		player_.add_module(slug);
 
-		auto *patch = storage_.get_view_patch();
+		auto *patch = patches_.get_view_patch();
 		uint16_t module_id = patch->add_module(slug);
 		auto info = ModuleFactory::getModuleInfo(slug);
 
@@ -142,6 +147,7 @@ struct PatchPlayLoader {
 private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;
+	OpenPatchManager &patches_;
 
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
@@ -151,10 +157,18 @@ private:
 	std::atomic<bool> should_save_patch_ = false;
 
 	Result save_patch() {
-		if (storage_.get_view_patch() == storage_.get_playing_patch())
-			storage_.update_view_patch_module_states(player_.get_module_states());
+		auto view_patch = patches_.get_view_patch();
 
-		if (auto res = storage_.write_patch(); res == FileStorageProxy::WriteResult::Success) {
+		if (view_patch == patches_.get_playing_patch())
+			patches_.update_view_patch_module_states(player_.get_module_states());
+
+		std::span<char> filedata = storage_.get_patch_data();
+		patch_to_yaml_buffer(*view_patch, filedata);
+
+		auto res =
+			storage_.request_write_file(filedata, patches_.get_view_patch_vol(), patches_.get_view_patch_filename());
+
+		if (res == FileStorageProxy::WriteResult::Success) {
 			should_save_patch_ = false;
 			saving_patch_ = true;
 			return {true, "Saving..."};
@@ -180,7 +194,7 @@ private:
 
 		} else if (msg.message_type == FileStorageProxy::PatchDataWriteOK) {
 			saving_patch_ = false;
-			storage_.reset_view_patch_modification_count();
+			patches_.reset_view_patch_modification_count();
 			return {true, "Saved"};
 
 		} else {
@@ -189,14 +203,14 @@ private:
 	}
 
 	Result load_patch() {
-		auto patch = storage_.get_view_patch();
-		auto vol = storage_.get_view_patch_vol();
+		auto patch = patches_.get_view_patch();
+		auto vol = patches_.get_view_patch_vol();
 
 		pr_trace("Attempting play patch from vol %d: %.31s\n", (uint32_t)vol, patch->patch_name.data());
 
 		auto result = player_.load_patch(*patch);
 		if (result.success) {
-			storage_.play_view_patch();
+			patches_.play_view_patch();
 			start_audio();
 		}
 

@@ -29,7 +29,7 @@ struct MapCableUserData {
 
 //TODO: Separate this into CableMappingPane, ParamMappingPane
 struct ModuleViewMappingPane {
-	ModuleViewMappingPane(FileStorageProxy &patch_storage,
+	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
 						  ParamsMidiState &params,
 						  PageArguments &args,
@@ -37,16 +37,16 @@ struct ModuleViewMappingPane {
 						  NotificationQueue &notify_queue,
 						  GuiState &gui_state)
 		: pane_group(lv_group_create())
-		, patch{patch_storage.get_view_patch()}
+		, patch{patches.get_view_patch()}
 		, params{params}
 		, args{args}
 		, page_list{page_list}
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
-		, control_popup{patch_storage, patch_mod_queue}
+		, control_popup{patches, patch_mod_queue}
 		, patch_mod_queue{patch_mod_queue}
-		, patch_storage{patch_storage} {
+		, patches{patches} {
 
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
@@ -69,7 +69,7 @@ struct ModuleViewMappingPane {
 	}
 
 	void show(const DrawnElement &drawn_el) {
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 		add_map_popup.hide();
 
 		lv_group_remove_all_objs(pane_group);
@@ -774,7 +774,7 @@ private:
 	ConfirmPopup add_cable_popup;
 	ChoicePopup panel_cable_popup;
 	PatchModQueue &patch_mod_queue;
-	FileStorageProxy &patch_storage;
+	OpenPatchManager &patches;
 };
 
 } // namespace MetaModule

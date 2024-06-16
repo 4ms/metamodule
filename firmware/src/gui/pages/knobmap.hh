@@ -20,7 +20,7 @@ struct KnobMapPage : PageBase {
 	KnobMapPage(PatchContext info)
 		: PageBase{info, PageId::KnobMap}
 		, base{ui_EditMappingPage}
-		, patch{patch_storage.get_view_patch()}
+		, patch{patches.get_view_patch()}
 		, add_map_popup{patch_mod_queue} {
 
 		init_bg(base);
@@ -62,7 +62,7 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_parent(ui_Keyboard, ui_EditMappingPage);
 		lv_obj_set_y(ui_Keyboard, 1);
 
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 
 		view_set_idx = args.view_knobset_id.value_or(view_set_idx);
 		if (view_set_idx != PatchData::MIDIKnobSet && view_set_idx >= patch->knob_sets.size()) {
@@ -197,7 +197,7 @@ struct KnobMapPage : PageBase {
 		page->patch_mod_queue.put(
 			EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx, .cur_val = val / 100.f});
 		page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
-		page->patch_storage.mark_view_patch_modified();
+		page->patches.mark_view_patch_modified();
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
@@ -282,7 +282,7 @@ struct KnobMapPage : PageBase {
 					return;
 
 				page->patch_mod_queue.put(RemoveMapping{.map = page->map, .set_id = page->view_set_idx});
-				page->patch_storage.mark_view_patch_modified();
+				page->patches.mark_view_patch_modified();
 
 				if (!page->patch->remove_mapping(page->view_set_idx, page->map))
 					pr_err("Could not delete mapping\n");

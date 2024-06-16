@@ -31,7 +31,7 @@ struct PatchViewPage : PageBase {
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
 		, settings{settings}
-		, file_menu{patch_playloader, patch_storage, subdir_panel, notify_queue, page_list} {
+		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -74,7 +74,7 @@ struct PatchViewPage : PageBase {
 		bool needs_refresh = false;
 		if (gui_state.force_redraw_patch)
 			needs_refresh = true;
-		if (patch_revision != patch_storage.get_view_patch_modification_count())
+		if (patch_revision != patches.get_view_patch_modification_count())
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
@@ -103,13 +103,13 @@ struct PatchViewPage : PageBase {
 		if (args.patch_loc_hash)
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
-		patch_revision = patch_storage.get_view_patch_modification_count();
+		patch_revision = patches.get_view_patch_modification_count();
 
 		clear();
 
 		lv_hide(modules_cont);
 
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 
 		if (patch->patch_name.length() == 0)
 			return;
@@ -177,7 +177,7 @@ struct PatchViewPage : PageBase {
 		settings_menu.prepare_focus(group);
 		file_menu.prepare_focus(group);
 
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 		desc_panel.set_patch(patch);
 		desc_panel.prepare_focus(group);
 	}
@@ -211,8 +211,8 @@ struct PatchViewPage : PageBase {
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
 
-		if (patch != patch_storage.get_view_patch()) {
-			patch = patch_storage.get_view_patch();
+		if (patch != patches.get_view_patch()) {
+			patch = patches.get_view_patch();
 			desc_panel.set_patch(patch);
 		}
 
@@ -256,13 +256,13 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (desc_panel.did_update_names()) {
-			gui_state.force_refresh_vol = patch_storage.get_view_patch_vol();
-			patch_storage.mark_view_patch_modified();
+			gui_state.force_refresh_vol = patches.get_view_patch_vol();
+			patches.mark_view_patch_modified();
 			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
 		}
 
 		if (file_menu.did_filesystem_change()) {
-			gui_state.force_refresh_vol = patch_storage.get_view_patch_vol();
+			gui_state.force_refresh_vol = patches.get_view_patch_vol();
 		}
 
 		if (is_patch_playing) {
@@ -482,7 +482,7 @@ private:
 		page->file_menu.hide();
 
 		if (event->target == ui_SaveButton) {
-			lv_label_set_text(ui_PatchName, page->patch_storage.get_view_patch_filename().data());
+			lv_label_set_text(ui_PatchName, page->patches.get_view_patch_filename().data());
 		} else {
 			lv_label_set_text(ui_PatchName, page->patch->patch_name.c_str());
 		}
@@ -523,7 +523,7 @@ private:
 	std::optional<uint32_t> highlighted_module_id{};
 	lv_obj_t *highlighted_module_obj = nullptr;
 
-	PatchData *patch = patch_storage.get_view_patch();
+	PatchData *patch = patches.get_view_patch();
 
 	std::vector<lv_obj_t *> module_canvases;
 	std::vector<uint32_t> module_ids;

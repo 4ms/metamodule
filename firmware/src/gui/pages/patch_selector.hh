@@ -40,7 +40,7 @@ struct PatchSelectorPage : PageBase {
 		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
 
-		auto playing_patch = patch_storage.get_playing_patch();
+		auto playing_patch = patches.get_playing_patch();
 		if (!playing_patch || playing_patch->patch_name.length() == 0) {
 			lv_label_set_text(ui_NowPlayingName, "none");
 			lv_label_set_text(ui_LoadMeter, "");
@@ -91,6 +91,10 @@ struct PatchSelectorPage : PageBase {
 		}
 
 		subdir_panel.blur();
+	}
+
+	void add_open_patches(PatchDirList &patchfiles) {
+		patch_storage.get_patch_list();
 	}
 
 	void populate_roller(PatchDirList &patchfiles) {
@@ -237,7 +241,7 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::TryingToRequestPatchData:
-				if (patch_storage.load_if_open(selected_patch)) {
+				if (patches.load_if_open(selected_patch)) {
 					view_loaded_patch();
 				} else if (patch_storage.request_load_patch(selected_patch)) {
 					state = State::RequestedPatchData;
@@ -250,7 +254,10 @@ struct PatchSelectorPage : PageBase {
 
 				if (message.message_type == FileStorageProxy::PatchDataLoaded) {
 					// Try to parse the patch and open the PatchView page
-					if (patch_storage.parse_loaded_patch(message.bytes_read)) {
+
+					auto data = patch_storage.get_patch_data(message.bytes_read);
+
+					if (patches.open_patch(data, selected_patch)) {
 						view_loaded_patch();
 						hide_spinner();
 
@@ -274,7 +281,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void view_loaded_patch() {
-		auto patch = patch_storage.get_view_patch();
+		auto patch = patches.get_view_patch();
 		pr_trace("Parsed patch: %.31s\n", patch->patch_name.data());
 
 		args.patch_loc_hash = PatchLocHash{selected_patch};

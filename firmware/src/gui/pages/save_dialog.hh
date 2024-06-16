@@ -14,11 +14,13 @@ namespace MetaModule
 struct SaveDialog {
 
 	SaveDialog(FileStorageProxy &patch_storage,
+			   OpenPatchManager &patches,
 			   PatchPlayLoader &play_loader,
 			   PatchSelectorSubdirPanel &subdir_panel,
 			   NotificationQueue &notify_queue,
 			   PageList &page_list)
 		: patch_storage{patch_storage}
+		, patches{patches}
 		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
 		, notify_queue{notify_queue}
@@ -87,11 +89,11 @@ struct SaveDialog {
 
 	void show() {
 		if (mode == Mode::Hidden) {
-			file_vol = patch_storage.get_view_patch_vol();
+			file_vol = patches.get_view_patch_vol();
 			if (file_vol == Volume::RamDisk)
 				file_vol = Volume::SDCard;
 
-			auto fullpath = patch_storage.get_view_patch_filename();
+			auto fullpath = patches.get_view_patch_filename();
 			auto slashpos = fullpath.find_last_of('/');
 			if (slashpos != std::string_view::npos) {
 				file_path = fullpath.substr(0, slashpos);
@@ -183,8 +185,7 @@ struct SaveDialog {
 			hide_subdir_panel();
 		};
 
-		EntryInfo selected_patch{
-			.kind = DirEntryKind::Dir, .vol = patch_storage.get_view_patch_vol(), .path = file_path};
+		EntryInfo selected_patch{.kind = DirEntryKind::Dir, .vol = patches.get_view_patch_vol(), .path = file_path};
 		subdir_panel.refresh(selected_patch);
 	}
 
@@ -254,13 +255,13 @@ private:
 		}
 
 		// if view patch vol is RamDisk, then don't duplicate, just rename
-		if (page->patch_storage.get_view_patch_vol() == Volume::RamDisk) {
-			page->patch_storage.rename_view_patch_file(fullpath, page->file_vol);
+		if (page->patches.get_view_patch_vol() == Volume::RamDisk) {
+			page->patches.rename_view_patch_file(fullpath, page->file_vol);
 			page->patch_playloader.request_save_patch();
 			page->saved = true;
 			page->hide();
 		} else {
-			if (page->patch_storage.duplicate_view_patch(fullpath, page->file_vol)) {
+			if (page->patches.duplicate_view_patch(fullpath, page->file_vol)) {
 				page->patch_playloader.request_save_patch();
 				page->saved = true;
 				auto patch_loc = PatchLocation{std::string_view{fullpath}, page->file_vol};
@@ -294,6 +295,7 @@ private:
 	}
 
 	FileStorageProxy &patch_storage;
+	OpenPatchManager &patches;
 	PatchPlayLoader &patch_playloader;
 	PatchSelectorSubdirPanel &subdir_panel;
 	NotificationQueue &notify_queue;
