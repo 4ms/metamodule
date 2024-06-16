@@ -193,6 +193,10 @@ public:
 			pr_err("Error: tried to update_view_patch_module_states on a null view_patch\n");
 	}
 
+	OpenPatchList const &get_open_patch_list() {
+		return open_patches_;
+	}
+
 private:
 	OpenPatch *view_patch_ = nullptr;
 	OpenPatch *playing_patch_ = nullptr;

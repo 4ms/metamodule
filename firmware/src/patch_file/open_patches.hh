@@ -34,6 +34,20 @@ struct OpenPatchList {
 		return nullptr;
 	}
 
+	Volume get_vol(std::string_view filename) const {
+		if (!list.empty()) {
+
+			if (auto it =
+					std::ranges::find_if(list, [&filename](auto &entry) { return entry.loc.filename == filename; });
+				it != list.end())
+			{
+				return it->loc.vol;
+			}
+		}
+
+		return Volume::RamDisk;
+	}
+
 	OpenPatch *emplace_back(PatchLocation const &loc) {
 		auto &openpatch = list.emplace_back(loc);
 		dump();
@@ -48,6 +62,19 @@ struct OpenPatchList {
 
 	void remove_last() {
 		list.pop_back();
+	}
+
+	auto begin() {
+		return list.begin();
+	}
+	auto end() {
+		return list.end();
+	}
+	auto begin() const {
+		return list.cbegin();
+	}
+	auto end() const {
+		return list.cend();
 	}
 
 private:

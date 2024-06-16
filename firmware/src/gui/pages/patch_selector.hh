@@ -50,6 +50,8 @@ struct PatchSelectorPage : PageBase {
 		}
 
 		setup_subdir_panel();
+
+		refresh_patchlist();
 	}
 
 	void setup_subdir_panel() {
@@ -75,9 +77,10 @@ struct PatchSelectorPage : PageBase {
 			subdir_panel.refresh(roller_item_infos[idx]);
 	}
 
-	void refresh_patchlist(PatchDirList &patchfiles) {
+	void refresh_patchlist() {
+		update_open_patches();
 		subdir_panel.populate(patchfiles);
-		populate_roller(patchfiles);
+		populate_roller();
 	}
 
 	void blur_subdir_panel() {
@@ -93,11 +96,22 @@ struct PatchSelectorPage : PageBase {
 		subdir_panel.blur();
 	}
 
-	void add_open_patches(PatchDirList &patchfiles) {
-		patch_storage.get_patch_list();
+	void update_open_patches() {
+		auto &root = patchfiles.volume_root(Volume::RamDisk);
+		root.files.clear();
+		root.dirs.clear();
+
+		auto open_patch_list = patches.get_open_patch_list();
+
+		for (auto &patch : open_patch_list) {
+			root.files.push_back({.filename = patch.loc.filename,
+								  .filesize = 0,
+								  .timestamp = patch.modification_count,
+								  .patchname = patch.patch.patch_name});
+		}
 	}
 
-	void populate_roller(PatchDirList &patchfiles) {
+	void populate_roller() {
 		// Save current selection
 		std::optional<EntryInfo> last_entry_info{};
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
@@ -233,8 +247,8 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::ReloadingPatchList:
-				//TODO: use our member var patch_list, not patch_storage
-				refresh_patchlist(patch_storage.get_patch_list());
+				patchfiles = patch_storage.get_patch_list(); //copy
+				refresh_patchlist();
 				refresh_subdir_panel();
 				hide_spinner();
 				state = State::Idle;
@@ -349,13 +363,31 @@ struct PatchSelectorPage : PageBase {
 
 		if (selected_index < roller_item_infos.size()) {
 			auto &entry = roller_item_infos[selected_index];
+
 			if (entry.kind == DirEntryKind::File) {
 				p = PatchLocation{};
-				p->vol = entry.vol;
-				p->filename.copy(std::string(entry.path + "/" + entry.name));
+
+				if (entry.vol == Volume::RamDisk) {
+					if (entry.path.empty())
+						p->filename.copy(std::string(entry.name));
+					else
+						p->filename.copy(std::string(entry.path + "/" + entry.name));
+
+					p->vol = patches.get_open_patch_list().get_vol(p->filename);
+
+					if (p->vol == Volume::RamDisk) {
+						pr_err("%s not found in open patches\n", p->filename.c_str());
+						p = std::nullopt;
+					}
+
+				} else {
+					p->vol = entry.vol;
+					p->filename.copy(std::string(entry.path + "/" + entry.name));
+				}
 			}
 		} else
 			pr_err("Bad roller index: %d, max is %zu\n", selected_index, roller_item_infos.size());
+
 		return p;
 	}
 
@@ -365,6 +397,7 @@ private:
 	std::vector<EntryInfo> roller_item_infos;
 
 	PatchSelectorSubdirPanel &subdir_panel;
+	PatchDirList patchfiles;
 
 	static constexpr uint32_t spinner_lag_ms = 200;
 	uint32_t spinner_show_tm = 0;
