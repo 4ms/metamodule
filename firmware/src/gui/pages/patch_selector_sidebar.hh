@@ -186,7 +186,7 @@ struct PatchSelectorSubdirPanel {
 		}
 	}
 
-	const std::array<lv_obj_t *, 3> vol_conts = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
+	const std::array<lv_obj_t *, 4> vol_conts = {ui_OpenFileCont, ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
 
 	std::function<void(Volume vol, std::string_view dirname)> focus_cb;
 	std::function<void(Volume vol, std::string_view dirname)> click_cb;
