@@ -17,7 +17,7 @@ struct MetaParams {
 	RotaryMotion rotary{};
 	RotaryMotion rotary_pushed{};
 	std::array<Toggler, PanelDef::NumMetaRgbButton> meta_buttons{};
-	std::array<AnalyzedSignal<8>, PanelDef::NumAudioIn> ins{};
+	std::array<AnalyzedSignal<64>, PanelDef::NumAudioIn> ins{};
 
 	bool midi_connected = false;
 	uint32_t midi_poly_chans = 1;

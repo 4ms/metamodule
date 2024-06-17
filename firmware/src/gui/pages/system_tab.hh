@@ -63,17 +63,20 @@ struct SystemTab : SystemMenuTab {
 
 	void update() override {
 		if (state == State::TryingReadCal || state == State::ReadingCal) {
-			update_read_cal();
+			update_read_saved_cal();
 
-		} else if (state == State::Calibrating) {
-			update_cal();
+		} else if (state == State::CalibratingIns) {
+			update_cal_ins_routine();
+
+		} else if (state == State::CalibratingOuts) {
+			update_cal_outs_routine();
 		}
 	}
 
 private:
 	enum class JackCalStatus { NotCal, LowOnly, HighOnly, Error, Done };
 
-	void start_calibration() {
+	void start_calibrate_ins() {
 		// send message via PatchPlayLoader to tell audio to disable calibration?
 
 		lv_show(ui_CalibrationProcedureCont);
@@ -94,7 +97,25 @@ private:
 		}
 	}
 
-	void update_read_cal() {
+	void start_calibrate_outs() {
+		// send message via PatchPlayLoader to tell audio to not play patch
+
+		lv_show(ui_CalibrationProcedureCont);
+		lv_hide(ui_SystemCalibrationButton);
+		lv_hide(ui_SystemResetInternalPatchesCont);
+
+		lv_label_set_text(ui_CalibrationInstructionLabel, "Patch each Out jack to Audio/CV Ins 1, one at a time.");
+
+		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_view_recursive(ui_SystemCalibrationTitle, LV_ANIM_OFF);
+
+		// for (auto i = 0u; i < input_status.size(); i++) {
+		// 	set_input_status(i, JackCalStatus::NotCal);
+		// 	input_plugged[i] = false;
+		// }
+	}
+
+	void update_read_saved_cal() {
 		if (state == State::TryingReadCal) {
 
 			auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&caldata), sizeof(caldata)};
@@ -108,52 +129,110 @@ private:
 			if (msg.message_type == IntercoreStorageMessage::MessageType::ReadFlashOk) {
 				if (caldata_bytes_read == sizeof(caldata)) {
 					pr_trace("Read calibration data\n");
-					state = State::Calibrating;
+					state = State::CalibratingIns;
 				} else {
 					pr_err("Wrong size calibration data read (%d read, expected %d)\n",
 						   caldata_bytes_read,
 						   sizeof(caldata));
-					state = State::Calibrating;
+					state = State::CalibratingIns;
 				}
 
 			} else if (msg.message_type == IntercoreStorageMessage::MessageType::ReadFlashFailed) {
 				pr_err("Failed to read calibration data\n");
-				state = State::Calibrating;
+				state = State::CalibratingIns;
 			}
 		}
 	}
 
-	void update_cal() {
+	void update_cal_ins_routine() {
+		unsigned num_done = 0;
+
 		for (unsigned i = 0; i < PanelDef::NumAudioIn; i++) {
 			if (params.is_input_plugged(i)) {
 				set_input_plugged(i, true);
+
 				in_signals[i].update(metaparams.ins[i].iir);
-				cal.update(i, in_signals[i]);
+
+				if (input_status[i] != JackCalStatus::Done) {
+					measure(i);
+				}
 
 			} else {
 				set_input_plugged(i, false);
+				if (input_status[i] == JackCalStatus::LowOnly || input_status[i] == JackCalStatus::HighOnly)
+					set_input_status(i, JackCalStatus::Error);
 			}
+
+			if (input_status[i] == JackCalStatus::Done)
+				num_done++;
+		}
+
+		if (num_done == 6) {
+			state = State::CalibratingOuts;
+		}
+	}
+
+	void update_cal_outs_routine() {
+		unsigned num_done = 0;
+
+		for (unsigned i = 0; i < PanelDef::NumAudioOut; i++) {
+			//TODO:
+		}
+
+		if (num_done == 6) {
+			state = State::WritingCal;
+		}
+	}
+
+	void measure(unsigned idx) {
+		// Measure each jack and advance state
+
+		using enum CalibrationMeasurer::CalibrationEvent;
+
+		auto event = cal.read(idx, in_signals[idx]);
+
+		if (event == MeasuredLow) {
+			if (input_status[idx] == JackCalStatus::NotCal)
+				set_input_status(idx, JackCalStatus::LowOnly);
+			else if (input_status[idx] == JackCalStatus::HighOnly)
+				set_input_status(idx, JackCalStatus::Done);
+		}
+
+		else if (event == MeasuredHigh)
+		{
+			if (input_status[idx] == JackCalStatus::NotCal)
+				set_input_status(idx, JackCalStatus::HighOnly);
+			else if (input_status[idx] == JackCalStatus::LowOnly)
+				set_input_status(idx, JackCalStatus::Done);
 		}
 	}
 
 	void set_input_status(unsigned idx, JackCalStatus status) {
-		input_status[idx] = status;
-		auto *label = input_status_labels[idx];
-		switch (status) {
-			case JackCalStatus::NotCal: {
-				lv_label_set_text_fmt(label, "In %d:\n #aaaaaa C2 C4#", idx);
-				// lv_obj_set_style_text_color(label, lv_color_white(), LV_PART_MAIN);
-			} break;
+		if (input_status[idx] != status) {
+			input_status[idx] = status;
 
-			case JackCalStatus::Done: {
-				lv_label_set_text_fmt(label, "In %d:\n#00a551 OK#", idx);
-				// lv_obj_set_style_text_color(label, Gui::palette_main[LV_PALETTE_GREEN], LV_PART_MAIN);
-			} break;
+			auto *label = input_status_labels[idx];
+			switch (status) {
+				case JackCalStatus::LowOnly: {
+					lv_label_set_text_fmt(label, "In %d:\n #00a551 C2# #aaaaaa C4#", idx + 1);
+				} break;
+				case JackCalStatus::HighOnly: {
+					lv_label_set_text_fmt(label, "In %d:\n #aaaaaa C2# #00a551 C4#", idx + 1);
+				} break;
+				case JackCalStatus::NotCal: {
+					lv_label_set_text_fmt(label, "In %d:\n #aaaaaa C2 C4#", idx + 1);
+				} break;
 
-			case JackCalStatus::Error: {
-				lv_label_set_text_fmt(label, "In %d:\n#f40000 FAIL#", idx);
-				// lv_obj_set_style_text_color(label, Gui::palette_main[LV_PALETTE_RED], LV_PART_MAIN);
-			} break;
+				case JackCalStatus::Done: {
+					lv_label_set_text_fmt(label, "In %d:\n#00a551 OK#", idx + 1);
+					caldata.ins_data[idx] = cal.get_cal_data(idx);
+					pr_dbg("Calibrated IN %d: %f %f\n", idx, caldata.ins_data[idx].first, caldata.ins_data[idx].second);
+				} break;
+
+				case JackCalStatus::Error: {
+					lv_label_set_text_fmt(label, "In %d:\n#f40000 FAIL#", idx + 1);
+				} break;
+			}
 		}
 	}
 
@@ -169,15 +248,6 @@ private:
 		} else if (!plugged && input_plugged[idx]) {
 			input_plugged[idx] = false;
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
-
-			if (auto reading = cal.stop_chan(idx)) {
-				pr_trace("Calibrated input %d: %f %f\n", idx, reading->first, reading->second);
-				caldata.ins_data[idx] = reading.value();
-				set_input_status(idx, JackCalStatus::Done);
-			} else {
-				pr_trace("Failed to calibrated input %d", idx);
-				set_input_status(idx, JackCalStatus::Error);
-			}
 		}
 	}
 
@@ -187,7 +257,7 @@ private:
 
 		auto page = static_cast<SystemTab *>(event->user_data);
 
-		page->start_calibration();
+		page->start_calibrate_ins();
 	}
 
 	static void resetbut_cb(lv_event_t *event) {
@@ -211,12 +281,21 @@ private:
 	MetaParams &metaparams;
 
 	ConfirmPopup confirm_popup;
-	CalibrationRoutine cal;
+	CalibrationMeasurer cal;
 	CalData caldata;
 	uint32_t caldata_bytes_read = 0;
-	std::array<AnalyzedSignal<16>, PanelDef::NumAudioIn> in_signals;
 
-	enum class State { Idle, TryingReadCal, ReadingCal, Calibrating, WritingCal } state = State::Idle;
+	static constexpr float coef = 1.f / 4.f;
+	std::array<AnalyzedSig, PanelDef::NumAudioIn> in_signals{coef, coef, coef, coef, coef, coef};
+
+	enum class State {
+		Idle,
+		TryingReadCal,
+		ReadingCal,
+		CalibratingIns,
+		CalibratingOuts,
+		WritingCal
+	} state = State::Idle;
 
 	std::array<bool, PanelDef::NumAudioIn> input_plugged{};
 	std::array<JackCalStatus, PanelDef::NumAudioIn> input_status{};

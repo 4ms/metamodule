@@ -23,107 +23,64 @@ struct CalibrationConfig {
 	float tolerance_volts; //valid range = measurement +/- tolerance
 };
 
-class CalibrationRoutine {
+class CalibrationMeasurer {
 private:
 	CalData caldata;
 	unsigned delay_ctr = 0;
-
-	enum class State { Idle, WaitingForReading, Done };
-	std::array<State, PanelDef::NumAudioIn> states{};
-	std::array<bool, PanelDef::NumAudioIn> got_low{};
-	std::array<bool, PanelDef::NumAudioIn> got_high{};
-
 	CalibrationConfig config;
 
 public:
-	CalibrationRoutine(CalibrationConfig config)
+	CalibrationMeasurer(CalibrationConfig config)
 		: config{config} {
 	}
 
 	void start_chan(unsigned chan_num) {
-		if (chan_num >= states.size())
-			return;
-
-		states[chan_num] = State::WaitingForReading;
-		got_low[chan_num] = false;
-		got_high[chan_num] = false;
 		delay_ctr = 0;
 	}
 
-	bool has_low_reading(unsigned chan_num) {
-		return chan_num < got_low.size() ? got_low[chan_num] : false;
+	[[nodiscard]] std::pair<float, float> get_cal_data(unsigned chan_num) {
+		return caldata.ins_data[chan_num];
 	}
 
-	bool has_high_reading(unsigned chan_num) {
-		return chan_num < got_high.size() ? got_high[chan_num] : false;
-	}
+	enum class CalibrationEvent { None, MeasuredLow, MeasuredHigh };
 
-	// return channel's validated readings if we got them both
-	[[nodiscard]] std::optional<std::pair<float, float>> stop_chan(unsigned chan_num) {
-		if (chan_num >= states.size())
-			return std::nullopt;
+	CalibrationEvent read(unsigned chan_num, AnalyzedSig &reading) {
+		CalibrationEvent event = CalibrationEvent::None;
 
-		auto old_state = states[chan_num];
-		states[chan_num] = State::Idle;
+		if (chan_num < caldata.ins_data.size()) {
+			if (delay_ctr == 0)
+				reading.reset_to(reading.iir);
 
-		if (old_state == State::Done)
-			return caldata.ins_data[chan_num];
-		else
-			return std::nullopt;
-	}
+			if (++delay_ctr >= 4) { //@16ms update rate = 256ms between attempts
+				delay_ctr = 0;
 
-	void update(unsigned chan_num, AnalyzedSignal<16> &reading) {
-		if (chan_num >= states.size())
-			return;
-
-		switch (states[chan_num]) {
-			case State::Idle: {
-			} break;
-
-			case State::WaitingForReading: {
-				if (delay_ctr == 0)
-					reading.reset_to(reading.iir);
-
-				if (++delay_ctr == 16) { //@16ms update rate = 256ms between attempts
-					delay_ctr = 0;
-
-					if (!got_low[chan_num] &&
-						validate_reading(reading, Calibration::from_volts(config.low_measurement_volts)))
-					{
-						pr_dbg("Low: ");
-						caldata.ins_data[chan_num].first = reading.iir;
-						got_low[chan_num] = true;
-					}
-
-					else if (!got_high[chan_num] &&
-							 validate_reading(reading, Calibration::from_volts(config.high_measurement_volts)))
-					{
-						pr_dbg("High: ");
-						caldata.ins_data[chan_num].second = reading.iir;
-						got_high[chan_num] = true;
-					}
-
-					else
-					{
-						pr_dbg("Rejected: ");
-					}
-
-					debug_print_reading(chan_num, reading);
-
-					if (got_low[chan_num] && got_high[chan_num]) {
-						pr_dbg("Got low and high\n");
-						states[chan_num] = State::Done;
-					}
+				if (validate_reading(reading, Calibration::from_volts(config.low_measurement_volts))) {
+					pr_dbg("Low: ");
+					caldata.ins_data[chan_num].first = reading.iir;
+					event = CalibrationEvent::MeasuredLow;
 				}
-			} break;
 
-			case State::Done: {
-			} break;
+				else if (validate_reading(reading, Calibration::from_volts(config.high_measurement_volts)))
+				{
+					pr_dbg("High: ");
+					caldata.ins_data[chan_num].second = reading.iir;
+					event = CalibrationEvent::MeasuredHigh;
+				}
+
+				else
+				{
+					pr_dbg("Rejected: ");
+				}
+
+				debug_print_reading(chan_num, reading);
+			}
 		}
+
+		return event;
 	}
 
 private:
-	bool validate_reading(AnalyzedSignal<16> &reading, float target) {
+	bool validate_reading(AnalyzedSig &reading, float target) {
 		if (std::abs(reading.iir - target) < Calibration::DefaultTolerance) {
 			if (std::abs(reading.min - target) < Calibration::DefaultTolerance) {
 				if (std::abs(reading.max - target) < Calibration::DefaultTolerance) {
@@ -136,7 +93,7 @@ private:
 		return false;
 	}
 
-	void debug_print_reading(unsigned idx, AnalyzedSignal<16> ain) {
+	void debug_print_reading(unsigned idx, AnalyzedSig ain) {
 		pr_dbg("AIN %zu: iir=%d min=%d max=%d range=%d\r\n",
 			   idx,
 			   (int)(ain.iir),
