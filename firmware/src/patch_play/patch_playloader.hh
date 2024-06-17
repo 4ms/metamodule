@@ -23,7 +23,7 @@ struct PatchPlayLoader {
 	void load_initial_patch() {
 		uint32_t tries = 10000;
 
-		PatchLocation initial_patch_loc{"SlothDrone.yml", Volume::NorFlash};
+		PatchLocation initial_patch_loc{"/SlothDrone.yml", Volume::NorFlash};
 		while (--tries) {
 			if (storage_.request_load_patch(initial_patch_loc))
 				break;

@@ -72,7 +72,6 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	void refresh(EntryInfo const &selected_patch) {
-
 		for (auto [vol, vol_name, vol_cont] : zip(PatchDirList::vols, PatchDirList::vol_name, vol_conts)) {
 			if (vol != selected_patch.vol)
 				continue;
@@ -82,7 +81,7 @@ struct PatchSelectorSubdirPanel {
 				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
 				const char *roller_path = (i == 0) ? vol_name : selected_patch.path.c_str();
 				if (txt == nullptr)
-					return true;
+					return true; //continue
 
 				if (strcmp(txt, roller_path) == 0) {
 					if (last_subdir_sel) {
@@ -100,9 +99,10 @@ struct PatchSelectorSubdirPanel {
 					}
 					label_scrolls(obj);
 					lv_obj_scroll_to_view_recursive(obj, LV_ANIM_ON);
-					return (i == 0) ? true : false;
+
+					return (i == 0) ? true : false; // continue to search in case a subdir of this vol matches better
 				}
-				return true;
+				return true; //path doess not match, continue
 			});
 		}
 	}
