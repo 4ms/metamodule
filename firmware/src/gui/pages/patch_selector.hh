@@ -109,10 +109,13 @@ struct PatchSelectorPage : PageBase {
 		auto open_patch_list = patches.get_open_patch_list();
 
 		for (auto &patch : open_patch_list) {
+			auto patch_name = std::string{std::string_view{patch.patch.patch_name}};
+			if (patch.modification_count > 0)
+				patch_name = "#ff0000 *# " + patch_name;
 			root.files.push_back({.filename = patch.loc.filename,
 								  .filesize = 0,
 								  .timestamp = patch.modification_count,
-								  .patchname = patch.patch.patch_name});
+								  .patchname = PatchName{patch_name}});
 		}
 	}
 
