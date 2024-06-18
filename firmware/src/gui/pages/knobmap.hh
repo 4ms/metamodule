@@ -20,8 +20,8 @@ struct KnobMapPage : PageBase {
 	KnobMapPage(PatchContext info)
 		: PageBase{info, PageId::KnobMap}
 		, base{ui_EditMappingPage}
-		, patch{patches.get_view_patch()}
-		, add_map_popup{patch_mod_queue} {
+		, patch{patches.get_view_patch()} // , add_map_popup{patch_mod_queue}
+	{
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -130,8 +130,8 @@ struct KnobMapPage : PageBase {
 
 		lv_group_set_editing(group, false);
 
-		add_map_popup.prepare_focus(group, ui_EditMappingPage);
-		add_map_popup.hide();
+		// add_map_popup.prepare_focus(group, ui_EditMappingPage);
+		// add_map_popup.hide();
 	}
 
 	void update() override {
@@ -152,7 +152,7 @@ struct KnobMapPage : PageBase {
 			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, s_val);
 		}
 
-		add_map_popup.update(params);
+		// add_map_popup.update(params);
 	}
 
 	void update_active_status() {
@@ -309,7 +309,7 @@ private:
 
 	ConfirmPopup del_popup;
 
-	AddMapPopUp add_map_popup;
+	// AddMapPopUp add_map_popup;
 
 	bool kb_visible = false;
 
