@@ -15,7 +15,9 @@ lv_obj_set_width( ui_SystemMenuTabView, lv_pct(100));
 lv_obj_set_height( ui_SystemMenuTabView, lv_pct(100));
 lv_obj_set_align( ui_SystemMenuTabView, LV_ALIGN_CENTER );
 lv_obj_clear_flag( ui_SystemMenuTabView, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_set_style_radius(ui_SystemMenuTabView, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_radius(ui_SystemMenuTabView, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_SystemMenuTabView, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_SystemMenuTabView, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_color(ui_SystemMenuTabView, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_border_opa(ui_SystemMenuTabView, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_SystemMenuTabView, 2, LV_PART_MAIN| LV_STATE_DEFAULT);

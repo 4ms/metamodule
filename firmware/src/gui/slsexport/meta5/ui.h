@@ -201,7 +201,7 @@ extern lv_obj_t *ui_ControlArc;
 extern lv_obj_t *ui_ControlAlertLabel;
 extern lv_obj_t *ui_ControlAlertAmount;
 extern lv_obj_t *ui_AddMapPopUp;
-extern lv_obj_t *ui_AddModuleName;
+extern lv_obj_t *ui_AddMappingTitle;
 extern lv_obj_t *ui_MapDetected;
 extern lv_obj_t *ui_AddMapButtonPanel;
 extern lv_obj_t *ui_CancelAdd;
@@ -282,7 +282,6 @@ extern lv_obj_t *ui_EditMapButtons;
 extern lv_obj_t *ui_ListButton;
 extern lv_obj_t *ui_ListLabel;
 extern lv_obj_t *ui_EditButton;
-extern lv_obj_t *ui_EditLabel;
 extern lv_obj_t *ui_KnobSetButton;
 extern lv_obj_t *ui_TrashButton;
 extern lv_obj_t *ui_TrashLabel;
@@ -399,15 +398,14 @@ LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
 
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50014);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90040);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded700_FA_16);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90032);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90040);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50014);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50016);
 
 
 void ui_init(void);

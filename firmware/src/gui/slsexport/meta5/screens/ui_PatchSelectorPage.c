@@ -117,7 +117,7 @@ lv_obj_set_style_text_opa(ui_LoadMeter, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_LoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_LoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_LoadMeter, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_LoadMeter, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_LoadMeter, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_radius(ui_LoadMeter, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_LoadMeter, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_LoadMeter, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -136,7 +136,7 @@ lv_obj_add_flag( ui_DrivesPanel, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
 lv_obj_clear_flag( ui_DrivesPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_DrivesPanel, LV_SCROLLBAR_MODE_ACTIVE);
 lv_obj_set_scroll_dir(ui_DrivesPanel, LV_DIR_VER);
-lv_obj_set_style_radius(ui_DrivesPanel, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_radius(ui_DrivesPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_DrivesPanel, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_DrivesPanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_DrivesPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -238,6 +238,7 @@ lv_obj_set_y( ui_OpenFileVolLabel2, 0 );
 lv_obj_set_align( ui_OpenFileVolLabel2, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_OpenFileVolLabel2,LV_LABEL_LONG_CLIP);
 lv_label_set_text(ui_OpenFileVolLabel2,"Recent");
+lv_obj_set_style_text_font(ui_OpenFileVolLabel2, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_USBVolCont = lv_obj_create(ui_DrivesPanel);
 lv_obj_remove_style_all(ui_USBVolCont);
@@ -311,6 +312,7 @@ lv_obj_set_y( ui_USBlabel1, 0 );
 lv_obj_set_align( ui_USBlabel1, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_USBlabel1,LV_LABEL_LONG_CLIP);
 lv_label_set_text(ui_USBlabel1,"USB");
+lv_obj_set_style_text_font(ui_USBlabel1, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SDVolCont = lv_obj_create(ui_DrivesPanel);
 lv_obj_remove_style_all(ui_SDVolCont);
@@ -378,6 +380,7 @@ lv_obj_set_y( ui_SDlabel1, 0 );
 lv_obj_set_align( ui_SDlabel1, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_SDlabel1,LV_LABEL_LONG_CLIP);
 lv_label_set_text(ui_SDlabel1,"Card");
+lv_obj_set_style_text_font(ui_SDlabel1, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_FlashVolCont = lv_obj_create(ui_DrivesPanel);
 lv_obj_remove_style_all(ui_FlashVolCont);
@@ -450,6 +453,7 @@ lv_obj_set_y( ui_Flashlabel1, 0 );
 lv_obj_set_align( ui_Flashlabel1, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_Flashlabel1,LV_LABEL_LONG_SCROLL);
 lv_label_set_text(ui_Flashlabel1,"Internal");
+lv_obj_set_style_text_font(ui_Flashlabel1, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_PatchListRoller = lv_roller_create(ui_PatchSelectorPage);
 lv_roller_set_options( ui_PatchListRoller, "Loading...", LV_ROLLER_MODE_NORMAL );
@@ -465,8 +469,8 @@ lv_obj_set_style_text_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_text_letter_space(ui_PatchListRoller, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_PatchListRoller, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_PatchListRoller, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_PatchListRoller, &ui_font_MuseoSansRounded700_FA_16, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_radius(ui_PatchListRoller, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_PatchListRoller, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_radius(ui_PatchListRoller, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_PatchListRoller, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_PatchListRoller, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(ui_PatchListRoller, LV_BORDER_SIDE_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
