@@ -29,6 +29,7 @@ struct OpenPatchList {
 			return nullptr;
 
 		if (auto it = std::ranges::find(list, hash, &OpenPatch::loc_hash); it != list.end()) {
+			pr_dbg("range found\n");
 			return &(*it);
 		}
 		return nullptr;
@@ -37,10 +38,8 @@ struct OpenPatchList {
 	Volume get_vol(std::string_view filename) const {
 		if (!list.empty()) {
 
-			if (auto it =
-					std::ranges::find_if(list, [&filename](auto &entry) { return entry.loc.filename == filename; });
-				it != list.end())
-			{
+			auto it = std::ranges::find_if(list, [&filename](auto &entry) { return entry.loc.filename == filename; });
+			if (it != list.end()) {
 				return it->loc.vol;
 			}
 		}
@@ -61,13 +60,13 @@ struct OpenPatchList {
 	}
 
 	bool remove_oldest_unmodified() {
-		for (auto &item : list) {
-			if (item.modification_count == 0) {
-				std::erase(list, item);
-				return true;
-			}
+		auto oldest_unmod = std::ranges::find_if(list, [](auto &entry) { return entry.modification_count == 0; });
+		if (oldest_unmod == list.end()) {
+			return false;
+		} else {
+			list.erase(oldest_unmod);
+			return true;
 		}
-		return false;
 	}
 
 	void remove_last() {

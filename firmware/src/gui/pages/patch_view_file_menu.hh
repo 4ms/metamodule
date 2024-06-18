@@ -166,16 +166,19 @@ struct PatchViewFileMenu {
 				patches.close_view_patch();
 
 				auto data = patch_storage.get_patch_data(message.bytes_read);
-				patches.open_patch(data, patch_loc);
 
-				if (was_playing) {
-					play_loader.request_load_view_patch();
+				if (patches.open_patch(data, patch_loc)) {
+					if (was_playing) {
+						play_loader.request_load_view_patch();
+					}
+
+					page_list.request_new_page_no_history(
+						PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
+					revert_state = RevertState::Idle;
+					hide_menu();
+				} else {
+					notify_queue.put({"Error reverting patch", Notification::Priority::Error, 1000});
 				}
-
-				page_list.request_new_page_no_history(
-					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
-				revert_state = RevertState::Idle;
-				hide_menu();
 			}
 
 			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {

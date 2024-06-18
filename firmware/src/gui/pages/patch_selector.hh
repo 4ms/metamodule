@@ -277,9 +277,17 @@ struct PatchSelectorPage : PageBase {
 			case State::TryingToRequestPatchData:
 				if (patches.load_if_open(selected_patch)) {
 					view_loaded_patch();
-				} else if (patch_storage.request_load_patch(selected_patch)) {
-					state = State::RequestedPatchData;
-					show_spinner();
+				} else {
+					if (patches.limit_open_patches(settings.max_open_patches)) {
+						if (patch_storage.request_load_patch(selected_patch)) {
+							state = State::RequestedPatchData;
+							show_spinner();
+						}
+					} else {
+						notify_queue.put(
+							{"Cannot open a patch: too many open unsaved patches!", Notification::Priority::Error});
+						state = State::Idle;
+					}
 				}
 				break;
 
