@@ -35,10 +35,24 @@ public:
 	// Closes unmodified patches if needed.
 	// Returns false if can't make room.
 	bool limit_open_patches(unsigned max_patches) {
-		while (open_patches_.size() >= max_patches) {
-			if (!open_patches_.remove_oldest_unmodified())
+		auto first = open_patches_.begin();
+
+		int num_to_remove = (open_patches_.size() >= max_patches) ? open_patches_.size() - max_patches : 0;
+
+		while (num_to_remove > 0) {
+
+			first = std::find_if(first, open_patches_.end(), [this](auto &entry) {
+				return &entry != view_patch_ && &entry != playing_patch_ && entry.modification_count == 0;
+			});
+
+			if (first == open_patches_.end()) {
 				return false;
+			} else {
+				open_patches_.remove(first);
+				num_to_remove--;
+			}
 		}
+
 		return true;
 	}
 

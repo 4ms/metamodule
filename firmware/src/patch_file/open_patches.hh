@@ -59,14 +59,9 @@ struct OpenPatchList {
 		return num_erased > 0;
 	}
 
-	bool remove_oldest_unmodified() {
-		auto oldest_unmod = std::ranges::find_if(list, [](auto &entry) { return entry.modification_count == 0; });
-		if (oldest_unmod == list.end()) {
-			return false;
-		} else {
-			list.erase(oldest_unmod);
-			return true;
-		}
+	void remove(std::list<OpenPatch>::iterator item) {
+		list.erase(item);
+		dump();
 	}
 
 	void remove_last() {
