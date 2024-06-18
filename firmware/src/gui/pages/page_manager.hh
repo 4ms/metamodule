@@ -34,8 +34,8 @@ class PageManager {
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info, subdir_panel};
-	PatchViewPage page_patchview{info, settings, subdir_panel};
-	ModuleViewPage page_module{info, settings};
+	PatchViewPage page_patchview{info, subdir_panel};
+	ModuleViewPage page_module{info};
 	KnobSetViewPage page_knobsetview{info};
 	KnobMapPage page_knobmap{info};
 	SystemMenuPage page_systemmenu{info};
@@ -48,6 +48,7 @@ public:
 	PageBase *cur_page = &page_mainmenu;
 
 	PageManager(FileStorageProxy &patch_storage,
+				OpenPatchManager &open_patch_manager,
 				PatchPlayLoader &patch_playloader,
 				ParamsMidiState &params,
 				MetaParams &metaparams,
@@ -55,6 +56,7 @@ public:
 				PatchModQueue &patch_mod_queue,
 				PluginManager &plugin_manager)
 		: info{patch_storage,
+			   open_patch_manager,
 			   patch_playloader,
 			   params,
 			   metaparams,
@@ -62,6 +64,7 @@ public:
 			   patch_mod_queue,
 			   page_list,
 			   gui_state,
+			   settings,
 			   plugin_manager} {
 	}
 
@@ -94,7 +97,7 @@ public:
 	void handle_knobset_change() {
 		if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
 
-			if (auto patch = info.patch_storage.get_playing_patch(); patch != nullptr) {
+			if (auto patch = info.open_patch_manager.get_playing_patch(); patch != nullptr) {
 
 				if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
 					int cur_knobset = info.page_list.get_active_knobset();
@@ -121,7 +124,7 @@ public:
 	// Update internal copy of patch with knob changes
 	// This is used to keep GUI in sync with patch player's copy of the patch without concurrancy issues
 	void update_patch_params() {
-		auto patch = info.patch_storage.get_playing_patch();
+		auto patch = info.open_patch_manager.get_playing_patch();
 		if (!patch)
 			return;
 

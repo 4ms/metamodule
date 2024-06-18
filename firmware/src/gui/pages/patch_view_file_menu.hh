@@ -17,14 +17,16 @@ struct PatchViewFileMenu {
 
 	PatchViewFileMenu(PatchPlayLoader &play_loader,
 					  FileStorageProxy &patch_storage,
+					  OpenPatchManager &patches,
 					  PatchSelectorSubdirPanel &subdir_panel,
 					  NotificationQueue &notify_queue,
 					  PageList &page_list)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
+		, patches{patches}
 		, notify_queue{notify_queue}
 		, page_list{page_list}
-		, save_dialog{patch_storage, play_loader, subdir_panel, notify_queue, page_list}
+		, save_dialog{patch_storage, patches, play_loader, subdir_panel, notify_queue, page_list}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
@@ -74,9 +76,7 @@ struct PatchViewFileMenu {
 	}
 
 	void show() {
-		if (patch_storage.get_view_patch_vol() == Volume::RamDisk ||
-			patch_storage.get_view_patch_vol() == Volume::MaxVolumes)
-		{
+		if (patches.get_view_patch_vol() == Volume::RamDisk || patches.get_view_patch_vol() == Volume::MaxVolumes) {
 			// patch has not been saved yet:
 			lv_group_focus_obj(ui_PatchFileSaveBut);
 			lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
@@ -89,7 +89,7 @@ struct PatchViewFileMenu {
 			lv_obj_clear_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
 			lv_obj_clear_state(ui_PatchFileDeleteBut, LV_STATE_DISABLED);
 
-			if (patch_storage.get_view_patch_modification_count() > 0)
+			if (patches.get_view_patch_modification_count() > 0)
 				lv_obj_clear_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
 			else
 				lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
@@ -119,7 +119,7 @@ struct PatchViewFileMenu {
 			if (patch_storage.request_delete_file(patch_loc.filename, patch_loc.vol)) {
 				delete_state = DeleteState::Requested;
 
-				if (patch_storage.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
+				if (patches.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
 					play_loader.stop_audio();
 				}
 			}
@@ -141,7 +141,7 @@ struct PatchViewFileMenu {
 					{.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
 
 				page_list.request_new_page_no_history(PageId::PatchSel, {});
-				patch_storage.close_view_patch();
+				patches.close_view_patch();
 				hide_menu();
 			}
 		}
@@ -152,7 +152,7 @@ struct PatchViewFileMenu {
 			if (patch_storage.request_load_patch(patch_loc)) {
 				revert_state = RevertState::Requested;
 
-				if (patch_storage.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
+				if (patches.get_playing_patch_loc_hash() == PatchLocHash{patch_loc}) {
 					was_playing = true;
 					play_loader.stop_audio();
 				} else
@@ -163,17 +163,22 @@ struct PatchViewFileMenu {
 			auto message = patch_storage.get_message();
 
 			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
-				patch_storage.close_view_patch();
-				patch_storage.parse_loaded_patch(message.bytes_read);
+				patches.close_view_patch();
 
-				if (was_playing) {
-					play_loader.request_load_view_patch();
+				auto data = patch_storage.get_patch_data(message.bytes_read);
+
+				if (patches.open_patch(data, patch_loc)) {
+					if (was_playing) {
+						play_loader.request_load_view_patch();
+					}
+
+					page_list.request_new_page_no_history(
+						PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
+					revert_state = RevertState::Idle;
+					hide_menu();
+				} else {
+					notify_queue.put({"Error reverting patch", Notification::Priority::Error, 1000});
 				}
-
-				page_list.request_new_page_no_history(
-					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
-				revert_state = RevertState::Idle;
-				hide_menu();
 			}
 
 			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
@@ -202,9 +207,9 @@ private:
 	}
 
 	void copy_patchname_to_filename() {
-		std::string patchname = patch_storage.get_view_patch()->patch_name;
+		std::string patchname = patches.get_view_patch()->patch_name;
 		patchname.append(".yml");
-		patch_storage.set_patch_filename(patchname);
+		patches.set_patch_filename(patchname);
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -222,8 +227,8 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		if (page->patch_storage.get_view_patch_vol() == Volume::RamDisk ||
-			page->patch_storage.get_view_patch_vol() == Volume::MaxVolumes)
+		if (page->patches.get_view_patch_vol() == Volume::RamDisk ||
+			page->patches.get_view_patch_vol() == Volume::MaxVolumes)
 		{
 			//Patch is not saved yet, do a save as...
 			saveas_but_cb(event);
@@ -239,7 +244,7 @@ private:
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
 		// If the filename has not been set yet, set it to the patchname + .yml
-		if (page->patch_storage.get_view_patch_filename().starts_with("Untitled Patch ")) {
+		if (page->patches.get_view_patch_filename().starts_with("Untitled Patch ")) {
 			page->copy_patchname_to_filename();
 		}
 		page->show_save_dialog();
@@ -251,9 +256,9 @@ private:
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
 		std::string confirm_msg =
-			"Delete " + std::string(page->patch_storage.get_view_patch_filename()) + " on disk? This cannot be undone.";
+			"Delete " + std::string(page->patches.get_view_patch_filename()) + " on disk? This cannot be undone.";
 
-		page->patch_loc = {page->patch_storage.get_view_patch_filename(), page->patch_storage.get_view_patch_vol()};
+		page->patch_loc = {page->patches.get_view_patch_filename(), page->patches.get_view_patch_vol()};
 		page->confirm_popup.show(
 			[page](unsigned choice) {
 				if (choice == 1) {
@@ -269,10 +274,10 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		std::string confirm_msg = "Revert " + std::string(page->patch_storage.get_view_patch_filename()) +
+		std::string confirm_msg = "Revert " + std::string(page->patches.get_view_patch_filename()) +
 								  " to last saved version on disk? This cannot be undone.";
 
-		page->patch_loc = {page->patch_storage.get_view_patch_filename(), page->patch_storage.get_view_patch_vol()};
+		page->patch_loc = {page->patches.get_view_patch_filename(), page->patches.get_view_patch_vol()};
 		page->confirm_popup.show(
 			[page](unsigned choice) {
 				if (choice == 1) {
@@ -285,6 +290,7 @@ private:
 
 	PatchPlayLoader &play_loader;
 	FileStorageProxy &patch_storage;
+	OpenPatchManager &patches;
 	NotificationQueue &notify_queue;
 	PageList &page_list;
 

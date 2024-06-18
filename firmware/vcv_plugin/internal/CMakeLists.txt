@@ -23,7 +23,7 @@ target_link_libraries(vcv_plugin_internal PRIVATE
     lvgl::lvgl
 )
 
-set_source_files_properties(src/svg.cc 
+set_source_files_properties(svg.cc 
     PROPERTIES 
     COMPILE_OPTIONS "-Wno-deprecated-enum-enum-conversion;-Wno-deprecated-anon-enum-enum-conversion;"
 )

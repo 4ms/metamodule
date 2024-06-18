@@ -14,11 +14,14 @@ namespace MetaModule
 struct AddMapPopUp {
 
 	AddMapPopUp(PatchModQueue &patch_mod_queue)
-		: patch_mod_queue{patch_mod_queue} {
-		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_CLICKED, this);
+		: patch_mod_queue{patch_mod_queue}
+		, popup_group(lv_group_create()) {
+
+		lv_group_add_obj(popup_group, ui_CancelAdd);
+		lv_group_add_obj(popup_group, ui_OkAdd);
 		lv_obj_add_event_cb(ui_CancelAdd, button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_OkAdd, button_cb, LV_EVENT_CLICKED, this);
 	}
-	//
 
 	void prepare_focus(lv_group_t *group, lv_obj_t *base) {
 		base_group = group;
@@ -28,26 +31,13 @@ struct AddMapPopUp {
 	void show(uint32_t knobset_id, uint16_t param_id, uint16_t module_id) {
 		selected_knob = std::nullopt;
 
-		popup_group = lv_group_create();
-		lv_group_remove_all_objs(popup_group);
-		lv_group_set_editing(popup_group, false);
-		lv_group_add_obj(popup_group, ui_CancelAdd);
-		lv_group_add_obj(popup_group, ui_OkAdd);
-		lv_group_focus_obj(ui_CancelAdd);
-
 		lv_show(ui_AddMapPopUp);
 		lv_obj_scroll_to_y(ui_AddMapPopUp, 0, LV_ANIM_OFF);
 
-		auto indev = lv_indev_get_next(nullptr);
-		if (!indev)
-			return;
-
-		lv_indev_set_group(indev, popup_group);
-
 		if (knobset_id == PatchData::MIDIKnobSet) {
-			lv_label_set_text(ui_AddModuleName, "Add a map: Send MIDI CC");
+			lv_label_set_text(ui_AddMappingTitle, "Add a map: Send MIDI CC");
 		} else
-			lv_label_set_text(ui_AddModuleName, "Add a map: Wiggle a knob");
+			lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob");
 
 		lv_label_set_text(ui_MapDetected, "");
 
@@ -56,6 +46,11 @@ struct AddMapPopUp {
 
 		set_id = knobset_id;
 		visible = true;
+
+		lv_group_activate(popup_group);
+		lv_group_focus_obj(ui_CancelAdd);
+		lv_group_set_editing(popup_group, false);
+		lv_group_set_wrap(popup_group, true);
 	}
 
 	void hide() {
@@ -65,17 +60,8 @@ struct AddMapPopUp {
 
 		lv_hide(ui_AddMapPopUp);
 
-		auto indev = lv_indev_get_next(nullptr);
-		if (!indev)
-			return;
-
-		if (base_group)
-			lv_indev_set_group(indev, base_group);
-
-		if (popup_group) {
-			lv_group_del(popup_group);
-			popup_group = nullptr;
-		}
+		lv_group_activate(base_group);
+		lv_group_set_editing(base_group, false);
 	}
 
 	void update(ParamsMidiState &params) {

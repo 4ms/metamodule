@@ -36,7 +36,7 @@ lv_obj_set_flex_align(ui_DelMapPopUpPanel, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_E
 lv_obj_add_flag( ui_DelMapPopUpPanel, LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_DelMapPopUpPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_DelMapPopUpPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_DelMapPopUpPanel, lv_color_hex(0x222222), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_color(ui_DelMapPopUpPanel, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_DelMapPopUpPanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_DelMapPopUpPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(ui_DelMapPopUpPanel, LV_BORDER_SIDE_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -129,15 +129,13 @@ lv_obj_set_align( ui_CancelLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_CancelLabel,"Cancel");
 lv_obj_set_style_text_color(ui_CancelLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_CancelLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_CancelLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_CancelLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_CancelLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_CancelLabel, &ui_font_MuseoSansRounded50016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_TrashButton2 = lv_btn_create(ui_DelMapButtonPanel);
 lv_obj_set_width( ui_TrashButton2, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_TrashButton2, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_TrashButton2, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_TrashButton2, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_add_flag( ui_TrashButton2, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_TrashButton2, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_TrashButton2, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_TrashButton2, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -146,13 +144,6 @@ lv_obj_set_style_pad_left(ui_TrashButton2, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_TrashButton2, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_TrashButton2, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_TrashButton2, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_color(ui_TrashButton2, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_TrashButton2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_TrashButton2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_TrashButton2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_align(ui_TrashButton2, LV_TEXT_ALIGN_AUTO, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_decor(ui_TrashButton2, LV_TEXT_DECOR_NONE, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_TrashButton2, &lv_font_montserrat_16, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_color(ui_TrashButton2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_PRESSED );
 lv_obj_set_style_outline_opa(ui_TrashButton2, 0, LV_PART_MAIN| LV_STATE_PRESSED);
 lv_obj_set_style_outline_color(ui_TrashButton2, lv_color_hex(0xE91C25), LV_PART_MAIN | LV_STATE_FOCUSED );
@@ -177,7 +168,7 @@ lv_obj_set_style_text_color(ui_TrashLabel2, lv_color_hex(0xFFFFFF), LV_PART_MAIN
 lv_obj_set_style_text_opa(ui_TrashLabel2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_TrashLabel2, -1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_TrashLabel2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_TrashLabel2, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_TrashLabel2, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_TrashLabel2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_TrashLabel2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_TrashLabel2, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -187,7 +178,7 @@ ui_Choice2Button = lv_btn_create(ui_DelMapButtonPanel);
 lv_obj_set_width( ui_Choice2Button, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Choice2Button, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Choice2Button, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_Choice2Button, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_add_flag( ui_Choice2Button, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_Choice2Button, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_Choice2Button, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_left(ui_Choice2Button, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -206,7 +197,7 @@ lv_obj_set_align( ui_Choice2Label, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Choice2Label,"Choice");
 lv_obj_set_style_text_color(ui_Choice2Label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_Choice2Label, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_Choice2Label, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_Choice2Label, &ui_font_MuseoSansRounded50016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_ConfirmButton = lv_btn_create(ui_DelMapButtonPanel);
 lv_obj_set_width( ui_ConfirmButton, LV_SIZE_CONTENT);  /// 1
@@ -246,7 +237,7 @@ lv_obj_set_style_text_color(ui_ConfirmLabel, lv_color_hex(0xFFFFFF), LV_PART_MAI
 lv_obj_set_style_text_opa(ui_ConfirmLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_letter_space(ui_ConfirmLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_line_space(ui_ConfirmLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_ConfirmLabel, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_ConfirmLabel, &ui_font_MuseoSansRounded50016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_MessagePanel = lv_obj_create(ui_DeleteMappingPopUp);
 lv_obj_set_width( ui_MessagePanel, lv_pct(100));

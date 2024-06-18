@@ -21,7 +21,7 @@ struct JackMapViewPage : PageBase {
 	JackMapViewPage(PatchContext info)
 		: PageBase{info, PageId::JackMapView}
 		, base{ui_JackMapViewPage}
-		, patch{patch_storage.get_view_patch()} {
+		, patch{patches.get_view_patch()} {
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
@@ -36,7 +36,7 @@ struct JackMapViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 
 		// Clear old text
 		for (unsigned i = 0; i < PanelDef::NumUserFacingInJacks; i++) {

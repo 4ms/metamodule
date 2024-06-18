@@ -17,7 +17,7 @@ inline constexpr bool PRINT_WARN = true;
 inline constexpr bool PRINT_INFO = true;
 
 // Debug: temporary messges used for debugging
-inline constexpr bool PRINT_DEBUG = true;
+inline constexpr bool PRINT_DEBUG = false;
 
 // Trace: detailed log of execution
 inline constexpr bool PRINT_TRACE = false;

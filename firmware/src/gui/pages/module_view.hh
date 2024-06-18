@@ -16,14 +16,13 @@ namespace MetaModule
 {
 struct ModuleViewPage : PageBase {
 
-	ModuleViewPage(PatchContext context, ViewSettings &settings)
+	ModuleViewPage(PatchContext context)
 		: PageBase{context, PageId::ModuleView}
-		, settings{settings}
 		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings}
-		, patch{patch_storage.get_view_patch()}
+		, patch{patches.get_view_patch()}
 		, roller{ui_ElementRoller}
-		, mapping_pane{context.patch_storage, module_mods, params, args, page_list, notify_queue, gui_state} {
+		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state} {
 
 		init_bg(ui_MappingMenu);
 
@@ -45,7 +44,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
@@ -232,7 +231,7 @@ struct ModuleViewPage : PageBase {
 		}
 
 		if (auto patch_mod = module_mods.get(); patch_mod.has_value()) {
-			patch_storage.mark_view_patch_modified();
+			patches.mark_view_patch_modified();
 
 			bool refresh = true;
 			// Apply to this thread's copy of patch
@@ -405,7 +404,6 @@ private:
 		}
 	}
 
-	ViewSettings &settings;
 	CableDrawer<240> cable_drawer;
 
 	ModuleInfoView moduleinfo;

@@ -72,38 +72,45 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	void refresh(EntryInfo const &selected_patch) {
+		// TODO: check if list was re-populated, or if entry info dir name changed, and only refresh if so
 
 		for (auto [vol, vol_name, vol_cont] : zip(PatchDirList::vols, PatchDirList::vol_name, vol_conts)) {
 			if (vol != selected_patch.vol)
 				continue;
 
-			lv_foreach_child(vol_cont, [selected_patch, vol_name = vol_name, this](lv_obj_t *obj, unsigned i) {
+			lv_obj_t *dir_obj = nullptr;
+
+			lv_foreach_child(vol_cont, [selected_patch, vol_name = vol_name, &dir_obj](lv_obj_t *obj, unsigned i) {
 				auto label_child = (i == 0) ? 1 : 0;
 				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
 				const char *roller_path = (i == 0) ? vol_name : selected_patch.path.c_str();
 				if (txt == nullptr)
-					return true;
+					return true; //continue
 
 				if (strcmp(txt, roller_path) == 0) {
-					if (last_subdir_sel) {
-						lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
-						lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUS_KEY);
-						lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
-						label_clips(last_subdir_sel);
-					}
-
-					last_subdir_sel = obj;
-					if (lv_obj_has_state(ui_DrivesPanel, LV_STATE_FOCUSED)) {
-						lv_obj_add_state(obj, LV_STATE_FOCUSED);
-					} else {
-						lv_obj_add_state(obj, LV_STATE_USER_2);
-					}
-					label_scrolls(obj);
-					lv_obj_scroll_to_view_recursive(obj, LV_ANIM_ON);
-					return (i == 0) ? true : false;
+					dir_obj = obj;
 				}
 				return true;
 			});
+
+			if (dir_obj && last_subdir_sel != dir_obj) {
+				if (last_subdir_sel) {
+					lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
+					lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUS_KEY);
+					lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
+					label_clips(last_subdir_sel);
+				}
+
+				if (lv_obj_has_state(ui_DrivesPanel, LV_STATE_FOCUSED)) {
+					lv_obj_add_state(dir_obj, LV_STATE_FOCUSED);
+				} else {
+					lv_obj_add_state(dir_obj, LV_STATE_USER_2);
+				}
+				label_scrolls(dir_obj);
+				lv_obj_scroll_to_view_recursive(dir_obj, LV_ANIM_ON);
+
+				last_subdir_sel = dir_obj;
+			}
 		}
 	}
 
@@ -186,7 +193,7 @@ struct PatchSelectorSubdirPanel {
 		}
 	}
 
-	const std::array<lv_obj_t *, 3> vol_conts = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
+	const std::array<lv_obj_t *, 4> vol_conts = {ui_OpenFileCont, ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
 
 	std::function<void(Volume vol, std::string_view dirname)> focus_cb;
 	std::function<void(Volume vol, std::string_view dirname)> click_cb;

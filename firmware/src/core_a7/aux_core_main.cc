@@ -35,6 +35,7 @@ extern "C" void aux_core_main() {
 	auto patch_player = A7SharedMemoryS::ptrs.patch_player;
 	auto patch_playloader = A7SharedMemoryS::ptrs.patch_playloader;
 	auto file_storage_proxy = A7SharedMemoryS::ptrs.patch_storage;
+	auto open_patch_manager = A7SharedMemoryS::ptrs.open_patch_manager;
 	auto sync_params = A7SharedMemoryS::ptrs.sync_params;
 	auto patch_mod_queue = A7SharedMemoryS::ptrs.patch_mod_queue;
 	auto ramdisk_storage = A7SharedMemoryS::ptrs.ramdrive;
@@ -46,7 +47,7 @@ extern "C" void aux_core_main() {
 	AssetFS asset_fs{AssetVolFlashOffset};
 
 	PluginManager plugin_manager{*file_storage_proxy, ramdisk};
-	Ui ui{*patch_playloader, *file_storage_proxy, *sync_params, *patch_mod_queue, plugin_manager};
+	Ui ui{*patch_playloader, *file_storage_proxy, *open_patch_manager, *sync_params, *patch_mod_queue, plugin_manager};
 	ui.update();
 
 	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};

@@ -9,12 +9,14 @@ class PatchPlayer;
 class PatchPlayLoader;
 class FileStorageProxy;
 class SyncParams;
+class OpenPatchManager;
 
 struct A7SharedMemoryS {
 	struct Ptrs {
 		PatchPlayer *patch_player{};
 		PatchPlayLoader *patch_playloader{};
 		FileStorageProxy *patch_storage{};
+		OpenPatchManager *open_patch_manager{};
 		SyncParams *sync_params{};
 		PatchModQueue *patch_mod_queue{};
 		RamDrive *ramdrive{};

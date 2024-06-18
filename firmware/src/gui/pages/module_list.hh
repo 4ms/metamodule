@@ -186,7 +186,7 @@ private:
 
 	void add_module(std::string_view slug) {
 		patch_playloader.load_module(slug);
-		patch_storage.mark_view_patch_modified();
+		patches.mark_view_patch_modified();
 	}
 
 	void draw_module() {

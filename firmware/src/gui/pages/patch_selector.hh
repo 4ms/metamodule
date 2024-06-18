@@ -31,6 +31,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		// Do not allow patch cables between patches
 		gui_state.new_cable = std::nullopt;
 
 		state = State::TryingToRequestPatchList;
@@ -40,7 +41,7 @@ struct PatchSelectorPage : PageBase {
 		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
 
-		auto playing_patch = patch_storage.get_playing_patch();
+		auto playing_patch = patches.get_playing_patch();
 		if (!playing_patch || playing_patch->patch_name.length() == 0) {
 			lv_label_set_text(ui_NowPlayingName, "none");
 			lv_label_set_text(ui_LoadMeter, "");
@@ -49,35 +50,42 @@ struct PatchSelectorPage : PageBase {
 			lv_label_set_text_fmt(ui_LoadMeter, "%d%%", metaparams.audio_load);
 		}
 
+		is_populating_subdir_panel = true;
 		setup_subdir_panel();
+
+		refresh_patchlist();
 	}
 
 	void setup_subdir_panel() {
 		subdir_panel.set_parent(ui_PatchSelectorPage, 1);
+
 		subdir_panel.focus_cb = [this](Volume vol, std::string_view dir) {
-			for (auto [i, entry] : enumerate(roller_item_infos)) {
-				if (entry.path == dir && entry.vol == vol) {
-					lv_roller_set_selected(ui_PatchListRoller, i + 1, LV_ANIM_ON);
-					break;
+			if (!is_populating_subdir_panel) {
+				for (auto [i, entry] : enumerate(roller_item_infos)) {
+					if (entry.path == dir && entry.vol == vol) {
+						lv_roller_set_selected(ui_PatchListRoller, i + 1, LV_ANIM_ON);
+						break;
+					}
 				}
 			}
 		};
 		subdir_panel.click_cb = [this](Volume vol, std::string_view dir) {
 			blur_subdir_panel();
 		};
-
-		refresh_subdir_panel();
 	}
 
 	void refresh_subdir_panel() {
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
-		if (idx < roller_item_infos.size())
+		if (idx < roller_item_infos.size()) {
 			subdir_panel.refresh(roller_item_infos[idx]);
+		}
 	}
 
-	void refresh_patchlist(PatchDirList &patchfiles) {
+	void refresh_patchlist() {
+		is_populating_subdir_panel = true;
+		update_open_patches();
 		subdir_panel.populate(patchfiles);
-		populate_roller(patchfiles);
+		populate_roller();
 	}
 
 	void blur_subdir_panel() {
@@ -93,12 +101,33 @@ struct PatchSelectorPage : PageBase {
 		subdir_panel.blur();
 	}
 
-	void populate_roller(PatchDirList &patchfiles) {
+	void update_open_patches() {
+		auto &root = patchfiles.volume_root(Volume::RamDisk);
+		root.files.clear();
+		root.dirs.clear();
+
+		auto open_patch_list = patches.get_open_patch_list();
+
+		for (auto &patch : open_patch_list) {
+			auto patch_name = std::string{std::string_view{patch.patch.patch_name}};
+
+			if (patch.modification_count > 0)
+				patch_name = "#ff0000 •# " + patch_name;
+
+			if (patch.loc_hash == patches.get_playing_patch_loc_hash())
+				patch_name = "#00a551 " + std::string(LV_SYMBOL_PLAY) + "# " + patch_name;
+
+			root.files.emplace_back(patch.loc.filename, 0, patch.modification_count, PatchName{patch_name});
+		}
+	}
+
+	void populate_roller() {
 		// Save current selection
 		std::optional<EntryInfo> last_entry_info{};
-		auto idx = lv_roller_get_selected(ui_PatchListRoller);
+		auto idx = last_selected_idx;
 		if (idx < roller_item_infos.size()) {
-			last_entry_info = roller_item_infos[idx];
+			if (roller_item_infos[idx].name.length())
+				last_entry_info = roller_item_infos[idx];
 		}
 
 		roller_item_infos.clear();
@@ -130,19 +159,25 @@ struct PatchSelectorPage : PageBase {
 		lv_label_set_recolor(roller_label, true);
 
 		lv_roller_set_options(ui_PatchListRoller, roller_text.c_str(), LV_ROLLER_MODE_NORMAL);
-		lv_roller_set_selected(ui_PatchListRoller, 1, LV_ANIM_OFF);
 
-		// Try to find the previous select in the new set of data
-		if (last_entry_info) {
-			std::optional<unsigned> match_idx{};
-			for (auto [i, entry] : enumerate(roller_item_infos)) {
-				if (entry == last_entry_info)
+		// Try to find the previously selected item in the new set of data, otherwise pick first non-dir entry
+		unsigned match_idx = 1;
+		for (auto [i, entry] : enumerate(roller_item_infos)) {
+			if (last_entry_info) {
+				if (entry == *last_entry_info) {
 					match_idx = i;
+					break;
+				}
+			} else {
+				if (entry.kind == DirEntryKind::File) {
+					match_idx = i;
+					break;
+				}
 			}
-
-			if (match_idx)
-				lv_roller_set_selected(ui_PatchListRoller, *match_idx, LV_ANIM_OFF);
 		}
+
+		lv_roller_set_selected(ui_PatchListRoller, match_idx, LV_ANIM_OFF);
+		// refresh_subdir_panel();
 	}
 
 	void add_all_files_to_roller(Volume vol, std::string &roller_text, std::string prefix, PatchDir &dir) {
@@ -155,6 +190,7 @@ struct PatchSelectorPage : PageBase {
 	std::string format_volume_name(StaticString<31> const &vol_name, PatchDir &root) {
 		std::string roller_text = Gui::orange_highlight_html + std::string(vol_name) + "#";
 
+		// TODO: make a setting to hide/show these?
 		add_file_count(roller_text, root);
 		add_dir_count(roller_text, root);
 
@@ -179,11 +215,23 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void add_dir_count(std::string &roller_text, PatchDir const &root) {
-		if (root.dirs.size() > 0)
-			roller_text += " (" + std::to_string(root.dirs.size()) + " dirs)";
+		if (root.dirs.size() > 0) {
+			unsigned num = 0;
+			for (auto &d : root.dirs) {
+				if (d.files.size() > 0)
+					num++;
+			}
+			if (num > 0)
+				roller_text += " (" + std::to_string(num) + " dirs)";
+		}
 	}
 
 	void update() override {
+
+		if (is_populating_subdir_panel) {
+			refresh_subdir_panel();
+			is_populating_subdir_panel = false;
+		}
 
 		if (metaparams.back_button.is_just_released()) {
 			if (!lv_obj_has_state(ui_PatchListRoller, LV_STATE_DISABLED)) {
@@ -229,19 +277,27 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::ReloadingPatchList:
-				//TODO: use our member var patch_list, not patch_storage
-				refresh_patchlist(patch_storage.get_patch_list());
+				patchfiles = patch_storage.get_patch_list(); //copy
+				refresh_patchlist();
 				refresh_subdir_panel();
 				hide_spinner();
 				state = State::Idle;
 				break;
 
 			case State::TryingToRequestPatchData:
-				if (patch_storage.load_if_open(selected_patch)) {
+				if (patches.load_if_open(selected_patch)) {
 					view_loaded_patch();
-				} else if (patch_storage.request_load_patch(selected_patch)) {
-					state = State::RequestedPatchData;
-					show_spinner();
+				} else {
+					if (patches.limit_open_patches(settings.max_open_patches)) {
+						if (patch_storage.request_load_patch(selected_patch)) {
+							state = State::RequestedPatchData;
+							show_spinner();
+						}
+					} else {
+						notify_queue.put(
+							{"Cannot open a patch: too many open unsaved patches!", Notification::Priority::Error});
+						state = State::Idle;
+					}
 				}
 				break;
 
@@ -250,7 +306,10 @@ struct PatchSelectorPage : PageBase {
 
 				if (message.message_type == FileStorageProxy::PatchDataLoaded) {
 					// Try to parse the patch and open the PatchView page
-					if (patch_storage.parse_loaded_patch(message.bytes_read)) {
+
+					auto data = patch_storage.get_patch_data(message.bytes_read);
+
+					if (patches.open_patch(data, selected_patch)) {
 						view_loaded_patch();
 						hide_spinner();
 
@@ -274,7 +333,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void view_loaded_patch() {
-		auto patch = patch_storage.get_view_patch();
+		auto patch = patches.get_view_patch();
 		pr_trace("Parsed patch: %.31s\n", patch->patch_name.data());
 
 		args.patch_loc_hash = PatchLocHash{selected_patch};
@@ -320,7 +379,8 @@ struct PatchSelectorPage : PageBase {
 				prev_idx = new_idx;
 			}
 		}
-		page->refresh_subdir_panel();
+		if (!page->is_populating_subdir_panel)
+			page->refresh_subdir_panel();
 	}
 
 	static void patchlist_click_cb(lv_event_t *event) {
@@ -332,6 +392,7 @@ struct PatchSelectorPage : PageBase {
 		if (selected_patch) {
 			page->selected_patch = *selected_patch;
 			page->state = State::TryingToRequestPatchData;
+			page->last_selected_idx = idx;
 		} else {
 			//Do nothing? Close/open directory? Focus subdir panel?
 		}
@@ -342,13 +403,31 @@ struct PatchSelectorPage : PageBase {
 
 		if (selected_index < roller_item_infos.size()) {
 			auto &entry = roller_item_infos[selected_index];
+
 			if (entry.kind == DirEntryKind::File) {
 				p = PatchLocation{};
-				p->vol = entry.vol;
-				p->filename.copy(std::string(entry.path + "/" + entry.name));
+
+				if (entry.vol == Volume::RamDisk) {
+					if (entry.path.empty())
+						p->filename.copy(std::string(entry.name));
+					else
+						p->filename.copy(std::string(entry.path + "/" + entry.name));
+
+					p->vol = patches.get_open_patch_list().get_vol(p->filename);
+
+					if (p->vol == Volume::RamDisk) {
+						pr_err("%s not found in open patches\n", p->filename.c_str());
+						p = std::nullopt;
+					}
+
+				} else {
+					p->vol = entry.vol;
+					p->filename.copy(std::string(entry.path + "/" + entry.name));
+				}
 			}
 		} else
 			pr_err("Bad roller index: %d, max is %zu\n", selected_index, roller_item_infos.size());
+
 		return p;
 	}
 
@@ -356,8 +435,12 @@ private:
 	PatchLocation selected_patch{"", Volume::NorFlash};
 
 	std::vector<EntryInfo> roller_item_infos;
+	unsigned last_selected_idx = 0;
 
 	PatchSelectorSubdirPanel &subdir_panel;
+	PatchDirList patchfiles;
+
+	bool is_populating_subdir_panel = false;
 
 	static constexpr uint32_t spinner_lag_ms = 200;
 	uint32_t spinner_show_tm = 0;

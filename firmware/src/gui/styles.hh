@@ -203,7 +203,6 @@ struct Gui {
 		lv_style_set_bg_color(&roller_style, lv_color_black());
 		lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_LEFT);
 		lv_style_set_text_font(&roller_style, &ui_font_MuseoSansRounded70014);
-		// lv_style_set_text_font(&roller_style, &lv_font_montserrat_14);
 		lv_style_set_text_color(&roller_style, lv_color_white());
 		lv_style_set_text_opa(&roller_style, LV_OPA_COVER);
 		lv_style_set_text_line_space(&roller_style, 5);
@@ -284,10 +283,10 @@ struct Gui {
 
 		// Dropdown
 		lv_style_init(&dropdown_style);
-		lv_style_set_bg_color(&dropdown_style, lv_color_hex(0x333333));
+		lv_style_set_bg_color(&dropdown_style, lv_color_hex(0x555555));
 		lv_style_set_text_color(&dropdown_style, lv_color_white());
 		lv_style_set_text_opa(&dropdown_style, 255);
-		lv_style_set_text_font(&dropdown_style, &lv_font_montserrat_14);
+		lv_style_set_text_font(&dropdown_style, &ui_font_MuseoSansRounded70014);
 		lv_style_set_pad_ver(&dropdown_style, 4);
 
 		// Dropdown: Part Selected
