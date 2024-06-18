@@ -175,7 +175,7 @@ struct PatchSelectorPage : PageBase {
 		}
 
 		lv_roller_set_selected(ui_PatchListRoller, match_idx, LV_ANIM_OFF);
-		refresh_subdir_panel();
+		// refresh_subdir_panel();
 	}
 
 	void add_all_files_to_roller(Volume vol, std::string &roller_text, std::string prefix, PatchDir &dir) {
@@ -369,7 +369,8 @@ struct PatchSelectorPage : PageBase {
 				prev_idx = new_idx;
 			}
 		}
-		page->refresh_subdir_panel();
+		if (!page->is_populating_subdir_panel)
+			page->refresh_subdir_panel();
 	}
 
 	static void patchlist_click_cb(lv_event_t *event) {
