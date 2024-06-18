@@ -110,8 +110,13 @@ struct PatchSelectorPage : PageBase {
 
 		for (auto &patch : open_patch_list) {
 			auto patch_name = std::string{std::string_view{patch.patch.patch_name}};
+
 			if (patch.modification_count > 0)
-				patch_name = "#ff0000 *# " + patch_name;
+				patch_name = "#ff0000 •# " + patch_name;
+
+			if (patch.loc_hash == patches.get_playing_patch_loc_hash())
+				patch_name = "#00a551 " + std::string(LV_SYMBOL_PLAY) + "# " + patch_name;
+
 			root.files.emplace_back(patch.loc.filename, 0, patch.modification_count, PatchName{patch_name});
 		}
 	}
@@ -185,6 +190,7 @@ struct PatchSelectorPage : PageBase {
 	std::string format_volume_name(StaticString<31> const &vol_name, PatchDir &root) {
 		std::string roller_text = Gui::orange_highlight_html + std::string(vol_name) + "#";
 
+		// TODO: make a setting to hide/show these?
 		add_file_count(roller_text, root);
 		add_dir_count(roller_text, root);
 
@@ -209,8 +215,15 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void add_dir_count(std::string &roller_text, PatchDir const &root) {
-		if (root.dirs.size() > 0)
-			roller_text += " (" + std::to_string(root.dirs.size()) + " dirs)";
+		if (root.dirs.size() > 0) {
+			unsigned num = 0;
+			for (auto &d : root.dirs) {
+				if (d.files.size() > 0)
+					num++;
+			}
+			if (num > 0)
+				roller_text += " (" + std::to_string(num) + " dirs)";
+		}
 	}
 
 	void update() override {
