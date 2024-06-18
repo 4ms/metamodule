@@ -31,6 +31,17 @@ public:
 		}
 	}
 
+	// Makes room for a opening a patch.
+	// Closes unmodified patches if needed.
+	// Returns false if can't make room.
+	bool limit_open_patches(unsigned max_patches) {
+		while (open_patches_.size() >= max_patches) {
+			if (!open_patches_.remove_oldest_unmodified())
+				return false;
+		}
+		return true;
+	}
+
 	// Parses and opens the loaded patch, and sets the view patch to point to it
 	bool open_patch(std::span<char> file_data, PatchLocation const &patch_loc) {
 

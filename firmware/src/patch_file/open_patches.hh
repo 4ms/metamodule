@@ -60,6 +60,16 @@ struct OpenPatchList {
 		return num_erased > 0;
 	}
 
+	bool remove_oldest_unmodified() {
+		for (auto &item : list) {
+			if (item.modification_count == 0) {
+				std::erase(list, item);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void remove_last() {
 		list.pop_back();
 	}
@@ -75,6 +85,9 @@ struct OpenPatchList {
 	}
 	auto end() const {
 		return list.cend();
+	}
+	auto size() const {
+		return list.size();
 	}
 
 private:
