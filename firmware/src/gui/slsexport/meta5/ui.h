@@ -81,6 +81,7 @@ extern lv_obj_t *ui_KnobButton;
 extern lv_obj_t *ui_AddButton;
 extern lv_obj_t *ui_SaveButton;
 extern lv_obj_t *ui_SaveButtonLabel;
+extern lv_obj_t *ui_SaveButtonRedDot;
 extern lv_obj_t *ui_SettingsButton;
 extern lv_obj_t *ui_ModulesPanel;
 extern lv_obj_t *ui_SettingsMenu;

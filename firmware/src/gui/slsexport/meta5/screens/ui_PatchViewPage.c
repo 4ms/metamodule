@@ -303,6 +303,19 @@ lv_obj_set_height( ui_SaveButtonLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SaveButtonLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SaveButtonLabel,"");
 
+ui_SaveButtonRedDot = lv_obj_create(ui_SaveButton);
+lv_obj_remove_style_all(ui_SaveButtonRedDot);
+lv_obj_set_width( ui_SaveButtonRedDot, 6);
+lv_obj_set_height( ui_SaveButtonRedDot, 6);
+lv_obj_set_x( ui_SaveButtonRedDot, 12 );
+lv_obj_set_y( ui_SaveButtonRedDot, -7 );
+lv_obj_set_align( ui_SaveButtonRedDot, LV_ALIGN_TOP_RIGHT );
+lv_obj_add_flag( ui_SaveButtonRedDot, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_IGNORE_LAYOUT );   /// Flags
+lv_obj_clear_flag( ui_SaveButtonRedDot, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_SaveButtonRedDot, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_SaveButtonRedDot, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_SaveButtonRedDot, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
 ui_SettingsButton = lv_imgbtn_create(ui_ButtonsContainer);
 lv_imgbtn_set_src(ui_SettingsButton, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_1x_settings1_png, NULL);
 lv_imgbtn_set_src(ui_SettingsButton, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_1x_settings1_png, NULL);
@@ -1761,7 +1774,7 @@ lv_obj_set_height( ui_SaveDialogCont, 215);
 lv_obj_set_align( ui_SaveDialogCont, LV_ALIGN_BOTTOM_LEFT );
 lv_obj_set_flex_flow(ui_SaveDialogCont,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_SaveDialogCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_add_flag( ui_SaveDialogCont, LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_add_flag( ui_SaveDialogCont, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_SaveDialogCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_bg_color(ui_SaveDialogCont, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_SaveDialogCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);

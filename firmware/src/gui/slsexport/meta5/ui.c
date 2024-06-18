@@ -77,6 +77,7 @@ lv_obj_t *ui_KnobButton;
 lv_obj_t *ui_AddButton;
 lv_obj_t *ui_SaveButton;
 lv_obj_t *ui_SaveButtonLabel;
+lv_obj_t *ui_SaveButtonRedDot;
 lv_obj_t *ui_SettingsButton;
 lv_obj_t *ui_ModulesPanel;
 lv_obj_t *ui_SettingsMenu;
