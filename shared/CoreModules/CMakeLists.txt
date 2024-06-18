@@ -14,10 +14,3 @@ target_include_directories(CoreModules
   ${FWDIR}/src
   ${FWDIR}/src/console
 )
-
-#TODO: is this still needed?
-set_source_files_properties(
-  ${SHARED}/CoreModules/moduleFactory.cc
-  PROPERTIES COMPILE_OPTIONS "-fno-lto"
-)
-
