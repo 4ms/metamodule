@@ -211,6 +211,8 @@ struct PatchViewPage : PageBase {
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
 
+		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
+
 		if (patch != patches.get_view_patch()) {
 			patch = patches.get_view_patch();
 			desc_panel.set_patch(patch);
