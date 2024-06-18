@@ -29,7 +29,6 @@ struct OpenPatchList {
 			return nullptr;
 
 		if (auto it = std::ranges::find(list, hash, &OpenPatch::loc_hash); it != list.end()) {
-			pr_dbg("range found\n");
 			return &(*it);
 		}
 		return nullptr;
@@ -49,19 +48,16 @@ struct OpenPatchList {
 
 	OpenPatch *emplace_back(PatchLocation const &loc) {
 		auto &openpatch = list.emplace_back(loc);
-		dump();
 		return &openpatch;
 	}
 
 	bool remove(PatchLocHash hash) {
 		auto num_erased = std::erase_if(list, [=](auto &e) { return e.loc_hash == hash; });
-		dump();
 		return num_erased > 0;
 	}
 
 	void remove(std::list<OpenPatch>::iterator item) {
 		list.erase(item);
-		dump();
 	}
 
 	void remove_last() {
@@ -85,13 +81,12 @@ struct OpenPatchList {
 	}
 
 private:
-	void dump() {
+	void dump_open_patches() {
 		unsigned i = 0;
 		size_t total_size = 0;
 
-		pr_dbg("________\n");
 		for (auto &p : list) {
-			auto sz = p.patch.patch_size();
+			auto sz = patch_size(p.patch);
 			total_size += sz;
 			pr_dbg("[%d] %d:%s: %s #%d [%zu B]\n",
 				   i++,
@@ -102,7 +97,35 @@ private:
 				   sz);
 		}
 		pr_dbg("TOTAL: %zu\n", total_size);
-		pr_dbg("________\n");
+	}
+
+	static size_t patch_size(PatchData const &p) {
+		auto sz = sizeof(PatchData);
+		sz += p.module_slugs.size() * sizeof(BrandModuleSlug);
+
+		sz += p.int_cables.size() * sizeof(InternalCable);
+		for (auto const &cable : p.int_cables)
+			sz += cable.ins.size() * sizeof(Jack);
+
+		sz += p.mapped_ins.size() * sizeof(MappedInputJack);
+		for (auto const &in : p.mapped_ins)
+			sz += in.ins.size() * sizeof(Jack);
+
+		sz += p.mapped_outs.size() * sizeof(MappedOutputJack);
+
+		sz += p.static_knobs.size() * sizeof(StaticParam);
+
+		sz += p.knob_sets.size() * sizeof(MappedKnobSet);
+		for (auto const &knob_set : p.knob_sets)
+			sz += knob_set.set.size() * sizeof(MappedKnob);
+
+		sz += p.module_states.size() * sizeof(ModuleInitState);
+		for (auto const &state : p.module_states)
+			sz += state.state_data.size() * sizeof(char);
+
+		sz += p.midi_maps.set.size() * sizeof(MappedKnob);
+
+		return sz;
 	}
 
 private:

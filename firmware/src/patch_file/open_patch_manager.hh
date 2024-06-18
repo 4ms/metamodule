@@ -93,7 +93,6 @@ public:
 		if (view_patch_)
 			return &view_patch_->patch;
 		else {
-			pr_err("Tried to get_view_patch when viewpatch is null.\n");
 			return nullptr;
 		}
 	}
@@ -121,7 +120,6 @@ public:
 		if (view_patch_)
 			return view_patch_->loc.vol;
 		else {
-			pr_err("Tried to get_view_patch_vol() for null view_patch\n");
 			return Volume::MaxVolumes;
 		}
 	}
