@@ -21,6 +21,10 @@ struct ViewSettings {
 	bool show_jack_maps = false;
 	MapRingStyle map_ring_style = {.mode = MapRingStyle::Mode::CurModuleIfPlaying, .opa = 128};
 	MapRingStyle cable_style = {.mode = MapRingStyle::Mode::ShowAll, .opa = 128};
+	unsigned patch_view_height_px = 180;
+
+	unsigned max_open_patches = 20;
+
 	bool changed = true;
 };
 

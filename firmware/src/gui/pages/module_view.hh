@@ -16,9 +16,8 @@ namespace MetaModule
 {
 struct ModuleViewPage : PageBase {
 
-	ModuleViewPage(PatchContext context, ViewSettings &settings)
+	ModuleViewPage(PatchContext context)
 		: PageBase{context, PageId::ModuleView}
-		, settings{settings}
 		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings}
 		, patch{patches.get_view_patch()}
@@ -405,7 +404,6 @@ private:
 		}
 	}
 
-	ViewSettings &settings;
 	CableDrawer<240> cable_drawer;
 
 	ModuleInfoView moduleinfo;

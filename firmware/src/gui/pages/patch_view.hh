@@ -23,14 +23,11 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
-	static inline uint32_t Height = 180;
-
-	PatchViewPage(PatchContext info, ViewSettings &settings, PatchSelectorSubdirPanel &subdir_panel)
+	PatchViewPage(PatchContext info, PatchSelectorSubdirPanel &subdir_panel)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
-		, settings{settings}
 		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list} {
 
 		init_bg(base);
@@ -131,7 +128,7 @@ struct PatchViewPage : PageBase {
 
 		lv_show(modules_cont);
 
-		auto module_drawer = ModuleDrawer{modules_cont, Height};
+		auto module_drawer = ModuleDrawer{modules_cont, settings.patch_view_height_px};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
 		int bottom = 0;
@@ -148,7 +145,8 @@ struct PatchViewPage : PageBase {
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
-			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) * Height);
+			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) *
+											settings.patch_view_height_px);
 			int this_bottom = lv_obj_get_y(canvas) + lv_obj_get_height(canvas);
 			bottom = std::max(bottom, this_bottom);
 
@@ -197,7 +195,8 @@ struct PatchViewPage : PageBase {
 			auto module_id = drawn_el.gui_element.module_idx;
 			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
 
-			ModuleDrawer{modules_cont, Height}.draw_mapped_ring(*patch, module_id, knobset, canvas, drawn_el);
+			ModuleDrawer{modules_cont, settings.patch_view_height_px}.draw_mapped_ring(
+				*patch, module_id, knobset, canvas, drawn_el);
 		}
 		update_map_ring_style();
 	}
@@ -388,7 +387,7 @@ private:
 		auto scroll_y = lv_obj_get_scroll_top(ui_PatchViewPage);
 		auto header_y = lv_obj_get_y(ui_ModulesPanel);
 		int16_t module_top_on_screen = header_y - scroll_y + module_y;
-		int16_t module_bot_on_screen = module_top_on_screen + Height;
+		int16_t module_bot_on_screen = module_top_on_screen + settings.patch_view_height_px;
 		int16_t space_above = module_top_on_screen;
 		int16_t space_below = 240 - module_bot_on_screen;
 		if (space_below > space_above) {
@@ -511,7 +510,6 @@ private:
 	lv_obj_t *modules_cont;
 	CableDrawer<4 * 240 + 8> cable_drawer; //TODO: relate this number to the module container size
 
-	ViewSettings &settings;
 	PatchViewSettingsMenu settings_menu{settings};
 
 	unsigned active_knobset = 0;

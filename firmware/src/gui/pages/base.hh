@@ -5,6 +5,7 @@
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/view_settings.hh"
 #include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
@@ -43,6 +44,7 @@ struct PatchContext {
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
 	GuiState &gui_state;
+	ViewSettings &settings;
 	PluginManager &plugin_manager;
 };
 
@@ -56,6 +58,7 @@ struct PageBase {
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
 	GuiState &gui_state;
+	ViewSettings &settings;
 
 	PageArguments args;
 
@@ -82,6 +85,7 @@ struct PageBase {
 		, patch_mod_queue{info.patch_mod_queue}
 		, page_list{info.page_list}
 		, gui_state{info.gui_state}
+		, settings{info.settings}
 		, id{id} {
 		page_list.register_page(this, id);
 	}

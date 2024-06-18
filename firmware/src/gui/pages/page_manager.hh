@@ -34,8 +34,8 @@ class PageManager {
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info, subdir_panel};
-	PatchViewPage page_patchview{info, settings, subdir_panel};
-	ModuleViewPage page_module{info, settings};
+	PatchViewPage page_patchview{info, subdir_panel};
+	ModuleViewPage page_module{info};
 	KnobSetViewPage page_knobsetview{info};
 	KnobMapPage page_knobmap{info};
 	SystemMenuPage page_systemmenu{info};
@@ -64,6 +64,7 @@ public:
 			   patch_mod_queue,
 			   page_list,
 			   gui_state,
+			   settings,
 			   plugin_manager} {
 	}
 
