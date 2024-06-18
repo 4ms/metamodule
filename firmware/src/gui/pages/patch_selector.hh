@@ -112,10 +112,7 @@ struct PatchSelectorPage : PageBase {
 			auto patch_name = std::string{std::string_view{patch.patch.patch_name}};
 			if (patch.modification_count > 0)
 				patch_name = "#ff0000 *# " + patch_name;
-			root.files.push_back({.filename = patch.loc.filename,
-								  .filesize = 0,
-								  .timestamp = patch.modification_count,
-								  .patchname = PatchName{patch_name}});
+			root.files.emplace_back(patch.loc.filename, 0, patch.modification_count, PatchName{patch_name});
 		}
 	}
 
