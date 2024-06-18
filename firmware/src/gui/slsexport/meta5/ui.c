@@ -108,6 +108,9 @@ lv_obj_t *ui_ShowAllCablesLabel;
 lv_obj_t *ui_ShowAllCablesCheck;
 lv_obj_t *ui_CablesTransparencyTitle;
 lv_obj_t *ui_CablesTranspSlider;
+lv_obj_t *ui_ModulesSettingsTitle;
+lv_obj_t *ui_ModulesSizeTitle;
+lv_obj_t *ui_ModulesSizeSlider;
 lv_obj_t *ui_KnobsetMenu;
 lv_obj_t *ui_KnobSetClosePanel;
 lv_obj_t *ui_KnobsetHeaderLabel;
@@ -156,6 +159,7 @@ lv_obj_t *ui_SaveDialogCancelBut;
 lv_obj_t *ui_SaveDialogCancelButLabel;
 lv_obj_t *ui_SaveDialogSaveBut;
 lv_obj_t *ui_SaveDialogSaveButLabel;
+
 
 // SCREEN: ui_MappingMenu
 void ui_MappingMenu_screen_init(void);
