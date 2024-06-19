@@ -14,7 +14,7 @@ constexpr float from_volts(float v) {
 	return (v / 10.3f) * 8388608.f;
 }
 
-static constexpr float DefaultTolerance = from_volts(0.1);
+static constexpr float DefaultTolerance = from_volts(0.5);
 static constexpr float DefaultLowV = 2;
 static constexpr float DefaultHighV = 4;
 static constexpr float DefaultLowReading = from_volts(DefaultLowV);
@@ -25,7 +25,7 @@ static constexpr float DefaultHighReading = from_volts(DefaultHighV);
 struct CalData {
 
 	const uint32_t version = 1;
-	std::pair<float, float> ins_measured_volts;
+	std::pair<float, float> ins_target_volts;
 	std::pair<float, float> outs_measured_volts;
 	std::array<std::pair<float, float>, PanelDef::NumAudioIn> ins_data;
 	std::array<std::pair<float, float>, PanelDef::NumAudioOut> outs_data;
@@ -56,7 +56,7 @@ struct CalData {
 	void reset_to_default() {
 		using namespace Calibration;
 
-		ins_measured_volts = {DefaultLowV, DefaultHighV};
+		ins_target_volts = {DefaultLowV, DefaultHighV};
 		outs_measured_volts = {DefaultLowV, DefaultHighV};
 
 		ins_data = {{

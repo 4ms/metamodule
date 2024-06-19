@@ -225,7 +225,9 @@ private:
 
 		auto result = player_.load_patch(*next_patch);
 		if (result.success) {
-			patches_.play_view_patch();
+			if (next_patch == patches_.get_view_patch())
+				patches_.play_view_patch();
+			//TODO: give patches a ptr to this patch?
 			start_audio();
 		}
 

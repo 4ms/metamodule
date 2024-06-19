@@ -79,20 +79,24 @@ public:
 		return event;
 	}
 
-private:
-	bool validate_reading(AnalyzedSig &reading, float target) {
-		if (std::abs(reading.iir - target) < Calibration::DefaultTolerance) {
-			if (std::abs(reading.min - target) < Calibration::DefaultTolerance) {
-				if (std::abs(reading.max - target) < Calibration::DefaultTolerance) {
+	bool validate_reading(AnalyzedSig &reading, float target, float tolerance = Calibration::DefaultTolerance) {
+		if (std::abs(reading.iir - target) < tolerance) {
+			if (std::abs(reading.min - target) < tolerance) {
+				if (std::abs(reading.max - target) < tolerance) {
 					if ((reading.max - reading.min) < Calibration::from_volts(0.001f))
 						return true;
-				}
-			}
-		}
-		pr_dbg(" X target=%f ", target);
+					else
+						pr_dbg("max-min = %f > %f\n", (reading.max - reading.min), Calibration::from_volts(0.001f));
+				} else
+					pr_dbg("max = %f\n", reading.max);
+			} else
+				pr_dbg("min = %f\n", reading.min);
+		} else
+			pr_dbg("iir = %f\n", reading.iir);
 		return false;
 	}
 
+private:
 	void debug_print_reading(unsigned idx, AnalyzedSig ain) {
 		pr_dbg("AIN %zu: iir=%d min=%d max=%d range=%d\r\n",
 			   idx,

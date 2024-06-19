@@ -8,10 +8,10 @@ struct CalibrationPatch {
 	PatchData *make_patch() {
 		patch.blank_patch("Calibrator");
 		// 4 dual-output SRC modules
-		uint16_t src1 = patch.add_module("4msCompany:SRC");
-		uint16_t src2 = patch.add_module("4msCompany:SRC");
-		uint16_t src3 = patch.add_module("4msCompany:SRC");
-		uint16_t src4 = patch.add_module("4msCompany:SRC");
+		uint16_t src1 = patch.add_module("4msCompany:Atvert2");
+		uint16_t src2 = patch.add_module("4msCompany:Atvert2");
+		uint16_t src3 = patch.add_module("4msCompany:Atvert2");
+		uint16_t src4 = patch.add_module("4msCompany:Atvert2");
 
 		// All knobs center (= 0V output)
 		patch.set_or_add_static_knob_value(src1, 0, 0.5f);

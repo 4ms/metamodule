@@ -9,6 +9,7 @@
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+#include "util/calibrator.hh"
 
 namespace MetaModule
 {
@@ -18,11 +19,13 @@ struct SystemTab : SystemMenuTab {
 	SystemTab(FileStorageProxy &patch_storage,
 			  ParamsMidiState &params,
 			  MetaParams &metaparams,
-			  PatchPlayLoader &patch_playloader)
+			  PatchPlayLoader &patch_playloader,
+			  PatchModQueue &patch_mod_queue)
 		: storage{patch_storage}
 		, params{params}
 		, metaparams{metaparams}
 		, patch_playloader{patch_playloader}
+		, patch_mod_queue{patch_mod_queue}
 		, cal{{Calibration::DefaultLowV, Calibration::DefaultHighV, Calibration::from_volts(0.1f)}} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
@@ -80,6 +83,10 @@ struct SystemTab : SystemMenuTab {
 private:
 	enum class JackCalStatus { NotCal, LowOnly, HighOnly, Error, Done };
 
+	///
+	/// INPUTS
+	///
+
 	void start_calibrate_ins() {
 		// send message via PatchPlayLoader to tell audio to disable calibration?
 
@@ -101,27 +108,8 @@ private:
 			set_input_status(i, JackCalStatus::NotCal);
 			jack_plugged[i] = false;
 		}
-	}
 
-	void start_calibrate_outs() {
-		lv_show(ui_CalibrationProcedureCont);
-		lv_hide(ui_CalibrationInputStatusCont);
-		lv_show(ui_CalibrationOutputStatusCont);
-		lv_hide(ui_SystemCalibrationButton);
-		lv_hide(ui_SystemResetInternalPatchesCont);
-
-		lv_label_set_text(ui_CalibrationInstructionLabel, "Inputs are calbrated!\nPatch each Out jack to In 1 jack.");
-
-		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
-		lv_obj_scroll_to_view_recursive(ui_SystemCalibrationTitle, LV_ANIM_OFF);
-
-		patch_playloader.request_load_calibration_patch();
-
-		for (auto i = 0u; i < PanelDef::NumAudioOut; i++) {
-			set_input_status(i, JackCalStatus::NotCal);
-			jack_plugged[i] = false;
-		}
-		state = State::CalibratingOuts;
+		caldata.ins_target_volts = {Calibration::DefaultLowV, Calibration::DefaultHighV};
 	}
 
 	void update_read_saved_cal() {
@@ -160,10 +148,11 @@ private:
 			if (params.is_input_plugged(i)) {
 				set_input_plugged(i, true);
 
+				pr_dbg("update ins\n");
 				in_signals[i].update(metaparams.ins[i].iir);
 
 				if (jack_status[i] != JackCalStatus::Done) {
-					measure(i);
+					measure_input(i);
 				}
 
 			} else {
@@ -176,29 +165,12 @@ private:
 				num_done++;
 		}
 
-		if (num_done == PanelDef::NumAudioIn) {
+		if (num_done == 1) { //FIXME: 1==debug only //PanelDef::NumAudioIn) {
 			start_calibrate_outs();
 		}
 	}
 
-	void update_cal_outs_routine() {
-		if (!patch_playloader.is_audio_muted())
-			return;
-
-		unsigned num_done = 0;
-
-		for (unsigned i = 0; i < PanelDef::NumAudioOut; i++) {
-			if (params.is_output_plugged(i) && params.is_input_plugged(0)) {
-			}
-			//TODO:
-		}
-
-		if (num_done == PanelDef::NumAudioOut) {
-			state = State::WritingCal;
-		}
-	}
-
-	void measure(unsigned idx) {
+	void measure_input(unsigned idx) {
 		// Measure each jack and advance state
 
 		using enum CalibrationMeasurer::CalibrationEvent;
@@ -265,6 +237,114 @@ private:
 		}
 	}
 
+	void start_calibrate_outs() {
+		lv_show(ui_CalibrationProcedureCont);
+		lv_hide(ui_CalibrationInputStatusCont);
+		lv_show(ui_CalibrationOutputStatusCont);
+		lv_hide(ui_SystemCalibrationButton);
+		lv_hide(ui_SystemResetInternalPatchesCont);
+
+		// lv_label_set_text(ui_CalibrationInstructionLabel, "Patch each Out jack to In 1 jack.");
+
+		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_view_recursive(ui_SystemCalibrationTitle, LV_ANIM_OFF);
+
+		patch_playloader.request_load_calibration_patch();
+
+		for (auto i = 0u; i < PanelDef::NumAudioOut; i++) {
+			set_input_status(i, JackCalStatus::NotCal);
+			jack_plugged[i] = false;
+		}
+		state = State::CalibratingOuts;
+
+		calibrated_in.calibrate_chan(caldata.ins_target_volts.first,
+									 caldata.ins_target_volts.second,
+									 caldata.ins_data[0].first,
+									 caldata.ins_data[0].second);
+		pr_dbg("Input 1: slope: %f offset: %f\n", calibrated_in._slope, calibrated_in._offset);
+
+		current_output = std::nullopt;
+	}
+
+	void update_cal_outs_routine() {
+		unsigned num_done = 0;
+		unsigned num_patched = 0;
+		unsigned active_output = 0;
+
+		for (unsigned i = 0; i < PanelDef::NumAudioOut; i++) {
+			if (params.is_output_plugged(i) && params.is_input_plugged(0)) {
+				num_patched++;
+				active_output = i;
+				set_output_plugged(i, true);
+			} else {
+				set_output_plugged(i, false);
+			}
+		}
+
+		if (num_patched == 1) {
+			// First time detected as patched
+			if (active_output != current_output) {
+				current_output = active_output;
+
+				lv_label_set_text_fmt(
+					ui_CalibrationInstructionLabel, "Calibrating Out %d, please wait...", active_output);
+
+				jack_status[active_output] = JackCalStatus::NotCal;
+
+				set_output_volts(active_output, 2.5f);
+				in_signals[0].reset_to(2.5f);
+				delay_measurement = 0;
+			}
+
+			else if (jack_status[active_output] == JackCalStatus::NotCal)
+			{
+				measure_validate_output(active_output, 2.5f);
+				// auto measured_volts =
+				//measure, validate, update output
+			} else if (jack_status[active_output] == JackCalStatus::LowOnly) {
+				//measure, validate, update output
+			} else if (jack_status[active_output] == JackCalStatus::HighOnly) {
+				//measure, validate, update output
+			}
+
+		} else if (num_patched > 1) {
+			current_output = std::nullopt;
+			lv_label_set_text(ui_CalibrationInstructionLabel, "Patch one output jack at a time!");
+		}
+
+		if (num_done == PanelDef::NumAudioOut) {
+			state = State::WritingCal;
+		}
+	}
+
+	bool measure_validate_output(unsigned idx, float target_volts) {
+		constexpr float Tolerance = 1.25f;
+
+		in_signals[0].update(calibrated_in.adjust(metaparams.ins[0].iir));
+
+		if (delay_measurement++ >= 64) {
+			if (cal.validate_reading(in_signals[0], target_volts, Tolerance)) {
+
+				pr_dbg("Got reading for %f volts: %f\n", target_volts, in_signals[0].iir);
+				//TODO save this
+				return true;
+			} else {
+				pr_err("Not validated reading: %f [%f,%f] vs: %f +/- %f\n",
+					   in_signals[0].iir,
+					   in_signals[0].min,
+					   in_signals[0].max,
+					   target_volts,
+					   Tolerance);
+				return false;
+			}
+
+			delay_measurement = 0;
+			in_signals[0].reset_to(in_signals[0].iir);
+			pr_dbg("in_signals[0] reset to %f\n", in_signals[0].iir);
+		}
+		return false;
+	}
+
 	void set_output_status(unsigned idx, JackCalStatus status) {
 		if (jack_status[idx] != status) {
 			jack_status[idx] = status;
@@ -293,8 +373,16 @@ private:
 		}
 	}
 
-	void set_output_jack(unsigned idx, int32_t raw_value) {
-		//TODO: set voltage
+	void set_output_volts(unsigned idx, float volts) {
+		if (volts < -5.f || volts > 5.f)
+			return;
+
+		StaticParam p{};
+		p.module_id = (idx / 2) + 1;
+		p.param_id = idx % 2;
+		p.value = volts / 10.f + 0.5;
+
+		patch_mod_queue.put(SetStaticParam{p});
 	}
 
 	void set_output_plugged(unsigned idx, bool plugged) {
@@ -303,10 +391,6 @@ private:
 		if (plugged && !jack_plugged[idx]) {
 			jack_plugged[idx] = true;
 			lv_obj_set_style_outline_opa(label, LV_OPA_100, LV_PART_MAIN);
-
-			set_output_status(idx, JackCalStatus::NotCal);
-			set_output_jack(idx, 0);
-
 		} else if (!plugged && jack_plugged[idx]) {
 			jack_plugged[idx] = false;
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
@@ -342,11 +426,13 @@ private:
 	ParamsMidiState &params;
 	MetaParams &metaparams;
 	PatchPlayLoader &patch_playloader;
+	PatchModQueue &patch_mod_queue;
 
 	ConfirmPopup confirm_popup;
 	CalibrationMeasurer cal;
 	CalData caldata;
 	uint32_t caldata_bytes_read = 0;
+	Calibrator calibrated_in;
 
 	static constexpr float coef = 1.f / 4.f;
 	std::array<AnalyzedSig, PanelDef::NumAudioIn> in_signals{coef, coef, coef, coef, coef, coef};
@@ -364,6 +450,8 @@ private:
 
 	std::array<bool, MaxJacks> jack_plugged{};
 	std::array<JackCalStatus, MaxJacks> jack_status{};
+	unsigned delay_measurement = 0;
+	std::optional<unsigned> current_output = 0;
 
 	std::array<lv_obj_t *, PanelDef::NumAudioIn> input_status_labels{
 		ui_CalibrationIn1Label,
