@@ -15,10 +15,14 @@ namespace MetaModule
 
 struct SystemTab : SystemMenuTab {
 
-	SystemTab(FileStorageProxy &patch_storage, ParamsMidiState &params, MetaParams &metaparams)
+	SystemTab(FileStorageProxy &patch_storage,
+			  ParamsMidiState &params,
+			  MetaParams &metaparams,
+			  PatchPlayLoader &patch_playloader)
 		: storage{patch_storage}
 		, params{params}
 		, metaparams{metaparams}
+		, patch_playloader{patch_playloader}
 		, cal{{Calibration::DefaultLowV, Calibration::DefaultHighV, Calibration::from_volts(0.1f)}} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
@@ -80,39 +84,44 @@ private:
 		// send message via PatchPlayLoader to tell audio to disable calibration?
 
 		lv_show(ui_CalibrationProcedureCont);
+		lv_show(ui_CalibrationInputStatusCont);
+		lv_hide(ui_CalibrationOutputStatusCont);
 		lv_hide(ui_SystemCalibrationButton);
 		lv_hide(ui_SystemResetInternalPatchesCont);
 
 		lv_label_set_text(ui_CalibrationInstructionLabel,
-						  "Play a C2 and then a C4 into each jack you wish to re-calibrate.");
+						  "Play a C2 and a C4 into each jack you wish to re-calibrate.");
 
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
 		lv_obj_scroll_to_view_recursive(ui_SystemCalibrationTitle, LV_ANIM_OFF);
 
 		state = State::TryingReadCal;
 
-		for (auto i = 0u; i < input_status.size(); i++) {
+		for (auto i = 0u; i < PanelDef::NumAudioIn; i++) {
 			set_input_status(i, JackCalStatus::NotCal);
-			input_plugged[i] = false;
+			jack_plugged[i] = false;
 		}
 	}
 
 	void start_calibrate_outs() {
-		// send message via PatchPlayLoader to tell audio to not play patch
-
 		lv_show(ui_CalibrationProcedureCont);
+		lv_hide(ui_CalibrationInputStatusCont);
+		lv_show(ui_CalibrationOutputStatusCont);
 		lv_hide(ui_SystemCalibrationButton);
 		lv_hide(ui_SystemResetInternalPatchesCont);
 
-		lv_label_set_text(ui_CalibrationInstructionLabel, "Patch each Out jack to Audio/CV Ins 1, one at a time.");
+		lv_label_set_text(ui_CalibrationInstructionLabel, "Inputs are calbrated!\nPatch each Out jack to In 1 jack.");
 
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
 		lv_obj_scroll_to_view_recursive(ui_SystemCalibrationTitle, LV_ANIM_OFF);
 
-		// for (auto i = 0u; i < input_status.size(); i++) {
-		// 	set_input_status(i, JackCalStatus::NotCal);
-		// 	input_plugged[i] = false;
-		// }
+		patch_playloader.request_load_calibration_patch();
+
+		for (auto i = 0u; i < PanelDef::NumAudioOut; i++) {
+			set_input_status(i, JackCalStatus::NotCal);
+			jack_plugged[i] = false;
+		}
+		state = State::CalibratingOuts;
 	}
 
 	void update_read_saved_cal() {
@@ -153,33 +162,38 @@ private:
 
 				in_signals[i].update(metaparams.ins[i].iir);
 
-				if (input_status[i] != JackCalStatus::Done) {
+				if (jack_status[i] != JackCalStatus::Done) {
 					measure(i);
 				}
 
 			} else {
 				set_input_plugged(i, false);
-				if (input_status[i] == JackCalStatus::LowOnly || input_status[i] == JackCalStatus::HighOnly)
+				if (jack_status[i] == JackCalStatus::LowOnly || jack_status[i] == JackCalStatus::HighOnly)
 					set_input_status(i, JackCalStatus::Error);
 			}
 
-			if (input_status[i] == JackCalStatus::Done)
+			if (jack_status[i] == JackCalStatus::Done)
 				num_done++;
 		}
 
-		if (num_done == 6) {
-			state = State::CalibratingOuts;
+		if (num_done == PanelDef::NumAudioIn) {
+			start_calibrate_outs();
 		}
 	}
 
 	void update_cal_outs_routine() {
+		if (!patch_playloader.is_audio_muted())
+			return;
+
 		unsigned num_done = 0;
 
 		for (unsigned i = 0; i < PanelDef::NumAudioOut; i++) {
+			if (params.is_output_plugged(i) && params.is_input_plugged(0)) {
+			}
 			//TODO:
 		}
 
-		if (num_done == 6) {
+		if (num_done == PanelDef::NumAudioOut) {
 			state = State::WritingCal;
 		}
 	}
@@ -192,24 +206,24 @@ private:
 		auto event = cal.read(idx, in_signals[idx]);
 
 		if (event == MeasuredLow) {
-			if (input_status[idx] == JackCalStatus::NotCal)
+			if (jack_status[idx] == JackCalStatus::NotCal)
 				set_input_status(idx, JackCalStatus::LowOnly);
-			else if (input_status[idx] == JackCalStatus::HighOnly)
+			else if (jack_status[idx] == JackCalStatus::HighOnly)
 				set_input_status(idx, JackCalStatus::Done);
 		}
 
 		else if (event == MeasuredHigh)
 		{
-			if (input_status[idx] == JackCalStatus::NotCal)
+			if (jack_status[idx] == JackCalStatus::NotCal)
 				set_input_status(idx, JackCalStatus::HighOnly);
-			else if (input_status[idx] == JackCalStatus::LowOnly)
+			else if (jack_status[idx] == JackCalStatus::LowOnly)
 				set_input_status(idx, JackCalStatus::Done);
 		}
 	}
 
 	void set_input_status(unsigned idx, JackCalStatus status) {
-		if (input_status[idx] != status) {
-			input_status[idx] = status;
+		if (jack_status[idx] != status) {
+			jack_status[idx] = status;
 
 			auto *label = input_status_labels[idx];
 			switch (status) {
@@ -239,14 +253,62 @@ private:
 	void set_input_plugged(unsigned idx, bool plugged) {
 		auto *label = input_status_labels[idx];
 
-		if (plugged && !input_plugged[idx]) {
-			input_plugged[idx] = true;
+		if (plugged && !jack_plugged[idx]) {
+			jack_plugged[idx] = true;
 			cal.start_chan(idx);
 			lv_obj_set_style_outline_opa(label, LV_OPA_100, LV_PART_MAIN);
 			set_input_status(idx, JackCalStatus::NotCal);
 
-		} else if (!plugged && input_plugged[idx]) {
-			input_plugged[idx] = false;
+		} else if (!plugged && jack_plugged[idx]) {
+			jack_plugged[idx] = false;
+			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
+		}
+	}
+
+	void set_output_status(unsigned idx, JackCalStatus status) {
+		if (jack_status[idx] != status) {
+			jack_status[idx] = status;
+
+			auto *label = output_status_labels[idx];
+			switch (status) {
+				case JackCalStatus::NotCal: {
+					lv_label_set_text_fmt(label, "#aaaaaa Out %d#", idx + 1);
+				} break;
+
+				case JackCalStatus::Done: {
+					lv_label_set_text_fmt(label, "#00a551 Out %d#", idx + 1);
+					// TODO
+					// caldata.outs_data[idx] = cal.get_cal_data(0);
+					// pr_dbg("Calibrated Out %d: %f %f\n", idx, caldata.outs_data[idx].first, caldata.outs_data[idx].second);
+				} break;
+
+				case JackCalStatus::Error: {
+					lv_label_set_text_fmt(label, "#f40000 Out %d#", idx + 1);
+				} break;
+
+				case JackCalStatus::LowOnly:
+				case JackCalStatus::HighOnly:
+					break;
+			}
+		}
+	}
+
+	void set_output_jack(unsigned idx, int32_t raw_value) {
+		//TODO: set voltage
+	}
+
+	void set_output_plugged(unsigned idx, bool plugged) {
+		auto *label = output_status_labels[idx];
+
+		if (plugged && !jack_plugged[idx]) {
+			jack_plugged[idx] = true;
+			lv_obj_set_style_outline_opa(label, LV_OPA_100, LV_PART_MAIN);
+
+			set_output_status(idx, JackCalStatus::NotCal);
+			set_output_jack(idx, 0);
+
+		} else if (!plugged && jack_plugged[idx]) {
+			jack_plugged[idx] = false;
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
 		}
 	}
@@ -279,6 +341,7 @@ private:
 	FileStorageProxy &storage;
 	ParamsMidiState &params;
 	MetaParams &metaparams;
+	PatchPlayLoader &patch_playloader;
 
 	ConfirmPopup confirm_popup;
 	CalibrationMeasurer cal;
@@ -297,14 +360,29 @@ private:
 		WritingCal
 	} state = State::Idle;
 
-	std::array<bool, PanelDef::NumAudioIn> input_plugged{};
-	std::array<JackCalStatus, PanelDef::NumAudioIn> input_status{};
-	std::array<lv_obj_t *, PanelDef::NumAudioIn> input_status_labels{ui_CalibrationIn1Label,
-																	 ui_CalibrationIn2Label,
-																	 ui_CalibrationIn3Label,
-																	 ui_CalibrationIn4Label,
-																	 ui_CalibrationIn5Label,
-																	 ui_CalibrationIn6Label};
+	static constexpr size_t MaxJacks = std::max(PanelDef::NumAudioIn, PanelDef::NumAudioOut);
+
+	std::array<bool, MaxJacks> jack_plugged{};
+	std::array<JackCalStatus, MaxJacks> jack_status{};
+
+	std::array<lv_obj_t *, PanelDef::NumAudioIn> input_status_labels{
+		ui_CalibrationIn1Label,
+		ui_CalibrationIn2Label,
+		ui_CalibrationIn3Label,
+		ui_CalibrationIn4Label,
+		ui_CalibrationIn5Label,
+		ui_CalibrationIn6Label,
+	};
+	std::array<lv_obj_t *, PanelDef::NumAudioOut> output_status_labels{
+		ui_CalibrationOut1Label,
+		ui_CalibrationOut2Label,
+		ui_CalibrationOut3Label,
+		ui_CalibrationOut4Label,
+		ui_CalibrationOut5Label,
+		ui_CalibrationOut6Label,
+		ui_CalibrationOut7Label,
+		ui_CalibrationOut8Label,
+	};
 
 	lv_group_t *group = nullptr;
 };

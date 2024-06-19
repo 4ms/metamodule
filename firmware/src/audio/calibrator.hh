@@ -51,7 +51,7 @@ public:
 			if (delay_ctr == 0)
 				reading.reset_to(reading.iir);
 
-			if (++delay_ctr >= 4) { //@16ms update rate = 256ms between attempts
+			if (++delay_ctr >= 4) {
 				delay_ctr = 0;
 
 				if (validate_reading(reading, Calibration::from_volts(config.low_measurement_volts))) {
