@@ -161,7 +161,7 @@ public:
 
 	void new_patch() {
 		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
-		std::string filename = name + ".yml";
+		std::string filename = "/" + name + ".yml";
 		PatchLocation loc{std::string_view{filename}, Volume::RamDisk};
 		view_patch_ = open_patches_.emplace_back(loc);
 		view_patch_->patch.blank_patch(name);
