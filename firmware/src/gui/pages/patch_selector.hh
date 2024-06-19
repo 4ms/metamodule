@@ -117,7 +117,8 @@ struct PatchSelectorPage : PageBase {
 			if (patch.loc_hash == patches.get_playing_patch_loc_hash())
 				patch_name = "#00a551 " + std::string(LV_SYMBOL_PLAY) + "# " + patch_name;
 
-			root.files.emplace_back(patch.loc.filename, 0, patch.modification_count, PatchName{patch_name});
+			root.files.emplace_back(
+				patch.loc.filename, 0, patch.modification_count, PatchName{patch_name}, patch.loc.vol);
 		}
 	}
 
@@ -177,13 +178,13 @@ struct PatchSelectorPage : PageBase {
 		}
 
 		lv_roller_set_selected(ui_PatchListRoller, match_idx, LV_ANIM_OFF);
-		// refresh_subdir_panel();
 	}
 
 	void add_all_files_to_roller(Volume vol, std::string &roller_text, std::string prefix, PatchDir &dir) {
 		for (auto &p : dir.files) {
 			roller_text += prefix + std::string{p.patchname} + "\n";
-			roller_item_infos.emplace_back(EntryInfo{DirEntryKind::File, vol, dir.name, p.filename});
+
+			roller_item_infos.emplace_back(EntryInfo{DirEntryKind::File, vol, dir.name, p.filename, p.link_vol});
 		}
 	}
 
@@ -363,6 +364,7 @@ struct PatchSelectorPage : PageBase {
 		lv_hide(ui_waitspinner);
 	}
 
+private:
 	static void patchlist_scroll_cb(lv_event_t *event) {
 		static uint32_t prev_idx = 0;
 
@@ -391,7 +393,7 @@ struct PatchSelectorPage : PageBase {
 		auto selected_patch = page->get_roller_item_patchloc(idx);
 		if (selected_patch) {
 			page->selected_patch = *selected_patch;
-			page->state = State::TryingToRequestPatchData;
+			page->state = State::TryingToRequestPatchData; // will load from RAM if open
 			page->last_selected_idx = idx;
 		} else {
 			//Do nothing? Close/open directory? Focus subdir panel?
@@ -405,25 +407,14 @@ struct PatchSelectorPage : PageBase {
 			auto &entry = roller_item_infos[selected_index];
 
 			if (entry.kind == DirEntryKind::File) {
+
 				p = PatchLocation{};
+				p->vol = entry.link_vol.value_or(entry.vol);
 
-				if (entry.vol == Volume::RamDisk) {
-					if (entry.path.empty())
-						p->filename.copy(std::string(entry.name));
-					else
-						p->filename.copy(std::string(entry.path + "/" + entry.name));
-
-					p->vol = patches.get_open_patch_list().get_vol(p->filename);
-
-					if (p->vol == Volume::RamDisk) {
-						pr_err("%s not found in open patches\n", p->filename.c_str());
-						p = std::nullopt;
-					}
-
-				} else {
-					p->vol = entry.vol;
+				if (entry.path.empty())
+					p->filename.copy(std::string(entry.name));
+				else
 					p->filename.copy(std::string(entry.path + "/" + entry.name));
-				}
 			}
 		} else
 			pr_err("Bad roller index: %d, max is %zu\n", selected_index, roller_item_infos.size());
@@ -431,7 +422,6 @@ struct PatchSelectorPage : PageBase {
 		return p;
 	}
 
-private:
 	PatchLocation selected_patch{"", Volume::NorFlash};
 
 	std::vector<EntryInfo> roller_item_infos;
