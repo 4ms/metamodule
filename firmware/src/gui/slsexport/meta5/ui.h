@@ -399,6 +399,7 @@ extern lv_obj_t *ui_SystemMenuUpdateFWlabel;
 extern lv_obj_t *ui_SystemMenUpdateProgressBar;
 extern lv_obj_t *ui_FWUpdateSpinner;
 extern lv_obj_t *ui_SystemMenuUpdateLog;
+// SCREEN: ui_JackMapViewPage
 void ui_JackMapViewPage_screen_init(void);
 extern lv_obj_t *ui_JackMapViewPage;
 extern lv_obj_t *ui_JackMapViewCont;
@@ -417,14 +418,14 @@ LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
 
 
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90040);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50014);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50016);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90040);
 
 
 void ui_init(void);
