@@ -376,7 +376,14 @@ private:
 			auto &entry = page->roller_item_infos[idx];
 			if (entry.kind == DirEntryKind::Dir) {
 				auto max = lv_roller_get_option_cnt(ui_PatchListRoller) - 1;
-				auto new_idx = (idx == 0) ? 1 : (idx == max) ? max - 1 : (idx > prev_idx) ? idx + 1 : idx - 1;
+				auto new_idx = (idx == 0) ? 1 : (idx >= max) ? max - 1 : (idx > prev_idx) ? idx + 1 : idx - 1;
+				if (page->roller_item_infos[new_idx].kind == DirEntryKind::Dir) {
+					// Handle skipping over two consecutive Dir entries
+					new_idx = (new_idx == 0)   ? 2 :
+							  (new_idx >= max) ? max - 1 :
+							  (new_idx > idx)  ? new_idx + 1 :
+												 new_idx - 1;
+				}
 				lv_roller_set_selected(ui_PatchListRoller, new_idx, LV_ANIM_ON);
 				prev_idx = new_idx;
 			}
