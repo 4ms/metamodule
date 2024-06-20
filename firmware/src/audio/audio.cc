@@ -18,8 +18,6 @@
 #include "util/countzip.hh"
 #include "util/math_tables.hh"
 #include "util/zip.hh"
-// #include "fft.hh"
-// #include "convolve.hh"
 
 namespace MetaModule
 {

@@ -12,11 +12,6 @@
 namespace MetaModule
 {
 
-// TODO: remove dependency on AudioStream so we can use this from CA7 core 2
-// GUI will request via PatchLoader to start/end calibration mode
-// audio.step_calibration() => AudioInCalibrator::step_calibration()
-// QSpiFlash -> use M4
-
 struct CalibrationConfig {
 	float low_measurement_volts;
 	float high_measurement_volts;

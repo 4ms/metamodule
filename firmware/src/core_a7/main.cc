@@ -18,7 +18,6 @@
 #include "uart_log.hh"
 
 #include "conf/qspi_flash_conf.hh"
-#include "drivers/pin.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "fs/norflash_layout.hh"
 
