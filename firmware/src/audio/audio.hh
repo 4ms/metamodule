@@ -1,5 +1,5 @@
 #pragma once
-#include "audio/calibration_data.hh"
+#include "calibrate/calibration_data.hh"
 #include "conf/board_codec_conf.hh"
 #include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
@@ -86,14 +86,13 @@ private:
 	void propagate_sense_pins(Params &params);
 	void handle_midi(Midi::Event const &event, unsigned poly_num);
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
-	bool check_patch_loading();
+	bool is_playing_patch();
 	void handle_patch_just_loaded();
 
 public:
 	void set_calibration(CalData const &caldata) {
 		for (auto [chan, val] : zip(incal, caldata.ins_data))
-			chan.calibrate_chan(
-				caldata.ins_measured_volts.first, caldata.ins_measured_volts.second, val.first, val.second);
+			chan.calibrate_chan(caldata.ins_target_volts.first, caldata.ins_target_volts.second, val.first, val.second);
 	}
 
 private:

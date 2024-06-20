@@ -1,6 +1,6 @@
 #include "app_startup.hh"
 #include "audio/audio.hh"
-#include "audio/calibration_data_reader.hh"
+#include "calibrate/calibration_data_reader.hh"
 #include "core_a7/a7_shared_memory.hh"
 #include "core_a7/static_buffers.hh"
 #include "core_intercom/shared_memory.hh"

@@ -1,5 +1,5 @@
 #pragma once
-#include "audio/calibration_data_reader.hh"
+#include "calibrate/calibration_data_reader.hh"
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "flash_loader/flash_loader.hh"

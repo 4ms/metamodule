@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/modules_helpers.hh"
-#include "audio/calibration_patch.hh"
+#include "calibrate/calibration_patch.hh"
 #include "delay.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"

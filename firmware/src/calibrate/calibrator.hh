@@ -1,5 +1,5 @@
 #pragma once
-#include "audio/calibration_data.hh"
+#include "calibrate/calibration_data.hh"
 #include "conf/panel_conf.hh"
 #include "pr_dbg.hh"
 #include "util/analyzed_signal.hh"

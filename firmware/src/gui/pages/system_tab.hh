@@ -1,5 +1,5 @@
 #pragma once
-#include "audio/calibrator.hh"
+#include "calibrate/calibrator.hh"
 #include "fs/norflash_layout.hh"
 #include "git_version.h"
 #include "gui/helpers/lv_helpers.hh"
@@ -261,7 +261,7 @@ private:
 									 caldata.ins_target_volts.second,
 									 caldata.ins_data[0].first,
 									 caldata.ins_data[0].second);
-		pr_dbg("Input 1: slope: %f offset: %f\n", calibrated_in._slope, calibrated_in._offset);
+		// pr_dbg("Input 1: slope: %f offset: %f\n", calibrated_in._slope, calibrated_in._offset);
 
 		current_output = std::nullopt;
 	}

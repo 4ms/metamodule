@@ -1,6 +1,6 @@
 #pragma once
 
-#include "audio/calibration_message_handler.hh"
+#include "calibrate/calibration_message_handler.hh"
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "dynload/plugin_file_finder.hh"

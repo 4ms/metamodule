@@ -1,5 +1,5 @@
 #pragma once
-#include "audio/calibration_data.hh"
+#include "calibrate/calibration_data.hh"
 #include "flash_loader/flash_loader.hh"
 #include "fs/norflash_layout.hh"
 #include "pr_dbg.hh"

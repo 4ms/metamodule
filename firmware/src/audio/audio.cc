@@ -87,10 +87,10 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.start_measurement();
 
-		if (check_patch_loading())
-			process_nopatch(audio_blocks[1 - block], local_p);
-		else
+		if (is_playing_patch())
 			process(audio_blocks[1 - block], local_p);
+		else
+			process_nopatch(audio_blocks[1 - block], local_p);
 
 		load_measure.end_measurement();
 
@@ -126,7 +126,7 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	return scaled_out;
 }
 
-bool AudioStream::check_patch_loading() {
+bool AudioStream::is_playing_patch() {
 	if (patch_loader.should_fade_down_audio()) {
 		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt <= 0.f) {
@@ -146,7 +146,7 @@ bool AudioStream::check_patch_loading() {
 		}
 	}
 
-	return !(patch_loader.ready_to_play());
+	return patch_loader.is_playing();
 }
 
 void AudioStream::handle_patch_just_loaded() {
