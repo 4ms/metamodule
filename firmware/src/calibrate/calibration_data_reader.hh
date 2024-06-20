@@ -34,16 +34,21 @@ public:
 	bool read_calibration(CalData *caldata) {
 		if (loader.read_sectors(CalDataFlashOffset, {reinterpret_cast<uint8_t *>(caldata), sizeof(CalData)})) {
 
-			for (auto chan : caldata->ins_data) {
-				if (!caldata->validate()) {
-					pr_info("Calibration data invalid\n");
-					return false;
-				}
-				pr_dbg("Read Calibration: %f %f\n", chan.first, chan.second);
-			}
+			if (caldata->validate()) {
+				pr_info("Calibration data valid\n");
 
-			pr_dbg("Calbration data validated\n");
-			return true;
+				for (auto chan : caldata->in_cal)
+					pr_dbg("Input: slope: 1/%f offset: %f\n", 1.f / chan.slope(), chan.offset());
+
+				for (auto chan : caldata->out_cal)
+					pr_dbg("Output: slope: %f offset: %f\n", chan.slope(), chan.offset());
+
+				return true;
+
+			} else {
+				pr_info("Calibration data invalid\n");
+				return false;
+			}
 
 		} else {
 			pr_dbg("Error reading calibration data in flash\n");

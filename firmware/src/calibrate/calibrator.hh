@@ -20,7 +20,7 @@ struct CalibrationConfig {
 
 class CalibrationMeasurer {
 private:
-	CalData caldata;
+	std::array<std::pair<float, float>, PanelDef::NumAudioIn> caldata;
 	unsigned delay_ctr = 0;
 	CalibrationConfig config;
 
@@ -34,7 +34,7 @@ public:
 	}
 
 	[[nodiscard]] std::pair<float, float> get_cal_data(unsigned chan_num) {
-		return caldata.ins_data[chan_num];
+		return caldata[chan_num];
 	}
 
 	enum class CalibrationEvent { None, MeasuredLow, MeasuredHigh };
@@ -42,7 +42,7 @@ public:
 	CalibrationEvent read(unsigned chan_num, AnalyzedSig &reading) {
 		CalibrationEvent event = CalibrationEvent::None;
 
-		if (chan_num < caldata.ins_data.size()) {
+		if (chan_num < caldata.size()) {
 			if (delay_ctr == 0)
 				reading.reset_to(reading.iir);
 
@@ -51,14 +51,14 @@ public:
 
 				if (validate_reading(reading, Calibration::from_volts(config.low_measurement_volts))) {
 					pr_dbg("Low: ");
-					caldata.ins_data[chan_num].first = reading.iir;
+					caldata[chan_num].first = reading.iir;
 					event = CalibrationEvent::MeasuredLow;
 				}
 
 				else if (validate_reading(reading, Calibration::from_volts(config.high_measurement_volts)))
 				{
 					pr_dbg("High: ");
-					caldata.ins_data[chan_num].second = reading.iir;
+					caldata[chan_num].second = reading.iir;
 					event = CalibrationEvent::MeasuredHigh;
 				}
 

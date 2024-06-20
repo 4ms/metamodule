@@ -49,9 +49,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, player{patchplayer} {
 
 	if (codec_.init() == CodecT::CODEC_NO_ERR)
-		UartLog::log("Codec initialized\n\r");
+		pr_info("Codec initialized\n");
 	else
-		UartLog::log("ERROR: No codec detected\n\r");
+		pr_info("ERROR: No codec detected\n");
 
 	codec_.set_tx_buffer_start(audio_out_block.codec);
 	codec_.set_rx_buffer_start(audio_in_block.codec);
@@ -60,10 +60,10 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		ext_audio_connected = true;
 		codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec);
 		codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec);
-		UartLog::log("Ext Audio codec detected\n\r");
+		pr_info("Ext Audio codec detected\n");
 	} else {
 		ext_audio_connected = false;
-		UartLog::log("No ext Audio codec detected\n\r");
+		pr_info("No ext Audio codec detected\n");
 	}
 
 	disable_calibration();
@@ -117,8 +117,8 @@ void AudioStream::start() {
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
-	float raw_out = player.get_panel_output(output_id) * output_fade_amt;
-	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(raw_out), 24);
+	float output_volts = player.get_panel_output(output_id) * output_fade_amt;
+	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
 }
 
 bool AudioStream::is_playing_patch() {
@@ -131,10 +131,10 @@ bool AudioStream::is_playing_patch() {
 		}
 
 	} else if (patch_loader.should_fade_up_audio()) {
-		output_fade_delta = 1.f / (sample_rate_ * 0.02f);
-		if (output_fade_amt >= 1.f) {
+		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
+		if (output_fade_amt <= 1.f) {
 			patch_loader.notify_audio_is_muted();
-			output_fade_amt = 1.f;
+			output_fade_amt = -1.f;
 			output_fade_delta = 0.f;
 			patch_loader.notify_audio_not_muted();
 			handle_patch_just_loaded();
@@ -298,34 +298,34 @@ void AudioStream::handle_patch_mod_queue() {
 }
 
 void AudioStream::disable_calibration() {
-	// Set default calibration values
-	for (auto &inc : cal.in_cal)
-		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
-			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
+	pr_trace("Disabling calibrated jacks\n");
 
-	for (auto &outc : cal.out_cal)
-		outc.calibrate_chan(-1.f * (float)AudioOutFrame::kMaxValue,
-							(float)AudioOutFrame::kMaxValue - 1.f,
-							-OutputMaxVolts,
-							OutputMaxVolts);
+	// Set default calibration values
+	for (auto &inc : cal.in_cal) {
+		inc.calibrate_chan({InputLowRangeVolts, InputHighRangeVolts},
+						   {-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f});
+		pr_dbg("s:1/%f o:%f\n", 1.f / inc.slope(), inc.offset());
+	}
+
+	for (auto &outc : cal.out_cal) {
+		outc.calibrate_chan({-1.f * (float)AudioOutFrame::kMaxValue, (float)AudioOutFrame::kMaxValue - 1.f},
+							{-OutputMaxVolts, OutputMaxVolts});
+	}
+
+	for (auto outc : cal.out_cal) {
+		pr_dbg("s:%f o:%f ", outc.slope(), outc.offset());
+		pr_dbg("-5V -> %f, 0V -> %f, 5V -> %f\n", outc.adjust(-5.f), outc.adjust(0), outc.adjust(5.f));
+	}
 }
 
 void AudioStream::enable_calibration() {
+	pr_trace("Enabling calibrated jacks\n");
 	cal = cal_stash;
 }
 
 void AudioStream::set_calibration(CalData const &caldata) {
-
-	for (auto [chan, val] : zip(cal.in_cal, caldata.ins_data)) {
-		chan.calibrate_chan(caldata.ins_target_volts.first, caldata.ins_target_volts.second, val.first, val.second);
-	}
-
-	for (auto [chan, val] : zip(cal.out_cal, caldata.outs_data)) {
-		chan.calibrate_chan(
-			caldata.outs_measured_volts.first, caldata.outs_measured_volts.second, val.first, val.second);
-	}
-
-	cal_stash = cal;
+	cal = caldata;
+	cal_stash = caldata;
 }
 
 } // namespace MetaModule

@@ -1,4 +1,5 @@
 #pragma once
+#include "calibrate/calibration_data.hh"
 #include "patch_mod_queue.hh"
 #include "patch_player.hh"
 #include "util/overloaded.hh"
@@ -8,7 +9,7 @@ namespace MetaModule
 
 inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 							  PatchPlayer &player,
-							  SavedCalData &caldata,
+							  CalData &caldata,
 							  std::optional<bool> &new_cal_state) {
 	if (auto patch_mod = patch_mod_queue.get()) {
 		std::visit(
@@ -33,6 +34,7 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 					   [&caldata](SetChanCalibration &mod) {
 						   if (mod.input_chan && mod.channel < caldata.in_cal.size()) {
 							   caldata.in_cal[mod.channel] = {mod.slope, mod.offset};
+
 						   } else if (!mod.input_chan && mod.channel < caldata.out_cal.size()) {
 							   caldata.out_cal[mod.channel] = {mod.slope, mod.offset};
 						   }

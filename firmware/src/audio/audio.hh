@@ -60,8 +60,8 @@ private:
 	CodecT &codec_ext_;
 	uint32_t sample_rate_;
 
-	SavedCalData cal;
-	SavedCalData cal_stash;
+	CalData cal;
+	CalData cal_stash;
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
@@ -71,7 +71,7 @@ private:
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	mdrivlib::CycleCounter load_measure;
 	float load_lpf = 0.f;
-	float output_fade_amt = 1.f;
+	float output_fade_amt = -1.f;
 	float output_fade_delta = 0.f;
 	uint32_t halves_muted = 0;
 	bool ext_audio_connected = false;
