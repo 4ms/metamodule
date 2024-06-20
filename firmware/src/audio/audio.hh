@@ -60,7 +60,7 @@ private:
 	CodecT &codec_ext_;
 	uint32_t sample_rate_;
 
-	std::array<Calibrator, PanelDef::NumAudioIn> incal;
+	SavedCalData cal;
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
@@ -88,12 +88,10 @@ private:
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool is_playing_patch();
 	void handle_patch_just_loaded();
+	void disable_calibration();
 
 public:
-	void set_calibration(CalData const &caldata) {
-		for (auto [chan, val] : zip(incal, caldata.ins_data))
-			chan.calibrate_chan(caldata.ins_target_volts.first, caldata.ins_target_volts.second, val.first, val.second);
-	}
+	void set_calibration(CalData const &caldata);
 
 private:
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;

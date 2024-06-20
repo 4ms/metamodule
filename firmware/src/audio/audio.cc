@@ -66,10 +66,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		UartLog::log("No ext Audio codec detected\n\r");
 	}
 
-	// Set default calibration values
-	for (auto &inc : incal)
+	disable_calibration();
+
 		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
-			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
 
 	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin4::high();
@@ -173,7 +172,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			if (!jack_is_patched(param_state.jack_senses, panel_jack_i))
 				continue;
 
-			float scaled_input = incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
+			float scaled_input = cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
 
 			player.set_panel_input(panel_jack_i, scaled_input);
 			param_block.metaparams.ins[panel_jack_i].update(AudioInFrame::sign_extend(inchan));
@@ -222,7 +221,7 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		// Set metaparams.ins with input signals
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
 			float scaled_input = jack_is_patched(param_state.jack_senses, panel_jack_i) ?
-									 incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
+									 cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
 									 0;
 			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
 		}
@@ -287,5 +286,18 @@ void AudioStream::propagate_sense_pins(Params &params) {
 
 	param_state.jack_senses = params.jack_senses;
 }
+void AudioStream::disable_calibration() {
+	// Set default calibration values
+	for (auto &inc : cal.in_cal)
+		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
+			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
+
+	for (auto &outc : cal.out_cal)
+		outc.calibrate_chan(-1.f * (float)AudioOutFrame::kMaxValue,
+							(float)AudioOutFrame::kMaxValue - 1.f,
+							-OutputMaxVolts,
+							OutputMaxVolts);
+}
+
 
 } // namespace MetaModule
