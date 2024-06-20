@@ -1,11 +1,17 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "util/calibrator.hh"
 #include <array>
 #include <cmath>
 #include <cstdio>
 
 namespace MetaModule
 {
+
+struct SavedCalData {
+	std::array<Calibrator, PanelDef::NumAudioIn> in_cal{};
+	std::array<Calibrator, PanelDef::NumAudioOut> out_cal{};
+};
 
 namespace Calibration
 {

@@ -117,10 +117,8 @@ void AudioStream::start() {
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
-	float raw_out = player.get_panel_output(output_id);
-	raw_out = -output_fade_amt * raw_out / OutputMaxVolts;
-	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
-	return scaled_out;
+	float raw_out = player.get_panel_output(output_id) * output_fade_amt;
+	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(raw_out), 24);
 }
 
 bool AudioStream::is_playing_patch() {
