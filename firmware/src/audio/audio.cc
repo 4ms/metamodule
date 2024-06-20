@@ -68,7 +68,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	disable_calibration();
 
-		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
+	cal_stash = cal;
 
 	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin4::high();
@@ -153,7 +153,7 @@ void AudioStream::handle_patch_just_loaded() {
 }
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
-	handle_patch_mods(patch_mod_queue, player);
+	handle_patch_mod_queue();
 
 	// TODO: handle second codec
 	if (ext_audio_connected)
@@ -284,6 +284,19 @@ void AudioStream::propagate_sense_pins(Params &params) {
 
 	param_state.jack_senses = params.jack_senses;
 }
+
+void AudioStream::handle_patch_mod_queue() {
+	std::optional<bool> new_cal_state;
+
+	handle_patch_mods(patch_mod_queue, player, cal, new_cal_state);
+
+	if (new_cal_state == true)
+		enable_calibration();
+
+	else if (new_cal_state == false)
+		disable_calibration();
+}
+
 void AudioStream::disable_calibration() {
 	// Set default calibration values
 	for (auto &inc : cal.in_cal)
@@ -297,5 +310,22 @@ void AudioStream::disable_calibration() {
 							OutputMaxVolts);
 }
 
+void AudioStream::enable_calibration() {
+	cal = cal_stash;
+}
+
+void AudioStream::set_calibration(CalData const &caldata) {
+
+	for (auto [chan, val] : zip(cal.in_cal, caldata.ins_data)) {
+		chan.calibrate_chan(caldata.ins_target_volts.first, caldata.ins_target_volts.second, val.first, val.second);
+	}
+
+	for (auto [chan, val] : zip(cal.out_cal, caldata.outs_data)) {
+		chan.calibrate_chan(
+			caldata.outs_measured_volts.first, caldata.outs_measured_volts.second, val.first, val.second);
+	}
+
+	cal_stash = cal;
+}
 
 } // namespace MetaModule

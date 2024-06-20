@@ -61,6 +61,7 @@ private:
 	uint32_t sample_rate_;
 
 	SavedCalData cal;
+	SavedCalData cal_stash;
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
@@ -89,6 +90,8 @@ private:
 	bool is_playing_patch();
 	void handle_patch_just_loaded();
 	void disable_calibration();
+	void enable_calibration();
+	void handle_patch_mod_queue();
 
 public:
 	void set_calibration(CalData const &caldata);
