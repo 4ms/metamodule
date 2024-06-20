@@ -403,6 +403,7 @@ lv_obj_t *ui_CalibrationOut6Label;
 lv_obj_t *ui_CalibrationOut7Label;
 lv_obj_t *ui_CalibrationOut8Label;
 lv_obj_t *ui_CalibrationButtonCont;
+lv_obj_t *ui_CalibrationMeasurementLabel;
 lv_obj_t *ui_CalibrationCancelButton;
 lv_obj_t *ui_CalibrationCancelButtonLabel;
 lv_obj_t *ui_CalibrationNextButton;

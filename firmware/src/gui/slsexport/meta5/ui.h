@@ -395,6 +395,7 @@ extern lv_obj_t *ui_CalibrationOut6Label;
 extern lv_obj_t *ui_CalibrationOut7Label;
 extern lv_obj_t *ui_CalibrationOut8Label;
 extern lv_obj_t *ui_CalibrationButtonCont;
+extern lv_obj_t *ui_CalibrationMeasurementLabel;
 extern lv_obj_t *ui_CalibrationCancelButton;
 extern lv_obj_t *ui_CalibrationCancelButtonLabel;
 extern lv_obj_t *ui_CalibrationNextButton;
