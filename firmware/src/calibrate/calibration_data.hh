@@ -39,7 +39,7 @@ struct CalData {
 
 	bool validate() {
 		for (auto chan : in_cal) {
-			if (isnanf(chan.offset()) || isnanf(chan.slope()))
+			if (std::isnan(chan.offset()) || std::isnan(chan.slope()))
 				return false;
 
 			if (std::fabs(chan.adjust(0x0040'0000) - 5.f) > Calibration::from_volts(0.5f)) {
@@ -48,7 +48,7 @@ struct CalData {
 		}
 
 		for (auto chan : out_cal) {
-			if (isnanf(chan.offset()) || isnanf(chan.slope()))
+			if (std::isnan(chan.offset()) || std::isnan(chan.slope()))
 				return false;
 
 			if (std::fabs(chan.adjust(5.f) - (float)0x0040'0000) > Calibration::to_volts(0.5f)) {
