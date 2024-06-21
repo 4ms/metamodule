@@ -66,9 +66,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		pr_info("No ext Audio codec detected\n");
 	}
 
-	disable_calibration();
-
-	cal_stash = cal;
+	cal.reset_to_default();
+	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin4::high();
@@ -299,23 +298,24 @@ void AudioStream::handle_patch_mod_queue() {
 
 void AudioStream::disable_calibration() {
 	pr_trace("Disabling calibrated jacks\n");
+	cal.reset_to_default();
 
-	// Set default calibration values
-	for (auto &inc : cal.in_cal) {
-		inc.calibrate_chan({InputLowRangeVolts, InputHighRangeVolts},
-						   {-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f});
-		pr_dbg("s:1/%f o:%f\n", 1.f / inc.slope(), inc.offset());
-	}
+	// // Set default calibration values
+	// for (auto &inc : cal.in_cal) {
+	// 	inc.calibrate_chan({InputLowRangeVolts, InputHighRangeVolts},
+	// 					   {-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f});
+	// 	pr_dbg("s:1/%f o:%f\n", 1.f / inc.slope(), inc.offset());
+	// }
 
-	for (auto &outc : cal.out_cal) {
-		outc.calibrate_chan({-1.f * (float)AudioOutFrame::kMaxValue, (float)AudioOutFrame::kMaxValue - 1.f},
-							{-OutputMaxVolts, OutputMaxVolts});
-	}
+	// for (auto &outc : cal.out_cal) {
+	// 	outc.calibrate_chan({-1.f * (float)AudioOutFrame::kMaxValue, (float)AudioOutFrame::kMaxValue - 1.f},
+	// 						{-OutputMaxVolts, OutputMaxVolts});
+	// }
 
-	for (auto outc : cal.out_cal) {
-		pr_dbg("s:%f o:%f ", outc.slope(), outc.offset());
-		pr_dbg("-5V -> %f, 0V -> %f, 5V -> %f\n", outc.adjust(-5.f), outc.adjust(0), outc.adjust(5.f));
-	}
+	// for (auto outc : cal.out_cal) {
+	// 	pr_dbg("s:%f o:%f ", outc.slope(), outc.offset());
+	// 	pr_dbg("-5V -> %f, 0V -> %f, 5V -> %f\n", outc.adjust(-5.f), outc.adjust(0), outc.adjust(5.f));
+	// }
 }
 
 void AudioStream::enable_calibration() {
