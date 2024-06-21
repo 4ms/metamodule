@@ -62,14 +62,18 @@ struct CalibrationRoutine {
 	}
 
 	void start() {
-		lv_show(ui_CalibrationProcedureCont);
-		lv_show(ui_CalibrationInputStatusCont);
 		lv_hide(ui_CalibrationOutputStatusCont);
 		lv_hide(ui_SystemCalibrationButton);
 		lv_hide(ui_SystemResetInternalPatchesCont);
 
+		lv_show(ui_CalibrationButtonCont);
+		lv_show(ui_CalibrationInputStatusCont);
+		lv_show(ui_CalibrationMeasurementLabel);
+		lv_show(ui_CalibrationProcedureCont);
+
 		lv_label_set_text(ui_CalibrationInstructionLabel,
 						  "Play a C2 and a C4 into each jack you wish to re-calibrate.");
+		lv_label_set_text(ui_CalibrationMeasurementLabel, "");
 
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
 		lv_obj_scroll_to_view_recursive(ui_SystemCalibrationTitle, LV_ANIM_OFF);
@@ -102,18 +106,27 @@ struct CalibrationRoutine {
 	}
 
 private:
+	void display_measurement(float val) {
+		lv_label_set_text_fmt(ui_CalibrationMeasurementLabel, "%.3fV", (double)val);
+	}
+
 	///
 	/// INPUTS
 	///
 
 	void update_cal_ins_routine() {
 		unsigned num_done = 0;
+		unsigned num_displayed = 0;
 
 		for (unsigned i = 0; i < PanelDef::NumAudioIn; i++) {
 			if (params.is_input_plugged(i)) {
 				set_input_plugged(i, true);
 
 				in_signals[i].update(metaparams.ins[i].iir);
+
+				if (num_displayed == 0)
+					display_measurement(saved_cal_data.in_cal[i].adjust(in_signals[i].iir));
+				num_displayed++;
 
 				if (jack_status[i] != JackCalStatus::Done) {
 					measure_input(i);
@@ -218,6 +231,7 @@ private:
 		lv_hide(ui_SystemResetInternalPatchesCont);
 
 		lv_label_set_text(ui_CalibrationInstructionLabel, "Patch each Out jack to In 1 jack (one at a time).");
+		lv_label_set_text(ui_CalibrationMeasurementLabel, "");
 
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
 		lv_obj_scroll_to_view_recursive(ui_SystemCalibrationTitle, LV_ANIM_OFF);
@@ -254,41 +268,28 @@ private:
 		}
 
 		if (num_patched == 1) {
+
+			display_measurement(in_signals[0].iir);
+
 			// First time detected as patched
 			if (active_output != current_output) {
 				current_output = active_output;
 
 				lv_label_set_text_fmt(
-					ui_CalibrationInstructionLabel, "Calibrating Out %d, please wait...", active_output);
+					ui_CalibrationInstructionLabel, "Calibrating Out %d, please wait", active_output + 1);
 
-				set_output_volts(active_output, out_check.low);
-				in_signals[0].reset_to(out_check.low);
-				delay_measurement = 0;
+				start_output_channel(active_output, out_check.low, JackCalStatus::NotCal);
 
-				set_output_status(active_output, JackCalStatus::NotCal);
-			}
-
-			else if (jack_status[active_output] == JackCalStatus::NotCal)
-			{
+			} else if (jack_status[active_output] == JackCalStatus::NotCal) {
 				if (measure_validate_output(active_output, out_check.low)) {
 					output_cal_meas.low = in_signals[0].iir;
-
-					set_output_volts(active_output, out_check.high);
-					in_signals[0].reset_to(out_check.high);
-					delay_measurement = 0;
-
-					set_output_status(active_output, JackCalStatus::LowOnly);
+					start_output_channel(active_output, out_check.high, JackCalStatus::LowOnly);
 				}
 
 			} else if (jack_status[active_output] == JackCalStatus::LowOnly) {
 				if (measure_validate_output(active_output, out_check.high)) {
 					output_cal_meas.high = in_signals[0].iir;
-
-					set_output_volts(active_output, out_check.zero);
-					in_signals[0].reset_to(out_check.zero);
-					delay_measurement = 0;
-
-					set_output_status(active_output, JackCalStatus::HighOnly);
+					start_output_channel(active_output, out_check.zero, JackCalStatus::HighOnly);
 				}
 
 			} else if (jack_status[active_output] == JackCalStatus::HighOnly) {
@@ -312,16 +313,16 @@ private:
 					float offset_error =
 						std::fabs(saved_cal_data.out_cal[active_output].offset() - output_cal_meas.zero);
 
-					pr_dbg("Offset error: %f", offset_error);
+					pr_dbg("Offset error: %f\n", offset_error);
 
 					if (offset_error > 0.020f) {
-						pr_err("Offset error is too large: %f", offset_error);
+						pr_err("Offset error is too large: %f\n", offset_error);
 						current_output = std::nullopt;
 
 					} else {
 						set_output_status(active_output, JackCalStatus::Done);
 						lv_label_set_text_fmt(ui_CalibrationInstructionLabel,
-											  "Calibrated Out %d. Patch the next Out to In 1",
+											  "Calibrated Out %d. Patch another Out jack to In 1",
 											  active_output + 1);
 					}
 				}
@@ -351,15 +352,23 @@ private:
 		}
 	}
 
+	void start_output_channel(unsigned chan, float target, JackCalStatus status) {
+		set_output_volts(chan, target);
+		in_signals[0].reset_to(target);
+		delay_measurement = 0;
+		set_output_status(chan, status);
+	}
+
 	bool measure_validate_output(unsigned idx, float target_volts) {
-		constexpr float Tolerance = 1.25f;
+		constexpr float Tolerance = 0.25f;
+		constexpr float MaxNoise = 0.001f;
 
 		bool is_valid = false;
 
 		in_signals[0].update(saved_cal_data.in_cal[0].adjust(metaparams.ins[0].iir));
 
-		if (delay_measurement++ >= 64) {
-			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance)) {
+		if (delay_measurement++ >= 16) {
+			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance, MaxNoise)) {
 
 				pr_dbg("Got reading for %f volts: %f\n", target_volts, in_signals[0].iir);
 				is_valid = true;
@@ -437,6 +446,7 @@ private:
 		state = State::StartWritingCal;
 		lv_hide(ui_CalibrationInputStatusCont);
 		lv_hide(ui_CalibrationOutputStatusCont);
+		lv_label_set_text(ui_CalibrationMeasurementLabel, "");
 		lv_label_set_text(ui_CalibrationInstructionLabel, "Click Next to write calibration data to internal memory");
 	}
 
@@ -454,6 +464,7 @@ private:
 			if (msg.message_type == IntercoreStorageMessage::MessageType::FlashingOk) {
 				pr_info("Flashing success!\n");
 				lv_label_set_text(ui_CalibrationInstructionLabel, "Calibration data is saved.");
+				lv_hide(ui_CalibrationButtonCont);
 				state = State::Idle;
 
 			} else if (msg.message_type == IntercoreStorageMessage::MessageType::FlashingFailed) {
@@ -521,7 +532,7 @@ private:
 	unsigned delay_measurement = 0;
 	std::optional<unsigned> current_output = 0;
 
-	uint32_t bytes_written;
+	uint32_t bytes_written{};
 
 	std::array<lv_obj_t *, PanelDef::NumAudioIn> input_status_labels{
 		ui_CalibrationIn1Label,

@@ -50,21 +50,14 @@ public:
 				delay_ctr = 0;
 
 				if (validate_reading(reading, Calibration::from_volts(config.low_measurement_volts))) {
-					pr_dbg("Low: ");
 					caldata[chan_num].first = reading.iir;
 					event = CalibrationEvent::MeasuredLow;
 				}
 
 				else if (validate_reading(reading, Calibration::from_volts(config.high_measurement_volts)))
 				{
-					pr_dbg("High: ");
 					caldata[chan_num].second = reading.iir;
 					event = CalibrationEvent::MeasuredHigh;
-				}
-
-				else
-				{
-					pr_dbg("Rejected: ");
 				}
 
 				debug_print_reading(chan_num, reading);
@@ -74,20 +67,18 @@ public:
 		return event;
 	}
 
-	bool validate_reading(AnalyzedSig &reading, float target, float tolerance = Calibration::DefaultTolerance) {
+	bool validate_reading(AnalyzedSig &reading,
+						  float target,
+						  float tolerance = Calibration::DefaultTolerance,
+						  float max_noise = Calibration::from_volts(0.001f)) {
 		if (std::abs(reading.iir - target) < tolerance) {
 			if (std::abs(reading.min - target) < tolerance) {
 				if (std::abs(reading.max - target) < tolerance) {
-					if ((reading.max - reading.min) < Calibration::from_volts(0.001f))
+					if ((reading.max - reading.min) < max_noise)
 						return true;
-					else
-						pr_dbg("max-min = %f > %f\n", (reading.max - reading.min), Calibration::from_volts(0.001f));
-				} else
-					pr_dbg("max = %f\n", reading.max);
-			} else
-				pr_dbg("min = %f\n", reading.min);
-		} else
-			pr_dbg("iir = %f\n", reading.iir);
+				}
+			}
+		}
 		return false;
 	}
 
