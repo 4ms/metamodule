@@ -48,7 +48,10 @@ struct CalibrationRoutine {
 	void update() {
 		if (state == State::Init) {
 			patch_mod_queue.put(CalibrationOnOff{.enable = false});
-			state = State::CalibratingIns;
+			state = State::StartReadingCal;
+
+		} else if (state == State::StartReadingCal || state == State::ReadingCal) {
+			update_read_flash();
 
 		} else if (state == State::CalibratingIns) {
 			update_cal_ins_routine();
@@ -57,7 +60,13 @@ struct CalibrationRoutine {
 			update_cal_outs_routine();
 
 		} else if (state == State::StartWritingCal || state == State::WritingCal) {
-			update_cal_write();
+			update_write_flash();
+
+		} else if (state == State::Verify) {
+			verify_cal();
+
+		} else if (state == State::UpdateAudioStream) {
+			update_audio_stream();
 		}
 	}
 
@@ -78,8 +87,8 @@ struct CalibrationRoutine {
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
 		lv_obj_scroll_to_view_recursive(ui_SystemCalibrationTitle, LV_ANIM_OFF);
 
-		state = State::CalibratingIns;
 		next_step = false;
+		is_reading_to_verify = false;
 
 		for (auto i = 0u; i < PanelDef::NumAudioIn; i++) {
 			set_input_status(i, JackCalStatus::Error); //clear
@@ -87,8 +96,7 @@ struct CalibrationRoutine {
 			jack_plugged[i] = false;
 		}
 
-		// TODO: read cal data
-		saved_cal_data.reset_to_default();
+		state = State::Init;
 	}
 
 	void abort() {
@@ -125,7 +133,7 @@ private:
 				in_signals[i].update(metaparams.ins[i].iir);
 
 				if (num_displayed == 0)
-					display_measurement(saved_cal_data.in_cal[i].adjust(in_signals[i].iir));
+					display_measurement(cal_data.in_cal[i].adjust(in_signals[i].iir));
 				num_displayed++;
 
 				if (jack_status[i] != JackCalStatus::Done) {
@@ -216,7 +224,7 @@ private:
 	}
 
 	void save_cal_in_readings(unsigned idx, std::pair<float, float> readings) {
-		saved_cal_data.in_cal[idx].calibrate_chan({Calibration::DefaultLowV, Calibration::DefaultHighV}, readings);
+		cal_data.in_cal[idx].calibrate_chan({Calibration::DefaultLowV, Calibration::DefaultHighV}, readings);
 		pr_dbg("Calibrated IN %d: %f %f\n", idx, readings.first, readings.second);
 	}
 
@@ -298,7 +306,7 @@ private:
 
 					auto uncal = CalData::DefaultOutput;
 
-					saved_cal_data.out_cal[active_output].calibrate_chan(
+					cal_data.out_cal[active_output].calibrate_chan(
 						{uncal.adjust(out_check.low), uncal.adjust(out_check.high)},
 						{output_cal_meas.low, output_cal_meas.high});
 
@@ -307,11 +315,10 @@ private:
 						   uncal.adjust(out_check.high),
 						   output_cal_meas.low,
 						   output_cal_meas.high,
-						   saved_cal_data.out_cal[active_output].slope(),
-						   saved_cal_data.out_cal[active_output].offset());
+						   cal_data.out_cal[active_output].slope(),
+						   cal_data.out_cal[active_output].offset());
 
-					float offset_error =
-						std::fabs(saved_cal_data.out_cal[active_output].offset() - output_cal_meas.zero);
+					float offset_error = std::fabs(cal_data.out_cal[active_output].offset() - output_cal_meas.zero);
 
 					pr_dbg("Offset error: %f\n", offset_error);
 
@@ -336,13 +343,13 @@ private:
 		if (num_done == PanelDef::NumAudioOut || next_step) {
 			next_step = false;
 
-			for (auto chan : saved_cal_data.in_cal)
+			for (auto chan : cal_data.in_cal)
 				pr_dbg("In 1/%f %f\n", 1.f / chan.slope(), chan.offset());
 
-			for (auto chan : saved_cal_data.out_cal)
+			for (auto chan : cal_data.out_cal)
 				pr_dbg("Out %f %f\n", chan.slope(), chan.offset());
 
-			if (saved_cal_data.validate())
+			if (cal_data.validate())
 				start_calibrate_write();
 			else {
 				pr_err("Invalid calibration data\n");
@@ -365,7 +372,7 @@ private:
 
 		bool is_valid = false;
 
-		in_signals[0].update(saved_cal_data.in_cal[0].adjust(metaparams.ins[0].iir));
+		in_signals[0].update(cal_data.in_cal[0].adjust(metaparams.ins[0].iir));
 
 		if (delay_measurement++ >= 16) {
 			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance, MaxNoise)) {
@@ -439,8 +446,41 @@ private:
 	}
 
 	//
-	// Writing
+	// Reading/Writing Flash
 	//
+
+	void update_read_flash() {
+		if (state == State::StartReadingCal) {
+
+			auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
+
+			mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(cal_data));
+
+			if (storage.request_read_flash(caldata_span, CalDataFlashOffset, &bytes_written))
+				state = State::ReadingCal;
+
+		} else if (state == State::ReadingCal) {
+
+			auto msg = storage.get_message();
+
+			if (msg.message_type == IntercoreStorageMessage::MessageType::ReadFlashOk) {
+
+				if (bytes_written == sizeof(cal_data)) {
+					pr_trace("Read calibration data\n");
+				} else {
+					pr_err("Internal error reading flash (%d bytes read)\n", bytes_written);
+				}
+
+				mdrivlib::SystemCache::invalidate_dcache_by_range(&cal_data, sizeof(cal_data));
+
+				state = is_reading_to_verify ? State::Verify : State::CalibratingIns;
+
+			} else if (msg.message_type == IntercoreStorageMessage::MessageType::ReadFlashFailed) {
+				pr_err("Failed to read calibration data\n");
+				state = is_reading_to_verify ? State::Verify : State::CalibratingIns;
+			}
+		}
+	}
 
 	void start_calibrate_write() {
 		state = State::StartWritingCal;
@@ -450,11 +490,16 @@ private:
 		lv_label_set_text(ui_CalibrationInstructionLabel, "Click Next to write calibration data to internal memory");
 	}
 
-	void update_cal_write() {
+	void update_write_flash() {
 		if (state == State::StartWritingCal) {
+
+			// Wait for Next button
 			if (next_step) {
+
+				mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(cal_data));
+
 				if (storage.request_file_flash(IntercoreStorageMessage::FlashTarget::QSPI,
-											   {(uint8_t *)(&saved_cal_data), sizeof(saved_cal_data)},
+											   {(uint8_t *)(&cal_data), sizeof(cal_data)},
 											   CalDataFlashOffset,
 											   &bytes_written))
 					state = State::WritingCal;
@@ -463,9 +508,12 @@ private:
 			auto msg = storage.get_message();
 			if (msg.message_type == IntercoreStorageMessage::MessageType::FlashingOk) {
 				pr_info("Flashing success!\n");
-				lv_label_set_text(ui_CalibrationInstructionLabel, "Calibration data is saved.");
+				lv_label_set_text(ui_CalibrationInstructionLabel, "Calibration data is saved, verifying.");
 				lv_hide(ui_CalibrationButtonCont);
-				state = State::Idle;
+
+				is_reading_to_verify = true;
+				cal_data_check = cal_data;
+				state = State::StartReadingCal;
 
 			} else if (msg.message_type == IntercoreStorageMessage::MessageType::FlashingFailed) {
 				pr_err("Flashing failed!\n");
@@ -473,6 +521,41 @@ private:
 				// hang in this state until the User goes back
 			}
 		}
+	}
+
+	void verify_cal() {
+		bool verified = true;
+		for (auto [a, b] : zip(cal_data.in_cal, cal_data_check.in_cal)) {
+			if (a.slope() != b.slope() || a.offset() != b.offset())
+				verified = false;
+		}
+		for (auto [a, b] : zip(cal_data.out_cal, cal_data_check.out_cal)) {
+			if (a.slope() != b.slope() || a.offset() != b.offset())
+				verified = false;
+		}
+		if (verified) {
+			lv_label_set_text(ui_CalibrationInstructionLabel, "Calibration data saved and verified.");
+			state = State::UpdateAudioStream;
+		} else {
+			lv_label_set_text(ui_CalibrationInstructionLabel, "Error: Calibration data corrupted");
+			state = State::Idle;
+		}
+	}
+
+	void update_audio_stream() {
+		for (auto [i, chan] : enumerate(cal_data.in_cal)) {
+			patch_mod_queue.put(SetChanCalibration{
+				.slope = chan.slope(), .offset = chan.offset(), .channel = (uint16_t)i, .input_chan = true});
+		}
+
+		for (auto [i, chan] : enumerate(cal_data.out_cal)) {
+			patch_mod_queue.put(SetChanCalibration{
+				.slope = chan.slope(), .offset = chan.offset(), .channel = (uint16_t)i, .input_chan = false});
+		}
+
+		patch_mod_queue.put(CalibrationOnOff{.enable = true});
+
+		state = State::Idle;
 	}
 
 private:
@@ -498,7 +581,9 @@ private:
 		CalibratingIns,
 		CalibratingOuts,
 		StartWritingCal,
-		WritingCal
+		WritingCal,
+		Verify,
+		UpdateAudioStream
 	};
 	static constexpr size_t MaxJacks = std::max(PanelDef::NumAudioIn, PanelDef::NumAudioOut);
 	static constexpr float coef = 1.f / 4.f;
@@ -514,7 +599,9 @@ private:
 	ParamsMidiState &params;
 	MetaParams &metaparams;
 
-	CalData saved_cal_data{};
+	CalData cal_data{};
+	CalData cal_data_check{};
+	bool is_reading_to_verify = false;
 
 	OutputCalVoltages output_cal_meas{};
 
