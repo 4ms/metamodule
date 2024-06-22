@@ -39,6 +39,7 @@ struct SystemTab : SystemMenuTab {
 		lv_hide(ui_CalibrationProcedureCont);
 		lv_show(ui_SystemCalibrationCont);
 		lv_show(ui_SystemCalibrationButton);
+		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 
 		lv_group_remove_obj(ui_SystemCalibrationButton);
