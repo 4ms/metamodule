@@ -73,6 +73,7 @@ struct CalibrationRoutine {
 	void start() {
 		lv_hide(ui_CalibrationOutputStatusCont);
 		lv_hide(ui_SystemCalibrationButton);
+		lv_hide(ui_SystemCalCheckButton);
 		lv_hide(ui_SystemResetInternalPatchesCont);
 
 		lv_show(ui_CalibrationButtonCont);
@@ -104,6 +105,7 @@ struct CalibrationRoutine {
 		lv_hide(ui_CalibrationInputStatusCont);
 		lv_hide(ui_CalibrationOutputStatusCont);
 		lv_show(ui_SystemCalibrationButton);
+		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_group_focus_obj(ui_SystemCalibrationButton);
 		state = State::Idle;

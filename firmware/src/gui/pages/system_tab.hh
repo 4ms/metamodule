@@ -1,4 +1,5 @@
 #pragma once
+#include "calibrate/cal_check.hh"
 #include "calibrate/calibration_routine.hh"
 #include "calibrate/calibrator.hh"
 #include "fs/norflash_layout.hh"
@@ -24,9 +25,11 @@ struct SystemTab : SystemMenuTab {
 			  PatchModQueue &patch_mod_queue)
 		: storage{patch_storage}
 		, patch_playloader{patch_playloader}
-		, cal_routine{params, metaparams, storage, patch_mod_queue} {
+		, cal_routine{params, metaparams, storage, patch_mod_queue}
+		, cal_check{params, metaparams} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_SystemCalCheckButton, cal_check_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
 	}
 
@@ -39,11 +42,13 @@ struct SystemTab : SystemMenuTab {
 		lv_show(ui_SystemResetInternalPatchesCont);
 
 		lv_group_remove_obj(ui_SystemCalibrationButton);
-		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
+		lv_group_remove_obj(ui_SystemCalCheckButton);
 		lv_group_remove_obj(ui_CalibrationCancelButton);
 		lv_group_remove_obj(ui_CalibrationNextButton);
+		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
 
 		lv_group_add_obj(group, ui_SystemCalibrationButton);
+		lv_group_add_obj(group, ui_SystemCalCheckButton);
 		lv_group_add_obj(group, ui_ResetFactoryPatchesButton);
 		lv_group_add_obj(group, ui_CalibrationCancelButton);
 		lv_group_add_obj(group, ui_CalibrationNextButton);
@@ -57,16 +62,24 @@ struct SystemTab : SystemMenuTab {
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
 			return true;
-		}
-		if (cal_routine.is_calibrating()) {
+
+		} else if (cal_routine.is_calibrating()) {
 			cal_routine.abort();
 			return true;
+
+		} else if (cal_check.is_visible()) {
+			cal_check.hide();
+			return true;
+
+		} else {
+			return false;
 		}
-		return false;
 	}
 
 	void update() override {
 		cal_routine.update();
+		if (cal_check.is_visible())
+			cal_check.update();
 	}
 
 private:
@@ -77,6 +90,15 @@ private:
 
 		page->patch_playloader.request_load_calibration_patch();
 		page->cal_routine.start();
+	}
+
+	static void cal_check_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<SystemTab *>(event->user_data);
+
+		page->patch_playloader.request_load_cal_check_patch();
+		page->cal_check.start();
 	}
 
 	static void resetbut_cb(lv_event_t *event) {
@@ -99,6 +121,7 @@ private:
 	PatchPlayLoader &patch_playloader;
 	ConfirmPopup confirm_popup;
 	CalibrationRoutine cal_routine;
+	CalCheck cal_check;
 
 	lv_group_t *group = nullptr;
 };

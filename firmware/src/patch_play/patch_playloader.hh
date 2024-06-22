@@ -79,7 +79,12 @@ struct PatchPlayLoader {
 	}
 
 	void request_load_calibration_patch() {
-		next_patch = calibration.make_patch();
+		next_patch = calibration.make_cal_patch();
+		loading_new_patch_ = true;
+	}
+
+	void request_load_cal_check_patch() {
+		next_patch = calibration.make_check_patch();
 		loading_new_patch_ = true;
 	}
 
