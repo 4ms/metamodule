@@ -538,7 +538,6 @@ ui_SystemCalibrationButton = lv_btn_create(ui_SystemCalibrationCont);
 lv_obj_set_height( ui_SystemCalibrationButton, 30);
 lv_obj_set_width( ui_SystemCalibrationButton, LV_SIZE_CONTENT);  /// 100
 lv_obj_set_align( ui_SystemCalibrationButton, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_SystemCalibrationButton, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_SystemCalibrationButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_SystemCalibrationButton, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_SystemCalibrationButton, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -564,7 +563,7 @@ lv_obj_set_height( ui_CalibrationProcedureCont, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_CalibrationProcedureCont, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_CalibrationProcedureCont,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_CalibrationProcedureCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-lv_obj_add_flag( ui_CalibrationProcedureCont, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
+lv_obj_add_flag( ui_CalibrationProcedureCont, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
 lv_obj_clear_flag( ui_CalibrationProcedureCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_pad_left(ui_CalibrationProcedureCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_CalibrationProcedureCont, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -872,6 +871,28 @@ lv_obj_set_height( ui_CalibrationNextButtonLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_CalibrationNextButtonLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_CalibrationNextButtonLabel,"Next");
 lv_obj_set_style_text_font(ui_CalibrationNextButtonLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemCalCheckButton = lv_btn_create(ui_SystemCalibrationCont);
+lv_obj_set_height( ui_SystemCalCheckButton, 30);
+lv_obj_set_width( ui_SystemCalCheckButton, LV_SIZE_CONTENT);  /// 100
+lv_obj_set_align( ui_SystemCalCheckButton, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_SystemCalCheckButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_SystemCalCheckButton, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_SystemCalCheckButton, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_SystemCalCheckButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_SystemCalCheckButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_SystemCalCheckButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_SystemCalCheckButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_SystemCalCheckButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_SystemCalCheckButton, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_SystemCalCheckButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_SystemCalCheckButtonLabel = lv_label_create(ui_SystemCalCheckButton);
+lv_obj_set_width( ui_SystemCalCheckButtonLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_SystemCalCheckButtonLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemCalCheckButtonLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_SystemCalCheckButtonLabel,"Check calibration");
+lv_obj_set_style_text_font(ui_SystemCalCheckButtonLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SystemResetInternalPatchesCont = lv_obj_create(ui_SystemMenuSystemTab);
 lv_obj_remove_style_all(ui_SystemResetInternalPatchesCont);

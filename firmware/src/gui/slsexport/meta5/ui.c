@@ -408,6 +408,8 @@ lv_obj_t *ui_CalibrationCancelButton;
 lv_obj_t *ui_CalibrationCancelButtonLabel;
 lv_obj_t *ui_CalibrationNextButton;
 lv_obj_t *ui_CalibrationNextButtonLabel;
+lv_obj_t *ui_SystemCalCheckButton;
+lv_obj_t *ui_SystemCalCheckButtonLabel;
 lv_obj_t *ui_SystemResetInternalPatchesCont;
 lv_obj_t *ui_ResetFactoryPatchesDescription;
 lv_obj_t *ui_ResetFactoryPatchesButton;

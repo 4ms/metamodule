@@ -400,6 +400,8 @@ extern lv_obj_t *ui_CalibrationCancelButton;
 extern lv_obj_t *ui_CalibrationCancelButtonLabel;
 extern lv_obj_t *ui_CalibrationNextButton;
 extern lv_obj_t *ui_CalibrationNextButtonLabel;
+extern lv_obj_t *ui_SystemCalCheckButton;
+extern lv_obj_t *ui_SystemCalCheckButtonLabel;
 extern lv_obj_t *ui_SystemResetInternalPatchesCont;
 extern lv_obj_t *ui_ResetFactoryPatchesDescription;
 extern lv_obj_t *ui_ResetFactoryPatchesButton;
