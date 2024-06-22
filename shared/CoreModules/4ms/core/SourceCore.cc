@@ -24,6 +24,8 @@ public:
 			case Info::Knob_2:
 				output2 = MathTools::map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
+			case 3: //hidden param used for calibration checking
+				octave_mode = (val + (octave_mode ? 0.1 : -0.1)) > 0.5f;
 		}
 	}
 
@@ -35,12 +37,15 @@ public:
 
 	float get_output(const int output_id) const override {
 		switch (output_id) {
-			case Info::Output_1_Out:
-				return output1 * OutputVoltageRange;
-				break;
-			case Info::Output_2_Out:
-				return output2 * OutputVoltageRange;
-				break;
+			case Info::Output_1_Out: {
+				float out = output1 * OutputVoltageRange;
+				return octave_mode ? int(out) : out;
+			} break;
+
+			case Info::Output_2_Out: {
+				float out = output2 * OutputVoltageRange;
+				return octave_mode ? int(out) : out;
+			} break;
 		}
 		return 0;
 	}
@@ -56,8 +61,9 @@ public:
 	// clang-format on
 
 private:
-	float output1;
-	float output2;
+	float output1{};
+	float output2{};
+	bool octave_mode = false;
 
 	static constexpr float OutputVoltageRange = 10.f;
 };

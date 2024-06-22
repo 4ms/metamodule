@@ -45,7 +45,7 @@ set(4msModules
     STS
     Seq8
     Slew
-    # Source
+    Source
     StMix
     Switch14
     Switch41
