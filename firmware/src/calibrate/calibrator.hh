@@ -49,12 +49,12 @@ public:
 			if (++delay_ctr >= 4) {
 				delay_ctr = 0;
 
-				if (validate_reading(reading, Calibration::from_volts(config.low_measurement_volts))) {
+				if (validate_reading(reading, config.low_measurement_volts)) {
 					caldata[chan_num].first = reading.iir;
 					event = CalibrationEvent::MeasuredLow;
 				}
 
-				else if (validate_reading(reading, Calibration::from_volts(config.high_measurement_volts)))
+				else if (validate_reading(reading, config.high_measurement_volts))
 				{
 					caldata[chan_num].second = reading.iir;
 					event = CalibrationEvent::MeasuredHigh;
@@ -67,10 +67,7 @@ public:
 		return event;
 	}
 
-	bool validate_reading(AnalyzedSig &reading,
-						  float target,
-						  float tolerance = Calibration::DefaultTolerance,
-						  float max_noise = Calibration::from_volts(0.001f)) {
+	bool validate_reading(AnalyzedSig &reading, float target, float tolerance = 0.5f, float max_noise = 0.001f) {
 		if (std::abs(reading.iir - target) < tolerance) {
 			if (std::abs(reading.min - target) < tolerance) {
 				if (std::abs(reading.max - target) < tolerance) {

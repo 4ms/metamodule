@@ -134,9 +134,8 @@ private:
 
 				in_signals[i].update(metaparams.ins[i].iir);
 
-				if (num_displayed == 0)
-					display_measurement(cal_data.in_cal[i].adjust(in_signals[i].iir));
-				num_displayed++;
+				if (++num_displayed == 0)
+					display_measurement(in_signals[i].iir);
 
 				if (jack_status[i] != JackCalStatus::Done) {
 					measure_input(i);
@@ -226,6 +225,9 @@ private:
 	}
 
 	void save_cal_in_readings(unsigned idx, std::pair<float, float> readings) {
+		// Calculate the actual codec 24-bit reading by reversing the default calibration
+		auto uncal = CalData::DefaultInput;
+		readings = {uncal.reverse_calibrate(readings.first), uncal.reverse_calibrate(readings.second)};
 		cal_data.in_cal[idx].calibrate_chan({Calibration::DefaultLowV, Calibration::DefaultHighV}, readings);
 		pr_dbg("Calibrated IN %d: %f %f\n", idx, readings.first, readings.second);
 	}
@@ -234,11 +236,8 @@ private:
 	/// OUTPUTS
 	///
 	void start_calibrate_outs() {
-		lv_show(ui_CalibrationProcedureCont);
 		lv_hide(ui_CalibrationInputStatusCont);
 		lv_show(ui_CalibrationOutputStatusCont);
-		lv_hide(ui_SystemCalibrationButton);
-		lv_hide(ui_SystemResetInternalPatchesCont);
 
 		lv_label_set_text(ui_CalibrationInstructionLabel, "Patch each Out jack to In 1 jack (one at a time).");
 		lv_label_set_text(ui_CalibrationMeasurementLabel, "");
@@ -370,14 +369,13 @@ private:
 
 	bool measure_validate_output(unsigned idx, float target_volts) {
 		constexpr float Tolerance = 0.25f;
-		constexpr float MaxNoise = 0.001f;
 
 		bool is_valid = false;
 
-		in_signals[0].update(cal_data.in_cal[0].adjust(metaparams.ins[0].iir));
+		in_signals[0].update(metaparams.ins[0].iir);
 
 		if (delay_measurement++ >= 16) {
-			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance, MaxNoise)) {
+			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance)) {
 
 				pr_dbg("Got reading for %f volts: %f\n", target_volts, in_signals[0].iir);
 				is_valid = true;

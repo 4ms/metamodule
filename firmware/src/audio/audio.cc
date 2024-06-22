@@ -172,7 +172,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			float scaled_input = cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
 
 			player.set_panel_input(panel_jack_i, scaled_input);
-			param_block.metaparams.ins[panel_jack_i].update(AudioInFrame::sign_extend(inchan));
+			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
 		}
 
 		// Gate inputs
