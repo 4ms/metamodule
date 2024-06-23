@@ -1,5 +1,5 @@
 #pragma once
-#include "calibrate/calibrator.hh"
+#include "calibrate/calibration_measurer.hh"
 #include "drivers/cache.hh"
 #include "fs/norflash_layout.hh"
 #include "gui/helpers/lv_helpers.hh"
@@ -25,7 +25,7 @@ struct CalibrationRoutine {
 		, patch_mod_queue{patch_mod_queue}
 		, params{params}
 		, metaparams{metaparams}
-		, measurer{{Calibration::DefaultLowV, Calibration::DefaultHighV, Calibration::from_volts(0.1f)}} {
+		, measurer{{Calibration::DefaultLowV, Calibration::DefaultHighV}} {
 
 		for (auto label : input_status_labels) {
 			lv_obj_set_style_outline_color(label, Gui::orange_highlight, LV_PART_MAIN);
@@ -108,6 +108,9 @@ struct CalibrationRoutine {
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_group_focus_obj(ui_SystemCalibrationButton);
+
+		patch_mod_queue.put(CalibrationOnOff{.enable = true});
+
 		state = State::Idle;
 	}
 
@@ -372,7 +375,11 @@ private:
 
 		bool is_valid = false;
 
-		in_signals[0].update(metaparams.ins[0].iir);
+		// Calculate the raw codec 24-bit reading by reversing the default calibration
+		// Then apply the new input calibration values to the raw value to determine a calibrated value
+		auto default_cal = CalData::DefaultInput;
+		auto raw_adc = default_cal.reverse_calibrate(metaparams.ins[0].iir);
+		in_signals[0].update(cal_data.in_cal[0].adjust(raw_adc));
 
 		if (delay_measurement++ >= 16) {
 			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance)) {

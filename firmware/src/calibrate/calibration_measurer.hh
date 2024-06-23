@@ -15,7 +15,6 @@ namespace MetaModule
 struct CalibrationConfig {
 	float low_measurement_volts;
 	float high_measurement_volts;
-	float tolerance_volts; //valid range = measurement +/- tolerance
 };
 
 class CalibrationMeasurer {

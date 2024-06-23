@@ -1,15 +1,9 @@
 #pragma once
-#include "calibrate/calibrator.hh"
-#include "drivers/cache.hh"
-#include "fs/norflash_layout.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "gui/styles.hh"
 #include "metaparams.hh"
 #include "params_state.hh"
-#include "patch_file/file_storage_proxy.hh"
-#include "patch_play/patch_mod_queue.hh"
-#include "util/calibrator.hh"
+#include "util/analyzed_signal.hh"
 
 namespace MetaModule
 {
