@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <common.hpp>
 #include <cstdarg>
+#include <string.hpp>
 #include <string>
 #include <vector>
 
@@ -152,6 +153,104 @@ std::vector<uint8_t> fromBase64(const std::string &str) {
 		}
 	}
 	return data;
+}
+
+bool CaseInsensitiveCompare::operator()(const std::string &a, const std::string &b) const {
+	for (size_t i = 0;; i++) {
+		char ai = std::tolower(a[i]);
+		char bi = std::tolower(b[i]);
+		if (ai < bi)
+			return true;
+		if (ai > bi)
+			return false;
+		if (!ai || !bi)
+			return false;
+	}
+}
+
+std::vector<std::string> split(const std::string &s, const std::string &separator, size_t maxTokens) {
+	if (separator.empty()) {
+		printf("Error: split(): separator cannot be empty string");
+		return {};
+	}
+
+	// Special case of empty string
+	if (s == "")
+		return {};
+	if (maxTokens == 1)
+		return {s};
+
+	std::vector<std::string> v;
+	size_t sepLen = separator.size();
+	size_t start = 0;
+	size_t end;
+	while ((end = s.find(separator, start)) != std::string::npos) {
+		// Add token to vector
+		std::string token = s.substr(start, end - start);
+		v.push_back(token);
+		// Don't include delimiter
+		start = end + sepLen;
+		// Stop searching for tokens if we're at the token limit
+		if (maxTokens == v.size() + 1)
+			break;
+	}
+
+	v.push_back(s.substr(start));
+	return v;
+}
+
+std::string formatTime(const char *format, double timestamp) {
+	// TODO?
+	return "";
+}
+
+std::string formatTimeISO(double timestamp) {
+	return formatTime("%Y-%m-%d %H:%M:%S %z", timestamp);
+}
+
+/** Parses `s` as a positive base-10 number. Returns -1 if invalid. */
+static int stringToInt(const std::string &s) {
+	if (s.empty())
+		return -1;
+
+	int i = 0;
+	for (char c : s) {
+		if (!std::isdigit((unsigned char)c))
+			return -1;
+		i *= 10;
+		i += (c - '0');
+	}
+	return i;
+}
+
+/** Returns whether version part p1 is earlier than p2. */
+static bool compareVersionPart(const std::string &p1, const std::string &p2) {
+	int i1 = stringToInt(p1);
+	int i2 = stringToInt(p2);
+
+	if (i1 >= 0 && i2 >= 0) {
+		// Compare integers.
+		return i1 < i2;
+	} else if (i1 < 0 && i2 < 0) {
+		// Compare strings.
+		return p1 < p2;
+	} else {
+		// Types are different. String is always less than int.
+		return i1 < 0;
+	}
+}
+
+Version::Version(const std::string &s) {
+	parts = split(s, ".");
+}
+
+Version::operator std::string() const {
+	return join(parts, ".");
+}
+
+bool Version::operator<(const Version &other) {
+	return std::lexicographical_compare(
+		parts.begin(), parts.end(), other.parts.begin(), other.parts.end(), compareVersionPart);
 }
 
 } // namespace rack::string
