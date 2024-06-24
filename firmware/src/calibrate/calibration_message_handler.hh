@@ -36,7 +36,7 @@ public:
 				} else {
 					pr_err("Buffer size is not large enough to read CalData\n");
 
-					return IntercoreStorageMessage{.message_type = ReadFlashOk, .bytes_read = sizeof(CalData)};
+					return IntercoreStorageMessage{.message_type = ReadFlashFailed, .bytes_read = sizeof(CalData)};
 				}
 			}
 		}

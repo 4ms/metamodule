@@ -32,17 +32,12 @@ public:
 	}
 
 	bool read_calibration(CalData *caldata) {
+		pr_dbg("Read Calibration at %x\n", CalDataFlashOffset);
+
 		if (loader.read_sectors(CalDataFlashOffset, {reinterpret_cast<uint8_t *>(caldata), sizeof(CalData)})) {
 
 			if (caldata->validate()) {
 				pr_info("Calibration data read and validated\n");
-
-				for (auto chan : caldata->in_cal)
-					pr_dbg("Input: slope: 1/%f offset: %f\n", 1.f / chan.slope(), chan.offset());
-
-				for (auto chan : caldata->out_cal)
-					pr_dbg("Output: slope: %f offset: %f\n", chan.slope(), chan.offset());
-
 				return true;
 
 			} else {

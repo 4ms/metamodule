@@ -15,7 +15,7 @@ namespace MetaModule
 {
 
 struct CalibrationRoutine {
-	enum class JackCalStatus { NotCal, LowOnly, HighOnly, Error, Done };
+	enum class JackCalStatus { NotCal, Settling, LowOnly, HighOnly, Error, Done };
 
 	CalibrationRoutine(ParamsMidiState &params,
 					   MetaParams &metaparams,
@@ -123,6 +123,11 @@ private:
 		lv_label_set_text_fmt(ui_CalibrationMeasurementLabel, "%.3fV", (double)val);
 	}
 
+	void display_measurement(unsigned idx, float val) {
+		lv_label_set_text_fmt(
+			ui_CalibrationMeasurementLabel, "%.3fV\n%.3fV", (double)val, (double)calibrated_value(idx, val));
+	}
+
 	///
 	/// INPUTS
 	///
@@ -135,10 +140,11 @@ private:
 			if (params.is_input_plugged(i)) {
 				set_input_plugged(i, true);
 
+				// during input cal routine, in_signals uses default cal values
 				in_signals[i].update(metaparams.ins[i].iir);
 
-				if (++num_displayed == 0)
-					display_measurement(in_signals[i].iir);
+				if (++num_displayed == 1)
+					display_measurement(i, in_signals[i].iir);
 
 				if (jack_status[i] != JackCalStatus::Done) {
 					measure_input(i);
@@ -171,8 +177,10 @@ private:
 			if (jack_status[idx] == JackCalStatus::NotCal)
 				set_input_status(idx, JackCalStatus::LowOnly);
 
-			else if (jack_status[idx] == JackCalStatus::HighOnly)
+			else if (jack_status[idx] == JackCalStatus::HighOnly) {
 				set_input_status(idx, JackCalStatus::Done);
+				save_cal_in_readings(idx, measurer.get_cal_data(idx));
+			}
 		}
 
 		else if (event == MeasuredHigh)
@@ -217,9 +225,13 @@ private:
 
 		if (plugged && !jack_plugged[idx]) {
 			jack_plugged[idx] = true;
-			measurer.start_chan(idx);
+
+			if (jack_status[idx] != JackCalStatus::Done) {
+				measurer.start_chan(idx);
+				set_input_status(idx, JackCalStatus::NotCal);
+			}
+
 			lv_obj_set_style_outline_opa(label, LV_OPA_100, LV_PART_MAIN);
-			set_input_status(idx, JackCalStatus::NotCal);
 
 		} else if (!plugged && jack_plugged[idx]) {
 			jack_plugged[idx] = false;
@@ -233,6 +245,12 @@ private:
 		readings = {uncal.reverse_calibrate(readings.first), uncal.reverse_calibrate(readings.second)};
 		cal_data.in_cal[idx].calibrate_chan({Calibration::DefaultLowV, Calibration::DefaultHighV}, readings);
 		pr_dbg("Calibrated IN %d: %f %f\n", idx, readings.first, readings.second);
+	}
+
+	float calibrated_value(unsigned idx, float reading) {
+		auto uncal = CalData::DefaultInput;
+		auto raw = uncal.reverse_calibrate(reading);
+		return cal_data.in_cal[idx].adjust(raw);
 	}
 
 	///
@@ -290,7 +308,16 @@ private:
 				lv_label_set_text_fmt(
 					ui_CalibrationInstructionLabel, "Calibrating Out %d, please wait", active_output + 1);
 
-				start_output_channel(active_output, out_check.low, JackCalStatus::NotCal);
+				start_output_channel(active_output, out_check.low, JackCalStatus::Settling);
+
+				delay_measurement = 64;
+
+			} else if (jack_status[active_output] == JackCalStatus::Settling) {
+				if (delay_measurement)
+					delay_measurement--;
+
+				if (delay_measurement == 0)
+					start_output_channel(active_output, out_check.low, JackCalStatus::NotCal);
 
 			} else if (jack_status[active_output] == JackCalStatus::NotCal) {
 				if (measure_validate_output(active_output, out_check.low)) {
@@ -347,11 +374,8 @@ private:
 		if (num_done == PanelDef::NumAudioOut || next_step) {
 			next_step = false;
 
-			for (auto chan : cal_data.in_cal)
-				pr_dbg("In 1/%f %f\n", 1.f / chan.slope(), chan.offset());
-
-			for (auto chan : cal_data.out_cal)
-				pr_dbg("Out %f %f\n", chan.slope(), chan.offset());
+			pr_dbg("Calibration complete, these are the values:\n");
+			cal_data.print_calibration();
 
 			if (cal_data.validate())
 				start_calibrate_write();
@@ -379,21 +403,22 @@ private:
 		// Then apply the new input calibration values to the raw value to determine a calibrated value
 		auto default_cal = CalData::DefaultInput;
 		auto raw_adc = default_cal.reverse_calibrate(metaparams.ins[0].iir);
+		pr_dbg("%d\n", (int32_t)raw_adc);
 		in_signals[0].update(cal_data.in_cal[0].adjust(raw_adc));
 
-		if (delay_measurement++ >= 16) {
+		if (delay_measurement++ >= 64) {
+			pr_err("Reading Out %d: %f [%f,%f = %f] vs: %f +/- %f\n",
+				   current_output.value(),
+				   in_signals[0].iir,
+				   in_signals[0].min,
+				   in_signals[0].max,
+				   std::fabs(in_signals[0].min - in_signals[0].max),
+				   target_volts,
+				   Tolerance);
+
 			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance)) {
-
-				pr_dbg("Got reading for %f volts: %f\n", target_volts, in_signals[0].iir);
+				pr_dbg("OK\n");
 				is_valid = true;
-
-			} else {
-				pr_err("Not validated reading: %f [%f,%f] vs: %f +/- %f\n",
-					   in_signals[0].iir,
-					   in_signals[0].min,
-					   in_signals[0].max,
-					   target_volts,
-					   Tolerance);
 			}
 
 			delay_measurement = 0;
@@ -423,6 +448,7 @@ private:
 
 				case JackCalStatus::LowOnly:
 				case JackCalStatus::HighOnly:
+				case JackCalStatus::Settling:
 					break;
 			}
 		}
@@ -462,6 +488,7 @@ private:
 			auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
 
 			mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(cal_data));
+			mdrivlib::SystemCache::clean_dcache_by_range(&bytes_written, sizeof(bytes_written));
 
 			if (storage.request_read_flash(caldata_span, CalDataFlashOffset, &bytes_written))
 				state = State::ReadingCal;
@@ -472,13 +499,14 @@ private:
 
 			if (msg.message_type == IntercoreStorageMessage::MessageType::ReadFlashOk) {
 
+				mdrivlib::SystemCache::invalidate_dcache_by_range(&cal_data, sizeof(cal_data));
+				mdrivlib::SystemCache::invalidate_dcache_by_range(&bytes_written, sizeof(bytes_written));
+
 				if (bytes_written == sizeof(cal_data)) {
 					pr_trace("Read calibration data\n");
 				} else {
 					pr_err("Internal error reading flash (%d bytes read)\n", bytes_written);
 				}
-
-				mdrivlib::SystemCache::invalidate_dcache_by_range(&cal_data, sizeof(cal_data));
 
 				state = is_reading_to_verify ? State::Verify : State::CalibratingIns;
 
@@ -504,6 +532,7 @@ private:
 			if (next_step) {
 
 				mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(cal_data));
+				mdrivlib::SystemCache::clean_dcache_by_range(&bytes_written, sizeof(bytes_written));
 
 				if (storage.request_file_flash(IntercoreStorageMessage::FlashTarget::QSPI,
 											   {(uint8_t *)(&cal_data), sizeof(cal_data)},
@@ -541,7 +570,8 @@ private:
 				verified = false;
 		}
 		if (verified) {
-			lv_label_set_text(ui_CalibrationInstructionLabel, "Calibration data saved and verified.");
+			lv_label_set_text(ui_CalibrationInstructionLabel,
+							  "Calibration data saved and verified, updating audio stream's cal values.");
 			state = State::UpdateAudioStream;
 		} else {
 			lv_label_set_text(ui_CalibrationInstructionLabel, "Error: Calibration data corrupted");

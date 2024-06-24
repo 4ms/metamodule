@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "pr_dbg.hh"
 #include "util/calibrator.hh"
 #include <array>
 #include <cmath>
@@ -20,7 +21,7 @@ constexpr float to_volts(float v) {
 }
 
 static constexpr float DefaultTolerance = from_volts(0.5);
-static constexpr float DefaultLowV = 2;
+static constexpr float DefaultLowV = 1;
 static constexpr float DefaultHighV = 4;
 static constexpr float DefaultLowReading = from_volts(DefaultLowV);
 static constexpr float DefaultHighReading = from_volts(DefaultHighV);
@@ -37,12 +38,12 @@ struct CalData {
 	static constexpr Calibrator DefaultOutput{{Calibration::DefaultLowReading, Calibration::DefaultHighReading},
 											  {Calibration::DefaultLowV, Calibration::DefaultHighV}};
 
-	bool validate() {
+	bool validate() const {
 		for (auto chan : in_cal) {
 			if (std::isnan(chan.offset()) || std::isnan(chan.slope()))
 				return false;
 
-			if (std::fabs(chan.adjust(0x0040'0000) - 5.f) > Calibration::from_volts(0.5f)) {
+			if (std::fabs(chan.adjust(0x0040'0000) - 5.f) > 0.5f) {
 				return false;
 			}
 		}
@@ -51,7 +52,7 @@ struct CalData {
 			if (std::isnan(chan.offset()) || std::isnan(chan.slope()))
 				return false;
 
-			if (std::fabs(chan.adjust(5.f) - (float)0x0040'0000) > Calibration::to_volts(0.5f)) {
+			if (std::fabs(chan.adjust(5.f) - (float)0x0040'0000) > Calibration::from_volts(0.5f)) {
 				return false;
 			}
 		}
@@ -79,6 +80,14 @@ struct CalData {
 			{DefaultOutput},
 			{DefaultOutput},
 		}};
+	}
+
+	void print_calibration() const {
+		for (auto chan : in_cal)
+			pr_dbg("Input: slope: 1/%f offset: %f\n", 1.f / chan.slope(), chan.offset());
+
+		for (auto chan : out_cal)
+			pr_dbg("Output: slope: %f offset: %f\n", chan.slope(), chan.offset());
 	}
 };
 

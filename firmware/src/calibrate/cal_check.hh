@@ -32,8 +32,10 @@ struct CalCheck {
 						  "Knob A sets the voltage on all output jacks, from -10V to +10V in 1.0V steps.\nInput jack "
 						  "readings are shown below:");
 
-		for (unsigned i = 0; i < PanelDef::NumAudioIn; i++) {
-			display_measurement(i, 0.f);
+		for (unsigned chan = 0; chan < PanelDef::NumAudioIn; chan++) {
+			auto *label = input_status_labels[chan];
+			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
+			lv_label_set_text_fmt(label, "In %d:\n--", chan + 1);
 		}
 
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
@@ -64,32 +66,33 @@ private:
 	}
 
 	void update_cal_ins_routine() {
-		for (unsigned i = 0; i < PanelDef::NumAudioIn; i++) {
+		for (unsigned chan = 0; chan < PanelDef::NumAudioIn; chan++) {
 
-			if (params.is_input_plugged(i)) {
+			if (params.is_input_plugged(chan)) {
 
-				set_input_plugged(i, true);
+				set_input_plugged(chan, true);
 
-				in_signals[i].update(metaparams.ins[i].iir);
+				in_signals[chan].update(metaparams.ins[chan].iir);
 
-				display_measurement(i, in_signals[i].iir);
+				display_measurement(chan, in_signals[chan].iir);
 
 			} else {
-				set_input_plugged(i, false);
+				set_input_plugged(chan, false);
 			}
 		}
 	}
 
-	void set_input_plugged(unsigned idx, bool plugged) {
-		auto *label = input_status_labels[idx];
+	void set_input_plugged(unsigned chan, bool plugged) {
+		auto *label = input_status_labels[chan];
 
-		if (plugged && !jack_plugged[idx]) {
-			jack_plugged[idx] = true;
+		if (plugged && !jack_plugged[chan]) {
+			jack_plugged[chan] = true;
 			lv_obj_set_style_outline_opa(label, LV_OPA_100, LV_PART_MAIN);
 
-		} else if (!plugged && jack_plugged[idx]) {
-			jack_plugged[idx] = false;
+		} else if (!plugged && jack_plugged[chan]) {
+			jack_plugged[chan] = false;
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
+			lv_label_set_text_fmt(label, "In %d:\n--", chan + 1);
 		}
 	}
 
