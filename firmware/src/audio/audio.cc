@@ -285,11 +285,11 @@ void AudioStream::propagate_sense_pins(Params &params) {
 }
 
 void AudioStream::handle_patch_mod_queue() {
-	std::optional<bool> new_cal_state;
+	std::optional<bool> new_cal_state = std::nullopt;
 
-	handle_patch_mods(patch_mod_queue, player, cal, new_cal_state);
+	handle_patch_mods(patch_mod_queue, player, cal_stash, new_cal_state);
 
-	if (new_cal_state == true)
+	if (new_cal_state.has_value() && *new_cal_state == true)
 		enable_calibration();
 
 	else if (new_cal_state == false)
@@ -299,33 +299,19 @@ void AudioStream::handle_patch_mod_queue() {
 void AudioStream::disable_calibration() {
 	pr_trace("Disabling calibrated jacks\n");
 	cal.reset_to_default();
-
-	// // Set default calibration values
-	// for (auto &inc : cal.in_cal) {
-	// 	inc.calibrate_chan({InputLowRangeVolts, InputHighRangeVolts},
-	// 					   {-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f});
-	// 	pr_dbg("s:1/%f o:%f\n", 1.f / inc.slope(), inc.offset());
-	// }
-
-	// for (auto &outc : cal.out_cal) {
-	// 	outc.calibrate_chan({-1.f * (float)AudioOutFrame::kMaxValue, (float)AudioOutFrame::kMaxValue - 1.f},
-	// 						{-OutputMaxVolts, OutputMaxVolts});
-	// }
-
-	// for (auto outc : cal.out_cal) {
-	// 	pr_dbg("s:%f o:%f ", outc.slope(), outc.offset());
-	// 	pr_dbg("-5V -> %f, 0V -> %f, 5V -> %f\n", outc.adjust(-5.f), outc.adjust(0), outc.adjust(5.f));
-	// }
+	cal.print_calibration();
 }
 
 void AudioStream::enable_calibration() {
-	pr_trace("Enabling calibrated jacks\n");
+	pr_dbg("Enabling calibrated jacks\n");
 	cal = cal_stash;
+	cal.print_calibration();
 }
 
 void AudioStream::set_calibration(CalData const &caldata) {
 	cal = caldata;
 	cal_stash = caldata;
+	cal.print_calibration();
 }
 
 } // namespace MetaModule
