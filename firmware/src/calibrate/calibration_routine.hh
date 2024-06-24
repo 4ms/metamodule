@@ -551,16 +551,28 @@ private:
 
 	void update_audio_stream() {
 		for (auto [i, chan] : enumerate(cal_data.in_cal)) {
-			patch_mod_queue.put(SetChanCalibration{
-				.slope = chan.slope(), .offset = chan.offset(), .channel = (uint16_t)i, .input_chan = true});
+			bool ok = patch_mod_queue.put(SetChanCalibration{
+				.slope = chan.slope(), .offset = chan.offset(), .channel = (uint16_t)i, .is_input = true});
+
+			if (!ok) {
+				pr_err("Error: patch mod queue full\n");
+				break;
+			}
 		}
 
 		for (auto [i, chan] : enumerate(cal_data.out_cal)) {
-			patch_mod_queue.put(SetChanCalibration{
-				.slope = chan.slope(), .offset = chan.offset(), .channel = (uint16_t)i, .input_chan = false});
+			auto ok = patch_mod_queue.put(SetChanCalibration{
+				.slope = chan.slope(), .offset = chan.offset(), .channel = (uint16_t)i, .is_input = false});
+
+			if (!ok) {
+				pr_err("Error: patch mod queue full\n");
+				break;
+			}
 		}
 
-		patch_mod_queue.put(CalibrationOnOff{.enable = true});
+		if (!patch_mod_queue.put(CalibrationOnOff{.enable = true})) {
+			pr_err("Error: patch mod queue full\n");
+		}
 
 		state = State::Idle;
 	}

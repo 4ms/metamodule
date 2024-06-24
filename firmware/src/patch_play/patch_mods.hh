@@ -32,10 +32,10 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 					   [&player](RemoveModule &mod) { player.remove_module(mod.module_idx); },
 
 					   [&caldata](SetChanCalibration &mod) {
-						   if (mod.input_chan && mod.channel < caldata.in_cal.size()) {
+						   if (mod.is_input && mod.channel < caldata.in_cal.size()) {
 							   caldata.in_cal[mod.channel] = {mod.slope, mod.offset};
 
-						   } else if (!mod.input_chan && mod.channel < caldata.out_cal.size()) {
+						   } else if (!mod.is_input && mod.channel < caldata.out_cal.size()) {
 							   caldata.out_cal[mod.channel] = {mod.slope, mod.offset};
 						   }
 					   },

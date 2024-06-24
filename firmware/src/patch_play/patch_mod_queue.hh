@@ -68,7 +68,7 @@ struct SetChanCalibration {
 	float slope{1.f};
 	float offset{0.f};
 	uint16_t channel{};
-	bool input_chan{};
+	bool is_input{};
 };
 
 using PatchModRequest = std::variant<SetStaticParam,
