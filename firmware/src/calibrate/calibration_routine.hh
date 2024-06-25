@@ -216,6 +216,8 @@ private:
 				case JackCalStatus::Error:
 					lv_label_set_text_fmt(label, "In %d:\n#f40000 FAIL#", idx + 1);
 					break;
+				case JackCalStatus::Settling:
+					break;
 			}
 		}
 	}
@@ -308,7 +310,7 @@ private:
 				lv_label_set_text_fmt(
 					ui_CalibrationInstructionLabel, "Calibrating Out %d, please wait", active_output + 1);
 
-				start_output_channel(active_output, out_check.low, JackCalStatus::Settling);
+				start_output_channel(active_output, out_target.low, JackCalStatus::Settling);
 
 				delay_measurement = 64;
 
@@ -317,33 +319,39 @@ private:
 					delay_measurement--;
 
 				if (delay_measurement == 0)
-					start_output_channel(active_output, out_check.low, JackCalStatus::NotCal);
+					start_output_channel(active_output, out_target.low, JackCalStatus::NotCal);
 
 			} else if (jack_status[active_output] == JackCalStatus::NotCal) {
-				if (measure_validate_output(active_output, out_check.low)) {
+				if (measure_validate_output(active_output, out_target.low)) {
 					output_cal_meas.low = in_signals[0].iir;
-					start_output_channel(active_output, out_check.high, JackCalStatus::LowOnly);
+					start_output_channel(active_output, out_target.high, JackCalStatus::LowOnly);
 				}
 
 			} else if (jack_status[active_output] == JackCalStatus::LowOnly) {
-				if (measure_validate_output(active_output, out_check.high)) {
+				if (measure_validate_output(active_output, out_target.high)) {
 					output_cal_meas.high = in_signals[0].iir;
-					start_output_channel(active_output, out_check.zero, JackCalStatus::HighOnly);
+					start_output_channel(active_output, out_target.zero, JackCalStatus::HighOnly);
 				}
 
 			} else if (jack_status[active_output] == JackCalStatus::HighOnly) {
-				if (measure_validate_output(active_output, out_check.zero)) {
+				if (measure_validate_output(active_output, out_target.zero)) {
 					output_cal_meas.zero = in_signals[0].iir;
 
-					auto uncal = CalData::DefaultOutput;
+					// TODO: check are
+					// default cal: to output 1.0 we need to send DAC 814427.937500 (0x000c6d5b)
+					// default cal: to output 5.0 we need to send DAC 4072139.750000 (0x003e22cb)
 
-					cal_data.out_cal[active_output].calibrate_chan(
-						{uncal.adjust(out_check.low), uncal.adjust(out_check.high)},
-						{output_cal_meas.low, output_cal_meas.high});
 
+					int32_t dac_val_on_low = std::round(CalData::DefaultOutput.adjust(out_target.low));	  //814428
+					int32_t dac_val_on_high = std::round(CalData::DefaultOutput.adjust(out_target.high)); //4072140
+
+					// When we sent 814428 to the DAC, we output 0.965V (output_cal_meas.low)
+					// When we sent 4072140 to the DAC, we output 4.946V (output_cal_meas.high)
+					cal_data.out_cal[active_output].calibrate_chan({dac_val_on_low, dac_val_on_high},
+																   {output_cal_meas.low, output_cal_meas.high});
 					pr_dbg("Calibrated: L:%f H:%f, l:%f h:%f -> s:%f o:%f\n",
-						   uncal.adjust(out_check.low),
-						   uncal.adjust(out_check.high),
+						   dac_val_on_low,
+						   dac_val_on_high,
 						   output_cal_meas.low,
 						   output_cal_meas.high,
 						   cal_data.out_cal[active_output].slope(),
@@ -641,7 +649,7 @@ private:
 		float low{};
 		float high{};
 	};
-	static constexpr OutputCalVoltages out_check{0.f, 1.f, 5.f};
+	static constexpr OutputCalVoltages out_target{0.f, 1.f, 5.f};
 
 	FileStorageProxy &storage;
 	PatchModQueue &patch_mod_queue;
