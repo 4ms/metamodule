@@ -15,23 +15,27 @@ struct LPGInfo : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 7> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(57.81), to_mm<72>(57.85), Center, "Level", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(31.83), to_mm<72>(119.09), Center, "CV", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(83.37), to_mm<72>(119.09), Center, "Decay", ""}},
-		AnalogJackInput4ms{{to_mm<72>(32.0), to_mm<72>(271.97), Center, "Input", ""}},
-		GateJackInput4ms{{to_mm<72>(83.2), to_mm<72>(271.97), Center, "Ping", ""}},
-		AnalogJackInput4ms{{to_mm<72>(32.0), to_mm<72>(313.57), Center, "CV Jack", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(83.2), to_mm<72>(313.57), Center, "Out", ""}},
+    static constexpr std::array<Element, 9> Elements{{
+		Davies1900hBlackKnob{{to_mm<72>(57.94), to_mm<72>(50.47), Center, "Level", ""}, 0.875f},
+		Davies1900hBlackKnob{{to_mm<72>(57.94), to_mm<72>(111.82), Center, "Color", ""}, 0.875f},
+		Davies1900hBlackKnob{{to_mm<72>(57.94), to_mm<72>(173.18), Center, "Decay", ""}, 0.875f},
+		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(230.48), Center, "Input", ""}},
+		GateJackInput4ms{{to_mm<72>(83.32), to_mm<72>(230.48), Center, "Ping", ""}},
+		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(272.09), Center, "Level CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(83.32), to_mm<72>(272.09), Center, "Color CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(313.7), Center, "Decay CV", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(83.32), to_mm<72>(313.7), Center, "Out", ""}},
 }};
 
     enum class Elem {
         LevelKnob,
-        CvKnob,
+        ColorKnob,
         DecayKnob,
         InputIn,
         PingIn,
-        CvJackIn,
+        LevelCvIn,
+        ColorCvIn,
+        DecayCvIn,
         Out,
     };
 
@@ -39,7 +43,7 @@ struct LPGInfo : ModuleInfoBase {
     
     enum {
         KnobLevel, 
-        KnobCv, 
+        KnobColor, 
         KnobDecay, 
         NumKnobs,
     };
@@ -48,7 +52,9 @@ struct LPGInfo : ModuleInfoBase {
     enum {
         InputInput, 
         InputPing, 
-        InputCv_Jack, 
+        InputLevel_Cv, 
+        InputColor_Cv, 
+        InputDecay_Cv, 
         NumInJacks,
     };
     
