@@ -27,7 +27,11 @@ void SvgPort::setSvg(std::shared_ptr<window::Svg> svg) {
 }
 
 void ThemedSvgPort::setSvg(std::shared_ptr<window::Svg> lightSvg, std::shared_ptr<window::Svg> darkSvg) {
-	sw->setSvg(lightSvg);
+	// Get the box size from either SVG that will load
+	SvgPort::setSvg(lightSvg);
+	if (!box.size.isFinite())
+		SvgPort::setSvg(darkSvg);
+
 	this->lightSvg = lightSvg;
 	this->darkSvg = darkSvg;
 }
