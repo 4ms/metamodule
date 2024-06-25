@@ -24,7 +24,7 @@ void Plugin::addModel(Model *model) {
 
 	pr_trace("Adding VCV_adaptor model %s:%s\n", brand.data(), slug.data());
 
-	if (ModuleFactory::isValidSlug(slug)) {
+	if (ModuleFactory::isValidBrandModule(brand, slug)) {
 		pr_err("Duplicate module slug: %s, skipping\n", model->slug.c_str());
 		return;
 	}
