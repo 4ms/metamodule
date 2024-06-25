@@ -249,7 +249,6 @@ private:
 		auto uncal = CalData::DefaultInput;
 		readings = {uncal.reverse_calibrate(readings.first), uncal.reverse_calibrate(readings.second)};
 		cal_data.in_cal[idx].calibrate_chan({Calibration::DefaultLowV, Calibration::DefaultHighV}, readings);
-		pr_dbg("Calibrated IN %d: %f %f\n", idx, readings.first, readings.second);
 	}
 
 	float calibrated_value(unsigned idx, float reading) {
@@ -362,7 +361,6 @@ private:
 		if (num_done == PanelDef::NumAudioOut || next_step) {
 			next_step = false;
 
-			pr_dbg("Calibration complete, these are the values:\n");
 			cal_data.print_calibration();
 
 			if (cal_data.validate())
@@ -399,8 +397,8 @@ private:
 						 current_output.value(),
 						 in_signals[0].iir,
 						 in_signals[0].min,
-				   in_signals[0].max,
-				   std::fabs(in_signals[0].min - in_signals[0].max),
+						 in_signals[0].max,
+						 std::fabs(in_signals[0].min - in_signals[0].max),
 						 target_volts,
 						 Tolerance);
 
@@ -508,9 +506,7 @@ private:
 				mdrivlib::SystemCache::invalidate_dcache_by_range(&cal_data, sizeof(cal_data));
 				mdrivlib::SystemCache::invalidate_dcache_by_range(&bytes_written, sizeof(bytes_written));
 
-				if (bytes_written == sizeof(cal_data)) {
-					pr_trace("Read calibration data\n");
-				} else {
+				if (bytes_written != sizeof(cal_data)) {
 					pr_err("Internal error reading flash (%d bytes read)\n", bytes_written);
 				}
 

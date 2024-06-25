@@ -51,7 +51,7 @@ public:
 
 				if (validate_reading(reading, config.low_measurement_volts)) {
 					caldata[chan_num].first = reading.iir;
-					pr_dbg("Recorded Low value: ");
+					pr_trace("Recorded Low value: ");
 					event = CalibrationEvent::MeasuredLow;
 				}
 
@@ -59,7 +59,7 @@ public:
 				{
 					caldata[chan_num].second = reading.iir;
 					event = CalibrationEvent::MeasuredHigh;
-					pr_dbg("Recorded High value: ");
+					pr_trace("Recorded High value: ");
 				}
 
 				debug_print_reading(chan_num, reading);
@@ -83,7 +83,7 @@ public:
 
 private:
 	void debug_print_reading(unsigned idx, AnalyzedSig ain) {
-		pr_dbg(
+		pr_trace(
 			"AIN %zu: iir=%f min=%f max=%f range=%f\n", idx, ain.iir, ain.min, ain.max, std::fabs(ain.max - ain.min));
 	}
 };

@@ -307,21 +307,19 @@ void AudioStream::handle_patch_mod_queue() {
 }
 
 void AudioStream::disable_calibration() {
-	pr_trace("Disabling calibrated jacks\n");
 	cal.reset_to_default();
-	cal.print_calibration();
+	// cal.print_calibration();
 }
 
 void AudioStream::enable_calibration() {
-	pr_dbg("Enabling calibrated jacks\n");
 	cal = cal_stash;
-	cal.print_calibration();
+	// cal.print_calibration();
 }
 
 void AudioStream::set_calibration(CalData const &caldata) {
 	cal = caldata;
 	cal_stash = caldata;
-	cal.print_calibration();
+	// cal.print_calibration();
 }
 
 } // namespace MetaModule
