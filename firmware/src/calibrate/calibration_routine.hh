@@ -134,10 +134,13 @@ private:
 
 	void update_cal_ins_routine() {
 		unsigned num_done = 0;
+		unsigned num_plugged = 0;
 		unsigned num_displayed = 0;
 
 		for (unsigned i = 0; i < PanelDef::NumAudioIn; i++) {
 			if (params.is_input_plugged(i)) {
+				num_plugged++;
+
 				set_input_plugged(i, true);
 
 				// during input cal routine, in_signals uses default cal values
@@ -160,7 +163,7 @@ private:
 				num_done++;
 		}
 
-		if (num_done == PanelDef::NumAudioIn || next_step) {
+		if ((num_done == PanelDef::NumAudioIn && num_plugged == 0) || next_step) {
 			next_step = false;
 			start_calibrate_outs();
 		}
@@ -312,7 +315,7 @@ private:
 
 				start_output_channel(active_output, out_target.low, JackCalStatus::Settling);
 
-				delay_measurement = 64;
+				delay_measurement = 8;
 
 			} else if (jack_status[active_output] == JackCalStatus::Settling) {
 				if (delay_measurement)
@@ -337,38 +340,16 @@ private:
 				if (measure_validate_output(active_output, out_target.zero)) {
 					output_cal_meas.zero = in_signals[0].iir;
 
-					// TODO: check are
-					// default cal: to output 1.0 we need to send DAC 814427.937500 (0x000c6d5b)
-					// default cal: to output 5.0 we need to send DAC 4072139.750000 (0x003e22cb)
+					calc_output_cal_data(active_output);
 
-					int32_t dac_val_on_low = std::round(CalData::DefaultOutput.adjust(out_target.low));	  //814428
-					int32_t dac_val_on_high = std::round(CalData::DefaultOutput.adjust(out_target.high)); //4072140
-
-					// When we sent 814428 to the DAC, we output 0.965V (output_cal_meas.low)
-					// When we sent 4072140 to the DAC, we output 4.946V (output_cal_meas.high)
-					cal_data.out_cal[active_output].calibrate_chan({dac_val_on_low, dac_val_on_high},
-																   {output_cal_meas.low, output_cal_meas.high});
-					pr_dbg("Calibrated: L:%f H:%f, l:%f h:%f -> s:%f o:%f\n",
-						   dac_val_on_low,
-						   dac_val_on_high,
-						   output_cal_meas.low,
-						   output_cal_meas.high,
-						   cal_data.out_cal[active_output].slope(),
-						   cal_data.out_cal[active_output].offset());
-
-					float offset_error = std::fabs(cal_data.out_cal[active_output].offset() - output_cal_meas.zero);
-
-					pr_dbg("Offset error: %f\n", offset_error);
-
-					if (offset_error > 0.020f) {
-						pr_err("Offset error is too large: %f\n", offset_error);
-						current_output = std::nullopt;
-
-					} else {
+					if (check_offset_error(active_output)) {
 						set_output_status(active_output, JackCalStatus::Done);
 						lv_label_set_text_fmt(ui_CalibrationInstructionLabel,
 											  "Calibrated Out %d. Patch another Out jack to In 1",
 											  active_output + 1);
+					} else {
+						current_output = std::nullopt;
+						// will automatically retry
 					}
 				}
 			}
@@ -410,21 +391,19 @@ private:
 		// Then apply the new input calibration values to the raw value to determine a calibrated value
 		auto default_cal = CalData::DefaultInput;
 		auto raw_adc = default_cal.reverse_calibrate(metaparams.ins[0]);
-		pr_dbg("%d\n", (int32_t)raw_adc);
 		in_signals[0].update(cal_data.in_cal[0].adjust(raw_adc));
 
-		if (delay_measurement++ >= 64) {
-			pr_err("Reading Out %d: %f [%f,%f = %f] vs: %f +/- %f\n",
-				   current_output.value(),
-				   in_signals[0].iir,
-				   in_signals[0].min,
+		if (delay_measurement++ >= 2) {
+			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance)) {
+				pr_trace("Validated Out %d: %f [%f,%f => delta %f] vs: %5f +/- %5f\n",
+						 current_output.value(),
+						 in_signals[0].iir,
+						 in_signals[0].min,
 				   in_signals[0].max,
 				   std::fabs(in_signals[0].min - in_signals[0].max),
-				   target_volts,
-				   Tolerance);
+						 target_volts,
+						 Tolerance);
 
-			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance)) {
-				pr_dbg("OK\n");
 				is_valid = true;
 			}
 
@@ -482,6 +461,26 @@ private:
 		} else if (!plugged && jack_plugged[idx]) {
 			jack_plugged[idx] = false;
 			lv_obj_set_style_outline_opa(label, LV_OPA_0, LV_PART_MAIN);
+		}
+	}
+
+	void calc_output_cal_data(unsigned active_output) {
+		int32_t dac_val_on_low = std::round(CalData::DefaultOutput.adjust(out_target.low));	  //814428
+		int32_t dac_val_on_high = std::round(CalData::DefaultOutput.adjust(out_target.high)); //4072140
+		cal_data.out_cal[active_output].calibrate_chan({dac_val_on_low, dac_val_on_high},
+													   {output_cal_meas.low, output_cal_meas.high});
+	}
+
+	float check_offset_error(unsigned active_output) {
+		constexpr float offset_tolerance = 0.020f;
+
+		float offset_error = std::fabs(cal_data.out_cal[active_output].offset() - output_cal_meas.zero);
+
+		if (offset_error < offset_tolerance) {
+			return true;
+		} else {
+			pr_err("Offset error is too large: %f. Tolerance is %f\n", offset_error, offset_tolerance);
+			return false;
 		}
 	}
 

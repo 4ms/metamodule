@@ -104,7 +104,7 @@ private:
 
 	std::array<bool, PanelDef::NumAudioIn> jack_plugged{};
 
-	static constexpr float coef = 1.f / 4.f;
+	static constexpr float coef = 1.f / 2.f;
 	std::array<AnalyzedSig, PanelDef::NumAudioIn> in_signals{coef, coef, coef, coef, coef, coef};
 
 	std::array<lv_obj_t *, PanelDef::NumAudioIn> input_status_labels{

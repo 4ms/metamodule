@@ -39,12 +39,12 @@ public:
 		switch (output_id) {
 			case Info::Output_1_Out: {
 				float out = output1 * OutputVoltageRange;
-				return octave_mode ? int(out) : out;
+				return octave_mode ? std::round(out) : out;
 			} break;
 
 			case Info::Output_2_Out: {
 				float out = output2 * OutputVoltageRange;
-				return octave_mode ? int(out) : out;
+				return octave_mode ? std::round(out) : out;
 			} break;
 		}
 		return 0;

@@ -46,7 +46,7 @@ public:
 			if (delay_ctr == 0)
 				reading.reset_to(reading.iir);
 
-			if (++delay_ctr >= 4) {
+			if (++delay_ctr >= 2) {
 				delay_ctr = 0;
 
 				if (validate_reading(reading, config.low_measurement_volts)) {
