@@ -58,7 +58,7 @@ struct CalData {
 			if (std::isnan(chan.offset()) || std::isnan(chan.slope()))
 				return false;
 
-			if (std::fabs(chan.adjust(5.f) - (float)0x0040'0000) > Calibration::from_volts(0.5f)) {
+			if (std::fabs(chan.adjust(-5.f) - (float)0x0040'0000) > Calibration::from_volts(0.5f)) {
 				return false;
 			}
 		}
@@ -90,10 +90,10 @@ struct CalData {
 
 	void print_calibration() const {
 		for (auto chan : in_cal)
-			pr_dbg("Input: slope: 1/%f offset: %f\n", 1.f / chan.slope(), chan.offset());
+			pr_dbg("Input: slope: 1/%f offset: %f\n", 1.f / chan.slope(), (float)chan.offset());
 
 		for (auto chan : out_cal)
-			pr_dbg("Output: slope: %f offset: %f\n", chan.slope(), chan.offset());
+			pr_dbg("Output: slope: %f offset: %f\n", (float)chan.slope(), (float)chan.offset());
 	}
 };
 
