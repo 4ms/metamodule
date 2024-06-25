@@ -130,6 +130,16 @@ bool ModuleFactory::isValidSlug(std::string_view combined_slug) {
 	return false;
 }
 
+bool ModuleFactory::isValidBrandModule(std::string_view brand, std::string_view module_name) {
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
+			return bool(module->creation_func);
+		}
+	}
+
+	return false;
+}
+
 std::vector<ModuleTypeSlug> ModuleFactory::getAllSlugs(std::string_view brand) {
 	std::vector<ModuleTypeSlug> slugs;
 	auto modules = brand_registry(brand)->modules;
