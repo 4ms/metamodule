@@ -37,7 +37,10 @@ public:
 			}
 		}
 
-		const float lpg_colour = getState<CvKnob>(); //range: 0 .. 1
+		const float lpg_colour_pot = getState<CvKnob>(); //range: 0 .. 1
+		const float lpg_color_cv = getInput<CvJackIn>().value_or(0.f) / 5.f; //range: -1 .. 1 for CV -5V .. +5V
+		const float lpg_colour = std::clamp(lpg_colour_pot + lpg_color_cv, 0.f, 1.f);
+
 		const float decay = getState<DecayKnob>(); //range: 0 .. 1
 		const float level = getState<LevelKnob>(); //range; 0 .. 1 was compressed_level
 
