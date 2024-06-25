@@ -133,6 +133,16 @@ public:
 		return comm_.send_message(message);
 	}
 
+	[[nodiscard]] bool request_read_flash(std::span<uint8_t> buffer, uint32_t address, uint32_t *bytes_processed) {
+		IntercoreStorageMessage message{
+			.message_type = RequestReadFlash,
+			.buffer = {(char *)buffer.data(), buffer.size()},
+			.address = address,
+			.bytes_processed = bytes_processed,
+		};
+		return comm_.send_message(message);
+	}
+
 	enum class WriteResult { Busy, Success, InvalidVol };
 
 	WriteResult request_write_file(std::span<char> file_data, Volume vol, std::string_view filename) {

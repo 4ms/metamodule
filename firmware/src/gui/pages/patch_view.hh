@@ -58,7 +58,7 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
-		if (is_patch_playing) {
+		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
 			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
 			lv_show(ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
@@ -468,8 +468,14 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		if (!page->is_patch_playing)
+		if (!page->is_patch_playing) {
 			page->patch_playloader.request_load_view_patch();
+		} else {
+			if (page->patch_playloader.is_audio_muted())
+				page->patch_playloader.start_audio();
+			else
+				page->patch_playloader.stop_audio();
+		}
 	}
 
 	static void button_focussed_cb(lv_event_t *event) {

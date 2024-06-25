@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/modules_helpers.hh"
+#include "calibrate/calibration_patch.hh"
 #include "delay.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
@@ -38,11 +39,13 @@ struct PatchPlayLoader {
 			auto message = storage_.get_message();
 
 			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
-				auto patch_data = storage_.get_patch_data(message.bytes_read);
-				if (!patches_.open_patch(patch_data, initial_patch_loc))
+				auto raw_patch_file = storage_.get_patch_data(message.bytes_read);
+				if (!patches_.open_patch(raw_patch_file, initial_patch_loc))
 					pr_err("ERROR: could not parse initial patch\n");
-				else
+				else {
+					next_patch = patches_.get_view_patch();
 					load_patch();
+				}
 
 				break;
 			}
@@ -71,12 +74,24 @@ struct PatchPlayLoader {
 	}
 
 	void request_load_view_patch() {
+		next_patch = patches_.get_view_patch();
+		loading_new_patch_ = true;
+	}
+
+	void request_load_calibration_patch() {
+		next_patch = calibration.make_cal_patch();
+		loading_new_patch_ = true;
+	}
+
+	void request_load_cal_check_patch() {
+		next_patch = calibration.make_check_patch();
 		loading_new_patch_ = true;
 	}
 
 	bool should_fade_down_audio() {
 		return loading_new_patch_ || stopping_audio_;
 	}
+
 	bool should_fade_up_audio() {
 		return starting_audio_;
 	}
@@ -94,7 +109,7 @@ struct PatchPlayLoader {
 		return audio_is_muted_;
 	}
 
-	bool ready_to_play() {
+	bool is_playing() {
 		return !audio_is_muted_ && player_.is_loaded;
 	}
 
@@ -148,6 +163,9 @@ private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;
 	OpenPatchManager &patches_;
+
+	PatchData *next_patch = nullptr;
+	CalibrationPatch calibration;
 
 	std::atomic<bool> loading_new_patch_ = false;
 	std::atomic<bool> audio_is_muted_ = false;
@@ -203,14 +221,18 @@ private:
 	}
 
 	Result load_patch() {
-		auto patch = patches_.get_view_patch();
-		auto vol = patches_.get_view_patch_vol();
+		if (!next_patch) {
+			pr_err("Internal error loading patch\n");
+			return {false, "Internal error loading patch"};
+		}
 
-		pr_trace("Attempting play patch from vol %d: %.31s\n", (uint32_t)vol, patch->patch_name.data());
+		pr_trace("Attempting play patch: %.31s\n", next_patch->patch_name.data());
 
-		auto result = player_.load_patch(*patch);
+		auto result = player_.load_patch(*next_patch);
 		if (result.success) {
-			patches_.play_view_patch();
+			if (next_patch == patches_.get_view_patch())
+				patches_.play_view_patch();
+			//TODO: give patches a ptr to this patch?
 			start_audio();
 		}
 

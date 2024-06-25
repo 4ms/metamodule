@@ -596,7 +596,7 @@ lv_obj_set_y( ui_ControlAlert, 90 );
 lv_obj_set_align( ui_ControlAlert, LV_ALIGN_TOP_MID );
 lv_obj_set_flex_flow(ui_ControlAlert,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_ControlAlert, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_obj_add_flag( ui_ControlAlert, LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_add_flag( ui_ControlAlert, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_ControlAlert, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_ControlAlert, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_ControlAlert, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -671,7 +671,7 @@ lv_obj_set_height( ui_AddMapPopUp, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_AddMapPopUp, LV_ALIGN_BOTTOM_MID );
 lv_obj_set_flex_flow(ui_AddMapPopUp,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_AddMapPopUp, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_SPACE_EVENLY);
-lv_obj_add_flag( ui_AddMapPopUp, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_add_flag( ui_AddMapPopUp, LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_AddMapPopUp, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_AddMapPopUp, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_AddMapPopUp, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -717,7 +717,7 @@ lv_label_set_text(ui_MapDetected,"Detecting...");
 lv_obj_set_style_text_color(ui_MapDetected, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_MapDetected, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_MapDetected, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_MapDetected, &ui_font_MuseoSansRounded50016, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_MapDetected, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_AddMapButtonPanel = lv_obj_create(ui_AddMapPopUp);
 lv_obj_set_width( ui_AddMapButtonPanel, lv_pct(100));
@@ -746,7 +746,6 @@ ui_CancelAdd = lv_btn_create(ui_AddMapButtonPanel);
 lv_obj_set_width( ui_CancelAdd, 60);
 lv_obj_set_height( ui_CancelAdd, 24);
 lv_obj_set_align( ui_CancelAdd, LV_ALIGN_CENTER );
-lv_obj_add_state( ui_CancelAdd, LV_STATE_FOCUSED );     /// States
 lv_obj_add_flag( ui_CancelAdd, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_CancelAdd, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_CancelAdd, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
