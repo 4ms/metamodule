@@ -16,9 +16,8 @@
 #include "sync_params.hh"
 #include "util/calibrator.hh"
 #include "util/edge_detector.hh"
-#include "util/interp_param.hh"
+#include "util/filter.hh"
 #include "util/math.hh"
-#include "util/oscs.hh"
 #include <array>
 
 namespace MetaModule
@@ -64,11 +63,9 @@ private:
 	CalData cal_stash;
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
-	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
-	// Should we class this out? It's only connected to Audio at init and process()
+	std::array<ResizingOversampler, PanelDef::NumAudioIn> smoothed_ins;
 
 	PatchPlayer &player;
-	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	mdrivlib::CycleCounter load_measure;
 	float load_lpf = 0.f;
 	float output_fade_amt = -1.f;

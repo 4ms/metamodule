@@ -3,7 +3,6 @@
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
-#include "conf/scaling_config.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
@@ -107,6 +106,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
 						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
+
+	for (auto &s : smoothed_ins)
+		s.set_size(AudioConf::BlockSize);
 }
 
 void AudioStream::start() {
@@ -169,10 +171,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			if (!jack_is_patched(param_state.jack_senses, panel_jack_i))
 				continue;
 
-			float scaled_input = cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
+			float calibrated_input = cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
 
-			player.set_panel_input(panel_jack_i, scaled_input);
-			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
+			player.set_panel_input(panel_jack_i, calibrated_input);
+
+			// Send smoothed sigals to other core via metaparams
+			smoothed_ins[panel_jack_i].add_val(calibrated_input);
 		}
 
 		// Gate inputs
@@ -206,6 +210,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			outchan = get_audio_output(i);
 	}
 
+	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins))
+		m = s.val();
+
 	player.update_lights();
 	propagate_sense_pins(param_block.params[0]);
 }
@@ -220,7 +227,7 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			float scaled_input = jack_is_patched(param_state.jack_senses, panel_jack_i) ?
 									 cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
 									 0;
-			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
+			smoothed_ins[panel_jack_i].add_val(scaled_input);
 		}
 
 		for (auto [knob, latch] : zip(params.knobs, param_state.knobs))
@@ -232,6 +239,9 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		for (auto &outchan : out.chan)
 			outchan = 0;
 	}
+
+	for (auto [s, m] : zip(smoothed_ins, param_block.metaparams.ins))
+		m = s.val();
 }
 
 void AudioStream::handle_midi(Midi::Event const &event, unsigned poly_num) {

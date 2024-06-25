@@ -72,7 +72,7 @@ private:
 
 				set_input_plugged(chan, true);
 
-				in_signals[chan].update(metaparams.ins[chan].iir);
+				in_signals[chan].update(metaparams.ins[chan]);
 
 				display_measurement(chan, in_signals[chan].iir);
 

@@ -141,7 +141,7 @@ private:
 				set_input_plugged(i, true);
 
 				// during input cal routine, in_signals uses default cal values
-				in_signals[i].update(metaparams.ins[i].iir);
+				in_signals[i].update(metaparams.ins[i]);
 
 				if (++num_displayed == 1)
 					display_measurement(i, in_signals[i].iir);
@@ -341,7 +341,6 @@ private:
 					// default cal: to output 1.0 we need to send DAC 814427.937500 (0x000c6d5b)
 					// default cal: to output 5.0 we need to send DAC 4072139.750000 (0x003e22cb)
 
-
 					int32_t dac_val_on_low = std::round(CalData::DefaultOutput.adjust(out_target.low));	  //814428
 					int32_t dac_val_on_high = std::round(CalData::DefaultOutput.adjust(out_target.high)); //4072140
 
@@ -410,7 +409,7 @@ private:
 		// Calculate the raw codec 24-bit reading by reversing the default calibration
 		// Then apply the new input calibration values to the raw value to determine a calibrated value
 		auto default_cal = CalData::DefaultInput;
-		auto raw_adc = default_cal.reverse_calibrate(metaparams.ins[0].iir);
+		auto raw_adc = default_cal.reverse_calibrate(metaparams.ins[0]);
 		pr_dbg("%d\n", (int32_t)raw_adc);
 		in_signals[0].update(cal_data.in_cal[0].adjust(raw_adc));
 

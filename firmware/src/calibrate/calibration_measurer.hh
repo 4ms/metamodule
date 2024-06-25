@@ -42,6 +42,7 @@ public:
 		CalibrationEvent event = CalibrationEvent::None;
 
 		if (chan_num < caldata.size()) {
+
 			if (delay_ctr == 0)
 				reading.reset_to(reading.iir);
 
