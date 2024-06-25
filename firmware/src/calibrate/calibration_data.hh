@@ -36,7 +36,13 @@ struct CalData {
 											 {Calibration::DefaultLowReading, Calibration::DefaultHighReading}};
 
 	static constexpr Calibrator DefaultOutput{{Calibration::DefaultLowReading, Calibration::DefaultHighReading},
-											  {Calibration::DefaultLowV, Calibration::DefaultHighV}};
+											  {-Calibration::DefaultLowV, -Calibration::DefaultHighV}};
+
+	static_assert(int(DefaultOutput.adjust(5.f)) == -4072139);
+	static_assert(int(DefaultOutput.adjust(1.f)) == -814427);
+	static_assert(int(DefaultOutput.adjust(0.f)) == 0);
+	static_assert(int(DefaultOutput.adjust(-1.f)) == 814427);
+	static_assert(int(DefaultOutput.adjust(-5.f)) == 4072139);
 
 	bool validate() const {
 		for (auto chan : in_cal) {
