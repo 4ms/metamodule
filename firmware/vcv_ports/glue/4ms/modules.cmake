@@ -23,7 +23,7 @@ set(4msModules
     KPLS
     L4
     # LPF
-    # LPG
+    LPG
     MNMX
     MPEG
     MultiLFO

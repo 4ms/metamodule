@@ -22,7 +22,7 @@ void init(rack::Plugin *p) {
 	p->addModel(modelQCD);
 	p->addModel(modelPI);
 	p->addModel(modelPEG);
-	// p->addModel(modelLPG);
+	p->addModel(modelLPG);
 	p->addModel(modelL4);
 	p->addModel(modelDLD);
 	p->addModel(modelCLKM);
