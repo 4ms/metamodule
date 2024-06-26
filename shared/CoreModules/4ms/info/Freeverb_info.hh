@@ -17,12 +17,12 @@ struct FreeverbInfo : ModuleInfoBase {
 
     static constexpr std::array<Element, 10> Elements{{
 		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(57.97), Center, "Size", ""}, 0.5f},
-		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(57.97), Center, "Time", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(57.97), Center, "Feedback", ""}, 0.5f},
 		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(119.21), Center, "Damp", ""}, 0.25f},
 		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(119.21), Center, "Mix", ""}, 0.875f},
 		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(214.66), Center, "Input", ""}},
 		AnalogJackInput4ms{{to_mm<72>(83.32), to_mm<72>(214.66), Center, "Size CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(263.38), Center, "Time CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(263.38), Center, "Feedback CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(83.32), to_mm<72>(263.38), Center, "Damp CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(32.13), to_mm<72>(312.1), Center, "Mix CV", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(83.32), to_mm<72>(312.1), Center, "Out", ""}},
@@ -30,12 +30,12 @@ struct FreeverbInfo : ModuleInfoBase {
 
     enum class Elem {
         SizeKnob,
-        TimeKnob,
+        FeedbackKnob,
         DampKnob,
         MixKnob,
         InputIn,
         SizeCvIn,
-        TimeCvIn,
+        FeedbackCvIn,
         DampCvIn,
         MixCvIn,
         Out,
@@ -45,7 +45,7 @@ struct FreeverbInfo : ModuleInfoBase {
     
     enum {
         KnobSize, 
-        KnobTime, 
+        KnobFeedback, 
         KnobDamp, 
         KnobMix, 
         NumKnobs,
@@ -55,7 +55,7 @@ struct FreeverbInfo : ModuleInfoBase {
     enum {
         InputInput, 
         InputSize_Cv, 
-        InputTime_Cv, 
+        InputFeedback_Cv, 
         InputDamp_Cv, 
         InputMix_Cv, 
         NumInJacks,
