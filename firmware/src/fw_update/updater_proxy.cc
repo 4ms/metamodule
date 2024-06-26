@@ -183,8 +183,15 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 						moveToState(Writing);
 						break;
 
+					case FileStorageProxy::WifiExpanderCommError:
+					case FileStorageProxy::ReadFlashFailed:
 					case FileStorageProxy::ChecksumFailed:
 						abortWithMessage("Error when comparing checksums");
+						break;
+
+					case FileStorageProxy::WifiExpanderNotConnected:
+						proceedWithNextFile();
+						// abortWithMessage("No Wifi expander found.");
 						break;
 
 					default:
