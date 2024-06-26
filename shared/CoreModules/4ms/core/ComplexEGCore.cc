@@ -70,7 +70,7 @@ public:
 		val = val / CvRangeVolts;
 
 		switch (input_id) {
-			case Info::InputInput:
+			case Info::InputGate_In:
 				gateInput = val;
 				break;
 			case Info::InputAttack_Cv:
