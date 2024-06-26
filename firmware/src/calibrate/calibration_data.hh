@@ -90,7 +90,7 @@ struct CalData {
 
 	void print_calibration() const {
 		for (auto chan : in_cal)
-			pr_dbg("Input: slope: 1/%f offset: %f\n", 1.f / chan.slope(), (float)chan.offset());
+			pr_dbg("Input: slope: 1/%f offset: %f\n", 1.f / (float)chan.slope(), (float)chan.offset());
 
 		for (auto chan : out_cal)
 			pr_dbg("Output: slope: %f offset: %f\n", (float)chan.slope(), (float)chan.offset());
