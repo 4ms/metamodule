@@ -143,38 +143,8 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 IntercoreStorageMessage
 FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum, uint32_t &bytesChecked) {
 
-	// Stop wifi reception before long running operation
-#ifdef ENABLE_WIFI_BRIDGE
-	WifiInterface::stop();
-#endif
-
-	MD5Processor processor;
-
-	const std::size_t BlockSize = 4096;
-	std::array<uint8_t, BlockSize> BlockBuffer;
-
-	std::size_t offset = 0;
-	while (offset < length) {
-		auto bytesToRead = std::min<std::size_t>(length - offset, BlockBuffer.size());
-		auto thisReadArea = std::span<uint8_t>(BlockBuffer.data(), bytesToRead);
-
-		auto read_result = loader_.read_sectors(address + offset, thisReadArea);
-
-		if (read_result) {
-			processor.update(thisReadArea);
-			offset += bytesToRead;
-			bytesChecked = offset;
-		} else {
-			return {.message_type = ChecksumFailed};
-		}
-	}
-
-	auto str_digest = to_hex_string(processor.getDigest());
-	auto str_digest_sv = std::string_view(str_digest.data(), str_digest.size());
-
-	auto match = checksum.compare(str_digest_sv) == 0;
-
-	return {.message_type = match ? ChecksumMatch : ChecksumMismatch};
+	// Force checking QSPI flash block-by-block, so we can skip blocks,,
+	return {.message_type = ChecksumMismatch};
 }
 
 IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uint32_t address, uint32_t &bytesWritten) {
@@ -192,13 +162,30 @@ IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uin
 
 	if (loader_.check_flash_chip()) {
 		while (bytesWritten < buffer.size()) {
-			auto to_read = std::min<std::size_t>(buffer.size() - bytesWritten, BatchSize);
-			auto thisBatch = buffer.subspan(bytesWritten, to_read);
+			auto num_bytes_to_write = std::min<std::size_t>(buffer.size() - bytesWritten, BatchSize);
+			auto buffer_to_write = buffer.subspan(bytesWritten, num_bytes_to_write);
 
-			auto success = loader_.write_sectors(address + bytesWritten, thisBatch);
+			bool data_matches = true;
+			{
+				std::array<uint8_t, BatchSize> verify_buffer;
+
+				if (loader_.read_sectors(address + bytesWritten, {verify_buffer.data(), num_bytes_to_write})) {
+					for (unsigned i = 0; i < num_bytes_to_write; i++)
+						if (verify_buffer[i] != buffer_to_write[i])
+							data_matches = false;
+				} else {
+					data_matches = false;
+				}
+			}
+
+			bool success = true;
+			if (data_matches)
+				pr_trace("Skipping sector at 0x%x, data matches\n", address + bytesWritten);
+			else
+				success = loader_.write_sectors(address + bytesWritten, buffer_to_write);
 
 			if (success) {
-				bytesWritten += to_read;
+				bytesWritten += num_bytes_to_write;
 			} else {
 				errorDetected = true;
 				break;
