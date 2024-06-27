@@ -19,7 +19,10 @@ private:
 	float sampleRate = 48000;
 	float phaccu = 0;
 	float increment = 0;
-	float envTimes[4] = {1000, 1000, 1000, 1000};
+	float attackTime = 1000;
+	float holdTime = 1000;
+	float decayTime = 1000;
+	float releaseTime = 1000;
 	float sustainLevel = 0.5f;
 	float lastSample = 0;
 	float envOut = 0;
@@ -98,8 +101,24 @@ public:
 			envOut = 0.f;
 
 		} else {
-			int stageSelect = stage == RELEASE ? 3 : stage;
-			increment = 1000.0f / envTimes[stageSelect] / sampleRate;
+
+			switch (stage)
+			{
+			case ATTACK:
+				increment = 1000.0f / attackTime / sampleRate;
+				break;
+			case HOLD:
+				increment = 1000.0f / holdTime / sampleRate;
+				break;
+			case DECAY:
+				increment = 1000.0f / decayTime / sampleRate;
+				break;
+			case RELEASE:
+				increment = 1000.0f / releaseTime / sampleRate;
+				break;
+			default:
+				break;
+			}		
 
 			phaccu += increment;
 			if (phaccu >= 1.0f) {
@@ -136,15 +155,53 @@ public:
 		return envOut;
 	}
 
-	void set_envelope_time(int _envStage, float milliseconds) {
-		envTimes[_envStage] = milliseconds;
-		if (_envStage == HOLD) // hold stage
+	void set_envelope_time(stage_t _envStage, float milliseconds) {
+		switch (_envStage)
 		{
-			if (milliseconds < 0.1f) {
+		case ATTACK:
+			attackTime = milliseconds;
+			break;
+		case HOLD:
+			holdTime = milliseconds;
+			if (holdTime < 0.1f) {
 				holdEnable = false;
 			} else {
 				holdEnable = true;
 			}
+			break;
+		case DECAY:
+			decayTime = milliseconds;
+			break;
+		case RELEASE:
+			releaseTime = milliseconds;
+			break;
+		default:
+			break;
+		}
+	}
+
+	void set_envelope_time(int _envStage, float milliseconds) {
+		switch (_envStage)
+		{
+		case 0:
+			attackTime = milliseconds;
+			break;
+		case 1:
+			holdTime = milliseconds;
+			if (holdTime < 0.1f) {
+				holdEnable = false;
+			} else {
+				holdEnable = true;
+			}
+			break;
+		case 2:
+			decayTime = milliseconds;
+			break;
+		case 3:
+			releaseTime = milliseconds;
+			break;
+		default:
+			break;
 		}
 	}
 

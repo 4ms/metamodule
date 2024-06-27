@@ -17,101 +17,40 @@ public:
 	ComplexEGCore() = default;
 
 	void update() override {
-		float finalAttack = constrain(attackCv + attackOffset, 0.0f, 1.0f);
-		float finalHold = constrain(holdCv + holdOffset, 0.0f, 1.0f);
-		float finalDecay = constrain(decayCv + decayOffset, 0.0f, 1.0f);
-		float finalSustain = constrain(sustainCv + sustainOffset, 0.0f, 1.0f);
-		float finalRelease = constrain(releaseCv + releaseOffset, 0.0f, 1.0f);
+		float finalAttack = constrain(getInput<AttackCvIn>().value_or(0.f)/CvRangeVolts + getState<AttackKnob>(), 0.0f, 1.0f);
+		float finalHold = constrain(getInput<HoldCvIn>().value_or(0.f)/CvRangeVolts + getState<HoldKnob>(), 0.0f, 1.0f);
+		float finalDecay = constrain(getInput<DecayCvIn>().value_or(0.f)/CvRangeVolts + getState<DecayKnob>(), 0.0f, 1.0f);
+		float finalSustain = constrain(getInput<SustainCvIn>().value_or(0.f)/CvRangeVolts + getState<SustainKnob>(), 0.0f, 1.0f);
+		float finalRelease = constrain(getInput<ReleaseCvIn>().value_or(0.f)/CvRangeVolts + getState<ReleaseKnob>(), 0.0f, 1.0f);
 
-		e.set_envelope_time(0, map_value(finalAttack, 0.0f, 1.0f, 0.1f, 1000.0f));
-		e.set_envelope_time(1, map_value(finalHold, 0.0f, 1.0f, 0.0f, 1000.0f));
-		e.set_envelope_time(2, map_value(finalDecay, 0.0f, 1.0f, 0.1f, 1000.0f));
-		e.set_envelope_time(3, map_value(finalRelease, 0.0f, 1.0f, 0.1f, 1000.0f));
+		e.set_envelope_time(e.ATTACK, map_value(finalAttack, 0.0f, 1.0f, 0.1f, 1000.0f));
+		e.set_envelope_time(e.HOLD, map_value(finalHold, 0.0f, 1.0f, 0.0f, 1000.0f));
+		e.set_envelope_time(e.DECAY, map_value(finalDecay, 0.0f, 1.0f, 0.1f, 1000.0f));
+		e.set_envelope_time(e.RELEASE, map_value(finalRelease, 0.0f, 1.0f, 0.1f, 1000.0f));
 
 		e.set_sustain(finalSustain);
-		envelopeOutput = e.update(gateInput);
+
+		e.set_attack_curve(getState<ACurveKnob>());
+		e.set_decay_curve(getState<DCurveKnob>());
+		e.set_release_curve(getState<RCurveKnob>());
+
+		envelopeOutput = e.update(getInput<GateIn>().value_or(0.f));
 
 		currentStage = e.getStage();
-	}
 
-	void set_param(int param_id, float val) override {
-		switch (param_id) {
-			case Info::KnobAttack:
-				attackOffset = val;
-				break;
-			case Info::KnobHold:
-				holdOffset = val;
-				break;
-			case Info::KnobDecay:
-				decayOffset = val;
-				break;
-			case Info::KnobSustain:
-				sustainOffset = val;
-				break;
-			case Info::KnobRelease:
-				releaseOffset = val;
-				break;
-			case Info::KnobA_Curve:
-				e.set_attack_curve(val);
-				break;
-			case Info::KnobD_Curve:
-				e.set_decay_curve(val);
-				break;
-			case Info::KnobR_Curve:
-				e.set_release_curve(val);
-				break;
-		}
+		setOutput<AttackOut>((currentStage == e.ATTACK) ? MaxOutputVolts : 0);
+		setOutput<HoldOut>((currentStage == e.HOLD) ? MaxOutputVolts : 0);
+		setOutput<DecayOut>((currentStage == e.DECAY) ? MaxOutputVolts : 0);
+		setOutput<SustainOut>((currentStage == e.SUSTAIN) ? MaxOutputVolts : 0);
+		setOutput<ReleaseOut>((currentStage == e.RELEASE) ? MaxOutputVolts : 0);
+
+		setOutput<Out>(envelopeOutput * MaxOutputVolts);
 	}
 
 	void set_samplerate(float sr) override {
 		e.set_samplerate(sr);
 	}
-
-	void set_input(int input_id, float val) override {
-		val = val / CvRangeVolts;
-
-		switch (input_id) {
-			case Info::InputGate_In:
-				gateInput = val;
-				break;
-			case Info::InputAttack_Cv:
-				attackCv = val;
-				break;
-			case Info::InputHold_Cv:
-				holdCv = val;
-				break;
-			case Info::InputDecay_Cv:
-				decayCv = val;
-				break;
-			case Info::InputSustain_Cv:
-				sustainCv = val;
-				break;
-			case Info::InputRelease_Cv:
-				releaseCv = val;
-				break;
-		}
-	}
-
-	float get_output(int output_id) const override {
-		if (output_id == Info::OutputOut) {
-			return envelopeOutput * MaxOutputVolts;
-		} else if (output_id == Info::OutputAttack_Out){
-			return (currentStage == e.ATTACK) ? MaxOutputVolts : 0;
-		} else if (output_id == Info::OutputHold_Out){
-			return (currentStage == e.HOLD) ? MaxOutputVolts : 0;
-		} else if (output_id == Info::OutputDecay_Out){
-			return (currentStage == e.DECAY) ? MaxOutputVolts : 0;
-		} else if (output_id == Info::OutputSustain_Out){
-			return (currentStage == e.SUSTAIN) ? MaxOutputVolts : 0;
-		} else if (output_id == Info::OutputRelease_Out){
-			return (currentStage == e.RELEASE) ? MaxOutputVolts : 0;
-		}
-	}
-
-	float get_led_brightness(int led_id) const override {
-		return 0.f;
-	}
-
+	
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
@@ -133,7 +72,7 @@ private:
 	float decayCv = 0;
 	float sustainCv = 0;
 	float releaseCv = 0;
-	int currentStage = 0;
+	Envelope::stage_t currentStage = Envelope::stage_t::ATTACK;
 	Envelope e;
 };
 
