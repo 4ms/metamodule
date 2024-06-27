@@ -1,4 +1,4 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/ComplexEG_info.hh"
 #include "processors/envelope.h"
@@ -8,9 +8,10 @@ using namespace MathTools;
 namespace MetaModule
 {
 
-class ComplexEGCore : public CoreProcessor {
+class ComplexEGCore : public SmartCoreProcessor<ComplexEGInfo> {
 	using Info = ComplexEGInfo;
 	using ThisCore = ComplexEGCore;
+	using enum Info::Elem;
 
 public:
 	ComplexEGCore() = default;
