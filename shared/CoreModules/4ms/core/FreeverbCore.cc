@@ -1,4 +1,3 @@
-#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/Freeverb_info.hh"
@@ -6,6 +5,7 @@
 #include "processors/comb.h"
 #include "processors/tools/dcBlock.h"
 #include "util/math.hh"
+#include "util/zip.hh"
 
 namespace MetaModule
 {
@@ -17,22 +17,19 @@ class FreeverbCore : public SmartCoreProcessor<FreeverbInfo> {
 
 public:
 	FreeverbCore() {
-		for (int i = 0; i < numAll; i++) {
-			apFilter[i].setLength(allTuning[i]);
-			apFilter[i].setFeedback(0.6f);
-			apFilter[i].setFadeSpeed(0.001f);
-			currentAllTunning[i] = allTuning[i];
+		for (auto [comb, def, curCombTuning] : zip(combFilter, DefaultCombTuning, currentCombTuning)) {
+			comb.setFeedback(0);
+			comb.setLength(def);
 		}
 
-		for (int i = 0; i < numComb; i++) {
-			combFilter[i].setFeedback(0);
-			combFilter[i].setLength(combTuning[i]);
-			currentCombTuning[i] = combTuning[i];
+		for (auto [ap, def, curApTuning] : zip(apFilter, DefaultAllPassTuning, currentAllPassTuning)) {
+			ap.setLength(def);
+			ap.setFeedback(0.6f);
+			ap.setFadeSpeed(0.001f);
 		}
 	}
 
 	void update() override {
-		float dry = getInput<InputIn>().value_or(0.f);
 
 		auto add_cv_and_pot = [](std::optional<float> cv, float pot) {
 			const float cv_val = cv.value_or(0.f) / 5.f; // range: -1 .. 1 for CV -5V .. +5V
@@ -54,12 +51,13 @@ public:
 			setFeedback(fb);
 		}
 
+		float dry = getInput<InputIn>().value_or(0.f);
 		float wet = 0;
 		for (auto &comb : combFilter) {
 			wet += comb.process(dry);
 		}
 
-		wet /= static_cast<float>(numComb);
+		wet /= static_cast<float>(NumComb);
 
 		for (auto &allpass : apFilter) {
 			wet = allpass.process(wet);
@@ -71,17 +69,14 @@ public:
 	}
 
 	void setSize(float val) {
-		for (int i = 0; i < numComb; i++) {
-			currentCombTuning[i] = combTuning[i] * val;
-			if (currentCombTuning[i] < 1)
-				currentCombTuning[i] = 1;
-			combFilter[i].setLength(currentCombTuning[i]);
+		for (auto [comb, def, curCombTuning] : zip(combFilter, DefaultCombTuning, currentCombTuning)) {
+			curCombTuning = std::clamp(def * val, 100.f, (float)MaxCombSize);
+			comb.setLength(curCombTuning);
 		}
-		for (int i = 0; i < numAll; i++) {
-			currentAllTunning[i] = allTuning[i] * val;
-			if (currentAllTunning[i] < 1)
-				currentAllTunning[i] = 1;
-			apFilter[i].setLength(currentAllTunning[i]);
+
+		for (auto [ap, def, curApTuning] : zip(apFilter, DefaultAllPassTuning, currentAllPassTuning)) {
+			curApTuning = std::clamp(def * val, 40.f, (float)MaxAPSize);
+			ap.setLength(curApTuning);
 		}
 	}
 
@@ -108,21 +103,26 @@ public:
 	// clang-format on
 
 private:
-	static const int numComb = 8;
-	static const int numAll = 4;
+	static const int NumComb = 8;
+	static const int NumAllPass = 4;
 
-	static constexpr int allTuning[numAll] = {605, 480, 371, 245};
-	static constexpr int combTuning[numComb] = {1215, 1293, 1390, 1476, 1548, 1623, 1695, 1760};
+	static constexpr std::array<int, NumComb> DefaultCombTuning{1215, 1293, 1390, 1476, 1548, 1623, 1695, 1760};
+	static constexpr std::array<int, NumAllPass> DefaultAllPassTuning{605, 480, 371, 245};
 
-	int currentAllTunning[numAll];
-	int currentCombTuning[numComb];
+	static constexpr float MaxSize = 2.5f;
+	static constexpr float MinSize = 0.23f;
+	static constexpr size_t MaxCombSize = MaxSize * 1760 /* max(DefaultCombTuning) */;
+	static constexpr size_t MaxAPSize = MaxSize * 605 /* max(DefaultAllPassTuning) */;
 
-	std::array<Comb<6000>, numComb> combFilter;
-	std::array<AllPass<6000>, numAll> apFilter;
+	std::array<int, NumAllPass> currentAllPassTuning{DefaultAllPassTuning};
+	std::array<int, NumComb> currentCombTuning{DefaultCombTuning};
 
-	float prev_size{0};
-	float prev_damp{0};
-	float prev_fb{0};
+	std::array<Comb<MaxCombSize>, NumComb> combFilter{};
+	std::array<AllPass<MaxAPSize>, NumAllPass> apFilter{};
+
+	float prev_size{-1};
+	float prev_damp{-1};
+	float prev_fb{-1};
 
 	DCBlock dcblock;
 };
