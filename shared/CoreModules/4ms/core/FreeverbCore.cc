@@ -111,8 +111,8 @@ private:
 	static const int numComb = 8;
 	static const int numAll = 4;
 
-	static constexpr int allTuning[numAll] = {1248, 812, 358, 125};
-	static constexpr int combTuning[numComb] = {3000, 4003, 4528, 5217, 1206, 2108, 3337, 5003};
+	static constexpr int allTuning[numAll] = {605, 480, 371, 245};
+	static constexpr int combTuning[numComb] = {1215, 1293, 1390, 1476, 1548, 1623, 1695, 1760};
 
 	int currentAllTunning[numAll];
 	int currentCombTuning[numComb];
