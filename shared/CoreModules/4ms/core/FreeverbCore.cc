@@ -69,6 +69,8 @@ public:
 	}
 
 	void setSize(float val) {
+		val *= (MaxSize - MinSize);
+		val += MinSize;
 		for (auto [comb, def, curCombTuning] : zip(combFilter, DefaultCombTuning, currentCombTuning)) {
 			curCombTuning = std::clamp(def * val, 100.f, (float)MaxCombSize);
 			comb.setLength(curCombTuning);
@@ -88,7 +90,7 @@ public:
 
 	void setFeedback(float val) {
 		for (auto &comb : combFilter) {
-			comb.setFeedback(MathTools::map_value(val, 0.0f, 1.0f, 0.8f, 0.99f));
+			comb.setFeedback(MathTools::map_value(val, 0.0f, 1.0f, 0.8f, 1.0f));
 		}
 	}
 
