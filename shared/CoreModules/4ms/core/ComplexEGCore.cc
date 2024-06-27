@@ -95,9 +95,16 @@ public:
 	float get_output(int output_id) const override {
 		if (output_id == Info::OutputOut) {
 			return envelopeOutput * MaxOutputVolts;
-		} else {
-			//FIXME: This only works because OutputOut is 5, and the others are 0-4 in AHDSR order
-			return (currentStage == output_id) ? MaxOutputVolts : 0;
+		} else if (output_id == Info::OutputAttack_Out){
+			return (currentStage == e.ATTACK) ? MaxOutputVolts : 0;
+		} else if (output_id == Info::OutputHold_Out){
+			return (currentStage == e.HOLD) ? MaxOutputVolts : 0;
+		} else if (output_id == Info::OutputDecay_Out){
+			return (currentStage == e.DECAY) ? MaxOutputVolts : 0;
+		} else if (output_id == Info::OutputSustain_Out){
+			return (currentStage == e.SUSTAIN) ? MaxOutputVolts : 0;
+		} else if (output_id == Info::OutputRelease_Out){
+			return (currentStage == e.RELEASE) ? MaxOutputVolts : 0;
 		}
 	}
 

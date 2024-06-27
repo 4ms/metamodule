@@ -5,8 +5,17 @@
 #include "util/math_tables.hh"
 
 class Envelope {
+public:
+	enum stage_t {
+		ATTACK,
+		HOLD,
+		DECAY,
+		SUSTAIN,
+		RELEASE,
+		IDLE
+	};
 private:
-	int stage = 0;
+	stage_t stage = ATTACK;
 	float sampleRate = 48000;
 	float phaccu = 0;
 	float increment = 0;
@@ -56,12 +65,14 @@ private:
 		return fall;
 	}
 
+
+
 public:
 	bool sustainEnable = true;
 
 	Envelope() = default;
 
-	int getStage() {
+	stage_t getStage() {
 		return stage;
 	}
 
@@ -72,49 +83,52 @@ public:
 		// Rising edge
 		if (gateInput.output() > lastGate) {
 			phaccu = 0;
-			stage = Attack;
+			stage = ATTACK;
 			attackSample = lastSample;
 		}
 
-		if (stage == Sustain) {
+		if (stage == SUSTAIN) {
 			envOut = sustainLevel;
 
 			// End Sustain if gate is low
 			if (!gateInput.output())
-				stage = Release;
+				stage = RELEASE;
 
-		} else if (stage > Release) {
+		} else if (stage == IDLE) {
 			envOut = 0.f;
 
 		} else {
-			int stageSelect = stage == Release ? 3 : stage;
+			int stageSelect = stage == RELEASE ? 3 : stage;
 			increment = 1000.0f / envTimes[stageSelect] / sampleRate;
 
 			phaccu += increment;
 			if (phaccu >= 1.0f) {
-
-				if (stage == Attack)
-					stage = holdEnable ? Hold : Decay;
-
-				else if (stage == Decay)
-					stage = gateInput.output() ? Sustain : Release;
-
+				if (stage == ATTACK)
+					stage = holdEnable ? HOLD : DECAY;
+				else if (stage == HOLD)
+					stage = DECAY;
+				else if (stage == DECAY)
+					stage = gateInput.output() ? SUSTAIN : RELEASE;
+				else if (stage == SUSTAIN)
+					stage = RELEASE;
+				else if (stage == RELEASE)
+					stage = IDLE;
 				else
-					stage++;
+					stage = IDLE;
 
 				phaccu = 0;
 			}
 
-			if (stage == Attack)
+			if (stage == ATTACK)
 				envOut = calcRise(attackCurve);
 
-			else if (stage == Hold)
+			else if (stage == HOLD)
 				envOut = 1.0f;
 
-			else if (stage == Decay)
+			else if (stage == DECAY)
 				envOut = calcFall(1.0f, sustainLevel, decayCurve);
 
-			else if (stage == Release)
+			else if (stage == RELEASE)
 				envOut = calcFall(sustainLevel, 0.0f, releaseCurve);
 		}
 
@@ -124,7 +138,7 @@ public:
 
 	void set_envelope_time(int _envStage, float milliseconds) {
 		envTimes[_envStage] = milliseconds;
-		if (_envStage == Hold) // hold stage
+		if (_envStage == HOLD) // hold stage
 		{
 			if (milliseconds < 0.1f) {
 				holdEnable = false;
@@ -153,12 +167,4 @@ public:
 	void set_release_curve(float val) {
 		releaseCurve = val;
 	}
-
-	enum {
-		Attack = 0,
-		Hold = 1,
-		Decay = 2,
-		Sustain = 3,
-		Release = 4,
-	};
 };
