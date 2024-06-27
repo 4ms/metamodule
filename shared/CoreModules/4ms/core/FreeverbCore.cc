@@ -71,6 +71,8 @@ public:
 	void setSize(float val) {
 		val *= (MaxSize - MinSize);
 		val += MinSize;
+		val *= sr_ratio;
+
 		for (auto [comb, def, curCombTuning] : zip(combFilter, DefaultCombTuning, currentCombTuning)) {
 			curCombTuning = std::clamp(def * val, 100.f, (float)MaxCombSize);
 			comb.setLength(curCombTuning);
@@ -95,7 +97,8 @@ public:
 	}
 
 	void set_samplerate(float sr) override {
-		//TODO
+		sr_ratio = sr / 48000.f;
+		prev_size = -1.f; //force re-calculate
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -125,6 +128,8 @@ private:
 	float prev_size{-1};
 	float prev_damp{-1};
 	float prev_fb{-1};
+
+	float sr_ratio = 1.f;
 
 	DCBlock dcblock;
 };
