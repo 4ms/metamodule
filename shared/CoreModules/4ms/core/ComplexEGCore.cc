@@ -17,6 +17,8 @@ public:
 	ComplexEGCore() = default;
 
 	void update() override {
+		isLooping = getState<LoopButton>() == LatchingButton::State_t::DOWN ? true : false;
+
 		float finalAttack = constrain(getInput<AttackCvIn>().value_or(0.f)/CvRangeVolts + getState<AttackKnob>(), 0.0f, 1.0f);
 		float finalHold = constrain(getInput<HoldCvIn>().value_or(0.f)/CvRangeVolts + getState<HoldKnob>(), 0.0f, 1.0f);
 		float finalDecay = constrain(getInput<DecayCvIn>().value_or(0.f)/CvRangeVolts + getState<DecayKnob>(), 0.0f, 1.0f);
@@ -34,7 +36,15 @@ public:
 		e.set_decay_curve(getState<DCurveKnob>());
 		e.set_release_curve(getState<RCurveKnob>());
 
-		envelopeOutput = e.update(getInput<GateIn>().value_or(0.f));
+		if(isLooping) {
+			if(currentStage == Envelope::IDLE) {
+				envelopeOutput = e.update(8.f);
+			} else {
+				envelopeOutput = e.update(0.f);
+			}
+		} else {
+			envelopeOutput = e.update(getInput<GateIn>().value_or(0.f));
+		}
 
 		currentStage = e.getStage();
 
@@ -45,12 +55,14 @@ public:
 		setOutput<ReleaseOut>((currentStage == e.RELEASE) ? MaxOutputVolts : 0);
 
 		setOutput<Out>(envelopeOutput * MaxOutputVolts);
+
+		setLED<LoopButton>(isLooping ? 1.f : 0.f);
 	}
 
 	void set_samplerate(float sr) override {
 		e.set_samplerate(sr);
 	}
-	
+
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
@@ -58,6 +70,7 @@ public:
 	// clang-format on
 
 private:
+	bool isLooping = false;
 	float gateInput = 0;
 	float envelopeOutput = 0;
 
