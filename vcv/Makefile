@@ -106,6 +106,15 @@ LDFLAGS +=
 DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
 
+all: debug
+
+debug:
+	$(CXX) --version
+
+clean:
+	$(CXX) --version
+
+
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
 
