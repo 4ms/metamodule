@@ -20,7 +20,9 @@ PatchStorage *patchStorage;
 
 Configuration_t FrameConfig{.start = 0x01, .end = 0x02, .escape = 0x03};
 
-StaticDeframerInclusive<16000> deframer(FrameConfig);
+__attribute__((section(".wifi"))) std::array<uint8_t,8*1024*1024> ReceiveBuffer;
+
+StaticDeframer deframer(FrameConfig, std::span(ReceiveBuffer));
 Framer framer(FrameConfig);
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
