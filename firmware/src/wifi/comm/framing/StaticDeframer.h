@@ -10,11 +10,13 @@
 namespace Framing
 {
 
-template <std::size_t SIZE>
-class StaticDeframer : public Deframer<StaticDeframer<SIZE>>
+class StaticDeframer : public Deframer<StaticDeframer>
 {
 public:
-	StaticDeframer(const Configuration_t& config_) : Deframer<StaticDeframer<SIZE>>(config_, this) {};
+	StaticDeframer(const Configuration_t& config_, std::span<uint8_t> scratchBuffer) 
+		: Deframer<StaticDeframer>(config_, this)
+		, receiveBuffer(scratchBuffer)
+		{};
 
 private:
 	template <typename FUNC>
@@ -26,7 +28,7 @@ private:
 	template <typename FUNC>
 	void doAdd(uint8_t byte, const FUNC&& func)
 	{
-		if (fillCount < SIZE)
+		if (fillCount < receiveBuffer.size())
 		{
 			receiveBuffer[fillCount++] = byte;
 		}
@@ -43,11 +45,20 @@ private:
 	}
 
 private:
-	std::array<uint8_t,SIZE> receiveBuffer;
+	std::span<uint8_t> receiveBuffer;
 	std::size_t fillCount = 0;
 
 private:
-	friend Deframer<StaticDeframer<SIZE>>;
+	friend Deframer<StaticDeframer>;
+};
+
+template <std::size_t SIZE>
+class StaticDeframerInclusive : public StaticDeframer
+{
+public:
+	StaticDeframerInclusive(const Configuration_t& config_) : StaticDeframer(config_, std::span(receiveBuffer)) {};
+private:
+	std::array<uint8_t,SIZE> receiveBuffer;
 };
 
 }

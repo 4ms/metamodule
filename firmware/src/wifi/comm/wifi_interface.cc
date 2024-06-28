@@ -20,7 +20,7 @@ PatchStorage *patchStorage;
 
 Configuration_t FrameConfig{.start = 0x01, .end = 0x02, .escape = 0x03};
 
-StaticDeframer<16000> deframer(FrameConfig);
+StaticDeframerInclusive<16000> deframer(FrameConfig);
 Framer framer(FrameConfig);
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
