@@ -21,26 +21,30 @@ struct ModuleViewPage : PageBase {
 		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings}
 		, patch{patches.get_view_patch()}
-		, roller{ui_ElementRoller}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state} {
 
 		init_bg(ui_MappingMenu);
 
 		lv_draw_img_dsc_init(&img_dsc);
 
-		lv_obj_remove_style(roller, nullptr, LV_STATE_EDITED);
-		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
+		lv_obj_remove_style(ui_ElementRoller, nullptr, LV_STATE_EDITED);
+		lv_obj_remove_style(ui_ElementRoller, nullptr, LV_STATE_FOCUS_KEY);
 
 		lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
 
 		button.clear();
 
-		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, roller);
-		lv_group_focus_obj(roller);
+		auto roller_label = lv_obj_get_child(ui_ElementRoller, 0);
+		lv_label_set_recolor(roller_label, true);
 
-		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
+		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, ui_ElementRoller);
+		lv_group_add_obj(group, ui_ModuleViewActionBut);
+		lv_group_focus_obj(ui_ElementRoller);
+
+		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
 	}
 
 	void prepare_focus() override {
@@ -67,6 +71,8 @@ struct ModuleViewPage : PageBase {
 		lv_label_set_text(ui_ElementRollerModuleName, module_slug.c_str());
 
 		redraw_module();
+
+		lv_hide(ui_ModuleViewActionMenu);
 	}
 
 	void redraw_module() {
@@ -104,6 +110,7 @@ struct ModuleViewPage : PageBase {
 		// Populate Roller and highlighter buttons
 		unsigned roller_idx = 0;
 		DrawnElement const *cur_el = nullptr;
+		ElementCount::Counts last_type{};
 
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &drawn = drawn_element.gui_element;
@@ -119,7 +126,22 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
-			opts += base.short_name;
+			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
+				opts += Gui::blue_highlight_html_str + " Params:#\n";
+				roller_idx++;
+				roller_drawn_el_idx.push_back(-1);
+			} else if (last_type.num_params > 0 && (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0)) {
+				opts += Gui::blue_highlight_html_str + " Jacks:#\n";
+				roller_idx++;
+				roller_drawn_el_idx.push_back(-1);
+			} else if (last_type.num_lights == 0 && drawn.count.num_lights > 0 && drawn.count.num_params == 0) {
+				opts += Gui::blue_highlight_html_str + " Lights:#\n";
+				roller_idx++;
+				roller_drawn_el_idx.push_back(-1);
+			}
+			last_type = drawn.count;
+
+			opts += std::string(" ") + std::string(base.short_name);
 
 			if (drawn.mapped_panel_id) {
 				append_panel_name(opts, drawn_element.element, drawn.mapped_panel_id.value());
@@ -151,14 +173,11 @@ struct ModuleViewPage : PageBase {
 		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
 		lv_obj_clear_flag(ui_ElementRollerPanel, LV_OBJ_FLAG_HIDDEN);
 
-		auto roller_label = lv_obj_get_child(roller, 0);
-		lv_label_set_recolor(roller_label, true);
-
 		// Add text list to roller options
-		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
-		lv_roller_set_visible_row_count(roller, 10);
+		lv_roller_set_options(ui_ElementRoller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_visible_row_count(ui_ElementRoller, 10);
 
-		lv_roller_set_selected(roller, cur_selected, LV_ANIM_OFF);
+		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
 		if (cur_selected < button.size() && button.size() > 0) {
 			lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
@@ -312,8 +331,8 @@ private:
 		mode = ViewMode::List;
 		mapping_pane.hide();
 		lv_show(ui_ElementRollerPanel);
-		lv_obj_set_height(roller, 210);
-		lv_group_focus_obj(roller);
+		lv_obj_set_height(ui_ElementRoller, 203);
+		lv_group_focus_obj(ui_ElementRoller);
 		lv_group_set_editing(group, true);
 	}
 
@@ -368,26 +387,49 @@ private:
 		return true;
 	}
 
-	static void roller_cb(lv_event_t *event) {
+	static void roller_scrolled_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto &cur_sel = page->cur_selected;
 		auto &but = page->button;
 
+		auto cur_sel = page->cur_selected;
+
+		auto next_sel = lv_roller_get_selected(ui_ElementRoller);
+
 		// Turn off old button
-		if (cur_sel >= 0 && cur_sel < but.size()) {
-			lv_obj_remove_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
-			lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
+		if (cur_sel < page->roller_drawn_el_idx.size()) {
+			if (size_t idx = page->roller_drawn_el_idx[cur_sel]; idx < but.size()) {
+				lv_obj_remove_style(but[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+				lv_event_send(but[idx], LV_EVENT_REFRESH, nullptr);
+			}
 		}
 
 		// Get the new button
-		cur_sel = lv_roller_get_selected(page->roller);
-		if (cur_sel < but.size()) {
-			// Turn on new button
-			lv_obj_add_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
-			lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
-			lv_obj_scroll_to_view(but[cur_sel], LV_ANIM_ON);
-		} else {
-			pr_err("%u is selected but only %zu buttons\n", cur_sel, but.size());
+		page->cur_selected = next_sel;
+		if (next_sel < page->roller_drawn_el_idx.size()) {
+			if (size_t idx = page->roller_drawn_el_idx[next_sel]; idx < but.size()) {
+				// Turn on new button
+				lv_obj_add_style(but[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+				lv_event_send(but[idx], LV_EVENT_REFRESH, nullptr);
+				lv_obj_scroll_to_view(but[idx], LV_ANIM_ON);
+			} else {
+				// Skip over headers
+				if (cur_sel < next_sel) {
+					if (next_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
+						next_sel++;
+					else
+						next_sel = cur_sel;
+				} else {
+					if (next_sel)
+						next_sel--;
+					else {
+						//Went up from the first item
+						lv_group_focus_obj(ui_ModuleViewActionBut);
+						next_sel = cur_sel;
+					}
+				}
+				lv_roller_set_selected(ui_ElementRoller, next_sel, LV_ANIM_ON);
+				page->cur_selected = next_sel;
+			}
 		}
 	}
 
@@ -400,7 +442,18 @@ private:
 			lv_hide(ui_ElementRollerPanel);
 
 			auto drawn_idx = page->roller_drawn_el_idx[cur_sel];
-			page->mapping_pane.show(page->drawn_elements[drawn_idx]);
+			if (drawn_idx >= 0)
+				page->mapping_pane.show(page->drawn_elements[drawn_idx]);
+		}
+	}
+
+	static void roller_focus_cb(lv_event_t *event) {
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		if (page) {
+			if (event->param != page) {
+				lv_group_set_editing(page->group, true);
+				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, page);
+			}
 		}
 	}
 
@@ -423,12 +476,11 @@ private:
 
 	std::vector<lv_obj_t *> button;
 	std::vector<DrawnElement> drawn_elements;
-	std::vector<unsigned> roller_drawn_el_idx;
+	std::vector<int> roller_drawn_el_idx;
 
 	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals{};
 
 	lv_obj_t *canvas = nullptr;
-	lv_obj_t *roller = nullptr;
 	ModuleViewMappingPane mapping_pane;
 
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};

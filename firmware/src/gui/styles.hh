@@ -3,6 +3,7 @@
 #include "slsexport/meta5/ui.h"
 #include <array>
 #include <span>
+#include <string>
 
 // lvgl has prop1 and has_group fields out of order, thus not C++ friendly
 #define LV_STYLE_CONST_CPP(prop_array)                                                                                 \
@@ -61,6 +62,7 @@ struct Gui {
 	static inline lv_color_t yellow_highlight = lv_color_hex(0x8bfd18);
 	static inline const char *yellow_highlight_html = "#d7ff6a ";
 	static inline const char *blue_highlight_html = "#188bfd ";
+	static inline const std::string blue_highlight_html_str = "#188bfd ";
 	static inline const char *brown_highlight_html = "#A26E3E ";
 
 	static inline lv_theme_t *theme;
