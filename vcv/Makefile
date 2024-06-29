@@ -95,7 +95,7 @@ FLAGS += $(INCLUDES)
 FLAGS += -g2
 
 CFLAGS +=
-CXXFLAGS += -DVCVRACK
+CXXFLAGS += -DVCVRACK -freport-bug
 
 # Careful about linking to shared libraries, since you can't assume much about the user's environment and library search path.
 # Static libraries are fine, but they should be added to this plugin's build system.
@@ -105,6 +105,15 @@ LDFLAGS +=
 # The compiled plugin and "plugin.json" are automatically added.
 DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
+
+all: debug
+
+debug:
+	$(CXX) --version
+
+clean:
+	$(CXX) --version
+
 
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
