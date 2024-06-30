@@ -59,6 +59,7 @@ struct Gui {
 	// COLORS
 	static inline lv_color_t orange_highlight = lv_color_hex(0xfd8b18);
 	static inline const char *orange_highlight_html = "#fd8b18 ";
+	static inline const std::string orange_highlight_html_str = "#fd8b18 ";
 	static inline lv_color_t yellow_highlight = lv_color_hex(0x8bfd18);
 	static inline const char *yellow_highlight_html = "#d7ff6a ";
 	static inline const char *blue_highlight_html = "#188bfd ";

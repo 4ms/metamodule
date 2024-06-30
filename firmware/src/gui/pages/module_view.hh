@@ -127,15 +127,15 @@ struct ModuleViewPage : PageBase {
 			}
 
 			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
-				opts += Gui::blue_highlight_html_str + " Params:#\n";
+				opts += Gui::orange_highlight_html_str + "Params:#\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 			} else if (last_type.num_params > 0 && (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0)) {
-				opts += Gui::blue_highlight_html_str + " Jacks:#\n";
+				opts += Gui::orange_highlight_html_str + "Jacks:#\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 			} else if (last_type.num_lights == 0 && drawn.count.num_lights > 0 && drawn.count.num_params == 0) {
-				opts += Gui::blue_highlight_html_str + " Lights:#\n";
+				opts += Gui::orange_highlight_html_str + "Lights:#\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 			}
@@ -175,7 +175,6 @@ struct ModuleViewPage : PageBase {
 
 		// Add text list to roller options
 		lv_roller_set_options(ui_ElementRoller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
-		lv_roller_set_visible_row_count(ui_ElementRoller, 10);
 
 		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
@@ -331,7 +330,6 @@ private:
 		mode = ViewMode::List;
 		mapping_pane.hide();
 		lv_show(ui_ElementRollerPanel);
-		lv_obj_set_height(ui_ElementRoller, 203);
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_group_set_editing(group, true);
 	}
@@ -372,7 +370,7 @@ private:
 		drawn_elements.clear();
 		opts.clear();
 		roller_drawn_el_idx.clear();
-		cur_selected = 0;
+		cur_selected = 1;
 	}
 
 	bool read_slug() {
@@ -422,9 +420,12 @@ private:
 					if (next_sel)
 						next_sel--;
 					else {
-						//Went up from the first item
+						//Going up from first header -> defocus roller and focus button bar
 						lv_group_focus_obj(ui_ModuleViewActionBut);
-						next_sel = cur_sel;
+						lv_group_set_editing(page->group, false);
+						page->cur_selected = cur_sel;
+						lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
+						return;
 					}
 				}
 				lv_roller_set_selected(ui_ElementRoller, next_sel, LV_ANIM_ON);
@@ -452,7 +453,7 @@ private:
 		if (page) {
 			if (event->param != page) {
 				lv_group_set_editing(page->group, true);
-				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, page);
+				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
 			}
 		}
 	}
