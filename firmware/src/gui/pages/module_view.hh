@@ -40,6 +40,7 @@ struct ModuleViewPage : PageBase {
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_ElementRoller);
 		lv_group_add_obj(group, ui_ModuleViewActionBut);
+		lv_group_add_obj(group, ui_ModuleViewSettingsBut);
 		lv_group_focus_obj(ui_ElementRoller);
 
 		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
@@ -130,10 +131,12 @@ struct ModuleViewPage : PageBase {
 				opts += Gui::orange_highlight_html_str + "Params:#\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
+
 			} else if (last_type.num_params > 0 && (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0)) {
 				opts += Gui::orange_highlight_html_str + "Jacks:#\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
+
 			} else if (last_type.num_lights == 0 && drawn.count.num_lights > 0 && drawn.count.num_params == 0) {
 				opts += Gui::orange_highlight_html_str + "Lights:#\n";
 				roller_idx++;
@@ -421,7 +424,7 @@ private:
 						next_sel--;
 					else {
 						//Going up from first header -> defocus roller and focus button bar
-						lv_group_focus_obj(ui_ModuleViewActionBut);
+						lv_group_focus_obj(ui_ModuleViewSettingsBut);
 						lv_group_set_editing(page->group, false);
 						page->cur_selected = cur_sel;
 						lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);

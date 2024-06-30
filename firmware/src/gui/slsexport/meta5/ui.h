@@ -173,6 +173,8 @@ extern lv_obj_t *ui_ElementRollerButtonCont;
 extern lv_obj_t *ui_ElementRollerModuleName;
 extern lv_obj_t *ui_ModuleViewActionBut;
 extern lv_obj_t *ui_ModuleViewActionButLabel;
+extern lv_obj_t *ui_ModuleViewSettingsBut;
+extern lv_obj_t *ui_ModuleViewSettingsButLabel;
 extern lv_obj_t *ui_ElementRoller;
 extern lv_obj_t *ui_ModuleViewActionMenu;
 extern lv_obj_t *ui_ModuleViewActionHeader;

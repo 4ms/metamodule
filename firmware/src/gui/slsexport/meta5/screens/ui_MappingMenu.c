@@ -76,7 +76,7 @@ lv_obj_set_style_pad_top(ui_ModuleImage, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT)
 lv_obj_set_style_pad_bottom(ui_ModuleImage, 2, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
 
 ui_ElementRollerPanel = lv_obj_create(ui_MappingFlexZone);
-lv_obj_set_width( ui_ElementRollerPanel, 148);
+lv_obj_set_width( ui_ElementRollerPanel, 157);
 lv_obj_set_height( ui_ElementRollerPanel, lv_pct(100));
 lv_obj_set_align( ui_ElementRollerPanel, LV_ALIGN_RIGHT_MID );
 lv_obj_add_flag( ui_ElementRollerPanel, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
@@ -114,11 +114,11 @@ lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 0, LV_PART_MAIN| LV_STATE_D
 lv_obj_set_style_pad_column(ui_ElementRollerButtonCont, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_ElementRollerModuleName = lv_label_create(ui_ElementRollerButtonCont);
-lv_obj_set_width( ui_ElementRollerModuleName, lv_pct(74));
+lv_obj_set_width( ui_ElementRollerModuleName, lv_pct(60));
 lv_obj_set_height( ui_ElementRollerModuleName, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_ElementRollerModuleName, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_ElementRollerModuleName,LV_LABEL_LONG_SCROLL_CIRCULAR);
-lv_label_set_text(ui_ElementRollerModuleName,"EnOsc #1");
+lv_label_set_text(ui_ElementRollerModuleName,"Ensemble Osc #1");
 lv_obj_add_flag( ui_ElementRollerModuleName, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );   /// Flags
 lv_obj_clear_flag( ui_ElementRollerModuleName, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_ElementRollerModuleName, LV_SCROLLBAR_MODE_OFF);
@@ -135,10 +135,10 @@ lv_obj_set_style_pad_top(ui_ElementRollerModuleName, 0, LV_PART_MAIN| LV_STATE_D
 lv_obj_set_style_pad_bottom(ui_ElementRollerModuleName, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_ModuleViewActionBut = lv_btn_create(ui_ElementRollerButtonCont);
-lv_obj_set_width( ui_ModuleViewActionBut, 32);
-lv_obj_set_height( ui_ModuleViewActionBut, 32);
-lv_obj_set_x( ui_ModuleViewActionBut, 0 );
-lv_obj_set_y( ui_ModuleViewActionBut, -1 );
+lv_obj_set_width( ui_ModuleViewActionBut, 30);
+lv_obj_set_height( ui_ModuleViewActionBut, 30);
+lv_obj_set_x( ui_ModuleViewActionBut, -30 );
+lv_obj_set_y( ui_ModuleViewActionBut, 0 );
 lv_obj_set_align( ui_ModuleViewActionBut, LV_ALIGN_TOP_RIGHT );
 lv_obj_set_style_radius(ui_ModuleViewActionBut, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_ModuleViewActionBut, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -150,7 +150,7 @@ lv_obj_set_style_text_opa(ui_ModuleViewActionBut, 255, LV_PART_MAIN| LV_STATE_CH
 lv_obj_set_style_outline_color(ui_ModuleViewActionBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_outline_opa(ui_ModuleViewActionBut, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_width(ui_ModuleViewActionBut, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
-lv_obj_set_style_outline_pad(ui_ModuleViewActionBut, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ModuleViewActionBut, -1, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_text_color(ui_ModuleViewActionBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
 lv_obj_set_style_text_opa(ui_ModuleViewActionBut, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_color(ui_ModuleViewActionBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
@@ -163,10 +163,41 @@ lv_obj_set_width( ui_ModuleViewActionButLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_ModuleViewActionButLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_ModuleViewActionButLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_ModuleViewActionButLabel,"");
-lv_obj_set_style_text_font(ui_ModuleViewActionButLabel, &ui_font_MuseoSansRounded90018, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_ModuleViewActionButLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_ModuleViewSettingsBut = lv_btn_create(ui_ElementRollerButtonCont);
+lv_obj_set_width( ui_ModuleViewSettingsBut, 30);
+lv_obj_set_height( ui_ModuleViewSettingsBut, 30);
+lv_obj_set_x( ui_ModuleViewSettingsBut, -2 );
+lv_obj_set_y( ui_ModuleViewSettingsBut, 0 );
+lv_obj_set_align( ui_ModuleViewSettingsBut, LV_ALIGN_TOP_RIGHT );
+lv_obj_set_style_radius(ui_ModuleViewSettingsBut, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewSettingsBut, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ModuleViewSettingsBut, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewSettingsBut, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_CHECKED );
+lv_obj_set_style_bg_opa(ui_ModuleViewSettingsBut, 0, LV_PART_MAIN| LV_STATE_CHECKED);
+lv_obj_set_style_text_color(ui_ModuleViewSettingsBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_CHECKED );
+lv_obj_set_style_text_opa(ui_ModuleViewSettingsBut, 255, LV_PART_MAIN| LV_STATE_CHECKED);
+lv_obj_set_style_outline_color(ui_ModuleViewSettingsBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_ModuleViewSettingsBut, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ModuleViewSettingsBut, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ModuleViewSettingsBut, -1, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_text_color(ui_ModuleViewSettingsBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_text_opa(ui_ModuleViewSettingsBut, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_ModuleViewSettingsBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_ModuleViewSettingsBut, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_ModuleViewSettingsBut, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_ModuleViewSettingsBut, 1, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_ModuleViewSettingsButLabel = lv_label_create(ui_ModuleViewSettingsBut);
+lv_obj_set_width( ui_ModuleViewSettingsButLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_ModuleViewSettingsButLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_ModuleViewSettingsButLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_ModuleViewSettingsButLabel,"");
+lv_obj_set_style_text_font(ui_ModuleViewSettingsButLabel, &ui_font_MuseoSansRounded90018, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_ElementRoller = lv_roller_create(ui_ElementRollerPanel);
-lv_roller_set_options( ui_ElementRoller, "Parameter Name 1\nParameter 2\nParameter 3\nParameter 4\nParameter Name 5\nParameter 6\nParameter 7\nParameter 8\nParameter 9\nParameter 10\nParameter 11\nParameter 12\nParameter 13\nParameter 14\nParameter 15\nParameter 16\nParameter 17\nParameter 18\nParameter 19\nParameter 20\nParameter 21\nParameter 22\nParameter 23\nParameter 24\nParameter 25\nParameter 26\nParameter 27\nParameter 28\nParameter 29\nParameter 28", LV_ROLLER_MODE_NORMAL );
+lv_roller_set_options( ui_ElementRoller, "Params\nParameter 3\nParameter 4\nParameter Name 5\nParameter 6\nParameter 7\nParameter 8\nParameter 9\nParameter 10\nParameter 11\nParameter 12\nParameter 13\nParameter 14\nParameter 15\nParameter 16\nParameter 17\nParameter 18\nParameter 19\nParameter 20\nParameter 21\nParameter 22\nParameter 23\nParameter 24\nParameter 25\nParameter 26\nParameter 27\nParameter 28\nParameter 29\nParameter 28", LV_ROLLER_MODE_NORMAL );
 lv_roller_set_selected( ui_ElementRoller, 4, LV_ANIM_OFF);
 lv_obj_set_height( ui_ElementRoller, 203);
 lv_obj_set_width( ui_ElementRoller, lv_pct(109));

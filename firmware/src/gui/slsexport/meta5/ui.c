@@ -171,6 +171,8 @@ lv_obj_t *ui_ElementRollerButtonCont;
 lv_obj_t *ui_ElementRollerModuleName;
 lv_obj_t *ui_ModuleViewActionBut;
 lv_obj_t *ui_ModuleViewActionButLabel;
+lv_obj_t *ui_ModuleViewSettingsBut;
+lv_obj_t *ui_ModuleViewSettingsButLabel;
 lv_obj_t *ui_ElementRoller;
 lv_obj_t *ui_ModuleViewActionMenu;
 lv_obj_t *ui_ModuleViewActionHeader;
