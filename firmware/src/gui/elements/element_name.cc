@@ -68,7 +68,7 @@ void append_panel_name(std::string &opts, Element const &el, uint16_t mapped_pan
 		opts += name;
 		opts += "";
 		if (color[0] != '\0')
-			opts += "#";
+			opts += LV_TXT_COLOR_CMD;
 	}
 }
 

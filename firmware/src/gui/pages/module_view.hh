@@ -132,23 +132,24 @@ struct ModuleViewPage : PageBase {
 			}
 
 			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
-				opts += Gui::orange_highlight_html_str + "Params:#\n";
+				opts += Gui::orange_highlight_html_str + "Params:" + LV_TXT_COLOR_CMD + "\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 
 			} else if (last_type.num_params > 0 && (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0)) {
-				opts += Gui::orange_highlight_html_str + "Jacks:#\n";
+				opts += Gui::orange_highlight_html_str + "Jacks:" + LV_TXT_COLOR_CMD + "\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 
 			} else if (last_type.num_lights == 0 && drawn.count.num_lights > 0 && drawn.count.num_params == 0) {
-				opts += Gui::orange_highlight_html_str + "Lights:#\n";
+				opts += Gui::orange_highlight_html_str + "Lights:" + LV_TXT_COLOR_CMD + "\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 			}
 			last_type = drawn.count;
 
-			opts += std::string(" ") + std::string(base.short_name);
+			opts.append(" ");
+			opts.append(base.short_name);
 
 			if (drawn.mapped_panel_id) {
 				append_panel_name(opts, drawn_element.element, drawn.mapped_panel_id.value());
