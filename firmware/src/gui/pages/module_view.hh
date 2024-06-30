@@ -7,6 +7,7 @@
 #include "gui/elements/redraw_light.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
+#include "gui/pages/module_view_action_menu.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -21,7 +22,8 @@ struct ModuleViewPage : PageBase {
 		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings}
 		, patch{patches.get_view_patch()}
-		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state} {
+		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
+		, action_menu{patch_mod_queue} {
 
 		init_bg(ui_MappingMenu);
 
@@ -74,6 +76,8 @@ struct ModuleViewPage : PageBase {
 		redraw_module();
 
 		lv_hide(ui_ModuleViewActionMenu);
+
+		action_menu.prepare_focus(group, this_module_id);
 	}
 
 	void redraw_module() {
@@ -206,7 +210,11 @@ struct ModuleViewPage : PageBase {
 
 	void update() override {
 		if (metaparams.back_button.is_just_released()) {
-			if (mode == ViewMode::List) {
+
+			if (action_menu.is_visible()) {
+				action_menu.hide();
+
+			} else if (mode == ViewMode::List) {
 				load_prev_page();
 
 			} else if (mode == ViewMode::Mapping) {
@@ -220,6 +228,9 @@ struct ModuleViewPage : PageBase {
 				show_roller();
 			}
 		}
+
+		if (action_menu.is_visible())
+			action_menu.update();
 
 		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
@@ -326,6 +337,7 @@ struct ModuleViewPage : PageBase {
 
 	void blur() final {
 		params.lights.stop_watching_all();
+		action_menu.hide();
 	}
 
 private:
@@ -486,6 +498,8 @@ private:
 
 	lv_obj_t *canvas = nullptr;
 	ModuleViewMappingPane mapping_pane;
+
+	ModuleViewActionMenu action_menu;
 
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};
 	lv_draw_img_dsc_t img_dsc{};
