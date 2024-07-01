@@ -25,6 +25,12 @@ __attribute__((section(".wifi"))) std::array<uint8_t,8*1024*1024> ReceiveBuffer;
 StaticDeframer deframer(FrameConfig, std::span(ReceiveBuffer));
 Framer framer(FrameConfig);
 
+using Timestamp_t = uint32_t;
+
+std::optional<Timestamp_t> lastHeartbeatSentTime;
+static constexpr Timestamp_t HeartbeatInterval = 1000;
+
+
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
 	auto CreateVector = [&fbb](auto fileList) {
 		std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.files.size());
@@ -103,10 +109,31 @@ void stop() {
 	BufferedUSART2::deinit();
 }
 
+Timestamp_t getTimestamp()
+{
+	return HAL_GetTick();
+}
+
 void run() {
 	if (auto val = BufferedUSART2::receive(); val) {
 		deframer.parse(*val, receiveFrame);
 	}
+
+	if (not lastHeartbeatSentTime or (getTimestamp() - *lastHeartbeatSentTime) > HeartbeatInterval)
+	{
+		send_heartbeat();
+		lastHeartbeatSentTime = getTimestamp();
+	}
+}
+
+void send_heartbeat()
+{
+	flatbuffers::FlatBufferBuilder fbb;
+	auto answer = fbb.CreateStruct(PresenceDetection(Phase::Phase_ANSWER));
+	auto message = CreateMessage(fbb, AnyMessage_PresenceDetection, answer.Union());
+	fbb.Finish(message);
+
+	sendBroadcast(fbb.GetBufferSpan());
 }
 
 void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
@@ -119,19 +146,7 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 	auto message = GetMessage(payload.data());
 
 	if (auto content = message->content(); content) {
-		if (auto presenceDetection = message->content_as_PresenceDetection(); presenceDetection) {
-			if (presenceDetection->phase() == Phase::Phase_REQUEST) {
-				// Answer presence detection
-				flatbuffers::FlatBufferBuilder fbb;
-				auto answer = fbb.CreateStruct(PresenceDetection(Phase::Phase_ANSWER));
-				auto message = CreateMessage(fbb, AnyMessage_PresenceDetection, answer.Union());
-				fbb.Finish(message);
-
-				sendResponse(fbb.GetBufferSpan());
-			} else {
-				printf("Unexpected detection\n");
-			}
-		} else if (auto switchMessage = message->content_as_Switch(); switchMessage) {
+		if (auto switchMessage = message->content_as_Switch(); switchMessage) {
 			printf("State: %u\n", switchMessage->state());
 
 			// Just echo back raw

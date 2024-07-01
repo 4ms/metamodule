@@ -13,4 +13,6 @@ namespace MetaModule::WifiInterface
 	void stop();
 
 	void handle_received_frame(uint8_t, std::span<uint8_t>);
+
+	void send_heartbeat();
 };
