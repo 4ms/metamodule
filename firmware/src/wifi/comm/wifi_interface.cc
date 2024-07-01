@@ -146,12 +146,7 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 	auto message = GetMessage(payload.data());
 
 	if (auto content = message->content(); content) {
-		if (auto switchMessage = message->content_as_Switch(); switchMessage) {
-			printf("State: %u\n", switchMessage->state());
-
-			// Just echo back raw
-			sendResponse(payload);
-		} else if (auto patchNameMessage = message->content_as_Patches(); patchNameMessage) {
+		if (auto patchNameMessage = message->content_as_Patches(); patchNameMessage) {
 			flatbuffers::FlatBufferBuilder fbb;
 			auto message = constructPatchesMessage(fbb);
 			fbb.Finish(message);
