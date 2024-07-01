@@ -86,18 +86,18 @@ void sendBroadcast(std::span<uint8_t> payload) {
 ////////////////////////////////7
 
 void init(PatchStorage *storage) {
-	printf("Initializing Wifi\n");
+	pr_info("Initializing Wifi\n");
 
 	patchStorage = storage;
 }
 
 void start() {
-	pr_dbg("Wifi: Starting RX\n");
+	pr_trace("Wifi: Starting RX\n");
 	BufferedUSART2::init();
 }
 
 void stop() {
-	pr_dbg("Wifi: Stopping RX\n");
+	pr_trace("Wifi: Stopping RX\n");
 	BufferedUSART2::deinit();
 }
 
@@ -127,10 +127,10 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 
 				sendResponse(fbb.GetBufferSpan());
 			} else {
-				printf("Unexpected detection\n");
+				pr_err("Unexpected detection\n");
 			}
 		} else if (auto switchMessage = message->content_as_Switch(); switchMessage) {
-			printf("State: %u\n", switchMessage->state());
+			pr_trace("State: %u\n", switchMessage->state());
 
 			// Just echo back raw
 			sendResponse(payload);
@@ -149,7 +149,7 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 
 			auto filename = flatbuffers::GetStringView(uploadPatchMessage->filename());
 
-			printf("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
+			pr_info("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
 
 			auto LocationToVolume = [](auto location) -> std::optional<Volume> {
 				switch (location) {
@@ -199,10 +199,10 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 				sendBroadcast(fbb.GetBufferSpan());
 			}
 		} else {
-			printf("Other option\n");
+			pr_trace("Other option\n");
 		}
 	} else {
-		printf("Invalid message\n");
+		pr_err("Invalid message\n");
 	}
 }
 

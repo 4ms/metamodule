@@ -191,10 +191,18 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 						abortWithMessage("Error when comparing checksums");
 						break;
 
-					case FileStorageProxy::WifiExpanderNotConnected:
-						error_message = "No Wifi Expander: skipping " + manifest.files[current_file_idx].filename;
+					case FileStorageProxy::WifiExpanderNotConnected: {
+						error_message = "No Wifi Expander: skipping ";
+
+						auto full_path = manifest.files[current_file_idx].filename;
+						auto slash_pos = full_path.find_first_of("/");
+						if (slash_pos != std::string::npos)
+							error_message += full_path.substr(slash_pos + 1);
+						else
+							error_message += full_path;
+
 						proceedWithNextFile();
-						break;
+					} break;
 
 					default:
 						break;
