@@ -141,7 +141,7 @@ add_custom_command(
            "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
   COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR} && rm -rf ${RELEASE_TARGET_DIR}
 
-  DEPENDS ${MAIN_FW_FILENAME} ${ASSET_IMG_PATH} bootloader bootloader-dfu
+  DEPENDS ${MAIN_FW_FILENAME} ${ASSET_IMG_PATH} bootloader bootloader-dfu AlwaysCheckGit
   COMMENT "Creating release at ${RELEASE_ARCHIVE_PATH}"
   VERBATIM USES_TERMINAL
 )
