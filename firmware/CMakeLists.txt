@@ -106,7 +106,7 @@ add_custom_command(
           ${MAIN_FW_FILENAME}
   COMMAND cp ${MAIN_FW_FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
   COMMAND ls -l ${MAIN_FW_FILENAME}
-  DEPENDS main.elf main_m4.elf ${SYMBOLS_FILE}
+  DEPENDS main.elf main_m4.elf ${SYMBOLS_FILE} AlwaysCheckGit
   COMMENT "Creating combined uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
@@ -140,7 +140,7 @@ add_custom_command(
            "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
   COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR} && rm -rf ${RELEASE_TARGET_DIR}
 
-  DEPENDS ${MAIN_FW_FILENAME} ${ASSET_IMG_PATH} bootloader bootloader-dfu
+  DEPENDS ${MAIN_FW_FILENAME} ${ASSET_IMG_PATH} bootloader bootloader-dfu AlwaysCheckGit
   COMMENT "Creating release at ${RELEASE_ARCHIVE_PATH}"
   VERBATIM USES_TERMINAL
 )
