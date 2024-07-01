@@ -23,7 +23,7 @@ struct ModuleViewPage : PageBase {
 		, map_ring_display{settings}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
-		, action_menu{patch_mod_queue} {
+		, action_menu{patch_mod_queue, patches} {
 
 		init_bg(ui_MappingMenu);
 
