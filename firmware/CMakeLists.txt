@@ -107,7 +107,7 @@ add_custom_command(
           ${MAIN_FW_FILENAME}
   COMMAND cp ${MAIN_FW_FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
   COMMAND ls -l ${MAIN_FW_FILENAME}
-  DEPENDS main.elf main_m4.elf ${SYMBOLS_FILE}
+  DEPENDS main.elf main_m4.elf ${SYMBOLS_FILE} AlwaysCheckGit
   COMMENT "Creating combined uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
