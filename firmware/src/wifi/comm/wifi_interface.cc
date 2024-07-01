@@ -129,8 +129,8 @@ void run() {
 void send_heartbeat()
 {
 	flatbuffers::FlatBufferBuilder fbb;
-	auto answer = fbb.CreateStruct(PresenceDetection(Phase::Phase_ANSWER));
-	auto message = CreateMessage(fbb, AnyMessage_PresenceDetection, answer.Union());
+	auto answer = fbb.CreateStruct(Heartbeat());
+	auto message = CreateMessage(fbb, AnyMessage_Heartbeat, answer.Union());
 	fbb.Finish(message);
 
 	sendBroadcast(fbb.GetBufferSpan());
