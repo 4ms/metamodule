@@ -221,6 +221,21 @@ lv_obj_t *ui_CancelAdd;
 lv_obj_t *ui_CancelAddLabel;
 lv_obj_t *ui_OkAdd;
 lv_obj_t *ui_OkAddLabel;
+lv_obj_t *ui_AutoMapSelectPanel;
+lv_obj_t *ui_AutoMapTitleCont;
+lv_obj_t *ui_AutoMapTitle;
+lv_obj_t *ui_AutoMapButtonBar;
+lv_obj_t *ui_AutoMapAllButton;
+lv_obj_t *ui_AutoMapAllButtonLabel;
+lv_obj_t *ui_AutoMapCancelButton;
+lv_obj_t *ui_AutoMapCancelButtonLabel;
+lv_obj_t *ui_AutoMapSaveButton;
+lv_obj_t *ui_AutoMapSaveButtonLabel;
+lv_obj_t *ui_AutoMapKnobCont;
+lv_obj_t *ui_AutoMapKnobHeader;
+lv_obj_t *ui_AutoMapKnobItemCheck;
+lv_obj_t *ui_AutoMapJackCont;
+lv_obj_t *ui_AutoMapJacksHeader;
 
 
 // SCREEN: ui_KnobSetViewPage
