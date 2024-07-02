@@ -11,6 +11,7 @@
 #include "lvgl.h"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
+#include "patch_play/randomize_param.hh"
 
 namespace MetaModule
 {
@@ -19,7 +20,9 @@ struct ModuleViewActionMenu {
 
 	ModuleViewActionMenu(PatchModQueue &patch_mod_queue, OpenPatchManager &patches)
 		: patch_mod_queue{patch_mod_queue}
+		, patches{patches}
 		, auto_map{patch_mod_queue, patches}
+		, randomizer{patch_mod_queue}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
@@ -102,6 +105,10 @@ private:
 		auto_map.show();
 	}
 
+	void randomize() {
+		randomizer.randomize(module_idx, patches.get_view_patch());
+	}
+
 	static void menu_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -124,6 +131,7 @@ private:
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		page->randomize();
 	}
 
 	static void delete_but_cb(lv_event_t *event) {
@@ -145,10 +153,12 @@ private:
 	}
 
 	PatchModQueue &patch_mod_queue;
+	OpenPatchManager &patches;
 
 	ConfirmPopup confirm_popup;
 
 	ModuleViewAutoMapDialog auto_map;
+	RandomizeParams randomizer;
 
 	unsigned module_idx = 0;
 	lv_group_t *group;
