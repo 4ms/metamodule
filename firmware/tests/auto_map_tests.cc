@@ -206,8 +206,8 @@ TEST_CASE("Map jacks") {
 
 	// Max input jacks already mapped, so auto mapping fails:
 	test_fail_map_injack(mod1, 0);
-	test_fail_map_outjack(mod1, 1);
-	test_fail_map_outjack(mod1, 2);
+	test_fail_map_injack(mod1, 1);
+	test_fail_map_injack(mod1, 2);
 
 	// Test output mapping:
 

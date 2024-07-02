@@ -29,6 +29,8 @@ struct ModuleViewAutoMapDialog {
 	}
 
 	void show() {
+		// TODO: this will display a dialog box for the user to check which knobs/jacks to map.
+		// not yet implemented!
 		auto patch = patches.get_view_patch();
 
 		if (module_idx >= patch->module_slugs.size()) {
@@ -62,7 +64,7 @@ struct ModuleViewAutoMapDialog {
 
 		lv_group_activate(group);
 
-		// set callbacks on buttons
+		// TODO: set callbacks on buttons
 		// Map button push_back all selected items
 		// maps_todo.push_back(indices);
 	}
@@ -79,20 +81,35 @@ struct ModuleViewAutoMapDialog {
 		return visible;
 	}
 
-private:
+	void make_all_maps() {
+		auto patch = patches.get_view_patch();
+		if (!patch)
+			return;
+
+		if (module_idx >= patch->module_slugs.size())
+			return;
+
+		auto slug = patch->module_slugs[module_idx];
+		auto info = ModuleFactory::getModuleInfo(slug);
+		for (auto idx : info.indices) {
+			maps_todo.push_back(idx);
+		}
+
+		make_maps();
+	}
+
 	void make_maps() {
 		auto patch = patches.get_view_patch();
 
 		for (auto indices : maps_todo) {
 			if (auto res = auto_map.map(module_idx, indices, *patch); res.has_value()) {
-				pr_dbg("Auto mapping module %d, param %d ", module_idx, indices.param_idx);
-				pr_dbg("to panel knob %d in set %d\n", res->panel_el_id, res->set_id);
 			} else {
 				pr_err("Failed to map\n");
 			}
 		}
 	}
 
+private:
 	void clear_element_checks() {
 		lv_foreach_child(ui_AutoMapKnobCont, [](lv_obj_t *obj, unsigned id) {
 			if (id > 0)
@@ -115,9 +132,6 @@ private:
 	bool visible = false;
 
 	std::vector<ElementCount::Indices> maps_todo;
-
-	// std::vector<lv_obj_t*> knob_maps;
-	// std::vector<lv_obj_t*> jack_maps;
 
 	unsigned module_idx = 0;
 };

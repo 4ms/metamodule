@@ -100,7 +100,10 @@ private:
 	void show_auto_map() {
 		hide();
 		auto_map.prepare_focus(module_idx, group);
-		auto_map.show();
+		//TODO: complete Auto Map selection panel:
+		// auto_map.show();
+		// For now we just make all maps
+		auto_map.make_all_maps();
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
