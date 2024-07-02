@@ -45,6 +45,8 @@ struct ModuleViewActionMenu {
 	void back() {
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
+		} else if (auto_map.is_visible()) {
+			auto_map.hide();
 		} else if (visible) {
 			hide();
 		}
@@ -84,6 +86,7 @@ struct ModuleViewActionMenu {
 
 	void update() {
 		process_delete_module();
+		auto_map.update();
 	}
 
 private:
@@ -95,7 +98,8 @@ private:
 	}
 
 	void show_auto_map() {
-		auto_map.prepare_focus(module_idx);
+		hide();
+		auto_map.prepare_focus(module_idx, group);
 		auto_map.show();
 	}
 
@@ -114,7 +118,6 @@ private:
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
 
-		//TODO: show all elements with checkboxes, Map and Cancel buttons
 		page->show_auto_map();
 	}
 

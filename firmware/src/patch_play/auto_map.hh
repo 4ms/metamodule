@@ -39,8 +39,7 @@ public:
 
 				for (uint16_t panel_knob_id : std::views::iota(0u, PanelDef::NumKnobs)) {
 					if (patch.find_mapped_knob(set_i, panel_knob_id) == nullptr) {
-						pr_dbg("Auto mapping module %d, param %d ", module_id, idx.param_idx);
-						pr_dbg("to panel knob %d in set %d\n", panel_knob_id, set_i);
+
 						auto map = MappedKnob{.panel_knob_id = panel_knob_id,
 											  .module_id = module_id,
 											  .param_id = idx.param_idx,
@@ -50,12 +49,13 @@ public:
 
 						if (patch.add_update_mapped_knob(set_i, map)) {
 							patch_mod_queue.put(AddMapping{.map = map, .set_id = set_i});
-							return MappingDest(panel_knob_id, set_i);
+							return MappingDest{panel_knob_id, set_i};
 						}
 					}
 				}
 			}
 			return std::nullopt;
+
 		} else if (idx.input_idx != ElementCount::Indices::NoElementMarker) {
 		} else if (idx.output_idx != ElementCount::Indices::NoElementMarker) {
 		} else if (idx.light_idx != ElementCount::Indices::NoElementMarker) {

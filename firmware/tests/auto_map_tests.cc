@@ -6,6 +6,8 @@ TEST_CASE("Basic usage: knob") {
 	using namespace MetaModule;
 
 	PatchData p;
+	PatchModQueue pq;
+	AutoMapper automap{pq};
 
 	uint16_t mod1 = p.add_module("Module1");
 	uint16_t mod2 = p.add_module("Module2");
@@ -24,7 +26,7 @@ TEST_CASE("Basic usage: knob") {
 				CHECK(p.find_mapped_knob(set_i, mod2, param_id) == nullptr);
 			}
 
-			CHECK(AutoMapper::map(mod2, {.param_idx = param_id}, p).has_value());
+			CHECK(automap.map(mod2, {.param_idx = param_id}, p).has_value());
 
 			// Check that the map is in the patch, in the first knob set
 			auto map = p.find_mapped_knob(set_id, mod2, param_id);
@@ -34,7 +36,7 @@ TEST_CASE("Basic usage: knob") {
 			CHECK(map->module_id == mod2);
 
 			// check we can't auto map the same knob again, because it's already mapped
-			CHECK(AutoMapper::map(mod2, {.param_idx = param_id}, p).has_value() == false);
+			CHECK(automap.map(mod2, {.param_idx = param_id}, p).has_value() == false);
 		}
 
 		{
@@ -46,7 +48,7 @@ TEST_CASE("Basic usage: knob") {
 				CHECK(p.find_mapped_knob(set_i, mod1, param_id) == nullptr);
 			}
 
-			auto res = AutoMapper::map(mod1, {.param_idx = param_id}, p);
+			auto res = automap.map(mod1, {.param_idx = param_id}, p);
 
 			expected_panel_knob_id++;
 
@@ -63,7 +65,7 @@ TEST_CASE("Basic usage: knob") {
 			CHECK(map->module_id == mod1);
 
 			// check we auto map fails for the same knob again, because it's already mapped
-			CHECK(AutoMapper::map(mod1, {.param_idx = param_id}, p).has_value() == false);
+			CHECK(automap.map(mod1, {.param_idx = param_id}, p).has_value() == false);
 		}
 	}
 
@@ -93,7 +95,7 @@ TEST_CASE("Basic usage: knob") {
 			}
 		}
 
-		auto res = AutoMapper::map(mod1, {.param_idx = 250}, p);
+		auto res = automap.map(mod1, {.param_idx = 250}, p);
 		CHECK(res.has_value());
 		CHECK(res->panel_el_id == leave_open_knob_id);
 		CHECK(res->set_id == leave_open_set_id);
@@ -104,6 +106,6 @@ TEST_CASE("Basic usage: knob") {
 		CHECK(map->module_id == mod1);
 		CHECK(map->panel_knob_id == leave_open_knob_id);
 
-		CHECK(AutoMapper::map(mod1, {.param_idx = 1}, p).has_value() == false);
+		CHECK(automap.map(mod1, {.param_idx = 1}, p).has_value() == false);
 	}
 }
