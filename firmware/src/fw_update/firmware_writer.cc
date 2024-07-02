@@ -184,7 +184,7 @@ IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uin
 	WifiInterface::stop();
 #endif
 
-	const uint32_t FlashSectorSize = 4096;
+	const uint32_t FlashSectorSize = 64 * 1024;
 	const std::size_t BatchSize = FlashSectorSize;
 	bytesWritten = 0;
 
