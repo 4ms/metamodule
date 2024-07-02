@@ -29,8 +29,15 @@ struct ModuleViewAutoMapDialog {
 	}
 
 	void show() {
+		////////////////////////////////////////
 		// TODO: this will display a dialog box for the user to check which knobs/jacks to map.
-		// not yet implemented!
+		// Not yet implemented!
+		// For now we just make all maps without any GUI
+		make_all_maps();
+		return;
+		////////////////////////////////////////
+		////////////////////////////////////////
+
 		auto patch = patches.get_view_patch();
 
 		if (module_idx >= patch->module_slugs.size()) {
@@ -89,6 +96,8 @@ struct ModuleViewAutoMapDialog {
 		if (module_idx >= patch->module_slugs.size())
 			return;
 
+		maps_todo.clear();
+
 		auto slug = patch->module_slugs[module_idx];
 		auto info = ModuleFactory::getModuleInfo(slug);
 		for (auto idx : info.indices) {
@@ -102,10 +111,7 @@ struct ModuleViewAutoMapDialog {
 		auto patch = patches.get_view_patch();
 
 		for (auto indices : maps_todo) {
-			if (auto res = auto_map.map(module_idx, indices, *patch); res.has_value()) {
-			} else {
-				pr_err("Failed to map\n");
-			}
+			auto_map.map(module_idx, indices, *patch);
 		}
 	}
 

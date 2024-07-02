@@ -1,4 +1,5 @@
 #include "doctest.h"
+#include "patch_convert/patch_to_yaml.hh"
 #include "patch_convert/yaml_to_patch.hh"
 
 #include "patch_play/patch_player.hh"
@@ -40,7 +41,7 @@ R"(PatchData:
 	player.copy_patch_data(pd);
 	player.calc_panel_jack_connections();
 
-	REQUIRE(pd.mapped_outs.size() == 3);
+	CHECK(pd.mapped_outs.size() == 3);
 
 	SUBCASE("Check if mapped_outs[] data was loaded OK") {
 		SUBCASE("Check if output connection data is correct") {
@@ -233,7 +234,7 @@ PatchData:
 	player.copy_patch_data(pd);
 	player.calc_panel_jack_connections();
 
-	REQUIRE(pd.mapped_ins.size() == 6);
+	CHECK(pd.mapped_ins.size() == 6);
 
 	SUBCASE("Check if input connection data is correct") {
 		CHECK(player.get_panel_input_connection(0) == Jack{1, 0});
@@ -300,8 +301,8 @@ PatchData:
 	player.copy_patch_data(pd);
 	player.calc_panel_jack_connections();
 
-	REQUIRE(pd.mapped_ins.size() == 1);
-	REQUIRE(pd.int_cables.size() == 1);
+	CHECK(pd.mapped_ins.size() == 1);
+	CHECK(pd.int_cables.size() == 1);
 
 	SUBCASE("No input mappings are present") {
 		CHECK(player.get_panel_input_connection(0) == Jack{0, 0});
@@ -357,7 +358,7 @@ PatchData:
 		player.copy_patch_data(pd);
 		player.calc_multiple_module_indicies();
 
-		REQUIRE(pd.module_slugs.size() == 8);
+		CHECK(pd.module_slugs.size() == 8);
 		CHECK(player.get_multiple_module_index(0) == 0); // PANEL_8
 		CHECK(player.get_multiple_module_index(1) == 1); // LFOSINE 1
 		CHECK(player.get_multiple_module_index(2) == 1); // KARPLUS 1
@@ -489,4 +490,290 @@ PatchData:
 	CHECK(pd.midi_maps.set[1].param_id == 3);
 	CHECK(pd.midi_maps.set[1].min == doctest::Approx(0.75));
 	CHECK(pd.midi_maps.set[1].max == doctest::Approx(0.25));
+}
+
+TEST_CASE("Remove a module") {
+	// clang-format off
+	std::string patchyml{R"( 
+PatchData:
+  patch_name: RemoveModuleTest
+  description: Patch Description
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:StMix'
+    2: '4msCompany:Drum'
+    3: '4msCompany:MultiLFO'
+  int_cables:
+    - out:
+        module_id: 3
+        jack_id: 2
+      ins:
+        - module_id: 2
+          jack_id: 3
+      color: 35419
+    - out:
+        module_id: 3
+        jack_id: 0
+      ins:
+        - module_id: 1
+          jack_id: 0
+        - module_id: 2
+          jack_id: 4
+        - module_id: 3
+          jack_id: 3
+      color: 65535
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 0
+        - module_id: 2
+          jack_id: 5
+      color: 13501
+  mapped_ins:
+    - panel_jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 1
+    - panel_jack_id: 1
+      ins:
+        - module_id: 3
+          jack_id: 2
+        - module_id: 2
+          jack_id: 2
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 3
+        jack_id: 1
+    - panel_jack_id: 1
+      out:
+        module_id: 3
+        jack_id: 3
+    - panel_jack_id: 2
+      out:
+        module_id: 3
+        jack_id: 3
+    - panel_jack_id: 3
+      out:
+        module_id: 3
+        jack_id: 2
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0.875
+    - module_id: 1
+      param_id: 2
+      value: 0.875
+    - module_id: 1
+      param_id: 3
+      value: 0.875
+    - module_id: 1
+      param_id: 4
+      value: 0.5
+    - module_id: 1
+      param_id: 5
+      value: 0.5
+    - module_id: 1
+      param_id: 6
+      value: 0.5
+    - module_id: 1
+      param_id: 7
+      value: 0.5
+    - module_id: 2
+      param_id: 0
+      value: 0.25
+    - module_id: 2
+      param_id: 1
+      value: 0.25
+    - module_id: 2
+      param_id: 2
+      value: 0
+    - module_id: 2
+      param_id: 3
+      value: 0.5
+    - module_id: 2
+      param_id: 4
+      value: 0.25
+    - module_id: 2
+      param_id: 5
+      value: 0
+    - module_id: 2
+      param_id: 6
+      value: 0.25
+    - module_id: 2
+      param_id: 7
+      value: 0
+    - module_id: 2
+      param_id: 8
+      value: 0
+    - module_id: 3
+      param_id: 0
+      value: 0.5
+    - module_id: 3
+      param_id: 1
+      value: 0.160241
+    - module_id: 3
+      param_id: 2
+      value: 0.5
+  mapped_knobs:
+    - name: ''
+      set:
+        - panel_knob_id: 0
+          module_id: 3
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 3
+          param_id: 2
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  vcvModuleStates: []
+)"};
+	// clang-format on
+
+	MetaModule::PatchData pd;
+	yaml_string_to_patch(patchyml, pd);
+
+	pd.remove_module(3);
+
+	auto patchyml2 = patch_to_yaml_string(pd);
+
+	// clang-format on
+	CHECK(patchyml2 == R"(PatchData:
+  patch_name: RemoveModuleTest
+  description: Patch Description
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:StMix'
+    2: '4msCompany:Drum'
+    3: Blank
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 0
+      ins:
+        - module_id: 2
+          jack_id: 5
+      color: 13501
+  mapped_ins:
+    - panel_jack_id: 1
+      ins:
+        - module_id: 2
+          jack_id: 2
+  mapped_outs: []
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0.875
+    - module_id: 1
+      param_id: 2
+      value: 0.875
+    - module_id: 1
+      param_id: 3
+      value: 0.875
+    - module_id: 1
+      param_id: 4
+      value: 0.5
+    - module_id: 1
+      param_id: 5
+      value: 0.5
+    - module_id: 1
+      param_id: 6
+      value: 0.5
+    - module_id: 1
+      param_id: 7
+      value: 0.5
+    - module_id: 2
+      param_id: 0
+      value: 0.25
+    - module_id: 2
+      param_id: 1
+      value: 0.25
+    - module_id: 2
+      param_id: 2
+      value: 0
+    - module_id: 2
+      param_id: 3
+      value: 0.5
+    - module_id: 2
+      param_id: 4
+      value: 0.25
+    - module_id: 2
+      param_id: 5
+      value: 0
+    - module_id: 2
+      param_id: 6
+      value: 0.25
+    - module_id: 2
+      param_id: 7
+      value: 0
+    - module_id: 2
+      param_id: 8
+      value: 0
+  mapped_knobs:
+    - name: ''
+      set:
+        - panel_knob_id: 0
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  vcvModuleStates: []
+)"
+		  // clang-format off
+		 );
 }

@@ -24,7 +24,7 @@ public:
 		uint16_t set_id{};
 	};
 
-	std::optional<MappingDest> map(uint16_t module_id, ElementCount::Indices idx, PatchData &patch) {
+	[[maybe_unused]] std::optional<MappingDest> map(uint16_t module_id, ElementCount::Indices idx, PatchData &patch) {
 		if (idx.param_idx != ElementCount::Indices::NoElementMarker) {
 			return map_param(module_id, idx.param_idx, patch);
 
@@ -64,8 +64,8 @@ public:
 
 					if (patch.add_update_mapped_knob(set_i, map)) {
 						patch_mod_queue.put(AddMapping{.map = map, .set_id = set_i});
-						pr_dbg("Auto mapping module %d param %d ", module_id, param_idx);
-						pr_dbg("to panel knob %d in set %d\n", panel_knob_id, set_i);
+						pr_trace("Auto mapping module %d param %d ", module_id, param_idx);
+						pr_trace("to panel knob %d in set %d\n", panel_knob_id, set_i);
 						return MappingDest{panel_knob_id, set_i};
 					}
 				}
@@ -92,7 +92,7 @@ public:
 		for (uint16_t panel_jack_id : std::views::iota(0u, PanelDef::NumAudioIn)) {
 			if (patch.find_mapped_injack(panel_jack_id) == nullptr) {
 				patch.add_mapped_injack(panel_jack_id, jack);
-				pr_dbg("Auto mapping module %d injack %d to In %d\n", module_id, input_idx, panel_jack_id);
+				pr_trace("Auto mapping module %d injack %d to In %d\n", module_id, input_idx, panel_jack_id);
 				return MappingDest{panel_jack_id};
 			}
 		}
@@ -117,7 +117,7 @@ public:
 		for (uint16_t panel_jack_id : std::views::iota(0u, PanelDef::NumAudioOut)) {
 			if (patch.find_mapped_outjack(panel_jack_id) == nullptr) {
 				patch.add_mapped_outjack(panel_jack_id, jack);
-				pr_dbg("Auto mapping module %d outjack %d to In %d\n", module_id, output_idx, panel_jack_id);
+				pr_trace("Auto mapping module %d outjack %d to In %d\n", module_id, output_idx, panel_jack_id);
 				return MappingDest{panel_jack_id};
 			}
 		}

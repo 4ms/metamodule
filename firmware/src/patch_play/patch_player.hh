@@ -418,7 +418,7 @@ public:
 	void disconnect_outjack(Jack jack) {
 		for (auto &out : out_conns) {
 			if (out == jack) {
-				out = {0xFFFF, 0xFFFF}; //disconnected
+				out = disconnected_jack;
 			}
 		}
 		modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
@@ -445,7 +445,72 @@ public:
 	}
 
 	void remove_module(uint16_t module_idx) {
-		// TODO: remove module and all cables, mappings
+		// TODO: for all cache structures, if (module_id > deleted_module_idx) module_id -= 1;
+		// For testing, we just replace module with a blank and don't touch any indices
+
+		for (auto &ins : in_conns) {
+			std::erase_if(ins, [=](Jack in) { return (in.module_id == module_idx); });
+		}
+		for (auto &out : out_conns) {
+			if (out.module_id == module_idx) {
+				out = disconnected_jack;
+			}
+		}
+
+		// Inform other modules connected to this one
+		// that their jacks are to be disconnected
+		for (auto &cable : pd.int_cables) {
+			for (auto in : cable.ins) {
+				if (in.module_id >= num_modules)
+					continue;
+
+				if (in.module_id == cable.out.module_id)
+					continue; //ignore this module patched to itself
+
+				if (cable.out.module_id == module_idx) {
+					modules[in.module_id]->mark_input_unpatched(in.jack_id);
+
+				} else if (in.module_id == module_idx) {
+					modules[cable.out.module_id]->mark_output_unpatched(cable.out.jack_id);
+				}
+			}
+		}
+
+		// Knob and MIDI connections
+		for (auto &knob_set : knob_conns) {
+			for (auto &mappings : knob_set) {
+				std::erase_if(mappings, [=](MappedKnob &map) { return (map.module_id == module_idx); });
+			}
+		}
+
+		for (auto &conn : midi_note_pitch_conns)
+			std::erase_if(conn, [=](Jack &jack) { return (jack.module_id == module_idx); });
+
+		for (auto &conn : midi_note_gate_conns)
+			std::erase_if(conn, [=](Jack &jack) { return (jack.module_id == module_idx); });
+
+		for (auto &conn : midi_note_vel_conns)
+			std::erase_if(conn, [=](Jack &jack) { return (jack.module_id == module_idx); });
+
+		for (auto &conn : midi_note_aft_conns)
+			std::erase_if(conn, [=](Jack &jack) { return (jack.module_id == module_idx); });
+
+		for (auto &ret : midi_note_retrig)
+			std::erase_if(ret.conns, [=](Jack &jack) { return (jack.module_id == module_idx); });
+
+		for (auto &conn : midi_cc_conns)
+			std::erase_if(conn, [=](Jack &jack) { return (jack.module_id == module_idx); });
+
+		for (auto &conn : midi_gate_conns)
+			std::erase_if(conn, [=](Jack &jack) { return (jack.module_id == module_idx); });
+
+		for (auto &mp : midi_pulses)
+			std::erase_if(mp.conns, [=](Jack &jack) { return (jack.module_id == module_idx); });
+
+		pd.remove_module(module_idx);
+		calc_multiple_module_indicies();
+
+		modules[module_idx] = std::make_unique<NullModule>();
 	}
 
 	void set_samplerate(float hz) {
@@ -498,13 +563,15 @@ public:
 	}
 
 private:
+	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
+
 	// Cache functions:
 	void clear_cache() {
 		for (auto &d : dup_module_index)
 			d = 0;
 
 		for (auto &out_conn : out_conns)
-			out_conn = {0xFFFF, 0xFFFF};
+			out_conn = disconnected_jack;
 
 		for (auto &in_conn : in_conns)
 			in_conn.clear();

@@ -331,6 +331,36 @@ struct PatchData {
 		return module_id;
 	}
 
+	void remove_module(unsigned module_id) {
+		//TODO: remove from vector and update all module indices > the deleted one?
+		// Or use a blank placeholder, and when adding a module replace the first blank placeholder?
+		module_slugs[module_id] = "Blank";
+
+		std::erase_if(int_cables, [=](InternalCable &cable) {
+			if (cable.out.module_id == module_id) {
+				return true;
+			} else {
+				std::erase_if(cable.ins, [=](Jack in) { return in.module_id == module_id; });
+				return (cable.ins.size() == 0);
+			}
+		});
+
+		for (MappedInputJack &map : mapped_ins) {
+			std::erase_if(map.ins, [=](Jack in) { return in.module_id == module_id; });
+		}
+		std::erase_if(mapped_ins, [=](MappedInputJack map) { return map.ins.size() == 0; });
+		std::erase_if(mapped_outs, [=](MappedOutputJack map) { return map.out.module_id == module_id; });
+
+		std::erase_if(static_knobs, [=](StaticParam &knob) { return knob.module_id == module_id; });
+
+		for (auto &knobset : knob_sets) {
+			std::erase_if(knobset.set, [=](MappedKnob &map) { return map.module_id == module_id; });
+		}
+		std::erase_if(midi_maps.set, [=](MappedKnob &map) { return map.module_id == module_id; });
+
+		std::erase_if(module_states, [=](ModuleInitState &state) { return state.module_id == module_id; });
+	}
+
 private:
 	//non-const version for private use only
 	MappedKnob *_get_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) {

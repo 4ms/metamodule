@@ -40,10 +40,12 @@ struct ModuleViewPage : PageBase {
 		lv_label_set_recolor(roller_label, true);
 
 		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, ui_ElementRoller);
 		lv_group_add_obj(group, ui_ModuleViewActionBut);
 		lv_group_add_obj(group, ui_ModuleViewSettingsBut);
+		lv_group_add_obj(group, ui_ElementRoller);
 		lv_group_focus_obj(ui_ElementRoller);
+
+		lv_group_set_wrap(group, false);
 
 		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
@@ -283,6 +285,11 @@ struct ModuleViewPage : PageBase {
 							   mod.type == ElementType::Output ? patch->disconnect_outjack(mod.jack) :
 																 patch->disconnect_injack(mod.jack);
 						   },
+						   [&](RemoveModule &mod) {
+							   patch->remove_module(mod.module_idx);
+							   refresh = false;
+							   page_list.request_new_page(PageId::PatchView, args);
+						   },
 						   [&](auto &m) { refresh = false; },
 					   },
 					   patch_mod.value());
@@ -350,6 +357,7 @@ private:
 		lv_show(ui_ElementRollerPanel);
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_group_set_editing(group, true);
+		lv_group_set_wrap(group, false);
 	}
 
 	void add_button(lv_obj_t *obj) {
@@ -404,7 +412,6 @@ private:
 	}
 
 	static void roller_scrolled_cb(lv_event_t *event) {
-		pr_dbg("Start roller_scrolled_cb\n");
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		auto &but = page->button;
 

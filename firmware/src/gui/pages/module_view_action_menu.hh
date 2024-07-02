@@ -19,7 +19,6 @@ struct ModuleViewActionMenu {
 
 	ModuleViewActionMenu(PatchModQueue &patch_mod_queue, OpenPatchManager &patches)
 		: patch_mod_queue{patch_mod_queue}
-		, patches{patches}
 		, auto_map{patch_mod_queue, patches}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
@@ -93,17 +92,14 @@ private:
 	void process_delete_module() {
 		if (delete_state == DeleteState::TryRequest) {
 			patch_mod_queue.put(RemoveModule{.module_idx = uint16_t(module_idx)});
-			//TODO
+			delete_state = DeleteState::Requested;
 		}
 	}
 
 	void show_auto_map() {
 		hide();
 		auto_map.prepare_focus(module_idx, group);
-		//TODO: complete Auto Map selection panel:
-		// auto_map.show();
-		// For now we just make all maps
-		auto_map.make_all_maps();
+		auto_map.show();
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -149,7 +145,6 @@ private:
 	}
 
 	PatchModQueue &patch_mod_queue;
-	OpenPatchManager &patches;
 
 	ConfirmPopup confirm_popup;
 
