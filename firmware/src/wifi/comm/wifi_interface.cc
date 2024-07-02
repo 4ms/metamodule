@@ -95,7 +95,19 @@ void sendBroadcast(std::span<uint8_t> payload) {
 	sendFrame(Broadcast_ID, payload);
 }
 
-////////////////////////////////7
+void requestIP()
+{
+	// For now, every request on the management channel is responded the IP
+	std::array<uint8_t,3> payload{0xA, 0xB, 0xC};
+	sendFrame(Management_ID, std::span(payload));
+}
+
+std::optional<IPAddress_t> getCurrentIP()
+{
+       return currentIPAddress;
+}
+
+////////////////////////////////
 
 void init(PatchStorage *storage) {
 	printf("Initializing Wifi\n");
@@ -127,6 +139,8 @@ void run() {
 	{
 		send_heartbeat();
 		lastHeartbeatSentTime = getTimestamp();
+
+		requestIP();
 	}
 }
 
@@ -143,6 +157,20 @@ void send_heartbeat()
 void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 	if (destination == Management_ID)
 	{
+		if (payload.size() == 4)
+		{
+			const IPAddress_t DummyAddress{0,0,0,0};
+
+			if (std::equal(DummyAddress.begin(), DummyAddress.end(), payload.data()))
+			{
+				currentIPAddress.reset();
+			}
+			else
+			{
+				currentIPAddress = DummyAddress;
+				std::copy(payload.begin(), payload.end(), currentIPAddress->data());
+			}
+		}
 	}
 	else
 	{
