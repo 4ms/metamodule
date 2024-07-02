@@ -85,7 +85,6 @@ struct ModuleViewPage : PageBase {
 
 	void redraw_module() {
 		reset_module_page();
-
 		size_t num_elements = moduleinfo.elements.size();
 		opts.reserve(num_elements * 32); // 32 chars per roller item
 		button.reserve(num_elements);
@@ -204,7 +203,7 @@ struct ModuleViewPage : PageBase {
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 
 		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
-		if (cur_el) {
+		if (cur_el && args.detail_mode == true) {
 			mode = ViewMode::Mapping;
 			mapping_pane.hide();
 			mapping_pane.show(*cur_el);
@@ -240,7 +239,10 @@ struct ModuleViewPage : PageBase {
 		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
-			redraw_map_rings();
+			redraw_module();
+
+			if (mode == ViewMode::Mapping)
+				mapping_pane.refresh();
 		}
 
 		if (is_patch_playing) {
@@ -305,25 +307,6 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
-	void redraw_map_rings() {
-		for (auto &drawn_el : drawn_elements) {
-			auto &gui_el = drawn_el.gui_element;
-
-			if (gui_el.count.num_params > 0 && gui_el.map_ring) {
-				lv_obj_del_async(gui_el.map_ring);
-				gui_el.map_ring = nullptr;
-			}
-		}
-
-		for (auto &drawn_el : drawn_elements) {
-			auto module_id = drawn_el.gui_element.module_idx;
-			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
-
-			ModuleDrawer{ui_ModuleImage, 240}.draw_mapped_ring(*patch, module_id, active_knobset, canvas, drawn_el);
-		}
-		update_map_ring_style();
-	}
-
 	// This gets called after map_ring_style changes
 	void update_map_ring_style() {
 		for (auto &drawn_el : drawn_elements) {
@@ -358,6 +341,7 @@ private:
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
+		args.detail_mode = false;
 	}
 
 	void add_button(lv_obj_t *obj) {
@@ -419,13 +403,7 @@ private:
 
 		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
 
-		// Turn off old component highlight button
-		if (prev_sel >= 0 && prev_sel < page->roller_drawn_el_idx.size()) {
-			if (auto idx = page->roller_drawn_el_idx[prev_sel]; (size_t)idx < but.size()) {
-				lv_obj_remove_style(but[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-				lv_event_send(but[idx], LV_EVENT_REFRESH, nullptr);
-			}
-		}
+		// if (ElementCount::matched(*args.element_indices, drawn.idx)) {
 
 		// Get the new button
 		if (cur_sel < page->roller_drawn_el_idx.size()) {
@@ -442,7 +420,7 @@ private:
 					if (cur_sel)
 						cur_sel--;
 					else {
-						//Going up from first header -> defocus roller and focus button bar
+						//Scrolling up from first header -> defocus roller and focus button bar
 						lv_group_focus_obj(ui_ModuleViewSettingsBut);
 						lv_group_set_editing(page->group, false);
 						page->cur_selected = prev_sel;
@@ -450,13 +428,25 @@ private:
 						return;
 					}
 				}
+				// cur_sel changed, so we need to update the roller position and our drawn_el idx
 				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_ON);
+				idx = page->roller_drawn_el_idx[cur_sel];
 			}
 
 			page->cur_selected = cur_sel;
+			page->args.element_indices = page->drawn_elements[idx].gui_element.idx;
+			page->args.detail_mode = false;
 
-			if (size_t idx = page->roller_drawn_el_idx[cur_sel]; idx < but.size()) {
-				// Turn on new button
+			// Turn off old component highlight button
+			if (prev_sel >= 0 && prev_sel < page->roller_drawn_el_idx.size()) {
+				if (auto prev_idx = page->roller_drawn_el_idx[prev_sel]; (size_t)prev_idx < but.size()) {
+					lv_obj_remove_style(but[prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+					lv_event_send(but[prev_idx], LV_EVENT_REFRESH, nullptr);
+				}
+			}
+
+			// Turn on new button
+			if ((size_t)idx < but.size()) {
 				lv_obj_add_style(but[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 				lv_event_send(but[idx], LV_EVENT_REFRESH, nullptr);
 				lv_obj_scroll_to_view(but[idx], LV_ANIM_ON);

@@ -89,6 +89,7 @@ struct ModuleViewMappingPane {
 
 		args.element_counts = drawn_el.gui_element.count;
 		args.element_indices = drawn_el.gui_element.idx;
+		args.detail_mode = true;
 
 		auto slug = patch->module_slugs[this_module_id];
 
@@ -542,7 +543,8 @@ private:
 			page->page_list.request_new_page(PageId::ModuleView,
 											 {.patch_loc_hash = page->args.patch_loc_hash,
 											  .module_id = endpoint.module_id,
-											  .element_indices = endpoint.idx});
+											  .element_indices = endpoint.idx,
+											  .detail_mode = true});
 		}
 	}
 
