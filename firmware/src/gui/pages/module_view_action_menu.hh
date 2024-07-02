@@ -2,13 +2,13 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/module_view_automap.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/pages/save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
-#include "patch_play//auto_map.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 
@@ -20,6 +20,7 @@ struct ModuleViewActionMenu {
 	ModuleViewActionMenu(PatchModQueue &patch_mod_queue, OpenPatchManager &patches)
 		: patch_mod_queue{patch_mod_queue}
 		, patches{patches}
+		, auto_map{patch_mod_queue, patches}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
@@ -93,17 +94,9 @@ private:
 		}
 	}
 
-	void auto_map() {
-		auto patch = patches.get_view_patch();
-		if (module_idx < patch->module_slugs.size()) {
-			auto slug = patch->module_slugs[module_idx];
-			auto info = ModuleFactory::getModuleInfo(slug);
-			for (auto indices : info.indices) {
-				auto ok = AutoMapper::make(module_idx, indices, *patch);
-				if (!ok)
-					pr_err("Failed to map\n");
-			}
-		}
+	void show_auto_map() {
+		auto_map.prepare_focus(module_idx);
+		auto_map.show();
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -120,8 +113,9 @@ private:
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+
 		//TODO: show all elements with checkboxes, Map and Cancel buttons
-		page->auto_map();
+		page->show_auto_map();
 	}
 
 	static void random_but_cb(lv_event_t *event) {
@@ -152,6 +146,8 @@ private:
 	OpenPatchManager &patches;
 
 	ConfirmPopup confirm_popup;
+
+	ModuleViewAutoMapDialog auto_map;
 
 	unsigned module_idx = 0;
 	lv_group_t *group;

@@ -24,7 +24,7 @@ TEST_CASE("Basic usage: knob") {
 				CHECK(p.find_mapped_knob(set_i, mod2, param_id) == nullptr);
 			}
 
-			CHECK(AutoMapper::make(mod2, {.param_idx = param_id}, p) == true);
+			CHECK(AutoMapper::map(mod2, {.param_idx = param_id}, p).has_value());
 
 			// Check that the map is in the patch, in the first knob set
 			auto map = p.find_mapped_knob(set_id, mod2, param_id);
@@ -34,7 +34,7 @@ TEST_CASE("Basic usage: knob") {
 			CHECK(map->module_id == mod2);
 
 			// check we can't auto map the same knob again, because it's already mapped
-			CHECK(AutoMapper::make(mod2, {.param_idx = param_id}, p) == false);
+			CHECK(AutoMapper::map(mod2, {.param_idx = param_id}, p).has_value() == false);
 		}
 
 		{
@@ -46,9 +46,16 @@ TEST_CASE("Basic usage: knob") {
 				CHECK(p.find_mapped_knob(set_i, mod1, param_id) == nullptr);
 			}
 
-			CHECK(AutoMapper::make(mod1, {.param_idx = param_id}, p) == true);
+			auto res = AutoMapper::map(mod1, {.param_idx = param_id}, p);
+
 			expected_panel_knob_id++;
 
+			// Check result is expected mapping
+			CHECK(res.has_value());
+			CHECK(res->panel_el_id == expected_panel_knob_id);
+			CHECK(res->set_id == set_id);
+
+			// Check map shows up in the patch
 			auto map = p.find_mapped_knob(set_id, mod1, param_id);
 			CHECK(map != nullptr);
 			CHECK(map->panel_knob_id == expected_panel_knob_id);
@@ -56,7 +63,7 @@ TEST_CASE("Basic usage: knob") {
 			CHECK(map->module_id == mod1);
 
 			// check we auto map fails for the same knob again, because it's already mapped
-			CHECK(AutoMapper::make(mod1, {.param_idx = param_id}, p) == false);
+			CHECK(AutoMapper::map(mod1, {.param_idx = param_id}, p).has_value() == false);
 		}
 	}
 
@@ -86,13 +93,17 @@ TEST_CASE("Basic usage: knob") {
 			}
 		}
 
-		CHECK(AutoMapper::make(mod1, {.param_idx = 250}, p) == true);
+		auto res = AutoMapper::map(mod1, {.param_idx = 250}, p);
+		CHECK(res.has_value());
+		CHECK(res->panel_el_id == leave_open_knob_id);
+		CHECK(res->set_id == leave_open_set_id);
+
 		auto map = p.find_mapped_knob(leave_open_set_id, mod1, 250);
 		CHECK(map != nullptr);
 		CHECK(map->param_id == 250);
 		CHECK(map->module_id == mod1);
 		CHECK(map->panel_knob_id == leave_open_knob_id);
 
-		CHECK(AutoMapper::make(mod1, {.param_idx = 1}, p) == false);
+		CHECK(AutoMapper::map(mod1, {.param_idx = 1}, p).has_value() == false);
 	}
 }

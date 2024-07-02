@@ -76,6 +76,7 @@ struct ModuleViewPage : PageBase {
 		redraw_module();
 
 		lv_hide(ui_ModuleViewActionMenu);
+		lv_hide(ui_AutoMapSelectPanel);
 
 		action_menu.prepare_focus(group, this_module_id);
 	}
