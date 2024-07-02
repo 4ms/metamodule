@@ -23,7 +23,7 @@ struct ModuleViewPage : PageBase {
 		, map_ring_display{settings}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
-		, action_menu{patch_mod_queue, patches} {
+		, action_menu{module_mods, patches} {
 
 		init_bg(ui_MappingMenu);
 
@@ -187,8 +187,9 @@ struct ModuleViewPage : PageBase {
 
 		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
-		if (cur_selected < button.size() && button.size() > 0) {
-			lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
+		if (cur_selected > 0 && cur_selected < button.size()) {
+			if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < button.size())
+				lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		} else {
 			pr_err("Current selected is not in range (%d/%zu)\n", cur_selected, button.size());
 		}
@@ -403,50 +404,55 @@ private:
 	}
 
 	static void roller_scrolled_cb(lv_event_t *event) {
+		pr_dbg("Start roller_scrolled_cb\n");
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		auto &but = page->button;
 
-		auto cur_sel = page->cur_selected;
+		auto prev_sel = page->cur_selected;
 
-		auto next_sel = lv_roller_get_selected(ui_ElementRoller);
+		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
 
-		// Turn off old button
-		if (cur_sel < page->roller_drawn_el_idx.size()) {
-			if (size_t idx = page->roller_drawn_el_idx[cur_sel]; idx < but.size()) {
+		// Turn off old component highlight button
+		if (prev_sel >= 0 && prev_sel < page->roller_drawn_el_idx.size()) {
+			if (auto idx = page->roller_drawn_el_idx[prev_sel]; (size_t)idx < but.size()) {
 				lv_obj_remove_style(but[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 				lv_event_send(but[idx], LV_EVENT_REFRESH, nullptr);
 			}
 		}
 
 		// Get the new button
-		page->cur_selected = next_sel;
-		if (next_sel < page->roller_drawn_el_idx.size()) {
-			if (size_t idx = page->roller_drawn_el_idx[next_sel]; idx < but.size()) {
-				// Turn on new button
-				lv_obj_add_style(but[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-				lv_event_send(but[idx], LV_EVENT_REFRESH, nullptr);
-				lv_obj_scroll_to_view(but[idx], LV_ANIM_ON);
-			} else {
-				// Skip over headers
-				if (cur_sel < next_sel) {
-					if (next_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
-						next_sel++;
+		if (cur_sel < page->roller_drawn_el_idx.size()) {
+			auto idx = page->roller_drawn_el_idx[cur_sel];
+
+			// Skip over headers
+			if (idx < 0) {
+				if (prev_sel < cur_sel) {
+					if (cur_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
+						cur_sel++;
 					else
-						next_sel = cur_sel;
+						cur_sel = prev_sel;
 				} else {
-					if (next_sel)
-						next_sel--;
+					if (cur_sel)
+						cur_sel--;
 					else {
 						//Going up from first header -> defocus roller and focus button bar
 						lv_group_focus_obj(ui_ModuleViewSettingsBut);
 						lv_group_set_editing(page->group, false);
-						page->cur_selected = cur_sel;
-						lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_OFF);
+						page->cur_selected = prev_sel;
+						lv_roller_set_selected(ui_ElementRoller, prev_sel, LV_ANIM_OFF);
 						return;
 					}
 				}
-				lv_roller_set_selected(ui_ElementRoller, next_sel, LV_ANIM_ON);
-				page->cur_selected = next_sel;
+				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_ON);
+			}
+
+			page->cur_selected = cur_sel;
+
+			if (size_t idx = page->roller_drawn_el_idx[cur_sel]; idx < but.size()) {
+				// Turn on new button
+				lv_obj_add_style(but[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+				lv_event_send(but[idx], LV_EVENT_REFRESH, nullptr);
+				lv_obj_scroll_to_view(but[idx], LV_ANIM_ON);
 			}
 		}
 	}
@@ -455,13 +461,14 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		auto cur_sel = page->cur_selected;
 
-		if (cur_sel < page->drawn_elements.size()) {
-			page->mode = ViewMode::Mapping;
-			lv_hide(ui_ElementRollerPanel);
-
+		if (cur_sel < page->roller_drawn_el_idx.size()) {
 			auto drawn_idx = page->roller_drawn_el_idx[cur_sel];
-			if (drawn_idx >= 0)
+			if ((size_t)drawn_idx < page->drawn_elements.size()) {
+				page->mode = ViewMode::Mapping;
+				lv_hide(ui_ElementRollerPanel);
+
 				page->mapping_pane.show(page->drawn_elements[drawn_idx]);
+			}
 		}
 	}
 
