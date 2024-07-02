@@ -17,20 +17,23 @@ bool FlashLoader::write_sectors(uint32_t base_addr, std::span<uint8_t> buffer) {
 	constexpr bool verbose_log = false;
 
 	//round up to smallest 4kB blocks that contains image
-	unsigned bytes_to_erase = (buffer.size() + 4095) & ~4095;
+	uint32_t block_size = (buffer.size() < 64 * 1024) ? 4096 : 64 * 1024;
+	uint32_t block_size_mask = block_size - 1;
+
+	unsigned bytes_to_erase = (buffer.size() + block_size_mask) & ~block_size_mask;
 
 	uint32_t addr = base_addr;
 
 	while (bytes_to_erase) {
 		if constexpr (verbose_log)
-			pr_dump("Erasing 4k sector at 0x%x\n", (unsigned)addr);
+			pr_dump("Erasing %u-byte block at 0x%x\n", block_size, (unsigned)addr);
 
-		if (!flash.erase(mdrivlib::QSpiFlash::SECTOR, addr)) {
-			pr_err("ERROR: Flash failed to erase\n");
+		if (!flash.erase(block_size, addr)) {
+			pr_err("ERROR: Flash failed to erase block\n");
 			return false;
 		}
-		addr += 4096;
-		bytes_to_erase -= 4096;
+		addr += block_size;
+		bytes_to_erase -= block_size;
 	}
 
 	if constexpr (verbose_log)
