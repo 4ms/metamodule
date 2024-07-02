@@ -30,6 +30,10 @@ using Timestamp_t = uint32_t;
 std::optional<Timestamp_t> lastHeartbeatSentTime;
 static constexpr Timestamp_t HeartbeatInterval = 1000;
 
+const uint8_t Management_ID = 1;
+const uint8_t Broadcast_ID = 0;
+
+std::optional<IPAddress_t> currentIPAddress;
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
 	auto CreateVector = [&fbb](auto fileList) {
@@ -88,7 +92,7 @@ void receiveFrame(std::span<uint8_t> fullFrame) {
 };
 
 void sendBroadcast(std::span<uint8_t> payload) {
-	sendFrame(0, payload);
+	sendFrame(Broadcast_ID, payload);
 }
 
 ////////////////////////////////7
@@ -137,84 +141,90 @@ void send_heartbeat()
 }
 
 void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
-	auto sendResponse = [destination](auto payload) {
-		sendFrame(destination, payload);
-	};
+	if (destination == Management_ID)
+	{
+	}
+	else
+	{
+		auto sendResponse = [destination](auto payload) {
+			sendFrame(destination, payload);
+		};
 
-	// Parse message
+		// Parse message
 
-	auto message = GetMessage(payload.data());
+		auto message = GetMessage(payload.data());
 
-	if (auto content = message->content(); content) {
-		if (auto patchNameMessage = message->content_as_Patches(); patchNameMessage) {
-			flatbuffers::FlatBufferBuilder fbb;
-			auto message = constructPatchesMessage(fbb);
-			fbb.Finish(message);
-
-			sendResponse(fbb.GetBufferSpan());
-		} else if (auto uploadPatchMessage = message->content_as_UploadPatch(); uploadPatchMessage) {
-			auto destination = uploadPatchMessage->destination();
-
-			assert(uploadPatchMessage->content()->is_span_observable);
-			auto receivedPatchData =
-				std::span(uploadPatchMessage->content()->data(), uploadPatchMessage->content()->size());
-
-			auto filename = flatbuffers::GetStringView(uploadPatchMessage->filename());
-
-			printf("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
-
-			auto LocationToVolume = [](auto location) -> std::optional<Volume> {
-				switch (location) {
-					case StorageLocation::StorageLocation_USB:
-						return Volume::USB;
-					case StorageLocation::StorageLocation_FLASH:
-						return Volume::NorFlash;
-					case StorageLocation::StorageLocation_SDCARD:
-						return Volume::SDCard;
-					default:
-						return std::nullopt;
-				}
-			};
-
-			flatbuffers::FlatBufferBuilder fbb;
-			bool filesUpdated = false;
-
-			if (auto thisVolume = LocationToVolume(destination); thisVolume) {
-				auto success = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
-
-				if (success) {
-					auto result = CreateResult(fbb, true);
-					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
-					fbb.Finish(message);
-
-					filesUpdated = true;
-				} else {
-					auto description = fbb.CreateString("Saving failed");
-					auto result = CreateResult(fbb, false, description);
-					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
-					fbb.Finish(message);
-				}
-			} else {
-				auto description = fbb.CreateString("Invalid volume id");
-				auto result = CreateResult(fbb, false, description);
-				auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
-				fbb.Finish(message);
-			}
-
-			sendResponse(fbb.GetBufferSpan());
-
-			if (filesUpdated) {
+		if (auto content = message->content(); content) {
+			if (auto patchNameMessage = message->content_as_Patches(); patchNameMessage) {
 				flatbuffers::FlatBufferBuilder fbb;
 				auto message = constructPatchesMessage(fbb);
 				fbb.Finish(message);
 
-				sendBroadcast(fbb.GetBufferSpan());
+				sendResponse(fbb.GetBufferSpan());
+			} else if (auto uploadPatchMessage = message->content_as_UploadPatch(); uploadPatchMessage) {
+				auto destination = uploadPatchMessage->destination();
+
+				assert(uploadPatchMessage->content()->is_span_observable);
+				auto receivedPatchData =
+					std::span(uploadPatchMessage->content()->data(), uploadPatchMessage->content()->size());
+
+				auto filename = flatbuffers::GetStringView(uploadPatchMessage->filename());
+
+				printf("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
+
+				auto LocationToVolume = [](auto location) -> std::optional<Volume> {
+					switch (location) {
+						case StorageLocation::StorageLocation_USB:
+							return Volume::USB;
+						case StorageLocation::StorageLocation_FLASH:
+							return Volume::NorFlash;
+						case StorageLocation::StorageLocation_SDCARD:
+							return Volume::SDCard;
+						default:
+							return std::nullopt;
+					}
+				};
+
+				flatbuffers::FlatBufferBuilder fbb;
+				bool filesUpdated = false;
+
+				if (auto thisVolume = LocationToVolume(destination); thisVolume) {
+					auto success = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
+
+					if (success) {
+						auto result = CreateResult(fbb, true);
+						auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
+						fbb.Finish(message);
+
+						filesUpdated = true;
+					} else {
+						auto description = fbb.CreateString("Saving failed");
+						auto result = CreateResult(fbb, false, description);
+						auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
+						fbb.Finish(message);
+					}
+				} else {
+					auto description = fbb.CreateString("Invalid volume id");
+					auto result = CreateResult(fbb, false, description);
+					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
+					fbb.Finish(message);
+				}
+
+				sendResponse(fbb.GetBufferSpan());
+
+				if (filesUpdated) {
+					flatbuffers::FlatBufferBuilder fbb;
+					auto message = constructPatchesMessage(fbb);
+					fbb.Finish(message);
+
+					sendBroadcast(fbb.GetBufferSpan());
+				}
+			} else {
+				printf("Other option\n");
 			}
 		} else {
-			printf("Other option\n");
+			printf("Invalid message\n");
 		}
-	} else {
-		printf("Invalid message\n");
 	}
 }
 
