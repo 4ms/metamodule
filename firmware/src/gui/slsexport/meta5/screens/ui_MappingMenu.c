@@ -361,7 +361,7 @@ ui_ModuleViewActionAutopatchLabel = lv_label_create(ui_ModuleViewActionAutopatch
 lv_obj_set_width( ui_ModuleViewActionAutopatchLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_ModuleViewActionAutopatchLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_ModuleViewActionAutopatchLabel, LV_ALIGN_LEFT_MID );
-lv_label_set_text(ui_ModuleViewActionAutopatchLabel,"Auto-Patch");
+lv_label_set_text(ui_ModuleViewActionAutopatchLabel,"Auto-Map");
 
 ui_ModuleViewActionRandomBut = lv_btn_create(ui_ModuleViewActionMenu);
 lv_obj_set_height( ui_ModuleViewActionRandomBut, 25);
