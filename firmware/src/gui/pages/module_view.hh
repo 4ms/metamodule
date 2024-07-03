@@ -435,7 +435,6 @@ private:
 
 			page->cur_selected = cur_sel;
 			page->args.element_indices = page->drawn_elements[idx].gui_element.idx;
-			page->args.detail_mode = false;
 
 			// Turn off old component highlight button
 			if (prev_sel >= 0 && prev_sel < page->roller_drawn_el_idx.size()) {
@@ -462,6 +461,7 @@ private:
 			auto drawn_idx = page->roller_drawn_el_idx[cur_sel];
 			if ((size_t)drawn_idx < page->drawn_elements.size()) {
 				page->mode = ViewMode::Mapping;
+				page->args.detail_mode = true;
 				lv_hide(ui_ElementRollerPanel);
 
 				page->mapping_pane.show(page->drawn_elements[drawn_idx]);
