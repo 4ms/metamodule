@@ -332,8 +332,77 @@ struct PatchData {
 	}
 
 	void remove_module(unsigned module_id) {
-		//TODO: remove from vector and update all module indices > the deleted one?
-		// Or use a blank placeholder, and when adding a module replace the first blank placeholder?
+		if (module_id >= module_slugs.size())
+			return;
+
+		blank_out_module(module_id);
+
+		module_slugs.erase(std::next(module_slugs.begin(), module_id));
+
+		std::transform(int_cables.begin(), int_cables.end(), int_cables.begin(), [=](InternalCable &cable) {
+			if (cable.out.module_id > module_id) {
+				cable.out.module_id--;
+			}
+
+			std::transform(cable.ins.begin(), cable.ins.end(), cable.ins.begin(), [=](Jack &jack) {
+				if (jack.module_id > module_id) {
+					jack.module_id--;
+				}
+				return jack;
+			});
+
+			return cable;
+		});
+
+		for (auto &map : mapped_ins) {
+			std::transform(map.ins.begin(), map.ins.end(), map.ins.begin(), [=](Jack &in) {
+				if (in.module_id > module_id) {
+					in.module_id--;
+				}
+				return in;
+			});
+		}
+
+		std::transform(mapped_outs.begin(), mapped_outs.end(), mapped_outs.begin(), [=](MappedOutputJack &map) {
+			if (map.out.module_id > module_id) {
+				map.out.module_id--;
+			}
+			return map;
+		});
+
+		std::transform(static_knobs.begin(), static_knobs.end(), static_knobs.begin(), [=](StaticParam &map) {
+			if (map.module_id > module_id) {
+				map.module_id--;
+			}
+			return map;
+		});
+
+		for (auto &knobset : knob_sets) {
+			std::transform(knobset.set.begin(), knobset.set.end(), knobset.set.begin(), [=](MappedKnob &map) {
+				if (map.module_id > module_id) {
+					map.module_id--;
+				}
+				return map;
+			});
+		}
+
+		std::transform(midi_maps.set.begin(), midi_maps.set.end(), midi_maps.set.begin(), [=](MappedKnob &map) {
+			if (map.module_id > module_id) {
+				map.module_id--;
+			}
+			return map;
+		});
+
+		std::transform(module_states.begin(), module_states.end(), module_states.begin(), [=](ModuleInitState &state) {
+			if (state.module_id > module_id) {
+				state.module_id--;
+			}
+			return state;
+		});
+	}
+
+	void blank_out_module(unsigned module_id) {
+		// use a blank placeholder, and when adding a module replace the first blank placeholder?
 		module_slugs[module_id] = "Blank";
 
 		std::erase_if(int_cables, [=](InternalCable &cable) {

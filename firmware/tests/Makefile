@@ -22,6 +22,7 @@ TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 TEST_SOURCES += src/fs/time_convert.cc
 TEST_SOURCES += src/fw_update/hash/md5_hash.h
 TEST_SOURCES += src/fw_update/hash/hash_processor.cc
+TEST_SOURCES += ../shared/CoreModules/moduleFactory.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
