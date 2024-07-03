@@ -203,22 +203,34 @@ private:
 			jack_status[idx] = status;
 
 			auto *label = input_status_labels[idx];
+			std::string in = std::string("In ") + std::to_string(idx + 1) + "\n";
+
 			switch (status) {
-				case JackCalStatus::LowOnly:
-					lv_label_set_text_fmt(label, "In %d:\n #00a551 C2# #aaaaaa C4#", idx + 1);
-					break;
-				case JackCalStatus::HighOnly:
-					lv_label_set_text_fmt(label, "In %d:\n #aaaaaa C2# #00a551 C4#", idx + 1);
-					break;
-				case JackCalStatus::NotCal:
-					lv_label_set_text_fmt(label, "In %d:\n #aaaaaa C2 C4#", idx + 1);
-					break;
-				case JackCalStatus::Done:
-					lv_label_set_text_fmt(label, "In %d:\n#00a551 OK#", idx + 1);
-					break;
-				case JackCalStatus::Error:
-					lv_label_set_text_fmt(label, "In %d:\n#f40000 FAIL#", idx + 1);
-					break;
+				case JackCalStatus::LowOnly: {
+					std::string stat = in + Gui::green_text("C2") + Gui::grey_text(" C4");
+					lv_label_set_text(label, stat.c_str());
+				} break;
+
+				case JackCalStatus::HighOnly: {
+					std::string stat = in + Gui::grey_text("C2") + Gui::green_text(" C4");
+					lv_label_set_text(label, stat.c_str());
+				} break;
+
+				case JackCalStatus::NotCal: {
+					std::string stat = in + Gui::grey_text("C2") + Gui::grey_text(" C4");
+					lv_label_set_text(label, stat.c_str());
+				} break;
+
+				case JackCalStatus::Done: {
+					std::string stat = in + Gui::green_text("OK");
+					lv_label_set_text(label, stat.c_str());
+				} break;
+
+				case JackCalStatus::Error: {
+					std::string stat = in + Gui::red_text("FAIL");
+					lv_label_set_text(label, stat.c_str());
+				} break;
+
 				case JackCalStatus::Settling:
 					break;
 			}
@@ -417,17 +429,19 @@ private:
 			jack_status[idx] = status;
 
 			auto *label = output_status_labels[idx];
+			std::string out = "Out " + std::to_string(idx + 1);
+
 			switch (status) {
 				case JackCalStatus::NotCal: {
-					lv_label_set_text_fmt(label, "#ffffff Out %d#", idx + 1);
+					lv_label_set_text(label, Gui::grey_text(out).c_str());
 				} break;
 
 				case JackCalStatus::Done: {
-					lv_label_set_text_fmt(label, "#00a551 Out %d#", idx + 1);
+					lv_label_set_text(label, Gui::green_text(out).c_str());
 				} break;
 
 				case JackCalStatus::Error: {
-					lv_label_set_text_fmt(label, "#f40000 Out %d#", idx + 1);
+					lv_label_set_text(label, Gui::red_text(out).c_str());
 				} break;
 
 				case JackCalStatus::LowOnly:
