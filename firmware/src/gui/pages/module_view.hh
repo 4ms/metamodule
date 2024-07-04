@@ -23,7 +23,7 @@ struct ModuleViewPage : PageBase {
 		, map_ring_display{settings}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
-		, action_menu{module_mods, patches} {
+		, action_menu{module_mods, patches, page_list} {
 
 		init_bg(ui_MappingMenu);
 
@@ -290,7 +290,7 @@ struct ModuleViewPage : PageBase {
 						   [&](RemoveModule &mod) {
 							   patch->remove_module(mod.module_idx);
 							   refresh = false;
-							   page_list.request_new_page(PageId::PatchView, args);
+							   page_list.request_new_page_no_history(PageId::PatchView, args);
 						   },
 						   [&](auto &m) { refresh = false; },
 					   },

@@ -18,9 +18,10 @@ namespace MetaModule
 
 struct ModuleViewActionMenu {
 
-	ModuleViewActionMenu(PatchModQueue &patch_mod_queue, OpenPatchManager &patches)
+	ModuleViewActionMenu(PatchModQueue &patch_mod_queue, OpenPatchManager &patches, PageList &page_list)
 		: patch_mod_queue{patch_mod_queue}
 		, patches{patches}
+		, page_list{page_list}
 		, auto_map{patch_mod_queue, patches}
 		, randomizer{patch_mod_queue}
 		, group(lv_group_create()) {
@@ -96,6 +97,7 @@ private:
 		if (delete_state == DeleteState::TryRequest) {
 			patch_mod_queue.put(RemoveModule{.module_idx = uint16_t(module_idx)});
 			delete_state = DeleteState::Requested;
+			page_list.remove_history_matching_args(PageArguments{.module_id = module_idx});
 		}
 	}
 
@@ -154,6 +156,7 @@ private:
 
 	PatchModQueue &patch_mod_queue;
 	OpenPatchManager &patches;
+	PageList &page_list;
 
 	ConfirmPopup confirm_popup;
 
