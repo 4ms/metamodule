@@ -29,8 +29,6 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 						   mod.type == ElementType::Input ? player.disconnect_injack(mod.jack) :
 															player.disconnect_outjack(mod.jack);
 					   },
-					   [&player](RemoveModule &mod) { player.remove_module(mod.module_idx); },
-
 					   [&caldata](SetChanCalibration &mod) {
 						   if (mod.is_input && mod.channel < caldata.in_cal.size()) {
 							   caldata.in_cal[mod.channel] = {mod.slope, mod.offset};

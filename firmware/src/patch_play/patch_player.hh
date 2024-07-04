@@ -170,7 +170,9 @@ public:
 
 	// Runs the patch
 	void update_patch() {
-		if (num_modules == 2)
+		if (num_modules <= 1)
+			return;
+		else if (num_modules == 2)
 			modules[1]->update();
 		else {
 			smp.update_modules();
@@ -520,8 +522,12 @@ public:
 		erase_and_squash_inner(midi_pulses);
 
 		pd.remove_module(module_idx);
+
 		std::move(std::next(modules.begin(), module_idx + 1), modules.end(), std::next(modules.begin(), module_idx));
+
 		calc_multiple_module_indicies();
+
+		smp.load_patch(num_modules);
 	}
 
 	void set_samplerate(float hz) {

@@ -18,10 +18,13 @@ namespace MetaModule
 
 struct ModuleViewActionMenu {
 
-	ModuleViewActionMenu(PatchModQueue &patch_mod_queue, OpenPatchManager &patches, PageList &page_list)
-		: patch_mod_queue{patch_mod_queue}
-		, patches{patches}
+	ModuleViewActionMenu(PatchModQueue &patch_mod_queue,
+						 OpenPatchManager &patches,
+						 PageList &page_list,
+						 PatchPlayLoader &patch_playloader)
+		: patches{patches}
 		, page_list{page_list}
+		, patch_playloader{patch_playloader}
 		, auto_map{patch_mod_queue, patches}
 		, randomizer{patch_mod_queue}
 		, group(lv_group_create()) {
@@ -95,9 +98,14 @@ struct ModuleViewActionMenu {
 private:
 	void process_delete_module() {
 		if (delete_state == DeleteState::TryRequest) {
-			patch_mod_queue.put(RemoveModule{.module_idx = uint16_t(module_idx)});
-			delete_state = DeleteState::Requested;
+			patches.get_view_patch()->remove_module(module_idx);
+			patch_playloader.remove_module(module_idx);
+
 			page_list.remove_history_matching_args(PageArguments{.module_id = module_idx});
+			page_list.request_new_page_no_history(PageId::PatchView,
+												  PageArguments{.patch_loc_hash = patches.get_view_patch_loc_hash()});
+			patches.mark_view_patch_modified();
+			delete_state = DeleteState::Idle;
 		}
 	}
 
@@ -154,9 +162,9 @@ private:
 			"Delete");
 	}
 
-	PatchModQueue &patch_mod_queue;
 	OpenPatchManager &patches;
 	PageList &page_list;
+	PatchPlayLoader &patch_playloader;
 
 	ConfirmPopup confirm_popup;
 
