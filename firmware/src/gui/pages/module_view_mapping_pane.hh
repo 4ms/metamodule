@@ -324,9 +324,9 @@ private:
 			lv_label_set_text(ui_CableAddLabel, "New cable");
 		}
 		lv_show(ui_CableAddButton);
-		lv_group_add_obj(pane_group, ui_CableRemoveButton);
 		lv_group_add_obj(pane_group, ui_CableAddButton);
 		lv_group_add_obj(pane_group, ui_CablePanelAddButton);
+		lv_group_add_obj(pane_group, ui_CableRemoveButton);
 		lv_group_focus_next(pane_group);
 
 		handle_cable_creating();
@@ -342,6 +342,7 @@ private:
 		lv_hide(ui_CableAddButton);
 		lv_hide(ui_CablePanelAddButton);
 		lv_show(ui_CableCreationPanel);
+		lv_show(ui_CableCreationLabel);
 
 		auto begin_type = gui_state.new_cable->type;
 		auto begin_connected = gui_state.new_cable->has_connections;
