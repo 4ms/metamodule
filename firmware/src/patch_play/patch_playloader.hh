@@ -159,6 +159,16 @@ struct PatchPlayLoader {
 		start_audio();
 	}
 
+	void remove_module(unsigned module_id) {
+		stop_audio();
+		while (!is_audio_muted())
+			;
+
+		player_.remove_module(module_id);
+
+		start_audio();
+	}
+
 private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;

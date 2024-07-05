@@ -85,8 +85,9 @@ public:
 
 	void request_new_page_no_history(PageId pageid, PageArguments args) {
 		auto last = _page_history.back();
-		if (last.has_value() && last->page == pageid && last->args == args)
+		if (last.has_value() && last->page == pageid && last->args == args) {
 			_page_history.pop_back();
+		}
 
 		_current_state = {pageid, args};
 		_new_page_requested = true;
@@ -96,10 +97,11 @@ public:
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop -- don't push
 		auto last = _page_history.back();
-		if (last.has_value() && last->page == pageid && last->args == args)
+		if (last.has_value() && last->page == pageid && last->args == args) {
 			_page_history.pop_back();
-		else
+		} else {
 			_page_history.push_back(_current_state);
+		}
 
 		_current_state = {pageid, args};
 		_new_page_requested = true;

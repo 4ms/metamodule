@@ -170,7 +170,9 @@ public:
 
 	// Runs the patch
 	void update_patch() {
-		if (num_modules == 2)
+		if (num_modules <= 1)
+			return;
+		else if (num_modules == 2)
 			modules[1]->update();
 		else {
 			smp.update_modules();
@@ -418,7 +420,7 @@ public:
 	void disconnect_outjack(Jack jack) {
 		for (auto &out : out_conns) {
 			if (out == jack) {
-				out = {0xFFFF, 0xFFFF}; //disconnected
+				out = disconnected_jack;
 			}
 		}
 		modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
@@ -445,7 +447,87 @@ public:
 	}
 
 	void remove_module(uint16_t module_idx) {
-		// TODO: remove module and all cables, mappings
+		// TODO: for all cache structures, if (module_id > deleted_module_idx) module_id -= 1;
+		// For testing, we just replace module with a blank and don't touch any indices
+
+		auto squash_module_id = [gap = module_idx](auto &module_id) {
+			if (module_id > gap && module_id != disconnected_jack.module_id)
+				module_id--;
+		};
+
+		auto erase_and_squash = [=](auto &container) {
+			for (auto &item : container) {
+				std::erase_if(item, [=](auto &map) { return (map.module_id == module_idx); });
+				for (auto &map : item) {
+					squash_module_id(map.module_id);
+				}
+			}
+		};
+
+		auto erase_and_squash_inner = [=](auto &container) {
+			for (auto &item : container) {
+				std::erase_if(item.conns, [=](auto &map) { return (map.module_id == module_idx); });
+				for (auto &map : item.conns) {
+					squash_module_id(map.module_id);
+				}
+			}
+		};
+
+		// Panel Input connections
+		erase_and_squash(in_conns);
+
+		// Panel Output connections
+		for (auto &out : out_conns) {
+			if (out.module_id == module_idx) {
+				out = disconnected_jack;
+			}
+			squash_module_id(out.module_id);
+		}
+
+		// Internal cables
+		// Inform other modules connected to this one
+		// that their jacks are to be disconnected
+		for (auto &cable : pd.int_cables) {
+
+			unsigned ins_to_disconnect = 0;
+			for (auto in : cable.ins) {
+
+				if (cable.out.module_id == module_idx) {
+					modules[in.module_id]->mark_input_unpatched(in.jack_id);
+				}
+
+				if (in.module_id == module_idx) {
+					ins_to_disconnect++;
+				}
+			}
+
+			if (ins_to_disconnect == cable.ins.size()) {
+				modules[cable.out.module_id]->mark_output_unpatched(cable.out.jack_id);
+			}
+		}
+
+		// Knob and MIDI connections
+		for (auto &knob_set : knob_conns) {
+			erase_and_squash(knob_set);
+		}
+
+		erase_and_squash(midi_knob_conns);
+		erase_and_squash(midi_note_pitch_conns);
+		erase_and_squash(midi_note_gate_conns);
+		erase_and_squash(midi_note_vel_conns);
+		erase_and_squash(midi_note_aft_conns);
+		erase_and_squash(midi_cc_conns);
+		erase_and_squash(midi_gate_conns);
+		erase_and_squash_inner(midi_note_retrig);
+		erase_and_squash_inner(midi_pulses);
+
+		pd.remove_module(module_idx);
+
+		std::move(std::next(modules.begin(), module_idx + 1), modules.end(), std::next(modules.begin(), module_idx));
+
+		calc_multiple_module_indicies();
+
+		smp.load_patch(num_modules);
 	}
 
 	void set_samplerate(float hz) {
@@ -498,13 +580,15 @@ public:
 	}
 
 private:
+	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
+
 	// Cache functions:
 	void clear_cache() {
 		for (auto &d : dup_module_index)
 			d = 0;
 
 		for (auto &out_conn : out_conns)
-			out_conn = {0xFFFF, 0xFFFF};
+			out_conn = disconnected_jack;
 
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
@@ -708,6 +792,7 @@ private:
 	}
 
 	///////////////////////////////////////
+#if defined(TESTPROJECT)
 public:
 	//Used in unit tests
 	unsigned get_num_int_cable_ins(unsigned int_cable_idx) {
@@ -747,5 +832,31 @@ public:
 	uint8_t get_multiple_module_index(uint8_t idx) {
 		return dup_module_index[idx];
 	}
+
+	auto const &get_inconns() {
+		return in_conns;
+	}
+
+	auto const &get_outconns() {
+		return out_conns;
+	}
+
+	auto const &get_knobconns() {
+		return knob_conns;
+	}
+
+	auto const &get_int_cables() {
+		return pd.int_cables;
+	}
+
+	auto const &get_modules() {
+		return modules;
+	}
+
+	auto const &get_module_slugs() {
+		return pd.module_slugs;
+	}
+
+#endif
 };
 } // namespace MetaModule

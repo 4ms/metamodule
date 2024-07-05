@@ -3,6 +3,7 @@
 #include "slsexport/meta5/ui.h"
 #include <array>
 #include <span>
+#include <string>
 
 // lvgl has prop1 and has_group fields out of order, thus not C++ friendly
 #define LV_STYLE_CONST_CPP(prop_array)                                                                                 \
@@ -56,34 +57,69 @@ struct Gui {
 	static inline lv_style_t focus_style;
 
 	// COLORS
+	static inline lv_color_t red_highlight = lv_color_hex(0xea1c25);
+	static inline const char *red_highlight_html = "^ea1c25 ";
+	static inline const std::string red_highlight_html_str{red_highlight_html};
+	static std::string red_text(std::string_view txt) {
+		return red_highlight_html_str + std::string(txt) + LV_TXT_COLOR_CMD;
+	}
+
 	static inline lv_color_t orange_highlight = lv_color_hex(0xfd8b18);
-	static inline const char *orange_highlight_html = "#fd8b18 ";
+	static inline const char *orange_highlight_html = "^fd8b18 ";
+	static inline const std::string orange_highlight_html_str{orange_highlight_html};
+	static std::string orange_text(std::string_view txt) {
+		return orange_highlight_html_str + std::string(txt) + LV_TXT_COLOR_CMD;
+	}
+
 	static inline lv_color_t yellow_highlight = lv_color_hex(0x8bfd18);
-	static inline const char *yellow_highlight_html = "#d7ff6a ";
-	static inline const char *blue_highlight_html = "#188bfd ";
-	static inline const char *brown_highlight_html = "#A26E3E ";
+	static inline const char *yellow_highlight_html = "^d7ff6a ";
+	static std::string yellow_text(std::string_view txt) {
+		return std::string(yellow_highlight_html) + std::string(txt) + LV_TXT_COLOR_CMD;
+	}
+
+	static inline lv_color_t green_highlight = lv_color_hex(0x00a551);
+	static inline const char *green_highlight_html = "^00a551 ";
+	static inline const std::string green_highlight_html_str{green_highlight_html};
+	static std::string green_text(std::string_view txt) {
+		return green_highlight_html_str + std::string(txt) + LV_TXT_COLOR_CMD;
+	}
+
+	static inline const char *blue_highlight_html = "^188bfd ";
+	static inline const std::string blue_highlight_html_str{blue_highlight_html};
+	static std::string blue_text(std::string_view txt) {
+		return std::string(blue_highlight_html) + std::string(txt) + LV_TXT_COLOR_CMD;
+	}
+
+	static inline lv_color_t grey_highlight = lv_color_hex(0xaaaaaa);
+	static inline const char *grey_highlight_html = "^aaaaaa ";
+	static inline const std::string grey_highlight_html_str{grey_highlight_html};
+	static std::string grey_text(std::string_view txt) {
+		return grey_highlight_html_str + std::string(txt) + LV_TXT_COLOR_CMD;
+	}
+
+	static inline const char *brown_highlight_html = "^A26E3E ";
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
 
 	static inline std::array<const char *, 6> knob_html{
-		"#F40000 ", // RED
-		"#FFF100 ", // YELLOW
-		"#00ADEE ", // CYAN
-		"#F06392 ", // PINK
-		"#FAA629 ", // ORANGE
-		"#00A551 ", // GREEN
+		"^F40000 ", // RED
+		"^FFF100 ", // YELLOW
+		"^00ADEE ", // CYAN
+		"^F06392 ", // PINK
+		"^FAA629 ", // ORANGE
+		"^00A551 ", // GREEN
 	};
 
 	static inline std::array<const char *, 8> jack_html{
-		"#EA1C25 ", // RED
-		"#FFF200 ", // YELLOW
-		"#00AEEE ", // CYAN
-		"#F66194 ", // PINK
-		"#FAB500 ", // ORANGE
-		"#00A552 ", // GREEN
-		"#000000 ", // dark grey/black
-		"#FFFFFF ", // light gray/white
+		"^EA1C25 ", // RED
+		"^FFF200 ", // YELLOW
+		"^00AEEE ", // CYAN
+		"^F66194 ", // PINK
+		"^FAB500 ", // ORANGE
+		"^00A552 ", // GREEN
+		"^000000 ", // dark grey/black
+		"^FFFFFF ", // light gray/white
 	};
 
 	static inline std::array<lv_color_t, 8> cable_palette{

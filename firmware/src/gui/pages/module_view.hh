@@ -7,6 +7,7 @@
 #include "gui/elements/redraw_light.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
+#include "gui/pages/module_view_action_menu.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -21,26 +22,34 @@ struct ModuleViewPage : PageBase {
 		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings}
 		, patch{patches.get_view_patch()}
-		, roller{ui_ElementRoller}
-		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state} {
+		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
+		, action_menu{module_mods, patches, page_list, patch_playloader} {
 
 		init_bg(ui_MappingMenu);
 
 		lv_draw_img_dsc_init(&img_dsc);
 
-		lv_obj_remove_style(roller, nullptr, LV_STATE_EDITED);
-		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
+		lv_obj_remove_style(ui_ElementRoller, nullptr, LV_STATE_EDITED);
+		lv_obj_remove_style(ui_ElementRoller, nullptr, LV_STATE_FOCUS_KEY);
 
 		lv_obj_add_flag(ui_MappingParameters, LV_OBJ_FLAG_HIDDEN);
 
 		button.clear();
 
-		lv_group_remove_all_objs(group);
-		lv_group_add_obj(group, roller);
-		lv_group_focus_obj(roller);
+		auto roller_label = lv_obj_get_child(ui_ElementRoller, 0);
+		lv_label_set_recolor(roller_label, true);
 
-		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
+		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, ui_ModuleViewActionBut);
+		lv_group_add_obj(group, ui_ModuleViewSettingsBut);
+		lv_group_add_obj(group, ui_ElementRoller);
+		lv_group_focus_obj(ui_ElementRoller);
+
+		lv_group_set_wrap(group, false);
+
+		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
 	}
 
 	void prepare_focus() override {
@@ -67,11 +76,15 @@ struct ModuleViewPage : PageBase {
 		lv_label_set_text(ui_ElementRollerModuleName, module_slug.c_str());
 
 		redraw_module();
+
+		lv_hide(ui_ModuleViewActionMenu);
+		lv_hide(ui_AutoMapSelectPanel);
+
+		action_menu.prepare_focus(group, this_module_id);
 	}
 
 	void redraw_module() {
 		reset_module_page();
-
 		size_t num_elements = moduleinfo.elements.size();
 		opts.reserve(num_elements * 32); // 32 chars per roller item
 		button.reserve(num_elements);
@@ -104,6 +117,7 @@ struct ModuleViewPage : PageBase {
 		// Populate Roller and highlighter buttons
 		unsigned roller_idx = 0;
 		DrawnElement const *cur_el = nullptr;
+		ElementCount::Counts last_type{};
 
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &drawn = drawn_element.gui_element;
@@ -119,7 +133,25 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
-			opts += base.short_name;
+			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
+				opts += Gui::orange_highlight_html_str + "Params:" + LV_TXT_COLOR_CMD + "\n";
+				roller_idx++;
+				roller_drawn_el_idx.push_back(-1);
+
+			} else if (last_type.num_params > 0 && (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0)) {
+				opts += Gui::orange_highlight_html_str + "Jacks:" + LV_TXT_COLOR_CMD + "\n";
+				roller_idx++;
+				roller_drawn_el_idx.push_back(-1);
+
+			} else if (last_type.num_lights == 0 && drawn.count.num_lights > 0 && drawn.count.num_params == 0) {
+				opts += Gui::orange_highlight_html_str + "Lights:" + LV_TXT_COLOR_CMD + "\n";
+				roller_idx++;
+				roller_drawn_el_idx.push_back(-1);
+			}
+			last_type = drawn.count;
+
+			opts.append(" ");
+			opts.append(base.short_name);
 
 			if (drawn.mapped_panel_id) {
 				append_panel_name(opts, drawn_element.element, drawn.mapped_panel_id.value());
@@ -151,17 +183,14 @@ struct ModuleViewPage : PageBase {
 		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
 		lv_obj_clear_flag(ui_ElementRollerPanel, LV_OBJ_FLAG_HIDDEN);
 
-		auto roller_label = lv_obj_get_child(roller, 0);
-		lv_label_set_recolor(roller_label, true);
-
 		// Add text list to roller options
-		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
-		lv_roller_set_visible_row_count(roller, 10);
+		lv_roller_set_options(ui_ElementRoller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
 
-		lv_roller_set_selected(roller, cur_selected, LV_ANIM_OFF);
+		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
 
-		if (cur_selected < button.size() && button.size() > 0) {
-			lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
+		if (cur_selected > 0 && cur_selected < button.size()) {
+			if (auto idx = roller_drawn_el_idx[cur_selected]; (size_t)idx < button.size())
+				lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 		} else {
 			pr_err("Current selected is not in range (%d/%zu)\n", cur_selected, button.size());
 		}
@@ -174,7 +203,7 @@ struct ModuleViewPage : PageBase {
 		mapping_pane.prepare_focus(group, roller_width, is_patch_playing);
 
 		// TODO: useful to make a PageArgument that selects an item from the roller but stays in List mode?
-		if (cur_el) {
+		if (cur_el && args.detail_mode == true) {
 			mode = ViewMode::Mapping;
 			mapping_pane.hide();
 			mapping_pane.show(*cur_el);
@@ -185,7 +214,11 @@ struct ModuleViewPage : PageBase {
 
 	void update() override {
 		if (metaparams.back_button.is_just_released()) {
-			if (mode == ViewMode::List) {
+
+			if (action_menu.is_visible()) {
+				action_menu.hide();
+
+			} else if (mode == ViewMode::List) {
 				load_prev_page();
 
 			} else if (mode == ViewMode::Mapping) {
@@ -200,10 +233,16 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		if (action_menu.is_visible())
+			action_menu.update();
+
 		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
-			redraw_map_rings();
+			redraw_module();
+
+			if (mode == ViewMode::Mapping)
+				mapping_pane.refresh();
 		}
 
 		if (is_patch_playing) {
@@ -263,25 +302,6 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
-	void redraw_map_rings() {
-		for (auto &drawn_el : drawn_elements) {
-			auto &gui_el = drawn_el.gui_element;
-
-			if (gui_el.count.num_params > 0 && gui_el.map_ring) {
-				lv_obj_del_async(gui_el.map_ring);
-				gui_el.map_ring = nullptr;
-			}
-		}
-
-		for (auto &drawn_el : drawn_elements) {
-			auto module_id = drawn_el.gui_element.module_idx;
-			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
-
-			ModuleDrawer{ui_ModuleImage, 240}.draw_mapped_ring(*patch, module_id, active_knobset, canvas, drawn_el);
-		}
-		update_map_ring_style();
-	}
-
 	// This gets called after map_ring_style changes
 	void update_map_ring_style() {
 		for (auto &drawn_el : drawn_elements) {
@@ -305,6 +325,7 @@ struct ModuleViewPage : PageBase {
 
 	void blur() final {
 		params.lights.stop_watching_all();
+		action_menu.hide();
 	}
 
 private:
@@ -312,9 +333,10 @@ private:
 		mode = ViewMode::List;
 		mapping_pane.hide();
 		lv_show(ui_ElementRollerPanel);
-		lv_obj_set_height(roller, 210);
-		lv_group_focus_obj(roller);
+		lv_group_focus_obj(ui_ElementRoller);
 		lv_group_set_editing(group, true);
+		lv_group_set_wrap(group, false);
+		args.detail_mode = false;
 	}
 
 	void add_button(lv_obj_t *obj) {
@@ -353,7 +375,7 @@ private:
 		drawn_elements.clear();
 		opts.clear();
 		roller_drawn_el_idx.clear();
-		cur_selected = 0;
+		cur_selected = 1;
 	}
 
 	bool read_slug() {
@@ -368,26 +390,61 @@ private:
 		return true;
 	}
 
-	static void roller_cb(lv_event_t *event) {
+	static void roller_scrolled_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto &cur_sel = page->cur_selected;
 		auto &but = page->button;
 
-		// Turn off old button
-		if (cur_sel >= 0 && cur_sel < but.size()) {
-			lv_obj_remove_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
-			lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
-		}
+		auto prev_sel = page->cur_selected;
+
+		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
+
+		// if (ElementCount::matched(*args.element_indices, drawn.idx)) {
 
 		// Get the new button
-		cur_sel = lv_roller_get_selected(page->roller);
-		if (cur_sel < but.size()) {
+		if (cur_sel < page->roller_drawn_el_idx.size()) {
+			auto idx = page->roller_drawn_el_idx[cur_sel];
+
+			// Skip over headers
+			if (idx < 0) {
+				if (prev_sel < cur_sel) {
+					if (cur_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
+						cur_sel++;
+					else
+						cur_sel = prev_sel;
+				} else {
+					if (cur_sel)
+						cur_sel--;
+					else {
+						//Scrolling up from first header -> defocus roller and focus button bar
+						lv_group_focus_obj(ui_ModuleViewSettingsBut);
+						lv_group_set_editing(page->group, false);
+						page->cur_selected = prev_sel;
+						lv_roller_set_selected(ui_ElementRoller, prev_sel, LV_ANIM_OFF);
+						return;
+					}
+				}
+				// cur_sel changed, so we need to update the roller position and our drawn_el idx
+				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_ON);
+				idx = page->roller_drawn_el_idx[cur_sel];
+			}
+
+			page->cur_selected = cur_sel;
+			page->args.element_indices = page->drawn_elements[idx].gui_element.idx;
+
+			// Turn off old component highlight button
+			if (prev_sel >= 0 && prev_sel < page->roller_drawn_el_idx.size()) {
+				if (auto prev_idx = page->roller_drawn_el_idx[prev_sel]; (size_t)prev_idx < but.size()) {
+					lv_obj_remove_style(but[prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+					lv_event_send(but[prev_idx], LV_EVENT_REFRESH, nullptr);
+				}
+			}
+
 			// Turn on new button
-			lv_obj_add_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
-			lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
-			lv_obj_scroll_to_view(but[cur_sel], LV_ANIM_ON);
-		} else {
-			pr_err("%u is selected but only %zu buttons\n", cur_sel, but.size());
+			if ((size_t)idx < but.size()) {
+				lv_obj_add_style(but[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+				lv_event_send(but[idx], LV_EVENT_REFRESH, nullptr);
+				lv_obj_scroll_to_view(but[idx], LV_ANIM_ON);
+			}
 		}
 	}
 
@@ -395,12 +452,25 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		auto cur_sel = page->cur_selected;
 
-		if (cur_sel < page->drawn_elements.size()) {
-			page->mode = ViewMode::Mapping;
-			lv_hide(ui_ElementRollerPanel);
-
+		if (cur_sel < page->roller_drawn_el_idx.size()) {
 			auto drawn_idx = page->roller_drawn_el_idx[cur_sel];
-			page->mapping_pane.show(page->drawn_elements[drawn_idx]);
+			if ((size_t)drawn_idx < page->drawn_elements.size()) {
+				page->mode = ViewMode::Mapping;
+				page->args.detail_mode = true;
+				lv_hide(ui_ElementRollerPanel);
+
+				page->mapping_pane.show(page->drawn_elements[drawn_idx]);
+			}
+		}
+	}
+
+	static void roller_focus_cb(lv_event_t *event) {
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		if (page) {
+			if (event->param != page) {
+				lv_group_set_editing(page->group, true);
+				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
+			}
 		}
 	}
 
@@ -423,13 +493,14 @@ private:
 
 	std::vector<lv_obj_t *> button;
 	std::vector<DrawnElement> drawn_elements;
-	std::vector<unsigned> roller_drawn_el_idx;
+	std::vector<int> roller_drawn_el_idx;
 
 	std::array<float, MAX_LIGHTS_PER_MODULE> light_vals{};
 
 	lv_obj_t *canvas = nullptr;
-	lv_obj_t *roller = nullptr;
 	ModuleViewMappingPane mapping_pane;
+
+	ModuleViewActionMenu action_menu;
 
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};
 	lv_draw_img_dsc_t img_dsc{};

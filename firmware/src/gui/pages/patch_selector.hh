@@ -112,10 +112,11 @@ struct PatchSelectorPage : PageBase {
 			auto patch_name = std::string{std::string_view{patch.patch.patch_name}};
 
 			if (patch.modification_count > 0)
-				patch_name = "#ff0000 •# " + patch_name;
+				patch_name = Gui::red_highlight_html_str + "•" + LV_TXT_COLOR_CMD + " " + patch_name;
 
 			if (patch.loc_hash == patches.get_playing_patch_loc_hash())
-				patch_name = "#00a551 " + std::string(LV_SYMBOL_PLAY) + "# " + patch_name;
+				patch_name = Gui::green_highlight_html_str + LV_SYMBOL_PLAY + LV_TXT_COLOR_CMD + " " + patch_name;
+			// patch_name = "#00a551 " + std::string(LV_SYMBOL_PLAY) + "# " + patch_name;
 
 			root.files.emplace_back(
 				patch.loc.filename, 0, patch.modification_count, PatchName{patch_name}, patch.loc.vol);
@@ -189,7 +190,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	std::string format_volume_name(StaticString<31> const &vol_name, PatchDir &root) {
-		std::string roller_text = Gui::orange_highlight_html + std::string(vol_name) + "#";
+		std::string roller_text = Gui::orange_highlight_html + std::string(vol_name) + LV_TXT_COLOR_CMD;
 
 		// TODO: make a setting to hide/show these?
 		add_file_count(roller_text, root);
@@ -203,7 +204,7 @@ struct PatchSelectorPage : PageBase {
 		std::string roller_text;
 
 		if (subdir.name.size() > 0) {
-			roller_text += Gui::yellow_highlight_html + subdir.name + "#";
+			roller_text += Gui::yellow_highlight_html + subdir.name + LV_TXT_COLOR_CMD;
 			add_file_count(roller_text, subdir);
 		}
 		roller_text += "\n";

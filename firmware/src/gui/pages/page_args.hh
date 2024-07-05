@@ -15,6 +15,7 @@ struct PageArguments {
 	std::optional<uint32_t> view_knobset_id{};
 	std::optional<ElementCount::Counts> element_counts{};
 	std::optional<ElementCount::Indices> element_indices{};
+	std::optional<bool> detail_mode{};
 
 	bool operator==(PageArguments const &that) const = default;
 };

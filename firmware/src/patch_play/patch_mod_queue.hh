@@ -56,10 +56,6 @@ struct AddJackMapping {
 	ElementType type;
 };
 
-struct RemoveModule {
-	uint16_t module_idx{};
-};
-
 struct CalibrationOnOff {
 	bool enable;
 };
@@ -81,7 +77,6 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 AddInternalCable,
 									 AddJackMapping,
 									 DisconnectJack,
-									 RemoveModule,
 									 CalibrationOnOff,
 									 SetChanCalibration>;
 
