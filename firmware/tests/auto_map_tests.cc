@@ -18,7 +18,7 @@ TEST_CASE("Basic usage: knob") {
 
 		auto test_map_knob = [&](unsigned set_id, uint16_t module_id, uint8_t param_id) {
 			// Check that the knob is initially not mapped
-			for (unsigned set_i : std::views::iota(0u, MaxKnobSets)) {
+			for (unsigned set_i = 0; set_i < MaxKnobSets; set_i++) {
 				CHECK(p.find_mapped_knob(set_i, module_id, param_id) == nullptr);
 			}
 
@@ -69,14 +69,14 @@ TEST_CASE("Basic usage: knob") {
 		const unsigned leave_open_knob_id = 3;
 
 		uint16_t param_id = 0;
-		for (unsigned set_i : std::views::iota(0u, MaxKnobSets)) {
-			for (uint16_t panel_knob_id : std::views::iota(0u, PanelDef::NumKnobs)) {
+		for (unsigned set_i = 0; set_i < MaxKnobSets; set_i++) {
+			for (uint16_t panel_knob_id = 0; panel_knob_id < PanelDef::NumKnobs; panel_knob_id++) {
 
 				// Leave one space open:
 				if (panel_knob_id == leave_open_knob_id && set_i == leave_open_set_id)
 					continue;
 
-				for ([[maybe_unused]] auto multi_map : std::views::iota(0u, 8u)) {
+				for ([[maybe_unused]] auto multi_map = 0u; multi_map < 8; multi_map++) {
 					bool ok = p.add_update_mapped_knob(set_i,
 													   MappedKnob{.panel_knob_id = panel_knob_id,
 																  .module_id = mod3,

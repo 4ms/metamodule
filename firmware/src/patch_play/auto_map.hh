@@ -43,16 +43,16 @@ public:
 
 	std::optional<MappingDest> map_param(uint16_t module_id, uint16_t param_idx, PatchData &patch) {
 		// Abort if param is already mapped
-		for (auto set_i : std::views::iota(0u, patch.knob_sets.size())) {
+		for (auto set_i = 0u; set_i < patch.knob_sets.size(); set_i++) {
 			if (patch.find_mapped_knob_idx(set_i, module_id, param_idx).has_value()) {
 				return std::nullopt;
 			}
 		}
 
 		// Map to first knobset with an unmapped panel knob
-		for (uint16_t set_i : std::views::iota(0u, std::min<size_t>(MaxKnobSets, patch.knob_sets.size() + 1))) {
+		for (uint16_t set_i = 0; set_i < std::min<size_t>(MaxKnobSets, patch.knob_sets.size() + 1); set_i++) {
 
-			for (uint16_t panel_knob_id : std::views::iota(0u, PanelDef::NumKnobs)) {
+			for (uint16_t panel_knob_id = 0; panel_knob_id < PanelDef::NumKnobs; panel_knob_id++) {
 				if (patch.find_mapped_knob(set_i, panel_knob_id) == nullptr) {
 
 					auto map = MappedKnob{.panel_knob_id = panel_knob_id,
@@ -89,7 +89,7 @@ public:
 
 		// Find first unmapped panel input jack
 		// Note: we ignore Gate In jacks here, since we have no way to know if a jack is audio/CV or gate
-		for (uint16_t panel_jack_id : std::views::iota(0u, PanelDef::NumAudioIn)) {
+		for (uint16_t panel_jack_id = 0; panel_jack_id < PanelDef::NumAudioIn; panel_jack_id++) {
 			if (patch.find_mapped_injack(panel_jack_id) == nullptr) {
 				patch.add_mapped_injack(panel_jack_id, jack);
 				pr_trace("Auto mapping module %d injack %d to In %d\n", module_id, input_idx, panel_jack_id);
@@ -114,7 +114,7 @@ public:
 		}
 
 		// Map to first unmapped panel output jack
-		for (uint16_t panel_jack_id : std::views::iota(0u, PanelDef::NumAudioOut)) {
+		for (uint16_t panel_jack_id = 0; panel_jack_id < PanelDef::NumAudioOut; panel_jack_id++) {
 			if (patch.find_mapped_outjack(panel_jack_id) == nullptr) {
 				patch.add_mapped_outjack(panel_jack_id, jack);
 				pr_trace("Auto mapping module %d outjack %d to In %d\n", module_id, output_idx, panel_jack_id);
