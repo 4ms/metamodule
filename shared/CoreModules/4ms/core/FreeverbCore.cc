@@ -1,101 +1,104 @@
-#include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/Freeverb_info.hh"
 #include "processors/allpass.h"
 #include "processors/comb.h"
 #include "processors/tools/dcBlock.h"
 #include "util/math.hh"
+#include "util/zip.hh"
 
 namespace MetaModule
 {
 
-class FreeverbCore : public CoreProcessor {
+class FreeverbCore : public SmartCoreProcessor<FreeverbInfo> {
 	using Info = FreeverbInfo;
 	using ThisCore = FreeverbCore;
+	using enum Info::Elem;
 
 public:
 	FreeverbCore() {
-		for (int i = 0; i < numAll; i++) {
-			apFilter[i].setLength(allTuning[i]);
-			apFilter[i].setFeedback(0.6f);
-			apFilter[i].setFadeSpeed(0.001f);
-			currentAllTunning[i] = allTuning[i];
+		for (auto [comb, def, curCombTuning] : zip(combFilter, DefaultCombTuning, currentCombTuning)) {
+			comb.setFeedback(0);
+			comb.setLength(def);
 		}
 
-		for (int i = 0; i < numComb; i++) {
-			combFilter[i].setFeedback(0);
-			combFilter[i].setLength(combTuning[i]);
-			currentCombTuning[i] = combTuning[i];
+		for (auto [ap, def, curApTuning] : zip(apFilter, DefaultAllPassTuning, currentAllPassTuning)) {
+			ap.setLength(def);
+			ap.setFeedback(0.6f);
+			ap.setFadeSpeed(0.001f);
 		}
 	}
 
 	void update() override {
-		float wetSignal = 0;
 
-		for (int i = 0; i < numComb; i++) {
-			wetSignal += combFilter[i].process(signalIn);
+		auto add_cv_and_pot = [](std::optional<float> cv, float pot) {
+			const float cv_val = cv.value_or(0.f) / 5.f; // range: -1 .. 1 for CV -5V .. +5V
+			return std::clamp(pot + cv_val, 0.f, 1.f);
+		};
+
+		if (auto size = add_cv_and_pot(getInput<SizeCvIn>(), getState<SizeKnob>()); prev_size != size) {
+			prev_size = size;
+			setSize(size);
 		}
 
-		wetSignal /= static_cast<float>(numComb);
-
-		for (int i = 0; i < numAll; i++) {
-			wetSignal = apFilter[i].process(wetSignal);
+		if (auto damp = add_cv_and_pot(getInput<DampCvIn>(), getState<DampKnob>()); prev_damp != damp) {
+			prev_damp = damp;
+			setDamp(damp);
 		}
 
-		signalOut = dcblock.update(MathTools::interpolate3(signalIn, wetSignal, mix));
+		if (auto fb = add_cv_and_pot(getInput<FeedbackCvIn>(), getState<FeedbackKnob>()); prev_fb != fb) {
+			prev_fb = fb;
+			setFeedback(fb);
+		}
+
+		float dry = getInput<InputIn>().value_or(0.f);
+		float wet = 0;
+		for (auto &comb : combFilter) {
+			wet += comb.process(dry);
+		}
+
+		wet /= static_cast<float>(NumComb);
+
+		for (auto &allpass : apFilter) {
+			wet = allpass.process(wet);
+		}
+
+		const auto mix = add_cv_and_pot(getInput<MixCvIn>(), getState<MixKnob>());
+
+		setOutput<Out>(dcblock.update(MathTools::interpolate3(dry, wet, mix)));
 	}
 
-	void set_param(int param_id, float val) override {
-		switch (param_id) {
-			case 0: // size
-				for (int i = 0; i < numComb; i++) {
-					currentCombTuning[i] = combTuning[i] * val;
-					if (currentCombTuning[i] < 1)
-						currentCombTuning[i] = 1;
-					combFilter[i].setLength(currentCombTuning[i]);
-				}
-				for (int i = 0; i < numAll; i++) {
-					currentAllTunning[i] = allTuning[i] * val;
-					if (currentAllTunning[i] < 1)
-						currentAllTunning[i] = 1;
-					apFilter[i].setLength(currentAllTunning[i]);
-				}
-				break;
-			case 1: // damp
-				for (int i = 0; i < numComb; i++) {
-					combFilter[i].setDamp(val);
-				}
-				break;
-			case 2:
-				mix = val;
-				break;
-			case 3: // time
-				for (int i = 0; i < numComb; i++) {
-					combFilter[i].setFeedback(MathTools::map_value(val, 0.0f, 1.0f, 0.8f, 0.99f));
-				}
-				break;
+	void setSize(float val) {
+		val *= (MaxSize - MinSize);
+		val += MinSize;
+		val *= sr_ratio;
+
+		for (auto [comb, def, curCombTuning] : zip(combFilter, DefaultCombTuning, currentCombTuning)) {
+			curCombTuning = std::clamp(def * val, 100.f, (float)MaxCombSize);
+			comb.setLength(curCombTuning);
 		}
-	}
 
-	void set_input(int input_id, float val) override {
-		if (input_id == Info::InputInput)
-			signalIn = val / MaxOutputVolts;
-
-		else {
-			val = val / CvRangeVolts;
-			//TODO handle other CV inputs
+		for (auto [ap, def, curApTuning] : zip(apFilter, DefaultAllPassTuning, currentAllPassTuning)) {
+			curApTuning = std::clamp(def * val, 40.f, (float)MaxAPSize);
+			ap.setLength(curApTuning);
 		}
 	}
 
-	float get_output(int output_id) const override {
-		return signalOut * MaxOutputVolts;
+	void setDamp(float val) {
+		for (auto &comb : combFilter) {
+			comb.setDamp(val);
+		}
+	}
+
+	void setFeedback(float val) {
+		for (auto &comb : combFilter) {
+			comb.setFeedback(MathTools::map_value(val, 0.0f, 1.0f, 0.8f, 1.0f));
+		}
 	}
 
 	void set_samplerate(float sr) override {
-	}
-
-	float get_led_brightness(int led_id) const override {
-		return 0.f;
+		sr_ratio = sr / 48000.f;
+		prev_size = -1.f; //force re-calculate
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -105,24 +108,30 @@ public:
 	// clang-format on
 
 private:
-	float signalIn = 0;
-	float signalOut = 0;
+	static const int NumComb = 8;
+	static const int NumAllPass = 4;
 
-	static const int numComb = 8;
-	static const int numAll = 4;
+	static constexpr std::array<int, NumComb> DefaultCombTuning{1215, 1293, 1390, 1476, 1548, 1623, 1695, 1760};
+	static constexpr std::array<int, NumAllPass> DefaultAllPassTuning{605, 480, 371, 245};
 
-	static constexpr int allTuning[numAll] = {1248, 812, 358, 125};
-	static constexpr int combTuning[numComb] = {3000, 4003, 4528, 5217, 1206, 2108, 3337, 5003};
+	static constexpr float MaxSize = 2.5f;
+	static constexpr float MinSize = 0.23f;
+	static constexpr size_t MaxCombSize = MaxSize * 1760 /* max(DefaultCombTuning) */;
+	static constexpr size_t MaxAPSize = MaxSize * 605 /* max(DefaultAllPassTuning) */;
 
-	int currentAllTunning[numAll];
-	int currentCombTuning[numComb];
+	std::array<int, NumAllPass> currentAllPassTuning{DefaultAllPassTuning};
+	std::array<int, NumComb> currentCombTuning{DefaultCombTuning};
 
-	Comb<6000> combFilter[numComb];
-	AllPass<6000> apFilter[numAll];
+	std::array<Comb<MaxCombSize>, NumComb> combFilter{};
+	std::array<AllPass<MaxAPSize>, NumAllPass> apFilter{};
+
+	float prev_size{-1};
+	float prev_damp{-1};
+	float prev_fb{-1};
+
+	float sr_ratio = 1.f;
 
 	DCBlock dcblock;
-
-	float mix = 0;
 };
 
 } // namespace MetaModule

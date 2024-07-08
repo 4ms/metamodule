@@ -11,6 +11,9 @@
 #include "internal_plugin_manager.hh"
 #include "patch_play/patch_player.hh"
 
+// Just to fix clangd:
+#include "helpers.hpp"
+
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
 static inline FrameBufferT framebuf1 alignas(64);
@@ -32,6 +35,7 @@ extern "C" void aux_core_main() {
 	auto patch_player = A7SharedMemoryS::ptrs.patch_player;
 	auto patch_playloader = A7SharedMemoryS::ptrs.patch_playloader;
 	auto file_storage_proxy = A7SharedMemoryS::ptrs.patch_storage;
+	auto open_patch_manager = A7SharedMemoryS::ptrs.open_patch_manager;
 	auto sync_params = A7SharedMemoryS::ptrs.sync_params;
 	auto patch_mod_queue = A7SharedMemoryS::ptrs.patch_mod_queue;
 	auto ramdisk_storage = A7SharedMemoryS::ptrs.ramdrive;
@@ -41,10 +45,12 @@ extern "C" void aux_core_main() {
 	RamDiskOps ramdisk_ops{*ramdisk_storage};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 	AssetFS asset_fs{AssetVolFlashOffset};
-	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
-	PluginManager plugin_manager{*file_storage_proxy, ramdisk};
 
-	Ui ui{*patch_playloader, *file_storage_proxy, *sync_params, *patch_mod_queue, plugin_manager};
+	PluginManager plugin_manager{*file_storage_proxy, ramdisk};
+	Ui ui{*patch_playloader, *file_storage_proxy, *open_patch_manager, *sync_params, *patch_mod_queue, plugin_manager};
+	ui.update();
+
+	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
 
 	struct AuxCorePlayerContext {
 		uint32_t starting_idx = 1;

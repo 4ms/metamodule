@@ -102,9 +102,18 @@ public:
 			auto *patch_dir_list_ = message.patch_dir_list;
 
 			if (patch_dir_list_) {
+				bool force_sd_refresh =
+					message.force_refresh && (message.vol_id == Volume::SDCard || message.vol_id == Volume::MaxVolumes);
+
+				bool force_usb_refresh =
+					message.force_refresh && (message.vol_id == Volume::USB || message.vol_id == Volume::MaxVolumes);
+
+				bool force_nor_refresh = message.force_refresh &&
+										 (message.vol_id == Volume::NorFlash || message.vol_id == Volume::MaxVolumes);
+
 				poll_media_change();
 
-				if (sd_changes_.take_change()) {
+				if (sd_changes_.take_change() || force_sd_refresh) {
 					patch_dir_list_->clear_patches(Volume::SDCard);
 
 					if (sdcard_.is_mounted())
@@ -113,7 +122,7 @@ public:
 					result.message_type = PatchListChanged;
 				}
 
-				if (usb_changes_.take_change()) {
+				if (usb_changes_.take_change() || force_usb_refresh) {
 					patch_dir_list_->clear_patches(Volume::USB);
 
 					if (usbdrive_.is_mounted())
@@ -122,7 +131,7 @@ public:
 					result.message_type = PatchListChanged;
 				}
 
-				if (norflash_changes_.take_change()) {
+				if (norflash_changes_.take_change() || force_nor_refresh) {
 					patch_dir_list_->clear_patches(Volume::NorFlash);
 
 					PatchFileIO::add_directory(norflash_, patch_dir_list_->volume_root(Volume::NorFlash));
@@ -203,6 +212,18 @@ public:
 			return result;
 		}
 
+		if (message.message_type == RequestDeleteFile) {
+			IntercoreStorageMessage result{.message_type = DeleteFileFailed};
+
+			if (message.filename.size() > 0 && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
+				if (delete_file(message.vol_id, message.filename)) {
+					result.message_type = DeleteFileSuccess;
+				}
+			}
+
+			return result;
+		}
+
 		return std::nullopt;
 	}
 
@@ -250,6 +271,34 @@ private:
 
 		pr_dbg("Read patch %.*s, %d bytes\n", (int)filename.size(), filename.data(), buffer.size_bytes());
 		return buffer.size_bytes();
+	}
+
+	bool delete_file(Volume vol, std::string_view filename) {
+		if (vol == Volume::USB) {
+			auto success = usbdrive_.delete_file(filename);
+			if (success) {
+				usb_changes_.reset();
+			}
+			return success;
+
+		} else if (vol == Volume::SDCard) {
+			auto success = sdcard_.delete_file(filename);
+			if (success) {
+				sd_changes_.reset();
+			}
+			return success;
+
+		} else if (vol == Volume::NorFlash) {
+			auto success = norflash_.delete_file(filename);
+			if (success) {
+				norflash_changes_.reset();
+			}
+			return success;
+
+		} else {
+			pr_err("No volume given\n");
+			return false;
+		}
 	}
 };
 

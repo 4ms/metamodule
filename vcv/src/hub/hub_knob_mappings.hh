@@ -138,6 +138,9 @@ public:
 	void setMapAliasName(MappableObj paramObj, std::string newname) {
 		if (paramObj.objID < (int)NumKnobs) {
 			aliases[paramObj.objID][activeSetId].copy(newname);
+			auto &knobmultimap = mappings[paramObj.objID];
+			auto &mapset = knobmultimap[0]; //first map per pot
+			mapset.maps[activeSetId].alias_name = newname;
 		}
 	}
 

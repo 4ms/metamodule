@@ -56,10 +56,38 @@ SOURCES += $(wildcard src/comm/*.cc)
 SOURCES += $(wildcard src/mapping/*.cc)
 SOURCES += $(wildcard src/models/*.cc)
 
+# DLD
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/looping-delay/src
+SOURCES  += $(SHARED)/CoreModules/4ms/core/looping-delay/src/calibration_storage.cc
+
 # QPLFO
 SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/qplfo/qplfo_mocks.cc
 
+# MiniPEG
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/peg_base.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/trigout.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/analog_conditioning.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/env_update.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/envelope_calcs.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/flash_user.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/params.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/pingable_env.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/dig_inouts.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/timers.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/calibration.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/env_transition.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/leds.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/shareddrv/debounced_digins.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/shareddrv/dac.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg-common/pwm.cc
+
+SOURCES += $(SHARED)/CoreModules/4ms/core/mpeg/envelope_calcs.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/peg/envelope_calcs.cc
+
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg-common/
+INCLUDES += -I$(SHARED)/CoreModules/4ms/core/peg-common/mocks
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS += -std=c++2a 
@@ -77,6 +105,15 @@ LDFLAGS +=
 # The compiled plugin and "plugin.json" are automatically added.
 DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
+
+all: debug
+
+debug:
+	$(CXX) --version
+
+clean:
+	$(CXX) --version
+
 
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
@@ -129,6 +166,13 @@ patch_convert_tests:
 
 win_dist:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
+
+clean_tests:
+	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(SHARED)/cpputil && $(MAKE) --no-print-directory -f tests/Makefile clean
+	@$(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(SHARED)/CoreModules/4ms/core/axoloti-wrapper && $(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(SHARED)/patch_convert && $(MAKE) --no-print-directory -f tests/Makefile clean
 
 .PHONY: all plugin tests core_tests vcv_tests util_tests axo_tests patch_convert_tests compile_commands run
 

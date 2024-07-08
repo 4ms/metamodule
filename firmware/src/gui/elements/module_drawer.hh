@@ -19,11 +19,13 @@ struct ModuleDrawer {
 	uint32_t height;
 
 	// Draws the module from patch, into container, using the provided buffer.
-	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
+	lv_obj_t *draw_faceplate(std::string_view slug, std::span<lv_color_t> canvas_buffer) {
+		lv_obj_scroll_to_x(container, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(container, 0, LV_ANIM_OFF);
 		const auto img_filename = ModuleImages::get_faceplate_path(slug);
 		if (img_filename.length() <= 2) {
-			if (!slug.is_equal("HubMedium"))
-				pr_warn("Image not found for %s\n", slug.c_str());
+			if (!slug.ends_with("HubMedium"))
+				pr_warn("Image not found for %.*s\n", (int)slug.size(), slug.data());
 			return nullptr;
 		}
 
@@ -34,7 +36,7 @@ struct ModuleDrawer {
 		lv_img_header_t img_header;
 		auto res = lv_img_decoder_get_info(img_filename.c_str(), &img_header);
 		if (res != LV_RES_OK) {
-			pr_warn("Could not read image %s for module %s\n", img_filename.data(), slug.c_str());
+			pr_warn("Could not read image %s for module %.*s\n", img_filename.data(), slug.size(), slug.data());
 			return nullptr;
 		}
 
@@ -90,8 +92,9 @@ struct ModuleDrawer {
 		//Reserve enough for what we will append
 		drawn_elements.reserve(drawn_elements.size() + moduleinfo.elements.size());
 
-		ElementCount::Indices indices{};
+		unsigned i = 0;
 		for (const auto &element : moduleinfo.elements) {
+			auto &indices = moduleinfo.indices[i];
 			auto element_ctx = std::visit(
 				[height = height, &patch, &indices, module_idx, canvas, active_knob_set](auto &el) -> GuiElement {
 					auto obj = ElementDrawer::draw_element(el, canvas, height);
@@ -103,15 +106,15 @@ struct ModuleDrawer {
 
 					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, count, el_idx, mapping_id};
 
-					indices = indices + count;
 					return element_ctx;
 				},
 				element);
+			i++;
 			drawn_elements.push_back({element_ctx, element});
 		}
 	}
 
-	void draw_elements(ModuleTypeSlug slug, lv_obj_t *canvas) {
+	void draw_elements(BrandModuleSlug slug, lv_obj_t *canvas) {
 		const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 		for (const auto &element : moduleinfo.elements) {
 			std::visit([this, canvas](auto &el) { ElementDrawer::draw_element(el, canvas, height); }, element);

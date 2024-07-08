@@ -19,6 +19,11 @@ public:
         return peak;
     }
 
+    void setDecay(float decayInSeconds)
+    {
+        decayTimeInSeconds = decayInSeconds;
+    }
+
     void setSamplerate(float sr) {
         samplingRate = sr;
     }

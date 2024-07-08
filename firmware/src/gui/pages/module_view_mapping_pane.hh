@@ -29,7 +29,7 @@ struct MapCableUserData {
 
 //TODO: Separate this into CableMappingPane, ParamMappingPane
 struct ModuleViewMappingPane {
-	ModuleViewMappingPane(FileStorageProxy &patch_storage,
+	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
 						  ParamsMidiState &params,
 						  PageArguments &args,
@@ -37,16 +37,16 @@ struct ModuleViewMappingPane {
 						  NotificationQueue &notify_queue,
 						  GuiState &gui_state)
 		: pane_group(lv_group_create())
-		, patch{patch_storage.get_view_patch()}
+		, patch{patches.get_view_patch()}
 		, params{params}
 		, args{args}
 		, page_list{page_list}
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
-		, control_popup{patch_storage, patch_mod_queue}
+		, control_popup{patches, patch_mod_queue}
 		, patch_mod_queue{patch_mod_queue}
-		, patch_storage{patch_storage} {
+		, patches{patches} {
 
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
@@ -69,7 +69,7 @@ struct ModuleViewMappingPane {
 	}
 
 	void show(const DrawnElement &drawn_el) {
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 		add_map_popup.hide();
 
 		lv_group_remove_all_objs(pane_group);
@@ -89,6 +89,7 @@ struct ModuleViewMappingPane {
 
 		args.element_counts = drawn_el.gui_element.count;
 		args.element_indices = drawn_el.gui_element.idx;
+		args.detail_mode = true;
 
 		auto slug = patch->module_slugs[this_module_id];
 
@@ -146,15 +147,19 @@ struct ModuleViewMappingPane {
 				if (last_active_knobset <= map_list_items.size()) {
 					//Remove active mark
 					if (auto set_i = last_active_knobset + 1; set_i < map_list_items.size()) {
-						if (auto obj = map_list_items[set_i])
-							lv_obj_set_style_bg_opa(obj, LV_OPA_0, LV_STATE_DEFAULT);
+						if (auto obj = map_list_items[set_i]) {
+							lv_obj_set_style_text_color(obj, lv_color_white(), LV_STATE_DEFAULT);
+							lv_obj_set_style_text_color(obj, lv_color_white(), LV_STATE_FOCUSED);
+						}
 					}
 				}
 				if (page_list.get_active_knobset() <= map_list_items.size()) {
 					//Add active mark
 					if (auto set_i = page_list.get_active_knobset() + 1; set_i < map_list_items.size()) {
-						if (auto obj = map_list_items[set_i])
-							lv_obj_set_style_bg_opa(obj, LV_OPA_100, LV_STATE_DEFAULT);
+						if (auto obj = map_list_items[set_i]) {
+							lv_obj_set_style_text_color(obj, lv_color_hex(0xFDB818), LV_STATE_DEFAULT);
+							lv_obj_set_style_text_color(obj, lv_color_hex(0xFDB818), LV_STATE_FOCUSED);
+						}
 					}
 				}
 				last_active_knobset = page_list.get_active_knobset();
@@ -319,9 +324,9 @@ private:
 			lv_label_set_text(ui_CableAddLabel, "New cable");
 		}
 		lv_show(ui_CableAddButton);
-		lv_group_add_obj(pane_group, ui_CableRemoveButton);
 		lv_group_add_obj(pane_group, ui_CableAddButton);
 		lv_group_add_obj(pane_group, ui_CablePanelAddButton);
+		lv_group_add_obj(pane_group, ui_CableRemoveButton);
 		lv_group_focus_next(pane_group);
 
 		handle_cable_creating();
@@ -337,6 +342,7 @@ private:
 		lv_hide(ui_CableAddButton);
 		lv_hide(ui_CablePanelAddButton);
 		lv_show(ui_CableCreationPanel);
+		lv_show(ui_CableCreationLabel);
 
 		auto begin_type = gui_state.new_cable->type;
 		auto begin_connected = gui_state.new_cable->has_connections;
@@ -536,7 +542,10 @@ private:
 		if (auto objdata = lv_obj_get_user_data(event->target)) {
 			auto endpoint = *static_cast<MapCableUserData *>(objdata);
 			page->page_list.request_new_page(PageId::ModuleView,
-											 {.module_id = endpoint.module_id, .element_indices = endpoint.idx});
+											 {.patch_loc_hash = page->args.patch_loc_hash,
+											  .module_id = endpoint.module_id,
+											  .element_indices = endpoint.idx,
+											  .detail_mode = true});
 		}
 	}
 
@@ -768,7 +777,7 @@ private:
 	ConfirmPopup add_cable_popup;
 	ChoicePopup panel_cable_popup;
 	PatchModQueue &patch_mod_queue;
-	FileStorageProxy &patch_storage;
+	OpenPatchManager &patches;
 };
 
 } // namespace MetaModule

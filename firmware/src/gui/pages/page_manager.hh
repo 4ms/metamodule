@@ -9,6 +9,7 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 
+#include "gui/pages/jackmaps.hh"
 #include "gui/pages/knobmap.hh"
 #include "gui/pages/knobset_view.hh"
 #include "gui/pages/main_menu.hh"
@@ -32,18 +33,22 @@ class PageManager {
 	ButtonLight button_light;
 
 	MainMenuPage page_mainmenu{info};
-	PatchSelectorPage page_patchsel{info};
-	PatchViewPage page_patchview{info, settings};
-	ModuleViewPage page_module{info, settings};
+	PatchSelectorPage page_patchsel{info, subdir_panel};
+	PatchViewPage page_patchview{info, subdir_panel};
+	ModuleViewPage page_module{info};
 	KnobSetViewPage page_knobsetview{info};
 	KnobMapPage page_knobmap{info};
 	SystemMenuPage page_systemmenu{info};
 	ModuleListPage page_modulelist{info};
+	JackMapViewPage page_jackmap{info};
+
+	PatchSelectorSubdirPanel subdir_panel;
 
 public:
 	PageBase *cur_page = &page_mainmenu;
 
 	PageManager(FileStorageProxy &patch_storage,
+				OpenPatchManager &open_patch_manager,
 				PatchPlayLoader &patch_playloader,
 				ParamsMidiState &params,
 				MetaParams &metaparams,
@@ -51,6 +56,7 @@ public:
 				PatchModQueue &patch_mod_queue,
 				PluginManager &plugin_manager)
 		: info{patch_storage,
+			   open_patch_manager,
 			   patch_playloader,
 			   params,
 			   metaparams,
@@ -58,6 +64,7 @@ public:
 			   patch_mod_queue,
 			   page_list,
 			   gui_state,
+			   settings,
 			   plugin_manager} {
 	}
 
@@ -88,30 +95,39 @@ public:
 	}
 
 	void handle_knobset_change() {
-		auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion();
-		if (knobset_change != 0) {
+		if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
 
-			auto patch = info.patch_storage.playing_patch();
-			if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
-				int cur_knobset = info.page_list.get_active_knobset();
-				int next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
+			if (auto patch = info.open_patch_manager.get_playing_patch(); patch != nullptr) {
 
-				info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
-				info.page_list.set_active_knobset(next_knobset);
-				std::string ks_name = patch->valid_knob_set_name(next_knobset);
+				if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
+					int cur_knobset = info.page_list.get_active_knobset();
+					int next_knobset = MathTools::wrap<int>(knobset_change + cur_knobset, 0, num_knobsets - 1);
 
-				if (cur_page != page_list.page(PageId::KnobSetView))
-					info.notify_queue.put({"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 1000});
+					info.patch_mod_queue.put(ChangeKnobSet{.knobset_num = (unsigned)next_knobset});
+					info.page_list.set_active_knobset(next_knobset);
+					std::string ks_name = patch->valid_knob_set_name(next_knobset);
 
-				button_light.display_knobset(next_knobset);
+					if (cur_page != page_list.page(PageId::KnobSetView))
+						info.notify_queue.put(
+							{"Using Knob Set \"" + ks_name + "\"", Notification::Priority::Status, 1000});
+
+					button_light.display_knobset(next_knobset);
+				}
 			}
+		}
+
+		if (button_light.display_knobset() != info.page_list.get_active_knobset()) {
+			button_light.display_knobset(info.page_list.get_active_knobset());
 		}
 	}
 
 	// Update internal copy of patch with knob changes
 	// This is used to keep GUI in sync with patch player's copy of the patch without concurrancy issues
 	void update_patch_params() {
-		auto patch = info.patch_storage.playing_patch();
+		auto patch = info.open_patch_manager.get_playing_patch();
+		if (!patch)
+			return;
+
 		auto active_knobset = info.page_list.get_active_knobset();
 		if (active_knobset >= patch->knob_sets.size())
 			return;
@@ -124,14 +140,20 @@ public:
 			if (!knobpos.has_value())
 				continue;
 
-			// Iterate all knob maps in the active knob set
+			// Update patch for any map that's mapped to the knob that moved
 			for (auto &map : patch->knob_sets[active_knobset].set) {
-
-				// update the patch for knobs that moved
 				if (map.panel_knob_id == panel_knob_i) {
 					auto scaled_val = map.get_mapped_val(knobpos.value());
 					patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
 				}
+			}
+		}
+
+		for (auto &map : patch->midi_maps.set) {
+			auto knobpos = info.params.panel_knob_new_value(map.panel_knob_id);
+			if (knobpos.has_value()) {
+				auto scaled_val = map.get_mapped_val(knobpos.value());
+				patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
 			}
 		}
 	}

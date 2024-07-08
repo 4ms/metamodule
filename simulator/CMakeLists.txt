@@ -3,6 +3,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(mm_sim LANGUAGES C CXX)
 
+set(SIMULATOR 1)
+
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(SHARED ${CMAKE_CURRENT_LIST_DIR}/../shared)
 set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
@@ -42,7 +44,6 @@ target_link_libraries(ui PRIVATE lvgl)
 # #################### VCV Adaptor ##################################
 
 add_subdirectory(${FWDIR}/vcv_plugin ${CMAKE_CURRENT_BINARY_DIR}/vcv_plugin)
-target_compile_options(vcv_plugin PRIVATE -Wno-double-promotion)
 
 # #################### Other brands ##################################
  
@@ -51,18 +52,22 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 
 # #################### Application ############################################
 
+add_subdirectory(${SHARED}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
+target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
+
 add_executable(
 	simulator 
 	src/main.cc 
 	src/ui.cc
     stubs/random.cpp
 	${FWDIR}/src/gui/elements/element_name.cc
+	${FWDIR}/src/gui/slsexport/ui_local.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
 	${SHARED}/patch_convert/ryml/ryml_serial.cc
 	${SHARED}/patch_convert/ryml/ryml_init.cc
 	${SHARED}/patch_convert/yaml_to_patch.cc 
 	${SHARED}/patch_convert/patch_to_yaml.cc
-	${SHARED}/CoreModules/moduleFactory.cc
+
 	#Fatfs:
 	stubs/fattime.cc
 	${FWDIR}/lib/fatfs/source/ff.c
@@ -91,8 +96,10 @@ target_include_directories(
 target_compile_options(simulator PRIVATE -Wall -Og)
 target_compile_options(simulator PRIVATE -Wno-double-promotion)
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports)
-target_link_libraries(simulator PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin>")
+
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports CoreModules)
+target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
+target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
 
@@ -114,7 +121,7 @@ endif()
 ## Debugging
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") 
   find_program(CMAKE_DEBUGGER_BINARY lldb)
-  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- -p ${CMAKE_CURRENT_LIST_DIR}/patches)
+  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- -p ${CMAKE_CURRENT_LIST_DIR}/../shared/patch)
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   find_program(CMAKE_DEBUGGER_BINARY gdb)

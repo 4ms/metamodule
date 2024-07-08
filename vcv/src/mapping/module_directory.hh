@@ -18,17 +18,22 @@ struct ModuleDirectory {
 		if (!module->model->plugin)
 			return false;
 
-		std::array blacklist = {
-			"Scope",
-			"Oscilloscope",
-			"AudioInterface2",
-			"AudioInterface",
-			"AudioInterface16",
-			"Bogaudio-Analyzer",
-			"Bogaudio-AnalyzerXL",
-			"Bogaudio-Ranalyzer",
-			"Notes",
-			"Blank",
+		std::array blacklist = {"Scope",
+								"Oscilloscope",
+								"AudioInterface2",
+								"AudioInterface",
+								"AudioInterface16",
+								"Bogaudio-Analyzer",
+								"Bogaudio-AnalyzerXL",
+								"Bogaudio-Ranalyzer",
+								"Notes",
+								"Blank",
+								"MIDIToCVInterface",
+								"MIDI-Map",
+								"MIDITriggerToCVInterface",
+								"MIDICCToCVInterface",
+								"Split"
+
 		};
 
 		for (auto slug : blacklist) {
@@ -42,6 +47,10 @@ struct ModuleDirectory {
 		if (slug == "PanelMedium")
 			return true;
 		if (slug == "HubMedium")
+			return true;
+		if (slug == "4msCompany:PanelMedium")
+			return true;
+		if (slug == "4msCompany:HubMedium")
 			return true;
 
 		return false;

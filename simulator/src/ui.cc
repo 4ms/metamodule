@@ -15,6 +15,7 @@ Ui::Ui(std::string_view patch_path, std::string_view asset_path, size_t block_si
 	, internal_plugin_manager{ramdisk, asset_fs}
 	, plugin_manager{file_storage_proxy, ramdisk}
 	, page_manager{file_storage_proxy,
+				   open_patches_manager,
 				   patch_playloader,
 				   params,
 				   metaparams,

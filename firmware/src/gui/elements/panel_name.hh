@@ -34,20 +34,34 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 	if (panel_id < PanelDef::NumUserFacingInJacks)
 		name = PanelDef::get_map_injack_name(panel_id);
 
-	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack)
-		name = "MIDI Note " + std::to_string(panel_id + 1 - MidiMonoNoteJack);
+	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack) {
+		std::string id = std::to_string(panel_id + 1 - MidiMonoNoteJack);
+		name = "MIDI Note " + id;
+	}
 
 	else if (panel_id >= MidiMonoGateJack && panel_id <= MidiGate8Jack)
-		name = "MIDI Gate " + std::to_string(panel_id + 1 - MidiMonoGateJack);
+	{
+		std::string id = std::to_string(panel_id + 1 - MidiMonoGateJack);
+		name = "MIDI Gate " + id;
+	}
 
 	else if (panel_id >= MidiMonoVelJack && panel_id <= MidiVel8Jack)
-		name = "MIDI Vel. " + std::to_string(panel_id + 1 - MidiMonoVelJack);
+	{
+		std::string id = std::to_string(panel_id + 1 - MidiMonoVelJack);
+		name = "MIDI Vel. " + id;
+	}
 
 	else if (panel_id >= MidiMonoAftertouchJack && panel_id <= MidiAftertouch8Jack)
-		name = "MIDI Aft. " + std::to_string(panel_id + 1 - MidiMonoAftertouchJack);
+	{
+		std::string id = std::to_string(panel_id + 1 - MidiMonoAftertouchJack);
+		name = "MIDI Aft. " + id;
+	}
 
 	else if (panel_id >= MidiMonoRetrigJack && panel_id <= MidiRetrig8Jack)
-		name = "MIDI Ret " + std::to_string(panel_id + 1 - MidiMonoRetrigJack);
+	{
+		std::string id = std::to_string(panel_id + 1 - MidiMonoRetrigJack);
+		name = "MIDI Ret " + id;
+	}
 
 	else if (panel_id >= MidiCC0 && panel_id <= MidiCC127)
 		name = "MIDI CC " + std::to_string(panel_id - MidiCC0);
@@ -82,7 +96,7 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 template<typename PanelDef>
 std::string get_panel_name(const JackOutput &, uint16_t panel_id) {
 	std::string name{8};
-	name += PanelDef::get_map_outjack_name(panel_id);
+	name = PanelDef::get_map_outjack_name(panel_id);
 	return name;
 }
 

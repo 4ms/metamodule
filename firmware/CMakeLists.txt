@@ -32,16 +32,15 @@ add_subdirectory(src ${A7_BIN_PATH})
 
 set(SYMBOLS_FILE ${CMAKE_CURRENT_BINARY_DIR}/a7_symbols.yaml)
 set(API_SYMBOL_NAMES_FILE ${CMAKE_CURRENT_LIST_DIR}/metamodule-plugin-sdk/api-symbols.txt)
-get_target_property(CoreModulesBinDir CoreModules BINARY_DIR)
-get_target_property(VcvPluginBinDir vcv_plugin BINARY_DIR)
+get_target_property(VcvPluginBinDir vcv_plugin_export BINARY_DIR)
 set(SYMBOLS_BINFILE_DIRS
-  --objdir ${CoreModulesBinDir} 
   --objdir ${VcvPluginBinDir} 
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
 )
 
 add_custom_command(
   OUTPUT ${API_SYMBOL_NAMES_FILE}
+  COMMAND echo "vcv export dir is ${VcvPluginBinDir}"
   COMMAND scripts/dump_syms.py
           ${SYMBOLS_BINFILE_DIRS}
           --text-out ${API_SYMBOL_NAMES_FILE}
@@ -107,7 +106,7 @@ add_custom_command(
           ${MAIN_FW_FILENAME}
   COMMAND cp ${MAIN_FW_FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/main-uimg.bin #Jlink and Ozone require .bin extension
   COMMAND ls -l ${MAIN_FW_FILENAME}
-  DEPENDS main.elf main_m4.elf ${SYMBOLS_FILE}
+  DEPENDS main.elf main_m4.elf ${SYMBOLS_FILE} AlwaysCheckGit
   COMMENT "Creating combined uimg file"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   VERBATIM USES_TERMINAL
@@ -141,7 +140,7 @@ add_custom_command(
            "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
   COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR} && rm -rf ${RELEASE_TARGET_DIR}
 
-  DEPENDS ${MAIN_FW_FILENAME} ${ASSET_IMG_PATH} bootloader bootloader-dfu
+  DEPENDS ${MAIN_FW_FILENAME} ${ASSET_IMG_PATH} bootloader bootloader-dfu AlwaysCheckGit
   COMMENT "Creating release at ${RELEASE_ARCHIVE_PATH}"
   VERBATIM USES_TERMINAL
 )

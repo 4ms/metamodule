@@ -53,6 +53,7 @@ struct InternalPluginManager {
 
 #ifndef BUILD_DYN_PLUGIN_Befaco
 		auto &befaco_plugin = internal_plugins.emplace_back("Befaco");
+		befaco_plugin.slug = "Befaco";
 		pluginInstance = &befaco_plugin;
 		pluginInstance->addModel(modelEvenVCO);
 		pluginInstance->addModel(modelPonyVCO);
@@ -76,6 +77,7 @@ struct InternalPluginManager {
 
 #ifndef BUILD_DYN_PLUGIN_AudibleInstruments
 		auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
+		audins_plugin.slug = "AudibleInstruments";
 		pluginInstance = &audins_plugin;
 		pluginInstance->addModel(modelBlinds);
 		pluginInstance->addModel(modelBraids);
@@ -102,6 +104,7 @@ struct InternalPluginManager {
 
 #ifndef BUILD_DYN_PLUGIN_hetrickcv
 		auto &hcv_plugin = internal_plugins.emplace_back("hetrickcv");
+		hcv_plugin.slug = "hetrickcv";
 		pluginInstance = &hcv_plugin;
 		pluginInstance->addModel(modelTwoToFour);
 		pluginInstance->addModel(modelAnalogToDigital);
@@ -174,6 +177,7 @@ struct InternalPluginManager {
 
 #ifndef BUILD_DYN_PLUGIN_nonlinearcircuits
 		auto &nlc_plugin = internal_plugins.emplace_back("nonlinearcircuits");
+		nlc_plugin.slug = "nonlinearcircuits";
 		pluginInstance = &nlc_plugin;
 		pluginInstance->addModel(model4Seq);
 		pluginInstance->addModel(modelCipher);
@@ -197,6 +201,7 @@ struct InternalPluginManager {
 
 #ifndef BUILD_DYN_PLUGIN_eightfold
 		auto &eightfold_plugin = internal_plugins.emplace_back("eightfold");
+		eightfold_plugin.slug = "eightfold";
 		pluginInstance = &eightfold_plugin;
 		pluginInstance->addModel(modelSDOrcasHeartV2);
 #endif

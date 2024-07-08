@@ -37,6 +37,8 @@ private:
 	// in_conns[]: In1-In6, GateIn1, GateIn2
 	std::array<std::vector<Jack>, PanelDef::NumUserFacingInJacks> in_conns;
 
+	unsigned num_modules = 0;
+
 	// MIDI
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_pitch_conns;
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_gate_conns;
@@ -98,15 +100,17 @@ public:
 
 		copy_patch_data(patchdata);
 
+		num_modules = pd.module_slugs.size();
+
 		// Tell the other core about the patch
-		smp.load_patch(pd.module_slugs.size());
+		smp.load_patch(num_modules);
 
 		// First module is the hub
 		modules[0] = ModuleFactory::create(PanelDef::typeID);
 
 		unsigned num_not_found = 0;
 		std::string not_found;
-		for (size_t i = 1; i < pd.module_slugs.size(); i++) {
+		for (size_t i = 1; i < num_modules; i++) {
 			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
@@ -142,7 +146,7 @@ public:
 			modules[k.module_id]->set_param(k.param_id, k.value);
 
 		for (auto const &ms : pd.module_states) {
-			if (ms.module_id >= modules.size())
+			if (ms.module_id >= num_modules)
 				continue;
 
 			modules[ms.module_id]->load_state(ms.state_data);
@@ -166,11 +170,13 @@ public:
 
 	// Runs the patch
 	void update_patch() {
-		if (pd.module_slugs.size() == 2)
+		if (num_modules <= 1)
+			return;
+		else if (num_modules == 2)
 			modules[1]->update();
 		else {
 			smp.update_modules();
-			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += smp.ModuleStride) {
+			for (size_t module_i = 1; module_i < num_modules; module_i += smp.ModuleStride) {
 				modules[module_i]->update();
 			}
 			smp.join();
@@ -193,9 +199,10 @@ public:
 
 	std::vector<ModuleInitState> get_module_states() {
 		std::vector<ModuleInitState> states;
+		states.reserve(num_modules);
 
 		for (auto [i, module] : enumerate(modules)) {
-			if (i >= pd.module_slugs.size())
+			if (i >= num_modules)
 				break;
 			if (!module)
 				continue;
@@ -209,7 +216,7 @@ public:
 	void unload_patch() {
 		smp.join();
 		is_loaded = false;
-		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
+		for (size_t i = 0; i < num_modules; i++) {
 			modules[i].reset(nullptr);
 		}
 		pd.int_cables.clear();
@@ -220,6 +227,8 @@ public:
 		pd.module_slugs.clear();
 		pd.midi_maps.set.clear();
 		pd.midi_maps.name = "";
+
+		num_modules = 0;
 
 		clear_cache();
 	}
@@ -316,14 +325,14 @@ private:
 public:
 	float get_panel_output(uint32_t jack_id) {
 		auto const &jack = out_conns[jack_id];
-		if (jack.module_id < pd.module_slugs.size())
+		if (jack.module_id < num_modules)
 			return modules[jack.module_id]->get_output(jack.jack_id);
 		else
 			return 0.f;
 	}
 
 	float get_module_light(uint16_t module_id, uint16_t light_id) const {
-		if (is_loaded && module_id < pd.module_slugs.size())
+		if (is_loaded && module_id < num_modules)
 			return modules[module_id]->get_led_brightness(light_id);
 		else
 			return 0;
@@ -334,7 +343,7 @@ public:
 	}
 
 	void apply_static_param(const StaticParam &sparam) {
-		if (sparam.module_id < pd.module_slugs.size() && modules[sparam.module_id])
+		if (sparam.module_id < num_modules && modules[sparam.module_id])
 			modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
 		//Also set it in the patch?
 	}
@@ -346,11 +355,17 @@ public:
 	}
 
 	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map, float cur_val) {
-		auto found =
-			std::find_if(knob_conns[knobset_id][map.panel_knob_id].begin(),
-						 knob_conns[knobset_id][map.panel_knob_id].end(),
-						 [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
-		if (found != knob_conns[knobset_id][map.panel_knob_id].end()) {
+		if (knobset_id != PatchData::MIDIKnobSet && knobset_id >= knob_conns.size())
+			return;
+
+		auto &knobconn = knobset_id == PatchData::MIDIKnobSet ? midi_knob_conns[map.cc_num()] :
+																knob_conns[knobset_id][map.panel_knob_id];
+
+		auto found = std::find_if(knobconn.begin(), knobconn.end(), [&map](auto m) {
+			return map.param_id == m.param_id && map.module_id == m.module_id;
+		});
+
+		if (found != knobconn.end()) {
 			found->min = map.min;
 			found->max = map.max;
 			found->curve_type = map.curve_type;
@@ -405,16 +420,17 @@ public:
 	void disconnect_outjack(Jack jack) {
 		for (auto &out : out_conns) {
 			if (out == jack) {
-				out = {0xFFFF, 0xFFFF}; //disconnected
+				out = disconnected_jack;
 			}
 		}
 		modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 		pd.disconnect_outjack(jack);
 	}
 
-	void add_module(ModuleTypeSlug slug) {
-		auto module_idx = pd.module_slugs.size();
-		pd.module_slugs.push_back(slug); //only needed to make sure pd.module_slugs.size() is accurate
+	void add_module(BrandModuleSlug slug) {
+		auto module_idx = num_modules;
+		pd.module_slugs.push_back(slug);
+		calc_multiple_module_indicies();
 
 		modules[module_idx] = ModuleFactory::create(slug);
 		if (modules[module_idx] == nullptr) {
@@ -427,12 +443,91 @@ public:
 		modules[module_idx]->mark_all_outputs_unpatched();
 		modules[module_idx]->set_samplerate(samplerate);
 
-		calc_multiple_module_indicies();
-		smp.load_patch(pd.module_slugs.size());
+		smp.load_patch(num_modules);
 	}
 
 	void remove_module(uint16_t module_idx) {
-		// TODO: remove module and all cables, mappings
+		// TODO: for all cache structures, if (module_id > deleted_module_idx) module_id -= 1;
+		// For testing, we just replace module with a blank and don't touch any indices
+
+		auto squash_module_id = [gap = module_idx](auto &module_id) {
+			if (module_id > gap && module_id != disconnected_jack.module_id)
+				module_id--;
+		};
+
+		auto erase_and_squash = [=](auto &container) {
+			for (auto &item : container) {
+				std::erase_if(item, [=](auto &map) { return (map.module_id == module_idx); });
+				for (auto &map : item) {
+					squash_module_id(map.module_id);
+				}
+			}
+		};
+
+		auto erase_and_squash_inner = [=](auto &container) {
+			for (auto &item : container) {
+				std::erase_if(item.conns, [=](auto &map) { return (map.module_id == module_idx); });
+				for (auto &map : item.conns) {
+					squash_module_id(map.module_id);
+				}
+			}
+		};
+
+		// Panel Input connections
+		erase_and_squash(in_conns);
+
+		// Panel Output connections
+		for (auto &out : out_conns) {
+			if (out.module_id == module_idx) {
+				out = disconnected_jack;
+			}
+			squash_module_id(out.module_id);
+		}
+
+		// Internal cables
+		// Inform other modules connected to this one
+		// that their jacks are to be disconnected
+		for (auto &cable : pd.int_cables) {
+
+			unsigned ins_to_disconnect = 0;
+			for (auto in : cable.ins) {
+
+				if (cable.out.module_id == module_idx) {
+					modules[in.module_id]->mark_input_unpatched(in.jack_id);
+				}
+
+				if (in.module_id == module_idx) {
+					ins_to_disconnect++;
+				}
+			}
+
+			if (ins_to_disconnect == cable.ins.size()) {
+				modules[cable.out.module_id]->mark_output_unpatched(cable.out.jack_id);
+			}
+		}
+
+		// Knob and MIDI connections
+		for (auto &knob_set : knob_conns) {
+			erase_and_squash(knob_set);
+		}
+
+		erase_and_squash(midi_knob_conns);
+		erase_and_squash(midi_note_pitch_conns);
+		erase_and_squash(midi_note_gate_conns);
+		erase_and_squash(midi_note_vel_conns);
+		erase_and_squash(midi_note_aft_conns);
+		erase_and_squash(midi_cc_conns);
+		erase_and_squash(midi_gate_conns);
+		erase_and_squash_inner(midi_note_retrig);
+		erase_and_squash_inner(midi_pulses);
+
+		pd.remove_module(module_idx);
+
+		std::move(std::next(modules.begin(), module_idx + 1), modules.end(), std::next(modules.begin(), module_idx));
+
+		calc_multiple_module_indicies();
+
+		smp.load_patch(num_modules);
 	}
 
 	void set_samplerate(float hz) {
@@ -476,7 +571,7 @@ public:
 		if (panel_out_jack_id >= out_conns.size())
 			return;
 		auto const &jack = out_conns[panel_out_jack_id];
-		if (jack.module_id < pd.module_slugs.size()) {
+		if (jack.module_id < num_modules) {
 			if (is_patched)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
 			else
@@ -485,13 +580,15 @@ public:
 	}
 
 private:
+	static inline Jack disconnected_jack = {0xFFFF, 0xFFFF};
+
 	// Cache functions:
 	void clear_cache() {
 		for (auto &d : dup_module_index)
 			d = 0;
 
 		for (auto &out_conn : out_conns)
-			out_conn = {0xFFFF, 0xFFFF};
+			out_conn = disconnected_jack;
 
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
@@ -628,17 +725,21 @@ public:
 	// Check for multiple instances of same module type, and cache the results
 	// This is used to create unique names for modules (e.g. LFO#1, LFO#2,...)
 	void calc_multiple_module_indicies() {
+
+		num_modules = pd.module_slugs.size(); //refresh this anytime we are refreshing dup_module_index
+
 		// Todo: this is a naive implementation, perhaps can be made more efficient
-		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
-			auto &this_slug = pd.module_slugs[i];
+		for (size_t i = 0; i < num_modules; i++) {
 
 			unsigned found = 1;
 			unsigned this_index = 0;
-			for (size_t j = 0; j < pd.module_slugs.size(); j++) {
+			for (size_t j = 0; j < num_modules; j++) {
 				if (i == j) {
 					this_index = found;
 					continue;
 				}
+
+				auto &this_slug = pd.module_slugs[i];
 				auto &that_slug = pd.module_slugs[j];
 				if (that_slug == this_slug) {
 					found++;
@@ -691,6 +792,7 @@ private:
 	}
 
 	///////////////////////////////////////
+#if defined(TESTPROJECT)
 public:
 	//Used in unit tests
 	unsigned get_num_int_cable_ins(unsigned int_cable_idx) {
@@ -730,5 +832,31 @@ public:
 	uint8_t get_multiple_module_index(uint8_t idx) {
 		return dup_module_index[idx];
 	}
+
+	auto const &get_inconns() {
+		return in_conns;
+	}
+
+	auto const &get_outconns() {
+		return out_conns;
+	}
+
+	auto const &get_knobconns() {
+		return knob_conns;
+	}
+
+	auto const &get_int_cables() {
+		return pd.int_cables;
+	}
+
+	auto const &get_modules() {
+		return modules;
+	}
+
+	auto const &get_module_slugs() {
+		return pd.module_slugs;
+	}
+
+#endif
 };
 } // namespace MetaModule

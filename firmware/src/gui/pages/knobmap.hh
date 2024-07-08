@@ -20,8 +20,8 @@ struct KnobMapPage : PageBase {
 	KnobMapPage(PatchContext info)
 		: PageBase{info, PageId::KnobMap}
 		, base{ui_EditMappingPage}
-		, patch{patch_storage.get_view_patch()}
-		, add_map_popup{patch_mod_queue} {
+		, patch{patches.get_view_patch()} // , add_map_popup{patch_mod_queue}
+	{
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -62,20 +62,29 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_parent(ui_Keyboard, ui_EditMappingPage);
 		lv_obj_set_y(ui_Keyboard, 1);
 
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 
 		view_set_idx = args.view_knobset_id.value_or(view_set_idx);
-		if (view_set_idx >= patch->knob_sets.size()) {
+		if (view_set_idx != PatchData::MIDIKnobSet && view_set_idx >= patch->knob_sets.size()) {
 			return;
+		}
+
+		auto &knobset =
+			(view_set_idx == PatchData::MIDIKnobSet) ? patch->midi_maps.set : patch->knob_sets[view_set_idx].set;
+
+		if (view_set_idx == PatchData::MIDIKnobSet) {
+			lv_hide(ui_KnobSetButton);
+		} else {
+			lv_show(ui_KnobSetButton);
 		}
 
 		//mappedknob_id is the index of the MappedKnob in the MappedKnobSet::set vector
 		auto map_idx = args.mappedknob_id;
-		if (!map_idx.has_value() || map_idx.value() >= patch->knob_sets[view_set_idx].set.size()) {
+		if (!map_idx.has_value() || map_idx.value() >= knobset.size()) {
 			pr_err("Mapping not found for set %d, panel_knob_id %d\n", view_set_idx, map_idx);
 			return;
 		}
-		map = patch->knob_sets[view_set_idx].set[map_idx.value()];
+		map = knobset[map_idx.value()];
 
 		// Title
 		auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
@@ -121,8 +130,8 @@ struct KnobMapPage : PageBase {
 
 		lv_group_set_editing(group, false);
 
-		add_map_popup.prepare_focus(group, ui_EditMappingPage);
-		add_map_popup.hide();
+		// add_map_popup.prepare_focus(group, ui_EditMappingPage);
+		// add_map_popup.hide();
 	}
 
 	void update() override {
@@ -143,7 +152,7 @@ struct KnobMapPage : PageBase {
 			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, s_val);
 		}
 
-		add_map_popup.update(params);
+		// add_map_popup.update(params);
 	}
 
 	void update_active_status() {
@@ -188,6 +197,7 @@ struct KnobMapPage : PageBase {
 		page->patch_mod_queue.put(
 			EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx, .cur_val = val / 100.f});
 		page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
+		page->patches.mark_view_patch_modified();
 	}
 
 	static void edit_text_cb(lv_event_t *event) {
@@ -256,6 +266,7 @@ struct KnobMapPage : PageBase {
 		page->args.module_id = page->map.module_id;
 		page->args.element_indices =
 			ElementCount::mark_unused_indices({.param_idx = (uint8_t)page->map.param_id}, {.num_params = 1});
+		page->args.detail_mode = true;
 		page->page_list.request_new_page(PageId::ModuleView, page->args);
 	}
 
@@ -272,6 +283,7 @@ struct KnobMapPage : PageBase {
 					return;
 
 				page->patch_mod_queue.put(RemoveMapping{.map = page->map, .set_id = page->view_set_idx});
+				page->patches.mark_view_patch_modified();
 
 				if (!page->patch->remove_mapping(page->view_set_idx, page->map))
 					pr_err("Could not delete mapping\n");
@@ -298,7 +310,7 @@ private:
 
 	ConfirmPopup del_popup;
 
-	AddMapPopUp add_map_popup;
+	// AddMapPopUp add_map_popup;
 
 	bool kb_visible = false;
 

@@ -4,50 +4,52 @@
 #include <span>
 
 ///
-
 #include "patch/default/Befaco4msPlayground.hh"
-#include "patch/default/BefacoVCOs.hh"
 #include "patch/default/Braids-Quad.hh"
 #include "patch/default/Djembe4verb.hh"
-#include "patch/default/EnOscDual.hh"
+#include "patch/default/DualEnvEnosc.hh"
 #include "patch/default/EnOscPoly4.hh"
 #include "patch/default/EnOsc_8_step_seq.hh"
-#include "patch/default/EnvVCA_knobsets.hh"
 #include "patch/default/KarplusStereo.hh"
+#include "patch/default/MIDI_Poly4.hh"
+#include "patch/default/Orcas_Heart_Octo_Djembe.hh"
 #include "patch/default/QuadDrum.hh"
 #include "patch/default/SlothDrone.hh"
-#include "patch/default/twosimpleosc.hh"
+#include "patch/default/SpringsintoCaves.hh"
+#include "patch/default/WanderVoices.hh"
 
 struct DefaultPatches {
 
 	static inline std::array patch_raw_data = std::to_array<std::span<const char>>({
 		Sloth_Drone_patch,
+		WanderVoices_patch,
+		DualEnvEnOsc_patch,
+		SpringsIntoCaves_patch,
+		Orcas_Heart_Octo_Djembe_patch,
 		EnOscPoly4_patch,
 		QuadDrum_patch,
 		Befaco4msPlayground_patch,
 		Djembe4verb_patch,
-		EnOsc_Dual_patch,
-		BefacoVCOs_patch,
 		KarplusStereo_patch,
 		EnOsc8StepSeq_patch,
-		twosimpleosc_patch,
-		EnvVCA_knobsets_patch,
 		BraidsQuad_patch,
+		MIDI_Poly4_patch,
 	});
 
 	static inline std::array patch_filenames = std::to_array<ModuleTypeSlug>({
 		"SlothDrone.yml",
+		"WanderVoices.yml",
+		"DualEnvEnOsc.yml",
+		"SpringsintoCaves.yml",
+		"Orcas_Heart_Octo_Djembe.yml",
 		"EnOscPoly4.yml",
 		"QuadDrum.yml",
 		"Befaco4msPlayground.yml",
 		"Djembe4verb.yml",
-		"EnOsc_Dual.yml",
-		"BefacoVCOs.yml",
 		"KarplusStereo.yml",
 		"EnOsc8StepSeq.yml",
-		"twosimpleosc.yml",
-		"EnvVCA_knobsets.yml",
 		"BraidsQuad.yml",
+		"MIDI_Poly4.yml",
 	});
 
 	static constexpr uint32_t num_patches() {

@@ -6,11 +6,14 @@
 #include <optional>
 #include <vector>
 
+namespace MetaModule
+{
+
 struct PatchData {
 	static constexpr size_t DescSize = 255;
-	ModuleTypeSlug patch_name{""};
+	PatchName patch_name{""};
 	StaticString<DescSize> description;
-	std::vector<ModuleTypeSlug> module_slugs;
+	std::vector<BrandModuleSlug> module_slugs;
 	std::vector<InternalCable> int_cables;
 	std::vector<MappedInputJack> mapped_ins;
 	std::vector<MappedOutputJack> mapped_outs;
@@ -88,18 +91,11 @@ struct PatchData {
 		return nullptr;
 	}
 
-	// Adds the knob mapping if and only if it does not exist
-	bool add_unique_mapped_knob(uint32_t set_id, MappedKnob const &map) {
-		if (!find_mapped_knob(set_id, map.module_id, map.param_id)) {
-			knob_sets[set_id].set.push_back(map);
-			return true;
-		}
-
-		return false;
-	}
-
 	// Updates an existing mapped knob, or adds it if it doesn't exist yet
 	bool add_update_mapped_knob(uint32_t set_id, MappedKnob const &map) {
+		if (set_id == MIDIKnobSet)
+			return add_update_midi_map(map);
+
 		if (set_id >= MaxKnobSets)
 			return false;
 
@@ -143,15 +139,16 @@ struct PatchData {
 	}
 
 	bool remove_mapping(uint32_t set_id, MappedKnob const &map) {
-		if (set_id >= knob_sets.size())
+		if (set_id != MIDIKnobSet && set_id >= knob_sets.size())
 			return false;
 
 		if (map.module_id >= module_slugs.size())
 			return false;
 
-		auto num_erased = std::erase_if(knob_sets[set_id].set, [&map](auto m) {
-			return (m.module_id == map.module_id && m.param_id == map.param_id);
-		});
+		MappedKnobSet &set = (set_id == MIDIKnobSet) ? midi_maps : knob_sets[set_id];
+
+		auto num_erased = std::erase_if(
+			set.set, [&map](auto m) { return (m.module_id == map.module_id && m.param_id == map.param_id); });
 
 		return num_erased > 0;
 	}
@@ -328,6 +325,111 @@ struct PatchData {
 		"Knob Set 8",
 	};
 
+	size_t add_module(std::string_view slug) {
+		auto module_id = module_slugs.size();
+		module_slugs.push_back({slug});
+		return module_id;
+	}
+
+	void remove_module(unsigned module_id) {
+		if (module_id >= module_slugs.size())
+			return;
+
+		blank_out_module(module_id);
+
+		module_slugs.erase(std::next(module_slugs.begin(), module_id));
+
+		std::transform(int_cables.begin(), int_cables.end(), int_cables.begin(), [=](InternalCable &cable) {
+			if (cable.out.module_id > module_id) {
+				cable.out.module_id--;
+			}
+
+			std::transform(cable.ins.begin(), cable.ins.end(), cable.ins.begin(), [=](Jack &jack) {
+				if (jack.module_id > module_id) {
+					jack.module_id--;
+				}
+				return jack;
+			});
+
+			return cable;
+		});
+
+		for (auto &map : mapped_ins) {
+			std::transform(map.ins.begin(), map.ins.end(), map.ins.begin(), [=](Jack &in) {
+				if (in.module_id > module_id) {
+					in.module_id--;
+				}
+				return in;
+			});
+		}
+
+		std::transform(mapped_outs.begin(), mapped_outs.end(), mapped_outs.begin(), [=](MappedOutputJack &map) {
+			if (map.out.module_id > module_id) {
+				map.out.module_id--;
+			}
+			return map;
+		});
+
+		std::transform(static_knobs.begin(), static_knobs.end(), static_knobs.begin(), [=](StaticParam &map) {
+			if (map.module_id > module_id) {
+				map.module_id--;
+			}
+			return map;
+		});
+
+		for (auto &knobset : knob_sets) {
+			std::transform(knobset.set.begin(), knobset.set.end(), knobset.set.begin(), [=](MappedKnob &map) {
+				if (map.module_id > module_id) {
+					map.module_id--;
+				}
+				return map;
+			});
+		}
+
+		std::transform(midi_maps.set.begin(), midi_maps.set.end(), midi_maps.set.begin(), [=](MappedKnob &map) {
+			if (map.module_id > module_id) {
+				map.module_id--;
+			}
+			return map;
+		});
+
+		std::transform(module_states.begin(), module_states.end(), module_states.begin(), [=](ModuleInitState &state) {
+			if (state.module_id > module_id) {
+				state.module_id--;
+			}
+			return state;
+		});
+	}
+
+	void blank_out_module(unsigned module_id) {
+		// use a blank placeholder, and when adding a module replace the first blank placeholder?
+		module_slugs[module_id] = "Blank";
+
+		std::erase_if(int_cables, [=](InternalCable &cable) {
+			if (cable.out.module_id == module_id) {
+				return true;
+			} else {
+				std::erase_if(cable.ins, [=](Jack in) { return in.module_id == module_id; });
+				return (cable.ins.size() == 0);
+			}
+		});
+
+		for (MappedInputJack &map : mapped_ins) {
+			std::erase_if(map.ins, [=](Jack in) { return in.module_id == module_id; });
+		}
+		std::erase_if(mapped_ins, [=](MappedInputJack map) { return map.ins.size() == 0; });
+		std::erase_if(mapped_outs, [=](MappedOutputJack map) { return map.out.module_id == module_id; });
+
+		std::erase_if(static_knobs, [=](StaticParam &knob) { return knob.module_id == module_id; });
+
+		for (auto &knobset : knob_sets) {
+			std::erase_if(knobset.set, [=](MappedKnob &map) { return map.module_id == module_id; });
+		}
+		std::erase_if(midi_maps.set, [=](MappedKnob &map) { return map.module_id == module_id; });
+
+		std::erase_if(module_states, [=](ModuleInitState &state) { return state.module_id == module_id; });
+	}
+
 private:
 	//non-const version for private use only
 	MappedKnob *_get_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) {
@@ -357,3 +459,5 @@ private:
 		return nullptr;
 	}
 };
+
+} // namespace MetaModule

@@ -10,7 +10,6 @@ constexpr int MAX_MODULES_IN_PATCH = 32;
 constexpr int MAX_LIGHTS_PER_MODULE = 256;
 constexpr unsigned MaxKnobSets = 8;
 
-// 4 Bytes
 struct Jack {
 	uint16_t module_id;
 	uint16_t jack_id;
@@ -18,20 +17,15 @@ struct Jack {
 		return this->module_id == other.module_id && this->jack_id == other.jack_id;
 	}
 };
-static_assert(sizeof(Jack) == 4, "Jack should be 4B");
 
-// 8 Bytes
 struct StaticParam {
 	uint16_t module_id;
 	uint16_t param_id;
 	float value;
 };
-static_assert(sizeof(StaticParam) == 8, "StaticParam should be 8B");
 
-using AliasNameString = StaticString<15>;
-static_assert(sizeof(AliasNameString) == 16, "AliasNameString should be 16B");
+using AliasNameString = StaticString<31>;
 
-// 32 Bytes
 struct MappedKnob {
 	uint16_t panel_knob_id;
 	uint16_t module_id;
@@ -70,21 +64,20 @@ struct MappedKnob {
 		return (module_id == other.module_id) && (param_id == other.param_id);
 	}
 };
-static_assert(sizeof(MappedKnob) == 32, "MappedKnob should be 32B");
 
 struct MappedKnobSet {
 	std::vector<MappedKnob> set;
-	AliasNameString name;
+	AliasNameString name{};
 };
 
 struct InternalCable {
-	Jack out;
+	Jack out{};
 	std::vector<Jack> ins;
 	std::optional<uint16_t> color{};
 };
 
 struct MappedInputJack {
-	uint32_t panel_jack_id;
+	uint32_t panel_jack_id{};
 	std::vector<Jack> ins;
 	AliasNameString alias_name{};
 
@@ -129,16 +122,19 @@ struct MappedInputJack {
 	}
 };
 
-// 24 Bytes
 struct MappedOutputJack {
-	uint32_t panel_jack_id;
-	Jack out;
+	uint32_t panel_jack_id{};
+	Jack out{};
 	AliasNameString alias_name{};
 };
 
-static_assert(sizeof(MappedOutputJack) == 24, "MappedOutputJack should be 24B");
-
 struct ModuleInitState {
-	uint32_t module_id;
+	uint32_t module_id{};
 	std::string state_data;
 };
+
+static_assert(sizeof(Jack) == 4, "Jack should be 4B");
+static_assert(sizeof(StaticParam) == 8, "StaticParam should be 8B");
+static_assert(sizeof(AliasNameString) == 32, "AliasNameString should be 32B");
+static_assert(sizeof(MappedKnob) == 48, "MappedKnob should be 48B");
+static_assert(sizeof(MappedOutputJack) == 40, "MappedOutputJack should be 40B");

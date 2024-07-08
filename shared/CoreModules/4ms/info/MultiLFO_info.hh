@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/4ms_elements.hh"
+#include "CoreModules/4ms/4ms_element_state_conversions.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -10,14 +11,14 @@ struct MultiLFOInfo : ModuleInfoBase {
     static constexpr std::string_view description{"Multi LFO"};
     static constexpr uint32_t width_hp = 8;
     static constexpr std::string_view svg_filename{"res/modules/MultiLFO_artwork.svg"};
-	static constexpr std::string_view png_filename{"4ms/fp/MultiLFO.png"};
+    static constexpr std::string_view png_filename{"4ms/fp/MultiLFO.png"};
 
     using enum Coords;
 
     static constexpr std::array<Element, 11> Elements{{
-		DaviesLargeKnob{{to_mm<72>(57.67), to_mm<72>(55.73), Center, "Rate", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(119.41), Center, "Phase", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(119.75), Center, "PW", ""}},
+		DaviesLargeKnob{{to_mm<72>(57.67), to_mm<72>(55.73), Center, "Rate", ""}, 0.5f},
+		Davies1900hBlackKnob{{to_mm<72>(31.96), to_mm<72>(119.41), Center, "Phase", ""}, 0.0f},
+		Davies1900hBlackKnob{{to_mm<72>(83.49), to_mm<72>(119.75), Center, "PW", ""}, 0.5f},
 		AnalogJackInput4ms{{to_mm<72>(32.1), to_mm<72>(167.36), Center, "Reset", ""}},
 		AnalogJackInput4ms{{to_mm<72>(83.63), to_mm<72>(167.36), Center, "PW CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(32.1), to_mm<72>(214.57), Center, "Rate CV", ""}},
@@ -45,28 +46,29 @@ struct MultiLFOInfo : ModuleInfoBase {
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobRate = 0,
-        KnobPhase = 1,
-        KnobPw = 2,
+        KnobRate, 
+        KnobPhase, 
+        KnobPw, 
         NumKnobs,
     };
     
     
     enum {
-        InputReset = 0,
-        InputPw_Cv = 1,
-        InputRate_Cv = 2,
-        InputPhase_Cv = 3,
+        InputReset, 
+        InputPw_Cv, 
+        InputRate_Cv, 
+        InputPhase_Cv, 
         NumInJacks,
     };
     
     enum {
-        OutputInv_Saw = 0,
-        OutputPulse = 1,
-        OutputSaw = 2,
-        OutputSine = 3,
+        OutputInv_Saw, 
+        OutputPulse, 
+        OutputSaw, 
+        OutputSine, 
         NumOutJacks,
     };
+    
     
 };
 } // namespace MetaModule

@@ -14,6 +14,7 @@ void write(ryml::NodeRef *n, InternalCable const &cable);
 void write(ryml::NodeRef *n, MappedInputJack const &j);
 void write(ryml::NodeRef *n, MappedOutputJack const &j);
 void write(ryml::NodeRef *n, StaticParam const &k);
+void write(ryml::NodeRef *n, std::vector<BrandModuleSlug> const &slugs);
 void write(ryml::NodeRef *n, std::vector<ModuleTypeSlug> const &slugs);
 void write(ryml::NodeRef *n, ModuleInitState const &state);
 

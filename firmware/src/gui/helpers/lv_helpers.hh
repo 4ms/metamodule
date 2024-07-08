@@ -80,4 +80,13 @@ inline void set_content_max_height(lv_obj_t *obj, lv_coord_t max) {
 	}
 }
 
+[[maybe_unused]] inline bool lv_group_activate(lv_group_t *group) {
+	auto indev = lv_indev_get_next(nullptr);
+	if (indev && group) {
+		lv_indev_set_group(indev, group);
+		return true;
+	}
+	return false;
+}
+
 } // namespace MetaModule
