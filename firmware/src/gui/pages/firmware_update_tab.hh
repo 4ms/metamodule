@@ -4,6 +4,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "util/poll_event.hh"
@@ -11,7 +12,7 @@
 namespace MetaModule
 {
 
-struct FirmwareUpdateTab {
+struct FirmwareUpdateTab : SystemMenuTab {
 	FirmwareUpdateTab(FileStorageProxy &patch_storage, PatchPlayLoader &patch_playloader)
 		: file_storage{patch_storage}
 		, patch_playloader{patch_playloader}
@@ -22,7 +23,7 @@ struct FirmwareUpdateTab {
 		lv_obj_add_event_cb(ui_SystemMenuUpdateFWBut, updatebut_cb, LV_EVENT_CLICKED, this);
 	}
 
-	void prepare_focus(lv_group_t *group) {
+	void prepare_focus(lv_group_t *group) override {
 		this->group = group;
 
 		state = State::Idle;
@@ -33,7 +34,7 @@ struct FirmwareUpdateTab {
 	}
 
 	// Returns true if this pages uses the back event
-	bool consume_back_event() {
+	bool consume_back_event() override {
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
 			return true;
@@ -44,7 +45,7 @@ struct FirmwareUpdateTab {
 			return true; //Consume back event: un-interruptable operation in progress
 	}
 
-	void update() {
+	void update() override {
 		switch (state) {
 
 			case State::Idle: {

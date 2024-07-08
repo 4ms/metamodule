@@ -1,982 +1,190 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   width="76.2mm"
-   height="130.18mm"
-   viewBox="0 0 216 369.03"
-   version="1.1"
-   id="svg165"
-   sodipodi:docname="ComplexEG_info.svg"
-   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs165" />
-  <sodipodi:namedview
-     id="namedview165"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="mm"
-     inkscape:zoom="0.98425258"
-     inkscape:cx="114.29993"
-     inkscape:cy="258.06384"
-     inkscape:window-width="1048"
-     inkscape:window-height="957"
-     inkscape:window-x="52"
-     inkscape:window-y="38"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="components" />
-  <g
-     id="faceplate">
-    <g
-       id="g1">
-      <rect
-         x=".12"
-         y=".13"
-         width="215.75"
-         height="364"
-         style="fill: #ededed; stroke-width: 0px;"
-         id="rect1" />
-      <path
-         d="M215.75.25v363.75H.25V.25h215.5M216,0H0v364.25h216V0h0Z"
-         style="fill: #9d9d9e; stroke-width: 0px;"
-         id="path1" />
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="76.29mm" height="128.59mm" viewBox="0 0 216.25 364.5">
+  <g id="faceplate">
+    <rect x=".12" y=".12" width="216" height="364.25" style="fill: #ededed; stroke: #9d9d9e; stroke-miterlimit: 10; stroke-width: .25px;"/>
+    <text transform="translate(28.34 189.6) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Sustain</tspan></text>
+    <path d="M43.62,143.6c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M29.13,149.97l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M34.6,145.8l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M25.39,155.74l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M48.05,144.12l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M23.91,162.43h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M24.77,169.23l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.87,4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M27.91,175.31l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M59.4,151.51l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M62.53,157.62l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M63.35,164.43h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M61.79,171.11l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M32.93,179.96l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M58.04,176.84l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M54.38,146.81l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <text transform="translate(29.1 73.6) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Attack</tspan></text>
+    <g>
+      <path d="M43.62,26.74c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M29.13,33.11l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M34.6,28.94l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M25.39,38.87l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M48.05,27.25l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M23.91,45.57h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M24.77,52.37l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.87,4.8Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M27.91,58.45l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M59.4,34.64l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M62.53,40.75l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M63.35,47.57h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M61.79,54.25l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M32.93,63.09l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M58.04,59.97l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M54.38,29.94l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z" style="fill: #000; stroke-width: 0px;"/>
     </g>
-    <path
-       d="M31.32,340.53h129.33s23.6,0,23.6,0c7.49,0,13.57-7.04,13.57-15.71v-107.97l-.06-6.23c-.3-8.38-6.24-15.07-13.54-15.07H31.28c-7.3,0-13.25,6.69-13.54,15.07l-.06,6.23v46.63l.07,61.34"
-       style="fill: #ededed; stroke: #000; stroke-miterlimit: 10;"
-       id="path2" />
-    <path
-       d="M198.28,313.96v-24.72H35.93c-7.49,0-13.57,7.49-13.57,16.73v34.53l140.82.53h15.07s0,0,0,0h14.39c3.12,0,5.64-2.72,5.64-6.03v-21.12.09Z"
-       style="fill: #000; stroke-width: 0px;"
-       id="path3" />
-    <path
-       d="M17.68,315.6v-23.22h1.14s20.4,0,20.4,0c7.49,0,13.57,7.04,13.57,15.71v32.44s0,.5,0,.5h-15.07s0,0,0,0h-14.39c-3.12,0-5.64-2.55-5.64-5.67v-10.04s0-9.8,0-9.8v.08Z"
-       style="fill: #000; stroke-width: 0px;"
-       id="path4" />
-    <path
-       d="M17.72,323.91v10.96c0,3.12,2.55,5.67,5.67,5.67h12.93"
-       style="fill: none; stroke: #000; stroke-miterlimit: 10;"
-       id="path5" />
-    <path
-       d="M198.26,272.63v-23.22h-1.14s-20.4,0-20.4,0c-7.49,0-13.57,7.04-13.57,15.71v32.44s0,.5,0,.5h15.07s0,0,0,0h14.39c3.12,0,5.64-2.55,5.64-5.67v-10.04s0-9.8,0-9.8v.08Z"
-       style="fill: #000; stroke-width: 0px;"
-       id="path6" />
-    <path
-       d="M17.68,272.63v-23.22h1.14s20.4,0,20.4,0c7.49,0,13.57,7.04,13.57,15.71v32.44s0,.5,0,.5h-15.07s0,0,0,0h-14.39c-3.12,0-5.64-2.55-5.64-5.67v-10.04s0-9.8,0-9.8v.08Z"
-       style="fill: #000; stroke-width: 0px;"
-       id="path7" />
-    <rect
-       x="52.7"
-       y="249.86"
-       width="110.49"
-       height="42.52"
-       rx="4"
-       ry="4"
-       style="fill: #ededed; stroke-width: 0px;"
-       id="rect7" />
-    <g
-       id="graphics_txt"
-       data-name="graphics txt">
-      <g
-         id="Layer_6"
-         data-name="Layer 6">
-        <line
-           x1="107.75"
-           y1="85.03"
-           x2="107.75"
-           y2="75.74"
-           style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"
-           id="line7" />
-        <line
-           x1="172.5"
-           y1="85.03"
-           x2="172.5"
-           y2="75.74"
-           style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"
-           id="line8" />
-        <line
-           x1="43.5"
-           y1="85.03"
-           x2="43.5"
-           y2="75.74"
-           style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"
-           id="line9" />
-      </g>
-      <g
-         id="Layer_5"
-         data-name="Layer 5">
-        <path
-           d="M43.5,143.48c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path9" />
-        <path
-           d="M29.01,149.85l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path10" />
-        <path
-           d="M34.47,145.68l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path11" />
-        <path
-           d="M25.27,155.61l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path12" />
-        <path
-           d="M47.92,143.99l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path13" />
-        <path
-           d="M23.78,162.31h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path14" />
-        <path
-           d="M24.65,169.11l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.87,4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path15" />
-        <path
-           d="M27.79,175.19l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path16" />
-        <path
-           d="M59.27,151.38l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path17" />
-        <path
-           d="M62.41,157.49l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path18" />
-        <path
-           d="M63.23,164.31h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path19" />
-        <path
-           d="M61.66,170.99l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path20" />
-        <path
-           d="M32.81,179.83l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path21" />
-        <path
-           d="M57.92,176.71l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path22" />
-        <path
-           d="M54.26,146.68l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path23" />
-        <g
-           id="g38">
-          <path
-             d="M43.5,26.61c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path24" />
-          <path
-             d="M29.01,32.98l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path25" />
-          <path
-             d="M34.47,28.81l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path26" />
-          <path
-             d="M25.27,38.75l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path27" />
-          <path
-             d="M47.92,27.13l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path28" />
-          <path
-             d="M23.78,45.44h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path29" />
-          <path
-             d="M24.65,52.24l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.87,4.8Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path30" />
-          <path
-             d="M27.79,58.32l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path31" />
-          <path
-             d="M59.27,34.52l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path32" />
-          <path
-             d="M62.41,40.63l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path33" />
-          <path
-             d="M63.23,47.44h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path34" />
-          <path
-             d="M61.66,54.12l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path35" />
-          <path
-             d="M32.81,62.97l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path36" />
-          <path
-             d="M57.92,59.85l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path37" />
-          <path
-             d="M54.26,29.82l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z"
-             style="fill: #000; stroke-width: 0px;"
-             id="path38" />
-        </g>
-        <path
-           d="M108,25.94c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path39" />
-        <path
-           d="M93.51,32.31l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path40" />
-        <path
-           d="M98.97,28.14l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path41" />
-        <path
-           d="M89.77,38.07l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path42" />
-        <path
-           d="M112.42,26.45l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path43" />
-        <path
-           d="M88.28,44.77h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path44" />
-        <path
-           d="M89.15,51.57l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path45" />
-        <path
-           d="M92.29,57.65l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path46" />
-        <path
-           d="M123.77,33.84l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path47" />
-        <path
-           d="M126.91,39.95l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path48" />
-        <path
-           d="M127.73,46.77h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path49" />
-        <path
-           d="M126.16,53.45l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path50" />
-        <path
-           d="M97.31,62.29l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path51" />
-        <path
-           d="M122.42,59.17l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path52" />
-        <path
-           d="M118.76,29.14l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path53" />
-        <path
-           d="M172.5,25.94c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path54" />
-        <path
-           d="M158.01,32.31l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path55" />
-        <path
-           d="M163.47,28.14l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path56" />
-        <path
-           d="M154.27,38.07l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path57" />
-        <path
-           d="M176.92,26.45l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path58" />
-        <path
-           d="M152.78,44.77h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path59" />
-        <path
-           d="M153.65,51.57l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path60" />
-        <path
-           d="M156.79,57.65l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path61" />
-        <path
-           d="M188.27,33.84l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path62" />
-        <path
-           d="M191.41,39.95l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path63" />
-        <path
-           d="M192.23,46.77h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path64" />
-        <path
-           d="M190.66,53.45l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path65" />
-        <path
-           d="M161.81,62.29l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path66" />
-        <path
-           d="M186.92,59.17l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path67" />
-        <path
-           d="M183.26,29.14l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path68" />
-        <path
-           d="M43.5,84.92c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path69" />
-        <path
-           d="M29.01,91.29l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path70" />
-        <path
-           d="M34.47,87.12l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path71" />
-        <path
-           d="M25.27,97.06l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path72" />
-        <path
-           d="M47.92,85.44l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path73" />
-        <path
-           d="M23.78,103.76h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path74" />
-        <path
-           d="M24.65,110.55l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.87,4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path75" />
-        <path
-           d="M27.79,116.64l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path76" />
-        <path
-           d="M59.27,92.83l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path77" />
-        <path
-           d="M62.41,98.94l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path78" />
-        <path
-           d="M63.23,105.75h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path79" />
-        <path
-           d="M61.66,112.43l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path80" />
-        <path
-           d="M32.81,121.28l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path81" />
-        <path
-           d="M57.92,118.16l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path82" />
-        <path
-           d="M54.26,88.13l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path83" />
-        <path
-           d="M108,84.92c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path84" />
-        <path
-           d="M93.51,91.29l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path85" />
-        <path
-           d="M98.97,87.12l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path86" />
-        <path
-           d="M89.77,97.06l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path87" />
-        <path
-           d="M112.42,85.44l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path88" />
-        <path
-           d="M88.28,103.76h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path89" />
-        <path
-           d="M89.15,110.55l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path90" />
-        <path
-           d="M92.29,116.64l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path91" />
-        <path
-           d="M123.77,92.83l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path92" />
-        <path
-           d="M126.91,98.94l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path93" />
-        <path
-           d="M127.73,105.75h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path94" />
-        <path
-           d="M126.16,112.43l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path95" />
-        <path
-           d="M97.31,121.28l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path96" />
-        <path
-           d="M122.42,118.16l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path97" />
-        <path
-           d="M118.76,88.13l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path98" />
-        <path
-           d="M172.5,84.92c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path99" />
-        <path
-           d="M158.01,91.29l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path100" />
-        <path
-           d="M163.47,87.12l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path101" />
-        <path
-           d="M154.27,97.06l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path102" />
-        <path
-           d="M176.92,85.44l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path103" />
-        <path
-           d="M152.78,103.76h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path104" />
-        <path
-           d="M153.65,110.55l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path105" />
-        <path
-           d="M156.79,116.64l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path106" />
-        <path
-           d="M188.27,92.83l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path107" />
-        <path
-           d="M191.41,98.94l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path108" />
-        <path
-           d="M192.23,105.75h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path109" />
-        <path
-           d="M190.66,112.43l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path110" />
-        <path
-           d="M161.81,121.28l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path111" />
-        <path
-           d="M186.92,118.16l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path112" />
-        <path
-           d="M183.26,88.13l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path113" />
-        <path
-           d="M172.5,143.48c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path114" />
-        <path
-           d="M158.01,149.85l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path115" />
-        <path
-           d="M163.47,145.68l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path116" />
-        <path
-           d="M154.27,155.61l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path117" />
-        <path
-           d="M176.92,143.99l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path118" />
-        <path
-           d="M152.78,162.31h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path119" />
-        <path
-           d="M153.65,169.11l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path120" />
-        <path
-           d="M156.79,175.19l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path121" />
-        <path
-           d="M188.27,151.38l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path122" />
-        <path
-           d="M191.41,157.49l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path123" />
-        <path
-           d="M192.23,164.31h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path124" />
-        <path
-           d="M190.66,170.99l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path125" />
-        <path
-           d="M161.81,179.83l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path126" />
-        <path
-           d="M186.92,176.71l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path127" />
-        <path
-           d="M183.26,146.68l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z"
-           style="fill: #000; stroke-width: 0px;"
-           id="path128" />
-      </g>
-      <g
-         id="Layer_3"
-         data-name="Layer 3">
-        <text
-           transform="translate(28.21 189.47) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
-           id="text128"><tspan
-             x="0"
-             y="0"
-             id="tspan128">Sustain</tspan></text>
-        <text
-           transform="translate(28.98 73.47) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
-           id="text129"><tspan
-             x="0"
-             y="0"
-             id="tspan129">Attack</tspan></text>
-        <text
-           transform="translate(95.14 72.8) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
-           id="text130"><tspan
-             x="0"
-             y="0"
-             id="tspan130">Decay</tspan></text>
-        <text
-           transform="translate(156.41 72.8) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
-           id="text131"><tspan
-             x="0"
-             y="0"
-             id="tspan131">Release</tspan></text>
-        <text
-           transform="translate(26.16 130.92) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
-           id="text132"><tspan
-             x="0"
-             y="0"
-             id="tspan132">A Curve</tspan></text>
-        <text
-           transform="translate(90.71 130.92) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
-           id="text133"><tspan
-             x="0"
-             y="0"
-             id="tspan133">D Curve</tspan></text>
-        <text
-           transform="translate(155.53 130.92) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
-           id="text134"><tspan
-             x="0"
-             y="0"
-             id="tspan134">R Curve</tspan></text>
-        <text
-           transform="translate(75.85 356.82) scale(.82 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 11px; font-weight: 700;"
-           id="text135"><tspan
-             x="0"
-             y="0"
-             id="tspan135">COMPLEX EG</tspan></text>
-        <text
-           transform="translate(162.17 189.47) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
-           id="text136"><tspan
-             x="0"
-             y="0"
-             id="tspan136">Hold</tspan></text>
-        <text
-           transform="translate(27.26 238.32) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text137"><tspan
-             x="0"
-             y="0"
-             id="tspan137">Input</tspan></text>
-        <text
-           transform="translate(72.22 238.32) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text138"><tspan
-             x="0"
-             y="0"
-             id="tspan138">Attack</tspan></text>
-        <text
-           transform="translate(121.53 238.32) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text139"><tspan
-             x="0"
-             y="0"
-             id="tspan139">Decay</tspan></text>
-        <text
-           transform="translate(167.07 238.32) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text140"><tspan
-             x="0"
-             y="0"
-             id="tspan140">Release</tspan></text>
-        <text
-           transform="translate(23.11 334.61) scale(.88 1)"
-           style="fill: #ededed; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text141"><tspan
-             x="0"
-             y="0"
-             id="tspan141">Release</tspan></text>
-        <text
-           transform="translate(71.75 334.61) scale(.88 1)"
-           style="fill: #ededed; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text142"><tspan
-             x="0"
-             y="0"
-             id="tspan142">Sustain</tspan></text>
-        <text
-           transform="translate(123.71 334.61) scale(.88 1)"
-           style="fill: #ededed; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text143"><tspan
-             x="0"
-             y="0"
-             id="tspan143">Hold</tspan></text>
-        <text
-           transform="translate(173.37 334.61) scale(.88 1)"
-           style="fill: #ededed; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text144"><tspan
-             x="0"
-             y="0"
-             id="tspan144">Out</tspan></text>
-        <text
-           transform="translate(24.36 287.35) scale(.88 1)"
-           style="fill: #fff; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text145"><tspan
-             x="0"
-             y="0"
-             id="tspan145">Attack</tspan></text>
-        <text
-           transform="translate(169.69 287.35) scale(.88 1)"
-           style="fill: #fff; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text146"><tspan
-             x="0"
-             y="0"
-             id="tspan146">Decay</tspan></text>
-        <text
-           transform="translate(97.43 182.78) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
-           id="text147"><tspan
-             x="0"
-             y="0"
-             id="tspan147">Loop</tspan></text>
-        <text
-           transform="translate(123.71 287.35) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text148"><tspan
-             x="0"
-             y="0"
-             id="tspan148">Hold</tspan></text>
-        <text
-           transform="translate(71.75 287.35) scale(.88 1)"
-           style="fill: #000; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
-           id="text149"><tspan
-             x="0"
-             y="0"
-             id="tspan149">Sustain</tspan></text>
-      </g>
+    <text transform="translate(95.26 72.92) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Decay</tspan></text>
+    <path d="M108.12,26.06c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M93.63,32.43l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M99.1,28.26l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M89.89,38.2l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M112.55,26.58l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M88.41,44.9h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M89.27,51.69l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M92.41,57.78l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M123.9,33.97l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M127.03,40.08l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M127.85,46.89h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M126.29,53.57l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M97.43,62.42l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M122.54,59.3l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M118.88,29.27l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <text transform="translate(156.53 72.92) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Release</tspan></text>
+    <path d="M172.62,26.06c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M158.13,32.43l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M163.6,28.26l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M154.39,38.2l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M177.05,26.58l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M152.91,44.9h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M153.77,51.69l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M156.91,57.78l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M188.4,33.97l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M191.53,40.08l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M192.35,46.89h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M190.79,53.57l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M161.93,62.42l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M187.04,59.3l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M183.38,29.27l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <text transform="translate(26.28 131.04) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">A Curve</tspan></text>
+    <path d="M43.62,85.05c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M29.13,91.42l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M34.6,87.25l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M25.39,97.19l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M48.05,85.56l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M23.91,103.88h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M24.77,110.68l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.87,4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M27.91,116.76l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M59.4,92.95l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M62.53,99.07l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M63.35,105.88h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M61.79,112.56l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M32.93,121.4l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M58.04,118.28l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M54.38,88.25l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <text transform="translate(90.83 131.04) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">D Curve</tspan></text>
+    <path d="M108.12,85.05c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M93.63,91.42l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M99.1,87.25l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M89.89,97.19l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M112.55,85.56l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M88.41,103.88h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M89.27,110.68l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M92.41,116.76l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M123.9,92.95l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M127.03,99.07l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M127.85,105.88h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M126.29,112.56l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M97.43,121.4l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M122.54,118.28l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M118.88,88.25l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <text transform="translate(155.66 131.04) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">R Curve</tspan></text>
+    <path d="M172.62,85.05c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M158.13,91.42l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M163.6,87.25l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M154.39,97.19l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M177.05,85.56l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M152.91,103.88h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M153.77,110.68l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M156.91,116.76l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M188.4,92.95l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M191.53,99.07l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M192.35,105.88h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M190.79,112.56l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M161.93,121.4l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M187.04,118.28l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M183.38,88.25l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <text transform="translate(75.98 356.95) scale(.82 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 11px; font-weight: 700;"><tspan x="0" y="0">COMPLEX EG</tspan></text>
+    <text transform="translate(162.29 189.6) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Hold</tspan></text>
+    <path d="M172.62,143.6c-.83,0-1.65.07-2.45.17l-.39-2.21c.93-.12,1.88-.19,2.84-.19s1.91.07,2.84.19l-.39,2.21c-.81-.1-1.62-.17-2.45-.17Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M158.13,149.97l-1.73-1.45c1.28-1.4,2.74-2.63,4.34-3.66l1.12,1.94c-1.38.9-2.62,1.96-3.73,3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M163.6,145.8l-1.12-1.94c1.67-.87,3.46-1.53,5.34-1.95l.39,2.21c-1.62.37-3.16.94-4.61,1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M154.39,155.74l-2.1-.76c.73-1.77,1.69-3.42,2.83-4.92l1.73,1.45c-.98,1.3-1.82,2.71-2.46,4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M177.05,144.12l.39-2.21c1.88.42,3.67,1.08,5.34,1.95l-1.12,1.94c-1.44-.74-2.98-1.31-4.6-1.69Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M152.91,162.43h-2.26c.08-1.93.41-3.8.96-5.58l2.11.77c-.47,1.53-.73,3.15-.81,4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M153.77,169.23l-2.1.76c-.57-1.79-.91-3.65-1.01-5.56h2.23c.09,1.65.39,3.25.88,4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M156.91,175.31l-1.71,1.44c-1.15-1.5-2.11-3.14-2.84-4.88l2.1-.77c.64,1.5,1.46,2.91,2.45,4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M188.4,151.51l1.73-1.45c1.14,1.5,2.1,3.15,2.83,4.92l-2.1.77c-.64-1.52-1.48-2.93-2.46-4.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M191.53,157.62l2.11-.77c.55,1.78.88,3.65.96,5.58h-2.26c-.08-1.66-.34-3.28-.81-4.81Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M192.35,164.43h2.23c-.09,1.91-.44,3.78-1.01,5.56l-2.1-.77c.48-1.54.79-3.15.88-4.8Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M190.79,171.11l2.11.77c-.73,1.74-1.69,3.38-2.84,4.88l-1.71-1.44c.99-1.3,1.81-2.71,2.45-4.2Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M161.93,179.96l-1.12,1.93c-1.61-1.03-3.05-2.24-4.32-3.62l1.71-1.44c1.1,1.18,2.34,2.23,3.72,3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M187.04,176.84l1.71,1.44c-1.27,1.37-2.71,2.59-4.32,3.62l-1.12-1.93c1.38-.89,2.62-1.94,3.72-3.12Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M183.38,146.81l1.12-1.94c1.6,1.03,3.06,2.26,4.34,3.66l-1.73,1.45c-1.11-1.2-2.36-2.27-3.74-3.16Z" style="fill: #000; stroke-width: 0px;"/>
+    <line x1="108.12" y1="83.1" x2="108.12" y2="75.32" style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"/>
+    <line x1="172.62" y1="83.1" x2="172.62" y2="75.32" style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"/>
+    <line x1="43.62" y1="83.1" x2="43.62" y2="75.32" style="fill: none; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"/>
+    <path d="M31.44,340.66h129.33s23.6,0,23.6,0c7.49,0,13.57-7.04,13.57-15.71v-107.97l-.06-6.23c-.3-8.38-6.24-15.07-13.54-15.07H31.41c-7.3,0-13.25,6.69-13.54,15.07l-.06,6.23v46.63l.07,61.34" style="fill: #ededed; stroke: #000; stroke-miterlimit: 10;"/>
+    <path d="M198.41,314.09v-24.72H36.05c-7.49,0-13.57,7.49-13.57,16.73v34.53l140.82.53h15.07s0,0,0,0h14.39c3.12,0,5.64-2.72,5.64-6.03v-21.12.09Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M17.81,315.73v-23.22h1.14s20.4,0,20.4,0c7.49,0,13.57,7.04,13.57,15.71v32.44s0,.5,0,.5h-15.07s0,0,0,0h-14.39c-3.12,0-5.64-2.55-5.64-5.67v-10.04s0-9.8,0-9.8v.08Z" style="fill: #000; stroke-width: 0px;"/>
+    <text transform="translate(24.19 238.44) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Gate In</tspan></text>
+    <text transform="translate(72.35 238.44) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Attack</tspan></text>
+    <text transform="translate(121.65 238.44) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Decay</tspan></text>
+    <text transform="translate(167.2 238.44) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Release</tspan></text>
+    <text transform="translate(23.23 334.73) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Release</tspan></text>
+    <text transform="translate(71.87 334.73) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Sustain</tspan></text>
+    <text transform="translate(123.84 334.73) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Hold</tspan></text>
+    <text transform="translate(165.6 334.73) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Env. Out</tspan></text>
+    <path d="M17.85,324.03v10.96c0,3.12,2.55,5.67,5.67,5.67h12.93" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+    <g>
+      <path d="M113.74,7.63s-3.5,4.44-5.53,7.03v-6.03c0-.52-.25-.98-.64-1.18-.39-.19-.84-.08-1.13.29l-7.28,9.25c-.4.5-.38,1.3.03,1.79.41.48,1.06.47,1.46-.03,0,0,3.47-4.41,5.5-6.99v6.03c0,.52.26.98.65,1.17.39.19.84.08,1.13-.29,0,0,3.49-4.44,5.53-7.03v6.15c0,.7.46,1.27,1.03,1.27s1.03-.57,1.03-1.27v-9.29c0-.52-.26-.98-.65-1.17-.39-.19-.84-.08-1.13.3Z" style="fill: #000; stroke: #000; stroke-width: .6px;"/>
+      <path d="M99.16,7.56l-4.82,6.13c-.4.5-.38,1.3.02,1.79.41.48,1.06.47,1.46-.03,0,0,1.62-2.07,3.05-3.87v6.31c0,.7.46,1.27,1.03,1.27s1.03-.57,1.03-1.27v-9.44c0-.52-.26-.98-.65-1.17-.39-.19-.84-.08-1.13.3Z" style="fill: #000; stroke: #000; stroke-width: .6px;"/>
+      <path d="M122.11,12.08c-.16-.47-.53-.77-.95-.77h-2.11l1.54-1.95s.8-1.17.09-1.82c-.7-.64-1.58.06-1.58.06l-3.22,4.1c-.29.37-.37.91-.21,1.37.16.47.54.77.95.77h2.11l-2.5,3.17s-1.03,1.13-.27,1.89c.76.76,1.76-.14,1.76-.14l4.18-5.32c.29-.36.37-.91.21-1.37Z" style="fill: #000; stroke: #000; stroke-width: .6px;"/>
     </g>
-    <g
-       id="g151">
-      <path
-         d="M99.8,18.19c-.37,0-.71-.17-.97-.47-.51-.6-.52-1.54-.04-2.16l6.97-8.88c.38-.48,1.05-.65,1.57-.39.5.25.79.82.79,1.45v4.77l4.64-5.85c.38-.48,1.01-.64,1.53-.38.5.25.83.81.83,1.44v8.82c0,.86-.61,1.57-1.36,1.57s-1.36-.7-1.36-1.57v-4.79l-4.64,5.85c-.38.48-1.01.64-1.54.38-.5-.24-.83-.81-.83-1.44v-4.67l-4.61,5.8c-.26.32-.62.51-1,.51h0Z"
-         style="fill: #2cabe1; stroke-width: 0px;"
-         id="path149" />
-      <path
-         d="M99.8,18.19c-.75,0-1.35-.7-1.35-1.57v-4.93l-2.26,2.84c-.5.63-1.44.65-1.97.04-.51-.6-.52-1.53-.03-2.15l4.61-5.76c.26-.32.63-.5,1-.5.18,0,.37.04.54.12.5.25.82.81.82,1.44v8.89c0,.86-.61,1.57-1.36,1.57h0Z"
-         style="fill: #ea2228; stroke-width: 0px;"
-         id="path150" />
-      <path
-         d="M116.4,18.21h0c-.35,0-.68-.15-.94-.42-.76-.78-.14-1.84.29-2.3l1.95-2.36-1.26-.02c-.56-.01-1.04-.4-1.24-1-.19-.56-.07-1.21.29-1.64l3.16-3.83c.23-.28.55-.48,1.13-.47.33,0,.67.17.92.4.71.66.29,1.7-.07,2.2l-1.04,1.26,1.26.02c.56.01,1.04.4,1.24,1,.19.56.07,1.21-.29,1.64l-4.1,4.97c-.35.35-.65.55-1.3.54h0Z"
-         style="fill: #00a650; stroke-width: 0px;"
-         id="path151" />
-    </g>
+    <path d="M198.38,272.76v-23.22h-1.14s-20.4,0-20.4,0c-7.49,0-13.57,7.04-13.57,15.71v32.44s0,.5,0,.5h15.07s0,0,0,0h14.39c3.12,0,5.64-2.55,5.64-5.67v-10.04s0-9.8,0-9.8v.08Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M17.81,272.76v-23.22h1.14s20.4,0,20.4,0c7.49,0,13.57,7.04,13.57,15.71v32.44s0,.5,0,.5h-15.07s0,0,0,0h-14.39c-3.12,0-5.64-2.55-5.64-5.67v-10.04s0-9.8,0-9.8v.08Z" style="fill: #000; stroke-width: 0px;"/>
+    <text transform="translate(24.49 287.48) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Attack</tspan></text>
+    <text transform="translate(169.82 287.48) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Decay</tspan></text>
+    <text transform="translate(97.56 182.9) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Loop</tspan></text>
+    <rect x="52.82" y="249.99" width="110.49" height="42.52" rx="4" ry="4" style="fill: #ededed; stroke-width: 0px;"/>
+    <text transform="translate(123.84 287.48) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Hold</tspan></text>
+    <text transform="translate(71.87 287.48) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Sustain</tspan></text>
   </g>
-  <g
-     id="components">
-    <circle
-       id="Out"
-       cx="179.84"
-       cy="309.72"
-       r="11.34"
-       style="fill: blue; stroke-width: 0px;" />
-    <circle
-       id="Hold_Out"
-       data-name="Hold Out"
-       cx="131.84"
-       cy="309.72"
-       r="11.34"
-       style="fill: blue; stroke-width: 0px;" />
-    <circle
-       id="Sustain_Out"
-       data-name="Sustain Out"
-       cx="83.84"
-       cy="309.72"
-       r="11.34"
-       style="fill: blue; stroke-width: 0px;" />
-    <circle
-       id="Release_Out"
-       data-name="Release Out"
-       cx="36.32"
-       cy="309.72"
-       r="11.34"
-       style="fill: blue; stroke-width: 0px;" />
-    <circle
-       id="Decay_Out"
-       data-name="Decay Out"
-       cx="179.84"
-       cy="265.59"
-       r="11.34"
-       style="fill: blue; stroke-width: 0px;" />
-    <circle
-       id="Hold_CV"
-       data-name="Hold CV"
-       cx="131.84"
-       cy="265.59"
-       r="11.34"
-       style="fill: lime; stroke-width: 0px;" />
-    <circle
-       id="Sustain_CV"
-       data-name="Sustain CV"
-       cx="83.84"
-       cy="265.59"
-       r="11.34"
-       style="fill: lime; stroke-width: 0px;" />
-    <circle
-       id="Attack_Out"
-       data-name="Attack Out"
-       cx="36.32"
-       cy="265.59"
-       r="11.34"
-       style="fill: blue; stroke-width: 0px;" />
-    <circle
-       id="Release_CV"
-       data-name="Release CV"
-       cx="179.84"
-       cy="214.01"
-       r="11.34"
-       style="fill: lime; stroke-width: 0px;" />
-    <circle
-       id="Decay_CV"
-       data-name="Decay CV"
-       cx="131.84"
-       cy="214.01"
-       r="11.34"
-       style="fill: lime; stroke-width: 0px;" />
-    <circle
-       id="Attack_CV"
-       data-name="Attack CV"
-       cx="83.84"
-       cy="214.01"
-       r="11.34"
-       style="fill: lime; stroke-width: 0px;" />
-    <circle
-       id="Input"
-       cx="36.32"
-       cy="214.01"
-       r="11.34"
-       style="fill: lime; stroke-width: 0px;" />
-    <circle
-       id="Hold"
-       cx="172.39"
-       cy="163.1"
-       r="17.01"
-       style="fill: red; stroke-width: 0px;" />
-    <circle
-       id="Loop"
-       cx="108"
-       cy="159.65"
-       r="10.63"
-       style="fill: #ff8000; stroke-width: 0px;" />
-    <circle
-       id="Sustain"
-       cx="43.5"
-       cy="163.16"
-       r="17.01"
-       style="fill:#ff0080" />
-    <circle
-       id="R_Curve"
-       data-name="R Curve"
-       cx="172.5"
-       cy="104.39"
-       r="17.01"
-       style="fill:#ff0080" />
-    <circle
-       id="D_Curve"
-       data-name="D Curve"
-       cx="108"
-       cy="104.39"
-       r="17.01"
-       style="fill:#ff0080" />
-    <circle
-       id="A_Curve"
-       data-name="A Curve"
-       cx="43.5"
-       cy="104.39"
-       r="17.01"
-       style="fill:#ff0080" />
-    <circle
-       id="Release"
-       cx="172.5"
-       cy="45.4"
-       r="17.01"
-       style="fill: #ff0020; stroke-width: 0px;" />
-    <circle
-       id="Decay"
-       cx="108"
-       cy="45.4"
-       r="17.01"
-       style="fill:#ff0010" />
-    <circle
-       id="Attack"
-       cx="43.5"
-       cy="46.07"
-       r="17.01"
-       style="fill:#ff0010" />
-    <text
-       id="slug"
-       transform="translate(158.03 368.28)"
-       style="fill: #000; font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 3px;"><tspan
-         x="0"
-         y="0"
-         style="letter-spacing: -.01em;"
-         id="tspan151">C</tspan><tspan
-         x="1.71"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan152">ompl</tspan><tspan
-         x="8.27"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan153">e</tspan><tspan
-         x="9.76"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan154">xEG</tspan></text>
-    <text
-       id="modulename"
-       transform="translate(179.19 368.28)"
-       style="fill: #000; font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 3px;"><tspan
-         x="0"
-         y="0"
-         style="letter-spacing: -.01em;"
-         id="tspan155">C</tspan><tspan
-         x="1.71"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan156">ompl</tspan><tspan
-         x="8.27"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan157">e</tspan><tspan
-         x="9.76"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan158">x E</tspan><tspan
-         x="13.27"
-         y="0"
-         style="letter-spacing: -.01em;"
-         id="tspan159">n</tspan><tspan
-         x="14.89"
-         y="0"
-         style="letter-spacing: -.01em;"
-         id="tspan160">v</tspan><tspan
-         x="16.3"
-         y="0"
-         id="tspan161">elope </tspan><tspan
-         x="24.01"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan162">G</tspan><tspan
-         x="25.96"
-         y="0"
-         id="tspan163">ene</tspan><tspan
-         x="30.63"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan164">rat</tspan><tspan
-         x="34.01"
-         y="0"
-         style="letter-spacing: 0em;"
-         id="tspan165">or</tspan></text>
+  <g id="components">
+    <circle id="Out" cx="179.96" cy="309.84" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Hold_Out" data-name="Hold Out" cx="131.96" cy="309.84" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Sustain_Out" data-name="Sustain Out" cx="83.96" cy="309.84" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Release_Out" data-name="Release Out" cx="36.45" cy="309.84" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Decay_Out" data-name="Decay Out" cx="179.96" cy="265.71" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Hold_CV" data-name="Hold CV" cx="131.96" cy="265.71" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Sustain_CV" data-name="Sustain CV" cx="83.96" cy="265.71" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Attack_Out" data-name="Attack Out" cx="36.45" cy="265.71" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Release_CV" data-name="Release CV" cx="179.96" cy="214.13" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Decay_CV" data-name="Decay CV" cx="131.96" cy="214.13" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Attack_CV" data-name="Attack CV" cx="83.96" cy="214.13" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Input" cx="36.45" cy="214.13" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Hold" cx="172.52" cy="163.23" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Loop" cx="108.12" cy="159.77" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Sustain" cx="43.62" cy="163.28" r="17.01" style="fill: #ff0060; stroke-width: 0px;"/>
+    <circle id="R_Curve" data-name="R Curve" cx="172.62" cy="104.51" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="D_Curve" data-name="D Curve" cx="108.12" cy="104.51" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="A_Curve" data-name="A Curve" cx="43.62" cy="104.51" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Release" cx="172.62" cy="45.53" r="17.01" style="fill: #ff0030; stroke-width: 0px;"/>
+    <circle id="Decay" cx="108.12" cy="45.53" r="17.01" style="fill: #ff0020; stroke-width: 0px;"/>
+    <circle id="Attack" cx="43.62" cy="46.2" r="17.01" style="fill: #ff0020; stroke-width: 0px;"/>
+    <text id="slug" transform="translate(154.76 359.59)" style="fill: #000; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">C</tspan><tspan x="1.71" y="0" style="letter-spacing: 0em;">ompl</tspan><tspan x="8.27" y="0" style="letter-spacing: 0em;">e</tspan><tspan x="9.76" y="0" style="letter-spacing: 0em;">xEG</tspan></text>
+    <text id="modulename" transform="translate(175.92 359.59)" style="fill: #000; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">C</tspan><tspan x="1.71" y="0" style="letter-spacing: 0em;">ompl</tspan><tspan x="8.27" y="0" style="letter-spacing: 0em;">e</tspan><tspan x="9.76" y="0" style="letter-spacing: 0em;">x E</tspan><tspan x="13.27" y="0" style="letter-spacing: -.01em;">n</tspan><tspan x="14.89" y="0" style="letter-spacing: -.01em;">v</tspan><tspan x="16.3" y="0">elope </tspan><tspan x="24.01" y="0" style="letter-spacing: 0em;">G</tspan><tspan x="25.96" y="0">ene</tspan><tspan x="30.63" y="0" style="letter-spacing: 0em;">rat</tspan><tspan x="34.01" y="0" style="letter-spacing: 0em;">or</tspan></text>
   </g>
 </svg>

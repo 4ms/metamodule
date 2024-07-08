@@ -3,7 +3,6 @@
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
-#include "conf/scaling_config.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
@@ -18,8 +17,6 @@
 #include "util/countzip.hh"
 #include "util/math_tables.hh"
 #include "util/zip.hh"
-// #include "fft.hh"
-// #include "convolve.hh"
 
 namespace MetaModule
 {
@@ -51,9 +48,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, player{patchplayer} {
 
 	if (codec_.init() == CodecT::CODEC_NO_ERR)
-		UartLog::log("Codec initialized\n\r");
+		pr_info("Codec initialized\n");
 	else
-		UartLog::log("ERROR: No codec detected\n\r");
+		pr_info("ERROR: No codec detected\n");
 
 	codec_.set_tx_buffer_start(audio_out_block.codec);
 	codec_.set_rx_buffer_start(audio_in_block.codec);
@@ -62,11 +59,14 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		ext_audio_connected = true;
 		codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec);
 		codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec);
-		UartLog::log("Ext Audio codec detected\n\r");
+		pr_info("Ext Audio codec detected\n");
 	} else {
 		ext_audio_connected = false;
-		UartLog::log("No ext Audio codec detected\n\r");
+		pr_info("No ext Audio codec detected\n");
 	}
+
+	cal.reset_to_default();
+	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin4::high();
@@ -82,10 +82,10 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.start_measurement();
 
-		if (check_patch_loading())
-			process_nopatch(audio_blocks[1 - block], local_p);
-		else
+		if (is_playing_patch())
 			process(audio_blocks[1 - block], local_p);
+		else
+			process_nopatch(audio_blocks[1 - block], local_p);
 
 		load_measure.end_measurement();
 
@@ -107,10 +107,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
 
-	//TODO: User/factory routine to calibrate jacks
-	for (auto &inc : incal)
-		inc.calibrate_chan<InputLowRangeMillivolts, InputHighRangeMillivolts, 1000>(
-			-1.f * (float)AudioInFrame::kMaxValue, (float)AudioInFrame::kMaxValue - 1.f);
+	for (auto &s : smoothed_ins)
+		s.set_size(AudioConf::BlockSize);
 }
 
 void AudioStream::start() {
@@ -120,13 +118,11 @@ void AudioStream::start() {
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
-	float raw_out = player.get_panel_output(output_id);
-	raw_out = -output_fade_amt * raw_out / OutputMaxVolts;
-	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
-	return scaled_out;
+	float output_volts = player.get_panel_output(output_id) * output_fade_amt;
+	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
 }
 
-bool AudioStream::check_patch_loading() {
+bool AudioStream::is_playing_patch() {
 	if (patch_loader.should_fade_down_audio()) {
 		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt <= 0.f) {
@@ -145,7 +141,7 @@ bool AudioStream::check_patch_loading() {
 		}
 	}
 
-	return !(patch_loader.ready_to_play());
+	return patch_loader.is_playing();
 }
 
 void AudioStream::handle_patch_just_loaded() {
@@ -157,7 +153,7 @@ void AudioStream::handle_patch_just_loaded() {
 }
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
-	handle_patch_mods(patch_mod_queue, player);
+	handle_patch_mod_queue();
 
 	// TODO: handle second codec
 	if (ext_audio_connected)
@@ -174,10 +170,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			if (!jack_is_patched(param_state.jack_senses, panel_jack_i))
 				continue;
 
-			float scaled_input = incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
+			float calibrated_input = cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
 
-			player.set_panel_input(panel_jack_i, scaled_input);
-			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
+			player.set_panel_input(panel_jack_i, calibrated_input);
+
+			// Send smoothed sigals to other core via metaparams
+			smoothed_ins[panel_jack_i].add_val(calibrated_input);
 		}
 
 		// Gate inputs
@@ -211,6 +209,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			outchan = get_audio_output(i);
 	}
 
+	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins))
+		m = s.val();
+
 	player.update_lights();
 	propagate_sense_pins(param_block.params[0]);
 }
@@ -223,9 +224,9 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		// Set metaparams.ins with input signals
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
 			float scaled_input = jack_is_patched(param_state.jack_senses, panel_jack_i) ?
-									 incal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
+									 cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
 									 0;
-			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
+			smoothed_ins[panel_jack_i].add_val(scaled_input);
 		}
 
 		for (auto [knob, latch] : zip(params.knobs, param_state.knobs))
@@ -237,6 +238,9 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		for (auto &outchan : out.chan)
 			outchan = 0;
 	}
+
+	for (auto [s, m] : zip(smoothed_ins, param_block.metaparams.ins))
+		m = s.val();
 }
 
 void AudioStream::handle_midi(Midi::Event const &event, unsigned poly_num) {
@@ -287,6 +291,34 @@ void AudioStream::propagate_sense_pins(Params &params) {
 	}
 
 	param_state.jack_senses = params.jack_senses;
+}
+
+void AudioStream::handle_patch_mod_queue() {
+	std::optional<bool> new_cal_state = std::nullopt;
+
+	handle_patch_mods(patch_mod_queue, player, cal_stash, new_cal_state);
+
+	if (new_cal_state.has_value() && *new_cal_state == true)
+		enable_calibration();
+
+	else if (new_cal_state == false)
+		disable_calibration();
+}
+
+void AudioStream::disable_calibration() {
+	cal.reset_to_default();
+	// cal.print_calibration();
+}
+
+void AudioStream::enable_calibration() {
+	cal = cal_stash;
+	// cal.print_calibration();
+}
+
+void AudioStream::set_calibration(CalData const &caldata) {
+	cal = caldata;
+	cal_stash = caldata;
+	// cal.print_calibration();
 }
 
 } // namespace MetaModule

@@ -56,8 +56,15 @@ struct AddJackMapping {
 	ElementType type;
 };
 
-struct RemoveModule {
-	uint16_t module_idx{};
+struct CalibrationOnOff {
+	bool enable;
+};
+
+struct SetChanCalibration {
+	float slope{1.f};
+	float offset{0.f};
+	uint16_t channel{};
+	bool is_input{};
 };
 
 using PatchModRequest = std::variant<SetStaticParam,
@@ -70,7 +77,8 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 AddInternalCable,
 									 AddJackMapping,
 									 DisconnectJack,
-									 RemoveModule>;
+									 CalibrationOnOff,
+									 SetChanCalibration>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 128>;
 

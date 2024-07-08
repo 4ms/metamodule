@@ -3,6 +3,7 @@
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
 #include "pr_dbg.hh"
+#include "util/analyzed_signal.hh"
 #include "util/countzip.hh"
 #include "util/term_codes.hh"
 
@@ -26,6 +27,8 @@ struct ParamDbgPrint {
 	static constexpr float iir_coef = 1.f / 1000.f;
 	static constexpr float iir_coef_inv = 1.f - iir_coef;
 
+	std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> ins;
+
 	bool flag_next_page = false;
 	bool flag_prev_page = false;
 
@@ -43,6 +46,10 @@ struct ParamDbgPrint {
 			if (pot > pot_max[i])
 				pot_max[i] = pot;
 			pot_iir[i] = pot_iir[i] * iir_coef_inv + pot * iir_coef;
+		}
+
+		for (auto [source, ain] : zip(metaparams.ins, ins)) {
+			ain.update(source);
 		}
 
 		readings++;
@@ -77,14 +84,14 @@ struct ParamDbgPrint {
 				   params.gate_ins[1].is_high() ? 1 : 0,
 				   b(7));
 
-			for (auto [i, ain] : enumerate(metaparams.ins)) {
-				pr_dbg("AIN %zu: [%d] iir=%d min=%d max=%d range=%d\r\n",
+			for (auto [i, ain] : enumerate(ins)) {
+				pr_dbg("AIN %zu: [%d] iir=%f min=%f max=%f range=%f\r\n",
 					   i,
 					   b(i),
-					   (int)(ain.iir * 32768.f),
-					   (int)(ain.min * 32768.f),
-					   (int)(ain.max * 32768.f),
-					   (int)((ain.max - ain.min) * 32768.f));
+					   ain.iir,
+					   ain.min,
+					   ain.max,
+					   std::fabs(ain.max - ain.min));
 				ain.reset_to(ain.iir);
 			}
 

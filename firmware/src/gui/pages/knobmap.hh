@@ -266,6 +266,7 @@ struct KnobMapPage : PageBase {
 		page->args.module_id = page->map.module_id;
 		page->args.element_indices =
 			ElementCount::mark_unused_indices({.param_idx = (uint8_t)page->map.param_id}, {.num_params = 1});
+		page->args.detail_mode = true;
 		page->page_list.request_new_page(PageId::ModuleView, page->args);
 	}
 

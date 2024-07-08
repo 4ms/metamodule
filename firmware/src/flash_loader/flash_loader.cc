@@ -20,13 +20,16 @@ bool FlashLoader::write_sectors(uint32_t base_addr, std::span<uint8_t> buffer) {
 	uint32_t addr = base_addr;
 
 	while (bytes_to_erase) {
-		pr_trace("Erasing sector at 0x%x\n", (unsigned)addr);
-		flash.erase(mdrivlib::QSpiFlash::SECTOR, addr);
+		pr_trace("Erasing 4k sector at 0x%x\n", (unsigned)addr);
+		if (!flash.erase(mdrivlib::QSpiFlash::SECTOR, addr)) {
+			pr_err("ERROR: Flash failed to erase\n");
+			return false;
+		}
 		addr += 4096;
 		bytes_to_erase -= 4096;
 	}
 
-	pr_dbg("Writing 0x%x B to %x\n", buffer.size(), base_addr);
+	pr_trace("Writing 0x%x B to %x\n", buffer.size(), base_addr);
 	if (!flash.write(buffer.data(), base_addr, buffer.size())) {
 		pr_err("ERROR: Flash failed to write\n");
 		return false;

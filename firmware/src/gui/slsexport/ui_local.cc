@@ -8,7 +8,7 @@ namespace MetaModule
 lv_obj_t *create_plugin_list_item(lv_obj_t *parent, const char *name) {
 	lv_obj_t *obj = lv_btn_create(parent);
 	lv_obj_set_width(obj, lv_pct(100));
-	lv_obj_set_height(obj, 23);
+	lv_obj_set_height(obj, LV_SIZE_CONTENT);
 	lv_obj_set_align(obj, LV_ALIGN_LEFT_MID);
 	lv_obj_add_flag(obj, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 	lv_obj_clear_flag(obj,
@@ -17,8 +17,8 @@ lv_obj_t *create_plugin_list_item(lv_obj_t *parent, const char *name) {
 						  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
 	lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_set_style_radius(obj, 0, LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_color(obj, lv_color_hex(0x888888), LV_STATE_DEFAULT);
-	lv_obj_set_style_bg_opa(obj, 64, LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(obj, lv_color_hex(0x555555), LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(obj, LV_OPA_100, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_left(obj, 6, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_right(obj, 4, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_top(obj, 2, LV_STATE_DEFAULT);
@@ -34,10 +34,11 @@ lv_obj_t *create_plugin_list_item(lv_obj_t *parent, const char *name) {
 
 	lv_obj_t *label = lv_label_create(obj);
 	lv_obj_set_width(label, lv_pct(100));
-	lv_obj_set_height(label, lv_pct(100));
+	lv_obj_set_height(label, LV_SIZE_CONTENT);
 	lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
 	lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
 	lv_label_set_text(label, name);
+	lv_obj_set_style_pad_all(label, 2, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
 
 	return obj;
@@ -134,6 +135,52 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_label_set_text(label, name);
 
 	return cont;
+}
+
+lv_obj_t *create_automap_item(lv_obj_t *parent, std::string_view name) {
+	lv_obj_t *obj = lv_obj_create(parent);
+	lv_obj_remove_style_all(obj);
+	lv_obj_set_width(obj, 100);
+	lv_obj_set_height(obj, 22);
+	lv_obj_set_align(obj, LV_ALIGN_CENTER);
+	lv_obj_set_flex_flow(obj, LV_FLEX_FLOW_ROW);
+	lv_obj_set_flex_align(obj, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+	lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE); /// Flags
+	lv_obj_set_style_pad_row(obj, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_column(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	ui_AutoMapItemContSwitch = lv_switch_create(obj);
+	lv_obj_set_width(ui_AutoMapItemContSwitch, 19);
+	lv_obj_set_height(ui_AutoMapItemContSwitch, 18);
+	lv_obj_set_align(ui_AutoMapItemContSwitch, LV_ALIGN_CENTER);
+	lv_obj_add_state(ui_AutoMapItemContSwitch, LV_STATE_CHECKED); /// States
+	lv_obj_set_style_radius(ui_AutoMapItemContSwitch, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui_AutoMapItemContSwitch, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui_AutoMapItemContSwitch, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	lv_obj_set_style_bg_color(ui_AutoMapItemContSwitch, lv_color_hex(0x888888), LV_PART_INDICATOR | LV_STATE_CHECKED);
+	lv_obj_set_style_bg_opa(ui_AutoMapItemContSwitch, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
+
+	lv_obj_set_style_radius(ui_AutoMapItemContSwitch, 20, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui_AutoMapItemContSwitch, lv_color_hex(0x333333), LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_opa(ui_AutoMapItemContSwitch, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_color(ui_AutoMapItemContSwitch, lv_color_hex(0x333333), LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_opa(ui_AutoMapItemContSwitch, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_width(ui_AutoMapItemContSwitch, 2, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_pad(ui_AutoMapItemContSwitch, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
+	lv_obj_set_style_bg_color(ui_AutoMapItemContSwitch, lv_color_hex(0xFD8B18), LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_bg_opa(ui_AutoMapItemContSwitch, 255, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_outline_width(ui_AutoMapItemContSwitch, 0, LV_PART_KNOB | LV_STATE_CHECKED);
+	lv_obj_set_style_outline_pad(ui_AutoMapItemContSwitch, 0, LV_PART_KNOB | LV_STATE_CHECKED);
+
+	ui_AutoMapItemContLabel = lv_label_create(obj);
+	lv_obj_set_width(ui_AutoMapItemContLabel, LV_SIZE_CONTENT);	 /// 1
+	lv_obj_set_height(ui_AutoMapItemContLabel, LV_SIZE_CONTENT); /// 1
+	lv_obj_set_align(ui_AutoMapItemContLabel, LV_ALIGN_CENTER);
+	lv_label_set_text(ui_AutoMapItemContLabel, "Pitch");
+	lv_obj_set_style_text_font(
+		ui_AutoMapItemContLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN | LV_STATE_DEFAULT);
+	return obj;
 }
 
 } // namespace MetaModule

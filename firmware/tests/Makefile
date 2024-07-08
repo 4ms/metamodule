@@ -14,6 +14,7 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 TEST_SOURCES += ../shared/patch_convert/yaml_to_patch.cc
+TEST_SOURCES += ../shared/patch_convert/patch_to_yaml.cc
 TEST_SOURCES += ../shared/patch_convert/ryml/ryml_serial.cc
 TEST_SOURCES += ../shared/patch_convert/ryml/ryml_init.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
@@ -21,6 +22,7 @@ TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 TEST_SOURCES += src/fs/time_convert.cc
 TEST_SOURCES += src/fw_update/hash/md5_hash.h
 TEST_SOURCES += src/fw_update/hash/hash_processor.cc
+TEST_SOURCES += ../shared/CoreModules/moduleFactory.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \

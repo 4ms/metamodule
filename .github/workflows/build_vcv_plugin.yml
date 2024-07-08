@@ -50,7 +50,7 @@ jobs:
     name: lin-x64
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/qno/rack-plugin-toolchain-win-linux
+      image: ghcr.io/4ms/rack-plugin-toolchain-win-linux
       options: --user root
     strategy:
       fail-fast: false
@@ -75,7 +75,7 @@ jobs:
     name: win-x64
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/qno/rack-plugin-toolchain-win-linux
+      image: ghcr.io/4ms/rack-plugin-toolchain-win-linux
       options: --user root
     strategy:
       fail-fast: false
