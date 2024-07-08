@@ -13,7 +13,7 @@ struct FirmwareWriter {
 	using Checksum_t = std::string_view;
 
 public:
-	FirmwareWriter(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio);
+	FirmwareWriter(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio, FlashLoader &flash_loader);
 
 	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message);
 
@@ -26,7 +26,7 @@ private:
 	FatFileIO &sdcard_;
 	FatFileIO &usbdrive_;
 
-	FlashLoader loader;
+	FlashLoader &loader_;
 };
 
 } // namespace MetaModule

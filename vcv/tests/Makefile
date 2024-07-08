@@ -5,8 +5,8 @@ TEST_DIR ?= tests
 DOCTESTHEADER_DIR ?= $(TEST_DIR)
 BUILDDIR = $(TEST_DIR)/build/obj
 RYMLDIR = ../shared/patch_convert/ryml/rapidyaml
-JANSSON_CONF_DIR = ../firmware/vcv_plugin/jansson
-JANSSON_DIR = ../firmware/vcv_plugin/jansson/jansson/src
+JANSSON_CONF_DIR = ../firmware/vcv_plugin/export/jansson
+JANSSON_DIR = ../firmware/vcv_plugin/export/jansson/jansson/src
 
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)

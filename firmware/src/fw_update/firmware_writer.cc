@@ -6,36 +6,45 @@
 namespace MetaModule
 {
 
-FirmwareWriter::FirmwareWriter(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
+FirmwareWriter::FirmwareWriter(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio, FlashLoader &flash_loader)
 	: sdcard_{sdcard_fileio}
-	, usbdrive_{usb_fileio} {
+	, usbdrive_{usb_fileio}
+	, loader_{flash_loader} {
 }
 
 std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const IntercoreStorageMessage &message) {
+	using enum IntercoreStorageMessage::FlashTarget;
+
 	if (message.message_type == StartChecksumCompare) {
 		pr_dbg("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 
-		if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI) {
+		if (message.flashTarget == WIFI) {
 			return compareChecksumWifi(message.address, message.length, {message.checksum.data()});
-		} else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI) {
+
+		} else if (message.flashTarget == QSPI) {
 			return compareChecksumQSPI(
 				message.address, message.length, {message.checksum.data()}, *message.bytes_processed);
+
 		} else {
 			pr_err("Undefined flash target %u\n", message.flashTarget);
 			return IntercoreStorageMessage{.message_type = ChecksumFailed};
 		}
+
 	} else if (message.message_type == StartFlashing) {
 		pr_dbg("-> Start flashing to 0x%08x\n", message.address);
+		auto buf = std::span<uint8_t>{(uint8_t *)message.buffer.data(), message.buffer.size()};
 
-		if (message.flashTarget == IntercoreStorageMessage::FlashTarget::WIFI) {
-			return flashWifi({(uint8_t*)message.buffer.data(), message.buffer.size()}, message.address, *message.bytes_processed);
-		} else if (message.flashTarget == IntercoreStorageMessage::FlashTarget::QSPI) {
-			return flashQSPI({(uint8_t*)message.buffer.data(), message.buffer.size()}, message.address, *message.bytes_processed);
+		if (message.flashTarget == WIFI) {
+			return flashWifi(buf, message.address, *message.bytes_processed);
+
+		} else if (message.flashTarget == QSPI) {
+			return flashQSPI(buf, message.address, *message.bytes_processed);
+
 		} else {
 			pr_err("Undefined flash target %u\n", message.flashTarget);
 			return IntercoreStorageMessage{.message_type = FlashingFailed};
-		}	
-		
+		}
+
 	} else {
 		return std::nullopt;
 	}
@@ -149,7 +158,7 @@ FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_
 		auto bytesToRead = std::min<std::size_t>(length - offset, BlockBuffer.size());
 		auto thisReadArea = std::span<uint8_t>(BlockBuffer.data(), bytesToRead);
 
-		auto read_result = loader.read_sectors(address + offset, thisReadArea);
+		auto read_result = loader_.read_sectors(address + offset, thisReadArea);
 
 		if (read_result) {
 			processor.update(thisReadArea);
@@ -181,12 +190,12 @@ IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uin
 
 	bool errorDetected = false;
 
-	if (loader.check_flash_chip()) {
+	if (loader_.check_flash_chip()) {
 		while (bytesWritten < buffer.size()) {
 			auto to_read = std::min<std::size_t>(buffer.size() - bytesWritten, BatchSize);
 			auto thisBatch = buffer.subspan(bytesWritten, to_read);
 
-			auto success = loader.write_sectors(address + bytesWritten, thisBatch);
+			auto success = loader_.write_sectors(address + bytesWritten, thisBatch);
 
 			if (success) {
 				bytesWritten += to_read;

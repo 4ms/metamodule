@@ -1,5 +1,6 @@
 #include "app_startup.hh"
 #include "audio/audio.hh"
+#include "calibrate/calibration_data_reader.hh"
 #include "core_a7/a7_shared_memory.hh"
 #include "core_a7/static_buffers.hh"
 #include "core_intercom/shared_memory.hh"
@@ -15,6 +16,10 @@
 #include "patch_play/patch_playloader.hh"
 #include "system/time.hh"
 #include "uart_log.hh"
+
+#include "conf/qspi_flash_conf.hh"
+#include "drivers/qspi_flash_driver.hh"
+#include "fs/norflash_layout.hh"
 
 #ifdef ENABLE_WIFI_BRIDGE
 #include <wifi_update.hh>
@@ -41,7 +46,8 @@ void main() {
 	PatchPlayer patch_player;
 	FileStorageComm patch_comm{StaticBuffers::icc_shared_message};
 	FileStorageProxy file_storage_proxy{StaticBuffers::raw_patch_data, patch_comm, StaticBuffers::patch_dir_list};
-	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
+	OpenPatchManager open_patches_manager;
+	PatchPlayLoader patch_playloader{file_storage_proxy, open_patches_manager, patch_player};
 
 	SyncParams sync_params;
 	PatchModQueue patch_mod_queue;
@@ -60,14 +66,22 @@ void main() {
 		&StaticBuffers::virtdrive,
 		&StaticBuffers::icc_shared_message,
 	};
+
 	A7SharedMemoryS::ptrs = {
 		&patch_player,
 		&patch_playloader,
 		&file_storage_proxy,
+		&open_patches_manager,
 		&sync_params,
 		&patch_mod_queue,
 		&StaticBuffers::virtdrive,
 	};
+
+	{
+		FlashLoader loader;
+		CalibrationDataReader cal{loader};
+		audio.set_calibration(cal.read_calibration_or_defaults());
+	}
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	mdrivlib::SystemCache::clean_dcache_by_range(&A7SharedMemoryS::ptrs, sizeof(A7SharedMemoryS::ptrs));
@@ -78,22 +92,26 @@ void main() {
 	WifiUpdate::run();
 #endif
 
-	// prevents M4 from using it as a USBD device: TODO remove this or remove usb_device in M4, or make it a config option to enable USB MSC Device mode
+	// prevents M4 from using it as a USBD device:
 	mdrivlib::HWSemaphore<MetaModule::RamDiskLock>::lock(0);
 
 	pr_info("A7 Core 1 initialized\n");
+	// Note: from after the HAL_Delay(50) until here, it takes 20ms
 
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
-	// wait for other cores to be ready
+	// wait for other cores to be ready: ~2400ms
 	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() && mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
+
+	// ~290ms until while loop
 
 	sync_params.clear();
 	patch_playloader.load_initial_patch();
 
 	audio.start();
+
 	print_time();
 
 	while (true) {

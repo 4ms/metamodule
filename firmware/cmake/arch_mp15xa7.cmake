@@ -32,8 +32,8 @@ add_compile_options(
   "SHELL:--param l2-cache-size=256"
   "$<$<CONFIG:Debug>:-O0>"
   "$<$<CONFIG:Debug>:-g3>"
-  "$<$<CONFIG:Release>:-O3>"
-  "$<$<CONFIG:RelWithDebInfo>:-O3>"
+  "$<$<CONFIG:Release>:-Ofast>"
+  "$<$<CONFIG:RelWithDebInfo>:-Ofast>"
   "$<$<CONFIG:RelWithDebInfo>:-g3>"
   -fno-common
   -fdata-sections

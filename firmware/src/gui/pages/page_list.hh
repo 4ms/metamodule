@@ -1,5 +1,4 @@
 #pragma once
-#include "gui/elements/module_param.hh"
 #include "page_args.hh"
 #include "patch_file/patch_location.hh"
 #include "util/circular_stack.hh"
@@ -23,7 +22,8 @@ enum class PageId {
 	KnobMap,
 	CableEdit,
 	SystemMenu,
-	ModuleList
+	ModuleList,
+	JackMapView
 };
 
 struct PageWithArgs {
@@ -34,17 +34,17 @@ struct PageWithArgs {
 class PageList {
 	bool _new_page_requested = false;
 
-	static constexpr uint32_t MaxPages = 10;
+	static constexpr uint32_t MaxPages = 11;
 	std::array<PageBase *, MaxPages> _pages{};
 
 	uint32_t _active_knobset_id = 0;
-	uint32_t _patch_revision = 0;
 
 	struct PageHistory {
 		PageId page;
 		PageArguments args;
 	};
 	CircularStack<PageHistory, 64> _page_history;
+
 	PageHistory _current_state{};
 
 public:
@@ -54,14 +54,6 @@ public:
 
 	uint32_t get_active_knobset() {
 		return _active_knobset_id;
-	}
-
-	void increment_patch_revision() {
-		_patch_revision++;
-	}
-
-	uint32_t get_patch_revision() {
-		return _patch_revision;
 	}
 
 	// Associates a pointer to a Page with an id
@@ -85,10 +77,17 @@ public:
 		_current_state = {pageid, args};
 	}
 
+	void remove_history_matching_args(PageArguments args) {
+		//TODO: could we remove the matching items?
+		_page_history.clear();
+		_page_history.push_back({.page = PageId::MainMenu});
+	}
+
 	void request_new_page_no_history(PageId pageid, PageArguments args) {
 		auto last = _page_history.back();
-		if (last.has_value() && last->page == pageid && last->args == args)
+		if (last.has_value() && last->page == pageid && last->args == args) {
 			_page_history.pop_back();
+		}
 
 		_current_state = {pageid, args};
 		_new_page_requested = true;
@@ -98,10 +97,11 @@ public:
 		// Requesting the same page that's most recent page in history
 		// is just like going back, so pop -- don't push
 		auto last = _page_history.back();
-		if (last.has_value() && last->page == pageid && last->args == args)
+		if (last.has_value() && last->page == pageid && last->args == args) {
 			_page_history.pop_back();
-		else
+		} else {
 			_page_history.push_back(_current_state);
+		}
 
 		_current_state = {pageid, args};
 		_new_page_requested = true;

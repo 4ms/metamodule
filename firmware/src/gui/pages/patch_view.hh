@@ -23,15 +23,12 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
-	static inline uint32_t Height = 180;
-
-	PatchViewPage(PatchContext info, ViewSettings &settings)
+	PatchViewPage(PatchContext info, PatchSelectorSubdirPanel &subdir_panel)
 		: PageBase{info, PageId::PatchView}
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
-		, settings{settings}
-		, file_menu{patch_playloader} {
+		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -61,7 +58,7 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
-		if (is_patch_playing) {
+		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
 			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
 			lv_show(ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
@@ -74,7 +71,7 @@ struct PatchViewPage : PageBase {
 		bool needs_refresh = false;
 		if (gui_state.force_redraw_patch)
 			needs_refresh = true;
-		if (patch_revision != page_list.get_patch_revision())
+		if (patch_revision != patches.get_view_patch_modification_count())
 			needs_refresh = true;
 		if (displayed_patch_loc_hash != args.patch_loc_hash)
 			needs_refresh = true;
@@ -103,13 +100,13 @@ struct PatchViewPage : PageBase {
 		if (args.patch_loc_hash)
 			displayed_patch_loc_hash = args.patch_loc_hash.value();
 
-		patch_revision = page_list.get_patch_revision();
+		patch_revision = patches.get_view_patch_modification_count();
 
 		clear();
 
 		lv_hide(modules_cont);
 
-		patch = patch_storage.get_view_patch();
+		patch = patches.get_view_patch();
 
 		if (patch->patch_name.length() == 0)
 			return;
@@ -131,7 +128,7 @@ struct PatchViewPage : PageBase {
 
 		lv_show(modules_cont);
 
-		auto module_drawer = ModuleDrawer{modules_cont, Height};
+		auto module_drawer = ModuleDrawer{modules_cont, settings.patch_view_height_px};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
 		int bottom = 0;
@@ -148,7 +145,8 @@ struct PatchViewPage : PageBase {
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
-			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) * Height);
+			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) *
+											settings.patch_view_height_px);
 			int this_bottom = lv_obj_get_y(canvas) + lv_obj_get_height(canvas);
 			bottom = std::max(bottom, this_bottom);
 
@@ -175,8 +173,11 @@ struct PatchViewPage : PageBase {
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 
 		settings_menu.prepare_focus(group);
-		desc_panel.prepare_focus(group, *patch);
 		file_menu.prepare_focus(group);
+
+		patch = patches.get_view_patch();
+		desc_panel.set_patch(patch);
+		desc_panel.prepare_focus(group);
 	}
 
 	void redraw_map_rings() {
@@ -194,7 +195,8 @@ struct PatchViewPage : PageBase {
 			auto module_id = drawn_el.gui_element.module_idx;
 			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
 
-			ModuleDrawer{modules_cont, Height}.draw_mapped_ring(*patch, module_id, knobset, canvas, drawn_el);
+			ModuleDrawer{modules_cont, settings.patch_view_height_px}.draw_mapped_ring(
+				*patch, module_id, knobset, canvas, drawn_el);
 		}
 		update_map_ring_style();
 	}
@@ -208,7 +210,12 @@ struct PatchViewPage : PageBase {
 	void update() override {
 		bool last_is_patch_playing = is_patch_playing;
 
-		patch = patch_storage.get_view_patch();
+		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
+
+		if (patch != patches.get_view_patch()) {
+			patch = patches.get_view_patch();
+			desc_panel.set_patch(patch);
+		}
 
 		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
 
@@ -250,23 +257,37 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (desc_panel.did_update_names()) {
+			gui_state.force_refresh_vol = patches.get_view_patch_vol();
+			patches.mark_view_patch_modified();
 			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
 		}
 
-		if (is_patch_playing) {
+		if (file_menu.did_filesystem_change()) {
+			gui_state.force_refresh_vol = patches.get_view_patch_vol();
+		}
+
+		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
 			update_changed_params();
+
+			if (!lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
+				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
+			}
+
 			if (last_audio_load != metaparams.audio_load) {
 				last_audio_load = metaparams.audio_load;
 				lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
 				lv_show(ui_LoadMeter2);
 			}
+
+		} else {
+			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
+				lv_hide(ui_LoadMeter2);
+				lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
+			}
 		}
 
-		if (is_patch_playing) {
-			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
-		} else {
-			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
-		}
+		if (file_menu.is_visible())
+			file_menu.update();
 	}
 
 private:
@@ -371,7 +392,7 @@ private:
 		auto scroll_y = lv_obj_get_scroll_top(ui_PatchViewPage);
 		auto header_y = lv_obj_get_y(ui_ModulesPanel);
 		int16_t module_top_on_screen = header_y - scroll_y + module_y;
-		int16_t module_bot_on_screen = module_top_on_screen + Height;
+		int16_t module_bot_on_screen = module_top_on_screen + settings.patch_view_height_px;
 		int16_t space_above = module_top_on_screen;
 		int16_t space_below = 240 - module_bot_on_screen;
 		if (space_below > space_above) {
@@ -410,6 +431,7 @@ private:
 			return;
 		page->args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
 		page->args.element_indices = {};
+		page->args.detail_mode = false;
 		page->page_list.request_new_page(PageId::ModuleView, page->args);
 	}
 
@@ -452,8 +474,15 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		if (!page->is_patch_playing)
+		if (!page->is_patch_playing) {
 			page->patch_playloader.request_load_view_patch();
+		} else {
+			if (page->patch_playloader.is_audio_muted()) {
+				page->patch_playloader.start_audio();
+			} else {
+				page->patch_playloader.stop_audio();
+			}
+		}
 	}
 
 	static void button_focussed_cb(lv_event_t *event) {
@@ -465,6 +494,12 @@ private:
 		page->update_map_ring_style();
 		page->settings_menu.hide();
 		page->file_menu.hide();
+
+		if (event->target == ui_SaveButton) {
+			lv_label_set_text(ui_PatchName, page->patches.get_view_patch_filename().data());
+		} else {
+			lv_label_set_text(ui_PatchName, page->patch->patch_name.c_str());
+		}
 	}
 
 	static void add_module_cb(lv_event_t *event) {
@@ -488,7 +523,6 @@ private:
 	lv_obj_t *modules_cont;
 	CableDrawer<4 * 240 + 8> cable_drawer; //TODO: relate this number to the module container size
 
-	ViewSettings &settings;
 	PatchViewSettingsMenu settings_menu{settings};
 
 	unsigned active_knobset = 0;
@@ -502,7 +536,7 @@ private:
 	std::optional<uint32_t> highlighted_module_id{};
 	lv_obj_t *highlighted_module_obj = nullptr;
 
-	PatchData *patch = patch_storage.get_view_patch();
+	PatchData *patch = patches.get_view_patch();
 
 	std::vector<lv_obj_t *> module_canvases;
 	std::vector<uint32_t> module_ids;

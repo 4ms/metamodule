@@ -6,7 +6,7 @@
    version="1.1"
    id="svg1179"
    sodipodi:docname="EnOsc_info.svg"
-   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,9 +25,9 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.1131277"
-     inkscape:cx="180.77469"
-     inkscape:cy="245.37088"
-     inkscape:window-width="1916"
+     inkscape:cx="180.53807"
+     inkscape:cy="245.60749"
+     inkscape:window-width="1920"
      inkscape:window-height="1205"
      inkscape:window-x="50"
      inkscape:window-y="25"
@@ -1817,13 +1817,6 @@
        r="11.34"
        style="fill: lime;" />
     <circle
-       id="Root_Jack"
-       data-name="Root Jack"
-       cx="21.88"
-       cy="305.91"
-       r="11.34"
-       style="fill: lime;" />
-    <circle
        id="Learn_Jack"
        data-name="Learn Jack"
        cx="171.75"
@@ -1852,12 +1845,63 @@
        r="11.34"
        style="fill: lime;" />
     <circle
+       id="Root_Jack"
+       data-name="Root Jack"
+       cx="21.88"
+       cy="305.91"
+       r="11.34"
+       style="fill: lime;" />
+    <circle
        id="Pitch_Jack"
        data-name="Pitch Jack"
        cx="21.88"
        cy="262.78"
        r="11.34"
        style="fill: lime;" />
+    <circle
+       id="FineTune"
+       cx="176.96"
+       cy="78.07"
+       r="6"
+       style="fill: #808080;" />
+    <circle
+       id="NumOsc@16"
+       cx="115.27"
+       cy="61.62"
+       r="6"
+       style="fill: #80808f;" />
+    <circle
+       id="Crossfade"
+       cx="32.72"
+       cy="144.14"
+       r="6"
+       style="fill: #808080;" />
+    <circle
+       id="StereoSplit@Even/Odd@Low/High@Root/Others"
+       cx="168.87"
+       cy="208.21"
+       r="6"
+       style="fill: #808080;" />
+    <circle
+       id="FreezeSplit@Even/Odd@Low/High@Root/Others"
+       cx="61.77"
+       cy="208.21"
+       r="6"
+       style="fill: #808080;" />
+    <circle
+       id="Freeze_MomentaryRGB7mm"
+       data-name="Freeze#MomentaryRGB7mm"
+       cx="209.56"
+       cy="42.53"
+       r="11.34"
+       style="fill: #ffc000;" />
+    <circle
+       id="Learn_MomentaryRGB7mm"
+       data-name="Learn#MomentaryRGB7mm"
+       cx="21.63"
+       cy="42.53"
+       r="11.34"
+       style="fill: #ffc000;" />
     <rect
        id="Warp_Switch"
        data-name="Warp Switch@Segment@Cheb@Fold"
@@ -1865,13 +1909,37 @@
        y="193.22"
        width="11.34"
        height="17.01"
+       style="fill:#ffc082" />
+    <rect
+       id="Twist_Switch"
+       data-name="Twist Switch@Crush@Pulsar@Ramp"
+       x="11.26"
+       y="206.56"
+       width="11.34"
+       height="17.01"
        style="fill: #ffc080;" />
+    <rect
+       id="Cross_FM_Switch"
+       data-name="Cross FM Switch@Down@All@Up"
+       x="208.56"
+       y="94.44"
+       width="11.34"
+       height="17.01"
+       style="fill:#ffc082" />
+    <rect
+       id="Scale_Switch"
+       data-name="Scale Switch@Free@Oct.@12TET"
+       x="11.26"
+       y="94.52"
+       width="11.34"
+       height="17.01"
+       style="fill:#ffc082" />
     <circle
        id="Warp"
        cx="168.87"
        cy="208.21"
        r="17.01"
-       style="fill: #ff0040;" />
+       style="fill:#ff0000" />
     <circle
        id="Detune"
        cx="115.49"
@@ -1884,14 +1952,6 @@
        cy="208.21"
        r="17.01"
        style="fill: red;" />
-    <rect
-       id="Twist_Switch"
-       data-name="Twist Switch@Crush@Pulsar@Ramp"
-       x="11.26"
-       y="206.56"
-       width="11.34"
-       height="17.01"
-       style="fill: #ffc080;" />
     <circle
        id="Cross_FM"
        data-name="Cross FM"
@@ -1910,55 +1970,25 @@
        cx="32.72"
        cy="144.14"
        r="17.01"
-       style="fill: red;" />
-    <rect
-       id="Cross_FM_Switch"
-       data-name="Cross FM Switch@Down@All@Up"
-       x="208.56"
-       y="94.44"
-       width="11.34"
-       height="17.01"
-       style="fill: #ffc080;" />
+       style="fill:#FF0040" />
     <circle
        id="Pitch"
        cx="176.96"
        cy="78.07"
        r="17.01"
-       style="fill: red;" />
+       style="fill:#FF0040" />
     <circle
        id="Spread"
        cx="115.27"
        cy="61.62"
        r="17.01"
-       style="fill: red;" />
+       style="fill:#FF0030" />
     <circle
        id="Scale"
        cx="54.1"
        cy="78.08"
        r="17.01"
-       style="fill: red;" />
-    <rect
-       id="Scale_Switch"
-       data-name="Scale Switch@Free@Oct.@12TET"
-       x="11.26"
-       y="94.52"
-       width="11.34"
-       height="17.01"
-       style="fill: #ffc080;" />
-    <circle
-       id="Freeze_MomentaryRGB7mm"
-       data-name="Freeze#MomentaryRGB7mm"
-       cx="209.56"
-       cy="42.53"
-       r="11.34"
-       style="fill: #ffc000;" />
-    <circle
-       id="Learn_MomentaryRGB7mm"
-       data-name="Learn#MomentaryRGB7mm"
-       cx="21.63"
-       cy="42.53"
-       r="11.34"
-       style="fill: #ffc000;" />
+       style="fill:#FF003A" />
     <text
        id="slug"
        transform="translate(80.36 8.09)"
@@ -1984,35 +2014,5 @@
          x="44.03"
          y="0"
          id="tspan1175">or</tspan></text>
-    <circle
-       id="FreezeSplit@Even/Odd@Low/High@Root/Others"
-       cx="61.77"
-       cy="208.21"
-       r="6"
-       style="fill: #808080;" />
-    <circle
-       id="StereoSplit@Even/Odd@Low/High@Root/Others"
-       cx="168.87"
-       cy="208.21"
-       r="6"
-       style="fill: #808080;" />
-    <circle
-       id="Crossfade"
-       cx="32.72"
-       cy="144.14"
-       r="6"
-       style="fill: #808080;" />
-    <circle
-       id="NumOsc@16"
-       cx="115.27"
-       cy="61.62"
-       r="6"
-       style="fill: #80808f;" />
-    <circle
-       id="FineTune"
-       cx="176.96"
-       cy="78.07"
-       r="6"
-       style="fill: #808080;" />
   </g>
 </svg>

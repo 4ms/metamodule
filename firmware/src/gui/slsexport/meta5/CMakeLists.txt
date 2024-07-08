@@ -1,6 +1,5 @@
 SET(SOURCES components/ui_comp_knobcontainer.c
     components/ui_comp_knobcontainerbig.c
-    components/ui_comp_knobsetgroup.c
     components/ui_comp_mappedknobsetitem.c
     components/ui_comp_unmappedsetitem.c
     components/ui_comp.c
@@ -12,8 +11,8 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     screens/ui_EditMappingPage.c
     screens/ui_DeleteMappingPopUp.c
     screens/ui_ModuleListPage.c
-    screens/ui_CableMapPage.c
     screens/ui_SystemMenu.c
+    screens/ui_JackMapViewPage.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
@@ -25,13 +24,13 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     images/ui_img_1x_knob1_png.c
     images/ui_img_1x_knob1pressed_png.c
     images/ui_img_1x_infosmall2_png.c
-    fonts/ui_font_MuseoSansRounded50010.c
-    fonts/ui_font_MuseoSansRounded50012.c
-    fonts/ui_font_MuseoSansRounded50014.c
+    fonts/ui_font_MuseoSansRounded90018.c
+    fonts/ui_font_MuseoSansRounded90040.c
     fonts/ui_font_MuseoSansRounded70014.c
     fonts/ui_font_MuseoSansRounded70016.c
-    fonts/ui_font_MuseoSansRounded90018.c
-    fonts/ui_font_MuseoSansRounded90032.c
-    fonts/ui_font_MuseoSansRounded90040.c)
+    fonts/ui_font_MuseoSansRounded50012.c
+    fonts/ui_font_MuseoSansRounded50014.c
+    fonts/ui_font_MuseoSansRounded50010.c
+    fonts/ui_font_MuseoSansRounded50016.c)
 
 add_library(ui ${SOURCES})

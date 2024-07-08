@@ -18,6 +18,8 @@ class AudioStream {
 	PatchPlayLoader &patch_loader;
 	PatchModQueue &patch_mod_queue;
 
+	CalData cal;
+
 public:
 	AudioStream(ParamsState &params_state,
 				PatchPlayer &player,
@@ -34,7 +36,8 @@ public:
 		if (mute_on_patch_load(out_buff))
 			return;
 
-		handle_patch_mods(patch_mod_queue, player);
+		std::optional<bool> update_cal;
+		handle_patch_mods(patch_mod_queue, player, cal, update_cal);
 
 		if (in_buff.size() != out_buff.size()) {
 			std::cout << "Buffer size mis-match!\n";
@@ -84,8 +87,9 @@ public:
 			// Acknowlegde patch loader's request to mute audio
 			patch_loader.notify_audio_is_muted();
 			return true;
-		} else {
-			patch_loader.audio_not_muted();
+
+		} else if (patch_loader.should_fade_up_audio()) {
+			patch_loader.notify_audio_not_muted();
 		}
 
 		if (!player.is_loaded) {

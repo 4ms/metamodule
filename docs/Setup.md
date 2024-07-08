@@ -60,17 +60,18 @@ Monterey (12.5) and Ventura (13.4 and 13.5) have been tested and are known to wo
    - `brew install jq rsync`
 
 ### Linux
-
-TODO: check this, and notes for different distros
+For Ubuntu (tested with 22.04):
 
  - `sudo apt-get install cmake g++-12 jq ninja-build pkg-config`
+ - Ubuntu 22.04 comes with cmake 3.22, which is not new enough. Install v3.24 or later from [Kitware](https://github.com/Kitware/CMake/releases)
+   - After downloading and extracting the release file, make sure to add the `bin/` dir to your `PATH`  
  - Set gcc-12 and g++-12 to be the default. E.g. on Ubuntu 22.04: 
    - `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 120`
    - `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 120`
-
  - To use the simulator GUI, you need to also install sdl2:
    - `sudo apt-get install libsdl2-dev`
 
+TODO: other distros
  
 ### Windows
 

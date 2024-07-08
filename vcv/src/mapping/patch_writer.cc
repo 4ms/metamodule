@@ -5,7 +5,7 @@
 #include "patch_convert/ryml/ryml_serial.hh"
 #include <algorithm>
 
-PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId)
+PatchFileWriter::PatchFileWriter(std::vector<BrandModule> modules, int64_t hubModuleId)
 	: hubModuleId{hubModuleId} {
 	setModuleList(modules);
 	pd.knob_sets.clear();
@@ -48,7 +48,7 @@ void PatchFileWriter::setMidiSettings(MetaModule::MIDI::ModuleIds &ids, MetaModu
 	pd.midi_poly_num = std::min<uint32_t>(midiSettings.CV.channels, 8U);
 }
 
-void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
+void PatchFileWriter::setModuleList(std::vector<BrandModule> &modules) {
 	std::vector<int64_t> vcv_mod_ids;
 
 	// Reserved for PANEL
@@ -217,7 +217,7 @@ void PatchFileWriter::addKnobMaps(unsigned panelKnobId, unsigned knobSetId, cons
 			.curve_type = 0,
 			.min = m.range_min,
 			.max = m.range_max,
-			.alias_name = "", //TODO
+			.alias_name = m.alias_name.c_str(),
 		});
 	}
 }
@@ -368,6 +368,6 @@ std::map<int64_t, uint16_t> PatchFileWriter::squash_ids(std::vector<int64_t> ids
 	return s;
 }
 
-PatchData &PatchFileWriter::get_data() {
+MetaModule::PatchData &PatchFileWriter::get_data() {
 	return pd;
 }

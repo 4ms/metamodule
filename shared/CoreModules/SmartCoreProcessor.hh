@@ -34,6 +34,13 @@ protected:
 	}
 
 	template<Elem EL>
+	float getOutput() requires(count(EL).num_outputs == 1)
+	{
+		auto idx = index(EL);
+		return outputValues[idx.output_idx];
+	}
+
+	template<Elem EL>
 	bool isPatched() requires(count(EL).num_outputs == 1)
 	{
 		auto idx = index(EL);

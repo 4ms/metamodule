@@ -298,7 +298,7 @@
     #define lv_snprintf  snprintf_
     #define lv_vsnprintf vsnprintf_
 #else   /*LV_SPRINTF_CUSTOM*/
-    #define LV_SPRINTF_USE_FLOAT 0
+    #define LV_SPRINTF_USE_FLOAT 1
 #endif  /*LV_SPRINTF_CUSTOM*/
 
 #define LV_USE_USER_DATA 1
@@ -447,7 +447,7 @@ LV_FONT_DECLARE( ui_font_MuseoSansRounded70016)\
 #define LV_TXT_LINE_BREAK_LONG_POST_MIN_LEN 3
 
 /*The control character to use for signalling text recoloring.*/
-#define LV_TXT_COLOR_CMD "#"
+#define LV_TXT_COLOR_CMD "^"
 
 /*Support bidirectional texts. Allows mixing Left-to-Right and Right-to-Left texts.
  *The direction will be processed according to the Unicode Bidirectional Algorithm:

@@ -85,15 +85,15 @@ struct Parameters {
 };
 
 struct TapParameters {
-  float time;
-  float velocity;
-  VelocityType velocity_type;
-  float panning;
+  float time{};
+  float velocity{};
+  VelocityType velocity_type{};
+  float panning{};
 };
 
 struct Slot {
-  uint8_t size;
-  std::array<TapParameters,kMaxTaps> taps;
+  uint8_t size{};
+  std::array<TapParameters,kMaxTaps> taps{};
 };
 }
 

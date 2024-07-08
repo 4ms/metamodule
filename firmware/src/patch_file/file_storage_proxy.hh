@@ -7,7 +7,6 @@
 #include "patch_file/file_storage_comm.hh"
 #include "patch_file/patch_location.hh"
 #include "pr_dbg.hh"
-#include "util/seq_map.hh"
 
 namespace MetaModule
 {
@@ -17,9 +16,11 @@ class FileStorageProxy {
 public:
 	using enum IntercoreStorageMessage::MessageType;
 
+	//TODO: use a general-purpose buffer instead of raw_patch_data and patch_dir_list
+
 	FileStorageProxy(std::span<char> raw_patch_data, FileStorageComm &comm, PatchDirList &patch_dir_list)
-		: patch_dir_list_{patch_dir_list}
-		, comm_{comm}
+		: comm_{comm}
+		, patch_dir_list_{patch_dir_list}
 		, raw_patch_data_{raw_patch_data} {
 	}
 
@@ -27,6 +28,8 @@ public:
 		return comm_.get_new_message();
 	}
 
+	// TODO: consider passing raw_patch_data_ as a param here,
+	// so the caller can read it on their own (but must ensure it's in shared/non-cache ram)
 	[[nodiscard]] bool request_load_patch(PatchLocation patch_loc) {
 		IntercoreStorageMessage message{
 			.message_type = RequestPatchData,
@@ -37,99 +40,24 @@ public:
 		if (!comm_.send_message(message))
 			return false;
 
-		requested_view_patch_loc_ = patch_loc;
 		return true;
-	}
-
-	bool load_if_open(PatchLocation patch_loc) {
-		if (PatchLocHash{patch_loc} == PatchLocHash{playing_patch_loc_}) {
-			view_playing_patch();
-			return true;
-
-		} else if (auto patch = open_patches_.get(PatchLocHash{patch_loc})) {
-			view_patch_ = patch;
-			view_patch_loc_ = patch_loc;
-			return true;
-
-		} else {
-			return false;
-		}
-	}
-
-	// TODO: pass the span as an arg, not as a member var
-	bool parse_loaded_patch(uint32_t bytes_read) {
-		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
-
-		if (auto new_patch = open_patches_.overwrite(PatchLocHash{requested_view_patch_loc_}, {})) {
-			if (!yaml_raw_to_patch(file_data, *new_patch)) {
-				pr_err("Failed to parse\n");
-				open_patches_.remove_last();
-				return false;
-			}
-			new_patch->trim_empty_knobsets(); //Handle patches saved by early firmware with empty knob sets
-			view_patch_ = new_patch;
-			view_patch_loc_ = requested_view_patch_loc_;
-			return true;
-
-		} else {
-			pr_err("Failed to add to cache\n");
-			return false;
-		}
-	}
-
-	//
-	// playing_patch: (copy of) patch currently playing in the audio thread
-	// Keep it outside of open_patches because we should never overwrite it
-	//
-	PatchData *playing_patch() {
-		return &playing_patch_;
-	}
-
-	//
-	// viewpatch: (pointer to) patch we are currently viewing in the GUI
-	//
-	PatchData *get_view_patch() {
-		return view_patch_;
-	}
-
-	//
-	// Tells FileStorageProxy that the view_patch is now being played
-	//
-	void play_view_patch() {
-		playing_patch_ = *view_patch_; //copy
-		playing_patch_loc_ = view_patch_loc_;
-
-		// Remove it from open_patches_
-		view_patch_->blank_patch("");
-		if (!open_patches_.remove(PatchLocHash{view_patch_loc_}))
-			pr_warn("Warning: patch not found in open patches\n");
-
-		//re-point view_patch to playing_patch
-		view_patch_ = &playing_patch_;
-	}
-
-	void view_playing_patch() {
-		view_patch_ = &playing_patch_;
-		view_patch_loc_ = playing_patch_loc_;
-	}
-
-	StaticString<255> get_view_patch_filename() {
-		return view_patch_loc_.filename;
-	}
-
-	Volume get_view_patch_vol() {
-		return view_patch_loc_.vol;
-	}
-
-	PatchLocHash get_view_patch_loc_hash() {
-		return PatchLocHash{view_patch_loc_};
 	}
 
 	//
 	// patchlist: list of all patches found on all volumes
 	//
-	[[nodiscard]] bool request_patchlist() {
-		IntercoreStorageMessage message{.message_type = RequestRefreshPatchList, .patch_dir_list = &patch_dir_list_};
+	// TODO: consider passing patch_dir_list_ as a param here,
+	// so the caller can read it on their own (but must ensure it's in shared/non-cache ram)
+	[[nodiscard]] bool request_patchlist(std::optional<Volume> force_refresh_vol = std::nullopt) {
+		IntercoreStorageMessage message{
+			.message_type = RequestRefreshPatchList,
+			.patch_dir_list = &patch_dir_list_,
+		};
+
+		if (force_refresh_vol.has_value()) {
+			message.force_refresh = true;
+			message.vol_id = force_refresh_vol.value();
+		}
 		return comm_.send_message(message);
 	}
 
@@ -139,6 +67,14 @@ public:
 		//or return nullptr if we've sent a RequestRefreshPatchList but
 		//haven't gotten a reply yet
 		return patch_dir_list_;
+	}
+
+	std::span<char> get_patch_data() {
+		return raw_patch_data_;
+	}
+
+	std::span<char> get_patch_data(uint32_t bytes) {
+		return raw_patch_data_.subspan(0, bytes);
 	}
 
 	// Scan all mounted volumes for firmware update files
@@ -188,36 +124,41 @@ public:
 		return comm_.send_message(message);
 	}
 
-	void new_patch() {
-		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
-		view_patch_ = &unsaved_patch_;
-		view_patch_->blank_patch(name);
-
-		name += ".yml";
-		view_patch_loc_.filename.copy(name);
-		view_patch_loc_.vol = Volume::RamDisk;
+	[[nodiscard]] bool request_delete_file(std::string_view filename, Volume vol) {
+		IntercoreStorageMessage message{
+			.message_type = RequestDeleteFile,
+			.vol_id = vol,
+			.filename = filename,
+		};
+		return comm_.send_message(message);
 	}
 
-	void update_patch_module_states(std::vector<ModuleInitState> const &states) {
-		view_patch_->module_states = states; //copy
+	[[nodiscard]] bool request_read_flash(std::span<uint8_t> buffer, uint32_t address, uint32_t *bytes_processed) {
+		IntercoreStorageMessage message{
+			.message_type = RequestReadFlash,
+			.buffer = {(char *)buffer.data(), buffer.size()},
+			.address = address,
+			.bytes_processed = bytes_processed,
+		};
+		return comm_.send_message(message);
 	}
 
-	bool write_patch(std::string_view filename = "") {
-		if (filename == "")
-			filename = view_patch_loc_.filename;
+	enum class WriteResult { Busy, Success, InvalidVol };
 
-		std::span<char> file_data = raw_patch_data_;
-
-		patch_to_yaml_buffer(*view_patch_, file_data);
+	WriteResult request_write_file(std::span<char> file_data, Volume vol, std::string_view filename) {
+		if (vol == Volume::RamDisk || vol == Volume::MaxVolumes) {
+			pr_err("Error: not a valid volume for writing a patch\n");
+			return WriteResult::InvalidVol;
+		}
 
 		IntercoreStorageMessage message{
 			.message_type = RequestWritePatchData,
-			.vol_id = view_patch_loc_.vol,
+			.vol_id = vol,
 			.buffer = file_data,
 			.filename = filename,
 		};
 
-		return comm_.send_message(message);
+		return comm_.send_message(message) ? WriteResult::Success : WriteResult::Busy;
 	}
 
 	bool request_reset_factory_patches() {
@@ -241,20 +182,8 @@ public:
 	}
 
 private:
-	PatchDirList &patch_dir_list_;
-
 	FileStorageComm &comm_;
-
+	PatchDirList &patch_dir_list_;
 	std::span<char> raw_patch_data_;
-
-	PatchData unsaved_patch_;
-	PatchData *view_patch_ = &unsaved_patch_;
-	PatchData playing_patch_;
-
-	SeqMap<PatchLocHash, PatchData, 32> open_patches_;
-
-	PatchLocation requested_view_patch_loc_;
-	PatchLocation view_patch_loc_;
-	PatchLocation playing_patch_loc_;
 };
 } // namespace MetaModule

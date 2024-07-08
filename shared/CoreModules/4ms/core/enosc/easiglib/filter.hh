@@ -5,6 +5,9 @@
 
 #pragma once
 
+namespace easiglib
+{
+
 struct OnePoleLp {
 	f Process(f coef, f input) {
 		state_ += (input - state_) * coef;
@@ -400,3 +403,5 @@ private:
 	const f gain_ = (1_f + coef_) * 0.5_f;
 	f xm1_ = 0_f, ym1_ = 0_f;
 };
+
+} // namespace easiglib

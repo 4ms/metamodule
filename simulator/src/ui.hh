@@ -45,7 +45,8 @@ private:
 	PluginManager plugin_manager;
 
 	PatchPlayer patch_player;
-	PatchPlayLoader patch_playloader{file_storage_proxy, patch_player};
+	OpenPatchManager open_patches_manager;
+	PatchPlayLoader patch_playloader{file_storage_proxy, open_patches_manager, patch_player};
 	PatchModQueue patch_mod_queue;
 
 	NotificationQueue notify_queue;

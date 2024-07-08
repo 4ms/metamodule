@@ -3,4 +3,7 @@ CompileFlags:
 		"-std=c++20",
 		"-I..",
 		"-I../cpputil",
+		"-I../CoreModules",
+		"-I../../firmware/metamodule-plugin-sdk/metamodule-core-interface",
+		"-I../../firmware/metamodule-plugin-sdk/metamodule-rack-interface",
 	]

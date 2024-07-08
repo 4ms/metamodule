@@ -8,12 +8,414 @@
 namespace MetaModule
 {
 
-class QCDCore : public SmartCoreProcessor<QCDInfo> {
-	using Info = QCDInfo;
-	using ThisCore = QCDCore;
-	using enum Info::Elem;
+
+template <class Parent, class Mapping>
+class QCDChannel
+{
+private:
+	template<typename Parent::Info::Elem EL>
+	void setOutput(auto val)
+	{
+		return parent->template setOutput<EL>(val);
+	}
+
+	template<typename Parent::Info::Elem EL>
+	auto getInput()
+	{
+		return parent->template getInput<EL>();
+	}
+
+	template<typename Parent::Info::Elem EL, typename VAL>
+	void setLED(const VAL &value)
+	{
+		return parent->template setLED<EL>(value);
+	}
+
+	template<typename Parent::Info::Elem EL>
+	auto getState()
+	{
+		return parent->template getState<EL>();
+	}
+
+private: 	
+	enum operation_t {MULT, DIV};
+
+	struct factorType_t
+	{
+		operation_t operation;
+		uint32_t factor;
+		uint32_t index;
+
+		inline bool operator!=(factorType_t a) {
+		if (a.operation == operation && a.factor == factor)
+			return false;
+		else
+			return true;
+		}
+	};
+
+	enum invMode_t {DELAY, INVERTED, SHUFFLE};
+	enum edge_t {FALLING, RISING};
+	enum outputState_t {LOW, HIGH};
+
+private:
+	Parent* parent;
 
 public:
+	QCDChannel(Parent* parent_)
+		: parent(parent_), ticks(0), clockDivCounter({0}), invMode(DELAY), clockOutState(LOW), phase(0.0f), processSyncPulse(false), clockOutRisingEdgeCounter(0), triggerDetectorClock(1.0f, 2.0f), triggerDetectorReset(1.0f, 2.0f) {
+			set_samplerate(48000.f);
+	}
+
+	void update(auto clockInput) {
+		auto now = ++ticks;
+
+		if (auto newFactor = readFactorCV(); newFactor != factor) {
+			factor = newFactor;
+			calculateClockOutPeriod(factor);
+		}
+
+		pulsewidth = readPulsewidthCV();
+		triggerLengthInTicks = calculateTriggerlength(pulsewidth);
+		invMode = readInvMode();
+
+		if (clockInput) {
+			if (triggerEdgeDetectorClock(triggerDetectorClock(*clockInput))) {
+				calculateClockInPeriod(now);
+				calculateClockOutPeriod(now, factor);
+			}
+		} else {
+			resetClocks(now);
+		}		
+
+		if(clockIn.lastEventInTicks && clockIn.periodInTicks) {
+			if(auto newPhase = processResetIn(now); newPhase) {
+				phase = *newPhase;
+			}
+
+			uint32_t phaseOffset = uint32_t(std::round(*clockIn.periodInTicks * phase));
+
+			if (now == *clockIn.lastEventInTicks + phaseOffset) {
+
+				for (uint32_t index = 0; index < clockDivCounter.size(); index++) {
+					
+					clockDivCounter[index]++;
+
+					if(clockDivCounter[index] >= clockFactor[index].factor) {
+						clockDivCounter[index] = 0;
+					}
+				}
+
+				if(factor.operation == DIV) {
+
+					if(clockDivCounter[factor.index] == 0)
+					{
+						processSyncPulse = true;
+					}
+				} else {
+					processSyncPulse = true;
+				}
+			}
+		}
+
+		updateClockOut(now, factor);
+		updateInvOut(now);
+	}
+
+	void set_samplerate(float sr) {
+		timeStepInS = 1.f /sr;
+
+		triggerLength5msInTicks = uint32_t(std::round(0.005f / timeStepInS));
+		triggerLengthMinimumInTicks = 2;
+	}
+
+private:
+	factorType_t readFactorCV() {
+		auto selector = getState<Mapping::DivMultKnob>();
+
+		if(auto selectorCV = getInput<Mapping::DivMultCvJackIn>(); selectorCV) {
+			selector += (getState<Mapping::DivMultCvKnob>() * 2.0f - 1.0f) * *selectorCV / 10.0f;
+			selector = std::clamp(selector, 0.0f, 1.0f);
+		}
+
+		return clockFactor[uint32_t(std::round(selector * (clockFactor.size() - 1)))];
+	}
+
+	float readPulsewidthCV() {
+		auto pulsewidth = getState<Mapping::GatePwKnob>();
+
+		if(auto pulsewidthCV = getInput<Mapping::GatePwCvIn>(); pulsewidthCV) {
+			pulsewidth += (getState<Mapping::GatePwAttKnob>() * 2.0f - 1.0f) * *pulsewidthCV / 10.0f;
+			pulsewidth = std::clamp(pulsewidth, 0.0f, 1.0f);
+		}
+
+		return pulsewidth;
+	}
+
+	invMode_t readInvMode() {
+		auto invMode = getState<Mapping::InvModeSwitch>();
+
+		if(invMode == Toggle3posHoriz::State_t::LEFT) {
+			return DELAY;
+		} else if(invMode == Toggle3posHoriz::State_t::CENTER) {
+			return INVERTED;
+		} else {
+			return SHUFFLE;
+		}
+	}
+
+	uint32_t calculateTriggerlength(float pulsewidth) {
+		if(clockOut.periodInTicks) {
+			if (1/(timeStepInS * *clockOut.periodInTicks) < 100) {
+				return triggerLength5msInTicks + uint32_t(std::round(pulsewidth * (*clockOut.periodInTicks - 2 * triggerLength5msInTicks)));
+			} else {
+				return triggerLengthMinimumInTicks + uint32_t(std::round(pulsewidth * (*clockOut.periodInTicks - 2 * triggerLengthMinimumInTicks)));
+			}
+		} else {
+			return triggerLengthMinimumInTicks;
+		}
+	}
+
+	void calculateClockInPeriod(uint32_t timestampInTicks) {
+		if(clockIn.lastEventInTicks) {
+			if(clockIn.lastEventInTicks < timestampInTicks) {
+				clockIn.periodInTicks = timestampInTicks - *clockIn.lastEventInTicks;
+			} else { //overflow
+				clockIn.periodInTicks = std::numeric_limits<decltype(ticks)>::max() - *clockIn.lastEventInTicks;
+				clockIn.periodInTicks = *clockIn.periodInTicks + timestampInTicks;
+			}
+		}
+
+		clockIn.lastEventInTicks = timestampInTicks;
+	}
+
+	void calculateClockOutPeriod(factorType_t factor) {
+		if(clockIn.periodInTicks) {
+			if(factor.operation == MULT) {
+				clockOut.periodInTicks = *clockIn.periodInTicks / factor.factor;
+			} else if (factor.operation == DIV){
+				clockOut.periodInTicks = *clockIn.periodInTicks * factor.factor;
+			} else {
+				clockOut.periodInTicks.reset();
+			}
+		}
+	}
+
+	void calculateClockOutPeriod(uint32_t timestampInTicks, factorType_t factor) {
+		if(clockIn.periodInTicks) {
+			if(factor.operation == MULT) {
+				clockOut.periodInTicks = *clockIn.periodInTicks / factor.factor;
+			} else if (factor.operation == DIV){
+				clockOut.periodInTicks = *clockIn.periodInTicks * factor.factor;
+			} else {
+				clockOut.periodInTicks.reset();
+			}
+
+			if (!clockOut.lastEventInTicks) {
+				clockOut.lastEventInTicks = timestampInTicks;
+			}
+		}
+	}
+
+	void updateClockOut(uint32_t timestampInTicks, factorType_t factor) {
+		if(clockOut.periodInTicks) {
+			if(clockOutIsLow()) {
+				if (processSyncPulse == true) {
+					clockOutRisingEdgeCounter = 0;
+
+					setClockOutRisingEdge(timestampInTicks);
+
+					processSyncPulse = false;
+				} else if (factor.operation == MULT) {
+					if(timestampInTicks >= (*clockOut.lastEventInTicks + *clockOut.periodInTicks) && clockOutRisingEdgeCounter < factor.factor) {
+						setClockOutRisingEdge(timestampInTicks);
+					}
+				}
+			} else {
+				if (timestampInTicks >= (*clockOut.lastEventInTicks + triggerLengthInTicks)) {
+					setClockOutFallingEdge(timestampInTicks);
+				}
+			}
+		}
+	}
+
+	bool clockOutIsLow() {
+		return clockOutState == LOW;
+	}
+
+	void setClockOutRisingEdge(uint32_t timestampInTicks) {
+		if(clockOutState == LOW) {
+			setOutput<Mapping::OutOut>(outputHighVoltageLevel);
+			setLED<Mapping::OutLight>(1.f);
+			updateInvOut(timestampInTicks, RISING);
+
+			clockOut.lastEventInTicks = timestampInTicks;
+
+			clockOutRisingEdgeCounter++;
+			clockOutState = HIGH;
+		}
+	}
+
+	void setClockOutFallingEdge(uint32_t timestampInTicks) {
+		if(clockOutState == HIGH) {
+			setOutput<Mapping::OutOut>(0.f);
+			setLED<Mapping::OutLight>(0.f);
+			updateInvOut(timestampInTicks, FALLING);
+
+			clockOutState = LOW;
+		}
+	}
+
+	void updateInvOut(uint32_t timestamp) {
+		if ((invMode == DELAY) || (invMode == SHUFFLE)) {
+			if(clockInvOut.lastEventInTicks) {
+				auto invOutTriggerLength = triggerLengthMinimumInTicks;
+
+				if (1/(timeStepInS * *clockOut.periodInTicks) < 100) {
+					invOutTriggerLength = triggerLength5msInTicks;
+				} else {
+					invOutTriggerLength = uint32_t(std::round(*clockOut.periodInTicks * 0.3f));
+				}
+
+				if(invOutTriggerLength < triggerLengthMinimumInTicks) {
+					invOutTriggerLength = triggerLengthMinimumInTicks;
+				}
+
+				if(timestamp >= (*clockInvOut.lastEventInTicks + invOutTriggerLength)) {
+					setOutput<Mapping::InvOutOut>(0.f);
+					setLED<Mapping::InvLight>(0.f);
+					clockInvOut.lastEventInTicks.reset();
+				}
+			}
+		}
+	}
+
+	void updateInvOut(uint32_t timestamp, edge_t edgeType) {
+		if(invMode == INVERTED) {
+			if(edgeType == RISING) {
+				setOutput<Mapping::InvOutOut>(0.f);
+				setLED<Mapping::InvLight>(0.f);
+				clockInvOut.lastEventInTicks.reset();
+			} else {
+				setOutput<Mapping::InvOutOut>(outputHighVoltageLevel);
+				setLED<Mapping::InvLight>(1.f);
+				clockInvOut.lastEventInTicks = timestamp;
+			}
+		} else if(invMode == DELAY) {
+			if(edgeType == FALLING) {
+				setOutput<Mapping::InvOutOut>(outputHighVoltageLevel);
+				setLED<Mapping::InvLight>(1.f);
+				clockInvOut.lastEventInTicks = timestamp;
+			}
+		} else if(invMode == SHUFFLE) {
+			setOutput<Mapping::InvOutOut>(outputHighVoltageLevel);
+			setLED<Mapping::InvLight>(1.f);
+			clockInvOut.lastEventInTicks = timestamp;
+		}
+	}
+
+	void resetClocks(uint32_t timestampInTicks) {
+		clockIn.lastEventInTicks.reset();
+		clockIn.periodInTicks.reset();
+
+		clockOut.lastEventInTicks.reset();
+		clockOut.periodInTicks.reset();
+
+		if(clockOutState == HIGH) {
+			setOutput<Mapping::OutOut>(0.f);
+			setLED<Mapping::OutLight>(0.f);
+			updateInvOut(timestampInTicks, FALLING);
+			clockOutState = LOW;
+		}
+	}
+
+	std::optional<float> processResetIn(uint32_t timestamp) {
+		if (auto input = getInput<Mapping::ResetIn>(); input) {
+			if (triggerEdgeDetectorReset(triggerDetectorReset(*input))) {
+				if(clockIn.periodInTicks) {
+					uint32_t ticksSinceLastEvent = timestamp - *clockIn.lastEventInTicks;
+					float phase = float(ticksSinceLastEvent) / float(*clockIn.periodInTicks);
+
+					return phase;
+				}
+			}
+		}
+
+		return std::nullopt;
+	}
+
+private:
+	static constexpr float outputHighVoltageLevel = 5.0f;
+	static constexpr float triggerLengthMinimumInS = 0.005f;
+
+	static constexpr uint32_t maxIndexDivisions = 9;
+	static constexpr std::array<factorType_t,21> clockFactor = {{
+		{DIV, 32, 0},
+		{DIV, 32, 1},
+		{DIV, 16, 2},
+		{DIV, 8, 3},
+		{DIV, 7, 4},
+		{DIV, 6, 5},
+		{DIV, 5, 6},
+		{DIV, 4, 7},
+		{DIV, 3, 8},
+		{DIV, 2, 9},
+		{MULT, 1, 10},
+		{MULT, 2, 11},
+		{MULT, 3, 12},
+		{MULT, 4, 13},
+		{MULT, 5, 14},
+		{MULT, 6, 15},
+		{MULT, 7, 16},
+		{MULT, 8, 17},
+		{MULT, 12, 18},
+		{MULT, 16, 19},
+		{MULT, 16, 20}
+	}};
+
+private:
+	float timeStepInS;
+	uint32_t triggerLengthMinimumInTicks;
+	uint32_t triggerLength5msInTicks;
+	uint32_t triggerLengthInTicks;
+	uint32_t ticks;
+	std::array<uint32_t, maxIndexDivisions + 1> clockDivCounter;
+	factorType_t factor;
+	float pulsewidth;
+	invMode_t invMode;
+	outputState_t clockOutState;
+	float phase;
+	bool processSyncPulse;
+	uint32_t clockOutRisingEdgeCounter;
+
+	struct clockMeasures
+	{
+		std::optional<uint32_t> lastEventInTicks;
+		std::optional<uint32_t> periodInTicks;
+	};
+
+	clockMeasures clockIn;
+	clockMeasures clockOut;
+	clockMeasures clockInvOut;
+
+private:
+	FlipFlop triggerDetectorClock;
+	EdgeDetector triggerEdgeDetectorClock;
+
+	FlipFlop triggerDetectorReset;
+	EdgeDetector triggerEdgeDetectorReset;
+};
+
+
+//////////////////////////////////////////////////////////////
+
+class QCDCore : public SmartCoreProcessor<QCDInfo> {
+	using ThisCore = QCDCore;
+
+public:
+	using Info = QCDInfo;
+	using enum Info::Elem;
+
 	template<Info::Elem EL>
 	void setOutput(auto val)
 	{
@@ -38,378 +440,6 @@ public:
 		return SmartCoreProcessor<Info>::getState<EL>();
 	}
 
-private:
-	template <class Mapping>
-	class Channel
-	{
-	private: 	
-		enum operation_t {MULT, DIV};
-
-		struct factorType_t
-		{
-			operation_t operation;
-			uint32_t factor;
-			uint32_t index;
-
-		   inline bool operator!=(factorType_t a) {
-	       if (a.operation == operation && a.factor == factor)
-	          return false;
-	       else
-	          return true;
-	    	}
-		};
-
-		enum invMode_t {DELAY, INVERTED, SHUFFLE};
-		enum edge_t {FALLING, RISING};
-		enum outputState_t {LOW, HIGH};
-
-	private:
-		QCDCore* parent;
-
-	public:
-		Channel(QCDCore* parent_)
-			: parent(parent_), ticks(0), clockDivCounter({0}), invMode(DELAY), clockOutState(LOW), phase(0.0f), processSyncPulse(false), clockOutRisingEdgeCounter(0), triggerDetectorClock(1.0f, 2.0f), triggerDetectorReset(1.0f, 2.0f) {
-				set_samplerate(48000.f);
-		}
-
-		void update(auto clockInput) {
-			auto now = ++ticks;
-
-			if (auto newFactor = readFactorCV(); newFactor != factor) {
-				factor = newFactor;
-				calculateClockOutPeriod(factor);
-			}
-
-			pulsewidth = readPulsewidthCV();
-			triggerLengthInTicks = calculateTriggerlength(pulsewidth);
-			invMode = readInvMode();
-
-			if (clockInput) {
-				if (triggerEdgeDetectorClock(triggerDetectorClock(*clockInput))) {
-					calculateClockInPeriod(now);
-					calculateClockOutPeriod(now, factor);
-				}
-			} else {
-				resetClocks(now);
-			}		
-
-			if(clockIn.lastEventInTicks && clockIn.periodInTicks) {
-				if(auto newPhase = processResetIn(now); newPhase) {
-					phase = *newPhase;
-				}
-
-				uint32_t phaseOffset = uint32_t(std::round(*clockIn.periodInTicks * phase));
-
-				if (now == *clockIn.lastEventInTicks + phaseOffset) {
-
-					for (uint32_t index = 0; index < clockDivCounter.size(); index++) {
-						
-						clockDivCounter[index]++;
-
-						if(clockDivCounter[index] >= clockFactor[index].factor) {
-							clockDivCounter[index] = 0;
-						}
-					}
-
-					if(factor.operation == DIV) {
-
-						if(clockDivCounter[factor.index] == 0)
-						{
-							processSyncPulse = true;
-						}
-					} else {
-						processSyncPulse = true;
-					}
-				}
-			}
-
-			updateClockOut(now, factor);
-			updateInvOut(now);
-		}
-
-		void set_samplerate(float sr) {
-			timeStepInS = 1.f /sr;
-
-			triggerLength5msInTicks = uint32_t(std::round(0.005f / timeStepInS));
-			triggerLengthMinimumInTicks = 2;
-		}
-
-	private:
-		factorType_t readFactorCV() {
-			auto selector = parent->getState<Mapping::DivMultKnob>();
-
-			if(auto selectorCV = parent->getInput<Mapping::DivMultCvJackIn>(); selectorCV) {
-				selector += (parent->getState<Mapping::DivMultCvKnob>() * 2.0f - 1.0f) * *selectorCV / 10.0f;
-				selector = std::clamp(selector, 0.0f, 1.0f);
-			}
-
-			return clockFactor[uint32_t(std::round(selector * (clockFactor.size() - 1)))];
-		}
-
-		float readPulsewidthCV() {
-			auto pulsewidth = parent->getState<Mapping::GatePwKnob>();
-
-			if(auto pulsewidthCV = parent->getInput<Mapping::GatePwCvIn>(); pulsewidthCV) {
-				pulsewidth += (parent->getState<Mapping::GatePwAttKnob>() * 2.0f - 1.0f) * *pulsewidthCV / 10.0f;
-				pulsewidth = std::clamp(pulsewidth, 0.0f, 1.0f);
-			}
-
-			return pulsewidth;
-		}
-
-		invMode_t readInvMode() {
-			auto invMode = parent->getState<Mapping::InvModeSwitch>();
-
-			if(invMode == Toggle3posHoriz::State_t::LEFT) {
-				return DELAY;
-			} else if(invMode == Toggle3posHoriz::State_t::CENTER) {
-				return INVERTED;
-			} else {
-				return SHUFFLE;
-			}
-		}
-
-		uint32_t calculateTriggerlength(float pulsewidth) {
-			if(clockOut.periodInTicks) {
-				if (1/(timeStepInS * *clockOut.periodInTicks) < 100) {
-					return triggerLength5msInTicks + uint32_t(std::round(pulsewidth * (*clockOut.periodInTicks - 2 * triggerLength5msInTicks)));
-				} else {
-					return triggerLengthMinimumInTicks + uint32_t(std::round(pulsewidth * (*clockOut.periodInTicks - 2 * triggerLengthMinimumInTicks)));
-				}
-			} else {
-				return triggerLengthMinimumInTicks;
-			}
-		}
-
-		void calculateClockInPeriod(uint32_t timestampInTicks) {
-			if(clockIn.lastEventInTicks) {
-				if(clockIn.lastEventInTicks < timestampInTicks) {
-					clockIn.periodInTicks = timestampInTicks - *clockIn.lastEventInTicks;
-				} else { //overflow
-					clockIn.periodInTicks = std::numeric_limits<decltype(ticks)>::max() - *clockIn.lastEventInTicks;
-					clockIn.periodInTicks = *clockIn.periodInTicks + timestampInTicks;
-				}
-			}
-
-			clockIn.lastEventInTicks = timestampInTicks;
-		}
-
-		void calculateClockOutPeriod(factorType_t factor) {
-			if(clockIn.periodInTicks) {
-				if(factor.operation == MULT) {
-					clockOut.periodInTicks = *clockIn.periodInTicks / factor.factor;
-				} else if (factor.operation == DIV){
-					clockOut.periodInTicks = *clockIn.periodInTicks * factor.factor;
-				} else {
-					clockOut.periodInTicks.reset();
-				}
-			}
-		}
-
-		void calculateClockOutPeriod(uint32_t timestampInTicks, factorType_t factor) {
-			if(clockIn.periodInTicks) {
-				if(factor.operation == MULT) {
-					clockOut.periodInTicks = *clockIn.periodInTicks / factor.factor;
-				} else if (factor.operation == DIV){
-					clockOut.periodInTicks = *clockIn.periodInTicks * factor.factor;
-				} else {
-					clockOut.periodInTicks.reset();
-				}
-
-				if (!clockOut.lastEventInTicks) {
-					clockOut.lastEventInTicks = timestampInTicks;
-				}
-			}
-		}
-
-		void updateClockOut(uint32_t timestampInTicks, factorType_t factor) {
-			if(clockOut.periodInTicks) {
-				if(clockOutIsLow()) {
-					if (processSyncPulse == true) {
-						clockOutRisingEdgeCounter = 0;
-
-						setClockOutRisingEdge(timestampInTicks);
-
-						processSyncPulse = false;
-					} else if (factor.operation == MULT) {
-						if(timestampInTicks >= (*clockOut.lastEventInTicks + *clockOut.periodInTicks) && clockOutRisingEdgeCounter < factor.factor) {
-							setClockOutRisingEdge(timestampInTicks);
-						}
-					}
-				} else {
-					if (timestampInTicks >= (*clockOut.lastEventInTicks + triggerLengthInTicks)) {
-						setClockOutFallingEdge(timestampInTicks);
-					}
-				}
-			}
-		}
-
-		bool clockOutIsLow() {
-			return clockOutState == LOW;
-		}
-
-		void setClockOutRisingEdge(uint32_t timestampInTicks) {
-			if(clockOutState == LOW) {
-				parent->setOutput<Mapping::OutOut>(outputHighVoltageLevel);
-				parent->setLED<Mapping::OutLight>(1.f);
-				updateInvOut(timestampInTicks, RISING);
-
-				clockOut.lastEventInTicks = timestampInTicks;
-
-				clockOutRisingEdgeCounter++;
-				clockOutState = HIGH;
-			}
-		}
-
-		void setClockOutFallingEdge(uint32_t timestampInTicks) {
-			if(clockOutState == HIGH) {
-				parent->setOutput<Mapping::OutOut>(0.f);
-				parent->setLED<Mapping::OutLight>(0.f);
-				updateInvOut(timestampInTicks, FALLING);
-
-				clockOutState = LOW;
-			}
-		}
-
-		void updateInvOut(uint32_t timestamp) {
-			if ((invMode == DELAY) || (invMode == SHUFFLE)) {
-				if(clockInvOut.lastEventInTicks) {
-					auto invOutTriggerLength = triggerLengthMinimumInTicks;
-
-					if (1/(timeStepInS * *clockOut.periodInTicks) < 100) {
-						invOutTriggerLength = triggerLength5msInTicks;
-					} else {
-						invOutTriggerLength = uint32_t(std::round(*clockOut.periodInTicks * 0.3f));
-					}
-
-					if(invOutTriggerLength < triggerLengthMinimumInTicks) {
-						invOutTriggerLength = triggerLengthMinimumInTicks;
-					}
-
-					if(timestamp >= (*clockInvOut.lastEventInTicks + invOutTriggerLength)) {
-						parent->setOutput<Mapping::InvOutOut>(0.f);
-						parent->setLED<Mapping::InvLight>(0.f);
-						clockInvOut.lastEventInTicks.reset();
-					}
-				}
-			}
-		}
-
-		void updateInvOut(uint32_t timestamp, edge_t edgeType) {
-			if(invMode == INVERTED) {
-				if(edgeType == RISING) {
-					parent->setOutput<Mapping::InvOutOut>(0.f);
-					parent->setLED<Mapping::InvLight>(0.f);
-					clockInvOut.lastEventInTicks.reset();
-				} else {
-					parent->setOutput<Mapping::InvOutOut>(outputHighVoltageLevel);
-					parent->setLED<Mapping::InvLight>(1.f);
-					clockInvOut.lastEventInTicks = timestamp;
-				}
-			} else if(invMode == DELAY) {
-				if(edgeType == FALLING) {
-					parent->setOutput<Mapping::InvOutOut>(outputHighVoltageLevel);
-					parent->setLED<Mapping::InvLight>(1.f);
-					clockInvOut.lastEventInTicks = timestamp;
-				}
-			} else if(invMode == SHUFFLE) {
-				parent->setOutput<Mapping::InvOutOut>(outputHighVoltageLevel);
-				parent->setLED<Mapping::InvLight>(1.f);
-				clockInvOut.lastEventInTicks = timestamp;
-			}
-		}
-
-		void resetClocks(uint32_t timestampInTicks) {
-			clockIn.lastEventInTicks.reset();
-			clockIn.periodInTicks.reset();
-
-			clockOut.lastEventInTicks.reset();
-			clockOut.periodInTicks.reset();
-
-			if(clockOutState == HIGH) {
-				parent->setOutput<Mapping::OutOut>(0.f);
-				parent->setLED<Mapping::OutLight>(0.f);
-				updateInvOut(timestampInTicks, FALLING);
-				clockOutState = LOW;
-			}
-		}
-
-		std::optional<float> processResetIn(uint32_t timestamp) {
-			if (auto input = parent->getInput<Mapping::ResetIn>(); input) {
-				if (triggerEdgeDetectorReset(triggerDetectorReset(*input))) {
-					if(clockIn.periodInTicks) {
-						uint32_t ticksSinceLastEvent = timestamp - *clockIn.lastEventInTicks;
-						float phase = float(ticksSinceLastEvent) / float(*clockIn.periodInTicks);
-
-						return phase;
-					}
-				}
-			}
-
-			return std::nullopt;
-		}
-
-	private:
-		static constexpr float outputHighVoltageLevel = 5.0f;
-		static constexpr float triggerLengthMinimumInS = 0.005f;
-
-		static constexpr uint32_t maxIndexDivisions = 9;
-		static constexpr std::array<factorType_t,21> clockFactor = {{
-			{DIV, 32, 0},
-			{DIV, 32, 1},
-			{DIV, 16, 2},
-			{DIV, 8, 3},
-			{DIV, 7, 4},
-			{DIV, 6, 5},
-			{DIV, 5, 6},
-			{DIV, 4, 7},
-			{DIV, 3, 8},
-			{DIV, 2, 9},
-			{MULT, 1, 10},
-			{MULT, 2, 11},
-			{MULT, 3, 12},
-			{MULT, 4, 13},
-			{MULT, 5, 14},
-			{MULT, 6, 15},
-			{MULT, 7, 16},
-			{MULT, 8, 17},
-			{MULT, 12, 18},
-			{MULT, 16, 19},
-			{MULT, 16, 20}
-		}};
-
-	private:
-		float timeStepInS;
-		uint32_t triggerLengthMinimumInTicks;
-		uint32_t triggerLength5msInTicks;
-		uint32_t triggerLengthInTicks;
-		uint32_t ticks;
-		std::array<uint32_t, maxIndexDivisions + 1> clockDivCounter;
-		factorType_t factor;
-		float pulsewidth;
-		invMode_t invMode;
-		outputState_t clockOutState;
-		float phase;
-		bool processSyncPulse;
-		uint32_t clockOutRisingEdgeCounter;
-
-		struct clockMeasures
-		{
-			std::optional<uint32_t> lastEventInTicks;
-			std::optional<uint32_t> periodInTicks;
-		};
-
-		clockMeasures clockIn;
-		clockMeasures clockOut;
-		clockMeasures clockInvOut;
-
-	private:
-		FlipFlop triggerDetectorClock;
-		EdgeDetector triggerEdgeDetectorClock;
-
-		FlipFlop triggerDetectorReset;
-		EdgeDetector triggerEdgeDetectorReset;
-	};
 
 private:
 	struct MappingA
@@ -480,15 +510,15 @@ private:
 		const static Info::Elem OutLight = Out4Light;
 	};
 
-	Channel<MappingA> channelA;
-	Channel<MappingB> channelB;
-	Channel<MappingC> channelC;
-	Channel<MappingD> channelD;
+	QCDChannel<QCDCore, MappingA> channelA;
+	QCDChannel<QCDCore, MappingB> channelB;
+	QCDChannel<QCDCore, MappingC> channelC;
+	QCDChannel<QCDCore, MappingD> channelD;
 
-	friend Channel<MappingA>;
-	friend Channel<MappingB>;
-	friend Channel<MappingC>;
-	friend Channel<MappingD>;
+	friend QCDChannel<QCDCore, MappingA>;
+	friend QCDChannel<QCDCore, MappingB>;
+	friend QCDChannel<QCDCore, MappingC>;
+	friend QCDChannel<QCDCore, MappingD>;
 
 public:
 	QCDCore()

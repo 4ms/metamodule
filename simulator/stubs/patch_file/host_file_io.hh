@@ -133,8 +133,16 @@ struct HostFileIO {
 	}
 
 	bool delete_file(std::string_view filename) {
-		//TODO
-		return false;
+		std::filesystem::current_path(_root_dir);
+		std::string filepath;
+		if (filename.starts_with("/"))
+			filepath = "." + std::string(filename);
+		else
+			filepath = filename;
+
+		std::cout << "HostFileIO: delete " << filepath << "\n";
+
+		return std::filesystem::remove(filepath) > 0;
 	}
 
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {

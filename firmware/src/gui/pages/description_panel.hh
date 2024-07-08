@@ -37,13 +37,15 @@ struct PatchDescriptionPanel {
 		lv_obj_add_event_cb(ui_DescriptionEditCancelButton, cancel_cb, LV_EVENT_CLICKED, this);
 	}
 
-	void prepare_focus(lv_group_t *base_group, PatchData &cur_patch) {
+	void prepare_focus(lv_group_t *base_group) {
 		parent_group = base_group;
-		patch = &cur_patch;
-
 		lv_hide(ui_DescriptionPanel);
-		lv_label_set_text(ui_Description, cur_patch.description.c_str());
-		lv_label_set_text(ui_DescPanelPatchName, cur_patch.patch_name.c_str());
+	}
+
+	void set_patch(PatchData *cur_patch) {
+		patch = cur_patch;
+		lv_label_set_text(ui_Description, patch->description.c_str());
+		lv_label_set_text(ui_DescPanelPatchName, patch->patch_name.c_str());
 	}
 
 	bool is_visible() {

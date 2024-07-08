@@ -8,24 +8,30 @@
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 #include "util/zip.hh"
+#include <functional>
 
 namespace MetaModule
 {
 
 struct PatchSelectorSubdirPanel {
-	PatchSelectorSubdirPanel(std::vector<EntryInfo> &roller_items)
-		: roller_item_infos{roller_items} {
+
+	void set_parent(lv_obj_t *parent, unsigned zindex) {
+		lv_obj_set_parent(ui_DrivesPanel, parent);
+		lv_obj_move_to_index(ui_DrivesPanel, zindex);
+
 		for (auto vol_cont : vol_conts) {
 			auto vol_item = lv_obj_get_child(vol_cont, 0);
+			while (lv_obj_remove_event_cb(vol_item, nullptr)) {
+			}
+			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
 			lv_obj_add_event_cb(vol_item, subdir_focus_cb, LV_EVENT_FOCUSED, this);
 			lv_obj_add_event_cb(vol_item, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
-			lv_obj_add_event_cb(vol_item, subdir_click_cb, LV_EVENT_CLICKED, this);
-			lv_obj_set_user_data(vol_item, nullptr);
 		}
 	}
 
-	void populate(lv_group_t *parent_group, PatchDirList &patchfiles) {
-		group = parent_group;
+	void populate(PatchDirList &patchfiles) {
+		if (group == nullptr)
+			group = lv_group_create();
 
 		// populate side bar with volumes and dirs
 		for (auto [vol_cont, root] : zip(vol_conts, patchfiles.vol_root)) {
@@ -33,6 +39,9 @@ struct PatchSelectorSubdirPanel {
 			// Delete existing dir labels (except first one, which is the volume root)
 			if (auto num_children = lv_obj_get_child_cnt(vol_cont); num_children > 1) {
 				for (unsigned i = 1; i < num_children; i++) {
+					if (last_subdir_sel == lv_obj_get_child(vol_cont, i)) {
+						last_subdir_sel = nullptr; //prevent dangling pointer
+					}
 					lv_obj_del_async(lv_obj_get_child(vol_cont, i));
 				}
 			}
@@ -62,48 +71,53 @@ struct PatchSelectorSubdirPanel {
 		}
 	}
 
-	void refresh() {
-		auto idx = lv_roller_get_selected(ui_PatchListRoller);
-		if (idx >= roller_item_infos.size())
-			return;
-
-		auto &entry = roller_item_infos[idx];
+	void refresh(EntryInfo const &selected_patch) {
+		// TODO: check if list was re-populated, or if entry info dir name changed, and only refresh if so
 
 		for (auto [vol, vol_name, vol_cont] : zip(PatchDirList::vols, PatchDirList::vol_name, vol_conts)) {
-			if (vol != entry.vol)
+			if (vol != selected_patch.vol)
 				continue;
 
-			lv_foreach_child(vol_cont, [this, entry, vol_name = vol_name](lv_obj_t *obj, unsigned i) {
+			lv_obj_t *dir_obj = nullptr;
+
+			lv_foreach_child(vol_cont, [selected_patch, vol_name = vol_name, &dir_obj](lv_obj_t *obj, unsigned i) {
 				auto label_child = (i == 0) ? 1 : 0;
 				const char *txt = lv_label_get_text(lv_obj_get_child(obj, label_child));
-				const char *roller_path = (i == 0) ? vol_name : entry.path.c_str();
+				const char *roller_path = (i == 0) ? vol_name : selected_patch.path.c_str();
 				if (txt == nullptr)
-					return true;
+					return true; //continue
 
 				if (strcmp(txt, roller_path) == 0) {
-					if (last_subdir_sel) {
-						lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
-						lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
-						label_clips(last_subdir_sel);
-					}
-					last_subdir_sel = obj;
-					if (lv_obj_has_state(ui_DrivesPanel, LV_STATE_FOCUSED)) {
-						lv_obj_add_state(obj, LV_STATE_FOCUSED);
-					} else {
-						lv_obj_add_state(obj, LV_STATE_USER_2);
-					}
-					label_scrolls(obj);
-					lv_obj_scroll_to_view_recursive(obj, LV_ANIM_ON);
-					return (i == 0) ? true : false;
+					dir_obj = obj;
 				}
 				return true;
 			});
+
+			if (dir_obj && last_subdir_sel != dir_obj) {
+				if (last_subdir_sel) {
+					lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
+					lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUS_KEY);
+					lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
+					label_clips(last_subdir_sel);
+				}
+
+				if (lv_obj_has_state(ui_DrivesPanel, LV_STATE_FOCUSED)) {
+					lv_obj_add_state(dir_obj, LV_STATE_FOCUSED);
+				} else {
+					lv_obj_add_state(dir_obj, LV_STATE_USER_2);
+				}
+				label_scrolls(dir_obj);
+				lv_obj_scroll_to_view_recursive(dir_obj, LV_ANIM_ON);
+
+				last_subdir_sel = dir_obj;
+			}
 		}
 	}
 
 	void focus() {
-		lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
 		lv_obj_add_state(ui_DrivesPanel, LV_STATE_FOCUSED);
+
+		lv_group_activate(group);
 
 		if (last_subdir_sel) {
 			lv_obj_clear_state(last_subdir_sel, LV_STATE_USER_2);
@@ -116,12 +130,8 @@ struct PatchSelectorSubdirPanel {
 
 	void blur() {
 		lv_obj_clear_state(ui_DrivesPanel, LV_STATE_FOCUSED);
-		lv_obj_clear_state(ui_PatchListRoller, LV_STATE_DISABLED);
-		lv_group_focus_obj(ui_PatchListRoller);
-		if (group)
-			lv_group_set_editing(group, true);
-
 		if (last_subdir_sel) {
+			lv_obj_clear_state(last_subdir_sel, LV_STATE_FOCUSED);
 			lv_obj_add_state(last_subdir_sel, LV_STATE_USER_2);
 		}
 	}
@@ -132,26 +142,26 @@ struct PatchSelectorSubdirPanel {
 			return;
 
 		label_scrolls(event->target);
-
 		page->last_subdir_sel = event->target;
 
-		auto *dir = static_cast<PatchDir *>(event->target->user_data);
+		if (page->focus_cb) {
+			auto parent = lv_obj_get_parent(event->target);
 
-		auto parent = lv_obj_get_parent(event->target);
-		Volume this_vol{};
-		for (auto [vol, vol_cont] : zip(PatchDirList::vols, page->vol_conts)) {
-			if (parent == vol_cont)
-				this_vol = vol;
-		}
-
-		uint32_t first_roller_entry = 0;
-		for (auto [i, entry] : enumerate(page->roller_item_infos)) {
-			if (entry.path == dir->name && entry.vol == this_vol) {
-				first_roller_entry = i;
-				break;
+			Volume this_vol{};
+			for (auto [vol, vol_cont] : zip(PatchDirList::vols, page->vol_conts)) {
+				if (parent == vol_cont) {
+					this_vol = vol;
+					break;
+				}
 			}
+
+			std::string_view dirname = "";
+			if (auto dir = static_cast<PatchDir *>(event->target->user_data); dir) {
+				dirname = std::string_view{dir->name};
+			}
+
+			page->focus_cb(this_vol, dirname);
 		}
-		lv_roller_set_selected(ui_PatchListRoller, first_roller_entry + 1, LV_ANIM_ON);
 	}
 
 	static void subdir_defocus_cb(lv_event_t *event) {
@@ -161,12 +171,32 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	static void subdir_click_cb(lv_event_t *event) {
-		auto panel = static_cast<PatchSelectorSubdirPanel *>(event->user_data);
-		if (panel)
-			panel->blur();
+		auto page = static_cast<PatchSelectorSubdirPanel *>(event->user_data);
+
+		if (page && event->target && page->click_cb) {
+			auto parent = lv_obj_get_parent(event->target);
+
+			Volume this_vol{};
+			for (auto [vol, vol_cont] : zip(PatchDirList::vols, page->vol_conts)) {
+				if (parent == vol_cont) {
+					this_vol = vol;
+					break;
+				}
+			}
+
+			std::string_view dirname = "";
+			if (auto dir = static_cast<PatchDir *>(event->target->user_data); dir) {
+				dirname = std::string_view{dir->name};
+			}
+
+			page->click_cb(this_vol, dirname);
+		}
 	}
 
-	lv_obj_t *last_subdir_sel = nullptr;
+	const std::array<lv_obj_t *, 4> vol_conts = {ui_OpenFileCont, ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
+
+	std::function<void(Volume vol, std::string_view dirname)> focus_cb;
+	std::function<void(Volume vol, std::string_view dirname)> click_cb;
 
 private:
 	void add_subdir_to_panel(PatchDir &dir, lv_obj_t *vol_label) {
@@ -187,6 +217,9 @@ private:
 
 		lv_obj_add_flag(btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_set_user_data(btn, &dir);
+
+		while (lv_obj_remove_event_cb(btn, nullptr)) {
+		}
 		lv_obj_add_event_cb(btn, subdir_focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(btn, subdir_defocus_cb, LV_EVENT_DEFOCUSED, this);
 		lv_obj_add_event_cb(btn, subdir_click_cb, LV_EVENT_CLICKED, this);
@@ -194,11 +227,8 @@ private:
 		lv_group_add_obj(group, btn);
 	}
 
-	lv_group_t *group{};
-
-	const std::array<lv_obj_t *, 3> vol_conts = {ui_USBVolCont, ui_SDVolCont, ui_FlashVolCont};
-
-	std::vector<EntryInfo> &roller_item_infos;
+	lv_obj_t *last_subdir_sel = nullptr;
+	lv_group_t *group = nullptr;
 };
 
 } // namespace MetaModule

@@ -35,12 +35,6 @@ build/simulator --help
 
 See the [Simulator Usage guide](simulator-usage.md) for arguments details.
 
-When adding/removing assets, sometimes you need to clean the build:
-
-```
-rm -rf build
-```
-
 As a shortcut, there is a Makefile wrapping the above cmake commands. 
 You can just do:
 
@@ -57,22 +51,20 @@ make clean
 
 Note that `make run` doesn't allow you to pass arguments.
 
-### Limiting the modules built
+## Adding/removing PNG images from assets directory
 
-You also can limit the modules built to substantially reduce the compilation
-and link times. Create a text file with the modules
-you want built, one per line. Each line should contain an
-entry in the form `Brand:Module`. For example:
+When adding/removing images in the `firmware/assets` dir, you must re-build the assets tar image before the simulator will 
+show the updated image assets. This is done automatically whenever you build the firmware normally, or you can build the `asset-image` cmake target:
 
 ```
-echo "4ms:EnOsc" >> quickbuild.txt
-echo "Befaco:EvenVCO" >> quickbuild.txt
-echo "hetrickcv:PhasorGen" >> quickbuild.txt
+# edit/add/remove some graphical asset in the firmware/assets dir
 
-make limit quickbuild.txt
+cd ../firmware
+cmake --build build -- asset-image
+cd ../simulator
+
+# now running the simulator will use the updated assets
 ```
 
-This would tell CMake to re-configure the project and just build those three modules.
-You can still open patches containing other modules, but their artwork won't be shown
-and you can't play them.
-
+The reason is that the simulator does not access the `firmware/assets` dir on the host filesystem
+directly, instead it does the same thing that the firmware does: untar the assets tarball into a virtual FatFS ram disk. 

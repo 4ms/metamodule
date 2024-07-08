@@ -23,12 +23,12 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.7368508"
-     inkscape:cx="188.27178"
+     inkscape:cx="187.98391"
      inkscape:cy="262.54414"
-     inkscape:window-width="2512"
-     inkscape:window-height="1387"
+     inkscape:window-width="1728"
+     inkscape:window-height="1051"
      inkscape:window-x="50"
-     inkscape:window-y="25"
+     inkscape:window-y="38"
      inkscape:window-maximized="0"
      inkscape:current-layer="components" />
   <defs
@@ -2562,7 +2562,7 @@
        x="134.53238"
        y="22.320103" />
     <rect
-       style="fill:#808080;fill-opacity:0.5;stroke-width:0.808629"
+       style="fill:#808082;fill-opacity:0.5;stroke-width:0.808629"
        id="Pan@SUM/R@RND@ALT"
        width="136.01607"
        height="7.2180891"
@@ -2576,7 +2576,7 @@
        x="61.751888"
        y="37.28054" />
     <rect
-       style="fill:#808080;fill-opacity:0.5;stroke-width:1.00004"
+       style="fill:#808082;fill-opacity:0.5;stroke-width:1.00004"
        id="Velocity@Min@Low@Med@High@Max"
        width="208.02959"
        height="7.2180891"
@@ -2678,7 +2678,7 @@
        y="308.5"
        width="11.34"
        height="17.01"
-       style="fill:#ffc080" />
+       style="fill:#ffc081" />
     <circle
        id="Delete#MomentaryRGB5mm"
        cx="194.13"
@@ -2705,7 +2705,7 @@
        y="308.5"
        width="11.34"
        height="17.01"
-       style="fill:#ffc080" />
+       style="fill:#ffc081" />
     <circle
        id="Button_6"
        data-name="Button 6#MomentaryRGB5mm"
@@ -2761,7 +2761,7 @@
        cx="223.88"
        cy="155.83"
        r="17.01"
-       style="fill: #ff0080;" />
+       style="fill:#ff0040" />
     <circle
        id="Modulation"
        cx="164.73"
@@ -2785,6 +2785,6 @@
        cx="34.7"
        cy="97.51"
        r="8.5"
-       style="fill: #ff0070;" />
+       style="fill:#ff0060" />
   </g>
 </svg>

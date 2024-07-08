@@ -92,11 +92,11 @@ public:
 
   size_t buffer_size() { return buffer_.size(); }
 
-  Observable0 reset_observable_;
-  Observable0 slot_modified_observable_;
-  Observable0 tap_modulo_observable_;
-  Observable2<TapType, float> tap_observable_;
-  Observable1<float> step_observable_;
+  Observable0 reset_observable_{};
+  Observable0 slot_modified_observable_{};
+  Observable0 tap_modulo_observable_{};
+  Observable2<TapType, float> tap_observable_{};
+  Observable1<float> step_observable_{};
 
 private:
   template<bool repeat_tap_on_output>

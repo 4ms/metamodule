@@ -27,7 +27,7 @@ TEST_CASE("squash_ids() works") {
 
 TEST_CASE("ids are re-arranged properly") {
 
-	std::vector<ModuleID> modules;
+	std::vector<BrandModule> modules;
 	int64_t hub_id = 1;
 	modules.push_back({11, "A"});
 	modules.push_back({6, "B"});
