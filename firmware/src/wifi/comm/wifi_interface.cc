@@ -30,8 +30,7 @@ using Timestamp_t = uint32_t;
 std::optional<Timestamp_t> lastHeartbeatSentTime;
 static constexpr Timestamp_t HeartbeatInterval = 1000;
 
-const uint8_t Management_ID = 1;
-const uint8_t Broadcast_ID = 0;
+enum ChannelID_t : uint8_t {Broadcast = 0, Management = 1, Connections = 2};
 
 std::optional<IPAddress_t> currentIPAddress;
 
@@ -92,14 +91,14 @@ void receiveFrame(std::span<uint8_t> fullFrame) {
 };
 
 void sendBroadcast(std::span<uint8_t> payload) {
-	sendFrame(Broadcast_ID, payload);
+	sendFrame(ChannelID_t::Broadcast, payload);
 }
 
 void requestIP()
 {
 	// For now, every request on the management channel is responded the IP
 	std::array<uint8_t,3> payload{0xA, 0xB, 0xC};
-	sendFrame(Management_ID, std::span(payload));
+	sendFrame(ChannelID_t::Management, std::span(payload));
 }
 
 std::optional<IPAddress_t> getCurrentIP()
@@ -155,7 +154,7 @@ void send_heartbeat()
 }
 
 void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
-	if (destination == Management_ID)
+	if (destination == ChannelID_t::Management)
 	{
 		if (payload.size() == 4)
 		{
