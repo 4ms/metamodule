@@ -3,6 +3,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(mm_sim LANGUAGES C CXX)
 
+set(SIMULATOR 1)
+
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
 set(SHARED ${CMAKE_CURRENT_LIST_DIR}/../shared)
 set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)

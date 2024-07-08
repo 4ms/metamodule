@@ -299,7 +299,7 @@ typedef struct
 #define SDMMC_CARD_LOCKED                  ((uint32_t)0x02000000U)
 
 //#define SDMMC_DATATIMEOUT                  ((uint32_t)0xFFFFFFFFU)
-#define SDMMC_DATATIMEOUT                  ((uint32_t)0x00100000U)
+#define SDMMC_DATATIMEOUT                  ((uint32_t)5000U) // 5 seconds
 
 #define SDMMC_0TO7BITS                     ((uint32_t)0x000000FFU)
 #define SDMMC_8TO15BITS                    ((uint32_t)0x0000FF00U)
@@ -317,7 +317,8 @@ typedef struct
 
 #define SDMMC_CMDTIMEOUT                   ((uint32_t)5000U)        /* Command send and response timeout */
 #define SDMMC_MAXERASETIMEOUT              ((uint32_t)63000U)       /* Max erase Timeout 63 s            */
-#define SDMMC_STOPTRANSFERTIMEOUT          ((uint32_t)100000000U)   /* Timeout for STOP TRANSMISSION command */
+// #define SDMMC_STOPTRANSFERTIMEOUT          ((uint32_t)100000000U)   /* Timeout for STOP TRANSMISSION command */
+#define SDMMC_STOPTRANSFERTIMEOUT          ((uint32_t)5000U)   /* Timeout for STOP TRANSMISSION command */
 
 /** @defgroup SDMMC_LL_Clock_Edge Clock Edge
   * @{
