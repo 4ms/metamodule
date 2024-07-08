@@ -9,7 +9,7 @@ struct StreamConfSingleCodec6x8 {
 	struct Audio {
 
 		// BlockSize: Number of Frames processed each time AudioStream::process() is called
-		static constexpr int BlockSize = 256;
+		static constexpr int BlockSize = 64;
 
 		// static constexpr int NumDMAHalfTransfers = 2;
 		using SampleT = int32_t;
