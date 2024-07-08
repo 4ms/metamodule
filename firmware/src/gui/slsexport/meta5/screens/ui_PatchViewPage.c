@@ -57,7 +57,7 @@ lv_obj_set_style_pad_column(ui_PatchViewPage, 0, LV_PART_SCROLLBAR| LV_STATE_FOC
 
 ui_PatchName = lv_label_create(ui_PatchViewPage);
 lv_obj_set_width( ui_PatchName, 260);
-lv_obj_set_height( ui_PatchName, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_height( ui_PatchName, 20);
 lv_obj_set_x( ui_PatchName, 0 );
 lv_obj_set_y( ui_PatchName, 60 );
 lv_obj_set_align( ui_PatchName, LV_ALIGN_CENTER );
