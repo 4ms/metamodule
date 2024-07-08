@@ -12,6 +12,8 @@ target_sources(pffft PRIVATE
 # Fixup for pffft compiler warnings
 set_source_files_properties(pffft.c PROPERTIES COMPILE_OPTIONS "-Wno-double-promotion;-Wno-pointer-to-int-cast")
 
-target_compile_definitions(pffft PRIVATE ZCONVOLVE_USING_INLINE_ASM=1)
+if(NOT DEFINED SIMULATOR)
+	target_compile_definitions(pffft PRIVATE ZCONVOLVE_USING_INLINE_ASM=1)
+endif()
 
 target_include_directories(pffft PUBLIC .)
