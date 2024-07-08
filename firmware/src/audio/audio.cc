@@ -130,15 +130,14 @@ bool AudioStream::check_patch_loading() {
 	if (patch_loader.should_fade_down_audio()) {
 		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt <= 0.f) {
-			patch_loader.notify_audio_is_muted();
 			output_fade_amt = 0.f;
 			output_fade_delta = 0.f;
+			patch_loader.notify_audio_is_muted();
 		}
 
 	} else if (patch_loader.should_fade_up_audio()) {
 		output_fade_delta = 1.f / (sample_rate_ * 0.02f);
 		if (output_fade_amt >= 1.f) {
-			patch_loader.notify_audio_is_muted();
 			output_fade_amt = 1.f;
 			output_fade_delta = 0.f;
 			patch_loader.notify_audio_not_muted();

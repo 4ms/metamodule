@@ -84,7 +84,8 @@ public:
 			// Acknowlegde patch loader's request to mute audio
 			patch_loader.notify_audio_is_muted();
 			return true;
-		} else {
+
+		} else if (patch_loader.should_fade_up_audio()) {
 			patch_loader.notify_audio_not_muted();
 		}
 

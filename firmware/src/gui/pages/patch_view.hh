@@ -266,19 +266,24 @@ struct PatchViewPage : PageBase {
 			gui_state.force_refresh_vol = patches.get_view_patch_vol();
 		}
 
-		if (is_patch_playing) {
+		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
 			update_changed_params();
+
+			if (!lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
+				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
+			}
+
 			if (last_audio_load != metaparams.audio_load) {
 				last_audio_load = metaparams.audio_load;
 				lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
 				lv_show(ui_LoadMeter2);
 			}
-		}
 
-		if (is_patch_playing) {
-			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 		} else {
-			lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
+			if (lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
+				lv_hide(ui_LoadMeter2);
+				lv_obj_clear_state(ui_PlayButton, LV_STATE_USER_2);
+			}
 		}
 
 		if (file_menu.is_visible())
@@ -470,6 +475,13 @@ private:
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page->is_patch_playing)
 			page->patch_playloader.request_load_view_patch();
+		} else {
+			if (page->patch_playloader.is_audio_muted()) {
+				page->patch_playloader.start_audio();
+			} else {
+				page->patch_playloader.stop_audio();
+			}
+		}
 	}
 
 	static void button_focussed_cb(lv_event_t *event) {
