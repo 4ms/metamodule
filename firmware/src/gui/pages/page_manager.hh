@@ -91,6 +91,8 @@ public:
 		} else
 			cur_page->update();
 
+		handle_audio_errors();
+
 		handle_notifications();
 	}
 
@@ -173,6 +175,13 @@ public:
 		if (msg) {
 			pr_info("%s\n", msg->message.c_str());
 			DisplayNotification::show(*msg);
+		}
+	}
+
+	void handle_audio_errors() {
+		if (info.patch_playloader.did_audio_overrun()) {
+			info.notify_queue.put({"Audio stopped because patch load > 99%.", Notification::Priority::Error, 1500});
+			info.patch_playloader.clear_audio_overrun();
 		}
 	}
 

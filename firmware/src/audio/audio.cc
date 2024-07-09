@@ -101,8 +101,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		load_measure.end_measurement();
 		if (load_measure.get_last_measurement_load_percent() >= 98) {
 			output_fade_amt = 0.f;
-			output_fade_delta = 0.f;
-			patch_loader.notify_audio_is_muted();
+			patch_loader.notify_audio_overrun();
 		}
 
 		// Debug::Pin4::low();
