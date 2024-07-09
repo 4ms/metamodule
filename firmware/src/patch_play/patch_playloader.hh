@@ -71,6 +71,7 @@ struct PatchPlayLoader {
 		audio_is_muted_ = false;
 		starting_audio_ = true;
 		stopping_audio_ = false;
+		clear_audio_overrun();
 	}
 
 	void request_load_view_patch() {
@@ -100,6 +101,12 @@ struct PatchPlayLoader {
 		stopping_audio_ = false;
 		audio_is_muted_ = true;
 	}
+
+	void notify_audio_overrun() {
+		notify_audio_is_muted();
+		audio_overrun_ = true;
+	}
+
 	void notify_audio_not_muted() {
 		starting_audio_ = false;
 		audio_is_muted_ = false;
@@ -111,6 +118,14 @@ struct PatchPlayLoader {
 
 	bool is_playing() {
 		return !audio_is_muted_ && player_.is_loaded;
+	}
+
+	bool did_audio_overrun() {
+		return audio_overrun_;
+	}
+
+	void clear_audio_overrun() {
+		audio_overrun_ = false;
 	}
 
 	// Concurrency: Called from UI thread
@@ -183,6 +198,7 @@ private:
 	std::atomic<bool> starting_audio_ = false;
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
+	std::atomic<bool> audio_overrun_ = false;
 
 	Result save_patch() {
 		auto view_patch = patches_.get_view_patch();
@@ -242,6 +258,7 @@ private:
 		if (result.success) {
 			if (next_patch == patches_.get_view_patch())
 				patches_.play_view_patch();
+
 			//TODO: give patches a ptr to this patch?
 			start_audio();
 		}

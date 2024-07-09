@@ -74,9 +74,6 @@ private:
 	bool ext_audio_connected = false;
 	ParamBlock local_p;
 
-	bool skip_audio = false;
-	unsigned skip_count = 0;
-
 	AudioConf::SampleT get_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
