@@ -53,6 +53,9 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
           cmake-version: '3.26.x'
+          
+      - name: Git setup
+        run: git config --global --add safe.directory '*'
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,9 +97,6 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
           cmake-version: '3.26.x'
-
-      - name: Git setup
-        run: git config --global --add safe.directory '*'
 
       - name: Checkout
         uses: actions/checkout@v4
