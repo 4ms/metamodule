@@ -12,8 +12,8 @@ namespace MetaModule
 struct InfoTab : SystemMenuTab {
 
 	InfoTab(FileStorageProxy &storage)
-		: storage{storage}
-	{
+		: storage{storage} {
+		lv_label_set_text(ui_SystemMenuExpanders, "No wifi module found");
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -54,24 +54,29 @@ struct InfoTab : SystemMenuTab {
 
 					lv_show(ui_SystemMenuExpanders);
 
-					auto& newIP = *message.wifi_ip_result;
+					auto &newIP = *message.wifi_ip_result;
 
-					if (message.wifi_ip_result)
-					{
-						pr_trace("Got Wifi IP: %u %u %u %u\n", newIP[0], newIP[1], newIP[2], newIP[3]);
+					if (message.wifi_ip_result) {
+						pr_trace("Got Wifi IP: %u.%u.%u.%u\n", newIP[0], newIP[1], newIP[2], newIP[3]);
 
-						lv_label_set_text_fmt(
-						ui_SystemMenuExpanders, "Wifi IP: %u.%u.%u.%u", newIP[0], newIP[1], newIP[2], newIP[3]);
-					}
-					else
-					{
-						switch (message.wifi_ip_result.error())
-						{
+						lv_label_set_text_fmt(ui_SystemMenuExpanders,
+											  "Wifi: http://%u.%u.%u.%u:8080",
+											  newIP[0],
+											  newIP[1],
+											  newIP[2],
+											  newIP[3]);
+
+					} else {
+
+						switch (message.wifi_ip_result.error()) {
+
 							case IntercoreStorageMessage::WifiIPError::NO_MODULE_CONNECTED:
-								lv_label_set_text(ui_SystemMenuExpanders, "No Module connected");
+								lv_label_set_text(ui_SystemMenuExpanders, "No wifi module found");
 								break;
+
 							case IntercoreStorageMessage::WifiIPError::NO_IP:
-								lv_label_set_text(ui_SystemMenuExpanders, "No IP");
+								lv_label_set_text(ui_SystemMenuExpanders,
+												  "Wifi module not connected\n to a wifi network");
 								break;
 						}
 					}
@@ -80,7 +85,7 @@ struct InfoTab : SystemMenuTab {
 
 				} else if (message.message_type == FileStorageProxy::WifiIPFailed) {
 					lv_show(ui_SystemMenuExpanders);
-					lv_label_set_text(ui_SystemMenuExpanders, "Internal Error");
+					lv_label_set_text(ui_SystemMenuExpanders, "Wifi module: Internal Error");
 
 					wifi_ip_state = WifiIPState::Idle;
 				}
