@@ -32,6 +32,8 @@ static constexpr Timestamp_t HeartbeatInterval = 1000;
 
 enum ChannelID_t : uint8_t {Broadcast = 0, Management = 1, Connections = 2};
 
+std::optional<Timestamp_t> lastIPAnswerTime;
+static constexpr Timestamp_t IPRequestTimeout = 1000;
 std::expected<IPAddress_t,ErrorCode_t> currentIPAddress = std::unexpected(ErrorCode_t::NO_ANSWER);
 
 void handle_management_channel(std::span<uint8_t>);
@@ -78,11 +80,22 @@ void receiveFrame(std::span<uint8_t> fullFrame) {
 
 ///////////////////////////
 
+Timestamp_t getTimestamp()
+{
+	return HAL_GetTick();
+}
+
+
 void requestIP()
 {
 	// For now, every request on the management channel is responded the IP
 	std::array<uint8_t,3> payload{0xA, 0xB, 0xC};
 	sendFrame(ChannelID_t::Management, std::span(payload));
+
+	if (auto now = getTimestamp(); !lastIPAnswerTime or (now - *lastIPAnswerTime) > IPRequestTimeout)
+	{
+		 currentIPAddress = std::unexpected(ErrorCode_t::NO_ANSWER);
+	}
 }
 
 void send_heartbeat()
@@ -93,11 +106,6 @@ void send_heartbeat()
 	fbb.Finish(message);
 
 	sendFrame(ChannelID_t::Broadcast, fbb.GetBufferSpan());
-}
-
-Timestamp_t getTimestamp()
-{
-	return HAL_GetTick();
 }
 
 ////////////////////////////////
@@ -155,6 +163,8 @@ void handle_management_channel(std::span<uint8_t> payload)
 			std::copy(payload.begin(), payload.end(), thisIP.data());
 			currentIPAddress = thisIP;
 		}
+
+		lastIPAnswerTime = getTimestamp();
 	}
 }
 
