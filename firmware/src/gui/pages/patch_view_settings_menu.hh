@@ -46,7 +46,7 @@ struct PatchViewSettingsMenu {
 		base_group = group;
 		using enum MapRingStyle::Mode;
 
-		switch (settings.map_ring_style.mode) {
+		switch (settings.param_style.mode) {
 			case ShowAllIfPlaying:
 				lv_obj_add_state(ui_ShowAllMapsCheck, LV_STATE_CHECKED);
 				lv_obj_clear_state(ui_ShowSelectedMapsCheck, LV_STATE_CHECKED);
@@ -83,13 +83,14 @@ struct PatchViewSettingsMenu {
 		else
 			lv_obj_clear_state(ui_FlashMapCheck, LV_STATE_CHECKED);
 
-		if (settings.show_jack_maps)
+		if (settings.paneljack_style.mode == ShowAll)
 			lv_obj_add_state(ui_ShowJackMapsCheck, LV_STATE_CHECKED);
 		else
 			lv_obj_clear_state(ui_ShowJackMapsCheck, LV_STATE_CHECKED);
 
 		// 0..100 => 0..255
-		uint32_t opacity = (float)settings.map_ring_style.opa / 2.5f;
+		uint32_t opacity = (float)settings.param_style.opa / 2.5f;
+		settings.paneljack_style.opa = settings.param_style.opa; //set these the same for now
 		opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
 	}
 
@@ -137,6 +138,7 @@ struct PatchViewSettingsMenu {
 			return;
 		lv_event_code_t event_code = lv_event_get_code(event);
 		auto obj = lv_event_get_target(event);
+		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
 
 		if (event_code == LV_EVENT_VALUE_CHANGED) {
 			auto show_all = lv_obj_has_state(ui_ShowAllMapsCheck, LV_STATE_CHECKED);
@@ -154,25 +156,24 @@ struct PatchViewSettingsMenu {
 				show_all = false;
 			}
 
-			auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
-			{
-				using enum MapRingStyle::Mode;
-				auto &style = page->settings.map_ring_style;
+			using enum MapRingStyle::Mode;
 
-				style.mode = show_only_playing ? ShowAllIfPlaying : ShowAll;
-				if (show_all)
-					style.mode = show_only_playing ? ShowAllIfPlaying : ShowAll;
-				else if (show_selected)
-					style.mode = show_only_playing ? CurModuleIfPlaying : CurModule;
-				else
-					style.mode = HideAlways;
-			}
+			page->settings.param_style.mode = show_only_playing ? ShowAllIfPlaying : ShowAll;
+			if (show_all)
+				page->settings.param_style.mode = show_only_playing ? ShowAllIfPlaying : ShowAll;
+			else if (show_selected)
+				page->settings.param_style.mode = show_only_playing ? CurModuleIfPlaying : CurModule;
+			else
+				page->settings.param_style.mode = HideAlways;
+
+			page->settings.paneljack_style.mode = show_jack_maps ? ShowAll : HideAlways;
 
 			auto opacity = lv_slider_get_value(ui_MapTranspSlider); //0..100
 			opacity = (float)opacity * 2.5f;
-			page->settings.map_ring_style.opa = opacity;
+			page->settings.param_style.opa = opacity;
+			page->settings.paneljack_style.opa = opacity;
+
 			page->settings.map_ring_flash_active = flash_active;
-			page->settings.show_jack_maps = show_jack_maps;
 			page->settings.changed = true;
 		}
 	}

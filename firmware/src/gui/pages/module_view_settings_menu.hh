@@ -41,31 +41,24 @@ struct ModuleViewSettingsMenu {
 		base_group = group;
 		using enum MapRingStyle::Mode;
 
-		switch (settings.map_ring_style.mode) {
-			case ShowAllIfPlaying:
-			case ShowAll:
-			case CurModuleIfPlaying:
-			case CurModule:
-				lv_obj_add_state(ui_MVShowPlayingMapsCheck, LV_STATE_CHECKED);
-				break;
-
-			case HideAlways:
-				lv_obj_clear_state(ui_MVShowPlayingMapsCheck, LV_STATE_CHECKED);
-				break;
-		}
+		if (settings.param_style.mode == ShowAll)
+			lv_obj_add_state(ui_MVShowPlayingMapsCheck, LV_STATE_CHECKED);
+		else
+			lv_obj_clear_state(ui_MVShowPlayingMapsCheck, LV_STATE_CHECKED);
 
 		if (settings.map_ring_flash_active)
 			lv_obj_add_state(ui_MVFlashMapCheck, LV_STATE_CHECKED);
 		else
 			lv_obj_clear_state(ui_MVFlashMapCheck, LV_STATE_CHECKED);
 
-		if (settings.show_jack_maps)
+		if (settings.paneljack_style.mode == ShowAll)
 			lv_obj_add_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
 		else
 			lv_obj_clear_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
 
 		// 0..100 => 0..255
-		uint32_t opacity = (float)settings.map_ring_style.opa / 2.5f;
+		uint32_t opacity = (float)settings.param_style.opa / 2.5f;
+		settings.paneljack_style.opa = settings.param_style.opa; //for now, jack and knob map opa is the same
 		opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
 	}
 
@@ -116,16 +109,16 @@ struct ModuleViewSettingsMenu {
 		auto flash_active = lv_obj_has_state(ui_MVFlashMapCheck, LV_STATE_CHECKED);
 		auto show_jack_maps = lv_obj_has_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
 
-		auto &style = page->settings.map_ring_style;
-
 		using enum MapRingStyle::Mode;
-		style.mode = show_control_maps ? ShowAll : HideAlways;
+		page->settings.param_style.mode = show_control_maps ? ShowAll : HideAlways;
+		page->settings.paneljack_style.mode = show_jack_maps ? ShowAll : HideAlways;
 
 		auto opacity = lv_slider_get_value(ui_MVMapTranspSlider); //0..100
 		opacity = (float)opacity * 2.5f;
-		page->settings.map_ring_style.opa = opacity;
+		page->settings.param_style.opa = opacity;
+		page->settings.paneljack_style.opa = opacity;
+
 		page->settings.map_ring_flash_active = flash_active;
-		page->settings.show_jack_maps = show_jack_maps;
 		page->settings.changed = true;
 	}
 

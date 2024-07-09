@@ -255,6 +255,7 @@ struct ModuleViewPage : PageBase {
 		if (page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
+			update_cable_style();
 		}
 
 		if (is_patch_playing) {
