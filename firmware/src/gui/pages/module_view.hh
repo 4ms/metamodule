@@ -9,6 +9,7 @@
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_action_menu.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
+#include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -22,6 +23,7 @@ struct ModuleViewPage : PageBase {
 		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings.module_view}
 		, page_settings{settings.module_view}
+		, settings_menu{settings.module_view}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader} {
@@ -81,6 +83,7 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_ModuleViewActionMenu);
 		lv_hide(ui_AutoMapSelectPanel);
 
+		settings_menu.prepare_focus(group);
 		action_menu.prepare_focus(group, this_module_id);
 	}
 
@@ -219,6 +222,9 @@ struct ModuleViewPage : PageBase {
 			if (action_menu.is_visible()) {
 				action_menu.hide();
 
+			} else if (settings_menu.visible) {
+				settings_menu.hide();
+
 			} else if (mode == ViewMode::List) {
 				load_prev_page();
 
@@ -326,6 +332,7 @@ struct ModuleViewPage : PageBase {
 
 	void blur() final {
 		params.lights.stop_watching_all();
+		settings_menu.hide();
 		action_menu.hide();
 	}
 
@@ -483,6 +490,7 @@ private:
 	MapRingDisplay map_ring_display;
 
 	ModuleDisplaySettings &page_settings;
+	ModuleViewSettingsMenu settings_menu;
 
 	std::string opts;
 	uint16_t this_module_id = 0;
