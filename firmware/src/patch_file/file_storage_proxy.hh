@@ -181,8 +181,8 @@ public:
 		return comm_.send_message(message);
 	}
 
-	[[nodiscard]] bool request_wifi_ip(std::span<char> buffer) {
-		IntercoreStorageMessage message{.message_type = RequestWifiIP, .buffer = buffer};
+	[[nodiscard]] bool request_wifi_ip() {
+		IntercoreStorageMessage message{.message_type = RequestWifiIP};
 		return comm_.send_message(message);
 	}
 

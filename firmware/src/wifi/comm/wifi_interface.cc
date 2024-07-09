@@ -32,7 +32,7 @@ static constexpr Timestamp_t HeartbeatInterval = 1000;
 
 enum ChannelID_t : uint8_t {Broadcast = 0, Management = 1, Connections = 2};
 
-std::optional<IPAddress_t> currentIPAddress;
+std::expected<IPAddress_t,ErrorCode_t> currentIPAddress = std::unexpected(ErrorCode_t::NO_ANSWER);
 
 void handle_management_channel(std::span<uint8_t>);
 void handle_client_channel(uint8_t, std::span<uint8_t>);
@@ -132,7 +132,7 @@ void run() {
 	}
 }
 
-std::optional<IPAddress_t> getCurrentIP()
+std::expected<IPAddress_t,ErrorCode_t> getCurrentIP()
 {
 	return currentIPAddress;
 }
@@ -147,12 +147,13 @@ void handle_management_channel(std::span<uint8_t> payload)
 
 		if (std::equal(DummyAddress.begin(), DummyAddress.end(), payload.data()))
 		{
-			currentIPAddress.reset();
+			currentIPAddress = std::unexpected(ErrorCode_t::NO_IP);
 		}
 		else
 		{
-			currentIPAddress = DummyAddress;
-			std::copy(payload.begin(), payload.end(), currentIPAddress->data());
+			IPAddress_t thisIP;
+			std::copy(payload.begin(), payload.end(), thisIP.data());
+			currentIPAddress = thisIP;
 		}
 	}
 }

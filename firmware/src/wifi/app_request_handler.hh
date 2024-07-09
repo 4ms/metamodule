@@ -13,31 +13,41 @@ struct WifiAppRequestHandler {
 
 	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
 
-		if (message.message_type == RequestWifiIP) {
-			return get_ip(message.buffer);
-		}
-
-		return std::nullopt;
-	}
-
-private:
-	IntercoreStorageMessage get_ip(std::span<char> buffer) {
 #ifdef ENABLE_WIFI_BRIDGE
+		if (message.message_type == RequestWifiIP)
+		{
+			IntercoreStorageMessage result;
 
-		auto addr = WifiInterface::getCurrentIP();
+			if (auto addr = WifiInterface::getCurrentIP(); addr)
+			{
+				IntercoreStorageMessage::IPAddr_t ip;
+				std::copy(addr->begin(), addr->end(), ip.begin());
 
-		if (addr.has_value()) {
-			buffer[0] = (*addr)[0];
-			buffer[1] = (*addr)[1];
-			buffer[2] = (*addr)[2];
-			buffer[3] = (*addr)[3];
-			return IntercoreStorageMessage{.message_type = WifiIPSuccess};
+				result.wifi_ip_result = ip;
+				result.message_type = WifiIPSuccess;
+			}
+			else
+			{
+				switch (addr.error())
+				{
+					case WifiInterface::ErrorCode_t::NO_ANSWER:
+						result.wifi_ip_result = std::unexpected(IntercoreStorageMessage::WifiIPError::NO_MODULE_CONNECTED);
+						result.message_type = WifiIPSuccess;
+						break;
+					case WifiInterface::ErrorCode_t::NO_IP:
+						result.wifi_ip_result = std::unexpected(IntercoreStorageMessage::WifiIPError::NO_IP);
+						result.message_type = WifiIPSuccess;
+						break;
+					default:
+						result.message_type = WifiIPFailed;
+						break;
+				}
+			}
 
-		} else {
-			return {.message_type = WifiIPFailed};
+			return result;
 		}
-
 #endif
+		return std::nullopt;
 	}
 };
 
