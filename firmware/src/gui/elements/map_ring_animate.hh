@@ -11,9 +11,9 @@ namespace MetaModule
 struct MapRingDisplay {
 	enum class Flash { On, Brighter };
 
-	ViewSettings &settings;
+	ModuleDisplaySettings &settings;
 
-	MapRingDisplay(ViewSettings &settings)
+	MapRingDisplay(ModuleDisplaySettings &settings)
 		: settings{settings} {
 	}
 

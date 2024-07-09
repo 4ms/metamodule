@@ -11,21 +11,25 @@ struct MapRingStyle {
 		CurModuleIfPlaying,
 		ShowAllIfPlaying,
 		ShowAll,
-	} mode;
+	} mode{Mode::CurModuleIfPlaying};
 	uint8_t opa = 128;
 };
 
-struct ViewSettings {
+struct ModuleDisplaySettings {
 	bool map_ring_flash_active = true;
 	bool scroll_to_active_param = false;
 	bool show_jack_maps = false;
 	MapRingStyle map_ring_style = {.mode = MapRingStyle::Mode::CurModuleIfPlaying, .opa = 128};
 	MapRingStyle cable_style = {.mode = MapRingStyle::Mode::ShowAll, .opa = 128};
-	unsigned patch_view_height_px = 180;
+	unsigned view_height_px = 180;
+	bool changed = true;
+};
+
+struct ViewSettings {
+	ModuleDisplaySettings patch_view{};
+	ModuleDisplaySettings module_view{};
 
 	unsigned max_open_patches = 20;
-
-	bool changed = true;
 };
 
 } // namespace MetaModule

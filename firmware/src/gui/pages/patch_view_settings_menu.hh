@@ -9,7 +9,7 @@ namespace MetaModule
 {
 
 struct PatchViewSettingsMenu {
-	PatchViewSettingsMenu(ViewSettings &settings)
+	PatchViewSettingsMenu(ModuleDisplaySettings &settings)
 		: settings_menu_group(lv_group_create())
 		, settings{settings} {
 
@@ -28,7 +28,10 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_CablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_set_x(ui_SettingsMenu, 220);
+	}
 
+	void prepare_focus(lv_group_t *group) {
+		lv_group_remove_all_objs(settings_menu_group);
 		lv_group_set_editing(settings_menu_group, false);
 		lv_group_add_obj(settings_menu_group, ui_SettingsCloseButton);
 		lv_group_add_obj(settings_menu_group, ui_ShowAllMapsCheck);
@@ -39,11 +42,10 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_MapTranspSlider);
 		lv_group_add_obj(settings_menu_group, ui_ShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_CablesTranspSlider);
-	}
 
-	void prepare_focus(lv_group_t *group) {
 		base_group = group;
 		using enum MapRingStyle::Mode;
+
 		switch (settings.map_ring_style.mode) {
 			case ShowAllIfPlaying:
 				lv_obj_add_state(ui_ShowAllMapsCheck, LV_STATE_CHECKED);
@@ -198,7 +200,7 @@ struct PatchViewSettingsMenu {
 	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
 	bool visible = false;
-	ViewSettings &settings;
+	ModuleDisplaySettings &settings;
 };
 
 } // namespace MetaModule

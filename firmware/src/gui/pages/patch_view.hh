@@ -28,7 +28,10 @@ struct PatchViewPage : PageBase {
 		, base(ui_PatchViewPage)
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
-		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list} {
+		, page_settings{settings.patch_view}
+		, settings_menu{settings.patch_view}
+		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list}
+		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -128,7 +131,7 @@ struct PatchViewPage : PageBase {
 
 		lv_show(modules_cont);
 
-		auto module_drawer = ModuleDrawer{modules_cont, settings.patch_view_height_px};
+		auto module_drawer = ModuleDrawer{modules_cont, page_settings.view_height_px};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
 		int bottom = 0;
@@ -146,7 +149,7 @@ struct PatchViewPage : PageBase {
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
 			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) *
-											settings.patch_view_height_px);
+											page_settings.view_height_px);
 			int this_bottom = lv_obj_get_y(canvas) + lv_obj_get_height(canvas);
 			bottom = std::max(bottom, this_bottom);
 
@@ -195,7 +198,7 @@ struct PatchViewPage : PageBase {
 			auto module_id = drawn_el.gui_element.module_idx;
 			auto canvas = lv_obj_get_parent(drawn_el.gui_element.obj);
 
-			ModuleDrawer{modules_cont, settings.patch_view_height_px}.draw_mapped_ring(
+			ModuleDrawer{modules_cont, page_settings.view_height_px}.draw_mapped_ring(
 				*patch, module_id, knobset, canvas, drawn_el);
 		}
 		update_map_ring_style();
@@ -219,8 +222,8 @@ struct PatchViewPage : PageBase {
 
 		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
 
-		if (is_patch_playing != last_is_patch_playing || settings.changed) {
-			settings.changed = false;
+		if (is_patch_playing != last_is_patch_playing || page_settings.changed) {
+			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
 			watch_lights();
@@ -342,10 +345,10 @@ private:
 			auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
 
 			if (was_redrawn) {
-				if (settings.map_ring_flash_active)
+				if (page_settings.map_ring_flash_active)
 					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
 
-				if (settings.scroll_to_active_param)
+				if (page_settings.scroll_to_active_param)
 					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 			}
 
@@ -367,15 +370,15 @@ private:
 	void update_cable_style(bool force = false) {
 		static MapRingStyle last_cable_style;
 
-		cable_drawer.set_opacity(settings.cable_style.opa);
+		cable_drawer.set_opacity(page_settings.cable_style.opa);
 
-		if (force || settings.cable_style.mode != last_cable_style.mode) {
-			if (settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
+		if (force || page_settings.cable_style.mode != last_cable_style.mode) {
+			if (page_settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
 				cable_drawer.draw(*patch);
 			else
 				cable_drawer.clear();
 		}
-		last_cable_style = settings.cable_style;
+		last_cable_style = page_settings.cable_style;
 	}
 
 	void redraw_modulename() {
@@ -392,7 +395,7 @@ private:
 		auto scroll_y = lv_obj_get_scroll_top(ui_PatchViewPage);
 		auto header_y = lv_obj_get_y(ui_ModulesPanel);
 		int16_t module_top_on_screen = header_y - scroll_y + module_y;
-		int16_t module_bot_on_screen = module_top_on_screen + settings.patch_view_height_px;
+		int16_t module_bot_on_screen = module_top_on_screen + page_settings.view_height_px;
 		int16_t space_above = module_top_on_screen;
 		int16_t space_below = 240 - module_bot_on_screen;
 		if (space_below > space_above) {
@@ -523,7 +526,8 @@ private:
 	lv_obj_t *modules_cont;
 	CableDrawer<4 * 240 + 8> cable_drawer; //TODO: relate this number to the module container size
 
-	PatchViewSettingsMenu settings_menu{settings};
+	ModuleDisplaySettings &page_settings;
+	PatchViewSettingsMenu settings_menu;
 
 	unsigned active_knobset = 0;
 
@@ -531,7 +535,7 @@ private:
 
 	PatchViewFileMenu file_menu;
 
-	MapRingDisplay map_ring_display{settings};
+	MapRingDisplay map_ring_display;
 
 	std::optional<uint32_t> highlighted_module_id{};
 	lv_obj_t *highlighted_module_obj = nullptr;

@@ -20,7 +20,8 @@ struct ModuleViewPage : PageBase {
 	ModuleViewPage(PatchContext context)
 		: PageBase{context, PageId::ModuleView}
 		, cable_drawer{ui_ModuleImage, drawn_elements}
-		, map_ring_display{settings}
+		, map_ring_display{settings.module_view}
+		, page_settings{settings.module_view}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader} {
@@ -261,7 +262,7 @@ struct ModuleViewPage : PageBase {
 
 				auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
 
-				if (was_redrawn && settings.map_ring_flash_active) {
+				if (was_redrawn && page_settings.map_ring_flash_active) {
 					map_ring_display.flash_once(gui_el.map_ring, true);
 				}
 
@@ -312,15 +313,15 @@ struct ModuleViewPage : PageBase {
 	void update_cable_style(bool force = false) {
 		static MapRingStyle last_cable_style;
 
-		cable_drawer.set_opacity(settings.cable_style.opa);
+		cable_drawer.set_opacity(page_settings.cable_style.opa);
 
-		if (force || settings.cable_style.mode != last_cable_style.mode) {
-			if (settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
+		if (force || page_settings.cable_style.mode != last_cable_style.mode) {
+			if (page_settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
 				cable_drawer.draw_single_module(*patch, this_module_id);
 			else
 				cable_drawer.clear();
 		}
-		last_cable_style = settings.cable_style;
+		last_cable_style = page_settings.cable_style;
 	}
 
 	void blur() final {
@@ -480,6 +481,8 @@ private:
 	PatchModQueue module_mods;
 
 	MapRingDisplay map_ring_display;
+
+	ModuleDisplaySettings &page_settings;
 
 	std::string opts;
 	uint16_t this_module_id = 0;
