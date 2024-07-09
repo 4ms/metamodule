@@ -4,9 +4,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "memory/ram_buffer.hh"
 #include "patch_file/file_storage_proxy.hh"
-#include "util/monotonic_allocator.hh"
 
 namespace MetaModule
 {
@@ -15,7 +13,7 @@ struct InfoTab : SystemMenuTab {
 
 	InfoTab(FileStorageProxy &storage)
 		: storage{storage}
-		, allocator{get_ram_buffer()} {
+	{
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -27,12 +25,7 @@ struct InfoTab : SystemMenuTab {
 
 		lv_label_set_text_fmt(ui_SystemMenuFWversion, "Firmware version: %s", fw_version.data());
 
-		allocator.reset();
-		if (auto mem_ptr = allocator.allocate(sizeof(IpAddr)); mem_ptr) {
-			wifi_ip_ptr = new (mem_ptr) IpAddr;
-			wifi_ip_state = WifiIPState::Idle;
-		} else
-			wifi_ip_state = WifiIPState::NoMemory;
+		wifi_ip_state = WifiIPState::Idle;
 	}
 
 	void update() override {
@@ -48,36 +41,50 @@ struct InfoTab : SystemMenuTab {
 
 					last_check_wifi_ip_tm = now;
 
-					if (storage.request_wifi_ip(*wifi_ip_ptr)) {
+					if (storage.request_wifi_ip()) {
 						wifi_ip_state = WifiIPState::Requested;
 					}
 				}
 			} break;
 
 			case WifiIPState::Requested: {
-				auto message = storage.get_message().message_type;
+				auto message = storage.get_message();
 
-				if (message == FileStorageProxy::WifiIPSuccess) {
-					auto &wifi_ip = *wifi_ip_ptr;
-
-					pr_trace("Got Wifi IP: %u %u %u %u\n", wifi_ip[0], wifi_ip[1], wifi_ip[2], wifi_ip[3]);
+				if (message.message_type == FileStorageProxy::WifiIPSuccess) {
 
 					lv_show(ui_SystemMenuExpanders);
-					lv_label_set_text_fmt(
-						ui_SystemMenuExpanders, "Wifi IP: %u.%u.%u.%u", wifi_ip[0], wifi_ip[1], wifi_ip[2], wifi_ip[3]);
+
+					auto& newIP = *message.wifi_ip_result;
+
+					if (message.wifi_ip_result)
+					{
+						pr_trace("Got Wifi IP: %u %u %u %u\n", newIP[0], newIP[1], newIP[2], newIP[3]);
+
+						lv_label_set_text_fmt(
+						ui_SystemMenuExpanders, "Wifi IP: %u.%u.%u.%u", newIP[0], newIP[1], newIP[2], newIP[3]);
+					}
+					else
+					{
+						switch (message.wifi_ip_result.error())
+						{
+							case IntercoreStorageMessage::WifiIPError::NO_MODULE_CONNECTED:
+								lv_label_set_text(ui_SystemMenuExpanders, "No Module connected");
+								break;
+							case IntercoreStorageMessage::WifiIPError::NO_IP:
+								lv_label_set_text(ui_SystemMenuExpanders, "No IP");
+								break;
+						}
+					}
 
 					wifi_ip_state = WifiIPState::Idle;
 
-				} else if (message == FileStorageProxy::WifiIPFailed) {
+				} else if (message.message_type == FileStorageProxy::WifiIPFailed) {
 					lv_show(ui_SystemMenuExpanders);
-					lv_label_set_text(ui_SystemMenuExpanders, "Wifi not connected");
+					lv_label_set_text(ui_SystemMenuExpanders, "Internal Error");
 
 					wifi_ip_state = WifiIPState::Idle;
 				}
 
-			} break;
-
-			case WifiIPState::NoMemory: {
 			} break;
 		}
 	}
@@ -86,12 +93,7 @@ private:
 	FileStorageProxy &storage;
 	lv_group_t *group = nullptr;
 
-	enum WifiIPState { Idle, Requested, NoMemory } wifi_ip_state = WifiIPState::Idle;
+	enum WifiIPState { Idle, Requested } wifi_ip_state = WifiIPState::Idle;
 	uint32_t last_check_wifi_ip_tm = 0;
-
-	using IpAddr = std::array<char, 4>;
-	IpAddr *wifi_ip_ptr = nullptr;
-
-	MonotonicAllocator allocator;
 };
 } // namespace MetaModule

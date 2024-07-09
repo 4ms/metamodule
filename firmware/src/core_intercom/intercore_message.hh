@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <span>
 #include <variant>
+#include <expected>
 
 namespace MetaModule
 {
@@ -86,6 +87,12 @@ struct IntercoreStorageMessage {
 	uint32_t *bytes_processed;
 	enum FlashTarget : uint8_t { WIFI, QSPI };
 	FlashTarget flashTarget;
+	
+	enum WifiIPError : uint8_t {NO_MODULE_CONNECTED, NO_IP};
+	using IPAddr_t = std::array<uint8_t,4>;
+	using WifiIPResult = std::expected<IPAddr_t,WifiIPError>;
+
+	WifiIPResult wifi_ip_result ;	
 
 	PluginFileList *plugin_file_list;
 };
