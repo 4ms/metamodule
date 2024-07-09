@@ -90,10 +90,10 @@ struct CalData {
 
 	void print_calibration() const {
 		for (auto chan : in_cal)
-			pr_trace("Input: slope: 1/%f offset: %f\n", 1. / (double)chan.slope(), (float)chan.offset());
+			pr_trace("Input: slope: 1/%f offset: %f\n", 1. / (double)chan.slope(), (double)chan.offset());
 
 		for (auto chan : out_cal)
-			pr_trace("Output: slope: %f offset: %f\n", (float)chan.slope(), (float)chan.offset());
+			pr_trace("Output: slope: %f offset: %f\n", (double)chan.slope(), (double)chan.offset());
 	}
 };
 

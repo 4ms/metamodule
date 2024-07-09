@@ -94,11 +94,12 @@ void main() {
 		static std::optional<WifiInterface::IPAddress_t> currentAddr;
 		auto newAddr = WifiInterface::getCurrentIP();
 
-		if (currentAddr != newAddr)
-		{
+		if (currentAddr != newAddr) {
 			currentAddr = newAddr;
-			if (currentAddr) printf("IP: %u.%u.%u.%u\n", (*currentAddr)[0], (*currentAddr)[1], (*currentAddr)[2], (*currentAddr)[3]);
-			else printf("No IP\n");
+			if (currentAddr)
+				printf("IP: %u.%u.%u.%u\n", (*currentAddr)[0], (*currentAddr)[1], (*currentAddr)[2], (*currentAddr)[3]);
+			else
+				printf("No IP\n");
 		}
 #endif
 	}
