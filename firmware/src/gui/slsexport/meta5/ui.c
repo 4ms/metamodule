@@ -393,6 +393,7 @@ lv_obj_t *ui_SystemInfoCont;
 lv_obj_t *ui_SystemMenuMetaModule;
 lv_obj_t *ui_SystemMenuInfoHardware;
 lv_obj_t *ui_SystemMenuPCBversion;
+lv_obj_t *ui_SystemMenuInfoExpanders;
 lv_obj_t *ui_SystemMenuExpanders;
 lv_obj_t *ui_SystemMenuFWversion;
 lv_obj_t *ui_SystemMenuPluginsTab;

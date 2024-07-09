@@ -385,6 +385,7 @@ extern lv_obj_t *ui_SystemInfoCont;
 extern lv_obj_t *ui_SystemMenuMetaModule;
 extern lv_obj_t *ui_SystemMenuInfoHardware;
 extern lv_obj_t *ui_SystemMenuPCBversion;
+extern lv_obj_t *ui_SystemMenuInfoExpanders;
 extern lv_obj_t *ui_SystemMenuExpanders;
 extern lv_obj_t *ui_SystemMenuFWversion;
 extern lv_obj_t *ui_SystemMenuPluginsTab;
