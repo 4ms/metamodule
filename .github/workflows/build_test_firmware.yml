@@ -3,8 +3,14 @@ name: Build and test firmware
 on:
   workflow_dispatch:
     inputs:
-      limited_modules:
-        description: 'Build only a subset of modules'
+      linux_x64:
+        description: 'Build on Linux x64'
+        required: true
+        default: true
+        type: boolean
+      win_x64:
+        description: 'build on Windows x64'
+        required: true
         default: false
         type: boolean
       skip_wifi:
@@ -27,7 +33,8 @@ on:
       - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
 
 jobs:
-  build:
+  build-lin:
+    if: ${{ inputs.linux_x64 }}
     strategy:
         matrix:
           gcc: ['12.2.Rel1']  # can add other versions if needed
@@ -56,18 +63,7 @@ jobs:
           submodules: 'recursive'
           token: ${{ secrets.CHECKOUT_TOKEN }}
 
-      - name: Build and test (limited modules)
-        if: ${{ inputs.limited_modules }}
-        run: |
-          echo "4ms:EnOsc" >> firmware/lim
-          echo "4ms:ENVCA" >> firmware/lim
-          echo "Befaco:EvenVCO" >> firmware/lim
-          echo "HetrickCV:PhasorGen" >> firmware/lim
-          echo "AudibleInstruments:Braids" >> firmware/lim
-          cd firmware && PRESET=${{ env.preset }} make limit lim && make all
-
       - name: Build and test
-        if: ${{ ! inputs.limited_modules }}
         run: cd firmware && make configure PRESET=${{ env.preset }} && make all
 
       - name: Set Release Version
@@ -81,4 +77,36 @@ jobs:
           name: "Firmware Version: ${{ env.CI_REF_NAME }}"
           files: |
             firmware/build/metamodule*.zip
+            
+  build-win:
+    if: ${{ inputs.win_x64 }}
+    name: "Build firmware on windows"
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      preset: ${{ inputs.skip_wifi && 'base' || 'full' }}
+    steps:
+      - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '12.2.Rel1'
+
+      - name: Install cmake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.26.x'
+
+      - name: Git setup
+        run: git config --global --add safe.directory '*'
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+
+      - name: Build and test
+        run: cd firmware && make configure PRESET=${{ env.preset }} && make all
 
