@@ -179,20 +179,39 @@ lv_obj_set_align( ui_SystemMenuPCBversion, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemMenuPCBversion,"PCB version p11");
 lv_obj_set_style_text_font(ui_SystemMenuPCBversion, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_SystemMenuExpanders = lv_label_create(ui_SystemInfoCont);
-lv_obj_set_width( ui_SystemMenuExpanders, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_SystemMenuExpanders, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_SystemMenuExpanders, LV_ALIGN_CENTER );
-lv_label_set_text(ui_SystemMenuExpanders,"Expanders connected:");
-lv_obj_add_flag( ui_SystemMenuExpanders, LV_OBJ_FLAG_HIDDEN );   /// Flags
-lv_obj_set_style_text_font(ui_SystemMenuExpanders, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
-
 ui_SystemMenuFWversion = lv_label_create(ui_SystemInfoCont);
 lv_obj_set_width( ui_SystemMenuFWversion, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_SystemMenuFWversion, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_SystemMenuFWversion, LV_ALIGN_CENTER );
 lv_label_set_text(ui_SystemMenuFWversion,"Firmware version 0.5.1");
 lv_obj_set_style_text_font(ui_SystemMenuFWversion, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemMenuInfoExpanders = lv_label_create(ui_SystemInfoCont);
+lv_obj_set_width( ui_SystemMenuInfoExpanders, lv_pct(100));
+lv_obj_set_height( ui_SystemMenuInfoExpanders, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemMenuInfoExpanders, LV_ALIGN_CENTER );
+lv_label_set_long_mode(ui_SystemMenuInfoExpanders,LV_LABEL_LONG_CLIP);
+lv_label_set_text(ui_SystemMenuInfoExpanders,"EXPANDERS");
+lv_obj_set_style_text_color(ui_SystemMenuInfoExpanders, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_SystemMenuInfoExpanders, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_SystemMenuInfoExpanders, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_line_space(ui_SystemMenuInfoExpanders, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_SystemMenuInfoExpanders, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_color(ui_SystemMenuInfoExpanders, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_border_opa(ui_SystemMenuInfoExpanders, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_SystemMenuInfoExpanders, 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_border_side(ui_SystemMenuInfoExpanders, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_SystemMenuInfoExpanders, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemMenuInfoExpanders, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemMenuInfoExpanders, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemMenuInfoExpanders, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_SystemMenuExpanders = lv_label_create(ui_SystemInfoCont);
+lv_obj_set_width( ui_SystemMenuExpanders, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_SystemMenuExpanders, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemMenuExpanders, LV_ALIGN_CENTER );
+lv_label_set_text(ui_SystemMenuExpanders,"No Expanders detected");
+lv_obj_set_style_text_font(ui_SystemMenuExpanders, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_SystemMenuPluginsTab = lv_tabview_add_tab(ui_SystemMenuTabView, "Plugins");
 lv_obj_set_flex_flow(ui_SystemMenuPluginsTab,LV_FLEX_FLOW_COLUMN);
