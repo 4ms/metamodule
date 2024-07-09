@@ -88,6 +88,13 @@ jobs:
     env:
       preset: ${{ inputs.skip_wifi && 'base' || 'full' }}
     steps:
+      - name: Install windows dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git make mingw-w64-x86_64-gcc mingw-w64-x86_64-ninja
+
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
