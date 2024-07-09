@@ -252,6 +252,11 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.refresh();
 		}
 
+		if (page_settings.changed) {
+			page_settings.changed = false;
+			update_map_ring_style();
+		}
+
 		if (is_patch_playing) {
 			// copy light values from params, indexed by light element id
 			for (auto &wl : params.lights.watch_lights) {
