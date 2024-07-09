@@ -65,6 +65,10 @@ struct IntercoreStorageMessage {
 		DeleteFileFailed,
 		DeleteFileSuccess,
 
+		RequestWifiIP,
+		WifiIPSuccess,
+		WifiIPFailed,
+
 		NumRequests,
 	};
 	MessageType message_type = MessageType::None;

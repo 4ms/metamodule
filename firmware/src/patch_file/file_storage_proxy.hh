@@ -181,6 +181,11 @@ public:
 		return comm_.send_message(message);
 	}
 
+	[[nodiscard]] bool request_wifi_ip(std::span<char> buffer) {
+		IntercoreStorageMessage message{.message_type = RequestWifiIP, .buffer = buffer};
+		return comm_.send_message(message);
+	}
+
 private:
 	FileStorageComm &comm_;
 	PatchDirList &patch_dir_list_;
