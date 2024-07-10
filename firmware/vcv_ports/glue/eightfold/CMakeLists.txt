@@ -19,7 +19,7 @@ target_include_directories(eightfoldLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/..
 
 target_compile_options(eightfoldLibrary PRIVATE -Wno-double-promotion)
 
-set_property(TARGET eightfoldLibrary PROPERTY CXX_STANDARD 20)
+set_property(TARGET eightfoldLibrary PROPERTY CXX_STANDARD 23)
 
 if (BUILD_DYN_PLUGIN)
     target_sources(eightfoldLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/plugin.cpp)

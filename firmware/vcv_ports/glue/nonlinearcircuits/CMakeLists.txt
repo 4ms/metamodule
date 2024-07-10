@@ -22,7 +22,7 @@ add_library(
 
 target_include_directories(nonlinearcircuitsLibrary PRIVATE ${NONLINEARCIRCUITS_DIR}/src)
 
-set_property(TARGET nonlinearcircuitsLibrary PROPERTY CXX_STANDARD 20)
+set_property(TARGET nonlinearcircuitsLibrary PROPERTY CXX_STANDARD 23)
 
 target_compile_options(
     nonlinearcircuitsLibrary
