@@ -83,14 +83,14 @@ private:
 		FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
 							(message.vol_id == Volume::SDCard) ? &sdcard_ :
 																 nullptr;
-		bool success = ram_loader.load_to_ram(fileio, message.filename, message.buffer);
+		auto bytes_read = ram_loader.load_to_ram(fileio, message.filename, message.buffer);
 
-		if (success) {
-			pr_trace("M4: Loaded OK.\n");
-			return {.message_type = LoadFileToRamSuccess};
+		if (bytes_read > 0) {
+			pr_trace("M4: Loaded file\n");
+			return {.message_type = LoadFileToRamSuccess, .bytes_read = bytes_read};
 		} else {
-			pr_err("M4: Failed Load\n");
-			return {.message_type = LoadFileToRamFailed};
+			pr_err("M4: Failed to load file\n");
+			return {.message_type = LoadFileToRamFailed, .bytes_read = 0};
 		}
 	}
 
