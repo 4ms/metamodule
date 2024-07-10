@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
 	auto flash_path = std::filesystem::absolute(settings.flash_path);
 
-	auto asset_tar_path = std::filesystem::absolute("../firmware/build/assets.uimg");
+	auto asset_tar_path = std::filesystem::absolute(settings.asset_file);
 
 	MetaModule::Ui ui{sdcard_path.string(), flash_path.string(), asset_tar_path.string(), audio_out.get_block_size()};
 

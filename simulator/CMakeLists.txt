@@ -124,6 +124,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Ap
   set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- 
     --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
 	--flashdir ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/default
+	--assets ${CMAKE_CURRENT_LIST_DIR}/../firmware/build/assets.uimg
   )
 
 
@@ -136,6 +137,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     --args $<TARGET_FILE:simulator> 
     --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
 	--flashdir ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/default
+	--assets ${CMAKE_CURRENT_LIST_DIR}/../firmware/build/assets.uimg
   )
 else ()
   set(DEBUG_COMMAND echo "Compiler is ${CMAKE_CXX_COMPILER_ID}, but must be Clang, AppleClang, or GNU to debug")

@@ -10,6 +10,7 @@ struct Settings {
 	unsigned zoom = 100;
 	std::string sdcard_path = "patches/";
 	std::string flash_path = "../shared/patch/default/";
+	std::string asset_file = "../firmware/build/assets.uimg";
 	int audioout_dev = 0;
 
 	void parse(int argc, char *argv[]) {
@@ -32,6 +33,10 @@ struct Settings {
 								  "Host directory simulating internal NOR Flash root",
 								  cxxopts::value<std::string>()->default_value("../shared/patch/default/"));
 
+			options.add_options()("s,assets",
+								  "Location of assets.uimg file (built by firmware project)",
+								  cxxopts::value<std::string>()->default_value("../firmware/build/assets.uimg"));
+
 			options.add_options()("h,help", "Print help");
 
 			auto args = options.parse(argc, argv);
@@ -44,6 +49,9 @@ struct Settings {
 
 			if (args.count("flashdir") > 0)
 				flash_path = args["flashdir"].as<std::string>();
+
+			if (args.count("assets") > 0)
+				asset_file = args["assets"].as<std::string>();
 
 			if (args.count("audioout") > 0)
 				audioout_dev = args["audioout"].as<int>();
