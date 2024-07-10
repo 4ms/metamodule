@@ -71,17 +71,17 @@ add_custom_command(
 # Asset Dir
 #
 
-set(ASSET_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/assets)
+cmake_path(SET ASSET_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 set(ASSET_IMG_FILENAME  assets.uimg)
-set(ASSET_IMG_PATH  ${CMAKE_CURRENT_BINARY_DIR}/${ASSET_IMG_FILENAME})
+cmake_path(APPEND ASSET_IMG_PATH  "${CMAKE_CURRENT_BINARY_DIR}" "${ASSET_IMG_FILENAME}")
 
 add_custom_command(
-  OUTPUT ${ASSET_IMG_PATH} _always_force_refresh_
   #TODO how to make this run only if any file in the directory is modified, added, or deleted?
-  COMMAND tar -cf ${ASSET_IMG_PATH}.tar -C ${ASSET_DIR} --strip-component=1 .
-  COMMAND flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
+  OUTPUT ${ASSET_IMG_PATH} _always_force_refresh_
+  COMMAND ${CMAKE_COMMAND} -E tar -cf ${ASSET_IMG_PATH}.tar .
+  COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && flashing/uimg_header.py --name Assets ${ASSET_IMG_PATH}.tar ${ASSET_IMG_PATH}
   COMMENT "Creating assets uimg file"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  WORKING_DIRECTORY ${ASSET_DIR}
   VERBATIM USES_TERMINAL
 )
 
