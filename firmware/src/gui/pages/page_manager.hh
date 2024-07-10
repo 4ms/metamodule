@@ -1,4 +1,5 @@
 #pragma once
+#include "fs/settings_file.hh"
 #include "gui/knobset_button.hh"
 #include "gui/notify/display.hh"
 #include "gui/notify/queue.hh"
@@ -71,6 +72,7 @@ public:
 	void init() {
 		page_list.request_initial_page(PageId::MainMenu, {});
 		button_light.display_knobset(0);
+		Settings::read_settings(info.patch_storage, settings);
 	}
 
 	void update_current_page() {
