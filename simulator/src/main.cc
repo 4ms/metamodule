@@ -1,6 +1,5 @@
 #include "frame.hh"
 #include "lv_port_disp.h"
-#include "lv_port_indev.h"
 #include "lvgl.h"
 #include "sdl_audio.hh"
 #include "settings.hh"
@@ -16,11 +15,13 @@ int main(int argc, char *argv[]) {
 
 	SDLAudio<Frame> audio_out{settings.audioout_dev};
 
-	auto patch_path = std::filesystem::absolute(settings.patch_path);
+	auto sdcard_path = std::filesystem::absolute(settings.sdcard_path);
+
+	auto flash_path = std::filesystem::absolute(settings.flash_path);
 
 	auto asset_tar_path = std::filesystem::absolute("../firmware/build/assets.uimg");
 
-	MetaModule::Ui ui{patch_path.string(), asset_tar_path.string(), audio_out.get_block_size()};
+	MetaModule::Ui ui{sdcard_path.string(), flash_path.string(), asset_tar_path.string(), audio_out.get_block_size()};
 
 	audio_out.set_callback([&ui](auto playback_buffer) { ui.play_patch(playback_buffer); });
 	audio_out.unpause();

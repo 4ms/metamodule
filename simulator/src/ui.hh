@@ -25,7 +25,7 @@ class Ui {
 	};
 
 public:
-	Ui(std::string_view patch_path, std::string_view asset_path, size_t block_size);
+	Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_view asset_path, size_t block_size);
 
 	bool update();
 	void play_patch(std::span<Frame> buffer);

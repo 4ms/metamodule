@@ -121,7 +121,11 @@ endif()
 ## Debugging
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") 
   find_program(CMAKE_DEBUGGER_BINARY lldb)
-  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- -p ${CMAKE_CURRENT_LIST_DIR}/../shared/patch)
+  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- 
+    --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
+	--flashdir ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/default
+  )
+
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   find_program(CMAKE_DEBUGGER_BINARY gdb)
@@ -129,7 +133,9 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     -ex \"set debuginfod enabled off\"
     -ex \"set pagination off\" 
     -ex \"run\"
-    --args $<TARGET_FILE:simulator> -p ${CMAKE_CURRENT_LIST_DIR}/patches
+    --args $<TARGET_FILE:simulator> 
+    --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
+	--flashdir ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/default
   )
 else ()
   set(DEBUG_COMMAND echo "Compiler is ${CMAKE_CXX_COMPILER_ID}, but must be Clang, AppleClang, or GNU to debug")
