@@ -1,17 +1,15 @@
 #include "gui/pages/view_settings.hh"
 #include "ryml.hpp"
+#include "ryml_init.hh"
 #include <span>
 
-namespace MetaModule::Settings
+namespace MetaModule
 {
-
-static bool read(ryml::ConstNodeRef const &n, MapRingStyle *s);
-static bool read(ryml::ConstNodeRef const &n, ModuleDisplaySettings *s);
 
 template<typename T>
 void read_or_default(ryml::ConstNodeRef const &n, c4::csubstr name, T *s, auto member_ptr) {
-	if (n.has_child(name)) {
-		read(n[name], &(s->*member_ptr));
+	if (n.is_map() && n.has_child(name)) {
+		n[name] >> s->*member_ptr;
 	} else {
 		s->*member_ptr = T{}.*member_ptr;
 	}
@@ -58,23 +56,29 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	return true;
 }
 
-bool parse_settings(std::span<char> yaml, ViewSettings *settings) {
+namespace Settings
+{
+
+bool parse(std::span<char> yaml, ViewSettings *settings) {
+	RymlInit::init_once();
+
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yaml.data(), yaml.size()));
 
 	if (tree.num_children(0) == 0)
-		return {};
+		return false;
 
 	ryml::ConstNodeRef root = tree.rootref();
 
 	if (!root.has_child("Settings"))
-		return {};
+		return false;
 
 	ryml::ConstNodeRef node = root["Settings"];
 
 	read_or_default(node, "patch_view", settings, &ViewSettings::patch_view);
 	read_or_default(node, "module_view", settings, &ViewSettings::module_view);
 
-	return settings;
+	return true;
 }
 
-} // namespace MetaModule::Settings
+} // namespace Settings
+} // namespace MetaModule

@@ -5,6 +5,6 @@
 namespace MetaModule::Settings
 {
 
-bool parse_settings(std::span<char> yaml, ViewSettings *settings);
+bool parse(std::span<char> yaml, ViewSettings *settings);
 
 } // namespace MetaModule::Settings

@@ -74,7 +74,9 @@ public:
 		button_light.display_knobset(0);
 		if (!Settings::read_settings(info.patch_storage, &settings)) {
 			settings = ViewSettings{};
-			Settings::write_settings(info.patch_storage, settings);
+			if (!Settings::write_settings(info.patch_storage, settings)) {
+				pr_err("Failed to write settings file\n");
+			}
 		}
 	}
 
