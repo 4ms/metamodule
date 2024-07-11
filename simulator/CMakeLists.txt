@@ -76,6 +76,9 @@ add_executable(
 	${FWDIR}/src/fs/time_convert.cc
 	#Tar:
 	${FWDIR}/src/fs/asset_drive/untar.cc
+
+	${FWDIR}/src/fs/settings_parse.cc
+	${FWDIR}/src/fs/settings_file.cc
 	)
 
 target_include_directories(
