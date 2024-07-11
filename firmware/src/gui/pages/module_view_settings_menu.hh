@@ -41,25 +41,39 @@ struct ModuleViewSettingsMenu {
 		base_group = group;
 		using enum MapRingStyle::Mode;
 
-		if (settings.param_style.mode == ShowAll)
-			lv_obj_add_state(ui_MVShowPlayingMapsCheck, LV_STATE_CHECKED);
-		else
+		if (settings.param_style.mode == HideAlways)
 			lv_obj_clear_state(ui_MVShowPlayingMapsCheck, LV_STATE_CHECKED);
+		else
+			lv_obj_add_state(ui_MVShowPlayingMapsCheck, LV_STATE_CHECKED);
 
 		if (settings.map_ring_flash_active)
 			lv_obj_add_state(ui_MVFlashMapCheck, LV_STATE_CHECKED);
 		else
 			lv_obj_clear_state(ui_MVFlashMapCheck, LV_STATE_CHECKED);
 
-		if (settings.paneljack_style.mode == ShowAll)
-			lv_obj_add_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
-		else
+		if (settings.paneljack_style.mode == HideAlways)
 			lv_obj_clear_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
+		else
+			lv_obj_add_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
+
+		if (settings.cable_style.mode == HideAlways)
+			lv_obj_clear_state(ui_MVShowAllCablesCheck, LV_STATE_CHECKED);
+		else
+			lv_obj_add_state(ui_MVShowAllCablesCheck, LV_STATE_CHECKED);
 
 		// 0..100 => 0..255
-		uint32_t opacity = (float)settings.param_style.opa / 2.5f;
+		{
+			uint32_t opacity = (float)settings.param_style.opa / 2.5f;
+			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
+			lv_slider_set_value(ui_MVMapTranspSlider, opacity, LV_ANIM_OFF);
+		}
+		{
+			uint32_t opacity = (float)settings.cable_style.opa / 2.5f;
+			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
+			lv_slider_set_value(ui_MVCablesTranspSlider, opacity, LV_ANIM_OFF);
+		}
+
 		settings.paneljack_style.opa = settings.param_style.opa; //for now, jack and knob map opa is the same
-		opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
 	}
 
 	void show() {
@@ -110,6 +124,7 @@ struct ModuleViewSettingsMenu {
 		auto show_jack_maps = lv_obj_has_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
 
 		using enum MapRingStyle::Mode;
+		// TODO: add checkbox to hide if not playing
 		page->settings.param_style.mode = show_control_maps ? ShowAll : HideAlways;
 		page->settings.paneljack_style.mode = show_jack_maps ? ShowAll : HideAlways;
 
