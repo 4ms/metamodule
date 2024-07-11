@@ -28,8 +28,6 @@ struct ModuleDisplaySettings {
 struct ViewSettings {
 	ModuleDisplaySettings patch_view{};
 	ModuleDisplaySettings module_view{};
-
-	unsigned max_open_patches = 20;
 };
 
 } // namespace MetaModule
