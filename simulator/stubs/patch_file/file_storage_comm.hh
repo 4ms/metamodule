@@ -9,6 +9,7 @@
 #include "patch_file/patch_fileio.hh"
 #include "patch_file/patch_location.hh"
 #include <cstdint>
+#include <string_view>
 
 namespace MetaModule
 {
@@ -41,11 +42,11 @@ struct SimulatorFileStorageComm {
 		using enum IntercoreStorageMessage::MessageType;
 
 		switch (msg.message_type) {
-			case RequestPatchData: {
+			case RequestLoadFile: {
 				requested_view_patch_loc_ = PatchLocation{msg.filename, msg.vol_id};
 				raw_patch_data_ = msg.buffer;
 				auto bytes_read = load_patch_file(requested_view_patch_loc_);
-				reply = {.message_type = bytes_read ? PatchDataLoaded : PatchDataLoadFail,
+				reply = {.message_type = bytes_read ? LoadFileOK : LoadFileFailed,
 						 .bytes_read = bytes_read,
 						 .vol_id = requested_view_patch_loc_.vol,
 						 .filename = requested_view_patch_loc_.filename};
@@ -87,13 +88,6 @@ struct SimulatorFileStorageComm {
 				reply = {ChecksumMatch}; //TODO: make it fail sometimes?
 			} break;
 
-			case RequestLoadFileToRam: {
-				if (storage.sd_hostfs.read_file(msg.filename, msg.buffer))
-					reply = {LoadFileToRamSuccess};
-				else
-					reply = {LoadFileToRamFailed};
-			} break;
-
 			case RequestPluginFileList: {
 				if (find_plugin_files(msg))
 					reply = {PluginFileListOK};
@@ -107,13 +101,20 @@ struct SimulatorFileStorageComm {
 				reply.message_type = ok ? CopyPluginAssetsOK : CopyPluginAssetsFail;
 			} break;
 
-			case RequestWritePatchData: {
-				if (!storage.sd_hostfs.update_or_create_file(msg.filename, msg.buffer)) {
+			case RequestWriteFile: {
+				bool ok = false;
+				if (msg.vol_id == Volume::SDCard) {
+					ok = storage.sd_hostfs.update_or_create_file(msg.filename, msg.buffer);
+				} else if (msg.vol_id == Volume::NorFlash) {
+					ok = storage.flash_hostfs.update_or_create_file(msg.filename, msg.buffer);
+				}
+
+				if (!ok) {
 					pr_err("Error writing file!\n");
-					reply = {PatchDataWriteFail};
+					reply = {WriteFileFail};
 					return false;
 				}
-				reply = {PatchDataWriteOK};
+				reply = {WriteFileOK};
 				// refresh_required = true;
 			} break;
 
@@ -155,11 +156,16 @@ private:
 
 		bool ok = false;
 
-		if (loc.vol == Volume::SDCard)
+		if (loc.vol == Volume::SDCard) {
+			std::cout << "Trying to load " << loc.filename.c_str() << " from SD Card\n";
 			ok = PatchFileIO::read_file(raw_patch_data_, storage.sd_hostfs, loc.filename);
+		}
 
-		if (loc.vol == Volume::NorFlash)
+		else if (loc.vol == Volume::NorFlash)
+		{
+			std::cout << "Trying to load " << loc.filename.c_str() << " from NorFlash\n";
 			ok = PatchFileIO::read_file(raw_patch_data_, storage.flash_hostfs, loc.filename);
+		}
 
 		//TODO: add USB when we have a usb fileio
 		// if (vol == Volume::USB)
