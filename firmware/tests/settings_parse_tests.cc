@@ -1,6 +1,8 @@
 #include "doctest.h"
 #include "fs/settings_parse.hh"
+#include "fs/settings_serialize.hh"
 #include "gui/pages/view_settings.hh"
+#include <string>
 
 TEST_CASE("Parse settings file") {
 
@@ -38,7 +40,7 @@ TEST_CASE("Parse settings file") {
 	// clang format-on
 
 	MetaModule::ViewSettings settings;
-	auto ok = MetaModule::Settings::parse_settings(yaml, &settings);
+	auto ok = MetaModule::Settings::parse(yaml, &settings);
 	CHECK(ok);
 
 	using enum MetaModule::MapRingStyle::Mode;
@@ -102,7 +104,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	}
 
 	MetaModule::ViewSettings settings;
-	auto ok = MetaModule::Settings::parse_settings(yaml, &settings);
+	auto ok = MetaModule::Settings::parse(yaml, &settings);
 	CHECK(ok == should_parse);
 
 	using enum MetaModule::MapRingStyle::Mode;
@@ -128,4 +130,65 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.module_view.cable_style.mode == df.cable_style.mode);
 	CHECK(settings.module_view.cable_style.opa == df.cable_style.opa);
 	CHECK(settings.module_view.view_height_px == df.view_height_px);
+}
+
+TEST_CASE("Serialize settings") {
+
+	MetaModule::ViewSettings settings;
+
+	using enum MetaModule::MapRingStyle::Mode;
+
+	settings.patch_view.map_ring_flash_active = true;
+	settings.patch_view.scroll_to_active_param = false;
+	settings.patch_view.param_style.mode = CurModuleIfPlaying;
+	settings.patch_view.param_style.opa = 129;
+	settings.patch_view.paneljack_style.mode = HideAlways;
+	settings.patch_view.paneljack_style.opa = 192;
+	settings.patch_view.cable_style.mode = ShowAll;
+	settings.patch_view.cable_style.opa = 100;
+	settings.patch_view.view_height_px = 180;
+
+	settings.module_view.map_ring_flash_active = false;
+	settings.module_view.scroll_to_active_param = true;
+	settings.module_view.param_style.mode = CurModule;
+	settings.module_view.param_style.opa = 128;
+	settings.module_view.paneljack_style.mode = ShowAllIfPlaying;
+	settings.module_view.paneljack_style.opa = 92;
+	settings.module_view.cable_style.mode = HideAlways;
+	settings.module_view.cable_style.opa = 0;
+	settings.module_view.view_height_px = 240;
+
+	// clang format-off
+	std::string expected = R"(Settings:
+  patch_view:
+    map_ring_flash_active: 1
+    scroll_to_active_param: 0
+    view_height_px: 180
+    param_style:
+      mode: CurModuleIfPlaying
+      opa: 129
+    paneljack_style:
+      mode: HideAlways
+      opa: 192
+    cable_style:
+      mode: ShowAll
+      opa: 100
+  module_view:
+    map_ring_flash_active: 0
+    scroll_to_active_param: 1
+    view_height_px: 240
+    param_style:
+      mode: CurModule
+      opa: 128
+    paneljack_style:
+      mode: ShowAllIfPlaying
+      opa: 92
+    cable_style:
+      mode: HideAlways
+      opa: 0
+)";
+	// clang format-on
+
+	auto parsed = MetaModule::Settings::serialize(settings);
+	CHECK(parsed == expected);
 }
