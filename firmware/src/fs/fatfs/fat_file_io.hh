@@ -173,6 +173,10 @@ public:
 		return true;
 	}
 
+	uint32_t get_file_size(std::string_view filename) {
+		return get_file_info(filename).size;
+	}
+
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset = 0) {
 		FIL fil;
 		UINT bytes_read = 0;

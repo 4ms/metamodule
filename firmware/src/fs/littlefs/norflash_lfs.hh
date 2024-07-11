@@ -132,6 +132,15 @@ public:
 		return (err >= 0);
 	}
 
+	uint32_t get_file_size(std::string_view filename) {
+		lfs_info info;
+		auto err = lfs_stat(&lfs, filename.data(), &info);
+		if (err < 0)
+			return 0;
+		else
+			return info.size;
+	}
+
 	// Reads into buffer, returns the bytes actually read
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset = 0) {
 		lfs_file_t file;
