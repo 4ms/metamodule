@@ -21,9 +21,9 @@ struct IntercoreStorageMessage {
 		PatchListChanged,
 		PatchListUnchanged,
 
-		RequestPatchData,
-		PatchDataLoadFail,
-		PatchDataLoaded,
+		RequestLoadFile,
+		LoadFileFailed,
+		LoadFileOK,
 
 		RequestFirmwareFile,
 		FirmwareFileNotFound,
@@ -42,13 +42,9 @@ struct IntercoreStorageMessage {
 		ReadFlashOk,
 		ReadFlashFailed,
 
-		RequestLoadFileToRam,
-		LoadFileToRamFailed,
-		LoadFileToRamSuccess,
-
-		RequestWritePatchData,
-		PatchDataWriteFail,
-		PatchDataWriteOK,
+		RequestWriteFile,
+		WriteFileFail,
+		WriteFileOK,
 
 		RequestFactoryResetPatches,
 		FactoryResetPatchesDone,
@@ -67,6 +63,7 @@ struct IntercoreStorageMessage {
 
 		NumRequests,
 	};
+
 	MessageType message_type = MessageType::None;
 
 	uint32_t bytes_read{};

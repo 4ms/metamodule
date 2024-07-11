@@ -308,7 +308,7 @@ struct PatchSelectorPage : PageBase {
 			case State::RequestedPatchData: {
 				auto message = patch_storage.get_message();
 
-				if (message.message_type == FileStorageProxy::PatchDataLoaded) {
+				if (message.message_type == FileStorageProxy::LoadFileOK) {
 					// Try to parse the patch and open the PatchView page
 
 					auto data = patch_storage.get_patch_data(message.bytes_read);
@@ -322,7 +322,7 @@ struct PatchSelectorPage : PageBase {
 						state = State::Idle;
 						hide_spinner();
 					}
-				} else if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
+				} else if (message.message_type == FileStorageProxy::LoadFileFailed) {
 					pr_warn("Error loading patch %s\n", selected_patch.filename.c_str());
 					state = State::Idle;
 					lv_group_set_editing(group, true);

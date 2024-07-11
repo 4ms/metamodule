@@ -32,7 +32,7 @@ public:
 	// so the caller can read it on their own (but must ensure it's in shared/non-cache ram)
 	[[nodiscard]] bool request_load_patch(PatchLocation patch_loc) {
 		IntercoreStorageMessage message{
-			.message_type = RequestPatchData,
+			.message_type = RequestLoadFile,
 			.vol_id = patch_loc.vol,
 			.buffer = raw_patch_data_,
 			.filename = patch_loc.filename,
@@ -86,7 +86,7 @@ public:
 	// Load a file from filesystem to RAM
 	[[nodiscard]] bool request_load_file(std::string_view filename, Volume vol, std::span<char> buffer) {
 		IntercoreStorageMessage message{
-			.message_type = RequestLoadFileToRam,
+			.message_type = RequestLoadFile,
 			.vol_id = vol,
 			.buffer = buffer,
 			.filename = filename,
@@ -152,7 +152,7 @@ public:
 		}
 
 		IntercoreStorageMessage message{
-			.message_type = RequestWritePatchData,
+			.message_type = RequestWriteFile,
 			.vol_id = vol,
 			.buffer = file_data,
 			.filename = filename,
