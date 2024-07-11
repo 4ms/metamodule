@@ -222,7 +222,7 @@ struct ModuleViewPage : PageBase {
 			if (action_menu.is_visible()) {
 				action_menu.hide();
 
-			} else if (settings_menu.visible) {
+			} else if (settings_menu.is_visible()) {
 				settings_menu.hide();
 
 			} else if (mode == ViewMode::List) {
