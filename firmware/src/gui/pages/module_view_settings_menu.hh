@@ -164,7 +164,7 @@ private:
 		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
 
 		auto if_playing = lv_obj_has_state(ui_MVShowPlayingMapsCheck, LV_STATE_CHECKED);
-		auto show_control_maps = lv_obj_has_state(ui_MVShowControlMapsLabel, LV_STATE_CHECKED);
+		auto show_control_maps = lv_obj_has_state(ui_MVShowControlMapsCheck, LV_STATE_CHECKED);
 		auto flash_active = lv_obj_has_state(ui_MVFlashMapCheck, LV_STATE_CHECKED);
 		auto show_jack_maps = lv_obj_has_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
 
@@ -189,8 +189,10 @@ private:
 		page->settings.map_ring_flash_active = flash_active;
 		page->settings.changed = true;
 
-		if (!show_control_maps && !show_jack_maps && if_playing)
+		if (!show_control_maps && !show_jack_maps && if_playing) {
 			lv_uncheck(ui_MVShowPlayingMapsCheck);
+			lv_disable(ui_MVShowPlayingMapsCheck);
+		}
 	}
 
 	static void cable_settings_value_change_cb(lv_event_t *event) {
