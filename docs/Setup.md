@@ -1,7 +1,7 @@
 ## Setting up your environment
 
 ### All platforms:
-- You will need a C++ toolchain that has partial support for c++20 (`gcc-12` or later, `clang` 14 or later).
+- You will need a C++ toolchain that has partial support for c++23 (`gcc-12` or later, `clang` 16 or later).
 - To build firmware, you need the gcc arm toolchain, version 12.2 or later.
   - Download here: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
     - Make sure you get the package for your host computer that ends in `arm-none-eabi`
@@ -26,7 +26,7 @@
 - Firmware:
   - cmake v3.24 or later
   - ninja (not required on MinGW or if you configure cmake to use a different generator) 
-  - gcc/g++ 12, or clang 14 or later (for unit tests)
+  - gcc/g++ 12, or clang 16 or later (for unit tests)
   - arm-none-eabi-gcc toolchain 12.2 or later
   - xxd
   - python3
@@ -35,11 +35,11 @@
 - Simulator:
   - cmake v3.24 or later
   - ninja (not required if configure cmake to use a different generator)
-  - gcc/g++ 12, or clang 14 or later
+  - gcc/g++ 12, or clang 16 or later
   - SDL2.x
 
 - VCV Plugin:
-  - gcc/g++ 12 or later, clang 14 or later
+  - gcc/g++ 12 or later, clang 16 or later
   - jq
   - rsync
 
@@ -144,7 +144,7 @@ you should set the Icon option. Again, with default paths, this path is
 C:/msys64/mingw64.ico
 ```
 
-*Tip*: Many elements of the Meta Module code require C++20, so if you previously setup
+*Tip*: Many elements of the Meta Module code require C++23, so if you previously setup
 a VCV environment (or an MSYS2 environment), you might need to update `gcc` to
 `gcc-12` or higher. To find out which version you are using, you need to open
 up a MinGW 64-Bit shell. Type the following command:
