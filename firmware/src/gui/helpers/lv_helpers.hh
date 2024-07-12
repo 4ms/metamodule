@@ -89,11 +89,11 @@ inline void set_content_max_height(lv_obj_t *obj, lv_coord_t max) {
 	return false;
 }
 
-void lv_uncheck(lv_obj_t *obj) {
+inline void lv_uncheck(lv_obj_t *obj) {
 	lv_obj_clear_state(obj, LV_STATE_CHECKED);
 }
 
-void lv_check(lv_obj_t *obj, bool checked = true) {
+inline void lv_check(lv_obj_t *obj, bool checked = true) {
 	if (checked)
 		lv_obj_add_state(obj, LV_STATE_CHECKED);
 	else
