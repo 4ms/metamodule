@@ -16,10 +16,6 @@ constexpr float from_volts(float v) {
 	return (v / 10.3f) * 8388608.f;
 }
 
-constexpr float to_volts(float v) {
-	return (v / 10.3f) * 8388608.f;
-}
-
 static constexpr float DefaultTolerance = from_volts(0.5);
 static constexpr float DefaultLowV = 1;
 static constexpr float DefaultHighV = 4;
@@ -90,10 +86,10 @@ struct CalData {
 
 	void print_calibration() const {
 		for (auto chan : in_cal)
-			pr_trace("Input: slope: 1/%f offset: %f\n", 1. / (double)chan.slope(), (float)chan.offset());
+			printf("Input: slope: 1/%f offset: %f\n", 1. / (double)chan.slope(), (double)chan.offset());
 
 		for (auto chan : out_cal)
-			pr_trace("Output: slope: %f offset: %f\n", (float)chan.slope(), (float)chan.offset());
+			printf("Output: slope: %f offset: %f\n", (double)chan.slope(), (double)chan.offset());
 	}
 };
 

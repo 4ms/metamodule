@@ -17,10 +17,10 @@ inline constexpr bool PRINT_WARN = true;
 inline constexpr bool PRINT_INFO = true;
 
 // Debug: temporary messages used for debugging
-inline constexpr bool PRINT_DEBUG = false;
+inline constexpr bool PRINT_DEBUG = true;
 
 // Trace: detailed log of execution
-inline constexpr bool PRINT_TRACE = false;
+inline constexpr bool PRINT_TRACE = true;
 
 // Dump: large amounts of verbose data
 inline constexpr bool PRINT_DUMP = false;
