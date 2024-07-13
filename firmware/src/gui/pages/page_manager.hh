@@ -72,6 +72,7 @@ public:
 	void init() {
 		page_list.request_initial_page(PageId::MainMenu, {});
 		button_light.display_knobset(0);
+
 		if (!Settings::read_settings(info.patch_storage, &settings)) {
 			settings = ViewSettings{};
 			if (!Settings::write_settings(info.patch_storage, settings)) {
@@ -173,7 +174,7 @@ public:
 		// Interpret and pass on back button events
 		if (info.metaparams.meta_buttons[0].is_just_released()) {
 			if (!info.metaparams.ignore_metabutton_release)
-				info.metaparams.back_button.register_falling_edge();
+				gui_state.back_button.register_falling_edge();
 			else
 				info.metaparams.ignore_metabutton_release = false;
 		}

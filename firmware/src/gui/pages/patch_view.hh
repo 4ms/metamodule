@@ -242,7 +242,7 @@ struct PatchViewPage : PageBase {
 			redraw_map_rings();
 		}
 
-		if (metaparams.back_button.is_just_released()) {
+		if (gui_state.back_button.is_just_released()) {
 			if (settings_menu.visible) {
 				settings_menu.hide();
 

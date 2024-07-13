@@ -217,7 +217,7 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
-		if (metaparams.back_button.is_just_released()) {
+		if (gui_state.back_button.is_just_released()) {
 
 			if (action_menu.is_visible()) {
 				action_menu.hide();

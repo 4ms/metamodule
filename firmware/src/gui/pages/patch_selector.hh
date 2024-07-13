@@ -237,7 +237,7 @@ struct PatchSelectorPage : PageBase {
 			is_populating_subdir_panel = false;
 		}
 
-		if (metaparams.back_button.is_just_released()) {
+		if (gui_state.back_button.is_just_released()) {
 			if (!lv_obj_has_state(ui_PatchListRoller, LV_STATE_DISABLED)) {
 				lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
 				lv_obj_clear_state(ui_PatchListRoller, LV_STATE_FOCUSED);
