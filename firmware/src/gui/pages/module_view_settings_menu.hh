@@ -27,7 +27,7 @@ struct ModuleViewSettingsMenu {
 		lv_obj_add_event_cb(ui_MVShowJackMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MVJackMapTranspSlider, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
-		lv_obj_add_event_cb(ui_MVShowPlayingMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_MVShowMapsAlwaysCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_MVShowAllCablesCheck, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_MVCablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -48,7 +48,7 @@ struct ModuleViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_MVShowJackMapsCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVJackMapTranspSlider);
 
-		lv_group_add_obj(settings_menu_group, ui_MVShowPlayingMapsCheck);
+		lv_group_add_obj(settings_menu_group, ui_MVShowMapsAlwaysCheck);
 
 		lv_group_add_obj(settings_menu_group, ui_MVShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVCablesTranspSlider);
@@ -63,18 +63,19 @@ struct ModuleViewSettingsMenu {
 		lv_check(ui_MVShowAllCablesCheck, settings.cable_style.mode != HideAlways);
 		lv_check(ui_MVFlashMapCheck, settings.map_ring_flash_active);
 
-		// "Hide When Not Playing"
+		// "Always Show Maps" checkbox:
 		if (settings.param_style.mode == HideAlways && settings.paneljack_style.mode == HideAlways) {
-			// Disable if hiding all maps
-			lv_disable(ui_MVShowPlayingMapsCheck);
-			lv_uncheck(ui_MVShowPlayingMapsCheck);
-		} else if (settings.param_style.mode == ShowAllIfPlaying || settings.paneljack_style.mode == ShowAllIfPlaying) {
-			lv_enable(ui_MVShowPlayingMapsCheck);
-			lv_check(ui_MVShowPlayingMapsCheck);
-		} else {
-			lv_enable(ui_MVShowPlayingMapsCheck);
-			lv_uncheck(ui_MVShowPlayingMapsCheck);
+			// Disable and uncheck if hiding both types of maps
+			lv_disable(ui_MVShowMapsAlwaysCheck);
+		} else if (settings.param_style.mode == ShowAllIfPlaying) {
+			lv_enable(ui_MVShowMapsAlwaysCheck);
+			lv_uncheck(ui_MVShowMapsAlwaysCheck);
+		} else { //ShowAll
+			lv_enable(ui_MVShowMapsAlwaysCheck);
+			lv_check(ui_MVShowMapsAlwaysCheck);
 		}
+
+		update_interactive_states();
 
 		// 0..100 => 0..255
 		{
@@ -128,6 +129,7 @@ private:
 	void fix_forbidden_states() {
 		using enum MapRingStyle::Mode;
 
+		// 'CurModule' is not different that 'ShowAll' since we just view one module at a time
 		if (settings.param_style.mode == CurModuleIfPlaying)
 			settings.param_style.mode = ShowAllIfPlaying;
 		else if (settings.param_style.mode == CurModule)
@@ -138,14 +140,37 @@ private:
 		else if (settings.paneljack_style.mode == CurModule)
 			settings.paneljack_style.mode = ShowAll;
 
+		// Control Maps and PanelJack Maps share the "Show if Playing" switch
 		if (settings.param_style.mode == ShowAllIfPlaying && settings.paneljack_style.mode == ShowAll)
 			settings.paneljack_style.mode = ShowAllIfPlaying;
 
 		else if (settings.param_style.mode == ShowAll && settings.paneljack_style.mode == ShowAllIfPlaying)
 			settings.paneljack_style.mode = ShowAll;
 
+		// Cables are either hidden or shown, no other states allowed
 		if (settings.cable_style.mode != HideAlways)
 			settings.cable_style.mode = ShowAll;
+	}
+
+	void update_interactive_states() {
+		auto show_control_maps = lv_obj_has_state(ui_MVShowControlMapsCheck, LV_STATE_CHECKED);
+		auto show_jack_maps = lv_obj_has_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
+
+		lv_enable(ui_MVControlMapTranspSlider, show_control_maps);
+		lv_enable(ui_MVJackMapTranspSlider, show_jack_maps);
+
+		if (!show_control_maps && !show_jack_maps) {
+			lv_disable(ui_MVShowMapsAlwaysCheck);
+			lv_label_set_text(ui_MapsWillBeHiddenNote, "");
+		} else {
+
+			lv_enable(ui_MVShowMapsAlwaysCheck);
+
+			if (lv_obj_has_state(ui_MVShowMapsAlwaysCheck, LV_STATE_CHECKED))
+				lv_label_set_text(ui_MapsWillBeHiddenNote, "");
+			else
+				lv_label_set_text(ui_MapsWillBeHiddenNote, "Maps will only show when playing");
+		}
 	}
 
 	static void settings_button_cb(lv_event_t *event) {
@@ -166,20 +191,22 @@ private:
 
 		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
 
-		auto if_playing = lv_obj_has_state(ui_MVShowPlayingMapsCheck, LV_STATE_CHECKED);
+		page->update_interactive_states();
+
+		auto show_always = lv_obj_has_state(ui_MVShowMapsAlwaysCheck, LV_STATE_CHECKED);
 		auto show_control_maps = lv_obj_has_state(ui_MVShowControlMapsCheck, LV_STATE_CHECKED);
-		auto flash_active = lv_obj_has_state(ui_MVFlashMapCheck, LV_STATE_CHECKED);
 		auto show_jack_maps = lv_obj_has_state(ui_MVShowJackMapsCheck, LV_STATE_CHECKED);
+		auto flash_active = lv_obj_has_state(ui_MVFlashMapCheck, LV_STATE_CHECKED);
 
 		using enum MapRingStyle::Mode;
 
-		page->settings.param_style.mode = show_control_maps && if_playing  ? ShowAllIfPlaying :
-										  show_control_maps && !if_playing ? ShowAll :
-																			 HideAlways;
-
-		page->settings.paneljack_style.mode = show_jack_maps && if_playing	? ShowAllIfPlaying :
-											  show_jack_maps && !if_playing ? ShowAll :
+		page->settings.param_style.mode = show_control_maps && show_always	? ShowAll :
+										  show_control_maps && !show_always ? ShowAllIfPlaying :
 																			  HideAlways;
+
+		page->settings.paneljack_style.mode = show_jack_maps && show_always	 ? ShowAll :
+											  show_jack_maps && !show_always ? ShowAllIfPlaying :
+																			   HideAlways;
 
 		auto opacity = lv_slider_get_value(ui_MVControlMapTranspSlider); //0..100
 		opacity = (float)opacity * 2.5f;
@@ -191,11 +218,6 @@ private:
 
 		page->settings.map_ring_flash_active = flash_active;
 		page->settings.changed = true;
-
-		if (!show_control_maps && !show_jack_maps && if_playing) {
-			lv_uncheck(ui_MVShowPlayingMapsCheck);
-			lv_disable(ui_MVShowPlayingMapsCheck);
-		}
 	}
 
 	static void cable_settings_value_change_cb(lv_event_t *event) {

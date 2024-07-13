@@ -454,12 +454,6 @@ private:
 			lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
 			lv_event_send(button[*prev_idx], LV_EVENT_REFRESH, nullptr);
 		}
-		// if (prev_sel >= 0 && prev_sel < roller_drawn_el_idx.size()) {
-		// 	if (auto prev_idx = roller_drawn_el_idx[prev_sel]; (size_t)prev_idx < button.size()) {
-		// 		lv_obj_remove_style(button[prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-		// 		lv_event_send(button[prev_idx], LV_EVENT_REFRESH, nullptr);
-		// 	}
-		// }
 	}
 
 	void highlight_component(size_t idx) {

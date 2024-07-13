@@ -23,8 +23,11 @@ inline void lv_disable(lv_obj_t *obj) {
 	lv_obj_add_state(obj, LV_STATE_DISABLED);
 }
 
-inline void lv_enable(lv_obj_t *obj) {
-	lv_obj_clear_state(obj, LV_STATE_DISABLED);
+inline void lv_enable(lv_obj_t *obj, bool enabled = true) {
+	if (enabled)
+		lv_obj_clear_state(obj, LV_STATE_DISABLED);
+	else
+		lv_disable(obj);
 }
 
 inline void lv_enable_all_children(lv_obj_t *obj) {
