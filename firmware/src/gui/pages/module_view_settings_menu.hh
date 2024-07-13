@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/pages/base.hh"
 #include "gui/pages/view_settings.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
@@ -10,9 +11,10 @@ namespace MetaModule
 {
 
 struct ModuleViewSettingsMenu {
-	ModuleViewSettingsMenu(ModuleDisplaySettings &settings)
+	ModuleViewSettingsMenu(ModuleDisplaySettings &settings, GuiState &gui_state)
 		: settings_menu_group(lv_group_create())
-		, settings{settings} {
+		, settings{settings}
+		, gui_state{gui_state} {
 
 		lv_obj_add_event_cb(ui_ModuleViewSettingsBut, settings_button_cb, LV_EVENT_CLICKED, this);
 
@@ -114,6 +116,7 @@ struct ModuleViewSettingsMenu {
 			if (base_group)
 				lv_indev_set_group(indev, base_group);
 			visible = false;
+			gui_state.do_write_settings = true;
 		}
 	}
 
@@ -219,6 +222,7 @@ private:
 	lv_group_t *settings_menu_group = nullptr;
 	bool visible = false;
 	ModuleDisplaySettings &settings;
+	GuiState &gui_state;
 };
 
 } // namespace MetaModule

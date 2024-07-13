@@ -23,7 +23,7 @@ struct ModuleViewPage : PageBase {
 		, cable_drawer{ui_ModuleImage, drawn_elements}
 		, map_ring_display{settings.module_view}
 		, page_settings{settings.module_view}
-		, settings_menu{settings.module_view}
+		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader} {

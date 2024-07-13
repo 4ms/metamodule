@@ -101,6 +101,8 @@ public:
 		handle_audio_errors();
 
 		handle_notifications();
+
+		handle_write_settings();
 	}
 
 	void handle_knobset_change() {
@@ -189,6 +191,17 @@ public:
 		if (info.patch_playloader.did_audio_overrun()) {
 			info.notify_queue.put({"Audio stopped because patch load > 99%.", Notification::Priority::Error, 1500});
 			info.patch_playloader.clear_audio_overrun();
+		}
+	}
+
+	void handle_write_settings() {
+		if (gui_state.do_write_settings) {
+			if (!Settings::write_settings(info.patch_storage, settings)) {
+				pr_err("Failed to write settings file\n");
+			} else
+				pr_info("Wrote settings\n");
+
+			gui_state.do_write_settings = false;
 		}
 	}
 

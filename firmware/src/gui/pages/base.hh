@@ -32,6 +32,9 @@ struct GuiState {
 	bool force_redraw_patch{};
 
 	std::optional<Volume> force_refresh_vol{};
+
+	bool do_write_settings{};
+
 };
 
 struct PatchContext {
