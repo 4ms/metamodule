@@ -70,6 +70,15 @@ struct CalibrationRoutine {
 		}
 	}
 
+	bool did_complete() {
+		if (state == State::Complete) {
+			state = State::Idle;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	void start() {
 		lv_hide(ui_CalibrationOutputStatusCont);
 		lv_hide(ui_SystemCalibrationButton);
@@ -617,7 +626,7 @@ private:
 			pr_err("Error: patch mod queue full\n");
 		}
 
-		state = State::Idle;
+		state = State::Complete;
 	}
 
 private:
@@ -645,7 +654,8 @@ private:
 		StartWritingCal,
 		WritingCal,
 		Verify,
-		UpdateAudioStream
+		UpdateAudioStream,
+		Complete,
 	};
 	static constexpr size_t MaxJacks = std::max(PanelDef::NumAudioIn, PanelDef::NumAudioOut);
 	static constexpr float coef = 1.f / 4.f;
