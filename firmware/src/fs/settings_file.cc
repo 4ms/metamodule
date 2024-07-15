@@ -1,3 +1,4 @@
+#include "debug.hh"
 #include "delay.hh"
 #include "drivers/cache.hh"
 #include "fs/settings_parse.hh"
@@ -8,14 +9,19 @@
 namespace MetaModule::Settings
 {
 
-[[maybe_unused]] bool write_settings(FileStorageProxy &proxy, ViewSettings const &settings) {
+bool write_settings(FileStorageProxy &proxy, ViewSettings const &settings) {
+	alignas(64) std::array<char, 1024> buffer;
 
-	alignas(64) std::string yaml = serialize(settings);
+	auto sz = serialize(settings, buffer);
 
-	mdrivlib::SystemCache::clean_dcache_by_range((void *)(yaml.data()), yaml.size());
+	auto yaml_clean = std::span<char>{buffer.data(), sz};
+
+	mdrivlib::SystemCache::clean_dcache_by_range((void *)(yaml_clean.data()), yaml_clean.size());
 
 	uint32_t timeout = get_time();
-	while (proxy.request_write_file(yaml, Volume::NorFlash, "settings.yml") == FileStorageProxy::WriteResult::Busy) {
+	while (proxy.request_write_file(yaml_clean, Volume::NorFlash, "settings.yml") ==
+		   FileStorageProxy::WriteResult::Busy)
+	{
 		if (get_time() - timeout > 1000) {
 			pr_err("Settings file write request not made in 1 second\n");
 			return false;
@@ -28,7 +34,6 @@ namespace MetaModule::Settings
 
 		if (msg.message_type == FileStorageProxy::WriteFileOK) {
 			pr_dbg("Settings file written\n");
-			pr_trace("\n%.*s\n", (int)yaml.size(), yaml.data());
 			return true;
 
 		} else if (msg.message_type == FileStorageProxy::WriteFileFail) {
@@ -66,8 +71,6 @@ bool read_settings(FileStorageProxy &proxy, ViewSettings *settings) {
 			auto yaml = std::span<char>{buffer.data(), msg.bytes_read};
 
 			mdrivlib::SystemCache::invalidate_dcache_by_range(yaml.data(), yaml.size());
-
-			pr_trace("\n%.*s\n", (int)yaml.size(), yaml.data());
 
 			return parse(yaml, settings);
 		}

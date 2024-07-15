@@ -189,6 +189,10 @@ TEST_CASE("Serialize settings") {
 )";
 	// clang format-on
 
-	auto parsed = MetaModule::Settings::serialize(settings);
+	std::string parsed;
+	parsed.resize(1024);
+	auto bytes_size = MetaModule::Settings::serialize(settings, {parsed.data(), parsed.size()});
+	parsed.resize(bytes_size);
+
 	CHECK(parsed == expected);
 }

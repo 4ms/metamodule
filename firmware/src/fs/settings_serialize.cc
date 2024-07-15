@@ -35,7 +35,7 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 namespace Settings
 {
 
-std::string serialize(ViewSettings const &settings) {
+uint32_t serialize(ViewSettings const &settings, std::span<char> buffer) {
 	RymlInit::init_once();
 
 	ryml::Tree tree;
@@ -48,7 +48,8 @@ std::string serialize(ViewSettings const &settings) {
 	data["patch_view"] << settings.patch_view;
 	data["module_view"] << settings.module_view;
 
-	return ryml::emitrs_yaml<std::string>(tree);
+	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
+	return res.size();
 }
 
 //

@@ -5,7 +5,7 @@
 namespace MetaModule::Settings
 {
 
-[[maybe_unused]] bool write_settings(FileStorageProxy &proxy, ViewSettings const &settings);
+bool write_settings(FileStorageProxy &proxy, ViewSettings const &settings);
 bool read_settings(FileStorageProxy &proxy, ViewSettings *settings);
 
 } // namespace MetaModule::Settings
