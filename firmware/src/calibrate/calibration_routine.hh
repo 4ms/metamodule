@@ -91,7 +91,7 @@ struct CalibrationRoutine {
 		lv_show(ui_CalibrationProcedureCont);
 
 		lv_label_set_text(ui_CalibrationInstructionLabel,
-						  "Play a C2 and a C4 into each jack you wish to re-calibrate.");
+						  "Play a C1 (1.00V) and a\nC4 (4.00V) into each jack\nto re-calibrate.");
 		lv_label_set_text(ui_CalibrationMeasurementLabel, "");
 
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
@@ -216,17 +216,17 @@ private:
 
 			switch (status) {
 				case JackCalStatus::LowOnly: {
-					std::string stat = in + Gui::green_text("C2") + Gui::grey_text(" C4");
+					std::string stat = in + Gui::green_text("C1") + Gui::grey_text(" C4");
 					lv_label_set_text(label, stat.c_str());
 				} break;
 
 				case JackCalStatus::HighOnly: {
-					std::string stat = in + Gui::grey_text("C2") + Gui::green_text(" C4");
+					std::string stat = in + Gui::grey_text("C1") + Gui::green_text(" C4");
 					lv_label_set_text(label, stat.c_str());
 				} break;
 
 				case JackCalStatus::NotCal: {
-					std::string stat = in + Gui::grey_text("C2") + Gui::grey_text(" C4");
+					std::string stat = in + Gui::grey_text("C1") + Gui::grey_text(" C4");
 					lv_label_set_text(label, stat.c_str());
 				} break;
 
