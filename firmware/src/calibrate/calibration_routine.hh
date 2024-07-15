@@ -70,6 +70,15 @@ struct CalibrationRoutine {
 		}
 	}
 
+	bool did_complete() {
+		if (state == State::Complete) {
+			state = State::Idle;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	void start() {
 		lv_hide(ui_CalibrationOutputStatusCont);
 		lv_hide(ui_SystemCalibrationButton);
@@ -82,7 +91,7 @@ struct CalibrationRoutine {
 		lv_show(ui_CalibrationProcedureCont);
 
 		lv_label_set_text(ui_CalibrationInstructionLabel,
-						  "Play a C2 and a C4 into each jack you wish to re-calibrate.");
+						  "Play a C1 (1.00V) and a\nC4 (4.00V) into each jack\nto re-calibrate.");
 		lv_label_set_text(ui_CalibrationMeasurementLabel, "");
 
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
@@ -207,17 +216,17 @@ private:
 
 			switch (status) {
 				case JackCalStatus::LowOnly: {
-					std::string stat = in + Gui::green_text("C2") + Gui::grey_text(" C4");
+					std::string stat = in + Gui::green_text("C1") + Gui::grey_text(" C4");
 					lv_label_set_text(label, stat.c_str());
 				} break;
 
 				case JackCalStatus::HighOnly: {
-					std::string stat = in + Gui::grey_text("C2") + Gui::green_text(" C4");
+					std::string stat = in + Gui::grey_text("C1") + Gui::green_text(" C4");
 					lv_label_set_text(label, stat.c_str());
 				} break;
 
 				case JackCalStatus::NotCal: {
-					std::string stat = in + Gui::grey_text("C2") + Gui::grey_text(" C4");
+					std::string stat = in + Gui::grey_text("C1") + Gui::grey_text(" C4");
 					lv_label_set_text(label, stat.c_str());
 				} break;
 
@@ -505,8 +514,7 @@ private:
 
 			auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
 
-			mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(cal_data));
-			mdrivlib::SystemCache::clean_dcache_by_range(&bytes_written, sizeof(bytes_written));
+			mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(PaddedCalData));
 
 			if (storage.request_read_flash(caldata_span, CalDataFlashOffset, &bytes_written))
 				state = State::ReadingCal;
@@ -517,8 +525,7 @@ private:
 
 			if (msg.message_type == IntercoreStorageMessage::MessageType::ReadFlashOk) {
 
-				mdrivlib::SystemCache::invalidate_dcache_by_range(&cal_data, sizeof(cal_data));
-				mdrivlib::SystemCache::invalidate_dcache_by_range(&bytes_written, sizeof(bytes_written));
+				mdrivlib::SystemCache::invalidate_dcache_by_range(&cal_data, sizeof(PaddedCalData));
 
 				if (bytes_written != sizeof(cal_data)) {
 					pr_err("Internal error reading flash (%d bytes read)\n", bytes_written);
@@ -547,8 +554,7 @@ private:
 			// Wait for Next button
 			if (next_step) {
 
-				mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(cal_data));
-				mdrivlib::SystemCache::clean_dcache_by_range(&bytes_written, sizeof(bytes_written));
+				mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(PaddedCalData));
 
 				if (storage.request_file_flash(IntercoreStorageMessage::FlashTarget::QSPI,
 											   {(uint8_t *)(&cal_data), sizeof(cal_data)},
@@ -562,6 +568,7 @@ private:
 				pr_info("Flashing success!\n");
 				lv_label_set_text(ui_CalibrationInstructionLabel, "Calibration data is saved, verifying.");
 				lv_hide(ui_CalibrationButtonCont);
+				cal_data.print_calibration();
 
 				is_reading_to_verify = true;
 				cal_data_check = cal_data;
@@ -620,7 +627,7 @@ private:
 			pr_err("Error: patch mod queue full\n");
 		}
 
-		state = State::Idle;
+		state = State::Complete;
 	}
 
 private:
@@ -648,7 +655,8 @@ private:
 		StartWritingCal,
 		WritingCal,
 		Verify,
-		UpdateAudioStream
+		UpdateAudioStream,
+		Complete,
 	};
 	static constexpr size_t MaxJacks = std::max(PanelDef::NumAudioIn, PanelDef::NumAudioOut);
 	static constexpr float coef = 1.f / 4.f;
@@ -664,7 +672,18 @@ private:
 	ParamsMidiState &params;
 	MetaParams &metaparams;
 
-	CalData cal_data{};
+	// Pad calibration data so does not share cache lines with other data
+	struct PaddedCalData {
+		CalData cal_data{};
+		uint32_t bytes_written{};
+		char padding[128 - sizeof(cal_data) - sizeof(bytes_written)]{};
+
+		static_assert(sizeof(CalData) > 64 && sizeof(CalData) <= 124);
+	};
+	alignas(64) PaddedCalData padded_cal_data{};
+	CalData &cal_data = padded_cal_data.cal_data;
+	uint32_t &bytes_written = padded_cal_data.bytes_written;
+
 	CalData cal_data_check{};
 	bool is_reading_to_verify = false;
 
@@ -683,8 +702,6 @@ private:
 
 	unsigned delay_measurement = 0;
 	std::optional<unsigned> current_output = 0;
-
-	uint32_t bytes_written{};
 
 	std::array<lv_obj_t *, PanelDef::NumAudioIn> input_status_labels{
 		ui_CalibrationIn1Label,
