@@ -243,7 +243,7 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (gui_state.back_button.is_just_released()) {
-			if (settings_menu.visible) {
+			if (settings_menu.is_visible()) {
 				settings_menu.hide();
 
 			} else if (desc_panel.is_visible()) {

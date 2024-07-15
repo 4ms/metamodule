@@ -36,6 +36,8 @@ struct ModuleViewSettingsMenu {
 	}
 
 	void prepare_focus(lv_group_t *group) {
+		base_group = group;
+
 		lv_group_remove_all_objs(settings_menu_group);
 		lv_group_set_editing(settings_menu_group, false);
 
@@ -53,25 +55,17 @@ struct ModuleViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_MVShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_MVCablesTranspSlider);
 
-		base_group = group;
-		using enum MapRingStyle::Mode;
-
 		fix_forbidden_states();
 
+		using enum MapRingStyle::Mode;
 		lv_check(ui_MVShowControlMapsCheck, settings.param_style.mode != HideAlways);
 		lv_check(ui_MVShowJackMapsCheck, settings.param_style.mode != HideAlways);
 		lv_check(ui_MVShowAllCablesCheck, settings.cable_style.mode != HideAlways);
 		lv_check(ui_MVFlashMapCheck, settings.map_ring_flash_active);
 
-		// "Always Show Maps" checkbox:
-		if (settings.param_style.mode == HideAlways && settings.paneljack_style.mode == HideAlways) {
-			// Disable and uncheck if hiding both types of maps
-			lv_disable(ui_MVShowMapsAlwaysCheck);
-		} else if (settings.param_style.mode == ShowAllIfPlaying) {
-			lv_enable(ui_MVShowMapsAlwaysCheck);
+		if (settings.param_style.mode == ShowAllIfPlaying) {
 			lv_uncheck(ui_MVShowMapsAlwaysCheck);
-		} else { //ShowAll
-			lv_enable(ui_MVShowMapsAlwaysCheck);
+		} else if (settings.param_style.mode == ShowAll) {
 			lv_check(ui_MVShowMapsAlwaysCheck);
 		}
 
@@ -104,7 +98,9 @@ struct ModuleViewSettingsMenu {
 			lv_indev_set_group(indev, settings_menu_group);
 			lv_group_focus_obj(ui_MVSettingsCloseButton);
 			lv_obj_scroll_to_y(ui_MVSettingsMenu, 0, LV_ANIM_OFF);
+
 			visible = true;
+			changed_while_visible = false;
 		}
 	}
 
@@ -117,7 +113,9 @@ struct ModuleViewSettingsMenu {
 			if (base_group)
 				lv_indev_set_group(indev, base_group);
 			visible = false;
-			gui_state.do_write_settings = true;
+
+			if (changed_while_visible)
+				gui_state.do_write_settings = true;
 		}
 	}
 
@@ -217,32 +215,33 @@ private:
 		page->settings.paneljack_style.opa = opacity;
 
 		page->settings.map_ring_flash_active = flash_active;
+
 		page->settings.changed = true;
+		page->changed_while_visible = true;
 	}
 
 	static void cable_settings_value_change_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
-		lv_event_code_t event_code = lv_event_get_code(event);
+		using enum MapRingStyle::Mode;
 
-		if (event_code == LV_EVENT_VALUE_CHANGED) {
-			using enum MapRingStyle::Mode;
+		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+		auto show_all = lv_obj_has_state(ui_MVShowAllCablesCheck, LV_STATE_CHECKED);
 
-			auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
-			auto show_all = lv_obj_has_state(ui_MVShowAllCablesCheck, LV_STATE_CHECKED);
+		page->settings.cable_style.mode = show_all ? ShowAll : HideAlways;
 
-			page->settings.cable_style.mode = show_all ? ShowAll : HideAlways;
+		auto opacity = lv_slider_get_value(ui_MVCablesTranspSlider); //0..100
+		opacity = (float)opacity * 2.5f;
+		page->settings.cable_style.opa = opacity;
 
-			auto opacity = lv_slider_get_value(ui_MVCablesTranspSlider); //0..100
-			opacity = (float)opacity * 2.5f;
-			page->settings.cable_style.opa = opacity;
-			page->settings.changed = true;
-		}
+		page->settings.changed = true;
+		page->changed_while_visible = true;
 	}
 
 	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
 	bool visible = false;
+	bool changed_while_visible = false;
 	ModuleDisplaySettings &settings;
 	GuiState &gui_state;
 };
