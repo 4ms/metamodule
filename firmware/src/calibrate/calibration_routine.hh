@@ -568,6 +568,7 @@ private:
 				pr_info("Flashing success!\n");
 				lv_label_set_text(ui_CalibrationInstructionLabel, "Calibration data is saved, verifying.");
 				lv_hide(ui_CalibrationButtonCont);
+				cal_data.print_calibration();
 
 				is_reading_to_verify = true;
 				cal_data_check = cal_data;
