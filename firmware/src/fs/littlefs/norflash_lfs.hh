@@ -54,14 +54,14 @@ public:
 			.lookahead_size = 64,
 		};
 
-		pr_dbg("Configure lfs with %u blocks (%u/%u)\n", cfg.block_count, ThisNorFlashOps::Size, BlockSize);
+		pr_trace("Configure lfs with %u blocks (%u/%u)\n", cfg.block_count, ThisNorFlashOps::Size, BlockSize);
 		auto err = lfs_mount(&lfs, &cfg);
 		if (err >= 0) {
-			pr_dbg("LittleFS mounted OK\n");
+			pr_info("LittleFS mounted OK\n");
 			return Status::AlreadyFormatted;
 		}
 
-		pr_dbg("LittleFS not formatted\n");
+		pr_info("LittleFS not formatted\n");
 
 		return Status::LFSError;
 	}
@@ -108,21 +108,25 @@ public:
 	update_or_create_file(const std::string_view filename, const std::span<const char> data, uint32_t timestamp = 0) {
 		TimeFile file;
 
-		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY);
+		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY | LFS_O_TRUNC);
 		if (err < 0) {
-			pr_err("Open failed with err %d\n", err);
+			pr_err("LFS: Open failed with err %d\n", err);
 			return false;
 		}
 
 		file.timestamp = timestamp ? timestamp : get_fattime();
 
-		pr_dbg("Littlefs: updating or creating file %s, timestamp 0x%x\n", filename.data(), (unsigned)file.timestamp);
-		if (int err = lfs_file_write(&lfs, &file.file, data.data(), data.size_bytes()); err < 0) {
-			pr_err("Write failed with err %d\n", err);
+		pr_trace("LFS: write file %s, timestamp 0x%x, size %u\n", filename.data(), file.timestamp, data.size());
+
+		if (err = lfs_file_write(&lfs, &file.file, data.data(), data.size_bytes()); err < 0) {
+			pr_err("LFS: Write failed with err %d\n", err);
 			return false;
 		}
 
-		lfs_file_close(&lfs, &file.file);
+		if (err = lfs_file_close(&lfs, &file.file); err < 0) {
+			pr_err("LFS: Closing failed with err %d\n", err);
+			return false;
+		}
 
 		return true;
 	}
@@ -143,9 +147,10 @@ public:
 
 	// Reads into buffer, returns the bytes actually read
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset = 0) {
-		lfs_file_t file;
+		TimeFile tfile;
+		auto &file = tfile.file;
 
-		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_RDONLY);
+		auto err = time_file_open(&tfile, filename.data(), LFS_O_RDONLY);
 		if (err < 0)
 			return 0;
 
@@ -153,7 +158,7 @@ public:
 		if (seek_err < 0)
 			return 0;
 
-		auto bytes_read = lfs_file_read(&lfs, &file, buffer.data(), buffer.size_bytes());
+		auto bytes_read = time_file_read(&tfile, buffer.data(), buffer.size_bytes());
 		if (bytes_read <= 0)
 			return 0;
 
@@ -163,20 +168,7 @@ public:
 
 	// Write
 	uint32_t write_file(const std::string_view filename, std::span<const char> buffer) {
-		lfs_file_t file;
-
-		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC);
-		if (err < 0)
-			return 0;
-
-		auto bytes_written = lfs_file_write(&lfs, &file, buffer.data(), buffer.size_bytes());
-		if (bytes_written <= (int)buffer.size_bytes()) {
-			lfs_file_close(&lfs, &file);
-			return 0;
-		}
-
-		lfs_file_close(&lfs, &file);
-		return bytes_written;
+		return update_or_create_file(filename, buffer);
 	}
 
 	// Performs an action(filename, timestamp) on each file in LittleFS root dir ending with the extension
@@ -263,10 +255,13 @@ public:
 		return lfs_file_opencfg(&lfs, &tfile->file, path, flags, &tfile->cfg);
 	}
 
-	// usage:
-	// TimeFile tfile;
-	// time_file_open(&tfile, info.name, LFS_O_RDONLY);
-	// if (tfile.attrs[0].type == ATTR_TIMESTAMP)
-	//     uint32_t timestamp = tfile.attrs[0].buffer;
+	int time_file_write(TimeFile *file, const void *buffer, size_t size) {
+		file->timestamp = get_fattime();
+		return lfs_file_write(&lfs, &file->file, buffer, size);
+	}
+
+	int time_file_read(TimeFile *file, void *buffer, size_t size) {
+		return lfs_file_read(&lfs, &file->file, buffer, size);
+	}
 };
 } // namespace MetaModule
