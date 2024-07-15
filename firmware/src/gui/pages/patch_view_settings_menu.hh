@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/pages/base.hh"
 #include "gui/pages/view_settings.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
@@ -10,9 +11,10 @@ namespace MetaModule
 {
 
 struct PatchViewSettingsMenu {
-	PatchViewSettingsMenu(ModuleDisplaySettings &settings)
+	PatchViewSettingsMenu(ModuleDisplaySettings &settings, GuiState &gui_state)
 		: settings_menu_group(lv_group_create())
-		, settings{settings} {
+		, settings{settings}
+		, gui_state{gui_state} {
 
 		lv_obj_set_parent(ui_PVSettingsMenu, lv_layer_top());
 		lv_obj_add_event_cb(ui_SettingsButton, settings_button_cb, LV_EVENT_CLICKED, this);
@@ -94,7 +96,9 @@ struct PatchViewSettingsMenu {
 			lv_group_focus_obj(ui_PVSettingsCloseButton);
 			lv_obj_clear_state(ui_PVSettingsCloseButton, LV_STATE_PRESSED);
 			lv_obj_scroll_to_y(ui_PVSettingsMenu, 0, LV_ANIM_OFF);
+
 			visible = true;
+			changed_while_visible = false;
 		}
 	}
 
@@ -107,7 +111,11 @@ struct PatchViewSettingsMenu {
 			if (base_group)
 				lv_indev_set_group(indev, base_group);
 			lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
+
 			visible = false;
+
+			if (changed_while_visible)
+				gui_state.do_write_settings = true;
 		}
 	}
 
@@ -233,7 +241,9 @@ private:
 		page->settings.paneljack_style.opa = opacity;
 
 		page->settings.map_ring_flash_active = flash_active;
+
 		page->settings.changed = true;
+		page->changed_while_visible = true;
 	}
 
 	static void cable_settings_value_change_cb(lv_event_t *event) {
@@ -252,12 +262,15 @@ private:
 		page->settings.cable_style.opa = opacity;
 
 		page->settings.changed = true;
+		page->changed_while_visible = true;
 	}
 
 	lv_group_t *base_group = nullptr;
 	lv_group_t *settings_menu_group = nullptr;
 	bool visible = false;
+	bool changed_while_visible = false;
 	ModuleDisplaySettings &settings;
+	GuiState &gui_state;
 };
 
 } // namespace MetaModule

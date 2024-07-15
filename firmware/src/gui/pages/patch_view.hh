@@ -29,7 +29,7 @@ struct PatchViewPage : PageBase {
 		, modules_cont(ui_ModulesPanel)
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
-		, settings_menu{settings.patch_view}
+		, settings_menu{settings.patch_view, gui_state}
 		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list}
 		, map_ring_display{settings.patch_view} {
 
