@@ -34,7 +34,7 @@ on:
 
 jobs:
   build-lin:
-    if: ${{ inputs.linux_x64 }}
+    if: ${{ github.event_name == 'push' || inputs.linux_x64 }}
     strategy:
         matrix:
           gcc: ['12.2.Rel1']  # can add other versions if needed
