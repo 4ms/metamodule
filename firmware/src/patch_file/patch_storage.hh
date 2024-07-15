@@ -265,11 +265,11 @@ private:
 		}
 
 		if (!ok) {
-			pr_warn("Could not load patch id %.*s\n", (int)filename.size(), filename.data());
+			pr_warn("M4: Could not load file id %.*s\n", (int)filename.size(), filename.data());
 			return 0;
 		}
 
-		pr_dbg("Read patch %.*s, %d bytes\n", (int)filename.size(), filename.data(), buffer.size_bytes());
+		pr_dbg("M4: Read file %.*s, %d bytes\n", (int)filename.size(), filename.data(), buffer.size_bytes());
 		return buffer.size_bytes();
 	}
 
