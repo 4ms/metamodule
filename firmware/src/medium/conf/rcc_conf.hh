@@ -10,7 +10,7 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLM = 2,
 			.PLLN = 34,
 			.PLLP = 2,	//208.896MHZ for MCU
-			.PLLQ = 34, //=>12.288014MHz for SAI
+			.PLLQ = 17, //=>24.576MHz for SAI
 			.PLLR = 2,	//208.89624MHz for ...?
 			.PLLRGE = RCC_PLL4IFRANGE_1,
 			.PLLFRACV = 6685,
