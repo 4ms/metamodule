@@ -47,5 +47,5 @@
 	path = shared/CoreModules/4ms/core/alpaca
 	url = https://github.com/4ms/alpaca
 [submodule "firmware/vcv_ports/VCV-Fundamental"]
-	path = firmware/vcv_ports/VCV-Fundamental
+	path = firmware/vcv_ports/Rack
 	url = https://github.com/4ms/VCVRack-Fundamental.git
