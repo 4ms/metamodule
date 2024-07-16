@@ -2,6 +2,15 @@
 
 namespace rack::widget
 {
+void Widget::setSize(math::Vec size) {
+	if (size.equals(box.size))
+		return;
+	box.size = size;
+	// Dispatch Resize event
+	ResizeEvent eResize;
+	onResize(eResize);
+}
+
 void Widget::requestDelete() {
 }
 
@@ -83,6 +92,13 @@ void Widget::clearChildren() {
 		delete child;
 	}
 	children.clear();
+}
+
+bool Widget::hasChild(Widget *child) {
+	if (!child)
+		return false;
+	auto it = std::find(children.begin(), children.end(), child);
+	return (it != children.end());
 }
 
 Widget::~Widget() {
