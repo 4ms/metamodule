@@ -27,7 +27,7 @@ if (CMAKE_CROSSCOMPILING)
   set_property(TARGET _vcv_ports_internal PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-set_property(TARGET _vcv_ports_internal PROPERTY CXX_STANDARD 20)
+set_property(TARGET _vcv_ports_internal PROPERTY CXX_STANDARD 23)
 
 
 # Create interface wrapper that whole-links the actual library

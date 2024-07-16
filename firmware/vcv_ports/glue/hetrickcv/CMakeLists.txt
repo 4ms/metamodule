@@ -41,7 +41,7 @@ add_library(
 
 target_include_directories(hetrickcvLibrary PRIVATE ${HETRICKCV_DIR}/Gamma ${HETRICKCV_DIR}/src)
 
-set_property(TARGET hetrickcvLibrary PROPERTY CXX_STANDARD 20)
+set_property(TARGET hetrickcvLibrary PROPERTY CXX_STANDARD 23)
 
 target_compile_options(
   hetrickcvLibrary

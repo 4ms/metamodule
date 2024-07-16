@@ -65,10 +65,12 @@ struct SystemTab : SystemMenuTab {
 
 		} else if (cal_routine.is_calibrating()) {
 			cal_routine.abort();
+			patch_playloader.request_reload_playing_patch();
 			return true;
 
 		} else if (cal_check.is_visible()) {
 			cal_check.hide();
+			patch_playloader.request_reload_playing_patch();
 			return true;
 
 		} else {
@@ -78,6 +80,10 @@ struct SystemTab : SystemMenuTab {
 
 	void update() override {
 		cal_routine.update();
+		if (cal_routine.did_complete()) {
+			patch_playloader.request_reload_playing_patch();
+		}
+
 		if (cal_check.is_visible())
 			cal_check.update();
 	}

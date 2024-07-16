@@ -90,8 +90,9 @@ struct SaveDialog {
 	void show() {
 		if (mode == Mode::Hidden) {
 			file_vol = patches.get_view_patch_vol();
+			// Default Volume:
 			if (file_vol == Volume::RamDisk)
-				file_vol = Volume::SDCard;
+				file_vol = Volume::NorFlash;
 
 			auto fullpath = patches.get_view_patch_filename();
 			auto slashpos = fullpath.find_last_of('/');

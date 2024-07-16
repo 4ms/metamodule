@@ -89,6 +89,11 @@ struct PatchPlayLoader {
 		loading_new_patch_ = true;
 	}
 
+	void request_reload_playing_patch() {
+		next_patch = patches_.get_playing_patch();
+		loading_new_patch_ = true;
+	}
+
 	bool should_fade_down_audio() {
 		return loading_new_patch_ || stopping_audio_;
 	}

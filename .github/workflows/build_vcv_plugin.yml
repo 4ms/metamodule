@@ -48,7 +48,7 @@ jobs:
   build-lin-x64:
     if: ${{ github.event_name == 'push' || inputs.linux_x64 || startsWith(github.ref, 'refs/tags/vcv-v') }}
     name: lin-x64
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: ghcr.io/4ms/rack-plugin-toolchain-win-linux
       options: --user root
@@ -73,7 +73,7 @@ jobs:
   build-win-x64:
     if: ${{ inputs.win_x64 || startsWith(github.ref, 'refs/tags/vcv-v') }}
     name: win-x64
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: ghcr.io/4ms/rack-plugin-toolchain-win-linux
       options: --user root
@@ -156,7 +156,7 @@ jobs:
   publish:
     if: startsWith(github.ref, 'refs/tags/vcv-v')
     name: Publish plugin
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-lin-x64, build-win-x64, build-mac-x64, build-mac-arm64]
     steps:
       - uses: actions/download-artifact@v4
