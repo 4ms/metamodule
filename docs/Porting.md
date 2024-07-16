@@ -60,7 +60,7 @@ target_include_directories(MyBrandLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../.
 target_compile_options(MyBrandLibrary PRIVATE -Wno-double-promotion)
 
 # Set properites here (at least c++20 is required)
-set_property(TARGET MyBrandLibrary PROPERTY CXX_STANDARD 20)
+set_property(TARGET MyBrandLibrary PROPERTY CXX_STANDARD 23)
 
 ```
 

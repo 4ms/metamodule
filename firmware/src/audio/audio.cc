@@ -87,8 +87,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		else
 			process_nopatch(audio_blocks[1 - block], local_p);
 
-		load_measure.end_measurement();
-
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
 		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof sync_params);
@@ -99,6 +97,12 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		// copy this value back so Controls can read it
 		param_blocks[block].metaparams.midi_poly_chans = local_p.metaparams.midi_poly_chans;
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
+
+		load_measure.end_measurement();
+		if (load_measure.get_last_measurement_load_percent() >= 98) {
+			output_fade_amt = 0.f;
+			patch_loader.notify_audio_overrun();
+		}
 
 		// Debug::Pin4::low();
 	};

@@ -101,7 +101,7 @@ target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui v
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
-set_property(TARGET simulator PROPERTY CXX_STANDARD 20)
+set_property(TARGET simulator PROPERTY CXX_STANDARD 23)
 
 # Arch-dependent Link options:
 message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")

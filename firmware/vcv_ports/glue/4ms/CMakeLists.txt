@@ -15,7 +15,7 @@ add_library(
   ${4MS_SOURCE_PATHS}
 )
 
-set_property(TARGET 4msLibrary PROPERTY CXX_STANDARD 20)
+set_property(TARGET 4msLibrary PROPERTY CXX_STANDARD 23)
 
 if (NOT DEFINED alpaca)
   add_subdirectory(${MM_ROOT}/shared/CoreModules/4ms/core/alpaca alpaca)
