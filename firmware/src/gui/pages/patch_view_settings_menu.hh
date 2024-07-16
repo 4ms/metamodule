@@ -35,10 +35,6 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_PVCablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_set_x(ui_PVSettingsMenu, 220);
-	}
-
-	void prepare_focus(lv_group_t *group) {
-		base_group = group;
 
 		lv_group_remove_all_objs(settings_menu_group);
 		lv_group_set_editing(settings_menu_group, false);
@@ -56,15 +52,27 @@ struct PatchViewSettingsMenu {
 
 		lv_group_add_obj(settings_menu_group, ui_PVShowAllCablesCheck);
 		lv_group_add_obj(settings_menu_group, ui_PVCablesTranspSlider);
+	}
+
+	void prepare_focus(lv_group_t *group) {
+		base_group = group;
 
 		fix_forbidden_states();
 
 		using enum MapRingStyle::Mode;
 
 		lv_check(ui_PVShowControlMapsCheck, settings.param_style.mode != HideAlways);
-		lv_check(ui_PVShowJackMapsCheck, settings.param_style.mode != HideAlways);
+		lv_check(ui_PVShowJackMapsCheck, settings.paneljack_style.mode != HideAlways);
 		lv_check(ui_PVShowAllCablesCheck, settings.cable_style.mode != HideAlways);
 		lv_check(ui_PVFlashMapCheck, settings.map_ring_flash_active);
+
+		lv_check(ui_PVShowMapsAlwaysCheck,
+				 settings.param_style.mode == ShowAll || settings.param_style.mode == CurModule ||
+					 settings.paneljack_style.mode == ShowAll || settings.paneljack_style.mode == CurModule);
+
+		lv_check(ui_PVShowMapsAllModulesCheck,
+				 settings.param_style.mode == ShowAll || settings.param_style.mode == ShowAllIfPlaying ||
+					 settings.paneljack_style.mode == ShowAll || settings.paneljack_style.mode == ShowAllIfPlaying);
 
 		update_interactive_states();
 
@@ -72,17 +80,17 @@ struct PatchViewSettingsMenu {
 		{
 			uint32_t opacity = (float)settings.param_style.opa / 2.5f;
 			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
-			lv_slider_set_value(ui_MVControlMapTranspSlider, opacity, LV_ANIM_OFF);
+			lv_slider_set_value(ui_PVControlMapTranspSlider, opacity, LV_ANIM_OFF);
 		}
 		{
 			uint32_t opacity = (float)settings.paneljack_style.opa / 2.5f;
 			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
-			lv_slider_set_value(ui_MVJackMapTranspSlider, opacity, LV_ANIM_OFF);
+			lv_slider_set_value(ui_PVJackMapTranspSlider, opacity, LV_ANIM_OFF);
 		}
 		{
 			uint32_t opacity = (float)settings.cable_style.opa / 2.5f;
 			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
-			lv_slider_set_value(ui_MVCablesTranspSlider, opacity, LV_ANIM_OFF);
+			lv_slider_set_value(ui_PVCablesTranspSlider, opacity, LV_ANIM_OFF);
 		}
 	}
 
@@ -183,14 +191,14 @@ private:
 			lv_enable(ui_PVShowMapsAllModulesCheck);
 
 			if (lv_obj_has_state(ui_PVShowMapsAlwaysCheck, LV_STATE_CHECKED))
-				lv_label_set_text(ui_PVMapsWillBeHiddenNote, "");
+				lv_label_set_text(ui_PVMapsWillBeHiddenNote, "Maps will show even if not playing");
 			else
 				lv_label_set_text(ui_PVMapsWillBeHiddenNote, "Maps will only show when playing");
 
 			if (lv_obj_has_state(ui_PVShowMapsAllModulesCheck, LV_STATE_CHECKED))
-				lv_label_set_text(ui_PVMapsWillShowSelectedModuleNote, "");
+				lv_label_set_text(ui_PVMapsWillShowSelectedModuleNote, "Maps will show on all modules");
 			else
-				lv_label_set_text(ui_PVMapsWillShowSelectedModuleNote, "Will show only on selected module");
+				lv_label_set_text(ui_PVMapsWillShowSelectedModuleNote, "Will only show on selected module");
 		}
 	}
 	static void settings_button_cb(lv_event_t *event) {

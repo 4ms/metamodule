@@ -59,15 +59,12 @@ struct ModuleViewSettingsMenu {
 
 		using enum MapRingStyle::Mode;
 		lv_check(ui_MVShowControlMapsCheck, settings.param_style.mode != HideAlways);
-		lv_check(ui_MVShowJackMapsCheck, settings.param_style.mode != HideAlways);
+		lv_check(ui_MVShowJackMapsCheck, settings.paneljack_style.mode != HideAlways);
 		lv_check(ui_MVShowAllCablesCheck, settings.cable_style.mode != HideAlways);
 		lv_check(ui_MVFlashMapCheck, settings.map_ring_flash_active);
 
-		if (settings.param_style.mode == ShowAllIfPlaying) {
-			lv_uncheck(ui_MVShowMapsAlwaysCheck);
-		} else if (settings.param_style.mode == ShowAll) {
-			lv_check(ui_MVShowMapsAlwaysCheck);
-		}
+		lv_check(ui_MVShowMapsAlwaysCheck,
+				 settings.param_style.mode == ShowAll || settings.paneljack_style.mode == ShowAll);
 
 		update_interactive_states();
 
@@ -165,7 +162,7 @@ private:
 			lv_enable(ui_MVShowMapsAlwaysCheck);
 
 			if (lv_obj_has_state(ui_MVShowMapsAlwaysCheck, LV_STATE_CHECKED))
-				lv_label_set_text(ui_MapsWillBeHiddenNote, "");
+				lv_label_set_text(ui_MapsWillBeHiddenNote, "Maps will show even if not playing");
 			else
 				lv_label_set_text(ui_MapsWillBeHiddenNote, "Maps will only show when playing");
 		}
