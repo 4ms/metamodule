@@ -36,6 +36,8 @@ TEST_CASE("Parse settings file") {
       opa: 0
     view_height_px: 240
 
+  sample_rate: 96000
+  block_size: 128
 )";
 	// clang format-on
 
@@ -64,6 +66,9 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.module_view.cable_style.mode == HideAlways);
 	CHECK(settings.module_view.cable_style.opa == 0);
 	CHECK(settings.module_view.view_height_px == 240);
+
+	CHECK(settings.sample_rate == MetaModule::ViewSettings::SampleRate::SR_96K);
+	CHECK(settings.block_size == MetaModule::ViewSettings::BlockSize::BS_128);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -130,6 +135,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.module_view.cable_style.mode == df.cable_style.mode);
 	CHECK(settings.module_view.cable_style.opa == df.cable_style.opa);
 	CHECK(settings.module_view.view_height_px == df.view_height_px);
+
+	CHECK(settings.sample_rate == MetaModule::ViewSettings::SampleRate::SR_48K);
+	CHECK(settings.block_size == MetaModule::ViewSettings::BlockSize::BS_64);
 }
 
 TEST_CASE("Serialize settings") {
@@ -186,6 +194,8 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: HideAlways
       opa: 0
+  sample_rate: 48000
+  block_size: 64
 )";
 	// clang format-on
 

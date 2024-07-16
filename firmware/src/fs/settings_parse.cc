@@ -42,6 +42,24 @@ static bool read(ryml::ConstNodeRef const &n, MapRingStyle *s) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, ViewSettings::BlockSize *bs) {
+	*bs = node.val() == "32"  ? ViewSettings::BlockSize::BS_32 :
+		  node.val() == "64"  ? ViewSettings::BlockSize::BS_64 :
+		  node.val() == "128" ? ViewSettings::BlockSize::BS_128 :
+		  node.val() == "256" ? ViewSettings::BlockSize::BS_256 :
+		  node.val() == "512" ? ViewSettings::BlockSize::BS_512 :
+								ViewSettings{}.block_size;
+	return true;
+}
+
+static bool read(ryml::ConstNodeRef const &node, ViewSettings::SampleRate *sr) {
+	*sr = node.val() == "24000" ? ViewSettings::SampleRate::SR_24K :
+		  node.val() == "48000" ? ViewSettings::SampleRate::SR_48K :
+		  node.val() == "96000" ? ViewSettings::SampleRate::SR_96K :
+								  ViewSettings{}.sample_rate;
+	return true;
+}
+
 static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	if (!node.is_map())
 		return false;
@@ -76,6 +94,8 @@ bool parse(std::span<char> yaml, ViewSettings *settings) {
 
 	read_or_default(node, "patch_view", settings, &ViewSettings::patch_view);
 	read_or_default(node, "module_view", settings, &ViewSettings::module_view);
+	read_or_default(node, "sample_rate", settings, &ViewSettings::sample_rate);
+	read_or_default(node, "block_size", settings, &ViewSettings::block_size);
 
 	return true;
 }

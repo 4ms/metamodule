@@ -47,6 +47,8 @@ uint32_t serialize(ViewSettings const &settings, std::span<char> buffer) {
 
 	data["patch_view"] << settings.patch_view;
 	data["module_view"] << settings.module_view;
+	data["sample_rate"] << std::to_underlying(settings.sample_rate);
+	data["block_size"] << std::to_underlying(settings.block_size);
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();
