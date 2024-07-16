@@ -67,7 +67,7 @@ target_include_directories( vcv_plugin_export PUBLIC
 
 target_compile_options(vcv_plugin_export PRIVATE -fno-function-sections -fno-data-sections)
 
-set_target_properties(vcv_plugin_export PROPERTIES CXX_STANDARD 20)
+set_target_properties(vcv_plugin_export PROPERTIES CXX_STANDARD 23)
 # set_target_properties(vcv_plugin_export PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/vcv-export)
 
 

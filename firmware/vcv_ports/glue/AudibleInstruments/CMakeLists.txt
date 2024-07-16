@@ -46,7 +46,7 @@ target_link_options(AudibleInstrumentsLibrary PUBLIC -Wno-stringop-overflow)
 # Define TEST so braids dsp/dsp.h works (since it contains raw Cortex-M4 assembly)
 target_compile_definitions(AudibleInstrumentsLibrary PRIVATE TEST)
 
-set_property(TARGET AudibleInstrumentsLibrary PROPERTY CXX_STANDARD 20)
+set_property(TARGET AudibleInstrumentsLibrary PROPERTY CXX_STANDARD 23)
 
 if (BUILD_DYN_PLUGIN)
     target_sources(AudibleInstrumentsLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/plugin.cpp)

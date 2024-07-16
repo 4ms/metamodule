@@ -48,7 +48,7 @@ jobs:
     name: linux-gcc
     strategy:
       fail-fast: false
-    runs-on: 'ubuntu-latest'
+    runs-on: 'ubuntu-24.04'
     defaults:
       run:
         shell: 'bash {0}'
@@ -76,7 +76,7 @@ jobs:
     name: linux-clang
     strategy:
       fail-fast: false
-    runs-on: 'ubuntu-latest'
+    runs-on: 'ubuntu-24.04'
     defaults:
       run:
         shell: 'bash {0}'

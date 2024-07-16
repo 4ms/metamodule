@@ -6,7 +6,7 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/minblep.cpp
 )
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(DEPFLAGS -MMD -MP -MF) 
 
 set(FW_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../firmware/)

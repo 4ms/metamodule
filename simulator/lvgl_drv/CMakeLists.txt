@@ -13,7 +13,7 @@ message("lvgl_drv: LV_CONF_DIR =${LV_CONF_DIR}")
 
 target_compile_options(lvglsdl PRIVATE -Wall -O2)
 
-set_property(TARGET lvglsdl PROPERTY CXX_STANDARD 20)
+set_property(TARGET lvglsdl PROPERTY CXX_STANDARD 23)
 set_property(TARGET lvglsdl PROPERTY C_STANDARD 99)
 
 # Fixup for compiler warning in lvgl header file included from here
