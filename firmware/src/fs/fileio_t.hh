@@ -42,6 +42,9 @@ concept FileIoC = requires(T t,
 	{
 		t.is_mounted()
 	} -> std::same_as<bool>;
+	{
+		t.get_file_size(filename)
+	} -> std::integral;
 
 	t.delete_file(filename);
 	t.set_file_timestamp(filename, tm);

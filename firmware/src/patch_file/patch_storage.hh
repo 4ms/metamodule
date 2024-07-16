@@ -142,10 +142,10 @@ public:
 			return result;
 		}
 
-		if (message.message_type == RequestPatchData) {
+		if (message.message_type == RequestLoadFile) {
 
 			IntercoreStorageMessage result{
-				.message_type = PatchDataLoadFail,
+				.message_type = LoadFileFailed,
 				.bytes_read = 0,
 				.vol_id = message.vol_id,
 				.filename = message.filename,
@@ -154,7 +154,7 @@ public:
 			if ((uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
 				auto bytes_read = load_file(message.buffer, message.vol_id, message.filename);
 				if (bytes_read) {
-					result.message_type = PatchDataLoaded;
+					result.message_type = LoadFileOK;
 					result.bytes_read = bytes_read;
 				}
 			}
@@ -162,13 +162,13 @@ public:
 			return result;
 		}
 
-		if (message.message_type == RequestWritePatchData) {
-			IntercoreStorageMessage result{.message_type = PatchDataWriteFail};
+		if (message.message_type == RequestWriteFile) {
+			IntercoreStorageMessage result{.message_type = WriteFileFail};
 
 			if (message.filename.size() > 0 && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
 				auto wrote_ok = write_file(message.vol_id, message.filename, message.buffer);
 				if (wrote_ok) {
-					result.message_type = PatchDataWriteOK;
+					result.message_type = WriteFileOK;
 				}
 			}
 
@@ -265,11 +265,11 @@ private:
 		}
 
 		if (!ok) {
-			pr_warn("Could not load patch id %.*s\n", (int)filename.size(), filename.data());
+			pr_warn("M4: Could not load file id %.*s\n", (int)filename.size(), filename.data());
 			return 0;
 		}
 
-		pr_dbg("Read patch %.*s, %d bytes\n", (int)filename.size(), filename.data(), buffer.size_bytes());
+		pr_dbg("M4: Read file %.*s, %d bytes\n", (int)filename.size(), filename.data(), buffer.size_bytes());
 		return buffer.size_bytes();
 	}
 

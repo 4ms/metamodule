@@ -48,3 +48,4 @@ simulator/shared
 *.o
 
 metamodule-plugins/
+settings.yml

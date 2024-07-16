@@ -32,6 +32,10 @@ struct GuiState {
 	bool force_redraw_patch{};
 
 	std::optional<Volume> force_refresh_vol{};
+
+	bool do_write_settings{};
+
+	Toggler back_button{};
 };
 
 struct PatchContext {
@@ -100,7 +104,7 @@ struct PageBase {
 	}
 
 	void focus(PageArguments const *args) {
-		metaparams.back_button.clear_events();
+		gui_state.back_button.clear_events();
 		metaparams.rotary_button.clear_events();
 
 		if (group) {

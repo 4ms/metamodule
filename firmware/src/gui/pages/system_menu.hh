@@ -48,7 +48,7 @@ struct SystemMenuPage : PageBase {
 
 		active_tab->update();
 
-		if (metaparams.back_button.is_just_released()) {
+		if (gui_state.back_button.is_just_released()) {
 			if (!active_tab->consume_back_event()) {
 
 				if (lv_group_get_focused(group) == tab_bar) {

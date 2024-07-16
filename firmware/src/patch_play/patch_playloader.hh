@@ -38,7 +38,7 @@ struct PatchPlayLoader {
 		while (--tries) {
 			auto message = storage_.get_message();
 
-			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
+			if (message.message_type == FileStorageProxy::LoadFileOK) {
 				auto raw_patch_file = storage_.get_patch_data(message.bytes_read);
 				if (!patches_.open_patch(raw_patch_file, initial_patch_loc))
 					pr_err("ERROR: could not parse initial patch\n");
@@ -49,7 +49,7 @@ struct PatchPlayLoader {
 
 				break;
 			}
-			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
+			if (message.message_type == FileStorageProxy::LoadFileFailed) {
 				pr_err("ERROR: initial patch failed to load from NOR flash\n");
 				break;
 			}
@@ -237,11 +237,11 @@ private:
 	Result check_save_patch_status() {
 		auto msg = storage_.get_message();
 
-		if (msg.message_type == FileStorageProxy::PatchDataWriteFail) {
+		if (msg.message_type == FileStorageProxy::WriteFileFail) {
 			saving_patch_ = false;
 			return {false, "Failed to write patch."};
 
-		} else if (msg.message_type == FileStorageProxy::PatchDataWriteOK) {
+		} else if (msg.message_type == FileStorageProxy::WriteFileOK) {
 			saving_patch_ = false;
 			patches_.reset_view_patch_modification_count();
 			return {true, "Saved"};

@@ -90,13 +90,13 @@ struct CalData {
 
 	void print_calibration() const {
 		for (auto chan : in_cal) {
-			auto slope_epsilon = chan.slope() == 0 ? 0. : double(DefaultInput.slope()) / double(chan.slope());
+			auto slope_ratio = chan.slope() == 0 ? 0. : double(DefaultInput.slope()) / double(chan.slope());
 			double offset_v = Calibration::to_volts(chan.offset());
-			pr_trace("Input: slope: %f offset(V): %f\n", slope_epsilon, offset_v);
+			pr_trace("Input: slope: %f offset(V): %f\n", slope_ratio, offset_v);
 		}
 		for (auto chan : out_cal) {
-			auto slope_epsilon = chan.slope() == 0 ? 0. : double(DefaultOutput.slope()) / double(chan.slope());
-			pr_trace("Output: slope: %f offset(V): %f\n", slope_epsilon, double(chan.offset()));
+			auto slope_ratio = chan.slope() == 0 ? 0. : double(DefaultOutput.slope()) / double(chan.slope());
+			pr_trace("Output: slope: %f offset(V): %f\n", slope_ratio, double(chan.offset()));
 		}
 	}
 };

@@ -114,6 +114,7 @@ struct HostFileIO {
 	bool update_or_create_file(const std::string_view filename, const std::span<const char> buffer) {
 		// Interpret "/" root dir as _patch_dir
 		std::filesystem::current_path(_root_dir);
+
 		std::string filepath;
 		if (filename.starts_with("/"))
 			filepath = "." + std::string(filename);
@@ -143,6 +144,28 @@ struct HostFileIO {
 		std::cout << "HostFileIO: delete " << filepath << "\n";
 
 		return std::filesystem::remove(filepath) > 0;
+	}
+
+	uint64_t get_file_size(std::string_view filename) {
+		// Interpret "/" root dir as _patch_dir
+		std::filesystem::current_path(_root_dir);
+
+		std::string filepath;
+		if (filename.starts_with("/"))
+			filepath = "." + std::string(filename);
+		else
+			filepath = filename;
+
+		std::cout << "HostFileIO: get file size " << filepath << "\n";
+		std::ifstream ifs(filepath, std::ios::in);
+		uint64_t sz = 0;
+		if (ifs.is_open()) {
+			// Find file size
+			ifs.seekg(0, std::ios::end);
+			sz = ifs.tellg();
+			ifs.close();
+		}
+		return sz;
 	}
 
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {

@@ -1,4 +1,5 @@
 #pragma once
+#include "fs/settings_file.hh"
 #include "gui/knobset_button.hh"
 #include "gui/notify/display.hh"
 #include "gui/notify/queue.hh"
@@ -71,6 +72,13 @@ public:
 	void init() {
 		page_list.request_initial_page(PageId::MainMenu, {});
 		button_light.display_knobset(0);
+
+		if (!Settings::read_settings(info.patch_storage, &settings)) {
+			settings = ViewSettings{};
+			if (!Settings::write_settings(info.patch_storage, settings)) {
+				pr_err("Failed to write settings file\n");
+			}
+		}
 	}
 
 	void update_current_page() {
@@ -94,6 +102,8 @@ public:
 		handle_audio_errors();
 
 		handle_notifications();
+
+		handle_write_settings();
 	}
 
 	void handle_knobset_change() {
@@ -164,7 +174,7 @@ public:
 		// Interpret and pass on back button events
 		if (info.metaparams.meta_buttons[0].is_just_released()) {
 			if (!info.metaparams.ignore_metabutton_release)
-				info.metaparams.back_button.register_falling_edge();
+				gui_state.back_button.register_falling_edge();
 			else
 				info.metaparams.ignore_metabutton_release = false;
 		}
@@ -182,6 +192,17 @@ public:
 		if (info.patch_playloader.did_audio_overrun()) {
 			info.notify_queue.put({"Audio stopped because patch load > 99%.", Notification::Priority::Error, 1500});
 			info.patch_playloader.clear_audio_overrun();
+		}
+	}
+
+	void handle_write_settings() {
+		if (gui_state.do_write_settings) {
+			if (!Settings::write_settings(info.patch_storage, settings)) {
+				pr_err("Failed to write settings file\n");
+			} else
+				pr_info("Wrote settings\n");
+
+			gui_state.do_write_settings = false;
 		}
 	}
 

@@ -9,6 +9,7 @@
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_action_menu.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
+#include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
@@ -20,7 +21,9 @@ struct ModuleViewPage : PageBase {
 	ModuleViewPage(PatchContext context)
 		: PageBase{context, PageId::ModuleView}
 		, cable_drawer{ui_ModuleImage, drawn_elements}
-		, map_ring_display{settings}
+		, map_ring_display{settings.module_view}
+		, page_settings{settings.module_view}
+		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader} {
@@ -80,6 +83,7 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_ModuleViewActionMenu);
 		lv_hide(ui_AutoMapSelectPanel);
 
+		settings_menu.prepare_focus(group);
 		action_menu.prepare_focus(group, this_module_id);
 	}
 
@@ -213,10 +217,13 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
-		if (metaparams.back_button.is_just_released()) {
+		if (gui_state.back_button.is_just_released()) {
 
 			if (action_menu.is_visible()) {
 				action_menu.hide();
+
+			} else if (settings_menu.is_visible()) {
+				settings_menu.hide();
 
 			} else if (mode == ViewMode::List) {
 				load_prev_page();
@@ -245,6 +252,12 @@ struct ModuleViewPage : PageBase {
 				mapping_pane.refresh();
 		}
 
+		if (page_settings.changed) {
+			page_settings.changed = false;
+			update_map_ring_style();
+			update_cable_style();
+		}
+
 		if (is_patch_playing) {
 			// copy light values from params, indexed by light element id
 			for (auto &wl : params.lights.watch_lights) {
@@ -261,7 +274,7 @@ struct ModuleViewPage : PageBase {
 
 				auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
 
-				if (was_redrawn && settings.map_ring_flash_active) {
+				if (was_redrawn && page_settings.map_ring_flash_active) {
 					map_ring_display.flash_once(gui_el.map_ring, true);
 				}
 
@@ -312,19 +325,20 @@ struct ModuleViewPage : PageBase {
 	void update_cable_style(bool force = false) {
 		static MapRingStyle last_cable_style;
 
-		cable_drawer.set_opacity(settings.cable_style.opa);
+		cable_drawer.set_opacity(page_settings.cable_style.opa);
 
-		if (force || settings.cable_style.mode != last_cable_style.mode) {
-			if (settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
+		if (force || page_settings.cable_style.mode != last_cable_style.mode) {
+			if (page_settings.cable_style.mode == MapRingStyle::Mode::ShowAll)
 				cable_drawer.draw_single_module(*patch, this_module_id);
 			else
 				cable_drawer.clear();
 		}
-		last_cable_style = settings.cable_style;
+		last_cable_style = page_settings.cable_style;
 	}
 
 	void blur() final {
 		params.lights.stop_watching_all();
+		settings_menu.hide();
 		action_menu.hide();
 	}
 
@@ -392,75 +406,81 @@ private:
 
 	static void roller_scrolled_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto &but = page->button;
-
-		auto prev_sel = page->cur_selected;
 
 		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
+		if (cur_sel >= page->roller_drawn_el_idx.size())
+			return;
 
-		// if (ElementCount::matched(*args.element_indices, drawn.idx)) {
+		auto prev_sel = page->cur_selected;
+		auto cur_idx = page->roller_drawn_el_idx[cur_sel];
 
-		// Get the new button
-		if (cur_sel < page->roller_drawn_el_idx.size()) {
-			auto idx = page->roller_drawn_el_idx[cur_sel];
+		// Skip over headers by scrolling over them in the same direction we just scrolled
+		if (cur_idx < 0) {
+			if (prev_sel < cur_sel) {
+				if (cur_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
+					cur_sel++;
+				else
+					// Don't scroll off the end of the roller
+					cur_sel = prev_sel;
 
-			// Skip over headers
-			if (idx < 0) {
-				if (prev_sel < cur_sel) {
-					if (cur_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
-						cur_sel++;
-					else
-						cur_sel = prev_sel;
-				} else {
-					if (cur_sel)
-						cur_sel--;
-					else {
-						//Scrolling up from first header -> defocus roller and focus button bar
-						lv_group_focus_obj(ui_ModuleViewSettingsBut);
-						lv_group_set_editing(page->group, false);
-						page->cur_selected = prev_sel;
-						lv_roller_set_selected(ui_ElementRoller, prev_sel, LV_ANIM_OFF);
-						return;
-					}
-				}
-				// cur_sel changed, so we need to update the roller position and our drawn_el idx
-				lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_ON);
-				idx = page->roller_drawn_el_idx[cur_sel];
-			}
-
-			page->cur_selected = cur_sel;
-			page->args.element_indices = page->drawn_elements[idx].gui_element.idx;
-
-			// Turn off old component highlight button
-			if (prev_sel >= 0 && prev_sel < page->roller_drawn_el_idx.size()) {
-				if (auto prev_idx = page->roller_drawn_el_idx[prev_sel]; (size_t)prev_idx < but.size()) {
-					lv_obj_remove_style(but[prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-					lv_event_send(but[prev_idx], LV_EVENT_REFRESH, nullptr);
+			} else {
+				if (cur_sel)
+					cur_sel--;
+				else {
+					//Scrolling up from first header -> defocus roller and focus button bar
+					page->focus_button_bar();
+					return;
 				}
 			}
-
-			// Turn on new button
-			if ((size_t)idx < but.size()) {
-				lv_obj_add_style(but[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-				lv_event_send(but[idx], LV_EVENT_REFRESH, nullptr);
-				lv_obj_scroll_to_view(but[idx], LV_ANIM_ON);
-			}
+			// cur_sel changed, so we need to update the roller position and our drawn_el idx
+			lv_roller_set_selected(ui_ElementRoller, cur_sel, LV_ANIM_ON);
+			cur_idx = page->roller_drawn_el_idx[cur_sel];
 		}
+
+		page->cur_selected = cur_sel;
+
+		// Save current select in args so we can navigate back to this item
+		page->args.element_indices = page->drawn_elements[cur_idx].gui_element.idx;
+
+		// Turn off previously highlighted component
+		page->unhighlight_component(prev_sel);
+
+		// Turn on new highlighted component
+		page->highlight_component(cur_idx);
+	}
+
+	void unhighlight_component(uint32_t prev_sel) {
+		if (auto prev_idx = get_drawn_idx(prev_sel)) {
+			lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			lv_event_send(button[*prev_idx], LV_EVENT_REFRESH, nullptr);
+		}
+	}
+
+	void highlight_component(size_t idx) {
+		if (idx < button.size()) {
+			lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
+			lv_event_send(button[idx], LV_EVENT_REFRESH, nullptr);
+			lv_obj_scroll_to_view(button[idx], LV_ANIM_ON);
+		}
+	}
+
+	void focus_button_bar() {
+		lv_group_focus_obj(ui_ModuleViewSettingsBut);
+		lv_group_set_editing(group, false);
+		cur_selected = 1;
+		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
+		unhighlight_component(cur_selected);
 	}
 
 	static void roller_click_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto cur_sel = page->cur_selected;
 
-		if (cur_sel < page->roller_drawn_el_idx.size()) {
-			auto drawn_idx = page->roller_drawn_el_idx[cur_sel];
-			if ((size_t)drawn_idx < page->drawn_elements.size()) {
-				page->mode = ViewMode::Mapping;
-				page->args.detail_mode = true;
-				lv_hide(ui_ElementRollerPanel);
+		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
+			page->mode = ViewMode::Mapping;
+			page->args.detail_mode = true;
+			lv_hide(ui_ElementRollerPanel);
 
-				page->mapping_pane.show(page->drawn_elements[drawn_idx]);
-			}
+			page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
 		}
 	}
 
@@ -470,8 +490,22 @@ private:
 			if (event->param != page) {
 				lv_group_set_editing(page->group, true);
 				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
+
+				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
+					page->highlight_component(*drawn_idx);
+				}
 			}
 		}
+	}
+
+	std::optional<unsigned> get_drawn_idx(unsigned roller_idx) {
+		if (roller_idx < roller_drawn_el_idx.size()) {
+			auto drawn_idx = roller_drawn_el_idx[roller_idx];
+			if ((size_t)drawn_idx < drawn_elements.size()) {
+				return drawn_idx;
+			}
+		}
+		return std::nullopt;
 	}
 
 	CableDrawer<240> cable_drawer;
@@ -480,6 +514,9 @@ private:
 	PatchModQueue module_mods;
 
 	MapRingDisplay map_ring_display;
+
+	ModuleDisplaySettings &page_settings;
+	ModuleViewSettingsMenu settings_menu;
 
 	std::string opts;
 	uint16_t this_module_id = 0;

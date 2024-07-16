@@ -4,11 +4,11 @@
 namespace MetaModule
 {
 
-Ui::Ui(std::string_view patch_path, std::string_view asset_path, size_t block_size)
+Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_view asset_path, size_t block_size)
 	: ramdrive{new RamDrive}
 	, ramdisk_ops{*ramdrive}
 	, ramdisk{&ramdisk_ops, Volume::RamDisk}
-	, patch_storage(patch_path, patch_dir_list, ramdisk)
+	, patch_storage(sdcard_path, flash_path, patch_dir_list, ramdisk)
 	, patch_comm{patch_storage}
 	, file_storage_proxy{raw_patch_data, patch_comm, patch_dir_list}
 	, asset_fs{asset_path}

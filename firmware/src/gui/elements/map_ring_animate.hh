@@ -11,9 +11,9 @@ namespace MetaModule
 struct MapRingDisplay {
 	enum class Flash { On, Brighter };
 
-	ViewSettings &settings;
+	ModuleDisplaySettings &settings;
 
-	MapRingDisplay(ViewSettings &settings)
+	MapRingDisplay(ModuleDisplaySettings &settings)
 		: settings{settings} {
 	}
 
@@ -24,22 +24,24 @@ struct MapRingDisplay {
 					   [&](const BaseElement &el) {},
 
 					   [&](const JackElement &el) {
-						   if (settings.show_jack_maps)
-							   update(drawn_el.gui_element.map_ring, on_highlighted_module, is_patch_playing);
-						   else
-							   hide(drawn_el.gui_element.map_ring);
+						   update(drawn_el.gui_element.map_ring,
+								  settings.paneljack_style,
+								  on_highlighted_module,
+								  is_patch_playing);
 					   },
 
 					   [&](const ParamElement &el) {
-						   update(drawn_el.gui_element.map_ring, on_highlighted_module, is_patch_playing);
+						   update(drawn_el.gui_element.map_ring,
+								  settings.param_style,
+								  on_highlighted_module,
+								  is_patch_playing);
 					   },
 				   },
 				   drawn_el.element);
 	}
 
-	void update(lv_obj_t *map_ring, bool on_highlighted_module, bool is_patch_playing) {
+	void update(lv_obj_t *map_ring, MapRingStyle const &style, bool on_highlighted_module, bool is_patch_playing) {
 		using enum MapRingStyle::Mode;
-		auto &style = settings.map_ring_style;
 
 		switch (style.mode) {
 			case ShowAllIfPlaying:
@@ -96,7 +98,7 @@ struct MapRingDisplay {
 
 	void flash_once(lv_obj_t *map_ring, bool on_highlighted_module) {
 		using enum MapRingStyle::Mode;
-		auto &style = settings.map_ring_style;
+		auto &style = settings.param_style;
 
 		if (style.mode == CurModuleIfPlaying && on_highlighted_module)
 			flash_once(map_ring, Flash::Brighter);

@@ -102,7 +102,7 @@ void main() {
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for other cores to be ready: ~2400ms
-	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() && mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
+	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() || mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
 
 	// ~290ms until while loop

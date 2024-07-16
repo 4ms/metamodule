@@ -1,3 +1,4 @@
+#pragma once
 #include "drivers/stm32xx.h"
 
 inline uint64_t get_time() {

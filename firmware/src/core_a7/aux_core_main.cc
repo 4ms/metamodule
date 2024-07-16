@@ -23,11 +23,11 @@ extern "C" void aux_core_main() {
 	using namespace MetaModule;
 	using namespace mdrivlib;
 
-	// Make m4 core wait for this core to be ready
+	// Tell A7 we're not ready yet
 	HWSemaphore<AuxCoreReady>::lock();
 
-	// Wait for main core to be ready
-	while (HWSemaphore<MainCoreReady>::is_locked())
+	// Wait for m4 core to be ready
+	while (HWSemaphore<MainCoreReady>::is_locked() || HWSemaphore<M4CoreReady>::is_locked())
 		;
 
 	pr_info("A7 Core 2 starting\n");
@@ -93,8 +93,8 @@ extern "C" void aux_core_main() {
 	pr_info("A7 Core 2 initialized\n");
 	HWSemaphore<AuxCoreReady>::unlock();
 
-	while (HWSemaphore<M4CoreReady>::is_locked())
-		;
+	// while (HWSemaphore<M4CoreReady>::is_locked())
+	// 	;
 
 	HAL_Delay(300); //allow time to load initial patch: TODO use semaphor
 
