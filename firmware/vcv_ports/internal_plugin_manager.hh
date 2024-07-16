@@ -3,11 +3,13 @@
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
 #include "fs/norflash_layout.hh"
-#include "internal_plugins.hh"
 #include "plugin/Plugin.hpp"
 #include <list>
 #include <span>
 #include <string_view>
+
+#include "glue/Rack//plugin.hpp"
+#include "internal_plugins.hh"
 
 namespace MetaModule
 {
@@ -204,6 +206,13 @@ struct InternalPluginManager {
 		eightfold_plugin.slug = "eightfold";
 		pluginInstance = &eightfold_plugin;
 		pluginInstance->addModel(modelSDOrcasHeartV2);
+#endif
+
+#ifndef BUILD_DYN_PLUGIN_Rack
+		auto &rack_plugin = internal_plugins.emplace_back("Fundamental");
+		rack_plugin.slug = "Fundamental";
+		pluginInstance = &rack_plugin;
+		Fundamental::init(pluginInstance);
 #endif
 	}
 };
