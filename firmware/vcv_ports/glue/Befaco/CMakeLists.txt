@@ -21,7 +21,7 @@ target_include_directories(BefacoLibrary PRIVATE ${BEFACO_DIR}/../../) #For Befa
 
 target_compile_options(BefacoLibrary PRIVATE -Wno-double-promotion $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-float-conversion>)
 
-set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 20)
+set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 23)
 
 if (BUILD_DYN_PLUGIN)
     target_sources(BefacoLibrary PRIVATE ${CMAKE_CURRENT_LIST_DIR}/plugin.cpp)

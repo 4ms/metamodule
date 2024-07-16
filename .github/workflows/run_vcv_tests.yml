@@ -41,7 +41,7 @@ jobs:
   build-tests-lin-x64:
     if: ${{ github.event_name == 'push' || inputs.linux_x64 }}
     name: lin-x64
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
     defaults:

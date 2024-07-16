@@ -28,6 +28,7 @@ public:
 			pr_info("No Calibration data found, using defaults\n");
 		}
 
+		caldata.print_calibration();
 		return caldata;
 	}
 

@@ -298,8 +298,14 @@ typedef struct
 #define SDMMC_SINGLE_BUS_SUPPORT           ((uint32_t)0x00010000U)
 #define SDMMC_CARD_LOCKED                  ((uint32_t)0x02000000U)
 
-//#define SDMMC_DATATIMEOUT                  ((uint32_t)0xFFFFFFFFU)
-#define SDMMC_DATATIMEOUT                  ((uint32_t)5000U) // 5 seconds
+///////////////////
+// See https://github.com/STMicroelectronics/STM32CubeF7/issues/20
+//
+// SDMMC_DATATIMEOUT: units is clock bus periods: max time DPSM can be in Wait_R or Busy before timeout status flag is set
+#define SDMMC_DATATIMEOUT                  ((uint32_t)0x09300000)  // about 200ms
+// SDMMC_DATATIMEOUT_TICKS: units is ticks (1ms by default) 
+#define SDMMC_DATATIMEOUT_TICKS            ((uint32_t)1000U)       // 1 second
+///////////////////
 
 #define SDMMC_0TO7BITS                     ((uint32_t)0x000000FFU)
 #define SDMMC_8TO15BITS                    ((uint32_t)0x0000FF00U)
