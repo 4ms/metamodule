@@ -69,7 +69,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin4::high();
+		// Debug::Pin3::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -94,8 +94,13 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		// copy analyzed signals back to shared param block (so GUI thread can access it)
 		param_blocks[block].metaparams.ins = local_p.metaparams.ins;
 
-		// copy this value back so Controls can read it
+		// copy midi_poly_chans back so Controls can read it
 		param_blocks[block].metaparams.midi_poly_chans = local_p.metaparams.midi_poly_chans;
+
+		if (auto new_sr = patch_loader.samplerate_change(); new_sr) {
+			change_samplerate(*new_sr);
+		}
+
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
 		load_measure.end_measurement();
@@ -104,7 +109,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			patch_loader.notify_audio_overrun();
 		}
 
-		// Debug::Pin4::low();
+		// Debug::Pin3::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -113,6 +118,15 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	for (auto &s : smoothed_ins)
 		s.set_size(AudioConf::BlockSize);
+}
+
+void AudioStream::change_samplerate(unsigned sample_rate) {
+	sample_rate_ = sample_rate;
+	if (codec_.change_samplerate(sample_rate_) == CodecPCM3168::CODEC_NO_ERR) {
+		player.set_samplerate(sample_rate_);
+	} else {
+		pr_err("FAIL: %d\n", sample_rate_);
+	}
 }
 
 void AudioStream::start() {

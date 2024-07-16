@@ -46,6 +46,7 @@ public:
 	void start();
 	void start_playing();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
+	void change_samplerate(unsigned sample_rate);
 
 private:
 	SyncParams &sync_params;
