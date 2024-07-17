@@ -46,7 +46,6 @@ public:
 	void start();
 	void start_playing();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
-	void change_samplerate(unsigned sample_rate);
 
 private:
 	SyncParams &sync_params;
@@ -59,6 +58,7 @@ private:
 	CodecT &codec_;
 	CodecT &codec_ext_;
 	uint32_t sample_rate_;
+	uint32_t block_size_;
 
 	CalData cal;
 	CalData cal_stash;
@@ -87,6 +87,8 @@ private:
 	void disable_calibration();
 	void enable_calibration();
 	void handle_patch_mod_queue();
+	void update_audio_settings();
+	void change_audio_settings(uint32_t sample_rate, uint32_t block_size);
 
 public:
 	void set_calibration(CalData const &caldata);

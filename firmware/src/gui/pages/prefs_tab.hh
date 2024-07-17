@@ -93,15 +93,11 @@ struct PrefsTab : SystemMenuTab {
 		auto block_size = read_blocksize_dropdown();
 		auto sample_rate = read_samplerate_dropdown();
 
-		if (settings.block_size != block_size) {
+		if (settings.block_size != block_size || settings.sample_rate != sample_rate) {
 			settings.block_size = block_size;
-			patch_playloader.request_blocksize(std::to_underlying(block_size));
-			gui_state.do_write_settings = true;
-		}
-
-		if (settings.sample_rate != sample_rate) {
 			settings.sample_rate = sample_rate;
-			patch_playloader.request_samplerate(std::to_underlying(sample_rate));
+			patch_playloader.request_new_audio_settings(std::to_underlying(sample_rate),
+														std::to_underlying(block_size));
 			gui_state.do_write_settings = true;
 		}
 

@@ -97,9 +97,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		// copy midi_poly_chans back so Controls can read it
 		param_blocks[block].metaparams.midi_poly_chans = local_p.metaparams.midi_poly_chans;
 
-		if (auto new_sr = patch_loader.samplerate_change(); new_sr) {
-			change_samplerate(*new_sr);
-		}
+		update_audio_settings();
 
 		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 
@@ -120,12 +118,25 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		s.set_size(AudioConf::BlockSize);
 }
 
-void AudioStream::change_samplerate(unsigned sample_rate) {
-	sample_rate_ = sample_rate;
-	if (codec_.change_samplerate(sample_rate_) == CodecPCM3168::CODEC_NO_ERR) {
-		player.set_samplerate(sample_rate_);
-		param_blocks[0].metaparams.sample_rate = sample_rate;
-		param_blocks[1].metaparams.sample_rate = sample_rate;
+void AudioStream::update_audio_settings() {
+	auto audio_settings = patch_loader.get_audio_settings();
+
+	if (audio_settings.sample_rate != sample_rate_ || audio_settings.block_size != block_size_) {
+		change_audio_settings(audio_settings.sample_rate, audio_settings.block_size);
+	}
+}
+
+void AudioStream::change_audio_settings(uint32_t sample_rate, uint32_t block_size) {
+	if (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR) {
+		if (sample_rate != sample_rate_) {
+			player.set_samplerate(sample_rate);
+			param_blocks[0].metaparams.sample_rate = sample_rate;
+			param_blocks[1].metaparams.sample_rate = sample_rate;
+		}
+
+		sample_rate_ = sample_rate;
+		block_size_ = block_size;
+
 	} else {
 		pr_err("FAIL: %d\n", sample_rate_);
 	}
