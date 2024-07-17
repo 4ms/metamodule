@@ -124,6 +124,8 @@ void AudioStream::change_samplerate(unsigned sample_rate) {
 	sample_rate_ = sample_rate;
 	if (codec_.change_samplerate(sample_rate_) == CodecPCM3168::CODEC_NO_ERR) {
 		player.set_samplerate(sample_rate_);
+		param_blocks[0].metaparams.sample_rate = sample_rate;
+		param_blocks[1].metaparams.sample_rate = sample_rate;
 	} else {
 		pr_err("FAIL: %d\n", sample_rate_);
 	}

@@ -113,6 +113,10 @@ void Controls::start_param_block() {
 	_first_param = true;
 	_buffer_full = false;
 
+	if (sample_rate != cur_metaparams->sample_rate) {
+		set_samplerate(cur_metaparams->sample_rate);
+	}
+
 	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
 		for (auto &aux : auxstream_blocks[block_num])
 			auxstream.queue_data(aux);
@@ -132,6 +136,7 @@ void Controls::start() {
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();
+
 	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
 		auxstream_updater.start();
 	}
@@ -165,6 +170,13 @@ void Controls::process() {
 		i2cqueue.update();
 }
 
+void Controls::set_samplerate(unsigned sample_rate) {
+	this->sample_rate = sample_rate;
+	for (auto &_knob : _knobs) {
+		_knob.set_num_updates(sample_rate / 631);
+	}
+}
+
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 				   DoubleAuxStreamBlock &auxsignal_blocks_ref,
 				   MidiHost &midi_host)
@@ -183,6 +195,8 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 			_new_adc_data_ready = true;
 		}
 	});
+
+	set_samplerate(sample_rate);
 
 	pot_adc.start();
 

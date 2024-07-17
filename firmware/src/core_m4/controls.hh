@@ -45,6 +45,8 @@ private:
 	uint32_t get_patchcv_reading();
 	uint32_t get_jacksense_reading();
 
+	void set_samplerate(unsigned sample_rate);
+
 	template<size_t block_num>
 	void start_param_block();
 
@@ -63,8 +65,7 @@ private:
 	std::array<uint16_t, NumPotAdcs> pot_vals{};
 	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
-	static constexpr size_t NumParamUpdatesPerAdcReading = 78; // see note below
-	InterpParam<float, NumParamUpdatesPerAdcReading> _knobs[PanelDef::NumPot];
+	InterpParamVariable<float> _knobs[PanelDef::NumPot]{};
 	bool _new_adc_data_ready = false;
 
 	// Jack plug sensing
@@ -86,21 +87,11 @@ private:
 	bool _buffer_full = false;
 	bool _first_param = true;
 
+	uint32_t sample_rate = 48000;
+
 	DoubleAuxStreamBlock &auxstream_blocks;
 	mdrivlib::PinChangeInt<AuxStreamUpdateConf> auxstream_updater;
 	AuxStream auxstream;
 };
 
-// Todo: calc NumParamUpdatesPerAdcReading from AdcSampTime, PotAdcConf::oversampling_ratio, and ADC periph clock (PLL_Div2... rcc...)
-// Tested with APB clock (rcc set to PER, but don't think that matters. clock_div set to APBClk_Div1):
-//  APB1 clk = 104.5MHz
-//  gets divided by 2.25???  ==> 46.4MHz
-//  46.4MHz / 2clks / 13 channels / 1024 OS = 1.742kHz
-//  48000 / 1742Hz = 27.. we add 1 to be safe it doesn't overflow
-//  Had ~30mV of noise @ 1.742kHz
-// Tested with PLL4 clock (rcc set to PLL4, clock_div set to PLL_Div1)
-//  PLL4 Clk: 66MHz
-//  gets divided by 4 ==> 16.5MHz
-//  16.5MHz / 2clks / 13 channels / 1024 OS = 619.74Hz
-//  48000 / 619.74 = 77.45.. we round up so it doesn't overshoot
 } // namespace MetaModule
