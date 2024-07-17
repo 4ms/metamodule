@@ -48,7 +48,7 @@ private:
 	template<size_t block_num>
 	void start_param_block();
 
-	mdrivlib::Timekeeper read_controls_task;
+	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
 	// Digital controls: Rotary, Buttons and Gate jacks
 	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, MMControlPins::rotA, MMControlPins::rotB> rotary;

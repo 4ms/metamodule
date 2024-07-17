@@ -193,8 +193,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 
-	// mp1 m4: every ~20us + 60us gap every 64 pulses (1.3ms), width= 2.8us ... ~14% load
-	read_controls_task.init(control_read_tim_conf, [this]() {
+	read_controls_task.init([this]() {
 		if (_buffer_full)
 			return;
 		update_debouncers();
