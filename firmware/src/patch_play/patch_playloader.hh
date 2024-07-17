@@ -190,8 +190,9 @@ struct PatchPlayLoader {
 	}
 
 	struct AudioSettings {
-		uint32_t sample_rate;
-		uint32_t block_size;
+		//TODO put defaults in one place
+		uint32_t sample_rate = 48000;
+		uint32_t block_size = 64;
 	};
 
 	void request_new_audio_settings(uint32_t sample_rate, uint32_t block_size) {

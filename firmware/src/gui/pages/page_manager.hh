@@ -30,7 +30,6 @@ class PageManager {
 	PatchContext info;
 	PageList page_list;
 	GuiState gui_state;
-	ViewSettings settings;
 	ButtonLight button_light;
 
 	MainMenuPage page_mainmenu{info};
@@ -55,7 +54,8 @@ public:
 				MetaParams &metaparams,
 				NotificationQueue &notify_queue,
 				PatchModQueue &patch_mod_queue,
-				PluginManager &plugin_manager)
+				PluginManager &plugin_manager,
+				ViewSettings &settings)
 		: info{patch_storage,
 			   open_patch_manager,
 			   patch_playloader,
@@ -72,13 +72,6 @@ public:
 	void init() {
 		page_list.request_initial_page(PageId::MainMenu, {});
 		button_light.display_knobset(0);
-
-		if (!Settings::read_settings(info.patch_storage, &settings)) {
-			settings = ViewSettings{};
-			if (!Settings::write_settings(info.patch_storage, settings)) {
-				pr_err("Failed to write settings file\n");
-			}
-		}
 	}
 
 	void update_current_page() {
@@ -197,7 +190,7 @@ public:
 
 	void handle_write_settings() {
 		if (gui_state.do_write_settings) {
-			if (!Settings::write_settings(info.patch_storage, settings)) {
+			if (!Settings::write_settings(info.patch_storage, info.settings)) {
 				pr_err("Failed to write settings file\n");
 			} else
 				pr_info("Wrote settings\n");
