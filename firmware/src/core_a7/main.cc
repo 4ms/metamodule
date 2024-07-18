@@ -116,5 +116,9 @@ void main() {
 
 	while (true) {
 		__NOP();
+		if (audio.get_audio_errors() > 0) {
+			pr_err("Audio error\n");
+			audio.start();
+		}
 	}
 }
