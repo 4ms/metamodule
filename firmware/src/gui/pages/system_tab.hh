@@ -57,7 +57,7 @@ struct SystemTab : SystemMenuTab {
 		confirm_popup.init(ui_SystemMenu, group);
 	}
 
-	// Returns true if this pages uses the back event
+	// Returns true if this page uses the back event
 	bool consume_back_event() override {
 		if (confirm_popup.is_visible()) {
 			confirm_popup.hide();

@@ -189,6 +189,20 @@ struct PatchPlayLoader {
 		start_audio();
 	}
 
+	struct AudioSettings {
+		//TODO put defaults in one place
+		uint32_t sample_rate = 48000;
+		uint32_t block_size = 64;
+	};
+
+	void request_new_audio_settings(uint32_t sample_rate, uint32_t block_size) {
+		new_audio_settings_.store(AudioSettings{sample_rate, block_size});
+	}
+
+	AudioSettings get_audio_settings() {
+		return new_audio_settings_.load();
+	}
+
 private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;
@@ -204,6 +218,8 @@ private:
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
 	std::atomic<bool> audio_overrun_ = false;
+
+	std::atomic<AudioSettings> new_audio_settings_ = {};
 
 	Result save_patch() {
 		auto view_patch = patches_.get_view_patch();

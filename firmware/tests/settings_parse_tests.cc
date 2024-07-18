@@ -1,7 +1,7 @@
 #include "doctest.h"
-#include "fs/settings_parse.hh"
-#include "fs/settings_serialize.hh"
 #include "gui/pages/view_settings.hh"
+#include "user_settings/settings_parse.hh"
+#include "user_settings/settings_serialize.hh"
 #include <string>
 
 TEST_CASE("Parse settings file") {
@@ -36,10 +36,13 @@ TEST_CASE("Parse settings file") {
       opa: 0
     view_height_px: 240
 
+  audio:
+    sample_rate: 96000
+    block_size: 128
 )";
 	// clang format-on
 
-	MetaModule::ViewSettings settings;
+	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
 	CHECK(ok);
 
@@ -64,6 +67,9 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.module_view.cable_style.mode == HideAlways);
 	CHECK(settings.module_view.cable_style.opa == 0);
 	CHECK(settings.module_view.view_height_px == 240);
+
+	CHECK(settings.audio.sample_rate == 96000);
+	CHECK(settings.audio.block_size == 128);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -102,8 +108,20 @@ TEST_CASE("Get default settings if file is missing fields") {
       opa: abc
 )";
 	}
+	SUBCASE("Bad audio sample rate:") {
+		yaml = R"(Settings:
+  audio:
+    sample_rate: 44100
+)";
+	}
+	SUBCASE("Bad audio block size:") {
+		yaml = R"(Settings:
+  audio:
+    block_size: 16
+)";
+	}
 
-	MetaModule::ViewSettings settings;
+	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
 	CHECK(ok == should_parse);
 
@@ -130,11 +148,14 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.module_view.cable_style.mode == df.cable_style.mode);
 	CHECK(settings.module_view.cable_style.opa == df.cable_style.opa);
 	CHECK(settings.module_view.view_height_px == df.view_height_px);
+
+	CHECK(settings.audio.sample_rate == 48000);
+	CHECK(settings.audio.block_size == 64);
 }
 
 TEST_CASE("Serialize settings") {
 
-	MetaModule::ViewSettings settings;
+	MetaModule::UserSettings settings;
 
 	using enum MetaModule::MapRingStyle::Mode;
 
@@ -157,6 +178,9 @@ TEST_CASE("Serialize settings") {
 	settings.module_view.cable_style.mode = HideAlways;
 	settings.module_view.cable_style.opa = 0;
 	settings.module_view.view_height_px = 240;
+
+	settings.audio.sample_rate = 24000;
+	settings.audio.block_size = 512;
 
 	// clang format-off
 	std::string expected = R"(Settings:
@@ -186,6 +210,9 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: HideAlways
       opa: 0
+  audio:
+    sample_rate: 24000
+    block_size: 512
 )";
 	// clang format-on
 

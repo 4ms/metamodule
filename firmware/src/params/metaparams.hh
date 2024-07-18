@@ -27,6 +27,8 @@ struct MetaParams {
 	RotaryMotion rotary_with_metabutton{};
 	bool ignore_metabutton_release = false;
 
+	uint32_t sample_rate = 48000;
+
 	MetaParams() {
 		clear();
 	}

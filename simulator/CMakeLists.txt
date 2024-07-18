@@ -77,9 +77,9 @@ add_executable(
     #Tar:
     ${FWDIR}/src/fs/asset_drive/untar.cc
 
-    ${FWDIR}/src/fs/settings_file.cc
-    ${FWDIR}/src/fs/settings_parse.cc
-    ${FWDIR}/src/fs/settings_serialize.cc
+    ${FWDIR}/src/user_settings/settings_file.cc
+    ${FWDIR}/src/user_settings/settings_parse.cc
+    ${FWDIR}/src/user_settings/settings_serialize.cc
     )
 
 target_include_directories(

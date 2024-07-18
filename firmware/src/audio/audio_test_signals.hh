@@ -1,14 +1,15 @@
 #pragma once
 #include "audio.hh"
-#include "util/countzip.hh"
-#include "util/zip.hh"
 
 namespace MetaModule
 {
 struct AudioTestSignal {
-	static void passthrough(AudioInBuffer &in, AudioOutBuffer &out) {
+	static void passthrough(std::span<AudioInFrame> in, std::span<AudioOutFrame> out) {
 
-		for (auto [i, o] : zip(in, out)) {
+		//  Requires gcc-13, clang 17:
+		// for (auto [i, o] : zip(in, out)) {
+		for (auto idx = 0u; auto const &i : in) {
+			auto &o = out[idx++];
 			o.chan[0] = i.chan[0];
 			o.chan[1] = i.chan[1];
 			o.chan[2] = i.chan[2];
@@ -35,7 +36,7 @@ struct AudioTestSignal {
 		int32_t refsum = 0;
 		for (auto inframe : in)
 			refsum += inframe.chan[0];
-		float refavg = AudioInFrame::scaleInput(refsum >> MathTools::Log2<AudioConf::BlockSize>::val);
+		float refavg = AudioInFrame::scaleInput(refsum >> MathTools::Log2<AudioConf::MaxBlockSize>::val);
 
 		constexpr float refref = 0x004A3000UL / AudioInFrame::kOutScaling;
 		float temp_adj = refref / refavg;
@@ -43,7 +44,7 @@ struct AudioTestSignal {
 		int32_t pitchsum = 0;
 		for (auto inframe : in)
 			pitchsum += inframe.chan[5];
-		float pitchavg = AudioInFrame::scaleInput(pitchsum >> MathTools::Log2<AudioConf::BlockSize>::val);
+		float pitchavg = AudioInFrame::scaleInput(pitchsum >> MathTools::Log2<AudioConf::MaxBlockSize>::val);
 		float adjpitch = pitchavg * temp_adj;
 
 		//Adjusted

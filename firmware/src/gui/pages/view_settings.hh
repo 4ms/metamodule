@@ -25,9 +25,4 @@ struct ModuleDisplaySettings {
 	bool changed = true;
 };
 
-struct ViewSettings {
-	ModuleDisplaySettings patch_view{};
-	ModuleDisplaySettings module_view{};
-};
-
 } // namespace MetaModule

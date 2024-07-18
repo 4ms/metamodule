@@ -24,6 +24,7 @@ private:
 	PageManager page_manager;
 	ParamsMidiState params;
 	MetaParams metaparams;
+	UserSettings settings;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
@@ -43,7 +44,8 @@ public:
 					   metaparams,
 					   notify_queue,
 					   patch_mod_queue,
-					   plugin_manager} {
+					   plugin_manager,
+					   settings} {
 
 		params.clear();
 		metaparams.clear();
@@ -51,6 +53,15 @@ public:
 		MMDisplay::init(metaparams);
 		Gui::init_lvgl_styles();
 		page_manager.init();
+
+		if (!Settings::read_settings(patch_storage, &settings)) {
+			settings = UserSettings{};
+			if (!Settings::write_settings(patch_storage, settings)) {
+				pr_err("Failed to write settings file\n");
+			}
+		}
+
+		patch_playloader.request_new_audio_settings(settings.audio.sample_rate, settings.audio.block_size);
 	}
 
 	void update() {
