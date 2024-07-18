@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/audio_settings.hh"
 #include <cstdint>
 
 namespace MetaModule
@@ -28,20 +29,7 @@ struct ModuleDisplaySettings {
 struct ViewSettings {
 	ModuleDisplaySettings patch_view{};
 	ModuleDisplaySettings module_view{};
-
-	enum class SampleRate {
-		SR_24K = 24000,
-		SR_48K = 48000,
-		SR_96K = 96000,
-	} sample_rate = SampleRate::SR_48K;
-
-	enum class BlockSize {
-		BS_32 = 32,
-		BS_64 = 64,
-		BS_128 = 128,
-		BS_256 = 256,
-		BS_512 = 512,
-	} block_size = BlockSize::BS_64;
+	AudioSettings audio{};
 };
 
 } // namespace MetaModule

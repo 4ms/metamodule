@@ -10,7 +10,7 @@ namespace MetaModule
 {
 
 struct PrefsTab : SystemMenuTab {
-	PrefsTab(PatchPlayLoader &patch_playloader, ViewSettings &settings, GuiState &gui_state)
+	PrefsTab(PatchPlayLoader &patch_playloader, AudioSettings &settings, GuiState &gui_state)
 		: patch_playloader{patch_playloader}
 		, settings{settings}
 		, gui_state{gui_state} {
@@ -19,8 +19,6 @@ struct PrefsTab : SystemMenuTab {
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioSampleRateDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
-		// lv_obj_add_event_cb(ui_SystemPrefsAudioSampleRateDropdown, sample_rate_open, LV_EVENT_READY, this);
-		// lv_obj_add_event_cb(ui_SystemPrefsAudioSampleRateDropdown, sample_rate_close, LV_EVENT_CANCEL, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -46,18 +44,18 @@ struct PrefsTab : SystemMenuTab {
 	}
 
 	void update_dropdowns_from_settings() {
-		auto sr_item = settings.sample_rate == ViewSettings::SampleRate::SR_24K ? 0 :
-					   settings.sample_rate == ViewSettings::SampleRate::SR_48K ? 1 :
-					   settings.sample_rate == ViewSettings::SampleRate::SR_96K ? 2 :
-																				  1;
+		auto sr_item = settings.sample_rate == 24000 ? 0 :
+					   settings.sample_rate == 48000 ? 1 :
+					   settings.sample_rate == 96000 ? 2 :
+													   1;
 		lv_dropdown_set_selected(ui_SystemPrefsAudioSampleRateDropdown, sr_item);
 
-		auto bs_item = settings.block_size == ViewSettings::BlockSize::BS_32  ? 0 :
-					   settings.block_size == ViewSettings::BlockSize::BS_64  ? 1 :
-					   settings.block_size == ViewSettings::BlockSize::BS_128 ? 2 :
-					   settings.block_size == ViewSettings::BlockSize::BS_256 ? 3 :
-					   settings.block_size == ViewSettings::BlockSize::BS_512 ? 4 :
-																				1;
+		auto bs_item = settings.block_size == 32  ? 0 :
+					   settings.block_size == 64  ? 1 :
+					   settings.block_size == 128 ? 2 :
+					   settings.block_size == 256 ? 3 :
+					   settings.block_size == 512 ? 4 :
+													1;
 		lv_dropdown_set_selected(ui_SystemPrefsAudioBlocksizeDropdown, bs_item);
 
 		gui_state.do_write_settings = false;
@@ -66,25 +64,22 @@ struct PrefsTab : SystemMenuTab {
 		lv_disable(ui_SystemPrefsRevertButton);
 	}
 
-	ViewSettings::SampleRate read_samplerate_dropdown() {
+	uint32_t read_samplerate_dropdown() {
 		auto sr_item = lv_dropdown_get_selected(ui_SystemPrefsAudioSampleRateDropdown);
 
-		auto sample_rate = sr_item == 0 ? ViewSettings::SampleRate::SR_24K :
-						   sr_item == 1 ? ViewSettings::SampleRate::SR_48K :
-						   sr_item == 2 ? ViewSettings::SampleRate::SR_96K :
-										  ViewSettings::SampleRate::SR_48K;
+		auto sample_rate = sr_item == 0 ? 24000 : sr_item == 1 ? 48000 : sr_item == 2 ? 96000 : 48000;
 		return sample_rate;
 	}
 
-	ViewSettings::BlockSize read_blocksize_dropdown() {
+	uint32_t read_blocksize_dropdown() {
 		auto bs_item = lv_dropdown_get_selected(ui_SystemPrefsAudioBlocksizeDropdown);
 
-		auto block_size = bs_item == 0 ? ViewSettings::BlockSize::BS_32 :
-						  bs_item == 1 ? ViewSettings::BlockSize::BS_64 :
-						  bs_item == 2 ? ViewSettings::BlockSize::BS_128 :
-						  bs_item == 3 ? ViewSettings::BlockSize::BS_256 :
-						  bs_item == 4 ? ViewSettings::BlockSize::BS_512 :
-										 ViewSettings::BlockSize::BS_64;
+		auto block_size = bs_item == 0 ? 32 :
+						  bs_item == 1 ? 64 :
+						  bs_item == 2 ? 128 :
+						  bs_item == 3 ? 256 :
+						  bs_item == 4 ? 512 :
+										 64;
 
 		return block_size;
 	}
@@ -94,10 +89,11 @@ struct PrefsTab : SystemMenuTab {
 		auto sample_rate = read_samplerate_dropdown();
 
 		if (settings.block_size != block_size || settings.sample_rate != sample_rate) {
+
 			settings.block_size = block_size;
 			settings.sample_rate = sample_rate;
-			patch_playloader.request_new_audio_settings(std::to_underlying(sample_rate),
-														std::to_underlying(block_size));
+
+			patch_playloader.request_new_audio_settings(sample_rate, block_size);
 			gui_state.do_write_settings = true;
 		}
 
@@ -159,26 +155,8 @@ private:
 		}
 	}
 
-	// static void sample_rate_close(lv_event_t *event) {
-	// 	if (!event || !event->user_data)
-	// 		return;
-	// 	auto page = static_cast<PrefsTab *>(event->user_data);
-	// }
-
-	// static void blocksize_cb(lv_event_t *event) {
-	// 	if (!event || !event->user_data)
-	// 		return;
-	// 	auto page = static_cast<PrefsTab *>(event->user_data);
-	// }
-
-	// static void samplerate_cb(lv_event_t *event) {
-	// 	if (!event || !event->user_data)
-	// 		return;
-	// 	auto page = static_cast<PrefsTab *>(event->user_data);
-	// }
-
 	PatchPlayLoader &patch_playloader;
-	ViewSettings &settings;
+	AudioSettings &settings;
 	GuiState &gui_state;
 
 	lv_group_t *group = nullptr;

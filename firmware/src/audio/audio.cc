@@ -39,8 +39,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, audio_out_block{audio_out_block}
 	, codec_{Hardware::codec}
 	, codec_ext_{Hardware::codec_ext}
-	, sample_rate_{DefaultSampleRate}
-	, block_size_{DefaultBlockSize}
+	, sample_rate_{AudioSettings::DefaultSampleRate}
+	, block_size_{AudioSettings::DefaultBlockSize}
 	, player{patchplayer} {
 
 	if (codec_.init() == CodecT::CODEC_NO_ERR)

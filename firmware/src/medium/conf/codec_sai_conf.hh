@@ -37,8 +37,8 @@ const SaiConfig codec_mainPCB_sai_conf = {
 		},
 
 	.datasize = SAI_DATASIZE_24,
-	.framesize = 256,
-	.samplerate = MetaModule::DefaultSampleRate,
+	.framesize = 256, //24bit extends to 32bits * max(num_tdm_outs, num_td_ins) = 256
+	.samplerate = MetaModule::AudioSettings::DefaultSampleRate,
 
 	.MCLK = {GPIO::E, PinNum::_0, PinAF::AltFunc10},
 	.SCLK = {GPIO::D, PinNum::_13, PinAF::AltFunc10},

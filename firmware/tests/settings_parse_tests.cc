@@ -36,8 +36,9 @@ TEST_CASE("Parse settings file") {
       opa: 0
     view_height_px: 240
 
-  sample_rate: 96000
-  block_size: 128
+  audio:
+    sample_rate: 96000
+    block_size: 128
 )";
 	// clang format-on
 
@@ -67,8 +68,8 @@ TEST_CASE("Parse settings file") {
 	CHECK(settings.module_view.cable_style.opa == 0);
 	CHECK(settings.module_view.view_height_px == 240);
 
-	CHECK(settings.sample_rate == MetaModule::ViewSettings::SampleRate::SR_96K);
-	CHECK(settings.block_size == MetaModule::ViewSettings::BlockSize::BS_128);
+	CHECK(settings.audio.sample_rate == 96000);
+	CHECK(settings.audio.block_size == 128);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -107,6 +108,18 @@ TEST_CASE("Get default settings if file is missing fields") {
       opa: abc
 )";
 	}
+	SUBCASE("Bad audio sample rate:") {
+		yaml = R"(Settings:
+  audio:
+    sample_rate: 44100
+)";
+	}
+	SUBCASE("Bad audio block size:") {
+		yaml = R"(Settings:
+  audio:
+    block_size: 16
+)";
+	}
 
 	MetaModule::ViewSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
@@ -136,8 +149,8 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.module_view.cable_style.opa == df.cable_style.opa);
 	CHECK(settings.module_view.view_height_px == df.view_height_px);
 
-	CHECK(settings.sample_rate == MetaModule::ViewSettings::SampleRate::SR_48K);
-	CHECK(settings.block_size == MetaModule::ViewSettings::BlockSize::BS_64);
+	CHECK(settings.audio.sample_rate == 48000);
+	CHECK(settings.audio.block_size == 64);
 }
 
 TEST_CASE("Serialize settings") {
@@ -165,6 +178,9 @@ TEST_CASE("Serialize settings") {
 	settings.module_view.cable_style.mode = HideAlways;
 	settings.module_view.cable_style.opa = 0;
 	settings.module_view.view_height_px = 240;
+
+	settings.audio.sample_rate = 24000;
+	settings.audio.block_size = 512;
 
 	// clang format-off
 	std::string expected = R"(Settings:
@@ -194,8 +210,9 @@ TEST_CASE("Serialize settings") {
     cable_style:
       mode: HideAlways
       opa: 0
-  sample_rate: 48000
-  block_size: 64
+  audio:
+    sample_rate: 24000
+    block_size: 512
 )";
 	// clang format-on
 

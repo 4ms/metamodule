@@ -32,6 +32,13 @@ static void write(ryml::NodeRef *n, ModuleDisplaySettings const &s) {
 	n->append_child() << ryml::key("cable_style") << s.cable_style;
 }
 
+static void write(ryml::NodeRef *n, AudioSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("sample_rate") << s.sample_rate;
+	n->append_child() << ryml::key("block_size") << s.block_size;
+}
+
 namespace Settings
 {
 
@@ -47,8 +54,7 @@ uint32_t serialize(ViewSettings const &settings, std::span<char> buffer) {
 
 	data["patch_view"] << settings.patch_view;
 	data["module_view"] << settings.module_view;
-	data["sample_rate"] << std::to_underlying(settings.sample_rate);
-	data["block_size"] << std::to_underlying(settings.block_size);
+	data["audio"] << settings.audio;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();
