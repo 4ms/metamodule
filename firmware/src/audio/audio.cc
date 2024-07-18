@@ -57,17 +57,17 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		ext_audio_connected = true;
 		codec_ext_.set_tx_buffer(audio_blocks[0].out_ext_codec, block_size_);
 		codec_ext_.set_rx_buffer(audio_blocks[0].in_ext_codec, block_size_);
-		pr_info("Ext Audio codec detected\n");
+		pr_info("Audio Expander detected\n");
 	} else {
 		ext_audio_connected = false;
-		pr_info("No ext Audio codec detected\n");
+		pr_info("No Audio Expander detected\n");
 	}
 
 	cal.reset_to_default();
 	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		Debug::Pin3::high();
+		// Debug::Pin3::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -97,7 +97,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			patch_loader.notify_audio_overrun();
 		}
 
-		Debug::Pin3::low();
+		// Debug::Pin3::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },

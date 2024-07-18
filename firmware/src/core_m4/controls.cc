@@ -173,7 +173,7 @@ void Controls::process() {
 void Controls::set_samplerate(unsigned sample_rate) {
 	this->sample_rate = sample_rate;
 	for (auto &_knob : _knobs) {
-		_knob.set_num_updates(sample_rate / 631);
+		_knob.set_num_updates(sample_rate / AdcReadFrequency);
 	}
 }
 
@@ -191,8 +191,10 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {
+			Debug::Pin1::high();
 			ADC1->ISR = tmp | ADC_ISR_EOS;
 			_new_adc_data_ready = true;
+			Debug::Pin1::low();
 		}
 	});
 
