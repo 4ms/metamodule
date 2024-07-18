@@ -24,7 +24,7 @@ private:
 	PageManager page_manager;
 	ParamsMidiState params;
 	MetaParams metaparams;
-	ViewSettings settings;
+	UserSettings settings;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
@@ -55,7 +55,7 @@ public:
 		page_manager.init();
 
 		if (!Settings::read_settings(patch_storage, &settings)) {
-			settings = ViewSettings{};
+			settings = UserSettings{};
 			if (!Settings::write_settings(patch_storage, settings)) {
 				pr_err("Failed to write settings file\n");
 			}

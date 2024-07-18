@@ -33,7 +33,7 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 	page_manager.init();
 
 	if (!Settings::read_settings(file_storage_proxy, &settings)) {
-		settings = ViewSettings{};
+		settings = UserSettings{};
 		if (!Settings::write_settings(file_storage_proxy, settings)) {
 			pr_err("Failed to write settings file\n");
 		}

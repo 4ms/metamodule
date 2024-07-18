@@ -1,5 +1,4 @@
 #pragma once
-#include "conf/audio_settings.hh"
 #include <cstdint>
 
 namespace MetaModule
@@ -24,12 +23,6 @@ struct ModuleDisplaySettings {
 	MapRingStyle cable_style = {.mode = MapRingStyle::Mode::ShowAll, .opa = 128};
 	unsigned view_height_px = 180;
 	bool changed = true;
-};
-
-struct ViewSettings {
-	ModuleDisplaySettings patch_view{};
-	ModuleDisplaySettings module_view{};
-	AudioSettings audio{};
 };
 
 } // namespace MetaModule

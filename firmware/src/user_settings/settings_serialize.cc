@@ -1,4 +1,4 @@
-#include "gui/pages/view_settings.hh"
+#include "settings_serialize.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"
@@ -42,7 +42,7 @@ static void write(ryml::NodeRef *n, AudioSettings const &s) {
 namespace Settings
 {
 
-uint32_t serialize(ViewSettings const &settings, std::span<char> buffer) {
+uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	RymlInit::init_once();
 
 	ryml::Tree tree;

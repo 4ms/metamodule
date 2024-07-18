@@ -1,15 +1,15 @@
+#include "settings_file.hh"
 #include "debug.hh"
 #include "delay.hh"
 #include "drivers/cache.hh"
-#include "fs/settings_parse.hh"
-#include "fs/settings_serialize.hh"
-#include "gui/pages/view_settings.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "settings_parse.hh"
+#include "settings_serialize.hh"
 
 namespace MetaModule::Settings
 {
 
-bool write_settings(FileStorageProxy &proxy, ViewSettings const &settings) {
+bool write_settings(FileStorageProxy &proxy, UserSettings const &settings) {
 	alignas(64) std::array<char, 1024> buffer;
 
 	auto sz = serialize(settings, buffer);
@@ -48,7 +48,7 @@ bool write_settings(FileStorageProxy &proxy, ViewSettings const &settings) {
 	}
 }
 
-bool read_settings(FileStorageProxy &proxy, ViewSettings *settings) {
+bool read_settings(FileStorageProxy &proxy, UserSettings *settings) {
 	alignas(64) std::array<char, 1024> buffer{};
 
 	static_assert(buffer.size() % 64 == 0, "Buffer must not share cache lines with other data");

@@ -5,7 +5,6 @@
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_args.hh"
 #include "gui/pages/page_list.hh"
-#include "gui/pages/view_settings.hh"
 #include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params_state.hh"
@@ -13,6 +12,7 @@
 #include "patch_file/open_patch_manager.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
+#include "user_settings/settings.hh"
 
 // Use for helpers:
 
@@ -48,7 +48,7 @@ struct PatchContext {
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
 	GuiState &gui_state;
-	ViewSettings &settings;
+	UserSettings &settings;
 	PluginManager &plugin_manager;
 };
 
@@ -62,7 +62,7 @@ struct PageBase {
 	PatchModQueue &patch_mod_queue;
 	PageList &page_list;
 	GuiState &gui_state;
-	ViewSettings &settings;
+	UserSettings &settings;
 
 	PageArguments args;
 

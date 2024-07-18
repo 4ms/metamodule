@@ -1,5 +1,4 @@
 #pragma once
-#include "fs/settings_file.hh"
 #include "gui/knobset_button.hh"
 #include "gui/notify/display.hh"
 #include "gui/notify/queue.hh"
@@ -9,6 +8,7 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
+#include "user_settings/settings_file.hh"
 
 #include "gui/pages/jackmaps.hh"
 #include "gui/pages/knobmap.hh"
@@ -55,7 +55,7 @@ public:
 				NotificationQueue &notify_queue,
 				PatchModQueue &patch_mod_queue,
 				PluginManager &plugin_manager,
-				ViewSettings &settings)
+				UserSettings &settings)
 		: info{patch_storage,
 			   open_patch_manager,
 			   patch_playloader,

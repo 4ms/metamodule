@@ -1,7 +1,7 @@
 #include "doctest.h"
-#include "fs/settings_parse.hh"
-#include "fs/settings_serialize.hh"
 #include "gui/pages/view_settings.hh"
+#include "user_settings/settings_parse.hh"
+#include "user_settings/settings_serialize.hh"
 #include <string>
 
 TEST_CASE("Parse settings file") {
@@ -42,7 +42,7 @@ TEST_CASE("Parse settings file") {
 )";
 	// clang format-on
 
-	MetaModule::ViewSettings settings;
+	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
 	CHECK(ok);
 
@@ -121,7 +121,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 )";
 	}
 
-	MetaModule::ViewSettings settings;
+	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
 	CHECK(ok == should_parse);
 
@@ -155,7 +155,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 TEST_CASE("Serialize settings") {
 
-	MetaModule::ViewSettings settings;
+	MetaModule::UserSettings settings;
 
 	using enum MetaModule::MapRingStyle::Mode;
 

@@ -1,4 +1,4 @@
-#include "gui/pages/view_settings.hh"
+#include "settings_parse.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include <span>
@@ -70,7 +70,7 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 namespace Settings
 {
 
-bool parse(std::span<char> yaml, ViewSettings *settings) {
+bool parse(std::span<char> yaml, UserSettings *settings) {
 	RymlInit::init_once();
 
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yaml.data(), yaml.size()));
@@ -85,9 +85,9 @@ bool parse(std::span<char> yaml, ViewSettings *settings) {
 
 	ryml::ConstNodeRef node = root["Settings"];
 
-	read_or_default(node, "patch_view", settings, &ViewSettings::patch_view);
-	read_or_default(node, "module_view", settings, &ViewSettings::module_view);
-	read_or_default(node, "audio", settings, &ViewSettings::audio);
+	read_or_default(node, "patch_view", settings, &UserSettings::patch_view);
+	read_or_default(node, "module_view", settings, &UserSettings::module_view);
+	read_or_default(node, "audio", settings, &UserSettings::audio);
 
 	return true;
 }
