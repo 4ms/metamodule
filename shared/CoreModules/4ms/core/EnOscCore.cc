@@ -179,6 +179,8 @@ public:
 			sample_rate_ = sr;
 			ui_process_throttle = (unsigned)sample_rate_ / kUiProcessRate;
 			ui_update_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
+
+			enosc.set_samplerate(sr);
 		}
 	}
 

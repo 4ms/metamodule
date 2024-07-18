@@ -79,6 +79,8 @@ struct Parameters {
 	AltParameters default_alt = {kMaxNumOsc, ALTERNATE, LOW_HIGH, 0.125_f, {}};
 
 	f new_note, fine_tune;
+
+	f sample_rate = f(kSampleRate);
 };
 
 enum EventType {
@@ -103,4 +105,4 @@ struct Event {
 	int data;
 };
 
-}
+} // namespace EnOsc

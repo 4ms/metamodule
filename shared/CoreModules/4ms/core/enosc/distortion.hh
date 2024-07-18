@@ -3,6 +3,7 @@
 #include "dynamic_data.hh"
 #include "easiglib/bitfield.hh"
 #include "easiglib/dsp.hh"
+#include "parameters.hh"
 
 namespace EnOsc
 {
@@ -116,4 +117,4 @@ f warp<SEGMENT>(f freq, f amount) {
 }
 }; // namespace Antialias
 
-}
+} // namespace EnOsc

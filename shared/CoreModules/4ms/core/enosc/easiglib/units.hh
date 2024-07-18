@@ -1,5 +1,3 @@
-// #include "data.hh"
-#include "../parameters.hh" // TODO bad
 #include "math.hh"
 #include "numtypes.hh"
 
@@ -12,22 +10,20 @@ struct Freq : private Float {
 		return Math::fast_exp2(p / 12_f);
 	}
 
-	explicit constexpr Freq(f x)
-		: Float(x / f(EnOsc::kSampleRate)){};
-	static Freq of_pitch(f p) {
-		return Freq(semitones_to_ratio(p - 69._f) * 440_f);
+	explicit constexpr Freq(f x, f sample_rate)
+		: Float(x / sample_rate){};
+
+	static Freq of_pitch(f p, f sample_rate) {
+		return Freq(semitones_to_ratio(p - 69._f) * 440_f, sample_rate);
 	}
 
 	constexpr Float const repr() const {
 		return *this;
 	}
+
 	u0_32 to_increment() const {
 		return u0_32(this->repr());
 	}
 };
 
-constexpr Freq operator"" _Hz(long double x) {
-	return Freq(f(x));
-}
-
-}
+} // namespace easiglib
