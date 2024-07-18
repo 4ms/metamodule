@@ -15,7 +15,11 @@ namespace MetaModule::WifiInterface
 
 
 	enum ErrorCode_t {NO_ANSWER, NO_IP};
-	using IPAddress_t = std::array<uint8_t,4>;
+	struct Endpoint_t
+	{
+		std::array<uint8_t,4> ip;
+		uint16_t port;
+	};
 
-	std::expected<IPAddress_t,ErrorCode_t> getCurrentIP();
+	std::expected<Endpoint_t,ErrorCode_t> getCurrentIP();
 };

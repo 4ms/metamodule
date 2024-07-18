@@ -90,18 +90,6 @@ void main() {
 
 #ifdef ENABLE_WIFI_BRIDGE
 		WifiInterface::run();
-
-		static std::expected<WifiInterface::IPAddress_t,WifiInterface::ErrorCode_t> currentAddr;
-		auto newAddr = WifiInterface::getCurrentIP();
-
-		if (newAddr != currentAddr) {
-			currentAddr = newAddr;
-
-			if (currentAddr)
-				printf("IP: %u.%u.%u.%u\n", (*currentAddr)[0], (*currentAddr)[1], (*currentAddr)[2], (*currentAddr)[3]);
-			else
-				printf("No IP. Code %u\n", currentAddr.error());
-		}
 #endif
 	}
 }
