@@ -1,6 +1,9 @@
 #pragma once
 #include "numtypes.hh"
 
+namespace easiglib
+{
+
 struct Signal {
 
   static f crossfade(f x, f y, f phase) {
@@ -54,3 +57,5 @@ struct Signal {
     return ((x - p) / (1_f - 2_f * p)).min(1_f).max(0_f);
   }
 };
+
+}

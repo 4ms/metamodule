@@ -2,6 +2,11 @@
 
 #include "easiglib/numtypes.hh"
 
+namespace EnOsc
+{
+
+using namespace easiglib;
+
 constexpr struct Frame {
 	s9_23 l = 0._s9_23;
 	s9_23 r = 0._s9_23;
@@ -97,3 +102,5 @@ struct Event {
 	EventType type;
 	int data;
 };
+
+}

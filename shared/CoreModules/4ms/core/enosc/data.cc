@@ -2,6 +2,9 @@
 #include "easiglib/numtypes.hh"
 
 using namespace std;
+using namespace easiglib;
+
+namespace EnOsc {
 
 /* sine */
 const Buffer<s1_15, 257> Data::sine = {{{
@@ -2245,3 +2248,5 @@ const Buffer<f, 16> Data::harm = {{{
 	34.88268714730222086473077069967985_f,
 	36.00000000000000000000000000000000_f,
 }}};
+
+}

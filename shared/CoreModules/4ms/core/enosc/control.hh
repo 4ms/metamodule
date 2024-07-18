@@ -8,6 +8,8 @@
 #include "easiglib/event_handler.hh"
 #include "polyptic_oscillator.hh"
 
+namespace EnOsc {
+
 const f kPotDeadZone = 0.01_f;
 const f kPitchPotRange = 6_f * 12_f;
 const f kRootPotRange = 9_f * 12_f;
@@ -675,3 +677,5 @@ public:
 		stereo_mode_raw = val;
 	}
 };
+
+}

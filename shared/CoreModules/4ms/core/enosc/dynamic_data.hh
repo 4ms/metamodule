@@ -2,6 +2,9 @@
 
 #include "easiglib/dsp.hh"
 
+namespace EnOsc
+{
+
 static constexpr int sine_size = 512 + 1;
 static constexpr int cheby_tables = 16;
 static constexpr int cheby_size = 512 + 1;
@@ -15,3 +18,5 @@ struct DynamicData {
 	static Buffer<f, (fold_size - 1) / 2 + 1> fold_max;
 	static Buffer<Buffer<f, 9>, 8> triangles;
 };
+
+}

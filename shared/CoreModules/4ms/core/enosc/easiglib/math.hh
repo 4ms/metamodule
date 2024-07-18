@@ -3,6 +3,9 @@
 // #include "../data.hh"
 #include "numtypes.hh"
 
+namespace easiglib
+{
+
 struct Math {
 	static constexpr f pi = 3.14159265358979323846264338327950288_f;
 
@@ -85,3 +88,5 @@ private:
 	static constexpr float exp2_increment = 1.000677130693066; // 2 ^ (1/exp2_size)
 	static inline uint32_t exp2_table[exp2_size];
 };
+
+}

@@ -2,6 +2,9 @@
 
 #include "numtypes.hh"
 
+namespace easiglib
+{
+
 template<int WIDTH>
 struct Bitfield {
   using Base = typename Basetype<WIDTH, UNSIGNED>::T;
@@ -43,3 +46,5 @@ struct Bitfield {
 private:
   Base val_ = 0;
 };
+
+}

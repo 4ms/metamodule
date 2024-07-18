@@ -1,6 +1,9 @@
 #pragma once
 #include "../easiglib/dsp.hh"
 
+namespace EnOsc
+{
+
 enum SpiAdcInput { CV_PITCH, CV_ROOT, NUM_SPI_ADC_CHANNELS };
 
 class SpiAdc : Nocopy {
@@ -22,3 +25,5 @@ public:
 		return values[i & 1]; //cheap bounds-checking
 	}
 };
+
+}

@@ -3,6 +3,9 @@
 #include "math.hh"
 #include "numtypes.hh"
 
+namespace easiglib
+{
+
 struct Freq : private Float {
 
 	static f semitones_to_ratio(f p) {
@@ -10,7 +13,7 @@ struct Freq : private Float {
 	}
 
 	explicit constexpr Freq(f x)
-		: Float(x / f(kSampleRate)){};
+		: Float(x / f(EnOsc::kSampleRate)){};
 	static Freq of_pitch(f p) {
 		return Freq(semitones_to_ratio(p - 69._f) * 440_f);
 	}
@@ -25,4 +28,6 @@ struct Freq : private Float {
 
 constexpr Freq operator"" _Hz(long double x) {
 	return Freq(f(x));
+}
+
 }

@@ -1,6 +1,9 @@
 #pragma once
 #include "../easiglib/dsp.hh"
 
+namespace EnOsc
+{
+
 enum AdcInput {
 	POT_WARP,
 	POT_DETUNE,
@@ -37,3 +40,5 @@ public:
 		return 0._u0_16;
 	}
 };
+
+}

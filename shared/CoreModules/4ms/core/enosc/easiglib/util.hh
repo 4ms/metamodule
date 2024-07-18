@@ -5,6 +5,9 @@
 #include <algorithm>
 #include <functional>
 
+namespace easiglib
+{
+
 template<class T, T x, T y>
 struct Max {
 	static constexpr T val = x > y ? x : y;
@@ -118,6 +121,7 @@ struct Zip : public Zip<Ts...> {
 	T &t_;
 };
 
+
 // base case
 template<typename T>
 struct Zip<T> {
@@ -136,11 +140,16 @@ private:
 	T &t_;
 };
 
+}
+
 // must implement tuple_size to check size equality
 template<typename T, typename... Ts>
-struct std::tuple_size<Zip<T, Ts...>> {
+struct std::tuple_size<easiglib::Zip<T, Ts...>> {
 	static constexpr int value = std::tuple_size<T>::value;
 };
+
+namespace easiglib
+{
 
 // smart instantiation function
 template<typename... Ts>
@@ -155,3 +164,5 @@ struct overloaded : Ts... {
 };
 template<class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
+
+}

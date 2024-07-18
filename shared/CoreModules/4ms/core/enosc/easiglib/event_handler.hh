@@ -2,6 +2,9 @@
 
 #include "buffer.hh"
 
+namespace easiglib
+{
+
 constexpr int kEventBufferSize = 64;
 
 template<class Event>
@@ -49,3 +52,5 @@ private:
   // number of events remaining to handle - 1
   int pending_ = -1;
 };
+
+}

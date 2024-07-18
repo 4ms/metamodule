@@ -8,6 +8,8 @@
 #include "easiglib/event_handler.hh"
 #include "polyptic_oscillator.hh"
 
+namespace EnOsc {
+
 template<int update_rate>
 struct LedManager {
 	using Color = EnOsc::Color;
@@ -389,3 +391,5 @@ public:
 		control_.set_stereo_mode(val);
 	}
 };
+
+}

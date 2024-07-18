@@ -2,6 +2,8 @@
 
 #include "../easiglib/util.hh"
 
+namespace EnOsc {
+
 enum Gate {
   GATE_LEARN,
   GATE_FREEZE,
@@ -29,3 +31,5 @@ struct Gates : Nocopy {
     freeze_.Debounce();
   }
 };
+
+}

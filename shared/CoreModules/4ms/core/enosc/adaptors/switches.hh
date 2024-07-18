@@ -2,6 +2,8 @@
 
 #include "../easiglib/util.hh"
 
+namespace EnOsc {
+
 struct Switches : Nocopy {
 
 	enum Switch { SCALE, MOD, TWIST, WARP };
@@ -50,3 +52,5 @@ struct Switches : Nocopy {
 	} warp_;
 
 };
+
+}

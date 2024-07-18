@@ -8,6 +8,8 @@
 #include "parameters.hh"
 #include "quantizer.hh"
 
+namespace EnOsc {
+
 class AmplitudeAccumulator {
 	f amplitude = 1_f;
 	f amplitudes = 0_f;
@@ -359,3 +361,5 @@ public:
 		}
 	}
 };
+
+}

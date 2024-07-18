@@ -4,6 +4,9 @@
 #include "easiglib/bitfield.hh"
 #include "easiglib/dsp.hh"
 
+namespace EnOsc
+{
+
 namespace Distortion
 {
 
@@ -112,3 +115,5 @@ f warp<SEGMENT>(f freq, f amount) {
 	return amount * (1_f - 4_f * freq).cube().max(0_f);
 }
 }; // namespace Antialias
+
+}

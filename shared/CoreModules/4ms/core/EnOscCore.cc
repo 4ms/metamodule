@@ -13,7 +13,6 @@ class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
 	using ThisCore = EnOscCore;
 
-	enum { kBlockSize = 32 };
 	enum { kUiUpdateRate = 60 };
 	enum { kUiProcessRate = 20 };
 
@@ -34,7 +33,7 @@ public:
 		}
 
 		// SampleRate / BlockRate (6kHz for 48k)
-		if (++block_ctr >= kBlockSize) {
+		if (++block_ctr >= EnOsc::kBlockSize) {
 			block_ctr = 0;
 			enosc.Poll();
 			enosc.osc().Process(out_block_);
@@ -42,11 +41,14 @@ public:
 	}
 
 	// DOWN=0 / MID=0.5 / UP=1.0
-	Switches::State switchstate(float val) {
-		return val < 0.25f ? Switches::State::DOWN : val < 0.75f ? Switches::State::MID : Switches::State::UP;
+	EnOsc::Switches::State switchstate(float val) {
+		using enum EnOsc::Switches::State;
+		return val < 0.25f ? DOWN : val < 0.75f ? MID : UP;
 	}
 
 	void set_param(int param_id, float val) override {
+		using AdcInput = EnOsc::AdcInput;
+
 		if (param_id < Info::NumKnobs) {
 			switch (param_id) {
 				case Info::KnobBalance:
@@ -103,7 +105,7 @@ public:
 		} else {
 			switch (param_id - (int)Info::NumKnobs - (int)Info::NumSwitches) {
 				case Info::AltParamStereosplit: {
-					auto mode = static_cast<SplitMode>(val * 2.9f);
+					auto mode = static_cast<EnOsc::SplitMode>(val * 2.9f);
 					enosc.set_stereo_mode(mode);
 				} break;
 				case Info::AltParamNumosc: {
@@ -114,7 +116,7 @@ public:
 					enosc.set_crossfade(val);
 					break;
 				case Info::AltParamFreezesplit: {
-					auto mode = static_cast<SplitMode>(val * 2.9f);
+					auto mode = static_cast<EnOsc::SplitMode>(val * 2.9f);
 					enosc.set_freeze_mode(mode);
 				} break;
 				case Info::AltParamFinetune:
@@ -125,6 +127,9 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
+		using AdcInput = EnOsc::AdcInput;
+		using SpiAdcInput = EnOsc::SpiAdcInput;
+
 		val /= 5.f;	  //-5V to +5V => -1..1
 		val *= -0.5f; //-1..1 => 0.5..-0.5
 		val += 0.5f;  // => 1..0
@@ -211,9 +216,9 @@ public:
 	// clang-format on
 
 private:
-	Ui<kUiUpdateRate, kBlockSize> enosc;
-	Buffer<Frame, kBlockSize> out_block_;
-	DynamicData dydata;
+	EnOsc::Ui<kUiUpdateRate, EnOsc::kBlockSize> enosc;
+	Buffer<EnOsc::Frame, EnOsc::kBlockSize> out_block_;
+	EnOsc::DynamicData dydata;
 	Math math;
 
 	float sample_rate_ = 48000.f;
@@ -224,7 +229,7 @@ private:
 	unsigned ui_update_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
 	unsigned ui_update_ctr = ui_update_throttle;
 
-	unsigned block_ctr = kBlockSize;
+	unsigned block_ctr = EnOsc::kBlockSize;
 };
 
 } // namespace MetaModule
