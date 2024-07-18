@@ -34,7 +34,7 @@ enum ChannelID_t : uint8_t {Broadcast = 0, Management = 1, Connections = 2};
 
 std::optional<Timestamp_t> lastIPAnswerTime;
 static constexpr Timestamp_t IPRequestTimeout = 1000;
-std::expected<IPAddress_t,ErrorCode_t> currentIPAddress = std::unexpected(ErrorCode_t::NO_ANSWER);
+std::expected<Endpoint_t,ErrorCode_t> currentEndpoint = std::unexpected(ErrorCode_t::NO_ANSWER);
 
 void handle_management_channel(std::span<uint8_t>);
 void handle_client_channel(uint8_t, std::span<uint8_t>);
@@ -94,7 +94,7 @@ void requestIP()
 
 	if (auto now = getTimestamp(); !lastIPAnswerTime or (now - *lastIPAnswerTime) > IPRequestTimeout)
 	{
-		 currentIPAddress = std::unexpected(ErrorCode_t::NO_ANSWER);
+		 currentEndpoint = std::unexpected(ErrorCode_t::NO_ANSWER);
 	}
 }
 
@@ -140,28 +140,31 @@ void run() {
 	}
 }
 
-std::expected<IPAddress_t,ErrorCode_t> getCurrentIP()
+std::expected<Endpoint_t,ErrorCode_t> getCurrentIP()
 {
-	return currentIPAddress;
+	return currentEndpoint;
 }
 
 ////////////////////////////////
 
 void handle_management_channel(std::span<uint8_t> payload)
 {
-	if (payload.size() == 4)
+	if (payload.size() == 6)
 	{
-		const IPAddress_t DummyAddress{0,0,0,0};
+		// assemble endpoint struct
+		Endpoint_t thisEndpoint;
+		std::copy(payload.begin(), payload.begin() + 4, thisEndpoint.ip.data());
+		thisEndpoint.port = (payload[5] << 8) | payload[4];
 
-		if (std::equal(DummyAddress.begin(), DummyAddress.end(), payload.data()))
+		const Endpoint_t DummyEndpoint {{0,0,0,0}, 0};
+
+		if (std::equal(DummyEndpoint.ip.begin(), DummyEndpoint.ip.end(), thisEndpoint.ip.begin()))
 		{
-			currentIPAddress = std::unexpected(ErrorCode_t::NO_IP);
+			currentEndpoint = std::unexpected(ErrorCode_t::NO_IP);
 		}
 		else
 		{
-			IPAddress_t thisIP;
-			std::copy(payload.begin(), payload.end(), thisIP.data());
-			currentIPAddress = thisIP;
+			currentEndpoint = thisEndpoint;
 		}
 
 		lastIPAnswerTime = getTimestamp();

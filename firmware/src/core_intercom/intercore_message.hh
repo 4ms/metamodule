@@ -89,8 +89,12 @@ struct IntercoreStorageMessage {
 	FlashTarget flashTarget;
 	
 	enum WifiIPError : uint8_t {NO_MODULE_CONNECTED, NO_IP};
-	using IPAddr_t = std::array<uint8_t,4>;
-	using WifiIPResult = std::expected<IPAddr_t,WifiIPError>;
+	struct Endpoint_t
+	{
+		std::array<uint8_t,4> ip;
+		uint16_t port;
+	};
+	using WifiIPResult = std::expected<Endpoint_t,WifiIPError>;
 
 	WifiIPResult wifi_ip_result ;	
 

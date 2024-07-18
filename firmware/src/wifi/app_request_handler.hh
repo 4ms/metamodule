@@ -18,17 +18,18 @@ struct WifiAppRequestHandler {
 		{
 			IntercoreStorageMessage result;
 
-			if (auto addr = WifiInterface::getCurrentIP(); addr)
+			if (auto endpoint = WifiInterface::getCurrentIP(); endpoint)
 			{
-				IntercoreStorageMessage::IPAddr_t ip;
-				std::copy(addr->begin(), addr->end(), ip.begin());
+				IntercoreStorageMessage::Endpoint_t epToSend;
+				std::copy(endpoint->ip.begin(), endpoint->ip.end(), epToSend.ip.begin());
+				epToSend.port = endpoint->port;
 
-				result.wifi_ip_result = ip;
+				result.wifi_ip_result = epToSend;
 				result.message_type = WifiIPSuccess;
 			}
 			else
 			{
-				switch (addr.error())
+				switch (endpoint.error())
 				{
 					case WifiInterface::ErrorCode_t::NO_ANSWER:
 						result.wifi_ip_result = std::unexpected(IntercoreStorageMessage::WifiIPError::NO_MODULE_CONNECTED);

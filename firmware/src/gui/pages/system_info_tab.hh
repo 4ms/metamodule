@@ -54,17 +54,32 @@ struct InfoTab : SystemMenuTab {
 
 					lv_show(ui_SystemMenuExpanders);
 
-					auto &newIP = *message.wifi_ip_result;
-
 					if (message.wifi_ip_result) {
-						pr_trace("Got Wifi IP: %u.%u.%u.%u\n", newIP[0], newIP[1], newIP[2], newIP[3]);
 
-						lv_label_set_text_fmt(ui_SystemMenuExpanders,
-											  "Wifi: http://%u.%u.%u.%u:8080",
-											  newIP[0],
-											  newIP[1],
-											  newIP[2],
-											  newIP[3]);
+						auto &newEndpoint = *message.wifi_ip_result;
+
+						pr_trace("Got Wifi IP: %u.%u.%u.%u:%U\n", newEndpoint.ip[0], newEndpoint.ip[1], newEndpoint.ip[2], newEndpoint.ip[3], newEndpoint.port);
+
+						if (newEndpoint.port != 80)
+						{
+							// only display port when it is non-default
+							lv_label_set_text_fmt(ui_SystemMenuExpanders,
+												"Wifi: http://%u.%u.%u.%u:%u",
+												newEndpoint.ip[0],
+												newEndpoint.ip[1],
+												newEndpoint.ip[2],
+												newEndpoint.ip[3],
+												newEndpoint.port);
+						}
+						else
+						{
+							lv_label_set_text_fmt(ui_SystemMenuExpanders,
+												"Wifi: http://%u.%u.%u.%u",
+												newEndpoint.ip[0],
+												newEndpoint.ip[1],
+												newEndpoint.ip[2],
+												newEndpoint.ip[3]);
+						}
 
 					} else {
 
