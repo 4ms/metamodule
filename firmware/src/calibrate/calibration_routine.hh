@@ -681,6 +681,8 @@ private:
 		static_assert(sizeof(CalData) > 64 && sizeof(CalData) <= 124);
 	};
 	alignas(64) PaddedCalData padded_cal_data{};
+	static_assert(sizeof padded_cal_data % 64 == 0, "CalData must not share cache lines with other data");
+
 	CalData &cal_data = padded_cal_data.cal_data;
 	uint32_t &bytes_written = padded_cal_data.bytes_written;
 

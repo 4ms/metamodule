@@ -51,6 +51,8 @@ bool write_settings(FileStorageProxy &proxy, ViewSettings const &settings) {
 bool read_settings(FileStorageProxy &proxy, ViewSettings *settings) {
 	alignas(64) std::array<char, 1024> buffer{};
 
+	static_assert(buffer.size() % 64 == 0, "Buffer must not share cache lines with other data");
+
 	mdrivlib::SystemCache::clean_dcache_by_range(buffer.data(), buffer.size());
 
 	uint32_t timeout = get_time();
