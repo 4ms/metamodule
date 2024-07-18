@@ -15,7 +15,8 @@ struct Persistent : T {
 
 template<typename T>
 using WearLevel = T;
+
 template<int, typename T>
 using FlashBlock = T;
 
-}
+} // namespace EnOsc

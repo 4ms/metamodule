@@ -1,13 +1,17 @@
 #pragma once
 
 #include "../easiglib/util.hh"
+#include <cstdint>
+
+namespace EnOsc
+{
 
 enum Button {
 	BUTTON_LEARN,
 	BUTTON_FREEZE,
 };
 
-struct Buttons : Nocopy {
+struct Buttons : easiglib::Nocopy {
 
 	Buttons() {
 		for (int i = 16; i--;) {
@@ -44,3 +48,5 @@ struct Buttons : Nocopy {
 		freeze_.Debounce();
 	}
 };
+
+} // namespace EnOsc

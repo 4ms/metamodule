@@ -23,6 +23,8 @@ enum AdcInput {
 	ADC_INPUT_MAX
 };
 
+using namespace easiglib; //for literal suffix
+
 class Adc : Nocopy {
 	u0_16 values[ADC_INPUT_MAX];
 
@@ -41,4 +43,4 @@ public:
 	}
 };
 
-}
+} // namespace EnOsc

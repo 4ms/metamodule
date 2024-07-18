@@ -2,9 +2,10 @@
 
 #include "../easiglib/util.hh"
 
-namespace EnOsc {
+namespace EnOsc
+{
 
-struct Switches : Nocopy {
+struct Switches : easiglib::Nocopy {
 
 	enum Switch { SCALE, MOD, TWIST, WARP };
 	enum State { UP = 1, DOWN = 2, MID = 3 };
@@ -50,7 +51,6 @@ struct Switches : Nocopy {
 
 	struct Warp : ThreePosSwitch {
 	} warp_;
-
 };
 
-}
+} // namespace EnOsc
