@@ -21,7 +21,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 				   metaparams,
 				   notify_queue,
 				   patch_mod_queue,
-				   plugin_manager}
+				   plugin_manager,
+				   settings}
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
 
@@ -30,6 +31,13 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 
 	Gui::init_lvgl_styles();
 	page_manager.init();
+
+	if (!Settings::read_settings(file_storage_proxy, &settings)) {
+		settings = ViewSettings{};
+		if (!Settings::write_settings(file_storage_proxy, settings)) {
+			pr_err("Failed to write settings file\n");
+		}
+	}
 
 	patch_playloader.notify_audio_is_muted();
 	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";

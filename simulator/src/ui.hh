@@ -49,6 +49,8 @@ private:
 	PatchPlayLoader patch_playloader{file_storage_proxy, open_patches_manager, patch_player};
 	PatchModQueue patch_mod_queue;
 
+	ViewSettings settings;
+
 	NotificationQueue notify_queue;
 	PageManager page_manager;
 	ParamsMidiState params;
