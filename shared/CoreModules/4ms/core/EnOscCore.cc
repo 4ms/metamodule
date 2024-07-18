@@ -170,7 +170,9 @@ public:
 
 	float get_output(int output_id) const override {
 		s9_23 sample = output_id == 0 ? out_block_[block_ctr].l : out_block_[block_ctr].r;
-		auto s = f::inclusive(sample).repr() * 4.5f; //hardware model is about 4.5Vpp for one osc
+
+		//hardware EnOssc is about 4.5Vpp for one osc, we make it 2x as loud to match other virtual VCOs
+		auto s = f::inclusive(sample).repr() * 9.f;
 		return s;
 	}
 
