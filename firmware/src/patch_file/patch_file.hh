@@ -2,9 +2,11 @@
 #include "CoreModules/module_type_slug.hh"
 #include "fs/volumes.hh"
 #include "util/static_string.hh"
+#include <cstdint>
 #include <optional>
 #include <span>
 #include <string>
+#include <string_view>
 
 namespace MetaModule
 {
