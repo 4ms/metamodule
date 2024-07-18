@@ -1,13 +1,12 @@
 #pragma once
 #include "audio.hh"
-#include "util/countzip.hh"
-#include "util/zip.hh"
 
 namespace MetaModule
 {
 struct AudioTestSignal {
 	static void passthrough(std::span<AudioInFrame> in, std::span<AudioOutFrame> out) {
 
+		//  Requires gcc-13, clang 17:
 		// for (auto [i, o] : zip(in, out)) {
 		for (auto idx = 0u; auto const &i : in) {
 			auto &o = out[idx++];

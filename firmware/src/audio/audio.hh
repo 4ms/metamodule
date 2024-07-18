@@ -93,8 +93,8 @@ private:
 	void handle_patch_mod_queue();
 	void update_audio_settings();
 	void set_block_spans();
-	ParamBlock &get_optimally_cached_params(unsigned block);
-	void set_optimally_cached_params(unsigned block);
+	ParamBlock &cache_params(unsigned block);
+	void return_cached_params(unsigned block);
 
 public:
 	void set_calibration(CalData const &caldata);

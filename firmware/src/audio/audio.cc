@@ -68,13 +68,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	auto audio_callback = [this]<unsigned block>() {
 		Debug::Pin3::high();
-		//here to is_playing_patch() takes:
-		// bs 512: 266us
-		// bs 256: 270us
-		// bs 128: 75us
-		// bs 64: 53us
-		// bs 32: 43us
-		// everything else is roughly the same (when using process_nopatch())
+
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 		load_measure.start_measurement();
@@ -82,28 +76,27 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
-		auto params = get_optimally_cached_params(block);
+		auto params = cache_params(block);
 
-		Debug::Pin0::high();
 		if (is_playing_patch())
 			process(audio_blocks[1 - block], params);
 		else
 			process_nopatch(audio_blocks[1 - block], params);
-		Debug::Pin0::low();
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
 		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof sync_params);
 
-		set_optimally_cached_params(block);
-
 		update_audio_settings();
+
+		return_cached_params(block);
 
 		load_measure.end_measurement();
 		if (load_measure.get_last_measurement_load_percent() >= 98) {
 			output_fade_amt = 0.f;
 			patch_loader.notify_audio_overrun();
 		}
+
 		Debug::Pin3::low();
 	};
 
@@ -337,30 +330,24 @@ uint32_t AudioStream::get_audio_errors() {
 	return codec_.get_sai_errors();
 }
 
-// Depending on buffer size, it may be more performant to
-// use the param_blocks in non-cacheable memory
-// or copy to cacheable memory
-ParamBlock &AudioStream::get_optimally_cached_params(unsigned block) {
-	if (block_size_ >= 256)
-		return param_blocks[block];
-
-	// Small blocks: it's faster to copy into cacheable ram
+// It's measurably faster to copy params into cacheable ram
+ParamBlock &AudioStream::cache_params(unsigned block) {
 	local_params.metaparams = param_blocks[block].metaparams;
+
 	for (unsigned i = 0; i < block_size_; i++)
 		local_params.params[i] = param_blocks[block].params[i];
+
 	return local_params;
 }
 
-void AudioStream::set_optimally_cached_params(unsigned block) {
-	if (block_size_ >= 256)
-		return;
-
+void AudioStream::return_cached_params(unsigned block) {
 	// copy analyzed signals back to shared param block (so GUI thread can access it)
 	param_blocks[block].metaparams.ins = local_params.metaparams.ins;
 
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
 
+	// write cache to memory (so all cores see the same values)
 	mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 }
 
