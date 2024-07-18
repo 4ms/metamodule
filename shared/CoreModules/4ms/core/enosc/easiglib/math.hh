@@ -6,6 +6,24 @@
 namespace easiglib
 {
 
+namespace Exp2Table
+{
+static constexpr int exp2_size = 1024;
+static constexpr float exp2_increment = 1.000677130693066; // 2 ^ (1/exp2_size)
+
+static consteval std::array<uint32_t, exp2_size> make_exp_table() {
+	std::array<uint32_t, exp2_size> table;
+
+	float x = 1.0f;
+	for (auto &el : table) {
+		el = static_cast<uint32_t>(x * (1 << 23));
+		x *= exp2_increment;
+	}
+
+	return table;
+}
+} //namespace Exp2Table
+
 struct Math {
 	static constexpr f pi = 3.14159265358979323846264338327950288_f;
 
@@ -43,8 +61,8 @@ struct Math {
 	}
 
 	static f fast_exp2(f x) {
-		static_assert(is_power_of_2(exp2_size), "");
-		constexpr int const BITS = Log2<exp2_size>::val;
+		static_assert(is_power_of_2(Exp2Table::exp2_size), "");
+		constexpr int const BITS = Log2<Exp2Table::exp2_size>::val;
 
 		typedef union {
 			f f_repr;
@@ -75,18 +93,8 @@ struct Math {
 		return x * (1.875_f + s * (-1.25_f + 0.375_f * s));
 	}
 
-	Math() {
-		float x = 1.0f;
-		for (int i = 0; i < exp2_size; i++) {
-			exp2_table[i] = static_cast<uint32_t>(x * (1 << 23));
-			x *= exp2_increment;
-		}
-	}
-
 private:
-	static constexpr int exp2_size = 1024;
-	static constexpr float exp2_increment = 1.000677130693066; // 2 ^ (1/exp2_size)
-	static inline uint32_t exp2_table[exp2_size];
+	static constexpr std::array<uint32_t, Exp2Table::exp2_size> exp2_table = Exp2Table::make_exp_table();
 };
 
-}
+} // namespace easiglib
