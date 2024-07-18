@@ -1,12 +1,13 @@
 #pragma once
+#include "audio_settings.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/sai_config_struct.hh"
 #include "drivers/stm32xx.h"
 
 using mdrivlib::GPIO;
-using mdrivlib::PinNum;
 using mdrivlib::PinAF;
+using mdrivlib::PinNum;
 using mdrivlib::SaiConfig;
 
 const SaiConfig codec_mainPCB_sai_conf = {
@@ -37,7 +38,7 @@ const SaiConfig codec_mainPCB_sai_conf = {
 
 	.datasize = SAI_DATASIZE_24,
 	.framesize = 256,
-	.samplerate = 48000,
+	.samplerate = MetaModule::DefaultSampleRate,
 
 	.MCLK = {GPIO::E, PinNum::_0, PinAF::AltFunc10},
 	.SCLK = {GPIO::D, PinNum::_13, PinAF::AltFunc10},

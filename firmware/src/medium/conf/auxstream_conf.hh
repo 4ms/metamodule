@@ -40,7 +40,7 @@ struct AuxStream {
 
 	// using ClockOutPin1 = mdrivlib::FPin<GPIO::G, 14, PinMode::Output>;
 	// using ClockOutPin2 = mdrivlib::FPin<GPIO::B, 12, PinMode::Output>;
-	using BufferType = CircularBuffer<uint8_t, StreamConf::Audio::BlockSize>;
+	using BufferType = CircularBuffer<uint8_t, StreamConf::Audio::MaxBlockSize>;
 
 	// mdrivlib::GPIOStream<ClockOutPin1, BufferType> gate_out_1;
 	// mdrivlib::GPIOStream<ClockOutPin2, BufferType> gate_out_2;

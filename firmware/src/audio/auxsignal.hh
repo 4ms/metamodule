@@ -6,7 +6,7 @@
 namespace MetaModule
 {
 
-using AuxStreamBlock = std::array<AuxStreamFrame, StreamConf::Audio::BlockSize>;
+using AuxStreamBlock = std::array<AuxStreamFrame, StreamConf::Audio::MaxBlockSize>;
 using DoubleAuxStreamBlock = std::array<AuxStreamBlock, 2>;
 
 } // namespace MetaModule
