@@ -16,7 +16,37 @@ using namespace Framing;
 namespace MetaModule::WifiInterface
 {
 
+/////////////////////////
+
 PatchStorage *patchStorage;
+
+flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
+	auto CreateVector = [&fbb](auto fileList) {
+		std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.files.size());
+		for (std::size_t i = 0; i < fileList.files.size(); i++) {
+			auto thisName = fbb.CreateString(std::string_view(fileList.files[i].patchname));
+
+			auto thisFilename = fbb.CreateString(std::string_view(fileList.files[i].filename));
+			auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename);
+			elems[i] = thisInfo;
+		};
+		//TODO: add directories, and files inside directories
+		return fbb.CreateVector(elems);
+	};
+
+	auto patchFileList = patchStorage->getPatchList();
+
+	auto usbList = CreateVector(patchFileList.volume_root(Volume::USB));
+	auto flashList = CreateVector(patchFileList.volume_root(Volume::NorFlash));
+	auto sdcardList = CreateVector(patchFileList.volume_root(Volume::SDCard));
+
+	auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
+	auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
+
+	return message;
+}
+
+/////////////////////////
 
 Configuration_t FrameConfig{.start = 0x01, .end = 0x02, .escape = 0x03};
 
@@ -137,6 +167,15 @@ void run() {
 		lastHeartbeatSentTime = getTimestamp();
 
 		requestIP();
+
+		if (patchStorage->has_media_changed())
+		{
+			flatbuffers::FlatBufferBuilder fbb;
+			auto message = constructPatchesMessage(fbb);
+			fbb.Finish(message);
+
+			sendFrame(ChannelID_t::Broadcast, fbb.GetBufferSpan());
+		}
 	}
 }
 
@@ -171,31 +210,7 @@ void handle_management_channel(std::span<uint8_t> payload)
 	}
 }
 
-flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
-	auto CreateVector = [&fbb](auto fileList) {
-		std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.files.size());
-		for (std::size_t i = 0; i < fileList.files.size(); i++) {
-			auto thisName = fbb.CreateString(std::string_view(fileList.files[i].patchname));
 
-			auto thisFilename = fbb.CreateString(std::string_view(fileList.files[i].filename));
-			auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename);
-			elems[i] = thisInfo;
-		};
-		//TODO: add directories, and files inside directories
-		return fbb.CreateVector(elems);
-	};
-
-	auto patchFileList = patchStorage->getPatchList();
-
-	auto usbList = CreateVector(patchFileList.volume_root(Volume::USB));
-	auto flashList = CreateVector(patchFileList.volume_root(Volume::NorFlash));
-	auto sdcardList = CreateVector(patchFileList.volume_root(Volume::SDCard));
-
-	auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
-	auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
-
-	return message;
-}
 
 void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 
