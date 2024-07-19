@@ -4,6 +4,9 @@
 #include "dynamic_data.hh"
 #include "easiglib/dsp.hh"
 
+namespace EnOsc
+{
+
 class Phasor {
 	u0_32 phase_ = u0_32::of_repr(easiglib::Random::Word());
 
@@ -22,7 +25,7 @@ public:
 };
 
 class SineShaper {
-	IOnePoleLp<s1_15, 2> lp_;
+	easiglib::IOnePoleLp<s1_15, 2> lp_;
 
 public:
 	s1_15 Process(u0_32 phase, u0_16 feedback) {
@@ -42,10 +45,10 @@ public:
 class Oscillator {
 	Phasor phasor_;
 	SineShaper sine_shaper_;
-	SimpleFloat amplitude_{0_f};
+	easiglib::SimpleFloat amplitude_{0_f};
 
 public:
-	IFloat fade_, twist_, warp_, modulation_;
+	easiglib::IFloat fade_, twist_, warp_, modulation_;
 
 	void sync_to(Oscillator &that) {
 		this->phasor_.set(that.phasor_.phase());
@@ -86,8 +89,8 @@ public:
 		u0_32 const fr = u0_32(freq);
 		Phasor ph = phasor_;
 		SineShaper sh = sine_shaper_;
-		IFloat fd = fade_, md = modulation_, tw = twist_, wa = warp_;
-		SimpleFloat am = amplitude_;
+		easiglib::IFloat fd = fade_, md = modulation_, tw = twist_, wa = warp_;
+		easiglib::SimpleFloat am = amplitude_;
 
 		fd.set(fade, block_size);
 
@@ -118,8 +121,8 @@ struct FrequencyPair {
 };
 
 class FrequencyState {
-	OnePoleLp freq1_, freq2_, crossfade_;
-	PositiveSlewLimiter<1024> coef_{0_f};
+	easiglib::OnePoleLp freq1_, freq2_, crossfade_;
+	easiglib::PositiveSlewLimiter<1024> coef_{0_f};
 
 public:
 	FrequencyPair Process(f coef, FrequencyPair const p) {
@@ -217,3 +220,5 @@ public:
 		(osc_[1].*process)(freq2, twist, warp, modulation, fade2, amplitude, mod_in, mod_out, sum_output);
 	}
 };
+
+}

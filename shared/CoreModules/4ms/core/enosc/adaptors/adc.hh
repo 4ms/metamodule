@@ -1,6 +1,9 @@
 #pragma once
 #include "../easiglib/dsp.hh"
 
+namespace EnOsc
+{
+
 enum AdcInput {
 	POT_WARP,
 	POT_DETUNE,
@@ -20,6 +23,8 @@ enum AdcInput {
 	ADC_INPUT_MAX
 };
 
+using namespace easiglib; //for literal suffix
+
 class Adc : Nocopy {
 	u0_16 values[ADC_INPUT_MAX];
 
@@ -37,3 +42,5 @@ public:
 		return 0._u0_16;
 	}
 };
+
+} // namespace EnOsc

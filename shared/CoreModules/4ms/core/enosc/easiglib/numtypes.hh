@@ -6,6 +6,9 @@
 
 #include "util.hh"
 
+namespace easiglib
+{
+
 // FIXME: __arm__ does not distinguish between host-computer and target-device
 // #ifdef __arm__
   // #include "hal.hh"
@@ -839,3 +842,5 @@ static constexpr auto min_val<Fixed<SIGN, INT, FRAC>> = Fixed<SIGN, INT, FRAC>::
 template <sign SIGN, int INT, int FRAC>
 static constexpr auto max_val<Fixed<SIGN, INT, FRAC>> = Fixed<SIGN, INT, FRAC>::of_repr(
     std::numeric_limits<typename Basetype<INT + FRAC, SIGN>::T>::max());
+
+}

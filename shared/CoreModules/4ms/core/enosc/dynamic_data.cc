@@ -1,5 +1,10 @@
 #include "dynamic_data.hh"
 
+namespace EnOsc
+{
+
+using namespace easiglib;
+
 /* triangles */
 Buffer<Buffer<s8_0, 9>, 8> triangles_12ths = {{{
   {{{-12._s8_0, -9._s8_0, -6._s8_0, -3._s8_0, 0._s8_0, 3._s8_0, 6._s8_0, 9._s8_0, 12._s8_0, }}},
@@ -77,4 +82,6 @@ DynamicData::DynamicData() {
       for (int j=0; j<9; j++)
         triangles[i][j] = (f)(triangles_12ths[i][j])/12.0_f;
   }
+}
+
 }

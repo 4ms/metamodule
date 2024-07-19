@@ -6,6 +6,9 @@
 #include "signal.hh"
 #include "util.hh"
 
+namespace easiglib
+{
+
 template<class T>
 int binary_search(T const x, T const array[], int const size) {
 	int low = 0;
@@ -140,10 +143,15 @@ struct Buffer : std::array<T, SIZE> {
 	}
 };
 
+}
+
 template<int SIZE, class T>
-struct std::tuple_size<Buffer<T, SIZE>> {
+struct std::tuple_size<easiglib::Buffer<T, SIZE>> {
 	static constexpr int value = SIZE;
 };
+
+namespace easiglib
+{
 
 template<typename T, size_t SIZE>
 class RingBuffer {
@@ -250,3 +258,5 @@ public:
 		return full_;
 	};
 };
+
+}

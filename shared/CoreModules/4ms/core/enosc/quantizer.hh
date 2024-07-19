@@ -4,6 +4,8 @@
 #include "easiglib/buffer.hh"
 #include "parameters.hh"
 
+namespace EnOsc {
+
 constexpr const int kScaleNr = 10;
 constexpr const int kBankNr = 3;
 constexpr const int kMaxScaleSize = 2 * kMaxNumOsc;
@@ -286,3 +288,5 @@ public:
 		scales_storage_.Save();
 	}
 };
+
+}

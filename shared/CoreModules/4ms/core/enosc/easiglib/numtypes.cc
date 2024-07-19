@@ -1,6 +1,8 @@
 #include "numtypes.hh"
 
 // STATIC TESTS:
+namespace easiglib
+{
 
 static_assert(65536_u16 == 0_u16, "");
 static_assert(f(10_u).repr() == 10.f, "");
@@ -222,3 +224,5 @@ struct Numtypes_Tests {
 } numtypes_tests;
 
 #endif
+
+}

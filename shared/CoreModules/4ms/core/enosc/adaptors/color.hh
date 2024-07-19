@@ -4,6 +4,9 @@
 
 namespace EnOsc
 {
+
+using namespace easiglib; //for literal suffix
+
 struct Color {
 	struct Adjustment {
 		u1_7 r, g, b;
