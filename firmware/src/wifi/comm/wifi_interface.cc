@@ -284,13 +284,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 
 			sendResponse(fbb.GetBufferSpan());
 
-			if (filesUpdated) {
-				flatbuffers::FlatBufferBuilder fbb;
-				auto message = constructPatchesMessage(fbb);
-				fbb.Finish(message);
-
-				sendBroadcast(fbb.GetBufferSpan());
-			}
 		} else {
 			printf("Other option\n");
 		}
