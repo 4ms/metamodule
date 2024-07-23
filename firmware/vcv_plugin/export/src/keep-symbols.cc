@@ -70,8 +70,9 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 		expm1l(1.);
 	}
 
-	static bool keep = MetaModule::register_module("", "", nullptr, {}, "");
-	printf("%c\n", keep);
+	static auto addr = &MetaModule::register_module;
+	// static bool keep = MetaModule::register_module("", "", nullptr, {}, "");
+	printf("%p\n", addr);
 
 	// provides vtable for Quantity
 	rack::Quantity q;
