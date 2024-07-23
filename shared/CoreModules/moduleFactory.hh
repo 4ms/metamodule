@@ -2,6 +2,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_info_view.hh"
 #include "CoreModules/module_type_slug.hh"
+#include <functional>
 #include <memory>
 #include <string_view>
 #include <vector>
@@ -11,7 +12,7 @@ namespace MetaModule
 
 class ModuleFactory {
 public:
-	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
+	using CreateModuleFunc = std::function<std::unique_ptr<CoreProcessor>()>;
 
 	ModuleFactory() = delete;
 
