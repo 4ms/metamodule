@@ -2,6 +2,7 @@
 #include "conf/panel_conf.hh"
 #include "pr_dbg.hh"
 #include "util/calibrator.hh"
+#include "util/math.hh"
 #include <array>
 #include <cmath>
 #include <cstdio>
@@ -46,7 +47,7 @@ struct CalData {
 
 	bool validate() const {
 		for (auto chan : in_cal) {
-			if (std::isnan(chan.offset()) || std::isnan(chan.slope()))
+			if (!MathTools::is_finite_fastmath(chan.offset()) || !MathTools::is_finite_fastmath(chan.slope()))
 				return false;
 
 			if (std::fabs(chan.adjust(0x0040'0000) - 5.f) > 0.5f) {
@@ -55,7 +56,7 @@ struct CalData {
 		}
 
 		for (auto chan : out_cal) {
-			if (std::isnan(chan.offset()) || std::isnan(chan.slope()))
+			if (!MathTools::is_finite_fastmath(chan.offset()) || !MathTools::is_finite_fastmath(chan.slope()))
 				return false;
 
 			if (std::fabs(chan.adjust(-5.f) - (float)0x0040'0000) > Calibration::from_volts(0.5f)) {
