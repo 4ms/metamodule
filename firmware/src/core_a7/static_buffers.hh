@@ -10,6 +10,7 @@
 #include "param_block.hh"
 #include "params.hh"
 #include "patch_file/patch_file.hh"
+#include "sync_params.hh"
 #include <span>
 
 namespace MetaModule
@@ -32,6 +33,7 @@ static inline __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};
 static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block{};
+static inline __attribute__((section(".sysram"))) SyncParams sync_params;
 
 static inline __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 
