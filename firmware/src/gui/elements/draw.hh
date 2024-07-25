@@ -234,15 +234,16 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 	lv_obj_set_align(label, LV_ALIGN_TOP_LEFT);
 	lv_obj_set_pos(label, x, y);
 	lv_obj_set_size(label, w, h);
-	lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
 	if (module_h < 240) {
 		float zoom = (float)module_h / 240.f;
 		lv_obj_set_style_transform_zoom(label, 255 * zoom, LV_PART_MAIN);
 	}
 	if (el.coords == Coords::Center) {
 		lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+		lv_label_set_long_mode(label, LV_LABEL_LONG_DOT); //CLIP will clip start and end
 	} else {
 		lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+		lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
 	}
 
 	return label;
