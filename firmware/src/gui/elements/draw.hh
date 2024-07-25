@@ -223,10 +223,9 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 	float oy = mm_to_px(el.y_mm, module_h);
 	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h));
 	lv_coord_t h = std::round(mm_to_px(el.height_mm, module_h));
+	//Skip the "fix" for zoomed coords, lv_label objects don't need the fix if TopLeft coords are used
 	lv_coord_t x = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, ox, w, module_h / 240.f) : std::round(ox);
 	lv_coord_t y = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, oy, h, module_h / 240.f) : std::round(oy);
-
-	// pr_dbg("Draw TextDisplay %.*s at %d, %d [%dx%d]\n", (int)el.text.size(), el.text.data(), x, y, w, h);
 
 	auto label = lv_label_create(canvas);
 	lv_label_set_text(label, el.text.data());
@@ -239,9 +238,6 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 	if (module_h < 240) {
 		float zoom = (float)module_h / 240.f;
 		lv_obj_set_style_transform_zoom(label, 255 * zoom, LV_PART_MAIN);
-		//Undo the "fix" for zoomed coords, it doesn't work fortext
-		// lv_obj_set_x(label, x + (w * (1.f - zoom) / 2.f));
-		// lv_obj_set_y(label, y + (h * (1.f - zoom) / 2.f));
 	}
 	if (el.coords == Coords::Center) {
 		lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);

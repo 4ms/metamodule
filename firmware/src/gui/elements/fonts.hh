@@ -13,6 +13,8 @@ inline lv_font_t const *get_font(std::string_view name) {
 	// lv_font_free(my_font);
 
 	if (name == "Default_10")
+		return &ui_font_MuseoSansRounded50010;
+	else if (name == "Montserrat_10")
 		return &lv_font_montserrat_10;
 	else if (name == "Default_12")
 		return &ui_font_MuseoSansRounded50012;
