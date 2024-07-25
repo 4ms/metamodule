@@ -24,9 +24,15 @@ struct CalCheck {
 		lv_hide(ui_SystemResetInternalPatchesCont);
 		lv_hide(ui_CalibrationOutputStatusCont);
 		lv_hide(ui_CalibrationButtonCont);
+		lv_hide(ui_SystemHardwareCheckCont);
 
 		lv_show(ui_CalibrationProcedureCont);
 		lv_show(ui_CalibrationInputStatusCont);
+
+		auto indev = lv_indev_get_next(nullptr);
+		if (indev && indev->group) {
+			lv_group_focus_next(indev->group);
+		}
 
 		lv_label_set_text(ui_CalibrationInstructionLabel,
 						  "Knob A sets the voltage on all output jacks, from -10V to +10V in 1.0V steps.\nInput jack "
@@ -50,6 +56,7 @@ struct CalCheck {
 		lv_show(ui_SystemCalibrationButton);
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
+		lv_show(ui_SystemHardwareCheckCont);
 
 		lv_group_focus_obj(ui_SystemCalCheckButton);
 		visible = false;

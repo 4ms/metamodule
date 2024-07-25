@@ -33,6 +33,8 @@ struct SystemTab : SystemMenuTab {
 		lv_obj_add_event_cb(ui_SystemCalCheckButton, cal_check_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CheckHardwareButton, hwcheck_cb, LV_EVENT_CLICKED, this);
+
+		lv_obj_add_event_cb(ui_SystemCalibrationButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -43,6 +45,7 @@ struct SystemTab : SystemMenuTab {
 		lv_show(ui_SystemCalibrationButton);
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
+		lv_show(ui_SystemHardwareCheckCont);
 
 		lv_group_remove_obj(ui_SystemCalibrationButton);
 		lv_group_remove_obj(ui_SystemCalCheckButton);
@@ -109,6 +112,10 @@ private:
 
 		page->patch_playloader.request_load_calibration_patch();
 		page->cal_routine.start();
+	}
+
+	static void scroll_up_cb(lv_event_t *event) {
+		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_ON);
 	}
 
 	static void cal_check_cb(lv_event_t *event) {

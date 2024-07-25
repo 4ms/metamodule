@@ -22,7 +22,6 @@ struct HardwareCheckPopup {
 		, btn7(lv_btn_create(ui_HWTestPagePanel))
 		, btn8(lv_btn_create(ui_HWTestPagePanel)) {
 
-		lv_hide(ui_Button1);
 		lv_group_add_obj(group, btn1);
 		lv_group_add_obj(group, btn2);
 		lv_group_add_obj(group, btn3);
@@ -32,7 +31,11 @@ struct HardwareCheckPopup {
 		lv_group_add_obj(group, btn7);
 		lv_group_add_obj(group, btn8);
 
+		lv_obj_add_flag(btn1, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK);
 		lv_hide(ui_HWTestPagePanel);
+
+		lv_obj_set_style_border_color(ui_HWTestMidiLabel, Gui::palette_main[1], LV_PART_MAIN);
+		lv_obj_set_style_border_opa(ui_HWTestMidiLabel, LV_OPA_100, LV_PART_MAIN);
 	}
 
 	void show(lv_group_t *parent_group) {
@@ -42,6 +45,10 @@ struct HardwareCheckPopup {
 		lv_show(ui_HWTestPagePanel);
 		lv_group_activate(group);
 		lv_group_focus_obj(btn1);
+
+		lv_label_set_text(ui_HWTestMidiLabel, "_");
+		lv_obj_set_style_border_width(ui_HWTestMidiLabel, 0, LV_PART_MAIN);
+
 		visible = true;
 	}
 
@@ -66,8 +73,8 @@ struct HardwareCheckPopup {
 			pot_iir[i] = pot_iir[i] * iir_coef_inv + pot * iir_coef;
 		}
 
-		if ((last_refresh_check_tm - HAL_GetTick()) > 200) {
-			last_refresh_check_tm = HAL_GetTick();
+		if ((last_refresh_check_tm - get_time()) > 200) {
+			last_refresh_check_tm = get_time();
 
 			for (auto [i, pot] : enumerate(params.knobs)) {
 				auto clamped_val = std::clamp<unsigned>(pot_iir[i] * 100.f, 0u, 99u);
@@ -77,13 +84,6 @@ struct HardwareCheckPopup {
 					lv_obj_set_style_text_color(knob_labels[i], Gui::palette_main[0], LV_PART_MAIN);
 				} else
 					lv_obj_set_style_text_color(knob_labels[i], lv_color_white(), LV_PART_MAIN);
-
-				// pr_dbg("Pot %zu: iir=%d min=%d max=%d range=%d\r\n",
-				// 	   i,
-				// 	   (int)(4096.f * pot_iir[i]),
-				// 	   (int)(4096.f * pot_min[i]),
-				// 	   (int)(4096.f * pot_max[i]),
-				// 	   (int)(4096.f * (pot_max[i] - pot_min[i])));
 
 				pot_iir[i] = pot;
 				pot_min[i] = 4096.f;
@@ -99,7 +99,6 @@ struct HardwareCheckPopup {
 				lv_obj_set_style_text_color(
 					outjack_labels[i - 8], b(i) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
 			}
-			// pr_dbg("Outs patched: %d %d %d %d %d %d %d %d\n", b(8), b(9), b(10), b(11), b(12), b(13), b(14), b(15));
 
 			lv_label_set_text(ui_RotaryButton1, metaparams.meta_buttons[0].is_high() ? "X" : "_");
 			lv_label_set_text(ui_RotaryButton, metaparams.rotary_button.is_high() ? "X" : "_");
@@ -110,13 +109,6 @@ struct HardwareCheckPopup {
 			lv_obj_set_style_text_color(ui_GateInData1, b(6) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
 			lv_obj_set_style_text_color(ui_GateInData2, b(7) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
 
-			// pr_dbg("Button: %d GateIn1: %d [%d] GateIn2: %d [%d] \r\n",
-			// 	   metaparams.meta_buttons[0].is_high() ? 1 : 0,
-			// 	   params.gate_ins[0].is_high() ? 1 : 0,
-			// 	   b(6),
-			// 	   params.gate_ins[1].is_high() ? 1 : 0,
-			// 	   b(7));
-
 			for (auto [i, ain] : enumerate(metaparams.ins)) {
 				auto clamped_val = std::clamp<int>(ain * 100.f, -999, 999);
 				if (clamped_val != last_injack_vals[i]) {
@@ -126,14 +118,24 @@ struct HardwareCheckPopup {
 				} else
 					lv_obj_set_style_text_color(
 						injack_labels[i], b(i) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
+			}
 
-				// pr_dbg("AIN %zu: [%d] iir=%d min=%d max=%d range=%d\r\n",
-				// 	   i,
-				// 	   b(i),
-				// 	   (int)(ain.iir * 32768.f),
-				// 	   (int)(ain.min * 32768.f),
-				// 	   (int)(ain.max * 32768.f),
-				// 	   (int)((ain.max - ain.min) * 32768.f));
+			for (auto ccnum = 0u; auto &cc : params.midi_ccs) {
+				if (cc.did_change()) {
+					float val = cc;
+					lv_label_set_text_fmt(ui_HWTestMidiLabel, "CC:%d=%d", ccnum, (int)(val * 127));
+				}
+				ccnum++;
+			}
+
+			if (params.last_midi_note.did_change()) {
+				lv_label_set_text_fmt(ui_HWTestMidiLabel, "Note: %d", params.last_midi_note.val);
+			}
+
+			if (metaparams.midi_connected) {
+				lv_obj_set_style_border_width(ui_HWTestMidiLabel, 2, LV_PART_MAIN);
+			} else {
+				lv_obj_set_style_border_width(ui_HWTestMidiLabel, 0, LV_PART_MAIN);
 			}
 		}
 	}
