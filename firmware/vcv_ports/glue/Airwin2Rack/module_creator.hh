@@ -64,7 +64,7 @@ private:
 		index_element(elem_idx, title, num_text_elements++);
 
 		{
-			const float row_spacing = 270.f / num_fx_params;
+			const float row_spacing = std::min(270.f / num_fx_params, 45.f);
 			const float left_pad = 4.f;
 			const float control_col = 70.f;
 			const float knob_radius = 12.f;
