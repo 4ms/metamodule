@@ -10,6 +10,7 @@
 #include "param_block.hh"
 #include "params.hh"
 #include "patch_file/patch_file.hh"
+#include "sync_params.hh"
 #include <span>
 
 namespace MetaModule
@@ -22,8 +23,8 @@ namespace StaticBuffers
 //If DMA Burst mode is enabled, See RM sec 18.3.12;
 //The burst configuration has to be selected in order to respect the AHB protocol, where bursts must not cross the 1 Kbyte address boundary because the minimum address space that can be allocated to a single slave is 1 Kbyte. This means that the 1-Kbyte address boundary must not be crossed by a burst block transfer, otherwise an AHB error is generated, that is not reported by the DMA registers.
 
-static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock audio_in_dma_block;
-static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block;
+static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock audio_in_dma_block{};
+static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block{};
 
 static inline __attribute__((section(".ddma"))) std::array<char, 65536> raw_patch_data;
 
@@ -32,6 +33,7 @@ static inline __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};
 static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block{};
+static inline __attribute__((section(".sysram"))) SyncParams sync_params;
 
 static inline __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 
@@ -43,7 +45,27 @@ static void init() {
 		}
 		block.metaparams.clear();
 	}
-	// mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks, sizeof param_blocks);
+
+	//clear buffers
+	for (auto &buff : audio_out_dma_block.codec) {
+		for (auto &frame : buff)
+			frame = StreamConf::Audio::AudioOutFrame{};
+	}
+
+	for (auto &buff : audio_out_dma_block.ext_codec) {
+		for (auto &frame : buff)
+			frame = StreamConf::Audio::AudioOutFrame{};
+	}
+
+	for (auto &buff : audio_in_dma_block.codec) {
+		for (auto &frame : buff)
+			frame = StreamConf::Audio::AudioInFrame{};
+	}
+
+	for (auto &buff : audio_in_dma_block.ext_codec) {
+		for (auto &frame : buff)
+			frame = StreamConf::Audio::AudioInFrame{};
+	}
 }
 }; // namespace StaticBuffers
 

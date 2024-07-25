@@ -21,6 +21,7 @@ struct SystemMenuPage : PageBase {
 		: PageBase{info, PageId::SystemMenu}
 		, info_tab{patch_storage}
 		, plugin_tab{info.plugin_manager, info.notify_queue}
+		, prefs_tab{info.patch_playloader, info.settings.audio, gui_state}
 		, system_tab{patch_storage, params, metaparams, patch_playloader, patch_mod_queue}
 		, fwupdate_tab{patch_storage, patch_playloader}
 		, tab_bar(lv_tabview_get_tab_btns(ui_SystemMenuTabView)) {
@@ -49,7 +50,7 @@ struct SystemMenuPage : PageBase {
 
 		active_tab->update();
 
-		if (metaparams.back_button.is_just_released()) {
+		if (gui_state.back_button.is_just_released()) {
 			if (!active_tab->consume_back_event()) {
 
 				if (lv_group_get_focused(group) == tab_bar) {

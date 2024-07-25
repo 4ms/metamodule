@@ -33,7 +33,15 @@ struct SlsComponentInit {
 		// lv_obj_set_style_outline_pad(settings_btns, 3, (uint32_t)LV_PART_ITEMS | LV_STATE_EDITED);
 
 		// Sliders
-		for (auto slider : {ui_MinSlider, ui_MaxSlider, ui_CablesTranspSlider, ui_MapTranspSlider}) {
+		for (auto slider : {ui_MinSlider,
+							ui_MaxSlider,
+							ui_PVCablesTranspSlider,
+							ui_PVJackMapTranspSlider,
+							ui_PVControlMapTranspSlider,
+							ui_MVCablesTranspSlider,
+							ui_MVJackMapTranspSlider,
+							ui_MVControlMapTranspSlider})
+		{
 			style_slider(slider);
 		}
 

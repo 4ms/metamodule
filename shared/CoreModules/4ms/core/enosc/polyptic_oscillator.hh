@@ -8,6 +8,9 @@
 #include "parameters.hh"
 #include "quantizer.hh"
 
+namespace EnOsc
+{
+
 class AmplitudeAccumulator {
 	f amplitude = 1_f;
 	f amplitudes = 0_f;
@@ -54,7 +57,7 @@ public:
 			OscillatorPair<block_size>::pick_processor(params.twist.mode, params.warp.mode);
 
 		for (int i = 0; i < kMaxScaleSize; ++i) {
-			f freq = Freq::of_pitch(scale.get(i)).repr();
+			f freq = Freq::of_pitch(scale.get(i), params.sample_rate).repr();
 			(oscs_[i].*
 			 process)(freq, twist, warp, modulation, 1_f, amplitudes.next(), dummy_block_, dummy_block_, out1);
 		}
@@ -115,15 +118,17 @@ class Oscillators : Nocopy {
 		f pitch;
 		f spread;
 		f detune;
+		f sample_rate;
 		f detune_accum = 0_f;
 
 	public:
-		FrequencyAccumulator(Scale const &g, f r, f p, f s, f d)
+		FrequencyAccumulator(Scale const &g, f r, f p, f s, f d, f sr)
 			: scale(g)
 			, root(r)
 			, pitch(p)
 			, spread(s)
-			, detune(d) {
+			, detune(d)
+			, sample_rate{sr} {
 		}
 
 		f next_pitch() {
@@ -140,8 +145,8 @@ class Oscillators : Nocopy {
 			p.p1 += pitch + detune_accum;
 			p.p2 += pitch + detune_accum;
 
-			f freq1 = Freq::of_pitch(p.p1).repr();
-			f freq2 = Freq::of_pitch(p.p2).repr();
+			f freq1 = Freq::of_pitch(p.p1, sample_rate).repr();
+			f freq2 = Freq::of_pitch(p.p2, sample_rate).repr();
 
 			root += spread;
 			detune *= -1.2_f;
@@ -160,7 +165,8 @@ public:
 		int numOsc = params.alt.numOsc;
 
 		AmplitudeAccumulator amplitude{params.balance, f(numOsc)};
-		FrequencyAccumulator frequency{scale, params.root, params.pitch, params.spread, params.detune};
+		FrequencyAccumulator frequency{
+			scale, params.root, params.pitch, params.spread, params.detune, params.sample_rate};
 
 		lowest_pitch_ = frequency.next_pitch();
 
@@ -359,3 +365,5 @@ public:
 		}
 	}
 };
+
+} // namespace EnOsc

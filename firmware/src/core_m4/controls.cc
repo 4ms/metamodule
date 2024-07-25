@@ -113,6 +113,10 @@ void Controls::start_param_block() {
 	_first_param = true;
 	_buffer_full = false;
 
+	if (sample_rate != cur_metaparams->sample_rate) {
+		set_samplerate(cur_metaparams->sample_rate);
+	}
+
 	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
 		for (auto &aux : auxstream_blocks[block_num])
 			auxstream.queue_data(aux);
@@ -132,6 +136,7 @@ void Controls::start() {
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();
+
 	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
 		auxstream_updater.start();
 	}
@@ -165,6 +170,13 @@ void Controls::process() {
 		i2cqueue.update();
 }
 
+void Controls::set_samplerate(unsigned sample_rate) {
+	this->sample_rate = sample_rate;
+	for (auto &_knob : _knobs) {
+		_knob.set_num_updates(sample_rate / AdcReadFrequency);
+	}
+}
+
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 				   DoubleAuxStreamBlock &auxsignal_blocks_ref,
 				   MidiHost &midi_host)
@@ -179,10 +191,14 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {
+			Debug::Pin1::high();
 			ADC1->ISR = tmp | ADC_ISR_EOS;
 			_new_adc_data_ready = true;
+			Debug::Pin1::low();
 		}
 	});
+
+	set_samplerate(sample_rate);
 
 	pot_adc.start();
 
@@ -193,8 +209,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 
-	// mp1 m4: every ~20us + 60us gap every 64 pulses (1.3ms), width= 2.8us ... ~14% load
-	read_controls_task.init(control_read_tim_conf, [this]() {
+	read_controls_task.init([this]() {
 		if (_buffer_full)
 			return;
 		update_debouncers();

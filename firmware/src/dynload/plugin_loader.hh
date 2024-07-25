@@ -117,11 +117,11 @@ public:
 			case State::LoadingPlugin: {
 				auto msg = file_storage.get_message();
 
-				if (msg.message_type == FileStorageProxy::LoadFileToRamFailed) {
+				if (msg.message_type == FileStorageProxy::LoadFileFailed) {
 					status.state = State::Error;
 					status.error_message = "Failed to read from disk";
 
-				} else if (msg.message_type == FileStorageProxy::LoadFileToRamSuccess) {
+				} else if (msg.message_type == FileStorageProxy::LoadFileOK) {
 					status.state = State::PrepareLoadPluginAssets;
 
 				} else if (msg.message_type != FileStorageProxy::None) {

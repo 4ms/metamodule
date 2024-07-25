@@ -25,8 +25,9 @@ struct MetaParams {
 
 	uint8_t audio_load = 0;
 	RotaryMotion rotary_with_metabutton{};
-	Toggler back_button{};
 	bool ignore_metabutton_release = false;
+
+	uint32_t sample_rate = 48000;
 
 	MetaParams() {
 		clear();

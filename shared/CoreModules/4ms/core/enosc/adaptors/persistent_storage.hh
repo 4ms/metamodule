@@ -1,6 +1,9 @@
 #pragma once
 #include <cstring>
 
+namespace EnOsc
+{
+
 template<typename T>
 struct Persistent : T {
 	Persistent(T *data, T const &default_data) {
@@ -12,5 +15,8 @@ struct Persistent : T {
 
 template<typename T>
 using WearLevel = T;
+
 template<int, typename T>
 using FlashBlock = T;
+
+} // namespace EnOsc

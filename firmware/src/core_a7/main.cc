@@ -49,13 +49,12 @@ void main() {
 	OpenPatchManager open_patches_manager;
 	PatchPlayLoader patch_playloader{file_storage_proxy, open_patches_manager, patch_player};
 
-	SyncParams sync_params;
 	PatchModQueue patch_mod_queue;
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
-					  sync_params,
+					  StaticBuffers::sync_params,
 					  patch_playloader,
 					  StaticBuffers::param_blocks,
 					  patch_mod_queue};
@@ -72,7 +71,7 @@ void main() {
 		&patch_playloader,
 		&file_storage_proxy,
 		&open_patches_manager,
-		&sync_params,
+		&StaticBuffers::sync_params,
 		&patch_mod_queue,
 		&StaticBuffers::virtdrive,
 	};
@@ -102,12 +101,12 @@ void main() {
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for other cores to be ready: ~2400ms
-	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() && mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
+	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() || mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
 
 	// ~290ms until while loop
 
-	sync_params.clear();
+	StaticBuffers::sync_params.clear();
 	patch_playloader.load_initial_patch();
 
 	audio.start();
@@ -116,5 +115,9 @@ void main() {
 
 	while (true) {
 		__NOP();
+		if (audio.get_audio_errors() > 0) {
+			pr_err("Audio error\n");
+			audio.start();
+		}
 	}
 }

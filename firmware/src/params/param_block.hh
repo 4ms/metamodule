@@ -7,7 +7,7 @@ namespace MetaModule
 {
 
 struct ParamBlock {
-	std::array<Params, StreamConf::Audio::BlockSize> params{};
+	std::array<Params, StreamConf::Audio::MaxBlockSize> params{};
 	MetaParams metaparams{};
 };
 

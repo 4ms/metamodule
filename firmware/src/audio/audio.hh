@@ -46,6 +46,7 @@ public:
 	void start();
 	void start_playing();
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block);
+	uint32_t get_audio_errors();
 
 private:
 	SyncParams &sync_params;
@@ -54,10 +55,13 @@ private:
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
 	PatchModQueue &patch_mod_queue;
+	AudioInBlock &audio_in_block;
+	AudioOutBlock &audio_out_block;
 
 	CodecT &codec_;
 	CodecT &codec_ext_;
 	uint32_t sample_rate_;
+	uint32_t block_size_;
 
 	CalData cal;
 	CalData cal_stash;
@@ -72,7 +76,8 @@ private:
 	float output_fade_delta = 0.f;
 	uint32_t halves_muted = 0;
 	bool ext_audio_connected = false;
-	ParamBlock local_p;
+
+	ParamBlock local_params;
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
@@ -86,6 +91,10 @@ private:
 	void disable_calibration();
 	void enable_calibration();
 	void handle_patch_mod_queue();
+	void update_audio_settings();
+	void set_block_spans();
+	ParamBlock &cache_params(unsigned block);
+	void return_cached_params(unsigned block);
 
 public:
 	void set_calibration(CalData const &caldata);

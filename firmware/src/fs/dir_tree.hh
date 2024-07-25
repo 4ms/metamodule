@@ -1,5 +1,6 @@
 #pragma once
 #include "fs/volumes.hh"
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>

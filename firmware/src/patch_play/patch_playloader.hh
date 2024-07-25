@@ -38,7 +38,7 @@ struct PatchPlayLoader {
 		while (--tries) {
 			auto message = storage_.get_message();
 
-			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
+			if (message.message_type == FileStorageProxy::LoadFileOK) {
 				auto raw_patch_file = storage_.get_patch_data(message.bytes_read);
 				if (!patches_.open_patch(raw_patch_file, initial_patch_loc))
 					pr_err("ERROR: could not parse initial patch\n");
@@ -49,7 +49,7 @@ struct PatchPlayLoader {
 
 				break;
 			}
-			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
+			if (message.message_type == FileStorageProxy::LoadFileFailed) {
 				pr_err("ERROR: initial patch failed to load from NOR flash\n");
 				break;
 			}
@@ -189,6 +189,20 @@ struct PatchPlayLoader {
 		start_audio();
 	}
 
+	struct AudioSettings {
+		//TODO put defaults in one place
+		uint32_t sample_rate = 48000;
+		uint32_t block_size = 64;
+	};
+
+	void request_new_audio_settings(uint32_t sample_rate, uint32_t block_size) {
+		new_audio_settings_.store(AudioSettings{sample_rate, block_size});
+	}
+
+	AudioSettings get_audio_settings() {
+		return new_audio_settings_.load();
+	}
+
 private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;
@@ -204,6 +218,8 @@ private:
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
 	std::atomic<bool> audio_overrun_ = false;
+
+	std::atomic<AudioSettings> new_audio_settings_ = {};
 
 	Result save_patch() {
 		auto view_patch = patches_.get_view_patch();
@@ -237,11 +253,11 @@ private:
 	Result check_save_patch_status() {
 		auto msg = storage_.get_message();
 
-		if (msg.message_type == FileStorageProxy::PatchDataWriteFail) {
+		if (msg.message_type == FileStorageProxy::WriteFileFail) {
 			saving_patch_ = false;
 			return {false, "Failed to write patch."};
 
-		} else if (msg.message_type == FileStorageProxy::PatchDataWriteOK) {
+		} else if (msg.message_type == FileStorageProxy::WriteFileOK) {
 			saving_patch_ = false;
 			patches_.reset_view_patch_modification_count();
 			return {true, "Saved"};

@@ -2,7 +2,6 @@
 #include "core_intercom/intercore_message.hh"
 #include "drivers/inter_core_comm.hh"
 #include "fat_file_io.hh"
-#include "fs/file_ram_loader.hh"
 #include "fw_update/update_path.hh"
 #include "util/poll_change.hh"
 #include "util/static_string.hh"
@@ -25,11 +24,6 @@ struct FirmwareFileFinder {
 
 		if (message.message_type == RequestFirmwareFile) {
 			return scan_all_for_manifest();
-		}
-
-		if (message.message_type == RequestLoadFileToRam) {
-			pr_trace("M4: got RequestLoadFileToRam\n");
-			return load_file(message);
 		}
 
 		return std::nullopt;
@@ -79,28 +73,11 @@ private:
 		return false;
 	}
 
-	IntercoreStorageMessage load_file(const IntercoreStorageMessage &message) {
-		FatFileIO *fileio = (message.vol_id == Volume::USB)	   ? &usbdrive_ :
-							(message.vol_id == Volume::SDCard) ? &sdcard_ :
-																 nullptr;
-		bool success = ram_loader.load_to_ram(fileio, message.filename, message.buffer);
-
-		if (success) {
-			pr_trace("M4: Loaded OK.\n");
-			return {.message_type = LoadFileToRamSuccess};
-		} else {
-			pr_err("M4: Failed Load\n");
-			return {.message_type = LoadFileToRamFailed};
-		}
-	}
-
 	FatFileIO &sdcard_;
 	FatFileIO &usbdrive_;
 
 	StaticString<255> found_filename;
 	uint32_t found_filesize = 0;
-
-	FileRamLoader ram_loader;
 };
 
 } // namespace MetaModule

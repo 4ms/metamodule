@@ -121,6 +121,10 @@ add_executable(
   ${FWDIR}/src/fs/asset_drive/untar.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
   #
+  ${FWDIR}/src/user_settings/settings_file.cc
+  ${FWDIR}/src/user_settings/settings_parse.cc
+  ${FWDIR}/src/user_settings/settings_serialize.cc
+  #
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
   #

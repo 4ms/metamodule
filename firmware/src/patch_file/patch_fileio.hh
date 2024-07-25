@@ -21,13 +21,19 @@ public:
 
 	static bool read_file(std::span<char> &buffer, FileIoC auto &fileio, const std::string_view filename) {
 
-		auto bytes_read = fileio.read_file(filename, buffer);
-		if (bytes_read == 0) {
-			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
+		auto file_size = fileio.get_file_size(filename);
+		if (file_size == 0) {
+			pr_warn("File '%.*s' does not exist, cannot read\n", (int)filename.size(), filename.data());
+		}
+
+		if (file_size > buffer.size_bytes()) {
+			pr_err("Error: File '%s' too large (max is %d), skipped\n", filename.data(), buffer.size_bytes());
 			return false;
 		}
-		if (bytes_read == buffer.size_bytes()) {
-			pr_err("Error: File %s too large (max is %d), skipped\n", filename.data(), buffer.size_bytes());
+
+		auto bytes_read = fileio.read_file(filename, buffer);
+		if (bytes_read == 0) {
+			pr_err("Error reading file '%s'\n", filename.data());
 			return false;
 		}
 

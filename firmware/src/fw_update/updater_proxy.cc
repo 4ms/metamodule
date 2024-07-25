@@ -68,7 +68,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 		case LoadingManifest: {
 			auto message = file_storage.get_message();
 
-			if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
+			if (message.message_type == FileStorageProxy::LoadFileOK) {
 				ManifestParser parser;
 
 				auto parseResult = parser.parse(manifestBuffer);
@@ -94,7 +94,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 					abortWithMessage("Manifest file has no valid files");
 				}
 
-			} else if (message.message_type == FileStorageProxy::LoadFileToRamFailed) {
+			} else if (message.message_type == FileStorageProxy::LoadFileFailed) {
 				abortWithMessage("Failed reading manifest file");
 			}
 
@@ -113,7 +113,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 				auto message = file_storage.get_message();
 
 				if (message.message_type != FileStorageProxy::None) {
-					if (message.message_type == FileStorageProxy::LoadFileToRamSuccess) {
+					if (message.message_type == FileStorageProxy::LoadFileOK) {
 						current_file_idx++;
 
 						if (current_file_idx == manifest.files.size()) {

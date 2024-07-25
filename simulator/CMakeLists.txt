@@ -56,27 +56,31 @@ add_subdirectory(${SHARED}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
 add_executable(
-	simulator 
-	src/main.cc 
-	src/ui.cc
+    simulator 
+    src/main.cc 
+    src/ui.cc
     stubs/random.cpp
-	${FWDIR}/src/gui/elements/element_name.cc
-	${FWDIR}/src/gui/slsexport/ui_local.cc
+    ${FWDIR}/src/gui/elements/element_name.cc
+    ${FWDIR}/src/gui/slsexport/ui_local.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
-	${SHARED}/patch_convert/ryml/ryml_serial.cc
-	${SHARED}/patch_convert/ryml/ryml_init.cc
-	${SHARED}/patch_convert/yaml_to_patch.cc 
-	${SHARED}/patch_convert/patch_to_yaml.cc
+    ${SHARED}/patch_convert/ryml/ryml_serial.cc
+    ${SHARED}/patch_convert/ryml/ryml_init.cc
+    ${SHARED}/patch_convert/yaml_to_patch.cc 
+    ${SHARED}/patch_convert/patch_to_yaml.cc
 
-	#Fatfs:
-	stubs/fattime.cc
-	${FWDIR}/lib/fatfs/source/ff.c
-	${FWDIR}/lib/fatfs/source/ffunicode.c
-	${FWDIR}/src/fs/fatfs/diskio.cc
-	${FWDIR}/src/fs/time_convert.cc
-	#Tar:
-	${FWDIR}/src/fs/asset_drive/untar.cc
-	)
+    #Fatfs:
+    stubs/fattime.cc
+    ${FWDIR}/lib/fatfs/source/ff.c
+    ${FWDIR}/lib/fatfs/source/ffunicode.c
+    ${FWDIR}/src/fs/fatfs/diskio.cc
+    ${FWDIR}/src/fs/time_convert.cc
+    #Tar:
+    ${FWDIR}/src/fs/asset_drive/untar.cc
+
+    ${FWDIR}/src/user_settings/settings_file.cc
+    ${FWDIR}/src/user_settings/settings_parse.cc
+    ${FWDIR}/src/user_settings/settings_serialize.cc
+    )
 
 target_include_directories(
   simulator
@@ -90,7 +94,7 @@ target_include_directories(
           ${FWDIR}/src/medium
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
-			.
+            .
           )
 
 target_compile_options(simulator PRIVATE -Wall -Og)
@@ -121,7 +125,12 @@ endif()
 ## Debugging
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") 
   find_program(CMAKE_DEBUGGER_BINARY lldb)
-  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- -p ${CMAKE_CURRENT_LIST_DIR}/../shared/patch)
+  set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- 
+    --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
+    --flashdir ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/default
+    --assets ${CMAKE_CURRENT_LIST_DIR}/../firmware/build/assets.uimg
+  )
+
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   find_program(CMAKE_DEBUGGER_BINARY gdb)
@@ -129,7 +138,10 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     -ex \"set debuginfod enabled off\"
     -ex \"set pagination off\" 
     -ex \"run\"
-    --args $<TARGET_FILE:simulator> -p ${CMAKE_CURRENT_LIST_DIR}/patches
+    --args $<TARGET_FILE:simulator> 
+    --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
+    --flashdir ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/default
+    --assets ${CMAKE_CURRENT_LIST_DIR}/../firmware/build/assets.uimg
   )
 else ()
   set(DEBUG_COMMAND echo "Compiler is ${CMAKE_CXX_COMPILER_ID}, but must be Clang, AppleClang, or GNU to debug")

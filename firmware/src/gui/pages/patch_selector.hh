@@ -16,6 +16,8 @@ namespace MetaModule
 
 struct PatchSelectorPage : PageBase {
 
+	static constexpr unsigned max_open_patches = 20;
+
 	PatchSelectorPage(PatchContext info, PatchSelectorSubdirPanel &subdir_panel)
 		: PageBase{info, PageId::PatchSel}
 		, subdir_panel{subdir_panel} {
@@ -235,7 +237,7 @@ struct PatchSelectorPage : PageBase {
 			is_populating_subdir_panel = false;
 		}
 
-		if (metaparams.back_button.is_just_released()) {
+		if (gui_state.back_button.is_just_released()) {
 			if (!lv_obj_has_state(ui_PatchListRoller, LV_STATE_DISABLED)) {
 				lv_obj_add_state(ui_PatchListRoller, LV_STATE_DISABLED);
 				lv_obj_clear_state(ui_PatchListRoller, LV_STATE_FOCUSED);
@@ -290,7 +292,7 @@ struct PatchSelectorPage : PageBase {
 				if (patches.load_if_open(selected_patch)) {
 					view_loaded_patch();
 				} else {
-					if (patches.limit_open_patches(settings.max_open_patches)) {
+					if (patches.limit_open_patches(max_open_patches)) {
 						if (patch_storage.request_load_patch(selected_patch)) {
 							state = State::RequestedPatchData;
 							show_spinner();
@@ -306,7 +308,7 @@ struct PatchSelectorPage : PageBase {
 			case State::RequestedPatchData: {
 				auto message = patch_storage.get_message();
 
-				if (message.message_type == FileStorageProxy::PatchDataLoaded) {
+				if (message.message_type == FileStorageProxy::LoadFileOK) {
 					// Try to parse the patch and open the PatchView page
 
 					auto data = patch_storage.get_patch_data(message.bytes_read);
@@ -320,7 +322,7 @@ struct PatchSelectorPage : PageBase {
 						state = State::Idle;
 						hide_spinner();
 					}
-				} else if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
+				} else if (message.message_type == FileStorageProxy::LoadFileFailed) {
 					pr_warn("Error loading patch %s\n", selected_patch.filename.c_str());
 					state = State::Idle;
 					lv_group_set_editing(group, true);

@@ -25,7 +25,7 @@ class Ui {
 	};
 
 public:
-	Ui(std::string_view patch_path, std::string_view asset_path, size_t block_size);
+	Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_view asset_path, size_t block_size);
 
 	bool update();
 	void play_patch(std::span<Frame> buffer);
@@ -48,6 +48,8 @@ private:
 	OpenPatchManager open_patches_manager;
 	PatchPlayLoader patch_playloader{file_storage_proxy, open_patches_manager, patch_player};
 	PatchModQueue patch_mod_queue;
+
+	UserSettings settings;
 
 	NotificationQueue notify_queue;
 	PageManager page_manager;

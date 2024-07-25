@@ -88,7 +88,7 @@ struct ModuleListPage : PageBase {
 	}
 
 	void update() final {
-		if (metaparams.back_button.is_just_released()) {
+		if (gui_state.back_button.is_just_released()) {
 
 			if (view == View::BrandRoller) {
 				gui_state.force_redraw_patch = true;

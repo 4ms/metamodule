@@ -57,7 +57,7 @@ struct MainMenuPage : PageBase {
 	}
 
 	void update() final {
-		if (metaparams.back_button.is_just_released()) {
+		if (gui_state.back_button.is_just_released()) {
 			if (patches.get_view_patch())
 				load_page(PageId::PatchView, {.patch_loc_hash = patches.get_view_patch_loc_hash()});
 		}

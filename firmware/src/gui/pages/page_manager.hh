@@ -8,6 +8,7 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
+#include "user_settings/settings_file.hh"
 
 #include "gui/pages/jackmaps.hh"
 #include "gui/pages/knobmap.hh"
@@ -29,7 +30,6 @@ class PageManager {
 	PatchContext info;
 	PageList page_list;
 	GuiState gui_state;
-	ViewSettings settings;
 	ButtonLight button_light;
 
 	MainMenuPage page_mainmenu{info};
@@ -54,7 +54,8 @@ public:
 				MetaParams &metaparams,
 				NotificationQueue &notify_queue,
 				PatchModQueue &patch_mod_queue,
-				PluginManager &plugin_manager)
+				PluginManager &plugin_manager,
+				UserSettings &settings)
 		: info{patch_storage,
 			   open_patch_manager,
 			   patch_playloader,
@@ -94,6 +95,8 @@ public:
 		handle_audio_errors();
 
 		handle_notifications();
+
+		handle_write_settings();
 	}
 
 	void handle_knobset_change() {
@@ -164,7 +167,7 @@ public:
 		// Interpret and pass on back button events
 		if (info.metaparams.meta_buttons[0].is_just_released()) {
 			if (!info.metaparams.ignore_metabutton_release)
-				info.metaparams.back_button.register_falling_edge();
+				gui_state.back_button.register_falling_edge();
 			else
 				info.metaparams.ignore_metabutton_release = false;
 		}
@@ -182,6 +185,17 @@ public:
 		if (info.patch_playloader.did_audio_overrun()) {
 			info.notify_queue.put({"Audio stopped because patch load > 99%.", Notification::Priority::Error, 1500});
 			info.patch_playloader.clear_audio_overrun();
+		}
+	}
+
+	void handle_write_settings() {
+		if (gui_state.do_write_settings) {
+			if (!Settings::write_settings(info.patch_storage, info.settings)) {
+				pr_err("Failed to write settings file\n");
+			} else
+				pr_info("Wrote settings\n");
+
+			gui_state.do_write_settings = false;
 		}
 	}
 

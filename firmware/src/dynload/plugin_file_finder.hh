@@ -3,7 +3,6 @@
 #include "drivers/inter_core_comm.hh"
 #include "dynload/plugin_file_scan.hh"
 #include "fat_file_io.hh"
-#include "fs/file_ram_loader.hh"
 #include "fs/fileio_t.hh"
 #include "fw_update/update_path.hh"
 #include "util/poll_change.hh"

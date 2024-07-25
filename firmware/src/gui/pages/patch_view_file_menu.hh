@@ -162,7 +162,7 @@ struct PatchViewFileMenu {
 		} else if (revert_state == RevertState::Requested) {
 			auto message = patch_storage.get_message();
 
-			if (message.message_type == FileStorageProxy::PatchDataLoaded) {
+			if (message.message_type == FileStorageProxy::LoadFileOK) {
 				patches.close_view_patch();
 
 				auto data = patch_storage.get_patch_data(message.bytes_read);
@@ -181,7 +181,7 @@ struct PatchViewFileMenu {
 				}
 			}
 
-			if (message.message_type == FileStorageProxy::PatchDataLoadFail) {
+			if (message.message_type == FileStorageProxy::LoadFileFailed) {
 				notify_queue.put({"Error opening file, not reverted.", Notification::Priority::Error});
 				revert_state = RevertState::Idle;
 				hide_menu();

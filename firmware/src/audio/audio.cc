@@ -1,5 +1,6 @@
 #include "audio/audio.hh"
 #include "audio/audio_test_signals.hh"
+#include "conf/audio_settings.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
@@ -33,18 +34,13 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	: sync_params{sync_p}
 	, patch_loader{patchloader}
 	, param_blocks{pblk}
-	, audio_blocks{{.in_codec = audio_in_block.codec[0],
-					.out_codec = audio_out_block.codec[0],
-					.in_ext_codec = audio_in_block.ext_codec[0],
-					.out_ext_codec = audio_out_block.ext_codec[0]},
-				   {.in_codec = audio_in_block.codec[1],
-					.out_codec = audio_out_block.codec[1],
-					.in_ext_codec = audio_in_block.ext_codec[1],
-					.out_ext_codec = audio_out_block.ext_codec[1]}}
 	, patch_mod_queue{patch_mod_queue}
+	, audio_in_block{audio_in_block}
+	, audio_out_block{audio_out_block}
 	, codec_{Hardware::codec}
 	, codec_ext_{Hardware::codec_ext}
-	, sample_rate_{Hardware::codec.get_samplerate()}
+	, sample_rate_{AudioSettings::DefaultSampleRate}
+	, block_size_{AudioSettings::DefaultBlockSize}
 	, player{patchplayer} {
 
 	if (codec_.init() == CodecT::CODEC_NO_ERR)
@@ -52,51 +48,47 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	else
 		pr_info("ERROR: No codec detected\n");
 
-	codec_.set_tx_buffer_start(audio_out_block.codec);
-	codec_.set_rx_buffer_start(audio_in_block.codec);
+	set_block_spans();
+
+	codec_.set_tx_buffer(audio_blocks[0].out_codec, block_size_);
+	codec_.set_rx_buffer(audio_blocks[0].in_codec, block_size_);
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
 		ext_audio_connected = true;
-		codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec);
-		codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec);
-		pr_info("Ext Audio codec detected\n");
+		codec_ext_.set_tx_buffer(audio_blocks[0].out_ext_codec, block_size_);
+		codec_ext_.set_rx_buffer(audio_blocks[0].in_ext_codec, block_size_);
+		pr_info("Audio Expander detected\n");
 	} else {
 		ext_audio_connected = false;
-		pr_info("No ext Audio codec detected\n");
+		pr_info("No Audio Expander detected\n");
 	}
 
 	cal.reset_to_default();
 	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin4::high();
+		// Debug::Pin3::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
+		load_measure.start_measurement();
 
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
-		// Copy from non-cacheable SYSRAM to cachable DDR: improves performance
-		local_p = param_blocks[block];
-
-		load_measure.start_measurement();
+		auto &params = cache_params(block);
 
 		if (is_playing_patch())
-			process(audio_blocks[1 - block], local_p);
+			process(audio_blocks[1 - block], params);
 		else
-			process_nopatch(audio_blocks[1 - block], local_p);
+			process_nopatch(audio_blocks[1 - block], params);
+
+		return_cached_params(block);
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
-		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof sync_params);
 
-		// copy analyzed signals back to shared param block (so GUI thread can access it)
-		param_blocks[block].metaparams.ins = local_p.metaparams.ins;
-
-		// copy this value back so Controls can read it
-		param_blocks[block].metaparams.midi_poly_chans = local_p.metaparams.midi_poly_chans;
-		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
+		update_audio_settings();
 
 		load_measure.end_measurement();
 		if (load_measure.get_last_measurement_load_percent() >= 98) {
@@ -104,7 +96,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			patch_loader.notify_audio_overrun();
 		}
 
-		// Debug::Pin4::low();
+		// Debug::Pin3::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -112,7 +104,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	load_measure.init();
 
 	for (auto &s : smoothed_ins)
-		s.set_size(AudioConf::BlockSize);
+		s.set_size(block_size_);
 }
 
 void AudioStream::start() {
@@ -165,7 +157,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
-	for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
+	// for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
+	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
+		auto &out = audio_block.out_codec[idx];
+		auto &params = param_block.params[idx];
+		idx++;
 
 		// Audio inputs
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
@@ -213,8 +209,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			outchan = get_audio_output(i);
 	}
 
-	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins))
+	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins)) {
 		m = s.val();
+	}
 
 	player.update_lights();
 	propagate_sense_pins(param_block.params[0]);
@@ -223,7 +220,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	param_state.jack_senses = param_block.params[0].jack_senses;
 
-	for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
+	// for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
+	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
+		auto &out = audio_block.out_codec[idx];
+		auto &params = param_block.params[idx];
+		idx++;
 
 		// Set metaparams.ins with input signals
 		for (auto [panel_jack_i, inchan] : zip(PanelDef::audioin_order, in.chan)) {
@@ -323,6 +324,71 @@ void AudioStream::set_calibration(CalData const &caldata) {
 	cal = caldata;
 	cal_stash = caldata;
 	// cal.print_calibration();
+}
+
+uint32_t AudioStream::get_audio_errors() {
+	return codec_.get_sai_errors();
+}
+
+// It's measurably faster to copy params into cacheable ram
+ParamBlock &AudioStream::cache_params(unsigned block) {
+	local_params.metaparams = param_blocks[block].metaparams;
+
+	for (unsigned i = 0; i < block_size_; i++)
+		local_params.params[i] = param_blocks[block].params[i];
+
+	return local_params;
+}
+
+void AudioStream::return_cached_params(unsigned block) {
+	// copy analyzed signals back to shared param block (so GUI thread can access it)
+	param_blocks[block].metaparams.ins = local_params.metaparams.ins;
+
+	// copy midi_poly_chans back so Controls can read it
+	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
+}
+
+void AudioStream::set_block_spans() {
+	audio_blocks[0].in_codec = {audio_in_block.codec[0].data(), block_size_};
+	audio_blocks[1].in_codec = {std::next(audio_in_block.codec[0].begin(), block_size_), block_size_};
+
+	audio_blocks[0].out_codec = {audio_out_block.codec[0].data(), block_size_};
+	audio_blocks[1].out_codec = {std::next(audio_out_block.codec[0].begin(), block_size_), block_size_};
+
+	audio_blocks[0].in_ext_codec = {audio_in_block.ext_codec[0].data(), block_size_};
+	audio_blocks[1].in_ext_codec = {std::next(audio_in_block.ext_codec[0].begin(), block_size_), block_size_};
+
+	audio_blocks[0].out_ext_codec = {audio_out_block.ext_codec[0].data(), block_size_};
+	audio_blocks[1].out_ext_codec = {std::next(audio_out_block.ext_codec[0].begin(), block_size_), block_size_};
+}
+
+void AudioStream::update_audio_settings() {
+	auto [sample_rate, block_size] = patch_loader.get_audio_settings();
+
+	if (sample_rate != sample_rate_ || block_size != block_size_) {
+
+		if (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR) {
+
+			if (sample_rate_ != sample_rate) {
+				sample_rate_ = sample_rate;
+				player.set_samplerate(sample_rate);
+				param_blocks[0].metaparams.sample_rate = sample_rate;
+				param_blocks[1].metaparams.sample_rate = sample_rate;
+			}
+
+			if (block_size != block_size_) {
+				block_size_ = block_size;
+
+				set_block_spans();
+
+				for (auto &s : smoothed_ins)
+					s.set_size(block_size_);
+			}
+
+		} else {
+			pr_err("FAIL: %d/%d\n", sample_rate_, block_size_);
+		}
+	}
 }
 
 } // namespace MetaModule

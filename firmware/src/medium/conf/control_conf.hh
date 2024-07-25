@@ -4,17 +4,20 @@
 #include "drivers/adc_periph_nums.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
+#include "drivers/pin_change_conf.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 
 namespace MetaModule
 {
 
-const mdrivlib::TimekeeperConfig control_read_tim_conf = {
-	.TIMx = TIM6,
-	.period_ns = 20000, // must be just a hair faster than 48kHz
-	.priority1 = 0,		// same group as global Semaphore unlock, so that
-	.priority2 = 3,
+struct FrameRatePinChangeConf : mdrivlib::DefaultPinChangeConf {
+	static constexpr uint32_t pin = 12;
+	static constexpr mdrivlib::GPIO port = mdrivlib::GPIO::D;
+	static constexpr bool on_rising_edge = true;
+	static constexpr bool on_falling_edge = false;
+	static constexpr uint32_t priority1 = 0;
+	static constexpr uint32_t priority2 = 3;
 };
 
 using mdrivlib::GPIO;

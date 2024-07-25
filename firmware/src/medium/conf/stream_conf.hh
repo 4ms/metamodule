@@ -1,6 +1,7 @@
 #pragma once
 #include "util/audio_frame.hh"
 #include <cstdint>
+#include <span>
 
 namespace MetaModule
 {
@@ -9,9 +10,10 @@ struct StreamConfSingleCodec6x8 {
 	struct Audio {
 
 		// BlockSize: Number of Frames processed each time AudioStream::process() is called
-		static constexpr int BlockSize = 64;
+		static constexpr int MaxBlockSize = 512;
 
-		// static constexpr int NumDMAHalfTransfers = 2;
+		static constexpr int NumDMAHalfTransfers = 2;
+
 		using SampleT = int32_t;
 		static constexpr int SampleBits = 24;
 		static constexpr int NumInChans = 6;
@@ -23,26 +25,26 @@ struct StreamConfSingleCodec6x8 {
 		using AudioInFrame = AudioFrame<SampleT, SampleBits, NumInChans>;
 
 		// A group of frames that are processed at the same time.
-		using AudioInBuffer = std::array<AudioInFrame, BlockSize>;
+		using AudioInBuffer = std::array<AudioInFrame, MaxBlockSize>;
 
 		// Total memory allocated for audio stream input DMA buffers
 		// There are [2] blocks per codec, one for each half-transfer
-		struct alignas(1024) AudioInBlock {
-			AudioInBuffer codec[2];
-			AudioInBuffer ext_codec[2];
+		struct alignas(64) AudioInBlock {
+			AudioInBuffer codec[NumDMAHalfTransfers];
+			AudioInBuffer ext_codec[NumDMAHalfTransfers];
 		};
 
 		// One frame: data for all output channels at a single moment of time
 		using AudioOutFrame = AudioFrame<SampleT, SampleBits, NumOutChans>;
 
 		// A group of frames that are processed at the same time.
-		using AudioOutBuffer = std::array<AudioOutFrame, BlockSize>;
+		using AudioOutBuffer = std::array<AudioOutFrame, MaxBlockSize>;
 
 		// Total memory allocated for audio stream output DMA buffers
 		// There are [2] blocks per codec, one for each half-transfer
-		struct alignas(1024) AudioOutBlock {
-			AudioOutBuffer codec[2];
-			AudioOutBuffer ext_codec[2];
+		struct alignas(64) AudioOutBlock {
+			AudioOutBuffer codec[NumDMAHalfTransfers];
+			AudioOutBuffer ext_codec[NumDMAHalfTransfers];
 		};
 
 		// A handy struct used to call the audio process() function
@@ -51,10 +53,10 @@ struct StreamConfSingleCodec6x8 {
 		// references makes it easier to refer to what we need to use
 		// suring each call to process()
 		struct CombinedAudioBlock {
-			AudioInBuffer &in_codec;
-			AudioOutBuffer &out_codec;
-			AudioInBuffer &in_ext_codec;
-			AudioOutBuffer &out_ext_codec;
+			std::span<AudioInFrame> in_codec;
+			std::span<AudioOutFrame> out_codec;
+			std::span<AudioInFrame> in_ext_codec;
+			std::span<AudioOutFrame> out_ext_codec;
 		};
 	};
 };

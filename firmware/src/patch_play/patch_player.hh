@@ -536,8 +536,9 @@ public:
 		for (auto &mp : midi_pulses)
 			mp.pulse.set_update_rate_hz(samplerate);
 
-		for (auto &module : modules)
-			module->set_samplerate(samplerate);
+		for (size_t i = 1; i < num_modules; i++) {
+			modules[i]->set_samplerate(samplerate);
+		}
 	}
 
 	// General info getters:

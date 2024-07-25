@@ -8,7 +8,9 @@ namespace MetaModuleSim
 
 struct Settings {
 	unsigned zoom = 100;
-	std::string patch_path = "patches/";
+	std::string sdcard_path = "patches/";
+	std::string flash_path = "../shared/patch/default/";
+	std::string asset_file = "../firmware/build/assets.uimg";
 	int audioout_dev = 0;
 
 	void parse(int argc, char *argv[]) {
@@ -23,8 +25,17 @@ struct Settings {
 			options.add_options()(
 				"a,audioout", "Audio output device ID (as seen by SDL)", cxxopts::value<int>()->default_value("0"));
 
-			options.add_options()(
-				"p,patchdir", "Directory with patch files", cxxopts::value<std::string>()->default_value("patches/"));
+			options.add_options()("p,sdcarddir",
+								  "Host directory simulating SD Card root",
+								  cxxopts::value<std::string>()->default_value("patches/"));
+
+			options.add_options()("f,flashdir",
+								  "Host directory simulating internal NOR Flash root",
+								  cxxopts::value<std::string>()->default_value("../shared/patch/default/"));
+
+			options.add_options()("s,assets",
+								  "Location of assets.uimg file (built by firmware project)",
+								  cxxopts::value<std::string>()->default_value("../firmware/build/assets.uimg"));
 
 			options.add_options()("h,help", "Print help");
 
@@ -33,8 +44,14 @@ struct Settings {
 			if (args.count("zoom") > 0)
 				zoom = std::clamp(args["zoom"].as<unsigned>(), 25U, 800U);
 
-			if (args.count("patchdir") > 0)
-				patch_path = args["patchdir"].as<std::string>();
+			if (args.count("sdcarddir") > 0)
+				sdcard_path = args["sdcarddir"].as<std::string>();
+
+			if (args.count("flashdir") > 0)
+				flash_path = args["flashdir"].as<std::string>();
+
+			if (args.count("assets") > 0)
+				asset_file = args["assets"].as<std::string>();
 
 			if (args.count("audioout") > 0)
 				audioout_dev = args["audioout"].as<int>();

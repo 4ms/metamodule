@@ -2,6 +2,11 @@
 
 #include "easiglib/numtypes.hh"
 
+namespace EnOsc
+{
+
+using namespace easiglib;
+
 constexpr struct Frame {
 	s9_23 l = 0._s9_23;
 	s9_23 r = 0._s9_23;
@@ -9,7 +14,7 @@ constexpr struct Frame {
 
 constexpr int kUiUpdateRate = 200; // Hz
 constexpr int kSampleRate = 48000; // Hz
-constexpr int kBlockSize = 8;
+constexpr int kBlockSize = 32;
 constexpr int kMaxNumOsc = 16;
 
 enum TwistMode { FEEDBACK, PULSAR, CRUSH };
@@ -74,6 +79,8 @@ struct Parameters {
 	AltParameters default_alt = {kMaxNumOsc, ALTERNATE, LOW_HIGH, 0.125_f, {}};
 
 	f new_note, fine_tune;
+
+	f sample_rate = f(kSampleRate);
 };
 
 enum EventType {
@@ -97,3 +104,5 @@ struct Event {
 	EventType type;
 	int data;
 };
+
+} // namespace EnOsc
