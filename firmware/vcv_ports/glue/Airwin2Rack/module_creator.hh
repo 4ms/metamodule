@@ -45,6 +45,7 @@ private:
 		constexpr std::string_view SliderHandle = "Airwin2Rack/comp/slider_handle.png";
 
 		auto fx = AirwinRegistry::registry[registry_idx].generator();
+		fx->setSampleRate(48000);
 		auto num_fx_params = std::min<unsigned>(AirwinRegistry::registry[registry_idx].nParams, maxParams);
 
 		// printf("Creating %s with %u params\n", Name, num_fx_params);

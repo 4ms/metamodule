@@ -6,7 +6,7 @@ struct Plugin;
 
 namespace MetaModuleAirwindows
 {
-std::vector<ModuleCreator> modules;
+std::vector<ModuleCreator> created_modules;
 }
 
 #ifdef BUILD_DYN_PLUGIN
@@ -18,8 +18,10 @@ namespace MetaModuleAirwindows
 
 	void init(rack::plugin::Plugin *p) {
 
+	AirwinConsolidatedBase::defaultSampleRate = 48000;
+
 	for (unsigned reg_idx = 0; auto module : AirwinRegistry::registry) {
-		MetaModuleAirwindows::modules.emplace_back(reg_idx);
+		MetaModuleAirwindows::created_modules.emplace_back(reg_idx);
 		reg_idx++;
 	}
 }
