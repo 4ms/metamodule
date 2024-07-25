@@ -60,6 +60,9 @@ using Timestamp_t = uint32_t;
 std::optional<Timestamp_t> lastHeartbeatSentTime;
 static constexpr Timestamp_t HeartbeatInterval = 1000;
 
+std::optional<Timestamp_t> lastPatchListSentTime;
+static constexpr Timestamp_t PatchListInterval = 1000;
+
 enum ChannelID_t : uint8_t {Broadcast = 0, Management = 1, Connections = 2};
 
 std::optional<Timestamp_t> lastIPAnswerTime;
@@ -167,8 +170,11 @@ void run() {
 		lastHeartbeatSentTime = getTimestamp();
 
 		requestIP();
+	}
 
-		if (patchStorage->has_media_changed())
+	if (not lastPatchListSentTime or (getTimestamp() - *lastPatchListSentTime) > PatchListInterval)
+	{
+		if (patchStorage->has_media_changed() and not deframer.isReceivingFrame())
 		{
 			flatbuffers::FlatBufferBuilder fbb;
 			auto message = constructPatchesMessage(fbb);
@@ -176,6 +182,8 @@ void run() {
 
 			sendFrame(ChannelID_t::Broadcast, fbb.GetBufferSpan());
 		}
+
+		lastPatchListSentTime = getTimestamp();
 	}
 }
 
@@ -258,7 +266,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 			};
 
 			flatbuffers::FlatBufferBuilder fbb;
-			bool filesUpdated = false;
 
 			if (auto thisVolume = LocationToVolume(destination); thisVolume) {
 				auto success = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
@@ -268,7 +275,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 					fbb.Finish(message);
 
-					filesUpdated = true;
 				} else {
 					auto description = fbb.CreateString("Saving failed");
 					auto result = CreateResult(fbb, false, description);
@@ -280,6 +286,17 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 				auto result = CreateResult(fbb, false, description);
 				auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 				fbb.Finish(message);
+			}
+
+			if (patchStorage->has_media_changed())
+			{
+				flatbuffers::FlatBufferBuilder fbb;
+				auto message = constructPatchesMessage(fbb);
+				fbb.Finish(message);
+
+				sendBroadcast(fbb.GetBufferSpan());
+
+				lastPatchListSentTime = getTimestamp();
 			}
 
 			sendResponse(fbb.GetBufferSpan());
