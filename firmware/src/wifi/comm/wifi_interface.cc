@@ -160,6 +160,12 @@ void stop() {
 }
 
 void run() {
+
+	if (BufferedUSART2::detectedOverrunSinceLastCall())
+	{
+		deframer.reset();
+	}
+
 	if (auto val = BufferedUSART2::receive(); val) {
 		deframer.parse(*val, receiveFrame);
 	}
