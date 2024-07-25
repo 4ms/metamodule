@@ -73,6 +73,8 @@ struct ParamsState {
 
 struct ParamsMidiState : ParamsState {
 	std::array<LatchedParam<float, 1, 127>, NumMidiCCs> midi_ccs;
+	LatchedParam<uint8_t, 1, 1> last_midi_note;
+	bool midi_gate = false;
 
 	LightWatcher lights;
 
