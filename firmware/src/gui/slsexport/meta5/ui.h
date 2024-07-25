@@ -478,6 +478,10 @@ extern lv_obj_t *ui_SystemResetInternalPatchesCont;
 extern lv_obj_t *ui_ResetFactoryPatchesDescription;
 extern lv_obj_t *ui_ResetFactoryPatchesButton;
 extern lv_obj_t *ui_ResetFactoryPatchesLabel;
+extern lv_obj_t *ui_SystemHardwareCheckCont;
+extern lv_obj_t *ui_CheckHardwareTitle;
+extern lv_obj_t *ui_CheckHardwareButton;
+extern lv_obj_t *ui_CheckHardwareButtonLabel;
 extern lv_obj_t *ui_SystemMenuUpdateTab;
 extern lv_obj_t *ui_SystemMenuUpdateFWversion;
 extern lv_obj_t *ui_SystemMenuUpdateMessage;
@@ -494,6 +498,55 @@ extern lv_obj_t *ui_JackMapLeftColumn;
 extern lv_obj_t *ui_JackMapInputsTitle;
 extern lv_obj_t *ui_JackMapRightColumn;
 extern lv_obj_t *ui_JackMapOutputsTitle;
+// SCREEN: ui_HwTestPage
+void ui_HwTestPage_screen_init(void);
+extern lv_obj_t *ui_HwTestPage;
+extern lv_obj_t *ui_HWTestPagePanel;
+extern lv_obj_t *ui_HwTestTitle;
+extern lv_obj_t *ui_KnobsRow1;
+extern lv_obj_t *ui_KnobsTitle;
+extern lv_obj_t *ui_KnobData1;
+extern lv_obj_t *ui_KnobData2;
+extern lv_obj_t *ui_KnobData3;
+extern lv_obj_t *ui_KnobData4;
+extern lv_obj_t *ui_KnobData5;
+extern lv_obj_t *ui_KnobData6;
+extern lv_obj_t *ui_KnobsRow2;
+extern lv_obj_t *ui_KnobsTitle2;
+extern lv_obj_t *ui_KnobData7;
+extern lv_obj_t *ui_KnobData8;
+extern lv_obj_t *ui_KnobData9;
+extern lv_obj_t *ui_KnobData10;
+extern lv_obj_t *ui_KnobData11;
+extern lv_obj_t *ui_KnobData12;
+extern lv_obj_t *ui_HWTestInputsRow;
+extern lv_obj_t *ui_InputsRowTitle;
+extern lv_obj_t *ui_InJackData1;
+extern lv_obj_t *ui_InJackData2;
+extern lv_obj_t *ui_InJackData3;
+extern lv_obj_t *ui_InJackData4;
+extern lv_obj_t *ui_InJackData5;
+extern lv_obj_t *ui_InJackData6;
+extern lv_obj_t *ui_HWTestGateInputsRow;
+extern lv_obj_t *ui_GateInputsRowTitle;
+extern lv_obj_t *ui_GateInData1;
+extern lv_obj_t *ui_GateInData2;
+extern lv_obj_t *ui_HWTestOutputsRow;
+extern lv_obj_t *ui_OutputsRowTitle;
+extern lv_obj_t *ui_OutJackPatchedData1;
+extern lv_obj_t *ui_OutJackPatchedData2;
+extern lv_obj_t *ui_OutJackPatchedData3;
+extern lv_obj_t *ui_OutJackPatchedData4;
+extern lv_obj_t *ui_OutJackPatchedData5;
+extern lv_obj_t *ui_OutJackPatchedData6;
+extern lv_obj_t *ui_OutJackPatchedData7;
+extern lv_obj_t *ui_OutJackPatchedData8;
+extern lv_obj_t *ui_HWTestMetaControlsRow;
+extern lv_obj_t *ui_RotaryTitle;
+extern lv_obj_t *ui_RotaryButton;
+extern lv_obj_t *ui_ButtonTitle;
+extern lv_obj_t *ui_RotaryButton1;
+extern lv_obj_t *ui_Button1;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png
@@ -503,16 +556,18 @@ LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
 LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
 LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
 LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
+LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
 
 
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90040);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50014);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);
 LV_FONT_DECLARE( ui_font_MuseoSansRounded50016);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90032);
+LV_FONT_DECLARE( ui_font_MuseoSansRounded90040);
 
 
 void ui_init(void);
