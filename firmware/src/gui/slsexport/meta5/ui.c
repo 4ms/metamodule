@@ -557,7 +557,7 @@ lv_obj_t *ui_RotaryTitle;
 lv_obj_t *ui_RotaryButton;
 lv_obj_t *ui_ButtonTitle;
 lv_obj_t *ui_RotaryButton1;
-lv_obj_t *ui_Button1;
+lv_obj_t *ui_HWTestMidiLabel;
 lv_obj_t *ui____initial_actions0;
 const lv_img_dsc_t *ui_imgset_add[1] = {&ui_img_1x_add1_png};
 const lv_img_dsc_t *ui_imgset_info[1] = {&ui_img_1x_info1_png};
@@ -685,6 +685,7 @@ ui_DeleteMappingPopUp_screen_init();
 ui_ModuleListPage_screen_init();
 ui_SystemMenu_screen_init();
 ui_JackMapViewPage_screen_init();
+ui_HwTestPage_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_MainMenu);
 }

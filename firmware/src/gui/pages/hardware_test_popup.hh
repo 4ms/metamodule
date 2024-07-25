@@ -12,10 +12,25 @@ struct HardwareCheckPopup {
 	HardwareCheckPopup(ParamsMidiState &params, MetaParams &metaparams)
 		: params{params}
 		, metaparams{metaparams}
-		, group(lv_group_create()) {
+		, group(lv_group_create())
+		, btn1(lv_btn_create(ui_HWTestPagePanel))
+		, btn2(lv_btn_create(ui_HWTestPagePanel))
+		, btn3(lv_btn_create(ui_HWTestPagePanel))
+		, btn4(lv_btn_create(ui_HWTestPagePanel))
+		, btn5(lv_btn_create(ui_HWTestPagePanel))
+		, btn6(lv_btn_create(ui_HWTestPagePanel))
+		, btn7(lv_btn_create(ui_HWTestPagePanel))
+		, btn8(lv_btn_create(ui_HWTestPagePanel)) {
 
-		lv_group_add_obj(group, ui_Button1);
-		// lv_group_add_obj(group, ui_Button2);
+		lv_hide(ui_Button1);
+		lv_group_add_obj(group, btn1);
+		lv_group_add_obj(group, btn2);
+		lv_group_add_obj(group, btn3);
+		lv_group_add_obj(group, btn4);
+		lv_group_add_obj(group, btn5);
+		lv_group_add_obj(group, btn6);
+		lv_group_add_obj(group, btn7);
+		lv_group_add_obj(group, btn8);
 
 		lv_hide(ui_HWTestPagePanel);
 	}
@@ -26,7 +41,7 @@ struct HardwareCheckPopup {
 
 		lv_show(ui_HWTestPagePanel);
 		lv_group_activate(group);
-		lv_group_focus_obj(ui_Button1);
+		lv_group_focus_obj(btn1);
 		visible = true;
 	}
 
@@ -124,12 +139,29 @@ struct HardwareCheckPopup {
 	}
 
 private:
+	static void exit_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<HardwareCheckPopup *>(event->user_data);
+
+		page->hide();
+	}
+
 	ParamsMidiState &params;
 	MetaParams &metaparams;
 
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
+
+	lv_obj_t *btn1;
+	lv_obj_t *btn2;
+	lv_obj_t *btn3;
+	lv_obj_t *btn4;
+	lv_obj_t *btn5;
+	lv_obj_t *btn6;
+	lv_obj_t *btn7;
+	lv_obj_t *btn8;
 
 	float pot_min[12]{9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999};
 	float pot_max[12]{};

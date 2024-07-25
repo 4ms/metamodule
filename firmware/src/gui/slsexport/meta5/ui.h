@@ -546,7 +546,7 @@ extern lv_obj_t *ui_RotaryTitle;
 extern lv_obj_t *ui_RotaryButton;
 extern lv_obj_t *ui_ButtonTitle;
 extern lv_obj_t *ui_RotaryButton1;
-extern lv_obj_t *ui_Button1;
+extern lv_obj_t *ui_HWTestMidiLabel;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png

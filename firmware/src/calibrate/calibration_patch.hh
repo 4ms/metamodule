@@ -92,6 +92,7 @@ struct CalibrationPatch {
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::MixKnob), 1.0f);
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::RatioFKnob), 0.f);
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::ShapeKnob), 0.f);
+			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::ShapeCvKnob), 1.f);
 
 			// Each output is an octave higher, starting from 40Hz
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::RatioCKnob), freq);

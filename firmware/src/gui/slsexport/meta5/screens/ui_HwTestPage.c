@@ -435,11 +435,11 @@ lv_label_set_text(ui_RotaryButton1,"1");
 lv_obj_set_style_text_color(ui_RotaryButton1, lv_color_hex(0xF19300), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_RotaryButton1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_Button1 = lv_btn_create(ui_HWTestPagePanel);
-lv_obj_set_width( ui_Button1, 40);
-lv_obj_set_height( ui_Button1, 20);
-lv_obj_set_align( ui_Button1, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_Button1, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK | LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_clear_flag( ui_Button1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+ui_HWTestMidiLabel = lv_label_create(ui_HWTestPagePanel);
+lv_obj_set_width( ui_HWTestMidiLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_HWTestMidiLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_HWTestMidiLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_HWTestMidiLabel,"");
+lv_obj_set_style_text_font(ui_HWTestMidiLabel, &ui_font_MuseoSansRounded70016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 }
