@@ -19,8 +19,7 @@ public:
 		{};
 
 private:
-	template <typename FUNC>
-	void doReset(const FUNC&& func)
+	void doReset()
 	{
 		fillCount = 0;
 	}
@@ -35,7 +34,7 @@ private:
 		else
 		{
 			pr_err("StaticDeframer: Frame larger than maximum size\n");
-			doReset(func);
+			doReset();
 		}
 	}
 	template <typename FUNC>
