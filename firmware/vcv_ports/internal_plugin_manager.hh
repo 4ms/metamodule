@@ -9,6 +9,11 @@
 #include <span>
 #include <string_view>
 
+namespace MetaModuleAirwindows
+{
+void init(rack::plugin::Plugin *p);
+}
+
 namespace MetaModule
 {
 
@@ -204,6 +209,14 @@ struct InternalPluginManager {
 		eightfold_plugin.slug = "eightfold";
 		pluginInstance = &eightfold_plugin;
 		pluginInstance->addModel(modelSDOrcasHeartV2);
+#endif
+
+#ifndef BUILD_DYN_PLUGIN_airwin2rack
+		// auto &airwin2rack_plugin = internal_plugins.emplace_back("Airwin2Rack");
+		// airwin2rack_plugin.slug = "Airwin2Rack";
+		// pluginInstance = &airwin2rack_plugin;
+		MetaModuleAirwindows::init(nullptr);
+
 #endif
 	}
 };
