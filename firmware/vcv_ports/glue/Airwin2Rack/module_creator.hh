@@ -4,6 +4,7 @@
 #include "CoreModules/elements/elements_index.hh"
 #include "CoreModules/register_module.hh"
 #include "module.hh"
+#include <list>
 #include <memory>
 
 namespace MetaModuleAirwindows
@@ -35,8 +36,9 @@ private:
 	}
 
 	void create_elements() {
-		constexpr float WidthHP = 10;
-		constexpr float WidthPx = WidthHP * 0.2f * 75;
+		constexpr float WidthHP = 10.f;
+		constexpr float WidthPx = WidthHP * 0.2f * 75.f;
+		constexpr float HeightPx = 240.f;
 
 		constexpr std::string_view JackImage = "Airwin2Rack/comp/jack.png";
 		constexpr std::string_view MainKnobImage = "Airwin2Rack/comp/main_knob.png";
@@ -45,19 +47,31 @@ private:
 		constexpr std::string_view SliderHandle = "Airwin2Rack/comp/slider_handle.png";
 
 		auto fx = AirwinRegistry::registry[registry_idx].generator();
-		fx->setSampleRate(48000);
 		auto num_fx_params = std::min<unsigned>(AirwinRegistry::registry[registry_idx].nParams, maxParams);
-
-		// printf("Creating %s with %u params\n", Name, num_fx_params);
+		fx->setSampleRate(48000);
 
 		element_names.clear();
-		element_names.reserve(6 + num_fx_params * 3); //InL InR OutL OutR VolL VolR
 
 		std::vector<std::pair<MetaModule::Element, ElementCount::Indices>> elem_idx;
 
-		// Try to match Airwin2Rack VCV module layout:
+		unsigned num_text_elements = 0;
+		auto title = new_element<MetaModule::TextDisplay>(WidthPx / 2, 10, "", "");
+		title.text = element_names.emplace_back(AirwinRegistry::registry[registry_idx].name);
+		title.font = element_names.emplace_back("Default_12");
+		title.color = Colors565::White;
+		title.width_mm = MetaModule::to_mm(WidthPx);
+		title.height_mm = MetaModule::to_mm(20);
+		index_element(elem_idx, title, num_text_elements++);
+
 		{
-			float row_spacing = 270.f / num_fx_params;
+			const float row_spacing = 270.f / num_fx_params;
+			const float left_pad = 4.f;
+			const float control_col = 70.f;
+			const float knob_radius = 12.f;
+			const float label_width =
+				num_fx_params < 7 ? WidthPx - left_pad * 2 : WidthPx - control_col - left_pad - knob_radius;
+			const float label_offset = num_fx_params < 7 ? 30.f : row_spacing / 4.f;
+
 			float ypos = 28.f + row_spacing / 2.f;
 
 			char name_buffer[256]{};
@@ -70,7 +84,7 @@ private:
 				}
 
 				auto param_name = std::string{name_buffer};
-				auto main_knob = new_element<MetaModule::Knob>(WidthPx - 70, ypos, MainKnobImage, param_name);
+				auto main_knob = new_element<MetaModule::Knob>(WidthPx - control_col, ypos, MainKnobImage, param_name);
 				main_knob.DefaultValue = 0;
 				index_element(elem_idx, main_knob, i + ParamIds::PARAM_0);
 
@@ -80,6 +94,15 @@ private:
 
 				auto cv_jack = new_element<MetaModule::JackInput>(WidthPx - 18, ypos, JackImage, param_name + " CV In");
 				index_element(elem_idx, cv_jack, i + InputIds::CV_0);
+
+				auto label = new_element<MetaModule::TextDisplay>(4, ypos - label_offset, "", "");
+				label.text = element_names.emplace_back(param_name);
+				label.font = element_names.emplace_back("Default_10");
+				label.color = Colors565::White;
+				label.coords = MetaModule::Coords::TopLeft;
+				label.width_mm = MetaModule::to_mm(label_width);
+				label.height_mm = MetaModule::to_mm(row_spacing);
+				index_element(elem_idx, label, num_text_elements++);
 
 				ypos += row_spacing;
 			}
@@ -126,11 +149,9 @@ private:
 		info.indices = indices;
 		info.width_hp = 10;
 		std::string description = "Airwindows module " + name;
+
 		//TODO: add other strings from airwin registry?
 		info.description = description;
-
-		// TODO: auto-gen artwork:
-		// std::string panel_name = "Airwin2Rack/panel/" + name + ".png";
 
 		std::string panel_name = "Airwin2Rack/panel/panel.png";
 		std::string brand = "Airwindows";
@@ -143,7 +164,7 @@ private:
 
 	std::vector<MetaModule::Element> elements;
 	std::vector<ElementCount::Indices> indices;
-	std::vector<std::string> element_names;
+	std::list<std::string> element_names;
 };
 
 } // namespace MetaModuleAirwindows
