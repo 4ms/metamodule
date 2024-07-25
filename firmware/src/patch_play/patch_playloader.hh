@@ -89,6 +89,11 @@ struct PatchPlayLoader {
 		loading_new_patch_ = true;
 	}
 
+	void request_load_hardware_check_patch() {
+		next_patch = calibration.make_hardware_check_patch();
+		loading_new_patch_ = true;
+	}
+
 	void request_reload_playing_patch() {
 		next_patch = patches_.get_playing_patch();
 		loading_new_patch_ = true;

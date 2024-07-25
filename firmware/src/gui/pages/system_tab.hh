@@ -6,6 +6,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/hardware_test_popup.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -25,11 +26,13 @@ struct SystemTab : SystemMenuTab {
 		: storage{patch_storage}
 		, patch_playloader{patch_playloader}
 		, cal_routine{params, metaparams, storage, patch_mod_queue}
-		, cal_check{params, metaparams} {
+		, cal_check{params, metaparams}
+		, hw_check{params, metaparams} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemCalCheckButton, cal_check_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_CheckHardwareButton, hwcheck_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -46,12 +49,14 @@ struct SystemTab : SystemMenuTab {
 		lv_group_remove_obj(ui_CalibrationCancelButton);
 		lv_group_remove_obj(ui_CalibrationNextButton);
 		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
+		lv_group_remove_obj(ui_CheckHardwareButton);
 
 		lv_group_add_obj(group, ui_SystemCalibrationButton);
 		lv_group_add_obj(group, ui_SystemCalCheckButton);
 		lv_group_add_obj(group, ui_ResetFactoryPatchesButton);
 		lv_group_add_obj(group, ui_CalibrationCancelButton);
 		lv_group_add_obj(group, ui_CalibrationNextButton);
+		lv_group_add_obj(group, ui_CheckHardwareButton);
 
 		lv_group_focus_obj(ui_SystemCalibrationButton);
 		confirm_popup.init(ui_SystemMenu, group);
@@ -73,6 +78,11 @@ struct SystemTab : SystemMenuTab {
 			patch_playloader.request_reload_playing_patch();
 			return true;
 
+		} else if (hw_check.is_visible()) {
+			hw_check.hide();
+			patch_playloader.request_reload_playing_patch();
+			return true;
+
 		} else {
 			return false;
 		}
@@ -86,6 +96,9 @@ struct SystemTab : SystemMenuTab {
 
 		if (cal_check.is_visible())
 			cal_check.update();
+
+		if (hw_check.is_visible())
+			hw_check.update();
 	}
 
 private:
@@ -105,6 +118,15 @@ private:
 
 		page->patch_playloader.request_load_cal_check_patch();
 		page->cal_check.start();
+	}
+
+	static void hwcheck_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<SystemTab *>(event->user_data);
+
+		page->patch_playloader.request_load_hardware_check_patch();
+		page->hw_check.show(page->group);
 	}
 
 	static void resetbut_cb(lv_event_t *event) {
@@ -128,6 +150,7 @@ private:
 	ConfirmPopup confirm_popup;
 	CalibrationRoutine cal_routine;
 	CalCheck cal_check;
+	HardwareCheckPopup hw_check;
 
 	lv_group_t *group = nullptr;
 };

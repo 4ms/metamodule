@@ -1,5 +1,7 @@
 #pragma once
+#include "CoreModules/4ms/info/FM_info.hh"
 #include "patch_data.hh"
+#include <utility>
 
 namespace MetaModule
 {
@@ -66,6 +68,47 @@ struct CalibrationPatch {
 		patch.add_mapped_outjack(5, {.module_id = src1, .jack_id = 0});
 		patch.add_mapped_outjack(6, {.module_id = src1, .jack_id = 0});
 		patch.add_mapped_outjack(7, {.module_id = src1, .jack_id = 0});
+		return &patch;
+	}
+
+	PatchData *make_hardware_check_patch() {
+		patch.blank_patch("Hardware Checker");
+
+		std::array<uint16_t, 8> vco{
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+		};
+
+		auto panel_out_idx = 0;
+		auto freq = 1.f / 14.f;
+		for (auto v : vco) {
+			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::PitchKnob), 1.0f);
+			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::MixKnob), 1.0f);
+			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::RatioFKnob), 0.f);
+			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::ShapeKnob), 0.f);
+
+			// Each output is an octave higher, starting from 40Hz
+			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::RatioCKnob), freq);
+
+			// Output
+			patch.add_mapped_outjack(panel_out_idx, {.module_id = v, .jack_id = 0}); //OutputOut
+
+			// In 1-6 => Voct, GateIn1-2 => Shape CV
+			if (panel_out_idx <= 6)
+				patch.add_mapped_injack(panel_out_idx, {.module_id = v, .jack_id = 1}); //InputV_Oct_S
+			else
+				patch.add_mapped_injack(panel_out_idx, {.module_id = v, .jack_id = 4}); //InputShape_Cv
+
+			freq = std::min(freq + 1.f / 7.f, 1.f);
+			panel_out_idx++;
+		}
+
 		return &patch;
 	}
 
