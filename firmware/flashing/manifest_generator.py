@@ -7,29 +7,46 @@ import os
 import hashlib
 import re
 import shutil
+import zlib
 
 ManifestFormatVersion = 1
 
 
-def process_file(dest_dir, filename, imagetype, *, name=None, address=None):
+def process_file(dest_dir, filename, imagetype, *, name=None, address=None, compressed=False):
 
     with open(filename, 'rb') as file:
 
         entry = dict()
 
-        entry["filename"] = os.path.basename(filename)
         entry["type"]     = imagetype
-        entry["filesize"] = os.stat(filename).st_size
         entry["md5"]      = hashlib.md5(file.read()).hexdigest()
         entry["address"]  = int(address)
 
         if name is not None:
             entry["name"] = name
 
-        try:
-            shutil.copyfile(filename, os.path.join(dest_dir, os.path.basename(filename)))
-        except shutil.SameFileError:
-            pass
+        if not compressed:
+            entry["filename"] = os.path.basename(filename)
+            entry["filesize"] = os.stat(filename).st_size
+
+            try:
+                shutil.copyfile(filename, os.path.join(dest_dir, entry["filename"]))
+            except shutil.SameFileError:
+                pass
+        else:
+            entry["filename"] = os.path.basename(filename) + ".gz"
+            entry["uncompressed_size"] = os.stat(filename).st_size
+
+            with open(filename, "rb") as orig_file:
+                with open(os.path.join(dest_dir, entry["filename"]), "wb") as dest_file:
+
+                    # use level 9 as in esptool, can probably be changed
+                    compressed_data = zlib.compress(orig_file.read(), level=9)
+                    dest_file.write(compressed_data)
+
+                    entry["filesize"] = len(compressed_data)
+
+
 
         return entry
 
@@ -97,7 +114,7 @@ if __name__ == "__main__":
         j["files"].append(process_file(destination_dir, args.wifi_app_file, "wifi", name="Wifi Application", address=0x10000))
 
     if args.wifi_fs_file:
-        j["files"].append(process_file(destination_dir, args.wifi_fs_file, "wifi", name="Wifi Filesystem", address=0x200000))
+        j["files"].append(process_file(destination_dir, args.wifi_fs_file, "wifi", name="Wifi Filesystem", address=0x200000, compressed=True))
 
     with open(args.out_file, "w+") as out_file:
         data_json = json.dumps(j, indent=4)
