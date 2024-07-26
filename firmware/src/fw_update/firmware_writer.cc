@@ -16,9 +16,9 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 	using enum IntercoreStorageMessage::FlashTarget;
 
 	if (message.message_type == StartChecksumCompare) {
-		pr_dbg("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 
 		if (message.flashTarget == WIFI) {
+			pr_trace("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 			return compareChecksumWifi(message.address, message.length, {message.checksum.data()});
 
 		} else if (message.flashTarget == QSPI) {
@@ -31,7 +31,7 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 		}
 
 	} else if (message.message_type == StartFlashing) {
-		pr_dbg("-> Start flashing to 0x%08x\n", message.address);
+		pr_trace("-> Start flashing %u bytes to 0x%08x\n", message.buffer.size(), message.address);
 		auto buf = std::span<uint8_t>{(uint8_t *)message.buffer.data(), message.buffer.size()};
 
 		if (message.flashTarget == WIFI) {
@@ -62,24 +62,21 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 
 	if (result == ESP_LOADER_SUCCESS) {
 
-		if (result == ESP_LOADER_SUCCESS) {
-			result = Flasher::verify(address, length, checksum);
-			if (result == ESP_LOADER_ERROR_INVALID_MD5) {
-				returnValue = {.message_type = ChecksumMismatch};
-			} else if (result == ESP_LOADER_SUCCESS) {
-				pr_dbg("-> Checksum matches\n");
-				returnValue = {.message_type = ChecksumMatch};
-			} else {
-				pr_dbg("-> Cannot get checksum\n");
-				returnValue = {.message_type = ChecksumFailed};
-			}
+		result = Flasher::verify(address, length, checksum);
+
+		if (result == ESP_LOADER_ERROR_INVALID_MD5) {
+			returnValue = {.message_type = ChecksumMismatch};
+		} else if (result == ESP_LOADER_SUCCESS) {
+			pr_trace("-> Checksum matches\n");
+			returnValue = {.message_type = ChecksumMatch};
+
 		} else {
-			pr_err("Cannot write dummy byte to wifi flash\n");
-			returnValue = {.message_type = ChecksumFailed};
+			pr_trace("-> Cannot get checksum\n");
+			returnValue = {.message_type = WifiExpanderCommError};
 		}
 	} else {
 		pr_err("Cannot connect to wifi bootloader\n");
-		returnValue = {.message_type = ChecksumFailed};
+		returnValue = {.message_type = WifiExpanderNotConnected};
 	}
 
 	Flasher::deinit();
@@ -120,10 +117,10 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 			}
 
 			if (not error_during_writes) {
-				pr_dbg("-> Flashing completed\n");
+				pr_trace("-> Flashing completed\n");
 				returnValue = {.message_type = FlashingOk};
 			} else {
-				pr_dbg("-> Flashing failed\n");
+				pr_trace("-> Flashing failed\n");
 				returnValue = {.message_type = FlashingFailed};
 			}
 		} else {
@@ -142,39 +139,8 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 
 IntercoreStorageMessage
 FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_t checksum, uint32_t &bytesChecked) {
-
-	// Stop wifi reception before long running operation
-#ifdef ENABLE_WIFI_BRIDGE
-	WifiInterface::stop();
-#endif
-
-	MD5Processor processor;
-
-	const std::size_t BlockSize = 4096;
-	std::array<uint8_t, BlockSize> BlockBuffer;
-
-	std::size_t offset = 0;
-	while (offset < length) {
-		auto bytesToRead = std::min<std::size_t>(length - offset, BlockBuffer.size());
-		auto thisReadArea = std::span<uint8_t>(BlockBuffer.data(), bytesToRead);
-
-		auto read_result = loader_.read_sectors(address + offset, thisReadArea);
-
-		if (read_result) {
-			processor.update(thisReadArea);
-			offset += bytesToRead;
-			bytesChecked = offset;
-		} else {
-			return {.message_type = ChecksumFailed};
-		}
-	}
-
-	auto str_digest = to_hex_string(processor.getDigest());
-	auto str_digest_sv = std::string_view(str_digest.data(), str_digest.size());
-
-	auto match = checksum.compare(str_digest_sv) == 0;
-
-	return {.message_type = match ? ChecksumMatch : ChecksumMismatch};
+	// Force checking QSPI flash block-by-block, so we can skip blocks
+	return {.message_type = ChecksumMismatch};
 }
 
 IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uint32_t address, uint32_t &bytesWritten) {
@@ -184,7 +150,7 @@ IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uin
 	WifiInterface::stop();
 #endif
 
-	const uint32_t FlashSectorSize = 4096;
+	const uint32_t FlashSectorSize = 64 * 1024;
 	const std::size_t BatchSize = FlashSectorSize;
 	bytesWritten = 0;
 
@@ -192,17 +158,32 @@ IntercoreStorageMessage FirmwareWriter::flashQSPI(std::span<uint8_t> buffer, uin
 
 	if (loader_.check_flash_chip()) {
 		while (bytesWritten < buffer.size()) {
-			auto to_read = std::min<std::size_t>(buffer.size() - bytesWritten, BatchSize);
-			auto thisBatch = buffer.subspan(bytesWritten, to_read);
+			auto num_bytes_to_write = std::min<std::size_t>(buffer.size() - bytesWritten, BatchSize);
+			auto buffer_to_write = buffer.subspan(bytesWritten, num_bytes_to_write);
 
-			auto success = loader_.write_sectors(address + bytesWritten, thisBatch);
+			bool data_matches = true;
+			{
+				std::array<uint8_t, BatchSize> verify_buffer;
 
-			if (success) {
-				bytesWritten += to_read;
-			} else {
-				errorDetected = true;
-				break;
+				if (loader_.read_sectors(address + bytesWritten, {verify_buffer.data(), num_bytes_to_write})) {
+					for (unsigned i = 0; i < num_bytes_to_write; i++)
+						if (verify_buffer[i] != buffer_to_write[i])
+							data_matches = false;
+				} else {
+					data_matches = false;
+				}
 			}
+
+			if (data_matches) {
+				pr_dump("Skipping sector at 0x%x, data matches\n", address + bytesWritten);
+			} else {
+				if (!loader_.write_sectors(address + bytesWritten, buffer_to_write)) {
+					errorDetected = true;
+					break;
+				}
+			}
+
+			bytesWritten += num_bytes_to_write;
 		}
 	} else {
 		errorDetected = true;

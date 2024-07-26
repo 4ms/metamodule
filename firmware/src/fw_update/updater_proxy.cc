@@ -59,6 +59,8 @@ bool FirmwareUpdaterProxy::start(std::string_view manifest_filename,
 }
 
 FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
+	error_message = "";
+
 	switch (state) {
 		case Idle:
 		case Success:
@@ -183,9 +185,24 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 						moveToState(Writing);
 						break;
 
+					case FileStorageProxy::WifiExpanderCommError:
+					case FileStorageProxy::ReadFlashFailed:
 					case FileStorageProxy::ChecksumFailed:
 						abortWithMessage("Error when comparing checksums");
 						break;
+
+					case FileStorageProxy::WifiExpanderNotConnected: {
+						error_message = "No Wifi Expander: skipping ";
+
+						auto full_path = manifest.files[current_file_idx].filename;
+						auto slash_pos = full_path.find_first_of("/");
+						if (slash_pos != std::string::npos)
+							error_message += full_path.substr(slash_pos + 1);
+						else
+							error_message += full_path;
+
+						proceedWithNextFile();
+					} break;
 
 					default:
 						break;
@@ -210,7 +227,8 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 						*target, thisLoadedFile, thisFile.address, &sharedMem->bytes_processed);
 
 					if (not result) {
-						abortWithMessage("Cannot trigger flashing");
+						// this is not an error, just need to retry
+						justEnteredState = true;
 					}
 				} else {
 					abortWithMessage("Invalid update file type");
@@ -237,9 +255,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 			abortWithMessage("Internal Error");
 	}
 
-	return state == State::Error ?
-			   Status{state, current_file_name, current_file_size, sharedMem->bytes_processed, error_message} :
-			   Status{state, current_file_name, current_file_size, sharedMem->bytes_processed};
+	return Status{state, current_file_name, current_file_size, sharedMem->bytes_processed, error_message};
 }
 
 void FirmwareUpdaterProxy::abortWithMessage(const char *message) {

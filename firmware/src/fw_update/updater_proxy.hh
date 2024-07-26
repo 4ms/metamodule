@@ -18,7 +18,7 @@ public:
 		std::string name;
 		std::size_t file_size{0};
 		std::size_t bytes_completed{0};
-		std::string error_message{};
+		std::string message{};
 	};
 
 	FirmwareUpdaterProxy(FileStorageProxy &file_storage);

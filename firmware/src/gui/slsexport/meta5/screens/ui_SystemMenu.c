@@ -1280,4 +1280,13 @@ lv_obj_set_style_text_color(ui_SystemMenuUpdateLog, lv_color_hex(0xFFFFFF), LV_P
 lv_obj_set_style_text_opa(ui_SystemMenuUpdateLog, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_SystemMenuUpdateLog, &ui_font_MuseoSansRounded50012, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_SystemMenuUpdateLog = lv_label_create(ui_SystemMenuUpdateTab);
+lv_obj_set_width( ui_SystemMenuUpdateLog, lv_pct(100));
+lv_obj_set_height( ui_SystemMenuUpdateLog, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_SystemMenuUpdateLog, LV_ALIGN_CENTER );
+lv_label_set_text(ui_SystemMenuUpdateLog,"");
+lv_obj_set_style_text_color(ui_SystemMenuUpdateLog, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_SystemMenuUpdateLog, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_SystemMenuUpdateLog, &ui_font_MuseoSansRounded50012, LV_PART_MAIN| LV_STATE_DEFAULT);
+
 }
