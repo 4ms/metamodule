@@ -35,7 +35,7 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 		auto buf = std::span<uint8_t>{(uint8_t *)message.buffer.data(), message.buffer.size()};
 
 		if (message.flashTarget == WIFI) {
-			return flashWifi(buf, message.address, *message.bytes_processed);
+			return flashWifi(buf, message.address, message.uncompressed_size, *message.bytes_processed);
 
 		} else if (message.flashTarget == QSPI) {
 			return flashQSPI(buf, message.address, *message.bytes_processed);
@@ -87,7 +87,7 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 	return returnValue;
 }
 
-IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uint32_t address, uint32_t &bytesWritten) {
+IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uint32_t address, std::optional<uint32_t> uncompressed_size, uint32_t &bytesWritten) {
 	IntercoreStorageMessage returnValue;
 
 // Stop wifi reception before long running operation
@@ -100,7 +100,7 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 	if (result == ESP_LOADER_SUCCESS) {
 		const std::size_t BatchSize = 1024;
 
-		result = Flasher::flash_start(address, buffer.size(), BatchSize, std::nullopt);
+		result = Flasher::flash_start(address, buffer.size(), BatchSize, uncompressed_size);
 
 		if (result == ESP_LOADER_SUCCESS) {
 			bool error_during_writes = false;
@@ -109,7 +109,7 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 				auto to_read = std::min<std::size_t>(buffer.size() - bytesWritten, BatchSize);
 				auto thisBatch = buffer.subspan(bytesWritten, to_read);
 
-				result = Flasher::flash_process(thisBatch, false);
+				result = Flasher::flash_process(thisBatch, uncompressed_size.has_value());
 
 				if (result != ESP_LOADER_SUCCESS) {
 					error_during_writes = true;

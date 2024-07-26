@@ -113,11 +113,13 @@ public:
 	[[nodiscard]] bool request_file_flash(IntercoreStorageMessage::FlashTarget target,
 										  std::span<uint8_t> buffer,
 										  uint32_t address,
+										  std::optional<uint32_t> uncompressed_size,
 										  uint32_t *bytes_processed) {
 		IntercoreStorageMessage message{
 			.message_type = StartFlashing,
 			.buffer = {(char *)buffer.data(), buffer.size()},
 			.address = address,
+			.uncompressed_size = uncompressed_size,
 			.bytes_processed = bytes_processed,
 			.flashTarget = target,
 		};

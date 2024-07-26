@@ -207,7 +207,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 
 				if (auto target = GetTargetForUpdateType(thisFile.type); target) {
 					auto result = file_storage.request_file_flash(
-						*target, thisLoadedFile, thisFile.address, &sharedMem->bytes_processed);
+						*target, thisLoadedFile, thisFile.address, std::nullopt, &sharedMem->bytes_processed);
 
 					if (not result) {
 						abortWithMessage("Cannot trigger flashing");

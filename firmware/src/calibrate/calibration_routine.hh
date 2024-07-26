@@ -563,6 +563,7 @@ private:
 				if (storage.request_file_flash(IntercoreStorageMessage::FlashTarget::QSPI,
 											   {(uint8_t *)(&cal_data), sizeof(cal_data)},
 											   CalDataFlashOffset,
+											   std::nullopt,
 											   &bytes_written))
 					state = State::WritingCal;
 			}

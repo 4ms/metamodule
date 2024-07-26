@@ -80,6 +80,7 @@ struct IntercoreStorageMessage {
 
 	uint32_t address;
 	uint32_t length;
+	std::optional<uint32_t> uncompressed_size;
 	StaticString<32> checksum;
 	uint32_t *bytes_processed;
 	enum FlashTarget : uint8_t { WIFI, QSPI };
