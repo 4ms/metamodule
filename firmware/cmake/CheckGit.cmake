@@ -86,6 +86,8 @@ function(CheckGitSetup)
         -DGIT_HASH_CACHE=${GIT_HASH_CACHE}
         -P ${CURRENT_LIST_DIR}/CheckGit.cmake
         BYPRODUCTS ${post_configure_file}
+        COMMENT "Tagging git revision"
+        VERBATIM
         )
 
     CheckGitVersion()

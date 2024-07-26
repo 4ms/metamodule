@@ -220,6 +220,7 @@ add_custom_target(
   COMMAND cd ${SHARED}/patch_convert && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/CoreModules && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
+  COMMENT "Running unit tests"
   VERBATIM USES_TERMINAL
 )
 file(
