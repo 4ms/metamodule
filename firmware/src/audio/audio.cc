@@ -76,20 +76,19 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
-		auto params = cache_params(block);
+		auto &params = cache_params(block);
 
 		if (is_playing_patch())
 			process(audio_blocks[1 - block], params);
 		else
 			process_nopatch(audio_blocks[1 - block], params);
 
+		return_cached_params(block);
+
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
-		mdrivlib::SystemCache::clean_dcache_by_range(&sync_params, sizeof sync_params);
 
 		update_audio_settings();
-
-		return_cached_params(block);
 
 		load_measure.end_measurement();
 		if (load_measure.get_last_measurement_load_percent() >= 98) {
@@ -210,8 +209,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			outchan = get_audio_output(i);
 	}
 
-	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins))
+	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins)) {
 		m = s.val();
+	}
 
 	player.update_lights();
 	propagate_sense_pins(param_block.params[0]);
@@ -258,10 +258,12 @@ void AudioStream::handle_midi(Midi::Event const &event, unsigned poly_num) {
 		player.set_midi_note_velocity(event.poly_chan, event.val);
 		player.set_midi_note_retrig(event.poly_chan, 10.f);
 		player.set_midi_gate(event.note, event.val); //TODO: if not velocity mode, then event.val => 10
+		sync_params.midi_events.put(event);
 
 	} else if (event.type == Midi::Event::Type::NoteOff) {
 		player.set_midi_note_gate(event.poly_chan, 0);
 		player.set_midi_gate(event.note, 0);
+		sync_params.midi_events.put(event);
 
 	} else if (event.type == Midi::Event::Type::Aft) {
 		player.set_midi_note_aftertouch(event.poly_chan, event.val);
@@ -346,9 +348,6 @@ void AudioStream::return_cached_params(unsigned block) {
 
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
-
-	// write cache to memory (so all cores see the same values)
-	mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams, sizeof(MetaParams));
 }
 
 void AudioStream::set_block_spans() {

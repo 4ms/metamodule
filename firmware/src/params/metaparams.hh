@@ -60,6 +60,8 @@ struct MetaParams {
 		rotary_pushed.add_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
 
+		midi_connected = that.midi_connected;
+
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
 	}
@@ -79,6 +81,8 @@ struct MetaParams {
 		rotary.transfer_motion(that.rotary);
 		rotary_pushed.transfer_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
+
+		midi_connected = that.midi_connected;
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
