@@ -13,6 +13,7 @@ screens/ui_DeleteMappingPopUp.c
 screens/ui_ModuleListPage.c
 screens/ui_SystemMenu.c
 screens/ui_JackMapViewPage.c
+screens/ui_HwTestPage.c
 ui.c
 components/ui_comp_hook.c
 ui_helpers.c

@@ -20,6 +20,7 @@ struct PluginTab : SystemMenuTab {
 		clear_found_list();
 		lv_show(ui_PluginScanButton);
 		lv_obj_add_event_cb(ui_PluginScanButton, scan_plugins_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_PluginScanButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
 		lv_hide(ui_PluginsFoundCont);
 	}
 
@@ -69,8 +70,9 @@ struct PluginTab : SystemMenuTab {
 
 					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx + 1));
 					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
-					lv_obj_add_event_cb(plugin_obj, scroll_on_focus_cb, LV_EVENT_FOCUSED, this);
+					lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
 					lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
+					lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 				}
 
 				idx++;
@@ -86,7 +88,7 @@ struct PluginTab : SystemMenuTab {
 				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
 				lv_group_add_obj(group, plugin_obj);
 				lv_group_focus_obj(plugin_obj);
-				lv_obj_add_event_cb(plugin_obj, scroll_on_focus_cb, LV_EVENT_FOCUSED, this);
+				lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
 				lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 
 				lv_obj_del_async(load_in_progress_obj);
@@ -123,7 +125,7 @@ private:
 		for (auto &plugin : loaded_plugin_list) {
 			auto plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
 			lv_group_add_obj(group, plugin_obj);
-			lv_obj_add_event_cb(plugin_obj, scroll_on_focus_cb, LV_EVENT_FOCUSED, this);
+			lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
 			lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 		}
 	}
@@ -148,6 +150,11 @@ private:
 		page->plugin_manager.start_loading_plugin_list();
 	}
 
+	static void scroll_up_cb(lv_event_t *event) {
+		lv_obj_scroll_to_y(ui_SystemMenuPluginsTab, 0, LV_ANIM_ON);
+		lv_obj_scroll_to_view(event->target, LV_ANIM_ON);
+	}
+
 	static void load_plugin_cb(lv_event_t *event) {
 		auto page = static_cast<PluginTab *>(event->user_data);
 		if (!page)
@@ -161,7 +168,7 @@ private:
 		}
 	}
 
-	static void scroll_on_focus_cb(lv_event_t *event) {
+	static void scroll_label_on_focus_cb(lv_event_t *event) {
 		if (event->target)
 			label_scrolls(event->target);
 	}

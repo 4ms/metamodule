@@ -84,11 +84,14 @@ struct CalibrationRoutine {
 		lv_hide(ui_SystemCalibrationButton);
 		lv_hide(ui_SystemCalCheckButton);
 		lv_hide(ui_SystemResetInternalPatchesCont);
+		lv_hide(ui_SystemHardwareCheckCont);
 
 		lv_show(ui_CalibrationButtonCont);
 		lv_show(ui_CalibrationInputStatusCont);
 		lv_show(ui_CalibrationMeasurementLabel);
 		lv_show(ui_CalibrationProcedureCont);
+
+		lv_group_focus_obj(ui_CalibrationCancelButton);
 
 		lv_label_set_text(ui_CalibrationInstructionLabel,
 						  "Play a C1 (1.00V) and a\nC4 (4.00V) into each jack\nto re-calibrate.");
@@ -116,6 +119,7 @@ struct CalibrationRoutine {
 		lv_show(ui_SystemCalibrationButton);
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
+		lv_show(ui_SystemHardwareCheckCont);
 		lv_group_focus_obj(ui_SystemCalibrationButton);
 
 		patch_mod_queue.put(CalibrationOnOff{.enable = true});
