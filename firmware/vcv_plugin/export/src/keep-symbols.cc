@@ -15,6 +15,17 @@
 #include <random>
 #include <unordered_map>
 
+#include "CoreModules/moduleFactory.hh"
+
+namespace MetaModule
+{
+bool register_module(std::string_view brand_name,
+					 std::string_view typeslug,
+					 MetaModule::ModuleFactory::CreateModuleFunc funcCreate,
+					 MetaModule::ModuleInfoView const &info,
+					 std::string_view faceplate_filename);
+}
+
 extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 }
 
@@ -53,6 +64,15 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 		auto x = &gettimeofday;
 		(void)x;
 	}
+
+	{
+		log1pl(1.);
+		expm1l(1.);
+	}
+
+	static auto addr = &MetaModule::register_module;
+	// static bool keep = MetaModule::register_module("", "", nullptr, {}, "");
+	printf("%p\n", addr);
 
 	// provides vtable for Quantity
 	rack::Quantity q;

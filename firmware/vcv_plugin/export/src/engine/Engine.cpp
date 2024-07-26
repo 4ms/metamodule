@@ -35,17 +35,17 @@ double Engine::getMeterMax(){ return {}; }
 // Modules
 size_t Engine::getNumModules(){ return {}; }
 size_t Engine::getModuleIds(int64_t *moduleIds, size_t len){ return {}; }
-std::vector<int64_t> getModuleIds(){ return {}; }
+std::vector<int64_t> Engine::getModuleIds(){ return {}; }
 void Engine::addModule(Module *module){}
 void Engine::removeModule(Module *module){}
 // PRIVATE Engine::void removeModule_NoLock(Module *module){ return {}; }
 bool Engine::hasModule(Module *module){ return {}; }
-Module Engine::*getModule(int64_t moduleId){ return {}; }
-Module Engine::*getModule_NoLock(int64_t moduleId){ return {}; }
+Module *Engine::getModule(int64_t moduleId){ return {}; }
+Module *Engine::getModule_NoLock(int64_t moduleId){ return {}; }
 void Engine::resetModule(Module *module){}
 void Engine::randomizeModule(Module *module){}
 void Engine::bypassModule(Module *module, bool bypassed){}
-json_t Engine::*moduleToJson(Module *module){ return {}; }
+json_t *Engine::moduleToJson(Module *module){ return {}; }
 void Engine::moduleFromJson(Module *module, json_t *rootJ){}
 void Engine::prepareSaveModule(Module *module){}
 void Engine::prepareSave(){}
@@ -53,7 +53,7 @@ void Engine::prepareSave(){}
 // Cables
 size_t Engine::getNumCables(){ return {}; }
 size_t Engine::getCableIds(int64_t *cableIds, size_t len){ return {}; }
-std::vector<int64_t> getCableIds(){ return {}; }
+std::vector<int64_t> Engine::getCableIds(){ return {}; }
 void Engine::addCable(Cable *cable){}
 void Engine::removeCable(Cable *cable){}
 // PRIVATE Engine::void removeCable_NoLock(Cable *cable){ return {}; }

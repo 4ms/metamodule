@@ -92,6 +92,8 @@ public:
 		for (uint16_t panel_jack_id = 0; panel_jack_id < PanelDef::NumAudioIn; panel_jack_id++) {
 			if (patch.find_mapped_injack(panel_jack_id) == nullptr) {
 				patch.add_mapped_injack(panel_jack_id, jack);
+				patch_mod_queue.put(
+					AddJackMapping{.panel_jack_id = panel_jack_id, .jack = jack, .type = ElementType::Input});
 				pr_trace("Auto mapping module %d injack %d to In %d\n", module_id, input_idx, panel_jack_id);
 				return MappingDest{panel_jack_id};
 			}
@@ -117,6 +119,8 @@ public:
 		for (uint16_t panel_jack_id = 0; panel_jack_id < PanelDef::NumAudioOut; panel_jack_id++) {
 			if (patch.find_mapped_outjack(panel_jack_id) == nullptr) {
 				patch.add_mapped_outjack(panel_jack_id, jack);
+				patch_mod_queue.put(
+					AddJackMapping{.panel_jack_id = panel_jack_id, .jack = jack, .type = ElementType::Output});
 				pr_trace("Auto mapping module %d outjack %d to In %d\n", module_id, output_idx, panel_jack_id);
 				return MappingDest{panel_jack_id};
 			}

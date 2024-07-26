@@ -91,7 +91,7 @@ std::unique_ptr<CoreProcessor> ModuleFactory::create(std::string_view combined_s
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
 			if (auto f_create = module->creation_func)
-				return (*f_create)();
+				return f_create();
 		}
 	}
 
@@ -121,6 +121,16 @@ std::string_view ModuleFactory::getModuleFaceplate(std::string_view combined_slu
 
 bool ModuleFactory::isValidSlug(std::string_view combined_slug) {
 	auto [brand, module_name] = brand_module(combined_slug);
+	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
+		if (auto module = brand_reg->modules.get(module_name)) {
+			return bool(module->creation_func);
+		}
+	}
+
+	return false;
+}
+
+bool ModuleFactory::isValidBrandModule(std::string_view brand, std::string_view module_name) {
 	if (auto brand_reg = brand_registry(brand); brand_reg != registry().end()) {
 		if (auto module = brand_reg->modules.get(module_name)) {
 			return bool(module->creation_func);

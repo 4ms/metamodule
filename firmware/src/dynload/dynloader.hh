@@ -51,11 +51,21 @@ struct DynLoader {
 			init_plugin_symbol = elf.find_dyn_symbol("init");
 		}
 
+		if (!init_plugin_symbol) {
+			pr_warn("No init() dyn symbol found, trying non-dyn init(Plugin*)\n");
+			init_plugin_symbol = elf.find_symbol("_Z4initPN4rack6plugin6PluginE");
+		}
+
+		if (!init_plugin_symbol) {
+			pr_warn("No non-dyn init(Plugin*) symbol found, trying non-dyn init()\n");
+			init_plugin_symbol = elf.find_symbol("init");
+		}
+
 		if (init_plugin_symbol) {
 			auto load_address = init_plugin_symbol->offset() + codeblock.data();
 			return reinterpret_cast<PluginInitFunc *>(load_address);
 		} else {
-			pr_err("Did not find init(rack::plugin::Plugin*)\n");
+			pr_err("Did not find init function\n");
 			return nullptr;
 		}
 	}

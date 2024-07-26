@@ -49,6 +49,7 @@ target_sources(
          src/settings.cpp
          src/string.cpp
          src/roundevenf.c
+         src/color.cpp
 )
 
 add_subdirectory(jansson)

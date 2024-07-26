@@ -2,6 +2,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_info_view.hh"
 #include "CoreModules/module_type_slug.hh"
+#include <functional>
 #include <memory>
 #include <string_view>
 #include <vector>
@@ -11,7 +12,7 @@ namespace MetaModule
 
 class ModuleFactory {
 public:
-	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
+	using CreateModuleFunc = std::function<std::unique_ptr<CoreProcessor>()>;
 
 	ModuleFactory() = delete;
 
@@ -34,6 +35,7 @@ public:
 
 	// Returns true if slug is valid and registered.
 	static bool isValidSlug(std::string_view combined_slug);
+	static bool isValidBrandModule(std::string_view brand, std::string_view module_name);
 
 	static std::vector<ModuleTypeSlug> getAllSlugs(std::string_view brand);
 	static std::vector<ModuleTypeSlug> getAllBrands();

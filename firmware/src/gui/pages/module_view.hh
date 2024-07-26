@@ -183,7 +183,7 @@ struct ModuleViewPage : PageBase {
 
 		//Show Roller and select it
 		lv_obj_set_pos(ui_ElementRollerPanel, 0, 0);
-		auto roller_width = std::min(320 - display_widthpx, 220); //roller is no more than 220px wide
+		auto roller_width = std::min<lv_coord_t>(320 - display_widthpx, 220); //roller is no more than 220px wide
 		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
 		lv_obj_clear_flag(ui_ElementRollerPanel, LV_OBJ_FLAG_HIDDEN);
 
