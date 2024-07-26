@@ -56,10 +56,10 @@ struct SystemTab : SystemMenuTab {
 
 		lv_group_add_obj(group, ui_SystemCalibrationButton);
 		lv_group_add_obj(group, ui_SystemCalCheckButton);
+		lv_group_add_obj(group, ui_CheckHardwareButton);
 		lv_group_add_obj(group, ui_ResetFactoryPatchesButton);
 		lv_group_add_obj(group, ui_CalibrationCancelButton);
 		lv_group_add_obj(group, ui_CalibrationNextButton);
-		lv_group_add_obj(group, ui_CheckHardwareButton);
 
 		lv_group_focus_obj(ui_SystemCalibrationButton);
 		confirm_popup.init(ui_SystemMenu, group);
