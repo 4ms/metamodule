@@ -100,7 +100,7 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 	if (result == ESP_LOADER_SUCCESS) {
 		const std::size_t BatchSize = 1024;
 
-		result = Flasher::flash_start(address, buffer.size(), BatchSize);
+		result = Flasher::flash_start(address, buffer.size(), BatchSize, std::nullopt);
 
 		if (result == ESP_LOADER_SUCCESS) {
 			bool error_during_writes = false;
@@ -109,7 +109,7 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 				auto to_read = std::min<std::size_t>(buffer.size() - bytesWritten, BatchSize);
 				auto thisBatch = buffer.subspan(bytesWritten, to_read);
 
-				result = Flasher::flash_process(thisBatch);
+				result = Flasher::flash_process(thisBatch, false);
 
 				if (result != ESP_LOADER_SUCCESS) {
 					error_during_writes = true;
