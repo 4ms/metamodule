@@ -1,9 +1,11 @@
 ### Instructions for adding a new module
 
-For creating a plugin, see [metamodule-plugin-examples](https://github.com/4ms/metamodule-plugin-examples)
+For creating a plugin, see [Plugins.md](Plugins.md)
+
+-----
 
 Below are instructions for adding a new built-in brand from an existing VCV Rack plugin, statically compiled 
-into the main firmware.
+into the main firmware. This is not a common thing, typically you will use plugins (see above).
 
 1) **Add the module code as a git submodule into vcv_ports/**
 

@@ -183,9 +183,9 @@ make flash-app-sd
 
 This will build the application as normal, and then use `dd` to copy it to the fourth partition.
 
-Eject the card and insert it into the Meta Module.
+Eject the card and insert it into the MetaModule.
 
-To tell the Meta Module to boot using the SD Card, you need to change the BOOT DIP switches.
+To tell the MetaModule to boot using the SD Card, you need to change the BOOT DIP switches.
 These are located on the back of the PCB, under the screen near the rotary encoder.
 They are labeled "BOOT0_2". There are two switches. Look at the diagram printed on the PCB.
 To boot with the SD, both switches should be pushed to the left.

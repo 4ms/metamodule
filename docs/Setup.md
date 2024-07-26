@@ -78,7 +78,7 @@ TODO: other distros
 To get started, you will want to follow the development environment guide for
 VCV Rack [here](https://vcvrack.com/manual/Building#Windows). This will help
 you set up an MSYS2/MinGW development environment along with most packages
-required for Meta Module development. In short, install [MSYS](http://www.msys2.org/)
+required for MetaModule development. In short, install [MSYS](http://www.msys2.org/)
 and then open the MinGW 64-bit shell and run:
 
 ```
@@ -126,7 +126,7 @@ arm-none-eabi-gcc --version
 You should see the version number and some copyright info. If not, check where
 the arm-none-eabi package was installed and adjust your PATH setting.
 
-*Tip*: When building anything for Meta Module, be sure to launch the MinGW 64-Bit
+*Tip*: When building anything for MetaModule, be sure to launch the MinGW 64-Bit
 shell! If you have Windows Terminal installed, it is worth setting up a profile
 so that you can easily launch MinGW 64-Bit shells as Terminal tabs. If you have
 Windows Terminal installed, you can open the Settings menu and create a
@@ -144,7 +144,7 @@ you should set the Icon option. Again, with default paths, this path is
 C:/msys64/mingw64.ico
 ```
 
-*Tip*: Many elements of the Meta Module code require C++23, so if you previously setup
+*Tip*: Many elements of the MetaModule code require C++23, so if you previously setup
 a VCV environment (or an MSYS2 environment), you might need to update `gcc` to
 `gcc-12` or higher. To find out which version you are using, you need to open
 up a MinGW 64-Bit shell. Type the following command:

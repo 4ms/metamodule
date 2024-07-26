@@ -1,4 +1,4 @@
-# Meta Module
+# MetaModule
 
 [![Build Simulator](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml)
 [![Build VCV Rack Plugin](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml)
@@ -30,7 +30,7 @@ Next, setup your development environment by [following the instructions on this 
 
 ## Next Steps
 
-The Meta Module environment is built using three separate components: The VCV Rack Plugin (which includes the Meta Module patch exporter module), the Firmware for the Meta Module hardware, and the Firmware Simulator that allows you to run the firmware locally to test changes.
+The MetaModule environment is built using three separate components: The VCV Rack Plugin (which includes the MetaModule patch exporter module), the Firmware for the MetaModule hardware, and the Firmware Simulator that allows you to run the firmware locally to test changes.
 
 For information about building and using these components, please follow the separate guides:
 
@@ -40,11 +40,11 @@ For information about building and using these components, please follow the sep
 
 ## Usage
 
-- [Creating Meta Module Patches With VCV](./docs/BasicVCVPatching.md)
+- [Creating MetaModule Patches With VCV](./docs/BasicVCVPatching.md)
 - [Updating Firmware](./docs/user-firmware-update.md)
 
 
 ## Contributing
 
-If you would like to port your own VCV modules to the Meta Module platform, please see the [Porting Guide](./docs/Porting.md).
+If you would like to create plugins of your own VCV modules for the MetaModule platform, please see the [Plugin Guide](./docs/Plugins.md).
 
