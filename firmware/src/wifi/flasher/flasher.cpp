@@ -202,4 +202,17 @@ esp_loader_error_t flash_process(std::span<uint8_t> buffer, bool compressed)
     }
 }
 
+esp_loader_error_t flash_finish(bool compressed)
+{
+    if (not compressed)
+    {
+        return esp_loader_flash_finish(false);
+    }
+    else
+    {
+        printf("Finishing defl flash\n");
+        return esp_loader_flash_defl_finish(false);
+    }
+}
+
 }

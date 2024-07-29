@@ -20,5 +20,6 @@ esp_loader_error_t conditional_flash(uint32_t address, std::span<const uint8_t>,
 
 esp_loader_error_t flash_start(uint32_t address, uint32_t length, uint32_t batchSize, std::optional<std::size_t> uncompressed_size);
 esp_loader_error_t flash_process(std::span<uint8_t>, bool compressed);
+esp_loader_error_t flash_finish(bool compressed);
 
 } // namespace Flasher

@@ -119,6 +119,12 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 				}
 			}
 
+			if (not error_during_writes)
+			{
+				result = Flasher::flash_finish(uncompressed_size.has_value());
+				error_during_writes = result != ESP_LOADER_SUCCESS;
+			}
+
 			if (not error_during_writes) {
 				pr_dbg("-> Flashing completed\n");
 				returnValue = {.message_type = FlashingOk};
