@@ -92,7 +92,7 @@ jobs:
       - name: Install linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build libsdl2-dev libc++-18-dev libc++abi-18-dev
+          sudo apt-get install ninja-build libsdl2-dev
       - name: 'Build'
         run: |
           cd simulator
