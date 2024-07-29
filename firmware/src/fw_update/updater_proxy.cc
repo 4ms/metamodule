@@ -161,7 +161,7 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 						current_file_name = thisFile.name;
 
 						auto result = file_storage.request_checksum_compare(
-							*target, *checksumValue, thisFile.address, thisFile.filesize, &sharedMem->bytes_processed);
+							*target, *checksumValue, thisFile.address, thisFile.uncompressed_size.value_or(thisFile.filesize), &sharedMem->bytes_processed);
 
 						if (not result) {
 							abortWithMessage("Cannot trigger comparing checksums");
