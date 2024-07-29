@@ -55,6 +55,18 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 add_subdirectory(${SHARED}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
+# Workaround for std::expected not available in clang
+# https://www.reddit.com/r/cpp/comments/1b6f3s4/any_news_on_when_libc_is_going_to_support/
+# https://github.com/llvm/llvm-project/issues/62801
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(
+    $<$<COMPILE_LANGUAGE:CXX>:-D__cpp_concepts=202002>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-builtin-macro-redefined>
+  )
+endif()
+
+
 add_executable(
     simulator 
     src/main.cc 
