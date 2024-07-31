@@ -78,6 +78,11 @@ public:
 			page_update_task();
 		}
 
+		now = HAL_GetTick();
+		if ((now - last_dbg_out) > 400) {
+			last_dbg_out = now;
+			printf("Temp: %f\n", metaparams.temperature);
+		}
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());
@@ -107,6 +112,7 @@ private:
 		new_patch_data = false;
 	}
 
+	uint32_t last_dbg_out = 0;
 	uint32_t last_page_update_tm = 0;
 	uint32_t last_lv_update_tm = 0;
 };

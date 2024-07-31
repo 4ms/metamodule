@@ -56,6 +56,7 @@ struct ParamDbgPrint {
 
 		if ((now_ticks - last_dbg_output_tm) > 2000) {
 			pr_dbg("%s", Term::ClearScreen);
+			pr_dbg("Temp: %f\n", metaparams.temperature);
 			pr_dbg("\r\nnumber of readings: %d\r\n", (int)readings);
 			readings = 0;
 

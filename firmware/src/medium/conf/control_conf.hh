@@ -55,7 +55,7 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 };
 
 using mdrivlib::AdcChannelConf;
-enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotU, PotV, PotW, PotX, PotY, PotZ };
+enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotU, PotV, PotW, PotX, PotY, PotZ, Temp };
 constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_2Cycles;
 constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::B, PinNum::_1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
@@ -70,6 +70,7 @@ constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::A, PinNum::_3}, mdrivlib::AdcChanNum::_15, PotX, AdcSampTime},
 	AdcChannelConf{{GPIO::C, PinNum::_3}, mdrivlib::AdcChanNum::_13, PotY, AdcSampTime},
 	AdcChannelConf{{GPIO::A, PinNum::_4}, mdrivlib::AdcChanNum::_18, PotZ, AdcSampTime},
+	AdcChannelConf{{GPIO::Unused}, mdrivlib::AdcChanNum::Temp, Temp, mdrivlib::AdcSamplingTime::_64Cycles},
 });
 
 constexpr int32_t MinPotValue = 72; // more like 69

@@ -29,6 +29,7 @@ void Controls::update_params() {
 		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
 			_knobs[i].set_new_value(get_pot_reading(i));
 		}
+		cur_metaparams->temperature = get_pot_reading(12);
 		_new_adc_data_ready = false;
 	}
 

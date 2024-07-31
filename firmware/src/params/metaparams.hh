@@ -29,6 +29,8 @@ struct MetaParams {
 
 	uint32_t sample_rate = 48000;
 
+	float temperature = 0.f;
+
 	MetaParams() {
 		clear();
 	}
@@ -61,6 +63,7 @@ struct MetaParams {
 		audio_load = that.audio_load;
 
 		midi_connected = that.midi_connected;
+		temperature = that.temperature;
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
@@ -83,6 +86,7 @@ struct MetaParams {
 		audio_load = that.audio_load;
 
 		midi_connected = that.midi_connected;
+		temperature = that.temperature;
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
