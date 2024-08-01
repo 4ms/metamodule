@@ -39,6 +39,11 @@ TEST_CASE("Parse settings file") {
   audio:
     sample_rate: 96000
     block_size: 128
+
+  plugin_autoload:
+    - Plugin One
+    - Plugin Two
+
 )";
 	// clang format-on
 
@@ -70,6 +75,9 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.audio.sample_rate == 96000);
 	CHECK(settings.audio.block_size == 128);
+
+	CHECK(settings.plugin_autoload.slug.at(0) == "Plugin One");
+	CHECK(settings.plugin_autoload.slug.at(1) == "Plugin Two");
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -120,6 +128,11 @@ TEST_CASE("Get default settings if file is missing fields") {
     block_size: 16
 )";
 	}
+	SUBCASE("Empty Autoload:") {
+		yaml = R"(Settings:
+  plugin_autoload: []
+)";
+	}
 
 	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
@@ -151,6 +164,8 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.audio.sample_rate == 48000);
 	CHECK(settings.audio.block_size == 64);
+
+	CHECK(settings.plugin_autoload.slug.size() == 0);
 }
 
 TEST_CASE("Serialize settings") {
@@ -181,6 +196,9 @@ TEST_CASE("Serialize settings") {
 
 	settings.audio.sample_rate = 24000;
 	settings.audio.block_size = 512;
+
+	settings.plugin_autoload.slug.emplace_back("Plugin One");
+	settings.plugin_autoload.slug.emplace_back("Plugin Two");
 
 	// clang format-off
 	std::string expected = R"(Settings:
@@ -213,6 +231,9 @@ TEST_CASE("Serialize settings") {
   audio:
     sample_rate: 24000
     block_size: 512
+  plugin_autoload:
+    - Plugin One
+    - Plugin Two
 )";
 	// clang format-on
 
