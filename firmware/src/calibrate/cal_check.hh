@@ -23,7 +23,12 @@ struct CalCheck {
 		lv_hide(ui_SystemCalCheckButton);
 		lv_hide(ui_SystemResetInternalPatchesCont);
 		lv_hide(ui_CalibrationOutputStatusCont);
-		lv_hide(ui_CalibrationButtonCont);
+
+		lv_show(ui_CalibrationButtonCont);
+		lv_show(ui_CalibrationMeasurementLabel);
+		lv_hide(ui_CalibrationCancelButton);
+		lv_hide(ui_CalibrationNextButton);
+
 		lv_hide(ui_SystemHardwareCheckCont);
 
 		lv_show(ui_CalibrationProcedureCont);
@@ -33,10 +38,11 @@ struct CalCheck {
 		if (indev && indev->group) {
 			lv_group_focus_next(indev->group);
 		}
+		lv_label_set_text(ui_SystemCalibrationTitle, "CHECK CALIBRATION");
 
 		lv_label_set_text(ui_CalibrationInstructionLabel,
-						  "Knob A sets the voltage on all output jacks, from -10V to +10V in 1.0V steps.\nInput jack "
-						  "readings are shown below:");
+						  "Knob A sets the voltage on all output jacks, from -10V to +10V in 1.0V steps.");
+		// "Input jack readings are shown below:");
 
 		for (unsigned chan = 0; chan < PanelDef::NumAudioIn; chan++) {
 			auto *label = input_status_labels[chan];
@@ -57,6 +63,10 @@ struct CalCheck {
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_show(ui_SystemHardwareCheckCont);
+
+		lv_show(ui_CalibrationCancelButton);
+		lv_show(ui_CalibrationNextButton);
+		lv_hide(ui_CalibrationButtonCont);
 
 		lv_group_focus_obj(ui_SystemCalCheckButton);
 		visible = false;
@@ -87,6 +97,8 @@ private:
 				set_input_plugged(chan, false);
 			}
 		}
+
+		lv_label_set_text_fmt(ui_CalibrationMeasurementLabel, "T: %f", (double)metaparams.temperature);
 	}
 
 	void set_input_plugged(unsigned chan, bool plugged) {

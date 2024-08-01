@@ -91,6 +91,8 @@ struct CalibrationRoutine {
 		lv_show(ui_CalibrationMeasurementLabel);
 		lv_show(ui_CalibrationProcedureCont);
 
+		lv_label_set_text(ui_SystemCalibrationTitle, "CALIBRATE CV JACKS");
+
 		lv_group_focus_obj(ui_CalibrationCancelButton);
 
 		lv_label_set_text(ui_CalibrationInstructionLabel,

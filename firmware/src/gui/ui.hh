@@ -78,11 +78,13 @@ public:
 			page_update_task();
 		}
 
-		now = HAL_GetTick();
-		if ((now - last_dbg_out) > 400) {
-			last_dbg_out = now;
-			printf("Temp: %f\n", metaparams.temperature);
-		}
+		// now = HAL_GetTick();
+		// if ((now - last_dbg_out) > 1000) {
+		// 	last_dbg_out = now;
+		// 	printf("Temp: %f\n", metaparams.temperature);
+		// 	std::string tmp = "Temp " + std::to_string(metaparams.temperature);
+		// 	notify_queue.put({tmp, Notification::Priority::Info, 500});
+		// }
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
 		// print_dbg_params.output_load(HAL_GetTick());
