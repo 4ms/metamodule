@@ -29,7 +29,7 @@ void Controls::update_params() {
 		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
 			_knobs[i].set_new_value(get_pot_reading(i));
 		}
-		cur_metaparams->temperature = get_pot_reading(12);
+		cur_metaparams->temperature = temp_val[0];
 		_new_adc_data_ready = false;
 	}
 
@@ -202,6 +202,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 	set_samplerate(sample_rate);
 
 	pot_adc.start();
+	temp_adc.start();
 
 	extaudio_jacksense_reader.start();
 

@@ -65,6 +65,9 @@ private:
 	std::array<uint16_t, NumPotAdcs> pot_vals{};
 	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
+	std::array<uint16_t, 1> temp_val{};
+	mdrivlib::AdcDmaPeriph<TempAdcConf> temp_adc{temp_val, TempChanConf};
+
 	InterpParamVariable<float> _knobs[PanelDef::NumPot]{};
 	static constexpr uint32_t AdcReadFrequency = 580; //measured
 	bool _new_adc_data_ready = false;
