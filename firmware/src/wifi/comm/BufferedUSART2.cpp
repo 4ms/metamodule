@@ -13,6 +13,7 @@
 
 static mdrivlib::Uart<WifiUartConfig> commMain;
 LockFreeFifoSpsc<uint8_t,256> BufferedUSART2::queue;
+std::atomic_bool BufferedUSART2::overrunDetected;
 
 #define USART_PERIPH        UART5
 #define USART_IRQ           UART5_IRQn
@@ -48,13 +49,18 @@ void BufferedUSART2::initPeripheral()
                 auto result = queue.put(val);
                 if (not result)
                 {
+                    queue.reset();
                     pr_warn("USART2: RX Soft Overrun\n");
+                    overrunDetected = true;
+                    break;
                 }
             }
             while (LL_USART_IsActiveFlag_RXNE(USART_PERIPH));
         }
         else if (LL_USART_IsActiveFlag_ORE(USART_PERIPH))
 		{
+            queue.reset();
+            overrunDetected = true;
             pr_warn("USART2: FIFO Overrun\n");
 			LL_USART_ClearFlag_ORE(USART_PERIPH);
 		}

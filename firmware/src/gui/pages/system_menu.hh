@@ -19,6 +19,7 @@ struct SystemMenuPage : PageBase {
 
 	SystemMenuPage(PatchContext info)
 		: PageBase{info, PageId::SystemMenu}
+		, info_tab{patch_storage}
 		, plugin_tab{info.plugin_manager, info.notify_queue}
 		, prefs_tab{info.patch_playloader, info.settings.audio, gui_state}
 		, system_tab{patch_storage, params, metaparams, patch_playloader, patch_mod_queue}

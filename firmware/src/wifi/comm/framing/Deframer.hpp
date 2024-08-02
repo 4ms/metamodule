@@ -31,13 +31,13 @@ void Deframer<IMPL>::parse(uint8_t thisByte, const FUNC&& func)
 	{
 		if (thisByte == Configuration.start)
 		{
-			impl->doReset(func);
+			impl->doReset();
 			state = WAIT_HEADER;
 		}
 		else if (thisByte == Configuration.end)
 		{
 			impl->doComplete(func);
-			impl->doReset(func);
+			impl->doReset();
 			state = WAIT_HEADER;
 		}
 		else if (thisByte == Configuration.escape)

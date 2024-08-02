@@ -10,6 +10,7 @@ MEMORY
     SHAREDMEMINDEX (RW) : ORIGIN = _M4_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
     m_data         (RW) : ORIGIN = _M4_RODATA,      LENGTH = _M4_RODATA_SZ
     HEAP           (RW) : ORIGIN = _M4_HEAP,        LENGTH = _M4_HEAP_SZ
+    WIFI           (RW) : ORIGIN = _M4_WIFI_BUF,    LENGTH = _M4_WIFI_BUF_SZ
 }
 
 _estack = _M4_STACK_END;
@@ -158,7 +159,13 @@ SECTIONS
 	_eheap = .;
   } > HEAP
 
-  
+  .wifi (NOLOAD):
+  {
+  . = ALIGN(8);
+  _swifi = .;
+  *(.wifi)
+  _ewifi = .;
+  } > WIFI
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :

@@ -19,7 +19,7 @@ constexpr inline UartConf WifiUartConfig{
 	.TXPin = {mdrivlib::GPIO::B, mdrivlib::PinNum::_13, mdrivlib::PinAF::AltFunc14},
 	.RXPin = {mdrivlib::GPIO::B, mdrivlib::PinNum::_12, mdrivlib::PinAF::AltFunc14},
 	.mode = UartConf::Mode::TXRX,
-	.baud = 115200, // 230400, 921600
+	.baud = 921600, // 230400, 921600
 	.wordlen = 8,
 	.parity = UartConf::Parity::None,
 	.stopbits = UartConf::StopBits::_1,
