@@ -1,5 +1,6 @@
 #pragma once
 #include "util/callable.hh"
+#include <memory>
 
 namespace MetaModule
 {
@@ -16,7 +17,8 @@ public:
 
 private:
 	Callback action{};
-	unsigned id{};
+	struct Internal;
+	std::unique_ptr<Internal> internal;
 };
 
 } // namespace MetaModule

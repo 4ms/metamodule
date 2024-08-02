@@ -3,7 +3,6 @@
 #include "bank_blink.hh"
 #include "controls.hh"
 #include "flags.hh"
-// #include "log.hh"
 #include "palette.hh"
 #include "settings.hh"
 
@@ -33,6 +32,8 @@ struct Leds {
 	Color last_bank_color = Colors::off;
 
 	bool is_writing_index = false;
+
+	float framerate_compensation = 3.f;
 
 	void update(LedCriteria state, uint32_t cur_time) {
 		const OperationMode &op_mode = state.op_mode;
@@ -109,6 +110,7 @@ struct Leds {
 			controls.bank_led.reset_breathe();
 		}
 
+#ifndef METAMODULE
 		if (flags.take(Flag::CVCalibrateAllJacksAnimate)) {
 			controls.rev_led.fade_once_ms(Colors::green, 500);
 			controls.bank_led.fade_once_ms(Colors::green, 500);
@@ -128,23 +130,24 @@ struct Leds {
 			controls.bank_led.fade_once_ms(Colors::red, 1000);
 			controls.play_led.fade_once_ms(Colors::red, 1000);
 		}
+#endif
 
 		if (flags.take(Flag::ToggleStereoModeAnimate)) {
 			if (stereo_mode) {
 				// mono->stereo
-				controls.rev_led.fade_once_ms(Colors::cyan, 500);
-				controls.bank_led.fade_once_ms(Colors::black, 500);
+				controls.rev_led.fade_once_ms(Colors::cyan, 500 * framerate_compensation);
+				controls.bank_led.fade_once_ms(Colors::black, 500 * framerate_compensation);
 			} else {
 				// stereo -> mono
-				controls.play_led.fade_once_ms(Colors::white, 500);
+				controls.play_led.fade_once_ms(Colors::white, 500 * framerate_compensation);
 			}
 		}
 
 		if (!is_writing_index && (flags.read(Flag::WriteSettingsToSD) || flags.read(Flag::WriteIndexToSD))) {
 			is_writing_index = true;
-			controls.bank_led.fade_once_ms(Colors::white, 200);
-			controls.play_led.fade_once_ms(Colors::white, 200);
-			controls.rev_led.fade_once_ms(Colors::white, 200);
+			controls.bank_led.fade_once_ms(Colors::white, 200 * framerate_compensation);
+			controls.play_led.fade_once_ms(Colors::white, 200 * framerate_compensation);
+			controls.rev_led.fade_once_ms(Colors::white, 200 * framerate_compensation);
 		} else if (is_writing_index) {
 			is_writing_index = false;
 			controls.bank_led.reset_breathe();
@@ -153,20 +156,24 @@ struct Leds {
 		}
 
 		// Sample Slot Change
-		if (flags.take(Flag::PlaySampleChangedValid))
-			controls.play_led.flash_once_ms(Colors::white, 20);
-		if (flags.take(Flag::PlaySampleChangedValidBright))
-			controls.play_led.flash_once_ms(Colors::white, 120);
-		if (flags.take(Flag::PlaySampleChangedEmpty))
-			controls.play_led.flash_once_ms(Colors::red, 20);
-		if (flags.take(Flag::PlaySampleChangedEmptyBright))
-			controls.play_led.flash_once_ms(Colors::red, 120);
+		if (flags.take(Flag::PlaySampleChangedValid)) {
+			controls.play_led.flash_once_ms(Colors::white, 20 * framerate_compensation);
+		}
+		if (flags.take(Flag::PlaySampleChangedValidBright)) {
+			controls.play_led.flash_once_ms(Colors::white, 120 * framerate_compensation);
+		}
+		if (flags.take(Flag::PlaySampleChangedEmpty)) {
+			controls.play_led.flash_once_ms(Colors::red, 20 * framerate_compensation);
+		}
+		if (flags.take(Flag::PlaySampleChangedEmptyBright)) {
+			controls.play_led.flash_once_ms(Colors::red, 20 * framerate_compensation);
+		}
 	}
 
 	void animate_startup() {
 		// Startup sequence
 		if (flags.take(Flag::StartupParsing))
-			controls.rev_led.flash_once_ms(Colors::yellow, 100);
+			controls.rev_led.flash_once_ms(Colors::yellow, 100 * framerate_compensation);
 		if (flags.take(Flag::StartupLoadingIndex)) {
 			controls.bank_led.set_base_color(Colors::orange);
 			controls.bank_led.breathe(SamplerColors::Bank::purple, 1);

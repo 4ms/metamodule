@@ -63,23 +63,21 @@ template<WavChan Chan>
 inline int32_t get_sample(uint32_t addr) {
 	wait_memory_ready();
 
-	int16_t r;
+	struct StereoSample {
+		int16_t L;
+		int16_t R;
+	};
+	auto rd = *((StereoSample *)(addr));
 
 	if constexpr (Chan == WavChan::Left || Chan == WavChan::Mono) {
-		r = *((int16_t *)addr);
-		return ((int32_t)r) * 256;
+		return (int32_t)rd.L * 256;
 
 	} else if constexpr (Chan == WavChan::Right) {
-		r = *((int16_t *)(addr + 2));
-		return ((int32_t)r) * 256;
+		return (int32_t)rd.R * 256;
 
 	} else {
 		// Average:
-		uint32_t rd = (*((uint32_t *)addr));
-		int16_t a = (rd >> 16);
-		int16_t b = (rd & 0x0000FFFF);
-		int32_t t = a + b;
-		return t * 128; //*256 and averaged is /2
+		return ((int32_t)rd.L + (int32_t)rd.R) * 128;
 	}
 }
 

@@ -1,8 +1,8 @@
 #pragma once
+#include "elements.hh"
 #include "util/debouncer.hh"
 #include "util/rgbled.hh"
 #include <cstdint>
-#include <limits>
 
 namespace SamplerKit::Mocks
 {
@@ -12,12 +12,24 @@ struct TrigIn : public Debouncer<0b0001, 0b1110, 0b1111> {
 	}
 };
 
-struct Button : public DebouncerCounter<0b01, 0b10, 0b11> {
+struct Button : public Toggler {
 	void update() {
 	}
 
-	void sideload_set(bool newVal) {
-		register_state(newVal);
+	void sideload_set(bool new_state) {
+		if (!last_state && new_state) {
+			register_rising_edge();
+			steady_state_ctr = 0;
+
+		} else if (last_state && !new_state) {
+			register_falling_edge();
+			steady_state_ctr = 0;
+
+		} else {
+			set_state_no_events(new_state);
+			steady_state_ctr++;
+		}
+		last_state = new_state;
 	}
 
 	unsigned how_long_held() {
@@ -31,6 +43,11 @@ struct Button : public DebouncerCounter<0b01, 0b10, 0b11> {
 	void reset_hold_ctr() {
 		steady_state_ctr = 0;
 	}
+
+	unsigned steady_state_ctr = 0;
+
+private:
+	bool last_state = false;
 };
 
 struct OutputPin {
@@ -72,6 +89,6 @@ struct LedElement {
 	}
 };
 
-using RgbLed = MixedRgbLed<LedElement, LedElement, LedElement>;
+using RgbLed = MixedRgbLed<LedElement, LedElement, LedElement, LEDUpdateRateHz>;
 
 } // namespace SamplerKit::Mocks

@@ -34,7 +34,7 @@ enum { FirmwareMinorVersion = 3 };
 
 enum { MaxNumBanks = 60 };
 enum { NumSamplesPerBank = 10 };
-enum { LEDUpdateRateHz = 93 };
+static constexpr unsigned LEDUpdateRateHz = 120;
 
 constexpr inline uint32_t BASE_BUFFER_THRESHOLD = 64 * 3;
 

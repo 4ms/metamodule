@@ -43,7 +43,10 @@ public:
 		// 	sampler.recorder.record_audio_to_buffer(inblock);
 		if (++out_buf_pos >= outblock.size()) {
 			out_buf_pos = 0;
-			params.update(uint32_t(tm));
+			params.update(tm);
+#ifndef METAMODULE
+			sampler.recorder.record_audio_to_buffer(inblock);
+#endif
 			sampler.audio.update(inblock, outblock);
 		}
 	}

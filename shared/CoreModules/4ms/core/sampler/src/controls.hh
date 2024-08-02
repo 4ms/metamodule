@@ -37,7 +37,7 @@ public:
 
 	Mocks::LED playing_led; //TODO not in Sampler, only STS
 
-	uint32_t sample_rate = 48000;
+	float sample_rate = 48000.f;
 	uint32_t led_throttle_ctr = 0;
 
 	uint16_t read_pot(PotAdcElement adcnum) {
@@ -52,9 +52,10 @@ public:
 	}
 
 	void set_samplerate(float sr) {
-		sample_rate = std::round(sr);
+		sample_rate = sr;
 	}
 
+	// Called every SampleRate / BlockSize (3k default)
 	void update() {
 		play_button.update();
 		rev_button.update();
@@ -62,8 +63,9 @@ public:
 		play_jack.update();
 		rev_jack.update();
 
-		uint32_t led_throttle = sample_rate / LEDUpdateRateHz;
-		if (led_throttle_ctr++ > led_throttle) {
+		// LED animations are updated every LEDUpdateRateHz
+		unsigned led_throttle = (sample_rate / AudioStreamConf::BlockSize) / LEDUpdateRateHz;
+		if (++led_throttle_ctr >= led_throttle) {
 			led_throttle_ctr = 0;
 			play_led.update_animation();
 			rev_led.update_animation();

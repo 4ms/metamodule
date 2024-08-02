@@ -8,6 +8,10 @@
 namespace MetaModule
 {
 
+struct AsyncThread::Internal {
+	unsigned id = 0;
+};
+
 namespace //anonymous
 {
 
@@ -41,10 +45,13 @@ uint32_t core() {
 
 } // namespace
 
-AsyncThread::AsyncThread() = default;
+AsyncThread::AsyncThread()
+	: internal{new Internal} {
+}
 
 AsyncThread::AsyncThread(Callback &&new_action)
-	: action(std::move(new_action)) {
+	: action(std::move(new_action))
+	, internal{new Internal} {
 }
 
 void AsyncThread::start(unsigned module_id) {
@@ -52,11 +59,11 @@ void AsyncThread::start(unsigned module_id) {
 		auto &tasks = core() == 1 ? tasks_core1 : tasks_core0;
 
 		if (module_id < tasks.size()) {
-			id = module_id;
+			internal->id = module_id;
 
-			tasks[id].action = action;
+			tasks[internal->id].action = action;
 			__DSB();
-			tasks[id].enabled = true;
+			tasks[internal->id].enabled = true;
 			__DSB();
 		}
 	}
@@ -69,8 +76,8 @@ void AsyncThread::start(unsigned module_id, Callback &&new_action) {
 
 AsyncThread::~AsyncThread() {
 	auto &tasks = core() == 1 ? tasks_core1 : tasks_core0;
-	if (id < tasks.size()) {
-		tasks[id].enabled = false;
+	if (internal->id < tasks.size()) {
+		tasks[internal->id].enabled = false;
 		__DSB();
 	}
 }
