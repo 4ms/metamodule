@@ -29,12 +29,9 @@ struct PluginTab : SystemMenuTab {
 		lv_show(ui_PluginScanButton);
 		lv_hide(ui_PluginsFoundCont);
 		lv_hide(ui_PluginTabSpinner);
-		lv_group_add_obj(this->group, ui_PluginScanButton);
 
-		lv_foreach_child(ui_PluginsLoadedCont, [this](auto *obj, unsigned) {
-			lv_group_add_obj(this->group, obj);
-			return true;
-		});
+		clear_found_list();
+		reset_group();
 		lv_group_focus_obj(ui_PluginScanButton);
 	}
 
@@ -48,7 +45,6 @@ struct PluginTab : SystemMenuTab {
 
 			clear_found_list();
 
-			bool first_item = true;
 			auto *found_plugins = plugin_manager.found_plugin_list();
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
@@ -61,12 +57,7 @@ struct PluginTab : SystemMenuTab {
 				if (!plugin_already_loaded(pluginname)) {
 
 					lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, pluginname.c_str());
-					lv_group_add_obj(group, plugin_obj);
 
-					if (first_item) {
-						lv_group_focus_obj(plugin_obj);
-						first_item = false;
-					}
 
 					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx + 1));
 					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
@@ -77,6 +68,8 @@ struct PluginTab : SystemMenuTab {
 
 				idx++;
 			}
+			reset_group();
+			lv_group_focus_obj(lv_obj_get_child(ui_PluginsFoundCont, 0));
 		}
 
 		else if (result.state == PluginFileLoader::State::Success)
@@ -106,6 +99,20 @@ struct PluginTab : SystemMenuTab {
 	}
 
 private:
+	void reset_group() {
+		lv_group_remove_all_objs(group);
+		lv_group_add_obj(group, lv_tabview_get_tab_btns(ui_SystemMenuTabView));
+		lv_group_add_obj(group, ui_PluginScanButton);
+		lv_foreach_child(ui_PluginsFoundCont, [this](auto *obj, unsigned) {
+			lv_group_add_obj(this->group, obj);
+			return true;
+		});
+		lv_foreach_child(ui_PluginsLoadedCont, [this](auto *obj, unsigned) {
+			lv_group_add_obj(this->group, obj);
+			return true;
+		});
+	}
+
 	void clear_loaded_list() {
 		lv_foreach_child(ui_PluginsLoadedCont, [](auto *obj, unsigned) {
 			lv_obj_del_async(obj);
