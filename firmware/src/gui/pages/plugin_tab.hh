@@ -30,6 +30,18 @@ struct PluginTab : SystemMenuTab {
 		lv_hide(ui_PluginsFoundCont);
 		lv_hide(ui_PluginTabSpinner);
 
+		const auto &loaded_plugins = plugin_manager.loaded_plugins();
+		if (!lv_obj_get_child_cnt(ui_PluginsLoadedCont) && loaded_plugins.size()) {
+			// plugins were autoloaded on startup, they need to be added to the loaded plugin list.
+			for (auto &p : loaded_plugins) {
+				auto pluginname = p.fileinfo.plugin_name;
+				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
+				lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
+				lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
+				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
+			}
+		}
+
 		clear_found_list();
 		reset_group();
 		lv_group_focus_obj(ui_PluginScanButton);
