@@ -20,8 +20,14 @@ public:
 private:
 	// Run this in the low-pri thread:
 	AsyncThread fs_thread{[this]() {
-		if (tm - last_tm >= 1.0f) {
-			// DebugPin1High();
+		if (!index_is_loaded) {
+			printf("Loading index from %s\n", index_file.data());
+			sd.reload_disk(index_file);
+			index_loader.load_all_banks();
+			index_is_loaded = true;
+		}
+
+		if (tm - last_tm >= 1) {
 			last_tm = tm;
 			chanL.fs_process(tm);
 			chanR.fs_process(tm);
@@ -51,7 +57,19 @@ public:
 	}
 
 	void set_param(int param_id, float val) override {
-		if (chanL.set_param(param_id, val))
+		if (param_id == CoreHelper<Info>::param_index<AltParamStereoMode>())
+			settings.stereo_mode = val < 0.5f;
+
+		else if (param_id == CoreHelper<Info>::param_index<AltParamStereoMode>()) {
+			auto new_index_file = root_name(val);
+			if (new_index_file != index_file) {
+				index_file = new_index_file;
+				index_is_loaded = false;
+				printf("Changing index to %s\n", index_file.data());
+			}
+		}
+
+		else if (chanL.set_param(param_id, val))
 			return;
 		else
 			chanR.set_param(param_id, val);
@@ -65,6 +83,8 @@ public:
 	}
 
 	float get_output(int output_id) const override {
+		//TODO: if chanR is not patched, feed mono to chan L
+
 		if (output_id == OutL) {
 			return chanL.get_output(OutL).value_or(0) + chanR.get_output(OutL).value_or(0);
 
@@ -95,6 +115,11 @@ public:
 
 		else
 			return 0.f;
+	}
+
+	std::string_view root_name(float val) {
+		unsigned index = std::clamp<unsigned>(std::round(val * 4.f), 0, 3);
+		return index_files[index];
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -180,6 +205,18 @@ private:
 
 	SamplerChannel chanL{MappingL, sd, banks, settings, cal_storage};
 	SamplerChannel chanR{MappingR, sd, banks, settings, cal_storage};
+
+	SamplerKit::Flags index_flags;
+	std::atomic<bool> index_is_loaded = false;
+	SamplerKit::SampleIndexLoader index_loader{sd, samples, banks, index_flags};
+
+	static constexpr std::array<std::string_view, 4> index_files = {
+		"_STS.system/sample_index.dat",
+		"Samples-1/_STS.system/sample_index.dat",
+		"Samples-2/_STS.system/sample_index.dat",
+		"Samples-3/_STS.system/sample_index.dat",
+	};
+	std::string_view index_file = index_files[0];
 };
 
 } // namespace MetaModule

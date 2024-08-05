@@ -18,15 +18,9 @@ struct Sdcard : MetaModule::FS {
 		: FS(root) {
 	}
 
-	void reload() {
-	}
-
-	bool reload_disk() {
-		// if (!sdcard.mount_disk()) {
-		// 	err_cant_mount = true;
-		// 	return false;
-		// }
-		return true;
+	bool reload_disk(std::string_view root_dir = "") {
+		std::string_view rt = root_dir.size() ? root_dir : SAMPLE_INDEX_FILE_PATH;
+		return find_valid_root(rt);
 	}
 
 	//
