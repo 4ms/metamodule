@@ -20,6 +20,7 @@ class Ui {
 private:
 	SyncParams &sync_params;
 	PatchPlayLoader &patch_playloader;
+	PluginManager &plugin_manager;
 
 	NotificationQueue notify_queue;
 	PageManager page_manager;
@@ -38,6 +39,7 @@ public:
 	   PluginManager &plugin_manager)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
+		, plugin_manager{plugin_manager}
 		, page_manager{patch_storage,
 					   open_patch_manager,
 					   patch_playloader,
@@ -90,12 +92,12 @@ public:
 
 	bool new_patch_data = false;
 
-	static void autoload_plugins(Ui &ui, PluginManager &plugin_manager) {
-		const auto &settings = ui.settings.plugin_autoload;
+	void autoload_plugins() {
+		const auto &plugin_settings = settings.plugin_autoload;
 
 		pr_info("Autoload: Starting...\n");
 
-		if (settings.slug.size() == 0) {
+		if (plugin_settings.slug.size() == 0) {
 			pr_info("Autoload: No plugins to load\n");
 			return;
 		}
@@ -113,7 +115,7 @@ public:
 
 		const auto found_plugins = plugin_manager.found_plugin_list();
 
-		for (const auto &s : settings.slug) {
+		for (const auto &s : plugin_settings.slug) {
 			pr_info("Autoload: Looking for plugin: %s\n", s.c_str());
 			const auto match = std::find_if(found_plugins->begin(), found_plugins->end(), [s](PluginFile const &f) {
 				const auto &plugin_name = std::string{std::string_view{f.plugin_name}};

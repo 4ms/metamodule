@@ -98,7 +98,7 @@ extern "C" void aux_core_main() {
 
 	HAL_Delay(300); //allow time to load initial patch: TODO use semaphor
 
-	Ui::autoload_plugins(ui, plugin_manager);
+	ui.autoload_plugins();
 
 	while (true) {
 		ui.update();
