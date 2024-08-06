@@ -70,7 +70,7 @@ void Plugin::addModel(Model *model) {
 	// 	}
 	// }
 
-	MetaModule::ModuleInfoView info;
+	ModuleInfoView info;
 	info.elements = model->elements;
 	info.description = slug;
 	info.width_hp = 1; //TODO: deprecate width_hp
@@ -91,8 +91,10 @@ Plugin::~Plugin() {
 		// In VCV Rack: don't delete model because it's allocated once and referenced by a global.
 
 		// In MetaModule: we need to delete the models when the Plugin is removed
-		// pr_dbg("Deleting Model %s\n", model->slug.c_str());
+		pr_dbg("Deleting Model %s\n", model->slug.c_str());
 		delete model;
+
+		MetaModule::ModuleFactory::unregisterBrand(slug);
 	}
 }
 
