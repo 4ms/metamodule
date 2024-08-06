@@ -23,7 +23,8 @@ struct ChoicePopup : ConfirmPopup {
 		ConfirmPopup::init(page_base, current_group);
 	}
 
-	void show(auto cb, const char *message, std::string_view confirm_text, const char *options) {
+	void show(
+		auto cb, const char *message, std::string_view confirm_text, const char *options, const unsigned init_idx = 0) {
 		ConfirmPopup::show(std::move(cb), message, confirm_text, "");
 		lv_obj_set_width(ui_DelMapLabel, 220);
 
@@ -38,6 +39,7 @@ struct ChoicePopup : ConfirmPopup {
 
 		lv_show(dropdown);
 		lv_dropdown_set_options(dropdown, options);
+		lv_dropdown_set_selected(dropdown, init_idx);
 
 		remove_all_event_cb(ui_CancelButton);
 		lv_obj_add_event_cb(ui_CancelButton, button_callback, LV_EVENT_CLICKED, this);
