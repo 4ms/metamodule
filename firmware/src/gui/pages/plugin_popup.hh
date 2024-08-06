@@ -45,6 +45,7 @@ struct PluginPopup {
 
 		lv_show(ui_DelMapPopUpPanel);
 
+		lv_label_set_text(ui_CancelLabel, "Close");
 		lv_label_set_text(ui_DelMapLabel, message);
 
 		_button_callback = std::move(button_cb);

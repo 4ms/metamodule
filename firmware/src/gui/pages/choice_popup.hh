@@ -47,6 +47,8 @@ struct ChoicePopup : ConfirmPopup {
 		lv_obj_add_event_cb(ui_ConfirmButton, button_callback, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, dropdown);
+
+		lv_label_set_text(ui_CancelLabel, "Cancel");
 	}
 
 	void hide() {

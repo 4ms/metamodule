@@ -38,6 +38,7 @@ struct ConfirmPopup {
 
 		lv_show(ui_DelMapPopUpPanel);
 
+		lv_label_set_text(ui_CancelLabel, "Cancel");
 		lv_label_set_text(ui_DelMapLabel, message);
 
 		callback = std::move(cb);
