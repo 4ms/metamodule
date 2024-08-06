@@ -18,11 +18,13 @@ struct PluginTab : SystemMenuTab {
 	PluginTab(PluginManager &plugin_manager,
 			  PluginAutoloadSettings &settings,
 			  NotificationQueue &notify_queue,
-			  GuiState &gui_state)
+			  GuiState &gui_state,
+			  PatchPlayLoader &play_loader)
 		: plugin_manager{plugin_manager}
 		, notify_queue{notify_queue}
 		, settings{settings}
-		, gui_state{gui_state} {
+		, gui_state{gui_state}
+		, play_loader{play_loader} {
 
 		clear_loaded_list();
 		clear_found_list();
@@ -86,7 +88,6 @@ struct PluginTab : SystemMenuTab {
 				if (!plugin_already_loaded(pluginname)) {
 
 					lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, pluginname.c_str());
-
 
 					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx + 1));
 					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
@@ -179,6 +180,12 @@ private:
 		return false;
 	}
 
+	void unload_plugin(std::string_view plugin_name) {
+		play_loader.prepare_remove_plugin(plugin_name);
+		plugin_manager.unload_plugin(plugin_name);
+		gui_state.force_redraw_patch = true;
+	}
+
 	static void query_loaded_plugin_cb(lv_event_t *event) {
 		auto page = static_cast<PluginTab *>(event->user_data);
 		if (!page)
@@ -201,7 +208,7 @@ private:
 					page->gui_state.do_write_settings = true;
 
 					pr_info("Unload Plugin: %s\n", plugin_name.data());
-					page->plugin_manager.unload_plugin(plugin_name);
+					page->unload_plugin(plugin_name);
 					lv_obj_del_async(target);
 				},
 				(plugin_name + '\n' + "Autoload: Enabled").c_str(),
@@ -214,7 +221,7 @@ private:
 
 					if (opt == 1) {
 						pr_info("Unload Plugin: %s\n", plugin_name.data());
-						page->plugin_manager.unload_plugin(plugin_name);
+						page->unload_plugin(plugin_name);
 						lv_obj_del_async(target);
 					} else {
 						pr_info("Set Autoload Enabled: %s\n", plugin_name.data());
@@ -268,6 +275,7 @@ private:
 	NotificationQueue &notify_queue;
 	PluginAutoloadSettings &settings;
 	GuiState &gui_state;
+	PatchPlayLoader &play_loader;
 	ConfirmPopup confirm_popup;
 
 	lv_obj_t *load_in_progress_obj = nullptr;

@@ -29,7 +29,7 @@ public:
 	}
 
 	void unload_plugin(std::string_view name) {
-		// TODO
+		loaded_plugin_list.remove_if([&](LoadedPlugin &plugin) { return (plugin.fileinfo.plugin_name == name); });
 	}
 
 	auto process_loading() {
