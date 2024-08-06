@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 //C and C++
