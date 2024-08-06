@@ -155,4 +155,9 @@ std::vector<BrandTypeSlug> ModuleFactory::getAllBrands() {
 	return brands;
 }
 
+bool ModuleFactory::unregisterBrand(std::string_view brand_name) {
+	auto removed = registry().remove_if([=](BrandRegistry &reg) { return reg.brand_name == brand_name; });
+	return removed > 0;
+}
+
 } // namespace MetaModule

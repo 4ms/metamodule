@@ -39,6 +39,8 @@ public:
 
 	static std::vector<ModuleTypeSlug> getAllSlugs(std::string_view brand);
 	static std::vector<ModuleTypeSlug> getAllBrands();
+
+	static bool unregisterBrand(std::string_view brand_name);
 };
 
 } // namespace MetaModule
