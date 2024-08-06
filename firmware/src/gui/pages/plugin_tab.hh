@@ -2,8 +2,8 @@
 #include "conf/plugin_autoload_settings.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
-#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/plugin_popup.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
@@ -197,42 +197,30 @@ private:
 		const auto autoload_slot = std::find(page->settings.slug.begin(), page->settings.slug.end(), plugin_name);
 		const auto is_autoloaded = autoload_slot != page->settings.slug.end();
 
-		if (is_autoloaded) {
-			page->confirm_popup.show(
-				[page, plugin_name, autoload_slot, target](bool opt) {
-					if (!opt)
-						return;
+		page->confirm_popup.show(
+			[page, plugin_name, target](uint8_t opt) {
+				if (!opt)
+					return;
 
-					pr_info("Set Autoload Disabled: %s\n", plugin_name.data());
-					page->settings.slug.erase(autoload_slot);
-					page->gui_state.do_write_settings = true;
-
+				if (opt == 1) {
 					pr_info("Unload Plugin: %s\n", plugin_name.data());
 					page->unload_plugin(plugin_name);
 					lv_obj_del_async(target);
-				},
-				(plugin_name + '\n' + "Autoload: Enabled").c_str(),
-				"Unload");
-		} else {
-			page->confirm_popup.show(
-				[page, plugin_name, target](uint8_t opt) {
-					if (!opt)
-						return;
-
-					if (opt == 1) {
-						pr_info("Unload Plugin: %s\n", plugin_name.data());
-						page->unload_plugin(plugin_name);
-						lv_obj_del_async(target);
-					} else {
-						pr_info("Set Autoload Enabled: %s\n", plugin_name.data());
-						page->settings.slug.push_back(plugin_name);
-						page->gui_state.do_write_settings = true;
-					}
-				},
-				(plugin_name + '\n' + "Autoload: Disabled").c_str(),
-				"Unload",
-				"Autoload");
-		}
+				}
+			},
+			[page, plugin_name, autoload_slot](bool opt) {
+				if (opt) {
+					pr_info("Set Autoload Enabled: %s\n", plugin_name.data());
+					page->settings.slug.push_back(plugin_name);
+				} else {
+					pr_info("Set Autoload Disabled: %s\n", plugin_name.data());
+					page->settings.slug.erase(autoload_slot);
+				}
+				page->gui_state.do_write_settings = true;
+			},
+			plugin_name.c_str(),
+			"Unload",
+			is_autoloaded);
 	}
 
 	static void scan_plugins_cb(lv_event_t *event) {
@@ -276,7 +264,7 @@ private:
 	PluginAutoloadSettings &settings;
 	GuiState &gui_state;
 	PatchPlayLoader &play_loader;
-	ConfirmPopup confirm_popup;
+	PluginPopup confirm_popup;
 
 	lv_obj_t *load_in_progress_obj = nullptr;
 
