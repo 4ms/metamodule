@@ -209,6 +209,17 @@ public:
 		}
 	}
 
+	void close_playing_patch() {
+		if (open_patches_.remove(playing_patch_->loc_hash)) {
+			if (playing_patch_ == view_patch_) {
+				view_patch_ = nullptr;
+			}
+			playing_patch_ = nullptr;
+		} else {
+			pr_err("Tried to delete playing patch, but it's not found\n");
+		}
+	}
+
 	void update_view_patch_module_states(std::vector<ModuleInitState> const &states) {
 		if (view_patch_)
 			view_patch_->patch.module_states = states; //copy
