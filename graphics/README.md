@@ -1,8 +1,5 @@
 ## Graphics
 
-These are the source svg files which get converted to PNG and LVGL-format .c files, to be used in the firmware and simulator.
+These are the source svg files which get converted to PNG files to be used in the firmware and simulator.
 
-Typically these will be copied from the original svg files (i.e. firmware/vcv_ports/BRAND/res/components/*.svg), and then modified to look good on a small  240x320px 16-bit color screen. Things like gradients are removed, contrast is increased, subtle markings are made larger, etc.
-
-Sometimes the files are changed more drastically to work with the way the MetaModule draws things. 
-For instance, in VCV a knob can have background svg (which doesn't change) and a foreground svg (which is rotated as the knob turns). The MetaModule, however, just has one image which is rotated. Therefore knob bg and fg svgs must be combined into one rotate-able svg.
+All graphics in Rack/ have been created as original artwork by 4ms Company and/or Dan Green. To be compatible with existing Rack plugins, the same names as in the Rack component library are used (most of the time).

@@ -17,7 +17,7 @@ namespace MetaModule
 inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
 	bool did_update_position = false;
 
-	constexpr int32_t threshold_centidegrees = 30; // 30 centidegrees = 3.0 degrees
+	constexpr int32_t threshold_centidegrees = 10; // 10 centidegrees = 1.0 degrees
 
 	int32_t angle = val * 3000.f - 1500.f;
 	while (angle < 0)

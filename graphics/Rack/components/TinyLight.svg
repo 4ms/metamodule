@@ -28,12 +28,12 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="79.999575"
-     inkscape:cx="2.5625136"
+     inkscape:cx="2.5562636"
      inkscape:cy="0.80000425"
      inkscape:window-width="1392"
-     inkscape:window-height="1205"
-     inkscape:window-x="376"
-     inkscape:window-y="62"
+     inkscape:window-height="1051"
+     inkscape:window-x="336"
+     inkscape:window-y="38"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer1" />
   <defs
@@ -49,19 +49,5 @@
        cx="1.0005169"
        cy="1.0068926"
        r="0.47520447" />
-    <ellipse
-       style="fill:#7b7b7b;fill-opacity:0.176591;stroke:none;stroke-width:0.0399348;paint-order:markers fill stroke"
-       id="path7866"
-       cx="0.99950409"
-       cy="0.72337246"
-       rx="0.23218592"
-       ry="0.14123918" />
-    <ellipse
-       style="fill:#232323;fill-opacity:0.36961;stroke:none;stroke-width:0.0399348;paint-order:markers fill stroke"
-       id="path7866-1"
-       cx="0.99589497"
-       cy="1.283452"
-       rx="0.23218592"
-       ry="0.14123918" />
   </g>
 </svg>
