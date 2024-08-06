@@ -16,7 +16,7 @@ struct PluginFile {
 	size_t file_size{};
 };
 
-static constexpr size_t MaxPlugins = 8;
+static constexpr size_t MaxPlugins = 32;
 using PluginFileList = FixedVector<PluginFile, MaxPlugins>;
 
 } // namespace MetaModule
