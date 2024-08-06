@@ -420,13 +420,13 @@ private:
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
 		std::string choices;
-		auto first_unpatched_jack = -1;
+		std::optional<unsigned> first_unpatched_jack{};
 		if (page->this_jack_type == ElementType::Input && !page->this_jack_has_connections) {
 			for (auto i = 0u; i < PanelDef::NumUserFacingInJacks; i++) {
 				choices += get_panel_name<PanelDef>(JackInput{}, i);
 				if (page->patch->find_mapped_injack(i))
 					choices += " (patched)";
-				else if (first_unpatched_jack == -1)
+				else if (!first_unpatched_jack.has_value())
 					first_unpatched_jack = i;
 
 				choices += "\n";
@@ -436,13 +436,12 @@ private:
 				choices += get_panel_name<PanelDef>(JackOutput{}, i);
 				if (page->patch->find_mapped_outjack(i))
 					choices += " (patched)";
-				else if (first_unpatched_jack == -1)
+				else if (!first_unpatched_jack.has_value())
 					first_unpatched_jack = i;
 				choices += "\n";
 			}
 		}
 		choices.pop_back(); //remove trailing \n
-		first_unpatched_jack = first_unpatched_jack == -1 ? 0 : first_unpatched_jack;
 
 		auto action = [page](unsigned choice) {
 			if (choice == 0 || choice > 8)
@@ -471,8 +470,11 @@ private:
 			page->gui_state.new_cable = std::nullopt;
 		};
 
-		page->panel_cable_popup.show(
-			action, "Which panel jack do you want to connect to?", "Connect", choices.c_str(), first_unpatched_jack);
+		page->panel_cable_popup.show(action,
+									 "Which panel jack do you want to connect to?",
+									 "Connect",
+									 choices.c_str(),
+									 first_unpatched_jack.value_or(0));
 	}
 
 	static void finish_cable_button_cb(lv_event_t *event) {
