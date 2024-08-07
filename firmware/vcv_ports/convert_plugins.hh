@@ -37,11 +37,48 @@ bool addModel(rack::plugin::Plugin *p, rack::plugin::Model *model) {
 	pr_trace("Adding VCV_adaptor model %s:%s\n", brand.data(), slug.data());
 
 	auto get_info_view = [&](std::string_view slug) -> std::optional<ModuleInfoView> {
-		if (model->slug == "Rings")
-			return ModuleInfoView::makeView<RingsInfo>();
-
+		if (model->slug == "Blinds")
+			return ModuleInfoView::makeView<BlindsInfo>();
+		if (model->slug == "Braids")
+			return ModuleInfoView::makeView<BraidsInfo>();
+		if (model->slug == "Branches")
+			return ModuleInfoView::makeView<BranchesInfo>();
+		if (model->slug == "Clouds")
+			return ModuleInfoView::makeView<CloudsInfo>();
+		if (model->slug == "Elements")
+			return ModuleInfoView::makeView<ElementsInfo>();
+		if (model->slug == "Frames")
+			return ModuleInfoView::makeView<FramesInfo>();
 		if (model->slug == "Kinks")
 			return ModuleInfoView::makeView<KinksInfo>();
+		if (model->slug == "Links")
+			return ModuleInfoView::makeView<LinksInfo>();
+		if (model->slug == "Marbles")
+			return ModuleInfoView::makeView<MarblesInfo>();
+		if (model->slug == "Plaits")
+			return ModuleInfoView::makeView<PlaitsInfo>();
+		if (model->slug == "Rings")
+			return ModuleInfoView::makeView<RingsInfo>();
+		if (model->slug == "Ripples")
+			return ModuleInfoView::makeView<RipplesInfo>();
+		if (model->slug == "Shades")
+			return ModuleInfoView::makeView<ShadesInfo>();
+
+		//TODO:
+		// if (model->slug == "Shelves")
+		// 	return ModuleInfoView::makeView<ShelvesInfo>();
+		// if (model->slug == "Stage")
+		// 	return ModuleInfoView::makeView<StageInfo>();
+		// if (model->slug == "Streams")
+		// 	return ModuleInfoView::makeView<StreamsInfo>();
+		// if (model->slug == "Tides")
+		// 	return ModuleInfoView::makeView<TidesInfo>();
+		// if (model->slug == "Tides2")
+		// 	return ModuleInfoView::makeView<Tides2Info>();
+		// if (model->slug == "Veils")
+		// 	return ModuleInfoView::makeView<VeilsInfo>();
+		// if (model->slug == "Warps")
+		// 	return ModuleInfoView::makeView<WarpsInfo>();
 
 		return std::nullopt;
 	};

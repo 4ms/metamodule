@@ -4,6 +4,7 @@
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
 #include "fs/norflash_layout.hh"
+#include "glue/Valley/plugins.hh"
 #include "internal_plugins.hh"
 #include "plugin/Plugin.hpp"
 #include <list>
