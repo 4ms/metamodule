@@ -82,7 +82,7 @@ public:
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListFail) {
 					status.state = State::Error;
-					status.error_message = "Failed to get list of plugins";
+					status.error_message = "No plugins found on USB or SD Card";
 				}
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
