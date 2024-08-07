@@ -75,8 +75,6 @@ struct PluginTab : SystemMenuTab {
 			lv_hide(ui_PluginScanButton);
 			lv_show(ui_PluginsFoundCont);
 
-			clear_found_list();
-
 			auto *found_plugins = plugin_manager.found_plugin_list();
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
@@ -186,7 +184,9 @@ private:
 		plugin_manager.unload_plugin(plugin_name);
 		gui_state.force_redraw_patch = true;
 		if (lv_obj_has_flag(ui_PluginScanButton, LV_OBJ_FLAG_HIDDEN)) {
+			clear_found_list();
 			scan_plugins();
+			lv_show(ui_PluginScanButton);
 		}
 	}
 
