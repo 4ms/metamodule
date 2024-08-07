@@ -18,7 +18,7 @@ struct CloudsInfo : ModuleInfoBase {
     static constexpr std::array<Element, 29> Elements{{
 		WhiteMomentary7mm{{to_mm<72>(41.9), to_mm<72>(55.35), Center, "Freeze", ""}},
 		SmallButton{{to_mm<72>(254.38), to_mm<72>(246.97), Center, "CV Jack Mode", ""}},
-		WhiteMomentary7mm{{to_mm<72>(254.38), to_mm<72>(25.63), Center, "Load", ""}},
+		SmallButton{{to_mm<72>(41.9), to_mm<72>(25.63), Center, "Load", ""}},
 		RedLargeKnob{{to_mm<72>(53.23), to_mm<72>(129.67), Center, "Position", ""}, 0.5f},
 		BlueLargeKnob{{to_mm<72>(137.2), to_mm<72>(129.67), Center, "Size", ""}, 0.5f},
 		WhiteLargeKnob{{to_mm<72>(220.37), to_mm<72>(129.67), Center, "Pitch", ""}, 0.5f},

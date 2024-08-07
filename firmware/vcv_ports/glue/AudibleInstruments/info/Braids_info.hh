@@ -16,13 +16,13 @@ struct BraidsInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 13> Elements{{
-		WhiteMediumKnob{{to_mm<72>(190.98), to_mm<72>(77.46), Center, "Edit", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(39.78), to_mm<72>(154.86), Center, "Fine", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(115.38), to_mm<72>(154.86), Center, "Coarse", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(190.98), to_mm<72>(154.86), Center, "FM", ""}, 0.5f},
 		BlueMediumKnob{{to_mm<72>(39.78), to_mm<72>(230.46), Center, "Timbre", ""}, 0.5f},
 		BlueMediumKnob{{to_mm<72>(115.38), to_mm<72>(230.46), Center, "Modulation", ""}, 0.5f},
 		RedMediumKnob{{to_mm<72>(190.98), to_mm<72>(230.46), Center, "Color", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(190.98), to_mm<72>(77.46), Center, "Edit", ""}, 0.5f},
 		GateJackInput4ms{{to_mm<72>(21.77), to_mm<72>(315.06), Center, "Trig", ""}},
 		AnalogJackInput4ms{{to_mm<72>(57.78), to_mm<72>(315.06), Center, "V/Oct", ""}},
 		AnalogJackInput4ms{{to_mm<72>(93.78), to_mm<72>(315.06), Center, "FM", ""}},
@@ -32,13 +32,13 @@ struct BraidsInfo : ModuleInfoBase {
 }};
 
     enum class Elem {
-        EditKnob,
         FineKnob,
         CoarseKnob,
         FmKnob,
         TimbreKnob,
         ModulationKnob,
         ColorKnob,
+        EditKnob,
         TrigIn,
         V_OctIn,
         FmIn,
@@ -50,13 +50,13 @@ struct BraidsInfo : ModuleInfoBase {
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobEdit, 
         KnobFine, 
         KnobCoarse, 
         KnobFm, 
         KnobTimbre, 
         KnobModulation, 
         KnobColor, 
+        KnobEdit, 
         NumKnobs,
     };
     

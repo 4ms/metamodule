@@ -166,13 +166,13 @@
     <circle id="FM" cx="93.78" cy="315.06" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="V_Oct" data-name="V/Oct" cx="57.78" cy="315.06" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Trig" cx="21.77" cy="315.06" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
+    <circle id="Edit_WhiteMediumKnob" data-name="Edit#WhiteMediumKnob" cx="190.98" cy="77.46" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Color_RedMediumKnob" data-name="Color#RedMediumKnob" cx="190.98" cy="230.46" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Modulation_BlueMediumKnob" data-name="Modulation#BlueMediumKnob" cx="115.38" cy="230.46" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Timbre_BlueMediumKnob" data-name="Timbre#BlueMediumKnob" cx="39.78" cy="230.46" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="FM_WhiteMediumKnob" data-name="FM#WhiteMediumKnob" cx="190.98" cy="154.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Coarse_WhiteMediumKnob" data-name="Coarse#WhiteMediumKnob" cx="115.38" cy="154.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Fine_WhiteMediumKnob" data-name="Fine#WhiteMediumKnob" cx="39.78" cy="154.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Edit_WhiteMediumKnob" data-name="Edit#WhiteMediumKnob" cx="190.98" cy="77.46" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <text id="slug" transform="translate(163.96 369.13)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0">B</tspan><tspan x="1.63" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="2.59" y="0">aids</tspan></text>
     <text id="modulename" transform="translate(180.57 369.13)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="2.43" y="0">ac</tspan><tspan x="5.22" y="0" style="letter-spacing: -.01em;">r</tspan><tspan x="6.17" y="0">o Oscill</tspan><tspan x="15.17" y="0" style="letter-spacing: 0em;">at</tspan><tspan x="17.58" y="0" style="letter-spacing: 0em;">or</tspan></text>
   </g>

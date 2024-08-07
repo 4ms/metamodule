@@ -5,11 +5,6 @@
       <polyline points=".15 364.39 .15 .14 85.19 .14 85.19 364.39 .15 364.39" style="fill: #ededee; stroke: #9c9c9e; stroke-miterlimit: 10; stroke-width: .25px;"/>
     </g>
     <g id="art">
-      <g>
-        <ellipse cx="11.83" cy="59.73" rx="2.09" ry="1.68" style="fill: #3babec; stroke-width: 0px;"/>
-        <path d="M3.37,54.26v17.57h17.57v-17.57H3.37ZM16.2,60.28v9.56h-2.28v-6.65c-.62.31-1.33.5-2.09.5-2.41,0-4.38-1.78-4.38-3.96s1.96-3.96,4.38-3.96,4.38,1.78,4.38,3.96c0,.19-.03.37-.06.55h.06Z" style="fill: #3babec; stroke-width: 0px;"/>
-      </g>
-      <path d="M3.43,203.24v18.43h18.43v-18.43H3.43ZM12.99,214.13h-.49l1.63,4.91-2.27.75-2.15-6.48c-.12-.36-.06-.77.17-1.08s.59-.5.97-.5h2.15c1.21,0,2.19-1.05,2.19-2.35s-.98-2.35-2.19-2.35-2.19,1.05-2.19,2.35h-2.39c0-2.61,2.06-4.74,4.59-4.74s4.59,2.13,4.59,4.74-2.06,4.74-4.59,4.74Z" style="fill: #ee6390; stroke-width: 0px;"/>
       <path d="M77.2,190.2c2.81,0,5.16-2.55,5.16-5.67v-20.78c0-8.09-6.35-14.65-14.18-14.65H17.17c-7.83,0-14.18,6.56-14.18,14.65v20.46c0,2.69,1.75,4.96,4.04,5.53.76.29,1.59.46,2.47.46h67.71Z" style="fill: #000; stroke-width: 0px;"/>
       <path d="M77.2,339.59c2.81,0,5.16-2.55,5.16-5.67v-20.78c0-8.09-6.35-14.65-14.18-14.65H17.17c-7.83,0-14.18,6.56-14.18,14.65v20.46c0,2.69,1.75,4.96,4.04,5.53.76.29,1.59.46,2.47.46h67.71Z" style="fill: #000; stroke-width: 0px;"/>
       <g id="art-2" data-name="art">
@@ -32,19 +27,19 @@
     </g>
   </g>
   <g id="components">
+    <circle id="Ch2_Mode_RedGreenLight" data-name="Ch2 Mode#RedGreenLight" cx="42.63" cy="315.07" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch1_Mode_RedGreenLight" data-name="Ch1 Mode#RedGreenLight" cx="42.63" cy="165.69" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch2_Out_B" data-name="Ch2 Out B" cx="65.11" cy="315.04" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Ch2_Mode_OrangeLight" data-name="Ch2 Mode#OrangeLight" cx="42.63" cy="315.07" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch2_Out_A" data-name="Ch2 Out A" cx="20.15" cy="315.04" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Ch2_Probability" data-name="Ch2 Probability" cx="65.11" cy="279.04" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Ch2_In" data-name="Ch2 In" cx="20.15" cy="279.04" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Ch2_Mode" data-name="Ch2 Mode" cx="73.2" cy="212.46" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="Ch2_Probability_WhiteMediumKnob" data-name="Ch2 Probability#WhiteMediumKnob" cx="42.64" cy="230.44" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Ch1_Out_B" data-name="Ch1 Out B" cx="65.11" cy="165.66" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Ch1_Mode_OrangeLight" data-name="Ch1 Mode#OrangeLight" cx="42.63" cy="165.69" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch2_Out_A" data-name="Ch2 Out A" cx="20.15" cy="315.04" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Ch1_Out_A" data-name="Ch1 Out A" cx="20.15" cy="165.66" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Ch2_Probability" data-name="Ch2 Probability" cx="65.11" cy="279.04" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Ch1_Probability" data-name="Ch1 Probability" cx="65.11" cy="129.66" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch2_In" data-name="Ch2 In" cx="20.15" cy="279.04" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Ch1_In" data-name="Ch1 In" cx="20.15" cy="129.66" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Ch1_Mode" data-name="Ch1 Mode" cx="73.2" cy="63.04" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Ch2_Toggle_Mode_SmallButton" data-name="Ch2 Toggle Mode#SmallButton" cx="73.2" cy="212.46" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Ch1_Toggle_Mode_SmallButton" data-name="Ch1 Toggle Mode#SmallButton" cx="73.2" cy="63.04" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Ch2_Probability_WhiteMediumKnob" data-name="Ch2 Probability#WhiteMediumKnob" cx="42.64" cy="230.44" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Ch1_Probability_WhiteMediumKnob" data-name="Ch1 Probability#WhiteMediumKnob" cx="42.64" cy="81.06" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <text id="slug" transform="translate(46.43 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0">B</tspan><tspan x="1.63" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="2.59" y="0">anches</tspan></text>
     <text id="modulename" transform="translate(63.18 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">G</tspan><tspan x="1.96" y="0" style="letter-spacing: 0em;">at</tspan><tspan x="4.37" y="0">e </tspan><tspan x="6.51" y="0" style="letter-spacing: 0em;">G</tspan><tspan x="8.46" y="0">ene</tspan><tspan x="13.13" y="0" style="letter-spacing: 0em;">rat</tspan><tspan x="16.51" y="0">or</tspan></text>

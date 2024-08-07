@@ -17,33 +17,33 @@ struct BranchesInfo : ModuleInfoBase {
 
     static constexpr std::array<Element, 14> Elements{{
 		WhiteMediumKnob{{to_mm<72>(42.64), to_mm<72>(81.06), Center, "Ch1 Probability", ""}, 0.5f},
-		OrangeButton{{to_mm<72>(73.2), to_mm<72>(63.04), Center, "Ch1 Mode", ""}},
 		WhiteMediumKnob{{to_mm<72>(42.64), to_mm<72>(230.44), Center, "Ch2 Probability", ""}, 0.5f},
-		OrangeButton{{to_mm<72>(73.2), to_mm<72>(212.46), Center, "Ch2 Mode", ""}},
+		SmallButton{{to_mm<72>(73.2), to_mm<72>(63.04), Center, "Ch1 Toggle Mode", ""}},
+		SmallButton{{to_mm<72>(73.2), to_mm<72>(212.46), Center, "Ch2 Toggle Mode", ""}},
 		AnalogJackInput4ms{{to_mm<72>(20.15), to_mm<72>(129.66), Center, "Ch1 In", ""}},
-		AnalogJackInput4ms{{to_mm<72>(65.11), to_mm<72>(129.66), Center, "Ch1 Probability", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(20.15), to_mm<72>(165.66), Center, "Ch1 Out A", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(65.11), to_mm<72>(165.66), Center, "Ch1 Out B", ""}},
 		AnalogJackInput4ms{{to_mm<72>(20.15), to_mm<72>(279.04), Center, "Ch2 In", ""}},
+		AnalogJackInput4ms{{to_mm<72>(65.11), to_mm<72>(129.66), Center, "Ch1 Probability", ""}},
 		AnalogJackInput4ms{{to_mm<72>(65.11), to_mm<72>(279.04), Center, "Ch2 Probability", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(20.15), to_mm<72>(165.66), Center, "Ch1 Out A", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(20.15), to_mm<72>(315.04), Center, "Ch2 Out A", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(65.11), to_mm<72>(165.66), Center, "Ch1 Out B", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(65.11), to_mm<72>(315.04), Center, "Ch2 Out B", ""}},
-		OrangeLight{{to_mm<72>(42.63), to_mm<72>(165.69), Center, "Ch1 Mode", ""}},
-		OrangeLight{{to_mm<72>(42.63), to_mm<72>(315.07), Center, "Ch2 Mode", ""}},
+		RedGreenLight{{to_mm<72>(42.63), to_mm<72>(165.69), Center, "Ch1 Mode", ""}},
+		RedGreenLight{{to_mm<72>(42.63), to_mm<72>(315.07), Center, "Ch2 Mode", ""}},
 }};
 
     enum class Elem {
         Ch1ProbabilityKnob,
-        Ch1ModeButton,
         Ch2ProbabilityKnob,
-        Ch2ModeButton,
+        Ch1ToggleModeButton,
+        Ch2ToggleModeButton,
         Ch1In,
-        Ch1ProbabilityIn,
-        Ch1OutAOut,
-        Ch1OutBOut,
         Ch2In,
+        Ch1ProbabilityIn,
         Ch2ProbabilityIn,
+        Ch1OutAOut,
         Ch2OutAOut,
+        Ch1OutBOut,
         Ch2OutBOut,
         Ch1ModeLight,
         Ch2ModeLight,
@@ -58,23 +58,23 @@ struct BranchesInfo : ModuleInfoBase {
     };
     
     enum {
-        SwitchCh1_Mode, 
-        SwitchCh2_Mode, 
+        SwitchCh1_Toggle_Mode, 
+        SwitchCh2_Toggle_Mode, 
         NumSwitches,
     };
     
     enum {
         InputCh1_In, 
-        InputCh1_Probability, 
         InputCh2_In, 
+        InputCh1_Probability, 
         InputCh2_Probability, 
         NumInJacks,
     };
     
     enum {
         OutputCh1_Out_A, 
-        OutputCh1_Out_B, 
         OutputCh2_Out_A, 
+        OutputCh1_Out_B, 
         OutputCh2_Out_B, 
         NumOutJacks,
     };

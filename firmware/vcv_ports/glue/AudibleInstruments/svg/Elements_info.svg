@@ -112,6 +112,10 @@
     </g>
   </g>
   <g id="components">
+    <circle id="Resonator_LED_RedLight" data-name="Resonator LED#RedLight" cx="385.07" cy="163.87" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="ControlExciter_LED_GreenLight" data-name="ControlExciter LED#GreenLight" cx="182.51" cy="163.87" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Out_R" data-name="Out R" cx="64.67" cy="315.07" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Out_L" data-name="Out L" cx="30.49" cy="315.07" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Space_CV" data-name="Space CV" cx="458.77" cy="315.07" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Brightness_CV" data-name="Brightness CV" cx="421.92" cy="315.07" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Position_CV" data-name="Position CV" cx="385.07" cy="315.07" r="11.34" style="fill: lime; stroke-width: 0px;"/>
@@ -122,8 +126,13 @@
     <circle id="Blow_Timbre_CV" data-name="Blow Timbre CV" cx="182.51" cy="315.07" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Flow_CV" data-name="Flow CV" cx="145.66" cy="315.07" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Bow_Timbre_CV" data-name="Bow Timbre CV" cx="108.81" cy="315.07" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Out_R" data-name="Out R" cx="64.67" cy="315.07" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Out_L" data-name="Out L" cx="30.49" cy="315.07" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Ext_IN_Strike" data-name="Ext IN Strike" cx="64.67" cy="270.97" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ext_IN_Blow" data-name="Ext IN Blow" cx="30.49" cy="270.97" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Strength" cx="64.67" cy="226.86" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Gate" cx="30.49" cy="226.86" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
+    <circle id="FM" cx="64.67" cy="182.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="V_Oct" data-name="V/Oct" cx="30.49" cy="182.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Play_WhiteMomentary7mm" data-name="Play#WhiteMomentary7mm" cx="47.58" cy="124.27" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
     <circle id="Space_Atten_WhiteSmallKnob" data-name="Space Atten#WhiteSmallKnob" cx="458.77" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
     <circle id="Brightness_Atten_WhiteSmallKnob" data-name="Brightness Atten#WhiteSmallKnob" cx="421.92" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
     <circle id="Position_Atten_WhiteSmallKnob" data-name="Position Atten#WhiteSmallKnob" cx="385.07" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
@@ -134,25 +143,16 @@
     <circle id="Blow_Timbre_Atten_WhiteSmallKnob" data-name="Blow Timbre Atten#WhiteSmallKnob" cx="182.51" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
     <circle id="Flow_Atten_WhiteSmallKnob" data-name="Flow Atten#WhiteSmallKnob" cx="145.66" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
     <circle id="Bow_Timbre_Atten_WhiteSmallKnob" data-name="Bow Timbre Atten#WhiteSmallKnob" cx="108.81" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ext_IN_Strike" data-name="Ext IN Strike" cx="64.67" cy="270.97" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Ext_IN_Blow" data-name="Ext IN Blow" cx="30.49" cy="270.97" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Space_WhiteMediumKnob" data-name="Space#WhiteMediumKnob" cx="452.59" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Position_WhiteMediumKnob" data-name="Position#WhiteMediumKnob" cx="385.07" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Damping_WhiteMediumKnob" data-name="Damping#WhiteMediumKnob" cx="317.55" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Strike_Timbre_BlueMediumKnob" data-name="Strike Timbre#BlueMediumKnob" cx="250.03" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Blow_Timbre_RedMediumKnob" data-name="Blow Timbre#RedMediumKnob" cx="182.51" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Bow_Timbre_WhiteMediumKnob" data-name="Bow Timbre#WhiteMediumKnob" cx="114.99" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Strength" cx="64.67" cy="226.86" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Gate" cx="30.49" cy="226.86" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
-    <circle id="FM" cx="64.67" cy="182.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="V_Oct" data-name="V/Oct" cx="30.49" cy="182.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Brightness_WhiteLargeKnob" data-name="Brightness#WhiteLargeKnob" cx="431.87" cy="137.31" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Resonator_LED_RedLight" data-name="Resonator LED#RedLight" cx="385.07" cy="163.87" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Geometry_WhiteLargeKnob" data-name="Geometry#WhiteLargeKnob" cx="338.27" cy="137.31" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Mallet_BlueLargeKnob" data-name="Mallet#BlueLargeKnob" cx="229.31" cy="137.31" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="ControlExciter_LED_GreenLight" data-name="ControlExciter LED#GreenLight" cx="182.51" cy="163.87" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Flow_RedLargeKnob" data-name="Flow#RedLargeKnob" cx="135.71" cy="137.31" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Play" cx="47.58" cy="124.27" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
     <circle id="FM_WhiteMediumKnob" data-name="FM#WhiteMediumKnob" cx="452.59" cy="60.35" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Fine_WhiteMediumKnob" data-name="Fine#WhiteMediumKnob" cx="385.07" cy="60.35" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Coarse_WhiteMediumKnob" data-name="Coarse#WhiteMediumKnob" cx="317.55" cy="60.35" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
