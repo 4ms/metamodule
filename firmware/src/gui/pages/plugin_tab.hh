@@ -194,8 +194,8 @@ private:
 		const auto target = lv_event_get_target(event);
 		const std::string plugin_name = lv_list_get_btn_text(lv_event_get_current_target(event), target);
 
-		const auto autoload_slot = std::find(page->settings.slug.begin(), page->settings.slug.end(), plugin_name);
-		const auto is_autoloaded = autoload_slot != page->settings.slug.end();
+		const auto is_autoloaded =
+			std::find(page->settings.slug.begin(), page->settings.slug.end(), plugin_name) != page->settings.slug.end();
 
 		page->confirm_popup.show(
 			[page, plugin_name, target](uint8_t opt) {
@@ -208,7 +208,9 @@ private:
 					lv_obj_del_async(target);
 				}
 			},
-			[page, plugin_name, autoload_slot](bool opt) {
+			[page, plugin_name](bool opt) {
+				const auto autoload_slot =
+					std::find(page->settings.slug.begin(), page->settings.slug.end(), plugin_name);
 				if (opt) {
 					pr_info("Set Autoload Enabled: %s\n", plugin_name.data());
 					page->settings.slug.push_back(plugin_name);
