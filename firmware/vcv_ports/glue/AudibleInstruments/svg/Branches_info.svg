@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="30.1mm" height="130.44mm" viewBox="0 0 85.32 369.75">
+  <g id="faceplate">
+    <g id="panel">
+      <polyline points=".15 364.39 .15 .14 85.19 .14 85.19 364.39 .15 364.39" style="fill: #ededee; stroke: #9c9c9e; stroke-miterlimit: 10; stroke-width: .25px;"/>
+    </g>
+    <g id="art">
+      <g>
+        <ellipse cx="11.83" cy="59.73" rx="2.09" ry="1.68" style="fill: #3babec;"/>
+        <path d="M3.37,54.26v17.57h17.57v-17.57H3.37ZM16.2,60.28v9.56h-2.28v-6.65c-.62.31-1.33.5-2.09.5-2.41,0-4.38-1.78-4.38-3.96s1.96-3.96,4.38-3.96,4.38,1.78,4.38,3.96c0,.19-.03.37-.06.55h.06Z" style="fill: #3babec;"/>
+      </g>
+      <path d="M3.43,203.24v18.43h18.43v-18.43H3.43ZM12.99,214.13h-.49l1.63,4.91-2.27.75-2.15-6.48c-.12-.36-.06-.77.17-1.08s.59-.5.97-.5h2.15c1.21,0,2.19-1.05,2.19-2.35s-.98-2.35-2.19-2.35-2.19,1.05-2.19,2.35h-2.39c0-2.61,2.06-4.74,4.59-4.74s4.59,2.13,4.59,4.74-2.06,4.74-4.59,4.74Z" style="fill: #ee6390;"/>
+      <path d="M77.2,190.2c2.81,0,5.16-2.55,5.16-5.67v-20.78c0-8.09-6.35-14.65-14.18-14.65H17.17c-7.83,0-14.18,6.56-14.18,14.65v20.46c0,2.69,1.75,4.96,4.04,5.53.76.29,1.59.46,2.47.46h67.71Z"/>
+      <path d="M77.2,339.59c2.81,0,5.16-2.55,5.16-5.67v-20.78c0-8.09-6.35-14.65-14.18-14.65H17.17c-7.83,0-14.18,6.56-14.18,14.65v20.46c0,2.69,1.75,4.96,4.04,5.53.76.29,1.59.46,2.47.46h67.71Z"/>
+      <g id="art-2" data-name="art">
+        <rect y="18.19" width="85.19" height="14.17"/>
+        <path d="M64.78,131.19c-17.66.44-21.46-8.67-22.02-20.14v-22.44" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+        <path d="M64.78,280.82c-17.66.44-21.46-8.67-22.02-20.14v-22.44" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      </g>
+      <g id="text">
+        <text transform="translate(15.78 115.27) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
+        <path d="M67.03,111.29c0,.27-.03.52-.1.77s-.17.47-.3.67c-.14.2-.31.36-.53.47-.21.12-.46.17-.75.17-.23,0-.41-.03-.54-.08s-.26-.13-.39-.22v2.04h-1.24v-5.79h1.24v.36c.12-.12.26-.22.41-.31s.35-.12.61-.12.5.07.75.21.45.37.61.67c.16.3.24.69.24,1.15ZM65.73,111.33c0-.24-.03-.43-.1-.58s-.15-.26-.26-.32-.21-.1-.33-.1c-.15,0-.27.03-.36.08s-.18.12-.26.2v1.52s.09.06.14.09c.05.03.1.06.15.08.05.02.1.04.16.06.06.02.12.02.18.02.19,0,.36-.09.49-.28.13-.19.2-.44.2-.77Z"/>
+        <text transform="translate(13.19 28.38) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: .08em;"><tspan x="0" y="0">Bernoulli Gate</tspan></text>
+        <text transform="translate(15.78 264.39) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
+        <path d="M67.03,260.42c0,.27-.03.52-.1.77s-.17.47-.3.67c-.14.2-.31.36-.53.47-.21.12-.46.17-.75.17-.23,0-.41-.03-.54-.08s-.26-.13-.39-.22v2.04h-1.24v-5.79h1.24v.36c.12-.12.26-.22.41-.31s.35-.12.61-.12.5.07.75.21.45.37.61.67c.16.3.24.69.24,1.15ZM65.73,260.45c0-.24-.03-.43-.1-.58s-.15-.26-.26-.32-.21-.1-.33-.1c-.15,0-.27.03-.36.08s-.18.12-.26.2v1.52s.09.06.14.09c.05.03.1.06.15.08.05.02.1.04.16.06.06.02.12.02.18.02.19,0,.36-.09.49-.28.13-.19.2-.44.2-.77Z"/>
+        <text transform="translate(7.99 186.59) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">OUT A</tspan></text>
+        <text transform="translate(53.24 186.59) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">OUT B</tspan></text>
+        <text transform="translate(7.99 335.98) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">OUT A</tspan></text>
+        <text transform="translate(53.24 335.98) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">OUT B</tspan></text>
+        <text transform="translate(16.64 357.32) scale(.82 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 11px; font-weight: 700; letter-spacing: -.05em;"><tspan x="0" y="0">BRANCHES</tspan></text>
+      </g>
+    </g>
+  </g>
+  <g id="components">
+    <circle id="Ch2_Out_B" cx="65.11" cy="315.04" r="11.34" style="fill: blue;"/>
+    <circle id="Ch2_Mode_x23_OrangeLight" cx="42.63" cy="315.07" r="4.96" style="fill: #f0f;"/>
+    <circle id="Ch2_Out_A" cx="20.15" cy="315.04" r="11.34" style="fill: blue;"/>
+    <circle id="Ch2_Probability" cx="65.11" cy="279.04" r="11.34" style="fill: lime;"/>
+    <circle id="Ch2_In" cx="20.15" cy="279.04" r="11.34" style="fill: lime;"/>
+    <circle id="Ch2_Mode" cx="73.2" cy="212.46" r="10.63" style="fill: #ff8000;"/>
+    <circle id="Ch2_Probability_x23_WhiteMediumKnob" cx="42.64" cy="230.44" r="17.01" style="fill: #ff0040;"/>
+    <circle id="Ch1_Out_B" cx="65.11" cy="165.66" r="11.34" style="fill: blue;"/>
+    <circle id="Ch1_Mode_x23_OrangeLight" cx="42.63" cy="165.69" r="4.96" style="fill: #f0f;"/>
+    <circle id="Ch1_Out_A" cx="20.15" cy="165.66" r="11.34" style="fill: blue;"/>
+    <circle id="Ch1_Probability" cx="65.11" cy="129.66" r="11.34" style="fill: lime;"/>
+    <circle id="Ch1_In" cx="20.15" cy="129.66" r="11.34" style="fill: lime;"/>
+    <circle id="Ch1_Mode" cx="73.2" cy="63.04" r="10.63" style="fill: #ff8000;"/>
+    <circle id="Ch1_Probability_x23_WhiteMediumKnob" cx="42.64" cy="81.06" r="17.01" style="fill: #ff0040;"/>
+    <text id="slug" transform="translate(46.43 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0">B</tspan><tspan x="1.63" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="2.59" y="0">anches</tspan></text>
+    <text id="modulename" transform="translate(63.18 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">G</tspan><tspan x="1.96" y="0" style="letter-spacing: 0em;">at</tspan><tspan x="4.37" y="0">e </tspan><tspan x="6.51" y="0" style="letter-spacing: 0em;">G</tspan><tspan x="8.46" y="0">ene</tspan><tspan x="13.13" y="0" style="letter-spacing: 0em;">rat</tspan><tspan x="16.51" y="0">or</tspan></text>
+  </g>
+</svg>
