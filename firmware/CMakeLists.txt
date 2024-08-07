@@ -94,11 +94,14 @@ add_custom_target(asset-image ALL DEPENDS ${ASSET_IMG_PATH})
 # Package Release
 #
 set(RELEASE_TARGET_DIR   ${CMAKE_CURRENT_BINARY_DIR}/metamodule-firmware)
-set(RELEASE_ARCHIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-all.zip)
-set(RELEASE_FW_ONLY_ARCHIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-main.zip)
-set(RELEASE_ASSETS_ARCHIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-assets.zip)
-set(MANIFEST_FILENAME    metamodule.json)
-set(MAIN_FW_FILENAME  ${CMAKE_CURRENT_BINARY_DIR}/main.uimg)
+
+set(RELEASE_AS_ARCHIVE             ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-assets.zip)
+set(RELEASE_FW_AS_ARCHIVE          ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware-assets.zip)
+set(RELEASE_FW_AS_BL_ARCHIVE       ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware-assets-bl.zip)
+set(RELEASE_FW_AS_BL_WIFI_ARCHIVE  ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware-assets-bl-wifi.zip)
+
+set(MANIFEST_FILENAME metamodule.json)
+set(MAIN_FW_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/main.uimg)
 
 add_custom_command(
   OUTPUT ${MAIN_FW_FILENAME}
@@ -115,41 +118,69 @@ add_custom_command(
 )
 
 add_custom_command(
-  OUTPUT ${RELEASE_ARCHIVE_PATH} ${RELEASE_FW_ONLY_ARCHIVE_PATH}
+  OUTPUT ${RELEASE_AS_ARCHIVE} ${RELEASE_FW_AS_ARCHIVE} ${RELEASE_FW_AS_BL_ARCHIVE} ${RELEASE_FW_AS_BL_WIFI_ARCHIVE}
 
+  # Assets
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
-           --version         "${GIT_FIRMWARE_VERSION_TAG}"
-           --assets          "${ASSET_IMG_PATH}"
-           "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_ASSETS_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}/${ASSET_IMG_FILENAME} ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} && rm -rf ${RELEASE_TARGET_DIR}
+                                   --version         "${GIT_FIRMWARE_VERSION_TAG}"
+                                   --assets          "${ASSET_IMG_PATH}"
+                                   "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_AS_ARCHIVE} --format=zip -- 
+                                    ${RELEASE_TARGET_DIR}/${ASSET_IMG_FILENAME} 
+                                    ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} 
+                                    && rm -rf ${RELEASE_TARGET_DIR}
 
+  # Firmware+Assets
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
-           --version         "${GIT_FIRMWARE_VERSION_TAG}"
-           --assets          "${ASSET_IMG_PATH}"
-           --app             "${MAIN_FW_FILENAME}"
-           "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_ONLY_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR}/main.uimg ${RELEASE_TARGET_DIR}/${ASSET_IMG_FILENAME} ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} && rm -rf ${RELEASE_TARGET_DIR}
+                                   --version         "${GIT_FIRMWARE_VERSION_TAG}"
+                                   --assets          "${ASSET_IMG_PATH}"
+                                   --app             "${MAIN_FW_FILENAME}"
+                                   "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_AS_ARCHIVE} --format=zip -- 
+                                        ${RELEASE_TARGET_DIR}/main.uimg 
+                                        ${RELEASE_TARGET_DIR}/${ASSET_IMG_FILENAME} 
+                                        ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} 
+                                        && rm -rf ${RELEASE_TARGET_DIR}
 
+  # Firmware+Assets+Bootloaders
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
-           --version         "${GIT_FIRMWARE_VERSION_TAG}"
-           --fsbl            "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot/build/fsbl.stm32"
-           --dfu             "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu/build/usbdfu.uimg"
-           --assets          "${ASSET_IMG_PATH}"
-           --app             "${MAIN_FW_FILENAME}"
-           --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/bootloader.bin"
-           --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
-           --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/filesystem.img"
-           "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
-  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_ARCHIVE_PATH} --format=zip -- ${RELEASE_TARGET_DIR} && rm -rf ${RELEASE_TARGET_DIR}
+                                   --version         "${GIT_FIRMWARE_VERSION_TAG}"
+                                   --fsbl            "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot/build/fsbl.stm32"
+                                   --dfu             "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu/build/usbdfu.uimg"
+                                   --assets          "${ASSET_IMG_PATH}"
+                                   --app             "${MAIN_FW_FILENAME}"
+                                   "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_AS_BL_ARCHIVE} --format=zip -- 
+                                        ${RELEASE_TARGET_DIR}/main.uimg 
+                                        ${RELEASE_TARGET_DIR}/${ASSET_IMG_FILENAME} 
+                                        ${RELEASE_TARGET_DIR}/fsbl.stm32
+                                        ${RELEASE_TARGET_DIR}/usbdfu.uimg
+                                        ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} 
+                                        && rm -rf ${RELEASE_TARGET_DIR}
+
+  # Firmware+Assets+Bootloaders+Wifi
+  COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
+                                   --version         "${GIT_FIRMWARE_VERSION_TAG}"
+                                   --fsbl            "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-boot/build/fsbl.stm32"
+                                   --dfu             "${CMAKE_CURRENT_LIST_DIR}/bootloader/mp1-usb-dfu/build/usbdfu.uimg"
+                                   --assets          "${ASSET_IMG_PATH}"
+                                   --app             "${MAIN_FW_FILENAME}"
+                                   --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/bootloader.bin"
+                                   --wifi_app        "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/application.bin"
+                                   --wifi_filesystem "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/filesystem.img"
+                                   "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_AS_BL_WIFI_ARCHIVE} --format=zip -- 
+                                        ${RELEASE_TARGET_DIR} 
+                                        && rm -rf ${RELEASE_TARGET_DIR}
 
   DEPENDS ${MAIN_FW_FILENAME} ${ASSET_IMG_PATH} bootloader bootloader-dfu AlwaysCheckGit
-  COMMENT "Creating release at ${RELEASE_ARCHIVE_PATH}"
+  COMMENT "Creating releases at ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-*.zip"
   VERBATIM USES_TERMINAL
 )
 
 add_custom_target(
   combined-uimg ALL
-  DEPENDS ${MAIN_FW_FILENAME} ${RELEASE_ARCHIVE_PATH}
+  DEPENDS ${MAIN_FW_FILENAME} ${RELEASE_AS_ARCHIVE} ${RELEASE_FW_AS_ARCHIVE} ${RELEASE_FW_AS_BL_ARCHIVE} ${RELEASE_FW_AS_BL_WIFI_ARCHIVE}
 )
 
 
@@ -189,6 +220,7 @@ add_custom_target(
   COMMAND cd ${SHARED}/patch_convert && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/CoreModules && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
+  COMMENT "Running unit tests"
   VERBATIM USES_TERMINAL
 )
 file(

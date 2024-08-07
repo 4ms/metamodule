@@ -223,7 +223,6 @@ private:
 	EnOsc::Ui<kUiUpdateRate, EnOsc::kBlockSize> enosc;
 	Buffer<EnOsc::Frame, EnOsc::kBlockSize> out_block_;
 	EnOsc::DynamicData dydata;
-	Math math;
 
 	float sample_rate_ = 48000.f;
 

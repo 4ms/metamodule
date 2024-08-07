@@ -39,6 +39,10 @@ class PatchStorage {
 
 	using enum IntercoreStorageMessage::MessageType;
 
+	PollChange usb_changes_wifi_{1000};
+	PollChange norflash_changes_wifi_{1000};
+	PollChange sd_changes_wifi_{1000};
+
 public:
 	PatchStorage(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)
 		: sdcard_{sdcard_fileio}
@@ -68,6 +72,7 @@ public:
 			auto success = PatchFileIO::write_file(data, usbdrive_, filename);
 			if (success) {
 				usb_changes_.reset();
+				usb_changes_wifi_.reset();
 			}
 			return success;
 
@@ -75,6 +80,7 @@ public:
 			auto success = PatchFileIO::write_file(data, sdcard_, filename);
 			if (success) {
 				sd_changes_.reset();
+				sd_changes_wifi_.reset();
 			}
 			return success;
 
@@ -82,6 +88,7 @@ public:
 			auto success = PatchFileIO::write_file(data, norflash_, filename);
 			if (success) {
 				norflash_changes_.reset();
+				norflash_changes_wifi_.reset();
 			}
 			return success;
 		} else {
@@ -241,6 +248,18 @@ public:
 		return patch_dir_list_;
 	}
 
+	bool has_media_changed()
+	{
+		sd_changes_wifi_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
+		usb_changes_wifi_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
+
+		auto result = sd_changes_wifi_.take_change();
+		result |= usb_changes_wifi_.take_change();
+		result |= norflash_changes_wifi_.take_change();
+
+		return result;
+	}
+
 private:
 	void poll_media_change() {
 		sd_changes_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
@@ -278,6 +297,7 @@ private:
 			auto success = usbdrive_.delete_file(filename);
 			if (success) {
 				usb_changes_.reset();
+				usb_changes_wifi_.reset();
 			}
 			return success;
 
@@ -285,6 +305,7 @@ private:
 			auto success = sdcard_.delete_file(filename);
 			if (success) {
 				sd_changes_.reset();
+				sd_changes_wifi_.reset();
 			}
 			return success;
 
@@ -292,6 +313,7 @@ private:
 			auto success = norflash_.delete_file(filename);
 			if (success) {
 				norflash_changes_.reset();
+				norflash_changes_wifi_.reset();
 			}
 			return success;
 

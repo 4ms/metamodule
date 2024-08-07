@@ -16,8 +16,7 @@ public:
 	~DynamicDeframer() = default;
 
 private:
-	template <typename FUNC>
-	void doReset(const FUNC&&)
+	void doReset()
 	{
 		receiveBuffer.clear();
 	}

@@ -24,6 +24,10 @@ endif()
 
 target_link_libraries(4msLibrary PRIVATE cpputil ryml alpaca::alpaca)
 
+target_compile_options(4msLibrary PRIVATE
+    -Wno-double-promotion #silence warnings in gcem
+)
+
 target_include_directories(
   4msLibrary
   PUBLIC ${MM_ROOT}/shared

@@ -16,12 +16,9 @@ using namespace Framing;
 namespace MetaModule::WifiInterface
 {
 
+/////////////////////////
+
 PatchStorage *patchStorage;
-
-Configuration_t FrameConfig{.start = 0x01, .end = 0x02, .escape = 0x03};
-
-StaticDeframer<16000> deframer(FrameConfig);
-Framer framer(FrameConfig);
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
 	auto CreateVector = [&fbb](auto fileList) {
@@ -49,6 +46,32 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
 	return message;
 }
 
+/////////////////////////
+
+Configuration_t FrameConfig{.start = 0x01, .end = 0x02, .escape = 0x03};
+
+__attribute__((section(".wifi"))) std::array<uint8_t,8*1024*1024> ReceiveBuffer;
+
+StaticDeframer deframer(FrameConfig, std::span(ReceiveBuffer));
+Framer framer(FrameConfig);
+
+using Timestamp_t = uint32_t;
+
+std::optional<Timestamp_t> lastHeartbeatSentTime;
+static constexpr Timestamp_t HeartbeatInterval = 1000;
+
+std::optional<Timestamp_t> lastPatchListSentTime;
+static constexpr Timestamp_t PatchListInterval = 1000;
+
+enum ChannelID_t : uint8_t {Broadcast = 0, Management = 1, Connections = 2};
+
+std::optional<Timestamp_t> lastIPAnswerTime;
+static constexpr Timestamp_t IPRequestTimeout = 1000;
+std::expected<Endpoint_t,ErrorCode_t> currentEndpoint = std::unexpected(ErrorCode_t::NO_ANSWER);
+
+void handle_management_channel(std::span<uint8_t>);
+void handle_client_channel(uint8_t, std::span<uint8_t>);
+
 ///////////////////////////
 
 void sendFrame(uint8_t channel, std::span<uint8_t> payload) {
@@ -72,18 +95,53 @@ void receiveFrame(std::span<uint8_t> fullFrame) {
 		if (parsedLength == actualLength) {
 			auto destination = fullFrame[2];
 			auto payload = fullFrame.subspan(3, fullFrame.size() - 3);
-			handle_received_frame(destination, payload);
+
+			if (destination == ChannelID_t::Management)
+			{
+				handle_management_channel(payload);
+			}
+			else
+			{
+				handle_client_channel(destination, payload);
+			}
+
 		} else {
 			pr_err("Invalid length (parsed %u actual %u)", parsedLength, actualLength);
 		}
 	}
 };
 
-void sendBroadcast(std::span<uint8_t> payload) {
-	sendFrame(0, payload);
+///////////////////////////
+
+Timestamp_t getTimestamp()
+{
+	return HAL_GetTick();
 }
 
-////////////////////////////////7
+
+void requestIP()
+{
+	// For now, every request on the management channel is responded the IP
+	std::array<uint8_t,3> payload{0xA, 0xB, 0xC};
+	sendFrame(ChannelID_t::Management, std::span(payload));
+
+	if (auto now = getTimestamp(); !lastIPAnswerTime or (now - *lastIPAnswerTime) > IPRequestTimeout)
+	{
+		 currentEndpoint = std::unexpected(ErrorCode_t::NO_ANSWER);
+	}
+}
+
+void send_heartbeat()
+{
+	flatbuffers::FlatBufferBuilder fbb;
+	auto answer = fbb.CreateStruct(Heartbeat());
+	auto message = CreateMessage(fbb, AnyMessage_Heartbeat, answer.Union());
+	fbb.Finish(message);
+
+	sendFrame(ChannelID_t::Broadcast, fbb.GetBufferSpan());
+}
+
+////////////////////////////////
 
 void init(PatchStorage *storage) {
 	printf("Initializing Wifi\n");
@@ -102,14 +160,80 @@ void stop() {
 }
 
 void run() {
+
+	if (BufferedUSART2::detectedOverrunSinceLastCall())
+	{
+		deframer.reset();
+	}
+
 	if (auto val = BufferedUSART2::receive(); val) {
 		deframer.parse(*val, receiveFrame);
 	}
+
+	if (not lastHeartbeatSentTime or (getTimestamp() - *lastHeartbeatSentTime) > HeartbeatInterval)
+	{
+		send_heartbeat();
+		lastHeartbeatSentTime = getTimestamp();
+
+		requestIP();
+	}
+
+	if (not lastPatchListSentTime or (getTimestamp() - *lastPatchListSentTime) > PatchListInterval)
+	{
+		if (patchStorage->has_media_changed() and not deframer.isReceivingFrame())
+		{
+			flatbuffers::FlatBufferBuilder fbb;
+			auto message = constructPatchesMessage(fbb);
+			fbb.Finish(message);
+
+			sendFrame(ChannelID_t::Broadcast, fbb.GetBufferSpan());
+		}
+
+		lastPatchListSentTime = getTimestamp();
+	}
 }
 
-void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
+std::expected<Endpoint_t,ErrorCode_t> getCurrentIP()
+{
+	return currentEndpoint;
+}
+
+////////////////////////////////
+
+void handle_management_channel(std::span<uint8_t> payload)
+{
+	if (payload.size() == 6)
+	{
+		// assemble endpoint struct
+		Endpoint_t thisEndpoint;
+		std::copy(payload.begin(), payload.begin() + 4, thisEndpoint.ip.data());
+		thisEndpoint.port = (payload[5] << 8) | payload[4];
+
+		const Endpoint_t DummyEndpoint {{0,0,0,0}, 0};
+
+		if (std::equal(DummyEndpoint.ip.begin(), DummyEndpoint.ip.end(), thisEndpoint.ip.begin()))
+		{
+			currentEndpoint = std::unexpected(ErrorCode_t::NO_IP);
+		}
+		else
+		{
+			currentEndpoint = thisEndpoint;
+		}
+
+		lastIPAnswerTime = getTimestamp();
+	}
+}
+
+
+
+void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
+
 	auto sendResponse = [destination](auto payload) {
 		sendFrame(destination, payload);
+	};
+
+	auto sendBroadcast = [](auto payload) {
+		sendFrame(ChannelID_t::Broadcast, payload);
 	};
 
 	// Parse message
@@ -117,24 +241,7 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 	auto message = GetMessage(payload.data());
 
 	if (auto content = message->content(); content) {
-		if (auto presenceDetection = message->content_as_PresenceDetection(); presenceDetection) {
-			if (presenceDetection->phase() == Phase::Phase_REQUEST) {
-				// Answer presence detection
-				flatbuffers::FlatBufferBuilder fbb;
-				auto answer = fbb.CreateStruct(PresenceDetection(Phase::Phase_ANSWER));
-				auto message = CreateMessage(fbb, AnyMessage_PresenceDetection, answer.Union());
-				fbb.Finish(message);
-
-				sendResponse(fbb.GetBufferSpan());
-			} else {
-				printf("Unexpected detection\n");
-			}
-		} else if (auto switchMessage = message->content_as_Switch(); switchMessage) {
-			printf("State: %u\n", switchMessage->state());
-
-			// Just echo back raw
-			sendResponse(payload);
-		} else if (auto patchNameMessage = message->content_as_Patches(); patchNameMessage) {
+		if (auto patchNameMessage = message->content_as_Patches(); patchNameMessage) {
 			flatbuffers::FlatBufferBuilder fbb;
 			auto message = constructPatchesMessage(fbb);
 			fbb.Finish(message);
@@ -165,7 +272,6 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 			};
 
 			flatbuffers::FlatBufferBuilder fbb;
-			bool filesUpdated = false;
 
 			if (auto thisVolume = LocationToVolume(destination); thisVolume) {
 				auto success = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
@@ -175,7 +281,6 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 					auto message = CreateMessage(fbb, AnyMessage_Result, result.Union());
 					fbb.Finish(message);
 
-					filesUpdated = true;
 				} else {
 					auto description = fbb.CreateString("Saving failed");
 					auto result = CreateResult(fbb, false, description);
@@ -189,15 +294,19 @@ void handle_received_frame(uint8_t destination, std::span<uint8_t> payload) {
 				fbb.Finish(message);
 			}
 
-			sendResponse(fbb.GetBufferSpan());
-
-			if (filesUpdated) {
+			if (patchStorage->has_media_changed())
+			{
 				flatbuffers::FlatBufferBuilder fbb;
 				auto message = constructPatchesMessage(fbb);
 				fbb.Finish(message);
 
 				sendBroadcast(fbb.GetBufferSpan());
+
+				lastPatchListSentTime = getTimestamp();
 			}
+
+			sendResponse(fbb.GetBufferSpan());
+
 		} else {
 			printf("Other option\n");
 		}
