@@ -49,3 +49,4 @@ simulator/shared
 
 metamodule-plugins/
 settings.yml
+.cache

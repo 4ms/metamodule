@@ -39,6 +39,13 @@ static void write(ryml::NodeRef *n, AudioSettings const &s) {
 	n->append_child() << ryml::key("block_size") << s.block_size;
 }
 
+static void write(ryml::NodeRef *n, PluginAutoloadSettings const &s) {
+	*n |= ryml::SEQ;
+
+	for (auto const &s : s.slug)
+		n->append_child() << s;
+}
+
 namespace Settings
 {
 
@@ -55,6 +62,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["patch_view"] << settings.patch_view;
 	data["module_view"] << settings.module_view;
 	data["audio"] << settings.audio;
+	data["plugin_autoload"] << settings.plugin_autoload;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();

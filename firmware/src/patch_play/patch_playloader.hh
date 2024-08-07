@@ -194,6 +194,28 @@ struct PatchPlayLoader {
 		start_audio();
 	}
 
+	void prepare_remove_plugin(std::string_view brand_slug) {
+		bool patch_contains_brand = false;
+
+		auto playing_patch = patches_.get_playing_patch();
+		std::string brand_prefix = std::string(brand_slug) + ":";
+		for (std::string_view module_slug : playing_patch->module_slugs) {
+			if (module_slug.starts_with(brand_prefix)) {
+				patch_contains_brand = true;
+				break;
+			}
+		}
+
+		if (patch_contains_brand) {
+			pr_dbg("Currently playing patch contains a module in the plugin to be removed. Stopping\n");
+			stop_audio();
+			while (!is_audio_muted())
+				;
+			player_.unload_patch();
+			patches_.close_playing_patch();
+		}
+	}
+
 	struct AudioSettings {
 		//TODO put defaults in one place
 		uint32_t sample_rate = 48000;

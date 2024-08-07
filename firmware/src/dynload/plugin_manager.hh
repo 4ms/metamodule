@@ -28,6 +28,10 @@ public:
 		plugin_file_loader.load_plugin(idx);
 	}
 
+	void unload_plugin(std::string_view name) {
+		loaded_plugin_list.remove_if([&](LoadedPlugin &plugin) { return (plugin.fileinfo.plugin_name == name); });
+	}
+
 	auto process_loading() {
 		return plugin_file_loader.process(loaded_plugin_list);
 	}

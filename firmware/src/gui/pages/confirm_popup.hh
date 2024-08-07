@@ -22,10 +22,13 @@ struct ConfirmPopup {
 	void show(auto cb, const char *message, std::string_view choice1_text, std::string_view choice2_text = "") {
 		remove_all_event_cb(ui_CancelButton);
 		lv_obj_add_event_cb(ui_CancelButton, button_callback, LV_EVENT_CLICKED, this);
+
 		remove_all_event_cb(ui_ConfirmButton);
 		lv_obj_add_event_cb(ui_ConfirmButton, button_callback, LV_EVENT_CLICKED, this);
+
 		remove_all_event_cb(ui_TrashButton2);
 		lv_obj_add_event_cb(ui_TrashButton2, button_callback, LV_EVENT_CLICKED, this);
+
 		remove_all_event_cb(ui_Choice2Button);
 		lv_obj_add_event_cb(ui_Choice2Button, button_callback, LV_EVENT_CLICKED, this);
 
@@ -35,9 +38,18 @@ struct ConfirmPopup {
 
 		lv_show(ui_DelMapPopUpPanel);
 
+		lv_label_set_text(ui_CancelLabel, "Cancel");
 		lv_label_set_text(ui_DelMapLabel, message);
 
 		callback = std::move(cb);
+
+		if (choice2_text.size() > 0) {
+			lv_show(ui_Choice2Button);
+			lv_label_set_text_fmt(ui_Choice2Label, "%.*s", (int)choice2_text.size(), choice2_text.data());
+			lv_group_add_obj(group, ui_Choice2Button);
+		} else {
+			lv_hide(ui_Choice2Button);
+		}
 
 		if (choice1_text == "Trash") {
 			lv_hide(ui_ConfirmButton);
@@ -48,14 +60,6 @@ struct ConfirmPopup {
 			lv_hide(ui_TrashButton2);
 			lv_label_set_text_fmt(ui_ConfirmLabel, "%.*s", (int)choice1_text.size(), choice1_text.data());
 			lv_group_add_obj(group, ui_ConfirmButton);
-		}
-
-		if (choice2_text.size() > 0) {
-			lv_show(ui_Choice2Button);
-			lv_label_set_text_fmt(ui_Choice2Label, "%.*s", (int)choice2_text.size(), choice2_text.data());
-			lv_group_add_obj(group, ui_Choice2Button);
-		} else {
-			lv_hide(ui_Choice2Button);
 		}
 
 		lv_group_add_obj(group, ui_CancelButton);

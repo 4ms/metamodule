@@ -20,7 +20,7 @@ struct SystemMenuPage : PageBase {
 	SystemMenuPage(PatchContext info)
 		: PageBase{info, PageId::SystemMenu}
 		, info_tab{patch_storage}
-		, plugin_tab{info.plugin_manager, info.notify_queue}
+		, plugin_tab{info.plugin_manager, info.settings.plugin_autoload, info.notify_queue, gui_state, patch_playloader}
 		, prefs_tab{info.patch_playloader, info.settings.audio, gui_state}
 		, system_tab{patch_storage, params, metaparams, patch_playloader, patch_mod_queue}
 		, fwupdate_tab{patch_storage, patch_playloader}

@@ -1,6 +1,8 @@
 #include "settings_parse.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
+#include "ryml_std.hpp"
+#include "util/countzip.hh"
 #include <span>
 
 namespace MetaModule
@@ -53,6 +55,18 @@ static bool read(ryml::ConstNodeRef const &node, AudioSettings *audio) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, PluginAutoloadSettings *autoload) {
+	if (!node.is_seq())
+		return false;
+
+	autoload->slug.resize(node.num_children());
+	auto pos = 0u;
+	for (auto const ch : node.children())
+		ch >> autoload->slug[pos++];
+
+	return true;
+}
+
 static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	if (!node.is_map())
 		return false;
@@ -88,6 +102,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "patch_view", settings, &UserSettings::patch_view);
 	read_or_default(node, "module_view", settings, &UserSettings::module_view);
 	read_or_default(node, "audio", settings, &UserSettings::audio);
+	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_autoload);
 
 	return true;
 }
