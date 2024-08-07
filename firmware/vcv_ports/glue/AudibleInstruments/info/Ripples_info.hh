@@ -16,9 +16,9 @@ struct RipplesInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 12> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(24.74), to_mm<72>(59.33), Center, "Resonance x23 RedSmallKnob", ""}, 0.0f},
-		DaviesLargeKnob{{to_mm<72>(57.15), to_mm<72>(120.53), Center, "Frequency x23 WhiteLargeKnob", ""}, 0.5f},
-		Davies1900hBlackKnob{{to_mm<72>(89.54), to_mm<72>(181.73), Center, "FM x23 BlueMediumKnob", ""}, 0.875f},
+		RedSmallKnob{{to_mm<72>(24.74), to_mm<72>(59.33), Center, "Resonance", ""}, 0.0f},
+		WhiteLargeKnob{{to_mm<72>(57.15), to_mm<72>(120.53), Center, "Frequency", ""}, 0.5f},
+		BlueMediumKnob{{to_mm<72>(89.54), to_mm<72>(181.73), Center, "FM", ""}, 0.875f},
 		AnalogJackInput4ms{{to_mm<72>(22.91), to_mm<72>(246.5), Center, "Resonance CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(57.12), to_mm<72>(246.5), Center, "Frequency CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(91.34), to_mm<72>(246.5), Center, "FM", ""}},
@@ -27,30 +27,30 @@ struct RipplesInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(91.34), to_mm<72>(280.72), Center, "LP2", ""}},
 		AnalogJackInput4ms{{to_mm<72>(22.91), to_mm<72>(314.93), Center, "Gain", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(57.12), to_mm<72>(314.93), Center, "LP4", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(91.34), to_mm<72>(314.93), Center, "LP4 x3E VCA", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(91.34), to_mm<72>(314.93), Center, "LP4&gt;VCA", ""}},
 }};
 
     enum class Elem {
-        Resonance_X23_RedsmallknobKnob,
-        Frequency_X23_WhitelargeknobKnob,
-        Fm_X23_BluemediumknobKnob,
-        Resonance_CvIn,
-        Frequency_CvIn,
+        ResonanceKnob,
+        FrequencyKnob,
+        FmKnob,
+        ResonanceCvIn,
+        FrequencyCvIn,
         FmIn,
         In,
         Bp2Out,
         Lp2Out,
         GainIn,
         Lp4Out,
-        Lp4_X3E_VcaOut,
+        Lp4_Gt_VcaOut,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobResonance_X23_Redsmallknob, 
-        KnobFrequency_X23_Whitelargeknob, 
-        KnobFm_X23_Bluemediumknob, 
+        KnobResonance, 
+        KnobFrequency, 
+        KnobFm, 
         NumKnobs,
     };
     
@@ -68,7 +68,7 @@ struct RipplesInfo : ModuleInfoBase {
         OutputBp2, 
         OutputLp2, 
         OutputLp4, 
-        OutputLp4_X3E_Vca, 
+        OutputLp4_Gt_Vca, 
         NumOutJacks,
     };
     

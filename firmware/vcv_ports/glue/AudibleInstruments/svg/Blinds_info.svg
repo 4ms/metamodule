@@ -1,143 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="173.22mm" height="130.48mm" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 491.01 369.88">
-  <defs>
-    <clipPath id="clippath">
-      <rect x="63.56" y="131.02" width="28.35" height="22.68" style="fill: none;"/>
-    </clipPath>
-    <clipPath id="clippath-1">
-      <rect x="63.56" y="131.02" width="28.35" height="22.68" style="fill: none;"/>
-    </clipPath>
-    <clipPath id="clippath-2">
-      <rect x="63.56" y="55.52" width="28.35" height="22.68" style="fill: none;"/>
-    </clipPath>
-    <clipPath id="clippath-3">
-      <rect x="63.56" y="55.52" width="28.35" height="22.68" style="fill: none;"/>
-    </clipPath>
-    <clipPath id="clippath-4">
-      <rect x="63.56" y="206.52" width="28.35" height="22.68" style="fill: none;"/>
-    </clipPath>
-    <clipPath id="clippath-5">
-      <rect x="63.56" y="206.52" width="28.35" height="22.68" style="fill: none;"/>
-    </clipPath>
-    <clipPath id="clippath-6">
-      <rect x="63.56" y="282.02" width="28.35" height="22.68" style="fill: none;"/>
-    </clipPath>
-    <clipPath id="clippath-7">
-      <rect x="63.56" y="282.02" width="28.35" height="22.68" style="fill: none;"/>
-    </clipPath>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="173.22mm" height="130.48mm" viewBox="0 0 491.01 369.88">
   <g id="faceplate">
     <g id="panel">
       <g>
-        <rect x=".25" y=".25" width="171.53" height="364" style="fill: #ededee;"/>
-        <path d="M171.65.37v363.75H.38V.37h171.28M171.9.12H.12v364.25h171.78V.12h0Z" style="fill: #9c9c9e;"/>
+        <rect x=".25" y=".25" width="171.53" height="364" style="fill: #ededee; stroke-width: 0px;"/>
+        <path d="M171.65.37v363.75H.38V.37h171.28M171.9.12H.12v364.25h171.78V.12h0Z" style="fill: #9c9c9e; stroke-width: 0px;"/>
       </g>
     </g>
-    <path id="round" d="M148.59,35.09h2.83c7.83,0,14.17,6.92,14.17,14.75v266.46c0,7.83-6.35,14.75-14.17,14.75h-2.83c-7.83,0-14.17-6.92-14.17-14.75V49.84c0-7.83,6.35-14.75,14.17-14.75Z"/>
+    <path id="round" d="M148.59,35.09h2.83c7.83,0,14.17,6.92,14.17,14.75v266.46c0,7.83-6.35,14.75-14.17,14.75h-2.83c-7.83,0-14.17-6.92-14.17-14.75V49.84c0-7.83,6.35-14.75,14.17-14.75Z" style="fill: #000; stroke-width: 0px;"/>
     <g>
-      <path d="M65.88,159.48h-3.94v-1.07h3.94v1.07Z"/>
-      <path d="M94.04,158.91h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z"/>
-      <g id="Artwork_5">
-        <g style="clip-path: url(#clippath);">
-          <g style="clip-path: url(#clippath-1);">
-            <path d="M68.03,152.29c-1.49-2-2.38-4.47-2.38-7.15,0-6.64,5.42-12.05,12.09-12.05s12.09,5.4,12.09,12.05c0,2.69-.9,5.17-2.4,7.18l1.56,1.23c1.77-2.35,2.83-5.25,2.83-8.41,0-7.75-6.3-14.02-14.07-14.02s-14.07,6.28-14.07,14.02c0,3.15,1.06,6.05,2.82,8.39l1.55-1.24Z"/>
-            <path d="M88.99,153.7l-1.71-1.36.06-.08c1.56-2.09,2.39-4.55,2.39-7.12,0-6.59-5.38-11.95-11.99-11.95s-11.99,5.36-11.99,11.95c0,2.56.82,5.01,2.36,7.09l.06.08-1.71,1.37-.06-.08c-1.86-2.47-2.84-5.39-2.84-8.45,0-7.79,6.36-14.12,14.17-14.12s14.17,6.34,14.17,14.12c0,3.07-.99,6-2.85,8.47l-.06.08ZM87.55,152.3l1.4,1.11c1.8-2.42,2.75-5.28,2.75-8.27,0-7.68-6.27-13.93-13.98-13.93s-13.97,6.25-13.97,13.93c0,2.98.95,5.84,2.74,8.25l1.4-1.12c-1.54-2.1-2.35-4.56-2.35-7.13,0-6.7,5.47-12.14,12.19-12.14s12.19,5.45,12.19,12.14c0,2.58-.82,5.06-2.37,7.16"/>
-          </g>
-        </g>
-      </g>
-      <path id="center" d="M77.59,130.01c-.98,0-1.77.79-1.77,1.77s.79,1.77,1.77,1.77,1.77-.79,1.77-1.77-.79-1.77-1.77-1.77Z" style="fill: #171717;"/>
-      <path d="M77.59,128.51c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27ZM77.59,133.55c-.98,0-1.77-.79-1.77-1.77s.79-1.77,1.77-1.77,1.77.79,1.77,1.77-.79,1.77-1.77,1.77Z" style="fill: #ededed;"/>
+      <path d="M65.88,159.48h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M94.04,158.91h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
+      <path id="center" d="M77.59,130.01c-.98,0-1.77.79-1.77,1.77s.79,1.77,1.77,1.77,1.77-.79,1.77-1.77-.79-1.77-1.77-1.77Z" style="fill: #171717; stroke-width: 0px;"/>
+      <path d="M77.59,128.51c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27ZM77.59,133.55c-.98,0-1.77-.79-1.77-1.77s.79-1.77,1.77-1.77,1.77.79,1.77,1.77-.79,1.77-1.77,1.77Z" style="fill: #ededed; stroke-width: 0px;"/>
     </g>
     <g>
-      <path d="M65.88,83.98h-3.94v-1.07h3.94v1.07Z"/>
-      <path d="M94.04,83.41h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z"/>
-      <g id="Artwork_5-2" data-name="Artwork_5">
-        <g style="clip-path: url(#clippath-2);">
-          <g style="clip-path: url(#clippath-3);">
-            <path d="M68.03,76.79c-1.49-2-2.38-4.47-2.38-7.15,0-6.64,5.42-12.05,12.09-12.05s12.09,5.4,12.09,12.05c0,2.69-.9,5.17-2.4,7.18l1.56,1.23c1.77-2.35,2.83-5.25,2.83-8.41,0-7.75-6.3-14.02-14.07-14.02s-14.07,6.28-14.07,14.02c0,3.15,1.06,6.05,2.82,8.39l1.55-1.24Z"/>
-            <path d="M88.99,78.2l-1.71-1.36.06-.08c1.56-2.09,2.39-4.55,2.39-7.12,0-6.59-5.38-11.95-11.99-11.95s-11.99,5.36-11.99,11.95c0,2.56.82,5.01,2.36,7.09l.06.08-1.71,1.37-.06-.08c-1.86-2.47-2.84-5.39-2.84-8.45,0-7.79,6.36-14.12,14.17-14.12s14.17,6.34,14.17,14.12c0,3.07-.99,6-2.85,8.47l-.06.08ZM87.55,76.8l1.4,1.11c1.8-2.42,2.75-5.28,2.75-8.27,0-7.68-6.27-13.93-13.98-13.93s-13.97,6.25-13.97,13.93c0,2.98.95,5.84,2.74,8.25l1.4-1.12c-1.54-2.1-2.35-4.56-2.35-7.13,0-6.7,5.47-12.14,12.19-12.14s12.19,5.45,12.19,12.14c0,2.58-.82,5.06-2.37,7.16"/>
-          </g>
-        </g>
-      </g>
-      <path id="center-2" data-name="center" d="M77.59,54.51c-.98,0-1.77.79-1.77,1.77s.79,1.77,1.77,1.77,1.77-.79,1.77-1.77-.79-1.77-1.77-1.77Z" style="fill: #171717;"/>
-      <path d="M77.59,53.01c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27ZM77.59,58.05c-.98,0-1.77-.79-1.77-1.77s.79-1.77,1.77-1.77,1.77.79,1.77,1.77-.79,1.77-1.77,1.77Z" style="fill: #ededed;"/>
+      <path d="M65.88,83.98h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M94.04,83.41h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
+      <path id="center-2" data-name="center" d="M77.59,54.51c-.98,0-1.77.79-1.77,1.77s.79,1.77,1.77,1.77,1.77-.79,1.77-1.77-.79-1.77-1.77-1.77Z" style="fill: #171717; stroke-width: 0px;"/>
+      <path d="M77.59,53.01c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27ZM77.59,58.05c-.98,0-1.77-.79-1.77-1.77s.79-1.77,1.77-1.77,1.77.79,1.77,1.77-.79,1.77-1.77,1.77Z" style="fill: #ededed; stroke-width: 0px;"/>
     </g>
     <g>
-      <path d="M65.88,234.98h-3.94v-1.07h3.94v1.07Z"/>
-      <path d="M94.04,234.41h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z"/>
-      <g id="Artwork_5-3" data-name="Artwork_5">
-        <g style="clip-path: url(#clippath-4);">
-          <g style="clip-path: url(#clippath-5);">
-            <path d="M68.03,227.8c-1.49-2-2.38-4.47-2.38-7.15,0-6.64,5.42-12.05,12.09-12.05s12.09,5.4,12.09,12.05c0,2.69-.9,5.17-2.4,7.18l1.56,1.23c1.77-2.35,2.83-5.25,2.83-8.41,0-7.75-6.3-14.02-14.07-14.02s-14.07,6.28-14.07,14.02c0,3.15,1.06,6.05,2.82,8.39l1.55-1.24Z"/>
-            <path d="M88.99,229.2l-1.71-1.36.06-.08c1.56-2.09,2.39-4.55,2.39-7.12,0-6.59-5.38-11.95-11.99-11.95s-11.99,5.36-11.99,11.95c0,2.56.82,5.01,2.36,7.09l.06.08-1.71,1.37-.06-.08c-1.86-2.47-2.84-5.39-2.84-8.45,0-7.79,6.36-14.12,14.17-14.12s14.17,6.34,14.17,14.12c0,3.07-.99,6-2.85,8.47l-.06.08ZM87.55,227.8l1.4,1.11c1.8-2.42,2.75-5.28,2.75-8.27,0-7.68-6.27-13.93-13.98-13.93s-13.97,6.25-13.97,13.93c0,2.98.95,5.84,2.74,8.25l1.4-1.12c-1.54-2.1-2.35-4.56-2.35-7.13,0-6.7,5.47-12.14,12.19-12.14s12.19,5.45,12.19,12.14c0,2.58-.82,5.06-2.37,7.16"/>
-          </g>
-        </g>
-      </g>
-      <path id="center-3" data-name="center" d="M77.59,205.51c-.98,0-1.77.79-1.77,1.77s.79,1.77,1.77,1.77,1.77-.79,1.77-1.77-.79-1.77-1.77-1.77Z" style="fill: #171717;"/>
-      <path d="M77.59,204.01c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27ZM77.59,209.05c-.98,0-1.77-.79-1.77-1.77s.79-1.77,1.77-1.77,1.77.79,1.77,1.77-.79,1.77-1.77,1.77Z" style="fill: #ededed;"/>
+      <path d="M65.88,234.98h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M94.04,234.41h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
+      <path id="center-3" data-name="center" d="M77.59,205.51c-.98,0-1.77.79-1.77,1.77s.79,1.77,1.77,1.77,1.77-.79,1.77-1.77-.79-1.77-1.77-1.77Z" style="fill: #171717; stroke-width: 0px;"/>
+      <path d="M77.59,204.01c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27ZM77.59,209.05c-.98,0-1.77-.79-1.77-1.77s.79-1.77,1.77-1.77,1.77.79,1.77,1.77-.79,1.77-1.77,1.77Z" style="fill: #ededed; stroke-width: 0px;"/>
     </g>
     <g>
-      <path d="M65.88,310.48h-3.94v-1.07h3.94v1.07Z"/>
-      <path d="M94.04,309.91h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z"/>
-      <g id="Artwork_5-4" data-name="Artwork_5">
-        <g style="clip-path: url(#clippath-6);">
-          <g style="clip-path: url(#clippath-7);">
-            <path d="M68.03,303.3c-1.49-2-2.38-4.47-2.38-7.15,0-6.64,5.42-12.05,12.09-12.05s12.09,5.4,12.09,12.05c0,2.69-.9,5.17-2.4,7.18l1.56,1.23c1.77-2.35,2.83-5.25,2.83-8.41,0-7.75-6.3-14.02-14.07-14.02s-14.07,6.28-14.07,14.02c0,3.15,1.06,6.05,2.82,8.39l1.55-1.24Z"/>
-            <path d="M88.99,304.7l-1.71-1.36.06-.08c1.56-2.09,2.39-4.55,2.39-7.12,0-6.59-5.38-11.95-11.99-11.95s-11.99,5.36-11.99,11.95c0,2.56.82,5.01,2.36,7.09l.06.08-1.71,1.37-.06-.08c-1.86-2.47-2.84-5.39-2.84-8.45,0-7.79,6.36-14.12,14.17-14.12s14.17,6.34,14.17,14.12c0,3.07-.99,6-2.85,8.47l-.06.08ZM87.55,303.3l1.4,1.11c1.8-2.42,2.75-5.28,2.75-8.27,0-7.68-6.27-13.93-13.98-13.93s-13.97,6.25-13.97,13.93c0,2.98.95,5.84,2.74,8.25l1.4-1.12c-1.54-2.1-2.35-4.56-2.35-7.13,0-6.7,5.47-12.14,12.19-12.14s12.19,5.45,12.19,12.14c0,2.58-.82,5.06-2.37,7.16"/>
-          </g>
-        </g>
-      </g>
-      <path id="center-4" data-name="center" d="M77.59,281.01c-.98,0-1.77.79-1.77,1.77s.79,1.77,1.77,1.77,1.77-.79,1.77-1.77-.79-1.77-1.77-1.77Z" style="fill: #171717;"/>
-      <path d="M77.59,279.51c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27ZM77.59,284.55c-.98,0-1.77-.79-1.77-1.77s.79-1.77,1.77-1.77,1.77.79,1.77,1.77-.79,1.77-1.77,1.77Z" style="fill: #ededed;"/>
+      <path d="M65.88,310.48h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M94.04,309.91h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
+      <path id="center-4" data-name="center" d="M77.59,281.01c-.98,0-1.77.79-1.77,1.77s.79,1.77,1.77,1.77,1.77-.79,1.77-1.77-.79-1.77-1.77-1.77Z" style="fill: #171717; stroke-width: 0px;"/>
+      <path d="M77.59,279.51c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27ZM77.59,284.55c-.98,0-1.77-.79-1.77-1.77s.79-1.77,1.77-1.77,1.77.79,1.77,1.77-.79,1.77-1.77,1.77Z" style="fill: #ededed; stroke-width: 0px;"/>
     </g>
-    <g id="curved_lines">
-      <rect x="24.5" y="69.03" width="37.35" height="1"/>
-      <rect x="24.5" y="144.86" width="37.35" height="1"/>
-      <rect x="24.5" y="220.12" width="37.35" height="1"/>
-      <rect x="24.5" y="295.79" width="37.35" height="1"/>
-      <path d="M94.13,69.5v1c2.37.39,5.62,1.12,8.94,2.45,8.41,3.4,13.1,8.91,13.95,16.37l.99-.11c-1.64-14.37-16.81-18.54-23.88-19.71Z"/>
-      <path d="M94.13,145.33v1c2.37.39,5.62,1.12,8.94,2.45,8.41,3.4,13.1,8.91,13.95,16.37l.99-.11c-1.64-14.37-16.81-18.54-23.88-19.71Z"/>
-      <path d="M94.13,220.6v1c2.37.39,5.62,1.12,8.94,2.45,8.41,3.4,13.1,8.91,13.95,16.37l.99-.11c-1.64-14.37-16.81-18.54-23.88-19.71Z"/>
-      <path d="M94.13,296.26v1c2.37.39,5.62,1.12,8.94,2.45,8.41,3.4,13.1,8.91,13.95,16.37l.99-.11c-1.64-14.37-16.81-18.54-23.88-19.71Z"/>
+    <g id="curved_lines" data-name="curved lines">
+      <rect x="24.5" y="69.03" width="37.35" height="1" style="fill: #000; stroke-width: 0px;"/>
+      <rect x="24.5" y="144.86" width="37.35" height="1" style="fill: #000; stroke-width: 0px;"/>
+      <rect x="24.5" y="220.12" width="37.35" height="1" style="fill: #000; stroke-width: 0px;"/>
+      <rect x="24.5" y="295.79" width="37.35" height="1" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M94.13,69.5v1c2.37.39,5.62,1.12,8.94,2.45,8.41,3.4,13.1,8.91,13.95,16.37l.99-.11c-1.64-14.37-16.81-18.54-23.88-19.71Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M94.13,145.33v1c2.37.39,5.62,1.12,8.94,2.45,8.41,3.4,13.1,8.91,13.95,16.37l.99-.11c-1.64-14.37-16.81-18.54-23.88-19.71Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M94.13,220.6v1c2.37.39,5.62,1.12,8.94,2.45,8.41,3.4,13.1,8.91,13.95,16.37l.99-.11c-1.64-14.37-16.81-18.54-23.88-19.71Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M94.13,296.26v1c2.37.39,5.62,1.12,8.94,2.45,8.41,3.4,13.1,8.91,13.95,16.37l.99-.11c-1.64-14.37-16.81-18.54-23.88-19.71Z" style="fill: #000; stroke-width: 0px;"/>
     </g>
-    <rect x=".12" y="18.32" width="171.78" height="14.17"/>
+    <rect x=".12" y="18.32" width="171.78" height="14.17" style="fill: #000; stroke-width: 0px;"/>
     <g>
       <line x1="150.01" y1="74.84" x2="150.01" y2="109.4" style="fill: none; stroke: #fff; stroke-miterlimit: 10; stroke-width: 2px;"/>
-      <polygon points="146.62 105.42 150.01 108.81 153.4 105.42 153.4 108.3 150.01 111.69 146.62 108.3 146.62 105.42" style="fill: #fff;"/>
+      <polygon points="146.62 105.42 150.01 108.81 153.4 105.42 153.4 108.3 150.01 111.69 146.62 108.3 146.62 105.42" style="fill: #fff; stroke-width: 0px;"/>
     </g>
     <g>
       <line x1="150.01" y1="150.58" x2="150.01" y2="185.15" style="fill: none; stroke: #fff; stroke-miterlimit: 10; stroke-width: 2px;"/>
-      <polygon points="146.62 181.16 150.01 184.56 153.4 181.16 153.4 184.04 150.01 187.43 146.62 184.04 146.62 181.16" style="fill: #fff;"/>
+      <polygon points="146.62 181.16 150.01 184.56 153.4 181.16 153.4 184.04 150.01 187.43 146.62 184.04 146.62 181.16" style="fill: #fff; stroke-width: 0px;"/>
     </g>
     <g>
       <line x1="150.01" y1="226.33" x2="150.01" y2="260.89" style="fill: none; stroke: #fff; stroke-miterlimit: 10; stroke-width: 2px;"/>
-      <polygon points="146.62 256.91 150.01 260.3 153.4 256.91 153.4 259.79 150.01 263.18 146.62 259.79 146.62 256.91" style="fill: #fff;"/>
+      <polygon points="146.62 256.91 150.01 260.3 153.4 256.91 153.4 259.79 150.01 263.18 146.62 259.79 146.62 256.91" style="fill: #fff; stroke-width: 0px;"/>
     </g>
-    <path d="M18.99,165.53v17.01h17.01v-17.01h-17.01ZM27.81,175.57h-.46l1.5,4.53-2.1.7-1.99-5.98c-.11-.34-.05-.71.15-.99s.54-.46.9-.46h1.99c1.12,0,2.03-.97,2.03-2.17s-.91-2.17-2.03-2.17-2.03.97-2.03,2.17h-2.21c0-2.41,1.9-4.37,4.23-4.37s4.23,1.96,4.23,4.37-1.9,4.37-4.23,4.37Z" style="fill: #3babec;"/>
+    <path d="M18.99,165.53v17.01h17.01v-17.01h-17.01ZM27.81,175.57h-.46l1.5,4.53-2.1.7-1.99-5.98c-.11-.34-.05-.71.15-.99s.54-.46.9-.46h1.99c1.12,0,2.03-.97,2.03-2.17s-.91-2.17-2.03-2.17-2.03.97-2.03,2.17h-2.21c0-2.41,1.9-4.37,4.23-4.37s4.23,1.96,4.23,4.37-1.9,4.37-4.23,4.37Z" style="fill: #3babec; stroke-width: 0px;"/>
     <g>
-      <path d="M2.85,114.75v14.17h14.17v-14.17H2.85ZM13.85,123.14h-7.83v-2.61h7.83v2.61Z"/>
-      <path d="M37.96,114.75v14.17h14.17v-14.17h-14.17ZM49.61,122.85h-3.56v3.56h-2.01v-3.56h-3.56v-2.01h3.56v-3.56h2.01v3.56h3.56v2.01Z"/>
-    </g>
-    <g>
-      <ellipse cx="27.06" cy="95.46" rx="2.03" ry="1.63" style="fill: #3babec;"/>
-      <path d="M18.87,90.17v17.01h17.01v-17.01h-17.01ZM31.29,96v9.25h-2.21v-6.44c-.6.3-1.29.49-2.03.49-2.33,0-4.23-1.72-4.23-3.84s1.9-3.84,4.23-3.84,4.23,1.72,4.23,3.84c0,.18-.03.36-.06.54h.06Z" style="fill: #3babec;"/>
+      <path d="M2.85,114.75v14.17h14.17v-14.17H2.85ZM13.85,123.14h-7.83v-2.61h7.83v2.61Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M37.96,114.75v14.17h14.17v-14.17h-14.17ZM49.61,122.85h-3.56v3.56h-2.01v-3.56h-3.56v-2.01h3.56v-3.56h2.01v3.56h3.56v2.01Z" style="fill: #000; stroke-width: 0px;"/>
     </g>
     <g>
-      <path d="M2.73,39.39v14.17h14.17v-14.17H2.73ZM13.73,47.78h-7.83v-2.61h7.83v2.61Z"/>
-      <path d="M37.85,39.39v14.17h14.17v-14.17h-14.17ZM49.5,47.49h-3.56v3.56h-2.01v-3.56h-3.56v-2.01h3.56v-3.56h2.01v3.56h3.56v2.01Z"/>
+      <ellipse cx="27.06" cy="95.46" rx="2.03" ry="1.63" style="fill: #3babec; stroke-width: 0px;"/>
+      <path d="M18.87,90.17v17.01h17.01v-17.01h-17.01ZM31.29,96v9.25h-2.21v-6.44c-.6.3-1.29.49-2.03.49-2.33,0-4.23-1.72-4.23-3.84s1.9-3.84,4.23-3.84,4.23,1.72,4.23,3.84c0,.18-.03.36-.06.54h.06Z" style="fill: #3babec; stroke-width: 0px;"/>
     </g>
     <g>
-      <path d="M2.85,265.47v14.17h14.17v-14.17H2.85ZM13.85,273.86h-7.83v-2.61h7.83v2.61Z"/>
-      <path d="M37.96,265.47v14.17h14.17v-14.17h-14.17ZM49.61,273.56h-3.56v3.56h-2.01v-3.56h-3.56v-2.01h3.56v-3.56h2.01v3.56h3.56v2.01Z"/>
+      <path d="M2.73,39.39v14.17h14.17v-14.17H2.73ZM13.73,47.78h-7.83v-2.61h7.83v2.61Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M37.85,39.39v14.17h14.17v-14.17h-14.17ZM49.5,47.49h-3.56v3.56h-2.01v-3.56h-3.56v-2.01h3.56v-3.56h2.01v3.56h3.56v2.01Z" style="fill: #000; stroke-width: 0px;"/>
     </g>
     <g>
-      <path d="M27.52,327.05c-1.01,0-1.9.59-1.9,1.27s.89,1.27,1.9,1.27,1.9-.59,1.9-1.27-.89-1.27-1.9-1.27Z" style="fill: #3babec;"/>
-      <path d="M18.99,316.25v17.01h17.01v-17.01h-17.01ZM31.63,328.32c0,1.92-1.84,3.48-4.11,3.48s-4.11-1.56-4.11-3.48c0-1.01.51-1.91,1.32-2.54-1.99-2.35-1.39-7.21-1.31-7.76l2.19.3c-.23,1.71-.22,4.86.82,6.05.29.33.62.48,1.09.48s.8-.15,1.09-.48c1.17-1.34.98-4.9.82-6.05l2.19-.3c.08.55.68,5.41-1.31,7.76.81.64,1.32,1.53,1.32,2.54Z" style="fill: #3babec;"/>
+      <path d="M2.85,265.47v14.17h14.17v-14.17H2.85ZM13.85,273.86h-7.83v-2.61h7.83v2.61Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M37.96,265.47v14.17h14.17v-14.17h-14.17ZM49.61,273.56h-3.56v3.56h-2.01v-3.56h-3.56v-2.01h3.56v-3.56h2.01v3.56h3.56v2.01Z" style="fill: #000; stroke-width: 0px;"/>
     </g>
-    <path d="M18.99,240.89v17.01h17.01v-17.01h-17.01ZM31.73,250.84c0,1.8-1.6,3.3-3.66,3.54l.79.82-1.59,1.53-2.56-2.66c-.31-.32-.39-.79-.22-1.2.17-.41.57-.67,1.02-.67h1.99c1.1,0,2.03-.62,2.03-1.36s-.93-1.36-2.03-1.36h-1.99v-2.21h1.99c1.1,0,2.03-.62,2.03-1.36s-.93-1.36-2.03-1.36-2.03.62-2.03,1.36h-2.21c0-1.97,1.9-3.57,4.23-3.57s4.23,1.6,4.23,3.57c0,.96-.45,1.82-1.18,2.46.73.64,1.18,1.51,1.18,2.46Z" style="fill: #3babec;"/>
     <g>
-      <path d="M2.85,190.11v14.17h14.17v-14.17H2.85ZM13.85,198.5h-7.83v-2.61h7.83v2.61Z"/>
-      <path d="M37.96,190.11v14.17h14.17v-14.17h-14.17ZM49.61,198.21h-3.56v3.56h-2.01v-3.56h-3.56v-2.01h3.56v-3.56h2.01v3.56h3.56v2.01Z"/>
+      <path d="M27.52,327.05c-1.01,0-1.9.59-1.9,1.27s.89,1.27,1.9,1.27,1.9-.59,1.9-1.27-.89-1.27-1.9-1.27Z" style="fill: #3babec; stroke-width: 0px;"/>
+      <path d="M18.99,316.25v17.01h17.01v-17.01h-17.01ZM31.63,328.32c0,1.92-1.84,3.48-4.11,3.48s-4.11-1.56-4.11-3.48c0-1.01.51-1.91,1.32-2.54-1.99-2.35-1.39-7.21-1.31-7.76l2.19.3c-.23,1.71-.22,4.86.82,6.05.29.33.62.48,1.09.48s.8-.15,1.09-.48c1.17-1.34.98-4.9.82-6.05l2.19-.3c.08.55.68,5.41-1.31,7.76.81.64,1.32,1.53,1.32,2.54Z" style="fill: #3babec; stroke-width: 0px;"/>
+    </g>
+    <path d="M18.99,240.89v17.01h17.01v-17.01h-17.01ZM31.73,250.84c0,1.8-1.6,3.3-3.66,3.54l.79.82-1.59,1.53-2.56-2.66c-.31-.32-.39-.79-.22-1.2.17-.41.57-.67,1.02-.67h1.99c1.1,0,2.03-.62,2.03-1.36s-.93-1.36-2.03-1.36h-1.99v-2.21h1.99c1.1,0,2.03-.62,2.03-1.36s-.93-1.36-2.03-1.36-2.03.62-2.03,1.36h-2.21c0-1.97,1.9-3.57,4.23-3.57s4.23,1.6,4.23,3.57c0,.96-.45,1.82-1.18,2.46.73.64,1.18,1.51,1.18,2.46Z" style="fill: #3babec; stroke-width: 0px;"/>
+    <g>
+      <path d="M2.85,190.11v14.17h14.17v-14.17H2.85ZM13.85,198.5h-7.83v-2.61h7.83v2.61Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M37.96,190.11v14.17h14.17v-14.17h-14.17ZM49.61,198.21h-3.56v3.56h-2.01v-3.56h-3.56v-2.01h3.56v-3.56h2.01v3.56h3.56v2.01Z" style="fill: #000; stroke-width: 0px;"/>
     </g>
     <line x1="27.38" y1="39.33" x2="27.38" y2="53.5" style="fill: none; stroke: #171717; stroke-miterlimit: 10; stroke-width: 3px;"/>
     <line x1="27.38" y1="114.59" x2="27.38" y2="128.76" style="fill: none; stroke: #171717; stroke-miterlimit: 10; stroke-width: 3px;"/>
@@ -145,50 +87,50 @@
     <line x1="27.38" y1="264.97" x2="27.38" y2="279.14" style="fill: none; stroke: #171717; stroke-miterlimit: 10; stroke-width: 3px;"/>
     <g>
       <line x1="168.37" y1="336.53" x2="167.87" y2="336.53" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
-      <line x1="163.88" y1="336.53" x2="6.15" y2="336.53" style="fill: none; stroke: #000; stroke-dasharray: 1 3.99; stroke-linecap: round; stroke-linejoin: round;"/>
+      <line x1="163.88" y1="336.53" x2="6.15" y2="336.53" style="fill: none; stroke: #000; stroke-dasharray: 0 0 1 3.99; stroke-linecap: round; stroke-linejoin: round;"/>
       <line x1="4.16" y1="336.53" x2="3.66" y2="336.53" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
     </g>
     <g id="text">
-      <text transform="translate(67.54 357.44) scale(.82 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 11px; font-weight: 700;"><tspan x="0" y="0">BLINDS</tspan></text>
+      <text transform="translate(67.54 357.44) scale(.82 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 11px; font-weight: 700;"><tspan x="0" y="0">BLINDS</tspan></text>
       <text transform="translate(141.55 72.33) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">OUT</tspan></text>
       <text transform="translate(141.55 147.82) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">OUT</tspan></text>
       <text transform="translate(141.55 223.32) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">OUT</tspan></text>
       <text transform="translate(141.55 298.82) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">OUT</tspan></text>
-      <text transform="translate(111.98 72.9) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
-      <text transform="translate(111.98 148.33) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
-      <text transform="translate(111.98 223.76) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
-      <text transform="translate(111.98 299.19) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
+      <text transform="translate(111.98 72.9) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
+      <text transform="translate(111.98 148.33) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
+      <text transform="translate(111.98 223.76) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
+      <text transform="translate(111.98 299.19) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
     </g>
   </g>
   <g id="components">
-    <circle id="Ch4_x23_YellowLight" cx="150.01" cy="315" r="4.96" style="fill: #f0f;"/>
-    <circle id="Ch4_CV" cx="117.44" cy="315" r="11.34" style="fill: lime;"/>
-    <circle id="Ch4_Atten_x23_GreenLight" cx="77.97" cy="323.93" r="4.96" style="fill: #f0f;"/>
-    <circle id="Ch4_Out" cx="150.01" cy="277.3" r="11.34" style="fill: blue;"/>
-    <circle id="Ch4_IN" cx="117.44" cy="277.3" r="11.34" style="fill: lime;"/>
-    <circle id="Ch4_Atten_x23_WhiteSmallKnob" cx="77.98" cy="296.15" r="8.5" style="fill: red;"/>
-    <circle id="Ch4_x23_WhiteMediumKnob" cx="27.38" cy="296.15" r="17.01" style="fill: #ff0040;"/>
-    <circle id="Ch3_x23_YellowLight" cx="150.01" cy="239.45" r="4.96" style="fill: #f0f;"/>
-    <circle id="Ch3_CV" cx="117.44" cy="239.45" r="11.34" style="fill: lime;"/>
-    <circle id="Ch3_Atten_x23_GreenLight" cx="77.97" cy="248.38" r="4.96" style="fill: #f0f;"/>
-    <circle id="Ch3_Out" cx="150.01" cy="201.75" r="11.34" style="fill: blue;"/>
-    <circle id="Ch3_IN" cx="117.44" cy="201.75" r="11.34" style="fill: lime;"/>
-    <circle id="Ch3_Atten_x23_WhiteSmallKnob" cx="77.98" cy="220.6" r="8.5" style="fill: red;"/>
-    <circle id="Ch3_x23_WhiteMediumKnob" cx="27.38" cy="220.6" r="17.01" style="fill: #ff0036;"/>
-    <circle id="Ch2_x23_YellowLight" cx="150.01" cy="163.91" r="4.96" style="fill: #f0f;"/>
-    <circle id="Ch2_CV" cx="117.44" cy="163.91" r="11.34" style="fill: lime;"/>
-    <circle id="Ch2_Atten_x23_GreenLight" cx="77.97" cy="172.84" r="4.96" style="fill: #f0f;"/>
-    <circle id="Ch2_Out" cx="150.01" cy="126.21" r="11.34" style="fill: blue;"/>
-    <circle id="Ch2_IN" cx="117.44" cy="126.21" r="11.34" style="fill: lime;"/>
-    <circle id="Ch2_Atten_x23_WhiteSmallKnob" cx="77.98" cy="145.06" r="8.5" style="fill: red;"/>
-    <circle id="Ch2_x23_WhiteMediumKnob" cx="27.38" cy="145.06" r="17.01" style="fill: #ff0040;"/>
-    <circle id="Ch1_x23_YellowLight" cx="150.01" cy="88.37" r="4.96" style="fill: #f0f;"/>
-    <circle id="Ch1_CV" cx="117.44" cy="88.37" r="11.34" style="fill: lime;"/>
-    <circle id="Ch1_Atten_x23_GreenLight" cx="77.97" cy="97.3" r="4.96" style="fill: #f0f;"/>
-    <circle id="Ch1_Out" cx="150.01" cy="50.67" r="11.34" style="fill: blue;"/>
-    <circle id="Ch1_IN" cx="117.44" cy="50.67" r="11.34" style="fill: lime;"/>
-    <circle id="Ch1_Atten_x23_WhiteSmallKnob" cx="77.98" cy="69.52" r="8.5" style="fill: red;"/>
-    <circle id="Ch1_x23_WhiteMediumKnob" cx="27.38" cy="69.52" r="17.01" style="fill: #ff0040;"/>
+    <circle id="Ch4_RedGreenLight" data-name="Ch4#RedGreenLight" cx="150.01" cy="315" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch4_CV" data-name="Ch4 CV" cx="117.44" cy="315" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch4_Atten_RedGreenLight" data-name="Ch4 Atten#RedGreenLight" cx="77.97" cy="323.93" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch4_Out" data-name="Ch4 Out" cx="150.01" cy="277.3" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Ch4_IN" data-name="Ch4 IN" cx="117.44" cy="277.3" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch4_Atten_WhiteSmallKnob" data-name="Ch4 Atten#WhiteSmallKnob" cx="77.98" cy="296.15" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Ch4_WhiteMediumKnob" data-name="Ch4#WhiteMediumKnob" cx="27.38" cy="296.15" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch3_RedGreenLight" data-name="Ch3#RedGreenLight" cx="150.01" cy="239.45" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch3_CV" data-name="Ch3 CV" cx="117.44" cy="239.45" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch3_Atten_RedGreenLight" data-name="Ch3 Atten#RedGreenLight" cx="77.97" cy="248.38" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch3_Out" data-name="Ch3 Out" cx="150.01" cy="201.75" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Ch3_IN" data-name="Ch3 IN" cx="117.44" cy="201.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch3_Atten_WhiteSmallKnob" data-name="Ch3 Atten#WhiteSmallKnob" cx="77.98" cy="220.6" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Ch3_WhiteMediumKnob" data-name="Ch3#WhiteMediumKnob" cx="27.38" cy="220.6" r="17.01" style="fill: #ff0036; stroke-width: 0px;"/>
+    <circle id="Ch2_RedGreenLight" data-name="Ch2#RedGreenLight" cx="150.01" cy="163.91" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch2_CV" data-name="Ch2 CV" cx="117.44" cy="163.91" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch2_Atten_RedGreenLight" data-name="Ch2 Atten#RedGreenLight" cx="77.97" cy="172.84" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch2_Out" data-name="Ch2 Out" cx="150.01" cy="126.21" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Ch2_IN" data-name="Ch2 IN" cx="117.44" cy="126.21" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch2_Atten_WhiteSmallKnob" data-name="Ch2 Atten#WhiteSmallKnob" cx="77.98" cy="145.06" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Ch2_WhiteMediumKnob" data-name="Ch2#WhiteMediumKnob" cx="27.38" cy="145.06" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch1_RedGreenLight" data-name="Ch1#RedGreenLight" cx="150.01" cy="88.37" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch1_CV" data-name="Ch1 CV" cx="117.44" cy="88.37" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch1_Atten_RedGreenLight" data-name="Ch1 Atten#RedGreenLight" cx="77.97" cy="97.3" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch1_Out" data-name="Ch1 Out" cx="150.01" cy="50.67" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Ch1_IN" data-name="Ch1 IN" cx="117.44" cy="50.67" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch1_Atten_WhiteSmallKnob" data-name="Ch1 Atten#WhiteSmallKnob" cx="77.98" cy="69.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Ch1_WhiteMediumKnob" data-name="Ch1#WhiteMediumKnob" cx="27.38" cy="69.52" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <text id="slug" transform="translate(135.59 369.12)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0">Blinds</tspan></text>
     <text id="modulename" transform="translate(147.15 369.12)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.02em;">P</tspan><tspan x="1.52" y="0" style="letter-spacing: 0em;">ola</tspan><tspan x="5.32" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="6.32" y="0" style="letter-spacing: 0em;">izing </tspan><tspan x="12.98" y="0" style="letter-spacing: .01em;">M</tspan><tspan x="15.43" y="0">i</tspan><tspan x="16.13" y="0" style="letter-spacing: -.01em;">x</tspan><tspan x="17.47" y="0">er</tspan></text>
   </g>

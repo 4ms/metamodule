@@ -15,29 +15,31 @@ struct RingsInfo : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 22> Elements{{
-		Toggle3posHoriz{{to_mm<72>(21.19), to_mm<72>(45.705), Center, "Polyphony Select Switch", ""}, {"1", "2", "4"}},
-		Toggle3posHoriz{{to_mm<72>(179.64), to_mm<72>(45.705), Center, "Resonator Mode Switch", ""}, {"Modal", "Symp", "Mod"}},
-		WhiteLargeKnob{{to_mm<72>(53.64), to_mm<72>(93.0), Center, "Frequency", ""}, 0.5f},
-		WhiteLargeKnob{{to_mm<72>(147.2), to_mm<72>(93.0), Center, "Structure", ""}, 0.5f},
-		WhiteMeiumKnob{{to_mm<72>(32.9), to_mm<72>(171.86), Center, "Brightness", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(100.39), to_mm<72>(171.86), Center, "Damping", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(167.88), to_mm<72>(171.86), Center, "Position", ""}, 0.5f},
-		WhiteSmallKnob{{to_mm<72>(26.67), to_mm<72>(228.56), Center, "Br Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(63.54), to_mm<72>(228.56), Center, "Frq Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(100.4), to_mm<72>(228.56), Center, "Dmp Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(137.27), to_mm<72>(228.56), Center, "Str Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(174.13), to_mm<72>(228.56), Center, "Pos Atten", ""}, 0.0f},
-		AnalogJackInput4ms{{to_mm<72>(26.66), to_mm<72>(273.49), Center, "Brightness CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(63.53), to_mm<72>(273.49), Center, "Frequency CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(100.39), to_mm<72>(273.49), Center, "Damping CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(137.26), to_mm<72>(273.49), Center, "Structure CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(174.12), to_mm<72>(273.49), Center, "Position CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(26.66), to_mm<72>(314.88), Center, "Strum", ""}},
-		AnalogJackInput4ms{{to_mm<72>(63.53), to_mm<72>(314.88), Center, "V/OCT", ""}},
-		AnalogJackInput4ms{{to_mm<72>(100.39), to_mm<72>(314.88), Center, "IN", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(137.26), to_mm<72>(314.88), Center, "Odd", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(174.12), to_mm<72>(314.88), Center, "Even", ""}},
+    static constexpr std::array<Element, 24> Elements{{
+		Toggle3posHoriz{{to_mm<72>(21.2), to_mm<72>(45.705), Center, "Polyphony Select Switch", ""}, {"1", "2", "4"}},
+		Toggle3posHoriz{{to_mm<72>(179.65), to_mm<72>(45.705), Center, "Resonator Mode Switch", ""}, {"Modal", "Symp", "Mod"}},
+		WhiteLargeKnob{{to_mm<72>(53.65), to_mm<72>(94.75), Center, "Frequency", ""}, 0.5f},
+		WhiteLargeKnob{{to_mm<72>(147.21), to_mm<72>(94.75), Center, "Structure", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(167.89), to_mm<72>(171.86), Center, "Brightness", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(100.4), to_mm<72>(171.86), Center, "Damping", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(32.92), to_mm<72>(171.86), Center, "Position", ""}, 0.5f},
+		WhiteSmallKnob{{to_mm<72>(26.69), to_mm<72>(228.56), Center, "Br Atten", ""}, 0.0f},
+		WhiteSmallKnob{{to_mm<72>(63.55), to_mm<72>(228.56), Center, "Frq Atten", ""}, 0.0f},
+		WhiteSmallKnob{{to_mm<72>(100.41), to_mm<72>(228.56), Center, "Dmp Atten", ""}, 0.0f},
+		WhiteSmallKnob{{to_mm<72>(137.28), to_mm<72>(228.56), Center, "Str Atten", ""}, 0.0f},
+		WhiteSmallKnob{{to_mm<72>(174.14), to_mm<72>(228.56), Center, "Pos Atten", ""}, 0.0f},
+		AnalogJackInput4ms{{to_mm<72>(26.67), to_mm<72>(273.49), Center, "Brightness CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(63.54), to_mm<72>(273.49), Center, "Frequency CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(100.4), to_mm<72>(273.49), Center, "Damping CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(137.27), to_mm<72>(273.49), Center, "Structure CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(174.13), to_mm<72>(273.49), Center, "Position CV", ""}},
+		GateJackOutput4ms{{to_mm<72>(26.67), to_mm<72>(314.88), Center, "Strum", ""}},
+		AnalogJackInput4ms{{to_mm<72>(63.54), to_mm<72>(314.88), Center, "V/OCT", ""}},
+		AnalogJackInput4ms{{to_mm<72>(100.4), to_mm<72>(314.88), Center, "IN", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(137.27), to_mm<72>(314.88), Center, "Odd", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(174.13), to_mm<72>(314.88), Center, "Even", ""}},
+		RedGreenLight{{to_mm<72>(179.65), to_mm<72>(64.0), Center, "Res Mode Light", ""}},
+		RedGreenLight{{to_mm<72>(21.2), to_mm<72>(64.0), Center, "Polyphony Light", ""}},
 }};
 
     enum class Elem {
@@ -58,11 +60,13 @@ struct RingsInfo : ModuleInfoBase {
         DampingCvIn,
         StructureCvIn,
         PositionCvIn,
-        StrumIn,
+        StrumOut,
         V_OctIn,
         In,
         OddOut,
         EvenOut,
+        ResModeLight,
+        PolyphonyLight,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
@@ -93,18 +97,23 @@ struct RingsInfo : ModuleInfoBase {
         InputDamping_Cv, 
         InputStructure_Cv, 
         InputPosition_Cv, 
-        InputStrum, 
         InputV_Oct, 
         InputIn, 
         NumInJacks,
     };
     
     enum {
+        OutputStrum, 
         OutputOdd, 
         OutputEven, 
         NumOutJacks,
     };
     
+    enum {
+        LedRes_Mode_Light, 
+        LedPolyphony_Light, 
+        NumDiscreteLeds,
+    };
     
 };
 } // namespace MetaModule

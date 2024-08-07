@@ -16,15 +16,15 @@ struct BraidsInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 13> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(190.98), to_mm<72>(77.46), Center, "Edit x23 WhiteMediumKnob", ""}, 0.5f},
-		Davies1900hBlackKnob{{to_mm<72>(39.78), to_mm<72>(154.86), Center, "Fine x23 WhiteMediumKnob", ""}, 0.5f},
-		Davies1900hBlackKnob{{to_mm<72>(115.38), to_mm<72>(154.86), Center, "Coarse x23 WhiteMediumKnob", ""}, 0.5f},
-		Davies1900hBlackKnob{{to_mm<72>(190.98), to_mm<72>(154.86), Center, "FM x23 WhiteMediumKnob", ""}, 0.5f},
-		Davies1900hBlackKnob{{to_mm<72>(39.78), to_mm<72>(230.46), Center, "Timbre x23 BlueMediumKnob", ""}, 0.5f},
-		Davies1900hBlackKnob{{to_mm<72>(115.38), to_mm<72>(230.46), Center, "Modulation x23 BlueMediumKnob", ""}, 0.5f},
-		Davies1900hBlackKnob{{to_mm<72>(190.98), to_mm<72>(230.46), Center, "Color x23 RedMediumKnob", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(190.98), to_mm<72>(77.46), Center, "Edit", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(39.78), to_mm<72>(154.86), Center, "Fine", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(115.38), to_mm<72>(154.86), Center, "Coarse", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(190.98), to_mm<72>(154.86), Center, "FM", ""}, 0.5f},
+		BlueMediumKnob{{to_mm<72>(39.78), to_mm<72>(230.46), Center, "Timbre", ""}, 0.5f},
+		BlueMediumKnob{{to_mm<72>(115.38), to_mm<72>(230.46), Center, "Modulation", ""}, 0.5f},
+		RedMediumKnob{{to_mm<72>(190.98), to_mm<72>(230.46), Center, "Color", ""}, 0.5f},
 		GateJackInput4ms{{to_mm<72>(21.77), to_mm<72>(315.06), Center, "Trig", ""}},
-		AnalogJackInput4ms{{to_mm<72>(57.78), to_mm<72>(315.06), Center, "V x2F Oct", ""}},
+		AnalogJackInput4ms{{to_mm<72>(57.78), to_mm<72>(315.06), Center, "V/Oct", ""}},
 		AnalogJackInput4ms{{to_mm<72>(93.78), to_mm<72>(315.06), Center, "FM", ""}},
 		AnalogJackInput4ms{{to_mm<72>(129.78), to_mm<72>(315.06), Center, "Timbre CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(165.78), to_mm<72>(315.06), Center, "Color CV", ""}},
@@ -32,38 +32,38 @@ struct BraidsInfo : ModuleInfoBase {
 }};
 
     enum class Elem {
-        Edit_X23_WhitemediumknobKnob,
-        Fine_X23_WhitemediumknobKnob,
-        Coarse_X23_WhitemediumknobKnob,
-        Fm_X23_WhitemediumknobKnob,
-        Timbre_X23_BluemediumknobKnob,
-        Modulation_X23_BluemediumknobKnob,
-        Color_X23_RedmediumknobKnob,
+        EditKnob,
+        FineKnob,
+        CoarseKnob,
+        FmKnob,
+        TimbreKnob,
+        ModulationKnob,
+        ColorKnob,
         TrigIn,
-        V_X2F_OctIn,
+        V_OctIn,
         FmIn,
-        Timbre_CvIn,
-        Color_CvIn,
+        TimbreCvIn,
+        ColorCvIn,
         Out,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobEdit_X23_Whitemediumknob, 
-        KnobFine_X23_Whitemediumknob, 
-        KnobCoarse_X23_Whitemediumknob, 
-        KnobFm_X23_Whitemediumknob, 
-        KnobTimbre_X23_Bluemediumknob, 
-        KnobModulation_X23_Bluemediumknob, 
-        KnobColor_X23_Redmediumknob, 
+        KnobEdit, 
+        KnobFine, 
+        KnobCoarse, 
+        KnobFm, 
+        KnobTimbre, 
+        KnobModulation, 
+        KnobColor, 
         NumKnobs,
     };
     
     
     enum {
         InputTrig, 
-        InputV_X2F_Oct, 
+        InputV_Oct, 
         InputFm, 
         InputTimbre_Cv, 
         InputColor_Cv, 

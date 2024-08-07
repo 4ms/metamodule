@@ -16,9 +16,9 @@ struct BranchesInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 14> Elements{{
-		Davies1900hBlackKnob{{to_mm<72>(42.64), to_mm<72>(81.06), Center, "Ch1 Probability x23 WhiteMediumKnob", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(42.64), to_mm<72>(81.06), Center, "Ch1 Probability", ""}, 0.5f},
 		OrangeButton{{to_mm<72>(73.2), to_mm<72>(63.04), Center, "Ch1 Mode", ""}},
-		Davies1900hBlackKnob{{to_mm<72>(42.64), to_mm<72>(230.44), Center, "Ch2 Probability x23 WhiteMediumKnob", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(42.64), to_mm<72>(230.44), Center, "Ch2 Probability", ""}, 0.5f},
 		OrangeButton{{to_mm<72>(73.2), to_mm<72>(212.46), Center, "Ch2 Mode", ""}},
 		AnalogJackInput4ms{{to_mm<72>(20.15), to_mm<72>(129.66), Center, "Ch1 In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(65.11), to_mm<72>(129.66), Center, "Ch1 Probability", ""}},
@@ -28,32 +28,32 @@ struct BranchesInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(65.11), to_mm<72>(279.04), Center, "Ch2 Probability", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(20.15), to_mm<72>(315.04), Center, "Ch2 Out A", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(65.11), to_mm<72>(315.04), Center, "Ch2 Out B", ""}},
-		RedGreenBlueLight{{to_mm<72>(42.63), to_mm<72>(165.69), Center, "Ch1 Mode x23 OrangeLight", ""}},
-		RedGreenBlueLight{{to_mm<72>(42.63), to_mm<72>(315.07), Center, "Ch2 Mode x23 OrangeLight", ""}},
+		OrangeLight{{to_mm<72>(42.63), to_mm<72>(165.69), Center, "Ch1 Mode", ""}},
+		OrangeLight{{to_mm<72>(42.63), to_mm<72>(315.07), Center, "Ch2 Mode", ""}},
 }};
 
     enum class Elem {
-        Ch1_Probability_X23_WhitemediumknobKnob,
-        Ch1_ModeButton,
-        Ch2_Probability_X23_WhitemediumknobKnob,
-        Ch2_ModeButton,
-        Ch1_In,
-        Ch1_ProbabilityIn,
-        Ch1_Out_AOut,
-        Ch1_Out_BOut,
-        Ch2_In,
-        Ch2_ProbabilityIn,
-        Ch2_Out_AOut,
-        Ch2_Out_BOut,
-        Ch1_Mode_X23_OrangelightLight,
-        Ch2_Mode_X23_OrangelightLight,
+        Ch1ProbabilityKnob,
+        Ch1ModeButton,
+        Ch2ProbabilityKnob,
+        Ch2ModeButton,
+        Ch1In,
+        Ch1ProbabilityIn,
+        Ch1OutAOut,
+        Ch1OutBOut,
+        Ch2In,
+        Ch2ProbabilityIn,
+        Ch2OutAOut,
+        Ch2OutBOut,
+        Ch1ModeLight,
+        Ch2ModeLight,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
     
     enum {
-        KnobCh1_Probability_X23_Whitemediumknob, 
-        KnobCh2_Probability_X23_Whitemediumknob, 
+        KnobCh1_Probability, 
+        KnobCh2_Probability, 
         NumKnobs,
     };
     
@@ -80,8 +80,8 @@ struct BranchesInfo : ModuleInfoBase {
     };
     
     enum {
-        LedCh1_Mode_X23_Orangelight, 
-        LedCh2_Mode_X23_Orangelight, 
+        LedCh1_Mode, 
+        LedCh2_Mode, 
         NumDiscreteLeds,
     };
     

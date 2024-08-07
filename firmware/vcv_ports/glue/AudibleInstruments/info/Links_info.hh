@@ -28,27 +28,27 @@ struct LinksInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(41.11), to_mm<72>(279.07), Center, "C2 IN", ""}},
 		AnalogJackInput4ms{{to_mm<72>(15.87), to_mm<72>(315.07), Center, "C3 IN", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(41.11), to_mm<72>(315.07), Center, "C1 Out", ""}},
-		RedGreenBlueLight{{to_mm<72>(28.49), to_mm<72>(61.27), Center, "A LED x23 GreenLight", ""}},
-		RedGreenBlueLight{{to_mm<72>(28.49), to_mm<72>(158.47), Center, "B LED x23 GreenLight", ""}},
-		RedGreenBlueLight{{to_mm<72>(28.49), to_mm<72>(255.67), Center, "C LED x23 GreenLight", ""}},
+		GreenLight{{to_mm<72>(28.49), to_mm<72>(61.27), Center, "A LED", ""}},
+		GreenLight{{to_mm<72>(28.49), to_mm<72>(158.47), Center, "B LED", ""}},
+		GreenLight{{to_mm<72>(28.49), to_mm<72>(255.67), Center, "C LED", ""}},
 }};
 
     enum class Elem {
-        A1_In,
-        A1_Out,
-        A2_Out,
-        A3_Out,
-        B1_In,
-        B2_In,
-        B1_Out,
-        B2_Out,
-        C1_In,
-        C2_In,
-        C3_In,
-        C1_Out,
-        A_Led_X23_GreenlightLight,
-        B_Led_X23_GreenlightLight,
-        C_Led_X23_GreenlightLight,
+        A1In,
+        A1Out,
+        A2Out,
+        A3Out,
+        B1In,
+        B2In,
+        B1Out,
+        B2Out,
+        C1In,
+        C2In,
+        C3In,
+        C1Out,
+        ALedLight,
+        BLedLight,
+        CLedLight,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
@@ -76,9 +76,9 @@ struct LinksInfo : ModuleInfoBase {
     };
     
     enum {
-        LedA_Led_X23_Greenlight, 
-        LedB_Led_X23_Greenlight, 
-        LedC_Led_X23_Greenlight, 
+        LedA_Led, 
+        LedB_Led, 
+        LedC_Led, 
         NumDiscreteLeds,
     };
     

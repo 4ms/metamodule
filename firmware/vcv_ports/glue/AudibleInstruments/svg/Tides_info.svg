@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="70.92mm" height="130.44mm" viewBox="0 0 201.04 369.75">
+  <g id="faceplate">
+    <g id="art">
+      <g id="panel">
+        <rect x=".43" y=".12" width="200.44" height="364" style="fill: #eeeded; stroke-width: 0px;"/>
+        <path d="M200.75.25v363.75H.56V.25h200.19M201,0H.31v364.25h200.69V0h0Z" style="fill: #9b9c9d; stroke-width: 0px;"/>
+      </g>
+      <g>
+        <path d="M63.58,344.77h111.09s7.91,0,7.91,0c3.15,0,5.71-2.4,5.71-5.34v-43.37H61.19c-7.58,0-13.73,6.63-13.73,14.81v33.91h16.12Z" style="fill: #000; stroke-width: 0px;"/>
+        <path d="M188.41,269.02c-.31-8.37-6.5-14.92-14.09-14.92h-22.35v1.01h22.35c7.04,0,12.79,6.12,13.08,13.94l.02,69.82c0,2.72-2.33,4.93-5.18,4.93H18.91c-2.86,0-5.18-2.21-5.18-4.93v-8.59h.03l-.07-55.34.06-5.88c.29-7.82,6.03-13.95,13.08-13.95h51.18v-1.01H26.83c-7.59,0-13.78,6.55-14.08,14.94l-.06,5.9.06,51.6-.02,12.33c0,3.27,2.78,5.94,6.19,5.94h163.33c3.41,0,6.19-2.66,6.19-5.94l-.02-69.85Z" style="fill: #000; stroke-width: 0px;"/>
+      </g>
+      <line x1="100.67" y1="273.54" x2="100.67" y2="256.65" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
+      <line x1="134.88" y1="273.54" x2="134.88" y2="256.65" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
+      <rect y="18.19" width="200.98" height="14.17" style="fill: #010101; stroke-width: 0px;"/>
+      <g>
+        <g>
+          <polygon points="49.39 40.01 47.16 49.18 55.75 49.18 53.23 40.01 49.39 40.01" style="fill: #09b8ed; stroke-width: 0px;"/>
+          <polygon points="43.77 33.78 43.77 49.18 44.59 49.18 47.43 37.51 55.14 37.51 58.34 49.18 59.17 49.18 59.17 33.78 43.77 33.78" style="fill: #09b8ed; stroke-width: 0px;"/>
+        </g>
+        <g>
+          <polygon points="19.14 49.18 13.01 41.12 6.88 49.18 19.14 49.18" style="fill: #00af66; stroke-width: 0px;"/>
+          <polygon points="13.01 36.99 20.71 47.11 20.71 33.78 5.31 33.78 5.31 47.11 13.01 36.99" style="fill: #00af66; stroke-width: 0px;"/>
+          <polygon points="20.71 49.18 20.71 49.18 20.71 49.18 20.71 49.18" style="fill: #00af66; stroke-width: 0px;"/>
+          <polygon points="5.31 49.18 5.31 49.18 5.31 49.18 5.31 49.18" style="fill: #00af66; stroke-width: 0px;"/>
+        </g>
+        <g>
+          <polygon points="26.79 41.82 29.03 35.88 31.16 41.55 33.3 35.88 35.43 41.55 37.47 36.16 39.94 41.34 39.94 33.78 24.54 33.78 24.54 37.09 26.79 41.82" style="fill: #f97d9e; stroke-width: 0px;"/>
+          <polygon points="37.67 41.13 35.43 47.08 33.3 41.41 31.16 47.08 29.03 41.41 27 46.8 24.54 41.63 24.54 49.18 39.94 49.18 39.94 45.88 37.67 41.13" style="fill: #f97d9e; stroke-width: 0px;"/>
+        </g>
+      </g>
+      <g>
+        <path d="M5.32,116.15v15.4h15.4v-15.4H5.32ZM16.79,128.79h-7.55v-9.3h2.7v7.04h4.85v2.26Z" style="fill: #00af66; stroke-width: 0px;"/>
+        <path d="M24.54,116.15v15.4h15.4v-15.4h-15.4ZM36.49,128.51h-2.08v-6.13l-1.5,3.79h-1.44l-1.5-3.79v6.13h-1.97v-9.01h2.43l1.83,4.38,1.82-4.38h2.43v9.01Z" style="fill: #f97d9e; stroke-width: 0px;"/>
+        <path d="M43.76,116.15v15.4h15.4v-15.4h-15.4ZM55.61,128.22h-2.38v-3.84h-3.52v3.84h-2.38v-8.72h2.38v3.19h3.52v-3.19h2.38v8.72Z" style="fill: #09b8ed; stroke-width: 0px;"/>
+      </g>
+      <rect x="154.92" y="116.48" width="28.35" height="14.17" style="fill: #3babec; stroke-width: 0px;"/>
+      <rect x="123.54" y="244.06" width="22.68" height="14.17" style="fill: #3babec; stroke-width: 0px;"/>
+      <rect x="83.66" y="244.06" width="34.02" height="14.17" style="fill: #3babec; stroke-width: 0px;"/>
+      <path d="M54.75,174.82c.16-4.5,3.39-4.25,3.39-4.25,0,0,3.3-.25,3.46,4.25" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <path d="M2.65,174.54s2.36.07,3.43-3.68c1.09,3.76,3.43,3.68,3.43,3.68" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <path d="M53.58,191.51s-3.72.98-3.9-4.05v-.04s-3.72-.98-3.9,4.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <path d="M9.19,191.51s3.9.09,3.9-4.09h0s3.72-1.01,3.9,4.17" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <path d="M60.45,154.93s-.96.02-1.91-1.03c-.94-1.06-1.79-3.22-2.54-3.22h-.12c-.75,0-1.46,2.16-2.4,3.22s-1.91,1.03-1.91,1.03" style="fill: none; stroke: #000; stroke-linejoin: round;"/>
+      <path d="M11.94,155.11c-.26-.85-1.27-1.97-2.04-2.56-.66-.51-1.27-.97-1.56-1.69-.28.72-.84,1.3-1.56,1.69-.78.43-1.78,1.71-2.04,2.56" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <polyline points="116.41 192.16 126.08 186.76 126.08 192.16" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <polyline points="85.43 192.16 75.76 186.76 75.76 192.16" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <polyline points="27.99 144.05 32.09 139.09 36.49 144.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <polyline points="96.41 144.05 100.52 139.09 104.92 144.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <polyline points="164.84 144.05 168.95 139.09 173.35 144.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <polyline points="184.53 192.26 185.77 190.73 185.13 188.87 187.07 188.49 187.77 186.66 189.49 187.61 191.22 186.66 191.92 188.49 193.86 188.87 193.21 190.73 194.45 192.26" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <path d="M142.57,48.27v14.17h14.17v-14.17h-14.17ZM153.57,56.66h-7.83v-2.61h7.83v2.61Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M181.3,48.27v14.17h14.17v-14.17h-14.17ZM192.95,56.36h-3.56v3.56h-2.01v-3.56h-3.56v-2.01h3.56v-3.56h2.01v3.56h3.56v2.01Z" style="fill: #000; stroke-width: 0px;"/>
+      <line x1="74.98" y1="314.93" x2="104.16" y2="314.93" style="fill: none; stroke: #fff; stroke-dasharray: 0 0 1 3; stroke-linecap: round; stroke-linejoin: round;"/>
+      <path d="M144.76,191.79c.05-2.69,2.43-5.89,4.29-3.13,2.11,4.08,4.82,3.3,5.45-1.53" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <line x1="82.11" y1="291.92" x2="156.57" y2="291.92" style="fill: none; stroke: #000; stroke-dasharray: 0 0 1 3; stroke-linecap: round; stroke-linejoin: round;"/>
+      <rect x="75.15" y="116.66" width="51.02" height="14.17" style="fill: #3babec; stroke-width: 0px;"/>
+      <line x1="169.1" y1="48.27" x2="169.1" y2="78.6" style="fill: none; stroke: #171717; stroke-miterlimit: 10; stroke-width: 3px;"/>
+      <g>
+        <line x1="187.98" y1="238.36" x2="187.48" y2="238.36" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
+        <line x1="183.5" y1="238.36" x2="16.64" y2="238.36" style="fill: none; stroke: #000; stroke-dasharray: 0 0 .99 3.97; stroke-linecap: round; stroke-linejoin: round;"/>
+        <line x1="14.65" y1="238.36" x2="14.15" y2="238.36" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
+      </g>
+    </g>
+  </g>
+  <g id="components">
+    <circle id="Bi" cx="169.09" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Uni" cx="134.88" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Low" cx="100.67" cy="314.93" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
+    <circle id="High" cx="66.45" cy="314.93" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
+    <circle id="Clock" cx="32.24" cy="314.93" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
+    <circle id="Level" cx="169.09" cy="273.54" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="FM_In" data-name="FM In" cx="134.88" cy="273.54" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="V_Oct" data-name="V/Oct" cx="100.67" cy="273.54" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Freeze" cx="66.45" cy="273.54" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
+    <circle id="Trig" cx="32.24" cy="273.54" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
+    <circle id="Smoothness_CV" data-name="Smoothness CV" cx="169.09" cy="221.33" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Slope_CV" data-name="Slope CV" cx="100.67" cy="221.33" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Shape_CV" data-name="Shape CV" cx="32.24" cy="221.33" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Smoothness_WhiteMediumKnob" data-name="Smoothness#WhiteMediumKnob" cx="169.1" cy="167.33" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Slope_WhiteMediumKnob" data-name="Slope#WhiteMediumKnob" cx="100.67" cy="167.33" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Shape_WhiteMediumKnob" data-name="Shape#WhiteMediumKnob" cx="32.24" cy="167.33" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Freq_Range_Light_RedGreenLight" data-name="Freq Range Light#RedGreenLight" cx="59.25" cy="102.56" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <rect id="Frequency_Range_Switch_L_M_H" data-name="Frequency Range Switch@L@M@H" x="26.57" y="94.05" width="11.34" height="17.01" transform="translate(134.8 70.32) rotate(90)" style="fill: #ffc080; stroke-width: 0px;"/>
+    <circle id="FM_BlueMediumKnob" data-name="FM#BlueMediumKnob" cx="169.1" cy="82.74" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Frequency_BlueLargeKnob" data-name="Frequency#BlueLargeKnob" cx="100.67" cy="82.74" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Freq_Light_RedGreenLight" data-name="Freq Light#RedGreenLight" cx="59.25" cy="82.74" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Output_Mode_Light_RedGreenLight" data-name="Output Mode Light#RedGreenLight" cx="59.25" cy="62.93" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <rect id="Output_Mode_Switch_1_2_3" data-name="Output Mode Switch@1@2@3" x="26.57" y="54.43" width="11.34" height="17.01" transform="translate(95.17 30.69) rotate(90)" style="fill: #ffc080; stroke-width: 0px;"/>
+    <text id="slug" transform="translate(155.91 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">T</tspan><tspan x="1.46" y="0">ides</tspan></text>
+    <text id="modulename" transform="translate(167.48 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">T</tspan><tspan x="1.46" y="0">idal </tspan><tspan x="6.64" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="9.07" y="0" style="letter-spacing: 0em;">odul</tspan><tspan x="14.77" y="0" style="letter-spacing: 0em;">a</tspan><tspan x="16.2" y="0" style="letter-spacing: 0em;">t</tspan><tspan x="17.18" y="0">or</tspan></text>
+  </g>
+</svg>
