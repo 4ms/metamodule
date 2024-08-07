@@ -13,6 +13,8 @@
 #include "glue/AudibleInstruments/info/Rings_info.hh"
 #include "glue/AudibleInstruments/info/Ripples_info.hh"
 #include "glue/AudibleInstruments/info/Shades_info.hh"
+#include "glue/AudibleInstruments/info/Tides_info.hh"
+#include "glue/AudibleInstruments/info/Warps_info.hh"
 #include "shared/CoreModules/moduleFactory.hh"
 #include <plugin/Model.hpp>
 
@@ -71,14 +73,14 @@ bool addModel(rack::plugin::Plugin *p, rack::plugin::Model *model) {
 		// 	return ModuleInfoView::makeView<StageInfo>();
 		// if (model->slug == "Streams")
 		// 	return ModuleInfoView::makeView<StreamsInfo>();
-		// if (model->slug == "Tides")
-		// 	return ModuleInfoView::makeView<TidesInfo>();
+		if (model->slug == "Tides")
+			return ModuleInfoView::makeView<TidesInfo>();
 		// if (model->slug == "Tides2")
 		// 	return ModuleInfoView::makeView<Tides2Info>();
 		// if (model->slug == "Veils")
 		// 	return ModuleInfoView::makeView<VeilsInfo>();
-		// if (model->slug == "Warps")
-		// 	return ModuleInfoView::makeView<WarpsInfo>();
+		if (model->slug == "Warps")
+			return ModuleInfoView::makeView<WarpsInfo>();
 
 		return std::nullopt;
 	};
