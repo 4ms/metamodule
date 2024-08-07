@@ -29,6 +29,8 @@ target_sources(ValleyLibrary
     ${SOURCE_DIR}/src/timers/Oneshot.cpp
     ${SOURCE_DIR}/src/gui/ValleyChoiceMenu.cpp
     ${SOURCE_DIR}/src/gui/PlainText.cpp
+
+    ${SOURCE_DIR}/src/utilities/math_lut.cc
 )
 
 if (BUILD_DYN_PLUGIN)
@@ -56,19 +58,27 @@ if (BUILD_DYN_PLUGIN)
 
         plugin.cpp 
     )
+
+    target_compile_definitions(ValleyLibrary PRIVATE
+        USE_SINGLE_FLOAT=1
+    )
 endif()
 
 target_include_directories(ValleyLibrary PRIVATE 
 	${SOURCE_DIR}/src 
 )
 
-target_compile_options(ValleyLibrary 
-	PRIVATE 
+set_property(TARGET ValleyLibrary PROPERTY CXX_STANDARD 23)
+
+target_compile_options(ValleyLibrary PRIVATE 
 	-Wno-double-promotion 
+    -Wno-unused-variable
 	$<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-float-conversion>
 )
 
-set_property(TARGET ValleyLibrary PROPERTY CXX_STANDARD 20)
+target_compile_definitions(ValleyLibrary PRIVATE
+    USE_SINGLE_FLOAT=1
+)
 
 
 if (BUILD_DYN_PLUGIN)
