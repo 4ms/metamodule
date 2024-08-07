@@ -32,6 +32,10 @@ struct Davies1900hBlackKnob : Knob {
 	}
 };
 
+using WhiteLargeKnob = DaviesLargeKnob;
+using WhiteMediumKnob = Davies1900hBlackKnob;
+using WhiteSmallKnob = Knob9mm;
+
 //
 // Sliders
 //
