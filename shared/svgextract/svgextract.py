@@ -89,7 +89,12 @@ def parse_args(args):
 
     if cmd == 'createinfo':
         output = args.pop(0) if len(args) > 0 else None
-        infofile.createInfoFile(inputfile, output)
+        if Path(inputfile).is_file():
+            infofile.createInfoFile(inputfile, output)
+        elif Path(inputfile).is_dir():
+            svg_files = Path(inputfile).glob("*.svg")
+            for svg_file in svg_files:
+                infofile.createInfoFile(svg_file, output)
         return
 
     if cmd == 'createcoremodule':
