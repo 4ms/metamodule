@@ -19,11 +19,16 @@ public:
 	void update() override {
 		isLooping = getState<LoopButton>() == LatchingButton::State_t::DOWN ? true : false;
 
-		float finalAttack = constrain(getInput<AttackCvIn>().value_or(0.f)/CvRangeVolts + getState<AttackKnob>(), 0.0f, 1.0f);
-		float finalHold = constrain(getInput<HoldCvIn>().value_or(0.f)/CvRangeVolts + getState<HoldKnob>(), 0.0f, 1.0f);
-		float finalDecay = constrain(getInput<DecayCvIn>().value_or(0.f)/CvRangeVolts + getState<DecayKnob>(), 0.0f, 1.0f);
-		float finalSustain = constrain(getInput<SustainCvIn>().value_or(0.f)/CvRangeVolts + getState<SustainKnob>(), 0.0f, 1.0f);
-		float finalRelease = constrain(getInput<ReleaseCvIn>().value_or(0.f)/CvRangeVolts + getState<ReleaseKnob>(), 0.0f, 1.0f);
+		float finalAttack =
+			constrain(getInput<AttackCvIn>().value_or(0.f) / CvRangeVolts + getState<AttackKnob>(), 0.0f, 1.0f);
+		float finalHold =
+			constrain(getInput<HoldCvIn>().value_or(0.f) / CvRangeVolts + getState<HoldKnob>(), 0.0f, 1.0f);
+		float finalDecay =
+			constrain(getInput<DecayCvIn>().value_or(0.f) / CvRangeVolts + getState<DecayKnob>(), 0.0f, 1.0f);
+		float finalSustain =
+			constrain(getInput<SustainCvIn>().value_or(0.f) / CvRangeVolts + getState<SustainKnob>(), 0.0f, 1.0f);
+		float finalRelease =
+			constrain(getInput<ReleaseCvIn>().value_or(0.f) / CvRangeVolts + getState<ReleaseKnob>(), 0.0f, 1.0f);
 
 		e.set_envelope_time(e.ATTACK, map_value(finalAttack, 0.0f, 1.0f, 0.1f, 1000.0f));
 		e.set_envelope_time(e.HOLD, map_value(finalHold, 0.0f, 1.0f, 0.0f, 1000.0f));
@@ -36,8 +41,8 @@ public:
 		e.set_decay_curve(getState<DCurveKnob>());
 		e.set_release_curve(getState<RCurveKnob>());
 
-		if(isLooping) {
-			if(currentStage == Envelope::IDLE) {
+		if (isLooping) {
+			if (currentStage == Envelope::IDLE) {
 				envelopeOutput = e.update(8.f);
 			} else {
 				envelopeOutput = e.update(0.f);
@@ -71,20 +76,8 @@ public:
 
 private:
 	bool isLooping = false;
-	float gateInput = 0;
 	float envelopeOutput = 0;
 
-	float attackOffset = 0;
-	float holdOffset = 0;
-	float decayOffset = 0;
-	float sustainOffset = 0;
-	float releaseOffset = 0;
-
-	float attackCv = 0;
-	float holdCv = 0;
-	float decayCv = 0;
-	float sustainCv = 0;
-	float releaseCv = 0;
 	Envelope::stage_t currentStage = Envelope::stage_t::ATTACK;
 	Envelope e;
 };
