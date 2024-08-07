@@ -8,6 +8,7 @@ target_compile_definitions(
   lvglsdl PRIVATE -DLV_CONF_INCLUDE_SIMPLE -DLV_LVGL_H_INCLUDE_SIMPLE
                   -DLV_CONF_PATH=${LV_CONF_PATH})
 
+
 message("lvgl_drv: LV_CONF_PATH =${LV_CONF_PATH}")
 message("lvgl_drv: LV_CONF_DIR =${LV_CONF_DIR}")
 
@@ -20,6 +21,7 @@ set_property(TARGET lvglsdl PROPERTY C_STANDARD 99)
 target_compile_options(lvglsdl PUBLIC
   $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>
   $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-anon-enum-enum-conversion>
+  $<$<COMPILE_LANGUAGE:CXX>:-Wno-c99-extensions>
 )
 
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")

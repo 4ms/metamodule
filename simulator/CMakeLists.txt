@@ -55,16 +55,6 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 add_subdirectory(${SHARED}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
-# Workaround for std::expected not available in clang
-# https://www.reddit.com/r/cpp/comments/1b6f3s4/any_news_on_when_libc_is_going_to_support/
-# https://github.com/llvm/llvm-project/issues/62801
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(
-    $<$<COMPILE_LANGUAGE:CXX>:-D__cpp_concepts=202002>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-builtin-macro-redefined>
-  )
-endif()
 
 
 add_executable(
@@ -113,6 +103,18 @@ target_include_directories(
 
 target_compile_options(simulator PRIVATE -Wall -Og)
 target_compile_options(simulator PRIVATE -Wno-double-promotion)
+
+# Workaround for std::expected not available in clang
+# https://www.reddit.com/r/cpp/comments/1b6f3s4/any_news_on_when_libc_is_going_to_support/
+# https://github.com/llvm/llvm-project/issues/62801
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_options(simulator PRIVATE 
+    $<$<COMPILE_LANGUAGE:CXX>:-D__cpp_concepts=202002>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-builtin-macro-redefined>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-macro-redefined>
+  )
+endif()
 
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports CoreModules)
