@@ -49,6 +49,7 @@ struct PluginTab : SystemMenuTab {
 				lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
 				lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
+				lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 			}
 		}
 
@@ -234,8 +235,13 @@ private:
 	}
 
 	static void scroll_up_cb(lv_event_t *event) {
-		lv_obj_scroll_to_y(ui_SystemMenuPluginsTab, 0, LV_ANIM_ON);
-		lv_obj_scroll_to_view(event->target, LV_ANIM_ON);
+		const auto list = lv_obj_get_parent(event->target);
+		const auto is_found_list = list == ui_PluginsFoundCont;
+		const auto found_list_empty = lv_obj_get_child_cnt(ui_PluginsFoundCont) == 0;
+		const auto is_first_in_list = event->target == lv_obj_get_child(list, 0);
+		if (event->target == ui_PluginScanButton || (is_first_in_list && (is_found_list || found_list_empty))) {
+			lv_obj_scroll_to_y(ui_SystemMenuPluginsTab, 0, LV_ANIM_ON);
+		}
 	}
 
 	static void load_plugin_cb(lv_event_t *event) {
