@@ -64,20 +64,21 @@ std::string_view Model::add_string(std::string_view str) {
 }
 
 inline void inspect_sv(std::string_view const &sv) {
-	printf("%.*s %p(+%zu)\n", (int)sv.size(), sv.data(), sv.data(), sv.size());
+	printf("%.*s %p(+%zu)\n", (int)sv.size(), sv.data(), (void *)sv.data(), sv.size());
 }
 
 void Model::debug_dump_strings() {
 	using namespace MetaModule;
 
 	for (auto const &s : strings)
-		printf("strtab: %p %s\n", s.data(), s.c_str());
+		printf("strtab: %p %s\n", (void *)s.data(), s.c_str());
 
 	printf("Dumping element strings: (%zu)\n", elements.size());
 	for (auto &element : elements) {
 		printf("Type %zu\n", element.index());
 		auto el = base_element(element);
-		printf("el.short_name: %.*s: %p\n", (int)el.short_name.size(), el.short_name.data(), el.short_name.data());
+		printf(
+			"el.short_name: %.*s: %p\n", (int)el.short_name.size(), el.short_name.data(), (void *)el.short_name.data());
 
 		std::visit(overloaded{[](BaseElement const &el) {},
 							  [](ImageElement const &el) {
