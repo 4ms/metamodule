@@ -185,6 +185,9 @@ private:
 		play_loader.prepare_remove_plugin(plugin_name);
 		plugin_manager.unload_plugin(plugin_name);
 		gui_state.force_redraw_patch = true;
+		if (lv_obj_has_flag(ui_PluginScanButton, LV_OBJ_FLAG_HIDDEN)) {
+			scan_plugins();
+		}
 	}
 
 	static void query_loaded_plugin_cb(lv_event_t *event) {
@@ -230,8 +233,12 @@ private:
 		auto page = static_cast<PluginTab *>(event->user_data);
 		if (!page)
 			return;
+		page->scan_plugins();
+	}
+
+	void scan_plugins() {
 		lv_show(ui_PluginTabSpinner);
-		page->plugin_manager.start_loading_plugin_list();
+		plugin_manager.start_loading_plugin_list();
 	}
 
 	static void scroll_up_cb(lv_event_t *event) {
