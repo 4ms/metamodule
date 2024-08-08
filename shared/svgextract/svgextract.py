@@ -28,11 +28,12 @@ Usage: {script} <command> [args]
 
 Commands (case-insensitive):
 
-createInfo [input SVG file name] {{optional output path for ModuleInfo file}}
+createInfo [input SVG file name] {{optional output path for ModuleInfo file}} {{optional brand name}}
     Creates a ModuleInfo struct and saves it to a file in the given path. The
     file will be named "slug_info.hh", where "slug" is the string of the text
     element with name/id "slug" found in the components layer/group of the SVG
     file. File will be overwritten if it exists.
+    If the brand name is given, it will be used in path of the #include
 
 createVcvSvg [input SVG file name] [output SVG file name]
     Saves a new SVG file with the 'components' layer removed.
@@ -89,12 +90,14 @@ def parse_args(args):
 
     if cmd == 'createinfo':
         output = args.pop(0) if len(args) > 0 else None
+        brand = args.pop(0) if len(args) > 0 else "4ms"
+
         if Path(inputfile).is_file():
-            infofile.createInfoFile(inputfile, output)
+            infofile.createInfoFile(inputfile, output, brand)
         elif Path(inputfile).is_dir():
             svg_files = Path(inputfile).glob("*.svg")
             for svg_file in svg_files:
-                infofile.createInfoFile(svg_file, output)
+                infofile.createInfoFile(svg_file, output, brand)
         return
 
     if cmd == 'createcoremodule':

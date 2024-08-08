@@ -6,7 +6,7 @@ from helpers.xml_helper import register_all_namespaces
 from helpers.util import *
 from helpers.svg_parse_helpers import *
 
-def createInfoFile(svgFilename, infoFilePath = None):
+def createInfoFile(svgFilename, infoFilePath = None, brand = "4ms"):
     if infoFilePath == None:
         infoFilePath = os.getenv('METAMODULE_INFO_DIR')
         if infoFilePath is None:
@@ -27,7 +27,7 @@ def createInfoFile(svgFilename, infoFilePath = None):
     register_all_namespaces(svgFilename)
     tree = xml.etree.ElementTree.parse(svgFilename)
     components = panel_to_components(tree)
-    infoFileText = components_to_infofile(components)
+    infoFileText = components_to_infofile(components, brand)
     infoFileName = os.path.join(infoFilePath, components['slug']+"_info.hh")
     with open(infoFileName, "w") as f:
         f.write(infoFileText)
@@ -315,15 +315,16 @@ def set_class_if_not_set(comp, newclass):
         comp['class'] = newclass
 
 
-def components_to_infofile(components):
+def components_to_infofile(components, brand="4ms"):
     slug = components['slug']
     DPI = components['dpi']
 
     #TODO: embed knob long name vs short name in svg
-    source = f"""#pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
-#include "CoreModules/elements/element_info.hh"
+    source = "#pragma once\n"
+    source += f"""#include "CoreModules/{brand}/{brand}_elements.hh"\n"""
+    if brand == "4ms":
+        source += """#include "CoreModules/4ms/4ms_element_state_conversions.hh"\n"""
+    source += f"""#include "CoreModules/elements/element_info.hh"
 #include <array>
 
 namespace MetaModule
