@@ -11,6 +11,9 @@ namespace MetaModule
 {
 
 struct PatchViewSettingsMenu {
+	static constexpr auto min_slider_before_visual_glitch = 11;
+	static constexpr auto max_slider_before_visual_glitch = 90;
+
 	PatchViewSettingsMenu(ModuleDisplaySettings &settings, GuiState &gui_state)
 		: settings_menu_group(lv_group_create())
 		, settings{settings}
@@ -22,17 +25,17 @@ struct PatchViewSettingsMenu {
 		lv_obj_add_event_cb(ui_PVSettingsCloseButton, settings_button_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_PVShowControlMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_PVControlMapTranspSlider, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_PVControlMapTranspSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_PVFlashMapCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_PVShowJackMapsCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_PVJackMapTranspSlider, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_PVJackMapTranspSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_PVShowMapsAlwaysCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_PVShowMapsAllModulesCheck, map_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_event_cb(ui_PVShowAllCablesCheck, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
-		lv_obj_add_event_cb(ui_PVCablesTranspSlider, cable_settings_value_change_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_PVCablesTranspSlider, slider_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_set_x(ui_PVSettingsMenu, 220);
 
@@ -78,18 +81,21 @@ struct PatchViewSettingsMenu {
 
 		// 0..100 => 0..255
 		{
-			uint32_t opacity = (float)settings.param_style.opa / 2.5f;
-			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
+			const auto opacity = MathTools::map_value(
+				settings.param_style.opa, 0.f, 250.f, min_slider_before_visual_glitch, max_slider_before_visual_glitch);
 			lv_slider_set_value(ui_PVControlMapTranspSlider, opacity, LV_ANIM_OFF);
 		}
 		{
-			uint32_t opacity = (float)settings.paneljack_style.opa / 2.5f;
-			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
+			const auto opacity = MathTools::map_value(settings.paneljack_style.opa,
+													  0.f,
+													  250.f,
+													  min_slider_before_visual_glitch,
+													  max_slider_before_visual_glitch);
 			lv_slider_set_value(ui_PVJackMapTranspSlider, opacity, LV_ANIM_OFF);
 		}
 		{
-			uint32_t opacity = (float)settings.cable_style.opa / 2.5f;
-			opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
+			const auto opacity = MathTools::map_value(
+				settings.cable_style.opa, 0.f, 250.f, min_slider_before_visual_glitch, max_slider_before_visual_glitch);
 			lv_slider_set_value(ui_PVCablesTranspSlider, opacity, LV_ANIM_OFF);
 		}
 	}
@@ -242,14 +248,6 @@ private:
 											  show_jack_maps && show_always && !show_all_modules  ? CurModule :
 											  show_jack_maps && !show_always && !show_all_modules ? CurModuleIfPlaying :
 																									HideAlways;
-		auto opacity = lv_slider_get_value(ui_PVControlMapTranspSlider); //0..100
-		opacity = (float)opacity * 2.5f;
-		page->settings.param_style.opa = opacity;
-
-		opacity = lv_slider_get_value(ui_PVJackMapTranspSlider); //0..100
-		opacity = (float)opacity * 2.5f;
-		page->settings.paneljack_style.opa = opacity;
-
 		page->settings.map_ring_flash_active = flash_active;
 
 		page->settings.changed = true;
@@ -269,9 +267,31 @@ private:
 
 		page->settings.cable_style.mode = show_all ? ShowAll : HideAlways;
 
-		auto opacity = lv_slider_get_value(ui_PVCablesTranspSlider); //0..100
-		opacity = (float)opacity * 2.5f;
-		page->settings.cable_style.opa = opacity;
+		page->settings.changed = true;
+		page->changed_while_visible = true;
+	}
+
+	static void slider_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
+
+		auto opacity = lv_slider_get_value(event->target); //0..100
+		auto clamped_op =
+			std::clamp<int32_t>(opacity, min_slider_before_visual_glitch, max_slider_before_visual_glitch);
+		if (opacity != clamped_op) {
+			opacity = clamped_op;
+			lv_slider_set_value(event->target, opacity, LV_ANIM_OFF);
+		}
+		opacity =
+			MathTools::map_value(opacity, min_slider_before_visual_glitch, max_slider_before_visual_glitch, 0, 250);
+
+		if (event->target == ui_PVCablesTranspSlider)
+			page->settings.cable_style.opa = opacity;
+		else if (event->target == ui_PVControlMapTranspSlider)
+			page->settings.param_style.opa = opacity;
+		else
+			page->settings.paneljack_style.opa = opacity;
 
 		page->settings.changed = true;
 		page->changed_while_visible = true;
