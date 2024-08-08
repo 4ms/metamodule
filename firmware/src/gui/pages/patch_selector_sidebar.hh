@@ -59,7 +59,8 @@ struct PatchSelectorSubdirPanel {
 
 			// Add root-level dir on volume
 			lv_obj_set_user_data(vol_item, &root);
-			lv_group_add_obj(group, vol_item);
+			if (root.files.size())
+				lv_group_add_obj(group, vol_item);
 
 			// Add all dirs on volume
 			for (auto &dir : root.dirs)
