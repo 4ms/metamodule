@@ -177,9 +177,11 @@ private:
 	void update_interactive_states() {
 		auto show_control_maps = lv_obj_has_state(ui_PVShowControlMapsCheck, LV_STATE_CHECKED);
 		auto show_jack_maps = lv_obj_has_state(ui_PVShowJackMapsCheck, LV_STATE_CHECKED);
+		auto show_cables = lv_obj_has_state(ui_PVShowAllCablesCheck, LV_STATE_CHECKED);
 
 		lv_enable(ui_PVControlMapTranspSlider, show_control_maps);
 		lv_enable(ui_PVJackMapTranspSlider, show_jack_maps);
+		lv_enable(ui_PVCablesTranspSlider, show_cables);
 
 		if (!show_control_maps && !show_jack_maps) {
 			lv_disable(ui_PVShowMapsAlwaysCheck);
@@ -262,6 +264,8 @@ private:
 
 		auto show_all = lv_obj_has_state(ui_PVShowAllCablesCheck, LV_STATE_CHECKED);
 		auto page = static_cast<PatchViewSettingsMenu *>(event->user_data);
+
+		page->update_interactive_states();
 
 		page->settings.cable_style.mode = show_all ? ShowAll : HideAlways;
 
