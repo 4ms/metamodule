@@ -94,33 +94,35 @@
     </g>
   </g>
   <g id="components">
-    <circle id="Aux" cx="150.88" cy="314.91" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="_8_LED_GreenRedLight" data-name="8 LED#GreenRedLight" cx="85.98" cy="177.28" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="_7_LED_GreenRedLight" data-name="7 LED#GreenRedLight" cx="85.98" cy="161.98" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="_6_LED_GreenRedLight" data-name="6 LED#GreenRedLight" cx="85.98" cy="146.67" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="_5_LED_GreenRedLight" data-name="5 LED#GreenRedLight" cx="85.98" cy="131.36" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="_4_LED_GreenRedLight" data-name="4 LED#GreenRedLight" cx="85.98" cy="116.05" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="_3_LED_GreenRedLight" data-name="3 LED#GreenRedLight" cx="85.98" cy="100.74" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="_2_LED_GreenRedLight" data-name="2 LED#GreenRedLight" cx="85.98" cy="85.44" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="_1_LED_GreenRedLight" data-name="1 LED#GreenRedLight" cx="85.98" cy="70.13" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Aux_Out" data-name="Aux Out" cx="150.88" cy="314.91" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Out" cx="118.43" cy="314.91" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="V_Oct" data-name="V/Oct" cx="85.99" cy="314.91" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Level_CV" data-name="Level CV" cx="53.54" cy="314.91" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Strum" cx="21.1" cy="314.91" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
-    <circle id="Harmo_CV" data-name="Harmo CV" cx="150.88" cy="273.52" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Trigger" cx="21.1" cy="314.91" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
+    <circle id="Harmonics_CV" data-name="Harmonics CV" cx="150.88" cy="273.52" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Morph_CV" data-name="Morph CV" cx="118.43" cy="273.52" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="FM_CV" data-name="FM CV" cx="85.99" cy="273.52" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Timbre_CV" data-name="Timbre CV" cx="53.54" cy="273.52" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Model_CV" data-name="Model CV" cx="21.1" cy="273.52" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Morph_Atten_WhiteSmallKnob" data-name="Morph Atten#WhiteSmallKnob" cx="140.77" cy="228.45" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="FM_Atten_WhiteSmallKnob" data-name="FM Atten#WhiteSmallKnob" cx="85.96" cy="228.45" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Timbre_Atten_WhiteSmallKnob" data-name="Timbre Atten#WhiteSmallKnob" cx="31.14" cy="228.45" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Model_In" data-name="Model In" cx="21.1" cy="273.52" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <rect id="LPG_Decay" data-name="LPG Decay" x="19.23" y="17.83" width="31" height="14.89" style="fill: gray; stroke-width: 0px;"/>
+    <rect id="LPG_Color" data-name="LPG Color" x="121.77" y="17.83" width="31" height="14.89" style="fill: gray; stroke-width: 0px;"/>
+    <circle id="Morph_Atten_Trimpot" data-name="Morph Atten#Trimpot" cx="140.77" cy="228.45" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="FM_Atten_Trimpot" data-name="FM Atten#Trimpot" cx="85.96" cy="228.45" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Timbre_Atten_Trimpot" data-name="Timbre Atten#Trimpot" cx="31.14" cy="228.45" r="8.5" style="fill: red; stroke-width: 0px;"/>
     <circle id="Morph_WhiteMediumKnob" data-name="Morph#WhiteMediumKnob" cx="140.79" cy="160.13" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Timbre_WhiteMediumKnob" data-name="Timbre#WhiteMediumKnob" cx="31.16" cy="160.13" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Harmonics_WhiteLargeKnob" data-name="Harmonics#WhiteLargeKnob" cx="137.28" cy="82.74" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="_8_LED_RedGreenLight" data-name="8 LED#RedGreenLight" cx="85.98" cy="177.28" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="_7_LED_RedGreenLight" data-name="7 LED#RedGreenLight" cx="85.98" cy="161.98" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="_6_LED_RedGreenLight" data-name="6 LED#RedGreenLight" cx="85.98" cy="146.67" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="_5_LED_RedGreenLight" data-name="5 LED#RedGreenLight" cx="85.98" cy="131.36" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="_4_LED_RedGreenLight" data-name="4 LED#RedGreenLight" cx="85.98" cy="116.05" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="_3_LED_RedGreenLight" data-name="3 LED#RedGreenLight" cx="85.98" cy="100.74" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="_2_LED_RedGreenLight" data-name="2 LED#RedGreenLight" cx="85.98" cy="85.44" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="_1_LED_RedGreenLight" data-name="1 LED#RedGreenLight" cx="85.98" cy="70.13" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Frequency_WhiteLargeKnob" data-name="Frequency#WhiteLargeKnob" cx="34.73" cy="82.74" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Percussive_Models" data-name="Percussive Models" cx="98.58" cy="48.44" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="Pitch_Models" data-name="Pitch Models" cx="73.35" cy="48.44" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Perc._Model_MediumButton" data-name="Perc. Model#MediumButton" cx="98.58" cy="48.44" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Pitched_Model_MediumButton" data-name="Pitched Model#MediumButton" cx="73.35" cy="48.44" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
     <text id="slug" transform="translate(132.62 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">P</tspan><tspan x="1.58" y="0">laits</tspan></text>
     <text id="modulename" transform="translate(145.12 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="2.43" y="0">ac</tspan><tspan x="5.22" y="0" style="letter-spacing: -.01em;">r</tspan><tspan x="6.17" y="0">o Oscill</tspan><tspan x="15.17" y="0" style="letter-spacing: 0em;">at</tspan><tspan x="17.58" y="0" style="letter-spacing: 0em;">or 2</tspan></text>
   </g>

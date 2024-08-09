@@ -1,6 +1,5 @@
 #pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+#include "CoreModules/AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -17,34 +16,34 @@ struct KinksInfo : ModuleInfoBase {
 
     static constexpr std::array<Element, 15> Elements{{
 		AnalogJackInput4ms{{to_mm<72>(15.74), to_mm<72>(84.53), Center, "Sign In", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(84.53), Center, "Sign Out", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(15.74), to_mm<72>(120.53), Center, "Half Sign Out", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(120.53), Center, "Full Sign Out", ""}},
-		AnalogJackInput4ms{{to_mm<72>(15.74), to_mm<72>(181.73), Center, "IN A", ""}},
-		AnalogJackInput4ms{{to_mm<72>(40.98), to_mm<72>(181.73), Center, "IN B", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(15.74), to_mm<72>(217.73), Center, "MAX", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(217.73), Center, "MIN", ""}},
-		AnalogJackInput4ms{{to_mm<72>(15.74), to_mm<72>(278.93), Center, "S&amp;H IN", ""}},
-		GateJackInput4ms{{to_mm<72>(40.98), to_mm<72>(278.93), Center, "Trig", ""}},
-		AnalogJackInput4ms{{to_mm<72>(15.74), to_mm<72>(314.93), Center, "Noise", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(84.53), Center, "Inverted Sign Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(15.74), to_mm<72>(120.53), Center, "Half Rect. Sign Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(120.53), Center, "Full Rect. Sign Out", ""}},
+		AnalogJackInput4ms{{to_mm<72>(15.74), to_mm<72>(181.73), Center, "Logic In A", ""}},
+		AnalogJackInput4ms{{to_mm<72>(40.98), to_mm<72>(181.73), Center, "Logic In B", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(15.74), to_mm<72>(217.73), Center, "Logic Max Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(217.73), Center, "Logic Min Out", ""}},
+		AnalogJackInput4ms{{to_mm<72>(15.74), to_mm<72>(278.93), Center, "S&amp;H In", ""}},
+		GateJackInput4ms{{to_mm<72>(40.98), to_mm<72>(278.93), Center, "S&amp;H Trig In", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(15.74), to_mm<72>(314.93), Center, "Noise Out", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(314.93), Center, "S&amp;H Out", ""}},
-		GreenLight{{to_mm<72>(14.89), to_mm<72>(61.1), Center, "Sign", ""}},
-		GreenLight{{to_mm<72>(14.89), to_mm<72>(158.29), Center, "Logic", ""}},
-		GreenLight{{to_mm<72>(14.89), to_mm<72>(255.48), Center, "S&amp;H", ""}},
+		GreenRedLight{{to_mm<72>(14.89), to_mm<72>(61.1), Center, "Sign", ""}},
+		GreenRedLight{{to_mm<72>(14.89), to_mm<72>(158.29), Center, "Logic", ""}},
+		GreenRedLight{{to_mm<72>(14.89), to_mm<72>(255.48), Center, "S&amp;H", ""}},
 }};
 
     enum class Elem {
         SignIn,
-        SignOut,
-        HalfSignOut,
-        FullSignOut,
-        InAIn,
-        InBIn,
-        MaxOut,
-        MinOut,
+        InvertedSignOut,
+        HalfRect_SignOut,
+        FullRect_SignOut,
+        LogicInAIn,
+        LogicInBIn,
+        LogicMaxOut,
+        LogicMinOut,
         S_Amp_HIn,
-        TrigIn,
-        NoiseIn,
+        S_Amp_HTrigIn,
+        NoiseOut,
         S_Amp_HOut,
         SignLight,
         LogicLight,
@@ -57,20 +56,20 @@ struct KinksInfo : ModuleInfoBase {
     
     enum {
         InputSign_In, 
-        InputIn_A, 
-        InputIn_B, 
+        InputLogic_In_A, 
+        InputLogic_In_B, 
         InputS_Amp_H_In, 
-        InputTrig, 
-        InputNoise, 
+        InputS_Amp_H_Trig_In, 
         NumInJacks,
     };
     
     enum {
-        OutputSign_Out, 
-        OutputHalf_Sign_Out, 
-        OutputFull_Sign_Out, 
-        OutputMax, 
-        OutputMin, 
+        OutputInverted_Sign_Out, 
+        OutputHalf_Rect__Sign_Out, 
+        OutputFull_Rect__Sign_Out, 
+        OutputLogic_Max_Out, 
+        OutputLogic_Min_Out, 
+        OutputNoise_Out, 
         OutputS_Amp_H_Out, 
         NumOutJacks,
     };

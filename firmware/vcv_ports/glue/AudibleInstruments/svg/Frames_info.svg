@@ -62,7 +62,7 @@
     </g>
   </g>
   <g id="components">
-    <circle id="Fr_Step" data-name="Fr Step" cx="233.77" cy="315.07" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
+    <circle id="Frame_Step" data-name="Frame Step" cx="233.77" cy="315.07" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
     <circle id="Ch4_Out" data-name="Ch4 Out" cx="192.37" cy="315.07" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Ch3_Out" data-name="Ch3 Out" cx="150.97" cy="315.07" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Ch2_Out" data-name="Ch2 Out" cx="109.57" cy="315.07" r="11.34" style="fill: blue; stroke-width: 0px;"/>
@@ -74,20 +74,21 @@
     <circle id="Ch2_In" data-name="Ch2 In" cx="109.57" cy="273.67" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Ch1_In" data-name="Ch1 In" cx="68.17" cy="273.67" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="All" cx="26.77" cy="273.67" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <rect id="_10V_Offset_On_Off" data-name="10V Offset@On@Off" x="21.1" y="227.37" width="11.34" height="17.01" transform="translate(262.64 209.1) rotate(90)" style="fill: #ff8080; stroke-width: 0px;"/>
-    <circle id="Modulation_WhiteMediumKnob" data-name="Modulation#WhiteMediumKnob" cx="219.36" cy="154.88" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Frame_WhiteLargeKnob" data-name="Frame#WhiteLargeKnob" cx="129.36" cy="154.88" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Del" cx="32.16" cy="178.27" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="AddDel_GreenLight" data-name="AddDel#GreenLight" cx="64.56" cy="154.89" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Add" cx="32.16" cy="131.5" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Frame_Light_Rogan6PSLight" data-name="Frame Light#Rogan6PSLight" cx="129.36" cy="154.88" r="30.45" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Edit_Light_GreenLight" data-name="Edit Light#GreenLight" cx="64.56" cy="154.89" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch4_GreenLight" data-name="Ch4#GreenLight" cx="226.56" cy="100.88" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch3_GreenLight" data-name="Ch3#GreenLight" cx="161.76" cy="100.88" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch2_GreenLight" data-name="Ch2#GreenLight" cx="96.96" cy="100.88" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch1_GreenLight" data-name="Ch1#GreenLight" cx="32.16" cy="100.88" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch4_WhiteMediumKnob" data-name="Ch4#WhiteMediumKnob" cx="226.56" cy="68.49" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Ch3_WhiteMediumKnob" data-name="Ch3#WhiteMediumKnob" cx="161.76" cy="68.49" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Ch2_WhiteMediumKnob" data-name="Ch2#WhiteMediumKnob" cx="96.96" cy="68.49" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Ch1_WhiteMediumKnob" data-name="Ch1#WhiteMediumKnob" cx="32.16" cy="68.49" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <rect id="Offset_0V_10V" data-name="Offset@0V@+10V" x="21.1" y="227.37" width="11.34" height="17.01" transform="translate(53.55 471.74) rotate(180)" style="fill: #ff8080; stroke-width: 0px;"/>
+    <circle id="Animation_Atten._WhiteSmallKnob" data-name="Animation Atten.#WhiteSmallKnob" cx="219.36" cy="154.88" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Frame_Rogan6PSWhite" data-name="Frame#Rogan6PSWhite" cx="129.36" cy="154.88" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Del_Keyframe_MediumButton" data-name="Del Keyframe#MediumButton" cx="32.16" cy="178.27" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Add_Keyframe_MediumButton" data-name="Add Keyframe#MediumButton" cx="32.16" cy="131.5" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Ch4_Gain_WhiteMediumKnob" data-name="Ch4 Gain#WhiteMediumKnob" cx="226.56" cy="68.49" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch3_Gain_WhiteMediumKnob" data-name="Ch3 Gain#WhiteMediumKnob" cx="161.76" cy="68.49" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch2_Gain_WhiteMediumKnob" data-name="Ch2 Gain#WhiteMediumKnob" cx="96.96" cy="68.49" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch1_Gain_WhiteMediumKnob" data-name="Ch1 Gain#WhiteMediumKnob" cx="32.16" cy="68.49" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <text id="slug" transform="translate(215.13 369.14)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.03em;">F</tspan><tspan x="1.38" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="2.35" y="0">ames</tspan></text>
     <text id="modulename" transform="translate(227.63 369.14)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0">Keyf</tspan><tspan x="5.42" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="6.38" y="0">ame </tspan><tspan x="12.47" y="0" style="letter-spacing: .01em;">M</tspan><tspan x="14.92" y="0">i</tspan><tspan x="15.62" y="0" style="letter-spacing: -.01em;">x</tspan><tspan x="16.96" y="0">er</tspan></text>
   </g>

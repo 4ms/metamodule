@@ -64,10 +64,13 @@
     </g>
   </g>
   <g id="components">
-    <circle id="Bi" cx="169.09" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Uni" cx="134.88" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Low" cx="100.67" cy="314.93" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
-    <circle id="High" cx="66.45" cy="314.93" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
+    <circle id="Freq_Range_Light_GreenRedLight" data-name="Freq Range Light#GreenRedLight" cx="59.25" cy="102.56" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Phase_Light_GreenRedLight" data-name="Phase Light#GreenRedLight" cx="59.25" cy="82.74" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Output_Mode_Light_GreenRedLight" data-name="Output Mode Light#GreenRedLight" cx="59.25" cy="62.93" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Bipolar" cx="169.09" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Unipolar" cx="134.88" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Low_Tide_Out" data-name="Low Tide Out" cx="100.67" cy="314.93" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
+    <circle id="High_Tide_Out" data-name="High Tide Out" cx="66.45" cy="314.93" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
     <circle id="Clock" cx="32.24" cy="314.93" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
     <circle id="Level" cx="169.09" cy="273.54" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="FM_In" data-name="FM In" cx="134.88" cy="273.54" r="11.34" style="fill: lime; stroke-width: 0px;"/>
@@ -80,13 +83,10 @@
     <circle id="Smoothness_WhiteMediumKnob" data-name="Smoothness#WhiteMediumKnob" cx="169.1" cy="167.33" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Slope_WhiteMediumKnob" data-name="Slope#WhiteMediumKnob" cx="100.67" cy="167.33" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Shape_WhiteMediumKnob" data-name="Shape#WhiteMediumKnob" cx="32.24" cy="167.33" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Freq_Range_Light_RedGreenLight" data-name="Freq Range Light#RedGreenLight" cx="59.25" cy="102.56" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <rect id="Frequency_Range_Switch_L_M_H" data-name="Frequency Range Switch@L@M@H" x="26.57" y="94.05" width="11.34" height="17.01" transform="translate(134.8 70.32) rotate(90)" style="fill: #ffc080; stroke-width: 0px;"/>
     <circle id="FM_BlueMediumKnob" data-name="FM#BlueMediumKnob" cx="169.1" cy="82.74" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Frequency_BlueLargeKnob" data-name="Frequency#BlueLargeKnob" cx="100.67" cy="82.74" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Freq_Light_RedGreenLight" data-name="Freq Light#RedGreenLight" cx="59.25" cy="82.74" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Output_Mode_Light_RedGreenLight" data-name="Output Mode Light#RedGreenLight" cx="59.25" cy="62.93" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <rect id="Output_Mode_Switch_1_2_3" data-name="Output Mode Switch@1@2@3" x="26.57" y="54.43" width="11.34" height="17.01" transform="translate(95.17 30.69) rotate(90)" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Frequency_Range_L_M_H" data-name="Frequency Range@L@M@H" x="26.57" y="94.05" width="11.34" height="17.01" transform="translate(134.8 70.32) rotate(90)" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Output_Mode_1_2_3" data-name="Output Mode@1@2@3" x="26.57" y="54.43" width="11.34" height="17.01" transform="translate(95.17 30.69) rotate(90)" style="fill: #ffc080; stroke-width: 0px;"/>
     <text id="slug" transform="translate(155.91 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">T</tspan><tspan x="1.46" y="0">ides</tspan></text>
     <text id="modulename" transform="translate(167.48 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">T</tspan><tspan x="1.46" y="0">idal </tspan><tspan x="6.64" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="9.07" y="0" style="letter-spacing: 0em;">odul</tspan><tspan x="14.77" y="0" style="letter-spacing: 0em;">a</tspan><tspan x="16.2" y="0" style="letter-spacing: 0em;">t</tspan><tspan x="17.18" y="0">or</tspan></text>
   </g>

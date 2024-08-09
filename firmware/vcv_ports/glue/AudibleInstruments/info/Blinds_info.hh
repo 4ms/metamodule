@@ -1,6 +1,5 @@
 #pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+#include "CoreModules/AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -20,10 +19,10 @@ struct BlindsInfo : ModuleInfoBase {
 		WhiteMediumKnob{{to_mm<72>(27.38), to_mm<72>(145.06), Center, "Ch2", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(27.38), to_mm<72>(220.6), Center, "Ch3", ""}, 0.421875f},
 		WhiteMediumKnob{{to_mm<72>(27.38), to_mm<72>(296.15), Center, "Ch4", ""}, 0.5f},
-		WhiteSmallKnob{{to_mm<72>(77.98), to_mm<72>(69.52), Center, "Ch1 Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(77.98), to_mm<72>(145.06), Center, "Ch2 Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(77.98), to_mm<72>(220.6), Center, "Ch3 Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(77.98), to_mm<72>(296.15), Center, "Ch4 Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(77.98), to_mm<72>(69.52), Center, "Ch1 Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(77.98), to_mm<72>(145.06), Center, "Ch2 Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(77.98), to_mm<72>(220.6), Center, "Ch3 Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(77.98), to_mm<72>(296.15), Center, "Ch4 Atten", ""}, 0.0f},
 		AnalogJackInput4ms{{to_mm<72>(117.44), to_mm<72>(50.67), Center, "Ch1 IN", ""}},
 		AnalogJackInput4ms{{to_mm<72>(117.44), to_mm<72>(126.21), Center, "Ch2 IN", ""}},
 		AnalogJackInput4ms{{to_mm<72>(117.44), to_mm<72>(201.75), Center, "Ch3 IN", ""}},
@@ -36,14 +35,14 @@ struct BlindsInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(150.01), to_mm<72>(126.21), Center, "Ch2 Out", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(150.01), to_mm<72>(201.75), Center, "Ch3 Out", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(150.01), to_mm<72>(277.3), Center, "Ch4 Out", ""}},
-		RedGreenLight{{to_mm<72>(77.97), to_mm<72>(97.3), Center, "Ch1 Atten", ""}},
-		RedGreenLight{{to_mm<72>(77.97), to_mm<72>(172.84), Center, "Ch2 Atten", ""}},
-		RedGreenLight{{to_mm<72>(77.97), to_mm<72>(248.38), Center, "Ch3 Atten", ""}},
-		RedGreenLight{{to_mm<72>(77.97), to_mm<72>(323.93), Center, "Ch4 Atten", ""}},
-		RedGreenLight{{to_mm<72>(150.01), to_mm<72>(88.37), Center, "Ch1", ""}},
-		RedGreenLight{{to_mm<72>(150.01), to_mm<72>(163.91), Center, "Ch2", ""}},
-		RedGreenLight{{to_mm<72>(150.01), to_mm<72>(239.45), Center, "Ch3", ""}},
-		RedGreenLight{{to_mm<72>(150.01), to_mm<72>(315.0), Center, "Ch4", ""}},
+		GreenRedLight{{to_mm<72>(77.97), to_mm<72>(97.3), Center, "Ch1 Atten", ""}},
+		GreenRedLight{{to_mm<72>(77.97), to_mm<72>(172.84), Center, "Ch2 Atten", ""}},
+		GreenRedLight{{to_mm<72>(77.97), to_mm<72>(248.38), Center, "Ch3 Atten", ""}},
+		GreenRedLight{{to_mm<72>(77.97), to_mm<72>(323.93), Center, "Ch4 Atten", ""}},
+		GreenRedLight{{to_mm<72>(150.01), to_mm<72>(88.37), Center, "Ch1", ""}},
+		GreenRedLight{{to_mm<72>(150.01), to_mm<72>(163.91), Center, "Ch2", ""}},
+		GreenRedLight{{to_mm<72>(150.01), to_mm<72>(239.45), Center, "Ch3", ""}},
+		GreenRedLight{{to_mm<72>(150.01), to_mm<72>(315.0), Center, "Ch4", ""}},
 }};
 
     enum class Elem {

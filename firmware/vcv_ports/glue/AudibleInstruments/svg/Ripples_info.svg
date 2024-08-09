@@ -24,12 +24,12 @@
     </g>
   </g>
   <g id="components">
-    <circle id="LP4_VCA" data-name="LP4&amp;gt;VCA" cx="91.34" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="LP4" cx="57.12" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="LP_4p_VCA_Out" data-name="LP 4p VCA Out" cx="91.34" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="LP_4p_Out" data-name="LP 4p Out" cx="57.12" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="LP_2p_Out" data-name="LP 2p Out" cx="91.34" cy="280.72" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="BP_2p_Out" data-name="BP 2p Out" cx="57.12" cy="280.72" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Gain" cx="22.91" cy="314.93" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="LP2" cx="91.34" cy="280.72" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="BP2" cx="57.12" cy="280.72" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="In" cx="22.91" cy="280.72" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Audio_In" data-name="Audio In" cx="22.91" cy="280.72" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="FM" cx="91.34" cy="246.5" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Frequency_CV" data-name="Frequency CV" cx="57.12" cy="246.5" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Resonance_CV" data-name="Resonance CV" cx="22.91" cy="246.5" r="11.34" style="fill: lime; stroke-width: 0px;"/>

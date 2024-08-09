@@ -1,6 +1,5 @@
 #pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+#include "CoreModules/AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -16,20 +15,20 @@ struct MarblesInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 43> Elements{{
-		OrangeButton{{to_mm<72>(46.78), to_mm<72>(50.91), Center, "T Deja Vu", ""}},
-		OrangeButton{{to_mm<72>(212.04), to_mm<72>(50.91), Center, "X Deja Vu", ""}},
+		WhiteMomentary7mm{{to_mm<72>(46.78), to_mm<72>(50.91), Center, "T Deja Vu", ""}},
+		WhiteMomentary7mm{{to_mm<72>(212.04), to_mm<72>(50.91), Center, "X Deja Vu", ""}},
 		WhiteMediumKnob{{to_mm<72>(129.41), to_mm<72>(63.52), Center, "DejaVu", ""}, 0.5f},
-		Toggle3pos{{to_mm<72>(19.57), to_mm<72>(96.045), Center, "t Mode Switch", ""}, {"1", "2", "3"}},
-		WhiteLargeKnob{{to_mm<72>(83.35), to_mm<72>(100.37), Center, "Rate", ""}, 0.5f},
+		WhiteLargeKnob{{to_mm<72>(83.35), to_mm<72>(100.37), Center, "Clock Rate", ""}, 0.5f},
 		WhiteLargeKnob{{to_mm<72>(175.48), to_mm<72>(100.37), Center, "Spread", ""}, 0.5f},
+		Toggle3pos{{to_mm<72>(19.57), to_mm<72>(96.045), Center, "T Mode Switch", ""}, {"1", "2", "3"}},
 		Toggle3pos{{to_mm<72>(239.26), to_mm<72>(96.045), Center, "X Mode Switch", ""}, {"1", "2", "3"}},
-		WhiteMediumKnob{{to_mm<72>(26.94), to_mm<72>(165.99), Center, "T Bias", ""}, 0.5f},
-		Toggle3pos{{to_mm<72>(75.41), to_mm<72>(158.675), Center, "Clock Range Switch", ""}, {"d4", "x1", "x4"}},
 		WhiteMediumKnob{{to_mm<72>(129.41), to_mm<72>(145.44), Center, "Length", ""}, 0.5f},
-		Toggle3pos{{to_mm<72>(183.42), to_mm<72>(158.675), Center, "Output Range Switch", ""}, {"2", "5", "5"}},
+		WhiteMediumKnob{{to_mm<72>(26.94), to_mm<72>(165.99), Center, "T Bias", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(231.89), to_mm<72>(165.99), Center, "X Bias", ""}, 0.5f},
+		Toggle3pos{{to_mm<72>(75.41), to_mm<72>(158.675), Center, "Clock Range Switch", ""}, {"/4", "x1", "x4"}},
+		Toggle3pos{{to_mm<72>(183.42), to_mm<72>(158.675), Center, "Output Range Switch", ""}, {"+2V", "+5V", "+/-5V"}},
+		SmallButton{{to_mm<72>(129.41), to_mm<72>(191.22), Center, "External", ""}},
 		WhiteMediumKnob{{to_mm<72>(89.3), to_mm<72>(209.36), Center, "Jitter", ""}, 0.5f},
-		Toggle2posHoriz{{to_mm<72>(129.42), to_mm<72>(191.225), Center, "Mode Switch", ""}, {"Off", "On"}},
 		WhiteMediumKnob{{to_mm<72>(169.52), to_mm<72>(209.36), Center, "Steps", ""}, 0.5f},
 		AnalogJackInput4ms{{to_mm<72>(26.94), to_mm<72>(232.75), Center, "T Bias CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(231.89), to_mm<72>(232.75), Center, "X Bias CV", ""}},
@@ -40,17 +39,17 @@ struct MarblesInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(163.57), to_mm<72>(274.14), Center, "Steps CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(197.73), to_mm<72>(274.14), Center, "Spread CV", ""}},
 		GateJackInput4ms{{to_mm<72>(231.89), to_mm<72>(274.14), Center, "X Clock", ""}},
-		GateJackOutput4ms{{to_mm<72>(26.94), to_mm<72>(315.52), Center, "t1", ""}},
-		GateJackOutput4ms{{to_mm<72>(61.1), to_mm<72>(315.52), Center, "t2", ""}},
-		GateJackOutput4ms{{to_mm<72>(95.26), to_mm<72>(315.52), Center, "t3", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(129.41), to_mm<72>(315.52), Center, "Y", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(163.57), to_mm<72>(315.52), Center, "X1", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(197.73), to_mm<72>(315.52), Center, "X2", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(231.89), to_mm<72>(315.52), Center, "X3", ""}},
-		RedGreenLight{{to_mm<72>(19.57), to_mm<72>(70.82), Center, "t Mode LED", ""}},
-		RedGreenLight{{to_mm<72>(239.26), to_mm<72>(70.82), Center, "X Mode Light", ""}},
-		RedGreenLight{{to_mm<72>(106.53), to_mm<72>(157.85), Center, "Clock Range Light", ""}},
-		RedGreenLight{{to_mm<72>(152.52), to_mm<72>(158.43), Center, "Output Range Light", ""}},
+		GateJackOutput4ms{{to_mm<72>(26.94), to_mm<72>(315.52), Center, "T1 Out", ""}},
+		GateJackOutput4ms{{to_mm<72>(61.1), to_mm<72>(315.52), Center, "T2 Out", ""}},
+		GateJackOutput4ms{{to_mm<72>(95.26), to_mm<72>(315.52), Center, "T3 Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(129.41), to_mm<72>(315.52), Center, "Y Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(163.57), to_mm<72>(315.52), Center, "X1 Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(197.73), to_mm<72>(315.52), Center, "X2 Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(231.89), to_mm<72>(315.52), Center, "X3 Out", ""}},
+		GreenRedLight{{to_mm<72>(19.57), to_mm<72>(70.82), Center, "T Mode LED", ""}},
+		GreenRedLight{{to_mm<72>(239.26), to_mm<72>(70.82), Center, "X Mode Light", ""}},
+		GreenRedLight{{to_mm<72>(106.53), to_mm<72>(157.85), Center, "Clock Range Light", ""}},
+		GreenRedLight{{to_mm<72>(152.52), to_mm<72>(158.43), Center, "Output Range Light", ""}},
 		GreenLight{{to_mm<72>(129.41), to_mm<72>(216.45), Center, "External Light", ""}},
 		GreenLight{{to_mm<72>(17.02), to_mm<72>(297.52), Center, "t1", ""}},
 		GreenLight{{to_mm<72>(51.18), to_mm<72>(297.52), Center, "t2", ""}},
@@ -65,17 +64,17 @@ struct MarblesInfo : ModuleInfoBase {
         TDejaVuButton,
         XDejaVuButton,
         DejavuKnob,
-        TModeSwitch,
-        RateKnob,
+        ClockRateKnob,
         SpreadKnob,
+        TModeSwitch,
         XModeSwitch,
-        TBiasKnob,
-        ClockRangeSwitch,
         LengthKnob,
-        OutputRangeSwitch,
+        TBiasKnob,
         XBiasKnob,
+        ClockRangeSwitch,
+        OutputRangeSwitch,
+        ExternalButton,
         JitterKnob,
-        ModeSwitch,
         StepsKnob,
         TBiasCvIn,
         XBiasCvIn,
@@ -111,10 +110,10 @@ struct MarblesInfo : ModuleInfoBase {
     
     enum {
         KnobDejavu, 
-        KnobRate, 
+        KnobClock_Rate, 
         KnobSpread, 
-        KnobT_Bias, 
         KnobLength, 
+        KnobT_Bias, 
         KnobX_Bias, 
         KnobJitter, 
         KnobSteps, 
@@ -128,7 +127,7 @@ struct MarblesInfo : ModuleInfoBase {
         SwitchX_Mode_Switch, 
         SwitchClock_Range_Switch, 
         SwitchOutput_Range_Switch, 
-        SwitchMode_Switch, 
+        SwitchExternal, 
         NumSwitches,
     };
     
@@ -146,13 +145,13 @@ struct MarblesInfo : ModuleInfoBase {
     };
     
     enum {
-        OutputT1, 
-        OutputT2, 
-        OutputT3, 
-        OutputY, 
-        OutputX1, 
-        OutputX2, 
-        OutputX3, 
+        OutputT1_Out, 
+        OutputT2_Out, 
+        OutputT3_Out, 
+        OutputY_Out, 
+        OutputX1_Out, 
+        OutputX2_Out, 
+        OutputX3_Out, 
         NumOutJacks,
     };
     

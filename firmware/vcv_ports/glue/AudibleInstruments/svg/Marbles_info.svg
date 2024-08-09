@@ -661,20 +661,25 @@
     </g>
   </g>
   <g id="components">
-    <circle id="X3" cx="231.89" cy="315.52" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="X3_GreenLight" data-name="X3#GreenLight" cx="221.97" cy="297.52" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="X2" cx="197.73" cy="315.52" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="X2_GreenLight" data-name="X2#GreenLight" cx="187.81" cy="297.52" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="X1" cx="163.57" cy="315.52" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="X1_GreenLight" data-name="X1#GreenLight" cx="153.65" cy="297.52" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Y" cx="129.41" cy="315.52" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Y_GreenLight" data-name="Y#GreenLight" cx="119.49" cy="297.52" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="t3" cx="95.26" cy="315.52" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
     <circle id="t3_GreenLight" data-name="t3#GreenLight" cx="85.34" cy="297.52" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="t2" cx="61.1" cy="315.52" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
     <circle id="t2_GreenLight" data-name="t2#GreenLight" cx="51.18" cy="297.52" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="t1" cx="26.94" cy="315.52" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
     <circle id="t1_GreenLight" data-name="t1#GreenLight" cx="17.02" cy="297.52" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="External_Light_GreenLight" data-name="External Light#GreenLight" cx="129.41" cy="216.45" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Output_Range_Light_GreenRedLight" data-name="Output Range Light#GreenRedLight" cx="152.52" cy="158.43" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Clock_Range_Light_GreenRedLight" data-name="Clock Range Light#GreenRedLight" cx="106.53" cy="157.85" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="X_Mode_Light_GreenRedLight" data-name="X Mode Light#GreenRedLight" cx="239.26" cy="70.82" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="T_Mode_LED_GreenRedLight" data-name="T Mode LED#GreenRedLight" cx="19.57" cy="70.82" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="X3_Out" data-name="X3 Out" cx="231.89" cy="315.52" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="X2_Out" data-name="X2 Out" cx="197.73" cy="315.52" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="X1_Out" data-name="X1 Out" cx="163.57" cy="315.52" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Y_Out" data-name="Y Out" cx="129.41" cy="315.52" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="T3_Out" data-name="T3 Out" cx="95.26" cy="315.52" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
+    <circle id="T2_Out" data-name="T2 Out" cx="61.1" cy="315.52" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
+    <circle id="T1_Out" data-name="T1 Out" cx="26.94" cy="315.52" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
     <circle id="X_Clock" data-name="X Clock" cx="231.89" cy="274.14" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
     <circle id="Spread_CV" data-name="Spread CV" cx="197.73" cy="274.14" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Steps_CV" data-name="Steps CV" cx="163.57" cy="274.14" r="11.34" style="fill: lime; stroke-width: 0px;"/>
@@ -685,25 +690,20 @@
     <circle id="X_Bias_CV" data-name="X Bias CV" cx="231.89" cy="232.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="T_Bias_CV" data-name="T Bias CV" cx="26.94" cy="232.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Steps_WhiteMediumKnob" data-name="Steps#WhiteMediumKnob" cx="169.52" cy="209.36" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="External_Light_GreenLight" data-name="External Light#GreenLight" cx="129.41" cy="216.45" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <rect id="Mode_Switch_Off_On" data-name="Mode Switch@Off@On" x="123.75" y="182.72" width="11.34" height="17.01" transform="translate(320.64 61.81) rotate(90)" style="fill: #ff8080; stroke-width: 0px;"/>
     <circle id="Jitter_WhiteMediumKnob" data-name="Jitter#WhiteMediumKnob" cx="89.3" cy="209.36" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="External_SmallButton" data-name="External#SmallButton" cx="129.41" cy="191.22" r="8.5" style="fill: #ff8000; stroke-width: 0px;"/>
+    <rect id="Output_Range_Switch_2V_5V_-5V" data-name="Output Range Switch@+2V@+5V@+/-5V" x="177.75" y="150.17" width="11.34" height="17.01" transform="translate(366.83 317.35) rotate(180)" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Clock_Range_Switch_4_x1_x4" data-name="Clock Range Switch@/4@x1@x4" x="69.74" y="150.17" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
     <circle id="X_Bias_WhiteMediumKnob" data-name="X Bias#WhiteMediumKnob" cx="231.89" cy="165.99" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <rect id="Output_Range_Switch_2_5_5" data-name="Output Range Switch@2@5@5" x="177.75" y="150.17" width="11.34" height="17.01" transform="translate(366.83 317.35) rotate(180)" style="fill: #ffc080; stroke-width: 0px;"/>
-    <circle id="Output_Range_Light_RedGreenLight" data-name="Output Range Light#RedGreenLight" cx="152.52" cy="158.43" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Length_WhiteMediumKnob" data-name="Length#WhiteMediumKnob" cx="129.41" cy="145.44" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <rect id="Clock_Range_Switch_d4_x1_x4" data-name="Clock Range Switch@d4@x1@x4" x="69.74" y="150.17" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
-    <circle id="Clock_Range_Light_RedGreenLight" data-name="Clock Range Light#RedGreenLight" cx="106.53" cy="157.85" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="T_Bias_WhiteMediumKnob" data-name="T Bias#WhiteMediumKnob" cx="26.94" cy="165.99" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Length_WhiteMediumKnob" data-name="Length#WhiteMediumKnob" cx="129.41" cy="145.44" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <rect id="X_Mode_Switch_1_2_3" data-name="X Mode Switch@1@2@3" x="233.59" y="87.54" width="11.34" height="17.01" transform="translate(478.51 192.1) rotate(180)" style="fill: #ffc080; stroke-width: 0px;"/>
-    <circle id="X_Mode_Light_RedGreenLight" data-name="X Mode Light#RedGreenLight" cx="239.26" cy="70.82" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <rect id="T_Mode_Switch_1_2_3" data-name="T Mode Switch@1@2@3" x="13.9" y="87.54" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
     <circle id="Spread_WhiteLargeKnob" data-name="Spread#WhiteLargeKnob" cx="175.48" cy="100.37" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Rate_WhiteLargeKnob" data-name="Rate#WhiteLargeKnob" cx="83.35" cy="100.37" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <rect id="t_Mode_Switch_1_2_3" data-name="t Mode Switch@1@2@3" x="13.9" y="87.54" width="11.34" height="17.01" style="fill: #ffc080; stroke-width: 0px;"/>
-    <circle id="t_Mode_LED_RedGreenLight" data-name="t Mode LED#RedGreenLight" cx="19.57" cy="70.82" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Clock_Rate_WhiteLargeKnob" data-name="Clock Rate#WhiteLargeKnob" cx="83.35" cy="100.37" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="DejaVu_WhiteMediumKnob" data-name="DejaVu#WhiteMediumKnob" cx="129.41" cy="63.52" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="X_Deja_Vu" data-name="X Deja Vu" cx="212.04" cy="50.91" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="T_Deja_Vu" data-name="T Deja Vu" cx="46.78" cy="50.91" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="X_Deja_Vu_WhiteMomentary7mm" data-name="X Deja Vu#WhiteMomentary7mm" cx="212.04" cy="50.91" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="T_Deja_Vu_WhiteMomentary7mm" data-name="T Deja Vu#WhiteMomentary7mm" cx="46.78" cy="50.91" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
     <text id="slug" transform="translate(214.57 369.59)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="2.43" y="0">a</tspan><tspan x="3.88" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="4.87" y="0">bles</tspan></text>
     <text id="modulename" transform="translate(227 369.59)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: .01em;">R</tspan><tspan x="1.65" y="0" style="letter-spacing: 0em;">andom </tspan><tspan x="11.24" y="0" style="letter-spacing: 0em;">S</tspan><tspan x="12.73" y="0">ampler</tspan></text>
   </g>

@@ -1,6 +1,5 @@
 #pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+#include "CoreModules/AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -33,16 +32,16 @@ struct ElementsInfo : ModuleInfoBase {
 		WhiteMediumKnob{{to_mm<72>(317.55), to_mm<72>(214.27), Center, "Damping", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(385.07), to_mm<72>(214.27), Center, "Position", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(452.59), to_mm<72>(214.27), Center, "Space", ""}, 0.5f},
-		WhiteSmallKnob{{to_mm<72>(108.81), to_mm<72>(270.97), Center, "Bow Timbre Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(145.66), to_mm<72>(270.97), Center, "Flow Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(182.51), to_mm<72>(270.97), Center, "Blow Timbre Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(219.36), to_mm<72>(270.97), Center, "Mallet Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(256.21), to_mm<72>(270.97), Center, "Strike Timbre Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(311.37), to_mm<72>(270.97), Center, "Damping Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(348.22), to_mm<72>(270.97), Center, "Geometry Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(385.07), to_mm<72>(270.97), Center, "Position Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(421.92), to_mm<72>(270.97), Center, "Brightness Atten", ""}, 0.0f},
-		WhiteSmallKnob{{to_mm<72>(458.77), to_mm<72>(270.97), Center, "Space Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(108.81), to_mm<72>(270.97), Center, "Bow Timbre Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(145.66), to_mm<72>(270.97), Center, "Flow Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(182.51), to_mm<72>(270.97), Center, "Blow Timbre Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(219.36), to_mm<72>(270.97), Center, "Mallet Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(256.21), to_mm<72>(270.97), Center, "Strike Timbre Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(311.37), to_mm<72>(270.97), Center, "Damping Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(348.22), to_mm<72>(270.97), Center, "Geometry Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(385.07), to_mm<72>(270.97), Center, "Position Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(421.92), to_mm<72>(270.97), Center, "Brightness Atten", ""}, 0.0f},
+		Trimpot{{to_mm<72>(458.77), to_mm<72>(270.97), Center, "Space Atten", ""}, 0.0f},
 		WhiteMomentary7mm{{to_mm<72>(47.58), to_mm<72>(124.27), Center, "Play", ""}},
 		AnalogJackInput4ms{{to_mm<72>(30.49), to_mm<72>(182.75), Center, "V/Oct", ""}},
 		AnalogJackInput4ms{{to_mm<72>(64.67), to_mm<72>(182.75), Center, "FM", ""}},

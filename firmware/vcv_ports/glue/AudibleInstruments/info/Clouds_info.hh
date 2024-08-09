@@ -1,6 +1,5 @@
 #pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+#include "CoreModules/AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -41,10 +40,10 @@ struct CloudsInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(157.9), to_mm<72>(315.28), Center, "Text CV", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(199.31), to_mm<72>(315.28), Center, "Out L", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(240.7), to_mm<72>(315.28), Center, "Out R", ""}},
-		RedGreenLight{{to_mm<72>(105.17), to_mm<72>(246.97), Center, "Mix Light", ""}},
-		RedGreenLight{{to_mm<72>(41.9), to_mm<72>(246.97), Center, "Pan Light", ""}},
-		RedGreenLight{{to_mm<72>(168.43), to_mm<72>(246.97), Center, "Feedback Light", ""}},
-		RedGreenLight{{to_mm<72>(231.7), to_mm<72>(246.97), Center, "Reverb Light", ""}},
+		GreenRedLight{{to_mm<72>(105.17), to_mm<72>(246.97), Center, "Mix Light", ""}},
+		GreenRedLight{{to_mm<72>(41.9), to_mm<72>(246.97), Center, "Pan Light", ""}},
+		GreenRedLight{{to_mm<72>(168.43), to_mm<72>(246.97), Center, "Feedback Light", ""}},
+		GreenRedLight{{to_mm<72>(231.7), to_mm<72>(246.97), Center, "Reverb Light", ""}},
 }};
 
     enum class Elem {

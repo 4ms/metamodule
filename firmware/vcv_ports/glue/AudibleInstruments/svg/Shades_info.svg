@@ -51,21 +51,21 @@
     </g>
   </g>
   <g id="components">
+    <circle id="Ch3_LED_GreenRedLight" data-name="Ch3 LED#GreenRedLight" cx="43.26" cy="315.07" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch2_LED_GreenRedLight" data-name="Ch2 LED#GreenRedLight" cx="43.26" cy="280.86" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch1_LED_GreenRedLight" data-name="Ch1 LED#GreenRedLight" cx="43.26" cy="246.64" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch3_Out" data-name="Ch3 Out" cx="65.76" cy="315.07" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Ch3_LED_RedGreenLight" data-name="Ch3 LED#RedGreenLight" cx="43.26" cy="315.07" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch3_IN" data-name="Ch3 IN" cx="20.75" cy="315.07" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Ch2_Out" data-name="Ch2 Out" cx="65.76" cy="280.86" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Ch2_LED_RedGreenLight" data-name="Ch2 LED#RedGreenLight" cx="43.26" cy="280.86" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch2_IN" data-name="Ch2 IN" cx="20.75" cy="280.86" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Ch1_Out" data-name="Ch1 Out" cx="65.76" cy="246.64" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Ch1_LED_RedGreenLight" data-name="Ch1 LED#RedGreenLight" cx="43.26" cy="246.64" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch1_IN" data-name="Ch1 IN" cx="20.75" cy="246.71" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Ch3_WhiteMediumKnob" data-name="Ch3#WhiteMediumKnob" cx="57.66" cy="185.47" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <rect id="Ch3_Mode_Switch_Atten_Attenuvert" data-name="Ch3 Mode Switch@Atten@Attenuvert" x="10.6" y="176.97" width="11.34" height="17.01" style="fill: #ff8080; stroke-width: 0px;"/>
-    <circle id="Ch2_WhiteMediumKnob" data-name="Ch2#WhiteMediumKnob" cx="57.66" cy="122.46" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <rect id="Ch2_Mode_Switch_Atten_Attenuvert" data-name="Ch2 Mode Switch@Atten@Attenuvert" x="10.6" y="113.95" width="11.34" height="17.01" style="fill: #ff8080; stroke-width: 0px;"/>
-    <circle id="Ch1_WhiteMediumKnob" data-name="Ch1#WhiteMediumKnob" cx="57.66" cy="59.44" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <rect id="Ch1_Mode_Switch_Atten_Attenuvert" data-name="Ch1 Mode Switch@Atten@Attenuvert" x="10.6" y="50.91" width="11.34" height="17.01" style="fill: #ff8080; stroke-width: 0px;"/>
+    <circle id="Ch3_In" data-name="Ch3 In" cx="20.75" cy="315.07" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch2_In" data-name="Ch2 In" cx="20.75" cy="280.86" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Ch1_In" data-name="Ch1 In" cx="20.75" cy="246.71" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <rect id="Ch3_Mode_Atten_Attenuvert" data-name="Ch3 Mode@Atten@Attenuvert" x="10.6" y="176.97" width="11.34" height="17.01" style="fill: #ff8080; stroke-width: 0px;"/>
+    <rect id="Ch2_Mode_Atten_Attenuvert" data-name="Ch2 Mode@Atten@Attenuvert" x="10.6" y="113.95" width="11.34" height="17.01" style="fill: #ff8080; stroke-width: 0px;"/>
+    <rect id="Ch1_Mode_Atten_Attenuvert" data-name="Ch1 Mode@Atten@Attenuvert" x="10.6" y="50.91" width="11.34" height="17.01" style="fill: #ff8080; stroke-width: 0px;"/>
+    <circle id="Ch3_Gain_WhiteMediumKnob" data-name="Ch3 Gain#WhiteMediumKnob" cx="57.66" cy="185.47" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch2_Gain_WhiteMediumKnob" data-name="Ch2 Gain#WhiteMediumKnob" cx="57.66" cy="122.46" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch1_Gain_WhiteMediumKnob" data-name="Ch1 Gain#WhiteMediumKnob" cx="57.66" cy="59.44" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <text id="slug" transform="translate(38.3 370.56)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0">Shades</tspan></text>
     <text id="modulename" transform="translate(50.72 370.56)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: .01em;">M</tspan><tspan x="2.45" y="0">i</tspan><tspan x="3.15" y="0" style="letter-spacing: -.01em;">x</tspan><tspan x="4.49" y="0">er</tspan></text>
   </g>

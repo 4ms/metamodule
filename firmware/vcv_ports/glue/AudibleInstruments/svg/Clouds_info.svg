@@ -49,10 +49,10 @@
     </g>
   </g>
   <g id="components">
-    <circle id="Reverb_Light_RedGreenLight" data-name="Reverb Light#RedGreenLight" cx="231.7" cy="246.97" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Feedback_Light_RedGreenLight" data-name="Feedback Light#RedGreenLight" cx="168.43" cy="246.97" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Pan_Light_RedGreenLight" data-name="Pan Light#RedGreenLight" cx="41.9" cy="246.97" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Mix_Light_RedGreenLight" data-name="Mix Light#RedGreenLight" cx="105.17" cy="246.97" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Reverb_Light_GreenRedLight" data-name="Reverb Light#GreenRedLight" cx="231.7" cy="246.97" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Feedback_Light_GreenRedLight" data-name="Feedback Light#GreenRedLight" cx="168.43" cy="246.97" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Pan_Light_GreenRedLight" data-name="Pan Light#GreenRedLight" cx="41.9" cy="246.97" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Mix_Light_GreenRedLight" data-name="Mix Light#GreenRedLight" cx="105.17" cy="246.97" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Out_R" data-name="Out R" cx="240.7" cy="315.28" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Out_L" data-name="Out L" cx="199.31" cy="315.28" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Text_CV" data-name="Text CV" cx="157.9" cy="315.28" r="11.34" style="fill: lime; stroke-width: 0px;"/>

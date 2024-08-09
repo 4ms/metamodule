@@ -1,6 +1,5 @@
 #pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+#include "CoreModules/AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -22,12 +21,12 @@ struct RipplesInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(22.91), to_mm<72>(246.5), Center, "Resonance CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(57.12), to_mm<72>(246.5), Center, "Frequency CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(91.34), to_mm<72>(246.5), Center, "FM", ""}},
-		AnalogJackInput4ms{{to_mm<72>(22.91), to_mm<72>(280.72), Center, "In", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(57.12), to_mm<72>(280.72), Center, "BP2", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(91.34), to_mm<72>(280.72), Center, "LP2", ""}},
+		AnalogJackInput4ms{{to_mm<72>(22.91), to_mm<72>(280.72), Center, "Audio In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(22.91), to_mm<72>(314.93), Center, "Gain", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(57.12), to_mm<72>(314.93), Center, "LP4", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(91.34), to_mm<72>(314.93), Center, "LP4&gt;VCA", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(57.12), to_mm<72>(280.72), Center, "BP 2p Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(91.34), to_mm<72>(280.72), Center, "LP 2p Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(57.12), to_mm<72>(314.93), Center, "LP 4p Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(91.34), to_mm<72>(314.93), Center, "LP 4p VCA Out", ""}},
 }};
 
     enum class Elem {
@@ -37,12 +36,12 @@ struct RipplesInfo : ModuleInfoBase {
         ResonanceCvIn,
         FrequencyCvIn,
         FmIn,
-        In,
-        Bp2Out,
-        Lp2Out,
+        AudioIn,
         GainIn,
-        Lp4Out,
-        Lp4_Gt_VcaOut,
+        Bp2POut,
+        Lp2POut,
+        Lp4POut,
+        Lp4PVcaOut,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
@@ -59,16 +58,16 @@ struct RipplesInfo : ModuleInfoBase {
         InputResonance_Cv, 
         InputFrequency_Cv, 
         InputFm, 
-        InputIn, 
+        InputAudio_In, 
         InputGain, 
         NumInJacks,
     };
     
     enum {
-        OutputBp2, 
-        OutputLp2, 
-        OutputLp4, 
-        OutputLp4_Gt_Vca, 
+        OutputBp_2P_Out, 
+        OutputLp_2P_Out, 
+        OutputLp_4P_Out, 
+        OutputLp_4P_Vca_Out, 
         NumOutJacks,
     };
     

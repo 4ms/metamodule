@@ -27,8 +27,8 @@
     </g>
   </g>
   <g id="components">
-    <circle id="Ch2_Mode_RedGreenLight" data-name="Ch2 Mode#RedGreenLight" cx="42.63" cy="315.07" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch1_Mode_RedGreenLight" data-name="Ch1 Mode#RedGreenLight" cx="42.63" cy="165.69" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch2_Mode_GreenRedLight" data-name="Ch2 Mode#GreenRedLight" cx="42.63" cy="315.07" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch1_Mode_GreenRedLight" data-name="Ch1 Mode#GreenRedLight" cx="42.63" cy="165.69" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch2_Out_B" data-name="Ch2 Out B" cx="65.11" cy="315.04" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Ch1_Out_B" data-name="Ch1 Out B" cx="65.11" cy="165.66" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Ch2_Out_A" data-name="Ch2 Out A" cx="20.15" cy="315.04" r="11.34" style="fill: blue; stroke-width: 0px;"/>

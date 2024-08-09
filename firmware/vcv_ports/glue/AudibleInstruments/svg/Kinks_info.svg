@@ -29,21 +29,21 @@
     </g>
   </g>
   <g id="components">
+    <circle id="S_H_GreenRedLight" data-name="S&amp;amp;H#GreenRedLight" cx="14.89" cy="255.48" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="S_H_Out" data-name="S&amp;amp;H Out" cx="40.98" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Noise" cx="15.74" cy="314.93" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Trig" cx="40.98" cy="278.93" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
-    <circle id="S_H_IN" data-name="S&amp;amp;H IN" cx="15.74" cy="278.93" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="S_H_GreenLight" data-name="S&amp;amp;H#GreenLight" cx="14.89" cy="255.48" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="MIN" cx="40.98" cy="217.73" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="MAX" cx="15.74" cy="217.73" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="IN_B" data-name="IN B" cx="40.98" cy="181.73" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="IN_A" data-name="IN A" cx="15.74" cy="181.73" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Logic_GreenLight" data-name="Logic#GreenLight" cx="14.89" cy="158.29" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Full_Sign_Out" data-name="Full Sign Out" cx="40.98" cy="120.53" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Half_Sign_Out" data-name="Half Sign Out" cx="15.74" cy="120.53" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Sign_Out" data-name="Sign Out" cx="40.98" cy="84.53" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Noise_Out" data-name="Noise Out" cx="15.74" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="S_H_Trig_In" data-name="S&amp;amp;H Trig In" cx="40.98" cy="278.93" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
+    <circle id="S_H_In" data-name="S&amp;amp;H In" cx="15.74" cy="278.93" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Logic_GreenRedLight" data-name="Logic#GreenRedLight" cx="14.89" cy="158.29" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Logic_Min_Out" data-name="Logic Min Out" cx="40.98" cy="217.73" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Logic_Max_Out" data-name="Logic Max Out" cx="15.74" cy="217.73" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Logic_In_B" data-name="Logic In B" cx="40.98" cy="181.73" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Logic_In_A" data-name="Logic In A" cx="15.74" cy="181.73" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Sign_GreenRedLight" data-name="Sign#GreenRedLight" cx="14.89" cy="61.1" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Full_Rect._Sign_Out" data-name="Full Rect. Sign Out" cx="40.98" cy="120.53" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Half_Rect._Sign_Out" data-name="Half Rect. Sign Out" cx="15.74" cy="120.53" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Inverted_Sign_Out" data-name="Inverted Sign Out" cx="40.98" cy="84.53" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Sign_In" data-name="Sign In" cx="15.74" cy="84.53" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Sign_GreenLight" data-name="Sign#GreenLight" cx="14.89" cy="61.1" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <text id="slug" transform="translate(23.39 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: .01em;">K</tspan><tspan x="1.66" y="0">inks</tspan></text>
     <text id="modulename" transform="translate(35.89 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">U</tspan><tspan x="1.95" y="0">tilities</tspan></text>
   </g>

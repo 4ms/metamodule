@@ -109,7 +109,7 @@
     </g>
   </g>
   <g id="components">
-    <circle id="Carrier_Light_RedGreenLight" data-name="Carrier Light#RedGreenLight" cx="23.09" cy="163.91" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Carrier_LightGreenRedLight" data-name="Carrier LightGreenRedLight" cx="23.09" cy="163.91" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Algorithm_Light_Rogan6PSLight" data-name="Algorithm Light#Rogan6PSLight" cx="71.71" cy="94.73" r="29.19" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Aux_Out" data-name="Aux Out" cx="123.23" cy="315.03" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Mod_Out" data-name="Mod Out" cx="88.9" cy="315.03" r="11.34" style="fill: blue; stroke-width: 0px;"/>
@@ -119,10 +119,10 @@
     <circle id="Algorithm_CV" data-name="Algorithm CV" cx="88.9" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Level_2_In" data-name="Level 2 In" cx="54.57" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Level_1_In" data-name="Level 1 In" cx="20.3" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Mod_Atten_Knob9mm" data-name="Mod Atten#Knob9mm" cx="59.95" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Osc_Atten_Knob9mm" data-name="Osc Atten#Knob9mm" cx="23.09" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Mode_MomentaryButton" data-name="Mode#MomentaryButton" cx="23.15" cy="182.05" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="Position_WhiteMediumKnob" data-name="Position#WhiteMediumKnob" cx="109.63" cy="185.46" r="17.01" style="fill: #ff0036; stroke-width: 0px;"/>
+    <circle id="Mod_Amp_Knob9mm" data-name="Mod Amp#Knob9mm" cx="59.95" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Osc_Amp_Freq_Knob9mm" data-name="Osc Amp/Freq#Knob9mm" cx="23.09" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Int._Osc_Mode_MomentaryButton" data-name="Int. Osc Mode#MomentaryButton" cx="23.15" cy="182.05" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Timbre_WhiteMediumKnob" data-name="Timbre#WhiteMediumKnob" cx="109.63" cy="185.46" r="17.01" style="fill: #ff0036; stroke-width: 0px;"/>
     <circle id="Algorithm_Rogan6PSWhite" data-name="Algorithm#Rogan6PSWhite" cx="71.71" cy="94.73" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
     <text id="slug" transform="translate(105.1 369.14)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.03em;">W</tspan><tspan x="2.44" y="0" style="letter-spacing: 0em;">a</tspan><tspan x="3.88" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="4.88" y="0">ps</tspan></text>
     <text id="modulename" transform="translate(116.66 369.14)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="2.43" y="0">eta </tspan><tspan x="7.01" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="9.44" y="0">odul</tspan><tspan x="15.14" y="0" style="letter-spacing: 0em;">at</tspan><tspan x="17.55" y="0" style="letter-spacing: 0em;">or</tspan></text>

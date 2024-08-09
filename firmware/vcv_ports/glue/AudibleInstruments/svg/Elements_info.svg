@@ -133,16 +133,16 @@
     <circle id="FM" cx="64.67" cy="182.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="V_Oct" data-name="V/Oct" cx="30.49" cy="182.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Play_WhiteMomentary7mm" data-name="Play#WhiteMomentary7mm" cx="47.58" cy="124.27" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="Space_Atten_WhiteSmallKnob" data-name="Space Atten#WhiteSmallKnob" cx="458.77" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Brightness_Atten_WhiteSmallKnob" data-name="Brightness Atten#WhiteSmallKnob" cx="421.92" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Position_Atten_WhiteSmallKnob" data-name="Position Atten#WhiteSmallKnob" cx="385.07" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Geometry_Atten_WhiteSmallKnob" data-name="Geometry Atten#WhiteSmallKnob" cx="348.22" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Damping_Atten_WhiteSmallKnob" data-name="Damping Atten#WhiteSmallKnob" cx="311.37" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Strike_Timbre_Atten_WhiteSmallKnob" data-name="Strike Timbre Atten#WhiteSmallKnob" cx="256.21" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Mallet_Atten_WhiteSmallKnob" data-name="Mallet Atten#WhiteSmallKnob" cx="219.36" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Blow_Timbre_Atten_WhiteSmallKnob" data-name="Blow Timbre Atten#WhiteSmallKnob" cx="182.51" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Flow_Atten_WhiteSmallKnob" data-name="Flow Atten#WhiteSmallKnob" cx="145.66" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Bow_Timbre_Atten_WhiteSmallKnob" data-name="Bow Timbre Atten#WhiteSmallKnob" cx="108.81" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Space_Atten_Trimpot" data-name="Space Atten#Trimpot" cx="458.77" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Brightness_Atten_Trimpot" data-name="Brightness Atten#Trimpot" cx="421.92" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Position_Atten_Trimpot" data-name="Position Atten#Trimpot" cx="385.07" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Geometry_Atten_Trimpot" data-name="Geometry Atten#Trimpot" cx="348.22" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Damping_Atten_Trimpot" data-name="Damping Atten#Trimpot" cx="311.37" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Strike_Timbre_Atten_Trimpot" data-name="Strike Timbre Atten#Trimpot" cx="256.21" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Mallet_Atten_Trimpot" data-name="Mallet Atten#Trimpot" cx="219.36" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Blow_Timbre_Atten_Trimpot" data-name="Blow Timbre Atten#Trimpot" cx="182.51" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Flow_Atten_Trimpot" data-name="Flow Atten#Trimpot" cx="145.66" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Bow_Timbre_Atten_Trimpot" data-name="Bow Timbre Atten#Trimpot" cx="108.81" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
     <circle id="Space_WhiteMediumKnob" data-name="Space#WhiteMediumKnob" cx="452.59" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Position_WhiteMediumKnob" data-name="Position#WhiteMediumKnob" cx="385.07" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Damping_WhiteMediumKnob" data-name="Damping#WhiteMediumKnob" cx="317.55" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>

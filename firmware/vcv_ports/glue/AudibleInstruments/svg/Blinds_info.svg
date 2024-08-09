@@ -103,14 +103,14 @@
     </g>
   </g>
   <g id="components">
-    <circle id="Ch4_RedGreenLight" data-name="Ch4#RedGreenLight" cx="150.01" cy="315" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch3_RedGreenLight" data-name="Ch3#RedGreenLight" cx="150.01" cy="239.45" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch2_RedGreenLight" data-name="Ch2#RedGreenLight" cx="150.01" cy="163.91" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch1_RedGreenLight" data-name="Ch1#RedGreenLight" cx="150.01" cy="88.37" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch4_Atten_RedGreenLight" data-name="Ch4 Atten#RedGreenLight" cx="77.97" cy="323.93" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch3_Atten_RedGreenLight" data-name="Ch3 Atten#RedGreenLight" cx="77.97" cy="248.38" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch2_Atten_RedGreenLight" data-name="Ch2 Atten#RedGreenLight" cx="77.97" cy="172.84" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch1_Atten_RedGreenLight" data-name="Ch1 Atten#RedGreenLight" cx="77.97" cy="97.3" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch4_GreenRedLight" data-name="Ch4#GreenRedLight" cx="150.01" cy="315" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch3_GreenRedLight" data-name="Ch3#GreenRedLight" cx="150.01" cy="239.45" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch2_GreenRedLight" data-name="Ch2#GreenRedLight" cx="150.01" cy="163.91" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch1_GreenRedLight" data-name="Ch1#GreenRedLight" cx="150.01" cy="88.37" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch4_Atten_GreenRedLight" data-name="Ch4 Atten#GreenRedLight" cx="77.97" cy="323.93" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch3_Atten_GreenRedLight" data-name="Ch3 Atten#GreenRedLight" cx="77.97" cy="248.38" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch2_Atten_GreenRedLight" data-name="Ch2 Atten#GreenRedLight" cx="77.97" cy="172.84" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Ch1_Atten_GreenRedLight" data-name="Ch1 Atten#GreenRedLight" cx="77.97" cy="97.3" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch4_Out" data-name="Ch4 Out" cx="150.01" cy="277.3" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Ch3_Out" data-name="Ch3 Out" cx="150.01" cy="201.75" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Ch2_Out" data-name="Ch2 Out" cx="150.01" cy="126.21" r="11.34" style="fill: blue; stroke-width: 0px;"/>
@@ -123,10 +123,10 @@
     <circle id="Ch3_IN" data-name="Ch3 IN" cx="117.44" cy="201.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Ch2_IN" data-name="Ch2 IN" cx="117.44" cy="126.21" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Ch1_IN" data-name="Ch1 IN" cx="117.44" cy="50.67" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Ch4_Atten_WhiteSmallKnob" data-name="Ch4 Atten#WhiteSmallKnob" cx="77.98" cy="296.15" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch3_Atten_WhiteSmallKnob" data-name="Ch3 Atten#WhiteSmallKnob" cx="77.98" cy="220.6" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch2_Atten_WhiteSmallKnob" data-name="Ch2 Atten#WhiteSmallKnob" cx="77.98" cy="145.06" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch1_Atten_WhiteSmallKnob" data-name="Ch1 Atten#WhiteSmallKnob" cx="77.98" cy="69.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Ch4_Atten_Trimpot" data-name="Ch4 Atten#Trimpot" cx="77.98" cy="296.15" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Ch3_Atten_Trimpot" data-name="Ch3 Atten#Trimpot" cx="77.98" cy="220.6" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Ch2_Atten_Trimpot" data-name="Ch2 Atten#Trimpot" cx="77.98" cy="145.06" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Ch1_Atten_Trimpot" data-name="Ch1 Atten#Trimpot" cx="77.98" cy="69.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
     <circle id="Ch4_WhiteMediumKnob" data-name="Ch4#WhiteMediumKnob" cx="27.38" cy="296.15" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Ch3_WhiteMediumKnob" data-name="Ch3#WhiteMediumKnob" cx="27.38" cy="220.6" r="17.01" style="fill: #ff0036; stroke-width: 0px;"/>
     <circle id="Ch2_WhiteMediumKnob" data-name="Ch2#WhiteMediumKnob" cx="27.38" cy="145.06" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>

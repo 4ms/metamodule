@@ -91,21 +91,23 @@
     </g>
   </g>
   <g id="components">
-    <circle id="Even" cx="174.13" cy="314.88" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Odd" cx="137.27" cy="314.88" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Res_Mode_Light_GreenRedLight" data-name="Res Mode Light#GreenRedLight" cx="179.65" cy="64" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Polyphony_Light_GreenRedLight" data-name="Polyphony Light#GreenRedLight" cx="21.2" cy="64" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Even_Out" data-name="Even Out" cx="174.13" cy="314.88" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Odd_Out" data-name="Odd Out" cx="137.27" cy="314.88" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="IN" cx="100.4" cy="314.88" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="V_OCT" data-name="V/OCT" cx="63.54" cy="314.88" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Strum" cx="26.67" cy="314.88" r="11.34" style="fill: #8080ff; stroke-width: 0px;"/>
+    <circle id="Strum" cx="26.67" cy="314.88" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
     <circle id="Position_CV" data-name="Position CV" cx="174.13" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Structure_CV" data-name="Structure CV" cx="137.27" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Damping_CV" data-name="Damping CV" cx="100.4" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Frequency_CV" data-name="Frequency CV" cx="63.54" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Brightness_CV" data-name="Brightness CV" cx="26.67" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Pos_Atten_WhiteSmallKnob" data-name="Pos Atten#WhiteSmallKnob" cx="174.14" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Str_Atten_WhiteSmallKnob" data-name="Str Atten#WhiteSmallKnob" cx="137.28" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Dmp_Atten_WhiteSmallKnob" data-name="Dmp Atten#WhiteSmallKnob" cx="100.41" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Frq_Atten_WhiteSmallKnob" data-name="Frq Atten#WhiteSmallKnob" cx="63.55" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Br_Atten_WhiteSmallKnob" data-name="Br Atten#WhiteSmallKnob" cx="26.69" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Pos_Atten_Trimpot" data-name="Pos Atten#Trimpot" cx="174.14" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Struct_Atten_Trimpot" data-name="Struct Atten#Trimpot" cx="137.28" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Damp_Atten_Trimpot" data-name="Damp Atten#Trimpot" cx="100.41" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Freq_Atten_Trimpot" data-name="Freq Atten#Trimpot" cx="63.55" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Bright_Atten_Trimpot" data-name="Bright Atten#Trimpot" cx="26.69" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
     <circle id="Position_WhiteMediumKnob" data-name="Position#WhiteMediumKnob" cx="32.92" cy="171.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Damping_WhiteMediumKnob" data-name="Damping#WhiteMediumKnob" cx="100.4" cy="171.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Brightness_WhiteMediumKnob" data-name="Brightness#WhiteMediumKnob" cx="167.89" cy="171.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
@@ -115,7 +117,5 @@
     <rect id="Polyphony_Select_Switch_1_2_4" data-name="Polyphony Select Switch@1@2@4" x="15.53" y="37.2" width="11.34" height="17.01" transform="translate(66.9 24.51) rotate(90)" style="fill: #ffc080; stroke-width: 0px;"/>
     <text id="slug" transform="translate(163.97 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">R</tspan><tspan x="1.64" y="0">ings</tspan></text>
     <text id="modulename" transform="translate(176.4 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">R</tspan><tspan x="1.63" y="0">esonan</tspan><tspan x="10.74" y="0" style="letter-spacing: 0em;">c</tspan><tspan x="12.07" y="0" style="letter-spacing: 0em;">e </tspan><tspan x="14.21" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="16.63" y="0">odule</tspan></text>
-    <circle id="Polyphony_Light_RedGreenLight" data-name="Polyphony Light#RedGreenLight" cx="21.2" cy="64" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Res_Mode_Light_RedGreenLight" data-name="Res Mode Light#RedGreenLight" cx="179.65" cy="64" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
   </g>
 </svg>

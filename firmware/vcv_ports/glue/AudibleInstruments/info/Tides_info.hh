@@ -1,6 +1,5 @@
 #pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+#include "CoreModules/AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -16,10 +15,10 @@ struct TidesInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 23> Elements{{
-		Toggle3posHoriz{{to_mm<72>(32.24), to_mm<72>(62.935), Center, "Output Mode Switch", ""}, {"1", "2", "3"}},
+		Toggle3posHoriz{{to_mm<72>(32.24), to_mm<72>(62.935), Center, "Output Mode", ""}, {"1", "2", "3"}},
+		Toggle3posHoriz{{to_mm<72>(32.24), to_mm<72>(102.555), Center, "Frequency Range", ""}, {"L", "M", "H"}},
 		BlueLargeKnob{{to_mm<72>(100.67), to_mm<72>(82.74), Center, "Frequency", ""}, 0.5f},
 		BlueMediumKnob{{to_mm<72>(169.1), to_mm<72>(82.74), Center, "FM", ""}, 0.5f},
-		Toggle3posHoriz{{to_mm<72>(32.24), to_mm<72>(102.555), Center, "Frequency Range Switch", ""}, {"L", "M", "H"}},
 		WhiteMediumKnob{{to_mm<72>(32.24), to_mm<72>(167.33), Center, "Shape", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(100.67), to_mm<72>(167.33), Center, "Slope", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(169.1), to_mm<72>(167.33), Center, "Smoothness", ""}, 0.5f},
@@ -32,20 +31,20 @@ struct TidesInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(134.88), to_mm<72>(273.54), Center, "FM In", ""}},
 		AnalogJackInput4ms{{to_mm<72>(169.09), to_mm<72>(273.54), Center, "Level", ""}},
 		GateJackInput4ms{{to_mm<72>(32.24), to_mm<72>(314.93), Center, "Clock", ""}},
-		GateJackOutput4ms{{to_mm<72>(66.45), to_mm<72>(314.93), Center, "High", ""}},
-		GateJackOutput4ms{{to_mm<72>(100.67), to_mm<72>(314.93), Center, "Low", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(134.88), to_mm<72>(314.93), Center, "Uni", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(169.09), to_mm<72>(314.93), Center, "Bi", ""}},
-		RedGreenLight{{to_mm<72>(59.25), to_mm<72>(62.93), Center, "Output Mode Light", ""}},
-		RedGreenLight{{to_mm<72>(59.25), to_mm<72>(82.74), Center, "Freq Light", ""}},
-		RedGreenLight{{to_mm<72>(59.25), to_mm<72>(102.56), Center, "Freq Range Light", ""}},
+		GateJackOutput4ms{{to_mm<72>(66.45), to_mm<72>(314.93), Center, "High Tide Out", ""}},
+		GateJackOutput4ms{{to_mm<72>(100.67), to_mm<72>(314.93), Center, "Low Tide Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(134.88), to_mm<72>(314.93), Center, "Unipolar", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(169.09), to_mm<72>(314.93), Center, "Bipolar", ""}},
+		GreenRedLight{{to_mm<72>(59.25), to_mm<72>(62.93), Center, "Output Mode Light", ""}},
+		GreenRedLight{{to_mm<72>(59.25), to_mm<72>(82.74), Center, "Phase Light", ""}},
+		GreenRedLight{{to_mm<72>(59.25), to_mm<72>(102.56), Center, "Freq Range Light", ""}},
 }};
 
     enum class Elem {
         OutputModeSwitch,
+        FrequencyRangeSwitch,
         FrequencyKnob,
         FmKnob,
-        FrequencyRangeSwitch,
         ShapeKnob,
         SlopeKnob,
         SmoothnessKnob,
@@ -58,12 +57,12 @@ struct TidesInfo : ModuleInfoBase {
         FmIn,
         LevelIn,
         ClockIn,
-        HighOut,
-        LowOut,
-        UniOut,
-        BiOut,
+        HighTideOut,
+        LowTideOut,
+        UnipolarOut,
+        BipolarOut,
         OutputModeLight,
-        FreqLight,
+        PhaseLight,
         FreqRangeLight,
     };
 
@@ -79,8 +78,8 @@ struct TidesInfo : ModuleInfoBase {
     };
     
     enum {
-        SwitchOutput_Mode_Switch, 
-        SwitchFrequency_Range_Switch, 
+        SwitchOutput_Mode, 
+        SwitchFrequency_Range, 
         NumSwitches,
     };
     
@@ -98,16 +97,16 @@ struct TidesInfo : ModuleInfoBase {
     };
     
     enum {
-        OutputHigh, 
-        OutputLow, 
-        OutputUni, 
-        OutputBi, 
+        OutputHigh_Tide_Out, 
+        OutputLow_Tide_Out, 
+        OutputUnipolar, 
+        OutputBipolar, 
         NumOutJacks,
     };
     
     enum {
         LedOutput_Mode_Light, 
-        LedFreq_Light, 
+        LedPhase_Light, 
         LedFreq_Range_Light, 
         NumDiscreteLeds,
     };

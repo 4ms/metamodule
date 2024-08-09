@@ -1,6 +1,5 @@
 #pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
+#include "CoreModules/AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -28,8 +27,8 @@ struct BranchesInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{{to_mm<72>(20.15), to_mm<72>(315.04), Center, "Ch2 Out A", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(65.11), to_mm<72>(165.66), Center, "Ch1 Out B", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(65.11), to_mm<72>(315.04), Center, "Ch2 Out B", ""}},
-		RedGreenLight{{to_mm<72>(42.63), to_mm<72>(165.69), Center, "Ch1 Mode", ""}},
-		RedGreenLight{{to_mm<72>(42.63), to_mm<72>(315.07), Center, "Ch2 Mode", ""}},
+		GreenRedLight{{to_mm<72>(42.63), to_mm<72>(165.69), Center, "Ch1 Mode", ""}},
+		GreenRedLight{{to_mm<72>(42.63), to_mm<72>(315.07), Center, "Ch2 Mode", ""}},
 }};
 
     enum class Elem {
