@@ -22,6 +22,4 @@ void append_connected_jack_name(std::string &opts, GuiElement const &drawn, Patc
 
 void append_panel_name(std::string &opts, Element const &el, uint16_t panel_jack_id);
 
-std::string_view module_name(std::string_view combined_slug);
-
 } // namespace MetaModule

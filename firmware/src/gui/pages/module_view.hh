@@ -75,8 +75,8 @@ struct ModuleViewPage : PageBase {
 			return;
 		}
 
-		module_slug = module_name(slug);
-		lv_label_set_text(ui_ElementRollerModuleName, module_slug.c_str());
+		auto module_display_name = ModuleFactory::getModuleDisplayName(slug);
+		lv_label_set_text(ui_ElementRollerModuleName, module_display_name.data());
 
 		redraw_module();
 
@@ -522,7 +522,6 @@ private:
 	uint16_t this_module_id = 0;
 	uint32_t cur_selected = 0;
 	std::string_view slug = "";
-	ModuleTypeSlug module_slug;
 	bool is_patch_playing = false;
 	PatchData *patch;
 

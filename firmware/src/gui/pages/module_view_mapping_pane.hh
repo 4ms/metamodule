@@ -92,9 +92,10 @@ struct ModuleViewMappingPane {
 		args.detail_mode = true;
 
 		auto slug = patch->module_slugs[this_module_id];
+		auto display_name = ModuleFactory::getModuleDisplayName(slug);
 
 		// Knob name label
-		lv_label_set_text(ui_Module_Name, slug.c_str());
+		lv_label_set_text(ui_Module_Name, display_name.data());
 		auto nm = base_element(drawn_el.element).short_name;
 		if (nm.size() == 0)
 			nm = "(no name)";

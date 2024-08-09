@@ -11,21 +11,13 @@
 namespace MetaModule
 {
 
-std::string_view module_name(std::string_view combined_slug) {
-	auto colon = combined_slug.find_first_of(':');
-	if (colon != std::string_view::npos) {
-		return combined_slug.substr(colon + 1);
-	} else
-		return combined_slug;
-}
-
 // Return the module name and element name, given the IDs and type (not the Element)
 FullElementName
 get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type, PatchData const &patch) {
 	FullElementName fullname{"?", "?"};
 
 	if (module_id < patch.module_slugs.size()) {
-		fullname.module_name = module_name(patch.module_slugs[module_id]);
+		fullname.module_name = ModuleFactory::getModuleDisplayName(patch.module_slugs[module_id]);
 
 		auto &info = ModuleFactory::getModuleInfo(patch.module_slugs[module_id]);
 
