@@ -31,8 +31,12 @@ CompileFlags:
         "-I../lib/cmsis/Core_A/Include",
         "-DSTM32MP1",
         "-DCORE_CA7",
-	]
+        "-D__cpp_concepts=202002",
+        "-Wno-builtin-macro-redefined",
+        "-Wno-macro-redefined",
+        ]
 ---
+
 If:
 	PathMatch: [".*tests/.*"]
 CompileFlags:
