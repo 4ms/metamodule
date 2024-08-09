@@ -112,6 +112,7 @@ add_executable(
   ${FWDIR}/src/gui/slsexport/ui_local.cc
   #
   ${FWDIR}/src/dynload/dynloader.cc
+  ${FWDIR}/metamodule-plugin-sdk/version.cc
   #
   ${SHARED}/patch_convert/yaml_to_patch.cc
   ${SHARED}/patch_convert/patch_to_yaml.cc

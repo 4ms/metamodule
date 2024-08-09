@@ -51,10 +51,12 @@ struct DynLoader {
 			return std::nullopt;
 
 		auto func_address = sym->offset() + codeblock.data();
+
 		using VersionFunc = uint32_t();
 		auto version_func = *reinterpret_cast<VersionFunc *>(func_address);
+
 		auto plugin_sdk_version = version_func();
-		return plugin_sdk_version;
+		return uint32_t(plugin_sdk_version);
 	}
 
 	template<typename PluginInitFunc>

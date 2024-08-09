@@ -10,6 +10,8 @@
 #include <string>
 
 extern rack::plugin::Plugin *pluginInstance;
+//header?
+uint32_t sdk_version();
 
 namespace MetaModule
 {
@@ -218,6 +220,18 @@ public:
 		if (auto err_msg = dynloader.load(); err_msg != "") {
 			status.error_message = err_msg;
 			pr_err("Could not load plugin\n");
+			return false;
+		}
+
+		auto plugin_sdk = dynloader.get_sdk_version();
+		if (!plugin_sdk.has_value()) {
+			pr_err("Plugin uses SDK < 0.14, or is not valid: not sdk_version() symbol found\n");
+			status.error_message = "Plugin's SDK is older than 0.14, or is corrupted.";
+			return false;
+		}
+
+		if (*plugin_sdk != sdk_version()) {
+			pr_err("Plugin SDK version mismatch: %d vs %d\n", *plugin_sdk, sdk_version());
 			return false;
 		}
 
