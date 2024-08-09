@@ -15,8 +15,8 @@ struct PlaitsInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 29> Elements{{
-		MediumButton{{to_mm<72>(73.35), to_mm<72>(48.44), Center, "Pitched Model", ""}},
-		MediumButton{{to_mm<72>(98.58), to_mm<72>(48.44), Center, "Perc. Model", ""}},
+		SmallButton{{to_mm<72>(73.35), to_mm<72>(48.44), Center, "Pitched Model", ""}},
+		SmallButton{{to_mm<72>(98.58), to_mm<72>(48.44), Center, "Perc. Model", ""}},
 		WhiteLargeKnob{{to_mm<72>(34.73), to_mm<72>(82.74), Center, "Frequency", ""}, 0.5f},
 		WhiteLargeKnob{{to_mm<72>(137.28), to_mm<72>(82.74), Center, "Harmonics", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(31.16), to_mm<72>(160.13), Center, "Timbre", ""}, 0.5f},

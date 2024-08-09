@@ -133,11 +133,11 @@
     <circle id="V_Oct" data-name="V Oct" cx="84.42" cy="273.7" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Frequency_CV" data-name="Frequency CV" cx="51.97" cy="273.7" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Slope_CV" data-name="Slope CV" cx="19.51" cy="273.7" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Shift_Level_Atten_Trimpot" data-name="Shift Level Atten#Trimpot" cx="174.57" cy="228.63" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Shape_Atten_Trimpot" data-name="Shape Atten#Trimpot" cx="137.57" cy="228.63" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Smoothness_Atten_Trimpot" data-name="Smoothness Atten#Trimpot" cx="100.58" cy="228.63" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Frequency_Atten_Trimpot" data-name="Frequency Atten#Trimpot" cx="63.59" cy="228.63" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Slope_Atten_Trimpot" data-name="Slope Atten#Trimpot" cx="26.6" cy="228.63" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Shift_Level_Atten_Trimpot" data-name="Shift Level Atten#Trimpot" cx="174.57" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Shape_Atten_Trimpot" data-name="Shape Atten#Trimpot" cx="137.57" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Smoothness_Atten_Trimpot" data-name="Smoothness Atten#Trimpot" cx="100.58" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Frequency_Atten_Trimpot" data-name="Frequency Atten#Trimpot" cx="63.59" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Slope_Atten_Trimpot" data-name="Slope Atten#Trimpot" cx="26.6" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
     <ellipse id="Shift_Level_WhiteMediumKnob" data-name="Shift Level#WhiteMediumKnob" cx="168.04" cy="171.94" rx="17.01" ry="17.02" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Slope_WhiteMediumKnob" data-name="Slope#WhiteMediumKnob" cx="33.12" cy="171.94" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Smoothness_WhiteMediumKnob" data-name="Smoothness#WhiteMediumKnob" cx="100.58" cy="157.62" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
