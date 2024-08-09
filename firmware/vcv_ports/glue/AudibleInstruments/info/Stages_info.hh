@@ -15,12 +15,12 @@ struct StagesInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 48> Elements{{
-		Trimpot{{to_mm<72>(19.38), to_mm<72>(48.44), Center, "Ch1 Shape", ""}, 0.0f},
-		Trimpot{{to_mm<72>(51.8), to_mm<72>(48.44), Center, "Ch2 Shape", ""}, 0.0f},
-		Trimpot{{to_mm<72>(84.23), to_mm<72>(48.44), Center, "Ch3 Shape", ""}, 0.0f},
-		Trimpot{{to_mm<72>(116.72), to_mm<72>(48.44), Center, "Ch4 Shape", ""}, 0.0f},
-		Trimpot{{to_mm<72>(149.15), to_mm<72>(48.44), Center, "Ch5 Shape", ""}, 0.0f},
-		Trimpot{{to_mm<72>(181.58), to_mm<72>(48.44), Center, "Ch6 Shape", ""}, 0.0f},
+		Trimpot{{to_mm<72>(19.38), to_mm<72>(48.44), Center, "Ch1 Shape", ""}, 0.5f},
+		Trimpot{{to_mm<72>(51.8), to_mm<72>(48.44), Center, "Ch2 Shape", ""}, 0.5f},
+		Trimpot{{to_mm<72>(84.23), to_mm<72>(48.44), Center, "Ch3 Shape", ""}, 0.5f},
+		Trimpot{{to_mm<72>(116.72), to_mm<72>(48.44), Center, "Ch4 Shape", ""}, 0.5f},
+		Trimpot{{to_mm<72>(149.15), to_mm<72>(48.44), Center, "Ch5 Shape", ""}, 0.5f},
+		Trimpot{{to_mm<72>(181.58), to_mm<72>(48.44), Center, "Ch6 Shape", ""}, 0.5f},
 		SmallButton{{to_mm<72>(19.38), to_mm<72>(99.32), Center, "Ch1 Type", ""}},
 		SmallButton{{to_mm<72>(51.81), to_mm<72>(99.32), Center, "Ch2 Type", ""}},
 		SmallButton{{to_mm<72>(84.24), to_mm<72>(99.32), Center, "Ch3 Type", ""}},

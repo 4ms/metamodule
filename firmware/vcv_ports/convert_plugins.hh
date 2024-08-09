@@ -13,7 +13,11 @@
 #include "glue/AudibleInstruments/info/Rings_info.hh"
 #include "glue/AudibleInstruments/info/Ripples_info.hh"
 #include "glue/AudibleInstruments/info/Shades_info.hh"
+#include "glue/AudibleInstruments/info/Stages_info.hh"
+#include "glue/AudibleInstruments/info/Streams_info.hh"
+#include "glue/AudibleInstruments/info/Tides2_info.hh"
 #include "glue/AudibleInstruments/info/Tides_info.hh"
+#include "glue/AudibleInstruments/info/Veils_info.hh"
 #include "glue/AudibleInstruments/info/Warps_info.hh"
 #include "shared/CoreModules/moduleFactory.hh"
 #include <plugin/Model.hpp>
@@ -69,16 +73,16 @@ inline bool addModel(rack::plugin::Plugin *p, rack::plugin::Model *model) {
 		//TODO:
 		// if (model->slug == "Shelves")
 		// 	return ModuleInfoView::makeView<ShelvesInfo>();
-		// if (model->slug == "Stage")
-		// 	return ModuleInfoView::makeView<StageInfo>();
-		// if (model->slug == "Streams")
-		// 	return ModuleInfoView::makeView<StreamsInfo>();
+		if (model->slug == "Stages")
+			return ModuleInfoView::makeView<StagesInfo>();
+		if (model->slug == "Streams")
+			return ModuleInfoView::makeView<StreamsInfo>();
 		if (model->slug == "Tides")
 			return ModuleInfoView::makeView<TidesInfo>();
-		// if (model->slug == "Tides2")
-		// 	return ModuleInfoView::makeView<Tides2Info>();
-		// if (model->slug == "Veils")
-		// 	return ModuleInfoView::makeView<VeilsInfo>();
+		if (model->slug == "Tides2")
+			return ModuleInfoView::makeView<Tides2Info>();
+		if (model->slug == "Veils")
+			return ModuleInfoView::makeView<VeilsInfo>();
 		if (model->slug == "Warps")
 			return ModuleInfoView::makeView<WarpsInfo>();
 

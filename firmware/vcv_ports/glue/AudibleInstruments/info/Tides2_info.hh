@@ -8,16 +8,16 @@ namespace MetaModule
 struct Tides2Info : ModuleInfoBase {
     static constexpr std::string_view slug{"Tides2"};
     static constexpr std::string_view description{"Tidal Modulator 2"};
-    static constexpr uint32_t width_hp = 34;
+    static constexpr uint32_t width_hp = 14;
     static constexpr std::string_view svg_filename{"res/modules/Tides2_artwork.svg"};
     static constexpr std::string_view png_filename{"4ms/fp/Tides2.png"};
 
     using enum Coords;
 
     static constexpr std::array<Element, 31> Elements{{
-		WhiteMomentary7mm{{to_mm<72>(21.35), to_mm<72>(45.94), Center, "Freq Range Switch", ""}},
-		WhiteMomentary7mm{{to_mm<72>(100.58), to_mm<72>(109.86), Center, "Ramp Mode Switch", ""}},
-		WhiteMomentary7mm{{to_mm<72>(179.81), to_mm<72>(45.94), Center, "Output Mode Switch", ""}},
+		SmallButton{{to_mm<72>(21.35), to_mm<72>(45.94), Center, "Freq Range Button", ""}},
+		SmallButton{{to_mm<72>(179.81), to_mm<72>(45.94), Center, "Output Mode", ""}},
+		SmallButton{{to_mm<72>(100.58), to_mm<72>(109.86), Center, "Ramp Mode", ""}},
 		WhiteLargeKnob{{to_mm<72>(46.58), to_mm<72>(94.97), Center, "Frequency", ""}, 0.5f},
 		WhiteLargeKnob{{to_mm<72>(154.58), to_mm<72>(94.97), Center, "Shape", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(100.58), to_mm<72>(157.62), Center, "Smoothness", ""}, 0.5f},
@@ -49,9 +49,9 @@ struct Tides2Info : ModuleInfoBase {
 }};
 
     enum class Elem {
-        FreqRangeSwitchButton,
-        RampModeSwitchButton,
-        OutputModeSwitchButton,
+        FreqRangeButton,
+        OutputModeButton,
+        RampModeButton,
         FrequencyKnob,
         ShapeKnob,
         SmoothnessKnob,
@@ -98,9 +98,9 @@ struct Tides2Info : ModuleInfoBase {
     };
     
     enum {
-        SwitchFreq_Range_Switch, 
-        SwitchRamp_Mode_Switch, 
-        SwitchOutput_Mode_Switch, 
+        SwitchFreq_Range, 
+        SwitchRamp_Mode, 
+        SwitchOutput_Mode, 
         NumSwitches,
     };
     

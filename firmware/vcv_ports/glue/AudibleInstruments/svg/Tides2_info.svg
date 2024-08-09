@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="173.27mm" height="130.5mm" viewBox="0 0 491.15 369.91">
+<svg xmlns="http://www.w3.org/2000/svg" width="70.9mm" height="130.5mm" viewBox="0 0 200.98 369.91">
   <g id="faceplate">
     <g id="art">
       <g id="panel">
@@ -143,9 +143,9 @@
     <circle id="Smoothness_WhiteMediumKnob" data-name="Smoothness#WhiteMediumKnob" cx="100.58" cy="157.62" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Shape_WhiteLargeKnob" data-name="Shape#WhiteLargeKnob" cx="154.58" cy="94.97" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Frequency_WhiteLargeKnob" data-name="Frequency#WhiteLargeKnob" cx="46.58" cy="94.97" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Output_Mode_Switch_1_2_3" data-name="Output Mode Switch@1@2@3" cx="179.81" cy="45.94" r="4.96" style="fill: #ffc000; stroke-width: 0px;"/>
-    <circle id="Ramp_Mode_Switch_1_2_3" data-name="Ramp Mode Switch@1@2@3" cx="100.58" cy="109.86" r="4.96" style="fill: #ffc000; stroke-width: 0px;"/>
-    <circle id="Freq_Range_Switch_1_8_2_C3" data-name="Freq Range Switch@1/8@2@C3" cx="21.35" cy="45.94" r="4.96" style="fill: #ffc000; stroke-width: 0px;"/>
+    <circle id="Output_Mode_SmallButton" data-name="Output Mode#SmallButton" cx="179.81" cy="45.94" r="4.96" style="fill: #ffc000; stroke-width: 0px;"/>
+    <circle id="Ramp_Mode_SmallButton" data-name="Ramp Mode#SmallButton" cx="100.58" cy="109.86" r="4.96" style="fill: #ffc000; stroke-width: 0px;"/>
+    <circle id="Freq_Range_SmallButton" data-name="Freq Range#SmallButton" cx="21.35" cy="45.94" r="4.96" style="fill: #ffc000; stroke-width: 0px;"/>
     <text id="slug" transform="translate(155.91 369.16)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">T</tspan><tspan x="1.46" y="0">ides 2</tspan></text>
     <text id="modulename" transform="translate(167.48 369.16)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">T</tspan><tspan x="1.46" y="0">idal </tspan><tspan x="6.64" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="9.07" y="0" style="letter-spacing: 0em;">odul</tspan><tspan x="14.77" y="0" style="letter-spacing: 0em;">a</tspan><tspan x="16.2" y="0" style="letter-spacing: 0em;">t</tspan><tspan x="17.18" y="0">or 2</tspan></text>
   </g>
