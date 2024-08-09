@@ -24,10 +24,11 @@ struct ModuleListPage : PageBase {
 		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
 	}
 
-	void populate_slugs() {
+private:
+	void populate_modules() {
 		//TODO: only repopulate if plugins changed
 
-		auto all_slugs = ModuleFactory::getAllSlugs(selected_brand);
+		auto all_slugs = ModuleFactory::getAllModuleDisplayNames(selected_brand_slug);
 		std::sort(all_slugs.begin(), all_slugs.end(), [](auto a, auto b) {
 			return std::string_view{a} < std::string_view{b};
 		});
@@ -35,8 +36,8 @@ struct ModuleListPage : PageBase {
 		std::string slugs_str;
 		slugs_str.reserve(all_slugs.size() * (sizeof(ModuleTypeSlug) + 1));
 		for (auto slug : all_slugs) {
-			if (!slug.is_equal("HubMedium")) {
-				slugs_str += std::string_view{slug};
+			if (slug != "HubMedium") {
+				slugs_str += slug;
 				slugs_str += "\n";
 			}
 		}
@@ -46,15 +47,15 @@ struct ModuleListPage : PageBase {
 	}
 
 	void populate_brands() {
-		auto all_brands = ModuleFactory::getAllBrands();
+		auto all_brands = ModuleFactory::getAllBrandDisplayNames();
 
 		std::string roller_str;
 		roller_str.reserve(all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
 		unsigned sel_idx = 0;
 		for (unsigned i = 0; auto item : all_brands) {
-			roller_str += std::string_view{item};
+			roller_str += item;
 			roller_str += "\n";
-			if (selected_brand.is_equal(item.c_str()))
+			if (selected_brand == item)
 				sel_idx = i;
 			i++;
 		}
@@ -63,14 +64,9 @@ struct ModuleListPage : PageBase {
 		lv_roller_set_selected(ui_ModuleListRoller, sel_idx, LV_ANIM_OFF);
 	}
 
-	void prepare_focus() final {
-		view = View::BrandRoller;
-		roller_brand_list();
-	}
-
 	void roller_module_list() {
-		lv_label_set_text(ui_ModuleListRollerTitle, selected_brand.c_str());
-		populate_slugs();
+		lv_label_set_text(ui_ModuleListRollerTitle, selected_brand.data());
+		populate_modules();
 		drawn_module_idx = -1; //force redraw
 		draw_module();
 
@@ -85,6 +81,32 @@ struct ModuleListPage : PageBase {
 		hide_module();
 		populate_brands();
 		show_roller();
+	}
+
+	void show_roller() {
+		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
+		lv_group_focus_obj(ui_ModuleListRoller);
+		lv_group_set_editing(group, true);
+		lv_group_set_wrap(group, false);
+	}
+
+	void hide_roller() {
+		lv_obj_set_width(ui_ModuleListRollerPanel, 2);
+		lv_group_set_editing(group, true);
+	}
+
+	void show_module() {
+		lv_show(ui_ModuleListImage);
+	}
+
+	void hide_module() {
+		lv_hide(ui_ModuleListImage);
+	}
+
+public:
+	void prepare_focus() final {
+		view = View::BrandRoller;
+		roller_brand_list();
 	}
 
 	void update() final {
@@ -113,26 +135,6 @@ struct ModuleListPage : PageBase {
 		}
 	}
 
-	void show_roller() {
-		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
-		lv_group_focus_obj(ui_ModuleListRoller);
-		lv_group_set_editing(group, true);
-		lv_group_set_wrap(group, false);
-	}
-
-	void hide_roller() {
-		lv_obj_set_width(ui_ModuleListRollerPanel, 2);
-		lv_group_set_editing(group, true);
-	}
-
-	void show_module() {
-		lv_show(ui_ModuleListImage);
-	}
-
-	void hide_module() {
-		lv_hide(ui_ModuleListImage);
-	}
-
 	void blur() final {
 		if (draw_timer)
 			lv_timer_del(draw_timer);
@@ -150,7 +152,11 @@ private:
 
 		if (page->view == View::BrandRoller) {
 			page->view = View::ModuleRoller;
-			page->selected_brand.copy(selected_str);
+			page->selected_brand = selected_str.c_str();
+			page->selected_brand_slug = ModuleFactory::getBrandSlug(page->selected_brand);
+			if (!page->selected_brand_slug.length()) {
+				pr_err("Brand not found with display name %s\n", page->selected_brand.data());
+			}
 			page->roller_module_list();
 
 		} else if (page->view == View::ModuleRoller) {
@@ -158,7 +164,7 @@ private:
 			page->hide_roller();
 
 		} else {
-			std::string slug = std::string{page->selected_brand} + ":" + std::string{selected_str};
+			std::string slug = std::string{page->selected_brand_slug} + ":" + page->selected_module_slug;
 			page->add_module(slug);
 			page->load_page(PageId::PatchView, page->args);
 		}
@@ -194,9 +200,11 @@ private:
 			auto cur_idx = lv_roller_get_selected(ui_ModuleListRoller);
 			if (cur_idx != drawn_module_idx) {
 				drawn_module_idx = cur_idx;
-				ModuleTypeSlug module_slug;
-				lv_roller_get_selected_str(ui_ModuleListRoller, module_slug._data, module_slug.capacity);
-				std::string slug = std::string{selected_brand} + ":" + std::string{module_slug};
+				ModuleTypeSlug module_display_name;
+				lv_roller_get_selected_str(
+					ui_ModuleListRoller, module_display_name._data, module_display_name.capacity);
+				selected_module_slug = ModuleFactory::getModuleSlug(selected_brand_slug, module_display_name);
+				std::string slug = std::string{selected_brand_slug} + ":" + selected_module_slug;
 				draw_module(slug.c_str());
 			}
 		}
@@ -228,7 +236,9 @@ private:
 	lv_timer_t *draw_timer{};
 	unsigned drawn_module_idx = -1;
 	bool do_redraw = false;
-	BrandTypeSlug selected_brand{"4ms"};
+	std::string selected_brand{"4msCompany"};
+	std::string selected_brand_slug{"4msCompany"};
+	std::string selected_module_slug;
 };
 
 } // namespace MetaModule
