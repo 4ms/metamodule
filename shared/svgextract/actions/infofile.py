@@ -321,9 +321,13 @@ def components_to_infofile(components, brand="4ms"):
 
     #TODO: embed knob long name vs short name in svg
     source = "#pragma once\n"
-    source += f"""#include "CoreModules/{brand}/{brand}_elements.hh"\n"""
+
     if brand == "4ms":
-        source += """#include "CoreModules/4ms/4ms_element_state_conversions.hh"\n"""
+        source += f"""#include "CoreModules/4ms/4ms_elements.hh"\n"""
+        source += f"""#include "CoreModules/4ms/4ms_element_state_conversions.hh"\n"""
+    else:
+        source += f"""#include "{brand}/{brand}_elements.hh"\n"""
+
     source += f"""#include "CoreModules/elements/element_info.hh"
 #include <array>
 

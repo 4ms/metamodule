@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/AudibleInstruments/AudibleInstruments_elements.hh"
+#include "AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 

@@ -14,7 +14,11 @@ include(modules.cmake)
 
 add_library(AudibleInstrumentsLibrary OBJECT ${AUDIBLEINSTRUMENTS_SOURCE_PATHS})
 
-target_include_directories(AudibleInstrumentsLibrary PRIVATE ${AUDIBLE_DIR}/src ${AUDIBLE_DIR}/eurorack)
+target_include_directories(AudibleInstrumentsLibrary PRIVATE 
+	${AUDIBLE_DIR}/src 
+	${AUDIBLE_DIR}/eurorack
+	../../
+)
 
 target_compile_options(AudibleInstrumentsLibrary
   PRIVATE
