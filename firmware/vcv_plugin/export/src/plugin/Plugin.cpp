@@ -98,4 +98,10 @@ std::string Plugin::getBrand() {
 	return slug;
 }
 
+void Plugin::fromJson(json_t *rootJ) {
+}
+
+void Plugin::modulesFromJson(json_t *rootJ) {
+}
+
 } // namespace rack::plugin
