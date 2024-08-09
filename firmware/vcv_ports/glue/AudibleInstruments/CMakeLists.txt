@@ -44,7 +44,7 @@ set_source_files_properties(
 target_link_options(AudibleInstrumentsLibrary PUBLIC -Wno-stringop-overflow)
 
 # Define TEST so braids dsp/dsp.h works (since it contains raw Cortex-M4 assembly)
-target_compile_definitions(AudibleInstrumentsLibrary PRIVATE TEST)
+target_compile_definitions(AudibleInstrumentsLibrary PRIVATE TEST METAMODULE)
 
 set_property(TARGET AudibleInstrumentsLibrary PROPERTY CXX_STANDARD 23)
 
