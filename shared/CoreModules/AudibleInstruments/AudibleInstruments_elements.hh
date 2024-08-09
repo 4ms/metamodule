@@ -140,4 +140,11 @@ struct GreenRedLight : DualLight {
 	}
 };
 
+struct GreenHandleSlider : Slider {
+	constexpr GreenHandleSlider(BaseElement b, float defaultValue = 0.5f)
+		: Slider{{{b, "4ms/comp/slider_x.png"}}, "rack-lib/LEDSliderGreenHandle.png"} {
+		DefaultValue = defaultValue;
+	}
+};
+
 } // namespace MetaModule
