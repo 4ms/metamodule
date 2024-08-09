@@ -21,7 +21,7 @@
 namespace MetaModule::AudibleInstruments
 {
 
-bool addModel(rack::plugin::Plugin *p, rack::plugin::Model *model) {
+inline bool addModel(rack::plugin::Plugin *p, rack::plugin::Model *model) {
 	if (!model || !p)
 		return false;
 
