@@ -103,11 +103,11 @@
     <circle id="Damping_CV" data-name="Damping CV" cx="100.4" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Frequency_CV" data-name="Frequency CV" cx="63.54" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Brightness_CV" data-name="Brightness CV" cx="26.67" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Pos_Atten_Trimpot" data-name="Pos Atten#Trimpot" cx="174.14" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Struct_Atten_Trimpot" data-name="Struct Atten#Trimpot" cx="137.28" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Damp_Atten_Trimpot" data-name="Damp Atten#Trimpot" cx="100.41" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Freq_Atten_Trimpot" data-name="Freq Atten#Trimpot" cx="63.55" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Bright_Atten_Trimpot" data-name="Bright Atten#Trimpot" cx="26.69" cy="228.56" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Pos_Atten_Trimpot" data-name="Pos Atten#Trimpot" cx="174.14" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Struct_Atten_Trimpot" data-name="Struct Atten#Trimpot" cx="137.28" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Damp_Atten_Trimpot" data-name="Damp Atten#Trimpot" cx="100.41" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Freq_Atten_Trimpot" data-name="Freq Atten#Trimpot" cx="63.55" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Bright_Atten_Trimpot" data-name="Bright Atten#Trimpot" cx="26.69" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Position_WhiteMediumKnob" data-name="Position#WhiteMediumKnob" cx="32.92" cy="171.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Damping_WhiteMediumKnob" data-name="Damping#WhiteMediumKnob" cx="100.4" cy="171.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Brightness_WhiteMediumKnob" data-name="Brightness#WhiteMediumKnob" cx="167.89" cy="171.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
