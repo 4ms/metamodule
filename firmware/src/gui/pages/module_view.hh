@@ -282,36 +282,42 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		if (auto patch_mod = module_mods.get(); patch_mod.has_value()) {
+		bool refresh = false;
+
+		while (auto patch_mod = module_mods.get()) {
 			patches.mark_view_patch_modified();
 
-			bool refresh = true;
 			// Apply to this thread's copy of patch
 			std::visit(overloaded{
 						   [&, this](AddMapping &mod) { refresh = patch->add_update_mapped_knob(mod.set_id, mod.map); },
 						   [&, this](AddMidiMap &mod) { refresh = patch->add_update_midi_map(mod.map); },
-						   [&, this](AddInternalCable &mod) { patch->add_internal_cable(mod.in, mod.out); },
+						   [&, this](AddInternalCable &mod) {
+							   refresh = true;
+							   patch->add_internal_cable(mod.in, mod.out);
+						   },
 						   [&, this](AddJackMapping &mod) {
 							   mod.type == ElementType::Output ?
 								   patch->add_mapped_outjack(mod.panel_jack_id, mod.jack) :
 								   patch->add_mapped_injack(mod.panel_jack_id, mod.jack);
+							   refresh = true;
 						   },
 						   [&, this](DisconnectJack &mod) {
 							   mod.type == ElementType::Output ? patch->disconnect_outjack(mod.jack) :
 																 patch->disconnect_injack(mod.jack);
+							   refresh = true;
 						   },
 						   [&](auto &m) { refresh = false; },
 					   },
 					   patch_mod.value());
 
-			if (refresh) {
-				redraw_module();
-				mapping_pane.refresh();
-			}
-
 			// Forward the mod to the audio/patch_player queue
 			if (is_patch_playing)
 				patch_mod_queue.put(patch_mod.value());
+		}
+
+		if (refresh) {
+			redraw_module();
+			mapping_pane.refresh();
 		}
 	}
 
