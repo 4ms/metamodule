@@ -35,6 +35,14 @@ set_source_files_properties(
   PROPERTIES COMPILE_OPTIONS "-Wno-unused-const-variable;-Wno-unused-but-set-variable"
 )
 
+# Fix plaits engines using "virtual" instead of "override"
+set_source_files_properties(
+  ${AUDIBLE_DIR}/eurorack/plaits/plaits.cc
+  ${AUDIBLE_DIR}/src/Plaits.cpp
+  PROPERTIES COMPILE_OPTIONS "-Wno-suggest-override"
+)
+
+
 # Fix for stmlib STATIC_ASSERT creating typedefs that aren't used
 target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs)
 
