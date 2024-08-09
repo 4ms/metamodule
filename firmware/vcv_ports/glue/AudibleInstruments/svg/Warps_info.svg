@@ -7,19 +7,19 @@
         <path d="M143.33.39v363.75H.39V.39h142.93M143.58.14H.14v364.25h143.43V.14h0Z" style="fill: #9c9c9e; stroke-width: 0px;"/>
       </g>
     </g>
-    <path d="M71.71,149.34c-30.11,0-54.61-24.5-54.61-54.61s24.5-54.61,54.61-54.61,54.61,24.5,54.61,54.61-24.5,54.61-54.61,54.61ZM71.71,41.62c-29.28,0-53.11,23.82-53.11,53.11s23.82,53.11,53.11,53.11,53.11-23.82,53.11-53.11-23.82-53.11-53.11-53.11Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M71.71,149.34c-30.11,0-54.61-24.5-54.61-54.61s24.5-54.61,54.61-54.61,54.61,24.5,54.61,54.61-24.5,54.61-54.61,54.61ZM71.71,41.62c-29.28,0-53.11,23.82-53.11,53.11s23.82,53.11,53.11,53.11,53.11-23.82,53.11-53.11-23.82-53.11-53.11-53.11Z" style="stroke-width: 0px;"/>
     <rect x="64.05" y="33.91" width="13.96" height="7.45" style="fill: #ededed; stroke-width: 0px;"/>
     <path d="M47.2,328.23v14.74h14.74v-14.74h-14.74ZM54.84,336.93h-.4l1.3,3.92-1.82.6-1.72-5.18c-.1-.29-.05-.61.13-.86s.47-.4.78-.4h1.72c.97,0,1.76-.84,1.76-1.88s-.79-1.88-1.76-1.88-1.76.84-1.76,1.88h-1.91c0-2.09,1.65-3.79,3.67-3.79s3.67,1.7,3.67,3.79-1.65,3.79-3.67,3.79Z" style="fill: #3babec; stroke-width: 0px;"/>
     <g>
       <ellipse cx="20.02" cy="332.81" rx="1.76" ry="1.41" style="fill: #ee6390; stroke-width: 0px;"/>
       <path d="M12.93,328.23v14.74h14.74v-14.74h-14.74ZM23.69,333.28v8.02h-1.91v-5.58c-.52.26-1.12.42-1.76.42-2.02,0-3.67-1.49-3.67-3.33s1.65-3.33,3.67-3.33,3.67,1.49,3.67,3.33c0,.16-.03.31-.05.47h.05Z" style="fill: #ee6390; stroke-width: 0px;"/>
     </g>
-    <rect x=".14" y="18.33" width="143.43" height="14.17" style="fill: #000; stroke-width: 0px;"/>
+    <rect x=".14" y="18.33" width="143.43" height="14.17" style="stroke-width: 0px;"/>
     <rect x="37.55" y="174.68" width="42.52" height="14.17" style="fill: #ee6390; stroke-width: 0px;"/>
     <rect x="40.7" y="286.66" width="30.05" height="14.17" style="fill: #3babec; stroke-width: 0px;"/>
     <rect x="6.65" y="286.66" width="30.05" height="14.17" style="fill: #ee6390; stroke-width: 0px;"/>
     <g>
-      <path d="M86.23,344.8h34.62s12.47,0,12.47,0c2.7,0,4.89-2.27,4.89-5.05v-41.02h-54.04c-6.49,0-11.76,6.27-11.76,14.01v32.07h13.81Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M86.23,344.8h34.62s12.47,0,12.47,0c2.7,0,4.89-2.27,4.89-5.05v-41.02h-54.04c-6.49,0-11.76,6.27-11.76,14.01v32.07h13.81Z" style="stroke-width: 0px;"/>
       <path d="M138.11,271.03c-.3-7.84-6.27-14.1-13.62-14.1h-59.49s-46.32,0-46.32,0c-7.35,0-13.32,6.26-13.62,14.1l-.06,5.76.07,54.07-.03-3.66v12.05c0,2.92,2.57,5.31,5.7,5.31h121.69c3.14,0,5.7-2.39,5.7-5.31v-12.05l-.02-56.17Z" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     </g>
     <g>
@@ -119,9 +119,9 @@
     <circle id="Algorithm_CV" data-name="Algorithm CV" cx="88.9" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Level_2_In" data-name="Level 2 In" cx="54.57" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Level_1_In" data-name="Level 1 In" cx="20.3" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Mod_Amp_Knob9mm" data-name="Mod Amp#Knob9mm" cx="59.95" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Osc_Amp_Freq_Knob9mm" data-name="Osc Amp/Freq#Knob9mm" cx="23.09" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Int._Osc_Mode_MomentaryButton" data-name="Int. Osc Mode#MomentaryButton" cx="23.15" cy="182.05" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Mod_Amp_Trimpot" data-name="Mod Amp#Trimpot" cx="59.95" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Osc_Amp_Freq_Trimpot" data-name="Osc Amp/Freq#Trimpot" cx="23.09" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Int._Osc_Mode_SmallButton" data-name="Int. Osc Mode#SmallButton" cx="23.15" cy="182.05" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
     <circle id="Timbre_WhiteMediumKnob" data-name="Timbre#WhiteMediumKnob" cx="109.63" cy="185.46" r="17.01" style="fill: #ff0036; stroke-width: 0px;"/>
     <circle id="Algorithm_Rogan6PSWhite" data-name="Algorithm#Rogan6PSWhite" cx="71.71" cy="94.73" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
     <text id="slug" transform="translate(105.1 369.14)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.03em;">W</tspan><tspan x="2.44" y="0" style="letter-spacing: 0em;">a</tspan><tspan x="3.88" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="4.88" y="0">ps</tspan></text>

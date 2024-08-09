@@ -23,13 +23,13 @@ struct KinksInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(40.98), to_mm<72>(181.73), Center, "Logic In B", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(15.74), to_mm<72>(217.73), Center, "Logic Max Out", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(217.73), Center, "Logic Min Out", ""}},
-		AnalogJackInput4ms{{to_mm<72>(15.74), to_mm<72>(278.93), Center, "S&amp;H In", ""}},
-		GateJackInput4ms{{to_mm<72>(40.98), to_mm<72>(278.93), Center, "S&amp;H Trig In", ""}},
+		AnalogJackInput4ms{{to_mm<72>(15.74), to_mm<72>(278.93), Center, "Sample+Hold In", ""}},
+		GateJackInput4ms{{to_mm<72>(40.98), to_mm<72>(278.93), Center, "Sample+Hold Trig In", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(15.74), to_mm<72>(314.93), Center, "Noise Out", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(314.93), Center, "S&amp;H Out", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(40.98), to_mm<72>(314.93), Center, "Sample+Hold Out", ""}},
 		GreenRedLight{{to_mm<72>(14.89), to_mm<72>(61.1), Center, "Sign", ""}},
 		GreenRedLight{{to_mm<72>(14.89), to_mm<72>(158.29), Center, "Logic", ""}},
-		GreenRedLight{{to_mm<72>(14.89), to_mm<72>(255.48), Center, "S&amp;H", ""}},
+		GreenRedLight{{to_mm<72>(14.89), to_mm<72>(255.48), Center, "Sample+Hold", ""}},
 }};
 
     enum class Elem {
@@ -41,13 +41,13 @@ struct KinksInfo : ModuleInfoBase {
         LogicInBIn,
         LogicMaxOut,
         LogicMinOut,
-        S_Amp_HIn,
-        S_Amp_HTrigIn,
+        SamplePHoldIn,
+        SamplePHoldTrigIn,
         NoiseOut,
-        S_Amp_HOut,
+        SamplePHoldOut,
         SignLight,
         LogicLight,
-        S_Amp_HLight,
+        SamplePHoldLight,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
@@ -58,8 +58,8 @@ struct KinksInfo : ModuleInfoBase {
         InputSign_In, 
         InputLogic_In_A, 
         InputLogic_In_B, 
-        InputS_Amp_H_In, 
-        InputS_Amp_H_Trig_In, 
+        InputSamplePHold_In, 
+        InputSamplePHold_Trig_In, 
         NumInJacks,
     };
     
@@ -70,14 +70,14 @@ struct KinksInfo : ModuleInfoBase {
         OutputLogic_Max_Out, 
         OutputLogic_Min_Out, 
         OutputNoise_Out, 
-        OutputS_Amp_H_Out, 
+        OutputSamplePHold_Out, 
         NumOutJacks,
     };
     
     enum {
         LedSign, 
         LedLogic, 
-        LedS_Amp_H, 
+        LedSamplePHold, 
         NumDiscreteLeds,
     };
     
