@@ -196,12 +196,12 @@
     <circle id="Ch3_Type_SmallButton" data-name="Ch3 Type#SmallButton" cx="84.24" cy="99.32" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
     <circle id="Ch2_Type_SmallButton" data-name="Ch2 Type#SmallButton" cx="51.81" cy="99.32" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
     <circle id="Ch1_Type_SmallButton" data-name="Ch1 Type#SmallButton" cx="19.38" cy="99.32" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="Ch6_Shape_Trimpot" data-name="Ch6 Shape#Trimpot" cx="181.58" cy="48.44" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch5_Shape_Trimpot" data-name="Ch5 Shape#Trimpot" cx="149.15" cy="48.44" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch4_Shape_Trimpot" data-name="Ch4 Shape#Trimpot" cx="116.72" cy="48.44" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch3_Shape_Trimpot" data-name="Ch3 Shape#Trimpot" cx="84.23" cy="48.44" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch2_Shape_Trimpot" data-name="Ch2 Shape#Trimpot" cx="51.8" cy="48.44" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch1_Shape_Trimpot" data-name="Ch1 Shape#Trimpot" cx="19.38" cy="48.44" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Ch6_Shape_Trimpot" data-name="Ch6 Shape#Trimpot" cx="181.58" cy="48.44" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch5_Shape_Trimpot" data-name="Ch5 Shape#Trimpot" cx="149.15" cy="48.44" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch4_Shape_Trimpot" data-name="Ch4 Shape#Trimpot" cx="116.72" cy="48.44" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch3_Shape_Trimpot" data-name="Ch3 Shape#Trimpot" cx="84.23" cy="48.44" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch2_Shape_Trimpot" data-name="Ch2 Shape#Trimpot" cx="51.8" cy="48.44" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch1_Shape_Trimpot" data-name="Ch1 Shape#Trimpot" cx="19.38" cy="48.44" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
     <text id="slug" transform="translate(122.02 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">S</tspan><tspan x="1.47" y="0">tages</tspan></text>
     <text id="modulename" transform="translate(138.83 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">S</tspan><tspan x="1.5" y="0">e</tspan><tspan x="3" y="0" style="letter-spacing: 0em;">g</tspan><tspan x="4.66" y="0">me</tspan><tspan x="8.66" y="0" style="letter-spacing: 0em;">n</tspan><tspan x="10.32" y="0" style="letter-spacing: 0em;">t </tspan><tspan x="11.95" y="0" style="letter-spacing: 0em;">G</tspan><tspan x="13.9" y="0">ene</tspan><tspan x="18.57" y="0" style="letter-spacing: 0em;">rat</tspan><tspan x="21.94" y="0">or</tspan></text>
   </g>

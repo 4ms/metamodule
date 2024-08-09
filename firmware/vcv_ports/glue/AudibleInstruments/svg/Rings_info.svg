@@ -5,14 +5,14 @@
       <rect x=".14" y=".12" width="200.44" height="364" style="fill: #ededee; stroke-width: 0px;"/>
       <path d="M200.45.25v363.75H.26V.25h200.19M200.7,0H.01v364.25h200.69V0h0Z" style="fill: #9c9c9e; stroke-width: 0px;"/>
     </g>
-    <path d="M134.59,344.28h39.38s14.18,0,14.18,0c3.07,0,5.56-2.38,5.56-5.29v-42.9h-61.46c-7.39,0-13.37,6.56-13.37,14.65v33.54h15.71Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M134.59,344.28h39.38s14.18,0,14.18,0c3.07,0,5.56-2.38,5.56-5.29v-42.9h-61.46c-7.39,0-13.37,6.56-13.37,14.65v33.54h15.71Z" style="stroke-width: 0px;"/>
     <path d="M6.9,326.24v12.2c0,2.96,2.55,5.37,5.67,5.37h175.71c3.12,0,5.67-2.42,5.67-5.37v-12.2l-.02-56.87c-.3-7.94-6.23-14.28-13.53-14.28h-87.99s-71.95,0-71.95,0c-7.3,0-13.24,6.34-13.53,14.28l-.06,5.83.04,51.04Z" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <text transform="translate(52.76 277.79) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Out</tspan></text>
-    <path d="M14.83,242.57h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M51.68,242.57h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M88.53,242.57h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M125.38,242.57h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M162.23,242.57h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M14.83,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M51.68,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M88.53,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M125.38,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M162.23,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
     <g id="linework">
       <line x1="26.69" y1="226.64" x2="26.69" y2="254.98" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
       <line x1="63.55" y1="226.64" x2="63.55" y2="254.98" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
@@ -22,7 +22,7 @@
       <line x1="137.07" y1="210.32" x2="137.07" y2="139.29" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
       <line x1="63.37" y1="210.32" x2="63.37" y2="139.29" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     </g>
-    <rect y="18.19" width="200.7" height="14.17" style="fill: #000; stroke-width: 0px;"/>
+    <rect y="18.19" width="200.7" height="14.17" style="stroke-width: 0px;"/>
     <g id="color_icons" data-name="color icons">
       <g>
         <polygon points="86.02 37.2 90.87 37.2 75.96 52.08 75.96 47.24 86.02 37.2" style="fill: #ee6390; stroke-width: 0px;"/>
@@ -43,27 +43,27 @@
       </g>
     </g>
     <g id="plus_signs" data-name="plus signs">
-      <path d="M42.99,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-      <path d="M79.84,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-      <path d="M116.69,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-      <path d="M153.54,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-      <path d="M190.39,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M42.99,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+      <path d="M79.84,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+      <path d="M116.69,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+      <path d="M153.54,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+      <path d="M190.39,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
     </g>
     <g id="text_-_gil_sans" data-name="text - gil sans">
-      <text transform="translate(122.94 133.32) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 12px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Structure</tspan></text>
-      <text transform="translate(10.66 204.29) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Brightness</tspan></text>
-      <text transform="translate(81.55 204.29) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Damping</tspan></text>
-      <text transform="translate(154.33 204.29) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Position</tspan></text>
-      <text transform="translate(27.27 133.32) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 12px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Frequency</tspan></text>
+      <text transform="translate(122.94 133.32) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 12px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Structure</tspan></text>
+      <text transform="translate(10.66 204.29) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Brightness</tspan></text>
+      <text transform="translate(81.55 204.29) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Damping</tspan></text>
+      <text transform="translate(154.33 204.29) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Position</tspan></text>
+      <text transform="translate(27.27 133.32) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 12px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Frequency</tspan></text>
       <text transform="translate(142.65 28.5) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Mode</tspan></text>
       <text transform="translate(25.89 27.91) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Polyphony</tspan></text>
-      <text transform="translate(84.85 357.32) scale(.82 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 11px; font-weight: 700;"><tspan x="0" y="0">RINGS</tspan></text>
+      <text transform="translate(84.85 357.32) scale(.82 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 11px; font-weight: 700;"><tspan x="0" y="0">RINGS</tspan></text>
       <text transform="translate(130.07 336.98) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Odd</tspan></text>
       <text transform="translate(165.89 336.98) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Even</tspan></text>
-      <text transform="translate(96.04 336.98) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
-      <text transform="translate(84.07 295.47) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">CV Inputs</tspan></text>
-      <text transform="translate(51.27 336.98) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">V/OCT</tspan></text>
-      <text transform="translate(15.97 336.98) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Strum</tspan></text>
+      <text transform="translate(96.04 336.98) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
+      <text transform="translate(84.07 295.47) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">CV Inputs</tspan></text>
+      <text transform="translate(51.27 336.98) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">V/OCT</tspan></text>
+      <text transform="translate(15.97 336.98) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Strum</tspan></text>
     </g>
     <g id="center">
       <path d="M26.54,217.68c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>

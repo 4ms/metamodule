@@ -15,9 +15,9 @@ struct Tides2Info : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 31> Elements{{
-		SmallButton{{to_mm<72>(21.35), to_mm<72>(45.94), Center, "Freq Range Button", ""}},
-		SmallButton{{to_mm<72>(179.81), to_mm<72>(45.94), Center, "Output Mode", ""}},
+		SmallButton{{to_mm<72>(21.35), to_mm<72>(45.94), Center, "Freq Range", ""}},
 		SmallButton{{to_mm<72>(100.58), to_mm<72>(109.86), Center, "Ramp Mode", ""}},
+		SmallButton{{to_mm<72>(179.81), to_mm<72>(45.94), Center, "Output Mode", ""}},
 		WhiteLargeKnob{{to_mm<72>(46.58), to_mm<72>(94.97), Center, "Frequency", ""}, 0.5f},
 		WhiteLargeKnob{{to_mm<72>(154.58), to_mm<72>(94.97), Center, "Shape", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(100.58), to_mm<72>(157.62), Center, "Smoothness", ""}, 0.5f},
@@ -50,8 +50,8 @@ struct Tides2Info : ModuleInfoBase {
 
     enum class Elem {
         FreqRangeButton,
-        OutputModeButton,
         RampModeButton,
+        OutputModeButton,
         FrequencyKnob,
         ShapeKnob,
         SmoothnessKnob,

@@ -6,24 +6,24 @@
       <path d="M488.81.39v363.75H.33V.39h488.48M489.06.14H.08v364.25h488.98V.14h0Z" style="fill: #9c9c9e; stroke-width: 0px;"/>
     </g>
     <text transform="translate(52.9 318.75) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Out</tspan></text>
-    <rect x=".08" y="18.34" width="488.98" height="14.17" style="fill: #000; stroke-width: 0px;"/>
+    <rect x=".08" y="18.34" width="488.98" height="14.17" style="stroke-width: 0px;"/>
     <line x1="219.09" y1="253.27" x2="219.09" y2="182.24" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="145.39" y1="253.27" x2="145.39" y2="182.24" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-    <path d="M96.78,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M133.63,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M170.49,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M207.34,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M244.19,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M96.78,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M133.63,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M170.49,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M207.34,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M244.19,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
     <line x1="108.64" y1="269.59" x2="108.64" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="145.5" y1="269.59" x2="145.5" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="182.37" y1="269.59" x2="182.37" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="219.23" y1="269.59" x2="219.23" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="256.1" y1="269.59" x2="256.1" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-    <path d="M124.94,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M161.79,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M198.64,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M235.5,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M272.35,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M124.94,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+    <path d="M161.79,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+    <path d="M198.64,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+    <path d="M235.5,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+    <path d="M272.35,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
     <g id="center">
       <path d="M108.5,260.34c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
       <path d="M108.5,256.05c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M108.5,254.55c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
@@ -46,19 +46,19 @@
     </g>
     <line x1="421.57" y1="253.27" x2="421.57" y2="182.24" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="347.86" y1="253.27" x2="347.86" y2="182.24" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-    <path d="M299.26,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M336.11,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M372.96,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M409.81,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M299.26,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M336.11,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M372.96,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M409.81,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
     <line x1="311.12" y1="269.59" x2="311.12" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="347.98" y1="269.59" x2="347.98" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="384.84" y1="269.59" x2="384.84" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="421.71" y1="269.59" x2="421.71" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
     <line x1="458.57" y1="269.59" x2="458.57" y2="296.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-    <path d="M327.42,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M364.27,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M401.12,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M437.97,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M327.42,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+    <path d="M364.27,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+    <path d="M401.12,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+    <path d="M437.97,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
     <g id="center-6" data-name="center">
       <path d="M310.97,260.34c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
       <path d="M310.98,256.05c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M310.98,254.55c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
@@ -76,24 +76,24 @@
       <path d="M421.53,256.05c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M421.53,254.55c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
     </g>
     <g>
-      <path d="M446.66,285.52h-3.94v-1.07h3.94v1.07Z" style="fill: #000; stroke-width: 0px;"/>
-      <path d="M474.82,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M446.66,285.52h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+      <path d="M474.82,284.94h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
       <g id="center-10" data-name="center">
         <path d="M458.38,260.34c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
         <path d="M458.38,256.05c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M458.38,254.55c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
       </g>
     </g>
-    <path d="M8.92,75.32v17.57h17.57v-17.57H8.92ZM21.93,89.92l-4.2-6.95-3.39,6.95h-3.32l6.71-12.13,7.04,12.13h-2.83Z" style="fill: #000; stroke-width: 0px;"/>
-    <path d="M68.66,75.32v17.57h17.57v-17.57h-17.57ZM82.74,89.61h-2.85v-8.28h-4.88v8.28h-2.85v-11.13h10.58v11.13Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M8.92,75.32v17.57h17.57v-17.57H8.92ZM21.93,89.92l-4.2-6.95-3.39,6.95h-3.32l6.71-12.13,7.04,12.13h-2.83Z" style="stroke-width: 0px;"/>
+    <path d="M68.66,75.32v17.57h17.57v-17.57h-17.57ZM82.74,89.61h-2.85v-8.28h-4.88v8.28h-2.85v-11.13h10.58v11.13Z" style="stroke-width: 0px;"/>
     <line x1="182.51" y1="60.35" x2="47.58" y2="60.35" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-    <path d="M419.99,75.32v17.58h17.57v-17.58h-17.57ZM433.63,85.72h-9.7v-3.23h9.7v3.23Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M419.99,75.32v17.58h17.57v-17.58h-17.57ZM433.63,85.72h-9.7v-3.23h9.7v3.23Z" style="stroke-width: 0px;"/>
     <g id="mid_line" data-name="mid line">
       <line x1="284.59" y1="39.16" x2="284.59" y2="291.45" style="fill: none; stroke: #000; stroke-dasharray: 0 0 1 4; stroke-linecap: round; stroke-linejoin: round;"/>
     </g>
     <rect x="451.18" y="34.61" width="2.83" height="8.74" style="fill: #171717; stroke-width: 0px;"/>
-    <path d="M467.36,75.32v17.57h17.57v-17.57h-17.57ZM481.81,85.35h-4.41v4.41h-2.5v-4.41h-4.41v-2.5h4.41v-4.41h2.5v4.41h4.41v2.5Z" style="fill: #000; stroke-width: 0px;"/>
+    <path d="M467.36,75.32v17.57h17.57v-17.57h-17.57ZM481.81,85.35h-4.41v4.41h-2.5v-4.41h-4.41v-2.5h4.41v-4.41h2.5v4.41h4.41v2.5Z" style="stroke-width: 0px;"/>
     <g id="two_row" data-name="two row">
-      <path d="M72.32,296.23H21.3c-7.83,0-14.18,6.56-14.18,14.65v27.41c0,3.39,2.91,6.13,6.5,6.13h31.75s1.43,0,1.43,0h1.43s0,0,0,0h21.6s16.65,0,16.65,0v-33.54c0-8.09-6.35-14.65-14.18-14.65Z" style="fill: #000; stroke-width: 0px;"/>
+      <path d="M72.32,296.23H21.3c-7.83,0-14.18,6.56-14.18,14.65v27.41c0,3.39,2.91,6.13,6.5,6.13h31.75s1.43,0,1.43,0h1.43s0,0,0,0h21.6s16.65,0,16.65,0v-33.54c0-8.09-6.35-14.65-14.18-14.65Z" style="stroke-width: 0px;"/>
       <path d="M481.97,310.33c-.3-7.94-6.23-14.28-13.53-14.28H92.53s-71.95,0-71.95,0c-7.3,0-13.24,6.34-13.53,14.28l-.06,5.83.07,13.93-.03-3.7v12.2c0,2.96,2.55,5.37,5.67,5.37h463.62c3.12,0,5.67-2.42,5.67-5.37v-12.2l-.02-16.06Z" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
       <line x1="472.71" y1="336.54" x2="309.2" y2="336.54" style="fill: none; stroke: #000; stroke-dasharray: 0 0 1 4; stroke-linecap: round; stroke-linejoin: round;"/>
       <line x1="255.76" y1="336.54" x2="92.25" y2="336.54" style="fill: none; stroke: #000; stroke-dasharray: 0 0 1 4; stroke-linecap: round; stroke-linejoin: round;"/>
@@ -133,16 +133,16 @@
     <circle id="FM" cx="64.67" cy="182.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="V_Oct" data-name="V/Oct" cx="30.49" cy="182.75" r="11.34" style="fill: lime; stroke-width: 0px;"/>
     <circle id="Play_WhiteMomentary7mm" data-name="Play#WhiteMomentary7mm" cx="47.58" cy="124.27" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="Space_Atten_Trimpot" data-name="Space Atten#Trimpot" cx="458.77" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Brightness_Atten_Trimpot" data-name="Brightness Atten#Trimpot" cx="421.92" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Position_Atten_Trimpot" data-name="Position Atten#Trimpot" cx="385.07" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Geometry_Atten_Trimpot" data-name="Geometry Atten#Trimpot" cx="348.22" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Damping_Atten_Trimpot" data-name="Damping Atten#Trimpot" cx="311.37" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Strike_Timbre_Atten_Trimpot" data-name="Strike Timbre Atten#Trimpot" cx="256.21" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Mallet_Atten_Trimpot" data-name="Mallet Atten#Trimpot" cx="219.36" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Blow_Timbre_Atten_Trimpot" data-name="Blow Timbre Atten#Trimpot" cx="182.51" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Flow_Atten_Trimpot" data-name="Flow Atten#Trimpot" cx="145.66" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Bow_Timbre_Atten_Trimpot" data-name="Bow Timbre Atten#Trimpot" cx="108.81" cy="270.97" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Space_Atten_Trimpot" data-name="Space Atten#Trimpot" cx="458.77" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Brightness_Atten_Trimpot" data-name="Brightness Atten#Trimpot" cx="421.92" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Position_Atten_Trimpot" data-name="Position Atten#Trimpot" cx="385.07" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Geometry_Atten_Trimpot" data-name="Geometry Atten#Trimpot" cx="348.22" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Damping_Atten_Trimpot" data-name="Damping Atten#Trimpot" cx="311.37" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Strike_Timbre_Atten_Trimpot" data-name="Strike Timbre Atten#Trimpot" cx="256.21" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Mallet_Atten_Trimpot" data-name="Mallet Atten#Trimpot" cx="219.36" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Blow_Timbre_Atten_Trimpot" data-name="Blow Timbre Atten#Trimpot" cx="182.51" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Flow_Atten_Trimpot" data-name="Flow Atten#Trimpot" cx="145.66" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Bow_Timbre_Atten_Trimpot" data-name="Bow Timbre Atten#Trimpot" cx="108.81" cy="270.97" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Space_WhiteMediumKnob" data-name="Space#WhiteMediumKnob" cx="452.59" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Position_WhiteMediumKnob" data-name="Position#WhiteMediumKnob" cx="385.07" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Damping_WhiteMediumKnob" data-name="Damping#WhiteMediumKnob" cx="317.55" cy="214.27" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>

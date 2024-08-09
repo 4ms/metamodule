@@ -164,17 +164,17 @@
     <circle id="Ch1_Func3_GreenRedLight" data-name="Ch1 Func3#GreenRedLight" cx="70.06" cy="94.8" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch1_Func2_GreenRedLight" data-name="Ch1 Func2#GreenRedLight" cx="70.06" cy="78.59" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Ch1_Func1_GreenRedLight" data-name="Ch1 Func1#GreenRedLight" cx="70.06" cy="62.38" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Meter_MediumButton" data-name="Meter#MediumButton" cx="86.24" cy="132.59" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="Ch2_Function_MediumButton" data-name="Ch2 Function#MediumButton" cx="102.43" cy="42.59" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
-    <circle id="Ch1_Function_MediumButton" data-name="Ch1 Function#MediumButton" cx="70.06" cy="42.59" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Meter_SmallButton" data-name="Meter#SmallButton" cx="86.24" cy="132.59" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Ch2_Function_SmallButton" data-name="Ch2 Function#SmallButton" cx="102.43" cy="42.59" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Ch1_Function_SmallButton" data-name="Ch1 Function#SmallButton" cx="70.06" cy="42.59" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
     <circle id="Ch2_Response_Trimpot" data-name="Ch2 Response#Trimpot" cx="86.24" cy="213.58" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch2_Level_Mod_BlueMediumKnob" data-name="Ch2 Level Mod#BlueMediumKnob" cx="141.12" cy="192.88" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Ch2_Mod_WhiteMediumKnob" data-name="Ch2 Mod#WhiteMediumKnob" cx="141.12" cy="126.3" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Ch2_Shape_WhiteMediumKnob" data-name="Ch2 Shape#WhiteMediumKnob" cx="141.12" cy="59.68" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch2_Level_Mod_BlueSmallKnob" data-name="Ch2 Level Mod#BlueSmallKnob" cx="141.12" cy="192.88" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch2_Mod_WhiteSmallKnob" data-name="Ch2 Mod#WhiteSmallKnob" cx="141.12" cy="126.3" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch2_Shape_WhiteSmallKnob" data-name="Ch2 Shape#WhiteSmallKnob" cx="141.12" cy="59.68" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <circle id="Ch1_Response_Trimpot" data-name="Ch1 Response#Trimpot" cx="86.24" cy="172.19" r="8.5" style="fill: red; stroke-width: 0px;"/>
-    <circle id="Ch1_Level_Mod_RedMediumKnob" data-name="Ch1 Level Mod#RedMediumKnob" cx="31.37" cy="192.88" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Ch1_Mod_WhiteMediumKnob" data-name="Ch1 Mod#WhiteMediumKnob" cx="31.37" cy="126.3" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Ch1_Shape_WhiteMediumKnob" data-name="Ch1 Shape#WhiteMediumKnob" cx="31.37" cy="59.68" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch1_Level_Mod_RedSmallKnob" data-name="Ch1 Level Mod#RedSmallKnob" cx="31.37" cy="192.88" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch1_Mod_WhiteSmallKnob" data-name="Ch1 Mod#WhiteSmallKnob" cx="31.37" cy="126.3" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Ch1_Shape_WhiteSmallKnob" data-name="Ch1 Shape#WhiteSmallKnob" cx="31.37" cy="59.68" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
     <text id="slug" transform="translate(122.02 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">S</tspan><tspan x="1.47" y="0">t</tspan><tspan x="2.46" y="0" style="letter-spacing: -.01em;">r</tspan><tspan x="3.41" y="0">eams</tspan></text>
     <text id="modulename" transform="translate(138.83 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">D</tspan><tspan x="2.01" y="0">ual </tspan><tspan x="6.45" y="0" style="letter-spacing: .01em;">D</tspan><tspan x="8.49" y="0" style="letter-spacing: 0em;">ynamics </tspan><tspan x="19.39" y="0" style="letter-spacing: 0em;">G</tspan><tspan x="21.35" y="0" style="letter-spacing: 0em;">at</tspan><tspan x="23.76" y="0">e</tspan></text>
   </g>
