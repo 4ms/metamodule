@@ -149,7 +149,7 @@ SECTIONS
 	} > FWBUFFER
 
     _user_stack_start = _ram_aligned_end;
-    _user_stack_end = _user_stack_start + 0x80000; /* 512k */
+    _user_stack_end = _user_stack_start + 0x100000; 
 
     _svc_stack_start = _user_stack_end;
     _svc_stack_end = _svc_stack_start + 0x6000; /* 24k for ISRs*/
@@ -161,7 +161,7 @@ SECTIONS
     _fiq_stack_end = _fiq_stack_start + 0x100;
 
     _auxcore_user_stack_start = _fiq_stack_end;
-    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x80000;
+    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x100000;
 
 
 	.sharedmemindex (NOLOAD) :
