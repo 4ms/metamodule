@@ -8,42 +8,42 @@ namespace MetaModule
 struct CloudsInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Clouds"};
     static constexpr std::string_view description{"Granular Synthesizer"};
-    static constexpr uint32_t width_hp = 19;
+    static constexpr uint32_t width_hp = 18;
     static constexpr std::string_view svg_filename{"res/modules/Clouds_artwork.svg"};
     static constexpr std::string_view png_filename{"4ms/fp/Clouds.png"};
 
     using enum Coords;
 
     static constexpr std::array<Element, 29> Elements{{
-		WhiteMomentary7mm{{to_mm<72>(41.9), to_mm<72>(55.35), Center, "Freeze", ""}},
-		SmallButton{{to_mm<72>(254.38), to_mm<72>(246.97), Center, "CV Jack Mode", ""}},
-		SmallButton{{to_mm<72>(41.9), to_mm<72>(25.63), Center, "Load", ""}},
-		RedLargeKnob{{to_mm<72>(53.23), to_mm<72>(129.67), Center, "Position", ""}, 0.5f},
-		BlueLargeKnob{{to_mm<72>(137.2), to_mm<72>(129.67), Center, "Size", ""}, 0.5f},
-		WhiteLargeKnob{{to_mm<72>(220.37), to_mm<72>(129.67), Center, "Pitch", ""}, 0.5f},
-		RedMediumKnob{{to_mm<72>(101.42), to_mm<72>(55.35), Center, "In Gain", ""}, 0.5f},
-		RedMediumKnob{{to_mm<72>(166.56), to_mm<72>(55.35), Center, "Density", ""}, 0.5f},
-		BlueMediumKnob{{to_mm<72>(231.7), to_mm<72>(55.35), Center, "Texture", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(41.9), to_mm<72>(203.2), Center, "DryWet", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(105.17), to_mm<72>(203.2), Center, "Spread", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(168.43), to_mm<72>(203.2), Center, "Feedback", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(231.7), to_mm<72>(203.2), Center, "Reverb", ""}, 0.5f},
-		GateJackInput4ms{{to_mm<72>(33.7), to_mm<72>(273.85), Center, "Freeze Trig", ""}},
-		GateJackInput4ms{{to_mm<72>(75.1), to_mm<72>(273.85), Center, "Trig", ""}},
-		AnalogJackInput4ms{{to_mm<72>(116.5), to_mm<72>(273.85), Center, "Position CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(157.9), to_mm<72>(273.85), Center, "Size CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(199.31), to_mm<72>(273.85), Center, "V/Oct", ""}},
-		AnalogJackInput4ms{{to_mm<72>(240.7), to_mm<72>(273.85), Center, "Blend CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(33.7), to_mm<72>(315.24), Center, "In L", ""}},
-		AnalogJackInput4ms{{to_mm<72>(75.1), to_mm<72>(315.24), Center, "In R", ""}},
-		AnalogJackInput4ms{{to_mm<72>(116.5), to_mm<72>(315.28), Center, "Density CV", ""}},
-		AnalogJackInput4ms{{to_mm<72>(157.9), to_mm<72>(315.28), Center, "Text CV", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(199.31), to_mm<72>(315.28), Center, "Out L", ""}},
-		AnalogJackOutput4ms{{to_mm<72>(240.7), to_mm<72>(315.28), Center, "Out R", ""}},
-		GreenRedLight{{to_mm<72>(105.17), to_mm<72>(246.97), Center, "Mix Light", ""}},
-		GreenRedLight{{to_mm<72>(41.9), to_mm<72>(246.97), Center, "Pan Light", ""}},
-		GreenRedLight{{to_mm<72>(168.43), to_mm<72>(246.97), Center, "Feedback Light", ""}},
-		GreenRedLight{{to_mm<72>(231.7), to_mm<72>(246.97), Center, "Reverb Light", ""}},
+		WhiteMomentary7mm{{to_mm<72>(34.3), to_mm<72>(54.99), Center, "Freeze", ""}},
+		SmallButton{{to_mm<72>(246.79), to_mm<72>(247.07), Center, "CV Jack Mode", ""}},
+		SmallButton{{to_mm<72>(12.84), to_mm<72>(247.07), Center, "Load", ""}},
+		RedLargeKnob{{to_mm<72>(45.64), to_mm<72>(129.32), Center, "Position", ""}, 0.5f},
+		BlueLargeKnob{{to_mm<72>(129.6), to_mm<72>(129.32), Center, "Size", ""}, 0.5f},
+		WhiteLargeKnob{{to_mm<72>(212.77), to_mm<72>(129.32), Center, "Pitch", ""}, 0.5f},
+		RedMediumKnob{{to_mm<72>(93.83), to_mm<72>(54.99), Center, "In Gain", ""}, 0.5f},
+		RedMediumKnob{{to_mm<72>(158.97), to_mm<72>(54.99), Center, "Density", ""}, 0.5f},
+		BlueMediumKnob{{to_mm<72>(224.11), to_mm<72>(54.99), Center, "Texture", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(34.3), to_mm<72>(202.85), Center, "DryWet", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(97.57), to_mm<72>(202.85), Center, "Spread", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(160.84), to_mm<72>(202.85), Center, "Feedback", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(224.11), to_mm<72>(202.85), Center, "Reverb", ""}, 0.5f},
+		GateJackInput4ms{{to_mm<72>(26.11), to_mm<72>(273.49), Center, "Freeze Trig", ""}},
+		GateJackInput4ms{{to_mm<72>(67.51), to_mm<72>(273.49), Center, "Trig", ""}},
+		AnalogJackInput4ms{{to_mm<72>(108.91), to_mm<72>(273.49), Center, "Position CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(150.31), to_mm<72>(273.49), Center, "Size CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(191.71), to_mm<72>(273.49), Center, "V/Oct", ""}},
+		AnalogJackInput4ms{{to_mm<72>(233.11), to_mm<72>(273.49), Center, "Blend CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(26.11), to_mm<72>(314.88), Center, "In L", ""}},
+		AnalogJackInput4ms{{to_mm<72>(67.51), to_mm<72>(314.88), Center, "In R", ""}},
+		AnalogJackInput4ms{{to_mm<72>(108.91), to_mm<72>(314.93), Center, "Density CV", ""}},
+		AnalogJackInput4ms{{to_mm<72>(150.31), to_mm<72>(314.93), Center, "Text CV", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(191.71), to_mm<72>(314.93), Center, "Out L", ""}},
+		AnalogJackOutput4ms{{to_mm<72>(233.11), to_mm<72>(314.93), Center, "Out R", ""}},
+		GreenRedLight{{to_mm<72>(97.57), to_mm<72>(246.61), Center, "Mix Light", ""}},
+		GreenRedLight{{to_mm<72>(34.3), to_mm<72>(246.61), Center, "Pan Light", ""}},
+		GreenRedLight{{to_mm<72>(160.84), to_mm<72>(246.61), Center, "Feedback Light", ""}},
+		GreenRedLight{{to_mm<72>(224.11), to_mm<72>(246.61), Center, "Reverb Light", ""}},
 }};
 
     enum class Elem {
