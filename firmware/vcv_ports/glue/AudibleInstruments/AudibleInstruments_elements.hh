@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/4ms/4ms_elements.hh"
 #include "CoreModules/elements/base_element.hh"
 #include "CoreModules/elements/units.hh"
 #include "util/colors_rgb565.hh"
