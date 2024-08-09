@@ -147,4 +147,13 @@ struct GreenHandleSlider : Slider {
 	}
 };
 
+struct BraidsDisplay : TextDisplay {
+	constexpr BraidsDisplay(BaseElement b)
+		: TextDisplay{{{b}}} {
+		text = "---";
+		font = "Segment32";
+		color = Colors565::Green;
+	}
+};
+
 } // namespace MetaModule

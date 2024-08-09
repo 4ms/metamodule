@@ -14,7 +14,7 @@ struct BraidsInfo : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 13> Elements{{
+    static constexpr std::array<Element, 14> Elements{{
 		WhiteMediumKnob{{to_mm<72>(39.78), to_mm<72>(154.86), Center, "Fine", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(115.38), to_mm<72>(154.86), Center, "Coarse", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(190.98), to_mm<72>(154.86), Center, "FM", ""}, 0.5f},
@@ -28,6 +28,7 @@ struct BraidsInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(129.78), to_mm<72>(315.06), Center, "Timbre CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(165.78), to_mm<72>(315.06), Center, "Color CV", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(208.97), to_mm<72>(315.06), Center, "Out", ""}},
+		BraidsDisplay{{to_mm<72>(84.9), to_mm<72>(82.26), Center, "Screen", "", to_mm<72>(146.28), to_mm<72>(48.02)}},
 }};
 
     enum class Elem {
@@ -44,6 +45,7 @@ struct BraidsInfo : ModuleInfoBase {
         TimbreCvIn,
         ColorCvIn,
         Out,
+        ScreenDisplay,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
@@ -74,6 +76,10 @@ struct BraidsInfo : ModuleInfoBase {
         NumOutJacks,
     };
     
+    enum {
+        LedScreen, 
+        NumDiscreteLeds,
+    };
     
 };
 } // namespace MetaModule
