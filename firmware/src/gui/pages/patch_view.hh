@@ -460,7 +460,11 @@ private:
 		page->highlighted_module_obj = this_module_obj;
 
 		const auto this_slug = page->patch->module_slugs[module_id];
-		lv_label_set_text(ui_ModuleName, this_slug.c_str());
+		if (auto display_name = ModuleFactory::getModuleDisplayName(this_slug); display_name.length()) {
+			lv_label_set_text(ui_ModuleName, display_name.data());
+		} else {
+			lv_label_set_text(ui_ModuleName, "");
+		}
 
 		auto module_x = lv_obj_get_x(page->highlighted_module_obj);
 		lv_obj_set_x(ui_ModuleName, module_x);
