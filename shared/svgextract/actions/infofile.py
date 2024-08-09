@@ -6,7 +6,7 @@ from helpers.xml_helper import register_all_namespaces
 from helpers.util import *
 from helpers.svg_parse_helpers import *
 
-def createInfoFile(svgFilename, infoFilePath = None):
+def createInfoFile(svgFilename, infoFilePath = None, brand = "4ms"):
     if infoFilePath == None:
         infoFilePath = os.getenv('METAMODULE_INFO_DIR')
         if infoFilePath is None:
@@ -27,7 +27,7 @@ def createInfoFile(svgFilename, infoFilePath = None):
     register_all_namespaces(svgFilename)
     tree = xml.etree.ElementTree.parse(svgFilename)
     components = panel_to_components(tree)
-    infoFileText = components_to_infofile(components)
+    infoFileText = components_to_infofile(components, brand)
     infoFileName = os.path.join(infoFilePath, components['slug']+"_info.hh")
     with open(infoFileName, "w") as f:
         f.write(infoFileText)
@@ -251,6 +251,12 @@ def panel_to_components(tree):
             components['params'].append(c)
             c['category'] = "Switch"
 
+        #Yellow: Display
+        elif shape == "rect" and color == '#ffff00':
+            set_class_if_not_set(c, "TextDisplay")
+            c['category'] = "Display"
+            components['lights'].append(c)
+
         #Medium grey: AltParam
         elif color.startswith('#8080'):
             if len(c['pos_names']) > 0:
@@ -315,15 +321,20 @@ def set_class_if_not_set(comp, newclass):
         comp['class'] = newclass
 
 
-def components_to_infofile(components):
+def components_to_infofile(components, brand="4ms"):
     slug = components['slug']
     DPI = components['dpi']
 
     #TODO: embed knob long name vs short name in svg
-    source = f"""#pragma once
-#include "CoreModules/4ms/4ms_elements.hh"
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
-#include "CoreModules/elements/element_info.hh"
+    source = "#pragma once\n"
+
+    if brand == "4ms":
+        source += f"""#include "CoreModules/4ms/4ms_elements.hh"\n"""
+        source += f"""#include "CoreModules/4ms/4ms_element_state_conversions.hh"\n"""
+    else:
+        source += f"""#include "{brand}/{brand}_elements.hh"\n"""
+
+    source += f"""#include "CoreModules/elements/element_info.hh"
 #include <array>
 
 namespace MetaModule
@@ -372,7 +383,8 @@ def list_elem_definitions(elems, DPI):
         source += f"{k['coord_ref']}, "
         source += f"\"{k['display_name']}\", "
         source += f"\"\"" #long name
-        source += f"""}}"""
+        source += print_size(k, DPI)
+        source += f"}}"
         source += print_position_names(k)
         source += print_default_value(k)
         source += f"""}},
@@ -416,6 +428,12 @@ def print_position_names(elem):
 def print_default_value(elem):
     if "default_val" in elem:
         return f""", {elem["default_val"]}""" 
+    else:
+        return ""
+
+def print_size(elem, DPI):
+    if elem['category'] == "Display":
+        return f", to_mm<{DPI}>({elem['width']}), to_mm<{DPI}>({elem['height']})"
     else:
         return ""
 

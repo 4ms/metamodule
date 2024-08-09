@@ -61,8 +61,10 @@ If height > width then it's vertical. Otherwise it's horizontal
 color is '#FFC080' (default = 0), '#FFC081' (default = 1), or '#FFC082' (default = 2)
 If height > width then it's vertical. Otherwise it's horizontal
 
-**Yellow: Misc widget/undefined custom element:**
+**Yellow: TextDisplay
 color is '#FFFF00' or '#ff0' or 'yellow'
+Must be a rectangle, the width and height will be used.
+Must specify a class name (which sets the font, color, and default text)
 
 **Grey: AltParam**
 color is '#808080'

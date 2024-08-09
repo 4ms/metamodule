@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="70.8mm" height="130.44mm" viewBox="0 0 200.7 369.75">
+  <g id="faceplate">
+    <g id="panel">
+      <rect x=".14" y=".12" width="200.44" height="364" style="fill: #ededee; stroke-width: 0px;"/>
+      <path d="M200.45.25v363.75H.26V.25h200.19M200.7,0H.01v364.25h200.69V0h0Z" style="fill: #9c9c9e; stroke-width: 0px;"/>
+    </g>
+    <path d="M134.59,344.28h39.38s14.18,0,14.18,0c3.07,0,5.56-2.38,5.56-5.29v-42.9h-61.46c-7.39,0-13.37,6.56-13.37,14.65v33.54h15.71Z" style="stroke-width: 0px;"/>
+    <path d="M6.9,326.24v12.2c0,2.96,2.55,5.37,5.67,5.37h175.71c3.12,0,5.67-2.42,5.67-5.37v-12.2l-.02-56.87c-.3-7.94-6.23-14.28-13.53-14.28h-87.99s-71.95,0-71.95,0c-7.3,0-13.24,6.34-13.53,14.28l-.06,5.83.04,51.04Z" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+    <text transform="translate(52.76 277.79) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Out</tspan></text>
+    <path d="M14.83,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M51.68,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M88.53,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M125.38,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <path d="M162.23,242.57h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
+    <g id="linework">
+      <line x1="26.69" y1="226.64" x2="26.69" y2="254.98" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <line x1="63.55" y1="226.64" x2="63.55" y2="254.98" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <line x1="100.41" y1="226.64" x2="100.41" y2="254.98" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <line x1="137.28" y1="226.64" x2="137.28" y2="254.98" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <line x1="174.14" y1="226.64" x2="174.14" y2="254.98" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <line x1="137.07" y1="210.32" x2="137.07" y2="139.29" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+      <line x1="63.37" y1="210.32" x2="63.37" y2="139.29" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+    </g>
+    <rect y="18.19" width="200.7" height="14.17" style="stroke-width: 0px;"/>
+    <g id="color_icons" data-name="color icons">
+      <g>
+        <polygon points="86.02 37.2 90.87 37.2 75.96 52.08 75.96 47.24 86.02 37.2" style="fill: #ee6390; stroke-width: 0px;"/>
+        <polygon points="82.91 54.21 78.06 54.21 92.97 39.33 92.97 44.17 82.91 54.21" style="fill: #ee6390; stroke-width: 0px;"/>
+        <polygon points="92.97 48.4 92.97 54.21 87.15 54.21 92.97 48.4" style="fill: #ee6390; stroke-width: 0px;"/>
+        <polygon points="81.78 37.2 75.96 43.01 75.96 37.2 81.78 37.2" style="fill: #ee6390; stroke-width: 0px;"/>
+      </g>
+      <rect x="37.51" y="37.2" width="17.01" height="17.01" transform="translate(.31 91.71) rotate(-90)" style="fill: #3babec; stroke-width: 0px;"/>
+      <g>
+        <polygon points="71.64 37.2 56.73 52.08 56.73 37.2 71.64 37.2" style="fill: #00a551; stroke-width: 0px;"/>
+        <polygon points="73.74 39.33 73.74 54.21 58.84 54.21 73.74 39.33" style="fill: #00a551; stroke-width: 0px;"/>
+      </g>
+      <path d="M146.31,37.2v17.01h17.01v-17.01h-17.01ZM151.52,49.35h-2.92v-7.29h2.92v7.29ZM156.27,52.75h-2.92v-14.09h2.92v14.09ZM161.02,49.35h-2.92v-7.29h2.92v7.29Z" style="fill: #ee6390; stroke-width: 0px;"/>
+      <path d="M127.08,37.2v17.01h17.01v-17.01h-17.01ZM128.35,52.22l2.13-4.15-2.43-4.74,2.73-5.32,2.29,1.18-2.13,4.14,2.43,4.74-2.73,5.33-2.29-1.18ZM133.23,52.22l2.13-4.15-2.43-4.74,2.73-5.32,2.29,1.18-2.13,4.14,2.43,4.74-2.73,5.32-2.29-1.17ZM140.38,53.39l-2.29-1.17,2.13-4.15-2.43-4.74,2.73-5.32,2.29,1.18-2.13,4.14,2.43,4.74-2.73,5.32Z" style="fill: #00a551; stroke-width: 0px;"/>
+      <g>
+        <path d="M107.85,37.2v17.01h17.01v-17.01h-17.01ZM116.36,52.71c-3.86,0-7-3.14-7-7s3.14-7,7-7,7,3.14,7,7-3.14,7-7,7Z" style="fill: #3babec; stroke-width: 0px;"/>
+        <path d="M116.36,41.2c-2.48,0-4.5,2.02-4.5,4.5s2.02,4.5,4.5,4.5,4.5-2.02,4.5-4.5-2.02-4.5-4.5-4.5ZM116.36,47.89c-1.21,0-2.19-.98-2.19-2.19s.98-2.19,2.19-2.19,2.19.98,2.19,2.19-.98,2.19-2.19,2.19Z" style="fill: #3babec; stroke-width: 0px;"/>
+      </g>
+    </g>
+    <g id="plus_signs" data-name="plus signs">
+      <path d="M42.99,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+      <path d="M79.84,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+      <path d="M116.69,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+      <path d="M153.54,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+      <path d="M190.39,241.99h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
+    </g>
+    <g id="text_-_gil_sans" data-name="text - gil sans">
+      <text transform="translate(122.94 133.32) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 12px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Structure</tspan></text>
+      <text transform="translate(10.66 204.29) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Brightness</tspan></text>
+      <text transform="translate(81.55 204.29) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Damping</tspan></text>
+      <text transform="translate(154.33 204.29) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Position</tspan></text>
+      <text transform="translate(27.27 133.32) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 12px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Frequency</tspan></text>
+      <text transform="translate(142.65 28.5) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Mode</tspan></text>
+      <text transform="translate(25.89 27.91) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Polyphony</tspan></text>
+      <text transform="translate(84.85 357.32) scale(.82 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 11px; font-weight: 700;"><tspan x="0" y="0">RINGS</tspan></text>
+      <text transform="translate(130.07 336.98) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Odd</tspan></text>
+      <text transform="translate(165.89 336.98) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Even</tspan></text>
+      <text transform="translate(96.04 336.98) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">IN</tspan></text>
+      <text transform="translate(84.07 295.47) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">CV Inputs</tspan></text>
+      <text transform="translate(51.27 336.98) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">V/OCT</tspan></text>
+      <text transform="translate(15.97 336.98) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Strum</tspan></text>
+    </g>
+    <g id="center">
+      <path d="M26.54,217.68c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
+      <path d="M26.54,213.38c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M26.54,211.88c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+    </g>
+    <g id="center-2" data-name="center">
+      <circle cx="63.4" cy="215.15" r="2.52" style="fill: #171717; stroke-width: 0px;"/>
+      <path d="M63.39,213.38c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M63.39,211.88c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+    </g>
+    <g id="center-3" data-name="center">
+      <circle cx="100.25" cy="215.15" r="2.52" style="fill: #171717; stroke-width: 0px;"/>
+      <path d="M100.25,213.38c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M100.25,211.88c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+    </g>
+    <g id="center-4" data-name="center">
+      <path d="M137.1,217.68c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
+      <path d="M137.1,213.38c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M137.1,211.88c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+    </g>
+    <g id="center-5" data-name="center">
+      <path d="M173.95,217.68c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
+      <path d="M173.95,213.38c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M173.95,211.88c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+    </g>
+    <g id="line">
+      <line x1="120.86" y1="292.07" x2="192.23" y2="292.07" style="fill: none; stroke: #000; stroke-dasharray: 0 0 1 4; stroke-linecap: round; stroke-linejoin: round;"/>
+      <line x1="9.43" y1="292.07" x2="79.95" y2="292.07" style="fill: none; stroke: #000; stroke-dasharray: 0 0 1 4; stroke-linecap: round; stroke-linejoin: round;"/>
+    </g>
+  </g>
+  <g id="components">
+    <circle id="Res_Mode_Light_GreenRedLight" data-name="Res Mode Light#GreenRedLight" cx="179.65" cy="64" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Polyphony_Light_GreenRedLight" data-name="Polyphony Light#GreenRedLight" cx="21.2" cy="64" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Even_Out" data-name="Even Out" cx="174.13" cy="314.88" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Odd_Out" data-name="Odd Out" cx="137.27" cy="314.88" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="IN" cx="100.4" cy="314.88" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="V_OCT" data-name="V/OCT" cx="63.54" cy="314.88" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Strum" cx="26.67" cy="314.88" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
+    <circle id="Position_CV" data-name="Position CV" cx="174.13" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Structure_CV" data-name="Structure CV" cx="137.27" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Damping_CV" data-name="Damping CV" cx="100.4" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Frequency_CV" data-name="Frequency CV" cx="63.54" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Brightness_CV" data-name="Brightness CV" cx="26.67" cy="273.49" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Pos_Atten_Trimpot" data-name="Pos Atten#Trimpot" cx="174.14" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Struct_Atten_Trimpot" data-name="Struct Atten#Trimpot" cx="137.28" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Damp_Atten_Trimpot" data-name="Damp Atten#Trimpot" cx="100.41" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Freq_Atten_Trimpot" data-name="Freq Atten#Trimpot" cx="63.55" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Bright_Atten_Trimpot" data-name="Bright Atten#Trimpot" cx="26.69" cy="228.56" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Position_WhiteMediumKnob" data-name="Position#WhiteMediumKnob" cx="32.92" cy="171.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Damping_WhiteMediumKnob" data-name="Damping#WhiteMediumKnob" cx="100.4" cy="171.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Brightness_WhiteMediumKnob" data-name="Brightness#WhiteMediumKnob" cx="167.89" cy="171.86" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Structure_WhiteLargeKnob" data-name="Structure#WhiteLargeKnob" cx="147.21" cy="94.75" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
+    <circle id="Frequency_WhiteLargeKnob" data-name="Frequency#WhiteLargeKnob" cx="53.65" cy="94.75" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
+    <rect id="Resonator_Mode_Switch_Modal_Symp_Mod" data-name="Resonator Mode Switch@Modal@Symp@Mod" x="173.98" y="37.2" width="11.34" height="17.01" transform="translate(225.35 -133.94) rotate(90)" style="fill: #ffc080; stroke-width: 0px;"/>
+    <rect id="Polyphony_Select_Switch_1_2_4" data-name="Polyphony Select Switch@1@2@4" x="15.53" y="37.2" width="11.34" height="17.01" transform="translate(66.9 24.51) rotate(90)" style="fill: #ffc080; stroke-width: 0px;"/>
+    <text id="slug" transform="translate(163.97 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">R</tspan><tspan x="1.64" y="0">ings</tspan></text>
+    <text id="modulename" transform="translate(176.4 369)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">R</tspan><tspan x="1.63" y="0">esonan</tspan><tspan x="10.74" y="0" style="letter-spacing: 0em;">c</tspan><tspan x="12.07" y="0" style="letter-spacing: 0em;">e </tspan><tspan x="14.21" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="16.63" y="0">odule</tspan></text>
+  </g>
+</svg>
