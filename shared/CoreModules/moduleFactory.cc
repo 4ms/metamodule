@@ -126,27 +126,26 @@ std::string_view ModuleFactory::getModuleFaceplate(std::string_view combined_slu
 		return "";
 }
 
-std::string_view ModuleFactory::getModuleDisplayName(std::string_view combined_slug) {
+std::string ModuleFactory::getModuleDisplayName(std::string_view combined_slug) {
 	if (auto module = find_module(combined_slug))
 		return module->display_name;
 	else {
 		[[maybe_unused]] auto [_, module_name] = brand_module(combined_slug);
 		if (module_name.length())
-			return module_name;
+			return std::string{module_name};
 		else
-			return combined_slug;
+			return std::string{combined_slug};
 	}
 }
 
 std::string_view ModuleFactory::getModuleSlug(std::string_view brand_slug, std::string_view display_name) {
 	if (auto brand_reg = brand_registry(brand_slug); brand_reg != registry().end()) {
 		for (auto i = 0u; auto const &module : brand_reg->modules.vals) {
-			if (i >= brand_reg->modules.size())
-				break;
 			if (module.display_name == display_name) {
 				return brand_reg->modules.keys[i];
 			}
-			i++;
+			if (++i >= brand_reg->modules.size())
+				break;
 		}
 	}
 	return "";

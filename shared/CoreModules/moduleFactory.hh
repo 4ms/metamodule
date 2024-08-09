@@ -43,7 +43,7 @@ public:
 	static std::vector<std::string_view> getAllBrandDisplayNames();
 
 	static void setModuleDisplayName(std::string_view combined_slug, std::string_view display_name);
-	static std::string_view getModuleDisplayName(std::string_view combined_slug);
+	static std::string getModuleDisplayName(std::string_view combined_slug);
 	static void setBrandDisplayName(std::string_view brand_name, std::string_view display_name);
 	static std::string_view getBrandDisplayName(std::string_view brand_name);
 	static std::string_view getBrandSlug(std::string_view display_name);
