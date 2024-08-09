@@ -43,6 +43,20 @@ struct DynLoader {
 		return "";
 	}
 
+	std::optional<uint32_t> get_sdk_version() {
+		auto sym = elf.find_dyn_symbol("sdk_version");
+		if (!sym)
+			sym = elf.find_symbol("sdk_version");
+		if (!sym)
+			return std::nullopt;
+
+		auto func_address = sym->offset() + codeblock.data();
+		using VersionFunc = uint32_t();
+		auto version_func = *reinterpret_cast<VersionFunc *>(func_address);
+		auto plugin_sdk_version = version_func();
+		return plugin_sdk_version;
+	}
+
 	template<typename PluginInitFunc>
 	PluginInitFunc *find_init_func() {
 		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
