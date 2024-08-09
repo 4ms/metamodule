@@ -93,6 +93,7 @@ def expand_color_synonyms(color):
     if color == 'black' or color == '#000': color = '#000000'
     if color == 'white' or color == '#fff': color = '#ffffff'
     if color == 'gray' or color == '#888': color = '#808080'
+    if color == 'grey' or color == '#888': color = '#808080'
     return color
 
 

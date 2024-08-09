@@ -251,6 +251,12 @@ def panel_to_components(tree):
             components['params'].append(c)
             c['category'] = "Switch"
 
+        #Yellow: Display
+        elif shape == "rect" and color == '#ffff00':
+            set_class_if_not_set(c, "TextDisplay")
+            c['category'] = "Display"
+            components['lights'].append(c)
+
         #Medium grey: AltParam
         elif color.startswith('#8080'):
             if len(c['pos_names']) > 0:
@@ -377,7 +383,8 @@ def list_elem_definitions(elems, DPI):
         source += f"{k['coord_ref']}, "
         source += f"\"{k['display_name']}\", "
         source += f"\"\"" #long name
-        source += f"""}}"""
+        source += print_size(k, DPI)
+        source += f"}}"
         source += print_position_names(k)
         source += print_default_value(k)
         source += f"""}},
@@ -421,6 +428,12 @@ def print_position_names(elem):
 def print_default_value(elem):
     if "default_val" in elem:
         return f""", {elem["default_val"]}""" 
+    else:
+        return ""
+
+def print_size(elem, DPI):
+    if elem['category'] == "Display":
+        return f", to_mm<{DPI}>({elem['width']}), to_mm<{DPI}>({elem['height']})"
     else:
         return ""
 
