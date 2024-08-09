@@ -5,12 +5,12 @@
       <rect x=".13" y=".13" width="258.95" height="364" style="fill: #eeeded; stroke-width: 0px;"/>
       <path d="M258.95.25v363.75H.25V.25h258.7M259.2,0H0v364.25h259.2V0h0Z" style="fill: #9b9c9d; stroke-width: 0px;"/>
     </g>
-    <path d="M187.44,343.52h47.28s12.42,0,12.42,0c2.69,0,4.87-2.31,4.87-5.13v-41.64h-66.62c-6.47,0-11.71,6.37-11.71,14.22v32.55h13.76Z" style="stroke-width: 0px;"/>
+    <path d="M187.44,343.52h47.28s12.42,0,12.42,0c2.69,0,4.87-2.31,4.87-5.13v-41.64h-66.62c-6.47,0-11.71,6.37-11.71,14.22v32.55h13.76Z" style="fill: #000; stroke-width: 0px;"/>
     <rect x="94.91" y="286.94" width="28.35" height="14.17" style="fill: #ee6390; stroke-width: 0px;"/>
     <rect x="94.91" y="327.74" width="28.35" height="14.17" style="fill: #ee6390; stroke-width: 0px;"/>
     <rect x="136.53" y="286.94" width="28.35" height="14.17" style="fill: #3babec; stroke-width: 0px;"/>
     <rect x="136.53" y="327.74" width="28.35" height="14.17" style="fill: #3babec; stroke-width: 0px;"/>
-    <path d="M246.64,344.31H12.77c-3.4,0-6.17-2.63-6.17-5.87l.02-12.2-.06-51.04.06-5.84c.31-8.29,6.47-14.77,14.03-14.77h71.95s146.14,0,146.14,0c7.56,0,13.73,6.48,14.04,14.76l.02,69.09c0,3.24-2.77,5.87-6.17,5.87ZM7.6,329.94v8.5c0,2.69,2.32,4.87,5.17,4.87h233.87c2.85,0,5.17-2.19,5.17-4.87l-.02-69.06c-.29-7.73-6.02-13.79-13.04-13.79H92.61s-71.95,0-71.95,0c-7.02,0-12.75,6.06-13.03,13.8l-.06,5.82.04,54.74Z" style="stroke-width: 0px;"/>
+    <path d="M246.64,344.31H12.77c-3.4,0-6.17-2.63-6.17-5.87l.02-12.2-.06-51.04.06-5.84c.31-8.29,6.47-14.77,14.03-14.77h71.95s146.14,0,146.14,0c7.56,0,13.73,6.48,14.04,14.76l.02,69.09c0,3.24-2.77,5.87-6.17,5.87ZM7.6,329.94v8.5c0,2.69,2.32,4.87,5.17,4.87h233.87c2.85,0,5.17-2.19,5.17-4.87l-.02-69.06c-.29-7.73-6.02-13.79-13.04-13.79H92.61s-71.95,0-71.95,0c-7.02,0-12.75,6.06-13.03,13.8l-.06,5.82.04,54.74Z" style="fill: #000; stroke-width: 0px;"/>
     <g id="Layer_5" data-name="Layer 5">
       <rect x="71.15" y="76.32" width="45.35" height="14.17" style="fill: #ee6390; stroke-width: 0px;"/>
       <rect x="23.73" y="159.49" width="45.35" height="14.17" style="fill: #ee6390; stroke-width: 0px;"/>
@@ -27,18 +27,18 @@
       <text transform="translate(140.96 338.38) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Text</tspan></text>
       <text transform="translate(223.11 336.98) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Out R</tspan></text>
       <text transform="translate(182.11 336.98) scale(.88 1)" style="fill: #ededed; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Out L</tspan></text>
-      <text transform="translate(208.91 237.52) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Reverb</tspan></text>
-      <text transform="translate(141.13 237.52) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Feedback</tspan></text>
-      <text transform="translate(83.38 237.52) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Spread</tspan></text>
-      <text transform="translate(14.75 237.52) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Dry/Wet</tspan></text>
-      <text transform="translate(201.94 170.28) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Pitch</tspan></text>
-      <text transform="translate(19.98 85.56) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Freeze</tspan></text>
-      <text transform="translate(223.38 294.74) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Blend</tspan></text>
-      <text transform="translate(181.31 294.74) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">V/Oct</tspan></text>
-      <text transform="translate(60.69 337.07) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">In R</tspan></text>
-      <text transform="translate(19.69 337.07) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">In L</tspan></text>
-      <text transform="translate(60.43 294.74) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Trig</tspan></text>
-      <text transform="translate(14.65 294.74) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Freeze</tspan></text>
+      <text transform="translate(208.91 237.52) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Reverb</tspan></text>
+      <text transform="translate(141.13 237.52) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Feedback</tspan></text>
+      <text transform="translate(83.38 237.52) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Spread</tspan></text>
+      <text transform="translate(14.75 237.52) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Dry/Wet</tspan></text>
+      <text transform="translate(201.94 170.28) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Pitch</tspan></text>
+      <text transform="translate(19.98 85.56) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Freeze</tspan></text>
+      <text transform="translate(223.38 294.74) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Blend</tspan></text>
+      <text transform="translate(181.31 294.74) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">V/Oct</tspan></text>
+      <text transform="translate(60.69 337.07) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">In R</tspan></text>
+      <text transform="translate(19.69 337.07) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">In L</tspan></text>
+      <text transform="translate(60.43 294.74) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Trig</tspan></text>
+      <text transform="translate(14.65 294.74) scale(.88 1)" style="fill: #000; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Freeze</tspan></text>
       <text transform="translate(121.62 169.95) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Size</tspan></text>
       <text transform="translate(29.75 169.77) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Position</tspan></text>
       <text transform="translate(78.95 87.29) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">In Gain</tspan></text>
@@ -49,8 +49,8 @@
   <g id="components">
     <circle id="Reverb_Light_GreenRedLight" data-name="Reverb Light#GreenRedLight" cx="224.11" cy="246.61" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Feedback_Light_GreenRedLight" data-name="Feedback Light#GreenRedLight" cx="160.84" cy="246.61" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Pan_Light_GreenRedLight" data-name="Pan Light#GreenRedLight" cx="34.3" cy="246.61" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Mix_Light_GreenRedLight" data-name="Mix Light#GreenRedLight" cx="97.57" cy="246.61" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Pan_Light_GreenRedLight" data-name="Pan Light#GreenRedLight" cx="34.3" cy="246.61" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
     <circle id="Out_R" data-name="Out R" cx="233.11" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Out_L" data-name="Out L" cx="191.71" cy="314.93" r="11.34" style="fill: blue; stroke-width: 0px;"/>
     <circle id="Text_CV" data-name="Text CV" cx="150.31" cy="314.93" r="11.34" style="fill: lime; stroke-width: 0px;"/>

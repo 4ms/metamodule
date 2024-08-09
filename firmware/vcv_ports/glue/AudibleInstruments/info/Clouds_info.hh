@@ -40,8 +40,8 @@ struct CloudsInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(150.31), to_mm<72>(314.93), Center, "Text CV", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(191.71), to_mm<72>(314.93), Center, "Out L", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(233.11), to_mm<72>(314.93), Center, "Out R", ""}},
-		GreenRedLight{{to_mm<72>(97.57), to_mm<72>(246.61), Center, "Mix Light", ""}},
 		GreenRedLight{{to_mm<72>(34.3), to_mm<72>(246.61), Center, "Pan Light", ""}},
+		GreenRedLight{{to_mm<72>(97.57), to_mm<72>(246.61), Center, "Mix Light", ""}},
 		GreenRedLight{{to_mm<72>(160.84), to_mm<72>(246.61), Center, "Feedback Light", ""}},
 		GreenRedLight{{to_mm<72>(224.11), to_mm<72>(246.61), Center, "Reverb Light", ""}},
 }};
@@ -72,8 +72,8 @@ struct CloudsInfo : ModuleInfoBase {
         TextCvIn,
         OutLOut,
         OutROut,
-        MixLight,
         PanLight,
+        MixLight,
         FeedbackLight,
         ReverbLight,
     };
@@ -122,8 +122,8 @@ struct CloudsInfo : ModuleInfoBase {
     };
     
     enum {
-        LedMix_Light, 
         LedPan_Light, 
+        LedMix_Light, 
         LedFeedback_Light, 
         LedReverb_Light, 
         NumDiscreteLeds,
