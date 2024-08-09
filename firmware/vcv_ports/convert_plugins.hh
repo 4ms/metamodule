@@ -13,6 +13,7 @@
 #include "glue/AudibleInstruments/info/Rings_info.hh"
 #include "glue/AudibleInstruments/info/Ripples_info.hh"
 #include "glue/AudibleInstruments/info/Shades_info.hh"
+#include "glue/AudibleInstruments/info/Shelves_info.hh"
 #include "glue/AudibleInstruments/info/Stages_info.hh"
 #include "glue/AudibleInstruments/info/Streams_info.hh"
 #include "glue/AudibleInstruments/info/Tides2_info.hh"
@@ -69,10 +70,8 @@ inline bool addModel(rack::plugin::Plugin *p, rack::plugin::Model *model) {
 			return ModuleInfoView::makeView<RipplesInfo>();
 		if (model->slug == "Shades")
 			return ModuleInfoView::makeView<ShadesInfo>();
-
-		//TODO:
-		// if (model->slug == "Shelves")
-		// 	return ModuleInfoView::makeView<ShelvesInfo>();
+		if (model->slug == "Shelves")
+			return ModuleInfoView::makeView<ShelvesInfo>();
 		if (model->slug == "Stages")
 			return ModuleInfoView::makeView<StagesInfo>();
 		if (model->slug == "Streams")
