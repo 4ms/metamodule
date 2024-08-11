@@ -84,6 +84,8 @@ add_executable(
     ${FWDIR}/src/user_settings/settings_serialize.cc
 
 	${FWDIR}/coreproc_plugin/create.cc
+
+	${FWDIR}/metamodule-plugin-sdk/version.cc
     )
 
 target_include_directories(
@@ -98,6 +100,7 @@ target_include_directories(
           ${FWDIR}/src/medium
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
+		  ${FWDIR}
             .
           )
 
