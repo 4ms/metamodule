@@ -5,6 +5,7 @@
 #include "elf_process/elf_relocator.hh"
 #include "host_sym_list.hh"
 #include "keep-symbols.hh"
+#include "metamodule-plugin-sdk/version.hh"
 #include "pr_dbg.hh"
 #include "stm32mp1xx.h"
 #include <cstring>
@@ -43,7 +44,7 @@ struct DynLoader {
 		return "";
 	}
 
-	std::optional<uint32_t> get_sdk_version() {
+	std::optional<Version> get_sdk_version() {
 		auto sym = elf.find_dyn_symbol("sdk_version");
 		if (!sym)
 			sym = elf.find_symbol("sdk_version");
@@ -52,11 +53,13 @@ struct DynLoader {
 
 		auto func_address = sym->offset() + codeblock.data();
 
-		using VersionFunc = uint32_t();
-		auto version_func = *reinterpret_cast<VersionFunc *>(func_address);
+		auto version_func = *reinterpret_cast<Version (*)()>(func_address);
 
-		auto plugin_sdk_version = version_func();
-		return uint32_t(plugin_sdk_version);
+		auto plugin_sdk = version_func();
+
+		pr_dbg("Plugin has version %d.%d.%d\n", plugin_sdk.major, plugin_sdk.minor, plugin_sdk.revision);
+
+		return plugin_sdk;
 	}
 
 	template<typename PluginInitFunc>
@@ -139,7 +142,7 @@ private:
 	void init_globals() {
 		auto initarray_section = elf.find_section(".init_array");
 		if (!initarray_section) {
-			pr_err("Could not find .init_array section");
+			pr_err("Could not find .init_array section\n");
 			return;
 		}
 

@@ -1,6 +1,8 @@
 #pragma once
+#include "metamodule-plugin-sdk/version.hh"
 #include "plugin/Plugin.hpp"
 #include <cstdint>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -12,6 +14,11 @@ struct DynLoader {
 	std::string load() {
 		printf("Plugin was loaded and symbols resolved\n");
 		return "";
+	}
+
+	std::optional<MetaModule::Version> get_sdk_version() {
+		printf("Pretending plugin has same version as firmware\n");
+		return MetaModule::sdk_version();
 	}
 
 	template<typename PluginInitFunc>
