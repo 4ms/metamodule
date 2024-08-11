@@ -115,18 +115,15 @@ bool Archive::extract_files(std::function<uint32_t(std::string_view, std::span<c
 		auto name = entry.name;
 
 		if (entry.type == TarEntry::File) {
-			if (auto filedata = extract_file_entry(entry); filedata.size() > 0) {
-				pr_dump("Extracted %zu bytes for %s\n", filedata.size(), name.c_str());
-				write(name, filedata);
-			} else {
-				all_entries_ok = false;
-				pr_err("Failed to extract %s\n", name.c_str());
-			}
+			auto filedata = extract_file_entry(entry);
+			pr_dump("Extracted %zu bytes for %s\n", filedata.size(), name.c_str());
+			write(name, filedata);
 		} else {
 			pr_trace("Skipping non-file entry %s\n", name.c_str());
 		}
 	}
 
+	// TODO: is there any way this should return false?
 	return all_entries_ok;
 }
 
