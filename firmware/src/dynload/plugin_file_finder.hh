@@ -32,18 +32,20 @@ struct PluginFileFinder {
 
 private:
 	IntercoreStorageMessage find_plugin_files(const IntercoreStorageMessage &message) {
-		pr_dbg("M4: scanning volumes for plugin files (plugin/**/*.so)\n");
+		pr_dbg("M4: scanning volumes for plugin files (metamodule-plugins/*.mmplugin)\n");
 
 		message.plugin_file_list->clear();
 
 		bool usb_ok = false;
 		if (usbdrive_.is_mounted()) {
-			usb_ok = scan_volume(usbdrive_, *message.plugin_file_list);
+			usb_ok = scan_volume(usbdrive_, *message.plugin_file_list, PluginDirName);
+			usb_ok |= scan_volume(usbdrive_, *message.plugin_file_list, "/");
 		}
 
 		bool sd_ok = false;
 		if (sdcard_.is_mounted()) {
-			sd_ok = scan_volume(sdcard_, *message.plugin_file_list);
+			sd_ok = scan_volume(sdcard_, *message.plugin_file_list, PluginDirName);
+			sd_ok |= scan_volume(sdcard_, *message.plugin_file_list, "/");
 		}
 
 		if (usb_ok || sd_ok)

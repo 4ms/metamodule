@@ -198,10 +198,12 @@ private:
 		message.plugin_file_list->clear();
 
 		bool hostfs_ok = false;
-		hostfs_ok = scan_volume(storage.sd_hostfs, *message.plugin_file_list);
+		hostfs_ok = scan_volume(storage.sd_hostfs, *message.plugin_file_list, PluginDirName);
+		hostfs_ok |= scan_volume(storage.sd_hostfs, *message.plugin_file_list, "/");
 
 		bool defaultpatchfs_ok = false;
-		defaultpatchfs_ok = scan_volume(storage.flash_hostfs, *message.plugin_file_list);
+		defaultpatchfs_ok = scan_volume(storage.flash_hostfs, *message.plugin_file_list, PluginDirName);
+		defaultpatchfs_ok |= scan_volume(storage.flash_hostfs, *message.plugin_file_list, "/");
 
 		return (hostfs_ok || defaultpatchfs_ok);
 	}

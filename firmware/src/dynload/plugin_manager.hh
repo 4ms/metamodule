@@ -11,7 +11,7 @@ class PluginManager {
 
 public:
 	PluginManager(FileStorageProxy &file_storage_proxy, FatFileIO &ramdisk)
-		: plugin_file_loader{file_storage_proxy}
+		: plugin_file_loader{file_storage_proxy, ramdisk}
 		, ramdisk{ramdisk} {
 	}
 
@@ -29,6 +29,8 @@ public:
 	}
 
 	void unload_plugin(std::string_view name) {
+		//TODO:
+		// ramdisk.remove_recursive(plugin.fileinfo.plugin_name)
 		loaded_plugin_list.remove_if([&](LoadedPlugin &plugin) { return (plugin.fileinfo.plugin_name == name); });
 	}
 
