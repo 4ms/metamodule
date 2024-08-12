@@ -50,7 +50,7 @@ public:
 	void start() {
 		allocator.reset();
 		if (auto newmem = allocator.allocate(sizeof(PluginFileList))) {
-			plugin_files = new (newmem) PluginFileList;
+			plugin_file_list = new (newmem) PluginFileList;
 			status = {State::RequestList, "", ""};
 		} else {
 			pr_err("Could not allocate %zu bytes for plugin file list\n", sizeof(PluginFileList)); //4164B
@@ -59,7 +59,7 @@ public:
 	}
 
 	void load_plugin(unsigned idx) {
-		if (idx < plugin_files->size()) {
+		if (idx < plugin_files.size()) {
 			status.state = State::PrepareForReadingPlugin;
 			file_idx = idx;
 		}
@@ -67,18 +67,19 @@ public:
 
 	PluginFileList const *found_plugin_list() {
 		status.state = State::Idle;
-		return plugin_files;
+		return &plugin_files;
 	}
 
 	Status process(LoadedPluginList &loaded_plugins) {
-		if (!plugin_files)
+		if (!plugin_file_list)
 			status.state = State::NotInit;
 
 		switch (status.state) {
 
 			case State::RequestList:
-				if (file_storage.request_plugin_file_list(plugin_files))
+				if (file_storage.request_plugin_file_list(plugin_file_list)) {
 					status.state = State::WaitingForList;
+				}
 				break;
 
 			case State::WaitingForList: {
@@ -90,7 +91,8 @@ public:
 				}
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
-					pr_trace("Found %d plugins\n", plugin_files->size());
+					plugin_files = *plugin_file_list; //make local copy
+					pr_trace("Found %d plugins\n", plugin_files.size());
 					status.state = State::GotList;
 					file_idx = 0;
 				}
@@ -100,7 +102,8 @@ public:
 				//////////////////
 
 			case State::PrepareForReadingPlugin: {
-				auto &plugin = (*plugin_files)[file_idx];
+				auto &plugin = plugin_files[file_idx];
+				allocator.reset();
 				buffer = {allocator.allocate(plugin.file_size), plugin.file_size};
 				if (buffer.data()) {
 					status.state = State::RequestReadPlugin;
@@ -112,7 +115,7 @@ public:
 			} break;
 
 			case State::RequestReadPlugin: {
-				auto &plugin = (*plugin_files)[file_idx];
+				auto &plugin = plugin_files[file_idx];
 				if (file_storage.request_load_file(
 						plugin.full_path, plugin.vol, {(char *)buffer.data(), buffer.size()}))
 					status.state = State::LoadingPlugin;
@@ -137,7 +140,7 @@ public:
 			} break;
 
 			case State::UntarPlugin: {
-				auto &plugin_file = (*plugin_files)[file_idx];
+				auto &plugin_file = plugin_files[file_idx];
 				std::string_view plugin_name = plugin_file.plugin_name;
 
 				auto plugin_tar = Tar::Archive({(char *)buffer.data(), buffer.size()});
@@ -154,7 +157,7 @@ public:
 
 					} else if (filename.ends_with(".so") && filename.starts_with(plugin_name)) {
 						so_buffer.assign(buffer.begin(), buffer.end());
-						pr_dbg("Found plugin binary file: %s\n", filename.data());
+						pr_trace("Found plugin binary file: %s\n", filename.data());
 						return buffer.size();
 
 					} else if (filename.ends_with("plugin.json")) {
@@ -167,14 +170,15 @@ public:
 						return buffer.size();
 
 					} else {
-						printf("Skip file: %s\n", filename.data());
+						pr_trace("Skip file: %s\n", filename.data());
 						return 1;
 					}
 				};
 
 				bool all_ok = plugin_tar.extract_files(ramdisk_writer);
 				if (!all_ok) {
-					status.error_message = "Warning: Failed to load some files";
+					pr_warn("Skipped loading some files in plugin dir (did not end in .png)\n");
+					// status.error_message = "Warning: Failed to load some files";
 				}
 				if (plugin_vers.length() == 0) {
 					status.error_message = "Warning: Plugin missing version file.";
@@ -191,7 +195,7 @@ public:
 			} break;
 
 			case State::ProcessingPlugin: {
-				auto &plugin_file = (*plugin_files)[file_idx];
+				auto &plugin_file = plugin_files[file_idx];
 				auto &plugin = loaded_plugins.emplace_back();
 				plugin.fileinfo = plugin_file;
 
@@ -282,7 +286,9 @@ private:
 	std::vector<char> json_buffer;
 
 	// Dynamically allocated in non-cacheable RAM
-	PluginFileList *plugin_files = nullptr;
+	PluginFileList *plugin_file_list = nullptr;
+	// Local copy so we can free the monotonic allocator
+	PluginFileList plugin_files;
 };
 
 } // namespace MetaModule
