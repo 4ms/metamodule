@@ -1,8 +1,8 @@
 static const char Orcas_Heart_Octo_Djembe_patch[] =
 	R"(
 PatchData:
-  patch_name: Orcas_Heart_Octo_Djembe
-  description: Patch Description
+  patch_name: Orcas Heart Octo-Djembe
+  description: 'Orcas Heart sequences 8 djembes, fed through reverb.'
   module_slugs:
     0: HubMedium
     1: SDOrcasHeartV2
@@ -18,6 +18,7 @@ PatchData:
     11: StMix
     12: StMix
     13: StMix
+    14: 'Valley:Plateau'
   int_cables:
     - out:
         module_id: 1
@@ -219,30 +220,40 @@ PatchData:
         module_id: 11
         jack_id: 0
       ins:
-        - module_id: 13
+        - module_id: 14
           jack_id: 0
-      color: 13501
     - out:
         module_id: 11
         jack_id: 1
       ins:
+        - module_id: 14
+          jack_id: 1
+    - out:
+        module_id: 14
+        jack_id: 0
+      ins:
         - module_id: 13
-          jack_id: 2
-      color: 35419
+          jack_id: 0
+    - out:
+        module_id: 14
+        jack_id: 1
+      ins:
+        - module_id: 13
+          jack_id: 1
   mapped_ins: []
   mapped_outs:
-    - panel_jack_id: 0
-      out:
-        module_id: 11
-        jack_id: 0
-    - panel_jack_id: 1
-      out:
-        module_id: 11
-        jack_id: 1
     - panel_jack_id: 2
       out:
         module_id: 13
         jack_id: 0
+    - panel_jack_id: 0
+      out:
+        module_id: 14
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 14
+        jack_id: 1
   static_knobs:
     - module_id: 1
       param_id: 0
@@ -267,7 +278,7 @@ PatchData:
       value: 0
     - module_id: 1
       param_id: 7
-      value: 0.2481928
+      value: 0.3888313
     - module_id: 1
       param_id: 8
       value: 0.22222222
@@ -282,10 +293,10 @@ PatchData:
       value: 1
     - module_id: 1
       param_id: 12
-      value: 0
+      value: 0.7813766
     - module_id: 1
       param_id: 13
-      value: 0.2913386
+      value: 0.16509062
     - module_id: 1
       param_id: 14
       value: 0.5826772
@@ -294,13 +305,13 @@ PatchData:
       value: 0
     - module_id: 1
       param_id: 16
-      value: 0
+      value: 0.52399576
     - module_id: 1
       param_id: 17
       value: 0.5
     - module_id: 1
       param_id: 18
-      value: 0
+      value: 0.30869302
     - module_id: 1
       param_id: 19
       value: 0
@@ -381,7 +392,7 @@ PatchData:
       value: 0.50120515
     - module_id: 2
       param_id: 2
-      value: 0.5
+      value: 0.26260227
     - module_id: 2
       param_id: 3
       value: 0.5
@@ -565,6 +576,96 @@ PatchData:
     - module_id: 13
       param_id: 7
       value: 0.5
+    - module_id: 14
+      param_id: 0
+      value: 0.43546158
+    - module_id: 14
+      param_id: 1
+      value: 0.5645384
+    - module_id: 14
+      param_id: 2
+      value: 0
+    - module_id: 14
+      param_id: 3
+      value: 1
+    - module_id: 14
+      param_id: 4
+      value: 1
+    - module_id: 14
+      param_id: 5
+      value: 0.62
+    - module_id: 14
+      param_id: 6
+      value: 1
+    - module_id: 14
+      param_id: 7
+      value: 0.5982012
+    - module_id: 14
+      param_id: 8
+      value: 1
+    - module_id: 14
+      param_id: 9
+      value: 1
+    - module_id: 14
+      param_id: 10
+      value: 0
+    - module_id: 14
+      param_id: 11
+      value: 0.5
+    - module_id: 14
+      param_id: 12
+      value: 0.03125
+    - module_id: 14
+      param_id: 13
+      value: 0
+    - module_id: 14
+      param_id: 14
+      value: 0
+    - module_id: 14
+      param_id: 15
+      value: 0
+    - module_id: 14
+      param_id: 17
+      value: 0.5
+    - module_id: 14
+      param_id: 18
+      value: 0.5
+    - module_id: 14
+      param_id: 19
+      value: 0.5
+    - module_id: 14
+      param_id: 20
+      value: 0.5
+    - module_id: 14
+      param_id: 21
+      value: 0.5
+    - module_id: 14
+      param_id: 22
+      value: 0.5
+    - module_id: 14
+      param_id: 23
+      value: 0.5
+    - module_id: 14
+      param_id: 24
+      value: 0.5
+    - module_id: 14
+      param_id: 25
+      value: 0.5
+    - module_id: 14
+      param_id: 26
+      value: 0.5
+    - module_id: 14
+      param_id: 27
+      value: 0.5
+    - module_id: 14
+      param_id: 28
+      value: 0.5
+    - module_id: 14
+      param_id: 29
+      value: 0
+    - module_id: 14
+      param_id: 30
+      value: 0.5
   mapped_knobs:
     - name: ''
       set:
@@ -622,42 +723,39 @@ PatchData:
           curve_type: 0
           min: 0
           max: 1
-        - panel_knob_id: 10
-          module_id: 1
-          param_id: 11
-          curve_type: 0
-          min: 0
-          max: 1
         - panel_knob_id: 11
           module_id: 1
           param_id: 12
           curve_type: 0
           min: 0
           max: 1
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
-    - name: ''
-      set: []
+        - panel_knob_id: 4
+          module_id: 14
+          param_id: 0
+          curve_type: 0
+          min: 1
+          max: 0
+        - panel_knob_id: 4
+          module_id: 14
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 14
+          param_id: 7
+          curve_type: 0
+          min: 0
+          max: 1
   midi_maps:
     name: ''
     set: []
   midi_poly_num: 0
-
-'vcvModuleStates':
-  - 'id': 1
-    'plugin': 'eightfold'
-    'model': 'SDOrcasHeartV2'
-    'version': '2.0.0'
-    'data':
-      'selected_scale': 0
+  vcvModuleStates:
+    - module_id: 1
+      data: |-
+        {"selectedScale":0,"globalCounter":10,"totalWeight":11,"counter":[10,10,10,10,10,10,10,10],"divisor":[4,5,6,5,4,3,2,1],"phase":[0,3,4,2,0,2,0,0],"trackOn":[0,0,0,0,0,0,1,0],"weightOn":[0,0,0,0,0,0,11,0],"notes0":[0,0,0,10,11,0,0,0],"notes1":[12,15,9,10,19,8,9,10],"notes2":[0,0,0,10,0,0,0,0],"notes3":[12,15,9,10,19,21,9,10],"notes4":[12,15,9,10,19,21,9,10],"notes5":[12,15,9,10,19,21,9,10],"notes6":[12,15,9,10,19,7,9,10],"notes7":[11,14,7,9,18,7,7,9],"gateOn0":[false,false,false,false,true,false,false,false],"gateOn1":[true,true,true,false,true,true,true,true],"gateOn2":[false,false,false,false,false,false,false,false],"gateOn3":[true,true,true,false,true,true,true,true],"gateOn4":[true,true,true,false,true,true,true,true],"gateOn5":[true,true,true,false,true,true,true,true],"gateOn6":[true,true,true,false,true,true,true,true],"gateOn7":[true,true,true,true,true,true,true,true],"gateChanged0":[true,true,true,false,true,true,true,true],"gateChanged1":[true,true,true,false,true,true,true,true],"gateChanged2":[true,true,true,false,true,true,true,true],"gateChanged3":[true,true,true,false,true,true,true,false],"gateChanged4":[true,true,true,false,true,false,true,true],"gateChanged5":[true,true,true,false,false,true,true,true],"gateChanged6":[true,true,true,true,true,false,true,true],"gateChanged7":[true,true,false,true,true,false,false,true],"gateTimer":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"gateTriggered":[true,true,true,true,true,true,true,true],"muted":[5,4,2,3,0,0,0,1],"shifts":[0,0,0,0,0,0,0,0],"modCvs":[3.6666667461395264,0.66666668653488159,2.3333334922790527,3.6666667461395264,3.6666667461395264,5.6666669845581055,0.3333333432674408,0.0],"modGate":[false,false,false,true,false,true,true,true]}
+    - module_id: 14
+      data: |-
+        {"frozen":false,"freezeToggle":false,"panelStyle":0,"tuned":0,"diffuseInput":1,"preDelayCVSens":0,"inputSensitivity":0,"outputSaturation":0}
 )";
