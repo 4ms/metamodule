@@ -176,9 +176,11 @@ public:
 			modules[1]->update();
 		else {
 			smp.update_modules();
+			// Debug::Pin2::high();
 			for (size_t module_i = 1; module_i < num_modules; module_i += smp.ModuleStride) {
 				modules[module_i]->update();
 			}
+			// Debug::Pin2::low();
 			smp.join();
 		}
 

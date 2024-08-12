@@ -60,9 +60,11 @@ extern "C" void aux_core_main() {
 
 	constexpr auto PlayModuleListIRQn = SMPControl::IRQn(SMPCommand::PlayModuleList);
 	InterruptManager::register_and_start_isr(PlayModuleListIRQn, 1, 0, [&context, &patch_player]() {
+		// Debug::Pin1::high();
 		for (unsigned i = context.starting_idx; i < context.num_modules; i += context.idx_increment) {
 			patch_player->modules[i]->update();
 		}
+		// Debug::Pin1::low();
 		SMPThread::signal_done();
 	});
 

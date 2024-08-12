@@ -67,7 +67,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin3::high();
+		// Debug::Pin0::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -96,7 +96,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			patch_loader.notify_audio_overrun();
 		}
 
-		// Debug::Pin3::low();
+		// Debug::Pin0::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
