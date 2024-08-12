@@ -14,13 +14,17 @@ bool FlashLoader::check_flash_chip() {
 }
 
 bool FlashLoader::write_sectors(uint32_t base_addr, std::span<uint8_t> buffer) {
+	constexpr bool verbose_log = false;
+
 	//round up to smallest 4kB blocks that contains image
 	unsigned bytes_to_erase = (buffer.size() + 4095) & ~4095;
 
 	uint32_t addr = base_addr;
 
 	while (bytes_to_erase) {
-		pr_trace("Erasing 4k sector at 0x%x\n", (unsigned)addr);
+		if constexpr (verbose_log)
+			pr_dump("Erasing 4k sector at 0x%x\n", (unsigned)addr);
+
 		if (!flash.erase(mdrivlib::QSpiFlash::SECTOR, addr)) {
 			pr_err("ERROR: Flash failed to erase\n");
 			return false;
@@ -29,7 +33,9 @@ bool FlashLoader::write_sectors(uint32_t base_addr, std::span<uint8_t> buffer) {
 		bytes_to_erase -= 4096;
 	}
 
-	pr_trace("Writing 0x%x B to %x\n", buffer.size(), base_addr);
+	if constexpr (verbose_log)
+		pr_dump("Writing 0x%x B to %x\n", buffer.size(), base_addr);
+
 	if (!flash.write(buffer.data(), base_addr, buffer.size())) {
 		pr_err("ERROR: Flash failed to write\n");
 		return false;

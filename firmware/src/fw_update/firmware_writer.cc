@@ -16,9 +16,9 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 	using enum IntercoreStorageMessage::FlashTarget;
 
 	if (message.message_type == StartChecksumCompare) {
-		pr_dbg("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 
 		if (message.flashTarget == WIFI) {
+			pr_trace("-> Compare with checksum %s at 0x%08x\n", message.checksum.c_str(), message.address);
 			return compareChecksumWifi(message.address, message.length, {message.checksum.data()});
 
 		} else if (message.flashTarget == QSPI) {
@@ -31,7 +31,7 @@ std::optional<IntercoreStorageMessage> FirmwareWriter::handle_message(const Inte
 		}
 
 	} else if (message.message_type == StartFlashing) {
-		pr_dbg("-> Start flashing to 0x%08x\n", message.address);
+		pr_trace("-> Start flashing %u bytes to 0x%08x\n", message.buffer.size(), message.address);
 		auto buf = std::span<uint8_t>{(uint8_t *)message.buffer.data(), message.buffer.size()};
 
 		if (message.flashTarget == WIFI) {
@@ -120,10 +120,10 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 			}
 
 			if (not error_during_writes) {
-				pr_dbg("-> Flashing completed\n");
+				pr_trace("-> Flashing completed\n");
 				returnValue = {.message_type = FlashingOk};
 			} else {
-				pr_dbg("-> Flashing failed\n");
+				pr_trace("-> Flashing failed\n");
 				returnValue = {.message_type = FlashingFailed};
 			}
 		} else {

@@ -144,7 +144,7 @@ public:
 				std::string_view plugin_name = plugin_file.plugin_name;
 
 				auto plugin_tar = Tar::Archive({(char *)buffer.data(), buffer.size()});
-				plugin_tar.print_info();
+				// plugin_tar.print_info();
 
 				so_buffer.clear();
 				json_buffer.clear();

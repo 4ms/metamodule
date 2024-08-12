@@ -135,7 +135,7 @@ std::vector<char> Archive::extract_file_entry(TarEntry const &entry) {
 	return filedata;
 }
 
-void Archive::print_info() {
+void Archive::print_contents() {
 	for (auto &entry : archive) {
 		pr_info("- %s\n", entry.name.c_str());
 	}

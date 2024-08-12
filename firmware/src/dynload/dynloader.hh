@@ -61,7 +61,7 @@ struct DynLoader {
 
 		auto plugin_sdk = version_func();
 
-		pr_dbg("Plugin has version %d.%d.%d\n", plugin_sdk.major, plugin_sdk.minor, plugin_sdk.revision);
+		pr_info("Plugin has version %d.%d.%d\n", plugin_sdk.major, plugin_sdk.minor, plugin_sdk.revision);
 
 		return plugin_sdk;
 	}
@@ -70,17 +70,17 @@ struct DynLoader {
 	PluginInitFunc *find_init_func() {
 		auto init_plugin_symbol = elf.find_dyn_symbol("_Z4initPN4rack6plugin6PluginE");
 		if (!init_plugin_symbol) {
-			pr_warn("No c++ init(rack::plugin::Plugin*) symbol found, trying init()\n");
+			pr_trace("No c++ init(rack::plugin::Plugin*) symbol found, trying init()\n");
 			init_plugin_symbol = elf.find_dyn_symbol("init");
 		}
 
 		if (!init_plugin_symbol) {
-			pr_warn("No init() dyn symbol found, trying non-dyn init(Plugin*)\n");
+			pr_trace("No init() dyn symbol found, trying non-dyn init(Plugin*)\n");
 			init_plugin_symbol = elf.find_symbol("_Z4initPN4rack6plugin6PluginE");
 		}
 
 		if (!init_plugin_symbol) {
-			pr_warn("No non-dyn init(Plugin*) symbol found, trying non-dyn init()\n");
+			pr_trace("No non-dyn init(Plugin*) symbol found, trying non-dyn init()\n");
 			init_plugin_symbol = elf.find_symbol("init");
 		}
 
@@ -99,7 +99,7 @@ private:
 
 		codeblock.clear();
 		codeblock.resize(load_size);
-		pr_info("Allocating %zu bytes for loading code at 0x%x\n", load_size, codeblock.begin());
+		pr_trace("Allocating %zu bytes for loading code at 0x%x\n", load_size, codeblock.begin());
 
 		for (auto &seg : elf.segments) {
 			if (seg.is_loadable()) {
@@ -117,7 +117,7 @@ private:
 	void init_host_symbol_table() {
 		if (hostsyms.size() == 0) {
 			auto host_symbols = get_host_symbols();
-			pr_info("Found %zu host symbols in binary to export for plugins\n", host_symbols.size());
+			pr_trace("Found %zu host symbols in binary to export for plugins\n", host_symbols.size());
 
 			hostsyms.insert(hostsyms.end(), host_symbols.begin(), host_symbols.end());
 
@@ -161,7 +161,7 @@ private:
 		for (auto ctor : ctors) {
 			auto addr = reinterpret_cast<uint32_t>(ctor);
 			ctor = reinterpret_cast<ctor_func_t>(addr + codeblock.data());
-			pr_info("Calling ctor %p\n", ctor);
+			pr_trace("Calling ctor %p\n", ctor);
 			ctor();
 		}
 	}

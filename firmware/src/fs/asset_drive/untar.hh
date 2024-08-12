@@ -28,7 +28,7 @@ class Archive {
 public:
 	Archive(std::span<const char> filedata);
 
-	void print_info();
+	void print_contents();
 	using extract_func_t = std::function<uint32_t(std::string_view, std::span<const char>)>;
 	bool extract_files(extract_func_t func);
 
