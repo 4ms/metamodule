@@ -26,12 +26,14 @@ public:
 
 	void load_plugin(unsigned idx) {
 		plugin_file_loader.load_plugin(idx);
+		ramdisk.debug_print_disk_info();
 	}
 
 	void unload_plugin(std::string_view name) {
 		//TODO:
 		// ramdisk.remove_recursive(plugin.fileinfo.plugin_name)
 		loaded_plugin_list.remove_if([&](LoadedPlugin &plugin) { return (plugin.fileinfo.plugin_name == name); });
+		ramdisk.debug_print_disk_info();
 	}
 
 	auto process_loading() {

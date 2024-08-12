@@ -46,6 +46,8 @@ struct InternalPluginManager {
 		};
 
 		asset_tar.extract_files(ramdisk_writer);
+
+		ramdisk.debug_print_disk_info();
 	}
 
 	void load_internal_plugins() {
