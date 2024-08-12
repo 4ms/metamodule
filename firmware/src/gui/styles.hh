@@ -135,7 +135,7 @@ struct Gui {
 
 	static constexpr std::array<lv_color_t, 19> palette_main = {
 		lv_color_make_rgb565(0xF4, 0x00, 0x00), // RED
-		lv_color_make_rgb565(0xF0, 0x63, 0x92), // PINK, F06392
+		lv_color_make_rgb565(0xF0, 0x63, 0xB2), // PINK
 		lv_color_make_rgb565(0x9C, 0x27, 0xB0), // PURPLE,
 		lv_color_make_rgb565(0x67, 0x3A, 0xB7), // DEEP_PURPLE,
 		lv_color_make_rgb565(0x3F, 0x51, 0xB5), // INDIGO,
