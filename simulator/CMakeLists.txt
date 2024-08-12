@@ -75,6 +75,7 @@ add_executable(
     ${FWDIR}/lib/fatfs/source/ff.c
     ${FWDIR}/lib/fatfs/source/ffunicode.c
     ${FWDIR}/src/fs/fatfs/diskio.cc
+    ${FWDIR}/src/fs/fatfs/delete_node.cc
     ${FWDIR}/src/fs/time_convert.cc
     #Tar:
     ${FWDIR}/src/fs/asset_drive/untar.cc

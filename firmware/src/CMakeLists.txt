@@ -44,6 +44,7 @@ target_sources(lvgl
     PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
             ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
             ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/delete_node.cc
 )
 
 #
