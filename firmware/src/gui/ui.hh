@@ -1,5 +1,4 @@
 #pragma once
-#include "conf/plugin_autoload_settings.hh"
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "dynload/plugin_manager.hh"
@@ -12,6 +11,7 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
+#include "user_settings/plugin_autoload_settings.hh"
 
 namespace MetaModule
 {
