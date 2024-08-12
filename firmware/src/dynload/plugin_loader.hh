@@ -148,12 +148,20 @@ public:
 
 				so_buffer.clear();
 				json_buffer.clear();
+				files_copied_to_ramdisk.clear();
 
 				std::string plugin_vers;
 
 				auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
 					if (filename.ends_with(".png")) {
-						return ramdisk.write_file(filename, buffer);
+						if (!ramdisk.file_exists(filename)) {
+							pr_trace("Copying file to ramdisk: %s\n", filename.data());
+							files_copied_to_ramdisk.emplace_back(filename);
+							return ramdisk.write_file(filename, buffer);
+						} else {
+							pr_trace("File exists, skipping: %s\n", filename.data());
+							return 0;
+						}
 
 					} else if (filename.ends_with(".so") && filename.starts_with(plugin_name)) {
 						so_buffer.assign(buffer.begin(), buffer.end());
@@ -171,7 +179,7 @@ public:
 
 					} else {
 						pr_trace("Skip file: %s\n", filename.data());
-						return 1;
+						return 0;
 					}
 				};
 
@@ -203,11 +211,17 @@ public:
 				plugin.rack_plugin.slug = plugin_json.slug.length() ? plugin_json.slug : plugin_file.plugin_name;
 				plugin.rack_plugin.name = plugin_json.name.length() ? plugin_json.name : plugin_file.plugin_name;
 
+				plugin.loaded_files = std::move(files_copied_to_ramdisk);
+
 				if (load_plugin(plugin))
 					status.state = State::Success;
 				else {
 					status.state = State::Error;
-					// ramdisk.remove_recursive(plugin.fileinfo.dir_name);
+					// Cleanup files we copied to the ramdisk
+					for (auto const &file : plugin.loaded_files) {
+						ramdisk.delete_file(file);
+					}
+					loaded_plugins.pop_back();
 				}
 
 			} break;
@@ -284,10 +298,12 @@ private:
 	std::span<uint8_t> buffer;
 	std::vector<uint8_t> so_buffer;
 	std::vector<char> json_buffer;
+	std::vector<std::string> files_copied_to_ramdisk;
 
 	// Dynamically allocated in non-cacheable RAM
+	// Used to transfer from M4 to A7 core
 	PluginFileList *plugin_file_list = nullptr;
-	// Local copy so we can free the monotonic allocator
+
 	PluginFileList plugin_files;
 };
 

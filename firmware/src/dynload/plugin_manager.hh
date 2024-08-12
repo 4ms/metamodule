@@ -31,9 +31,20 @@ public:
 	}
 
 	void unload_plugin(std::string_view name) {
-		//TODO:
-		// ramdisk.remove_recursive(plugin.fileinfo.plugin_name)
-		loaded_plugin_list.remove_if([&](LoadedPlugin &plugin) { return (plugin.fileinfo.plugin_name == name); });
+		for (unsigned i = 0; auto const &plugin : loaded_plugin_list) {
+			if (plugin.fileinfo.plugin_name == name) {
+
+				// Cleanup files we copied to the ramdisk
+				for (auto const &file : plugin.loaded_files) {
+					ramdisk.delete_file(file);
+				}
+
+				// Delete it
+				loaded_plugin_list.erase(std::next(loaded_plugin_list.begin(), i));
+				break;
+			}
+			i++;
+		}
 		ramdisk.debug_print_disk_info();
 	}
 

@@ -160,6 +160,11 @@ public:
 		};
 	}
 
+	bool file_exists(std::string_view filename) {
+		auto res = f_stat(filename.data(), nullptr);
+		return res == FR_OK;
+	}
+
 	bool get_fat_filinfo(std::string_view filename, FILINFO &fno) {
 		f_chdrive(_fatvol);
 
@@ -261,9 +266,12 @@ public:
 	bool delete_file(std::string_view filename) {
 		f_chdrive(_fatvol);
 		auto res = f_unlink(filename.data());
-		if (res != FR_OK)
+		if (res != FR_OK) {
+			pr_err("Failed to delete file %s\n", filename.data());
 			return false;
+		}
 
+		pr_dbg("Deleted file %s\n", filename.data());
 		return true;
 	}
 
