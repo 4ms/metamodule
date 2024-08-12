@@ -45,7 +45,11 @@ struct DynLoader {
 	}
 
 	std::optional<Version> get_sdk_version() {
-		auto sym = elf.find_dyn_symbol("sdk_version");
+		auto sym = elf.find_dyn_symbol("_ZN10MetaModule11sdk_versionEv");
+		if (!sym)
+			sym = elf.find_symbol("_ZN10MetaModule11sdk_versionEv");
+		if (!sym)
+			sym = elf.find_dyn_symbol("sdk_version");
 		if (!sym)
 			sym = elf.find_symbol("sdk_version");
 		if (!sym)
