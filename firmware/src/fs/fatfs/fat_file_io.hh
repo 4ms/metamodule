@@ -1,6 +1,7 @@
 #pragma once
 #include "disk_ops.hh"
 #include "fs/dir_entry_kind.hh"
+#include "fs/fatfs/delete_node.hh"
 #include "fs/volumes.hh"
 #include "pr_dbg.hh"
 #include <cstdint>
@@ -159,6 +160,11 @@ public:
 		};
 	}
 
+	bool file_exists(std::string_view filename) {
+		auto res = f_stat(filename.data(), nullptr);
+		return res == FR_OK;
+	}
+
 	bool get_fat_filinfo(std::string_view filename, FILINFO &fno) {
 		f_chdrive(_fatvol);
 
@@ -260,10 +266,39 @@ public:
 	bool delete_file(std::string_view filename) {
 		f_chdrive(_fatvol);
 		auto res = f_unlink(filename.data());
-		if (res != FR_OK)
+		if (res != FR_OK) {
+			pr_err("Failed to delete file %s\n", filename.data());
 			return false;
+		}
 
+		pr_dbg("Deleted file %s\n", filename.data());
 		return true;
+	}
+
+	bool remove_recursive(std::string_view dir) {
+		f_chdrive(_fatvol);
+		FILINFO info;
+		std::array<char, 256> path{};
+		std::copy(dir.begin(), dir.end(), path.begin());
+		auto res = delete_node(path.data(), path.size(), &info);
+		return res == FR_OK;
+	}
+
+	void debug_print_disk_info() {
+		/* Get volume information and free clusters of drive 1 */
+		FATFS *fs = nullptr;
+		DWORD free_clust = 0;
+		auto res = f_getfree(_fatvol, &free_clust, &fs);
+
+		if (res == FR_OK && fs) {
+			/* Get total sectors and free sectors */
+			auto tot_sect = (fs->n_fatent - 2) * fs->csize;
+			auto free_sect = free_clust * fs->csize;
+
+			// Assume 512B sector:
+			pr_info("Ramdisk: %u/%u KB free/total\n", free_sect / 2, tot_sect / 2);
+		} else
+			pr_err("Error f_getfree returned %d\n", res);
 	}
 
 	void debug_print_fileinfo(FileInfo info) {

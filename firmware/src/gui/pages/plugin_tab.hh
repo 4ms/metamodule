@@ -1,5 +1,4 @@
 #pragma once
-#include "conf/plugin_autoload_settings.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
@@ -8,6 +7,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "user_settings/plugin_autoload_settings.hh"
 #include <algorithm>
 
 namespace MetaModule
@@ -78,11 +78,7 @@ struct PluginTab : SystemMenuTab {
 			auto *found_plugins = plugin_manager.found_plugin_list();
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
-				// Strip .so
 				auto pluginname = std::string{std::string_view{plugin.plugin_name}};
-				if (pluginname.ends_with(".so")) {
-					pluginname = pluginname.substr(0, pluginname.length() - 3);
-				}
 
 				if (!plugin_already_loaded(pluginname)) {
 

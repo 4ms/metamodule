@@ -44,6 +44,7 @@ target_sources(lvgl
     PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
             ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
             ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/delete_node.cc
 )
 
 #
@@ -112,6 +113,7 @@ add_executable(
   ${FWDIR}/src/gui/slsexport/ui_local.cc
   #
   ${FWDIR}/src/dynload/dynloader.cc
+  ${FWDIR}/metamodule-plugin-sdk/version.cc
   #
   ${SHARED}/patch_convert/yaml_to_patch.cc
   ${SHARED}/patch_convert/patch_to_yaml.cc

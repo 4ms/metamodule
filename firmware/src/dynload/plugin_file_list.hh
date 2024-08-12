@@ -11,8 +11,8 @@ static constexpr std::string_view PluginDirName{"metamodule-plugins"};
 
 struct PluginFile {
 	Volume vol{Volume::MaxVolumes};
-	StaticString<255> dir_name;	   //"BrandX"     ==> "/{Volume}/metamodule-plugins/BrandX"
-	StaticString<255> plugin_name; //"PluginName" ==> "/{Volume}/metamodule-plugins/BrandX/PluginName.so"
+	StaticString<255> full_path;   //"metamodule-plugins/BrandX.mmpatch"
+	StaticString<255> plugin_name; //"BrandX" ==> "dirname will untar to: BrandX/BrandX.so"
 	size_t file_size{};
 };
 

@@ -75,6 +75,7 @@ add_executable(
     ${FWDIR}/lib/fatfs/source/ff.c
     ${FWDIR}/lib/fatfs/source/ffunicode.c
     ${FWDIR}/src/fs/fatfs/diskio.cc
+    ${FWDIR}/src/fs/fatfs/delete_node.cc
     ${FWDIR}/src/fs/time_convert.cc
     #Tar:
     ${FWDIR}/src/fs/asset_drive/untar.cc
@@ -84,6 +85,8 @@ add_executable(
     ${FWDIR}/src/user_settings/settings_serialize.cc
 
 	${FWDIR}/coreproc_plugin/create.cc
+
+	${FWDIR}/metamodule-plugin-sdk/version.cc
     )
 
 target_include_directories(
@@ -98,6 +101,7 @@ target_include_directories(
           ${FWDIR}/src/medium
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
+		  ${FWDIR}
             .
           )
 

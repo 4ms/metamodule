@@ -176,9 +176,11 @@ public:
 			modules[1]->update();
 		else {
 			smp.update_modules();
+			// Debug::Pin2::high();
 			for (size_t module_i = 1; module_i < num_modules; module_i += smp.ModuleStride) {
 				modules[module_i]->update();
 			}
+			// Debug::Pin2::low();
 			smp.join();
 		}
 
@@ -399,14 +401,12 @@ public:
 		pd.add_mapped_injack(panel_jack_id, jack);
 		if (panel_jack_id < in_conns.size())
 			update_or_add(in_conns[panel_jack_id], jack);
-		modules[jack.module_id]->mark_input_patched(jack.jack_id);
 	}
 
 	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
 		pd.add_mapped_outjack(panel_jack_id, jack);
 		if (panel_jack_id < out_conns.size())
 			out_conns[panel_jack_id] = jack;
-		modules[jack.module_id]->mark_output_patched(jack.jack_id);
 	}
 
 	void disconnect_injack(Jack jack) {

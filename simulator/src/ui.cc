@@ -39,6 +39,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 		}
 	}
 
+	plugin_manager.autoload_plugins(settings.plugin_autoload);
+
 	patch_playloader.notify_audio_is_muted();
 	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";
 

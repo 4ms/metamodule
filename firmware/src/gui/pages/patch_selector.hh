@@ -66,6 +66,7 @@ struct PatchSelectorPage : PageBase {
 				for (auto [i, entry] : enumerate(roller_item_infos)) {
 					if (entry.path == dir && entry.vol == vol) {
 						lv_roller_set_selected(ui_PatchListRoller, i + 1, LV_ANIM_ON);
+						scroll_to_next_valid();
 						break;
 					}
 				}
@@ -368,19 +369,17 @@ struct PatchSelectorPage : PageBase {
 	}
 
 private:
-	static void patchlist_scroll_cb(lv_event_t *event) {
+	void scroll_to_next_valid() {
 		static uint32_t prev_idx = 0;
-
-		auto page = static_cast<PatchSelectorPage *>(event->user_data);
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
 
 		// Skip over dir entries:
-		if (idx < page->roller_item_infos.size()) {
-			auto &entry = page->roller_item_infos[idx];
+		if (idx < roller_item_infos.size()) {
+			auto &entry = roller_item_infos[idx];
 			if (entry.kind == DirEntryKind::Dir) {
 				auto max = lv_roller_get_option_cnt(ui_PatchListRoller) - 1;
 				auto new_idx = (idx == 0) ? 1 : (idx >= max) ? max - 1 : (idx > prev_idx) ? idx + 1 : idx - 1;
-				if (page->roller_item_infos[new_idx].kind == DirEntryKind::Dir) {
+				if (roller_item_infos[new_idx].kind == DirEntryKind::Dir) {
 					// Handle skipping over two consecutive Dir entries
 					new_idx = (new_idx == 0)   ? 2 :
 							  (new_idx >= max) ? max - 1 :
@@ -391,6 +390,14 @@ private:
 				prev_idx = new_idx;
 			}
 		}
+	}
+
+	static void patchlist_scroll_cb(lv_event_t *event) {
+
+		auto page = static_cast<PatchSelectorPage *>(event->user_data);
+
+		page->scroll_to_next_valid();
+
 		if (!page->is_populating_subdir_panel)
 			page->refresh_subdir_panel();
 	}

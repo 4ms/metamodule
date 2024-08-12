@@ -126,15 +126,15 @@ std::string_view ModuleFactory::getModuleFaceplate(std::string_view combined_slu
 		return "";
 }
 
-std::string ModuleFactory::getModuleDisplayName(std::string_view combined_slug) {
+std::string_view ModuleFactory::getModuleDisplayName(std::string_view combined_slug) {
 	if (auto module = find_module(combined_slug))
 		return module->display_name;
 	else {
 		[[maybe_unused]] auto [_, module_name] = brand_module(combined_slug);
 		if (module_name.length())
-			return std::string{module_name};
+			return module_name;
 		else
-			return std::string{combined_slug};
+			return combined_slug;
 	}
 }
 
