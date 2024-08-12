@@ -195,9 +195,12 @@ struct PatchPlayLoader {
 	}
 
 	void prepare_remove_plugin(std::string_view brand_slug) {
+		auto playing_patch = patches_.get_playing_patch();
+		if (!playing_patch)
+			return;
+
 		bool patch_contains_brand = false;
 
-		auto playing_patch = patches_.get_playing_patch();
 		std::string brand_prefix = std::string(brand_slug) + ":";
 		for (std::string_view module_slug : playing_patch->module_slugs) {
 			if (module_slug.starts_with(brand_prefix)) {
