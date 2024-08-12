@@ -1,5 +1,4 @@
 #pragma once
-#include "conf/plugin_autoload_settings.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
@@ -8,6 +7,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "user_settings/plugin_autoload_settings.hh"
 #include <algorithm>
 
 namespace MetaModule

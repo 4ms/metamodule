@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/audio_settings.hh"
-#include "conf/plugin_autoload_settings.hh"
 #include "gui/pages/view_settings.hh"
+#include "plugin_autoload_settings.hh"
 
 namespace MetaModule
 {

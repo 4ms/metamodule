@@ -90,60 +90,11 @@ public:
 		return params.lights;
 	}
 
-	bool new_patch_data = false;
-
 	void autoload_plugins() {
-		const auto &plugin_settings = settings.plugin_autoload;
-
-		pr_info("Autoload: Starting...\n");
-
-		if (plugin_settings.slug.size() == 0) {
-			pr_info("Autoload: No plugins to load\n");
-			return;
-		}
-
-		plugin_manager.start_loading_plugin_list();
-		auto result = plugin_manager.process_loading();
-		while (result.state != PluginFileLoader::State::GotList && result.state != PluginFileLoader::State::Error) {
-			result = plugin_manager.process_loading();
-		}
-
-		if (result.error_message.length()) {
-			pr_err("Autoload: Error: %s\n", result.error_message.c_str());
-			return;
-		}
-
-		const auto found_plugins = plugin_manager.found_plugin_list();
-
-		for (const auto &s : plugin_settings.slug) {
-			pr_info("Autoload: Looking for plugin: %s\n", s.c_str());
-			const auto match = std::find_if(found_plugins->begin(), found_plugins->end(), [s](PluginFile const &f) {
-				const auto &plugin_name = std::string{std::string_view{f.plugin_name}};
-				if (plugin_name == s || (plugin_name.contains(s) && plugin_name.ends_with(".so"))) {
-					return true;
-				}
-				return false;
-			});
-
-			if (match == found_plugins->end()) {
-				pr_info("Autoload: Can't find plugin: %s\n", s.c_str());
-				continue;
-			}
-			const auto idx = std::distance(found_plugins->begin(), match);
-			plugin_manager.load_plugin(idx);
-			result = plugin_manager.process_loading();
-			while (result.state != PluginFileLoader::State::Success && result.state != PluginFileLoader::State::Error) {
-				result = plugin_manager.process_loading();
-			}
-			if (result.error_message.length()) {
-				pr_err("Autoload: Error: %s\n", result.error_message.c_str());
-				continue;
-			}
-			pr_info("Autoload: Loaded plugin: %s\n", s.c_str());
-		}
-
-		pr_info("Autoload: Complete\n");
+		plugin_manager.autoload_plugins(settings.plugin_autoload);
 	}
+
+	bool new_patch_data = false;
 
 private:
 	void page_update_task() {
