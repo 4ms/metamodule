@@ -78,11 +78,7 @@ struct PluginTab : SystemMenuTab {
 			auto *found_plugins = plugin_manager.found_plugin_list();
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
-				// Strip .so
 				auto pluginname = std::string{std::string_view{plugin.plugin_name}};
-				if (pluginname.ends_with(".so")) {
-					pluginname = pluginname.substr(0, pluginname.length() - 3);
-				}
 
 				if (!plugin_already_loaded(pluginname)) {
 
