@@ -1,4 +1,3 @@
-#include "console/pr_dbg.hh"
 #include "ff.h"
 
 // From: http://elm-chan.org/fsw/ff/res/app2.c
