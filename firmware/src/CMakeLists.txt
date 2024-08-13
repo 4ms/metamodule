@@ -58,12 +58,14 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 
+add_subdirectory(${SHARED}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
+
 #
 # RYML
 #
-if (NOT TARGET ryml)
-  add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
-endif()
+# if (NOT TARGET ryml)
+#   add_subdirectory(${SHARED}/patch-serial/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+# endif()
 
 #
 # Jansson
@@ -114,11 +116,6 @@ add_executable(
   #
   ${FWDIR}/src/dynload/dynloader.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc
-  #
-  ${SHARED}/patch_convert/yaml_to_patch.cc
-  ${SHARED}/patch_convert/patch_to_yaml.cc
-  ${SHARED}/patch_convert/ryml/ryml_serial.cc
-  ${SHARED}/patch_convert/ryml/ryml_init.cc
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
@@ -198,8 +195,7 @@ target_include_directories(
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
           ${SHARED}
           ${SHARED}/patch
-          ${SHARED}/patch_convert
-          ${SHARED}/patch_convert/ryml
+          ${SHARED}/patch-serial/ryml
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
@@ -212,7 +208,7 @@ if (NOT TARGET cpputil::cpputil)
 endif()
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui ryml cpputil vcv_ports)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui metamodule::patch-serial cpputil vcv_ports)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 # target_link_libraries(main.elf PUBLIC coreproc_plugin_export)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)

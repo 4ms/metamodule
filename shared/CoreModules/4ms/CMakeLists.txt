@@ -5,6 +5,7 @@ add_library(CoreModules-4ms OBJECT)
 target_compile_features(CoreModules-4ms PUBLIC cxx_std_23)
 
 target_include_directories(CoreModules-4ms PUBLIC 
+	./
 	core/tapo/stmlib
 	core/tapo/
 	core/alpaca/include

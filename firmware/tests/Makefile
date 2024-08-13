@@ -4,7 +4,7 @@
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR = $(TEST_DIR)
 BUILDDIR = $(TEST_DIR)/build
-RYMLDIR = ../shared/patch_convert/ryml/rapidyaml
+RYMLDIR = ../shared/patch-serial/ryml/rapidyaml
 
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
@@ -13,10 +13,10 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
-TEST_SOURCES += ../shared/patch_convert/yaml_to_patch.cc
-TEST_SOURCES += ../shared/patch_convert/patch_to_yaml.cc
-TEST_SOURCES += ../shared/patch_convert/ryml/ryml_serial.cc
-TEST_SOURCES += ../shared/patch_convert/ryml/ryml_init.cc
+TEST_SOURCES += ../shared/patch-serial/yaml_to_patch.cc
+TEST_SOURCES += ../shared/patch-serial/patch_to_yaml.cc
+TEST_SOURCES += ../shared/patch-serial/ryml/ryml_serial.cc
+TEST_SOURCES += ../shared/patch-serial/ryml/ryml_init.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 TEST_SOURCES += src/fs/time_convert.cc
@@ -40,8 +40,8 @@ CXXFLAGS = 	-Wall \
 			-I../src \
 			-I../shared \
 			-I../shared/cpputil \
-			-I../shared/patch_convert \
-			-I../shared/patch_convert/ryml \
+			-I../shared/patch-serial \
+			-I../shared/patch-serial/ryml \
 			-I../shared/CoreModules \
 			-Imetamodule-plugin-sdk/metamodule-core-interface \
 			-I$(RYMLDIR)/src \
