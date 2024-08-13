@@ -11,9 +11,6 @@
 #include "internal_plugin_manager.hh"
 #include "patch_play/patch_player.hh"
 
-// Just to fix clangd:
-#include "helpers.hpp"
-
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
 static inline FrameBufferT framebuf1 alignas(64);
@@ -107,8 +104,9 @@ extern "C" void aux_core_main() {
 	// while (HWSemaphore<M4CoreReady>::is_locked())
 	// 	;
 
-	HAL_Delay(300); //allow time to load initial patch: TODO use semaphor
+	//HAL_Delay(300); //allow time to load initial patch: TODO use semaphor
 
+	ui.load_initial_patch();
 	ui.autoload_plugins();
 
 	while (true) {

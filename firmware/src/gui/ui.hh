@@ -98,6 +98,10 @@ public:
 		return params.displays;
 	}
 
+	void load_initial_patch() {
+		patch_playloader.load_initial_patch(settings.last_patch_opened, settings.last_patch_vol);
+	}
+
 	bool new_patch_data = false;
 
 private:
