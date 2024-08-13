@@ -128,14 +128,12 @@ struct ModuleViewPage : PageBase {
 			auto &drawn = drawn_element.gui_element;
 
 			std::visit(overloaded{
-						   [](auto &el) {},
-						   [&](LightElement const &el) {
+						   [&](auto const &el) {
 							   for (unsigned i = 0; i < drawn.count.num_lights; i++) {
 								   params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
 							   }
 						   },
 						   [&](DynamicTextDisplay const &el) {
-							   printf("Start watching display %d\n", drawn.idx.light_idx);
 							   params.displays.start_watching_display(this_module_id, drawn.idx.light_idx);
 						   },
 					   },
@@ -357,6 +355,7 @@ struct ModuleViewPage : PageBase {
 
 	void blur() final {
 		params.lights.stop_watching_all();
+		params.displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}

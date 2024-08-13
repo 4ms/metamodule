@@ -29,7 +29,7 @@ struct WatchedTextDisplay {
 };
 
 struct TextDisplayWatcher {
-	static constexpr size_t MaxDisplaysToWatch = 4;
+	static constexpr size_t MaxDisplaysToWatch = 8;
 
 	std::array<WatchedTextDisplay, MaxDisplaysToWatch> watch_displays;
 
@@ -68,8 +68,11 @@ struct TextDisplayWatcher {
 	}
 
 	void stop_watching_all() {
-		for (auto &w : watch_displays)
-			w.deactivate();
+		for (auto &w : watch_displays) {
+			if (w.is_active()) {
+				w.deactivate();
+			}
+		}
 	}
 };
 
