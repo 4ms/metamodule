@@ -1,16 +1,18 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.19)
 
 add_library(CoreModules STATIC
-  ${SHARED}/CoreModules/hub/hub_medium.cc
-  ${SHARED}/CoreModules/moduleFactory.cc
-  ${SHARED}/CoreModules/modules_helpers.cc
+  hub/hub_medium.cc
+  moduleFactory.cc
 )
+
+# add_subdirectory(4ms)
+# target_link_libraries(CoreModules PUBLIC CoreModules-4ms)
 
 target_link_libraries(CoreModules PRIVATE metamodule-core-interface cpputil)
 
 target_include_directories(CoreModules
   PRIVATE
-  ${SHARED}
+  ../
   ${FWDIR}/src
   ${FWDIR}/src/console
 )
