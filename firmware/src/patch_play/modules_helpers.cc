@@ -25,7 +25,7 @@ std::optional<float> get_normalized_default_value(Element const &element) {
 			},
 		},
 		element);
-	// clang-format on
+// clang-format on
 }
 
 } // namespace MetaModule

@@ -1,10 +1,10 @@
 #pragma once
-#include "CoreModules/modules_helpers.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "patch_play/modules_helpers.hh"
 #include "src/core/lv_obj_pos.h"
 #include "src/misc/lv_timer.h"
 
