@@ -148,7 +148,7 @@ private:
 				}
 			},
 			"Do you really want to PERMANENTLY DELETE all patches stored internally? This will replace them with "
-			"factory default patches.\n",
+			"factory default patches. You must reboot.\n",
 			"Delete");
 	}
 

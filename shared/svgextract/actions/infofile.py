@@ -253,6 +253,7 @@ def panel_to_components(tree):
 
         #Yellow: Display
         elif shape == "rect" and color == '#ffff00':
+            c['coord_ref'] = "TopLeft";
             set_class_if_not_set(c, "TextDisplay")
             c['category'] = "Display"
             components['lights'].append(c)
@@ -378,8 +379,12 @@ def list_elem_definitions(elems, DPI):
         source += f"{k['class']}{{{{"
         if k['class'] == "AltParamChoiceLabeled":
             source += f"{{"
-        source += f"to_mm<{DPI}>({k['cx']}), "
-        source += f"to_mm<{DPI}>({k['cy']}), "
+        if k['coord_ref'] == "Center":
+            source += f"to_mm<{DPI}>({k['cx']}), "
+            source += f"to_mm<{DPI}>({k['cy']}), "
+        else:
+            source += f"to_mm<{DPI}>({k['x']}), "
+            source += f"to_mm<{DPI}>({k['y']}), "
         source += f"{k['coord_ref']}, "
         source += f"\"{k['display_name']}\", "
         source += f"\"\"" #long name
