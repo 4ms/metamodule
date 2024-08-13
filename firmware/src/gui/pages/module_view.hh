@@ -4,6 +4,7 @@
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/redraw.hh"
+#include "gui/elements/redraw_display.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
@@ -128,12 +129,13 @@ struct ModuleViewPage : PageBase {
 
 			std::visit(overloaded{
 						   [](auto &el) {},
-						   [&](LightElement &el) {
+						   [&](LightElement const &el) {
 							   for (unsigned i = 0; i < drawn.count.num_lights; i++) {
 								   params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
 							   }
 						   },
-						   [&](TextDisplay &el) {
+						   [&](DynamicTextDisplay const &el) {
+							   printf("Start watching display %d\n", drawn.idx.light_idx);
 							   params.displays.start_watching_display(this_module_id, drawn.idx.light_idx);
 						   },
 					   },
@@ -288,6 +290,8 @@ struct ModuleViewPage : PageBase {
 				}
 
 				update_light(drawn_el, light_vals);
+
+				redraw_display(drawn_el, this_module_id, params.displays.watch_displays);
 			}
 		}
 
