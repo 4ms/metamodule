@@ -249,4 +249,12 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 	return label;
 }
 
+inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
+	auto label = draw_element(TextDisplay(el), canvas, module_h);
+	//DOT mode don't work with dynamic elements
+	//because we can't compare the new text with the existing text since it may contain dots
+	lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+	return label;
+}
+
 } // namespace MetaModule::ElementDrawer

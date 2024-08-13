@@ -1,0 +1,835 @@
+static const char EnOscStepSeq_patch[] =
+	R"(
+PatchData:
+  patch_name: 'EnOsc-step-seq'
+  description: 'Seq with two EnOsc and clock-synced DLD.'
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: '4msCompany:MultiLFO'
+    2: '4msCompany:EnOsc'
+    3: '4msCompany:ENVVCA'
+    4: '4msCompany:ENVVCA'
+    5: '4msCompany:CLKD'
+    6: '4msCompany:CLKD'
+    7: '4msCompany:CLKM'
+    8: '4msCompany:CLKM'
+    9: '4msCompany:EnOsc'
+    10: 'eightfold:SDOrcasHeartV2'
+    11: '4msCompany:StMix'
+    12: '4msCompany:Atvert2'
+    13: '4msCompany:DLD'
+    14: 'Befaco:Mixer'
+  int_cables:
+    - out:
+        module_id: 2
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 4
+      color: 61865
+    - out:
+        module_id: 5
+        jack_id: 0
+      ins:
+        - module_id: 7
+          jack_id: 1
+      color: 35419
+    - out:
+        module_id: 7
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 1
+      color: 1453
+    - out:
+        module_id: 6
+        jack_id: 0
+      ins:
+        - module_id: 8
+          jack_id: 1
+      color: 64934
+    - out:
+        module_id: 8
+        jack_id: 0
+      ins:
+        - module_id: 3
+          jack_id: 1
+      color: 13501
+    - out:
+        module_id: 10
+        jack_id: 2
+      ins:
+        - module_id: 2
+          jack_id: 0
+      color: 61865
+    - out:
+        module_id: 10
+        jack_id: 3
+      ins:
+        - module_id: 9
+          jack_id: 0
+      color: 35419
+    - out:
+        module_id: 12
+        jack_id: 0
+      ins:
+        - module_id: 8
+          jack_id: 0
+        - module_id: 6
+          jack_id: 0
+        - module_id: 5
+          jack_id: 0
+      color: 35419
+    - out:
+        module_id: 12
+        jack_id: 1
+      ins:
+        - module_id: 7
+          jack_id: 0
+      color: 61865
+    - out:
+        module_id: 10
+        jack_id: 19
+      ins:
+        - module_id: 12
+          jack_id: 1
+      color: 35921
+    - out:
+        module_id: 10
+        jack_id: 18
+      ins:
+        - module_id: 12
+          jack_id: 0
+      color: 1453
+    - out:
+        module_id: 3
+        jack_id: 2
+      ins:
+        - module_id: 13
+          jack_id: 1
+      color: 1453
+    - out:
+        module_id: 4
+        jack_id: 2
+      ins:
+        - module_id: 13
+          jack_id: 6
+      color: 13501
+    - out:
+        module_id: 13
+        jack_id: 3
+      ins:
+        - module_id: 11
+          jack_id: 0
+      color: 61865
+    - out:
+        module_id: 13
+        jack_id: 6
+      ins:
+        - module_id: 11
+          jack_id: 2
+      color: 64934
+    - out:
+        module_id: 1
+        jack_id: 1
+      ins:
+        - module_id: 14
+          jack_id: 0
+      color: 13501
+    - out:
+        module_id: 10
+        jack_id: 21
+      ins:
+        - module_id: 9
+          jack_id: 3
+      color: 1453
+    - out:
+        module_id: 9
+        jack_id: 0
+      ins:
+        - module_id: 4
+          jack_id: 4
+      color: 64934
+    - out:
+        module_id: 10
+        jack_id: 20
+      ins:
+        - module_id: 2
+          jack_id: 6
+      color: 64934
+    - out:
+        module_id: 10
+        jack_id: 24
+      ins:
+        - module_id: 13
+          jack_id: 8
+      color: 35921
+    - out:
+        module_id: 10
+        jack_id: 22
+      ins:
+        - module_id: 13
+          jack_id: 7
+      color: 13501
+    - out:
+        module_id: 14
+        jack_id: 0
+      ins:
+        - module_id: 10
+          jack_id: 17
+        - module_id: 5
+          jack_id: 1
+        - module_id: 6
+          jack_id: 1
+      color: 35419
+    - out:
+        module_id: 14
+        jack_id: 1
+      ins:
+        - module_id: 13
+          jack_id: 0
+      color: 1453
+  mapped_ins:
+    - panel_jack_id: 6
+      ins:
+        - module_id: 14
+          jack_id: 1
+  mapped_outs:
+    - panel_jack_id: 3
+      out:
+        module_id: 4
+        jack_id: 2
+    - panel_jack_id: 2
+      out:
+        module_id: 3
+        jack_id: 2
+    - panel_jack_id: 1
+      out:
+        module_id: 11
+        jack_id: 1
+    - panel_jack_id: 0
+      out:
+        module_id: 11
+        jack_id: 0
+    - panel_jack_id: 7
+      out:
+        module_id: 14
+        jack_id: 0
+  static_knobs:
+    - module_id: 1
+      param_id: 0
+      value: 0.187952
+    - module_id: 1
+      param_id: 1
+      value: 0
+    - module_id: 1
+      param_id: 2
+      value: 0.377108
+    - module_id: 2
+      param_id: 0
+      value: 0
+    - module_id: 2
+      param_id: 1
+      value: 0.306024
+    - module_id: 2
+      param_id: 2
+      value: 0.5
+    - module_id: 2
+      param_id: 3
+      value: 0.209639
+    - module_id: 2
+      param_id: 4
+      value: 0.378313
+    - module_id: 2
+      param_id: 5
+      value: 0.0493976
+    - module_id: 2
+      param_id: 6
+      value: 0
+    - module_id: 2
+      param_id: 7
+      value: 0
+    - module_id: 2
+      param_id: 8
+      value: 0
+    - module_id: 2
+      param_id: 9
+      value: 1
+    - module_id: 2
+      param_id: 10
+      value: 1
+    - module_id: 2
+      param_id: 11
+      value: 1
+    - module_id: 2
+      param_id: 12
+      value: 1
+    - module_id: 2
+      param_id: 13
+      value: 0
+    - module_id: 2
+      param_id: 14
+      value: 0
+    - module_id: 2
+      param_id: 15
+      value: 0
+    - module_id: 2
+      param_id: 16
+      value: 0
+    - module_id: 2
+      param_id: 17
+      value: 0.5
+    - module_id: 2
+      param_id: 18
+      value: 1
+    - module_id: 2
+      param_id: 19
+      value: 0.5
+    - module_id: 3
+      param_id: 0
+      value: 0.5
+    - module_id: 3
+      param_id: 1
+      value: 0.5
+    - module_id: 3
+      param_id: 2
+      value: 0.351807
+    - module_id: 3
+      param_id: 3
+      value: 0
+    - module_id: 3
+      param_id: 4
+      value: 0.339759
+    - module_id: 3
+      param_id: 5
+      value: 0
+    - module_id: 3
+      param_id: 6
+      value: 0.636144
+    - module_id: 3
+      param_id: 7
+      value: 0.420481
+    - module_id: 4
+      param_id: 0
+      value: 0.5
+    - module_id: 4
+      param_id: 1
+      value: 0.5
+    - module_id: 4
+      param_id: 2
+      value: 0.154
+    - module_id: 4
+      param_id: 3
+      value: 0
+    - module_id: 4
+      param_id: 4
+      value: 0.454217
+    - module_id: 4
+      param_id: 5
+      value: 0.06
+    - module_id: 4
+      param_id: 6
+      value: 0.654217
+    - module_id: 4
+      param_id: 7
+      value: 0.522891
+    - module_id: 5
+      param_id: 0
+      value: 0.0879518
+    - module_id: 6
+      param_id: 0
+      value: 0.103614
+    - module_id: 7
+      param_id: 0
+      value: 0.0518072
+    - module_id: 8
+      param_id: 0
+      value: 0.0891566
+    - module_id: 9
+      param_id: 0
+      value: 0.184337
+    - module_id: 9
+      param_id: 1
+      value: 0.240067
+    - module_id: 9
+      param_id: 2
+      value: 0.5
+    - module_id: 9
+      param_id: 3
+      value: 0.209639
+    - module_id: 9
+      param_id: 4
+      value: 0.484338
+    - module_id: 9
+      param_id: 5
+      value: 0.0060241
+    - module_id: 9
+      param_id: 6
+      value: 0
+    - module_id: 9
+      param_id: 7
+      value: 0
+    - module_id: 9
+      param_id: 8
+      value: 0.145783
+    - module_id: 9
+      param_id: 9
+      value: 1
+    - module_id: 9
+      param_id: 10
+      value: 0
+    - module_id: 9
+      param_id: 11
+      value: 0
+    - module_id: 9
+      param_id: 12
+      value: 1
+    - module_id: 9
+      param_id: 13
+      value: 0
+    - module_id: 9
+      param_id: 14
+      value: 0
+    - module_id: 9
+      param_id: 15
+      value: 0
+    - module_id: 9
+      param_id: 16
+      value: 0
+    - module_id: 9
+      param_id: 17
+      value: 0.5
+    - module_id: 9
+      param_id: 18
+      value: 1
+    - module_id: 9
+      param_id: 19
+      value: 0.5
+    - module_id: 10
+      param_id: 0
+      value: 0
+    - module_id: 10
+      param_id: 1
+      value: 0
+    - module_id: 10
+      param_id: 2
+      value: 0
+    - module_id: 10
+      param_id: 3
+      value: 1
+    - module_id: 10
+      param_id: 4
+      value: 0
+    - module_id: 10
+      param_id: 5
+      value: 0.133333
+    - module_id: 10
+      param_id: 6
+      value: 0
+    - module_id: 10
+      param_id: 7
+      value: 0
+    - module_id: 10
+      param_id: 8
+      value: 0.571429
+    - module_id: 10
+      param_id: 9
+      value: 0.5
+    - module_id: 10
+      param_id: 10
+      value: 0.148489
+    - module_id: 10
+      param_id: 11
+      value: 0.428571
+    - module_id: 10
+      param_id: 12
+      value: 0.245783
+    - module_id: 10
+      param_id: 13
+      value: 0.15748
+    - module_id: 10
+      param_id: 14
+      value: 0.307087
+    - module_id: 10
+      param_id: 15
+      value: 0
+    - module_id: 10
+      param_id: 16
+      value: 0
+    - module_id: 10
+      param_id: 17
+      value: 0.5
+    - module_id: 10
+      param_id: 18
+      value: 0
+    - module_id: 10
+      param_id: 19
+      value: 1
+    - module_id: 10
+      param_id: 20
+      value: 0
+    - module_id: 10
+      param_id: 21
+      value: 1
+    - module_id: 10
+      param_id: 22
+      value: 0
+    - module_id: 10
+      param_id: 23
+      value: 1
+    - module_id: 10
+      param_id: 24
+      value: 0
+    - module_id: 10
+      param_id: 25
+      value: 0
+    - module_id: 10
+      param_id: 26
+      value: 1
+    - module_id: 10
+      param_id: 27
+      value: 0
+    - module_id: 10
+      param_id: 28
+      value: 1
+    - module_id: 10
+      param_id: 29
+      value: 0
+    - module_id: 10
+      param_id: 30
+      value: 0
+    - module_id: 10
+      param_id: 31
+      value: 0
+    - module_id: 10
+      param_id: 32
+      value: 0
+    - module_id: 10
+      param_id: 33
+      value: 0
+    - module_id: 10
+      param_id: 34
+      value: 0
+    - module_id: 10
+      param_id: 35
+      value: 0
+    - module_id: 10
+      param_id: 36
+      value: 0
+    - module_id: 10
+      param_id: 37
+      value: 0
+    - module_id: 10
+      param_id: 38
+      value: 0
+    - module_id: 10
+      param_id: 39
+      value: 0
+    - module_id: 10
+      param_id: 40
+      value: 0
+    - module_id: 10
+      param_id: 41
+      value: 0
+    - module_id: 10
+      param_id: 42
+      value: 0
+    - module_id: 11
+      param_id: 0
+      value: 0.875
+    - module_id: 11
+      param_id: 1
+      value: 0.875
+    - module_id: 11
+      param_id: 2
+      value: 0.875
+    - module_id: 11
+      param_id: 3
+      value: 0.875
+    - module_id: 11
+      param_id: 4
+      value: 0.340964
+    - module_id: 11
+      param_id: 5
+      value: 0.622892
+    - module_id: 11
+      param_id: 6
+      value: 0.5
+    - module_id: 11
+      param_id: 7
+      value: 0.5
+    - module_id: 12
+      param_id: 0
+      value: 0.501
+    - module_id: 12
+      param_id: 1
+      value: 0.498
+    - module_id: 13
+      param_id: 0
+      value: 0.254669
+    - module_id: 13
+      param_id: 1
+      value: 0.5
+    - module_id: 13
+      param_id: 2
+      value: 0
+    - module_id: 13
+      param_id: 3
+      value: 0.5
+    - module_id: 13
+      param_id: 4
+      value: 0.25547
+    - module_id: 13
+      param_id: 5
+      value: 0.571041
+    - module_id: 13
+      param_id: 6
+      value: 0
+    - module_id: 13
+      param_id: 7
+      value: 0
+    - module_id: 13
+      param_id: 8
+      value: 0
+    - module_id: 13
+      param_id: 9
+      value: 1
+    - module_id: 13
+      param_id: 10
+      value: 0.58573
+    - module_id: 13
+      param_id: 11
+      value: 0.774699
+    - module_id: 13
+      param_id: 12
+      value: 0.451807
+    - module_id: 13
+      param_id: 13
+      value: 0.451807
+    - module_id: 13
+      param_id: 14
+      value: 0.692771
+    - module_id: 13
+      param_id: 15
+      value: 0
+    - module_id: 13
+      param_id: 16
+      value: 0
+    - module_id: 13
+      param_id: 17
+      value: 0
+    - module_id: 13
+      param_id: 18
+      value: 0
+    - module_id: 13
+      param_id: 19
+      value: 0
+    - module_id: 13
+      param_id: 20
+      value: 0
+    - module_id: 13
+      param_id: 21
+      value: 0
+    - module_id: 13
+      param_id: 22
+      value: 0
+    - module_id: 13
+      param_id: 23
+      value: 0
+    - module_id: 13
+      param_id: 24
+      value: 0
+    - module_id: 13
+      param_id: 25
+      value: 0
+    - module_id: 13
+      param_id: 26
+      value: 0
+    - module_id: 13
+      param_id: 27
+      value: 0
+    - module_id: 13
+      param_id: 28
+      value: 0
+    - module_id: 13
+      param_id: 29
+      value: 0
+    - module_id: 13
+      param_id: 30
+      value: 0.666667
+    - module_id: 13
+      param_id: 31
+      value: 0.666667
+    - module_id: 14
+      param_id: 0
+      value: 1
+    - module_id: 14
+      param_id: 1
+      value: 1
+    - module_id: 14
+      param_id: 2
+      value: 0
+    - module_id: 14
+      param_id: 3
+      value: 0
+  mapped_knobs:
+    - name: seq1
+      set:
+        - panel_knob_id: 0
+          module_id: 12
+          param_id: 0
+          curve_type: 0
+          min: 0.501
+          max: 0.571
+        - panel_knob_id: 0
+          module_id: 12
+          param_id: 1
+          curve_type: 0
+          min: 0.498
+          max: 0.562
+        - panel_knob_id: 1
+          module_id: 3
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 4
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 13
+          param_id: 10
+          curve_type: 0
+          min: 0
+          max: 0.638
+        - panel_knob_id: 3
+          module_id: 13
+          param_id: 5
+          curve_type: 0
+          min: 0
+          max: 0.622
+        - panel_knob_id: 4
+          module_id: 10
+          param_id: 14
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 13
+          param_id: 12
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 13
+          param_id: 13
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 2
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 2
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 8
+          module_id: 13
+          param_id: 4
+          curve_type: 0
+          min: 0.209
+          max: 0.499
+        - panel_knob_id: 8
+          module_id: 13
+          param_id: 0
+          curve_type: 0
+          min: 0.209
+          max: 0.494
+        - panel_knob_id: 9
+          module_id: 2
+          param_id: 8
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 10
+          param_id: 18
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 11
+          module_id: 9
+          param_id: 8
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: seq2
+      set:
+        - panel_knob_id: 6
+          module_id: 9
+          param_id: 4
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 7
+          module_id: 9
+          param_id: 3
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 9
+          module_id: 9
+          param_id: 1
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 10
+          module_id: 9
+          param_id: 8
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: Int Clock
+      set:
+        - panel_knob_id: 0
+          module_id: 14
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  vcvModuleStates:
+    - module_id: 10
+      data: |-
+        {"selectedScale":0,"globalCounter":16,"totalWeight":7,"counter":[16,16,16,16,16,16,16,16],"divisor":[1,3,4,3,2,1,8,7],"phase":[0,2,2,1,0,0,6,0],"trackOn":[0,0,0,1,0,0,0,0],"weightOn":[0,0,0,7,0,0,0,0],"notes0":[7,7,7,0,3,1,3,0],"notes1":[9,8,10,11,3,1,3,3],"notes2":[9,7,9,11,0,18,2,2],"notes3":[10,9,7,11,20,18,20,11],"notes4":[8,8,4,8,17,17,17,8],"notes5":[8,9,5,0,20,18,18,9],"notes6":[15,15,11,0,17,17,16,8],"notes7":[9,8,10,0,27,25,16,3],"gateOn0":[true,true,false,true,true,true,true,false],"gateOn1":[true,true,true,false,true,true,true,true],"gateOn2":[true,true,true,false,true,true,true,true],"gateOn3":[true,true,true,false,true,true,true,true],"gateOn4":[true,false,true,true,true,true,false,true],"gateOn5":[true,true,true,false,true,true,true,true],"gateOn6":[true,true,true,false,true,true,true,true],"gateOn7":[true,true,true,false,true,true,true,true],"gateChanged0":[true,true,true,true,false,false,false,true],"gateChanged1":[true,true,true,false,true,true,true,true],"gateChanged2":[true,true,true,false,true,false,true,true],"gateChanged3":[true,true,true,true,true,true,true,true],"gateChanged4":[true,true,true,true,true,true,true,true],"gateChanged5":[true,true,true,false,true,true,true,true],"gateChanged6":[true,true,true,false,true,true,false,true],"gateChanged7":[true,true,true,false,true,true,true,true],"gateTimer":[0.40091809630393982,0.41695860028266907,0.0,0.44901877641677856,0.0,0.12887200713157654,0.0,0.0],"gateTriggered":[true,true,true,true,false,false,false,false],"muted":[0,0,0,0,0,0,0,0],"shifts":[0,0,0,0,0,0,0,0],"modCvs":[2.3333334922790527,0.66666668653488159,2.6666667461395264,4.3333334922790527,2.3333334922790527,5.6666669845581055,6.0,6.3333334922790527],"modGate":[false,true,false,true,false,true,false,true]}
+    - module_id: 13
+      data: |-
+        aLIm++Bd
+)";

@@ -28,7 +28,7 @@ struct BraidsInfo : ModuleInfoBase {
 		AnalogJackInput4ms{{to_mm<72>(129.78), to_mm<72>(315.06), Center, "Timbre CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(165.78), to_mm<72>(315.06), Center, "Color CV", ""}},
 		AnalogJackOutput4ms{{to_mm<72>(208.97), to_mm<72>(315.06), Center, "Out", ""}},
-		BraidsDisplay{{to_mm<72>(84.9), to_mm<72>(82.26), Center, "Screen", "", to_mm<72>(146.28), to_mm<72>(48.02)}},
+		BraidsDisplay{{to_mm<72>(22.68), to_mm<72>(58.25), TopLeft, "Screen", "", to_mm<72>(135.79), to_mm<72>(49.89)}},
 }};
 
     enum class Elem {

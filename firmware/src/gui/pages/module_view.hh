@@ -4,6 +4,7 @@
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/redraw.hh"
+#include "gui/elements/redraw_display.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
@@ -126,9 +127,17 @@ struct ModuleViewPage : PageBase {
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &drawn = drawn_element.gui_element;
 
-			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
-				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
-			}
+			std::visit(overloaded{
+						   [&](auto const &el) {
+							   for (unsigned i = 0; i < drawn.count.num_lights; i++) {
+								   params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
+							   }
+						   },
+						   [&](DynamicTextDisplay const &el) {
+							   params.displays.start_watching_display(this_module_id, drawn.idx.light_idx);
+						   },
+					   },
+					   drawn_element.element);
 
 			auto base = base_element(drawn_element.element);
 
@@ -279,6 +288,8 @@ struct ModuleViewPage : PageBase {
 				}
 
 				update_light(drawn_el, light_vals);
+
+				redraw_display(drawn_el, this_module_id, params.displays.watch_displays);
 			}
 		}
 
@@ -344,6 +355,7 @@ struct ModuleViewPage : PageBase {
 
 	void blur() final {
 		params.lights.stop_watching_all();
+		params.displays.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}

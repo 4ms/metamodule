@@ -94,6 +94,13 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 			w.value = patch_player.get_module_light(w.module_id, w.light_id);
 	}
 
+	for (auto &d : params.displays.watch_displays) {
+		if (d.is_active()) {
+			auto text = std::span<char>(d.text._data, d.text.capacity);
+			patch_player.get_display_text(d.module_id, d.light_id, text);
+		}
+	}
+
 	for (size_t i = 0; auto &frame : out_buffer) {
 		auto &out = soundcard_out[i++];
 

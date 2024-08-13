@@ -44,8 +44,6 @@ struct PatchDescriptionPanel {
 
 	void set_patch(PatchData *cur_patch) {
 		patch = cur_patch;
-		lv_label_set_text(ui_Description, patch->description.c_str());
-		lv_label_set_text(ui_DescPanelPatchName, patch->patch_name.c_str());
 	}
 
 	bool is_visible() {
@@ -77,6 +75,8 @@ struct PatchDescriptionPanel {
 		is_showing = true;
 		edit_panel_visible = false;
 
+		lv_label_set_text(ui_Description, patch->description.c_str());
+		lv_label_set_text(ui_DescPanelPatchName, patch->patch_name.c_str());
 		set_content_max_height(ui_DescriptionPanel, 230);
 	}
 

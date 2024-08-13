@@ -148,10 +148,10 @@ struct GreenHandleSlider : Slider {
 	}
 };
 
-struct BraidsDisplay : TextDisplay {
+struct BraidsDisplay : DynamicTextDisplay {
 	constexpr BraidsDisplay(BaseElement b)
-		: TextDisplay{{{b}}} {
-		text = "---";
+		: DynamicTextDisplay{{{b}}} {
+		text = "----";
 		font = "Segment32";
 		color = Colors565::Green;
 	}

@@ -5,6 +5,7 @@
 #include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/redraw.hh"
+#include "gui/elements/redraw_display.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
@@ -208,6 +209,8 @@ struct PatchViewPage : PageBase {
 		settings_menu.hide();
 		desc_panel.hide();
 		file_menu.hide();
+		params.displays.stop_watching_all();
+		params.lights.stop_watching_all();
 	}
 
 	void update() override {
@@ -255,7 +258,6 @@ struct PatchViewPage : PageBase {
 			} else {
 				page_list.request_last_page();
 				blur();
-				params.lights.stop_watching_all();
 			}
 		}
 
@@ -299,9 +301,18 @@ private:
 		if (is_patch_playing) {
 			for (const auto &drawn_element : drawn_elements) {
 				auto &gui_el = drawn_element.gui_element;
-				for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
-					params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
-				}
+
+				std::visit(overloaded{
+							   [&](auto const &el) {
+								   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
+									   params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
+								   }
+							   },
+							   [&](DynamicTextDisplay const &el) {
+								   params.displays.start_watching_display(gui_el.module_idx, gui_el.idx.light_idx);
+							   },
+						   },
+						   drawn_element.element);
 			}
 		}
 	}
@@ -343,7 +354,6 @@ private:
 			auto &gui_el = drawn_el.gui_element;
 
 			auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
-
 			if (was_redrawn) {
 				if (page_settings.map_ring_flash_active)
 					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
@@ -353,6 +363,8 @@ private:
 			}
 
 			update_light(drawn_el, light_vals[gui_el.module_idx]);
+
+			redraw_display(drawn_el, gui_el.module_idx, params.displays.watch_displays);
 		}
 	}
 
