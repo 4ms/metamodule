@@ -49,3 +49,6 @@
 [submodule "firmware/vcv_ports/Valley"]
 	path = firmware/vcv_ports/Valley
 	url = https://github.com/4ms/ValleyRackFree
+[submodule "metamodule-patch-serial"]
+	path = shared/patch-serial
+	url = git@github.com:4ms/metamodule-patch-serial
