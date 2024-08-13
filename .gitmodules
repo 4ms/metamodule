@@ -4,9 +4,6 @@
 [submodule "firmware/lib/lvgl/lvgl"]
 	path = firmware/lib/lvgl/lvgl
 	url = https://github.com/lvgl/lvgl.git
-[submodule "shared/patch_convert/ryml/rapidyaml"]
-	path = shared/patch_convert/ryml/rapidyaml
-	url = https://github.com/danngreen/rapidyaml.git
 [submodule "shared/cpputil"]
 	path = shared/cpputil
 	url = https://github.com/4ms/cpputil.git
