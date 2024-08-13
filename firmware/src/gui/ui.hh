@@ -94,6 +94,10 @@ public:
 		plugin_manager.autoload_plugins(settings.plugin_autoload);
 	}
 
+	TextDisplayWatcher &displays() {
+		return params.displays;
+	}
+
 	bool new_patch_data = false;
 
 private:

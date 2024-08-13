@@ -79,12 +79,21 @@ extern "C" void aux_core_main() {
 	constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchLights);
 	InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [patch_player, &ui]() {
 		if (ui.new_patch_data == false) {
+
 			for (auto &w : ui.lights().watch_lights) {
 				if (w.is_active()) {
 					auto val = patch_player->get_module_light(w.module_id, w.light_id);
 					w.value = val;
 				}
 			}
+
+			for (auto &d : ui.displays().watch_displays) {
+				if (d.is_active()) {
+					auto text = std::span<char>(d.text._data, d.text.capacity);
+					patch_player->get_display_text(d.module_id, d.light_id, text);
+				}
+			}
+
 			ui.new_patch_data = true;
 		}
 

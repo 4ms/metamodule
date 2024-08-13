@@ -121,6 +121,11 @@ inline void redraw_light_element(const SliderLight &element, const GuiElement &g
 	return;
 }
 
+inline void redraw_light_element(const TextDisplay &element, const GuiElement &gui_el, std::span<const float>) {
+	if (!gui_el.obj)
+		return;
+}
+
 inline void redraw_light_element(const BaseElement &, const GuiElement &, std::span<const float>) {
 }
 

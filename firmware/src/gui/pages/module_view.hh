@@ -126,9 +126,18 @@ struct ModuleViewPage : PageBase {
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &drawn = drawn_element.gui_element;
 
-			for (unsigned i = 0; i < drawn.count.num_lights; i++) {
-				params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
-			}
+			std::visit(overloaded{
+						   [](auto &el) {},
+						   [&](LightElement &el) {
+							   for (unsigned i = 0; i < drawn.count.num_lights; i++) {
+								   params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
+							   }
+						   },
+						   [&](TextDisplay &el) {
+							   params.displays.start_watching_display(this_module_id, drawn.idx.light_idx);
+						   },
+					   },
+					   drawn_element.element);
 
 			auto base = base_element(drawn_element.element);
 

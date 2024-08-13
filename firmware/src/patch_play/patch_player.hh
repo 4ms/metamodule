@@ -343,6 +343,13 @@ public:
 			return 0;
 	}
 
+	unsigned get_display_text(uint16_t module_id, uint16_t light_id, std::span<char> text) const {
+		if (is_loaded && module_id < num_modules)
+			return modules[module_id]->get_display_text(light_id, text);
+		else
+			return 0;
+	}
+
 	uint32_t get_midi_poly_num() {
 		return pd.midi_poly_num;
 	}
