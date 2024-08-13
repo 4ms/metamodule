@@ -259,6 +259,11 @@ private:
 		if (page->patches.get_view_patch_vol() == Volume::RamDisk) {
 			page->patches.rename_view_patch_file(fullpath, page->file_vol);
 			page->patch_playloader.request_save_patch();
+			auto &patchname = page->patches.get_view_patch()->patch_name;
+			if (std::string_view(patchname).starts_with("Untitled Patch ")) {
+				patchname.copy(page->file_name);
+			}
+
 			page->saved = true;
 			page->hide();
 		} else {
