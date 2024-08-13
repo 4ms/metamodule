@@ -11,7 +11,7 @@
 #include "patch/default/Djembe4verb.hh"
 #include "patch/default/DualEnvEnosc.hh"
 #include "patch/default/EnOscPoly4.hh"
-#include "patch/default/EnOsc_8_step_seq.hh"
+#include "patch/default/EnOsc_step_seq.hh"
 #include "patch/default/KarplusStereo.hh"
 #include "patch/default/MIDI_Poly4.hh"
 #include "patch/default/Orcas_Heart_Octo_Djembe.hh"
@@ -33,7 +33,7 @@ struct DefaultPatches {
 		PlaygroundBefaco_patch,
 		Djembe4verb_patch,	 //
 		KarplusStereo_patch, //
-		EnOsc8StepSeq_patch, //
+		EnOscStepSeq_patch,
 		UntwistedBraid_patch,
 		MIDI_Poly4_patch, //
 	});
@@ -49,7 +49,7 @@ struct DefaultPatches {
 		"PlaygroundBefaco.yml",
 		"Djembe4verb.yml",	 //
 		"KarplusStereo.yml", //
-		"EnOsc8StepSeq.yml", //
+		"EnOscStepSeq.yml",
 		"UntwistedBraid_patch.yml",
 		"MIDI_Poly4.yml", //
 	});

@@ -1,3 +1,5 @@
+static const char EnOscStepSeq_patch[] =
+	R"(
 PatchData:
   patch_name: 'EnOsc-step-seq'
   description: 'Seq with two EnOsc and clock-synced DLD.'
@@ -830,3 +832,4 @@ PatchData:
     - module_id: 13
       data: |-
         aLIm++Bd
+)";
