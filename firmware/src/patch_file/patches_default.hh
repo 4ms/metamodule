@@ -4,8 +4,10 @@
 #include <span>
 
 ///
-#include "patch/default/Befaco4msPlayground.hh"
-#include "patch/default/Braids-Quad.hh"
+
+#include "patch/default/PlaygroundBefaco.hh"
+#include "patch/default/UntwistedBraid.hh"
+
 #include "patch/default/Djembe4verb.hh"
 #include "patch/default/DualEnvEnosc.hh"
 #include "patch/default/EnOscPoly4.hh"
@@ -21,35 +23,35 @@
 struct DefaultPatches {
 
 	static inline std::array patch_raw_data = std::to_array<std::span<const char>>({
-		Sloth_Drone_patch,
-		WanderVoices_patch,
-		DualEnvEnOsc_patch,
-		SpringsIntoCaves_patch,
+		Sloth_Drone_patch,		//
+		WanderVoices_patch,		//
+		DualEnvEnOsc_patch,		//
+		SpringsIntoCaves_patch, //
 		Orcas_Heart_Octo_Djembe_patch,
-		EnOscPoly4_patch,
-		QuadDrum_patch,
-		Befaco4msPlayground_patch,
-		Djembe4verb_patch,
-		KarplusStereo_patch,
-		EnOsc8StepSeq_patch,
-		BraidsQuad_patch,
-		MIDI_Poly4_patch,
+		EnOscPoly4_patch, //
+		QuadDrum_patch,	  //
+		PlaygroundBefaco_patch,
+		Djembe4verb_patch,	 //
+		KarplusStereo_patch, //
+		EnOsc8StepSeq_patch, //
+		UntwistedBraid_patch,
+		MIDI_Poly4_patch, //
 	});
 
 	static inline std::array patch_filenames = std::to_array<ModuleTypeSlug>({
-		"SlothDrone.yml",
-		"WanderVoices.yml",
-		"DualEnvEnOsc.yml",
-		"SpringsintoCaves.yml",
+		"SlothDrone.yml",		//
+		"WanderVoices.yml",		//
+		"DualEnvEnOsc.yml",		//
+		"SpringsintoCaves.yml", //
 		"Orcas_Heart_Octo_Djembe.yml",
-		"EnOscPoly4.yml",
-		"QuadDrum.yml",
-		"Befaco4msPlayground.yml",
-		"Djembe4verb.yml",
-		"KarplusStereo.yml",
-		"EnOsc8StepSeq.yml",
-		"BraidsQuad.yml",
-		"MIDI_Poly4.yml",
+		"EnOscPoly4.yml", //
+		"QuadDrum.yml",	  //
+		"PlaygroundBefaco.yml",
+		"Djembe4verb.yml",	 //
+		"KarplusStereo.yml", //
+		"EnOsc8StepSeq.yml", //
+		"UntwistedBraid_patch.yml",
+		"MIDI_Poly4.yml", //
 	});
 
 	static constexpr uint32_t num_patches() {
