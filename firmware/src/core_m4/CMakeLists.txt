@@ -106,7 +106,7 @@ target_include_directories(
           ${FWDIR}/system
           ${SHARED}
           ${SHARED}/processors
-          ${SHARED}/patch
+          ${SHARED}/patch-serial
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/src/usb

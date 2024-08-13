@@ -3,7 +3,7 @@
 
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR = $(TEST_DIR)
-RYMLDIR = ../../shared/patch_convert/ryml
+RYMLDIR = ../../shared/patch-serial/ryml
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += moduleFactory.cc
 TEST_SOURCES += $(wildcard ../cpputil/util/*.cc)
@@ -27,6 +27,7 @@ CXXFLAGS = 	-Wall \
 			-I.. \
 			-I../../firmware/metamodule-plugin-sdk/metamodule-core-interface \
 			-I../../shared/cpputil \
+			-I../../shared/patch-serial \
 			-I$(RYMLDIR) \
 			-I$(RYMLDIR)/rapidyaml/src \
 			-I$(RYMLDIR)/rapidyaml/ext/c4core/src \

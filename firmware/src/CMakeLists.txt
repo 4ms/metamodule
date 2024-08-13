@@ -194,8 +194,6 @@ target_include_directories(
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
           ${SHARED}
-          ${SHARED}/patch
-          ${SHARED}/patch-serial/ryml
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include

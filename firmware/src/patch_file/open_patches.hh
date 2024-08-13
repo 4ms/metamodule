@@ -1,7 +1,7 @@
 #pragma once
 
 #include "console/pr_dbg.hh"
-#include "patch_data.hh"
+#include "patch/patch_data.hh"
 #include "patch_file/patch_location.hh"
 #include <list>
 
