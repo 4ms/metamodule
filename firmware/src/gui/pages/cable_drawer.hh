@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "cmsis_gcc.h"
 #include "gui/elements/context.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
