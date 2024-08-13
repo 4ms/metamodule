@@ -1,23 +1,6 @@
-# Requires cpputil and ryml libraries
-
-add_library(CoreModules-4ms OBJECT)
+add_library(CoreModules-4ms STATIC)
 
 target_compile_features(CoreModules-4ms PUBLIC cxx_std_23)
-
-target_include_directories(CoreModules-4ms PUBLIC 
-	./
-	core/tapo/stmlib
-	core/tapo/
-	core/alpaca/include
-	core/looping-delay/src
-	core/
-	core/peg-common/
-	core/peg-common/mocks
-)
-
-target_compile_options(CoreModules-4ms PRIVATE
-    -Wno-double-promotion #silence warnings in gcem
-)
 
 file(GLOB CORE_SOURCES core/*Core.cc)
 
@@ -26,7 +9,7 @@ target_sources(CoreModules-4ms PUBLIC
 
 	core/enosc/data.cc
 	core/enosc/dynamic_data.cc
-	core/enosc/easiglib/numtypes.cc
+	# core/enosc/easiglib/numtypes.cc
 	core/axoloti-wrapper/axoloti_math.cpp
 	core/tapo/multitap_delay.cc
 	core/tapo/resources.cc
@@ -58,20 +41,40 @@ target_sources(CoreModules-4ms PUBLIC
 	core/peg/envelope_calcs.cc
 )
 
+target_include_directories(CoreModules-4ms PUBLIC 
+	./
+	core/tapo/stmlib
+	core/tapo/
+	core/alpaca/include
+	core/looping-delay/src
+	core/
+	core/peg-common/
+	core/peg-common/mocks
+)
+
+
 target_compile_definitions(CoreModules-4ms PRIVATE 
 	TEST     
 	SAMPLE_RATE=48000
 )
+
+target_compile_options(CoreModules-4ms PRIVATE
+    -Wno-double-promotion #silence warnings in gcem
+)
+
+set_property(TARGET CoreModules-4ms PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 if (NOT DEFINED alpaca)
   add_subdirectory(core/alpaca)
   target_compile_definitions(alpaca INTERFACE ALPACA_NO_PREFETCH)
 endif()
 
-target_link_libraries(CoreModules-4ms PRIVATE 
+target_link_libraries(CoreModules-4ms PUBLIC 
 	cpputil 
 	ryml 
-	alpaca::alpaca
+	alpaca
+	CoreModules
+	metamodule::core-interface
+	metamodule::patch-serial
 )
-
 

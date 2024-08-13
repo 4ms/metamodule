@@ -57,8 +57,10 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 # Brands
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
+add_subdirectory(${SHARED}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 
 add_subdirectory(${SHARED}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
+
 
 #
 # RYML
@@ -206,7 +208,7 @@ if (NOT TARGET cpputil::cpputil)
 endif()
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui metamodule::patch-serial cpputil vcv_ports)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules CoreModules-4ms ui metamodule::patch-serial cpputil vcv_ports)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 # target_link_libraries(main.elf PUBLIC coreproc_plugin_export)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)

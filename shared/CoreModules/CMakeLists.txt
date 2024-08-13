@@ -5,14 +5,11 @@ add_library(CoreModules STATIC
   moduleFactory.cc
 )
 
-# add_subdirectory(4ms)
-# target_link_libraries(CoreModules PUBLIC CoreModules-4ms)
-
 target_link_libraries(CoreModules PRIVATE metamodule-core-interface cpputil)
 
 target_include_directories(CoreModules
-  PRIVATE
-  ../
+  PUBLIC
+  ../ #so libs that link to this can do #include "CoreModules/moduleFactory.hh"
   ${FWDIR}/src
   ${FWDIR}/src/console
 )

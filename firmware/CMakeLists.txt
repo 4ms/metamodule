@@ -265,37 +265,6 @@ add_custom_target(
   VERBATIM USES_TERMINAL
 )
 
-
-#
-# Process 4ms info files
-#
-
-add_custom_command(
-  OUTPUT moduleinfos-cmd
-  COMMAND ${CMAKE_COMMAND} -E echo "Updating/creating CoreModule *_info.hh files from *_info.svg"
-  VERBATIM USES_TERMINAL
-)
-
-
-# 4ms Info SVGs for each info svg, add_custom_command (...) to to generate the _info.hh
-include(vcv_ports/glue/4ms/modules.cmake)
-foreach(info_svg ${4MS_INFO_SVGS})
-  get_filename_component(slug ${info_svg} NAME_WE) # e.g. Verb_info
-
-  add_custom_command(
-    OUTPUT moduleinfos-cmd
-    APPEND
-    COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createInfo ${info_svg}
-            ${PROJECT_SOURCE_DIR}/../shared/CoreModules/4ms/info
-    DEPENDS ${info_svg}
-    COMMENT "Creating info header: ${slug}"
-  )
-endforeach()
-
-set_source_files_properties(moduleinfos-cmd PROPERTIES SYMBOLIC "true")
-
-add_custom_target(module-infos DEPENDS moduleinfos-cmd)
-
 #
 # minBlep tables for vcv modules
 #
