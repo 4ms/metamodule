@@ -24,6 +24,7 @@ BUILDDIR = $(TEST_DIR)/build/obj/obj
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++20 \
 			-I. \
+			-I4ms/core \
 			-I.. \
 			-I../../firmware/metamodule-plugin-sdk/metamodule-core-interface \
 			-I../../shared/cpputil \
