@@ -62,6 +62,9 @@ private:
 	using KnobSet = std::array<std::vector<MappedKnob>, PanelDef::NumKnobs>;
 	std::array<KnobSet, MaxKnobSets> knob_conns;
 
+	std::array<bool, PanelDef::NumUserFacingOutJacks> out_patched{};
+	std::array<bool, PanelDef::NumUserFacingInJacks> in_patched{};
+
 	MulticorePlayer smp;
 
 	float samplerate = 48000.f;
@@ -399,14 +402,24 @@ public:
 
 	void add_injack_mapping(uint16_t panel_jack_id, Jack jack) {
 		pd.add_mapped_injack(panel_jack_id, jack);
-		if (panel_jack_id < in_conns.size())
+
+		if (panel_jack_id < in_conns.size()) {
 			update_or_add(in_conns[panel_jack_id], jack);
+
+			if (in_patched[panel_jack_id] && jack.module_id < num_modules)
+				modules[jack.module_id]->mark_input_patched(jack.jack_id);
+		}
 	}
 
 	void add_outjack_mapping(uint16_t panel_jack_id, Jack jack) {
 		pd.add_mapped_outjack(panel_jack_id, jack);
-		if (panel_jack_id < out_conns.size())
+
+		if (panel_jack_id < out_conns.size()) {
 			out_conns[panel_jack_id] = jack;
+
+			if (out_patched[panel_jack_id] && jack.module_id < num_modules)
+				modules[jack.module_id]->mark_output_patched(jack.jack_id);
+		}
 	}
 
 	void disconnect_injack(Jack jack) {
@@ -558,6 +571,9 @@ public:
 	void set_input_jack_patched_status(uint32_t panel_in_jack_id, bool is_patched) {
 		if (panel_in_jack_id >= in_conns.size())
 			return;
+
+		in_patched[panel_in_jack_id] = is_patched;
+
 		for (auto const &jack : in_conns[panel_in_jack_id]) {
 			if (jack.module_id > 0) {
 				if (is_patched)
@@ -571,6 +587,9 @@ public:
 	void set_output_jack_patched_status(uint32_t panel_out_jack_id, bool is_patched) {
 		if (panel_out_jack_id >= out_conns.size())
 			return;
+
+		out_patched[panel_out_jack_id] = is_patched;
+
 		auto const &jack = out_conns[panel_out_jack_id];
 		if (jack.module_id < num_modules) {
 			if (is_patched)
