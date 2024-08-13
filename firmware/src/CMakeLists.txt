@@ -208,11 +208,11 @@ if (NOT TARGET cpputil::cpputil)
 endif()
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules CoreModules-4ms ui metamodule::patch-serial cpputil vcv_ports)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui metamodule::patch-serial cpputil vcv_ports)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
-# target_link_libraries(main.elf PUBLIC coreproc_plugin_export)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
+target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
 
 if (METAMODULE_PCB_VERSION)
     target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})

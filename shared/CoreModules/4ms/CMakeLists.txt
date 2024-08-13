@@ -4,7 +4,7 @@ target_compile_features(CoreModules-4ms PUBLIC cxx_std_23)
 
 file(GLOB CORE_SOURCES core/*Core.cc)
 
-target_sources(CoreModules-4ms PUBLIC 
+target_sources(CoreModules-4ms PRIVATE 
 	${CORE_SOURCES}
 
 	core/enosc/data.cc
