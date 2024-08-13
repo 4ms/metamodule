@@ -106,7 +106,8 @@ private:
 
 		auto load_status = patch_playloader.handle_file_events();
 		if (!load_status.success) {
-			notify_queue.put({load_status.error_string, Notification::Priority::Error, 3000});
+			notify_queue.put({load_status.error_string, Notification::Priority::Error, 1500});
+
 		} else if (load_status.error_string.size()) {
 			notify_queue.put({load_status.error_string, Notification::Priority::Info, 3000});
 		}
