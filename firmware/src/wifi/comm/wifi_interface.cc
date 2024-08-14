@@ -284,7 +284,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 
 			sendResponse(fbb.GetBufferSpan());
 		} else if (auto uploadPatchMessage = message->content_as_UploadPatch(); uploadPatchMessage) {
-			auto destination = uploadPatchMessage->destination();
 
 			assert(uploadPatchMessage->content()->is_span_observable);
 			auto receivedPatchData =
@@ -292,24 +291,33 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 
 			auto filename = flatbuffers::GetStringView(uploadPatchMessage->filename());
 
-			pr_info("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
+			pr_info("Received Patch %.*s of %u bytes\n", filename.size(), filename.data(), receivedPatchData.size());
 
-			auto LocationToVolume = [](auto location) -> std::optional<Volume> {
-				switch (location) {
-					case StorageLocation::StorageLocation_USB:
-						return Volume::USB;
-					case StorageLocation::StorageLocation_FLASH:
-						return Volume::NorFlash;
-					case StorageLocation::StorageLocation_SDCARD:
-						return Volume::SDCard;
-					default:
-						return std::nullopt;
+			auto ParseStorageString = [](std::string_view locationName) -> std::optional<Volume> {
+
+				if (locationName.compare(PatchDirList::get_vol_name(Volume::USB)) == 0)
+				{
+					return Volume::USB;
+				}
+				else if (locationName.compare(PatchDirList::get_vol_name(Volume::NorFlash)) == 0)
+				{
+					return Volume::NorFlash;
+				}
+				else if (locationName.compare(PatchDirList::get_vol_name(Volume::SDCard)) == 0)
+				{
+					return Volume::SDCard;
+				}
+				else
+				{
+					return std::nullopt;
 				}
 			};
 
 			flatbuffers::FlatBufferBuilder fbb;
 
-			if (auto thisVolume = LocationToVolume(destination); thisVolume) {
+			auto volumeString = flatbuffers::GetStringView(uploadPatchMessage->volume());
+
+			if (auto thisVolume = ParseStorageString(volumeString); thisVolume) {
 				auto success = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
 
 				if (success) {
@@ -342,6 +350,7 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 			}
 
 			sendResponse(fbb.GetBufferSpan());
+
 
 		} else {
 			pr_trace("Other option\n");
