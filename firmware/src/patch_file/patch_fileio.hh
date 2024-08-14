@@ -133,7 +133,7 @@ public:
 				patch = patch.subspan(0, patch.size() - 1);
 
 			if (!fileio.update_or_create_file(filename, patch)) {
-				pr_err("Error: aborted creating default patches to flash\n");
+				pr_err("Error: failed to write %d. Aborted creating default patches to flash\n", filename.c_str());
 				return false;
 			}
 		}

@@ -107,7 +107,6 @@ void main() {
 	// ~290ms until while loop
 
 	StaticBuffers::sync_params.clear();
-	patch_playloader.load_initial_patch();
 
 	audio.start();
 

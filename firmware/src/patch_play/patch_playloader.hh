@@ -21,10 +21,15 @@ struct PatchPlayLoader {
 		, patches_{patches} {
 	}
 
-	void load_initial_patch() {
+	void load_initial_patch(std::string_view patchname, Volume patch_vol) {
 		uint32_t tries = 10000;
 
-		PatchLocation initial_patch_loc{"/SlothDrone.yml", Volume::NorFlash};
+		if (patchname.length() == 0) {
+			patchname = "/SlothDrone.yml";
+			patch_vol = Volume::NorFlash;
+		}
+
+		PatchLocation initial_patch_loc{patchname, patch_vol};
 		while (--tries) {
 			if (storage_.request_load_patch(initial_patch_loc))
 				break;

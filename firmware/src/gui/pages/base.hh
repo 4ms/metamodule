@@ -34,6 +34,7 @@ struct GuiState {
 	std::optional<Volume> force_refresh_vol{};
 
 	bool do_write_settings{};
+	uint32_t write_settings_after_ms{};
 
 	Toggler back_button{};
 };

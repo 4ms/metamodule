@@ -491,10 +491,28 @@ private:
 		page->redraw_modulename();
 	}
 
+	void save_last_opened_patch_in_settings() {
+		if (settings.last_patch_vol != patches.get_view_patch_vol() ||
+			settings.last_patch_opened != patches.get_view_patch_filename())
+		{
+			settings.last_patch_vol = patches.get_view_patch_vol();
+			settings.last_patch_opened = patches.get_view_patch_filename();
+			pr_dbg("Will set last_patch opened to %s on %d\n",
+				   settings.last_patch_opened.c_str(),
+				   settings.last_patch_vol);
+
+			if (gui_state.write_settings_after_ms == 0) {
+				gui_state.write_settings_after_ms = get_time() + 60 * 1000; //1 minute delay
+				pr_dbg("Setting timer...\n");
+			}
+		}
+	}
+
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page->is_patch_playing) {
 			page->patch_playloader.request_load_view_patch();
+			page->save_last_opened_patch_in_settings();
 		} else {
 			if (page->patch_playloader.is_audio_muted()) {
 				page->patch_playloader.start_audio();
