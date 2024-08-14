@@ -21,24 +21,60 @@ namespace MetaModule::WifiInterface
 PatchStorage *patchStorage;
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
-	auto CreateVector = [&fbb](auto fileList) {
-		std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.files.size());
-		for (std::size_t i = 0; i < fileList.files.size(); i++) {
-			auto thisName = fbb.CreateString(std::string_view(fileList.files[i].patchname));
 
-			auto thisFilename = fbb.CreateString(std::string_view(fileList.files[i].filename));
-			auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename);
-			elems[i] = thisInfo;
-		};
-		//TODO: add directories, and files inside directories
-		return fbb.CreateVector(elems);
+	auto ExtractFileInfo = [&fbb](auto& thisFile, auto& destination)
+	{
+		auto thisName = fbb.CreateString(std::string_view(thisFile.patchname));
+		auto thisFilename = fbb.CreateString(std::string_view(thisFile.filename));
+		auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename, 0, 0);
+
+		destination = thisInfo;
 	};
+
+	auto ExtractFileFromDir = [&fbb, &ExtractFileInfo](const auto& fileList)
+	{
+		std::vector<flatbuffers::Offset<PatchInfo>> fileInfos(fileList.files.size());
+		for (std::size_t i = 0; i < fileList.files.size(); i++) {
+			ExtractFileInfo(fileList.files[i], fileInfos[i]);
+		};
+		auto files = fbb.CreateVector(fileInfos);
+
+		return files;
+	};
+
+	auto ExtractDirFull = [&fbb, &ExtractFileFromDir](const auto& fileList, std::optional<std::string_view> overrideName)
+	{
+		auto FixDirName = [](std::string_view in)
+		{
+			// remove extra leading slash
+			return in.substr(1);
+		};
+
+		std::vector<flatbuffers::Offset<DirInfo>> dirInfos(fileList.dirs.size());
+		for (std::size_t i=0; i<fileList.dirs.size(); i++)
+		{
+			auto files = ExtractFileFromDir(fileList.dirs[i]);
+			auto name = fbb.CreateString(FixDirName(std::string_view(fileList.dirs[i].name)));
+
+			dirInfos[i] = CreateDirInfo(fbb, name, 0, files);
+		}
+		auto dirs = fbb.CreateVector(dirInfos);
+
+		auto files = ExtractFileFromDir(fileList);
+		
+		auto name = overrideName.has_value()
+			? fbb.CreateString(std::string_view(*overrideName)) 
+			: fbb.CreateString(FixDirName(std::string_view(fileList.name)));
+
+		return CreateDirInfo(fbb, name, dirs, files);
+	};
+
 
 	auto patchFileList = patchStorage->getPatchList();
 
-	auto usbList = CreateVector(patchFileList.volume_root(Volume::USB));
-	auto flashList = CreateVector(patchFileList.volume_root(Volume::NorFlash));
-	auto sdcardList = CreateVector(patchFileList.volume_root(Volume::SDCard));
+	auto usbList    = ExtractDirFull(patchFileList.volume_root(Volume::USB), patchFileList.get_vol_name(Volume::USB));
+	auto flashList  = ExtractDirFull(patchFileList.volume_root(Volume::NorFlash), patchFileList.get_vol_name(Volume::NorFlash));
+	auto sdcardList = ExtractDirFull(patchFileList.volume_root(Volume::SDCard), patchFileList.get_vol_name(Volume::SDCard));
 
 	auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
 	auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
