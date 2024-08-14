@@ -103,6 +103,17 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "module_view", settings, &UserSettings::module_view);
 	read_or_default(node, "audio", settings, &UserSettings::audio);
 	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_autoload);
+	read_or_default(node, "last_patch_opened", settings, &UserSettings::last_patch_opened);
+
+	// TODO: cleaner way to parse and enum and reject out of range?
+	if (node.is_map() && node.has_child("last_patch_vol")) {
+		unsigned t = 0;
+		node["last_patch_vol"] >> t;
+		if (t < static_cast<unsigned>(Volume::MaxVolumes))
+			settings->last_patch_vol = static_cast<Volume>(t);
+	} else {
+		settings->last_patch_vol = UserSettings{}.last_patch_vol;
+	}
 
 	return true;
 }

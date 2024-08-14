@@ -196,6 +196,20 @@ public:
 				pr_info("Wrote settings\n");
 
 			gui_state.do_write_settings = false;
+			gui_state.write_settings_after_ms = 0;
+		}
+
+		if (gui_state.write_settings_after_ms > 0) {
+			if (get_time() >= gui_state.write_settings_after_ms) {
+
+				if (!Settings::write_settings(info.patch_storage, info.settings)) {
+					pr_err("Failed to write settings file (timer)\n");
+				} else {
+					pr_info("Wrote settings (timer)\n");
+				}
+
+				gui_state.write_settings_after_ms = 0;
+			}
 		}
 	}
 

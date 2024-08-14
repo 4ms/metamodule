@@ -13,7 +13,7 @@ struct UserSettings {
 	AudioSettings audio{};
 	PluginAutoloadSettings plugin_autoload{};
 	std::string last_patch_opened{};
-	Volume last_patch_vol{};
+	Volume last_patch_vol{Volume::NorFlash};
 };
 
 } // namespace MetaModule

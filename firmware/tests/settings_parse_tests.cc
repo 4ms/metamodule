@@ -44,6 +44,9 @@ TEST_CASE("Parse settings file") {
     - Plugin One
     - Plugin Two
 
+  last_patch_opened: '/somedir/SomePatch.yml'
+  last_patch_vol: 1
+
 )";
 	// clang format-on
 
@@ -78,6 +81,9 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.plugin_autoload.slug.at(0) == "Plugin One");
 	CHECK(settings.plugin_autoload.slug.at(1) == "Plugin Two");
+
+	CHECK(settings.last_patch_opened == "/somedir/SomePatch.yml");
+	CHECK(settings.last_patch_vol == MetaModule::Volume::SDCard);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -166,6 +172,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.audio.block_size == 64);
 
 	CHECK(settings.plugin_autoload.slug.size() == 0);
+
+	CHECK(settings.last_patch_opened == "");
+	CHECK(settings.last_patch_vol == MetaModule::Volume::NorFlash);
 }
 
 TEST_CASE("Serialize settings") {
@@ -199,6 +208,9 @@ TEST_CASE("Serialize settings") {
 
 	settings.plugin_autoload.slug.emplace_back("Plugin One");
 	settings.plugin_autoload.slug.emplace_back("Plugin Two");
+
+	settings.last_patch_vol = MetaModule::Volume::SDCard;
+	settings.last_patch_opened = "SomePatch.yml";
 
 	// clang format-off
 	std::string expected = R"(Settings:
@@ -234,6 +246,8 @@ TEST_CASE("Serialize settings") {
   plugin_autoload:
     - Plugin One
     - Plugin Two
+  last_patch_opened: SomePatch.yml
+  last_patch_vol: 1
 )";
 	// clang format-on
 
