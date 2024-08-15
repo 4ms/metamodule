@@ -85,6 +85,7 @@ if (BUILD_DYN_PLUGIN)
 	create_plugin(
 		SOURCE_LIB      ValleyLibrary                       # This is the cmake target name (defined in add_target)
 		PLUGIN_NAME     Valley                              # This must match the brand "slug" used in VCV Rack
+        PLUGIN_JSON     ${CMAKE_CURRENT_LIST_DIR}/../../Valley/plugin.json
 		SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/assets    # Path to the assets/ dir containing the PNGs
 		DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../metamodule-plugins/Valley
 	)

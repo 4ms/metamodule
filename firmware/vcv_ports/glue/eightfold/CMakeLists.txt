@@ -27,6 +27,7 @@ if (BUILD_DYN_PLUGIN)
     create_plugin(
         SOURCE_LIB      eightfoldLibrary
         PLUGIN_NAME     eightfold
+        PLUGIN_JSON     ${CMAKE_CURRENT_LIST_DIR}/../../eightfold/plugin.json
         SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/eightfold
         DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/eightfold
     )
