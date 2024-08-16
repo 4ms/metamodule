@@ -10,7 +10,7 @@ target_sources(coreproc_plugin_export PRIVATE
 )
 
 target_include_directories(coreproc_plugin_export PRIVATE
-    ${MM_ROOT}/shared
+    ${MM_ROOT}/firmware/lib
     ${MM_ROOT}/firmware/metamodule-plugin-sdk/metamodule-core-interface
     ${MM_ROOT}/shared/cpputil
 )
