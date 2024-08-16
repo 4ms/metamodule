@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/module_type_slug.hh"
+#include "util/static_string.hh"
 #include <cstdint>
 #include <span>
 
@@ -38,7 +38,7 @@ struct DefaultPatches {
 		MIDI_Poly4_patch, //
 	});
 
-	static inline std::array patch_filenames = std::to_array<ModuleTypeSlug>({
+	static inline std::array patch_filenames = std::to_array<StaticString<63>>({
 		"SlothDrone.yml",		//
 		"WanderVoices.yml",		//
 		"DualEnvEnOsc.yml",		//
@@ -64,11 +64,11 @@ struct DefaultPatches {
 		return {patch_raw_data[id].data(), patch_raw_data[id].size_bytes()};
 	}
 
-	static ModuleTypeSlug get_filename(uint32_t id) {
+	static auto get_filename(uint32_t id) {
 		if (id < patch_filenames.size())
 			return patch_filenames[id];
 		else {
-			ModuleTypeSlug s;
+			StaticString<63> s;
 			s._data[0] = ((id / 10) % 10) + '0';
 			s._data[1] = (id % 10) + '0';
 			s._data[2] = '.';
