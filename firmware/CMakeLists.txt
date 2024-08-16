@@ -218,8 +218,9 @@ add_custom_target(
   tests ALL
   COMMAND cd ${PROJECT_SOURCE_DIR} && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${LIBDIR}/patch-serial && make --no-print-directory -f tests/Makefile -j8
-  # COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/tests && make all
+  COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests && make all
   COMMENT "Running unit tests"
   VERBATIM USES_TERMINAL
 )
@@ -229,7 +230,8 @@ file(
   CONFIGURE_DEPENDS
   "${PROJECT_SOURCE_DIR}/tests/build/*"
   "${LIBDIR}/patch-serial/tests/build/*"
-  # "${PROJECT_SOURCE_DIR}/lib/CoreModules/tests/build/*"
+  "${PROJECT_SOURCE_DIR}/lib/CoreModules/tests/build/*"
+  "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests/build/*"
   "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper/tests/build/*"
 )
 set_target_properties(tests PROPERTIES ADDITIONAL_CLEAN_FILES "${tests_clean_files}")
