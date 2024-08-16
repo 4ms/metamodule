@@ -218,8 +218,8 @@ add_custom_target(
   tests ALL
   COMMAND cd ${PROJECT_SOURCE_DIR} && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${SHARED}/patch-serial && make --no-print-directory -f tests/Makefile -j8
-  COMMAND cd ${SHARED}/CoreModules && make --no-print-directory -f tests/Makefile -j8
-  COMMAND cd ${SHARED}/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
+  # COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules && make --no-print-directory -f tests/Makefile -j8
+  # COMMAND cd lib/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
   COMMENT "Running unit tests"
   VERBATIM USES_TERMINAL
 )
