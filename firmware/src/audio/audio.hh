@@ -79,12 +79,14 @@ private:
 
 	ParamBlock local_params;
 
+	bool midi_last_connected = false;
+
 	AudioConf::SampleT get_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
-	void handle_midi(Midi::Event const &event, unsigned poly_num);
+	void handle_midi(bool is_connected, Midi::Event const &event, unsigned poly_num);
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool is_playing_patch();
 	void handle_patch_just_loaded();

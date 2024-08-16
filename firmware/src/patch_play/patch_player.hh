@@ -569,7 +569,7 @@ public:
 		for (auto const &cable : pd.int_cables) {
 			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
 			for (auto const &input_jack : cable.ins) {
-				if (input_jack.module_id > 0)
+				if (input_jack.module_id < num_modules)
 					modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
 			}
 		}
@@ -582,7 +582,7 @@ public:
 		in_patched[panel_in_jack_id] = is_patched;
 
 		for (auto const &jack : in_conns[panel_in_jack_id]) {
-			if (jack.module_id > 0) {
+			if (jack.module_id < num_modules) {
 				if (is_patched)
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
 				else
@@ -604,6 +604,40 @@ public:
 			else
 				modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 		}
+	}
+
+	void set_midi_connected() {
+		auto mark_patched = [&](auto const &midi_conns) {
+			for (auto const &conn : midi_conns) {
+				for (auto const &jack : conn) {
+					if (jack.module_id < num_modules)
+						modules[jack.module_id]->mark_input_patched(jack.jack_id);
+				}
+			}
+		};
+		mark_patched(midi_note_pitch_conns);
+		mark_patched(midi_note_gate_conns);
+		mark_patched(midi_note_vel_conns);
+		mark_patched(midi_note_aft_conns);
+		mark_patched(midi_cc_conns);
+		mark_patched(midi_gate_conns);
+	}
+
+	void set_midi_disconnected() {
+		auto mark_unpatched = [&](auto const &midi_conns) {
+			for (auto const &conn : midi_conns) {
+				for (auto const &jack : conn) {
+					if (jack.module_id < num_modules)
+						modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+				}
+			}
+		};
+		mark_unpatched(midi_note_pitch_conns);
+		mark_unpatched(midi_note_gate_conns);
+		mark_unpatched(midi_note_vel_conns);
+		mark_unpatched(midi_note_aft_conns);
+		mark_unpatched(midi_cc_conns);
+		mark_unpatched(midi_gate_conns);
 	}
 
 private:
