@@ -1,8 +1,0 @@
-CompileFlags: 
-	Add: [ 
-			"-std=c++20",
-			"-I../shared/doctest/doctest",
-			"-I../../doctest/doctest",
-			"-I../..",
-		]
-
