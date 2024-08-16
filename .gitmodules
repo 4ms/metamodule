@@ -49,3 +49,6 @@
 [submodule "metamodule-patch-serial"]
 	path = shared/patch-serial
 	url = git@github.com:4ms/metamodule-patch-serial
+[submodule "firmware/lib/CoreModules"]
+	path = firmware/lib/CoreModules
+	url = https://github.com/4ms/metamodule-core-modules
