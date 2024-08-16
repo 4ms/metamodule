@@ -1,6 +1,6 @@
 #pragma once
-#include "CoreModules/module_type_slug.hh"
 #include "gui/elements/element_type.hh"
+#include "patch/module_type_slug.hh"
 #include "patch/patch.hh"
 #include "util/lockfree_fifo_spsc.hh"
 #include <variant>

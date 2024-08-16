@@ -64,6 +64,7 @@ target_include_directories( vcv_plugin_export PUBLIC
     src
     ${MM_ROOT}/firmware/src #for svg.cc to access gui/elements/..., and for console/pr_dbg.hh
     ${SHARED}
+	${MM_ROOT}/firmware/lib
 )
 
 target_compile_options(vcv_plugin_export PRIVATE -fno-function-sections -fno-data-sections -Wno-double-promotion)

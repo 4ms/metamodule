@@ -229,7 +229,7 @@ file(
   CONFIGURE_DEPENDS
   "${PROJECT_SOURCE_DIR}/tests/build/*"
   "${SHARED}/patch-serial/tests/build/*"
-  "${SHARED}/CoreModules/tests/build/*"
+  "lib/CoreModules/tests/build/*"
   "${SHARED}/axoloti-wrapper/tests/build/*"
 )
 set_target_properties(tests PROPERTIES ADDITIONAL_CLEAN_FILES "${tests_clean_files}")

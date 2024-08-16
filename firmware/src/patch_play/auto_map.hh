@@ -2,6 +2,7 @@
 
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/elements.hh"
+#include "conf/panel_conf.hh"
 #include "console/pr_dbg.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/patch_mod_queue.hh"

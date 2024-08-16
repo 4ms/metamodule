@@ -13,6 +13,7 @@ add_library(vcv_plugin_internal STATIC
 target_include_directories(vcv_plugin_internal PRIVATE 
     ../export 
     ${SHARED} 
+	${MM_ROOT}/firmware/lib
     ${MM_ROOT}/firmware/src
 )
 

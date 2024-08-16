@@ -103,6 +103,7 @@ target_include_directories(
           ${FWDIR}/src/medium
           ${M4DIR}
           ${FWDIR}
+          ${FWDIR}/lib
           ${FWDIR}/system
           ${SHARED}
           ${SHARED}/processors

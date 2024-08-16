@@ -57,7 +57,7 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 # Brands
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
-add_subdirectory(${SHARED}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
+add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 
 add_subdirectory(${SHARED}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
 
@@ -172,7 +172,7 @@ add_executable(
 )
 
 # CoreModules sources
-add_subdirectory(${SHARED}/CoreModules CoreModules)
+add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(

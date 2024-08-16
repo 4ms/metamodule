@@ -24,7 +24,7 @@ TEST_SOURCES += src/user_settings/settings_parse.cc
 TEST_SOURCES += src/user_settings/settings_serialize.cc
 TEST_SOURCES += src/fw_update/hash/md5_hash.h
 TEST_SOURCES += src/fw_update/hash/hash_processor.cc
-TEST_SOURCES += ../shared/CoreModules/moduleFactory.cc
+TEST_SOURCES += lib/CoreModules/moduleFactory.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
@@ -37,7 +37,7 @@ CXXFLAGS = 	-Wall \
 			-I.. \
 			-Isrc \
 			-Isrc/medium \
-			-I../src \
+			-Ilib \
 			-I../shared \
 			-I../shared/cpputil \
 			-I../shared/patch-serial \
