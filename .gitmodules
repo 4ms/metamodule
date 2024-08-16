@@ -5,7 +5,7 @@
 	path = firmware/lib/lvgl/lvgl
 	url = https://github.com/lvgl/lvgl.git
 [submodule "shared/cpputil"]
-	path = shared/cpputil
+	path = firmware/lib/cpputil
 	url = https://github.com/4ms/cpputil.git
 [submodule "firmware/bootloader/mp1-boot"]
 	path = firmware/bootloader/mp1-boot
