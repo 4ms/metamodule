@@ -215,7 +215,7 @@ std::vector<std::string> ModuleFactory::getAllModuleDisplayNames(std::string_vie
 
 std::vector<std::string_view> ModuleFactory::getAllBrandDisplayNames() {
 	std::vector<std::string_view> brands;
-	brands.resize(registry().size());
+	brands.reserve(registry().size());
 	for (auto &brand : registry()) {
 		brands.push_back(brand.display_name);
 	}
@@ -224,7 +224,7 @@ std::vector<std::string_view> ModuleFactory::getAllBrandDisplayNames() {
 
 std::vector<BrandTypeSlug> ModuleFactory::getAllBrands() {
 	std::vector<BrandTypeSlug> brands;
-	brands.resize(registry().size());
+	brands.reserve(registry().size());
 	for (auto &brand : registry()) {
 		brands.push_back(brand.brand_name.c_str());
 	}

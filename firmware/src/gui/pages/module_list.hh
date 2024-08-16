@@ -49,10 +49,10 @@ private:
 	void populate_brands() {
 		auto all_brands = ModuleFactory::getAllBrandDisplayNames();
 
-		std::string roller_str;
+		std::string roller_str = "";
 		roller_str.reserve(all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
 		unsigned sel_idx = 0;
-		for (unsigned i = 0; auto item : all_brands) {
+		for (unsigned i = 0; auto const &item : all_brands) {
 			roller_str += item;
 			roller_str += "\n";
 			if (selected_brand == item)
