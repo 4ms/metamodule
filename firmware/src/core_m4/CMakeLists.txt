@@ -6,7 +6,6 @@ set_arch_flags()
 
 set(M4DIR ${CMAKE_CURRENT_SOURCE_DIR}) # /firmware/src/core_m4
 set(FWDIR ${CMAKE_SOURCE_DIR}) # /firmware
-set(SHARED ${FWDIR}/../shared) # /shared
 
 set(HALDIR ${FWDIR}/lib/stm32-hal/stm32mp1)
 set(DRIVERLIB ${FWDIR}/lib/mdrivlib)
@@ -105,9 +104,7 @@ target_include_directories(
           ${FWDIR}
           ${FWDIR}/lib
           ${FWDIR}/system
-          ${SHARED}
-          ${SHARED}/processors
-          ${SHARED}/patch-serial
+          ${FWDIR}/lib/patch-serial
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/src/usb

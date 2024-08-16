@@ -212,14 +212,14 @@ add_custom_target(
 #
 # Tests
 #
-set(SHARED ${PROJECT_SOURCE_DIR}/../shared)
+set(LIBDIR ${PROJECT_SOURCE_DIR}/lib)
 
 add_custom_target(
   tests ALL
   COMMAND cd ${PROJECT_SOURCE_DIR} && make --no-print-directory -f tests/Makefile -j8
-  COMMAND cd ${SHARED}/patch-serial && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${LIBDIR}/patch-serial && make --no-print-directory -f tests/Makefile -j8
   # COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules && make --no-print-directory -f tests/Makefile -j8
-  # COMMAND cd lib/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
   COMMENT "Running unit tests"
   VERBATIM USES_TERMINAL
 )
@@ -228,17 +228,17 @@ file(
   tests_clean_files
   CONFIGURE_DEPENDS
   "${PROJECT_SOURCE_DIR}/tests/build/*"
-  "${SHARED}/patch-serial/tests/build/*"
-  "lib/CoreModules/tests/build/*"
-  "${SHARED}/axoloti-wrapper/tests/build/*"
+  "${LIBDIR}/patch-serial/tests/build/*"
+  # "${PROJECT_SOURCE_DIR}/lib/CoreModules/tests/build/*"
+  "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper/tests/build/*"
 )
 set_target_properties(tests PROPERTIES ADDITIONAL_CLEAN_FILES "${tests_clean_files}")
 
 add_custom_target(
   dep_tests
-  COMMAND cd ${SHARED}/cpputil && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${LIBDIR}/cpputil && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${PROJECT_SOURCE_DIR}/lib/mdrivlib && make --no-print-directory -f tests/Makefile -j8
-  BYPRODUCTS ${PROJECT_SOURCE_DIR}/lib/mdrivlib/tests/build/* ${SHARED}/cpputil/tests/build/*
+  BYPRODUCTS ${PROJECT_SOURCE_DIR}/lib/mdrivlib/tests/build/* ${LIBDIR}/cpputil/tests/build/*
   VERBATIM USES_TERMINAL
 )
 
@@ -248,7 +248,7 @@ set_property(
   PROPERTY ADDITIONAL_CLEAN_FILES
            ${PROJECT_SOURCE_DIR}/tests/build
            ${PROJECT_SOURCE_DIR}/lib/mdrivlib/tests/build
-           ${SHARED}/cpputil/tests/build
+           ${LIBDIR}/cpputil/tests/build
 )
 
 #

@@ -4,7 +4,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" ON)
 
 set(FWDIR ${CMAKE_SOURCE_DIR})
-set(SHARED ${FWDIR}/../shared)
+set(LIBDIR ${FWDIR}/lib)
 
 set_arch_flags()
 
@@ -59,14 +59,14 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 
-add_subdirectory(${SHARED}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
+add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
 
 
 #
 # RYML
 #
 # if (NOT TARGET ryml)
-#   add_subdirectory(${SHARED}/patch-serial/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+#   add_subdirectory(${LIBDIR}/patch-serial/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
 # endif()
 
 #
@@ -195,7 +195,7 @@ target_include_directories(
           ${FWDIR}/lib/mdrivlib
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
-          ${SHARED}
+          ${LIBDIR}
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
@@ -204,7 +204,7 @@ target_include_directories(
 )
 
 if (NOT TARGET cpputil::cpputil)
-  add_subdirectory(${SHARED}/cpputil cpputil)
+  add_subdirectory(${LIBDIR}/cpputil cpputil)
 endif()
 
 

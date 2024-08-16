@@ -1,6 +1,6 @@
-#include "../shared/gcem/include/gcem.hpp"
 #include "CoreModules/4ms/core/helpers/mapping.h"
 #include "doctest.h"
+#include "lib/gcem/include/gcem.hpp"
 #include <iostream>
 
 //Copy-pasted from ENVVCACore.cc

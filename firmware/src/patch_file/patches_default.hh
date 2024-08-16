@@ -5,20 +5,19 @@
 
 ///
 
-#include "patch/default/PlaygroundBefaco.hh"
-#include "patch/default/UntwistedBraid.hh"
-
-#include "patch/default/Djembe4verb.hh"
-#include "patch/default/DualEnvEnosc.hh"
-#include "patch/default/EnOscPoly4.hh"
-#include "patch/default/EnOsc_step_seq.hh"
-#include "patch/default/KarplusStereo.hh"
-#include "patch/default/MIDI_Poly4.hh"
-#include "patch/default/Orcas_Heart_Octo_Djembe.hh"
-#include "patch/default/QuadDrum.hh"
-#include "patch/default/SlothDrone.hh"
-#include "patch/default/SpringsintoCaves.hh"
-#include "patch/default/WanderVoices.hh"
+#include "../patches/default/Djembe4verb.hh"
+#include "../patches/default/DualEnvEnosc.hh"
+#include "../patches/default/EnOscPoly4.hh"
+#include "../patches/default/EnOsc_step_seq.hh"
+#include "../patches/default/KarplusStereo.hh"
+#include "../patches/default/MIDI_Poly4.hh"
+#include "../patches/default/Orcas_Heart_Octo_Djembe.hh"
+#include "../patches/default/PlaygroundBefaco.hh"
+#include "../patches/default/QuadDrum.hh"
+#include "../patches/default/SlothDrone.hh"
+#include "../patches/default/SpringsintoCaves.hh"
+#include "../patches/default/UntwistedBraid.hh"
+#include "../patches/default/WanderVoices.hh"
 
 struct DefaultPatches {
 
