@@ -7,10 +7,6 @@ target_sources(coreproc_plugin_export PRIVATE
     create.cc
 )
 
-target_include_directories(coreproc_plugin_export PRIVATE
-    # ${CMAKE_CURRENT_LIST_DIR}/../lib
-)
-
 target_link_libraries(coreproc_plugin_export PRIVATE 
 	cpputil 
 	metamodule::core-interface
