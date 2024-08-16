@@ -6,7 +6,7 @@ project(mm_sim LANGUAGES C CXX)
 set(SIMULATOR 1)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
-set(SHARED ${CMAKE_CURRENT_LIST_DIR}/../shared)
+set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
 set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
 
 set(LV_CONF_PATH
@@ -17,7 +17,7 @@ add_compile_options(-O0 -g2)
 
 # #################### cpputil #########################################
 
-add_subdirectory(../shared/cpputil cpputil)
+add_subdirectory(${LIBDIR}/cpputil cpputil)
 
 # #################### LVGL Simulator Driver #################################
 
@@ -34,7 +34,8 @@ target_include_directories(lvgl PRIVATE
 
 # #################### RYML ##################################
 
-add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+# add_subdirectory(${LIBDIR}/patch-serial/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
 
 # #################### SLS Export ##################################
 
@@ -52,7 +53,7 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 
 # #################### Application ############################################
 
-add_subdirectory(${SHARED}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
+add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
 
@@ -65,10 +66,7 @@ add_executable(
     ${FWDIR}/src/gui/elements/element_name.cc
     ${FWDIR}/src/gui/slsexport/ui_local.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
-    ${SHARED}/patch_convert/ryml/ryml_serial.cc
-    ${SHARED}/patch_convert/ryml/ryml_init.cc
-    ${SHARED}/patch_convert/yaml_to_patch.cc 
-    ${SHARED}/patch_convert/patch_to_yaml.cc
+    ${FWDIR}/src/patch_play/modules_helpers.cc
 
     #Fatfs:
     stubs/fattime.cc
@@ -97,7 +95,6 @@ target_include_directories(
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${SHARED}/patch
           ${FWDIR}/src/medium
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
@@ -121,7 +118,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports CoreModules)
+target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl metamodule::patch-serial SDL2 ui vcv_ports CoreModules)
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
