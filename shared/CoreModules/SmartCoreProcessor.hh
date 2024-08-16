@@ -30,37 +30,47 @@ protected:
 	void setOutput(float val) requires(count(EL).num_outputs == 1)
 	{
 		auto idx = index(EL);
-		outputValues[idx.output_idx] = val;
+		if (idx.output_idx < outputValues.size())
+			outputValues[idx.output_idx] = val;
 	}
 
 	template<Elem EL>
 	float getOutput() requires(count(EL).num_outputs == 1)
 	{
 		auto idx = index(EL);
-		return outputValues[idx.output_idx];
+		return idx.output_idx < outputValues.size() ? outputValues[idx.output_idx] : 0.f;
 	}
 
 	template<Elem EL>
 	bool isPatched() requires(count(EL).num_outputs == 1)
 	{
 		auto idx = index(EL);
-		return outputPatched[idx.output_idx];
+		if (idx.output_idx < outputPatched.size())
+			return outputPatched[idx.output_idx];
+		else
+			return false;
 	}
 
 	template<Elem EL>
 	bool isPatched() requires(count(EL).num_inputs == 1)
 	{
 		auto idx = index(EL);
-		return inputValues[idx.input_idx].has_value();
+		if (idx.input_idx < inputValues.size())
+			return inputValues[idx.input_idx].has_value();
+		else
+			return false;
 	}
 
 	template<Elem EL>
 	std::optional<float> getInput() requires(count(EL).num_inputs == 1)
 	{
 		auto idx = index(EL);
-		auto result = inputValues[idx.input_idx];
-		inputValues[idx.input_idx].reset();
-		return result;
+		if (idx.input_idx < inputValues.size()) {
+			auto result = inputValues[idx.input_idx];
+			inputValues[idx.input_idx].reset();
+			return result;
+		} else
+			return std::nullopt;
 	}
 
 	template<Elem EL>
@@ -135,13 +145,13 @@ public:
 private:
 	float getParamRaw(Elem el, size_t local_index = 0) {
 		auto idx = index(el);
-		auto param_id = idx.param_idx + local_index;
+		size_t param_id = idx.param_idx + local_index;
 		return (param_id < paramValues.size()) ? paramValues[param_id] : 0.f;
 	}
 
 	void setLEDRaw(Elem el, float val, size_t color_idx = 0) {
 		auto idx = index(el);
-		auto led_idx = idx.light_idx + color_idx;
+		size_t led_idx = idx.light_idx + color_idx;
 		if (led_idx < ledValues.size())
 			ledValues[led_idx] = val;
 	}
@@ -151,29 +161,30 @@ private:
 
 	constexpr static auto index(Elem el) {
 		auto element_idx = element_index(el);
-		return indices[element_idx];
+		return element_idx < indices.size() ? indices[element_idx] : ElementCount::NoElementIndices;
 	}
 
 public:
 	float get_output(int output_id) const override {
-		if (output_id < (int)outputValues.size())
+		if ((size_t)output_id < outputValues.size())
 			return outputValues[output_id];
-		return 0.f;
+		else
+			return 0.f;
 	}
 
 	void set_input(int input_id, float val) override {
-		if (input_id < (int)inputValues.size())
+		if ((size_t)input_id < inputValues.size())
 			inputValues[input_id] = val;
 	}
 
 	void set_param(int param_id, float val) override {
-		if (param_id < (int)paramValues.size()) {
+		if ((size_t)param_id < paramValues.size()) {
 			paramValues[param_id] = val;
 		}
 	}
 
 	float get_led_brightness(int led_id) const override {
-		if (led_id < (int)ledValues.size()) {
+		if ((size_t)led_id < ledValues.size()) {
 			return ledValues[led_id];
 		} else {
 			return 0.0f;
@@ -185,7 +196,8 @@ public:
 	}
 
 	void mark_input_unpatched(const int input_id) override {
-		inputValues[input_id].reset();
+		if ((size_t)input_id < inputValues.size())
+			inputValues[input_id].reset();
 	}
 
 	void mark_input_patched(const int input_id) override {
@@ -198,11 +210,13 @@ public:
 	}
 
 	void mark_output_unpatched(int output_id) override {
-		outputPatched[output_id] = false;
+		if (size_t(output_id) < outputPatched.size())
+			outputPatched[output_id] = false;
 	}
 
 	void mark_output_patched(int output_id) override {
-		outputPatched[output_id] = true;
+		if (size_t(output_id) < outputPatched.size())
+			outputPatched[output_id] = true;
 	}
 
 private:
