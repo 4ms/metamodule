@@ -54,6 +54,7 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 # #################### Application ############################################
 
 add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
+add_subdirectory(${LIBDIR}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
 
@@ -118,7 +119,15 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl metamodule::patch-serial SDL2 ui vcv_ports CoreModules)
+target_link_libraries(simulator PRIVATE 
+	${SDL2_LIBRARIES}
+	lvglsdl
+	metamodule::patch-serial
+	SDL2
+	ui
+	vcv_ports
+)
+target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
