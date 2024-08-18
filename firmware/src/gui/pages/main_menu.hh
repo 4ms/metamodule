@@ -32,6 +32,8 @@ struct MainMenuPage : PageBase {
 		lv_label_set_text(ui_MainMenuNowPlayingName, "");
 
 		lv_hide(ui_MainMenuLastViewedPanel);
+
+		lv_label_set_text(ui_MenuLabelPatches, "Load\nPatch");
 	}
 
 	void prepare_focus() final {
