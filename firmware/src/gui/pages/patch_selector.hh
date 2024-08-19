@@ -335,6 +335,12 @@ struct PatchSelectorPage : PageBase {
 						hide_spinner();
 					}
 				} else if (message.message_type == FileStorageProxy::LoadFileFailed) {
+					// If it's the playing patch, try loading it from memory
+					if (patches.get_playing_patch_loc_hash() == PatchLocHash{selected_patch}) {
+						patches.view_playing_patch();
+						view_loaded_patch();
+						hide_spinner();
+					}
 					pr_warn("Error loading patch %s\n", selected_patch.filename.c_str());
 					state = State::Idle;
 					lv_group_set_editing(group, true);

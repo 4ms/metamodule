@@ -25,7 +25,6 @@ public:
 				return true;
 			} else {
 				pr_trace("Reload playing patch from disk\n");
-				close_playing_patch();
 				return false;
 			}
 
@@ -35,7 +34,6 @@ public:
 				return true;
 			} else {
 				pr_trace("Reload patch from disk\n");
-				close_open_patch(openpatch);
 				return false;
 			}
 
@@ -88,6 +86,10 @@ public:
 
 	// Parses and opens the loaded patch, and sets the view patch to point to it
 	bool open_patch(std::span<char> file_data, PatchLocation const &patch_loc) {
+
+		if (open_patches_.find(patch_loc)) {
+			open_patches_.remove(patch_loc);
+		}
 
 		auto *new_patch = open_patches_.emplace_back(patch_loc);
 
