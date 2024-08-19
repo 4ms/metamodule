@@ -7,6 +7,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/choice_popup.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/manual_control_popup.hh"
 #include "gui/pages/module_view_mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
@@ -483,60 +484,30 @@ private:
 									 first_unpatched_jack.value_or(0));
 	}
 
+	// Not used:
 	static void finish_cable_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		if (!page->gui_state.new_cable) {
+		if (page->gui_state.new_cable.has_value()) {
+
+			make_cable(page->gui_state.new_cable.value(),
+					   page->patch,
+					   page->patch_mod_queue,
+					   page->notify_queue,
+					   page->this_jack,
+					   page->this_jack_type);
+
+			// End cable making
+			page->gui_state.new_cable = std::nullopt;
+
+			// Do not show instructions again this session
+			page->gui_state.already_displayed_cable_instructions = true;
+
+		} else {
 			page->notify_queue.put({"Something went wrong... can't finish a cable here because no cable was started",
 									Notification::Priority::Error});
-			return;
-		}
-
-		// Do not show instructions again this session
-		page->gui_state.already_displayed_cable_instructions = true;
-
-		auto begin_jack = page->gui_state.new_cable->jack;
-		auto begin_jack_type = page->gui_state.new_cable->type;
-
-		bool make_panel_mapping = false;
-
-		// Handle case of starting with a PanelIn->In and finishing on an input
-		if (begin_jack_type == ElementType::Input && page->this_jack_type == ElementType::Input) {
-			AddJackMapping jackmapping{};
-			if (auto panel_jack = page->patch->find_mapped_injack(begin_jack)) {
-				jackmapping.jack = page->this_jack;
-				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
-				make_panel_mapping = true;
-
-			} else if (auto panel_jack = page->patch->find_mapped_injack(page->this_jack)) {
-				jackmapping.jack = begin_jack;
-				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
-				make_panel_mapping = true;
-			}
-
-			if (make_panel_mapping) {
-				jackmapping.type = ElementType::Input;
-				page->patch_mod_queue.put(jackmapping);
-				page->notify_queue.put({"Added cable from panel input"});
-				page->gui_state.new_cable = std::nullopt;
-			}
-		}
-
-		if (!make_panel_mapping) {
-			AddInternalCable newcable{};
-			if (begin_jack_type == ElementType::Input) {
-				newcable.in = begin_jack;
-				newcable.out = page->this_jack;
-			} else {
-				newcable.in = page->this_jack;
-				newcable.out = begin_jack;
-			}
-
-			page->patch_mod_queue.put(newcable);
-			page->notify_queue.put({"Added cable"});
-			page->gui_state.new_cable = std::nullopt;
 		}
 	}
 

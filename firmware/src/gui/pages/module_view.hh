@@ -148,6 +148,7 @@ struct ModuleViewPage : PageBase {
 					   drawn_element.element);
 
 			add_button(drawn.obj);
+
 			auto base = base_element(drawn_element.element);
 
 			if (base.short_name.size() == 0) {
@@ -159,9 +160,21 @@ struct ModuleViewPage : PageBase {
 				if (gui_state.new_cable->type == ElementType::Input) {
 					if (drawn.count.num_outputs == 0)
 						continue;
+					if (!can_finish_cable(gui_state.new_cable.value(),
+										  patch,
+										  Jack{.module_id = this_module_id, .jack_id = drawn.idx.output_idx},
+										  ElementType::Output,
+										  drawn.mapped_panel_id.has_value()))
+						continue;
 				}
 				if (gui_state.new_cable->type == ElementType::Output) {
 					if (drawn.count.num_inputs == 0)
+						continue;
+					if (!can_finish_cable(gui_state.new_cable.value(),
+										  patch,
+										  Jack{.module_id = this_module_id, .jack_id = drawn.idx.input_idx},
+										  ElementType::Input,
+										  drawn.mapped_panel_id.has_value()))
 						continue;
 				}
 			}
@@ -513,11 +526,50 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-			page->mode = ViewMode::Mapping;
-			page->args.detail_mode = true;
-			lv_hide(ui_ElementRollerPanel);
+			if (page->gui_state.new_cable) {
+				// Determine id and type of this element
+				std::optional<Jack> this_jack{};
+				ElementType this_jack_type{};
+				auto idx = page->drawn_elements[*drawn_idx].gui_element.idx;
 
-			page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+				std::visit(overloaded{[](auto const &) {},
+									  [&](const JackInput &) {
+										  this_jack_type = ElementType::Input;
+										  this_jack = Jack{.module_id = page->this_module_id, .jack_id = idx.input_idx};
+									  },
+									  [&](const JackOutput &) {
+										  this_jack_type = ElementType::Output;
+										  this_jack =
+											  Jack{.module_id = page->this_module_id, .jack_id = idx.output_idx};
+									  }},
+						   page->drawn_elements[*drawn_idx].element);
+
+				if (this_jack) {
+					make_cable(page->gui_state.new_cable.value(),
+							   page->patch,
+							   page->module_mods,
+							   page->notify_queue,
+							   *this_jack,
+							   this_jack_type);
+
+					page->gui_state.new_cable = std::nullopt;
+
+					// Do not show instructions again this session
+					page->gui_state.already_displayed_cable_instructions = true;
+
+					page->gui_state.force_redraw_patch = true;
+					page->args.detail_mode = false;
+					page->page_list.request_new_page(PageId::PatchView, page->args);
+				} else
+					pr_err("Error completing cable\n");
+
+			} else {
+				page->mode = ViewMode::Mapping;
+				page->args.detail_mode = true;
+				lv_hide(ui_ElementRollerPanel);
+
+				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+			}
 		}
 	}
 
