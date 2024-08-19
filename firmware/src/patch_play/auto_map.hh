@@ -25,9 +25,15 @@ public:
 		uint16_t set_id{};
 	};
 
-	[[maybe_unused]] std::optional<MappingDest> map(uint16_t module_id, ElementCount::Indices idx, PatchData &patch) {
+	[[maybe_unused]] std::optional<MappingDest> map(uint16_t module_id,
+													ElementCount::Indices idx,
+													PatchData &patch,
+													std::optional<uint16_t> force_knobset = std::nullopt) {
 		if (idx.param_idx != ElementCount::Indices::NoElementMarker) {
-			return map_param(module_id, idx.param_idx, patch);
+			if (force_knobset.has_value())
+				return map_param_single_knobset(module_id, idx.param_idx, patch, force_knobset.value());
+			else
+				return map_param(module_id, idx.param_idx, patch);
 
 		} else if (idx.input_idx != ElementCount::Indices::NoElementMarker) {
 			return map_input(module_id, idx.input_idx, patch);
@@ -69,6 +75,30 @@ public:
 						pr_trace("to panel knob %d in set %d\n", panel_knob_id, set_i);
 						return MappingDest{panel_knob_id, set_i};
 					}
+				}
+			}
+		}
+		return std::nullopt;
+	}
+
+	std::optional<MappingDest>
+	map_param_single_knobset(uint16_t module_id, uint16_t param_idx, PatchData &patch, uint16_t set_i) {
+
+		for (uint16_t panel_knob_id = 0; panel_knob_id < PanelDef::NumKnobs; panel_knob_id++) {
+			if (patch.find_mapped_knob(set_i, panel_knob_id) == nullptr) {
+
+				auto map = MappedKnob{.panel_knob_id = panel_knob_id,
+									  .module_id = module_id,
+									  .param_id = param_idx,
+									  .min = 0,
+									  .max = 1,
+									  .alias_name = ""};
+
+				if (patch.add_update_mapped_knob(set_i, map)) {
+					patch_mod_queue.put(AddMapping{.map = map, .set_id = set_i});
+					pr_trace("Auto mapping module %d param %d ", module_id, param_idx);
+					pr_trace("to panel knob %d in set %d\n", panel_knob_id, set_i);
+					return MappingDest{panel_knob_id, set_i};
 				}
 			}
 		}

@@ -88,7 +88,7 @@ struct ModuleViewAutoMapDialog {
 		return visible;
 	}
 
-	void make_all_maps() {
+	void make_all_maps(bool single_knobset = false) {
 		auto patch = patches.get_view_patch();
 		if (!patch)
 			return;
@@ -104,10 +104,24 @@ struct ModuleViewAutoMapDialog {
 			maps_todo.push_back(idx);
 		}
 
-		make_maps();
+		if (single_knobset) {
+			if (patch->knob_sets.size() < MaxKnobSets) {
+				auto new_knobset_id = patch->knob_sets.size();
+				// Use first knobset if it's empty
+				if (patch->knob_sets.size() == 1) {
+					if (patch->knob_sets[0].set.size() == 0)
+						new_knobset_id = 0;
+				}
+				make_maps(new_knobset_id);
+				name_knobset_by_modulename(new_knobset_id);
+			} else
+				pr_warn("All knobsets full\n");
+		} else {
+			make_maps();
+		}
 	}
 
-	void make_maps() {
+	void make_maps(std::optional<uint16_t> knobset_id = std::nullopt) {
 		auto patch = patches.get_view_patch();
 
 		for (auto indices : maps_todo) {
@@ -116,6 +130,16 @@ struct ModuleViewAutoMapDialog {
 	}
 
 private:
+	void name_knobset_by_modulename(uint16_t knobset_id) {
+		auto patch = patches.get_view_patch();
+		if (knobset_id < patch->knob_sets.size()) {
+			if (module_idx < patch->module_slugs.size()) {
+				auto module_display_name = ModuleFactory::getModuleDisplayName(patch->module_slugs[module_idx]);
+				patch->knob_sets[knobset_id].name = module_display_name;
+			}
+		}
+	}
+
 	void clear_element_checks() {
 		lv_foreach_child(ui_AutoMapKnobCont, [](lv_obj_t *obj, unsigned id) {
 			if (id > 0)
