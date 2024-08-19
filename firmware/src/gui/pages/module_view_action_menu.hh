@@ -30,7 +30,7 @@ struct ModuleViewActionMenu {
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
-		lv_obj_set_x(ui_ModuleViewActionMenu, 140);
+		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
 
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionAutopatchBut, autopatch_but_cb, LV_EVENT_CLICKED, this);
