@@ -79,7 +79,7 @@ void append_connected_jack_name(std::string &opts, GuiElement const &drawn, Patc
 			if (auto out_map = patch.find_mapped_outjack(cable->out)) {
 				auto color = get_mapped_color(JackOutput{}, out_map->panel_jack_id);
 				opts = opts + std::string(color) + " " +
-					   get_panel_name<PanelDef>(JackOutput{}, out_map->panel_jack_id) + "# ";
+					   get_panel_name<PanelDef>(JackOutput{}, out_map->panel_jack_id) + LV_TXT_COLOR_CMD + " ";
 			}
 
 			append(cable->out, ElementType::Output);
