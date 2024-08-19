@@ -18,6 +18,7 @@ struct OpenPatch {
 	PatchLocation loc{};
 	PatchData patch{};
 	unsigned modification_count = 0;
+	bool force_reload = false;
 };
 
 struct OpenPatchList {
