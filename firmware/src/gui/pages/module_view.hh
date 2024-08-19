@@ -124,6 +124,14 @@ struct ModuleViewPage : PageBase {
 		DrawnElement const *cur_el = nullptr;
 		ElementCount::Counts last_type{};
 
+		if (gui_state.new_cable) {
+			opts += Gui::orange_highlight_html_str;
+			opts += gui_state.new_cable->type == ElementType::Output ? "Inputs:" : "Outputs:";
+			opts += LV_TXT_COLOR_CMD;
+			opts += "\n";
+			roller_idx++;
+			roller_drawn_el_idx.push_back(-1);
+		}
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &drawn = drawn_element.gui_element;
 
@@ -139,11 +147,23 @@ struct ModuleViewPage : PageBase {
 					   },
 					   drawn_element.element);
 
+			add_button(drawn.obj);
 			auto base = base_element(drawn_element.element);
 
 			if (base.short_name.size() == 0) {
 				pr_info("Skipping element with no name\n");
 				continue;
+			}
+
+			if (gui_state.new_cable.has_value()) {
+				if (gui_state.new_cable->type == ElementType::Input) {
+					if (drawn.count.num_outputs == 0)
+						continue;
+				}
+				if (gui_state.new_cable->type == ElementType::Output) {
+					if (drawn.count.num_inputs == 0)
+						continue;
+				}
 			}
 
 			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
@@ -173,7 +193,6 @@ struct ModuleViewPage : PageBase {
 			append_connected_jack_name(opts, drawn, *patch);
 
 			opts += "\n";
-			add_button(drawn.obj);
 			roller_drawn_el_idx.push_back(drawn_el_idx);
 
 			if (args.element_indices.has_value()) {
