@@ -146,6 +146,8 @@ void AudioStream::handle_patch_just_loaded() {
 	// and will propagate to the patch player
 	for (auto &p : plug_detects)
 		p.reset();
+
+	midi_last_connected = false;
 }
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
@@ -249,13 +251,15 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 
 void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsigned poly_num) {
 	if (is_connected && !midi_last_connected) {
-		//Connect event
 		player.set_midi_connected();
 	} else if (!is_connected && midi_last_connected) {
-		//Disconnect event
 		player.set_midi_disconnected();
 	}
+
 	midi_last_connected = is_connected;
+
+	if (!is_connected)
+		return;
 
 	if (event.type == Midi::Event::Type::None)
 		return;

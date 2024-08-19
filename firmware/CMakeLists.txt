@@ -212,14 +212,15 @@ add_custom_target(
 #
 # Tests
 #
-set(SHARED ${PROJECT_SOURCE_DIR}/../shared)
+set(LIBDIR ${PROJECT_SOURCE_DIR}/lib)
 
 add_custom_target(
   tests ALL
   COMMAND cd ${PROJECT_SOURCE_DIR} && make --no-print-directory -f tests/Makefile -j8
-  COMMAND cd ${SHARED}/patch_convert && make --no-print-directory -f tests/Makefile -j8
-  COMMAND cd ${SHARED}/CoreModules && make --no-print-directory -f tests/Makefile -j8
-  COMMAND cd ${SHARED}/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${LIBDIR}/patch-serial && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/tests && make all
+  COMMAND cd ${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests && make all
   COMMENT "Running unit tests"
   VERBATIM USES_TERMINAL
 )
@@ -228,17 +229,18 @@ file(
   tests_clean_files
   CONFIGURE_DEPENDS
   "${PROJECT_SOURCE_DIR}/tests/build/*"
-  "${SHARED}/patch_convert/tests/build/*"
-  "${SHARED}/CoreModules/tests/build/*"
-  "${SHARED}/axoloti-wrapper/tests/build/*"
+  "${LIBDIR}/patch-serial/tests/build/*"
+  "${PROJECT_SOURCE_DIR}/lib/CoreModules/tests/build/*"
+  "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/tests/build/*"
+  "${PROJECT_SOURCE_DIR}/lib/CoreModules/4ms/core/axoloti-wrapper/tests/build/*"
 )
 set_target_properties(tests PROPERTIES ADDITIONAL_CLEAN_FILES "${tests_clean_files}")
 
 add_custom_target(
   dep_tests
-  COMMAND cd ${SHARED}/cpputil && make --no-print-directory -f tests/Makefile -j8
+  COMMAND cd ${LIBDIR}/cpputil && make --no-print-directory -f tests/Makefile -j8
   COMMAND cd ${PROJECT_SOURCE_DIR}/lib/mdrivlib && make --no-print-directory -f tests/Makefile -j8
-  BYPRODUCTS ${PROJECT_SOURCE_DIR}/lib/mdrivlib/tests/build/* ${SHARED}/cpputil/tests/build/*
+  BYPRODUCTS ${PROJECT_SOURCE_DIR}/lib/mdrivlib/tests/build/* ${LIBDIR}/cpputil/tests/build/*
   VERBATIM USES_TERMINAL
 )
 
@@ -248,7 +250,7 @@ set_property(
   PROPERTY ADDITIONAL_CLEAN_FILES
            ${PROJECT_SOURCE_DIR}/tests/build
            ${PROJECT_SOURCE_DIR}/lib/mdrivlib/tests/build
-           ${SHARED}/cpputil/tests/build
+           ${LIBDIR}/cpputil/tests/build
 )
 
 #
@@ -264,37 +266,6 @@ add_custom_target(
   COMMAND make -C ${PROJECT_SOURCE_DIR}/../simulator run
   VERBATIM USES_TERMINAL
 )
-
-
-#
-# Process 4ms info files
-#
-
-add_custom_command(
-  OUTPUT moduleinfos-cmd
-  COMMAND ${CMAKE_COMMAND} -E echo "Updating/creating CoreModule *_info.hh files from *_info.svg"
-  VERBATIM USES_TERMINAL
-)
-
-
-# 4ms Info SVGs for each info svg, add_custom_command (...) to to generate the _info.hh
-include(vcv_ports/glue/4ms/modules.cmake)
-foreach(info_svg ${4MS_INFO_SVGS})
-  get_filename_component(slug ${info_svg} NAME_WE) # e.g. Verb_info
-
-  add_custom_command(
-    OUTPUT moduleinfos-cmd
-    APPEND
-    COMMAND python3 ${PROJECT_SOURCE_DIR}/../shared/svgextract/svgextract.py createInfo ${info_svg}
-            ${PROJECT_SOURCE_DIR}/../shared/CoreModules/4ms/info
-    DEPENDS ${info_svg}
-    COMMENT "Creating info header: ${slug}"
-  )
-endforeach()
-
-set_source_files_properties(moduleinfos-cmd PROPERTIES SYMBOLIC "true")
-
-add_custom_target(module-infos DEPENDS moduleinfos-cmd)
 
 #
 # minBlep tables for vcv modules

@@ -181,6 +181,8 @@ extern lv_obj_t *ui_ModuleViewActionMenuHeader;
 extern lv_obj_t *ui_ModuleViewActionHeaderLine;
 extern lv_obj_t *ui_ModuleViewActionAutopatchBut;
 extern lv_obj_t *ui_ModuleViewActionAutopatchLabel;
+extern lv_obj_t *ui_ModuleViewActionAutoKnobSet;
+extern lv_obj_t *ui_ModuleViewActionAutoKnobSetLabel;
 extern lv_obj_t *ui_ModuleViewActionRandomBut;
 extern lv_obj_t *ui_ModuleViewActionRandomLabel;
 extern lv_obj_t *ui_ModuleViewActionDeleteBut;

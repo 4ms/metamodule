@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/moduleFactory.hh"
 #include "console/pr_dbg.hh"
 #include "glue/AudibleInstruments/info/Blinds_info.hh"
 #include "glue/AudibleInstruments/info/Braids_info.hh"
@@ -20,7 +21,6 @@
 #include "glue/AudibleInstruments/info/Tides_info.hh"
 #include "glue/AudibleInstruments/info/Veils_info.hh"
 #include "glue/AudibleInstruments/info/Warps_info.hh"
-#include "shared/CoreModules/moduleFactory.hh"
 #include <plugin/Model.hpp>
 
 namespace MetaModule::AudibleInstruments

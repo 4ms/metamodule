@@ -255,9 +255,9 @@ lv_obj_set_style_bg_color(ui_ElementRoller, lv_color_hex(0xFD8B18), LV_PART_SELE
 lv_obj_set_style_bg_opa(ui_ElementRoller, 255, LV_PART_SELECTED| LV_STATE_FOCUSED);
 
 ui_ModuleViewActionMenu = lv_obj_create(ui_ElementRollerPanel);
-lv_obj_set_width( ui_ModuleViewActionMenu, 117);
+lv_obj_set_width( ui_ModuleViewActionMenu, 150);
 lv_obj_set_height( ui_ModuleViewActionMenu, LV_SIZE_CONTENT);   /// 168
-lv_obj_set_x( ui_ModuleViewActionMenu, 130 );
+lv_obj_set_x( ui_ModuleViewActionMenu, 0 );
 lv_obj_set_y( ui_ModuleViewActionMenu, -3 );
 lv_obj_set_align( ui_ModuleViewActionMenu, LV_ALIGN_TOP_RIGHT );
 lv_obj_set_flex_flow(ui_ModuleViewActionMenu,LV_FLEX_FLOW_COLUMN);
@@ -362,6 +362,27 @@ lv_obj_set_width( ui_ModuleViewActionAutopatchLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_ModuleViewActionAutopatchLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_ModuleViewActionAutopatchLabel, LV_ALIGN_LEFT_MID );
 lv_label_set_text(ui_ModuleViewActionAutopatchLabel,"Auto-Map");
+
+ui_ModuleViewActionAutoKnobSet = lv_btn_create(ui_ModuleViewActionMenu);
+lv_obj_set_height( ui_ModuleViewActionAutoKnobSet, 40);
+lv_obj_set_width( ui_ModuleViewActionAutoKnobSet, lv_pct(100));
+lv_obj_set_align( ui_ModuleViewActionAutoKnobSet, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_ModuleViewActionAutoKnobSet, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_ModuleViewActionAutoKnobSet, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewActionAutoKnobSet, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ModuleViewActionAutoKnobSet, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewActionAutoKnobSet, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_bg_opa(ui_ModuleViewActionAutoKnobSet, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ModuleViewActionAutoKnobSet, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ModuleViewActionAutoKnobSet, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ModuleViewActionAutoKnobSet, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_ModuleViewActionAutoKnobSet, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_ModuleViewActionAutoKnobSetLabel = lv_label_create(ui_ModuleViewActionAutoKnobSet);
+lv_obj_set_width( ui_ModuleViewActionAutoKnobSetLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_ModuleViewActionAutoKnobSetLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_ModuleViewActionAutoKnobSetLabel, LV_ALIGN_LEFT_MID );
+lv_label_set_text(ui_ModuleViewActionAutoKnobSetLabel,"Auto-Map in \nnew Knob Set");
 
 ui_ModuleViewActionRandomBut = lv_btn_create(ui_ModuleViewActionMenu);
 lv_obj_set_height( ui_ModuleViewActionRandomBut, 25);
@@ -1099,7 +1120,7 @@ lv_obj_set_style_pad_left(ui_MVSettingsMenu, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_MVSettingsMenu, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_MVSettingsMenu, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_MVSettingsMenu, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_MVSettingsMenu, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_MVSettingsMenu, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_MVSettingsMenu, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_MVSettingsMenu, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 

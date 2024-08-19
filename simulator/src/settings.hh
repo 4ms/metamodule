@@ -9,7 +9,7 @@ namespace MetaModuleSim
 struct Settings {
 	unsigned zoom = 100;
 	std::string sdcard_path = "patches/";
-	std::string flash_path = "../shared/patch/default/";
+	std::string flash_path = "../patches/default/";
 	std::string asset_file = "../firmware/build/assets.uimg";
 	int audioout_dev = 0;
 
@@ -31,7 +31,7 @@ struct Settings {
 
 			options.add_options()("f,flashdir",
 								  "Host directory simulating internal NOR Flash root",
-								  cxxopts::value<std::string>()->default_value("../shared/patch/default/"));
+								  cxxopts::value<std::string>()->default_value("../patches/default/"));
 
 			options.add_options()("s,assets",
 								  "Location of assets.uimg file (built by firmware project)",

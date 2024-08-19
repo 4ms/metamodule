@@ -179,6 +179,8 @@ lv_obj_t *ui_ModuleViewActionMenuHeader;
 lv_obj_t *ui_ModuleViewActionHeaderLine;
 lv_obj_t *ui_ModuleViewActionAutopatchBut;
 lv_obj_t *ui_ModuleViewActionAutopatchLabel;
+lv_obj_t *ui_ModuleViewActionAutoKnobSet;
+lv_obj_t *ui_ModuleViewActionAutoKnobSetLabel;
 lv_obj_t *ui_ModuleViewActionRandomBut;
 lv_obj_t *ui_ModuleViewActionRandomLabel;
 lv_obj_t *ui_ModuleViewActionDeleteBut;

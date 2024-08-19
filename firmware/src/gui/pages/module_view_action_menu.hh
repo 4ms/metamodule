@@ -30,14 +30,16 @@ struct ModuleViewActionMenu {
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
-		lv_obj_set_x(ui_ModuleViewActionMenu, 140);
+		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
 
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionAutopatchBut, autopatch_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionAutoKnobSet, autopatch_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionRandomBut, random_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
+		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 	}
@@ -115,6 +117,12 @@ private:
 		auto_map.show();
 	}
 
+	void auto_map_single_knobset() {
+		hide();
+		auto_map.prepare_focus(module_idx, group);
+		auto_map.make_all_maps(true);
+	}
+
 	void randomize() {
 		randomizer.randomize(module_idx, patches.get_view_patch());
 	}
@@ -134,7 +142,10 @@ private:
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
 
-		page->show_auto_map();
+		if (event->target == ui_ModuleViewActionAutopatchBut)
+			page->show_auto_map();
+		else
+			page->auto_map_single_knobset();
 	}
 
 	static void random_but_cb(lv_event_t *event) {

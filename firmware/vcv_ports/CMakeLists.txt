@@ -10,7 +10,7 @@ if (NOT TARGET metamodule::vcv-plugin-interface)
 endif()
 
 if (NOT TARGET cpputil::cpputil)
-  add_subdirectory(../../shared/cpputil cpputil)
+  add_subdirectory(../lib/cpputil cpputil)
 endif()
 
 #############################

@@ -1,6 +1,0 @@
-CompileFlags:
-	Add: [
-			"-std=c++2a",
-			"-I..",
-			"-I../../vcv/src"
-	]

@@ -1,5 +1,6 @@
 #include "element_name.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "conf/panel_conf.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/styles.hh"

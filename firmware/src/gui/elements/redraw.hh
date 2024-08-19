@@ -4,7 +4,7 @@
 #include "gui/elements/context.hh"
 #include "gui/images/paths.hh"
 #include "lvgl.h"
-#include "patch_data.hh"
+#include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 #include <cmath>
 

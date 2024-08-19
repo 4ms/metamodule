@@ -1,34 +1,33 @@
-#include "../shared/CoreModules/4ms/core/helpers/mapping.h"
-#include "../shared/gcem/include/gcem.hpp"
+#include "CoreModules/4ms/core/helpers/mapping.h"
 #include "doctest.h"
+#include "lib/gcem/include/gcem.hpp"
 #include <iostream>
 
 //Copy-pasted from ENVVCACore.cc
-struct VoltageToFreqTableRange
-{
+struct VoltageToFreqTableRange {
 	static constexpr float min = -0.1f;
 	static constexpr float max = 0.5f;
 };
-constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage)
-{
-	// two points in the V->f curve
-	constexpr double V_1 = 0.4;
-	constexpr double f_1 = 0.09;
-	constexpr double V_2 = 0.06;
-	constexpr double f_2 = 1000.0;
+constinit auto VoltageToFrequencyTable =
+	Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage) {
+		// two points in the V->f curve
+		constexpr double V_1 = 0.4;
+		constexpr double f_1 = 0.09;
+		constexpr double V_2 = 0.06;
+		constexpr double f_2 = 1000.0;
 
-	// std::pow is not required to be constexpr by the standard
-	// so this might not work in clang
-	constexpr double ArgScalingFactor = 10.0;
-	constexpr double arg = gcem::log2(f_1 / f_2) / (V_1 - V_2);
-	constexpr double b = gcem::pow(2.0f, arg / ArgScalingFactor);
-	constexpr double a = f_1 / gcem::pow(gcem::pow(2.0, arg), V_1);
+		// std::pow is not required to be constexpr by the standard
+		// so this might not work in clang
+		constexpr double ArgScalingFactor = 10.0;
+		constexpr double arg = gcem::log2(f_1 / f_2) / (V_1 - V_2);
+		constexpr double b = gcem::pow(2.0f, arg / ArgScalingFactor);
+		constexpr double a = f_1 / gcem::pow(gcem::pow(2.0, arg), V_1);
 
-	// interpolate
-	auto frequency = float(gcem::pow(b, double(voltage) * ArgScalingFactor) * a);
+		// interpolate
+		auto frequency = float(gcem::pow(b, double(voltage) * ArgScalingFactor) * a);
 
-	return frequency;
-});
+		return frequency;
+	});
 
 TEST_CASE("check mapping table") {
 	constexpr unsigned LEN = 50;

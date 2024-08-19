@@ -1,7 +1,7 @@
 #include "patchlist_ryml_tests.hh"
+#include "patch-serial/yaml_to_patch.hh"
 #include "patch/patch_data.hh"
-#include "patch_convert/yaml_to_patch.hh"
-#include "ryml/ryml_serial.hh"
+#include "ryml_serial.hh"
 
 namespace
 {

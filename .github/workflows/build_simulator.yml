@@ -28,18 +28,17 @@ on:
       - main
     paths:
       - 'simulator/**'
-      - 'shared/**'
+      - 'firmware/vcv_ports/**'
+      - 'firmware/vcv_plugin/**'
+      - 'firmware/metamodule-plugin-sdk/**'
+      - 'firmware/lib/CoreModules/**'
+      - 'firmware/lib/patch-serial/**'
+      - 'firmware/lib/lvgl/**'
       - 'firmware/src/gui/**'
-      - 'firmware/src/VCV_adaptor/**'
       - 'firmware/src/patch**'
       - 'firmware/src/params/**'
       - 'firmware/src/console/**'
-      - 'firmware/vcv_ports/**'
-      - 'firmware/lib/lvgl/**'
       - '!**.md' # Skip docs
-      - '!shared/svgextract' # Skip generator script (still run CI if generated files change)
-      - '!shared/gen_minblep' # Skip generator script (still run CI if generated files change)
-      - '!shared/tableGen' # Skip generator script (still run CI if generated files change)
         
 jobs:
 
