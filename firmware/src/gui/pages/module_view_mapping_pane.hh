@@ -388,31 +388,36 @@ private:
 		}
 	}
 
+	void start_new_cable() {
+		auto name = get_full_element_name(this_jack.module_id, this_jack.jack_id, this_jack_type, *patch);
+
+		gui_state.new_cable = {.jack = this_jack, .type = this_jack_type, .has_connections = this_jack_has_connections};
+
+		notify_queue.put(
+			{"Choose a jack to connect to " + std::string(name.module_name) + " " + std::string(name.element_name),
+			 Notification::Priority::Status,
+			 10000});
+
+		page_list.request_new_page(PageId::PatchView, args);
+	}
+
 	static void add_cable_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		page->add_cable_popup.show(
-			[page](unsigned choice) {
-				if (choice == 0) //Cancel
-					return;
-				auto name = get_full_element_name(
-					page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, *page->patch);
-
-				page->gui_state.new_cable = {.jack = page->this_jack,
-											 .type = page->this_jack_type,
-											 .has_connections = page->this_jack_has_connections};
-
-				page->notify_queue.put({"Choose a jack to connect to " + std::string(name.module_name) + " " +
-											std::string(name.element_name),
-										Notification::Priority::Status,
-										10000});
-
-				page->page_list.request_new_page(PageId::PatchView, page->args);
-			},
-			"Navigate to the module and jack you want to patch to.",
-			"Start");
+		if (page->gui_state.already_displayed_cable_instructions) {
+			page->start_new_cable();
+		} else {
+			page->add_cable_popup.show(
+				[page](unsigned choice) {
+					if (choice == 0) //Cancel
+						return;
+					page->start_new_cable();
+				},
+				"Navigate to the module and jack you want to patch to.",
+				"Start");
+		}
 	}
 
 	static void add_panel_cable_button_cb(lv_event_t *event) {
@@ -488,6 +493,10 @@ private:
 									Notification::Priority::Error});
 			return;
 		}
+
+		// Do not show instructions again this session
+		page->gui_state.already_displayed_cable_instructions = true;
+
 		auto begin_jack = page->gui_state.new_cable->jack;
 		auto begin_jack_type = page->gui_state.new_cable->type;
 
