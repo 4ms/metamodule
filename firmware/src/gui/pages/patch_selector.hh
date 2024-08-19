@@ -119,7 +119,6 @@ struct PatchSelectorPage : PageBase {
 
 			if (patch.loc_hash == patches.get_playing_patch_loc_hash())
 				patch_name = Gui::green_highlight_html_str + LV_SYMBOL_PLAY + LV_TXT_COLOR_CMD + " " + patch_name;
-			// patch_name = "#00a551 " + std::string(LV_SYMBOL_PLAY) + "# " + patch_name;
 
 			root.files.emplace_back(
 				patch.loc.filename, 0, patch.modification_count, PatchName{patch_name}, patch.loc.vol);
@@ -270,11 +269,23 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::RequestedPatchList: {
-				auto message = patch_storage.get_message().message_type;
-				if (message == FileStorageProxy::PatchListChanged) {
+				auto message = patch_storage.get_message();
+				if (message.message_type == FileStorageProxy::PatchListChanged) {
 					gui_state.force_refresh_vol = std::nullopt;
+					if (message.USBEvent == IntercoreStorageMessage::VolEvent::Mounted) {
+						patches.mark_patches_force_reload(Volume::USB);
+					}
+					if (message.USBEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
+						patches.mark_patches_no_reload(Volume::USB);
+					}
+					if (message.SDEvent == IntercoreStorageMessage::VolEvent::Mounted) {
+						patches.mark_patches_force_reload(Volume::SDCard);
+					}
+					if (message.SDEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
+						patches.mark_patches_no_reload(Volume::SDCard);
+					}
 					state = State::ReloadingPatchList;
-				} else if (message == FileStorageProxy::PatchListUnchanged) {
+				} else if (message.message_type == FileStorageProxy::PatchListUnchanged) {
 					gui_state.force_refresh_vol = std::nullopt;
 					hide_spinner();
 					state = State::Idle;

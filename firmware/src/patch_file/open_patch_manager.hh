@@ -17,14 +17,27 @@ class OpenPatchManager {
 public:
 	using enum IntercoreStorageMessage::MessageType;
 
+	// If the given patch loc is an open patch, set view_patch to it
 	bool load_if_open(PatchLocation patch_loc) {
 		if (playing_patch_ && (PatchLocHash{patch_loc} == playing_patch_->loc_hash)) {
-			view_playing_patch();
-			return true;
+			if (playing_patch_->force_reload == false) {
+				view_playing_patch();
+				return true;
+			} else {
+				pr_trace("Reload playing patch from disk\n");
+				close_playing_patch();
+				return false;
+			}
 
 		} else if (auto openpatch = open_patches_.find(PatchLocHash{patch_loc})) {
-			view_patch_ = openpatch;
-			return true;
+			if (openpatch->force_reload == false) {
+				view_patch_ = openpatch;
+				return true;
+			} else {
+				pr_trace("Reload patch from disk\n");
+				close_open_patch(openpatch);
+				return false;
+			}
 
 		} else {
 			return false;
@@ -54,6 +67,23 @@ public:
 		}
 
 		return true;
+	}
+
+	// Flag all unmodified patches on vol that they need to be re-loaded from disk
+	// the next time the user opens the patch
+	void mark_patches_force_reload(Volume vol) {
+		for (auto &patch : open_patches_) {
+			if (patch.loc.vol == vol && patch.modification_count == 0)
+				patch.force_reload = true;
+		}
+	}
+
+	// Clears the force-reload flag on all open patches with given volume
+	void mark_patches_no_reload(Volume vol) {
+		for (auto &patch : open_patches_) {
+			if (patch.loc.vol == vol)
+				patch.force_reload = false;
+		}
 	}
 
 	// Parses and opens the loaded patch, and sets the view patch to point to it
@@ -206,6 +236,18 @@ public:
 			view_patch_ = nullptr;
 		} else {
 			pr_err("Tried to delete view patch, but it's not found\n");
+		}
+	}
+
+	void close_open_patch(OpenPatch *patch) {
+		if (patch == playing_patch_)
+			close_playing_patch();
+		else if (patch == view_patch_)
+			close_view_patch();
+		else {
+			if (!open_patches_.remove(patch->loc_hash)) {
+				pr_err("Tried to close patch, but it's not found\n");
+			}
 		}
 	}
 

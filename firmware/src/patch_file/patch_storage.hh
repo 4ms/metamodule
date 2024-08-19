@@ -104,7 +104,10 @@ public:
 
 		if (message.message_type == RequestRefreshPatchList) {
 
-			IntercoreStorageMessage result{.message_type = PatchListUnchanged};
+			using VolEvent = IntercoreStorageMessage::VolEvent;
+
+			IntercoreStorageMessage result{
+				.message_type = PatchListUnchanged, .USBEvent = VolEvent::None, .SDEvent = VolEvent::None};
 
 			auto *patch_dir_list_ = message.patch_dir_list;
 
@@ -120,20 +123,34 @@ public:
 
 				poll_media_change();
 
-				if (sd_changes_.take_change() || force_sd_refresh) {
+				bool sd_changed = sd_changes_.take_change();
+				if (sd_changed || force_sd_refresh) {
 					patch_dir_list_->clear_patches(Volume::SDCard);
 
-					if (sdcard_.is_mounted())
+					if (sdcard_.is_mounted()) {
 						PatchFileIO::add_directory(sdcard_, patch_dir_list_->volume_root(Volume::SDCard));
+						if (sd_changed)
+							result.SDEvent = VolEvent::Mounted;
+					} else {
+						if (sd_changed)
+							result.SDEvent = VolEvent::Unmounted;
+					}
 
 					result.message_type = PatchListChanged;
 				}
 
-				if (usb_changes_.take_change() || force_usb_refresh) {
+				bool usb_changed = usb_changes_.take_change();
+				if (usb_changed || force_usb_refresh) {
 					patch_dir_list_->clear_patches(Volume::USB);
 
-					if (usbdrive_.is_mounted())
+					if (usbdrive_.is_mounted()) {
 						PatchFileIO::add_directory(usbdrive_, patch_dir_list_->volume_root(Volume::USB));
+						if (usb_changed)
+							result.USBEvent = VolEvent::Mounted;
+					} else {
+						if (usb_changed)
+							result.USBEvent = VolEvent::Unmounted;
+					}
 
 					result.message_type = PatchListChanged;
 				}
@@ -248,8 +265,7 @@ public:
 		return patch_dir_list_;
 	}
 
-	bool has_media_changed()
-	{
+	bool has_media_changed() {
 		sd_changes_wifi_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
 		usb_changes_wifi_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
 
