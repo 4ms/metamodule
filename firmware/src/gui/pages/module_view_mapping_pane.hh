@@ -444,6 +444,7 @@ private:
 			page->patch_mod_queue.put(jackmapping);
 			page->notify_queue.put({"Connected to panel"});
 			page->gui_state.new_cable = std::nullopt;
+			page->should_close = true;
 		};
 
 		page->panel_cable_popup.show(action,
