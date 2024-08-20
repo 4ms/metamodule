@@ -161,6 +161,11 @@ struct PatchViewPage : PageBase {
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_CLICKED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
+			if (args.module_id.has_value()) {
+				if (args.module_id.value() == module_idx) {
+					lv_group_focus_obj(canvas);
+				}
+			}
 		}
 
 		is_ready = true;
