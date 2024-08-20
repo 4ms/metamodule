@@ -93,6 +93,7 @@ struct ModuleViewPage : PageBase {
 			lv_hide(ui_ModuleViewSettingsBut);
 			lv_show(ui_ModuleViewCableCancelBut);
 			lv_show(ui_ModuleViewCableCreateLabel);
+			lv_label_set_text(ui_ModuleViewCableCreateLabel, "Creating a cable");
 			lv_obj_set_height(ui_ElementRoller, 132);
 			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
@@ -151,7 +152,7 @@ struct ModuleViewPage : PageBase {
 
 		if (gui_state.new_cable) {
 			opts += Gui::orange_highlight_html_str;
-			opts += gui_state.new_cable->type == ElementType::Output ? "Inputs:" : "Outputs:";
+			opts += "Select a jack:"; //gui_state.new_cable->type == ElementType::Output ? "Inputs:" : "Outputs:";
 			opts += LV_TXT_COLOR_CMD;
 			opts += "\n";
 			roller_idx++;
@@ -188,26 +189,20 @@ struct ModuleViewPage : PageBase {
 			}
 
 			if (gui_state.new_cable.has_value()) {
-				if (gui_state.new_cable->type == ElementType::Input) {
-					if (drawn.count.num_outputs == 0)
-						continue;
-					if (!can_finish_cable(gui_state.new_cable.value(),
-										  patch,
-										  Jack{.module_id = this_module_id, .jack_id = drawn.idx.output_idx},
-										  ElementType::Output,
-										  drawn.mapped_panel_id.has_value()))
-						continue;
-				}
-				if (gui_state.new_cable->type == ElementType::Output) {
-					if (drawn.count.num_inputs == 0)
-						continue;
-					if (!can_finish_cable(gui_state.new_cable.value(),
-										  patch,
-										  Jack{.module_id = this_module_id, .jack_id = drawn.idx.input_idx},
-										  ElementType::Input,
-										  drawn.mapped_panel_id.has_value()))
-						continue;
-				}
+				uint16_t this_jack_id{};
+				if (drawn.count.num_inputs > 0)
+					this_jack_id = drawn.idx.input_idx;
+				else if (drawn.count.num_outputs > 0)
+					this_jack_id = drawn.idx.output_idx;
+				else
+					continue;
+				auto this_jack_type = (drawn.count.num_inputs > 0) ? ElementType::Input : ElementType::Output;
+				if (!can_finish_cable(gui_state.new_cable.value(),
+									  patch,
+									  Jack{.module_id = this_module_id, .jack_id = this_jack_id},
+									  this_jack_type,
+									  drawn.mapped_panel_id.has_value()))
+					continue;
 			}
 
 			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
