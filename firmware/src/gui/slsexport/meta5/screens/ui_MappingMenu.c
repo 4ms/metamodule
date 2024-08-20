@@ -243,8 +243,8 @@ lv_obj_set_style_outline_width(ui_ModuleViewCableCancelBut, 2, LV_PART_MAIN| LV_
 lv_obj_set_style_outline_pad(ui_ModuleViewCableCancelBut, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
 lv_obj_set_style_outline_color(ui_ModuleViewCableCancelBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
 lv_obj_set_style_outline_opa(ui_ModuleViewCableCancelBut, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-lv_obj_set_style_outline_width(ui_ModuleViewCableCancelBut, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
-lv_obj_set_style_outline_pad(ui_ModuleViewCableCancelBut, 1, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_ModuleViewCableCancelBut, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_ModuleViewCableCancelBut, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
 ui_ModuleViewCabelCancelLabel = lv_label_create(ui_ModuleViewCableCancelBut);
 lv_obj_set_width( ui_ModuleViewCabelCancelLabel, LV_SIZE_CONTENT);  /// 1
