@@ -325,6 +325,13 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		if (handle_patch_mods()) {
+			redraw_module();
+			mapping_pane.refresh();
+		}
+	}
+
+	bool handle_patch_mods() {
 		bool refresh = false;
 
 		while (auto patch_mod = module_mods.get()) {
@@ -358,10 +365,7 @@ struct ModuleViewPage : PageBase {
 				patch_mod_queue.put(patch_mod.value());
 		}
 
-		if (refresh) {
-			redraw_module();
-			mapping_pane.refresh();
-		}
+		return refresh;
 	}
 
 	// This gets called after map_ring_style changes
@@ -552,14 +556,19 @@ private:
 							   *this_jack,
 							   this_jack_type);
 
+					page->handle_patch_mods();
+
 					page->gui_state.new_cable = std::nullopt;
 
 					// Do not show instructions again this session
 					page->gui_state.already_displayed_cable_instructions = true;
 
 					page->gui_state.force_redraw_patch = true;
-					page->args.detail_mode = false;
-					page->page_list.request_new_page(PageId::PatchView, page->args);
+					PageArguments args = {.patch_loc = page->args.patch_loc,
+										  .patch_loc_hash = page->args.patch_loc_hash,
+										  .module_id = page->args.module_id,
+										  .detail_mode = false};
+					page->page_list.request_new_page(PageId::PatchView, args);
 				} else
 					pr_err("Error completing cable\n");
 

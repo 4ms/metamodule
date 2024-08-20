@@ -50,6 +50,7 @@ inline void make_cable(GuiState::CableBeginning &new_cable,
 	bool make_panel_mapping = false;
 
 	// Handle case of starting with a PanelIn->In and finishing on an input
+	// In this case we create a new Panel mapping
 	if (begin_jack_type == ElementType::Input && this_jack_type == ElementType::Input) {
 		AddJackMapping jackmapping{};
 		if (auto panel_jack = patch->find_mapped_injack(begin_jack)) {
