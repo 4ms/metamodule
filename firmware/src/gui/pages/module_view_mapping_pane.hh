@@ -51,10 +51,8 @@ struct ModuleViewMappingPane {
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
 
-		lv_hide(ui_CableFinishButton);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(ui_CableCancelButton, cancel_creating_cable_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableRemoveButton, disconnect_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CablePanelAddButton, add_panel_cable_button_cb, LV_EVENT_CLICKED, this);
@@ -209,9 +207,7 @@ private:
 
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_ControlButton);
-		lv_hide(ui_CableCancelButton);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_MappedPanel);
@@ -336,24 +332,6 @@ private:
 		lv_group_add_obj(pane_group, ui_CablePanelAddButton);
 		lv_group_add_obj(pane_group, ui_CableRemoveButton);
 		lv_group_focus_next(pane_group);
-
-		handle_cable_creating();
-	}
-
-	void handle_cable_creating() {
-		if (!gui_state.new_cable) {
-			lv_hide(ui_CableCreationPanel);
-			return;
-		}
-
-		// Should never get here, since we immediate make a cable when clicking a jack
-		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CablePanelAddButton);
-		lv_show(ui_CableCreationPanel);
-		lv_show(ui_CableCreationLabel);
-
-		lv_group_add_obj(pane_group, ui_CableCancelButton);
-		lv_label_set_text(ui_CableCreationLabel, "In progress: adding a cable");
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
@@ -505,22 +483,11 @@ private:
 		}
 	}
 
-	static void cancel_creating_cable_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-
-		page->gui_state.new_cable = std::nullopt;
-		page->notify_queue.put({"Cancelled making a cable", Notification::Priority::Info, 1000});
-		page->should_close = true;
-	}
-
 	//
 	// Params
 	//
 	void prepare_for_element(const ParamElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 
@@ -606,7 +573,6 @@ private:
 	//
 	void prepare_for_element(const AltParamElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 
@@ -627,7 +593,6 @@ private:
 	//
 	void prepare_for_element(const LightElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 

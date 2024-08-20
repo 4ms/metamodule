@@ -43,9 +43,12 @@ struct ModuleViewPage : PageBase {
 		auto roller_label = lv_obj_get_child(ui_ElementRoller, 0);
 		lv_label_set_recolor(roller_label, true);
 
+		lv_hide(ui_ModuleViewCableCancelBut);
+
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_ModuleViewActionBut);
 		lv_group_add_obj(group, ui_ModuleViewSettingsBut);
+		lv_group_add_obj(group, ui_ModuleViewCableCancelBut);
 		lv_group_add_obj(group, ui_ElementRoller);
 		lv_group_focus_obj(ui_ElementRoller);
 
@@ -54,6 +57,7 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() override {
@@ -87,9 +91,23 @@ struct ModuleViewPage : PageBase {
 		if (gui_state.new_cable) {
 			lv_hide(ui_ModuleViewActionBut);
 			lv_hide(ui_ModuleViewSettingsBut);
+			lv_show(ui_ModuleViewCableCancelBut);
+			lv_show(ui_ModuleViewCableCreateLabel);
+			lv_obj_set_height(ui_ElementRoller, 132);
+			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
+			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
+			lv_obj_set_flex_align(
+				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 		} else {
 			lv_show(ui_ModuleViewActionBut);
 			lv_show(ui_ModuleViewSettingsBut);
+			lv_hide(ui_ModuleViewCableCancelBut);
+			lv_hide(ui_ModuleViewCableCreateLabel);
+			lv_obj_set_height(ui_ElementRoller, 186);
+			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 2, LV_PART_MAIN);
+			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, -4, LV_PART_MAIN);
+			lv_obj_set_flex_align(
+				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 			settings_menu.prepare_focus(group);
 			action_menu.prepare_focus(group, this_module_id);
 		}
@@ -509,10 +527,7 @@ private:
 		// Save current select in args so we can navigate back to this item
 		page->args.element_indices = page->drawn_elements[cur_idx].gui_element.idx;
 
-		// Turn off previously highlighted component
 		page->unhighlight_component(prev_sel);
-
-		// Turn on new highlighted component
 		page->highlight_component(cur_idx);
 	}
 
@@ -532,7 +547,12 @@ private:
 	}
 
 	void focus_button_bar() {
-		lv_group_focus_obj(ui_ModuleViewSettingsBut);
+		pr_dbg("Focus button bar\n");
+		if (gui_state.new_cable)
+			lv_group_focus_obj(ui_ModuleViewCableCancelBut);
+		else
+			lv_group_focus_obj(ui_ModuleViewSettingsBut);
+
 		lv_group_set_editing(group, false);
 		cur_selected = 1;
 		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
@@ -599,14 +619,26 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		if (page) {
 			if (event->param != page) {
+				pr_dbg("Roller focused, pressing...\n");
 				lv_group_set_editing(page->group, true);
 				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
 
 				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
 					page->highlight_component(*drawn_idx);
 				}
-			}
+			} else
+				pr_dbg("Roller focused, but not pressing\n");
 		}
+	}
+
+	static void cancel_cable_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+
+		page->gui_state.new_cable = std::nullopt;
+		page->notify_queue.put({"Cancelled making a cable", Notification::Priority::Info, 1000});
+		page->page_list.request_new_page(PageId::PatchView, page->args);
 	}
 
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx) {
