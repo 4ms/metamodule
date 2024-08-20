@@ -120,11 +120,13 @@ struct ModuleViewMappingPane {
 
 		should_close = false;
 
+		is_visible = true;
+
 		lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_OFF);
 	}
 
 	void refresh() {
-		if (drawn_element) {
+		if (is_visible && drawn_element) {
 			remove_all_items();
 			show(*drawn_element);
 		}
@@ -141,6 +143,7 @@ struct ModuleViewMappingPane {
 		}
 
 		remove_all_items();
+		is_visible = false;
 	}
 
 	void update() {
@@ -731,6 +734,8 @@ private:
 	ChoicePopup panel_cable_popup;
 	PatchModQueue &patch_mod_queue;
 	OpenPatchManager &patches;
+
+	bool is_visible = false;
 };
 
 } // namespace MetaModule
