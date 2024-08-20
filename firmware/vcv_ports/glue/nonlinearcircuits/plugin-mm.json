@@ -1,0 +1,27 @@
+{
+	"MetaModuleBrandName": "NonlinearCircuits",
+	"MetaModulePluginMaintainer": "4ms Company",
+	"MetaModulePluginMaintainerEmail": "4ms@4mscompany.com",
+	"MetaModulePluginMaintainerUrl": "https://metamodule.4ms.info",
+	"MetaModuleDescription": "",
+	"MetaModuleIncludedModules": [
+        "4Seq",
+        "Cipher",
+        "BOOLs",
+        "DivideConquer",
+        "DivineCMOS",
+        "DoubleNeuron",
+        "Genie",
+        "LetsSplosh",
+        "Neuron",
+        "Numberwang",
+        "Router",
+        "Segue",
+        "SlothApathy",
+        "SlothInertia",
+        "SlothTorpor",
+        "SquidAxon",
+        "Statues",
+        "TripleSloth"
+	]
+}

@@ -1,0 +1,27 @@
+{
+	"MetaModuleBrandName": "Befaco",
+	"MetaModulePluginMaintainer": "4ms Company",
+	"MetaModulePluginMaintainerEmail": "4ms@4mscompany.com",
+	"MetaModulePluginMaintainerUrl": "https://metamodule.4ms.info",
+	"MetaModuleDescription": "",
+	"MetaModuleIncludedModules": [
+        "ABC",
+        "ADSR",
+        "ChoppingKinky",
+        "DualAtenuverter",
+        "EvenVCO",
+        "HexmixVCA",
+        "Kickall",
+        "Mixer",
+        "Morphader",
+        "MotionMTR",
+        "Percall",
+        "PonyVCO",
+        "Rampage",
+        "STMix",
+        "SamplingModulator",
+        "SlewLimiter",
+        "SpringReverb",
+        "StereoStrip"
+	]
+}

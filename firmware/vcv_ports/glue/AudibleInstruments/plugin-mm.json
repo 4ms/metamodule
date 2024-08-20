@@ -1,0 +1,29 @@
+{
+	"MetaModuleBrandName": "Cloned Instruments",
+	"MetaModulePluginMaintainer": "4ms Company",
+	"MetaModulePluginMaintainerEmail": "4ms@4mscompany.com",
+	"MetaModulePluginMaintainerUrl": "https://metamodule.4ms.info",
+	"MetaModuleDescription": "Clones of Mutable Instruments modules, compatible with Audible Instruments VCV Rack plugin",
+	"MetaModuleIncludedModules": [
+		"Algorithm VCO",
+		"Algorithm VCO II",
+		"Compressing Filter",
+		"Envelopes",
+		"Envelopes II",
+		"Granulation",
+		"Keyframes",
+		"Mod Osc",
+		"Modeler",
+		"Multi-filter",
+		"Quad Attenuverter",
+		"Quad VCA",
+		"Random Router",
+		"Random-maker",
+		"Rect-Logic-S&H",
+		"Resonator",
+		"Slope Sequencer",
+		"Split-Combine",
+		"Triple Mix",
+		"VC Filter"
+	]
+}
