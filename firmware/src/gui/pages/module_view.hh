@@ -225,6 +225,12 @@ struct ModuleViewPage : PageBase {
 			roller_idx++;
 		}
 
+		if (roller_idx == 1) {
+			if (gui_state.new_cable) {
+				opts.append("No available jacks to patch\n");
+			}
+		}
+
 		// remove final \n
 		if (opts.length() > 0)
 			opts.pop_back();
