@@ -150,14 +150,6 @@ struct ModuleViewPage : PageBase {
 		DrawnElement const *cur_el = nullptr;
 		ElementCount::Counts last_type{};
 
-		if (gui_state.new_cable) {
-			opts += Gui::orange_highlight_html_str;
-			opts += "Select a jack:"; //gui_state.new_cable->type == ElementType::Output ? "Inputs:" : "Outputs:";
-			opts += LV_TXT_COLOR_CMD;
-			opts += "\n";
-			roller_idx++;
-			roller_drawn_el_idx.push_back(-1);
-		}
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &drawn = drawn_element.gui_element;
 
@@ -210,7 +202,9 @@ struct ModuleViewPage : PageBase {
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 
-			} else if (last_type.num_params > 0 && (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0)) {
+			} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
+					   (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0))
+			{
 				opts += Gui::orange_highlight_html_str + "Jacks:" + LV_TXT_COLOR_CMD + "\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
