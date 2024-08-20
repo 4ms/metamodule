@@ -253,7 +253,6 @@ private:
 				list_panel_out_cable(*panel_jack_id);
 		}
 
-		// TODO: use make_cable.hh:
 		this_jack_has_connections = has_connections;
 		prepare_jack_gui();
 	}

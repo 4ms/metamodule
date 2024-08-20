@@ -5,26 +5,24 @@
 namespace MetaModule
 {
 
-inline bool has_connections(PatchData const *patch, Jack jack, ElementType jack_type, bool is_mapped) {
-	auto has_int_cable = [&]() {
-		if (jack_type == ElementType::Output)
-			return patch->find_internal_cable_with_outjack(jack);
-		else
-			return patch->find_internal_cable_with_injack(jack);
-	};
-
-	return (has_int_cable() || is_mapped);
+inline bool has_connections(PatchData const *patch, Jack jack, ElementType jack_type) {
+	if (jack_type == ElementType::Output)
+		return patch->find_internal_cable_with_outjack(jack) != nullptr;
+	else
+		return patch->find_internal_cable_with_injack(jack) != nullptr;
 }
 
-inline bool can_finish_cable(GuiState::CableBeginning const &new_cable,
-							 bool this_jack_has_connections,
-							 ElementType this_jack_type) {
-	auto begin_type = new_cable.type;
-	auto begin_connected = new_cable.has_connections;
-	auto begin_node_has_output = begin_connected || begin_type == ElementType::Output;
+inline bool can_finish_cable(ElementType begin_jack_type,
+							 bool begin_jack_has_connections,
+							 ElementType this_jack_type,
+							 bool this_jack_has_connections) {
+
+	auto begin_node_has_output = begin_jack_has_connections || begin_jack_type == ElementType::Output;
 	auto this_node_has_output = this_jack_has_connections || this_jack_type == ElementType::Output;
-	// Exactly one node can have an output
+
+	// XOR: Exactly one node can have an output
 	bool can_finish_cable_ = this_node_has_output ^ begin_node_has_output;
+
 	return can_finish_cable_;
 }
 
@@ -34,7 +32,8 @@ inline bool can_finish_cable(GuiState::CableBeginning const &new_cable,
 							 ElementType jack_type,
 							 bool is_mapped) {
 
-	return can_finish_cable(new_cable, has_connections(patch, jack, jack_type, is_mapped), jack_type);
+	return can_finish_cable(
+		new_cable.type, new_cable.has_connections, jack_type, is_mapped || has_connections(patch, jack, jack_type));
 }
 
 inline void make_cable(GuiState::CableBeginning &new_cable,
