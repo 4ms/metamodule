@@ -238,7 +238,7 @@ struct ModuleViewPage : PageBase {
 			roller_idx++;
 		}
 
-		if (roller_idx == 1) {
+		if (roller_idx <= 1) {
 			if (gui_state.new_cable) {
 				opts.append("No available jacks to patch\n");
 			}
@@ -613,6 +613,11 @@ private:
 	static void roller_focus_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		if (page) {
+			if (page->roller_drawn_el_idx.size() <= 1) {
+				page->focus_button_bar();
+				return;
+			}
+
 			if (event->param != page) {
 				lv_group_set_editing(page->group, true);
 				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
