@@ -29,6 +29,8 @@ struct MapCableUserData {
 };
 
 //TODO: Separate this into CableMappingPane, ParamMappingPane
+
+//TODO: remove ui_CableFinishButton button and associated logic
 struct ModuleViewMappingPane {
 	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
@@ -49,10 +51,10 @@ struct ModuleViewMappingPane {
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
 
+		lv_hide(ui_CableFinishButton);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_CableCancelButton, cancel_creating_cable_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_CableFinishButton, finish_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableRemoveButton, disconnect_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CablePanelAddButton, add_panel_cable_button_cb, LV_EVENT_CLICKED, this);
@@ -252,6 +254,7 @@ private:
 				list_panel_out_cable(*panel_jack_id);
 		}
 
+		// TODO: use make_cable.hh:
 		this_jack_has_connections = has_connections;
 		prepare_jack_gui();
 	}
@@ -340,28 +343,14 @@ private:
 			return;
 		}
 
-		// Hide "New cable/connection" and "Edit Cable" if already have a cable open
+		// Should never get here, since we immediate make a cable when clicking a jack
 		lv_hide(ui_CableAddButton);
 		lv_hide(ui_CablePanelAddButton);
 		lv_show(ui_CableCreationPanel);
 		lv_show(ui_CableCreationLabel);
 
-		auto begin_type = gui_state.new_cable->type;
-		auto begin_connected = gui_state.new_cable->has_connections;
-		auto begin_node_has_output = begin_connected || begin_type == ElementType::Output;
-		auto this_node_has_output = this_jack_has_connections || this_jack_type == ElementType::Output;
-		bool can_finish_cable = this_node_has_output ^ begin_node_has_output;
-		lv_show(ui_CableFinishButton, can_finish_cable);
-
-		lv_group_add_obj(pane_group, ui_CableFinishButton);
 		lv_group_add_obj(pane_group, ui_CableCancelButton);
-
-		auto begin_jack = gui_state.new_cable->jack;
-		auto jackname = get_full_element_name(begin_jack.module_id, begin_jack.jack_id, begin_type, *patch);
-		lv_label_set_text_fmt(ui_CableCreationLabel,
-							  "In progress: adding a cable from %s %s",
-							  jackname.module_name.data(),
-							  jackname.element_name.data());
+		lv_label_set_text(ui_CableCreationLabel, "In progress: adding a cable");
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
@@ -482,33 +471,6 @@ private:
 									 "Connect",
 									 choices.c_str(),
 									 first_unpatched_jack.value_or(0));
-	}
-
-	// Not used:
-	static void finish_cable_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-
-		if (page->gui_state.new_cable.has_value()) {
-
-			make_cable(page->gui_state.new_cable.value(),
-					   page->patch,
-					   page->patch_mod_queue,
-					   page->notify_queue,
-					   page->this_jack,
-					   page->this_jack_type);
-
-			// End cable making
-			page->gui_state.new_cable = std::nullopt;
-
-			// Do not show instructions again this session
-			page->gui_state.already_displayed_cable_instructions = true;
-
-		} else {
-			page->notify_queue.put({"Something went wrong... can't finish a cable here because no cable was started",
-									Notification::Priority::Error});
-		}
 	}
 
 	static void disconnect_button_cb(lv_event_t *event) {
