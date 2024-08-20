@@ -429,11 +429,29 @@ public:
 		}
 	}
 
+	void safe_unpatch_output(Jack jack) {
+		if (jack.module_id < num_modules)
+			modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
+	}
+
+	void safe_unpatch_input(Jack jack) {
+		if (jack.module_id < num_modules)
+			modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+	}
+
 	void disconnect_injack(Jack jack) {
 		for (auto &ins : in_conns) {
 			std::erase(ins, jack);
 		}
-		modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+		safe_unpatch_input(jack);
+
+		// Unpatch the output if the int_cable has no more inputs
+		if (auto cable = pd.find_internal_cable_with_injack(jack)) {
+			if (cable->ins.size() == 1) {
+				safe_unpatch_output(cable->out);
+			}
+		}
+
 		pd.disconnect_injack(jack);
 	}
 
@@ -443,7 +461,15 @@ public:
 				out = disconnected_jack;
 			}
 		}
-		modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
+		safe_unpatch_output(jack);
+
+		// Disconnect all inputs
+		if (auto cable = pd.find_internal_cable_with_outjack(jack)) {
+			for (auto in : cable->ins) {
+				safe_unpatch_input(in);
+			}
+		}
+
 		pd.disconnect_outjack(jack);
 	}
 

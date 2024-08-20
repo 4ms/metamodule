@@ -7,6 +7,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/choice_popup.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/manual_control_popup.hh"
 #include "gui/pages/module_view_mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
@@ -28,6 +29,8 @@ struct MapCableUserData {
 };
 
 //TODO: Separate this into CableMappingPane, ParamMappingPane
+
+//TODO: remove ui_CableFinishButton button and associated logic
 struct ModuleViewMappingPane {
 	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
@@ -50,8 +53,6 @@ struct ModuleViewMappingPane {
 
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(ui_CableCancelButton, cancel_creating_cable_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_CableFinishButton, finish_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableRemoveButton, disconnect_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CablePanelAddButton, add_panel_cable_button_cb, LV_EVENT_CLICKED, this);
@@ -117,11 +118,13 @@ struct ModuleViewMappingPane {
 
 		should_close = false;
 
+		is_visible = true;
+
 		lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_OFF);
 	}
 
 	void refresh() {
-		if (drawn_element) {
+		if (is_visible && drawn_element) {
 			remove_all_items();
 			show(*drawn_element);
 		}
@@ -138,6 +141,7 @@ struct ModuleViewMappingPane {
 		}
 
 		remove_all_items();
+		is_visible = false;
 	}
 
 	void update() {
@@ -203,9 +207,7 @@ private:
 
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_ControlButton);
-		lv_hide(ui_CableCancelButton);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_MappedPanel);
@@ -329,38 +331,6 @@ private:
 		lv_group_add_obj(pane_group, ui_CablePanelAddButton);
 		lv_group_add_obj(pane_group, ui_CableRemoveButton);
 		lv_group_focus_next(pane_group);
-
-		handle_cable_creating();
-	}
-
-	void handle_cable_creating() {
-		if (!gui_state.new_cable) {
-			lv_hide(ui_CableCreationPanel);
-			return;
-		}
-
-		// Hide "New cable/connection" and "Edit Cable" if already have a cable open
-		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CablePanelAddButton);
-		lv_show(ui_CableCreationPanel);
-		lv_show(ui_CableCreationLabel);
-
-		auto begin_type = gui_state.new_cable->type;
-		auto begin_connected = gui_state.new_cable->has_connections;
-		auto begin_node_has_output = begin_connected || begin_type == ElementType::Output;
-		auto this_node_has_output = this_jack_has_connections || this_jack_type == ElementType::Output;
-		bool can_finish_cable = this_node_has_output ^ begin_node_has_output;
-		lv_show(ui_CableFinishButton, can_finish_cable);
-
-		lv_group_add_obj(pane_group, ui_CableFinishButton);
-		lv_group_add_obj(pane_group, ui_CableCancelButton);
-
-		auto begin_jack = gui_state.new_cable->jack;
-		auto jackname = get_full_element_name(begin_jack.module_id, begin_jack.jack_id, begin_type, *patch);
-		lv_label_set_text_fmt(ui_CableCreationLabel,
-							  "In progress: adding a cable from %s %s",
-							  jackname.module_name.data(),
-							  jackname.element_name.data());
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
@@ -388,31 +358,36 @@ private:
 		}
 	}
 
+	void start_new_cable() {
+		auto name = get_full_element_name(this_jack.module_id, this_jack.jack_id, this_jack_type, *patch);
+
+		gui_state.new_cable = {.jack = this_jack, .type = this_jack_type, .has_connections = this_jack_has_connections};
+
+		notify_queue.put(
+			{"Choose a jack to connect to " + std::string(name.module_name) + " " + std::string(name.element_name),
+			 Notification::Priority::Status,
+			 10000});
+
+		page_list.request_new_page(PageId::PatchView, args);
+	}
+
 	static void add_cable_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		page->add_cable_popup.show(
-			[page](unsigned choice) {
-				if (choice == 0) //Cancel
-					return;
-				auto name = get_full_element_name(
-					page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, *page->patch);
-
-				page->gui_state.new_cable = {.jack = page->this_jack,
-											 .type = page->this_jack_type,
-											 .has_connections = page->this_jack_has_connections};
-
-				page->notify_queue.put({"Choose a jack to connect to " + std::string(name.module_name) + " " +
-											std::string(name.element_name),
-										Notification::Priority::Status,
-										10000});
-
-				page->page_list.request_new_page(PageId::PatchView, page->args);
-			},
-			"Navigate to the module and jack you want to patch to.",
-			"Start");
+		if (page->gui_state.already_displayed_cable_instructions) {
+			page->start_new_cable();
+		} else {
+			page->add_cable_popup.show(
+				[page](unsigned choice) {
+					if (choice == 0) //Cancel
+						return;
+					page->start_new_cable();
+				},
+				"Navigate to the module and jack you want to patch to.",
+				"Start");
+		}
 	}
 
 	static void add_panel_cable_button_cb(lv_event_t *event) {
@@ -478,59 +453,6 @@ private:
 									 first_unpatched_jack.value_or(0));
 	}
 
-	static void finish_cable_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-
-		if (!page->gui_state.new_cable) {
-			page->notify_queue.put({"Something went wrong... can't finish a cable here because no cable was started",
-									Notification::Priority::Error});
-			return;
-		}
-		auto begin_jack = page->gui_state.new_cable->jack;
-		auto begin_jack_type = page->gui_state.new_cable->type;
-
-		bool make_panel_mapping = false;
-
-		// Handle case of starting with a PanelIn->In and finishing on an input
-		if (begin_jack_type == ElementType::Input && page->this_jack_type == ElementType::Input) {
-			AddJackMapping jackmapping{};
-			if (auto panel_jack = page->patch->find_mapped_injack(begin_jack)) {
-				jackmapping.jack = page->this_jack;
-				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
-				make_panel_mapping = true;
-
-			} else if (auto panel_jack = page->patch->find_mapped_injack(page->this_jack)) {
-				jackmapping.jack = begin_jack;
-				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
-				make_panel_mapping = true;
-			}
-
-			if (make_panel_mapping) {
-				jackmapping.type = ElementType::Input;
-				page->patch_mod_queue.put(jackmapping);
-				page->notify_queue.put({"Added cable from panel input"});
-				page->gui_state.new_cable = std::nullopt;
-			}
-		}
-
-		if (!make_panel_mapping) {
-			AddInternalCable newcable{};
-			if (begin_jack_type == ElementType::Input) {
-				newcable.in = begin_jack;
-				newcable.out = page->this_jack;
-			} else {
-				newcable.in = page->this_jack;
-				newcable.out = begin_jack;
-			}
-
-			page->patch_mod_queue.put(newcable);
-			page->notify_queue.put({"Added cable"});
-			page->gui_state.new_cable = std::nullopt;
-		}
-	}
-
 	static void disconnect_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -560,22 +482,11 @@ private:
 		}
 	}
 
-	static void cancel_creating_cable_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-
-		page->gui_state.new_cable = std::nullopt;
-		page->notify_queue.put({"Cancelled making a cable", Notification::Priority::Info, 1000});
-		page->should_close = true;
-	}
-
 	//
 	// Params
 	//
 	void prepare_for_element(const ParamElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 
@@ -661,7 +572,6 @@ private:
 	//
 	void prepare_for_element(const AltParamElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 
@@ -682,7 +592,6 @@ private:
 	//
 	void prepare_for_element(const LightElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 
@@ -789,6 +698,8 @@ private:
 	ChoicePopup panel_cable_popup;
 	PatchModQueue &patch_mod_queue;
 	OpenPatchManager &patches;
+
+	bool is_visible = false;
 };
 
 } // namespace MetaModule

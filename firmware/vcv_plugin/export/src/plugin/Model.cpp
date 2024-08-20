@@ -77,8 +77,11 @@ void Model::debug_dump_strings() {
 	for (auto &element : elements) {
 		printf("Type %zu\n", element.index());
 		auto el = base_element(element);
-		printf(
-			"el.short_name: %.*s: %p\n", (int)el.short_name.size(), el.short_name.data(), (void *)el.short_name.data());
+		if (el.short_name.size())
+			printf("el.short_name: %.*s: %p\n",
+				   (int)el.short_name.size(),
+				   el.short_name.data(),
+				   (void *)el.short_name.data());
 
 		std::visit(overloaded{[](BaseElement const &el) {},
 							  [](ImageElement const &el) {

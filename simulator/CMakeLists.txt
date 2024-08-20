@@ -153,7 +153,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Ap
   find_program(CMAKE_DEBUGGER_BINARY lldb)
   set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- 
     --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
-    --flashdir ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/default
+    --flashdir ${CMAKE_CURRENT_LIST_DIR}/../patches/default
     --assets ${CMAKE_CURRENT_LIST_DIR}/../firmware/build/assets.uimg
   )
 
