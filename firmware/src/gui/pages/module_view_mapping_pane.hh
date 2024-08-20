@@ -366,7 +366,7 @@ private:
 		notify_queue.put(
 			{"Choose a jack to connect to " + std::string(name.module_name) + " " + std::string(name.element_name),
 			 Notification::Priority::Status,
-			 10000});
+			 0});
 
 		page_list.request_new_page(PageId::PatchView, args);
 	}

@@ -11,6 +11,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
@@ -31,7 +32,7 @@ struct PatchViewPage : PageBase {
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
-		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list}
+		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list, gui_state}
 		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
@@ -40,6 +41,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_AddButton, add_module_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_KnobButton, knob_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_InfoButton, desc_open_cb, LV_EVENT_CLICKED, this);
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -261,6 +263,7 @@ struct PatchViewPage : PageBase {
 				file_menu.hide();
 
 			} else {
+				abort_cable(gui_state, notify_queue);
 				page_list.request_last_page();
 				blur();
 			}
@@ -548,6 +551,7 @@ private:
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page)
 			return;
+		abort_cable(page->gui_state, page->notify_queue);
 		page->load_page(PageId::ModuleList, page->args);
 	}
 
@@ -556,8 +560,15 @@ private:
 			return;
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 
+		abort_cable(page->gui_state, page->notify_queue);
 		page->load_page(PageId::KnobSetView,
 						{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->active_knobset});
+	}
+
+	static void desc_open_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		abort_cable(page->gui_state, page->notify_queue);
+		page->desc_panel.show();
 	}
 
 private:

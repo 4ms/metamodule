@@ -26,7 +26,6 @@ struct PatchDescriptionPanel {
 
 		lv_group_set_editing(group, false);
 
-		lv_obj_add_event_cb(ui_InfoButton, openbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_DescriptionClose, closebut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_DescriptionEditButton, editbut_cb, LV_EVENT_CLICKED, this);
 
@@ -95,11 +94,6 @@ private:
 	static void closebut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
 		page->hide();
-	}
-
-	static void openbut_cb(lv_event_t *event) {
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
-		page->show();
 	}
 
 	// Edit button: hide panel, show editable panel

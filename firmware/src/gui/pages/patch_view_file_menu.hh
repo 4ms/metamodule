@@ -1,7 +1,9 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
+#include "gui/pages/base.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/pages/save_dialog.hh"
@@ -20,12 +22,14 @@ struct PatchViewFileMenu {
 					  OpenPatchManager &patches,
 					  PatchSelectorSubdirPanel &subdir_panel,
 					  NotificationQueue &notify_queue,
-					  PageList &page_list)
+					  PageList &page_list,
+					  GuiState &gui_state)
 		: play_loader{play_loader}
 		, patch_storage{patch_storage}
 		, patches{patches}
 		, notify_queue{notify_queue}
 		, page_list{page_list}
+		, gui_state{gui_state}
 		, save_dialog{patch_storage, patches, play_loader, subdir_panel, notify_queue, page_list}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
@@ -221,8 +225,10 @@ private:
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 		if (page->visible)
 			page->hide();
-		else
+		else {
+			abort_cable(page->gui_state, page->notify_queue);
 			page->show();
+		}
 	}
 
 	static void savebut_cb(lv_event_t *event) {
@@ -296,6 +302,7 @@ private:
 	OpenPatchManager &patches;
 	NotificationQueue &notify_queue;
 	PageList &page_list;
+	GuiState &gui_state;
 
 	SaveDialog save_dialog;
 	ConfirmPopup confirm_popup;

@@ -5,6 +5,7 @@
 #include "gui/helpers/lvgl_mem_helper.hh"
 #include "gui/helpers/lvgl_string_helper.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -33,8 +34,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		// Do not allow patch cables between patches
-		gui_state.new_cable = std::nullopt;
+		abort_cable(gui_state, notify_queue);
 
 		state = State::TryingToRequestPatchList;
 		hide_spinner();

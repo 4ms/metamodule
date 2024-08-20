@@ -547,7 +547,6 @@ private:
 	}
 
 	void focus_button_bar() {
-		pr_dbg("Focus button bar\n");
 		if (gui_state.new_cable)
 			lv_group_focus_obj(ui_ModuleViewCableCancelBut);
 		else
@@ -636,8 +635,7 @@ private:
 			return;
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
-		page->gui_state.new_cable = std::nullopt;
-		page->notify_queue.put({"Cancelled making a cable", Notification::Priority::Info, 1000});
+		abort_cable(page->gui_state, page->notify_queue);
 		page->page_list.request_new_page(PageId::PatchView, page->args);
 	}
 
