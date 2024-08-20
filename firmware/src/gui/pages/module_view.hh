@@ -298,6 +298,7 @@ struct ModuleViewPage : PageBase {
 				settings_menu.hide();
 
 			} else if (mode == ViewMode::List) {
+				args.module_id = this_module_id;
 				load_prev_page();
 
 			} else if (mode == ViewMode::Mapping) {
@@ -618,15 +619,13 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		if (page) {
 			if (event->param != page) {
-				pr_dbg("Roller focused, pressing...\n");
 				lv_group_set_editing(page->group, true);
 				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
 
 				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
 					page->highlight_component(*drawn_idx);
 				}
-			} else
-				pr_dbg("Roller focused, but not pressing\n");
+			}
 		}
 	}
 

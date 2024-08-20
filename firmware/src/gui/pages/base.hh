@@ -123,7 +123,6 @@ struct PageBase {
 	}
 
 	void load_prev_page() {
-		page_list.update_state(id, args);
 		page_list.request_last_page();
 	}
 
