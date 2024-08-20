@@ -513,7 +513,7 @@ private:
 
 	static void scroll_end_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		// page->redraw_modulename();
+		page->redraw_modulename();
 	}
 
 	void save_last_opened_patch_in_settings() {
