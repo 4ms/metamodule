@@ -85,4 +85,11 @@ inline void make_cable(GuiState::CableBeginning &new_cable,
 	}
 }
 
+inline void abort_cable(GuiState &gui_state, NotificationQueue &notify_queue) {
+	if (gui_state.new_cable) {
+		gui_state.new_cable = std::nullopt;
+		notify_queue.put(Notification{"Cancelled making a cable", Notification::Priority::Info, 1000});
+	}
+}
+
 } // namespace MetaModule

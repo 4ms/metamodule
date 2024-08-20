@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 
@@ -37,6 +38,8 @@ struct MainMenuPage : PageBase {
 	}
 
 	void prepare_focus() final {
+		abort_cable(gui_state, notify_queue);
+
 		auto patch = patches.get_playing_patch();
 		if (!patch || patch->patch_name.length() == 0) {
 			lv_hide(ui_MainMenuNowPlayingPanel);

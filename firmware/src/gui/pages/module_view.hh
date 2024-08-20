@@ -93,6 +93,7 @@ struct ModuleViewPage : PageBase {
 			lv_hide(ui_ModuleViewSettingsBut);
 			lv_show(ui_ModuleViewCableCancelBut);
 			lv_show(ui_ModuleViewCableCreateLabel);
+			lv_label_set_text(ui_ModuleViewCableCreateLabel, "Creating a cable");
 			lv_obj_set_height(ui_ElementRoller, 132);
 			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
 			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
@@ -149,14 +150,6 @@ struct ModuleViewPage : PageBase {
 		DrawnElement const *cur_el = nullptr;
 		ElementCount::Counts last_type{};
 
-		if (gui_state.new_cable) {
-			opts += Gui::orange_highlight_html_str;
-			opts += gui_state.new_cable->type == ElementType::Output ? "Inputs:" : "Outputs:";
-			opts += LV_TXT_COLOR_CMD;
-			opts += "\n";
-			roller_idx++;
-			roller_drawn_el_idx.push_back(-1);
-		}
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &drawn = drawn_element.gui_element;
 
@@ -181,27 +174,27 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
+			if (drawn.count.num_lights > 0 && drawn.count.num_params == 0 && drawn.count.num_outputs == 0 &&
+				drawn.count.num_inputs == 0)
+			{
+				continue;
+			}
+
 			if (gui_state.new_cable.has_value()) {
-				if (gui_state.new_cable->type == ElementType::Input) {
-					if (drawn.count.num_outputs == 0)
-						continue;
-					if (!can_finish_cable(gui_state.new_cable.value(),
-										  patch,
-										  Jack{.module_id = this_module_id, .jack_id = drawn.idx.output_idx},
-										  ElementType::Output,
-										  drawn.mapped_panel_id.has_value()))
-						continue;
-				}
-				if (gui_state.new_cable->type == ElementType::Output) {
-					if (drawn.count.num_inputs == 0)
-						continue;
-					if (!can_finish_cable(gui_state.new_cable.value(),
-										  patch,
-										  Jack{.module_id = this_module_id, .jack_id = drawn.idx.input_idx},
-										  ElementType::Input,
-										  drawn.mapped_panel_id.has_value()))
-						continue;
-				}
+				uint16_t this_jack_id{};
+				if (drawn.count.num_inputs > 0)
+					this_jack_id = drawn.idx.input_idx;
+				else if (drawn.count.num_outputs > 0)
+					this_jack_id = drawn.idx.output_idx;
+				else
+					continue;
+				auto this_jack_type = (drawn.count.num_inputs > 0) ? ElementType::Input : ElementType::Output;
+				if (!can_finish_cable(gui_state.new_cable.value(),
+									  patch,
+									  Jack{.module_id = this_module_id, .jack_id = this_jack_id},
+									  this_jack_type,
+									  drawn.mapped_panel_id.has_value()))
+					continue;
 			}
 
 			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
@@ -209,7 +202,9 @@ struct ModuleViewPage : PageBase {
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 
-			} else if (last_type.num_params > 0 && (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0)) {
+			} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
+					   (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0))
+			{
 				opts += Gui::orange_highlight_html_str + "Jacks:" + LV_TXT_COLOR_CMD + "\n";
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
@@ -243,7 +238,7 @@ struct ModuleViewPage : PageBase {
 			roller_idx++;
 		}
 
-		if (roller_idx == 1) {
+		if (roller_idx <= 1) {
 			if (gui_state.new_cable) {
 				opts.append("No available jacks to patch\n");
 			}
@@ -298,6 +293,7 @@ struct ModuleViewPage : PageBase {
 				settings_menu.hide();
 
 			} else if (mode == ViewMode::List) {
+				args.module_id = this_module_id;
 				load_prev_page();
 
 			} else if (mode == ViewMode::Mapping) {
@@ -547,7 +543,6 @@ private:
 	}
 
 	void focus_button_bar() {
-		pr_dbg("Focus button bar\n");
 		if (gui_state.new_cable)
 			lv_group_focus_obj(ui_ModuleViewCableCancelBut);
 		else
@@ -618,16 +613,19 @@ private:
 	static void roller_focus_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		if (page) {
+			if (page->roller_drawn_el_idx.size() <= 1) {
+				page->focus_button_bar();
+				return;
+			}
+
 			if (event->param != page) {
-				pr_dbg("Roller focused, pressing...\n");
 				lv_group_set_editing(page->group, true);
 				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
 
 				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
 					page->highlight_component(*drawn_idx);
 				}
-			} else
-				pr_dbg("Roller focused, but not pressing\n");
+			}
 		}
 	}
 
@@ -636,8 +634,7 @@ private:
 			return;
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
-		page->gui_state.new_cable = std::nullopt;
-		page->notify_queue.put({"Cancelled making a cable", Notification::Priority::Info, 1000});
+		abort_cable(page->gui_state, page->notify_queue);
 		page->page_list.request_new_page(PageId::PatchView, page->args);
 	}
 

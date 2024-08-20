@@ -125,7 +125,7 @@ struct ModuleViewAutoMapDialog {
 		auto patch = patches.get_view_patch();
 
 		for (auto indices : maps_todo) {
-			auto_map.map(module_idx, indices, *patch);
+			auto_map.map(module_idx, indices, *patch, knobset_id);
 		}
 	}
 

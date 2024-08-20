@@ -11,6 +11,7 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/description_panel.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_view_file_menu.hh"
 #include "gui/pages/patch_view_settings_menu.hh"
@@ -31,7 +32,7 @@ struct PatchViewPage : PageBase {
 		, cable_drawer{modules_cont, drawn_elements}
 		, page_settings{settings.patch_view}
 		, settings_menu{settings.patch_view, gui_state}
-		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list}
+		, file_menu{patch_playloader, patch_storage, patches, subdir_panel, notify_queue, page_list, gui_state}
 		, map_ring_display{settings.patch_view} {
 
 		init_bg(base);
@@ -40,6 +41,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(ui_PlayButton, playbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_AddButton, add_module_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_KnobButton, knob_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_InfoButton, desc_open_cb, LV_EVENT_CLICKED, this);
 
 		// Scroll to top when focussing on a button
 		lv_obj_add_event_cb(ui_PlayButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
@@ -84,6 +86,12 @@ struct PatchViewPage : PageBase {
 			is_ready = true;
 			watch_lights();
 			update_map_ring_style();
+
+			if (args.module_id) {
+				if (*args.module_id < module_canvases.size()) {
+					lv_obj_scroll_to_view_recursive(module_canvases[*args.module_id], LV_ANIM_ON);
+				}
+			}
 			return;
 		}
 
@@ -136,6 +144,7 @@ struct PatchViewPage : PageBase {
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
 		int bottom = 0;
+		lv_obj_t *initial_selected_module = nullptr;
 
 		for (auto [module_idx, slug] : enumerate(patch->module_slugs)) {
 			module_ids.push_back(module_idx);
@@ -159,11 +168,12 @@ struct PatchViewPage : PageBase {
 
 			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
-			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_CLICKED, (void *)this);
+			lv_obj_add_event_cb(canvas, module_click_cb, LV_EVENT_CLICKED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 			if (args.module_id.has_value()) {
 				if (args.module_id.value() == module_idx) {
-					lv_group_focus_obj(canvas);
+					initial_selected_module = canvas;
 				}
 			}
 		}
@@ -179,14 +189,21 @@ struct PatchViewPage : PageBase {
 		cable_drawer.set_height(bottom + 30);
 		update_cable_style(true);
 
-		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
-
 		settings_menu.prepare_focus(group);
 		file_menu.prepare_focus(group);
 
 		patch = patches.get_view_patch();
 		desc_panel.set_patch(patch);
 		desc_panel.prepare_focus(group);
+
+		if (initial_selected_module) {
+			lv_obj_refr_size(base);
+			lv_obj_refr_pos(base);
+			lv_group_focus_obj(initial_selected_module);
+			lv_obj_scroll_to_view_recursive(initial_selected_module, LV_ANIM_OFF);
+		} else {
+			lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
+		}
 	}
 
 	void redraw_map_rings() {
@@ -261,6 +278,7 @@ struct PatchViewPage : PageBase {
 				file_menu.hide();
 
 			} else {
+				abort_cable(gui_state, notify_queue);
 				page_list.request_last_page();
 				blur();
 			}
@@ -363,8 +381,9 @@ private:
 				if (page_settings.map_ring_flash_active)
 					map_ring_display.flash_once(gui_el.map_ring, highlighted_module_id == gui_el.module_idx);
 
-				if (page_settings.scroll_to_active_param)
+				if (page_settings.scroll_to_active_param) {
 					lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+				}
 			}
 
 			update_light(drawn_el, light_vals[gui_el.module_idx]);
@@ -441,7 +460,7 @@ private:
 		lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
 	}
 
-	static void module_pressed_cb(lv_event_t *event) {
+	static void module_click_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page)
 			return;
@@ -452,6 +471,7 @@ private:
 		page->args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
 		page->args.element_indices = {};
 		page->args.detail_mode = false;
+		page->page_list.update_state(PageId::PatchView, page->args);
 		page->page_list.request_new_page(PageId::ModuleView, page->args);
 	}
 
@@ -502,13 +522,13 @@ private:
 		{
 			settings.last_patch_vol = patches.get_view_patch_vol();
 			settings.last_patch_opened = patches.get_view_patch_filename();
-			pr_dbg("Will set last_patch opened to %s on %d\n",
-				   settings.last_patch_opened.c_str(),
-				   settings.last_patch_vol);
+			pr_info("Will set last_patch opened to %s on %d\n",
+					settings.last_patch_opened.c_str(),
+					settings.last_patch_vol);
 
 			if (gui_state.write_settings_after_ms == 0) {
 				gui_state.write_settings_after_ms = get_time() + 60 * 1000; //1 minute delay
-				pr_dbg("Setting timer...\n");
+				pr_info("Setting timer...\n");
 			}
 		}
 	}
@@ -548,6 +568,7 @@ private:
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page)
 			return;
+		abort_cable(page->gui_state, page->notify_queue);
 		page->load_page(PageId::ModuleList, page->args);
 	}
 
@@ -556,8 +577,15 @@ private:
 			return;
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 
+		abort_cable(page->gui_state, page->notify_queue);
 		page->load_page(PageId::KnobSetView,
 						{.patch_loc_hash = page->args.patch_loc_hash, .view_knobset_id = page->active_knobset});
+	}
+
+	static void desc_open_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		abort_cable(page->gui_state, page->notify_queue);
+		page->desc_panel.show();
 	}
 
 private:
