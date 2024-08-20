@@ -84,8 +84,15 @@ struct ModuleViewPage : PageBase {
 		lv_hide(ui_ModuleViewActionMenu);
 		lv_hide(ui_AutoMapSelectPanel);
 
-		settings_menu.prepare_focus(group);
-		action_menu.prepare_focus(group, this_module_id);
+		if (gui_state.new_cable) {
+			lv_hide(ui_ModuleViewActionBut);
+			lv_hide(ui_ModuleViewSettingsBut);
+		} else {
+			lv_show(ui_ModuleViewActionBut);
+			lv_show(ui_ModuleViewSettingsBut);
+			settings_menu.prepare_focus(group);
+			action_menu.prepare_focus(group, this_module_id);
+		}
 	}
 
 	void redraw_module() {
