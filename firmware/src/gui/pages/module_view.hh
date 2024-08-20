@@ -181,6 +181,12 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
+			if (drawn.count.num_lights > 0 && drawn.count.num_params == 0 && drawn.count.num_outputs == 0 &&
+				drawn.count.num_inputs == 0)
+			{
+				continue;
+			}
+
 			if (gui_state.new_cable.has_value()) {
 				if (gui_state.new_cable->type == ElementType::Input) {
 					if (drawn.count.num_outputs == 0)
