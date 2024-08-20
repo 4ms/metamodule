@@ -79,7 +79,7 @@ ui_ElementRollerPanel = lv_obj_create(ui_MappingFlexZone);
 lv_obj_set_width( ui_ElementRollerPanel, 157);
 lv_obj_set_height( ui_ElementRollerPanel, lv_pct(100));
 lv_obj_set_align( ui_ElementRollerPanel, LV_ALIGN_RIGHT_MID );
-lv_obj_add_flag( ui_ElementRollerPanel, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
+lv_obj_add_flag( ui_ElementRollerPanel, LV_OBJ_FLAG_OVERFLOW_VISIBLE );   /// Flags
 lv_obj_clear_flag( ui_ElementRollerPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_ElementRollerPanel, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_ElementRollerPanel, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -198,6 +198,36 @@ lv_obj_set_align( ui_ModuleViewSettingsButLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_ModuleViewSettingsButLabel,"");
 lv_obj_set_style_text_font(ui_ModuleViewSettingsButLabel, &ui_font_MuseoSansRounded90018, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_ModuleViewCableCancelBut = lv_btn_create(ui_ElementRollerButtonCont);
+lv_obj_set_height( ui_ModuleViewCableCancelBut, 24);
+lv_obj_set_width( ui_ModuleViewCableCancelBut, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_x( ui_ModuleViewCableCancelBut, -30 );
+lv_obj_set_y( ui_ModuleViewCableCancelBut, -1 );
+lv_obj_set_align( ui_ModuleViewCableCancelBut, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_ModuleViewCableCancelBut, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_set_style_radius(ui_ModuleViewCableCancelBut, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewCableCancelBut, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ModuleViewCableCancelBut, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewCableCancelBut, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_CHECKED );
+lv_obj_set_style_bg_opa(ui_ModuleViewCableCancelBut, 0, LV_PART_MAIN| LV_STATE_CHECKED);
+lv_obj_set_style_text_color(ui_ModuleViewCableCancelBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_CHECKED );
+lv_obj_set_style_text_opa(ui_ModuleViewCableCancelBut, 255, LV_PART_MAIN| LV_STATE_CHECKED);
+lv_obj_set_style_outline_color(ui_ModuleViewCableCancelBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_ModuleViewCableCancelBut, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ModuleViewCableCancelBut, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ModuleViewCableCancelBut, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_ModuleViewCableCancelBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_ModuleViewCableCancelBut, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_ModuleViewCableCancelBut, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_ModuleViewCableCancelBut, 1, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_ModuleViewCabelCancelLabel = lv_label_create(ui_ModuleViewCableCancelBut);
+lv_obj_set_width( ui_ModuleViewCabelCancelLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_ModuleViewCabelCancelLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_ModuleViewCabelCancelLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_ModuleViewCabelCancelLabel,"Cancel Cable");
+lv_obj_set_style_text_font(ui_ModuleViewCabelCancelLabel, &ui_font_MuseoSansRounded50014, LV_PART_MAIN| LV_STATE_DEFAULT);
+
 ui_ElementRoller = lv_roller_create(ui_ElementRollerPanel);
 lv_roller_set_options( ui_ElementRoller, "Params\nParameter 3\nParameter 4\nParameter Name 5\nParameter 6\nParameter 7\nParameter 8\nParameter 9\nParameter 10\nParameter 11\nParameter 12\nParameter 13\nParameter 14\nParameter 15\nParameter 16\nParameter 17\nParameter 18\nParameter 19\nParameter 20\nParameter 21\nParameter 22\nParameter 23\nParameter 24\nParameter 25\nParameter 26\nParameter 27\nParameter 28\nParameter 29\nParameter 28", LV_ROLLER_MODE_NORMAL );
 lv_roller_set_selected( ui_ElementRoller, 4, LV_ANIM_OFF);
@@ -257,7 +287,7 @@ lv_obj_set_style_bg_opa(ui_ElementRoller, 255, LV_PART_SELECTED| LV_STATE_FOCUSE
 ui_ModuleViewActionMenu = lv_obj_create(ui_ElementRollerPanel);
 lv_obj_set_width( ui_ModuleViewActionMenu, 150);
 lv_obj_set_height( ui_ModuleViewActionMenu, LV_SIZE_CONTENT);   /// 168
-lv_obj_set_x( ui_ModuleViewActionMenu, 0 );
+lv_obj_set_x( ui_ModuleViewActionMenu, 160 );
 lv_obj_set_y( ui_ModuleViewActionMenu, -3 );
 lv_obj_set_align( ui_ModuleViewActionMenu, LV_ALIGN_TOP_RIGHT );
 lv_obj_set_flex_flow(ui_ModuleViewActionMenu,LV_FLEX_FLOW_COLUMN);
@@ -434,6 +464,7 @@ lv_obj_set_height( ui_MappingParameters, 240);
 lv_obj_set_align( ui_MappingParameters, LV_ALIGN_BOTTOM_RIGHT );
 lv_obj_set_flex_flow(ui_MappingParameters,LV_FLEX_FLOW_ROW_WRAP);
 lv_obj_set_flex_align(ui_MappingParameters, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+lv_obj_add_flag( ui_MappingParameters, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_MappingParameters, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_radius(ui_MappingParameters, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_MappingParameters, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -1094,7 +1125,7 @@ lv_obj_set_height( ui_MVSettingsMenu, 240);
 lv_obj_set_align( ui_MVSettingsMenu, LV_ALIGN_RIGHT_MID );
 lv_obj_set_flex_flow(ui_MVSettingsMenu,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_MVSettingsMenu, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START);
-lv_obj_add_flag( ui_MVSettingsMenu, LV_OBJ_FLAG_IGNORE_LAYOUT | LV_OBJ_FLAG_FLOATING );   /// Flags
+lv_obj_add_flag( ui_MVSettingsMenu, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_IGNORE_LAYOUT | LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_MVSettingsMenu, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scroll_dir(ui_MVSettingsMenu, LV_DIR_VER);
 lv_obj_set_style_radius(ui_MVSettingsMenu, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
