@@ -88,6 +88,7 @@ struct ModuleViewSettingsMenu {
 
 	void show() {
 		if (!visible) {
+			lv_show(ui_MVSettingsMenu);
 			DropInFromLeft_Animation(ui_MVSettingsMenu, 0);
 			auto indev = lv_indev_get_next(nullptr);
 			if (!indev)
