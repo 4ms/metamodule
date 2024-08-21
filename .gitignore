@@ -50,3 +50,4 @@ simulator/shared
 metamodule-plugins/
 settings.yml
 .cache
+simulator/patches/metamodule-firmware
