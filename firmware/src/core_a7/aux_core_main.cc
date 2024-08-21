@@ -106,8 +106,8 @@ extern "C" void aux_core_main() {
 
 	//HAL_Delay(300); //allow time to load initial patch: TODO use semaphor
 
-	ui.load_initial_patch();
 	ui.autoload_plugins();
+	ui.load_initial_patch();
 
 	while (true) {
 		ui.update();
