@@ -292,6 +292,8 @@ struct PatchViewPage : PageBase {
 
 		if (file_menu.did_filesystem_change()) {
 			gui_state.force_refresh_vol = patches.get_view_patch_vol();
+			displayed_patch_loc_hash = patches.get_view_patch_loc_hash();
+			args.patch_loc_hash = patches.get_view_patch_loc_hash();
 		}
 
 		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
