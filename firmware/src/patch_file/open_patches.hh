@@ -57,6 +57,16 @@ struct OpenPatchList {
 		return num_erased > 0;
 	}
 
+	bool exists(OpenPatch const *patch) {
+		for (auto const &p : list) {
+			if (&p == patch)
+				return true;
+		}
+		return false;
+
+		// return (std::find(list.begin(), list.end(), patch) != list.end());
+	}
+
 	void remove(std::list<OpenPatch>::iterator item) {
 		list.erase(item);
 	}
@@ -81,7 +91,6 @@ struct OpenPatchList {
 		return list.size();
 	}
 
-private:
 	void dump_open_patches() {
 		unsigned i = 0;
 		size_t total_size = 0;
@@ -100,6 +109,7 @@ private:
 		pr_dbg("TOTAL: %zu\n", total_size);
 	}
 
+private:
 	static size_t patch_size(PatchData const &p) {
 		auto sz = sizeof(PatchData);
 		sz += p.module_slugs.size() * sizeof(BrandModuleSlug);

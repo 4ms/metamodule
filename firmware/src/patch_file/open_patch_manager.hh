@@ -111,9 +111,15 @@ public:
 	// playing_patch: (copy of) patch currently playing in the audio thread
 	//
 	PatchData *get_playing_patch() {
-		if (playing_patch_)
-			return &playing_patch_->patch;
-		else {
+		if (playing_patch_) {
+			if (open_patches_.exists(playing_patch_)) {
+				pr_dbg("Playing patch exists\n");
+				return &playing_patch_->patch;
+			} else {
+				pr_err("Playing patch not null and not found in open patches!\n");
+				return nullptr;
+			}
+		} else {
 			return nullptr;
 		}
 	}
