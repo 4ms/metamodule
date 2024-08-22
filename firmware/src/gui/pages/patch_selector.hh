@@ -243,7 +243,7 @@ struct PatchSelectorPage : PageBase {
 				lv_obj_clear_state(ui_PatchListRoller, LV_STATE_FOCUSED);
 				subdir_panel.focus();
 			} else {
-				page_list.request_last_page();
+				page_list.request_new_page_no_history(PageId::MainMenu, args);
 			}
 		}
 

@@ -279,7 +279,7 @@ struct PatchViewPage : PageBase {
 
 			} else {
 				abort_cable(gui_state, notify_queue);
-				page_list.request_last_page();
+				page_list.request_new_page_no_history(PageId::PatchSel, args);
 				blur();
 			}
 		}
