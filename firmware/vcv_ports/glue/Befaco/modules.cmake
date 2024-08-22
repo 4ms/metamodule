@@ -19,8 +19,11 @@ set(BefacoModules
     SamplingModulator
     SlewLimiter
     StereoStrip
-    #
-    # Muxlicer NoisePlethora
+    Voltio
+    Burst    
+    Octaves
+    # disabled:
+    # Muxlicer NoisePlethora MidiThingv2
 )
 
 # svg paths

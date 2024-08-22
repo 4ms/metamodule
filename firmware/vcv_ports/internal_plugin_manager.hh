@@ -77,6 +77,9 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelChannelStrip);
 		pluginInstance->addModel(modelMotionMTR);
 		pluginInstance->addModel(modelSpringReverb);
+		pluginInstance->addModel(modelBurst);
+		pluginInstance->addModel(modelVoltio);
+		pluginInstance->addModel(modelOctaves);		
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_AudibleInstruments
