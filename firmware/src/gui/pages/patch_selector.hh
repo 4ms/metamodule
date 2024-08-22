@@ -36,6 +36,9 @@ struct PatchSelectorPage : PageBase {
 	void prepare_focus() override {
 		abort_cable(gui_state, notify_queue);
 
+		// Don't persist module selection
+		args.module_id = std::nullopt;
+
 		state = State::TryingToRequestPatchList;
 		hide_spinner();
 		blur_subdir_panel();
