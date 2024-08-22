@@ -250,7 +250,8 @@ private:
 
 		page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
 
-		std::string fullpath = page->file_path + "/" + page->file_name;
+		std::string fullpath = page->file_path.length() ? (page->file_path + "/") : "";
+		fullpath += page->file_name;
 		if (!fullpath.ends_with(".yml")) {
 			fullpath.append(".yml");
 		}
