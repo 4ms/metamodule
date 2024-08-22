@@ -36,6 +36,9 @@ struct PatchSelectorPage : PageBase {
 	void prepare_focus() override {
 		abort_cable(gui_state, notify_queue);
 
+		// Don't persist module selection
+		args.module_id = std::nullopt;
+
 		state = State::TryingToRequestPatchList;
 		hide_spinner();
 		blur_subdir_panel();
@@ -243,7 +246,7 @@ struct PatchSelectorPage : PageBase {
 				lv_obj_clear_state(ui_PatchListRoller, LV_STATE_FOCUSED);
 				subdir_panel.focus();
 			} else {
-				page_list.request_last_page();
+				page_list.request_new_page_no_history(PageId::MainMenu, args);
 			}
 		}
 
