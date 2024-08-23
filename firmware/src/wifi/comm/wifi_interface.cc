@@ -22,20 +22,19 @@ PatchStorage *patchStorage;
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
 
-	auto ExtractFileInfo = [&fbb](auto& thisFile, auto& destination)
+	auto ExtractFileInfo = [&fbb](auto& thisFile)
 	{
 		auto thisName = fbb.CreateString(std::string_view(thisFile.patchname));
 		auto thisFilename = fbb.CreateString(std::string_view(thisFile.filename));
-		auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename, 0, 0);
 
-		destination = thisInfo;
+		return CreatePatchInfo(fbb, thisName, thisFilename, thisFile.filesize, thisFile.timestamp);
 	};
 
 	auto ExtractFileFromDir = [&fbb, &ExtractFileInfo](const auto& fileList)
 	{
 		std::vector<flatbuffers::Offset<PatchInfo>> fileInfos(fileList.files.size());
 		for (std::size_t i = 0; i < fileList.files.size(); i++) {
-			ExtractFileInfo(fileList.files[i], fileInfos[i]);
+			fileInfos[i] = ExtractFileInfo(fileList.files[i]);
 		};
 		auto files = fbb.CreateVector(fileInfos);
 
