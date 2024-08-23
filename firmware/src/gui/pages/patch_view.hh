@@ -277,9 +277,11 @@ struct PatchViewPage : PageBase {
 			} else if (file_menu.is_visible()) {
 				file_menu.hide();
 
-			} else {
+			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
-				page_list.request_new_page_no_history(PageId::PatchSel, args);
+
+			} else {
+				page_list.request_new_page_no_history(PageId::MainMenu, args);
 				blur();
 			}
 		}
