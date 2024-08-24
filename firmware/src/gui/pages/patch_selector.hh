@@ -39,7 +39,10 @@ struct PatchSelectorPage : PageBase {
 		// Don't persist module selection
 		args.module_id = std::nullopt;
 
-		state = State::TryingToRequestPatchList;
+		if (last_refresh_check_tm == 0)
+			state = State::ReloadingPatchList;
+		else
+			state = State::TryingToRequestPatchList;
 		hide_spinner();
 		blur_subdir_panel();
 
