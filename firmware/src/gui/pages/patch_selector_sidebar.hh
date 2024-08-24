@@ -70,6 +70,14 @@ struct PatchSelectorSubdirPanel {
 		}
 	}
 
+	void hide_recent_files() {
+		lv_hide(vol_conts[0]);
+	}
+
+	void show_recent_files() {
+		lv_show(vol_conts[0]);
+	}
+
 	void refresh(EntryInfo const &selected_patch) {
 		// TODO: check if list was re-populated, or if entry info dir name changed, and only refresh if so
 
