@@ -62,6 +62,7 @@ struct PatchSelectorPage : PageBase {
 		is_populating_subdir_panel = true;
 		setup_subdir_panel();
 
+		patchfiles_locked = false;
 		refresh_patchlist();
 	}
 
@@ -92,11 +93,14 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void refresh_patchlist() {
-		is_populating_subdir_panel = true;
-		update_open_patches();
-		subdir_panel.populate(patchfiles);
-		subdir_panel.show_recent_files();
-		populate_roller();
+		// Do not access patchfiles while M4 is accessing them
+		if (!patchfiles_locked) {
+			is_populating_subdir_panel = true;
+			update_open_patches();
+			subdir_panel.populate(patchfiles);
+			subdir_panel.show_recent_files();
+			populate_roller();
+		}
 	}
 
 	void blur_subdir_panel() {
@@ -271,6 +275,8 @@ struct PatchSelectorPage : PageBase {
 
 			case State::TryingToRequestPatchList:
 				if (patch_storage.request_patchlist(gui_state.force_refresh_vol)) {
+					// Lock patchesfiles: we are not allowed to access it, because M4 has access now
+					patchfiles_locked = true;
 					state = State::RequestedPatchList;
 					show_spinner();
 				}
@@ -293,10 +299,17 @@ struct PatchSelectorPage : PageBase {
 						patches.mark_patches_no_reload(Volume::SDCard);
 					}
 					state = State::ReloadingPatchList;
+
+					// Unlock patchesfiles: M4 is done with it
+					patchfiles_locked = false;
+
 				} else if (message.message_type == FileStorageProxy::PatchListUnchanged) {
 					gui_state.force_refresh_vol = std::nullopt;
 					hide_spinner();
 					state = State::Idle;
+
+					// Unlock patchesfiles: M4 is done with it
+					patchfiles_locked = false;
 				}
 			} break;
 
@@ -434,7 +447,7 @@ private:
 		auto selected_patch = page->get_roller_item_patchloc(idx);
 		if (selected_patch) {
 			page->selected_patch = *selected_patch;
-			page->state = State::TryingToRequestPatchData; // will load from RAM if open
+			page->state = State::TryingToRequestPatchData;
 			page->last_selected_idx = idx;
 		} else {
 			//Do nothing? Close/open directory? Focus subdir panel?
@@ -470,6 +483,7 @@ private:
 
 	PatchSelectorSubdirPanel &subdir_panel;
 	PatchDirList &patchfiles;
+	bool patchfiles_locked = true;
 
 	bool is_populating_subdir_panel = false;
 
