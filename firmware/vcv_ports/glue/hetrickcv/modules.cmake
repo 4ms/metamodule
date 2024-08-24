@@ -14,7 +14,14 @@ set(hetrickcvModules
     ClockedNoise
     Contrast
     Crackle
-    # skip: DataCompander, Delta
+	RandomGates
+
+	Comparator
+    DataCompander
+	Delta
+	Rotator
+	Rungler
+
     DigitalToAnalog
     Dust
     Exponent
@@ -40,6 +47,7 @@ set(hetrickcvModules
     PhasorGen
     PhasorGeometry
     PhasorHumanizer
+	PhasorMixer
     PhasorOctature
     PhasorQuadrature
     PhasorRandom
