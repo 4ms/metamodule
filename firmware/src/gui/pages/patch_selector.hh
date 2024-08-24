@@ -21,7 +21,8 @@ struct PatchSelectorPage : PageBase {
 
 	PatchSelectorPage(PatchContext info, PatchSelectorSubdirPanel &subdir_panel)
 		: PageBase{info, PageId::PatchSel}
-		, subdir_panel{subdir_panel} {
+		, subdir_panel{subdir_panel}
+		, patchfiles{patch_storage.get_patch_list()} {
 
 		init_bg(ui_PatchSelectorPage);
 
@@ -94,6 +95,7 @@ struct PatchSelectorPage : PageBase {
 		is_populating_subdir_panel = true;
 		update_open_patches();
 		subdir_panel.populate(patchfiles);
+		subdir_panel.show_recent_files();
 		populate_roller();
 	}
 
@@ -299,7 +301,6 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::ReloadingPatchList:
-				patchfiles = patch_storage.get_patch_list(); //copy
 				refresh_patchlist();
 				refresh_subdir_panel();
 				hide_spinner();
@@ -468,7 +469,7 @@ private:
 	unsigned last_selected_idx = 0;
 
 	PatchSelectorSubdirPanel &subdir_panel;
-	PatchDirList patchfiles;
+	PatchDirList &patchfiles;
 
 	bool is_populating_subdir_panel = false;
 
