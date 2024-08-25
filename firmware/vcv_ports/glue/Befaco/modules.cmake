@@ -19,7 +19,7 @@ set(BefacoModules
     SamplingModulator
     SlewLimiter
     StereoStrip
-    # Muxlicer 
+    Muxlicer 
     NoisePlethora
 )
 

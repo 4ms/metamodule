@@ -78,6 +78,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelMotionMTR);
 		pluginInstance->addModel(modelSpringReverb);
 		pluginInstance->addModel(modelNoisePlethora);
+		pluginInstance->addModel(modelMuxlicer);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_AudibleInstruments
