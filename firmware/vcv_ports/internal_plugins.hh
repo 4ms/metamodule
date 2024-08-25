@@ -20,6 +20,7 @@ extern rack::plugin::Model *modelSTMix;
 extern rack::plugin::Model *modelChannelStrip;
 extern rack::plugin::Model *modelPonyVCO;
 extern rack::plugin::Model *modelMotionMTR;
+extern rack::plugin::Model *modelNoisePlethora;
 
 extern rack::plugin::Model *modelBraids;
 extern rack::plugin::Model *modelPlaits;

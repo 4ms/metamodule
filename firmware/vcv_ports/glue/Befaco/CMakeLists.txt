@@ -19,6 +19,14 @@ add_library(BefacoLibrary STATIC ${BEFACO_SOURCE_PATHS})
 target_include_directories(BefacoLibrary PRIVATE ${BEFACO_DIR}/src .)
 target_include_directories(BefacoLibrary PRIVATE ${BEFACO_DIR}/../../) #For Befaco SpringReverb to find IR.h file
 
+file(GLOB BEFACO_NOISE_PLETH_SOURCES 
+	${BEFACO_DIR}/src/noise-plethora/teensy/*.cpp
+	${BEFACO_DIR}/src/noise-plethora/plugins/*.cpp
+)
+
+target_sources(BefacoLibrary PRIVATE ${BEFACO_NOISE_PLETH_SOURCES})
+
+
 target_compile_options(BefacoLibrary PRIVATE -Wno-double-promotion $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-float-conversion>)
 
 set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 23)

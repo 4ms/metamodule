@@ -77,6 +77,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelChannelStrip);
 		pluginInstance->addModel(modelMotionMTR);
 		pluginInstance->addModel(modelSpringReverb);
+		pluginInstance->addModel(modelNoisePlethora);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_AudibleInstruments
@@ -170,7 +171,6 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelXYToPolar);
 		pluginInstance->addModel(modelPhasorMixer);
 		pluginInstance->addModel(modelRandomGates);
-		// TODO:
 		pluginInstance->addModel(modelComparator);
 		pluginInstance->addModel(modelDataCompander);
 		pluginInstance->addModel(modelDelta);
