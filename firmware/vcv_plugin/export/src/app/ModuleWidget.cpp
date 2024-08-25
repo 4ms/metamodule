@@ -209,30 +209,76 @@ void ModuleWidget::addChildBottom(SvgPanel *child) {
 	setPanel(child);
 }
 
-app::ParamWidget *ModuleWidget::getParam(int paramId) {
+template<class T, typename F>
+T *getFirstDescendantOfTypeWithCondition(widget::Widget *w, F f) {
+	T *t = dynamic_cast<T *>(w);
+	if (t && f(t))
+		return t;
+
+	for (widget::Widget *child : w->children) {
+		T *foundT = getFirstDescendantOfTypeWithCondition<T>(child, f);
+		if (foundT)
+			return foundT;
+	}
 	return nullptr;
 }
 
-app::PortWidget *ModuleWidget::getInput(int portId) {
-	return nullptr;
+ParamWidget *ModuleWidget::getParam(int paramId) {
+	return getFirstDescendantOfTypeWithCondition<ParamWidget>(
+		this, [&](ParamWidget *pw) -> bool { return pw->paramId == paramId; });
 }
 
-app::PortWidget *ModuleWidget::getOutput(int portId) {
-	return nullptr;
+PortWidget *ModuleWidget::getInput(int portId) {
+	return getFirstDescendantOfTypeWithCondition<PortWidget>(
+		this, [&](PortWidget *pw) -> bool { return pw->type == engine::Port::INPUT && pw->portId == portId; });
+}
+
+PortWidget *ModuleWidget::getOutput(int portId) {
+	return getFirstDescendantOfTypeWithCondition<PortWidget>(
+		this, [&](PortWidget *pw) -> bool { return pw->type == engine::Port::OUTPUT && pw->portId == portId; });
+}
+
+template<class T, typename F>
+void doIfTypeRecursive(widget::Widget *w, F f) {
+	T *t = dynamic_cast<T *>(w);
+	if (t)
+		f(t);
+
+	for (widget::Widget *child : w->children) {
+		doIfTypeRecursive<T>(child, f);
+	}
 }
 
 std::vector<ParamWidget *> ModuleWidget::getParams() {
-	return {};
+	std::vector<ParamWidget *> pws;
+	doIfTypeRecursive<ParamWidget>(this, [&](ParamWidget *pw) { pws.push_back(pw); });
+	return pws;
 }
+
 std::vector<PortWidget *> ModuleWidget::getPorts() {
-	return {};
+	std::vector<PortWidget *> pws;
+	doIfTypeRecursive<PortWidget>(this, [&](PortWidget *pw) { pws.push_back(pw); });
+	return pws;
 }
+
 std::vector<PortWidget *> ModuleWidget::getInputs() {
-	return {};
+	std::vector<PortWidget *> pws;
+	doIfTypeRecursive<PortWidget>(this, [&](PortWidget *pw) {
+		if (pw->type == engine::Port::INPUT)
+			pws.push_back(pw);
+	});
+	return pws;
 }
+
 std::vector<PortWidget *> ModuleWidget::getOutputs() {
-	return {};
+	std::vector<PortWidget *> pws;
+	doIfTypeRecursive<PortWidget>(this, [&](PortWidget *pw) {
+		if (pw->type == engine::Port::OUTPUT)
+			pws.push_back(pw);
+	});
+	return pws;
 }
+
 } // namespace rack::app
 
 static void log_widget(std::string_view preface, rack::widget::Widget const *widget) {
