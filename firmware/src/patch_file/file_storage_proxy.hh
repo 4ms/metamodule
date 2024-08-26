@@ -181,64 +181,6 @@ public:
 		return comm_.send_message(message);
 	}
 
-	///////////////////////// fatfs
-
-	uint32_t uid = 0;
-	uint32_t unique_id() {
-		return uid++;
-	}
-
-	std::optional<uint32_t> request_close_file(FIL *fil) {
-		uint32_t id = unique_id();
-		IntercoreStorageMessage message{
-			.message_type = RequestFatFsOp,
-			.fatfs_req_id = id,
-			.fatfs_op = IntercoreStorageMessage::FatFsOp::close,
-			.fil = fil,
-		};
-
-		return comm_.send_message(message) ? id : std::optional<uint32_t>{};
-	}
-
-	std::optional<uint32_t> request_open_file(FIL *fil, std::string_view filename, uint8_t read_mode) {
-		uint32_t id = unique_id();
-		IntercoreStorageMessage message{
-			.message_type = RequestFatFsOp,
-			.fatfs_req_id = id,
-			.fatfs_op = IntercoreStorageMessage::FatFsOp::open,
-			.fil = fil,
-			.mode = read_mode,
-		};
-
-		return comm_.send_message(message) ? id : std::optional<uint32_t>{};
-	}
-
-	std::optional<uint32_t> request_seek_file(FIL *fil, uint64_t offset) {
-		uint32_t id = unique_id();
-		IntercoreStorageMessage message{
-			.message_type = RequestFatFsOp,
-			.fatfs_req_id = id,
-			.fatfs_op = IntercoreStorageMessage::FatFsOp::seek,
-			.fil = fil,
-			.file_offset = offset,
-		};
-
-		return comm_.send_message(message) ? id : std::optional<uint32_t>{};
-	}
-
-	std::optional<uint32_t> request_read_file(FIL *fil, std::span<char> buffer) {
-		uint32_t id = unique_id();
-		IntercoreStorageMessage message{
-			.message_type = RequestFatFsOp,
-			.buffer = buffer,
-			.fatfs_req_id = id,
-			.fatfs_op = IntercoreStorageMessage::FatFsOp::read,
-			.fil = fil,
-		};
-
-		return comm_.send_message(message) ? id : std::optional<uint32_t>{};
-	}
-
 	[[nodiscard]] bool request_wifi_ip() {
 		IntercoreStorageMessage message{.message_type = RequestWifiIP};
 		return comm_.send_message(message);
