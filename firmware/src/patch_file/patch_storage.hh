@@ -30,9 +30,9 @@ class PatchStorage {
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
 	PatchVolFileIO norflash_{flash_};
 
-	PollChange usb_changes_{1000};
-	PollChange norflash_changes_{1000};
-	PollChange sd_changes_{1000};
+	PollChange usb_changes_{300};
+	PollChange norflash_changes_{300};
+	PollChange sd_changes_{300};
 
 	RamDiskOps ramdisk_ops{*SharedMemoryS::ptrs.ramdrive};
 	FatFileIO ramdisk_{&ramdisk_ops, Volume::RamDisk};
@@ -276,12 +276,12 @@ public:
 		return result;
 	}
 
-private:
 	void poll_media_change() {
 		sd_changes_.poll(HAL_GetTick(), [this] { return sdcard_.is_mounted(); });
 		usb_changes_.poll(HAL_GetTick(), [this] { return usbdrive_.is_mounted(); });
 	}
 
+private:
 	uint32_t load_file(std::span<char> buffer, Volume vol, std::string_view filename) {
 
 		bool ok = false;

@@ -277,9 +277,11 @@ struct PatchViewPage : PageBase {
 			} else if (file_menu.is_visible()) {
 				file_menu.hide();
 
-			} else {
+			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
-				page_list.request_last_page();
+
+			} else {
+				page_list.request_new_page_no_history(PageId::MainMenu, args);
 				blur();
 			}
 		}
@@ -292,6 +294,8 @@ struct PatchViewPage : PageBase {
 
 		if (file_menu.did_filesystem_change()) {
 			gui_state.force_refresh_vol = patches.get_view_patch_vol();
+			displayed_patch_loc_hash = patches.get_view_patch_loc_hash();
+			args.patch_loc_hash = patches.get_view_patch_loc_hash();
 		}
 
 		if (is_patch_playing && !patch_playloader.is_audio_muted()) {

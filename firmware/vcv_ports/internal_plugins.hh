@@ -23,6 +23,8 @@ extern rack::plugin::Model *modelMotionMTR;
 extern rack::plugin::Model *modelBurst;
 extern rack::plugin::Model *modelVoltio;
 extern rack::plugin::Model *modelOctaves;
+extern rack::plugin::Model *modelNoisePlethora;
+extern rack::plugin::Model *modelMuxlicer;
 
 extern rack::plugin::Model *modelBraids;
 extern rack::plugin::Model *modelPlaits;

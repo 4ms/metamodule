@@ -86,9 +86,17 @@ public:
 
 	// Parses and opens the loaded patch, and sets the view patch to point to it
 	bool open_patch(std::span<char> file_data, PatchLocation const &patch_loc) {
+		bool patch_is_playing = false;
 
-		if (open_patches_.find(patch_loc)) {
+		if (auto patch = open_patches_.find(patch_loc)) {
+			open_patches_.dump_open_patches();
+
+			if (patch == playing_patch_)
+				patch_is_playing = true;
+
+			pr_warn("open patch found already. p:%d\n", patch_is_playing);
 			open_patches_.remove(patch_loc);
+			open_patches_.dump_open_patches();
 		}
 
 		auto *new_patch = open_patches_.emplace_back(patch_loc);
@@ -96,6 +104,10 @@ public:
 		if (!yaml_raw_to_patch(file_data, new_patch->patch)) {
 			pr_err("Failed to parse\n");
 			open_patches_.remove_last();
+
+			if (patch_is_playing)
+				playing_patch_ = nullptr;
+
 			return false;
 		}
 
@@ -104,6 +116,9 @@ public:
 
 		view_patch_ = new_patch;
 
+		if (patch_is_playing)
+			playing_patch_ = new_patch;
+
 		return true;
 	}
 
@@ -111,9 +126,14 @@ public:
 	// playing_patch: (copy of) patch currently playing in the audio thread
 	//
 	PatchData *get_playing_patch() {
-		if (playing_patch_)
-			return &playing_patch_->patch;
-		else {
+		if (playing_patch_) {
+			if (open_patches_.exists(playing_patch_)) {
+				return &playing_patch_->patch;
+			} else {
+				pr_err("Playing patch not null and not found in open patches!\n");
+				return nullptr;
+			}
+		} else {
 			return nullptr;
 		}
 	}
@@ -193,7 +213,7 @@ public:
 
 	void new_patch() {
 		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
-		std::string filename = "/" + name + ".yml";
+		std::string filename = name + ".yml";
 		PatchLocation loc{std::string_view{filename}, Volume::RamDisk};
 		view_patch_ = open_patches_.emplace_back(loc);
 		view_patch_->patch.blank_patch(name);

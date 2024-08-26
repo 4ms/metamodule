@@ -24,6 +24,8 @@ set(BefacoModules
     Octaves
     # disabled:
     # Muxlicer NoisePlethora MidiThingv2
+    Muxlicer 
+    NoisePlethora
 )
 
 # svg paths

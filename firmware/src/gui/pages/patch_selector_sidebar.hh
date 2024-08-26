@@ -29,7 +29,7 @@ struct PatchSelectorSubdirPanel {
 		}
 	}
 
-	void populate(PatchDirList &patchfiles) {
+	void populate(PatchDirList const &patchfiles) {
 		if (group == nullptr)
 			group = lv_group_create();
 
@@ -58,7 +58,7 @@ struct PatchSelectorSubdirPanel {
 			}
 
 			// Add root-level dir on volume
-			lv_obj_set_user_data(vol_item, &root);
+			lv_obj_set_user_data(vol_item, (void *)&root);
 			lv_group_add_obj(group, vol_item);
 
 			// Add all dirs on volume
@@ -68,6 +68,14 @@ struct PatchSelectorSubdirPanel {
 			lv_enable(vol_cont);
 			lv_enable_all_children(vol_cont);
 		}
+	}
+
+	void hide_recent_files() {
+		lv_hide(vol_conts[0]);
+	}
+
+	void show_recent_files() {
+		lv_show(vol_conts[0]);
 	}
 
 	void refresh(EntryInfo const &selected_patch) {
@@ -155,7 +163,7 @@ struct PatchSelectorSubdirPanel {
 			}
 
 			std::string_view dirname = "";
-			if (auto dir = static_cast<PatchDir *>(event->target->user_data); dir) {
+			if (auto dir = static_cast<PatchDir const *>(event->target->user_data); dir) {
 				dirname = std::string_view{dir->name};
 			}
 
@@ -184,7 +192,7 @@ struct PatchSelectorSubdirPanel {
 			}
 
 			std::string_view dirname = "";
-			if (auto dir = static_cast<PatchDir *>(event->target->user_data); dir) {
+			if (auto dir = static_cast<PatchDir const *>(event->target->user_data); dir) {
 				dirname = std::string_view{dir->name};
 			}
 
@@ -198,7 +206,7 @@ struct PatchSelectorSubdirPanel {
 	std::function<void(Volume vol, std::string_view dirname)> click_cb;
 
 private:
-	void add_subdir_to_panel(PatchDir &dir, lv_obj_t *vol_label) {
+	void add_subdir_to_panel(PatchDir const &dir, lv_obj_t *vol_label) {
 		if (dir.files.size() == 0)
 			return;
 
@@ -215,7 +223,7 @@ private:
 		lv_obj_set_width(name_label, LV_PCT(100));
 
 		lv_obj_add_flag(btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_set_user_data(btn, &dir);
+		lv_obj_set_user_data(btn, (void *)&dir);
 
 		while (lv_obj_remove_event_cb(btn, nullptr)) {
 		}

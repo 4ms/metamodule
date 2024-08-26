@@ -80,6 +80,8 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelBurst);
 		pluginInstance->addModel(modelVoltio);
 		pluginInstance->addModel(modelOctaves);		
+		pluginInstance->addModel(modelNoisePlethora);
+		pluginInstance->addModel(modelMuxlicer);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_AudibleInstruments
@@ -171,14 +173,13 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelVectorMix);
 		pluginInstance->addModel(modelWaveshape);
 		pluginInstance->addModel(modelXYToPolar);
-		// TODO:
-		// 	pluginInstance->addModel(modelComparator);
-		// 	pluginInstance->addModel(modelDataCompander);
-		// 	pluginInstance->addModel(modelDelta);
-		// 	pluginInstance->addModel(modelPhasorMixer);
-		// 	pluginInstance->addModel(modelRandomGates);
-		// 	pluginInstance->addModel(modelRotator);
-		// 	pluginInstance->addModel(modelRungler);
+		pluginInstance->addModel(modelPhasorMixer);
+		pluginInstance->addModel(modelRandomGates);
+		pluginInstance->addModel(modelComparator);
+		pluginInstance->addModel(modelDataCompander);
+		pluginInstance->addModel(modelDelta);
+		pluginInstance->addModel(modelRotator);
+		pluginInstance->addModel(modelRungler);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_nonlinearcircuits
