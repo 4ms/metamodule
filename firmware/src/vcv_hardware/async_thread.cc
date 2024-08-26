@@ -32,17 +32,6 @@ uint32_t core() {
 	return (__get_MPIDR() & 0b1); //0 = CA7 Core 1, 1 = CA7 Core 2
 }
 
-// static std::optional<size_t> first_available_id() {
-// 	auto &tasks = core() == 1 ? tasks_core1 : tasks_core0;
-// 	unsigned i = 0;
-// 	for (auto &task : tasks) {
-// 		if (!task.enabled)
-// 			return i;
-// 		i++;
-// 	}
-// 	return std::nullopt;
-// }
-
 } // namespace
 
 AsyncThread::AsyncThread()
@@ -88,7 +77,7 @@ void start_module_threads() {
 
 	mdrivlib::TimekeeperConfig task_config{
 		.TIMx = current_core == 0 ? TIM7 : TIM6,
-		.period_ns = mdrivlib::TimekeeperConfig::Hz(1000),
+		.period_ns = mdrivlib::TimekeeperConfig::Hz(2000),
 		.priority1 = 3,
 		.priority2 = 3,
 	};
@@ -118,6 +107,11 @@ void start_module_threads() {
 void pause_module_threads(unsigned core_id = core()) {
 	auto &task_runner = core_id == 1 ? async_task_core1 : async_task_core0;
 	task_runner.stop();
+}
+
+void kill_module_threads() {
+	async_task_core0.stop();
+	async_task_core1.stop();
 }
 
 } // namespace MetaModule
