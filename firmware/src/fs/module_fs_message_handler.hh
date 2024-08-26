@@ -38,15 +38,23 @@ struct ModuleFSMessageHandler {
 			overloaded{
 				[](auto &msg) { return false; },
 
+				// READING:
+
 				[](IntercoreModuleFS::Open &msg) {
 					msg.res = f_open(&msg.fil, msg.path.c_str(), msg.access_mode);
-					pr_dbg("M4: f_open(%p, %s, %d) -> %d\n", &msg.fil, msg.path.c_str(), msg.access_mode, msg.res);
+					pr_trace("M4: f_open(%p, %s, %d) -> %d\n", &msg.fil, msg.path.c_str(), msg.access_mode, msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::Close &msg) {
+					msg.res = f_close(&msg.fil);
+					pr_trace("M4: f_close(%p) -> %d\n", msg.fil, msg.res);
 					return true;
 				},
 
 				[](IntercoreModuleFS::Seek &msg) {
 					msg.res = f_lseek(&msg.fil, msg.file_offset);
-					pr_dbg("M4: f_lseek(%p, %llu) -> %d\n", &msg.fil, msg.file_offset, msg.res);
+					pr_trace("M4: f_lseek(%p, %llu) -> %d\n", &msg.fil, msg.file_offset, msg.res);
 					return true;
 				},
 
@@ -54,29 +62,80 @@ struct ModuleFSMessageHandler {
 					UINT bytes_read = 0;
 					msg.res = f_read(&msg.fil, msg.buffer.data(), msg.buffer.size(), &bytes_read);
 					msg.bytes_read = bytes_read;
-					pr_dbg("M4: f_read(%p, %p, %zu, -> %u) -> %d\n",
-						   &msg.fil,
-						   msg.buffer.data(),
-						   msg.buffer.size(),
-						   bytes_read,
-						   msg.res);
+					pr_trace("M4: f_read(%p, %p, %zu, -> %u) -> %d\n",
+							 &msg.fil,
+							 msg.buffer.data(),
+							 msg.buffer.size(),
+							 bytes_read,
+							 msg.res);
 					return true;
 				},
 
 				[](IntercoreModuleFS::GetS &msg) {
-					auto txt = f_gets(msg.buffer.data(), (int)msg.buffer.size(), &msg.fil);
-
-					msg.res = txt == nullptr ? FR_INT_ERR : FR_OK;
-
-					pr_dbg("M4: f_gets(%p, %zu, %p) -> %p\n", msg.buffer.data(), msg.buffer.size(), &msg.fil, txt);
+					msg.res = f_gets(msg.buffer.data(), (int)msg.buffer.size(), &msg.fil);
+					pr_trace("M4: f_gets(%p, %u, %p)-> %p\n", msg.buffer.data(), msg.buffer.size(), &msg.fil, msg.res);
 					return true;
 				},
 
-				[](IntercoreModuleFS::Close &msg) {
-					msg.res = f_close(&msg.fil);
-					pr_dbg("M4: f_close(%p) -> %d\n", msg.fil, msg.res);
+				[](IntercoreModuleFS::Stat &msg) {
+					msg.res = f_stat(msg.path, &msg.info);
+					pr_trace("M4: f_stat(%s, ->{sz=%llu}) -> %d\n", msg.path, msg.info.fsize, msg.res);
 					return true;
 				},
+
+				// DIRS
+
+				[](IntercoreModuleFS::OpenDir &msg) {
+					msg.res = f_opendir(&msg.dir, msg.path);
+					pr_trace("M4: f_opendir(%p, %s) -> %d\n", &msg.dir, msg.path, msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::CloseDir &msg) {
+					msg.res = f_closedir(&msg.dir);
+					pr_trace("M4: f_closedir(%p) -> %d\n", &msg.dir, msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::ReadDir &msg) {
+					msg.res = f_readdir(&msg.dir, &msg.info);
+					pr_trace("M4: f_readdir(%p, ->{name=%s}) -> %d\n", &msg.dir, msg.info.fname, msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::FindFirst &msg) {
+					msg.res = f_findfirst(&msg.dir, &msg.info, msg.path.data(), msg.pattern.data());
+					pr_trace("M4: f_findfirst(%p, ->{name=%s}, %s, %s) -> %d\n",
+							 &msg.dir,
+							 msg.info.fname,
+							 msg.path.data(),
+							 msg.pattern.data(),
+							 msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::FindNext &msg) {
+					msg.res = f_findnext(&msg.dir, &msg.info);
+					pr_trace("M4: f_findnext(%p, ->{name=%s}, %s, %s) -> %d\n", &msg.dir, msg.info.fname, msg.res);
+					return true;
+				},
+
+				[](IntercoreModuleFS::MkDir &msg) {
+					msg.res = f_mkdir(msg.path);
+					pr_trace("M4: f_mkdir(%s) -> %d\n", msg.path, msg.res);
+					return true;
+				},
+
+				//TODO:
+				//Write
+				//Sync
+				//Trunc
+				//Puts
+				//Unlink
+				//Rename
+				//UTime
+				//Expand
+
 			},
 			message);
 

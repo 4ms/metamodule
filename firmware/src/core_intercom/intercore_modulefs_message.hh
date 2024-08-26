@@ -63,7 +63,7 @@ struct GetS {
 	FIL fil{};
 	std::span<char> buffer;
 	uint32_t bytes_read{};
-	FRESULT res{};
+	char *res{};
 };
 
 struct Seek {
@@ -85,7 +85,7 @@ struct CloseDir {
 
 struct ReadDir {
 	DIR dir{};
-	//??
+	FILINFO info{};
 	FRESULT res{};
 };
 
@@ -95,9 +95,30 @@ struct Stat {
 	FRESULT res{};
 };
 
-//280B with DIR* FIL* FILINFO*
+struct FindFirst {
+	DIR dir{};
+	FILINFO info{};
+	StaticString<255> path;
+	StaticString<63> pattern;
+	FRESULT res{};
+};
+
+struct FindNext {
+	DIR dir{};
+	FILINFO info{};
+	FRESULT res{};
+};
+
+struct MkDir {
+	StaticString<255> path;
+	FRESULT res{};
+};
+
+using Message =
+	std::variant<None, Open, Close, Read, GetS, Seek, OpenDir, CloseDir, ReadDir, Stat, FindFirst, FindNext, MkDir>;
+
+static constexpr size_t MessageSize = sizeof(Message);
 //880B with DIR FIL FILINFO
-using Message = std::variant<None, Open, Close, Read, GetS, Seek, OpenDir, CloseDir, ReadDir, Stat>;
 
 } // namespace IntercoreModuleFS
 
