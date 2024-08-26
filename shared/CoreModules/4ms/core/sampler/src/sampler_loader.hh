@@ -11,7 +11,8 @@ namespace SamplerKit
 {
 
 class SampleLoader {
-	SamplerModes &s;
+	SamplerModes &modes;
+	SampleState &s;
 	Params &params;
 	Flags &flags;
 	Sdcard &sd;
@@ -19,39 +20,31 @@ class SampleLoader {
 	std::array<CircularBuffer, NumSamplesPerBank> &play_buff;
 	uint32_t &g_error;
 
-	mdrivlib::Timekeeper sdcard_update_task;
-	bool time_to_update = false;
+	uint32_t last_update = 0;
+	static constexpr uint32_t UpdateRate = 1;
 
 public:
-	SampleLoader(SamplerModes &sampler_modes,
+	SampleLoader(SamplerModes &modes,
+				 SampleState &state,
 				 Params &params,
 				 Flags &flags,
 				 Sdcard &sd,
 				 BankManager &banks,
 				 std::array<CircularBuffer, NumSamplesPerBank> &splay_buff,
 				 uint32_t &g_error)
-		: s{sampler_modes}
+		: modes{modes}
+		, s{state}
 		, params{params}
 		, flags{flags}
 		, sd{sd}
 		, samples{banks.samples}
 		, play_buff{splay_buff}
 		, g_error{g_error} {
-		sdcard_update_task.init(
-			{
-				.TIMx = TIM7,
-				.period_ns = 1'000'000'000 / 1400,
-				.priority1 = 1,
-				.priority2 = 0,
-			},
-			[this]() { time_to_update = true; });
 	}
 
-	void start() { sdcard_update_task.start(); }
-
-	void update() {
-		if (time_to_update) {
-			time_to_update = false;
+	void update(uint32_t time) {
+		if (last_update == 0 || last_update - time > UpdateRate) {
+			last_update = time;
 			read_storage_to_buffer();
 		}
 	}
@@ -84,7 +77,7 @@ public:
 
 		// FixMe: Calculate play_buff_bufferedamt after play_buff changes, not here, then make bufferedmat private
 		// again
-		s.state.play_buff_bufferedamt[samplenum] = play_buff[samplenum].distance(params.reverse);
+		s.play_buff_bufferedamt[samplenum] = play_buff[samplenum].distance(params.reverse);
 
 		//
 		// Try to recover from a file read error
@@ -126,7 +119,7 @@ public:
 		// Calculate how many bytes we need to pre-load in our buffer
 		uint32_t pre_buff_amt =
 			(float)(BASE_BUFFER_THRESHOLD * s_sample->blockAlign * s_sample->numChannels) * resample_amt;
-		uint32_t playback_buff_amt = std::clamp(pre_buff_amt * 4, uint32_t{0}, (play_buff[samplenum].size * 7) / 10);
+		auto playback_buff_amt = std::clamp<uint32_t>(pre_buff_amt * 4, 0, (play_buff[samplenum].size * 7) / 10);
 		uint32_t target_buff_amt = params.play_state == PlayStates::PREBUFFERING ? pre_buff_amt : playback_buff_amt;
 
 		// Check if the we need to load more from SD Card to the buffer
@@ -137,7 +130,7 @@ public:
 				// TODO: When does this happen? sample_file_curpos has not changed recently...
 				g_error |= FILE_WAVEFORMATERR;
 				params.play_state = PlayStates::SILENT;
-				s.start_playing();
+				modes.start_playing();
 
 			} else if (s.sample_file_curpos[samplenum] > s_sample->inst_end) {
 				// Buffered the end of the file, do not load any more
@@ -157,14 +150,14 @@ public:
 						// FixMe: Do we really want to set this in case of disk error? We don't when reversing.
 						g_error |= FILE_READ_FAIL_1;
 						s.is_buffered_to_file_end[samplenum] = 1;
-						printf_("Err Read\n");
+						printf("Err Read\n");
 					}
 
 					if (br < rd) {
 						// unexpected EOF, but we can continue writing out the data we read
 						g_error |= FILE_UNEXPECTEDEOF;
 						s.is_buffered_to_file_end[samplenum] = 1;
-						printf_("Err EOF\n");
+						printf("Err EOF\n");
 					}
 
 					s.sample_file_curpos[samplenum] = f_tell(&s.fil[samplenum]) - s_sample->startOfData;
@@ -197,7 +190,7 @@ public:
 
 						// Jump to the beginning
 						s.sample_file_curpos[samplenum] = s_sample->inst_start;
-						res = s.set_file_pos(banknum, samplenum);
+						res = modes.set_file_pos(banknum, samplenum);
 						if (res != FR_OK)
 							g_error |= FILE_SEEK_FAIL;
 
@@ -328,7 +321,7 @@ public:
 			return;
 
 		if (s.cached_rev_state[params.sample] != params.reverse) {
-			s.reverse_file_positions(params.sample, params.bank, params.reverse);
+			modes.reverse_file_positions(params.sample, params.bank, params.reverse);
 			s.cached_rev_state[params.sample] = params.reverse;
 		}
 
@@ -365,7 +358,7 @@ public:
 		if (flags.read(Flag::PlaySampleChangedValidBright) == 0)
 			flags.set(Flag::PlaySampleChangedValid);
 		flags.clear(Flag::PlaySampleChangedEmpty);
-		pr_dbg("%.80s\n", samples[params.bank][params.sample].filename);
+		// pr_dbg("%.80s\n", samples[params.bank][params.sample].filename);
 
 		if (params.settings.auto_stop_on_sample_change == AutoStopMode::Always) {
 			if (params.play_state == PlayStates::SILENT && params.looping)

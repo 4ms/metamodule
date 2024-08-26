@@ -15,10 +15,18 @@ struct SampleState {
 	// file position where we will end playback. endpos > startpos when REV==0, endpos < startpos when REV==1
 	uint32_t sample_file_endpos;
 
+	// current file position being read. Must match the actual open file's position. This is always inc/decrementing
+	// from startpos towards endpos
+	uint32_t sample_file_curpos[NumSamplesPerBank];
+
 	// Whether file is totally cached (from inst_start to inst_end)
 	bool is_buffered_to_file_end[NumSamplesPerBank];
+
 	uint32_t play_buff_bufferedamt[NumSamplesPerBank];
 
+	bool cached_rev_state[NumSamplesPerBank];
+
+	FIL fil[NumSamplesPerBank];
 	Cache cache[NumSamplesPerBank];
 
 	void check_sample_end(Params &params,

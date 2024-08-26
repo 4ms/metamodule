@@ -34,6 +34,10 @@
 #include "sts_filesystem.hh"
 #include "wavefmt.hh"
 
+#ifdef METAMODULE
+#include <cstdlib> //std::rand
+#endif
+
 namespace SamplerKit
 {
 
@@ -187,7 +191,11 @@ FRESULT new_filename(uint8_t bank_idx, uint8_t sample_num, char *path, Sdcard &s
 			path[sz++] = '/';
 			sz += intToStr(sample_num, &(path[sz]), 2);
 			path[sz++] = '-';
+#ifdef METAMODULE
+			sz += intToStr(std::rand(), &(path[sz]), 0);
+#else
 			sz += intToStr(HAL_GetTick(), &(path[sz]), 0);
+#endif
 			path[sz++] = '.';
 			path[sz++] = 'w';
 			path[sz++] = 'a';
@@ -257,7 +265,11 @@ FRESULT new_filename(uint8_t bank_idx, uint8_t sample_num, char *path, Sdcard &s
 
 	if (do_add_timestamp) {
 		str_cat(path, path, "-");
+#ifdef METAMODULE
+		intToStr(std::rand(), timestamp_str, 10);
+#else
 		intToStr(HAL_GetTick(), timestamp_str, 10);
+#endif
 		str_cat(path, path, timestamp_str);
 	}
 	str_cat(path, path, slot_suffix);

@@ -1,6 +1,4 @@
 #pragma once
-#include "audio_memory.hh"
-// #include "audio_stream_conf.hh"
 #include "bank.hh"
 #include "cache.hh"
 #include "circular_buffer.hh"
@@ -10,7 +8,9 @@
 #include "sampler_calcs.hh"
 #include "sampler_state.hh"
 #include "sdcard.hh"
-// #include "wav_recording.hh"
+#ifndef METAMODULE
+#include "wav_recording.hh"
+#endif
 
 namespace SamplerKit
 {
@@ -33,19 +33,11 @@ class SamplerModes {
 	uint32_t &g_error;
 
 	float env_level;
-	float env_rate = 0.f;
+	// float env_rate = 0.f;
 
 	uint32_t last_play_start_tmr;
 
 public:
-	// current file position being read. Must match the actual open file's position. This is always inc/decrementing
-	// from startpos towards endpos
-	uint32_t sample_file_curpos[NumSamplesPerBank];
-
-	bool cached_rev_state[NumSamplesPerBank];
-
-	FIL fil[NumSamplesPerBank];
-
 	SamplerModes(Params &params,
 				 Flags &flags,
 				 Sdcard &sd,
@@ -71,7 +63,7 @@ public:
 			state.cache[i].map_pt = play_buff[i].min;
 			state.cache[i].low = 0;
 			state.cache[i].high = 0;
-			cached_rev_state[i] = 0;
+			state.cached_rev_state[i] = 0;
 			state.play_buff_bufferedamt[i] = 0;
 			state.is_buffered_to_file_end[i] = 0;
 
@@ -190,7 +182,7 @@ public:
 		if (flags.take(Flag::ForceFileReload) || /*(fil[samplenum].obj.fs == 0) ||*/
 			(s_sample->file_status == FileStatus::NewFile))
 		{
-			res = reload_sample_file(&fil[samplenum], s_sample, sd);
+			res = reload_sample_file(&state.fil[samplenum], s_sample, sd);
 			if (res != FR_OK) {
 				g_error |= FILE_OPEN_FAIL;
 				params.play_state = PlayStates::SILENT;
@@ -198,21 +190,21 @@ public:
 			}
 			s_sample->file_status = FileStatus::Found;
 
-			res = sd.create_linkmap(&fil[samplenum], samplenum);
+			res = sd.create_linkmap(&state.fil[samplenum], samplenum);
 			if (res == FR_NOT_ENOUGH_CORE) {
 				g_error |= FILE_CANNOT_CREATE_CLTBL;
 			} // ToDo: Log this error
 			else if (res != FR_OK)
 			{
 				g_error |= FILE_CANNOT_CREATE_CLTBL;
-				f_close(&fil[samplenum]);
+				f_close(&state.fil[samplenum]);
 				params.play_state = PlayStates::SILENT;
 				return;
 			}
 
 			// Check the file is really as long as the sampleSize says it is
-			if (f_size(&fil[samplenum]) < (s_sample->startOfData + s_sample->sampleSize)) {
-				s_sample->sampleSize = f_size(&fil[samplenum]) - s_sample->startOfData;
+			if (f_size(&state.fil[samplenum]) < (s_sample->startOfData + s_sample->sampleSize)) {
+				s_sample->sampleSize = f_size(&state.fil[samplenum]) - s_sample->startOfData;
 
 				if (s_sample->inst_end > s_sample->sampleSize)
 					s_sample->inst_end = s_sample->sampleSize;
@@ -273,23 +265,23 @@ public:
 			play_buff[samplenum].init();
 
 			// Seek to the file position where we will start reading
-			sample_file_curpos[samplenum] = state.sample_file_startpos;
+			state.sample_file_curpos[samplenum] = state.sample_file_startpos;
 			res = set_file_pos(banknum, samplenum);
 
 			// If seeking fails, perhaps we need to reload the file
 			if (res != FR_OK) {
 
-				res = reload_sample_file(&fil[samplenum], s_sample, sd);
+				res = reload_sample_file(&state.fil[samplenum], s_sample, sd);
 				if (res != FR_OK) {
 					g_error |= FILE_OPEN_FAIL;
 					params.play_state = PlayStates::SILENT;
 					return;
 				}
 
-				res = sd.create_linkmap(&fil[samplenum], samplenum);
+				res = sd.create_linkmap(&state.fil[samplenum], samplenum);
 				if (res != FR_OK) {
 					g_error |= FILE_CANNOT_CREATE_CLTBL;
-					f_close(&fil[samplenum]);
+					f_close(&state.fil[samplenum]);
 					params.play_state = PlayStates::SILENT;
 					return;
 				}
@@ -301,7 +293,7 @@ public:
 			}
 			if (g_error & LSEEK_FPTR_MISMATCH) {
 				state.sample_file_startpos =
-					align_addr(f_tell(&fil[samplenum]) - s_sample->startOfData, s_sample->blockAlign);
+					align_addr(f_tell(&state.fil[samplenum]) - s_sample->startOfData, s_sample->blockAlign);
 			}
 
 			state.cache[samplenum].low = state.sample_file_startpos;
@@ -399,8 +391,8 @@ public:
 	}
 
 	FRESULT set_file_pos(uint8_t b, uint8_t s) {
-		FRESULT r = f_lseek(&fil[s], samples[b][s].startOfData + sample_file_curpos[s]);
-		if (fil[s].fptr != (samples[b][s].startOfData + sample_file_curpos[s]))
+		FRESULT r = f_lseek(&state.fil[s], samples[b][s].startOfData + state.sample_file_curpos[s]);
+		if (state.fil[s].fptr != (samples[b][s].startOfData + state.sample_file_curpos[s]))
 			g_error |= LSEEK_FPTR_MISMATCH;
 		return r;
 	}
@@ -410,10 +402,10 @@ public:
 		// and move ->in to the equivalant address in play_buff
 		// This gets us ready to read new data to the opposite end of the cache.
 		if (new_dir) {
-			sample_file_curpos[samplenum] = state.cache[samplenum].low;
+			state.sample_file_curpos[samplenum] = state.cache[samplenum].low;
 			play_buff[samplenum].in = state.cache[samplenum].map_pt; // cache_map_pt is the map of cache_low
 		} else {
-			sample_file_curpos[samplenum] = state.cache[samplenum].high;
+			state.sample_file_curpos[samplenum] = state.cache[samplenum].high;
 			play_buff[samplenum].in = state.cache[samplenum].map_cache_to_buffer(
 				state.cache[samplenum].high, samples[banknum][samplenum].sampleByteSize, &play_buff[samplenum]);
 		}
@@ -424,7 +416,7 @@ public:
 
 		// Seek the starting position in the file
 		// This gets us ready to start reading from the new position
-		if (fil[samplenum].obj.id > 0) {
+		if (state.fil[samplenum].obj.id > 0) {
 			FRESULT res;
 			res = set_file_pos(banknum, samplenum);
 			if (res != FR_OK)
@@ -477,7 +469,7 @@ private:
 		}
 		params.reverse = !params.reverse;
 		reverse_file_positions(samplenum, banknum, params.reverse);
-		cached_rev_state[params.sample] = params.reverse;
+		state.cached_rev_state[params.sample] = params.reverse;
 
 		// Restore params.play_state
 		params.play_state = tplay_state;
@@ -537,9 +529,9 @@ private:
 		FRESULT res;
 
 		for (samplenum = 0; samplenum < NUM_SAMPLES_PER_BANK; samplenum++) {
-			res = f_close(&fil[samplenum]);
+			res = f_close(&state.fil[samplenum]);
 			if (res != FR_OK)
-				fil[samplenum].obj.fs = 0;
+				state.fil[samplenum].obj.fs = 0;
 
 			state.is_buffered_to_file_end[samplenum] = 0;
 

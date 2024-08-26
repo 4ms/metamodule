@@ -18,7 +18,7 @@ struct Sampler {
 			BankManager &banks,
 			std::array<CircularBuffer, NumSamplesPerBank> &play_buff)
 		: audio{state, params, flags, banks.samples, play_buff}
-		, loader{modes, params, flags, sd, banks, play_buff, g_error}
+		, loader{modes, state, params, flags, sd, banks, play_buff, g_error}
 		, modes{params, flags, sd, banks, state, play_buff, g_error}
 #ifndef METAMODULE
 		, recorder{params, flags, sd, banks}
@@ -35,10 +35,10 @@ struct Sampler {
 #endif
 
 	void start() {
-		loader.start();
+		// loader.start();
 	}
 
-	void update_bg(uint32_t time) {
+	void update_fs_thread(uint32_t time) {
 		modes.process_mode_flags(time);
 		loader.update(time);
 #ifndef METAMODULE

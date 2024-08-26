@@ -31,6 +31,11 @@ target_include_directories(
 		 ${MM_ROOT}/shared/patch_convert/ryml #For ryml_serial
 )
 
+target_include_directories(4msLibrary
+    PUBLIC ${MM_ROOT}/firmware/lib/fatfs/source 
+           ${MM_ROOT}/firmware/src/fs/fatfs
+)
+
 # Ensemble Oscillator
 target_sources(
   4msLibrary
@@ -44,7 +49,6 @@ target_compile_definitions(
   4msLibrary
   PRIVATE
   SAMPLE_RATE=48000
-  METAMODULE
 )
 
 target_include_directories(
@@ -122,13 +126,18 @@ target_include_directories(
 # Sampler
 target_sources(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/mocks/calibration_storage.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/mocks/time.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/bank.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/sample_file.cc
 )
 target_include_directories(
   4msLibrary
   PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/mocks
+)
+target_compile_definitions(4msLibrary PRIVATE 
+    METAMODULE
 )
 
 # Axoloti ports

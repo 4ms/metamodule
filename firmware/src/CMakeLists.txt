@@ -26,6 +26,24 @@ target_include_directories(
 target_compile_options(mdrivlib_interface INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>)
 
 #
+# FatFs
+#
+add_library(FatFs STATIC)
+
+target_include_directories(FatFs 
+    PUBLIC ${PROJECT_SOURCE_DIR}/lib/fatfs/source 
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs
+)
+
+target_sources(FatFs
+    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
+            ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/delete_node.cc
+)
+
+
+#
 # LVGL
 #
 set(LV_CONF_PATH
@@ -34,18 +52,7 @@ set(LV_CONF_PATH
 )
 add_subdirectory(${FWDIR}/lib/lvgl ${CMAKE_CURRENT_BINARY_DIR}/lvgl)
 target_link_libraries(lvgl PRIVATE mdrivlib_interface)
-
-target_include_directories(lvgl 
-    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source 
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs
-)
-
-target_sources(lvgl
-    PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
-            ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
-            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/delete_node.cc
-)
+target_link_libraries(lvgl PRIVATE FatFs)
 
 #
 # VCV Adaptor
@@ -165,6 +172,8 @@ add_executable(
   #
   ${FWDIR}/src/vcv_hardware/random.cpp
   ${FWDIR}/src/vcv_hardware/gettimeofday.cc
+  ${FWDIR}/src/vcv_hardware/async_thread.cc
+
   #
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #

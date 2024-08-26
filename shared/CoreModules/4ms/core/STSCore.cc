@@ -1,9 +1,11 @@
 #include "CoreModules/CoreHelper.hh"
+#include "CoreModules/async_thread.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "info/STS_info.hh"
 #include "sampler/channel_mapping.hh"
 #include "sampler/sampler_channel.hh"
-#include "sampler/src/sts_filesystem.hh"
+// #include "sampler/src/sts_filesystem.hh"
+#include "../firmware/src/medium/debug_raw.h"
 #include "sdcard.hh"
 
 namespace MetaModule
@@ -79,16 +81,51 @@ private:
 		.BankButB = CoreHelper<STSInfo>::first_light_index<BankRButton>() + 2,
 	};
 
+	AsyncThread fs_thread;
+	// {[this]() {
+	// 	// Run this in the low-pri thread:
+	// 	if (tm - last_tm > 1.0f) {
+	// 		DebugPin0High();
+	// 		DebugPin2High();
+	// 		last_tm = tm;
+	// 		chanL.fs_process(tm);
+	// 		chanR.fs_process(tm);
+	// 		DebugPin0Low();
+	// 		DebugPin2Low();
+	// 		// index_loader.handle_events();
+	// 	}
+	// }};
+
 public:
 	STSCore() {
 		sd.reload();
 
+		// TODO: load index
+		// SamplerKit::SampleIndexLoader index_loader{sd, samples, banks, flags};
+		// index_loader.load_all_banks();
 	}
 
 	void update() override {
 		tm += ms_per_update;
 		chanL.update(tm);
 		chanR.update(tm);
+
+		if (!started_fs_thread) {
+			started_fs_thread = true;
+			fs_thread.start(id, {[this]() {
+								// Run this in the low-pri thread:
+								if (tm - last_tm > 1.0f) {
+									DebugPin0High();
+									DebugPin2High();
+									last_tm = tm;
+									chanL.fs_process(tm);
+									chanR.fs_process(tm);
+									DebugPin0Low();
+									DebugPin2Low();
+									// index_loader.handle_events();
+								}
+							}});
+		}
 	}
 
 	void set_param(int param_id, float val) override {
@@ -124,7 +161,7 @@ public:
 	void set_samplerate(float sr) override {
 		chanL.set_samplerate(sr);
 		chanR.set_samplerate(sr);
-		ms_per_update = std::round(1000.f / sr);
+		ms_per_update = 1000.f / sr;
 	}
 
 	float get_led_brightness(int led_id) const override {
@@ -151,11 +188,14 @@ private:
 	SamplerKit::UserSettings settings;
 	SamplerKit::CalibrationStorage cal_storage;
 
-	SamplerChannel chanL{MappingL, banks, settings, cal_storage};
-	SamplerChannel chanR{MappingR, banks, settings, cal_storage};
+	SamplerChannel chanL{MappingL, sd, banks, settings, cal_storage};
+	SamplerChannel chanR{MappingR, sd, banks, settings, cal_storage};
 
 	float tm = 0;
-	uint32_t ms_per_update = 1.f / 48.f;
+	float last_tm = 0;
+	float ms_per_update = 1000.f / 48000.f;
+
+	bool started_fs_thread = false;
 };
 
 } // namespace MetaModule

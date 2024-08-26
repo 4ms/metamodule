@@ -66,6 +66,9 @@ struct IntercoreStorageMessage {
 		WifiIPSuccess,
 		WifiIPFailed,
 
+		RequestFatFsOp,
+		FatFsOpResponse,
+
 		NumRequests,
 	};
 
@@ -98,6 +101,11 @@ struct IntercoreStorageMessage {
 	WifiIPResult wifi_ip_result;
 
 	PluginFileList *plugin_file_list;
+
+	uint32_t fatfs_req_id;
+	enum FatFsOp : uint8_t { open, close, read, seek, opendir, closedir, readdir, stat } fatfs_op;
+	void *objptr;
+	uint8_t mode;
 };
 
 constexpr static auto IntercoreStorageMessageSize = sizeof(IntercoreStorageMessage);

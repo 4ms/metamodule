@@ -1,3 +1,4 @@
+#include "CoreModules/async_thread.hh"
 #include "app_startup.hh"
 #include "audio/audio.hh"
 #include "calibrate/calibration_data_reader.hh"
@@ -16,6 +17,7 @@
 #include "patch_play/patch_playloader.hh"
 #include "system/time.hh"
 #include "uart_log.hh"
+#include "vcv_hardware/async_thread_control.hh"
 
 #include "conf/qspi_flash_conf.hh"
 #include "drivers/qspi_flash_driver.hh"
@@ -111,6 +113,8 @@ void main() {
 	audio.start();
 
 	print_time();
+
+	start_module_threads();
 
 	while (true) {
 		__NOP();

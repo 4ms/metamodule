@@ -33,11 +33,11 @@ namespace SamplerKit
 {
 
 struct CircularBuffer {
-	uint32_t in;
-	uint32_t out;
-	uint32_t min;
-	uint32_t max;
-	uint32_t size; // should always be max-min
+	uintptr_t in;
+	uintptr_t out;
+	uintptr_t min;
+	uintptr_t max;
+	intptr_t size; // should always be max-min
 	bool wrapping;
 
 	CircularBuffer() {
@@ -50,14 +50,12 @@ struct CircularBuffer {
 	}
 
 	void wait_memory_ready() {
-		// Memory::wait_until_ready();
 	}
 
 	// FIXME: For all the memory IO, we could use memcpy to save some cycles
 	//  - Is it worth it? Memory IO is not the bottleneck (SD card IO is)
 	//  - We'd need to write new under/overflow checks
 
-	// TODO: use span<int16_t>
 	uint32_t memory_read16(std::span<int16_t> rd_buff, bool decrement) {
 		return memory_read16(rd_buff.data(), rd_buff.size(), decrement);
 	}

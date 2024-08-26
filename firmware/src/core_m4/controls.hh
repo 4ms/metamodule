@@ -12,7 +12,6 @@
 #include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
-#include "drivers/timekeeper.hh"
 #include "gpio_expander_reader.hh"
 #include "metaparams.hh"
 #include "midi_controls.hh"
