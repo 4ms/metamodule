@@ -18,9 +18,21 @@ struct Sdcard : MetaModule::FS {
 		: FS(root) {
 	}
 
-	bool reload_disk(std::string_view root_dir = "") {
-		std::string_view rt = root_dir.size() ? root_dir : SAMPLE_INDEX_FILE_PATH;
-		return find_valid_root(rt);
+	bool reload_disk(std::string_view base_dir = "") {
+		// base_dir will be "" or "Sample-1", etc.
+
+		// First look for a root with base_dir + STS system dir
+		std::string sys_dir = base_dir.length() ? std::string(base_dir) + "/" + std::string(SAMPLE_INDEX_FILE_PATH) :
+												  std::string(SAMPLE_INDEX_FILE_PATH);
+		if (find_valid_root(sys_dir))
+			return true;
+
+		// If not found, then look for a root where the base_dir exists
+		// If base_dir is "" then...?
+		if (find_valid_root(base_dir))
+			return true;
+
+		return false;
 	}
 
 	//
@@ -160,9 +172,8 @@ struct Sdcard : MetaModule::FS {
 
 		for (i = 0; i < FF_MAX_LFN + 1; i++) {
 			firstf_name[i] = 127;
-		}					// last possible file name, alphabetically
-		fname[0] = 0;		// null string
-		fno.fname[0] = 'a'; // enables while loop
+		} // last possible file name, alphabetically
+		fname[0] = 0; // null string
 
 		// Open folder
 		res = f_opendir(&dir, path);

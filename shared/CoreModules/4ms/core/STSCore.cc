@@ -21,8 +21,10 @@ private:
 	// Run this in the low-pri thread:
 	AsyncThread fs_thread{[this]() {
 		if (!index_is_loaded) {
-			printf("Loading index from %s\n", index_file.data());
-			sd.reload_disk(index_file);
+			printf("Loading samples from %s\n", root_dir.data());
+
+			sd.reload_disk(root_dir);
+
 			index_loader.load_all_banks();
 			index_is_loaded = true;
 		}
@@ -57,15 +59,19 @@ public:
 	}
 
 	void set_param(int param_id, float val) override {
-		if (param_id == CoreHelper<Info>::param_index<AltParamStereoMode>())
-			settings.stereo_mode = val < 0.5f;
+		if (param_id == CoreHelper<Info>::param_index<AltParamStereoMode>()) {
+			bool new_stereo_mode = val < 0.5f;
+			if (new_stereo_mode != settings.stereo_mode) {
+				settings.stereo_mode = val < 0.5f;
+				printf("Changing stereo mode to %d\n", settings.stereo_mode);
+			}
 
-		else if (param_id == CoreHelper<Info>::param_index<AltParamStereoMode>()) {
+		} else if (param_id == CoreHelper<Info>::param_index<AltParamSampleDir>()) {
 			auto new_index_file = root_name(val);
-			if (new_index_file != index_file) {
-				index_file = new_index_file;
+			if (new_index_file != root_dir) {
+				root_dir = new_index_file;
 				index_is_loaded = false;
-				printf("Changing index to %s\n", index_file.data());
+				printf("Changing index to %s (%f)\n", new_index_file.data(), val);
 			}
 		}
 
@@ -119,7 +125,7 @@ public:
 
 	std::string_view root_name(float val) {
 		unsigned index = std::clamp<unsigned>(std::round(val * 4.f), 0, 3);
-		return index_files[index];
+		return sample_root_dirs[index];
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -210,13 +216,13 @@ private:
 	std::atomic<bool> index_is_loaded = false;
 	SamplerKit::SampleIndexLoader index_loader{sd, samples, banks, index_flags};
 
-	static constexpr std::array<std::string_view, 4> index_files = {
-		"_STS.system/sample_index.dat",
-		"Samples-1/_STS.system/sample_index.dat",
-		"Samples-2/_STS.system/sample_index.dat",
-		"Samples-3/_STS.system/sample_index.dat",
+	static constexpr std::array<std::string_view, 4> sample_root_dirs = {
+		"",
+		"Samples-1/",
+		"Samples-2/",
+		"Samples-3/",
 	};
-	std::string_view index_file = index_files[0];
+	std::string_view root_dir = sample_root_dirs[0];
 };
 
 } // namespace MetaModule
