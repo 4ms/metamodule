@@ -40,11 +40,9 @@
 #include "elements.hh"
 #include "ff.h"
 #include "log.hh"
-#include "params.hh"
 #include "sample_header.hh"
 #include "str_util.h"
 #include "sts_sampleindex.hh"
-#include "wavefmt.hh"
 
 namespace SamplerKit
 {
@@ -211,10 +209,10 @@ void SampleIndexLoader::load_empty_slots(void) {
 					if (banks.find_filename_in_bank(bank, fullpath) != 0xFF)
 						continue; // Skip files that are already used in this bank
 
-					res = f_open(&temp_file, fullpath, FA_READ); // Open the file
+					res = sd.f_open(&temp_file, fullpath, FA_READ); // Open the file
 
 					if (res == FR_OK) {
-						auto ires = load_sample_header(&(samples[bank][samplenum]), &temp_file);
+						auto ires = load_sample_header(&(samples[bank][samplenum]), &temp_file, sd);
 
 						if (ires == FR_OK) // If we can load the file's wav header, then success!
 						{
@@ -226,7 +224,7 @@ void SampleIndexLoader::load_empty_slots(void) {
 								   bank);
 						}
 					}
-					f_close(&temp_file);
+					sd.f_close(&temp_file);
 
 				} // while !file_found
 			}	  // if filename is blank
@@ -297,11 +295,11 @@ void SampleIndexLoader::load_missing_files(void) {
 							continue;
 					} // Second pass: Skip files that are used in *this* bank
 
-					res = f_open(&temp_file, fullpath, FA_READ); // Open the file
+					res = sd.f_open(&temp_file, fullpath, FA_READ); // Open the file
 
 					if (res == FR_OK) {
-						res = load_sample_header(&(samples[bank][samplenum]),
-												 &temp_file); // Load the sample header info into samples[][]
+						// Load the sample header info into samples[][]
+						res = load_sample_header(&(samples[bank][samplenum]), &temp_file, sd);
 
 						if (res == FR_OK) {
 							str_cpy(samples[bank][samplenum].filename, fullpath); // Set the filename (full path)
@@ -313,7 +311,7 @@ void SampleIndexLoader::load_missing_files(void) {
 							banks.enable_bank(bank);
 						}
 					}
-					f_close(&temp_file);
+					sd.f_close(&temp_file);
 				}
 
 				// If no files are found, try searching anywhere for the filename
@@ -390,14 +388,14 @@ void SampleIndexLoader::load_new_folders(void) {
 			l = 0;
 
 			// Check if root dir contains any .wav files
-			res = f_opendir(&test_dir, foldername);
+			res = sd.f_opendir(&test_dir, foldername);
 
 			if (res != FR_OK) {
-				f_closedir(&test_dir);
+				sd.f_closedir(&test_dir);
 				continue;
 			}
 			if (sd.find_next_ext_in_dir(&test_dir, ".wav", default_bankname) != FR_OK) {
-				f_closedir(&test_dir);
+				sd.f_closedir(&test_dir);
 				continue;
 			}
 
@@ -412,14 +410,14 @@ void SampleIndexLoader::load_new_folders(void) {
 			// exit if no more dirs found
 			if (res != FR_OK) {
 				pr_dbg("No more dirs found\n");
-				f_closedir(&root_dir);
+				sd.f_closedir(&root_dir);
 				break;
 			}
 
 			pr_dbg("Checking next dir in root: %.255s\n", foldername);
 
 			// Check if foldername contains any .wav files
-			res = f_opendir(&test_dir, foldername);
+			res = sd.f_opendir(&test_dir, foldername);
 			if (res != FR_OK) {
 				pr_dbg("Failed to open\n");
 				continue;
@@ -560,7 +558,7 @@ uint8_t SampleIndexLoader::load_banks_by_color_prefix(void) {
 		test_path_loaded = 0;
 
 		// Check if folder contains any .wav files
-		res = f_opendir(&testdir, foldername);
+		res = sd.f_opendir(&testdir, foldername);
 		if (res != FR_OK)
 			continue;
 		if (sd.find_next_ext_in_dir(&testdir, ".wav", default_bankname) != FR_OK)
@@ -698,13 +696,13 @@ uint8_t SampleIndexLoader::load_banks_with_noncolors(void) {
 		test_path_loaded = 0;
 
 		// Open the folder
-		res = f_opendir(&testdir, foldername);
+		res = sd.f_opendir(&testdir, foldername);
 		if (res != FR_OK)
 			continue;
 
 		// Check if folder contains any .wav files
 		if (sd.find_next_ext_in_dir(&testdir, ".wav", default_bankname) != FR_OK) {
-			f_closedir(&testdir);
+			sd.f_closedir(&testdir);
 			continue;
 		}
 
@@ -798,15 +796,15 @@ uint8_t SampleIndexLoader::load_bank_from_disk(Bank &sample_bank, char *path_nos
 			break;
 		} // Stop if no more files found/available or there's an error
 
-		str_cpy(&(path[path_len]), filename);	 // Append filename to path
-		res = f_open(&temp_file, path, FA_READ); // Open file
-		f_sync(&temp_file);
+		str_cpy(&(path[path_len]), filename);		// Append filename to path
+		res = sd.f_open(&temp_file, path, FA_READ); // Open file
+		sd.f_sync(&temp_file);
 
 		if (res == FR_OK) {
-			if (load_sample_header(&(sample_bank[sample_num]), &temp_file) == FR_OK)
+			if (load_sample_header(&(sample_bank[sample_num]), &temp_file, sd) == FR_OK)
 				str_cpy(sample_bank[sample_num++].filename, path); // Set the filename (full path)
 		}
-		f_close(&temp_file);
+		sd.f_close(&temp_file);
 	}
 	return sample_num;
 }

@@ -71,148 +71,157 @@ struct UserSettingsStorage {
 			return res;
 
 		// Create/overwrite the settings file
-		str_cat(filepath, SYS_DIR_SLASH, SETTINGS_FILE);
-		res = f_open(&settings_file, filepath, FA_CREATE_ALWAYS | FA_WRITE);
+		str_cat(filepath, Sdcard::SYS_DIR_SLASH.data(), SETTINGS_FILE);
+		res = MetaModule::f_open(&settings_file, filepath, FA_CREATE_ALWAYS | FA_WRITE);
 		if (res != FR_OK)
 			return (res);
 
 		// Write the header
-		f_printf(&settings_file, "##\n");
-		f_printf(&settings_file, "## 4ms Stereo Triggered Sampler\n");
-		f_printf(&settings_file, "## Settings File\n");
-		f_printf(&settings_file, "## http://www.4mscompany.com/sts.php\n");
-		f_printf(&settings_file, "##\n");
-		f_printf(&settings_file, "## [STEREO MODE] can be \"stereo\" or \"mono\" (default)\n");
-		f_printf(&settings_file, "## [RECORD SAMPLE BITS] can be 24 or 16 (default)\n");
-		f_printf(&settings_file, "## [RECORD SAMPLE RATE] can be 96k, 88.2k, 48k, or 44.1k (default)\n");
-		f_printf(&settings_file,
-				 "## [AUTO STOP ON SAMPLE CHANGE] can be \"No\", \"Looping Only\" or \"Yes\" (default)\n");
-		f_printf(&settings_file, "## [PLAY BUTTON STOPS WITH LENGTH AT FULL] can be \"No\" or \"Yes\" (default)\n");
-		f_printf(&settings_file, "## [QUANTIZE CHANNEL 1 1V/OCT JACK] can be \"Yes\" or \"No\" (default)\n");
-		f_printf(&settings_file, "## [QUANTIZE CHANNEL 2 1V/OCT JACK] can be \"Yes\" or \"No\" (default)\n");
-		f_printf(&settings_file, "## [SHORT SAMPLE PERCUSSIVE ENVELOPE] can be \"No\" or \"Yes\" (default)\n");
-		f_printf(&settings_file, "## [CROSSFADE SAMPLE END POINTS] can be \"No\" or \"Yes\" (default)\n");
-		f_printf(&settings_file,
-				 "## [STARTUP BANK CHANNEL 1] can be a number between 0 and 59 (default is 0, which is the White "
-				 "bank)\n");
-		f_printf(&settings_file,
-				 "## [STARTUP BANK CHANNEL 2] can be a number between 0 and 59 (default is 0, which is the White "
-				 "bank)\n");
-		f_printf(&settings_file,
-				 "## [TRIG DELAY] can be a number between 1 and 10 which translates to a delay between 0.5ms and 20ms, "
-				 "respectively (default is 5)\n");
-		f_printf(&settings_file,
-				 "## [FADE TIME] can be a number between 0 and 255 which sets the fade in/out time in milliseconds. "
-				 "(0 is actually 0.36ms, and 255 is 255ms. Default is 24)\n");
-		f_printf(&settings_file, "## [AUTO INCREMENT REC SLOT ON TRIG] can be \"Yes\" or \"No\" (default)\n");
-		f_printf(&settings_file, "## [USE CUES] can be \"Yes\" or \"No\" (default)\n");
-		f_printf(&settings_file, "##\n");
-		f_printf(&settings_file, "## Deleting this file will restore default settings\n");
-		f_printf(&settings_file, "##\n\n");
+		MetaModule::f_printf(&settings_file, "##\n");
+		MetaModule::f_printf(&settings_file, "## 4ms Stereo Triggered Sampler\n");
+		MetaModule::f_printf(&settings_file, "## Settings File\n");
+		MetaModule::f_printf(&settings_file, "## http://www.4mscompany.com/sts.php\n");
+		MetaModule::f_printf(&settings_file, "##\n");
+		MetaModule::f_printf(&settings_file, "## [STEREO MODE] can be \"stereo\" or \"mono\" (default)\n");
+		MetaModule::f_printf(&settings_file, "## [RECORD SAMPLE BITS] can be 24 or 16 (default)\n");
+		MetaModule::f_printf(&settings_file, "## [RECORD SAMPLE RATE] can be 96k, 88.2k, 48k, or 44.1k (default)\n");
+		MetaModule::f_printf(&settings_file,
+							 "## [AUTO STOP ON SAMPLE CHANGE] can be \"No\", \"Looping Only\" or \"Yes\" (default)\n");
+		MetaModule::f_printf(&settings_file,
+							 "## [PLAY BUTTON STOPS WITH LENGTH AT FULL] can be \"No\" or \"Yes\" (default)\n");
+		MetaModule::f_printf(&settings_file,
+							 "## [QUANTIZE CHANNEL 1 1V/OCT JACK] can be \"Yes\" or \"No\" (default)\n");
+		MetaModule::f_printf(&settings_file,
+							 "## [QUANTIZE CHANNEL 2 1V/OCT JACK] can be \"Yes\" or \"No\" (default)\n");
+		MetaModule::f_printf(&settings_file,
+							 "## [SHORT SAMPLE PERCUSSIVE ENVELOPE] can be \"No\" or \"Yes\" (default)\n");
+		MetaModule::f_printf(&settings_file, "## [CROSSFADE SAMPLE END POINTS] can be \"No\" or \"Yes\" (default)\n");
+		MetaModule::f_printf(
+			&settings_file,
+			"## [STARTUP BANK CHANNEL 1] can be a number between 0 and 59 (default is 0, which is the White "
+			"bank)\n");
+		MetaModule::f_printf(
+			&settings_file,
+			"## [STARTUP BANK CHANNEL 2] can be a number between 0 and 59 (default is 0, which is the White "
+			"bank)\n");
+		MetaModule::f_printf(
+			&settings_file,
+			"## [TRIG DELAY] can be a number between 1 and 10 which translates to a delay between 0.5ms and 20ms, "
+			"respectively (default is 5)\n");
+		MetaModule::f_printf(
+			&settings_file,
+			"## [FADE TIME] can be a number between 0 and 255 which sets the fade in/out time in milliseconds. "
+			"(0 is actually 0.36ms, and 255 is 255ms. Default is 24)\n");
+		MetaModule::f_printf(&settings_file,
+							 "## [AUTO INCREMENT REC SLOT ON TRIG] can be \"Yes\" or \"No\" (default)\n");
+		MetaModule::f_printf(&settings_file, "## [USE CUES] can be \"Yes\" or \"No\" (default)\n");
+		MetaModule::f_printf(&settings_file, "##\n");
+		MetaModule::f_printf(&settings_file, "## Deleting this file will restore default settings\n");
+		MetaModule::f_printf(&settings_file, "##\n\n");
 
 		// Write the stereo mode setting
-		f_printf(&settings_file, "[STEREO MODE]\n");
+		MetaModule::f_printf(&settings_file, "[STEREO MODE]\n");
 
 		if (settings.stereo_mode)
-			f_printf(&settings_file, "stereo\n\n");
+			MetaModule::f_printf(&settings_file, "stereo\n\n");
 		else
-			f_printf(&settings_file, "mono\n\n");
+			MetaModule::f_printf(&settings_file, "mono\n\n");
 
 		// Write the 24bit record mode setting
-		f_printf(&settings_file, "[RECORD SAMPLE BITS]\n");
+		MetaModule::f_printf(&settings_file, "[RECORD SAMPLE BITS]\n");
 
 		if (settings.rec_24bits)
-			f_printf(&settings_file, "24\n\n");
+			MetaModule::f_printf(&settings_file, "24\n\n");
 		else
-			f_printf(&settings_file, "16\n\n");
+			MetaModule::f_printf(&settings_file, "16\n\n");
 
 		// Write the record sample rate setting
-		f_printf(&settings_file, "[RECORD SAMPLE RATE]\n");
+		MetaModule::f_printf(&settings_file, "[RECORD SAMPLE RATE]\n");
 
 		if (settings.record_sample_rate == 48000)
-			f_printf(&settings_file, "48k\n\n");
+			MetaModule::f_printf(&settings_file, "48k\n\n");
 		else if (settings.record_sample_rate == 88200)
-			f_printf(&settings_file, "88.2k\n\n");
+			MetaModule::f_printf(&settings_file, "88.2k\n\n");
 		else if (settings.record_sample_rate == 96000)
-			f_printf(&settings_file, "96k\n\n");
+			MetaModule::f_printf(&settings_file, "96k\n\n");
 		else
-			f_printf(&settings_file, "44.1k\n\n");
+			MetaModule::f_printf(&settings_file, "44.1k\n\n");
 
 		// Write the Auto Stop on Sample Change mode setting
-		f_printf(&settings_file, "[AUTO STOP ON SAMPLE CHANGE]\n");
+		MetaModule::f_printf(&settings_file, "[AUTO STOP ON SAMPLE CHANGE]\n");
 
 		if (settings.auto_stop_on_sample_change == AutoStopMode::Always)
-			f_printf(&settings_file, "Yes\n\n");
+			MetaModule::f_printf(&settings_file, "Yes\n\n");
 		else if (settings.auto_stop_on_sample_change == AutoStopMode::Off)
-			f_printf(&settings_file, "No\n\n");
+			MetaModule::f_printf(&settings_file, "No\n\n");
 		else if (settings.auto_stop_on_sample_change == AutoStopMode::Looping)
-			f_printf(&settings_file, "Looping Only\n\n");
+			MetaModule::f_printf(&settings_file, "Looping Only\n\n");
 
 		// Write the Auto Stop on Sample Change mode setting
-		f_printf(&settings_file, "[PLAY BUTTON STOPS WITH LENGTH AT FULL]\n");
+		MetaModule::f_printf(&settings_file, "[PLAY BUTTON STOPS WITH LENGTH AT FULL]\n");
 
 		if (settings.length_full_start_stop)
-			f_printf(&settings_file, "Yes\n\n");
+			MetaModule::f_printf(&settings_file, "Yes\n\n");
 		else
-			f_printf(&settings_file, "No\n\n");
+			MetaModule::f_printf(&settings_file, "No\n\n");
 
 		// Write the Quantize Channel 1 setting
-		f_printf(&settings_file, "[QUANTIZE CHANNEL 1 1V/OCT JACK]\n");
+		MetaModule::f_printf(&settings_file, "[QUANTIZE CHANNEL 1 1V/OCT JACK]\n");
 
 		if (settings.quantize)
-			f_printf(&settings_file, "Yes\n\n");
+			MetaModule::f_printf(&settings_file, "Yes\n\n");
 		else
-			f_printf(&settings_file, "No\n\n");
+			MetaModule::f_printf(&settings_file, "No\n\n");
 
 		// Write the Quantize Channel 2 setting
-		f_printf(&settings_file, "[QUANTIZE CHANNEL 2 1V/OCT JACK]\n");
+		MetaModule::f_printf(&settings_file, "[QUANTIZE CHANNEL 2 1V/OCT JACK]\n");
 
 		if (settings.quantize)
-			f_printf(&settings_file, "Yes\n\n");
+			MetaModule::f_printf(&settings_file, "Yes\n\n");
 		else
-			f_printf(&settings_file, "No\n\n");
+			MetaModule::f_printf(&settings_file, "No\n\n");
 
 		// Write the Perc Envelope setting
-		f_printf(&settings_file, "[SHORT SAMPLE PERCUSSIVE ENVELOPE]\n");
+		MetaModule::f_printf(&settings_file, "[SHORT SAMPLE PERCUSSIVE ENVELOPE]\n");
 
 		if (settings.perc_env)
-			f_printf(&settings_file, "Yes\n\n");
+			MetaModule::f_printf(&settings_file, "Yes\n\n");
 		else
-			f_printf(&settings_file, "No\n\n");
+			MetaModule::f_printf(&settings_file, "No\n\n");
 
 		// Write the Fade Up/Down Envelope setting
-		f_printf(&settings_file, "[CROSSFADE SAMPLE END POINTS]\n");
+		MetaModule::f_printf(&settings_file, "[CROSSFADE SAMPLE END POINTS]\n");
 
 		if (settings.fadeupdown_env)
-			f_printf(&settings_file, "Yes\n\n");
+			MetaModule::f_printf(&settings_file, "Yes\n\n");
 		else
-			f_printf(&settings_file, "No\n\n");
+			MetaModule::f_printf(&settings_file, "No\n\n");
 
 		// Write the Channel 1 startup bank setting
-		f_printf(&settings_file, "[STARTUP BANK CHANNEL 1]\n");
-		f_printf(&settings_file, "%d\n\n", settings.startup_bank);
+		MetaModule::f_printf(&settings_file, "[STARTUP BANK CHANNEL 1]\n");
+		MetaModule::f_printf(&settings_file, "%d\n\n", settings.startup_bank);
 
 		// Write the Channel 2 startup bank setting
-		f_printf(&settings_file, "[STARTUP BANK CHANNEL 2]\n");
-		f_printf(&settings_file, "%d\n\n", settings.startup_bank);
+		MetaModule::f_printf(&settings_file, "[STARTUP BANK CHANNEL 2]\n");
+		MetaModule::f_printf(&settings_file, "%d\n\n", settings.startup_bank);
 
 		// Write the Trig Delay setting
-		f_printf(&settings_file, "[TRIG DELAY]\n");
-		f_printf(&settings_file, "%d\n\n", settings.trig_delay);
+		MetaModule::f_printf(&settings_file, "[TRIG DELAY]\n");
+		MetaModule::f_printf(&settings_file, "%d\n\n", settings.trig_delay);
 
 		// Write the Trig Delay setting
-		f_printf(&settings_file, "[FADE TIME]\n");
-		f_printf(&settings_file, "%d\n\n", settings.fade_time_ms);
+		MetaModule::f_printf(&settings_file, "[FADE TIME]\n");
+		MetaModule::f_printf(&settings_file, "%d\n\n", settings.fade_time_ms);
 
 		// Write Auto Inc Rec Slot setting
-		f_printf(&settings_file, "[AUTO INCREMENT REC SLOT ON TRIG]\n");
-		f_printf(&settings_file, "%s\n\n", settings.auto_inc_slot_num_after_rec_trig ? "Yes" : "No");
+		MetaModule::f_printf(&settings_file, "[AUTO INCREMENT REC SLOT ON TRIG]\n");
+		MetaModule::f_printf(&settings_file, "%s\n\n", settings.auto_inc_slot_num_after_rec_trig ? "Yes" : "No");
 
 		// Write Cues setting
-		f_printf(&settings_file, "[USE CUES]\n");
-		f_printf(&settings_file, "%s\n\n", settings.use_cues ? "Yes" : "No");
+		MetaModule::f_printf(&settings_file, "[USE CUES]\n");
+		MetaModule::f_printf(&settings_file, "%s\n\n", settings.use_cues ? "Yes" : "No");
 
-		res = f_close(&settings_file);
+		res = MetaModule::f_close(&settings_file);
 
 		return res;
 	}
@@ -230,15 +239,15 @@ struct UserSettingsStorage {
 			return false;
 
 		// Open the settings file read-only
-		str_cat(filepath, SYS_DIR_SLASH, SETTINGS_FILE);
-		res = f_open(&settings_file, filepath, FA_READ);
+		str_cat(filepath, Sdcard::SYS_DIR_SLASH.data(), SETTINGS_FILE);
+		res = MetaModule::f_open(&settings_file, filepath, FA_READ);
 		if (res != FR_OK)
 			return false;
 
 		cur_setting_found = NoSetting;
-		while (!f_eof(&settings_file)) {
+		while (!MetaModule::f_eof(&settings_file)) {
 			// Read next line
-			if (f_gets(read_buffer, 255, &settings_file) == 0)
+			if (MetaModule::f_gets(read_buffer, 255, &settings_file) == 0)
 				return false;
 
 			// Ignore lines starting with #
@@ -459,7 +468,7 @@ struct UserSettingsStorage {
 			}
 		}
 
-		res = f_close(&settings_file);
+		res = MetaModule::f_close(&settings_file);
 		return res == FR_OK;
 	}
 };

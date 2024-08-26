@@ -1,4 +1,5 @@
 #include "CoreModules/async_thread.hh"
+#include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "util/zip.hh"
 #include <array>
@@ -51,15 +52,13 @@ void AsyncThread::start(unsigned module_id) {
 		auto &tasks = core() == 1 ? tasks_core1 : tasks_core0;
 
 		if (module_id < tasks.size()) {
-			printf("Starting async task %d on core %u\n", module_id, core());
-
 			id = module_id;
 
 			tasks[id].action = action;
-			__DMB();
+			__DSB();
 			tasks[id].enabled = true;
+			__DSB();
 		}
-		start(module_id, std::move(action));
 	}
 }
 
@@ -70,36 +69,47 @@ void AsyncThread::start(unsigned module_id, Callback &&new_action) {
 
 AsyncThread::~AsyncThread() {
 	auto &tasks = core() == 1 ? tasks_core1 : tasks_core0;
-	if (id < tasks.size())
+	if (id < tasks.size()) {
 		tasks[id].enabled = false;
+		__DSB();
+	}
 }
 
 void start_module_threads() {
 	uint32_t current_core = core();
-	auto &tasks = current_core == 1 ? tasks_core1 : tasks_core0;
 	auto &task_runner = current_core == 1 ? async_task_core1 : async_task_core0;
 
 	mdrivlib::TimekeeperConfig task_config{
 		.TIMx = current_core == 0 ? TIM7 : TIM6,
-		.period_ns = mdrivlib::TimekeeperConfig::Hz(2000),
+		.period_ns = mdrivlib::TimekeeperConfig::Hz(1000),
 		.priority1 = 3,
 		.priority2 = 3,
 	};
 
-	task_runner.init(task_config, [&tasks]() {
-		for (unsigned i = 0; auto &task : tasks) {
-			if (!task.enabled || i == 0)
-				continue;
-			printf("Running async task %d on core %d\n", i, core());
-			i++;
-			task.action();
+	task_runner.init(task_config, []() {
+		if (core() == 0)
+			Debug::Pin2::high();
+		else
+			Debug::Pin3::high();
+
+		auto &tasks = core() == 1 ? tasks_core1 : tasks_core0;
+
+		for (auto &task : tasks) {
+			if (task.enabled) {
+				task.action();
+			}
 		}
+
+		if (core() == 0)
+			Debug::Pin2::low();
+		else
+			Debug::Pin3::low();
 	});
 	task_runner.start();
 }
 
-void pause_module_threads() {
-	auto &task_runner = core() == 1 ? async_task_core1 : async_task_core0;
+void pause_module_threads(unsigned core_id = core()) {
+	auto &task_runner = core_id == 1 ? async_task_core1 : async_task_core0;
 	task_runner.stop();
 }
 

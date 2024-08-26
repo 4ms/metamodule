@@ -50,8 +50,9 @@ struct SampleIndexLoader {
 		: sd{sd}
 		, samples{samples}
 		, banks{banks}
-		, index{samples, flags}
-		, flags{flags} {}
+		, index{samples, flags, sd}
+		, flags{flags} {
+	}
 
 	void load_new_folders();
 	void load_missing_files();

@@ -5,6 +5,6 @@
 namespace MetaModule
 {
 
-using FileStorageComm = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, IntercoreStorageMessage>;
+using FileStorageComm = mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Initiator, IntercoreStorageMessage>;
 
 }

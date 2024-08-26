@@ -197,7 +197,7 @@ public:
 			else if (res != FR_OK)
 			{
 				g_error |= FILE_CANNOT_CREATE_CLTBL;
-				f_close(&state.fil[samplenum]);
+				sd.f_close(&state.fil[samplenum]);
 				params.play_state = PlayStates::SILENT;
 				return;
 			}
@@ -281,7 +281,7 @@ public:
 				res = sd.create_linkmap(&state.fil[samplenum], samplenum);
 				if (res != FR_OK) {
 					g_error |= FILE_CANNOT_CREATE_CLTBL;
-					f_close(&state.fil[samplenum]);
+					sd.f_close(&state.fil[samplenum]);
 					params.play_state = PlayStates::SILENT;
 					return;
 				}
@@ -391,7 +391,7 @@ public:
 	}
 
 	FRESULT set_file_pos(uint8_t b, uint8_t s) {
-		FRESULT r = f_lseek(&state.fil[s], samples[b][s].startOfData + state.sample_file_curpos[s]);
+		FRESULT r = sd.f_lseek(&state.fil[s], samples[b][s].startOfData + state.sample_file_curpos[s]);
 		if (state.fil[s].fptr != (samples[b][s].startOfData + state.sample_file_curpos[s]))
 			g_error |= LSEEK_FPTR_MISMATCH;
 		return r;
@@ -529,7 +529,7 @@ private:
 		FRESULT res;
 
 		for (samplenum = 0; samplenum < NUM_SAMPLES_PER_BANK; samplenum++) {
-			res = f_close(&state.fil[samplenum]);
+			res = sd.f_close(&state.fil[samplenum]);
 			if (res != FR_OK)
 				state.fil[samplenum].obj.fs = 0;
 

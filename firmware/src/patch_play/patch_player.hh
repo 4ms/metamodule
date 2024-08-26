@@ -486,6 +486,7 @@ public:
 			pr_err("Module %s not found\n", slug.c_str());
 			return;
 		}
+		modules[module_idx]->id = module_idx;
 		pr_trace("Loaded module[%zu]: %s\n", module_idx, slug.c_str());
 
 		modules[module_idx]->mark_all_inputs_unpatched();

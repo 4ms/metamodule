@@ -12,7 +12,7 @@ namespace MetaModule
 {
 
 struct FirmwareFileFinder {
-	using InterCoreComm = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage>;
+	using InterCoreComm = mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Responder, IntercoreStorageMessage>;
 	using enum IntercoreStorageMessage::MessageType;
 
 	FirmwareFileFinder(FatFileIO &sdcard_fileio, FatFileIO &usb_fileio)

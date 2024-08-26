@@ -15,8 +15,8 @@ public:
 	~AsyncThread();
 
 private:
-	Callback action;
-	unsigned id;
+	Callback action{};
+	unsigned id{};
 };
 
 } // namespace MetaModule

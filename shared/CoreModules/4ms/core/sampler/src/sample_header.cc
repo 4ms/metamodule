@@ -1,5 +1,6 @@
 #include "sample_header.hh"
 #include "errors.hh"
+#include "sdcard.hh"
 #include "wavefmt.hh"
 #include <cstdio>
 
@@ -10,15 +11,15 @@
 namespace SamplerKit
 {
 
-static uint32_t read(FIL *file, void *data, uint32_t bytes_to_read, unsigned int *bytes_read) {
-	FRESULT res = f_read(file, data, bytes_to_read, bytes_read);
+static uint32_t read(FIL *file, void *data, uint32_t bytes_to_read, unsigned int *bytes_read, Sdcard &sd) {
+	FRESULT res = sd.f_read(file, data, bytes_to_read, bytes_read);
 
 	if (res != FR_OK) {
-		f_close(file);
+		sd.f_close(file);
 		return HEADER_READ_FAIL;
 	}
 	if (bytes_to_read < *bytes_read) {
-		f_close(file);
+		sd.f_close(file);
 		// printf_("Read %d bytes, requested %d\n", *bytes_read, bytes_to_read);
 		return FILE_WAVEFORMATERR;
 	}
@@ -28,7 +29,7 @@ static uint32_t read(FIL *file, void *data, uint32_t bytes_to_read, unsigned int
 //
 // Load the sample header from the provided file
 //
-uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
+uint32_t load_sample_header(Sample *s_sample, FIL *sample_file, Sdcard &sd) {
 	WaveHeader sample_header;
 	WaveFmtChunk fmt_chunk;
 	UINT br;
@@ -37,11 +38,11 @@ uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
 	uint32_t next_chunk_start;
 
 	rd = sizeof(WaveHeader);
-	if (auto err = read(sample_file, &sample_header, rd, &br); err)
+	if (auto err = read(sample_file, &sample_header, rd, &br, sd); err)
 		return err;
 
 	if (!is_valid_wav_header(sample_header)) {
-		f_close(sample_file);
+		sd.f_close(sample_file);
 		return FILE_WAVEFORMATERR;
 	}
 
@@ -50,7 +51,7 @@ uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
 	rd = sizeof(WaveChunkHeader);
 
 	while (chunk_hdr.chunkId != ccFMT) {
-		if (auto err = read(sample_file, &chunk_hdr, rd, &br); err) {
+		if (auto err = read(sample_file, &chunk_hdr, rd, &br, sd); err) {
 			// printf_("fmt chunk read err\n");
 			return err;
 		}
@@ -62,21 +63,21 @@ uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
 		next_chunk_start = f_tell(sample_file) + chunk_hdr.chunkSize;
 		// fast-forward to the next chunk
 		if (chunk_hdr.chunkId != ccFMT)
-			f_lseek(sample_file, next_chunk_start);
+			sd.f_lseek(sample_file, next_chunk_start);
 	}
 
 	// Go back to beginning of chunk --probably could do this more elegantly by removing fmtID and fmtSize from
 	// WaveFmtChunk and just reading the next bit of data
-	f_lseek(sample_file, f_tell(sample_file) - sizeof(WaveChunkHeader));
+	sd.f_lseek(sample_file, f_tell(sample_file) - sizeof(WaveChunkHeader));
 
 	// Re-read the whole chunk (or at least the fields we need) since it's a WaveFmtChunk
 	rd = sizeof(WaveFmtChunk);
-	if (auto err = read(sample_file, &fmt_chunk, rd, &br); err)
+	if (auto err = read(sample_file, &fmt_chunk, rd, &br, sd); err)
 		return err;
 
 	if (!is_valid_format_chunk(fmt_chunk)) {
 		// printf_("Invalid format chunk: %x %x %x\n", fmt_chunk.byteRate, fmt_chunk.audioFormat, fmt_chunk.sampleRate);
-		f_close(sample_file);
+		sd.f_close(sample_file);
 		return FILE_WAVEFORMATERR;
 	}
 
@@ -88,7 +89,7 @@ uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
 	s_sample->PCM = (fmt_chunk.audioFormat == 0xFFFE) ? 3 : fmt_chunk.audioFormat;
 
 	// Skip to the next chunk
-	f_lseek(sample_file, next_chunk_start);
+	sd.f_lseek(sample_file, next_chunk_start);
 
 	// Look for the data and cue chunks
 	chunk_hdr.chunkId = 0;
@@ -98,7 +99,7 @@ uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
 	bool found_data_chunk = false;
 	bool found_cue_chunk = false;
 	while (!found_data_chunk || !found_cue_chunk) {
-		if (auto err = read(sample_file, &chunk_hdr, rd, &br); err)
+		if (auto err = read(sample_file, &chunk_hdr, rd, &br, sd); err)
 			return err;
 
 		next_chunk_start = f_tell(sample_file) + chunk_hdr.chunkSize;
@@ -112,7 +113,7 @@ uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
 		if (chunk_hdr.chunkId == ccDATA) {
 			// check valid data chunk size
 			if (chunk_hdr.chunkSize == 0) {
-				f_close(sample_file);
+				sd.f_close(sample_file);
 				return FR_INT_ERR;
 			}
 
@@ -140,7 +141,7 @@ uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
 				continue;
 
 			CueChunk cue_chunk;
-			if (auto err = read(sample_file, &cue_chunk, sizeof(CueChunk), &br); err)
+			if (auto err = read(sample_file, &cue_chunk, sizeof(CueChunk), &br, sd); err)
 				continue; // ignore cue chunk in case of error
 
 			s_sample->num_cues = cue_chunk.num_cues;
@@ -148,7 +149,7 @@ uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
 			unsigned s_i = 0;
 			for (unsigned c_i = 0; c_i < cue_chunk.num_cues; c_i++) {
 				CueMarker cue;
-				if (auto err = read(sample_file, &cue, sizeof(CueMarker), &br); err)
+				if (auto err = read(sample_file, &cue, sizeof(CueMarker), &br, sd); err)
 					continue; // ignore cue chunk in case of error
 				auto start = cue.sample_start;
 				// printf_("\nCue %d @%d\n", c_i, start);
@@ -171,7 +172,7 @@ uint32_t load_sample_header(Sample *s_sample, FIL *sample_file) {
 			break;
 
 		// keeping scanning chunks
-		f_lseek(sample_file, next_chunk_start);
+		sd.f_lseek(sample_file, next_chunk_start);
 	}
 
 	if (!found_data_chunk)

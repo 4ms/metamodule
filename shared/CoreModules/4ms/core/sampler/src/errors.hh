@@ -1,5 +1,5 @@
 #pragma once
-#include "printf.h"
+#include "log.hh"
 #include <cstdint>
 
 enum g_Errors {
@@ -41,5 +41,5 @@ enum g_Errors {
 
 static inline void check_errors(uint32_t err) {
 	if (err)
-		printf_("Error: %x\n", err);
+		pr_err("STS Error: %x\n", (unsigned)err);
 }

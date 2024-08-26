@@ -10,8 +10,7 @@ endif()
 
 ####################
 
-add_library(
-  4msLibrary OBJECT
+add_library(4msLibrary OBJECT
   ${4MS_SOURCE_PATHS}
 )
 
@@ -24,11 +23,10 @@ endif()
 
 target_link_libraries(4msLibrary PRIVATE cpputil ryml alpaca::alpaca)
 
-target_include_directories(
-  4msLibrary
-  PUBLIC ${MM_ROOT}/shared
-         ${MM_ROOT}/shared/CoreModules/4ms
-		 ${MM_ROOT}/shared/patch_convert/ryml #For ryml_serial
+target_include_directories(4msLibrary PUBLIC 
+    ${MM_ROOT}/shared
+    ${MM_ROOT}/shared/CoreModules/4ms
+    ${MM_ROOT}/shared/patch_convert/ryml #For ryml_serial
 )
 
 target_include_directories(4msLibrary
@@ -37,29 +35,20 @@ target_include_directories(4msLibrary
 )
 
 # Ensemble Oscillator
-target_sources(
-  4msLibrary
-  PRIVATE
+target_sources(4msLibrary PRIVATE 
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
 )
 
 # Tapographic Delay
-target_compile_definitions(
-  4msLibrary
-  PRIVATE
-  SAMPLE_RATE=48000
+target_compile_definitions(4msLibrary PRIVATE 
+    SAMPLE_RATE=48000
 )
 
-target_include_directories(
-  4msLibrary
-  PRIVATE
-    ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/
-)
+target_include_directories(4msLibrary PRIVATE
+    ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/)
 
-target_sources(
-  4msLibrary
-  PRIVATE
+target_sources(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/multitap_delay.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/resources.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/tapo/tap_allocator.cc
@@ -70,18 +59,14 @@ target_sources(
 )
 
 # QPLFO
-target_sources(
-  4msLibrary
-  PRIVATE
+target_sources(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/qplfo/qplfo.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/qplfo/qplfo_mocks.cc
 )
 
 #MPEG
 # MiniPEG
-target_sources(
-  4msLibrary
-  PRIVATE
+target_sources(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/peg_base.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/trigout.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/analog_conditioning.cc
@@ -102,24 +87,19 @@ target_sources(
     ${MM_ROOT}/shared/CoreModules/4ms/core/mpeg/envelope_calcs.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg/envelope_calcs.cc
 )
-target_include_directories(
-  4msLibrary
-  PRIVATE
+
+target_include_directories(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/
     ${MM_ROOT}/shared/CoreModules/4ms/core/peg-common/mocks
 )
 
 # DLD
-target_sources(
-  4msLibrary
-  PRIVATE
+target_sources(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/looping-delay/src/calibration_storage.cc
 )
 
-target_include_directories(
-  4msLibrary
-  PRIVATE
+target_include_directories(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/looping-delay/src
 )
 
@@ -129,10 +109,16 @@ target_sources(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/mocks/time.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/bank.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/sample_file.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/sts_filesystem.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/sts_sampleindex.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/sample_header.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/str_util.c
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/bank.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/bank_util.cc
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/wavefmt.cc
 )
-target_include_directories(
-  4msLibrary
-  PRIVATE
+
+target_include_directories(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/mocks
 )
@@ -141,8 +127,6 @@ target_compile_definitions(4msLibrary PRIVATE
 )
 
 # Axoloti ports
-target_sources(
-	4msLibrary
-	PRIVATE
-    ${MM_ROOT}/shared/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
-)
+# target_sources(4msLibrary PRIVATE
+#     ${MM_ROOT}/shared/CoreModules/4ms/core/axoloti-wrapper/axoloti_math.cpp
+# )

@@ -4,6 +4,7 @@
 #include "conf/screen_buffer_conf.hh"
 #include "conf/stream_conf.hh"
 #include "core_intercom/intercore_message.hh"
+#include "core_intercom/intercore_modulefs_message.hh"
 #include "drivers/cache.hh"
 #include "fs/ramdisk.hh"
 #include "metaparams.hh"
@@ -29,6 +30,8 @@ static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlo
 static inline __attribute__((section(".ddma"))) std::array<char, 65536> raw_patch_data;
 
 static inline __attribute__((section(".ddma"))) IntercoreStorageMessage icc_shared_message;
+static inline __attribute__((section(".ddma"))) IntercoreModuleFSMessage icc_module_fs_message_core0;
+static inline __attribute__((section(".ddma"))) IntercoreModuleFSMessage icc_module_fs_message_core1;
 static inline __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};

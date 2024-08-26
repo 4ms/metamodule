@@ -37,9 +37,11 @@ namespace SamplerKit
 struct SampleIndex {
 	enum IndexSelection { USE_INDEX_FILE = 0, USE_BACKUP_FILE = 1 };
 
-	SampleIndex(SampleList &samples, Flags &flags)
+	SampleIndex(SampleList &samples, Flags &flags, Sdcard &sd)
 		: samples{samples}
-		, flags{flags} {}
+		, sd{sd}
+		, flags{flags} {
+	}
 
 	FRESULT write_sampleindex_file();
 	FRESULT write_samplelist();
@@ -51,6 +53,7 @@ struct SampleIndex {
 
 private:
 	SampleList &samples;
+	Sdcard &sd;
 	Flags &flags;
 };
 

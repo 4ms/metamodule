@@ -66,6 +66,8 @@ void main() {
 		&StaticBuffers::auxsignal_block,
 		&StaticBuffers::virtdrive,
 		&StaticBuffers::icc_shared_message,
+		&StaticBuffers::icc_module_fs_message_core0,
+		&StaticBuffers::icc_module_fs_message_core1,
 	};
 
 	A7SharedMemoryS::ptrs = {

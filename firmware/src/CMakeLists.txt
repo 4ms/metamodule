@@ -173,6 +173,7 @@ add_executable(
   ${FWDIR}/src/vcv_hardware/random.cpp
   ${FWDIR}/src/vcv_hardware/gettimeofday.cc
   ${FWDIR}/src/vcv_hardware/async_thread.cc
+  ${FWDIR}/src/vcv_hardware/fs_access.cc
 
   #
   ${FWDIR}/src/patch_play/modules_helpers.cc

@@ -8,6 +8,7 @@
 #include "drivers/system_clocks.hh"
 #include "fs/fatfs/sd_host.hh"
 #include "fs/fs_messages.hh"
+#include "fs/module_fs_message_handler.hh"
 #include "hsem_handler.hh"
 #include "patch_file/patch_storage.hh"
 #include "usb/usb_manager.hh"
@@ -56,6 +57,9 @@ void main() {
 
 	FilesystemMessages fs_messages{usb.get_msc_fileio(), sd.get_fileio(), SharedMemoryS::ptrs.icc_message};
 
+	ModuleFSMessageHandler module_fs_messages{SharedMemoryS::ptrs.icc_modulefs_message_core0,
+											  SharedMemoryS::ptrs.icc_modulefs_message_core1};
+
 	if (reload_default_patches)
 		fs_messages.reload_default_patches();
 
@@ -87,6 +91,8 @@ void main() {
 		sd.process();
 
 		fs_messages.process();
+
+		module_fs_messages.process();
 
 #ifdef ENABLE_WIFI_BRIDGE
 		WifiInterface::run();
