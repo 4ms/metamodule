@@ -112,7 +112,7 @@ target_sources(4msLibrary PRIVATE
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/sts_filesystem.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/sts_sampleindex.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/sample_header.cc
-    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/str_util.c
+    ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/str_util.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/bank.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/bank_util.cc
     ${MM_ROOT}/shared/CoreModules/4ms/core/sampler/src/wavefmt.cc

@@ -104,7 +104,7 @@ public:
 	// clang-format on
 
 private:
-	SamplerKit::Sdcard sd{"4msCompany/samples/"};
+	SamplerKit::Sdcard sd{"1:/"};
 	SamplerKit::SampleList samples;
 	SamplerKit::BankManager banks{samples};
 	SamplerKit::UserSettings settings;

@@ -3,7 +3,7 @@
 
 #define STS_PRINT_ERROR 1
 #define STS_PRINT_LOG 1
-#define STS_PRINT_DEBUG 1
+#define STS_PRINT_DEBUG 0
 
 inline void _do_printf_impl(const char *str) {
 	printf("%s", str);
