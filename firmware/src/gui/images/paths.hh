@@ -9,7 +9,7 @@ namespace MetaModule
 
 struct ComponentImages {
 	static const std::string get_comp_path(const std::string_view filename) {
-		if (filename.length() > 0)
+		if (filename.length() > 0 && filename.length() < 256)
 			return LV_FS_FATFS_LETTER + std::string(":2:/") + std::string(filename);
 		else
 			return "";
