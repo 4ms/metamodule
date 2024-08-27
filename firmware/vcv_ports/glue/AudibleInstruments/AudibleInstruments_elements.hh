@@ -113,14 +113,6 @@ struct Rogan6PSLight : RgbLight {
 	}
 };
 
-struct SmallButton : MomentaryButton {
-	constexpr SmallButton(BaseElement b)
-		: MomentaryButton{{b}} {
-		image = "rack-lib/TL1105_0.png";
-		pressed_image = "rack-lib/TL1105_1.png";
-	}
-};
-
 struct MediumButton : MomentaryButton {
 	constexpr MediumButton(BaseElement b)
 		: MomentaryButton{{b}} {
