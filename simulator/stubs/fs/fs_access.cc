@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdarg>
 #include <cstring>
+#include <filesystem>
 #include <string_view>
 
 namespace MetaModule
@@ -41,15 +42,25 @@ bool FS::find_valid_root(std::string_view path) {
 
 	for (auto root : valid_roots) {
 		impl->root = root;
-		impl->cwd = "./";
+		impl->cwd = "";
 
-		File file;
-		auto res = f_open(&file, path.data(), FA_READ);
-		auto res2 = f_close(&file);
-		if (res == FR_OK && res2 == FR_OK) {
-			printf("Found valid root %s\n", root.data());
-			//keep the root, restore cwd
-			impl->cwd = t_cwd;
+		bool is_valid_root = false;
+		if (path == "") {
+			// f_stat cannot open root dir, so we use f_opendir;
+			Dir dir;
+
+			auto res = f_opendir(&dir, path.data());
+			is_valid_root = (res == FR_OK);
+			f_closedir(&dir);
+		} else {
+			Fileinfo info;
+			auto res = f_stat(path.data(), &info);
+			is_valid_root = (res == FR_OK);
+		}
+
+		if (is_valid_root) {
+			impl->cwd = path;
+			printf("Found valid root %s\n", impl->full_path("").c_str());
 			return true;
 		}
 	}
@@ -103,81 +114,61 @@ FRESULT FS::f_close(File *fil) {
 FRESULT FS::f_lseek(File *fil, uint64_t offset) {
 	fs_trace("f_lseek(%p, %lld)\n", fil, offset);
 
-	// auto msg = IntercoreModuleFS::Seek{
-	// 	.fil = *fil,
-	// 	.file_offset = offset,
-	// };
+	if (!fil)
+		return FR_INVALID_PARAMETER;
 
-	// if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Seek>(msg, 3000)) {
-	// 	*fil = response->fil; //copy File back
-	// 	return response->res;
-	// }
+	auto res = std::fseek(fil->fil, offset, SEEK_SET);
 
-	return FR_TIMEOUT;
+	return res == 0 ? FR_OK : FR_NO_FILE;
 }
 
 FRESULT FS::f_read(File *fil, void *buff, unsigned bytes_to_read, unsigned *br) {
 	fs_trace("f_read(%p, %p, %u, ...)\n", fil, buff, bytes_to_read);
 
-	// if (bytes_to_read > impl->file_buffer.size()) {
-	// 	pr_err("Cannot f_read %d bytes\n", bytes_to_read);
-	// 	return FR_NOT_ENOUGH_CORE;
-	// }
+	auto res = std::fread(buff, 1, bytes_to_read, fil->fil);
 
-	// auto msg = IntercoreModuleFS::Read{
-	// 	.fil = *fil,
-	// 	.buffer = impl->file_buffer.subspan(0, bytes_to_read),
-	// };
+	if (!fil || !buff)
+		return FR_INVALID_PARAMETER;
 
-	// if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Read>(msg, 3000)) {
-	// 	*fil = response->fil;
-	// 	*br = response->bytes_read;
-	// 	std::copy(response->buffer.begin(), std::next(response->buffer.begin(), response->bytes_read), (char *)buff);
-
-	// 	return FR_OK;
-	// }
-	return FR_TIMEOUT;
+	if (res == 0) {
+		// TODO: determine error
+		return FR_NO_FILE;
+	} else {
+		*br = res;
+		return FR_OK;
+	}
 }
 
 char *FS::f_gets(char *buffer, int len, File *fil) {
 	fs_trace("f_gets(%p, %d, %p)\n", buffer, len, fil);
 
-	// if ((size_t)len > impl->file_buffer.size()) {
-	// 	pr_err("Cannot f_gets %d bytes\n", len);
-	// 	return nullptr;
-	// }
+	if (!fil)
+		return nullptr;
 
-	// auto msg = IntercoreModuleFS::GetS{
-	// 	.fil = *fil,
-	// 	.buffer = impl->file_buffer.subspan(0, len),
-	// };
-
-	// auto response = impl->get_response_or_timeout<IntercoreModuleFS::GetS>(msg, 3000);
-	// if (response) {
-	// 	*fil = response->fil;
-	// 	// copy buffer until we hit a \0
-	// 	std::strcpy(buffer, response->buffer.data());
-	// 	return msg.res;
-	// }
-	return nullptr;
+	return std::fgets(buffer, len, fil->fil);
 }
 
 FRESULT FS::f_stat(const char *path, Fileinfo *info) {
+	if (info == nullptr)
+		return FR_INVALID_PARAMETER;
+
 	auto fullpath = impl->full_path(path);
 
 	fs_trace("f_stat(%s, %p)\n", fullpath.c_str(), info);
 
-	// auto msg = IntercoreModuleFS::Stat{
-	// 	.path = fullpath.c_str(),
-	// 	// .info = *info, //will be overwritten TODO: check
-	// };
+	if (std::filesystem::is_regular_file(fullpath)) {
+		info->dir_entry = true;
+		info->name = path;
+		return FR_OK;
 
-	// if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::Stat>(msg, 3000)) {
-	// 	*info = response->info;
-	// 	return response->res;
-	// }
+	} else if (std::filesystem::is_directory(fullpath)) {
+		info->dir_entry = false;
+		info->name = path;
+		return FR_OK;
+	}
 
-	return FR_TIMEOUT;
+	info->name = "";
+	return FR_NO_FILE;
 }
 
 // DIRS (READ-ONLY)
@@ -187,48 +178,53 @@ FRESULT FS::f_opendir(Dir *dir, const char *path) {
 
 	fs_trace("f_opendir(%p, %s)\n", dir, fullpath.c_str());
 
-	// auto msg = IntercoreModuleFS::OpenDir{
-	// 	.dir = *dir,
-	// 	.path = fullpath.c_str(),
-	// };
+	if (!dir)
+		return FR_INVALID_PARAMETER;
 
-	// if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::OpenDir>(msg, 3000)) {
-	// 	*dir = response->dir;
-	// 	return response->res;
-	// }
+	try {
+		if (std::filesystem::is_directory(path)) {
+			dir->path = path;
+			dir->reset();
+			return FR_OK;
+		}
+	} catch (std::exception &e) {
+		//not an error
+	}
 
-	return FR_TIMEOUT;
+	return FR_NO_PATH;
 }
 
 FRESULT FS::f_closedir(Dir *dir) {
 	fs_trace("f_closedir(%p)\n", dir);
 
-	// auto msg = IntercoreModuleFS::CloseDir{
-	// 	.dir = *dir,
-	// };
-
-	// if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::CloseDir>(msg, 3000)) {
-	// 	*dir = response->dir;
-	// 	return response->res;
-	// }
+	if (dir)
+		dir->reset();
 
 	return FR_TIMEOUT;
 }
 
 FRESULT FS::f_readdir(Dir *dir, Fileinfo *info) {
 	fs_trace("f_readdir(%p, %p)\n", dir, info);
-	// auto msg = IntercoreModuleFS::ReadDir{
-	// 	.dir = *dir,
-	// 	.info = *info,
-	// };
 
-	// if (auto response = impl->get_response_or_timeout<IntercoreModuleFS::ReadDir>(msg, 3000)) {
-	// 	*dir = response->dir;
-	// 	*info = response->info;
-	// 	return response->res;
-	// }
+	if (!info || !dir)
+		return FR_INVALID_PARAMETER;
 
-	return FR_TIMEOUT;
+	try {
+		// All entries read:
+		if (dir->dir == std::filesystem::directory_iterator{}) {
+			info->name = '\0';
+			return FR_NO_FILE;
+		}
+
+		info->name = dir->dir->path();
+		info->dir_entry = dir->dir->is_directory();
+
+		dir->dir++;
+
+		return FR_OK;
+	} catch (std::exception &e) {
+		return FR_NO_PATH;
+	}
 }
 
 FRESULT FS::f_findfirst(Dir *dir, Fileinfo *info, const char *path, const char *pattern) {

@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <cstdio>
+#include <filesystem>
+#include <string>
 
 namespace MetaModule
 {
@@ -23,33 +25,37 @@ struct File {
 };
 
 struct Fileinfo {
-	// FILINFO filinfo;
+	bool dir_entry = false;
+	std::string name;
 
 	const char *fname() {
-		return "";
-		// return filinfo.fname;
+		return name.c_str();
 	}
 
 	bool is_dir() {
-		return false;
-		// return filinfo.fattrib & AM_DIR;
+		return dir_entry;
 	}
 };
 
 struct Dir {
-	// DIR dir{};
+	std::filesystem::path path = "";
+	std::filesystem::directory_iterator dir{};
 
 	Dir() {
-		reset();
 	}
 
 	void reset() {
-		// dir.obj.fs = nullptr;
+		if (std::filesystem::is_directory(path))
+			dir = std::filesystem::directory_iterator{path};
+		else
+			dir = std::filesystem::directory_iterator{};
 	}
 
 	bool is_reset() {
-		return true;
-		// return dir.obj.fs == nullptr;
+		if (std::filesystem::is_directory(path))
+			return dir == std::filesystem::directory_iterator{path};
+		else
+			return false;
 	}
 };
 
