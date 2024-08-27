@@ -64,7 +64,9 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 # Brands
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
+
 add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
+target_include_directories(CoreModules-4ms PRIVATE ${FWDIR}/src/vcv_hardware)
 
 add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
 
@@ -203,6 +205,7 @@ target_include_directories(
           ${FWDIR}/src/params
           ${FWDIR}/src/core_a7
           ${FWDIR}/src/medium
+          ${FWDIR}/src/vcv_hardware
           ${FWDIR}/lib/mdrivlib
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7

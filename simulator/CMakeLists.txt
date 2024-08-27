@@ -54,7 +54,10 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 # #################### Application ############################################
 
 add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
+
 add_subdirectory(${LIBDIR}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
+target_include_directories(CoreModules-4ms PRIVATE stubs/fs)
+
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
 
@@ -63,7 +66,11 @@ add_executable(
     simulator 
     src/main.cc 
     src/ui.cc
+
     stubs/random.cpp
+	stubs/async_thread.cc
+	stubs/fs/fs_access.cc
+
     ${FWDIR}/src/gui/elements/element_name.cc
     ${FWDIR}/src/gui/slsexport/ui_local.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
@@ -92,6 +99,7 @@ target_include_directories(
   simulator
   PRIVATE src
           stubs
+		  stubs/fs
           sdl_audio
           ${FWDIR}/src
           ${FWDIR}/src/console
