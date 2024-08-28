@@ -252,20 +252,31 @@ lv_obj_t *ui_AutoMapSelectPanel;
 lv_obj_t *ui_AutoMapTitleCont;
 lv_obj_t *ui_AutoMapTitle;
 lv_obj_t *ui_AutoMapButtonBar;
-lv_obj_t *ui_AutoMapAllButton;
-lv_obj_t *ui_AutoMapAllButtonLabel;
 lv_obj_t *ui_AutoMapCancelButton;
 lv_obj_t *ui_AutoMapCancelButtonLabel;
 lv_obj_t *ui_AutoMapSaveButton;
 lv_obj_t *ui_AutoMapSaveButtonLabel;
 lv_obj_t *ui_AutoMapKnobCont;
 lv_obj_t *ui_AutoMapKnobHeader;
-lv_obj_t *ui_AutoMapItemCont;
+lv_obj_t *ui_AutoMapAllKnobsButton;
+lv_obj_t *ui_AutoMapAllButtonLabel;
+lv_obj_t *ui_AutoMapKnobItemCont;
+lv_obj_t *ui_AutoMapKnobSlideItem;
 lv_obj_t *ui_AutoMapItemContSwitch;
 lv_obj_t *ui_AutoMapItemContLabel;
 lv_obj_t *ui_AutoMapKnobItemCheck;
 lv_obj_t *ui_AutoMapJackCont;
 lv_obj_t *ui_AutoMapJacksHeader;
+lv_obj_t *ui_AutoMapAllJacksButton;
+lv_obj_t *ui_AutoMapAllJacksButtonLabel;
+lv_obj_t *ui_AutoMapJackItemCont;
+lv_obj_t *ui_MIDIMapPanel;
+lv_obj_t *ui_MidiMapJackTitle;
+lv_obj_t *ui_MidiMapCont;
+lv_obj_t *ui_MidiMapJackTitle1;
+lv_obj_t *ui_MidiMapNoteCheck;
+lv_obj_t *ui_MidiMapNoteDrop;
+lv_obj_t *ui_MidiMapNoteLabel;
 
 
 // SCREEN: ui_KnobSetViewPage

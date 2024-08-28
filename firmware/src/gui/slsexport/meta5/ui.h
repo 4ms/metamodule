@@ -10,17 +10,17 @@
 extern "C" {
 #endif
 
-    #include "lvgl.h"
+#include "lvgl.h"
 
-#include "ui_helpers.h"
 #include "components/ui_comp.h"
 #include "components/ui_comp_hook.h"
 #include "ui_events.h"
+#include "ui_helpers.h"
 
-void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay);
-void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay);
-void SlideDown_Animation( lv_obj_t *TargetObject, int delay);
-void SlideUp_Animation( lv_obj_t *TargetObject, int delay);
+void DropInFromLeft_Animation(lv_obj_t *TargetObject, int delay);
+void DropOutToRight_Animation(lv_obj_t *TargetObject, int delay);
+void SlideDown_Animation(lv_obj_t *TargetObject, int delay);
+void SlideUp_Animation(lv_obj_t *TargetObject, int delay);
 // SCREEN: ui_MainMenu
 void ui_MainMenu_screen_init(void);
 extern lv_obj_t *ui_MainMenu;
@@ -254,20 +254,31 @@ extern lv_obj_t *ui_AutoMapSelectPanel;
 extern lv_obj_t *ui_AutoMapTitleCont;
 extern lv_obj_t *ui_AutoMapTitle;
 extern lv_obj_t *ui_AutoMapButtonBar;
-extern lv_obj_t *ui_AutoMapAllButton;
-extern lv_obj_t *ui_AutoMapAllButtonLabel;
 extern lv_obj_t *ui_AutoMapCancelButton;
 extern lv_obj_t *ui_AutoMapCancelButtonLabel;
 extern lv_obj_t *ui_AutoMapSaveButton;
 extern lv_obj_t *ui_AutoMapSaveButtonLabel;
 extern lv_obj_t *ui_AutoMapKnobCont;
 extern lv_obj_t *ui_AutoMapKnobHeader;
-extern lv_obj_t *ui_AutoMapItemCont;
+extern lv_obj_t *ui_AutoMapAllKnobsButton;
+extern lv_obj_t *ui_AutoMapAllButtonLabel;
+extern lv_obj_t *ui_AutoMapKnobItemCont;
+extern lv_obj_t *ui_AutoMapKnobSlideItem;
 extern lv_obj_t *ui_AutoMapItemContSwitch;
 extern lv_obj_t *ui_AutoMapItemContLabel;
 extern lv_obj_t *ui_AutoMapKnobItemCheck;
 extern lv_obj_t *ui_AutoMapJackCont;
 extern lv_obj_t *ui_AutoMapJacksHeader;
+extern lv_obj_t *ui_AutoMapAllJacksButton;
+extern lv_obj_t *ui_AutoMapAllJacksButtonLabel;
+extern lv_obj_t *ui_AutoMapJackItemCont;
+extern lv_obj_t *ui_MIDIMapPanel;
+extern lv_obj_t *ui_MidiMapJackTitle;
+extern lv_obj_t *ui_MidiMapCont;
+extern lv_obj_t *ui_MidiMapJackTitle1;
+extern lv_obj_t *ui_MidiMapNoteCheck;
+extern lv_obj_t *ui_MidiMapNoteDrop;
+extern lv_obj_t *ui_MidiMapNoteLabel;
 // SCREEN: ui_KnobSetViewPage
 void ui_KnobSetViewPage_screen_init(void);
 extern lv_obj_t *ui_KnobSetViewPage;
@@ -550,27 +561,25 @@ extern lv_obj_t *ui_RotaryButton1;
 extern lv_obj_t *ui_HWTestMidiLabel;
 extern lv_obj_t *ui____initial_actions0;
 
-LV_IMG_DECLARE( ui_img_1x_play1_png);   // assets/1x/Play1.png
-LV_IMG_DECLARE( ui_img_1x_add1_png);   // assets/1x/Add1.png
-LV_IMG_DECLARE( ui_img_1x_settings1_png);   // assets/1x/Settings1.png
-LV_IMG_DECLARE( ui_img_1x_info1_png);   // assets/1x/Info1.png
-LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
-LV_IMG_DECLARE( ui_img_1x_knob1pressed_png);   // assets/1x/Knob1Pressed.png
-LV_IMG_DECLARE( ui_img_1x_infosmall2_png);   // assets/1x/InfoSmall2.png
-LV_IMG_DECLARE( ui_img_1x_knob1_png);   // assets/1x/Knob1.png
+LV_IMG_DECLARE(ui_img_1x_play1_png);		// assets/1x/Play1.png
+LV_IMG_DECLARE(ui_img_1x_add1_png);			// assets/1x/Add1.png
+LV_IMG_DECLARE(ui_img_1x_settings1_png);	// assets/1x/Settings1.png
+LV_IMG_DECLARE(ui_img_1x_info1_png);		// assets/1x/Info1.png
+LV_IMG_DECLARE(ui_img_1x_knob1_png);		// assets/1x/Knob1.png
+LV_IMG_DECLARE(ui_img_1x_knob1pressed_png); // assets/1x/Knob1Pressed.png
+LV_IMG_DECLARE(ui_img_1x_infosmall2_png);	// assets/1x/InfoSmall2.png
+LV_IMG_DECLARE(ui_img_1x_knob1_png);		// assets/1x/Knob1.png
 
-
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50010);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50012);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50014);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded50016);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70016);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90018);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90032);
-LV_FONT_DECLARE( ui_font_MuseoSansRounded90040);
-LV_FONT_DECLARE( ui_font_Segment32);
-
+LV_FONT_DECLARE(ui_font_MuseoSansRounded50010);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded50012);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded50014);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded50016);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded70014);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded70016);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded90018);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded90032);
+LV_FONT_DECLARE(ui_font_MuseoSansRounded90040);
+LV_FONT_DECLARE(ui_font_Segment32);
 
 void ui_init(void);
 
