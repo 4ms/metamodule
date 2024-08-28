@@ -110,11 +110,12 @@ struct ModuleViewMappingPane {
 
 		lv_show(ui_MappingParameters);
 
-		lv_group_focus_next(pane_group);
 		lv_indev_set_group(lv_indev_get_next(nullptr), pane_group);
 
 		add_map_popup.prepare_focus(pane_group, ui_MappingParameters);
 		control_popup.prepare_focus(pane_group);
+
+		lv_group_set_wrap(pane_group, false);
 
 		should_close = false;
 
@@ -330,7 +331,7 @@ private:
 		lv_group_add_obj(pane_group, ui_CableAddButton);
 		lv_group_add_obj(pane_group, ui_CablePanelAddButton);
 		lv_group_add_obj(pane_group, ui_CableRemoveButton);
-		lv_group_focus_next(pane_group);
+		lv_group_focus_obj(ui_CableAddButton);
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
@@ -346,7 +347,7 @@ private:
 	void make_selectable_jack_item(lv_obj_t *obj, uint16_t module_id, ElementCount::Indices idx) {
 		map_list_items.push_back(obj);
 		lv_group_add_obj(pane_group, obj);
-		lv_group_focus_obj(obj);
+		// lv_group_focus_obj(obj);
 		lv_obj_add_event_cb(obj, follow_cable_button_cb, LV_EVENT_CLICKED, this);
 		if (displayed_cable_endpts < mapped_cable_user_data.size()) {
 			mapped_cable_user_data[displayed_cable_endpts] = {module_id, idx};
@@ -499,7 +500,6 @@ private:
 
 		if (is_patch_playing) {
 			lv_group_add_obj(pane_group, ui_ControlButton);
-			lv_group_focus_obj(ui_ControlButton);
 		}
 
 		// Show MIDI set first (always show, even if set is empty)
@@ -518,6 +518,10 @@ private:
 
 		if (patch->knob_sets.size() < 8) {
 			show_unmapped_knobset(patch->knob_sets.size(), "(new knobset)");
+		}
+
+		if (is_patch_playing) {
+			lv_group_focus_obj(ui_ControlButton);
 		}
 	}
 
