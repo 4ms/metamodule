@@ -42,6 +42,7 @@ struct ModuleViewActionMenu {
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
+		lv_group_set_wrap(group, false);
 	}
 
 	void prepare_focus(lv_group_t *parent_group, unsigned module_idx) {
