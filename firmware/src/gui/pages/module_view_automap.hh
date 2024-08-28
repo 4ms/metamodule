@@ -35,8 +35,6 @@ struct ModuleViewAutoMapDialog {
 		// TODO: this will display a dialog box for the user to check which knobs/jacks to map.
 		// Not yet implemented!
 
-		auto patch = patches.get_view_patch();
-
 		if (module_idx >= patch->module_slugs.size()) {
 			pr_err("Invalid module index\n");
 			return;
@@ -50,6 +48,21 @@ struct ModuleViewAutoMapDialog {
 		lv_show(ui_AutoMapSelectPanel);
 		lv_group_remove_all_objs(group);
 
+		lv_group_add_obj(group, ui_AutoMapCancelButton);
+		lv_group_add_obj(group, ui_AutoMapSaveButton);
+
+		// Knobss
+		lv_group_add_obj(group, ui_AutoMapAllKnobsButton);
+		for (auto i = 0u; auto el : info.elements) {
+			auto &idx = info.indices[i];
+			if (idx.param_idx != ElementCount::Indices::NoElementMarker) {
+				auto obj = create_automap_item(ui_AutoMapKnobCont, base_element(el).short_name);
+				lv_group_add_obj(group, obj);
+			}
+		}
+
+		//Jacks
+		lv_group_add_obj(group, ui_AutoMapAllJacksButton);
 		for (auto i = 0u; auto el : info.elements) {
 			auto &idx = info.indices[i];
 			if (idx.param_idx != ElementCount::Indices::NoElementMarker) {
