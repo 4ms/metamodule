@@ -204,6 +204,8 @@ lv_obj_t *ui_CableAddButton;
 lv_obj_t *ui_CableAddLabel;
 lv_obj_t *ui_CablePanelAddButton;
 lv_obj_t *ui_CablePanelAddLabel;
+lv_obj_t *ui_CableMidiAddButton;
+lv_obj_t *ui_CableMidiAddLabel;
 lv_obj_t *ui_CableRemoveButton;
 lv_obj_t *ui_CableRemoveButtonLabel;
 lv_obj_t *ui_ControlAlert;
