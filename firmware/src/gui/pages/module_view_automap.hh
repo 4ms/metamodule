@@ -17,8 +17,9 @@ namespace MetaModule
 {
 
 struct ModuleViewAutoMapDialog {
-	ModuleViewAutoMapDialog(PatchModQueue &patch_mod_queue, OpenPatchManager &patches)
+	ModuleViewAutoMapDialog(PatchModQueue &patch_mod_queue, OpenPatchManager &patches, NotificationQueue &notify_queue)
 		: patches{patches}
+		, notify_queue{notify_queue}
 		, auto_map{patch_mod_queue}
 		, group(lv_group_create()) {
 	}
@@ -26,17 +27,13 @@ struct ModuleViewAutoMapDialog {
 	void prepare_focus(unsigned module_id, lv_group_t *base_group) {
 		module_idx = module_id;
 		parent_group = base_group;
+		patch = patches.get_view_patch();
 	}
 
 	void show() {
 		////////////////////////////////////////
 		// TODO: this will display a dialog box for the user to check which knobs/jacks to map.
 		// Not yet implemented!
-		// For now we just make all maps without any GUI
-		make_all_maps();
-		return;
-		////////////////////////////////////////
-		////////////////////////////////////////
 
 		auto patch = patches.get_view_patch();
 
@@ -88,50 +85,75 @@ struct ModuleViewAutoMapDialog {
 		return visible;
 	}
 
-	void make_all_maps(bool single_knobset = false) {
-		auto patch = patches.get_view_patch();
-		if (!patch)
-			return;
+	void map_all() {
+		// map into all knobsets
+		make_knob_maps(std::nullopt);
+		make_jack_maps();
+	}
 
-		if (module_idx >= patch->module_slugs.size())
-			return;
+	void map_knobs_single_knobset() {
+		if (auto first_free_knobset = first_empty_knobset()) {
+			make_knob_maps(first_free_knobset); // map into all knobsets
+		} else {
+			notify_queue.put({"Cannot map, all knob sets are full", Notification::Priority::Error, 1000});
+		}
+	}
 
-		maps_todo.clear();
+private:
+	void make_jack_maps() {
+		if (!patch || module_idx >= patch->module_slugs.size())
+			return;
 
 		auto slug = patch->module_slugs[module_idx];
 		auto info = ModuleFactory::getModuleInfo(slug);
 		for (auto idx : info.indices) {
-			maps_todo.push_back(idx);
+			if (idx.input_idx != ElementCount::Indices::NoElementMarker ||
+				idx.output_idx != ElementCount::Indices::NoElementMarker)
+				maps_todo.push_back(idx);
 		}
 
-		if (single_knobset) {
-			if (patch->knob_sets.size() < MaxKnobSets) {
-				auto new_knobset_id = patch->knob_sets.size();
-				// Use first knobset if it's empty
-				if (patch->knob_sets.size() == 1) {
-					if (patch->knob_sets[0].set.size() == 0)
-						new_knobset_id = 0;
-				}
-				make_maps(new_knobset_id);
-				name_knobset_by_modulename(new_knobset_id);
-			} else
-				pr_warn("All knobsets full\n");
-		} else {
-			make_maps();
+		make_maps();
+	}
+
+	void make_knob_maps(std::optional<unsigned> knobset) {
+		if (!patch || module_idx >= patch->module_slugs.size())
+			return;
+
+		auto slug = patch->module_slugs[module_idx];
+		auto info = ModuleFactory::getModuleInfo(slug);
+		for (auto idx : info.indices) {
+			if (idx.param_idx != ElementCount::Indices::NoElementMarker)
+				maps_todo.push_back(idx);
 		}
+
+		make_maps(knobset);
+		if (knobset.has_value())
+			name_knobset_by_modulename(knobset.value());
 	}
 
 	void make_maps(std::optional<uint16_t> knobset_id = std::nullopt) {
-		auto patch = patches.get_view_patch();
+		if (!patch)
+			return;
 
 		for (auto indices : maps_todo) {
 			auto_map.map(module_idx, indices, *patch, knobset_id);
 		}
 	}
 
-private:
+	std::optional<unsigned> first_empty_knobset() {
+		if (patch->knob_sets.size() >= MaxKnobSets) {
+			return std::nullopt;
+
+		} else if (patch->knob_sets.size() == 1) {
+			// Use first knobset if it's empty
+			if (patch->knob_sets[0].set.size() == 0)
+				return 0;
+		}
+
+		return patch->knob_sets.size();
+	}
+
 	void name_knobset_by_modulename(uint16_t knobset_id) {
-		auto patch = patches.get_view_patch();
 		if (knobset_id < patch->knob_sets.size()) {
 			if (module_idx < patch->module_slugs.size()) {
 				auto module_display_name = ModuleFactory::getModuleDisplayName(patch->module_slugs[module_idx]);
@@ -155,6 +177,7 @@ private:
 	}
 
 	OpenPatchManager &patches;
+	NotificationQueue &notify_queue;
 	AutoMapper auto_map;
 
 	lv_group_t *parent_group = nullptr;
@@ -164,6 +187,8 @@ private:
 	std::vector<ElementCount::Indices> maps_todo;
 
 	unsigned module_idx = 0;
+
+	PatchData *patch = nullptr;
 };
 
 } // namespace MetaModule

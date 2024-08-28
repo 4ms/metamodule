@@ -21,11 +21,12 @@ struct ModuleViewActionMenu {
 	ModuleViewActionMenu(PatchModQueue &patch_mod_queue,
 						 OpenPatchManager &patches,
 						 PageList &page_list,
-						 PatchPlayLoader &patch_playloader)
+						 PatchPlayLoader &patch_playloader,
+						 NotificationQueue &notify_queue)
 		: patches{patches}
 		, page_list{page_list}
 		, patch_playloader{patch_playloader}
-		, auto_map{patch_mod_queue, patches}
+		, auto_map{patch_mod_queue, patches, notify_queue}
 		, randomizer{patch_mod_queue}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
@@ -112,16 +113,16 @@ private:
 		}
 	}
 
-	void show_auto_map() {
+	void auto_map_all() {
 		hide();
 		auto_map.prepare_focus(module_idx, group);
-		auto_map.show();
+		auto_map.map_all();
 	}
 
 	void auto_map_single_knobset() {
 		hide();
 		auto_map.prepare_focus(module_idx, group);
-		auto_map.make_all_maps(true);
+		auto_map.map_knobs_single_knobset();
 	}
 
 	void randomize() {
@@ -144,7 +145,7 @@ private:
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
 
 		if (event->target == ui_ModuleViewActionAutopatchBut)
-			page->show_auto_map();
+			page->auto_map_all();
 		else
 			page->auto_map_single_knobset();
 	}
