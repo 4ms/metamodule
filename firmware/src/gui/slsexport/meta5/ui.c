@@ -277,6 +277,22 @@ lv_obj_t *ui_MidiMapJackTitle1;
 lv_obj_t *ui_MidiMapNoteCheck;
 lv_obj_t *ui_MidiMapNoteDrop;
 lv_obj_t *ui_MidiMapNoteLabel;
+lv_obj_t *ui_MidiMapNotePolyDrop;
+lv_obj_t *ui_MidiMapCCCheck;
+lv_obj_t *ui_MidiMapNoteCCDrop;
+lv_obj_t *ui_Spacer1;
+lv_obj_t *ui_MidiMapPitchWheelCheck;
+lv_obj_t *ui_MidiMapGateCheck;
+lv_obj_t *ui_MidiMapGateDrop;
+lv_obj_t *ui_MidiMapClockCheck;
+lv_obj_t *ui_MidiMapClockDrop;
+lv_obj_t *ui_MidiMapTransportCheck;
+lv_obj_t *ui_MidiMapTransportDrop;
+lv_obj_t *ui_MidiMapButtonSpacer;
+lv_obj_t *ui_MidiMapCancelButton;
+lv_obj_t *ui_MidiMapCancelButtonLabel;
+lv_obj_t *ui_MidiMapOKButton;
+lv_obj_t *ui_MidiMapOKButtonLabel;
 
 
 // SCREEN: ui_KnobSetViewPage

@@ -279,6 +279,8 @@ extern lv_obj_t *ui_MidiMapJackTitle1;
 extern lv_obj_t *ui_MidiMapNoteCheck;
 extern lv_obj_t *ui_MidiMapNoteDrop;
 extern lv_obj_t *ui_MidiMapNoteLabel;
+extern lv_obj_t *ui_MidiMapNotePolyDrop;
+extern lv_obj_t *ui_MidiMapCCCheck;
 // SCREEN: ui_KnobSetViewPage
 void ui_KnobSetViewPage_screen_init(void);
 extern lv_obj_t *ui_KnobSetViewPage;
@@ -559,6 +561,20 @@ extern lv_obj_t *ui_RotaryButton;
 extern lv_obj_t *ui_ButtonTitle;
 extern lv_obj_t *ui_RotaryButton1;
 extern lv_obj_t *ui_HWTestMidiLabel;
+extern lv_obj_t *ui_MidiMapNoteCCDrop;
+extern lv_obj_t *ui_Spacer1;
+extern lv_obj_t *ui_MidiMapPitchWheelCheck;
+extern lv_obj_t *ui_MidiMapGateCheck;
+extern lv_obj_t *ui_MidiMapGateDrop;
+extern lv_obj_t *ui_MidiMapClockCheck;
+extern lv_obj_t *ui_MidiMapClockDrop;
+extern lv_obj_t *ui_MidiMapTransportCheck;
+extern lv_obj_t *ui_MidiMapTransportDrop;
+extern lv_obj_t *ui_MidiMapButtonSpacer;
+extern lv_obj_t *ui_MidiMapCancelButton;
+extern lv_obj_t *ui_MidiMapCancelButtonLabel;
+extern lv_obj_t *ui_MidiMapOKButton;
+extern lv_obj_t *ui_MidiMapOKButtonLabel;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE(ui_img_1x_play1_png);		// assets/1x/Play1.png
