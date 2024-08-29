@@ -87,6 +87,7 @@ struct ModuleViewPage : PageBase {
 
 		lv_hide(ui_ModuleViewActionMenu);
 		lv_hide(ui_AutoMapSelectPanel);
+		lv_hide(ui_MIDIMapPanel);
 
 		if (gui_state.new_cable) {
 			lv_hide(ui_ModuleViewActionBut);
