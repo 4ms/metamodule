@@ -274,12 +274,16 @@ public:
 	}
 
 	void set_midi_cc(unsigned ccnum, float val) {
+		// Update jacks connected to this CC
 		if (ccnum < midi_cc_conns.size())
 			set_all_connected_jacks(midi_cc_conns[ccnum], val);
 
-		if (ccnum < NumMidiCCs) {
-			for (auto &mm : midi_knob_conns[ccnum])
-				modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val / 10.f));
+		// Update knobs connected to theis CC
+		if (ccnum < midi_knob_conns.size()) {
+			for (auto &mm : midi_knob_conns[ccnum]) {
+				if (mm.module_id < num_modules)
+					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val / 10.f));
+			}
 		}
 	}
 
@@ -684,6 +688,8 @@ private:
 			for (auto &mappings : knob_set)
 				mappings.clear();
 
+		for (auto &conn : midi_knob_conns)
+			conn.clear();
 		for (auto &conn : midi_note_pitch_conns)
 			conn.clear();
 		for (auto &conn : midi_note_gate_conns)
