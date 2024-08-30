@@ -48,6 +48,7 @@ struct MidiMapPopup {
 				lv_obj_add_style(dropdown, &Gui::focus_style, LV_STATE_EDITED);
 
 				lv_obj_add_event_cb(dropdown, drop_callback, LV_EVENT_VALUE_CHANGED, this);
+				lv_obj_add_event_cb(dropdown, drop_callback, LV_EVENT_READY, this);
 			}
 		}
 

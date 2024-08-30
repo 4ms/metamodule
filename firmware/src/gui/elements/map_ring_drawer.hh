@@ -92,9 +92,9 @@ draw_mapped_jack(const JackElement &, lv_obj_t *element_obj, lv_obj_t *canvas, s
 	lv_obj_set_pos(circle, lv_obj_get_x(element_obj), lv_obj_get_y(element_obj));
 	lv_obj_set_size(circle, lv_obj_get_width(element_obj), lv_obj_get_height(element_obj));
 
-	auto panel_id = panel_el_id.value();
-	lv_obj_set_style_outline_color(circle, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
-	lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
+	auto color = Gui::mapped_jack_color(panel_el_id.value());
+	lv_obj_set_style_outline_color(circle, color, LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(circle, color, LV_STATE_DEFAULT);
 
 	return circle;
 }
