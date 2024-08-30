@@ -475,11 +475,23 @@ private:
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
 		//TODO
-		page->midi_map_popup.show([](unsigned choice) {
-			if (choice == 1) {
-				printf("OK\n");
+		page->midi_map_popup.show([page](std::optional<unsigned> choice) {
+			if (choice.has_value()) {
+				pr_dbg("Creating MIDI map %d to jack %d, module %d\n",
+					   choice.value(),
+					   page->this_jack.jack_id,
+					   page->this_jack.module_id);
+				AddJackMapping mapping{};
+				mapping.panel_jack_id = choice.value();
+				mapping.jack = page->this_jack;
+				mapping.type = page->this_jack_type;
+
+				page->patch_mod_queue.put(mapping);
+				page->notify_queue.put({"Connected to MIDI signal"});
+				page->gui_state.new_cable = std::nullopt;
+				page->should_close = true;
 			} else
-				printf("Cancel\n");
+				pr_dbg("Cancel making MIDI signal\n");
 		});
 	}
 

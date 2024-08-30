@@ -103,6 +103,10 @@ inline void lv_check(lv_obj_t *obj, bool checked = true) {
 		lv_uncheck(obj);
 }
 
+inline bool lv_is_checked(lv_obj_t *obj) {
+	return lv_obj_has_state(obj, LV_STATE_CHECKED);
+}
+
 inline lv_obj_t *create_labeled_check_obj(lv_obj_t *parent, const char *name) {
 	auto check_panel = lv_obj_create(parent);
 	lv_obj_set_height(check_panel, 20);

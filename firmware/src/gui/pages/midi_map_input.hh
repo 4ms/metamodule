@@ -5,12 +5,14 @@
 #include "lvgl.h"
 #include "patch-serial/patch/midi_def.hh"
 #include <functional>
+#include <optional>
 #include <string_view>
 
 namespace MetaModule
 {
 
 struct MidiMapPopup {
+
 	MidiMapPopup()
 		: group(lv_group_create()) {
 
@@ -121,11 +123,15 @@ struct MidiMapPopup {
 			return;
 
 		if (page->callback) {
+			std::optional<unsigned> midi_map_number;
+
 			if (event->target == ui_MidiMapCancelButton)
-				page->callback(0);
+				midi_map_number = std::nullopt;
 
 			else if (event->target == ui_MidiMapOKButton)
-				page->callback(1);
+				midi_map_number = page->calc_midi_signal_number();
+
+			page->callback(midi_map_number);
 		}
 
 		printf("clicked\n");
@@ -164,6 +170,61 @@ struct MidiMapPopup {
 		}
 	}
 
+	std::optional<unsigned> calc_midi_signal_number() {
+		if (lv_is_checked(ui_MidiMapNoteCheck)) {
+			auto polynum = lv_dropdown_get_selected(ui_MidiMapNotePolyDrop);
+			polynum = std::min<unsigned>(polynum, 7);
+
+			auto eventnum = lv_dropdown_get_selected(ui_MidiMapNoteDrop);
+			unsigned midibase = eventnum == 0 ? MidiMonoNoteJack :
+								eventnum == 1 ? MidiMonoGateJack :
+								eventnum == 2 ? MidiMonoVelJack :
+								eventnum == 3 ? MidiMonoAftertouchJack :
+								eventnum == 4 ? MidiMonoRetrigJack :
+												0;
+			return midibase ? midibase + polynum : std::optional<unsigned>{std::nullopt};
+
+		} else if (lv_is_checked(ui_MidiMapCCCheck)) {
+			auto ccnum = lv_dropdown_get_selected(ui_MidiMapCCDrop);
+			unsigned midibase = MidiCC0;
+			return ccnum <= 127 ? midibase + ccnum : std::optional<unsigned>{std::nullopt};
+
+		} else if (lv_is_checked(ui_MidiMapPitchWheelCheck)) {
+			return static_cast<unsigned>(MidiPitchWheelJack);
+
+		} else if (lv_is_checked(ui_MidiMapGateCheck)) {
+			auto notenum = lv_dropdown_get_selected(ui_MidiMapGateDrop);
+			unsigned midibase = MidiGateNote0;
+			return notenum <= 127 ? midibase + notenum : std::optional<unsigned>{std::nullopt};
+
+		} else if (lv_is_checked(ui_MidiMapClockCheck)) {
+			auto clock = lv_dropdown_get_selected(ui_MidiMapClockDrop);
+			unsigned midinum = clock == 0 ? MidiClockJack :// 24PPQN
+							   clock == 1 ? MidiClockDiv2Jack :// 12PPQN (/2)
+							   clock == 2 ? MidiClockDiv3Jack :// 32nd note (/3)
+							   clock == 3 ? MidiClockDiv6Jack :// 16th note (/6)
+							   clock == 4 ? MidiClockDiv12Jack :// 8th note (/12)
+							   clock == 5 ? MidiClockDiv24Jack :// Quarter note (/24)
+							   clock == 6 ? MidiClockDiv48Jack :// Half note (/48)
+							   clock == 7 ? MidiClockDiv96Jack :// Whole note (/96)
+											0;
+
+			return midinum ? midinum : std::optional<unsigned>{std::nullopt};
+
+		} else if (lv_is_checked(ui_MidiMapTransportCheck)) {
+			auto event = lv_dropdown_get_selected(ui_MidiMapTransportDrop);
+			unsigned midinum = event == 0 ? MidiStartJack :
+							   event == 1 ? MidiStopJack :
+							   event == 2 ? MidiContinueJack :
+											0;
+
+			return midinum ? midinum : std::optional<unsigned>{std::nullopt};
+
+		} else {
+			return std::optional<unsigned>{std::nullopt};
+		}
+	}
+
 protected:
 	lv_obj_t *base{};
 	lv_group_t *group;
@@ -172,7 +233,7 @@ protected:
 	bool visible = false;
 	bool done = true;
 
-	std::function<void(unsigned)> callback;
+	std::function<void(std::optional<unsigned>)> callback;
 
 	std::array<MidiSourceGUI, 6> sources;
 };
