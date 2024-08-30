@@ -67,6 +67,10 @@ struct SetChanCalibration {
 	bool is_input{};
 };
 
+struct SetMidiPolyNum {
+	uint32_t poly_num;
+};
+
 using PatchModRequest = std::variant<SetStaticParam,
 									 AddMapping,
 									 EditMappingMinMax,
@@ -78,7 +82,8 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 AddJackMapping,
 									 DisconnectJack,
 									 CalibrationOnOff,
-									 SetChanCalibration>;
+									 SetChanCalibration,
+									 SetMidiPolyNum>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 128>;
 

@@ -479,21 +479,35 @@ private:
 		std::string title = "Map MIDI to: " + std::string(name.element_name);
 		page->midi_map_popup.set_header_text(title);
 
+		pr_dbg("Patch midi poly#%u\n", page->patch->midi_poly_num);
 		page->midi_map_popup.show([page](std::optional<unsigned> choice) {
 			if (choice.has_value()) {
 				pr_dbg("Creating MIDI map %d to jack %d, module %d\n",
 					   choice.value(),
 					   page->this_jack.jack_id,
 					   page->this_jack.module_id);
+
+				// Get poly number of choice and adjust patch if needed
+				if (auto poly_num = Midi::polychan(choice.value())) {
+					if (*poly_num > page->patch->midi_poly_num) {
+						SetMidiPolyNum poly{.poly_num = *poly_num};
+						page->patch_mod_queue.put(poly);
+						std::string msg = "Connected to MIDI signal, set poly# to " + std::to_string(*poly_num);
+						page->notify_queue.put({msg});
+					}
+				} else {
+					page->notify_queue.put({"Connected to MIDI signal"});
+				}
+
 				AddJackMapping mapping{};
 				mapping.panel_jack_id = choice.value();
 				mapping.jack = page->this_jack;
 				mapping.type = page->this_jack_type;
 
 				page->patch_mod_queue.put(mapping);
-				page->notify_queue.put({"Connected to MIDI signal"});
 				page->gui_state.new_cable = std::nullopt;
 				page->should_close = true;
+
 			} else
 				pr_dbg("Cancel making MIDI signal\n");
 		});

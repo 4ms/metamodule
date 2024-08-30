@@ -354,6 +354,10 @@ public:
 			return 0;
 	}
 
+	void set_midi_poly_num(uint32_t poly_num) {
+		pd.midi_poly_num = poly_num;
+	}
+
 	uint32_t get_midi_poly_num() {
 		return pd.midi_poly_num;
 	}

@@ -12,8 +12,8 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 							  CalData &caldata,
 							  std::optional<bool> &new_cal_state) {
 	if (auto patch_mod = patch_mod_queue.get()) {
-		std::visit(
-			overloaded{[&player](SetStaticParam &mod) { player.apply_static_param(mod.param); },
+		std::visit(overloaded{
+					   [&player](SetStaticParam &mod) { player.apply_static_param(mod.param); },
 					   [&player](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
 					   [&player](AddMapping &mod) { player.add_mapped_knob(mod.set_id, mod.map); },
 					   [&player](EditMappingMinMax &mod) { player.edit_mapped_knob(mod.set_id, mod.map, mod.cur_val); },
@@ -29,6 +29,8 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 						   mod.type == ElementType::Input ? player.disconnect_injack(mod.jack) :
 															player.disconnect_outjack(mod.jack);
 					   },
+					   [&](SetMidiPolyNum mod) { player.set_midi_poly_num(mod.poly_num); },
+
 					   [&caldata](SetChanCalibration &mod) {
 						   if (mod.is_input && mod.channel < caldata.in_cal.size()) {
 							   caldata.in_cal[mod.channel] = {mod.slope, mod.offset};
@@ -38,12 +40,10 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 						   }
 					   },
 
-					   [&new_cal_state](CalibrationOnOff &mod) {
-						   new_cal_state = mod.enable;
-					   }
+					   [&new_cal_state](CalibrationOnOff &mod) { new_cal_state = mod.enable; },
 
-			},
-			patch_mod.value());
+				   },
+				   patch_mod.value());
 	}
 }
 
