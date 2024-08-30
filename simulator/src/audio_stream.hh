@@ -6,6 +6,7 @@
 #include "patch_play/patch_playloader.hh"
 #include "stream_conf.hh"
 #include "util/countzip.hh"
+#include "util/edge_detector.hh"
 #include <iostream>
 #include <span>
 
@@ -33,8 +34,10 @@ public:
 
 	void process(StreamConfSim::Audio::AudioInBuffer in_buff, StreamConfSim::Audio::AudioOutBuffer out_buff) {
 
-		if (mute_on_patch_load(out_buff))
+		if (!is_playing_patch()) {
+			output_silence(out_buff);
 			return;
+		}
 
 		std::optional<bool> update_cal;
 		handle_patch_mods(patch_mod_queue, player, cal, update_cal);
@@ -100,6 +103,36 @@ public:
 		return false;
 	}
 
+	bool is_playing_patch() {
+		if (patch_loader.should_fade_down_audio()) {
+			output_fade_delta = -1.f / (sample_rate_ * 0.02f);
+			if (output_fade_amt <= 0.f) {
+				output_fade_amt = 0.f;
+				output_fade_delta = 0.f;
+				patch_loader.notify_audio_is_muted();
+			}
+
+		} else if (patch_loader.should_fade_up_audio()) {
+			output_fade_delta = 1.f / (sample_rate_ * 0.02f);
+			if (output_fade_amt >= 1.f) {
+				output_fade_amt = 1.f;
+				output_fade_delta = 0.f;
+				patch_loader.notify_audio_not_muted();
+				handle_patch_just_loaded();
+			}
+		}
+
+		return patch_loader.is_playing();
+	}
+
+	void handle_patch_just_loaded() {
+		// Reset the plug detects
+		// this ensures any patched jacks will be detected as a new event
+		// and will propagate to the patch player
+		for (auto &p : plug_detects)
+			p.reset();
+	}
+
 	// Fill buffer with 0's
 	void output_silence(StreamConfSim::Audio::AudioOutBuffer out_buff) {
 		for (auto &frame : out_buff) {
@@ -107,6 +140,11 @@ public:
 				chan = 0;
 		}
 	}
+
+	EdgeStateDetector plug_detects[PanelDef::NumJacks];
+	float output_fade_amt = -1.f;
+	float output_fade_delta = 0.f;
+	float sample_rate_ = 48000.f;
 };
 
 } // namespace MetaModule
