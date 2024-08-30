@@ -132,10 +132,12 @@ struct HardwareCheckPopup {
 				lv_label_set_text_fmt(ui_HWTestMidiLabel, "Note: %d", params.last_midi_note.val);
 			}
 
+			lv_obj_set_style_border_width(ui_HWTestMidiLabel, 2, LV_PART_MAIN);
+
 			if (metaparams.midi_connected) {
-				lv_obj_set_style_border_width(ui_HWTestMidiLabel, 2, LV_PART_MAIN);
+				lv_obj_set_style_border_opa(ui_HWTestMidiLabel, LV_OPA_100, LV_PART_MAIN);
 			} else {
-				lv_obj_set_style_border_width(ui_HWTestMidiLabel, 0, LV_PART_MAIN);
+				lv_obj_set_style_border_opa(ui_HWTestMidiLabel, LV_OPA_0, LV_PART_MAIN);
 			}
 		}
 	}
