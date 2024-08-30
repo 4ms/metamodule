@@ -116,8 +116,8 @@ private:
 	void auto_map_all() {
 		hide();
 		auto_map.prepare_focus(module_idx, group);
-		auto_map.show();
-		// auto_map.map_all();
+		auto_map.map_all();
+		// auto_map.show();
 	}
 
 	void auto_map_single_knobset() {
