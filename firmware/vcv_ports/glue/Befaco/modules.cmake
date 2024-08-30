@@ -21,11 +21,11 @@ set(BefacoModules
     StereoStrip
     Voltio
     Burst    
-    Octaves
-    # disabled:
-    # Muxlicer NoisePlethora MidiThingv2
+    Octaves    
     Muxlicer 
     NoisePlethora
+    # disabled:
+    # MidiThingv2
 )
 
 # svg paths
