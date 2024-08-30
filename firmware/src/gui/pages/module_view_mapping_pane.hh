@@ -474,7 +474,11 @@ private:
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		//TODO
+		auto name = get_full_element_name(
+			page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, *page->patch);
+		std::string title = "Map MIDI to: " + std::string(name.element_name);
+		page->midi_map_popup.set_header_text(title);
+
 		page->midi_map_popup.show([page](std::optional<unsigned> choice) {
 			if (choice.has_value()) {
 				pr_dbg("Creating MIDI map %d to jack %d, module %d\n",

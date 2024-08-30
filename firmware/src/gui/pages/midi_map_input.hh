@@ -53,6 +53,9 @@ struct MidiMapPopup {
 
 		lv_obj_add_event_cb(ui_MidiMapCancelButton, button_callback, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_MidiMapOKButton, button_callback, LV_EVENT_CLICKED, this);
+
+		lv_obj_add_event_cb(ui_MidiMapNoteCheck, scroll_to_top, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_MidiMapNotePolyDrop, scroll_to_top, LV_EVENT_FOCUSED, this);
 	}
 
 	void init(lv_obj_t *page_base, lv_group_t *current_group) {
@@ -65,6 +68,10 @@ struct MidiMapPopup {
 		lv_obj_t *checkbox{};
 		std::vector<lv_obj_t *> dropdowns;
 	};
+
+	void set_header_text(std::string_view title) {
+		lv_label_set_text(ui_MidiMapJackTitle, title.data());
+	}
 
 	void show(auto cb) {
 		callback = std::move(cb);
@@ -137,6 +144,10 @@ struct MidiMapPopup {
 
 		printf("clicked\n");
 		page->hide();
+	}
+
+	static void scroll_to_top(lv_event_t *event) {
+		lv_obj_scroll_to_y(ui_MIDIMapPanel, 0, LV_ANIM_ON);
 	}
 
 	static void check_callback(lv_event_t *event) {
