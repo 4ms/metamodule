@@ -76,6 +76,7 @@ struct MidiMapPopup {
 		// initial state: Note checked
 		lv_group_focus_obj(ui_MidiMapNoteCheck);
 		lv_obj_add_state(ui_MidiMapNoteCheck, LV_STATE_CHECKED);
+		check_only(ui_MidiMapNoteCheck);
 
 		// Make visible
 		lv_obj_set_parent(ui_MIDIMapPanel, base);
