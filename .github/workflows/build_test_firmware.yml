@@ -60,6 +60,10 @@ jobs:
         with:
           submodules: 'recursive'
           token: ${{ secrets.CHECKOUT_TOKEN }}
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install ninja-build
 
       - name: Build and test
         run: cd firmware && make configure PRESET=${{ env.preset }} && make all
