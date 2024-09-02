@@ -39,7 +39,6 @@ jobs:
           gcc: ['12.2.Rel1']  # can add other versions if needed
     name: "Build firmware"
     runs-on: ubuntu-24.04
-    container: ghcr.io/lnnrts/metamodule@sha256:fc81416d9f424a3dcc735644cdfb0e6f8d2641f64fe5eec73d9e3e6bc23640c3
     env:
       preset: ${{ inputs.skip_wifi && 'base' || 'full' }}
     steps:
