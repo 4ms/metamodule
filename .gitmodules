@@ -40,9 +40,6 @@
 [submodule "firmware/metamodule-plugin-sdk"]
 	path = firmware/metamodule-plugin-sdk
 	url = https://github.com/4ms/metamodule-plugin-sdk.git
-[submodule "shared/CoreModules/4ms/core/alpaca"]
-	path = shared/CoreModules/4ms/core/alpaca
-	url = https://github.com/4ms/alpaca
 [submodule "firmware/vcv_ports/Valley"]
 	path = firmware/vcv_ports/Valley
 	url = https://github.com/4ms/ValleyRackFree
