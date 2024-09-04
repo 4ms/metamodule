@@ -53,6 +53,10 @@
 /** @defgroup USBH_CTLREQ_Private_Macros
   * @{
   */
+
+#define PARSE_CFGDESC_NORMAL 0
+#define PARSE_CFGDESC_FIX_AUDIO_SUBCLASS 1
+
 /**
   * @}
   */
@@ -70,7 +74,7 @@
   */
 static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_ParseDevDesc(USBH_HandleTypeDef *phost, uint8_t *buf, uint16_t length);
-static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *buf, uint16_t length);
+static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *buf, uint16_t length, uint8_t fix_audio_subclass_length);
 static USBH_StatusTypeDef USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDescTypeDef *ep_descriptor, uint8_t *buf);
 
 static void USBH_ParseStringDesc(uint8_t *psrc, uint8_t *pdest, uint16_t length);
@@ -143,7 +147,14 @@ USBH_StatusTypeDef USBH_Get_CfgDesc(USBH_HandleTypeDef *phost, uint16_t length)
   if (status == USBH_OK)
   {
     /* Commands successfully sent and Response Received  */
-    status = USBH_ParseCfgDesc(phost, pData, length);
+
+    /* Try "fixing" the audio subclass interface descriptor length */
+    status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_FIX_AUDIO_SUBCLASS);
+    if (status == USBH_NOT_SUPPORTED)
+    {
+      /* If that fails, try parsing normally */
+      status = USBH_ParseCfgDesc(phost, pData, length, PARSE_CFGDESC_NORMAL);
+    }
   }
 
   return status;
@@ -426,7 +437,7 @@ static USBH_StatusTypeDef USBH_ParseDevDesc(USBH_HandleTypeDef *phost, uint8_t *
   * @param  length: Length of the descriptor
   * @retval USBH status
   */
-static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *buf, uint16_t length)
+static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *buf, uint16_t length, uint8_t fix_audio_subclass_length)
 {
   USBH_CfgDescTypeDef *cfg_desc = &phost->device.CfgDesc;
   USBH_StatusTypeDef           status = USBH_OK;
@@ -489,12 +500,13 @@ static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *
           if (pdesc->bDescriptorType == USB_DESC_TYPE_ENDPOINT)
           {
             /* Check if the endpoint is appartening to an audio streaming interface */
-            if ((pif->bInterfaceClass == 0x01U) &&
+            if (fix_audio_subclass_length && (pif->bInterfaceClass == 0x01U) &&
                 ((pif->bInterfaceSubClass == 0x02U) || (pif->bInterfaceSubClass == 0x03U)))
             {
               /* Check if it is supporting the USB AUDIO 01 class specification */
               if ((pif->bInterfaceProtocol == 0x00U) && (pdesc->bLength != 0x09U))
               {
+				USBH_ErrLog("Setting audio streaming subclass length to 9 (was %d) for ep %d\n", pdesc->bLength, ep_ix);
                 pdesc->bLength = 0x09U;
               }
             }
