@@ -181,6 +181,10 @@ struct ModuleViewMappingPane {
 		}
 	}
 
+	bool is_creating_map() const {
+		return add_map_popup.visible;
+	}
+
 	bool wants_to_close() {
 		return should_close;
 	}
