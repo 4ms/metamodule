@@ -1450,7 +1450,7 @@ ui_DescriptionPanel = lv_obj_create(ui_PatchViewPage);
 lv_obj_set_width( ui_DescriptionPanel, lv_pct(100));
 lv_obj_set_height( ui_DescriptionPanel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_flex_flow(ui_DescriptionPanel,LV_FLEX_FLOW_ROW_WRAP);
-lv_obj_set_flex_align(ui_DescriptionPanel, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_obj_set_flex_align(ui_DescriptionPanel, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
 lv_obj_add_flag( ui_DescriptionPanel, LV_OBJ_FLAG_FLOATING );   /// Flags
 lv_obj_clear_flag( ui_DescriptionPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scroll_dir(ui_DescriptionPanel, LV_DIR_VER);
@@ -1505,24 +1505,23 @@ lv_obj_set_flex_align(ui_DescPanelFilenameCont, LV_FLEX_ALIGN_START, LV_FLEX_ALI
 lv_obj_clear_flag( ui_DescPanelFilenameCont, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 ui_DescPanelFileNameTitle = lv_label_create(ui_DescPanelFilenameCont);
+lv_obj_set_width( ui_DescPanelFileNameTitle, 78);
 lv_obj_set_height( ui_DescPanelFileNameTitle, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_flex_grow( ui_DescPanelFileNameTitle, 1);
 lv_obj_set_align( ui_DescPanelFileNameTitle, LV_ALIGN_CENTER );
 lv_label_set_text(ui_DescPanelFileNameTitle,"File name:");
 lv_obj_set_style_text_color(ui_DescPanelFileNameTitle, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_DescPanelFileNameTitle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_DescPanelFileName = lv_label_create(ui_DescPanelFilenameCont);
+lv_obj_set_width( ui_DescPanelFileName, 202);
 lv_obj_set_height( ui_DescPanelFileName, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_flex_grow( ui_DescPanelFileName, 2);
-lv_obj_set_align( ui_DescPanelFileName, LV_ALIGN_CENTER );
+lv_obj_set_align( ui_DescPanelFileName, LV_ALIGN_LEFT_MID );
 lv_label_set_long_mode(ui_DescPanelFileName,LV_LABEL_LONG_SCROLL);
 lv_label_set_text(ui_DescPanelFileName,"Filename.yml");
 lv_obj_clear_flag( ui_DescPanelFileName, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_style_text_color(ui_DescPanelFileName, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_DescPanelFileName, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_letter_space(ui_DescPanelFileName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_line_space(ui_DescPanelFileName, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_align(ui_DescPanelFileName, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_Description = lv_label_create(ui_DescriptionPanel);
 lv_obj_set_width( ui_Description, lv_pct(100));
@@ -1542,17 +1541,14 @@ lv_obj_set_style_pad_top(ui_Description, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_Description, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_DescMIDIPolyNumLabel = lv_label_create(ui_DescriptionPanel);
-lv_obj_set_width( ui_DescMIDIPolyNumLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_width( ui_DescMIDIPolyNumLabel, 141);
 lv_obj_set_height( ui_DescMIDIPolyNumLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_DescMIDIPolyNumLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_DescMIDIPolyNumLabel,"MIDI Poly Channels: 1");
 lv_obj_set_style_text_color(ui_DescMIDIPolyNumLabel, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_DescMIDIPolyNumLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_align(ui_DescMIDIPolyNumLabel, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_DescMIDIPolyNumLabel, &ui_font_MuseoSansRounded50012, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_left(ui_DescMIDIPolyNumLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(ui_DescMIDIPolyNumLabel, 34, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(ui_DescMIDIPolyNumLabel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_DescMIDIPolyNumLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_DescriptionEditButton = lv_btn_create(ui_DescriptionPanel);
 lv_obj_set_height( ui_DescriptionEditButton, 24);
