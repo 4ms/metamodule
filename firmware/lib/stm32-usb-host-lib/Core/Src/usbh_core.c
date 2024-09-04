@@ -707,6 +707,10 @@ USBH_StatusTypeDef USBH_Process(USBH_HandleTypeDef *phost)
 
         for (idx = 0U; idx < USBH_MAX_NUM_SUPPORTED_CLASS; idx++)
         {
+          if (phost->pClass[idx] == NULL)
+          {
+            continue;
+          }
           if (phost->pClass[idx]->ClassCode == phost->device.CfgDesc.Itf_Desc[0].bInterfaceClass)
           {
             phost->pActiveClass = phost->pClass[idx];
