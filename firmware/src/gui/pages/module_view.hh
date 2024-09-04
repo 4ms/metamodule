@@ -283,6 +283,10 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
+	bool is_creating_map() const {
+		return mapping_pane.is_creating_map();
+	}
+
 	void update() override {
 		if (gui_state.back_button.is_just_released()) {
 

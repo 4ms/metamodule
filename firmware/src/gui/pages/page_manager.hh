@@ -137,6 +137,9 @@ public:
 		if (active_knobset >= patch->knob_sets.size())
 			return;
 
+		if (page_module.is_creating_map())
+			return;
+
 		// Iterate all panel knobs
 		for (auto panel_knob_i = 0u; panel_knob_i < info.params.knobs.size(); panel_knob_i++) {
 
