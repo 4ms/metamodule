@@ -49,6 +49,7 @@ struct ModuleViewMappingPane {
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
 		, control_popup{patches, patch_mod_queue}
+		, midi_map_popup{params}
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
 
@@ -150,6 +151,10 @@ struct ModuleViewMappingPane {
 
 	void update() {
 		add_map_popup.update(params);
+
+		if (midi_map_popup.is_visible())
+			midi_map_popup.update();
+
 		if (is_patch_playing) {
 
 			if (last_active_knobset != page_list.get_active_knobset()) {

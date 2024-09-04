@@ -3,6 +3,8 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
+#include "metaparams.hh"
+#include "params_state.hh"
 #include "patch-serial/patch/midi_def.hh"
 #include <functional>
 #include <optional>
@@ -13,8 +15,9 @@ namespace MetaModule
 
 struct MidiMapPopup {
 
-	MidiMapPopup()
-		: group(lv_group_create()) {
+	MidiMapPopup(ParamsMidiState &params)
+		: group(lv_group_create())
+		, params{params} {
 
 		sources = {{
 			{ui_MidiMapNoteCheck, {ui_MidiMapNoteDrop, ui_MidiMapNotePolyDrop}},
@@ -57,6 +60,9 @@ struct MidiMapPopup {
 
 		lv_obj_add_event_cb(ui_MidiMapNoteCheck, scroll_to_top, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_MidiMapNotePolyDrop, scroll_to_top, LV_EVENT_FOCUSED, this);
+
+		lv_dropdown_set_selected(ui_MidiMapCCDrop, 20);
+		lv_dropdown_set_selected(ui_MidiMapGateDrop, 60);
 	}
 
 	void init(lv_obj_t *page_base, lv_group_t *current_group) {
@@ -92,6 +98,22 @@ struct MidiMapPopup {
 		lv_show(ui_MIDIMapPanel);
 		visible = true;
 		done = false;
+	}
+
+	void update() {
+		if (midi_learn) {
+			for (auto ccnum = 0u; auto &cc : params.midi_ccs) {
+				if (cc.did_change() && ccnum < lv_dropdown_get_option_cnt(ui_MidiMapCCDrop)) {
+					lv_dropdown_set_selected(ui_MidiMapCCDrop, ccnum);
+				}
+				ccnum++;
+			}
+
+			auto &note = params.last_midi_note;
+			if (note.did_change() && note.val < lv_dropdown_get_option_cnt(ui_MidiMapGateDrop)) {
+				lv_dropdown_set_selected(ui_MidiMapGateDrop, note.val);
+			}
+		}
 	}
 
 	void hide() {
@@ -143,7 +165,6 @@ struct MidiMapPopup {
 			page->callback(midi_map_number);
 		}
 
-		printf("clicked\n");
 		page->hide();
 	}
 
@@ -242,9 +263,11 @@ protected:
 	lv_obj_t *base{};
 	lv_group_t *group;
 	lv_group_t *orig_group{};
+	ParamsMidiState &params;
 
 	bool visible = false;
 	bool done = true;
+	bool midi_learn = true;
 
 	std::function<void(std::optional<unsigned>)> callback;
 
