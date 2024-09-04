@@ -160,8 +160,13 @@ public:
 		for (auto &map : patch->midi_maps.set) {
 			auto knobpos = info.params.panel_knob_new_value(map.panel_knob_id);
 			if (knobpos.has_value()) {
-				auto scaled_val = map.get_mapped_val(knobpos.value());
-				patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
+				// Update all MIDI maps to this CC
+				for (auto &other_map : patch->midi_maps.set) {
+					if (other_map.panel_knob_id == map.panel_knob_id) {
+						auto scaled_val = other_map.get_mapped_val(knobpos.value());
+						patch->set_or_add_static_knob_value(other_map.module_id, other_map.param_id, scaled_val);
+					}
+				}
 			}
 		}
 	}

@@ -27,7 +27,7 @@ struct ModuleViewPage : PageBase {
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
-		, action_menu{module_mods, patches, page_list, patch_playloader} {
+		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue} {
 
 		init_bg(ui_MappingMenu);
 
@@ -87,6 +87,7 @@ struct ModuleViewPage : PageBase {
 
 		lv_hide(ui_ModuleViewActionMenu);
 		lv_hide(ui_AutoMapSelectPanel);
+		lv_hide(ui_MIDIMapPanel);
 
 		if (gui_state.new_cable) {
 			lv_hide(ui_ModuleViewActionBut);
@@ -153,6 +154,8 @@ struct ModuleViewPage : PageBase {
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &drawn = drawn_element.gui_element;
 
+			// Watch Lights
+			// TODO: watch_lights(drawn_element);
 			std::visit(overloaded{
 						   [&](auto const &el) {
 							   for (unsigned i = 0; i < drawn.count.num_lights; i++) {
@@ -164,6 +167,7 @@ struct ModuleViewPage : PageBase {
 						   },
 					   },
 					   drawn_element.element);
+			//////
 
 			add_button(drawn.obj);
 
@@ -174,12 +178,15 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
+			// Skip lights
+			// TODO: if (is_light_only(drawn)) continue;
 			if (drawn.count.num_lights > 0 && drawn.count.num_params == 0 && drawn.count.num_outputs == 0 &&
 				drawn.count.num_inputs == 0)
 			{
 				continue;
 			}
 
+			// TODO: if (should_skip_for_cable_mode(gui_state.new_cable, drawn)) continue;
 			if (gui_state.new_cable.has_value()) {
 				uint16_t this_jack_id{};
 				if (drawn.count.num_inputs > 0)
@@ -197,6 +204,7 @@ struct ModuleViewPage : PageBase {
 					continue;
 			}
 
+			// TODO: if (append_header(last_type, drawn.count, opts)) {roller_idx++; roler_drawn_el_idx.push_back(-1);}
 			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
 				opts += Gui::orange_highlight_html_str + "Params:" + LV_TXT_COLOR_CMD + "\n";
 				roller_idx++;

@@ -30,6 +30,8 @@ int main(int argc, char *argv[]) {
 	while (ui.update()) {
 	}
 
+	audio_out.pause();
+
 	lv_port_disp_deinit();
 	lv_deinit();
 

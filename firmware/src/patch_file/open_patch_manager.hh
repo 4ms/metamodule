@@ -89,14 +89,14 @@ public:
 		bool patch_is_playing = false;
 
 		if (auto patch = open_patches_.find(patch_loc)) {
-			open_patches_.dump_open_patches();
+			// open_patches_.dump_open_patches();
 
 			if (patch == playing_patch_)
 				patch_is_playing = true;
 
 			pr_warn("open patch found already. p:%d\n", patch_is_playing);
 			open_patches_.remove(patch_loc);
-			open_patches_.dump_open_patches();
+			// open_patches_.dump_open_patches();
 		}
 
 		auto *new_patch = open_patches_.emplace_back(patch_loc);
@@ -111,8 +111,10 @@ public:
 			return false;
 		}
 
-		//Handle patches saved by legacy firmware with empty knob sets
+		// Handle patches saved by legacy firmware with empty knob sets
 		new_patch->patch.trim_empty_knobsets();
+		// Handle legacy use of midi poly num
+		new_patch->patch.update_midi_poly_num();
 
 		view_patch_ = new_patch;
 

@@ -73,8 +73,20 @@ inline void make_cable(GuiState::CableBeginning &new_cable,
 	if (!make_panel_mapping) {
 		AddInternalCable newcable{};
 		if (begin_jack_type == ElementType::Input) {
-			newcable.in = begin_jack;
-			newcable.out = this_jack;
+			if (this_jack_type == ElementType::Output) {
+				newcable.in = begin_jack;
+				newcable.out = this_jack;
+			} else {
+				//both are inputss
+				newcable.in = this_jack;
+				if (auto cable = patch->find_internal_cable_with_injack(begin_jack)) {
+					newcable.out = cable->out;
+				} else if (auto cable = patch->find_internal_cable_with_injack(this_jack)) {
+					newcable.out = cable->out;
+				} else {
+					notify_queue.put({"Error: cannot connect two inputs", Notification::Priority::Error});
+				}
+			}
 		} else {
 			newcable.in = this_jack;
 			newcable.out = begin_jack;
