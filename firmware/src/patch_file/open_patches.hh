@@ -98,15 +98,15 @@ struct OpenPatchList {
 		for (auto &p : list) {
 			auto sz = patch_size(p.patch);
 			total_size += sz;
-			pr_dbg("[%d] %d:%s: %s #%d [%zu B]\n",
-				   i++,
-				   p.loc.vol,
-				   p.loc.filename.c_str(),
-				   p.patch.patch_name.c_str(),
-				   p.modification_count,
-				   sz);
+			pr_dump("[%d] %d:%s: %s #%d [%zu B]\n",
+					i++,
+					p.loc.vol,
+					p.loc.filename.c_str(),
+					p.patch.patch_name.c_str(),
+					p.modification_count,
+					sz);
 		}
-		pr_dbg("TOTAL: %zu\n", total_size);
+		pr_dump("TOTAL: %zu\n", total_size);
 	}
 
 private:

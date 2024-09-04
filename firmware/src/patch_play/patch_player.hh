@@ -141,6 +141,8 @@ public:
 			}
 		}
 
+		pd.update_midi_poly_num();
+
 		for (auto const &mm : pd.midi_maps.set) {
 			cache_midi_mapping(mm);
 		}

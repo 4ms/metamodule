@@ -84,7 +84,7 @@ struct PatchDescriptionPanel {
 		lv_label_set_text(ui_DescPanelFileName, filename.c_str());
 
 		if (patch->midi_poly_num)
-			lv_label_set_text_fmt(ui_DescMIDIPolyNumLabel, "MIDI Poly Chans: %d", patch->midi_poly_num);
+			lv_label_set_text_fmt(ui_DescMIDIPolyNumLabel, "MIDI Poly Chans: %u", patch->midi_poly_num);
 		else
 			lv_label_set_text(ui_DescMIDIPolyNumLabel, "");
 
