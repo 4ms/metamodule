@@ -90,18 +90,18 @@ struct ParamsMidiState : ParamsState {
 			cc = 0;
 	}
 
-	std::optional<float> panel_knob_new_value(uint16_t mapped_panel_id) const {
+	std::optional<float> panel_knob_new_value(uint16_t mapped_panel_id) {
 
 		auto mk = MappedKnob{.panel_knob_id = mapped_panel_id};
 
 		if (mk.is_panel_knob()) {
-			auto latched = knobs[mapped_panel_id];
+			auto &latched = knobs[mapped_panel_id];
 			return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
 		}
 
 		else if (mk.is_midi_cc())
 		{
-			auto latched = midi_ccs[mk.cc_num()];
+			auto &latched = midi_ccs[mk.cc_num()];
 			return latched.did_change() ? std::optional<float>{latched.val} : std::nullopt;
 		}
 
