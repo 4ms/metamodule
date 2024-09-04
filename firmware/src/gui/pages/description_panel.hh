@@ -45,6 +45,10 @@ struct PatchDescriptionPanel {
 		patch = cur_patch;
 	}
 
+	void set_filename(std::string_view name) {
+		filename = name;
+	}
+
 	bool is_visible() {
 		return is_showing;
 	}
@@ -76,6 +80,14 @@ struct PatchDescriptionPanel {
 
 		lv_label_set_text(ui_Description, patch->description.c_str());
 		lv_label_set_text(ui_DescPanelPatchName, patch->patch_name.c_str());
+
+		lv_label_set_text(ui_DescPanelFileName, filename.c_str());
+
+		if (patch->midi_poly_num)
+			lv_label_set_text_fmt(ui_DescMIDIPolyNumLabel, "MIDI Poly Chans: %d", patch->midi_poly_num);
+		else
+			lv_label_set_text(ui_DescMIDIPolyNumLabel, "");
+
 		set_content_max_height(ui_DescriptionPanel, 230);
 	}
 
@@ -201,6 +213,8 @@ private:
 	lv_obj_t *active_ta = nullptr;
 
 	PatchData *patch = nullptr;
+
+	std::string filename;
 
 	bool is_showing = false;
 	bool edit_panel_visible = false;

@@ -193,7 +193,6 @@ struct PatchViewPage : PageBase {
 		file_menu.prepare_focus(group);
 
 		patch = patches.get_view_patch();
-		desc_panel.set_patch(patch);
 		desc_panel.prepare_focus(group);
 
 		if (initial_selected_module) {
@@ -242,7 +241,6 @@ struct PatchViewPage : PageBase {
 
 		if (patch != patches.get_view_patch()) {
 			patch = patches.get_view_patch();
-			desc_panel.set_patch(patch);
 		}
 
 		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
@@ -589,7 +587,13 @@ private:
 	static void desc_open_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		abort_cable(page->gui_state, page->notify_queue);
-		page->desc_panel.show();
+		page->show_desc_panel();
+	}
+
+	void show_desc_panel() {
+		desc_panel.set_patch(patch);
+		desc_panel.set_filename(patches.get_view_patch_filename());
+		desc_panel.show();
 	}
 
 private:
