@@ -225,7 +225,9 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void update() override {
-		lv_group_set_editing(group, false);
+		if (!kb_visible)
+			lv_group_set_editing(group, false);
+
 		if (gui_state.back_button.is_just_released()) {
 			if (kb_visible) {
 				hide_keyboard();
