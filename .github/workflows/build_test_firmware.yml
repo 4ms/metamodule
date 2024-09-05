@@ -22,7 +22,7 @@ on:
       - main
       - fix-ci
     tags:
-      - 'firmware-v[0-9]+.[0-9]+.[0-9]+'
+      - 'firmware-v[0-9]+.[0-9]+.[0-9]+*'
     paths:
       - 'firmware/**'
       - '!firmware/bootloader/**'
