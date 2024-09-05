@@ -258,11 +258,12 @@ struct KnobSetViewPage : PageBase {
 
 	void show_keyboard() {
 		lv_show(ui_Keyboard);
+		lv_group_add_obj(group, ui_Keyboard);
+		lv_group_focus_obj(ui_Keyboard);
+		lv_group_set_editing(group, true);
 		lv_keyboard_set_textarea(ui_Keyboard, ui_KnobSetNameText);
 		kb_visible = true;
 		lv_obj_add_state(ui_KnobSetNameText, LV_STATE_USER_1);
-		lv_group_add_obj(group, ui_Keyboard);
-		lv_group_focus_obj(ui_Keyboard);
 	}
 
 	void hide_keyboard() {
