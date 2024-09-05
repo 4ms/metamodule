@@ -14,7 +14,7 @@ inline constexpr bool PRINT_ERROR = true;
 inline constexpr bool PRINT_WARN = true;
 
 // Info: Important or useful information that is neither a warning or error
-inline constexpr bool PRINT_INFO = true;
+inline constexpr bool PRINT_INFO = false;
 
 // Debug: temporary messages used for debugging
 inline constexpr bool PRINT_DEBUG = false;

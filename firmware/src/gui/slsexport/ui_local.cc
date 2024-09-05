@@ -177,7 +177,7 @@ lv_obj_t *create_automap_item(lv_obj_t *parent, std::string_view name) {
 	lv_obj_set_width(ui_AutoMapItemContLabel, LV_SIZE_CONTENT);	 /// 1
 	lv_obj_set_height(ui_AutoMapItemContLabel, LV_SIZE_CONTENT); /// 1
 	lv_obj_set_align(ui_AutoMapItemContLabel, LV_ALIGN_CENTER);
-	lv_label_set_text(ui_AutoMapItemContLabel, "Pitch");
+	lv_label_set_text(ui_AutoMapItemContLabel, name.data());
 	lv_obj_set_style_text_font(
 		ui_AutoMapItemContLabel, &ui_font_MuseoSansRounded70014, LV_PART_MAIN | LV_STATE_DEFAULT);
 	return obj;

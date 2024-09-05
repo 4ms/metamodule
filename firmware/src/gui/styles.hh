@@ -1,7 +1,9 @@
 #pragma once
 #include "lvgl.h"
+#include "patch-serial/patch/midi_def.hh"
 #include "slsexport/meta5/ui.h"
 #include <array>
+#include <charconv>
 #include <span>
 #include <string>
 
@@ -201,6 +203,57 @@ struct Gui {
 		LV_STYLE_CONST_RADIUS(2),
 	};
 	static inline auto slider_handle_style = LV_STYLE_CONST_CPP(slider_handle_style_props);
+
+	static lv_color_t mapped_jack_color(unsigned panel_id) {
+		if (panel_id <= LastPossibleKnob)
+			return jack_palette[panel_id % jack_palette.size()];
+
+		else if (panel_id <= MidiNote8Jack)
+			return palette_main[0];
+
+		else if (panel_id <= MidiGate8Jack)
+			return palette_main[1];
+
+		else if (panel_id <= MidiVel8Jack)
+			return palette_main[2];
+
+		else if (panel_id <= MidiAftertouch8Jack)
+			return palette_main[3];
+
+		else if (panel_id <= MidiRetrig8Jack)
+			return palette_main[4];
+
+		else if (panel_id <= MidiCC127)
+			return palette_main[5];
+
+		else if (panel_id <= MidiPitchWheelJack)
+			return palette_main[6];
+
+		else if (panel_id <= MidiGateNote127)
+			return palette_main[7];
+
+		else if (panel_id <= MidiClockDiv96Jack)
+			return palette_main[8];
+
+		else if (panel_id <= MidiContinueJack)
+			return palette_main[9];
+
+		else
+			return jack_palette[panel_id % jack_palette.size()];
+	}
+
+	static std::string color_to_html(lv_color_t color) {
+		std::string c = "^000000 ";
+		auto printhex = [&c](uint8_t v, size_t pos) {
+			if (v < 0x10)
+				pos++; //add leading zero
+			std::to_chars(c.data() + pos, c.data() + pos + 2, v, 16);
+		};
+		printhex(color.ch.red << 3, 1);
+		printhex(color.ch.green << 2, 3);
+		printhex(color.ch.blue << 3, 5);
+		return c;
+	}
 
 	static void init_lvgl_styles() {
 
