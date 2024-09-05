@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_strings.hh"
+#include "util/contains_word.hh"
 #include "util/overloaded.hh"
 #include <engine/Module.hpp>
 
@@ -29,6 +30,8 @@ inline std::string_view getInputName(rack::engine::Module *module, int id) {
 	if (auto info = module->getInputInfo(id)) {
 		if (info->name.size()) {
 			remove_extended_chars(info->name);
+			if (!contains_word(info->name, "in") && !contains_word(info->name, "input"))
+				info->name += " In";
 			return info->name;
 		} else {
 			info->name = "In " + std::to_string(id + 1);
@@ -49,6 +52,8 @@ inline std::string_view getOutputName(rack::engine::Module *module, int id) {
 	if (auto info = module->getOutputInfo(id)) {
 		if (info->name.size()) {
 			remove_extended_chars(info->name);
+			if (!contains_word(info->name, "out") && !contains_word(info->name, "output"))
+				info->name += " Out";
 			return info->name;
 		} else {
 			info->name = "Out " + std::to_string(id + 1);

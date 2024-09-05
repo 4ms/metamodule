@@ -7,14 +7,18 @@
 	"MetaModuleIncludedModules": [
         "ABC",
         "ADSR",
+        "Burst",
         "ChoppingKinky",
         "DualAtenuverter",
         "EvenVCO",
         "HexmixVCA",
         "Kickall",
-        "Mixer",
+        "Mixer",        
         "Morphader",
         "MotionMTR",
+        "Muxlicer",
+        "NoisePlethora",
+        "Octaves",
         "Percall",
         "PonyVCO",
         "Rampage",
@@ -22,6 +26,7 @@
         "SamplingModulator",
         "SlewLimiter",
         "SpringReverb",
-        "StereoStrip"
+        "StereoStrip",
+        "Voltio"
 	]
 }
