@@ -9,6 +9,8 @@
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
+#include "src/core/lv_event.h"
+#include "src/widgets/lv_textarea.h"
 
 namespace MetaModule
 {
@@ -29,11 +31,23 @@ struct KnobSetViewPage : PageBase {
 		lv_obj_add_event_cb(ui_PreviousKnobSet, goto_jackmap_cb, LV_EVENT_CLICKED, this);
 		lv_label_set_text(ui_PreviousKnobSetLabel, "Jacks");
 
+		lv_obj_add_event_cb(ui_KnobSetNameText, rename_knobset_cb, LV_EVENT_CLICKED, this);
+
 		lv_obj_add_event_cb(ui_NextKnobSet, next_knobset_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ActivateKnobSet, activate_knobset_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() override {
+		while (lv_obj_remove_event_cb(ui_Keyboard, nullptr))
+			;
+		lv_obj_add_event_cb(ui_Keyboard, lv_keyboard_def_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_READY, this);
+		lv_obj_add_event_cb(ui_Keyboard, keyboard_cb, LV_EVENT_CANCEL, this);
+
+		lv_obj_set_parent(ui_Keyboard, ui_KnobSetViewPage);
+		lv_obj_set_y(ui_Keyboard, 40);
+
+		lv_hide(ui_Keyboard);
 		// Clear
 		for (unsigned i = 0; auto cont : containers) {
 			set_for_knob(cont, i);
@@ -74,6 +88,7 @@ struct KnobSetViewPage : PageBase {
 			lv_hide(ui_NextKnobSet);
 		}
 		lv_group_add_obj(group, ui_PreviousKnobSet);
+		lv_group_add_obj(group, ui_KnobSetNameText);
 		lv_group_add_obj(group, ui_ActivateKnobSet);
 		lv_group_add_obj(group, ui_NextKnobSet);
 
@@ -85,7 +100,7 @@ struct KnobSetViewPage : PageBase {
 			return;
 		knobset = &patch->knob_sets[ks_idx];
 
-		lv_label_set_text(ui_KnobSetNameText, patch->valid_knob_set_name(ks_idx));
+		lv_textarea_set_text(ui_KnobSetNameText, patch->valid_knob_set_name(ks_idx));
 
 		// Set mappings in knobset
 		unsigned num_maps[PanelDef::NumKnobs]{};
@@ -212,7 +227,9 @@ struct KnobSetViewPage : PageBase {
 	void update() override {
 		lv_group_set_editing(group, false);
 		if (gui_state.back_button.is_just_released()) {
-			if (page_list.request_last_page()) {
+			if (kb_visible) {
+				hide_keyboard();
+			} else if (page_list.request_last_page()) {
 				blur();
 			}
 		}
@@ -236,6 +253,45 @@ struct KnobSetViewPage : PageBase {
 				if (child != cont)
 					lv_obj_del_async(child);
 			}
+		}
+	}
+
+	void show_keyboard() {
+		lv_show(ui_Keyboard);
+		lv_keyboard_set_textarea(ui_Keyboard, ui_KnobSetNameText);
+		kb_visible = true;
+		lv_obj_add_state(ui_KnobSetNameText, LV_STATE_USER_1);
+		lv_group_add_obj(group, ui_Keyboard);
+		lv_group_focus_obj(ui_Keyboard);
+	}
+
+	void hide_keyboard() {
+		lv_obj_clear_state(ui_KnobSetNameText, LV_STATE_USER_1);
+		lv_group_focus_obj(ui_KnobSetNameText);
+		lv_group_remove_obj(ui_Keyboard);
+		lv_hide(ui_Keyboard);
+		kb_visible = false;
+	}
+
+	static void keyboard_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+
+		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
+			page->hide_keyboard();
+			std::string t = lv_textarea_get_text(ui_KnobSetNameText);
+			pr_warn("%s", t.c_str());
+		}
+	}
+
+	static void rename_knobset_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
+		if (kb_hidden) {
+			page->show_keyboard();
 		}
 	}
 
@@ -343,6 +399,8 @@ private:
 
 	std::vector<lv_obj_t *> arcs;
 	std::vector<const StaticParam *> static_params;
+
+	bool kb_visible = false;
 
 	std::array<lv_obj_t *, 12> panes{ui_KnobPanelA,
 									 ui_KnobPanelB,
