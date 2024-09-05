@@ -100,11 +100,13 @@ struct ModuleViewAutoMapDialog {
 
 	void map_all() {
 		// map into all knobsets
+		maps_todo.clear();
 		make_knob_maps(std::nullopt);
 		make_jack_maps();
 	}
 
 	void map_knobs_single_knobset() {
+		maps_todo.clear();
 		if (auto first_free_knobset = first_empty_knobset()) {
 			make_knob_maps(first_free_knobset); // map into all knobsets
 		} else {
@@ -151,6 +153,7 @@ private:
 		for (auto indices : maps_todo) {
 			auto_map.map(module_idx, indices, *patch, knobset_id);
 		}
+		maps_todo.clear();
 	}
 
 	std::optional<unsigned> first_empty_knobset() {
