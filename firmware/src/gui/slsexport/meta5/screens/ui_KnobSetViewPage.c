@@ -145,7 +145,7 @@ lv_obj_set_align( ui_KnobSetNameText, LV_ALIGN_CENTER );
 lv_textarea_set_text(ui_KnobSetNameText,"Knob Set Name");
 lv_textarea_set_one_line(ui_KnobSetNameText,true);
 lv_obj_add_flag( ui_KnobSetNameText, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_clear_flag( ui_KnobSetNameText, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_clear_flag( ui_KnobSetNameText, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
 lv_obj_set_scrollbar_mode(ui_KnobSetNameText, LV_SCROLLBAR_MODE_OFF);
 lv_obj_set_scroll_dir(ui_KnobSetNameText, LV_DIR_HOR);
 lv_obj_set_style_text_color(ui_KnobSetNameText, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_DEFAULT );
