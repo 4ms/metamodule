@@ -106,6 +106,10 @@ public:
 
 		num_modules = pd.module_slugs.size();
 
+		if (num_modules > MAX_MODULES_IN_PATCH) {
+			return {false, "Too many modules in the patch! Max is 32"};
+		}
+
 		// Tell the other core about the patch
 		smp.load_patch(num_modules);
 
