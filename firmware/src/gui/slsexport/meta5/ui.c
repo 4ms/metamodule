@@ -192,6 +192,8 @@ lv_obj_t *ui_ModuleViewActionRandomBut;
 lv_obj_t *ui_ModuleViewActionRandomLabel;
 lv_obj_t *ui_ModuleViewActionDeleteBut;
 lv_obj_t *ui_ModuleViewActionDeleteLabel;
+lv_obj_t *ui_ModuleViewActionResetBut;
+lv_obj_t *ui_ModuleViewActionResetLabel;
 lv_obj_t *ui_MappingParameters;
 lv_obj_t *ui_Module_Name;
 lv_obj_t *ui_Element_Name;

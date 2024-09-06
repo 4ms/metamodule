@@ -482,6 +482,27 @@ lv_obj_set_height( ui_ModuleViewActionDeleteLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_ModuleViewActionDeleteLabel, LV_ALIGN_LEFT_MID );
 lv_label_set_text(ui_ModuleViewActionDeleteLabel,"Delete");
 
+ui_ModuleViewActionResetBut = lv_btn_create(ui_ModuleViewActionMenu);
+lv_obj_set_height( ui_ModuleViewActionResetBut, 20);
+lv_obj_set_width( ui_ModuleViewActionResetBut, lv_pct(100));
+lv_obj_set_align( ui_ModuleViewActionResetBut, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_ModuleViewActionResetBut, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_ModuleViewActionResetBut, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_radius(ui_ModuleViewActionResetBut, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewActionResetBut, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ModuleViewActionResetBut, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ModuleViewActionResetBut, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_bg_opa(ui_ModuleViewActionResetBut, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ModuleViewActionResetBut, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ModuleViewActionResetBut, 0, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ModuleViewActionResetBut, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_ModuleViewActionResetBut, 0, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_ModuleViewActionResetLabel = lv_label_create(ui_ModuleViewActionResetBut);
+lv_obj_set_width(  ui_ModuleViewActionResetLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_ModuleViewActionResetLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align(  ui_ModuleViewActionResetLabel, LV_ALIGN_LEFT_MID );
+lv_label_set_text( ui_ModuleViewActionResetLabel,"Reset");
 ui_MappingParameters = lv_obj_create(ui_MappingFlexZone);
 lv_obj_set_width( ui_MappingParameters, 160);
 lv_obj_set_height( ui_MappingParameters, 240);
