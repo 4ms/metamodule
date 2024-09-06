@@ -283,8 +283,10 @@ struct KnobSetViewPage : PageBase {
 
 		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
 			page->hide_keyboard();
-			std::string t = lv_textarea_get_text(ui_KnobSetNameText);
-			pr_warn("%s", t.c_str());
+			if (page->knobset == nullptr)
+				return;
+			page->knobset->name = lv_textarea_get_text(ui_KnobSetNameText);
+			page->patches.mark_view_patch_modified();
 		}
 	}
 
