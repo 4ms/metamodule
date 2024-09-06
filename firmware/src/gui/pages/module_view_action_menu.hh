@@ -40,11 +40,13 @@ struct ModuleViewActionMenu {
 		lv_obj_add_event_cb(ui_ModuleViewActionAutoKnobSet, autopatch_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionRandomBut, random_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionResetBut, reset_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
+		lv_group_add_obj(group, ui_ModuleViewActionResetBut);
 		lv_group_set_wrap(group, false);
 	}
 
@@ -132,7 +134,10 @@ private:
 		randomizer.randomize(module_idx, patches.get_view_patch());
 	}
 
+	void reset_params() {
 		reset_params_.reset(module_idx, patches.get_view_patch());
+	}
+
 	static void menu_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -159,6 +164,13 @@ private:
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
 		page->randomize();
+	}
+
+	static void reset_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		page->reset_params();
 	}
 
 	static void delete_but_cb(lv_event_t *event) {
