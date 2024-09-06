@@ -12,6 +12,7 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "patch_play/randomize_param.hh"
+#include "patch_play/reset_param.hh"
 
 namespace MetaModule
 {
@@ -28,6 +29,7 @@ struct ModuleViewActionMenu {
 		, patch_playloader{patch_playloader}
 		, auto_map{patch_mod_queue, patches, notify_queue}
 		, randomizer{patch_mod_queue}
+		, reset_params_{patch_mod_queue}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
@@ -130,6 +132,7 @@ private:
 		randomizer.randomize(module_idx, patches.get_view_patch());
 	}
 
+		reset_params_.reset(module_idx, patches.get_view_patch());
 	static void menu_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -184,6 +187,7 @@ private:
 
 	ModuleViewAutoMapDialog auto_map;
 	RandomizeParams randomizer;
+	ResetParams reset_params_;
 
 	unsigned module_idx = 0;
 	lv_group_t *group;
