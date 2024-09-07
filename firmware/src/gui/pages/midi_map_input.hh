@@ -63,6 +63,8 @@ struct MidiMapPopup {
 
 		lv_dropdown_set_selected(ui_MidiMapCCDrop, 20);
 		lv_dropdown_set_selected(ui_MidiMapGateDrop, 60);
+
+		lv_label_set_text(ui_MidiMapNoteLabel, "Note:");
 	}
 
 	void init(lv_obj_t *page_base, lv_group_t *current_group) {
