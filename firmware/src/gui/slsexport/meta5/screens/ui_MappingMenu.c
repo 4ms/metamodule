@@ -617,6 +617,46 @@ lv_obj_set_style_text_line_space(ui_ControlButtonLabel, 0, LV_PART_MAIN| LV_STAT
 lv_obj_set_style_text_align(ui_ControlButtonLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_ControlButtonLabel, &ui_font_MuseoSansRounded50016, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_ResetButton = lv_btn_create(ui_MappingParameters);
+lv_obj_set_width( ui_ResetButton, lv_pct(100));
+lv_obj_set_height( ui_ResetButton, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_ResetButton, 0 );
+lv_obj_set_y( ui_ResetButton, 108 );
+lv_obj_set_align( ui_ResetButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_ResetButton, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_clear_flag( ui_ResetButton, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+lv_obj_set_style_radius(ui_ResetButton, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_ResetButton, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_ResetButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_ResetButton, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_ResetButton, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_ResetButton, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_ResetButton, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_ResetButton, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_PRESSED );
+lv_obj_set_style_outline_opa(ui_ResetButton, 255, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_outline_width(ui_ResetButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_outline_pad(ui_ResetButton, 0, LV_PART_MAIN| LV_STATE_PRESSED);
+lv_obj_set_style_outline_color(ui_ResetButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUSED );
+lv_obj_set_style_outline_opa(ui_ResetButton, 255, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_ResetButton, 2, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_ResetButton, 3, LV_PART_MAIN| LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_ResetButton, lv_color_hex(0xFD8B18), LV_PART_MAIN | LV_STATE_FOCUS_KEY );
+lv_obj_set_style_outline_opa(ui_ResetButton, 255, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_ResetButton, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_ResetButton, 3, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
+
+ui_ResetButtonLabel = lv_label_create(ui_ResetButton);
+lv_obj_set_width( ui_ResetButtonLabel, lv_pct(100));
+lv_obj_set_height( ui_ResetButtonLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_ResetButtonLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_ResetButtonLabel,"Reset");
+lv_obj_set_style_text_color(ui_ResetButtonLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_ResetButtonLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_letter_space(ui_ResetButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_line_space(ui_ResetButtonLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_align(ui_ResetButtonLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_ResetButtonLabel, &ui_font_MuseoSansRounded50016, LV_PART_MAIN| LV_STATE_DEFAULT);
+
 ui_MappedPanel = lv_obj_create(ui_MappingParameters);
 lv_obj_set_width( ui_MappedPanel, lv_pct(100));
 lv_obj_set_height( ui_MappedPanel, LV_SIZE_CONTENT);   /// 1

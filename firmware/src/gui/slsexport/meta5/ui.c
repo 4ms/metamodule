@@ -199,6 +199,8 @@ lv_obj_t *ui_Module_Name;
 lv_obj_t *ui_Element_Name;
 lv_obj_t *ui_ControlButton;
 lv_obj_t *ui_ControlButtonLabel;
+lv_obj_t *ui_ResetButton;
+lv_obj_t *ui_ResetButtonLabel;
 lv_obj_t *ui_MappedPanel;
 lv_obj_t *ui_MappedListTitle;
 lv_obj_t *ui_MappedListPane;

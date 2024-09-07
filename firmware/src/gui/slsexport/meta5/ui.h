@@ -201,6 +201,8 @@ extern lv_obj_t *ui_Module_Name;
 extern lv_obj_t *ui_Element_Name;
 extern lv_obj_t *ui_ControlButton;
 extern lv_obj_t *ui_ControlButtonLabel;
+extern lv_obj_t *ui_ResetButton;
+extern lv_obj_t *ui_ResetButtonLabel;
 extern lv_obj_t *ui_MappedPanel;
 extern lv_obj_t *ui_MappedListTitle;
 extern lv_obj_t *ui_MappedListPane;
