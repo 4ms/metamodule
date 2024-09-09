@@ -91,14 +91,7 @@ struct KnobMapPage : PageBase {
 		lv_label_set_text(ui_ModuleMapName, fullname.module_name.data());
 		lv_label_set_text(ui_KnobMapName, fullname.element_name.data());
 
-		if (map.alias_name.length()) {
-			lv_textarea_set_text(ui_AliasTextArea, map.alias_name.data());
-		} else {
-			char name[64]{};
-			snprintf(name, 64, "%s %s", fullname.module_name.data(), fullname.element_name.data());
-			lv_textarea_set_text(ui_AliasTextArea, "");
-			lv_textarea_set_placeholder_text(ui_AliasTextArea, name);
-		}
+		update_alias_text_area();
 
 		auto panel_name = get_panel_name<PanelDef>(ParamElement{}, map.panel_knob_id);
 		lv_label_set_text_fmt(
@@ -137,7 +130,10 @@ struct KnobMapPage : PageBase {
 	void update() override {
 		if (gui_state.back_button.is_just_released()) {
 			if (kb_visible) {
-				hide_keyboard();
+				if (map.alias_name.is_equal(lv_textarea_get_text(ui_AliasTextArea)))
+					save_knob_alias(false);
+				else
+					del_popup.show([this](bool ok) { save_knob_alias(ok); }, "Do you want to keep your edits?", "Keep");
 			} else if (del_popup.is_visible()) {
 				del_popup.hide();
 			} else {
@@ -213,10 +209,6 @@ struct KnobMapPage : PageBase {
 			lv_obj_add_state(ui_AliasTextArea, LV_STATE_USER_1);
 			lv_group_add_obj(page->group, ui_Keyboard);
 			lv_group_focus_obj(ui_Keyboard);
-		} else {
-			page->hide_keyboard();
-			page->map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
-			page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
 		}
 	}
 
@@ -226,9 +218,7 @@ struct KnobMapPage : PageBase {
 
 		auto page = static_cast<KnobMapPage *>(event->user_data);
 		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
-			page->hide_keyboard();
-			page->map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
-			page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
+			page->save_knob_alias(event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL);
 		}
 	}
 
@@ -294,12 +284,31 @@ struct KnobMapPage : PageBase {
 			"Trash");
 	}
 
-	void hide_keyboard() {
+	void save_knob_alias(bool save) {
 		lv_obj_clear_state(ui_AliasTextArea, LV_STATE_USER_1);
 		lv_group_focus_obj(ui_AliasTextArea);
 		lv_group_remove_obj(ui_Keyboard);
 		lv_hide(ui_Keyboard);
 		kb_visible = false;
+
+		if (save) {
+			map.alias_name = lv_textarea_get_text(ui_AliasTextArea);
+			patch->add_update_mapped_knob(view_set_idx, map);
+		}
+
+		update_alias_text_area();
+	}
+
+	void update_alias_text_area() {
+		const auto fullname = get_full_element_name(map.module_id, map.param_id, ElementType::Param, *patch);
+		if (map.alias_name.length()) {
+			lv_textarea_set_text(ui_AliasTextArea, map.alias_name.data());
+		} else {
+			char name[64]{};
+			snprintf(name, 64, "%s %s", fullname.module_name.data(), fullname.element_name.data());
+			lv_textarea_set_text(ui_AliasTextArea, "");
+			lv_textarea_set_placeholder_text(ui_AliasTextArea, name);
+		}
 	}
 
 private:
