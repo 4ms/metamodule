@@ -35,6 +35,8 @@ struct KnobSetViewPage : PageBase {
 
 		lv_obj_add_event_cb(ui_NextKnobSet, next_knobset_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ActivateKnobSet, activate_knobset_cb, LV_EVENT_CLICKED, this);
+
+		kb_popup.init(base, group);
 	}
 
 	void prepare_focus() override {
@@ -100,7 +102,7 @@ struct KnobSetViewPage : PageBase {
 			return;
 		knobset = &patch->knob_sets[ks_idx];
 
-		lv_textarea_set_text(ui_KnobSetNameText, patch->valid_knob_set_name(ks_idx));
+		update_knobset_text_area();
 
 		// Set mappings in knobset
 		unsigned num_maps[PanelDef::NumKnobs]{};
@@ -230,9 +232,11 @@ struct KnobSetViewPage : PageBase {
 
 		if (gui_state.back_button.is_just_released()) {
 			if (kb_visible) {
-				hide_keyboard();
+				kb_popup.show([this](bool ok) { save_knobset_name(ok); }, "Do you want to save your edits?", "Save");
 			} else if (page_list.request_last_page()) {
 				blur();
+			} else if (kb_popup.is_visible()) {
+				kb_popup.hide();
 			}
 		}
 
@@ -268,12 +272,29 @@ struct KnobSetViewPage : PageBase {
 		lv_obj_add_state(ui_KnobSetNameText, LV_STATE_USER_1);
 	}
 
-	void hide_keyboard() {
+	void save_knobset_name(bool save) {
 		lv_obj_clear_state(ui_KnobSetNameText, LV_STATE_USER_1);
 		lv_group_focus_obj(ui_KnobSetNameText);
 		lv_group_remove_obj(ui_Keyboard);
 		lv_hide(ui_Keyboard);
 		kb_visible = false;
+
+		if (save) {
+			knobset->name = lv_textarea_get_text(ui_KnobSetNameText);
+			patches.mark_view_patch_modified();
+		}
+
+		update_knobset_text_area();
+	}
+
+	void update_knobset_text_area() {
+		if (!args.view_knobset_id)
+			return;
+		auto ks_idx = args.view_knobset_id.value();
+		if (ks_idx >= patch->knob_sets.size())
+			return;
+		knobset = &patch->knob_sets[ks_idx];
+		lv_textarea_set_text(ui_KnobSetNameText, patch->valid_knob_set_name(ks_idx));
 	}
 
 	static void keyboard_cb(lv_event_t *event) {
@@ -282,11 +303,7 @@ struct KnobSetViewPage : PageBase {
 		auto page = static_cast<KnobSetViewPage *>(event->user_data);
 
 		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
-			page->hide_keyboard();
-			if (page->knobset == nullptr)
-				return;
-			page->knobset->name = lv_textarea_get_text(ui_KnobSetNameText);
-			page->patches.mark_view_patch_modified();
+			page->save_knobset_name(true);
 		}
 	}
 
@@ -397,6 +414,7 @@ private:
 	lv_obj_t *base = nullptr;
 	MappedKnobSet *knobset = nullptr;
 	PatchData *patch;
+	ConfirmPopup kb_popup;
 	bool is_actively_playing = false;
 
 	bool is_patch_playing = false;
