@@ -152,24 +152,11 @@ struct ModuleViewPage : PageBase {
 		ElementCount::Counts last_type{};
 
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
-			auto &drawn = drawn_element.gui_element;
+			auto &gui_el = drawn_element.gui_element;
 
-			// Watch Lights
-			// TODO: watch_lights(drawn_element);
-			std::visit(overloaded{
-						   [&](auto const &el) {
-							   for (unsigned i = 0; i < drawn.count.num_lights; i++) {
-								   params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
-							   }
-						   },
-						   [&](DynamicTextDisplay const &el) {
-							   params.displays.start_watching_display(this_module_id, drawn.idx.light_idx);
-						   },
-					   },
-					   drawn_element.element);
-			//////
+			watch_lights(drawn_element);
 
-			add_button(drawn.obj);
+			add_button(gui_el.obj);
 
 			auto base = base_element(drawn_element.element);
 
@@ -178,66 +165,33 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
-			// Skip lights
-			// TODO: if (is_light_only(drawn)) continue;
-			if (drawn.count.num_lights > 0 && drawn.count.num_params == 0 && drawn.count.num_outputs == 0 &&
-				drawn.count.num_inputs == 0)
-			{
+			if (is_light_only(gui_el))
 				continue;
-			}
 
-			// TODO: if (should_skip_for_cable_mode(gui_state.new_cable, drawn)) continue;
-			if (gui_state.new_cable.has_value()) {
-				uint16_t this_jack_id{};
-				if (drawn.count.num_inputs > 0)
-					this_jack_id = drawn.idx.input_idx;
-				else if (drawn.count.num_outputs > 0)
-					this_jack_id = drawn.idx.output_idx;
-				else
-					continue;
-				auto this_jack_type = (drawn.count.num_inputs > 0) ? ElementType::Input : ElementType::Output;
-				if (!can_finish_cable(gui_state.new_cable.value(),
-									  patch,
-									  Jack{.module_id = this_module_id, .jack_id = this_jack_id},
-									  this_jack_type,
-									  drawn.mapped_panel_id.has_value()))
-					continue;
-			}
+			if (should_skip_for_cable_mode(gui_state.new_cable, gui_el))
+				continue;
 
-			// TODO: if (append_header(last_type, drawn.count, opts)) {roller_idx++; roler_drawn_el_idx.push_back(-1);}
-			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
-				opts += Gui::orange_highlight_html_str + "Params:" + LV_TXT_COLOR_CMD + "\n";
-				roller_idx++;
-				roller_drawn_el_idx.push_back(-1);
-
-			} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
-					   (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0))
-			{
-				opts += Gui::orange_highlight_html_str + "Jacks:" + LV_TXT_COLOR_CMD + "\n";
-				roller_idx++;
-				roller_drawn_el_idx.push_back(-1);
-
-			} else if (last_type.num_lights == 0 && drawn.count.num_lights > 0 && drawn.count.num_params == 0) {
-				opts += Gui::orange_highlight_html_str + "Lights:" + LV_TXT_COLOR_CMD + "\n";
+			if (append_header(opts, last_type, gui_el.count)) {
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 			}
-			last_type = drawn.count;
+			last_type = gui_el.count;
 
 			opts.append(" ");
 			opts.append(base.short_name);
 
-			if (drawn.mapped_panel_id) {
-				append_panel_name(opts, drawn_element.element, drawn.mapped_panel_id.value());
+			if (gui_el.mapped_panel_id) {
+				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
 			}
 
-			append_connected_jack_name(opts, drawn, *patch);
+			append_connected_jack_name(opts, gui_el, *patch);
 
 			opts += "\n";
 			roller_drawn_el_idx.push_back(drawn_el_idx);
 
+			// Pre-select an element
 			if (args.element_indices.has_value()) {
-				if (ElementCount::matched(*args.element_indices, drawn.idx)) {
+				if (ElementCount::matched(*args.element_indices, gui_el.idx)) {
 					cur_selected = roller_idx;
 					cur_el = &drawn_element;
 				}
@@ -288,6 +242,66 @@ struct ModuleViewPage : PageBase {
 			mapping_pane.show(*cur_el);
 		} else {
 			show_roller();
+		}
+	}
+
+	void watch_lights(DrawnElement const &drawn_element) {
+		auto gui_el = drawn_element.gui_element;
+		std::visit(overloaded{
+					   [&](auto const &el) {
+						   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
+							   params.lights.start_watching_light(this_module_id, gui_el.idx.light_idx + i);
+						   }
+					   },
+					   [&](DynamicTextDisplay const &el) {
+						   params.displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
+					   },
+				   },
+				   drawn_element.element);
+	}
+
+	bool is_light_only(GuiElement const &gui_el) const {
+		return (gui_el.count.num_lights > 0) && (gui_el.count.num_params == 0) && (gui_el.count.num_outputs == 0) &&
+			   (gui_el.count.num_inputs == 0);
+	}
+
+	bool should_skip_for_cable_mode(std::optional<GuiState::CableBeginning> const &new_cable,
+									GuiElement const &gui_el) const {
+		if (gui_state.new_cable.has_value()) {
+			uint16_t this_jack_id{};
+			if (gui_el.count.num_inputs > 0)
+				this_jack_id = gui_el.idx.input_idx;
+			else if (gui_el.count.num_outputs > 0)
+				this_jack_id = gui_el.idx.output_idx;
+			else
+				return true;
+			auto this_jack_type = (gui_el.count.num_inputs > 0) ? ElementType::Input : ElementType::Output;
+			if (!can_finish_cable(gui_state.new_cable.value(),
+								  patch,
+								  Jack{.module_id = this_module_id, .jack_id = this_jack_id},
+								  this_jack_type,
+								  gui_el.mapped_panel_id.has_value()))
+				return true;
+		}
+		return false;
+	}
+
+	bool append_header(std::string &opts, ElementCount::Counts last_type, ElementCount::Counts this_type) {
+		if (last_type.num_params == 0 && this_type.num_params > 0) {
+			opts += Gui::orange_highlight_html_str + "Params:" + LV_TXT_COLOR_CMD + "\n";
+			return true;
+
+		} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
+				   (this_type.num_inputs > 0 || this_type.num_outputs > 0))
+		{
+			opts += Gui::orange_highlight_html_str + "Jacks:" + LV_TXT_COLOR_CMD + "\n";
+			return true;
+
+		} else if (last_type.num_lights == 0 && this_type.num_lights > 0 && this_type.num_params == 0) {
+			opts += Gui::orange_highlight_html_str + "Lights:" + LV_TXT_COLOR_CMD + "\n";
+			return true;
+		} else {
+			return false;
 		}
 	}
 
