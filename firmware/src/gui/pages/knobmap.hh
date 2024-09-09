@@ -130,7 +130,10 @@ struct KnobMapPage : PageBase {
 	void update() override {
 		if (gui_state.back_button.is_just_released()) {
 			if (kb_visible) {
-				del_popup.show([this](bool ok) { save_knob_alias(ok); }, "Do you want to save your edits?", "Save");
+				if (map.alias_name.is_equal(lv_textarea_get_text(ui_AliasTextArea)))
+					save_knob_alias(false);
+				else
+					del_popup.show([this](bool ok) { save_knob_alias(ok); }, "Do you want to keep your edits?", "Keep");
 			} else if (del_popup.is_visible()) {
 				del_popup.hide();
 			} else {

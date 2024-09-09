@@ -232,7 +232,12 @@ struct KnobSetViewPage : PageBase {
 
 		if (gui_state.back_button.is_just_released()) {
 			if (kb_visible) {
-				kb_popup.show([this](bool ok) { save_knobset_name(ok); }, "Do you want to save your edits?", "Save");
+				if (knobset->name.is_equal(lv_textarea_get_text(ui_KnobSetNameText))) {
+					save_knobset_name(false);
+				} else {
+					kb_popup.show(
+						[this](bool ok) { save_knobset_name(ok); }, "Do you want to keep your edits?", "Keep");
+				}
 			} else if (page_list.request_last_page()) {
 				blur();
 			} else if (kb_popup.is_visible()) {
@@ -294,7 +299,8 @@ struct KnobSetViewPage : PageBase {
 		if (ks_idx >= patch->knob_sets.size())
 			return;
 		knobset = &patch->knob_sets[ks_idx];
-		lv_textarea_set_text(ui_KnobSetNameText, patch->valid_knob_set_name(ks_idx));
+		knobset->name = patch->valid_knob_set_name(ks_idx);
+		lv_textarea_set_text(ui_KnobSetNameText, knobset->name.c_str());
 	}
 
 	static void keyboard_cb(lv_event_t *event) {
