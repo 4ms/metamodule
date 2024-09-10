@@ -1,152 +1,738 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="70.9mm" height="130.5mm" viewBox="0 0 200.98 369.91">
-  <g id="faceplate">
-    <g id="art">
-      <g id="panel">
-        <rect x=".36" y=".12" width="200.44" height="364" style="fill: #eeeded; stroke-width: 0px;"/>
-        <path d="M200.68.25v363.75H.49V.25h200.19M200.93,0H.24v364.25h200.69V0h0Z" style="fill: #9b9c9d; stroke-width: 0px;"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="70.9mm"
+   height="130.5mm"
+   viewBox="0 0 200.98 369.91"
+   version="1.1"
+   id="svg78"
+   sodipodi:docname="Tides2_info.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs78" />
+  <sodipodi:namedview
+     id="namedview78"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="2.4653895"
+     inkscape:cx="133.85309"
+     inkscape:cy="246.61417"
+     inkscape:window-width="2512"
+     inkscape:window-height="1387"
+     inkscape:window-x="50"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="components" />
+  <g
+     id="faceplate">
+    <g
+       id="art">
+      <g
+         id="panel">
+        <rect
+           x=".36"
+           y=".12"
+           width="200.44"
+           height="364"
+           style="fill: #eeeded; stroke-width: 0px;"
+           id="rect1" />
+        <path
+           d="M200.68.25v363.75H.49V.25h200.19M200.93,0H.24v364.25h200.69V0h0Z"
+           style="fill: #9b9c9d; stroke-width: 0px;"
+           id="path1" />
       </g>
-      <path d="M197.99,341.3c.35-.71.56-1.5.56-2.33l-.02-67.67c-.32-8.11-6.73-14.46-14.6-14.46H17.61c-7.86,0-14.27,6.35-14.59,14.47l-.06,5.72.06,49.99-.02,11.95c0,3.17,2.88,5.75,6.41,5.75h182.72c.29,0,.57-.02.85-.06,2.29-.17,4.2-1.52,5.01-3.36ZM4.04,338.97v-8.32h.03l-.07-53.61.06-5.7c.3-7.58,6.25-13.51,13.55-13.51h166.32c7.3,0,13.25,5.93,13.56,13.5v24.89s-.28,0-.28,0h-116.81c-7.85,0-14.22,6.6-14.22,14.74v32.79H9.41c-2.96,0-5.37-2.14-5.37-4.77Z" style="stroke-width: 0px;"/>
-      <line x1="100.58" y1="72.28" x2="100.58" y2="113.39" style="fill: none; stroke: #000; stroke-linejoin: round;"/>
-      <line x1="36.47" y1="45.9" x2="20.11" y2="45.9" style="fill: none; stroke: #000; stroke-linejoin: round;"/>
-      <line x1="180.74" y1="45.9" x2="164.58" y2="45.9" style="fill: none; stroke: #000; stroke-linejoin: round;"/>
-      <rect y="18.35" width="200.98" height="14.17" style="fill: #010101; stroke-width: 0px;"/>
-      <g>
-        <polygon points="116.66 63.42 114.42 72.59 123.01 72.59 120.49 63.42 116.66 63.42" style="fill: #09b8ed; stroke-width: 0px;"/>
-        <polygon points="111.03 57.19 111.03 72.59 111.85 72.59 114.69 60.92 122.4 60.92 125.6 72.59 126.43 72.59 126.43 57.19 111.03 57.19" style="fill: #09b8ed; stroke-width: 0px;"/>
+      <path
+         d="M197.99,341.3c.35-.71.56-1.5.56-2.33l-.02-67.67c-.32-8.11-6.73-14.46-14.6-14.46H17.61c-7.86,0-14.27,6.35-14.59,14.47l-.06,5.72.06,49.99-.02,11.95c0,3.17,2.88,5.75,6.41,5.75h182.72c.29,0,.57-.02.85-.06,2.29-.17,4.2-1.52,5.01-3.36ZM4.04,338.97v-8.32h.03l-.07-53.61.06-5.7c.3-7.58,6.25-13.51,13.55-13.51h166.32c7.3,0,13.25,5.93,13.56,13.5v24.89s-.28,0-.28,0h-116.81c-7.85,0-14.22,6.6-14.22,14.74v32.79H9.41c-2.96,0-5.37-2.14-5.37-4.77Z"
+         style="stroke-width: 0px;"
+         id="path2" />
+      <line
+         x1="100.58"
+         y1="72.28"
+         x2="100.58"
+         y2="113.39"
+         style="fill: none; stroke: #000; stroke-linejoin: round;"
+         id="line2" />
+      <line
+         x1="36.47"
+         y1="45.9"
+         x2="20.11"
+         y2="45.9"
+         style="fill: none; stroke: #000; stroke-linejoin: round;"
+         id="line3" />
+      <line
+         x1="180.74"
+         y1="45.9"
+         x2="164.58"
+         y2="45.9"
+         style="fill: none; stroke: #000; stroke-linejoin: round;"
+         id="line4" />
+      <rect
+         y="18.35"
+         width="200.98"
+         height="14.17"
+         style="fill: #010101; stroke-width: 0px;"
+         id="rect4" />
+      <g
+         id="g5">
+        <polygon
+           points="116.66 63.42 114.42 72.59 123.01 72.59 120.49 63.42 116.66 63.42"
+           style="fill: #09b8ed; stroke-width: 0px;"
+           id="polygon4" />
+        <polygon
+           points="111.03 57.19 111.03 72.59 111.85 72.59 114.69 60.92 122.4 60.92 125.6 72.59 126.43 72.59 126.43 57.19 111.03 57.19"
+           style="fill: #09b8ed; stroke-width: 0px;"
+           id="polygon5" />
       </g>
-      <g>
-        <polygon points="88.56 72.59 82.43 64.53 76.3 72.59 88.56 72.59" style="fill: #00af66; stroke-width: 0px;"/>
-        <polygon points="82.43 60.4 90.14 70.52 90.14 57.19 74.73 57.19 74.73 70.52 82.43 60.4" style="fill: #00af66; stroke-width: 0px;"/>
-        <polygon points="90.13 72.59 90.14 72.59 90.14 72.59 90.13 72.59" style="fill: #00af66; stroke-width: 0px;"/>
-        <polygon points="74.73 72.59 74.73 72.59 74.73 72.59 74.73 72.59" style="fill: #00af66; stroke-width: 0px;"/>
+      <g
+         id="g9">
+        <polygon
+           points="88.56 72.59 82.43 64.53 76.3 72.59 88.56 72.59"
+           style="fill: #00af66; stroke-width: 0px;"
+           id="polygon6" />
+        <polygon
+           points="82.43 60.4 90.14 70.52 90.14 57.19 74.73 57.19 74.73 70.52 82.43 60.4"
+           style="fill: #00af66; stroke-width: 0px;"
+           id="polygon7" />
+        <polygon
+           points="90.13 72.59 90.14 72.59 90.14 72.59 90.13 72.59"
+           style="fill: #00af66; stroke-width: 0px;"
+           id="polygon8" />
+        <polygon
+           points="74.73 72.59 74.73 72.59 74.73 72.59 74.73 72.59"
+           style="fill: #00af66; stroke-width: 0px;"
+           id="polygon9" />
       </g>
-      <g>
-        <polygon points="95.14 65.23 97.37 59.29 99.51 64.96 101.64 59.29 103.78 64.96 105.81 59.57 108.28 64.75 108.28 57.19 92.88 57.19 92.88 60.5 95.14 65.23" style="fill: #f97d9e; stroke-width: 0px;"/>
-        <polygon points="106.02 64.54 103.77 70.49 101.64 64.82 99.51 70.49 97.37 64.82 95.34 70.21 92.88 65.04 92.88 72.59 108.28 72.59 108.28 69.29 106.02 64.54" style="fill: #f97d9e; stroke-width: 0px;"/>
+      <g
+         id="g11">
+        <polygon
+           points="95.14 65.23 97.37 59.29 99.51 64.96 101.64 59.29 103.78 64.96 105.81 59.57 108.28 64.75 108.28 57.19 92.88 57.19 92.88 60.5 95.14 65.23"
+           style="fill: #f97d9e; stroke-width: 0px;"
+           id="polygon10" />
+        <polygon
+           points="106.02 64.54 103.77 70.49 101.64 64.82 99.51 70.49 97.37 64.82 95.34 70.21 92.88 65.04 92.88 72.59 108.28 72.59 108.28 69.29 106.02 64.54"
+           style="fill: #f97d9e; stroke-width: 0px;"
+           id="polygon11" />
       </g>
-      <path d="M183.27,100.29c.16-4.5,3.39-4.25,3.39-4.25,0,0,3.3-.25,3.46,4.25" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <path d="M118.56,100.01s2.36.07,3.43-3.68c1.09,3.76,3.43,3.68,3.43,3.68" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <path d="M180.45,121.55s-3.72.98-3.9-4.05v-.04s-3.72-.98-3.9,4.05" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <path d="M128.48,121.55s3.9.09,3.9-4.09h0s3.72-1.01,3.9,4.17" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <path d="M185.43,77.61s-.96.02-1.91-1.03c-.94-1.06-1.79-3.22-2.54-3.22h-.12c-.75,0-1.46,2.16-2.4,3.22-.94,1.06-1.91,1.03-1.91,1.03" style="fill: none; stroke: #000; stroke-linejoin: round;"/>
-      <path d="M132.96,77.79c-.26-.85-1.27-1.97-2.04-2.56-.66-.51-1.27-.97-1.56-1.69-.28.72-.84,1.3-1.56,1.69-.78.43-1.78,1.71-2.04,2.56" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <polyline points="150.44 64.92 154.55 59.96 158.95 64.92" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <polyline points="48.61 196.95 58.27 191.55 58.27 196.95" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <polyline points="17.63 196.95 7.96 191.55 7.96 196.95" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <polyline points="28.61 149.06 32.72 144.1 37.12 149.06" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <polyline points="96.11 134.27 100.21 129.31 104.61 134.27" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <polyline points="114.48 182.68 115.9 180.92 115.16 178.78 117.39 178.35 118.2 176.23 120.18 177.33 122.16 176.23 122.97 178.35 125.2 178.78 124.46 180.92 125.88 182.68" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <path d="M76.02,181.41c.05-2.69,2.43-5.89,4.29-3.13,2.11,4.08,4.82,3.3,5.45-1.53" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-      <path d="M128.46,35.33v17.01h17.01v-17.01h-17.01ZM137.36,50.44h-7v-2.76h7v2.76ZM140.87,45.21h-7.39v-2.76h7.39v2.76ZM143.72,39.95h-7v-2.76h7v2.76Z" style="fill: #f97d9e; stroke-width: 0px;"/>
-      <path d="M108.66,35.33v17.01s17.01,0,17.01,0v-17.01s-17.01,0-17.01,0ZM120.1,44.69h2.21v5.41h-2.21v-5.41ZM116.06,41.07h2.21v9.02h-2.21v-9.02ZM112.03,37.57h2.21v12.52h-2.21v-12.52Z" style="fill: #00af66; stroke-width: 0px;"/>
-      <path d="M148.25,35.33v17.01h17.01v-17.01h-17.01ZM159.15,42.54h1.75v1.84h-1.75v-1.84ZM149.84,43.2l2.64-2.64-2.64-2.64,1.23-1.23,2.64,2.64,2.64-2.64,1.23,1.23-2.64,2.64,2.54,2.55-1.23,1.23-2.54-2.55-2.64,2.64-1.23-1.23ZM160.9,51.07h-1.75v-1.84h1.75v1.84ZM164.15,47.68h-8.24v-1.75h8.24v1.75Z" style="fill: #09b8ed; stroke-width: 0px;"/>
-      <g>
-        <path d="M48.59,42.91c.36,0,.65-.16.89-.47s.36-.7.36-1.15c0-.48-.11-.86-.34-1.14s-.53-.42-.91-.42-.69.14-.92.41-.34.66-.34,1.15.12.86.36,1.17.54.45.91.45Z" style="fill: #00af66; stroke-width: 0px;"/>
-        <path d="M48.61,44.45c-.45,0-.81.16-1.08.47s-.41.74-.41,1.27.13.97.4,1.28c.27.31.63.47,1.08.47s.81-.16,1.06-.47.39-.73.39-1.25-.13-.94-.4-1.27-.61-.5-1.04-.5Z" style="fill: #00af66; stroke-width: 0px;"/>
-        <path d="M35.83,35.33v17.01h17.01v-17.01h-17.01ZM38.58,49.36h-1.9v-11.05h1.9v11.05ZM41.45,49.5h-1.32l2.77-11.33h1.32l-2.77,11.33ZM51.54,47.94c-.29.49-.7.88-1.22,1.15-.52.27-1.1.41-1.73.41-.99,0-1.8-.3-2.44-.9-.64-.6-.96-1.37-.96-2.32,0-.63.13-1.16.38-1.59s.63-.79,1.14-1.08c-.85-.57-1.28-1.36-1.28-2.36,0-.91.3-1.65.89-2.22s1.35-.86,2.27-.86,1.68.29,2.27.86.88,1.32.88,2.23c0,1-.43,1.78-1.28,2.35.53.3.92.67,1.16,1.12s.36.96.36,1.56-.15,1.16-.44,1.66Z" style="fill: #00af66; stroke-width: 0px;"/>
+      <path
+         d="M183.27,100.29c.16-4.5,3.39-4.25,3.39-4.25,0,0,3.3-.25,3.46,4.25"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="path11" />
+      <path
+         d="M118.56,100.01s2.36.07,3.43-3.68c1.09,3.76,3.43,3.68,3.43,3.68"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="path12" />
+      <path
+         d="M180.45,121.55s-3.72.98-3.9-4.05v-.04s-3.72-.98-3.9,4.05"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="path13" />
+      <path
+         d="M128.48,121.55s3.9.09,3.9-4.09h0s3.72-1.01,3.9,4.17"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="path14" />
+      <path
+         d="M185.43,77.61s-.96.02-1.91-1.03c-.94-1.06-1.79-3.22-2.54-3.22h-.12c-.75,0-1.46,2.16-2.4,3.22-.94,1.06-1.91,1.03-1.91,1.03"
+         style="fill: none; stroke: #000; stroke-linejoin: round;"
+         id="path15" />
+      <path
+         d="M132.96,77.79c-.26-.85-1.27-1.97-2.04-2.56-.66-.51-1.27-.97-1.56-1.69-.28.72-.84,1.3-1.56,1.69-.78.43-1.78,1.71-2.04,2.56"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="path16" />
+      <polyline
+         points="150.44 64.92 154.55 59.96 158.95 64.92"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="polyline16" />
+      <polyline
+         points="48.61 196.95 58.27 191.55 58.27 196.95"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="polyline17" />
+      <polyline
+         points="17.63 196.95 7.96 191.55 7.96 196.95"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="polyline18" />
+      <polyline
+         points="28.61 149.06 32.72 144.1 37.12 149.06"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="polyline19" />
+      <polyline
+         points="96.11 134.27 100.21 129.31 104.61 134.27"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="polyline20" />
+      <polyline
+         points="114.48 182.68 115.9 180.92 115.16 178.78 117.39 178.35 118.2 176.23 120.18 177.33 122.16 176.23 122.97 178.35 125.2 178.78 124.46 180.92 125.88 182.68"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="polyline21" />
+      <path
+         d="M76.02,181.41c.05-2.69,2.43-5.89,4.29-3.13,2.11,4.08,4.82,3.3,5.45-1.53"
+         style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+         id="path21" />
+      <path
+         d="M128.46,35.33v17.01h17.01v-17.01h-17.01ZM137.36,50.44h-7v-2.76h7v2.76ZM140.87,45.21h-7.39v-2.76h7.39v2.76ZM143.72,39.95h-7v-2.76h7v2.76Z"
+         style="fill: #f97d9e; stroke-width: 0px;"
+         id="path22" />
+      <path
+         d="M108.66,35.33v17.01s17.01,0,17.01,0v-17.01s-17.01,0-17.01,0ZM120.1,44.69h2.21v5.41h-2.21v-5.41ZM116.06,41.07h2.21v9.02h-2.21v-9.02ZM112.03,37.57h2.21v12.52h-2.21v-12.52Z"
+         style="fill: #00af66; stroke-width: 0px;"
+         id="path23" />
+      <path
+         d="M148.25,35.33v17.01h17.01v-17.01h-17.01ZM159.15,42.54h1.75v1.84h-1.75v-1.84ZM149.84,43.2l2.64-2.64-2.64-2.64,1.23-1.23,2.64,2.64,2.64-2.64,1.23,1.23-2.64,2.64,2.54,2.55-1.23,1.23-2.54-2.55-2.64,2.64-1.23-1.23ZM160.9,51.07h-1.75v-1.84h1.75v1.84ZM164.15,47.68h-8.24v-1.75h8.24v1.75Z"
+         style="fill: #09b8ed; stroke-width: 0px;"
+         id="path24" />
+      <g
+         id="g27">
+        <path
+           d="M48.59,42.91c.36,0,.65-.16.89-.47s.36-.7.36-1.15c0-.48-.11-.86-.34-1.14s-.53-.42-.91-.42-.69.14-.92.41-.34.66-.34,1.15.12.86.36,1.17.54.45.91.45Z"
+           style="fill: #00af66; stroke-width: 0px;"
+           id="path25" />
+        <path
+           d="M48.61,44.45c-.45,0-.81.16-1.08.47s-.41.74-.41,1.27.13.97.4,1.28c.27.31.63.47,1.08.47s.81-.16,1.06-.47.39-.73.39-1.25-.13-.94-.4-1.27-.61-.5-1.04-.5Z"
+           style="fill: #00af66; stroke-width: 0px;"
+           id="path26" />
+        <path
+           d="M35.83,35.33v17.01h17.01v-17.01h-17.01ZM38.58,49.36h-1.9v-11.05h1.9v11.05ZM41.45,49.5h-1.32l2.77-11.33h1.32l-2.77,11.33ZM51.54,47.94c-.29.49-.7.88-1.22,1.15-.52.27-1.1.41-1.73.41-.99,0-1.8-.3-2.44-.9-.64-.6-.96-1.37-.96-2.32,0-.63.13-1.16.38-1.59s.63-.79,1.14-1.08c-.85-.57-1.28-1.36-1.28-2.36,0-.91.3-1.65.89-2.22s1.35-.86,2.27-.86,1.68.29,2.27.86.88,1.32.88,2.23c0,1-.43,1.78-1.28,2.35.53.3.92.67,1.16,1.12s.36.96.36,1.56-.15,1.16-.44,1.66Z"
+           style="fill: #00af66; stroke-width: 0px;"
+           id="path27" />
       </g>
-      <path d="M55.62,35.33v17.01h17.01v-17.01h-17.01ZM68.13,50.09h-8.01v-.26c.93-1.15,1.73-2.18,2.4-3.1.67-.92,1.19-1.68,1.55-2.28s.63-1.12.78-1.54.23-.86.23-1.32c0-.57-.18-1.04-.54-1.43s-.8-.58-1.32-.58c-.93,0-1.9.53-2.9,1.59v-2.42c1.06-.78,2.13-1.18,3.23-1.18,1.17,0,2.11.33,2.8,1s1.04,1.56,1.04,2.68c0,.85-.26,1.77-.77,2.76s-1.42,2.3-2.72,3.94h4.24v2.14Z" style="fill: #f97d9e; stroke-width: 0px;"/>
-      <path d="M75.41,35.33v17.01h17.01v-17.01h-17.01ZM83.86,47.62c-.47.31-.89.52-1.28.65s-.85.19-1.37.19c-.76,0-1.43-.19-2.03-.57-.6-.38-1.06-.93-1.41-1.64s-.51-1.5-.51-2.35c0-.91.18-1.73.53-2.45.35-.72.83-1.28,1.45-1.68.61-.39,1.31-.59,2.08-.59.41,0,.81.06,1.2.17.39.12.81.31,1.26.6v1.64c-.44-.32-.85-.55-1.23-.69-.38-.14-.77-.21-1.17-.21-.51,0-.97.13-1.38.4-.41.27-.73.64-.96,1.12-.23.48-.34,1.02-.34,1.61s.11,1.15.34,1.62c.23.48.55.85.96,1.11.41.26.87.39,1.39.39.39,0,.77-.07,1.13-.21.36-.14.81-.4,1.35-.77v1.64ZM89.68,47.73c-.59.49-1.36.74-2.32.74-.76,0-1.48-.17-2.18-.51v-1.59c.38.25.74.42,1.06.53.32.11.65.16.98.16.44,0,.81-.12,1.09-.36.28-.24.42-.55.42-.93,0-.42-.16-.76-.47-1.01s-.74-.38-1.28-.38h-.11v-1.4h.08c.51,0,.9-.11,1.19-.32s.43-.5.43-.86-.14-.65-.41-.86c-.28-.22-.63-.33-1.06-.33-.53,0-1.1.14-1.68.41v-1.42c.59-.26,1.26-.39,2-.39.88,0,1.59.21,2.13.62.54.42.81.97.81,1.65,0,.93-.44,1.62-1.32,2.07.51.17.89.45,1.15.84s.39.86.39,1.39c0,.8-.29,1.45-.88,1.94Z" style="fill: #09b8ed; stroke-width: 0px;"/>
-      <rect x="65.9" y="246.28" width="34.02" height="14.17" style="fill: #3babec; stroke-width: 0px;"/>
-      <g id="art_2" data-name="art 2">
-        <path d="M15.13,242.72h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
-        <path d="M51.98,242.72h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
-        <path d="M88.83,242.72h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
-        <path d="M125.68,242.72h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
-        <path d="M162.53,242.72h-3.94v-1.07h3.94v1.07Z" style="stroke-width: 0px;"/>
-        <path d="M43.29,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
-        <path d="M80.14,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
-        <path d="M116.99,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
-        <path d="M153.84,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
-        <path d="M190.69,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z" style="stroke-width: 0px;"/>
-        <g id="center">
-          <path d="M26.48,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
-          <path d="M26.48,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M26.48,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+      <path
+         d="M55.62,35.33v17.01h17.01v-17.01h-17.01ZM68.13,50.09h-8.01v-.26c.93-1.15,1.73-2.18,2.4-3.1.67-.92,1.19-1.68,1.55-2.28s.63-1.12.78-1.54.23-.86.23-1.32c0-.57-.18-1.04-.54-1.43s-.8-.58-1.32-.58c-.93,0-1.9.53-2.9,1.59v-2.42c1.06-.78,2.13-1.18,3.23-1.18,1.17,0,2.11.33,2.8,1s1.04,1.56,1.04,2.68c0,.85-.26,1.77-.77,2.76s-1.42,2.3-2.72,3.94h4.24v2.14Z"
+         style="fill: #f97d9e; stroke-width: 0px;"
+         id="path28" />
+      <path
+         d="M75.41,35.33v17.01h17.01v-17.01h-17.01ZM83.86,47.62c-.47.31-.89.52-1.28.65s-.85.19-1.37.19c-.76,0-1.43-.19-2.03-.57-.6-.38-1.06-.93-1.41-1.64s-.51-1.5-.51-2.35c0-.91.18-1.73.53-2.45.35-.72.83-1.28,1.45-1.68.61-.39,1.31-.59,2.08-.59.41,0,.81.06,1.2.17.39.12.81.31,1.26.6v1.64c-.44-.32-.85-.55-1.23-.69-.38-.14-.77-.21-1.17-.21-.51,0-.97.13-1.38.4-.41.27-.73.64-.96,1.12-.23.48-.34,1.02-.34,1.61s.11,1.15.34,1.62c.23.48.55.85.96,1.11.41.26.87.39,1.39.39.39,0,.77-.07,1.13-.21.36-.14.81-.4,1.35-.77v1.64ZM89.68,47.73c-.59.49-1.36.74-2.32.74-.76,0-1.48-.17-2.18-.51v-1.59c.38.25.74.42,1.06.53.32.11.65.16.98.16.44,0,.81-.12,1.09-.36.28-.24.42-.55.42-.93,0-.42-.16-.76-.47-1.01s-.74-.38-1.28-.38h-.11v-1.4h.08c.51,0,.9-.11,1.19-.32s.43-.5.43-.86-.14-.65-.41-.86c-.28-.22-.63-.33-1.06-.33-.53,0-1.1.14-1.68.41v-1.42c.59-.26,1.26-.39,2-.39.88,0,1.59.21,2.13.62.54.42.81.97.81,1.65,0,.93-.44,1.62-1.32,2.07.51.17.89.45,1.15.84s.39.86.39,1.39c0,.8-.29,1.45-.88,1.94Z"
+         style="fill: #09b8ed; stroke-width: 0px;"
+         id="path29" />
+      <rect
+         x="65.9"
+         y="246.28"
+         width="34.02"
+         height="14.17"
+         style="fill: #3babec; stroke-width: 0px;"
+         id="rect29" />
+      <g
+         id="art_2"
+         data-name="art 2">
+        <path
+           d="M15.13,242.72h-3.94v-1.07h3.94v1.07Z"
+           style="stroke-width: 0px;"
+           id="path30" />
+        <path
+           d="M51.98,242.72h-3.94v-1.07h3.94v1.07Z"
+           style="stroke-width: 0px;"
+           id="path31" />
+        <path
+           d="M88.83,242.72h-3.94v-1.07h3.94v1.07Z"
+           style="stroke-width: 0px;"
+           id="path32" />
+        <path
+           d="M125.68,242.72h-3.94v-1.07h3.94v1.07Z"
+           style="stroke-width: 0px;"
+           id="path33" />
+        <path
+           d="M162.53,242.72h-3.94v-1.07h3.94v1.07Z"
+           style="stroke-width: 0px;"
+           id="path34" />
+        <path
+           d="M43.29,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z"
+           style="stroke-width: 0px;"
+           id="path35" />
+        <path
+           d="M80.14,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z"
+           style="stroke-width: 0px;"
+           id="path36" />
+        <path
+           d="M116.99,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z"
+           style="stroke-width: 0px;"
+           id="path37" />
+        <path
+           d="M153.84,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z"
+           style="stroke-width: 0px;"
+           id="path38" />
+        <path
+           d="M190.69,242.15h-1.65v1.87h-.93v-1.87h-1.65v-1.06h1.65v-1.87h.93v1.87h1.65v1.06Z"
+           style="stroke-width: 0px;"
+           id="path39" />
+        <g
+           id="center">
+          <path
+             d="M26.48,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z"
+             style="fill: #171717; stroke-width: 0px;"
+             id="path40" />
+          <path
+             d="M26.48,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M26.48,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z"
+             style="fill: #ededed; stroke-width: 0px;"
+             id="path41" />
         </g>
-        <g id="center-2" data-name="center">
-          <path d="M63.33,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
-          <path d="M63.33,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M63.33,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+        <g
+           id="center-2"
+           data-name="center">
+          <path
+             d="M63.33,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z"
+             style="fill: #171717; stroke-width: 0px;"
+             id="path42" />
+          <path
+             d="M63.33,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M63.33,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z"
+             style="fill: #ededed; stroke-width: 0px;"
+             id="path43" />
         </g>
-        <g id="center-3" data-name="center">
-          <path d="M100.36,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
-          <path d="M100.36,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M100.36,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+        <g
+           id="center-3"
+           data-name="center">
+          <path
+             d="M100.36,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z"
+             style="fill: #171717; stroke-width: 0px;"
+             id="path44" />
+          <path
+             d="M100.36,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M100.36,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z"
+             style="fill: #ededed; stroke-width: 0px;"
+             id="path45" />
         </g>
-        <g id="center-4" data-name="center">
-          <path d="M137.39,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
-          <path d="M137.39,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M137.39,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+        <g
+           id="center-4"
+           data-name="center">
+          <path
+             d="M137.39,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z"
+             style="fill: #171717; stroke-width: 0px;"
+             id="path46" />
+          <path
+             d="M137.39,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M137.39,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z"
+             style="fill: #ededed; stroke-width: 0px;"
+             id="path47" />
         </g>
-        <g id="center-5" data-name="center">
-          <path d="M174.24,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z" style="fill: #171717; stroke-width: 0px;"/>
-          <path d="M174.24,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M174.24,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z" style="fill: #ededed; stroke-width: 0px;"/>
+        <g
+           id="center-5"
+           data-name="center">
+          <path
+             d="M174.24,217.73c-1.39,0-2.52-1.13-2.52-2.52s1.13-2.52,2.52-2.52,2.52,1.13,2.52,2.52-1.13,2.52-2.52,2.52Z"
+             style="fill: #171717; stroke-width: 0px;"
+             id="path48" />
+          <path
+             d="M174.24,213.43c.98,0,1.77.79,1.77,1.77s-.79,1.77-1.77,1.77-1.77-.79-1.77-1.77.79-1.77,1.77-1.77M174.24,211.93c-1.8,0-3.27,1.47-3.27,3.27s1.47,3.27,3.27,3.27,3.27-1.47,3.27-3.27-1.47-3.27-3.27-3.27h0Z"
+             style="fill: #ededed; stroke-width: 0px;"
+             id="path49" />
         </g>
-        <path d="M137.37,211.05c0-9.41,0-19.43,0-28.85.03-9.38-.04-18.53,1.88-27.26,1.27-6.1,3.49-13.05,5.8-18.83" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-        <path d="M63.29,211.05c0-9.41,0-19.43,0-28.85-.03-9.38.04-18.53-1.88-27.26-1.27-6.1-3.49-13.05-5.8-18.83" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-        <g id="Layer_7" data-name="Layer 7">
-          <path d="M64.61,227.96c-.96,11.87-3.62,26.6-10.83,29.41" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-          <path d="M26.93,227.96c-.96,11.87-1.6,26.6-8.81,29.41" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-          <path d="M99.69,227.93c.96,11.87,3.62,26.6,10.83,29.41" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-          <path d="M136.72,227.93c.96,11.87,3.62,26.6,10.83,29.41" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
-          <path d="M173.61,227.93c.96,11.87,1.6,26.6,8.81,29.41" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+        <path
+           d="M137.37,211.05c0-9.41,0-19.43,0-28.85.03-9.38-.04-18.53,1.88-27.26,1.27-6.1,3.49-13.05,5.8-18.83"
+           style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+           id="path50" />
+        <path
+           d="M63.29,211.05c0-9.41,0-19.43,0-28.85-.03-9.38.04-18.53-1.88-27.26-1.27-6.1-3.49-13.05-5.8-18.83"
+           style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+           id="path51" />
+        <g
+           id="Layer_7"
+           data-name="Layer 7">
+          <path
+             d="M64.61,227.96c-.96,11.87-3.62,26.6-10.83,29.41"
+             style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+             id="path52" />
+          <path
+             d="M26.93,227.96c-.96,11.87-1.6,26.6-8.81,29.41"
+             style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+             id="path53" />
+          <path
+             d="M99.69,227.93c.96,11.87,3.62,26.6,10.83,29.41"
+             style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+             id="path54" />
+          <path
+             d="M136.72,227.93c.96,11.87,3.62,26.6,10.83,29.41"
+             style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+             id="path55" />
+          <path
+             d="M173.61,227.93c.96,11.87,1.6,26.6,8.81,29.41"
+             style="fill: none; stroke: #000; stroke-miterlimit: 10;"
+             id="path56" />
         </g>
-        <g id="solid_divider" data-name="solid divider">
-          <g>
-            <line x1="1.62" y1="54.92" x2="2.12" y2="54.92" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
-            <line x1="5.1" y1="54.92" x2="198.12" y2="54.92" style="fill: none; stroke: #000; stroke-dasharray: 0 0 .99 2.98; stroke-linecap: round; stroke-linejoin: round;"/>
-            <line x1="199.61" y1="54.92" x2="200.11" y2="54.92" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
+        <g
+           id="solid_divider"
+           data-name="solid divider">
+          <g
+             id="g58">
+            <line
+               x1="1.62"
+               y1="54.92"
+               x2="2.12"
+               y2="54.92"
+               style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"
+               id="line56" />
+            <line
+               x1="5.1"
+               y1="54.92"
+               x2="198.12"
+               y2="54.92"
+               style="fill: none; stroke: #000; stroke-dasharray: 0 0 .99 2.98; stroke-linecap: round; stroke-linejoin: round;"
+               id="line57" />
+            <line
+               x1="199.61"
+               y1="54.92"
+               x2="200.11"
+               y2="54.92"
+               style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"
+               id="line58" />
           </g>
         </g>
       </g>
-      <line x1="8.57" y1="295.79" x2="64.61" y2="295.79" style="fill: none; stroke: #000; stroke-dasharray: 0 0 1 4; stroke-linecap: round; stroke-linejoin: round;"/>
-      <line x1="168.05" y1="141.51" x2="168.05" y2="155.68" style="fill: none; stroke: #171717; stroke-miterlimit: 10; stroke-width: 3px;"/>
-      <line x1="46.58" y1="57.19" x2="46.58" y2="71.36" style="fill: none; stroke: #171717; stroke-miterlimit: 10; stroke-width: 3px;"/>
+      <line
+         x1="8.57"
+         y1="295.79"
+         x2="64.61"
+         y2="295.79"
+         style="fill: none; stroke: #000; stroke-dasharray: 0 0 1 4; stroke-linecap: round; stroke-linejoin: round;"
+         id="line59" />
+      <line
+         x1="168.05"
+         y1="141.51"
+         x2="168.05"
+         y2="155.68"
+         style="fill: none; stroke: #171717; stroke-miterlimit: 10; stroke-width: 3px;"
+         id="line60" />
+      <line
+         x1="46.58"
+         y1="57.19"
+         x2="46.58"
+         y2="71.36"
+         style="fill: none; stroke: #171717; stroke-miterlimit: 10; stroke-width: 3px;"
+         id="line61" />
     </g>
-    <g id="text">
-      <text transform="translate(21.54 204.57) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Slope</tspan></text>
-      <text transform="translate(24.59 133.3) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Frequency</tspan></text>
-      <text transform="translate(141.86 133.3) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Shape</tspan></text>
-      <text transform="translate(74.94 192.55) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Smoothness</tspan></text>
-      <text transform="translate(12.44 337.78) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Trig</tspan></text>
-      <text transform="translate(42.51 337.78) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Clock</tspan></text>
-      <text transform="translate(82.09 357.47) scale(.82 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 11px; font-weight: 700;"><tspan x="0" y="0">TIDES 2</tspan></text>
-      <text transform="translate(72.15 256.63) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">V/OCT</tspan></text>
-      <text transform="translate(145.01 204.57) scale(.88 1)" style="font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Shift/Level</tspan></text>
+    <g
+       id="text">
+      <text
+         transform="translate(21.54 204.57) scale(.88 1)"
+         style="font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
+         id="text61"><tspan
+           x="0"
+           y="0"
+           id="tspan61">Slope</tspan></text>
+      <text
+         transform="translate(24.59 133.3) scale(.88 1)"
+         style="font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
+         id="text62"><tspan
+           x="0"
+           y="0"
+           id="tspan62">Frequency</tspan></text>
+      <text
+         transform="translate(141.86 133.3) scale(.88 1)"
+         style="font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
+         id="text63"><tspan
+           x="0"
+           y="0"
+           id="tspan63">Shape</tspan></text>
+      <text
+         transform="translate(74.94 192.55) scale(.88 1)"
+         style="font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
+         id="text64"><tspan
+           x="0"
+           y="0"
+           id="tspan64">Smoothness</tspan></text>
+      <text
+         transform="translate(12.44 337.78) scale(.88 1)"
+         style="font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
+         id="text65"><tspan
+           x="0"
+           y="0"
+           id="tspan65">Trig</tspan></text>
+      <text
+         transform="translate(42.51 337.78) scale(.88 1)"
+         style="font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
+         id="text66"><tspan
+           x="0"
+           y="0"
+           id="tspan66">Clock</tspan></text>
+      <text
+         transform="translate(82.09 357.47) scale(.82 1)"
+         style="font-family: GillSans-Bold, 'Gill Sans'; font-size: 11px; font-weight: 700;"
+         id="text67"><tspan
+           x="0"
+           y="0"
+           id="tspan67">TIDES 2</tspan></text>
+      <text
+         transform="translate(72.15 256.63) scale(.88 1)"
+         style="fill: #fff; font-family: GillSans-Bold, 'Gill Sans'; font-size: 8px; font-weight: 700; letter-spacing: -.04em;"
+         id="text68"><tspan
+           x="0"
+           y="0"
+           id="tspan68">V/OCT</tspan></text>
+      <text
+         transform="translate(145.01 204.57) scale(.88 1)"
+         style="font-family: GillSans-Bold, 'Gill Sans'; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"
+         id="text69"><tspan
+           x="0"
+           y="0"
+           id="tspan69">Shift/Level</tspan></text>
     </g>
   </g>
-  <g id="components">
-    <circle id="Ch4_LED_GreenLight" data-name="Ch4 LED#GreenLight" cx="171.87" cy="297.09" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch3_LED_GreenLight" data-name="Ch3 LED#GreenLight" cx="139.42" cy="297.09" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch2_LED_GreenLight" data-name="Ch2 LED#GreenLight" cx="106.96" cy="297.09" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch1_LED_GreenLight" data-name="Ch1 LED#GreenLight" cx="74.5" cy="297.09" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ramp_Mode_LED_GreenRedLight" data-name="Ramp Mode LED#GreenRedLight" cx="100.58" cy="86.57" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Output_Mode_LED_GreenRedLight" data-name="Output Mode LED#GreenRedLight" cx="136.94" cy="25.67" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Freq_Range_LED_GreenRedLight" data-name="Freq Range LED#GreenRedLight" cx="64.37" cy="25.67" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
-    <circle id="Ch4_Out" data-name="Ch4 Out" cx="181.79" cy="315.09" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Ch3_Out" data-name="Ch3 Out" cx="149.34" cy="315.09" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Ch2_Out" data-name="Ch2 Out" cx="116.88" cy="315.09" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Ch1_Out" data-name="Ch1 Out" cx="84.42" cy="315.09" r="11.34" style="fill: blue; stroke-width: 0px;"/>
-    <circle id="Clock" cx="51.97" cy="315.09" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
-    <circle id="Trig" cx="19.51" cy="315.09" r="11.34" style="fill: #80ff80; stroke-width: 0px;"/>
-    <circle id="Shift_Level_CV" data-name="Shift Level CV" cx="181.79" cy="273.7" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Shape_CV" data-name="Shape CV" cx="149.34" cy="273.7" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Smoothness_CV" data-name="Smoothness CV" cx="116.88" cy="273.7" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="V_Oct" data-name="V Oct" cx="84.42" cy="273.7" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Frequency_CV" data-name="Frequency CV" cx="51.97" cy="273.7" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Slope_CV" data-name="Slope CV" cx="19.51" cy="273.7" r="11.34" style="fill: lime; stroke-width: 0px;"/>
-    <circle id="Shift_Level_Atten_Trimpot" data-name="Shift Level Atten#Trimpot" cx="174.57" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Shape_Atten_Trimpot" data-name="Shape Atten#Trimpot" cx="137.57" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Smoothness_Atten_Trimpot" data-name="Smoothness Atten#Trimpot" cx="100.58" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Frequency_Atten_Trimpot" data-name="Frequency Atten#Trimpot" cx="63.59" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Slope_Atten_Trimpot" data-name="Slope Atten#Trimpot" cx="26.6" cy="228.63" r="8.5" style="fill: #ff0040; stroke-width: 0px;"/>
-    <ellipse id="Shift_Level_WhiteMediumKnob" data-name="Shift Level#WhiteMediumKnob" cx="168.04" cy="171.94" rx="17.01" ry="17.02" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Slope_WhiteMediumKnob" data-name="Slope#WhiteMediumKnob" cx="33.12" cy="171.94" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Smoothness_WhiteMediumKnob" data-name="Smoothness#WhiteMediumKnob" cx="100.58" cy="157.62" r="17.01" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Shape_WhiteLargeKnob" data-name="Shape#WhiteLargeKnob" cx="154.58" cy="94.97" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Frequency_WhiteLargeKnob" data-name="Frequency#WhiteLargeKnob" cx="46.58" cy="94.97" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
-    <circle id="Output_Mode_SmallButton" data-name="Output Mode#SmallButton" cx="179.81" cy="45.94" r="4.96" style="fill: #ffc000; stroke-width: 0px;"/>
-    <circle id="Ramp_Mode_SmallButton" data-name="Ramp Mode#SmallButton" cx="100.58" cy="109.86" r="4.96" style="fill: #ffc000; stroke-width: 0px;"/>
-    <circle id="Freq_Range_SmallButton" data-name="Freq Range#SmallButton" cx="21.35" cy="45.94" r="4.96" style="fill: #ffc000; stroke-width: 0px;"/>
-    <text id="slug" transform="translate(155.91 369.16)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">T</tspan><tspan x="1.46" y="0">ides 2</tspan></text>
-    <text id="modulename" transform="translate(167.48 369.16)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.01em;">T</tspan><tspan x="1.46" y="0">idal </tspan><tspan x="6.64" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="9.07" y="0" style="letter-spacing: 0em;">odul</tspan><tspan x="14.77" y="0" style="letter-spacing: 0em;">a</tspan><tspan x="16.2" y="0" style="letter-spacing: 0em;">t</tspan><tspan x="17.18" y="0">or 2</tspan></text>
+  <g
+     id="components">
+    <circle
+       id="Ch4_LED_GreenLight"
+       data-name="Ch4 LED#GreenLight"
+       cx="171.87"
+       cy="297.09"
+       r="4.96"
+       style="fill: #f0f; stroke-width: 0px;" />
+    <circle
+       id="Ch3_LED_GreenLight"
+       data-name="Ch3 LED#GreenLight"
+       cx="139.42"
+       cy="297.09"
+       r="4.96"
+       style="fill: #f0f; stroke-width: 0px;" />
+    <circle
+       id="Ch2_LED_GreenLight"
+       data-name="Ch2 LED#GreenLight"
+       cx="106.96"
+       cy="297.09"
+       r="4.96"
+       style="fill: #f0f; stroke-width: 0px;" />
+    <circle
+       id="Ch1_LED_GreenLight"
+       data-name="Ch1 LED#GreenLight"
+       cx="74.5"
+       cy="297.09"
+       r="4.96"
+       style="fill: #f0f; stroke-width: 0px;" />
+    <circle
+       id="Ramp_Mode_LED_GreenRedLight"
+       data-name="Ramp Mode LED#GreenRedLight"
+       cx="100.58"
+       cy="86.57"
+       r="4.96"
+       style="fill: #f0f; stroke-width: 0px;" />
+    <circle
+       id="Output_Mode_LED_GreenRedLight"
+       data-name="Output Mode LED#GreenRedLight"
+       cx="136.94"
+       cy="25.67"
+       r="4.96"
+       style="fill: #f0f; stroke-width: 0px;" />
+    <circle
+       id="Freq_Range_LED_GreenRedLight"
+       data-name="Freq Range LED#GreenRedLight"
+       cx="64.37"
+       cy="25.67"
+       r="4.96"
+       style="fill: #f0f; stroke-width: 0px;" />
+    <circle
+       id="Ch4_Out"
+       data-name="Ch4 Out"
+       cx="181.79"
+       cy="315.09"
+       r="11.34"
+       style="fill: blue; stroke-width: 0px;" />
+    <circle
+       id="Ch3_Out"
+       data-name="Ch3 Out"
+       cx="149.34"
+       cy="315.09"
+       r="11.34"
+       style="fill: blue; stroke-width: 0px;" />
+    <circle
+       id="Ch2_Out"
+       data-name="Ch2 Out"
+       cx="116.88"
+       cy="315.09"
+       r="11.34"
+       style="fill: blue; stroke-width: 0px;" />
+    <circle
+       id="Ch1_Out"
+       data-name="Ch1 Out"
+       cx="84.42"
+       cy="315.09"
+       r="11.34"
+       style="fill: blue; stroke-width: 0px;" />
+    <circle
+       id="Clock"
+       cx="51.97"
+       cy="315.09"
+       r="11.34"
+       style="fill: #80ff80; stroke-width: 0px;" />
+    <circle
+       id="Trig"
+       cx="19.51"
+       cy="315.09"
+       r="11.34"
+       style="fill: #80ff80; stroke-width: 0px;" />
+    <circle
+       id="Shift_Level_CV"
+       data-name="Shift Level CV"
+       cx="181.79"
+       cy="273.7"
+       r="11.34"
+       style="fill: lime; stroke-width: 0px;" />
+    <circle
+       id="Shape_CV"
+       data-name="Shape CV"
+       cx="149.34"
+       cy="273.7"
+       r="11.34"
+       style="fill: lime; stroke-width: 0px;" />
+    <circle
+       id="Smoothness_CV"
+       data-name="Smoothness CV"
+       cx="116.88"
+       cy="273.7"
+       r="11.34"
+       style="fill: lime; stroke-width: 0px;" />
+    <circle
+       id="V_Oct"
+       data-name="V Oct"
+       cx="84.42"
+       cy="273.7"
+       r="11.34"
+       style="fill: lime; stroke-width: 0px;" />
+    <circle
+       id="Frequency_CV"
+       data-name="Frequency CV"
+       cx="51.97"
+       cy="273.7"
+       r="11.34"
+       style="fill: lime; stroke-width: 0px;" />
+    <circle
+       id="Slope_CV"
+       data-name="Slope CV"
+       cx="19.51"
+       cy="273.7"
+       r="11.34"
+       style="fill: lime; stroke-width: 0px;" />
+    <circle
+       id="Shift_Level_Atten_Trimpot"
+       data-name="Shift Level Atten#Trimpot"
+       cx="174.57"
+       cy="228.63"
+       r="8.5"
+       style="fill: #ff0040; stroke-width: 0px;" />
+    <circle
+       id="Shape_Atten_Trimpot"
+       data-name="Shape Atten#Trimpot"
+       cx="137.57"
+       cy="228.63"
+       r="8.5"
+       style="fill: #ff0040; stroke-width: 0px;" />
+    <circle
+       id="Smoothness_Atten_Trimpot"
+       data-name="Smoothness Atten#Trimpot"
+       cx="100.58"
+       cy="228.63"
+       r="8.5"
+       style="fill: #ff0040; stroke-width: 0px;" />
+    <circle
+       id="Frequency_Atten_Trimpot"
+       data-name="Frequency Atten#Trimpot"
+       cx="63.59"
+       cy="228.63"
+       r="8.5"
+       style="fill: #ff0040; stroke-width: 0px;" />
+    <circle
+       id="Slope_Atten_Trimpot"
+       data-name="Slope Atten#Trimpot"
+       cx="26.6"
+       cy="228.63"
+       r="8.5"
+       style="fill: #ff0040; stroke-width: 0px;" />
+    <circle
+       id="Shift_Level_WhiteMediumKnob"
+       data-name="Shift Level#WhiteMediumKnob"
+       cx="168.04"
+       cy="171.94"
+       r="17.01"
+       style="fill:#ff0040;stroke-width:0px" />
+    <circle
+       id="Slope_WhiteMediumKnob"
+       data-name="Slope#WhiteMediumKnob"
+       cx="33.12"
+       cy="171.94"
+       r="17.01"
+       style="fill: #ff0040; stroke-width: 0px;" />
+    <circle
+       id="Smoothness_WhiteMediumKnob"
+       data-name="Smoothness#WhiteMediumKnob"
+       cx="100.58"
+       cy="157.62"
+       r="17.01"
+       style="fill: #ff0040; stroke-width: 0px;" />
+    <circle
+       id="Shape_WhiteLargeKnob"
+       data-name="Shape#WhiteLargeKnob"
+       cx="154.58"
+       cy="94.97"
+       r="25.51"
+       style="fill: #ff0040; stroke-width: 0px;" />
+    <circle
+       id="Frequency_WhiteLargeKnob"
+       data-name="Frequency#WhiteLargeKnob"
+       cx="46.58"
+       cy="94.97"
+       r="25.51"
+       style="fill: #ff0040; stroke-width: 0px;" />
+    <circle
+       id="Output_Mode_SmallButton"
+       data-name="Output Mode#SmallButton"
+       cx="179.81"
+       cy="45.94"
+       r="4.96"
+       style="fill: #ffc000; stroke-width: 0px;" />
+    <circle
+       id="Ramp_Mode_SmallButton"
+       data-name="Ramp Mode#SmallButton"
+       cx="100.58"
+       cy="109.86"
+       r="4.96"
+       style="fill: #ffc000; stroke-width: 0px;" />
+    <circle
+       id="Freq_Range_SmallButton"
+       data-name="Freq Range#SmallButton"
+       cx="21.35"
+       cy="45.94"
+       r="4.96"
+       style="fill: #ffc000; stroke-width: 0px;" />
+    <text
+       id="slug"
+       transform="translate(155.91 369.16)"
+       style="fill: #010101; font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 3px;"><tspan
+         x="0"
+         y="0"
+         style="letter-spacing: -.01em;"
+         id="tspan70">T</tspan><tspan
+         x="1.46"
+         y="0"
+         id="tspan71">ides 2</tspan></text>
+    <text
+       id="modulename"
+       transform="translate(167.48 369.16)"
+       style="fill: #010101; font-family: MyriadPro-Regular, 'Myriad Pro'; font-size: 3px;"><tspan
+         x="0"
+         y="0"
+         style="letter-spacing: -.01em;"
+         id="tspan72">T</tspan><tspan
+         x="1.46"
+         y="0"
+         id="tspan73">idal </tspan><tspan
+         x="6.64"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan74">M</tspan><tspan
+         x="9.07"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan75">odul</tspan><tspan
+         x="14.77"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan76">a</tspan><tspan
+         x="16.2"
+         y="0"
+         style="letter-spacing: 0em;"
+         id="tspan77">t</tspan><tspan
+         x="17.18"
+         y="0"
+         id="tspan78">or 2</tspan></text>
   </g>
 </svg>
