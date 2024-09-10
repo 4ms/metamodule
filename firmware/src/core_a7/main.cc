@@ -9,6 +9,7 @@
 #include "fs/time_convert.hh"
 #include "git_version.h"
 #include "hsem_handler.hh"
+#include "load_test/test_modules.hh"
 #include "params.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
@@ -20,6 +21,11 @@
 #include "conf/qspi_flash_conf.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "fs/norflash_layout.hh"
+
+#ifdef CPU_TEST_ALL_MODULES
+#include "fs/general_io.hh"
+#include "load_test/tester.hh"
+#endif
 
 #ifdef ENABLE_WIFI_BRIDGE
 #include <wifi_update.hh>
@@ -100,11 +106,24 @@ void main() {
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
-	// wait for other cores to be ready: ~2400ms
+	// wait for other cores to be ready: ~2400ms + more for auto-loading plugins
 	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() || mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
 
-	// ~290ms until while loop
+		// ~290ms until while loop
+
+#ifdef CPU_TEST_ALL_MODULES
+	mdrivlib::HWSemaphore<MainCoreReady>::lock();
+
+	mdrivlib::Pin but0{GPIO::D, PinNum::_8, PinMode::Input, 0, mdrivlib::PinPull::Up, mdrivlib::PinPolarity::Inverted};
+	if (but0.is_on()) {
+		auto db = LoadTest::test_all_modules();
+		auto filedata = LoadTest::entries_to_csv(db);
+		FS::write_file(file_storage_proxy, filedata, {"cpu_test.csv", Volume::USB});
+	}
+
+	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
+#endif
 
 	StaticBuffers::sync_params.clear();
 

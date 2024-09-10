@@ -6,8 +6,8 @@
 
 namespace MetaModule
 {
-enum class KnobTestType { Bare, AllStill, AllMoving, OneMoving };
-enum class JackTestType { NonePatched, AllPatched, AllInputsLFO, AllInputsAudio, OneInputLFO, OneInputAudio };
+enum class KnobTestType { Bare, AllStill, AllMovingSlowly };
+enum class JackTestType { NonePatched, AllInputsZero, AllInputsRandom, AllInputsAudio, OneInputLFO, OneInputAudio };
 
 struct ModuleLoadTester {
 
@@ -32,7 +32,7 @@ struct ModuleLoadTester {
 		, counts{ElementCount::count(info.elements)} {
 	}
 
-	Measurements run_test(KnobTestType knob_test, JackTestType jack_test) {
+	Measurements run_test(unsigned block_size, KnobTestType knob_test, JackTestType jack_test) {
 		patch.blank_patch(slug);
 		module_id = patch.add_module(slug);
 
@@ -41,14 +41,39 @@ struct ModuleLoadTester {
 
 		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::NonePatched) {
 			patch_all_knobs_static();
-			return run_patch();
+			if (load_patch()) {
+				set_all_params(0.5f);
+				send_to_all_inputs(0.f);
+				return run_patch([] {}, block_size);
+			}
 
-		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllPatched) {
+		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllInputsZero) {
 			patch_all_knobs_static();
 			auto other_module_id = patch.add_module("HubMedium");
 			patch_all_input_jacks(other_module_id);
 			patch_all_output_jacks(other_module_id);
-			return run_patch();
+			if (load_patch()) {
+				set_all_params(0.5f);
+				send_to_all_inputs(0.f);
+				return run_patch([] {}, block_size);
+			}
+
+		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllInputsRandom) {
+			patch_all_knobs_static();
+			auto other_module_id = patch.add_module("HubMedium");
+			patch_all_input_jacks(other_module_id);
+			patch_all_output_jacks(other_module_id);
+			if (load_patch()) {
+				set_all_params(0.5f);
+				int16_t x = 0;
+				return run_patch(
+					[&, this] {
+						float f = ((float)x / (2147483648.f / 5.f));
+						send_to_all_inputs(f);
+						x += 4800;
+					},
+					block_size);
+			}
 		}
 		return {};
 	}
@@ -68,6 +93,18 @@ struct ModuleLoadTester {
 		}
 
 		return {};
+	}
+
+	void set_all_params(float val) {
+		for (uint16_t param_id = 0; param_id < counts.num_params; param_id++) {
+			player.modules[module_id]->set_param(param_id, val);
+		}
+	}
+
+	void send_to_all_inputs(float val) {
+		for (uint16_t injack_id = 0; injack_id < counts.num_inputs; injack_id++) {
+			player.modules[module_id]->set_input(injack_id, val);
+		}
 	}
 
 	void patch_all_knobs_static() {
@@ -93,24 +130,28 @@ struct ModuleLoadTester {
 		}
 	}
 
-	Measurements run_patch() {
-		Measurements meas;
-		meas.first_run_time = measure([&]() { player.update_patch(); });
+	bool load_patch() {
+		auto res = player.load_patch(patch);
+		if (res.success == false) {
+			pr_err("Test failed to load patch: %s\n", res.error_string.c_str());
+			return false;
+		}
+		return true;
+	}
 
-		auto tm = measure([&]() {
-			for (auto i = 0u; i < 128; i++) {
-				player.update_patch();
-			}
-		});
-		meas.average_run_time = tm / 128.f;
-		meas.worst_run_time_after_first = 0;
+	Measurements run_patch(auto control_func, size_t iterations) {
+		std::vector<uint64_t> times(iterations, 0);
 
-		return meas;
+		for (auto &tm : times) {
+			control_func();
+			tm = measure([&]() { player.update_patch_singlecore(); });
+		}
+
+		return Measurements{times};
 	}
 
 	static uint64_t time_us() {
-		return PL1_GetCurrentPhysicalValue();
-		// std::chrono::steady_clock::now().time_since_epoch().count();
+		return std::chrono::steady_clock::now().time_since_epoch().count() / 1000ULL;
 	}
 
 	[[nodiscard]] static uint64_t measure(auto test) {
