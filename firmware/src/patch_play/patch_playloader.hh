@@ -10,6 +10,8 @@
 #include "result_t.hh"
 #include <atomic>
 
+size_t get_heap_size();
+
 namespace MetaModule
 {
 
@@ -186,6 +188,7 @@ struct PatchPlayLoader {
 			i++;
 		}
 
+		pr_info("Heap: %u\n", get_heap_size());
 		start_audio();
 	}
 
@@ -196,6 +199,7 @@ struct PatchPlayLoader {
 
 		player_.remove_module(module_id);
 
+		pr_info("Heap: %u\n", get_heap_size());
 		start_audio();
 	}
 
@@ -312,6 +316,7 @@ private:
 
 		auto result = player_.load_patch(*next_patch);
 		if (result.success) {
+			pr_info("Heap: %u\n", get_heap_size());
 			if (next_patch == patches_.get_view_patch())
 				patches_.play_view_patch();
 

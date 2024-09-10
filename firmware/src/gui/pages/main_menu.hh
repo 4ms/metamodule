@@ -107,7 +107,9 @@ private:
 			return;
 		page->patches.new_patch();
 		page->patch_playloader.request_load_view_patch();
-		page->load_page(PageId::ModuleList, {.patch_loc_hash = page->patches.get_view_patch_loc_hash()});
+		page->page_list.set_active_knobset(0);
+		page->load_page(PageId::ModuleList,
+						{.patch_loc_hash = page->patches.get_view_patch_loc_hash(), .view_knobset_id = 0});
 	}
 
 	static void settings_cb(lv_event_t *event) {

@@ -12,6 +12,7 @@
 #include "patch_play/auto_map.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
+#include "util/overloaded.hh"
 
 namespace MetaModule
 {
@@ -136,9 +137,18 @@ private:
 
 		auto slug = patch->module_slugs[module_idx];
 		auto info = ModuleFactory::getModuleInfo(slug);
-		for (auto idx : info.indices) {
-			if (idx.param_idx != ElementCount::Indices::NoElementMarker)
+		for (auto i = 0u; auto idx : info.indices) {
+			bool is_mappable_param = std::visit(overloaded{
+													[](BaseElement const &el) { return false; },
+													[](ParamElement const &el) { return true; },
+													[](AltParamElement const &el) { return false; },
+												},
+												info.elements[i]);
+
+			if (is_mappable_param && idx.param_idx != ElementCount::Indices::NoElementMarker) {
 				maps_todo.push_back(idx);
+			}
+			i++;
 		}
 
 		make_maps(knobset);

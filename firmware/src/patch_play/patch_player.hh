@@ -166,6 +166,11 @@ public:
 
 		set_active_knob_set(0);
 
+		// Test-run the modules once
+		for (size_t i = 1; i < num_modules; i++) {
+			modules[i]->update();
+		}
+
 		is_loaded = true;
 		if (num_not_found == 1)
 			return {true, std::string{"Module "} + not_found + std::string{" not known, ignoring."}};
