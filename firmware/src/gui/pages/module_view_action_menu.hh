@@ -136,6 +136,7 @@ private:
 
 	void reset_params() {
 		reset_params_.reset(module_idx, patches.get_view_patch());
+		patch_playloader.reset_module(module_idx);
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
