@@ -64,6 +64,7 @@ add_executable(
     src/main.cc 
     src/ui.cc
     stubs/random.cpp
+	stubs/memory/heap.cc
     ${FWDIR}/src/gui/elements/element_name.cc
     ${FWDIR}/src/gui/slsexport/ui_local.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
