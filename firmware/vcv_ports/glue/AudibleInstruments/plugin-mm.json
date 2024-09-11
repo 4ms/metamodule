@@ -1,29 +1,89 @@
 {
 	"MetaModuleBrandName": "Cloned Instruments",
 	"MetaModulePluginMaintainer": "4ms Company",
-	"MetaModulePluginMaintainerEmail": "4ms@4mscompany.com",
-	"MetaModulePluginMaintainerUrl": "https://metamodule.4ms.info",
+	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerUrl": "",
 	"MetaModuleDescription": "Clones of Mutable Instruments modules, compatible with Audible Instruments VCV Rack plugin",
 	"MetaModuleIncludedModules": [
-		"Algorithm VCO",
-		"Algorithm VCO II",
-		"Compressing Filter",
-		"Envelopes",
-		"Envelopes II",
-		"Granulation",
-		"Keyframes",
-		"Mod Osc",
-		"Modeler",
-		"Multi-filter",
-		"Quad Attenuverter",
-		"Quad VCA",
-		"Random Router",
-		"Random-maker",
-		"Rect-Logic-S&H",
-		"Resonator",
-		"Slope Sequencer",
-		"Split-Combine",
-		"Triple Mix",
-		"VC Filter"
+	{
+		"slug": "Braids",
+		"name": "Algorithm VCO"
+	},
+	{
+		"slug": "Plaits",
+		"name": "Algorithm VCO II"
+	},
+	{
+		"slug": "Streams",
+		"name": "Compressing Filter"
+	},
+	{
+		"slug": "Tides",
+		"name": "Envelopes"
+	},
+	{
+		"slug": "Tides2",
+		"name": "Envelopes II"
+	},
+	{
+		"slug": "Clouds",
+		"name": "Granulation"
+	},
+	{
+		"slug": "Frames",
+		"name": "Keyframes"
+	},
+	{
+		"slug": "Warps",
+		"name": "Mod Osc"
+	},
+	{
+		"slug": "Elements",
+		"name": "Modeler"
+	},
+	{
+		"slug": "Shelves",
+		"name": "Multi-filter"
+	},
+	{
+		"slug": "Blinds",
+		"name": "Quad Attenuverter"
+	},
+	{
+		"slug": "Veils",
+		"name": "Quad VCA"
+	},
+	{
+		"slug": "Branches",
+		"name": "Random Router"
+	},
+	{
+		"slug": "Marbles",
+		"name": "Random-maker"
+	},
+	{
+		"slug": "Kinks",
+		"name": "Rect-Logic-S&H"
+	},
+	{
+		"slug": "Rings",
+		"name": "Resonator"
+	},
+	{
+		"slug": "Stages",
+		"name": "Slope Sequencer"
+	},
+	{
+		"slug": "Multiples",
+		"name": "Split-Combine"
+	},
+	{
+		"slug": "Shades",
+		"name": "Triple Mix"
+	},
+	{
+		"slug": "Ripples",
+		"name": "VC Filter"
+	}
 	]
 }

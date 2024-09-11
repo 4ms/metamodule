@@ -1,10 +1,13 @@
 {
 	"MetaModuleBrandName": "",
-	"MetaModulePluginMaintainer": "4ms Company",
-	"MetaModulePluginMaintainerEmail": "4ms@4mscompany.com",
-	"MetaModulePluginMaintainerUrl": "https://metamodule.4ms.info",
+	"MetaModulePluginMaintainer": "Scanner Darkly, 4ms Company",
+	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerUrl": "",
 	"MetaModuleDescription": "",
 	"MetaModuleIncludedModules": [
-		"SDOrcasHeartV2"
+	{
+		"slug": "SDOrcasHeartV2",
+		"name": "SDOrcasHeartV2"
+	}
 	]
 }

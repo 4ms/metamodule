@@ -1,32 +1,101 @@
 {
 	"MetaModuleBrandName": "Befaco",
-	"MetaModulePluginMaintainer": "4ms Company",
-	"MetaModulePluginMaintainerEmail": "4ms@4mscompany.com",
-	"MetaModulePluginMaintainerUrl": "https://metamodule.4ms.info",
+	"MetaModulePluginMaintainer": "Ewan Hemingway, 4ms Company",
+	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerUrl": "",
 	"MetaModuleDescription": "",
 	"MetaModuleIncludedModules": [
-        "ABC",
-        "ADSR",
-        "Burst",
-        "ChoppingKinky",
-        "DualAtenuverter",
-        "EvenVCO",
-        "HexmixVCA",
-        "Kickall",
-        "Mixer",        
-        "Morphader",
-        "MotionMTR",
-        "Muxlicer",
-        "NoisePlethora",
-        "Octaves",
-        "Percall",
-        "PonyVCO",
-        "Rampage",
-        "STMix",
-        "SamplingModulator",
-        "SlewLimiter",
-        "SpringReverb",
-        "StereoStrip",
-        "Voltio"
+	{
+		"slug": "ABC",
+		"name": "ABC"
+	},
+	{
+		"slug": "ADSR",
+		"name": "ADSR"
+	},
+	{
+		"slug": "Burst",
+		"name": "Burst"
+	},
+	{
+		"slug": "ChoppingKinky",
+		"name": "ChoppingKinky"
+	},
+	{
+		"slug": "DualAtenuverter",
+		"name": "DualAtenuverter"
+	},
+	{
+		"slug": "EvenVCO",
+		"name": "EvenVCO"
+	},
+	{
+		"slug": "HexmixVCA",
+		"name": "HexmixVCA"
+	},
+	{
+		"slug": "Kickall",
+		"name": "Kickall"
+	},
+	{
+		"slug": "Mixer",
+		"name": "Mixer"
+	},        
+	{
+		"slug": "Morphader",
+		"name": "Morphader"
+	},
+	{
+		"slug": "MotionMTR",
+		"name": "MotionMTR"
+	},
+	{
+		"slug": "Muxlicer",
+		"name": "Muxlicer"
+	},
+	{
+		"slug": "NoisePlethora",
+		"name": "NoisePlethora"
+	},
+	{
+		"slug": "Octaves",
+		"name": "Octaves"
+	},
+	{
+		"slug": "Percall",
+		"name": "Percall"
+	},
+	{
+		"slug": "PonyVCO",
+		"name": "PonyVCO"
+	},
+	{
+		"slug": "Rampage",
+		"name": "Rampage"
+	},
+	{
+		"slug": "STMix",
+		"name": "STMix"
+	},
+	{
+		"slug": "SamplingModulator",
+		"name": "SamplingModulator"
+	},
+	{
+		"slug": "SlewLimiter",
+		"name": "SlewLimiter"
+	},
+	{
+		"slug": "SpringReverb",
+		"name": "SpringReverb"
+	},
+	{
+		"slug": "StereoStrip",
+		"name": "StereoStrip"
+	},
+	{
+		"slug": "Voltio",
+		"name": "Voltio"
+	}
 	]
 }
