@@ -184,6 +184,12 @@ void ModuleWidget::addChild(Widget *widget) {
 	Widget::addChild(widget);
 }
 
+void ModuleWidget::addChild(ui::TextField *widget) {
+	log_widget("Skipped: addChild(unknown TextField)", widget);
+	adaptor->addText(widget);
+	Widget::addChild(widget);
+}
+
 void ModuleWidget::addChild(widget::SvgWidget *widget) {
 	log_widget("addChild(SvgWidget)", widget);
 	adaptor->addImage(widget);

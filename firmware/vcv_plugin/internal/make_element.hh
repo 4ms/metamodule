@@ -25,6 +25,10 @@ Element make_element(rack::app::MultiLightWidget *widget);
 Element make_element(rack::widget::SvgWidget *widget);
 Element make_element(rack::app::SvgButton *widget);
 
+// Text
+Element make_element(rack::ui::TextField *widget);
+
+
 // Not supported/not found:
 Element make_element(rack::app::SvgScrew *widget);
 Element make_element(rack::app::ParamWidget *widget);

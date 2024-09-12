@@ -486,6 +486,14 @@ Element make_element(rack::app::SvgButton *widget) {
 	return make_element(widget->sw);
 }
 
+Element make_element(rack::ui::TextField *widget) {
+	DynamicTextDisplay element{};
+	element.text = widget->text;
+	element.font = "Segment32";
+	element.color = Colors565::Red;
+	return element;
+}
+
 //
 // Not supported
 //
