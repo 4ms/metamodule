@@ -32,7 +32,7 @@ The MetaModule environment is built using three separate components: The VCV Rac
 
 For information about building and using these components, please follow the separate guides:
 
-- [VCV Rack Plugin](./vcv/README.md)
+- [VCV Rack Plugin](https://github.com/4ms/4ms-vcv/blob/main/README.md)
 - [Simulator](./simulator/README.md)
 - [Firmware](./firmware/README.md)
 
