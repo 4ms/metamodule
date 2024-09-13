@@ -108,6 +108,7 @@ struct KnobSetViewPage : PageBase {
 		unsigned num_maps[PanelDef::NumKnobs]{};
 		arcs.resize(knobset->set.size());
 		static_params.resize(knobset->set.size());
+		lv_obj_t *focus{};
 
 		for (auto [idx, map] : enumerate(knobset->set)) {
 			if (!map.is_panel_knob())
@@ -143,8 +144,6 @@ struct KnobSetViewPage : PageBase {
 			else
 				disable(cont, map.panel_knob_id);
 
-			lv_group_add_obj(group, cont);
-
 			lv_obj_remove_event_cb(cont, mapping_cb);
 			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
 
@@ -153,14 +152,28 @@ struct KnobSetViewPage : PageBase {
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx));
 
 			if (idx == args.mappedknob_id)
-				lv_group_focus_obj(cont);
+				focus = cont;
 			else if (idx == 0 && !args.mappedknob_id) {
 				if (lv_obj_has_flag(ui_NextKnobSet, LV_OBJ_FLAG_HIDDEN))
-					lv_group_focus_obj(cont);
+					focus = cont;
 				else
-					lv_group_focus_obj(ui_NextKnobSet);
+					focus = ui_NextKnobSet;
 			}
 		}
+
+		for (auto [idx, cont] : enumerate(containers)) {
+			if (!num_maps[idx])
+				continue;
+
+			lv_group_add_obj(group, cont);
+
+			lv_foreach_child(panes[idx], [this](lv_obj_t *cont, int idx) {
+				lv_group_add_obj(group, cont);
+				return true;
+			});
+		}
+
+		lv_group_focus_obj(focus);
 
 		lv_group_set_editing(group, false);
 	}
