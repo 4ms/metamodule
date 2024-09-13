@@ -6,6 +6,10 @@
 	"MetaModuleDescription": "",
 	"MetaModuleIncludedModules": [
 	{
+		"slug": "2To4",
+		"name": "2To4"
+	},
+	{
 		"slug": "ASR",
 		"name": "ASR"
 	},
@@ -50,12 +54,24 @@
 		"name": "ClockedNoise"
 	},
 	{
+		"slug": "Comparator",
+		"name": "Comparator"
+	},
+	{
 		"slug": "Contrast",
 		"name": "Contrast"
 	},
 	{
 		"slug": "Crackle",
 		"name": "Crackle"
+	},
+	{
+		"slug": "DataCompander",
+		"name": "DataCompander"
+	},
+	{
+		"slug": "Delta",
+		"name": "Delta"
 	},
 	{
 		"slug": "DigitalToAnalog",
@@ -158,6 +174,10 @@
 		"name": "PhasorHumanizer"
 	},
 	{
+		"slug": "PhasorMixer",
+		"name": "PhasorMixer"
+	},
+	{
 		"slug": "PhasorOctature",
 		"name": "PhasorOctature"
 	},
@@ -222,20 +242,28 @@
 		"name": "Probability"
 	},
 	{
-		"slug": "Scanner",
-		"name": "Scanner"
+		"slug": "RandomGates",
+		"name": "RandomGates"
 	},
 	{
-		"slug": "TwoToFour",
-		"name": "TwoToFour"
+		"slug": "Rotator",
+		"name": "Rotator"
+	},
+	{
+		"slug": "Rungler",
+		"name": "Rungler"
+	},
+	{
+		"slug": "Scanner",
+		"name": "Scanner"
 	},
 	{
 		"slug": "VectorMix",
 		"name": "VectorMix"
 	},
 	{
-		"slug": "Waveshape",
-		"name": "Waveshape"
+		"slug": "Waveshaper",
+		"name": "Waveshaper"
 	},
 	{
 		"slug": "XYToPolar",
