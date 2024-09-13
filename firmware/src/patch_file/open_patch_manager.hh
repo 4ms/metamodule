@@ -116,6 +116,9 @@ public:
 		// Handle legacy use of midi poly num
 		new_patch->patch.update_midi_poly_num();
 
+		// Sort knobsets (this is to fix knobset issue #379 for patches that were made before)
+		new_patch->patch.sort_knobsets();
+
 		view_patch_ = new_patch;
 
 		if (patch_is_playing)
