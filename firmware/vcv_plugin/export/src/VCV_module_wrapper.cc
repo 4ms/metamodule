@@ -8,7 +8,7 @@ VCVModuleWrapper::VCVModuleWrapper() {
 
 void VCVModuleWrapper::update() {
 	args.frame++;
-	process(args);
+	update(args, bypassed);
 }
 
 // This is called by SDK v1.3 and earlier: (later will call Module::set_samplerate)

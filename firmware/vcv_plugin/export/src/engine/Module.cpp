@@ -93,6 +93,27 @@ void Module::config(int num_params, int num_inputs, int num_outputs, int num_lig
 	lightInfos.resize(num_lights);
 }
 
+void Module::update(const ProcessArgs &args, bool bypassed) {
+	if (bypassed)
+		processBypass(args);
+	else
+		process(args);
+}
+
+void Module::processBypass(const ProcessArgs &args) {
+	for (BypassRoute &bypassRoute : bypassRoutes) {
+		// Route input voltages to output
+		Input &input = inputs[bypassRoute.inputId];
+		Output &output = outputs[bypassRoute.outputId];
+		int channels = input.getChannels();
+		for (int c = 0; c < channels; c++) {
+			float v = input.getVoltage(c);
+			output.setVoltage(v, c);
+		}
+		output.setChannels(channels);
+	}
+}
+
 void Module::set_samplerate(float rate) {
 	APP->engine->sample_rate = rate;
 	args.sampleRate = rate;
