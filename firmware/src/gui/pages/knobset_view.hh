@@ -161,13 +161,11 @@ struct KnobSetViewPage : PageBase {
 			}
 		}
 
-		for (auto [idx, cont] : enumerate(containers)) {
+		for (auto [idx, pane] : enumerate(panes)) {
 			if (!num_maps[idx])
 				continue;
 
-			lv_group_add_obj(group, cont);
-
-			lv_foreach_child(panes[idx], [this](lv_obj_t *cont, int idx) {
+			lv_foreach_child(pane, [this](lv_obj_t *cont, int idx) {
 				lv_group_add_obj(group, cont);
 				return true;
 			});
