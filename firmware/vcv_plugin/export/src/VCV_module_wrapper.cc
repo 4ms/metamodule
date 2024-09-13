@@ -8,7 +8,7 @@ VCVModuleWrapper::VCVModuleWrapper() {
 
 void VCVModuleWrapper::update() {
 	args.frame++;
-	process(args);
+	update(args, bypassed);
 }
 
 void VCVModuleWrapper::set_samplerate(float rate) {
