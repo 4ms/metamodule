@@ -65,11 +65,10 @@
       }
     },
     {
-      "name": "pcb-p12",
-      "description": "PCB p11 with mods (aka p12)",
-      "inherits": "base",
+      "name": "cpu-test",
+      "inherits": "full",
       "cacheVariables": {
-        "METAMODULE_PCB_VERSION": "12"
+        "CPU_TEST_ALL_MODULES": { "type": "BOOL", "value": "ON" }
       }
     }
   ],
@@ -85,6 +84,10 @@
     {
       "name": "dyn-plugins",
       "configurePreset": "dyn-plugins"
+    },
+    {
+      "name": "cpu-test",
+      "configurePreset": "cpu-test"
     }
   ]
 }
