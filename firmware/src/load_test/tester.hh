@@ -1,13 +1,14 @@
 #pragma once
 #include "patch/module_type_slug.hh"
 #include "patch_play/patch_player.hh"
+#include "util/oscs.hh"
 #include <chrono>
 #include <string_view>
 
 namespace MetaModule
 {
 enum class KnobTestType { Bare, AllStill, AllMovingSlowly };
-enum class JackTestType { NonePatched, AllInputsZero, AllInputsRandom, AllInputsAudio, OneInputLFO, OneInputAudio };
+enum class JackTestType { NonePatched, AllInputsZero, AllInputsLFO, AllInputsAudio, OneInputLFO, OneInputAudio };
 
 struct ModuleLoadTester {
 
@@ -15,13 +16,14 @@ struct ModuleLoadTester {
 		uint64_t first_run_time{};
 		uint64_t worst_run_time_after_first{};
 		float average_run_time{};
+		float average_run_time_after_first{};
 
 		Measurements() = default;
 		Measurements(std::span<uint64_t> update_times)
 			: first_run_time(update_times[0])
 			, average_run_time(std::accumulate(update_times.begin(), update_times.end(), 0.f) /
 							   (float)update_times.size()) {
-			worst_run_time_after_first = *std::max_element(update_times.begin(), update_times.end());
+			worst_run_time_after_first = *std::max_element(std::next(update_times.begin()), update_times.end());
 		}
 	};
 
@@ -42,40 +44,108 @@ struct ModuleLoadTester {
 		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::NonePatched) {
 			patch_all_knobs_static();
 			if (load_patch()) {
-				set_all_params(0.5f);
+				set_all_params(0.25f);
 				send_to_all_inputs(0.f);
 				return run_patch([] {}, block_size);
 			}
 
 		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllInputsZero) {
 			patch_all_knobs_static();
+
 			auto other_module_id = patch.add_module("HubMedium");
 			patch_all_input_jacks(other_module_id);
 			patch_all_output_jacks(other_module_id);
+
 			if (load_patch()) {
-				set_all_params(0.5f);
+				set_all_params(0.25f);
 				send_to_all_inputs(0.f);
 				return run_patch([] {}, block_size);
 			}
 
-		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllInputsRandom) {
+		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllInputsLFO) {
 			patch_all_knobs_static();
+
 			auto other_module_id = patch.add_module("HubMedium");
 			patch_all_input_jacks(other_module_id);
 			patch_all_output_jacks(other_module_id);
+
 			if (load_patch()) {
-				set_all_params(0.5f);
-				int16_t x = 0;
+				set_all_params(0.25f);
+				auto oscs = make_oscs<2, 10>();
 				return run_patch(
 					[&, this] {
-						float f = ((float)x / (2147483648.f / 5.f));
-						send_to_all_inputs(f);
-						x += 4800;
+						for (uint16_t i = 0; i < counts.num_inputs; i++) {
+							auto lfo = oscs[i].process_float() * 10.f - 5.f;
+							player.modules[module_id]->set_input(i, lfo);
+						}
+					},
+					block_size);
+			}
+
+		} else if (knob_test == KnobTestType::AllStill && jack_test == JackTestType::AllInputsAudio) {
+			patch_all_knobs_static();
+
+			auto other_module_id = patch.add_module("HubMedium");
+			patch_all_input_jacks(other_module_id);
+			patch_all_output_jacks(other_module_id);
+
+			if (load_patch()) {
+				set_all_params(0.25f);
+				auto oscs = make_oscs<400, 6000>();
+				return run_patch(
+					[&, this] {
+						for (uint16_t i = 0; i < counts.num_inputs; i++) {
+							auto lfo = oscs[i].process_float() * 10.f - 5.f;
+							player.modules[module_id]->set_input(i, lfo);
+						}
 					},
 					block_size);
 			}
 		}
 		return {};
+	}
+
+	bool load_patch() {
+		auto res = player.load_patch(patch);
+		if (res.success == false) {
+			pr_err("Test failed to load patch: %s\n", res.error_string.c_str());
+			return false;
+		}
+		return true;
+	}
+
+	Measurements run_patch(auto control_func, size_t block_size) {
+		// Always run at least this many iterations and return
+		// the worst measurements from any block_size.
+		// This accounts for modules that process in blocks <= 2048
+		constexpr size_t min_total_iterations = 2048;
+
+		std::vector<uint64_t> times(block_size, 0);
+
+		Measurements worst{};
+
+		size_t iterations = 0;
+		while (iterations < min_total_iterations) {
+			for (auto &tm : times) {
+				control_func();
+				tm = measure([&]() { player.update_patch_singlecore(); });
+			}
+
+			auto current = Measurements{times};
+			worst.first_run_time = std::max(worst.first_run_time, current.first_run_time);
+			worst.average_run_time = std::max(worst.average_run_time, current.average_run_time);
+			worst.worst_run_time_after_first =
+				std::max(worst.worst_run_time_after_first, current.worst_run_time_after_first);
+			pr_dump("it %d: avg:%f first:%f worst(>1):%f\n",
+					iterations,
+					worst.average_run_time,
+					worst.first_run_time,
+					worst.worst_run_time_after_first);
+
+			iterations += block_size;
+		}
+
+		return worst;
 	}
 
 	uint64_t measure_construction_time() {
@@ -130,24 +200,22 @@ struct ModuleLoadTester {
 		}
 	}
 
-	bool load_patch() {
-		auto res = player.load_patch(patch);
-		if (res.success == false) {
-			pr_err("Test failed to load patch: %s\n", res.error_string.c_str());
-			return false;
-		}
-		return true;
-	}
+	template<unsigned low_hz, unsigned high_hz>
+	std::vector<TriangleOscillator<48000>> make_oscs() {
 
-	Measurements run_patch(auto control_func, size_t iterations) {
-		std::vector<uint64_t> times(iterations, 0);
+		std::vector<TriangleOscillator<48000>> oscs(counts.num_inputs);
 
-		for (auto &tm : times) {
-			control_func();
-			tm = measure([&]() { player.update_patch_singlecore(); });
+		float freq = low_hz;
+		uint32_t phase = 0;
+
+		for (auto &osc : oscs) {
+			osc.set_frequency(freq);
+			osc.set_phase(phase);
+			freq += float(high_hz - low_hz) / float(counts.num_inputs);
+			phase += UINT32_MAX / counts.num_inputs;
 		}
 
-		return Measurements{times};
+		return oscs;
 	}
 
 	static uint64_t time_us() {
