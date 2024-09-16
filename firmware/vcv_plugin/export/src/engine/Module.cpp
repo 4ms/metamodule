@@ -5,14 +5,18 @@
 namespace rack::engine
 {
 
-Module::Module() = default;
+Module::Module() {
+	onReset();
+}
 
 Module::~Module() {
 }
 
 void Module::load_state(std::string_view state_data) {
-	if (state_data.size() == 0)
+	if (state_data.size() == 0) {
+		onReset();
 		return;
+	}
 
 	json_error_t err;
 

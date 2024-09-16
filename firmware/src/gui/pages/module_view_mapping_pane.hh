@@ -53,6 +53,7 @@ struct ModuleViewMappingPane {
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
 
+		lv_obj_add_event_cb(ui_ResetButton, reset_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
@@ -227,6 +228,7 @@ private:
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_CableAddButton);
 		lv_hide(ui_ControlButton);
+		lv_hide(ui_ResetButton);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_CableMidiAddButton);
@@ -334,6 +336,7 @@ private:
 
 	void prepare_jack_gui() {
 		lv_hide(ui_ControlButton);
+		lv_hide(ui_ResetButton);
 		lv_hide(ui_ControlAlert);
 		lv_hide(ui_AddMapPopUp);
 
@@ -546,6 +549,11 @@ private:
 
 		lv_show(ui_MappedPanel);
 		lv_show(ui_MappedItemHeader);
+
+		// Do not use Reset Button for individual params until we implement calling
+		// paramQuantity->reset() and/or paramWidget->onReset()
+		lv_show(ui_ResetButton, false);
+
 		lv_show(ui_ControlButton, is_patch_playing);
 		lv_label_set_text(ui_ControlButtonLabel, "Adjust");
 		lv_label_set_text(ui_MappedListTitle, "Mappings:");
@@ -573,6 +581,7 @@ private:
 		}
 
 		if (is_patch_playing) {
+			lv_group_add_obj(pane_group, ui_ResetButton);
 			lv_group_focus_obj(ui_ControlButton);
 		}
 	}
@@ -704,7 +713,7 @@ private:
 
 		auto module_id = page->drawn_element->gui_element.module_idx;
 		auto param_id = page->drawn_element->gui_element.idx.param_idx;
-		page->add_map_popup.show(knobset_id, param_id, module_id);
+		page->add_map_popup.show(knobset_id, param_id, module_id, page->patch);
 	}
 
 	static void scroll_to_top(lv_event_t *event) {
@@ -722,6 +731,23 @@ private:
 		if (event->target == ui_ControlButton) {
 			lv_obj_clear_state(ui_ControlButton, LV_STATE_PRESSED);
 			page->control_popup.show(page->drawn_element);
+		}
+	}
+
+	static void reset_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		if (auto def_val = get_normalized_default_value(page->drawn_element->element); def_val.has_value()) {
+			StaticParam sp{
+				.module_id = page->drawn_element->gui_element.module_idx,
+				.param_id = page->drawn_element->gui_element.idx.param_idx,
+				.value = def_val.value(),
+			};
+			page->patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
+			page->patch_mod_queue.put(SetStaticParam{.param = sp});
 		}
 	}
 

@@ -77,8 +77,10 @@ add_executable(
     ${FWDIR}/src/fs/fatfs/diskio.cc
     ${FWDIR}/src/fs/fatfs/delete_node.cc
     ${FWDIR}/src/fs/time_convert.cc
+    ${FWDIR}/src/fs/general_io.cc
     #Tar:
     ${FWDIR}/src/fs/asset_drive/untar.cc
+
 
     ${FWDIR}/src/user_settings/settings_file.cc
     ${FWDIR}/src/user_settings/settings_parse.cc

@@ -192,6 +192,10 @@ struct PatchPlayLoader {
 		start_audio();
 	}
 
+	void reset_module(unsigned module_id) {
+		player_.reset_module(module_id);
+	}
+
 	void remove_module(unsigned module_id) {
 		stop_audio();
 		while (!is_audio_muted())

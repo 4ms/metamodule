@@ -12,6 +12,7 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "patch_play/randomize_param.hh"
+#include "patch_play/reset_param.hh"
 
 namespace MetaModule
 {
@@ -28,6 +29,7 @@ struct ModuleViewActionMenu {
 		, patch_playloader{patch_playloader}
 		, auto_map{patch_mod_queue, patches, notify_queue}
 		, randomizer{patch_mod_queue}
+		, reset_params_{patch_mod_queue}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
@@ -38,10 +40,12 @@ struct ModuleViewActionMenu {
 		lv_obj_add_event_cb(ui_ModuleViewActionAutoKnobSet, autopatch_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionRandomBut, random_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionResetBut, reset_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
+		lv_group_add_obj(group, ui_ModuleViewActionResetBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
 	}
@@ -130,6 +134,11 @@ private:
 		randomizer.randomize(module_idx, patches.get_view_patch());
 	}
 
+	void reset_params() {
+		reset_params_.reset(module_idx, patches.get_view_patch());
+		patch_playloader.reset_module(module_idx);
+	}
+
 	static void menu_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -158,6 +167,13 @@ private:
 		page->randomize();
 	}
 
+	static void reset_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		page->reset_params();
+	}
+
 	static void delete_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -184,6 +200,7 @@ private:
 
 	ModuleViewAutoMapDialog auto_map;
 	RandomizeParams randomizer;
+	ResetParams reset_params_;
 
 	unsigned module_idx = 0;
 	lv_group_t *group;
