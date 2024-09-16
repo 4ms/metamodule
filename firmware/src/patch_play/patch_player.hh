@@ -529,6 +529,8 @@ public:
 		modules[module_idx]->mark_all_outputs_unpatched();
 		modules[module_idx]->set_samplerate(samplerate);
 
+		modules[module_idx]->load_state("");
+
 		smp.load_patch(num_modules);
 	}
 
