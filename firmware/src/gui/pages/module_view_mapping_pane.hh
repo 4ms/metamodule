@@ -576,9 +576,8 @@ private:
 			show_unmapped_knobset(patch->knob_sets.size(), "(new knobset)");
 		}
 
-		lv_group_add_obj(pane_group, ui_ResetButton);
-
 		if (is_patch_playing) {
+			lv_group_add_obj(pane_group, ui_ResetButton);
 			lv_group_focus_obj(ui_ControlButton);
 		}
 	}
