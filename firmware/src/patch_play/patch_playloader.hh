@@ -193,7 +193,7 @@ struct PatchPlayLoader {
 	}
 
 	void reset_module(unsigned module_id) {
-		player_.modules[module_id]->load_state("");
+		player_.reset_module(module_id);
 	}
 
 	void remove_module(unsigned module_id) {

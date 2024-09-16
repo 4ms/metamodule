@@ -513,6 +513,11 @@ public:
 		pd.disconnect_outjack(jack);
 	}
 
+	void reset_module(uint16_t module_id) {
+		if (module_id < num_modules)
+			modules[module_id]->load_state("");
+	}
+
 	void add_module(BrandModuleSlug slug) {
 		auto module_idx = num_modules;
 		pd.module_slugs.push_back(slug);
@@ -529,7 +534,7 @@ public:
 		modules[module_idx]->mark_all_outputs_unpatched();
 		modules[module_idx]->set_samplerate(samplerate);
 
-		modules[module_idx]->load_state("");
+		reset_module(module_idx);
 
 		smp.load_patch(num_modules);
 	}
