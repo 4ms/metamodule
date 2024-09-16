@@ -45,8 +45,8 @@ struct ModuleViewActionMenu {
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
-		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_add_obj(group, ui_ModuleViewActionResetBut);
+		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
 	}
 

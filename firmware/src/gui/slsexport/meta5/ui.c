@@ -223,6 +223,7 @@ lv_obj_t *ui_ControlAlertAmount;
 lv_obj_t *ui_AddMapPopUp;
 lv_obj_t *ui_AddMappingTitle;
 lv_obj_t *ui_MapDetected;
+lv_obj_t *ui_MapExistsLabel;
 lv_obj_t *ui_AddMapButtonPanel;
 lv_obj_t *ui_CancelAdd;
 lv_obj_t *ui_CancelAddLabel;

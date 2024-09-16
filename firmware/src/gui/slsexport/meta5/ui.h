@@ -225,6 +225,7 @@ extern lv_obj_t *ui_ControlAlertAmount;
 extern lv_obj_t *ui_AddMapPopUp;
 extern lv_obj_t *ui_AddMappingTitle;
 extern lv_obj_t *ui_MapDetected;
+extern lv_obj_t *ui_MapExistsLabel;
 extern lv_obj_t *ui_AddMapButtonPanel;
 extern lv_obj_t *ui_CancelAdd;
 extern lv_obj_t *ui_CancelAddLabel;

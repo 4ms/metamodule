@@ -558,8 +558,6 @@ private:
 			lv_group_add_obj(pane_group, ui_ControlButton);
 		}
 
-		lv_group_add_obj(pane_group, ui_ResetButton);
-
 		// Show MIDI set first (always show, even if set is empty)
 		if (!show_knobset(patch->midi_maps, PatchData::MIDIKnobSet))
 			show_unmapped_knobset(PatchData::MIDIKnobSet, patch->valid_knob_set_name(PatchData::MIDIKnobSet));
@@ -577,6 +575,8 @@ private:
 		if (patch->knob_sets.size() < 8) {
 			show_unmapped_knobset(patch->knob_sets.size(), "(new knobset)");
 		}
+
+		lv_group_add_obj(pane_group, ui_ResetButton);
 
 		if (is_patch_playing) {
 			lv_group_focus_obj(ui_ControlButton);
