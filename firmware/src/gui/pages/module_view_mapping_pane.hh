@@ -549,7 +549,11 @@ private:
 
 		lv_show(ui_MappedPanel);
 		lv_show(ui_MappedItemHeader);
-		lv_show(ui_ResetButton);
+
+		// Do not use Reset Button for individual params until we implement calling
+		// paramQuantity->reset() and/or paramWidget->onReset()
+		lv_show(ui_ResetButton, false);
+
 		lv_show(ui_ControlButton, is_patch_playing);
 		lv_label_set_text(ui_ControlButtonLabel, "Adjust");
 		lv_label_set_text(ui_MappedListTitle, "Mappings:");
@@ -709,7 +713,7 @@ private:
 
 		auto module_id = page->drawn_element->gui_element.module_idx;
 		auto param_id = page->drawn_element->gui_element.idx.param_idx;
-		page->add_map_popup.show(knobset_id, param_id, module_id);
+		page->add_map_popup.show(knobset_id, param_id, module_id, page->patch);
 	}
 
 	static void scroll_to_top(lv_event_t *event) {
