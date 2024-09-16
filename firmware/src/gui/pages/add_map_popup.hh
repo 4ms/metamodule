@@ -28,8 +28,9 @@ struct AddMapPopUp {
 		lv_obj_set_parent(ui_AddMapPopUp, base);
 	}
 
-	void show(uint32_t knobset_id, uint16_t param_id, uint16_t module_id) {
+	void show(uint32_t knobset_id, uint16_t param_id, uint16_t module_id, PatchData *patchdata) {
 		selected_knob = std::nullopt;
+		patch = patchdata;
 
 		lv_show(ui_AddMapPopUp);
 		lv_obj_scroll_to_y(ui_AddMapPopUp, 0, LV_ANIM_OFF);
@@ -38,8 +39,8 @@ struct AddMapPopUp {
 			lv_label_set_text(ui_AddMappingTitle, "Add a map: Send MIDI CC");
 		} else
 			lv_label_set_text(ui_AddMappingTitle, "Add a map: Wiggle a knob");
-
 		lv_label_set_text(ui_MapDetected, "");
+		lv_label_set_text(ui_MapExistsLabel, "");
 
 		param_idx = param_id;
 		module_idx = module_id;
@@ -66,6 +67,8 @@ struct AddMapPopUp {
 
 	void update(ParamsMidiState &params) {
 		if (visible) {
+			auto last_selected_knob = selected_knob;
+
 			if (set_id == PatchData::MIDIKnobSet) {
 				for (unsigned ccnum = 0; auto &cc : params.midi_ccs) {
 					if (cc.did_change()) {
@@ -77,11 +80,27 @@ struct AddMapPopUp {
 			} else {
 				for (unsigned i = 0; auto &knob : params.knobs) {
 					if (knob.did_change()) {
-						auto name = PanelDef::get_map_param_name(i);
-						lv_label_set_text_fmt(ui_MapDetected, "Knob: %.4s", name.data());
 						selected_knob = i;
+						std::string_view name = PanelDef::get_map_param_name(i);
+
+						lv_label_set_text_fmt(ui_MapDetected, "Knob: %.4s", name.data());
 					}
 					i++;
+				}
+			}
+
+			// Print "Already Mapped To..."
+			if (patch && last_selected_knob != selected_knob && selected_knob.has_value()) {
+				if (auto existingmap = patch->find_mapped_knob(set_id, selected_knob.value())) {
+					auto full_name = get_full_element_name(
+						existingmap->module_id, existingmap->param_id, ElementType::Param, *patch);
+
+					std::string combined =
+						(module_idx == existingmap->module_id) ?
+							std::string(full_name.element_name) :
+							std::string(full_name.module_name) + "\n" + std::string(full_name.element_name);
+
+					lv_label_set_text_fmt(ui_MapExistsLabel, "Already Mapped To:\n%s", combined.c_str());
 				}
 			}
 		}
@@ -120,6 +139,7 @@ struct AddMapPopUp {
 	PatchModQueue &patch_mod_queue;
 	lv_group_t *base_group = nullptr;
 	lv_group_t *popup_group = nullptr;
+	PatchData *patch = nullptr;
 
 	uint16_t module_idx = 0;
 	uint16_t param_idx = 0;
