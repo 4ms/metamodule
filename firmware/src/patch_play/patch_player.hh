@@ -151,16 +151,17 @@ public:
 			cache_midi_mapping(mm);
 		}
 
-		// Set static (non-mapped) knobs
-		for (auto const &k : pd.static_knobs)
-			modules[k.module_id]->set_param(k.param_id, k.value);
-
+		// Load module states
 		for (auto const &ms : pd.module_states) {
 			if (ms.module_id >= num_modules)
 				continue;
 
 			modules[ms.module_id]->load_state(ms.state_data);
 		}
+
+		// Set static (non-mapped) knobs
+		for (auto const &k : pd.static_knobs)
+			modules[k.module_id]->set_param(k.param_id, k.value);
 
 		calc_multiple_module_indicies();
 
