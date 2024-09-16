@@ -396,7 +396,7 @@ lv_obj_set_style_pad_top(ui_ModuleViewActionHeaderLine, 0, LV_PART_MAIN| LV_STAT
 lv_obj_set_style_pad_bottom(ui_ModuleViewActionHeaderLine, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_ModuleViewActionAutopatchBut = lv_btn_create(ui_ModuleViewActionMenu);
-lv_obj_set_height( ui_ModuleViewActionAutopatchBut, 20);
+lv_obj_set_height( ui_ModuleViewActionAutopatchBut, 25);
 lv_obj_set_width( ui_ModuleViewActionAutopatchBut, lv_pct(100));
 lv_obj_set_align( ui_ModuleViewActionAutopatchBut, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_ModuleViewActionAutopatchBut, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
@@ -418,7 +418,7 @@ lv_obj_set_align( ui_ModuleViewActionAutopatchLabel, LV_ALIGN_LEFT_MID );
 lv_label_set_text(ui_ModuleViewActionAutopatchLabel,"Auto-Map All");
 
 ui_ModuleViewActionAutoKnobSet = lv_btn_create(ui_ModuleViewActionMenu);
-lv_obj_set_height( ui_ModuleViewActionAutoKnobSet, 32);
+lv_obj_set_height( ui_ModuleViewActionAutoKnobSet, 40);
 lv_obj_set_width( ui_ModuleViewActionAutoKnobSet, lv_pct(100));
 lv_obj_set_align( ui_ModuleViewActionAutoKnobSet, LV_ALIGN_CENTER );
 lv_obj_clear_flag( ui_ModuleViewActionAutoKnobSet, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
@@ -439,7 +439,7 @@ lv_obj_set_align( ui_ModuleViewActionAutoKnobSetLabel, LV_ALIGN_LEFT_MID );
 lv_label_set_text(ui_ModuleViewActionAutoKnobSetLabel,"Auto-Map Knobs\n(new Knob Set)");
 
 ui_ModuleViewActionRandomBut = lv_btn_create(ui_ModuleViewActionMenu);
-lv_obj_set_height( ui_ModuleViewActionRandomBut, 20);
+lv_obj_set_height( ui_ModuleViewActionRandomBut, 25);
 lv_obj_set_width( ui_ModuleViewActionRandomBut, lv_pct(100));
 lv_obj_set_align( ui_ModuleViewActionRandomBut, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_ModuleViewActionRandomBut, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
@@ -461,7 +461,7 @@ lv_obj_set_align( ui_ModuleViewActionRandomLabel, LV_ALIGN_LEFT_MID );
 lv_label_set_text(ui_ModuleViewActionRandomLabel,"Randomize");
 
 ui_ModuleViewActionDeleteBut = lv_btn_create(ui_ModuleViewActionMenu);
-lv_obj_set_height( ui_ModuleViewActionDeleteBut, 20);
+lv_obj_set_height( ui_ModuleViewActionDeleteBut, 25);
 lv_obj_set_width( ui_ModuleViewActionDeleteBut, lv_pct(100));
 lv_obj_set_align( ui_ModuleViewActionDeleteBut, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_ModuleViewActionDeleteBut, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
