@@ -6,6 +6,7 @@
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
 #include "patch_play/lights.hh"
+#include "patch_play/param_watch.hh"
 #include "patch_play/text_display.hh"
 #include "util/debouncer.hh"
 #include "util/filter.hh"
@@ -111,12 +112,14 @@ struct ParamsMidiState : ParamsState {
 
 	LightWatcher lights;
 	TextDisplayWatcher displays;
+	ParamWatcher watched_params;
 
 	void clear() {
 		ParamsState::clear();
 
 		lights.stop_watching_all();
 		displays.stop_watching_all();
+		watched_params.stop_watching_all();
 
 		for (auto &cc : midi_ccs)
 			cc = 0;

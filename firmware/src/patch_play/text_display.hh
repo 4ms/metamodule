@@ -1,7 +1,7 @@
 #pragma once
-#include "util/lockfree_fifo_spsc.hh"
 #include "util/static_string.hh"
 #include <array>
+#include <atomic>
 #include <cstdint>
 
 namespace MetaModule

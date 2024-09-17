@@ -395,6 +395,13 @@ public:
 			return 0;
 	}
 
+	float get_param(uint16_t module_id, uint16_t param_id) const {
+		if (is_loaded && module_id < num_modules)
+			return modules[module_id]->get_param(param_id);
+		else
+			return 0;
+	}
+
 	void set_midi_poly_num(uint32_t poly_num) {
 		pd.midi_poly_num = poly_num;
 	}
