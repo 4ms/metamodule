@@ -63,13 +63,13 @@ Element make_element(rack::app::Knob *widget) {
 	log_make_element("Knob", widget->paramId);
 
 	Knob element{};
-	element.DefaultValue = getScaledDefaultValue(widget);
+	element.default_value = getScaledDefaultValue(widget);
 	return element;
 }
 
 Element make_element(rack::componentlibrary::Rogan *widget) {
 	Knob element{};
-	element.DefaultValue = getScaledDefaultValue(widget);
+	element.default_value = getScaledDefaultValue(widget);
 
 	if (widget->sw->svg->filename.size()) {
 		element.image = widget->sw->svg->filename;
@@ -85,7 +85,7 @@ Element make_element(rack::app::SvgKnob *widget) {
 	log_make_element("SvgKnob", widget->paramId);
 
 	Knob element{};
-	element.DefaultValue = getScaledDefaultValue(widget);
+	element.default_value = getScaledDefaultValue(widget);
 
 	// Hack to support BefacoTinyKnobs:
 	// The main SVG is just the dot, either BefacoTinyPointWhite or BefacoTinyPointBlack.
@@ -135,7 +135,7 @@ Element make_element(rack::app::SliderKnob *widget) {
 	log_make_element("SliderKnob", widget->paramId);
 
 	Slider element{};
-	element.DefaultValue = getScaledDefaultValue(widget);
+	element.default_value = getScaledDefaultValue(widget);
 	return element;
 }
 
@@ -184,7 +184,7 @@ Element make_element(rack::app::SvgSlider *widget) {
 		log_make_element("SvgSlider slider", widget->paramId);
 
 		Slider element{};
-		element.DefaultValue = getScaledDefaultValue(widget);
+		element.default_value = getScaledDefaultValue(widget);
 		element.image_handle = widget->handle->svg->filename;
 
 		if (widget->background->svg->filename.length()) {
@@ -201,7 +201,7 @@ Element make_element(rack::app::SvgSlider *widget, rack::app::MultiLightWidget *
 	log_make_element("SvgSlider, Light", widget->paramId);
 
 	SliderLight element;
-	element.DefaultValue = getScaledDefaultValue(widget);
+	element.default_value = getScaledDefaultValue(widget);
 	element.image_handle = widget->handle->svg->filename;
 	auto color = light->baseColors.size() ? light->baseColors[0] : light->color;
 	element.color = RGB565{color.r, color.g, color.b};
