@@ -140,18 +140,18 @@ struct ModuleWidgetAdaptor {
 			pr_err("Error: can't add a null SvgWidget\n");
 	}
 
-	void addText(rack::ui::TextField *widget) {
+	void addTextDisplay(rack::widget::MetaModuleDisplay *widget) {
 		if (widget) {
 			widget->element = make_element(widget);
 			assign_element_fields(widget, "");
 
 			ElementCount::Indices indices = clear();
-			indices.light_idx = 0; // widget->firstLightId;
+			indices.light_idx = widget->firstLightId;
 			elem_idx.emplace_back(widget->element, indices);
 
-			log_widget("TextField:", 0, widget);
+			log_widget("MetaModuleDisplay:", 0, widget);
 		} else
-			pr_err("Error: can't add a null TextField\n");
+			pr_err("Error: can't add a null MetaModuleDisplay\n");
 	}
 
 	void populate_elements_indices(std::vector<MetaModule::Element> &elements,
@@ -169,8 +169,7 @@ struct ModuleWidgetAdaptor {
 				el.height_mm = to_mm(widget->box.size.y);
 				el.coords = Coords::TopLeft;
 				el.short_name = name;
-				el.long_name = name;
-				el.visible = widget->visible;
+				el.long_name = name;				
 			},
 			widget->element);
 	}

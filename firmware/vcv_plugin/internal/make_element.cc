@@ -486,11 +486,11 @@ Element make_element(rack::app::SvgButton *widget) {
 	return make_element(widget->sw);
 }
 
-Element make_element(rack::ui::TextField *widget) {
+Element make_element(rack::widget::MetaModuleDisplay *widget) {
 	DynamicTextDisplay element{};
-	element.text = widget->text;
-	element.font = "Segment32";
-	element.color = Colors565::Red;
+	// element.text = widget->text;
+	element.font = widget->font;  //widget->font; //"Segment7Standard24"; 
+	element.color = widget->color;
 	return element;
 }
 

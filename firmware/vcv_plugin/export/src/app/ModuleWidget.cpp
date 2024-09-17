@@ -184,9 +184,8 @@ void ModuleWidget::addChild(Widget *widget) {
 	Widget::addChild(widget);
 }
 
-void ModuleWidget::addChild(ui::TextField *widget) {
-	log_widget("Skipped: addChild(unknown TextField)", widget);
-	adaptor->addText(widget);
+void ModuleWidget::addChild(widget::MetaModuleDisplay *widget) {
+	adaptor->addTextDisplay(widget);
 	Widget::addChild(widget);
 }
 

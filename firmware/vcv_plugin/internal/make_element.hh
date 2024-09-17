@@ -26,7 +26,7 @@ Element make_element(rack::widget::SvgWidget *widget);
 Element make_element(rack::app::SvgButton *widget);
 
 // Text
-Element make_element(rack::ui::TextField *widget);
+Element make_element(rack::widget::MetaModuleDisplay *widget);
 
 
 // Not supported/not found:
