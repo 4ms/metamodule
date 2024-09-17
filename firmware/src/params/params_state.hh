@@ -112,14 +112,14 @@ struct ParamsMidiState : ParamsState {
 
 	LightWatcher lights;
 	TextDisplayWatcher displays;
-	ParamWatcher watched_params;
+	ParamWatcher param_watcher;
 
 	void clear() {
 		ParamsState::clear();
 
 		lights.stop_watching_all();
 		displays.stop_watching_all();
-		watched_params.stop_watching_all();
+		param_watcher.stop_watching_all();
 
 		for (auto &cc : midi_ccs)
 			cc = 0;

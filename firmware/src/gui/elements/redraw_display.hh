@@ -2,12 +2,9 @@
 #include "CoreModules/elements/elements.hh"
 #include "debug.hh"
 #include "gui/elements/context.hh"
-#include "gui/images/paths.hh"
 #include "lvgl.h"
-#include "patch/patch_data.hh"
 #include "patch_play/text_display.hh"
 #include "pr_dbg.hh"
-#include "util/overloaded.hh"
 
 namespace MetaModule
 {

@@ -23,7 +23,7 @@ struct WatchedParam {
 		active.store(false, std::memory_order_release);
 	}
 
-	bool is_active() {
+	bool is_active() const {
 		return active.load();
 	}
 };

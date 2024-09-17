@@ -159,7 +159,7 @@ struct ModuleViewPage : PageBase {
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
 			auto &gui_el = drawn_element.gui_element;
 
-			watch_lights(drawn_element);
+			watch_element(drawn_element);
 
 			add_button(gui_el.obj);
 
@@ -250,12 +250,15 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
-	void watch_lights(DrawnElement const &drawn_element) {
+	void watch_element(DrawnElement const &drawn_element) {
 		auto gui_el = drawn_element.gui_element;
 		std::visit(overloaded{
 					   [&](auto const &el) {
 						   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
 							   params.lights.start_watching_light(this_module_id, gui_el.idx.light_idx + i);
+						   }
+						   if (gui_el.count.num_params > 0) {
+							   params.param_watcher.start_watching_param(this_module_id, gui_el.idx.param_idx);
 						   }
 					   },
 					   [&](DynamicTextDisplay const &el) {
@@ -371,7 +374,9 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
 
-				auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
+				auto const &watched_params = params.param_watcher.watched_params;
+				auto was_redrawn = redraw_param(drawn_el, watched_params);
+				// auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
 
 				if (was_redrawn && page_settings.map_ring_flash_active) {
 					map_ring_display.flash_once(gui_el.map_ring, true);
@@ -452,6 +457,7 @@ struct ModuleViewPage : PageBase {
 	void blur() final {
 		params.lights.stop_watching_all();
 		params.displays.stop_watching_all();
+		params.param_watcher.stop_watching_all();
 		settings_menu.hide();
 		action_menu.hide();
 	}
