@@ -169,36 +169,34 @@ inline bool redraw_element(const BaseElement &, const GuiElement &, float) {
 	return false;
 }
 
-struct RedrawElement {
-	PatchData const *patch;
-	GuiElement &gui_el;
+// struct RedrawElement {
+// 	PatchData const *patch;
+// 	GuiElement &gui_el;
 
-	bool operator()(auto &el) {
-		if (!gui_el.obj)
-			return false;
+// 	bool operator()(auto &el) {
+// 		if (!gui_el.obj)
+// 			return false;
 
-		if (auto s_param = patch->find_static_knob(gui_el.module_idx, gui_el.idx.param_idx))
-			return redraw_element(el, gui_el, s_param->value);
-		else
-			return false;
-	}
-};
+// 		if (auto s_param = patch->find_static_knob(gui_el.module_idx, gui_el.idx.param_idx))
+// 			return redraw_element(el, gui_el, s_param->value);
+// 		else
+// 			return false;
+// 	}
+// };
 
 inline bool redraw_param(DrawnElement &drawn_el,
 						 std::array<WatchedParam, ParamWatcher::MaxParamsToWatch> const &watched_params) {
 	bool was_redrawn = false;
-	if (drawn_el.element.index() == Element{DynamicTextDisplay{}}.index()) {
 
-		// Scan all watched_params to find a match
-		for (auto &p : watched_params) {
-			if (p.is_active() && p.module_id == drawn_el.gui_element.module_idx &&
-				p.param_id != drawn_el.gui_element.idx.param_idx)
+	// Scan all watched_params to find a match
+	for (auto &p : watched_params) {
+		if (p.is_active() && p.module_id == drawn_el.gui_element.module_idx &&
+			p.param_id != drawn_el.gui_element.idx.param_idx)
 
-				was_redrawn = std::visit([&](auto &el) { return redraw_element(el, drawn_el.gui_element, p.value); },
-										 drawn_el.element);
+			was_redrawn = std::visit([&](auto &el) { return redraw_element(el, drawn_el.gui_element, p.value); },
+									 drawn_el.element);
 
-			break;
-		}
+		break;
 	}
 	return was_redrawn;
 }
