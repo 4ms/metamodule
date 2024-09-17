@@ -10,6 +10,7 @@
 #include "params/params_state.hh"
 #include "params/sync_params.hh"
 #include "patch_file/file_storage_proxy.hh"
+#include "patch_play/param_watch.hh"
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
 #include "user_settings/plugin_autoload_settings.hh"
@@ -92,6 +93,14 @@ public:
 		return params.lights;
 	}
 
+	TextDisplayWatcher &displays() {
+		return params.displays;
+	}
+
+	ParamWatcher &watched_params() {
+		return params.watched_params;
+	}
+
 	void autoload_plugins() {
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
@@ -119,10 +128,6 @@ public:
 
 		lv_label_set_text(ui_MainMenuNowPlaying, "");
 		page_manager.init();
-	}
-
-	TextDisplayWatcher &displays() {
-		return params.displays;
 	}
 
 	void load_initial_patch() {
