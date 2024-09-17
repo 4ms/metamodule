@@ -14,6 +14,9 @@ struct PluginFile {
 	StaticString<255> full_path;   //"metamodule-plugins/BrandX.mmpatch"
 	StaticString<255> plugin_name; //"BrandX" ==> "dirname will untar to: BrandX/BrandX.so"
 	size_t file_size{};
+	StaticString<15> version; //1.0.16
+	unsigned sdk_major_version = 1;
+	unsigned sdk_minor_version = 0;
 };
 
 static constexpr size_t MaxPlugins = 32;
