@@ -1,5 +1,6 @@
 #include "metamodule/VCV_module_wrapper.hh"
 #include "console/pr_dbg.hh"
+#include "util/math.hh"
 #include <random.hpp>
 
 VCVModuleWrapper::VCVModuleWrapper() {
@@ -25,6 +26,17 @@ void VCVModuleWrapper::set_param(int id, float val) {
 	}
 	if ((size_t)id < params.size())
 		params[id].setValue(val);
+}
+
+float VCVModuleWrapper::get_param(int id) {
+	if ((size_t)id < params.size()) {
+		float val = params[id].getValue();
+		// Reverse scale it
+		if ((size_t)id < paramQuantities.size())
+			val = MathTools::map_value(val, paramQuantities[id]->minValue, paramQuantities[id]->maxValue, 0.f, 1.f);
+		return val;
+	}
+	return 0.f;
 }
 
 void VCVModuleWrapper::set_input(int input_id, float val) {
