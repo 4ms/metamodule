@@ -42,7 +42,7 @@ struct MainMenuPage : PageBase {
 
 		auto patch = patches.get_playing_patch();
 		if (!patch || patch->patch_name.length() == 0) {
-			lv_hide(ui_MainMenuNowPlayingPanel);
+			lv_show(ui_MainMenuNowPlayingPanel);
 		} else {
 			lv_show(ui_MainMenuNowPlayingPanel);
 			lv_label_set_text(ui_MainMenuNowPlaying, "Playing:");
@@ -54,6 +54,7 @@ struct MainMenuPage : PageBase {
 			lv_hide(ui_MainMenuLastViewedPanel);
 		} else {
 			lv_show(ui_MainMenuLastViewedPanel);
+			lv_label_set_text(ui_MainMenuLastViewed, "Last Viewed:");
 			lv_label_set_text(ui_MainMenuLastViewedName, viewpatch->patch_name.c_str());
 		}
 

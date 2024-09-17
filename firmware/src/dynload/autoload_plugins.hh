@@ -56,10 +56,13 @@ private:
 		auto &s = plugin_settings.slug[slug_idx];
 		pr_info("Autoload: Looking for plugin: %s\n", s.c_str());
 
-		if (load_plugin(s))
-			return {State::Processing, "Loading " + s};
-		else
+		autoload_state = State::Processing;
+
+		if (load_plugin(s)) {
+			return {State::Processing, "Auto-loading " + s};
+		} else {
 			return {State::Processing, "Can't find " + s};
+		}
 	}
 
 	Status process_loading() {
