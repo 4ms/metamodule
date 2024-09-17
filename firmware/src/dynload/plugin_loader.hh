@@ -9,6 +9,7 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
 #include "util/monotonic_allocator.hh"
+#include "util/version_tools.hh"
 #include <cstdint>
 #include <deque>
 #include <string>
@@ -62,6 +63,8 @@ public:
 		if (idx < plugin_files.size()) {
 			status.state = State::PrepareForReadingPlugin;
 			file_idx = idx;
+		} else {
+			pr_err("Cannot load plugin with idx %u, only have %zu plugins\n", idx, plugin_files.size());
 		}
 	}
 
@@ -93,6 +96,8 @@ public:
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
 					plugin_files = *plugin_file_list; //make local copy
 					pr_trace("Found %d plugins\n", plugin_files.size());
+
+					parse_versions();
 					status.state = State::GotList;
 					file_idx = 0;
 				}
@@ -241,6 +246,25 @@ public:
 		}
 
 		return status;
+	}
+
+	void parse_versions() {
+		for (auto &plugin : plugin_files) {
+			auto name = std::string_view{plugin.plugin_name};
+			pr_dbg("Finding version for %s\n", name.data());
+			if (auto v = name.find("-v"); v != std::string_view::npos) {
+				std::string_view vers = name.substr(v + 2);
+				pr_dbg("Found version at %d (%s)\n", v, vers.data());
+				auto version = VersionUtil::parse_version(vers);
+				printf(
+					"%s => %s => %u.%u.%u\n", name.data(), vers.data(), version.major, version.minor, version.revision);
+			} else {
+				pr_dbg("No version found\n");
+				plugin.version = "1.0.x";
+				plugin.sdk_major_version = 1;
+				plugin.sdk_minor_version = 0;
+			}
+		}
 	}
 
 	bool load_plugin(LoadedPlugin &plugin) {
