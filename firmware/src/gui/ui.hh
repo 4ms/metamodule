@@ -113,7 +113,6 @@ public:
 			} else {
 				if (status.message.length()) {
 					lv_label_set_text(ui_MainMenuNowPlaying, status.message.c_str());
-					pr_dbg("msg: %s\n", status.message.c_str());
 				}
 			}
 
@@ -126,6 +125,8 @@ public:
 			}
 		}
 
+		lv_label_set_text(ui_MainMenuNowPlaying, "");
+		lv_label_set_text(ui_MainMenuLastViewedName, "");
 		page_manager.init();
 	}
 
