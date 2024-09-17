@@ -98,7 +98,7 @@ public:
 	}
 
 	ParamWatcher &watched_params() {
-		return params.watched_params;
+		return params.param_watcher;
 	}
 
 	void autoload_plugins() {
