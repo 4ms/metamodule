@@ -146,7 +146,6 @@ public:
 
 			case State::UntarPlugin: {
 				auto &plugin_file = plugin_files[file_idx];
-				std::string_view plugin_name = plugin_file.plugin_name;
 
 				auto plugin_tar = Tar::Archive({(char *)buffer.data(), buffer.size()});
 				// plugin_tar.print_info();
@@ -155,7 +154,7 @@ public:
 				json_buffer.clear();
 				files_copied_to_ramdisk.clear();
 
-				std::string plugin_vers;
+				std::string plugin_vers_filename;
 
 				auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
 					if (filename.ends_with(".png")) {
@@ -188,7 +187,7 @@ public:
 						return buffer.size();
 
 					} else if (filename.contains("/SDK-")) {
-						plugin_vers = filename;
+						plugin_vers_filename = filename;
 						return buffer.size();
 
 					} else {
@@ -203,21 +202,27 @@ public:
 					pr_warn("Skipped loading some files in plugin dir (did not end in .png)\n");
 					// status.error_message = "Warning: Failed to load some files";
 				}
-				if (plugin_vers.length() == 0) {
-					status.error_message = "Warning: Plugin missing version file.";
-				}
+
 				if (so_buffer.size() == 0) {
 					status.error_message = "Error: no plugin .so file found. Plugin is corrupted?";
+					break;
 				}
 
+				auto vers_pos = plugin_vers_filename.find_last_of("/SDK-");
+				if (plugin_vers_filename.length() == 0 || vers_pos == std::string::npos) {
+					status.state = State::Error;
+					status.error_message = "Warning: Plugin missing version file.";
+					break;
+				}
+				auto plugin_vers = plugin_vers_filename.substr(vers_pos + 1);
 				auto fw_version = sdk_version();
-				auto plugin_version = VersionUtil::parse_version(plugin_vers);
-				if (fw_version.major != plugin_version.major || fw_version.minor < plugin_version.minor) {
+				if (fw_version.can_host_version(VersionUtil::parse_version(plugin_vers))) {
+					status.state = State::ProcessingPlugin;
+				} else {
 					std::string fw_vers = std::to_string(fw_version.major) + "." + std::to_string(fw_version.minor);
 					status.error_message = "Plugin version is " + plugin_vers + ", but firmware version is " + fw_vers;
 					status.state = State::Error;
-				} else
-					status.state = State::ProcessingPlugin;
+				}
 
 			} break;
 
@@ -227,8 +232,10 @@ public:
 				plugin.fileinfo = plugin_file;
 
 				auto plugin_json = Plugin::parse_json(json_buffer);
-				plugin.rack_plugin.slug = plugin_json.slug.length() ? plugin_json.slug : plugin_file.plugin_name;
-				plugin.rack_plugin.name = plugin_json.name.length() ? plugin_json.name : plugin_file.plugin_name;
+				plugin.rack_plugin.slug =
+					plugin_json.slug.length() ? plugin_json.slug : std::string{plugin_file.plugin_name};
+				plugin.rack_plugin.name =
+					plugin_json.name.length() ? plugin_json.name : std::string{plugin_file.plugin_name};
 
 				plugin.loaded_files = std::move(files_copied_to_ramdisk);
 
@@ -264,20 +271,28 @@ public:
 
 	void parse_versions() {
 		for (auto &plugin : plugin_files) {
-			auto name = std::string_view{plugin.plugin_name};
-			pr_dbg("Finding version for %s\n", name.data());
+			const auto name = std::string{plugin.plugin_name};
+
+			pr_dbg("Finding version for %s\n", name.c_str());
 
 			if (auto v = name.find("-v"); v != std::string_view::npos) {
-				// drop version from plugin name
-				plugin.plugin_name = name.substr(0, v);
+				// extract version string:
+				std::string vers = name.substr(v + 2);
 
-				std::string_view vers = name.substr(v + 2);
+				// drop version from plugin name:
+				plugin.plugin_name.copy(name.substr(0, v));
+
 				auto version = VersionUtil::parse_version(vers);
-				printf(
-					"%s => %s => %u.%u.%u\n", name.data(), vers.data(), version.major, version.minor, version.revision);
+				plugin.version = std::string_view(vers);
+				pr_dbg("%s => %s => %u.%u.%u\n",
+					   name.c_str(),
+					   vers.c_str(),
+					   version.major,
+					   version.minor,
+					   version.revision);
 			} else {
 				pr_dbg("No version found\n");
-				plugin.version = "1.0.0";
+				plugin.version = "";
 				plugin.sdk_major_version = 1;
 				plugin.sdk_minor_version = 0;
 			}

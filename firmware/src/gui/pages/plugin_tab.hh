@@ -44,8 +44,7 @@ struct PluginTab : SystemMenuTab {
 		if (!lv_obj_get_child_cnt(ui_PluginsLoadedCont) && loaded_plugins.size()) {
 			// plugins were autoloaded on startup, they need to be added to the loaded plugin list.
 			for (auto &p : loaded_plugins) {
-				auto pluginname = p.fileinfo.plugin_name;
-				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
+				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, p.fileinfo.plugin_name.c_str());
 				lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
 				lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
@@ -81,10 +80,11 @@ struct PluginTab : SystemMenuTab {
 			auto *found_plugins = plugin_manager.found_plugin_list();
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
-				auto pluginname = std::string{std::string_view{plugin.plugin_name}};
-				pluginname += " (" + std::string{std::string_view{plugin.version}} + ")";
+				auto pluginname = std::string{plugin.plugin_name};
+				if (plugin.version.length() > 0)
+					pluginname += " (" + std::string{plugin.version} + ")";
 
-				if (!plugin_already_loaded(pluginname)) {
+				if (!plugin_already_loaded(plugin)) {
 
 					lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, pluginname.c_str());
 
@@ -166,12 +166,13 @@ private:
 		}
 	}
 
-	bool plugin_already_loaded(std::string_view name) {
-		// TODO: handle multiple versions
+	bool plugin_already_loaded(PluginFile const &plugin) {
 		auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
-		for (auto &plugin : loaded_plugin_list) {
-			pr_dbg("Comparing %s (new) and %s (loaded)\n", name.data(), plugin.fileinfo.plugin_name.c_str());
-			if (plugin.fileinfo.plugin_name == name) {
+		for (auto &loaded_plugin_file : loaded_plugin_list) {
+			auto const &loaded_plugin = loaded_plugin_file.fileinfo;
+			pr_dbg(
+				"Comparing %s (new) and %s (loaded)\n", plugin.plugin_name.c_str(), loaded_plugin.plugin_name.c_str());
+			if (loaded_plugin.plugin_name == plugin.plugin_name) {
 				return true;
 			}
 		}
