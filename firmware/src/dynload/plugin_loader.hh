@@ -168,17 +168,26 @@ public:
 							return 0;
 						}
 
-					} else if (filename.ends_with(".so") && filename.starts_with(plugin_name)) {
-						so_buffer.assign(buffer.begin(), buffer.end());
-						pr_trace("Found plugin binary file: %s\n", filename.data());
-						return buffer.size();
+					} else if (filename.ends_with(".so")) { // && filename.starts_with(plugin_name)) {
+						if (so_buffer.size() == 0) {
+							so_buffer.assign(buffer.begin(), buffer.end());
+							auto name = filename;
+							name.remove_suffix(3); //.so
+							plugin_file.plugin_name = name;
+							pr_trace("Found plugin binary file: %s, plugin name is %s\n",
+									 filename.data(),
+									 plugin_file.plugin_name.c_str());
+							return buffer.size();
+						} else {
+							pr_warn("More than one .so file found! Using just the first\n");
+							return 0;
+						}
 
 					} else if (filename.ends_with("plugin.json")) {
 						json_buffer.assign(buffer.begin(), buffer.end());
 						return buffer.size();
 
 					} else if (filename.contains("/SDK-")) {
-						//TODO: check version matches
 						plugin_vers = filename;
 						return buffer.size();
 
@@ -189,6 +198,7 @@ public:
 				};
 
 				bool all_ok = plugin_tar.extract_files(ramdisk_writer);
+
 				if (!all_ok) {
 					pr_warn("Skipped loading some files in plugin dir (did not end in .png)\n");
 					// status.error_message = "Warning: Failed to load some files";
@@ -197,7 +207,7 @@ public:
 					status.error_message = "Warning: Plugin missing version file.";
 				}
 				if (so_buffer.size() == 0) {
-					status.error_message = "Error: no plugin binary found. Plugin is corrupted?";
+					status.error_message = "Error: no plugin .so file found. Plugin is corrupted?";
 				}
 
 				auto fw_version = sdk_version();
