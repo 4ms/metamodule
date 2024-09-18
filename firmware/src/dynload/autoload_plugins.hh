@@ -100,11 +100,26 @@ private:
 	}
 
 	bool load_plugin(std::string_view s) {
-		const auto match = std::find_if(found_plugins->begin(), found_plugins->end(), [s](PluginFile const &f) {
-			return f.plugin_name == std::string_view(s);
-		});
+		Version latest_version{};
+		const PluginFile *match = nullptr;
 
-		if (match == found_plugins->end()) {
+		for (auto const &found_plugin : *found_plugins) {
+			if (found_plugin.plugin_name == s) {
+				auto fw_version = sdk_version();
+				auto found_version = VersionUtil::parse_version(found_plugin.version);
+				if (fw_version.can_host_version(found_version)) {
+					if (latest_version.is_later(found_version))
+						continue;
+
+					latest_version.major = found_version.major;
+					latest_version.minor = found_version.minor;
+					latest_version.revision = found_version.revision;
+					match = &found_plugin;
+				}
+			}
+		}
+
+		if (!match) {
 			pr_info("Autoload: Can't find plugin: %.*s\n", (int)s.size(), s.data());
 			slug_idx++;
 			return false;
