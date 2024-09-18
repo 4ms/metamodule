@@ -35,6 +35,8 @@ struct AutoLoader {
 private:
 	Status start() {
 		if (plugin_settings.slug.size()) {
+			HAL_Delay(600); //allow time for ???
+
 			pr_info("Autoload: Scanning...\n");
 			plugins.start_loading_plugin_list();
 
