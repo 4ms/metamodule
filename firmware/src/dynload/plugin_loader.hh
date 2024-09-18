@@ -293,8 +293,8 @@ public:
 		}
 
 		auto firmware_sdk_version = sdk_version();
-		if (!plugin_sdk_version->is_compatible(firmware_sdk_version)) {
-			pr_err("Plugin SDK version mismatch: %d.%d vs %d.%d\n",
+		if (!firmware_sdk_version.can_host_version(*plugin_sdk_version)) {
+			pr_err("Plugin and firmware version mismatch: %d.%d vs %d.%d\n",
 				   plugin_sdk_version->major,
 				   plugin_sdk_version->minor,
 				   firmware_sdk_version.major,
