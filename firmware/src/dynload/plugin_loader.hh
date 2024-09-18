@@ -196,14 +196,18 @@ public:
 				if (plugin_vers.length() == 0) {
 					status.error_message = "Warning: Plugin missing version file.";
 				}
-
-				Version version = sdk_version();
-				std::string vers = "/SDK-" + std::to_string(version.major) + "." + std::to_string(version.minor);
-				if (!plugin_vers.ends_with(vers)) {
-					status.error_message = "Plugin version is " + plugin_vers + ", needs to be " + vers;
+				if (so_buffer.size() == 0) {
+					status.error_message = "Error: no plugin binary found. Plugin is corrupted?";
 				}
 
-				status.state = State::ProcessingPlugin;
+				auto fw_version = sdk_version();
+				auto plugin_version = VersionUtil::parse_version(plugin_vers);
+				if (fw_version.major != plugin_version.major || fw_version.minor < plugin_version.minor) {
+					std::string fw_vers = std::to_string(fw_version.major) + "." + std::to_string(fw_version.minor);
+					status.error_message = "Plugin version is " + plugin_vers + ", but firmware version is " + fw_vers;
+					status.state = State::Error;
+				} else
+					status.state = State::ProcessingPlugin;
 
 			} break;
 
@@ -252,15 +256,18 @@ public:
 		for (auto &plugin : plugin_files) {
 			auto name = std::string_view{plugin.plugin_name};
 			pr_dbg("Finding version for %s\n", name.data());
+
 			if (auto v = name.find("-v"); v != std::string_view::npos) {
+				// drop version from plugin name
+				plugin.plugin_name = name.substr(0, v);
+
 				std::string_view vers = name.substr(v + 2);
-				pr_dbg("Found version at %d (%s)\n", v, vers.data());
 				auto version = VersionUtil::parse_version(vers);
 				printf(
 					"%s => %s => %u.%u.%u\n", name.data(), vers.data(), version.major, version.minor, version.revision);
 			} else {
 				pr_dbg("No version found\n");
-				plugin.version = "1.0.x";
+				plugin.version = "1.0.0";
 				plugin.sdk_major_version = 1;
 				plugin.sdk_minor_version = 0;
 			}

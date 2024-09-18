@@ -79,6 +79,7 @@ struct PluginTab : SystemMenuTab {
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
 				auto pluginname = std::string{std::string_view{plugin.plugin_name}};
+				pluginname += " (" + std::string{std::string_view{plugin.version}} + ")";
 
 				if (!plugin_already_loaded(pluginname)) {
 
@@ -118,7 +119,6 @@ struct PluginTab : SystemMenuTab {
 
 		if (result.error_message.length()) {
 			lv_hide(ui_PluginTabSpinner);
-			pr_err("Error: %s\n", result.error_message.c_str());
 			std::string err = "Error loading plugin: " + result.error_message;
 			notify_queue.put({err, Notification::Priority::Error, 1500});
 		}
