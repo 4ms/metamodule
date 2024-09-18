@@ -92,12 +92,6 @@ public:
 	}
 
 	void autoload_plugins() {
-		constexpr std::array<std::string_view, 4> dots{"", ".", "..", "..."};
-		uint8_t dot_i = 0;
-
-		lv_show(ui_MainMenuLastViewedPanel);
-		lv_label_set_text(ui_MainMenuLastViewed, "Please Wait");
-
 		auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
 
 		while (true) {
@@ -119,14 +113,11 @@ public:
 			auto now = HAL_GetTick();
 			if ((now - last_lv_update_tm) > 2) {
 				last_lv_update_tm = now;
-				lv_label_set_text(ui_MainMenuLastViewedName, dots[dot_i >> 6].data());
-				dot_i++;
 				lv_timer_handler();
 			}
 		}
 
 		lv_label_set_text(ui_MainMenuNowPlaying, "");
-		lv_label_set_text(ui_MainMenuLastViewedName, "");
 		page_manager.init();
 	}
 
