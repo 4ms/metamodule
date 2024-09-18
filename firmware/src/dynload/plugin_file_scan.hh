@@ -19,7 +19,7 @@ inline bool scan_volume(FileIoC auto &fileio, PluginFileList &plugin_files, std:
 			if (kind == DirEntryKind::File) {
 				if (entryname.ends_with(".mmplugin") && !entryname.starts_with(".")) {
 					entryname.remove_suffix(9);
-					plugin_files.push_back({fileio.vol_id(), full_path.c_str(), entryname, filesize});
+					plugin_files.push_back({fileio.vol_id(), full_path.c_str(), entryname, filesize, "", 1, 0});
 					pr_trace("Found plugin file %s\n", full_path.c_str());
 				}
 			}

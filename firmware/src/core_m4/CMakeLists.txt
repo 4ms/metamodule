@@ -125,6 +125,7 @@ target_link_script(
 )
 
 target_link_libraries(main_m4.elf PRIVATE cpputil)
+target_compile_definitions(main_m4.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")

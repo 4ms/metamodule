@@ -66,7 +66,7 @@ inline void make_cable(GuiState::CableBeginning &new_cable,
 		if (make_panel_mapping) {
 			jackmapping.type = ElementType::Input;
 			patch_mod_queue.put(jackmapping);
-			notify_queue.put({"Added cable from panel input"});
+			notify_queue.put({"Added cable from panel input", Notification::Priority::Info, 1000});
 		}
 	}
 
@@ -84,7 +84,7 @@ inline void make_cable(GuiState::CableBeginning &new_cable,
 				} else if (auto cable = patch->find_internal_cable_with_injack(this_jack)) {
 					newcable.out = cable->out;
 				} else {
-					notify_queue.put({"Error: cannot connect two inputs", Notification::Priority::Error});
+					notify_queue.put({"Error: cannot connect two inputs", Notification::Priority::Error, 2000});
 				}
 			}
 		} else {

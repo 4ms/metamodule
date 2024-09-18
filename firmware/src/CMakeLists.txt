@@ -207,6 +207,7 @@ target_include_directories(
 if (NOT TARGET cpputil::cpputil)
   add_subdirectory(${LIBDIR}/cpputil cpputil)
 endif()
+target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui metamodule::patch-serial cpputil vcv_ports)

@@ -36,10 +36,11 @@ lv_obj_t *create_plugin_list_item(lv_obj_t *parent, const char *name) {
 	lv_obj_set_width(label, lv_pct(100));
 	lv_obj_set_height(label, LV_SIZE_CONTENT);
 	lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
-	lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
+	lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
 	lv_label_set_text(label, name);
 	lv_obj_set_style_pad_all(label, 2, LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(label, &ui_font_MuseoSansRounded70016, LV_STATE_DEFAULT);
+	lv_label_set_recolor(label, true);
 
 	return obj;
 }

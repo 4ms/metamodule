@@ -9,6 +9,7 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "plugin/Plugin.hpp"
 #include "util/monotonic_allocator.hh"
+#include "util/version_tools.hh"
 #include <cstdint>
 #include <deque>
 #include <string>
@@ -62,6 +63,8 @@ public:
 		if (idx < plugin_files.size()) {
 			status.state = State::PrepareForReadingPlugin;
 			file_idx = idx;
+		} else {
+			pr_err("Cannot load plugin with idx %u, only have %zu plugins\n", idx, plugin_files.size());
 		}
 	}
 
@@ -93,6 +96,8 @@ public:
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
 					plugin_files = *plugin_file_list; //make local copy
 					pr_trace("Found %d plugins\n", plugin_files.size());
+
+					parse_versions();
 					status.state = State::GotList;
 					file_idx = 0;
 				}
@@ -141,7 +146,6 @@ public:
 
 			case State::UntarPlugin: {
 				auto &plugin_file = plugin_files[file_idx];
-				std::string_view plugin_name = plugin_file.plugin_name;
 
 				auto plugin_tar = Tar::Archive({(char *)buffer.data(), buffer.size()});
 				// plugin_tar.print_info();
@@ -150,7 +154,7 @@ public:
 				json_buffer.clear();
 				files_copied_to_ramdisk.clear();
 
-				std::string plugin_vers;
+				std::string plugin_vers_filename;
 
 				auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
 					if (filename.ends_with(".png")) {
@@ -163,18 +167,35 @@ public:
 							return 0;
 						}
 
-					} else if (filename.ends_with(".so") && filename.starts_with(plugin_name)) {
-						so_buffer.assign(buffer.begin(), buffer.end());
-						pr_trace("Found plugin binary file: %s\n", filename.data());
-						return buffer.size();
+					} else if (filename.ends_with(".so")) {
+						if (so_buffer.size() == 0) {
+							auto name = filename;
+							if (auto slashpos = name.find_last_of("/"); slashpos != std::string::npos) {
+								name = name.substr(slashpos + 1);
+							}
+							name.remove_suffix(3); //.so
+							if (!name.starts_with(".")) {
+								plugin_file.plugin_name = name;
+
+								pr_dbg("Found plugin binary file: %s, plugin name is %s\n",
+									   filename.data(),
+									   plugin_file.plugin_name.c_str());
+
+								so_buffer.assign(buffer.begin(), buffer.end());
+								return buffer.size();
+							} else
+								return 0;
+						} else {
+							pr_warn("More than one .so file found! Using just the first\n");
+							return 0;
+						}
 
 					} else if (filename.ends_with("plugin.json")) {
 						json_buffer.assign(buffer.begin(), buffer.end());
 						return buffer.size();
 
 					} else if (filename.contains("/SDK-")) {
-						//TODO: check version matches
-						plugin_vers = filename;
+						plugin_vers_filename = filename;
 						return buffer.size();
 
 					} else {
@@ -184,21 +205,32 @@ public:
 				};
 
 				bool all_ok = plugin_tar.extract_files(ramdisk_writer);
+
 				if (!all_ok) {
 					pr_warn("Skipped loading some files in plugin dir (did not end in .png)\n");
 					// status.error_message = "Warning: Failed to load some files";
 				}
-				if (plugin_vers.length() == 0) {
+
+				if (so_buffer.size() == 0) {
+					status.error_message = "Error: no plugin .so file found. Plugin is corrupted?";
+					break;
+				}
+
+				auto vers_pos = plugin_vers_filename.find_last_of("/SDK-");
+				if (plugin_vers_filename.length() == 0 || vers_pos == std::string::npos) {
+					status.state = State::Error;
 					status.error_message = "Warning: Plugin missing version file.";
+					break;
 				}
-
-				Version version = sdk_version();
-				std::string vers = "/SDK-" + std::to_string(version.major) + "." + std::to_string(version.minor);
-				if (!plugin_vers.ends_with(vers)) {
-					status.error_message = "Plugin version is " + plugin_vers + ", needs to be " + vers;
+				auto plugin_vers = plugin_vers_filename.substr(vers_pos + 1);
+				auto fw_version = sdk_version();
+				if (fw_version.can_host_version(VersionUtil::parse_version(plugin_vers))) {
+					status.state = State::ProcessingPlugin;
+				} else {
+					std::string fw_vers = std::to_string(fw_version.major) + "." + std::to_string(fw_version.minor);
+					status.error_message = "Plugin version is " + plugin_vers + ", but firmware version is " + fw_vers;
+					status.state = State::Error;
 				}
-
-				status.state = State::ProcessingPlugin;
 
 			} break;
 
@@ -206,10 +238,13 @@ public:
 				auto &plugin_file = plugin_files[file_idx];
 				auto &plugin = loaded_plugins.emplace_back();
 				plugin.fileinfo = plugin_file;
-
+				// name/name
+				pr_info("Put plugin in loaded list: %s\n", plugin.fileinfo.plugin_name.c_str());
 				auto plugin_json = Plugin::parse_json(json_buffer);
-				plugin.rack_plugin.slug = plugin_json.slug.length() ? plugin_json.slug : plugin_file.plugin_name;
-				plugin.rack_plugin.name = plugin_json.name.length() ? plugin_json.name : plugin_file.plugin_name;
+				plugin.rack_plugin.slug =
+					plugin_json.slug.length() ? plugin_json.slug : std::string{plugin_file.plugin_name};
+				plugin.rack_plugin.name =
+					plugin_json.name.length() ? plugin_json.name : std::string{plugin_file.plugin_name};
 
 				plugin.loaded_files = std::move(files_copied_to_ramdisk);
 
@@ -243,6 +278,36 @@ public:
 		return status;
 	}
 
+	void parse_versions() {
+		for (auto &plugin : plugin_files) {
+			const auto name = std::string{plugin.plugin_name};
+
+			pr_dbg("Finding version for %s\n", name.c_str());
+
+			if (auto v = name.find("-v"); v != std::string_view::npos) {
+				// extract version string:
+				std::string vers = name.substr(v + 2);
+
+				// drop version from plugin name:
+				plugin.plugin_name.copy(name.substr(0, v));
+
+				auto version = VersionUtil::parse_version(vers);
+				plugin.version = std::string_view(vers);
+				pr_dbg("%s => %s => %u.%u.%u\n",
+					   name.c_str(),
+					   vers.c_str(),
+					   version.major,
+					   version.minor,
+					   version.revision);
+			} else {
+				pr_dbg("No version found\n");
+				plugin.version = "";
+				plugin.sdk_major_version = 1;
+				plugin.sdk_minor_version = 0;
+			}
+		}
+	}
+
 	bool load_plugin(LoadedPlugin &plugin) {
 		using InitPluginFunc = void(rack::plugin::Plugin *);
 
@@ -262,8 +327,8 @@ public:
 		}
 
 		auto firmware_sdk_version = sdk_version();
-		if (!plugin_sdk_version->is_compatible(firmware_sdk_version)) {
-			pr_err("Plugin SDK version mismatch: %d.%d vs %d.%d\n",
+		if (!firmware_sdk_version.can_host_version(*plugin_sdk_version)) {
+			pr_err("Plugin and firmware version mismatch: %d.%d vs %d.%d\n",
 				   plugin_sdk_version->major,
 				   plugin_sdk_version->minor,
 				   firmware_sdk_version.major,
