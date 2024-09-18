@@ -167,16 +167,24 @@ public:
 							return 0;
 						}
 
-					} else if (filename.ends_with(".so")) { // && filename.starts_with(plugin_name)) {
+					} else if (filename.ends_with(".so")) {
 						if (so_buffer.size() == 0) {
-							so_buffer.assign(buffer.begin(), buffer.end());
 							auto name = filename;
+							if (auto slashpos = name.find_last_of("/"); slashpos != std::string::npos) {
+								name = name.substr(slashpos + 1);
+							}
 							name.remove_suffix(3); //.so
-							plugin_file.plugin_name = name;
-							pr_trace("Found plugin binary file: %s, plugin name is %s\n",
-									 filename.data(),
-									 plugin_file.plugin_name.c_str());
-							return buffer.size();
+							if (!name.starts_with(".")) {
+								plugin_file.plugin_name = name;
+
+								pr_dbg("Found plugin binary file: %s, plugin name is %s\n",
+									   filename.data(),
+									   plugin_file.plugin_name.c_str());
+
+								so_buffer.assign(buffer.begin(), buffer.end());
+								return buffer.size();
+							} else
+								return 0;
 						} else {
 							pr_warn("More than one .so file found! Using just the first\n");
 							return 0;
@@ -230,7 +238,8 @@ public:
 				auto &plugin_file = plugin_files[file_idx];
 				auto &plugin = loaded_plugins.emplace_back();
 				plugin.fileinfo = plugin_file;
-
+				// name/name
+				pr_info("Put plugin in loaded list: %s\n", plugin.fileinfo.plugin_name.c_str());
 				auto plugin_json = Plugin::parse_json(json_buffer);
 				plugin.rack_plugin.slug =
 					plugin_json.slug.length() ? plugin_json.slug : std::string{plugin_file.plugin_name};
