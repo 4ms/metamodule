@@ -104,9 +104,6 @@ extern "C" void aux_core_main() {
 	pr_info("A7 Core 2 initialized\n");
 	HWSemaphore<AuxCoreReady>::unlock();
 
-	//Aurrent Time:  2020000-10--11-1 0:00:16 (Ticks: 16124, posix time: 60904915216)
-	//Current Time: 6 digits and two dashes
-
 	ui.autoload_plugins();
 	ui.load_initial_patch();
 

@@ -37,7 +37,7 @@ private:
 		if (plugin_settings.slug.size()) {
 			HAL_Delay(600); //allow time for ???
 
-			pr_info("Autoload: Scanning...\n");
+			pr_trace("Autoload: Scanning...\n");
 			plugins.start_loading_plugin_list();
 
 			autoload_state = State::Processing;
@@ -56,7 +56,7 @@ private:
 		}
 
 		auto &s = plugin_settings.slug[slug_idx];
-		pr_info("Autoload: Looking for plugin: %s\n", s.c_str());
+		pr_trace("Autoload: Looking for plugin: %s\n", s.c_str());
 
 		autoload_state = State::Processing;
 
@@ -80,7 +80,7 @@ private:
 
 		if (result.state == PluginFileLoader::State::Success) {
 			auto &s = plugin_settings.slug[slug_idx];
-			pr_info("Autoload: Loaded plugin: %s\n", s.c_str());
+			pr_trace("Autoload: Done with plugin: %s\n", s.c_str());
 
 			slug_idx++;
 			autoload_state = State::LoadingPlugin;
@@ -107,6 +107,8 @@ private:
 			if (found_plugin.plugin_name == s) {
 				auto fw_version = sdk_version();
 				auto found_version = VersionUtil::parse_version(found_plugin.version);
+				if (found_version.major == 0)
+					found_version = {1, 0, 0};
 				if (fw_version.can_host_version(found_version)) {
 					if (latest_version.is_later(found_version))
 						continue;
@@ -121,7 +123,6 @@ private:
 
 		if (!match) {
 			pr_info("Autoload: Can't find plugin: %.*s\n", (int)s.size(), s.data());
-			slug_idx++;
 			return false;
 		}
 
