@@ -301,8 +301,13 @@ Element make_element(rack::app::SvgSwitch *widget) {
 	}
 
 	if (momentary) {
-		log_make_element("SvgSwitch mom", widget->paramId);
-		return make_momentary(widget);
+		if (widget->visible) {
+			log_make_element("SvgSwitch mom", widget->paramId);
+			return make_momentary(widget);
+		} else {
+			// momentary buttons that are not visible should become AltParams (specifically AltParamMomentary)
+			return AltParamMomentary();
+		}
 	} else {
 		if (auto pq = widget->getParamQuantity(); pq) {
 			if ((pq->maxValue - pq->minValue + 1) > FlipSwitch::MaxPositions) {

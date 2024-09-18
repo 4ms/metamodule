@@ -108,6 +108,10 @@ private:
 						   lv_arc_set_value(ui_ControlArc, 1);
 						   arc_change_value();
 					   },
+					   [this](const AltParamMomentary &el) {
+						   lv_arc_set_value(ui_ControlArc, 1);
+						   arc_change_value();
+					   },
 
 					   [this](const AltParamChoice &el) {
 						   auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
@@ -132,6 +136,10 @@ private:
 						   lv_arc_set_value(ui_ControlArc, 0);
 						   arc_change_value();
 					   },
+					   [this](const AltParamMomentary &el) {
+						   lv_arc_set_value(ui_ControlArc, 0);
+						   arc_change_value();
+					   },
 				   },
 				   drawn_el->element);
 		lv_group_focus_obj(ui_ControlArc);
@@ -151,6 +159,7 @@ private:
 					   [](const Pot &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
 					   [](const AltParamChoice &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
 					   [](const AltParamContinuous &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
+					   [](const AltParamMomentary &) { lv_arc_set_range(ui_ControlArc, 0, 1); },
 				   },
 				   drawn_el->element);
 
