@@ -21,10 +21,6 @@ public:
 		plugin_file_loader.start();
 	}
 
-	PluginFileList const *found_plugin_list() {
-		return plugin_file_loader.found_plugin_list();
-	}
-
 	void load_plugin(unsigned idx) {
 		plugin_file_loader.load_plugin(idx);
 		ramdisk.debug_print_disk_info();
@@ -50,6 +46,10 @@ public:
 
 	auto process_loading() {
 		return plugin_file_loader.process(loaded_plugin_list);
+	}
+
+	PluginFileList const *found_plugin_list() {
+		return plugin_file_loader.found_plugin_list();
 	}
 
 	LoadedPluginList const &loaded_plugins() {

@@ -44,9 +44,11 @@ struct PluginTab : SystemMenuTab {
 		if (!lv_obj_get_child_cnt(ui_PluginsLoadedCont) && loaded_plugins.size()) {
 			// plugins were autoloaded on startup, they need to be added to the loaded plugin list.
 			for (auto &p : loaded_plugins) {
-				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, p.fileinfo.plugin_name.c_str());
-				lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
-				lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
+				auto pluginname = std::string{p.fileinfo.plugin_name};
+				if (p.fileinfo.version.length() > 0)
+					pluginname += Gui::grey_text(" " + std::string{p.fileinfo.version});
+
+				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
 				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
 				lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 			}
@@ -82,7 +84,7 @@ struct PluginTab : SystemMenuTab {
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
 				auto pluginname = std::string{plugin.plugin_name};
 				if (plugin.version.length() > 0)
-					pluginname += " (" + std::string{plugin.version} + ")";
+					pluginname += Gui::grey_text(" " + std::string{plugin.version});
 
 				if (!plugin_already_loaded(plugin)) {
 
@@ -90,8 +92,6 @@ struct PluginTab : SystemMenuTab {
 
 					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx + 1));
 					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
-					lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
-					lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 					lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 				}
 
@@ -110,8 +110,6 @@ struct PluginTab : SystemMenuTab {
 				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
 				lv_group_add_obj(group, plugin_obj);
 				lv_group_focus_obj(plugin_obj);
-				lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
-				lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
 
 				lv_obj_del_async(load_in_progress_obj);
@@ -123,7 +121,7 @@ struct PluginTab : SystemMenuTab {
 		if (result.error_message.length()) {
 			lv_hide(ui_PluginTabSpinner);
 			std::string err = "Error loading plugin: " + result.error_message;
-			notify_queue.put({err, Notification::Priority::Error, 1500});
+			notify_queue.put({err, Notification::Priority::Error, 2500});
 		}
 	}
 
@@ -161,8 +159,6 @@ private:
 		for (auto &plugin : loaded_plugin_list) {
 			auto plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
 			lv_group_add_obj(group, plugin_obj);
-			lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
-			lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 		}
 	}
 
@@ -262,16 +258,6 @@ private:
 			page->plugin_manager.load_plugin(idx - 1);
 			page->load_in_progress_obj = event->target;
 		}
-	}
-
-	static void scroll_label_on_focus_cb(lv_event_t *event) {
-		if (event->target)
-			label_scrolls(event->target);
-	}
-
-	static void noscroll_on_defocus_cb(lv_event_t *event) {
-		if (event->target)
-			label_overflow_dot(event->target);
 	}
 
 	PluginManager &plugin_manager;
