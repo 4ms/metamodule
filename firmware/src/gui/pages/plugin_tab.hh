@@ -64,6 +64,9 @@ struct PluginTab : SystemMenuTab {
 			confirm_popup.hide();
 			return true;
 		}
+
+		if (should_write_settings)
+			gui_state.do_write_settings = true;
 		return false;
 	}
 
@@ -164,7 +167,7 @@ private:
 	}
 
 	bool plugin_already_loaded(std::string_view name) {
-		// TODO: get this working
+		// TODO: handle multiple versions
 		auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
 		for (auto &plugin : loaded_plugin_list) {
 			pr_dbg("Comparing %s (new) and %s (loaded)\n", name.data(), plugin.fileinfo.plugin_name.c_str());
@@ -218,7 +221,7 @@ private:
 					pr_info("Set Autoload Disabled: %s\n", plugin_name.data());
 					page->settings.slug.erase(autoload_slot);
 				}
-				page->gui_state.do_write_settings = true;
+				page->should_write_settings = true;
 			},
 			plugin_name.c_str(),
 			"Unload",
@@ -274,6 +277,7 @@ private:
 	NotificationQueue &notify_queue;
 	PluginAutoloadSettings &settings;
 	GuiState &gui_state;
+	bool should_write_settings = false;
 	PatchPlayLoader &play_loader;
 	PluginPopup confirm_popup;
 
