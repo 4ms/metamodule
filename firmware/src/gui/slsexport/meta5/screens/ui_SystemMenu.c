@@ -244,7 +244,7 @@ lv_obj_set_scroll_dir(ui_PluginsLeftColumn, LV_DIR_VER);
 lv_obj_set_style_pad_left(ui_PluginsLeftColumn, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_PluginsLeftColumn, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PluginsLeftColumn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(ui_PluginsLeftColumn, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_PluginsLeftColumn, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_PluginsLeftColumn, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_PluginsLeftColumn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
