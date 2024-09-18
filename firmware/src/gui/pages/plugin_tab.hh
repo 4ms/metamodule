@@ -192,7 +192,12 @@ private:
 			return;
 
 		const auto target = lv_event_get_target(event);
-		const std::string plugin_name = lv_list_get_btn_text(lv_event_get_current_target(event), target);
+		if (lv_obj_get_child_cnt(target) != 1)
+			return;
+		std::string plugin_name = lv_label_get_text(lv_obj_get_child(target, 0));
+		if (auto colorpos = plugin_name.find_first_of("^"); colorpos != std::string::npos) {
+			plugin_name = plugin_name.substr(0, colorpos);
+		}
 
 		const auto is_autoloaded =
 			std::find(page->settings.slug.begin(), page->settings.slug.end(), plugin_name) != page->settings.slug.end();
