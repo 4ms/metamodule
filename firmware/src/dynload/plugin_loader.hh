@@ -177,9 +177,9 @@ public:
 							if (!name.starts_with(".")) {
 								plugin_file.plugin_name = name;
 
-								pr_dbg("Found plugin binary file: %s, plugin name is %s\n",
-									   filename.data(),
-									   plugin_file.plugin_name.c_str());
+								pr_trace("Found plugin binary file: %s, plugin name is %s\n",
+										 filename.data(),
+										 plugin_file.plugin_name.c_str());
 
 								so_buffer.assign(buffer.begin(), buffer.end());
 								return buffer.size();
@@ -282,8 +282,6 @@ public:
 		for (auto &plugin : plugin_files) {
 			const auto name = std::string{plugin.plugin_name};
 
-			pr_dbg("Finding version for %s\n", name.c_str());
-
 			if (auto v = name.find("-v"); v != std::string_view::npos) {
 				// extract version string:
 				std::string vers = name.substr(v + 2);
@@ -293,14 +291,14 @@ public:
 
 				auto version = VersionUtil::Version(vers);
 				plugin.version = std::string_view(vers);
-				pr_dbg("%s => %s => %u.%u.%u\n",
-					   name.c_str(),
-					   vers.c_str(),
-					   version.major,
-					   version.minor,
-					   version.revision);
+				pr_trace("Plugin: %s => %s => %u.%u.%u\n",
+						 name.c_str(),
+						 vers.c_str(),
+						 version.major,
+						 version.minor,
+						 version.revision);
 			} else {
-				pr_dbg("No version found\n");
+				pr_warn("Plugin %s: No version found\n", name.c_str());
 				plugin.version = "";
 				plugin.sdk_major_version = 1;
 				plugin.sdk_minor_version = 0;

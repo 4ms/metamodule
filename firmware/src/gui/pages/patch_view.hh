@@ -62,6 +62,11 @@ struct PatchViewPage : PageBase {
 	void prepare_focus() override {
 		is_ready = false;
 
+		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
+			pr_err("Error: Tried to load PatchView with no patch\n");
+			return;
+		}
+
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playing && !patch_playloader.is_audio_muted()) {

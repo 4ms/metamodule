@@ -42,7 +42,7 @@ struct MainMenuPage : PageBase {
 
 		auto patch = patches.get_playing_patch();
 		if (!patch || patch->patch_name.length() == 0) {
-			lv_show(ui_MainMenuNowPlayingPanel);
+			lv_hide(ui_MainMenuNowPlayingPanel);
 		} else {
 			lv_show(ui_MainMenuNowPlayingPanel);
 			lv_label_set_text(ui_MainMenuNowPlaying, "Playing:");
@@ -91,8 +91,10 @@ private:
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		page->patches.view_playing_patch();
-		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patches.get_playing_patch_loc_hash()});
+		if (page->patches.get_playing_patch()) {
+			page->patches.view_playing_patch();
+			page->load_page(PageId::PatchView, {.patch_loc_hash = page->patches.get_playing_patch_loc_hash()});
+		}
 	}
 
 	static void patchsel_cb(lv_event_t *event) {
