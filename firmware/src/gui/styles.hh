@@ -63,38 +63,32 @@ struct Gui {
 		return std::string{color} + std::string{txt} + LV_TXT_COLOR_CMD + " ";
 	}
 	static inline lv_color_t red_highlight = lv_color_hex(0xea1c25);
-	static inline const char *red_highlight_html = "^ea1c25 ";
 	static std::string red_text(std::string_view txt) {
-		return color_text(txt, red_highlight_html);
+		return color_text(txt, "^ea1c25 ");
 	}
 
 	static inline lv_color_t orange_highlight = lv_color_hex(0xfd8b18);
-	static inline const char *orange_highlight_html = "^fd8b18 ";
 	static std::string orange_text(std::string_view txt) {
-		return color_text(txt, orange_highlight_html);
+		return color_text(txt, "^fd9b18 ");
 	}
 
 	static inline lv_color_t yellow_highlight = lv_color_hex(0x8bfd18);
-	static inline const char *yellow_highlight_html = "^d7ff6a ";
 	static std::string yellow_text(std::string_view txt) {
-		return color_text(txt, yellow_highlight_html);
+		return color_text(txt, "^d7ff6a ");
 	}
 
 	static inline lv_color_t green_highlight = lv_color_hex(0x00a551);
-	static inline const char *green_highlight_html = "^00a551 ";
 	static std::string green_text(std::string_view txt) {
-		return color_text(txt, green_highlight_html);
+		return color_text(txt, "^00a551 ");
 	}
 
-	static inline const char *blue_highlight_html = "^188bfd ";
 	static std::string blue_text(std::string_view txt) {
-		return color_text(txt, blue_highlight_html);
+		return color_text(txt, "^188bfd ");
 	}
 
 	static inline lv_color_t grey_highlight = lv_color_hex(0xaaaaaa);
-	static inline const char *grey_highlight_html = "^aaaaaa ";
 	static std::string grey_text(std::string_view txt) {
-		return color_text(txt, grey_highlight_html);
+		return color_text(txt, "^aaaaaa ");
 	}
 
 	static inline const char *brown_highlight_html = "^A26E3E ";
