@@ -101,7 +101,8 @@ struct AddMapPopUp {
 							std::string(full_name.module_name) + "\n" + std::string(full_name.element_name);
 
 					lv_label_set_text_fmt(ui_MapExistsLabel, "Already Mapped To:\n%s", combined.c_str());
-				}
+				} else
+					lv_label_set_text(ui_MapExistsLabel, "");
 			}
 		}
 	}
