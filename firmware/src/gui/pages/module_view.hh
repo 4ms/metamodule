@@ -288,17 +288,17 @@ struct ModuleViewPage : PageBase {
 
 	bool append_header(std::string &opts, ElementCount::Counts last_type, ElementCount::Counts this_type) {
 		if (last_type.num_params == 0 && this_type.num_params > 0) {
-			opts += Gui::orange_highlight_html_str + "Params:" + LV_TXT_COLOR_CMD + "\n";
+			opts += Gui::orange_highlight_html_str + "Params:" + LV_TXT_COLOR_CMD + " \n";
 			return true;
 
 		} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
 				   (this_type.num_inputs > 0 || this_type.num_outputs > 0))
 		{
-			opts += Gui::orange_highlight_html_str + "Jacks:" + LV_TXT_COLOR_CMD + "\n";
+			opts += Gui::orange_highlight_html_str + "Jacks:" + LV_TXT_COLOR_CMD + " \n";
 			return true;
 
 		} else if (last_type.num_lights == 0 && this_type.num_lights > 0 && this_type.num_params == 0) {
-			opts += Gui::orange_highlight_html_str + "Lights:" + LV_TXT_COLOR_CMD + "\n";
+			opts += Gui::orange_highlight_html_str + "Lights:" + LV_TXT_COLOR_CMD + " \n";
 			return true;
 		} else {
 			return false;
