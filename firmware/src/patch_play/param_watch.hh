@@ -37,16 +37,7 @@ struct ParamWatcher {
 	}
 
 	void start_watching_param(uint16_t module_id, uint16_t param_id) {
-		// First search for existing param:
-		for (auto idx = 0u; auto &w : watched_params) {
-			if (w.module_id == module_id && w.param_id == param_id) {
-				w.activate(module_id, param_id);
-				add(idx);
-				return;
-			}
-			idx++;
-		}
-		// If not found, add it into an empty slot:
+		// Add to first empty slot:
 		for (auto idx = 0u; auto &w : watched_params) {
 			if (!w.is_active()) {
 				w.activate(module_id, param_id);
