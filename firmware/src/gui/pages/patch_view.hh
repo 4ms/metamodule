@@ -278,6 +278,9 @@ struct PatchViewPage : PageBase {
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
 
+			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
+				lv_group_focus_obj(ui_PlayButton);
+
 			} else {
 				page_list.request_new_page_no_history(PageId::MainMenu, args);
 				blur();
