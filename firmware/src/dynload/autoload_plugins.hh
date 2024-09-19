@@ -1,4 +1,5 @@
 #pragma once
+#include "delay.hh"
 #include "plugin_manager.hh"
 
 namespace MetaModule
@@ -35,7 +36,7 @@ struct AutoLoader {
 private:
 	Status start() {
 		if (plugin_settings.slug.size()) {
-			HAL_Delay(600); //allow time for ???
+			delay_ms(600); //allow time for ???
 
 			pr_trace("Autoload: Scanning...\n");
 			plugins.start_loading_plugin_list();
@@ -106,7 +107,7 @@ private:
 		for (auto const &found_plugin : *found_plugins) {
 			if (found_plugin.plugin_name == s) {
 				auto fw_version = sdk_version();
-				auto found_version = VersionUtil::parse_version(found_plugin.version);
+				auto found_version = VersionUtil::Version(found_plugin.version);
 				if (found_version.major == 0)
 					found_version = {1, 0, 0};
 				if (fw_version.can_host_version(found_version)) {

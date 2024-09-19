@@ -224,7 +224,7 @@ public:
 				}
 				auto plugin_vers = plugin_vers_filename.substr(vers_pos + 1);
 				auto fw_version = sdk_version();
-				if (fw_version.can_host_version(VersionUtil::parse_version(plugin_vers))) {
+				if (fw_version.can_host_version(VersionUtil::Version(plugin_vers))) {
 					status.state = State::ProcessingPlugin;
 				} else {
 					std::string fw_vers = std::to_string(fw_version.major) + "." + std::to_string(fw_version.minor);
@@ -291,7 +291,7 @@ public:
 				// drop version from plugin name:
 				plugin.plugin_name.copy(name.substr(0, v));
 
-				auto version = VersionUtil::parse_version(vers);
+				auto version = VersionUtil::Version(vers);
 				plugin.version = std::string_view(vers);
 				pr_dbg("%s => %s => %u.%u.%u\n",
 					   name.c_str(),

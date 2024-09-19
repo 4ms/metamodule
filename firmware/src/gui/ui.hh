@@ -110,7 +110,7 @@ public:
 				}
 			}
 
-			auto now = HAL_GetTick();
+			auto now = get_time();
 			if ((now - last_lv_update_tm) > 2) {
 				last_lv_update_tm = now;
 				lv_timer_handler();
