@@ -18,6 +18,8 @@ add_compile_options(-O0 -g2)
 # #################### cpputil #########################################
 
 add_subdirectory(${LIBDIR}/cpputil cpputil)
+target_compile_definitions(cpputil PUBLIC CPPUTIL_STATIC_STRING_USE_STD_STRING)
+
 
 # #################### LVGL Simulator Driver #################################
 
