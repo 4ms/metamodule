@@ -411,8 +411,7 @@ private:
 
 			auto &gui_el = drawn_el.gui_element;
 
-			// auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
-			auto was_redrawn = redraw_param(drawn_el, params.param_watcher.watched_params);
+			auto was_redrawn = redraw_param(drawn_el, params.param_watcher.active_watched_params());
 
 			if (was_redrawn) {
 				if (page_settings.map_ring_flash_active)

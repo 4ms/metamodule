@@ -94,7 +94,7 @@ extern "C" void aux_core_main() {
 				}
 			}
 
-			for (auto &p : ui.watched_params().watched_params) {
+			for (auto &p : ui.watched_params().active_watched_params()) {
 				if (p.is_active()) {
 					p.value = patch_player->get_param(p.module_id, p.param_id);
 				}

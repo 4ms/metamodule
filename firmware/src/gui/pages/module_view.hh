@@ -253,16 +253,17 @@ struct ModuleViewPage : PageBase {
 	void watch_element(DrawnElement const &drawn_element) {
 		auto gui_el = drawn_element.gui_element;
 		std::visit(overloaded{
+					   [&](DynamicTextDisplay const &el) {
+						   params.displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
+					   },
 					   [&](auto const &el) {
 						   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
 							   params.lights.start_watching_light(this_module_id, gui_el.idx.light_idx + i);
 						   }
+
 						   if (gui_el.count.num_params > 0) {
 							   params.param_watcher.start_watching_param(this_module_id, gui_el.idx.param_idx);
 						   }
-					   },
-					   [&](DynamicTextDisplay const &el) {
-						   params.displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
 					   },
 				   },
 				   drawn_element.element);
@@ -374,9 +375,7 @@ struct ModuleViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				auto &gui_el = drawn_el.gui_element;
 
-				auto const &watched_params = params.param_watcher.watched_params;
-				auto was_redrawn = redraw_param(drawn_el, watched_params);
-				// auto was_redrawn = std::visit(RedrawElement{patch, drawn_el.gui_element}, drawn_el.element);
+				auto was_redrawn = redraw_param(drawn_el, params.param_watcher.active_watched_params());
 
 				if (was_redrawn && page_settings.map_ring_flash_active) {
 					map_ring_display.flash_once(gui_el.map_ring, true);
