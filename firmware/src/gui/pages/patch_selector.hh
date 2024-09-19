@@ -204,7 +204,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	std::string format_volume_name(StaticString<31> const &vol_name, PatchDir &root) {
-		std::string roller_text = Gui::orange_highlight_html + std::string(vol_name) + LV_TXT_COLOR_CMD;
+		std::string roller_text = Gui::orange_text(vol_name);
 
 		// TODO: make a setting to hide/show these?
 		add_file_count(roller_text, root);
@@ -218,7 +218,7 @@ struct PatchSelectorPage : PageBase {
 		std::string roller_text;
 
 		if (subdir.name.size() > 0) {
-			roller_text += Gui::yellow_highlight_html + subdir.name + LV_TXT_COLOR_CMD;
+			roller_text += Gui::yellow_text(subdir.name);
 			add_file_count(roller_text, subdir);
 		}
 		roller_text += "\n";
