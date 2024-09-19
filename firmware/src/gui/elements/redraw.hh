@@ -180,6 +180,7 @@ inline bool redraw_param(DrawnElement &drawn_el, std::span<const WatchedParam> w
 			{
 				was_redrawn = std::visit([&](auto &el) { return redraw_element(el, drawn_el.gui_element, p.value); },
 										 drawn_el.element);
+				break;
 			}
 		}
 	}
