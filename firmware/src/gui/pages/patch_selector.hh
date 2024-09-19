@@ -127,10 +127,10 @@ struct PatchSelectorPage : PageBase {
 			auto patch_name = std::string{std::string_view{patch.patch.patch_name}};
 
 			if (patch.modification_count > 0)
-				patch_name = Gui::red_highlight_html_str + "•" + LV_TXT_COLOR_CMD + " " + patch_name;
+				patch_name = Gui::red_text("•") + " " + patch_name;
 
 			if (patch.loc_hash == patches.get_playing_patch_loc_hash())
-				patch_name = Gui::green_highlight_html_str + LV_SYMBOL_PLAY + LV_TXT_COLOR_CMD + " " + patch_name;
+				patch_name = Gui::green_text(LV_SYMBOL_PLAY) + " " + patch_name;
 
 			root.files.emplace_back(
 				patch.loc.filename, 0, patch.modification_count, PatchName{patch_name}, patch.loc.vol);
