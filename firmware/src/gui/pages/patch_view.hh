@@ -89,7 +89,7 @@ struct PatchViewPage : PageBase {
 
 		if (!needs_refresh) {
 			is_ready = true;
-			watch_lights();
+			watch_modules();
 			update_map_ring_style();
 
 			if (args.module_id) {
@@ -185,7 +185,7 @@ struct PatchViewPage : PageBase {
 
 		is_ready = true;
 
-		watch_lights();
+		watch_modules();
 
 		highlighted_module_id = std::nullopt;
 		highlighted_module_obj = nullptr;
@@ -237,6 +237,7 @@ struct PatchViewPage : PageBase {
 		file_menu.hide();
 		params.displays.stop_watching_all();
 		params.lights.stop_watching_all();
+		params.param_watcher.stop_watching_all();
 	}
 
 	void update() override {
@@ -254,7 +255,7 @@ struct PatchViewPage : PageBase {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
-			watch_lights();
+			watch_modules();
 		}
 
 		if (is_patch_playing != last_is_patch_playing) {
@@ -331,7 +332,7 @@ struct PatchViewPage : PageBase {
 private:
 	std::vector<std::vector<float>> light_vals;
 
-	void watch_lights() {
+	void watch_modules() {
 
 		if (is_patch_playing) {
 			for (const auto &drawn_element : drawn_elements) {
@@ -341,6 +342,11 @@ private:
 							   [&](auto const &el) {
 								   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
 									   params.lights.start_watching_light(gui_el.module_idx, gui_el.idx.light_idx + i);
+								   }
+
+								   if (gui_el.count.num_params > 0) {
+									   params.param_watcher.start_watching_param(gui_el.module_idx,
+																				 gui_el.idx.param_idx);
 								   }
 							   },
 							   [&](DynamicTextDisplay const &el) {
