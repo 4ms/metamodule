@@ -28,7 +28,7 @@ void VCVModuleWrapper::set_param(int id, float val) {
 		params[id].setValue(val);
 }
 
-float VCVModuleWrapper::get_param(int id) {
+float VCVModuleWrapper::get_param(int id) const {
 	if ((size_t)id < params.size()) {
 		float val = params[id].getValue();
 		// Reverse scale it
