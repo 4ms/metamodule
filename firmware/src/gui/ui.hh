@@ -92,6 +92,9 @@ public:
 	}
 
 	void autoload_plugins() {
+		lv_show(ui_MainMenuNowPlayingPanel);
+		lv_show(ui_MainMenuNowPlaying);
+
 		auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
 
 		while (true) {
