@@ -491,10 +491,9 @@ Element make_element(rack::app::SvgButton *widget) {
 	return make_element(widget->sw);
 }
 
-Element make_element(rack::widget::MetaModuleDisplay *widget) {
+Element make_element(MetaModule::VCVTextDisplay *widget) {
 	DynamicTextDisplay element{};
-	// element.text = widget->text;
-	element.font = widget->font;  //widget->font; //"Segment7Standard24"; 
+	element.font = widget->font;
 	element.color = widget->color;
 	return element;
 }

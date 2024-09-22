@@ -184,7 +184,7 @@ void ModuleWidget::addChild(Widget *widget) {
 	Widget::addChild(widget);
 }
 
-void ModuleWidget::addChild(widget::MetaModuleDisplay *widget) {
+void ModuleWidget::addChild(MetaModule::VCVTextDisplay *widget) {
 	adaptor->addTextDisplay(widget);
 	Widget::addChild(widget);
 }

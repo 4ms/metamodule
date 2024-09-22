@@ -140,7 +140,7 @@ struct ModuleWidgetAdaptor {
 			pr_err("Error: can't add a null SvgWidget\n");
 	}
 
-	void addTextDisplay(rack::widget::MetaModuleDisplay *widget) {
+	void addTextDisplay(MetaModule::VCVTextDisplay *widget) {
 		if (widget) {
 			widget->element = make_element(widget);
 			assign_element_fields(widget, "");
