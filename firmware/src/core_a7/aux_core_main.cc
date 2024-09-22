@@ -45,7 +45,8 @@ extern "C" void aux_core_main() {
 
 	PluginManager plugin_manager{*file_storage_proxy, ramdisk};
 	Ui ui{*patch_playloader, *file_storage_proxy, *open_patch_manager, *sync_params, *patch_mod_queue, plugin_manager};
-	ui.update();
+	ui.update_screen();
+	ui.update_page();
 
 	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
 
@@ -111,7 +112,7 @@ extern "C" void aux_core_main() {
 	HAL_Delay(50);
 	while (mdrivlib::HWSemaphore<MainCoreReady>::is_locked()) {
 		ui.update_screen();
-	}
+	};
 #endif
 
 	ui.load_initial_patch();

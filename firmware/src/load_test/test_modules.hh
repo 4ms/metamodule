@@ -1,7 +1,11 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
+#include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "system/alloc_watch.hh"
 #include "tester.hh"
+
+extern AllocationWatch *watch;
 
 namespace MetaModule::LoadTest
 {
@@ -14,10 +18,20 @@ struct ModuleEntry {
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> cv_modulated;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> audio_modulated;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> knob_tweak;
+
+	bool allocs_overflowed_on_create = false;
+	bool allocs_overflowed_on_run = false;
+	size_t memory_to_create_module{};
+	size_t memory_to_run_module{};
 };
 
 std::vector<ModuleEntry> test_all_modules() {
+	AllocationWatch watcher;
+
 	std::vector<ModuleEntry> res;
+
+	lv_show(ui_MainMenuNowPlayingPanel);
+	lv_show(ui_MainMenuNowPlaying);
 
 	auto brands = ModuleFactory::getAllBrands();
 	for (auto brand : brands) {
@@ -27,6 +41,20 @@ std::vector<ModuleEntry> test_all_modules() {
 			entry.slug = brand + ":" + slug;
 			pr_info("Testing %s\n", slug.c_str());
 			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", slug.c_str());
+
+			watch = &watcher;
+
+			watcher.reset();
+			auto module = ModuleFactory::create(slug);
+			entry.memory_to_create_module = watcher.allocations;
+			entry.allocs_overflowed_on_create = watcher.overflowed;
+
+			watcher.reset();
+			module->update();
+			entry.allocs_overflowed_on_run = watcher.overflowed;
+			entry.memory_to_run_module = watcher.allocations;
+
+			watch = nullptr;
 
 			for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
 				ModuleLoadTester tester(slug);
@@ -52,6 +80,10 @@ std::vector<ModuleEntry> test_all_modules() {
 			res.emplace_back(entry);
 		}
 	}
+
+	lv_label_set_text(ui_MainMenuNowPlaying, "");
+	lv_hide(ui_MainMenuNowPlaying);
+
 	return res;
 }
 
@@ -83,6 +115,9 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 		s += "InputsAudio-" + std::to_string(blocksize) + ", ";
 		pr_info("InputsAudio-%u, ", blocksize);
 	}
+
+	s += "Memory to Create, Memory to Run";
+	pr_info("Memory to Create, Memory to Run");
 
 	s += "\n";
 	pr_info("\n");
@@ -119,6 +154,22 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 			s += buf;
 			pr_info("%.3f, ", entry.audio_modulated[i].average_run_time / sampletime);
 		}
+
+		if (entry.allocs_overflowed_on_create)
+			s += "OVF, ";
+		else
+			s += std::to_string(entry.memory_to_create_module) + ", ";
+
+		if (entry.allocs_overflowed_on_run)
+			s += "OVF";
+		else
+			s += std::to_string(entry.memory_to_run_module);
+
+		pr_info("%d: %zu, %d: %zu",
+				entry.allocs_overflowed_on_create,
+				entry.memory_to_create_module,
+				entry.allocs_overflowed_on_run,
+				entry.memory_to_run_module);
 
 		s += "\n";
 		pr_info("\n");
