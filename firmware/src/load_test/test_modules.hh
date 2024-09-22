@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
+#include "gui/slsexport/meta5/ui.h"
 #include "tester.hh"
 
 namespace MetaModule::LoadTest
@@ -25,6 +26,7 @@ std::vector<ModuleEntry> test_all_modules() {
 			ModuleEntry entry;
 			entry.slug = brand + ":" + slug;
 			pr_info("Testing %s\n", slug.c_str());
+			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", slug.c_str());
 
 			for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
 				ModuleLoadTester tester(slug);

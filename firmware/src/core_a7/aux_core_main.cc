@@ -109,14 +109,16 @@ extern "C" void aux_core_main() {
 #ifdef CPU_TEST_ALL_MODULES
 	// Wait for main core to be done with testing all modules
 	HAL_Delay(50);
-	while (mdrivlib::HWSemaphore<MainCoreReady>::is_locked())
-		;
+	while (mdrivlib::HWSemaphore<MainCoreReady>::is_locked()) {
+		ui.update_screen();
+	}
 #endif
 
 	ui.load_initial_patch();
 
 	while (true) {
-		ui.update();
+		ui.update_screen();
+		ui.update_page();
 		__NOP();
 	}
 }
