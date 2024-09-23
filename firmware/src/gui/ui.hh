@@ -121,7 +121,6 @@ public:
 		}
 
 		lv_label_set_text(ui_MainMenuNowPlaying, "");
-		lv_hide(ui_MainMenuNowPlaying);
 		page_manager.init();
 	}
 
