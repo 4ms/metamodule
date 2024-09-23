@@ -79,7 +79,7 @@ private:
 			return {autoload_state, "All disks scanned"};
 		}
 
-		if (result.state == PluginFileLoader::State::Success) {
+		if (result.state == PluginFileLoader::State::Idle || result.state == PluginFileLoader::State::Success) {
 			auto &s = plugin_settings.slug[slug_idx];
 			pr_trace("Autoload: Done with plugin: %s\n", s.c_str());
 
