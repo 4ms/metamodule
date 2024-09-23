@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <cstdlib>
 #include <new>
 
@@ -8,7 +7,13 @@
 AllocationWatch *watch = nullptr;
 #endif
 
-void *operator new(size_t size) {
+#ifdef __clang__
+#define THROW_SPEC _THROW_BAD_ALLOC
+#else
+#define THROW_SPEC
+#endif
+
+void *operator new(size_t size) THROW_SPEC {
 #ifdef CPU_TEST_ALL_MODULES
 	auto ptr = malloc(size);
 	if (watch)
