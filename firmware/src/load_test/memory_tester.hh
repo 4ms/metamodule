@@ -4,22 +4,19 @@
 #include "system/alloc_watch.hh"
 #include <string_view>
 
-extern AllocationWatch *watch;
+extern AllocationWatcher *watch;
 
 namespace MetaModule
 {
 
 struct ModuleMemoryTester {
-	struct MemUsage {
-		size_t memory_used{};
-		bool measuring_failed = false;
-		int32_t memory_leaked{};
-	};
 
 	struct Measurements {
-		MemUsage create{};
-		MemUsage run_unpatched{};
-		MemUsage run_fully_patched{};
+		size_t peak_mem_startup{};
+		size_t peak_running_mem{};
+		size_t mem_leaked{};
+		bool results_invalid = false;
+		bool double_free = false;
 	};
 
 	ModuleMemoryTester(std::string_view slug)
@@ -40,18 +37,10 @@ struct ModuleMemoryTester {
 			watcher.reset();
 
 			auto module = ModuleFactory::create(slug);
-			{
-				int32_t leaked = (int32_t)watcher.allocations - (int32_t)watcher.deallocations;
-				meas.create = MemUsage{watcher.allocations, watcher.overflowed, leaked};
-				watcher.reset();
-			}
+			meas.peak_mem_startup = watcher.peak_usage;
+			watcher.peak_usage = watcher.mem_alloced - watcher.mem_dealloced;
 
 			module->update();
-			{
-				int32_t leaked = (int32_t)watcher.allocations - (int32_t)watcher.deallocations;
-				meas.run_unpatched = MemUsage{watcher.allocations, watcher.overflowed, leaked};
-				watcher.reset();
-			}
 
 			for (uint16_t injack_id = 0; injack_id < counts.num_inputs; injack_id++) {
 				module->mark_input_patched(injack_id);
@@ -64,21 +53,34 @@ struct ModuleMemoryTester {
 			}
 
 			module->update();
-			{
-				int32_t leaked = (int32_t)watcher.allocations - (int32_t)watcher.deallocations;
-				meas.run_fully_patched = MemUsage{watcher.allocations, watcher.overflowed, leaked};
-				watcher.reset();
+			module->update();
+			module->update();
+			// TODO: modulate jacks/params?
+
+			meas.peak_running_mem = watcher.peak_usage;
+		}
+
+		// Check for leaks
+		uint64_t leaked = 0;
+		for (auto const &block : watcher.allocs) {
+			if (block.dealloced == false) {
+				leaked += block.size;
 			}
 		}
+		meas.mem_leaked = leaked;
+
+		meas.double_free = watcher.double_free;
+		meas.results_invalid = watcher.too_many_allocs;
 
 		// Disable allocation watching
 		watch = nullptr;
+		watcher.reset();
 
 		return meas;
 	}
 
 private:
-	AllocationWatch watcher;
+	AllocationWatcher watcher;
 
 	BrandModuleSlug slug;
 	ModuleInfoView info;

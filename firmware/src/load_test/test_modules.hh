@@ -99,8 +99,8 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 		pr_info("InputsAudio-%u, ", blocksize);
 	}
 
-	s += "Memory to Create, Memory to Run Unpatched, Memory Fully Patched";
-	pr_info("Memory to Create, Memory to Run Unpatched, Memory Fully Patched,");
+	s += "PeakStartupMem, PeakRunningMem, LeakedMem, DoubleFree?";
+	pr_info("PeakStartupMem, PeakRunningMem, LeakedMem, DoubleFree?, Valid");
 
 	s += "\n";
 	pr_info("\n");
@@ -133,24 +133,20 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 			report_cpu(entry.audio_modulated[i]);
 		}
 
-		auto report_mem = [&s](auto entrymem) {
-			if (entrymem.measuring_failed)
-				s += "CAN'T MEASURE, ";
-			else {
-				s += std::to_string(entrymem.memory_used);
-				if (entrymem.memory_leaked != 0) {
-					s += " LEAKED " + std::to_string(entrymem.memory_leaked);
-				}
-				s += ", ";
-			}
-
-			pr_info(
-				"%s %zu %d, ", entrymem.measuring_failed ? "OVF" : "", entrymem.memory_used, entrymem.memory_leaked);
-		};
-
-		report_mem(entry.mem_usage.create);
-		report_mem(entry.mem_usage.run_unpatched);
-		report_mem(entry.mem_usage.run_fully_patched);
+		if (entry.mem_usage.results_invalid) {
+			s += "CAN'T MEASURE, , , ";
+		} else {
+			s += std::to_string(entry.mem_usage.peak_mem_startup) + ", ";
+			s += std::to_string(entry.mem_usage.peak_running_mem) + ", ";
+			s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
+			s += entry.mem_usage.double_free ? "YES" : "n";
+		}
+		pr_info("%zu, %zu, %lld, %d, %s\n",
+				entry.mem_usage.peak_mem_startup,
+				entry.mem_usage.peak_running_mem,
+				entry.mem_usage.mem_leaked,
+				entry.mem_usage.double_free,
+				entry.mem_usage.results_invalid ? "TOOMANYALLOCS" : "ok");
 
 		s += "\n";
 		pr_info("\n");

@@ -4,7 +4,7 @@
 #ifdef CPU_TEST_ALL_MODULES
 #include "alloc_watch.hh"
 
-AllocationWatch *watch = nullptr;
+AllocationWatcher *watch = nullptr;
 #endif
 
 #ifdef __clang__
