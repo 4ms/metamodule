@@ -2,10 +2,8 @@
 #include "CoreModules/moduleFactory.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "system/alloc_watch.hh"
+#include "memory_tester.hh"
 #include "tester.hh"
-
-extern AllocationWatch *watch;
 
 namespace MetaModule::LoadTest
 {
@@ -19,14 +17,10 @@ struct ModuleEntry {
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> audio_modulated;
 	std::array<ModuleLoadTester::Measurements, blocksizes.size()> knob_tweak;
 
-	bool allocs_overflowed_on_create = false;
-	bool allocs_overflowed_on_run = false;
-	size_t memory_to_create_module{};
-	size_t memory_to_run_module{};
+	ModuleMemoryTester::Measurements mem_usage{};
 };
 
 std::vector<ModuleEntry> test_all_modules() {
-	AllocationWatch watcher;
 
 	std::vector<ModuleEntry> res;
 
@@ -42,19 +36,8 @@ std::vector<ModuleEntry> test_all_modules() {
 			pr_info("Testing %s\n", slug.c_str());
 			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", slug.c_str());
 
-			watch = &watcher;
-
-			watcher.reset();
-			auto module = ModuleFactory::create(slug);
-			entry.memory_to_create_module = watcher.allocations;
-			entry.allocs_overflowed_on_create = watcher.overflowed;
-
-			watcher.reset();
-			module->update();
-			entry.allocs_overflowed_on_run = watcher.overflowed;
-			entry.memory_to_run_module = watcher.allocations;
-
-			watch = nullptr;
+			auto mem_tester = ModuleMemoryTester{slug};
+			entry.mem_usage = mem_tester.run_test(ModuleMemoryTester::TestType::FirstRun);
 
 			for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
 				ModuleLoadTester tester(slug);
@@ -116,8 +99,8 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 		pr_info("InputsAudio-%u, ", blocksize);
 	}
 
-	s += "Memory to Create, Memory to Run";
-	pr_info("Memory to Create, Memory to Run");
+	s += "Memory to Create, Memory to Run Unpatched, Memory Fully Patched";
+	pr_info("Memory to Create, Memory to Run Unpatched, Memory Fully Patched,");
 
 	s += "\n";
 	pr_info("\n");
@@ -127,49 +110,47 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 		s += entry.slug + ", ";
 		pr_info("%s, ", entry.slug.c_str());
 
-		for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
+		auto report_cpu = [&s](auto entryitem) {
 			char buf[8];
-			snprintf(buf, 8, "%.3f, ", entry.isolated[i].average_run_time / sampletime);
+			snprintf(buf, 8, "%.3f, ", entryitem.average_run_time / sampletime);
 			s += buf;
-			pr_info("%.3f, ", entry.isolated[i].average_run_time / sampletime);
+			pr_info("%.3f, ", entryitem.average_run_time / sampletime);
+		};
+
+		for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
+			report_cpu(entry.isolated[i]);
 		}
 
 		for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-			char buf[8];
-			snprintf(buf, 8, "%.3f, ", entry.patched[i].average_run_time / sampletime);
-			s += buf;
-			pr_info("%.3f, ", entry.patched[i].average_run_time / sampletime);
+			report_cpu(entry.patched[i]);
 		}
 
 		for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-			char buf[8];
-			snprintf(buf, 8, "%.3f, ", entry.cv_modulated[i].average_run_time / sampletime);
-			s += buf;
-			pr_info("%.3f, ", entry.cv_modulated[i].average_run_time / sampletime);
+			report_cpu(entry.cv_modulated[i]);
 		}
 
 		for (auto i = 0u; i < ModuleEntry::blocksizes.size(); i++) {
-			char buf[8];
-			snprintf(buf, 8, "%.3f, ", entry.audio_modulated[i].average_run_time / sampletime);
-			s += buf;
-			pr_info("%.3f, ", entry.audio_modulated[i].average_run_time / sampletime);
+			report_cpu(entry.audio_modulated[i]);
 		}
 
-		if (entry.allocs_overflowed_on_create)
-			s += "OVF, ";
-		else
-			s += std::to_string(entry.memory_to_create_module) + ", ";
+		auto report_mem = [&s](auto entrymem) {
+			if (entrymem.measuring_failed)
+				s += "CAN'T MEASURE, ";
+			else {
+				s += std::to_string(entrymem.memory_used);
+				if (entrymem.memory_leaked != 0) {
+					s += " LEAKED " + std::to_string(entrymem.memory_leaked);
+				}
+				s += ", ";
+			}
 
-		if (entry.allocs_overflowed_on_run)
-			s += "OVF";
-		else
-			s += std::to_string(entry.memory_to_run_module);
+			pr_info(
+				"%s %zu %d, ", entrymem.measuring_failed ? "OVF" : "", entrymem.memory_used, entrymem.memory_leaked);
+		};
 
-		pr_info("%d: %zu, %d: %zu",
-				entry.allocs_overflowed_on_create,
-				entry.memory_to_create_module,
-				entry.allocs_overflowed_on_run,
-				entry.memory_to_run_module);
+		report_mem(entry.mem_usage.create);
+		report_mem(entry.mem_usage.run_unpatched);
+		report_mem(entry.mem_usage.run_fully_patched);
 
 		s += "\n";
 		pr_info("\n");

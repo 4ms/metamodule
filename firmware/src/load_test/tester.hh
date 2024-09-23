@@ -27,7 +27,6 @@ struct ModuleLoadTester {
 		}
 	};
 
-	BrandModuleSlug slug;
 	ModuleLoadTester(std::string_view slug)
 		: slug{slug}
 		, info{ModuleFactory::getModuleInfo(slug)}
@@ -171,6 +170,18 @@ struct ModuleLoadTester {
 		}
 	}
 
+	void patch_all_inputs() {
+		for (uint16_t injack_id = 0; injack_id < counts.num_inputs; injack_id++) {
+			player.modules[module_id]->mark_input_patched(injack_id);
+		}
+	}
+
+	void patch_all_outputs() {
+		for (uint16_t outjack_id = 0; outjack_id < counts.num_outputs; outjack_id++) {
+			player.modules[module_id]->mark_output_patched(outjack_id);
+		}
+	}
+
 	void send_to_all_inputs(float val) {
 		for (uint16_t injack_id = 0; injack_id < counts.num_inputs; injack_id++) {
 			player.modules[module_id]->set_input(injack_id, val);
@@ -232,6 +243,8 @@ struct ModuleLoadTester {
 private:
 	PatchPlayer player;
 	PatchData patch;
+
+	BrandModuleSlug slug;
 	ModuleInfoView info;
 	uint16_t module_id{};
 	ElementCount::Counts counts;

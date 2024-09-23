@@ -4,6 +4,7 @@
 
 struct AllocationWatch {
 	size_t allocations = 0;
+	size_t deallocations = 0;
 
 	FixedVector<std::pair<size_t, void *>, 4096> allocs{};
 	bool overflowed = false;
@@ -15,8 +16,9 @@ struct AllocationWatch {
 	}
 
 	void register_dealloc(void *addr) {
-		for (auto i = 0u; auto alloc : allocs) {
+		for (auto i = 0u; auto const &alloc : allocs) {
 			if (alloc.second == addr) {
+				deallocations += alloc.first;
 				allocs.erase(i);
 				break;
 			}
@@ -25,6 +27,7 @@ struct AllocationWatch {
 
 	void reset() {
 		allocations = 0;
+		deallocations = 0;
 		overflowed = false;
 		allocs.clear();
 	}
