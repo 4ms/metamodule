@@ -40,8 +40,11 @@ struct SaveDialog {
 		lv_hide(ui_SaveDialogCont);
 	}
 
-	void prepare_focus(lv_group_t *parent_group) {
+	enum class Action { None, Duplicate, Rename };
+
+	void prepare_focus(lv_group_t *parent_group, Action action) {
 		base_group = parent_group;
+		method = action;
 	}
 
 	void update() {
@@ -274,6 +277,12 @@ private:
 
 			page->saved = true;
 			page->hide();
+			// } else if (page->method == Action::Rename) {
+			// 	page->patches.rename_view_patch_file(fullpath, page->file_vol);
+			// 	page->patch_playloader.request_rename_patch(fullpath);
+			// 	page->saved = true;
+			// 	page->hide();
+
 		} else {
 			if (page->patches.duplicate_view_patch(fullpath, page->file_vol)) {
 				page->patch_playloader.request_save_patch();
@@ -335,6 +344,8 @@ private:
 	uint32_t last_refresh_check_tm = 0;
 
 	bool saved = false;
+
+	Action method{};
 };
 
 } // namespace MetaModule

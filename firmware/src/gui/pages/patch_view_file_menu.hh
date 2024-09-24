@@ -201,8 +201,9 @@ struct PatchViewFileMenu {
 	}
 
 private:
-	void show_save_dialog() {
-		save_dialog.prepare_focus(base_group);
+	void show_save_dialog(SaveDialog::Action method) {
+		current_action = method;
+		save_dialog.prepare_focus(base_group, method);
 
 		lv_obj_set_x(ui_PatchFileMenu, 220);
 		visible = false;
@@ -256,7 +257,19 @@ private:
 		if (page->patches.get_view_patch_vol() == Volume::RamDisk) {
 			page->copy_patchname_to_filename();
 		}
-		page->show_save_dialog();
+		page->show_save_dialog(SaveDialog::Action::Duplicate);
+	}
+
+	static void rename_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+
+		// If it hasn't been saved yet, use the patchname if its been set
+		if (page->patches.get_view_patch_vol() == Volume::RamDisk) {
+			page->copy_patchname_to_filename();
+		}
+		page->show_save_dialog(SaveDialog::Action::Rename);
 	}
 
 	static void delete_but_cb(lv_event_t *event) {
@@ -317,6 +330,8 @@ private:
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 	enum class RevertState { Idle, TryRequest, Requested } revert_state = RevertState::Idle;
+
+	SaveDialog::Action current_action{};
 };
 
 } // namespace MetaModule
