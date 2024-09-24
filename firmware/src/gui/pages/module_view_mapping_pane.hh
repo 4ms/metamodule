@@ -60,6 +60,8 @@ struct ModuleViewMappingPane {
 		lv_obj_add_event_cb(ui_CableRemoveButton, disconnect_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CablePanelAddButton, add_panel_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableMidiAddButton, add_midi_cable_button_cb, LV_EVENT_CLICKED, this);
+
+		lv_hide(ui_ResetButton);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -552,7 +554,7 @@ private:
 
 		// Do not use Reset Button for individual params until we implement calling
 		// paramQuantity->reset() and/or paramWidget->onReset()
-		lv_show(ui_ResetButton, false);
+		lv_hide(ui_ResetButton);
 
 		lv_show(ui_ControlButton, is_patch_playing);
 		lv_label_set_text(ui_ControlButtonLabel, "Adjust");
