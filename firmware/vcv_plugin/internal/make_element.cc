@@ -21,6 +21,7 @@ static void log_make_element_notes(std::string_view note1, std::string_view note
 }
 
 static float getScaledDefaultValue(rack::app::ParamWidget *widget);
+static unsigned getDefaultValue(rack::app::ParamWidget *widget);
 
 //
 // Jacks
@@ -145,7 +146,7 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 		element.image = widget->background->svg->filename;
 	}
 
-	element.DefaultValue = getScaledDefaultValue(widget);
+	element.DefaultValue = getDefaultValue(widget);
 
 	if (widget->handle->svg->filename.length())
 		element.image_handle = widget->handle->svg->filename;
@@ -259,7 +260,7 @@ static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
 
 	element.image_handle = "no-image";
 	element.image = widget->frames[0]->filename;
-	element.DefaultValue = getScaledDefaultValue(widget);
+	element.DefaultValue = getDefaultValue(widget);
 	return element;
 }
 
@@ -288,7 +289,7 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 		element.frames[i] = widget->frames[i]->filename;
 	}
 
-	element.DefaultValue = getScaledDefaultValue(widget);
+	element.DefaultValue = getDefaultValue(widget);
 	return element;
 }
 
@@ -350,6 +351,7 @@ static Element make_latching_mono(std::string_view image, NVGcolor c, LatchingBu
 Element make_element(rack::app::SvgSwitch *widget, rack::app::MultiLightWidget *light) {
 	log_make_element("SvgSwitch, Light", widget->paramId);
 
+	// Note: this seems reversed, but PhasorGates uses this (VCVLightBezel<>), and it works
 	LatchingButton::State_t defaultValue =
 		getScaledDefaultValue(widget) > 0.5f ? LatchingButton::State_t::UP : LatchingButton::State_t::DOWN;
 
@@ -514,6 +516,13 @@ static float getScaledDefaultValue(rack::app::ParamWidget *widget) {
 	auto pq = widget->getParamQuantity();
 	float defaultValue = pq ? pq->toScaled(pq->getDefaultValue()) : 0.f;
 	return defaultValue;
+}
+
+static unsigned getDefaultValue(rack::app::ParamWidget *widget) {
+	if (!widget)
+		return 0;
+	auto pq = widget->getParamQuantity();
+	return pq ? pq->getDefaultValue() : 0;
 }
 
 } // namespace MetaModule
