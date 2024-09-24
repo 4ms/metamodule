@@ -233,9 +233,13 @@ public:
 
 	bool duplicate_view_patch(std::string_view filepath, Volume vol) {
 		// Check if filename is already open
-		if (open_patches_.find(PatchLocHash{filepath, vol})) {
-			pr_err("Can't rename to same name as an already open patch: %.*s\n", filepath.size(), filepath.data());
-			return false;
+		if (auto openpatch = open_patches_.find(PatchLocHash{filepath, vol})) {
+			if (openpatch->modification_count > 0) {
+				pr_err("Can't overwrite an open and modified patch: %.*s\n", filepath.size(), filepath.data());
+				return false;
+			} else {
+				close_open_patch(openpatch);
+			}
 		}
 
 		// Create a new patch
