@@ -5,6 +5,7 @@
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "patch_file/file_storage_proxy.hh"
+#include <malloc.h>
 
 namespace MetaModule
 {
@@ -23,7 +24,22 @@ struct InfoTab : SystemMenuTab {
 		if (fw_version.starts_with("firmware-"))
 			fw_version.remove_prefix(9);
 
-		lv_label_set_text_fmt(ui_SystemMenuFWversion, "Firmware version: %s", fw_version.data());
+		struct mallinfo mi = mallinfo();
+		pr_info("arena    (total space allocated from system): %zu\n", mi.arena);
+		pr_info("ordblks  (number of non-inuse chunks) %zu\n", mi.ordblks);
+		pr_info("smblks   (unused -- always zero) %zu\n", mi.smblks);
+		pr_info("hblks    (number of mmapped regions) %zu\n", mi.hblks);
+		pr_info("hblkhd   (total space in mmapped regions) %zu\n", mi.hblkhd);
+		pr_info("uordblks (total allocated space) %zu\n", mi.uordblks);
+		pr_info("fordblks (total non-inuse space) %zu\n", mi.fordblks);
+		pr_info("keepcost (top-most, releasable (via malloc_trim) space */ %zu\n", mi.keepcost);
+
+		lv_label_set_text_fmt(ui_SystemMenuFWversion,
+							  "Firmware version: %s\nMemory (kB): %zu/%zu (%2f%%)",
+							  fw_version.data(),
+							  mi.uordblks / 1024,
+							  mi.arena / 1024,
+							  float(100 * mi.uordblks / mi.arena));
 
 		wifi_ip_state = WifiIPState::Idle;
 	}
@@ -58,27 +74,29 @@ struct InfoTab : SystemMenuTab {
 
 						auto &newEndpoint = *message.wifi_ip_result;
 
-						pr_trace("Got Wifi IP: %u.%u.%u.%u:%U\n", newEndpoint.ip[0], newEndpoint.ip[1], newEndpoint.ip[2], newEndpoint.ip[3], newEndpoint.port);
+						pr_trace("Got Wifi IP: %u.%u.%u.%u:%U\n",
+								 newEndpoint.ip[0],
+								 newEndpoint.ip[1],
+								 newEndpoint.ip[2],
+								 newEndpoint.ip[3],
+								 newEndpoint.port);
 
-						if (newEndpoint.port != 80)
-						{
+						if (newEndpoint.port != 80) {
 							// only display port when it is non-default
 							lv_label_set_text_fmt(ui_SystemMenuExpanders,
-												"Wifi: http://%u.%u.%u.%u:%u",
-												newEndpoint.ip[0],
-												newEndpoint.ip[1],
-												newEndpoint.ip[2],
-												newEndpoint.ip[3],
-												newEndpoint.port);
-						}
-						else
-						{
+												  "Wifi: http://%u.%u.%u.%u:%u",
+												  newEndpoint.ip[0],
+												  newEndpoint.ip[1],
+												  newEndpoint.ip[2],
+												  newEndpoint.ip[3],
+												  newEndpoint.port);
+						} else {
 							lv_label_set_text_fmt(ui_SystemMenuExpanders,
-												"Wifi: http://%u.%u.%u.%u",
-												newEndpoint.ip[0],
-												newEndpoint.ip[1],
-												newEndpoint.ip[2],
-												newEndpoint.ip[3]);
+												  "Wifi: http://%u.%u.%u.%u",
+												  newEndpoint.ip[0],
+												  newEndpoint.ip[1],
+												  newEndpoint.ip[2],
+												  newEndpoint.ip[3]);
 						}
 
 					} else {
