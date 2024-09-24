@@ -376,9 +376,12 @@ struct PatchSelectorPage : PageBase {
 
 	void view_loaded_patch() {
 		auto patch = patches.get_view_patch();
-		pr_trace("Parsed patch: %.31s\n", patch->patch_name.data());
+		pr_trace("View view_loaded_patch: %.31s\n", patch->patch_name.data());
 
 		args.patch_loc_hash = PatchLocHash{selected_patch};
+		// Anytime you open a patch from PatchSel, force redraw it
+		// This fixes issues with a patch that's reloaded from disk
+		gui_state.force_redraw_patch = true;
 		page_list.request_new_page(PageId::PatchView, args);
 
 		state = State::Closing;
