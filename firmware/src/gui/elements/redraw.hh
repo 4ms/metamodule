@@ -143,8 +143,8 @@ inline bool redraw_element(const SlideSwitch &element, const GuiElement &gui_el,
 		cur_pos = major_range - cur_pos;
 
 	// cur_pos ranges from 0 to major_range
-	auto cur_state = StateConversion::convertState(element, (float)cur_pos / (float)major_range) - 1;
-	auto new_state = StateConversion::convertState(element, val) - 1; //0..N-1 0..6
+	auto cur_state = StateConversion::convertState(element, (float)cur_pos / (float)major_range);
+	auto new_state = StateConversion::convertState(element, val); //0..N-1 0..6
 
 	bool did_update_position = false;
 

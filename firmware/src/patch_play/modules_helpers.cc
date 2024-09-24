@@ -18,14 +18,15 @@ std::optional<float> get_normalized_default_value(Element const &element) {
 			},
 
 			[&]<typename T>(T const &el)
+			// If it's AltParamContinuous or regular Param that's not an AltParamChoice or Switch
 				requires(std::derived_from<T, AltParamContinuous> ||
-						 (std::derived_from<T, ParamElement> && !std::derived_from<T, Switch>))
+						 (std::derived_from<T, ParamElement> && !std::derived_from<T, Switch> && !std::derived_from<T, AltParamChoice>))
 			{ 
 				return std::optional<float>((float)el.DefaultValue); 
 			},
 		},
 		element);
-// clang-format on
+	// clang-format on
 }
 
 } // namespace MetaModule
