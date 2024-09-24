@@ -39,6 +39,7 @@ add_executable(
   ${FWDIR}/system/libc_stub.c
   ${M4DIR}/libcpp_stub.cc
   ${FWDIR}/system/new.cc
+  ${FWDIR}/system/sbrk.cc
   ${FWDIR}/system/startup_stm32mp157cxx_cm4.s
   ${DRIVERLIB}/drivers/hal_handlers.cc
   ${DRIVERLIB}/drivers/i2c.cc
