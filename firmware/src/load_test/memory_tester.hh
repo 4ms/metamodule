@@ -2,6 +2,7 @@
 #include "patch/module_type_slug.hh"
 #include "patch_play/patch_player.hh"
 #include "system/alloc_watch.hh"
+#include <malloc.h>
 #include <string_view>
 
 extern AllocationWatcher *watch;
@@ -29,9 +30,14 @@ struct ModuleMemoryTester {
 
 	Measurements run_test(TestType test_type) {
 		Measurements meas;
+		struct mallinfo mi {};
 
 		// Enable allocation watching
 		watch = &watcher;
+
+		mi = mallinfo();
+		auto start_mem_used = mi.uordblks;
+		pr_dbg("mallinfo: %zu\n", start_mem_used);
 
 		if (test_type == TestType::FirstRun) {
 			watcher.reset();
@@ -71,7 +77,12 @@ struct ModuleMemoryTester {
 				leaked += block.size;
 			}
 		}
-		meas.mem_leaked = leaked;
+
+		mi = mallinfo();
+		auto end_mem_used = mi.uordblks;
+		pr_dbg("mallinfo: leaked %zu - %zu = %zu\n", end_mem_used, start_mem_used, end_mem_used - start_mem_used);
+
+		meas.mem_leaked = end_mem_used - start_mem_used;
 
 		meas.double_free = watcher.double_free;
 		meas.results_invalid = watcher.too_many_allocs;
