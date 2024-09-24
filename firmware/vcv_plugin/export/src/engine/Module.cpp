@@ -10,6 +10,22 @@ Module::Module() {
 }
 
 Module::~Module() {
+	for (auto paramQuantity : paramQuantities) {
+		if (paramQuantity)
+			delete paramQuantity;
+	}
+	for (auto inputInfo : inputInfos) {
+		if (inputInfo)
+			delete inputInfo;
+	}
+	for (auto outputInfo : outputInfos) {
+		if (outputInfo)
+			delete outputInfo;
+	}
+	for (auto lightInfo : lightInfos) {
+		if (lightInfo)
+			delete lightInfo;
+	}
 }
 
 void Module::load_state(std::string_view state_data) {

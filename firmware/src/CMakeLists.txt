@@ -99,6 +99,7 @@ add_executable(
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
+  ${FWDIR}/system/sbrk.cc
   ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
   ${FWDIR}/system/startup_ca7.s

@@ -45,6 +45,8 @@ struct MainMenuPage : PageBase {
 			lv_hide(ui_MainMenuNowPlayingPanel);
 		} else {
 			lv_show(ui_MainMenuNowPlayingPanel);
+			lv_show(ui_MainMenuNowPlaying);
+			lv_show(ui_MainMenuNowPlayingName);
 			lv_label_set_text(ui_MainMenuNowPlaying, "Playing:");
 			lv_label_set_text(ui_MainMenuNowPlayingName, patch->patch_name.c_str());
 		}
