@@ -4,7 +4,9 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/system_menu_tab_base.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "ld.h"
 #include "patch_file/file_storage_proxy.hh"
+#include <cmath>
 #include <malloc.h>
 
 namespace MetaModule
@@ -25,21 +27,21 @@ struct InfoTab : SystemMenuTab {
 			fw_version.remove_prefix(9);
 
 		struct mallinfo mi = mallinfo();
-		pr_info("arena    (total space allocated from system): %zu\n", mi.arena);
-		pr_info("ordblks  (number of non-inuse chunks) %zu\n", mi.ordblks);
-		pr_info("smblks   (unused -- always zero) %zu\n", mi.smblks);
-		pr_info("hblks    (number of mmapped regions) %zu\n", mi.hblks);
-		pr_info("hblkhd   (total space in mmapped regions) %zu\n", mi.hblkhd);
-		pr_info("uordblks (total allocated space) %zu\n", mi.uordblks);
-		pr_info("fordblks (total non-inuse space) %zu\n", mi.fordblks);
-		pr_info("keepcost (top-most, releasable (via malloc_trim) space */ %zu\n", mi.keepcost);
+		pr_info("HEAP_SZ  %zu (total amount linker reserved for A7 heap)\n", A7_HEAP_SZ);
+		pr_info("arena    %zu (total space allocated so far via sbrk)\n", mi.arena);
+		pr_info("ordblks  %zu (number of non-inuse chunks)\n", mi.ordblks);
+		pr_info("hblks    %zu (number of mmapped regions)\n", mi.hblks);
+		pr_info("hblkhd   %zu (total space in mmapped regions)\n", mi.hblkhd);
+		pr_info("uordblks %zu (total allocated space)\n", mi.uordblks);
+		pr_info("fordblks %zu (total non-inuse space)\n", mi.fordblks);
+		pr_info("keepcost %zu (top-most, releasable via malloc_trim space)\n", mi.keepcost);
 
 		lv_label_set_text_fmt(ui_SystemMenuFWversion,
-							  "Firmware version: %s\nMemory (kB): %zu/%zu (%2f%%)",
+							  "Firmware version: %s\nRAM: %d%% (%zu/%zu kB)",
 							  fw_version.data(),
+							  (int)std::round(100.f * (float)mi.uordblks / (float)A7_HEAP_SZ),
 							  mi.uordblks / 1024,
-							  mi.arena / 1024,
-							  float(100 * mi.uordblks / mi.arena));
+							  A7_HEAP_SZ / 1024);
 
 		wifi_ip_state = WifiIPState::Idle;
 	}
