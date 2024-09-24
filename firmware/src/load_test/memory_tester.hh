@@ -37,6 +37,10 @@ struct ModuleMemoryTester {
 			watcher.reset();
 
 			auto module = ModuleFactory::create(slug);
+			if (!module) {
+				pr_err("Module %s not found\n", slug.c_str());
+				return {};
+			}
 			meas.peak_mem_startup = watcher.peak_usage;
 			watcher.peak_usage = watcher.mem_alloced - watcher.mem_dealloced;
 

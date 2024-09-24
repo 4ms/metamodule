@@ -36,6 +36,9 @@ struct AllocationWatcher {
 			return (alloc.addr == addr) && (alloc.dealloced == false);
 		});
 		if (block != allocs.end()) {
+			if (block->dealloced) {
+				double_free = true;
+			}
 			block->dealloced = true;
 			mem_dealloced += block->size;
 		}

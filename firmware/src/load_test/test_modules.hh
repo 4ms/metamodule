@@ -34,13 +34,13 @@ std::vector<ModuleEntry> test_all_modules() {
 			ModuleEntry entry;
 			entry.slug = brand + ":" + slug;
 			pr_info("Testing %s\n", slug.c_str());
-			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", slug.c_str());
+			lv_label_set_text_fmt(ui_MainMenuNowPlaying, "Testing %s", entry.slug.c_str());
 
-			auto mem_tester = ModuleMemoryTester{slug};
+			auto mem_tester = ModuleMemoryTester{entry.slug};
 			entry.mem_usage = mem_tester.run_test(ModuleMemoryTester::TestType::FirstRun);
 
 			for (auto i = 0u; auto blocksize : ModuleEntry::blocksizes) {
-				ModuleLoadTester tester(slug);
+				ModuleLoadTester tester(entry.slug);
 
 				pr_trace("Block size %u\n", blocksize);
 
