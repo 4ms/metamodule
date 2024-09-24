@@ -263,12 +263,12 @@ def panel_to_components(tree):
             if len(c['pos_names']) > 0:
                 set_class_if_not_set(c, "AltParamChoiceLabeled")
                 c['num_choices'] = len(c['pos_names'])
-                c['default_val'] = str(max(1, min(c['num_choices'], default_val_int - 127)))
+                c['default_val'] = str(max(0, min(c['num_choices'], default_val_int - 128)))
 
             elif c['num_choices'] > 0:
                 set_class_if_not_set(c, "AltParamChoice")
                 c['pos_names'] = []
-                c['default_val'] = str(max(1, min(c['num_choices'], default_val_int - 127)))
+                c['default_val'] = str(max(0, min(c['num_choices'], default_val_int - 128)))
 
             elif c['num_choices'] == 0:
                 set_class_if_not_set(c, "AltParamContinuous")
