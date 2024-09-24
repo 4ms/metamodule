@@ -543,6 +543,7 @@ private:
 	//
 	// Params
 	//
+
 	void prepare_for_element(const ParamElement &) {
 		lv_hide(ui_CableAddButton);
 		lv_hide(ui_CableRemoveButton);
@@ -643,6 +644,7 @@ private:
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
 		lv_hide(ui_CableMidiAddButton);
+		lv_hide(ui_ResetButton);
 
 		lv_hide(ui_MappedPanel);
 		lv_hide(ui_MappedItemHeader);
