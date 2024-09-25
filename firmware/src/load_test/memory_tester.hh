@@ -70,18 +70,17 @@ struct ModuleMemoryTester {
 			meas.peak_running_mem = watcher.peak_usage;
 		}
 
-		// Check for leaks
-		uint64_t leaked = 0;
-		for (auto const &block : watcher.allocs) {
-			if (block.dealloced == false) {
-				leaked += block.size;
-			}
-		}
+		// Check for leaks: not working, detects false leaks?
+		// uint64_t leaked = 0;
+		// for (auto const &block : watcher.allocs) {
+		// 	if (block.dealloced == false) {
+		// 		leaked += block.size;
+		// 	}
+		// }
 
+		// Leak detects false? leaks in OrangeLine (all modules) and Bogaudio:DADSRH, DADSRHPlus
 		mi = mallinfo();
 		auto end_mem_used = mi.uordblks;
-		pr_dbg("mallinfo: leaked %zu - %zu = %zu\n", end_mem_used, start_mem_used, end_mem_used - start_mem_used);
-
 		meas.mem_leaked = end_mem_used - start_mem_used;
 
 		meas.double_free = watcher.double_free;

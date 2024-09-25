@@ -98,7 +98,10 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 		pr_info("InputsAudio-%u, ", blocksize);
 	}
 
-	s += "PeakStartupMem, PeakRunningMem, LeakedMem, DoubleFree?";
+	s += "PeakStartupMem, PeakRunningMem, ";
+	// Not accurate, don't include in CSV report:
+	// s += "LeakedMem, ";
+	s += "DoubleFree?";
 	pr_info("PeakStartupMem, PeakRunningMem, LeakedMem, DoubleFree?, Valid");
 
 	s += "\n";
@@ -137,7 +140,8 @@ std::string entries_to_csv(std::vector<ModuleEntry> const &entries) {
 		} else {
 			s += std::to_string(entry.mem_usage.peak_mem_startup) + ", ";
 			s += std::to_string(entry.mem_usage.peak_running_mem) + ", ";
-			s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
+			// Not accurate, don't include in report:
+			// s += std::to_string(entry.mem_usage.mem_leaked) + ", ";
 			s += entry.mem_usage.double_free ? "YES" : "n";
 		}
 		pr_info("%zu, %zu, %lld, %d, %s\n",

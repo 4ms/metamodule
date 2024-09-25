@@ -1,5 +1,6 @@
 #pragma once
 
+#include "pr_dbg.hh"
 #include "util/fixed_vector.hh"
 
 struct AllocationWatcher {
@@ -38,9 +39,12 @@ struct AllocationWatcher {
 		if (block != allocs.end()) {
 			if (block->dealloced) {
 				double_free = true;
+			} else {
+				block->dealloced = true;
+				mem_dealloced += block->size;
 			}
-			block->dealloced = true;
-			mem_dealloced += block->size;
+		} else {
+			pr_err("Unknown block de-alloced at %p\n", addr);
 		}
 	}
 
