@@ -142,16 +142,20 @@ struct ModuleWidgetAdaptor {
 
 	void addTextDisplay(MetaModule::VCVTextDisplay *widget) {
 		if (widget) {
-			widget->element = make_element(widget);
-			assign_element_fields(widget, "");
+			if (widget->firstLightId >= 0) {
+				widget->element = make_element(widget);
+				assign_element_fields(widget, "");
 
-			ElementCount::Indices indices = clear();
-			indices.light_idx = widget->firstLightId;
-			elem_idx.emplace_back(widget->element, indices);
+				ElementCount::Indices indices = clear();
+				indices.light_idx = widget->firstLightId;
+				elem_idx.emplace_back(widget->element, indices);
 
-			log_widget("MetaModuleDisplay:", 0, widget);
+				log_widget("VCVTextDisplay:", widget->firstLightId, widget);
+			} else {
+				pr_err("Error: VCVTextDisplay needs a non-negative firstLightId\n");
+			}
 		} else
-			pr_err("Error: can't add a null MetaModuleDisplay\n");
+			pr_err("Error: can't add a null VCVTextDisplay\n");
 	}
 
 	void populate_elements_indices(std::vector<MetaModule::Element> &elements,
