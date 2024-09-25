@@ -43,8 +43,8 @@ struct AllocationWatcher {
 				block->dealloced = true;
 				mem_dealloced += block->size;
 			}
-		} else {
-			pr_err("Unknown block de-alloced at %p\n", addr);
+			// } else {
+			// 	pr_err("Unknown block de-alloced at %p\n", addr);
 		}
 	}
 

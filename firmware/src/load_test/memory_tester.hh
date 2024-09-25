@@ -37,7 +37,6 @@ struct ModuleMemoryTester {
 
 		mi = mallinfo();
 		auto start_mem_used = mi.uordblks;
-		pr_dbg("mallinfo: %zu\n", start_mem_used);
 
 		if (test_type == TestType::FirstRun) {
 			watcher.reset();
