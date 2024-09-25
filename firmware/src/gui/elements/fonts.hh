@@ -21,6 +21,8 @@ inline lv_font_t const *get_font(std::string_view name) {
 		return &ui_font_MuseoSansRounded50012;
 	else if (name == "Default_14")
 		return &ui_font_MuseoSansRounded70014;
+	else if (name == "Segment7Standard24")
+		return &ui_font_Segment7Standard24;
 	else if (name == "Segment32")
 		return &ui_font_Segment32;
 	else

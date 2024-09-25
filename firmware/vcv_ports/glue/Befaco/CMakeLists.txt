@@ -41,6 +41,8 @@ target_compile_options(BefacoLibrary PRIVATE
     -Wno-asm-operand-widths
 )
 
+target_compile_definitions(BefacoLibrary PRIVATE METAMODULE)
+
 set_property(TARGET BefacoLibrary PROPERTY CXX_STANDARD 23)
 
 if (BUILD_DYN_PLUGIN)

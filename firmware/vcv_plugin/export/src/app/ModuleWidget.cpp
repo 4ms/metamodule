@@ -184,6 +184,11 @@ void ModuleWidget::addChild(Widget *widget) {
 	Widget::addChild(widget);
 }
 
+void ModuleWidget::addChild(MetaModule::VCVTextDisplay *widget) {
+	adaptor->addTextDisplay(widget);
+	Widget::addChild(widget);
+}
+
 void ModuleWidget::addChild(widget::SvgWidget *widget) {
 	log_widget("addChild(SvgWidget)", widget);
 	adaptor->addImage(widget);
