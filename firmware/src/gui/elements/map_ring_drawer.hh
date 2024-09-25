@@ -40,11 +40,11 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 	} else {
 		color = Gui::knob_palette[panel_id % 6];
 		if (module_height == 240) {
-			ring_thickness = (panel_id >= 6) ? 2 : 4;
+			ring_thickness = (panel_id >= 6) ? 2 : 5;
 			gap = 2;
 
 		} else {
-			ring_thickness = (panel_id >= 6) ? 2 : 3;
+			ring_thickness = (panel_id >= 6) ? 2 : 4;
 			gap = 0;
 		}
 	}

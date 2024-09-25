@@ -222,7 +222,7 @@ private:
 			lv_obj_refr_size(ui_ModuleListImage);
 			drawer.draw_elements(slug, module_canvas);
 		} else
-			notify_queue.put(Notification{"Could not load faceplate image", Notification::Priority::Error});
+			notify_queue.put(Notification{"Could not load faceplate image", Notification::Priority::Error, 2000});
 	}
 
 	void clear_module_canvas() {

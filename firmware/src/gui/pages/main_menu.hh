@@ -45,6 +45,8 @@ struct MainMenuPage : PageBase {
 			lv_hide(ui_MainMenuNowPlayingPanel);
 		} else {
 			lv_show(ui_MainMenuNowPlayingPanel);
+			lv_show(ui_MainMenuNowPlaying);
+			lv_show(ui_MainMenuNowPlayingName);
 			lv_label_set_text(ui_MainMenuNowPlaying, "Playing:");
 			lv_label_set_text(ui_MainMenuNowPlayingName, patch->patch_name.c_str());
 		}
@@ -54,6 +56,7 @@ struct MainMenuPage : PageBase {
 			lv_hide(ui_MainMenuLastViewedPanel);
 		} else {
 			lv_show(ui_MainMenuLastViewedPanel);
+			lv_label_set_text(ui_MainMenuLastViewed, "Last Viewed:");
 			lv_label_set_text(ui_MainMenuLastViewedName, viewpatch->patch_name.c_str());
 		}
 
@@ -90,8 +93,10 @@ private:
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		page->patches.view_playing_patch();
-		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patches.get_playing_patch_loc_hash()});
+		if (page->patches.get_playing_patch()) {
+			page->patches.view_playing_patch();
+			page->load_page(PageId::PatchView, {.patch_loc_hash = page->patches.get_playing_patch_loc_hash()});
+		}
 	}
 
 	static void patchsel_cb(lv_event_t *event) {

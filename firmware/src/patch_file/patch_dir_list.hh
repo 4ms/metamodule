@@ -29,7 +29,7 @@ struct PatchDirList {
 	}
 
 	std::array<PatchDir, 4> vol_root{};
-	static constexpr std::array<const char *, 4> vol_name = {"Recent", "USB", "Card", "Internal"};
+	static constexpr std::array<const char *, 4> vol_name = {"Open Patches", "USB", "Card", "Internal"};
 	static constexpr std::array<Volume, 4> vols{Volume::RamDisk, Volume::USB, Volume::SDCard, Volume::NorFlash};
 
 	static std::string_view get_vol_name(Volume vol) {

@@ -39,6 +39,7 @@ add_executable(
   ${FWDIR}/system/libc_stub.c
   ${M4DIR}/libcpp_stub.cc
   ${FWDIR}/system/new.cc
+  ${FWDIR}/system/sbrk.cc
   ${FWDIR}/system/startup_stm32mp157cxx_cm4.s
   ${DRIVERLIB}/drivers/hal_handlers.cc
   ${DRIVERLIB}/drivers/i2c.cc
@@ -125,6 +126,7 @@ target_link_script(
 )
 
 target_link_libraries(main_m4.elf PRIVATE cpputil)
+target_compile_definitions(main_m4.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 # Fixup for compiler warning for LittleFS
 set_source_files_properties(${FWDIR}/lib/littlefs/lfs.c PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")

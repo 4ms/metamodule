@@ -151,16 +151,17 @@ public:
 			cache_midi_mapping(mm);
 		}
 
-		// Set static (non-mapped) knobs
-		for (auto const &k : pd.static_knobs)
-			modules[k.module_id]->set_param(k.param_id, k.value);
-
+		// Load module states
 		for (auto const &ms : pd.module_states) {
 			if (ms.module_id >= num_modules)
 				continue;
 
 			modules[ms.module_id]->load_state(ms.state_data);
 		}
+
+		// Set static (non-mapped) knobs
+		for (auto const &k : pd.static_knobs)
+			modules[k.module_id]->set_param(k.param_id, k.value);
 
 		calc_multiple_module_indicies();
 
@@ -512,6 +513,11 @@ public:
 		pd.disconnect_outjack(jack);
 	}
 
+	void reset_module(uint16_t module_id) {
+		if (module_id < num_modules)
+			modules[module_id]->load_state("");
+	}
+
 	void add_module(BrandModuleSlug slug) {
 		auto module_idx = num_modules;
 		pd.module_slugs.push_back(slug);
@@ -527,6 +533,8 @@ public:
 		modules[module_idx]->mark_all_inputs_unpatched();
 		modules[module_idx]->mark_all_outputs_unpatched();
 		modules[module_idx]->set_samplerate(samplerate);
+
+		reset_module(module_idx);
 
 		smp.load_patch(num_modules);
 	}

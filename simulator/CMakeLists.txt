@@ -18,6 +18,8 @@ add_compile_options(-O0 -g2)
 # #################### cpputil #########################################
 
 add_subdirectory(${LIBDIR}/cpputil cpputil)
+target_compile_definitions(cpputil PUBLIC CPPUTIL_STATIC_STRING_USE_STD_STRING)
+
 
 # #################### LVGL Simulator Driver #################################
 
@@ -77,8 +79,10 @@ add_executable(
     ${FWDIR}/src/fs/fatfs/diskio.cc
     ${FWDIR}/src/fs/fatfs/delete_node.cc
     ${FWDIR}/src/fs/time_convert.cc
+    ${FWDIR}/src/fs/general_io.cc
     #Tar:
     ${FWDIR}/src/fs/asset_drive/untar.cc
+
 
     ${FWDIR}/src/user_settings/settings_file.cc
     ${FWDIR}/src/user_settings/settings_parse.cc

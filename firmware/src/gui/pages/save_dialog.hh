@@ -258,6 +258,11 @@ private:
 			fullpath.append(".yml");
 		}
 
+		std::string patchname = page->file_name;
+		strip_yml(patchname);
+		page->patches.get_view_patch()->patch_name = patchname;
+		pr_dbg("Renaming patch to %s\n", patchname.c_str());
+
 		// if view patch vol is RamDisk, then don't duplicate, just rename
 		if (page->patches.get_view_patch_vol() == Volume::RamDisk) {
 			page->patches.rename_view_patch_file(fullpath, page->file_vol);

@@ -127,10 +127,10 @@ struct PatchSelectorPage : PageBase {
 			auto patch_name = std::string{std::string_view{patch.patch.patch_name}};
 
 			if (patch.modification_count > 0)
-				patch_name = Gui::red_highlight_html_str + "•" + LV_TXT_COLOR_CMD + " " + patch_name;
+				patch_name = Gui::red_text("•") + " " + patch_name;
 
 			if (patch.loc_hash == patches.get_playing_patch_loc_hash())
-				patch_name = Gui::green_highlight_html_str + LV_SYMBOL_PLAY + LV_TXT_COLOR_CMD + " " + patch_name;
+				patch_name = Gui::green_text(LV_SYMBOL_PLAY) + " " + patch_name;
 
 			root.files.emplace_back(
 				patch.loc.filename, 0, patch.modification_count, PatchName{patch_name}, patch.loc.vol);
@@ -204,7 +204,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	std::string format_volume_name(StaticString<31> const &vol_name, PatchDir &root) {
-		std::string roller_text = Gui::orange_highlight_html + std::string(vol_name) + LV_TXT_COLOR_CMD;
+		std::string roller_text = Gui::orange_text(vol_name);
 
 		// TODO: make a setting to hide/show these?
 		add_file_count(roller_text, root);
@@ -218,7 +218,7 @@ struct PatchSelectorPage : PageBase {
 		std::string roller_text;
 
 		if (subdir.name.size() > 0) {
-			roller_text += Gui::yellow_highlight_html + subdir.name + LV_TXT_COLOR_CMD;
+			roller_text += Gui::yellow_text(subdir.name);
 			add_file_count(roller_text, subdir);
 		}
 		roller_text += "\n";
@@ -376,9 +376,12 @@ struct PatchSelectorPage : PageBase {
 
 	void view_loaded_patch() {
 		auto patch = patches.get_view_patch();
-		pr_trace("Parsed patch: %.31s\n", patch->patch_name.data());
+		pr_trace("View view_loaded_patch: %.31s\n", patch->patch_name.data());
 
 		args.patch_loc_hash = PatchLocHash{selected_patch};
+		// Anytime you open a patch from PatchSel, force redraw it
+		// This fixes issues with a patch that's reloaded from disk
+		gui_state.force_redraw_patch = true;
 		page_list.request_new_page(PageId::PatchView, args);
 
 		state = State::Closing;

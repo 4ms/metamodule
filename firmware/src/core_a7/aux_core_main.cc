@@ -97,14 +97,12 @@ extern "C" void aux_core_main() {
 		SMPThread::signal_done();
 	});
 
+	while (HWSemaphore<M4CoreReady>::is_locked())
+		;
+
 	// Signal that we're ready
 	pr_info("A7 Core 2 initialized\n");
 	HWSemaphore<AuxCoreReady>::unlock();
-
-	// while (HWSemaphore<M4CoreReady>::is_locked())
-	// 	;
-
-	//HAL_Delay(300); //allow time to load initial patch: TODO use semaphor
 
 	ui.autoload_plugins();
 	ui.load_initial_patch();

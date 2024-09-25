@@ -1,6 +1,7 @@
 set(HETRICKCV_DIR ${CMAKE_CURRENT_LIST_DIR}/../../hetrickcv)
 
 set(hetrickcvModules
+    2To4
     ASR
     AnalogToDigital
     BinaryGate
@@ -12,16 +13,11 @@ set(hetrickcvModules
     Chaos3Op
     ChaoticAttractors
     ClockedNoise
+    Comparator
     Contrast
     Crackle
-	RandomGates
-
-	Comparator
     DataCompander
-	Delta
-	Rotator
-	Rungler
-
+    Delta
     DigitalToAnalog
     Dust
     Exponent
@@ -47,7 +43,7 @@ set(hetrickcvModules
     PhasorGen
     PhasorGeometry
     PhasorHumanizer
-	PhasorMixer
+    PhasorMixer
     PhasorOctature
     PhasorQuadrature
     PhasorRandom
@@ -63,12 +59,14 @@ set(hetrickcvModules
     PhasorToClock
     PhasorToLFO
     PhasorToWaveforms
-    XYToPolar
     Probability
+    RandomGates
+    Rotator
+    Rungler
     Scanner
-    2To4
     VectorMix
     Waveshaper
+    XYToPolar
 )
 
 # cpp paths

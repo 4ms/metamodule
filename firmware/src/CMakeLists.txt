@@ -99,6 +99,7 @@ add_executable(
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
+  ${FWDIR}/system/sbrk.cc
   ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
   ${FWDIR}/system/startup_ca7.s
@@ -121,6 +122,7 @@ add_executable(
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
+  ${FWDIR}/src/fs/general_io.cc
   #
   ${FWDIR}/src/user_settings/settings_file.cc
   ${FWDIR}/src/user_settings/settings_parse.cc
@@ -206,6 +208,7 @@ target_include_directories(
 if (NOT TARGET cpputil::cpputil)
   add_subdirectory(${LIBDIR}/cpputil cpputil)
 endif()
+target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 
 target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui metamodule::patch-serial cpputil vcv_ports)

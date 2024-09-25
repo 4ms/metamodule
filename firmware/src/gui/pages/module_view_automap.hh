@@ -111,7 +111,7 @@ struct ModuleViewAutoMapDialog {
 		if (auto first_free_knobset = first_empty_knobset()) {
 			make_knob_maps(first_free_knobset); // map into all knobsets
 		} else {
-			notify_queue.put({"Cannot map, all knob sets are full", Notification::Priority::Error, 1000});
+			notify_queue.put({"Cannot map, all knob sets are full", Notification::Priority::Error, 2000});
 		}
 	}
 

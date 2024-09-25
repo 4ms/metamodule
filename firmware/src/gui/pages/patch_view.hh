@@ -62,6 +62,11 @@ struct PatchViewPage : PageBase {
 	void prepare_focus() override {
 		is_ready = false;
 
+		if (args.patch_loc_hash.value_or(PatchLocHash{}) == PatchLocHash{}) {
+			pr_err("Error: Tried to load PatchView with no patch\n");
+			return;
+		}
+
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
@@ -277,6 +282,9 @@ struct PatchViewPage : PageBase {
 
 			} else if (gui_state.new_cable) {
 				abort_cable(gui_state, notify_queue);
+
+			} else if (highlighted_module_id.has_value() && highlighted_module_obj != nullptr) {
+				lv_group_focus_obj(ui_PlayButton);
 
 			} else {
 				page_list.request_new_page_no_history(PageId::MainMenu, args);
