@@ -136,6 +136,8 @@ target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
 
+target_compile_definitions(simulator PUBLIC SIMULATOR)
+
 set_property(TARGET simulator PROPERTY CXX_STANDARD 23)
 
 # Arch-dependent Link options:

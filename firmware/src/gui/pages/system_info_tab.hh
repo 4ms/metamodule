@@ -7,7 +7,10 @@
 #include "ld.h"
 #include "patch_file/file_storage_proxy.hh"
 #include <cmath>
+
+#if !defined(SIMULATOR)
 #include <malloc.h>
+#endif
 
 namespace MetaModule
 {
@@ -26,6 +29,11 @@ struct InfoTab : SystemMenuTab {
 		if (fw_version.starts_with("firmware-"))
 			fw_version.remove_prefix(9);
 
+		int memory_percent_used = 0;
+		size_t memory_used = 0;
+		unsigned memory_total = A7_HEAP_SZ / (1024 * 1024);
+
+#if !defined(SIMULATOR)
 		struct mallinfo mi = mallinfo();
 		pr_info("HEAP_SZ  %zu (total amount linker reserved for A7 heap)\n", A7_HEAP_SZ);
 		pr_info("arena    %zu (total space allocated so far via sbrk)\n", mi.arena);
@@ -36,12 +44,16 @@ struct InfoTab : SystemMenuTab {
 		pr_info("fordblks %zu (total non-inuse space)\n", mi.fordblks);
 		pr_info("keepcost %zu (top-most, releasable via malloc_trim space)\n", mi.keepcost);
 
+		memory_percent_used = (int)std::round(100.f * (float)mi.uordblks / (float)A7_HEAP_SZ);
+		memory_used = mi.uordblks / (1024 * 1024);
+#endif
+
 		lv_label_set_text_fmt(ui_SystemMenuFWversion,
-							  "Firmware version: %s\nRAM: %d%% (%zu/%zu kB)",
+							  "Firmware version: %s\nRAM: %d%% (%zu/%u MB)",
 							  fw_version.data(),
-							  (int)std::round(100.f * (float)mi.uordblks / (float)A7_HEAP_SZ),
-							  mi.uordblks / 1024,
-							  A7_HEAP_SZ / 1024);
+							  memory_percent_used,
+							  memory_used,
+							  memory_total);
 
 		wifi_ip_state = WifiIPState::Idle;
 	}
