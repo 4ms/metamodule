@@ -169,7 +169,7 @@ struct ModuleWidgetAdaptor {
 				el.height_mm = to_mm(widget->box.size.y);
 				el.coords = Coords::TopLeft;
 				el.short_name = name;
-				el.long_name = name;				
+				el.long_name = name;
 			},
 			widget->element);
 	}
