@@ -2,6 +2,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xm4.cmake)
 set_arch_flags()
 
+include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
+enable_logging()
+
 # set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 set(M4DIR ${CMAKE_CURRENT_SOURCE_DIR}) # /firmware/src/core_m4

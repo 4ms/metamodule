@@ -19,7 +19,7 @@ public:
 
 private:
 	IntercoreStorageMessage compareChecksumWifi(uint32_t, uint32_t, Checksum_t);
-	IntercoreStorageMessage flashWifi(std::span<uint8_t>, uint32_t address, uint32_t &bytesWritten);
+	IntercoreStorageMessage flashWifi(std::span<uint8_t>, uint32_t address, std::optional<uint32_t> uncompressed_size, uint32_t &bytesWritten);
 	IntercoreStorageMessage compareChecksumQSPI(uint32_t, uint32_t, Checksum_t, uint32_t &bytesWritten);
 	IntercoreStorageMessage flashQSPI(std::span<uint8_t>, uint32_t address, uint32_t &bytesWritten);
 

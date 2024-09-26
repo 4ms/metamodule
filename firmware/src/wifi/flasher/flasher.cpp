@@ -3,6 +3,7 @@
 #include "custom_port.h"
 #include "esp_loader.h"
 #include "esp_loader_io.h"
+#include "drivers/stm32xx.h"
 
 #include <console/pr_dbg.hh>
 
@@ -27,7 +28,7 @@ esp_loader_error_t init(uint32_t baudrate)
     }
     else
     {
-        pr_dbg("Flasher: Connected to target\n");
+        pr_trace("Flasher: Connected to target\n");
 
         err = esp_loader_change_transmission_rate(baudrate);
         if (err == ESP_LOADER_ERROR_UNSUPPORTED_FUNC)
@@ -47,7 +48,7 @@ esp_loader_error_t init(uint32_t baudrate)
             }
             else
             {
-                pr_dbg("Flasher: Transmission rate changed changed\n");
+                pr_trace("Flasher: Transmission rate changed\n");
             }
         }
     }
@@ -119,7 +120,8 @@ esp_loader_error_t flash(uint32_t address, std::span<const uint8_t> buffer)
 
 esp_loader_error_t verify(uint32_t address, uint32_t length, std::string_view checksum)
 {
-    pr_dbg("Flasher: Getting checksum from %08x-%08x\n", address, address + length);
+	HAL_Delay(10);
+    pr_trace("Flasher: Getting checksum from %08x-%08x\n", address, address + length);
 
     std::array<uint8_t,32> readValue;
 
@@ -178,14 +180,41 @@ esp_loader_error_t conditional_flash(uint32_t address, std::span<const uint8_t> 
     return result;
 }
 
-esp_loader_error_t flash_start(uint32_t address, uint32_t length, uint32_t batchSize)
+esp_loader_error_t flash_start(uint32_t address, uint32_t length, uint32_t batchSize, std::optional<std::size_t> uncompressed_size)
 {
-    return esp_loader_flash_start(address, length, batchSize);
+    if (not uncompressed_size)
+    {
+        return esp_loader_flash_start(address, length, batchSize);
+    }
+    else
+    {
+        return esp_loader_flash_defl_start(address, *uncompressed_size, length, batchSize);
+    }
 }
 
-esp_loader_error_t flash_process(std::span<uint8_t> buffer)
+esp_loader_error_t flash_process(std::span<uint8_t> buffer, bool compressed)
 {
-    return esp_loader_flash_write(buffer.data(), buffer.size());
+    if (not compressed)
+    {
+        return esp_loader_flash_write(buffer.data(), buffer.size());
+    }
+    else
+    {
+        return esp_loader_flash_defl_write(buffer.data(), buffer.size());
+    }
+}
+
+esp_loader_error_t flash_finish(bool compressed)
+{
+    if (not compressed)
+    {
+        return esp_loader_flash_finish(false);
+    }
+    else
+    {
+        printf("Finishing defl flash\n");
+        return esp_loader_flash_defl_finish(false);
+    }
 }
 
 }
