@@ -107,14 +107,14 @@ if __name__ == "__main__":
     if args.assets_file:
         j["files"].append(process_file(destination_dir, args.assets_file, "app", name="Assets", address=0xa00000))
 
+    if args.wifi_fs_file:
+        j["files"].append(process_file(destination_dir, args.wifi_fs_file, "wifi", name="Wifi Filesystem", address=0x200000, compressed=True))
+
     if args.wifi_bl_file:
         j["files"].append(process_file(destination_dir, args.wifi_bl_file, "wifi", name="Wifi Bootloader", address=0x0))
 
     if args.wifi_app_file:
         j["files"].append(process_file(destination_dir, args.wifi_app_file, "wifi", name="Wifi Application", address=0x10000))
-
-    if args.wifi_fs_file:
-        j["files"].append(process_file(destination_dir, args.wifi_fs_file, "wifi", name="Wifi Filesystem", address=0x200000, compressed=True))
 
     with open(args.out_file, "w+") as out_file:
         data_json = json.dumps(j, indent=4)
