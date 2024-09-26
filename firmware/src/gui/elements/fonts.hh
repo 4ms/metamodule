@@ -1,6 +1,8 @@
 #pragma once
+#include "gui/images/paths.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
+#include "pr_dbg.hh"
 #include <string_view>
 
 namespace MetaModule
@@ -25,7 +27,31 @@ inline lv_font_t const *get_font(std::string_view name) {
 		return &ui_font_Segment7Standard24;
 	else if (name == "Segment32")
 		return &ui_font_Segment32;
-	else
-		return &lv_font_montserrat_12;
+	else if (name == "Segment14_10")
+		return &Segment14_10;
+	else if (name == "Segment14_12")
+		return &Segment14_12;
+	else if (name == "Segment14_14")
+		return &Segment14_14;
+	else if (name == "Segment14_16")
+		return &Segment14_16;
+	else if (name == "Segment14_20")
+		return &Segment14_20;
+	else if (name == "Segment14_24")
+		return &Segment14_24;
+	else if (name == "Segment14_26")
+		return &Segment14_26;
+	else {
+		pr_dbg("Trying to load font %s (%s)\n", name.data(), ComponentImages::get_comp_path(name).c_str());
+
+		auto font = lv_font_load(ComponentImages::get_comp_path(name).c_str());
+		if (font) {
+			pr_dbg("Found!\n");
+			return font;
+		} else {
+			pr_dbg("Not found\n");
+			return &lv_font_montserrat_12;
+		}
+	}
 }
 } // namespace MetaModule
