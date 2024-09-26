@@ -77,6 +77,7 @@ private:
 	void transfer_params();
 	void change_knobset();
 	void update_channel_selections();
+	void autoload_plugins();
 };
 
 } // namespace MetaModule

@@ -18,12 +18,16 @@ namespace MetaModule
 {
 
 struct DynLoader {
+	static inline bool kept_syms = false;
 
 	DynLoader(std::span<uint8_t> elf_file_data, std::vector<uint8_t> &code_buffer)
 		: elf{elf_file_data}
 		, codeblock{code_buffer} {
 
-		keep_symbols();
+		if (!kept_syms) {
+			keep_symbols();
+			kept_syms = true;
+		}
 		init_host_symbol_table();
 	}
 

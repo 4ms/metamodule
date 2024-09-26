@@ -1,8 +1,8 @@
 #pragma once
 #include "core_intercom/intercore_message.hh"
+#include "patch-serial/patch_to_yaml.hh"
+#include "patch-serial/yaml_to_patch.hh"
 #include "patch/patch_data.hh"
-#include "patch_convert/patch_to_yaml.hh"
-#include "patch_convert/yaml_to_patch.hh"
 #include "patch_file.hh"
 #include "patch_file/file_storage_comm.hh"
 #include "patch_file/patch_location.hh"
@@ -113,11 +113,13 @@ public:
 	[[nodiscard]] bool request_file_flash(IntercoreStorageMessage::FlashTarget target,
 										  std::span<uint8_t> buffer,
 										  uint32_t address,
+										  std::optional<uint32_t> uncompressed_size,
 										  uint32_t *bytes_processed) {
 		IntercoreStorageMessage message{
 			.message_type = StartFlashing,
 			.buffer = {(char *)buffer.data(), buffer.size()},
 			.address = address,
+			.uncompressed_size = uncompressed_size,
 			.bytes_processed = bytes_processed,
 			.flashTarget = target,
 		};

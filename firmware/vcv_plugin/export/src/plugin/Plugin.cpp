@@ -1,10 +1,12 @@
 #include "console/pr_dbg.hh"
 #include "module_widget_adaptor.hh"
-#include "shared/CoreModules/moduleFactory.hh"
 #include <app/ModuleWidget.hpp>
 #include <deque>
 #include <plugin/Model.hpp>
 #include <plugin/Plugin.hpp>
+#include <string_view>
+
+#include "CoreModules/moduleFactory.hh"
 
 extern rack::plugin::Plugin *pluginInstance;
 

@@ -6,8 +6,8 @@
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
-#include "patch.hh"
-#include "patch_data.hh"
+#include "patch/patch.hh"
+#include "patch/patch_data.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "util/overloaded.hh"
@@ -88,6 +88,18 @@ private:
 						   arc_change_value();
 					   },
 
+					   [this](const Pot &) {
+						   auto cur_arc_range = arc_range_value[arc_range_idx];
+						   auto next_idx = (arc_range_idx + 1) % arc_range_value.size();
+						   auto next_arc_range = arc_range_value[next_idx];
+						   float cur_value = lv_arc_get_value(ui_ControlArc);
+						   lv_arc_set_range(ui_ControlArc, 0, next_arc_range);
+						   lv_arc_set_value(ui_ControlArc,
+											std::round(cur_value / (float)cur_arc_range * (float)next_arc_range));
+						   arc_range_idx = next_idx;
+						   show_resolution_text();
+					   },
+
 					   // switches: increment value, wrapping
 					   [this](const Switch &) {
 						   auto new_value = lv_arc_get_value(ui_ControlArc) + 1;
@@ -139,18 +151,26 @@ private:
 	}
 
 	void prepare_control_arc() {
+		arc_range_idx = 0; //default
+
 		if (!drawn_el)
 			return;
 
 		std::visit(overloaded{
 					   [](const BaseElement &) {},
 					   [](const ParamElement &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
+					   [this](const Pot &) { lv_arc_set_range(ui_ControlArc, 0, arc_range_value[arc_range_idx]); },
 					   [](const Button &el) { lv_arc_set_range(ui_ControlArc, 0, 1); },
 					   [](const FlipSwitch &el) { lv_arc_set_range(ui_ControlArc, 0, el.num_pos - 1); },
 					   [](const SlideSwitch &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
-					   [](const Pot &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
 					   [](const AltParamChoice &el) { lv_arc_set_range(ui_ControlArc, 1, el.num_pos); },
 					   [](const AltParamContinuous &) { lv_arc_set_range(ui_ControlArc, 0, 100); },
+				   },
+				   drawn_el->element);
+
+		std::visit(overloaded{
+					   [this](const BaseElement &) { hide_resolution_text(); },
+					   [this](const Pot &) { show_resolution_text(); },
 				   },
 				   drawn_el->element);
 
@@ -182,8 +202,20 @@ private:
 
 		float val = (float)value / (float)range;
 
-		auto strval = get_element_value_string(drawn_el->element, val);
+		auto strval = get_element_value_string(drawn_el->element, val, arc_range_value[arc_range_idx]);
 		lv_label_set_text(ui_ControlAlertAmount, strval.c_str());
+	}
+
+	void hide_resolution_text() {
+		lv_hide(ui_ControlAlertResolutionCont);
+		lv_label_set_text(ui_ControlAlertClickLabel, "");
+		lv_label_set_text(ui_ControlAlertResolution, "");
+	}
+
+	void show_resolution_text() {
+		lv_show(ui_ControlAlertResolutionCont);
+		lv_label_set_text(ui_ControlAlertClickLabel, "Click to change:");
+		lv_label_set_text(ui_ControlAlertResolution, arc_range_text[arc_range_idx].data());
 	}
 
 	static void click_arc_cb(lv_event_t *event) {
@@ -205,12 +237,16 @@ private:
 		page->arc_change_value();
 	}
 
-	const DrawnElement *drawn_el;
-	PatchData *patch;
+	const DrawnElement *drawn_el{};
+	PatchData *patch{};
 	PatchModQueue &patch_mod_queue;
 	OpenPatchManager &patches;
 	lv_group_t *controlarc_group = nullptr;
 	lv_group_t *prev_group = nullptr;
+
+	unsigned arc_range_idx = 0;
+	std::array<unsigned, 3> arc_range_value{100, 1000, 10000};
+	std::array<std::string_view, 3> arc_range_text{"Coarse (1%)", "Fine (0.1%)", "Ultra (0.01%)"};
 
 public:
 	bool visible = true;

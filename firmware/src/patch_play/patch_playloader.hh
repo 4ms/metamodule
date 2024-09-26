@@ -1,7 +1,7 @@
 #pragma once
-#include "CoreModules/modules_helpers.hh"
 #include "calibrate/calibration_patch.hh"
 #include "delay.hh"
+#include "modules_helpers.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
@@ -9,6 +9,8 @@
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include <atomic>
+
+size_t get_heap_size();
 
 namespace MetaModule
 {
@@ -186,7 +188,12 @@ struct PatchPlayLoader {
 			i++;
 		}
 
+		pr_info("Heap: %u\n", get_heap_size());
 		start_audio();
+	}
+
+	void reset_module(unsigned module_id) {
+		player_.reset_module(module_id);
 	}
 
 	void remove_module(unsigned module_id) {
@@ -196,6 +203,7 @@ struct PatchPlayLoader {
 
 		player_.remove_module(module_id);
 
+		pr_info("Heap: %u\n", get_heap_size());
 		start_audio();
 	}
 
@@ -312,6 +320,7 @@ private:
 
 		auto result = player_.load_patch(*next_patch);
 		if (result.success) {
+			pr_info("Heap: %u\n", get_heap_size());
 			if (next_patch == patches_.get_view_patch())
 				patches_.play_view_patch();
 

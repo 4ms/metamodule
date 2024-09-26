@@ -1,4 +1,5 @@
 #include "doctest.h"
+#include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "patch_play/auto_map.hh"
 

@@ -4,27 +4,9 @@
 namespace
 {
 
-/////////////////////////////////////////////////
-// Change these to enable/disable logging levels
-
-// Error: unexpected conditions that may lead to program failure
-inline constexpr bool PRINT_ERROR = true;
-
-// Warnings: conditions that deserve attention but do not lead to program failure
-inline constexpr bool PRINT_WARN = true;
-
-// Info: Important or useful information that is neither a warning or error
-inline constexpr bool PRINT_INFO = true;
-
-// Debug: temporary messages used for debugging
-inline constexpr bool PRINT_DEBUG = false;
-
-// Trace: detailed log of execution
-inline constexpr bool PRINT_TRACE = false;
-
-// Dump: large amounts of verbose data
-inline constexpr bool PRINT_DUMP = false;
-/////////////////////////////////////////////////
+#ifndef LOG_LEVEL
+#define LOG_LEVEL 0
+#endif
 
 inline void _do_printf_impl(const char *str) {
 	printf("%s", str);
@@ -34,34 +16,46 @@ inline void _do_printf_impl(auto... args) {
 	printf(args...);
 }
 
+// Error: unexpected conditions that may lead to program failure
 inline void pr_err(auto... args) {
-	if constexpr (PRINT_ERROR)
-		_do_printf_impl(args...);
+#if LOG_LEVEL > 0
+	_do_printf_impl(args...);
+#endif
 }
 
+// Warnings: conditions that deserve attention but do not lead to program failure
 inline void pr_warn(auto... args) {
-	if constexpr (PRINT_WARN)
-		_do_printf_impl(args...);
+#if LOG_LEVEL > 1
+	_do_printf_impl(args...);
+#endif
 }
 
+// Info: Important or useful information that is neither a warning or error
 inline void pr_info(auto... args) {
-	if constexpr (PRINT_INFO)
-		_do_printf_impl(args...);
+#if LOG_LEVEL > 2
+	_do_printf_impl(args...);
+#endif
 }
 
+// Debug: temporary messages used for debugging
 inline void pr_dbg(auto... args) {
-	if constexpr (PRINT_DEBUG)
-		_do_printf_impl(args...);
+#if LOG_LEVEL > 3
+	_do_printf_impl(args...);
+#endif
 }
 
+// Trace: detailed log of execution
 inline void pr_trace(auto... args) {
-	if constexpr (PRINT_TRACE)
-		_do_printf_impl(args...);
+#if LOG_LEVEL > 4
+	_do_printf_impl(args...);
+#endif
 }
 
+// Dump: large amounts of verbose data
 inline void pr_dump(auto... args) {
-	if constexpr (PRINT_DUMP)
-		_do_printf_impl(args...);
+#if LOG_LEVEL > 5
+	_do_printf_impl(args...);
+#endif
 }
 
 } // namespace

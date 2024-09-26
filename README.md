@@ -1,8 +1,6 @@
 # MetaModule
 
 [![Build Simulator](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_simulator.yml)
-[![Build VCV Rack Plugin](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_vcv_plugin.yml)
-[![Run VCV unit tests](https://github.com/4ms/metamodule/actions/workflows/run_vcv_tests.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/run_vcv_tests.yml)
 [![Build Firmware](https://github.com/4ms/metamodule/actions/workflows/build_test_firmware.yml/badge.svg)](https://github.com/4ms/metamodule/actions/workflows/build_test_firmware.yml)
 
 ## Start
@@ -34,7 +32,7 @@ The MetaModule environment is built using three separate components: The VCV Rac
 
 For information about building and using these components, please follow the separate guides:
 
-- [VCV Rack Plugin](./vcv/README.md)
+- [VCV Rack Plugin](https://github.com/4ms/4ms-vcv/blob/main/README.md)
 - [Simulator](./simulator/README.md)
 - [Firmware](./firmware/README.md)
 

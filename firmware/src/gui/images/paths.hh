@@ -1,6 +1,6 @@
 #pragma once
+#include "CoreModules/moduleFactory.hh"
 #include "lv_conf.h"
-#include "shared/CoreModules/moduleFactory.hh"
 #include <string>
 #include <string_view>
 

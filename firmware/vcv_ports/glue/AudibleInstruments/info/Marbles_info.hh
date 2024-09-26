@@ -6,15 +6,15 @@
 namespace MetaModule
 {
 struct MarblesInfo : ModuleInfoBase {
-    static constexpr std::string_view slug{"Marbles"};
-    static constexpr std::string_view description{"Random Sampler"};
-    static constexpr uint32_t width_hp = 19;
-    static constexpr std::string_view svg_filename{"res/modules/Marbles_artwork.svg"};
-    static constexpr std::string_view png_filename{"4ms/fp/Marbles.png"};
+	static constexpr std::string_view slug{"Marbles"};
+	static constexpr std::string_view description{"Random Sampler"};
+	static constexpr uint32_t width_hp = 19;
+	static constexpr std::string_view svg_filename{"res/modules/Marbles_artwork.svg"};
+	static constexpr std::string_view png_filename{"4ms/fp/Marbles.png"};
 
-    using enum Coords;
+	using enum Coords;
 
-    static constexpr std::array<Element, 43> Elements{{
+	static constexpr std::array<Element, 44> Elements{{
 		WhiteMomentary7mm{{to_mm<72>(46.78), to_mm<72>(50.91), Center, "T Deja Vu", ""}},
 		WhiteMomentary7mm{{to_mm<72>(212.04), to_mm<72>(50.91), Center, "X Deja Vu", ""}},
 		WhiteMediumKnob{{to_mm<72>(129.41), to_mm<72>(63.52), Center, "DejaVu", ""}, 0.5f},
@@ -58,118 +58,119 @@ struct MarblesInfo : ModuleInfoBase {
 		GreenLight{{to_mm<72>(153.65), to_mm<72>(297.52), Center, "X1", ""}},
 		GreenLight{{to_mm<72>(187.81), to_mm<72>(297.52), Center, "X2", ""}},
 		GreenLight{{to_mm<72>(221.97), to_mm<72>(297.52), Center, "X3", ""}},
-}};
+		AltParamChoiceLabeled{{{to_mm<72>(61.77), to_mm<72>(208.21), Center, "Scale", ""}, 6, 1},
+							  {"Major", "Minor", "Pentatonic", "Pelog", "Raag Bhairav That", "Raag Shri"}},
+	}};
 
-    enum class Elem {
-        TDejaVuButton,
-        XDejaVuButton,
-        DejavuKnob,
-        ClockRateKnob,
-        SpreadKnob,
-        TModeSwitch,
-        XModeSwitch,
-        LengthKnob,
-        TBiasKnob,
-        XBiasKnob,
-        ClockRangeSwitch,
-        OutputRangeSwitch,
-        ExternalButton,
-        JitterKnob,
-        StepsKnob,
-        TBiasCvIn,
-        XBiasCvIn,
-        TClockIn,
-        RateCvIn,
-        JitterCvIn,
-        DejaVuCvIn,
-        StepsCvIn,
-        SpreadCvIn,
-        XClockIn,
-        T1Out,
-        T2Out,
-        T3Out,
-        YOut,
-        X1Out,
-        X2Out,
-        X3Out,
-        TModeLedLight,
-        XModeLight,
-        ClockRangeLight,
-        OutputRangeLight,
-        ExternalLight,
-        T1Light,
-        T2Light,
-        T3Light,
-        YLight,
-        X1Light,
-        X2Light,
-        X3Light,
-    };
+	enum class Elem {
+		TDejaVuButton,
+		XDejaVuButton,
+		DejavuKnob,
+		ClockRateKnob,
+		SpreadKnob,
+		TModeSwitch,
+		XModeSwitch,
+		LengthKnob,
+		TBiasKnob,
+		XBiasKnob,
+		ClockRangeSwitch,
+		OutputRangeSwitch,
+		ExternalButton,
+		JitterKnob,
+		StepsKnob,
+		TBiasCvIn,
+		XBiasCvIn,
+		TClockIn,
+		RateCvIn,
+		JitterCvIn,
+		DejaVuCvIn,
+		StepsCvIn,
+		SpreadCvIn,
+		XClockIn,
+		T1Out,
+		T2Out,
+		T3Out,
+		YOut,
+		X1Out,
+		X2Out,
+		X3Out,
+		TModeLedLight,
+		XModeLight,
+		ClockRangeLight,
+		OutputRangeLight,
+		ExternalLight,
+		T1Light,
+		T2Light,
+		T3Light,
+		YLight,
+		X1Light,
+		X2Light,
+		X3Light,
+	};
 
-    // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
-    
-    enum {
-        KnobDejavu, 
-        KnobClock_Rate, 
-        KnobSpread, 
-        KnobLength, 
-        KnobT_Bias, 
-        KnobX_Bias, 
-        KnobJitter, 
-        KnobSteps, 
-        NumKnobs,
-    };
-    
-    enum {
-        SwitchT_Deja_Vu, 
-        SwitchX_Deja_Vu, 
-        SwitchT_Mode_Switch, 
-        SwitchX_Mode_Switch, 
-        SwitchClock_Range_Switch, 
-        SwitchOutput_Range_Switch, 
-        SwitchExternal, 
-        NumSwitches,
-    };
-    
-    enum {
-        InputT_Bias_Cv, 
-        InputX_Bias_Cv, 
-        InputT_Clock, 
-        InputRate_Cv, 
-        InputJitter_Cv, 
-        InputDeja_Vu_Cv, 
-        InputSteps_Cv, 
-        InputSpread_Cv, 
-        InputX_Clock, 
-        NumInJacks,
-    };
-    
-    enum {
-        OutputT1_Out, 
-        OutputT2_Out, 
-        OutputT3_Out, 
-        OutputY_Out, 
-        OutputX1_Out, 
-        OutputX2_Out, 
-        OutputX3_Out, 
-        NumOutJacks,
-    };
-    
-    enum {
-        LedT_Mode_Led, 
-        LedX_Mode_Light, 
-        LedClock_Range_Light, 
-        LedOutput_Range_Light, 
-        LedExternal_Light, 
-        LedT1, 
-        LedT2, 
-        LedT3, 
-        LedY, 
-        LedX1, 
-        LedX2, 
-        LedX3, 
-        NumDiscreteLeds,
-    };
-    
+	// Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)
+
+	enum {
+		KnobDejavu,
+		KnobClock_Rate,
+		KnobSpread,
+		KnobLength,
+		KnobT_Bias,
+		KnobX_Bias,
+		KnobJitter,
+		KnobSteps,
+		NumKnobs,
+	};
+
+	enum {
+		SwitchT_Deja_Vu,
+		SwitchX_Deja_Vu,
+		SwitchT_Mode_Switch,
+		SwitchX_Mode_Switch,
+		SwitchClock_Range_Switch,
+		SwitchOutput_Range_Switch,
+		SwitchExternal,
+		NumSwitches,
+	};
+
+	enum {
+		InputT_Bias_Cv,
+		InputX_Bias_Cv,
+		InputT_Clock,
+		InputRate_Cv,
+		InputJitter_Cv,
+		InputDeja_Vu_Cv,
+		InputSteps_Cv,
+		InputSpread_Cv,
+		InputX_Clock,
+		NumInJacks,
+	};
+
+	enum {
+		OutputT1_Out,
+		OutputT2_Out,
+		OutputT3_Out,
+		OutputY_Out,
+		OutputX1_Out,
+		OutputX2_Out,
+		OutputX3_Out,
+		NumOutJacks,
+	};
+
+	enum {
+		LedT_Mode_Led,
+		LedX_Mode_Light,
+		LedClock_Range_Light,
+		LedOutput_Range_Light,
+		LedExternal_Light,
+		LedT1,
+		LedT2,
+		LedT3,
+		LedY,
+		LedX1,
+		LedX2,
+		LedX3,
+		NumDiscreteLeds,
+	};
 };
 } // namespace MetaModule

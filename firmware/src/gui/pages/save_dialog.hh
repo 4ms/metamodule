@@ -79,6 +79,7 @@ struct SaveDialog {
 
 				case RefreshState::ReloadingPatchList:
 					subdir_panel.populate(patch_storage.get_patch_list());
+					subdir_panel.hide_recent_files();
 					// hide_spinner();
 					subdir_panel.focus();
 					refresh_state = RefreshState::Idle;
@@ -188,6 +189,7 @@ struct SaveDialog {
 
 		EntryInfo selected_patch{.kind = DirEntryKind::Dir, .vol = patches.get_view_patch_vol(), .path = file_path};
 		subdir_panel.refresh(selected_patch);
+		subdir_panel.hide_recent_files();
 	}
 
 	void hide_subdir_panel() {
@@ -250,10 +252,16 @@ private:
 
 		page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
 
-		std::string fullpath = page->file_path + "/" + page->file_name;
+		std::string fullpath = page->file_path.length() ? (page->file_path + "/") : "";
+		fullpath += page->file_name;
 		if (!fullpath.ends_with(".yml")) {
 			fullpath.append(".yml");
 		}
+
+		std::string patchname = page->file_name;
+		strip_yml(patchname);
+		page->patches.get_view_patch()->patch_name = patchname;
+		pr_dbg("Renaming patch to %s\n", patchname.c_str());
 
 		// if view patch vol is RamDisk, then don't duplicate, just rename
 		if (page->patches.get_view_patch_vol() == Volume::RamDisk) {

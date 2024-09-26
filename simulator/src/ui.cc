@@ -1,4 +1,5 @@
 #include "ui.hh"
+#include "dynload/autoload_plugins.hh"
 #include "gui/notify/queue.hh"
 
 namespace MetaModule
@@ -39,7 +40,7 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 		}
 	}
 
-	plugin_manager.autoload_plugins(settings.plugin_autoload);
+	autoload_plugins();
 
 	patch_playloader.notify_audio_is_muted();
 	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";
@@ -186,6 +187,36 @@ void Ui::update_channel_selections() {
 		std::cout << "Soundcard left input --> Input Jack # " << cur_inchan_left + 1 << "\n";
 		std::cout << "Soundcard right input --> Input Jack # " << cur_inchan_right + 1 << "\n";
 	}
+}
+
+void Ui::autoload_plugins() {
+	auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
+
+	while (true) {
+		auto status = autoloader.process();
+
+		if (status.state == AutoLoader::State::Error) {
+			notify_queue.put({status.message, Notification::Priority::Error, 2000});
+			break;
+		}
+
+		if (status.state == AutoLoader::State::Done) {
+			break;
+		}
+
+		if (status.message.length()) {
+			lv_label_set_text(ui_MainMenuNowPlaying, status.message.c_str());
+		}
+
+		auto now = get_time();
+		if ((now - last_lvgl_task_tm) > 2) {
+			last_lvgl_task_tm = now;
+			lv_timer_handler();
+		}
+	}
+
+	lv_label_set_text(ui_MainMenuNowPlaying, "");
+	page_manager.init();
 }
 
 } // namespace MetaModule

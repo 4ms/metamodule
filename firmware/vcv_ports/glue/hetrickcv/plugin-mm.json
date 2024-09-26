@@ -1,0 +1,273 @@
+{
+	"MetaModuleBrandName": "HetrickCV",
+	"MetaModulePluginMaintainer": "Michael Hetrick, 4ms Company",
+	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerUrl": "",
+	"MetaModuleDescription": "",
+	"MetaModuleIncludedModules": [
+	{
+		"slug": "2To4",
+		"name": "2To4"
+	},
+	{
+		"slug": "ASR",
+		"name": "ASR"
+	},
+	{
+		"slug": "AnalogToDigital",
+		"name": "AnalogToDigital"
+	},
+	{
+		"slug": "BinaryGate",
+		"name": "BinaryGate"
+	},
+	{
+		"slug": "BinaryNoise",
+		"name": "BinaryNoise"
+	},
+	{
+		"slug": "Bitshift",
+		"name": "Bitshift"
+	},
+	{
+		"slug": "Boolean3",
+		"name": "Boolean3"
+	},
+	{
+		"slug": "Chaos1Op",
+		"name": "Chaos1Op"
+	},
+	{
+		"slug": "Chaos2Op",
+		"name": "Chaos2Op"
+	},
+	{
+		"slug": "Chaos3Op",
+		"name": "Chaos3Op"
+	},
+	{
+		"slug": "ChaoticAttractors",
+		"name": "ChaoticAttractors"
+	},
+	{
+		"slug": "ClockedNoise",
+		"name": "ClockedNoise"
+	},
+	{
+		"slug": "Comparator",
+		"name": "Comparator"
+	},
+	{
+		"slug": "Contrast",
+		"name": "Contrast"
+	},
+	{
+		"slug": "Crackle",
+		"name": "Crackle"
+	},
+	{
+		"slug": "DataCompander",
+		"name": "DataCompander"
+	},
+	{
+		"slug": "Delta",
+		"name": "Delta"
+	},
+	{
+		"slug": "DigitalToAnalog",
+		"name": "DigitalToAnalog"
+	},
+	{
+		"slug": "Dust",
+		"name": "Dust"
+	},
+	{
+		"slug": "Exponent",
+		"name": "Exponent"
+	},
+	{
+		"slug": "FBSineChaos",
+		"name": "FBSineChaos"
+	},
+	{
+		"slug": "FlipFlop",
+		"name": "FlipFlop"
+	},
+	{
+		"slug": "FlipPan",
+		"name": "FlipPan"
+	},
+	{
+		"slug": "GateDelay",
+		"name": "GateDelay"
+	},
+	{
+		"slug": "GateJunction",
+		"name": "GateJunction"
+	},
+	{
+		"slug": "GateJunctionExp",
+		"name": "GateJunctionExp"
+	},
+	{
+		"slug": "Gingerbread",
+		"name": "Gingerbread"
+	},
+	{
+		"slug": "LogicCombine",
+		"name": "LogicCombine"
+	},
+	{
+		"slug": "MidSide",
+		"name": "MidSide"
+	},
+	{
+		"slug": "MinMax",
+		"name": "MinMax"
+	},
+	{
+		"slug": "PhaseDrivenSequencer",
+		"name": "PhaseDrivenSequencer"
+	},
+	{
+		"slug": "PhaseDrivenSequencer32",
+		"name": "PhaseDrivenSequencer32"
+	},
+	{
+		"slug": "PhasorAnalyzer",
+		"name": "PhasorAnalyzer"
+	},
+	{
+		"slug": "PhasorBurstGen",
+		"name": "PhasorBurstGen"
+	},
+	{
+		"slug": "PhasorDivMult",
+		"name": "PhasorDivMult"
+	},
+	{
+		"slug": "PhasorEuclidean",
+		"name": "PhasorEuclidean"
+	},
+	{
+		"slug": "PhasorGates",
+		"name": "PhasorGates"
+	},
+	{
+		"slug": "PhasorGates32",
+		"name": "PhasorGates32"
+	},
+	{
+		"slug": "PhasorGates64",
+		"name": "PhasorGates64"
+	},
+	{
+		"slug": "PhasorGen",
+		"name": "PhasorGen"
+	},
+	{
+		"slug": "PhasorGeometry",
+		"name": "PhasorGeometry"
+	},
+	{
+		"slug": "PhasorHumanizer",
+		"name": "PhasorHumanizer"
+	},
+	{
+		"slug": "PhasorMixer",
+		"name": "PhasorMixer"
+	},
+	{
+		"slug": "PhasorOctature",
+		"name": "PhasorOctature"
+	},
+	{
+		"slug": "PhasorQuadrature",
+		"name": "PhasorQuadrature"
+	},
+	{
+		"slug": "PhasorRandom",
+		"name": "PhasorRandom"
+	},
+	{
+		"slug": "PhasorRanger",
+		"name": "PhasorRanger"
+	},
+	{
+		"slug": "PhasorReset",
+		"name": "PhasorReset"
+	},
+	{
+		"slug": "PhasorRhythmGroup",
+		"name": "PhasorRhythmGroup"
+	},
+	{
+		"slug": "PhasorShape",
+		"name": "PhasorShape"
+	},
+	{
+		"slug": "PhasorShift",
+		"name": "PhasorShift"
+	},
+	{
+		"slug": "PhasorStutter",
+		"name": "PhasorStutter"
+	},
+	{
+		"slug": "PhasorSubstepShape",
+		"name": "PhasorSubstepShape"
+	},
+	{
+		"slug": "PhasorSwing",
+		"name": "PhasorSwing"
+	},
+	{
+		"slug": "PhasorTimetable",
+		"name": "PhasorTimetable"
+	},
+	{
+		"slug": "PhasorToClock",
+		"name": "PhasorToClock"
+	},
+	{
+		"slug": "PhasorToLFO",
+		"name": "PhasorToLFO"
+	},
+	{
+		"slug": "PhasorToWaveforms",
+		"name": "PhasorToWaveforms"
+	},
+	{
+		"slug": "Probability",
+		"name": "Probability"
+	},
+	{
+		"slug": "RandomGates",
+		"name": "RandomGates"
+	},
+	{
+		"slug": "Rotator",
+		"name": "Rotator"
+	},
+	{
+		"slug": "Rungler",
+		"name": "Rungler"
+	},
+	{
+		"slug": "Scanner",
+		"name": "Scanner"
+	},
+	{
+		"slug": "VectorMix",
+		"name": "VectorMix"
+	},
+	{
+		"slug": "Waveshaper",
+		"name": "Waveshaper"
+	},
+	{
+		"slug": "XYToPolar",
+		"name": "XYToPolar"
+	}
+	]
+}

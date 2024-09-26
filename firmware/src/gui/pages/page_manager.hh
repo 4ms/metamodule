@@ -137,6 +137,9 @@ public:
 		if (active_knobset >= patch->knob_sets.size())
 			return;
 
+		if (page_module.is_creating_map())
+			return;
+
 		// Iterate all panel knobs
 		for (auto panel_knob_i = 0u; panel_knob_i < info.params.knobs.size(); panel_knob_i++) {
 
@@ -157,8 +160,13 @@ public:
 		for (auto &map : patch->midi_maps.set) {
 			auto knobpos = info.params.panel_knob_new_value(map.panel_knob_id);
 			if (knobpos.has_value()) {
-				auto scaled_val = map.get_mapped_val(knobpos.value());
-				patch->set_or_add_static_knob_value(map.module_id, map.param_id, scaled_val);
+				// Update all MIDI maps to this CC
+				for (auto &other_map : patch->midi_maps.set) {
+					if (other_map.panel_knob_id == map.panel_knob_id) {
+						auto scaled_val = other_map.get_mapped_val(knobpos.value());
+						patch->set_or_add_static_knob_value(other_map.module_id, other_map.param_id, scaled_val);
+					}
+				}
 			}
 		}
 	}

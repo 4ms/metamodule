@@ -14,7 +14,7 @@ struct Tides2Info : ModuleInfoBase {
 
     using enum Coords;
 
-    static constexpr std::array<Element, 31> Elements{{
+    static constexpr std::array<Element, 32> Elements{{
 		SmallButton{{to_mm<72>(21.35), to_mm<72>(45.94), Center, "Freq Range", ""}},
 		SmallButton{{to_mm<72>(100.58), to_mm<72>(109.86), Center, "Ramp Mode", ""}},
 		SmallButton{{to_mm<72>(179.81), to_mm<72>(45.94), Center, "Output Mode", ""}},
@@ -22,6 +22,7 @@ struct Tides2Info : ModuleInfoBase {
 		WhiteLargeKnob{{to_mm<72>(154.58), to_mm<72>(94.97), Center, "Shape", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(100.58), to_mm<72>(157.62), Center, "Smoothness", ""}, 0.5f},
 		WhiteMediumKnob{{to_mm<72>(33.12), to_mm<72>(171.94), Center, "Slope", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(168.04), to_mm<72>(171.94), Center, "Shift Level", ""}, 0.5f},
 		Trimpot{{to_mm<72>(26.6), to_mm<72>(228.63), Center, "Slope Atten", ""}, 0.5f},
 		Trimpot{{to_mm<72>(63.59), to_mm<72>(228.63), Center, "Frequency Atten", ""}, 0.5f},
 		Trimpot{{to_mm<72>(100.58), to_mm<72>(228.63), Center, "Smoothness Atten", ""}, 0.5f},
@@ -56,6 +57,7 @@ struct Tides2Info : ModuleInfoBase {
         ShapeKnob,
         SmoothnessKnob,
         SlopeKnob,
+        ShiftLevelKnob,
         SlopeAttenKnob,
         FrequencyAttenKnob,
         SmoothnessAttenKnob,
@@ -89,6 +91,7 @@ struct Tides2Info : ModuleInfoBase {
         KnobShape, 
         KnobSmoothness, 
         KnobSlope, 
+        KnobShift_Level, 
         KnobSlope_Atten, 
         KnobFrequency_Atten, 
         KnobSmoothness_Atten, 

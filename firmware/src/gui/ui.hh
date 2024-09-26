@@ -1,6 +1,7 @@
 #pragma once
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
+#include "dynload/autoload_plugins.hh"
 #include "dynload/plugin_manager.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
@@ -67,15 +68,16 @@ public:
 		patch_playloader.request_new_audio_settings(settings.audio.sample_rate, settings.audio.block_size);
 	}
 
-	void update() {
-
+	void update_screen() {
 		auto now = HAL_GetTick();
 		if ((now - last_lv_update_tm) > 2) {
 			last_lv_update_tm = now;
 			lv_timer_handler();
 		}
+	}
 
-		now = HAL_GetTick();
+	void update_page() {
+		auto now = HAL_GetTick();
 		if ((now - last_page_update_tm) > 16) {
 			last_page_update_tm = now;
 			page_update_task();
@@ -91,7 +93,32 @@ public:
 	}
 
 	void autoload_plugins() {
-		plugin_manager.autoload_plugins(settings.plugin_autoload);
+		lv_show(ui_MainMenuNowPlayingPanel);
+		lv_show(ui_MainMenuNowPlaying);
+
+		auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
+
+		while (true) {
+			auto status = autoloader.process();
+
+			if (status.state == AutoLoader::State::Error) {
+				notify_queue.put({status.message, Notification::Priority::Error, 2000});
+				break;
+
+			} else if (status.state == AutoLoader::State::Done) {
+				break;
+
+			} else {
+				if (status.message.length()) {
+					lv_label_set_text(ui_MainMenuNowPlaying, status.message.c_str());
+				}
+			}
+
+			update_screen();
+		}
+
+		lv_label_set_text(ui_MainMenuNowPlaying, "");
+		page_manager.init();
 	}
 
 	TextDisplayWatcher &displays() {

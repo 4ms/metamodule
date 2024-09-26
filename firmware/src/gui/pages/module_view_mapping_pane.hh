@@ -7,7 +7,9 @@
 #include "gui/pages/base.hh"
 #include "gui/pages/choice_popup.hh"
 #include "gui/pages/confirm_popup.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/manual_control_popup.hh"
+#include "gui/pages/midi_map_input.hh"
 #include "gui/pages/module_view_mapping_pane_list.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -28,6 +30,8 @@ struct MapCableUserData {
 };
 
 //TODO: Separate this into CableMappingPane, ParamMappingPane
+
+//TODO: remove ui_CableFinishButton button and associated logic
 struct ModuleViewMappingPane {
 	ModuleViewMappingPane(OpenPatchManager &patches,
 						  PatchModQueue &patch_mod_queue,
@@ -45,16 +49,19 @@ struct ModuleViewMappingPane {
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
 		, control_popup{patches, patch_mod_queue}
+		, midi_map_popup{params}
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
 
+		lv_obj_add_event_cb(ui_ResetButton, reset_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, control_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ControlButton, scroll_to_top, LV_EVENT_FOCUSED, this);
-		lv_obj_add_event_cb(ui_CableCancelButton, cancel_creating_cable_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_CableFinishButton, finish_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableAddButton, add_cable_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CableRemoveButton, disconnect_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CablePanelAddButton, add_panel_cable_button_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_CableMidiAddButton, add_midi_cable_button_cb, LV_EVENT_CLICKED, this);
+
+		lv_hide(ui_ResetButton);
 	}
 
 	void prepare_focus(lv_group_t *group, uint32_t width, bool patch_playing) {
@@ -66,6 +73,7 @@ struct ModuleViewMappingPane {
 
 		add_cable_popup.init(ui_MappingMenu, pane_group);
 		panel_cable_popup.init(ui_MappingMenu, pane_group);
+		midi_map_popup.init(ui_MappingMenu, pane_group);
 	}
 
 	void show(const DrawnElement &drawn_el) {
@@ -109,19 +117,22 @@ struct ModuleViewMappingPane {
 
 		lv_show(ui_MappingParameters);
 
-		lv_group_focus_next(pane_group);
 		lv_indev_set_group(lv_indev_get_next(nullptr), pane_group);
 
 		add_map_popup.prepare_focus(pane_group, ui_MappingParameters);
 		control_popup.prepare_focus(pane_group);
 
+		lv_group_set_wrap(pane_group, false);
+
 		should_close = false;
+
+		is_visible = true;
 
 		lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_OFF);
 	}
 
 	void refresh() {
-		if (drawn_element) {
+		if (is_visible && drawn_element) {
 			remove_all_items();
 			show(*drawn_element);
 		}
@@ -138,10 +149,15 @@ struct ModuleViewMappingPane {
 		}
 
 		remove_all_items();
+		is_visible = false;
 	}
 
 	void update() {
 		add_map_popup.update(params);
+
+		if (midi_map_popup.is_visible())
+			midi_map_popup.update();
+
 		if (is_patch_playing) {
 
 			if (last_active_knobset != page_list.get_active_knobset()) {
@@ -168,6 +184,10 @@ struct ModuleViewMappingPane {
 		}
 	}
 
+	bool is_creating_map() const {
+		return add_map_popup.visible;
+	}
+
 	bool wants_to_close() {
 		return should_close;
 	}
@@ -184,6 +204,12 @@ struct ModuleViewMappingPane {
 
 		else if (panel_cable_popup.is_visible())
 			panel_cable_popup.hide();
+
+		else if (midi_map_popup.is_visible()) {
+			midi_map_popup.back();
+			if (midi_map_popup.should_close())
+				midi_map_popup.hide();
+		}
 
 		else
 			should_close = true;
@@ -203,11 +229,11 @@ private:
 
 	void prepare_for_element(const BaseElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_ControlButton);
-		lv_hide(ui_CableCancelButton);
+		lv_hide(ui_ResetButton);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
+		lv_hide(ui_CableMidiAddButton);
 		lv_hide(ui_MappedPanel);
 	}
 
@@ -237,6 +263,7 @@ private:
 		bool has_connections = false;
 
 		lv_show(ui_CablePanelAddButton);
+		lv_show(ui_CableMidiAddButton, this_jack_type == ElementType::Input);
 
 		if (auto *cable = find_internal_cable(this_jack_type, this_jack)) {
 			has_connections = true;
@@ -287,6 +314,7 @@ private:
 	void list_panel_in_cable(Jack injack) {
 		if (auto panel_jack = patch->find_mapped_injack(injack)) {
 			lv_hide(ui_CablePanelAddButton);
+			lv_hide(ui_CableMidiAddButton);
 
 			auto obj = list.create_panel_incable_item(panel_jack->panel_jack_id, ui_MapList);
 			make_nonselectable_item(obj);
@@ -302,6 +330,7 @@ private:
 
 	void list_panel_out_cable(uint16_t panel_jack_id) {
 		lv_hide(ui_CablePanelAddButton);
+		lv_hide(ui_CableMidiAddButton);
 
 		auto obj = list.create_panel_outcable_item(panel_jack_id, ui_MapList);
 		make_nonselectable_item(obj);
@@ -309,6 +338,7 @@ private:
 
 	void prepare_jack_gui() {
 		lv_hide(ui_ControlButton);
+		lv_hide(ui_ResetButton);
 		lv_hide(ui_ControlAlert);
 		lv_hide(ui_AddMapPopUp);
 
@@ -327,40 +357,9 @@ private:
 		lv_show(ui_CableAddButton);
 		lv_group_add_obj(pane_group, ui_CableAddButton);
 		lv_group_add_obj(pane_group, ui_CablePanelAddButton);
+		lv_group_add_obj(pane_group, ui_CableMidiAddButton);
 		lv_group_add_obj(pane_group, ui_CableRemoveButton);
-		lv_group_focus_next(pane_group);
-
-		handle_cable_creating();
-	}
-
-	void handle_cable_creating() {
-		if (!gui_state.new_cable) {
-			lv_hide(ui_CableCreationPanel);
-			return;
-		}
-
-		// Hide "New cable/connection" and "Edit Cable" if already have a cable open
-		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CablePanelAddButton);
-		lv_show(ui_CableCreationPanel);
-		lv_show(ui_CableCreationLabel);
-
-		auto begin_type = gui_state.new_cable->type;
-		auto begin_connected = gui_state.new_cable->has_connections;
-		auto begin_node_has_output = begin_connected || begin_type == ElementType::Output;
-		auto this_node_has_output = this_jack_has_connections || this_jack_type == ElementType::Output;
-		bool can_finish_cable = this_node_has_output ^ begin_node_has_output;
-		lv_show(ui_CableFinishButton, can_finish_cable);
-
-		lv_group_add_obj(pane_group, ui_CableFinishButton);
-		lv_group_add_obj(pane_group, ui_CableCancelButton);
-
-		auto begin_jack = gui_state.new_cable->jack;
-		auto jackname = get_full_element_name(begin_jack.module_id, begin_jack.jack_id, begin_type, *patch);
-		lv_label_set_text_fmt(ui_CableCreationLabel,
-							  "In progress: adding a cable from %s %s",
-							  jackname.module_name.data(),
-							  jackname.element_name.data());
+		lv_group_focus_obj(ui_CableAddButton);
 	}
 
 	void make_selectable_outjack_item(lv_obj_t *obj, Jack dest) {
@@ -376,7 +375,7 @@ private:
 	void make_selectable_jack_item(lv_obj_t *obj, uint16_t module_id, ElementCount::Indices idx) {
 		map_list_items.push_back(obj);
 		lv_group_add_obj(pane_group, obj);
-		lv_group_focus_obj(obj);
+		// lv_group_focus_obj(obj);
 		lv_obj_add_event_cb(obj, follow_cable_button_cb, LV_EVENT_CLICKED, this);
 		if (displayed_cable_endpts < mapped_cable_user_data.size()) {
 			mapped_cable_user_data[displayed_cable_endpts] = {module_id, idx};
@@ -388,31 +387,36 @@ private:
 		}
 	}
 
+	void start_new_cable() {
+		auto name = get_full_element_name(this_jack.module_id, this_jack.jack_id, this_jack_type, *patch);
+
+		gui_state.new_cable = {.jack = this_jack, .type = this_jack_type, .has_connections = this_jack_has_connections};
+
+		notify_queue.put(
+			{"Choose a jack to connect to " + std::string(name.module_name) + " " + std::string(name.element_name),
+			 Notification::Priority::Status,
+			 0});
+
+		page_list.request_new_page(PageId::PatchView, args);
+	}
+
 	static void add_cable_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		page->add_cable_popup.show(
-			[page](unsigned choice) {
-				if (choice == 0) //Cancel
-					return;
-				auto name = get_full_element_name(
-					page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, *page->patch);
-
-				page->gui_state.new_cable = {.jack = page->this_jack,
-											 .type = page->this_jack_type,
-											 .has_connections = page->this_jack_has_connections};
-
-				page->notify_queue.put({"Choose a jack to connect to " + std::string(name.module_name) + " " +
-											std::string(name.element_name),
-										Notification::Priority::Status,
-										10000});
-
-				page->page_list.request_new_page(PageId::PatchView, page->args);
-			},
-			"Navigate to the module and jack you want to patch to.",
-			"Start");
+		if (page->gui_state.already_displayed_cable_instructions) {
+			page->start_new_cable();
+		} else {
+			page->add_cable_popup.show(
+				[page](unsigned choice) {
+					if (choice == 0) //Cancel
+						return;
+					page->start_new_cable();
+				},
+				"Navigate to the module and jack you want to patch to.",
+				"Start");
+		}
 	}
 
 	static void add_panel_cable_button_cb(lv_event_t *event) {
@@ -469,6 +473,7 @@ private:
 			page->patch_mod_queue.put(jackmapping);
 			page->notify_queue.put({"Connected to panel"});
 			page->gui_state.new_cable = std::nullopt;
+			page->should_close = true;
 		};
 
 		page->panel_cable_popup.show(action,
@@ -478,57 +483,32 @@ private:
 									 first_unpatched_jack.value_or(0));
 	}
 
-	static void finish_cable_button_cb(lv_event_t *event) {
+	static void add_midi_cable_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
 
-		if (!page->gui_state.new_cable) {
-			page->notify_queue.put({"Something went wrong... can't finish a cable here because no cable was started",
-									Notification::Priority::Error});
-			return;
-		}
-		auto begin_jack = page->gui_state.new_cable->jack;
-		auto begin_jack_type = page->gui_state.new_cable->type;
+		auto name = get_full_element_name(
+			page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, *page->patch);
+		std::string title = "Map MIDI to: " + std::string(name.element_name);
+		page->midi_map_popup.set_header_text(title);
 
-		bool make_panel_mapping = false;
+		page->midi_map_popup.show([page](std::optional<unsigned> choice) {
+			if (choice.has_value()) {
+				page->notify_queue.put({"Connected to MIDI signal"});
 
-		// Handle case of starting with a PanelIn->In and finishing on an input
-		if (begin_jack_type == ElementType::Input && page->this_jack_type == ElementType::Input) {
-			AddJackMapping jackmapping{};
-			if (auto panel_jack = page->patch->find_mapped_injack(begin_jack)) {
-				jackmapping.jack = page->this_jack;
-				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
-				make_panel_mapping = true;
+				AddJackMapping mapping{};
+				mapping.panel_jack_id = choice.value();
+				mapping.jack = page->this_jack;
+				mapping.type = page->this_jack_type;
 
-			} else if (auto panel_jack = page->patch->find_mapped_injack(page->this_jack)) {
-				jackmapping.jack = begin_jack;
-				jackmapping.panel_jack_id = panel_jack->panel_jack_id;
-				make_panel_mapping = true;
-			}
-
-			if (make_panel_mapping) {
-				jackmapping.type = ElementType::Input;
-				page->patch_mod_queue.put(jackmapping);
-				page->notify_queue.put({"Added cable from panel input"});
+				page->patch_mod_queue.put(mapping);
 				page->gui_state.new_cable = std::nullopt;
-			}
-		}
+				page->should_close = true;
 
-		if (!make_panel_mapping) {
-			AddInternalCable newcable{};
-			if (begin_jack_type == ElementType::Input) {
-				newcable.in = begin_jack;
-				newcable.out = page->this_jack;
-			} else {
-				newcable.in = page->this_jack;
-				newcable.out = begin_jack;
-			}
-
-			page->patch_mod_queue.put(newcable);
-			page->notify_queue.put({"Added cable"});
-			page->gui_state.new_cable = std::nullopt;
-		}
+			} else
+				pr_dbg("Cancel making MIDI signal\n");
+		});
 	}
 
 	static void disconnect_button_cb(lv_event_t *event) {
@@ -560,34 +540,29 @@ private:
 		}
 	}
 
-	static void cancel_creating_cable_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
-			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
-
-		page->gui_state.new_cable = std::nullopt;
-		page->notify_queue.put({"Cancelled making a cable", Notification::Priority::Info, 1000});
-		page->should_close = true;
-	}
-
 	//
 	// Params
 	//
+
 	void prepare_for_element(const ParamElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
+		lv_hide(ui_CableMidiAddButton);
 
 		lv_show(ui_MappedPanel);
 		lv_show(ui_MappedItemHeader);
+
+		// Do not use Reset Button for individual params until we implement calling
+		// paramQuantity->reset() and/or paramWidget->onReset()
+		lv_hide(ui_ResetButton);
+
 		lv_show(ui_ControlButton, is_patch_playing);
 		lv_label_set_text(ui_ControlButtonLabel, "Adjust");
 		lv_label_set_text(ui_MappedListTitle, "Mappings:");
 
 		if (is_patch_playing) {
 			lv_group_add_obj(pane_group, ui_ControlButton);
-			lv_group_focus_obj(ui_ControlButton);
 		}
 
 		// Show MIDI set first (always show, even if set is empty)
@@ -606,6 +581,11 @@ private:
 
 		if (patch->knob_sets.size() < 8) {
 			show_unmapped_knobset(patch->knob_sets.size(), "(new knobset)");
+		}
+
+		if (is_patch_playing) {
+			lv_group_add_obj(pane_group, ui_ResetButton);
+			lv_group_focus_obj(ui_ControlButton);
 		}
 	}
 
@@ -661,9 +641,10 @@ private:
 	//
 	void prepare_for_element(const AltParamElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
+		lv_hide(ui_CableMidiAddButton);
+		lv_hide(ui_ResetButton);
 
 		lv_hide(ui_MappedPanel);
 		lv_hide(ui_MappedItemHeader);
@@ -682,9 +663,9 @@ private:
 	//
 	void prepare_for_element(const LightElement &) {
 		lv_hide(ui_CableAddButton);
-		lv_hide(ui_CableCreationPanel);
 		lv_hide(ui_CableRemoveButton);
 		lv_hide(ui_CablePanelAddButton);
+		lv_hide(ui_CableMidiAddButton);
 
 		lv_hide(ui_MappedPanel);
 		lv_hide(ui_MappedItemHeader);
@@ -736,7 +717,7 @@ private:
 
 		auto module_id = page->drawn_element->gui_element.module_idx;
 		auto param_id = page->drawn_element->gui_element.idx.param_idx;
-		page->add_map_popup.show(knobset_id, param_id, module_id);
+		page->add_map_popup.show(knobset_id, param_id, module_id, page->patch);
 	}
 
 	static void scroll_to_top(lv_event_t *event) {
@@ -754,6 +735,23 @@ private:
 		if (event->target == ui_ControlButton) {
 			lv_obj_clear_state(ui_ControlButton, LV_STATE_PRESSED);
 			page->control_popup.show(page->drawn_element);
+		}
+	}
+
+	static void reset_button_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+
+		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+
+		if (auto def_val = get_normalized_default_value(page->drawn_element->element); def_val.has_value()) {
+			StaticParam sp{
+				.module_id = page->drawn_element->gui_element.module_idx,
+				.param_id = page->drawn_element->gui_element.idx.param_idx,
+				.value = def_val.value(),
+			};
+			page->patch->set_or_add_static_knob_value(sp.module_id, sp.param_id, sp.value);
+			page->patch_mod_queue.put(SetStaticParam{.param = sp});
 		}
 	}
 
@@ -787,8 +785,12 @@ private:
 
 	ConfirmPopup add_cable_popup;
 	ChoicePopup panel_cable_popup;
+	MidiMapPopup midi_map_popup;
 	PatchModQueue &patch_mod_queue;
+
 	OpenPatchManager &patches;
+
+	bool is_visible = false;
 };
 
 } // namespace MetaModule

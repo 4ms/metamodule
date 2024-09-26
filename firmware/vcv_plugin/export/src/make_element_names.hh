@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_strings.hh"
+#include "util/contains_word.hh"
 #include "util/overloaded.hh"
 #include <engine/Module.hpp>
 
@@ -11,6 +12,15 @@ inline std::string_view getParamName(rack::engine::Module *module, int id) {
 		if (pq->name.size()) {
 			remove_extended_chars(pq->name);
 			return pq->name;
+		} else {
+			pq->name = "Param " + std::to_string(id + 1);
+			return pq->name;
+		}
+	} else {
+		if ((size_t)id < module->paramQuantities.size()) {
+			module->paramQuantities[id] = new rack::engine::ParamQuantity;
+			module->paramQuantities[id]->name = "Param " + std::to_string(id + 1);
+			return module->paramQuantities[id]->name;
 		}
 	}
 	return "(Param)";
@@ -20,9 +30,21 @@ inline std::string_view getInputName(rack::engine::Module *module, int id) {
 	if (auto info = module->getInputInfo(id)) {
 		if (info->name.size()) {
 			remove_extended_chars(info->name);
+			if (!contains_word(info->name, "in") && !contains_word(info->name, "input"))
+				info->name += " In";
+			return info->name;
+		} else {
+			info->name = "In " + std::to_string(id + 1);
 			return info->name;
 		}
+	} else {
+		if ((size_t)id < module->inputInfos.size()) {
+			module->inputInfos[id] = new rack::engine::PortInfo;
+			module->inputInfos[id]->name = "In " + std::to_string(id + 1);
+			return module->inputInfos[id]->name;
+		}
 	}
+
 	return "(In)";
 }
 
@@ -30,7 +52,18 @@ inline std::string_view getOutputName(rack::engine::Module *module, int id) {
 	if (auto info = module->getOutputInfo(id)) {
 		if (info->name.size()) {
 			remove_extended_chars(info->name);
+			if (!contains_word(info->name, "out") && !contains_word(info->name, "output"))
+				info->name += " Out";
 			return info->name;
+		} else {
+			info->name = "Out " + std::to_string(id + 1);
+			return info->name;
+		}
+	} else {
+		if ((size_t)id < module->outputInfos.size()) {
+			module->outputInfos[id] = new rack::engine::PortInfo;
+			module->outputInfos[id]->name = "Out " + std::to_string(id + 1);
+			return module->outputInfos[id]->name;
 		}
 	}
 	return "(Out)";

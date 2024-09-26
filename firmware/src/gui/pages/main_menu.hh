@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
+#include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 
@@ -32,14 +33,20 @@ struct MainMenuPage : PageBase {
 		lv_label_set_text(ui_MainMenuNowPlayingName, "");
 
 		lv_hide(ui_MainMenuLastViewedPanel);
+
+		lv_label_set_text(ui_MenuLabelPatches, "Load\nPatch");
 	}
 
 	void prepare_focus() final {
+		abort_cable(gui_state, notify_queue);
+
 		auto patch = patches.get_playing_patch();
 		if (!patch || patch->patch_name.length() == 0) {
 			lv_hide(ui_MainMenuNowPlayingPanel);
 		} else {
 			lv_show(ui_MainMenuNowPlayingPanel);
+			lv_show(ui_MainMenuNowPlaying);
+			lv_show(ui_MainMenuNowPlayingName);
 			lv_label_set_text(ui_MainMenuNowPlaying, "Playing:");
 			lv_label_set_text(ui_MainMenuNowPlayingName, patch->patch_name.c_str());
 		}
@@ -49,6 +56,7 @@ struct MainMenuPage : PageBase {
 			lv_hide(ui_MainMenuLastViewedPanel);
 		} else {
 			lv_show(ui_MainMenuLastViewedPanel);
+			lv_label_set_text(ui_MainMenuLastViewed, "Last Viewed:");
 			lv_label_set_text(ui_MainMenuLastViewedName, viewpatch->patch_name.c_str());
 		}
 
@@ -85,8 +93,10 @@ private:
 		auto page = static_cast<MainMenuPage *>(event->user_data);
 		if (!page)
 			return;
-		page->patches.view_playing_patch();
-		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patches.get_playing_patch_loc_hash()});
+		if (page->patches.get_playing_patch()) {
+			page->patches.view_playing_patch();
+			page->load_page(PageId::PatchView, {.patch_loc_hash = page->patches.get_playing_patch_loc_hash()});
+		}
 	}
 
 	static void patchsel_cb(lv_event_t *event) {
@@ -102,7 +112,9 @@ private:
 			return;
 		page->patches.new_patch();
 		page->patch_playloader.request_load_view_patch();
-		page->load_page(PageId::ModuleList, {.patch_loc_hash = page->patches.get_view_patch_loc_hash()});
+		page->page_list.set_active_knobset(0);
+		page->load_page(PageId::ModuleList,
+						{.patch_loc_hash = page->patches.get_view_patch_loc_hash(), .view_knobset_id = 0});
 	}
 
 	static void settings_cb(lv_event_t *event) {

@@ -1,0 +1,81 @@
+{
+	"MetaModuleBrandName": "NonlinearCircuits",
+	"MetaModulePluginMaintainer": "Michael Hetrick, 4ms Company",
+	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerUrl": "",
+	"MetaModuleDescription": "",
+	"MetaModuleIncludedModules": [
+	{
+		"slug": "4Seq",
+		"name": "4Seq"
+	},
+	{
+		"slug": "Cipher",
+		"name": "Cipher"
+	},
+	{
+		"slug": "BOOLs",
+		"name": "BOOLs"
+	},
+	{
+		"slug": "DivideConquer",
+		"name": "DivideConquer"
+	},
+	{
+		"slug": "DivineCMOS",
+		"name": "DivineCMOS"
+	},
+	{
+		"slug": "DoubleNeuron",
+		"name": "DoubleNeuron"
+	},
+	{
+		"slug": "Genie",
+		"name": "Genie"
+	},
+	{
+		"slug": "LetsSplosh",
+		"name": "LetsSplosh"
+	},
+	{
+		"slug": "Neuron",
+		"name": "Neuron"
+	},
+	{
+		"slug": "Numberwang",
+		"name": "Numberwang"
+	},
+	{
+		"slug": "Router",
+		"name": "Router"
+	},
+	{
+		"slug": "Segue",
+		"name": "Segue"
+	},
+	{
+		"slug": "SlothApathy",
+		"name": "SlothApathy"
+	},
+	{
+		"slug": "SlothInertia",
+		"name": "SlothInertia"
+	},
+	{
+		"slug": "SlothTorpor",
+		"name": "SlothTorpor"
+	},
+	{
+		"slug": "SquidAxon",
+		"name": "SquidAxon"
+	},
+	{
+		"slug": "Statues",
+		"name": "Statues"
+	},
+	{
+		"slug": "TripleSloth",
+		"name": "TripleSloth"
+	}
+	]
+}

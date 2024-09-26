@@ -28,6 +28,7 @@ struct GuiState {
 		bool has_connections;
 	};
 	std::optional<CableBeginning> new_cable{};
+	bool already_displayed_cable_instructions = false;
 
 	bool force_redraw_patch{};
 
@@ -122,7 +123,6 @@ struct PageBase {
 	}
 
 	void load_prev_page() {
-		page_list.update_state(id, args);
 		page_list.request_last_page();
 	}
 

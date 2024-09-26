@@ -12,6 +12,7 @@
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "patch_play/randomize_param.hh"
+#include "patch_play/reset_param.hh"
 
 namespace MetaModule
 {
@@ -21,25 +22,32 @@ struct ModuleViewActionMenu {
 	ModuleViewActionMenu(PatchModQueue &patch_mod_queue,
 						 OpenPatchManager &patches,
 						 PageList &page_list,
-						 PatchPlayLoader &patch_playloader)
+						 PatchPlayLoader &patch_playloader,
+						 NotificationQueue &notify_queue)
 		: patches{patches}
 		, page_list{page_list}
 		, patch_playloader{patch_playloader}
-		, auto_map{patch_mod_queue, patches}
+		, auto_map{patch_mod_queue, patches, notify_queue}
 		, randomizer{patch_mod_queue}
+		, reset_params_{patch_mod_queue}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
-		lv_obj_set_x(ui_ModuleViewActionMenu, 140);
+		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
 
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionAutopatchBut, autopatch_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionAutoKnobSet, autopatch_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionRandomBut, random_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionResetBut, reset_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
+		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
+		lv_group_add_obj(group, ui_ModuleViewActionResetBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
+		lv_group_set_wrap(group, false);
 	}
 
 	void prepare_focus(lv_group_t *parent_group, unsigned module_idx) {
@@ -109,14 +117,26 @@ private:
 		}
 	}
 
-	void show_auto_map() {
+	void auto_map_all() {
 		hide();
 		auto_map.prepare_focus(module_idx, group);
-		auto_map.show();
+		auto_map.map_all();
+		// auto_map.show();
+	}
+
+	void auto_map_single_knobset() {
+		hide();
+		auto_map.prepare_focus(module_idx, group);
+		auto_map.map_knobs_single_knobset();
 	}
 
 	void randomize() {
 		randomizer.randomize(module_idx, patches.get_view_patch());
+	}
+
+	void reset_params() {
+		reset_params_.reset(module_idx, patches.get_view_patch());
+		patch_playloader.reset_module(module_idx);
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -134,7 +154,10 @@ private:
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
 
-		page->show_auto_map();
+		if (event->target == ui_ModuleViewActionAutopatchBut)
+			page->auto_map_all();
+		else
+			page->auto_map_single_knobset();
 	}
 
 	static void random_but_cb(lv_event_t *event) {
@@ -142,6 +165,13 @@ private:
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
 		page->randomize();
+	}
+
+	static void reset_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		page->reset_params();
 	}
 
 	static void delete_but_cb(lv_event_t *event) {
@@ -170,6 +200,7 @@ private:
 
 	ModuleViewAutoMapDialog auto_map;
 	RandomizeParams randomizer;
+	ResetParams reset_params_;
 
 	unsigned module_idx = 0;
 	lv_group_t *group;

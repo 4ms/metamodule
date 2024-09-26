@@ -1,10 +1,10 @@
 #pragma once
-#include "CoreModules/modules_helpers.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "patch_play/modules_helpers.hh"
 #include "src/core/lv_obj_pos.h"
 #include "src/misc/lv_timer.h"
 
@@ -49,10 +49,10 @@ private:
 	void populate_brands() {
 		auto all_brands = ModuleFactory::getAllBrandDisplayNames();
 
-		std::string roller_str;
+		std::string roller_str = "";
 		roller_str.reserve(all_brands.size() * (sizeof(ModuleTypeSlug) + 1));
 		unsigned sel_idx = 0;
-		for (unsigned i = 0; auto item : all_brands) {
+		for (unsigned i = 0; auto const &item : all_brands) {
 			roller_str += item;
 			roller_str += "\n";
 			if (selected_brand == item)
@@ -222,7 +222,7 @@ private:
 			lv_obj_refr_size(ui_ModuleListImage);
 			drawer.draw_elements(slug, module_canvas);
 		} else
-			notify_queue.put(Notification{"Could not load faceplate image", Notification::Priority::Error});
+			notify_queue.put(Notification{"Could not load faceplate image", Notification::Priority::Error, 2000});
 	}
 
 	void clear_module_canvas() {

@@ -5,14 +5,34 @@
 namespace rack::engine
 {
 
-Module::Module() = default;
+Module::Module() {
+	onReset();
+}
 
 Module::~Module() {
+	for (auto paramQuantity : paramQuantities) {
+		if (paramQuantity)
+			delete paramQuantity;
+	}
+	for (auto inputInfo : inputInfos) {
+		if (inputInfo)
+			delete inputInfo;
+	}
+	for (auto outputInfo : outputInfos) {
+		if (outputInfo)
+			delete outputInfo;
+	}
+	for (auto lightInfo : lightInfos) {
+		if (lightInfo)
+			delete lightInfo;
+	}
 }
 
 void Module::load_state(std::string_view state_data) {
-	if (state_data.size() == 0)
+	if (state_data.size() == 0) {
+		onReset();
 		return;
+	}
 
 	json_error_t err;
 

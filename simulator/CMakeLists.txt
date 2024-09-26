@@ -6,7 +6,7 @@ project(mm_sim LANGUAGES C CXX)
 set(SIMULATOR 1)
 
 set(FWDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware)
-set(SHARED ${CMAKE_CURRENT_LIST_DIR}/../shared)
+set(LIBDIR ${CMAKE_CURRENT_LIST_DIR}/../firmware/lib)
 set(LVGL_DIR ${FWDIR}/lib/lvgl/lvgl)
 
 set(LV_CONF_PATH
@@ -17,7 +17,9 @@ add_compile_options(-O0 -g2)
 
 # #################### cpputil #########################################
 
-add_subdirectory(../shared/cpputil cpputil)
+add_subdirectory(${LIBDIR}/cpputil cpputil)
+target_compile_definitions(cpputil PUBLIC CPPUTIL_STATIC_STRING_USE_STD_STRING)
+
 
 # #################### LVGL Simulator Driver #################################
 
@@ -34,7 +36,8 @@ target_include_directories(lvgl PRIVATE
 
 # #################### RYML ##################################
 
-add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+# add_subdirectory(${LIBDIR}/patch-serial/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
+add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
 
 # #################### SLS Export ##################################
 
@@ -52,7 +55,8 @@ target_compile_options(vcv_ports INTERFACE -Wno-double-promotion)
 
 # #################### Application ############################################
 
-add_subdirectory(${SHARED}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
+add_subdirectory(${LIBDIR}/CoreModules ${CMAKE_CURRENT_BINARY_DIR}/CoreModules)
+add_subdirectory(${LIBDIR}/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 target_compile_options(CoreModules INTERFACE -Wno-double-promotion)
 
 
@@ -62,13 +66,11 @@ add_executable(
     src/main.cc 
     src/ui.cc
     stubs/random.cpp
+	stubs/memory/heap.cc
     ${FWDIR}/src/gui/elements/element_name.cc
     ${FWDIR}/src/gui/slsexport/ui_local.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
-    ${SHARED}/patch_convert/ryml/ryml_serial.cc
-    ${SHARED}/patch_convert/ryml/ryml_init.cc
-    ${SHARED}/patch_convert/yaml_to_patch.cc 
-    ${SHARED}/patch_convert/patch_to_yaml.cc
+    ${FWDIR}/src/patch_play/modules_helpers.cc
 
     #Fatfs:
     stubs/fattime.cc
@@ -77,8 +79,10 @@ add_executable(
     ${FWDIR}/src/fs/fatfs/diskio.cc
     ${FWDIR}/src/fs/fatfs/delete_node.cc
     ${FWDIR}/src/fs/time_convert.cc
+    ${FWDIR}/src/fs/general_io.cc
     #Tar:
     ${FWDIR}/src/fs/asset_drive/untar.cc
+
 
     ${FWDIR}/src/user_settings/settings_file.cc
     ${FWDIR}/src/user_settings/settings_parse.cc
@@ -97,7 +101,6 @@ target_include_directories(
           ${FWDIR}/src
           ${FWDIR}/src/console
           ${FWDIR}/src/params
-          ${SHARED}/patch
           ${FWDIR}/src/medium
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
@@ -121,9 +124,19 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl ryml SDL2 ui vcv_ports CoreModules)
+target_link_libraries(simulator PRIVATE 
+	${SDL2_LIBRARIES}
+	lvglsdl
+	metamodule::patch-serial
+	SDL2
+	ui
+	vcv_ports
+)
+target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_internal>")
 target_link_libraries(simulator PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,vcv_plugin_export>")
+
+target_compile_definitions(simulator PUBLIC SIMULATOR)
 
 set_property(TARGET simulator PROPERTY CXX_STANDARD 23)
 
@@ -147,7 +160,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Ap
   find_program(CMAKE_DEBUGGER_BINARY lldb)
   set(DEBUG_COMMAND ${CMAKE_DEBUGGER_BINARY} $<TARGET_FILE:simulator> -- 
     --sdcarddir ${CMAKE_CURRENT_LIST_DIR}/patches
-    --flashdir ${CMAKE_CURRENT_LIST_DIR}/../shared/patch/default
+    --flashdir ${CMAKE_CURRENT_LIST_DIR}/../patches/default
     --assets ${CMAKE_CURRENT_LIST_DIR}/../firmware/build/assets.uimg
   )
 

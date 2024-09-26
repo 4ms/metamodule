@@ -27,7 +27,7 @@ struct ModuleViewPage : PageBase {
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
-		, action_menu{module_mods, patches, page_list, patch_playloader} {
+		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue} {
 
 		init_bg(ui_MappingMenu);
 
@@ -43,9 +43,12 @@ struct ModuleViewPage : PageBase {
 		auto roller_label = lv_obj_get_child(ui_ElementRoller, 0);
 		lv_label_set_recolor(roller_label, true);
 
+		lv_hide(ui_ModuleViewCableCancelBut);
+
 		lv_group_remove_all_objs(group);
 		lv_group_add_obj(group, ui_ModuleViewActionBut);
 		lv_group_add_obj(group, ui_ModuleViewSettingsBut);
+		lv_group_add_obj(group, ui_ModuleViewCableCancelBut);
 		lv_group_add_obj(group, ui_ElementRoller);
 		lv_group_focus_obj(ui_ElementRoller);
 
@@ -54,6 +57,7 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ElementRoller, roller_scrolled_cb, LV_EVENT_KEY, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
 	}
 
 	void prepare_focus() override {
@@ -83,9 +87,32 @@ struct ModuleViewPage : PageBase {
 
 		lv_hide(ui_ModuleViewActionMenu);
 		lv_hide(ui_AutoMapSelectPanel);
+		lv_hide(ui_MIDIMapPanel);
 
-		settings_menu.prepare_focus(group);
-		action_menu.prepare_focus(group, this_module_id);
+		if (gui_state.new_cable) {
+			lv_hide(ui_ModuleViewActionBut);
+			lv_hide(ui_ModuleViewSettingsBut);
+			lv_show(ui_ModuleViewCableCancelBut);
+			lv_show(ui_ModuleViewCableCreateLabel);
+			lv_label_set_text(ui_ModuleViewCableCreateLabel, "Creating a cable");
+			lv_obj_set_height(ui_ElementRoller, 132);
+			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
+			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, 8, LV_PART_MAIN);
+			lv_obj_set_flex_align(
+				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+		} else {
+			lv_show(ui_ModuleViewActionBut);
+			lv_show(ui_ModuleViewSettingsBut);
+			lv_hide(ui_ModuleViewCableCancelBut);
+			lv_hide(ui_ModuleViewCableCreateLabel);
+			lv_obj_set_height(ui_ElementRoller, 186);
+			lv_obj_set_style_pad_bottom(ui_ElementRollerButtonCont, 2, LV_PART_MAIN);
+			lv_obj_set_style_pad_row(ui_ElementRollerButtonCont, -4, LV_PART_MAIN);
+			lv_obj_set_flex_align(
+				ui_ElementRollerButtonCont, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+			settings_menu.prepare_focus(group);
+			action_menu.prepare_focus(group, this_module_id);
+		}
 	}
 
 	void redraw_module() {
@@ -125,19 +152,11 @@ struct ModuleViewPage : PageBase {
 		ElementCount::Counts last_type{};
 
 		for (auto [drawn_el_idx, drawn_element] : enumerate(drawn_elements)) {
-			auto &drawn = drawn_element.gui_element;
+			auto &gui_el = drawn_element.gui_element;
 
-			std::visit(overloaded{
-						   [&](auto const &el) {
-							   for (unsigned i = 0; i < drawn.count.num_lights; i++) {
-								   params.lights.start_watching_light(this_module_id, drawn.idx.light_idx + i);
-							   }
-						   },
-						   [&](DynamicTextDisplay const &el) {
-							   params.displays.start_watching_display(this_module_id, drawn.idx.light_idx);
-						   },
-					   },
-					   drawn_element.element);
+			watch_lights(drawn_element);
+
+			add_button(gui_el.obj);
 
 			auto base = base_element(drawn_element.element);
 
@@ -146,44 +165,45 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
-			if (last_type.num_params == 0 && drawn.count.num_params > 0) {
-				opts += Gui::orange_highlight_html_str + "Params:" + LV_TXT_COLOR_CMD + "\n";
-				roller_idx++;
-				roller_drawn_el_idx.push_back(-1);
+			if (is_light_only(gui_el))
+				continue;
 
-			} else if (last_type.num_params > 0 && (drawn.count.num_inputs > 0 || drawn.count.num_outputs > 0)) {
-				opts += Gui::orange_highlight_html_str + "Jacks:" + LV_TXT_COLOR_CMD + "\n";
-				roller_idx++;
-				roller_drawn_el_idx.push_back(-1);
+			if (should_skip_for_cable_mode(gui_state.new_cable, gui_el))
+				continue;
 
-			} else if (last_type.num_lights == 0 && drawn.count.num_lights > 0 && drawn.count.num_params == 0) {
-				opts += Gui::orange_highlight_html_str + "Lights:" + LV_TXT_COLOR_CMD + "\n";
+			if (append_header(opts, last_type, gui_el.count)) {
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 			}
-			last_type = drawn.count;
+			last_type = gui_el.count;
 
 			opts.append(" ");
 			opts.append(base.short_name);
 
-			if (drawn.mapped_panel_id) {
-				append_panel_name(opts, drawn_element.element, drawn.mapped_panel_id.value());
+			if (gui_el.mapped_panel_id) {
+				append_panel_name(opts, drawn_element.element, gui_el.mapped_panel_id.value());
 			}
 
-			append_connected_jack_name(opts, drawn, *patch);
+			append_connected_jack_name(opts, gui_el, *patch);
 
 			opts += "\n";
-			add_button(drawn.obj);
 			roller_drawn_el_idx.push_back(drawn_el_idx);
 
+			// Pre-select an element
 			if (args.element_indices.has_value()) {
-				if (ElementCount::matched(*args.element_indices, drawn.idx)) {
+				if (ElementCount::matched(*args.element_indices, gui_el.idx)) {
 					cur_selected = roller_idx;
 					cur_el = &drawn_element;
 				}
 			}
 
 			roller_idx++;
+		}
+
+		if (roller_idx <= 1) {
+			if (gui_state.new_cable) {
+				opts.append("No available jacks to patch\n");
+			}
 		}
 
 		// remove final \n
@@ -225,6 +245,70 @@ struct ModuleViewPage : PageBase {
 		}
 	}
 
+	void watch_lights(DrawnElement const &drawn_element) {
+		auto gui_el = drawn_element.gui_element;
+		std::visit(overloaded{
+					   [&](auto const &el) {
+						   for (unsigned i = 0; i < gui_el.count.num_lights; i++) {
+							   params.lights.start_watching_light(this_module_id, gui_el.idx.light_idx + i);
+						   }
+					   },
+					   [&](DynamicTextDisplay const &el) {
+						   params.displays.start_watching_display(this_module_id, gui_el.idx.light_idx);
+					   },
+				   },
+				   drawn_element.element);
+	}
+
+	bool is_light_only(GuiElement const &gui_el) const {
+		return (gui_el.count.num_lights > 0) && (gui_el.count.num_params == 0) && (gui_el.count.num_outputs == 0) &&
+			   (gui_el.count.num_inputs == 0);
+	}
+
+	bool should_skip_for_cable_mode(std::optional<GuiState::CableBeginning> const &new_cable,
+									GuiElement const &gui_el) const {
+		if (gui_state.new_cable.has_value()) {
+			uint16_t this_jack_id{};
+			if (gui_el.count.num_inputs > 0)
+				this_jack_id = gui_el.idx.input_idx;
+			else if (gui_el.count.num_outputs > 0)
+				this_jack_id = gui_el.idx.output_idx;
+			else
+				return true;
+			auto this_jack_type = (gui_el.count.num_inputs > 0) ? ElementType::Input : ElementType::Output;
+			if (!can_finish_cable(gui_state.new_cable.value(),
+								  patch,
+								  Jack{.module_id = this_module_id, .jack_id = this_jack_id},
+								  this_jack_type,
+								  gui_el.mapped_panel_id.has_value()))
+				return true;
+		}
+		return false;
+	}
+
+	bool append_header(std::string &opts, ElementCount::Counts last_type, ElementCount::Counts this_type) {
+		if (last_type.num_params == 0 && this_type.num_params > 0) {
+			opts += Gui::orange_text("Params:") + "\n";
+			return true;
+
+		} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
+				   (this_type.num_inputs > 0 || this_type.num_outputs > 0))
+		{
+			opts += Gui::orange_text("Jacks:") + "\n";
+			return true;
+
+		} else if (last_type.num_lights == 0 && this_type.num_lights > 0 && this_type.num_params == 0) {
+			opts += Gui::orange_text("Lights:") + "\n";
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	bool is_creating_map() const {
+		return mapping_pane.is_creating_map();
+	}
+
 	void update() override {
 		if (gui_state.back_button.is_just_released()) {
 
@@ -235,6 +319,7 @@ struct ModuleViewPage : PageBase {
 				settings_menu.hide();
 
 			} else if (mode == ViewMode::List) {
+				args.module_id = this_module_id;
 				load_prev_page();
 
 			} else if (mode == ViewMode::Mapping) {
@@ -293,6 +378,13 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		if (handle_patch_mods()) {
+			redraw_module();
+			mapping_pane.refresh();
+		}
+	}
+
+	bool handle_patch_mods() {
 		bool refresh = false;
 
 		while (auto patch_mod = module_mods.get()) {
@@ -326,10 +418,7 @@ struct ModuleViewPage : PageBase {
 				patch_mod_queue.put(patch_mod.value());
 		}
 
-		if (refresh) {
-			redraw_module();
-			mapping_pane.refresh();
-		}
+		return refresh;
 	}
 
 	// This gets called after map_ring_style changes
@@ -460,10 +549,7 @@ private:
 		// Save current select in args so we can navigate back to this item
 		page->args.element_indices = page->drawn_elements[cur_idx].gui_element.idx;
 
-		// Turn off previously highlighted component
 		page->unhighlight_component(prev_sel);
-
-		// Turn on new highlighted component
 		page->highlight_component(cur_idx);
 	}
 
@@ -483,7 +569,11 @@ private:
 	}
 
 	void focus_button_bar() {
-		lv_group_focus_obj(ui_ModuleViewSettingsBut);
+		if (gui_state.new_cable)
+			lv_group_focus_obj(ui_ModuleViewCableCancelBut);
+		else
+			lv_group_focus_obj(ui_ModuleViewSettingsBut);
+
 		lv_group_set_editing(group, false);
 		cur_selected = 1;
 		lv_roller_set_selected(ui_ElementRoller, cur_selected, LV_ANIM_OFF);
@@ -494,17 +584,66 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
-			page->mode = ViewMode::Mapping;
-			page->args.detail_mode = true;
-			lv_hide(ui_ElementRollerPanel);
+			if (page->gui_state.new_cable) {
+				// Determine id and type of this element
+				std::optional<Jack> this_jack{};
+				ElementType this_jack_type{};
+				auto idx = page->drawn_elements[*drawn_idx].gui_element.idx;
 
-			page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+				std::visit(overloaded{[](auto const &) {},
+									  [&](const JackInput &) {
+										  this_jack_type = ElementType::Input;
+										  this_jack = Jack{.module_id = page->this_module_id, .jack_id = idx.input_idx};
+									  },
+									  [&](const JackOutput &) {
+										  this_jack_type = ElementType::Output;
+										  this_jack =
+											  Jack{.module_id = page->this_module_id, .jack_id = idx.output_idx};
+									  }},
+						   page->drawn_elements[*drawn_idx].element);
+
+				if (this_jack) {
+					make_cable(page->gui_state.new_cable.value(),
+							   page->patch,
+							   page->module_mods,
+							   page->notify_queue,
+							   *this_jack,
+							   this_jack_type);
+
+					page->handle_patch_mods();
+
+					page->gui_state.new_cable = std::nullopt;
+
+					// Do not show instructions again this session
+					page->gui_state.already_displayed_cable_instructions = true;
+
+					page->gui_state.force_redraw_patch = true;
+					PageArguments args = {.patch_loc = page->args.patch_loc,
+										  .patch_loc_hash = page->args.patch_loc_hash,
+										  .module_id = page->args.module_id,
+										  .detail_mode = false};
+					page->page_list.request_new_page(PageId::PatchView, args);
+				} else
+					pr_err("Error completing cable\n");
+
+			} else {
+				page->mode = ViewMode::Mapping;
+				page->args.detail_mode = true;
+				lv_hide(ui_ElementRollerPanel);
+
+				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+			}
 		}
 	}
 
 	static void roller_focus_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		if (page) {
+			if (page->roller_drawn_el_idx.size() <= 1) {
+				page->focus_button_bar();
+				return;
+			}
+
 			if (event->param != page) {
 				lv_group_set_editing(page->group, true);
 				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
@@ -514,6 +653,15 @@ private:
 				}
 			}
 		}
+	}
+
+	static void cancel_cable_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+
+		abort_cable(page->gui_state, page->notify_queue);
+		page->page_list.request_new_page(PageId::PatchView, page->args);
 	}
 
 	std::optional<unsigned> get_drawn_idx(unsigned roller_idx) {

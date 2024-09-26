@@ -1,6 +1,6 @@
 #pragma once
-#include "CoreModules/module_type_slug.hh"
 #include "fs/volumes.hh"
+#include "patch/module_type_slug.hh"
 #include "util/static_string.hh"
 #include <cstdint>
 #include <optional>

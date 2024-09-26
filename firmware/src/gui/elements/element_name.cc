@@ -1,5 +1,6 @@
 #include "element_name.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "conf/panel_conf.hh"
 #include "gui/elements/context.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/styles.hh"
@@ -42,26 +43,24 @@ get_full_element_name(unsigned module_id, unsigned element_idx, ElementType type
 	return fullname;
 }
 
-static const char *get_mapped_color(Element const &element, uint16_t panel_id) {
-	return std::visit(overloaded{[=](ParamElement const &el) { return Gui::knob_html[panel_id % 6]; },
-								 [=](JackElement const &el) { return Gui::jack_html[panel_id % 8]; },
-								 [](BaseElement const &) {
-									 return "";
-								 }},
+static std::string get_mapped_color(Element const &element, uint16_t panel_id) {
+	return std::visit(overloaded{
+						  [=](ParamElement const &el) { return std::string(Gui::knob_html[panel_id % 6]); },
+						  [=](JackElement const &el) { return Gui::color_to_html(Gui::mapped_jack_color(panel_id)); },
+						  [](BaseElement const &) { return std::string(""); },
+					  },
 					  element);
 }
 
 void append_panel_name(std::string &opts, Element const &el, uint16_t mapped_panel_id) {
-	auto name = std::visit([=](auto &e) { return get_panel_name<PanelDef>(e, mapped_panel_id); }, el);
-	if (name.size() > 0) {
-		auto color = get_mapped_color(el, mapped_panel_id);
-		opts += color;
-		opts += " ";
-		opts += name;
-		opts += "";
-		if (color[0] != '\0')
-			opts += LV_TXT_COLOR_CMD;
-	}
+	const auto name = std::visit([=](auto &e) { return get_panel_name<PanelDef>(e, mapped_panel_id); }, el);
+	if (name.size() < 0)
+		return;
+	const auto color = get_mapped_color(el, mapped_panel_id);
+	if (color[0] == '\0')
+		return;
+	opts += " ";
+	opts += Gui::color_text(name, color);
 }
 
 void append_connected_jack_name(std::string &opts, GuiElement const &drawn, PatchData const &patch) {
@@ -76,9 +75,9 @@ void append_connected_jack_name(std::string &opts, GuiElement const &drawn, Patc
 
 		if (auto *cable = patch.find_internal_cable_with_injack(in_jack)) {
 			if (auto out_map = patch.find_mapped_outjack(cable->out)) {
-				auto color = get_mapped_color(JackOutput{}, out_map->panel_jack_id);
-				opts = opts + std::string(color) + " " +
-					   get_panel_name<PanelDef>(JackOutput{}, out_map->panel_jack_id) + "# ";
+				const auto color = get_mapped_color(JackOutput{}, out_map->panel_jack_id);
+				const auto p_name = get_panel_name<PanelDef>(JackOutput{}, out_map->panel_jack_id);
+				opts += " " + Gui::color_text(p_name, color);
 			}
 
 			append(cable->out, ElementType::Output);

@@ -44,6 +44,14 @@ inline bool read(ryml::ConstNodeRef const &n, UpdateFile *updateFile) {
 				if (n.has_child("name")) {
 					n["name"] >> updateFile->name;
 				}
+
+				if (n.has_child("uncompressed_size"))
+				{
+					uint32_t val;
+					n["uncompressed_size"] >> val;
+					updateFile->uncompressed_size = val;
+				}
+
 				return true;
 			} else {
 				pr_err("Missing required fields\n");

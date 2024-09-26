@@ -1,5 +1,4 @@
 set(brands
-    4ms
 	Befaco
 	hetrickcv
 	AudibleInstruments
