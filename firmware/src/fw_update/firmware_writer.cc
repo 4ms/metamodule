@@ -128,7 +128,7 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer,
 			}
 
 			if (not error_during_writes) {
-				pr_dbg("-> Flashing completed\n");
+				pr_trace("-> Flashing completed\n");
 				returnValue = {.message_type = FlashingOk};
 			} else {
 				pr_trace("-> Flashing failed\n");

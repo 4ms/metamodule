@@ -44,7 +44,6 @@ struct IntercoreStorageMessage {
 
 		RequestReadFlash,
 		ReadFlashOk,
-		ReadFlashFailed,
 
 		RequestWriteFile,
 		WriteFileFail,
