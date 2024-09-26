@@ -62,21 +62,20 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 
 	if (result == ESP_LOADER_SUCCESS) {
 
-		if (result == ESP_LOADER_SUCCESS) {
-			result = Flasher::verify(address, length, checksum);
-			if (result == ESP_LOADER_ERROR_INVALID_MD5) {
-				returnValue = {.message_type = ChecksumMismatch};
-			} else if (result == ESP_LOADER_SUCCESS) {
-				pr_dbg("-> Checksum matches\n");
-				returnValue = {.message_type = ChecksumMatch};
-			} else {
-				pr_dbg("-> Cannot get checksum\n");
-				returnValue = {.message_type = ChecksumFailed};
-			}
+		result = Flasher::verify(address, length, checksum);
+
+		if (result == ESP_LOADER_ERROR_INVALID_MD5) {
+			returnValue = {.message_type = ChecksumMismatch};
+
+		} else if (result == ESP_LOADER_SUCCESS) {
+			pr_dbg("-> Checksum matches\n");
+			returnValue = {.message_type = ChecksumMatch};
+
 		} else {
-			pr_err("Cannot write dummy byte to wifi flash\n");
+			pr_err("-> Cannot get checksum\n");
 			returnValue = {.message_type = ChecksumFailed};
 		}
+
 	} else {
 		pr_err("Cannot connect to wifi bootloader\n");
 		returnValue = {.message_type = ChecksumFailed};
@@ -87,7 +86,10 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 	return returnValue;
 }
 
-IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uint32_t address, std::optional<uint32_t> uncompressed_size, uint32_t &bytesWritten) {
+IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer,
+												  uint32_t address,
+												  std::optional<uint32_t> uncompressed_size,
+												  uint32_t &bytesWritten) {
 	IntercoreStorageMessage returnValue;
 
 // Stop wifi reception before long running operation
@@ -119,8 +121,7 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer, uin
 				}
 			}
 
-			if (not error_during_writes)
-			{
+			if (not error_during_writes) {
 				result = Flasher::flash_finish(uncompressed_size.has_value());
 				error_during_writes = result != ESP_LOADER_SUCCESS;
 			}
@@ -171,6 +172,7 @@ FirmwareWriter::compareChecksumQSPI(uint32_t address, uint32_t length, Checksum_
 			offset += bytesToRead;
 			bytesChecked = offset;
 		} else {
+			pr_trace("Flash checksum could not be read\n");
 			return {.message_type = ChecksumFailed};
 		}
 	}

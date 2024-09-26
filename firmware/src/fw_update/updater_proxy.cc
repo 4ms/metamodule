@@ -161,7 +161,11 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 						current_file_name = thisFile.name;
 
 						auto result = file_storage.request_checksum_compare(
-							*target, *checksumValue, thisFile.address, thisFile.uncompressed_size.value_or(thisFile.filesize), &sharedMem->bytes_processed);
+							*target,
+							*checksumValue,
+							thisFile.address,
+							thisFile.uncompressed_size.value_or(thisFile.filesize),
+							&sharedMem->bytes_processed);
 
 						if (not result) {
 							abortWithMessage("Cannot trigger comparing checksums");
@@ -206,8 +210,11 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 				current_file_name = thisFile.name;
 
 				if (auto target = GetTargetForUpdateType(thisFile.type); target) {
-					auto result = file_storage.request_file_flash(
-						*target, thisLoadedFile, thisFile.address, thisFile.uncompressed_size, &sharedMem->bytes_processed);
+					auto result = file_storage.request_file_flash(*target,
+																  thisLoadedFile,
+																  thisFile.address,
+																  thisFile.uncompressed_size,
+																  &sharedMem->bytes_processed);
 
 					if (not result) {
 						abortWithMessage("Cannot trigger flashing");
