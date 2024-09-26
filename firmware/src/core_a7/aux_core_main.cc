@@ -45,7 +45,8 @@ extern "C" void aux_core_main() {
 
 	PluginManager plugin_manager{*file_storage_proxy, ramdisk};
 	Ui ui{*patch_playloader, *file_storage_proxy, *open_patch_manager, *sync_params, *patch_mod_queue, plugin_manager};
-	ui.update();
+	ui.update_screen();
+	ui.update_page();
 
 	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
 
@@ -97,18 +98,28 @@ extern "C" void aux_core_main() {
 		SMPThread::signal_done();
 	});
 
-	while (HWSemaphore<M4CoreReady>::is_locked())
+	// Wait for M4 to be ready (so USB and SD are available)
+	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
 		;
+	ui.autoload_plugins();
 
 	// Signal that we're ready
 	pr_info("A7 Core 2 initialized\n");
 	HWSemaphore<AuxCoreReady>::unlock();
 
-	ui.autoload_plugins();
+#ifdef CPU_TEST_ALL_MODULES
+	// Wait for main core to be done with testing all modules
+	HAL_Delay(50);
+	while (mdrivlib::HWSemaphore<MainCoreReady>::is_locked()) {
+		ui.update_screen();
+	};
+#endif
+
 	ui.load_initial_patch();
 
 	while (true) {
-		ui.update();
+		ui.update_screen();
+		ui.update_page();
 		__NOP();
 	}
 }

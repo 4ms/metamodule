@@ -68,15 +68,16 @@ public:
 		patch_playloader.request_new_audio_settings(settings.audio.sample_rate, settings.audio.block_size);
 	}
 
-	void update() {
-
+	void update_screen() {
 		auto now = HAL_GetTick();
 		if ((now - last_lv_update_tm) > 2) {
 			last_lv_update_tm = now;
 			lv_timer_handler();
 		}
+	}
 
-		now = HAL_GetTick();
+	void update_page() {
+		auto now = HAL_GetTick();
 		if ((now - last_page_update_tm) > 16) {
 			last_page_update_tm = now;
 			page_update_task();
@@ -113,11 +114,7 @@ public:
 				}
 			}
 
-			auto now = get_time();
-			if ((now - last_lv_update_tm) > 2) {
-				last_lv_update_tm = now;
-				lv_timer_handler();
-			}
+			update_screen();
 		}
 
 		lv_label_set_text(ui_MainMenuNowPlaying, "");

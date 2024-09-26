@@ -1,7 +1,9 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
-option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" ON)
+option(ENABLE_WIFI_BRIDGE       "Enable serial bridge to wifi module" ON)
+option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and auto-loaded plugins)" OFF)
+
 
 include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
 enable_logging()
@@ -62,15 +64,11 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
 add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 
+#
+# Patch format and serialization
+#
 add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
 
-
-#
-# RYML
-#
-# if (NOT TARGET ryml)
-#   add_subdirectory(${LIBDIR}/patch-serial/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
-# endif()
 
 #
 # Jansson
@@ -93,6 +91,9 @@ target_link_libraries(ui PRIVATE lvgl)
 if (NOT TARGET metamodule::core-interface)
   add_subdirectory(${FWDIR}/metamodule-plugin-sdk/metamodule-core-interface metamodule-core-interface)
 endif()
+
+# CoreModules sources
+add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 
 #
 # Main App
@@ -176,11 +177,10 @@ add_executable(
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
-# CoreModules sources
-add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
+  ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
@@ -220,8 +220,8 @@ add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
 
-if (METAMODULE_PCB_VERSION)
-    target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
+if (CPU_TEST_ALL_MODULES)
+  target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
@@ -240,6 +240,5 @@ target_link_script(
   -Wno-psabi
   -ffreestanding
   -nostartfiles
-  # -flto=auto
 )
 
