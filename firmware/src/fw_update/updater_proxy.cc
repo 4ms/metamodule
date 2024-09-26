@@ -224,7 +224,8 @@ FirmwareUpdaterProxy::Status FirmwareUpdaterProxy::process() {
 																  &sharedMem->bytes_processed);
 
 					if (not result) {
-						abortWithMessage("Cannot trigger flashing");
+						// this is not an error, just need to retry
+						justEnteredState = true;
 					}
 				} else {
 					abortWithMessage("Invalid update file type");
