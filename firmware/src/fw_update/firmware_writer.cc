@@ -68,17 +68,17 @@ IntercoreStorageMessage FirmwareWriter::compareChecksumWifi(uint32_t address, ui
 			returnValue = {.message_type = ChecksumMismatch};
 
 		} else if (result == ESP_LOADER_SUCCESS) {
-			pr_dbg("-> Checksum matches\n");
+			pr_trace("-> Checksum matches\n");
 			returnValue = {.message_type = ChecksumMatch};
 
 		} else {
-			pr_err("-> Cannot get checksum\n");
-			returnValue = {.message_type = ChecksumFailed};
+			pr_trace("-> Cannot get checksum\n");
+			returnValue = {.message_type = WifiExpanderCommError};
 		}
 
 	} else {
 		pr_err("Cannot connect to wifi bootloader\n");
-		returnValue = {.message_type = ChecksumFailed};
+		returnValue = {.message_type = WifiExpanderNotConnected};
 	}
 
 	Flasher::deinit();

@@ -34,6 +34,9 @@ struct IntercoreStorageMessage {
 		ChecksumMatch,
 		ChecksumMismatch,
 		ChecksumFailed,
+		ReadFlashFailed,
+		WifiExpanderNotConnected,
+		WifiExpanderCommError,
 
 		StartFlashing, // write to Flash or WifiExpander
 		FlashingOk,
