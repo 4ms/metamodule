@@ -1,5 +1,4 @@
 #pragma once
-#include "conf/plugin_autoload_settings.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
@@ -8,6 +7,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
+#include "user_settings/plugin_autoload_settings.hh"
 #include <algorithm>
 
 namespace MetaModule
@@ -44,10 +44,11 @@ struct PluginTab : SystemMenuTab {
 		if (!lv_obj_get_child_cnt(ui_PluginsLoadedCont) && loaded_plugins.size()) {
 			// plugins were autoloaded on startup, they need to be added to the loaded plugin list.
 			for (auto &p : loaded_plugins) {
-				auto pluginname = p.fileinfo.plugin_name;
+				auto pluginname = std::string{p.fileinfo.plugin_name};
+				if (p.fileinfo.version.length() > 0)
+					pluginname += Gui::grey_text(" " + std::string{p.fileinfo.version});
+
 				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
-				lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
-				lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
 				lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 			}
@@ -64,6 +65,9 @@ struct PluginTab : SystemMenuTab {
 			confirm_popup.hide();
 			return true;
 		}
+
+		if (should_write_settings)
+			gui_state.do_write_settings = true;
 		return false;
 	}
 
@@ -78,20 +82,16 @@ struct PluginTab : SystemMenuTab {
 			auto *found_plugins = plugin_manager.found_plugin_list();
 
 			for (unsigned idx = 0; auto plugin : *found_plugins) {
-				// Strip .so
-				auto pluginname = std::string{std::string_view{plugin.plugin_name}};
-				if (pluginname.ends_with(".so")) {
-					pluginname = pluginname.substr(0, pluginname.length() - 3);
-				}
+				auto pluginname = std::string{plugin.plugin_name};
+				if (plugin.version.length() > 0)
+					pluginname += Gui::grey_text(" " + std::string{plugin.version});
 
-				if (!plugin_already_loaded(pluginname)) {
+				if (!plugin_already_loaded(plugin)) {
 
 					lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsFoundCont, pluginname.c_str());
 
 					lv_obj_set_user_data(plugin_obj, (void *)((uintptr_t)idx + 1));
 					lv_obj_add_event_cb(plugin_obj, load_plugin_cb, LV_EVENT_CLICKED, this);
-					lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
-					lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 					lv_obj_add_event_cb(plugin_obj, scroll_up_cb, LV_EVENT_FOCUSED, this);
 				}
 
@@ -110,8 +110,6 @@ struct PluginTab : SystemMenuTab {
 				lv_obj_t *plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, pluginname.c_str());
 				lv_group_add_obj(group, plugin_obj);
 				lv_group_focus_obj(plugin_obj);
-				lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
-				lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 				lv_obj_add_event_cb(plugin_obj, query_loaded_plugin_cb, LV_EVENT_CLICKED, this);
 
 				lv_obj_del_async(load_in_progress_obj);
@@ -122,9 +120,8 @@ struct PluginTab : SystemMenuTab {
 
 		if (result.error_message.length()) {
 			lv_hide(ui_PluginTabSpinner);
-			pr_err("Error: %s\n", result.error_message.c_str());
 			std::string err = "Error loading plugin: " + result.error_message;
-			notify_queue.put({err, Notification::Priority::Error, 1500});
+			notify_queue.put({err, Notification::Priority::Error, 2500});
 		}
 	}
 
@@ -162,17 +159,16 @@ private:
 		for (auto &plugin : loaded_plugin_list) {
 			auto plugin_obj = create_plugin_list_item(ui_PluginsLoadedCont, plugin.fileinfo.plugin_name.c_str());
 			lv_group_add_obj(group, plugin_obj);
-			lv_obj_add_event_cb(plugin_obj, scroll_label_on_focus_cb, LV_EVENT_FOCUSED, this);
-			lv_obj_add_event_cb(plugin_obj, noscroll_on_defocus_cb, LV_EVENT_DEFOCUSED, this);
 		}
 	}
 
-	bool plugin_already_loaded(std::string_view name) {
-		// TODO: get this working
+	bool plugin_already_loaded(PluginFile const &plugin) {
 		auto const &loaded_plugin_list = plugin_manager.loaded_plugins();
-		for (auto &plugin : loaded_plugin_list) {
-			pr_dbg("Comparing %s (new) and %s (loaded)\n", name.data(), plugin.fileinfo.plugin_name.c_str());
-			if (plugin.fileinfo.plugin_name == name) {
+		for (auto &loaded_plugin_file : loaded_plugin_list) {
+			auto const &loaded_plugin = loaded_plugin_file.fileinfo;
+			pr_dbg(
+				"Comparing %s (new) and %s (loaded)\n", plugin.plugin_name.c_str(), loaded_plugin.plugin_name.c_str());
+			if (loaded_plugin.plugin_name == plugin.plugin_name) {
 				return true;
 			}
 		}
@@ -196,7 +192,12 @@ private:
 			return;
 
 		const auto target = lv_event_get_target(event);
-		const std::string plugin_name = lv_list_get_btn_text(lv_event_get_current_target(event), target);
+		if (lv_obj_get_child_cnt(target) != 1)
+			return;
+		std::string plugin_name = lv_label_get_text(lv_obj_get_child(target, 0));
+		if (auto colorpos = plugin_name.find_first_of("^"); colorpos != std::string::npos) {
+			plugin_name = plugin_name.substr(0, colorpos);
+		}
 
 		const auto is_autoloaded =
 			std::find(page->settings.slug.begin(), page->settings.slug.end(), plugin_name) != page->settings.slug.end();
@@ -222,7 +223,7 @@ private:
 					pr_info("Set Autoload Disabled: %s\n", plugin_name.data());
 					page->settings.slug.erase(autoload_slot);
 				}
-				page->gui_state.do_write_settings = true;
+				page->should_write_settings = true;
 			},
 			plugin_name.c_str(),
 			"Unload",
@@ -264,20 +265,11 @@ private:
 		}
 	}
 
-	static void scroll_label_on_focus_cb(lv_event_t *event) {
-		if (event->target)
-			label_scrolls(event->target);
-	}
-
-	static void noscroll_on_defocus_cb(lv_event_t *event) {
-		if (event->target)
-			label_overflow_dot(event->target);
-	}
-
 	PluginManager &plugin_manager;
 	NotificationQueue &notify_queue;
 	PluginAutoloadSettings &settings;
 	GuiState &gui_state;
+	bool should_write_settings = false;
 	PatchPlayLoader &play_loader;
 	PluginPopup confirm_popup;
 

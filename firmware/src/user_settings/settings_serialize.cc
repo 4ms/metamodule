@@ -63,6 +63,8 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["module_view"] << settings.module_view;
 	data["audio"] << settings.audio;
 	data["plugin_autoload"] << settings.plugin_autoload;
+	data["last_patch_opened"] << settings.last_patch_opened;
+	data["last_patch_vol"] << static_cast<unsigned>(settings.last_patch_vol);
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();

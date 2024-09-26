@@ -28,12 +28,14 @@ struct GuiState {
 		bool has_connections;
 	};
 	std::optional<CableBeginning> new_cable{};
+	bool already_displayed_cable_instructions = false;
 
 	bool force_redraw_patch{};
 
 	std::optional<Volume> force_refresh_vol{};
 
 	bool do_write_settings{};
+	uint32_t write_settings_after_ms{};
 
 	Toggler back_button{};
 };
@@ -121,7 +123,6 @@ struct PageBase {
 	}
 
 	void load_prev_page() {
-		page_list.update_state(id, args);
 		page_list.request_last_page();
 	}
 

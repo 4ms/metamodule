@@ -1,5 +1,7 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
+#include "conf/panel_conf.hh"
+#include "gui/elements/panel_name.hh"
 #include "gui/helpers/units_conversion.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
@@ -38,11 +40,11 @@ inline lv_obj_t *draw_mapped_ring(const ParamElement &,
 	} else {
 		color = Gui::knob_palette[panel_id % 6];
 		if (module_height == 240) {
-			ring_thickness = (panel_id >= 6) ? 2 : 4;
+			ring_thickness = (panel_id >= 6) ? 2 : 5;
 			gap = 2;
 
 		} else {
-			ring_thickness = (panel_id >= 6) ? 2 : 3;
+			ring_thickness = (panel_id >= 6) ? 2 : 4;
 			gap = 0;
 		}
 	}
@@ -90,14 +92,9 @@ draw_mapped_jack(const JackElement &, lv_obj_t *element_obj, lv_obj_t *canvas, s
 	lv_obj_set_pos(circle, lv_obj_get_x(element_obj), lv_obj_get_y(element_obj));
 	lv_obj_set_size(circle, lv_obj_get_width(element_obj), lv_obj_get_height(element_obj));
 
-	lv_obj_refr_size(element_obj);
-	lv_obj_refr_pos(element_obj);
-	lv_obj_set_pos(circle, lv_obj_get_x(element_obj), lv_obj_get_y(element_obj));
-	lv_obj_set_size(circle, lv_obj_get_width(element_obj), lv_obj_get_height(element_obj));
-
-	auto panel_id = panel_el_id.value();
-	lv_obj_set_style_outline_color(circle, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
-	lv_obj_set_style_border_color(circle, Gui::knob_palette[panel_id], LV_STATE_DEFAULT);
+	auto color = Gui::mapped_jack_color(panel_el_id.value());
+	lv_obj_set_style_outline_color(circle, color, LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(circle, color, LV_STATE_DEFAULT);
 
 	return circle;
 }
@@ -116,10 +113,8 @@ inline lv_obj_t *draw_mapped_ring(const JackInput &el,
 	if (auto label = lv_obj_get_child(circle, 0)) {
 
 		if (panel_el_id.has_value()) {
-			if (*panel_el_id < 6)
-				lv_label_set_text_fmt(label, "%d", int(*panel_el_id + 1));
-			else
-				lv_label_set_text_fmt(label, "G%d", int(*panel_el_id - 5));
+			auto name = get_panel_brief_name<PanelDef>(el, *panel_el_id);
+			lv_label_set_text(label, name.c_str());
 		}
 	}
 
@@ -141,6 +136,9 @@ inline lv_obj_t *draw_mapped_ring(const JackOutput &el,
 
 		if (panel_el_id.has_value()) {
 			lv_label_set_text_fmt(label, "%d", int(*panel_el_id + 1));
+			// TODO:
+			// auto name = get_panel_brief_name<PanelDef>(el, *panel_el_id);
+			// lv_label_set_text(label, name.c_str());
 		}
 	}
 

@@ -60,6 +60,7 @@ if (BUILD_DYN_PLUGIN)
     create_plugin(
         SOURCE_LIB      hetrickcvLibrary
         PLUGIN_NAME     hetrickcv
+        PLUGIN_JSON     ${CMAKE_CURRENT_LIST_DIR}/../../hetrickcv/plugin.json
         SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/hetrickcv
         DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/hetrickcv
     )

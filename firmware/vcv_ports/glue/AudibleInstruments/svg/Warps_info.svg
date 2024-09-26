@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="50.7mm" height="130.49mm" viewBox="0 0 143.72 369.89">
+  <g id="faceplate">
+    <g id="panel">
+      <g>
+        <rect x=".27" y=".27" width="143.18" height="364" style="fill: #ededee; stroke-width: 0px;"/>
+        <path d="M143.33.39v363.75H.39V.39h142.93M143.58.14H.14v364.25h143.43V.14h0Z" style="fill: #9c9c9e; stroke-width: 0px;"/>
+      </g>
+    </g>
+    <path d="M71.71,149.34c-30.11,0-54.61-24.5-54.61-54.61s24.5-54.61,54.61-54.61,54.61,24.5,54.61,54.61-24.5,54.61-54.61,54.61ZM71.71,41.62c-29.28,0-53.11,23.82-53.11,53.11s23.82,53.11,53.11,53.11,53.11-23.82,53.11-53.11-23.82-53.11-53.11-53.11Z" style="stroke-width: 0px;"/>
+    <rect x="64.05" y="33.91" width="13.96" height="7.45" style="fill: #ededed; stroke-width: 0px;"/>
+    <path d="M47.2,328.23v14.74h14.74v-14.74h-14.74ZM54.84,336.93h-.4l1.3,3.92-1.82.6-1.72-5.18c-.1-.29-.05-.61.13-.86s.47-.4.78-.4h1.72c.97,0,1.76-.84,1.76-1.88s-.79-1.88-1.76-1.88-1.76.84-1.76,1.88h-1.91c0-2.09,1.65-3.79,3.67-3.79s3.67,1.7,3.67,3.79-1.65,3.79-3.67,3.79Z" style="fill: #3babec; stroke-width: 0px;"/>
+    <g>
+      <ellipse cx="20.02" cy="332.81" rx="1.76" ry="1.41" style="fill: #ee6390; stroke-width: 0px;"/>
+      <path d="M12.93,328.23v14.74h14.74v-14.74h-14.74ZM23.69,333.28v8.02h-1.91v-5.58c-.52.26-1.12.42-1.76.42-2.02,0-3.67-1.49-3.67-3.33s1.65-3.33,3.67-3.33,3.67,1.49,3.67,3.33c0,.16-.03.31-.05.47h.05Z" style="fill: #ee6390; stroke-width: 0px;"/>
+    </g>
+    <rect x=".14" y="18.33" width="143.43" height="14.17" style="stroke-width: 0px;"/>
+    <rect x="37.55" y="174.68" width="42.52" height="14.17" style="fill: #ee6390; stroke-width: 0px;"/>
+    <rect x="40.7" y="286.66" width="30.05" height="14.17" style="fill: #3babec; stroke-width: 0px;"/>
+    <rect x="6.65" y="286.66" width="30.05" height="14.17" style="fill: #ee6390; stroke-width: 0px;"/>
+    <g>
+      <path d="M86.23,344.8h34.62s12.47,0,12.47,0c2.7,0,4.89-2.27,4.89-5.05v-41.02h-54.04c-6.49,0-11.76,6.27-11.76,14.01v32.07h13.81Z" style="stroke-width: 0px;"/>
+      <path d="M138.11,271.03c-.3-7.84-6.27-14.1-13.62-14.1h-59.49s-46.32,0-46.32,0c-7.35,0-13.32,6.26-13.62,14.1l-.06,5.76.07,54.07-.03-3.66v12.05c0,2.92,2.57,5.31,5.7,5.31h121.69c3.14,0,5.7-2.39,5.7-5.31v-12.05l-.02-56.17Z" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+    </g>
+    <g>
+      <g>
+        <path d="M79.97,336.78c-1.8,0-3.27-1.32-3.27-2.95s1.47-2.95,3.27-2.95c1.68,0,3.08,1.28,3.27,2.99h0c.07.65-.15,1.3-.61,1.82-.62.69-1.61,1.1-2.66,1.1ZM79.97,332.39c-.97,0-1.75.64-1.75,1.43s.79,1.43,1.75,1.43c.61,0,1.2-.23,1.52-.6.18-.2.26-.41.23-.64-.09-.79-.73-1.63-1.76-1.63Z" style="fill: #fff; stroke-width: 0px;"/>
+        <rect x="81.72" y="334.25" width="1.52" height="7.43" style="fill: #fff; stroke-width: 0px;"/>
+      </g>
+      <path d="M97.11,341.92l-1.59-4.8c-.08-.23-.04-.49.1-.68.14-.2.37-.32.62-.32h1.59c.97,0,1.75-.84,1.75-1.86s-.79-1.86-1.75-1.86-1.75.84-1.75,1.86h-1.52c0-1.87,1.47-3.38,3.27-3.38s3.27,1.52,3.27,3.38-1.47,3.38-3.27,3.38h-.54l1.26,3.8-1.44.48Z" style="fill: #fff; stroke-width: 0px;"/>
+      <path d="M92.47,333.72l-2.48,2.48,2.48,2.48-.75.75-2.48-2.48-2.48,2.48-.73-.73,2.48-2.48-2.48-2.48.76-.76,2.48,2.48,2.48-2.48.73.73Z" style="fill: #fff; stroke-width: 0px;"/>
+    </g>
+    <g>
+      <line x1="138.47" y1="235.44" x2="137.97" y2="235.44" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
+      <line x1="134.03" y1="235.44" x2="7.72" y2="235.44" style="fill: none; stroke: #000; stroke-dasharray: 0 0 .99 3.95; stroke-linecap: round; stroke-linejoin: round;"/>
+      <line x1="5.74" y1="235.44" x2="5.24" y2="235.44" style="fill: none; stroke: #000; stroke-linecap: round; stroke-linejoin: round;"/>
+    </g>
+    <line x1="23.15" y1="165.14" x2="23.15" y2="178.45" style="fill: none; stroke: #000; stroke-miterlimit: 10;"/>
+    <g>
+      <path d="M68.43,221.6c4.42-3.85,4.96-11.02,1.36-15.63-4.52-6.17-14.24-6.31-19.11-.47-4.36,4.88-4.11,12.88.54,17.53-1.94-1.77-3.36-4.15-3.98-6.76-2.5-10.27,7.41-19.44,17.5-16.58,10.82,2.92,14.36,16.85,6.49,24.77,0,0-2.8-2.86-2.8-2.86h0Z" style="fill: #ee6390; stroke-width: 0px;"/>
+      <path d="M69.83,223.03c2.47-2.42,4.01-5.79,4.01-9.52,0-7.36-5.96-13.32-13.32-13.32s-13.32,5.96-13.32,13.32c0,3.73,1.54,7.1,4.01,9.52" style="fill: none; stroke: #ee6390; stroke-miterlimit: 10;"/>
+    </g>
+    <g>
+      <path d="M31.34,221.6c4.42-3.85,4.96-11.02,1.36-15.63-4.52-6.17-14.24-6.31-19.11-.47-4.36,4.88-4.11,12.88.54,17.53-1.94-1.77-3.36-4.15-3.98-6.76-2.5-10.27,7.41-19.44,17.5-16.58,10.82,2.92,14.36,16.85,6.49,24.77,0,0-2.8-2.86-2.8-2.86h0Z" style="fill: #3babec; stroke-width: 0px;"/>
+      <path d="M32.74,223.03c2.47-2.42,4.01-5.79,4.01-9.52,0-7.36-5.96-13.32-13.32-13.32s-13.32,5.96-13.32,13.32c0,3.73,1.54,7.1,4.01,9.52" style="fill: none; stroke: #3babec; stroke-miterlimit: 10;"/>
+    </g>
+    <rect x="103.13" y="135.41" width="2.72" height="0" style="fill: #09b8ed; stroke-width: 0px;"/>
+    <rect x="96.79" y="141.76" width="0" height="2.72" style="fill: #09b8ed; stroke-width: 0px;"/>
+    <g>
+      <rect x="96.65" y="42.2" width="15.84" height="15.84" style="fill: #ededed; stroke-width: 0px;"/>
+      <g>
+        <polygon points="100.1 53.5 103.29 43.42 103.36 43.42 110.52 43.42 113.04 43.42 113.04 41.92 96.03 41.92 96.03 53.5 100.1 53.5" style="fill: #00af66; stroke-width: 0px;"/>
+        <polygon points="109.27 47.34 106.08 57.42 105.71 57.42 98.85 57.42 96.03 57.42 96.03 58.92 113.04 58.92 113.04 47.34 109.27 47.34" style="fill: #00af66; stroke-width: 0px;"/>
+      </g>
+    </g>
+    <g>
+      <rect x="31.97" y="45.12" width="14" height="12.69" style="fill: #ededed; stroke-width: 0px;"/>
+      <path d="M30.47,41.92v17.01h17.01v-17.01h-17.01ZM42.91,44.63l-3.93,4.1-3.93-4.1c1.12-.76,2.48-1.21,3.93-1.21s2.81.45,3.93,1.21ZM33.36,46.26l4,4.16-4,4.16c-.87-1.17-1.39-2.6-1.39-4.16s.52-3,1.39-4.16ZM35.04,56.21l3.93-4.1,3.93,4.1c-1.12.77-2.48,1.21-3.93,1.21s-2.81-.45-3.93-1.21ZM44.59,54.58l-4-4.16,4-4.16c.87,1.17,1.39,2.6,1.39,4.16s-.52,3-1.38,4.16Z" style="fill: #09b8ed; stroke-width: 0px;"/>
+    </g>
+    <g>
+      <rect x="38.94" y="138.11" width="8.02" height="8.02" style="fill: #ededed; stroke-width: 0px;"/>
+      <path d="M30.43,134.61v17.01h17.01v-17.01h-17.01ZM45.46,149.32h-13.04v-7.83l6.52,6.52,6.52-6.52v7.83Z" style="fill: #09b8ed; stroke-width: 0px;"/>
+    </g>
+    <g>
+      <rect x="13.11" y="72.48" width="10.94" height="15.22" style="fill: #ededed; stroke-width: 0px;"/>
+      <g>
+        <polygon points="17.08 70.69 8.58 70.69 8.58 79.19 17.08 70.69" style="fill: #00af66; stroke-width: 0px;"/>
+        <polygon points="25.59 79.19 25.59 70.69 17.09 70.69 25.59 79.19" style="fill: #00af66; stroke-width: 0px;"/>
+        <rect x="13.83" y="75.94" width="6.51" height="6.51" transform="translate(-50.99 35.28) rotate(-45)" style="fill: #00af66; stroke-width: 0px;"/>
+        <polygon points="17.09 87.7 25.59 87.7 25.59 79.19 17.09 87.7" style="fill: #00af66; stroke-width: 0px;"/>
+        <polygon points="8.58 79.19 8.58 87.7 17.08 87.7 8.58 79.19" style="fill: #00af66; stroke-width: 0px;"/>
+      </g>
+    </g>
+    <g>
+      <rect x="119.12" y="71.23" width="10.4" height="14.43" style="fill: #ededed; stroke-width: 0px;"/>
+      <path d="M117.91,70.69v17.01h17.01v-17.01h-17.01ZM119.12,75.46c0-1.65,1.34-2.98,2.98-2.98s2.98,1.34,2.98,2.98-1.34,2.98-2.98,2.98-2.98-1.34-2.98-2.98ZM129.52,85.65h-6.21v-5.35h6.21v5.35ZM130.73,78.44c-1.65,0-2.98-1.34-2.98-2.98s1.34-2.98,2.98-2.98,2.98,1.34,2.98,2.98-1.34,2.98-2.98,2.98Z" style="fill: #f97d9e; stroke-width: 0px;"/>
+    </g>
+    <g>
+      <rect x="13.12" y="106.52" width="13.98" height="16.47" style="fill: #ededed; stroke-width: 0px;"/>
+      <g>
+        <polygon points="20.11 114.12 17.45 123.34 22.77 123.34 20.11 114.12" style="fill: #f97d9e; stroke-width: 0px;"/>
+        <polygon points="17.35 123.34 14.68 114.12 12.04 123.34 17.35 123.34" style="fill: #f97d9e; stroke-width: 0px;"/>
+        <polygon points="28.61 116.92 28.61 106.34 25.58 106.34 28.61 116.92" style="fill: #f97d9e; stroke-width: 0px;"/>
+        <polygon points="14.73 106.34 17.4 115.56 20.06 106.34 14.73 106.34" style="fill: #f97d9e; stroke-width: 0px;"/>
+        <polygon points="14.63 106.34 11.6 106.34 11.6 116.82 14.63 106.34" style="fill: #f97d9e; stroke-width: 0px;"/>
+        <polygon points="27.18 119.83 25.53 114.13 22.87 123.34 28.15 123.34 27.18 119.83" style="fill: #f97d9e; stroke-width: 0px;"/>
+        <polygon points="20.16 106.34 22.82 115.55 25.48 106.34 20.16 106.34" style="fill: #f97d9e; stroke-width: 0px;"/>
+      </g>
+    </g>
+    <g>
+      <rect x="116.77" y="111.57" width="13.12" height="9.33" style="fill: #ededed; stroke-width: 0px;"/>
+      <path d="M124.43,106.34v-4.58h-2.21v4.58h-7.4v17.01h17.01v-17.01h-7.4ZM116.77,111.57c0-1.48,1.2-2.68,2.68-2.68s2.68,1.2,2.68,2.68-1.2,2.68-2.68,2.68-2.68-1.2-2.68-2.68ZM129.89,120.89h-13.12v-4.42h13.12v4.42ZM127.21,114.25c-1.48,0-2.68-1.2-2.68-2.68s1.2-2.68,2.68-2.68,2.68,1.2,2.68,2.68-1.2,2.68-2.68,2.68Z" style="fill: #f97d9e; stroke-width: 0px;"/>
+    </g>
+    <g>
+      <rect x="63.25" y="39.94" width="15.41" height="8.23" style="fill: #ededed; stroke-width: 0px;"/>
+      <path d="M63.25,32.54v17.01h17.01v-17.01h-17.01ZM78.66,39.94h-5.81v-5.8c2.98.47,5.34,2.82,5.81,5.8ZM71.76,34.04h0s0,0,0,0,0,0,0,0ZM70.64,34.14v5.8h-5.79c.47-2.97,2.82-5.32,5.79-5.8ZM64.85,42.14h5.79v5.8c-2.97-.48-5.31-2.83-5.79-5.8ZM72.85,47.95v-5.8h5.81c-.48,2.98-2.83,5.33-5.81,5.8ZM78.74,41.3v-.53c0,.09.01.17.01.26s-.01.18-.01.26Z" style="fill: #09b8ed; stroke-width: 0px;"/>
+    </g>
+    <g>
+      <rect x="95.99" y="134.61" width="17.01" height="17.01" style="fill: #ededed; stroke-width: 0px;"/>
+      <polygon points="113 144.62 112.59 144.62 108.11 144.62 111.57 148.07 109.44 150.19 105.99 146.74 105.99 151.62 113 151.62 113 144.62 113 144.62" style="fill: #09b8ed; stroke-width: 0px;"/>
+      <polygon points="109.44 136.04 111.57 138.16 108.11 141.62 112.59 141.62 113 141.62 113 141.62 113 134.61 105.99 134.61 105.99 139.49 109.44 136.04" style="fill: #09b8ed; stroke-width: 0px;"/>
+      <polygon points="102.99 139.49 102.99 134.61 95.99 134.61 95.99 141.62 96.28 141.62 100.87 141.62 97.42 138.16 99.54 136.04 102.99 139.49" style="fill: #09b8ed; stroke-width: 0px;"/>
+      <polygon points="99.54 150.19 97.42 148.07 100.87 144.62 96.28 144.62 95.99 144.62 95.99 151.62 102.99 151.62 102.99 146.74 99.54 150.19" style="fill: #09b8ed; stroke-width: 0px;"/>
+    </g>
+    <g id="text">
+      <text transform="translate(40.6 185.32) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Int. Osc</tspan></text>
+      <text transform="translate(44.48 297.29) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Level</tspan></text>
+      <text transform="translate(9.85 297.29) scale(.88 1)" style="fill: #fff; font-family: GillSans-Bold, &apos;Gill Sans&apos;; font-size: 10px; font-weight: 700; letter-spacing: -.04em;"><tspan x="0" y="0">Level</tspan></text>
+    </g>
+  </g>
+  <g id="components">
+    <circle id="Carrier_LightGreenRedLight" data-name="Carrier LightGreenRedLight" cx="23.09" cy="163.91" r="4.96" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Algorithm_Light_Rogan6PSLight" data-name="Algorithm Light#Rogan6PSLight" cx="71.71" cy="94.73" r="29.19" style="fill: #f0f; stroke-width: 0px;"/>
+    <circle id="Aux_Out" data-name="Aux Out" cx="123.23" cy="315.03" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Mod_Out" data-name="Mod Out" cx="88.9" cy="315.03" r="11.34" style="fill: blue; stroke-width: 0px;"/>
+    <circle id="Mod_In" data-name="Mod In" cx="54.57" cy="315.03" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Carrier_In" data-name="Carrier In" cx="20.3" cy="315.03" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Timbre_CV" data-name="Timbre CV" cx="123.23" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Algorithm_CV" data-name="Algorithm CV" cx="88.9" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Level_2_In" data-name="Level 2 In" cx="54.57" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Level_1_In" data-name="Level 1 In" cx="20.3" cy="273.63" r="11.34" style="fill: lime; stroke-width: 0px;"/>
+    <circle id="Mod_Amp_Trimpot" data-name="Mod Amp#Trimpot" cx="59.95" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Osc_Amp_Freq_Trimpot" data-name="Osc Amp/Freq#Trimpot" cx="23.09" cy="213.52" r="8.5" style="fill: red; stroke-width: 0px;"/>
+    <circle id="Int._Osc_Mode_SmallButton" data-name="Int. Osc Mode#SmallButton" cx="23.15" cy="182.05" r="10.63" style="fill: #ff8000; stroke-width: 0px;"/>
+    <circle id="Timbre_WhiteMediumKnob" data-name="Timbre#WhiteMediumKnob" cx="109.63" cy="185.46" r="17.01" style="fill: #ff0036; stroke-width: 0px;"/>
+    <circle id="Algorithm_Rogan6PSWhite" data-name="Algorithm#Rogan6PSWhite" cx="71.71" cy="94.73" r="25.51" style="fill: #ff0040; stroke-width: 0px;"/>
+    <text id="slug" transform="translate(105.1 369.14)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: -.03em;">W</tspan><tspan x="2.44" y="0" style="letter-spacing: 0em;">a</tspan><tspan x="3.88" y="0" style="letter-spacing: 0em;">r</tspan><tspan x="4.88" y="0">ps</tspan></text>
+    <text id="modulename" transform="translate(116.66 369.14)" style="fill: #010101; font-family: MyriadPro-Regular, &apos;Myriad Pro&apos;; font-size: 3px;"><tspan x="0" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="2.43" y="0">eta </tspan><tspan x="7.01" y="0" style="letter-spacing: 0em;">M</tspan><tspan x="9.44" y="0">odul</tspan><tspan x="15.14" y="0" style="letter-spacing: 0em;">at</tspan><tspan x="17.55" y="0" style="letter-spacing: 0em;">or</tspan></text>
+  </g>
+</svg>

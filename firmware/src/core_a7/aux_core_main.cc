@@ -11,9 +11,6 @@
 #include "internal_plugin_manager.hh"
 #include "patch_play/patch_player.hh"
 
-// Just to fix clangd:
-#include "helpers.hpp"
-
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
 static inline FrameBufferT framebuf1 alignas(64);
@@ -48,7 +45,8 @@ extern "C" void aux_core_main() {
 
 	PluginManager plugin_manager{*file_storage_proxy, ramdisk};
 	Ui ui{*patch_playloader, *file_storage_proxy, *open_patch_manager, *sync_params, *patch_mod_queue, plugin_manager};
-	ui.update();
+	ui.update_screen();
+	ui.update_page();
 
 	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
 
@@ -60,9 +58,11 @@ extern "C" void aux_core_main() {
 
 	constexpr auto PlayModuleListIRQn = SMPControl::IRQn(SMPCommand::PlayModuleList);
 	InterruptManager::register_and_start_isr(PlayModuleListIRQn, 1, 0, [&context, &patch_player]() {
+		// Debug::Pin1::high();
 		for (unsigned i = context.starting_idx; i < context.num_modules; i += context.idx_increment) {
 			patch_player->modules[i]->update();
 		}
+		// Debug::Pin1::low();
 		SMPThread::signal_done();
 	});
 
@@ -77,31 +77,49 @@ extern "C" void aux_core_main() {
 	constexpr auto ReadPatchLightsIRQn = SMPControl::IRQn(SMPCommand::ReadPatchLights);
 	InterruptManager::register_and_start_isr(ReadPatchLightsIRQn, 2, 0, [patch_player, &ui]() {
 		if (ui.new_patch_data == false) {
+
 			for (auto &w : ui.lights().watch_lights) {
 				if (w.is_active()) {
 					auto val = patch_player->get_module_light(w.module_id, w.light_id);
 					w.value = val;
 				}
 			}
+
+			for (auto &d : ui.displays().watch_displays) {
+				if (d.is_active()) {
+					auto text = std::span<char>(d.text._data, d.text.capacity);
+					patch_player->get_display_text(d.module_id, d.light_id, text);
+				}
+			}
+
 			ui.new_patch_data = true;
 		}
 
 		SMPThread::signal_done();
 	});
 
+	// Wait for M4 to be ready (so USB and SD are available)
+	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
+		;
+	ui.autoload_plugins();
+
 	// Signal that we're ready
 	pr_info("A7 Core 2 initialized\n");
 	HWSemaphore<AuxCoreReady>::unlock();
 
-	// while (HWSemaphore<M4CoreReady>::is_locked())
-	// 	;
+#ifdef CPU_TEST_ALL_MODULES
+	// Wait for main core to be done with testing all modules
+	HAL_Delay(50);
+	while (mdrivlib::HWSemaphore<MainCoreReady>::is_locked()) {
+		ui.update_screen();
+	};
+#endif
 
-	HAL_Delay(300); //allow time to load initial patch: TODO use semaphor
-
-	ui.autoload_plugins();
+	ui.load_initial_patch();
 
 	while (true) {
-		ui.update();
+		ui.update_screen();
+		ui.update_page();
 		__NOP();
 	}
 }

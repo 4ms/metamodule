@@ -9,20 +9,30 @@
 namespace MetaModule
 {
 
-inline std::string get_element_value_string(Element const &element, float value) {
+inline std::string get_element_value_string(Element const &element, float value, float resolution) {
 	std::string s;
 
 	std::visit(overloaded{
-				   [value = value, &s](Pot const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
+				   [value = value, res = resolution, &s](Pot const &) {
+					   float v = std::clamp(value * 100.f, 0.f, 100.f);
+					   char buf[16];
+					   if (res <= 100)
+						   std::snprintf(buf, sizeof buf, "%.0f", v);
+					   if (res == 1000)
+						   std::snprintf(buf, sizeof buf, "%.1f", v);
+					   if (res >= 10000)
+						   std::snprintf(buf, sizeof buf, "%.2f", v);
+					   s = std::string(buf) + "%";
+				   },
 
 				   [value = value, &s](ParamElement const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
 
 				   [value = value, &s](SlideSwitch const &el) {
 					   auto v = StateConversion::convertState(el, value);
-					   if (v > 0 && v <= el.pos_names.size() && el.pos_names[v - 1].size())
-						   s = el.pos_names[v - 1];
+					   if (v >= 0 && v < el.pos_names.size() && el.pos_names[v].size())
+						   s = el.pos_names[v];
 					   else
-						   s = std::to_string(v) + std::string("/") + std::to_string(el.num_pos);
+						   s = std::to_string(v + 1) + std::string("/") + std::to_string(el.num_pos);
 				   },
 
 				   [value = value, &s](FlipSwitch const &el) {

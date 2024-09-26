@@ -12,6 +12,7 @@ namespace MetaModule
 struct LoadedPlugin {
 	PluginFile fileinfo;
 	rack::plugin::Plugin rack_plugin;
+	std::vector<std::string> loaded_files;
 	std::vector<uint8_t> code;
 };
 

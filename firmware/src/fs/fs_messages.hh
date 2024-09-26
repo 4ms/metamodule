@@ -22,6 +22,8 @@ struct FilesystemMessages {
 	}
 
 	void process() {
+		patch_storage.poll_media_change();
+
 		auto message = intercore_comm.get_new_message();
 
 		if (message.message_type != IntercoreStorageMessage::MessageType::None) {

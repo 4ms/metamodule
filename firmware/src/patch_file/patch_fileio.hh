@@ -1,7 +1,7 @@
 #pragma once
 #include "dynload/plugin_file_list.hh"
 #include "fs/fileio_t.hh"
-#include "patch_convert/yaml_to_patch.hh"
+#include "patch-serial/yaml_to_patch.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "patches_default.hh"
 #include "pr_dbg.hh"
@@ -133,7 +133,7 @@ public:
 				patch = patch.subspan(0, patch.size() - 1);
 
 			if (!fileio.update_or_create_file(filename, patch)) {
-				pr_err("Error: aborted creating default patches to flash\n");
+				pr_err("Error: failed to write %d. Aborted creating default patches to flash\n", filename.c_str());
 				return false;
 			}
 		}

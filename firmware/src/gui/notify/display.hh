@@ -19,7 +19,8 @@ struct DisplayNotification {
 	static void show(Notification const &msg) {
 		lv_label_set_text(ui_MessageLabel, msg.message.c_str());
 		SlideDown_Animation(ui_MessagePanel, 0);
-		SlideUp_Animation(ui_MessagePanel, msg.duration_ms);
+		if (msg.duration_ms > 0)
+			SlideUp_Animation(ui_MessagePanel, msg.duration_ms);
 	}
 };
 

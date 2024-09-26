@@ -1,8 +1,8 @@
 #pragma once
 #include "core_intercom/intercore_message.hh"
+#include "patch-serial/patch_to_yaml.hh"
+#include "patch-serial/yaml_to_patch.hh"
 #include "patch/patch_data.hh"
-#include "patch_convert/patch_to_yaml.hh"
-#include "patch_convert/yaml_to_patch.hh"
 #include "patch_file.hh"
 #include "patch_file/file_storage_comm.hh"
 #include "patch_file/open_patches.hh"
@@ -17,14 +17,25 @@ class OpenPatchManager {
 public:
 	using enum IntercoreStorageMessage::MessageType;
 
+	// If the given patch loc is an open patch, set view_patch to it
 	bool load_if_open(PatchLocation patch_loc) {
 		if (playing_patch_ && (PatchLocHash{patch_loc} == playing_patch_->loc_hash)) {
-			view_playing_patch();
-			return true;
+			if (playing_patch_->force_reload == false) {
+				view_playing_patch();
+				return true;
+			} else {
+				pr_trace("Reload playing patch from disk\n");
+				return false;
+			}
 
 		} else if (auto openpatch = open_patches_.find(PatchLocHash{patch_loc})) {
-			view_patch_ = openpatch;
-			return true;
+			if (openpatch->force_reload == false) {
+				view_patch_ = openpatch;
+				return true;
+			} else {
+				pr_trace("Reload patch from disk\n");
+				return false;
+			}
 
 		} else {
 			return false;
@@ -56,21 +67,59 @@ public:
 		return true;
 	}
 
+	// Flag all unmodified patches on vol that they need to be re-loaded from disk
+	// the next time the user opens the patch
+	void mark_patches_force_reload(Volume vol) {
+		for (auto &patch : open_patches_) {
+			if (patch.loc.vol == vol && patch.modification_count == 0)
+				patch.force_reload = true;
+		}
+	}
+
+	// Clears the force-reload flag on all open patches with given volume
+	void mark_patches_no_reload(Volume vol) {
+		for (auto &patch : open_patches_) {
+			if (patch.loc.vol == vol)
+				patch.force_reload = false;
+		}
+	}
+
 	// Parses and opens the loaded patch, and sets the view patch to point to it
 	bool open_patch(std::span<char> file_data, PatchLocation const &patch_loc) {
+		bool patch_is_playing = false;
+
+		if (auto patch = open_patches_.find(patch_loc)) {
+			// open_patches_.dump_open_patches();
+
+			if (patch == playing_patch_)
+				patch_is_playing = true;
+
+			pr_warn("open patch found already. p:%d\n", patch_is_playing);
+			open_patches_.remove(patch_loc);
+			// open_patches_.dump_open_patches();
+		}
 
 		auto *new_patch = open_patches_.emplace_back(patch_loc);
 
 		if (!yaml_raw_to_patch(file_data, new_patch->patch)) {
 			pr_err("Failed to parse\n");
 			open_patches_.remove_last();
+
+			if (patch_is_playing)
+				playing_patch_ = nullptr;
+
 			return false;
 		}
 
-		//Handle patches saved by legacy firmware with empty knob sets
+		// Handle patches saved by legacy firmware with empty knob sets
 		new_patch->patch.trim_empty_knobsets();
+		// Handle legacy use of midi poly num
+		new_patch->patch.update_midi_poly_num();
 
 		view_patch_ = new_patch;
+
+		if (patch_is_playing)
+			playing_patch_ = new_patch;
 
 		return true;
 	}
@@ -79,9 +128,14 @@ public:
 	// playing_patch: (copy of) patch currently playing in the audio thread
 	//
 	PatchData *get_playing_patch() {
-		if (playing_patch_)
-			return &playing_patch_->patch;
-		else {
+		if (playing_patch_) {
+			if (open_patches_.exists(playing_patch_)) {
+				return &playing_patch_->patch;
+			} else {
+				pr_err("Playing patch not null and not found in open patches!\n");
+				return nullptr;
+			}
+		} else {
 			return nullptr;
 		}
 	}
@@ -161,7 +215,7 @@ public:
 
 	void new_patch() {
 		std::string name = "Untitled Patch " + std::to_string((uint8_t)std::rand());
-		std::string filename = "/" + name + ".yml";
+		std::string filename = name + ".yml";
 		PatchLocation loc{std::string_view{filename}, Volume::RamDisk};
 		view_patch_ = open_patches_.emplace_back(loc);
 		view_patch_->patch.blank_patch(name);
@@ -179,9 +233,13 @@ public:
 
 	bool duplicate_view_patch(std::string_view filepath, Volume vol) {
 		// Check if filename is already open
-		if (open_patches_.find(PatchLocHash{filepath, vol})) {
-			pr_err("Can't rename to same name as an already open patch: %.*s\n", filepath.size(), filepath.data());
-			return false;
+		if (auto openpatch = open_patches_.find(PatchLocHash{filepath, vol})) {
+			if (openpatch->modification_count > 0) {
+				pr_err("Can't overwrite an open and modified patch: %.*s\n", filepath.size(), filepath.data());
+				return false;
+			} else {
+				close_open_patch(openpatch);
+			}
 		}
 
 		// Create a new patch
@@ -206,6 +264,18 @@ public:
 			view_patch_ = nullptr;
 		} else {
 			pr_err("Tried to delete view patch, but it's not found\n");
+		}
+	}
+
+	void close_open_patch(OpenPatch *patch) {
+		if (patch == playing_patch_)
+			close_playing_patch();
+		else if (patch == view_patch_)
+			close_view_patch();
+		else {
+			if (!open_patches_.remove(patch->loc_hash)) {
+				pr_err("Tried to close patch, but it's not found\n");
+			}
 		}
 	}
 

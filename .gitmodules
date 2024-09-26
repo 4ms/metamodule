@@ -4,11 +4,8 @@
 [submodule "firmware/lib/lvgl/lvgl"]
 	path = firmware/lib/lvgl/lvgl
 	url = https://github.com/lvgl/lvgl.git
-[submodule "shared/patch_convert/ryml/rapidyaml"]
-	path = shared/patch_convert/ryml/rapidyaml
-	url = https://github.com/danngreen/rapidyaml.git
 [submodule "shared/cpputil"]
-	path = shared/cpputil
+	path = firmware/lib/cpputil
 	url = https://github.com/4ms/cpputil.git
 [submodule "firmware/bootloader/mp1-boot"]
 	path = firmware/bootloader/mp1-boot
@@ -39,13 +36,16 @@
 	url = https://github.com/4ms/metamodule-bridge-protocol.git
 [submodule "firmware/vcv_ports/eightfold"]
 	path = firmware/vcv_ports/eightfold
-	url = https://github.com/scanner-darkly/eightfold.git
+	url = https://github.com/danngreen/eightfold.git
 [submodule "firmware/metamodule-plugin-sdk"]
 	path = firmware/metamodule-plugin-sdk
 	url = https://github.com/4ms/metamodule-plugin-sdk.git
-[submodule "shared/CoreModules/4ms/core/alpaca"]
-	path = shared/CoreModules/4ms/core/alpaca
-	url = https://github.com/4ms/alpaca
 [submodule "firmware/vcv_ports/Valley"]
 	path = firmware/vcv_ports/Valley
 	url = https://github.com/4ms/ValleyRackFree
+[submodule "metamodule-patch-serial"]
+	path = firmware/lib/patch-serial
+	url = git@github.com:4ms/metamodule-patch-serial
+[submodule "firmware/lib/CoreModules"]
+	path = firmware/lib/CoreModules
+	url = https://github.com/4ms/metamodule-core-modules

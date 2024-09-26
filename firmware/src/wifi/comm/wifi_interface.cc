@@ -144,18 +144,18 @@ void send_heartbeat()
 ////////////////////////////////
 
 void init(PatchStorage *storage) {
-	printf("Initializing Wifi\n");
+	pr_info("Initializing Wifi\n");
 
 	patchStorage = storage;
 }
 
 void start() {
-	pr_dbg("Wifi: Starting RX\n");
+	pr_trace("Wifi: Starting RX\n");
 	BufferedUSART2::init();
 }
 
 void stop() {
-	pr_dbg("Wifi: Stopping RX\n");
+	pr_trace("Wifi: Stopping RX\n");
 	BufferedUSART2::deinit();
 }
 
@@ -256,7 +256,7 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 
 			auto filename = flatbuffers::GetStringView(uploadPatchMessage->filename());
 
-			printf("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
+			pr_info("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
 
 			auto LocationToVolume = [](auto location) -> std::optional<Volume> {
 				switch (location) {
@@ -308,10 +308,10 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 			sendResponse(fbb.GetBufferSpan());
 
 		} else {
-			printf("Other option\n");
+			pr_trace("Other option\n");
 		}
 	} else {
-		printf("Invalid message\n");
+		pr_err("Invalid message\n");
 	}
 }
 

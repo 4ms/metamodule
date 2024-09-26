@@ -23,4 +23,7 @@ void init(rack::Plugin *p) {
 	p->addModel(modelChannelStrip);
 	p->addModel(modelMotionMTR);
 	p->addModel(modelSpringReverb);
+	p->addModel(modelBurst);
+	p->addModel(modelVoltio);
+	p->addModel(modelOctaves);
 }

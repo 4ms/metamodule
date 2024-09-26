@@ -7,7 +7,7 @@
 #include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
-#include "patch.hh"
+#include "patch/patch.hh"
 #include <string_view>
 
 #include "pr_dbg.hh"

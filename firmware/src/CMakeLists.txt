@@ -1,10 +1,15 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
-option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" ON)
+option(ENABLE_WIFI_BRIDGE       "Enable serial bridge to wifi module" ON)
+option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and auto-loaded plugins)" OFF)
+
+
+include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
+enable_logging()
 
 set(FWDIR ${CMAKE_SOURCE_DIR})
-set(SHARED ${FWDIR}/../shared)
+set(LIBDIR ${FWDIR}/lib)
 
 set_arch_flags()
 
@@ -44,6 +49,7 @@ target_sources(lvgl
     PRIVATE ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ff.c
             ${PROJECT_SOURCE_DIR}/lib/fatfs/source/ffunicode.c
             ${PROJECT_SOURCE_DIR}/src/fs/fatfs/diskio.cc
+            ${PROJECT_SOURCE_DIR}/src/fs/fatfs/delete_node.cc
 )
 
 #
@@ -56,13 +62,13 @@ target_sources(vcv_plugin_export PRIVATE ../vcv_plugin/export/src/keep-symbols.c
 # Brands
 #
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports ${CMAKE_BINARY_DIR}/vcv_ports)
+add_subdirectory(${FWDIR}/lib/CoreModules/4ms ${CMAKE_CURRENT_BINARY_DIR}/CoreModules-4ms)
 
 #
-# RYML
+# Patch format and serialization
 #
-if (NOT TARGET ryml)
-  add_subdirectory(${SHARED}/patch_convert/ryml/rapidyaml ${CMAKE_CURRENT_BINARY_DIR}/rapidyaml)
-endif()
+add_subdirectory(${LIBDIR}/patch-serial ${CMAKE_CURRENT_BINARY_DIR}/patch-serial)
+
 
 #
 # Jansson
@@ -86,6 +92,9 @@ if (NOT TARGET metamodule::core-interface)
   add_subdirectory(${FWDIR}/metamodule-plugin-sdk/metamodule-core-interface metamodule-core-interface)
 endif()
 
+# CoreModules sources
+add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
+
 #
 # Main App
 #
@@ -94,6 +103,7 @@ add_executable(
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
+  ${FWDIR}/system/sbrk.cc
   ${FWDIR}/system/mmu_ca7.c
   ${FWDIR}/system/time.cc
   ${FWDIR}/system/startup_ca7.s
@@ -112,14 +122,11 @@ add_executable(
   ${FWDIR}/src/gui/slsexport/ui_local.cc
   #
   ${FWDIR}/src/dynload/dynloader.cc
-  #
-  ${SHARED}/patch_convert/yaml_to_patch.cc
-  ${SHARED}/patch_convert/patch_to_yaml.cc
-  ${SHARED}/patch_convert/ryml/ryml_serial.cc
-  ${SHARED}/patch_convert/ryml/ryml_init.cc
+  ${FWDIR}/metamodule-plugin-sdk/version.cc
   #
   ${FWDIR}/src/fs/asset_drive/untar.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
+  ${FWDIR}/src/fs/general_io.cc
   #
   ${FWDIR}/src/user_settings/settings_file.cc
   ${FWDIR}/src/user_settings/settings_parse.cc
@@ -165,14 +172,15 @@ add_executable(
   ${FWDIR}/src/vcv_hardware/random.cpp
   ${FWDIR}/src/vcv_hardware/gettimeofday.cc
   #
+  ${FWDIR}/src/patch_play/modules_helpers.cc
+  #
   ${CMAKE_BINARY_DIR}/checkgit/git_version.cpp
 )
 
-# CoreModules sources
-add_subdirectory(${SHARED}/CoreModules CoreModules)
 
 # Fixup for compiler warning on files that include LVGL 8.3.4 headers:
 set_source_files_properties(
+  ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
@@ -192,9 +200,7 @@ target_include_directories(
           ${FWDIR}/lib/mdrivlib
           ${FWDIR}/lib/mdrivlib/target/stm32mp1
           ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7
-          ${SHARED}
-          ${SHARED}/patch
-          ${SHARED}/patch_convert
+          ${LIBDIR}
           ${FWDIR}/lib/fatfs/source
           ${FWDIR}/src/fs/fatfs
           ${FWDIR}/lib/cmsis-device/stm32mp157c/include
@@ -203,18 +209,19 @@ target_include_directories(
 )
 
 if (NOT TARGET cpputil::cpputil)
-  add_subdirectory(${SHARED}/cpputil cpputil)
+  add_subdirectory(${LIBDIR}/cpputil cpputil)
 endif()
+target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui ryml cpputil vcv_ports)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui metamodule::patch-serial cpputil vcv_ports)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
-# target_link_libraries(main.elf PUBLIC coreproc_plugin_export)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
+target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-4ms>")
 
-if (METAMODULE_PCB_VERSION)
-    target_compile_definitions(main.elf PRIVATE METAMODULE_PCB_VERSION=${METAMODULE_PCB_VERSION})
+if (CPU_TEST_ALL_MODULES)
+  target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
@@ -233,6 +240,5 @@ target_link_script(
   -Wno-psabi
   -ffreestanding
   -nostartfiles
-  # -flto=auto
 )
 

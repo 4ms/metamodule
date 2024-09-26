@@ -18,10 +18,10 @@ SvgSlider::SvgSlider()
 SvgSlider::~SvgSlider() = default;
 
 void SvgSlider::setBackgroundSvg(std::shared_ptr<window::Svg> svg) {
-	//TODO: should we just set this->SvgWidget::svg_filename here? then we don't have to special-case it in make_element
 	if (svg && svg->filename.size()) {
 		background->svg = svg;
 		background->box.size = get_svg_size(background->svg->filename);
+		this->box = background->box;
 	} else
 		pr_warn("Svgslider: Svg bg with empty name\n");
 }

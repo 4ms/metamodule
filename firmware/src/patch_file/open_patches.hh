@@ -1,7 +1,7 @@
 #pragma once
 
 #include "console/pr_dbg.hh"
-#include "patch_data.hh"
+#include "patch/patch_data.hh"
 #include "patch_file/patch_location.hh"
 #include <list>
 
@@ -18,6 +18,7 @@ struct OpenPatch {
 	PatchLocation loc{};
 	PatchData patch{};
 	unsigned modification_count = 0;
+	bool force_reload = false;
 };
 
 struct OpenPatchList {
@@ -56,6 +57,16 @@ struct OpenPatchList {
 		return num_erased > 0;
 	}
 
+	bool exists(OpenPatch const *patch) {
+		for (auto const &p : list) {
+			if (&p == patch)
+				return true;
+		}
+		return false;
+
+		// return (std::find(list.begin(), list.end(), patch) != list.end());
+	}
+
 	void remove(std::list<OpenPatch>::iterator item) {
 		list.erase(item);
 	}
@@ -80,7 +91,6 @@ struct OpenPatchList {
 		return list.size();
 	}
 
-private:
 	void dump_open_patches() {
 		unsigned i = 0;
 		size_t total_size = 0;
@@ -88,17 +98,18 @@ private:
 		for (auto &p : list) {
 			auto sz = patch_size(p.patch);
 			total_size += sz;
-			pr_dbg("[%d] %d:%s: %s #%d [%zu B]\n",
-				   i++,
-				   p.loc.vol,
-				   p.loc.filename.c_str(),
-				   p.patch.patch_name.c_str(),
-				   p.modification_count,
-				   sz);
+			pr_dump("[%d] %d:%s: %s #%d [%zu B]\n",
+					i++,
+					p.loc.vol,
+					p.loc.filename.c_str(),
+					p.patch.patch_name.c_str(),
+					p.modification_count,
+					sz);
 		}
-		pr_dbg("TOTAL: %zu\n", total_size);
+		pr_dump("TOTAL: %zu\n", total_size);
 	}
 
+private:
 	static size_t patch_size(PatchData const &p) {
 		auto sz = sizeof(PatchData);
 		sz += p.module_slugs.size() * sizeof(BrandModuleSlug);

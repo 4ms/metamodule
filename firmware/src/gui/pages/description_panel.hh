@@ -2,7 +2,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
-#include "patch_data.hh"
+#include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 #include "src/core/lv_event.h"
 
@@ -18,7 +18,7 @@ struct PatchDescriptionPanel {
 		lv_group_add_obj(group, ui_DescriptionClose);
 
 		lv_hide(ui_DescriptionEditPanel);
-		lv_group_add_obj(group, ui_PatchNameEditTextArea);
+		lv_hide(ui_PatchNameEditTextArea);
 		lv_group_add_obj(group, ui_DescriptionEditTextArea);
 
 		lv_group_add_obj(group, ui_DescriptionEditSaveButton);
@@ -26,12 +26,10 @@ struct PatchDescriptionPanel {
 
 		lv_group_set_editing(group, false);
 
-		lv_obj_add_event_cb(ui_InfoButton, openbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_DescriptionClose, closebut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_DescriptionEditButton, editbut_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_DescriptionEditTextArea, textarea_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(ui_PatchNameEditTextArea, textarea_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_DescriptionEditSaveButton, save_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_DescriptionEditCancelButton, cancel_cb, LV_EVENT_CLICKED, this);
@@ -44,8 +42,10 @@ struct PatchDescriptionPanel {
 
 	void set_patch(PatchData *cur_patch) {
 		patch = cur_patch;
-		lv_label_set_text(ui_Description, patch->description.c_str());
-		lv_label_set_text(ui_DescPanelPatchName, patch->patch_name.c_str());
+	}
+
+	void set_filename(std::string_view name) {
+		filename = name;
 	}
 
 	bool is_visible() {
@@ -71,11 +71,25 @@ struct PatchDescriptionPanel {
 	void show() {
 		lv_show(ui_DescriptionPanel);
 		lv_hide(ui_DescriptionEditPanel);
+
+		lv_obj_set_parent(ui_DescPanelPatchName, ui_DescriptionPanel);
+		lv_obj_move_background(ui_DescPanelPatchName);
+
 		lv_indev_set_group(lv_indev_get_next(nullptr), group);
 		lv_group_focus_obj(ui_DescriptionClose);
 		lv_group_set_editing(group, false);
 		is_showing = true;
 		edit_panel_visible = false;
+
+		lv_label_set_text(ui_Description, patch->description.c_str());
+		lv_label_set_text(ui_DescPanelPatchName, patch->patch_name.c_str());
+
+		lv_label_set_text(ui_DescPanelFileName, filename.c_str());
+
+		if (patch->midi_poly_num)
+			lv_label_set_text_fmt(ui_DescMIDIPolyNumLabel, "MIDI Poly Chans: %u", (unsigned)patch->midi_poly_num);
+		else
+			lv_label_set_text(ui_DescMIDIPolyNumLabel, "");
 
 		set_content_max_height(ui_DescriptionPanel, 230);
 	}
@@ -97,11 +111,6 @@ private:
 		page->hide();
 	}
 
-	static void openbut_cb(lv_event_t *event) {
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
-		page->show();
-	}
-
 	// Edit button: hide panel, show editable panel
 	static void editbut_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
@@ -109,9 +118,11 @@ private:
 		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
 		lv_hide(ui_DescriptionPanel);
 		lv_show(ui_DescriptionEditPanel);
-		lv_textarea_set_text(ui_PatchNameEditTextArea, lv_label_get_text(ui_DescPanelPatchName));
+
+		lv_obj_set_parent(ui_DescPanelPatchName, ui_DescriptionEditPanel);
+		lv_obj_move_background(ui_DescPanelPatchName);
+
 		lv_textarea_set_text(ui_DescriptionEditTextArea, lv_label_get_text(ui_Description));
-		lv_group_focus_obj(ui_PatchNameEditTextArea);
 		lv_group_set_editing(page->group, false);
 
 		set_content_max_height(ui_DescriptionEditPanel, 230);
@@ -126,7 +137,7 @@ private:
 		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
 		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
 		if (kb_hidden) {
-			if (event->target == ui_PatchNameEditTextArea || event->target == ui_DescriptionEditTextArea) {
+			if (event->target == ui_DescriptionEditTextArea) {
 				page->show_keyboard();
 				lv_keyboard_set_textarea(ui_Keyboard, event->target);
 				lv_obj_add_state(event->target, LV_STATE_USER_1);
@@ -157,7 +168,6 @@ private:
 	}
 
 	void hide_keyboard() {
-		lv_obj_clear_state(ui_PatchNameEditTextArea, LV_STATE_USER_1);
 		lv_obj_clear_state(ui_DescriptionEditTextArea, LV_STATE_USER_1);
 		if (active_ta)
 			lv_group_focus_obj(active_ta);
@@ -176,9 +186,7 @@ private:
 
 		if (page->patch) {
 			page->patch->description = lv_textarea_get_text(ui_DescriptionEditTextArea);
-			page->patch->patch_name = lv_textarea_get_text(ui_PatchNameEditTextArea);
 			lv_label_set_text(ui_Description, lv_textarea_get_text(ui_DescriptionEditTextArea));
-			lv_label_set_text(ui_DescPanelPatchName, lv_textarea_get_text(ui_PatchNameEditTextArea));
 			page->did_save = true;
 		}
 		page->hide();
@@ -207,6 +215,8 @@ private:
 	lv_obj_t *active_ta = nullptr;
 
 	PatchData *patch = nullptr;
+
+	std::string filename;
 
 	bool is_showing = false;
 	bool edit_panel_visible = false;

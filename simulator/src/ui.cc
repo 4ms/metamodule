@@ -1,4 +1,5 @@
 #include "ui.hh"
+#include "dynload/autoload_plugins.hh"
 #include "gui/notify/queue.hh"
 
 namespace MetaModule
@@ -38,6 +39,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 			pr_err("Failed to write settings file\n");
 		}
 	}
+
+	autoload_plugins();
 
 	patch_playloader.notify_audio_is_muted();
 	std::cout << "UI: buffers have # frames: in: " << in_buffer.size() << ", out: " << out_buffer.size() << "\n";
@@ -90,6 +93,13 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 	for (auto &w : params.lights.watch_lights) {
 		if (w.is_active())
 			w.value = patch_player.get_module_light(w.module_id, w.light_id);
+	}
+
+	for (auto &d : params.displays.watch_displays) {
+		if (d.is_active()) {
+			auto text = std::span<char>(d.text._data, d.text.capacity);
+			patch_player.get_display_text(d.module_id, d.light_id, text);
+		}
 	}
 
 	for (size_t i = 0; auto &frame : out_buffer) {
@@ -177,6 +187,36 @@ void Ui::update_channel_selections() {
 		std::cout << "Soundcard left input --> Input Jack # " << cur_inchan_left + 1 << "\n";
 		std::cout << "Soundcard right input --> Input Jack # " << cur_inchan_right + 1 << "\n";
 	}
+}
+
+void Ui::autoload_plugins() {
+	auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
+
+	while (true) {
+		auto status = autoloader.process();
+
+		if (status.state == AutoLoader::State::Error) {
+			notify_queue.put({status.message, Notification::Priority::Error, 2000});
+			break;
+		}
+
+		if (status.state == AutoLoader::State::Done) {
+			break;
+		}
+
+		if (status.message.length()) {
+			lv_label_set_text(ui_MainMenuNowPlaying, status.message.c_str());
+		}
+
+		auto now = get_time();
+		if ((now - last_lvgl_task_tm) > 2) {
+			last_lvgl_task_tm = now;
+			lv_timer_handler();
+		}
+	}
+
+	lv_label_set_text(ui_MainMenuNowPlaying, "");
+	page_manager.init();
 }
 
 } // namespace MetaModule

@@ -1,7 +1,7 @@
 #pragma once
-#include "conf/plugin_autoload_settings.hh"
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
+#include "dynload/autoload_plugins.hh"
 #include "dynload/plugin_manager.hh"
 #include "gui/notify/notification.hh"
 #include "gui/pages/page_manager.hh"
@@ -12,6 +12,7 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_playloader.hh"
 #include "screen/lvgl_driver.hh"
+#include "user_settings/plugin_autoload_settings.hh"
 
 namespace MetaModule
 {
@@ -67,15 +68,16 @@ public:
 		patch_playloader.request_new_audio_settings(settings.audio.sample_rate, settings.audio.block_size);
 	}
 
-	void update() {
-
+	void update_screen() {
 		auto now = HAL_GetTick();
 		if ((now - last_lv_update_tm) > 2) {
 			last_lv_update_tm = now;
 			lv_timer_handler();
 		}
+	}
 
-		now = HAL_GetTick();
+	void update_page() {
+		auto now = HAL_GetTick();
 		if ((now - last_page_update_tm) > 16) {
 			last_page_update_tm = now;
 			page_update_task();
@@ -90,60 +92,44 @@ public:
 		return params.lights;
 	}
 
-	bool new_patch_data = false;
-
 	void autoload_plugins() {
-		const auto &plugin_settings = settings.plugin_autoload;
+		lv_show(ui_MainMenuNowPlayingPanel);
+		lv_show(ui_MainMenuNowPlaying);
 
-		pr_info("Autoload: Starting...\n");
+		auto autoloader = AutoLoader{plugin_manager, settings.plugin_autoload};
 
-		if (plugin_settings.slug.size() == 0) {
-			pr_info("Autoload: No plugins to load\n");
-			return;
-		}
+		while (true) {
+			auto status = autoloader.process();
 
-		plugin_manager.start_loading_plugin_list();
-		auto result = plugin_manager.process_loading();
-		while (result.state != PluginFileLoader::State::GotList && result.state != PluginFileLoader::State::Error) {
-			result = plugin_manager.process_loading();
-		}
+			if (status.state == AutoLoader::State::Error) {
+				notify_queue.put({status.message, Notification::Priority::Error, 2000});
+				break;
 
-		if (result.error_message.length()) {
-			pr_err("Autoload: Error: %s\n", result.error_message.c_str());
-			return;
-		}
+			} else if (status.state == AutoLoader::State::Done) {
+				break;
 
-		const auto found_plugins = plugin_manager.found_plugin_list();
-
-		for (const auto &s : plugin_settings.slug) {
-			pr_info("Autoload: Looking for plugin: %s\n", s.c_str());
-			const auto match = std::find_if(found_plugins->begin(), found_plugins->end(), [s](PluginFile const &f) {
-				const auto &plugin_name = std::string{std::string_view{f.plugin_name}};
-				if (plugin_name == s || (plugin_name.contains(s) && plugin_name.ends_with(".so"))) {
-					return true;
+			} else {
+				if (status.message.length()) {
+					lv_label_set_text(ui_MainMenuNowPlaying, status.message.c_str());
 				}
-				return false;
-			});
+			}
 
-			if (match == found_plugins->end()) {
-				pr_info("Autoload: Can't find plugin: %s\n", s.c_str());
-				continue;
-			}
-			const auto idx = std::distance(found_plugins->begin(), match);
-			plugin_manager.load_plugin(idx);
-			result = plugin_manager.process_loading();
-			while (result.state != PluginFileLoader::State::Success && result.state != PluginFileLoader::State::Error) {
-				result = plugin_manager.process_loading();
-			}
-			if (result.error_message.length()) {
-				pr_err("Autoload: Error: %s\n", result.error_message.c_str());
-				continue;
-			}
-			pr_info("Autoload: Loaded plugin: %s\n", s.c_str());
+			update_screen();
 		}
 
-		pr_info("Autoload: Complete\n");
+		lv_label_set_text(ui_MainMenuNowPlaying, "");
+		page_manager.init();
 	}
+
+	TextDisplayWatcher &displays() {
+		return params.displays;
+	}
+
+	void load_initial_patch() {
+		patch_playloader.load_initial_patch(settings.last_patch_opened, settings.last_patch_vol);
+	}
+
+	bool new_patch_data = false;
 
 private:
 	void page_update_task() {
@@ -155,7 +141,8 @@ private:
 
 		auto load_status = patch_playloader.handle_file_events();
 		if (!load_status.success) {
-			notify_queue.put({load_status.error_string, Notification::Priority::Error, 3000});
+			notify_queue.put({load_status.error_string, Notification::Priority::Error, 1500});
+
 		} else if (load_status.error_string.size()) {
 			notify_queue.put({load_status.error_string, Notification::Priority::Info, 3000});
 		}

@@ -1,4 +1,5 @@
 #pragma once
+#include "convert_plugins.hh"
 #include "fat_file_io.hh"
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
@@ -45,6 +46,8 @@ struct InternalPluginManager {
 		};
 
 		asset_tar.extract_files(ramdisk_writer);
+
+		ramdisk.debug_print_disk_info();
 	}
 
 	void load_internal_plugins() {
@@ -74,33 +77,37 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelChannelStrip);
 		pluginInstance->addModel(modelMotionMTR);
 		pluginInstance->addModel(modelSpringReverb);
+		pluginInstance->addModel(modelBurst);
+		pluginInstance->addModel(modelVoltio);
+		pluginInstance->addModel(modelOctaves);		
+		pluginInstance->addModel(modelNoisePlethora);
+		pluginInstance->addModel(modelMuxlicer);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_AudibleInstruments
 		auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
 		audins_plugin.slug = "AudibleInstruments";
 		pluginInstance = &audins_plugin;
-		pluginInstance->addModel(modelBlinds);
-		pluginInstance->addModel(modelBraids);
-		pluginInstance->addModel(modelBranches);
-		pluginInstance->addModel(modelElements);
-		pluginInstance->addModel(modelKinks);
-		pluginInstance->addModel(modelLinks);
-		pluginInstance->addModel(modelMarbles);
-		pluginInstance->addModel(modelRings);
-		pluginInstance->addModel(modelRipples);
-		pluginInstance->addModel(modelShades);
-		pluginInstance->addModel(modelShelves);
-		pluginInstance->addModel(modelTides2);
-		pluginInstance->addModel(modelVeils);
-		// NEW:
-		pluginInstance->addModel(modelClouds);
-		pluginInstance->addModel(modelFrames);
-		pluginInstance->addModel(modelPlaits);
-		pluginInstance->addModel(modelStages);
-		pluginInstance->addModel(modelStreams);
-		pluginInstance->addModel(modelTides);
-		pluginInstance->addModel(modelWarps);
+		AudibleInstruments::addModel(&audins_plugin, modelBlinds);
+		AudibleInstruments::addModel(&audins_plugin, modelBraids);
+		AudibleInstruments::addModel(&audins_plugin, modelBranches);
+		AudibleInstruments::addModel(&audins_plugin, modelElements);
+		AudibleInstruments::addModel(&audins_plugin, modelKinks);
+		AudibleInstruments::addModel(&audins_plugin, modelLinks);
+		AudibleInstruments::addModel(&audins_plugin, modelMarbles);
+		AudibleInstruments::addModel(&audins_plugin, modelRings);
+		AudibleInstruments::addModel(&audins_plugin, modelRipples);
+		AudibleInstruments::addModel(&audins_plugin, modelShades);
+		AudibleInstruments::addModel(&audins_plugin, modelShelves);
+		AudibleInstruments::addModel(&audins_plugin, modelTides2);
+		AudibleInstruments::addModel(&audins_plugin, modelVeils);
+		AudibleInstruments::addModel(&audins_plugin, modelClouds);
+		AudibleInstruments::addModel(&audins_plugin, modelFrames);
+		AudibleInstruments::addModel(&audins_plugin, modelPlaits);
+		AudibleInstruments::addModel(&audins_plugin, modelStages);
+		AudibleInstruments::addModel(&audins_plugin, modelStreams);
+		AudibleInstruments::addModel(&audins_plugin, modelTides);
+		AudibleInstruments::addModel(&audins_plugin, modelWarps);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_hetrickcv
@@ -166,14 +173,13 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelVectorMix);
 		pluginInstance->addModel(modelWaveshape);
 		pluginInstance->addModel(modelXYToPolar);
-		// TODO:
-		// 	pluginInstance->addModel(modelComparator);
-		// 	pluginInstance->addModel(modelDataCompander);
-		// 	pluginInstance->addModel(modelDelta);
-		// 	pluginInstance->addModel(modelPhasorMixer);
-		// 	pluginInstance->addModel(modelRandomGates);
-		// 	pluginInstance->addModel(modelRotator);
-		// 	pluginInstance->addModel(modelRungler);
+		pluginInstance->addModel(modelPhasorMixer);
+		pluginInstance->addModel(modelRandomGates);
+		pluginInstance->addModel(modelComparator);
+		pluginInstance->addModel(modelDataCompander);
+		pluginInstance->addModel(modelDelta);
+		pluginInstance->addModel(modelRotator);
+		pluginInstance->addModel(modelRungler);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_nonlinearcircuits

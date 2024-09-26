@@ -5,9 +5,9 @@
 #include "util/static_string.hh"
 #include <array>
 #include <cstdint>
+#include <expected>
 #include <span>
 #include <variant>
-#include <expected>
 
 namespace MetaModule
 {
@@ -77,6 +77,9 @@ struct IntercoreStorageMessage {
 	std::span<char> buffer;
 	PatchDirList *patch_dir_list;
 	StaticString<255> filename;
+	enum class VolEvent { None, Mounted, Unmounted };
+	VolEvent USBEvent;
+	VolEvent SDEvent;
 
 	uint32_t address;
 	uint32_t length;
@@ -85,16 +88,15 @@ struct IntercoreStorageMessage {
 	uint32_t *bytes_processed;
 	enum FlashTarget : uint8_t { WIFI, QSPI };
 	FlashTarget flashTarget;
-	
-	enum WifiIPError : uint8_t {NO_MODULE_CONNECTED, NO_IP};
-	struct Endpoint_t
-	{
-		std::array<uint8_t,4> ip;
+
+	enum WifiIPError : uint8_t { NO_MODULE_CONNECTED, NO_IP };
+	struct Endpoint_t {
+		std::array<uint8_t, 4> ip;
 		uint16_t port;
 	};
-	using WifiIPResult = std::expected<Endpoint_t,WifiIPError>;
+	using WifiIPResult = std::expected<Endpoint_t, WifiIPError>;
 
-	WifiIPResult wifi_ip_result ;	
+	WifiIPResult wifi_ip_result;
 
 	PluginFileList *plugin_file_list;
 };

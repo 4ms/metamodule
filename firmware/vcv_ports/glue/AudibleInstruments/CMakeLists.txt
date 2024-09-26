@@ -14,7 +14,11 @@ include(modules.cmake)
 
 add_library(AudibleInstrumentsLibrary OBJECT ${AUDIBLEINSTRUMENTS_SOURCE_PATHS})
 
-target_include_directories(AudibleInstrumentsLibrary PRIVATE ${AUDIBLE_DIR}/src ${AUDIBLE_DIR}/eurorack)
+target_include_directories(AudibleInstrumentsLibrary PRIVATE 
+	${AUDIBLE_DIR}/src 
+	${AUDIBLE_DIR}/eurorack
+	../../
+)
 
 target_compile_options(AudibleInstrumentsLibrary
   PRIVATE
@@ -31,6 +35,14 @@ set_source_files_properties(
   PROPERTIES COMPILE_OPTIONS "-Wno-unused-const-variable;-Wno-unused-but-set-variable"
 )
 
+# Fix plaits engines using "virtual" instead of "override"
+set_source_files_properties(
+  ${AUDIBLE_DIR}/eurorack/plaits/plaits.cc
+  ${AUDIBLE_DIR}/src/Plaits.cpp
+  PROPERTIES COMPILE_OPTIONS "-Wno-suggest-override"
+)
+
+
 # Fix for stmlib STATIC_ASSERT creating typedefs that aren't used
 target_compile_options(AudibleInstrumentsLibrary PRIVATE -Wno-unused-local-typedefs)
 
@@ -44,7 +56,7 @@ set_source_files_properties(
 target_link_options(AudibleInstrumentsLibrary PUBLIC -Wno-stringop-overflow)
 
 # Define TEST so braids dsp/dsp.h works (since it contains raw Cortex-M4 assembly)
-target_compile_definitions(AudibleInstrumentsLibrary PRIVATE TEST)
+target_compile_definitions(AudibleInstrumentsLibrary PRIVATE TEST METAMODULE)
 
 set_property(TARGET AudibleInstrumentsLibrary PROPERTY CXX_STANDARD 23)
 
@@ -54,6 +66,7 @@ if (BUILD_DYN_PLUGIN)
     create_plugin(
         SOURCE_LIB      AudibleInstrumentsLibrary
         PLUGIN_NAME     AudibleInstruments
+        PLUGIN_JSON     ${CMAKE_CURRENT_LIST_DIR}/../../AudibleInstruments/plugin.json
         SOURCE_ASSETS   ${CMAKE_CURRENT_LIST_DIR}/../../../assets/AudibleInstruments
         DESTINATION     ${CMAKE_CURRENT_LIST_DIR}/../../../build/metamodule-plugins/AudibleInstruments
     )

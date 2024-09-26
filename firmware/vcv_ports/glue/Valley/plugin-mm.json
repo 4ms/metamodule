@@ -1,0 +1,21 @@
+{
+	"MetaModuleBrandName": "Valley",
+	"MetaModulePluginMaintainer": "4ms Company",
+	"MetaModulePluginMaintainerEmail": "",
+	"MetaModulePluginMaintainerUrl": "",
+	"MetaModuleDescription": "",
+	"MetaModuleIncludedModules": [
+	{
+		"slug": "Plateau",
+		"name": "Plateau"
+	},
+	{
+		"slug": "Topograph",
+		"name": "Topograph"
+	},
+	{
+		"slug": "uGraph",
+		"name": "uGraph"
+	}
+	]
+}

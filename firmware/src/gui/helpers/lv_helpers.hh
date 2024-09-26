@@ -70,6 +70,12 @@ inline void label_overflow_dot(lv_obj_t *obj) {
 	}
 }
 
+inline void label_wraps(lv_obj_t *obj) {
+	if (lv_obj_get_child_cnt(obj) > 0) {
+		lv_label_set_long_mode(lv_obj_get_child(obj, 0), LV_LABEL_LONG_WRAP);
+	}
+}
+
 inline void remove_all_event_cb(lv_obj_t *obj) {
 	while (lv_obj_remove_event_cb(obj, nullptr))
 		;
@@ -101,6 +107,10 @@ inline void lv_check(lv_obj_t *obj, bool checked = true) {
 		lv_obj_add_state(obj, LV_STATE_CHECKED);
 	else
 		lv_uncheck(obj);
+}
+
+inline bool lv_is_checked(lv_obj_t *obj) {
+	return lv_obj_has_state(obj, LV_STATE_CHECKED);
 }
 
 inline lv_obj_t *create_labeled_check_obj(lv_obj_t *parent, const char *name) {

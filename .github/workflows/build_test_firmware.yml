@@ -22,9 +22,8 @@ on:
       - main
       - fix-ci
     tags:
-      - 'firmware-v[0-9]+.[0-9]+.[0-9]+'
+      - 'firmware-v[0-9]+.[0-9]+.[0-9]+*'
     paths:
-      - 'shared/**'
       - 'firmware/**'
       - '!firmware/bootloader/**'
       - '!**.md' # Skip docs
@@ -37,10 +36,9 @@ jobs:
     if: ${{ github.event_name == 'push' || inputs.linux_x64 }}
     strategy:
         matrix:
-          gcc: ['12.2.Rel1']  # can add other versions if needed
+          gcc: ['12.3.Rel1']  # can add other versions if needed
     name: "Build firmware"
     runs-on: ubuntu-24.04
-    container: ghcr.io/lnnrts/metamodule@sha256:fc81416d9f424a3dcc735644cdfb0e6f8d2641f64fe5eec73d9e3e6bc23640c3
     env:
       preset: ${{ inputs.skip_wifi && 'base' || 'full' }}
     steps:
@@ -62,9 +60,13 @@ jobs:
         with:
           submodules: 'recursive'
           token: ${{ secrets.CHECKOUT_TOKEN }}
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install ninja-build
 
       - name: Build and test
-        run: cd firmware && make configure PRESET=${{ env.preset }} && make all
+        run: cd firmware && cmake --fresh --preset ${{ env.preset }} -G Ninja && make all
 
       - name: Set Release Version
         if: startsWith(github.ref, 'refs/tags/firmware-v')
@@ -99,7 +101,7 @@ jobs:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          release: '12.2.Rel1'
+          release: '12.3.Rel1'
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -108,5 +110,5 @@ jobs:
           token: ${{ secrets.CHECKOUT_TOKEN }}
 
       - name: Build and test
-        run: cd firmware && make configure PRESET=${{ env.preset }} && make all
+        run: cd firmware && cmake --fresh --preset ${{ env.preset }} -G "Unix Makefiles" && make all
 

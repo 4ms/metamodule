@@ -17,30 +17,30 @@ void VCVModuleWrapper::set_samplerate(float rate) {
 }
 
 void VCVModuleWrapper::set_param(int id, float val) {
-	if (id < (int)paramQuantities.size() && paramQuantities[id]) {
+	if ((size_t)id < paramQuantities.size() && paramQuantities[id]) {
 		val *= (paramQuantities[id]->maxValue - paramQuantities[id]->minValue);
 		val += paramQuantities[id]->minValue;
 		if (paramQuantities[id]->snapEnabled)
 			val = std::round(val);
 	}
-	if (id < (int)params.size())
+	if ((size_t)id < params.size())
 		params[id].setValue(val);
 }
 
-void VCVModuleWrapper::set_input(const int input_id, const float val) {
-	if (input_id < (int)inputs.size())
+void VCVModuleWrapper::set_input(int input_id, float val) {
+	if ((size_t)input_id < inputs.size())
 		inputs[input_id].setVoltage(val);
 }
 
-float VCVModuleWrapper::get_output(const int output_id) const {
-	if (output_id < (int)outputs.size())
+float VCVModuleWrapper::get_output(int output_id) const {
+	if ((size_t)output_id < outputs.size())
 		return outputs[output_id].getVoltage();
 	else
 		return 0.f;
 }
 
-float VCVModuleWrapper::get_led_brightness(const int led_id) const {
-	if (led_id >= 0 && led_id < (int)lights.size()) {
+float VCVModuleWrapper::get_led_brightness(int led_id) const {
+	if ((size_t)led_id < lights.size()) {
 		auto l = std::clamp(lights[led_id].value, 0.f, 1.f);
 		return l;
 	}
@@ -48,17 +48,25 @@ float VCVModuleWrapper::get_led_brightness(const int led_id) const {
 }
 
 void VCVModuleWrapper::mark_all_inputs_unpatched() {
-	for (auto &in : inputs)
+	for (auto &in : inputs) {
+		for (auto &chan_volts : in.voltages) {
+			chan_volts = 0;
+		}
 		in.channels = 0;
+	}
 }
 
-void VCVModuleWrapper::mark_input_unpatched(const int input_id) {
-	if (input_id < (int)inputs.size())
+void VCVModuleWrapper::mark_input_unpatched(int input_id) {
+	if ((size_t)input_id < inputs.size()) {
 		inputs[input_id].channels = 0;
+		for (auto &chan_volts : inputs[input_id].voltages) {
+			chan_volts = 0;
+		}
+	}
 }
 
-void VCVModuleWrapper::mark_input_patched(const int input_id) {
-	if (input_id < (int)inputs.size())
+void VCVModuleWrapper::mark_input_patched(int input_id) {
+	if ((size_t)input_id < inputs.size())
 		inputs[input_id].channels = 1;
 }
 
@@ -67,12 +75,12 @@ void VCVModuleWrapper::mark_all_outputs_unpatched() {
 		out.channels = 0;
 }
 
-void VCVModuleWrapper::mark_output_unpatched(const int output_id) {
-	if (output_id < (int)outputs.size())
+void VCVModuleWrapper::mark_output_unpatched(int output_id) {
+	if ((size_t)output_id < outputs.size())
 		outputs[output_id].channels = 0;
 }
 
-void VCVModuleWrapper::mark_output_patched(const int output_id) {
-	if (output_id < (int)outputs.size())
+void VCVModuleWrapper::mark_output_patched(int output_id) {
+	if ((size_t)output_id < outputs.size())
 		outputs[output_id].channels = 1;
 }

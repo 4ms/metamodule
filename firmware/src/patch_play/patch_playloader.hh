@@ -1,7 +1,7 @@
 #pragma once
-#include "CoreModules/modules_helpers.hh"
 #include "calibrate/calibration_patch.hh"
 #include "delay.hh"
+#include "modules_helpers.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_file/open_patch_manager.hh"
 #include "patch_file/patch_location.hh"
@@ -9,6 +9,8 @@
 #include "pr_dbg.hh"
 #include "result_t.hh"
 #include <atomic>
+
+size_t get_heap_size();
 
 namespace MetaModule
 {
@@ -21,10 +23,15 @@ struct PatchPlayLoader {
 		, patches_{patches} {
 	}
 
-	void load_initial_patch() {
+	void load_initial_patch(std::string_view patchname, Volume patch_vol) {
 		uint32_t tries = 10000;
 
-		PatchLocation initial_patch_loc{"/SlothDrone.yml", Volume::NorFlash};
+		if (patchname.length() == 0) {
+			patchname = "/SlothDrone.yml";
+			patch_vol = Volume::NorFlash;
+		}
+
+		PatchLocation initial_patch_loc{patchname, patch_vol};
 		while (--tries) {
 			if (storage_.request_load_patch(initial_patch_loc))
 				break;
@@ -181,7 +188,12 @@ struct PatchPlayLoader {
 			i++;
 		}
 
+		pr_info("Heap: %u\n", get_heap_size());
 		start_audio();
+	}
+
+	void reset_module(unsigned module_id) {
+		player_.reset_module(module_id);
 	}
 
 	void remove_module(unsigned module_id) {
@@ -191,13 +203,17 @@ struct PatchPlayLoader {
 
 		player_.remove_module(module_id);
 
+		pr_info("Heap: %u\n", get_heap_size());
 		start_audio();
 	}
 
 	void prepare_remove_plugin(std::string_view brand_slug) {
+		auto playing_patch = patches_.get_playing_patch();
+		if (!playing_patch)
+			return;
+
 		bool patch_contains_brand = false;
 
-		auto playing_patch = patches_.get_playing_patch();
 		std::string brand_prefix = std::string(brand_slug) + ":";
 		for (std::string_view module_slug : playing_patch->module_slugs) {
 			if (module_slug.starts_with(brand_prefix)) {
@@ -304,6 +320,7 @@ private:
 
 		auto result = player_.load_patch(*next_patch);
 		if (result.success) {
+			pr_info("Heap: %u\n", get_heap_size());
 			if (next_patch == patches_.get_view_patch())
 				patches_.play_view_patch();
 

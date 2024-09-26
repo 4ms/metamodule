@@ -145,10 +145,15 @@ private:
 			[page](bool ok) {
 				if (ok) {
 					page->storage.request_reset_factory_patches();
+					while (true) {
+						auto msg = page->storage.get_message();
+						if (msg.message_type == FileStorageProxy::FactoryResetPatchesDone)
+							break;
+					}
 				}
 			},
-			"Do you really want to PERMANENTLY DELETE all patches stored internally? This will replace them with "
-			"factory default patches.\n",
+			"Do you really want to PERMANENTLY DELETE all settings and all patches stored internally? The "
+			"factory default patches will be restored. You must reboot.\n",
 			"Delete");
 	}
 

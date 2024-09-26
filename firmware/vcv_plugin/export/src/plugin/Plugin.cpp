@@ -1,11 +1,12 @@
 #include "console/pr_dbg.hh"
 #include "module_widget_adaptor.hh"
-#include "shared/CoreModules/AudibleInstruments/info/Rings_info.hh"
-#include "shared/CoreModules/moduleFactory.hh"
 #include <app/ModuleWidget.hpp>
 #include <deque>
 #include <plugin/Model.hpp>
 #include <plugin/Plugin.hpp>
+#include <string_view>
+
+#include "CoreModules/moduleFactory.hh"
 
 extern rack::plugin::Plugin *pluginInstance;
 
@@ -26,15 +27,6 @@ void Plugin::addModel(Model *model) {
 
 	if (ModuleFactory::isValidBrandModule(brand, slug)) {
 		pr_err("Duplicate module slug: %s, skipping\n", model->slug.c_str());
-		return;
-	}
-
-	if (slug == "Rings") {
-		ModuleFactory::registerModuleType("AudibleInstruments",
-										  slug,
-										  model->creation_func,
-										  ModuleInfoView::makeView<RingsInfo>(),
-										  "AudibleInstruments/Rings.png");
 		return;
 	}
 
@@ -106,6 +98,12 @@ Model *Plugin::getModel(const std::string &slug) {
 
 std::string Plugin::getBrand() {
 	return slug;
+}
+
+void Plugin::fromJson(json_t *rootJ) {
+}
+
+void Plugin::modulesFromJson(json_t *rootJ) {
 }
 
 } // namespace rack::plugin

@@ -62,6 +62,8 @@ struct MetaParams {
 
 		midi_connected = that.midi_connected;
 
+		midi_poly_chans = that.midi_poly_chans;
+
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
 	}
@@ -83,6 +85,8 @@ struct MetaParams {
 		audio_load = that.audio_load;
 
 		midi_connected = that.midi_connected;
+
+		midi_poly_chans = that.midi_poly_chans;
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;

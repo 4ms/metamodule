@@ -55,11 +55,20 @@
       }
     },
     {
-      "name": "pcb-p12",
-      "description": "PCB p11 with mods (aka p12)",
-      "inherits": "base",
+      "name": "audible",
+      "inherits": "full",
       "cacheVariables": {
-        "METAMODULE_PCB_VERSION": "12"
+        "BUILD_DYN_PLUGIN_Befaco":             { "type": "BOOL", "value": "ON" }, 
+        "BUILD_DYN_PLUGIN_hetrickcv":          { "type": "BOOL", "value": "ON" },
+        "BUILD_DYN_PLUGIN_nonlinearcircuits":  { "type": "BOOL", "value": "ON" },
+        "BUILD_DYN_PLUGIN_eightfold":          { "type": "BOOL", "value": "ON" }
+      }
+    },
+    {
+      "name": "cpu-test",
+      "inherits": "full",
+      "cacheVariables": {
+        "CPU_TEST_ALL_MODULES": { "type": "BOOL", "value": "ON" }
       }
     }
   ],
@@ -75,6 +84,10 @@
     {
       "name": "dyn-plugins",
       "configurePreset": "dyn-plugins"
+    },
+    {
+      "name": "cpu-test",
+      "configurePreset": "cpu-test"
     }
   ]
 }

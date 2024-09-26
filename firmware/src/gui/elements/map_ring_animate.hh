@@ -116,17 +116,17 @@ struct MapRingDisplay {
 			flash_once(map_ring, Flash::On);
 	}
 
-	static void flash_once(lv_obj_t *map_ring, Flash flash) {
+	void flash_once(lv_obj_t *map_ring, Flash flash) {
 		if (!map_ring)
 			return;
 
-		auto start = LV_OPA_50;
-		auto end = LV_OPA_0;
+		uint8_t start = settings.param_style.opa;
+		uint8_t end = LV_OPA_0;
 		auto delay = 200;
 		auto time = 500;
 		if (flash == Flash::Brighter) {
 			start = LV_OPA_100;
-			end = LV_OPA_50;
+			end = settings.param_style.opa;
 			delay = 100;
 			time = 100;
 		}
