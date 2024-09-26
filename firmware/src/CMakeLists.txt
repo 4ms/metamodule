@@ -3,6 +3,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
 option(ENABLE_WIFI_BRIDGE        "Enable serial bridge to wifi module" ON)
 
+include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
+enable_logging()
+
 set(FWDIR ${CMAKE_SOURCE_DIR})
 set(LIBDIR ${FWDIR}/lib)
 
