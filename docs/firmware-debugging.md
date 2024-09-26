@@ -156,6 +156,37 @@ pin). The bottom four pins are all GND. Settings are 115200, 8N1. See image abov
 Use `pr_dbg()`, `pr_warn()`, `pr_err()`, and `pr_trace()` for debug output. These
 require the `pr_dbg.hh` header.
 
+Make sure to set the console log level equal or lower to what you want to see. The levels are:
+
+- NONE (no console output)
+- ERROR (pr_err only)
+- WARN (pr_warn and above)
+- INFO (pr_info and above)
+- DEBUG (pr_dbg and above)
+- TRACE (pr_trace and above)
+- DUMP (pr_dump and above)
+
+To set the log level, configure with cmake like this:
+
+```
+cmake --fresh --preset full -G Ninja -DLOG_LEVEL=TRACE
+```
+
+The convention for each level is as follows:
+
+- Error: unexpected conditions that may lead to program failure
+- Warnings: conditions that deserve attention but do not lead to program failure
+- Info: Important or useful information that is neither a warning or error
+- Debug: temporary messages used for debugging
+- Trace: detailed log of execution
+- Dump: large amounts of verbose data
+
+Debug (pr_dbg) is particularly useful to use ONLY when debugging. Then, when the
+feature is ready to merge, it's easy to search for pr_dbg and remove all
+instances (or selectively replace with a more suitable level).
+This technique reduces clutter in the console as we continually add features.
+
+
 
 ## Notes
 

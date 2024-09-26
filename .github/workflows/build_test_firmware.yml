@@ -36,7 +36,7 @@ jobs:
     if: ${{ github.event_name == 'push' || inputs.linux_x64 }}
     strategy:
         matrix:
-          gcc: ['12.2.Rel1']  # can add other versions if needed
+          gcc: ['12.3.Rel1']  # can add other versions if needed
     name: "Build firmware"
     runs-on: ubuntu-24.04
     env:
@@ -66,7 +66,7 @@ jobs:
           sudo apt install ninja-build
 
       - name: Build and test
-        run: cd firmware && make configure PRESET=${{ env.preset }} && make all
+        run: cd firmware && cmake --fresh --preset ${{ env.preset }} -G Ninja && make all
 
       - name: Set Release Version
         if: startsWith(github.ref, 'refs/tags/firmware-v')
@@ -101,7 +101,7 @@ jobs:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          release: '12.2.Rel1'
+          release: '12.3.Rel1'
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -110,5 +110,5 @@ jobs:
           token: ${{ secrets.CHECKOUT_TOKEN }}
 
       - name: Build and test
-        run: cd firmware && make configure PRESET=${{ env.preset }} && make all
+        run: cd firmware && cmake --fresh --preset ${{ env.preset }} -G "Unix Makefiles" && make all
 
