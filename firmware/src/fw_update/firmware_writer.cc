@@ -102,6 +102,7 @@ IntercoreStorageMessage FirmwareWriter::flashWifi(std::span<uint8_t> buffer,
 	if (result == ESP_LOADER_SUCCESS) {
 		const std::size_t BatchSize = 1024;
 
+		HAL_Delay(20);
 		result = Flasher::flash_start(address, buffer.size(), BatchSize, uncompressed_size);
 
 		if (result == ESP_LOADER_SUCCESS) {
