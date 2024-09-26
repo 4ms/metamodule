@@ -21,24 +21,59 @@ namespace MetaModule::WifiInterface
 PatchStorage *patchStorage;
 
 flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuilder &fbb) {
-	auto CreateVector = [&fbb](auto fileList) {
-		std::vector<flatbuffers::Offset<PatchInfo>> elems(fileList.files.size());
-		for (std::size_t i = 0; i < fileList.files.size(); i++) {
-			auto thisName = fbb.CreateString(std::string_view(fileList.files[i].patchname));
 
-			auto thisFilename = fbb.CreateString(std::string_view(fileList.files[i].filename));
-			auto thisInfo = CreatePatchInfo(fbb, thisName, thisFilename);
-			elems[i] = thisInfo;
-		};
-		//TODO: add directories, and files inside directories
-		return fbb.CreateVector(elems);
+	auto ExtractFileInfo = [&fbb](auto& thisFile)
+	{
+		auto thisName = fbb.CreateString(std::string_view(thisFile.patchname));
+		auto thisFilename = fbb.CreateString(std::string_view(thisFile.filename));
+
+		return CreatePatchInfo(fbb, thisName, thisFilename, thisFile.filesize, thisFile.timestamp);
 	};
+
+	auto ExtractFileFromDir = [&fbb, &ExtractFileInfo](const auto& fileList)
+	{
+		std::vector<flatbuffers::Offset<PatchInfo>> fileInfos(fileList.files.size());
+		for (std::size_t i = 0; i < fileList.files.size(); i++) {
+			fileInfos[i] = ExtractFileInfo(fileList.files[i]);
+		};
+		auto files = fbb.CreateVector(fileInfos);
+
+		return files;
+	};
+
+	auto ExtractDirFull = [&fbb, &ExtractFileFromDir](const auto& fileList, std::optional<std::string_view> overrideName)
+	{
+		auto FixDirName = [](std::string_view in)
+		{
+			// remove extra leading slash
+			return in.substr(1);
+		};
+
+		std::vector<flatbuffers::Offset<DirInfo>> dirInfos(fileList.dirs.size());
+		for (std::size_t i=0; i<fileList.dirs.size(); i++)
+		{
+			auto files = ExtractFileFromDir(fileList.dirs[i]);
+			auto name = fbb.CreateString(FixDirName(std::string_view(fileList.dirs[i].name)));
+
+			dirInfos[i] = CreateDirInfo(fbb, name, 0, files);
+		}
+		auto dirs = fbb.CreateVector(dirInfos);
+
+		auto files = ExtractFileFromDir(fileList);
+		
+		auto name = overrideName.has_value()
+			? fbb.CreateString(std::string_view(*overrideName)) 
+			: fbb.CreateString(FixDirName(std::string_view(fileList.name)));
+
+		return CreateDirInfo(fbb, name, dirs, files);
+	};
+
 
 	auto patchFileList = patchStorage->getPatchList();
 
-	auto usbList = CreateVector(patchFileList.volume_root(Volume::USB));
-	auto flashList = CreateVector(patchFileList.volume_root(Volume::NorFlash));
-	auto sdcardList = CreateVector(patchFileList.volume_root(Volume::SDCard));
+	auto usbList    = ExtractDirFull(patchFileList.volume_root(Volume::USB), patchFileList.get_vol_name(Volume::USB));
+	auto flashList  = ExtractDirFull(patchFileList.volume_root(Volume::NorFlash), patchFileList.get_vol_name(Volume::NorFlash));
+	auto sdcardList = ExtractDirFull(patchFileList.volume_root(Volume::SDCard), patchFileList.get_vol_name(Volume::SDCard));
 
 	auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
 	auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
@@ -248,7 +283,6 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 
 			sendResponse(fbb.GetBufferSpan());
 		} else if (auto uploadPatchMessage = message->content_as_UploadPatch(); uploadPatchMessage) {
-			auto destination = uploadPatchMessage->destination();
 
 			assert(uploadPatchMessage->content()->is_span_observable);
 			auto receivedPatchData =
@@ -256,24 +290,33 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 
 			auto filename = flatbuffers::GetStringView(uploadPatchMessage->filename());
 
-			pr_info("Received Patch of %u bytes for location %u\n", receivedPatchData.size(), destination);
+			pr_info("Received Patch %.*s of %u bytes\n", filename.size(), filename.data(), receivedPatchData.size());
 
-			auto LocationToVolume = [](auto location) -> std::optional<Volume> {
-				switch (location) {
-					case StorageLocation::StorageLocation_USB:
-						return Volume::USB;
-					case StorageLocation::StorageLocation_FLASH:
-						return Volume::NorFlash;
-					case StorageLocation::StorageLocation_SDCARD:
-						return Volume::SDCard;
-					default:
-						return std::nullopt;
+			auto ParseStorageString = [](std::string_view locationName) -> std::optional<Volume> {
+
+				if (locationName.compare(PatchDirList::get_vol_name(Volume::USB)) == 0)
+				{
+					return Volume::USB;
+				}
+				else if (locationName.compare(PatchDirList::get_vol_name(Volume::NorFlash)) == 0)
+				{
+					return Volume::NorFlash;
+				}
+				else if (locationName.compare(PatchDirList::get_vol_name(Volume::SDCard)) == 0)
+				{
+					return Volume::SDCard;
+				}
+				else
+				{
+					return std::nullopt;
 				}
 			};
 
 			flatbuffers::FlatBufferBuilder fbb;
 
-			if (auto thisVolume = LocationToVolume(destination); thisVolume) {
+			auto volumeString = flatbuffers::GetStringView(uploadPatchMessage->volume());
+
+			if (auto thisVolume = ParseStorageString(volumeString); thisVolume) {
 				auto success = patchStorage->write_file(*thisVolume, filename, receivedPatchData);
 
 				if (success) {
@@ -306,6 +349,7 @@ void handle_client_channel(uint8_t destination, std::span<uint8_t> payload) {
 			}
 
 			sendResponse(fbb.GetBufferSpan());
+
 
 		} else {
 			pr_trace("Other option\n");
