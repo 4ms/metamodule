@@ -16,7 +16,7 @@ namespace StaticBuffers
 
 extern StreamConf::Audio::AudioInBlock audio_in_dma_block;
 extern StreamConf::Audio::AudioOutBlock audio_out_dma_block;
-extern std::array<char, 65536> raw_patch_data;
+extern std::array<char, 1024 * 1024> raw_patch_data;
 extern IntercoreStorageMessage icc_shared_message;
 extern PatchDirList patch_dir_list;
 extern DoubleBufParamBlock param_blocks;

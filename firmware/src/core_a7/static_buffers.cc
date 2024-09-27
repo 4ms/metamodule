@@ -19,7 +19,7 @@ namespace StaticBuffers
 
 __attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock audio_in_dma_block{};
 __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block{};
-__attribute__((section(".ddma"))) std::array<char, 65536> raw_patch_data;
+__attribute__((section(".ddma"))) std::array<char, 1024 * 1024> raw_patch_data;
 
 __attribute__((section(".ddma"))) IntercoreStorageMessage icc_shared_message;
 
