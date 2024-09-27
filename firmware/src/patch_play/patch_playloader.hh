@@ -1,5 +1,6 @@
 #pragma once
 #include "calibrate/calibration_patch.hh"
+#include "conf/audio_settings.hh"
 #include "delay.hh"
 #include "modules_helpers.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -231,12 +232,6 @@ struct PatchPlayLoader {
 			patches_.close_playing_patch();
 		}
 	}
-
-	struct AudioSettings {
-		//TODO put defaults in one place
-		uint32_t sample_rate = 48000;
-		uint32_t block_size = 64;
-	};
 
 	void request_new_audio_settings(uint32_t sample_rate, uint32_t block_size) {
 		new_audio_settings_.store(AudioSettings{sample_rate, block_size});

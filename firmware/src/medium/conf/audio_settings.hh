@@ -7,8 +7,8 @@ namespace MetaModule
 {
 
 struct AudioSettings {
-	static constexpr std::array ValidSampleRates = {24000u, 48000u, 96000u};
-	static constexpr std::array ValidBlockSizes = {32u, 64u, 128u, 256u, 512u};
+	static constexpr std::array ValidSampleRates = {24000u, 32000u, 48000u, 96000u};
+	static constexpr std::array ValidBlockSizes = {16u, 32u, 64u, 128u, 256u, 512u};
 
 	static constexpr uint32_t DefaultSampleRate = 48000;
 	static constexpr uint32_t DefaultBlockSize = 64;

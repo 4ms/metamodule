@@ -131,7 +131,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	SUBCASE("Bad audio block size:") {
 		yaml = R"(Settings:
   audio:
-    block_size: 16
+    block_size: 6
 )";
 	}
 	SUBCASE("Empty Autoload:") {

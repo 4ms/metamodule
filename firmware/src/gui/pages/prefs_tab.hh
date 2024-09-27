@@ -1,8 +1,8 @@
 #pragma once
+#include "conf/audio_settings.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/system_menu_tab_base.hh"
-#include "gui/pages/view_settings.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "patch_play/patch_playloader.hh"
 
@@ -19,6 +19,22 @@ struct PrefsTab : SystemMenuTab {
 
 		lv_obj_add_event_cb(ui_SystemPrefsAudioBlocksizeDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_SystemPrefsAudioSampleRateDropdown, changed_cb, LV_EVENT_VALUE_CHANGED, this);
+
+		std::string opts;
+		for (auto item : AudioSettings::ValidBlockSizes) {
+			opts += std::to_string(item) + "\n";
+		}
+		if (opts.length())
+			opts.pop_back();
+		lv_dropdown_set_options(ui_SystemPrefsAudioBlocksizeDropdown, opts.c_str());
+
+		opts = "";
+		for (auto item : AudioSettings::ValidSampleRates) {
+			opts += std::to_string(item) + "\n";
+		}
+		if (opts.length())
+			opts.pop_back();
+		lv_dropdown_set_options(ui_SystemPrefsAudioSampleRateDropdown, opts.c_str());
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -44,19 +60,18 @@ struct PrefsTab : SystemMenuTab {
 	}
 
 	void update_dropdowns_from_settings() {
-		auto sr_item = settings.sample_rate == 24000 ? 0 :
-					   settings.sample_rate == 48000 ? 1 :
-					   settings.sample_rate == 96000 ? 2 :
-													   1;
-		lv_dropdown_set_selected(ui_SystemPrefsAudioSampleRateDropdown, sr_item);
+		auto get_index = [](auto item, auto dataset) {
+			int idx = -1;
+			if (auto found = std::find(dataset.begin(), dataset.end(), item)) {
+				idx = std::distance(dataset.begin(), found);
+			}
+			return idx;
+		};
+		auto sr_item = get_index(settings.sample_rate, AudioSettings::ValidSampleRates);
+		lv_dropdown_set_selected(ui_SystemPrefsAudioSampleRateDropdown, sr_item >= 0 ? sr_item : 1);
 
-		auto bs_item = settings.block_size == 32  ? 0 :
-					   settings.block_size == 64  ? 1 :
-					   settings.block_size == 128 ? 2 :
-					   settings.block_size == 256 ? 3 :
-					   settings.block_size == 512 ? 4 :
-													1;
-		lv_dropdown_set_selected(ui_SystemPrefsAudioBlocksizeDropdown, bs_item);
+		auto bs_item = get_index(settings.block_size, AudioSettings::ValidBlockSizes);
+		lv_dropdown_set_selected(ui_SystemPrefsAudioBlocksizeDropdown, bs_item >= 0 ? bs_item : 1);
 
 		gui_state.do_write_settings = false;
 
@@ -67,21 +82,19 @@ struct PrefsTab : SystemMenuTab {
 	uint32_t read_samplerate_dropdown() {
 		auto sr_item = lv_dropdown_get_selected(ui_SystemPrefsAudioSampleRateDropdown);
 
-		auto sample_rate = sr_item == 0 ? 24000 : sr_item == 1 ? 48000 : sr_item == 2 ? 96000 : 48000;
-		return sample_rate;
+		if (sr_item >= 0 && sr_item < AudioSettings::ValidSampleRates.size())
+			return AudioSettings::ValidSampleRates[sr_item];
+		else
+			return AudioSettings::DefaultSampleRate;
 	}
 
 	uint32_t read_blocksize_dropdown() {
 		auto bs_item = lv_dropdown_get_selected(ui_SystemPrefsAudioBlocksizeDropdown);
 
-		auto block_size = bs_item == 0 ? 32 :
-						  bs_item == 1 ? 64 :
-						  bs_item == 2 ? 128 :
-						  bs_item == 3 ? 256 :
-						  bs_item == 4 ? 512 :
-										 64;
-
-		return block_size;
+		if (bs_item >= 0 && bs_item < AudioSettings::ValidBlockSizes.size())
+			return AudioSettings::ValidBlockSizes[bs_item];
+		else
+			return AudioSettings::DefaultBlockSize;
 	}
 
 	void update_settings_from_dropdown() {
