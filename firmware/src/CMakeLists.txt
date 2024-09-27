@@ -112,6 +112,7 @@ add_executable(
   ${FWDIR}/src/console/uart_log.cc
   ${FWDIR}/src/core_a7/main.cc
   ${FWDIR}/src/audio/audio.cc
+  ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
