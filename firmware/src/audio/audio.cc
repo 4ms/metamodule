@@ -237,7 +237,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// MIDI
-		handle_midi(param_block.metaparams.midi_connected, params.midi_event, param_block.metaparams.midi_poly_chans);
+		handle_midi(param_block.metaparams.midi_connected,
+					params.midi_event,
+					param_block.metaparams.midi_poly_chans,
+					params.raw_msg);
 
 		// Run each module
 		player.update_patch();
@@ -287,7 +290,10 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 	}
 }
 
-void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsigned poly_num) {
+void AudioStream::handle_midi(bool is_connected,
+							  Midi::Event const &event,
+							  unsigned poly_num,
+							  MidiMessage const &raw_msg) {
 	if (is_connected && !midi_last_connected) {
 		player.set_midi_connected();
 	} else if (!is_connected && midi_last_connected) {
@@ -298,6 +304,8 @@ void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsig
 
 	if (!is_connected)
 		return;
+
+	player.send_raw_midi(raw_msg);
 
 	if (event.type == Midi::Event::Type::None)
 		return;

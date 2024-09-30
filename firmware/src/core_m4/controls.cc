@@ -83,6 +83,7 @@ void Controls::update_params() {
 
 	// Parse a MIDI message if available
 	if (auto msg = _midi_rx_buf.get(); msg.has_value()) {
+		cur_params->raw_msg = msg.value();
 		cur_params->midi_event = _midi_parser.parse(msg.value());
 
 	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence(); noteoff.has_value()) {
