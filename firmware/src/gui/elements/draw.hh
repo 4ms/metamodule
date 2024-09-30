@@ -2,7 +2,7 @@
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/draw_img.hh"
-#include "gui/elements/fonts.hh"
+#include "gui/fonts/fonts.hh"
 #include "gui/helpers/units_conversion.hh"
 #include "gui/images/paths.hh"
 #include "gui/styles.hh"
@@ -223,7 +223,7 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 	float oy = mm_to_px(el.y_mm, module_h);
 	lv_coord_t w = std::round(mm_to_px(el.width_mm, module_h));
 	lv_coord_t h = std::round(mm_to_px(el.height_mm, module_h));
-	//Skip the "fix" for zoomed coords, lv_label objects don't need the fix if TopLeft coords are used
+	//If TopLeft coords are used, skip the "fix" for zoomed coords (lv_label objects don't need the fix for some reason)
 	lv_coord_t x = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, ox, w, module_h / 240.f) : std::round(ox);
 	lv_coord_t y = el.coords == Coords::Center ? fix_zoomed_coord(el.coords, oy, h, module_h / 240.f) : std::round(oy);
 
@@ -231,6 +231,7 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 	lv_label_set_text(label, el.text.data());
 	lv_obj_set_style_text_font(label, get_font(el.font.data()), LV_PART_MAIN);
 	lv_obj_set_style_text_color(label, lv_color_t{.full = el.color.raw()}, LV_PART_MAIN);
+
 	lv_obj_set_align(label, LV_ALIGN_TOP_LEFT);
 	lv_obj_set_pos(label, x, y);
 	lv_obj_set_size(label, w, h);
@@ -251,7 +252,7 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 
 inline lv_obj_t *draw_element(const DynamicTextDisplay &el, lv_obj_t *canvas, uint32_t module_h) {
 	auto label = draw_element(TextDisplay(el), canvas, module_h);
-	//DOT mode don't work with dynamic elements
+	//DOT mode doesn't work with dynamic elements
 	//because we can't compare the new text with the existing text since it may contain dots
 	lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
 	return label;

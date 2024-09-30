@@ -35,6 +35,13 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     fonts/ui_font_MuseoSansRounded50010.c
     fonts/ui_font_MuseoSansRounded50016.c
     fonts/ui_font_Segment7Standard24.c
+    fonts/ui_font_Segment14_10.c
+    fonts/ui_font_Segment14_12.c
+    fonts/ui_font_Segment14_14.c
+    fonts/ui_font_Segment14_16.c
+    fonts/ui_font_Segment14_20.c
+    fonts/ui_font_Segment14_24.c
+    fonts/ui_font_Segment14_26.c
 	fonts/ui_font_Segment32.c)
 
 add_library(ui ${SOURCES})

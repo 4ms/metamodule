@@ -5,6 +5,8 @@
 #include "plugin_loader.hh"
 #include "user_settings/plugin_autoload_settings.hh"
 
+#include "gui/fonts/fonts.hh"
+
 namespace MetaModule
 {
 
@@ -32,6 +34,9 @@ public:
 
 				// Cleanup files we copied to the ramdisk
 				for (auto const &file : plugin.loaded_files) {
+					if (file.ends_with(".bin")) {
+						free_font(file);
+					}
 					ramdisk.delete_file(file);
 				}
 

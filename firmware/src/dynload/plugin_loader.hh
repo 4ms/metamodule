@@ -157,11 +157,13 @@ public:
 				std::string plugin_vers_filename;
 
 				auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
-					if (filename.ends_with(".png")) {
+					if (filename.ends_with(".png") || filename.ends_with(".bin")) {
 						if (!ramdisk.file_exists(filename)) {
 							pr_trace("Copying file to ramdisk: %s\n", filename.data());
-							files_copied_to_ramdisk.emplace_back(filename);
-							return ramdisk.write_file(filename, buffer);
+							auto bytes_written = ramdisk.write_file(filename, buffer);
+							if (bytes_written > 0)
+								files_copied_to_ramdisk.emplace_back(filename);
+							return bytes_written;
 						} else {
 							pr_trace("File exists, skipping: %s\n", filename.data());
 							return 0;

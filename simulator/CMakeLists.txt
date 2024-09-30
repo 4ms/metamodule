@@ -69,6 +69,7 @@ add_executable(
 	stubs/memory/heap.cc
     ${FWDIR}/src/gui/elements/element_name.cc
     ${FWDIR}/src/gui/slsexport/ui_local.cc
+    ${FWDIR}/src/gui/fonts/fonts.cc
     ${FWDIR}/src/fw_update/updater_proxy.cc
     ${FWDIR}/src/patch_play/modules_helpers.cc
 

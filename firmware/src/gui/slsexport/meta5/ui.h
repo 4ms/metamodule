@@ -614,6 +614,13 @@ LV_FONT_DECLARE(ui_font_MuseoSansRounded90018);
 LV_FONT_DECLARE(ui_font_MuseoSansRounded90032);
 LV_FONT_DECLARE(ui_font_MuseoSansRounded90040);
 LV_FONT_DECLARE(ui_font_Segment7Standard24);
+LV_FONT_DECLARE(Segment14_10);
+LV_FONT_DECLARE(Segment14_12);
+LV_FONT_DECLARE(Segment14_14);
+LV_FONT_DECLARE(Segment14_16);
+LV_FONT_DECLARE(Segment14_20);
+LV_FONT_DECLARE(Segment14_24);
+LV_FONT_DECLARE(Segment14_26);
 LV_FONT_DECLARE(ui_font_Segment32);
 
 void ui_init(void);
