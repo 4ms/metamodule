@@ -1,7 +1,7 @@
 #pragma once
-#include "patch/midi_def.hh"
-#include "midi_message.hh"
+#include "midi/midi_message.hh"
 #include "params.hh"
+#include "patch/midi_def.hh"
 #include <algorithm>
 #include <optional>
 

@@ -4,6 +4,7 @@
 #include "conf/panel_conf.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/smp.hh"
+#include "midi/midi_message.hh"
 #include "null_module.hh"
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
@@ -280,6 +281,10 @@ public:
 
 	void set_panel_input(unsigned jack_id, float val) {
 		set_all_connected_jacks(in_conns[jack_id], val);
+	}
+
+	void send_raw_midi(MidiMessage msg) {
+		MidiRouter::push_incoming_message(msg);
 	}
 
 	void set_midi_note_pitch(unsigned midi_poly_note, float val) {
