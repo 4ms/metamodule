@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "midi/midi_message.hh"
 #include "midi_params.hh"
 #include "patch/midi_def.hh"
 #include "util/debouncer.hh"
@@ -15,6 +16,7 @@ struct Params {
 	std::array<float, PanelDef::NumPot> knobs{};
 
 	Midi::Event midi_event{};
+	MidiMessage raw_msg{};
 
 	uint32_t jack_senses{};
 
