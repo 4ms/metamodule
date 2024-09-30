@@ -2,7 +2,7 @@
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/draw_img.hh"
-#include "gui/elements/fonts.hh"
+#include "gui/fonts/fonts.hh"
 #include "gui/helpers/units_conversion.hh"
 #include "gui/images/paths.hh"
 #include "gui/styles.hh"
