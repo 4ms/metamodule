@@ -10,7 +10,7 @@ namespace MetaModule
 struct WatchedTextDisplay {
 	uint16_t module_id{};
 	uint16_t light_id{};
-	StaticString<255> text;
+	StaticString<63> text;
 	std::atomic<bool> active{false};
 
 	void activate(uint16_t m_id, uint16_t l_id) {
@@ -29,7 +29,7 @@ struct WatchedTextDisplay {
 };
 
 struct TextDisplayWatcher {
-	static constexpr size_t MaxDisplaysToWatch = 8;
+	static constexpr size_t MaxDisplaysToWatch = 16;
 
 	std::array<WatchedTextDisplay, MaxDisplaysToWatch> watch_displays;
 
