@@ -95,6 +95,9 @@ public:
 
 				if (message.message_type == IntercoreStorageMessage::PluginFileListOK) {
 					plugin_files = *plugin_file_list; //make local copy
+					std::sort(plugin_files.begin(), plugin_files.end(), [](auto const &a, auto const &b) {
+						return std::string_view{a.plugin_name} < std::string_view{b.plugin_name};
+					});
 					pr_trace("Found %d plugins\n", plugin_files.size());
 
 					parse_versions();
