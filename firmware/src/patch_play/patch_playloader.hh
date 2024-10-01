@@ -154,10 +154,11 @@ struct PatchPlayLoader {
 			return result;
 		}
 
-		if (should_save_patch_) {
+		if (rename_state_ != RenameState::Idle) {
+			return process_renaming();
+		} else if (should_save_patch_) {
 			return save_patch();
-		}
-		if (saving_patch_) {
+		} else if (saving_patch_) {
 			return check_save_patch_status();
 		}
 
@@ -166,6 +167,16 @@ struct PatchPlayLoader {
 
 	void request_save_patch() {
 		should_save_patch_ = true;
+	}
+
+	bool is_renaming_idle() {
+		return rename_state_ == RenameState::Idle;
+	}
+
+	void request_rename_view_patch(PatchLocation const &loc) {
+		old_loc = {patches_.get_view_patch_filename(), patches_.get_view_patch_vol()};
+		new_loc = loc;
+		rename_state_ = RenameState::RequestSaveNew;
 	}
 
 	void load_module(std::string_view slug) {
@@ -257,9 +268,15 @@ private:
 	std::atomic<bool> should_save_patch_ = false;
 	std::atomic<bool> audio_overrun_ = false;
 
+	PatchLocation new_loc{};
+	PatchLocation old_loc{};
+	enum class RenameState { Idle, RequestSaveNew, SavingNew, RequestDeleteOld, DeletingOld };
+	RenameState rename_state_{RenameState::Idle};
+	uint32_t attempts = 0;
+
 	std::atomic<AudioSettings> new_audio_settings_ = {};
 
-	Result save_patch() {
+	Result save_patch(PatchLocation const &loc) {
 		auto view_patch = patches_.get_view_patch();
 
 		if (view_patch == patches_.get_playing_patch())
@@ -268,8 +285,7 @@ private:
 		std::span<char> filedata = storage_.get_patch_data();
 		patch_to_yaml_buffer(*view_patch, filedata);
 
-		auto res =
-			storage_.request_write_file(filedata, patches_.get_view_patch_vol(), patches_.get_view_patch_filename());
+		auto res = storage_.request_write_file(filedata, loc.vol, loc.filename);
 
 		if (res == FileStorageProxy::WriteResult::Success) {
 			should_save_patch_ = false;
@@ -288,6 +304,10 @@ private:
 		}
 	}
 
+	Result save_patch() {
+		return save_patch({patches_.get_view_patch_filename(), patches_.get_view_patch_vol()});
+	}
+
 	Result check_save_patch_status() {
 		auto msg = storage_.get_message();
 
@@ -299,6 +319,20 @@ private:
 			saving_patch_ = false;
 			patches_.reset_view_patch_modification_count();
 			return {true, "Saved"};
+
+		} else {
+			return {true, ""};
+		}
+	}
+
+	Result check_delete_file_status() {
+		auto msg = storage_.get_message();
+
+		if (msg.message_type == FileStorageProxy::DeleteFileFailed) {
+			return {false, "Failed to remove original patch."};
+
+		} else if (msg.message_type == FileStorageProxy::DeleteFileSuccess) {
+			return {true, "Patch Moved"};
 
 		} else {
 			return {true, ""};
@@ -324,6 +358,52 @@ private:
 		}
 
 		return result;
+	}
+
+	Result process_renaming() {
+		if (rename_state_ == RenameState::RequestSaveNew) {
+			auto res = save_patch(new_loc);
+			if (saving_patch_) {
+				rename_state_ = RenameState::SavingNew;
+			}
+			return res;
+		}
+
+		if (rename_state_ == RenameState::SavingNew) {
+			auto res = check_save_patch_status();
+			if (saving_patch_ == false) {
+				if (res.success) {
+					attempts = 0;
+					patches_.rename_view_patch_file(new_loc.filename, new_loc.vol);
+					rename_state_ = RenameState::RequestDeleteOld;
+				} else {
+					rename_state_ = RenameState::Idle; //Fail
+				}
+			}
+			return res;
+		}
+
+		if (rename_state_ == RenameState::RequestDeleteOld) {
+			if (storage_.request_delete_file(old_loc.filename, old_loc.vol)) {
+				rename_state_ = RenameState::DeletingOld;
+				return {true, ""};
+			} else {
+				if (attempts++ > 100) {
+					rename_state_ = RenameState::Idle;
+					return {false, "Failed to request deleting old file"};
+				}
+			}
+		}
+
+		if (rename_state_ == RenameState::DeletingOld) {
+			auto res = check_delete_file_status();
+			if (res.error_string.length() > 0) {
+				rename_state_ = RenameState::Idle;
+			}
+			return res;
+		}
+
+		return {true, ""};
 	}
 };
 } // namespace MetaModule

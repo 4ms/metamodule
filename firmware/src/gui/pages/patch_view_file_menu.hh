@@ -40,14 +40,19 @@ struct PatchViewFileMenu {
 		lv_obj_add_event_cb(ui_PatchFileMenuCloseButton, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileSaveBut, savebut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileDuplicateBut, saveas_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_PatchFileRenameBut, rename_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_PatchFileRevertBut, revert_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_PatchFileMenuCloseButton);
 		lv_group_add_obj(group, ui_PatchFileSaveBut);
 		lv_group_add_obj(group, ui_PatchFileDuplicateBut);
+		lv_group_add_obj(group, ui_PatchFileRenameBut);
 		lv_group_add_obj(group, ui_PatchFileRevertBut);
 		lv_group_add_obj(group, ui_PatchFileDeleteBut);
+
+		lv_obj_set_width( ui_PatchFileMenu, 126);
+		lv_label_set_text(ui_PatchFileRenameLabel, "Move/Rename");
 	}
 
 	void prepare_focus(lv_group_t *parent_group) {
@@ -83,20 +88,16 @@ struct PatchViewFileMenu {
 		if (patches.get_view_patch_vol() == Volume::RamDisk || patches.get_view_patch_vol() == Volume::MaxVolumes) {
 			// patch has not been saved yet:
 			lv_group_focus_obj(ui_PatchFileSaveBut);
-			lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
-			lv_obj_add_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
-			lv_obj_add_state(ui_PatchFileDeleteBut, LV_STATE_DISABLED);
-			lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
+			lv_disable(ui_PatchFileRevertBut);
+			lv_disable(ui_PatchFileDuplicateBut);
+			lv_disable(ui_PatchFileRenameBut);
+			lv_disable(ui_PatchFileDeleteBut);
 		} else {
 			lv_group_focus_obj(ui_PatchFileSaveBut);
-			lv_obj_clear_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
-			lv_obj_clear_state(ui_PatchFileDuplicateBut, LV_STATE_DISABLED);
-			lv_obj_clear_state(ui_PatchFileDeleteBut, LV_STATE_DISABLED);
-
-			if (patches.get_view_patch_modification_count() > 0)
-				lv_obj_clear_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
-			else
-				lv_obj_add_state(ui_PatchFileRevertBut, LV_STATE_DISABLED);
+			lv_enable(ui_PatchFileDuplicateBut);
+			lv_enable(ui_PatchFileRenameBut);
+			lv_enable(ui_PatchFileDeleteBut);
+			lv_enable(ui_PatchFileRevertBut, patches.get_view_patch_modification_count() > 0);
 		}
 
 		if (!visible) {
@@ -201,22 +202,14 @@ struct PatchViewFileMenu {
 	}
 
 private:
-	void show_save_dialog() {
-		save_dialog.prepare_focus(base_group);
+	void show_save_dialog(SaveDialog::Action method) {
+		current_action = method;
+		save_dialog.prepare_focus(base_group, method);
 
 		lv_obj_set_x(ui_PatchFileMenu, 220);
 		visible = false;
 
 		save_dialog.show();
-	}
-
-	void copy_patchname_to_filename() {
-		// Copy patchname -> filename if patchname has been set
-		std::string patchname = patches.get_view_patch()->patch_name;
-		if (!patchname.starts_with("Untitled Patch ")) {
-			patchname.append(".yml");
-			patches.set_patch_filename(patchname);
-		}
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -252,11 +245,19 @@ private:
 			return;
 		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
 
-		// If it hasn't been saved yet, use the patchname if its been set
-		if (page->patches.get_view_patch_vol() == Volume::RamDisk) {
-			page->copy_patchname_to_filename();
-		}
-		page->show_save_dialog();
+		// If it hasn't been saved yet, then we can't duplicate, so save
+		if (page->patches.get_view_patch_vol() == Volume::RamDisk)
+			page->show_save_dialog(SaveDialog::Action::Save);
+		else
+			page->show_save_dialog(SaveDialog::Action::Duplicate);
+	}
+
+	static void rename_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+
+		page->show_save_dialog(SaveDialog::Action::Rename);
 	}
 
 	static void delete_but_cb(lv_event_t *event) {
@@ -317,6 +318,8 @@ private:
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 	enum class RevertState { Idle, TryRequest, Requested } revert_state = RevertState::Idle;
+
+	SaveDialog::Action current_action{};
 };
 
 } // namespace MetaModule

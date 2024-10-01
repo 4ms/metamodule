@@ -113,10 +113,6 @@ public:
 		return true;
 	}
 
-	bool update_or_create_file(const std::string_view filename, const std::span<const char> data) {
-		return write_file(filename, data);
-	}
-
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
 		FILINFO fno;
 
@@ -262,6 +258,11 @@ public:
 
 		return bytes_written;
 	}
+
+	uint32_t update_or_create_file(const std::string_view filename, const std::span<const char> data) {
+		return write_file(filename, data);
+	}
+
 
 	bool delete_file(std::string_view filename) {
 		f_chdrive(_fatvol);

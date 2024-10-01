@@ -24,24 +24,8 @@ SET(SOURCES components/ui_comp_knobcontainer.c
     images/ui_img_1x_info1_png.c
     images/ui_img_1x_knob1_png.c
     images/ui_img_1x_knob1pressed_png.c
-    images/ui_img_1x_infosmall2_png.c
-    fonts/ui_font_MuseoSansRounded50010.c
-    fonts/ui_font_MuseoSansRounded90018.c
-    fonts/ui_font_MuseoSansRounded90040.c
-    fonts/ui_font_MuseoSansRounded70014.c
-    fonts/ui_font_MuseoSansRounded70016.c
-    fonts/ui_font_MuseoSansRounded50012.c
-    fonts/ui_font_MuseoSansRounded50014.c
-    fonts/ui_font_MuseoSansRounded50010.c
-    fonts/ui_font_MuseoSansRounded50016.c
-    fonts/ui_font_Segment7Standard24.c
-    fonts/ui_font_Segment14_10.c
-    fonts/ui_font_Segment14_12.c
-    fonts/ui_font_Segment14_14.c
-    fonts/ui_font_Segment14_16.c
-    fonts/ui_font_Segment14_20.c
-    fonts/ui_font_Segment14_24.c
-    fonts/ui_font_Segment14_26.c
-	fonts/ui_font_Segment32.c)
+    images/ui_img_1x_infosmall2_png.c)
 
-add_library(ui ${SOURCES})
+file(GLOB FONTS fonts/*.c)
+
+add_library(ui ${SOURCES} ${FONTS})

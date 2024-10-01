@@ -141,6 +141,8 @@ extern lv_obj_t *ui_PatchFileSaveBut;
 extern lv_obj_t *ui_PatchFileSaveLabel;
 extern lv_obj_t *ui_PatchFileDuplicateBut;
 extern lv_obj_t *ui_PatchFileDuplicateLabel;
+extern lv_obj_t *ui_PatchFileRenameBut;
+extern lv_obj_t *ui_PatchFileRenameLabel;
 extern lv_obj_t *ui_PatchFileRevertBut;
 extern lv_obj_t *ui_PatchFileRevertLabel;
 extern lv_obj_t *ui_PatchFileDeleteBut;

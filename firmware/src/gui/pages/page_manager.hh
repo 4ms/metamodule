@@ -184,14 +184,14 @@ public:
 	void handle_notifications() {
 		auto msg = info.notify_queue.get();
 		if (msg) {
-			pr_info("%s\n", msg->message.c_str());
+			pr_info("Notify: %s\n", msg->message.c_str());
 			DisplayNotification::show(*msg);
 		}
 	}
 
 	void handle_audio_errors() {
 		if (info.patch_playloader.did_audio_overrun()) {
-			info.notify_queue.put({"Audio stopped because patch load > 99%.", Notification::Priority::Error, 1500});
+			info.notify_queue.put({"Audio stopped: patch load > 99%.", Notification::Priority::Error, 1000});
 			info.patch_playloader.clear_audio_overrun();
 		}
 	}

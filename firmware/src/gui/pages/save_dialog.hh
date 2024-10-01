@@ -40,8 +40,11 @@ struct SaveDialog {
 		lv_hide(ui_SaveDialogCont);
 	}
 
-	void prepare_focus(lv_group_t *parent_group) {
+	enum class Action { None, Save, Duplicate, Rename };
+
+	void prepare_focus(lv_group_t *parent_group, Action action) {
 		base_group = parent_group;
+		method = action;
 	}
 
 	void update() {
@@ -86,6 +89,14 @@ struct SaveDialog {
 					break;
 			}
 		}
+
+		if (is_renaming) {
+			if (patch_playloader.is_renaming_idle()) {
+				saved = true;
+				is_renaming = false;
+				hide();
+			}
+		}
 	}
 
 	void show() {
@@ -121,6 +132,7 @@ struct SaveDialog {
 			lv_group_set_editing(group, false);
 
 			mode = Mode::Idle;
+			is_renaming = false;
 		}
 	}
 
@@ -261,20 +273,29 @@ private:
 		std::string patchname = page->file_name;
 		strip_yml(patchname);
 		page->patches.get_view_patch()->patch_name = patchname;
-		pr_dbg("Renaming patch to %s\n", patchname.c_str());
 
-		// if view patch vol is RamDisk, then don't duplicate, just rename
-		if (page->patches.get_view_patch_vol() == Volume::RamDisk) {
+		// if view patch vol is RamDisk, then don't duplicate, just save
+		// if (page->patches.get_view_patch_vol() == Volume::RamDisk) {
+		if (page->method == Action::Save) {
+			//TODO: have playloader rename the open patch
 			page->patches.rename_view_patch_file(fullpath, page->file_vol);
 			page->patch_playloader.request_save_patch();
 			auto &patchname = page->patches.get_view_patch()->patch_name;
-			if (std::string_view(patchname).starts_with("Untitled Patch ")) {
-				patchname.copy(page->file_name);
-			}
+			patchname.copy(page->file_name);
 
 			page->saved = true;
 			page->hide();
-		} else {
+
+		} else if (page->method == Action::Rename) {
+			if (page->patches.get_view_patch_loc_hash() == PatchLocHash{fullpath, page->file_vol}) {
+				//send notification of failure
+				page->notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
+			} else {
+				page->patch_playloader.request_rename_view_patch({fullpath, page->file_vol});
+				page->is_renaming = true;
+			}
+
+		} else { //Duplicate
 			if (page->patches.duplicate_view_patch(fullpath, page->file_vol)) {
 				page->patch_playloader.request_save_patch();
 				page->saved = true;
@@ -335,6 +356,9 @@ private:
 	uint32_t last_refresh_check_tm = 0;
 
 	bool saved = false;
+	bool is_renaming = false;
+
+	Action method{};
 };
 
 } // namespace MetaModule

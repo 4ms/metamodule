@@ -23,25 +23,28 @@ concept FileIoC = requires(T t,
 						   std::size_t offset) {
 	{
 		t.update_or_create_file(filename, const_data)
-	} -> std::convertible_to<bool>;
+	} -> std::integral;
+
 	{
 		t.foreach_file_with_ext(filename, action)
 	} -> std::convertible_to<bool>;
+
 	{
 		t.foreach_dir_entry(path, direntry_action)
 	} -> std::convertible_to<bool>;
+
 	{
 		t.read_file(filename, read_buffer, offset)
 	} -> std::integral;
-	{
-		t.update_or_create_file(filename, write_buffer)
-	} -> std::integral;
+
 	{
 		t.volname()
 	} -> std::convertible_to<std::string_view>;
+
 	{
 		t.is_mounted()
 	} -> std::same_as<bool>;
+
 	{
 		t.get_file_size(filename)
 	} -> std::integral;

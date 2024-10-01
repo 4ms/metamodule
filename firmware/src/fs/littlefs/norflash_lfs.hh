@@ -104,14 +104,14 @@ public:
 		return Status::NewlyFormatted;
 	}
 
-	bool
+	uint32_t
 	update_or_create_file(const std::string_view filename, const std::span<const char> data, uint32_t timestamp = 0) {
 		TimeFile file;
 
 		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY | LFS_O_TRUNC);
 		if (err < 0) {
 			pr_err("LFS: Open failed with err %d\n", err);
-			return false;
+			return 0;
 		}
 
 		file.timestamp = timestamp ? timestamp : get_fattime();
@@ -120,15 +120,15 @@ public:
 
 		if (err = lfs_file_write(&lfs, &file.file, data.data(), data.size_bytes()); err < 0) {
 			pr_err("LFS: Write failed with err %d\n", err);
-			return false;
+			return 0;
 		}
 
 		if (err = lfs_file_close(&lfs, &file.file); err < 0) {
 			pr_err("LFS: Closing failed with err %d\n", err);
-			return false;
+			return 0;
 		}
 
-		return true;
+		return data.size_bytes();
 	}
 
 	bool delete_file(const std::string_view filename) {

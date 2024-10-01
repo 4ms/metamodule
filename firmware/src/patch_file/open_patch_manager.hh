@@ -233,6 +233,11 @@ public:
 
 	bool duplicate_view_patch(std::string_view filepath, Volume vol) {
 		// Check if filename is already open
+		if (view_patch_->loc_hash == PatchLocHash{filepath, vol}) {
+			pr_warn("Can't duplicate a patch onto itself\n");
+			return false;
+		}
+
 		if (auto openpatch = open_patches_.find(PatchLocHash{filepath, vol})) {
 			if (openpatch->modification_count > 0) {
 				pr_err("Can't overwrite an open and modified patch: %.*s\n", filepath.size(), filepath.data());

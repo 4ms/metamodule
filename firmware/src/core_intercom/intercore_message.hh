@@ -75,10 +75,12 @@ struct IntercoreStorageMessage {
 
 	uint32_t bytes_read{};
 	Volume vol_id;
+	Volume dest_vol_id;
 	bool force_refresh;
 	std::span<char> buffer;
 	PatchDirList *patch_dir_list;
 	StaticString<255> filename;
+	StaticString<255> dest_filename;
 	enum class VolEvent { None, Mounted, Unmounted };
 	VolEvent USBEvent;
 	VolEvent SDEvent;
