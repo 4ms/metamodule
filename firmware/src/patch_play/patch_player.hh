@@ -7,6 +7,7 @@
 #include "core_a7/smp_api.hh"
 #include "drivers/smp.hh"
 #include "midi/midi_message.hh"
+#include "midi/midi_router.hh"
 #include "null_module.hh"
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
