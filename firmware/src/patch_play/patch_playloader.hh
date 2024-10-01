@@ -169,6 +169,10 @@ struct PatchPlayLoader {
 		should_save_patch_ = true;
 	}
 
+	bool is_renaming_idle() {
+		return rename_state_ == RenameState::Idle;
+	}
+
 	void request_rename_view_patch(PatchLocation const &loc) {
 		old_loc = {patches_.get_view_patch_filename(), patches_.get_view_patch_vol()};
 		new_loc = loc;
@@ -370,6 +374,7 @@ private:
 			if (saving_patch_ == false) {
 				if (res.success) {
 					attempts = 0;
+					patches_.rename_view_patch_file(new_loc.filename, new_loc.vol);
 					rename_state_ = RenameState::RequestDeleteOld;
 				} else {
 					rename_state_ = RenameState::Idle; //Fail

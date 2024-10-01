@@ -50,6 +50,8 @@ struct PatchViewFileMenu {
 		lv_group_add_obj(group, ui_PatchFileRenameBut);
 		lv_group_add_obj(group, ui_PatchFileRevertBut);
 		lv_group_add_obj(group, ui_PatchFileDeleteBut);
+
+		lv_label_set_text(ui_PatchFileRenameLabel, "Move/Rename");
 	}
 
 	void prepare_focus(lv_group_t *parent_group) {
@@ -208,15 +210,6 @@ private:
 
 		save_dialog.show();
 	}
-
-	// void copy_patchname_to_filename() {
-	// 	// Copy patchname -> filename if patchname has been set
-	// 	std::string patchname = patches.get_view_patch()->patch_name;
-	// 	if (!patchname.starts_with("Untitled Patch ")) {
-	// 		patchname.append(".yml");
-	// 		patches.set_patch_filename(patchname);
-	// 	}
-	// }
 
 	static void menu_button_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
