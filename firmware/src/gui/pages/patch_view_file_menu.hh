@@ -51,6 +51,7 @@ struct PatchViewFileMenu {
 		lv_group_add_obj(group, ui_PatchFileRevertBut);
 		lv_group_add_obj(group, ui_PatchFileDeleteBut);
 
+		lv_obj_set_width( ui_PatchFileMenu, 126);
 		lv_label_set_text(ui_PatchFileRenameLabel, "Move/Rename");
 	}
 

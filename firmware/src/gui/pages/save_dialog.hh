@@ -287,8 +287,13 @@ private:
 			page->hide();
 
 		} else if (page->method == Action::Rename) {
-			page->patch_playloader.request_rename_view_patch({fullpath, page->file_vol});
-			page->is_renaming = true;
+			if (page->patches.get_view_patch_loc_hash() == PatchLocHash{fullpath, page->file_vol}) {
+				//send notification of failure
+				page->notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
+			} else {
+				page->patch_playloader.request_rename_view_patch({fullpath, page->file_vol});
+				page->is_renaming = true;
+			}
 
 		} else { //Duplicate
 			if (page->patches.duplicate_view_patch(fullpath, page->file_vol)) {
