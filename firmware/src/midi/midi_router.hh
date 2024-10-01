@@ -6,9 +6,9 @@ namespace MetaModule
 {
 
 struct MidiRouter {
-
 	static void subscribe(MidiQueue *listener);
-	void push_incoming_message(MidiMessage msg);
+	static void unsubscribe(MidiQueue *listener);
+	static void push_incoming_message(MidiMessage msg);
 };
 
 } // namespace MetaModule
