@@ -1,10 +1,10 @@
 #pragma once
 #include "midi_message.hh"
+#include "util/circular_buffer_opt.hh"
 
 namespace MetaModule
 {
-struct MidiQueue {
-	void onMessage(MidiMessage) {
-	}
-};
+
+using MidiQueue = CircularBufferOpt<MidiMessage, 128>;
+
 } // namespace MetaModule
