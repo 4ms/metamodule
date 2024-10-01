@@ -137,6 +137,8 @@ lv_obj_t *ui_PatchFileSaveBut;
 lv_obj_t *ui_PatchFileSaveLabel;
 lv_obj_t *ui_PatchFileDuplicateBut;
 lv_obj_t *ui_PatchFileDuplicateLabel;
+lv_obj_t *ui_PatchFileRenameBut;
+lv_obj_t *ui_PatchFileRenameLabel;
 lv_obj_t *ui_PatchFileRevertBut;
 lv_obj_t *ui_PatchFileRevertLabel;
 lv_obj_t *ui_PatchFileDeleteBut;
