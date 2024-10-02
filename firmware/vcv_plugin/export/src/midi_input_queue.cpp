@@ -1,4 +1,5 @@
 #include "midi.hpp"
+#include "midi/midi_queue.hh"
 #include "midi/midi_router.hh"
 
 namespace rack::midi
@@ -9,13 +10,14 @@ struct InputQueue::Internal {
 };
 
 InputQueue::InputQueue()
-	: internal(std::make_unique<Internal>()) {
+	: internal(new Internal) { //std::make_unique<Internal>()) {
 
 	MetaModule::MidiRouter::subscribe(&internal->queue);
 }
 
 InputQueue::~InputQueue() {
 	MetaModule::MidiRouter::unsubscribe(&internal->queue);
+	delete internal;
 }
 
 void InputQueue::onMessage(const Message &message) {
