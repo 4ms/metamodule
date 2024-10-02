@@ -499,6 +499,10 @@ public:
 			std::erase(ins, jack);
 		for (auto &ins : midi_gate_conns)
 			std::erase(ins, jack);
+		for (auto &mp : midi_pulses)
+			std::erase(mp.conns, jack);
+		for (auto &mp : midi_note_retrig)
+			std::erase(mp.conns, jack);
 
 		safe_unpatch_input(jack);
 
