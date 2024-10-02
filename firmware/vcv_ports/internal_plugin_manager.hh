@@ -4,6 +4,7 @@
 #include "fs/asset_drive/asset_fs.hh"
 #include "fs/asset_drive/untar.hh"
 #include "fs/norflash_layout.hh"
+#include "glue/RackCore/plugins.hh"
 #include "glue/Valley/plugins.hh"
 #include "internal_plugins.hh"
 #include "plugin/Plugin.hpp"
@@ -79,7 +80,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelSpringReverb);
 		pluginInstance->addModel(modelBurst);
 		pluginInstance->addModel(modelVoltio);
-		pluginInstance->addModel(modelOctaves);		
+		pluginInstance->addModel(modelOctaves);
 		pluginInstance->addModel(modelNoisePlethora);
 		pluginInstance->addModel(modelMuxlicer);
 #endif
@@ -219,6 +220,12 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelTopograph);
 		pluginInstance->addModel(modelUGraph);
 		pluginInstance->addModel(modelPlateau);
+#endif
+
+#ifndef BUILD_DYN_PLUGIN_RackCore
+		auto &RackCore_plugin = internal_plugins.emplace_back("RackCore");
+		pluginInstance = &RackCore_plugin;
+		pluginInstance->addModel(rack::core::modelMIDI_CV);
 #endif
 	}
 };
