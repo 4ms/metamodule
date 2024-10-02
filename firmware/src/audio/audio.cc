@@ -305,7 +305,8 @@ void AudioStream::handle_midi(bool is_connected,
 	if (!is_connected)
 		return;
 
-	player.send_raw_midi(raw_msg);
+	if (raw_msg.status != 0xfe && raw_msg.status != 0)
+		player.send_raw_midi(raw_msg);
 
 	if (event.type == Midi::Event::Type::None)
 		return;
