@@ -65,6 +65,8 @@ foreach(brand ${brands})
 
 	target_link_libraries(${brand}Library PRIVATE cpputil::cpputil)
 
+    target_compile_definitions(${brand}Library PRIVATE METAMODULE)
+
 	if (CMAKE_CROSSCOMPILING)
 		# Enable LTO for all brands
 		set_property(TARGET ${brand}Library PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
