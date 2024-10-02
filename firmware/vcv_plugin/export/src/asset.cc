@@ -24,6 +24,12 @@ std::string system(std::string_view filename) {
 		path = std::string("rack-lib/") + path;
 	}
 
+	const std::string_view rcprefix{"res/Core/"};
+	if (path.starts_with(rcprefix)) {
+		path = path.substr(rcprefix.length());
+		path = std::string("RackCore/") + path;
+	}
+
 	set_drive(path);
 	return path;
 }
