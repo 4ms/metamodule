@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "plugin.hpp"
+#include "util/circular_buffer.hh"
 
 namespace rack
 {
@@ -66,6 +67,9 @@ struct MIDI_CV : Module {
 	dsp::PulseGenerator stopPulse;
 	dsp::PulseGenerator continuePulse;
 
+	// METAMODULE
+	CircularBuffer<midi::Message, 4> msg_history;
+
 	MIDI_CV() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configOutput(PITCH_OUTPUT, "1V/octave pitch");
@@ -118,6 +122,10 @@ struct MIDI_CV : Module {
 	void process(const ProcessArgs &args) override {
 		midi::Message msg;
 		while (midiInput.tryPop(&msg, args.frame)) {
+			//METAMODULE
+			if (msg.getStatus() >= 0x8)
+				msg_history.put(msg);
+			////////
 			processMessage(msg);
 		}
 
@@ -208,8 +216,8 @@ struct MIDI_CV : Module {
 					aftertouches[msg.getChannel()] = msg.getNote();
 				} else {
 					// Set all aftertouches
-					for (int c = 0; c < 16; c++) {
-						aftertouches[c] = msg.getNote();
+					for (auto &aftertouche : aftertouches) {
+						aftertouche = msg.getNote();
 					}
 				}
 			} break;
@@ -475,6 +483,21 @@ struct MIDI_CV : Module {
 		if (midiJ)
 			midiInput.fromJson(midiJ);
 	}
+
+	// METAMODULE
+	size_t get_display_text(int led_id, std::span<char> text) override {
+		std::string chars;
+
+		for (auto i = 0u; i < msg_history.count(); i++) {
+			auto msg = msg_history.peek(i);
+			chars += " " + msg.toString() + "\n";
+		}
+
+		size_t chars_to_copy = std::min(text.size(), chars.length());
+		std::copy(chars.begin(), chars.begin() + chars_to_copy, text.begin());
+
+		return chars_to_copy;
+	}
 };
 
 struct MIDI_CVWidget : ModuleWidget {
@@ -504,15 +527,13 @@ struct MIDI_CVWidget : ModuleWidget {
 		addOutput(
 			createOutputCentered<ThemedPJ301MPort>(mm2px(Vec(32.591, 112.975)), module, MIDI_CV::CONTINUE_OUTPUT));
 
-		MidiDisplay *display = createWidget<MidiDisplay>(mm2px(Vec(0.0, 13.048)));
-		display->box.size = mm2px(Vec(40.64, 29.012));
-		display->setMidiPort(module ? &module->midiInput : NULL);
+		// Changed for METAMODULE
+		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(2, 10)));
+		display->box.size = mm2px(Vec(36, 42));
+		display->firstLightId = 0;
+		display->font = "Default_14";
+		display->color = Colors565::Yellow;
 		addChild(display);
-
-		// MidiButton example
-		// MidiButton* midiButton = createWidget<MidiButton_MIDI_DIN>(Vec(0, 0));
-		// midiButton->setMidiPort(module ? &module->midiInput : NULL);
-		// addChild(midiButton);
 	}
 
 	void appendContextMenu(Menu *menu) override {
