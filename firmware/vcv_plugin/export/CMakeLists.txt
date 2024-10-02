@@ -46,6 +46,7 @@ target_sources(
          src/glfw3.c
          src/history.cpp
          src/logger.cpp
+         src/midi.cpp
          src/midi_input_queue.cpp
          src/settings.cpp
          src/string.cpp
