@@ -39,66 +39,80 @@ void Controls::update_params() {
 	if (_first_param) {
 		_first_param = false;
 
-		_midi_connected.update(_midi_host.is_connected());
+		update_midi_connected();
 
 		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
 
-		if (_midi_connected.went_low()) {
-			_midi_parser.start_all_notes_off_sequence();
-		}
-
-		if (_midi_connected.is_high() && !cur_metaparams->midi_connected) {
-			cur_metaparams->midi_connected = true;
-		}
-
-		if (cur_metaparams->midi_poly_chans > 0)
-			_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
-
-		// Rotary button
-		if (rotary_button.is_just_pressed()) {
-			_rotary_moved_while_pressed = false;
-			cur_metaparams->rotary_button.register_rising_edge();
-		}
-
-		if (rotary_button.is_just_released()) {
-			if (_rotary_moved_while_pressed) {
-				cur_metaparams->rotary_button.reset();
-			} else {
-				cur_metaparams->rotary_button.register_falling_edge();
-			}
-		}
-		cur_metaparams->rotary_button.set_state_no_events(rotary_button.is_pressed());
-
-		// Rotary turning
-		int new_rotary_motion = rotary.read();
-		bool pressed = rotary_button.is_pressed();
-		cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
-		cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
-		//"If rotary was turned at any point since button was pressed" --> logical OR of all (pressed AND new_motion)
-		_rotary_moved_while_pressed |= pressed && (new_rotary_motion != 0);
+		update_rotary();
 
 		// Meta button
 		cur_metaparams->meta_buttons[0].transfer_events(button0);
 	}
 
+	parse_midi();
+
+	cur_params++;
+	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
+		_buffer_full = true;
+}
+
+void Controls::update_rotary() {
+	// Rotary button
+	if (rotary_button.is_just_pressed()) {
+		_rotary_moved_while_pressed = false;
+		cur_metaparams->rotary_button.register_rising_edge();
+	}
+
+	if (rotary_button.is_just_released()) {
+		if (_rotary_moved_while_pressed) {
+			cur_metaparams->rotary_button.reset();
+		} else {
+			cur_metaparams->rotary_button.register_falling_edge();
+		}
+	}
+	cur_metaparams->rotary_button.set_state_no_events(rotary_button.is_pressed());
+
+	// Rotary turning
+	int new_rotary_motion = rotary.read();
+	bool pressed = rotary_button.is_pressed();
+	cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
+	cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
+	//"If rotary was turned at any point since button was pressed" --> logical OR of all (pressed AND new_motion)
+	_rotary_moved_while_pressed |= pressed && (new_rotary_motion != 0);
+}
+
+void Controls::update_midi_connected() {
+	_midi_connected.update(_midi_host.is_connected());
+
+	if (_midi_connected.went_low()) {
+		_midi_parser.start_all_notes_off_sequence();
+	}
+
+	if (_midi_connected.is_high() && !cur_metaparams->midi_connected) {
+		cur_metaparams->midi_connected = true;
+	}
+
+	if (cur_metaparams->midi_poly_chans > 0)
+		_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
+}
+
+void Controls::parse_midi() {
 	// Parse a MIDI message if available
 	if (auto msg = _midi_rx_buf.get(); msg.has_value()) {
 		cur_params->raw_msg = msg.value();
 		cur_params->midi_event = _midi_parser.parse(msg.value());
 
-	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence(); noteoff.has_value()) {
-		if (noteoff.value().type == Midi::Event::Type::None) {
+	} else if (auto noteoff = _midi_parser.step_all_notes_off_sequence()) {
+		if (noteoff->type == Midi::Event::Type::None) {
 			cur_metaparams->midi_connected = false;
 		}
-		cur_params->midi_event = noteoff.value();
+		cur_params->midi_event = *noteoff;
+		cur_params->raw_msg = {0x80, noteoff->note, 0};
 
 	} else {
+		cur_params->raw_msg = 0;
 		cur_params->midi_event.type = Midi::Event::Type::None;
 	}
-
-	cur_params++;
-	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
-		_buffer_full = true;
 }
 
 template<size_t block_num>

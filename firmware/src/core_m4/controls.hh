@@ -47,6 +47,10 @@ private:
 	template<size_t block_num>
 	void start_param_block();
 
+	void parse_midi();
+	void update_midi_connected();
+	void update_rotary();
+
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
 	// Digital controls: Rotary, Buttons and Gate jacks
