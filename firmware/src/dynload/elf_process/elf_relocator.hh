@@ -29,11 +29,12 @@ public:
 
 		switch (rel.reloc_type()) {
 
+			case R_ARM_REL32:
 			case R_ARM_RELATIVE: {
 				if (rel.symbol_value() == 0) {
 					*reloc_address = *reloc_address + base_address;
 					ok = true;
-					pr_dump("R_ARM_RELATIVE: %s ", rel.symbol_name().data());
+					pr_dump("R_ARM_RELATIVE/REL32: %s ", rel.symbol_name().data());
 					pr_dump("write 0x%x (+%x) to address 0x%x (+%x)\n",
 							*reloc_address + base_address,
 							*reloc_address,
@@ -41,7 +42,7 @@ public:
 							rel.reloc_offset());
 				} else {
 					// Docs are not clear how to handle this case.
-					pr_warn("(?) R_ARM_RELATIVE: %s ", rel.symbol_name().data());
+					pr_warn("(?) R_ARM_RELATIVE/REL32: %s\n", rel.symbol_name().data());
 					*reloc_address = rel.symbol_value() + base_address;
 					ok = true;
 				}
@@ -60,7 +61,7 @@ public:
 						*reloc_address = sym->address;
 						ok = true;
 					} else {
-						pr_err("R_ARM_GLOB_DAT: %s ", rel.symbol_name().data());
+						pr_err("R_ARM_GLOB_DAT: %s\n", rel.symbol_name().data());
 						pr_err("\nSymbol value is 0 and name not found in host symbols\n");
 						ok = false;
 					}
