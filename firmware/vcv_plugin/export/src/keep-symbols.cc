@@ -59,7 +59,7 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 		expm1l(1.);
 	}
 
-	volatile const auto addr = &MetaModule::register_module;
+	[[maybe_unused]] volatile const auto addr = &MetaModule::register_module;
 
 	// provides vtable for Quantity
 	rack::Quantity q;
