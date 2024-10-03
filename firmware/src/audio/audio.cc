@@ -162,7 +162,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	// for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
-		auto &params = param_block.params[idx];
+		auto const &params = param_block.params[idx];
 		idx++;
 
 		// Audio inputs
@@ -183,12 +183,13 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		// Gate inputs
 		for (auto [i, gatein, sync_gatein] : countzip(params.gate_ins, param_state.gate_ins)) {
 
-			if (!jack_is_patched(param_state.jack_senses, i + FirstGateInput)) {
-				gatein = false;
-			} else
+			bool gate = false;
+			if (jack_is_patched(param_state.jack_senses, i + FirstGateInput)) {
+				gate = gatein;
 				player.set_panel_input(i + FirstGateInput, gatein ? 8.f : 0.f);
+			}
 
-			sync_gatein.register_state(gatein);
+			sync_gatein.register_state(gate);
 		}
 
 		// Pass Knob values to modules
