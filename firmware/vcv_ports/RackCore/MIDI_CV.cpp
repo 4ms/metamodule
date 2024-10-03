@@ -531,7 +531,7 @@ struct MIDI_CVWidget : ModuleWidget {
 		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(2, 10)));
 		display->box.size = mm2px(Vec(36, 42));
 		display->firstLightId = 0;
-		display->font = "Default_14";
+		display->font = "Default_12";
 		display->color = Colors565::Yellow;
 		addChild(display);
 	}
