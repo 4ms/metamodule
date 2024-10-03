@@ -305,8 +305,10 @@ void AudioStream::handle_midi(bool is_connected,
 	if (!is_connected)
 		return;
 
-	if (raw_msg.status != 0xfe && raw_msg.status != 0)
+	if (raw_msg.status != 0xfe && raw_msg.status != 0) {
+		// 50ns with no listeners + ~100ns additional per listener
 		player.send_raw_midi(raw_msg);
+	}
 
 	if (event.type == Midi::Event::Type::None)
 		return;
