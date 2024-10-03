@@ -40,7 +40,7 @@ void Controls::update_params() {
 
 		update_midi_connected();
 
-		cur_params->jack_senses = get_jacksense_reading();
+		cur_metaparams->jack_senses = get_jacksense_reading();
 
 		// PatchCV
 		if constexpr (PanelDef::NumMetaCV > 0)
