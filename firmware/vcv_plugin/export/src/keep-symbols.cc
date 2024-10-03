@@ -15,6 +15,8 @@
 #include <random>
 #include <unordered_map>
 
+#include <exception>
+
 #include "CoreModules/moduleFactory.hh"
 
 namespace MetaModule
@@ -76,4 +78,13 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 
 	// provides vtable for Quantity
 	rack::Quantity q;
+
+	//`typeinfo for __cxxabiv1::__forced_unwind`
+	try {
+		char *x = reinterpret_cast<char *>(0xC0000000);
+		std::stoi(x, nullptr);
+
+	} catch (__cxxabiv1::__forced_unwind &) {
+		printf("fail\n");
+	}
 }

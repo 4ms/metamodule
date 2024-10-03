@@ -10,7 +10,6 @@ add_compile_definitions(
 
 # Note: MCU_FLAGS is used with linking as well
 set(MCU_FLAGS
-    -fno-exceptions
     -fno-math-errno
     -mcpu=cortex-a7
     -mlittle-endian
@@ -40,7 +39,6 @@ add_compile_options(
   -ffunction-sections
   -nostartfiles
   -ffreestanding
-  -fno-unwind-tables
   -Wall
   -Werror=return-type
   -Wsign-compare

@@ -1,38 +1,38 @@
 namespace std
 {
-void __throw_bad_function_call() {
-	return;
-	// while (1)
-	// 	;
-}
-void __throw_bad_alloc() {
-	while (true)
-		;
-}
-void __throw_length_error(char const *) {
-	while (true)
-		;
-}
+// void __throw_bad_function_call() {
+// 	return;
+// 	// while (1)
+// 	// 	;
+// }
+// void __throw_bad_alloc() {
+// 	while (true)
+// 		;
+// }
+// void __throw_length_error(char const *) {
+// 	while (true)
+// 		;
+// }
 
 //Needed for std::string constructor and function to return std::string
-void __throw_logic_error(char const *) {
-	while (true)
-		;
-}
+// void __throw_logic_error(char const *) {
+// 	while (true)
+// 		;
+// }
 
-void __throw_out_of_range_fmt(char const *, ...) {
-}
+// void __throw_out_of_range_fmt(char const *, ...) {
+// }
 
-void __throw_bad_array_new_length() {
-}
+// void __throw_bad_array_new_length() {
+// }
 
-void __throw_bad_cast() {
-	while (true)
-		;
-}
+// void __throw_bad_cast() {
+// 	while (true)
+// 		;
+// }
 
-void __throw_runtime_error(char const *) {
-}
+// void __throw_runtime_error(char const *) {
+// }
 
 //Needed to compile at -O0 when using std::string
 // template<typename T>
