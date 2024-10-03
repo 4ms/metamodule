@@ -141,6 +141,11 @@ private:
 				else
 					err_msg = "Unknown relocation entry";
 				return err_msg;
+
+				// DEBUG: Keep going, don't stop on errors
+				if (err_msg.length())
+					pr_dbg("%s\n", err_msg.c_str());
+				// return err_msg;
 			}
 		}
 
