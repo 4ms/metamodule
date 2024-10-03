@@ -1,6 +1,7 @@
 #include "audio/audio.hh"
 #include "audio/audio_test_signals.hh"
 #include "conf/audio_settings.hh"
+#include "conf/ext_audio_expander.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
@@ -118,6 +119,13 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
 }
 
+AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
+	output_id = AudioExpander::out_order[output_id];
+	float output_volts = player.get_panel_output(output_id + PanelDef::NumAudioOut) * output_fade_amt;
+	// FIXME: ext_cal
+	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
+}
+
 bool AudioStream::is_playing_patch() {
 	if (patch_loader.should_fade_down_audio()) {
 		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
@@ -154,15 +162,16 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	handle_patch_mod_queue();
 
 	// TODO: handle second codec
-	if (ext_audio_connected)
-		AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
+	// if (ext_audio_connected)
+	// 	AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
-	// for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto const &params = param_block.params[idx];
+		auto &ext_out = audio_block.out_ext_codec[idx];
+		auto const &ext_in = audio_block.out_ext_codec[idx];
 		idx++;
 
 		// Audio inputs
@@ -209,6 +218,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		for (auto [i, outchan] : countzip(out.chan))
 			outchan = get_audio_output(i);
+
+		// Ext audio modules:
+		if (ext_audio_connected) {
+			for (auto [i, extoutchan] : countzip(ext_out.chan))
+				extoutchan = get_ext_audio_output(i);
+		}
 	}
 
 	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins)) {
