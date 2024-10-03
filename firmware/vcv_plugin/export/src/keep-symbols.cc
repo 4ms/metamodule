@@ -15,8 +15,6 @@
 #include <random>
 #include <unordered_map>
 
-#include <exception>
-
 #include "CoreModules/moduleFactory.hh"
 
 namespace MetaModule
@@ -30,17 +28,6 @@ bool register_module(std::string_view brand_name,
 
 extern "C" __attribute__((optimize("-O0"))) void _empty_func_stub() {
 }
-
-// Define std::random so plugins can use it
-// namespace std
-// {
-// random_device::result_type random_device::_M_getval() {
-// 	return rack::random::get<random_device::result_type>();
-// }
-
-// void random_device::_M_init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const &) {
-// }
-// } // namespace std
 
 extern "C" int gettimeofday(struct timeval *tp, struct timezone *tzp);
 extern "C" void __cxa_pure_virtual();
@@ -72,19 +59,17 @@ void __attribute__((optimize("-O0"))) keep_symbols() {
 		expm1l(1.);
 	}
 
-	static auto addr = &MetaModule::register_module;
-	// static bool keep = MetaModule::register_module("", "", nullptr, {}, "");
-	printf("%p\n", addr);
+	volatile const auto addr = &MetaModule::register_module;
 
 	// provides vtable for Quantity
 	rack::Quantity q;
 
 	//`typeinfo for __cxxabiv1::__forced_unwind`
-	try {
-		char *x = reinterpret_cast<char *>(0xC0000000);
-		std::stoi(x, nullptr);
+	// try {
+	// 	char *x = reinterpret_cast<char *>(0xD0000000);
+	// 	std::stoi(x, nullptr);
 
-	} catch (__cxxabiv1::__forced_unwind &) {
-		printf("fail\n");
-	}
+	// } catch (__cxxabiv1::__forced_unwind &) {
+	// 	printf("fail\n");
+	// }
 }
