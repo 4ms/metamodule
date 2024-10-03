@@ -61,6 +61,22 @@ public:
 					player.set_panel_param(i, knob.val);
 			}
 
+			// MIDI: random stream
+			{
+				static unsigned random_midi_ctr = 0;
+				static uint8_t last_note = 0;
+
+				if (random_midi_ctr % 24000 == 0) {
+					last_note = random() & 0x3F + 0x20;
+					player.send_raw_midi({0x90, last_note, (uint8_t)random()});
+				} else if (random_midi_ctr % 24000 == 12000) {
+					player.send_raw_midi({0x80, last_note, 0x00});
+				} else if (random_midi_ctr % 36000 == 0) {
+					player.send_raw_midi({0xB0, 0x74, (uint8_t)random()});
+				}
+				random_midi_ctr++;
+			}
+
 			// TODO: enable "recording" in SDL
 			// Input jacks
 			(void)in;
