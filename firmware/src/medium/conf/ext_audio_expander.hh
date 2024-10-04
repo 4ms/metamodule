@@ -1,21 +1,40 @@
 #include <array>
 #include <cstdint>
+#include <string_view>
 
 namespace MetaModule::AudioExpander
 {
+static constexpr uint32_t NumInJacks = 8;
+static constexpr uint32_t NumUserFacingInJacks = NumInJacks;
 
 static constexpr std::array<uint32_t, 6> in_order{0, 1, 2, 3, 4, 5};
-// static constexpr std::array<uint32_t, 8> out_order{0, 7, 8, 5, 1, 4, 2, 3};
-static constexpr std::array<uint32_t, 8> out_order{0, 6, 7, 5, 1, 4, 2, 3};
-// static constexpr std::array<uint32_t, 8> out_order{0, 4, 6, 7, 5, 3, 1, 2};
 
-//Patching into jack 1 (0), hear panel jack 8 -> 0
-//Patching into jack 2 (1), hear Enosc 3 Out A (panel jack 14 -> 6)
-//Patching into jack 3 (2), hear Enosc 3 Out B (panel jack 15 -> 7)
-//Patching into jack 4 (3), hear Enosc 2 Out B (panel jack 13 -> 5)
-//Patching into jack 5 (4), hear panel jack 9 -> 1
-//Patching into jack 6 (5), hear Enosc 2 Out A (panel jack 12 -> 4)
-//Patching into jack 7 (6), hear Enosc 1 Out A (panel jack 10 -> 2)
-//Patching into jack 8 (7), hear Enosc 1 Out B (panel jack 11 -> 3)
+static constexpr std::array<std::string_view, NumUserFacingInJacks> InJackNames{
+	"Out9", "Out10", "Out11", "Out12", "Out13", "Out14"};
+
+static constexpr std::array<std::string_view, NumUserFacingInJacks> InJackAbbrevs{"9", "10", "11", "12", "13", "14"};
+
+static constexpr std::string_view get_map_injack_name(uint32_t id) {
+	if (id < InJackNames.size())
+		return InJackNames[id];
+	return "?";
+}
+
+static constexpr std::array<uint32_t, 8> out_order{0, 4, 6, 7, 5, 3, 1, 2};
+
+static constexpr uint32_t NumOutJacks = 8;
+static constexpr uint32_t NumUserFacingOutJacks = NumOutJacks;
+
+static constexpr std::array<std::string_view, NumUserFacingOutJacks> OutJackNames{
+	"Out9", "Out10", "Out11", "Out12", "Out13", "Out14", "Out15", "Out16"};
+
+static constexpr std::array<std::string_view, NumUserFacingOutJacks> OutJackAbbrevs{
+	"9", "10", "11", "12", "13", "14", "15", "16"};
+
+static constexpr std::string_view get_map_outjack_name(uint32_t id) {
+	if (id < OutJackNames.size())
+		return OutJackNames[id];
+	return "?";
+}
 
 } // namespace MetaModule::AudioExpander

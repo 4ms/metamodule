@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
+#include "conf/ext_audio_expander.hh"
 #include "patch/patch.hh"
 #include <string>
 
@@ -96,7 +97,11 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 template<typename PanelDef>
 std::string get_panel_name(const JackOutput &, uint16_t panel_id) {
 	std::string name{8};
-	name = PanelDef::get_map_outjack_name(panel_id);
+	if (panel_id < PanelDef::NumUserFacingOutJacks) {
+		name = PanelDef::get_map_outjack_name(panel_id);
+	} else if (size_t id = panel_id - PanelDef::NumUserFacingOutJacks; id < AudioExpander::NumOutJacks) {
+		name = AudioExpander::get_map_outjack_name(id);
+	}
 	return name;
 }
 
