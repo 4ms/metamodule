@@ -1,6 +1,8 @@
 #include "engine/Module.hpp"
 #include "console/pr_dbg.hh"
 #include "jansson.h"
+#include <context.hpp>
+#include <engine/Engine.hpp>
 
 namespace rack::engine
 {
@@ -91,10 +93,11 @@ void Module::config(int num_params, int num_inputs, int num_outputs, int num_lig
 	lightInfos.resize(num_lights);
 }
 
-void Module::set_samplerate(float sr) {
-	args.sampleRate = sr;
-	args.sampleTime = 1.f / sr;
-	onSampleRateChange(SampleRateChangeEvent{.sampleRate = args.sampleRate, .sampleTime = args.sampleTime});
+void Module::set_samplerate(float rate) {
+	APP->engine->sample_rate = rate;
+	args.sampleRate = rate;
+	args.sampleTime = 1.f / rate;
+	onSampleRateChange({.sampleRate = rate, .sampleTime = 1.f / rate});
 }
 
 } // namespace rack::engine
