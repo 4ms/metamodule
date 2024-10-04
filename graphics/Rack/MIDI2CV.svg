@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="40.73mm"
+   height="128.5mm"
+   viewBox="0 0 40.73 128.5"
+   version="1.1"
+   id="svg1"
+   inkscape:export-filename="../../firmware/assets/RackCore/MIDI_CV.png"
+   inkscape:export-xdpi="47.439999"
+   inkscape:export-ydpi="47.439999"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   sodipodi:docname="MIDI2CV.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="2.0020443"
+     inkscape:cx="99.3984"
+     inkscape:cy="252.74166"
+     inkscape:window-width="2512"
+     inkscape:window-height="1387"
+     inkscape:window-x="49"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer2" />
+  <defs
+     id="defs1">
+    <linearGradient
+       id="aae5b07c-b446-4b70-86f6-2dd95e4bbb54"
+       x1="60"
+       x2="60"
+       y2="380"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#ebebeb"
+         id="stop2" />
+      <stop
+         offset="1"
+         stop-color="#e1e1e1"
+         id="stop4" />
+    </linearGradient>
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="artwork">
+    <rect
+       style="fill:#EEEEEE"
+       id="rect3"
+       width="40.73"
+       height="128.5"
+       x="0"
+       y="0" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:4px;font-family:GillSans-Bold, 'Gill Sans'"
+       x="8.9772968"
+       y="9.4902859"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="stroke-width:0.4"
+         x="8.9772968"
+         y="9.4902859">MIDI to CV</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="4.119556"
+       y="48.5448"
+       id="text1-4"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0"
+         style="stroke-width:0.326095"
+         x="4.119556"
+         y="48.5448">V/OCT</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="20.342566"
+       y="48.5448"
+       id="text1-4-7"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-5"
+         style="stroke-width:0.326095"
+         x="20.342566"
+         y="48.5448">GATE</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="36.908627"
+       y="48.5448"
+       id="text1-4-7-5"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-5-1"
+         style="stroke-width:0.326095"
+         x="36.908627"
+         y="48.5448">VEL</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="6.4442496"
+       y="61.65527"
+       id="text1-4-1"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-55"
+         style="stroke-width:0.326095"
+         x="6.4442496"
+         y="61.65527">AFT</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="21.902182"
+       y="61.62661"
+       id="text1-4-7-8"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-5-5"
+         style="stroke-width:0.326095"
+         x="21.902182"
+         y="61.62661">PW</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="36.557533"
+       y="61.62661"
+       id="text1-4-7-5-6"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-5-1-7"
+         style="stroke-width:0.326095"
+         x="36.557533"
+         y="61.62661">MW</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="6.4116082"
+       y="75.069809"
+       id="text1-4-1-9"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-55-5"
+         style="stroke-width:0.326095"
+         x="6.4116082"
+         y="75.069809">CLK</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="18.288555"
+       y="75.069809"
+       id="text1-4-7-8-9"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-5-5-0"
+         style="stroke-width:0.326095"
+         x="18.288555"
+         y="75.069809">DIVCLK</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="35.311592"
+       y="75.098473"
+       id="text1-4-7-5-6-9"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-5-1-7-3"
+         style="stroke-width:0.326095"
+         x="35.311592"
+         y="75.098473">RETR</tspan></text>
+    <rect
+       style="fill:#000000;stroke-width:1.07318"
+       id="rect2"
+       width="36.678673"
+       height="42.834534"
+       x="2.1802006"
+       y="10.644509" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="4.1123905"
+       y="88.134354"
+       id="text1-4-1-9-4"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-55-5-1"
+         style="stroke-width:0.326095"
+         x="4.1123905"
+         y="88.134354">START</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="20.373615"
+       y="88.134354"
+       id="text1-4-7-8-9-8"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-5-5-0-5"
+         style="stroke-width:0.326095"
+         x="20.373615"
+         y="88.134354">STOP</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:3.26094px;font-family:GillSans-Bold, 'Gill Sans';stroke-width:0.815236"
+       x="34.892033"
+       y="88.134354"
+       id="text1-4-7-5-6-9-8"
+       transform="scale(0.81523624,1.2266383)"><tspan
+         sodipodi:role="line"
+         id="tspan1-0-5-1-7-3-9"
+         style="stroke-width:0.326095"
+         x="34.892033"
+         y="88.134354">CONT</tspan></text>
+  </g>
+</svg>

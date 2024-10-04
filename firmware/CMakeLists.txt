@@ -96,6 +96,7 @@ add_custom_target(asset-image ALL DEPENDS ${ASSET_IMG_PATH})
 set(RELEASE_TARGET_DIR   ${CMAKE_CURRENT_BINARY_DIR}/metamodule-firmware)
 
 set(RELEASE_AS_ARCHIVE             ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-assets.zip)
+set(RELEASE_FW_ARCHIVE             ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware.zip)
 set(RELEASE_FW_AS_ARCHIVE          ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware-assets.zip)
 set(RELEASE_FW_AS_BL_ARCHIVE       ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware-assets-bl.zip)
 set(RELEASE_FW_AS_BL_WIFI_ARCHIVE  ${CMAKE_CURRENT_BINARY_DIR}/metamodule-${GIT_FIRMWARE_VERSION_TAG}-firmware-assets-bl-wifi.zip)
@@ -129,6 +130,16 @@ add_custom_command(
                                     ${RELEASE_TARGET_DIR}/${ASSET_IMG_FILENAME} 
                                     ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} 
                                     && rm -rf ${RELEASE_TARGET_DIR}
+
+  # Firmware
+  COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
+                                   --version         "${GIT_FIRMWARE_VERSION_TAG}"
+                                   --app             "${MAIN_FW_FILENAME}"
+                                   "${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME}"
+  COMMAND ${CMAKE_COMMAND} -E tar cf ${RELEASE_FW_ARCHIVE} --format=zip -- 
+                                        ${RELEASE_TARGET_DIR}/main.uimg 
+                                        ${RELEASE_TARGET_DIR}/${MANIFEST_FILENAME} 
+                                        && rm -rf ${RELEASE_TARGET_DIR}
 
   # Firmware+Assets
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py

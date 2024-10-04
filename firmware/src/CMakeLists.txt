@@ -122,6 +122,7 @@ add_executable(
   ${FWDIR}/src/gui/elements/element_name.cc
   ${FWDIR}/src/gui/slsexport/ui_local.cc
   ${FWDIR}/src/gui/fonts/fonts.cc
+  ${FWDIR}/src/midi/midi_router.cc
   #
   ${FWDIR}/src/dynload/dynloader.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc

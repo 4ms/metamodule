@@ -5,4 +5,5 @@ set(brands
 	nonlinearcircuits
     eightfold
 	Valley
+    RackCore
 )

@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <span>
 
-#define MIDIDEBUG
+// #define MIDIDEBUG
 #if defined(MIDIDEBUG)
 #include "pr_dbg.hh"
 #endif
@@ -188,10 +188,12 @@ struct MidiMessage {
 	}
 
 	static void dump_raw(std::span<uint8_t> buffer) {
+#if defined(MIDIDEBUG)
 		pr_dbg("%d bytes ", buffer.size());
 		for (auto byte : buffer)
 			pr_dbg("0x%02x ", byte);
 		pr_dbg("\n");
+#endif
 	}
 
 	void print() const {
