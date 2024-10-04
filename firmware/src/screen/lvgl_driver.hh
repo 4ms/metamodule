@@ -2,6 +2,7 @@
 #include "conf/screen_conf.hh"
 #include "drivers/screen_ST77XX.hh"
 #include "drivers/timekeeper.hh"
+#include "gui/elements/screensaver.hh"
 #include "lvgl.h"
 #include "params/metaparams.hh"
 #include "params/params.hh"
@@ -68,16 +69,17 @@ public:
 class MMDisplay {
 	static inline lv_disp_drv_t *last_used_disp_drv;
 	static inline MetaParams *m;
+	static inline Screensaver *_screensaver;
 	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
 
-private:
 	static inline ScreenFrameWriter _spi_driver;
 
 	static inline std::array<lv_color_t, BufferSize> testbuf;
 
 public:
-	static void init(MetaParams &metaparams) {
+	static void init(MetaParams &metaparams, Screensaver &screensaver) {
 		m = &metaparams;
+		_screensaver = &screensaver;
 
 		_spi_driver.init();
 		_spi_driver.register_partial_frame_cb(end_flush);
@@ -149,10 +151,18 @@ public:
 			data->continue_reading = true;
 		}
 #else
+		if (_screensaver->is_active()) {
+			if (m->rotary_button.is_just_released() || m->rotary.use_motion())
+				_screensaver->wake();
+			return;
+		} else
+			m->rotary_button.clear_events();
+
 		if (m->meta_buttons[0].is_pressed()) {
 			if (m->rotary.motion != 0) {
 				m->ignore_metabutton_release = true;
 				m->rotary_with_metabutton.transfer_motion(m->rotary);
+				_screensaver->wake();
 			}
 		} else
 			data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
@@ -169,6 +179,9 @@ public:
 			data->enc_diff = m->rotary.use_motion();
 #else
 		data->enc_diff = m->rotary.use_motion();
+
+		if (data->state || data->enc_diff)
+			_screensaver->wake();
 #endif
 	}
 };
