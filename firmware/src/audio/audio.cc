@@ -9,6 +9,7 @@
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
+#include "expanders.hh"
 #include "param_block.hh"
 #include "patch_play/patch_mods.hh"
 #include "patch_play/patch_player.hh"
@@ -55,12 +56,16 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_rx_buffer(audio_blocks[0].in_codec, block_size_);
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
+		ext_cal.reset_to_default();
+		// ext_cal = ext_audio_calibrator.read_calibration();
 		ext_audio_connected = true;
 		codec_ext_.set_tx_buffer(audio_blocks[0].out_ext_codec, block_size_);
 		codec_ext_.set_rx_buffer(audio_blocks[0].in_ext_codec, block_size_);
+		Expanders::ext_audio_found(true);
 		pr_info("Audio Expander detected\n");
 	} else {
 		ext_audio_connected = false;
+		Expanders::ext_audio_found(false);
 		pr_info("No Audio Expander detected\n");
 	}
 
@@ -122,8 +127,7 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
 	output_id = AudioExpander::out_order[output_id];
 	float output_volts = player.get_panel_output(output_id + PanelDef::NumAudioOut) * output_fade_amt;
-	// FIXME: ext_cal
-	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
+	return MathTools::signed_saturate(ext_cal.out_cal[output_id].adjust(output_volts), 24);
 }
 
 bool AudioStream::is_playing_patch() {
