@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
-#include "conf/ext_audio_expander.hh"
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "patch/patch.hh"
 #include <string>
 
@@ -32,10 +32,15 @@ template<typename PanelDef>
 std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 	std::string name{16};
 
-	if (panel_id < PanelDef::NumUserFacingInJacks)
+	if (panel_id < PanelDef::NumUserFacingInJacks) {
 		name = PanelDef::get_map_injack_name(panel_id);
 
-	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack) {
+	} else if (size_t id = panel_id - PanelDef::NumUserFacingInJacks; id < AudioExpander::NumInJacks) {
+		name = AudioExpander::get_map_injack_name(id);
+	}
+
+	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack)
+	{
 		std::string id = std::to_string(panel_id + 1 - MidiMonoNoteJack);
 		name = "MIDI Note " + id;
 	}
