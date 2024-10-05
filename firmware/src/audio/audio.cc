@@ -1,7 +1,7 @@
 #include "audio/audio.hh"
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "audio/audio_test_signals.hh"
 #include "conf/audio_settings.hh"
-#include "conf/ext_audio_expander.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
@@ -189,8 +189,21 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 			player.set_panel_input(panel_jack_i, calibrated_input);
 
-			// Send smoothed sigals to other core via metaparams
+			// Send smoothed sigals to other core
 			smoothed_ins[panel_jack_i].add_val(calibrated_input);
+		}
+
+		if (ext_audio_connected) {
+			for (auto [panel_jack_i, inchan] : zip(AudioExpander::in_order, ext_in.chan)) {
+
+				// Skip unpatched jacks
+				if (!AudioExpander::jack_is_patched(param_state.jack_senses, panel_jack_i))
+					continue;
+
+				float calibrated_input = ext_cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
+
+				player.set_panel_input(panel_jack_i, calibrated_input);
+			}
 		}
 
 		// Gate inputs
@@ -230,6 +243,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 	}
 
+	// TODO: put this in params_state not metaparams
 	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins)) {
 		m = s.val();
 	}
