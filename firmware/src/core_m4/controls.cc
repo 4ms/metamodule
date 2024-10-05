@@ -53,10 +53,6 @@ void Controls::update_params() {
 
 		cur_params->jack_senses = get_jacksense_reading();
 
-		// PatchCV
-		if constexpr (PanelDef::NumMetaCV > 0)
-			cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
-
 		// Rotary button
 		if (rotary_button.is_just_pressed()) {
 			_rotary_moved_while_pressed = false;

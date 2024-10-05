@@ -19,6 +19,7 @@ namespace MetaModule
 struct ParamsState {
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
+	// std::array<float, PanelDef::NumAudioIn> smoothed_ins{};
 	uint32_t jack_senses;
 
 	void clear() {
