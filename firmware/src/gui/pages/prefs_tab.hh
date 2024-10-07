@@ -237,10 +237,11 @@ private:
 			return;
 
 		auto tar = event->target;
+
 		if (tar == ui_SystemPrefsScreensaverTimeDropdown || tar == ui_SystemPrefsScreensaverKnobsCheck) {
-			const auto y = lv_obj_get_y(ui_SystemPrefsScreensaverSettingsTitle);
-			lv_obj_scroll_to_y(ui_SystemMenuPrefsTab, y, LV_ANIM_ON);
-		} else {
+			lv_obj_scroll_to_view_recursive(ui_SystemPrefsSaveButton, LV_ANIM_ON);
+
+		} else if (tar == ui_SystemPrefsAudioBlocksizeDropdown || tar == ui_SystemPrefsAudioSampleRateDropdown) {
 			lv_obj_scroll_to_y(ui_SystemMenuPrefsTab, 0, LV_ANIM_ON);
 		}
 	}
