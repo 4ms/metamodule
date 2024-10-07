@@ -188,7 +188,7 @@ TEST_CASE("Get default settings if file is missing fields") {
 	CHECK(settings.last_patch_opened == "");
 	CHECK(settings.last_patch_vol == MetaModule::Volume::NorFlash);
 
-	CHECK(settings.screensaver.timeout_ms == 0);
+	CHECK(settings.screensaver.timeout_ms == MetaModule::ScreensaverSettings::defaultTimeout);
 	CHECK(settings.screensaver.knobs_can_wake == true);
 }
 
