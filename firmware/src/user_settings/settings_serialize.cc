@@ -46,6 +46,13 @@ static void write(ryml::NodeRef *n, PluginAutoloadSettings const &s) {
 		n->append_child() << s;
 }
 
+static void write(ryml::NodeRef *n, ScreensaverSettings const &s) {
+	*n |= ryml::MAP;
+
+	n->append_child() << ryml::key("index") << s.timeout_ms;
+	n->append_child() << ryml::key("knobs_can_wake") << s.knobs_can_wake;
+}
+
 namespace Settings
 {
 
@@ -65,6 +72,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["plugin_autoload"] << settings.plugin_autoload;
 	data["last_patch_opened"] << settings.last_patch_opened;
 	data["last_patch_vol"] << static_cast<unsigned>(settings.last_patch_vol);
+	data["screensaver"] << settings.screensaver;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();

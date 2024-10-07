@@ -28,6 +28,7 @@ private:
 	ParamsMidiState params;
 	MetaParams metaparams;
 	UserSettings settings;
+	Screensaver screensaver{settings.screensaver};
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
@@ -49,12 +50,13 @@ public:
 					   notify_queue,
 					   patch_mod_queue,
 					   plugin_manager,
-					   settings} {
+					   settings,
+					   screensaver} {
 
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams);
+		MMDisplay::init(metaparams, screensaver);
 		Gui::init_lvgl_styles();
 		page_manager.init();
 

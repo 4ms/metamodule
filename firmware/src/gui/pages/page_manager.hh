@@ -1,4 +1,5 @@
 #pragma once
+#include "gui/elements/screensaver.hh"
 #include "gui/knobset_button.hh"
 #include "gui/notify/display.hh"
 #include "gui/notify/queue.hh"
@@ -31,6 +32,7 @@ class PageManager {
 	PageList page_list;
 	GuiState gui_state;
 	ButtonLight button_light;
+	Screensaver &screensaver;
 
 	MainMenuPage page_mainmenu{info};
 	PatchSelectorPage page_patchsel{info, subdir_panel};
@@ -55,7 +57,8 @@ public:
 				NotificationQueue &notify_queue,
 				PatchModQueue &patch_mod_queue,
 				PluginManager &plugin_manager,
-				UserSettings &settings)
+				UserSettings &settings,
+				Screensaver &screensaver)
 		: info{patch_storage,
 			   open_patch_manager,
 			   patch_playloader,
@@ -66,7 +69,8 @@ public:
 			   page_list,
 			   gui_state,
 			   settings,
-			   plugin_manager} {
+			   plugin_manager}
+		, screensaver{screensaver} {
 	}
 
 	void init() {
@@ -97,11 +101,12 @@ public:
 		handle_notifications();
 
 		handle_write_settings();
+
+		screensaver.update();
 	}
 
 	void handle_knobset_change() {
 		if (auto knobset_change = info.metaparams.rotary_with_metabutton.use_motion(); knobset_change != 0) {
-
 			if (auto patch = info.open_patch_manager.get_playing_patch(); patch != nullptr) {
 
 				if (int num_knobsets = patch->knob_sets.size(); num_knobsets > 0) {
@@ -148,6 +153,8 @@ public:
 			if (!knobpos.has_value())
 				continue;
 
+			screensaver.wake_knob();
+
 			// Update patch for any map that's mapped to the knob that moved
 			for (auto &map : patch->knob_sets[active_knobset].set) {
 				if (map.panel_knob_id == panel_knob_i) {
@@ -174,16 +181,20 @@ public:
 	void handle_back_event() {
 		// Interpret and pass on back button events
 		if (info.metaparams.meta_buttons[0].is_just_released()) {
-			if (!info.metaparams.ignore_metabutton_release)
-				gui_state.back_button.register_falling_edge();
-			else
-				info.metaparams.ignore_metabutton_release = false;
+			if (!screensaver.is_active()) {
+				if (!info.metaparams.ignore_metabutton_release)
+					gui_state.back_button.register_falling_edge();
+				else
+					info.metaparams.ignore_metabutton_release = false;
+			}
+			screensaver.wake();
 		}
 	}
 
 	void handle_notifications() {
 		auto msg = info.notify_queue.get();
 		if (msg) {
+			screensaver.wake();
 			pr_info("Notify: %s\n", msg->message.c_str());
 			DisplayNotification::show(*msg);
 		}

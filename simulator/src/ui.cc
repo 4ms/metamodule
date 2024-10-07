@@ -23,7 +23,8 @@ Ui::Ui(std::string_view sdcard_path, std::string_view flash_path, std::string_vi
 				   notify_queue,
 				   patch_mod_queue,
 				   plugin_manager,
-				   settings}
+				   settings,
+				   screensaver}
 	, in_buffer(block_size)
 	, out_buffer(block_size) {
 

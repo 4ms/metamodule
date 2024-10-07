@@ -1,6 +1,7 @@
 #pragma once
 #include "audio_stream.hh"
 #include "frame.hh"
+#include "gui/elements/screensaver.hh"
 #include "gui/notify/queue.hh"
 #include "gui/pages/page_manager.hh"
 #include "internal_plugin_manager.hh"
@@ -50,6 +51,7 @@ private:
 	PatchModQueue patch_mod_queue;
 
 	UserSettings settings;
+	Screensaver screensaver{settings.screensaver};
 
 	NotificationQueue notify_queue;
 	PageManager page_manager;
