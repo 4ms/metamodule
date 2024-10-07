@@ -344,7 +344,7 @@ struct PatchSelectorPage : PageBase {
 				if (patches.load_if_open(selected_patch)) {
 					view_loaded_patch();
 				} else {
-					if (patches.limit_open_patches(max_open_patches)) {
+					if (patches.have_space_to_open_patch(max_open_patches)) {
 						if (patch_storage.request_load_patch(selected_patch)) {
 							state = State::RequestedPatchData;
 							show_spinner();
@@ -367,6 +367,13 @@ struct PatchSelectorPage : PageBase {
 
 					if (patches.open_patch(data, selected_patch)) {
 						view_loaded_patch();
+						patches.mark_patch_no_reload(selected_patch);
+
+						// if we just loaded a file that's already playing, then reload it into the patch player
+						if (patches.get_playing_patch_loc_hash() == PatchLocHash{selected_patch}) {
+							patches.play_view_patch();
+							patch_playloader.request_reload_playing_patch(false);
+						}
 						hide_spinner();
 
 					} else {

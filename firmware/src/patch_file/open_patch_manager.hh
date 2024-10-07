@@ -45,7 +45,7 @@ public:
 	// Makes room for a opening a patch.
 	// Closes unmodified patches if needed.
 	// Returns false if can't make room.
-	bool limit_open_patches(unsigned max_patches) {
+	bool have_space_to_open_patch(unsigned max_patches) {
 		auto first = open_patches_.begin();
 
 		int num_to_remove = (open_patches_.size() >= max_patches) ? open_patches_.size() - max_patches : 0;
@@ -81,6 +81,12 @@ public:
 		for (auto &patch : open_patches_) {
 			if (patch.loc.vol == vol)
 				patch.force_reload = false;
+		}
+	}
+
+	void mark_patch_no_reload(PatchLocHash loc_hash) {
+		if (auto openpatch = open_patches_.find(loc_hash)) {
+			openpatch->force_reload = false;
 		}
 	}
 
