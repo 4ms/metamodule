@@ -31,8 +31,9 @@ struct MetaParams {
 
 	// Populated by controls, passed to audio, which it uses
 	bool midi_connected = false;
-	uint32_t ext_buttons_pressed = 0;
-	uint32_t ext_buttons_released = 0;
+	uint32_t ext_buttons_pressed_event = 0;
+	uint32_t ext_buttons_released_event = 0;
+	std::array<uint8_t, 4> button_exp_addrs{};
 
 	// Populated by audio, passed to controls
 	uint32_t midi_poly_chans = 1;
@@ -56,8 +57,9 @@ struct MetaParams {
 		rotary_pushed.motion = 0;
 		rotary_pushed.abs_pos = 0;
 		audio_load = 0;
-		ext_buttons_pressed = 0;
-		ext_buttons_released = 0;
+		ext_buttons_pressed_event = 0;
+		ext_buttons_released_event = 0;
+		button_exp_addrs = {};
 	}
 
 	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
@@ -76,6 +78,8 @@ struct MetaParams {
 		midi_connected = that.midi_connected;
 
 		midi_poly_chans = that.midi_poly_chans;
+
+		button_exp_addrs = that.button_exp_addrs;
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
@@ -98,6 +102,8 @@ struct MetaParams {
 		midi_connected = that.midi_connected;
 
 		midi_poly_chans = that.midi_poly_chans;
+
+		button_exp_addrs = that.button_exp_addrs;
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;

@@ -34,8 +34,10 @@ public:
 			if (butexp.is_present()) {
 				butexp.start();
 				pr_info("Button Expander [%d] found at addr 0x%x\n", num_expanders_found, addr);
+				but_exp_addresses[num_expanders_found] = addr;
 				num_expanders_found++;
 			} else {
+				but_exp_addresses[num_expanders_found] = 0xFF;
 				pr_trace("Button Expander not found at addr 0x%x\n", addr);
 				if (addr - base_addr >= 8) {
 					pr_trace("Done scanning\n");
@@ -122,6 +124,10 @@ public:
 		return num_expanders_found;
 	}
 
+	std::array<uint8_t, 4> button_expander_addresses() {
+		return but_exp_addresses;
+	}
+
 private:
 	I2CPeriph auxi2c{ControlExpander::i2c_conf};
 
@@ -131,6 +137,8 @@ private:
 		{auxi2c, ControlExpander::gpio_chip_conf},
 		{auxi2c, ControlExpander::gpio_chip_conf},
 	}};
+
+	std::array<uint8_t, 4> but_exp_addresses;
 
 	uint32_t tmr{0};
 	uint32_t num_expanders_found = 0;

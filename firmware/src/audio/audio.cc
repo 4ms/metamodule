@@ -244,8 +244,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// Button Expanders:
 		if (Expanders::get_connected().num_button_connected > 0) {
-			handle_button_events(param_block.metaparams.ext_buttons_pressed, 1.f);
-			handle_button_events(param_block.metaparams.ext_buttons_released, 0.f);
+			handle_button_events(param_block.metaparams.ext_buttons_pressed_event, 1.f);
+			handle_button_events(param_block.metaparams.ext_buttons_released_event, 0.f);
 		}
 	}
 
