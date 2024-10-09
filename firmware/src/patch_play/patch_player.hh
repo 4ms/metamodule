@@ -939,7 +939,7 @@ private:
 	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
 		if (knob_set >= knob_conns.size())
 			return;
-		if (k.panel_knob_id < PanelDef::NumKnobs) {
+		if (k.panel_knob_id < knob_conns[knob_set].size()) {
 			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
 		}
 	}
