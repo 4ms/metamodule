@@ -98,6 +98,10 @@ public:
 		}
 	}
 
+	lv_obj_t *cont() {
+		return label_cont;
+	}
+
 private:
 	uint32_t display_timer = 0;
 	lv_obj_t *label_cont;

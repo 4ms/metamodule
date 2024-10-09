@@ -4,6 +4,7 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/helpers/lvgl_mem_helper.hh"
 #include "gui/helpers/lvgl_string_helper.hh"
+#include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/make_cable.hh"
 #include "gui/pages/page_list.hh"
@@ -22,7 +23,8 @@ struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchContext info, PatchSelectorSubdirPanel &subdir_panel)
 		: PageBase{info, PageId::PatchSel}
 		, subdir_panel{subdir_panel}
-		, patchfiles{patch_storage.get_patch_list()} {
+		, patchfiles{patch_storage.get_patch_list()}
+		, roller_hover(ui_PatchSelectorPage, ui_PatchListRoller) {
 
 		init_bg(ui_PatchSelectorPage);
 
@@ -32,6 +34,13 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_FOCUS_KEY);
 		lv_obj_clear_state(ui_Flashbut, LV_STATE_FOCUSED);
+
+		auto hov = roller_hover.cont();
+		lv_obj_add_flag(hov, LV_OBJ_FLAG_FLOATING);
+		lv_obj_set_x(hov, 2);
+		lv_obj_set_y(hov, 13);
+		lv_obj_set_width(hov, 210);
+		lv_obj_set_align(hov, LV_ALIGN_RIGHT_MID);
 	}
 
 	void prepare_focus() override {
@@ -64,6 +73,8 @@ struct PatchSelectorPage : PageBase {
 
 		patchfiles_locked = false;
 		refresh_patchlist();
+
+		roller_hover.hide();
 	}
 
 	void setup_subdir_panel() {
@@ -257,9 +268,13 @@ struct PatchSelectorPage : PageBase {
 			} else {
 				page_list.request_new_page_no_history(PageId::MainMenu, args);
 			}
+
+			roller_hover.hide();
 		}
 
 		update_spinner();
+
+		roller_hover.update();
 
 		switch (state) {
 			case State::Idle: {
@@ -440,12 +455,16 @@ private:
 
 		if (!page->is_populating_subdir_panel)
 			page->refresh_subdir_panel();
+
+		page->roller_hover.hide();
 	}
 
 	static void patchlist_click_cb(lv_event_t *event) {
 		auto page = static_cast<PatchSelectorPage *>(event->user_data);
 
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
+
+		page->roller_hover.hide();
 
 		auto selected_patch = page->get_roller_item_patchloc(idx);
 		if (selected_patch) {
@@ -507,6 +526,8 @@ private:
 	} state{State::TryingToRequestPatchList};
 
 	uint32_t last_refresh_check_tm = 0;
+
+	RollerHoverText roller_hover;
 };
 
 } // namespace MetaModule
