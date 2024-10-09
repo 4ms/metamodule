@@ -90,6 +90,8 @@ private:
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
 	void handle_midi(bool is_connected, Midi::Event const &event, unsigned poly_num);
+	void handle_button_events(uint32_t event_bitmask, bool pressed);
+
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool is_playing_patch();
 	void handle_patch_just_loaded();

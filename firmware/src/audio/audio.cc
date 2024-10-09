@@ -241,6 +241,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			for (auto [i, extoutchan] : countzip(ext_out.chan))
 				extoutchan = get_ext_audio_output(i);
 		}
+
+		// Button Expanders:
+		if (Expanders::get_connected().num_button_connected > 0) {
+			handle_button_events(param_block.metaparams.ext_buttons_pressed, 1.f);
+			handle_button_events(param_block.metaparams.ext_buttons_released, 0.f);
+		}
 	}
 
 	// TODO: put this in params_state not metaparams
@@ -330,6 +336,15 @@ void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsig
 	}
 }
 
+void AudioStream::handle_button_events(uint32_t event_bitmask, bool pressed) {
+	unsigned i = 0;
+	while (event_bitmask) {
+		if (event_bitmask & 0b1)
+			player.set_panel_button(i, pressed);
+		event_bitmask >>= 1;
+		i++;
+	}
+}
 void AudioStream::propagate_sense_pins(Params &params) {
 	for (unsigned i = 0; auto &plug_detect : plug_detects) {
 		bool sense = jack_is_patched(params.jack_senses, i);

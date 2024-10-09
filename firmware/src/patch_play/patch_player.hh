@@ -281,6 +281,10 @@ public:
 		}
 	}
 
+	void set_panel_button(unsigned button_id, bool val) {
+		// TODO: button_id is 0-31
+	}
+
 	void set_panel_input(unsigned jack_id, float val) {
 		set_all_connected_jacks(in_conns[jack_id], val);
 	}
