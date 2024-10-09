@@ -56,8 +56,8 @@ struct MetaParams {
 		rotary_pushed.motion = 0;
 		rotary_pushed.abs_pos = 0;
 		audio_load = 0;
-		buttons_pressed = 0;
-		buttons_released = 0;
+		ext_buttons_pressed = 0;
+		ext_buttons_released = 0;
 	}
 
 	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
