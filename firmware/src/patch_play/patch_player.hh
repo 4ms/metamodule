@@ -1,5 +1,7 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/hub/button_expander_defs.hh"
+#include "CoreModules/hub/pot_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/panel_conf.hh"
 #include "core_a7/smp_api.hh"
@@ -62,8 +64,11 @@ private:
 	uint32_t midi_divclk_ctr = 0;
 	uint32_t midi_divclk_div_amt = 0;
 
-	// knob_conns[]: ABCDEFuvwxyz
-	using KnobSet = std::array<std::vector<MappedKnob>, PanelDef::NumKnobs>;
+	// TODO: faster to have a large matrix or a sparse matrix?
+	// std::vector<std::vector<std::vector<MappedKnob>>> param_conns;
+	//MappedKnob &get_knob(unsigned panel_id) { ... push_back if doesn't exist }
+	constexpr static size_t NumParamMaps = PanelDef::NumKnobs + MaxExpPots + MaxExpButtons;
+	using KnobSet = std::array<std::vector<MappedKnob>, NumParamMaps>;
 	std::array<KnobSet, MaxKnobSets> knob_conns;
 
 	std::array<bool, NumOutJacks> out_patched{};
@@ -274,15 +279,11 @@ public:
 	// K-rate setters/getters:
 
 	void set_panel_param(unsigned param_id, float val) {
-		if (param_id < PanelDef::NumKnobs) {
+		if (param_id <= knob_conns[active_knob_set].size()) {
 			for (auto const &k : knob_conns[active_knob_set][param_id]) {
 				modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 			}
 		}
-	}
-
-	void set_panel_button(unsigned button_id, bool val) {
-		// TODO: button_id is 0-31
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {

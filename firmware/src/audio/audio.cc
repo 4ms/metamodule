@@ -340,7 +340,7 @@ void AudioStream::handle_button_events(uint32_t event_bitmask, bool pressed) {
 	unsigned i = 0;
 	while (event_bitmask) {
 		if (event_bitmask & 0b1)
-			player.set_panel_button(i, pressed);
+			player.set_panel_param(i + FirstButton, pressed ? 1 : 0);
 		event_bitmask >>= 1;
 		i++;
 	}
