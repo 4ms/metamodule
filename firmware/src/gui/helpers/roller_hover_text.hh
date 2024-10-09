@@ -2,16 +2,19 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
+#include <functional>
+#include <utility>
 
 namespace MetaModule
 {
 class RollerHoverText {
 public:
 	// Typically `parent` will be the enclosing container of `roller`
-	RollerHoverText(lv_obj_t *parent, lv_obj_t *roller)
+	RollerHoverText(lv_obj_t *parent, lv_obj_t *roller, std::function<void()> draw_callback = nullptr)
 		: label_cont{lv_obj_create(parent)}
 		, label{lv_label_create(label_cont)}
-		, roller{roller} {
+		, roller{roller}
+		, draw_callback{std::move(draw_callback)} {
 
 		if (lv_obj_get_child_cnt(roller) > 0) {
 			auto roller_label = lv_obj_get_child(roller, 0);
@@ -91,10 +94,17 @@ public:
 		}
 	}
 
+	void default_draw_callback() {
+		display_in_time(10);
+	}
+
 	static void redraw_done_cb(lv_event_t *event) {
 		auto page = static_cast<RollerHoverText *>(event->user_data);
 		if (event->code == LV_EVENT_DRAW_POST_END) {
-			page->display_in_time(10);
+			if (page->draw_callback)
+				page->draw_callback();
+			else
+				page->default_draw_callback();
 		}
 	}
 
@@ -108,6 +118,8 @@ private:
 	lv_obj_t *label;
 	lv_obj_t *roller;
 	uint32_t sel_idx = 0;
+
+	std::function<void()> draw_callback;
 };
 
 } // namespace MetaModule

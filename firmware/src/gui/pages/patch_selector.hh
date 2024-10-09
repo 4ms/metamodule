@@ -24,7 +24,7 @@ struct PatchSelectorPage : PageBase {
 		: PageBase{info, PageId::PatchSel}
 		, subdir_panel{subdir_panel}
 		, patchfiles{patch_storage.get_patch_list()}
-		, roller_hover(ui_PatchSelectorPage, ui_PatchListRoller) {
+		, roller_hover(ui_PatchSelectorPage, ui_PatchListRoller, [this] { redraw_cb(); }) {
 
 		init_bg(ui_PatchSelectorPage);
 
@@ -41,6 +41,11 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_set_y(hov, 13);
 		lv_obj_set_width(hov, 210);
 		lv_obj_set_align(hov, LV_ALIGN_RIGHT_MID);
+	}
+
+	void redraw_cb() {
+		if (!lv_obj_has_state(ui_PatchListRoller, LV_STATE_DISABLED))
+			roller_hover.display_in_time(10);
 	}
 
 	void prepare_focus() override {
@@ -398,12 +403,14 @@ struct PatchSelectorPage : PageBase {
 		// This fixes issues with a patch that's reloaded from disk
 		gui_state.force_redraw_patch = true;
 		page_list.request_new_page(PageId::PatchView, args);
+		roller_hover.hide();
 
 		state = State::Closing;
 	}
 
 	void blur() final {
 		hide_spinner();
+		roller_hover.hide();
 	}
 
 	void show_spinner() {
