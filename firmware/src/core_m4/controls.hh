@@ -4,6 +4,7 @@
 #include "conf/control_conf.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/i2c_codec_conf.hh"
+#include "control_expander.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
@@ -13,11 +14,12 @@
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
-#include "gpio_expander_reader.hh"
+#include "lib/CoreModules/hub/button_expander_defs.hh"
 #include "metaparams.hh"
 #include "midi_controls.hh"
 #include "param_block.hh"
 #include "params.hh"
+#include "sense_pin_reader.hh"
 #include "usb/midi_host.hh"
 #include "usb/midi_message.hh"
 #include "util/edge_detector.hh"
@@ -42,8 +44,6 @@ private:
 	void update_debouncers();
 
 	float get_pot_reading(uint32_t pot_id);
-	uint32_t get_patchcv_reading();
-	uint32_t get_jacksense_reading();
 
 	void set_samplerate(unsigned sample_rate);
 
@@ -69,11 +69,15 @@ private:
 	static constexpr uint32_t AdcReadFrequency = 580; //measured
 	bool _new_adc_data_ready = false;
 
+	SensePinReader sense_pin_reader;
+	ControlExpanderManager control_expander;
+	std::array<Toggler, ButtonExpander::NumTotalButtons> ext_buttons{};
+
 	// Jack plug sensing
-	mdrivlib::I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
-	mdrivlib::GPIOExpander jacksense_reader{i2c, mainboard_gpio_expander_conf};
-	mdrivlib::GPIOExpander extaudio_jacksense_reader{i2c, extaudio_gpio_expander_conf};
-	SharedBusQueue i2cqueue{jacksense_reader, extaudio_jacksense_reader};
+	// mdrivlib::I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
+	// mdrivlib::GPIOExpander jacksense_reader{i2c, mainboard_gpio_expander_conf};
+	// mdrivlib::GPIOExpander extaudio_jacksense_reader{i2c, extaudio_gpio_expander_conf};
+	// SharedBusQueue i2cqueue{jacksense_reader, extaudio_jacksense_reader};
 
 	// MIDI
 	MidiHost &_midi_host;
