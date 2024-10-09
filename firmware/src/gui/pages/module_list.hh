@@ -23,13 +23,13 @@ struct ModuleListPage : PageBase {
 		lv_obj_add_event_cb(ui_ModuleListRoller, scroll_cb, LV_EVENT_KEY, this);
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_FOCUS_KEY);
-		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
+		lv_obj_set_width(ui_ModuleListRollerPanel, 164);
 
 		auto hov = roller_hover.get_cont();
 		lv_obj_set_align(hov, LV_ALIGN_LEFT_MID);
 		lv_obj_set_x(hov, -2);
 		lv_obj_set_y(hov, 13);
-		lv_obj_set_width(hov, 164);
+		lv_obj_set_width(hov, 172);
 	}
 
 private:
@@ -92,7 +92,7 @@ private:
 	}
 
 	void show_roller() {
-		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
+		lv_obj_set_width(ui_ModuleListRollerPanel, 166);
 		lv_group_focus_obj(ui_ModuleListRoller);
 		lv_group_set_editing(group, true);
 		lv_group_set_wrap(group, false);
