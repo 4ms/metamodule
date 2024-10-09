@@ -29,7 +29,7 @@ struct ModuleViewPage : PageBase {
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue}
-		, roller_hover(ui_ElementRollerPanel) {
+		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller) {
 
 		init_bg(ui_MappingMenu);
 
@@ -60,10 +60,6 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ElementRoller, roller_click_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ElementRoller, roller_focus_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewCableCancelBut, cancel_cable_cb, LV_EVENT_CLICKED, this);
-
-		lv_obj_add_event_cb(roller_label, roller_scroll, LV_EVENT_DRAW_POST_END, this);
-
-		roller_hover.init(ui_ElementRoller);
 	}
 
 	void prepare_focus() override {
@@ -223,8 +219,6 @@ struct ModuleViewPage : PageBase {
 		auto roller_width = std::min<lv_coord_t>(320 - display_widthpx, 220); //roller is no more than 220px wide
 		lv_obj_set_size(ui_ElementRollerPanel, roller_width, 240);
 		lv_obj_clear_flag(ui_ElementRollerPanel, LV_OBJ_FLAG_HIDDEN);
-
-		roller_hover.set_width(roller_width);
 
 		// Add text list to roller options
 		lv_roller_set_options(ui_ElementRoller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
@@ -568,11 +562,6 @@ private:
 		page->roller_hover.hide();
 	}
 
-	static void roller_scroll(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		page->roller_hover.display_in_time(10);
-	}
-
 	void unhighlight_component(uint32_t prev_sel) {
 		if (auto prev_idx = get_drawn_idx(prev_sel)) {
 			lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
@@ -732,8 +721,6 @@ private:
 
 	enum class ViewMode { List, Mapping } mode{ViewMode::List};
 
-	// lv_obj_t *roller_hover_label = nullptr;
-	// uint32_t roller_hover_timer = 0;
 	RollerHoverText roller_hover;
 };
 
