@@ -30,6 +30,7 @@ public:
 		lv_obj_set_style_bg_opa(label_cont, LV_OPA_0, LV_PART_MAIN);
 		lv_obj_set_style_border_opa(label_cont, LV_OPA_0, LV_PART_MAIN);
 		lv_obj_clear_flag(label_cont, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_clear_flag(label_cont, LV_OBJ_FLAG_SCROLLABLE);
 
 		lv_obj_set_align(label, LV_ALIGN_CENTER);
 		lv_obj_set_y(label, 0);
@@ -54,7 +55,6 @@ public:
 		lv_obj_set_style_pad_right(label, 6, LV_PART_MAIN);
 		lv_obj_set_style_radius(label, 0, LV_PART_MAIN);
 		lv_label_set_recolor(label, true);
-		lv_obj_clear_flag(label_cont, LV_OBJ_FLAG_SCROLLABLE);
 		lv_hide(label);
 	}
 
@@ -98,7 +98,7 @@ public:
 		}
 	}
 
-	lv_obj_t *cont() {
+	lv_obj_t *get_cont() {
 		return label_cont;
 	}
 

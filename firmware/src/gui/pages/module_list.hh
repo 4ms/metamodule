@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/elements/module_drawer.hh"
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -13,7 +14,8 @@ namespace MetaModule
 
 struct ModuleListPage : PageBase {
 	ModuleListPage(PatchContext info)
-		: PageBase{info, PageId::ModuleList} {
+		: PageBase{info, PageId::ModuleList}
+		, roller_hover{ui_ModuleListRollerPanel, ui_ModuleListRoller} {
 		init_bg(ui_ModuleListPage);
 
 		lv_group_add_obj(group, ui_ModuleListRoller);
@@ -22,6 +24,12 @@ struct ModuleListPage : PageBase {
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_ModuleListRoller, nullptr, LV_STATE_FOCUS_KEY);
 		lv_obj_set_width(ui_ModuleListRollerPanel, 160);
+
+		auto hov = roller_hover.get_cont();
+		lv_obj_set_align(hov, LV_ALIGN_LEFT_MID);
+		lv_obj_set_x(hov, -2);
+		lv_obj_set_y(hov, 13);
+		lv_obj_set_width(hov, 164);
 	}
 
 private:
@@ -107,10 +115,13 @@ public:
 	void prepare_focus() final {
 		view = View::BrandRoller;
 		roller_brand_list();
+		roller_hover.hide();
 	}
 
 	void update() final {
+		roller_hover.update();
 		if (gui_state.back_button.is_just_released()) {
+			roller_hover.hide();
 
 			if (view == View::BrandRoller) {
 				gui_state.force_redraw_patch = true;
@@ -174,6 +185,8 @@ private:
 		auto page = static_cast<ModuleListPage *>(event->user_data);
 		if (!page)
 			return;
+
+		page->roller_hover.hide();
 
 		if (page->view == View::ModuleOnly || page->view == View::ModuleRoller) {
 			lv_timer_reset(page->draw_timer);
@@ -239,6 +252,9 @@ private:
 	std::string selected_brand{"4msCompany"};
 	std::string selected_brand_slug{"4msCompany"};
 	std::string selected_module_slug;
+
+	RollerHoverText roller_hover;
+	;
 };
 
 } // namespace MetaModule
