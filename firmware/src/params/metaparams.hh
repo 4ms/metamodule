@@ -36,8 +36,11 @@ struct MetaParams {
 	std::array<uint8_t, 4> button_exp_addrs{};
 
 	// Populated by audio, passed to controls
-	uint32_t midi_poly_chans = 1;
 	uint32_t sample_rate = 48000;
+	uint32_t button_leds = 0;
+
+	// Populated by audio, passed to controls and GUI
+	uint32_t midi_poly_chans = 1;
 
 	// Populated by GUI, used by GUI
 	// TODO: move this to a PageManager object like gui_state

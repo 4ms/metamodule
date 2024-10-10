@@ -29,6 +29,7 @@ namespace MetaModule
 {
 
 class PatchPlayer {
+
 public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 	std::atomic<bool> is_loaded = false;
@@ -285,6 +286,19 @@ public:
 				modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 			}
 		}
+	}
+
+	// Button lights are on or off (no fading supported)
+	// so 32 lights fits in uint32_t
+	uint32_t get_button_leds() {
+		uint32_t b = 0;
+		for (auto light : pd.light_maps) {
+			if (light.panel_light_id < 32 && light.module_id < num_modules) {
+				if (modules[light.module_id]->get_led_brightness(light.light_id) >= 0.5f)
+					b |= (1 << light.panel_light_id);
+			}
+		}
+		return b;
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {

@@ -66,6 +66,8 @@ void Controls::update_params() {
 				cur_metaparams->ext_buttons_released_event |= (1 << i);
 		}
 
+		control_expander.set_leds(cur_metaparams->button_leds);
+
 		// Rotary button
 		if (rotary_button.is_just_pressed()) {
 			_rotary_moved_while_pressed = false;
