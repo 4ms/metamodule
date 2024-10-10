@@ -292,7 +292,7 @@ public:
 	// so 32 lights fits in uint32_t
 	uint32_t get_button_leds() {
 		uint32_t b = 0;
-		for (auto light : pd.light_maps) {
+		for (auto light : pd.mapped_lights) {
 			if (light.panel_light_id < 32 && light.module_id < num_modules) {
 				if (modules[light.module_id]->get_led_brightness(light.light_id) >= 0.5f)
 					b |= (1 << light.panel_light_id);
