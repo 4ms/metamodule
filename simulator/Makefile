@@ -19,6 +19,6 @@ run: all
 	build/simulator
 
 debug:
-	cmake --build ${BUILDDIR} --target debug -DLOG_LEVEL=DEBUG
+	cmake --build ${BUILDDIR} --target debug
 	
 .PHONY: all clean warnings run
