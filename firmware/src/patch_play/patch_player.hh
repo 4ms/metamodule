@@ -6,6 +6,7 @@
 #include "conf/panel_conf.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/smp.hh"
+#include "mapped_knob_small.hh"
 #include "null_module.hh"
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
@@ -52,7 +53,7 @@ private:
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_aft_conns;
 	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
-	std::array<std::vector<MappedKnob>, NumMidiCCs> midi_knob_conns;
+	std::array<std::vector<MappedKnobSmall>, NumMidiCCs> midi_knob_conns;
 
 	struct MidiPulse {
 		OneShot pulse{};
@@ -68,7 +69,7 @@ private:
 	// std::vector<std::vector<std::vector<MappedKnob>>> param_conns;
 	//MappedKnob &get_knob(unsigned panel_id) { ... push_back if doesn't exist }
 	constexpr static size_t NumParamMaps = PanelDef::NumKnobs + MaxExpPots + MaxExpButtons;
-	using KnobSet = std::array<std::vector<MappedKnob>, NumParamMaps>;
+	using KnobSet = std::array<std::vector<MappedKnobSmall>, NumParamMaps>;
 	std::array<KnobSet, MaxKnobSets> knob_conns;
 
 	std::array<bool, NumOutJacks> out_patched{};
@@ -426,7 +427,6 @@ public:
 		if (found != knobconn.end()) {
 			found->min = map.min;
 			found->max = map.max;
-			found->curve_type = map.curve_type;
 			set_panel_param(map.panel_knob_id, cur_val);
 		}
 	}
@@ -940,7 +940,7 @@ private:
 		if (knob_set >= knob_conns.size())
 			return;
 		if (k.panel_knob_id < knob_conns[knob_set].size()) {
-			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
+			update_or_add(knob_conns[knob_set][k.panel_knob_id], MappedKnobSmall{k});
 		}
 	}
 
@@ -957,7 +957,7 @@ private:
 	void cache_midi_mapping(const MappedKnob &k) {
 		if (k.is_midi_cc()) {
 			pr_dbg("Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
-			update_or_add(midi_knob_conns[k.cc_num()], k);
+			update_or_add(midi_knob_conns[k.cc_num()], MappedKnobSmall{k});
 		} else {
 			pr_warn("Bad Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
 		}
