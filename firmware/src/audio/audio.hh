@@ -67,6 +67,8 @@ private:
 	CalData cal_stash;
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
+	CalData ext_cal{};
+
 	std::array<ResizingOversampler, PanelDef::NumAudioIn> smoothed_ins;
 
 	PatchPlayer &player;
@@ -82,6 +84,7 @@ private:
 	bool midi_last_connected = false;
 
 	AudioConf::SampleT get_audio_output(int output_id);
+	AudioConf::SampleT get_ext_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();

@@ -31,11 +31,14 @@ public:
 	std::atomic<bool> is_loaded = false;
 
 private:
-	// out_conns[]: Out1-Out8
-	std::array<Jack, PanelDef::NumUserFacingOutJacks> out_conns __attribute__((aligned(4))) = {{{0, 0}}};
+	// Out1-Out8 + Ext Out1-8
+	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks * 2;
+	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks * 2;
+
+	std::array<Jack, NumOutJacks> out_conns __attribute__((aligned(4))) = {{{0, 0}}};
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2
-	std::array<std::vector<Jack>, PanelDef::NumUserFacingInJacks> in_conns;
+	std::array<std::vector<Jack>, NumInJacks> in_conns;
 
 	unsigned num_modules = 0;
 
@@ -63,8 +66,8 @@ private:
 	using KnobSet = std::array<std::vector<MappedKnob>, PanelDef::NumKnobs>;
 	std::array<KnobSet, MaxKnobSets> knob_conns;
 
-	std::array<bool, PanelDef::NumUserFacingOutJacks> out_patched{};
-	std::array<bool, PanelDef::NumUserFacingInJacks> in_patched{};
+	std::array<bool, NumOutJacks> out_patched{};
+	std::array<bool, NumInJacks> in_patched{};
 
 	MulticorePlayer smp;
 
@@ -826,7 +829,7 @@ public:
 
 		for (auto const &cable : pd.mapped_outs) {
 			auto panel_jack_id = cable.panel_jack_id;
-			if (panel_jack_id >= PanelDef::NumUserFacingOutJacks)
+			if (panel_jack_id >= out_conns.size())
 				break;
 			out_conns[panel_jack_id] = cable.out;
 			pr_dbg("Connect module %d out jack %d to panel out %d\n",
@@ -975,7 +978,7 @@ public:
 
 	//Used in unit tests
 	Jack get_panel_output_connection(unsigned jack_id) {
-		if (jack_id >= PanelDef::NumUserFacingOutJacks)
+		if (jack_id >= out_conns.size())
 			return {.module_id = 0, .jack_id = 0};
 
 		return out_conns[jack_id];
@@ -983,7 +986,7 @@ public:
 
 	//Used in unit tests
 	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0) {
-		if ((jack_id >= PanelDef::NumUserFacingInJacks) || (multiple_connection_id >= in_conns[jack_id].size()))
+		if ((jack_id >= in_conns.size()) || (multiple_connection_id >= in_conns[jack_id].size()))
 			return {.module_id = 0, .jack_id = 0};
 
 		return in_conns[jack_id][multiple_connection_id];

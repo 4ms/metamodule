@@ -1,4 +1,5 @@
 #include "audio/audio.hh"
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "audio/audio_test_signals.hh"
 #include "conf/audio_settings.hh"
 #include "conf/hsem_conf.hh"
@@ -8,6 +9,7 @@
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
+#include "expanders.hh"
 #include "param_block.hh"
 #include "patch_play/patch_mods.hh"
 #include "patch_play/patch_player.hh"
@@ -54,12 +56,16 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_rx_buffer(audio_blocks[0].in_codec, block_size_);
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
+		ext_cal.reset_to_default();
+		// ext_cal = ext_audio_calibrator.read_calibration();
 		ext_audio_connected = true;
 		codec_ext_.set_tx_buffer(audio_blocks[0].out_ext_codec, block_size_);
 		codec_ext_.set_rx_buffer(audio_blocks[0].in_ext_codec, block_size_);
+		Expanders::ext_audio_found(true);
 		pr_info("Audio Expander detected\n");
 	} else {
 		ext_audio_connected = false;
+		Expanders::ext_audio_found(false);
 		pr_info("No Audio Expander detected\n");
 	}
 
@@ -118,6 +124,12 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	return MathTools::signed_saturate(cal.out_cal[output_id].adjust(output_volts), 24);
 }
 
+AudioConf::SampleT AudioStream::get_ext_audio_output(int output_id) {
+	output_id = AudioExpander::out_order[output_id];
+	float output_volts = player.get_panel_output(output_id + PanelDef::NumAudioOut) * output_fade_amt;
+	return MathTools::signed_saturate(ext_cal.out_cal[output_id].adjust(output_volts), 24);
+}
+
 bool AudioStream::is_playing_patch() {
 	if (patch_loader.should_fade_down_audio()) {
 		output_fade_delta = -1.f / (sample_rate_ * 0.02f);
@@ -154,15 +166,16 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	handle_patch_mod_queue();
 
 	// TODO: handle second codec
-	if (ext_audio_connected)
-		AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
+	// if (ext_audio_connected)
+	// 	AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
-	// for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
-		auto &params = param_block.params[idx];
+		auto const &params = param_block.params[idx];
+		auto &ext_out = audio_block.out_ext_codec[idx];
+		auto const &ext_in = audio_block.out_ext_codec[idx];
 		idx++;
 
 		// Audio inputs
@@ -176,19 +189,33 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 			player.set_panel_input(panel_jack_i, calibrated_input);
 
-			// Send smoothed sigals to other core via metaparams
+			// Send smoothed sigals to other core
 			smoothed_ins[panel_jack_i].add_val(calibrated_input);
+		}
+
+		if (ext_audio_connected) {
+			for (auto [panel_jack_i, inchan] : zip(AudioExpander::in_order, ext_in.chan)) {
+
+				// Skip unpatched jacks
+				if (!AudioExpander::jack_is_patched(param_state.jack_senses, panel_jack_i))
+					continue;
+
+				float calibrated_input = ext_cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
+
+				player.set_panel_input(panel_jack_i, calibrated_input);
+			}
 		}
 
 		// Gate inputs
 		for (auto [i, gatein, sync_gatein] : countzip(params.gate_ins, param_state.gate_ins)) {
 
-			if (!jack_is_patched(param_state.jack_senses, i + FirstGateInput)) {
-				gatein = false;
-			} else
+			bool gate = false;
+			if (jack_is_patched(param_state.jack_senses, i + FirstGateInput)) {
+				gate = gatein;
 				player.set_panel_input(i + FirstGateInput, gatein ? 8.f : 0.f);
+			}
 
-			sync_gatein.register_state(gatein);
+			sync_gatein.register_state(gate);
 		}
 
 		// Pass Knob values to modules
@@ -208,8 +235,15 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		for (auto [i, outchan] : countzip(out.chan))
 			outchan = get_audio_output(i);
+
+		// Ext audio modules:
+		if (ext_audio_connected) {
+			for (auto [i, extoutchan] : countzip(ext_out.chan))
+				extoutchan = get_ext_audio_output(i);
+		}
 	}
 
+	// TODO: put this in params_state not metaparams
 	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins)) {
 		m = s.val();
 	}
