@@ -62,3 +62,5 @@ static inline void DebugPin0Low() {
 	volatile uint32_t *GPIOB_BSRR = (volatile uint32_t *)(0x50003018);
 	*GPIOB_BSRR = (1 << (10 + 16));
 }
+
+#define HARDWARE_BKPT() asm volatile("bkpt")
