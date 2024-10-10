@@ -27,17 +27,17 @@ public:
 		const auto base_addr = ControlExpander::gpio_chip_conf.addr;
 		auto addr = base_addr;
 
-		while (num_expanders_found <= 4) {
-			auto &butexp = butexps[num_expanders_found];
+		while (num_button_expanders_found <= 4) {
+			auto &butexp = butexps[num_button_expanders_found];
 			butexp.set_address(addr);
 
 			if (butexp.is_present()) {
 				butexp.start();
-				pr_info("Button Expander [%d] found at addr 0x%x\n", num_expanders_found, addr);
-				but_exp_addresses[num_expanders_found] = addr;
-				num_expanders_found++;
+				pr_info("Button Expander [%d] found at addr 0x%x\n", num_button_expanders_found, addr);
+				but_exp_addresses[num_button_expanders_found] = addr;
+				num_button_expanders_found++;
 			} else {
-				but_exp_addresses[num_expanders_found] = 0xFF;
+				but_exp_addresses[num_button_expanders_found] = 0xFF;
 				pr_trace("Button Expander not found at addr 0x%x\n", addr);
 				if (addr - base_addr >= 8) {
 					pr_trace("Done scanning\n");
@@ -47,11 +47,11 @@ public:
 			addr++;
 		}
 
-		pr_dbg("Found %d Button Expanders\n", num_expanders_found);
+		pr_dbg("Found %d Button Expanders\n", num_button_expanders_found);
 	}
 
 	void update() {
-		if (num_expanders_found == 0)
+		if (num_button_expanders_found == 0)
 			return;
 
 		if (!auxi2c.is_ready())
@@ -80,7 +80,7 @@ public:
 
 				// Testing (loopback)
 				// TODO: Remove this
-				set_leds(buttons);
+				// set_leds(buttons);
 
 				auto these_leds = leds.load();
 				these_leds >>= shift_amt;
@@ -95,7 +95,7 @@ public:
 			case States::Pause: {
 				if ((HAL_GetTick() - tmr) > 50) {
 					state = States::ReadButtons;
-					if (++cur_butexp_idx >= num_expanders_found)
+					if (++cur_butexp_idx >= num_button_expanders_found)
 						cur_butexp_idx = 0;
 				}
 				break;
@@ -113,15 +113,15 @@ public:
 		leds.store(led_bitmask);
 	}
 
-	void write_leds() {
-	}
+	// void write_leds() {
+	// }
 
 	uint32_t get_buttons() {
 		return buttons.load();
 	}
 
 	uint32_t num_button_expanders_connected() {
-		return num_expanders_found;
+		return num_button_expanders_found;
 	}
 
 	std::array<uint8_t, 4> button_expander_addresses() {
@@ -131,6 +131,7 @@ public:
 private:
 	I2CPeriph auxi2c{ControlExpander::i2c_conf};
 
+	/// Button Exp:
 	std::array<GPIOExpander, 4> butexps{{
 		{auxi2c, ControlExpander::gpio_chip_conf},
 		{auxi2c, ControlExpander::gpio_chip_conf},
@@ -140,8 +141,7 @@ private:
 
 	std::array<uint8_t, 4> but_exp_addresses;
 
-	uint32_t tmr{0};
-	uint32_t num_expanders_found = 0;
+	uint32_t num_button_expanders_found = 0;
 
 	// Each Expander has 8 buttons, 8 LEDs, so we can support max 4 expander modules
 	std::atomic<uint32_t> leds;
@@ -154,6 +154,11 @@ private:
 		FinishSending,
 	} state = States::ReadButtons;
 	uint32_t cur_butexp_idx = 0;
+
+	/// Pot Exp:
+	uint32_t num_pot_expanders_found = 0;
+
+	uint32_t tmr{0};
 
 	void handle_error() {
 		pr_err("ControlExpander I2C Error!\n");
