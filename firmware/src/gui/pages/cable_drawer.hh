@@ -22,7 +22,8 @@ class CableDrawer {
 	lv_draw_rect_dsc_t injack_dsc;
 	lv_draw_rect_dsc_t outjack_dsc;
 
-	static constexpr uint32_t Height = MaxCanvasHeight;
+	//LVGL canvas is internally an img, which has 11 bits for height, so max is 2047
+	static constexpr uint32_t Height = std::min<uint32_t>(MaxCanvasHeight, 2047);
 	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, Height)> cable_buf;
 
 	struct Vec2 {
