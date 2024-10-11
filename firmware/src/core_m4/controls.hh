@@ -73,12 +73,6 @@ private:
 	ControlExpanderManager control_expander;
 	std::array<Toggler, ButtonExpander::NumTotalButtons> ext_buttons{};
 
-	// Jack plug sensing
-	// mdrivlib::I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
-	// mdrivlib::GPIOExpander jacksense_reader{i2c, mainboard_gpio_expander_conf};
-	// mdrivlib::GPIOExpander extaudio_jacksense_reader{i2c, extaudio_gpio_expander_conf};
-	// SharedBusQueue i2cqueue{jacksense_reader, extaudio_jacksense_reader};
-
 	// MIDI
 	MidiHost &_midi_host;
 	LockFreeFifoSpsc<MidiMessage, 256> _midi_rx_buf;

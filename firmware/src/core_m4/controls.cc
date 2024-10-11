@@ -54,16 +54,21 @@ void Controls::update_params() {
 
 		cur_params->jack_senses = sense_pin_reader.last_reading();
 
-		cur_metaparams->button_exp_addrs = control_expander.button_expander_addresses();
+		// Button Expanders
+		cur_metaparams->num_button_expanders_found = control_expander.num_button_expanders_connected();
+
 		uint32_t buttons_state = control_expander.get_buttons();
 		cur_metaparams->ext_buttons_pressed_event = 0;
 		cur_metaparams->ext_buttons_released_event = 0;
 		for (auto [i, extbut] : enumerate(ext_buttons)) {
 			extbut.register_state(buttons_state & (1 << i));
-			if (extbut.just_went_high())
+
+			if (extbut.just_went_high()) {
 				cur_metaparams->ext_buttons_pressed_event |= (1 << i);
-			if (extbut.just_went_low())
+			}
+			if (extbut.just_went_low()) {
 				cur_metaparams->ext_buttons_released_event |= (1 << i);
+			}
 		}
 
 		control_expander.set_leds(cur_metaparams->button_leds);

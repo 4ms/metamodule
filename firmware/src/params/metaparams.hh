@@ -23,6 +23,9 @@ struct MetaParams {
 	RotaryMotion rotary_pushed{};
 	std::array<Toggler, PanelDef::NumMetaRgbButton> meta_buttons{};
 
+	// Populated by controls, used by audio and GUI
+	uint32_t num_button_expanders_found = 0;
+
 	// Populated by audio, which passes to GUI
 	// TODO: move this out of MetaParams and do something like LightWatcher
 	// so we can watch any arbitrary jack(s)
@@ -33,7 +36,6 @@ struct MetaParams {
 	bool midi_connected = false;
 	uint32_t ext_buttons_pressed_event = 0;
 	uint32_t ext_buttons_released_event = 0;
-	std::array<uint8_t, 4> button_exp_addrs{};
 
 	// Populated by audio, passed to controls
 	uint32_t sample_rate = 48000;
@@ -62,7 +64,7 @@ struct MetaParams {
 		audio_load = 0;
 		ext_buttons_pressed_event = 0;
 		ext_buttons_released_event = 0;
-		button_exp_addrs = {};
+		num_button_expanders_found = 0;
 	}
 
 	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
@@ -81,8 +83,6 @@ struct MetaParams {
 		midi_connected = that.midi_connected;
 
 		midi_poly_chans = that.midi_poly_chans;
-
-		button_exp_addrs = that.button_exp_addrs;
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
@@ -105,8 +105,6 @@ struct MetaParams {
 		midi_connected = that.midi_connected;
 
 		midi_poly_chans = that.midi_poly_chans;
-
-		button_exp_addrs = that.button_exp_addrs;
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;

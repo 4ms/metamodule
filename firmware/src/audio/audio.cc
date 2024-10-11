@@ -243,7 +243,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// Button Expanders:
-		if (Expanders::get_connected().num_button_connected > 0) {
+		if (param_block.metaparams.num_button_expanders_found > 0) {
 			handle_button_events(param_block.metaparams.ext_buttons_pressed_event, 1.f);
 			handle_button_events(param_block.metaparams.ext_buttons_released_event, 0.f);
 
@@ -263,7 +263,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	param_state.jack_senses = param_block.params[0].jack_senses;
 
-	// for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto &params = param_block.params[idx];
@@ -411,6 +410,9 @@ void AudioStream::return_cached_params(unsigned block) {
 
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
+
+	// copy button_leds back so Controls can light them
+	param_blocks[block].metaparams.button_leds = local_params.metaparams.button_leds;
 }
 
 void AudioStream::set_block_spans() {

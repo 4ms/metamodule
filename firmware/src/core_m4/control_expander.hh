@@ -27,7 +27,7 @@ public:
 		const auto base_addr = ControlExpander::gpio_chip_conf.addr;
 		auto addr = base_addr;
 
-		while (num_button_expanders_found <= 4) {
+		while (num_button_expanders_found < 4) {
 			auto &butexp = butexps[num_button_expanders_found];
 			butexp.set_address(addr);
 
@@ -38,9 +38,9 @@ public:
 				num_button_expanders_found++;
 			} else {
 				but_exp_addresses[num_button_expanders_found] = 0xFF;
-				pr_trace("Button Expander not found at addr 0x%x\n", addr);
+				pr_dbg("Button Expander not found at addr 0x%x\n", addr);
 				if (addr - base_addr >= 8) {
-					pr_trace("Done scanning\n");
+					pr_dbg("Done scanning\n");
 					break;
 				}
 			}
@@ -112,9 +112,6 @@ public:
 	void set_leds(uint32_t led_bitmask) {
 		leds.store(led_bitmask);
 	}
-
-	// void write_leds() {
-	// }
 
 	uint32_t get_buttons() {
 		return buttons.load();
