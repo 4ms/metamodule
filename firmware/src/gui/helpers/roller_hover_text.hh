@@ -71,6 +71,7 @@ public:
 						char sel_buf[64];
 						lv_roller_get_selected_str(roller, sel_buf, 64);
 						lv_label_set_text(label, sel_buf);
+						lv_obj_set_y(label_cont, lv_obj_get_y(roller) / 2 + 0);
 						lv_show(label);
 						display_timer = 0;
 					}
