@@ -14,6 +14,8 @@ set(LV_CONF_PATH
     CACHE STRING "" FORCE)
 
 add_compile_options(-O0 -g2)
+include(${FWDIR}/cmake/log_levels.cmake)
+enable_logging()
 
 # #################### cpputil #########################################
 

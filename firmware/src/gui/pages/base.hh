@@ -70,13 +70,11 @@ struct PageBase {
 
 	PageId id;
 
-	static constexpr uint32_t MaxBufferWidth = 320 * 4;
-	static constexpr uint32_t MaxBufferHeight = 240 * 4;
-	static inline std::array<lv_color_t, MaxBufferHeight * MaxBufferWidth> page_pixel_buffer;
+	static constexpr uint32_t MaxBufferWidth = 320;
+	//Note: LVGL cannot deal with canvas larger than 2047 because there are only 11 bits for the height. 2047 / 180 = 11.4
+	static constexpr uint32_t MaxBufferHeight = 11 * 180;
 
-	// Why doesn't this work?
-	// uint8_t *buffer = StaticBuffers::gui_scratch_buffer;
-	// uint8_t *cable_buf = StaticBuffers::gui_scratch_screen;
+	static inline std::array<lv_color_t, MaxBufferHeight * MaxBufferWidth> page_pixel_buffer;
 
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;

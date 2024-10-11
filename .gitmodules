@@ -15,7 +15,7 @@
 	url = https://github.com/4ms/AudibleInstruments.git
 [submodule "firmware/vcv_ports/Befaco"]
 	path = firmware/vcv_ports/Befaco
-	url = https://github.com/hemmer/Befaco.git
+	url = https://github.com/danngreen/Befaco.git
 [submodule "firmware/vcv_ports/hetrickcv"]
 	path = firmware/vcv_ports/hetrickcv
 	url = https://github.com/mhetrick/hetrickcv.git

@@ -4,16 +4,16 @@ all: | $(BUILDDIR)
 	cmake --build $(BUILDDIR) 
 
 $(BUILDDIR):
-	cmake --fresh --preset Default
+	cmake --fresh --preset Default -DLOG_LEVEL=DEBUG
 
 clean:
-	cmake --fresh --preset Default
+	cmake --fresh --preset Default -DLOG_LEVEL=DEBUG
 
 realclean:
 	rm -rf $(BUILDDIR)
 
 warnings: 
-	cmake --fresh --preset gcc-warn
+	cmake --fresh --preset gcc-warn -DLOG_LEVEL=TRACE
 
 run: all
 	build/simulator
@@ -21,16 +21,4 @@ run: all
 debug:
 	cmake --build ${BUILDDIR} --target debug
 	
-# "make limit filename.txt" --> only build modules whose names are in the text file
-ifeq (limit,$(firstword $(MAKECMDGOALS)))
-LIMITFILE := $(filter-out limit,$(MAKECMDGOALS))
-# silence messages about filename.txt target
-.PHONY: $(LIMITFILE)
-$(LIMITFILE): 
-	@echo ""
-endif
-
-limit:
-	cmake --fresh --preset Default -DLIMITED_MODULES_FILE=$(LIMITFILE)
-
 .PHONY: all clean warnings run

@@ -607,7 +607,7 @@ private:
 private:
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
-	CableDrawer<4 * 240 + 8> cable_drawer; //TODO: relate this number to the module container size
+	CableDrawer<MaxBufferHeight> cable_drawer;
 
 	ModuleDisplaySettings &page_settings;
 	PatchViewSettingsMenu settings_menu;
