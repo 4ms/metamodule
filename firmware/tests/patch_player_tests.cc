@@ -773,6 +773,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  mapped_lights: []
   vcvModuleStates: []
 )"
 		  // clang-format off
@@ -946,6 +947,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  mapped_lights: []
   vcvModuleStates: []
 )"};
 	// clang-format on
@@ -1058,6 +1060,7 @@ PatchData:
     name: ''
     set: []
   midi_poly_num: 0
+  mapped_lights: []
   vcvModuleStates: []
 )");
 	// clang-format on

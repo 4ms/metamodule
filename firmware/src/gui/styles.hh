@@ -1,5 +1,6 @@
 #pragma once
 #include "lvgl.h"
+#include "patch-serial/patch/mapping_ids.hh"
 #include "patch-serial/patch/midi_def.hh"
 #include "slsexport/meta5/ui.h"
 #include <array>
@@ -198,6 +199,9 @@ struct Gui {
 
 	static lv_color_t mapped_jack_color(unsigned panel_id) {
 		if (panel_id <= LastPossibleKnob)
+			return jack_palette[panel_id % jack_palette.size()];
+
+		else if (panel_id <= LastButton)
 			return jack_palette[panel_id % jack_palette.size()];
 
 		else if (panel_id <= MidiNote8Jack)

@@ -15,6 +15,7 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
+#include "params/expanders.hh"
 #include "params/params_state.hh"
 
 namespace MetaModule
@@ -426,8 +427,11 @@ private:
 
 		std::string choices;
 		std::optional<unsigned> first_unpatched_jack{};
+
 		if (page->this_jack_type == ElementType::Input && !page->this_jack_has_connections) {
-			for (auto i = 0u; i < PanelDef::NumUserFacingInJacks; i++) {
+			unsigned num_jacks = PanelDef::NumUserFacingInJacks;
+			num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumInJacks : 0;
+			for (auto i = 0u; i < num_jacks; i++) {
 				choices += get_panel_name<PanelDef>(JackInput{}, i);
 				if (page->patch->find_mapped_injack(i))
 					choices += " (patched)";
@@ -437,7 +441,9 @@ private:
 				choices += "\n";
 			}
 		} else {
-			for (auto i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
+			unsigned num_jacks = PanelDef::NumUserFacingOutJacks;
+			num_jacks += Expanders::get_connected().ext_audio_connected ? AudioExpander::NumOutJacks : 0;
+			for (auto i = 0u; i < num_jacks; i++) {
 				choices += get_panel_name<PanelDef>(JackOutput{}, i);
 				if (page->patch->find_mapped_outjack(i))
 					choices += " (patched)";
@@ -449,7 +455,7 @@ private:
 		choices.pop_back(); //remove trailing \n
 
 		auto action = [page](unsigned choice) {
-			if (choice == 0 || choice > 8)
+			if (choice == 0)
 				return;
 
 			AddJackMapping jackmapping{};
