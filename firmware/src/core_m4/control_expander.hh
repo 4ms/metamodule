@@ -1,6 +1,9 @@
 #pragma once
+#include "conf/button_expander_conf.hh"
 #include "conf/control_expander_conf.hh"
 #include "conf/i2c_codec_conf.hh"
+#include "conf/knob_expander_conf.hh"
+#include "drivers/adc_i2c_tla2528.hh"
 #include "drivers/gpio_expander.hh"
 #include "pr_dbg.hh"
 #include <atomic>
@@ -12,33 +15,36 @@ namespace MetaModule
 // (For now, there is only the ButtonExpander)
 
 class ControlExpanderManager {
-	using GPIOExpander = mdrivlib::GPIOExpander;
 	using I2CPeriph = mdrivlib::I2CPeriph;
 
 public:
 	ControlExpanderManager() {
 		auxi2c.enable_IT(ControlExpander::i2c_conf.priority1, ControlExpander::i2c_conf.priority2);
-		scan_for_button_expanders();
-		//TODO: scan_for_MIDI_expander(), scan_for_pot_expanders()
+		num_button_expanders_found = scan_for_expanders(ButtonExpander::conf.addr, but_exps, but_exp_addresses);
+		num_knob_expanders_found = scan_for_expanders(KnobExpander::conf.addr, knob_exps, knob_exp_addresses);
+
+		pr_dbg("Found %d Button Expanders\n", num_button_expanders_found);
+		pr_dbg("Found %d Knob Expanders\n", num_knob_expanders_found);
 	}
 
-	void scan_for_button_expanders() {
+	// returns num found
+	uint32_t scan_for_expanders(uint8_t base_addr, auto &exp_array, std::array<uint8_t, 4> &addrs) {
 		// Scan for attached
-		const auto base_addr = ControlExpander::gpio_chip_conf.addr;
 		auto addr = base_addr;
+		uint32_t num_found = 0;
 
-		while (num_button_expanders_found < 4) {
-			auto &butexp = butexps[num_button_expanders_found];
-			butexp.set_address(addr);
+		while (num_found < 4) {
+			auto &cur_exp = exp_array[num_found];
+			cur_exp.set_address(addr);
 
-			if (butexp.is_present()) {
-				butexp.start();
-				pr_info("Button Expander [%d] found at addr 0x%x\n", num_button_expanders_found, addr);
-				but_exp_addresses[num_button_expanders_found] = addr;
-				num_button_expanders_found++;
+			if (cur_exp.is_present()) {
+				cur_exp.start();
+				pr_info("Expander [%d] found at addr 0x%x\n", num_found, addr);
+				addrs[num_found] = addr;
+				num_found++;
 			} else {
-				but_exp_addresses[num_button_expanders_found] = 0xFF;
-				pr_dbg("Button Expander not found at addr 0x%x\n", addr);
+				addrs[num_found] = 0xFF;
+				pr_dbg("Expander not found at addr 0x%x\n", addr);
 				if (addr - base_addr >= 8) {
 					pr_dbg("Done scanning\n");
 					break;
@@ -47,7 +53,7 @@ public:
 			addr++;
 		}
 
-		pr_dbg("Found %d Button Expanders\n", num_button_expanders_found);
+		return num_found;
 	}
 
 	void update() {
@@ -57,13 +63,13 @@ public:
 		if (!auxi2c.is_ready())
 			return;
 
-		auto &butexp = butexps[cur_butexp_idx];
+		auto &butexp = but_exps[cur_butexp_idx];
 
 		switch (state) {
 
 			case States::ReadButtons: {
 				auto err = butexp.read_inputs();
-				if (err != GPIOExpander::Error::None)
+				if (err != mdrivlib::GPIOExpander::Error::None)
 					handle_error();
 				state = States::SetLEDs;
 				break;
@@ -78,14 +84,10 @@ public:
 				update |= (this_reading << shift_amt);
 				buttons.store(update);
 
-				// Testing (loopback)
-				// TODO: Remove this
-				// set_leds(buttons);
-
 				auto these_leds = leds.load();
 				these_leds >>= shift_amt;
 				these_leds &= 0xFF;
-				butexp.set_output_values(ControlExpander::calc_output_data(these_leds));
+				butexp.set_output_values(ButtonExpander::calc_output_data(these_leds));
 
 				tmr = HAL_GetTick();
 				state = States::Pause;
@@ -129,16 +131,16 @@ private:
 	I2CPeriph auxi2c{ControlExpander::i2c_conf};
 
 	/// Button Exp:
-	std::array<GPIOExpander, 4> butexps{{
-		{auxi2c, ControlExpander::gpio_chip_conf},
-		{auxi2c, ControlExpander::gpio_chip_conf},
-		{auxi2c, ControlExpander::gpio_chip_conf},
-		{auxi2c, ControlExpander::gpio_chip_conf},
+	uint32_t num_button_expanders_found = 0;
+
+	std::array<mdrivlib::GPIOExpander, 4> but_exps{{
+		{auxi2c, ButtonExpander::conf},
+		{auxi2c, ButtonExpander::conf},
+		{auxi2c, ButtonExpander::conf},
+		{auxi2c, ButtonExpander::conf},
 	}};
 
-	std::array<uint8_t, 4> but_exp_addresses;
-
-	uint32_t num_button_expanders_found = 0;
+	std::array<uint8_t, 4> but_exp_addresses{};
 
 	// Each Expander has 8 buttons, 8 LEDs, so we can support max 4 expander modules
 	std::atomic<uint32_t> leds;
@@ -153,7 +155,15 @@ private:
 	uint32_t cur_butexp_idx = 0;
 
 	/// Pot Exp:
-	uint32_t num_pot_expanders_found = 0;
+	uint32_t num_knob_expanders_found = 0;
+	std::array<mdrivlib::TLA2528::Device, 4> knob_exps{{
+		{auxi2c, KnobExpander::conf},
+		{auxi2c, KnobExpander::conf},
+		{auxi2c, KnobExpander::conf},
+		{auxi2c, KnobExpander::conf},
+	}};
+
+	std::array<uint8_t, 4> knob_exp_addresses{};
 
 	uint32_t tmr{0};
 
