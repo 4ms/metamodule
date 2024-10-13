@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/hub/knob_expander_defs.hh"
 #include "conf/button_expander_conf.hh"
 #include "conf/control_expander_conf.hh"
 #include "conf/i2c_codec_conf.hh"
@@ -23,8 +24,8 @@ public:
 		num_button_expanders_found = scan_for_expanders(ButtonExpander::conf.addr, but_exps, but_exp_addresses);
 		num_knob_expanders_found = scan_for_expanders(KnobExpander::conf.addr, knob_exps, knob_exp_addresses);
 
-		pr_dbg("Found %d Button Expanders\n", num_button_expanders_found);
-		pr_dbg("Found %d Knob Expanders\n", num_knob_expanders_found);
+		pr_info("Found %d Button Expanders\n", num_button_expanders_found);
+		pr_info("Found %d Knob Expanders\n", num_knob_expanders_found);
 	}
 
 	// returns num found
@@ -38,10 +39,13 @@ public:
 			cur_exp.set_address(addr);
 
 			if (cur_exp.is_present()) {
-				cur_exp.start();
-				pr_info("Expander [%d] found at addr 0x%x\n", num_found, addr);
-				addrs[num_found] = addr;
-				num_found++;
+				auto ok = cur_exp.start();
+				if (ok) {
+					pr_dbg("Expander [%d] found at addr 0x%x\n", num_found, addr);
+					addrs[num_found] = addr;
+					num_found++;
+				} else
+					pr_dbg("Expander [%d] at addr 0x%x found but will not start\n", num_found, addr);
 			} else {
 				addrs[num_found] = 0xFF;
 				pr_dbg("Expander not found at addr 0x%x\n", addr);
@@ -57,18 +61,16 @@ public:
 	}
 
 	void update() {
-		if (num_button_expanders_found == 0)
+		if (num_button_expanders_found == 0 && num_knob_expanders_found == 0)
 			return;
 
 		if (!auxi2c.is_ready())
 			return;
 
-		auto &butexp = but_exps[cur_butexp_idx];
-
 		switch (state) {
 
 			case States::ReadButtons: {
-				auto err = butexp.read_inputs();
+				auto err = but_exps[cur_butexp_idx].read_inputs();
 				if (err != mdrivlib::GPIOExpander::Error::None)
 					handle_error();
 				state = States::SetLEDs;
@@ -76,6 +78,8 @@ public:
 			}
 
 			case States::SetLEDs: {
+				auto &butexp = but_exps[cur_butexp_idx];
+
 				const uint32_t shift_amt = cur_butexp_idx * 8;
 				uint32_t this_reading = (butexp.collect_last_reading() & 0xFF);
 
@@ -89,6 +93,40 @@ public:
 				these_leds &= 0xFF;
 				butexp.set_output_values(ButtonExpander::calc_output_data(these_leds));
 
+				if (num_knob_expanders_found > 0)
+					state = States::ReadKnobs;
+				else
+					state = States::StartPause;
+				break;
+			}
+
+			case States::ReadKnobs: {
+				auto &knobexp = knob_exps[cur_knobexp_idx];
+				if (knobexp.read_channel()) {
+					state = States::CollectKnobReadings;
+				} else {
+					// Failed to read: skip collecting knob readings
+					state = States::StartPause;
+				}
+
+				break;
+			}
+
+			case States::CollectKnobReadings: {
+				auto const &knobexp = knob_exps[cur_knobexp_idx];
+				auto [value, chan] = knobexp.collect_reading();
+				if (chan < knob_readings.size()) {
+					knob_readings[chan] = value;
+					printf("%d=%d\n", chan, value);
+				}
+
+				if (++cur_knobexp_idx >= num_knob_expanders_found)
+					cur_knobexp_idx = 0;
+				state = States::StartPause;
+				break;
+			}
+
+			case States::StartPause: {
 				tmr = HAL_GetTick();
 				state = States::Pause;
 				break;
@@ -104,8 +142,7 @@ public:
 			}
 
 			default:
-				tmr = HAL_GetTick();
-				state = States::Pause;
+				state = States::StartPause;
 				break;
 		}
 	}
@@ -127,6 +164,26 @@ public:
 		return but_exp_addresses;
 	}
 
+	uint16_t get_knob(uint32_t chan) {
+		if (chan < num_knob_expanders_found * KnobExpander::NumKnobsPerExpander)
+			return knob_readings[chan];
+		else
+			return 0;
+	}
+
+	void get_all_knobs(std::span<uint16_t, 32> values) {
+		for (auto idx = 0u; auto reading : knob_readings) {
+			values[idx] = reading;
+			idx++;
+			if (idx >= num_knob_expanders_found * KnobExpander::NumKnobsPerExpander)
+				break;
+		}
+	}
+
+	uint32_t num_knob_expanders_connected() {
+		return num_knob_expanders_found;
+	}
+
 private:
 	I2CPeriph auxi2c{ControlExpander::i2c_conf};
 
@@ -142,19 +199,12 @@ private:
 
 	std::array<uint8_t, 4> but_exp_addresses{};
 
-	// Each Expander has 8 buttons, 8 LEDs, so we can support max 4 expander modules
+	uint32_t cur_butexp_idx = 0;
+
 	std::atomic<uint32_t> leds;
 	std::atomic<uint32_t> buttons;
 
-	enum class States {
-		Pause,
-		ReadButtons,
-		SetLEDs,
-		FinishSending,
-	} state = States::ReadButtons;
-	uint32_t cur_butexp_idx = 0;
-
-	/// Pot Exp:
+	/// Knob Exp:
 	uint32_t num_knob_expanders_found = 0;
 	std::array<mdrivlib::TLA2528::Device, 4> knob_exps{{
 		{auxi2c, KnobExpander::conf},
@@ -164,7 +214,20 @@ private:
 	}};
 
 	std::array<uint8_t, 4> knob_exp_addresses{};
+	uint32_t cur_knobexp_idx = 0;
+	std::array<uint16_t, KnobExpander::NumKnobsPerExpander * 4> knob_readings{};
 
+	/////
+
+	enum class States {
+		StartPause,
+		Pause,
+		ReadButtons,
+		SetLEDs,
+		ReadKnobs,
+		CollectKnobReadings,
+		FinishSending,
+	} state = States::ReadButtons;
 	uint32_t tmr{0};
 
 	void handle_error() {
