@@ -6,7 +6,7 @@ namespace MetaModule::KnobExpander
 
 constexpr mdrivlib::TLA2528::Config conf{
 	.addr = mdrivlib::TLA2528::Config::LowestAllowedAddr,
-	.oversample = true,
+	.oversample = false,
 };
 
 }
