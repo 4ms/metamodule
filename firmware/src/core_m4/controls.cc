@@ -57,21 +57,28 @@ void Controls::update_params() {
 		// Button Expanders
 		cur_metaparams->num_button_expanders_found = control_expander.num_button_expanders_connected();
 
-		uint32_t buttons_state = control_expander.get_buttons();
-		cur_metaparams->ext_buttons_pressed_event = 0;
-		cur_metaparams->ext_buttons_released_event = 0;
-		for (auto [i, extbut] : enumerate(ext_buttons)) {
-			extbut.register_state(buttons_state & (1 << i));
+		if (cur_metaparams->num_button_expanders_found > 0) {
+			uint32_t buttons_state = control_expander.get_buttons();
+			cur_metaparams->ext_buttons_pressed_event = 0;
+			cur_metaparams->ext_buttons_released_event = 0;
+			for (auto [i, extbut] : enumerate(ext_buttons)) {
+				extbut.register_state(buttons_state & (1 << i));
 
-			if (extbut.just_went_high()) {
-				cur_metaparams->ext_buttons_pressed_event |= (1 << i);
+				if (extbut.just_went_high()) {
+					cur_metaparams->ext_buttons_pressed_event |= (1 << i);
+				}
+				if (extbut.just_went_low()) {
+					cur_metaparams->ext_buttons_released_event |= (1 << i);
+				}
 			}
-			if (extbut.just_went_low()) {
-				cur_metaparams->ext_buttons_released_event |= (1 << i);
-			}
+			control_expander.set_leds(cur_metaparams->button_leds);
 		}
 
-		control_expander.set_leds(cur_metaparams->button_leds);
+		// Knob Expanders
+		cur_metaparams->num_knob_expanders_found = control_expander.num_knob_expanders_connected();
+		if (cur_metaparams->num_knob_expanders_found > 0) {
+			control_expander.get_all_knobs(cur_metaparams->exp_knobs);
+		}
 
 		// Rotary button
 		if (rotary_button.is_just_pressed()) {
