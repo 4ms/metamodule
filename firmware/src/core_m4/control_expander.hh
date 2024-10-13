@@ -13,7 +13,6 @@ namespace MetaModule
 {
 
 // Manage all expander modules connected via I2C to the ControlExpander header
-// (For now, there is only the ButtonExpander)
 
 class ControlExpanderManager {
 	using I2CPeriph = mdrivlib::I2CPeriph;
@@ -116,8 +115,8 @@ public:
 				auto const &knobexp = knob_exps[cur_knobexp_idx];
 				auto [value, chan] = knobexp.collect_reading();
 				if (chan < knob_readings.size()) {
-					knob_readings[chan] = value;
-					printf("%d=%d\n", chan, value);
+					knob_readings[cur_knobexp_idx][chan] = value;
+					// printf("%d=%d\n", chan, value);
 				}
 
 				if (++cur_knobexp_idx >= num_knob_expanders_found)
@@ -164,19 +163,11 @@ public:
 		return but_exp_addresses;
 	}
 
-	uint16_t get_knob(uint32_t chan) {
-		if (chan < num_knob_expanders_found * KnobExpander::NumKnobsPerExpander)
-			return knob_readings[chan];
-		else
-			return 0;
-	}
-
-	void get_all_knobs(std::span<uint16_t, 32> values) {
-		for (auto idx = 0u; auto reading : knob_readings) {
-			values[idx] = reading;
-			idx++;
-			if (idx >= num_knob_expanders_found * KnobExpander::NumKnobsPerExpander)
-				break;
+	void get_all_knobs(std::array<std::array<uint16_t, 8>, 4> &values) {
+		for (auto exp_idx = 0u; exp_idx < num_knob_expanders_found; exp_idx++) {
+			for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
+				values[exp_idx][knob_idx] = knob_readings[exp_idx][knob_idx];
+			}
 		}
 	}
 
@@ -215,7 +206,7 @@ private:
 
 	std::array<uint8_t, 4> knob_exp_addresses{};
 	uint32_t cur_knobexp_idx = 0;
-	std::array<uint16_t, KnobExpander::NumKnobsPerExpander * 4> knob_readings{};
+	std::array<std::array<uint16_t, KnobExpander::NumKnobsPerExpander>, 4> knob_readings{};
 
 	/////
 

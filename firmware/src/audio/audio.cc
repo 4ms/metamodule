@@ -1,5 +1,6 @@
 #include "audio/audio.hh"
 #include "CoreModules/hub/audio_expander_defs.hh"
+#include "CoreModules/hub/knob_expander_defs.hh"
 #include "audio/audio_test_signals.hh"
 #include "conf/audio_settings.hh"
 #include "conf/hsem_conf.hh"
@@ -251,7 +252,15 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 	}
 
-	// TODO: put this in params_state not metaparams
+	for (auto knob_exp_idx = 0u; knob_exp_idx < param_block.metaparams.num_knob_expanders_found; knob_exp_idx++) {
+		auto &knobs = param_block.metaparams.exp_knobs[knob_exp_idx];
+		for (auto knob_idx = 0u; auto knob : knobs) {
+			auto param_id = knob_idx + FirstExpKnob + knob_exp_idx * KnobExpander::NumKnobsPerExpander;
+			player.set_panel_param(param_id, knob);
+			knob_idx++;
+		}
+	}
+
 	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins)) {
 		m = s.val();
 	}
