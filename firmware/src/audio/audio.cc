@@ -112,6 +112,11 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	for (auto &s : smoothed_ins)
 		s.set_size(block_size_);
+
+	for (auto &expander : exp_knobs) {
+		for (auto &knobs : expander)
+			knobs.set_num_updates(block_size_);
+	}
 }
 
 void AudioStream::start() {
@@ -166,11 +171,16 @@ void AudioStream::handle_patch_just_loaded() {
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	handle_patch_mod_queue();
 
-	// TODO: handle second codec
-	// if (ext_audio_connected)
-	// 	AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
-
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
+
+	for (auto exp_i = 0u; auto expander_reading : param_block.metaparams.exp_knobs) {
+		if (exp_i >= param_block.metaparams.num_knob_expanders_found)
+			break;
+		for (auto knob_i = 0u; auto knob_reading : expander_reading) {
+			exp_knobs[exp_i][knob_i++].set_new_value(knob_reading);
+		}
+		exp_i++;
+	}
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
@@ -250,14 +260,13 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 			param_block.metaparams.button_leds = player.get_button_leds();
 		}
-	}
 
-	for (auto knob_exp_idx = 0u; knob_exp_idx < param_block.metaparams.num_knob_expanders_found; knob_exp_idx++) {
-		auto &knobs = param_block.metaparams.exp_knobs[knob_exp_idx];
-		for (auto knob_idx = 0u; auto knob : knobs) {
-			auto param_id = knob_idx + FirstExpKnob + knob_exp_idx * KnobExpander::NumKnobsPerExpander;
-			player.set_panel_param(param_id, knob);
-			knob_idx++;
+		unsigned param_id = FirstExpKnob;
+		for (auto exp_i = 0u; exp_i < param_block.metaparams.num_knob_expanders_found; exp_i++) {
+			for (auto knob : exp_knobs[exp_i]) {
+				player.set_panel_param(param_id, knob.next());
+				param_id++;
+			}
 		}
 	}
 
@@ -459,6 +468,11 @@ void AudioStream::update_audio_settings() {
 
 				for (auto &s : smoothed_ins)
 					s.set_size(block_size_);
+
+				for (auto &expander : exp_knobs) {
+					for (auto &knobs : expander)
+						knobs.set_num_updates(block_size_);
+				}
 			}
 
 		} else {

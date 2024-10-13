@@ -17,6 +17,7 @@
 #include "util/calibrator.hh"
 #include "util/edge_detector.hh"
 #include "util/filter.hh"
+#include "util/interp_param.hh"
 #include "util/math.hh"
 #include <array>
 
@@ -70,6 +71,8 @@ private:
 	CalData ext_cal{};
 
 	std::array<ResizingOversampler, PanelDef::NumAudioIn> smoothed_ins;
+
+	std::array<std::array<InterpParamVariable<float>, 8>, 4> exp_knobs;
 
 	PatchPlayer &player;
 	mdrivlib::CycleCounter load_measure;
