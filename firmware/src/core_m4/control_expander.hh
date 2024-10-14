@@ -92,6 +92,10 @@ public:
 				these_leds &= 0xFF;
 				butexp.set_output_values(ButtonExpander::calc_output_data(these_leds));
 
+				// Next button expander
+				if (++cur_butexp_idx >= num_button_expanders_found)
+					cur_butexp_idx = 0;
+
 				if (num_knob_expanders_found > 0)
 					state = States::ReadKnobs;
 				else
@@ -101,7 +105,8 @@ public:
 
 			case States::ReadKnobs: {
 				auto &knobexp = knob_exps[cur_knobexp_idx];
-				if (knobexp.read_channel()) {
+				// This occupies the bus for ~1.6ms (every 50ms)
+				if (knobexp.read_channels()) {
 					state = States::CollectKnobReadings;
 				} else {
 					// Failed to read: skip collecting knob readings
@@ -112,11 +117,12 @@ public:
 			}
 
 			case States::CollectKnobReadings: {
-				auto const &knobexp = knob_exps[cur_knobexp_idx];
-				auto [value, chan] = knobexp.collect_reading();
-				if (chan < knob_readings.size()) {
-					knob_readings[cur_knobexp_idx][chan] = value;
-					// printf("%d=%d\n", chan, value);
+				auto &knobexp = knob_exps[cur_knobexp_idx];
+				for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
+					auto [value, chan] = knobexp.collect_reading(knob_idx);
+					if (chan < knob_readings[cur_knobexp_idx].size()) {
+						knob_readings[cur_knobexp_idx][chan] = 4095 - value; //Knob expander p1 pots are backwards
+					}
 				}
 
 				if (++cur_knobexp_idx >= num_knob_expanders_found)
@@ -133,9 +139,12 @@ public:
 
 			case States::Pause: {
 				if ((HAL_GetTick() - tmr) > 50) {
-					state = States::ReadButtons;
-					if (++cur_butexp_idx >= num_button_expanders_found)
-						cur_butexp_idx = 0;
+					if (num_button_expanders_found > 0) {
+						state = States::ReadButtons;
+					} else if (num_knob_expanders_found > 0) {
+						state = States::ReadKnobs;
+					} else
+						state = States::StartPause; //No expanders found, just pause
 				}
 				break;
 			}
