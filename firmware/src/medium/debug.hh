@@ -2,8 +2,17 @@
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
 
-struct Debug {
+#define DEBUG_PINS_CTRL_EXP_GPIOS
 
+struct Debug {
+	struct NoPin {
+		void high() {
+		}
+		void low() {
+		}
+	};
+
+#if defined(DEBUG_PINS_CTRL_EXP_ALL)
 	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::B, 10, mdrivlib::PinMode::Output>; //Control Exp pin 1 (AUX_I2C_SCL)
 	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::A, 14, mdrivlib::PinMode::Output>; //Control Exp pin 3 (EXTGPIO1)
 	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::E, 2, mdrivlib::PinMode::Output>;  //Control Exp pin 5 (EXTGPIO2)
@@ -14,12 +23,28 @@ struct Debug {
 	using Pin6 = mdrivlib::FPin<mdrivlib::GPIO::B, 14, mdrivlib::PinMode::Output>; //DEBUG2 pad
 	using Pin7 = mdrivlib::FPin<mdrivlib::GPIO::G, 6, mdrivlib::PinMode::Output>;  //DEBUG3 pad (p11)
 
-	struct NoPin {
-		void high() {
-		}
-		void low() {
-		}
-	};
+#elif defined(DEBUG_PINS_CTRL_EXP_GPIOS)
+	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::A, 14, mdrivlib::PinMode::Output>; //Control Exp pin 3 (EXTGPIO1)
+	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::E, 2, mdrivlib::PinMode::Output>;  //Control Exp pin 5 (EXTGPIO2)
+	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::G, 11, mdrivlib::PinMode::Output>; //Control Exp pin 7 (EXTGPIO3)
+	using Pin3 = NoPin;
+
+	using Pin4 = mdrivlib::FPin<mdrivlib::GPIO::E, 4, mdrivlib::PinMode::Output>; //DEBUG0 pin 5 of debug header
+	using Pin5 = NoPin;
+	using Pin6 = mdrivlib::FPin<mdrivlib::GPIO::B, 14, mdrivlib::PinMode::Output>; //DEBUG2 pad
+	using Pin7 = mdrivlib::FPin<mdrivlib::GPIO::G, 6, mdrivlib::PinMode::Output>;  //DEBUG3 pad (p11)
+
+#else
+	using Pin0 = NoPin;
+	using Pin1 = NoPin;
+	using Pin2 = NoPin;
+	using Pin3 = NoPin;
+	using Pin4 = NoPin;
+	using Pin5 = NoPin;
+	using Pin6 = NoPin;
+	using Pin7 = NoPin;
+#endif
+
 	using green_LED1 = NoPin;
 	using blue_LED1 = NoPin;
 	using red_LED1 = NoPin;
