@@ -138,7 +138,7 @@ public:
 			}
 
 			case States::Pause: {
-				if ((HAL_GetTick() - tmr) > 50) {
+				if ((HAL_GetTick() - tmr) > 10) {
 					if (num_button_expanders_found > 0) {
 						state = States::ReadButtons;
 					} else if (num_knob_expanders_found > 0) {
