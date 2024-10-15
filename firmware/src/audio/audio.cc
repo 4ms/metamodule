@@ -173,13 +173,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
-	for (auto exp_i = 0u; auto expander_reading : param_block.metaparams.exp_knobs) {
-		if (exp_i >= param_block.metaparams.num_knob_expanders_found)
-			break;
-		for (auto knob_i = 0u; auto knob_reading : expander_reading) {
-			exp_knobs[exp_i][knob_i++].set_new_value(knob_reading);
+	for (auto exp_i = 0u; exp_i < param_block.metaparams.num_knob_expanders_found; exp_i++) {
+		for (auto knob_i = 0; auto reading : param_block.metaparams.exp_knobs[exp_i]) {
+			exp_knobs[exp_i][knob_i].set_new_value((float)reading / 4095.f);
+			knob_i++;
 		}
-		exp_i++;
 	}
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
@@ -263,7 +261,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		unsigned param_id = FirstExpKnob;
 		for (auto exp_i = 0u; exp_i < param_block.metaparams.num_knob_expanders_found; exp_i++) {
-			for (auto knob : exp_knobs[exp_i]) {
+			for (auto &knob : exp_knobs[exp_i]) {
 				player.set_panel_param(param_id, knob.next());
 				param_id++;
 			}
@@ -273,6 +271,18 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins)) {
 		m = s.val();
 	}
+
+	// unsigned param_id = FirstExpKnob;
+	// for (auto exp_i = 0u; exp_i < param_block.metaparams.num_knob_expanders_found; exp_i++) {
+	// 	Debug::Pin0::high();
+	// 	for (auto knob : param_block.metaparams.exp_knobs[exp_i]) {
+	// 		Debug::Pin1::high();
+	// 		player.set_panel_param(param_id, knob / 4095.f);
+	// 		param_id++;
+	// 		Debug::Pin1::low();
+	// 	}
+	// 	Debug::Pin0::low();
+	// }
 
 	player.update_lights();
 	propagate_sense_pins(param_block.params[0]);
@@ -358,8 +368,9 @@ void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsig
 void AudioStream::handle_button_events(uint32_t event_bitmask, bool pressed) {
 	unsigned i = 0;
 	while (event_bitmask) {
-		if (event_bitmask & 0b1)
+		if (event_bitmask & 0b1) {
 			player.set_panel_param(i + FirstButton, pressed ? 1 : 0);
+		}
 		event_bitmask >>= 1;
 		i++;
 	}
