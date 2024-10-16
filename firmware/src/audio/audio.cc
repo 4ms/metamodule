@@ -74,8 +74,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		Debug::Pin4::high();
-
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 		load_measure.start_measurement();
@@ -83,21 +81,22 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
-		// auto &params = cache_params(block);
 		auto &params = param_blocks[block];
-		mdrivlib::SystemCache::invalidate_dcache_by_range(&param_blocks[block], sizeof(param_blocks[block]));
+		mdrivlib::SystemCache::invalidate_dcache_by_range(&param_blocks[block].params, sizeof(Params) * block_size_);
+		mdrivlib::SystemCache::invalidate_dcache_by_range(&param_blocks[block].metaparams,
+														  sizeof(param_blocks[block].metaparams));
 
 		if (is_playing_patch())
 			process(audio_blocks[1 - block], params);
 		else
 			process_nopatch(audio_blocks[1 - block], params);
 
-		// return_cached_params(block);
-
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
 
-		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block], sizeof(param_blocks[block]));
+		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].params, sizeof(Params) * block_size_);
+		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block].metaparams,
+													 sizeof(param_blocks[block].metaparams));
 
 		update_audio_settings();
 
@@ -106,8 +105,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			output_fade_amt = 0.f;
 			patch_loader.notify_audio_overrun();
 		}
-
-		Debug::Pin4::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -413,27 +410,6 @@ void AudioStream::set_calibration(CalData const &caldata) {
 
 uint32_t AudioStream::get_audio_errors() {
 	return codec_.get_sai_errors();
-}
-
-// It's measurably faster to copy params into cacheable ram
-ParamBlock &AudioStream::cache_params(unsigned block) {
-	local_params.metaparams = param_blocks[block].metaparams;
-
-	for (unsigned i = 0; i < block_size_; i++)
-		local_params.params[i] = param_blocks[block].params[i];
-
-	return local_params;
-}
-
-void AudioStream::return_cached_params(unsigned block) {
-	// copy analyzed signals back to shared param block (so GUI thread can access it)
-	param_blocks[block].metaparams.ins = local_params.metaparams.ins;
-
-	// copy midi_poly_chans back so Controls can read it
-	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
-
-	// copy button_leds back so Controls can light them
-	param_blocks[block].metaparams.button_leds = local_params.metaparams.button_leds;
 }
 
 void AudioStream::set_block_spans() {
