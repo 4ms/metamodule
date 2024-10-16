@@ -74,7 +74,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	cal_stash.reset_to_default();
 
 	auto audio_callback = [this]<unsigned block>() {
-		// Debug::Pin0::high();
+		Debug::Pin4::high();
 
 		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.05f;
 		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
@@ -83,17 +83,21 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
-		auto &params = cache_params(block);
+		// auto &params = cache_params(block);
+		auto &params = param_blocks[block];
+		mdrivlib::SystemCache::invalidate_dcache_by_range(&param_blocks[block], sizeof(param_blocks[block]));
 
 		if (is_playing_patch())
 			process(audio_blocks[1 - block], params);
 		else
 			process_nopatch(audio_blocks[1 - block], params);
 
-		return_cached_params(block);
+		// return_cached_params(block);
 
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
+
+		mdrivlib::SystemCache::clean_dcache_by_range(&param_blocks[block], sizeof(param_blocks[block]));
 
 		update_audio_settings();
 
@@ -103,7 +107,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			patch_loader.notify_audio_overrun();
 		}
 
-		// Debug::Pin0::low();
+		Debug::Pin4::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
