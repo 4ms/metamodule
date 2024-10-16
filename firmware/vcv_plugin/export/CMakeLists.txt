@@ -51,6 +51,7 @@ target_sources(
          src/roundevenf.c
          src/color.cpp
          src/common.cpp
+         src/resampler.cc
 )
 
 add_subdirectory(jansson)
