@@ -174,9 +174,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
 	for (auto exp_i = 0u; exp_i < param_block.metaparams.num_knob_expanders_found; exp_i++) {
-		for (auto knob_i = 0; auto reading : param_block.metaparams.exp_knobs[exp_i]) {
-			exp_knobs[exp_i][knob_i].set_new_value((float)reading / 4095.f);
-			knob_i++;
+		for (auto knob_i = 0u; knob_i < param_block.metaparams.exp_knobs[exp_i].size(); knob_i++) {
+			float reading = param_block.metaparams.exp_knobs[exp_i][knob_i];
+			exp_knobs[exp_i][knob_i].set_new_value(reading);
 		}
 	}
 
@@ -271,18 +271,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins)) {
 		m = s.val();
 	}
-
-	// unsigned param_id = FirstExpKnob;
-	// for (auto exp_i = 0u; exp_i < param_block.metaparams.num_knob_expanders_found; exp_i++) {
-	// 	Debug::Pin0::high();
-	// 	for (auto knob : param_block.metaparams.exp_knobs[exp_i]) {
-	// 		Debug::Pin1::high();
-	// 		player.set_panel_param(param_id, knob / 4095.f);
-	// 		param_id++;
-	// 		Debug::Pin1::low();
-	// 	}
-	// 	Debug::Pin0::low();
-	// }
 
 	player.update_lights();
 	propagate_sense_pins(param_block.params[0]);
@@ -474,6 +462,8 @@ void AudioStream::update_audio_settings() {
 
 			if (block_size != block_size_) {
 				block_size_ = block_size;
+				param_blocks[0].metaparams.block_size = block_size;
+				param_blocks[1].metaparams.block_size = block_size;
 
 				set_block_spans();
 

@@ -77,7 +77,23 @@ void Controls::update_params() {
 		// Knob Expanders
 		cur_metaparams->num_knob_expanders_found = control_expander.num_knob_expanders_connected();
 		if (cur_metaparams->num_knob_expanders_found > 0) {
-			control_expander.get_all_knobs(cur_metaparams->exp_knobs);
+			if (control_expander.has_new_knob_readings()) {
+				auto now = HAL_GetTick();
+				exp_pot_data_ms = (now - last_exp_data_tm[0]) / 2.f;
+				last_exp_data_tm[0] = last_exp_data_tm[1];
+				last_exp_data_tm[1] = now;
+				for (auto exp_idx = 0u; exp_idx < cur_metaparams->num_knob_expanders_found; exp_idx++) {
+					for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
+						auto val = get_exp_pot_reading(exp_idx, knob_idx);
+						_exp_knobs[exp_idx][knob_idx].set_new_value(val);
+					}
+				}
+			}
+			for (auto exp_idx = 0u; exp_idx < cur_metaparams->num_knob_expanders_found; exp_idx++) {
+				for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
+					cur_metaparams->exp_knobs[exp_idx][knob_idx] = _exp_knobs[exp_idx][knob_idx].next();
+				}
+			}
 		}
 
 		// Rotary button
@@ -136,8 +152,10 @@ void Controls::start_param_block() {
 	_first_param = true;
 	_buffer_full = false;
 
-	if (sample_rate != cur_metaparams->sample_rate) {
-		set_samplerate(cur_metaparams->sample_rate);
+	if (sample_rate != cur_metaparams->sample_rate || block_size != cur_metaparams->block_size) {
+		sample_rate = cur_metaparams->sample_rate;
+		block_size = cur_metaparams->block_size;
+		change_samplerate_blocksize();
 	}
 
 	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
@@ -193,10 +211,18 @@ void Controls::process() {
 	control_expander.update();
 }
 
-void Controls::set_samplerate(unsigned sample_rate) {
-	this->sample_rate = sample_rate;
+void Controls::change_samplerate_blocksize() {
 	for (auto &_knob : _knobs) {
 		_knob.set_num_updates(sample_rate / AdcReadFrequency);
+	}
+
+	float block_ms = 1000.f * (float)block_size / (float)sample_rate;
+	unsigned num_updates = std::clamp<unsigned>(std::round(exp_pot_data_ms / block_ms), 1u, 32u);
+	// pr_dbg("%f -> %d\n", exp_pot_data_ms, num_updates);
+	for (auto &exp : _exp_knobs) {
+		for (auto &knob : exp) {
+			knob.set_num_updates(num_updates);
+		}
 	}
 }
 
@@ -221,7 +247,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 		}
 	});
 
-	set_samplerate(sample_rate);
+	change_samplerate_blocksize();
 
 	pot_adc.start();
 
@@ -244,14 +270,15 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 }
 
 float Controls::get_pot_reading(uint32_t pot_id) {
-	if (pot_id < NumPotAdcs) {
-		auto raw = (int32_t)pot_vals[pot_id];
-		int32_t val = raw - MinPotValue;
-		if (val < 0)
-			val = 0;
-		return (float)val / (4096.f - MinPotValue);
-	}
-	return 0;
+	auto raw = (int32_t)pot_vals[pot_id] - MinPotValue;
+	float v = (float)raw / (4095.f - MinPotValue);
+	return std::clamp(v, 0.f, 1.f);
+}
+
+float Controls::get_exp_pot_reading(uint32_t exp_idx, uint32_t pot_idx) {
+	auto raw = control_expander.get_knob(exp_idx, pot_idx);
+	float v = (float)raw / 4095.f;
+	return std::clamp(v, 0.f, 1.f);
 }
 
 } // namespace MetaModule

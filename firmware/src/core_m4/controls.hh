@@ -44,8 +44,9 @@ private:
 	void update_debouncers();
 
 	float get_pot_reading(uint32_t pot_id);
+	float get_exp_pot_reading(uint32_t, uint32_t);
 
-	void set_samplerate(unsigned sample_rate);
+	void change_samplerate_blocksize();
 
 	template<size_t block_num>
 	void start_param_block();
@@ -61,13 +62,18 @@ private:
 	bool _rotary_moved_while_pressed = false;
 
 	// Analog controls (pots)
-	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
-	std::array<uint16_t, NumPotAdcs> pot_vals{};
+	std::array<uint16_t, PanelDef::NumPot> pot_vals{};
 	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
 	InterpParamVariable<float> _knobs[PanelDef::NumPot]{};
 	static constexpr uint32_t AdcReadFrequency = 580; //measured
 	bool _new_adc_data_ready = false;
+
+	static constexpr auto NumKnobsPerExpander = KnobExpander::NumKnobsPerExpander;
+	static constexpr auto MaxExpanders = KnobExpander::MaxExpanders;
+	std::array<std::array<InterpParamVariable<float>, NumKnobsPerExpander>, MaxExpanders> _exp_knobs;
+	float exp_pot_data_ms = 10;
+	uint32_t last_exp_data_tm[2] = {0, 10};
 
 	SensePinReader sense_pin_reader;
 	ControlExpanderManager control_expander;
@@ -87,6 +93,7 @@ private:
 	bool _first_param = true;
 
 	uint32_t sample_rate = 48000;
+	uint32_t block_size = 32;
 
 	DoubleAuxStreamBlock &auxstream_blocks;
 	mdrivlib::PinChangeInt<AuxStreamUpdateConf> auxstream_updater;

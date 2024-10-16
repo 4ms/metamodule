@@ -105,7 +105,6 @@ public:
 
 			case States::ReadKnobs: {
 				auto &knobexp = knob_exps[cur_knobexp_idx];
-				// This occupies the bus for ~1.6ms (every 50ms)
 				if (knobexp.read_channels()) {
 					state = States::CollectKnobReadings;
 				} else {
@@ -125,8 +124,10 @@ public:
 					}
 				}
 
-				if (++cur_knobexp_idx >= num_knob_expanders_found)
+				if (++cur_knobexp_idx >= num_knob_expanders_found) {
 					cur_knobexp_idx = 0;
+					new_knob_readings_ready.store(true);
+				}
 				state = States::StartPause;
 				break;
 			}
@@ -138,7 +139,7 @@ public:
 			}
 
 			case States::Pause: {
-				if ((HAL_GetTick() - tmr) > 10) {
+				if ((HAL_GetTick() - tmr) > 2) {
 					if (num_button_expanders_found > 0) {
 						state = States::ReadButtons;
 					} else if (num_knob_expanders_found > 0) {
@@ -180,8 +181,16 @@ public:
 		}
 	}
 
+	uint16_t get_knob(uint32_t exp_idx, uint32_t knob_idx) {
+		return knob_readings[exp_idx][knob_idx];
+	}
+
 	uint32_t num_knob_expanders_connected() {
 		return num_knob_expanders_found;
+	}
+
+	bool has_new_knob_readings() {
+		return new_knob_readings_ready.exchange(false);
 	}
 
 private:
@@ -216,6 +225,8 @@ private:
 	std::array<uint8_t, 4> knob_exp_addresses{};
 	uint32_t cur_knobexp_idx = 0;
 	std::array<std::array<uint16_t, KnobExpander::NumKnobsPerExpander>, 4> knob_readings{};
+
+	std::atomic<bool> new_knob_readings_ready = false;
 
 	/////
 

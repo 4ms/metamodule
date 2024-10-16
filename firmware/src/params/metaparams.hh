@@ -34,7 +34,7 @@ struct MetaParams {
 	uint32_t ext_buttons_pressed_event = 0;
 	uint32_t ext_buttons_released_event = 0;
 	uint32_t num_knob_expanders_found = 0;
-	std::array<std::array<uint16_t, 8>, 4> exp_knobs{}; //exp_knobs[ExpanderId][KnobId]
+	std::array<std::array<float, 8>, 4> exp_knobs{};
 
 	// Populated by audio, which passes to GUI
 	// TODO: move this out of MetaParams and do something like LightWatcher
@@ -44,6 +44,7 @@ struct MetaParams {
 
 	// Populated by audio, passed to controls
 	uint32_t sample_rate = 48000;
+	uint32_t block_size = 48000;
 	uint32_t button_leds = 0;
 
 	// Populated by audio, passed to controls and GUI
