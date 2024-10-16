@@ -1,9 +1,12 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/hub/button_expander_defs.hh"
+#include "CoreModules/hub/pot_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/panel_conf.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/smp.hh"
+#include "mapped_knob_small.hh"
 #include "null_module.hh"
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
@@ -26,16 +29,20 @@ namespace MetaModule
 {
 
 class PatchPlayer {
+
 public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 	std::atomic<bool> is_loaded = false;
 
 private:
-	// out_conns[]: Out1-Out8
-	std::array<Jack, PanelDef::NumUserFacingOutJacks> out_conns __attribute__((aligned(4))) = {{{0, 0}}};
+	// Out1-Out8 + Ext Out1-8
+	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks * 2;
+	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks * 2;
+
+	std::array<Jack, NumOutJacks> out_conns __attribute__((aligned(4))) = {{{0, 0}}};
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2
-	std::array<std::vector<Jack>, PanelDef::NumUserFacingInJacks> in_conns;
+	std::array<std::vector<Jack>, NumInJacks> in_conns;
 
 	unsigned num_modules = 0;
 
@@ -47,7 +54,7 @@ private:
 	std::array<std::vector<Jack>, MaxMidiPolyphony> midi_note_aft_conns;
 	std::array<std::vector<Jack>, NumMidiCCsPW> midi_cc_conns;
 	std::array<std::vector<Jack>, NumMidiNotes> midi_gate_conns;
-	std::array<std::vector<MappedKnob>, NumMidiCCs> midi_knob_conns;
+	std::array<std::vector<MappedKnobSmall>, NumMidiCCs> midi_knob_conns;
 
 	struct MidiPulse {
 		OneShot pulse{};
@@ -59,12 +66,15 @@ private:
 	uint32_t midi_divclk_ctr = 0;
 	uint32_t midi_divclk_div_amt = 0;
 
-	// knob_conns[]: ABCDEFuvwxyz
-	using KnobSet = std::array<std::vector<MappedKnob>, PanelDef::NumKnobs>;
+	// TODO: faster to have a large matrix or a sparse matrix?
+	// std::vector<std::vector<std::vector<MappedKnob>>> param_conns;
+	//MappedKnob &get_knob(unsigned panel_id) { ... push_back if doesn't exist }
+	constexpr static size_t NumParamMaps = PanelDef::NumKnobs + MaxExpPots + MaxExpButtons;
+	using KnobSet = std::array<std::vector<MappedKnobSmall>, NumParamMaps>;
 	std::array<KnobSet, MaxKnobSets> knob_conns;
 
-	std::array<bool, PanelDef::NumUserFacingOutJacks> out_patched{};
-	std::array<bool, PanelDef::NumUserFacingInJacks> in_patched{};
+	std::array<bool, NumOutJacks> out_patched{};
+	std::array<bool, NumInJacks> in_patched{};
 
 	MulticorePlayer smp;
 
@@ -271,11 +281,24 @@ public:
 	// K-rate setters/getters:
 
 	void set_panel_param(unsigned param_id, float val) {
-		if (param_id < PanelDef::NumKnobs) {
+		if (param_id <= knob_conns[active_knob_set].size()) {
 			for (auto const &k : knob_conns[active_knob_set][param_id]) {
 				modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 			}
 		}
+	}
+
+	// Button lights are on or off (no fading supported)
+	// so 32 lights fits in uint32_t
+	uint32_t get_button_leds() {
+		uint32_t b = 0;
+		for (auto light : pd.mapped_lights) {
+			if (light.panel_light_id < 32 && light.module_id < num_modules) {
+				if (modules[light.module_id]->get_led_brightness(light.light_id) > 0.1f)
+					b |= (1 << light.panel_light_id);
+			}
+		}
+		return b;
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {
@@ -418,7 +441,6 @@ public:
 		if (found != knobconn.end()) {
 			found->min = map.min;
 			found->max = map.max;
-			found->curve_type = map.curve_type;
 			set_panel_param(map.panel_knob_id, cur_val);
 		}
 	}
@@ -826,7 +848,7 @@ public:
 
 		for (auto const &cable : pd.mapped_outs) {
 			auto panel_jack_id = cable.panel_jack_id;
-			if (panel_jack_id >= PanelDef::NumUserFacingOutJacks)
+			if (panel_jack_id >= out_conns.size())
 				break;
 			out_conns[panel_jack_id] = cable.out;
 			pr_dbg("Connect module %d out jack %d to panel out %d\n",
@@ -931,8 +953,8 @@ private:
 	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
 		if (knob_set >= knob_conns.size())
 			return;
-		if (k.panel_knob_id < PanelDef::NumKnobs) {
-			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
+		if (k.panel_knob_id < knob_conns[knob_set].size()) {
+			update_or_add(knob_conns[knob_set][k.panel_knob_id], MappedKnobSmall{k});
 		}
 	}
 
@@ -949,7 +971,7 @@ private:
 	void cache_midi_mapping(const MappedKnob &k) {
 		if (k.is_midi_cc()) {
 			pr_dbg("Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
-			update_or_add(midi_knob_conns[k.cc_num()], k);
+			update_or_add(midi_knob_conns[k.cc_num()], MappedKnobSmall{k});
 		} else {
 			pr_warn("Bad Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
 		}
@@ -975,7 +997,7 @@ public:
 
 	//Used in unit tests
 	Jack get_panel_output_connection(unsigned jack_id) {
-		if (jack_id >= PanelDef::NumUserFacingOutJacks)
+		if (jack_id >= out_conns.size())
 			return {.module_id = 0, .jack_id = 0};
 
 		return out_conns[jack_id];
@@ -983,7 +1005,7 @@ public:
 
 	//Used in unit tests
 	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0) {
-		if ((jack_id >= PanelDef::NumUserFacingInJacks) || (multiple_connection_id >= in_conns[jack_id].size()))
+		if ((jack_id >= in_conns.size()) || (multiple_connection_id >= in_conns[jack_id].size()))
 			return {.module_id = 0, .jack_id = 0};
 
 		return in_conns[jack_id][multiple_connection_id];

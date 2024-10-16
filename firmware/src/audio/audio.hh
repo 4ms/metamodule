@@ -17,6 +17,7 @@
 #include "util/calibrator.hh"
 #include "util/edge_detector.hh"
 #include "util/filter.hh"
+#include "util/interp_param.hh"
 #include "util/math.hh"
 #include <array>
 
@@ -67,7 +68,11 @@ private:
 	CalData cal_stash;
 	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
+	CalData ext_cal{};
+
 	std::array<ResizingOversampler, PanelDef::NumAudioIn> smoothed_ins;
+
+	std::array<std::array<InterpParamVariable<float>, 8>, 4> exp_knobs;
 
 	PatchPlayer &player;
 	mdrivlib::CycleCounter load_measure;
@@ -82,11 +87,14 @@ private:
 	bool midi_last_connected = false;
 
 	AudioConf::SampleT get_audio_output(int output_id);
+	AudioConf::SampleT get_ext_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
 	void handle_midi(bool is_connected, Midi::Event const &event, unsigned poly_num);
+	void handle_button_events(uint32_t event_bitmask, bool pressed);
+
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool is_playing_patch();
 	void handle_patch_just_loaded();
