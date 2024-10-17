@@ -65,7 +65,8 @@ struct HardwareCheckPopup {
 
 	void update() {
 
-		for (auto [i, pot] : enumerate(params.knobs)) {
+		for (auto i = 0u; i < PanelDef::NumPot; i++) {
+			auto pot = params.knobs[i];
 			if (pot < pot_min[i])
 				pot_min[i] = pot;
 			if (pot > pot_max[i])
@@ -76,7 +77,8 @@ struct HardwareCheckPopup {
 		if ((last_refresh_check_tm - get_time()) > 200) {
 			last_refresh_check_tm = get_time();
 
-			for (auto [i, pot] : enumerate(params.knobs)) {
+			for (auto i = 0u; i < PanelDef::NumPot; i++) {
+				auto pot = params.knobs[i];
 				auto clamped_val = std::clamp<unsigned>(pot_iir[i] * 100.f, 0u, 99u);
 				if (clamped_val != last_pot_vals[i]) {
 					lv_label_set_text_fmt(knob_labels[i], "%02d", clamped_val);

@@ -174,13 +174,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
-	for (auto exp_i = 0u; exp_i < param_block.metaparams.num_knob_expanders_found; exp_i++) {
-		for (auto knob_i = 0u; knob_i < param_block.metaparams.exp_knobs[exp_i].size(); knob_i++) {
-			float reading = param_block.metaparams.exp_knobs[exp_i][knob_i];
-			exp_knobs[exp_i][knob_i].set_new_value(reading);
-		}
-	}
-
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
 		auto const &params = param_block.params[idx];
@@ -230,6 +223,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// Pass Knob values to modules
 		for (auto [i, knob, latch] : countzip(params.knobs, param_state.knobs)) {
+			if (i >= PanelDef::NumPot +
+						 (param_block.metaparams.num_knob_expanders_found * KnobExpander::NumKnobsPerExpander))
+				break;
 			if (latch.store_changed(knob))
 				player.set_panel_param(i, knob);
 		}
@@ -258,14 +254,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			handle_button_events(param_block.metaparams.ext_buttons_released_event, 0.f);
 
 			param_block.metaparams.button_leds = player.get_button_leds();
-		}
-
-		unsigned param_id = FirstExpKnob;
-		for (auto exp_i = 0u; exp_i < param_block.metaparams.num_knob_expanders_found; exp_i++) {
-			for (auto &knob : exp_knobs[exp_i]) {
-				player.set_panel_param(param_id, knob.next());
-				param_id++;
-			}
 		}
 	}
 

@@ -36,6 +36,32 @@ void Controls::update_params() {
 	for (unsigned i = 0; i < PanelDef::NumPot; i++)
 		cur_params->knobs[i] = _knobs[i].next();
 
+	// Knob Expanders
+	cur_metaparams->num_knob_expanders_found = control_expander.num_knob_expanders_connected();
+	if (cur_metaparams->num_knob_expanders_found > 0) {
+		if (control_expander.has_new_knob_readings()) {
+			// Get average of last two periods
+			auto now = HAL_GetTick();
+			exp_pot_data_ms = (now - last_exp_data_tm[0]) / 2.f;
+			last_exp_data_tm[0] = last_exp_data_tm[1];
+			last_exp_data_tm[1] = now;
+
+			// Set new values
+			for (auto exp_idx = 0u; exp_idx < cur_metaparams->num_knob_expanders_found; exp_idx++) {
+				for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
+					auto val = get_exp_pot_reading(exp_idx, knob_idx);
+					_exp_knobs[exp_idx][knob_idx].set_new_value(val);
+				}
+			}
+		}
+		for (auto exp_idx = 0u; exp_idx < cur_metaparams->num_knob_expanders_found; exp_idx++) {
+			auto base_knob_idx = PanelDef::NumPot + exp_idx * KnobExpander::NumKnobsPerExpander;
+			for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
+				cur_params->knobs[base_knob_idx + knob_idx] = _exp_knobs[exp_idx][knob_idx].next();
+			}
+		}
+	}
+
 	if (_first_param) {
 		_first_param = false;
 
@@ -72,28 +98,6 @@ void Controls::update_params() {
 				}
 			}
 			control_expander.set_leds(cur_metaparams->button_leds);
-		}
-
-		// Knob Expanders
-		cur_metaparams->num_knob_expanders_found = control_expander.num_knob_expanders_connected();
-		if (cur_metaparams->num_knob_expanders_found > 0) {
-			if (control_expander.has_new_knob_readings()) {
-				auto now = HAL_GetTick();
-				exp_pot_data_ms = (now - last_exp_data_tm[0]) / 2.f;
-				last_exp_data_tm[0] = last_exp_data_tm[1];
-				last_exp_data_tm[1] = now;
-				for (auto exp_idx = 0u; exp_idx < cur_metaparams->num_knob_expanders_found; exp_idx++) {
-					for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
-						auto val = get_exp_pot_reading(exp_idx, knob_idx);
-						_exp_knobs[exp_idx][knob_idx].set_new_value(val);
-					}
-				}
-			}
-			for (auto exp_idx = 0u; exp_idx < cur_metaparams->num_knob_expanders_found; exp_idx++) {
-				for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
-					cur_metaparams->exp_knobs[exp_idx][knob_idx] = _exp_knobs[exp_idx][knob_idx].next();
-				}
-			}
 		}
 
 		// Rotary button
@@ -216,13 +220,12 @@ void Controls::change_samplerate_blocksize() {
 		_knob.set_num_updates(sample_rate / AdcReadFrequency);
 	}
 
-	float block_ms = 1000.f * (float)block_size / (float)sample_rate;
-	unsigned num_updates = std::clamp<unsigned>(std::round(exp_pot_data_ms / block_ms), 1u, 32u);
-	// pr_dbg("%f -> %d\n", exp_pot_data_ms, num_updates);
-	for (auto &exp : _exp_knobs) {
-		for (auto &knob : exp) {
-			knob.set_num_updates(num_updates);
-		}
+	// float block_ms = 1000.f * (float)block_size / (float)sample_rate;
+	float block_ms = 1000.f / (float)sample_rate;
+	unsigned num_updates = std::clamp<unsigned>(std::round(exp_pot_data_ms / block_ms), 1u, 1024u);
+	pr_dbg("%f -> %d\n", exp_pot_data_ms, num_updates);
+	for (auto &knob : _exp_knobs) {
+		knob.set_num_updates(num_updates);
 	}
 }
 

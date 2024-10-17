@@ -34,7 +34,6 @@ struct MetaParams {
 	uint32_t ext_buttons_pressed_event = 0;
 	uint32_t ext_buttons_released_event = 0;
 	uint32_t num_knob_expanders_found = 0;
-	std::array<std::array<float, 8>, 4> exp_knobs{};
 
 	// Populated by audio, which passes to GUI
 	// TODO: move this out of MetaParams and do something like LightWatcher
@@ -93,9 +92,6 @@ struct MetaParams {
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
-
-		for (auto [exp_knob, that_exp_knob] : zip(exp_knobs, that.exp_knobs))
-			exp_knob = that_exp_knob;
 	}
 
 	// For buttons: moves events from `that` to `this`, removing them from `this`
@@ -118,9 +114,6 @@ struct MetaParams {
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
-
-		for (auto [exp_knob, that_exp_knob] : zip(exp_knobs, that.exp_knobs))
-			exp_knob = that_exp_knob;
 	}
 };
 

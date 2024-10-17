@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/hub/knob_expander_defs.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
 #include "midi_params.hh"
@@ -17,7 +18,9 @@ namespace MetaModule
 {
 
 struct ParamsState {
-	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
+	static constexpr auto MaxKnobs =
+		PanelDef::NumPot + (KnobExpander::NumKnobsPerExpander * KnobExpander::MaxExpanders);
+	std::array<LatchedParam<float, 25, 40960>, MaxKnobs> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
 	// std::array<float, PanelDef::NumAudioIn> smoothed_ins{};
 	uint32_t jack_senses;

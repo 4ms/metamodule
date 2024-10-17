@@ -12,7 +12,7 @@ struct Params {
 	std::array<float, PanelDef::NumCVIn> cvjacks{};
 	std::array<bool, PanelDef::NumGateIn> gate_ins{};
 	std::array<Toggler, PanelDef::NumRgbButton> buttons{};
-	std::array<float, PanelDef::NumPot> knobs{};
+	std::array<float, PanelDef::NumPot + 32> knobs{};
 
 	Midi::Event midi_event{};
 
