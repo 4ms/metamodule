@@ -2,6 +2,7 @@
 #include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/hub/knob_expander_defs.hh"
 #include "audio/audio_test_signals.hh"
+#include "calibrate/calibration_data_reader.hh"
 #include "conf/audio_settings.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
@@ -58,11 +59,16 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
 		ext_cal.reset_to_default();
-		// ext_cal = ext_audio_calibrator.read_calibration();
 		ext_audio_connected = true;
 		codec_ext_.set_tx_buffer(audio_blocks[0].out_ext_codec, block_size_);
 		codec_ext_.set_rx_buffer(audio_blocks[0].in_ext_codec, block_size_);
 		Expanders::ext_audio_found(true);
+
+		if (!CalibrationDataReader::read_calibration(&ext_cal, Hardware::codec_ext_memory, 0)) {
+			ext_cal.reset_to_default();
+			Hardware::codec_ext_memory.write(ext_cal);
+		}
+
 		pr_info("Audio Expander detected\n");
 	} else {
 		ext_audio_connected = false;
