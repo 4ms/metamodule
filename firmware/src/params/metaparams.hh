@@ -44,7 +44,7 @@ struct MetaParams {
 
 	// Populated by audio, passed to controls
 	uint32_t sample_rate = 48000;
-	uint32_t block_size = 48000;
+	uint32_t block_size = 64;
 	uint32_t button_leds = 0;
 
 	// Populated by audio, passed to controls and GUI
