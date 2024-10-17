@@ -171,10 +171,6 @@ void AudioStream::handle_patch_just_loaded() {
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	handle_patch_mod_queue();
 
-	// TODO: handle second codec
-	// if (ext_audio_connected)
-	// 	AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
-
 	param_block.metaparams.midi_poly_chans = player.get_midi_poly_num();
 
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
@@ -209,6 +205,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 				float calibrated_input = ext_cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
 
 				player.set_panel_input(panel_jack_i, calibrated_input);
+
+				smoothed_ins[panel_jack_i].add_val(calibrated_input);
 			}
 		}
 
