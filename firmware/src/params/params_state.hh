@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
 #include "midi_params.hh"
@@ -39,26 +40,37 @@ struct ParamsState {
 
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
 		if (plugged)
-			jack_senses |= (1 << jacksense_pin_order[panel_injack_idx]);
+			jack_senses |= (1 << input_bit(panel_injack_idx));
 		else
-			jack_senses &= ~(1 << jacksense_pin_order[panel_injack_idx]);
+			jack_senses &= ~(1 << input_bit(panel_injack_idx));
+	}
+
+	constexpr unsigned input_bit(unsigned panel_injack_idx) {
+		return panel_injack_idx < PanelDef::NumUserFacingInJacks ?
+				   jacksense_pin_order[panel_injack_idx] :
+				   AudioExpander::jacksense_pin_order[panel_injack_idx - PanelDef::NumUserFacingInJacks];
+	}
+
+	constexpr unsigned output_bit(unsigned panel_outjack_idx) {
+		return panel_outjack_idx < PanelDef::NumUserFacingOutJacks ?
+				   jacksense_pin_order[panel_outjack_idx + PanelDef::NumUserFacingInJacks] :
+				   AudioExpander::jacksense_pin_order[panel_outjack_idx - PanelDef::NumUserFacingOutJacks +
+													  AudioExpander::NumInJacks];
 	}
 
 	bool is_input_plugged(unsigned panel_injack_idx) {
-		return jack_senses & (1 << jacksense_pin_order[panel_injack_idx]);
+		return jack_senses & (1 << input_bit(panel_injack_idx));
 	}
 
 	void set_output_plugged(unsigned panel_outjack_idx, bool plugged) {
-		auto jack_idx = panel_outjack_idx + PanelDef::NumAudioIn + PanelDef::NumGateIn;
 		if (plugged)
-			jack_senses |= (1 << jacksense_pin_order[jack_idx]);
+			jack_senses |= (1 << output_bit(panel_outjack_idx));
 		else
-			jack_senses &= ~(1 << jacksense_pin_order[jack_idx]);
+			jack_senses &= ~(1 << output_bit(panel_outjack_idx));
 	}
 
 	bool is_output_plugged(unsigned panel_outjack_idx) {
-		auto jack_idx = panel_outjack_idx + PanelDef::NumAudioIn + PanelDef::NumGateIn;
-		return jack_senses & (1 << jacksense_pin_order[jack_idx]);
+		return jack_senses & (1 << output_bit(panel_outjack_idx));
 	}
 
 	friend void copy(ParamsState &dst, ParamsState const &src) {
