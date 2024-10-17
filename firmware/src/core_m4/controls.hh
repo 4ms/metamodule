@@ -1,6 +1,4 @@
 #pragma once
-#include "audio/auxsignal.hh"
-#include "conf/auxstream_conf.hh"
 #include "conf/control_conf.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/i2c_codec_conf.hh"
@@ -32,7 +30,7 @@ using mdrivlib::GPIOExpander;
 using mdrivlib::PinPolarity;
 
 struct Controls {
-	Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &auxsignal_blocks_ref, MidiHost &midi_host);
+	Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host);
 
 	void start();
 	void process();
@@ -89,10 +87,6 @@ private:
 	bool _first_param = true;
 
 	uint32_t sample_rate = 48000;
-
-	DoubleAuxStreamBlock &auxstream_blocks;
-	mdrivlib::PinChangeInt<AuxStreamUpdateConf> auxstream_updater;
-	AuxStream auxstream;
 };
 
 } // namespace MetaModule
