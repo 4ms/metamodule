@@ -110,6 +110,9 @@ struct HardwareCheckPopup {
 			lv_obj_set_style_text_color(ui_GateInData2, b(7) ? Gui::palette_main[2] : lv_color_white(), LV_PART_MAIN);
 
 			for (auto [i, ain] : enumerate(metaparams.ins)) {
+				if (i >= last_injack_vals.size() || i >= injack_labels.size())
+					break;
+
 				auto clamped_val = std::clamp<int>(ain * 100.f, -999, 999);
 				if (clamped_val != last_injack_vals[i]) {
 					lv_label_set_text_fmt(injack_labels[i], "%03d", clamped_val);

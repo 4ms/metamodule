@@ -13,8 +13,7 @@ class CalibrationMessageHandler {
 
 public:
 	CalibrationMessageHandler(FlashLoader &loader)
-		: loader{loader}
-		, reader{loader} {
+		: loader{loader} {
 	}
 
 	std::optional<IntercoreStorageMessage> handle_message(const IntercoreStorageMessage &message) {
@@ -28,7 +27,7 @@ public:
 				if (message.buffer.data() && message.buffer.size() >= sizeof(CalData)) {
 
 					auto *caldata = new (message.buffer.data()) CalData;
-					if (!reader.read_calibration(caldata))
+					if (!reader.read_calibration(caldata, loader, CalDataFlashOffset))
 						caldata->reset_to_default();
 
 					return IntercoreStorageMessage{.message_type = ReadFlashOk, .bytes_read = sizeof(CalData)};

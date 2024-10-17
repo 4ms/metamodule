@@ -104,4 +104,6 @@ struct CalData {
 	}
 };
 
+static constexpr size_t CalDataSize = sizeof(CalData);
+
 } // namespace MetaModule

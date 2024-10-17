@@ -83,9 +83,8 @@ void main() {
 	};
 
 	{
-		FlashLoader loader;
-		CalibrationDataReader cal{loader};
-		audio.set_calibration(cal.read_calibration_or_defaults());
+		CalibrationDataReader cal;
+		audio.set_calibration(cal.read_calibration_or_defaults(FlashLoader{}, CalDataFlashOffset));
 	}
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));

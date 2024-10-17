@@ -41,35 +41,43 @@ PatchData:
   mapped_outs:
     - panel_jack_id: 0
       out:
-        module_id: 1
+        module_id: 4
         jack_id: 0
     - panel_jack_id: 1
       out:
+        module_id: 4
+        jack_id: 1
+    - panel_jack_id: 8
+      out:
+        module_id: 5
+        jack_id: 0
+    - panel_jack_id: 9
+      out:
+        module_id: 5
+        jack_id: 1
+    - panel_jack_id: 10
+      out:
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 11
+      out:
         module_id: 1
         jack_id: 1
-    - panel_jack_id: 2
-      out:
-        module_id: 4
-        jack_id: 0
-    - panel_jack_id: 3
-      out:
-        module_id: 4
-        jack_id: 1
-    - panel_jack_id: 4
+    - panel_jack_id: 12
       out:
         module_id: 2
         jack_id: 0
-    - panel_jack_id: 5
+    - panel_jack_id: 13
+      out:
+        module_id: 2
+        jack_id: 1
+    - panel_jack_id: 14
       out:
         module_id: 3
         jack_id: 0
-    - panel_jack_id: 6
+    - panel_jack_id: 15
       out:
-        module_id: 5
-        jack_id: 0
-    - panel_jack_id: 7
-      out:
-        module_id: 5
+        module_id: 3
         jack_id: 1
   static_knobs:
     - module_id: 1

@@ -63,7 +63,7 @@ private:
 	FatFileIO &usb_fileio;
 	FatFileIO &sd_fileio;
 
-	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, IntercoreStorageMessage> intercore_comm;
+	mdrivlib::InterCoreComm<mdrivlib::ICCRoleType::Responder, IntercoreStorageMessage> intercore_comm;
 
 	FlashLoader flash_loader;
 
