@@ -71,7 +71,9 @@ private:
 
 	static constexpr auto NumKnobsPerExpander = KnobExpander::NumKnobsPerExpander;
 	static constexpr auto MaxExpanders = KnobExpander::MaxExpanders;
-	std::array<std::array<InterpParamVariable<float>, NumKnobsPerExpander>, MaxExpanders> _exp_knobs;
+	// std::array<std::array<InterpParamVariable<float>, NumKnobsPerExpander>, MaxExpanders> _exp_knobs;
+	std::array<InterpParamVariable<float>, NumKnobsPerExpander * MaxExpanders> _exp_knobs;
+
 	float exp_pot_data_ms = 10;
 	uint32_t last_exp_data_tm[2] = {0, 10};
 

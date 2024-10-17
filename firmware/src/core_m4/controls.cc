@@ -38,7 +38,8 @@ void Controls::update_params() {
 
 	// Knob Expanders
 	cur_metaparams->num_knob_expanders_found = control_expander.num_knob_expanders_connected();
-	if (cur_metaparams->num_knob_expanders_found > 0) {
+	auto num_exp_knobs = cur_metaparams->num_knob_expanders_found * KnobExpander::NumKnobsPerExpander;
+	if (num_exp_knobs > 0) {
 		if (control_expander.has_new_knob_readings()) {
 			// Get average of last two periods
 			auto now = HAL_GetTick();
@@ -47,18 +48,13 @@ void Controls::update_params() {
 			last_exp_data_tm[1] = now;
 
 			// Set new values
-			for (auto exp_idx = 0u; exp_idx < cur_metaparams->num_knob_expanders_found; exp_idx++) {
-				for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
-					auto val = get_exp_pot_reading(exp_idx, knob_idx);
-					_exp_knobs[exp_idx][knob_idx].set_new_value(val);
-				}
+			for (auto knob_idx = 0u; knob_idx < num_exp_knobs; knob_idx++) {
+				auto val = get_exp_pot_reading(knob_idx / 8, knob_idx % 8);
+				_exp_knobs[knob_idx].set_new_value(val);
 			}
 		}
-		for (auto exp_idx = 0u; exp_idx < cur_metaparams->num_knob_expanders_found; exp_idx++) {
-			auto base_knob_idx = PanelDef::NumPot + exp_idx * KnobExpander::NumKnobsPerExpander;
-			for (auto knob_idx = 0u; knob_idx < KnobExpander::NumKnobsPerExpander; knob_idx++) {
-				cur_params->knobs[base_knob_idx + knob_idx] = _exp_knobs[exp_idx][knob_idx].next();
-			}
+		for (auto knob_idx = 0u; knob_idx < num_exp_knobs; knob_idx++) {
+			cur_params->knobs[PanelDef::NumPot + knob_idx] = _exp_knobs[knob_idx].next();
 		}
 	}
 
