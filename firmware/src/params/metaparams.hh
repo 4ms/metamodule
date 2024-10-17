@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
 #include "util/debouncer.hh"
@@ -26,7 +27,7 @@ struct MetaParams {
 	// Populated by audio, which passes to GUI
 	// TODO: move this out of MetaParams and do something like LightWatcher
 	// so we can watch any arbitrary jack(s)
-	std::array<float, PanelDef::NumAudioIn> ins{};
+	std::array<float, PanelDef::NumAudioIn + AudioExpander::NumInJacks> ins{};
 	uint8_t audio_load = 0;
 
 	// Populated by controls, passed to audio, which it uses
