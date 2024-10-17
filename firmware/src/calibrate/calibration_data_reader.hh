@@ -12,17 +12,11 @@ namespace MetaModule
 {
 
 class CalibrationDataReader {
-	FlashLoader &loader;
-
 public:
-	CalibrationDataReader(FlashLoader &loader)
-		: loader{loader} {
-	}
-
-	CalData read_calibration_or_defaults() {
+	static CalData read_calibration_or_defaults(auto &&loader, uint32_t address) {
 		CalData caldata;
 
-		auto valid = read_calibration(&caldata);
+		auto valid = read_calibration(&caldata, std::move(loader), address);
 		if (!valid) {
 			caldata.reset_to_default();
 			pr_info("No Calibration data found, using defaults\n");
@@ -32,10 +26,10 @@ public:
 		return caldata;
 	}
 
-	bool read_calibration(CalData *caldata) {
-		pr_dbg("Read Calibration at %x\n", CalDataFlashOffset);
+	static bool read_calibration(CalData *caldata, auto &&loader, uint32_t address) {
+		pr_dbg("Read Calibration at %x\n", address);
 
-		if (loader.read_sectors(CalDataFlashOffset, {reinterpret_cast<uint8_t *>(caldata), sizeof(CalData)})) {
+		if (loader.read(address, {reinterpret_cast<uint8_t *>(caldata), sizeof(CalData)})) {
 
 			if (caldata->validate()) {
 				pr_info("Calibration data read and validated\n");
