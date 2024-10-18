@@ -43,6 +43,8 @@ target_include_directories(hetrickcvLibrary PRIVATE ${HETRICKCV_DIR}/Gamma ${HET
 
 set_property(TARGET hetrickcvLibrary PROPERTY CXX_STANDARD 23)
 
+set_source_files_properties(${HETRICKCV_DIR}/src/Rungler.cpp PROPERTIES COMPILE_OPTIONS "-Wno-sign-compare")
+
 target_compile_options(
   hetrickcvLibrary
   PRIVATE 
