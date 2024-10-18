@@ -117,8 +117,6 @@ aux_core_start:
 													// Set Vector Base Address Register (VBAR) to point to this application's vector table
 	ldr    r0, =_Reset
 	mcr    p15, 0, r0, c12, c0, 0
-													
-	bl SystemInitAuxCore 							// System and libc/cpp init
 
 	msr cpsr_c, MODE_SYS 							// Setup secondary core user/sys mode stack
 	ldr r1, =_auxcore_user_stack_start
@@ -129,6 +127,8 @@ auxcore_usrsys_loop:
     cmp r1, sp
     strlt r0, [r1], #4
     blt auxcore_usrsys_loop
+
+	bl SystemInitAuxCore 							// System and libc/cpp init
 
 	cpsie   i 										// Enable interrupts
 	bl aux_core_main 								// Go to secondary core main code
