@@ -2,6 +2,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/panel_conf.hh"
+#include "conf/patch_conf.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/smp.hh"
 #include "null_module.hh"

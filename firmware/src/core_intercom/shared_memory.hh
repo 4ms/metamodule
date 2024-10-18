@@ -1,5 +1,4 @@
 #pragma once
-#include "audio/auxsignal.hh"
 #include "conf/ramdisk_conf.hh"
 #include "params/param_block.hh"
 
@@ -12,7 +11,6 @@ class IntercoreStorageMessage;
 struct SharedMemoryS {
 	struct Ptrs {
 		DoubleBufParamBlock *param_block;
-		DoubleAuxStreamBlock *auxsignal_block;
 		RamDrive *ramdrive;
 		IntercoreStorageMessage *icc_message;
 	};

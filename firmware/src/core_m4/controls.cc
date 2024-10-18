@@ -116,11 +116,6 @@ void Controls::start_param_block() {
 	if (sample_rate != cur_metaparams->sample_rate) {
 		set_samplerate(cur_metaparams->sample_rate);
 	}
-
-	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
-		for (auto &aux : auxstream_blocks[block_num])
-			auxstream.queue_data(aux);
-	}
 }
 
 void Controls::start() {
@@ -136,10 +131,6 @@ void Controls::start() {
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();
-
-	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
-		auxstream_updater.start();
-	}
 
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
 		bool ignore = false;
@@ -177,14 +168,11 @@ void Controls::set_samplerate(unsigned sample_rate) {
 	}
 }
 
-Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
-				   DoubleAuxStreamBlock &auxsignal_blocks_ref,
-				   MidiHost &midi_host)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	: _midi_host{midi_host}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
-	, cur_metaparams(&param_blocks_ref[0].metaparams)
-	, auxstream_blocks{auxsignal_blocks_ref} {
+	, cur_metaparams(&param_blocks_ref[0].metaparams) {
 
 	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
 	// TODO: _new_adc_data_ready is written from multiple threads, but is not thread-safe. Use atomic? Or accept dropped/duplicate ADC values?
@@ -215,11 +203,6 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 		update_debouncers();
 		update_params();
 	});
-
-	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
-		auxstream.init();
-		auxstream_updater.init([&]() { auxstream.output_next(); });
-	}
 }
 
 float Controls::get_pot_reading(uint32_t pot_id) {

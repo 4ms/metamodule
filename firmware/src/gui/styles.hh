@@ -1,5 +1,6 @@
 #pragma once
 #include "lvgl.h"
+#include "patch-serial/patch/mapping_ids.hh"
 #include "patch-serial/patch/midi_def.hh"
 #include "slsexport/meta5/ui.h"
 #include <array>

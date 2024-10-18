@@ -67,7 +67,6 @@ void main() {
 
 	SharedMemoryS::ptrs = {
 		&StaticBuffers::param_blocks,
-		&StaticBuffers::auxsignal_block,
 		&StaticBuffers::virtdrive,
 		&StaticBuffers::icc_shared_message,
 	};
