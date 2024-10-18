@@ -1,6 +1,7 @@
 #pragma once
 
 #include "md5_hash.h"
+#include <array>
 #include <cstdio>
 #include <span>
 
