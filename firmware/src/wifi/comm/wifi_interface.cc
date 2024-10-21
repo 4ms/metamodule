@@ -41,7 +41,7 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
 		return files;
 	};
 
-	auto ExtractDirFull = [&fbb, &ExtractFileFromDir](const auto& fileList, std::optional<std::string_view> overrideName)
+	auto ExtractDirFull = [&fbb, &ExtractFileFromDir](const auto& fileList, std::string_view overrideName, bool isMounted)
 	{
 		auto FixDirName = [](std::string_view in)
 		{
@@ -61,9 +61,9 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
 
 		auto files = ExtractFileFromDir(fileList);
 		
-		auto name = overrideName.has_value()
-			? fbb.CreateString(std::string_view(*overrideName)) 
-			: fbb.CreateString(FixDirName(std::string_view(fileList.name)));
+		auto name = isMounted 
+			? fbb.CreateString(std::string_view(overrideName)) 
+			: fbb.CreateString("(not mounted)");
 
 		return CreateDirInfo(fbb, name, dirs, files);
 	};
@@ -71,9 +71,9 @@ flatbuffers::Offset<Message> constructPatchesMessage(flatbuffers::FlatBufferBuil
 
 	auto patchFileList = patchStorage->getPatchList();
 
-	auto usbList    = ExtractDirFull(patchFileList.volume_root(Volume::USB), patchFileList.get_vol_name(Volume::USB));
-	auto flashList  = ExtractDirFull(patchFileList.volume_root(Volume::NorFlash), patchFileList.get_vol_name(Volume::NorFlash));
-	auto sdcardList = ExtractDirFull(patchFileList.volume_root(Volume::SDCard), patchFileList.get_vol_name(Volume::SDCard));
+	auto usbList    = ExtractDirFull(patchFileList.volume_root(Volume::USB), patchFileList.get_vol_name(Volume::USB), patchFileList.is_mounted(Volume::USB));
+	auto flashList  = ExtractDirFull(patchFileList.volume_root(Volume::NorFlash), patchFileList.get_vol_name(Volume::NorFlash), patchFileList.is_mounted(Volume::NorFlash));
+	auto sdcardList = ExtractDirFull(patchFileList.volume_root(Volume::SDCard), patchFileList.get_vol_name(Volume::SDCard), patchFileList.is_mounted(Volume::SDCard));
 
 	auto patches = CreatePatches(fbb, usbList, flashList, sdcardList);
 	auto message = CreateMessage(fbb, AnyMessage_Patches, patches.Union());
