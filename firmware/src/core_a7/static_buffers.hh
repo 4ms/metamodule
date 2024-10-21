@@ -1,5 +1,4 @@
 #pragma once
-#include "audio/auxsignal.hh"
 #include "conf/ramdisk_conf.hh"
 #include "core_intercom/intercore_message.hh"
 #include "param_block.hh"
@@ -20,7 +19,6 @@ extern std::array<char, 1024 * 1024> raw_patch_data;
 extern IntercoreStorageMessage icc_shared_message;
 extern PatchDirList patch_dir_list;
 extern DoubleBufParamBlock param_blocks;
-extern DoubleAuxStreamBlock auxsignal_block;
 extern SyncParams sync_params;
 extern RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 
