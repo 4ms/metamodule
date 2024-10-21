@@ -1,6 +1,7 @@
 #pragma once
 #include "calibrate/cal_check.hh"
 #include "calibrate/calibration_routine.hh"
+#include "expanders.hh"
 #include "fs/norflash_layout.hh"
 #include "git_version.h"
 #include "gui/helpers/lv_helpers.hh"
@@ -46,6 +47,8 @@ struct SystemTab : SystemMenuTab {
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_show(ui_SystemHardwareCheckCont);
+
+		lv_show(ui_SystemCalibrationButton, Expanders::get_connected().ext_audio_connected);
 
 		lv_group_remove_obj(ui_SystemCalibrationButton);
 		lv_group_remove_obj(ui_SystemCalCheckButton);
@@ -111,7 +114,10 @@ private:
 		auto page = static_cast<SystemTab *>(event->user_data);
 
 		page->patch_playloader.request_load_calibration_patch();
-		page->cal_routine.start();
+		if (event->target == ui_SystemCalibrationButton)
+			page->cal_routine.start();
+		else if (event->target == ui_SystemExpCalibrationButton)
+			page->cal_routine.start_expander();
 	}
 
 	static void scroll_up_cb(lv_event_t *event) {
@@ -124,10 +130,7 @@ private:
 		auto page = static_cast<SystemTab *>(event->user_data);
 
 		page->patch_playloader.request_load_cal_check_patch();
-		if (event->target == ui_SystemCalCheckButton)
-			page->cal_check.start();
-		else if (event->target = ui_SystemCalCheckExtAudioButton)
-			page->ext_cal_check.start();
+		page->cal_check.start();
 	}
 
 	static void hwcheck_cb(lv_event_t *event) {
@@ -165,7 +168,6 @@ private:
 	ConfirmPopup confirm_popup;
 	CalibrationRoutine cal_routine;
 	CalCheck cal_check;
-	CalCheck ext_cal_check;
 	HardwareCheckPopup hw_check;
 
 	lv_group_t *group = nullptr;
