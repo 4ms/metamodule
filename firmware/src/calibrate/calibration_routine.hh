@@ -1,6 +1,7 @@
 #pragma once
 #include "calibrate/calibration_measurer.hh"
 #include "drivers/cache.hh"
+#include "expanders.hh"
 #include "fs/norflash_layout.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -102,6 +103,7 @@ struct CalibrationRoutine {
 		lv_hide(ui_CalibrationInputStatusCont);
 		lv_hide(ui_CalibrationOutputStatusCont);
 		lv_show(ui_SystemCalibrationButton);
+		lv_show(ui_SystemExpCalibrationButton, Expanders::get_connected().ext_audio_connected);
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_show(ui_SystemHardwareCheckCont);
@@ -120,6 +122,7 @@ private:
 	void start_routine() {
 		lv_hide(ui_CalibrationOutputStatusCont);
 		lv_hide(ui_SystemCalibrationButton);
+		lv_hide(ui_SystemExpCalibrationButton);
 		lv_hide(ui_SystemCalCheckButton);
 		lv_hide(ui_SystemResetInternalPatchesCont);
 		lv_hide(ui_SystemHardwareCheckCont);

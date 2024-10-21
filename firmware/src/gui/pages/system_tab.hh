@@ -46,13 +46,13 @@ struct SystemTab : SystemMenuTab {
 		lv_hide(ui_CalibrationProcedureCont);
 		lv_show(ui_SystemCalibrationCont);
 		lv_show(ui_SystemCalibrationButton);
+		lv_show(ui_SystemExpCalibrationButton, Expanders::get_connected().ext_audio_connected);
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_show(ui_SystemHardwareCheckCont);
 
-		lv_show(ui_SystemExpCalibrationButton, Expanders::get_connected().ext_audio_connected);
-
 		lv_group_remove_obj(ui_SystemCalibrationButton);
+		lv_group_remove_obj(ui_SystemExpCalibrationButton);
 		lv_group_remove_obj(ui_SystemCalCheckButton);
 		lv_group_remove_obj(ui_CalibrationCancelButton);
 		lv_group_remove_obj(ui_CalibrationNextButton);
