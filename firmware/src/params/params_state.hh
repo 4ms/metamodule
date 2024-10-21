@@ -21,6 +21,14 @@ struct ParamsState {
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
 	// std::array<float, PanelDef::NumAudioIn> smoothed_ins{};
+
+	//jack_senses bit order:
+	//0-5: Audio Ins (main panel)
+	//6,7: Gate Ins (main panel)
+	//8-15: Audio Outs (main panel)
+	//16-21: Expander Audio Ins
+	//22-29: Expander Audio outs
+	//30-31: Unused
 	uint32_t jack_senses;
 
 	void clear() {
@@ -38,13 +46,6 @@ struct ParamsState {
 			knob.changed = false;
 	}
 
-	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
-		if (plugged)
-			jack_senses |= (1 << input_bit(panel_injack_idx));
-		else
-			jack_senses &= ~(1 << input_bit(panel_injack_idx));
-	}
-
 	constexpr unsigned input_bit(unsigned panel_injack_idx) {
 		return panel_injack_idx < PanelDef::NumUserFacingInJacks ?
 				   jacksense_pin_order[panel_injack_idx] :
@@ -58,10 +59,19 @@ struct ParamsState {
 													  AudioExpander::NumInJacks];
 	}
 
+	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
+		if (plugged)
+			jack_senses |= (1 << input_bit(panel_injack_idx));
+		else
+			jack_senses &= ~(1 << input_bit(panel_injack_idx));
+	}
+
+	//0-5: Main Audio Ins, 6-7: GateIns, 8-13: Expander Ins
 	bool is_input_plugged(unsigned panel_injack_idx) {
 		return jack_senses & (1 << input_bit(panel_injack_idx));
 	}
 
+	//0-7: Main Outs, 8-15: Expander Outs
 	void set_output_plugged(unsigned panel_outjack_idx, bool plugged) {
 		if (plugged)
 			jack_senses |= (1 << output_bit(panel_outjack_idx));

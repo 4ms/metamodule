@@ -124,7 +124,10 @@ private:
 		auto page = static_cast<SystemTab *>(event->user_data);
 
 		page->patch_playloader.request_load_cal_check_patch();
-		page->cal_check.start();
+		if (event->target == ui_SystemCalCheckButton)
+			page->cal_check.start();
+		else if (event->target = ui_SystemCalCheckExtAudioButton)
+			page->ext_cal_check.start();
 	}
 
 	static void hwcheck_cb(lv_event_t *event) {
@@ -162,6 +165,7 @@ private:
 	ConfirmPopup confirm_popup;
 	CalibrationRoutine cal_routine;
 	CalCheck cal_check;
+	CalCheck ext_cal_check;
 	HardwareCheckPopup hw_check;
 
 	lv_group_t *group = nullptr;
