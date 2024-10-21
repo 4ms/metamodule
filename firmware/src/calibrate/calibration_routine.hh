@@ -353,7 +353,7 @@ private:
 
 				lv_label_set_text_fmt(ui_CalibrationInstructionLabel,
 									  "Calibrating Out %d, please wait",
-									  active_output + first_output + 1);
+									  int(active_output + first_output + 1));
 
 				start_output_channel(active_output, out_target.low, JackCalStatus::Settling);
 

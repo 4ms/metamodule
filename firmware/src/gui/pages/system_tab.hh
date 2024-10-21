@@ -31,11 +31,13 @@ struct SystemTab : SystemMenuTab {
 		, hw_check{params, metaparams} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_SystemExpCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemCalCheckButton, cal_check_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CheckHardwareButton, hwcheck_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_SystemExpCalibrationButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -48,7 +50,7 @@ struct SystemTab : SystemMenuTab {
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_show(ui_SystemHardwareCheckCont);
 
-		lv_show(ui_SystemCalibrationButton, Expanders::get_connected().ext_audio_connected);
+		lv_show(ui_SystemExpCalibrationButton, Expanders::get_connected().ext_audio_connected);
 
 		lv_group_remove_obj(ui_SystemCalibrationButton);
 		lv_group_remove_obj(ui_SystemCalCheckButton);
@@ -58,6 +60,7 @@ struct SystemTab : SystemMenuTab {
 		lv_group_remove_obj(ui_CheckHardwareButton);
 
 		lv_group_add_obj(group, ui_SystemCalibrationButton);
+		lv_group_add_obj(group, ui_SystemExpCalibrationButton);
 		lv_group_add_obj(group, ui_SystemCalCheckButton);
 		lv_group_add_obj(group, ui_CheckHardwareButton);
 		lv_group_add_obj(group, ui_ResetFactoryPatchesButton);
