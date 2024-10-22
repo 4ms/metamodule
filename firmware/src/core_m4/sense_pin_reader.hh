@@ -80,14 +80,9 @@ public:
 		uint16_t main_jacksense = main_jacksense_reader.get_last_reading();
 		uint16_t aux_jacksense = ext_jacksense_reader.get_last_reading();
 
-		//Fix for MM p11 mono jacks: patched = high, outputs always patched
-		// main_jacksense |= 0x00FF; //mark outputs always plugged
-
-		// For stereo jacks on inputs: patched = low, outputs always patched
-		// main_jacksense = (~main_jacksense) | 0x00FF;
-
-		// For stereo jacks on all jacks: patched = low
+		// For stereo jacks: patched = low
 		main_jacksense = ~main_jacksense;
+		aux_jacksense = ~aux_jacksense;
 
 		return main_jacksense | (aux_jacksense << 16);
 	}
