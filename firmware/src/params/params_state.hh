@@ -8,6 +8,7 @@
 #include "patch_play/lights.hh"
 #include "patch_play/text_display.hh"
 #include "util/debouncer.hh"
+#include "util/filter.hh"
 #include "util/parameter.hh"
 #include "util/zip.hh"
 #include <array>
@@ -20,7 +21,10 @@ namespace MetaModule
 struct ParamsState {
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
-	// std::array<float, PanelDef::NumAudioIn> smoothed_ins{};
+
+	// TODO: is smoothed_ins good here? Consider making like LightWatcher
+	// so we can watch any arbitrary jack(s)
+	std::array<ResizingOversampler, PanelDef::NumAudioIn + AudioExpander::NumInJacks> smoothed_ins;
 
 	//jack_senses bit order:
 	//0-5: Audio Ins (main panel)

@@ -69,8 +69,6 @@ private:
 
 	CalData ext_cal{};
 
-	std::array<ResizingOversampler, PanelDef::NumAudioIn + AudioExpander::NumInJacks> smoothed_ins;
-
 	PatchPlayer &player;
 	mdrivlib::CycleCounter load_measure;
 	float load_lpf = 0.f;

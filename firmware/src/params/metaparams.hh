@@ -25,9 +25,6 @@ struct MetaParams {
 	std::array<Toggler, PanelDef::NumMetaRgbButton> meta_buttons{};
 
 	// Populated by audio, which passes to GUI
-	// TODO: move this out of MetaParams and do something like LightWatcher
-	// so we can watch any arbitrary jack(s)
-	std::array<float, PanelDef::NumAudioIn + AudioExpander::NumInJacks> ins{};
 	uint8_t audio_load = 0;
 
 	// Populated by controls, passed to audio, which it uses

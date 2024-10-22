@@ -195,7 +195,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			player.set_panel_input(panel_jack_i, calibrated_input);
 
 			// Send smoothed sigals to other core
-			smoothed_ins[panel_jack_i].add_val(calibrated_input);
+			param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
 		}
 
 		if (ext_audio_connected) {
@@ -209,7 +209,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 				player.set_panel_input(panel_jack_i, calibrated_input);
 
-				smoothed_ins[panel_jack_i].add_val(calibrated_input);
+				param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
 			}
 		}
 
@@ -248,11 +248,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			for (auto [i, extoutchan] : countzip(ext_out.chan))
 				extoutchan = get_ext_audio_output(i);
 		}
-	}
-
-	// TODO: put this in params_state not metaparams
-	for (auto [m, s] : zip(param_block.metaparams.ins, smoothed_ins)) {
-		m = s.val();
 	}
 
 	player.update_lights();
