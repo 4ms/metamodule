@@ -94,7 +94,7 @@ struct CalibrationRoutine {
 		first_input = PanelDef::NumAudioIn;						  //First expander jack index is after main audio ins
 		first_output = PanelDef::NumAudioOut;					  //First output is after last main panel output
 		lv_label_set_text(ui_CalibrationInstructionLabel,
-						  "Play a C1 (1.00V) and a\nC4 (4.00V) into each jack\non the MMAIO Expander to re-calibrate.");
+						  "Play a C1 (1.00V) and a\nC4 (4.00V) into each Expander\njack to re-calibrate.");
 		start_routine();
 	}
 
@@ -331,7 +331,7 @@ private:
 		unsigned active_output = 0;
 
 		for (unsigned i = 0; i < NumOutputs; i++) {
-			if (params.is_output_plugged(i) && params.is_input_plugged(0)) {
+			if (params.is_output_plugged(i + first_output) && params.is_input_plugged(0)) {
 				num_patched++;
 				active_output = i;
 				set_output_plugged(i, true);

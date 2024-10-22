@@ -35,6 +35,16 @@ struct CalibrationPatch {
 		patch.add_mapped_outjack(5, {.module_id = src3, .jack_id = 1});
 		patch.add_mapped_outjack(6, {.module_id = src4, .jack_id = 0});
 		patch.add_mapped_outjack(7, {.module_id = src4, .jack_id = 1});
+
+		// Expander outs
+		patch.add_mapped_outjack(8, {.module_id = src1, .jack_id = 0});
+		patch.add_mapped_outjack(9, {.module_id = src1, .jack_id = 1});
+		patch.add_mapped_outjack(10, {.module_id = src2, .jack_id = 0});
+		patch.add_mapped_outjack(11, {.module_id = src2, .jack_id = 1});
+		patch.add_mapped_outjack(12, {.module_id = src3, .jack_id = 0});
+		patch.add_mapped_outjack(13, {.module_id = src3, .jack_id = 1});
+		patch.add_mapped_outjack(14, {.module_id = src4, .jack_id = 0});
+		patch.add_mapped_outjack(15, {.module_id = src4, .jack_id = 1});
 		return &patch;
 	}
 
@@ -68,6 +78,15 @@ struct CalibrationPatch {
 		patch.add_mapped_outjack(5, {.module_id = src1, .jack_id = 0});
 		patch.add_mapped_outjack(6, {.module_id = src1, .jack_id = 0});
 		patch.add_mapped_outjack(7, {.module_id = src1, .jack_id = 0});
+
+		patch.add_mapped_outjack(8, {.module_id = src1, .jack_id = 0});
+		patch.add_mapped_outjack(9, {.module_id = src1, .jack_id = 0});
+		patch.add_mapped_outjack(10, {.module_id = src1, .jack_id = 0});
+		patch.add_mapped_outjack(11, {.module_id = src1, .jack_id = 0});
+		patch.add_mapped_outjack(12, {.module_id = src1, .jack_id = 0});
+		patch.add_mapped_outjack(13, {.module_id = src1, .jack_id = 0});
+		patch.add_mapped_outjack(14, {.module_id = src1, .jack_id = 0});
+		patch.add_mapped_outjack(15, {.module_id = src1, .jack_id = 0});
 		return &patch;
 	}
 
