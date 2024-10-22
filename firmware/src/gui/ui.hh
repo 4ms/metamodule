@@ -88,10 +88,6 @@ public:
 		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
-	LightWatcher &lights() {
-		return params.lights;
-	}
-
 	void autoload_plugins() {
 		lv_show(ui_MainMenuNowPlayingPanel);
 		lv_show(ui_MainMenuNowPlaying);
@@ -121,6 +117,10 @@ public:
 		page_manager.init();
 	}
 
+	LightWatcher &lights() {
+		return params.lights;
+	}
+
 	TextDisplayWatcher &displays() {
 		return params.displays;
 	}
@@ -133,8 +133,6 @@ public:
 
 private:
 	void page_update_task() {
-		//This returns false when audio stops
-		//TODO: if (!read_ok) ... restart audio
 		[[maybe_unused]] bool read_ok = sync_params.read_sync(params, metaparams);
 
 		page_manager.update_current_page();
