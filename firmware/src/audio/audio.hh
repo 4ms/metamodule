@@ -88,7 +88,7 @@ private:
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
-	void propagate_sense_pins(Params &params);
+	void propagate_sense_pins(uint32_t jack_senses);
 	void handle_midi(bool is_connected, Midi::Event const &event, unsigned poly_num);
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool is_playing_patch();

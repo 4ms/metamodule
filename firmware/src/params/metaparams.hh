@@ -42,6 +42,7 @@ struct MetaParams {
 	RotaryMotion rotary_with_metabutton{};
 	bool ignore_metabutton_release = false;
 
+	uint32_t jack_senses{};
 	MetaParams() {
 		clear();
 	}
@@ -55,6 +56,7 @@ struct MetaParams {
 		rotary_pushed.motion = 0;
 		rotary_pushed.abs_pos = 0;
 		audio_load = 0;
+		jack_senses = 0;
 	}
 
 	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
@@ -76,6 +78,8 @@ struct MetaParams {
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
+
+		jack_senses = that.jack_senses;
 	}
 
 	// For buttons: moves events from `that` to `this`, removing them from `this`
@@ -98,6 +102,8 @@ struct MetaParams {
 
 		for (auto [in, thatin] : zip(ins, that.ins))
 			in = thatin;
+
+		jack_senses = that.jack_senses;
 	}
 };
 

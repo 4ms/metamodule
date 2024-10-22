@@ -88,6 +88,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
+		// 71.2us w/both MIDIs
+		// alternating 44us/71.3us with jack sense in metamparams (why alternating?)
 		auto &params = cache_params(block);
 
 		if (is_playing_patch())
@@ -97,6 +99,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		return_cached_params(block);
 
+		// 3.5us w/both MIDIs
 		sync_params.write_sync(param_state, param_blocks[block].metaparams);
 		param_state.reset_change_flags();
 
@@ -253,11 +256,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	}
 
 	player.update_lights();
-	propagate_sense_pins(param_block.params[0]);
+	propagate_sense_pins(param_block.metaparams.jack_senses);
 }
 
 void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
-	param_state.jack_senses = param_block.params[0].jack_senses;
+	param_state.jack_senses = param_block.metaparams.jack_senses;
 
 	// for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
@@ -302,6 +305,7 @@ void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsig
 	if (event.type == Midi::Event::Type::None)
 		return;
 
+	// All other MIDI events: 150ns min (no listeners) + more... 150-600ns for some listeners
 	if (event.type == Midi::Event::Type::NoteOn) {
 		player.set_midi_note_pitch(event.poly_chan, Midi::note_to_volts(event.note));
 		player.set_midi_note_gate(event.poly_chan, 10.f);
@@ -334,9 +338,9 @@ void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsig
 	}
 }
 
-void AudioStream::propagate_sense_pins(Params &params) {
+void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 	for (unsigned i = 0; auto &plug_detect : plug_detects) {
-		bool sense = jack_is_patched(params.jack_senses, i);
+		bool sense = jack_is_patched(jack_senses, i);
 		plug_detect.update(sense);
 		if (plug_detect.changed()) {
 			if (i < PanelDef::NumUserFacingInJacks)
@@ -347,7 +351,7 @@ void AudioStream::propagate_sense_pins(Params &params) {
 		i++;
 	}
 
-	param_state.jack_senses = params.jack_senses;
+	param_state.jack_senses = jack_senses;
 }
 
 void AudioStream::handle_patch_mod_queue() {

@@ -41,6 +41,8 @@ void Controls::update_params() {
 
 		_midi_connected.update(_midi_host.is_connected());
 
+		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
+
 		if (_midi_connected.went_low()) {
 			_midi_parser.start_all_notes_off_sequence();
 		}
@@ -51,8 +53,6 @@ void Controls::update_params() {
 
 		if (cur_metaparams->midi_poly_chans > 0)
 			_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
-
-		cur_params->jack_senses = sense_pin_reader.last_reading();
 
 		// Rotary button
 		if (rotary_button.is_just_pressed()) {
