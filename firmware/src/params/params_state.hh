@@ -46,17 +46,29 @@ struct ParamsState {
 			knob.changed = false;
 	}
 
+	// Given an input jack ID (panel=0..7, expander = 8..13)
+	// return the corresponding bit position in `jack_senses`
 	constexpr unsigned input_bit(unsigned panel_injack_idx) {
-		return panel_injack_idx < PanelDef::NumUserFacingInJacks ?
-				   jacksense_pin_order[panel_injack_idx] :
-				   AudioExpander::jacksense_pin_order[panel_injack_idx - PanelDef::NumUserFacingInJacks];
+		if (panel_injack_idx < PanelDef::NumUserFacingInJacks)
+			return jacksense_pin_order[panel_injack_idx];
+
+		if (panel_injack_idx < PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks)
+			return AudioExpander::jacksense_pin_order[panel_injack_idx - PanelDef::NumUserFacingInJacks];
+
+		return 0;
 	}
 
+	// Given an output jack ID (panel=0..7, expander = 8..15)
+	// return the corresponding bit position in `jack_senses`
 	constexpr unsigned output_bit(unsigned panel_outjack_idx) {
-		return panel_outjack_idx < PanelDef::NumUserFacingOutJacks ?
-				   jacksense_pin_order[panel_outjack_idx + PanelDef::NumUserFacingInJacks] :
-				   AudioExpander::jacksense_pin_order[panel_outjack_idx - PanelDef::NumUserFacingOutJacks +
+		if (panel_outjack_idx < PanelDef::NumUserFacingOutJacks)
+			return jacksense_pin_order[panel_outjack_idx + PanelDef::NumUserFacingInJacks];
+
+		if (panel_outjack_idx < PanelDef::NumUserFacingOutJacks + AudioExpander::NumInJacks)
+			return AudioExpander::jacksense_pin_order[panel_outjack_idx - PanelDef::NumUserFacingOutJacks +
 													  AudioExpander::NumInJacks];
+
+		return 0;
 	}
 
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
