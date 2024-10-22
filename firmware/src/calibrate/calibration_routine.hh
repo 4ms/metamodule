@@ -177,7 +177,7 @@ private:
 				set_input_plugged(i, true);
 
 				// during input cal routine, in_signals uses default cal values
-				in_signals[i].update(metaparams.ins[i + first_input]);
+				in_signals[i].update(params.smoothed_ins[i + first_input].val());
 
 				if (++num_displayed == 1)
 					display_measurement(i, in_signals[i].iir);
@@ -434,7 +434,7 @@ private:
 		// Calculate the raw codec 24-bit reading by reversing the default calibration
 		// Then apply the new input calibration values to the raw value to determine a calibrated value
 		auto default_cal = CalData::DefaultInput;
-		auto raw_adc = default_cal.reverse_calibrate(metaparams.ins[0]);
+		auto raw_adc = default_cal.reverse_calibrate(params.smoothed_ins[0].val());
 		in_signals[0].update(cal_data.in_cal[0].adjust(raw_adc));
 
 		if (delay_measurement++ >= 2) {

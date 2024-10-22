@@ -118,7 +118,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
 
-	for (auto &s : smoothed_ins)
+	for (auto &s : param_state.smoothed_ins)
 		s.set_size(block_size_);
 }
 
@@ -268,7 +268,7 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			float scaled_input = jack_is_patched(param_state.jack_senses, panel_jack_i) ?
 									 cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan)) :
 									 0;
-			smoothed_ins[panel_jack_i].add_val(scaled_input);
+			param_state.smoothed_ins[panel_jack_i].add_val(scaled_input);
 		}
 
 		for (auto [knob, latch] : zip(params.knobs, param_state.knobs))
@@ -280,9 +280,6 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		for (auto &outchan : out.chan)
 			outchan = 0;
 	}
-
-	for (auto [s, m] : zip(smoothed_ins, param_block.metaparams.ins))
-		m = s.val();
 }
 
 void AudioStream::handle_midi(bool is_connected, Midi::Event const &event, unsigned poly_num) {
@@ -392,9 +389,6 @@ ParamBlock &AudioStream::cache_params(unsigned block) {
 }
 
 void AudioStream::return_cached_params(unsigned block) {
-	// copy analyzed signals back to shared param block (so GUI thread can access it)
-	param_blocks[block].metaparams.ins = local_params.metaparams.ins;
-
 	// copy midi_poly_chans back so Controls can read it
 	param_blocks[block].metaparams.midi_poly_chans = local_params.metaparams.midi_poly_chans;
 }
@@ -432,7 +426,7 @@ void AudioStream::update_audio_settings() {
 
 				set_block_spans();
 
-				for (auto &s : smoothed_ins)
+				for (auto &s : param_state.smoothed_ins)
 					s.set_size(block_size_);
 			}
 

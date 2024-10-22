@@ -48,8 +48,8 @@ struct ParamDbgPrint {
 			pot_iir[i] = pot_iir[i] * iir_coef_inv + pot * iir_coef;
 		}
 
-		for (auto [source, ain] : zip(metaparams.ins, ins)) {
-			ain.update(source);
+		for (auto [source, ain] : zip(params.smoothed_ins, ins)) {
+			ain.update(source.val());
 		}
 
 		readings++;

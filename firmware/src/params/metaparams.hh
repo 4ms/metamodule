@@ -17,29 +17,31 @@ namespace MetaModule
 // TODO: separate out into data that follows the same paths
 struct MetaParams {
 
-	// Populated by controls, which passes to audio, which does not use it and passes to GUI via SyncParams
+	// Controls -> GUI (via audio -> SyncParams)
 	// TODO: could controls pass directly to GUI via SPSC queue?
 	Toggler rotary_button;
 	RotaryMotion rotary{};
 	RotaryMotion rotary_pushed{};
 	std::array<Toggler, PanelDef::NumMetaRgbButton> meta_buttons{};
 
-	// Populated by audio, which passes to GUI
+	// Audio -> GUI
 	uint8_t audio_load = 0;
 
-	// Populated by controls, passed to audio, which it uses
+	// Controls -> Audio
 	bool midi_connected = false;
 
-	// Populated by audio, passed to controls
+	// Controls -> Audio, Audio -> GUI (via ParamsState in SyncParams)
+	uint32_t jack_senses{};
+
+	// Audio -> Controls
 	uint32_t midi_poly_chans = 1;
 	uint32_t sample_rate = 48000;
 
-	// Populated by GUI, used by GUI
+	// GUI -> GUI
 	// TODO: move this to a PageManager object like gui_state
 	RotaryMotion rotary_with_metabutton{};
 	bool ignore_metabutton_release = false;
 
-	uint32_t jack_senses{};
 	MetaParams() {
 		clear();
 	}
@@ -73,9 +75,6 @@ struct MetaParams {
 
 		midi_poly_chans = that.midi_poly_chans;
 
-		for (auto [in, thatin] : zip(ins, that.ins))
-			in = thatin;
-
 		jack_senses = that.jack_senses;
 	}
 
@@ -96,9 +95,6 @@ struct MetaParams {
 		midi_connected = that.midi_connected;
 
 		midi_poly_chans = that.midi_poly_chans;
-
-		for (auto [in, thatin] : zip(ins, that.ins))
-			in = thatin;
 
 		jack_senses = that.jack_senses;
 	}

@@ -42,6 +42,9 @@ struct ParamsState {
 		for (auto &knob : knobs)
 			knob = {0.f, false};
 
+		for (auto &in : smoothed_ins)
+			in.reset();
+
 		jack_senses = 0;
 	}
 
@@ -108,6 +111,9 @@ struct ParamsState {
 		}
 
 		dst.jack_senses = src.jack_senses;
+
+		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
+			in = that_in;
 	}
 };
 
