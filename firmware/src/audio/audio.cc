@@ -180,7 +180,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		auto &out = audio_block.out_codec[idx];
 		auto const &params = param_block.params[idx];
 		auto &ext_out = audio_block.out_ext_codec[idx];
-		auto const &ext_in = audio_block.out_ext_codec[idx];
+		auto const &ext_in = audio_block.in_ext_codec[idx];
 		idx++;
 
 		// Audio inputs
@@ -199,14 +199,15 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		if (ext_audio_connected) {
-			for (auto [panel_jack_i, inchan] : zip(AudioExpander::in_order, ext_in.chan)) {
+			for (auto [exp_panel_jack_i, inchan] : zip(AudioExpander::in_order, ext_in.chan)) {
 
 				// Skip unpatched jacks
-				if (!AudioExpander::jack_is_patched(param_state.jack_senses, panel_jack_i))
+				if (!AudioExpander::jack_is_patched(param_state.jack_senses, exp_panel_jack_i))
 					continue;
 
-				float calibrated_input = ext_cal.in_cal[panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
+				float calibrated_input = ext_cal.in_cal[exp_panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
 
+				auto panel_jack_i = exp_panel_jack_i + PanelDef::NumAudioIn; //0..5 => 6..11
 				player.set_panel_input(panel_jack_i, calibrated_input);
 
 				param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
