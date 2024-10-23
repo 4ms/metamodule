@@ -1,11 +1,13 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
+#include "conf/patch_conf.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/redraw.hh"
 #include "gui/elements/redraw_display.hh"
 #include "gui/elements/redraw_light.hh"
+#include "gui/helpers/roller_hover_text.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_action_menu.hh"
@@ -27,7 +29,8 @@ struct ModuleViewPage : PageBase {
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
-		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue} {
+		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue}
+		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller) {
 
 		init_bg(ui_MappingMenu);
 
@@ -61,6 +64,8 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		roller_hover.hide();
+
 		patch = patches.get_view_patch();
 
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
@@ -382,6 +387,8 @@ struct ModuleViewPage : PageBase {
 			redraw_module();
 			mapping_pane.refresh();
 		}
+
+		roller_hover.update();
 	}
 
 	bool handle_patch_mods() {
@@ -536,6 +543,7 @@ private:
 				else {
 					//Scrolling up from first header -> defocus roller and focus button bar
 					page->focus_button_bar();
+					page->roller_hover.hide();
 					return;
 				}
 			}
@@ -551,6 +559,8 @@ private:
 
 		page->unhighlight_component(prev_sel);
 		page->highlight_component(cur_idx);
+
+		page->roller_hover.hide();
 	}
 
 	void unhighlight_component(uint32_t prev_sel) {
@@ -623,6 +633,7 @@ private:
 										  .module_id = page->args.module_id,
 										  .detail_mode = false};
 					page->page_list.request_new_page(PageId::PatchView, args);
+					page->roller_hover.hide();
 				} else
 					pr_err("Error completing cable\n");
 
@@ -630,6 +641,7 @@ private:
 				page->mode = ViewMode::Mapping;
 				page->args.detail_mode = true;
 				lv_hide(ui_ElementRollerPanel);
+				page->roller_hover.hide();
 
 				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
 			}
@@ -641,6 +653,7 @@ private:
 		if (page) {
 			if (page->roller_drawn_el_idx.size() <= 1) {
 				page->focus_button_bar();
+				page->roller_hover.hide();
 				return;
 			}
 
@@ -708,6 +721,8 @@ private:
 	lv_draw_img_dsc_t img_dsc{};
 
 	enum class ViewMode { List, Mapping } mode{ViewMode::List};
+
+	RollerHoverText roller_hover;
 };
 
 } // namespace MetaModule

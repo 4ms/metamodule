@@ -40,8 +40,8 @@ set(SYMBOLS_BINFILE_DIRS
   --objdir ${CMAKE_BINARY_DIR}/mp1corea7/medium/CMakeFiles/main.elf.dir/vcv_hardware/
 )
 
-add_custom_command(
-  OUTPUT ${API_SYMBOL_NAMES_FILE}
+add_custom_target(
+  new-api-sym-list
   COMMAND echo "vcv export dir is ${VcvPluginBinDir}"
   COMMAND scripts/dump_syms.py
           ${SYMBOLS_BINFILE_DIRS}
@@ -52,8 +52,6 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/metamodule-plugin-sdk
   VERBATIM USES_TERMINAL
 )
-
-add_custom_target(new-api-sym-list DEPENDS ${API_SYMBOL_NAMES_FILE})
 
 add_custom_command(
   OUTPUT ${SYMBOLS_FILE}

@@ -2,6 +2,7 @@
 #include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/panel_conf.hh"
+#include "conf/patch_conf.hh"
 #include "core_a7/smp_api.hh"
 #include "drivers/smp.hh"
 #include "null_module.hh"
@@ -746,8 +747,12 @@ private:
 
 	// Cache functions:
 	void clear_cache() {
-		for (auto &d : dup_module_index)
-			d = 0;
+		for (auto i = 0u; i < dup_module_index.size(); i++)
+			dup_module_index[i] = 0;
+		// gcc 12.3 complains of writing past end of array
+		// when using range-based for loop:
+		// for (auto &d : dup_module_index)
+		// 	d = 0;
 
 		for (auto &out_conn : out_conns)
 			out_conn = disconnected_jack;

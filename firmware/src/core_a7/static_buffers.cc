@@ -1,4 +1,3 @@
-#include "audio/auxsignal.hh"
 #include "conf/ramdisk_conf.hh"
 #include "core_intercom/intercore_message.hh"
 #include "param_block.hh"
@@ -26,7 +25,6 @@ __attribute__((section(".ddma"))) IntercoreStorageMessage icc_shared_message;
 __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 
 __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};
-__attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block{};
 __attribute__((section(".sysram"))) SyncParams sync_params;
 __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 

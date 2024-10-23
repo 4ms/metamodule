@@ -25,6 +25,8 @@ TEST_SOURCES += src/user_settings/settings_serialize.cc
 TEST_SOURCES += src/fw_update/hash/md5_hash.h
 TEST_SOURCES += src/fw_update/hash/hash_processor.cc
 TEST_SOURCES += lib/CoreModules/moduleFactory.cc
+TEST_SOURCES += tests/resampler_tests.cc
+TEST_SOURCES += vcv_plugin/export/src/resampler.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
@@ -44,10 +46,12 @@ CXXFLAGS = 	-Wall \
 			-Ilib/patch-serial/ryml \
 			-Ilib/CoreModules \
 			-Imetamodule-plugin-sdk/metamodule-core-interface \
+			-Imetamodule-plugin-sdk/metamodule-rack-interface/dep/include \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
 			-isystem $(TEST_DIR) \
 			-DTESTPROJECT \
+			-g3 -O0 \
 
 ### Boilerplate below here:
 

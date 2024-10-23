@@ -81,6 +81,16 @@ static bool read(ryml::ConstNodeRef const &node, ModuleDisplaySettings *s) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, ScreensaverSettings *s) {
+	if (!node.is_map())
+		return false;
+
+	read_or_default(node, "index", s, &ScreensaverSettings::timeout_ms);
+	read_or_default(node, "knobs_can_wake", s, &ScreensaverSettings::knobs_can_wake);
+
+	return true;
+}
+
 namespace Settings
 {
 
@@ -104,6 +114,7 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "audio", settings, &UserSettings::audio);
 	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_autoload);
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::last_patch_opened);
+	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
 
 	// TODO: cleaner way to parse and enum and reject out of range?
 	if (node.is_map() && node.has_child("last_patch_vol")) {

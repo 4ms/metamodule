@@ -47,6 +47,10 @@ TEST_CASE("Parse settings file") {
   last_patch_opened: '/somedir/SomePatch.yml'
   last_patch_vol: 1
 
+  screensaver:
+    index: 3
+    knobs_can_wake: 1
+
 )";
 	// clang format-on
 
@@ -84,6 +88,9 @@ TEST_CASE("Parse settings file") {
 
 	CHECK(settings.last_patch_opened == "/somedir/SomePatch.yml");
 	CHECK(settings.last_patch_vol == MetaModule::Volume::SDCard);
+
+	CHECK(settings.screensaver.timeout_ms == 3);
+	CHECK(settings.screensaver.knobs_can_wake == true);
 }
 
 TEST_CASE("Get default settings if file is missing fields") {
@@ -139,6 +146,11 @@ TEST_CASE("Get default settings if file is missing fields") {
   plugin_autoload: []
 )";
 	}
+	SUBCASE("Bad screensaver settings:") {
+		yaml = R"(Settings:
+  screensaver:
+)";
+	}
 
 	MetaModule::UserSettings settings;
 	auto ok = MetaModule::Settings::parse(yaml, &settings);
@@ -175,6 +187,9 @@ TEST_CASE("Get default settings if file is missing fields") {
 
 	CHECK(settings.last_patch_opened == "");
 	CHECK(settings.last_patch_vol == MetaModule::Volume::NorFlash);
+
+	CHECK(settings.screensaver.timeout_ms == MetaModule::ScreensaverSettings::defaultTimeout);
+	CHECK(settings.screensaver.knobs_can_wake == true);
 }
 
 TEST_CASE("Serialize settings") {
@@ -212,6 +227,9 @@ TEST_CASE("Serialize settings") {
 	settings.last_patch_vol = MetaModule::Volume::SDCard;
 	settings.last_patch_opened = "SomePatch.yml";
 
+	settings.screensaver.knobs_can_wake = false;
+	settings.screensaver.timeout_ms = 2;
+
 	// clang format-off
 	std::string expected = R"(Settings:
   patch_view:
@@ -248,6 +266,9 @@ TEST_CASE("Serialize settings") {
     - Plugin Two
   last_patch_opened: SomePatch.yml
   last_patch_vol: 1
+  screensaver:
+    index: 2
+    knobs_can_wake: 0
 )";
 	// clang format-on
 

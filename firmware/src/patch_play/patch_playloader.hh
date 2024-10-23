@@ -102,9 +102,13 @@ struct PatchPlayLoader {
 		loading_new_patch_ = true;
 	}
 
-	void request_reload_playing_patch() {
+	void request_reload_playing_patch(bool start_audio_immediately = true) {
 		next_patch = patches_.get_playing_patch();
 		loading_new_patch_ = true;
+		if (start_audio_immediately)
+			should_play_when_loaded_ = true;
+		else
+			should_play_when_loaded_ = !audio_is_muted_;
 	}
 
 	bool should_fade_down_audio() {
@@ -149,8 +153,9 @@ struct PatchPlayLoader {
 	// Concurrency: Called from UI thread
 	Result handle_file_events() {
 		if (loading_new_patch_ && audio_is_muted_) {
-			auto result = load_patch();
+			auto result = load_patch(should_play_when_loaded_);
 			loading_new_patch_ = false;
+			should_play_when_loaded_ = true;
 			return result;
 		}
 
@@ -267,6 +272,7 @@ private:
 	std::atomic<bool> saving_patch_ = false;
 	std::atomic<bool> should_save_patch_ = false;
 	std::atomic<bool> audio_overrun_ = false;
+	bool should_play_when_loaded_ = true;
 
 	PatchLocation new_loc{};
 	PatchLocation old_loc{};
@@ -339,7 +345,7 @@ private:
 		}
 	}
 
-	Result load_patch() {
+	Result load_patch(bool start_audio_immediately = true) {
 		if (!next_patch) {
 			pr_err("Internal error loading patch\n");
 			return {false, "Internal error loading patch"};
@@ -353,8 +359,8 @@ private:
 			if (next_patch == patches_.get_view_patch())
 				patches_.play_view_patch();
 
-			//TODO: give patches a ptr to this patch?
-			start_audio();
+			if (start_audio_immediately)
+				start_audio();
 		}
 
 		return result;

@@ -65,7 +65,7 @@ void main() {
 #endif
 
 	// Controls
-	Controls controls{*SharedMemoryS::ptrs.param_block, *SharedMemoryS::ptrs.auxsignal_block, usb.get_midi_host()};
+	Controls controls{*SharedMemoryS::ptrs.param_block, usb.get_midi_host()};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 1);
 

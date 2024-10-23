@@ -329,6 +329,8 @@ struct PatchViewPage : PageBase {
 	}
 
 private:
+	std::vector<std::vector<float>> light_vals;
+
 	void watch_lights() {
 
 		if (is_patch_playing) {
@@ -347,20 +349,43 @@ private:
 						   },
 						   drawn_element.element);
 			}
+
+			// Get number of lights per module and resize the vectors
+			light_vals.clear();
+			for (auto const &slug : patch->module_slugs) {
+				auto info = ModuleFactory::getModuleInfo(slug);
+				auto &vec = light_vals.emplace_back();
+				int max = -1;
+				for (auto i = 0u; auto idx : info.indices) {
+					auto count = ElementCount::count(info.elements[i]).num_lights;
+					if (count > 0 && idx.light_idx != ElementCount::Indices::NoElementMarker) {
+						max = std::max(int(idx.light_idx + count), max);
+					}
+					i++;
+				}
+				vec.resize(max + 1, 0.f);
+			}
 		}
 	}
 
 	void update_changed_params() {
-		std::array<std::vector<float>, MAX_MODULES_IN_PATCH> light_vals; //384B on the stack
 
 		// copy light values from params
 		// indexed by module id and light element id
 		for (auto &wl : params.lights.watch_lights) {
 			if (wl.is_active()) {
-				auto &vec = light_vals[wl.module_id];
-				if (vec.size() <= wl.light_id)
-					vec.resize(wl.light_id + 1);
-				vec[wl.light_id] = wl.value;
+				if (wl.module_id < light_vals.size()) {
+					auto &vec = light_vals[wl.module_id];
+					if (wl.light_id < 256) {
+						if (wl.light_id < vec.size())
+							vec[wl.light_id] = wl.value;
+						else
+							pr_err("Invalid light size %u for module %u\n", wl.light_id, wl.module_id);
+					} else {
+						pr_err("Can only watch 256 lights, request made for %u\n", wl.light_id);
+					}
+				} else
+					pr_err("Invalid module id in watch lights: %u\n", wl.module_id);
 			}
 		}
 
@@ -396,7 +421,8 @@ private:
 				}
 			}
 
-			update_light(drawn_el, light_vals[gui_el.module_idx]);
+			if (gui_el.module_idx < light_vals.size())
+				update_light(drawn_el, light_vals[gui_el.module_idx]);
 
 			redraw_display(drawn_el, gui_el.module_idx, params.displays.watch_displays);
 		}
@@ -607,7 +633,7 @@ private:
 private:
 	lv_obj_t *base;
 	lv_obj_t *modules_cont;
-	CableDrawer<4 * 240 + 8> cable_drawer; //TODO: relate this number to the module container size
+	CableDrawer<MaxBufferHeight> cable_drawer;
 
 	ModuleDisplaySettings &page_settings;
 	PatchViewSettingsMenu settings_menu;

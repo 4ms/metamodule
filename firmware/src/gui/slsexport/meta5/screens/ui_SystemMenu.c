@@ -657,6 +657,160 @@ lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsAudioBlocksizeDropdow
 lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_SystemPrefsAudioBlocksizeDropdown), lv_color_hex(0xFD8B18),  LV_PART_SELECTED | LV_STATE_CHECKED );
 lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsAudioBlocksizeDropdown), 255,  LV_PART_SELECTED| LV_STATE_CHECKED);
 
+ui_SystemPrefsScreensaverSettingsTitle = lv_label_create(ui_SystemMenuPrefsTab);
+lv_obj_set_width(ui_SystemPrefsScreensaverSettingsTitle, lv_pct(100));
+lv_obj_set_height(ui_SystemPrefsScreensaverSettingsTitle, LV_SIZE_CONTENT);    /// 1
+lv_obj_set_align(ui_SystemPrefsScreensaverSettingsTitle, LV_ALIGN_CENTER);
+lv_label_set_text(ui_SystemPrefsScreensaverSettingsTitle, "SCREENSAVER");
+lv_obj_set_style_text_color(ui_SystemPrefsScreensaverSettingsTitle, lv_color_hex(0xFD8B18),
+                            LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_text_opa(ui_SystemPrefsScreensaverSettingsTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_SystemPrefsScreensaverSettingsTitle, &ui_font_MuseoSansRounded70016,
+                           LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_border_color(ui_SystemPrefsScreensaverSettingsTitle, lv_color_hex(0x888888),
+                              LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_border_opa(ui_SystemPrefsScreensaverSettingsTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_border_width(ui_SystemPrefsScreensaverSettingsTitle, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_border_side(ui_SystemPrefsScreensaverSettingsTitle, LV_BORDER_SIDE_BOTTOM,
+                             LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_SystemPrefsScreensaverSettingsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemPrefsScreensaverSettingsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemPrefsScreensaverSettingsTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemPrefsScreensaverSettingsTitle, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+ui_SystemPrefsScreensaverTimeCont = lv_obj_create(ui_SystemMenuPrefsTab);
+lv_obj_remove_style_all(ui_SystemPrefsScreensaverTimeCont);
+lv_obj_set_width(ui_SystemPrefsScreensaverTimeCont, lv_pct(100));
+lv_obj_set_height(ui_SystemPrefsScreensaverTimeCont, LV_SIZE_CONTENT);    /// 1
+lv_obj_set_align(ui_SystemPrefsScreensaverTimeCont, LV_ALIGN_CENTER);
+lv_obj_set_flex_flow(ui_SystemPrefsScreensaverTimeCont, LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_SystemPrefsScreensaverTimeCont, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER,
+                      LV_FLEX_ALIGN_CENTER);
+lv_obj_clear_flag(ui_SystemPrefsScreensaverTimeCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+lv_obj_set_style_pad_left(ui_SystemPrefsScreensaverTimeCont, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemPrefsScreensaverTimeCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemPrefsScreensaverTimeCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemPrefsScreensaverTimeCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+ui_SystemPrefsScreensaverTimeLabel = lv_label_create(ui_SystemPrefsScreensaverTimeCont);
+lv_obj_set_width(ui_SystemPrefsScreensaverTimeLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_height(ui_SystemPrefsScreensaverTimeLabel, LV_SIZE_CONTENT);    /// 1
+lv_obj_set_align(ui_SystemPrefsScreensaverTimeLabel, LV_ALIGN_CENTER);
+lv_label_set_text(ui_SystemPrefsScreensaverTimeLabel, "Timeout:");
+lv_obj_set_style_text_font(ui_SystemPrefsScreensaverTimeLabel, &ui_font_MuseoSansRounded70016,
+                           LV_PART_MAIN | LV_STATE_DEFAULT);
+
+ui_SystemPrefsScreensaverTimeDropdown = lv_dropdown_create(ui_SystemPrefsScreensaverTimeCont);
+lv_dropdown_set_options(ui_SystemPrefsScreensaverTimeDropdown,
+                        "Never\n30 Sec\n1 Min\n5 Min\n10 Min\n30 Min\n1 Hour\n4 Hours");
+lv_obj_set_width(ui_SystemPrefsScreensaverTimeDropdown, 90);
+lv_obj_set_height(ui_SystemPrefsScreensaverTimeDropdown, LV_SIZE_CONTENT);    /// 1
+lv_obj_set_align(ui_SystemPrefsScreensaverTimeDropdown, LV_ALIGN_CENTER);
+lv_obj_clear_flag(ui_SystemPrefsScreensaverTimeDropdown,
+                  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
+                  LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+lv_obj_set_style_text_font(ui_SystemPrefsScreensaverTimeDropdown, &ui_font_MuseoSansRounded70014,
+                           LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_SystemPrefsScreensaverTimeDropdown, lv_color_hex(0x666666),
+                          LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_SystemPrefsScreensaverTimeDropdown, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_SystemPrefsScreensaverTimeDropdown, lv_color_hex(0x000000),
+                               LV_PART_MAIN | LV_STATE_EDITED);
+lv_obj_set_style_outline_opa(ui_SystemPrefsScreensaverTimeDropdown, 0, LV_PART_MAIN | LV_STATE_EDITED);
+lv_obj_set_style_outline_color(ui_SystemPrefsScreensaverTimeDropdown, lv_color_hex(0xFD8B18),
+                               LV_PART_MAIN | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_opa(ui_SystemPrefsScreensaverTimeDropdown, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_SystemPrefsScreensaverTimeDropdown, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_SystemPrefsScreensaverTimeDropdown, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_SystemPrefsScreensaverTimeDropdown, lv_color_hex(0xFD8B18),
+                               LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_opa(ui_SystemPrefsScreensaverTimeDropdown, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+
+lv_obj_set_style_text_font(ui_SystemPrefsScreensaverTimeDropdown, &lv_font_montserrat_14,
+                           LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+lv_obj_set_style_text_letter_space(lv_dropdown_get_list(ui_SystemPrefsScreensaverTimeDropdown), 0,
+                                   LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_text_line_space(lv_dropdown_get_list(ui_SystemPrefsScreensaverTimeDropdown), 8,
+                                 LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_SystemPrefsScreensaverTimeDropdown), lv_color_hex(0x666666),
+                          LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsScreensaverTimeDropdown), 255,
+                        LV_PART_MAIN | LV_STATE_DEFAULT);
+
+lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_SystemPrefsScreensaverTimeDropdown), lv_color_hex(0xFD8B18),
+                          LV_PART_SELECTED | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsScreensaverTimeDropdown), 255,
+                        LV_PART_SELECTED | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(lv_dropdown_get_list(ui_SystemPrefsScreensaverTimeDropdown), lv_color_hex(0xFD8B18),
+                          LV_PART_SELECTED | LV_STATE_CHECKED);
+lv_obj_set_style_bg_opa(lv_dropdown_get_list(ui_SystemPrefsScreensaverTimeDropdown), 255,
+                        LV_PART_SELECTED | LV_STATE_CHECKED);
+
+ui_SystemPrefsScreensaverKnobsCont = lv_obj_create(ui_SystemMenuPrefsTab);
+lv_obj_remove_style_all(ui_SystemPrefsScreensaverKnobsCont);
+lv_obj_set_width(ui_SystemPrefsScreensaverKnobsCont, lv_pct(100));
+lv_obj_set_height(ui_SystemPrefsScreensaverKnobsCont, LV_SIZE_CONTENT);    /// 1
+lv_obj_set_align(ui_SystemPrefsScreensaverKnobsCont, LV_ALIGN_CENTER);
+lv_obj_set_flex_flow(ui_SystemPrefsScreensaverKnobsCont, LV_FLEX_FLOW_ROW);
+lv_obj_set_flex_align(ui_SystemPrefsScreensaverKnobsCont, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER,
+                      LV_FLEX_ALIGN_CENTER);
+lv_obj_clear_flag(ui_SystemPrefsScreensaverKnobsCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+lv_obj_set_style_pad_left(ui_SystemPrefsScreensaverKnobsCont, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemPrefsScreensaverKnobsCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemPrefsScreensaverKnobsCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemPrefsScreensaverKnobsCont, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+ui_SystemPrefsScreensaverKnobsLabel = lv_label_create(ui_SystemPrefsScreensaverKnobsCont);
+lv_obj_set_width(ui_SystemPrefsScreensaverKnobsLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_height(ui_SystemPrefsScreensaverKnobsLabel, LV_SIZE_CONTENT);    /// 1
+lv_obj_set_align(ui_SystemPrefsScreensaverKnobsLabel, LV_ALIGN_CENTER);
+lv_label_set_text(ui_SystemPrefsScreensaverKnobsLabel, "Wake with knob");
+lv_obj_set_style_text_font(ui_SystemPrefsScreensaverKnobsLabel, &ui_font_MuseoSansRounded70016,
+                           LV_PART_MAIN | LV_STATE_DEFAULT);
+
+ui_SystemPrefsScreensaverKnobsCheck = lv_switch_create(ui_SystemPrefsScreensaverKnobsCont);
+lv_obj_set_width(ui_SystemPrefsScreensaverKnobsCheck, 35);
+lv_obj_set_height(ui_SystemPrefsScreensaverKnobsCheck, 20);
+lv_obj_set_align(ui_SystemPrefsScreensaverKnobsCheck, LV_ALIGN_TOP_RIGHT);
+lv_obj_add_flag(ui_SystemPrefsScreensaverKnobsCheck, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+lv_obj_clear_flag(ui_SystemPrefsScreensaverKnobsCheck,
+                  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE);     /// Flags
+lv_obj_set_style_radius(ui_SystemPrefsScreensaverKnobsCheck, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_SystemPrefsScreensaverKnobsCheck, lv_color_hex(0x202328), LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_SystemPrefsScreensaverKnobsCheck, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_outline_color(ui_SystemPrefsScreensaverKnobsCheck, lv_color_hex(0xFD8B18),
+                               LV_PART_MAIN | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_opa(ui_SystemPrefsScreensaverKnobsCheck, 255, LV_PART_MAIN | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_SystemPrefsScreensaverKnobsCheck, 2, LV_PART_MAIN | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_SystemPrefsScreensaverKnobsCheck, 1, LV_PART_MAIN | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_color(ui_SystemPrefsScreensaverKnobsCheck, lv_color_hex(0xFD8B18),
+                               LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_opa(ui_SystemPrefsScreensaverKnobsCheck, 255, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_width(ui_SystemPrefsScreensaverKnobsCheck, 2, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_pad(ui_SystemPrefsScreensaverKnobsCheck, 1, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+lv_obj_set_style_outline_color(ui_SystemPrefsScreensaverKnobsCheck, lv_color_hex(0xFD8B18),
+                               LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_opa(ui_SystemPrefsScreensaverKnobsCheck, 200,
+                             LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_width(ui_SystemPrefsScreensaverKnobsCheck, 2,
+                               LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
+lv_obj_set_style_outline_pad(ui_SystemPrefsScreensaverKnobsCheck, 1,
+                             LV_PART_MAIN | LV_STATE_CHECKED | LV_STATE_FOCUSED);
+
+lv_obj_set_style_radius(ui_SystemPrefsScreensaverKnobsCheck, 20, LV_PART_INDICATOR | LV_STATE_CHECKED);
+lv_obj_set_style_bg_color(ui_SystemPrefsScreensaverKnobsCheck, lv_color_hex(0x4067D3),
+                          LV_PART_INDICATOR | LV_STATE_CHECKED);
+lv_obj_set_style_bg_opa(ui_SystemPrefsScreensaverKnobsCheck, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
+
+lv_obj_set_style_radius(ui_SystemPrefsScreensaverKnobsCheck, 20, LV_PART_KNOB | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_SystemPrefsScreensaverKnobsCheck, lv_color_hex(0xFFFFFF), LV_PART_KNOB | LV_STATE_DEFAULT);
+lv_obj_set_style_bg_opa(ui_SystemPrefsScreensaverKnobsCheck, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_SystemPrefsScreensaverKnobsCheck, -4, LV_PART_KNOB | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_SystemPrefsScreensaverKnobsCheck, -6, LV_PART_KNOB | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_SystemPrefsScreensaverKnobsCheck, -5, LV_PART_KNOB | LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_SystemPrefsScreensaverKnobsCheck, -5, LV_PART_KNOB | LV_STATE_DEFAULT);
+
 ui_SystemPrefsButtonCont = lv_obj_create(ui_SystemMenuPrefsTab);
 lv_obj_remove_style_all(ui_SystemPrefsButtonCont);
 lv_obj_set_width( ui_SystemPrefsButtonCont, lv_pct(100));
