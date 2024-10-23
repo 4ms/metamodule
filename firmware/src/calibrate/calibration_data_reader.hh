@@ -36,7 +36,7 @@ public:
 				return true;
 
 			} else {
-				pr_info("Calibration data invalid\n");
+				pr_info("Calibration data read, but is invalid\n");
 				return false;
 			}
 
