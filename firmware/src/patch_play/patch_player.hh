@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/CoreProcessor.hh"
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "conf/panel_conf.hh"
 #include "conf/patch_conf.hh"
@@ -33,12 +34,12 @@ public:
 
 private:
 	// Out1-Out8 + Ext Out1-8
-	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks * 2;
-	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks * 2;
+	static constexpr auto NumOutJacks = PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks;
+	static constexpr auto NumInJacks = PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks;
 
 	std::array<Jack, NumOutJacks> out_conns __attribute__((aligned(4))) = {{{0, 0}}};
 
-	// in_conns[]: In1-In6, GateIn1, GateIn2
+	// in_conns[]: In1-In6, GateIn1, GateIn2, ExpIn7-12
 	std::array<std::vector<Jack>, NumInJacks> in_conns;
 
 	unsigned num_modules = 0;

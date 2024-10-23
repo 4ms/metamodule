@@ -32,11 +32,11 @@ template<typename PanelDef>
 std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 	std::string name{16};
 
-	if (panel_id < PanelDef::NumUserFacingInJacks) {
+	if (PanelDef::is_main_panel_input(panel_id)) {
 		name = PanelDef::get_map_injack_name(panel_id);
 
-	} else if (size_t id = panel_id - PanelDef::NumUserFacingInJacks; id < AudioExpander::NumInJacks) {
-		name = AudioExpander::get_map_injack_name(id);
+	} else if (AudioExpander::is_expander_input(panel_id)) {
+		name = AudioExpander::get_map_injack_name(AudioExpander::panel_to_exp_input(panel_id));
 	}
 
 	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack)

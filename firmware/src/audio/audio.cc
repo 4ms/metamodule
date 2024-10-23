@@ -207,10 +207,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 				float calibrated_input = ext_cal.in_cal[exp_panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
 
-				auto panel_jack_i = exp_panel_jack_i + PanelDef::NumAudioIn; //0..5 => 6..11
+				auto panel_jack_i = AudioExpander::exp_to_panel_input(exp_panel_jack_i); //0..5 => 8..13
 				player.set_panel_input(panel_jack_i, calibrated_input);
 
-				param_state.smoothed_ins[panel_jack_i].add_val(calibrated_input);
+				// Smoothed ins skips the gate inputs, so subtract those from the index: 8..13 => 6..11
+				auto smooth_idx = panel_jack_i - PanelDef::NumGateIn;
+				param_state.smoothed_ins[smooth_idx].add_val(calibrated_input);
 			}
 		}
 
