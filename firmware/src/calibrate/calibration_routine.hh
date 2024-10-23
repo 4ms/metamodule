@@ -1,5 +1,6 @@
 #pragma once
 #include "calibrate/calibration_measurer.hh"
+#include "conf/board_codec_conf.hh"
 #include "drivers/cache.hh"
 #include "expanders.hh"
 #include "fs/norflash_layout.hh"
@@ -84,6 +85,7 @@ struct CalibrationRoutine {
 		first_input_panel_index = 0;
 		first_input = 0;
 		first_output = 0;
+		is_expander = false;
 		lv_label_set_text(ui_CalibrationInstructionLabel,
 						  "Play a C1 (1.00V) and a\nC4 (4.00V) into each jack\nto re-calibrate.");
 		start_routine();
@@ -93,6 +95,7 @@ struct CalibrationRoutine {
 		first_input_panel_index = PanelDef::NumUserFacingInJacks; //First expander jack is after main audio + gate ins
 		first_input = PanelDef::NumAudioIn;						  //First expander jack index is after main audio ins
 		first_output = PanelDef::NumAudioOut;					  //First output is after last main panel output
+		is_expander = true;
 		lv_label_set_text(ui_CalibrationInstructionLabel,
 						  "Play a C1 (1.00V) and a\nC4 (4.00V) into each Expander\njack to re-calibrate.");
 		start_routine();
@@ -537,6 +540,15 @@ private:
 	void update_read_flash() {
 		if (state == State::StartReadingCal) {
 
+			if (is_expander) {
+				auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
+				if (Hardware::codec_ext_memory.read(0, caldata_span)) {
+					state = is_reading_to_verify ? State::Verify : State::CalibratingIns;
+					return;
+				}
+				return;
+			}
+
 			auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
 
 			mdrivlib::SystemCache::clean_dcache_by_range(&padded_cal_data, sizeof(PaddedCalData));
@@ -706,7 +718,6 @@ private:
 	struct PaddedCalData {
 		CalData cal_data{};
 		char padding[128 - sizeof(cal_data)]{};
-		char padding[128 - sizeof(cal_data) - sizeof(bytes_written)]{};
 
 		static_assert(sizeof(CalData) >= 64 && sizeof(CalData) < 128);
 	};
@@ -719,6 +730,7 @@ private:
 	uint32_t first_input_panel_index = 0;
 	uint32_t first_input = 0;
 	uint32_t first_output = 0;
+	bool is_expander = false;
 
 	CalData cal_data_check{};
 	bool is_reading_to_verify = false;
