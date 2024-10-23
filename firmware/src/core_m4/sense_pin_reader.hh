@@ -1,7 +1,9 @@
 #pragma once
 #include "conf/gpio_expander_conf.hh"
+#include "conf/hsem_conf.hh"
 #include "conf/i2c_codec_conf.hh"
 #include "drivers/gpio_expander.hh"
+#include "drivers/hsem.hh"
 #include "params.hh"
 #include "pr_dbg.hh"
 
@@ -17,6 +19,10 @@ class SensePinReader {
 
 public:
 	SensePinReader() {
+		//Spin until we get the lock
+		while (mdrivlib::HWSemaphore<SharedI2CLock>::lock() == mdrivlib::HWSemaphoreFlag::LockFailed) {
+		}
+
 		i2c.enable_IT(a7m4_shared_i2c_codec_conf.priority1, a7m4_shared_i2c_codec_conf.priority2);
 
 		if (!main_jacksense_reader.is_present()) {
@@ -33,15 +39,26 @@ public:
 		} else {
 			num_jacksense_readers = 1;
 		}
+
+		mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
 	}
 
 	void update() {
+		// Note: this just checks if I2C is busy in this process, not globally:
 		if (!i2c.is_ready())
 			return;
+
+		// Our process is not using the bus, so release our lock:
+		mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
 
 		switch (state) {
 
 			case Read: {
+				if (mdrivlib::HWSemaphore<SharedI2CLock>::lock() == mdrivlib::HWSemaphoreFlag::LockFailed) {
+					// if we can't get the lock, abort and try again next time
+					return;
+				}
+
 				auto err = cur_reader == 0 ? main_jacksense_reader.read_inputs() : ext_jacksense_reader.read_inputs();
 				if (err != GPIOExpander::Error::None)
 					handle_error();
@@ -104,6 +121,8 @@ private:
 	} state = Read;
 
 	void handle_error() {
+		mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
+
 		static bool already_printed_error = false;
 
 		if (!already_printed_error) {
