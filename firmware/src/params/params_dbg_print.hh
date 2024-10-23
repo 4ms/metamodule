@@ -27,7 +27,7 @@ struct ParamDbgPrint {
 	static constexpr float iir_coef = 1.f / 1000.f;
 	static constexpr float iir_coef_inv = 1.f - iir_coef;
 
-	std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> ins;
+	std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn + AudioExpander::NumInJacks> ins;
 
 	bool flag_next_page = false;
 	bool flag_prev_page = false;
@@ -74,8 +74,12 @@ struct ParamDbgPrint {
 			auto b = [j = params.jack_senses](uint32_t bit) -> int {
 				return (j >> (jacksense_pin_order[bit])) & 1;
 			};
+			auto x = [j = params.jack_senses](uint32_t bit) -> int {
+				return (j >> (AudioExpander::jacksense_pin_order[bit])) & 1;
+			};
 
 			pr_dbg("Outs patched: %d %d %d %d %d %d %d %d\n", b(8), b(9), b(10), b(11), b(12), b(13), b(14), b(15));
+			pr_dbg("ExpOuts patched: %d %d %d %d %d %d %d %d\n", x(6), x(7), x(8), x(9), x(10), x(11), x(12), x(13));
 
 			pr_dbg("Button: %d GateIn1: %d [%d] GateIn2: %d [%d] \r\n",
 				   metaparams.meta_buttons[0].is_high() ? 1 : 0,
@@ -87,7 +91,7 @@ struct ParamDbgPrint {
 			for (auto [i, ain] : enumerate(ins)) {
 				pr_dbg("AIN %zu: [%d] iir=%f min=%f max=%f range=%f\r\n",
 					   i,
-					   b(i),
+					   i < 6 ? b(i) : x(i - 6),
 					   ain.iir,
 					   ain.min,
 					   ain.max,
