@@ -54,26 +54,15 @@ struct ParamsState {
 	// Given an input jack ID (panel=0..7, expander = 8..13)
 	// return the corresponding bit position in `jack_senses`
 	static constexpr unsigned input_bit(unsigned panel_injack_idx) {
-		if (panel_injack_idx < PanelDef::NumUserFacingInJacks)
-			return jacksense_pin_order[panel_injack_idx];
-
-		if (panel_injack_idx < PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks)
-			return AudioExpander::jacksense_pin_order[panel_injack_idx - PanelDef::NumUserFacingInJacks];
-
-		return 0;
+		auto p = panel_injack_idx;
+		return main_jacksense_input_bit(p).value_or(AudioExpander::jacksense_input_bit(p).value_or(0));
 	}
 
 	// Given an output jack ID (panel=0..7, expander = 8..15)
 	// return the corresponding bit position in `jack_senses`
 	static constexpr unsigned output_bit(unsigned panel_outjack_idx) {
-		if (panel_outjack_idx < PanelDef::NumUserFacingOutJacks)
-			return jacksense_pin_order[panel_outjack_idx + PanelDef::NumUserFacingInJacks];
-
-		if (panel_outjack_idx < PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks)
-			return AudioExpander::jacksense_pin_order[panel_outjack_idx - PanelDef::NumUserFacingOutJacks +
-													  AudioExpander::NumInJacks];
-
-		return 0;
+		auto p = panel_outjack_idx;
+		return main_jacksense_output_bit(p).value_or(AudioExpander::jacksense_output_bit(p).value_or(0));
 	}
 
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
