@@ -93,7 +93,15 @@ struct CalibrationPatch {
 	PatchData *make_hardware_check_patch() {
 		patch.blank_patch("Hardware Checker");
 
-		std::array<uint16_t, 8> vco{
+		std::array<uint16_t, 16> vco{
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
+			(uint16_t)patch.add_module("4msCompany:FM"),
 			(uint16_t)patch.add_module("4msCompany:FM"),
 			(uint16_t)patch.add_module("4msCompany:FM"),
 			(uint16_t)patch.add_module("4msCompany:FM"),
@@ -109,23 +117,30 @@ struct CalibrationPatch {
 		for (auto v : vco) {
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::PitchKnob), 1.0f);
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::MixKnob), 1.0f);
-			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::RatioFKnob), 0.f);
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::ShapeKnob), 0.f);
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::ShapeCvKnob), 1.f);
 
 			// Each output is an octave higher, starting from 40Hz
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::RatioCKnob), freq);
+			// Expanders are higher
+			patch.set_or_add_static_knob_value(
+				v, std::to_underlying(FMInfo::Elem::RatioFKnob), panel_out_idx < 8 ? 0.f : 0.5f);
 
 			// Output
 			patch.add_mapped_outjack(panel_out_idx, {.module_id = v, .jack_id = 0}); //OutputOut
 
 			// In 1-6 => Voct, GateIn1-2 => Shape CV
-			if (panel_out_idx <= 6)
+			if (panel_out_idx < 6)
 				patch.add_mapped_injack(panel_out_idx, {.module_id = v, .jack_id = 1}); //InputV_Oct_S
-			else
+			else if (panel_out_idx < 8)
 				patch.add_mapped_injack(panel_out_idx, {.module_id = v, .jack_id = 4}); //InputShape_Cv
+			else if (panel_out_idx < 14)
+				patch.add_mapped_injack(panel_out_idx, {.module_id = v, .jack_id = 1}); //InputV_Oct_S
 
-			freq = std::min(freq + 1.f / 7.f, 1.f);
+			freq += 1.f / 7.f;
+			if (freq >= 1.f)
+				freq = 1.f / 14.f;
+
 			panel_out_idx++;
 		}
 
