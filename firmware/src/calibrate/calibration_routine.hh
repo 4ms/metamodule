@@ -539,10 +539,12 @@ private:
 
 			auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
 
-			mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(PaddedCalData));
+			mdrivlib::SystemCache::clean_dcache_by_range(&padded_cal_data, sizeof(PaddedCalData));
 
-			if (storage.request_read_flash(caldata_span, CalDataFlashOffset, &bytes_written))
+			if (storage.request_read_flash(caldata_span, CalDataFlashOffset)) {
 				state = State::ReadingCal;
+			} else
+				pr_warn("Failed to request reading cal from flash, trying again\n");
 
 		} else if (state == State::ReadingCal) {
 
@@ -550,10 +552,10 @@ private:
 
 			if (msg.message_type == IntercoreStorageMessage::MessageType::ReadFlashOk) {
 
-				mdrivlib::SystemCache::invalidate_dcache_by_range(&cal_data, sizeof(PaddedCalData));
+				mdrivlib::SystemCache::invalidate_dcache_by_range(&padded_cal_data, sizeof(PaddedCalData));
 
-				if (bytes_written != sizeof(cal_data)) {
-					pr_err("Internal error reading flash (%d bytes read)\n", bytes_written);
+				if (msg.bytes_read != sizeof(cal_data)) {
+					pr_err("Internal error reading flash (%u bytes read)\n", msg.bytes_read);
 				}
 
 				state = is_reading_to_verify ? State::Verify : State::CalibratingIns;
@@ -585,7 +587,7 @@ private:
 											   {(uint8_t *)(&cal_data), sizeof(cal_data)},
 											   CalDataFlashOffset,
 											   std::nullopt,
-											   &bytes_written))
+											   &dummy)) //we don't need to know how many bytes were written
 					state = State::WritingCal;
 			}
 		} else if (state == State::WritingCal) {
@@ -703,16 +705,16 @@ private:
 	// Pad calibration data so does not share cache lines with other data
 	struct PaddedCalData {
 		CalData cal_data{};
-		uint32_t bytes_written{};
+		char padding[128 - sizeof(cal_data)]{};
 		char padding[128 - sizeof(cal_data) - sizeof(bytes_written)]{};
 
-		static_assert(sizeof(CalData) > 64 && sizeof(CalData) <= 124);
+		static_assert(sizeof(CalData) >= 64 && sizeof(CalData) < 128);
 	};
 	alignas(64) PaddedCalData padded_cal_data{};
 	static_assert(sizeof padded_cal_data % 64 == 0, "CalData must not share cache lines with other data");
 
 	CalData &cal_data = padded_cal_data.cal_data;
-	uint32_t &bytes_written = padded_cal_data.bytes_written;
+	uint32_t dummy = 0;
 
 	uint32_t first_input_panel_index = 0;
 	uint32_t first_input = 0;
