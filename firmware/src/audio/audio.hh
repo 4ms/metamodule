@@ -65,9 +65,10 @@ private:
 
 	CalData cal;
 	CalData cal_stash;
-	EdgeStateDetector plug_detects[PanelDef::NumJacks];
-
 	CalData ext_cal{};
+	CalData ext_cal_stash{};
+
+	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
 	PatchPlayer &player;
 	mdrivlib::CycleCounter load_measure;
@@ -92,7 +93,7 @@ private:
 	bool is_playing_patch();
 	void handle_patch_just_loaded();
 	void disable_calibration();
-	void enable_calibration();
+	void re_enable_calibration();
 	void handle_patch_mod_queue();
 	void update_audio_settings();
 	void set_block_spans();

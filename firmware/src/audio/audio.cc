@@ -67,8 +67,10 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 			ext_cal.reset_to_default();
 			Hardware::codec_ext_memory.write(ext_cal);
 		}
+		ext_cal_stash = ext_cal;
 
 		pr_info("Audio Expander detected\n");
+		ext_cal.print_calibration();
 	} else {
 		ext_audio_connected = false;
 		Expanders::ext_audio_found(false);
@@ -355,26 +357,35 @@ void AudioStream::handle_patch_mod_queue() {
 	handle_patch_mods(patch_mod_queue, player, cal_stash, new_cal_state);
 
 	if (new_cal_state.has_value() && *new_cal_state == true)
-		enable_calibration();
+		re_enable_calibration();
 
 	else if (new_cal_state == false)
 		disable_calibration();
 }
 
 void AudioStream::disable_calibration() {
+	// Stash existing cal so we can restore it later
+	cal_stash = cal;
 	cal.reset_to_default();
-	// cal.print_calibration();
+
+	ext_cal_stash = ext_cal;
+	ext_cal.reset_to_default();
+
+	pr_dbg("Using default cal. ext_cal=\n");
+	ext_cal.print_calibration();
 }
 
-void AudioStream::enable_calibration() {
+void AudioStream::re_enable_calibration() {
 	cal = cal_stash;
-	// cal.print_calibration();
+	ext_cal = ext_cal_stash;
+
+	pr_dbg("Re-enable cal. ext_cal=\n");
+	ext_cal.print_calibration();
 }
 
 void AudioStream::set_calibration(CalData const &caldata) {
 	cal = caldata;
 	cal_stash = caldata;
-	// cal.print_calibration();
 }
 
 uint32_t AudioStream::get_audio_errors() {
