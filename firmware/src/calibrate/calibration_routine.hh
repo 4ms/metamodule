@@ -544,19 +544,18 @@ private:
 				auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
 				if (Hardware::codec_ext_memory.read(0, caldata_span)) {
 					state = is_reading_to_verify ? State::Verify : State::CalibratingIns;
-					return;
 				}
-				return;
+			} else {
+
+				auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
+
+				mdrivlib::SystemCache::clean_dcache_by_range(&padded_cal_data, sizeof(PaddedCalData));
+
+				if (storage.request_read_flash(caldata_span, CalDataFlashOffset)) {
+					state = State::ReadingCal;
+				} else
+					pr_warn("Failed to request reading cal from flash, trying again\n");
 			}
-
-			auto caldata_span = std::span<uint8_t>{reinterpret_cast<uint8_t *>(&cal_data), sizeof(cal_data)};
-
-			mdrivlib::SystemCache::clean_dcache_by_range(&padded_cal_data, sizeof(PaddedCalData));
-
-			if (storage.request_read_flash(caldata_span, CalDataFlashOffset)) {
-				state = State::ReadingCal;
-			} else
-				pr_warn("Failed to request reading cal from flash, trying again\n");
 
 		} else if (state == State::ReadingCal) {
 
@@ -588,37 +587,53 @@ private:
 	}
 
 	void update_write_flash() {
-		if (state == State::StartWritingCal) {
+		bool success = false;
+		bool failure = false;
 
+		if (state == State::StartWritingCal) {
 			// Wait for Next button
 			if (next_step) {
+				if (is_expander) {
+					if (Hardware::codec_ext_memory.write(cal_data, 0)) {
+						success = true;
+					} else {
+						failure = true;
+					}
+				} else {
+					mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(PaddedCalData));
 
-				mdrivlib::SystemCache::clean_dcache_by_range(&cal_data, sizeof(PaddedCalData));
-
-				if (storage.request_file_flash(IntercoreStorageMessage::FlashTarget::QSPI,
-											   {(uint8_t *)(&cal_data), sizeof(cal_data)},
-											   CalDataFlashOffset,
-											   std::nullopt,
-											   &dummy)) //we don't need to know how many bytes were written
-					state = State::WritingCal;
+					if (storage.request_file_flash(IntercoreStorageMessage::FlashTarget::QSPI,
+												   {(uint8_t *)(&cal_data), sizeof(cal_data)},
+												   CalDataFlashOffset,
+												   std::nullopt,
+												   &dummy)) //we don't need to know how many bytes were written
+						state = State::WritingCal;
+				}
 			}
 		} else if (state == State::WritingCal) {
 			auto msg = storage.get_message();
 			if (msg.message_type == IntercoreStorageMessage::MessageType::FlashingOk) {
-				pr_info("Flashing success!\n");
-				lv_label_set_text(ui_CalibrationInstructionLabel, "Calibration data is saved, verifying.");
-				lv_hide(ui_CalibrationButtonCont);
-				cal_data.print_calibration();
-
-				is_reading_to_verify = true;
-				cal_data_check = cal_data;
-				state = State::StartReadingCal;
+				success = true;
 
 			} else if (msg.message_type == IntercoreStorageMessage::MessageType::FlashingFailed) {
-				pr_err("Flashing failed!\n");
-				lv_label_set_text(ui_CalibrationInstructionLabel, "FAILED! Could not write calibration data to flash");
-				// hang in this state until the User goes back
+				failure = true;
 			}
+		}
+
+		if (success) {
+			pr_info("Flashing success!\n");
+			lv_label_set_text(ui_CalibrationInstructionLabel, "Calibration data is saved, verifying.");
+			lv_hide(ui_CalibrationButtonCont);
+			cal_data.print_calibration();
+			is_reading_to_verify = true;
+			cal_data_check = cal_data;
+			state = State::StartReadingCal;
+		}
+
+		if (failure) {
+			pr_err("Writing cal data failed!\n");
+			lv_label_set_text(ui_CalibrationInstructionLabel, "FAILED! Could not write calibration data");
+			// hang in this state until the User goes back
 		}
 	}
 
