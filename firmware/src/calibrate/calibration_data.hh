@@ -10,6 +10,14 @@
 namespace MetaModule
 {
 
+#define DEBUG_CAL_READINGS
+
+#ifdef DEBUG_CAL_READINGS
+#define CAL_PRINT printf
+#else
+#define CAL_PRINT(...)
+#endif
+
 namespace Calibration
 {
 
@@ -94,12 +102,12 @@ struct CalData {
 			[[maybe_unused]] auto slope_ratio =
 				chan.slope() == 0 ? 0. : double(DefaultInput.slope()) / double(chan.slope());
 			[[maybe_unused]] double offset_v = Calibration::to_volts(chan.offset());
-			pr_trace("Input: slope: %f offset(V): %f\n", slope_ratio, offset_v);
+			CAL_PRINT("Input: slope: %f offset(V): %f\n", slope_ratio, offset_v);
 		}
 		for (auto chan : out_cal) {
 			[[maybe_unused]] auto slope_ratio =
 				chan.slope() == 0 ? 0. : double(DefaultOutput.slope()) / double(chan.slope());
-			pr_trace("Output: slope: %f offset(V): %f\n", slope_ratio, double(chan.offset()));
+			CAL_PRINT("Output: slope: %f offset(V): %f\n", slope_ratio, double(chan.offset()));
 		}
 	}
 };
