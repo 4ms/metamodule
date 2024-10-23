@@ -22,8 +22,6 @@ struct ParamsState {
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
 
-	// TODO: is smoothed_ins good here? Consider making like LightWatcher
-	// so we can watch any arbitrary jack(s)
 	std::array<ResizingOversampler, PanelDef::NumAudioIn + AudioExpander::NumInJacks> smoothed_ins;
 
 	//jack_senses bit order:
@@ -55,7 +53,7 @@ struct ParamsState {
 
 	// Given an input jack ID (panel=0..7, expander = 8..13)
 	// return the corresponding bit position in `jack_senses`
-	constexpr unsigned input_bit(unsigned panel_injack_idx) {
+	static constexpr unsigned input_bit(unsigned panel_injack_idx) {
 		if (panel_injack_idx < PanelDef::NumUserFacingInJacks)
 			return jacksense_pin_order[panel_injack_idx];
 
@@ -67,11 +65,11 @@ struct ParamsState {
 
 	// Given an output jack ID (panel=0..7, expander = 8..15)
 	// return the corresponding bit position in `jack_senses`
-	constexpr unsigned output_bit(unsigned panel_outjack_idx) {
+	static constexpr unsigned output_bit(unsigned panel_outjack_idx) {
 		if (panel_outjack_idx < PanelDef::NumUserFacingOutJacks)
 			return jacksense_pin_order[panel_outjack_idx + PanelDef::NumUserFacingInJacks];
 
-		if (panel_outjack_idx < PanelDef::NumUserFacingOutJacks + AudioExpander::NumInJacks)
+		if (panel_outjack_idx < PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks)
 			return AudioExpander::jacksense_pin_order[panel_outjack_idx - PanelDef::NumUserFacingOutJacks +
 													  AudioExpander::NumInJacks];
 
