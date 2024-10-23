@@ -351,7 +351,6 @@ private:
 			}
 
 			// Get number of lights per module and resize the vectors
-			Debug::Pin0::high();
 			light_vals.clear();
 			for (auto const &slug : patch->module_slugs) {
 				auto info = ModuleFactory::getModuleInfo(slug);
@@ -366,7 +365,6 @@ private:
 				}
 				vec.resize(max + 1, 0.f);
 			}
-			Debug::Pin0::low();
 		}
 	}
 
@@ -378,7 +376,6 @@ private:
 			if (wl.is_active()) {
 				if (wl.module_id < light_vals.size()) {
 					auto &vec = light_vals[wl.module_id];
-					Debug::Pin1::high();
 					if (wl.light_id < 256) {
 						if (wl.light_id < vec.size())
 							vec[wl.light_id] = wl.value;
@@ -387,7 +384,6 @@ private:
 					} else {
 						pr_err("Can only watch 256 lights, request made for %u\n", wl.light_id);
 					}
-					Debug::Pin1::low();
 				} else
 					pr_err("Invalid module id in watch lights: %u\n", wl.module_id);
 			}
@@ -425,10 +421,8 @@ private:
 				}
 			}
 
-			Debug::Pin3::high();
 			if (gui_el.module_idx < light_vals.size())
 				update_light(drawn_el, light_vals[gui_el.module_idx]);
-			Debug::Pin3::low();
 
 			redraw_display(drawn_el, gui_el.module_idx, params.displays.watch_displays);
 		}
