@@ -57,12 +57,12 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	codec_.set_rx_buffer(audio_blocks[0].in_codec, block_size_);
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
-		ext_cal.reset_to_default();
 		ext_audio_connected = true;
+		Expanders::ext_audio_found(true);
 		codec_ext_.set_tx_buffer(audio_blocks[0].out_ext_codec, block_size_);
 		codec_ext_.set_rx_buffer(audio_blocks[0].in_ext_codec, block_size_);
-		Expanders::ext_audio_found(true);
 
+		ext_cal.reset_to_default();
 		if (!CalibrationDataReader::read_calibration(&ext_cal, Hardware::codec_ext_memory, 0)) {
 			ext_cal.reset_to_default();
 			Hardware::codec_ext_memory.write(ext_cal);
@@ -371,7 +371,7 @@ void AudioStream::disable_calibration() {
 	ext_cal_stash = ext_cal;
 	ext_cal.reset_to_default();
 
-	pr_dbg("Using default cal. ext_cal=\n");
+	pr_dbg("Using default cal and ext_cal:\n");
 	ext_cal.print_calibration();
 }
 
@@ -379,7 +379,9 @@ void AudioStream::re_enable_calibration() {
 	cal = cal_stash;
 	ext_cal = ext_cal_stash;
 
-	pr_dbg("Re-enable cal. ext_cal=\n");
+	pr_dbg("Re-enable cal=\n");
+	cal.print_calibration();
+	pr_dbg("Re-enable ext_cal=\n");
 	ext_cal.print_calibration();
 }
 

@@ -97,7 +97,7 @@ struct CalibrationRoutine {
 		first_output = PanelDef::NumAudioOut;					  //First output is after last main panel output
 		is_expander = true;
 		lv_label_set_text(ui_CalibrationInstructionLabel,
-						  "Play a C1 (1.00V) and a\nC4 (4.00V) into each Expander\njack to re-calibrate.");
+						  "Play a C1 (1.00V) and a\nC4 (4.00V) into each Expander jack to re-calibrate.");
 		start_routine();
 	}
 
@@ -394,7 +394,7 @@ private:
 						set_output_status(active_output, JackCalStatus::Done);
 						lv_label_set_text_fmt(ui_CalibrationInstructionLabel,
 											  "Calibrated Out %d. Patch another Out jack to In 1",
-											  active_output + 1);
+											  int(active_output + first_output + 1));
 					} else {
 						current_output = std::nullopt;
 						// will automatically retry
@@ -659,6 +659,7 @@ private:
 
 	void update_audio_stream() {
 		for (auto [i, chan] : enumerate(cal_data.in_cal)) {
+			i += first_input;
 			bool ok = patch_mod_queue.put(SetChanCalibration{
 				.slope = chan.slope(), .offset = chan.offset(), .channel = (uint16_t)i, .is_input = true});
 
@@ -669,6 +670,7 @@ private:
 		}
 
 		for (auto [i, chan] : enumerate(cal_data.out_cal)) {
+			i += first_output;
 			auto ok = patch_mod_queue.put(SetChanCalibration{
 				.slope = chan.slope(), .offset = chan.offset(), .channel = (uint16_t)i, .is_input = false});
 

@@ -102,6 +102,7 @@ struct CalibrationPatch {
 			(uint16_t)patch.add_module("4msCompany:FM"),
 			(uint16_t)patch.add_module("4msCompany:FM"),
 			(uint16_t)patch.add_module("4msCompany:FM"),
+
 			(uint16_t)patch.add_module("4msCompany:FM"),
 			(uint16_t)patch.add_module("4msCompany:FM"),
 			(uint16_t)patch.add_module("4msCompany:FM"),
@@ -113,7 +114,7 @@ struct CalibrationPatch {
 		};
 
 		auto panel_out_idx = 0;
-		auto freq = 1.f / 14.f;
+		auto octave = 0;
 		for (auto v : vco) {
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::PitchKnob), 1.0f);
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::MixKnob), 1.0f);
@@ -121,25 +122,28 @@ struct CalibrationPatch {
 			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::ShapeCvKnob), 1.f);
 
 			// Each output is an octave higher, starting from 40Hz
-			patch.set_or_add_static_knob_value(v, std::to_underlying(FMInfo::Elem::RatioCKnob), freq);
-			// Expanders are higher
 			patch.set_or_add_static_knob_value(
-				v, std::to_underlying(FMInfo::Elem::RatioFKnob), panel_out_idx < 8 ? 0.f : 0.5f);
+				v, std::to_underlying(FMInfo::Elem::RatioCKnob), std::min(octave / 7.f + 1.f / 14.f, 1.f));
+			// Expanders are higher by a fifth or so
+			patch.set_or_add_static_knob_value(
+				v, std::to_underlying(FMInfo::Elem::RatioFKnob), panel_out_idx < 8 ? 0.f : 0.25f);
 
 			// Output
 			patch.add_mapped_outjack(panel_out_idx, {.module_id = v, .jack_id = 0}); //OutputOut
 
-			// In 1-6 => Voct, GateIn1-2 => Shape CV
+			// 0-5: In 1-6 => Voct,
 			if (panel_out_idx < 6)
 				patch.add_mapped_injack(panel_out_idx, {.module_id = v, .jack_id = 1}); //InputV_Oct_S
+
+			// 6-7: GateIn1-2 => Shape CV
 			else if (panel_out_idx < 8)
 				patch.add_mapped_injack(panel_out_idx, {.module_id = v, .jack_id = 4}); //InputShape_Cv
+
+			// 8-13: Exp In1-6
 			else if (panel_out_idx < 14)
 				patch.add_mapped_injack(panel_out_idx, {.module_id = v, .jack_id = 1}); //InputV_Oct_S
 
-			freq += 1.f / 7.f;
-			if (freq >= 1.f)
-				freq = 1.f / 14.f;
+			octave = (octave + 1) % 8;
 
 			panel_out_idx++;
 		}
