@@ -3,6 +3,7 @@
 #include "fs/volumes.hh"
 #include "patch_file/patch_dir_list.hh"
 #include "util/static_string.hh"
+#include "wifi/wifi_result_t.hh"
 #include <array>
 #include <cstdint>
 #include <expected>
@@ -92,13 +93,6 @@ struct IntercoreStorageMessage {
 	uint32_t *bytes_processed;
 	enum FlashTarget : uint8_t { WIFI, QSPI };
 	FlashTarget flashTarget;
-
-	enum WifiIPError : uint8_t { NO_MODULE_CONNECTED, NO_IP };
-	struct Endpoint_t {
-		std::array<uint8_t, 4> ip;
-		uint16_t port;
-	};
-	using WifiIPResult = std::expected<Endpoint_t, WifiIPError>;
 
 	WifiIPResult wifi_ip_result;
 
