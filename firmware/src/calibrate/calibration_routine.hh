@@ -110,6 +110,7 @@ struct CalibrationRoutine {
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_show(ui_SystemHardwareCheckCont);
+
 		lv_group_focus_obj(ui_SystemCalibrationButton);
 
 		patch_mod_queue.put(CalibrationOnOff{.enable = true});
@@ -134,6 +135,13 @@ private:
 		lv_show(ui_CalibrationInputStatusCont);
 		lv_show(ui_CalibrationMeasurementLabel);
 		lv_show(ui_CalibrationProcedureCont);
+
+		lv_hide(ui_CalibrationIn7Label);
+		lv_hide(ui_CalibrationIn8Label);
+		lv_hide(ui_CalibrationIn9Label);
+		lv_hide(ui_CalibrationIn10Label);
+		lv_hide(ui_CalibrationIn11Label);
+		lv_hide(ui_CalibrationIn12Label);
 
 		lv_group_focus_obj(ui_CalibrationCancelButton);
 
