@@ -105,6 +105,10 @@ public:
 	}
 
 	void reinit() {
+		i2c.disable_IT();
+		i2c.deinit();
+		i2c.init(a7m4_shared_i2c_codec_conf);
+		i2c.enable_IT(a7m4_shared_i2c_codec_conf.priority1, a7m4_shared_i2c_codec_conf.priority2);
 		num_errors = 0;
 	}
 
@@ -131,8 +135,11 @@ private:
 
 		num_errors++;
 
-		if (num_errors < 10) {
+		if (num_errors < 3) {
 			pr_err("I2C Error chip %d!\n", cur_reader);
+		} else {
+			pr_err("Restarting I2C\n");
+			reinit();
 		}
 	}
 };
