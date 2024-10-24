@@ -104,6 +104,10 @@ public:
 		return main_jacksense | (aux_jacksense << 16);
 	}
 
+	void reinit() {
+		num_errors = 0;
+	}
+
 private:
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
 
@@ -114,6 +118,8 @@ private:
 	unsigned num_jacksense_readers{1};
 	unsigned cur_reader{0};
 
+	unsigned num_errors = 0;
+
 	enum States {
 		Pause,
 		Read,
@@ -123,11 +129,10 @@ private:
 	void handle_error() {
 		mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
 
-		static bool already_printed_error = false;
+		num_errors++;
 
-		if (!already_printed_error) {
+		if (num_errors < 10) {
 			pr_err("I2C Error chip %d!\n", cur_reader);
-			already_printed_error = true;
 		}
 	}
 };
