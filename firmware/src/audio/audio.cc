@@ -354,7 +354,7 @@ void AudioStream::propagate_sense_pins(uint32_t jack_senses) {
 void AudioStream::handle_patch_mod_queue() {
 	std::optional<bool> new_cal_state = std::nullopt;
 
-	handle_patch_mods(patch_mod_queue, player, cal_stash, new_cal_state);
+	handle_patch_mods(patch_mod_queue, player, {&cal_stash, &ext_cal_stash}, new_cal_state);
 
 	if (new_cal_state.has_value() && *new_cal_state == true)
 		re_enable_calibration();
@@ -371,18 +371,18 @@ void AudioStream::disable_calibration() {
 	ext_cal_stash = ext_cal;
 	ext_cal.reset_to_default();
 
-	pr_dbg("Using default cal and ext_cal:\n");
-	ext_cal.print_calibration();
+	// pr_dbg("Using default cal and ext_cal:\n");
+	// 	ext_cal.print_calibration();
 }
 
 void AudioStream::re_enable_calibration() {
 	cal = cal_stash;
 	ext_cal = ext_cal_stash;
 
-	pr_dbg("Re-enable cal=\n");
-	cal.print_calibration();
-	pr_dbg("Re-enable ext_cal=\n");
-	ext_cal.print_calibration();
+	// pr_dbg("Re-enable cal=\n");
+	// cal.print_calibration();
+	// pr_dbg("Re-enable ext_cal=\n");
+	// ext_cal.print_calibration();
 }
 
 void AudioStream::set_calibration(CalData const &caldata) {

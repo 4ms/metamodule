@@ -320,7 +320,9 @@ private:
 		lv_hide(ui_CalibrationInputStatusCont);
 		lv_show(ui_CalibrationOutputStatusCont);
 
-		lv_label_set_text(ui_CalibrationInstructionLabel, "Patch each Out jack to In 1 jack (one at a time).");
+		lv_label_set_text_fmt(ui_CalibrationInstructionLabel,
+							  "Patch each Out jack to In %u jack (one at a time).",
+							  unsigned(first_input + 1));
 		lv_label_set_text(ui_CalibrationMeasurementLabel, "");
 
 		lv_obj_scroll_to_y(ui_SystemMenuSystemTab, 0, LV_ANIM_OFF);
@@ -342,7 +344,7 @@ private:
 		unsigned active_output = 0;
 
 		for (unsigned i = 0; i < NumOutputs; i++) {
-			if (params.is_output_plugged(i + first_output) && params.is_input_plugged(0)) {
+			if (params.is_output_plugged(i + first_output) && params.is_input_plugged(first_input_panel_index)) {
 				num_patched++;
 				active_output = i;
 				set_output_plugged(i, true);
@@ -445,10 +447,10 @@ private:
 		// Calculate the raw codec 24-bit reading by reversing the default calibration
 		// Then apply the new input calibration values to the raw value to determine a calibrated value
 		auto default_cal = CalData::DefaultInput;
-		auto raw_adc = default_cal.reverse_calibrate(params.smoothed_ins[0].val());
+		auto raw_adc = default_cal.reverse_calibrate(params.smoothed_ins[first_input].val());
 		in_signals[0].update(cal_data.in_cal[0].adjust(raw_adc));
 
-		if (delay_measurement++ >= 2) {
+		if (delay_measurement++ >= 4) {
 			if (measurer.validate_reading(in_signals[0], target_volts, Tolerance)) {
 				pr_trace("Validated Out %d: %f [%f,%f => delta %f] vs: %5f +/- %5f\n",
 						 current_output.value(),

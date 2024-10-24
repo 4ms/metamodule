@@ -38,8 +38,11 @@ static constexpr float DefaultHighReading = from_volts(DefaultHighV);
 } // namespace Calibration
 
 struct CalData {
-	std::array<Calibrator, PanelDef::NumAudioIn> in_cal{};
-	std::array<Calibrator, PanelDef::NumAudioOut> out_cal{};
+	static constexpr size_t NumIns = PanelDef::NumAudioIn;
+	static constexpr size_t NumOuts = PanelDef::NumAudioOut;
+
+	std::array<Calibrator, NumIns> in_cal{};
+	std::array<Calibrator, NumOuts> out_cal{};
 
 	static constexpr Calibrator DefaultInput{{Calibration::DefaultLowV, Calibration::DefaultHighV},
 											 {Calibration::DefaultLowReading, Calibration::DefaultHighReading}};
