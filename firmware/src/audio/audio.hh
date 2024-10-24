@@ -65,9 +65,10 @@ private:
 
 	CalData cal;
 	CalData cal_stash;
-	EdgeStateDetector plug_detects[PanelDef::NumJacks];
+	CalData ext_cal{};
+	CalData ext_cal_stash{};
 
-	std::array<ResizingOversampler, PanelDef::NumAudioIn> smoothed_ins;
+	EdgeStateDetector plug_detects[PanelDef::NumJacks];
 
 	PatchPlayer &player;
 	mdrivlib::CycleCounter load_measure;
@@ -82,16 +83,17 @@ private:
 	bool midi_last_connected = false;
 
 	AudioConf::SampleT get_audio_output(int output_id);
+	AudioConf::SampleT get_ext_audio_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
-	void propagate_sense_pins(Params &params);
+	void propagate_sense_pins(uint32_t jack_senses);
 	void handle_midi(bool is_connected, Midi::Event const &event, unsigned poly_num);
 	void process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block);
 	bool is_playing_patch();
 	void handle_patch_just_loaded();
 	void disable_calibration();
-	void enable_calibration();
+	void re_enable_calibration();
 	void handle_patch_mod_queue();
 	void update_audio_settings();
 	void set_block_spans();

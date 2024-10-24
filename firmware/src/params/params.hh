@@ -16,8 +16,6 @@ struct Params {
 
 	Midi::Event midi_event{};
 
-	uint32_t jack_senses{};
-
 	Params() {
 		clear();
 	}
@@ -33,8 +31,6 @@ struct Params {
 			knob = 0.f;
 
 		midi_event = Midi::Event{};
-
-		jack_senses = 0;
 	}
 
 	void copy(const Params &that) {
@@ -48,8 +44,6 @@ struct Params {
 			knobs[i] = that.knobs[i];
 
 		midi_event = that.midi_event;
-
-		jack_senses = that.jack_senses;
 	}
 };
 

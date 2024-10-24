@@ -9,7 +9,7 @@ namespace MetaModule
 
 inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 							  PatchPlayer &player,
-							  CalData &caldata,
+							  std::array<CalData *, 2> caldatas,
 							  std::optional<bool> &new_cal_state) {
 	if (auto patch_mod = patch_mod_queue.get()) {
 		std::visit(overloaded{
@@ -31,17 +31,21 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 					   },
 					   [&](SetMidiPolyNum mod) { player.set_midi_poly_num(mod.poly_num); },
 
-					   [&caldata](SetChanCalibration &mod) {
-						   if (mod.is_input && mod.channel < caldata.in_cal.size()) {
-							   caldata.in_cal[mod.channel] = {mod.slope, mod.offset};
-
-						   } else if (!mod.is_input && mod.channel < caldata.out_cal.size()) {
-							   caldata.out_cal[mod.channel] = {mod.slope, mod.offset};
+					   [&caldatas](SetChanCalibration &mod) {
+						   if (mod.is_input) {
+							   auto chan = mod.channel % CalData::NumIns;
+							   auto caldata_idx = mod.channel / CalData::NumIns;
+							   if (caldata_idx < caldatas.size())
+								   caldatas[caldata_idx]->in_cal[chan] = {mod.slope, mod.offset};
+						   } else {
+							   auto chan = mod.channel % CalData::NumOuts;
+							   auto caldata_idx = mod.channel / CalData::NumOuts;
+							   if (caldata_idx < caldatas.size())
+								   caldatas[caldata_idx]->out_cal[chan] = {mod.slope, mod.offset};
 						   }
 					   },
 
 					   [&new_cal_state](CalibrationOnOff &mod) { new_cal_state = mod.enable; },
-
 				   },
 				   patch_mod.value());
 	}

@@ -135,12 +135,11 @@ public:
 		return comm_.send_message(message);
 	}
 
-	[[nodiscard]] bool request_read_flash(std::span<uint8_t> buffer, uint32_t address, uint32_t *bytes_processed) {
+	[[nodiscard]] bool request_read_flash(std::span<uint8_t> buffer, uint32_t address) {
 		IntercoreStorageMessage message{
 			.message_type = RequestReadFlash,
 			.buffer = {(char *)buffer.data(), buffer.size()},
 			.address = address,
-			.bytes_processed = bytes_processed,
 		};
 		return comm_.send_message(message);
 	}

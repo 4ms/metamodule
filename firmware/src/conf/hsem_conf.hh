@@ -11,6 +11,7 @@ enum SemaphoreLocks {
 	M4CoreReady,
 	ParamCacheLock,
 	RamDiskLock,
+	SharedI2CLock,
 };
 
 } // namespace MetaModule

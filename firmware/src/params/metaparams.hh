@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
 #include "util/debouncer.hh"
@@ -12,29 +13,40 @@
 namespace MetaModule
 {
 
+// A catch-all of data shared between cores
+// TODO: separate out into data that follows the same paths
 struct MetaParams {
-	float patchcv = 0.f;
+
+	// Controls -> GUI (via audio -> SyncParams)
+	// TODO: could controls pass directly to GUI via SPSC queue?
 	Toggler rotary_button;
 	RotaryMotion rotary{};
 	RotaryMotion rotary_pushed{};
 	std::array<Toggler, PanelDef::NumMetaRgbButton> meta_buttons{};
-	std::array<float, PanelDef::NumAudioIn> ins{};
 
-	bool midi_connected = false;
-	uint32_t midi_poly_chans = 1;
-
+	// Audio -> GUI
 	uint8_t audio_load = 0;
+
+	// Controls -> Audio
+	bool midi_connected = false;
+
+	// Controls -> Audio, Audio -> GUI (via ParamsState in SyncParams)
+	uint32_t jack_senses{};
+
+	// Audio -> Controls
+	uint32_t midi_poly_chans = 1;
+	uint32_t sample_rate = 48000;
+
+	// GUI -> GUI
+	// TODO: move this to a PageManager object like gui_state
 	RotaryMotion rotary_with_metabutton{};
 	bool ignore_metabutton_release = false;
-
-	uint32_t sample_rate = 48000;
 
 	MetaParams() {
 		clear();
 	}
 
 	void clear() {
-		patchcv = 0.f;
 		for (auto &but : meta_buttons)
 			but.reset();
 		rotary_button.reset();
@@ -43,6 +55,7 @@ struct MetaParams {
 		rotary_pushed.motion = 0;
 		rotary_pushed.abs_pos = 0;
 		audio_load = 0;
+		jack_senses = 0;
 	}
 
 	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
@@ -50,8 +63,6 @@ struct MetaParams {
 	// Copies non-event signals (CV, audio)
 	// Used with write_sync()
 	void update_with(MetaParams &that) {
-		patchcv = that.patchcv;
-
 		for (auto [but, thatbut] : zip(meta_buttons, that.meta_buttons))
 			but.transfer_events(thatbut);
 
@@ -64,8 +75,7 @@ struct MetaParams {
 
 		midi_poly_chans = that.midi_poly_chans;
 
-		for (auto [in, thatin] : zip(ins, that.ins))
-			in = thatin;
+		jack_senses = that.jack_senses;
 	}
 
 	// For buttons: moves events from `that` to `this`, removing them from `this`
@@ -74,8 +84,6 @@ struct MetaParams {
 	// Copies non-event signals (CV, audio)
 	// Used with read_sync()
 	void transfer(MetaParams &that) {
-		patchcv = that.patchcv;
-
 		for (auto [but, thatbut] : zip(meta_buttons, that.meta_buttons))
 			but.transfer_events(thatbut);
 
@@ -88,8 +96,7 @@ struct MetaParams {
 
 		midi_poly_chans = that.midi_poly_chans;
 
-		for (auto [in, thatin] : zip(ins, that.ins))
-			in = thatin;
+		jack_senses = that.jack_senses;
 	}
 };
 

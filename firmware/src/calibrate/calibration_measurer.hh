@@ -28,7 +28,7 @@ public:
 		: config{config} {
 	}
 
-	void start_chan(unsigned chan_num) {
+	void start_chan() {
 		delay_ctr = 0;
 	}
 

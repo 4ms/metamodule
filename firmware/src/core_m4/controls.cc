@@ -5,6 +5,7 @@
 #include "hsem_handler.hh"
 #include "midi_controls.hh"
 #include "patch/midi_def.hh"
+#include "util/countzip.hh"
 
 namespace MetaModule
 {
@@ -40,6 +41,8 @@ void Controls::update_params() {
 
 		_midi_connected.update(_midi_host.is_connected());
 
+		cur_metaparams->jack_senses = sense_pin_reader.last_reading();
+
 		if (_midi_connected.went_low()) {
 			_midi_parser.start_all_notes_off_sequence();
 		}
@@ -50,12 +53,6 @@ void Controls::update_params() {
 
 		if (cur_metaparams->midi_poly_chans > 0)
 			_midi_parser.set_poly_num(cur_metaparams->midi_poly_chans);
-
-		cur_params->jack_senses = get_jacksense_reading();
-
-		// PatchCV
-		if constexpr (PanelDef::NumMetaCV > 0)
-			cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
 
 		// Rotary button
 		if (rotary_button.is_just_pressed()) {
@@ -157,8 +154,7 @@ void Controls::start() {
 }
 
 void Controls::process() {
-	if (i2c.is_ready())
-		i2cqueue.update();
+	sense_pin_reader.update();
 }
 
 void Controls::set_samplerate(unsigned sample_rate) {
@@ -190,8 +186,6 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 
 	pot_adc.start();
 
-	extaudio_jacksense_reader.start();
-
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen
 	__HAL_DBGMCU_FREEZE_TIM6();
@@ -214,26 +208,6 @@ float Controls::get_pot_reading(uint32_t pot_id) {
 		return (float)val / (4096.f - MinPotValue);
 	}
 	return 0;
-}
-
-uint32_t Controls::get_patchcv_reading() {
-	return 0;
-}
-
-uint32_t Controls::get_jacksense_reading() {
-	uint16_t main_jacksense = jacksense_reader.get_last_reading();
-	uint16_t aux_jacksense = extaudio_jacksense_reader.get_last_reading();
-
-	//Fix for MM p11 mono jacks: patched = high, outputs always patched
-	// main_jacksense |= 0x00FF; //mark outputs always plugged
-
-	// For stereo jacks on inputs: patched = low, outputs always patched
-	// main_jacksense = (~main_jacksense) | 0x00FF;
-
-	// For stereo jacks on all jacks: patched = low
-	main_jacksense = ~main_jacksense;
-
-	return main_jacksense | (aux_jacksense << 16);
 }
 
 } // namespace MetaModule
