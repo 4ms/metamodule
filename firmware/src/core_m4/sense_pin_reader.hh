@@ -126,7 +126,7 @@ private:
 		static bool already_printed_error = false;
 
 		if (!already_printed_error) {
-			pr_err("I2C Error!\n");
+			pr_err("I2C Error chip %d!\n", cur_reader);
 			already_printed_error = true;
 		}
 	}
