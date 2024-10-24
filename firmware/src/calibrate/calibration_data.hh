@@ -10,7 +10,7 @@
 namespace MetaModule
 {
 
-#define DEBUG_CAL_READINGS
+//#define DEBUG_CAL_READINGS
 
 #ifdef DEBUG_CAL_READINGS
 #define CAL_PRINT printf
