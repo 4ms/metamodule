@@ -30,7 +30,7 @@ struct InfoTab : SystemMenuTab {
 			fw_version.remove_prefix(9);
 
 		int memory_percent_used = 0;
-		size_t memory_used = 0;
+		size_t memory_used = 1;
 		unsigned memory_total = A7_HEAP_SZ / (1024 * 1024);
 
 #if !defined(SIMULATOR)
@@ -63,6 +63,10 @@ struct InfoTab : SystemMenuTab {
 	}
 
 	void update_wifi_ip() {
+#ifdef SIMULATOR
+		lv_label_set_text(ui_SystemMenuExpanders, "Wi-Fi: http://192.168.1.23");
+		return;
+#endif
 		switch (wifi_ip_state) {
 
 			case WifiIPState::Idle: {
