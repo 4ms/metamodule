@@ -7,7 +7,6 @@
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
-#include "metaparams.hh"
 #include "params_state.hh"
 #include "patch_file/file_storage_proxy.hh"
 #include "patch_play/patch_mod_queue.hh"
@@ -20,13 +19,11 @@ struct CalibrationRoutine {
 	enum class JackCalStatus { NotCal, Settling, LowOnly, HighOnly, Error, Done };
 
 	CalibrationRoutine(ParamsMidiState &params,
-					   MetaParams &metaparams,
 					   FileStorageProxy &storage,
 					   PatchModQueue &patch_mod_queue)
 		: storage{storage}
 		, patch_mod_queue{patch_mod_queue}
 		, params{params}
-		, metaparams{metaparams}
 		, measurer{{Calibration::DefaultLowV, Calibration::DefaultHighV}} {
 
 		for (auto label : input_status_labels) {
@@ -739,7 +736,6 @@ private:
 	FileStorageProxy &storage;
 	PatchModQueue &patch_mod_queue;
 	ParamsMidiState &params;
-	MetaParams &metaparams;
 
 	// Pad calibration data so does not share cache lines with other data
 	struct PaddedCalData {

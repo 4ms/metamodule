@@ -26,8 +26,8 @@ struct SystemTab : SystemMenuTab {
 			  PatchModQueue &patch_mod_queue)
 		: storage{patch_storage}
 		, patch_playloader{patch_playloader}
-		, cal_routine{params, metaparams, storage, patch_mod_queue}
-		, cal_check{params, metaparams}
+		, cal_routine{params, storage, patch_mod_queue}
+		, cal_check{params}
 		, hw_check{params, metaparams} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);

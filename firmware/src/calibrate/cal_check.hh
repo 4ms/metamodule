@@ -2,7 +2,6 @@
 #include "expanders.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/meta5/ui.h"
-#include "metaparams.hh"
 #include "params_state.hh"
 #include "util/analyzed_signal.hh"
 
@@ -10,9 +9,8 @@ namespace MetaModule
 {
 
 struct CalCheck {
-	CalCheck(ParamsMidiState &params, MetaParams &metaparams)
-		: params{params}
-		, metaparams{metaparams} {
+	CalCheck(ParamsMidiState &params)
+		: params{params} {
 	}
 
 	void update() {
@@ -132,7 +130,6 @@ private:
 
 private:
 	ParamsMidiState &params;
-	MetaParams &metaparams;
 
 	bool visible = false;
 
