@@ -111,6 +111,19 @@ std::string get_panel_name(const JackOutput &, uint16_t panel_id) {
 }
 
 template<typename PanelDef>
+std::string get_panel_brief_name(const JackOutput &, uint16_t panel_id) {
+	std::string name{6};
+
+	if (panel_id < PanelDef::NumAudioOut)
+		name = std::to_string(panel_id + 1);
+
+	else if (AudioExpander::is_expander_output(panel_id))
+		name = "X" + std::to_string(panel_id + 1);
+
+	return name;
+}
+
+template<typename PanelDef>
 std::string get_panel_brief_name(const JackInput &, uint16_t panel_id) {
 	std::string name{6}; //longest: MG127\0
 
@@ -119,6 +132,9 @@ std::string get_panel_brief_name(const JackInput &, uint16_t panel_id) {
 
 	else if (panel_id < PanelDef::NumUserFacingInJacks)
 		name = "G" + std::to_string(panel_id + 1 - PanelDef::NumAudioIn);
+
+	else if (AudioExpander::is_expander_input(panel_id))
+		name = "X" + std::to_string(panel_id - 1);
 
 	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack) {
 		std::string id = std::to_string(panel_id + 1 - MidiMonoNoteJack);
