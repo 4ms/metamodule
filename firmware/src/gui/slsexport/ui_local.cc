@@ -1,5 +1,7 @@
 #include "ui_local.h"
+#include "CoreModules/elements/base_element.hh"
 #include "conf/panel_conf.hh"
+#include "gui/elements/panel_name.hh"
 #include "gui/styles.hh"
 
 namespace MetaModule
@@ -51,24 +53,22 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	unsigned circle_borderwidth = 0;
 
 	if (type == JackMapType::Input) {
-		circle_bgcolor = panel_jack_id < Gui::jack_palette.size() ? Gui::jack_palette[panel_jack_id] :
-																	lv_color_make_rgb565(0x80, 0x80, 0x80);
+		circle_bgcolor = Gui::jack_palette[panel_jack_id % Gui::jack_palette.size()];
 		circle_bordercolor = lv_color_black();
 		circle_borderwidth = 0;
 	} else {
 		circle_bgcolor = lv_color_make_rgb565(0x88, 0x88, 0x88);
-		circle_bordercolor = panel_jack_id < Gui::jack_palette.size() ? Gui::jack_palette[panel_jack_id] :
-																		lv_color_make_rgb565(0x44, 0x44, 0x44);
+		circle_bordercolor = Gui::jack_palette[panel_jack_id % Gui::jack_palette.size()];
 		circle_borderwidth = 2;
 	}
 
 	auto letter_color = panel_jack_id == 6 ? lv_color_white() : lv_color_make_rgb565(0x11, 0x11, 0x11);
 
-	std::string_view letterchar = "";
-	if (type == JackMapType::Input && panel_jack_id < PanelDef::InJackAbbrev.size()) {
-		letterchar = PanelDef::InJackAbbrev[panel_jack_id];
-	} else if (type == JackMapType::Output && panel_jack_id < PanelDef::OutJackAbbrevs.size()) {
-		letterchar = PanelDef::OutJackAbbrevs[panel_jack_id];
+	std::string letterchar = "";
+	if (type == JackMapType::Input) {
+		letterchar = get_panel_brief_name<PanelDef>(JackInput{}, panel_jack_id);
+	} else if (type == JackMapType::Output) {
+		letterchar = get_panel_brief_name<PanelDef>(JackOutput{}, panel_jack_id);
 	}
 
 	auto font = letterchar.size() > 1 ? &ui_font_MuseoSansRounded70014 : &ui_font_MuseoSansRounded70016;
@@ -80,11 +80,13 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_obj_set_align(cont, LV_ALIGN_CENTER);
 	lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_ROW);
 	lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
-	lv_obj_add_flag(cont, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+	lv_obj_add_flag(cont,
+					LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_OVERFLOW_VISIBLE |
+						LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 	lv_obj_clear_flag(cont,
-					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
-						  LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE |
-						  LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);
+					  LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
+						  LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+						  LV_OBJ_FLAG_SCROLL_CHAIN);
 	lv_obj_set_style_radius(cont, 2, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_row(cont, 0, LV_STATE_DEFAULT);
 	lv_obj_set_style_pad_column(cont, 4, LV_STATE_DEFAULT);
@@ -93,8 +95,9 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_obj_set_style_outline_width(cont, 1, LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(cont, 2, LV_STATE_FOCUSED);
 
+	auto circle_width = letterchar.length() > 1 ? 30 : 20;
 	lv_obj_t *circle = lv_btn_create(cont);
-	lv_obj_set_width(circle, 20);
+	lv_obj_set_width(circle, circle_width);
 	lv_obj_set_height(circle, 20);
 	lv_obj_set_x(circle, 0);
 	lv_obj_set_y(circle, 31);

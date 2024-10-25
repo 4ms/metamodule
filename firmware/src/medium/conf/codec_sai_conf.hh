@@ -102,5 +102,5 @@ const SaiConfig codec_ext_sai_conf = {
 	.num_tdm_outs = 8,
 
 	.sync_send = SaiConfig::NoSendSync,
-	.sync_receive_from = SaiConfig::SyncToSAI3,
+	.sync_receive_from = SaiConfig::SyncToSAI2,
 };

@@ -21,18 +21,31 @@ struct JackMapViewPage : PageBase {
 	JackMapViewPage(PatchContext info)
 		: PageBase{info, PageId::JackMapView}
 		, base{ui_JackMapViewPage}
-		, patch{patches.get_view_patch()} {
+		, patch{patches.get_view_patch()}
+		, group{lv_group_create()} {
+
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
 		//TODO:Back button
 		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
 
-		for (unsigned i = 0; i < PanelDef::NumUserFacingInJacks; i++)
-			in_conts[i] = create_jack_map_item(ui_JackMapLeftColumn, JackMapType::Input, i, "");
+		unsigned num_inputs = PanelDef::NumUserFacingInJacks;
+		unsigned num_outputs = PanelDef::NumUserFacingOutJacks;
+		if (Expanders::get_connected().ext_audio_connected) {
+			num_inputs += AudioExpander::NumInJacks;
+			num_outputs += AudioExpander::NumOutJacks;
+		}
 
-		for (unsigned i = 0; i < PanelDef::NumUserFacingOutJacks; i++)
+		for (unsigned i = 0; i < num_inputs; i++) {
+			in_conts[i] = create_jack_map_item(ui_JackMapLeftColumn, JackMapType::Input, i, "");
+			lv_group_add_obj(group, in_conts[i]);
+		}
+
+		for (unsigned i = 0; i < num_outputs; i++) {
 			out_conts[i] = create_jack_map_item(ui_JackMapRightColumn, JackMapType::Output, i, "");
+			lv_group_add_obj(group, out_conts[i]);
+		}
 	}
 
 	void prepare_focus() override {
@@ -70,6 +83,11 @@ struct JackMapViewPage : PageBase {
 				}
 			}
 		}
+
+		lv_group_activate(group);
+
+		lv_obj_scroll_to_y(ui_JackMapLeftColumn, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(ui_JackMapRightColumn, 0, LV_ANIM_OFF);
 	}
 
 	void update() override {
@@ -83,8 +101,9 @@ struct JackMapViewPage : PageBase {
 private:
 	lv_obj_t *base = nullptr;
 	PatchData *patch;
-	std::array<lv_obj_t *, PanelDef::NumUserFacingInJacks> in_conts{};
-	std::array<lv_obj_t *, PanelDef::NumUserFacingOutJacks> out_conts{};
+	std::array<lv_obj_t *, PanelDef::NumUserFacingInJacks + AudioExpander::NumInJacks> in_conts{};
+	std::array<lv_obj_t *, PanelDef::NumUserFacingOutJacks + AudioExpander::NumOutJacks> out_conts{};
+	lv_group_t *group;
 };
 
 } // namespace MetaModule

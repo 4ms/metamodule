@@ -35,10 +35,11 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_remove_style(ui_PatchListRoller, nullptr, LV_STATE_FOCUS_KEY);
 		lv_obj_clear_state(ui_Flashbut, LV_STATE_FOCUSED);
 
+		roller_hover.center_on_roller(false);
+		roller_hover.set_y_offset(13);
 		auto hov = roller_hover.get_cont();
 		lv_obj_add_flag(hov, LV_OBJ_FLAG_FLOATING);
 		lv_obj_set_x(hov, 3);
-		lv_obj_set_y(hov, 13);
 		lv_obj_set_width(hov, 210);
 		lv_obj_set_align(hov, LV_ALIGN_RIGHT_MID);
 	}
