@@ -85,6 +85,9 @@ struct JackMapViewPage : PageBase {
 		}
 
 		lv_group_activate(group);
+
+		lv_obj_scroll_to_y(ui_JackMapLeftColumn, 0, LV_ANIM_OFF);
+		lv_obj_scroll_to_y(ui_JackMapRightColumn, 0, LV_ANIM_OFF);
 	}
 
 	void update() override {

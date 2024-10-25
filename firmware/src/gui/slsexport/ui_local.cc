@@ -53,14 +53,12 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	unsigned circle_borderwidth = 0;
 
 	if (type == JackMapType::Input) {
-		circle_bgcolor = panel_jack_id < Gui::jack_palette.size() ? Gui::jack_palette[panel_jack_id] :
-																	lv_color_make_rgb565(0x80, 0x80, 0x80);
+		circle_bgcolor = Gui::jack_palette[panel_jack_id % Gui::jack_palette.size()];
 		circle_bordercolor = lv_color_black();
 		circle_borderwidth = 0;
 	} else {
 		circle_bgcolor = lv_color_make_rgb565(0x88, 0x88, 0x88);
-		circle_bordercolor = panel_jack_id < Gui::jack_palette.size() ? Gui::jack_palette[panel_jack_id] :
-																		lv_color_make_rgb565(0x44, 0x44, 0x44);
+		circle_bordercolor = Gui::jack_palette[panel_jack_id % Gui::jack_palette.size()];
 		circle_borderwidth = 2;
 	}
 
@@ -97,7 +95,7 @@ lv_obj_t *create_jack_map_item(lv_obj_t *parent, JackMapType type, unsigned pane
 	lv_obj_set_style_outline_width(cont, 1, LV_STATE_FOCUSED);
 	lv_obj_set_style_outline_pad(cont, 2, LV_STATE_FOCUSED);
 
-	auto circle_width = letterchar.length() > 1 ? 28 : 20;
+	auto circle_width = letterchar.length() > 1 ? 30 : 20;
 	lv_obj_t *circle = lv_btn_create(cont);
 	lv_obj_set_width(circle, circle_width);
 	lv_obj_set_height(circle, 20);
