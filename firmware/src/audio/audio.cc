@@ -428,7 +428,11 @@ void AudioStream::update_audio_settings() {
 
 	if (sample_rate != sample_rate_ || block_size != block_size_) {
 
-		if (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR) {
+		auto ok = (codec_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
+		if (ok && ext_audio_connected)
+			ok = (codec_ext_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
+
+		if (ok) {
 
 			if (sample_rate_ != sample_rate) {
 				sample_rate_ = sample_rate;
@@ -445,7 +449,6 @@ void AudioStream::update_audio_settings() {
 				for (auto &s : param_state.smoothed_ins)
 					s.set_size(block_size_);
 			}
-
 		} else {
 			pr_err("FAIL: %d/%d\n", sample_rate_, block_size_);
 		}
