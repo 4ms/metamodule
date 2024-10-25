@@ -433,6 +433,8 @@ void AudioStream::update_audio_settings() {
 			ok = (codec_ext_.change_samplerate_blocksize(sample_rate, block_size) == CodecPCM3168::CODEC_NO_ERR);
 
 		if (ok) {
+			codec_ext_.start();
+			codec_.start();
 
 			if (sample_rate_ != sample_rate) {
 				sample_rate_ = sample_rate;
@@ -441,7 +443,7 @@ void AudioStream::update_audio_settings() {
 				param_blocks[1].metaparams.sample_rate = sample_rate;
 			}
 
-			if (block_size != block_size_) {
+			if (block_size_ != block_size) {
 				block_size_ = block_size;
 
 				set_block_spans();
@@ -450,7 +452,9 @@ void AudioStream::update_audio_settings() {
 					s.set_size(block_size_);
 			}
 		} else {
-			pr_err("FAIL: %d/%d\n", sample_rate_, block_size_);
+			pr_err("FAIL TO CHANGE SR/BS: %d/%d\n", sample_rate_, block_size_);
+			codec_ext_.start();
+			codec_.start();
 		}
 	}
 }
