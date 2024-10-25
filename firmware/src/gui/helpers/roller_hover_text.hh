@@ -24,6 +24,7 @@ public:
 		}
 
 		lv_obj_set_align(label_cont, LV_ALIGN_CENTER);
+		// default: center on roller and no offset
 		lv_obj_set_y(label_cont, lv_obj_get_y(roller) / 2 + 0);
 		lv_obj_set_x(label_cont, 0);
 		lv_obj_set_width(label_cont, lv_pct(109));
@@ -61,6 +62,14 @@ public:
 		lv_hide(label);
 	}
 
+	void center_on_roller(bool do_center = true) {
+		is_centered_on_roller = do_center;
+	}
+
+	void set_y_offset(int32_t offset) {
+		y_offset = offset;
+	}
+
 	void update() {
 		if (display_timer > 0) {
 			if (display_timer == 1) {
@@ -71,7 +80,9 @@ public:
 						char sel_buf[64];
 						lv_roller_get_selected_str(roller, sel_buf, 64);
 						lv_label_set_text(label, sel_buf);
-						lv_obj_set_y(label_cont, lv_obj_get_y(roller) / 2 + 0);
+						int32_t y = is_centered_on_roller ? lv_obj_get_y(roller) / 2 : 0;
+						y += y_offset;
+						lv_obj_set_y(label_cont, y);
 						lv_show(label);
 						display_timer = 0;
 					}
@@ -119,6 +130,9 @@ private:
 	lv_obj_t *label;
 	lv_obj_t *roller;
 	uint32_t sel_idx = 0;
+
+	bool is_centered_on_roller = true;
+	int32_t y_offset = 0;
 
 	std::function<void()> draw_callback;
 };
