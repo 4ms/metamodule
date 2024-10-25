@@ -36,8 +36,10 @@ public:
 			pr_dbg("Audio Expander GPIO expander chip present\n");
 			num_jacksense_readers = 2;
 			ext_jacksense_reader.start();
+			cur_reader = 1;
 		} else {
 			num_jacksense_readers = 1;
+			cur_reader = 0;
 		}
 
 		mdrivlib::HWSemaphore<SharedI2CLock>::unlock();
@@ -72,16 +74,14 @@ public:
 
 				if (++cur_reader == num_jacksense_readers) {
 					cur_reader = 0;
-					tmr = HAL_GetTick();
-					state = Pause;
-				} else {
-					state = Read;
 				}
+				tmr = HAL_GetTick();
+				state = Pause;
 				break;
 			}
 
 			case Pause: {
-				if ((HAL_GetTick() - tmr) > 200)
+				if ((HAL_GetTick() - tmr) > 100)
 					state = Read;
 				break;
 			}
