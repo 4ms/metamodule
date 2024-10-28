@@ -1,4 +1,5 @@
 #include "engine/Module.hpp"
+#include "app/ModuleWidget.hpp"
 #include "console/pr_dbg.hh"
 #include "jansson.h"
 #include <context.hpp>
