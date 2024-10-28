@@ -2,6 +2,7 @@
 #include "conf/control_conf.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/i2c_codec_conf.hh"
+#include "conf/pin_conf.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
@@ -49,11 +50,11 @@ private:
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
 	// Digital controls: Rotary, Buttons and Gate jacks
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, MMControlPins::rotA, MMControlPins::rotB> rotary;
-	DebouncedPin<MMControlPins::rotS, PinPolarity::Inverted> rotary_button;
-	DebouncedPin<MMControlPins::but0, PinPolarity::Inverted> button0;
-	DebouncedPin<MMControlPins::gate_in_1, PinPolarity::Normal> gate_in_1;
-	DebouncedPin<MMControlPins::gate_in_2, PinPolarity::Normal> gate_in_2;
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::rotA, ControlPins::rotB> rotary;
+	DebouncedPin<ControlPins::rotS, PinPolarity::Inverted> rotary_button;
+	DebouncedPin<ControlPins::but0, PinPolarity::Inverted> button0;
+	DebouncedPin<ControlPins::gate_in_1, PinPolarity::Normal> gate_in_1;
+	DebouncedPin<ControlPins::gate_in_2, PinPolarity::Normal> gate_in_2;
 	bool _rotary_moved_while_pressed = false;
 
 	// Analog controls (pots)

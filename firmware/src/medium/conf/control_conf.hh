@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "conf/pin_conf.hh"
 #include "drivers/adc_builtin_conf.hh"
 #include "drivers/adc_periph_nums.hh"
 #include "drivers/dma_config_struct.hh"
@@ -21,19 +22,7 @@ struct FrameRatePinChangeConf : mdrivlib::DefaultPinChangeConf {
 };
 
 using mdrivlib::GPIO;
-using mdrivlib::PinAF;
-using mdrivlib::PinDef;
 using mdrivlib::PinNum;
-using mdrivlib::PinPull;
-
-struct MMControlPins {
-	static constexpr PinDef rotA{GPIO::D, PinNum::_5};
-	static constexpr PinDef rotB{GPIO::E, PinNum::_13};
-	static constexpr PinDef rotS{GPIO::E, PinNum::_15};
-	static constexpr PinDef but0{GPIO::D, PinNum::_8};
-	static constexpr PinDef gate_in_1{GPIO::F, PinNum::_11};
-	static constexpr PinDef gate_in_2{GPIO::B, PinNum::_8};
-};
 
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr mdrivlib::AdcResolution resolution = mdrivlib::Bits12;

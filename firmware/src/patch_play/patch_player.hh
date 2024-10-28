@@ -216,11 +216,11 @@ public:
 	}
 
 	void update_patch_singlecore() {
-		Debug::Pin2::high();
+		// Debug::Pin2::high();
 		for (size_t module_i = 1; module_i < num_modules; module_i++) {
 			modules[module_i]->update();
 		}
-		Debug::Pin2::low();
+		// Debug::Pin2::low();
 
 		for (auto &cable : pd.int_cables) {
 			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
