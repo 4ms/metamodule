@@ -19,14 +19,14 @@ struct ModuleWidgetAdaptor {
 		return {None, None, None, None};
 	}
 
-	void log_widget(std::string_view type, unsigned index, rack::widget::Widget const *widget) {
+	void log_widget(std::string_view type, unsigned index, rack::widget::Widget const *widget, Element const &element) {
 		if constexpr (LogWidgetNames) {
 			pr_trace("Add %.*s #%d '%.*s' to ModuleWidget\n\n",
 					 type.size(),
 					 type.data(),
 					 index,
-					 base_element(widget->element).short_name.size(),
-					 base_element(widget->element).short_name.data());
+					 base_element(element).short_name.size(),
+					 base_element(element).short_name.data());
 		}
 	}
 
@@ -34,14 +34,14 @@ struct ModuleWidgetAdaptor {
 	void addParam(ParamWidgetT *widget) requires(std::derived_from<ParamWidgetT, rack::app::ParamWidget>)
 	{
 		if (widget) {
-			widget->element = make_element(widget);
-			assign_element_fields(widget, getParamName(widget->module, widget->paramId));
+			Element element = make_element(widget);
+			assign_element_fields(widget, getParamName(widget->module, widget->paramId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.param_idx = widget->paramId;
-			elem_idx.emplace_back(widget->element, indices);
+			elem_idx.emplace_back(element, indices);
 
-			log_widget("param", indices.param_idx, widget);
+			log_widget("param", indices.param_idx, widget, element);
 		} else
 			pr_err("Error: can't add a null ParamWidget\n");
 	}
@@ -50,14 +50,14 @@ struct ModuleWidgetAdaptor {
 	void addInput(PortWidgetT *widget) requires(std::derived_from<PortWidgetT, rack::app::PortWidget>)
 	{
 		if (widget) {
-			widget->element = make_element(widget);
-			assign_element_fields(widget, getInputName(widget->module, widget->portId));
+			Element element = make_element(widget);
+			assign_element_fields(widget, getInputName(widget->module, widget->portId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.input_idx = widget->portId;
-			elem_idx.emplace_back(widget->element, indices);
+			elem_idx.emplace_back(element, indices);
 
-			log_widget("input", indices.input_idx, widget);
+			log_widget("input", indices.input_idx, widget, element);
 		} else
 			pr_err("Error: can't add a null input PortWidget\n");
 	}
@@ -66,14 +66,14 @@ struct ModuleWidgetAdaptor {
 	void addOutput(PortWidgetT *widget) requires(std::derived_from<PortWidgetT, rack::app::PortWidget>)
 	{
 		if (widget) {
-			widget->element = make_element(widget);
-			assign_element_fields(widget, getOutputName(widget->module, widget->portId));
+			Element element = make_element(widget);
+			assign_element_fields(widget, getOutputName(widget->module, widget->portId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.output_idx = widget->portId;
-			elem_idx.emplace_back(widget->element, indices);
+			elem_idx.emplace_back(element, indices);
 
-			log_widget("output", indices.output_idx, widget);
+			log_widget("output", indices.output_idx, widget, element);
 		} else
 			pr_err("Error: can't add a null output PortWidget\n");
 	}
@@ -82,14 +82,14 @@ struct ModuleWidgetAdaptor {
 	void addLight(LightWidgetT *widget) requires(std::derived_from<LightWidgetT, rack::app::ModuleLightWidget>)
 	{
 		if (widget) {
-			widget->element = make_element(widget);
-			assign_element_fields(widget, getLightName(widget->module, widget->firstLightId));
+			Element element = make_element(widget);
+			assign_element_fields(widget, getLightName(widget->module, widget->firstLightId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = widget->firstLightId;
-			elem_idx.emplace_back(widget->element, indices);
+			elem_idx.emplace_back(element, indices);
 
-			log_widget("light", indices.light_idx, widget);
+			log_widget("light", indices.light_idx, widget, element);
 		} else
 			pr_err("Error: can't add a null Light\n");
 	}
@@ -99,43 +99,43 @@ struct ModuleWidgetAdaptor {
 		requires(std::derived_from<ParamWidgetT, rack::app::ParamWidget>)
 	{
 		if (widget) {
-			widget->element = make_element(widget, light);
-			assign_element_fields(widget, getParamName(widget->module, widget->paramId));
+			Element element = make_element(widget, light);
+			assign_element_fields(widget, getParamName(widget->module, widget->paramId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = light->firstLightId;
 			indices.param_idx = widget->paramId;
-			elem_idx.emplace_back(widget->element, indices);
+			elem_idx.emplace_back(element, indices);
 
-			log_widget("light param: param", indices.param_idx, widget);
-			log_widget("light param: light", indices.light_idx, widget);
+			log_widget("light param: param", indices.param_idx, widget, element);
+			log_widget("light param: light", indices.light_idx, widget, element);
 		} else
 			pr_err("Error: can't add a null Light Param widget\n");
 	}
 
 	void addSvgLight(rack::app::ModuleLightWidget *widget, std::string_view image) {
 		if (widget) {
-			widget->element = make_element(widget, image);
-			assign_element_fields(widget, getLightName(widget->module, widget->firstLightId));
+			Element element = make_element(widget, image);
+			assign_element_fields(widget, getLightName(widget->module, widget->firstLightId), element);
 
 			ElementCount::Indices indices = clear();
 			indices.light_idx = widget->firstLightId;
-			elem_idx.emplace_back(widget->element, indices);
+			elem_idx.emplace_back(element, indices);
 
-			log_widget("SvgLight:", indices.light_idx, widget);
+			log_widget("SvgLight:", indices.light_idx, widget, element);
 		} else
 			pr_err("Error: can't add a null Light Param widget\n");
 	}
 
 	void addImage(rack::widget::SvgWidget *widget) {
 		if (widget) {
-			widget->element = make_element(widget);
-			assign_element_fields(widget, "");
+			Element element = make_element(widget);
+			assign_element_fields(widget, "", element);
 
 			ElementCount::Indices indices = clear();
-			elem_idx.emplace_back(widget->element, indices);
+			elem_idx.emplace_back(element, indices);
 
-			log_widget("SvgWidget (image):", 0, widget);
+			log_widget("SvgWidget (image):", 0, widget, element);
 		} else
 			pr_err("Error: can't add a null SvgWidget\n");
 	}
@@ -143,14 +143,14 @@ struct ModuleWidgetAdaptor {
 	void addTextDisplay(MetaModule::VCVTextDisplay *widget) {
 		if (widget) {
 			if (widget->firstLightId >= 0) {
-				widget->element = make_element(widget);
-				assign_element_fields(widget, "");
+				Element element = make_element(widget);
+				assign_element_fields(widget, "", element);
 
 				ElementCount::Indices indices = clear();
 				indices.light_idx = widget->firstLightId;
-				elem_idx.emplace_back(widget->element, indices);
+				elem_idx.emplace_back(element, indices);
 
-				log_widget("VCVTextDisplay:", widget->firstLightId, widget);
+				log_widget("VCVTextDisplay:", widget->firstLightId, widget, element);
 			} else {
 				pr_err("Error: VCVTextDisplay needs a non-negative firstLightId\n");
 			}
@@ -164,7 +164,7 @@ struct ModuleWidgetAdaptor {
 		populate_sorted_elements_indices(elem_idx, elements, indices);
 	}
 
-	static void assign_element_fields(rack::widget::Widget *widget, std::string_view name) {
+	static void assign_element_fields(rack::widget::Widget *widget, std::string_view name, Element &element) {
 		std::visit(
 			[&name, &widget](BaseElement &el) {
 				el.x_mm = to_mm(widget->box.pos.x);
@@ -175,7 +175,7 @@ struct ModuleWidgetAdaptor {
 				el.short_name = name;
 				el.long_name = name;
 			},
-			widget->element);
+			element);
 	}
 };
 
