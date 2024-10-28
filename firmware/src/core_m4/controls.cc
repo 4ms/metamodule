@@ -22,8 +22,8 @@ void Controls::update_debouncers() {
 }
 
 void Controls::update_params() {
-	cur_params->gate_ins[0] = gate_in_1.is_high();
-	cur_params->gate_ins[1] = gate_in_2.is_high();
+	cur_params->gate_ins = gate_in_1.is_high() ? 0b01 : 0b00;
+	cur_params->gate_ins |= gate_in_2.is_high() ? 0b10 : 0b00;
 
 	// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
 	if (_new_adc_data_ready) {
