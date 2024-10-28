@@ -21,6 +21,7 @@
 #include "util/countzip.hh"
 #include "util/math_tables.hh"
 #include "util/zip.hh"
+#include <cstring>
 
 namespace MetaModule
 {
@@ -90,8 +91,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
 		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
 
-		// 71.2us w/both MIDIs
-		// alternating 44us/71.3us with jack sense in metamparams (why alternating?)
+		// Blocksize 64: alternating 33.8us on block 1, 66us on block 0
+		// time changes relative to block size (always 0.53/1.03us per frame = 3.7% avg. load)
 		auto &params = cache_params(block);
 
 		if (is_playing_patch())
@@ -407,10 +408,10 @@ uint32_t AudioStream::get_audio_errors() {
 
 // It's measurably faster to copy params into cacheable ram
 ParamBlock &AudioStream::cache_params(unsigned block) {
-	local_params.metaparams = param_blocks[block].metaparams;
+	local_params.metaparams.midi_connected = param_blocks[block].metaparams.midi_connected;
+	local_params.metaparams.jack_senses = param_blocks[block].metaparams.jack_senses;
 
-	for (unsigned i = 0; i < block_size_; i++)
-		local_params.params[i] = param_blocks[block].params[i];
+	std::memcpy(local_params.params.data(), param_blocks[block].params.data(), sizeof(Params) * block_size_);
 
 	return local_params;
 }
