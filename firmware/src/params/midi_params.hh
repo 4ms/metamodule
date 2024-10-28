@@ -21,13 +21,13 @@ struct Event {
 		GateNote,
 		CC,
 		Bend,
-		Time
+		Time,
 	} type = Type::None;
 
 	uint8_t midi_chan = 0; //currently not implemented
 	uint8_t poly_chan = 0;
 	uint8_t note = 0; // GateNote: note value; CC: ccnum; Time: event type
-	float val = 0;	  //velocity or on/off
+	int16_t val = 0;  //velocity, pitchBend, or on/off
 };
 static constexpr auto sizeofEvent = sizeof(Event);
 
