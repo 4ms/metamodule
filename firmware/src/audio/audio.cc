@@ -220,19 +220,20 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// Gate inputs
-		for (auto [i, gatein, sync_gatein] : countzip(params.gate_ins, param_state.gate_ins)) {
-
-			bool gate = false;
-			if (jack_is_patched(param_state.jack_senses, i + FirstGateInput)) {
-				gate = gatein;
-				player.set_panel_input(i + FirstGateInput, gatein ? 8.f : 0.f);
-			}
+		for (auto [i, sync_gatein] : enumerate(param_state.gate_ins)) {
+			bool gate =
+				jack_is_patched(param_state.jack_senses, i + FirstGateInput) ? ((params.gate_ins >> i) & 1) : false;
 
 			sync_gatein.register_state(gate);
+
+			if (sync_gatein.just_went_low())
+				player.set_panel_input(i + FirstGateInput, 0.f);
+			else if (sync_gatein.just_went_high())
+				player.set_panel_input(i + FirstGateInput, 8.f);
 		}
 
 		// Pass Knob values to modules
-		for (auto [i, knob, latch] : countzip(params.knobs, param_state.knobs)) {
+		for (auto [i, knob, latch] : countzip(params.knobs, knob_states)) {
 			if (latch.store_changed(knob))
 				player.set_panel_param(i, knob);
 		}
