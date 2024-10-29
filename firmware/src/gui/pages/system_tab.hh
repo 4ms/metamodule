@@ -1,6 +1,7 @@
 #pragma once
 #include "calibrate/cal_check.hh"
 #include "calibrate/calibration_routine.hh"
+#include "expanders.hh"
 #include "fs/norflash_layout.hh"
 #include "git_version.h"
 #include "gui/helpers/lv_helpers.hh"
@@ -25,16 +26,18 @@ struct SystemTab : SystemMenuTab {
 			  PatchModQueue &patch_mod_queue)
 		: storage{patch_storage}
 		, patch_playloader{patch_playloader}
-		, cal_routine{params, metaparams, storage, patch_mod_queue}
-		, cal_check{params, metaparams}
+		, cal_routine{params, storage, patch_mod_queue}
+		, cal_check{params}
 		, hw_check{params, metaparams} {
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_SystemExpCalibrationButton, calibrate_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_SystemCalCheckButton, cal_check_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ResetFactoryPatchesButton, resetbut_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_CheckHardwareButton, hwcheck_cb, LV_EVENT_CLICKED, this);
 
 		lv_obj_add_event_cb(ui_SystemCalibrationButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_SystemExpCalibrationButton, scroll_up_cb, LV_EVENT_FOCUSED, this);
 	}
 
 	void prepare_focus(lv_group_t *group) override {
@@ -43,25 +46,28 @@ struct SystemTab : SystemMenuTab {
 		lv_hide(ui_CalibrationProcedureCont);
 		lv_show(ui_SystemCalibrationCont);
 		lv_show(ui_SystemCalibrationButton);
+		lv_show(ui_SystemExpCalibrationButton, Expanders::get_connected().ext_audio_connected);
 		lv_show(ui_SystemCalCheckButton);
 		lv_show(ui_SystemResetInternalPatchesCont);
 		lv_show(ui_SystemHardwareCheckCont);
 
-		lv_group_remove_obj(ui_SystemCalibrationButton);
 		lv_group_remove_obj(ui_SystemCalCheckButton);
+		lv_group_remove_obj(ui_SystemCalibrationButton);
+		lv_group_remove_obj(ui_SystemExpCalibrationButton);
 		lv_group_remove_obj(ui_CalibrationCancelButton);
 		lv_group_remove_obj(ui_CalibrationNextButton);
 		lv_group_remove_obj(ui_ResetFactoryPatchesButton);
 		lv_group_remove_obj(ui_CheckHardwareButton);
 
-		lv_group_add_obj(group, ui_SystemCalibrationButton);
 		lv_group_add_obj(group, ui_SystemCalCheckButton);
+		lv_group_add_obj(group, ui_SystemCalibrationButton);
+		lv_group_add_obj(group, ui_SystemExpCalibrationButton);
 		lv_group_add_obj(group, ui_CheckHardwareButton);
 		lv_group_add_obj(group, ui_ResetFactoryPatchesButton);
 		lv_group_add_obj(group, ui_CalibrationCancelButton);
 		lv_group_add_obj(group, ui_CalibrationNextButton);
 
-		lv_group_focus_obj(ui_SystemCalibrationButton);
+		lv_group_focus_obj(ui_SystemCalCheckButton);
 		confirm_popup.init(ui_SystemMenu, group);
 	}
 
@@ -111,7 +117,10 @@ private:
 		auto page = static_cast<SystemTab *>(event->user_data);
 
 		page->patch_playloader.request_load_calibration_patch();
-		page->cal_routine.start();
+		if (event->target == ui_SystemCalibrationButton)
+			page->cal_routine.start();
+		else if (event->target == ui_SystemExpCalibrationButton)
+			page->cal_routine.start_expander();
 	}
 
 	static void scroll_up_cb(lv_event_t *event) {

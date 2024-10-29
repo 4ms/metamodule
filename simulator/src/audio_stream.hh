@@ -1,4 +1,5 @@
 #pragma once
+#include "expanders.hh"
 #include "params_state.hh"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_mods.hh"
@@ -20,6 +21,7 @@ class AudioStream {
 	PatchModQueue &patch_mod_queue;
 
 	CalData cal;
+	CalData ext_cal;
 
 public:
 	AudioStream(ParamsState &params_state,
@@ -30,6 +32,9 @@ public:
 		, player{player}
 		, patch_loader{play_loader}
 		, patch_mod_queue{patch_mod_queue} {
+
+		// Pretend that we found an audio expander
+		Expanders::ext_audio_found(true);
 	}
 
 	void process(StreamConfSim::Audio::AudioInBuffer in_buff, StreamConfSim::Audio::AudioOutBuffer out_buff) {
@@ -40,7 +45,7 @@ public:
 		}
 
 		std::optional<bool> update_cal;
-		handle_patch_mods(patch_mod_queue, player, cal, update_cal);
+		handle_patch_mods(patch_mod_queue, player, {&cal, &ext_cal}, update_cal);
 
 		if (in_buff.size() != out_buff.size()) {
 			std::cout << "Buffer size mis-match!\n";

@@ -10,6 +10,14 @@
 namespace MetaModule
 {
 
+//#define DEBUG_CAL_READINGS
+
+#ifdef DEBUG_CAL_READINGS
+#define CAL_PRINT printf
+#else
+#define CAL_PRINT(...)
+#endif
+
 namespace Calibration
 {
 
@@ -30,8 +38,11 @@ static constexpr float DefaultHighReading = from_volts(DefaultHighV);
 } // namespace Calibration
 
 struct CalData {
-	std::array<Calibrator, PanelDef::NumAudioIn> in_cal{};
-	std::array<Calibrator, PanelDef::NumAudioOut> out_cal{};
+	static constexpr size_t NumIns = PanelDef::NumAudioIn;
+	static constexpr size_t NumOuts = PanelDef::NumAudioOut;
+
+	std::array<Calibrator, NumIns> in_cal{};
+	std::array<Calibrator, NumOuts> out_cal{};
 
 	static constexpr Calibrator DefaultInput{{Calibration::DefaultLowV, Calibration::DefaultHighV},
 											 {Calibration::DefaultLowReading, Calibration::DefaultHighReading}};
@@ -94,14 +105,16 @@ struct CalData {
 			[[maybe_unused]] auto slope_ratio =
 				chan.slope() == 0 ? 0. : double(DefaultInput.slope()) / double(chan.slope());
 			[[maybe_unused]] double offset_v = Calibration::to_volts(chan.offset());
-			pr_trace("Input: slope: %f offset(V): %f\n", slope_ratio, offset_v);
+			CAL_PRINT("Input: slope: %f offset(V): %f\n", slope_ratio, offset_v);
 		}
 		for (auto chan : out_cal) {
 			[[maybe_unused]] auto slope_ratio =
 				chan.slope() == 0 ? 0. : double(DefaultOutput.slope()) / double(chan.slope());
-			pr_trace("Output: slope: %f offset(V): %f\n", slope_ratio, double(chan.offset()));
+			CAL_PRINT("Output: slope: %f offset(V): %f\n", slope_ratio, double(chan.offset()));
 		}
 	}
 };
+
+static constexpr size_t CalDataSize = sizeof(CalData);
 
 } // namespace MetaModule

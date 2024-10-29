@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "patch/patch.hh"
 #include <string>
 
@@ -31,10 +32,15 @@ template<typename PanelDef>
 std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 	std::string name{16};
 
-	if (panel_id < PanelDef::NumUserFacingInJacks)
+	if (PanelDef::is_main_panel_input(panel_id)) {
 		name = PanelDef::get_map_injack_name(panel_id);
 
-	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack) {
+	} else if (AudioExpander::is_expander_input(panel_id)) {
+		name = AudioExpander::get_map_injack_name(AudioExpander::panel_to_exp_input(panel_id));
+	}
+
+	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack)
+	{
 		std::string id = std::to_string(panel_id + 1 - MidiMonoNoteJack);
 		name = "MIDI Note " + id;
 	}
@@ -96,7 +102,24 @@ std::string get_panel_name(const JackInput &, uint16_t panel_id) {
 template<typename PanelDef>
 std::string get_panel_name(const JackOutput &, uint16_t panel_id) {
 	std::string name{8};
-	name = PanelDef::get_map_outjack_name(panel_id);
+	if (panel_id < PanelDef::NumUserFacingOutJacks) {
+		name = PanelDef::get_map_outjack_name(panel_id);
+	} else if (size_t id = panel_id - PanelDef::NumUserFacingOutJacks; id < AudioExpander::NumOutJacks) {
+		name = AudioExpander::get_map_outjack_name(id);
+	}
+	return name;
+}
+
+template<typename PanelDef>
+std::string get_panel_brief_name(const JackOutput &, uint16_t panel_id) {
+	std::string name{6};
+
+	if (panel_id < PanelDef::NumAudioOut)
+		name = std::to_string(panel_id + 1);
+
+	else if (AudioExpander::is_expander_output(panel_id))
+		name = "X" + std::to_string(panel_id + 1);
+
 	return name;
 }
 
@@ -109,6 +132,9 @@ std::string get_panel_brief_name(const JackInput &, uint16_t panel_id) {
 
 	else if (panel_id < PanelDef::NumUserFacingInJacks)
 		name = "G" + std::to_string(panel_id + 1 - PanelDef::NumAudioIn);
+
+	else if (AudioExpander::is_expander_input(panel_id))
+		name = "X" + std::to_string(panel_id - 1);
 
 	else if (panel_id >= MidiMonoNoteJack && panel_id <= MidiNote8Jack) {
 		std::string id = std::to_string(panel_id + 1 - MidiMonoNoteJack);

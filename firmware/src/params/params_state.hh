@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/hub/audio_expander_defs.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
 #include "midi_params.hh"
@@ -7,6 +8,7 @@
 #include "patch_play/lights.hh"
 #include "patch_play/text_display.hh"
 #include "util/debouncer.hh"
+#include "util/filter.hh"
 #include "util/parameter.hh"
 #include "util/zip.hh"
 #include <array>
@@ -19,6 +21,16 @@ namespace MetaModule
 struct ParamsState {
 	std::array<LatchedParam<float, 25, 40960>, PanelDef::NumPot> knobs{};
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
+
+	std::array<ResizingOversampler, PanelDef::NumAudioIn + AudioExpander::NumInJacks> smoothed_ins;
+
+	//jack_senses bit order:
+	//0-5: Audio Ins (main panel)
+	//6,7: Gate Ins (main panel)
+	//8-15: Audio Outs (main panel)
+	//16-21: Expander Audio Ins
+	//22-29: Expander Audio outs
+	//30-31: Unused
 	uint32_t jack_senses;
 
 	void clear() {
@@ -28,6 +40,9 @@ struct ParamsState {
 		for (auto &knob : knobs)
 			knob = {0.f, false};
 
+		for (auto &in : smoothed_ins)
+			in.reset();
+
 		jack_senses = 0;
 	}
 
@@ -36,28 +51,42 @@ struct ParamsState {
 			knob.changed = false;
 	}
 
+	// Given an input jack ID (panel=0..7, expander = 8..13)
+	// return the corresponding bit position in `jack_senses`
+	static constexpr unsigned input_bit(unsigned panel_injack_idx) {
+		auto p = panel_injack_idx;
+		return main_jacksense_input_bit(p).value_or(AudioExpander::jacksense_input_bit(p).value_or(0));
+	}
+
+	// Given an output jack ID (panel=0..7, expander = 8..15)
+	// return the corresponding bit position in `jack_senses`
+	static constexpr unsigned output_bit(unsigned panel_outjack_idx) {
+		auto p = panel_outjack_idx;
+		return main_jacksense_output_bit(p).value_or(AudioExpander::jacksense_output_bit(p).value_or(0));
+	}
+
 	void set_input_plugged(unsigned panel_injack_idx, bool plugged) {
 		if (plugged)
-			jack_senses |= (1 << jacksense_pin_order[panel_injack_idx]);
+			jack_senses |= (1 << input_bit(panel_injack_idx));
 		else
-			jack_senses &= ~(1 << jacksense_pin_order[panel_injack_idx]);
+			jack_senses &= ~(1 << input_bit(panel_injack_idx));
 	}
 
+	//0-5: Main Audio Ins, 6-7: GateIns, 8-13: Expander Ins
 	bool is_input_plugged(unsigned panel_injack_idx) {
-		return jack_senses & (1 << jacksense_pin_order[panel_injack_idx]);
+		return jack_senses & (1 << input_bit(panel_injack_idx));
 	}
 
+	//0-7: Main Outs, 8-15: Expander Outs
 	void set_output_plugged(unsigned panel_outjack_idx, bool plugged) {
-		auto jack_idx = panel_outjack_idx + PanelDef::NumAudioIn + PanelDef::NumGateIn;
 		if (plugged)
-			jack_senses |= (1 << jacksense_pin_order[jack_idx]);
+			jack_senses |= (1 << output_bit(panel_outjack_idx));
 		else
-			jack_senses &= ~(1 << jacksense_pin_order[jack_idx]);
+			jack_senses &= ~(1 << output_bit(panel_outjack_idx));
 	}
 
 	bool is_output_plugged(unsigned panel_outjack_idx) {
-		auto jack_idx = panel_outjack_idx + PanelDef::NumAudioIn + PanelDef::NumGateIn;
-		return jack_senses & (1 << jacksense_pin_order[jack_idx]);
+		return jack_senses & (1 << output_bit(panel_outjack_idx));
 	}
 
 	friend void copy(ParamsState &dst, ParamsState const &src) {
@@ -69,6 +98,9 @@ struct ParamsState {
 		}
 
 		dst.jack_senses = src.jack_senses;
+
+		for (auto [in, that_in] : zip(dst.smoothed_ins, src.smoothed_ins))
+			in = that_in;
 	}
 };
 

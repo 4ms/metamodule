@@ -23,6 +23,7 @@
 #include "fs/norflash_layout.hh"
 
 #ifdef CPU_TEST_ALL_MODULES
+#include "conf/pin_conf.hh"
 #include "fs/general_io.hh"
 #include "load_test/tester.hh"
 #endif
@@ -82,9 +83,8 @@ void main() {
 	};
 
 	{
-		FlashLoader loader;
-		CalibrationDataReader cal{loader};
-		audio.set_calibration(cal.read_calibration_or_defaults());
+		CalibrationDataReader cal;
+		audio.set_calibration(cal.read_calibration_or_defaults(FlashLoader{}, CalDataFlashOffset));
 	}
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
@@ -114,7 +114,8 @@ void main() {
 #ifdef CPU_TEST_ALL_MODULES
 	mdrivlib::HWSemaphore<MainCoreReady>::lock();
 
-	mdrivlib::Pin but0{GPIO::D, PinNum::_8, PinMode::Input, 0, mdrivlib::PinPull::Up, mdrivlib::PinPolarity::Inverted};
+	mdrivlib::Pin but0{
+		ControlPins::but0, mdrivlib::PinMode::Input, mdrivlib::PinPull::Up, mdrivlib::PinPolarity::Inverted};
 	if (but0.is_on()) {
 		auto db = LoadTest::test_all_modules();
 		auto filedata = LoadTest::entries_to_csv(db);

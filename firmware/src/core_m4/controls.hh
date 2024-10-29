@@ -2,6 +2,7 @@
 #include "conf/control_conf.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/i2c_codec_conf.hh"
+#include "conf/pin_conf.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
@@ -11,11 +12,11 @@
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
-#include "gpio_expander_reader.hh"
 #include "metaparams.hh"
 #include "midi_controls.hh"
 #include "param_block.hh"
 #include "params.hh"
+#include "sense_pin_reader.hh"
 #include "usb/midi_host.hh"
 #include "usb/midi_message.hh"
 #include "util/edge_detector.hh"
@@ -40,8 +41,6 @@ private:
 	void update_debouncers();
 
 	float get_pot_reading(uint32_t pot_id);
-	uint32_t get_patchcv_reading();
-	uint32_t get_jacksense_reading();
 
 	void set_samplerate(unsigned sample_rate);
 
@@ -51,11 +50,11 @@ private:
 	mdrivlib::PinChangeInt<FrameRatePinChangeConf> read_controls_task;
 
 	// Digital controls: Rotary, Buttons and Gate jacks
-	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, MMControlPins::rotA, MMControlPins::rotB> rotary;
-	DebouncedPin<MMControlPins::rotS, PinPolarity::Inverted> rotary_button;
-	DebouncedPin<MMControlPins::but0, PinPolarity::Inverted> button0;
-	DebouncedPin<MMControlPins::gate_in_1, PinPolarity::Normal> gate_in_1;
-	DebouncedPin<MMControlPins::gate_in_2, PinPolarity::Normal> gate_in_2;
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, ControlPins::rotA, ControlPins::rotB> rotary;
+	DebouncedPin<ControlPins::rotS, PinPolarity::Inverted> rotary_button;
+	DebouncedPin<ControlPins::but0, PinPolarity::Inverted> button0;
+	DebouncedPin<ControlPins::gate_in_1, PinPolarity::Normal> gate_in_1;
+	DebouncedPin<ControlPins::gate_in_2, PinPolarity::Normal> gate_in_2;
 	bool _rotary_moved_while_pressed = false;
 
 	// Analog controls (pots)
@@ -67,11 +66,7 @@ private:
 	static constexpr uint32_t AdcReadFrequency = 580; //measured
 	bool _new_adc_data_ready = false;
 
-	// Jack plug sensing
-	mdrivlib::I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
-	mdrivlib::GPIOExpander jacksense_reader{i2c, mainboard_gpio_expander_conf};
-	mdrivlib::GPIOExpander extaudio_jacksense_reader{i2c, extaudio_gpio_expander_conf};
-	SharedBusQueue i2cqueue{jacksense_reader, extaudio_jacksense_reader};
+	SensePinReader sense_pin_reader;
 
 	// MIDI
 	MidiHost &_midi_host;
