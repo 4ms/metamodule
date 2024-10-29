@@ -22,6 +22,14 @@ struct PatchDirList {
 		return vol_root[vol_idx(vol)];
 	}
 
+	bool is_mounted(Volume vol) {
+		return mounted[vol_idx(vol)];
+	}
+
+	void mark_mounted(Volume vol, bool status) {
+		mounted[vol_idx(vol)] = status;
+	}
+
 	void clear_patches(Volume vol) {
 		auto vol_num = vol_idx(vol);
 		vol_root[vol_num].dirs.clear();
@@ -31,6 +39,7 @@ struct PatchDirList {
 	std::array<PatchDir, 4> vol_root{};
 	static constexpr std::array<const char *, 4> vol_name = {"Open Patches", "USB", "Card", "Internal"};
 	static constexpr std::array<Volume, 4> vols{Volume::RamDisk, Volume::USB, Volume::SDCard, Volume::NorFlash};
+	std::array<bool, 4> mounted{};
 
 	static std::string_view get_vol_name(Volume vol) {
 		for (auto [name, v] : zip(vol_name, vols)) {
