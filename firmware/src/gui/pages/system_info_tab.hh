@@ -76,6 +76,7 @@ struct InfoTab : SystemMenuTab {
 
 	void update_wifi_expander() {
 #ifdef SIMULATOR
+		lv_show(ui_SystemMenuExpanders);
 		lv_label_set_text(ui_SystemMenuExpanders, "Wi-Fi: http://192.168.1.23");
 		return;
 #endif
