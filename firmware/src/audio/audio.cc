@@ -233,7 +233,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		}
 
 		// Pass Knob values to modules
-		for (auto [i, knob, latch] : countzip(params.knobs, knob_states)) {
+		for (auto [i, knob, latch] : countzip(params.knobs, param_state.knobs)) {
 			if (latch.store_changed(knob))
 				player.set_panel_param(i, knob);
 		}
