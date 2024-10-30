@@ -40,7 +40,7 @@ struct PluginModuleMenu {
 			return populate_menu_items() > 0;
 
 		} else if (auto native_module = patch_playloader.get_plugin_module<CoreProcessor>(this_module_id)) {
-			plugin_menu = std::make_unique<NativeModuleMenu>();
+			plugin_menu = std::make_unique<NativeModuleMenu>(native_module);
 			return populate_menu_items() > 0;
 		}
 

@@ -1,5 +1,7 @@
 #pragma once
+#include "CoreModules/CoreProcessor.hh"
 #include "gui/module_menu/base_plugin_menu.hh"
+#include <memory>
 
 namespace MetaModule
 {
@@ -7,7 +9,9 @@ namespace MetaModule
 // Not implemented yet, just placeholder to demonstrate support for multiple plugin types
 struct NativeModuleMenu : BasePluginModuleMenu {
 
-	NativeModuleMenu() = default;
+	NativeModuleMenu(CoreProcessor *module) {
+	}
+
 	~NativeModuleMenu() override = default;
 
 	std::vector<std::string> get_items() override {
