@@ -1,6 +1,7 @@
 #pragma once
 #include "console/pr_dbg.hh"
 #include "gui/module_menu/base_plugin_menu.hh"
+#include "gui/styles.hh"
 #include <app/ModuleWidget.hpp>
 #include <ui/MenuItem.hpp>
 
@@ -24,6 +25,8 @@ struct RackModuleMenu : BasePluginModuleMenu {
 			if (auto mw = module_widget.lock()) {
 				mw->appendContextMenu(rack_menu.get());
 			}
+
+			exited = false;
 		}
 
 		if (current_menu) {
@@ -34,14 +37,17 @@ struct RackModuleMenu : BasePluginModuleMenu {
 	}
 
 	void back_event() override {
-		if (current_menu->parentMenu) {
+		if (current_menu && current_menu->parentMenu) {
 			current_menu = current_menu->parentMenu;
-		} else
+		} else {
+			rack_menu.reset();
 			current_menu = nullptr;
+			exited = true;
+		}
 	}
 
 	bool is_done() override {
-		return current_menu == nullptr;
+		return exited;
 	}
 
 	void click_item(unsigned idx) override {
@@ -89,9 +95,16 @@ private:
 				child->step();
 
 				auto &item = menu.emplace_back();
-				item = rack_item->text;
-				if (rack_item->rightText.length())
-					item += " | " + rack_item->rightText;
+				// Checkmarks go on left side
+				if (rack_item->rightText.ends_with(CHECKMARK_STRING))
+					item = Gui::grey_text(CHECKMARK_STRING);
+				else
+					item = "  ";
+
+				item += rack_item->text;
+
+				if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
+					item += "  " + Gui::grey_text(rack_item->rightText);
 			}
 		}
 	}
@@ -100,6 +113,8 @@ private:
 	std::shared_ptr<rack::ui::Menu> rack_menu;
 
 	rack::ui::Menu *current_menu{}; //can't use smart pointer because must point to a raw pointer in rack API
+
+	bool exited = false;
 };
 
 } // namespace MetaModule
