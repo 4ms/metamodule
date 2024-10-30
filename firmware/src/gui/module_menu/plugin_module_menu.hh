@@ -23,8 +23,15 @@ struct PluginModuleMenu {
 		lv_obj_add_event_cb(roller, roller_scrolled_cb, LV_EVENT_KEY, this);
 		lv_obj_remove_style(roller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(roller, nullptr, LV_STATE_FOCUS_KEY);
+
 		auto roller_label = lv_obj_get_child(roller, 0);
 		lv_label_set_recolor(roller_label, true);
+
+		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
+		lv_obj_set_style_text_font(roller, &ui_font_MuseoSansRounded70014, LV_PART_SELECTED);
+
+		auto hover_label = lv_obj_get_child(roller_hover.get_cont(), 0);
+		lv_obj_set_style_text_font(hover_label, &ui_font_MuseoSansRounded70014, LV_PART_MAIN);
 	}
 
 	bool create_options_menu(unsigned this_module_id) {

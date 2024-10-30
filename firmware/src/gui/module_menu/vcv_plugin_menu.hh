@@ -97,14 +97,12 @@ private:
 				auto &item = menu.emplace_back();
 				// Checkmarks go on left side
 				if (rack_item->rightText.ends_with(CHECKMARK_STRING))
-					item = Gui::grey_text(CHECKMARK_STRING);
-				else
-					item = "  ";
+					item = Gui::yellow_text(CHECKMARK_STRING);
 
 				item += rack_item->text;
 
 				if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
-					item += "  " + Gui::grey_text(rack_item->rightText);
+					item += " " + Gui::yellow_text(rack_item->rightText);
 			}
 		}
 	}
