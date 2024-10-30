@@ -182,6 +182,7 @@ lv_obj_t *ui_ModuleViewSettingsButLabel;
 lv_obj_t *ui_ModuleViewCableCancelBut;
 lv_obj_t *ui_ModuleViewCabelCancelLabel;
 lv_obj_t *ui_ElementRoller;
+lv_obj_t *ui_ModuleViewExtraMenuRoller;
 lv_obj_t *ui_ModuleViewActionMenu;
 lv_obj_t *ui_ModuleViewActionHeader;
 lv_obj_t *ui_ModuleViewActionMenuHeader;

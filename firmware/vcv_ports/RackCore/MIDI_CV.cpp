@@ -550,26 +550,34 @@ struct MIDI_CVWidget : ModuleWidget {
 			else
 				return string::f("%g octave", pwRange / 12) + (pwRange / 12 == 1 ? "" : "s");
 		};
-		menu->addChild(createSubmenuItem("Pitch bend range", getPwRangeLabel(module->pwRange), [=](Menu *menu) {
-			for (size_t i = 0; i < pwRanges.size(); i++) {
-				menu->addChild(createCheckMenuItem(
-					getPwRangeLabel(pwRanges[i]),
-					"",
-					[=]() { return module->pwRange == pwRanges[i]; },
-					[=]() { module->pwRange = pwRanges[i]; }));
-			}
-		}));
+		// METAMODULE: using lambda for rightText in createSubmenuItem for:
+		// - Pitch bend range
+		// - CLK/N divider
+		// - Polyphony channels
+		menu->addChild(createSubmenuItem(
+			"Pitch bend range",
+			[=] { return getPwRangeLabel(module->pwRange); },
+			[=](Menu *menu) {
+				for (float pwRange : pwRanges) {
+					menu->addChild(createCheckMenuItem(
+						getPwRangeLabel(pwRange),
+						"",
+						[=]() { return module->pwRange == pwRange; },
+						[=]() { module->pwRange = pwRange; }));
+				}
+			}));
 
 		menu->addChild(createBoolPtrMenuItem("Smooth pitch/mod wheel", "", &module->smooth));
 
 		static const std::vector<int> clockDivisions = {24 * 4, 24 * 2, 24, 24 / 2, 24 / 4, 24 / 8, 2, 1};
 		static const std::vector<std::string> clockDivisionLabels = {
 			"Whole", "Half", "Quarter", "8th", "16th", "32nd", "12 PPQN", "24 PPQN"};
-		size_t clockDivisionIndex =
-			std::find(clockDivisions.begin(), clockDivisions.end(), module->clockDivision) - clockDivisions.begin();
-		std::string clockDivisionLabel =
-			(clockDivisionIndex < clockDivisionLabels.size()) ? clockDivisionLabels[clockDivisionIndex] : "";
-		menu->addChild(createSubmenuItem("CLK/N divider", clockDivisionLabel, [=](Menu *menu) {
+		auto getClockDivisionLabel = [=] {
+			size_t clockDivisionIndex =
+				std::find(clockDivisions.begin(), clockDivisions.end(), module->clockDivision) - clockDivisions.begin();
+			return (clockDivisionIndex < clockDivisionLabels.size()) ? clockDivisionLabels[clockDivisionIndex] : "";
+		};
+		menu->addChild(createSubmenuItem("CLK/N divider", getClockDivisionLabel, [=](Menu *menu) {
 			for (size_t i = 0; i < clockDivisions.size(); i++) {
 				menu->addChild(createCheckMenuItem(
 					clockDivisionLabels[i],
@@ -579,14 +587,17 @@ struct MIDI_CVWidget : ModuleWidget {
 			}
 		}));
 
-		menu->addChild(createSubmenuItem("Polyphony channels", string::f("%d", module->channels), [=](Menu *menu) {
-			for (int c = 1; c <= 16; c++) {
-				menu->addChild(createCheckMenuItem((c == 1) ? "Monophonic" : string::f("%d", c),
-												   "",
-												   [=]() { return module->channels == c; },
-												   [=]() { module->setChannels(c); }));
-			}
-		}));
+		menu->addChild(createSubmenuItem(
+			"Polyphony channels",
+			[=] { return string::f("%d", module->channels); },
+			[=](Menu *menu) {
+				for (int c = 1; c <= 16; c++) {
+					menu->addChild(createCheckMenuItem((c == 1) ? "Monophonic" : string::f("%d", c),
+													   "",
+													   [=]() { return module->channels == c; },
+													   [=]() { module->setChannels(c); }));
+				}
+			}));
 
 		menu->addChild(createIndexPtrSubmenuItem("Polyphony mode",
 												 {

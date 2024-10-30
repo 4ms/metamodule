@@ -8,10 +8,12 @@
 #include "gui/elements/redraw_display.hh"
 #include "gui/elements/redraw_light.hh"
 #include "gui/helpers/roller_hover_text.hh"
+#include "gui/module_menu/plugin_module_menu.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_action_menu.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
+#include "gui/pages/module_view_roller_helpers.hh"
 #include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -30,7 +32,8 @@ struct ModuleViewPage : PageBase {
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue}
-		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller) {
+		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
+		, module_menu{patch_playloader} {
 
 		init_bg(ui_MappingMenu);
 
@@ -54,6 +57,9 @@ struct ModuleViewPage : PageBase {
 		lv_group_add_obj(group, ui_ModuleViewCableCancelBut);
 		lv_group_add_obj(group, ui_ElementRoller);
 		lv_group_focus_obj(ui_ElementRoller);
+
+		lv_group_add_obj(group, ui_ModuleViewExtraMenuRoller);
+		lv_hide(ui_ModuleViewExtraMenuRoller);
 
 		lv_group_set_wrap(group, false);
 
@@ -123,7 +129,7 @@ struct ModuleViewPage : PageBase {
 	void redraw_module() {
 		reset_module_page();
 		size_t num_elements = moduleinfo.elements.size();
-		opts.reserve(num_elements * 32); // 32 chars per roller item
+		opts.reserve(num_elements * 32); // estimate avg. 32 chars per roller item
 		button.reserve(num_elements);
 		drawn_elements.reserve(num_elements);
 
@@ -170,13 +176,13 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
-			if (is_light_only(gui_el))
+			if (ModView::is_light_only(gui_el))
 				continue;
 
-			if (should_skip_for_cable_mode(gui_state.new_cable, gui_el))
+			if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
 				continue;
 
-			if (append_header(opts, last_type, gui_el.count)) {
+			if (ModView::append_header(opts, last_type, gui_el.count)) {
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 			}
@@ -203,6 +209,16 @@ struct ModuleViewPage : PageBase {
 			}
 
 			roller_idx++;
+		}
+
+		if (is_patch_playing) {
+			if (module_menu.create_options_menu(this_module_id)) {
+				opts += Gui::orange_text("Options:") + "\n";
+				opts += " >>>\n";
+				roller_drawn_el_idx.push_back(-1);
+				roller_drawn_el_idx.push_back(ExtraMenuTag);
+				roller_idx += 2;
+			}
 		}
 
 		if (roller_idx <= 1) {
@@ -269,51 +285,6 @@ struct ModuleViewPage : PageBase {
 				   drawn_element.element);
 	}
 
-	bool is_light_only(GuiElement const &gui_el) const {
-		return (gui_el.count.num_lights > 0) && (gui_el.count.num_params == 0) && (gui_el.count.num_outputs == 0) &&
-			   (gui_el.count.num_inputs == 0);
-	}
-
-	bool should_skip_for_cable_mode(std::optional<GuiState::CableBeginning> const &new_cable,
-									GuiElement const &gui_el) const {
-		if (gui_state.new_cable.has_value()) {
-			uint16_t this_jack_id{};
-			if (gui_el.count.num_inputs > 0)
-				this_jack_id = gui_el.idx.input_idx;
-			else if (gui_el.count.num_outputs > 0)
-				this_jack_id = gui_el.idx.output_idx;
-			else
-				return true;
-			auto this_jack_type = (gui_el.count.num_inputs > 0) ? ElementType::Input : ElementType::Output;
-			if (!can_finish_cable(gui_state.new_cable.value(),
-								  patch,
-								  Jack{.module_id = this_module_id, .jack_id = this_jack_id},
-								  this_jack_type,
-								  gui_el.mapped_panel_id.has_value()))
-				return true;
-		}
-		return false;
-	}
-
-	bool append_header(std::string &opts, ElementCount::Counts last_type, ElementCount::Counts this_type) {
-		if (last_type.num_params == 0 && this_type.num_params > 0) {
-			opts += Gui::orange_text("Params:") + "\n";
-			return true;
-
-		} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
-				   (this_type.num_inputs > 0 || this_type.num_outputs > 0))
-		{
-			opts += Gui::orange_text("Jacks:") + "\n";
-			return true;
-
-		} else if (last_type.num_lights == 0 && this_type.num_lights > 0 && this_type.num_params == 0) {
-			opts += Gui::orange_text("Lights:") + "\n";
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	bool is_creating_map() const {
 		return mapping_pane.is_creating_map();
 	}
@@ -333,12 +304,23 @@ struct ModuleViewPage : PageBase {
 
 			} else if (mode == ViewMode::Mapping) {
 				mapping_pane.back_event();
+
+			} else if (mode == ViewMode::ExtraMenu) {
+				module_menu.back_event();
 			}
 		}
 
 		if (mode == ViewMode::Mapping) {
 			mapping_pane.update();
 			if (mapping_pane.wants_to_close()) {
+				show_roller();
+			}
+		}
+
+		if (mode == ViewMode::ExtraMenu) {
+			module_menu.update();
+			if (module_menu.wants_to_close()) {
+				module_menu.hide();
 				show_roller();
 			}
 		}
@@ -391,6 +373,10 @@ struct ModuleViewPage : PageBase {
 			redraw_module();
 			mapping_pane.refresh();
 		}
+
+		if (lv_group_get_focused(group) == ui_ModuleViewActionBut ||
+			lv_group_get_focused(group) == ui_ModuleViewSettingsBut)
+			roller_hover.hide();
 
 		roller_hover.update();
 	}
@@ -465,6 +451,7 @@ private:
 	void show_roller() {
 		mode = ViewMode::List;
 		mapping_pane.hide();
+		lv_show(ui_ElementRoller);
 		lv_show(ui_ElementRollerPanel);
 		lv_group_focus_obj(ui_ElementRoller);
 		lv_group_set_editing(group, true);
@@ -527,14 +514,24 @@ private:
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
 		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
-		if (cur_sel >= page->roller_drawn_el_idx.size())
+		if (cur_sel >= page->roller_drawn_el_idx.size()) {
+			page->roller_hover.hide();
 			return;
+		}
 
 		auto prev_sel = page->cur_selected;
 		auto cur_idx = page->roller_drawn_el_idx[cur_sel];
 
+		// Extra menu:
+		if (cur_idx == ExtraMenuTag) {
+			page->unhighlight_component(prev_sel);
+			page->cur_selected = cur_sel;
+			page->roller_hover.hide();
+			return;
+		}
+
 		// Skip over headers by scrolling over them in the same direction we just scrolled
-		if (cur_idx < 0) {
+		if (cur_idx == -1) {
 			if (prev_sel < cur_sel) {
 				if (cur_sel < lv_roller_get_option_cnt(ui_ElementRoller) - 1)
 					cur_sel++;
@@ -597,8 +594,9 @@ private:
 
 	static void roller_click_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		auto roller_idx = page->cur_selected;
 
-		if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
+		if (auto drawn_idx = page->get_drawn_idx(roller_idx)) {
 			if (page->gui_state.new_cable) {
 				// Determine id and type of this element
 				std::optional<Jack> this_jack{};
@@ -649,6 +647,15 @@ private:
 				page->roller_hover.hide();
 
 				page->mapping_pane.show(page->drawn_elements[*drawn_idx]);
+			}
+
+			//Not an element: Is it the Extra Menu?
+		} else if (roller_idx < page->roller_drawn_el_idx.size()) {
+			if (page->roller_drawn_el_idx[roller_idx] == ExtraMenuTag) {
+				page->mode = ViewMode::ExtraMenu;
+				lv_hide(ui_ElementRoller);
+				page->roller_hover.hide();
+				page->module_menu.show();
 			}
 		}
 	}
@@ -725,9 +732,13 @@ private:
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};
 	lv_draw_img_dsc_t img_dsc{};
 
-	enum class ViewMode { List, Mapping } mode{ViewMode::List};
+	enum class ViewMode { List, Mapping, ExtraMenu } mode{ViewMode::List};
 
 	RollerHoverText roller_hover;
+
+	PluginModuleMenu module_menu;
+
+	enum { ExtraMenuTag = -2 };
 };
 
 } // namespace MetaModule

@@ -257,6 +257,14 @@ struct PatchPlayLoader {
 		return new_audio_settings_.load();
 	}
 
+	template<typename PluginModuleType>
+	PluginModuleType *get_plugin_module(int32_t module_idx) {
+		if (auto pluginmodule = dynamic_cast<PluginModuleType *>(player_.modules[module_idx].get()))
+			return pluginmodule;
+		else
+			return nullptr;
+	}
+
 private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;

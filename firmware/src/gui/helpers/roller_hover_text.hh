@@ -106,6 +106,10 @@ public:
 		}
 	}
 
+	void force_redraw() {
+		sel_idx = -1;
+	}
+
 	void default_draw_callback() {
 		display_in_time(10);
 	}

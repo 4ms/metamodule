@@ -184,6 +184,7 @@ extern lv_obj_t *ui_ModuleViewSettingsButLabel;
 extern lv_obj_t *ui_ModuleViewCableCancelBut;
 extern lv_obj_t *ui_ModuleViewCabelCancelLabel;
 extern lv_obj_t *ui_ElementRoller;
+extern lv_obj_t *ui_ModuleViewExtraMenuRoller;
 extern lv_obj_t *ui_ModuleViewActionMenu;
 extern lv_obj_t *ui_ModuleViewActionHeader;
 extern lv_obj_t *ui_ModuleViewActionMenuHeader;

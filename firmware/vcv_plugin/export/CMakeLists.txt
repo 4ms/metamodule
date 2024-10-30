@@ -28,11 +28,17 @@ target_sources(
          src/app/SvgSwitch.cc
          src/app/SvgButton.cc
          src/app/SvgScrew.cc
+
          src/engine/Engine.cpp
          src/engine/Module.cpp
          src/engine/ParamQuantity.cpp
+
          src/plugin/Model.cpp
          src/plugin/Plugin.cpp
+
+         src/ui/Menu.cc
+         src/ui/MenuItem.cc
+
          src/widget/Widget.cc
          src/widget/SvgWidget.cc
          src/widget/FramebufferWidget.cc
