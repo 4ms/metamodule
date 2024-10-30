@@ -146,7 +146,7 @@ static Element make_slideswitch(rack::app::SvgSlider *widget) {
 		element.image = widget->background->svg->filename;
 	}
 
-	element.DefaultValue = getDefaultValue(widget);
+	element.default_value = getDefaultValue(widget);
 
 	if (widget->handle->svg->filename.length())
 		element.image_handle = widget->handle->svg->filename;
@@ -260,7 +260,7 @@ static SlideSwitch make_slideswitch(rack::app::SvgSwitch *widget) {
 
 	element.image_handle = "no-image";
 	element.image = widget->frames[0]->filename;
-	element.DefaultValue = getDefaultValue(widget);
+	element.default_value = getDefaultValue(widget);
 	return element;
 }
 
@@ -289,7 +289,7 @@ static FlipSwitch make_flipswitch(rack::app::SvgSwitch *widget) {
 		element.frames[i] = widget->frames[i]->filename;
 	}
 
-	element.DefaultValue = getDefaultValue(widget);
+	element.default_value = getDefaultValue(widget);
 	return element;
 }
 
@@ -343,7 +343,7 @@ static Element make_latching_mono(std::string_view image, NVGcolor c, LatchingBu
 	LatchingButton element;
 	element.image = image;
 	element.color = RGB565{c.r, c.g, c.b};
-	element.DefaultValue = defaultValue;
+	element.default_value = defaultValue;
 	log_make_element_notes("make_latching_mono()", "");
 	return element;
 }
