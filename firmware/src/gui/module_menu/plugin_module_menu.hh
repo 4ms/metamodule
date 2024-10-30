@@ -114,7 +114,6 @@ private:
 			opts.pop_back();
 
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
-		roller_hover.hide();
 
 		return item_strings.size();
 	}
@@ -138,6 +137,9 @@ private:
 		if (auto *group = static_cast<lv_group_t *>(lv_obj_get_group(page->roller)))
 			lv_group_set_editing(group, true);
 		lv_event_send(page->roller, LV_EVENT_PRESSED, nullptr);
+
+		// index might be the same, but content probably changed
+		page->roller_hover.force_redraw();
 	}
 
 	static void roller_scrolled_cb(lv_event_t *event) {
