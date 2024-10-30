@@ -90,19 +90,23 @@ struct RackModuleMenu : BasePluginModuleMenu {
 
 private:
 	void add_menu_items(std::list<rack::widget::Widget *> children, std::vector<std::string> &menu) {
+		unsigned num_children = 0;
 		for (auto child : children) {
 			if (auto rack_item = dynamic_cast<rack::ui::MenuItem *>(child)) {
 				child->step();
 
-				auto &item = menu.emplace_back();
-				// Checkmarks go on left side
-				if (rack_item->rightText.ends_with(CHECKMARK_STRING))
-					item = Gui::yellow_text(CHECKMARK_STRING);
+				// Reasonable limit to size of menu:
+				if (num_children++ < 256) {
+					auto &item = menu.emplace_back();
+					// Checkmarks go on left side
+					if (rack_item->rightText.ends_with(CHECKMARK_STRING))
+						item = Gui::yellow_text(CHECKMARK_STRING);
 
-				item += rack_item->text;
+					item += rack_item->text;
 
-				if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
-					item += " " + Gui::yellow_text(rack_item->rightText);
+					if (rack_item->rightText.length() && !rack_item->rightText.ends_with(CHECKMARK_STRING))
+						item += " " + Gui::yellow_text(rack_item->rightText);
+				}
 			}
 		}
 	}
