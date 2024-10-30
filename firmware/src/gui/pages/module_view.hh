@@ -12,6 +12,7 @@
 #include "gui/pages/cable_drawer.hh"
 #include "gui/pages/module_view_action_menu.hh"
 #include "gui/pages/module_view_mapping_pane.hh"
+#include "gui/pages/module_view_roller_helpers.hh"
 #include "gui/pages/module_view_settings_menu.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -170,13 +171,13 @@ struct ModuleViewPage : PageBase {
 				continue;
 			}
 
-			if (is_light_only(gui_el))
+			if (ModView::is_light_only(gui_el))
 				continue;
 
-			if (should_skip_for_cable_mode(gui_state.new_cable, gui_el))
+			if (ModView::should_skip_for_cable_mode(gui_state.new_cable, gui_el, gui_state, patch, this_module_id))
 				continue;
 
-			if (append_header(opts, last_type, gui_el.count)) {
+			if (ModView::append_header(opts, last_type, gui_el.count)) {
 				roller_idx++;
 				roller_drawn_el_idx.push_back(-1);
 			}
@@ -267,51 +268,6 @@ struct ModuleViewPage : PageBase {
 					   },
 				   },
 				   drawn_element.element);
-	}
-
-	bool is_light_only(GuiElement const &gui_el) const {
-		return (gui_el.count.num_lights > 0) && (gui_el.count.num_params == 0) && (gui_el.count.num_outputs == 0) &&
-			   (gui_el.count.num_inputs == 0);
-	}
-
-	bool should_skip_for_cable_mode(std::optional<GuiState::CableBeginning> const &new_cable,
-									GuiElement const &gui_el) const {
-		if (gui_state.new_cable.has_value()) {
-			uint16_t this_jack_id{};
-			if (gui_el.count.num_inputs > 0)
-				this_jack_id = gui_el.idx.input_idx;
-			else if (gui_el.count.num_outputs > 0)
-				this_jack_id = gui_el.idx.output_idx;
-			else
-				return true;
-			auto this_jack_type = (gui_el.count.num_inputs > 0) ? ElementType::Input : ElementType::Output;
-			if (!can_finish_cable(gui_state.new_cable.value(),
-								  patch,
-								  Jack{.module_id = this_module_id, .jack_id = this_jack_id},
-								  this_jack_type,
-								  gui_el.mapped_panel_id.has_value()))
-				return true;
-		}
-		return false;
-	}
-
-	bool append_header(std::string &opts, ElementCount::Counts last_type, ElementCount::Counts this_type) {
-		if (last_type.num_params == 0 && this_type.num_params > 0) {
-			opts += Gui::orange_text("Params:") + "\n";
-			return true;
-
-		} else if ((last_type.num_inputs == 0 && last_type.num_outputs == 0) &&
-				   (this_type.num_inputs > 0 || this_type.num_outputs > 0))
-		{
-			opts += Gui::orange_text("Jacks:") + "\n";
-			return true;
-
-		} else if (last_type.num_lights == 0 && this_type.num_lights > 0 && this_type.num_params == 0) {
-			opts += Gui::orange_text("Lights:") + "\n";
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	bool is_creating_map() const {
