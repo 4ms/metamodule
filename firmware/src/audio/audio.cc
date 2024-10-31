@@ -281,11 +281,17 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			param_state.smoothed_ins[panel_jack_i].add_val(scaled_input);
 		}
 
-		for (auto [knob, latch] : zip(params.knobs, param_state.knobs))
-			latch.store_changed(knob);
+		// Pass Knob values to modules
+		for (auto [i, knob, latch] : countzip(params.knobs, param_state.knobs)) {
+			if (latch.store_changed(knob))
+				player.set_panel_param(i, knob);
+		}
 
-		if (params.midi_event.type == Midi::Event::Type::CC)
-			sync_params.midi_events.put(params.midi_event);
+		// MIDI
+		handle_midi(param_block.metaparams.midi_connected,
+					params.midi_event,
+					param_block.metaparams.midi_poly_chans,
+					params.raw_msg);
 
 		for (auto &outchan : out.chan)
 			outchan = 0;

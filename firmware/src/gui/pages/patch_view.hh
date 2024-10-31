@@ -67,9 +67,9 @@ struct PatchViewPage : PageBase {
 			return;
 		}
 
-		is_patch_playing = patch_is_playing(args.patch_loc_hash);
+		is_patch_loaded = patch_is_playing(args.patch_loc_hash);
 
-		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
+		if (is_patch_loaded && !patch_playloader.is_audio_muted()) {
 			lv_label_set_text_fmt(ui_LoadMeter2, "%d%%", metaparams.audio_load);
 			lv_show(ui_LoadMeter2);
 			lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
@@ -103,7 +103,7 @@ struct PatchViewPage : PageBase {
 		gui_state.force_redraw_patch = false;
 
 		// Prepare the knobset menu with the actively playing patch's knobset
-		if (is_patch_playing)
+		if (is_patch_loaded)
 			active_knobset = page_list.get_active_knobset();
 
 		else {
@@ -159,7 +159,7 @@ struct PatchViewPage : PageBase {
 				continue;
 
 			module_drawer.draw_mapped_elements(
-				*patch, module_idx, active_knobset, canvas, drawn_elements, is_patch_playing);
+				*patch, module_idx, active_knobset, canvas, drawn_elements, is_patch_loaded);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
@@ -241,7 +241,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
-		bool last_is_patch_playing = is_patch_playing;
+		bool last_is_patch_playing = is_patch_loaded;
 
 		lv_show(ui_SaveButtonRedDot, patches.get_view_patch_modification_count() > 0);
 
@@ -249,23 +249,24 @@ struct PatchViewPage : PageBase {
 			patch = patches.get_view_patch();
 		}
 
-		is_patch_playing = patch_is_playing(displayed_patch_loc_hash);
+		is_patch_loaded = patch_is_playing(displayed_patch_loc_hash);
 
-		if (is_patch_playing != last_is_patch_playing || page_settings.changed) {
+		if (is_patch_loaded != last_is_patch_playing || page_settings.changed) {
 			page_settings.changed = false;
 			update_map_ring_style();
 			update_cable_style();
 			watch_modules();
 		}
 
-		if (is_patch_playing != last_is_patch_playing) {
+		if (is_patch_loaded != last_is_patch_playing) {
 			args.view_knobset_id = active_knobset;
 			page_list.set_active_knobset(active_knobset);
 			patch_mod_queue.put(ChangeKnobSet{active_knobset});
 			redraw_map_rings();
+			pr_dbg("patch changed loaded status: => %d\n", is_patch_loaded);
 		}
 
-		if (is_patch_playing && active_knobset != page_list.get_active_knobset()) {
+		if (is_patch_loaded && active_knobset != page_list.get_active_knobset()) {
 			args.view_knobset_id = page_list.get_active_knobset();
 			active_knobset = page_list.get_active_knobset();
 			redraw_map_rings();
@@ -305,9 +306,10 @@ struct PatchViewPage : PageBase {
 			args.patch_loc_hash = patches.get_view_patch_loc_hash();
 		}
 
-		if (is_patch_playing && !patch_playloader.is_audio_muted()) {
+		if (is_patch_loaded)
 			update_changed_params();
 
+		if (is_patch_loaded && !patch_playloader.is_audio_muted()) {
 			if (!lv_obj_has_state(ui_PlayButton, LV_STATE_USER_2)) {
 				lv_obj_add_state(ui_PlayButton, LV_STATE_USER_2);
 			}
@@ -334,7 +336,7 @@ private:
 
 	void watch_modules() {
 
-		if (is_patch_playing) {
+		if (is_patch_loaded) {
 			for (const auto &drawn_element : drawn_elements) {
 				auto &gui_el = drawn_element.gui_element;
 
@@ -442,7 +444,7 @@ private:
 
 		for (auto &drawn_el : drawn_elements) {
 			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
-			map_ring_display.update(drawn_el, is_on_highlighted_module, is_patch_playing);
+			map_ring_display.update(drawn_el, is_on_highlighted_module, is_patch_loaded);
 		}
 	}
 
@@ -578,7 +580,7 @@ private:
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		if (!page->is_patch_playing) {
+		if (!page->is_patch_loaded) {
 			page->patch_playloader.request_load_view_patch();
 			page->save_last_opened_patch_in_settings();
 		} else {
@@ -661,7 +663,7 @@ private:
 	std::vector<lv_obj_t *> module_canvases;
 	std::vector<uint32_t> module_ids;
 	std::vector<DrawnElement> drawn_elements;
-	bool is_patch_playing = false;
+	bool is_patch_loaded = false; //loaded into the player: might be paused or playing
 	bool is_ready = false;
 
 	PatchLocHash displayed_patch_loc_hash;
