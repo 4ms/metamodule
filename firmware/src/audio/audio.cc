@@ -267,9 +267,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &param_block) {
 	param_state.jack_senses = param_block.metaparams.jack_senses;
 
-	// for (auto [in, out, params] : zip(audio_block.in_codec, audio_block.out_codec, param_block.params)) {
 	for (auto idx = 0u; auto const &in : audio_block.in_codec) {
 		auto &out = audio_block.out_codec[idx];
+		auto &ext_out = audio_block.out_ext_codec[idx];
+		auto const &ext_in = audio_block.in_ext_codec[idx];
 		auto &params = param_block.params[idx];
 		idx++;
 
@@ -281,10 +282,27 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 			param_state.smoothed_ins[panel_jack_i].add_val(scaled_input);
 		}
 
+		if (ext_audio_connected) {
+			for (auto [exp_panel_jack_i, inchan] : zip(AudioExpander::in_order, ext_in.chan)) {
+				// Skip unpatched jacks
+				if (!AudioExpander::jack_is_patched(param_state.jack_senses, exp_panel_jack_i))
+					continue;
+
+				float calibrated_input = ext_cal.in_cal[exp_panel_jack_i].adjust(AudioInFrame::sign_extend(inchan));
+
+				auto panel_jack_i = AudioExpander::exp_to_panel_input(exp_panel_jack_i); //0..5 => 8..13
+
+				// Smoothed ins skips the gate inputs, so subtract those from the index: 8..13 => 6..11
+				auto smooth_idx = panel_jack_i - PanelDef::NumGateIn;
+				param_state.smoothed_ins[smooth_idx].add_val(calibrated_input);
+			}
+		}
+
 		// Pass Knob values to modules
 		for (auto [i, knob, latch] : countzip(params.knobs, param_state.knobs)) {
-			if (latch.store_changed(knob))
+			if (latch.store_changed(knob)) {
 				player.set_panel_param(i, knob);
+			}
 		}
 
 		// MIDI
@@ -295,6 +313,9 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 
 		for (auto &outchan : out.chan)
 			outchan = 0;
+
+		for (auto &extoutchan : ext_out.chan)
+			extoutchan = 0;
 	}
 }
 
