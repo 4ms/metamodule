@@ -301,12 +301,12 @@ public:
 		set_all_connected_jacks(midi_note_gate_conns[midi_poly_note], val);
 	}
 
-	void set_midi_note_velocity(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], val);
+	void set_midi_note_velocity(unsigned midi_poly_note, int16_t val) {
+		set_all_connected_jacks(midi_note_vel_conns[midi_poly_note], float(val) / 12.7f);
 	}
 
-	void set_midi_note_aftertouch(unsigned midi_poly_note, float val) {
-		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], val);
+	void set_midi_note_aftertouch(unsigned midi_poly_note, int16_t val) {
+		set_all_connected_jacks(midi_note_aft_conns[midi_poly_note], float(val) / 12.7f);
 	}
 
 	void set_midi_note_retrig(unsigned midi_poly_note, float val) {
@@ -314,16 +314,18 @@ public:
 		midi_note_retrig[midi_poly_note].pulse.start(0.01);
 	}
 
-	void set_midi_cc(unsigned ccnum, float val) {
+	void set_midi_cc(unsigned ccnum, int16_t val) {
+		float volts = ccnum == Midi::PitchBendCC ? Midi::s14_to_semitones<2>(val) : val / 12.7f;
+
 		// Update jacks connected to this CC
 		if (ccnum < midi_cc_conns.size())
-			set_all_connected_jacks(midi_cc_conns[ccnum], val);
+			set_all_connected_jacks(midi_cc_conns[ccnum], volts);
 
 		// Update knobs connected to theis CC
 		if (ccnum < midi_knob_conns.size()) {
 			for (auto &mm : midi_knob_conns[ccnum]) {
 				if (mm.module_id < num_modules)
-					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(val / 10.f));
+					modules[mm.module_id]->set_param(mm.param_id, mm.get_mapped_val(volts / 10.f)); //0V-10V => 0-1
 			}
 		}
 	}
@@ -970,7 +972,7 @@ private:
 
 	void cache_midi_mapping(const MappedKnob &k) {
 		if (k.is_midi_cc()) {
-			pr_dbg("Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
+			pr_trace("Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
 			update_or_add(midi_knob_conns[k.cc_num()], k);
 		} else {
 			pr_warn("Bad Midi Map: CC%d to m:%d p:%d\n", k.cc_num(), k.module_id, k.param_id);
