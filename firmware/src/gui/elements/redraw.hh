@@ -9,20 +9,18 @@
 #include "pr_dbg.hh"
 #include <cmath>
 
-// TODO: there should be no dependency on a specific brand here
-#include "CoreModules/4ms/4ms_element_state_conversions.hh"
-
 namespace MetaModule
 {
 
-inline bool redraw_element(const Knob &, const GuiElement &gui_el, float val) {
+inline bool redraw_element(const Knob &el, const GuiElement &gui_el, float val) {
 	bool did_update_position = false;
 
 	constexpr int32_t threshold_centidegrees = 10; // 10 centidegrees = 1.0 degrees
 
-	int32_t angle = val * 3000.f - 1500.f;
-	while (angle < 0)
-		angle += 3600;
+	int32_t begin_angle = std::round(el.min_angle * 10.f);
+	int32_t end_angle = std::round(el.max_angle * 10.f);
+	int32_t angle = (val * (end_angle - begin_angle)) + begin_angle;
+	angle = angle % 3600;
 
 	bool is_img = lv_obj_has_class(gui_el.obj, &lv_img_class);
 
