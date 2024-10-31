@@ -317,6 +317,8 @@ void AudioStream::process_nopatch(CombinedAudioBlock &audio_block, ParamBlock &p
 		for (auto &extoutchan : ext_out.chan)
 			extoutchan = 0;
 	}
+
+	player.update_lights();
 }
 
 void AudioStream::handle_midi(bool is_connected,
