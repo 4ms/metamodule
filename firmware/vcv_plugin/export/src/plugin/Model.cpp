@@ -26,6 +26,12 @@ void Model::move_strings() {
 				   element);
 
 		std::visit(overloaded{[](BaseElement &el) {},
+							  [this](Knob &el) {
+								  el.units = strings.emplace_back(el.units);
+							  }},
+				   element);
+
+		std::visit(overloaded{[](BaseElement &el) {},
 							  [this](Slider &el) {
 								  el.image_handle = strings.emplace_back(el.image_handle);
 							  }},

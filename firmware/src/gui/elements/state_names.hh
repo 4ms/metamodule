@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_state_conversion.hh"
+#include "CoreModules/elements/elements.hh"
 #include "util/overloaded.hh"
 #include <string>
 
@@ -26,6 +27,27 @@ inline std::string get_element_value_string(Element const &element, float value,
 				   },
 
 				   [value = value, &s](ParamElement const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
+				   // [value = value, &s](Button const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
+				   // [value = value, &s](Switch const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
+				   // [value = value, &s](Encoder const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
+
+				   [value = value, &s](Pot const &el) {
+					   if (el.display_mult == 1 && el.display_offset == 0 && el.display_base == 0)
+						   s = std::to_string((int)(value * 100.f)) + "%";
+					   else {
+						   float v = value;
+						   if (el.display_base < 0.f) {
+							   // Logarithmic
+							   v = std::log(v) / std::log(-el.display_base);
+						   } else if (el.display_base > 0.f) {
+							   // Exponential
+							   v = std::pow(el.display_base, v);
+						   }
+						   v = v * el.display_mult + el.display_offset;
+					   }
+					   if (el.units.length())
+						   s += std::string(el.units);
+				   },
 
 				   [value = value, &s](SlideSwitch const &el) {
 					   auto v = StateConversion::convertState(el, value);
