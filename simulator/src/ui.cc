@@ -103,6 +103,12 @@ void Ui::play_patch(std::span<Frame> soundcard_out) {
 		}
 	}
 
+	for (auto &p : params.param_watcher.active_watched_params()) {
+		if (p.is_active()) {
+			p.value = patch_player.get_param(p.module_id, p.param_id);
+		}
+	}
+
 	for (size_t i = 0; auto &frame : out_buffer) {
 		auto &out = soundcard_out[i++];
 
