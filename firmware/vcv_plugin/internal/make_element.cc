@@ -58,18 +58,25 @@ Element make_element(rack::app::PortWidget *widget) {
 //
 // Pots
 //
+static float radians_to_degrees(float radians) {
+	return radians / (M_PI / 180.f);
+};
 
 Element make_element(rack::app::Knob *widget) {
 	log_make_element("Knob", widget->paramId);
 
 	Knob element{};
 	element.default_value = getScaledDefaultValue(widget);
+	element.min_angle = radians_to_degrees(widget->minAngle);
+	element.max_angle = radians_to_degrees(widget->maxAngle);
 	return element;
 }
 
 Element make_element(rack::componentlibrary::Rogan *widget) {
 	Knob element{};
 	element.default_value = getScaledDefaultValue(widget);
+	element.min_angle = radians_to_degrees(widget->minAngle);
+	element.max_angle = radians_to_degrees(widget->maxAngle);
 
 	if (widget->sw->svg->filename.size()) {
 		element.image = widget->sw->svg->filename;
@@ -86,6 +93,8 @@ Element make_element(rack::app::SvgKnob *widget) {
 
 	Knob element{};
 	element.default_value = getScaledDefaultValue(widget);
+	element.min_angle = radians_to_degrees(widget->minAngle);
+	element.max_angle = radians_to_degrees(widget->maxAngle);
 
 	// Hack to support BefacoTinyKnobs:
 	// The main SVG is just the dot, either BefacoTinyPointWhite or BefacoTinyPointBlack.
