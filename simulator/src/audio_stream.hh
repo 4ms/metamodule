@@ -56,9 +56,11 @@ public:
 			auto &in = in_buff[i++];
 
 			// Knobs
-			for (auto [i, knob] : enumerate(params.knobs)) {
-				if (knob.changed)
-					player.set_panel_param(i, knob.val);
+			for (auto i = 0u; auto &knob : params.knobs) {
+				// if (knob.did_change()) { // Why does the changed flag not sync with the SDL audio callback?
+				player.set_panel_param(i, knob.val);
+				// }
+				i++;
 			}
 
 			// MIDI: random stream

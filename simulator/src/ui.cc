@@ -142,20 +142,21 @@ void Ui::transfer_aux_button_events() {
 
 void Ui::transfer_params() {
 	if (unsigned cur_param = input_driver.selected_param(); cur_param < params.knobs.size()) {
-		params.knobs[cur_param].changed = false;
 
 		if (input_driver.param_inc()) {
-			params.knobs[cur_param].val = std::clamp(params.knobs[cur_param] + 0.05f, 0.f, 1.f);
-			params.knobs[cur_param].changed = true;
-
-			std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
+			float val = std::clamp(params.knobs[cur_param].val + 0.05f, 0.f, 1.f);
+			if (params.knobs[cur_param].store_changed(val))
+				std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
+			else
+				std::cout << "Failed to change knob";
 		}
 
 		if (input_driver.param_dec()) {
-			params.knobs[cur_param].val = std::clamp(params.knobs[cur_param] - 0.05f, 0.f, 1.f);
-			params.knobs[cur_param].changed = true;
-
-			std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
+			float val = std::clamp(params.knobs[cur_param].val - 0.05f, 0.f, 1.f);
+			if (params.knobs[cur_param].store_changed(val))
+				std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
+			else
+				std::cout << "Failed to change knob";
 		}
 	}
 }
