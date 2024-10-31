@@ -20,8 +20,8 @@ void Menu::setChildMenu(Menu *menu) {
 		childMenu = menu;
 		if (!parent)
 			pr_err("rack::ui::Menu object has no parent! Memory will be leaked\n");
-		else
-			parent->addChild(childMenu);
+		// parent->addChild(childMenu); // Rack does this, but why does the menu's parent own the submenu?
+		addChild(childMenu);
 	}
 }
 
