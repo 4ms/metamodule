@@ -186,7 +186,7 @@ add_custom_command(
                                         ${RELEASE_TARGET_DIR} 
                                         && rm -rf ${RELEASE_TARGET_DIR}
 
-  # Wifi
+  # Wifi only
   COMMAND ${CMAKE_CURRENT_LIST_DIR}/flashing/manifest_generator.py
                                    --version         "${GIT_FIRMWARE_VERSION_TAG}"
                                    --wifi_bootloader "${CMAKE_CURRENT_LIST_DIR}/src/wifi/flasher/images/wifi-bootloader.bin"
