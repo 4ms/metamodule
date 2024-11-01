@@ -69,11 +69,14 @@ static Knob create_base_knob(rack::app::Knob *widget) {
 	element.max_angle = radians_to_degrees(widget->maxAngle);
 
 	if (auto pq = widget->getParamQuantity()) {
+		element.min_value = pq->minValue;
+		element.max_value = pq->maxValue;
 		element.units = pq->unit;
 		element.display_base = pq->displayBase;
 		element.display_mult = pq->displayMultiplier;
 		element.display_offset = pq->displayOffset;
-		// unused? pq->displayPrecision;
+		element.integral = pq->snapEnabled;
+		element.display_precision = pq->displayPrecision;
 	}
 
 	return element;
