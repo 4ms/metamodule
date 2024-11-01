@@ -41,7 +41,7 @@ static inline void Error_Handler() {
 #define USBH_MAX_DATA_BUFFER 0x200U
 #define USBH_USE_OS 0U
 
-#define USBH_USER_LOG_OUTPUT 0
+#define USBH_USER_LOG_OUTPUT 1
 #define USBH_ERR_LOG_OUTPUT 1
 #define USBH_DBG_LOG_OUTPUT 0
 
