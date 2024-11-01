@@ -35,6 +35,10 @@ add_executable(
   ${FWDIR}/src/usb/usbd_desc.c
   ${FWDIR}/src/usb/usbh_conf.cc
   ${FWDIR}/src/usb/usbh_midi.cc
+  ${FWDIR}/src/usb/device_cdc/usb_serial_device.cc
+  ${FWDIR}/src/usb/device_cdc/usbd_desc.c
+  ${FWDIR}/src/usb/device_cdc/usbd_cdc_interface.c
+
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c
   ${FWDIR}/lib/littlefs/lfs.c
@@ -75,13 +79,17 @@ add_executable(
   ${HALDIR}/src/stm32mp1xx_ll_tim.c
   ${HALDIR}/src/stm32mp1xx_ll_usb.c
   ${HALDIR}/src/stm32mp1xx_ll_usb_phy.c
+
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc.c
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_bot.c
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_data.c
   ${USBDEV_LIBDIR}/Class/MSC/Src/usbd_msc_scsi.c
+  ${USBDEV_LIBDIR}/Class/CDC/Src/usbd_cdc.c
+
   ${USBDEV_LIBDIR}/Core/Src/usbd_core.c
   ${USBDEV_LIBDIR}/Core/Src/usbd_ctlreq.c
   ${USBDEV_LIBDIR}/Core/Src/usbd_ioreq.c
+
   ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc.c
   ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_bot.c
   ${USBHOST_LIBDIR}/Class/MSC/Src/usbh_msc_scsi.c
@@ -116,6 +124,7 @@ target_include_directories(
           ${USBHOST_LIBDIR}/Class/MSC/Inc
           ${USBDEV_LIBDIR}/Core/Inc
           ${USBDEV_LIBDIR}/Class/MSC/Inc
+          ${USBDEV_LIBDIR}/Class/CDC/Inc
 )
 
 target_link_libraries(main_m4.elf PUBLIC metamodule::core-interface)
