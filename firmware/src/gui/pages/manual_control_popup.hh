@@ -6,6 +6,7 @@
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "lvgl.h"
+#include "params_state.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "patch_file/open_patch_manager.hh"
@@ -17,9 +18,10 @@ namespace MetaModule
 
 struct ManualControlPopUp {
 
-	ManualControlPopUp(OpenPatchManager &patches, PatchModQueue &patch_mod_queue)
+	ManualControlPopUp(OpenPatchManager &patches, PatchModQueue &patch_mod_queue, ParamWatcher &param_watcher)
 		: patch_mod_queue{patch_mod_queue}
 		, patches{patches}
+		, param_watcher{param_watcher}
 		, controlarc_group(lv_group_create()) {
 
 		lv_group_add_obj(controlarc_group, ui_ControlArc);
@@ -53,10 +55,13 @@ struct ManualControlPopUp {
 
 		auto param_id = drawn_el->gui_element.idx.param_idx;
 		auto module_id = drawn_el->gui_element.module_idx;
-		auto cur_val = patch->get_static_knob_value(module_id, param_id);
-		if (cur_val) {
+		auto watched = param_watcher.active_watched_params();
+		auto found = std::find_if(watched.begin(), watched.end(), [=](auto const &knob) {
+			return knob.module_id == module_id && knob.param_id == param_id && knob.is_active();
+		});
+		if (found != watched.end()) {
 			float range = lv_arc_get_max_value(ui_ControlArc) - lv_arc_get_min_value(ui_ControlArc);
-			lv_arc_set_value(ui_ControlArc, std::round(cur_val.value() * range) + lv_arc_get_min_value(ui_ControlArc));
+			lv_arc_set_value(ui_ControlArc, std::round(found->value * range) + lv_arc_get_min_value(ui_ControlArc));
 			update_control_arc_text();
 		}
 	}
@@ -241,6 +246,8 @@ private:
 	PatchData *patch{};
 	PatchModQueue &patch_mod_queue;
 	OpenPatchManager &patches;
+	ParamWatcher &param_watcher;
+
 	lv_group_t *controlarc_group = nullptr;
 	lv_group_t *prev_group = nullptr;
 
