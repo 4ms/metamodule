@@ -1,7 +1,6 @@
 #pragma once
-#include "drivers/uart_conf.hh"
 #include "drivers/pin.hh"
-
+#include "drivers/uart_conf.hh"
 
 constexpr inline UartConf WifiBootloaderUartConfig{
 	.base_addr = USART6_BASE,
@@ -19,7 +18,7 @@ constexpr inline UartConf WifiUartConfig{
 	.TXPin = {mdrivlib::GPIO::B, mdrivlib::PinNum::_13, mdrivlib::PinAF::AltFunc14},
 	.RXPin = {mdrivlib::GPIO::B, mdrivlib::PinNum::_12, mdrivlib::PinAF::AltFunc14},
 	.mode = UartConf::Mode::TXRX,
-	.baud = 921600, // 230400, 921600
+	.baud = 230400, // 230400, 921600
 	.wordlen = 8,
 	.parity = UartConf::Parity::None,
 	.stopbits = UartConf::StopBits::_1,
