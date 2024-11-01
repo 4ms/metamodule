@@ -254,13 +254,22 @@ public:
 	PatchDirList getPatchList() {
 		PatchDirList patch_dir_list_;
 
-		if (sdcard_.is_mounted())
+		if (sdcard_.is_mounted()) {
 			PatchFileIO::add_directory(sdcard_, patch_dir_list_.volume_root(Volume::SDCard));
+			patch_dir_list_.mark_mounted(Volume::SDCard, true);
+		} else {
+			patch_dir_list_.mark_mounted(Volume::SDCard, false);
+		}
 
-		if (usbdrive_.is_mounted())
+		if (usbdrive_.is_mounted()) {
 			PatchFileIO::add_directory(usbdrive_, patch_dir_list_.volume_root(Volume::USB));
+			patch_dir_list_.mark_mounted(Volume::USB, true);
+		} else {
+			patch_dir_list_.mark_mounted(Volume::USB, false);
+		}
 
 		PatchFileIO::add_directory(norflash_, patch_dir_list_.volume_root(Volume::NorFlash));
+		patch_dir_list_.mark_mounted(Volume::NorFlash, true);
 
 		return patch_dir_list_;
 	}
