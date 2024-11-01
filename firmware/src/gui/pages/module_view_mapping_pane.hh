@@ -49,7 +49,7 @@ struct ModuleViewMappingPane {
 		, notify_queue{notify_queue}
 		, gui_state{gui_state}
 		, add_map_popup{patch_mod_queue}
-		, control_popup{patches, patch_mod_queue}
+		, control_popup{patches, patch_mod_queue, params.param_watcher}
 		, midi_map_popup{params}
 		, patch_mod_queue{patch_mod_queue}
 		, patches{patches} {
