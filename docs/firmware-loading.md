@@ -66,7 +66,9 @@ If you need to load new firmware and then debug it, then follow the guide in
 
 To load firmware (without debugging) with a JLink programmer, do this:
 
-1) Install a "Freeze jumper" on `Control Expander` header that bridges the top-left pin
+1) Install a "Freeze jumper" :
+
+On earlier bootloaders, this is on `Control Expander` header that bridges the top-left pin
 and the pin just to the right of it. Make sure you use the right header, it's
 the one above the Wifi header, near the `y` and `z` pots. The jumper should be
 horizontal, not vertical, on the top row of pins all the way to the left:
@@ -78,7 +80,19 @@ horizontal, not vertical, on the top row of pins all the way to the left:
            o  o  o  o
 ```
 
-See image above for reference.
+On later bootloaders, this is on the Debug header, on the left-most pins:
+```
+          __    RX TX
+          || o  o  o 
+          || o  o  o
+          --
+```
+
+As of Nov 1, 2024 all shipped units have the older bootloader unless
+you intentionally installed a newer one. This is done via loading a 
+release file that has "-bl-" in the name.
+Release tag `firmware-v2.0.0-dev-2` and later on the v2.0-dev branch use the newer bootloader.
+
 
 2) Power off and back on (full power-cycle is required).
 
