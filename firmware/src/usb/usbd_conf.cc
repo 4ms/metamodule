@@ -17,8 +17,8 @@
  */
 
 /* Includes ------------------------------------------------------------------ */
+#include "device_msc/usb_drive_device.hh"
 #include "drivers/stm32xx.h"
-#include "usb_drive_device.hh"
 #include "usbd_core.h"
 #include "usbd_msc.h"
 
@@ -198,11 +198,15 @@ void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd) {
  */
 void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd) {
 	USBD_LL_DevDisconnected((USBD_HandleTypeDef *)hpcd->pData);
+
+	//TODO: Run this in the class DeInit() class callback, which is USBD_MSC_DeInit()
+#ifdef USE_RAMDISK_USB
 	int8_t num_lun = UsbDriveDevice::ops.GetMaxLun();
 	while (num_lun >= 0) {
 		UsbDriveDevice::ops.Eject(num_lun);
 		num_lun--;
 	}
+#endif
 }
 
 /*******************************************************************************

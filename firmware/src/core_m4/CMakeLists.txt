@@ -30,14 +30,15 @@ add_executable(
   ${FWDIR}/src/fw_update/hash/md5_hash.c
   ${FWDIR}/src/fw_update/firmware_writer.cc
   ${FWDIR}/src/flash_loader/flash_loader.cc
-  ${FWDIR}/src/usb/usb_drive_device.cc
+
   ${FWDIR}/src/usb/usbd_conf.cc
-  ${FWDIR}/src/usb/usbd_desc.c
   ${FWDIR}/src/usb/usbh_conf.cc
   ${FWDIR}/src/usb/usbh_midi.cc
   ${FWDIR}/src/usb/device_cdc/usb_serial_device.cc
+  # ${FWDIR}/src/usb/device_cdc/usbd_cdc_interface.c
   ${FWDIR}/src/usb/device_cdc/usbd_desc.c
-  ${FWDIR}/src/usb/device_cdc/usbd_cdc_interface.c
+  # ${FWDIR}/src/usb/device_msc/usb_drive_device.cc
+  # ${FWDIR}/src/usb/device_msc/usbd_desc.c
 
   ${FWDIR}/lib/fatfs/source/ff.c
   ${FWDIR}/lib/fatfs/source/ffunicode.c

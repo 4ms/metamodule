@@ -9,16 +9,11 @@
 
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
 
-//TODO make a device manager that owns hpcd, like UsbHostManager
-extern "C" PCD_HandleTypeDef hpcd;
-
 using mdrivlib::HWSemaphore;
 using mdrivlib::HWSemaphoreFlag;
 using mdrivlib::InterruptControl;
 using mdrivlib::InterruptManager;
 
-//TODO: Add support for multiple usb interfaces (CDC/MIDI): "AddClass()" not RegisterClass
-//Should also rename this class to UsbDeviceManager or something
 void UsbDriveDevice::init_usb_device() {
 }
 
@@ -38,7 +33,6 @@ void UsbDriveDevice::start() {
 		return;
 	}
 
-	mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
 	USBD_RegisterClass(&pdev, USBD_MSC_CLASS);
 	USBD_MSC_RegisterStorage(&pdev, &ops);
 	USBD_Start(&pdev);
