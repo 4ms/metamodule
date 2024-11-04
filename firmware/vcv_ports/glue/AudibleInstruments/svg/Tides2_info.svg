@@ -25,8 +25,8 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.4653895"
-     inkscape:cx="133.85309"
-     inkscape:cy="246.61417"
+     inkscape:cx="134.0559"
+     inkscape:cy="246.61418"
      inkscape:window-width="2512"
      inkscape:window-height="1387"
      inkscape:window-x="50"
@@ -503,23 +503,23 @@
        id="Ramp_Mode_LED_GreenRedLight"
        data-name="Ramp Mode LED#GreenRedLight"
        cx="100.58"
-       cy="86.57"
+       cy="109.86"
        r="4.96"
-       style="fill: #f0f; stroke-width: 0px;" />
+       style="fill:#ff00ff;stroke-width:0px" />
     <circle
        id="Output_Mode_LED_GreenRedLight"
        data-name="Output Mode LED#GreenRedLight"
-       cx="136.94"
-       cy="25.67"
+       cx="179.81"
+       cy="45.939999"
        r="4.96"
-       style="fill: #f0f; stroke-width: 0px;" />
+       style="fill:#ff00ff;stroke-width:0px" />
     <circle
        id="Freq_Range_LED_GreenRedLight"
        data-name="Freq Range LED#GreenRedLight"
-       cx="64.37"
-       cy="25.67"
+       cx="21.35"
+       cy="45.939999"
        r="4.96"
-       style="fill: #f0f; stroke-width: 0px;" />
+       style="fill:#ff00ff;stroke-width:0px" />
     <circle
        id="Ch4_Out"
        data-name="Ch4 Out"
