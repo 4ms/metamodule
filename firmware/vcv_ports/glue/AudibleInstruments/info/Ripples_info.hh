@@ -1,6 +1,7 @@
 #pragma once
 #include "AudibleInstruments/AudibleInstruments_elements.hh"
 #include "CoreModules/elements/element_info.hh"
+#include "gcem/include/gcem.hpp"
 #include <array>
 
 namespace MetaModule
@@ -15,8 +16,8 @@ struct RipplesInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 12> Elements{{
-		RedSmallKnob{{to_mm<72>(24.74), to_mm<72>(59.33), Center, "Resonance", ""}, 0.0f},
-		WhiteLargeKnob{{to_mm<72>(57.15), to_mm<72>(120.53), Center, "Frequency", ""}, 0.5f},
+		RedSmallKnob{{to_mm<72>(24.74), to_mm<72>(59.33), Center, "Resonance", ""},0.f, 1.f, 0.f, "Resonance", "%", 0, 100},
+		WhiteLargeKnob{{to_mm<72>(57.15), to_mm<72>(120.53), Center, "Frequency", ""}, gcem::log2(20.f), gcem::log2(20000.f), gcem::log2(20000.f), "", " Hz", 2.f},
 		BlueMediumKnob{{to_mm<72>(89.54), to_mm<72>(181.73), Center, "FM", ""}, 0.875f},
 		AnalogJackInput4ms{{to_mm<72>(22.91), to_mm<72>(246.5), Center, "Resonance CV", ""}},
 		AnalogJackInput4ms{{to_mm<72>(57.12), to_mm<72>(246.5), Center, "Frequency CV", ""}},

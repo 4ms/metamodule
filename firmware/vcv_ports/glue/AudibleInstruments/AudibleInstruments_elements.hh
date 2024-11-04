@@ -18,7 +18,8 @@ constexpr inline void config_knob(Pot &pot,
 								  float displayOffset = 0.f) {
 	pot.min_value = minValue;
 	pot.max_value = maxValue;
-	pot.default_value = defaultValue;
+	auto range = maxValue - minValue;
+	pot.default_value = range == 0 ? 0 : (defaultValue - minValue) / range;
 	pot.units = unit;
 	pot.display_base = displayBase;
 	pot.display_mult = displayMultiplier;
@@ -30,7 +31,7 @@ constexpr inline void config_knob(Pot &pot,
 struct Trimpot : Knob {
 	constexpr Trimpot(BaseElement b,
 					  float min = 0.f,
-					  float max = 0.f,
+					  float max = 1.f,
 					  float deflt = 0.5f,
 					  std::string_view = "",
 					  std::string_view unit = "",
@@ -46,7 +47,7 @@ struct Trimpot : Knob {
 struct WhiteMediumKnob : Knob {
 	constexpr WhiteMediumKnob(BaseElement b,
 							  float min = 0.f,
-							  float max = 0.f,
+							  float max = 1.f,
 							  float deflt = 0.5f,
 							  std::string_view = "",
 							  std::string_view unit = "",
@@ -61,7 +62,7 @@ struct WhiteMediumKnob : Knob {
 struct WhiteLargeKnob : Knob {
 	constexpr WhiteLargeKnob(BaseElement b,
 							 float min = 0.f,
-							 float max = 0.f,
+							 float max = 1.f,
 							 float deflt = 0.5f,
 							 std::string_view = "",
 							 std::string_view unit = "",
@@ -77,7 +78,7 @@ struct WhiteLargeKnob : Knob {
 struct WhiteSmallKnob : Knob {
 	constexpr WhiteSmallKnob(BaseElement b,
 							 float min = 0.f,
-							 float max = 0.f,
+							 float max = 1.f,
 							 float deflt = 0.5f,
 							 std::string_view = "",
 							 std::string_view unit = "",
@@ -93,7 +94,7 @@ struct WhiteSmallKnob : Knob {
 struct BlueMediumKnob : Knob {
 	constexpr BlueMediumKnob(BaseElement b,
 							 float min = 0.f,
-							 float max = 0.f,
+							 float max = 1.f,
 							 float deflt = 0.5f,
 							 std::string_view = "",
 							 std::string_view unit = "",
@@ -109,7 +110,7 @@ struct BlueMediumKnob : Knob {
 struct BlueLargeKnob : Knob {
 	constexpr BlueLargeKnob(BaseElement b,
 							float min = 0.f,
-							float max = 0.f,
+							float max = 1.f,
 							float deflt = 0.5f,
 							std::string_view = "",
 							std::string_view unit = "",
@@ -125,7 +126,7 @@ struct BlueLargeKnob : Knob {
 struct BlueSmallKnob : Knob {
 	constexpr BlueSmallKnob(BaseElement b,
 							float min = 0.f,
-							float max = 0.f,
+							float max = 1.f,
 							float deflt = 0.5f,
 							std::string_view = "",
 							std::string_view unit = "",
@@ -141,7 +142,7 @@ struct BlueSmallKnob : Knob {
 struct GreenMediumKnob : Knob {
 	constexpr GreenMediumKnob(BaseElement b,
 							  float min = 0.f,
-							  float max = 0.f,
+							  float max = 1.f,
 							  float deflt = 0.5f,
 							  std::string_view = "",
 							  std::string_view unit = "",
@@ -157,7 +158,7 @@ struct GreenMediumKnob : Knob {
 struct GreenLargeKnob : Knob {
 	constexpr GreenLargeKnob(BaseElement b,
 							 float min = 0.f,
-							 float max = 0.f,
+							 float max = 1.f,
 							 float deflt = 0.5f,
 							 std::string_view = "",
 							 std::string_view unit = "",
@@ -173,7 +174,7 @@ struct GreenLargeKnob : Knob {
 struct GreenSmallKnob : Knob {
 	constexpr GreenSmallKnob(BaseElement b,
 							 float min = 0.f,
-							 float max = 0.f,
+							 float max = 1.f,
 							 float deflt = 0.5f,
 							 std::string_view = "",
 							 std::string_view unit = "",
@@ -189,7 +190,7 @@ struct GreenSmallKnob : Knob {
 struct RedMediumKnob : Knob {
 	constexpr RedMediumKnob(BaseElement b,
 							float min = 0.f,
-							float max = 0.f,
+							float max = 1.f,
 							float deflt = 0.5f,
 							std::string_view = "",
 							std::string_view unit = "",
@@ -205,7 +206,7 @@ struct RedMediumKnob : Knob {
 struct RedLargeKnob : Knob {
 	constexpr RedLargeKnob(BaseElement b,
 						   float min = 0.f,
-						   float max = 0.f,
+						   float max = 1.f,
 						   float deflt = 0.5f,
 						   std::string_view = "",
 						   std::string_view unit = "",
@@ -221,7 +222,7 @@ struct RedLargeKnob : Knob {
 struct RedSmallKnob : Knob {
 	constexpr RedSmallKnob(BaseElement b,
 						   float min = 0.f,
-						   float max = 0.f,
+						   float max = 1.f,
 						   float deflt = 0.5f,
 						   std::string_view = "",
 						   std::string_view unit = "",
@@ -237,7 +238,7 @@ struct RedSmallKnob : Knob {
 struct Rogan6PSWhite : Knob {
 	constexpr Rogan6PSWhite(BaseElement b,
 							float min = 0.f,
-							float max = 0.f,
+							float max = 1.f,
 							float deflt = 0.5f,
 							std::string_view = "",
 							std::string_view unit = "",
@@ -289,7 +290,7 @@ struct GreenRedLight : DualLight {
 struct GreenHandleSlider : Slider {
 	constexpr GreenHandleSlider(BaseElement b,
 								float min = 0.f,
-								float max = 0.f,
+								float max = 1.f,
 								float deflt = 0.5f,
 								std::string_view = "",
 								std::string_view unit = "",
