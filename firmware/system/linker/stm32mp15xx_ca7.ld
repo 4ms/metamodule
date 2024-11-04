@@ -10,6 +10,7 @@ MEMORY
     ROM (rx)			: ORIGIN = _A7_CODE,		LENGTH = _A7_CODE_SZ
     RAM (rx)			: ORIGIN = _A7_RAM,			LENGTH = _A7_RAM_SZ
 	VIRTDRIVE (rw)		: ORIGIN = _VIRTDRIVE,		LENGTH = _VIRTDRIVE_SZ 
+	CONSOLEBUF (rw)		: ORIGIN = _CONSOLEBUF,		LENGTH = _CONSOLEBUF_SZ 
 	FWBUFFER (rw)		: ORIGIN = _FWBUFFER,		LENGTH = _FWBUFFER_SZ 
 	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
 	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
@@ -142,6 +143,11 @@ SECTIONS
 	{
 		*(.virtdrive)
 	} > VIRTDRIVE
+
+	.consolebuf (NOLOAD):
+	{
+		*(.consolebuf)
+	} > _CONSOLEBUF
 
 	.fwbuffer (NOLOAD):
 	{
