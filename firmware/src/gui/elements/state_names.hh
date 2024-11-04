@@ -17,7 +17,7 @@ inline std::string get_element_value_string(Element const &element, float value,
 	std::visit(overloaded{
 				   [value = value, res = resolution, &s](Pot const &el) {
 					   if (el.min_value == 0 && el.max_value == 1 && el.display_mult == 1 && el.display_offset == 0 &&
-						   el.display_base == 0)
+						   el.display_base == 0 && el.units.length() == 0)
 					   {
 						   // No custom range or display: show it as a percentage
 						   float v = std::clamp(value * 100.f, 0.f, 100.f);
@@ -43,14 +43,19 @@ inline std::string get_element_value_string(Element const &element, float value,
 						   v = v * el.display_mult + el.display_offset;
 
 						   s.resize(32, '\0');
-						   if (el.display_precision > 0)
-							   std::snprintf(s.data(), s.size(), "%.*g", el.display_precision, v);
-						   else
-							   std::to_chars(s.data(), s.data() + s.size(), v); // automatic precision
-					   }
+						   if (el.display_precision > 0) {
+							   auto sz = std::snprintf(s.data(), s.size(), "%.*g", el.display_precision, v);
+							   s.resize(sz);
+						   } else {
+							   auto res = std::to_chars(s.data(), s.data() + s.size(), v); // automatic precision
+							   *res.ptr = '\0';
+							   s.resize(res.ptr - s.data());
+						   }
 
-					   if (el.units.length())
-						   s += std::string(el.units);
+						   if (el.units.length()) {
+							   s = s + std::string(el.units);
+						   }
+					   }
 				   },
 
 				   [value = value, &s](ParamElement const &) { s = std::to_string((int)(value * 100.f)) + "%"; },
