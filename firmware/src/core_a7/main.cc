@@ -70,6 +70,7 @@ void main() {
 		&StaticBuffers::param_blocks,
 		&StaticBuffers::virtdrive,
 		&StaticBuffers::icc_shared_message,
+		StaticBuffers::console_m4_buff,
 	};
 
 	A7SharedMemoryS::ptrs = {
@@ -80,6 +81,7 @@ void main() {
 		&StaticBuffers::sync_params,
 		&patch_mod_queue,
 		&StaticBuffers::virtdrive,
+		StaticBuffers::console_a7_1_buff,
 	};
 
 	{

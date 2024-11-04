@@ -13,6 +13,7 @@ struct SharedMemoryS {
 		DoubleBufParamBlock *param_block;
 		RamDrive *ramdrive;
 		IntercoreStorageMessage *icc_message;
+		std::span<uint8_t> console_m4_buff;
 	};
 
 	static Ptrs ptrs;

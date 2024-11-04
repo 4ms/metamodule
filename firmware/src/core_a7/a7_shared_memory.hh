@@ -20,6 +20,7 @@ struct A7SharedMemoryS {
 		SyncParams *sync_params{};
 		PatchModQueue *patch_mod_queue{};
 		RamDrive *ramdrive{};
+		std::span<uint8_t> console_a7_1_buff{};
 	};
 
 	static Ptrs ptrs;

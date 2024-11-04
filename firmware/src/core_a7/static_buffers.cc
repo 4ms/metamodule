@@ -26,7 +26,12 @@ __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 
 __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};
 __attribute__((section(".sysram"))) SyncParams sync_params;
+
 __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
+
+__attribute__((section(".consolebuf"))) std::array<uint8_t, 1024 * 1024> console_a7_0_buff;
+__attribute__((section(".consolebuf"))) std::array<uint8_t, 1024 * 1024> console_a7_1_buff;
+__attribute__((section(".consolebuf"))) std::array<uint8_t, 1024 * 1024> console_m4_buff;
 
 void init() {
 	// Todo: why doesn't Params::Params() get called? because it's in a NOLOAD section of memory?
