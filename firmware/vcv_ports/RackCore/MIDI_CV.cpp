@@ -1,7 +1,7 @@
-#include <algorithm>
-
+#include "CoreModules/midi/midi_message.hh"
 #include "plugin.hpp"
 #include "util/circular_buffer.hh"
+#include <algorithm>
 
 namespace rack
 {
@@ -490,7 +490,7 @@ struct MIDI_CV : Module {
 
 		for (auto i = 0u; i < msg_history.count(); i++) {
 			auto msg = msg_history.peek(i);
-			chars += " " + msg.toString() + "\n";
+			chars += " " + MetaModule::Midi::toPrettyString(msg.bytes) + "\n";
 		}
 
 		size_t chars_to_copy = std::min(text.size(), chars.length());
@@ -531,15 +531,31 @@ struct MIDI_CVWidget : ModuleWidget {
 		auto display = createWidget<MetaModule::VCVTextDisplay>(mm2px(Vec(2, 10)));
 		display->box.size = mm2px(Vec(36, 42));
 		display->firstLightId = 0;
-		display->font = "Default_12";
+		display->font = "Default_10";
 		display->color = Colors565::Yellow;
 		addChild(display);
 	}
 
 	void appendContextMenu(Menu *menu) override {
-		MIDI_CV *module = dynamic_cast<MIDI_CV *>(this->module);
+		auto *module = dynamic_cast<MIDI_CV *>(this->module);
 
 		menu->addChild(new MenuSeparator);
+
+		// METAMODULE: add MIDI channel selection to menu
+		menu->addChild(createSubmenuItem(
+			"MIDI channel",
+			[=] {
+				auto chan = module->midiInput.getChannel();
+				return chan < 0 ? "Omni" : std::to_string(chan + 1);
+			},
+			[=](Menu *menu) {
+				for (int c = -1; c < 16; c++) {
+					menu->addChild(createCheckMenuItem((c < 0) ? "Omni" : string::f("Channel %d", c + 1),
+													   "",
+													   [=]() { return module->midiInput.getChannel() == c; },
+													   [=]() { module->midiInput.setChannel(c); }));
+				}
+			}));
 
 		static const std::vector<float> pwRanges = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 36, 48};
 		auto getPwRangeLabel = [](float pwRange) -> std::string {

@@ -60,6 +60,7 @@ target_sources(
          src/color.cpp
          src/common.cpp
          src/resampler.cc
+         src/midi_message.cc
 )
 
 add_subdirectory(jansson)
