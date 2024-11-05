@@ -15,8 +15,8 @@ struct BranchesInfo : ModuleInfoBase {
     using enum Coords;
 
     static constexpr std::array<Element, 14> Elements{{
-		WhiteMediumKnob{{to_mm<72>(42.64), to_mm<72>(81.06), Center, "Ch1 Probability", ""}, 0.5f},
-		WhiteMediumKnob{{to_mm<72>(42.64), to_mm<72>(230.44), Center, "Ch2 Probability", ""}, 0.5f},
+		WhiteMediumKnob{{to_mm<72>(42.64), to_mm<72>(81.06), Center, "Ch1 Probability", ""}, 0.f, 1.f, 0.5f, "", "%", 0, 100},
+		WhiteMediumKnob{{to_mm<72>(42.64), to_mm<72>(230.44), Center, "Ch2 Probability", ""}, 0.f, 1.f, 0.5f, "", "%", 0, 100},
 		SmallButton{{to_mm<72>(73.2), to_mm<72>(63.04), Center, "Ch1 Toggle Mode", ""}},
 		SmallButton{{to_mm<72>(73.2), to_mm<72>(212.46), Center, "Ch2 Toggle Mode", ""}},
 		AnalogJackInput4ms{{to_mm<72>(20.15), to_mm<72>(129.66), Center, "Ch1 In", ""}},

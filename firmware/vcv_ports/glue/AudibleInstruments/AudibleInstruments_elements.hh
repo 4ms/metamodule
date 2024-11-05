@@ -6,102 +6,248 @@
 
 namespace MetaModule
 {
+namespace
+{
+constexpr inline void config_knob(Pot &pot,
+								  float minValue,
+								  float maxValue,
+								  float defaultValue,
+								  std::string_view unit = "",
+								  float displayBase = 0.f,
+								  float displayMultiplier = 1.f,
+								  float displayOffset = 0.f) {
+	pot.min_value = minValue;
+	pot.max_value = maxValue;
+	auto range = maxValue - minValue;
+	pot.default_value = range == 0 ? 0 : (defaultValue - minValue) / range;
+	pot.units = unit;
+	pot.display_base = displayBase;
+	pot.display_mult = displayMultiplier;
+	pot.display_offset = displayOffset;
+	pot.display_precision = 5;
+}
+} // namespace
 
 struct Trimpot : Knob {
-	constexpr Trimpot(BaseElement b, float defaultValue = 0.5f)
+	constexpr Trimpot(BaseElement b,
+					  float min = 0.f,
+					  float max = 1.f,
+					  float deflt = 0.5f,
+					  std::string_view = "",
+					  std::string_view unit = "",
+					  float disp_base = 0.f,
+					  float disp_mult = 1.f,
+					  float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Trimpot.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct WhiteMediumKnob : Knob {
-	constexpr WhiteMediumKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr WhiteMediumKnob(BaseElement b,
+							  float min = 0.f,
+							  float max = 1.f,
+							  float deflt = 0.5f,
+							  std::string_view = "",
+							  std::string_view unit = "",
+							  float disp_base = 0.f,
+							  float disp_mult = 1.f,
+							  float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan2PWhite.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
 	}
 };
 
 struct WhiteLargeKnob : Knob {
-	constexpr WhiteLargeKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr WhiteLargeKnob(BaseElement b,
+							 float min = 0.f,
+							 float max = 1.f,
+							 float deflt = 0.5f,
+							 std::string_view = "",
+							 std::string_view unit = "",
+							 float disp_base = 0.f,
+							 float disp_mult = 1.f,
+							 float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan3PWhite.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct WhiteSmallKnob : Knob {
-	constexpr WhiteSmallKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr WhiteSmallKnob(BaseElement b,
+							 float min = 0.f,
+							 float max = 1.f,
+							 float deflt = 0.5f,
+							 std::string_view = "",
+							 std::string_view unit = "",
+							 float disp_base = 0.f,
+							 float disp_mult = 1.f,
+							 float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan1PWhite.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct BlueMediumKnob : Knob {
-	constexpr BlueMediumKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr BlueMediumKnob(BaseElement b,
+							 float min = 0.f,
+							 float max = 1.f,
+							 float deflt = 0.5f,
+							 std::string_view = "",
+							 std::string_view unit = "",
+							 float disp_base = 0.f,
+							 float disp_mult = 1.f,
+							 float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan2PBlue.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct BlueLargeKnob : Knob {
-	constexpr BlueLargeKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr BlueLargeKnob(BaseElement b,
+							float min = 0.f,
+							float max = 1.f,
+							float deflt = 0.5f,
+							std::string_view = "",
+							std::string_view unit = "",
+							float disp_base = 0.f,
+							float disp_mult = 1.f,
+							float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan3PBlue.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct BlueSmallKnob : Knob {
-	constexpr BlueSmallKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr BlueSmallKnob(BaseElement b,
+							float min = 0.f,
+							float max = 1.f,
+							float deflt = 0.5f,
+							std::string_view = "",
+							std::string_view unit = "",
+							float disp_base = 0.f,
+							float disp_mult = 1.f,
+							float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan1PBlue.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct GreenMediumKnob : Knob {
-	constexpr GreenMediumKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr GreenMediumKnob(BaseElement b,
+							  float min = 0.f,
+							  float max = 1.f,
+							  float deflt = 0.5f,
+							  std::string_view = "",
+							  std::string_view unit = "",
+							  float disp_base = 0.f,
+							  float disp_mult = 1.f,
+							  float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan2PGreen.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct GreenLargeKnob : Knob {
-	constexpr GreenLargeKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr GreenLargeKnob(BaseElement b,
+							 float min = 0.f,
+							 float max = 1.f,
+							 float deflt = 0.5f,
+							 std::string_view = "",
+							 std::string_view unit = "",
+							 float disp_base = 0.f,
+							 float disp_mult = 1.f,
+							 float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan3PGreen.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct GreenSmallKnob : Knob {
-	constexpr GreenSmallKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr GreenSmallKnob(BaseElement b,
+							 float min = 0.f,
+							 float max = 1.f,
+							 float deflt = 0.5f,
+							 std::string_view = "",
+							 std::string_view unit = "",
+							 float disp_base = 0.f,
+							 float disp_mult = 1.f,
+							 float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan1PGreen.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct RedMediumKnob : Knob {
-	constexpr RedMediumKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr RedMediumKnob(BaseElement b,
+							float min = 0.f,
+							float max = 1.f,
+							float deflt = 0.5f,
+							std::string_view = "",
+							std::string_view unit = "",
+							float disp_base = 0.f,
+							float disp_mult = 1.f,
+							float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan2PRed.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct RedLargeKnob : Knob {
-	constexpr RedLargeKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr RedLargeKnob(BaseElement b,
+						   float min = 0.f,
+						   float max = 1.f,
+						   float deflt = 0.5f,
+						   std::string_view = "",
+						   std::string_view unit = "",
+						   float disp_base = 0.f,
+						   float disp_mult = 1.f,
+						   float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan3PRed.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct RedSmallKnob : Knob {
-	constexpr RedSmallKnob(BaseElement b, float defaultValue = 0.5f)
+	constexpr RedSmallKnob(BaseElement b,
+						   float min = 0.f,
+						   float max = 1.f,
+						   float deflt = 0.5f,
+						   std::string_view = "",
+						   std::string_view unit = "",
+						   float disp_base = 0.f,
+						   float disp_mult = 1.f,
+						   float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan1PRed.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
 struct Rogan6PSWhite : Knob {
-	constexpr Rogan6PSWhite(BaseElement b, float defaultValue = 0.5f)
+	constexpr Rogan6PSWhite(BaseElement b,
+							float min = 0.f,
+							float max = 1.f,
+							float deflt = 0.5f,
+							std::string_view = "",
+							std::string_view unit = "",
+							float disp_base = 0.f,
+							float disp_mult = 1.f,
+							float disp_offset = 0.f)
 		: Knob{{{b, "rack-lib/Rogan6PSWhite.png"}}} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
@@ -142,9 +288,18 @@ struct GreenRedLight : DualLight {
 };
 
 struct GreenHandleSlider : Slider {
-	constexpr GreenHandleSlider(BaseElement b, float defaultValue = 0.5f)
+	constexpr GreenHandleSlider(BaseElement b,
+								float min = 0.f,
+								float max = 1.f,
+								float deflt = 0.5f,
+								std::string_view = "",
+								std::string_view unit = "",
+								float disp_base = 0.f,
+								float disp_mult = 1.f,
+								float disp_offset = 0.f)
 		: Slider{{{b, "4ms/comp/slider_x.png"}}, "rack-lib/LEDSliderGreenHandle.png"} {
-		default_value = defaultValue;
+		config_knob(*this, min, max, deflt, unit, disp_base, disp_mult, disp_offset);
+		;
 	}
 };
 
