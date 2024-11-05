@@ -10,7 +10,7 @@ namespace MetaModule
 struct WatchedTextDisplay {
 	uint16_t module_id{};
 	uint16_t light_id{};
-	StaticString<63> text;
+	StaticString<95> text;
 	std::atomic<bool> active{false};
 
 	void activate(uint16_t m_id, uint16_t l_id) {
