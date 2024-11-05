@@ -68,7 +68,7 @@ struct MIDI_CV : Module {
 	dsp::PulseGenerator continuePulse;
 
 	// METAMODULE
-	CircularBuffer<midi::Message, 4> msg_history;
+	CircularBuffer<midi::Message, 8> msg_history;
 
 	MIDI_CV() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -486,7 +486,7 @@ struct MIDI_CV : Module {
 
 	// METAMODULE
 	size_t get_display_text(int led_id, std::span<char> text) override {
-		std::string chars;
+		std::string chars = "";
 
 		for (auto i = 0u; i < msg_history.count(); i++) {
 			auto msg = msg_history.peek(i);
