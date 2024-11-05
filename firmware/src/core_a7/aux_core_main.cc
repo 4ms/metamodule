@@ -90,7 +90,8 @@ extern "C" void aux_core_main() {
 			for (auto &d : ui.displays().watch_displays) {
 				if (d.is_active()) {
 					auto text = std::span<char>(d.text._data, d.text.capacity);
-					patch_player->get_display_text(d.module_id, d.light_id, text);
+					auto sz = patch_player->get_display_text(d.module_id, d.light_id, text);
+					d.text._data[sz] = '\0';
 				}
 			}
 
