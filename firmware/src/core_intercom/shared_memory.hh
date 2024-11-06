@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/ramdisk_conf.hh"
+#include "console/concurrent_buffer.hh"
 #include "params/param_block.hh"
 
 namespace MetaModule
@@ -13,7 +14,9 @@ struct SharedMemoryS {
 		DoubleBufParamBlock *param_block;
 		RamDrive *ramdrive;
 		IntercoreStorageMessage *icc_message;
-		std::span<uint8_t> console_m4_buff;
+		ConcurrentBuffer *console_a7_0_buff;
+		ConcurrentBuffer *console_a7_1_buff;
+		ConcurrentBuffer *console_m4_buff;
 	};
 
 	static Ptrs ptrs;

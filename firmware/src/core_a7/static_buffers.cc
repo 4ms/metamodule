@@ -1,4 +1,5 @@
 #include "conf/ramdisk_conf.hh"
+#include "console/concurrent_buffer.hh"
 #include "core_intercom/intercore_message.hh"
 #include "param_block.hh"
 #include "patch_file/patch_dir_list.hh"
@@ -29,39 +30,38 @@ __attribute__((section(".sysram"))) SyncParams sync_params;
 
 __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 
-__attribute__((section(".consolebuf"))) std::array<uint8_t, 1024 * 1024> console_a7_0_buff;
-__attribute__((section(".consolebuf"))) std::array<uint8_t, 1024 * 1024> console_a7_1_buff;
-__attribute__((section(".consolebuf"))) std::array<uint8_t, 1024 * 1024> console_m4_buff;
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff;
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff;
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff;
 
 void init() {
-	// Todo: why doesn't Params::Params() get called? because it's in a NOLOAD section of memory?
-	for (auto &block : param_blocks) {
-		for (auto &param : block.params) {
-			param.clear();
-		}
-		block.metaparams.clear();
-	}
+	//for (auto &block : param_blocks) {
+	//	for (auto &param : block.params) {
+	//		param.clear();
+	//	}
+	//	block.metaparams.clear();
+	//}
 
-	//clear buffers
-	for (auto &buff : audio_out_dma_block.codec) {
-		for (auto &frame : buff)
-			frame = StreamConf::Audio::AudioOutFrame{};
-	}
+	////clear buffers
+	//for (auto &buff : audio_out_dma_block.codec) {
+	//	for (auto &frame : buff)
+	//		frame = StreamConf::Audio::AudioOutFrame{};
+	//}
 
-	for (auto &buff : audio_out_dma_block.ext_codec) {
-		for (auto &frame : buff)
-			frame = StreamConf::Audio::AudioOutFrame{};
-	}
+	//for (auto &buff : audio_out_dma_block.ext_codec) {
+	//	for (auto &frame : buff)
+	//		frame = StreamConf::Audio::AudioOutFrame{};
+	//}
 
-	for (auto &buff : audio_in_dma_block.codec) {
-		for (auto &frame : buff)
-			frame = StreamConf::Audio::AudioInFrame{};
-	}
+	//for (auto &buff : audio_in_dma_block.codec) {
+	//	for (auto &frame : buff)
+	//		frame = StreamConf::Audio::AudioInFrame{};
+	//}
 
-	for (auto &buff : audio_in_dma_block.ext_codec) {
-		for (auto &frame : buff)
-			frame = StreamConf::Audio::AudioInFrame{};
-	}
+	//for (auto &buff : audio_in_dma_block.ext_codec) {
+	//	for (auto &frame : buff)
+	//		frame = StreamConf::Audio::AudioInFrame{};
+	//}
 }
 
 }; // namespace StaticBuffers

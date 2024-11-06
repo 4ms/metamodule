@@ -14,10 +14,10 @@ USBD_CDC_LineCodingTypeDef LineCoding = {
 };
 }
 
-UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice)
-	: pdev{pDevice} {
+UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice, std::array<ConcurrentBuffer *, 3> console_buffers)
+	: pdev{pDevice}
+	, console_buffers{console_buffers} {
 	rx_buffer.resize(2048);
-	tx_buffer.resize(2048);
 	_instance = this;
 }
 
@@ -41,13 +41,32 @@ void UsbSerialDevice::stop() {
 	USBD_DeInit(pdev);
 }
 
+void UsbSerialDevice::process() {
+	for (auto i = 0u; auto *buff : console_buffers) {
+		if (buff->writer_ref_count.load() == 0) {
+			auto start_pos = current_read_pos[i];
+			unsigned end_pos = buff->current_write_pos.load(std::memory_order_acquire);
+			end_pos = end_pos & buff->buffer.SIZEMASK;
+
+			if (current_read_pos[i] != end_pos) {
+				if (end_pos > start_pos) {
+					current_read_pos[i] = end_pos;
+					USBD_CDC_SetTxBuffer(pdev, &buff->buffer.data[start_pos], end_pos - start_pos);
+					USBD_CDC_TransmitPacket(pdev);
+				}
+			}
+		}
+		i++;
+	}
+}
+
 int8_t UsbSerialDevice::CDC_Itf_Init() {
 	// TIM_Config();
 	// if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK) {
 	// 	Error_Handler();
 	// }
 
-	USBD_CDC_SetTxBuffer(_instance->pdev, _instance->tx_buffer.data(), 0); //for now, size is 0
+	USBD_CDC_SetTxBuffer(_instance->pdev, _instance->console_buffers[0]->buffer.data.data(), 0);
 	USBD_CDC_SetRxBuffer(_instance->pdev, _instance->rx_buffer.data()); // FIXME: how does the driver prevent overflow?
 
 	return USBD_OK;
@@ -84,6 +103,7 @@ int8_t UsbSerialDevice::CDC_Itf_Receive(uint8_t *Buf, uint32_t *Len) {
 		pr_dbg("%c", *Buf++);
 	pr_dbg("\n");
 
+	// Indicate that we're ready to receive more
 	USBD_CDC_ReceivePacket(_instance->pdev);
 	return USBD_OK;
 }

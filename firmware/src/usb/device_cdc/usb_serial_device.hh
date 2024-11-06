@@ -1,4 +1,5 @@
 #pragma once
+#include "console/concurrent_buffer.hh"
 #include "usbd_cdc.h"
 #include "usbd_core.h"
 #include "util/circular_buffer_ext.hh"
@@ -7,19 +8,18 @@
 class UsbSerialDevice {
 
 public:
-	UsbSerialDevice(USBD_HandleTypeDef *pDevice);
+	UsbSerialDevice(USBD_HandleTypeDef *pDevice, std::array<ConcurrentBuffer *, 3> console_buffers);
+	void process();
 	void start();
 	void stop();
 
 private:
 	USBD_HandleTypeDef *pdev;
 
-	// std::array<uint8_t, 4096> rx_buffer{};
-	// std::array<uint8_t, 4096> tx_buffer{};
-	std::vector<uint8_t> rx_buffer{};
-	std::vector<uint8_t> tx_buffer{};
-	// CircularBufferAccess<std::array<uint8_t, 4096>> rx_fifo{rx_buffer};
-	// CircularBufferAccess<std::array<uint8_t, 4096>> tx_fifo{tx_buffer};
+	std::array<ConcurrentBuffer *, 3> console_buffers;
+	std::array<unsigned, 3> current_read_pos{};
+
+	std::vector<uint8_t> rx_buffer{}; // force to be on heap
 
 	static int8_t CDC_Itf_Init();
 	static int8_t CDC_Itf_DeInit();

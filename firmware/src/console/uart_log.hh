@@ -1,4 +1,5 @@
 #pragma once
+#include "concurrent_buffer.hh"
 #include "conf/console_uart_conf.hh"
 #include "drivers/lazy_uart.hh"
 #include "drivers/uart_conf.hh"
@@ -8,6 +9,7 @@ namespace MetaModule
 
 struct UartLog {
 	static inline mdrivlib::LazyUart<LogUartConfig> log_uart;
+	static inline ConcurrentBuffer log_usb;
 
 	UartLog() {
 		init();
@@ -18,5 +20,12 @@ struct UartLog {
 	static void putchar(char c);
 
 	static void log(const char *format, ...);
+
+	static void write_uart(char *ptr, size_t len);
+	static void write_usb(char *ptr, size_t len);
+
+	enum class Port { Uart, USB };
+
+	static Port port;
 };
 } // namespace MetaModule

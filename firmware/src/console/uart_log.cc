@@ -1,5 +1,6 @@
 #include "uart_log.hh"
 #include <cstdarg>
+#include <cstring>
 
 namespace MetaModule
 {
@@ -18,13 +19,32 @@ void UartLog::log(const char *format, ...) {
 	va_end(va);
 }
 
-extern "C" void _putchar(char c) {
+UartLog::Port UartLog::port = UartLog::Port::Uart;
+
+// extern "C" void _putchar(char c) {
+// }
+
+void UartLog::write_uart(char *ptr, size_t len) {
+	for (auto idx = 0u; idx < len; idx++) {
+		UartLog::putchar(*ptr++);
+	}
+}
+
+void UartLog::write_usb(char *ptr, size_t len) {
+	log_usb.writer_ref_count.fetch_add(1, std::memory_order_acquire);
+
+	auto offset = log_usb.current_write_pos.fetch_add(len, std::memory_order_acquire);
+	log_usb.buffer.write({(uint8_t *)ptr, len}, offset);
+
+	log_usb.writer_ref_count.fetch_sub(1, std::memory_order_release);
 }
 
 extern "C" int _write(int file, char *ptr, int len) {
-	// TODO: make this more efficient using UART DMA
-	for (auto idx = 0; idx < len; idx++) {
-		UartLog::putchar(*ptr++);
+	if (UartLog::port == UartLog::Port::Uart) {
+		UartLog::write_uart(ptr, len);
+
+	} else if (UartLog::port == UartLog::Port::USB) {
+		UartLog::write_usb(ptr, len);
 	}
 
 	return len;

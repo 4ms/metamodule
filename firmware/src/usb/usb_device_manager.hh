@@ -1,4 +1,5 @@
 #pragma once
+#include "console/concurrent_buffer.hh"
 #include "device_cdc/usb_serial_device.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
@@ -15,12 +16,11 @@ extern "C" PCD_HandleTypeDef hpcd;
 
 struct UsbDeviceManager {
 	USBD_HandleTypeDef USBD_Device{};
-
 	UsbSerialDevice serial;
 
-#ifndef USE_RAMDISK_USB
-	UsbDeviceManager()
-		: serial{&USBD_Device} {
+#if !defined(USE_RAMDISK_USB)
+	UsbDeviceManager(std::array<ConcurrentBuffer *, 3> console_buffers)
+		: serial{&USBD_Device, console_buffers} {
 	}
 #endif
 

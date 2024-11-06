@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/fusb30x_conf.hh"
+#include "console/concurrent_buffer.hh"
 #include "debug.hh"
 #include "drivers/fusb302.hh"
 #include "drivers/pin_change.hh"
@@ -26,8 +27,9 @@ class UsbManager {
 	// uint32_t tm;
 
 public:
-	UsbManager(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
-		: fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
+	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
+		: usb_device{console_buffers}
+		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		usb_device.start();
 		usb_host.init();
 		found_fusb = usbctl.init(); //NOLINT
