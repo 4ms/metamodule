@@ -1,4 +1,5 @@
 #pragma once
+#include "concurrent_buffer.hh"
 #include "conf/ramdisk_conf.hh"
 #include "core_intercom/intercore_message.hh"
 #include "param_block.hh"
@@ -21,9 +22,9 @@ extern PatchDirList patch_dir_list;
 extern DoubleBufParamBlock param_blocks;
 extern SyncParams sync_params;
 extern RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
-extern std::array<uint8_t, 1024 * 1024> console_a7_0_buff;
-extern std::array<uint8_t, 1024 * 1024> console_a7_1_buff;
-extern std::array<uint8_t, 1024 * 1024> console_m4_buff;
+extern ConcurrentBuffer console_a7_0_buff;
+extern ConcurrentBuffer console_a7_1_buff;
+extern ConcurrentBuffer console_m4_buff;
 
 void init();
 
