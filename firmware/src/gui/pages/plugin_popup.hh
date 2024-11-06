@@ -1,7 +1,6 @@
 #pragma once
-#include "gui/helpers/lv_helpers.hh"
-#include "gui/helpers/lv_obj_copy.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "lvgl.h"
 #include "src/core/lv_obj.h"
 #include "src/core/lv_obj_tree.h"
