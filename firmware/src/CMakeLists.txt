@@ -3,6 +3,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/arch_mp15xa7.cmake)
 
 option(ENABLE_WIFI_BRIDGE       "Enable serial bridge to wifi module" ON)
 option(CPU_TEST_ALL_MODULES     "Perform CPU tests at boot on all modules (built-in and auto-loaded plugins)" OFF)
+option(CONSOLE_USE_USB          "Send printf() to USB if connected" OFF)
 
 
 include(${CMAKE_SOURCE_DIR}/cmake/log_levels.cmake)
@@ -227,6 +228,10 @@ target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,CoreModules-
 
 if (CPU_TEST_ALL_MODULES)
   target_compile_definitions(main.elf PRIVATE CPU_TEST_ALL_MODULES=1)
+endif()
+
+if (CONSOLE_USE_USB)
+  target_compile_definitions(main.elf PRIVATE CONSOLE_USE_USB=1)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../vcv_ports/brands.cmake)
