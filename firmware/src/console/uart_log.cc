@@ -19,25 +19,27 @@ void UartLog::log(const char *format, ...) {
 	va_end(va);
 }
 
-UartLog::Port UartLog::port = UartLog::Port::Uart;
-
-static uint32_t get_core_id() {
-	uint32_t current_core = 0;
-
+namespace
+{
+static uint32_t core_id() {
+	// There are two separate static instances of UartLog: one in M4's memory and one in A7's memory
+	// (because this file is compiled+linked once for A7 and once for M4).
+	// The A7 instance has two cores, while the M4 instance just uses core_id() == 0
 #ifdef CORE_CA7
-	current_core = std::min<uint32_t>(__get_MPIDR() & 0xFF, UartLog::NumCores - 1);
+	return std::min<uint32_t>(__get_MPIDR() & 0xFF, UartLog::NumCores - 1);
+#else
+	return 0;
 #endif
-
-	return current_core;
 }
+} // namespace
 
 void UartLog::use_usb(ConcurrentBuffer *usb_buffer) {
-	log_usb[get_core_id()] = usb_buffer;
-	port = UartLog::Port::USB;
+	log_usb[core_id()] = usb_buffer;
+	port[core_id()] = UartLog::Port::USB;
 }
 
 void UartLog::use_uart() {
-	port = UartLog::Port::Uart;
+	port[core_id()] = UartLog::Port::Uart;
 }
 
 // extern "C" void _putchar(char c) {
@@ -50,7 +52,7 @@ void UartLog::write_uart(char *ptr, size_t len) {
 }
 
 void UartLog::write_usb(char *ptr, size_t len) {
-	auto core = get_core_id();
+	auto core = core_id();
 
 	//TODO: make this interrupt-safe
 	log_usb[core]->writer_ref_count++;
@@ -63,11 +65,11 @@ void UartLog::write_usb(char *ptr, size_t len) {
 }
 
 extern "C" int _write(int file, char *ptr, int len) {
-	if (UartLog::port == UartLog::Port::Uart) {
+	if (UartLog::port[core_id()] == UartLog::Port::Uart) {
 		UartLog::write_uart(ptr, len);
 
-	} else if (UartLog::port == UartLog::Port::USB) {
-		if (UartLog::log_usb[get_core_id()])
+	} else if (UartLog::port[core_id()] == UartLog::Port::USB) {
+		if (UartLog::log_usb[core_id()])
 			UartLog::write_usb(ptr, len);
 	}
 

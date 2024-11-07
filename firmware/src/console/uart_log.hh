@@ -10,8 +10,12 @@ namespace MetaModule
 struct UartLog {
 	static inline mdrivlib::LazyUart<LogUartConfig> log_uart;
 
+	enum class Port { Uart, USB };
+
 	static constexpr size_t NumCores = 2;
+
 	static inline std::array<ConcurrentBuffer *, NumCores> log_usb = {nullptr, nullptr};
+	static inline std::array<Port, NumCores> port{Port::Uart, Port::Uart};
 
 	UartLog() {
 		init();
@@ -26,9 +30,6 @@ struct UartLog {
 	static void write_uart(char *ptr, size_t len);
 	static void write_usb(char *ptr, size_t len);
 
-	enum class Port { Uart, USB };
-
-	static Port port;
 	static void use_usb(ConcurrentBuffer *usb_buffer);
 	static void use_uart();
 };

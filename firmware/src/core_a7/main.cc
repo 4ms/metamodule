@@ -83,6 +83,7 @@ void main() {
 		&StaticBuffers::sync_params,
 		&patch_mod_queue,
 		&StaticBuffers::virtdrive,
+		&StaticBuffers::console_a7_1_buff,
 	};
 
 	{

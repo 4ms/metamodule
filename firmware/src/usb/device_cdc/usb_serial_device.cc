@@ -69,14 +69,14 @@ void UsbSerialDevice::process() {
 			unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
 			end_pos = end_pos & buff->buffer.SIZEMASK;
 
-			if (end_pos < start_pos) {
+			if (start_pos > end_pos) {
 				// Data to transmit spans the "seam" of the circular buffer,
 				// Send the first chunk
 				transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
 				current_read_pos[i] = 0;
 				return;
 
-			} else if (start_pos > end_pos) {
+			} else if (start_pos < end_pos) {
 				transmit(&buff->buffer.data[start_pos], end_pos - start_pos);
 				current_read_pos[i] = end_pos;
 				return;
