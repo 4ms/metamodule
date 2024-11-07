@@ -43,40 +43,31 @@ void UartLog::use_uart() {
 	port[core_id()] = UartLog::Port::Uart;
 }
 
-extern "C" void _putchar(char c) {
-	UartLog::putchar(c);
-}
-
 void UartLog::write_uart(char *ptr, size_t len) {
 	for (auto idx = 0u; idx < len; idx++) {
 		UartLog::putchar(*ptr++);
 	}
 }
 
+//TODO: make this interrupt-safe
 void UartLog::write_usb(char *ptr, size_t len) {
 	auto core = core_id();
 
-	//TODO: make this interrupt-safe
 	log_usb[core]->writer_ref_count++;
+	std::atomic_signal_fence(std::memory_order_release);
+	{
+		if (log_usb[core]->use_color) {
+			auto color = core_id() ? Term::Green : Term::Blue;
+			log_usb[core]->write({color, strlen(color)});
+		}
 
-	if (log_usb[core]->use_color) {
-		auto color = core_id() ? Term::Green : Term::Blue;
-		auto code = std::span<const uint8_t>{(const uint8_t *)color, strlen(color)};
-		log_usb[core]->buffer.write(code, log_usb[core]->current_write_pos);
-		log_usb[core]->current_write_pos += strlen(color);
+		log_usb[core]->write({ptr, len});
+
+		if (log_usb[core]->use_color) {
+			log_usb[core]->write({Term::Normal, strlen(Term::Normal)});
+		}
 	}
-
-	auto offset = log_usb[core]->current_write_pos;
-	log_usb[core]->current_write_pos += len;
-	log_usb[core]->buffer.write({(uint8_t *)ptr, len}, offset);
-
-	if (log_usb[core]->use_color) {
-		auto color = Term::Normal;
-		auto code = std::span<const uint8_t>{(const uint8_t *)color, strlen(color)};
-		log_usb[core]->buffer.write(code, log_usb[core]->current_write_pos);
-		log_usb[core]->current_write_pos += strlen(color);
-	}
-
+	std::atomic_signal_fence(std::memory_order_release);
 	log_usb[core]->writer_ref_count--;
 }
 
@@ -90,6 +81,11 @@ extern "C" int _write(int file, char *ptr, int len) {
 	}
 
 	return len;
+}
+
+// This is used for bypassing write() and going direct to UART
+extern "C" void _putchar(char c) {
+	UartLog::putchar(c);
 }
 
 } // namespace MetaModule
