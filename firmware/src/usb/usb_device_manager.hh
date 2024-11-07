@@ -39,6 +39,11 @@ struct UsbDeviceManager {
 		serial.process();
 	}
 
+	void process_disconnected() {
+		// Still process serial because we if USB is not connected, we forward console messages to UART
+		serial.forward_to_uart();
+	}
+
 #ifdef USE_RAMDISK_USB
 	RamDiskOps ramdiskops;
 	UsbDriveDevice drive;

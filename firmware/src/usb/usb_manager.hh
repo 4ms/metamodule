@@ -93,9 +93,10 @@ public:
 			usb_host.process();
 		}
 
-		else if (state == FUSB302::Device::ConnectedState::AsDevice)
-		{
+		if (state == FUSB302::Device::ConnectedState::AsDevice) {
 			usb_device.process();
+		} else {
+			usb_device.process_disconnected();
 		}
 
 		//DEBUG: toggle Pin0 when we're DRD polling

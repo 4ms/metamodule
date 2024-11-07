@@ -42,8 +42,9 @@ void UartLog::use_uart() {
 	port[core_id()] = UartLog::Port::Uart;
 }
 
-// extern "C" void _putchar(char c) {
-// }
+extern "C" void _putchar(char c) {
+	UartLog::putchar(c);
+}
 
 void UartLog::write_uart(char *ptr, size_t len) {
 	for (auto idx = 0u; idx < len; idx++) {

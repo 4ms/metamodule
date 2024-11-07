@@ -13,6 +13,8 @@ public:
 	void start();
 	void stop();
 
+	void forward_to_uart();
+
 private:
 	USBD_HandleTypeDef *pdev;
 
@@ -35,4 +37,8 @@ private:
 
 	static USBD_CDC_ItfTypeDef USBD_CDC_fops;
 	static inline UsbSerialDevice *_instance;
+
+	enum class Destination { UART, USB };
+	void transmit_buffers(Destination dest);
+
 };

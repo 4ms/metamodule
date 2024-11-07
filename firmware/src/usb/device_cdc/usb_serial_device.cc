@@ -30,6 +30,9 @@ void UsbSerialDevice::start() {
 		return;
 	}
 
+	for (auto i = 0u; auto const &buff : console_buffers)
+		current_read_pos[i++] = buff->current_write_pos;
+
 	USBD_RegisterClass(pdev, USBD_CDC_CLASS);
 	USBD_CDC_RegisterInterface(pdev, &USBD_CDC_fops);
 	USBD_Start(pdev);
@@ -42,22 +45,33 @@ void UsbSerialDevice::stop() {
 	USBD_DeInit(pdev);
 }
 
-void UsbSerialDevice::process() {
-	auto transmit = [this](uint8_t *ptr, int len) {
-		USBD_CDC_SetTxBuffer(pdev, ptr, len);
-		if (auto err = USBD_CDC_TransmitPacket(pdev) != USBD_OK) {
-			pr_err("Error: %d\n", err);
-		} else {
-			is_transmitting = true;
-			last_transmission_tm = HAL_GetTick();
+void UsbSerialDevice::transmit_buffers(Destination dest) {
+	auto transmit = [this, dest = dest](uint8_t *ptr, int len) {
+		if (dest == Destination::USB) {
+			USBD_CDC_SetTxBuffer(pdev, ptr, len);
+
+			if (auto err = USBD_CDC_TransmitPacket(pdev) == USBD_OK) {
+				is_transmitting = true;
+				last_transmission_tm = HAL_GetTick();
+
+			} else if (err != USBD_BUSY) {
+				pr_dbg("USB CDC Transmit Error: %d\n", err);
+			}
+		}
+
+		if (dest == Destination::UART) {
+			while (len--)
+				putchar(*ptr++);
 		}
 	};
 
+
 	// Don't transmit if we already are transmitting
-	// But have a 2 second timeout in case of a USB error
+	// But have a 100ms timeout in case of a USB error
 	if (is_transmitting) {
-		if (HAL_GetTick() - last_transmission_tm > 2000) {
+		if (HAL_GetTick() - last_transmission_tm > 100) {
 			is_transmitting = false;
+			last_transmission_tm = HAL_GetTick();
 		} else
 			return;
 	}
@@ -84,6 +98,14 @@ void UsbSerialDevice::process() {
 		}
 		i++;
 	}
+}
+
+void UsbSerialDevice::process() {
+	transmit_buffers(Destination::USB);
+}
+
+void UsbSerialDevice::forward_to_uart() {
+	transmit_buffers(Destination::UART);
 }
 
 int8_t UsbSerialDevice::CDC_Itf_Init() {
