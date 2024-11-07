@@ -1,10 +1,12 @@
 #pragma once
 #include "conf/fusb30x_conf.hh"
+#include "console/concurrent_buffer.hh"
 #include "debug.hh"
 #include "drivers/fusb302.hh"
 #include "drivers/pin_change.hh"
 #include "fs/fatfs/ramdisk_ops.hh"
-#include "usb/usb_drive_device.hh"
+#include "usb/device_cdc/usb_serial_device.hh"
+#include "usb/usb_device_manager.hh"
 #include "usb/usb_host_manager.hh"
 
 namespace MetaModule
@@ -12,9 +14,7 @@ namespace MetaModule
 
 class UsbManager {
 	UsbHostManager usb_host{Usb5VSrcEnablePin};
-
-	RamDiskOps ramdiskops;
-	UsbDriveDevice usb_drive;
+	UsbDeviceManager usb_device;
 
 	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
 	FUSB302::Device usbctl{usbi2c, FUSBDevAddr};
@@ -27,11 +27,10 @@ class UsbManager {
 	// uint32_t tm;
 
 public:
-	UsbManager(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
-		: ramdiskops{rmdisk}
-		, usb_drive{ramdiskops}
+	UsbManager(std::array<ConcurrentBuffer *, 3> console_buffers)
+		: usb_device{console_buffers}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
-		usb_drive.init_usb_device();
+		usb_device.start();
 		usb_host.init();
 		found_fusb = usbctl.init(); //NOLINT
 	}
@@ -55,7 +54,7 @@ public:
 
 			if (newstate == AsDevice) {
 				pr_info("Connected as a device\n");
-				usb_drive.start();
+				usb_device.start();
 
 			} else if (newstate == AsHost) {
 				pr_info("Starting host\n");
@@ -67,8 +66,9 @@ public:
 					usb_host.stop();
 				}
 
-				if (state == AsDevice)
-					usb_drive.stop();
+				if (state == AsDevice) {
+					usb_device.stop();
+				}
 
 				//printf_("Disconnected, resuming DRP polling\n");
 				usbctl.start_drp_polling();
@@ -91,6 +91,12 @@ public:
 
 		if (state == FUSB302::Device::ConnectedState::AsHost) {
 			usb_host.process();
+		}
+
+		if (state == FUSB302::Device::ConnectedState::AsDevice) {
+			usb_device.process();
+		} else {
+			usb_device.process_disconnected();
 		}
 
 		//DEBUG: toggle Pin0 when we're DRD polling

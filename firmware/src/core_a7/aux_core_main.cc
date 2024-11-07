@@ -36,6 +36,9 @@ extern "C" void aux_core_main() {
 	auto sync_params = A7SharedMemoryS::ptrs.sync_params;
 	auto patch_mod_queue = A7SharedMemoryS::ptrs.patch_mod_queue;
 	auto ramdisk_storage = A7SharedMemoryS::ptrs.ramdrive;
+#ifdef CONSOLE_USE_USB
+	UartLog::use_usb(A7SharedMemoryS::ptrs.console_buffer);
+#endif
 
 	LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::wait_cb, framebuf1, framebuf2};
 

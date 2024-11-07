@@ -70,6 +70,13 @@
       "cacheVariables": {
         "CPU_TEST_ALL_MODULES": { "type": "BOOL", "value": "ON" }
       }
+    },
+    {
+      "name": "usb-log",
+      "inherits": "full",
+      "cacheVariables": {
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "ON" }
+      }
     }
   ],
   "buildPresets": [
@@ -88,6 +95,10 @@
     {
       "name": "cpu-test",
       "configurePreset": "cpu-test"
+    },
+    {
+      "name": "usb-log",
+      "configurePreset": "usb-log"
     }
   ]
 }

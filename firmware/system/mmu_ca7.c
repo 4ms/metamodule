@@ -131,6 +131,9 @@ void MMU_CreateTranslationTable(void) {
 	create_aligned_section(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ, Sect_Normal_NonCache);
 	create_aligned_section(TTB_BASE, FWBUFFER, FWBUFFER_SZ, Sect_Normal_NonCache);
 
+	//
+	create_aligned_section(TTB_BASE, CONSOLEBUF, CONSOLEBUF_SZ, Sect_Normal_NonCache);
+
 	//M4 heap/data
 	create_aligned_section(TTB_BASE, M4_RODATA, M4_RODATA_SZ, Sect_StronglyOrdered);
 	create_aligned_section(TTB_BASE, M4_HEAP, M4_HEAP_SZ, Sect_StronglyOrdered);

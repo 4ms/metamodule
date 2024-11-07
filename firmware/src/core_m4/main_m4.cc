@@ -48,7 +48,9 @@ void main() {
 	pr_info("M4 starting\n");
 
 	// USB
-	UsbManager usb{*SharedMemoryS::ptrs.ramdrive};
+	UsbManager usb{{SharedMemoryS::ptrs.console_a7_0_buff,
+					SharedMemoryS::ptrs.console_a7_1_buff,
+					SharedMemoryS::ptrs.console_m4_buff}};
 	usb.start();
 
 	// SD Card

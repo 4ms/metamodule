@@ -1,4 +1,5 @@
 #include "conf/ramdisk_conf.hh"
+#include "console/concurrent_buffer.hh"
 #include "core_intercom/intercore_message.hh"
 #include "param_block.hh"
 #include "patch_file/patch_dir_list.hh"
@@ -26,10 +27,14 @@ __attribute__((section(".ddma"))) PatchDirList patch_dir_list;
 
 __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks{};
 __attribute__((section(".sysram"))) SyncParams sync_params;
+
 __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff{};
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff{};
+
 void init() {
-	// Todo: why doesn't Params::Params() get called? because it's in a NOLOAD section of memory?
 	for (auto &block : param_blocks) {
 		for (auto &param : block.params) {
 			param.clear();
@@ -57,6 +62,21 @@ void init() {
 		for (auto &frame : buff)
 			frame = StreamConf::Audio::AudioInFrame{};
 	}
+
+	console_a7_0_buff.writer_ref_count = 0;
+	console_a7_0_buff.current_write_pos = 0;
+	console_a7_0_buff.buffer.data[0] = 0;
+	console_a7_0_buff.use_color = false;
+
+	console_a7_1_buff.writer_ref_count = 0;
+	console_a7_1_buff.current_write_pos = 0;
+	console_a7_1_buff.buffer.data[0] = 0;
+	console_a7_1_buff.use_color = false;
+
+	console_m4_buff.writer_ref_count = 0;
+	console_m4_buff.current_write_pos = 0;
+	console_m4_buff.buffer.data[0] = 0;
+	console_m4_buff.use_color = false;
 }
 
 }; // namespace StaticBuffers
