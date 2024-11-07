@@ -30,38 +30,50 @@ __attribute__((section(".sysram"))) SyncParams sync_params;
 
 __attribute__((section(".virtdrive"))) RamDisk<RamDiskSizeBytes, RamDiskBlockSize> virtdrive;
 
-__attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff;
-__attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff;
-__attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff;
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_0_buff{};
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_a7_1_buff{};
+__attribute__((section(".consolebuf"))) ConcurrentBuffer console_m4_buff{};
 
 void init() {
-	//for (auto &block : param_blocks) {
-	//	for (auto &param : block.params) {
-	//		param.clear();
-	//	}
-	//	block.metaparams.clear();
-	//}
+	for (auto &block : param_blocks) {
+		for (auto &param : block.params) {
+			param.clear();
+		}
+		block.metaparams.clear();
+	}
 
-	////clear buffers
-	//for (auto &buff : audio_out_dma_block.codec) {
-	//	for (auto &frame : buff)
-	//		frame = StreamConf::Audio::AudioOutFrame{};
-	//}
+	//clear buffers
+	for (auto &buff : audio_out_dma_block.codec) {
+		for (auto &frame : buff)
+			frame = StreamConf::Audio::AudioOutFrame{};
+	}
 
-	//for (auto &buff : audio_out_dma_block.ext_codec) {
-	//	for (auto &frame : buff)
-	//		frame = StreamConf::Audio::AudioOutFrame{};
-	//}
+	for (auto &buff : audio_out_dma_block.ext_codec) {
+		for (auto &frame : buff)
+			frame = StreamConf::Audio::AudioOutFrame{};
+	}
 
-	//for (auto &buff : audio_in_dma_block.codec) {
-	//	for (auto &frame : buff)
-	//		frame = StreamConf::Audio::AudioInFrame{};
-	//}
+	for (auto &buff : audio_in_dma_block.codec) {
+		for (auto &frame : buff)
+			frame = StreamConf::Audio::AudioInFrame{};
+	}
 
-	//for (auto &buff : audio_in_dma_block.ext_codec) {
-	//	for (auto &frame : buff)
-	//		frame = StreamConf::Audio::AudioInFrame{};
-	//}
+	for (auto &buff : audio_in_dma_block.ext_codec) {
+		for (auto &frame : buff)
+			frame = StreamConf::Audio::AudioInFrame{};
+	}
+
+	console_a7_0_buff.writer_ref_count = 0;
+	console_a7_0_buff.current_write_pos = 0;
+	console_a7_0_buff.buffer.data[0] = 0;
+
+	console_a7_1_buff.writer_ref_count = 0;
+	console_a7_1_buff.current_write_pos = 0;
+	console_a7_1_buff.buffer.data[0] = 0;
+
+	console_m4_buff.writer_ref_count = 0;
+	console_m4_buff.current_write_pos = 0;
+	console_m4_buff.buffer.data[0] = 0;
 }
 
 }; // namespace StaticBuffers
