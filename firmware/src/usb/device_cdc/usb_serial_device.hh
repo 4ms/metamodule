@@ -41,4 +41,5 @@ private:
 	enum class Destination { UART, USB };
 	void transmit_buffers(Destination dest);
 
+	bool use_color = false;
 };

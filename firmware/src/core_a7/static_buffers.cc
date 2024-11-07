@@ -66,14 +66,17 @@ void init() {
 	console_a7_0_buff.writer_ref_count = 0;
 	console_a7_0_buff.current_write_pos = 0;
 	console_a7_0_buff.buffer.data[0] = 0;
+	console_a7_0_buff.use_color = false;
 
 	console_a7_1_buff.writer_ref_count = 0;
 	console_a7_1_buff.current_write_pos = 0;
 	console_a7_1_buff.buffer.data[0] = 0;
+	console_a7_1_buff.use_color = false;
 
 	console_m4_buff.writer_ref_count = 0;
 	console_m4_buff.current_write_pos = 0;
 	console_m4_buff.buffer.data[0] = 0;
+	console_m4_buff.use_color = false;
 }
 
 }; // namespace StaticBuffers

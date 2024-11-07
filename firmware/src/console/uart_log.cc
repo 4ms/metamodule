@@ -1,4 +1,5 @@
 #include "uart_log.hh"
+#include "util/term_codes.hh"
 #include <cstdarg>
 #include <cstring>
 
@@ -58,9 +59,23 @@ void UartLog::write_usb(char *ptr, size_t len) {
 	//TODO: make this interrupt-safe
 	log_usb[core]->writer_ref_count++;
 
+	if (log_usb[core]->use_color) {
+		auto color = core_id() ? Term::Green : Term::Blue;
+		auto code = std::span<const uint8_t>{(const uint8_t *)color, strlen(color)};
+		log_usb[core]->buffer.write(code, log_usb[core]->current_write_pos);
+		log_usb[core]->current_write_pos += strlen(color);
+	}
+
 	auto offset = log_usb[core]->current_write_pos;
 	log_usb[core]->current_write_pos += len;
 	log_usb[core]->buffer.write({(uint8_t *)ptr, len}, offset);
+
+	if (log_usb[core]->use_color) {
+		auto color = Term::Normal;
+		auto code = std::span<const uint8_t>{(const uint8_t *)color, strlen(color)};
+		log_usb[core]->buffer.write(code, log_usb[core]->current_write_pos);
+		log_usb[core]->current_write_pos += strlen(color);
+	}
 
 	log_usb[core]->writer_ref_count--;
 }

@@ -78,6 +78,8 @@ void UsbSerialDevice::transmit_buffers(Destination dest) {
 
 	// Scan buffers for data to transmit, and exit after first transmission
 	for (auto i = 0u; auto *buff : console_buffers) {
+		buff->use_color = use_color;
+
 		if (buff->writer_ref_count == 0) {
 			auto start_pos = current_read_pos[i];
 			unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
@@ -133,6 +135,11 @@ int8_t UsbSerialDevice::CDC_Itf_DeInit() {
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
 int8_t UsbSerialDevice::CDC_Itf_Receive(uint8_t *Buf, uint32_t *Len) {
+	if (*Buf == 'c')
+		_instance->use_color = true;
+	if (*Buf == 'm')
+		_instance->use_color = false;
+
 	pr_dbg("Rx: ");
 	uint32_t len = *Len;
 	while (len--)
