@@ -231,6 +231,7 @@ if (CPU_TEST_ALL_MODULES)
 endif()
 
 if (CONSOLE_USE_USB)
+  message("USB serial device enabled for console logging")
   target_compile_definitions(main.elf PRIVATE CONSOLE_USE_USB=1)
 endif()
 

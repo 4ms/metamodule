@@ -13,8 +13,8 @@ on:
         required: true
         default: false
         type: boolean
-      skip_wifi:
-        description: 'Skip building wifi features'
+      usb_logging:
+        description: 'Enable USB serial device for logging'
         default: false
         type: boolean
   push:
@@ -40,7 +40,7 @@ jobs:
     name: "Build firmware"
     runs-on: ubuntu-24.04
     env:
-      preset: ${{ inputs.skip_wifi && 'base' || 'full' }}
+      preset: ${{ inputs.usb_logging && 'usb-log' || 'full' }}
     steps:
       - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
         uses: carlosperate/arm-none-eabi-gcc-action@v1
@@ -88,7 +88,7 @@ jobs:
       run:
         shell: msys2 {0}
     env:
-      preset: ${{ inputs.skip_wifi && 'base' || 'full' }}
+      preset: ${{ inputs.usb_logging && 'usb-log' || 'full' }}
     steps:
       - name: Install windows dependencies
         uses: msys2/setup-msys2@v2

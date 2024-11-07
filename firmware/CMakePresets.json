@@ -75,7 +75,8 @@
       "name": "usb-log",
       "inherits": "full",
       "cacheVariables": {
-        "CONSOLE_USE_USB": { "type": "BOOL", "value": "ON" }
+        "CONSOLE_USE_USB": { "type": "BOOL", "value": "ON" },
+        "LOG_LEVEL": { "type": "STRING", "value": "DEBUG" }
       }
     }
   ],
