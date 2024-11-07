@@ -83,7 +83,6 @@ void main() {
 		&StaticBuffers::sync_params,
 		&patch_mod_queue,
 		&StaticBuffers::virtdrive,
-		StaticBuffers::console_a7_1_buff,
 	};
 
 	{
@@ -106,11 +105,15 @@ void main() {
 	pr_info("A7 Core 1 initialized\n");
 	// Note: from after the HAL_Delay(50) until here, it takes 20ms
 
+	printf("Stopping UART buffer\n");
+	UartLog::use_usb(&StaticBuffers::console_a7_0_buff);
+	printf("Using USB buffer\n");
+
 	// Tell other cores we're done with init
 	mdrivlib::HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for other cores to be ready: ~2400ms + more for auto-loading plugins
-	while (mdrivlib::HWSemaphore<AuxCoreReady>::is_locked() || mdrivlib::HWSemaphore<M4CoreReady>::is_locked())
+	while (mdrivlib::HWSemaphore<M4CoreReady>::is_locked() || mdrivlib::HWSemaphore<AuxCoreReady>::is_locked())
 		;
 
 		// ~290ms until while loop
