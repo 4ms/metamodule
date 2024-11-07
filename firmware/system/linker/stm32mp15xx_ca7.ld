@@ -147,7 +147,7 @@ SECTIONS
 	.consolebuf (NOLOAD):
 	{
 		*(.consolebuf)
-	} > _CONSOLEBUF
+	} > CONSOLEBUF
 
 	.fwbuffer (NOLOAD):
 	{
