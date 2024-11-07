@@ -21,6 +21,9 @@ private:
 
 	std::vector<uint8_t> rx_buffer{}; // force to be on heap
 
+	bool is_transmitting = false;
+	uint32_t last_transmission_tm = 0;
+
 	static int8_t CDC_Itf_Init();
 	static int8_t CDC_Itf_DeInit();
 	static int8_t CDC_Itf_Control(uint8_t cmd, uint8_t *pbuf, uint16_t length);

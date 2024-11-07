@@ -43,35 +43,43 @@ void UsbSerialDevice::stop() {
 }
 
 void UsbSerialDevice::process() {
-	auto write = [this](uint8_t *ptr, int len) {
+	auto transmit = [this](uint8_t *ptr, int len) {
 		USBD_CDC_SetTxBuffer(pdev, ptr, len);
 		if (auto err = USBD_CDC_TransmitPacket(pdev) != USBD_OK) {
 			pr_err("Error: %d\n", err);
+		} else {
+			is_transmitting = true;
+			last_transmission_tm = HAL_GetTick();
 		}
 	};
 
+	// Don't transmit if we already are transmitting
+	// But have a 2 second timeout in case of a USB error
+	if (is_transmitting) {
+		if (HAL_GetTick() - last_transmission_tm > 2000) {
+			is_transmitting = false;
+		} else
+			return;
+	}
+
+	// Scan buffers for data to transmit, and exit after first transmission
 	for (auto i = 0u; auto *buff : console_buffers) {
 		if (buff->writer_ref_count == 0) {
 			auto start_pos = current_read_pos[i];
 			unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
 			end_pos = end_pos & buff->buffer.SIZEMASK;
 
-			if (start_pos != end_pos) {
+			if (end_pos < start_pos) {
+				// Data to transmit spans the "seam" of the circular buffer,
+				// Send the first chunk
+				transmit(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
+				current_read_pos[i] = 0;
+				return;
 
-				if (end_pos < start_pos) {
-
-					// Write from current pos to the end
-					write(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
-
-					// Then setup for writing remaining bytes from 0
-					start_pos = 0;
-
-					pr_dbg("wraparound\n");
-				}
-
-				write(&buff->buffer.data[start_pos], end_pos - start_pos);
-
+			} else if (start_pos > end_pos) {
+				transmit(&buff->buffer.data[start_pos], end_pos - start_pos);
 				current_read_pos[i] = end_pos;
+				return;
 			}
 		}
 		i++;
@@ -79,14 +87,8 @@ void UsbSerialDevice::process() {
 }
 
 int8_t UsbSerialDevice::CDC_Itf_Init() {
-	// TIM_Config();
-	// if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK) {
-	// 	Error_Handler();
-	// }
-
 	USBD_CDC_SetTxBuffer(_instance->pdev, _instance->console_buffers[0]->buffer.data.data(), 0);
 	USBD_CDC_SetRxBuffer(_instance->pdev, _instance->rx_buffer.data()); // FIXME: how does the driver prevent overflow?
-
 	return USBD_OK;
 }
 
@@ -97,9 +99,6 @@ int8_t UsbSerialDevice::CDC_Itf_Init() {
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
 int8_t UsbSerialDevice::CDC_Itf_DeInit() {
-	// if (HAL_UART_DeInit(&UartHandle) != HAL_OK) {
-	// 	Error_Handler();
-	// }
 	return USBD_OK;
 }
 
@@ -112,9 +111,6 @@ int8_t UsbSerialDevice::CDC_Itf_DeInit() {
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
 int8_t UsbSerialDevice::CDC_Itf_Receive(uint8_t *Buf, uint32_t *Len) {
-	// SCB_CleanDCache_by_Addr((uint32_t *)Buf, *Len);
-
-	// HAL_UART_Transmit_DMA(&UartHandle, Buf, *Len);
 	pr_dbg("Rx: ");
 	uint32_t len = *Len;
 	while (len--)
@@ -142,6 +138,7 @@ int8_t UsbSerialDevice::CDC_TransmitCplt(uint8_t *Buf, uint32_t *Len, uint8_t ep
 	UNUSED(Buf);
 	UNUSED(Len);
 	UNUSED(epnum);
+	_instance->is_transmitting = false;
 	return 0;
 }
 
