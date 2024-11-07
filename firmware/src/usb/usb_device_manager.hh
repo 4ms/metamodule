@@ -35,6 +35,10 @@ struct UsbDeviceManager {
 		// drive.stop();
 	}
 
+	void process() {
+		serial.process();
+	}
+
 #ifdef USE_RAMDISK_USB
 	RamDiskOps ramdiskops;
 	UsbDriveDevice drive;

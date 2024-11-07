@@ -93,6 +93,11 @@ public:
 			usb_host.process();
 		}
 
+		else if (state == FUSB302::Device::ConnectedState::AsDevice)
+		{
+			usb_device.process();
+		}
+
 		//DEBUG: toggle Pin0 when we're DRD polling
 		// if ((HAL_GetTick() - tm) > 400) {
 		// 	tm = HAL_GetTick();

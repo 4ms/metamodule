@@ -17,7 +17,7 @@ USBD_CDC_LineCodingTypeDef LineCoding = {
 UsbSerialDevice::UsbSerialDevice(USBD_HandleTypeDef *pDevice, std::array<ConcurrentBuffer *, 3> console_buffers)
 	: pdev{pDevice}
 	, console_buffers{console_buffers} {
-	rx_buffer.resize(2048);
+	rx_buffer.resize(256);
 	_instance = this;
 }
 
@@ -33,6 +33,7 @@ void UsbSerialDevice::start() {
 	USBD_RegisterClass(pdev, USBD_CDC_CLASS);
 	USBD_CDC_RegisterInterface(pdev, &USBD_CDC_fops);
 	USBD_Start(pdev);
+	pr_info("Started UsbSerialDevice\n");
 }
 
 void UsbSerialDevice::stop() {
@@ -42,18 +43,35 @@ void UsbSerialDevice::stop() {
 }
 
 void UsbSerialDevice::process() {
+	auto write = [this](uint8_t *ptr, int len) {
+		USBD_CDC_SetTxBuffer(pdev, ptr, len);
+		if (auto err = USBD_CDC_TransmitPacket(pdev) != USBD_OK) {
+			pr_err("Error: %d\n", err);
+		}
+	};
+
 	for (auto i = 0u; auto *buff : console_buffers) {
-		if (buff->writer_ref_count.load() == 0) {
+		if (buff->writer_ref_count == 0) {
 			auto start_pos = current_read_pos[i];
-			unsigned end_pos = buff->current_write_pos.load(std::memory_order_acquire);
+			unsigned end_pos = buff->current_write_pos; //.load(std::memory_order_acquire);
 			end_pos = end_pos & buff->buffer.SIZEMASK;
 
-			if (current_read_pos[i] != end_pos) {
-				if (end_pos > start_pos) {
-					current_read_pos[i] = end_pos;
-					USBD_CDC_SetTxBuffer(pdev, &buff->buffer.data[start_pos], end_pos - start_pos);
-					USBD_CDC_TransmitPacket(pdev);
+			if (start_pos != end_pos) {
+
+				if (end_pos < start_pos) {
+
+					// Write from current pos to the end
+					write(&buff->buffer.data[start_pos], buff->buffer.data.size() - start_pos);
+
+					// Then setup for writing remaining bytes from 0
+					start_pos = 0;
+
+					pr_dbg("wraparound\n");
 				}
+
+				write(&buff->buffer.data[start_pos], end_pos - start_pos);
+
+				current_read_pos[i] = end_pos;
 			}
 		}
 		i++;
@@ -124,7 +142,6 @@ int8_t UsbSerialDevice::CDC_TransmitCplt(uint8_t *Buf, uint32_t *Len, uint8_t ep
 	UNUSED(Buf);
 	UNUSED(Len);
 	UNUSED(epnum);
-
 	return 0;
 }
 
