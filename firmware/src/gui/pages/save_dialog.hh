@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
+#include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
 #include "gui/slsexport/meta5/ui.h"
@@ -18,13 +19,15 @@ struct SaveDialog {
 			   PatchPlayLoader &play_loader,
 			   PatchSelectorSubdirPanel &subdir_panel,
 			   NotificationQueue &notify_queue,
-			   PageList &page_list)
+			   PageList &page_list,
+			   GuiState &gui_state)
 		: patch_storage{patch_storage}
 		, patches{patches}
 		, patch_playloader{play_loader}
 		, subdir_panel{subdir_panel}
 		, notify_queue{notify_queue}
 		, page_list{page_list}
+		, gui_state{gui_state}
 		, group(lv_group_create()) {
 
 		lv_group_add_obj(group, ui_SaveDialogFilename);
@@ -92,6 +95,8 @@ struct SaveDialog {
 
 		if (is_renaming) {
 			if (patch_playloader.is_renaming_idle()) {
+				gui_state.force_refresh_vol.mark(file_vol);
+				gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
 				saved = true;
 				is_renaming = false;
 				hide();
@@ -274,8 +279,6 @@ private:
 		strip_yml(patchname);
 		page->patches.get_view_patch()->patch_name = patchname;
 
-		// if view patch vol is RamDisk, then don't duplicate, just save
-		// if (page->patches.get_view_patch_vol() == Volume::RamDisk) {
 		if (page->method == Action::Save) {
 			//TODO: have playloader rename the open patch
 			page->patches.rename_view_patch_file(fullpath, page->file_vol);
@@ -284,6 +287,8 @@ private:
 			patchname.copy(page->file_name);
 
 			page->saved = true;
+			page->gui_state.force_refresh_vol.mark(page->file_vol);
+			page->gui_state.force_refresh_vol.mark(page->patches.get_view_patch_vol());
 			page->hide();
 
 		} else if (page->method == Action::Rename) {
@@ -299,6 +304,8 @@ private:
 			if (page->patches.duplicate_view_patch(fullpath, page->file_vol)) {
 				page->patch_playloader.request_save_patch();
 				page->saved = true;
+				page->gui_state.force_refresh_vol.mark(page->file_vol);
+				page->gui_state.force_refresh_vol.mark(page->patches.get_view_patch_vol());
 				auto patch_loc = PatchLocation{std::string_view{fullpath}, page->file_vol};
 				page->page_list.request_new_page_no_history(
 					PageId::PatchView, {.patch_loc = patch_loc, .patch_loc_hash = PatchLocHash{patch_loc}});
@@ -335,6 +342,7 @@ private:
 	PatchSelectorSubdirPanel &subdir_panel;
 	NotificationQueue &notify_queue;
 	PageList &page_list;
+	GuiState &gui_state;
 
 	std::vector<EntryInfo> subdir_panel_patches;
 

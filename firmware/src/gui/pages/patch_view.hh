@@ -293,13 +293,12 @@ struct PatchViewPage : PageBase {
 		}
 
 		if (desc_panel.did_update_names()) {
-			gui_state.force_refresh_vol = patches.get_view_patch_vol();
+			gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
 			patches.mark_view_patch_modified();
 			lv_label_set_text(ui_PatchName, patch->patch_name.c_str());
 		}
 
 		if (file_menu.did_filesystem_change()) {
-			gui_state.force_refresh_vol = patches.get_view_patch_vol();
 			displayed_patch_loc_hash = patches.get_view_patch_loc_hash();
 			args.patch_loc_hash = patches.get_view_patch_loc_hash();
 		}

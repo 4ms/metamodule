@@ -32,7 +32,41 @@ struct GuiState {
 
 	bool force_redraw_patch{};
 
-	std::optional<Volume> force_refresh_vol{};
+	class ForceRefreshVol {
+		bool USB{};
+		bool SDCard{};
+		bool NorFlash{};
+
+	public:
+		void mark(Volume vol) {
+			if (vol == Volume::NorFlash)
+				NorFlash = true;
+			if (vol == Volume::SDCard)
+				SDCard = true;
+			if (vol == Volume::USB)
+				USB = true;
+		}
+		void unmark(Volume vol) {
+			if (vol == Volume::NorFlash)
+				NorFlash = false;
+			if (vol == Volume::SDCard)
+				SDCard = false;
+			if (vol == Volume::USB)
+				USB = false;
+		}
+
+		bool needs_refresh(Volume vol) {
+			if (vol == Volume::NorFlash)
+				return NorFlash;
+			if (vol == Volume::SDCard)
+				return SDCard;
+			if (vol == Volume::USB)
+				return USB;
+			return false;
+		}
+	};
+
+	ForceRefreshVol force_refresh_vol{};
 
 	bool do_write_settings{};
 	uint32_t write_settings_after_ms{};

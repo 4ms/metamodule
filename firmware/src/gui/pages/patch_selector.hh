@@ -294,19 +294,29 @@ struct PatchSelectorPage : PageBase {
 				}
 			} break;
 
-			case State::TryingToRequestPatchList:
-				if (patch_storage.request_patchlist(gui_state.force_refresh_vol)) {
+			case State::TryingToRequestPatchList: {
+				//Pick first vol needing refresh
+				std::optional<Volume> force_refresh_vol =
+					gui_state.force_refresh_vol.needs_refresh(Volume::USB)		? Volume::USB :
+					gui_state.force_refresh_vol.needs_refresh(Volume::SDCard)	? Volume::SDCard :
+					gui_state.force_refresh_vol.needs_refresh(Volume::NorFlash) ? Volume::NorFlash :
+																				  std::optional<Volume>{};
+
+				if (patch_storage.request_patchlist(force_refresh_vol)) {
 					// Lock patchesfiles: we are not allowed to access it, because M4 has access now
 					patchfiles_locked = true;
 					state = State::RequestedPatchList;
 					show_spinner();
+
+					if (force_refresh_vol)
+						gui_state.force_refresh_vol.unmark(*force_refresh_vol);
 				}
-				break;
+			} break;
 
 			case State::RequestedPatchList: {
 				auto message = patch_storage.get_message();
 				if (message.message_type == FileStorageProxy::PatchListChanged) {
-					gui_state.force_refresh_vol = std::nullopt;
+
 					if (message.USBEvent == IntercoreStorageMessage::VolEvent::Mounted) {
 						patches.mark_patches_force_reload(Volume::USB);
 					}
@@ -325,7 +335,6 @@ struct PatchSelectorPage : PageBase {
 					patchfiles_locked = false;
 
 				} else if (message.message_type == FileStorageProxy::PatchListUnchanged) {
-					gui_state.force_refresh_vol = std::nullopt;
 					hide_spinner();
 					state = State::Idle;
 
