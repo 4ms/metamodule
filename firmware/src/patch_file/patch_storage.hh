@@ -107,7 +107,11 @@ public:
 			using VolEvent = IntercoreStorageMessage::VolEvent;
 
 			IntercoreStorageMessage result{
-				.message_type = PatchListUnchanged, .USBEvent = VolEvent::None, .SDEvent = VolEvent::None};
+				.message_type = PatchListUnchanged,
+				.USBEvent = VolEvent::None,
+				.SDEvent = VolEvent::None,
+				.NorFlashEvent = VolEvent::None,
+			};
 
 			auto *patch_dir_list_ = message.patch_dir_list;
 
@@ -155,10 +159,13 @@ public:
 					result.message_type = PatchListChanged;
 				}
 
-				if (norflash_changes_.take_change() || force_nor_refresh) {
+				bool norflash_changed = norflash_changes_.take_change();
+				if (norflash_changed || force_nor_refresh) {
 					patch_dir_list_->clear_patches(Volume::NorFlash);
 
 					PatchFileIO::add_directory(norflash_, patch_dir_list_->volume_root(Volume::NorFlash));
+					if (norflash_changed)
+						result.NorFlashEvent = VolEvent::Mounted;
 
 					result.message_type = PatchListChanged;
 				}

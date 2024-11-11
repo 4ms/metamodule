@@ -85,6 +85,7 @@ struct IntercoreStorageMessage {
 	enum class VolEvent { None, Mounted, Unmounted };
 	VolEvent USBEvent;
 	VolEvent SDEvent;
+	VolEvent NorFlashEvent;
 
 	uint32_t address;
 	uint32_t length;
