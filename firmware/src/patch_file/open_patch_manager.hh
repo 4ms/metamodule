@@ -18,7 +18,10 @@ public:
 	using enum IntercoreStorageMessage::MessageType;
 
 	// If the given patch loc is an open patch, set view_patch to it
+	// Returns true if patch can be loaded (already open and not "force_reload")
+	// false if it needs to be reloaded from disk
 	bool load_if_open(PatchLocation patch_loc) {
+		// Check if it's the playing patch
 		if (playing_patch_ && (PatchLocHash{patch_loc} == playing_patch_->loc_hash)) {
 			if (playing_patch_->force_reload == false) {
 				view_playing_patch();

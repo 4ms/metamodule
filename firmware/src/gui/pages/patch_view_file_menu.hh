@@ -30,7 +30,7 @@ struct PatchViewFileMenu {
 		, notify_queue{notify_queue}
 		, page_list{page_list}
 		, gui_state{gui_state}
-		, save_dialog{patch_storage, patches, play_loader, subdir_panel, notify_queue, page_list}
+		, save_dialog{patch_storage, patches, play_loader, subdir_panel, notify_queue, page_list, gui_state}
 		, group(lv_group_create()) {
 		lv_obj_set_parent(ui_PatchFileMenu, lv_layer_top());
 		lv_show(ui_PatchFileMenu);
@@ -51,7 +51,7 @@ struct PatchViewFileMenu {
 		lv_group_add_obj(group, ui_PatchFileRevertBut);
 		lv_group_add_obj(group, ui_PatchFileDeleteBut);
 
-		lv_obj_set_width( ui_PatchFileMenu, 126);
+		lv_obj_set_width(ui_PatchFileMenu, 126);
 		lv_label_set_text(ui_PatchFileRenameLabel, "Move/Rename");
 	}
 
@@ -140,6 +140,8 @@ struct PatchViewFileMenu {
 					notify_queue.put({"Error deleting file", Notification::Priority::Error});
 
 				filesystem_changed = true;
+				gui_state.force_refresh_vol.mark(patches.get_view_patch_vol());
+
 				delete_state = DeleteState::Idle;
 
 				page_list.remove_history_matching_args(
@@ -237,6 +239,7 @@ private:
 		} else {
 			page->play_loader.request_save_patch();
 			page->filesystem_changed = true;
+			page->gui_state.force_refresh_vol.mark(page->patches.get_view_patch_vol());
 		}
 	}
 
