@@ -329,6 +329,12 @@ struct PatchSelectorPage : PageBase {
 					if (message.SDEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
 						patches.mark_patches_no_reload(Volume::SDCard);
 					}
+					if (message.NorFlashEvent == IntercoreStorageMessage::VolEvent::Mounted) {
+						patches.mark_patches_force_reload(Volume::NorFlash);
+					}
+					if (message.NorFlashEvent == IntercoreStorageMessage::VolEvent::Unmounted) {
+						patches.mark_patches_no_reload(Volume::NorFlash);
+					}
 					state = State::ReloadingPatchList;
 
 					// Unlock patchesfiles: M4 is done with it

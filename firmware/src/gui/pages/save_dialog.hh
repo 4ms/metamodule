@@ -277,10 +277,10 @@ private:
 
 		std::string patchname = page->file_name;
 		strip_yml(patchname);
-		page->patches.get_view_patch()->patch_name = patchname;
 
 		if (page->method == Action::Save) {
 			//TODO: have playloader rename the open patch
+			page->patches.get_view_patch()->patch_name = patchname;
 			page->patches.rename_view_patch_file(fullpath, page->file_vol);
 			page->patch_playloader.request_save_patch();
 			auto &patchname = page->patches.get_view_patch()->patch_name;
@@ -296,6 +296,7 @@ private:
 				//send notification of failure
 				page->notify_queue.put({"To rename a patch, you must enter a new name", Notification::Priority::Error});
 			} else {
+				page->patches.get_view_patch()->patch_name = patchname;
 				page->patch_playloader.request_rename_view_patch({fullpath, page->file_vol});
 				page->is_renaming = true;
 			}
