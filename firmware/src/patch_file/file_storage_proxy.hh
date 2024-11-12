@@ -162,6 +162,15 @@ public:
 		return comm_.send_message(message) ? WriteResult::Success : WriteResult::Busy;
 	}
 
+	[[nodiscard]] bool request_file_info(std::string_view filename, Volume vol) {
+		IntercoreStorageMessage message{
+			.message_type = RequestFileInfo,
+			.vol_id = vol,
+			.filename = filename,
+		};
+		return comm_.send_message(message);
+	}
+
 	bool request_reset_factory_patches() {
 		IntercoreStorageMessage message{
 			.message_type = RequestFactoryResetPatches,

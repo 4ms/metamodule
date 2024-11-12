@@ -193,6 +193,24 @@ public:
 			return result;
 		}
 
+		if (message.message_type == RequestFileInfo) {
+
+			IntercoreStorageMessage result{
+				.message_type = FileInfoFailed,
+				.vol_id = message.vol_id,
+				.filename = message.filename,
+			};
+
+			if ((uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes) {
+				if (file_info(message.vol_id, message.filename)) {
+					result.message_type = FileInfoSuccess;
+					// result.file_info = ...
+				}
+			}
+
+			return result;
+		}
+
 		if (message.message_type == RequestWriteFile) {
 			IntercoreStorageMessage result{.message_type = WriteFileFail};
 
@@ -322,6 +340,10 @@ private:
 
 		pr_dbg("M4: Read file %.*s, %d bytes\n", (int)filename.size(), filename.data(), buffer.size_bytes());
 		return buffer.size_bytes();
+	}
+
+	bool file_info(Volume vol, std::string_view filename) {
+		return false;
 	}
 
 	bool delete_file(Volume vol, std::string_view filename) {

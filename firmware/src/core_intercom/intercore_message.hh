@@ -69,6 +69,10 @@ struct IntercoreStorageMessage {
 		WifiIPSuccess,
 		WifiIPFailed,
 
+		RequestFileInfo,
+		FileInfoSuccess,
+		FileInfoFailed,
+
 		NumRequests,
 	};
 
