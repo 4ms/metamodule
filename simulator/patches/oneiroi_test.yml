@@ -1,0 +1,299 @@
+PatchData:
+  patch_name: oneiroi_test
+  description: Patch Description
+  module_slugs:
+    0: '4msCompany:HubMedium'
+    1: 'Befaco:DualAtenuverter'
+    2: 'BefacoOneiroi:Oneiroi'
+  int_cables: []
+  mapped_ins: []
+  mapped_outs:
+    - panel_jack_id: 0
+      out:
+        module_id: 2
+        jack_id: 0
+    - panel_jack_id: 1
+      out:
+        module_id: 2
+        jack_id: 1
+  static_knobs:
+    - module_id: 2
+      param_id: 0
+      value: 0.75
+    - module_id: 2
+      param_id: 1
+      value: 0
+    - module_id: 2
+      param_id: 2
+      value: 1
+    - module_id: 2
+      param_id: 3
+      value: 0.5
+    - module_id: 2
+      param_id: 4
+      value: 0
+    - module_id: 2
+      param_id: 5
+      value: 0.5
+    - module_id: 2
+      param_id: 6
+      value: 0
+    - module_id: 2
+      param_id: 7
+      value: 0.5
+    - module_id: 2
+      param_id: 8
+      value: 0
+    - module_id: 2
+      param_id: 9
+      value: 0.5
+    - module_id: 2
+      param_id: 10
+      value: 0
+    - module_id: 2
+      param_id: 11
+      value: 0.5
+    - module_id: 2
+      param_id: 12
+      value: 0.5
+    - module_id: 2
+      param_id: 13
+      value: 0
+    - module_id: 2
+      param_id: 14
+      value: 0.5
+    - module_id: 2
+      param_id: 15
+      value: 1
+    - module_id: 2
+      param_id: 16
+      value: 0
+    - module_id: 2
+      param_id: 17
+      value: 0
+    - module_id: 2
+      param_id: 18
+      value: 1
+    - module_id: 2
+      param_id: 19
+      value: 0.5
+    - module_id: 2
+      param_id: 20
+      value: 1
+    - module_id: 2
+      param_id: 21
+      value: 0
+    - module_id: 2
+      param_id: 22
+      value: 0
+    - module_id: 2
+      param_id: 23
+      value: 0
+    - module_id: 2
+      param_id: 24
+      value: 0.5
+    - module_id: 2
+      param_id: 25
+      value: 0.5
+    - module_id: 2
+      param_id: 26
+      value: 0
+    - module_id: 2
+      param_id: 27
+      value: 0.434
+    - module_id: 2
+      param_id: 28
+      value: 0.41
+    - module_id: 2
+      param_id: 29
+      value: 0.368
+    - module_id: 2
+      param_id: 30
+      value: 0.326
+    - module_id: 2
+      param_id: 31
+      value: 1
+    - module_id: 2
+      param_id: 32
+      value: 0.5
+    - module_id: 2
+      param_id: 33
+      value: 0.5
+    - module_id: 2
+      param_id: 34
+      value: 0.5
+    - module_id: 2
+      param_id: 35
+      value: 0
+    - module_id: 2
+      param_id: 36
+      value: 0
+    - module_id: 2
+      param_id: 37
+      value: 0
+    - module_id: 2
+      param_id: 38
+      value: 0
+    - module_id: 2
+      param_id: 39
+      value: 0.5
+    - module_id: 2
+      param_id: 40
+      value: 0.5
+    - module_id: 2
+      param_id: 41
+      value: 0
+    - module_id: 2
+      param_id: 42
+      value: 0
+    - module_id: 2
+      param_id: 43
+      value: 0
+    - module_id: 2
+      param_id: 44
+      value: 0
+    - module_id: 2
+      param_id: 45
+      value: 0
+    - module_id: 2
+      param_id: 46
+      value: 0.25
+    - module_id: 2
+      param_id: 47
+      value: 0
+    - module_id: 2
+      param_id: 48
+      value: 0.5
+    - module_id: 2
+      param_id: 49
+      value: 0
+    - module_id: 2
+      param_id: 50
+      value: 0
+    - module_id: 2
+      param_id: 51
+      value: 0
+    - module_id: 2
+      param_id: 52
+      value: 0
+    - module_id: 2
+      param_id: 53
+      value: 0.5
+    - module_id: 2
+      param_id: 54
+      value: 1
+    - module_id: 2
+      param_id: 55
+      value: 1
+    - module_id: 2
+      param_id: 56
+      value: 1
+    - module_id: 2
+      param_id: 57
+      value: 1
+    - module_id: 2
+      param_id: 58
+      value: 1
+    - module_id: 2
+      param_id: 59
+      value: 1
+    - module_id: 2
+      param_id: 60
+      value: 0
+    - module_id: 2
+      param_id: 61
+      value: 1
+    - module_id: 2
+      param_id: 62
+      value: 0
+    - module_id: 2
+      param_id: 63
+      value: 1
+    - module_id: 2
+      param_id: 64
+      value: 0
+    - module_id: 2
+      param_id: 65
+      value: 1
+    - module_id: 2
+      param_id: 66
+      value: 0
+    - module_id: 1
+      param_id: 0
+      value: 0.5
+    - module_id: 1
+      param_id: 1
+      value: 0.5
+    - module_id: 1
+      param_id: 2
+      value: 0.5
+    - module_id: 1
+      param_id: 3
+      value: 0.5
+  mapped_knobs:
+    - name: ''
+      set:
+        - panel_knob_id: 0
+          module_id: 2
+          param_id: 24
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 1
+          module_id: 2
+          param_id: 25
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 2
+          module_id: 2
+          param_id: 5
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 3
+          module_id: 2
+          param_id: 7
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 4
+          module_id: 2
+          param_id: 9
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 5
+          module_id: 2
+          param_id: 11
+          curve_type: 0
+          min: 0
+          max: 1
+        - panel_knob_id: 6
+          module_id: 1
+          param_id: 0
+          curve_type: 0
+          min: 0
+          max: 1
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+    - name: ''
+      set: []
+  midi_maps:
+    name: ''
+    set: []
+  midi_poly_num: 0
+  vcvModuleStates:
+    - module_id: 2
+      data: |-
+        {"editMode":0,"useNativeRackRandomisation":false,"modulationMode":0,"cvMode":0}

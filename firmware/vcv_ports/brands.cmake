@@ -1,5 +1,6 @@
 set(brands
 	Befaco
+	BefacoOneiroi
 	hetrickcv
 	AudibleInstruments
 	nonlinearcircuits

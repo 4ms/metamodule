@@ -27,6 +27,8 @@ extern rack::plugin::Model *modelNoisePlethora;
 extern rack::plugin::Model *modelMuxlicer;
 extern rack::plugin::Model *modelBandit;
 
+extern rack::plugin::Model *modelOneiroi;
+
 extern rack::plugin::Model *modelBraids;
 extern rack::plugin::Model *modelPlaits;
 extern rack::plugin::Model *modelElements;

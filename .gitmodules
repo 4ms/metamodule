@@ -49,3 +49,6 @@
 [submodule "firmware/lib/CoreModules"]
 	path = firmware/lib/CoreModules
 	url = https://github.com/4ms/metamodule-core-modules
+[submodule "firmware/vcv_ports/BefacoOneiroi"]
+	path = firmware/vcv_ports/BefacoOneiroi
+	url = https://github.com/hemmer/befaco-oneiroi

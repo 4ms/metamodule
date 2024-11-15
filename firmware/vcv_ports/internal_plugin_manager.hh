@@ -93,6 +93,13 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelBandit);
 #endif
 
+#ifndef BUILD_DYN_PLUGIN_BefacoOneiroi
+		auto &newbrand_plugin = internal_plugins.emplace_back("BefacoOneiroi");
+		newbrand_plugin.slug = "BefacoOneiroi";
+		pluginInstance = &newbrand_plugin;
+		pluginInstance->addModel(modelOneiroi);
+#endif
+
 #ifndef BUILD_DYN_PLUGIN_AudibleInstruments
 		auto &audins_plugin = internal_plugins.emplace_back("AudibleInstruments");
 		audins_plugin.slug = "AudibleInstruments";
