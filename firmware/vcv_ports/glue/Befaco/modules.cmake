@@ -24,6 +24,8 @@ set(BefacoModules
     Octaves    
     Muxlicer 
     NoisePlethora
+    Bandit
+    Bypass
     # disabled:
     # MidiThingv2
 )

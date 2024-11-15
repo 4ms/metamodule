@@ -82,6 +82,8 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelOctaves);		
 		pluginInstance->addModel(modelNoisePlethora);
 		pluginInstance->addModel(modelMuxlicer);
+		pluginInstance->addModel(modelBypass);
+		pluginInstance->addModel(modelBandit);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_AudibleInstruments
