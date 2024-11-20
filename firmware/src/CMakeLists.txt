@@ -82,7 +82,10 @@ endif()
 # SLS Exported GUI (meta5)
 #
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
+add_subdirectory(${FWDIR}/src/gui/slsexport)
 target_link_libraries(ui PRIVATE lvgl)
+target_link_libraries(SlsExport PRIVATE lvgl)
+# target_link_libraries(ui PRIVATE SlsExport)
 
 #
 # Core Interface
@@ -218,7 +221,7 @@ endif()
 target_compile_definitions(main.elf PRIVATE CPPUTIL_STATIC_STRING_USE_STD_STRING)
 
 
-target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui metamodule::patch-serial cpputil vcv_ports)
+target_link_libraries(main.elf PRIVATE lvgl::lvgl mdrivlib_interface CoreModules ui SlsExport metamodule::patch-serial cpputil vcv_ports)
 target_link_libraries(main.elf PUBLIC vcv_plugin)
 add_subdirectory(${FWDIR}/coreproc_plugin ${CMAKE_BINARY_DIR}/coreproc_plugin)
 target_link_libraries(main.elf PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,coreproc_plugin_export>")
