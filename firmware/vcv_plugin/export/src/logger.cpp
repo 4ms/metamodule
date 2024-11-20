@@ -17,7 +17,7 @@ void destroy() {
 #define LOG_LEVEL 0
 #endif
 
-static const char* const levelLabels[] = {
+static const char *const levelLabels[] = {
 	"debug",
 	"info",
 	"warn",
@@ -33,6 +33,8 @@ void log(Level level, const char *filename, int line, const char *func, const ch
 	else if (level == Level::WARN_LEVEL && LOG_LEVEL <= 1)
 		return;
 	else if (level == Level::FATAL_LEVEL && LOG_LEVEL <= 0)
+		return;
+	else if ((unsigned)level >= 4)
 		return;
 
 	va_list args;
