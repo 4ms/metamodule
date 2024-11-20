@@ -1,0 +1,17 @@
+SET(SOURCES screens/ui_MainMenu.c
+    ui.c
+    components/ui_comp_hook.c
+    ui_helpers.c
+    images/ui_img_1x_play1_png.c
+    images/ui_img_1x_add1_png.c
+    images/ui_img_1x_settings1_png.c
+    fonts/ui_font_MuseoSansRounded50010.c
+    fonts/ui_font_MuseoSansRounded50012.c
+    fonts/ui_font_MuseoSansRounded50014.c
+    fonts/ui_font_MuseoSansRounded70014.c
+    fonts/ui_font_MuseoSansRounded70016.c
+    fonts/ui_font_MuseoSansRounded90018.c
+    fonts/ui_font_MuseoSansRounded90032.c
+    fonts/ui_font_MuseoSansRounded90040.c)
+
+add_library(ui ${SOURCES})
