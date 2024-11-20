@@ -14,26 +14,26 @@ void SlideUp_Animation( lv_obj_t *TargetObject, int delay);
 
 
 // SCREEN: ui_MainMenu
-void ui_MainMenu_screen_init(void);
-lv_obj_t *ui_MainMenu;
-lv_obj_t *ui_MainMenuStatusBar;
-lv_obj_t *ui_MainMenuNowPlayingPanel;
-lv_obj_t *ui_MainMenuNowPlaying;
-lv_obj_t *ui_MainMenuNowPlayingName;
-lv_obj_t *ui_MainMenuLastViewedPanel;
-lv_obj_t *ui_MainMenuLastViewed;
-lv_obj_t *ui_MainMenuLastViewedName;
-lv_obj_t *ui_MainMenuPanel;
-lv_obj_t *ui_MenuPanelPatches;
-lv_obj_t *ui_MenuImagePatches;
-lv_obj_t *ui_MenuLabelPatches;
-lv_obj_t *ui_MenuPanelSave;
-lv_obj_t *ui_MenuImageSave;
-lv_obj_t *ui_MenuLabelSave;
-lv_obj_t *ui_MenuPanelSettings;
-lv_obj_t *ui_MenuImageSettings;
-lv_obj_t *ui_MenuLabelSettings;
-lv_obj_t *ui_MainMenuLoadMeter;
+// void ui_MainMenu_screen_init(void);
+// lv_obj_t *ui_MainMenu;
+// lv_obj_t *ui_MainMenuStatusBar;
+// lv_obj_t *ui_MainMenuNowPlayingPanel;
+// lv_obj_t *ui_MainMenuNowPlaying;
+// lv_obj_t *ui_MainMenuNowPlayingName;
+// lv_obj_t *ui_MainMenuLastViewedPanel;
+// lv_obj_t *ui_MainMenuLastViewed;
+// lv_obj_t *ui_MainMenuLastViewedName;
+// lv_obj_t *ui_MainMenuPanel;
+// lv_obj_t *ui_MenuPanelPatches;
+// lv_obj_t *ui_MenuImagePatches;
+// lv_obj_t *ui_MenuLabelPatches;
+// lv_obj_t *ui_MenuPanelSave;
+// lv_obj_t *ui_MenuImageSave;
+// lv_obj_t *ui_MenuLabelSave;
+// lv_obj_t *ui_MenuPanelSettings;
+// lv_obj_t *ui_MenuImageSettings;
+// lv_obj_t *ui_MenuLabelSettings;
+// lv_obj_t *ui_MainMenuLoadMeter;
 
 
 // SCREEN: ui_PatchSelectorPage
