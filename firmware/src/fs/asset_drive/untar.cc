@@ -52,7 +52,8 @@ static std::string entry_name(TarRaw *entry);
 static bool is_ustar(TarRaw *entry);
 
 Archive::Archive(std::span<const char> filedata)
-	: filedata{filedata} {
+	: filedata{filedata}
+	, valid{false} {
 
 	if (filedata.size() == 0) {
 		pr_err("No data");
@@ -83,6 +84,7 @@ Archive::Archive(std::span<const char> filedata)
 
 			// check if next block is all zeros as well
 			if (iszeroed(&buffer, 512)) {
+				valid = true;
 				break;
 			}
 
@@ -90,7 +92,16 @@ Archive::Archive(std::span<const char> filedata)
 		}
 
 		auto size = oct2uint(buffer.size, 11);
+		if (size > MaxEntrySizeBytes) {
+			pr_err("Invalid file size: %zu (max = %zu)\n", size, MaxEntrySizeBytes);
+			break;
+		}
+
 		auto type = is_file(buffer.type) ? TarEntry::File : is_dir(buffer.type) ? TarEntry::Dir : TarEntry::Unknown;
+		if (type == TarEntry::Unknown) {
+			pr_err("Unknown tar entry type (not Dir or File): %d\n", buffer.type);
+			break;
+		}
 
 		// Cannot use emplace_back with earlier Clang
 		archive.push_back({.name = entry_name(&buffer), .size = size, .file_offset = offset, .type = type});
@@ -104,35 +115,42 @@ Archive::Archive(std::span<const char> filedata)
 		offset += 512 + jump;
 		image_seek_relative(jump);
 	}
+}
 
-	num_entries = count;
+bool Archive::is_valid() {
+	return valid;
 }
 
 bool Archive::extract_files(std::function<uint32_t(std::string_view, std::span<const char>)> write) {
-	bool all_entries_ok = true;
-
 	for (auto &entry : archive) {
 		auto name = entry.name;
 
 		if (entry.type == TarEntry::File) {
 			auto filedata = extract_file_entry(entry);
-			pr_dump("Extracted %zu bytes for %s\n", filedata.size(), name.c_str());
-			write(name, filedata);
+			if (filedata.size()) {
+				pr_dump("Extracted %zu bytes for %s\n", filedata.size(), name.c_str());
+				write(name, filedata);
+			} else {
+				pr_dump("Skipped invalid file with size %zu\n", entry.size);
+			}
 		} else {
 			pr_trace("Skipping non-file entry %s\n", name.c_str());
 		}
 	}
 
-	// TODO: is there any way this should return false?
-	return all_entries_ok;
+	return true;
 }
 
 std::vector<char> Archive::extract_file_entry(TarEntry const &entry) {
 	image_seek_absolute(512 + entry.file_offset);
 
-	std::vector<char> filedata(entry.size);
-	image_read(filedata.data(), entry.size);
-	return filedata;
+	if (entry.size < MaxEntrySizeBytes) {
+		std::vector<char> filedata(entry.size);
+		image_read(filedata.data(), entry.size);
+		return filedata;
+	} else {
+		return {};
+	}
 }
 
 void Archive::print_contents() {
@@ -182,7 +200,7 @@ std::string entry_name(TarRaw *entry) {
 }
 
 bool is_ustar(TarRaw *entry) {
-	return std::string_view{entry->ustar} == std::string_view{"ustar"};
+	return std::string_view{entry->ustar, 8} == std::string_view{"ustar"};
 }
 
 bool is_file(char entry_type) {

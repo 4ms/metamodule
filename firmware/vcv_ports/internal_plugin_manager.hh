@@ -19,6 +19,7 @@ struct InternalPluginManager {
 	AssetFS &asset_fs;
 
 	std::list<rack::plugin::Plugin> internal_plugins;
+	bool asset_fs_valid = true;
 
 	InternalPluginManager(FatFileIO &ramdisk, AssetFS &asset_fs)
 		: ramdisk{ramdisk}
@@ -39,7 +40,14 @@ struct InternalPluginManager {
 	void load_internal_assets() {
 		auto raw_image = asset_fs.read_image();
 		auto asset_tar = Tar::Archive(raw_image);
-		// asset_tar.print_info();
+
+		if (asset_tar.is_valid()) {
+			// asset_tar.print_info();
+			asset_fs_valid = true;
+		} else {
+			pr_err("Internal Assets tar file is not valid\n");
+			asset_fs_valid = false;
+		}
 
 		auto ramdisk_writer = [&](const std::string_view filename, std::span<const char> buffer) -> uint32_t {
 			return ramdisk.write_file(filename, buffer);
@@ -79,7 +87,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelSpringReverb);
 		pluginInstance->addModel(modelBurst);
 		pluginInstance->addModel(modelVoltio);
-		pluginInstance->addModel(modelOctaves);		
+		pluginInstance->addModel(modelOctaves);
 		pluginInstance->addModel(modelNoisePlethora);
 		pluginInstance->addModel(modelMuxlicer);
 #endif

@@ -19,11 +19,14 @@ struct TarEntry {
 };
 
 class Archive {
+	static constexpr size_t MaxEntrySizeBytes = 10 * 1024 * 1024;
+
 	std::span<const char> filedata;
 	unsigned read_pos = 0;
-	unsigned num_entries = 0;
 
 	std::list<TarEntry> archive;
+
+	bool valid;
 
 public:
 	Archive(std::span<const char> filedata);
@@ -31,6 +34,7 @@ public:
 	void print_contents();
 	using extract_func_t = std::function<uint32_t(std::string_view, std::span<const char>)>;
 	bool extract_files(extract_func_t func);
+	bool is_valid();
 
 private:
 	bool image_read(char *buf, int size);

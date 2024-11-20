@@ -49,6 +49,9 @@ extern "C" void aux_core_main() {
 	ui.update_page();
 
 	InternalPluginManager internal_plugin_manager{ramdisk, asset_fs};
+	if (!internal_plugin_manager.asset_fs_valid) {
+		ui.notify_error("Graphic assets are corrupted!\nRe-install firmware.");
+	}
 
 	struct AuxCoreModulesToRun {
 		uint32_t starting_idx = 1;
