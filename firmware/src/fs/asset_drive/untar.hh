@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <functional>
 #include <list>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -39,7 +40,7 @@ public:
 private:
 	bool image_read(char *buf, int size);
 	bool image_read(TarRaw *buf, int size);
-	std::vector<char> extract_file_entry(TarEntry const &entry);
+	std::optional<std::vector<char>> extract_file_entry(TarEntry const &entry);
 	void image_seek_relative(int advance);
 	void image_seek_absolute(unsigned new_pos);
 };

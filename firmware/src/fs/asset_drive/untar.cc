@@ -126,12 +126,11 @@ bool Archive::extract_files(std::function<uint32_t(std::string_view, std::span<c
 		auto name = entry.name;
 
 		if (entry.type == TarEntry::File) {
-			auto filedata = extract_file_entry(entry);
-			if (filedata.size()) {
-				pr_dump("Extracted %zu bytes for %s\n", filedata.size(), name.c_str());
-				write(name, filedata);
+			if (auto filedata = extract_file_entry(entry)) {
+				pr_dump("Extracted %zu bytes for %s\n", filedata->size(), name.c_str());
+				write(name, *filedata);
 			} else {
-				pr_dump("Skipped invalid file with size %zu\n", entry.size);
+				pr_warn("Skipped invalid file with size %zu\n", entry.size);
 			}
 		} else {
 			pr_trace("Skipping non-file entry %s\n", name.c_str());
@@ -141,7 +140,7 @@ bool Archive::extract_files(std::function<uint32_t(std::string_view, std::span<c
 	return true;
 }
 
-std::vector<char> Archive::extract_file_entry(TarEntry const &entry) {
+std::optional<std::vector<char>> Archive::extract_file_entry(TarEntry const &entry) {
 	image_seek_absolute(512 + entry.file_offset);
 
 	if (entry.size < MaxEntrySizeBytes) {
