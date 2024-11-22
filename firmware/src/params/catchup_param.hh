@@ -102,6 +102,7 @@ private:
 	std::optional<T> update_resume_equal(T phys_val, T module_val) {
 		// Exit catchup mode if module and physical values are close
 		if (MathTools::abs_diff(module_val, phys_val) < Tolerance) {
+			last_module_val = phys_val;
 			return enter_tracking(phys_val);
 		}
 		return {};
