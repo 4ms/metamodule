@@ -20,7 +20,7 @@ class CatchupParam {
 	enum class State { Tracking, Catchup } state = State::Catchup;
 
 public:
-	enum class Mode { ResumeOnMotion, ResumeOnEqual, LinearFade } mode = Mode::LinearFade;
+	enum class Mode { ResumeOnMotion, ResumeOnEqual, LinearFade } mode = Mode::ResumeOnMotion;
 
 	// Called when a physical knob changes value.
 	std::optional<T> update(T cur_phys_val, T cur_module_val) {
@@ -29,13 +29,13 @@ public:
 		if (state == State::Tracking) {
 			// Change to Catchup mode if module changes value
 			if (MathTools::abs_diff(last_module_val, cur_module_val) >= Tolerance) {
-				pr_dbg("update(): m:%f=>%f  ->c\n", last_module_val, cur_module_val);
+				// printf("update(): m:%f=>%f  ->c\n", last_module_val, cur_module_val);
 				last_module_val = cur_module_val;
 				enter_catchup();
 				return {};
 
 			} else {
-				pr_dbg("update(): m:%f=>%f (t)\n", last_module_val, cur_module_val);
+				// pr_dbg("update(): m:%f=>%f (t)\n", last_module_val, cur_module_val);
 				last_module_val = cur_phys_val;
 				return cur_phys_val;
 			}
@@ -60,11 +60,11 @@ public:
 		if (mode == Mode::LinearFade) {
 			if (MathTools::abs_diff(module_val, phys_val) < Tolerance) {
 				enter_tracking(phys_val);
-				pr_dbg("reset(): m:%f p:%f  ->t\n", module_val, phys_val);
+				// pr_dbg("reset(): m:%f p:%f  ->t\n", module_val, phys_val);
 			} else {
 				fade_phys_val = std::clamp(phys_val, Tolerance, Max - Tolerance); //cannot be 0 or Max
 				fade_mod_val = module_val;
-				pr_dbg("reset(): m:%f p:%f  ->c\n", module_val, phys_val);
+				// pr_dbg("reset(): m:%f p:%f  ->c\n", module_val, phys_val);
 				enter_catchup();
 			}
 		} else {
@@ -122,12 +122,7 @@ private:
 	}
 
 	T enter_tracking(T phys_val) {
-		Debug::Pin1::high();
-
 		state = State::Tracking;
-
-		Debug::Pin1::low();
-
 		return phys_val;
 	}
 
@@ -135,12 +130,7 @@ private:
 		if (state != State::Catchup && mode == Mode::LinearFade) {
 			pr_dbg("Should not get here!\n");
 		}
-
-		Debug::Pin0::high();
-
 		state = State::Catchup;
-
-		Debug::Pin0::low();
 	}
 };
 
