@@ -37,6 +37,8 @@ public:
 		Expanders::ext_audio_found(true);
 	}
 
+	std::array<float, PanelDef::NumPot> last_knob_val{};
+
 	void process(StreamConfSim::Audio::AudioInBuffer in_buff, StreamConfSim::Audio::AudioOutBuffer out_buff) {
 
 		if (!is_playing_patch()) {
@@ -58,7 +60,10 @@ public:
 			// Knobs
 			for (auto i = 0u; auto &knob : params.knobs) {
 				// if (knob.did_change()) { // Why does the changed flag not sync with the SDL audio callback?
-				player.set_panel_param(i, knob.val);
+				if (last_knob_val[i] != knob.val) {
+					last_knob_val[i] = knob.val;
+					player.set_panel_param(i, knob.val);
+				}
 				// }
 				i++;
 			}
