@@ -125,6 +125,8 @@ add_executable(
   ${FWDIR}/src/gui/fonts/fonts.cc
   ${FWDIR}/src/midi/midi_router.cc
   ${FWDIR}/src/params/expanders.cc
+  ${FWDIR}/src/patch_play/patch_player_catchup.cc
+
   #
   ${FWDIR}/src/dynload/dynloader.cc
   ${FWDIR}/metamodule-plugin-sdk/version.cc

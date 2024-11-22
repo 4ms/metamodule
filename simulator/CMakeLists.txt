@@ -76,6 +76,7 @@ add_executable(
     ${FWDIR}/src/patch_play/modules_helpers.cc
     ${FWDIR}/src/midi/midi_router.cc
     ${FWDIR}/src/params/expanders.cc
+    ${FWDIR}/src/patch_play/patch_player_catchup.cc
 
     #Fatfs:
     stubs/fattime.cc
