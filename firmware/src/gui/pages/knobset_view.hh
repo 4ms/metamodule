@@ -25,7 +25,6 @@ struct KnobSetViewPage : PageBase {
 		, patch{patches.get_view_patch()} {
 		init_bg(base);
 		lv_group_set_editing(group, false);
-		// lv_obj_add_event_cb(ui_PreviousKnobSet, prev_knobset_cb, LV_EVENT_CLICKED, this);
 		// Use Prev button for Jack Map
 		lv_show(ui_PreviousKnobSet);
 		lv_obj_add_event_cb(ui_PreviousKnobSet, goto_jackmap_cb, LV_EVENT_CLICKED, this);
@@ -35,6 +34,8 @@ struct KnobSetViewPage : PageBase {
 
 		lv_obj_add_event_cb(ui_NextKnobSet, next_knobset_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ActivateKnobSet, activate_knobset_cb, LV_EVENT_CLICKED, this);
+
+		lv_hide(ui_KnobSetDescript);
 
 		kb_popup.init(base, group);
 	}
@@ -58,12 +59,10 @@ struct KnobSetViewPage : PageBase {
 			lv_arc_set_mode(knob, LV_ARC_MODE_NORMAL);
 			lv_arc_set_bg_angles(knob, min_arc, max_arc);
 			lv_arc_set_value(knob, 0);
-			lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
+			// lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
 
 			auto label = get_label(cont);
 			lv_label_set_text(label, "");
-
-			disable(cont, i);
 
 			i++;
 		}
@@ -71,22 +70,18 @@ struct KnobSetViewPage : PageBase {
 
 		knobset = nullptr;
 		arcs.clear();
-		static_params.clear();
+		indicators.clear();
 
-		// Setup
+		for (auto &m : num_maps)
+			m = 0;
+
 		update_active_status();
-		display_active_status();
 
 		patch = patches.get_view_patch();
 
-		if (patch->knob_sets.size() > 2) {
-			// lv_show(ui_PreviousKnobSet);
-			lv_show(ui_NextKnobSet);
-		} else if (patch->knob_sets.size() > 1) {
-			// lv_hide(ui_PreviousKnobSet);
+		if (patch->knob_sets.size() > 1) {
 			lv_show(ui_NextKnobSet);
 		} else {
-			// lv_hide(ui_PreviousKnobSet);
 			lv_hide(ui_NextKnobSet);
 		}
 		lv_group_add_obj(group, ui_PreviousKnobSet);
@@ -105,10 +100,13 @@ struct KnobSetViewPage : PageBase {
 		update_knobset_text_area();
 
 		// Set mappings in knobset
-		unsigned num_maps[PanelDef::NumKnobs]{};
+		for (auto &m : num_maps)
+			m = 0;
 		arcs.resize(knobset->set.size());
-		static_params.resize(knobset->set.size());
+		indicators.resize(knobset->set.size());
+
 		lv_obj_t *focus{};
+		params.param_watcher.stop_watching_all();
 
 		for (auto [idx, map] : enumerate(knobset->set)) {
 			if (!map.is_panel_knob())
@@ -133,21 +131,16 @@ struct KnobSetViewPage : PageBase {
 				}
 			}
 
-			static_params[idx] = patch->find_static_knob(map.module_id, map.param_id);
-			float val = static_params[idx] ? map.unmap_val(static_params[idx]->value) : 0;
-			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), val);
+			params.param_watcher.start_watching_param(map.module_id, map.param_id);
+			set_knob_arc<min_arc, max_arc>(map, get_knob(cont), 0);
 
 			set_for_knob(cont, map.panel_knob_id);
-
-			if (is_actively_playing)
-				enable(cont, map.panel_knob_id);
-			else
-				disable(cont, map.panel_knob_id);
 
 			lv_obj_remove_event_cb(cont, mapping_cb);
 			lv_obj_add_event_cb(cont, mapping_cb, LV_EVENT_CLICKED, this);
 
 			arcs[idx] = get_knob(cont);
+			indicators[idx] = get_indicator(cont);
 
 			lv_obj_set_user_data(cont, reinterpret_cast<void *>(idx));
 
@@ -174,6 +167,8 @@ struct KnobSetViewPage : PageBase {
 		lv_group_focus_obj(focus);
 
 		lv_group_set_editing(group, false);
+
+		display_active_status();
 	}
 
 	void jump_to_active_knobset() {
@@ -211,28 +206,13 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	void display_active_status() {
-		if (is_actively_playing) {
-			lv_show(ui_KnobSetDescript);
-			lv_hide(ui_ActivateKnobSet);
-			// lv_label_set_text(ui_KnobSetDescript, "(Active)");
-			lv_hide(ui_KnobSetDescript);
+		lv_show(ui_ActivateKnobSet, !is_actively_playing && is_patch_playing);
 
-			for (auto [knob_i, pane] : enumerate(panes)) {
-				auto num_children = lv_obj_get_child_cnt(pane);
-				for (auto i = 0u; i < num_children; i++) {
-					auto child = lv_obj_get_child(pane, i);
-					enable(child, knob_i);
-				}
-			}
-		} else {
-			lv_hide(ui_KnobSetDescript);
-			lv_show(ui_ActivateKnobSet, is_patch_playing);
-			for (auto [knob_i, pane] : enumerate(panes)) {
-				auto num_children = lv_obj_get_child_cnt(pane);
-				for (auto i = 0u; i < num_children; i++) {
-					auto child = lv_obj_get_child(pane, i);
-					disable(child, knob_i);
-				}
+		for (auto [knob_i, pane] : enumerate(panes)) {
+			auto num_children = lv_obj_get_child_cnt(pane);
+			for (auto i = 0u; i < num_children; i++) {
+				auto child = lv_obj_get_child(pane, i);
+				update_enabled_status(child, knob_i, is_actively_playing);
 			}
 		}
 	}
@@ -259,9 +239,47 @@ struct KnobSetViewPage : PageBase {
 		handle_changed_active_status();
 
 		if (knobset) {
-			for (auto [arc, s_param, map] : zip(arcs, static_params, knobset->set)) {
-				float s_val = s_param ? map.unmap_val(s_param->value) : 0;
-				lv_arc_set_value(arc, s_val * 120.f);
+			auto watched_params = params.param_watcher.active_watched_params();
+
+			for (auto const &p : watched_params) {
+				if (p.is_active()) {
+					auto map_it = std::find_if(knobset->set.begin(), knobset->set.end(), [&p](MappedKnob const &m) {
+						return m.module_id == p.module_id && m.param_id == p.param_id;
+					});
+					if (map_it != knobset->set.end()) {
+						auto idx = std::distance(knobset->set.begin(), map_it);
+						auto val = map_it->unmap_val(p.value);
+						lv_arc_set_value(arcs[idx], val * 120.f);
+
+						if (map_it->is_panel_knob()) {
+							auto phys_val = params.knobs[map_it->panel_knob_id].val;
+							auto mapped_phys_val = map_it->get_mapped_val(phys_val);
+
+							lv_obj_set_style_transform_angle(
+								indicators[idx], mapped_phys_val * 2500.f - 1250.f, LV_PART_MAIN);
+
+							// show catchup mode with knob color
+							update_knob_color(arcs[idx], p.module_id, p.param_id); //mapped_phys_val, p.value);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void update_knob_color(lv_obj_t *arc,
+						   unsigned module_id,
+						   unsigned param_id) { //float mapped_phys_val, float cur_value) {
+		auto color = lv_obj_get_style_bg_color(arc, LV_PART_KNOB);
+
+		if (patch_playloader.is_param_tracking(module_id, param_id)) {
+			// if (MathTools::abs_diff(mapped_phys_val, cur_value) < 10.f / 4096.f) {
+			if (color.full != lv_color_hex(0xFFFFFF).full) {
+				lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+			}
+		} else {
+			if (color.full != lv_color_hex(0xAAAAAA).full) {
+				lv_obj_set_style_bg_color(arc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
 			}
 		}
 	}
@@ -426,6 +444,10 @@ private:
 
 		auto circle_letter = get_circle_letter(cont);
 		lv_label_set_text(circle_letter, PanelDef::get_map_param_name(knob_i).data());
+
+		auto indicator = get_indicator(cont);
+		lv_obj_set_style_bg_color(indicator, Gui::knob_palette[(knob_i + 1) % 6], LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
 	}
 
 	lv_obj_t *base = nullptr;
@@ -438,7 +460,8 @@ private:
 	unsigned last_known_active_knobset = 0;
 
 	std::vector<lv_obj_t *> arcs;
-	std::vector<const StaticParam *> static_params;
+	std::vector<lv_obj_t *> indicators;
+	std::array<unsigned, PanelDef::NumKnobs> num_maps{};
 
 	bool kb_visible = false;
 
@@ -497,6 +520,17 @@ private:
 		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINERBIG_CIRCLE_KNOBLETTER);
 	}
 
+	lv_obj_t *get_indicator(lv_obj_t *container) {
+		return ui_comp_get_child(container, UI_COMP_KNOBCONTAINER_INDICATOR);
+	}
+
+	void update_enabled_status(lv_obj_t *container, unsigned knob_i, bool actively_playing) {
+		if (actively_playing && num_maps[knob_i] > 0)
+			enable(container, knob_i);
+		else
+			disable(container, knob_i);
+	}
+
 	void disable(lv_obj_t *container, unsigned knob_i) {
 		auto knob = get_knob(container);
 		auto circle = get_circle(container);
@@ -507,6 +541,9 @@ private:
 
 		lv_obj_set_style_arc_color(knob, Gui::knob_disabled_palette[knob_i % 6], LV_PART_INDICATOR);
 		lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
+
+		auto indicator = get_indicator(container);
+		lv_obj_add_flag(indicator, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void enable(lv_obj_t *container, unsigned knob_i) {
@@ -519,6 +556,9 @@ private:
 
 		lv_obj_set_style_arc_color(knob, Gui::knob_palette[knob_i % 6], LV_PART_INDICATOR);
 		lv_obj_set_style_opa(knob, LV_OPA_100, LV_PART_KNOB);
+
+		auto indicator = get_indicator(container);
+		lv_obj_clear_flag(indicator, LV_OBJ_FLAG_HIDDEN);
 	}
 };
 

@@ -265,6 +265,10 @@ struct PatchPlayLoader {
 			return nullptr;
 	}
 
+	bool is_param_tracking(unsigned module_id, unsigned param_id) {
+		return player_.is_param_tracking(module_id, param_id);
+	}
+
 private:
 	PatchPlayer &player_;
 	FileStorageProxy &storage_;
