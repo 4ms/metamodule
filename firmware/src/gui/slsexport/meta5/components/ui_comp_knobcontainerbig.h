@@ -18,7 +18,8 @@ extern "C" {
 #define UI_COMP_KNOBCONTAINERBIG_CIRCLE 2
 #define UI_COMP_KNOBCONTAINERBIG_CIRCLE_KNOBLETTER 3
 #define UI_COMP_KNOBCONTAINERBIG_LABEL 4
-#define _UI_COMP_KNOBCONTAINERBIG_NUM 5
+#define UI_COMP_KNOBCONTAINERBIG_INDICATOR 5
+#define _UI_COMP_KNOBCONTAINERBIG_NUM 6
 lv_obj_t *ui_KnobContainerBig_create(lv_obj_t *comp_parent);
 
 #ifdef __cplusplus
