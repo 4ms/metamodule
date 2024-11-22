@@ -144,8 +144,10 @@ void Ui::transfer_aux_button_events() {
 void Ui::transfer_params() {
 	if (unsigned cur_param = input_driver.selected_param(); cur_param < params.knobs.size()) {
 
+		auto delta = input_driver.param_fine() ? 0.001f : 0.05f;
+
 		if (input_driver.param_inc()) {
-			float val = std::clamp(params.knobs[cur_param].val + 0.05f, 0.f, 1.f);
+			float val = std::clamp(params.knobs[cur_param].val + delta, 0.f, 1.f);
 			if (params.knobs[cur_param].store_changed(val))
 				std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
 			else
@@ -153,7 +155,7 @@ void Ui::transfer_params() {
 		}
 
 		if (input_driver.param_dec()) {
-			float val = std::clamp(params.knobs[cur_param].val - 0.05f, 0.f, 1.f);
+			float val = std::clamp(params.knobs[cur_param].val - delta, 0.f, 1.f);
 			if (params.knobs[cur_param].store_changed(val))
 				std::cout << "Knob #" << cur_param << " = " << params.knobs[cur_param].val << "\n";
 			else
