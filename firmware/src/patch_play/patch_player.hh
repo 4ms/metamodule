@@ -9,6 +9,7 @@
 #include "midi/midi_message.hh"
 #include "midi/midi_router.hh"
 #include "null_module.hh"
+#include "params/catchup_param.hh"
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
@@ -66,9 +67,15 @@ private:
 	uint32_t midi_divclk_ctr = 0;
 	uint32_t midi_divclk_div_amt = 0;
 
-	// knob_conns[]: ABCDEFuvwxyz
-	using KnobSet = std::array<std::vector<MappedKnob>, PanelDef::NumKnobs>;
-	std::array<KnobSet, MaxKnobSets> knob_conns;
+	// knob_maps[knobset_idx][panel_knob_id].map and .catchup
+	struct MappedParam {
+		MappedKnob map;
+		CatchupParam catchup;
+	};
+	using ParamSet = std::array<std::vector<MappedParam>, PanelDef::NumKnobs>;
+	std::array<ParamSet, MaxKnobSets> knob_maps;
+
+	std::array<float, PanelDef::NumKnobs> panel_knobs{};
 
 	std::array<bool, NumOutJacks> out_patched{};
 	std::array<bool, NumInJacks> in_patched{};
@@ -425,21 +432,35 @@ public:
 	}
 
 	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map, float cur_val) {
-		if (knobset_id != PatchData::MIDIKnobSet && knobset_id >= knob_conns.size())
+		if (knobset_id != PatchData::MIDIKnobSet && knobset_id >= knob_maps.size())
 			return;
 
-		auto &knobconn = knobset_id == PatchData::MIDIKnobSet ? midi_knob_conns[map.cc_num()] :
-																knob_conns[knobset_id][map.panel_knob_id];
+		if (knobset_id == PatchData::MIDIKnobSet) {
+			auto &knobconn = midi_knob_conns[map.cc_num()];
+			auto found = std::find_if(knobconn.begin(), knobconn.end(), [&map](auto m) {
+				return map.param_id == m.param_id && map.module_id == m.module_id;
+			});
 
-		auto found = std::find_if(knobconn.begin(), knobconn.end(), [&map](auto m) {
-			return map.param_id == m.param_id && map.module_id == m.module_id;
-		});
+			if (found != knobconn.end()) {
+				found->min = map.min;
+				found->max = map.max;
+				found->curve_type = map.curve_type;
+				if (map.panel_knob_id < PanelDef::NumKnobs)
+					set_panel_param(map.panel_knob_id, cur_val);
+			}
 
-		if (found != knobconn.end()) {
-			found->min = map.min;
-			found->max = map.max;
-			found->curve_type = map.curve_type;
-			set_panel_param(map.panel_knob_id, cur_val);
+		} else {
+			auto &knobconn = knob_maps[knobset_id][map.panel_knob_id];
+			auto found = std::find_if(knobconn.begin(), knobconn.end(), [&map](auto m) {
+				return map.param_id == m.map.param_id && map.module_id == m.map.module_id;
+			});
+			if (found != knobconn.end()) {
+				found->map.min = map.min;
+				found->map.max = map.max;
+				found->map.curve_type = map.curve_type;
+				if (map.panel_knob_id < PanelDef::NumKnobs)
+					set_panel_param(map.panel_knob_id, cur_val);
+			}
 		}
 	}
 
@@ -641,8 +662,14 @@ public:
 		}
 
 		// Knob and MIDI connections
-		for (auto &knob_set : knob_conns) {
-			erase_and_squash(knob_set);
+		for (auto &param_set : knob_maps) {
+			// erase_and_squash(knob_set);
+			for (auto &set : param_set) {
+				std::erase_if(set, [=](auto &map) { return (map.map.module_id == module_idx); });
+				for (auto &map : set) {
+					squash_module_id(map.map.module_id);
+				}
+			}
 		}
 
 		erase_and_squash(midi_knob_conns);
@@ -775,10 +802,10 @@ private:
 
 	// Cache functions:
 	void clear_cache() {
-		for (auto i = 0u; i < dup_module_index.size(); i++)
+		for (auto i = 0u; i < dup_module_index.size(); i++) // NOLINT
 			dup_module_index[i] = 0;
 		// gcc 12.3 complains of writing past end of array
-		// when using range-based for loop:
+		// when using range-based for loop
 		// for (auto &d : dup_module_index)
 		// 	d = 0;
 
@@ -788,7 +815,7 @@ private:
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
 
-		for (auto &knob_set : knob_conns)
+		for (auto &knob_set : knob_maps)
 			for (auto &mappings : knob_set)
 				mappings.clear();
 
@@ -965,21 +992,27 @@ private:
 
 	// Cache a panel knob mapping into knob_conns[]
 	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
-		if (knob_set >= knob_conns.size())
+		if (knob_set >= knob_maps.size())
 			return;
 		if (k.panel_knob_id < PanelDef::NumKnobs) {
-			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
+			for (auto &el : knob_maps[knob_set][k.panel_knob_id]) {
+				if (el.map.maps_to_same_as(k)) {
+					el.map = k;
+					return;
+				}
+			}
+			CatchupParam f{};
+			knob_maps[knob_set][k.panel_knob_id].push_back({k, f});
 		}
 	}
 
 	//Remove a mapping
 	void uncache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
-		if (knob_set >= knob_conns.size())
+		if (knob_set >= knob_maps.size())
 			return;
-		if (k.panel_knob_id >= knob_conns[knob_set].size())
+		if (k.panel_knob_id >= knob_maps[knob_set].size())
 			return;
-		std::erase_if(knob_conns[knob_set][k.panel_knob_id],
-					  [&k](auto m) { return (k.module_id == m.module_id && k.param_id == m.param_id); });
+		std::erase_if(knob_maps[knob_set][k.panel_knob_id], [&k](auto m) { return (k.maps_to_same_as(m.map)); });
 	}
 
 	void cache_midi_mapping(const MappedKnob &k) {
@@ -1042,7 +1075,7 @@ public:
 	}
 
 	auto const &get_knobconns() {
-		return knob_conns;
+		return knob_maps;
 	}
 
 	auto const &get_int_cables() {
