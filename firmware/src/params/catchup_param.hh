@@ -73,6 +73,9 @@ public:
 			// then enter catchup mode
 			if (MathTools::abs_diff(last_phys_val, phys_val) >= Tolerance) {
 				enter_catchup();
+
+			} else if (MathTools::abs_diff(last_module_val, module_val) >= Tolerance) {
+				enter_catchup();
 			}
 		}
 
