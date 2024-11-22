@@ -284,10 +284,17 @@ public:
 
 	// K-rate setters/getters:
 
-	void set_panel_param(unsigned param_id, float val) {
-		if (param_id < PanelDef::NumKnobs) {
-			for (auto const &k : knob_conns[active_knob_set][param_id]) {
-				modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
+	void set_panel_param(unsigned panel_knob_id, float val) {
+		panel_knobs[panel_knob_id] = val;
+
+		for (auto &knob_map : knob_maps[active_knob_set][panel_knob_id]) {
+			auto &k = knob_map.map;
+			auto &catchup = knob_map.catchup;
+
+			auto module_val = modules[k.module_id]->get_param(k.param_id);
+			auto scaled_phys_val = k.get_mapped_val(val);
+			if (auto v = catchup.update(scaled_phys_val, module_val)) {
+				modules[k.module_id]->set_param(k.param_id, *v);
 			}
 		}
 	}
@@ -477,7 +484,21 @@ public:
 	}
 
 	void set_active_knob_set(unsigned num) {
-		active_knob_set = std::min(num, MaxKnobSets - 1);
+		auto new_active_knob_set = std::min(num, MaxKnobSets - 1);
+
+		if (active_knob_set != new_active_knob_set) {
+			active_knob_set = new_active_knob_set;
+
+			// Reset all catchups in the new active knobset.
+			// This allows them to change to catchup mode if necessary
+			for (unsigned i = 0u; auto &knob : knob_maps[active_knob_set]) {
+				for (auto &map : knob) {
+					auto module_val = modules[map.map.module_id]->get_param(map.map.param_id);
+					map.catchup.reset_phys_val(panel_knobs[i], module_val);
+				}
+				i++;
+			}
+		}
 	}
 
 	void add_internal_cable(Jack in, Jack out) {
