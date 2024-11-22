@@ -59,7 +59,6 @@ struct KnobSetViewPage : PageBase {
 			lv_arc_set_mode(knob, LV_ARC_MODE_NORMAL);
 			lv_arc_set_bg_angles(knob, min_arc, max_arc);
 			lv_arc_set_value(knob, 0);
-			// lv_obj_set_style_opa(knob, LV_OPA_0, LV_PART_KNOB);
 
 			auto label = get_label(cont);
 			lv_label_set_text(label, "");
@@ -248,8 +247,8 @@ struct KnobSetViewPage : PageBase {
 					});
 					if (map_it != knobset->set.end()) {
 						auto idx = std::distance(knobset->set.begin(), map_it);
-						auto val = map_it->unmap_val(p.value);
-						lv_arc_set_value(arcs[idx], val * 120.f);
+						auto arc_val = map_it->unmap_val(p.value) * 120.f;
+						lv_arc_set_value(arcs[idx], arc_val);
 
 						if (map_it->is_panel_knob()) {
 							auto phys_val = params.knobs[map_it->panel_knob_id].val;
@@ -259,7 +258,7 @@ struct KnobSetViewPage : PageBase {
 								indicators[idx], mapped_phys_val * 2500.f - 1250.f, LV_PART_MAIN);
 
 							// show catchup mode with knob color
-							update_knob_color(arcs[idx], p.module_id, p.param_id); //mapped_phys_val, p.value);
+							update_knob_color(arcs[idx], p.module_id, p.param_id, arc_val);
 						}
 					}
 				}
@@ -267,19 +266,26 @@ struct KnobSetViewPage : PageBase {
 		}
 	}
 
-	void update_knob_color(lv_obj_t *arc,
-						   unsigned module_id,
-						   unsigned param_id) { //float mapped_phys_val, float cur_value) {
+	void update_knob_color(lv_obj_t *arc, unsigned module_id, unsigned param_id, float arc_val) {
+
 		auto color = lv_obj_get_style_bg_color(arc, LV_PART_KNOB);
 
-		if (patch_playloader.is_param_tracking(module_id, param_id)) {
-			// if (MathTools::abs_diff(mapped_phys_val, cur_value) < 10.f / 4096.f) {
-			if (color.full != lv_color_hex(0xFFFFFF).full) {
-				lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+		if (arc_val > lv_arc_get_max_value(arc) || arc_val < lv_arc_get_min_value(arc)) {
+			lv_obj_set_style_radius(arc, 0, LV_PART_KNOB);
+			if (color.full != lv_color_hex(0x000000).full) {
+				lv_obj_set_style_bg_color(arc, lv_color_hex(0x000000), LV_PART_KNOB);
 			}
 		} else {
-			if (color.full != lv_color_hex(0xAAAAAA).full) {
-				lv_obj_set_style_bg_color(arc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
+			lv_obj_set_style_radius(arc, 20, LV_PART_KNOB);
+
+			if (patch_playloader.is_param_tracking(module_id, param_id)) {
+				if (color.full != lv_color_hex(0xFFFFFF).full) {
+					lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+				}
+			} else {
+				if (color.full != lv_color_hex(0xAAAAAA).full) {
+					lv_obj_set_style_bg_color(arc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
+				}
 			}
 		}
 	}
