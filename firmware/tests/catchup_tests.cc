@@ -28,7 +28,7 @@ struct TestModule : CoreProcessor {
 	}
 };
 
-TEST_CASE("Basic usage") {
+TEST_CASE("Basic usage of ResumeOnEqual") {
 	using namespace MetaModule;
 
 	std::array<std::unique_ptr<CoreProcessor>, 1> modules;
@@ -237,5 +237,101 @@ TEST_CASE("Basic usage") {
 		catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.19999f);
 		CHECK(p.catchup.is_tracking() == false);
 		CHECK(modules[0]->get_param(param_id) == 0.1f);
+	}
+}
+
+TEST_CASE("Basic usage of ResumeOnMotion") {
+	using namespace MetaModule;
+
+	std::array<std::unique_ptr<CoreProcessor>, 1> modules;
+	modules[0] = std::make_unique<TestModule>();
+
+	CatchupManager catchup_manager;
+	std::array<ParamSet, MaxKnobSets> knob_maps;
+
+	// Knob 1: set to .3
+	unsigned active_knobset = 0;
+	unsigned panel_knob = 1;
+	unsigned param_id = 2;
+
+	auto &p = knob_maps[active_knobset][panel_knob].emplace_back();
+	p.map.panel_knob_id = panel_knob;
+	p.map.module_id = 0;
+	p.map.param_id = param_id;
+
+	SUBCASE("ResumeOnMotion: Normal mapping (0-1 => 0-1). Test for pickup on equal, module changing value, switching "
+			"knobsets") {
+		p.map.min = 0;
+		p.map.max = 1;
+		p.catchup.set_mode(CatchupParam::Mode::ResumeOnMotion);
+
+		// Starting (default) value
+		CHECK(modules[0]->get_param(param_id) == 0.0f);
+		CHECK(p.catchup.is_tracking() == false);
+
+		// Moving knob has immediate effect
+		catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.2f);
+		CHECK(modules[0]->get_param(param_id) == 0.2f);
+		CHECK(p.catchup.is_tracking() == true);
+
+		catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.4f);
+		CHECK(modules[0]->get_param(param_id) == 0.4f);
+		CHECK(p.catchup.is_tracking() == true);
+
+		// Module changes own value -> stop tracking until knob moves
+		modules[0]->set_param(param_id, 0.8f);
+		catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.4f);
+		CHECK(modules[0]->get_param(param_id) == 0.8f);
+		CHECK(p.catchup.is_tracking() == false);
+
+		catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.7f);
+		CHECK(modules[0]->get_param(param_id) == 0.7f);
+		CHECK(p.catchup.is_tracking() == true);
+
+		////User switches knobset, moves knob (which is mapped to something else)
+		//active_knobset = 1;
+		//catchup_manager.reset(modules, knob_maps[active_knobset]);
+		//catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.2f);
+
+		//// User switches knobset back -> stop tracking
+		//active_knobset = 0;
+		//catchup_manager.reset(modules, knob_maps[active_knobset]);
+		//CHECK(modules[0]->get_param(param_id) == 0.79999f);
+		//CHECK(p.catchup.is_tracking() == false);
+
+		//catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.2f);
+		//CHECK(p.catchup.is_tracking() == false);
+
+		//catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.3f);
+		//CHECK(p.catchup.is_tracking() == false);
+
+		//// Move knob close to module value -> start tracking again
+		//catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.80001f);
+		//CHECK(modules[0]->get_param(param_id) == 0.80001f);
+		//CHECK(p.catchup.is_tracking() == true);
+
+		//// User switches knobset and then back again, without moving knob -> still tracking
+		//active_knobset = 1;
+		//catchup_manager.reset(modules, knob_maps[active_knobset]);
+		//active_knobset = 0;
+		//catchup_manager.reset(modules, knob_maps[active_knobset]);
+		//catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.80001f);
+		//CHECK(p.catchup.is_tracking() == true);
+
+		//// Module changes own value (so that tracking mode stops)
+		//modules[0]->set_param(param_id, 0.1f);
+		//catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.80001f);
+		//CHECK(modules[0]->get_param(param_id) == 0.1f);
+		//CHECK(p.catchup.is_tracking() == false);
+
+		//// User switches knobset and then back again, without moving knob -> still not tracking
+		//active_knobset = 1;
+		//catchup_manager.reset(modules, knob_maps[active_knobset]);
+		//catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.80001f);
+		//active_knobset = 0;
+		//catchup_manager.reset(modules, knob_maps[active_knobset]);
+		//catchup_manager.set_panel_param(modules, knob_maps[active_knobset], panel_knob, 0.80001f);
+		//CHECK(p.catchup.is_tracking() == false);
+		//CHECK(modules[0]->get_param(param_id) == 0.1f);
 	}
 }
