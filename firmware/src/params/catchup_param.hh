@@ -24,25 +24,26 @@ public:
 
 	// Called when a physical knob changes value.
 	std::optional<T> update(T cur_phys_val, T cur_module_val) {
+
 		last_phys_val = cur_phys_val;
+
+		// ResumeOnMotion mode always returns knob physical value.
+		// This is because update() is only called when knob moves.
+		if (mode == Mode::ResumeOnMotion) {
+			return enter_tracking(cur_phys_val);
+		}
 
 		if (state == State::Tracking) {
 			// Change to Catchup mode if module changes value
 			if (MathTools::abs_diff(last_module_val, cur_module_val) >= Tolerance) {
-				// printf("update(): m:%f=>%f  ->c\n", last_module_val, cur_module_val);
 				last_module_val = cur_module_val;
 				enter_catchup();
 				return {};
-
 			} else {
-				// pr_dbg("update(): m:%f=>%f (t)\n", last_module_val, cur_module_val);
+				//Otherwise return the physical knob value
 				last_module_val = cur_phys_val;
 				return cur_phys_val;
 			}
-		}
-
-		if (mode == Mode::ResumeOnMotion) {
-			return update_resume_motion(cur_phys_val, cur_module_val);
 		}
 
 		if (mode == Mode::ResumeOnEqual) {
@@ -93,16 +94,10 @@ public:
 	}
 
 private:
-	T update_resume_motion(T phys_val, T) {
-		// Since update() is only is called if the physical value changed
-		// then always start tracking
-		return enter_tracking(phys_val);
-	}
 
 	std::optional<T> update_resume_equal(T phys_val, T module_val) {
 		// Exit catchup mode if module and physical values are close
 		if (MathTools::abs_diff(module_val, phys_val) < Tolerance) {
-			last_module_val = phys_val;
 			return enter_tracking(phys_val);
 		}
 		return {};
@@ -122,6 +117,7 @@ private:
 	}
 
 	T enter_tracking(T phys_val) {
+		last_module_val = phys_val;
 		state = State::Tracking;
 		return phys_val;
 	}
