@@ -38,7 +38,7 @@ public:
 		for (unsigned i = 0u; auto &knob : active_knob_maps) {
 			for (auto &map : knob) {
 				auto module_val = modules[map.map.module_id]->get_param(map.map.param_id);
-				map.catchup.reset_phys_val(panel_knobs[i], module_val);
+				map.catchup.reset_phys_val(map.map.get_mapped_val(panel_knobs[i]), module_val);
 			}
 			i++;
 		}

@@ -2,6 +2,8 @@
 #include "console/pr_dbg.hh"
 #include "debug.hh"
 #include "util/math.hh"
+#include <math.h>
+
 #include <optional>
 
 namespace MetaModule
@@ -14,8 +16,11 @@ class CatchupParam {
 
 	T last_module_val{0};
 	T last_phys_val{0};
+
 	float fade_phys_val{0};
-	float fade_mod_val{0};
+	float fade_coef_a{1.f};
+	float fade_coef_b{1.f};
+	float fade_offset_b{0.f};
 
 	enum class State { Tracking, Catchup } state = State::Catchup;
 
@@ -61,11 +66,8 @@ public:
 		if (mode == Mode::LinearFade) {
 			if (MathTools::abs_diff(module_val, phys_val) < Tolerance) {
 				enter_tracking(phys_val);
-				// pr_dbg("reset(): m:%f p:%f  ->t\n", module_val, phys_val);
 			} else {
-				fade_phys_val = std::clamp(phys_val, Tolerance, Max - Tolerance); //cannot be 0 or Max
-				fade_mod_val = module_val;
-				// pr_dbg("reset(): m:%f p:%f  ->c\n", module_val, phys_val);
+				calc_linear_fade_coef(phys_val, module_val);
 				enter_catchup();
 			}
 		} else {
@@ -86,7 +88,11 @@ public:
 
 	void set_mode(Mode newmode) {
 		mode = newmode;
-		// TODO: does it matter if we're in the Tracking or Catchup state when the mode changes?
+
+		if (mode == Mode::LinearFade) {
+			if (last_module_val == last_phys_val)
+				state = State::Tracking;
+		}
 	}
 
 	bool is_tracking() const {
@@ -94,7 +100,6 @@ public:
 	}
 
 private:
-
 	std::optional<T> update_resume_equal(T phys_val, T module_val) {
 		// Exit catchup mode if module and physical values are close
 		if (MathTools::abs_diff(module_val, phys_val) < Tolerance) {
@@ -103,17 +108,27 @@ private:
 		return {};
 	}
 
-	T update_linear_fade(T phys_val, T) {
+	T update_linear_fade(T phys_val, T module_val) {
+		// Re-calc fade coef if module changed its own value
+		if (MathTools::abs_diff(module_val, last_module_val) >= Tolerance) {
+			calc_linear_fade_coef(phys_val, module_val);
+		}
+
 		// Exit by moving physical knob to min or max (0 or 1)
 		if (phys_val <= Tolerance || phys_val >= (Max - Tolerance)) {
 			enter_tracking(phys_val);
 		}
 
-		// TODO: cache these coefficients
+		float new_module_val{};
+
 		if (phys_val > fade_phys_val)
-			return (phys_val - fade_phys_val) * (Max - fade_mod_val) / (Max - fade_phys_val) + fade_mod_val;
+			new_module_val = phys_val * fade_coef_b + fade_offset_b;
+		// new_module_val = (phys_val - fade_phys_val) * (Max - fade_mod_val) / (Max - fade_phys_val) + fade_mod_val;
 		else
-			return phys_val * fade_mod_val / fade_phys_val;
+			new_module_val = phys_val * fade_coef_a;
+
+		last_module_val = new_module_val;
+		return new_module_val;
 	}
 
 	T enter_tracking(T phys_val) {
@@ -127,6 +142,19 @@ private:
 			pr_dbg("Should not get here!\n");
 		}
 		state = State::Catchup;
+	}
+
+	void calc_linear_fade_coef(T phys_val, T module_val) {
+		if (phys_val == 0 && module_val == 0) {
+			fade_coef_a = 1.f;
+			fade_coef_b = 1.f;
+			fade_offset_b = 0.f;
+		} else {
+			fade_phys_val = phys_val;
+			fade_coef_a = module_val / std::max(phys_val, Tolerance); //cannot be 0
+			fade_coef_b = (Max - module_val) / std::min(Max - phys_val, Max - Tolerance);
+			fade_offset_b = module_val - phys_val * fade_coef_b;
+		}
 	}
 };
 
