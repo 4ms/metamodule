@@ -17,7 +17,7 @@ class CatchupParam {
 	T last_module_val{0};
 	T last_phys_val{0};
 
-	float fade_phys_val{0};
+	float fade_phys_breakpoint{0};
 	float fade_coef_a{1.f};
 	float fade_coef_b{1.f};
 	float fade_offset_b{0.f};
@@ -41,12 +41,12 @@ public:
 		if (state == State::Tracking) {
 			// Change to Catchup mode if module changes value
 			if (MathTools::abs_diff(last_module_val, cur_module_val) >= Tolerance) {
-				last_module_val = cur_module_val;
+				// last_module_val = cur_module_val; //not needed??
 				enter_catchup();
 				return {};
 			} else {
 				//Otherwise return the physical knob value
-				last_module_val = cur_phys_val;
+				// last_module_val = cur_phys_val; //not needed if we also call report_actual_module_val()
 				return cur_phys_val;
 			}
 		}
@@ -99,6 +99,14 @@ public:
 		return state == State::Tracking;
 	}
 
+	// After setting the module's param value, the caller should query the module
+	// for the param value it actually saved, then pass that along to this function.
+	// In case a module modifies the value sent to it, e.g. quantizes it to a value
+	// then this allows CatchupParam to see that happen.
+	void report_actual_module_val(T val) {
+		last_module_val = val;
+	}
+
 private:
 	std::optional<T> update_resume_equal(T phys_val, T module_val) {
 		// Exit catchup mode if module and physical values are close
@@ -121,9 +129,8 @@ private:
 
 		float new_module_val{};
 
-		if (phys_val > fade_phys_val)
+		if (phys_val > fade_phys_breakpoint)
 			new_module_val = phys_val * fade_coef_b + fade_offset_b;
-		// new_module_val = (phys_val - fade_phys_val) * (Max - fade_mod_val) / (Max - fade_phys_val) + fade_mod_val;
 		else
 			new_module_val = phys_val * fade_coef_a;
 
@@ -150,7 +157,7 @@ private:
 			fade_coef_b = 1.f;
 			fade_offset_b = 0.f;
 		} else {
-			fade_phys_val = phys_val;
+			fade_phys_breakpoint = phys_val;
 			fade_coef_a = module_val / std::max(phys_val, Tolerance); //cannot be 0
 			fade_coef_b = (Max - module_val) / std::min(Max - phys_val, Max - Tolerance);
 			fade_offset_b = module_val - phys_val * fade_coef_b;

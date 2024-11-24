@@ -28,6 +28,8 @@ public:
 			auto scaled_phys_val = map.get_mapped_val(val);
 			if (auto v = knob_map.catchup.update(scaled_phys_val, module_val)) {
 				modules[map.module_id]->set_param(map.param_id, *v);
+				auto new_module_val = modules[map.module_id]->get_param(map.param_id);
+				knob_map.catchup.report_actual_module_val(new_module_val);
 			}
 		}
 	}
