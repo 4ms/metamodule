@@ -24,10 +24,17 @@ public:
 		for (auto &knob_map : active_knob_maps[panel_knob_id]) {
 			auto &map = knob_map.map;
 
+			// Note: if needed, for performance we could check the catchup mode here, and
+			// if it's ResumeOnMotion, then just call module[]->set_param (skip calls to get_param)
+
 			auto module_val = modules[map.module_id]->get_param(map.param_id);
 			auto scaled_phys_val = map.get_mapped_val(val);
 			if (auto v = knob_map.catchup.update(scaled_phys_val, module_val)) {
 				modules[map.module_id]->set_param(map.param_id, *v);
+
+				// Read the module's value back after setting it. This handles cases where the
+				// module stores a different value than the one set.
+				// E.g. "ParamQuantity::snapEnabled" or "Pot::integral"
 				auto new_module_val = modules[map.module_id]->get_param(map.param_id);
 				knob_map.catchup.report_actual_module_val(new_module_val);
 			}
