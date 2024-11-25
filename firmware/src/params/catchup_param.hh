@@ -1,8 +1,5 @@
 #pragma once
-#include "console/pr_dbg.hh"
-#include "debug.hh"
 #include "util/math.hh"
-#include <math.h>
 
 #include <optional>
 
@@ -41,12 +38,10 @@ public:
 		if (state == State::Tracking) {
 			// Change to Catchup mode if module changes value
 			if (MathTools::abs_diff(last_module_val, cur_module_val) >= Tolerance) {
-				// last_module_val = cur_module_val; //not needed??
 				enter_catchup();
 				return {};
 			} else {
 				//Otherwise return the physical knob value
-				// last_module_val = cur_phys_val; //not needed if we also call report_actual_module_val()
 				return cur_phys_val;
 			}
 		}
@@ -146,7 +141,7 @@ private:
 
 	void enter_catchup() {
 		if (state != State::Catchup && mode == Mode::LinearFade) {
-			pr_dbg("Should not get here!\n");
+			// pr_dbg("Should not get here!\n");
 		}
 		state = State::Catchup;
 	}
