@@ -4,6 +4,12 @@ import argparse
 import logging
 import csv
 
+def try_float(x):
+    try:
+        return float(x)
+    except:
+        return 0
+
 def process_file(filename):
     r = {}
     testnames = []
@@ -20,7 +26,8 @@ def process_file(filename):
             if skipFirstRow:
                 skipFirstRow = False
             else:
-                r[row[0]] = [float(x) for x in row[1:-1]]
+                r[row[0]] = [try_float(x) for x in row[1:-1]]
+
 
     return r, testnames
 
@@ -36,6 +43,7 @@ if __name__ == "__main__":
     parser.add_argument("--tol", dest="tol", default=0.02, type=float, help="Tolerance: ignore differences equal or below to this")
     parser.add_argument("--brand", dest="onlybrand", help="Compare only specific brand")
     parser.add_argument("--module", dest="onlymodule", help="Compare only specific module (Brand:Module format)")
+    parser.add_argument("--show-mem", dest="showmem", action="store_true", default=False, help="Show changes in memory usage (not reliable)")
     parser.add_argument("-v", dest="verbose", help="Verbose logging", action="store_true")
     args = parser.parse_args()
 
@@ -51,6 +59,8 @@ if __name__ == "__main__":
     not_found = []
     changes = {}
     for module, refload in ref.items():
+        if not args.showmem:
+            refload = refload[:-2] #Skip PeakStartupMem and PeakRunningMem
         if args.onlymodule:
             if module != args.onlymodule:
                 continue
