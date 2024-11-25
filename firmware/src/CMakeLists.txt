@@ -101,6 +101,7 @@ add_subdirectory(${FWDIR}/lib/CoreModules CoreModules)
 #
 add_executable(
   main.elf
+  ${FWDIR}/src/fs/filesystem.cc
   ${FWDIR}/system/libc_stub.c
   ${FWDIR}/system/libcpp_stub.cc
   ${FWDIR}/system/new.cc
