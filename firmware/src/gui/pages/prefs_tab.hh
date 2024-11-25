@@ -103,6 +103,9 @@ struct PrefsTab : SystemMenuTab {
 		lv_group_focus_obj(ui_SystemPrefsAudioSampleRateDropdown);
 		lv_group_set_editing(group, true);
 
+		//todo: implement this
+		lv_hide(ui_SystemPrefsCatchupExcludeButtonsCont);
+
 		update_dropdowns_from_settings();
 	}
 
@@ -213,6 +216,7 @@ struct PrefsTab : SystemMenuTab {
 		if (catchup.mode != catchupmode || catchup.button_exclude != catchup_exclude_buttons) {
 			catchup.mode = catchupmode;
 			catchup.button_exclude = catchup_exclude_buttons;
+			patch_playloader.set_all_param_catchup_mode(catchup.mode, catchup.button_exclude);
 			gui_state.do_write_settings = true;
 		}
 

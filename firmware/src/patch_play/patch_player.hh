@@ -791,6 +791,9 @@ public:
 	// Set mode for one mapping only
 	void set_catchup_mode(int knob_set_idx, unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
 
+	// Set mode for one module/param, in any knobset
+	void set_catchup_mode(unsigned module_id, unsigned param_id, CatchupParam::Mode mode);
+
 	bool is_param_tracking(unsigned module_id, unsigned param_id);
 
 private:

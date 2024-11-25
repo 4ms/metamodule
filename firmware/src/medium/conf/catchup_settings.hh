@@ -1,5 +1,5 @@
 #pragma once
-#include "catchup_param.hh"
+#include "params/catchup_param.hh"
 #include <array>
 #include <cstdint>
 #include <string_view>
@@ -34,7 +34,7 @@ struct CatchupSettings {
 			mode = DefaultMode;
 
 		// Check if deserialized data contains a value other than 0 or 1
-		if (*reinterpret_cast<int *>(&button_exclude) != 0)
+		if (*reinterpret_cast<uint8_t *>(&button_exclude) != 0)
 			button_exclude = true;
 		else
 			button_exclude = false;
