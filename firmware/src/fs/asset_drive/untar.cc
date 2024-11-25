@@ -40,6 +40,7 @@ struct TarRaw {
 		DIRECTORY = '5',
 		FIFO = '6',
 		CONTIGUOUS = '7',
+		EXTENDED_HDR = 'x',
 	};
 };
 static_assert(sizeof(TarRaw) == 512);
@@ -99,12 +100,12 @@ Archive::Archive(std::span<const char> filedata)
 
 		auto type = is_file(buffer.type) ? TarEntry::File : is_dir(buffer.type) ? TarEntry::Dir : TarEntry::Unknown;
 		if (type == TarEntry::Unknown) {
-			pr_err("Unknown tar entry type (not Dir or File): %d\n", buffer.type);
-			break;
-		}
+			pr_err("Unknown tar entry type (not Dir or File): 0x%x, name = %.100s\n", buffer.type, buffer.name);
+		} else {
 
-		// Cannot use emplace_back with earlier Clang
-		archive.push_back({.name = entry_name(&buffer), .size = size, .file_offset = offset, .type = type});
+			// Cannot use emplace_back with earlier Clang
+			archive.push_back({.name = entry_name(&buffer), .size = size, .file_offset = offset, .type = type});
+		}
 
 		// skip over data and unfilled block
 		unsigned jump = size;

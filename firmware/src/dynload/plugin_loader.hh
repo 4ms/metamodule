@@ -218,6 +218,7 @@ public:
 
 				if (so_buffer.size() == 0) {
 					status.error_message = "Error: no plugin .so file found. Plugin is corrupted?";
+					status.state = State::Error;
 					break;
 				}
 
