@@ -1,4 +1,5 @@
 #include "settings_parse.hh"
+#include "conf/catchup_settings.hh"
 #include "ryml.hpp"
 #include "ryml_init.hh"
 #include "ryml_std.hpp"
@@ -91,6 +92,27 @@ static bool read(ryml::ConstNodeRef const &node, ScreensaverSettings *s) {
 	return true;
 }
 
+static bool read(ryml::ConstNodeRef const &node, CatchupSettings *settings) {
+	if (!node.is_map())
+		return false;
+
+	using enum CatchupParam::Mode;
+
+	if (node.has_child("mode")) {
+		settings->mode = node["mode"].val() == "ResumeOnEqual"	? ResumeOnEqual :
+						 node["mode"].val() == "ResumeOnMotion" ? ResumeOnMotion :
+						 node["mode"].val() == "LinearFade"		? LinearFade :
+																  ResumeOnMotion;
+	} else {
+		settings->mode = CatchupParam{}.mode;
+	}
+
+	read_or_default(node, "exclude_buttons", settings, &CatchupSettings::button_exclude);
+	settings->make_valid();
+
+	return true;
+}
+
 namespace Settings
 {
 
@@ -115,8 +137,9 @@ bool parse(std::span<char> yaml, UserSettings *settings) {
 	read_or_default(node, "plugin_autoload", settings, &UserSettings::plugin_autoload);
 	read_or_default(node, "last_patch_opened", settings, &UserSettings::last_patch_opened);
 	read_or_default(node, "screensaver", settings, &UserSettings::screensaver);
+	read_or_default(node, "catchup", settings, &UserSettings::catchup);
 
-	// TODO: cleaner way to parse and enum and reject out of range?
+	// TODO: cleaner way to parse an enum and reject out of range?
 	if (node.is_map() && node.has_child("last_patch_vol")) {
 		unsigned t = 0;
 		node["last_patch_vol"] >> t;
