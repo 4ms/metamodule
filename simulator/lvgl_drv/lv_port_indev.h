@@ -20,6 +20,7 @@ struct RotaryEncoderKeys {
 	SDL_Keycode quit;
 	SDL_Keycode param_inc;
 	SDL_Keycode param_dec;
+	SDL_Keycode param_fine_toggle;
 	SDL_Keycode prev_knobset;
 	SDL_Keycode next_knobset;
 };
@@ -37,6 +38,7 @@ struct LvglEncoderSimulatorDriver {
 
 	bool param_inc();
 	bool param_dec();
+	bool param_fine();
 	int knobset_changed();
 	unsigned selected_param();
 	unsigned selected_outchan();
@@ -59,6 +61,7 @@ private:
 
 	bool param_inc_pressed = false;
 	bool param_dec_pressed = false;
+	bool param_fine_mode = false;
 	int knobset_change = 0;
 	unsigned last_selected_param = 0;
 	unsigned last_selected_outchan = 0;

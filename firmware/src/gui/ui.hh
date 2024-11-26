@@ -69,6 +69,7 @@ public:
 		}
 
 		patch_playloader.request_new_audio_settings(settings.audio.sample_rate, settings.audio.block_size);
+		patch_playloader.set_all_param_catchup_mode(settings.catchup.mode, settings.catchup.button_exclude);
 	}
 
 	void update_screen() {

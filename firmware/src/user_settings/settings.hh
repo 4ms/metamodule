@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/audio_settings.hh"
+#include "conf/catchup_settings.hh"
 #include "fs/volumes.hh"
 #include "gui/elements/screensaver_settings.hh"
 #include "gui/pages/view_settings.hh"
@@ -16,6 +17,7 @@ struct UserSettings {
 	std::string last_patch_opened{};
 	Volume last_patch_vol{Volume::NorFlash};
 	ScreensaverSettings screensaver{};
+	CatchupSettings catchup{};
 };
 
 } // namespace MetaModule

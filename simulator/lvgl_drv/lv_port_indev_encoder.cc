@@ -98,6 +98,10 @@ void LvglEncoderSimulatorDriver::handle_key_up(SDL_Keycode key, lv_indev_data_t 
 		_instance->param_inc_pressed = true;
 	}
 
+	if (key == keys.param_fine_toggle) {
+		_instance->param_fine_mode = !_instance->param_fine_mode;
+	}
+
 	if (key == keys.param_dec) {
 		_instance->param_dec_pressed = true;
 	}
@@ -183,6 +187,10 @@ bool LvglEncoderSimulatorDriver::param_dec() {
 	bool pressed = param_dec_pressed;
 	param_dec_pressed = false;
 	return pressed;
+}
+
+bool LvglEncoderSimulatorDriver::param_fine() {
+	return param_fine_mode;
 }
 
 int LvglEncoderSimulatorDriver::knobset_changed() {

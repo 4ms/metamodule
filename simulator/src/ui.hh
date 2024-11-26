@@ -21,6 +21,7 @@ class Ui {
 		.quit = SDLK_ESCAPE,
 		.param_inc = ']',
 		.param_dec = '[',
+		.param_fine_toggle = '\\',
 		.prev_knobset = ',',
 		.next_knobset = '.',
 	};

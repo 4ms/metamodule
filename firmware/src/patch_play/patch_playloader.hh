@@ -9,6 +9,7 @@
 #include "patch_play/patch_player.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
+#include "util/overloaded.hh"
 #include <atomic>
 
 size_t get_heap_size();
@@ -263,6 +264,42 @@ struct PatchPlayLoader {
 			return pluginmodule;
 		else
 			return nullptr;
+	}
+
+	bool is_param_tracking(unsigned module_id, unsigned param_id) {
+		return player_.is_param_tracking(module_id, param_id);
+	}
+
+	void set_all_param_catchup_mode(CatchupParam::Mode mode, bool exclude_buttons) {
+		// if (exclude_buttons) {
+
+		// 	for (auto module_id = 0u; auto slug : patches_.get_view_patch()->module_slugs) {
+		// 		auto info = ModuleFactory::getModuleInfo(slug);
+
+		// 		for (unsigned i = 0; auto const &element : info.elements) {
+		// 			auto param_id = info.indices[i].param_idx;
+		// 			enum { Ignore, Enable, Disable };
+		// 			auto action = std::visit(overloaded{
+		// 										 [](Pot const &el) { return el.integral ? Disable : Enable; },
+		// 										 [](Switch const &el) { return Disable; },
+		// 										 [](Button const &el) { return Disable; },
+		// 										 [](ParamElement const &el) { return Enable; },
+		// 										 [](BaseElement const &el) { return Ignore; },
+		// 									 },
+		// 									 element);
+		// 			if (action == Enable)
+		// 				player_.set_catchup_mode(module_id, param_id, mode);
+		// 			else if (action == Disable)
+		// 				player_.set_catchup_mode(module_id, param_id, CatchupParam::Mode::ResumeOnMotion);
+
+		// 			i++;
+		// 		}
+		// 		module_id++;
+		// 	}
+
+		// } else {
+		player_.set_catchup_mode(mode);
+		// }
 	}
 
 private:

@@ -53,6 +53,18 @@ static void write(ryml::NodeRef *n, ScreensaverSettings const &s) {
 	n->append_child() << ryml::key("knobs_can_wake") << s.knobs_can_wake;
 }
 
+static void write(ryml::NodeRef *n, CatchupSettings const &s) {
+	*n |= ryml::MAP;
+
+	using enum CatchupParam::Mode;
+	ryml::csubstr mode_string = s.mode == ResumeOnEqual	 ? "ResumeOnEqual" :
+								s.mode == ResumeOnMotion ? "ResumeOnMotion" :
+								s.mode == LinearFade	 ? "LinearFade" :
+														   "ResumeOnMotion";
+	n->append_child() << ryml::key("mode") << mode_string;
+	n->append_child() << ryml::key("exclude_buttons") << s.button_exclude;
+}
+
 namespace Settings
 {
 
@@ -73,6 +85,7 @@ uint32_t serialize(UserSettings const &settings, std::span<char> buffer) {
 	data["last_patch_opened"] << settings.last_patch_opened;
 	data["last_patch_vol"] << static_cast<unsigned>(settings.last_patch_vol);
 	data["screensaver"] << settings.screensaver;
+	data["catchup"] << settings.catchup;
 
 	auto res = ryml::emit_yaml(tree, c4::substr(buffer.data(), buffer.size()));
 	return res.size();
