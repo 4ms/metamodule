@@ -20,10 +20,10 @@ struct DetectExpander {
 
 			case WifiIPState::Idle: {
 				if (now - last_check_wifi_ip_tm > 1000) { //poll once per second
-					last_check_wifi_ip_tm = now;
 
 					if (storage.request_wifi_ip()) {
 						wifi_ip_state = WifiIPState::Requested;
+						last_check_wifi_ip_tm = now;
 					}
 				}
 			} break;
