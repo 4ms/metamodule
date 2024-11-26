@@ -62,5 +62,6 @@ constexpr auto PotConfs = std::to_array({
 });
 
 constexpr int32_t MinPotValue = 72; // more like 69
+constexpr float MaxPotValue = 4080.f;
 
 } // namespace MetaModule

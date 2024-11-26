@@ -34,7 +34,7 @@ void Controls::update_params() {
 	}
 
 	for (unsigned i = 0; i < PanelDef::NumPot; i++)
-		cur_params->knobs[i] = _knobs[i].next();
+		cur_params->knobs[i] = std::clamp(_knobs[i].next(), 0.f, 1.f);
 
 	if (_first_param) {
 		_first_param = false;
@@ -215,12 +215,10 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 }
 
 float Controls::get_pot_reading(uint32_t pot_id) {
-	if (pot_id < NumPotAdcs) {
+	if (pot_id < pot_vals.size()) {
 		auto raw = (int32_t)pot_vals[pot_id];
-		int32_t val = raw - MinPotValue;
-		if (val < 0)
-			val = 0;
-		return (float)val / (4096.f - MinPotValue);
+		float val = raw - MinPotValue;
+		return std::clamp(val / MaxPotValue, 0.f, 1.f);
 	}
 	return 0;
 }
