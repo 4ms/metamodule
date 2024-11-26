@@ -2,6 +2,7 @@
 #include "doctest.h"
 #include "params/catchup_manager.hh"
 #include "params/catchup_param.hh"
+#include <cmath>
 #include <memory>
 
 // These tests use a module that has 'snapping' params:
