@@ -49,9 +49,9 @@ struct AddMapPopUp {
 		visible = true;
 
 		lv_group_activate(popup_group);
-		lv_group_focus_obj(ui_CancelAdd);
+		lv_group_focus_obj(ui_OkAdd);
 		lv_group_set_editing(popup_group, false);
-		lv_group_set_wrap(popup_group, true);
+		lv_group_set_wrap(popup_group, false);
 	}
 
 	void hide() {
