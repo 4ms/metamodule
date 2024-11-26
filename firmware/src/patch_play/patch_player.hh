@@ -173,7 +173,7 @@ public:
 
 		calc_multiple_module_indicies();
 
-		set_active_knob_set(0);
+		active_knob_set = 0;
 
 		// Test-run the modules once
 		for (size_t i = 1; i < num_modules; i++) {
@@ -994,13 +994,16 @@ private:
 		if (knob_set >= knob_maps.size())
 			return;
 		if (k.panel_knob_id < PanelDef::NumKnobs) {
+			// Update existing, if present
 			for (auto &el : knob_maps[knob_set][k.panel_knob_id]) {
 				if (el.map.maps_to_same_as(k)) {
 					el.map = k;
 					return;
 				}
 			}
+			// Create new entry:
 			CatchupParam f{};
+			f.mode = catchup_manager.get_default_mode();
 			knob_maps[knob_set][k.panel_knob_id].push_back({k, f});
 		}
 	}

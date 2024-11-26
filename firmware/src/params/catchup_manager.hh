@@ -15,7 +15,8 @@ using ParamSet = std::array<std::vector<MappedParam>, PanelDef::NumKnobs>;
 
 class CatchupManager {
 
-	std::array<float, PanelDef::NumKnobs> panel_knobs{};
+	std::array<float, PanelDef::NumKnobs> panel_knobs{0.f};
+	CatchupParam::Mode default_mode{CatchupParam::Mode::ResumeOnMotion};
 
 public:
 	void set_panel_param(auto &modules, ParamSet &active_knob_maps, unsigned panel_knob_id, float val) {
@@ -51,6 +52,14 @@ public:
 			}
 			i++;
 		}
+	}
+
+	void set_default_mode(CatchupParam::Mode mode) {
+		default_mode = mode;
+	}
+
+	CatchupParam::Mode get_default_mode() {
+		return default_mode;
 	}
 };
 

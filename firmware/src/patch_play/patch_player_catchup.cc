@@ -5,6 +5,8 @@ namespace MetaModule
 
 // Set mode for all maps
 void PatchPlayer::set_catchup_mode(CatchupParam::Mode mode) {
+	catchup_manager.set_default_mode(mode);
+
 	for (auto &knobset : knob_maps) {
 		for (auto &knob : knobset) {
 			for (auto &map : knob) {
