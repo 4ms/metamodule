@@ -41,6 +41,9 @@ public:
 			}
 		}
 	}
+	void set_panel_param_no_play(unsigned panel_knob_id, float val) {
+		panel_knobs[panel_knob_id] = val;
+	}
 
 	void reset(auto &modules, ParamSet &active_knob_maps) {
 		// Reset all catchups in the new active knobset.

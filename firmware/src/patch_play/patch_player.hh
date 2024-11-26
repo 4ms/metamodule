@@ -174,6 +174,7 @@ public:
 		calc_multiple_module_indicies();
 
 		active_knob_set = 0;
+		catchup_manager.reset(modules, knob_maps[active_knob_set]);
 
 		// Test-run the modules once
 		for (size_t i = 1; i < num_modules; i++) {
@@ -280,6 +281,10 @@ public:
 
 	void set_panel_param(unsigned panel_knob_id, float val) {
 		catchup_manager.set_panel_param(modules, knob_maps[active_knob_set], panel_knob_id, val);
+	}
+
+	void set_panel_param_no_play(unsigned panel_knob_id, float val) {
+		catchup_manager.set_panel_param_no_play(panel_knob_id, val);
 	}
 
 	void set_panel_input(unsigned jack_id, float val) {

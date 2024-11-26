@@ -39,7 +39,8 @@ void Controls::update_params() {
 	num_pot_updates++;
 	if (num_pot_updates > _knobs[0].get_num_updates()) {
 		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
-			cur_params->knobs[i] = std::clamp(_knobs[i].cur_val, 0.f, 1.f);
+			auto val = _knobs[i].target_val;
+			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
 		}
 	} else {
 		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
@@ -187,7 +188,7 @@ void Controls::process() {
 void Controls::set_samplerate(unsigned sample_rate) {
 	this->sample_rate = sample_rate;
 	for (auto &_knob : _knobs) {
-		_knob.set_num_updates(sample_rate / AdcReadFrequency + 1);
+		_knob.set_num_updates(sample_rate / AdcReadFrequency);
 	}
 }
 
@@ -202,10 +203,8 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {
-			// Debug::Pin1::high();
 			ADC1->ISR = tmp | ADC_ISR_EOS;
 			_new_adc_data_ready = true;
-			// Debug::Pin1::low();
 		}
 	});
 
