@@ -21,6 +21,8 @@ void Controls::update_debouncers() {
 	gate_in_2.update();
 }
 
+unsigned num_pot_updates = 0;
+
 void Controls::update_params() {
 	cur_params->gate_ins = gate_in_1.is_high() ? 0b01 : 0b00;
 	cur_params->gate_ins |= gate_in_2.is_high() ? 0b10 : 0b00;
@@ -29,12 +31,22 @@ void Controls::update_params() {
 	if (_new_adc_data_ready) {
 		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
 			_knobs[i].set_new_value(get_pot_reading(i));
+			num_pot_updates = 0;
 		}
 		_new_adc_data_ready = false;
 	}
 
-	for (unsigned i = 0; i < PanelDef::NumPot; i++)
-		cur_params->knobs[i] = std::clamp(_knobs[i].next(), 0.f, 1.f);
+	num_pot_updates++;
+	if (num_pot_updates > _knobs[0].get_num_updates()) {
+		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
+			cur_params->knobs[i] = std::clamp(_knobs[i].cur_val, 0.f, 1.f);
+		}
+	} else {
+		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
+			auto val = _knobs[i].next();
+			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
+		}
+	}
 
 	if (_first_param) {
 		_first_param = false;
@@ -175,7 +187,7 @@ void Controls::process() {
 void Controls::set_samplerate(unsigned sample_rate) {
 	this->sample_rate = sample_rate;
 	for (auto &_knob : _knobs) {
-		_knob.set_num_updates(sample_rate / AdcReadFrequency);
+		_knob.set_num_updates(sample_rate / AdcReadFrequency + 1);
 	}
 }
 
