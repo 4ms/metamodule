@@ -63,7 +63,7 @@ private:
 	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
 	InterpParamVariable<float> _knobs[PanelDef::NumPot]{};
-	static constexpr uint32_t AdcReadFrequency = 580; //measured
+	static constexpr uint32_t AdcReadFrequency = 580; //571
 	bool _new_adc_data_ready = false;
 
 	SensePinReader sense_pin_reader;
