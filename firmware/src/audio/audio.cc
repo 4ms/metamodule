@@ -350,7 +350,7 @@ void AudioStream::handle_midi(bool is_connected,
 		player.set_midi_note_gate(event.poly_chan, 10.f);
 		player.set_midi_note_velocity(event.poly_chan, event.val);
 		player.set_midi_note_retrig(event.poly_chan, 10.f);
-		player.set_midi_gate(event.note, event.val); //TODO: if not velocity mode, then event.val => 10
+		player.set_midi_gate(event.note, 10.f);
 		sync_params.midi_events.put(event);
 
 	} else if (event.type == Midi::Event::Type::NoteOff) {
