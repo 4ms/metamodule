@@ -11,6 +11,7 @@
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
 #include "patch_play/patch_player.hh"
+#include "vcv_hardware/async_thread_control.hh"
 
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;
@@ -135,6 +136,8 @@ extern "C" void aux_core_main() {
 #endif
 
 	ui.load_initial_patch();
+
+	start_module_threads();
 
 	while (true) {
 		ui.update_screen();
