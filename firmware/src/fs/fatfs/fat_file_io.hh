@@ -5,6 +5,7 @@
 #include "fs/volumes.hh"
 #include "pr_dbg.hh"
 #include <cstdint>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -179,6 +180,34 @@ public:
 		return get_file_info(filename).size;
 	}
 
+	bool open(const std::string_view filename, FIL *out) {
+		f_chdrive(_fatvol);
+
+		if (f_open(out, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK) {
+			if (!mount_disk())
+				return false;
+
+			if (f_open(out, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK)
+				return false;
+		}
+
+		return true;
+	}
+
+	std::optional<uint32_t> read(FIL *fil, std::span<char> buffer) {
+		UINT bytes_read = 0;
+		if (f_read(fil, buffer.data(), buffer.size_bytes(), &bytes_read) != FR_OK) {
+			f_close(fil);
+			return std::nullopt;
+		}
+
+		return bytes_read;
+	}
+
+	void close(FIL *fil) {
+		f_close(fil);
+	}
+
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer, std::size_t offset = 0) {
 		FIL fil;
 		UINT bytes_read = 0;
@@ -262,7 +291,6 @@ public:
 	uint32_t update_or_create_file(const std::string_view filename, const std::span<const char> data) {
 		return write_file(filename, data);
 	}
-
 
 	bool delete_file(std::string_view filename) {
 		f_chdrive(_fatvol);
