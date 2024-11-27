@@ -21,6 +21,8 @@ void Controls::update_debouncers() {
 	gate_in_2.update();
 }
 
+unsigned num_pot_updates = 0;
+
 void Controls::update_params() {
 	cur_params->gate_ins[0] = gate_in_1.is_high();
 	cur_params->gate_ins[1] = gate_in_2.is_high();
@@ -29,12 +31,23 @@ void Controls::update_params() {
 	if (_new_adc_data_ready) {
 		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
 			_knobs[i].set_new_value(get_pot_reading(i));
+			num_pot_updates = 0;
 		}
 		_new_adc_data_ready = false;
 	}
 
-	for (unsigned i = 0; i < PanelDef::NumPot; i++)
-		cur_params->knobs[i] = _knobs[i].next();
+	num_pot_updates++;
+	if (num_pot_updates > _knobs[0].get_num_updates()) {
+		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
+			auto val = _knobs[i].target_val;
+			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
+		}
+	} else {
+		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
+			auto val = _knobs[i].next();
+			cur_params->knobs[i] = std::clamp(val, 0.f, 1.f);
+		}
+	}
 
 	if (_first_param) {
 		_first_param = false;
@@ -175,10 +188,8 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {
-			// Debug::Pin1::high();
 			ADC1->ISR = tmp | ADC_ISR_EOS;
 			_new_adc_data_ready = true;
-			// Debug::Pin1::low();
 		}
 	});
 
@@ -200,12 +211,10 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, MidiHost &midi_host)
 }
 
 float Controls::get_pot_reading(uint32_t pot_id) {
-	if (pot_id < NumPotAdcs) {
+	if (pot_id < pot_vals.size()) {
 		auto raw = (int32_t)pot_vals[pot_id];
-		int32_t val = raw - MinPotValue;
-		if (val < 0)
-			val = 0;
-		return (float)val / (4096.f - MinPotValue);
+		float val = raw - MinPotValue;
+		return std::clamp(val / MaxPotValue, 0.f, 1.f);
 	}
 	return 0;
 }

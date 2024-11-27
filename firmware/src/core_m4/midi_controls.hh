@@ -26,17 +26,17 @@ struct MessageParser {
 		// Monophonic MIDI CV/Gate
 		if (msg.is_noteoff()) {
 
+			// Find the note in held midi_notes, and get the poly chan if found.
 			for (unsigned i = 0; auto &midi_note : midi_notes) {
 				if (midi_note.note == msg.note() && midi_note.gate) {
 					midi_note.gate = false;
-
-					event.type = Midi::Event::Type::NoteOff;
-					event.note = msg.note();
 					event.poly_chan = i;
 					break;
 				}
 				i++;
 			}
+			event.type = Midi::Event::Type::NoteOff;
+			event.note = msg.note();
 
 		} else if (msg.is_command<MidiCommand::NoteOn>()) {
 

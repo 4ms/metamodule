@@ -68,6 +68,7 @@ struct InfoTab : SystemMenuTab {
 		}
 
 		detect_wifi.start();
+		detect_wifi.new_wifi_status_available(lv_tick_get());
 	}
 
 	void update() override {
