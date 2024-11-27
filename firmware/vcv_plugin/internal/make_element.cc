@@ -2,6 +2,7 @@
 #include "CoreModules/elements/base_element.hh"
 #include "CoreModules/elements/units.hh"
 #include "console/pr_dbg.hh"
+#include <concepts>
 
 namespace MetaModule
 {
@@ -22,6 +23,17 @@ static void log_make_element_notes(std::string_view note1, std::string_view note
 
 static float getScaledDefaultValue(rack::app::ParamWidget *widget);
 static unsigned getDefaultValue(rack::app::ParamWidget *widget);
+
+template<typename MatchType>
+requires std::derived_from<MatchType, rack::widget::Widget>
+static MatchType *match_child(rack::widget::Widget *w) {
+	for (auto child : w->children) {
+		if (auto m = dynamic_cast<MatchType *>(child)) {
+			return m;
+		}
+	}
+	return nullptr;
+}
 
 //
 // Jacks
@@ -46,12 +58,23 @@ Element make_element(rack::app::SvgPort *widget) {
 }
 
 Element make_element(rack::app::PortWidget *widget) {
+	JackElement element;
+	if (auto inner_fb = match_child<rack::widget::FramebufferWidget>(widget); inner_fb != nullptr) {
+		if (auto svgw = match_child<rack::widget::SvgWidget>(inner_fb); svgw != nullptr) {
+			if (!svgw->box.size.isZero() && svgw->box.size.isFinite()) {
+				if (svgw->svg && svgw->svg->filename.size() > 0) {
+					element.image = std::string_view{svgw->svg->filename};
+				}
+			}
+		}
+	}
+
 	if (widget->type == rack::engine::Port::Type::INPUT) {
 		log_make_element("Port In", widget->portId);
-		return JackInput{};
+		return JackInput{element};
 	} else {
 		log_make_element("Port Out", widget->portId);
-		return JackOutput{};
+		return JackOutput{element};
 	}
 }
 
@@ -100,12 +123,10 @@ Element make_element(rack::app::SvgKnob *widget) {
 	//
 	// This does not work for Rogan knobs
 	auto find_inner_svg_widget = [](rack::widget::FramebufferWidget *fb) {
-		for (auto child : fb->children) {
-			if (auto svgw = dynamic_cast<rack::widget::SvgWidget *>(child)) {
-				if (!svgw->box.size.isZero() && svgw->box.size.isFinite()) {
-					if (svgw->svg && svgw->svg->filename.size() > 0) {
-						return std::string_view{svgw->svg->filename};
-					}
+		if (auto svgw = match_child<rack::widget::SvgWidget>(fb)) {
+			if (!svgw->box.size.isZero() && svgw->box.size.isFinite()) {
+				if (svgw->svg && svgw->svg->filename.size() > 0) {
+					return std::string_view{svgw->svg->filename};
 				}
 			}
 		}
