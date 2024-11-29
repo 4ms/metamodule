@@ -1,5 +1,4 @@
 #pragma once
-#include "conf/audio_settings.hh"
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/system_menu_tab_base.hh"
@@ -7,6 +6,7 @@
 #include "gui/slsexport/prefs_menu.hh"
 #include "patch_play/patch_playloader.hh"
 #include "src/core/lv_obj_scroll.h"
+#include "user_settings/audio_settings.hh"
 #include <functional>
 
 namespace MetaModule

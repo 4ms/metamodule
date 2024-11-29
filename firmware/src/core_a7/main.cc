@@ -2,6 +2,7 @@
 #include "audio/audio.hh"
 #include "calibrate/calibration_data_reader.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_a7/async_thread_control.hh"
 #include "core_a7/static_buffers.hh"
 #include "core_intercom/shared_memory.hh"
 #include "debug.hh"
@@ -17,7 +18,6 @@
 #include "patch_play/patch_playloader.hh"
 #include "system/time.hh"
 #include "uart_log.hh"
-#include "vcv_hardware/async_thread_control.hh"
 
 #include "conf/qspi_flash_conf.hh"
 #include "drivers/qspi_flash_driver.hh"

@@ -1,5 +1,6 @@
 #include "conf/hsem_conf.hh"
 #include "core_a7/a7_shared_memory.hh"
+#include "core_a7/async_thread_control.hh"
 #include "core_a7/smp_api.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
@@ -11,7 +12,6 @@
 #include "gui/ui.hh"
 #include "internal_plugin_manager.hh"
 #include "patch_play/patch_player.hh"
-#include "vcv_hardware/async_thread_control.hh"
 
 using FrameBufferT =
 	std::array<lv_color_t, MetaModule::ScreenBufferConf::width * MetaModule::ScreenBufferConf::height / 4>;

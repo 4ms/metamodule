@@ -1,6 +1,5 @@
 #pragma once
 #include "calibrate/calibration_patch.hh"
-#include "conf/audio_settings.hh"
 #include "delay.hh"
 #include "modules_helpers.hh"
 #include "patch_file/file_storage_proxy.hh"
@@ -9,6 +8,7 @@
 #include "patch_play/patch_player.hh"
 #include "pr_dbg.hh"
 #include "result_t.hh"
+#include "user_settings/audio_settings.hh"
 #include "util/overloaded.hh"
 #include <atomic>
 

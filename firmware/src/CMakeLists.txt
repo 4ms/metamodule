@@ -112,11 +112,13 @@ add_executable(
   ${FWDIR}/system/startup_ca7.s
   ${FWDIR}/src/core_intercom/shared_memory.cc
   ${FWDIR}/src/core_a7/a7_shared_memory.cc
-  ${FWDIR}/src/console/uart_log.cc
+  ${FWDIR}/src/core_a7/gettimeofday.cc
+  ${FWDIR}/src/core_a7/async_thread.cc
   ${FWDIR}/src/core_a7/main.cc
-  ${FWDIR}/src/audio/audio.cc
   ${FWDIR}/src/core_a7/static_buffers.cc
   ${FWDIR}/src/core_a7/aux_core_main.cc
+  ${FWDIR}/src/console/uart_log.cc
+  ${FWDIR}/src/audio/audio.cc
   ${FWDIR}/src/ryml_tests/patchlist_ryml_tests.cc
   ${FWDIR}/src/fs/fatfs/diskio.cc
   ${FWDIR}/src/fs/fatfs/fattime.cc
@@ -180,8 +182,6 @@ add_executable(
   ${FWDIR}/lib/mdrivlib/target/stm32mp1_ca7/drivers/cycle_counter.cc
   #
   ${FWDIR}/src/vcv_hardware/random.cpp
-  ${FWDIR}/src/vcv_hardware/gettimeofday.cc
-  ${FWDIR}/src/vcv_hardware/async_thread.cc
   #
   ${FWDIR}/src/patch_play/modules_helpers.cc
   #
