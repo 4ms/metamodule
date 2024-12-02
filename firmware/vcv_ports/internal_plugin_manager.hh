@@ -134,8 +134,11 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelChaos3Op);
 		pluginInstance->addModel(modelChaoticAttractors);
 		pluginInstance->addModel(modelClockedNoise);
+		pluginInstance->addModel(modelComparator);
 		pluginInstance->addModel(modelContrast);
 		pluginInstance->addModel(modelCrackle);
+		pluginInstance->addModel(modelDataCompander);
+		pluginInstance->addModel(modelDelta);
 		pluginInstance->addModel(modelDigitalToAnalog);
 		pluginInstance->addModel(modelDust);
 		pluginInstance->addModel(modelExponent);
@@ -155,13 +158,16 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelPhasorBurstGen);
 		pluginInstance->addModel(modelPhasorDivMult);
 		pluginInstance->addModel(modelPhasorEuclidean);
+		pluginInstance->addModel(modelPhasorFreezer);
 		pluginInstance->addModel(modelPhasorGates);
 		pluginInstance->addModel(modelPhasorGates32);
 		pluginInstance->addModel(modelPhasorGates64);
 		pluginInstance->addModel(modelPhasorGen);
 		pluginInstance->addModel(modelPhasorGeometry);
 		pluginInstance->addModel(modelPhasorHumanizer);
+		pluginInstance->addModel(modelPhasorMixer);
 		pluginInstance->addModel(modelPhasorOctature);
+		pluginInstance->addModel(modelPhasorProbability);
 		pluginInstance->addModel(modelPhasorQuadrature);
 		pluginInstance->addModel(modelPhasorRandom);
 		pluginInstance->addModel(modelPhasorRanger);
@@ -169,6 +175,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelPhasorRhythmGroup);
 		pluginInstance->addModel(modelPhasorShape);
 		pluginInstance->addModel(modelPhasorShift);
+		pluginInstance->addModel(modelPhasorSplitter);
 		pluginInstance->addModel(modelPhasorStutter);
 		pluginInstance->addModel(modelPhasorSubstepShape);
 		pluginInstance->addModel(modelPhasorSwing);
@@ -177,17 +184,14 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelPhasorToLFO);
 		pluginInstance->addModel(modelPhasorToWaveforms);
 		pluginInstance->addModel(modelProbability);
+		pluginInstance->addModel(modelRandomGates);
+		pluginInstance->addModel(modelRotator);
+		pluginInstance->addModel(modelRungler);
 		pluginInstance->addModel(modelScanner);
+		pluginInstance->addModel(modelTrigShaper);
 		pluginInstance->addModel(modelVectorMix);
 		pluginInstance->addModel(modelWaveshape);
 		pluginInstance->addModel(modelXYToPolar);
-		pluginInstance->addModel(modelPhasorMixer);
-		pluginInstance->addModel(modelRandomGates);
-		pluginInstance->addModel(modelComparator);
-		pluginInstance->addModel(modelDataCompander);
-		pluginInstance->addModel(modelDelta);
-		pluginInstance->addModel(modelRotator);
-		pluginInstance->addModel(modelRungler);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_nonlinearcircuits
