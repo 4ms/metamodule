@@ -37,6 +37,7 @@ set(hetrickcvModules
     PhasorBurstGen
     PhasorDivMult
     PhasorEuclidean
+    PhasorFreezer
     PhasorGates
     PhasorGates32
     PhasorGates64
@@ -45,6 +46,7 @@ set(hetrickcvModules
     PhasorHumanizer
     PhasorMixer
     PhasorOctature
+    PhasorProbability
     PhasorQuadrature
     PhasorRandom
     PhasorRanger
@@ -52,6 +54,7 @@ set(hetrickcvModules
     PhasorRhythmGroup
     PhasorShape
     PhasorShift
+    PhasorSplitter
     PhasorStutter
     PhasorSubstepShape
     PhasorSwing
@@ -64,6 +67,7 @@ set(hetrickcvModules
     Rotator
     Rungler
     Scanner
+    TrigShaper
     VectorMix
     Waveshaper
     XYToPolar

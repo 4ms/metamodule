@@ -1,5 +1,8 @@
 #include "HetrickCV.hpp"
 
+// MetaModule Note: this is only built when building as an plugin,
+// that is, when cmake variable BUILD_DYN_PLUGIN_hetrickcv=ON
+
 // The pluginInstance-wide instance of the Plugin class
 Plugin *pluginInstance;
 
@@ -19,11 +22,11 @@ void init(rack::Plugin *p) {
 	p->addModel(modelChaos3Op);
 	p->addModel(modelChaoticAttractors);
 	p->addModel(modelClockedNoise);
-	// p->addModel(modelComparator);
+	p->addModel(modelComparator);
 	p->addModel(modelContrast);
 	p->addModel(modelCrackle);
-	// p->addModel(modelDataCompander);
-	// p->addModel(modelDelta);
+	p->addModel(modelDataCompander);
+	p->addModel(modelDelta);
 	p->addModel(modelDigitalToAnalog);
 	p->addModel(modelDust);
 	p->addModel(modelExponent);
@@ -43,14 +46,16 @@ void init(rack::Plugin *p) {
 	p->addModel(modelPhasorBurstGen);
 	p->addModel(modelPhasorDivMult);
 	p->addModel(modelPhasorEuclidean);
+	p->addModel(modelPhasorFreezer);
 	p->addModel(modelPhasorGates);
 	p->addModel(modelPhasorGates32);
 	p->addModel(modelPhasorGates64);
 	p->addModel(modelPhasorGen);
 	p->addModel(modelPhasorGeometry);
 	p->addModel(modelPhasorHumanizer);
-	// p->addModel(modelPhasorMixer);
+	p->addModel(modelPhasorMixer);
 	p->addModel(modelPhasorOctature);
+	p->addModel(modelPhasorProbability);
 	p->addModel(modelPhasorQuadrature);
 	p->addModel(modelPhasorRandom);
 	p->addModel(modelPhasorRanger);
@@ -58,6 +63,7 @@ void init(rack::Plugin *p) {
 	p->addModel(modelPhasorRhythmGroup);
 	p->addModel(modelPhasorShape);
 	p->addModel(modelPhasorShift);
+	p->addModel(modelPhasorSplitter);
 	p->addModel(modelPhasorStutter);
 	p->addModel(modelPhasorSubstepShape);
 	p->addModel(modelPhasorSwing);
@@ -66,10 +72,11 @@ void init(rack::Plugin *p) {
 	p->addModel(modelPhasorToLFO);
 	p->addModel(modelPhasorToWaveforms);
 	p->addModel(modelProbability);
-	// p->addModel(modelRandomGates);
-	// p->addModel(modelRotator);
-	// p->addModel(modelRungler);
+	p->addModel(modelRandomGates);
+	p->addModel(modelRotator);
+	p->addModel(modelRungler);
 	p->addModel(modelScanner);
+	p->addModel(modelTrigShaper);
 	p->addModel(modelVectorMix);
 	p->addModel(modelWaveshape);
 	p->addModel(modelXYToPolar);

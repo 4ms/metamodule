@@ -15,15 +15,15 @@
 	},
 	{
 		"slug": "AnalogToDigital",
-		"name": "AnalogToDigital"
+		"name": "Analog To Digital"
 	},
 	{
 		"slug": "BinaryGate",
-		"name": "BinaryGate"
+		"name": "Binary Gate"
 	},
 	{
 		"slug": "BinaryNoise",
-		"name": "BinaryNoise"
+		"name": "Binary Noise"
 	},
 	{
 		"slug": "Bitshift",
@@ -31,27 +31,27 @@
 	},
 	{
 		"slug": "Boolean3",
-		"name": "Boolean3"
+		"name": "Boolean Logic"
 	},
 	{
 		"slug": "Chaos1Op",
-		"name": "Chaos1Op"
+		"name": "1-Op Chaos"
 	},
 	{
 		"slug": "Chaos2Op",
-		"name": "Chaos2Op"
+		"name": "2-Op Chaos"
 	},
 	{
 		"slug": "Chaos3Op",
-		"name": "Chaos3Op"
+		"name": "3-Op Chaos"
 	},
 	{
 		"slug": "ChaoticAttractors",
-		"name": "ChaoticAttractors"
+		"name": "Chaotic Attractors"
 	},
 	{
 		"slug": "ClockedNoise",
-		"name": "ClockedNoise"
+		"name": "Clocked Noise"
 	},
 	{
 		"slug": "Comparator",
@@ -67,7 +67,7 @@
 	},
 	{
 		"slug": "DataCompander",
-		"name": "DataCompander"
+		"name": "Data Compander"
 	},
 	{
 		"slug": "Delta",
@@ -75,7 +75,7 @@
 	},
 	{
 		"slug": "DigitalToAnalog",
-		"name": "DigitalToAnalog"
+		"name": "Digital To Analog"
 	},
 	{
 		"slug": "Dust",
@@ -87,67 +87,71 @@
 	},
 	{
 		"slug": "FBSineChaos",
-		"name": "FBSineChaos"
+		"name": "Feedback Sine Chaos"
 	},
 	{
 		"slug": "FlipFlop",
-		"name": "FlipFlop"
+		"name": "Flip-Flop"
 	},
 	{
 		"slug": "FlipPan",
-		"name": "FlipPan"
+		"name": "Flip Pan"
 	},
 	{
 		"slug": "GateDelay",
-		"name": "GateDelay"
+		"name": "Gate Delay"
 	},
 	{
 		"slug": "GateJunction",
-		"name": "GateJunction"
+		"name": "Gate Junction"
 	},
 	{
 		"slug": "GateJunctionExp",
-		"name": "GateJunctionExp"
+		"name": "Gate Junction Expanded"
 	},
 	{
 		"slug": "Gingerbread",
-		"name": "Gingerbread"
+		"name": "Gingerbread Chaos"
 	},
 	{
 		"slug": "LogicCombine",
-		"name": "LogicCombine"
+		"name": "Gate Combiner"
 	},
 	{
 		"slug": "MidSide",
-		"name": "MidSide"
+		"name": "Mid/Side"
 	},
 	{
 		"slug": "MinMax",
-		"name": "MinMax"
+		"name": "Min-Max"
 	},
 	{
 		"slug": "PhaseDrivenSequencer",
-		"name": "PhaseDrivenSequencer"
+		"name": "Phase Driven Sequencer"
 	},
 	{
 		"slug": "PhaseDrivenSequencer32",
-		"name": "PhaseDrivenSequencer32"
+		"name": "Phase Driven Sequencer32"
 	},
 	{
 		"slug": "PhasorAnalyzer",
-		"name": "PhasorAnalyzer"
+		"name": "Phasor Analyzer"
 	},
 	{
 		"slug": "PhasorBurstGen",
-		"name": "PhasorBurstGen"
+		"name": "Phasor Burst Generator"
 	},
 	{
 		"slug": "PhasorDivMult",
-		"name": "PhasorDivMult"
+		"name": "Phasor Div Mult"
 	},
 	{
 		"slug": "PhasorEuclidean",
-		"name": "PhasorEuclidean"
+		"name": "Phasor Euclidean"
+	},
+	{
+		"slug": "PhasorFreezer",
+		"name": "Phasor Freezer"
 	},
 	{
 		"slug": "PhasorGates",
@@ -155,87 +159,95 @@
 	},
 	{
 		"slug": "PhasorGates32",
-		"name": "PhasorGates32"
+		"name": "Phasor Gates 32"
 	},
 	{
 		"slug": "PhasorGates64",
-		"name": "PhasorGates64"
+		"name": "Phasor Gates 64"
 	},
 	{
 		"slug": "PhasorGen",
-		"name": "PhasorGen"
+		"name": "Phasor Generator"
 	},
 	{
 		"slug": "PhasorGeometry",
-		"name": "PhasorGeometry"
+		"name": "Phasor Geometry"
 	},
 	{
 		"slug": "PhasorHumanizer",
-		"name": "PhasorHumanizer"
+		"name": "Phasor Humanizer"
 	},
 	{
 		"slug": "PhasorMixer",
-		"name": "PhasorMixer"
+		"name": "Phasor Mixer"
 	},
 	{
 		"slug": "PhasorOctature",
-		"name": "PhasorOctature"
+		"name": "Phasor Octature"
+	},
+	{
+		"slug": "PhasorProbability",
+		"name": "Phasor Probability"
 	},
 	{
 		"slug": "PhasorQuadrature",
-		"name": "PhasorQuadrature"
+		"name": "Phasor Quadrature"
 	},
 	{
 		"slug": "PhasorRandom",
-		"name": "PhasorRandom"
+		"name": "Phasor Random"
 	},
 	{
 		"slug": "PhasorRanger",
-		"name": "PhasorRanger"
+		"name": "Phasor Ranger"
 	},
 	{
 		"slug": "PhasorReset",
-		"name": "PhasorReset"
+		"name": "Phasor Reset"
 	},
 	{
 		"slug": "PhasorRhythmGroup",
-		"name": "PhasorRhythmGroup"
+		"name": "Phasor Rhythm Group"
 	},
 	{
 		"slug": "PhasorShape",
-		"name": "PhasorShape"
+		"name": "Phasor Shape"
 	},
 	{
 		"slug": "PhasorShift",
-		"name": "PhasorShift"
+		"name": "Phasor Shift"
+	},
+	{
+		"slug": "PhasorSplitter",
+		"name": "Phasor Splitter"
 	},
 	{
 		"slug": "PhasorStutter",
-		"name": "PhasorStutter"
+		"name": "Phasor Stutter"
 	},
 	{
 		"slug": "PhasorSubstepShape",
-		"name": "PhasorSubstepShape"
+		"name": "Phasor Substep Shape"
 	},
 	{
 		"slug": "PhasorSwing",
-		"name": "PhasorSwing"
+		"name": "Phasor Swing"
 	},
 	{
 		"slug": "PhasorTimetable",
-		"name": "PhasorTimetable"
+		"name": "Phasor Timetable"
 	},
 	{
 		"slug": "PhasorToClock",
-		"name": "PhasorToClock"
+		"name": "Phasor To Clock"
 	},
 	{
 		"slug": "PhasorToLFO",
-		"name": "PhasorToLFO"
+		"name": "Phasor To LFO"
 	},
 	{
 		"slug": "PhasorToWaveforms",
-		"name": "PhasorToWaveforms"
+		"name": "Phasor To Waveforms"
 	},
 	{
 		"slug": "Probability",
@@ -243,7 +255,7 @@
 	},
 	{
 		"slug": "RandomGates",
-		"name": "RandomGates"
+		"name": "Random Gates"
 	},
 	{
 		"slug": "Rotator",
@@ -258,8 +270,12 @@
 		"name": "Scanner"
 	},
 	{
+		"slug": "TrigShaper",
+		"name": "Trigonometric Shaper",
+	},
+	{
 		"slug": "VectorMix",
-		"name": "VectorMix"
+		"name": "Vector Mix"
 	},
 	{
 		"slug": "Waveshaper",
@@ -267,7 +283,7 @@
 	},
 	{
 		"slug": "XYToPolar",
-		"name": "XYToPolar"
+		"name": "XY<->Polar"
 	}
 	]
 }
