@@ -135,6 +135,7 @@ extern rack::plugin::Model *modelSlothApathy;
 extern rack::plugin::Model *modelSlothInertia;
 extern rack::plugin::Model *modelSlothTorpor;
 extern rack::plugin::Model *modelSquidAxon;
+extern rack::plugin::Model *modelSplish;
 extern rack::plugin::Model *modelStatues;
 extern rack::plugin::Model *modelTripleSloth;
 

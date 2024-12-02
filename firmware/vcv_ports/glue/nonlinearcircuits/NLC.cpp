@@ -1,5 +1,8 @@
 #include "NLC.hpp"
 
+// MetaModule Note: this is only built when building as an plugin,
+// that is, when cmake variable BUILD_DYN_PLUGIN_nonlinearcircuits=ON
+
 // The pluginInstance-wide instance of the Plugin class
 Plugin *pluginInstance;
 
@@ -22,6 +25,7 @@ void init(rack::Plugin *p) {
 	p->addModel(modelSlothInertia);
 	p->addModel(modelSlothTorpor);
 	p->addModel(modelSquidAxon);
+	p->addModel(modelSplish);
 	p->addModel(modelStatues);
 	p->addModel(modelTripleSloth);
 	// Any other pluginInstance initialization may go here.
