@@ -214,6 +214,7 @@ struct InternalPluginManager {
 		pluginInstance->addModel(modelSlothInertia);
 		pluginInstance->addModel(modelSlothTorpor);
 		pluginInstance->addModel(modelSquidAxon);
+		pluginInstance->addModel(modelSplish);
 		pluginInstance->addModel(modelStatues);
 		pluginInstance->addModel(modelTripleSloth);
 #endif
