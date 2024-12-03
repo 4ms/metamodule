@@ -47,6 +47,7 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 					   },
 
 					   [&new_cal_state](CalibrationOnOff &mod) { new_cal_state = mod.enable; },
+					   [&player](LoadModuleState &mod) { player.reset_module(mod.module_id, mod.data); },
 				   },
 				   patch_mod);
 	}
