@@ -15,4 +15,10 @@ lv_obj_t *create_automap_item(lv_obj_t *parent, std::string_view name);
 
 lv_obj_t *create_labeled_check_obj(lv_obj_t *parent, const char *name);
 
+lv_obj_t *create_lv_list_button(lv_obj_t *parent, const char *name);
+
+lv_obj_t *create_lv_roller(lv_obj_t *parent);
+
+lv_obj_t *create_lv_labeled_popup(lv_obj_t *parent, const char *label_text);
+
 } // namespace MetaModule
