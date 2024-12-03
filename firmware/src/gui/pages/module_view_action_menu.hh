@@ -23,8 +23,11 @@ struct ModuleViewActionMenu {
 						 OpenPatchManager &patches,
 						 PageList &page_list,
 						 PatchPlayLoader &patch_playloader,
-						 NotificationQueue &notify_queue)
-		: patches{patches}
+						 NotificationQueue &notify_queue,
+						 FatFileIO &ramdisk)
+		: moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")}
+		, ramdisk{ramdisk}
+		, patches{patches}
 		, page_list{page_list}
 		, patch_playloader{patch_playloader}
 		, auto_map{patch_mod_queue, patches, notify_queue}

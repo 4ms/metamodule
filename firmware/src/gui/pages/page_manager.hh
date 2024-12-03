@@ -58,7 +58,8 @@ public:
 				PatchModQueue &patch_mod_queue,
 				PluginManager &plugin_manager,
 				UserSettings &settings,
-				Screensaver &screensaver)
+				Screensaver &screensaver,
+				FatFileIO &ramdisk)
 		: info{patch_storage,
 			   open_patch_manager,
 			   patch_playloader,
@@ -69,7 +70,8 @@ public:
 			   page_list,
 			   gui_state,
 			   settings,
-			   plugin_manager}
+			   plugin_manager,
+			   ramdisk}
 		, screensaver{screensaver} {
 	}
 
