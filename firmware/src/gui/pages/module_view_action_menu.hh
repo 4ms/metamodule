@@ -1,18 +1,22 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
-#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/module_view_automap.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
+#include "gui/pages/roller_popup.hh"
 #include "gui/pages/save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "patch_play/randomize_param.hh"
 #include "patch_play/reset_param.hh"
+#include "src/core/lv_obj_pos.h"
+#include "src/lv_api_map.h"
+#include <vector>
 
 namespace MetaModule
 {
@@ -38,29 +42,65 @@ struct ModuleViewActionMenu {
 		lv_show(ui_ModuleViewActionMenu);
 		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
 
+		lv_obj_move_foreground(ui_ModuleViewActionDeleteBut);
+
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionAutopatchBut, autopatch_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionAutoKnobSet, autopatch_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionRandomBut, random_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(moduleViewActionPresetBut, preset_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionResetBut, reset_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
 		lv_group_add_obj(group, ui_ModuleViewActionResetBut);
+		lv_group_add_obj(group, moduleViewActionPresetBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
 	}
+
+	lv_obj_t *moduleViewActionPresetBut;
+	FatFileIO &ramdisk;
+	std::string preset_path{};
+	std::string presets{};
+	RollerPopup preset_popup{"Select Preset"};
 
 	void prepare_focus(lv_group_t *parent_group, unsigned module_idx) {
 		this->module_idx = module_idx;
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), base_group);
+		const auto module_slug = std::string{patches.get_view_patch()->module_slugs[module_idx]};
+		const auto module_name = module_slug.substr(module_slug.find_first_of(':') + 1);
+		const auto slug_name = module_slug.substr(0, module_slug.find_first_of(':'));
+		preset_path = slug_name + "/presets/" + module_name;
+		presets.clear();
+		if (ramdisk.foreach_dir_entry(
+				preset_path.c_str(),
+				[&presets = this->presets](std::string fname, unsigned time_stamp, unsigned size, DirEntryKind type) {
+					fname.erase(fname.find(".vcvm"));
+					presets += fname + '\n';
+				}))
+		{
+			if (presets.size()) {
+				presets.pop_back(); //remove trailing '/n'
+			}
+			pr_dbg("%s\n", presets.c_str());
+			lv_obj_set_height(ui_ModuleViewActionMenu, 240);
+			lv_show(moduleViewActionPresetBut);
+		} else {
+			pr_dbg("no plugin presets exist for %s\n", module_slug.c_str());
+			lv_hide(moduleViewActionPresetBut);
+			lv_obj_set_height(ui_ModuleViewActionMenu, LV_SIZE_CONTENT);
+		}
+		preset_popup.init(lv_layer_sys(), group);
 	}
 
 	void back() {
-		if (confirm_popup.is_visible()) {
+		if (preset_popup.is_visible()) {
+			preset_popup.hide();
+		} else if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
 		} else if (auto_map.is_visible()) {
 			auto_map.hide();
@@ -70,6 +110,7 @@ struct ModuleViewActionMenu {
 	}
 
 	void hide() {
+		preset_popup.hide();
 		confirm_popup.hide();
 		hide_menu();
 	}
@@ -168,6 +209,24 @@ private:
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
 		page->randomize();
+	}
+
+	static void preset_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		page->preset_popup.show(
+			[page](unsigned opt) {
+				pr_dbg("hello preset: %d\n", opt);
+				const auto t = page->ramdisk.get_file_name_by_index(page->preset_path, opt);
+				if (!t.has_value()) {
+					pr_dbg("no find\n");
+				} else {
+					pr_dbg("%s\n", t.value().data());
+				}
+			},
+			"Presets",
+			page->presets.c_str());
 	}
 
 	static void reset_but_cb(lv_event_t *event) {
