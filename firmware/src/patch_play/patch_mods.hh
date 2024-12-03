@@ -11,7 +11,8 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 							  PatchPlayer &player,
 							  std::array<CalData *, 2> caldatas,
 							  std::optional<bool> &new_cal_state) {
-	if (auto patch_mod = patch_mod_queue.get()) {
+	PatchModRequest patch_mod{};
+	if (patch_mod_queue.get_move(patch_mod)) {
 		std::visit(overloaded{
 					   [&player](SetStaticParam &mod) { player.apply_static_param(mod.param); },
 					   [&player](ChangeKnobSet mod) { player.set_active_knob_set(mod.knobset_num); },
@@ -47,7 +48,7 @@ inline void handle_patch_mods(PatchModQueue &patch_mod_queue,
 
 					   [&new_cal_state](CalibrationOnOff &mod) { new_cal_state = mod.enable; },
 				   },
-				   patch_mod.value());
+				   patch_mod);
 	}
 }
 
