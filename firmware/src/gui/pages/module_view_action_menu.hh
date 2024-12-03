@@ -34,6 +34,7 @@ struct ModuleViewActionMenu {
 		, patches{patches}
 		, page_list{page_list}
 		, patch_playloader{patch_playloader}
+		, patch_mod_queue{patch_mod_queue}
 		, auto_map{patch_mod_queue, patches, notify_queue}
 		, randomizer{patch_mod_queue}
 		, reset_params_{patch_mod_queue}
@@ -80,6 +81,10 @@ struct ModuleViewActionMenu {
 				preset_path.c_str(),
 				[&presets = this->presets](std::string fname, unsigned time_stamp, unsigned size, DirEntryKind type) {
 					fname.erase(fname.find(".vcvm"));
+					if (fname.find_first_of('_') == 2) {
+						// some vcv presets have an ugly 'xx_' prefex.. let's remove it
+						fname = fname.substr(3);
+					}
 					presets += fname + '\n';
 				}))
 		{
@@ -180,7 +185,7 @@ private:
 
 	void reset_params() {
 		reset_params_.reset(module_idx, patches.get_view_patch());
-		patch_playloader.reset_module(module_idx);
+		patch_mod_queue.put(LoadModuleState{static_cast<uint16_t>(module_idx), ""});
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -211,22 +216,32 @@ private:
 		page->randomize();
 	}
 
+	void preset_but_cb() {
+		preset_popup.show(
+			[this](unsigned opt) {
+				const auto t = ramdisk.get_file_name_by_index(preset_path, opt);
+				if (!t.has_value()) {
+					return;
+				}
+				const auto filename = preset_path + "/" + t.value().data();
+				const auto preset_file_size = ramdisk.get_file_size(filename);
+
+				auto mod_request = LoadModuleState{static_cast<uint16_t>(module_idx)};
+				mod_request.data.resize(preset_file_size);
+
+				pr_dbg("loading preset: %s\n", filename.c_str());
+				ramdisk.read_file(filename, mod_request.data);
+				patch_mod_queue.put(std::move(mod_request));
+			},
+			"Presets",
+			presets.c_str());
+	}
+
 	static void preset_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
-		page->preset_popup.show(
-			[page](unsigned opt) {
-				pr_dbg("hello preset: %d\n", opt);
-				const auto t = page->ramdisk.get_file_name_by_index(page->preset_path, opt);
-				if (!t.has_value()) {
-					pr_dbg("no find\n");
-				} else {
-					pr_dbg("%s\n", t.value().data());
-				}
-			},
-			"Presets",
-			page->presets.c_str());
+		page->preset_but_cb();
 	}
 
 	static void reset_but_cb(lv_event_t *event) {
@@ -257,6 +272,7 @@ private:
 	OpenPatchManager &patches;
 	PageList &page_list;
 	PatchPlayLoader &patch_playloader;
+	PatchModQueue &patch_mod_queue;
 
 	ConfirmPopup confirm_popup;
 
