@@ -86,6 +86,7 @@ struct PatchContext {
 	GuiState &gui_state;
 	UserSettings &settings;
 	PluginManager &plugin_manager;
+	FatFileIO &ramdisk;
 };
 
 struct PageBase {
