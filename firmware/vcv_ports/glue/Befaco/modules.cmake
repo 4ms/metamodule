@@ -24,8 +24,10 @@ set(BefacoModules
     Octaves    
     Muxlicer 
     NoisePlethora
+    Bandit    
     # disabled:
     # MidiThingv2
+    # Bypass (for now, due to odd UI interactions)
 )
 
 # svg paths
