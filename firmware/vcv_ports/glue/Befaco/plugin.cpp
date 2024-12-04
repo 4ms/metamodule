@@ -25,7 +25,6 @@ void init(rack::Plugin *p) {
 	p->addModel(modelSpringReverb);
 	p->addModel(modelBurst);
 	p->addModel(modelVoltio);
-	p->addModel(modelOctaves);
-	p->addModel(modelBypass);
+	p->addModel(modelOctaves);	
 	p->addModel(modelBandit);
 }

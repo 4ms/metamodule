@@ -25,7 +25,6 @@ extern rack::plugin::Model *modelVoltio;
 extern rack::plugin::Model *modelOctaves;
 extern rack::plugin::Model *modelNoisePlethora;
 extern rack::plugin::Model *modelMuxlicer;
-extern rack::plugin::Model *modelBypass;
 extern rack::plugin::Model *modelBandit;
 
 extern rack::plugin::Model *modelBraids;
