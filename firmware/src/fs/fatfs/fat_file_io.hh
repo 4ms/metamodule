@@ -364,7 +364,6 @@ public:
 		return true;
 	}
 
-	// Returns false if dir cannot be opened
 	std::optional<std::string_view> get_file_name_by_index(const std::string_view path, unsigned idx) {
 		DIR dj;
 		FILINFO fno;
@@ -394,6 +393,7 @@ public:
 		return fno.fname;
 	}
 
+	// Returns false if dir cannot be opened
 	bool foreach_dir_entry(const std::string_view path, auto action) {
 		DIR dj;
 		FILINFO fno;
