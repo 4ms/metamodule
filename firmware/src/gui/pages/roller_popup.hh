@@ -43,9 +43,10 @@ struct RollerPopup {
 		page->hide();
 	}
 
-	void show(auto cb, const char *message, const char *options) {
+	void show(auto cb, const char *message, const char *options, const uint16_t start_index) {
 
 		lv_roller_set_options(roller, options, LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_selected(roller, start_index, LV_ANIM_OFF);
 
 		lv_obj_set_parent(popup, base);
 
