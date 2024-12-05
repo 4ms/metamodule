@@ -2,8 +2,10 @@
 #include "app/ModuleWidget.hpp"
 #include "console/pr_dbg.hh"
 #include "jansson.h"
+#include <array>
 #include <context.hpp>
 #include <engine/Engine.hpp>
+#include <string_view>
 
 namespace rack::engine
 {
@@ -45,7 +47,35 @@ void Module::load_state(std::string_view state_data) {
 		return;
 	}
 
-	this->dataFromJson(root);
+	// we need to check if the incoming state data is a preset or patch
+	// occasionally presets use params, and other times they use the data node.
+	// the params node is always present, however the data node is not.
+	const auto is_preset = [root]() {
+		std::array<std::string_view, 4> nodes = {
+			"plugin",
+			"model",
+			"version",
+			"params",
+		};
+
+		for (const auto i : nodes) {
+			if (!json_object_get(root, i.data())) {
+				return false;
+			}
+		}
+		return true;
+	}();
+
+	if (is_preset) {
+		if (auto node = json_object_get(root, "data"); node) {
+			this->dataFromJson(node);
+		}
+		if (auto node = json_object_get(root, "params"); node) {
+			this->paramsFromJson(node);
+		}
+	} else {
+		this->dataFromJson(root);
+	}
 
 	json_decref(root);
 }
