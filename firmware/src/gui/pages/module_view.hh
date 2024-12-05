@@ -124,6 +124,8 @@ struct ModuleViewPage : PageBase {
 			settings_menu.prepare_focus(group);
 			action_menu.prepare_focus(group, this_module_id);
 		}
+
+		rack_module = patch_playloader.get_plugin_module<rack::engine::Module>(this_module_id);
 	}
 
 	void redraw_module() {
@@ -379,6 +381,15 @@ struct ModuleViewPage : PageBase {
 			roller_hover.hide();
 
 		roller_hover.update();
+
+		if (rack_module) {
+			if (rack_module->module_widget) {
+				rack::app::ModuleWidget::DrawArgs args{};
+				for (auto &w : rack_module->module_widget->drawable_widgets) {
+					w->draw(args);
+				}
+			}
+		}
 	}
 
 	bool handle_patch_mods() {
@@ -737,6 +748,8 @@ private:
 	RollerHoverText roller_hover;
 
 	PluginModuleMenu module_menu;
+
+	rack::engine::Module *rack_module = nullptr;
 
 	enum { ExtraMenuTag = -2 };
 };
