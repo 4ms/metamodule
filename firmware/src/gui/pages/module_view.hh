@@ -34,7 +34,8 @@ struct ModuleViewPage : PageBase {
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue}
 		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
-		, module_menu{patch_playloader} {
+		, module_menu{patch_playloader}
+		, dyn_draw{patch_playloader} {
 
 		init_bg(ui_MappingMenu);
 
@@ -126,7 +127,7 @@ struct ModuleViewPage : PageBase {
 			action_menu.prepare_focus(group, this_module_id);
 		}
 
-		rack_module = patch_playloader.get_plugin_module<rack::engine::Module>(this_module_id);
+		dyn_draw.prepare_module(this_module_id);
 	}
 
 	void redraw_module() {
@@ -383,14 +384,7 @@ struct ModuleViewPage : PageBase {
 
 		roller_hover.update();
 
-		if (rack_module) {
-			if (rack_module->module_widget) {
-				rack::app::ModuleWidget::DrawArgs args{};
-				for (auto &w : rack_module->module_widget->drawable_widgets) {
-					w->draw(args);
-				}
-			}
-		}
+		dyn_draw.draw();
 	}
 
 	bool handle_patch_mods() {
