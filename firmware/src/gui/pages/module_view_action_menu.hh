@@ -14,9 +14,6 @@
 #include "patch_play/patch_playloader.hh"
 #include "patch_play/randomize_param.hh"
 #include "patch_play/reset_param.hh"
-#include "src/core/lv_obj_pos.h"
-#include "src/core/lv_obj_scroll.h"
-#include "src/lv_api_map.h"
 #include <vector>
 
 namespace MetaModule
@@ -30,8 +27,7 @@ struct ModuleViewActionMenu {
 						 PatchPlayLoader &patch_playloader,
 						 NotificationQueue &notify_queue,
 						 FatFileIO &ramdisk)
-		: moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")}
-		, ramdisk{ramdisk}
+		: ramdisk{ramdisk}
 		, patches{patches}
 		, page_list{page_list}
 		, patch_playloader{patch_playloader}
@@ -39,7 +35,8 @@ struct ModuleViewActionMenu {
 		, auto_map{patch_mod_queue, patches, notify_queue}
 		, randomizer{patch_mod_queue}
 		, reset_params_{patch_mod_queue}
-		, group(lv_group_create()) {
+		, group(lv_group_create())
+		, moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
 		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
@@ -63,13 +60,6 @@ struct ModuleViewActionMenu {
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
 	}
-
-	lv_obj_t *moduleViewActionPresetBut;
-	FatFileIO &ramdisk;
-	std::string preset_path{};
-	uint16_t cur_preset_idx{};
-	std::string presets{};
-	RollerPopup preset_popup{"Select Preset"};
 
 	void prepare_focus(lv_group_t *parent_group, unsigned module_idx) {
 		this->module_idx = module_idx;
@@ -281,6 +271,7 @@ private:
 			"Delete");
 	}
 
+	FatFileIO &ramdisk;
 	OpenPatchManager &patches;
 	PageList &page_list;
 	PatchPlayLoader &patch_playloader;
@@ -296,6 +287,12 @@ private:
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
+
+	lv_obj_t *moduleViewActionPresetBut;
+	std::string preset_path{};
+	uint16_t cur_preset_idx{};
+	std::string presets{};
+	RollerPopup preset_popup{"Select Preset"};
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 };
