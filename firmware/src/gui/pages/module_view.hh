@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "conf/patch_conf.hh"
+#include "gui/dyn_element.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -749,7 +750,7 @@ private:
 
 	PluginModuleMenu module_menu;
 
-	rack::engine::Module *rack_module = nullptr;
+	DynamicElementDraw dyn_draw;
 
 	enum { ExtraMenuTag = -2 };
 };
