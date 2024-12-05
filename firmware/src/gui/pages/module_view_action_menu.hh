@@ -14,13 +14,19 @@
 #include "patch_play/patch_playloader.hh"
 #include "patch_play/randomize_param.hh"
 #include "patch_play/reset_param.hh"
+#include <algorithm>
 #include <vector>
 
 namespace MetaModule
 {
 
-struct ModuleViewActionMenu {
+class ModuleViewActionMenu {
+	struct Preset {
+		std::string fname{};
+		int idx{};
+	};
 
+public:
 	ModuleViewActionMenu(PatchModQueue &patch_mod_queue,
 						 OpenPatchManager &patches,
 						 PageList &page_list,
@@ -72,17 +78,22 @@ struct ModuleViewActionMenu {
 		cur_preset_idx = 0;
 		preset_path = slug_name + "/presets/" + module_name;
 		presets.clear();
-		if (ramdisk.foreach_dir_entry(
-				preset_path.c_str(),
-				[&presets = this->presets](std::string fname, unsigned time_stamp, unsigned size, DirEntryKind type) {
-					fname.erase(fname.find(".vcvm"));
-					if (fname.find_first_of('_') == 2) {
-						// some vcv presets have an ugly 'xx_' prefex.. let's remove it
-						fname = fname.substr(3);
-					}
-					presets += fname + '\n';
-				}))
-		{
+		preset_map.clear();
+
+		auto populate_vector = [this](std::string fname, unsigned time_stamp, unsigned size, DirEntryKind type) {
+			fname.erase(fname.find(".vcvm"));
+			preset_map.emplace_back(fname, preset_map.size());
+		};
+
+		if (ramdisk.foreach_dir_entry(preset_path.c_str(), populate_vector)) {
+			std::sort(preset_map.begin(), preset_map.end(), [](Preset &f, Preset &s) { return f.fname < s.fname; });
+			for (auto &p : preset_map) {
+				if (p.fname.find_first_of('_') == 2) {
+					// some vcv presets have an ugly 'xx_' prefix.. let's remove it
+					p.fname = p.fname.substr(3);
+				}
+				presets += p.fname + '\n';
+			}
 			if (presets.size()) {
 				presets.pop_back(); //remove trailing '/n'
 			}
@@ -219,7 +230,7 @@ private:
 	void preset_but_cb() {
 		preset_popup.show(
 			[this](unsigned opt) {
-				const auto t = ramdisk.get_file_name_by_index(preset_path, opt);
+				const auto t = ramdisk.get_file_name_by_index(preset_path, preset_map[opt].idx);
 				if (!t.has_value()) {
 					return;
 				}
@@ -292,6 +303,7 @@ private:
 	std::string preset_path{};
 	uint16_t cur_preset_idx{};
 	std::string presets{};
+	std::vector<Preset> preset_map{};
 	RollerPopup preset_popup{"Select Preset"};
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
