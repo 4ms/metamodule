@@ -1,14 +1,16 @@
 cmake_minimum_required(VERSION 3.24)
 project(VCV-Plugin)
 
-#################################
+# This library will have its symbols (API)
+# made available (that is, "exported") to plugins.
+# Any source files that are required for plugins 
+# to work but should NOT have their API exported
+# must go in the vcv_plugin/internal/ library.
+
 
 add_subdirectory(interface)
 
-# TODO: This needs to be removed eventually
 set(MM_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../)
-
-#################################
 
 # Create library that holds the implementation of the interface defined by vcv_plugin_interface
 add_library(vcv_plugin_export STATIC)
@@ -65,10 +67,13 @@ target_sources(
 
 add_subdirectory(jansson)
 add_subdirectory(pffft)
+add_subdirectory(nanovg)
+target_link_libraries(nanovg PRIVATE metamodule::rack-interface)
 
 target_link_libraries(vcv_plugin_export PUBLIC cpputil) 
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,jansson>")
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,pffft>")
+target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,nanovg>")
 target_link_libraries(vcv_plugin_export INTERFACE metamodule::rack-interface)
 
 target_include_directories( vcv_plugin_export PUBLIC
