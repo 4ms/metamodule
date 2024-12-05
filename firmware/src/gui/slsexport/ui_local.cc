@@ -282,11 +282,11 @@ lv_obj_t *create_lv_list_button(lv_obj_t *parent, const char *name) {
 
 lv_obj_t *create_lv_labeled_popup(lv_obj_t *parent, const char *label_text) {
 	const auto out = lv_obj_create(parent);
-	lv_obj_set_width(out, LV_SIZE_CONTENT);	 /// 1
-	lv_obj_set_height(out, LV_SIZE_CONTENT); /// 1
-	lv_obj_set_align(out, LV_ALIGN_CENTER);
+	lv_obj_set_width(out, LV_SIZE_CONTENT); /// 1
+	lv_obj_set_height(out, 236);			/// 1
+	lv_obj_set_align(out, LV_ALIGN_RIGHT_MID);
 	lv_obj_set_flex_flow(out, LV_FLEX_FLOW_COLUMN);
-	lv_obj_set_flex_align(out, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER);
+	lv_obj_set_flex_align(out, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 	lv_obj_add_flag(out, LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
 	lv_obj_clear_flag(out,
 					  LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
@@ -305,9 +305,9 @@ lv_obj_t *create_lv_labeled_popup(lv_obj_t *parent, const char *label_text) {
 	lv_obj_set_style_pad_column(out, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 	const auto label = lv_label_create(out);
-	lv_obj_set_width(label, 180);
+	lv_obj_set_width(label, LV_SIZE_CONTENT);
 	lv_obj_set_height(label, LV_SIZE_CONTENT); /// 30
-	lv_obj_set_align(label, LV_ALIGN_CENTER);
+	lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
 	lv_label_set_text(label, label_text);
 	lv_obj_set_style_text_color(label, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_opa(label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -332,7 +332,7 @@ lv_obj_t *create_lv_labeled_popup(lv_obj_t *parent, const char *label_text) {
 lv_obj_t *create_lv_roller(lv_obj_t *parent) {
 	auto out = lv_roller_create(parent);
 	lv_roller_set_options(out, "(loading)", LV_ROLLER_MODE_NORMAL);
-	lv_obj_set_height(out, 100);
+	lv_obj_set_height(out, 180);
 	lv_obj_set_width(out, 200);
 	lv_obj_set_align(out, LV_ALIGN_CENTER);
 	lv_obj_clear_flag(out,

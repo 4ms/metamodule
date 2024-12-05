@@ -12,6 +12,9 @@ struct RollerPopup {
 		, roller(create_lv_roller(popup))
 		, group(lv_group_create()) {
 		lv_hide(popup);
+		lv_obj_remove_style(popup, nullptr, LV_STATE_EDITED);
+		lv_obj_remove_style(popup, nullptr, LV_STATE_FOCUS_KEY);
+
 		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
 		lv_group_add_obj(group, roller);
 	}
