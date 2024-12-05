@@ -136,3 +136,4 @@ extern rack::plugin::Model *modelStatues;
 extern rack::plugin::Model *modelTripleSloth;
 
 extern rack::plugin::Model *modelSDOrcasHeartV2;
+extern rack::plugin::Model *modelADSR2;
