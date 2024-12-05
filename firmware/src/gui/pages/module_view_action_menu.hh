@@ -14,7 +14,6 @@
 #include "patch_play/patch_playloader.hh"
 #include "patch_play/randomize_param.hh"
 #include "patch_play/reset_param.hh"
-#include "src/lv_api_map.h"
 #include <vector>
 
 namespace MetaModule

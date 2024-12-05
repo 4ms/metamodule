@@ -3,7 +3,6 @@
 #include "conf/panel_conf.hh"
 #include "gui/elements/panel_name.hh"
 #include "gui/styles.hh"
-#include "src/core/lv_obj_pos.h"
 
 namespace MetaModule
 {

@@ -1,16 +1,7 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
-#include "gui/slsexport/meta5/ui.h"
 #include "gui/slsexport/ui_local.h"
-#include "lvgl.h"
-#include "src/core/lv_event.h"
-#include "src/core/lv_group.h"
-#include "src/core/lv_obj.h"
-#include "src/core/lv_obj_tree.h"
-#include "src/widgets/lv_roller.h"
 #include <functional>
-#include <string_view>
-#include <tuple>
 
 namespace MetaModule
 {
