@@ -122,4 +122,51 @@ void Module::set_samplerate(float rate) {
 	onSampleRateChange({.sampleRate = rate, .sampleTime = 1.f / rate});
 }
 
+json_t *Module::paramsToJson() {
+	json_t *rootJ = json_array();
+	for (size_t paramId = 0; paramId < paramQuantities.size(); paramId++) {
+		// Don't serialize unbounded Params
+		if (!paramQuantities[paramId]->isBounded())
+			continue;
+
+		json_t *paramJ = paramQuantities[paramId]->toJson();
+
+		json_object_set_new(paramJ, "id", json_integer(paramId));
+
+		json_array_append_new(rootJ, paramJ);
+	}
+	return rootJ;
+}
+
+void Module::paramsFromJson(json_t *rootJ) {
+	size_t i{};
+	json_t *paramJ{};
+	json_array_foreach(rootJ, i, paramJ) {
+		// Get paramId
+		json_t *paramIdJ = json_object_get(paramJ, "id");
+		// Legacy v0.6 to <v1
+		if (!paramIdJ)
+			paramIdJ = json_object_get(paramJ, "paramId");
+		size_t paramId{};
+		if (paramIdJ)
+			paramId = json_integer_value(paramIdJ);
+		// Use index if all else fails
+		else
+			paramId = i;
+
+		// Check ID bounds
+		if (paramId >= paramQuantities.size())
+			continue;
+
+		ParamQuantity *pq = paramQuantities[paramId];
+		// Check that the Param is bounded
+		if (!pq->isBounded())
+			continue;
+
+		json_t *valueJ = json_object_get(paramJ, "value");
+		if (valueJ)
+			pq->setImmediateValue(json_number_value(valueJ));
+	}
+}
+
 } // namespace rack::engine
