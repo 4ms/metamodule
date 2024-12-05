@@ -15,6 +15,7 @@
 #include "patch_play/randomize_param.hh"
 #include "patch_play/reset_param.hh"
 #include "src/core/lv_obj_pos.h"
+#include "src/core/lv_obj_scroll.h"
 #include "src/lv_api_map.h"
 #include <vector>
 
@@ -47,6 +48,7 @@ struct ModuleViewActionMenu {
 
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionAutopatchBut, autopatch_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionAutopatchBut, scroll_top_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionAutoKnobSet, autopatch_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionRandomBut, random_but_cb, LV_EVENT_CLICKED, this);
@@ -214,6 +216,12 @@ private:
 			return;
 		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
 		page->randomize();
+	}
+
+	static void scroll_top_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		lv_obj_scroll_to_y(ui_ModuleViewActionMenu, 0, LV_ANIM_ON);
 	}
 
 	void preset_but_cb() {
