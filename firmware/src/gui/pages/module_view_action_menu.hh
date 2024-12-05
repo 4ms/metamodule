@@ -39,7 +39,9 @@ struct ModuleViewActionMenu {
 		, moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
+		lv_show(moduleViewActionPresetBut);
 		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
+		lv_obj_set_height(ui_ModuleViewActionMenu, 240);
 
 		lv_obj_move_foreground(ui_ModuleViewActionDeleteBut);
 
@@ -86,12 +88,10 @@ struct ModuleViewActionMenu {
 			if (presets.size()) {
 				presets.pop_back(); //remove trailing '/n'
 			}
-			lv_obj_set_height(ui_ModuleViewActionMenu, 240);
-			lv_show(moduleViewActionPresetBut);
+			lv_enable(moduleViewActionPresetBut);
 		} else {
 			pr_dbg("no plugin presets exist for %s\n", module_slug.c_str());
-			lv_hide(moduleViewActionPresetBut);
-			lv_obj_set_height(ui_ModuleViewActionMenu, LV_SIZE_CONTENT);
+			lv_disable(moduleViewActionPresetBut);
 		}
 		preset_popup.init(lv_layer_sys(), group);
 	}

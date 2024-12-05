@@ -344,10 +344,11 @@ lv_obj_t *create_lv_roller(lv_obj_t *parent) {
 	lv_obj_set_style_text_line_space(out, 7, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_align(out, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(out, &ui_font_MuseoSansRounded70016, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_radius(out, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_radius(out, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_color(out, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_opa(out, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_border_width(out, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_border_width(out, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_border_color(out, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_shadow_color(out, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_shadow_opa(out, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
 	lv_obj_set_style_shadow_width(out, 0, LV_PART_MAIN | LV_STATE_FOCUSED);
