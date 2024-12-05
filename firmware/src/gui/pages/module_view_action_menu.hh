@@ -67,6 +67,7 @@ struct ModuleViewActionMenu {
 	lv_obj_t *moduleViewActionPresetBut;
 	FatFileIO &ramdisk;
 	std::string preset_path{};
+	uint16_t cur_preset_idx{};
 	std::string presets{};
 	RollerPopup preset_popup{"Select Preset"};
 
@@ -74,9 +75,11 @@ struct ModuleViewActionMenu {
 		this->module_idx = module_idx;
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), base_group);
+
 		const auto module_slug = std::string{patches.get_view_patch()->module_slugs[module_idx]};
 		const auto module_name = module_slug.substr(module_slug.find_first_of(':') + 1);
 		const auto slug_name = module_slug.substr(0, module_slug.find_first_of(':'));
+		cur_preset_idx = 0;
 		preset_path = slug_name + "/presets/" + module_name;
 		presets.clear();
 		if (ramdisk.foreach_dir_entry(
@@ -93,7 +96,6 @@ struct ModuleViewActionMenu {
 			if (presets.size()) {
 				presets.pop_back(); //remove trailing '/n'
 			}
-			pr_dbg("%s\n", presets.c_str());
 			lv_obj_set_height(ui_ModuleViewActionMenu, 240);
 			lv_show(moduleViewActionPresetBut);
 		} else {
@@ -231,6 +233,7 @@ private:
 				if (!t.has_value()) {
 					return;
 				}
+				cur_preset_idx = opt;
 				const auto filename = preset_path + "/" + t.value().data();
 				const auto preset_file_size = ramdisk.get_file_size(filename);
 
@@ -242,7 +245,8 @@ private:
 				patch_mod_queue.put(std::move(mod_request));
 			},
 			"Presets",
-			presets.c_str());
+			presets.c_str(),
+			cur_preset_idx);
 	}
 
 	static void preset_but_cb(lv_event_t *event) {
