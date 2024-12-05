@@ -293,7 +293,7 @@ struct ModuleViewPage : PageBase {
 		if (gui_state.back_button.is_just_released()) {
 
 			if (action_menu.is_visible()) {
-				action_menu.hide();
+				action_menu.back();
 
 			} else if (settings_menu.is_visible()) {
 				settings_menu.hide();
