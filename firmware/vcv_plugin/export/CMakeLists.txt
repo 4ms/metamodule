@@ -21,6 +21,7 @@ target_sources(
   vcv_plugin_export
   PRIVATE 
          src/app/Knob.cpp
+         src/app/LedDisplay.cpp
          src/app/ModuleWidget.cpp
          src/app/ParamWidget.cc
          src/app/SvgKnob.cc
@@ -63,6 +64,8 @@ target_sources(
          src/common.cpp
          src/resampler.cc
          src/midi_message.cc
+
+         src/blendish.c
 )
 
 add_subdirectory(jansson)
