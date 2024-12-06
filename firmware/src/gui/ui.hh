@@ -38,7 +38,8 @@ public:
 	   OpenPatchManager &open_patch_manager,
 	   SyncParams &sync_params,
 	   PatchModQueue &patch_mod_queue,
-	   PluginManager &plugin_manager)
+	   PluginManager &plugin_manager,
+	   FatFileIO &ramdisk)
 		: sync_params{sync_params}
 		, patch_playloader{patch_playloader}
 		, plugin_manager{plugin_manager}
@@ -51,8 +52,8 @@ public:
 					   patch_mod_queue,
 					   plugin_manager,
 					   settings,
-					   screensaver} {
-
+					   screensaver,
+					   ramdisk} {
 		params.clear();
 		metaparams.clear();
 

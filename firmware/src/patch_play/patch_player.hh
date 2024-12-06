@@ -20,6 +20,7 @@
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <string_view>
 #include <vector>
 
 #include "debug.hh"
@@ -539,9 +540,9 @@ public:
 		pd.disconnect_outjack(jack);
 	}
 
-	void reset_module(uint16_t module_id) {
+	void reset_module(uint16_t module_id, std::string_view data = "") {
 		if (module_id < num_modules)
-			modules[module_id]->load_state("");
+			modules[module_id]->load_state(data);
 	}
 
 	void add_module(BrandModuleSlug slug) {

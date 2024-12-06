@@ -1,51 +1,70 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
 #include "gui/notify/queue.hh"
-#include "gui/pages/confirm_popup.hh"
 #include "gui/pages/module_view_automap.hh"
 #include "gui/pages/page_list.hh"
 #include "gui/pages/patch_selector_sidebar.hh"
+#include "gui/pages/roller_popup.hh"
 #include "gui/pages/save_dialog.hh"
 #include "gui/slsexport/meta5/ui.h"
+#include "gui/slsexport/ui_local.h"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "patch_play/patch_mod_queue.hh"
 #include "patch_play/patch_playloader.hh"
 #include "patch_play/randomize_param.hh"
 #include "patch_play/reset_param.hh"
+#include <algorithm>
+#include <vector>
 
 namespace MetaModule
 {
 
-struct ModuleViewActionMenu {
+class ModuleViewActionMenu {
+	struct Preset {
+		std::string fname{};
+		int idx{};
+	};
 
+public:
 	ModuleViewActionMenu(PatchModQueue &patch_mod_queue,
 						 OpenPatchManager &patches,
 						 PageList &page_list,
 						 PatchPlayLoader &patch_playloader,
-						 NotificationQueue &notify_queue)
-		: patches{patches}
+						 NotificationQueue &notify_queue,
+						 FatFileIO &ramdisk)
+		: ramdisk{ramdisk}
+		, patches{patches}
 		, page_list{page_list}
 		, patch_playloader{patch_playloader}
+		, patch_mod_queue{patch_mod_queue}
 		, auto_map{patch_mod_queue, patches, notify_queue}
 		, randomizer{patch_mod_queue}
 		, reset_params_{patch_mod_queue}
-		, group(lv_group_create()) {
+		, group(lv_group_create())
+		, moduleViewActionPresetBut{create_lv_list_button(ui_ModuleViewActionMenu, "Presets")} {
 		lv_obj_set_parent(ui_ModuleViewActionMenu, lv_layer_top());
 		lv_show(ui_ModuleViewActionMenu);
+		lv_show(moduleViewActionPresetBut);
 		lv_obj_set_x(ui_ModuleViewActionMenu, 160);
+		lv_obj_set_height(ui_ModuleViewActionMenu, 240);
+
+		lv_obj_move_foreground(ui_ModuleViewActionDeleteBut);
 
 		lv_obj_add_event_cb(ui_ModuleViewActionBut, menu_button_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionAutopatchBut, autopatch_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(ui_ModuleViewActionAutopatchBut, scroll_top_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionAutoKnobSet, autopatch_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionDeleteBut, delete_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionRandomBut, random_but_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(moduleViewActionPresetBut, preset_but_cb, LV_EVENT_CLICKED, this);
 		lv_obj_add_event_cb(ui_ModuleViewActionResetBut, reset_but_cb, LV_EVENT_CLICKED, this);
 
 		lv_group_add_obj(group, ui_ModuleViewActionAutopatchBut);
 		lv_group_add_obj(group, ui_ModuleViewActionAutoKnobSet);
 		lv_group_add_obj(group, ui_ModuleViewActionRandomBut);
 		lv_group_add_obj(group, ui_ModuleViewActionResetBut);
+		lv_group_add_obj(group, moduleViewActionPresetBut);
 		lv_group_add_obj(group, ui_ModuleViewActionDeleteBut);
 		lv_group_set_wrap(group, false);
 	}
@@ -54,10 +73,44 @@ struct ModuleViewActionMenu {
 		this->module_idx = module_idx;
 		base_group = parent_group;
 		confirm_popup.init(lv_layer_top(), base_group);
+
+		const auto module_slug = std::string{patches.get_view_patch()->module_slugs[module_idx]};
+		const auto module_name = module_slug.substr(module_slug.find_first_of(':') + 1);
+		const auto slug_name = module_slug.substr(0, module_slug.find_first_of(':'));
+		cur_preset_idx = 0;
+		preset_path = slug_name + "/presets/" + module_name;
+		presets.clear();
+		preset_map.clear();
+
+		auto populate_vector = [this](std::string fname, unsigned time_stamp, unsigned size, DirEntryKind type) {
+			fname.erase(fname.find(".vcvm"));
+			preset_map.push_back({fname, (int)preset_map.size()});
+		};
+
+		if (ramdisk.foreach_dir_entry(preset_path.c_str(), populate_vector)) {
+			std::ranges::sort(preset_map, std::less{}, &Preset::fname);
+
+			for (auto &p : preset_map) {
+				if (p.fname.find_first_of('_') == 2) {
+					// some vcv presets have an ugly 'xx_' prefix.. let's remove it
+					p.fname = p.fname.substr(3);
+				}
+				presets += p.fname + '\n';
+			}
+			if (presets.size()) {
+				presets.pop_back(); //remove trailing '/n'
+			}
+			lv_enable(moduleViewActionPresetBut);
+		} else {
+			lv_disable(moduleViewActionPresetBut);
+		}
+		preset_popup.init(lv_layer_sys(), group);
 	}
 
 	void back() {
-		if (confirm_popup.is_visible()) {
+		if (preset_popup.is_visible()) {
+			preset_popup.hide();
+		} else if (confirm_popup.is_visible()) {
 			confirm_popup.hide();
 		} else if (auto_map.is_visible()) {
 			auto_map.hide();
@@ -67,6 +120,7 @@ struct ModuleViewActionMenu {
 	}
 
 	void hide() {
+		preset_popup.hide();
 		confirm_popup.hide();
 		hide_menu();
 	}
@@ -136,7 +190,7 @@ private:
 
 	void reset_params() {
 		reset_params_.reset(module_idx, patches.get_view_patch());
-		patch_playloader.reset_module(module_idx);
+		patch_mod_queue.put(LoadModuleState{static_cast<uint16_t>(module_idx), ""});
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
@@ -167,6 +221,42 @@ private:
 		page->randomize();
 	}
 
+	static void scroll_top_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		lv_obj_scroll_to_y(ui_ModuleViewActionMenu, 0, LV_ANIM_ON);
+	}
+
+	void preset_but_cb() {
+		preset_popup.show(
+			[this](unsigned opt) {
+				const auto t = ramdisk.get_file_name_by_index(preset_path, preset_map[opt].idx);
+				if (!t.has_value()) {
+					return;
+				}
+				cur_preset_idx = opt;
+				const auto filename = preset_path + "/" + t.value().data();
+				const auto preset_file_size = ramdisk.get_file_size(filename);
+
+				auto mod_request = LoadModuleState{static_cast<uint16_t>(module_idx)};
+				mod_request.data.resize(preset_file_size);
+
+				pr_dbg("Loading preset: %s\n", filename.c_str());
+				ramdisk.read_file(filename, mod_request.data);
+				patch_mod_queue.put(std::move(mod_request));
+			},
+			"Presets",
+			presets.c_str(),
+			cur_preset_idx);
+	}
+
+	static void preset_but_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		page->preset_but_cb();
+	}
+
 	static void reset_but_cb(lv_event_t *event) {
 		if (!event || !event->user_data)
 			return;
@@ -192,9 +282,11 @@ private:
 			"Delete");
 	}
 
+	FatFileIO &ramdisk;
 	OpenPatchManager &patches;
 	PageList &page_list;
 	PatchPlayLoader &patch_playloader;
+	PatchModQueue &patch_mod_queue;
 
 	ConfirmPopup confirm_popup;
 
@@ -206,6 +298,13 @@ private:
 	lv_group_t *group;
 	lv_group_t *base_group = nullptr;
 	bool visible = false;
+
+	lv_obj_t *moduleViewActionPresetBut;
+	std::string preset_path{};
+	uint16_t cur_preset_idx{};
+	std::string presets{};
+	std::vector<Preset> preset_map{};
+	RollerPopup preset_popup{"Select Preset"};
 
 	enum class DeleteState { Idle, TryRequest, Requested } delete_state = DeleteState::Idle;
 };

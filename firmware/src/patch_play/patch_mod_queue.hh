@@ -3,6 +3,7 @@
 #include "patch/module_type_slug.hh"
 #include "patch/patch.hh"
 #include "util/lockfree_fifo_spsc.hh"
+#include <string>
 #include <variant>
 
 namespace MetaModule
@@ -71,6 +72,11 @@ struct SetMidiPolyNum {
 	uint32_t poly_num;
 };
 
+struct LoadModuleState {
+	uint16_t module_id;
+	std::string data;
+};
+
 using PatchModRequest = std::variant<SetStaticParam,
 									 AddMapping,
 									 EditMappingMinMax,
@@ -83,7 +89,8 @@ using PatchModRequest = std::variant<SetStaticParam,
 									 DisconnectJack,
 									 CalibrationOnOff,
 									 SetChanCalibration,
-									 SetMidiPolyNum>;
+									 SetMidiPolyNum,
+									 LoadModuleState>;
 
 using PatchModQueue = LockFreeFifoSpsc<PatchModRequest, 128>;
 
