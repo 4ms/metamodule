@@ -126,8 +126,6 @@ struct ModuleViewPage : PageBase {
 			settings_menu.prepare_focus(group);
 			action_menu.prepare_focus(group, this_module_id);
 		}
-
-		dyn_draw.prepare_module(this_module_id, canvas);
 	}
 
 	void redraw_module() {
@@ -268,6 +266,8 @@ struct ModuleViewPage : PageBase {
 		} else {
 			show_roller();
 		}
+
+		dyn_draw.prepare_module(this_module_id, canvas);
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {
