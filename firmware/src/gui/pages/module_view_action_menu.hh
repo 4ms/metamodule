@@ -88,7 +88,8 @@ public:
 		};
 
 		if (ramdisk.foreach_dir_entry(preset_path.c_str(), populate_vector)) {
-			std::sort(preset_map.begin(), preset_map.end(), [](Preset &f, Preset &s) { return f.fname < s.fname; });
+			std::ranges::sort(preset_map, std::less{}, &Preset::fname);
+
 			for (auto &p : preset_map) {
 				if (p.fname.find_first_of('_') == 2) {
 					// some vcv presets have an ugly 'xx_' prefix.. let's remove it
@@ -101,7 +102,6 @@ public:
 			}
 			lv_enable(moduleViewActionPresetBut);
 		} else {
-			pr_dbg("no plugin presets exist for %s\n", module_slug.c_str());
 			lv_disable(moduleViewActionPresetBut);
 		}
 		preset_popup.init(lv_layer_sys(), group);
@@ -241,7 +241,7 @@ private:
 				auto mod_request = LoadModuleState{static_cast<uint16_t>(module_idx)};
 				mod_request.data.resize(preset_file_size);
 
-				pr_dbg("loading preset: %s\n", filename.c_str());
+				pr_dbg("Loading preset: %s\n", filename.c_str());
 				ramdisk.read_file(filename, mod_request.data);
 				patch_mod_queue.put(std::move(mod_request));
 			},
