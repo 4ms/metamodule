@@ -20,14 +20,16 @@ public:
 		if (auto rack_module = patch_playloader.get_plugin_module<rack::engine::Module>(this_module_id)) {
 			if (rack_module->module_widget) {
 				drawer = std::make_unique<RackDynDraw>(rack_module->module_widget);
-				drawer->prepare(canvas);
+				auto widget_canvas = lv_canvas_create(canvas);
+				// lv_canvas_set_buffer(canvas, buffer,
+				drawer->prepare(widget_canvas);
 			}
 		}
 	}
 
-	void draw(lv_obj_t *canvas) {
+	void draw() {
 		if (drawer) {
-			drawer->draw(canvas);
+			drawer->draw();
 		}
 	}
 

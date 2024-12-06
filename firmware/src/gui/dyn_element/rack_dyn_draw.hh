@@ -13,17 +13,14 @@ struct RackDynDraw : BaseDynDraw {
 
 	RackDynDraw(std::shared_ptr<rack::app::ModuleWidget> module_widget)
 		: module_widget{module_widget} {
-
-		args.vg = nvgCreatePixelBufferContext();
 	}
 
-	// void prepare_focus(lv_obj_t *module_canvas) override {
-	// }
+	void prepare(lv_obj_t *widget_canvas) override {
+		args.vg = nvgCreatePixelBufferContext(widget_canvas);
+	}
 
-	void draw(lv_obj_t *canvas) override {
+	void draw() override {
 		if (auto mw = module_widget.lock()) {
-
-			nvgBindFrameBuffer(args.vg, canvas);
 
 			for (auto &w : mw->drawable_widgets) {
 				args.clipBox = w->getBox();
