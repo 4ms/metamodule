@@ -74,12 +74,12 @@ public:
 				static uint8_t last_note = 0;
 
 				if (random_midi_ctr % 24000 == 0) {
-					last_note = random() & 0x3F + 0x20;
-					player.send_raw_midi({0x90, last_note, (uint8_t)random()});
+					last_note = std::rand() & 0x3F + 0x20;
+					player.send_raw_midi({0x90, last_note, (uint8_t)std::rand()});
 				} else if (random_midi_ctr % 24000 == 12000) {
 					player.send_raw_midi({0x80, last_note, 0x00});
 				} else if (random_midi_ctr % 36000 == 0) {
-					player.send_raw_midi({0xB0, 0x74, (uint8_t)random()});
+					player.send_raw_midi({0xB0, 0x74, (uint8_t)std::rand()});
 				}
 				random_midi_ctr++;
 			}
