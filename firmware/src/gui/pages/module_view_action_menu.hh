@@ -84,7 +84,7 @@ public:
 
 		auto populate_vector = [this](std::string fname, unsigned time_stamp, unsigned size, DirEntryKind type) {
 			fname.erase(fname.find(".vcvm"));
-			preset_map.emplace_back(fname, preset_map.size());
+			preset_map.push_back({fname, (int)preset_map.size()});
 		};
 
 		if (ramdisk.foreach_dir_entry(preset_path.c_str(), populate_vector)) {
