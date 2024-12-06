@@ -31,7 +31,7 @@ struct ModuleViewPage : PageBase {
 		, settings_menu{settings.module_view, gui_state}
 		, patch{patches.get_view_patch()}
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
-		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue}
+		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
 		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
 		, module_menu{patch_playloader} {
 
@@ -293,7 +293,7 @@ struct ModuleViewPage : PageBase {
 		if (gui_state.back_button.is_just_released()) {
 
 			if (action_menu.is_visible()) {
-				action_menu.hide();
+				action_menu.back();
 
 			} else if (settings_menu.is_visible()) {
 				settings_menu.hide();
