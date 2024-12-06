@@ -127,7 +127,7 @@ struct ModuleViewPage : PageBase {
 			action_menu.prepare_focus(group, this_module_id);
 		}
 
-		dyn_draw.prepare_module(this_module_id);
+		dyn_draw.prepare_module(this_module_id, canvas);
 	}
 
 	void redraw_module() {
