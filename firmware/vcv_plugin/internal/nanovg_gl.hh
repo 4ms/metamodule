@@ -3,7 +3,7 @@
 struct NVGcontext;
 struct NVGLUframebuffer;
 
-NVGcontext *nvgCreatePixelBufferContext();
+NVGcontext *nvgCreatePixelBufferContext(void *canvas);
 void nvgBindFrameBuffer(NVGcontext *, void *);
 
 // void nvgluBindFramebuffer(NVGLUframebuffer *);

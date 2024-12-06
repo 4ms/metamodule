@@ -3,6 +3,7 @@
 #include "gui/dyn_element/base_dyn_draw.hh"
 #include "gui/dyn_element/rack_dyn_draw.hh"
 #include "patch_play/patch_playloader.hh"
+#include <memory>
 
 namespace MetaModule
 {
@@ -13,25 +14,28 @@ public:
 		: patch_playloader{patch_playloader} {
 	}
 
-	void prepare_module(unsigned this_module_id) {
+	void prepare_module(unsigned this_module_id, lv_obj_t *canvas) {
 		drawer.reset();
 
 		if (auto rack_module = patch_playloader.get_plugin_module<rack::engine::Module>(this_module_id)) {
 			if (rack_module->module_widget) {
 				drawer = std::make_unique<RackDynDraw>(rack_module->module_widget);
+				auto widget_canvas = lv_canvas_create(canvas);
+				// lv_canvas_set_buffer(canvas, buffer,
+				drawer->prepare(widget_canvas);
 			}
 		}
 	}
 
-	void draw(lv_obj_t *canvas) {
+	void draw() {
 		if (drawer) {
-			drawer->draw(canvas);
+			drawer->draw();
 		}
 	}
 
 private:
 	PatchPlayLoader &patch_playloader;
-	std::unique_ptr<BaseDynDraw> drawer;
+	std::unique_ptr<BaseDynDraw> drawer{};
 };
 
 } // namespace MetaModule
