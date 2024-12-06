@@ -384,7 +384,7 @@ struct ModuleViewPage : PageBase {
 
 		roller_hover.update();
 
-		dyn_draw.draw();
+		dyn_draw.draw(canvas);
 	}
 
 	bool handle_patch_mods() {

@@ -1,13 +1,13 @@
 #pragma once
-#include <string>
-#include <vector>
+#include "lvgl.h"
 
 namespace MetaModule
 {
 
 struct BaseDynDraw {
 	virtual ~BaseDynDraw() = default;
-	virtual void draw() = 0;
+	virtual void draw(lv_obj_t *canvas) = 0;
+	// virtual void prepare_focus(lv_obj_t *module_canvas);
 };
 
 } // namespace MetaModule

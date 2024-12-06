@@ -23,9 +23,9 @@ public:
 		}
 	}
 
-	void draw() {
+	void draw(lv_obj_t *canvas) {
 		if (drawer) {
-			drawer->draw();
+			drawer->draw(canvas);
 		}
 	}
 
