@@ -1,3 +1,5 @@
+#include "lvgl.h"
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <nanovg.h>
@@ -6,33 +8,52 @@
 #include <nanovg_gl.h>
 #include <nanovg_gl_utils.h>
 
+namespace MetaModule
+{
+
+struct DrawContext {
+	lv_obj_t *canvas{};
+};
+
+DrawContext draw_ctx;
+
+} // namespace MetaModule
+
 // Share the textures of GLNVGcontext 'otherUptr' if it's non-NULL.
 static int glnvg__renderCreate(void *uptr, void *otherUptr) {
+	printf("RenderCreate\n");
 	return 1;
 }
 
 static int glnvg__renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, const unsigned char *data) {
+	printf("renderCreateTexture\n");
 	return 1;
 }
 
 static int glnvg__renderDeleteTexture(void *uptr, int image) {
+	printf("renderDeleteTexture\n");
 	return 1;
 }
 
 static int glnvg__renderUpdateTexture(void *uptr, int image, int x, int y, int w, int h, const unsigned char *data) {
+	printf("renderUpdateTexture\n");
 	return 1;
 }
 static int glnvg__renderGetTextureSize(void *uptr, int image, int *w, int *h) {
+	printf("renderGetTextureSize\n");
 	return 1;
 }
 
 static void glnvg__renderViewport(void *uptr, float width, float height, float devicePixelRatio) {
+	printf("renderViewport\n");
 }
 
 static void glnvg__renderCancel(void *uptr) {
+	printf("renderCancel\n");
 }
 
 static void glnvg__renderFlush(void *uptr) {
+	printf("renderFlush\n");
 }
 
 static void glnvg__renderFill(void *uptr,
@@ -43,7 +64,9 @@ static void glnvg__renderFill(void *uptr,
 							  const float *bounds,
 							  const NVGpath *paths,
 							  int npaths) {
+	printf("renderFill %d paths\n", npaths);
 }
+
 static void glnvg__renderStroke(void *uptr,
 								NVGpaint *paint,
 								NVGcompositeOperationState compositeOperation,
@@ -52,7 +75,9 @@ static void glnvg__renderStroke(void *uptr,
 								float strokeWidth,
 								const NVGpath *paths,
 								int npaths) {
+	printf("renderStroke %d paths\n", npaths);
 }
+
 static void glnvg__renderTriangles(void *uptr,
 								   NVGpaint *paint,
 								   NVGcompositeOperationState compositeOperation,
@@ -60,18 +85,16 @@ static void glnvg__renderTriangles(void *uptr,
 								   const NVGvertex *verts,
 								   int nverts,
 								   float fringe) {
+	printf("renderTriangles %d verts\n", nverts);
 }
 
 static void glnvg__renderDelete(void *uptr) {
+	printf("renderDelete\n");
 }
 
-NVGcontext *nvgCreatePixelBufferContext(int flags) {
+NVGcontext *nvgCreatePixelBufferContext() {
 	NVGparams params;
 	NVGcontext *ctx = nullptr;
-
-	// GLNVGcontext* gl = (GLNVGcontext*)malloc(sizeof(GLNVGcontext));
-	// if (gl == NULL) goto error;
-	// memset(gl, 0, sizeof(GLNVGcontext));
 
 	memset(&params, 0, sizeof(params));
 	params.renderCreate = glnvg__renderCreate;
@@ -86,13 +109,20 @@ NVGcontext *nvgCreatePixelBufferContext(int flags) {
 	params.renderStroke = glnvg__renderStroke;
 	params.renderTriangles = glnvg__renderTriangles;
 	params.renderDelete = glnvg__renderDelete;
-	// params.userPtr = gl;
-	params.edgeAntiAlias = flags & NVG_ANTIALIAS ? 1 : 0;
 
-	// gl->flags = flags;
+	auto draw_ctx = new MetaModule::DrawContext;
+	params.userPtr = draw_ctx;
+
+	params.edgeAntiAlias = 0;
 
 	ctx = nvgCreateInternal(&params, nullptr);
-	return ctx;
+
+	if (ctx) {
+		return ctx;
+	} else {
+		delete draw_ctx;
+		return nullptr;
+	}
 }
 
 void nvgluBindFramebuffer(NVGLUframebuffer *) {
@@ -130,4 +160,10 @@ void nvgluDeleteFramebuffer(NVGLUframebuffer *fb) {
 	fb->texture = 0;
 	fb->image = -1;
 	free(fb);
+}
+
+void nvgBindFrameBuffer(NVGcontext *ctx, lv_obj_t *canvas) {
+	if (ctx) {
+		MetaModule::draw_ctx.canvas = canvas;
+	}
 }

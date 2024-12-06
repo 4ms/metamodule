@@ -74,7 +74,6 @@ target_link_libraries(vcv_plugin_export PUBLIC cpputil)
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,jansson>")
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,pffft>")
 target_link_libraries(vcv_plugin_export PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,nanovg>")
-target_link_libraries(vcv_plugin_export INTERFACE metamodule::rack-interface)
 
 target_include_directories( vcv_plugin_export PUBLIC
     src

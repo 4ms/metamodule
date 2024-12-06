@@ -2,10 +2,9 @@ add_library(nanovg STATIC)
 
 target_sources(nanovg PRIVATE 
     nanovg.c 
-    nanovg_gl.cc
 )
 
-target_link_libraries(nanovg PRIVATE metamodule-rack-interface)
+set_property(TARGET nanovg PROPERTY CXX_STANDARD 23)
 
 target_include_directories(nanovg PRIVATE ./)
 
