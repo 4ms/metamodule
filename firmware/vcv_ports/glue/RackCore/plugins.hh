@@ -1,3 +1,4 @@
+#pragma once
 #include "plugin/Plugin.hpp"
 
 namespace rack::core
@@ -5,4 +6,4 @@ namespace rack::core
 
 extern rack::plugin::Model *modelMIDI_CV;
 
-}
+} // namespace rack::core

@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "conf/patch_conf.hh"
+#include "gui/dyn_element.hh"
 #include "gui/elements/element_name.hh"
 #include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
@@ -33,7 +34,8 @@ struct ModuleViewPage : PageBase {
 		, mapping_pane{patches, module_mods, params, args, page_list, notify_queue, gui_state}
 		, action_menu{module_mods, patches, page_list, patch_playloader, notify_queue, context.ramdisk}
 		, roller_hover(ui_ElementRollerPanel, ui_ElementRoller)
-		, module_menu{patch_playloader} {
+		, module_menu{patch_playloader}
+		, dyn_draw{patch_playloader} {
 
 		init_bg(ui_MappingMenu);
 
@@ -264,6 +266,8 @@ struct ModuleViewPage : PageBase {
 		} else {
 			show_roller();
 		}
+
+		dyn_draw.prepare_module(this_module_id, canvas);
 	}
 
 	void watch_element(DrawnElement const &drawn_element) {
@@ -379,6 +383,8 @@ struct ModuleViewPage : PageBase {
 			roller_hover.hide();
 
 		roller_hover.update();
+
+		dyn_draw.draw();
 	}
 
 	bool handle_patch_mods() {
@@ -737,6 +743,8 @@ private:
 	RollerHoverText roller_hover;
 
 	PluginModuleMenu module_menu;
+
+	DynamicElementDraw dyn_draw;
 
 	enum { ExtraMenuTag = -2 };
 };
