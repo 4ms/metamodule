@@ -21,8 +21,10 @@ struct RackDynDraw : BaseDynDraw {
 		args.vg = nvgCreatePixelBufferContext(widget_canvas);
 		args.fb = nullptr;
 		canvas = widget_canvas;
+		lv_obj_refr_size(canvas);
 		width = lv_obj_get_width(canvas);
 		height = lv_obj_get_height(canvas);
+		printf("Dyn canvas %d,%d\n", width, height);
 	}
 
 	void draw() override {
