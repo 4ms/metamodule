@@ -27,12 +27,6 @@ constexpr lv_point_t to_lv_point(NVGvertex vertex) {
 	return lv_point_t(std::round(mm_to_px(to_mm(vertex.x), 240)), std::round(mm_to_px(to_mm(vertex.y), 240.f)));
 }
 
-// constexpr lv_point_t scale_to_lv_point(NVGvertex vertex, NVGscissor *scissor) {
-// 	vertex.x += scissor->xform[4] - scissor->extent[0];
-// 	vertex.y += scissor->xform[5] - scissor->extent[1];
-// 	return lv_point_t(std::round(mm_to_px(to_mm(vertex.x), 240)), std::round(mm_to_px(to_mm(vertex.y), 240.f)));
-// }
-
 lv_obj_t *get_canvas_from_context(void *uptr) {
 	auto ctx = (MetaModule::DrawContext *)(uptr);
 	return ctx->canvas;
@@ -116,56 +110,58 @@ void renderTriangles(void *uptr,
 					 const NVGvertex *verts,
 					 int nverts,
 					 float fringe) {
-	printf("renderTriangles %d verts\n", nverts);
+	// printf("renderTriangles %d verts\n", nverts);
 }
 
 void renderDelete(void *uptr) {
-	printf("renderDelete\n");
+	// printf("renderDelete\n");
 }
 
 // Share the textures of GLNVGcontext 'otherUptr' if it's non-NULL.
 int renderCreate(void *uptr, void *otherUptr) {
-	printf("RenderCreate (canvas = %p)\n", get_canvas_from_context(uptr));
+	// printf("RenderCreate (canvas = %p)\n", get_canvas_from_context(uptr));
 	return 1;
 }
 
 int renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, const unsigned char *data) {
-	printf("renderCreateTexture (canvas=%p): %d x %d (%p)\n", get_canvas_from_context(uptr), w, h, data);
+	// printf("renderCreateTexture (canvas=%p): %d x %d (%p)\n", get_canvas_from_context(uptr), w, h, data);
 	if (data) {
 		for (auto i = 0; auto c : std::span{data, size_t(w * h)}) {
-			printf("%02x ", c);
-			if (++i == w)
-				printf("\n");
+			//TODO: copy pixels to canvas
+
+			// 		printf("%02x ", c);
+			// 		if (++i == w)
+			// 			printf("\n");
 		}
-		printf("\n");
+		// 	printf("\n");
 	}
 	return 1;
 }
 
 int renderDeleteTexture(void *uptr, int image) {
-	printf("renderDeleteTexture\n");
+	// printf("renderDeleteTexture\n");
 	return 1;
 }
 
 int renderUpdateTexture(void *uptr, int image, int x, int y, int w, int h, const unsigned char *data) {
-	printf("renderUpdateTexture\n");
+	// printf("renderUpdateTexture\n");
 	return 1;
 }
 int renderGetTextureSize(void *uptr, int image, int *w, int *h) {
-	printf("renderGetTextureSize\n");
+	// printf("renderGetTextureSize\n");
 	return 1;
 }
 
 void renderViewport(void *uptr, float width, float height, float devicePixelRatio) {
-	printf("renderViewport\n");
+	// printf("renderViewport\n");
 }
 
 void renderCancel(void *uptr) {
-	printf("renderCancel\n");
+	// printf("renderCancel\n");
 }
 
 void renderFlush(void *uptr) {
-	printf("renderFlush\n");
+	// printf("renderFlush\n");
 }
 
 } // namespace NanoVG
@@ -194,7 +190,6 @@ NVGcontext *nvgCreatePixelBufferContext(void *canvas) {
 
 	auto draw_ctx = new MetaModule::DrawContext{(lv_obj_t *)canvas};
 	params.userPtr = draw_ctx;
-	printf("nvgCreatePixelBufferContext: set params.userPtr to canvas (%p)\n", canvas);
 
 	params.edgeAntiAlias = 0;
 
