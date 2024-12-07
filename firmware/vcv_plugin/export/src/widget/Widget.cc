@@ -101,6 +101,53 @@ bool Widget::hasChild(Widget *child) {
 	return (it != children.end());
 }
 
+void Widget::draw(const DrawArgs &args) {
+	// Iterate children
+	for (Widget *child : children) {
+		// Don't draw if invisible
+		if (!child->isVisible())
+			continue;
+		// Don't draw if child is outside clip box
+		if (!args.clipBox.intersects(child->box))
+			continue;
+
+		drawChild(child, args);
+	}
+}
+
+void Widget::drawLayer(const DrawArgs &args, int layer) {
+	// Iterate children
+	for (Widget *child : children) {
+		// Don't draw if invisible
+		if (!child->isVisible())
+			continue;
+		// Don't draw if child is outside clip box
+		if (!args.clipBox.intersects(child->box))
+			continue;
+
+		drawChild(child, args, layer);
+	}
+}
+
+void Widget::drawChild(Widget *child, const DrawArgs &args, int layer) {
+	DrawArgs childArgs = args;
+	// Intersect child clip box with self
+	childArgs.clipBox = childArgs.clipBox.intersect(child->box);
+	// Offset clip box by child pos
+	childArgs.clipBox.pos = childArgs.clipBox.pos.minus(child->box.pos);
+
+	nvgSave(args.vg);
+	nvgTranslate(args.vg, child->box.pos.x, child->box.pos.y);
+
+	if (layer == 0) {
+		child->draw(childArgs);
+	} else {
+		child->drawLayer(childArgs, layer);
+	}
+
+	nvgRestore(args.vg);
+}
+
 Widget::~Widget() {
 	// printf("~Widget() this=%p, parent=%p\n", this, parent);
 	if (!parent) {

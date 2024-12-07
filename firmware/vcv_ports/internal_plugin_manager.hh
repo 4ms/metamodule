@@ -213,6 +213,7 @@ struct InternalPluginManager {
 		eightfold_plugin.slug = "eightfold";
 		pluginInstance = &eightfold_plugin;
 		pluginInstance->addModel(modelSDOrcasHeartV2);
+		pluginInstance->addModel(modelADSR2);
 #endif
 
 #ifndef BUILD_DYN_PLUGIN_Valley
