@@ -83,7 +83,7 @@ endif()
 # SLS Exported GUI (meta5)
 #
 add_subdirectory(${FWDIR}/src/gui/slsexport/meta5)
-target_link_libraries(ui PRIVATE lvgl)
+target_link_libraries(ui PRIVATE lvgl_thorvg)
 
 #
 # Core Interface

@@ -23,9 +23,37 @@ target_compile_definitions(
 # Include root and optional parent path of LV_CONF_PATH
 target_include_directories(lvgl PUBLIC ${LVGL_ROOT_DIR} ${LV_CONF_DIR})
 
+if(NOT LV_CONF_BUILD_DISABLE_THORVG_INTERNAL)
+    file(GLOB_RECURSE THORVG_SOURCES ${LVGL_ROOT_DIR}/src/libs/thorvg/*.cpp ${LVGL_ROOT_DIR}/src/others/vg_lite_tvg/*.cpp)
+    add_library(lvgl_thorvg ${THORVG_SOURCES})
+    add_library(lvgl::thorvg ALIAS lvgl_thorvg)
+    target_include_directories(lvgl_thorvg SYSTEM PUBLIC ${LVGL_ROOT_DIR}/src/libs/thorvg)
+    target_link_libraries(lvgl_thorvg PUBLIC lvgl)
+endif()
+
 set_target_properties(
   lvgl
   PROPERTIES OUTPUT_NAME lvgl
              ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
              LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
 )
+
+if(NOT LV_CONF_BUILD_DISABLE_THORVG_INTERNAL)
+  set_target_properties(
+    lvgl_thorvg
+    PROPERTIES OUTPUT_NAME lvgl_thorvg
+               VERSION ${LVGL_VERSION}
+               SOVERSION ${LVGL_SOVERSION}
+               ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+               LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+               RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+               PUBLIC_HEADER "${LVGL_PUBLIC_HEADERS}")
+
+  install(
+    TARGETS lvgl_thorvg
+    ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
+    LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
+    RUNTIME DESTINATION "${RUNTIME_INSTALL_DIR}"
+    PUBLIC_HEADER DESTINATION "${INC_INSTALL_DIR}")
+endif()
+
