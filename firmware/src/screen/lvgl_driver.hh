@@ -26,28 +26,18 @@ public:
 			   lv_indev_read_cb_t indev_cb,
 			   lv_display_flush_wait_cb_t wait_cb,
 			   std::span<lv_color_t> buffer1,
-			   std::span<lv_color_t> buffer2)
-		: display(lv_display_create(ScreenWidth, ScreenHeight))
-		, indev{lv_indev_create()} {
+			   std::span<lv_color_t> buffer2) {
 		UartLog::log("LVGLDriver started\n");
 
 		lv_init();
+		display = lv_display_create(ScreenWidth, ScreenHeight); //NOLINT: cannot construct before lv_init
+		indev = lv_indev_create();								//NOLINT: cannot construct before lv_init
 
 		lv_display_set_flush_cb(display, flush_cb);
 		lv_display_set_buffers(
 			display, buffer1.data(), buffer2.data(), buffer1.size_bytes(), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
 		lv_display_set_flush_wait_cb(display, wait_cb);
-
-		////////////////////
-		// lv_disp_draw_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
-		// lv_disp_drv_init(&disp_drv);
-		// disp_drv.draw_buf = &disp_buf;
-		// disp_drv.flush_cb = flush_cb;
-		// disp_drv.wait_cb = wait_cb;
-		// disp_drv.hor_res = ScreenWidth;
-		// disp_drv.ver_res = ScreenHeight;
-		// display = lv_disp_drv_register(&disp_drv); // NOLINT
 
 		lv_indev_set_type(indev, LV_INDEV_TYPE_ENCODER);
 		lv_indev_set_read_cb(indev, indev_cb);
