@@ -56,13 +56,19 @@ void renderFill(void *uptr,
 	rect_dsc.bg_color = to_lv_color(paint->innerColor);
 	rect_dsc.radius = 0;
 
+	lv_draw_line_dsc_t line_dsc;
+	lv_draw_line_dsc_init(&line_dsc);
+	line_dsc.color = to_lv_color(paint->innerColor);
+	line_dsc.opa = to_lv_opa(paint->innerColor);
+	line_dsc.width = 1;
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		std::vector<lv_point_t> points;
 
 		std::ranges::transform(std::span{path.fill, (size_t)path.nfill}, std::back_inserter(points), to_lv_point);
 		// [](NVGvertex v) { return to_lv_point(v); });
 
-		lv_canvas_draw_polygon(canvas, points.data(), points.size(), &rect_dsc);
+		// lv_canvas_draw_polygon(canvas, points.data(), points.size(), &rect_dsc);
+		lv_canvas_draw_line(canvas, points.data(), points.size(), &line_dsc);
 
 		// printf("Fill poly: ");
 		// for (auto &p : points)
