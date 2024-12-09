@@ -126,13 +126,13 @@ int renderCreate(void *uptr, void *otherUptr) {
 int renderCreateTexture(void *uptr, int type, int w, int h, int imageFlags, const unsigned char *data) {
 	// printf("renderCreateTexture (canvas=%p): %d x %d (%p)\n", get_canvas_from_context(uptr), w, h, data);
 	if (data) {
-		for (auto i = 0; auto c : std::span{data, size_t(w * h)}) {
-			//TODO: copy pixels to canvas
+		// for (auto i = 0; auto c : std::span{data, size_t(w * h)}) {
+		//TODO: copy pixels to canvas
 
-			// 		printf("%02x ", c);
-			// 		if (++i == w)
-			// 			printf("\n");
-		}
+		// 		printf("%02x ", c);
+		// 		if (++i == w)
+		// 			printf("\n");
+		// }
 		// 	printf("\n");
 	}
 	return 1;
