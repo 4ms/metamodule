@@ -79,11 +79,17 @@ public:
 	static inline lv_area_t last_area{0, 0, 0, 0};
 	static inline uint16_t *last_pixbuf = nullptr;
 
+	static inline std::atomic<bool> flush_done = false;
+
 	static void end_flush() {
-		lv_disp_flush_ready(last_used_display);
+		lv_display_flush_ready(last_used_display);
+		Debug::Pin0::low();
+		flush_done = true;
 	}
 
 	static void flush_to_screen(lv_display_t *display, const lv_area_t *area, uint8_t *color_p) {
+		Debug::Pin0::high();
+		flush_done = false;
 		last_used_display = display;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
@@ -95,25 +101,24 @@ public:
 
 	static void wait_cb(lv_display_t *display) {
 		// if (display->draw_buf->flushing) {
-		if (_spi_driver.had_transfer_error()) {
-			// disp_drv->draw_buf->flushing = 0;
-		}
+		while (true) {
+			if (_spi_driver.had_transfer_error()) {
+				return;
+			}
 
-		if (_spi_driver.had_fifo_error()) {
-			HAL_Delay(1);
-		}
+			if (_spi_driver.had_fifo_error()) {
+				HAL_Delay(1);
+				return;
+			}
 
-		//Timeout
-		if (HAL_GetTick() - last_transfer_start_time > 20) {
-			// disp_drv->draw_buf->flushing = 0;
+			//Timeout
+			if (HAL_GetTick() - last_transfer_start_time > 20) {
+				return;
+			}
 
-			// Doesn't seem to matter:
-			// _spi_driver.reinit();
-			// HAL_Delay(1);
-			// Doesn't work at all (screen is still expecting data from previous command):
-			// _spi_driver.transfer_partial_frame(last_area.x1, last_area.y1, last_area.x2, last_area.y2, last_pixbuf);
+			if (flush_done)
+				return;
 		}
-		// }
 	}
 
 	static void read_input(lv_indev_t *indev, lv_indev_data_t *data) {
