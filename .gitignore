@@ -53,3 +53,5 @@ settings.yml
 simulator/patches/metamodule-firmware
 
 .clangd
+
+firmware/src/gui/slsexport/meta9/

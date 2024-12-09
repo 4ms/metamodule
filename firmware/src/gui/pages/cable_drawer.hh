@@ -40,7 +40,7 @@ public:
 		lv_obj_set_align(canvas, LV_ALIGN_TOP_LEFT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_IGNORE_LAYOUT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
-		lv_canvas_set_buffer(canvas, cable_buf.data(), 320, Height, LV_COLOR_FORMAT_RGB565A8);
+		lv_canvas_set_buffer(canvas, cable_buf.data(), 320, Height, LV_COLOR_FORMAT_NATIVE_WITH_ALPHA);
 
 		lv_draw_line_dsc_init(&cable_dsc);
 		cable_dsc.width = 3;
