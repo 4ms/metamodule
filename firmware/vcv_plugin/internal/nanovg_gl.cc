@@ -54,11 +54,11 @@ void renderFill(void *uptr,
 				int npaths) {
 	auto canvas = get_canvas_from_context(uptr);
 
-	lv_draw_rect_dsc_t rect_dsc;
-	lv_draw_rect_dsc_init(&rect_dsc);
-	rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
-	rect_dsc.bg_color = to_lv_color(paint->innerColor);
-	rect_dsc.radius = 0;
+	// lv_draw_rect_dsc_t rect_dsc;
+	// lv_draw_rect_dsc_init(&rect_dsc);
+	// rect_dsc.bg_opa = to_lv_opa(paint->innerColor);
+	// rect_dsc.bg_color = to_lv_color(paint->innerColor);
+	// rect_dsc.radius = 0;
 
 	lv_draw_line_dsc_t line_dsc;
 	lv_draw_line_dsc_init(&line_dsc);
@@ -66,48 +66,42 @@ void renderFill(void *uptr,
 	line_dsc.opa = to_lv_opa(paint->innerColor);
 	line_dsc.width = 1;
 
-	int16_t line_mask_id_1 = 0;
-	int16_t line_mask_id_2 = 0;
-	int16_t line_mask_id_3 = 0;
-	int16_t line_mask_id_4 = 0;
-	lv_draw_mask_line_param_t line_mask_param;
-	if (scissor->extent[0] > 0) {
+	// int16_t line_mask_id_1 = 0;
+	// int16_t line_mask_id_2 = 0;
+	// int16_t line_mask_id_3 = 0;
+	// int16_t line_mask_id_4 = 0;
+	// lv_draw_mask_line_param_t line_mask_param;
+	// if (scissor->extent[0] > 0) {
+	// 	auto w = lv_coord(scissor->extent[0] * 2);
+	// 	auto h = lv_coord(scissor->extent[1] * 2);
+	// 	auto x = lv_coord(scissor->xform[4] - scissor->extent[0]);
+	// 	auto y = lv_coord(scissor->xform[5] - scissor->extent[1]);
+	// 	lv_draw_mask_line_points_init(&line_mask_param, x, y, x + w, y, LV_DRAW_MASK_LINE_SIDE_BOTTOM);
+	// 	line_mask_id_1 = lv_draw_mask_add(&line_mask_param, nullptr);
+	// 	lv_draw_mask_line_points_init(&line_mask_param, x, y + h, x + w, y + h, LV_DRAW_MASK_LINE_SIDE_TOP);
+	// 	line_mask_id_2 = lv_draw_mask_add(&line_mask_param, nullptr);
+	// 	lv_draw_mask_line_points_init(&line_mask_param, x, y, x, y + h, LV_DRAW_MASK_LINE_SIDE_RIGHT);
+	// 	line_mask_id_3 = lv_draw_mask_add(&line_mask_param, nullptr);
+	// 	lv_draw_mask_line_points_init(&line_mask_param, x + w, y, x + w, y + h, LV_DRAW_MASK_LINE_SIDE_LEFT);
+	// 	line_mask_id_4 = lv_draw_mask_add(&line_mask_param, nullptr);
+	// }
 
-		auto w = lv_coord(scissor->extent[0] * 2);
-		auto h = lv_coord(scissor->extent[1] * 2);
-		auto x = lv_coord(scissor->xform[4] - scissor->extent[0]);
-		auto y = lv_coord(scissor->xform[5] - scissor->extent[1]);
-		lv_draw_mask_line_points_init(&line_mask_param, x, y, x + w, y, LV_DRAW_MASK_LINE_SIDE_BOTTOM);
-		line_mask_id_1 = lv_draw_mask_add(&line_mask_param, nullptr);
-		lv_draw_mask_line_points_init(&line_mask_param, x, y + h, x + w, y + h, LV_DRAW_MASK_LINE_SIDE_TOP);
-		line_mask_id_2 = lv_draw_mask_add(&line_mask_param, nullptr);
-		// lv_draw_mask_line_points_init(&line_mask_param, x, y, x, y + h, LV_DRAW_MASK_LINE_SIDE_LEFT);
-		// line_mask_id_3 = lv_draw_mask_add(&line_mask_param, nullptr);
-		// lv_draw_mask_line_points_init(&line_mask_param, x + w, y, x + w, y + h, LV_DRAW_MASK_LINE_SIDE_RIGHT);
-		// line_mask_id_4 = lv_draw_mask_add(&line_mask_param, nullptr);
-	}
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		std::vector<lv_point_t> points;
 
 		std::ranges::transform(std::span{path.fill, (size_t)path.nfill}, std::back_inserter(points), to_lv_point);
-		// [](NVGvertex v) { return to_lv_point(v); });
 
 		// lv_canvas_draw_polygon(canvas, points.data(), points.size(), &rect_dsc);
 		lv_canvas_draw_line(canvas, points.data(), points.size(), &line_dsc);
-
-		// printf("Fill poly: ");
-		// for (auto &p : points)
-		// 	printf("%d,%d -> ", (int)p.x, (int)p.y);
-		// printf("\n");
 	}
 
-	if (scissor->extent[0] > 0) {
-		lv_draw_mask_remove_id(line_mask_id_1);
-		lv_draw_mask_remove_id(line_mask_id_2);
-		// lv_draw_mask_remove_id(line_mask_id_3);
-		// lv_draw_mask_remove_id(line_mask_id_4);
-		lv_draw_mask_free_param(&line_mask_param);
-	}
+	// if (scissor->extent[0] > 0) {
+	// 	lv_draw_mask_remove_id(line_mask_id_1);
+	// 	lv_draw_mask_remove_id(line_mask_id_2);
+	// 	lv_draw_mask_remove_id(line_mask_id_3);
+	// 	lv_draw_mask_remove_id(line_mask_id_4);
+	// 	lv_draw_mask_free_param(&line_mask_param);
+	// }
 }
 
 void renderStroke(void *uptr,
