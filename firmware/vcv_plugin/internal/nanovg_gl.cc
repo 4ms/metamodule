@@ -23,8 +23,12 @@ struct DrawContext {
 namespace NanoVG
 {
 
+constexpr lv_coord_t lv_coord(float x) {
+	return std::round(mm_to_px(to_mm(x), 240));
+}
+
 constexpr lv_point_t to_lv_point(NVGvertex vertex) {
-	return lv_point_t(std::round(mm_to_px(to_mm(vertex.x), 240)), std::round(mm_to_px(to_mm(vertex.y), 240.f)));
+	return lv_point_t(lv_coord(vertex.x), lv_coord(vertex.y));
 }
 
 lv_obj_t *get_canvas_from_context(void *uptr) {
@@ -61,6 +65,27 @@ void renderFill(void *uptr,
 	line_dsc.color = to_lv_color(paint->innerColor);
 	line_dsc.opa = to_lv_opa(paint->innerColor);
 	line_dsc.width = 1;
+
+	int16_t line_mask_id_1 = 0;
+	int16_t line_mask_id_2 = 0;
+	int16_t line_mask_id_3 = 0;
+	int16_t line_mask_id_4 = 0;
+	lv_draw_mask_line_param_t line_mask_param;
+	if (scissor->extent[0] > 0) {
+
+		auto w = lv_coord(scissor->extent[0] * 2);
+		auto h = lv_coord(scissor->extent[1] * 2);
+		auto x = lv_coord(scissor->xform[4] - scissor->extent[0]);
+		auto y = lv_coord(scissor->xform[5] - scissor->extent[1]);
+		lv_draw_mask_line_points_init(&line_mask_param, x, y, x + w, y, LV_DRAW_MASK_LINE_SIDE_BOTTOM);
+		line_mask_id_1 = lv_draw_mask_add(&line_mask_param, nullptr);
+		lv_draw_mask_line_points_init(&line_mask_param, x, y + h, x + w, y + h, LV_DRAW_MASK_LINE_SIDE_TOP);
+		line_mask_id_2 = lv_draw_mask_add(&line_mask_param, nullptr);
+		// lv_draw_mask_line_points_init(&line_mask_param, x, y, x, y + h, LV_DRAW_MASK_LINE_SIDE_LEFT);
+		// line_mask_id_3 = lv_draw_mask_add(&line_mask_param, nullptr);
+		// lv_draw_mask_line_points_init(&line_mask_param, x + w, y, x + w, y + h, LV_DRAW_MASK_LINE_SIDE_RIGHT);
+		// line_mask_id_4 = lv_draw_mask_add(&line_mask_param, nullptr);
+	}
 	for (auto &path : std::span{paths, (size_t)npaths}) {
 		std::vector<lv_point_t> points;
 
@@ -74,6 +99,14 @@ void renderFill(void *uptr,
 		// for (auto &p : points)
 		// 	printf("%d,%d -> ", (int)p.x, (int)p.y);
 		// printf("\n");
+	}
+
+	if (scissor->extent[0] > 0) {
+		lv_draw_mask_remove_id(line_mask_id_1);
+		lv_draw_mask_remove_id(line_mask_id_2);
+		// lv_draw_mask_remove_id(line_mask_id_3);
+		// lv_draw_mask_remove_id(line_mask_id_4);
+		lv_draw_mask_free_param(&line_mask_param);
 	}
 }
 
