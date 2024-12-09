@@ -76,6 +76,7 @@ public:
 	void update_screen() {
 		auto now = HAL_GetTick();
 		if ((now - last_lv_update_tm) > 2) {
+			lv_tick_inc(now - last_lv_update_tm);
 			last_lv_update_tm = now;
 			lv_timer_handler();
 		}
