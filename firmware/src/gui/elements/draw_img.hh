@@ -20,9 +20,9 @@ struct ImageSize {
 };
 
 inline std::optional<ImageSize> get_image_size(std::string_view img_path) {
-	lv_img_header_t img_header;
-	if (lv_img_decoder_get_info(img_path.data(), &img_header) == LV_RES_OK)
-		return ImageSize{img_header.w, img_header.h};
+	lv_image_header_t img_header;
+	if (lv_image_decoder_get_info(img_path.data(), &img_header) == LV_RES_OK)
+		return ImageSize{.w = img_header.w, .h = img_header.h};
 	else
 		return {};
 }
@@ -51,7 +51,7 @@ inline void draw_image(float x,
 
 	uint16_t lv_zoom = 256.f * zoom;
 	lv_img_set_zoom(obj, lv_zoom);
-	lv_img_set_size_mode(obj, LV_IMG_SIZE_MODE_VIRTUAL);
+	// lv_img_set_size_mode(obj, LV_IMAGE_SIZE_MODE_VIRTUAL); //LVGL 8.3
 	lv_img_set_antialias(obj, true);
 	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
 

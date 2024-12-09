@@ -154,12 +154,12 @@ public:
 
 private:
 	static void click_roller_cb(lv_event_t *event) {
-		auto page = static_cast<ModuleListPage *>(event->user_data);
+		auto page = static_cast<ModuleListPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
 		ModuleTypeSlug selected_str;
-		lv_roller_get_selected_str(event->target, selected_str._data, selected_str.capacity);
+		lv_roller_get_selected_str(lv_event_get_target_obj(event), selected_str._data, selected_str.capacity);
 
 		if (page->view == View::BrandRoller) {
 			page->view = View::ModuleRoller;
@@ -182,7 +182,7 @@ private:
 	}
 
 	static void scroll_cb(lv_event_t *event) {
-		auto page = static_cast<ModuleListPage *>(event->user_data);
+		auto page = static_cast<ModuleListPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
@@ -194,7 +194,7 @@ private:
 	}
 
 	static void draw_module_cb(lv_timer_t *timer) {
-		auto page = static_cast<ModuleListPage *>(timer->user_data);
+		auto page = static_cast<ModuleListPage *>(lv_timer_get_user_data(timer));
 		if (!page)
 			return;
 

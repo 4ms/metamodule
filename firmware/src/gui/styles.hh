@@ -1,4 +1,5 @@
 #pragma once
+#include "helpers/lv_helpers.hh"
 #include "lvgl.h"
 #include "patch-serial/patch/mapping_ids.hh"
 #include "patch-serial/patch/midi_def.hh"
@@ -8,16 +9,14 @@
 #include <span>
 #include <string>
 
-// lvgl has prop1 and has_group fields out of order, thus not C++ friendly
-#define LV_STYLE_CONST_CPP(prop_array)                                                                                 \
-	lv_style_t {                                                                                                       \
-		.v_p = {.const_props = prop_array}, .prop1 = LV_STYLE_PROP_ANY, .has_group = 0xFF,                             \
-		.prop_cnt = (sizeof(prop_array) / sizeof((prop_array)[0])),                                                    \
-	}
-
 //constexpr helper
-static constexpr lv_color16_t lv_color_make_rgb565(uint8_t r8, uint8_t g8, uint8_t b8) {
-	return {{(uint8_t)((b8 >> 3) & 0x1FU), (uint8_t)((g8 >> 2) & 0x3FU), (uint8_t)((r8 >> 3) & 0x1FU)}};
+static constexpr lv_color_t lv_color_make_rgb565(uint8_t r8, uint8_t g8, uint8_t b8) {
+	return lv_color_t{b8, g8, r8};
+	// lv_color_t col;
+	// col.blue = (b8 >> 3) & 0x1F;
+	// col.green = (g8 >> 2) & 0x3F;
+	// col.red = (r8 >> 3) & 0x1F;
+	// return col;
 }
 
 namespace MetaModule
@@ -59,9 +58,12 @@ struct Gui {
 	// General outline for focused objects (FOCUS and FOCUS_KEY)
 	static inline lv_style_t focus_style;
 
+	// static inline lv_style_t slider_handle_style;
+
 	// COLORS
 	static inline std::string color_text(std::string_view txt, std::string_view color) {
-		return std::string{color} + std::string{txt} + LV_TXT_COLOR_CMD + " ";
+		return std::string{txt};
+		// return std::string{color} + std::string{txt} + LV_TXT_COLOR_CMD + " ";
 	}
 	static inline lv_color_t red_highlight = lv_color_hex(0xea1c25);
 	static std::string red_text(std::string_view txt) {
@@ -199,7 +201,10 @@ struct Gui {
 		LV_STYLE_CONST_BORDER_OPA(LV_OPA_80),
 		LV_STYLE_CONST_RADIUS(2),
 	};
-	static inline auto slider_handle_style = LV_STYLE_CONST_CPP(slider_handle_style_props);
+	static inline const lv_style_t slider_handle_style = {.sentinel = LV_STYLE_SENTINEL_VALUE,
+														  .values_and_props = (void *)slider_handle_style_props,
+														  .has_group = 0xFFFFFFFF,
+														  .prop_cnt = 255};
 
 	static lv_color_t mapped_jack_color(unsigned panel_id) {
 		if (panel_id <= LastPossibleKnob)
@@ -239,25 +244,33 @@ struct Gui {
 			return jack_palette[panel_id % jack_palette.size()];
 	}
 
-	static std::string color_to_html(lv_color_t color) {
+	static std::string color_to_html(auto color) {
 		std::string c = "^000000 ";
 		auto printhex = [&c](uint8_t v, size_t pos) {
 			if (v < 0x10)
 				pos++; //add leading zero
 			std::to_chars(c.data() + pos, c.data() + pos + 2, v, 16);
 		};
-		printhex(color.ch.red << 3, 1);
-		printhex(color.ch.green << 2, 3);
-		printhex(color.ch.blue << 3, 5);
+		printhex(color.red << 3, 1);
+		printhex(color.green << 2, 3);
+		printhex(color.blue << 3, 5);
 		return c;
 	}
 
 	static void init_lvgl_styles() {
 
 		for (auto &color : knob_disabled_palette) {
-			auto hsv = lv_color_to_hsv(color);
+			lv_color_t col;
+			col.red = color.red >> 8;
+			col.green = color.green >> 8;
+			col.blue = color.blue >> 8;
+
+			auto hsv = lv_color_to_hsv(col);
 			color = lv_color_hsv_to_rgb(hsv.h, hsv.s / 2, hsv.v / 2);
 		}
+
+		// lv_style_init(&slider_handle_style);
+		// lv_style_set_bg_opa(&slider_handle_style, LV_OPA_100);
 
 		// invisible_style
 		lv_style_init(&invisible_style);

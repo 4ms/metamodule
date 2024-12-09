@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
+#include "gui/helpers/lv_helpers.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include "util/colors.hh"
@@ -16,9 +17,8 @@ inline void update_light_style(lv_obj_t *obj, lv_color_t color, lv_opa_t opa) {
 
 	constexpr uint16_t ColorThresh = 8;
 	auto cur_color = lv_obj_get_style_img_recolor(obj, LV_PART_MAIN);
-	if (abs_diff(color.ch.red, cur_color.ch.red) > ColorThresh ||
-		abs_diff(color.ch.blue, cur_color.ch.blue) > ColorThresh ||
-		abs_diff(color.ch.green, cur_color.ch.green) > ColorThresh)
+	if (abs_diff(color.red, cur_color.red) > ColorThresh || abs_diff(color.blue, cur_color.blue) > ColorThresh ||
+		abs_diff(color.green, cur_color.green) > ColorThresh)
 	{
 		lv_obj_set_style_img_recolor(obj, color, LV_PART_MAIN);
 		if (lv_obj_get_style_shadow_spread(obj, LV_PART_MAIN) > 0)
@@ -42,10 +42,10 @@ inline void style_rgb(lv_obj_t *obj, std::span<const float> vals, float max_brig
 	auto g_amt = std::clamp(vals[1], 0.f, 1.f);
 	auto b_amt = std::clamp(vals[2], 0.f, 1.f);
 
-	auto max = std::max(r_amt, std::max(g_amt, b_amt));
+	auto max = std::max({r_amt, g_amt, b_amt});
 	float gain = 1.f / max;
 	Color normalized = Color(r_amt * gain * 255, g_amt * gain * 255, b_amt * gain * 255);
-	lv_color_t color{.full = normalized.Rgb565()};
+	auto color = lv_color_from_rgb565(normalized.Rgb565());
 	uint8_t opa = std::clamp<unsigned>(std::min(max, max_brightness) * 255.f, 0u, 255u);
 
 	update_light_style(obj, color, opa);
@@ -65,7 +65,7 @@ inline void style_dual_color(lv_obj_t *obj, std::array<RGB565, 2> colors, std::s
 	auto col2 = Colors::black.blend(Color{colors[1]}, c2_amt * gain);
 	auto normalized = col1.combine(col2);
 
-	lv_color_t color{.full = normalized.Rgb565()};
+	auto color = lv_color_from_rgb565(normalized.Rgb565());
 	uint8_t opa = std::clamp<unsigned>(max * 255.f, 0u, 255u);
 
 	update_light_style(obj, color, opa);
@@ -75,7 +75,7 @@ inline void style_mono(lv_obj_t *obj, RGB565 col, std::span<const float> vals) {
 	if (!obj || vals.size() < 1)
 		return;
 
-	lv_color_t color{.full = col.raw()};
+	auto color = lv_color_from_rgb565(col);
 	lv_opa_t opa = std::clamp<uint16_t>(vals[0] * 255.f, 0, 255);
 
 	update_light_style(obj, color, opa);

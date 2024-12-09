@@ -74,7 +74,7 @@ struct SystemMenuPage : PageBase {
 
 private:
 	static void tab_cb(lv_event_t *event) {
-		auto page = static_cast<SystemMenuPage *>(event->user_data);
+		auto page = static_cast<SystemMenuPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 

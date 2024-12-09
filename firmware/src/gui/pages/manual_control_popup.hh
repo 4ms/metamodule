@@ -231,21 +231,21 @@ private:
 	}
 
 	static void click_arc_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ManualControlPopUp *>(event->user_data);
+		auto page = static_cast<ManualControlPopUp *>(lv_event_get_user_data(event));
 
-		if (event->code == LV_EVENT_PRESSED)
+		if (lv_event_get_code(event) == LV_EVENT_PRESSED)
 			page->press();
 
-		else if (event->code == LV_EVENT_RELEASED)
+		else if (lv_event_get_code(event) == LV_EVENT_RELEASED)
 			page->release();
 	}
 
 	static void arc_change_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ManualControlPopUp *>(event->user_data);
+		auto page = static_cast<ManualControlPopUp *>(lv_event_get_user_data(event));
 		page->arc_change_value();
 	}
 

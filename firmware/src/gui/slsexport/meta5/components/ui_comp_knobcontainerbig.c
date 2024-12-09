@@ -142,7 +142,7 @@ lv_obj_set_style_radius(cui_Indicator, 0, LV_PART_MAIN);
 lv_obj_set_style_transform_pivot_x(cui_Indicator, 0, LV_PART_MAIN);
 lv_obj_set_style_transform_pivot_y(cui_Indicator, 11, LV_PART_MAIN);
 
-lv_obj_t ** children = lv_mem_alloc(sizeof(lv_obj_t *) * _UI_COMP_KNOBCONTAINERBIG_NUM);
+lv_obj_t ** children = lv_malloc(sizeof(lv_obj_t *) * _UI_COMP_KNOBCONTAINERBIG_NUM);
 children[UI_COMP_KNOBCONTAINERBIG_KNOBCONTAINERBIG] = cui_KnobContainerBig;
 children[UI_COMP_KNOBCONTAINERBIG_KNOB] = cui_Knob;
 children[UI_COMP_KNOBCONTAINERBIG_CIRCLE] = cui_Circle;

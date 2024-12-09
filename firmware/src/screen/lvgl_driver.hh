@@ -18,41 +18,40 @@ class LVGLDriver {
 	static constexpr uint32_t ScreenWidth = ScreenBufferConf::viewWidth;
 	static constexpr uint32_t ScreenHeight = ScreenBufferConf::viewHeight;
 
-	lv_disp_draw_buf_t disp_buf;
-	lv_indev_drv_t indev_drv;
+	lv_display_t *display;
 	lv_indev_t *indev;
 
-	// Callbacks
-	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
-	using indev_cb_t = void(lv_indev_drv_t *indev, lv_indev_data_t *data);
-	using wait_cb_t = void(lv_disp_drv_t *);
-
-	// Display driver
-	lv_disp_drv_t disp_drv;
-	lv_disp_t *display;
-
 public:
-	LVGLDriver(flush_cb_t flush_cb,
-			   indev_cb_t indev_cb,
-			   wait_cb_t wait_cb,
+	LVGLDriver(lv_display_flush_cb_t flush_cb,
+			   lv_indev_read_cb_t indev_cb,
+			   lv_display_flush_wait_cb_t wait_cb,
 			   std::span<lv_color_t> buffer1,
-			   std::span<lv_color_t> buffer2) {
+			   std::span<lv_color_t> buffer2)
+		: display(lv_display_create(ScreenWidth, ScreenHeight))
+		, indev{lv_indev_create()} {
 		UartLog::log("LVGLDriver started\n");
 
 		lv_init();
-		lv_disp_draw_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
-		lv_disp_drv_init(&disp_drv);
-		disp_drv.draw_buf = &disp_buf;
-		disp_drv.flush_cb = flush_cb;
-		disp_drv.wait_cb = wait_cb;
-		disp_drv.hor_res = ScreenWidth;
-		disp_drv.ver_res = ScreenHeight;
-		display = lv_disp_drv_register(&disp_drv); // NOLINT
 
-		lv_indev_drv_init(&indev_drv);
-		indev_drv.type = LV_INDEV_TYPE_ENCODER;
-		indev_drv.read_cb = indev_cb;
-		indev = lv_indev_drv_register(&indev_drv); // NOLINT
+		lv_display_set_flush_cb(display, flush_cb);
+		lv_display_set_buffers(
+			display, buffer1.data(), buffer2.data(), buffer1.size_bytes(), LV_DISPLAY_RENDER_MODE_PARTIAL);
+
+		lv_display_set_flush_wait_cb(display, wait_cb);
+
+		////////////////////
+		// lv_disp_draw_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
+		// lv_disp_drv_init(&disp_drv);
+		// disp_drv.draw_buf = &disp_buf;
+		// disp_drv.flush_cb = flush_cb;
+		// disp_drv.wait_cb = wait_cb;
+		// disp_drv.hor_res = ScreenWidth;
+		// disp_drv.ver_res = ScreenHeight;
+		// display = lv_disp_drv_register(&disp_drv); // NOLINT
+
+		lv_indev_set_type(indev, LV_INDEV_TYPE_ENCODER);
+		lv_indev_set_read_cb(indev, indev_cb);
+
 		lv_indev_enable(indev, true);
 		lv_indev_set_group(indev, nullptr);
 
@@ -61,13 +60,13 @@ public:
 #endif
 	}
 
-	static void log_cb(const char *buf) {
-		UartLog::log("%s", buf);
+	static void log_cb(lv_log_level_t level, const char *buf) {
+		UartLog::log("[%d]: %s", level, buf);
 	}
 };
 
 class MMDisplay {
-	static inline lv_disp_drv_t *last_used_disp_drv;
+	static inline lv_display_t *last_used_display;
 	static inline MetaParams *m;
 	static inline Screensaver *_screensaver;
 	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
@@ -91,11 +90,11 @@ public:
 	static inline uint16_t *last_pixbuf = nullptr;
 
 	static void end_flush() {
-		lv_disp_flush_ready(last_used_disp_drv);
+		lv_disp_flush_ready(last_used_display);
 	}
 
-	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
-		last_used_disp_drv = disp_drv;
+	static void flush_to_screen(lv_display_t *display, const lv_area_t *area, uint8_t *color_p) {
+		last_used_display = display;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
 
@@ -104,29 +103,30 @@ public:
 		last_pixbuf = pixbuf;
 	}
 
-	static void wait_cb(lv_disp_drv_t *disp_drv) {
-		if (disp_drv->draw_buf->flushing) {
-			if (_spi_driver.had_transfer_error()) {
-				disp_drv->draw_buf->flushing = 0;
-			}
-
-			if (_spi_driver.had_fifo_error()) {
-				HAL_Delay(1);
-			}
-
-			//Timeout
-			if (HAL_GetTick() - last_transfer_start_time > 20) {
-				disp_drv->draw_buf->flushing = 0;
-				// Doesn't seem to matter:
-				// _spi_driver.reinit();
-				// HAL_Delay(1);
-				// Doesn't work at all (screen is still expecting data from previous command):
-				// _spi_driver.transfer_partial_frame(last_area.x1, last_area.y1, last_area.x2, last_area.y2, last_pixbuf);
-			}
+	static void wait_cb(lv_display_t *display) {
+		// if (display->draw_buf->flushing) {
+		if (_spi_driver.had_transfer_error()) {
+			// disp_drv->draw_buf->flushing = 0;
 		}
+
+		if (_spi_driver.had_fifo_error()) {
+			HAL_Delay(1);
+		}
+
+		//Timeout
+		if (HAL_GetTick() - last_transfer_start_time > 20) {
+			// disp_drv->draw_buf->flushing = 0;
+
+			// Doesn't seem to matter:
+			// _spi_driver.reinit();
+			// HAL_Delay(1);
+			// Doesn't work at all (screen is still expecting data from previous command):
+			// _spi_driver.transfer_partial_frame(last_area.x1, last_area.y1, last_area.x2, last_area.y2, last_pixbuf);
+		}
+		// }
 	}
 
-	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
+	static void read_input(lv_indev_t *indev, lv_indev_data_t *data) {
 		data->continue_reading = false;
 
 #ifdef LONG_PRESS_MANUALLY_PARSED

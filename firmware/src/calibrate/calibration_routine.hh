@@ -18,9 +18,7 @@ namespace MetaModule
 struct CalibrationRoutine {
 	enum class JackCalStatus { NotCal, Settling, LowOnly, HighOnly, Error, Done };
 
-	CalibrationRoutine(ParamsMidiState &params,
-					   FileStorageProxy &storage,
-					   PatchModQueue &patch_mod_queue)
+	CalibrationRoutine(ParamsMidiState &params, FileStorageProxy &storage, PatchModQueue &patch_mod_queue)
 		: storage{storage}
 		, patch_mod_queue{patch_mod_queue}
 		, params{params}
@@ -696,16 +694,16 @@ private:
 
 private:
 	static void cancel_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<CalibrationRoutine *>(event->user_data);
+		auto page = static_cast<CalibrationRoutine *>(lv_event_get_user_data(event));
 		page->abort();
 	}
 
 	static void next_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<CalibrationRoutine *>(event->user_data);
+		auto page = static_cast<CalibrationRoutine *>(lv_event_get_user_data(event));
 		page->next_step = true;
 	}
 

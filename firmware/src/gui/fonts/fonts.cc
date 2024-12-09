@@ -75,7 +75,7 @@ lv_font_t const *get_font(std::string_view name) {
 	}
 
 	// Try loading it into the cache:
-	else if (auto font = lv_font_load(ComponentImages::get_comp_path(name).c_str()))
+	else if (auto font = lv_binfont_create(ComponentImages::get_comp_path(name).c_str()))
 	{
 		font->user_data = hash(name);
 		font_cache.push_back(font);
@@ -90,7 +90,7 @@ void free_font(std::string_view filename) {
 	font_cache.remove_if([&](lv_font_t *font) {
 		if (font->user_data == hash(filename)) {
 			// Free the lvgl memory
-			lv_font_free(font);
+			lv_binfont_destroy(font);
 			return true;
 		}
 		return false;

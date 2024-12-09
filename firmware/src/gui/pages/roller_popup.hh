@@ -28,11 +28,11 @@ struct RollerPopup {
 	}
 
 	static void roller_click_cb(lv_event_t *event) {
-		if (!event || !event->user_data) {
+		if (!event || !lv_event_get_user_data(event)) {
 			return;
 		}
-		auto page = static_cast<RollerPopup *>(event->user_data);
-		const auto roller_idx = lv_roller_get_selected(event->target);
+		auto page = static_cast<RollerPopup *>(lv_event_get_user_data(event));
+		const auto roller_idx = lv_roller_get_selected(lv_event_get_target_obj(event));
 		page->callback(roller_idx);
 		page->hide();
 	}

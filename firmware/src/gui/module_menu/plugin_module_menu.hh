@@ -55,7 +55,7 @@ struct PluginModuleMenu {
 		lv_group_focus_obj(roller);
 		if (auto *group = static_cast<lv_group_t *>(lv_obj_get_group(roller)))
 			lv_group_set_editing(group, true);
-		lv_event_send(roller, LV_EVENT_PRESSED, nullptr);
+		lv_obj_send_event(roller, LV_EVENT_PRESSED, nullptr);
 
 		roller_hover.hide();
 
@@ -134,7 +134,7 @@ private:
 	}
 
 	static void roller_click_cb(lv_event_t *event) {
-		auto page = static_cast<PluginModuleMenu *>(event->user_data);
+		auto page = static_cast<PluginModuleMenu *>(lv_event_get_user_data(event));
 		auto idx = lv_roller_get_selected(page->roller);
 
 		page->click(idx);
@@ -143,14 +143,14 @@ private:
 		lv_group_focus_obj(page->roller);
 		if (auto *group = static_cast<lv_group_t *>(lv_obj_get_group(page->roller)))
 			lv_group_set_editing(group, true);
-		lv_event_send(page->roller, LV_EVENT_PRESSED, nullptr);
+		lv_obj_send_event(page->roller, LV_EVENT_PRESSED, nullptr);
 
 		// index might be the same, but content probably changed
 		page->roller_hover.force_redraw();
 	}
 
 	static void roller_scrolled_cb(lv_event_t *event) {
-		auto page = static_cast<PluginModuleMenu *>(event->user_data);
+		auto page = static_cast<PluginModuleMenu *>(lv_event_get_user_data(event));
 		page->roller_hover.hide();
 	}
 

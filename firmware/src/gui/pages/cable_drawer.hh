@@ -16,6 +16,7 @@ class CableDrawer {
 	const std::vector<DrawnElement> &drawn;
 
 	lv_obj_t *canvas;
+	lv_layer_t layer;
 	lv_draw_line_dsc_t cable_dsc;
 	lv_draw_line_dsc_t inner_outline_dsc;
 	lv_draw_line_dsc_t outer_outline_dsc;
@@ -24,7 +25,7 @@ class CableDrawer {
 
 	//LVGL canvas is internally an img, which has 11 bits for height, so max is 2047
 	static constexpr uint32_t Height = std::min<uint32_t>(MaxCanvasHeight, 2047);
-	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, Height)> cable_buf;
+	static inline std::array<uint8_t, (320 * Height * 3)> cable_buf;
 
 	struct Vec2 {
 		int32_t x;
@@ -39,7 +40,7 @@ public:
 		lv_obj_set_align(canvas, LV_ALIGN_TOP_LEFT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_IGNORE_LAYOUT);
 		lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
-		lv_canvas_set_buffer(canvas, cable_buf.data(), 320, Height, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		lv_canvas_set_buffer(canvas, cable_buf.data(), 320, Height, LV_COLOR_FORMAT_RGB565A8);
 
 		lv_draw_line_dsc_init(&cable_dsc);
 		cable_dsc.width = 3;
@@ -60,24 +61,24 @@ public:
 
 		lv_draw_rect_dsc_init(&injack_dsc);
 		injack_dsc.bg_opa = LV_OPA_100;
-		injack_dsc.bg_img_opa = LV_OPA_0;
+		injack_dsc.bg_image_opa = LV_OPA_0;
 		injack_dsc.outline_opa = LV_OPA_0;
 		injack_dsc.shadow_opa = LV_OPA_0;
 		injack_dsc.border_opa = LV_OPA_100;
 		injack_dsc.border_color = lv_color_black();
 		injack_dsc.border_width = 4;
-		injack_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
+		// injack_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 		injack_dsc.radius = 2;
 
 		lv_draw_rect_dsc_init(&outjack_dsc);
 		outjack_dsc.bg_opa = LV_OPA_50;
-		outjack_dsc.bg_img_opa = LV_OPA_0;
+		outjack_dsc.bg_image_opa = LV_OPA_0;
 		outjack_dsc.outline_opa = LV_OPA_0;
 		outjack_dsc.shadow_opa = LV_OPA_0;
 		outjack_dsc.border_opa = LV_OPA_100;
 		outjack_dsc.border_color = lv_color_black();
 		outjack_dsc.border_width = 3;
-		outjack_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
+		// outjack_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 		outjack_dsc.radius = 2;
 
 		set_opacity(LV_OPA_60);
@@ -92,6 +93,8 @@ public:
 	}
 
 	void draw(const PatchData &patch) {
+		lv_canvas_init_layer(canvas, &layer);
+
 		clear();
 		lv_obj_move_foreground(canvas);
 		lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_0);
@@ -106,6 +109,8 @@ public:
 				}
 			}
 		}
+
+		lv_canvas_finish_layer(canvas, &layer);
 	}
 
 	void draw_single_module(const PatchData &patch, uint32_t module_id) {
@@ -181,8 +186,7 @@ public:
 	}
 
 	void draw_cable(Vec2 start, Vec2 end, const InternalCable &cable) {
-		uint16_t default_color = get_cable_color(cable.out).full;
-		cable_dsc.color.full = cable.color.value_or(default_color);
+		cable_dsc.color = get_cable_color(cable);
 		draw_cable(start, end);
 	}
 
@@ -197,22 +201,24 @@ public:
 	}
 
 	void draw_injack(Vec2 location, const InternalCable &cable) {
-		uint16_t default_color = get_cable_color(cable.out).full;
-		injack_dsc.border_color.full = cable.color.value_or(default_color);
+		injack_dsc.border_color = get_cable_color(cable);
+
 		injack_dsc.bg_color =
-			(injack_dsc.border_color.full == lv_color_black().full) ? lv_color_white() : injack_dsc.border_color;
-		lv_canvas_draw_rect(canvas, location.x - 4, location.y - 4, 9, 9, &injack_dsc);
+			lv_color_eq(injack_dsc.border_color, lv_color_black()) ? lv_color_white() : injack_dsc.border_color;
+		// lv_canvas_draw_rect(canvas, location.x - 4, location.y - 4, 9, 9, &injack_dsc);
 	}
 
 	void draw_outjack(Vec2 location, const InternalCable &cable) {
-		uint16_t default_color = get_cable_color(cable.out).full;
-		outjack_dsc.border_color.full = cable.color.value_or(default_color);
+		outjack_dsc.border_color = get_cable_color(cable);
 		outjack_dsc.bg_color = outjack_dsc.border_color;
-		lv_canvas_draw_rect(canvas, location.x - 9, location.y - 9, 19, 19, &outjack_dsc);
+		// lv_canvas_draw_rect(canvas, location.x - 9, location.y - 9, 19, 19, &outjack_dsc);
 	}
 
-	static lv_color_t get_cable_color(Jack jack) {
-		return Gui::cable_palette[(jack.jack_id + jack.module_id) % Gui::cable_palette.size()];
+	static lv_color_t get_cable_color(const InternalCable &cable) {
+		if (cable.color)
+			return lv_color_from_rgb565(*cable.color);
+		else
+			return Gui::cable_palette[(cable.out.jack_id + cable.out.module_id) % Gui::cable_palette.size()];
 	}
 
 	void draw_bezier(Vec2 start, Vec2 end, Vec2 control, unsigned steps) {
@@ -225,11 +231,11 @@ public:
 		}
 
 		// outlines to make cable stand out on a black or white background
-		lv_canvas_draw_line(canvas, points, steps + 1, &outer_outline_dsc);
-		lv_canvas_draw_line(canvas, points, steps + 1, &inner_outline_dsc);
+		// lv_draw_line(layer, points, steps + 1, &outer_outline_dsc);
+		// lv_draw_line(layer, points, steps + 1, &inner_outline_dsc);
 
-		//colored center:
-		lv_canvas_draw_line(canvas, points, steps + 1, &cable_dsc);
+		////colored center:
+		// lv_draw_line(layer, points, steps + 1, &cable_dsc);
 	}
 
 	static Vec2 get_quadratic_bezier_pt(Vec2 start, Vec2 end, Vec2 control, float step) {

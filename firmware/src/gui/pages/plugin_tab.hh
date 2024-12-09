@@ -187,12 +187,12 @@ private:
 	}
 
 	static void query_loaded_plugin_cb(lv_event_t *event) {
-		auto page = static_cast<PluginTab *>(event->user_data);
+		auto page = static_cast<PluginTab *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
-		const auto target = lv_event_get_target(event);
-		if (lv_obj_get_child_cnt(target) != 1)
+		const auto target = lv_event_get_target_obj(event);
+		if (lv_obj_get_child_count(target) != 1)
 			return;
 		std::string plugin_name = lv_label_get_text(lv_obj_get_child(target, 0));
 		if (auto colorpos = plugin_name.find_first_of("^"); colorpos != std::string::npos) {
@@ -231,7 +231,7 @@ private:
 	}
 
 	static void scan_plugins_cb(lv_event_t *event) {
-		auto page = static_cast<PluginTab *>(event->user_data);
+		auto page = static_cast<PluginTab *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 		page->scan_plugins();
@@ -243,25 +243,27 @@ private:
 	}
 
 	static void scroll_up_cb(lv_event_t *event) {
-		const auto list = lv_obj_get_parent(event->target);
+		const auto list = lv_obj_get_parent(lv_event_get_target_obj(event));
 		const auto is_found_list = list == ui_PluginsFoundCont;
 		const auto found_list_empty = lv_obj_get_child_cnt(ui_PluginsFoundCont) == 0;
-		const auto is_first_in_list = event->target == lv_obj_get_child(list, 0);
-		if (event->target == ui_PluginScanButton || (is_first_in_list && (is_found_list || found_list_empty))) {
+		const auto is_first_in_list = lv_event_get_target_obj(event) == lv_obj_get_child(list, 0);
+		if (lv_event_get_target_obj(event) == ui_PluginScanButton ||
+			(is_first_in_list && (is_found_list || found_list_empty)))
+		{
 			lv_obj_scroll_to_y(ui_SystemMenuPluginsTab, 0, LV_ANIM_ON);
 		}
 	}
 
 	static void load_plugin_cb(lv_event_t *event) {
-		auto page = static_cast<PluginTab *>(event->user_data);
+		auto page = static_cast<PluginTab *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
-		auto idx = (uintptr_t)lv_obj_get_user_data(event->target);
+		auto idx = (uintptr_t)lv_obj_get_user_data(lv_event_get_target_obj(event));
 		if (idx > 0) {
 			lv_show(ui_PluginTabSpinner);
 			page->plugin_manager.load_plugin(idx - 1);
-			page->load_in_progress_obj = event->target;
+			page->load_in_progress_obj = lv_event_get_target_obj(event);
 		}
 	}
 

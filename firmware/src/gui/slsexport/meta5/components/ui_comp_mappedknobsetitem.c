@@ -83,7 +83,7 @@ lv_obj_set_style_pad_right(cui_KnobSetNameText, 0, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_top(cui_KnobSetNameText, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(cui_KnobSetNameText, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-lv_obj_t ** children = lv_mem_alloc(sizeof(lv_obj_t *) * _UI_COMP_MAPPEDKNOBSETITEM_NUM);
+lv_obj_t ** children = lv_malloc(sizeof(lv_obj_t *) * _UI_COMP_MAPPEDKNOBSETITEM_NUM);
 children[UI_COMP_MAPPEDKNOBSETITEM_MAPPEDKNOBSETITEM] = cui_MappedKnobsetitem;
 children[UI_COMP_MAPPEDKNOBSETITEM_CIRCLE] = cui_Circle;
 children[UI_COMP_MAPPEDKNOBSETITEM_CIRCLE_KNOBLETTER] = cui_KnobLetter;

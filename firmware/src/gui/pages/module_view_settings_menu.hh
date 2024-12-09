@@ -170,9 +170,9 @@ private:
 	}
 
 	static void settings_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+		auto page = static_cast<ModuleViewSettingsMenu *>(lv_event_get_user_data(event));
 
 		if (page->visible) {
 			page->hide();
@@ -182,10 +182,10 @@ private:
 	}
 
 	static void map_settings_value_change_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 
-		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+		auto page = static_cast<ModuleViewSettingsMenu *>(lv_event_get_user_data(event));
 
 		page->update_interactive_states();
 
@@ -219,11 +219,11 @@ private:
 	}
 
 	static void cable_settings_value_change_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 		using enum MapRingStyle::Mode;
 
-		auto page = static_cast<ModuleViewSettingsMenu *>(event->user_data);
+		auto page = static_cast<ModuleViewSettingsMenu *>(lv_event_get_user_data(event));
 		auto show_all = lv_obj_has_state(ui_MVShowAllCablesCheck, LV_STATE_CHECKED);
 
 		page->settings.cable_style.mode = show_all ? ShowAll : HideAlways;

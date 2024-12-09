@@ -1,9 +1,7 @@
 #pragma once
-#include "gui/slsexport/meta5/ui.h"
+#include "gui/helpers/lv_helpers.hh"
 #include "gui/slsexport/ui_local.h"
 #include "lvgl.h"
-#include "src/core/lv_obj.h"
-#include "src/core/lv_obj_tree.h"
 #include <functional>
 #include <string_view>
 
@@ -87,16 +85,16 @@ struct PluginPopup {
 	}
 
 	static void button_callback(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PluginPopup *>(event->user_data);
+		auto page = static_cast<PluginPopup *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
 		if (page->_button_callback) {
-			if (event->target == ui_CancelButton)
+			if (lv_event_get_target_obj(event) == ui_CancelButton)
 				page->_button_callback(0);
-			else if (event->target == ui_ConfirmButton)
+			else if (lv_event_get_target_obj(event) == ui_ConfirmButton)
 				page->_button_callback(1);
 		}
 
@@ -104,14 +102,14 @@ struct PluginPopup {
 	}
 
 	static void toggle_callback(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PluginPopup *>(event->user_data);
+		auto page = static_cast<PluginPopup *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
 		if (page->_toggle_callback) {
-			if (event->target == page->check)
+			if (lv_event_get_target_obj(event) == page->check)
 				page->_toggle_callback(lv_obj_has_state(page->check, LV_STATE_CHECKED));
 		}
 	}

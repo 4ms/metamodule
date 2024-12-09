@@ -45,10 +45,12 @@ struct CalCheck {
 		lv_show(ui_CalibrationCancelButton);
 
 		auto indev = lv_indev_get_next(nullptr);
-		if (indev && indev->group) {
-			lv_group_remove_obj(ui_CalibrationInstructionLabel);
-			lv_group_add_obj(indev->group, ui_CalibrationInstructionLabel);
-			lv_group_focus_next(indev->group);
+		if (indev) {
+			if (auto group = lv_indev_get_group(indev)) {
+				lv_group_remove_obj(ui_CalibrationInstructionLabel);
+				lv_group_add_obj(group, ui_CalibrationInstructionLabel);
+				lv_group_focus_next(group);
+			}
 		}
 
 		lv_label_set_text(ui_CalibrationInstructionLabel,

@@ -112,14 +112,14 @@ struct SystemTab : SystemMenuTab {
 
 private:
 	static void calibrate_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<SystemTab *>(event->user_data);
+		auto page = static_cast<SystemTab *>(lv_event_get_user_data(event));
 
 		page->patch_playloader.request_load_calibration_patch();
-		if (event->target == ui_SystemCalibrationButton)
+		if (lv_event_get_target_obj(event) == ui_SystemCalibrationButton)
 			page->cal_routine.start();
-		else if (event->target == ui_SystemExpCalibrationButton)
+		else if (lv_event_get_target_obj(event) == ui_SystemExpCalibrationButton)
 			page->cal_routine.start_expander();
 	}
 
@@ -128,28 +128,28 @@ private:
 	}
 
 	static void cal_check_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<SystemTab *>(event->user_data);
+		auto page = static_cast<SystemTab *>(lv_event_get_user_data(event));
 
 		page->patch_playloader.request_load_cal_check_patch();
 		page->cal_check.start();
 	}
 
 	static void hwcheck_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<SystemTab *>(event->user_data);
+		auto page = static_cast<SystemTab *>(lv_event_get_user_data(event));
 
 		page->patch_playloader.request_load_hardware_check_patch();
 		page->hw_check.show(page->group);
 	}
 
 	static void resetbut_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 
-		auto page = static_cast<SystemTab *>(event->user_data);
+		auto page = static_cast<SystemTab *>(lv_event_get_user_data(event));
 		page->confirm_popup.show(
 			[page](bool ok) {
 				if (ok) {

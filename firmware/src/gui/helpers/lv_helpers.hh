@@ -1,5 +1,6 @@
 #pragma once
 #include "lvgl.h"
+#include "util/colors_rgb565.hh"
 
 namespace MetaModule
 {
@@ -111,6 +112,18 @@ inline void lv_check(lv_obj_t *obj, bool checked = true) {
 
 inline bool lv_is_checked(lv_obj_t *obj) {
 	return lv_obj_has_state(obj, LV_STATE_CHECKED);
+}
+
+inline void lv_obj_remove_flag(lv_obj_t *obj, int f) {
+	lv_obj_remove_flag(obj, static_cast<lv_obj_flag_t>(f));
+}
+
+inline void lv_obj_add_flag(lv_obj_t *obj, int f) {
+	lv_obj_add_flag(obj, static_cast<lv_obj_flag_t>(f));
+}
+
+inline lv_color_t lv_color_from_rgb565(RGB565 rgb) {
+	return lv_color_make(rgb.r, rgb.g, rgb.b);
 }
 
 } // namespace MetaModule

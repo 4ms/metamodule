@@ -4,7 +4,6 @@
 #include "gui/slsexport/meta5/ui.h"
 #include "pr_dbg.hh"
 #include "screensaver_settings.hh"
-#include "src/core/lv_disp.h"
 #include <array>
 
 namespace MetaModule

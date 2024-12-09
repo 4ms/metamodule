@@ -9,8 +9,7 @@
 #include "gui/pages/page_list.hh"
 #include "gui/slsexport/meta5/ui.h"
 #include "gui/styles.hh"
-#include "src/core/lv_event.h"
-#include "src/widgets/lv_textarea.h"
+#include "lvgl.h"
 
 namespace MetaModule
 {
@@ -272,18 +271,18 @@ struct KnobSetViewPage : PageBase {
 
 		if (arc_val > lv_arc_get_max_value(arc) || arc_val < lv_arc_get_min_value(arc)) {
 			lv_obj_set_style_radius(arc, 0, LV_PART_KNOB);
-			if (color.full != lv_color_hex(0x000000).full) {
+			if (lv_color_to_int(color) != 0x000000) {
 				lv_obj_set_style_bg_color(arc, lv_color_hex(0x000000), LV_PART_KNOB);
 			}
 		} else {
 			lv_obj_set_style_radius(arc, 20, LV_PART_KNOB);
 
 			if (patch_playloader.is_param_tracking(module_id, param_id)) {
-				if (color.full != lv_color_hex(0xFFFFFF).full) {
+				if (lv_color_to_int(color) != 0xFFFFFF) {
 					lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
 				}
 			} else {
-				if (color.full != lv_color_hex(0xAAAAAA).full) {
+				if (lv_color_to_int(color) != 0xAAAAAA) {
 					lv_obj_set_style_bg_color(arc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
 				}
 			}
@@ -339,19 +338,19 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	static void keyboard_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		auto page = static_cast<KnobSetViewPage *>(lv_event_get_user_data(event));
 
-		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
+		if (lv_event_get_code(event) == LV_EVENT_READY || lv_event_get_code(event) == LV_EVENT_CANCEL) {
 			page->save_knobset_name(true);
 		}
 	}
 
 	static void rename_knobset_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		auto page = static_cast<KnobSetViewPage *>(lv_event_get_user_data(event));
 		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
 		if (kb_hidden) {
 			page->show_keyboard();
@@ -359,12 +358,12 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	static void mapping_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 
-		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		auto page = static_cast<KnobSetViewPage *>(lv_event_get_user_data(event));
 
-		auto obj = event->current_target;
+		auto obj = lv_event_get_current_target(event);
 		if (!obj)
 			return;
 
@@ -372,7 +371,7 @@ struct KnobSetViewPage : PageBase {
 		if (view_set_idx >= page->patch->knob_sets.size())
 			return;
 
-		auto map_idx = reinterpret_cast<uintptr_t>(obj->user_data);
+		auto map_idx = reinterpret_cast<uintptr_t>(lv_obj_get_user_data((lv_obj_t *)obj));
 		if (map_idx >= page->patch->knob_sets[view_set_idx].set.size())
 			return;
 
@@ -381,10 +380,10 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	static void next_knobset_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 
-		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		auto page = static_cast<KnobSetViewPage *>(lv_event_get_user_data(event));
 
 		if (auto cur_id = page->args.view_knobset_id) {
 			if (page->args.view_knobset_id >= page->patch->knob_sets.size() - 1)
@@ -399,10 +398,10 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	static void prev_knobset_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 
-		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		auto page = static_cast<KnobSetViewPage *>(lv_event_get_user_data(event));
 
 		if (auto cur_id = page->args.view_knobset_id) {
 			if (page->args.view_knobset_id == 0)
@@ -417,17 +416,17 @@ struct KnobSetViewPage : PageBase {
 	}
 
 	static void goto_jackmap_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		auto page = static_cast<KnobSetViewPage *>(lv_event_get_user_data(event));
 		page->page_list.request_new_page_no_history(PageId::JackMapView, page->args);
 	}
 
 	static void activate_knobset_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 
-		auto page = static_cast<KnobSetViewPage *>(event->user_data);
+		auto page = static_cast<KnobSetViewPage *>(lv_event_get_user_data(event));
 
 		if (page->args.view_knobset_id.has_value())
 			page->activate_knobset(page->args.view_knobset_id.value());

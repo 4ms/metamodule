@@ -160,7 +160,7 @@ inline lv_obj_t *draw_element(const SliderLight &el, lv_obj_t *canvas, uint32_t 
 
 	auto handle = lv_obj_get_child(obj, 0);
 	if (handle) {
-		lv_color_t color{.full = el.color};
+		lv_color_t color = lv_color_from_rgb565(el.color);
 		lv_obj_set_style_bg_color(handle, color, LV_PART_MAIN);
 		lv_obj_set_style_radius(handle, 20, LV_PART_MAIN);
 		lv_obj_set_style_shadow_width(handle, module_height == 240 ? 16 : 0, LV_PART_MAIN);
@@ -230,7 +230,8 @@ inline lv_obj_t *draw_element(const TextDisplay &el, lv_obj_t *canvas, uint32_t 
 	auto label = lv_label_create(canvas);
 	lv_label_set_text(label, el.text.data());
 	lv_obj_set_style_text_font(label, get_font(el.font.data()), LV_PART_MAIN);
-	lv_obj_set_style_text_color(label, lv_color_t{.full = el.color.raw()}, LV_PART_MAIN);
+
+	lv_obj_set_style_text_color(label, lv_color_from_rgb565(el.color), LV_PART_MAIN);
 
 	lv_obj_set_align(label, LV_ALIGN_TOP_LEFT);
 	lv_obj_set_pos(label, x, y);

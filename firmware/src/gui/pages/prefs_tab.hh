@@ -258,27 +258,27 @@ struct PrefsTab : SystemMenuTab {
 
 private:
 	static void save_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PrefsTab *>(event->user_data);
+		auto page = static_cast<PrefsTab *>(lv_event_get_user_data(event));
 
 		page->update_settings_from_dropdown();
 		lv_group_focus_next(page->group);
 	}
 
 	static void revert_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PrefsTab *>(event->user_data);
+		auto page = static_cast<PrefsTab *>(lv_event_get_user_data(event));
 
 		page->update_dropdowns_from_settings();
 		lv_group_focus_next(page->group);
 	}
 
 	static void changed_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PrefsTab *>(event->user_data);
+		auto page = static_cast<PrefsTab *>(lv_event_get_user_data(event));
 
 		auto block_size = page->read_blocksize_dropdown();
 		auto sample_rate = page->read_samplerate_dropdown();
@@ -303,7 +303,7 @@ private:
 		if (!event)
 			return;
 
-		auto tar = event->target;
+		auto tar = lv_event_get_target_obj(event);
 
 		if (tar == ui_SystemPrefsCatchupModeDropdown || tar == ui_SystemPrefsCatchupExcludeButtonsCheck) {
 			lv_obj_scroll_to_view_recursive(ui_SystemPrefsSaveButton, LV_ANIM_ON);

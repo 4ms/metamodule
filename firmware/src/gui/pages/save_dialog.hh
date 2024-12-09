@@ -243,29 +243,29 @@ private:
 	}
 
 	static void click_filename_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<SaveDialog *>(lv_event_get_user_data(event));
 
 		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
 		if (kb_hidden) {
 			page->show_keyboard();
-			lv_keyboard_set_textarea(ui_Keyboard, event->target);
-			lv_obj_scroll_to_view_recursive(event->target, LV_ANIM_ON);
+			lv_keyboard_set_textarea(ui_Keyboard, lv_event_get_target_obj(event));
+			lv_obj_scroll_to_view_recursive(lv_event_get_target_obj(event), LV_ANIM_ON);
 		}
 	}
 
 	static void click_location_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<SaveDialog *>(lv_event_get_user_data(event));
 		page->show_subdir_panel();
 	}
 
 	static void save_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<SaveDialog *>(lv_event_get_user_data(event));
 
 		page->file_name = lv_textarea_get_text(ui_SaveDialogFilename);
 
@@ -321,18 +321,18 @@ private:
 	}
 
 	static void cancel_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<SaveDialog *>(lv_event_get_user_data(event));
 		page->hide();
 	}
 
 	static void keyboard_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<SaveDialog *>(event->user_data);
+		auto page = static_cast<SaveDialog *>(lv_event_get_user_data(event));
 
-		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
+		if (lv_event_get_code(event) == LV_EVENT_READY || lv_event_get_code(event) == LV_EVENT_CANCEL) {
 			page->hide_keyboard();
 		}
 	}

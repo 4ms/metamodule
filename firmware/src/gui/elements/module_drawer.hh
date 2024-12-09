@@ -10,6 +10,7 @@
 #include "lvgl.h"
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
+#include "src/misc/lv_color.h"
 
 namespace MetaModule
 {
@@ -33,8 +34,8 @@ struct ModuleDrawer {
 
 		// we need the image size to set the canvas buffer
 		// but we need the canvas w/buffer to draw the image
-		lv_img_header_t img_header;
-		auto res = lv_img_decoder_get_info(img_filename.c_str(), &img_header);
+		lv_image_header_t img_header;
+		auto res = lv_image_decoder_get_info(img_filename.c_str(), &img_header);
 		if (res != LV_RES_OK) {
 			pr_warn("Could not read image %s for module %.*s\n", img_filename.data(), slug.size(), slug.data());
 			return nullptr;
@@ -56,16 +57,22 @@ struct ModuleDrawer {
 		}
 
 		lv_obj_set_size(canvas, widthpx, height);
-		lv_canvas_set_buffer(canvas, canvas_buffer.data(), widthpx, height, LV_IMG_CF_TRUE_COLOR);
+		lv_canvas_set_buffer(canvas, canvas_buffer.data(), widthpx, height, LV_COLOR_FORMAT_NATIVE); //8.4: TRUE_COLOR
 
 		// Draw module artwork
-		lv_draw_img_dsc_t draw_img_dsc;
-		lv_draw_img_dsc_init(&draw_img_dsc);
-		draw_img_dsc.zoom = zoom * 256;
+		lv_draw_image_dsc_t draw_img_dsc;
+		lv_draw_image_dsc_init(&draw_img_dsc);
+		draw_img_dsc.scale_x = zoom * 256;
+		draw_img_dsc.scale_y = zoom * 256;
+		draw_img_dsc.src = img_filename.c_str();
 
 		pr_trace("Drawing faceplate %s (%d x %d)\n", slug.data(), widthpx, height);
 
-		lv_canvas_draw_img(canvas, 0, 0, img_filename.c_str(), &draw_img_dsc);
+		lv_layer_t layer;
+		lv_canvas_init_layer(canvas, &layer);
+		lv_area_t coords(0, 0, widthpx, height);
+		lv_draw_image(&layer, &draw_img_dsc, &coords);
+
 		// Overflow visible: requires too much processing when zoomed-out to view lots of modules
 		if (height == 240)
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_OVERFLOW_VISIBLE);

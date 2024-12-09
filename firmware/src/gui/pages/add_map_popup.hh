@@ -108,11 +108,11 @@ struct AddMapPopUp {
 	}
 
 	static void button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<AddMapPopUp *>(event->user_data);
+		auto page = static_cast<AddMapPopUp *>(lv_event_get_user_data(event));
 
-		if (event->target == ui_OkAdd) {
+		if (lv_event_get_target(event) == ui_OkAdd) {
 
 			if (page->selected_knob.has_value()) {
 				auto map = MappedKnob{
@@ -132,7 +132,7 @@ struct AddMapPopUp {
 			}
 			page->hide();
 
-		} else if (event->target == ui_CancelAdd) {
+		} else if (lv_event_get_target(event) == ui_CancelAdd) {
 			page->hide();
 		}
 	}

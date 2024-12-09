@@ -92,7 +92,7 @@ void renderFill(void *uptr,
 		std::ranges::transform(std::span{path.fill, (size_t)path.nfill}, std::back_inserter(points), to_lv_point);
 
 		// lv_canvas_draw_polygon(canvas, points.data(), points.size(), &rect_dsc);
-		lv_canvas_draw_line(canvas, points.data(), points.size(), &line_dsc);
+		// lv_canvas_draw_line(canvas, points.data(), points.size(), &line_dsc);
 	}
 
 	// if (scissor->extent[0] > 0) {
@@ -125,14 +125,7 @@ void renderStroke(void *uptr,
 		std::vector<lv_point_t> points;
 
 		std::ranges::transform(std::span{path.stroke, (size_t)path.nstroke}, std::back_inserter(points), to_lv_point);
-		// [](NVGvertex v) { return to_lv_point(v); });
-
-		lv_canvas_draw_line(canvas, points.data(), points.size(), &line_dsc);
-
-		// printf("Draw line: ");
-		// for (auto &p : points)
-		// 	printf("%d,%d -> ", (int)p.x, (int)p.y);
-		// printf("\n");
+		// lv_canvas_draw_line(canvas, points.data(), points.size(), &line_dsc);
 	}
 }
 

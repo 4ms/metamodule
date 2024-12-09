@@ -83,14 +83,14 @@ struct MainMenuPage : PageBase {
 
 private:
 	static void last_viewed_cb(lv_event_t *event) {
-		auto page = static_cast<MainMenuPage *>(event->user_data);
+		auto page = static_cast<MainMenuPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 		page->load_page(PageId::PatchView, {.patch_loc_hash = page->patches.get_view_patch_loc_hash()});
 	}
 
 	static void now_playing_cb(lv_event_t *event) {
-		auto page = static_cast<MainMenuPage *>(event->user_data);
+		auto page = static_cast<MainMenuPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 		if (page->patches.get_playing_patch()) {
@@ -100,14 +100,14 @@ private:
 	}
 
 	static void patchsel_cb(lv_event_t *event) {
-		auto page = static_cast<MainMenuPage *>(event->user_data);
+		auto page = static_cast<MainMenuPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 		page->load_page(PageId::PatchSel, {});
 	}
 
 	static void new_patch_cb(lv_event_t *event) {
-		auto page = static_cast<MainMenuPage *>(event->user_data);
+		auto page = static_cast<MainMenuPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 		page->patches.new_patch();
@@ -118,7 +118,7 @@ private:
 	}
 
 	static void settings_cb(lv_event_t *event) {
-		auto page = static_cast<MainMenuPage *>(event->user_data);
+		auto page = static_cast<MainMenuPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 		page->load_page(PageId::SystemMenu, {});

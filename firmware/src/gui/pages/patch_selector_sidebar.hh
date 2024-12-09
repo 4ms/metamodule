@@ -8,6 +8,7 @@
 #include "pr_dbg.hh"
 #include "util/countzip.hh"
 #include "util/zip.hh"
+#include <cstring>
 #include <functional>
 
 namespace MetaModule
@@ -144,15 +145,15 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	static void subdir_focus_cb(lv_event_t *event) {
-		auto page = static_cast<PatchSelectorSubdirPanel *>(event->user_data);
-		if (!page || !event->target || !event->target->user_data)
+		auto page = static_cast<PatchSelectorSubdirPanel *>(lv_event_get_user_data(event));
+		if (!page || !lv_event_get_target_obj(event) || !lv_obj_get_user_data(lv_event_get_target_obj(event)))
 			return;
 
-		label_scrolls(event->target);
-		page->last_subdir_sel = event->target;
+		label_scrolls(lv_event_get_target_obj(event));
+		page->last_subdir_sel = lv_event_get_target_obj(event);
 
 		if (page->focus_cb) {
-			auto parent = lv_obj_get_parent(event->target);
+			auto parent = lv_obj_get_parent(lv_event_get_target_obj(event));
 
 			Volume this_vol{};
 			for (auto [vol, vol_cont] : zip(PatchDirList::vols, page->vol_conts)) {
@@ -163,7 +164,7 @@ struct PatchSelectorSubdirPanel {
 			}
 
 			std::string_view dirname = "";
-			if (auto dir = static_cast<PatchDir const *>(event->target->user_data); dir) {
+			if (auto dir = static_cast<PatchDir const *>(lv_obj_get_user_data(lv_event_get_target_obj(event))); dir) {
 				dirname = std::string_view{dir->name};
 			}
 
@@ -172,16 +173,16 @@ struct PatchSelectorSubdirPanel {
 	}
 
 	static void subdir_defocus_cb(lv_event_t *event) {
-		if (!event->target)
+		if (!lv_event_get_target_obj(event))
 			return;
-		label_clips(event->target);
+		label_clips(lv_event_get_target_obj(event));
 	}
 
 	static void subdir_click_cb(lv_event_t *event) {
-		auto page = static_cast<PatchSelectorSubdirPanel *>(event->user_data);
+		auto page = static_cast<PatchSelectorSubdirPanel *>(lv_event_get_user_data(event));
 
-		if (page && event->target && page->click_cb) {
-			auto parent = lv_obj_get_parent(event->target);
+		if (page && lv_event_get_target_obj(event) && page->click_cb) {
+			auto parent = lv_obj_get_parent(lv_event_get_target_obj(event));
 
 			Volume this_vol{};
 			for (auto [vol, vol_cont] : zip(PatchDirList::vols, page->vol_conts)) {
@@ -192,7 +193,7 @@ struct PatchSelectorSubdirPanel {
 			}
 
 			std::string_view dirname = "";
-			if (auto dir = static_cast<PatchDir const *>(event->target->user_data); dir) {
+			if (auto dir = static_cast<PatchDir const *>(lv_obj_get_user_data(lv_event_get_target_obj(event))); dir) {
 				dirname = std::string_view{dir->name};
 			}
 

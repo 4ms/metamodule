@@ -510,7 +510,8 @@ lv_obj_set_style_border_side(ui_PatchListRoller, LV_BORDER_SIDE_FULL, LV_PART_SE
 lv_obj_set_style_bg_color(ui_PatchListRoller, lv_color_hex(0xFD8B18), LV_PART_SELECTED | LV_STATE_FOCUSED );
 lv_obj_set_style_bg_opa(ui_PatchListRoller, 255, LV_PART_SELECTED| LV_STATE_FOCUSED);
 
-ui_waitspinner = lv_spinner_create(ui_PatchSelectorPage,1000,90);
+ui_waitspinner = lv_spinner_create(ui_PatchSelectorPage);
+lv_spinner_set_anim_params(ui_waitspinner, 1000, 90);
 lv_obj_set_width( ui_waitspinner, 64);
 lv_obj_set_height( ui_waitspinner, 64);
 lv_obj_set_align( ui_waitspinner, LV_ALIGN_CENTER );

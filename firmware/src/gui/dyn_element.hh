@@ -41,9 +41,9 @@ public:
 			lv_obj_set_size(canvas, w, h);
 
 			// setup backing buffer for canvas
-			buffer.resize(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(w, h));
+			buffer.resize(w * h * 4);
 			std::ranges::fill(buffer, 0);
-			lv_canvas_set_buffer(canvas, buffer.data(), w, h, LV_IMG_CF_TRUE_COLOR_ALPHA);
+			lv_canvas_set_buffer(canvas, buffer.data(), w, h, LV_COLOR_FORMAT_RGB565A8);
 
 			drawer->prepare(canvas);
 		}

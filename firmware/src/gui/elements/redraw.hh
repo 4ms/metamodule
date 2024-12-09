@@ -22,7 +22,7 @@ inline bool redraw_element(const Knob &el, const GuiElement &gui_el, float val) 
 	int32_t angle = (val * (end_angle - begin_angle)) + begin_angle;
 	angle = angle % 3600;
 
-	bool is_img = lv_obj_has_class(gui_el.obj, &lv_img_class);
+	bool is_img = lv_obj_has_class(gui_el.obj, &lv_image_class);
 
 	int32_t cur_angle =
 		is_img ? lv_img_get_angle(gui_el.obj) : lv_obj_get_style_transform_angle(gui_el.obj, LV_PART_MAIN);

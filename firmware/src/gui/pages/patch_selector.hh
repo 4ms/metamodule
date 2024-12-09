@@ -479,7 +479,7 @@ private:
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
 
-		auto page = static_cast<PatchSelectorPage *>(event->user_data);
+		auto page = static_cast<PatchSelectorPage *>(lv_event_get_user_data(event));
 
 		page->scroll_to_next_valid();
 
@@ -490,7 +490,7 @@ private:
 	}
 
 	static void patchlist_click_cb(lv_event_t *event) {
-		auto page = static_cast<PatchSelectorPage *>(event->user_data);
+		auto page = static_cast<PatchSelectorPage *>(lv_event_get_user_data(event));
 
 		auto idx = lv_roller_get_selected(ui_PatchListRoller);
 

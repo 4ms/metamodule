@@ -194,9 +194,9 @@ private:
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		auto page = static_cast<ModuleViewActionMenu *>(lv_event_get_user_data(event));
 		if (page->visible)
 			page->hide();
 		else
@@ -204,25 +204,25 @@ private:
 	}
 
 	static void autopatch_but_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		auto page = static_cast<ModuleViewActionMenu *>(lv_event_get_user_data(event));
 
-		if (event->target == ui_ModuleViewActionAutopatchBut)
+		if (lv_event_get_target_obj(event) == ui_ModuleViewActionAutopatchBut)
 			page->auto_map_all();
 		else
 			page->auto_map_single_knobset();
 	}
 
 	static void random_but_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		auto page = static_cast<ModuleViewActionMenu *>(lv_event_get_user_data(event));
 		page->randomize();
 	}
 
 	static void scroll_top_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 		lv_obj_scroll_to_y(ui_ModuleViewActionMenu, 0, LV_ANIM_ON);
 	}
@@ -251,23 +251,23 @@ private:
 	}
 
 	static void preset_but_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		auto page = static_cast<ModuleViewActionMenu *>(lv_event_get_user_data(event));
 		page->preset_but_cb();
 	}
 
 	static void reset_but_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		auto page = static_cast<ModuleViewActionMenu *>(lv_event_get_user_data(event));
 		page->reset_params();
 	}
 
 	static void delete_but_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewActionMenu *>(event->user_data);
+		auto page = static_cast<ModuleViewActionMenu *>(lv_event_get_user_data(event));
 
 		std::string confirm_msg =
 			"Remove this module, all its mappings, and all connected cables from the patch? This cannot be undone.";

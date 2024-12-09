@@ -642,7 +642,7 @@ const lv_img_dsc_t *ui_imgset_settings[1] = {&ui_img_1x_settings1_png};
 ///////////////////// ANIMATIONS ////////////////////
 void DropInFromLeft_Animation( lv_obj_t *TargetObject, int delay)
 {
-ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_malloc(sizeof(ui_anim_user_data_t));
 PropertyAnimation_0_user_data->target = TargetObject;
 PropertyAnimation_0_user_data->val = -1;
 lv_anim_t PropertyAnimation_0;
@@ -664,7 +664,7 @@ lv_anim_start(&PropertyAnimation_0);
 }
 void DropOutToRight_Animation( lv_obj_t *TargetObject, int delay)
 {
-ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_malloc(sizeof(ui_anim_user_data_t));
 PropertyAnimation_0_user_data->target = TargetObject;
 PropertyAnimation_0_user_data->val = -1;
 lv_anim_t PropertyAnimation_0;
@@ -686,7 +686,7 @@ lv_anim_start(&PropertyAnimation_0);
 }
 void SlideDown_Animation( lv_obj_t *TargetObject, int delay)
 {
-ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_malloc(sizeof(ui_anim_user_data_t));
 PropertyAnimation_0_user_data->target = TargetObject;
 PropertyAnimation_0_user_data->val = -1;
 lv_anim_t PropertyAnimation_0;
@@ -708,7 +708,7 @@ lv_anim_start(&PropertyAnimation_0);
 }
 void SlideUp_Animation( lv_obj_t *TargetObject, int delay)
 {
-ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_malloc(sizeof(ui_anim_user_data_t));
 PropertyAnimation_0_user_data->target = TargetObject;
 PropertyAnimation_0_user_data->val = -1;
 lv_anim_t PropertyAnimation_0;

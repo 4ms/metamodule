@@ -646,6 +646,9 @@ LV_FONT_DECLARE(ui_font_Segment32);
 
 void ui_init(void);
 
+inline void lv_label_set_recolor(lv_obj_t *, bool) {
+}
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

@@ -28,7 +28,7 @@ lv_obj_clear_flag( ui_JackMapViewCont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS
 lv_obj_set_style_radius(ui_JackMapViewCont, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_JackMapViewCont, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_img_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+// lv_obj_set_style_bg_img_opa(ui_JackMapViewCont, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_img_recolor(ui_JackMapViewCont, lv_color_hex(0x666666), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_img_recolor_opa(ui_JackMapViewCont, 100, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_color(ui_JackMapViewCont, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT );

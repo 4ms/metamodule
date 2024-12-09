@@ -1,5 +1,6 @@
 #pragma once
 #include "gui/helpers/lv_helpers.hh"
+#include "gui/slsexport/meta5/ui.h" //for lv_label_set_recolor
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include <functional>
@@ -115,8 +116,8 @@ public:
 	}
 
 	static void redraw_done_cb(lv_event_t *event) {
-		auto page = static_cast<RollerHoverText *>(event->user_data);
-		if (event->code == LV_EVENT_DRAW_POST_END) {
+		auto page = static_cast<RollerHoverText *>(lv_event_get_user_data(event));
+		if (lv_event_get_code(event) == LV_EVENT_DRAW_POST_END) {
 			if (page->draw_callback)
 				page->draw_callback();
 			else

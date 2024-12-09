@@ -56,7 +56,7 @@ private:
 	// Takes ~50us for A 14HP-ish module
 	void clear_canvas() {
 		if (canvas) {
-			auto buf = lv_canvas_get_img(canvas);
+			auto buf = lv_canvas_get_image(canvas);
 			if (buf) {
 				std::memset((void *)buf->data, 0, width * height * 3);
 			}

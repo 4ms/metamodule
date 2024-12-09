@@ -119,11 +119,11 @@ struct FirmwareUpdateTab : SystemMenuTab {
 
 private:
 	static void updatebut_cb(lv_event_t *event) {
-		auto page = static_cast<FirmwareUpdateTab *>(event->user_data);
+		auto page = static_cast<FirmwareUpdateTab *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
-		if (event->code == LV_EVENT_CLICKED) {
+		if (lv_event_get_code(event) == LV_EVENT_CLICKED) {
 			page->confirm_popup.show(
 				[page](bool ok) {
 					if (ok) {

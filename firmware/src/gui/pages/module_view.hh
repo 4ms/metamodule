@@ -39,7 +39,7 @@ struct ModuleViewPage : PageBase {
 
 		init_bg(ui_MappingMenu);
 
-		lv_draw_img_dsc_init(&img_dsc);
+		lv_draw_image_dsc_init(&img_dsc);
 
 		lv_obj_remove_style(ui_ElementRoller, nullptr, LV_STATE_EDITED);
 		lv_obj_remove_style(ui_ElementRoller, nullptr, LV_STATE_FOCUS_KEY);
@@ -517,7 +517,7 @@ private:
 	}
 
 	static void roller_scrolled_cb(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		auto page = static_cast<ModuleViewPage *>(lv_event_get_user_data(event));
 
 		auto cur_sel = lv_roller_get_selected(ui_ElementRoller);
 		if (cur_sel >= page->roller_drawn_el_idx.size()) {
@@ -574,14 +574,14 @@ private:
 	void unhighlight_component(uint32_t prev_sel) {
 		if (auto prev_idx = get_drawn_idx(prev_sel)) {
 			lv_obj_remove_style(button[*prev_idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-			lv_event_send(button[*prev_idx], LV_EVENT_REFRESH, nullptr);
+			lv_obj_send_event(button[*prev_idx], LV_EVENT_REFRESH, nullptr);
 		}
 	}
 
 	void highlight_component(size_t idx) {
 		if (idx < button.size()) {
 			lv_obj_add_style(button[idx], &Gui::panel_highlight_style, LV_PART_MAIN);
-			lv_event_send(button[idx], LV_EVENT_REFRESH, nullptr);
+			lv_obj_send_event(button[idx], LV_EVENT_REFRESH, nullptr);
 			lv_obj_scroll_to_view(button[idx], LV_ANIM_ON);
 		}
 	}
@@ -599,7 +599,7 @@ private:
 	}
 
 	static void roller_click_cb(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		auto page = static_cast<ModuleViewPage *>(lv_event_get_user_data(event));
 		auto roller_idx = page->cur_selected;
 
 		if (auto drawn_idx = page->get_drawn_idx(roller_idx)) {
@@ -667,7 +667,7 @@ private:
 	}
 
 	static void roller_focus_cb(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		auto page = static_cast<ModuleViewPage *>(lv_event_get_user_data(event));
 		if (page) {
 			if (page->roller_drawn_el_idx.size() <= 1) {
 				page->focus_button_bar();
@@ -675,9 +675,9 @@ private:
 				return;
 			}
 
-			if (event->param != page) {
+			if (lv_event_get_param(event) != page) {
 				lv_group_set_editing(page->group, true);
-				lv_event_send(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
+				lv_obj_send_event(ui_ElementRoller, LV_EVENT_PRESSED, nullptr);
 
 				if (auto drawn_idx = page->get_drawn_idx(page->cur_selected)) {
 					page->highlight_component(*drawn_idx);
@@ -687,9 +687,9 @@ private:
 	}
 
 	static void cancel_cable_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		auto page = static_cast<ModuleViewPage *>(lv_event_get_user_data(event));
 
 		abort_cable(page->gui_state, page->notify_queue);
 		page->page_list.request_new_page(PageId::PatchView, page->args);
@@ -735,8 +735,8 @@ private:
 
 	ModuleViewActionMenu action_menu;
 
-	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)]{};
-	lv_draw_img_dsc_t img_dsc{};
+	lv_color_t buffer[240 * 240 * 3]{};
+	lv_draw_image_dsc_t img_dsc{};
 
 	enum class ViewMode { List, Mapping, ExtraMenu } mode{ViewMode::List};
 

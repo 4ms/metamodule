@@ -19,6 +19,7 @@
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
+#include "src/misc/lv_color.h"
 #include "util/countzip.hh"
 
 namespace MetaModule
@@ -163,8 +164,8 @@ struct PatchViewPage : PageBase {
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
-			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) *
-											page_settings.view_height_px);
+			auto bytes_per_pix = lv_color_format_get_size(LV_COLOR_FORMAT_NATIVE_WITH_ALPHA);
+			canvas_buf = canvas_buf.subspan(bytes_per_pix * lv_obj_get_width(canvas) * page_settings.view_height_px);
 			int this_bottom = lv_obj_get_y(canvas) + lv_obj_get_height(canvas);
 			bottom = std::max(bottom, this_bottom);
 
@@ -505,11 +506,11 @@ private:
 	}
 
 	static void module_click_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto page = static_cast<PatchViewPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
-		auto obj = event->current_target;
+		auto obj = lv_event_get_current_target_obj(event);
 		if (!obj)
 			return;
 		page->args.module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
@@ -520,7 +521,7 @@ private:
 	}
 
 	static void module_focus_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto page = static_cast<PatchViewPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
@@ -556,7 +557,7 @@ private:
 	}
 
 	static void scroll_end_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto page = static_cast<PatchViewPage *>(lv_event_get_user_data(event));
 		page->redraw_modulename();
 	}
 
@@ -578,7 +579,7 @@ private:
 	}
 
 	static void playbut_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto page = static_cast<PatchViewPage *>(lv_event_get_user_data(event));
 		if (!page->is_patch_loaded) {
 			page->patch_playloader.request_load_view_patch();
 			page->save_last_opened_patch_in_settings();
@@ -592,7 +593,7 @@ private:
 	}
 
 	static void button_focussed_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto page = static_cast<PatchViewPage *>(lv_event_get_user_data(event));
 		lv_label_set_text(ui_ModuleName, "");
 		lv_hide(ui_ModuleName);
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
@@ -601,7 +602,7 @@ private:
 		page->settings_menu.hide();
 		page->file_menu.hide();
 
-		if (event->target == ui_SaveButton) {
+		if (lv_event_get_target_obj(event) == ui_SaveButton) {
 			lv_label_set_text(ui_PatchName, page->patches.get_view_patch_filename().data());
 		} else {
 			lv_label_set_text(ui_PatchName, page->patch->patch_name.c_str());
@@ -609,7 +610,7 @@ private:
 	}
 
 	static void add_module_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto page = static_cast<PatchViewPage *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 		abort_cable(page->gui_state, page->notify_queue);
@@ -617,9 +618,9 @@ private:
 	}
 
 	static void knob_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto page = static_cast<PatchViewPage *>(lv_event_get_user_data(event));
 
 		abort_cable(page->gui_state, page->notify_queue);
 		page->load_page(PageId::KnobSetView,
@@ -627,7 +628,7 @@ private:
 	}
 
 	static void desc_open_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto page = static_cast<PatchViewPage *>(lv_event_get_user_data(event));
 		abort_cable(page->gui_state, page->notify_queue);
 		page->show_desc_panel();
 	}

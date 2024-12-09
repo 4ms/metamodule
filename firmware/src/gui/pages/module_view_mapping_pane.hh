@@ -402,9 +402,9 @@ private:
 	}
 
 	static void add_cable_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+		auto page = static_cast<ModuleViewMappingPane *>(lv_event_get_user_data(event));
 
 		if (page->gui_state.already_displayed_cable_instructions) {
 			page->start_new_cable();
@@ -421,9 +421,9 @@ private:
 	}
 
 	static void add_panel_cable_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+		auto page = static_cast<ModuleViewMappingPane *>(lv_event_get_user_data(event));
 
 		std::string choices;
 		std::optional<unsigned> first_unpatched_jack{};
@@ -490,9 +490,9 @@ private:
 	}
 
 	static void add_midi_cable_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+		auto page = static_cast<ModuleViewMappingPane *>(lv_event_get_user_data(event));
 
 		auto name = get_full_element_name(
 			page->this_jack.module_id, page->this_jack.jack_id, page->this_jack_type, *page->patch);
@@ -518,9 +518,9 @@ private:
 	}
 
 	static void disconnect_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+		auto page = static_cast<ModuleViewMappingPane *>(lv_event_get_user_data(event));
 
 		DisconnectJack disconnect{.jack = page->this_jack, .type = page->this_jack_type};
 		page->patch_mod_queue.put(disconnect);
@@ -529,14 +529,14 @@ private:
 	}
 
 	static void follow_cable_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+		auto page = static_cast<ModuleViewMappingPane *>(lv_event_get_user_data(event));
 
-		if (!event->target)
+		if (!lv_event_get_target(event))
 			return;
 
-		if (auto objdata = lv_obj_get_user_data(event->target)) {
+		if (auto objdata = lv_obj_get_user_data((lv_obj_t *)lv_event_get_target(event))) {
 			auto endpoint = *static_cast<MapCableUserData *>(objdata);
 			page->page_list.request_new_page(PageId::ModuleView,
 											 {.patch_loc_hash = page->args.patch_loc_hash,
@@ -680,14 +680,14 @@ private:
 	}
 
 	static void edit_map_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data || !event->target)
+		if (!event || !lv_event_get_user_data(event) || !lv_event_get_target(event))
 			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+		auto page = static_cast<ModuleViewMappingPane *>(lv_event_get_user_data(event));
 
-		if (!event->target)
+		if (!lv_event_get_target(event))
 			return;
 
-		if (auto objdata = lv_obj_get_user_data(event->target)) {
+		if (auto objdata = lv_obj_get_user_data((lv_obj_t *)lv_event_get_target(event))) {
 
 			auto data = *static_cast<MapKnobUserData *>(objdata);
 			if (!data.mappedknob_idx.has_value())
@@ -702,13 +702,13 @@ private:
 	}
 
 	static void add_map_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+		auto page = static_cast<ModuleViewMappingPane *>(lv_event_get_user_data(event));
 
 		uint32_t knobset_id = 0;
-		auto obj = event->target;
-		if (auto knobset_ptr = lv_obj_get_user_data(obj)) {
+		auto obj = lv_event_get_target(event);
+		if (auto knobset_ptr = lv_obj_get_user_data((lv_obj_t *)obj)) {
 			knobset_id = *static_cast<uint32_t *>(knobset_ptr);
 		} else {
 			pr_err("Knob set id not set\n");
@@ -727,28 +727,28 @@ private:
 	}
 
 	static void scroll_to_top(lv_event_t *event) {
-		if (event->target == ui_ControlButton) {
+		if (lv_event_get_target(event) == ui_ControlButton) {
 			lv_obj_scroll_to_y(ui_MappingParameters, 0, LV_ANIM_ON);
 		}
 	}
 
 	static void control_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+		auto page = static_cast<ModuleViewMappingPane *>(lv_event_get_user_data(event));
 
-		if (event->target == ui_ControlButton) {
+		if (lv_event_get_target(event) == ui_ControlButton) {
 			lv_obj_clear_state(ui_ControlButton, LV_STATE_PRESSED);
 			page->control_popup.show(page->drawn_element);
 		}
 	}
 
 	static void reset_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
 
-		auto page = static_cast<ModuleViewMappingPane *>(event->user_data);
+		auto page = static_cast<ModuleViewMappingPane *>(lv_event_get_user_data(event));
 
 		if (auto def_val = get_normalized_default_value(page->drawn_element->element); def_val.has_value()) {
 			StaticParam sp{

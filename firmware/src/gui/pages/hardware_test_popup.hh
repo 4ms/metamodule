@@ -141,9 +141,9 @@ struct HardwareCheckPopup {
 
 private:
 	static void exit_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<HardwareCheckPopup *>(event->user_data);
+		auto page = static_cast<HardwareCheckPopup *>(lv_event_get_user_data(event));
 
 		page->hide();
 	}

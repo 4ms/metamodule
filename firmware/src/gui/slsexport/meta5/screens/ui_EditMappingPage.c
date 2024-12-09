@@ -40,7 +40,7 @@ lv_obj_clear_flag( ui_EditMappingContainer, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG
 lv_obj_set_style_radius(ui_EditMappingContainer, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_EditMappingContainer, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_EditMappingContainer, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_img_opa(ui_EditMappingContainer, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_image_opa(ui_EditMappingContainer, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_img_recolor(ui_EditMappingContainer, lv_color_hex(0x666666), LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_img_recolor_opa(ui_EditMappingContainer, 100, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_width(ui_EditMappingContainer, 0, LV_PART_MAIN| LV_STATE_DEFAULT);

@@ -1,5 +1,6 @@
 #include "lvgl.h"
 // #include "meta5/ui.h"
+#include "gui/helpers/lv_helpers.hh"
 
 namespace MetaModule
 {

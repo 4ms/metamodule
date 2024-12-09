@@ -67,17 +67,17 @@ struct ChoicePopup : ConfirmPopup {
 	}
 
 	static void button_callback(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<ChoicePopup *>(event->user_data);
+		auto page = static_cast<ChoicePopup *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
 		if (page->callback) {
-			if (event->target == ui_CancelButton)
+			if (lv_event_get_target(event) == ui_CancelButton)
 				page->callback(0);
 
-			else if (event->target == ui_ConfirmButton) {
+			else if (lv_event_get_target(event) == ui_ConfirmButton) {
 				auto selected = lv_dropdown_get_selected(page->dropdown) + 1;
 				page->callback(selected);
 			}

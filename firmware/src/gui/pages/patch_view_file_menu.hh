@@ -215,9 +215,9 @@ private:
 	}
 
 	static void menu_button_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+		auto page = static_cast<PatchViewFileMenu *>(lv_event_get_user_data(event));
 		if (page->visible)
 			page->hide();
 		else {
@@ -227,9 +227,9 @@ private:
 	}
 
 	static void savebut_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+		auto page = static_cast<PatchViewFileMenu *>(lv_event_get_user_data(event));
 
 		if (page->patches.get_view_patch_vol() == Volume::RamDisk ||
 			page->patches.get_view_patch_vol() == Volume::MaxVolumes)
@@ -244,9 +244,9 @@ private:
 	}
 
 	static void saveas_but_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+		auto page = static_cast<PatchViewFileMenu *>(lv_event_get_user_data(event));
 
 		// If it hasn't been saved yet, then we can't duplicate, so save
 		if (page->patches.get_view_patch_vol() == Volume::RamDisk)
@@ -256,17 +256,17 @@ private:
 	}
 
 	static void rename_but_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+		auto page = static_cast<PatchViewFileMenu *>(lv_event_get_user_data(event));
 
 		page->show_save_dialog(SaveDialog::Action::Rename);
 	}
 
 	static void delete_but_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+		auto page = static_cast<PatchViewFileMenu *>(lv_event_get_user_data(event));
 
 		std::string confirm_msg =
 			"Delete " + std::string(page->patches.get_view_patch_filename()) + " on disk? This cannot be undone.";
@@ -283,9 +283,9 @@ private:
 	}
 
 	static void revert_but_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchViewFileMenu *>(event->user_data);
+		auto page = static_cast<PatchViewFileMenu *>(lv_event_get_user_data(event));
 
 		std::string confirm_msg = "Revert " + std::string(page->patches.get_view_patch_filename()) +
 								  " to last saved version on disk? This cannot be undone.";

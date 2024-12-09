@@ -4,7 +4,6 @@
 #include "gui/styles.hh"
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
-#include "src/core/lv_event.h"
 
 namespace MetaModule
 {
@@ -107,15 +106,15 @@ struct PatchDescriptionPanel {
 
 private:
 	static void closebut_cb(lv_event_t *event) {
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		auto page = static_cast<PatchDescriptionPanel *>(lv_event_get_user_data(event));
 		page->hide();
 	}
 
 	// Edit button: hide panel, show editable panel
 	static void editbut_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		auto page = static_cast<PatchDescriptionPanel *>(lv_event_get_user_data(event));
 		lv_hide(ui_DescriptionPanel);
 		lv_show(ui_DescriptionEditPanel);
 
@@ -132,19 +131,19 @@ private:
 
 	// Any text area: show keyboard
 	static void textarea_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		auto page = static_cast<PatchDescriptionPanel *>(lv_event_get_user_data(event));
 		auto kb_hidden = lv_obj_has_flag(ui_Keyboard, LV_OBJ_FLAG_HIDDEN);
 		if (kb_hidden) {
-			if (event->target == ui_DescriptionEditTextArea) {
+			if (lv_event_get_target_obj(event) == ui_DescriptionEditTextArea) {
 				page->show_keyboard();
-				lv_keyboard_set_textarea(ui_Keyboard, event->target);
-				lv_obj_add_state(event->target, LV_STATE_USER_1);
+				lv_keyboard_set_textarea(ui_Keyboard, lv_event_get_target_obj(event));
+				lv_obj_add_state(lv_event_get_target_obj(event), LV_STATE_USER_1);
 				set_content_max_height(ui_DescriptionEditPanel, 128);
-				set_content_max_height(event->target, 128);
-				lv_obj_scroll_to_view_recursive(event->target, LV_ANIM_ON);
-				page->active_ta = event->target;
+				set_content_max_height(lv_event_get_target_obj(event), 128);
+				lv_obj_scroll_to_view_recursive(lv_event_get_target_obj(event), LV_ANIM_ON);
+				page->active_ta = lv_event_get_target_obj(event);
 			}
 		}
 	}
@@ -180,9 +179,9 @@ private:
 	}
 
 	static void save_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		auto page = static_cast<PatchDescriptionPanel *>(lv_event_get_user_data(event));
 
 		if (page->patch) {
 			page->patch->description = lv_textarea_get_text(ui_DescriptionEditTextArea);
@@ -193,18 +192,18 @@ private:
 	}
 
 	static void cancel_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		auto page = static_cast<PatchDescriptionPanel *>(lv_event_get_user_data(event));
 		page->hide();
 	}
 
 	static void keyboard_cb(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<PatchDescriptionPanel *>(event->user_data);
+		auto page = static_cast<PatchDescriptionPanel *>(lv_event_get_user_data(event));
 
-		if (event->code == LV_EVENT_READY || event->code == LV_EVENT_CANCEL) {
+		if (lv_event_get_code(event) == LV_EVENT_READY || lv_event_get_code(event) == LV_EVENT_CANCEL) {
 			page->hide_keyboard();
 		}
 	}

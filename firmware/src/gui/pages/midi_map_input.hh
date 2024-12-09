@@ -149,19 +149,19 @@ struct MidiMapPopup {
 	}
 
 	static void button_callback(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<MidiMapPopup *>(event->user_data);
+		auto page = static_cast<MidiMapPopup *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
 		if (page->callback) {
 			std::optional<unsigned> midi_map_number;
 
-			if (event->target == ui_MidiMapCancelButton)
+			if (lv_event_get_target(event) == ui_MidiMapCancelButton)
 				midi_map_number = std::nullopt;
 
-			else if (event->target == ui_MidiMapOKButton)
+			else if (lv_event_get_target(event) == ui_MidiMapOKButton)
 				midi_map_number = page->calc_midi_signal_number();
 
 			page->callback(midi_map_number);
@@ -175,22 +175,22 @@ struct MidiMapPopup {
 	}
 
 	static void check_callback(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<MidiMapPopup *>(event->user_data);
+		auto page = static_cast<MidiMapPopup *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
 
-		page->check_only(event->target);
+		page->check_only((lv_obj_t *)lv_event_get_target(event));
 	}
 
 	static void drop_callback(lv_event_t *event) {
-		if (!event || !event->user_data)
+		if (!event || !lv_event_get_user_data(event))
 			return;
-		auto page = static_cast<MidiMapPopup *>(event->user_data);
+		auto page = static_cast<MidiMapPopup *>(lv_event_get_user_data(event));
 		if (!page)
 			return;
-		auto source_check = static_cast<lv_obj_t *>(lv_obj_get_user_data(event->target));
+		auto source_check = static_cast<lv_obj_t *>(lv_obj_get_user_data((lv_obj_t *)lv_event_get_target(event)));
 		if (!source_check)
 			return;
 

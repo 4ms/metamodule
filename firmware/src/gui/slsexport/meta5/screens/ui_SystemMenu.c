@@ -10,7 +10,9 @@ void ui_SystemMenu_screen_init(void)
 ui_SystemMenu = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_SystemMenu, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_SystemMenuTabView = lv_tabview_create(ui_SystemMenu, LV_DIR_LEFT, 90);
+ui_SystemMenuTabView = lv_tabview_create(ui_SystemMenu);
+lv_tabview_set_tab_bar_position(ui_SystemMenuTabView, LV_DIR_LEFT);
+lv_tabview_set_tab_bar_size(ui_SystemMenuTabView, 90);
 lv_obj_set_width( ui_SystemMenuTabView, lv_pct(100));
 lv_obj_set_height( ui_SystemMenuTabView, lv_pct(100));
 lv_obj_set_align( ui_SystemMenuTabView, LV_ALIGN_CENTER );
@@ -513,7 +515,8 @@ lv_obj_set_style_outline_opa(ui_PluginsBuiltinListText, 255, LV_PART_MAIN| LV_ST
 lv_obj_set_style_outline_width(ui_PluginsBuiltinListText, 2, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 lv_obj_set_style_outline_pad(ui_PluginsBuiltinListText, 1, LV_PART_MAIN| LV_STATE_FOCUS_KEY);
 
-ui_PluginTabSpinner = lv_spinner_create(ui_SystemMenuPluginsTab,1000,90);
+ui_PluginTabSpinner = lv_spinner_create(ui_SystemMenuPluginsTab);
+lv_spinner_set_anim_params(ui_PluginTabSpinner,1000,90);
 lv_obj_set_width( ui_PluginTabSpinner, 64);
 lv_obj_set_height( ui_PluginTabSpinner, 64);
 lv_obj_set_align( ui_PluginTabSpinner, LV_ALIGN_CENTER );
@@ -1576,7 +1579,8 @@ lv_obj_add_flag( ui_SystemMenUpdateProgressBar, LV_OBJ_FLAG_HIDDEN );   /// Flag
 lv_obj_set_style_bg_color(ui_SystemMenUpdateProgressBar, lv_color_hex(0xFF8918), LV_PART_INDICATOR | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_SystemMenUpdateProgressBar, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
 
-ui_FWUpdateSpinner = lv_spinner_create(ui_SystemMenuUpdateTab,1000,90);
+ui_FWUpdateSpinner = lv_spinner_create(ui_SystemMenuUpdateTab);
+lv_spinner_set_anim_params(ui_FWUpdateSpinner,1000,90);
 lv_obj_set_width( ui_FWUpdateSpinner, 64);
 lv_obj_set_height( ui_FWUpdateSpinner, 64);
 lv_obj_set_x( ui_FWUpdateSpinner, 0 );
