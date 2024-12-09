@@ -73,6 +73,8 @@ public:
 		_spi_driver.init();
 		_spi_driver.register_partial_frame_cb(end_flush);
 		_spi_driver.clear_overrun_on_interrupt();
+
+		is_init = true;
 	}
 
 	static inline uint32_t last_transfer_start_time = 0;
@@ -80,15 +82,20 @@ public:
 	static inline uint16_t *last_pixbuf = nullptr;
 
 	static inline std::atomic<bool> flush_done = false;
+	static inline std::atomic<bool> is_init = false;
 
 	static void end_flush() {
 		lv_display_flush_ready(last_used_display);
-		Debug::Pin0::low();
+		Debug::Pin1::low();
 		flush_done = true;
 	}
 
 	static void flush_to_screen(lv_display_t *display, const lv_area_t *area, uint8_t *color_p) {
-		Debug::Pin0::high();
+		if (!is_init) {
+			end_flush();
+			return;
+		}
+		Debug::Pin1::high();
 		flush_done = false;
 		last_used_display = display;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
