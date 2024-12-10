@@ -224,8 +224,7 @@ struct KnobMapPage : PageBase {
 		}
 
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});
-		page->patch_mod_queue.put(
-			EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx, .cur_val = val / 100.f});
+		page->patch_mod_queue.put(EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx});
 		page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
 		page->patches.mark_view_patch_modified();
 	}
