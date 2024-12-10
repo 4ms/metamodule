@@ -4,26 +4,25 @@
 #include "patch_file/file_storage_proxy.hh"
 #include "settings_parse.hh"
 #include "settings_serialize.hh"
+#include "util/monotonic_allocator.hh"
 
 namespace MetaModule::Settings
 {
 
 bool write_settings(FileStorageProxy &proxy, UserSettings const &settings) {
-	std::array<char, 1024> buffer;
+	std::array<char, 2048> buffer{};
 
 	auto sz = serialize(settings, buffer);
 
 	auto yaml_clean = std::span<char>{buffer.data(), sz};
 
-	return FS::write_file(proxy, yaml_clean, {"settings.yml", Volume::NorFlash});
+	return FS::write_file(proxy, yaml_clean, {.filename = "settings.yml", .vol = Volume::NorFlash});
 }
 
 bool read_settings(FileStorageProxy &proxy, UserSettings *settings) {
-	alignas(64) std::array<char, 1024> buffer{};
 
-	static_assert(buffer.size() % 64 == 0, "Buffer must not share cache lines with other data");
-
-	mdrivlib::SystemCache::clean_dcache_by_range(buffer.data(), buffer.size());
+	auto rawmem = get_ram_buffer();
+	auto buffer = std::span{(char *)rawmem.data(), 2048};
 
 	uint32_t timeout = get_time();
 	while (!proxy.request_load_file("settings.yml", Volume::NorFlash, buffer)) {
@@ -38,11 +37,9 @@ bool read_settings(FileStorageProxy &proxy, UserSettings *settings) {
 		auto msg = proxy.get_message();
 
 		if (msg.message_type == FileStorageProxy::LoadFileOK) {
-			pr_dbg("Settings file loaded, beginning parsing\n");
+			pr_dbg("Settings file loaded, %zu bytes, beginning parsing\n", msg.bytes_read);
 
 			auto yaml = std::span<char>{buffer.data(), msg.bytes_read};
-
-			mdrivlib::SystemCache::invalidate_dcache_by_range(yaml.data(), yaml.size());
 
 			return parse(yaml, settings);
 		}
