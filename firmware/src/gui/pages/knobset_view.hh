@@ -258,7 +258,7 @@ struct KnobSetViewPage : PageBase {
 
 							auto is_tracking = patch_playloader.is_param_tracking(p.module_id, p.param_id);
 							update_indicator(indicators[idx], is_tracking, mapped_phys_val);
-							update_knob_color(arcs[idx], is_tracking, arc_val);
+							update_knob(arcs[idx], is_tracking, arc_val);
 						}
 					}
 				}
@@ -275,25 +275,17 @@ struct KnobSetViewPage : PageBase {
 		}
 	}
 
-	void update_knob_color(lv_obj_t *arc, bool is_tracking, float arc_val) {
-		auto color = lv_obj_get_style_bg_color(arc, LV_PART_KNOB);
-
+	void update_knob(lv_obj_t *arc, bool is_tracking, float arc_val) {
 		if (arc_val > lv_arc_get_max_value(arc) || arc_val < lv_arc_get_min_value(arc)) {
 			lv_obj_set_style_radius(arc, 0, LV_PART_KNOB);
-			if (color.full != lv_color_hex(0x000000).full) {
-				lv_obj_set_style_bg_color(arc, lv_color_hex(0x000000), LV_PART_KNOB);
-			}
+			lv_obj_set_style_bg_color(arc, lv_color_hex(0x000000), LV_PART_KNOB);
 		} else {
 			lv_obj_set_style_radius(arc, 20, LV_PART_KNOB);
 
 			if (is_tracking) {
-				if (color.full != lv_color_hex(0xFFFFFF).full) {
-					lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
-				}
+				lv_obj_set_style_bg_color(arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
 			} else {
-				if (color.full != lv_color_hex(0xAAAAAA).full) {
-					lv_obj_set_style_bg_color(arc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
-				}
+				lv_obj_set_style_bg_color(arc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
 			}
 		}
 	}

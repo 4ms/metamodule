@@ -53,12 +53,12 @@ struct KnobMapPage : PageBase {
 		lv_obj_set_width(indicator, 3);
 		lv_obj_set_height(indicator, 10);
 		lv_obj_set_x(indicator, 0);
-		lv_obj_set_y(indicator, 22);
+		lv_obj_set_y(indicator, 31);
 		lv_obj_set_align(indicator, LV_ALIGN_TOP_MID);
 		lv_obj_set_style_bg_color(indicator, lv_color_hex(0x0), LV_PART_MAIN);
 		lv_obj_set_style_radius(indicator, 0, LV_PART_MAIN);
 		lv_obj_set_style_transform_pivot_x(indicator, 0, LV_PART_MAIN);
-		lv_obj_set_style_transform_pivot_y(indicator, 20, LV_PART_MAIN);
+		lv_obj_set_style_transform_pivot_y(indicator, 23, LV_PART_MAIN);
 	}
 
 	void prepare_focus() override {
@@ -132,6 +132,9 @@ struct KnobMapPage : PageBase {
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
 
+		lv_obj_set_style_bg_color(indicator, Gui::knob_palette[(map.panel_knob_id + 1) % 6], LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
+
 		update_active_status();
 
 		lv_group_set_editing(group, false);
@@ -158,8 +161,13 @@ struct KnobMapPage : PageBase {
 
 		if (is_actively_playing) {
 			auto is_tracking = patch_playloader.is_param_tracking(map.module_id, map.param_id);
-			lv_show(indicator, !is_tracking);
-			if (!is_tracking) {
+
+			if (is_tracking) {
+				lv_hide(indicator);
+				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+			} else {
+				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
+
 				auto phys_val = params.knobs[map.panel_knob_id].val;
 				auto mapped_phys_val = map.get_mapped_val(phys_val);
 				lv_obj_set_style_transform_angle(indicator, mapped_phys_val * 2500.f - 1250.f, LV_PART_MAIN);
