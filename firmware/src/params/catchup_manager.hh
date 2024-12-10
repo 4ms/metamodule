@@ -45,6 +45,10 @@ public:
 		panel_knobs[panel_knob_id] = val;
 	}
 
+	void recalc_panel_param(auto &modules, ParamSet &active_knob_maps, unsigned panel_knob_id) {
+		set_panel_param(modules, active_knob_maps, panel_knob_id, panel_knobs[panel_knob_id]);
+	}
+
 	void reset(auto &modules, ParamSet &active_knob_maps) {
 		// Reset all catchups in the new active knobset.
 		// This allows them to change to catchup mode if necessary

@@ -15,7 +15,7 @@ namespace MetaModule
 {
 
 class AudioStream {
-	ParamsState &params;
+	ParamsState &param_state;
 	PatchPlayer &player;
 	PatchPlayLoader &patch_loader;
 	PatchModQueue &patch_mod_queue;
@@ -28,7 +28,7 @@ public:
 				PatchPlayer &player,
 				PatchPlayLoader &play_loader,
 				PatchModQueue &patch_mod_queue)
-		: params{params_state}
+		: param_state{params_state}
 		, player{player}
 		, patch_loader{play_loader}
 		, patch_mod_queue{patch_mod_queue} {
@@ -58,9 +58,9 @@ public:
 			auto &in = in_buff[i++];
 
 			// Knobs
-			for (auto i = 0u; auto &knob : params.knobs) {
+			for (auto i = 0u; auto &knob : param_state.knobs) {
 				// if (knob.did_change()) { // Why does the changed flag not sync with the SDL audio callback?
-				if (last_knob_val[i] != knob.val) {
+				if (std::abs(last_knob_val[i] - knob.val) > 2.5f / 4096.f) {
 					last_knob_val[i] = knob.val;
 					player.set_panel_param(i, knob.val);
 				}
@@ -100,7 +100,7 @@ public:
 
 			// Get outputs
 			for (auto [i, outjack] : enumerate(out.chan)) {
-				if (params.is_output_plugged(i)) {
+				if (param_state.is_output_plugged(i)) {
 					outjack = player.get_panel_output(i);
 					player.set_output_jack_patched_status(i, true);
 				} else {

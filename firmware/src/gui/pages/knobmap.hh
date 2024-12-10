@@ -20,8 +20,7 @@ struct KnobMapPage : PageBase {
 	KnobMapPage(PatchContext info)
 		: PageBase{info, PageId::KnobMap}
 		, base{ui_EditMappingPage}
-		, patch{patches.get_view_patch()} // , add_map_popup{patch_mod_queue}
-	{
+		, patch{patches.get_view_patch()} {
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -49,6 +48,17 @@ struct KnobMapPage : PageBase {
 		lv_group_add_obj(group, ui_TrashButton);
 		lv_hide(ui_EditButton);
 		lv_group_set_editing(group, false);
+
+		indicator = lv_btn_create(ui_EditMapKnob); //NOLINT
+		lv_obj_set_width(indicator, 3);
+		lv_obj_set_height(indicator, 10);
+		lv_obj_set_x(indicator, 0);
+		lv_obj_set_y(indicator, 31);
+		lv_obj_set_align(indicator, LV_ALIGN_TOP_MID);
+		lv_obj_set_style_bg_color(indicator, lv_color_hex(0x0), LV_PART_MAIN);
+		lv_obj_set_style_radius(indicator, 0, LV_PART_MAIN);
+		lv_obj_set_style_transform_pivot_x(indicator, 0, LV_PART_MAIN);
+		lv_obj_set_style_transform_pivot_y(indicator, 23, LV_PART_MAIN);
 	}
 
 	void prepare_focus() override {
@@ -105,9 +115,12 @@ struct KnobMapPage : PageBase {
 
 		// Knob arc
 
-		static_param = patch->find_static_knob(map.module_id, map.param_id);
+		params.param_watcher.stop_watching_all();
+		params.param_watcher.start_watching_param(map.module_id, map.param_id);
+		pr_dbg("Start watching m:%d p:%d\n", map.module_id, map.param_id);
 		float knob_val = static_param ? map.unmap_val(static_param->value) : 0;
 		set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, knob_val);
+
 		lv_obj_set_style_opa(ui_EditMappingArc, is_actively_playing ? LV_OPA_100 : LV_OPA_50, LV_PART_KNOB);
 
 		auto color = Gui::knob_palette[map.panel_knob_id % 6];
@@ -118,6 +131,9 @@ struct KnobMapPage : PageBase {
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90018, LV_PART_MAIN);
 		else
 			lv_obj_set_style_text_font(ui_EditMappingLetter, &ui_font_MuseoSansRounded90040, LV_PART_MAIN);
+
+		lv_obj_set_style_bg_color(indicator, Gui::knob_palette[(map.panel_knob_id + 1) % 6], LV_STATE_DEFAULT);
+		lv_obj_set_style_bg_opa(indicator, LV_OPA_100, LV_STATE_DEFAULT);
 
 		update_active_status();
 
@@ -143,24 +159,42 @@ struct KnobMapPage : PageBase {
 
 		update_active_status();
 
-		if (is_actively_playing && static_param) {
-			float s_val = map.unmap_val(static_param->value);
-			set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, s_val);
-		}
+		if (is_actively_playing) {
+			auto is_tracking = patch_playloader.is_param_tracking(map.module_id, map.param_id);
 
-		// add_map_popup.update(params);
+			if (is_tracking) {
+				lv_hide(indicator);
+				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+			} else {
+				lv_obj_set_style_bg_color(ui_EditMappingArc, lv_color_hex(0xAAAAAA), LV_PART_KNOB);
+
+				auto phys_val = params.knobs[map.panel_knob_id].val;
+				auto mapped_phys_val = map.get_mapped_val(phys_val);
+				lv_obj_set_style_transform_angle(indicator, mapped_phys_val * 2500.f - 1250.f, LV_PART_MAIN);
+			}
+
+			auto watched_params = params.param_watcher.active_watched_params();
+			for (auto const &p : watched_params) {
+				if (p.is_active() && p.param_id == map.param_id && p.module_id == map.module_id) {
+					auto arc_val = map.unmap_val(p.value);
+					set_knob_arc<min_arc, max_arc>(map, ui_EditMappingArc, arc_val);
+				}
+			}
+		}
 	}
 
 	void update_active_status() {
 		is_patch_playing = patch_is_playing(args.patch_loc_hash);
 
 		if (is_patch_playing && args.view_knobset_id.value_or(999) == page_list.get_active_knobset()) {
-			if (!is_actively_playing)
+			if (!is_actively_playing) {
 				lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_100, LV_PART_KNOB);
+			}
 			is_actively_playing = true;
 		} else {
-			if (is_actively_playing)
+			if (is_actively_playing) {
 				lv_obj_set_style_opa(ui_EditMappingArc, LV_OPA_50, LV_PART_KNOB);
+			}
 			is_actively_playing = false;
 		}
 	}
@@ -190,8 +224,7 @@ struct KnobMapPage : PageBase {
 		}
 
 		set_knob_arc<min_arc, max_arc>(page->map, ui_EditMappingArc, {});
-		page->patch_mod_queue.put(
-			EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx, .cur_val = val / 100.f});
+		page->patch_mod_queue.put(EditMappingMinMax{.map = page->map, .set_id = page->view_set_idx});
 		page->patch->add_update_mapped_knob(page->view_set_idx, page->map);
 		page->patches.mark_view_patch_modified();
 	}
@@ -313,6 +346,7 @@ struct KnobMapPage : PageBase {
 
 private:
 	lv_obj_t *base = nullptr;
+	lv_obj_t *indicator = nullptr;
 	PatchData *patch;
 	MappedKnob map{};
 	const StaticParam *static_param = nullptr;

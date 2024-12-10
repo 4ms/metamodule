@@ -437,27 +437,26 @@ public:
 		}
 	}
 
-	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map, float cur_val) {
+	void edit_mapped_knob(uint32_t knobset_id, const MappedKnob &map) {
 		if (knobset_id != PatchData::MIDIKnobSet && knobset_id >= knob_maps.size())
 			return;
 
 		if (knobset_id == PatchData::MIDIKnobSet) {
 			auto &knobconn = midi_knob_conns[map.cc_num()];
-			auto found = std::find_if(knobconn.begin(), knobconn.end(), [&map](auto m) {
-				return map.param_id == m.param_id && map.module_id == m.module_id;
-			});
+			auto found = std::ranges::find_if(
+				knobconn, [&map](auto m) { return map.param_id == m.param_id && map.module_id == m.module_id; });
 
 			if (found != knobconn.end()) {
 				found->min = map.min;
 				found->max = map.max;
 				found->curve_type = map.curve_type;
 				if (map.panel_knob_id < PanelDef::NumKnobs)
-					set_panel_param(map.panel_knob_id, cur_val);
+					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
 			}
 
 		} else {
 			auto &knobconn = knob_maps[knobset_id][map.panel_knob_id];
-			auto found = std::find_if(knobconn.begin(), knobconn.end(), [&map](auto m) {
+			auto found = std::ranges::find_if(knobconn, [&map](auto m) {
 				return map.param_id == m.map.param_id && map.module_id == m.map.module_id;
 			});
 			if (found != knobconn.end()) {
@@ -465,7 +464,7 @@ public:
 				found->map.max = map.max;
 				found->map.curve_type = map.curve_type;
 				if (map.panel_knob_id < PanelDef::NumKnobs)
-					set_panel_param(map.panel_knob_id, cur_val);
+					catchup_manager.recalc_panel_param(modules, knob_maps[active_knob_set], map.panel_knob_id);
 			}
 		}
 	}
